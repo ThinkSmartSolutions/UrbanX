@@ -527,13 +527,64 @@ const UTR_COLORS={
   'G/P9':'#d1fae5',T1B:'#374151'
 };
 const ucol=u=>UTR_COLORS[u]||'#94a3b8';
+// Paleta culori per stil arhitectural
+const ARCH_PALETTES = {
+  modern: {
+    parter:    '#94a3b8', // gri-albastru - spatiu neutru
+    etaje:     ['#cbd5e1','#e2e8f0','#f1f5f9','#f8fafc','#e2e8f0','#cbd5e1'],
+    retras:    '#64748b',
+    terasa:    '#475569',
+    comercial: '#f59e0b',
+    label: '🏢 Modern / Contemporan'
+  },
+  clasic: {
+    parter:    '#d4a76a', // ocru cald - soclu clasic
+    etaje:     ['#e8d5b7','#f5ebe0','#fdf6ec','#f5ebe0','#e8d5b7','#d4a76a'],
+    retras:    '#c4956a',
+    terasa:    '#a0785a',
+    comercial: '#e07b39',
+    label: '🏛 Clasic / Tradițional'
+  },
+  mixt: {
+    parter:    '#f59e0b', // portocaliu - comercial la parter
+    etaje:     ['#93c5fd','#bfdbfe','#dbeafe','#eff6ff','#dbeafe','#bfdbfe'],
+    retras:    '#60a5fa',
+    terasa:    '#3b82f6',
+    comercial: '#f59e0b',
+    label: '🏬 Mixt — Comercial + Rezidențial'
+  },
+  birouri: {
+    parter:    '#7dd3fc', // albastru deschis
+    etaje:     ['#38bdf8','#7dd3fc','#bae6fd','#e0f2fe','#bae6fd','#7dd3fc'],
+    retras:    '#0ea5e9',
+    terasa:    '#0284c7',
+    comercial: '#f59e0b',
+    label: '🏢 Birouri / Office'
+  },
+  industrial: {
+    parter:    '#9ca3af',
+    etaje:     ['#6b7280','#9ca3af','#d1d5db','#9ca3af','#6b7280','#4b5563'],
+    retras:    '#4b5563',
+    terasa:    '#374151',
+    comercial: '#d97706',
+    label: '🏭 Industrial / Depozitare'
+  },
+  rezidential: {
+    parter:    '#86efac',
+    etaje:     ['#4ade80','#86efac','#bbf7d0','#dcfce7','#bbf7d0','#86efac'],
+    retras:    '#22c55e',
+    terasa:    '#16a34a',
+    comercial: '#f59e0b',
+    label: '🏠 Rezidențial Colectiv'
+  }
+};
+
+function getArchPalette(){
+  return ARCH_PALETTES[S.vol.archStyle||'modern'] || ARCH_PALETTES.modern;
+}
+
 const FLOOR_COLORS=[
-  '#22d3ee', // P - cyan
-  '#34d399', // Et1 - verde
-  '#86efac', // Et2 - verde deschis
-  '#fde68a', // Et3 - galben
-  '#fcd34d', // Et4 - galben intens
-  '#fb923c', // Et5 - portocaliu
+  '#22d3ee','#34d399','#86efac','#fde68a','#fcd34d','#fb923c',
   '#f97316', // Et6 - portocaliu intens
   '#ef4444', // Et7 - roșu
   '#dc2626', // Et8 - roșu intens
@@ -871,7 +922,8 @@ function addLayers(){
     paint:{
       'line-color':['case',
         ['==',['get','type'],'between_own'],'#f59e0b',
-        ['case',['get','ok'],'#34d399','#ef4444']
+        ['==',['get','ok'],true],'#34d399',
+        '#ef4444'
       ],
       'line-width':2,
       'line-dasharray':[5,3],
@@ -888,8 +940,11 @@ function addLayers(){
       'text-allow-overlap':true
     },
     paint:{
-      'text-color':['case',['==',['get','type'],'between_own'],'#f59e0b',
-        ['case',['get','ok'],'#34d399','#f87171'],'#94a3b8'],
+      'text-color':['case',
+        ['==',['get','type'],'between_own'],'#f59e0b',
+        ['==',['get','ok'],true],'#34d399',
+        '#ef4444'
+      ],
       'text-halo-color':'rgba(0,0,0,.9)',
       'text-halo-width':2
     }
@@ -1481,28 +1536,27 @@ function buildFP(geom, paramsOrUtr){
     // Apoi calculăm intersecțiile laturilor translatate → noul poligon
     
     // Pas 1: calculăm laturile translatate (ca drepte infinite)
-    // Fiecare latură = (punct pe dreaptă, vector direcție)
+    // sb=0 → calcan = latura rămâne pe limita de proprietate (nu translatăm)
     const offsetLines = [];
     for(let i=0;i<ring.length-1;i++){
       const p1=ring[i], p2=ring[i+1];
       const mx=(p1[0]+p2[0])/2, my=(p1[1]+p2[1])/2;
       const sb = getSetback(i, mx, my);
       
-      // Vector direcție latură (în metri)
       const dx=(p2[0]-p1[0])*mLng, dy=(p2[1]-p1[1])*mLat;
       const len=Math.sqrt(dx*dx+dy*dy);
       if(len<0.01){ offsetLines.push(null); continue; }
       
-      // Normala spre interior
-      let nx=-dy/len, ny=dx/len;
-      if(nx*(cx-p1[0])*mLng+ny*(cy-p1[1])*mLat<0){nx=-nx;ny=-ny;}
-      
-      // Translatăm latura cu sb metri spre interior
-      const offx=nx*sb/mLng, offy=ny*sb/mLat;
+      let offx=0, offy=0;
+      if(sb>0){
+        // Normala spre interior
+        let nx=-dy/len, ny=dx/len;
+        if(nx*(cx-p1[0])*mLng+ny*(cy-p1[1])*mLat<0){nx=-nx;ny=-ny;}
+        offx=nx*sb/mLng; offy=ny*sb/mLat;
+      }
+      // sb=0: calcan → latura rămâne exactă pe limita parcelei
       offsetLines.push({
-        // Punct pe dreapta translată
         px: p1[0]+offx, py: p1[1]+offy,
-        // Vector direcție (normalizat în grade)
         dx: p2[0]-p1[0], dy: p2[1]-p1[1],
         sb
       });
@@ -1707,7 +1761,9 @@ function buildFP(geom, paramsOrUtr){
     }
 
     // ── Factor amprentă design (vizual, nu urbanistic) ────────────────────
-    const fpF=Math.max(0.5,Math.min(1,Number(S.vol.fpF||0.95)));
+    // Nu aplicam reducerea daca toate aliniamentele sunt 0 (calcan pe toate laturile)
+    const allCalcan = [rf,rl,rr,rs].every(v=>v===0);
+    const fpF=allCalcan ? 1.0 : Math.max(0.5,Math.min(1,Number(S.vol.fpF||0.95)));
     if(fpF<0.98){
       try{
         const sc2=turf.transformScale(zone,fpF,{origin:turf.centerOfMass(zone)});
@@ -2157,31 +2213,71 @@ function buildVolume(){
       return; // sarim generarea volumului unic (return in forEach = continue)
     }
 
-    // ── Generare etaje 3D ───────────────────────────────────────────────
+    // ── Generare 3D cu stil arhitectural ────────────────────────────────
     const fpFinal = {type:'Feature', geometry:volumeGeom, properties:{}};
+    const pal = getArchPalette();
+    const hasComercial = S.vol.parterComercial || S.vol.archStyle==='mixt' || S.vol.archStyle==='comercial';
+    const hParter = hasComercial ? (S.vol.hParter||4.5) : hNiv;
+    const retragereEtaj = S.vol.retragereEtaj||0.85;
     
     for(let i=0; i<efectivNiv; i++){
-      const base = baseH + i*hNiv;
-      const top = baseH + Math.min((i+1)*hNiv, efectivNiv*hNiv);
-      const color = FLOOR_COLORS[Math.min(i, FLOOR_COLORS.length-1)];
-      let g = volumeGeom;
+      let base, top, color, g=volumeGeom;
       
-      // Etaj retras (penthouse)
-      if(S.vol.retras && i===efectivNiv-1 && efectivNiv>1){
+      if(i===0){
+        // PARTER — comercial sau normal
+        base = baseH;
+        top = baseH + hParter;
+        color = hasComercial ? pal.comercial : pal.etaje[0];
+      } else {
+        // ETAJE CURENTE
+        base = baseH + hParter + (i-1)*hNiv;
+        top = base + hNiv;
+        color = pal.etaje[Math.min(i, pal.etaje.length-1)];
+      }
+      
+      // ETAJ RETRAS (ultimul etaj sau penthouse)
+      const isLastFloor = i===efectivNiv-1 && efectivNiv>1;
+      if(S.vol.retras && isLastFloor){
         try{
-          const sc = turf.transformScale(fpFinal, Number(S.vol.retrasH||0.7), {origin:turf.centerOfMass(fpFinal)});
-          if(sc?.geometry) g = sc.geometry;
+          const sc = turf.transformScale(fpFinal, retragereEtaj,
+            {origin:turf.centerOfMass(fpFinal)});
+          if(sc?.geometry){ g=sc.geometry; color=pal.retras; }
         }catch(e){}
       }
-      feats.push({type:'Feature', properties:{base, top, color, floor:i, parcelIdx:pi, scenariu}, geometry:g});
+      
+      feats.push({type:'Feature',
+        properties:{base,top,color,floor:i,parcelIdx:pi,scenariu,
+          archStyle:S.vol.archStyle,
+          isComercial:i===0&&hasComercial,
+          isRetras:isLastFloor&&S.vol.retras},
+        geometry:g});
     }
     
-    // Terasa
-    if(S.vol.terasa && feats.length){
-      const lastTop = baseH + efectivNiv * hNiv;
+    // TERASA / ACOPERIS PLAT
+    if(S.vol.terasa){
+      const lastH = baseH + hParter + Math.max(0,efectivNiv-1)*hNiv;
       try{
-        const t = turf.buffer(fpFinal, -0.5, {units:'meters'});
-        if(t?.geometry) feats.push({type:'Feature', properties:{base:lastTop, top:lastTop+0.4, color:'#78350f', floor:-1, parcelIdx:pi}, geometry:t.geometry});
+        // Terasa = suprafata plata usor mai mica
+        const tGeom = S.vol.retras
+          ? turf.transformScale(fpFinal, retragereEtaj, {origin:turf.centerOfMass(fpFinal)})
+          : fpFinal;
+        if(tGeom?.geometry){
+          feats.push({type:'Feature',
+            properties:{base:lastH,top:lastH+0.3,color:pal.terasa,floor:-1,parcelIdx:pi,isTerasa:true},
+            geometry:tGeom.geometry});
+          // Parapet terasa (rama)
+          try{
+            const parapet = turf.buffer(tGeom, -0.4, {units:'meters'});
+            if(parapet?.geometry){
+              feats.push({type:'Feature',
+                properties:{base:lastH,top:lastH+1.0,color:pal.terasa,floor:-2,parcelIdx:pi},
+                geometry:{type:'Polygon',coordinates:[[
+                  ...tGeom.geometry.coordinates[0],
+                  ...(parapet.geometry.coordinates[0]||[]).reverse()
+                ]]}});
+            }
+          }catch(e){}
+        }
       }catch(e){}
     }
     
@@ -2285,6 +2381,8 @@ async function loadContext(){
     setSource('ctx-labels-src',{type:'FeatureCollection',features:labelFeats});
     const curSt=$('status').textContent;
     ss(curSt.replace('⏳','✅')+` · ${feats.length} clădiri context`);
+    // Actualizam distantele fata de vecini dupa ce contextul e incarcat
+    if(S.vol.genDone) setTimeout(updateDistanceLines, 300);
   }catch(e){ss($('status').textContent+' · Context OSM indisponibil');}
 }
 
@@ -2713,6 +2811,35 @@ function htmlProiect(){
   '</select>',
   '<div class="'+(fnVal.status==='ok'?'ok-box':fnVal.status==='warn'?'warn-box':'err-box')+'" style="font-size:11px">'+fnVal.msg+'</div>',
   // ── VOLUM 3D ──
+  '<div class="section">🎨 Stil arhitectural</div>',
+  `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:8px">${
+    Object.entries(ARCH_PALETTES).map(([k,v])=>
+      '<button onclick="setArchStyle(\''+k+'\')" style="padding:7px 3px;border-radius:8px;cursor:pointer;font-size:9px;text-align:center;line-height:1.3;border:1.5px solid '+
+      (S.vol.archStyle===k?'#d4af37':'rgba(255,255,255,.15)')+
+      ';background:'+(S.vol.archStyle===k?'rgba(212,175,55,.15)':'rgba(11,18,32,.7)')+
+      ';color:'+(S.vol.archStyle===k?'#d4af37':'#94a3b8')+'">'+v.label+'</button>'
+    ).join('')
+  }</div>`,
+  '<div class="card" style="background:#08152a;padding:10px;margin-bottom:8px">',
+  `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:6px">
+    <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer">
+      <input type="checkbox" ${S.vol.parterComercial?'checked':''} onchange="S.vol.parterComercial=this.checked;if(S.vol.genDone)genVol()" style="width:16px;height:16px;accent-color:#f59e0b">
+      <span style="color:#f59e0b">🏪 Parter comercial</span>
+    </label>
+    ${S.vol.parterComercial?'<span style="font-size:11px;color:#94a3b8">H parter: <b style=color:#f59e0b>'+(S.vol.hParter||4.5)+'m</b> <input type=range min=3 max=6 step=0.5 value='+(S.vol.hParter||4.5)+' oninput="S.vol.hParter=+this.value;if(S.vol.genDone)genVol()" style="width:60px;accent-color:#f59e0b;vertical-align:middle"></span>':''}
+  </div>`,
+  `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+    <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer">
+      <input type="checkbox" ${S.vol.retras?'checked':''} onchange="S.vol.retras=this.checked;if(S.vol.genDone)genVol()" style="width:16px;height:16px;accent-color:#3b82f6">
+      <span>🔝 Etaj retras</span>
+    </label>
+    ${S.vol.retras?'<span style="font-size:11px;color:#94a3b8">Retragere: <b style=color:#3b82f6>'+Math.round((S.vol.retragereEtaj||0.85)*100)+'%</b> <input type=range min=50 max=95 step=5 value='+Math.round((S.vol.retragereEtaj||0.85)*100)+' oninput="S.vol.retragereEtaj=+this.value/100;if(S.vol.genDone)genVol()" style="width:60px;accent-color:#3b82f6;vertical-align:middle"></span>':''}
+    <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer">
+      <input type="checkbox" ${S.vol.terasa?'checked':''} onchange="S.vol.terasa=this.checked;if(S.vol.genDone)genVol()" style="width:16px;height:16px;accent-color:#34d399">
+      <span>🏗 Terasă</span>
+    </label>
+  </div>`,
+  '</div>',
   '<div class="section">🏗 Volum 3D</div>',
   '<div class="card" style="background:#08152a">',
   '<div class="help" style="margin-bottom:6px">Nivelurile și înălțimea se setează în <b>Parametri urbanistici</b> mai jos (Nr. niveluri, H max). Aici setezi doar forma și generezi.</div>',
@@ -3765,6 +3892,11 @@ function htmlMultiVolUI(){
     '</div>',
     '</div>'
   ];
+}
+function setArchStyle(s){
+  S.vol.archStyle=s;
+  if(S.vol.genDone){const f=buildVolume();setSource('vol-src',{type:'FeatureCollection',features:f});}
+  renderTab('proiect');
 }
 function updateMVDist(v){
   S.vol.multiVolDist=v;
