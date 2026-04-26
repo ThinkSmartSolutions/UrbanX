@@ -1619,11 +1619,45 @@ function buildFP(geom, paramsOrUtr){
     // ── POT: dacă zona depășește SC_max ───────────────────────────────────
     const zA=turf.area(zone);
     if(SC_max>0&&SC_max<zA-1){
-      const sf=Math.sqrt(SC_max/zA);
-      try{
-        const sc=turf.transformScale(zone,Math.max(0.05,sf),{origin:turf.centerOfMass(zone)});
-        if(sc?.geometry&&turf.area(sc)>0.5) zone=sc;
-      }catch(e){}
+      // Scalare POT directionala: laturile cu setback=0 raman fixe pe limita
+      // Scalarea se face spre laturile cu setback>0 (nu centric)
+      const fixedSides = sides.filter(s=>{
+        const sb = frontSet.has(s.i)?rf:s.i===postIdx?rs:
+          ((s.mx-cx)*mLng*Math.sin(brg*Math.PI/180)+(s.my-cy)*mLat*Math.cos(brg*Math.PI/180)>0?rl:rr);
+        return sb===0; // latura fixa = calcan = setback 0
+      });
+      
+      if(fixedSides.length===0){
+        // Fara laturi fixe: scalare centrica clasica
+        const sf=Math.sqrt(SC_max/zA);
+        try{
+          const sc=turf.transformScale(zone,Math.max(0.05,sf),{origin:turf.centerOfMass(zone)});
+          if(sc?.geometry&&turf.area(sc)>0.5) zone=sc;
+        }catch(e){}
+      } else {
+        // Cu laturi fixe: scalare directionala
+        // Gasim un punct "ancora" pe laturile fixe (centrul lor)
+        // si scalăm de la acel punct
+        try{
+          // Ancora = centrul geometric al laturilor fixe
+          let ancX=0,ancY=0,ancN=0;
+          fixedSides.forEach(s=>{ancX+=s.mx;ancY+=s.my;ancN++;});
+          if(ancN>0){
+            ancX/=ancN; ancY/=ancN;
+            const sf=Math.sqrt(SC_max/zA);
+            const anchor=turf.point([ancX,ancY]);
+            const sc=turf.transformScale(zone,Math.max(0.05,sf),{origin:anchor});
+            if(sc?.geometry&&turf.area(sc)>0.5) zone=sc;
+          }
+        }catch(e){
+          // Fallback centrica
+          const sf=Math.sqrt(SC_max/zA);
+          try{
+            const sc=turf.transformScale(zone,Math.max(0.05,sf),{origin:turf.centerOfMass(zone)});
+            if(sc?.geometry&&turf.area(sc)>0.5) zone=sc;
+          }catch(e2){}
+        }
+      }
     }
 
     return zone;
@@ -1956,7 +1990,8 @@ function updateDistanceLines(){
   if(!ap?.geo?.geometry) return;
 
   const feats = [];
-  const volFeats = (map.getSource('vol-src')?._data?.features)||[];
+  // Folosim volumele stocate (mai fiabil decat getSource()._data)
+  const volFeats = S.vol._lastFeats || (map.getSource('vol-src')?._data?.features) || [];
   const ctxFeats = S.ctx?.features||[];
   const parcelFeat = {type:'Feature',geometry:ap.geo.geometry,properties:{}};
 
@@ -1971,9 +2006,21 @@ function updateDistanceLines(){
     const k = pi*100+bi;
     if(!myBlds[k]) myBlds[k]=f;
   });
-  // Fallback: volum unic fara proprietati
+  // Fallback: daca nu avem floor=0 etichetat, luam primele features unice ca baza
   if(Object.keys(myBlds).length===0 && volFeats.length>0){
-    myBlds[0] = volFeats[0];
+    // Grupam dupa geometrie hash (primele 3 coordonate)
+    volFeats.forEach((f,fi)=>{
+      const coords = f.geometry?.coordinates?.[0];
+      if(!coords?.length) return;
+      const k = fi; // fiecare feature = potential cladire separata
+      if(!myBlds[k]) myBlds[k]=f;
+    });
+    // Daca tot multe, luam doar primul (volum unic)
+    if(Object.keys(myBlds).length>10){
+      const first=volFeats[0];
+      Object.keys(myBlds).forEach(k=>delete myBlds[k]);
+      myBlds[0]=first;
+    }
   }
   const myBldArr = Object.values(myBlds);
   if(!myBldArr.length) return;
@@ -2308,6 +2355,8 @@ function buildVolume(){
     };
   });
   
+  // Stocam pentru updateDistanceLines
+  S.vol._lastFeats = feats;
   return feats;
 }
 
