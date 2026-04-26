@@ -1,0 +1,12 @@
+﻿utr,functie_cod,functie_nume,status,observatii
+LL,locuinta_individuala,Locuință individuală,ADMIS,Funcțiunea principală
+LL,locuinta_colectiva,Locuință colectivă / bloc,CONDITIONAT,Doar dacă regulamentul local permite
+LL,birouri,Birouri,INTERZIS,Incompatibil cu caracterul predominant
+CM,locuinta_colectiva,Locuință colectivă / bloc,ADMIS,Cu respectarea regulilor de protecție
+CM,birouri,Birouri,ADMIS,Funcțiune compatibilă
+CM,comert,Comerț,ADMIS,Funcțiune principală admisă
+CM,hotel,Hotel,CONDITIONAT,În funcție de acces și parcaje
+TF,locuinta_individuala,Locuință individuală,INTERZIS,Incompatibil cu infrastructura feroviară
+TF,industrial,Industrial,CONDITIONAT,Doar funcțiuni legate de infrastructură
+LA,locuinta_individuala,Locuință individuală,ADMIS,Funcțiune admisă
+LA,servicii,Servicii,CONDITIONAT,Doar servicii compatibile cu locuirea

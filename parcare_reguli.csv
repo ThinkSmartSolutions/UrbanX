@@ -1,0 +1,11 @@
+﻿functie_cod,metoda_calcul,valoare_baza,unitate,formula_text,observatii
+locuinta_individuala,per_unitate,2,unitate_locativa,2 locuri per casă,Poate varia prin regulament local
+locuinta_colectiva,per_unitate,1,unitate_locativa,1 loc per apartament,Se poate rafina ulterior
+birouri,per_100_mp,2,100_mp_gfa,2 locuri la 100 mp GFA,Exemplu de lucru
+comert,per_100_mp,3,100_mp_gfa,3 locuri la 100 mp GFA,Se verifică normativul local
+hotel,per_camera,1,camera,1 loc per cameră,Poate fi ajustat
+mixed_use,combinat,0,mix,Sumă reguli componente,Se calculează pe sub-funcțiuni
+servicii,per_100_mp,2,100_mp_gfa,2 locuri la 100 mp,Regulă generică
+institutional,per_100_mp,2,100_mp_gfa,2 locuri la 100 mp,Regulă generică
+industrial,per_100_mp,1,100_mp_gfa,1 loc la 100 mp,Regulă generică
+logistic,per_100_mp,1,100_mp_gfa,1 loc la 100 mp,Regulă generică

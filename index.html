@@ -1,0 +1,2165 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="utf-8"/>
+<m
+
+eta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<title>UrbanX – PUG Iași</title>
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.11.0/mapbox-gl.css" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'Segoe UI',Arial,sans-serif;background:#0b1220;color:#e2e8f0;overflow:hidden}
+#map{position:fixed;inset:0}
+
+/* TOPBAR */
+#topbar{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;gap:6px;padding:7px 10px;background:linear-gradient(180deg,rgba(8,37,74,.95),rgba(8,37,74,.7));backdrop-filter:blur(8px);flex-wrap:nowrap}
+.logo{color:#d4af37;font-weight:800;font-size:14px;letter-spacing:2px;margin-right:4px;white-space:nowrap}
+.tb-btn,.tb-sel{border:1px solid rgba(255,255,255,.2);background:rgba(11,18,32,.8);color:#e2e8f0;border-radius:8px;padding:6px 11px;font-size:12px;cursor:pointer;white-space:nowrap;transition:all .15s;min-height:34px}
+.tb-btn:hover{background:rgba(59,130,246,.35);border-color:#3b82f6}
+.tb-btn.on{background:#3b82f6;border-color:#3b82f6;color:#fff}
+.tb-btn.multi-on{background:#d4af37;border-color:#d4af37;color:#0b1220;font-weight:700}
+.spacer{flex:1}
+
+/* STATUS */
+#status{position:fixed;top:50px;left:10px;z-index:90;background:rgba(11,18,32,.92);border:1px solid rgba(255,255,255,.15);border-radius:9px;padding:6px 12px;font-size:12px;max-width:min(520px,calc(100vw - 20px));backdrop-filter:blur(6px)}
+
+/* UTR DRAWER */
+#utr-drawer{position:fixed;top:48px;left:0;right:0;z-index:200;background:rgba(11,18,32,.98);border-bottom:2px solid rgba(212,175,55,.4);padding:12px 14px;max-height:58vh;overflow-y:auto;backdrop-filter:blur(12px);display:none}
+#utr-drawer.open{display:block}
+.utr-chip{display:inline-flex;align-items:center;padding:4px 9px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;margin:2px;border:2px solid;transition:all .15s}
+.utr-chip:hover{opacity:.8;transform:scale(1.05)}
+
+/* PANEL */
+#panel{position:fixed;top:0;right:0;bottom:0;z-index:80;width:420px;background:rgba(10,16,30,.97);border-left:1px solid rgba(255,255,255,.1);display:flex;flex-direction:column;backdrop-filter:blur(12px)}
+#panel-tabs{display:flex;background:#08152a;border-bottom:1px solid rgba(255,255,255,.1);padding-top:48px;overflow-x:auto;flex-shrink:0;-ms-overflow-style:none;scrollbar-width:none}
+#panel-tabs::-webkit-scrollbar{display:none}
+.ptab{flex-shrink:0;padding:10px 14px;font-size:12px;font-weight:700;text-align:center;cursor:pointer;color:#64748b;border-bottom:2px solid transparent;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none;transition:all .15s;letter-spacing:.02em}
+.ptab.active{color:#d4af37;border-bottom-color:#d4af37;background:rgba(212,175,55,.05)}
+.ptab:hover:not(.active){color:#94a3b8;background:rgba(255,255,255,.04)}
+#panel-body{flex:1;overflow-y:auto;padding:12px}
+.tc{display:none}.tc.active{display:block}
+
+/* MOBILE SHEET */
+#mob-sheet{position:fixed;bottom:0;left:0;right:0;z-index:110;background:#0f172a;border-top:2px solid rgba(212,175,55,.4);border-radius:18px 18px 0 0;max-height:78vh;transform:translateY(100%);transition:transform .3s ease;display:flex;flex-direction:column}
+#mob-sheet.open{transform:translateY(0)}
+.msh-drag{width:36px;height:4px;border-radius:999px;background:#374151;margin:9px auto 5px}
+.msh-head{display:flex;justify-content:space-between;align-items:center;padding:5px 14px 9px;border-bottom:1px solid rgba(255,255,255,.1)}
+#mob-tabs{display:flex;overflow-x:auto;background:#08152a;border-bottom:1px solid rgba(255,255,255,.1);flex-shrink:0;-ms-overflow-style:none;scrollbar-width:none}
+#mob-tabs::-webkit-scrollbar{display:none}
+.mtab{flex-shrink:0;padding:8px 13px;font-size:13px;font-weight:700;color:#64748b;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none}
+.mtab.active{color:#d4af37;border-bottom-color:#d4af37}
+#mob-body{flex:1;overflow-y:auto;padding:12px;-webkit-overflow-scrolling:touch}
+
+/* 3D CTRL (doar pitch/bearing) */
+#ctrl3d{position:fixed;bottom:32px;right:428px;z-index:80;background:rgba(11,18,32,.9);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:10px 13px;min-width:185px;backdrop-filter:blur(8px)}
+#ctrl3d label{font-size:10px;color:#94a3b8;display:block;margin-bottom:2px}
+#ctrl3d input[type=range]{width:100%;accent-color:#3b82f6;margin-bottom:6px}
+.c3row{display:flex;justify-content:space-between}
+.c3val{font-size:10px;color:#d4af37}
+
+/* UI */
+.section{font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;margin:12px 0 6px}
+.section:first-child{margin-top:0}
+.card{background:#0f172a;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:11px;margin-bottom:9px}
+.inp{width:100%;padding:10px 12px;border-radius:9px;border:1px solid rgba(255,255,255,.15);background:#080f1c;color:#e2e8f0;font-size:15px;margin-bottom:7px;outline:none;font-family:inherit}
+.inp:focus{border-color:#3b82f6}
+.inp::placeholder{color:#475569}
+.sel{width:100%;padding:9px 12px;border-radius:9px;border:1px solid rgba(255,255,255,.15);background:#080f1c;color:#e2e8f0;font-size:14px;margin-bottom:7px;outline:none}
+.btn-p,.btn-s,.btn-g,.btn-w{display:inline-flex;align-items:center;justify-content:center;gap:5px;border:none;border-radius:9px;padding:9px 14px;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .15s}
+.btn-p{background:#3b82f6;color:#fff}.btn-p:hover{background:#2563eb}
+.btn-s{background:#374151;color:#e2e8f0}.btn-s:hover{background:#4b5563}
+.btn-g{background:rgba(212,175,55,.2);color:#d4af37;border:1px solid rgba(212,175,55,.4)}.btn-g:hover{background:rgba(212,175,55,.35)}
+.btn-w{background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3)}.btn-w:hover{background:rgba(239,68,68,.25)}
+.btn-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:8px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.met{background:#080f1c;border:1px solid rgba(255,255,255,.08);border-radius:9px;padding:10px}
+.ml{font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em}
+.mv{margin-top:4px;font-size:13px;font-weight:700;color:#e2e8f0}
+.mv.big{font-size:18px;color:#3b82f6}
+.mv.gold{font-size:14px;color:#d4af37}
+.mv.ok{color:#34d399}.mv.warn{color:#fbbf24}.mv.err{color:#f87171}
+.badge{display:inline-flex;align-items:center;border-radius:999px;padding:3px 9px;font-weight:700;font-size:11px;margin:2px}
+.b-b{background:rgba(59,130,246,.15);color:#60a5fa}
+.b-g{background:rgba(16,185,129,.15);color:#34d399}
+.b-y{background:rgba(212,175,55,.15);color:#d4af37}
+.b-r{background:rgba(239,68,68,.15);color:#f87171}
+.help{font-size:11px;color:#64748b;margin:-2px 0 7px;line-height:1.5}
+.res-box{border:1px solid rgba(255,255,255,.1);border-radius:9px;max-height:170px;overflow:auto;background:#080f1c;margin-bottom:7px}
+.ri{padding:8px 11px;border-bottom:1px solid rgba(255,255,255,.07);cursor:pointer;font-size:12px;color:#e2e8f0}
+.ri:last-child{border-bottom:none}.ri:hover{background:rgba(59,130,246,.15)}
+.re{padding:8px 11px;font-size:12px;color:#64748b}
+.spin{display:inline-block;width:10px;height:10px;border:2px solid rgba(255,255,255,.2);border-top-color:#3b82f6;border-radius:50%;animation:sp .6s linear infinite;vertical-align:middle;margin-right:4px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.vbox{min-height:160px;border:1px solid rgba(255,255,255,.1);border-radius:9px;background:#080f1c;display:flex;align-items:center;justify-content:center;overflow:hidden}
+canvas#c2d{width:100%;height:100%;display:block}
+.fl-leg{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.fl-dot{display:inline-flex;align-items:center;gap:3px;font-size:11px;color:#94a3b8}
+.fl-sq{width:11px;height:11px;border-radius:2px;display:inline-block}
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{background:#080f1c;padding:6px 7px;text-align:left;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,.08)}
+.tbl td{padding:6px 7px;border-bottom:1px solid rgba(255,255,255,.06);color:#e2e8f0}
+.tbl tr:last-child td{border-bottom:none}
+.warn-box{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:8px 10px;font-size:12px;color:#fbbf24;margin-bottom:8px}
+.ok-box{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:8px;padding:8px 10px;font-size:12px;color:#34d399;margin-bottom:8px}
+.err-box{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:8px 10px;font-size:12px;color:#f87171;margin-bottom:8px}
+.sc-item{background:#080f1c;border:1px solid rgba(255,255,255,.08);border-radius:9px;padding:8px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:7px}
+.ms-item{background:#080f1c;border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:9px;margin-bottom:7px}
+.ms-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+#copy{position:fixed;bottom:0;left:0;right:0;z-index:70;background:rgba(8,37,74,.8);color:rgba(212,175,55,.6);display:flex;justify-content:space-between;padding:4px 12px;font-size:10px}
+
+/* PDF MODAL */
+#pdf-modal{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+#pdf-modal.open{display:flex}
+#pdf-box{background:#0f172a;border:1px solid rgba(212,175,55,.4);border-radius:16px;width:min(580px,96vw);max-height:90vh;overflow-y:auto;padding:24px}
+.pdf-opt{background:#080f1c;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px;margin-bottom:9px;cursor:pointer;transition:all .15s}
+.pdf-opt:hover{border-color:#d4af37;background:rgba(212,175,55,.08)}
+.pdf-opt.sel{border-color:#3b82f6;background:rgba(59,130,246,.1)}
+.pdf-opt h4{font-size:14px;font-weight:700;color:#e2e8f0;margin-bottom:4px}
+.pdf-opt p{font-size:12px;color:#64748b;line-height:1.5}
+#pdf-preview{background:#fff;border-radius:8px;margin-top:16px;overflow:hidden;display:none}
+
+@media(max-width:840px){
+  #panel{display:none!important}
+  #ctrl3d{right:10px;bottom:56px}
+  /* Topbar pe 2 rânduri pe mobile */
+  #topbar{
+    flex-wrap:wrap;
+    padding:6px 8px;
+    gap:5px;
+    background:rgba(8,37,74,.98);
+  }
+  .logo{font-size:13px;flex-shrink:0}
+  /* Rândul 1: butoane mici */
+  #btnUTR,#btnGPS,#btnANCPI,#btnMulti{
+    padding:5px 9px;font-size:12px;min-height:32px;
+  }
+  /* Rândul 2: select + spacer + buton panel MARE */
+  #selBase{order:10;padding:5px 8px;font-size:12px}
+  .spacer{order:11;flex:1}
+  #btn3D,#btn2D{order:12;padding:5px 8px;font-size:12px;min-height:32px}
+  /* Butonul Panel - mereu vizibil, mare, auriu */
+  #btnPanel{
+    order:13;
+    background:#d4af37!important;
+    color:#0b1220!important;
+    font-weight:800!important;
+    font-size:14px!important;
+    padding:8px 18px!important;
+    border-color:#d4af37!important;
+    min-height:38px;
+    flex-shrink:0;
+  }
+  /* Status sub topbar */
+  #status{top:86px;left:8px;right:8px;font-size:11px;max-width:none}
+  /* Grile adaptate */
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:1fr 1fr 1fr}
+  .inp{font-size:16px}
+  /* Mob sheet mai înalt */
+  #mob-sheet{max-height:82vh}
+  /* FAB button mereu vizibil pe mobile */
+  #mob-fab{display:flex!important}
+}
+@media(min-width:841px){
+  #mob-sheet{display:none!important}
+  #mob-fab{display:none!important}
+}
+@media(max-width:840px){
+  #mob-fab{
+    display:flex!important;
+    position:fixed!important;
+    bottom:22px!important;
+    right:16px!important;
+    z-index:9999!important;
+    width:62px!important;
+    height:62px!important;
+    border-radius:50%!important;
+    background:#d4af37!important;
+    border:none!important;
+    font-size:28px!important;
+    cursor:pointer!important;
+    box-shadow:0 2px 16px rgba(0,0,0,.8)!important;
+    align-items:center!important;
+    justify-content:center!important;
+    color:#000!important;
+    font-weight:bold!important;
+  }
+}
+}
+
+.mapboxgl-popup-content{background:rgba(11,18,32,.96)!important;color:#e2e8f0!important;border:1px solid rgba(255,255,255,.15)!important;border-radius:10px!important;padding:10px 13px 10px 13px!important;font-size:12px!important;min-width:160px;max-width:240px!important}
+.mapboxgl-popup-tip{display:none}
+.mapboxgl-popup-close-button{color:#94a3b8!important;font-size:18px!important;right:4px!important;top:4px!important;padding:0 6px!important;background:none!important;line-height:1.2!important}
+.mapboxgl-popup-close-button:hover{color:#fff!important;background:rgba(255,255,255,.1)!important;border-radius:4px!important}
+</style>
+</head>
+<body>
+<div id="map"></div>
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <span class="logo">UrbanX</span>
+  <button class="tb-btn" id="btnUTR">🗺 Zone UTR</button>
+  <button class="tb-btn" id="btnGPS">📍 GPS</button>
+  <button class="tb-btn" id="btnANCPI">📦 ANCPI zonă</button>
+  <button class="tb-btn" id="btnMulti" title="Multiselect parcele">🔲 Multi</button>
+  <select class="tb-sel" id="selBase">
+    <option value="custom">Urban 3D</option>
+    <option value="streets">Streets</option>
+    <option value="sat">Satelitar</option>
+  </select>
+  <div class="spacer"></div>
+  <button class="tb-btn" id="btn3D" title="Vedere 3D (Pitch 60°)">🏙 3D</button>
+  <button class="tb-btn" id="btn2D" title="Vedere plată 2D">⬛ 2D</button>
+  <button class="tb-btn" id="btnPanel" style="background:rgba(212,175,55,.2);border-color:#d4af37;color:#d4af37">☰</button>
+  <button class="tb-btn" id="btnPDF" title="Export PDF / Raport">⬇ PDF</button>
+</div>
+
+<div id="status">⏳ Se încarcă…</div>
+
+<!-- UTR DRAWER -->
+<div id="utr-drawer">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px">
+    <b style="color:#d4af37">🗺 Zone UTR — PUG Iași · Click pe UTR pentru a-l evidenția și a vedea regulamentul</b>
+    <button class="btn-s" id="btnCloseUTR" style="padding:3px 9px;font-size:11px">✕</button>
+  </div>
+  <div id="utr-chips"></div>
+  <div id="utr-leg" style="margin-top:6px;font-size:11px;color:#64748b"></div>
+</div>
+
+<!-- 3D CTRL -->
+<div id="ctrl3d">
+  <div class="c3row"><label>Pitch (înclinare)</label><span class="c3val" id="pitchV">0°</span></div>
+  <input type="range" id="slPitch" min="0" max="85" value="0">
+  <div class="c3row"><label>Bearing (rotire)</label><span class="c3val" id="bearV">0°</span></div>
+  <input type="range" id="slBearing" min="0" max="360" value="0">
+</div>
+
+<!-- PANEL DESKTOP -->
+<div id="panel">
+  <div id="panel-tabs">
+    <button class="ptab active" data-t="search">🔍 Căutare</button>
+    <button class="ptab" data-t="utr">🗺 UTR</button>
+    <button class="ptab" data-t="indicatori">📊 Indic.</button>
+    <button class="ptab" data-t="proiect">🏗 Proiect</button>
+    <button class="ptab" data-t="multi">🔲 Multi</button>
+    <button class="ptab" data-t="scen">📅 Scen.</button>
+  </div>
+  <div id="panel-body">
+    <div class="tc active" id="tc-search"></div>
+    <div class="tc" id="tc-utr"></div>
+    <div class="tc" id="tc-indicatori"></div>
+    <div class="tc" id="tc-proiect"></div>
+    <div class="tc" id="tc-multi"></div>
+    <div class="tc" id="tc-scen"></div>
+  </div>
+</div>
+
+<!-- MOBILE SHEET -->
+<div id="mob-sheet">
+  <div class="msh-drag"></div>
+  <div class="msh-head">
+    <b style="color:#d4af37;font-size:14px">UrbanX PUG Iași</b>
+    <button class="btn-s" id="btnMobClose" style="padding:4px 10px;font-size:12px">✕</button>
+  </div>
+  <div id="mob-tabs">
+    <button class="mtab active" data-mt="search">🔍 Căutare</button>
+    <button class="mtab" data-mt="utr">🗺 UTR</button>
+    <button class="mtab" data-mt="indicatori">📊 Indicatori</button>
+    <button class="mtab" data-mt="proiect">🏗 Proiect</button>
+    <button class="mtab" data-mt="multi">🔲 Multi</button>
+    <button class="mtab" data-mt="scen">📅 Scenarii</button>
+  </div>
+  <div id="mob-body"></div>
+</div>
+
+<!-- Buton flotant mobile failsafe -->
+<button id="mob-fab" onclick="toggleMobSheet()">☰</button>
+
+<div id="copy"><span>© UrbanX – FG · TSS</span><span>Mapbox GL · ANCPI · PUG Iași · OSM</span></div>
+
+<!-- PDF MODAL -->
+<div id="pdf-modal">
+  <div id="pdf-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h2 style="color:#d4af37;font-size:18px">⬇ Export Raport UrbanX</h2>
+      <button onclick="$('pdf-modal').classList.remove('open')" style="background:none;border:1px solid rgba(255,255,255,.2);color:#94a3b8;border-radius:8px;padding:5px 12px;cursor:pointer;font-size:13px">✕</button>
+    </div>
+
+    <div class="pdf-opt sel" id="pdf-opt-full" onclick="selectPdfOpt('full')">
+      <h4>🏙 Raport complet — Teren + Volum 3D + Context + Indicatori</h4>
+      <p>Capturează harta 3D cu volumul generat și clădirile existente, plus pagina cu toți indicatorii urbanistici, parametrii proiectului și validarea funcțiunii. Recomandat pentru prezentări și studii de fezabilitate.</p>
+    </div>
+
+    <div class="pdf-opt" id="pdf-opt-scen" onclick="selectPdfOpt('scen')">
+      <h4>📅 Raport scenarii — Comparație orizonturi 5/10/15 ani</h4>
+      <p>Exportă toate scenariile salvate cu parametrii lor (UTR, funcțiune, niveluri, înălțime, suprafețe) într-un tabel comparativ. Ideal pentru analize de dezvoltare urbanistică pe termen lung.</p>
+    </div>
+
+    <div class="pdf-opt" id="pdf-opt-multi" onclick="selectPdfOpt('multi')">
+      <h4>🔲 Raport multiparcelă — Toate parcelele selectate</h4>
+      <p>Generează un raport cu datele fiecărei parcele selectate (număr cadastral, suprafață, UTR, funcțiune, indicatori). Util pentru proiecte pe blocuri întregi sau zone de dezvoltare.</p>
+    </div>
+
+    <div style="margin-top:16px;padding:12px;background:#080f1c;border-radius:10px;font-size:12px;color:#64748b">
+      <b style="color:#94a3b8">Format:</b> PDF A4 landscape (hartă) + A4 portrait (date). Harta se captează din vederea curentă — poziționați-vă înainte de export cum doriți să apară în raport.
+    </div>
+
+    <div id="pdf-progress" style="display:none;margin-top:12px;padding:10px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);border-radius:8px;font-size:12px;color:#60a5fa">
+      <span class="spin"></span><span id="pdf-prog-msg">Se generează raportul…</span>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn-p" onclick="runExport()" style="flex:1;font-size:14px">⬇ Generează PDF</button>
+      <button class="btn-s" onclick="$('pdf-modal').classList.remove('open')">Anulează</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.11.0/mapbox-gl.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script>
+// ═══ URBANX v16 ═══════════════════════════════════════════════════════════
+const $=id=>document.getElementById(id);
+const ss=t=>{$('status').textContent=t};
+const esc=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const pN=v=>{const n=Number(String(v??'').replace(',','.'));return Number.isFinite(n)&&n>=0?n:null};
+const normU=v=>String(v??'').trim().replace(/[?\s]/g,'').toUpperCase();
+const fmt=(v,s='')=>v!=null&&!isNaN(v)?`${v}${s}`:'—';
+
+// ═══ MAPBOX ═══════════════════════════════════════════════════════════════
+mapboxgl.accessToken='pk.eyJ1IjoiZWk4aHRlciIsImEiOiJjajhhNGtiN3YwOW50MnFwOHBnOGJtcjVtIn0.dT4Ld3v1GoeQRCaIzxNn2g';
+const STYLES={
+  custom:'mapbox://styles/ei8hter/clftn1bs7001l01qkclbhwzzq',
+  streets:'mapbox://styles/mapbox/streets-v12',
+  sat:'mapbox://styles/mapbox/satellite-streets-v12'
+};
+
+// ═══ REGULI PUG ═══════════════════════════════════════════════════════════
+const REGULI={
+"LL":{d:"Locuințe individuale",pot:35,cut:1.0,niv:2,h:10,rf:5,rl:3,rs:5,sv:30,pk:2,ao:"NU",fm:null,ua:"Locuințe și funcțiuni compatibile",uc:"Comerț mic",ui:"Industrie și depozitare"},
+"LL2":{d:"Locuințe individuale tip 2",pot:35,cut:1.0,niv:2,h:10,rf:5,rl:3,rs:5,sv:30,pk:2,ao:"NU",fm:null,ua:"Locuințe compatibile",uc:"Comerț mic",ui:"Industrie"},
+"LA":{d:"Locuințe + funcțiuni complementare",pot:35,cut:1.2,niv:2,h:12,rf:5,rl:3,rs:5,sv:30,pk:2,ao:"NU",fm:null,ua:"Locuire individuală și colectivă; servicii",uc:"Comerț și servicii",ui:"Activități industriale"},
+"LA1":{d:"Locuințe + funcțiuni tip 1",pot:35,cut:1.2,niv:2,h:12,rf:5,rl:3,rs:5,sv:30,pk:2,ao:"NU",fm:null,ua:"Locuire; servicii mici",uc:"Comerț compatibil",ui:"Industrie"},
+"LB":{d:"Locuințe colective mici",pot:40,cut:1.5,niv:3,h:14,rf:5,rl:3,rs:5,sv:25,pk:1,ao:"NU",fm:null,ua:"Locuințe colective, servicii",uc:"Comerț la parter",ui:"Industrie"},
+"LB,C2":{d:"Locuințe colective + comerț",pot:45,cut:1.8,niv:3,h:14,rf:3,rl:3,rs:5,sv:20,pk:1,ao:"DA",fm:null,ua:"Locuire colectivă, comerț, servicii",uc:"Funcțiuni compatibile",ui:"Industrie poluantă"},
+"LC":{d:"Locuințe colective",pot:40,cut:1.6,niv:4,h:16,rf:5,rl:3,rs:5,sv:25,pk:1,ao:"NU",fm:null,ua:"Locuințe colective, servicii aferente",uc:"Comerț la parter",ui:"Industrie"},
+"LV":{d:"Locuințe cu vegetație",pot:25,cut:0.7,niv:1,h:8,rf:8,rl:4,rs:8,sv:40,pk:2,ao:"NU",fm:null,ua:"Locuire cu grădini",uc:"Servicii mici",ui:"Industrie"},
+"CM":{d:"Zonă mixtă",pot:60,cut:3.0,niv:6,h:24,rf:0,rl:3,rs:5,sv:20,pk:3,ao:"DA",fm:18,ua:"Comerț, birouri, servicii, locuire",uc:"Funcțiuni sensibile",ui:"Industrie poluantă"},
+"CA":{d:"Zonă centrală",pot:80,cut:4.0,niv:7,h:28,rf:0,rl:0,rs:3,sv:10,pk:2,ao:"DA",fm:12,ua:"Funcțiuni mixte interes public și privat",uc:"Activități culturale",ui:"Industrie"},
+"CC":{d:"Comerț și servicii",pot:70,cut:3.5,niv:5,h:20,rf:0,rl:0,rs:3,sv:10,pk:3,ao:"DA",fm:null,ua:"Comerț, servicii, alimentație publică",uc:"Locuire la etaje",ui:"Industrie poluantă"},
+"CP":{d:"Comerț predominant",pot:65,cut:2.8,niv:4,h:18,rf:0,rl:3,rs:5,sv:15,pk:3,ao:"DA",fm:null,ua:"Comerț, servicii",uc:"Locuire condiționată",ui:"Industrie"},
+"CB1":{d:"Construită protejată 1",pot:55,cut:1.8,niv:1,h:8,rf:0,rl:0,rs:3,sv:20,pk:1,ao:"DA",fm:null,ua:"Funcțiuni compatibile cu patrimoniul",uc:"Consolidare",ui:"Incompatibile"},
+"CB2":{d:"Construită protejată 2",pot:60,cut:2.0,niv:2,h:10,rf:0,rl:0,rs:3,sv:18,pk:1,ao:"DA",fm:null,ua:"Funcțiuni compatibile",uc:"Consolidare",ui:"Incompatibile"},
+"CB3":{d:"Construită protejată 3",pot:60,cut:2.0,niv:3,h:14,rf:0,rl:0,rs:3,sv:15,pk:1,ao:"DA",fm:null,ua:"Funcțiuni mixte compatibile",uc:"Consolidare",ui:"Incompatibile"},
+"CB4":{d:"Construită protejată 4",pot:62,cut:2.2,niv:4,h:16,rf:0,rl:0,rs:3,sv:15,pk:1,ao:"DA",fm:null,ua:"Funcțiuni mixte",uc:"Consolidare",ui:"Incompatibile"},
+"CB5":{d:"Construită protejată 5",pot:65,cut:2.5,niv:5,h:20,rf:0,rl:0,rs:3,sv:12,pk:1,ao:"DA",fm:null,ua:"Funcțiuni mixte",uc:"Consolidare",ui:"Incompatibile"},
+"CB6":{d:"Construită protejată 6",pot:68,cut:2.8,niv:6,h:24,rf:0,rl:0,rs:3,sv:10,pk:1,ao:"DA",fm:null,ua:"Funcțiuni mixte",uc:"Consolidare",ui:"Incompatibile"},
+"CB7":{d:"Construită protejată 7",pot:70,cut:3.0,niv:7,h:28,rf:0,rl:0,rs:3,sv:10,pk:1,ao:"DA",fm:null,ua:"Funcțiuni mixte",uc:"Consolidare",ui:"Incompatibile"},
+"D1":{d:"Dotări publice",pot:45,cut:1.5,niv:3,h:16,rf:5,rl:5,rs:5,sv:25,pk:2,ao:"DA",fm:null,ua:"Școli, spitale, primărie",uc:"Servicii conexe",ui:"Industrie"},
+"AI1":{d:"Industrial 1",pot:55,cut:1.8,niv:2,h:12,rf:5,rl:5,rs:5,sv:15,pk:1,ao:"NU",fm:null,ua:"Producție ușoară",uc:"Servicii productive",ui:"Locuire"},
+"AI2A":{d:"Industrial 2A",pot:60,cut:2.0,niv:3,h:14,rf:10,rl:10,rs:10,sv:10,pk:1,ao:"NU",fm:null,ua:"Activități industriale",uc:"Servicii aferente",ui:"Locuire"},
+"AI2B":{d:"Industrial 2B",pot:60,cut:2.0,niv:3,h:14,rf:10,rl:10,rs:10,sv:10,pk:1,ao:"NU",fm:null,ua:"Industrial tip B",uc:"Servicii",ui:"Locuire"},
+"AI2C":{d:"Industrial 2C",pot:60,cut:2.0,niv:3,h:14,rf:10,rl:10,rs:10,sv:10,pk:1,ao:"NU",fm:null,ua:"Industrial tip C",uc:"Servicii",ui:"Locuire"},
+"AI3":{d:"Industrial 3",pot:70,cut:3.0,niv:5,h:20,rf:15,rl:15,rs:15,sv:10,pk:1,ao:"NU",fm:null,ua:"Industrie mare",uc:"Administrative",ui:"Locuire"},
+"AI4":{d:"Industrial 4",pot:70,cut:3.5,niv:6,h:24,rf:20,rl:20,rs:20,sv:10,pk:1,ao:"NU",fm:null,ua:"Platforme industriale",uc:"Suport",ui:"Locuire"},
+"AI4A":{d:"Industrial 4A",pot:75,cut:4.0,niv:7,h:28,rf:20,rl:20,rs:20,sv:10,pk:1,ao:"NU",fm:null,ua:"Platforme extinse",uc:"Suport extins",ui:"Locuire"},
+"AI5":{d:"Industrial 5",pot:75,cut:4.0,niv:8,h:32,rf:20,rl:20,rs:20,sv:8,pk:1,ao:"NU",fm:null,ua:"Industrie grea",uc:"Administrative",ui:"Locuire"},
+"AI6":{d:"Industrial 6",pot:80,cut:4.5,niv:9,h:36,rf:25,rl:25,rs:25,sv:8,pk:1,ao:"NU",fm:null,ua:"Industrie specială",uc:"Speciale",ui:"Locuire"},
+"P1":{d:"Parc",pot:5,cut:0.1,niv:1,h:5,rf:10,rl:10,rs:10,sv:90,pk:0,ao:"NU",fm:null,ua:"Parcuri, alei",uc:"Agrement",ui:"Construcții"},
+"P1A":{d:"Parc cartier",pot:5,cut:0.1,niv:1,h:5,rf:5,rl:5,rs:5,sv:90,pk:0,ao:"NU",fm:null,ua:"Spații verzi",uc:"Dotări mici",ui:"Construcții"},
+"P1B":{d:"Spații verzi",pot:2,cut:0.05,niv:0,h:3,rf:5,rl:5,rs:5,sv:95,pk:0,ao:"NU",fm:null,ua:"Scuaruri",uc:"-",ui:"Construcții"},
+"P2":{d:"Spații verzi 2",pot:5,cut:0.1,niv:1,h:5,rf:10,rl:10,rs:10,sv:88,pk:0,ao:"NU",fm:null,ua:"Agrement",uc:"Dotări",ui:"Construcții"},
+"P3":{d:"Zone agrement",pot:8,cut:0.2,niv:1,h:6,rf:10,rl:10,rs:10,sv:85,pk:0,ao:"NU",fm:null,ua:"Sport în aer liber",uc:"Temporare",ui:"Construcții"},
+"P4":{d:"Sport și agrement",pot:20,cut:0.5,niv:1,h:12,rf:10,rl:10,rs:10,sv:50,pk:2,ao:"NU",fm:null,ua:"Baze sportive",uc:"Servicii conexe",ui:"Locuire"},
+"P5":{d:"Agrement și turism",pot:25,cut:0.8,niv:2,h:12,rf:10,rl:10,rs:10,sv:40,pk:1,ao:"NU",fm:null,ua:"Cazare, agrement",uc:"Comerț turistic",ui:"Industrie"},
+"P":{d:"Parc",pot:5,cut:0.1,niv:1,h:5,rf:10,rl:10,rs:10,sv:90,pk:0,ao:"NU",fm:null,ua:"Parc",uc:"Agrement",ui:"Construcții"},
+"AA":{d:"Agricolă",pot:10,cut:0.2,niv:1,h:6,rf:10,rl:5,rs:5,sv:60,pk:0,ao:"NU",fm:null,ua:"Grădini, livezi",uc:"Auxiliare",ui:"Industrie"},
+"S":{d:"Subzistență",pot:10,cut:0.2,niv:1,h:5,rf:10,rl:5,rs:5,sv:60,pk:0,ao:"NU",fm:null,ua:"Grădini, culturi",uc:"Auxiliare",ui:"Construcții"},
+"EP6":{d:"Echipamente publice",pot:40,cut:1.5,niv:3,h:16,rf:5,rl:5,rs:5,sv:25,pk:2,ao:"DA",fm:null,ua:"Dotări publice mari",uc:"Conexe",ui:"Industrie"},
+"ET3":{d:"Echipamente tehnice",pot:35,cut:1.0,niv:2,h:10,rf:5,rl:5,rs:5,sv:20,pk:1,ao:"NU",fm:null,ua:"Utilități",uc:"Aferente",ui:"Locuire"},
+"TA":{d:"Transport auto",pot:50,cut:1.0,niv:1,h:8,rf:5,rl:5,rs:5,sv:15,pk:0,ao:"NU",fm:null,ua:"Transport, parcări",uc:"Servicii",ui:"Locuire"},
+"TF":{d:"Feroviar",pot:null,cut:null,niv:null,h:null,rf:null,rl:null,rs:null,sv:null,pk:0,ao:"DA",fm:null,ua:"Feroviar",uc:"Suport",ui:"Locuire"},
+"TP":{d:"Transport public",pot:30,cut:0.8,niv:1,h:8,rf:5,rl:5,rs:5,sv:20,pk:0,ao:"NU",fm:null,ua:"Stații transport",uc:"Conexe",ui:"Locuire"},
+"G1":{d:"Gospodărie comunală",pot:40,cut:1.0,niv:1,h:8,rf:5,rl:5,rs:5,sv:20,pk:1,ao:"NU",fm:null,ua:"Tehnico-edilitare",uc:"Administrative",ui:"Locuire"},
+"G2":{d:"Gospodărie comunală 2",pot:50,cut:1.5,niv:2,h:10,rf:5,rl:5,rs:5,sv:15,pk:1,ao:"NU",fm:null,ua:"Depozite tehnice",uc:"Productive",ui:"Locuire"},
+"PP":{d:"Pădure parc",pot:1,cut:0,niv:0,h:0,rf:20,rl:20,rs:20,sv:99,pk:0,ao:"NU",fm:null,ua:"Pădure",uc:"Alei",ui:"Construcții"},
+"P1A,P1B":{d:"Parc+spații verzi",pot:5,cut:0.1,niv:1,h:5,rf:5,rl:5,rs:5,sv:90,pk:0,ao:"NU",fm:null,ua:"Spații verzi mixte",uc:"Agrement",ui:"Construcții"},
+"G/P9":{d:"Gospodărie/Parc",pot:15,cut:0.3,niv:1,h:6,rf:8,rl:8,rs:8,sv:60,pk:0,ao:"NU",fm:null,ua:"Mixt",uc:"Mici",ui:"Industrie"},
+"T1B":{d:"Transport 1B",pot:35,cut:1.0,niv:1,h:8,rf:5,rl:5,rs:5,sv:15,pk:0,ao:"NU",fm:null,ua:"Infrastructură",uc:"Conexe",ui:"Locuire"}
+};
+
+// Funcțiuni și validare UTR
+const FN_UTR = {
+  locuinta_individuala:{label:'Locuință individuală',admis:['LL','LL2','LA','LA1','LV','LB','AA'],cond:['LB,C2','LC'],pk_formula:'2/unitate',sv_extra:0},
+  locuinta_colectiva:{label:'Locuință colectivă',admis:['LC','LB','LB,C2','CB1','CB2','CB3','CB4','CB5','CB6','CB7'],cond:['CM','CA','CC'],pk_formula:'1/apartament',sv_extra:0},
+  birouri:{label:'Birouri',admis:['CM','CA','CB1','CB2','CB3','CB4','CB5','CB6','CB7','CC','CP'],cond:['LA','LB'],pk_formula:'2/100mp',sv_extra:0},
+  comert:{label:'Comerț',admis:['CM','CA','CC','CP','CB1','CB2','CB3','CB4','CB5','CB6','CB7'],cond:['LC','LB,C2'],pk_formula:'3/100mp',sv_extra:0},
+  hotel:{label:'Hotel',admis:['CA','CM','CC'],cond:['CB3','CB4','CB5'],pk_formula:'1/cameră + 0.5/autocar/10cam',sv_extra:5},
+  servicii:{label:'Servicii',admis:['CM','CA','CC','CP','LA','LA1','LB'],cond:['LL','LL2'],pk_formula:'2/100mp',sv_extra:0},
+  institutional:{label:'Instituțional/Public',admis:['D1','EP6','CA','CM'],cond:['CC','CB1','CB2','CB3'],pk_formula:'2/100mp',sv_extra:0},
+  industrial:{label:'Industrial',admis:['AI1','AI2A','AI2B','AI2C','AI3','AI4','AI4A','AI5','AI6'],cond:['G1','G2'],pk_formula:'1/100mp',sv_extra:0},
+  logistic:{label:'Logistică/Depozitare',admis:['AI1','AI2A','AI2B','AI2C','AI3','AI4'],cond:['G1','G2'],pk_formula:'1/100mp',sv_extra:0},
+  sport:{label:'Sport și agrement',admis:['P4','P3','P5'],cond:['P','P1','P2'],pk_formula:'2/100mp',sv_extra:10}
+};
+
+const UTR_COLORS={
+  LL:'#4ade80',LL2:'#22c55e',LA:'#86efac',LA1:'#bbf7d0',LB:'#34d399','LB,C2':'#059669',LC:'#6ee7b7',LV:'#a7f3d0',
+  CM:'#60a5fa',CA:'#1d4ed8',CC:'#3b82f6',CP:'#93c5fd',
+  CB1:'#ddd6fe',CB2:'#c4b5fd',CB3:'#a78bfa',CB4:'#8b5cf6',CB5:'#7c3aed',CB6:'#6d28d9',CB7:'#4c1d95',
+  D1:'#f9a8d4',EP6:'#ec4899',ET3:'#fbcfe8',
+  TA:'#6b7280',TF:'#9ca3af',TP:'#4b5563',G1:'#d1d5db',G2:'#9ca3af',
+  P:'#4ade80',P1:'#bbf7d0',P1A:'#86efac',P1B:'#4ade80','P1A,P1B':'#34d399',P2:'#34d399',P3:'#6ee7b7',P4:'#fde68a',P5:'#fcd34d',P:'#4ade80',PP:'#064e3b',
+  AA:'#fef08a',S:'#fef9c3',
+  AI1:'#fca5a5',AI2A:'#f87171',AI2B:'#ef4444',AI2C:'#dc2626',AI2D:'#b91c1c',AI3:'#991b1b',AI4:'#7f1d1d',AI4A:'#7f1d1d',AI5:'#450a0a',AI6:'#3b0a0a',
+  'G/P9':'#d1fae5',T1B:'#374151'
+};
+const ucol=u=>UTR_COLORS[u]||'#94a3b8';
+const FLOOR_COLORS=[
+  '#22d3ee', // P - cyan
+  '#34d399', // Et1 - verde
+  '#86efac', // Et2 - verde deschis
+  '#fde68a', // Et3 - galben
+  '#fcd34d', // Et4 - galben intens
+  '#fb923c', // Et5 - portocaliu
+  '#f97316', // Et6 - portocaliu intens
+  '#ef4444', // Et7 - roșu
+  '#dc2626', // Et8 - roșu intens
+  '#a855f7', // Et9 - violet
+  '#7c3aed', // Et10 - violet intens
+  '#ec4899'  // Et11+ - roz
+];
+
+// ═══ STATE ════════════════════════════════════════════════════════════════
+const S={
+  pug:null,pugIdx:[],cadData:null,cadIdx:new Map(),
+  parcels:[],          // array de parcele selectate (multiselect)
+  activeParcel:null,   // parcela curentă (index în S.parcels)
+  utr:'',rule:{},ll:null,
+  ctx:null,popup:null,
+  tab:'search',multiMode:false,
+  bearing:0,
+  scenarios:JSON.parse(localStorage.getItem('ux16')||'[]'),
+  params:{},  // parametri urbanistici editabili per parcelă
+  vol:{fn:'locuinta_individuala',niv:4,hNiv:3.0,hOvr:'',fpF:0.8,retras:true,terasa:true,ctxR:200,onlyVol:false,genDone:false}
+};
+
+// ═══ HARTĂ ════════════════════════════════════════════════════════════════
+const map=new mapboxgl.Map({
+  container:'map',style:STYLES.custom,
+  center:[27.6014,47.1585],zoom:13,pitch:0,bearing:0,antialias:true
+});
+map.addControl(new mapboxgl.NavigationControl(),'top-left');
+
+// ═══ ANCPI JSONP ══════════════════════════════════════════════════════════
+// ANCPI JSONP - registry global pentru callbacks
+window._ancpiRegistry = window._ancpiRegistry || {};
+let _aId = 0;
+
+function ancpiJSONP(params, timeout=12000){
+  return new Promise((res, rej) => {
+    const id = ++_aId;
+    const cb = `_ancpiCb${id}`;
+    
+    const cleanup = () => {
+      delete window._ancpiRegistry[cb];
+      // Definim ca no-op pentru a evita "not defined" dacă scriptul mai vine
+      window[cb] = () => {};
+      const s = document.getElementById('ancpi-script-'+id);
+      if(s) s.remove();
+    };
+    
+    const t = setTimeout(() => {
+      cleanup();
+      rej(new Error('ANCPI timeout'));
+    }, timeout);
+    
+    // Definim callback ÎNAINTE de a crea scriptul
+    window[cb] = (d) => {
+      clearTimeout(t);
+      cleanup();
+      if(d?.error) rej(new Error(d.error.message));
+      else res(d);
+    };
+    window._ancpiRegistry[cb] = true;
+    
+    const s = document.createElement('script');
+    s.id = 'ancpi-script-' + id;
+    s.onerror = () => { clearTimeout(t); cleanup(); rej(new Error('ANCPI script error')); };
+    s.src = `https://geoportal.ancpi.ro/maps/rest/services/eterra3_publish/MapServer/1/query?${new URLSearchParams({...params, f:'json', callback:cb})}`;
+    document.head.appendChild(s);
+  });
+}
+
+function stereo70(x,y){
+  const a=6378245,f=1/298.3,e2=2*f-f*f,e=Math.sqrt(e2);
+  const k0=0.99975,lon0=25*Math.PI/180,lat0=46*Math.PI/180,FE=500000,FN=500000;
+  const chi0=2*Math.atan(Math.tan(Math.PI/4+lat0/2)*Math.pow((1-e*Math.sin(lat0))/(1+e*Math.sin(lat0)),e/2))-Math.PI/2;
+  const R=a*k0*Math.sqrt(1-e2)/(1-e2*Math.sin(lat0)**2);
+  const dx=x-FE,dy=y-FN,rho=Math.sqrt(dx*dx+dy*dy);
+  const c=2*Math.atan2(rho,2*R);
+  if(rho<1e-10)return[lon0*180/Math.PI,lat0*180/Math.PI];
+  const sC=Math.sin(c),cC=Math.cos(c),sC0=Math.sin(chi0),cC0=Math.cos(chi0);
+  const chi=Math.asin(cC*sC0+(dy*sC*cC0)/rho);
+  const lon=lon0+Math.atan2(dx*sC,rho*cC0*cC-dy*sC0*sC);
+  let lat=chi;
+  for(let i=0;i<6;i++)lat=2*Math.atan(Math.tan(Math.PI/4+chi/2)*Math.pow((1+e*Math.sin(lat))/(1-e*Math.sin(lat)),e/2))-Math.PI/2;
+  return[lon*180/Math.PI,lat*180/Math.PI];
+}
+
+function ancpiRingsToGeoJSON(data){
+  if(!data?.features) return [];
+  return data.features.filter(f=>f.geometry?.rings?.length).map(f=>{
+    const coords = f.geometry.rings.map(r=>r.map(([x,y])=>{
+      // Detectare automată Stereo70 vs WGS84
+      if(Math.abs(x)>180||Math.abs(y)>90) return stereo70(x,y);
+      return [x,y];
+    }));
+    const props = f.attributes||{};
+    // Normalizăm câmpurile cheie
+    const nrcad = props.NR_CAD||props.nr_cad||props.NRCAD||
+                  (props.INSPIRE_ID||'').split('.').pop()||'—';
+    return {
+      type:'Feature',
+      geometry:{type:'Polygon',coordinates:coords},
+      properties:{...props, nrcad, source:'ANCPI'}
+    };
+  }).filter(f=>{
+    // Eliminăm geometriile invalide
+    try{ return turf.area(f)>1; }catch(e){ return false; }
+  });
+}
+
+async function fetchANCPIParcel(lat,lng,nrcad){
+  try{
+    const d=0.002;
+    const data=await ancpiJSONP({
+      geometry:`${lng-d},${lat-d},${lng+d},${lat+d}`,
+      geometryType:'esriGeometryEnvelope',
+      inSR:'4326',
+      spatialRel:'esriSpatialRelIntersects',
+      outFields:'*',
+      returnGeometry:'true',
+      resultRecordCount:'15',
+      where:'1=1',
+      outSR:'4326'
+    });
+    const feats=ancpiRingsToGeoJSON(data);
+    if(!feats.length) return null;
+    const pt=turf.point([lng,lat]);
+    for(const f of feats){
+      try{if(turf.booleanPointInPolygon(pt,f))return f;}catch(e){}
+    }
+    return feats[0];
+  }catch(e){console.log('ANCPI:',e.message);return null;}
+}
+
+// ═══ MAP INIT ════════════════════════════════════════════════════════════
+function addLayers(){
+  const E={type:'FeatureCollection',features:[]};
+  ['parcel-src','utr-src','ctx-src','vol-src','fp-src'].forEach(id=>{
+    if(!map.getSource(id)) map.addSource(id,{type:'geojson',data:E});
+  });
+  const L=(spec)=>{if(!map.getLayer(spec.id))map.addLayer(spec);};
+
+  L({id:'utr-fill',type:'fill',source:'utr-src',paint:{'fill-color':['coalesce',['get','c'],'#6d28d9'],'fill-opacity':0.2}});
+  L({id:'utr-line',type:'line',source:'utr-src',paint:{'line-color':['coalesce',['get','c'],'#6d28d9'],'line-width':1.5,'line-opacity':0.7}});
+  L({id:'utr-lbl',type:'symbol',source:'utr-src',minzoom:13,layout:{'text-field':['get','utr'],'text-size':11,'text-font':['DIN Pro Bold','Arial Unicode MS Bold']},paint:{'text-color':['coalesce',['get','c'],'#c4b5fd'],'text-halo-color':'rgba(0,0,0,.8)','text-halo-width':1.5}});
+
+  // Parcele cadastrale (multiselect)
+  L({id:'parcel-fill',type:'fill',source:'parcel-src',paint:{'fill-color':['coalesce',['get','fc'],'#00e5b4'],'fill-opacity':0.22}});
+  L({id:'parcel-line',type:'line',source:'parcel-src',paint:{'line-color':['coalesce',['get','lc'],'#00e5b4'],'line-width':3}});
+
+  L({id:'fp-fill',type:'fill',source:'fp-src',paint:{'fill-color':'#ff6b35','fill-opacity':0.15}});
+  L({id:'fp-line',type:'line',source:'fp-src',paint:{'line-color':'#ff6b35','line-width':2,'line-dasharray':[4,3]}});
+
+  L({id:'ctx-3d',type:'fill-extrusion',source:'ctx-src',paint:{
+    'fill-extrusion-color':['coalesce',['get','col'],'#6b7280'],
+    'fill-extrusion-height':['coalesce',['get','h'],7],
+    'fill-extrusion-base':0,'fill-extrusion-opacity':0.6
+  }});
+  L({id:'vol-3d',type:'fill-extrusion',source:'vol-src',paint:{
+    'fill-extrusion-color':['coalesce',['get','color'],'#f59e0b'],
+    'fill-extrusion-height':['coalesce',['get','top'],9],
+    'fill-extrusion-base':['coalesce',['get','base'],0],
+    'fill-extrusion-opacity':0.92
+  }});
+
+  if(map._ux) return; map._ux=true;
+  map.on('click','ctx-3d',e=>{
+    const f=e.features?.[0];if(!f)return;
+    const h=f.properties.h,lv=f.properties.lv,fn=f.properties.fn||'clădire';
+    popup(`<b>🏢 Clădire existentă</b><br>Înălțime: <b>${h?Math.round(h)+'m':'?'}</b>${lv?`<br>Niveluri: <b>${lv}</b>`:''}<br>Tip: ${esc(fn)}`,e.lngLat);
+  });
+  map.on('click','vol-3d',e=>{
+    const f=e.features?.[0];if(!f)return;
+    const fl=f.properties.floor,pi=f.properties.parcelIdx;
+    const p=S.parcels[pi]||S.parcels[0];
+    const label=fl===-1?'Terasă':(fl===0?'Parter':'Etaj '+fl);
+    const base=Number(f.properties.base||0),top=Number(f.properties.top||0);
+    popup(`<b>🏗 ${label}</b><br>${p?`Parcelă: <b>${esc(p.nrcad||'-')}</b><br>`:''}Cotă: <b>${base.toFixed(1)}m → ${top.toFixed(1)}m</b><br><small style="color:#64748b">Click X sau ESC pentru a închide</small>`,e.lngLat);
+  });
+  map.on('mouseenter','ctx-3d',()=>map.getCanvas().style.cursor='crosshair');
+  map.on('mouseleave','ctx-3d',()=>map.getCanvas().style.cursor='');
+  map.on('mouseenter','vol-3d',()=>map.getCanvas().style.cursor='pointer');
+  map.on('mouseleave','vol-3d',()=>map.getCanvas().style.cursor='');
+  map.on('click','parcel-fill',e=>{
+    const f=e.features?.[0];if(!f)return;
+    const idx=parseInt(f.properties.pidx||'0');
+    if(idx<S.parcels.length){S.activeParcel=idx;renderAll();}
+  });
+}
+
+map.on('load',()=>{addLayers();loadData();});
+map.on('style.load',()=>setTimeout(()=>{addLayers();updateMap();},200));
+
+// CLICK pe hartă → DOAR selectează (NU generează volum automat)
+map.on('click',e=>{
+  // Click pe hartă gol → închide popup dacă există
+  const lyrsCheck=map.queryRenderedFeatures(e.point,{layers:['ctx-3d','vol-3d','parcel-fill','utr-fill']});
+  if(!lyrsCheck.length && S.popup){S.popup.remove();S.popup=null;return;}
+  const lyrs=map.queryRenderedFeatures(e.point,{layers:['ctx-3d','vol-3d','parcel-fill','utr-fill']});
+  if(lyrs.length) return;
+  onMapClick(e.lngLat.lat,e.lngLat.lng);
+});
+
+map.on('dblclick',e=>{
+  document.querySelectorAll('#inp-coord').forEach(el=>el.value=`${e.lngLat.lat.toFixed(6)}, ${e.lngLat.lng.toFixed(6)}`);
+  e.preventDefault();
+});
+map.on('pitch',()=>{const p=Math.round(map.getPitch());$('pitchV').textContent=p+'°';$('slPitch').value=p;});
+map.on('rotate',()=>{const b=((Math.round(map.getBearing())%360)+360)%360;$('bearV').textContent=b+'°';$('slBearing').value=b;});
+
+// ═══ CLICK HARTĂ ══════════════════════════════════════════════════════════
+async function onMapClick(lat,lng){
+  // Curățăm popup-ul anterior
+  if(S.popup){S.popup.remove();S.popup=null;}
+
+  const utr=lookupUTR(lng,lat);
+  const local=findNearest(lat,lng,60);
+  const nrcad=local?.properties?.nrcad||null;
+  const parUtr=normU(local?.properties?.utr||'')||utr||'';
+
+  ss(`⏳ ${local?`Parcelă ${nrcad||'?'}`:lat.toFixed(5)+', '+lng.toFixed(5)} — se obține forma cadastrală…`);
+
+  // Încearcă ANCPI pentru forma reală
+  let poly=null;
+  try{
+    const p=fetchANCPIParcel(lat,lng,nrcad);
+    const t=new Promise(r=>setTimeout(()=>r(null),8000));
+    poly=await Promise.race([p,t]);
+  }catch(e){}
+
+  let parcelObj;
+  if(poly?.geometry){
+    const area=turf.area(poly).toFixed(0);
+    const nc=poly.properties?.NR_CAD||nrcad||'—';
+    parcelObj={geo:poly,nrcad:nc,utr:parUtr,area:Number(area),source:'ANCPI',params:getDefaultParams(parUtr)};
+    popup(`<b>✅ Parcelă ANCPI</b><br>Cad: <b>${esc(nc)}</b><br>UTR: <b>${esc(parUtr||'—')}</b><br>Suprafață: <b>${area} m²</b>`,{lng,lat});
+    ss(`✅ Parcelă ${nc} | UTR: ${parUtr||'—'} | ${area} m² · ANCPI ✓`);
+  } else if(local){
+    const area=pN(local.properties?.SHAPE_Area)||400;
+    // Buffer dreptunghiular din SHAPE_Leng (perimetru) și SHAPE_Area
+    const r=Math.min(Math.sqrt(area/Math.PI)*0.65,20);
+    const perim=pN(local.properties?.SHAPE_Leng)||4*r*4;
+    // Calculăm dimensiunile reale ale dreptunghiului din perimetru și suprafață
+    const disc=perim*perim-16*area;
+    let l1=r,l2=r;
+    if(disc>0){
+      l1=Math.min(Math.max((perim+Math.sqrt(disc))/4,3),40);
+      l2=Math.min(Math.max((perim-Math.sqrt(disc))/4,3),40);
+    }
+    const [lng0,lat0]=local.geometry.coordinates;
+    const mPerDegLat=111320;
+    const mPerDegLng=111320*Math.cos(lat0*Math.PI/180);
+    const dx=l1/2/mPerDegLat, dy=l2/2/mPerDegLng;
+    const rectCoords=[[lng0-dy,lat0-dx],[lng0+dy,lat0-dx],[lng0+dy,lat0+dx],[lng0-dy,lat0+dx],[lng0-dy,lat0-dx]];
+    const buf={type:'Feature',geometry:{type:'Polygon',coordinates:[rectCoords]},properties:{}};
+    if(buf){buf.properties={...local.properties};poly=buf;}
+    parcelObj={geo:poly,nrcad:nrcad||'—',utr:parUtr,area,source:'local',params:getDefaultParams(parUtr)};
+    popup(`<b>⚠️ Parcelă aproximativă</b><br>Cad: <b>${esc(nrcad||'—')}</b><br>UTR: <b>${esc(parUtr||'—')}</b><br>~${Math.round(area)} m²<br><small style="color:#fbbf24">ANCPI indisponibil — buffer circular</small>`,{lng,lat});
+    ss(`⚠️ Parcelă ${nrcad||'—'} | UTR: ${parUtr||'—'} | ~${Math.round(area)} m² · formă aproximativă`);
+  } else {
+    ss(`📍 ${lat.toFixed(5)}, ${lng.toFixed(5)} | UTR: ${utr||'necunoscut'} | Nicio parcelă în 60m`);
+    return;
+  }
+
+  S.ll={lat,lng};
+  if(S.multiMode){
+    S.parcels.push(parcelObj);
+    S.activeParcel=S.parcels.length-1;
+  } else {
+    S.parcels=[parcelObj];
+    S.activeParcel=0;
+    S.ctx=null;
+    clearSource('vol-src');
+    clearSource('ctx-src');
+    S.vol.genDone=false;
+  }
+  S.utr=parcelObj.utr;S.rule=REGULI[S.utr]||{};
+  updateMap();
+  renderAll();
+
+  // Zoom pe parcelă - fitBounds dacă avem geometrie poligon, altfel flyTo
+  if(parcelObj.geo?.geometry?.type==='Polygon'||parcelObj.geo?.geometry?.type==='MultiPolygon'){
+    try{
+      const bb=turf.bbox(parcelObj.geo);
+      map.fitBounds([[bb[0],bb[1]],[bb[2],bb[3]]],{padding:120,maxZoom:19,duration:700});
+    }catch(e){map.flyTo({center:[lng,lat],zoom:18,duration:600});}
+  } else {
+    map.flyTo({center:[lng,lat],zoom:18,duration:600});
+  }
+  await loadContext();
+}
+
+function getDefaultParams(utr){
+  const r=REGULI[utr]||{};
+  // rl = aliniament lateral stânga, rr = lateral dreapta (implicit = rl)
+  return {pot:r.pot,cut:r.cut,niv:r.niv,h:r.h,rf:r.rf,rl:r.rl,rr:r.rl,rs:r.rs,sv:r.sv,pk:r.pk};
+}
+
+// ═══ UTR LOOKUP ═══════════════════════════════════════════════════════════
+function lookupUTR(lng,lat){
+  if(!S.pugIdx.length)return'';
+  const pt=turf.point([lng,lat]);
+  for(const{utr,geom,bb}of S.pugIdx){
+    if(lng<bb[0]||lng>bb[2]||lat<bb[1]||lat>bb[3])continue;
+    try{if(turf.booleanPointInPolygon(pt,{type:'Feature',geometry:geom,properties:{}}))return utr;}catch(e){}
+  }
+  return'';
+}
+
+function findNearest(lat,lng,maxM){
+  if(!S.cadData?.features?.length)return null;
+  const pt=turf.point([lng,lat]);
+  let best=null,bestD=Infinity;
+  for(const f of S.cadData.features){
+    try{const d=turf.distance(pt,turf.point(f.geometry.coordinates),{units:'meters'});if(d<bestD){best=f;bestD=d;}}catch(e){}
+  }
+  return bestD<=maxM?best:null;
+}
+
+// ═══ UPDATE MAP SOURCES ════════════════════════════════════════════════════
+function clearSource(id){const s=map.getSource(id);if(s)s.setData({type:'FeatureCollection',features:[]});}
+function setSource(id,fc){const s=map.getSource(id);if(s)s.setData(fc||{type:'FeatureCollection',features:[]});}
+
+function updateMap(){
+  // Parcele selectate
+  const pFeats=S.parcels.filter(p=>p.geo?.geometry).map((p,i)=>({
+    ...p.geo,
+    id:i,
+    properties:{...p.geo.properties,pidx:i,
+      fc:i===S.activeParcel?'#00e5b4':'#60a5fa',
+      lc:i===S.activeParcel?'#00e5b4':'#3b82f6'}
+  }));
+  setSource('parcel-src',{type:'FeatureCollection',features:pFeats});
+
+  // Footprint pentru parcela activă
+  const ap=S.parcels[S.activeParcel??0];
+  if(ap?.geo?.geometry){
+    // Footprint = buildFP cu parametrii curenți (aliniamente etc.)
+    const fp = buildFP(ap.geo.geometry, ap.params||ap.utr);
+    if(fp?.geometry){
+      setSource('fp-src',{type:'FeatureCollection',features:[fp]});
+    } else clearSource('fp-src');
+  } else clearSource('fp-src');
+
+  // Context
+  setSource('ctx-src',S.ctx);
+
+  // Volum (dacă a fost generat)
+  // Nu regenerăm automat - doar la apăsarea butonului
+}
+
+// ═══ FOOTPRINT & VOLUM ════════════════════════════════════════════════════
+function buildFP(geom,paramsOrUtr){
+  if(!geom)return null;
+  let p=typeof paramsOrUtr==='object'?paramsOrUtr:getDefaultParams(paramsOrUtr);
+  try{
+    let c={type:'Feature',geometry:geom,properties:{}};
+    // Aliniamente: rf=față stradă, rl=lateral stânga, rr=lateral dreapta, rs=posterior
+    const rf=pN(p.rf)||0, rl=pN(p.rl)||0, rr=pN(p.rr)||pN(p.rl)||0, rs=pN(p.rs)||0;
+    // Buffer progresiv: aplicăm cel mai mic aliniament ca buffer uniform
+    // apoi reducem cu diferența pentru fiecare latură
+    const minAlin = Math.min(rf,rl,rr,rs);
+    const maxAlin = Math.max(rf,rl,rr,rs);
+    if(maxAlin > 0.5){
+      // Buffer uniform cu minimul
+      const bufMin = minAlin > 0.5 ? turf.buffer(c, -minAlin, {units:'meters'}) : c;
+      if(bufMin?.geometry && turf.area(bufMin)>4) c = bufMin;
+      // Buffer adițional cu media aliniamentelor rămase
+      const extra = (rf+rl+rr+rs)/4 - minAlin;
+      if(extra > 0.5){
+        const bufExtra = turf.buffer(c, -Math.min(extra,20), {units:'meters'});
+        if(bufExtra?.geometry && turf.area(bufExtra)>4) c = bufExtra;
+      }
+    }
+    const fpF=Math.max(0.1,Math.min(1,Number(S.vol.fpF||0.8)));
+    if(fpF<0.999){const sc=turf.transformScale(c,fpF,{origin:turf.centerOfMass(c)});if(sc?.geometry)c=sc;}
+    return c;
+  }catch(e){return{type:'Feature',geometry:geom,properties:{}};}
+}
+
+// ── Detectare și eliminare coliziuni cu clădiri existente ─────────────────
+function checkCollisions(fp){
+  if(!fp?.geometry) return {fp, collisions:0};
+  
+  // Sursa 1: clădiri din contextul OSM (S.ctx)
+  // Sursa 2: clădiri din stilul Mapbox (queryRenderedFeatures)
+  const bldFeatures = [];
+  
+  // Din S.ctx dacă există
+  if(S.ctx?.features?.length){
+    bldFeatures.push(...S.ctx.features.filter(f=>f.geometry));
+  }
+  
+  // Din hartă: clădirile vizibile pe layerul ctx-3d (au geometrie GeoJSON validă)
+  try{
+    const bb = turf.bbox(fp);
+    const sw = map.project([bb[0],bb[1]]);
+    const ne = map.project([bb[2],bb[3]]);
+    const rendered = map.queryRenderedFeatures(
+      [[Math.min(sw.x,ne.x)-5, Math.min(sw.y,ne.y)-5],
+       [Math.max(sw.x,ne.x)+5, Math.max(sw.y,ne.y)+5]],
+      {layers:['ctx-3d']}
+    );
+    // ctx-3d are geometrie GeoJSON validă
+    rendered.forEach(f=>{
+      if(f.geometry && f.geometry.type==='Polygon'){
+        // Evităm duplicatele față de S.ctx
+        if(!S.ctx?.features?.some(sf=>
+          sf.geometry?.coordinates?.[0]?.[0]?.[0]===f.geometry?.coordinates?.[0]?.[0]?.[0]
+        )) bldFeatures.push(f);
+      }
+    });
+  }catch(e){}
+  
+  if(!bldFeatures.length) return {fp, collisions:0};
+  
+  let result = fp;
+  let collisions = 0;
+  const fpArea = turf.area(fp);
+  
+  for(const bld of bldFeatures){
+    if(!bld.geometry) continue;
+    try{
+      // Verificăm suprapunerea
+      const bldFeature = {type:'Feature', geometry:bld.geometry, properties:{}};
+      let overlap;
+      try{ overlap = turf.intersect(result, bldFeature); }catch(e){ continue; }
+      
+      if(overlap && turf.area(overlap) > 1){
+        // Scădem clădirea din footprint
+        let diff;
+        try{ diff = turf.difference(result, bldFeature); }catch(e){ continue; }
+        
+        if(diff?.geometry){
+          const diffArea = turf.area(diff);
+          // Acceptăm diferența doar dacă rămâne suficientă suprafață (min 10mp)
+          if(diffArea > 10){
+            result = diff;
+            collisions++;
+          }
+        }
+      }
+    }catch(e){}
+  }
+  
+  return {fp: result, collisions};
+}
+
+function buildVolume(){
+  const feats=[];
+  S.parcels.forEach((p,pi)=>{
+    if(!p.geo?.geometry)return;
+    // Construim footprint din parametri curenți (aliniamente + factor)
+    let fp = buildFP(p.geo.geometry, p.params||p.utr);
+    if(!fp?.geometry)return;
+    // Verificăm și eliminăm coliziunile cu clădiri existente
+    if(S.ctx?.features?.length){
+      const {fp:fpAdj, collisions} = checkCollisions(fp);
+      if(collisions>0){
+        fp=fpAdj;
+        p._fpAdj=fpAdj;
+        console.log('Coliziuni eliminate:',collisions);
+      } else {
+        p._fpAdj=null;
+      }
+    }
+    // Aplicăm _fpAdj dacă există (setat anterior)
+    if(p._fpAdj?.geometry) fp = p._fpAdj;
+    const params=p.params||getDefaultParams(p.utr);
+    const hOvr=pN(S.vol.hOvr);
+    const hNiv=Math.max(2.4,Number(S.vol.hNiv||3.0));
+    // Niveluri și H din parametri editabili (prioritate față de UI global)
+    const nivFromParams=pN(params.niv);
+    const hFromParams=pN(params.h);
+    const niv=Math.max(1,nivFromParams||Number(S.vol.niv||4));
+    const totalH=hOvr||hFromParams||(niv*hNiv);
+    const realNiv=Math.max(1,Math.round(totalH/hNiv));
+
+    let baseGeom=fp.geometry;
+    if(S.bearing!==0){
+      try{const rot=turf.transformRotate(fp,S.bearing,{pivot:turf.centerOfMass(fp)});if(rot?.geometry)baseGeom=rot.geometry;}catch(e){}
+    }
+
+    for(let i=0;i<realNiv;i++){
+      const base=i*hNiv;
+      const top=Math.min((i+1)*hNiv,totalH);
+      const color=FLOOR_COLORS[Math.min(i,FLOOR_COLORS.length-1)];
+      let g=baseGeom;
+      if(S.vol.retras&&i===realNiv-1&&realNiv>1){
+        try{const sc=turf.transformScale({type:'Feature',geometry:baseGeom,properties:{}},0.78,{origin:turf.centerOfMass({type:'Feature',geometry:baseGeom,properties:{}})});if(sc?.geometry)g=sc.geometry;}catch(e){}
+      }
+      feats.push({type:'Feature',properties:{base,top,color,floor:i,parcelIdx:pi},geometry:g});
+    }
+    if(S.vol.terasa&&feats.length){
+      const last=feats[feats.length-1];
+      try{const t=turf.buffer({type:'Feature',geometry:last.geometry,properties:{}},-0.4,{units:'meters'});if(t?.geometry)feats.push({type:'Feature',properties:{base:totalH,top:totalH+0.35,color:'#78350f',floor:-1,parcelIdx:pi},geometry:t.geometry});}catch(e){}
+    }
+  });
+  return feats;
+}
+
+// ═══ CONTEXT 3D ═══════════════════════════════════════════════════════════
+const BLD_COL={
+  residential:'#9ca3af',apartments:'#9ca3af',house:'#b0b8c4',
+  commercial:'#c8a060',retail:'#c8845a',office:'#a08cc8',
+  industrial:'#6b7280',school:'#60a87a',hospital:'#c87070',
+  church:'#c8b040',civic:'#60a870',hotel:'#c07090',
+  yes:'#8a9ab0'  // default building - gri-albastru neutru
+};
+async function loadContext(){
+  const ap=S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry)return;
+  const c=turf.centerOfMass(ap.geo).geometry.coordinates;
+  const r=Math.max(80,Number(S.vol.ctxR||200));
+  ss(ss.last||'⏳ Context 3D OSM…');
+  const q=`[out:json][timeout:20];(way["building"](around:${r},${c[1]},${c[0]}););out geom tags;`;
+  try{
+    const res=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:q});
+    const json=await res.json();
+    const feats=(json.elements||[]).filter(el=>el.type==='way'&&Array.isArray(el.geometry)&&el.geometry.length>=3).map(el=>{
+      const ring=el.geometry.map(p=>[Number(p.lon),Number(p.lat)]);
+      if(ring[0][0]!==ring.at(-1)[0]||ring[0][1]!==ring.at(-1)[1])ring.push(ring[0]);
+      const lv=pN(el.tags?.['building:levels']);
+      const ht=pN(el.tags?.height);
+      const h=ht||(lv?lv*3.0:7);
+      const fn=el.tags?.building||'yes';
+      return{type:'Feature',properties:{h,lv,fn,col:BLD_COL[fn]||BLD_COL['yes']||'#8a9ab0'},geometry:{type:'Polygon',coordinates:[ring]}};
+    });
+    S.ctx={type:'FeatureCollection',features:feats};
+    setSource('ctx-src',S.ctx);
+    const curSt=$('status').textContent;
+    ss(curSt.replace('⏳','✅')+` · ${feats.length} clădiri context`);
+  }catch(e){ss($('status').textContent+' · Context OSM indisponibil');}
+}
+
+// ═══ POPUP ════════════════════════════════════════════════════════════════
+function popup(html,lngLat){
+  if(S.popup){S.popup.remove();S.popup=null;}
+  S.popup=new mapboxgl.Popup({closeButton:true,offset:12,closeOnClick:false})
+    .setLngLat(lngLat).setHTML(html).addTo(map);
+  S.popup.on('close',()=>{S.popup=null;});
+}
+
+// Buton global de închidere popup (keyboard ESC)
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.popup){S.popup.remove();S.popup=null;}});
+
+// ═══ PARCAJE ══════════════════════════════════════════════════════════════
+function calcParcaje(fn,area,nrApart,nrCam){
+  const f=FN_UTR[fn];if(!f)return'—';
+  if(fn==='locuinta_individuala')return`${Math.ceil(2*(nrApart||1))} locuri (2/unitate)`;
+  if(fn==='locuinta_colectiva')return`${Math.ceil(1*(nrApart||Math.round(area/60)))} locuri (1/apart.)`;
+  if(fn==='hotel')return`${Math.ceil((nrCam||10)*1)+(nrCam>=10?1:0)} locuri (1/cameră + autocar)`;
+  if(['birouri','servicii','institutional'].includes(fn))return`${Math.ceil(area/100*2)} locuri (2/100mp)`;
+  if(fn==='comert')return`${Math.ceil(area/100*3)} locuri (3/100mp)`;
+  if(fn==='industrial'||fn==='logistic')return`${Math.ceil(area/100*1)} locuri (1/100mp)`;
+  return f.pk_formula;
+}
+
+function valFunctiune(fn,utr){
+  const f=FN_UTR[fn];const u=utr||S.utr;
+  if(!f||!u)return{status:'neutral',msg:'Selectează UTR și funcțiune'};
+  if(f.admis.includes(u))return{status:'ok',msg:`✅ ${f.label} ADMISĂ în UTR ${u}`};
+  if(f.cond.includes(u))return{status:'warn',msg:`⚠️ ${f.label} CONDIȚIONATĂ în UTR ${u} — necesită aviz`};
+  return{status:'err',msg:`🚫 ${f.label} INTERZISĂ în UTR ${u} — schimbați funcțiunea sau solicitați PUZ`};
+}
+
+// ═══ RENDER PANELS ════════════════════════════════════════════════════════
+function toggleMobSheet(){
+  const sh = document.getElementById('mob-sheet');
+  if(!sh) return;
+  const isOpen = sh.classList.contains('open');
+  if(isOpen){
+    sh.classList.remove('open');
+  } else {
+    sh.classList.add('open');
+    const mb = document.getElementById('mob-body');
+    if(mb) mb.innerHTML = getContent(S.tab||'search');
+    // Actualizăm tabs mobile
+    document.querySelectorAll('.mtab').forEach(b=>b.classList.toggle('active',b.dataset.mt===(S.tab||'search')));
+  }
+}
+
+function renderAll(){
+  // Actualizăm tab-ul activ
+  renderTab(S.tab);
+  // Actualizăm tabs
+  document.querySelectorAll('.ptab').forEach(b=>b.classList.toggle('active',b.dataset.t===S.tab));
+  document.querySelectorAll('.tc').forEach(c=>c.classList.toggle('active',c.id===`tc-${S.tab}`));
+  document.querySelectorAll('.mtab').forEach(b=>b.classList.toggle('active',b.dataset.mt===S.tab));
+  // Mobile sync
+  const mb=$('mob-body');if(mb&&$('mob-sheet')?.classList.contains('open'))mb.innerHTML=getContent(S.tab);
+  setTimeout(draw2D,60);
+}
+
+function renderTab(tab){
+  const el=$(`tc-${tab}`);if(el)el.innerHTML=getContent(tab);
+}
+
+function getContent(tab){
+  switch(tab){
+    case'search':return htmlSearch();
+    case'utr':return htmlUTR();
+    case'indicatori':return htmlIndicatori();
+    case'proiect':return htmlProiect();
+    case'multi':return htmlMulti();
+    case'scen':return htmlScen();
+    default:return'';
+  }
+}
+
+// ═══ HTML SEARCH ══════════════════════════════════════════════════════════
+function htmlSearch(){
+  return`
+  <div class="section">📍 Coordonate GPS</div>
+  <div class="card">
+    <input class="inp" id="inp-coord" placeholder="47.1585, 27.6014 (lat, lng)">
+    <div class="help">Dublu-click pe hartă → completare automată. Funcționează pentru orice localitate din România.</div>
+    <div class="btn-row">
+      <button class="btn-p" onclick="doCoord()" style="flex:1">Mergi</button>
+      <button class="btn-s" onclick="doGPS()">📱 GPS</button>
+    </div>
+  </div>
+  <div class="section">🏠 Adresă sau punct de interes</div>
+  <div class="card">
+    <input class="inp" id="inp-addr" placeholder="Str. Lascăr Catargi 54, Palas, Grand Hotel Traian…" oninput="doAddr(this.value)">
+    <div class="res-box" id="addr-box"></div>
+    <div class="help">Funcționează pentru orice adresă sau POI din România și lume.</div>
+  </div>
+  <div class="section">🔢 Număr cadastral Iași</div>
+  <div class="card">
+    <input class="inp" id="inp-cad" placeholder="Ex: 127835" oninput="onCadInput(this.value)" onkeydown="if(event.key==='Enter')doCad()">
+    <div class="btn-row">
+      <button class="btn-p" onclick="doCad()" style="flex:1">🔍 Caută</button>
+      <button class="btn-s" onclick="doReset()">🗑 Resetează tot</button>
+    </div>
+    <div class="res-box" id="cad-box"></div>
+  </div>
+  <div class="section">📦 Parcele ANCPI din zona vizibilă</div>
+  <div class="card">
+    <button class="btn-p" onclick="doANCPIZona()" style="width:100%">📦 Încarcă parcele ANCPI</button>
+    <div class="help">Încarcă poligoanele reale ale parcelelor cadastrale din zona vizibilă de pe hartă (ANCPI eTerra). Zoom pe zona dorită înainte de a apăsa.</div>
+  </div>
+  <div class="section">🔲 Multiselect parcele</div>
+  <div class="card">
+    <label style="display:flex;gap:8px;align-items:center;cursor:pointer;font-size:13px;margin-bottom:8px">
+      <input type="checkbox" id="chkMulti" onchange="toggleMulti(this.checked)" ${S.multiMode?'checked':''}> Activează multiselect (click = adaugă parcelă)
+    </label>
+    <div class="help">Cu multiselect activ, fiecare click pe hartă adaugă o parcelă la selecție. Poți genera volum unificat sau individual per parcelă.</div>
+    ${S.parcels.length?`<div class="help" style="color:#34d399">✅ ${S.parcels.length} parcelă/parcele selectate</div>`:''}
+  </div>`;
+}
+
+// ═══ HTML UTR ══════════════════════════════════════════════════════════════
+function htmlUTR(){
+  const ap=S.parcels[S.activeParcel??0];
+  if(!ap)return`<div class="card"><div style="color:#64748b">Selectează un teren pe hartă.</div></div>`;
+  const r=REGULI[ap.utr]||{},u=ap.utr;
+  const fnData=FN_UTR[S.vol.fn];
+  const fnVal=valFunctiune(S.vol.fn,u);
+  return`
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+      <div>
+        <span class="badge b-b">📋 ${esc(ap.nrcad||'—')}</span>
+        ${u?`<span class="badge b-g">🗺 UTR: ${esc(u)}</span>`:`<span class="badge b-y">⚠️ UTR necunoscut</span>`}
+        <span class="badge" style="background:rgba(212,175,55,.15);color:#d4af37">${esc(ap.source==='ANCPI'?'🏛 ANCPI ✓':'⚠️ approx.')}</span>
+      </div>
+      <button class="btn-s" onclick="centerOnParcel()" title="Centrează harta pe parcelă" style="padding:4px 10px;font-size:11px;flex-shrink:0">📍 Centrează</button>
+    </div>
+    <div class="g2" style="margin-top:9px">
+      <div class="met"><div class="ml">Suprafață teren</div><div class="mv">${ap.area?Math.round(ap.area)+' m²':'—'}</div></div>
+      <div class="met"><div class="ml">UTR</div><div class="mv">${esc(u||'—')}</div></div>
+      ${r.d?`<div class="met" style="grid-column:span 2"><div class="ml">Descriere zonă</div><div class="mv">${esc(r.d)}</div></div>`:''}
+    </div>
+    ${r.ua?`
+    <div class="met" style="margin-top:7px"><div class="ml">✅ Utilizări admise</div><div class="mv">${esc(r.ua)}</div></div>
+    <div class="met" style="margin-top:6px"><div class="ml">⚠️ Condiționate</div><div class="mv">${esc(r.uc||'-')}</div></div>
+    <div class="met" style="margin-top:6px"><div class="ml">🚫 Interzise</div><div class="mv">${esc(r.ui||'-')}</div></div>
+    `:''}
+  </div>
+  <div class="section">🏗 Validare funcțiune propusă</div>
+  <div class="${fnVal.status==='ok'?'ok-box':fnVal.status==='warn'?'warn-box':'err-box'}">${fnVal.msg}</div>
+  ${fnData?`<div class="help">🅿️ Parcaje necesare: <b>${calcParcaje(S.vol.fn,ap.area,0,0)}</b></div>`:''}`;
+}
+
+// ═══ HTML INDICATORI ══════════════════════════════════════════════════════
+function htmlIndicatori(){
+  const ap=S.parcels[S.activeParcel??0];
+  if(!ap)return`<div class="card"><div style="color:#64748b">Selectează un teren.</div></div>`;
+  const r=REGULI[ap.utr]||{},p=ap.params||getDefaultParams(ap.utr);
+  const m2=ap.area||0;
+  const sC=p.pot&&m2?Math.floor(m2*p.pot/100):null;
+  const sD=p.cut&&m2?Math.floor(m2*p.cut):null;
+  const sV=p.sv&&m2?Math.floor(m2*p.sv/100):null;
+
+  return`
+  <div class="card">
+    <div style="font-size:13px;color:#d4af37;font-weight:700;margin-bottom:10px">Indicatori Urbanistici — PUG Iași · UTR: ${esc(ap.utr||'—')}</div>
+    <div class="warn-box" style="margin-bottom:10px;font-size:11px">ℹ️ Valorile de mai jos sunt <b>maxime admise</b> conform PUG. POT = %, CUT = mp.ADC/mp.teren, H și aliniamente = metri, spații verzi = %, parcaje = nr. locuri (valori minime).</div>
+    <table class="tbl">
+      <tr><th>Indicator</th><th>PUG max/min</th><th>Pe teren tău (${m2?Math.round(m2)+'m²':'?'})</th></tr>
+      <tr><td><b>POT</b> — Procentul de Ocupare a Terenului</td><td>${fmt(r.pot,'%')} <small>(maxim)</small></td><td>${sC?sC+' m²':'-'}</td></tr>
+      <tr><td><b>CUT</b> — Coef. de Utilizare a Terenului (mp.ADC/mp.teren)</td><td>${fmt(r.cut)} <small>(maxim)</small></td><td>${sD?sD+' mp.ADC':'-'}</td></tr>
+      <tr><td><b>Nr. niveluri</b> — maxim admis</td><td>${fmt(r.niv,' et.')} <small>(maxim)</small></td><td>—</td></tr>
+      <tr><td><b>H max</b> — înălțime maximă</td><td>${fmt(r.h,' m')} <small>(maxim)</small></td><td>—</td></tr>
+      <tr><td><b>Aliniament principal</b> (față stradă)</td><td>${fmt(r.rf,' m')} <small>(minim)</small></td><td>—</td></tr>
+      <tr><td><b>Aliniament lateral stg.</b></td><td>${fmt(r.rl,' m')} <small>(minim)</small></td><td>—</td></tr>
+      <tr><td><b>Aliniament lateral dr.</b></td><td>${fmt(r.rl,' m')} <small>(minim)</small></td><td>—</td></tr>
+      <tr><td><b>Aliniament posterior</b> (spate)</td><td>${fmt(r.rs,' m')} <small>(minim)</small></td><td>—</td></tr>
+      <tr><td><b>Spații verzi</b></td><td>${fmt(r.sv,'%')} <small>(minim)</small></td><td>${sV?sV+' m²':'-'}</td></tr>
+      <tr><td><b>Parcaje</b> (per 100mp sau unitate)</td><td>${fmt(r.pk)} loc/100mp <small>(minim)</small></td><td>${ap.area?Math.ceil(ap.area/100*(r.pk||0))+' locuri':'-'}</td></tr>
+      <tr><td><b>Aliniament obligatoriu</b></td><td>${esc(r.ao||'—')}</td><td>—</td></tr>
+      <tr><td><b>Front minim stradă</b></td><td>${fmt(r.fm,' m')}</td><td>—</td></tr>
+    </table>
+  </div>`;
+}
+
+// ═══ HTML PROIECT (Parametri + Volum unificate) ══════════════════════════
+function htmlProiect(){
+  const ap = S.parcels[S.activeParcel??0];
+  if(!ap) return '<div class="card"><div style="color:#64748b">Selectează un teren pe hartă.</div></div>';
+  const r = REGULI[ap.utr]||{};
+  const p = ap.params || getDefaultParams(ap.utr);
+  const m2 = ap.area||0;
+  const fp = ap.geo?.geometry ? buildFP(ap.geo.geometry, p) : null;
+  const fp_m2 = fp?.geometry ? Math.round(turf.area(fp)) : 0;
+  const sv_m2 = Math.round(m2 * (p.sv||0) / 100);
+  const pot_m2 = p.pot ? Math.floor(m2 * p.pot/100) : fp_m2;
+  const construibil_real = Math.min(fp_m2, pot_m2);
+  const hNiv = Number(S.vol.hNiv||3);
+  const totalH = pN(S.vol.hOvr) || pN(p.h) || (Number(p.niv||S.vol.niv||4)*hNiv);
+  const realNiv = Math.max(1, Math.round(totalH / hNiv));
+  const sD_calc = Math.round(construibil_real * realNiv);
+  const sD_max = p.cut&&m2 ? Math.floor(m2*p.cut) : null;
+  const pkNec = Math.ceil((fp_m2 * realNiv / 100) * (p.pk||0));
+  const fnVal = valFunctiune(S.vol.fn, ap.utr);
+  const PUZK = ['cut'];
+
+  function pf(label, key, unit, hint){
+    const v = p[key]??''; const vPUG = r[key];
+    const pct = vPUG!=null&&Number(v)>0&&Number(vPUG)>0?(Number(v)/Number(vPUG)-1)*100:0;
+    const ovr = PUZK.includes(key)&&vPUG!=null&&Number(v)>Number(vPUG)*1.2;
+    const changed = vPUG!=null&&Math.abs(Number(v)-Number(vPUG))>0.001;
+    const border = ovr?'border-color:#f59e0b':changed?'border-color:#3b82f6':'';
+    const wMsg = ovr ? '<div style="font-size:10px;color:#fbbf24;margin-top:2px">PUZ posibil (+'+pct.toFixed(0)+'%)</div>' : '';
+    const mMsg = (!ovr&&changed&&vPUG!=null)?'<div style="font-size:10px;color:#60a5fa;margin-top:2px">'+(pct>0?'+':'')+pct.toFixed(0)+'% vs PUG</div>':'';
+    return '<div>'
+      +'<div class="ml" style="display:flex;justify-content:space-between">'
+      +'<span>'+label+(unit?' ('+unit+')':'')+'</span>'
+      +'<span style="color:#475569;font-size:10px">PUG: <b>'+(vPUG!=null?vPUG:'-')+'</b></span>'
+      +'</div>'
+      +'<input class="inp" type="number" value="'+v+'" min="0" step="0.1"'
+      +' oninput="updateParam(\''+key+'\',this.value,false)"'
+      +' onchange="updateParam(\''+key+'\',this.value,true)"'
+      +' style="margin-bottom:0;'+border+'" title="'+(hint||'')+'">'
+      +wMsg+mMsg+'</div>';
+  }
+
+  const flLeg = S.vol.genDone ? Array.from({length:Math.min(realNiv,12)},(_,i)=>
+    '<div class="fl-dot"><span class="fl-sq" style="background:'+FLOOR_COLORS[i]+';"></span>'+(i===0?'P':'Et.'+i)+'</div>').join('') : '';
+
+  const neconstruibil = Math.round(sv_m2 + Math.max(0, m2 - fp_m2 - sv_m2));
+  const pot_real = m2>0 ? Math.round(construibil_real/m2*100) : 0;
+  const overCut = sD_max && sD_calc > sD_max;
+
+  return [
+  // ── CALCULE LIVE ──
+  '<div class="card" style="background:#0a1628;border-color:rgba(212,175,55,.3)">',
+  '<div style="font-size:12px;font-weight:700;color:#d4af37;margin-bottom:8px">📐 Calcule live — '+esc(ap.nrcad||'?')+' · UTR: '+esc(ap.utr||'—')+'</div>',
+  '<div class="g3">',
+  '<div class="met"><div class="ml">Teren total</div><div class="mv">'+(m2?Math.round(m2)+' m²':'—')+'</div></div>',
+  '<div class="met"><div class="ml">Spații verzi obligatorii</div><div class="mv warn">'+(sv_m2?sv_m2+' m²  ('+( p.sv||0)+'%)':'—')+'</div></div>',
+  '<div class="met"><div class="ml">Suprafață la sol max (POT)</div><div class="mv gold">'+(construibil_real?construibil_real+' m²':'—')+'<div style="font-size:10px;color:#64748b">POT real: '+pot_real+'%</div></div></div>',
+  '</div>',
+  '<div class="g3" style="margin-top:7px">',
+  '<div class="met"><div class="ml">Niveluri</div><div class="mv">'+realNiv+' et. × '+hNiv+'m</div></div>',
+  '<div class="met"><div class="ml">H total</div><div class="mv">'+totalH.toFixed(1)+' m</div></div>',
+  '<div class="met"><div class="ml">Supraf. desfășurată (CUT)</div><div class="mv '+(overCut?'err':'gold')+'">'+sD_calc+' mp.ADC'+(sD_max?'<div style="font-size:10px;color:#64748b">max CUT: '+sD_max+' mp.ADC</div>':'')+'</div></div>',
+  '</div>',
+  '<div class="g3" style="margin-top:7px">',
+  '<div class="met"><div class="ml">Parcaje necesare</div><div class="mv">'+pkNec+' locuri</div></div>',
+  '<div class="met"><div class="ml">Teren neconstruibil</div><div class="mv">'+neconstruibil+' m²<div style="font-size:10px;color:#64748b">SV+aliniamente</div></div></div>',
+  '<div class="met"><div class="ml">Funcțiune</div><div class="mv" style="font-size:11px">'+esc(FN_UTR[S.vol.fn]?.label||S.vol.fn)+'</div></div>',
+  '</div>',
+  overCut ? '<div class="err-box" style="margin-top:8px;font-size:11px">⚠️ Suprafața desfășurată ('+sD_calc+' m²) depășește CUT maxim ('+sD_max+' m²)</div>' : '',
+  '</div>',
+  // ── FUNCȚIUNE ──
+  '<div class="section">Funcțiune propusă</div>',
+  '<select class="sel" onchange="S.vol.fn=this.value;renderTab(\'proiect\')">',
+  Object.entries(FN_UTR).map(([k,v])=>'<option value="'+k+'" '+(S.vol.fn===k?'selected':'')+'>'+v.label+'</option>').join(''),
+  '</select>',
+  '<div class="'+(fnVal.status==='ok'?'ok-box':fnVal.status==='warn'?'warn-box':'err-box')+'" style="font-size:11px">'+fnVal.msg+'</div>',
+  // ── VOLUM 3D ──
+  '<div class="section">🏗 Volum 3D</div>',
+  '<div class="card" style="background:#08152a">',
+  '<div class="help" style="margin-bottom:6px">Nivelurile și înălțimea se setează în <b>Parametri urbanistici</b> mai jos (Nr. niveluri, H max). Aici setezi doar forma și generezi.</div>',
+  '<div class="g2">',
+  '<div><div class="help">H/nivel (m)</div><input class="inp" type="number" min="2.4" max="6" step="0.1" value="'+S.vol.hNiv+'" onchange="S.vol.hNiv=Math.max(2.4,+this.value);if(S.vol.genDone){const f=buildVolume();setSource(\'vol-src\',{type:\'FeatureCollection\',features:f});}renderTab(\'proiect\')"></div>',
+  '<div><div class="help">Factor amprentă (0.1–1.0)</div><input class="inp" type="number" min="0.1" max="1" step="0.05" value="'+S.vol.fpF+'" onchange="S.vol.fpF=Math.max(0.1,Math.min(1,+this.value));updateMap();if(S.vol.genDone){const f=buildVolume();setSource(\'vol-src\',{type:\'FeatureCollection\',features:f});}renderTab(\'proiect\')"></div>',
+  '</div>',
+  '<div class="help">H override (m) — suprascrie H din parametri ('+(pN(ap.params?.h)||r.h||'?')+'m PUG)</div>',
+  '<input class="inp" type="number" min="0" step="0.5" value="'+(S.vol.hOvr||'')+'" placeholder="Gol = folosește H max din parametri" onchange="S.vol.hOvr=this.value;if(S.vol.genDone){const f=buildVolume();setSource(\'vol-src\',{type:\'FeatureCollection\',features:f});}renderTab(\'proiect\')">',
+  '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px">',
+  '<label style="display:flex;gap:5px;align-items:center;cursor:pointer;font-size:13px"><input type="checkbox" '+(S.vol.retras?'checked':'')+' onchange="S.vol.retras=this.checked;if(S.vol.genDone){const f=buildVolume();setSource(\'vol-src\',{type:\'FeatureCollection\',features:f});}"> Etaj retras</label>',
+  '<label style="display:flex;gap:5px;align-items:center;cursor:pointer;font-size:13px"><input type="checkbox" '+(S.vol.terasa?'checked':'')+' onchange="S.vol.terasa=this.checked;if(S.vol.genDone){const f=buildVolume();setSource(\'vol-src\',{type:\'FeatureCollection\',features:f});}"> Terasă</label>',
+  '<label style="display:flex;gap:5px;align-items:center;cursor:pointer;font-size:13px"><input type="checkbox" '+(S.vol.onlyVol?'checked':'')+' onchange="S.vol.onlyVol=this.checked;map.setLayoutProperty(\'ctx-3d\',\'visibility\',this.checked?\'none\':\'visible\')"> Doar volumul meu</label>',
+  '</div>',
+  '<div class="btn-row">',
+  '<button class="btn-p" onclick="genVol()" style="flex:1;font-size:14px">🏗 Generează volum 3D</button>',
+  '<button class="btn-s" onclick="clearVol()">✕ Șterge</button>',
+  '</div></div>',
+  // ── ORIENTARE ──
+  '<div class="section">🔄 Orientare față de Nord</div>',
+  '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">',
+  '<input type="range" min="0" max="360" value="'+S.bearing+'" oninput="S.bearing=+this.value;this.nextElementSibling.textContent=this.value+\'°\';if(S.vol.genDone){const f=buildVolume();setSource(\'vol-src\',{type:\'FeatureCollection\',features:f});}" style="flex:1;accent-color:#d4af37">',
+  '<span style="color:#d4af37;font-size:12px;min-width:38px">'+S.bearing+'°</span>',
+  '</div>',
+  // ── PARAMETRI URBANISTICI ──
+  '<div class="section">⚙️ Parametri urbanistici editabili</div>',
+  '<div class="card" style="background:#08152a">',
+  '<div class="help" style="margin-bottom:8px">Modificările se reflectă <b>live</b> în calcule și volum. Aliniamente mari = suprafață construibilă mai mică. SV mare = suprafață construibilă mai mică.</div>',
+  '<div class="g2">'+pf('POT max (%)','pot','%','Procent ocupare teren — maxim')+pf('CUT max (mp.ADC/mp)','cut','','Coeficient utilizare — maxim')+'</div>',
+  '<div class="g2">'+pf('Nr. niveluri max','niv','et.','Număr maxim de niveluri admis')+pf('H max','h','m','Înălțime maximă admisă')+'</div>',
+  '<div class="section" style="margin-top:8px">Aliniamente minime (metri de la construcție la limita terenului)</div>',
+  '<div class="g2">',
+  pf('Față stradă (rf)','rf','m','Distanța minimă de la construcție la limita orientată spre stradă'),
+  pf('Posterior / spate (rs)','rs','m','Distanța minimă de la construcție la limita posterioară'),
+  '</div>',
+  '<div class="g2">',
+  pf('Lateral stânga (rl)','rl','m','Distanța la limita laterală stângă (0 = construcție pe limita terenului / calcan)'),
+  pf('Lateral dreapta (rr)','rr','m','Distanța la limita laterală dreaptă (0 = calcan)'),
+  '</div>',
+  '<div class="section" style="margin-top:8px">Spații verzi și parcaje (minime)</div>',
+  '<div class="g2">'+pf('Spații verzi (%)','sv','%','% din suprafața terenului — reduce suprafața construibilă')+pf('Parcaje (loc/100mp)','pk','','Locuri parcare minime per 100mp')+'</div>',
+  '<div class="btn-row" style="margin-top:10px">',
+  '<button class="btn-s" onclick="resetParams()" style="flex:1">↩ Reset la PUG</button>',
+  '<button class="btn-p" onclick="switchTab(\'indicatori\')">📊 Indicatori PUG</button>',
+  '</div></div>',
+  // ── ETAJE ──
+  S.vol.genDone ? '<div class="section">🎨 Etaje generate ('+realNiv+' niveluri)</div><div class="fl-leg">'+flLeg+'</div>' : '',
+  // ── PLAN 2D ──
+  '<div class="section">📐 Plan 2D — parcelă și suprafață construibilă</div>',
+  '<div class="help">Verde = parcelă. Portocaliu = suprafață construibilă (se micșorează când mărești aliniamentele sau spațiile verzi).</div>',
+  '<div class="vbox" style="min-height:180px">'+(ap.geo?'<canvas id="c2d" width="380" height="180"></canvas>':'<div style="color:#64748b">Selectează o parcelă</div>')+'</div>',
+  // ── CONTEXT ──
+  '<div class="section">🌆 Context 3D OSM</div>',
+  '<div style="display:flex;gap:8px;align-items:center">',
+  '<input class="inp" type="number" min="60" max="500" step="10" value="'+S.vol.ctxR+'" onchange="S.vol.ctxR=Math.max(60,+this.value)" style="width:90px;margin:0">',
+  '<span style="color:#64748b;font-size:12px">m raza</span>',
+  '<button class="btn-s" onclick="loadContext().then(()=>renderTab(\'proiect\'))" style="padding:7px 12px">🔄</button>',
+  '</div>'
+  ].join('');
+}
+
+// ═══ HTML MULTI ════════════════════════════════════════════════════════════
+function htmlMulti(){
+  if(!S.parcels.length)return`<div class="card"><div style="color:#64748b">Nicio parcelă selectată. Activează multiselect din tab Căutare și dă click pe parcele pe hartă.</div></div>`;
+  return`
+  <div class="card">
+    <div style="font-size:13px;color:#d4af37;font-weight:700;margin-bottom:8px">🔲 Parcele selectate (${S.parcels.length})</div>
+    <div class="btn-row" style="margin-bottom:10px">
+      <button class="btn-p" onclick="genVolAll()" style="flex:1">🏗 Volum unificat</button>
+      <button class="btn-s" onclick="genVolEach()">📦 Per parcelă</button>
+      <button class="btn-w" onclick="clearAll()">🗑 Șterge tot</button>
+    </div>
+    ${S.parcels.map((p,i)=>`
+    <div class="ms-item" ${i===S.activeParcel?'style="border-color:#d4af37"':''}>
+      <div class="ms-head">
+        <div>
+          <b>Parcelă ${i+1}: ${esc(p.nrcad||'—')}</b>
+          <span class="badge ${i===S.activeParcel?'b-y':'b-b'}" style="font-size:10px">UTR: ${esc(p.utr||'—')}</span>
+          <span class="badge" style="background:rgba(100,116,139,.15);color:#94a3b8;font-size:10px">${esc(p.source==='ANCPI'?'ANCPI ✓':'approx.')}</span>
+        </div>
+        <div style="display:flex;gap:5px">
+          <button class="btn-s" onclick="S.activeParcel=${i};S.utr='${p.utr}';S.rule=REGULI['${p.utr}']||{};renderAll()" style="padding:4px 8px;font-size:11px">✏️</button>
+          <button class="btn-w" onclick="removeParcel(${i})" style="padding:4px 8px;font-size:11px">✕</button>
+        </div>
+      </div>
+      <div class="g2">
+        <div class="met"><div class="ml">Suprafață</div><div class="mv">${p.area?Math.round(p.area)+' m²':'—'}</div></div>
+        <div class="met"><div class="ml">Funcțiune</div><div class="mv" style="font-size:12px">${esc(FN_UTR[p.fn||S.vol.fn]?.label||S.vol.fn)}</div></div>
+      </div>
+      <select class="sel" style="margin-top:7px;margin-bottom:0" onchange="S.parcels[${i}].fn=this.value;renderAll()">
+        ${Object.entries(FN_UTR).map(([k,v])=>`<option value="${k}" ${(p.fn||S.vol.fn)===k?'selected':''}>${v.label}</option>`).join('')}
+      </select>
+    </div>
+    `).join('')}
+  </div>`;
+}
+
+// ═══ HTML SCENARII ═══════════════════════════════════════════════════════
+function htmlScen(){
+  return`
+  <div class="card">
+    <div class="section">📅 Orizont de analiză</div>
+    <div style="display:flex;gap:6px;margin-bottom:10px">
+      ${['','5','10','15'].map(y=>`<button onclick="S.timeline='${y}';renderTab('scen')" style="flex:1;padding:7px;border-radius:8px;border:1px solid ${S.timeline===y?'#d4af37':'rgba(255,255,255,.15)'};background:${S.timeline===y?'rgba(212,175,55,.2)':'rgba(11,18,32,.8)'};color:${S.timeline===y?'#d4af37':'#94a3b8'};cursor:pointer;font-size:12px;font-weight:700">${y||'Curent'} ${y?'ani':''}</button>`).join('')}
+    </div>
+    <div class="btn-row">
+      <button class="btn-g" onclick="saveScen()" style="flex:1">💾 Salvează</button>
+      <button class="btn-s" onclick="expJSON()">⬇ JSON</button>
+    </div>
+  </div>
+  <div class="section">Scenarii salvate (${S.scenarios.length})</div>
+  ${S.scenarios.length?S.scenarios.map((s,i)=>`
+  <div class="sc-item">
+    <div><div style="font-weight:700;font-size:13px">${esc(s.name||'Sc.'+( i+1))}</div><div style="font-size:11px;color:#64748b">${esc((s.ts||'').slice(0,16).replace('T',' '))} · ${s.nParcele||1} parcele · ${s.niv||'?'}et. · ${s.h||'?'}m</div></div>
+    <div style="display:flex;gap:5px">
+      <button class="btn-g" onclick="loadScen(${i})" style="padding:5px 9px;font-size:11px">▶</button>
+      <button class="btn-w" onclick="S.scenarios.splice(${i},1);localStorage.setItem('ux16',JSON.stringify(S.scenarios));renderTab('scen')" style="padding:5px 9px;font-size:11px">✕</button>
+    </div>
+  </div>`).join(''):'<div class="card"><div style="color:#64748b">Niciun scenariu salvat.</div></div>'}`;
+}
+
+// ═══ DRAW 2D ═══════════════════════════════════════════════════════════════
+function draw2D(){
+  const cv=$('c2d');if(!cv)return;
+  const ap=S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry){cv.getContext('2d').clearRect(0,0,cv.width,cv.height);return;}
+  const fp=buildFP(ap.geo.geometry,ap.params||ap.utr);
+  const feats=[ap.geo];if(fp)feats.push(fp);
+  const pr=cv.parentElement;cv.width=Math.max(280,pr.clientWidth-2);cv.height=Math.max(155,pr.clientHeight-2);
+  const ctx=cv.getContext('2d');ctx.clearRect(0,0,cv.width,cv.height);
+  const bb=turf.bbox({type:'FeatureCollection',features:feats});
+  const pad=22,sx=(cv.width-2*pad)/Math.max(1e-9,bb[2]-bb[0]),sy=(cv.height-2*pad)/Math.max(1e-9,bb[3]-bb[1]),sc=Math.min(sx,sy);
+  const dr=(f,stroke,fill,lw=2,dash=[])=>{
+    const g=f.geometry;
+    const polys=g.type==='Polygon'?[g.coordinates[0]]:g.type==='MultiPolygon'?g.coordinates.map(r=>r[0]):[];
+    ctx.strokeStyle=stroke;ctx.fillStyle=fill;ctx.lineWidth=lw;ctx.setLineDash(dash);
+    polys.forEach(ring=>{ctx.beginPath();ring.forEach(([x,y],i)=>{const px=pad+(x-bb[0])*sc,py=cv.height-(pad+(y-bb[1])*sc);i===0?ctx.moveTo(px,py):ctx.lineTo(px,py);});ctx.closePath();ctx.fill();ctx.stroke();});
+  };
+  dr(ap.geo,'#00e5b4','rgba(0,229,180,.2)',2);
+  if(fp)dr(fp,'#ff6b35','rgba(255,107,53,.18)',2,[5,3]);
+  ctx.setLineDash([]);ctx.fillStyle='#64748b';ctx.font='10px Segoe UI,Arial';
+  ctx.fillText('🟦 Parcelă  🟥 Footprint buildable (după aliniamente)',10,14);
+  // Suprafețe
+  if(fp?.geometry){const fpA=turf.area(fp).toFixed(0);ctx.fillText(`Amprentă: ${fpA} m²`,10,cv.height-6);}
+}
+
+// ═══ ACȚIUNI ══════════════════════════════════════════════════════════════
+function doCoord(){
+  const v=(document.querySelector('#inp-coord')?.value||'').trim().split(',');
+  const lat=parseFloat(v[0]),lng=parseFloat(v[1]);
+  if(!isFinite(lat)||!isFinite(lng))return alert('Format: 47.1585, 27.6014');
+  onMapClick(lat,lng);
+  if(window.innerWidth<=840)$('mob-sheet')?.classList.remove('open');
+}
+
+function doGPS(){
+  if(!navigator.geolocation)return alert('GPS necesită HTTPS.');
+  ss('📍 Se detectează locația…');
+  navigator.geolocation.getCurrentPosition(
+    p=>{onMapClick(p.coords.latitude,p.coords.longitude);$('mob-sheet')?.classList.remove('open');},
+    e=>{ss('❌ GPS: '+e.message);}
+  ,{enableHighAccuracy:true,timeout:15000,maximumAge:0});
+}
+
+let _addrT=null;
+function doAddr(q){
+  clearTimeout(_addrT);
+  const box=document.querySelector('#addr-box');if(!box)return;
+  if(!q||q.trim().length<2){box.innerHTML='';return;}
+  box.innerHTML=`<div class="re"><span class="spin"></span>Se caută…</div>`;
+  _addrT=setTimeout(async()=>{
+    try{
+      // Căutare în paralel: Nominatim (OSM) pentru POI + Mapbox pentru adrese
+      const ctr = map.getCenter();
+      const TOKEN='pk.eyJ1IjoiZWk4aHRlciIsImEiOiJjajhhNGtiN3YwOW50MnFwOHBnOGJtcjVtIn0.dT4Ld3v1GoeQRCaIzxNn2g';
+
+      // Nominatim - cel mai bun pentru POI locale (teatru, hotel, restaurant etc)
+      const nomUrl = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&q=${encodeURIComponent(q)}&viewbox=${ctr.lng-0.5},${ctr.lat+0.5},${ctr.lng+0.5},${ctr.lat-0.5}&bounded=0&addressdetails=1&accept-language=ro`;
+      // Mapbox - bun pentru adrese stradale
+      const mbUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?access_token=${TOKEN}&language=ro&limit=5&proximity=${ctr.lng.toFixed(4)},${ctr.lat.toFixed(4)}&bbox=20.2,43.6,30.0,48.3&types=address,poi,place,locality`;
+
+      // Rulăm ambele în paralel
+      const [nomRes, mbRes] = await Promise.allSettled([
+        fetch(nomUrl, {headers:{'Accept-Language':'ro','User-Agent':'UrbanX/1.0 (urbanx@fgtss.ro)'}}).then(r=>r.json()),
+        fetch(mbUrl).then(r=>r.json())
+      ]);
+
+      // Combinăm rezultatele - Nominatim primul (mai bun pentru POI locale)
+      const combined = [];
+
+      if(nomRes.status==='fulfilled' && Array.isArray(nomRes.value)){
+        nomRes.value.forEach(it=>{
+          combined.push({
+            text: it.name||it.display_name.split(',')[0],
+            place_name: it.display_name,
+            center: [parseFloat(it.lon), parseFloat(it.lat)],
+            source: 'OSM',
+            type: it.type||it.class||''
+          });
+        });
+      }
+
+      if(mbRes.status==='fulfilled' && mbRes.value?.features){
+        mbRes.value.features.forEach(it=>{
+          // Evităm duplicate
+          const isDup = combined.some(c=>
+            Math.abs(c.center[0]-it.center[0])<0.001 &&
+            Math.abs(c.center[1]-it.center[1])<0.001
+          );
+          if(!isDup) combined.push({
+            text: it.text||it.place_name.split(',')[0],
+            place_name: it.place_name,
+            center: it.center,
+            source: 'MB',
+            type: it.place_type?.[0]||''
+          });
+        });
+      }
+
+      console.log('Căutare:', q, '→', combined.length, 'rezultate (Nominatim+Mapbox)');
+
+      if(!combined.length){
+        box.innerHTML=`<div class="re">Niciun rezultat pentru "<b>${esc(q)}</b>".<br><small>Încercați: "Teatrul Național Iași", "Hotel Traian Iași"</small></div>`;
+        return;
+      }
+
+      window._addrI = combined;
+      box.innerHTML = combined.map((it,i)=>`
+        <div class="ri" onclick="pickAddr(${i})">
+          <div style="font-size:12px;font-weight:600;color:#e2e8f0">${esc(it.text)}</div>
+          <div style="font-size:11px;color:#64748b">${esc(it.place_name.length>80?it.place_name.slice(0,80)+'…':it.place_name)}</div>
+        </div>`).join('');
+    }catch(e){
+      console.error('Geocoding error:',e);
+      box.innerHTML=`<div class="re">Eroare geocodare: ${esc(e.message)}</div>`;
+    }
+  },300);
+}
+
+function pickAddr(i){
+  const it=window._addrI?.[i];if(!it)return;
+  const[lng,lat]=it.center;
+  const box=document.querySelector('#addr-box');if(box)box.innerHTML='';
+  const inp=document.querySelector('#inp-addr');if(inp)inp.value=it.text||it.place_name.split(',')[0];
+  if(window.innerWidth<=840)$('mob-sheet')?.classList.remove('open');
+  map.flyTo({center:[lng,lat],zoom:17,duration:800});
+  setTimeout(()=>onMapClick(lat,lng),900);
+}
+
+// Autocomplete cadastral live (la tastare)
+let _cadTimer = null;
+function onCadInput(val){
+  clearTimeout(_cadTimer);
+  const box = document.querySelector('#cad-box');
+  if(!box) return;
+  const v = val.trim();
+  if(v.length < 3){ box.innerHTML=''; return; }
+  
+  _cadTimer = setTimeout(()=>{
+    const key = v.toLowerCase().replace(/\s+/g,'');
+    const res = [];
+    for(const [k,f] of S.cadIdx){
+      if(k.startsWith(key)||k.includes(key)) res.push(f);
+      if(res.length >= 15) break;
+    }
+    if(!res.length){
+      box.innerHTML = `<div class="re">Niciun nr. cadastral cu "${esc(v)}"</div>`;
+      return;
+    }
+    window._cadR = res;
+    box.innerHTML = res.map((f,i)=>`
+      <div class="ri" onclick="pickCad(${i})">
+        <span style="font-weight:700;color:#e2e8f0">${esc(f.properties?.nrcad||'-')}</span>
+        <span class="badge b-b" style="padding:1px 6px;font-size:10px;margin-left:5px">${esc(f.properties?.utr||'?')}</span>
+        <span style="font-size:10px;color:#64748b;margin-left:4px">~${Math.round(f.properties?.SHAPE_Area||0)} m²</span>
+      </div>`).join('');
+  }, 200);
+}
+
+function doCad(){
+  const v=(document.querySelector('#inp-cad')?.value||'').trim();
+  if(!v)return;
+  const key=v.toLowerCase().replace(/\s+/g,'');
+  const found=S.cadIdx.get(key);
+  const box=document.querySelector('#cad-box');
+  if(found){
+    if(box)box.innerHTML='';
+    const[lng,lat]=found.geometry.coordinates;
+    onMapClick(lat,lng);
+    if(window.innerWidth<=840)$('mob-sheet')?.classList.remove('open');
+  } else {
+    // Fallback: caută prefixe
+    const res=[];for(const[k,f]of S.cadIdx){if(k.startsWith(key)||k.includes(key))res.push(f);if(res.length>=15)break;}
+    if(!res.length){if(box)box.innerHTML=`<div class="re">Niciun nr. cadastral "${esc(v)}" găsit.</div>`;return;}
+    if(box){
+      window._cadR=res;
+      box.innerHTML=res.map((f,i)=>`
+        <div class="ri" onclick="pickCad(${i})">
+          <span style="font-weight:700;color:#e2e8f0">${esc(f.properties?.nrcad||'-')}</span>
+          <span class="badge b-b" style="padding:1px 6px;font-size:10px;margin-left:5px">${esc(f.properties?.utr||'?')}</span>
+          <span style="font-size:10px;color:#64748b;margin-left:4px">~${Math.round(f.properties?.SHAPE_Area||0)} m²</span>
+        </div>`).join('');
+    }
+  }
+}
+
+function pickCad(i){
+  const f=window._cadR?.[i];if(!f)return;
+  const[lng,lat]=f.geometry.coordinates;
+  onMapClick(lat,lng);
+  const b=document.querySelector('#cad-box');if(b)b.innerHTML='';
+  if(window.innerWidth<=840)$('mob-sheet')?.classList.remove('open');
+}
+
+async function doANCPIZona(){
+  const bb=map.getBounds();
+  // Verificăm că zoom-ul e suficient (ANCPI nu returnează la zoom mic)
+  if(map.getZoom()<14){
+    ss('⚠️ Zoom mai aproape (min nivel 14) pentru a încărca parcele ANCPI');
+    map.flyTo({zoom:15,duration:600});
+    return;
+  }
+  ss('⏳ Se încarcă parcele ANCPI din zonă…');
+  ss('⏳ Se contactează ANCPI eTerra…');
+  
+  // Încercăm JSONP (ocolește CORS)
+  let data = null;
+  let errMsg = '';
+  
+  try{
+    data = await ancpiJSONP({
+      geometry:`${bb.getWest()},${bb.getSouth()},${bb.getEast()},${bb.getNorth()}`,
+      geometryType:'esriGeometryEnvelope',
+      inSR:'4326',
+      spatialRel:'esriSpatialRelIntersects',
+      outFields:'*',
+      returnGeometry:'true',
+      resultRecordCount:'100',
+      where:'1=1',
+      outSR:'4326'
+    }, 12000);
+  }catch(e){
+    errMsg = e.message;
+    console.warn('ANCPI JSONP failed:', e.message);
+  }
+  
+  // Dacă JSONP a eșuat, încercăm fetch direct (funcționează când serverul permite CORS)
+  if(!data){
+    try{
+      ss('⏳ ANCPI JSONP eșuat, se încearcă fetch direct…');
+      const params = new URLSearchParams({
+        geometry:`${bb.getWest()},${bb.getSouth()},${bb.getEast()},${bb.getNorth()}`,
+        geometryType:'esriGeometryEnvelope',
+        inSR:'4326',
+        spatialRel:'esriSpatialRelIntersects',
+        outFields:'*',
+        returnGeometry:'true',
+        resultRecordCount:'100',
+        where:'1=1',
+        outSR:'4326',
+        f:'json'
+      });
+      const r = await fetch(
+        `https://geoportal.ancpi.ro/maps/rest/services/eterra3_publish/MapServer/1/query?${params}`,
+        {mode:'cors', headers:{'Accept':'application/json'}}
+      );
+      if(r.ok) data = await r.json();
+    }catch(e2){
+      console.warn('ANCPI fetch direct failed:', e2.message);
+    }
+  }
+  
+  if(!data){
+    ss(`⚠️ ANCPI indisponibil (${errMsg||'eroare necunoscută'}). Serviciul ANCPI eTerra poate fi temporar oprit. Încercați mai târziu sau folosiți click pe hartă pentru selecție individuală.`);
+    return;
+  }
+  
+  if(data?.error){
+    ss('⚠️ ANCPI eroare: '+JSON.stringify(data.error));
+    console.error('ANCPI error response:', data.error);
+    return;
+  }
+  
+  console.log('ANCPI răspuns:', data?.features?.length, 'features');
+  const feats = ancpiRingsToGeoJSON(data);
+  
+  if(!feats.length){
+    ss('⚠️ ANCPI: 0 parcele returnate. Serviciul poate fi temporar oprit sau zona nu are date.');
+    return;
+  }
+  
+  const fc={type:'FeatureCollection',features:feats.map((f,i)=>({
+    ...f, id:i,
+    properties:{...f.properties, pidx:i, fc:'#60a5fa', lc:'#3b82f6'}
+  }))};
+  setSource('parcel-src', fc);
+  ss(`✅ ${feats.length} parcele ANCPI încărcate · Click pe o parcelă pentru a o selecta`);
+}
+
+function doReset(){
+  S.parcels=[];S.activeParcel=null;S.utr='';S.rule={};S.ll=null;S.ctx=null;S.vol.genDone=false;
+  if(S.popup){S.popup.remove();S.popup=null;}
+  ['parcel-src','vol-src','fp-src','ctx-src','utr-src'].forEach(clearSource);
+  // Curățăm inputurile
+  document.querySelectorAll('#inp-addr,#inp-cad,#inp-coord').forEach(el=>el.value='');
+  document.querySelectorAll('#addr-box,#cad-box').forEach(el=>el.innerHTML='');
+  window._addrI=null;window._cadR=null;
+  // Nu avem nevoie de refresh - resetăm starea complet
+  renderAll();
+  ss('Resetat ✓ — Selectează un teren nou pe hartă sau caută o adresă.');
+}
+
+async function genVol(){
+  if(!S.parcels.length)return alert('Selectează mai întâi o parcelă.');
+  
+  const ap = S.parcels[S.activeParcel??0];
+  
+  // Dacă nu avem context OSM, încărcăm mai întâi
+  if(!S.ctx?.features?.length && ap?.geo?.geometry){
+    ss('⏳ Se încarcă clădirile existente pentru detecție coliziuni…');
+    await loadContext();
+  }
+  
+  // Verificăm coliziuni
+  if(ap?.geo?.geometry){
+    const fp = buildFP(ap.geo.geometry, ap.params||ap.utr);
+    if(fp?.geometry){
+      const {fp:fpAdj, collisions} = checkCollisions(fp);
+      if(collisions > 0){
+        ap._fpAdj = fpAdj;
+        console.log(`Coliziuni detectate: ${collisions}, footprint ajustat`);
+      } else {
+        ap._fpAdj = null;
+      }
+    }
+  }
+  
+  const feats = buildVolume();
+  setSource('vol-src',{type:'FeatureCollection',features:feats});
+  S.vol.genDone = true;
+  set3D(60,-20);
+  
+  const colMsg = ap?._fpAdj ? ` · ⚠️ Footprint ajustat (coliziuni cu clădiri existente eliminate)` : '';
+  ss(`🏗 Volum 3D generat! Etaje colorate · Click pe etaj/clădire pentru info${colMsg}`);
+  renderTab('volume');
+  if(window.innerWidth<=840)$('mob-sheet')?.classList.remove('open');
+}
+
+function clearVol(){
+  clearSource('vol-src');S.vol.genDone=false;renderTab('proiect');
+}
+
+// ── Actualizare parametri urbanistici editabili ────────────────────────────
+function updateParam(key, val, rerender){
+  const ap = S.parcels[S.activeParcel??0];
+  if(!ap) return;
+  if(!ap.params) ap.params = getDefaultParams(ap.utr);
+  const n = parseFloat(String(val).replace(',','.'));
+  if(isNaN(n) || n < 0) return;
+  ap.params[key] = n;
+  S.rule = {...ap.params};
+  ap._fpAdj = null; // recalculăm footprint cu noile aliniamente
+  updateMap(); // actualizăm footprint pe hartă
+  if(S.vol.genDone && ap.geo?.geometry){
+    // Recalculăm footprint cu noii parametri (aliniamente, sv etc)
+    const fp = buildFP(ap.geo.geometry, ap.params);
+    if(fp?.geometry && S.ctx?.features?.length){
+      const {fp:fpAdj, collisions} = checkCollisions(fp);
+      if(collisions > 0) ap._fpAdj = fpAdj;
+    }
+    // Regenerăm volumul cu noii parametri (niv, h din params)
+    const f = buildVolume();
+    setSource('vol-src', {type:'FeatureCollection', features:f});
+  }
+  if(rerender) renderTab('proiect');
+}
+
+function updateParamLive(key, val){ updateParam(key, val, false); }
+
+function resetParams(){
+  const ap = S.parcels[S.activeParcel??0];
+  if(!ap) return;
+  ap.params = getDefaultParams(ap.utr);
+  S.rule = {...ap.params};
+  ap._fpAdj = null;
+  if(S.vol.genDone && ap.geo?.geometry){
+    const f = buildVolume();
+    setSource('vol-src', {type:'FeatureCollection', features:f});
+  }
+  updateMap();
+  renderTab('proiect');
+}
+
+
+function centerOnParcel(){
+  const ap=S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry&&!S.ll)return;
+  
+  let center;
+  if(ap?.geo?.geometry){
+    try{center=turf.centerOfMass(ap.geo).geometry.coordinates;}
+    catch(e){center=[S.ll?.lng||27.6014,S.ll?.lat||47.1585];}
+  } else {
+    center=[S.ll?.lng||27.6014,S.ll?.lat||47.1585];
+  }
+  
+  // Zburăm la parcelă
+  map.flyTo({center, zoom:Math.max(map.getZoom(),18), duration:700});
+  
+  // Reafișăm popup-ul cu info parcelei
+  if(ap){
+    const nrcad=ap.nrcad||'—';
+    const utr=ap.utr||'—';
+    const area=ap.area?Math.round(ap.area)+' m²':'—';
+    const src=ap.source==='ANCPI'?'<span style="color:#34d399">● ANCPI</span>':'<span style="color:#fbbf24">● approx.</span>';
+    popup(
+      `<b>📍 ${esc(nrcad)}</b><br>UTR: <b>${esc(utr)}</b><br>Suprafață: <b>${area}</b> ${src}<br><small style="color:#64748b">Click X sau ESC pentru a închide</small>`,
+      {lng:center[0],lat:center[1]}
+    );
+  }
+}
+
+function genVolAll(){
+  const feats=buildVolume();
+  setSource('vol-src',{type:'FeatureCollection',features:feats});
+  S.vol.genDone=true;set3D(60,-20);ss('🏗 Volum unificat generat pentru toate parcelele!');
+}
+
+function genVolEach(){
+  // Generează volume separate pentru fiecare parcelă (cu funcțiuni individuale)
+  const feats=[];
+  const prevFn=S.vol.fn;
+  S.parcels.forEach((p,pi)=>{
+    if(p.fn)S.vol.fn=p.fn;
+    const pFeats=buildVolume();
+    feats.push(...pFeats.map(f=>({...f,properties:{...f.properties,parcelIdx:pi}})));
+    S.vol.fn=prevFn;
+  });
+  setSource('vol-src',{type:'FeatureCollection',features:feats});
+  S.vol.genDone=true;set3D(60,-20);ss('🏗 Volume individuale generate per parcelă!');
+}
+
+function removeParcel(i){
+  S.parcels.splice(i,1);
+  if(S.activeParcel>=S.parcels.length)S.activeParcel=S.parcels.length-1;
+  updateMap();renderAll();
+}
+
+function clearAll(){
+  S.parcels=[];S.activeParcel=null;S.vol.genDone=false;
+  ['parcel-src','vol-src','fp-src'].forEach(clearSource);
+  renderAll();ss('Toate parcelele șterse.');
+}
+
+function toggleMulti(v){
+  S.multiMode=v;
+  $('btnMulti')?.classList.toggle('multi-on',v);
+  renderTab('search');
+}
+
+function set3D(pitch=60,bearing=-20){
+  map.easeTo({pitch,bearing,duration:800,zoom:Math.max(map.getZoom(),16)});
+  $('pitchV').textContent=pitch+'°';$('slPitch').value=pitch;
+  $('bearV').textContent=((bearing+360)%360)+'°';$('slBearing').value=((bearing+360)%360);
+}
+function set2D(){map.easeTo({pitch:0,bearing:0,duration:600});$('pitchV').textContent='0°';$('slPitch').value=0;$('bearV').textContent='0°';$('slBearing').value=0;}
+
+function switchTab(t){
+  S.tab=t;
+  document.querySelectorAll('.ptab').forEach(b=>b.classList.toggle('active',b.dataset.t===t));
+  document.querySelectorAll('.tc').forEach(c=>c.classList.toggle('active',c.id===`tc-${t}`));
+  document.querySelectorAll('.mtab').forEach(b=>b.classList.toggle('active',b.dataset.mt===t));
+  renderTab(t);
+  const mb=$('mob-body');if(mb&&$('mob-sheet')?.classList.contains('open'))mb.innerHTML=getContent(t);
+  setTimeout(draw2D,60);
+}
+
+// ═══ UTR DRAWER ═══════════════════════════════════════════════════════════
+let utrOpen=false;
+function toggleUTR(){
+  utrOpen=!utrOpen;
+  $('btnUTR').classList.toggle('on',utrOpen);
+  $('utr-drawer').classList.toggle('open',utrOpen);
+  if(!utrOpen){clearSource('utr-src');return;}
+  if(!S.pug)return;
+  const fc={type:'FeatureCollection',features:S.pug.features.map(f=>({...f,properties:{...f.properties,utr:normU(f.properties?.utr||''),c:ucol(normU(f.properties?.utr||''))}}))};
+  setSource('utr-src',fc);
+  const bb=turf.bbox(S.pug);map.fitBounds([[bb[0],bb[1]],[bb[2],bb[3]]],{padding:40,duration:800});
+  ss(`🗺 ${S.pug.features.length} zone UTR`);
+  const utrMap={};
+  S.pug.features.forEach(f=>{const u=normU(f.properties?.utr||'');if(u&&u!=='?'&&u!=='??')utrMap[u]=(utrMap[u]||0)+1;});
+  const chips=$('utr-chips');
+  if(chips)chips.innerHTML=Object.keys(utrMap).sort().map(u=>`<span class="utr-chip" style="background:${ucol(u)}22;border-color:${ucol(u)};color:${ucol(u)}" onclick="selectUTR('${u}')" title="${esc(REGULI[u]?.d||u)} · ${utrMap[u]} zone">${u}</span>`).join('');
+  const leg=$('utr-leg');if(leg)leg.textContent=`${Object.keys(utrMap).length} tipuri UTR · ${S.pug.features.length} zone · Click pe UTR pentru detalii și zoom`;
+}
+
+function selectUTR(utr){
+  if(!S.pug)return;
+  const feats=S.pug.features.filter(f=>normU(f.properties?.utr||'')===utr);
+  setSource('utr-src',{type:'FeatureCollection',features:feats.map(f=>({...f,properties:{...f.properties,utr,c:ucol(utr)}}))});
+  if(feats.length){const bb=turf.bbox({type:'FeatureCollection',features:feats});map.fitBounds([[bb[0],bb[1]],[bb[2],bb[3]]],{padding:60,duration:700});}
+  S.utr=utr;S.rule=REGULI[utr]||{};
+  utrOpen=false;$('utr-drawer').classList.remove('open');$('btnUTR').classList.remove('on');
+  switchTab('utr');
+  ss(`🗺 UTR ${utr} — ${esc(REGULI[utr]?.d||'')} · ${feats.length} zone`);
+}
+
+// ═══ SCENARII ═════════════════════════════════════════════════════════════
+function saveScen(){
+  const name=prompt('Nume scenariu:')||`Sc.${S.scenarios.length+1}`;
+  S.scenarios.unshift({ts:new Date().toISOString(),name,nParcele:S.parcels.length,niv:S.vol.niv,h:S.vol.hOvr||S.rule.h,fn:S.vol.fn,timeline:S.timeline||null,parcels:S.parcels.map(p=>({nrcad:p.nrcad,utr:p.utr,area:p.area,fn:p.fn}))});
+  localStorage.setItem('ux16',JSON.stringify(S.scenarios));renderTab('scen');ss('💾 Salvat.');
+}
+function expJSON(){const b=new Blob([JSON.stringify(S.scenarios,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='urbanx_scenarii.json';a.click();}
+function loadScen(i){const sc=S.scenarios[i];if(!sc)return;Object.assign(S.vol,{fn:sc.fn||'locuinta_individuala',niv:sc.niv||4});renderAll();ss('📦 Scenariu încărcat.');}
+
+// ═══ BUTOANE GLOBALE ═══════════════════════════════════════════════════════
+$('btnUTR').onclick=toggleUTR;
+$('btnCloseUTR').onclick=toggleUTR;
+$('btnGPS').onclick=doGPS;
+$('btnANCPI').onclick=doANCPIZona;
+$('btnMulti').onclick=()=>{S.multiMode=!S.multiMode;$('btnMulti').classList.toggle('multi-on',S.multiMode);$('chkMulti')&&($('chkMulti').checked=S.multiMode);renderTab('search');ss(S.multiMode?'🔲 Multiselect ACTIV — click pe hartă adaugă parcele':'Multiselect dezactivat.');};
+$('btn3D').onclick=()=>set3D(60,-20);
+$('btn2D').onclick=()=>set2D();
+$('btnPDF').onclick=showPdfModal;
+$('btnPanel').onclick=()=>{
+  if(window.innerWidth<=840){
+    toggleMobSheet();
+  } else {
+    $('panel').style.display=$('panel').style.display==='none'?'flex':'none';
+    $('ctrl3d').style.right=$('panel').style.display==='none'?'10px':'428px';
+  }
+};
+$('btnMobClose').onclick=()=>$('mob-sheet')?.classList.remove('open');
+
+$('selBase').onchange=e=>map.setStyle(STYLES[e.target.value]||STYLES.custom);
+$('slPitch').oninput=()=>{const v=+$('slPitch').value;map.easeTo({pitch:v,duration:150});$('pitchV').textContent=v+'°';};
+$('slBearing').oninput=()=>{const v=+$('slBearing').value;map.easeTo({bearing:v,duration:150});$('bearV').textContent=v+'°';};
+
+// Tab switching
+document.querySelectorAll('.ptab').forEach(b=>b.onclick=()=>switchTab(b.dataset.t));
+document.querySelectorAll('.mtab').forEach(b=>b.onclick=()=>switchTab(b.dataset.mt));
+
+// ═══ BOOTSTRAP ════════════════════════════════════════════════════════════
+async function loadData(){
+  ss('⏳ Se încarcă PUG…');
+  try{
+    const r=await fetch('./qGis_pug.iasi.geojson');
+    if(!r.ok)throw new Error('lipsă');
+    S.pug=await r.json();
+    S.pugIdx=[];
+    S.pug.features.forEach(f=>{
+      const u=normU(f.properties?.utr||'');if(!u||u==='?'||u==='??')return;
+      try{const bb=turf.bbox(f);const area=turf.area(f);S.pugIdx.push({utr:u,geom:f.geometry,bb:[bb[0],bb[1],bb[2],bb[3]],area});}catch(e){}
+    });
+    S.pugIdx.sort((a,b)=>a.area-b.area);
+    ss(`⏳ PUG OK (${S.pug.features.length} zone). Se încarcă cadastrul…`);
+  }catch(e){ss('⚠️ PUG indisponibil');}
+
+  try{
+    const r=await fetch('./cadastru_parcele.geojson');
+    if(!r.ok)throw new Error('lipsă');
+    S.cadData=await r.json();
+    S.cadIdx=new Map();
+    S.cadData.features.forEach(f=>{const k=String(f.properties?.nrcad||'').toLowerCase().replace(/\s+/g,'');if(k)S.cadIdx.set(k,f);});
+    ss(`✅ Gata · ${S.pug?.features?.length||0} zone PUG · ${S.cadData.features.length.toLocaleString()} parcele · Click pe hartă pentru a selecta un teren`);
+  }catch(e){
+    S.cadData={type:'FeatureCollection',features:[]};
+    ss(`✅ Gata · ${S.pug?.features?.length||0} zone PUG · Cadastru indisponibil — folosiți ANCPI`);
+  }
+  renderAll();
+}
+
+
+// ═══ PDF EXPORT ═══════════════════════════════════════════════════════════
+let _pdfOpt = 'full';
+
+function selectPdfOpt(opt){
+  _pdfOpt=opt;
+  document.querySelectorAll('.pdf-opt').forEach(el=>el.classList.remove('sel'));
+  const el=document.getElementById('pdf-opt-'+opt);
+  if(el)el.classList.add('sel');
+}
+
+function showPdfModal(){
+  $('pdf-modal').classList.add('open');
+  $('pdf-progress').style.display='none';
+}
+
+async function runExport(){
+  const prog=$('pdf-progress');
+  const msg=$('pdf-prog-msg');
+  prog.style.display='block';
+
+  try{
+    const{jsPDF}=window.jspdf;
+
+    if(_pdfOpt==='full'){
+      // ── RAPORT COMPLET ──
+      msg.textContent='Se capturează harta 3D…';
+      const mapCanvas=await html2canvas($('map'),{useCORS:true,scale:1.5,logging:false});
+
+      const pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+      const pw=pdf.internal.pageSize.getWidth(),ph=pdf.internal.pageSize.getHeight();
+
+      // Pagina 1: Harta
+      pdf.addImage(mapCanvas.toDataURL('image/jpeg',.85),'JPEG',0,0,pw,ph);
+      // Header overlay
+      pdf.setFillColor(8,37,74);pdf.rect(0,0,pw,14,'F');
+      pdf.setFont('helvetica','bold');pdf.setFontSize(11);pdf.setTextColor(212,175,55);
+      pdf.text('UrbanX — Analiză Urbanistică PUG Iași',5,9);
+      const ap=S.parcels[S.activeParcel??0];
+      const dateStr=new Date().toLocaleDateString('ro',{day:'2-digit',month:'2-digit',year:'numeric'});
+      pdf.setFontSize(8);pdf.setTextColor(180,180,180);
+      pdf.text(`Data: ${dateStr} · Parcele: ${S.parcels.length} · ${ap?`Cad: ${ap.nrcad||'-'} · UTR: ${ap.utr||'-'}`:''}`,5,13);
+      pdf.text('© UrbanX — FG · TSS · Toate drepturile rezervate',pw-5,13,{align:'right'});
+
+      // Pagina 2: Date
+      msg.textContent='Se generează pagina cu date…';
+      pdf.addPage('a4','portrait');
+      await addDataPage(pdf);
+
+      // Pagina 3: Dacă există scenarii
+      if(S.scenarios.length>0){
+        msg.textContent='Se adaugă scenariile…';
+        pdf.addPage('a4','portrait');
+        await addScenariiPage(pdf);
+      }
+
+      pdf.save(`UrbanX_${ap?.nrcad||'raport'}_${dateStr.replace(/\./g,'-')}.pdf`);
+
+    } else if(_pdfOpt==='scen'){
+      // ── RAPORT SCENARII ──
+      msg.textContent='Se generează raportul scenarii…';
+      const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+      addHeader(pdf,'📅 Raport Scenarii de Dezvoltare Urbanistică',1,S.scenarios.length);
+      await addScenariiPage(pdf);
+      const mapC=await html2canvas($('map'),{useCORS:true,scale:1,logging:false});
+      pdf.addPage('a4','landscape');
+      const pw=pdf.internal.pageSize.getWidth(),ph=pdf.internal.pageSize.getHeight();
+      pdf.addImage(mapC.toDataURL('image/jpeg',.8),'JPEG',0,0,pw,ph);
+      pdf.save(`UrbanX_Scenarii_${new Date().toLocaleDateString('ro').replace(/\./g,'-')}.pdf`);
+
+    } else if(_pdfOpt==='multi'){
+      // ── RAPORT MULTIPARCELĂ ──
+      msg.textContent='Se generează raportul multiparcelă…';
+      const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+      addHeader(pdf,'🔲 Raport Multiparcelă',1,S.parcels.length);
+      await addMultiPage(pdf);
+      const mapC=await html2canvas($('map'),{useCORS:true,scale:1.2,logging:false});
+      pdf.addPage('a4','landscape');
+      const pw=pdf.internal.pageSize.getWidth(),ph=pdf.internal.pageSize.getHeight();
+      pdf.addImage(mapC.toDataURL('image/jpeg',.85),'JPEG',0,0,pw,ph);
+      pdf.save(`UrbanX_MultiParcele_${new Date().toLocaleDateString('ro').replace(/\./g,'-')}.pdf`);
+    }
+
+    prog.style.display='none';
+    $('pdf-modal').classList.remove('open');
+    ss('✅ PDF exportat cu succes!');
+
+  }catch(e){
+    console.error('PDF error:',e);
+    msg.textContent='❌ Eroare: '+e.message;
+  }
+}
+
+function addHeader(pdf,title,pg,total){
+  const pw=pdf.internal.pageSize.getWidth();
+  pdf.setFillColor(8,37,74);pdf.rect(0,0,pw,20,'F');
+  pdf.setFont('helvetica','bold');pdf.setFontSize(13);pdf.setTextColor(212,175,55);
+  pdf.text('UrbanX',8,13);
+  pdf.setFontSize(10);pdf.setTextColor(200,200,200);
+  pdf.text(title,35,13);
+  pdf.setFontSize(8);pdf.setTextColor(150,150,150);
+  const d=new Date().toLocaleDateString('ro',{day:'2-digit',month:'long',year:'numeric'});
+  pdf.text(`${d} · pag. ${pg}${total?' din '+total:''}`,pw-8,13,{align:'right'});
+}
+
+async function addDataPage(pdf){
+  const pw=pdf.internal.pageSize.getWidth(),ph=pdf.internal.pageSize.getHeight();
+  const ap=S.parcels[S.activeParcel??0];
+  const r=S.rule||REGULI[ap?.utr||'']||{};
+  const p=ap?.params||getDefaultParams(ap?.utr||'');
+  const fn=FN_UTR[S.vol.fn];
+  const m2=ap?.area||0;
+
+  addHeader(pdf,'📊 Indicatori Urbanistici & Date Proiect',2);
+
+  let y=28;
+  const lw=pw-16; // lățime utilă
+  const col=(txt,x,w,bold=false,color=[30,30,30])=>{
+    pdf.setFont('helvetica',bold?'bold':'normal');pdf.setTextColor(...color);
+    pdf.text(String(txt||'—'),x,y,{maxWidth:w-2});
+  };
+
+  // Secțiunea 1: Date parcelă
+  pdf.setFillColor(11,24,44);pdf.rect(8,y-4,lw,8,F);
+  pdf.setFont('helvetica','bold');pdf.setFontSize(10);pdf.setTextColor(212,175,55);
+  pdf.text('DATE PARCELĂ',8,y+1);y+=10;
+
+  const row=(label,val,label2,val2)=>{
+    pdf.setFillColor(240,243,248);pdf.rect(8,y-4,lw,7,'F');
+    pdf.setFont('helvetica','normal');pdf.setFontSize(9);pdf.setTextColor(80,80,80);pdf.text(label,10,y);
+    pdf.setFont('helvetica','bold');pdf.setTextColor(20,20,20);pdf.text(String(val||'—'),65,y);
+    if(label2){pdf.setFont('helvetica','normal');pdf.setTextColor(80,80,80);pdf.text(label2,105,y);pdf.setFont('helvetica','bold');pdf.setTextColor(20,20,20);pdf.text(String(val2||'—'),155,y);}
+    y+=8;
+  };
+
+  row('Nr. cadastral:',ap?.nrcad||'—','Sursa date:',ap?.source==='ANCPI'?'ANCPI eTerra (formă reală)':'Cadastru local (formă aprox.)');
+  row('UTR (Unitate Teritorială de Referință):',ap?.utr||'—','Descriere UTR:',r.d||'—');
+  row('Suprafață teren:',m2?Math.round(m2)+' m²':'—','Coordonate GPS:',S.ll?`${S.ll.lat.toFixed(6)}, ${S.ll.lng.toFixed(6)}`:'—');
+  row('Funcțiune propusă:',fn?.label||S.vol.fn,'Validare funcțiune:',valFunctiune(S.vol.fn,ap?.utr).msg.replace(/[✅⚠️🚫]/g,'').trim());
+  y+=4;
+
+  // Secțiunea 2: Indicatori urbanistici
+  pdf.setFillColor(11,24,44);pdf.rect(8,y-4,lw,8,'F');
+  pdf.setFont('helvetica','bold');pdf.setFontSize(10);pdf.setTextColor(212,175,55);
+  pdf.text('INDICATORI URBANISTICI CONFORM PUG (valori PUG vs. proiect)',8,y+1);y+=10;
+
+  // Header tabel
+  pdf.setFillColor(30,50,90);pdf.rect(8,y-5,lw,7,'F');
+  pdf.setFont('helvetica','bold');pdf.setFontSize(8);pdf.setTextColor(200,220,255);
+  pdf.text('Indicator',10,y);pdf.text('Valoare PUG',70,y);pdf.text('Valoare proiect',105,y);pdf.text('Obs.',145,y);
+  y+=8;
+
+  const trow=(ind,vPUG,vProj,obs,ovr=false)=>{
+    const bg=ovr?[255,240,220]:(y%16<8?[248,249,252]:[255,255,255]);
+    pdf.setFillColor(...bg);pdf.rect(8,y-5,lw,7,'F');
+    pdf.setFont('helvetica','normal');pdf.setFontSize(8);
+    pdf.setTextColor(60,60,60);pdf.text(String(ind),10,y);
+    pdf.setTextColor(20,20,20);pdf.text(String(vPUG),70,y);
+    pdf.setFont('helvetica',ovr?'bold':'normal');pdf.setTextColor(ovr?180:20,ovr?80:20,20);
+    pdf.text(String(vProj),105,y);
+    pdf.setFont('helvetica','normal');pdf.setTextColor(100,100,100);pdf.text(String(obs||''),145,y);
+    y+=7;
+  };
+
+  const m2S=Math.round(m2);
+  trow('POT — Procent Ocupare Teren (maxim %)',fmt(r.pot,'%'),fmt(p.pot,'%'),(p.pot>r.pot*1.2?'⚠ depășire PUG':''),p.pot>r.pot*1.2);
+  trow('CUT — Coef. Utilizare Teren (mp.ADC/mp.teren, maxim)',fmt(r.cut),fmt(p.cut),(p.cut>r.cut*1.2?'⚠ depășire PUG':''),p.cut>r.cut*1.2);
+  trow('Număr niveluri (maxim)',fmt(r.niv,' et.'),fmt(S.vol.niv,' et.'),'');
+  trow('H max — înălțime maximă (m)',fmt(r.h,' m'),fmt(pN(S.vol.hOvr)||p.h,' m'),(pN(S.vol.hOvr)>p.h?'⚠ depășire PUG':''));
+  trow('Aliniament principal față stradă (minim m)',fmt(r.rf,' m'),fmt(p.rf,' m'),'');
+  trow('Aliniament lateral stg./dr. (minim m)',fmt(r.rl,' m'),fmt(p.rl,' m'),'');
+  trow('Aliniament posterior / spate (minim m)',fmt(r.rs,' m'),fmt(p.rs,' m'),'');
+  trow('Spații verzi (minim %)',fmt(r.sv,'%'),fmt(p.sv,'%'),(p.sv<r.sv?'⚠ sub limita PUG':''),p.sv<r.sv);
+  trow('Suprafață construită la sol max (POT)',fmt(r.pot&&m2S?Math.floor(m2S*r.pot/100):'—',' m²'),fmt(p.pot&&m2S?Math.floor(m2S*p.pot/100):'—',' m²'),'');
+  trow('Suprafață desfășurată max (CUT)',fmt(r.cut&&m2S?Math.floor(m2S*r.cut):'—',' mp.ADC'),fmt(p.cut&&m2S?Math.floor(m2S*p.cut):'—',' mp.ADC'),'');
+  trow('Spații verzi obligatorii (minim)',fmt(r.sv&&m2S?Math.floor(m2S*r.sv/100):'—',' m²'),fmt(p.sv&&m2S?Math.floor(m2S*p.sv/100):'—',' m²'),'');
+  trow('Parcaje necesare',calcParcaje(S.vol.fn,m2S,0,0),'—','conform funcțiune propusă');
+  y+=4;
+
+  // Secțiunea 3: Volum generat
+  if(S.vol.genDone){
+    const totalH=pN(S.vol.hOvr)||pN(p.h)||(S.vol.niv*S.vol.hNiv);
+    pdf.setFillColor(11,24,44);pdf.rect(8,y-4,lw,8,'F');
+    pdf.setFont('helvetica','bold');pdf.setFontSize(10);pdf.setTextColor(212,175,55);
+    pdf.text('PARAMETRI VOLUM GENERAT 3D',8,y+1);y+=10;
+    row('Niveluri proiectate:',S.vol.niv+' niveluri','Înălțime totală:',totalH.toFixed(1)+' m');
+    row('H / nivel:',S.vol.hNiv+' m/nivel','Factor amprentă:',S.vol.fpF);
+    row('Etaj retras:',S.vol.retras?'Da':'Nu','Terasă:',S.vol.terasa?'Da':'Nu');
+    row('Orientare (bearing):',S.bearing+'° față de Nord','Rotire volum la stradă:',S.bearing>0?'Da':'Nu/Nord');
+  }
+
+  // Footer
+  y=ph-10;
+  pdf.setFontSize(7);pdf.setTextColor(150,150,150);
+  pdf.text('UrbanX — instrument de analiză urbanistică · © FG TSS · Datele sunt orientative și trebuie verificate cu autoritățile competente',8,y);
+}
+
+async function addScenariiPage(pdf){
+  addHeader(pdf,'📅 Scenarii de Dezvoltare Urbanistică',pdf.internal.getCurrentPageInfo().pageNumber);
+  const pw=pdf.internal.pageSize.getWidth(),ph=pdf.internal.pageSize.getHeight();
+  let y=28;
+
+  if(!S.scenarios.length){
+    pdf.setFontSize(10);pdf.setTextColor(100,100,100);pdf.text('Niciun scenariu salvat.',10,y);return;
+  }
+
+  // Tabel scenarii
+  pdf.setFillColor(30,50,90);pdf.rect(8,y-5,pw-16,7,'F');
+  pdf.setFont('helvetica','bold');pdf.setFontSize(8);pdf.setTextColor(200,220,255);
+  const cols=[['Scenariu',10,40],['Data',52,28],['Parcele',82,18],['UTR',102,14],['Funcțiune',118,32],['Niv.',152,12],['H(m)',165,12],['Orizont',178,20]];
+  cols.forEach(([t,x])=>pdf.text(t,x,y));y+=8;
+
+  S.scenarios.forEach((s,i)=>{
+    if(y>ph-20){pdf.addPage();y=20;}
+    const bg=i%2===0?[248,249,252]:[255,255,255];
+    pdf.setFillColor(...bg);pdf.rect(8,y-5,pw-16,7,'F');
+    pdf.setFont('helvetica','normal');pdf.setFontSize(7.5);pdf.setTextColor(40,40,40);
+    cols.forEach(([,x,w])=>{});
+    const vals=[s.name||'Sc.'+(i+1),(s.ts||'').slice(0,10),s.nParcele||1,s.utr||'—',FN_UTR[s.fn]?.label||s.fn||'—',s.niv||'—',s.h||'—',(s.timeline?s.timeline+' ani':'curent')];
+    vals.forEach((v,j)=>pdf.text(String(v||'—'),cols[j][1],y,{maxWidth:cols[j][2]-2}));
+    y+=8;
+  });
+
+  y+=8;
+  pdf.setFontSize(8);pdf.setTextColor(80,80,80);
+  pdf.text('Notă: Scenariile de mai sus sunt salvate în aplicație și pot fi reîncărcate pentru analiză detaliată.',10,y);
+}
+
+async function addMultiPage(pdf){
+  addHeader(pdf,'🔲 Raport Multiparcelă',pdf.internal.getCurrentPageInfo().pageNumber);
+  const pw=pdf.internal.pageSize.getWidth(),ph=pdf.internal.pageSize.getHeight();
+  let y=28;
+  const lw=pw-16;
+
+  if(!S.parcels.length){pdf.setFontSize(10);pdf.setTextColor(100,100,100);pdf.text('Nicio parcelă selectată.',10,y);return;}
+
+  // Sumar
+  const totalArea=S.parcels.reduce((s,p)=>s+(p.area||0),0);
+  pdf.setFillColor(11,24,44);pdf.rect(8,y-4,lw,7,'F');
+  pdf.setFont('helvetica','bold');pdf.setFontSize(9);pdf.setTextColor(212,175,55);
+  pdf.text(`SUMAR: ${S.parcels.length} parcele · Suprafață totală: ${Math.round(totalArea)} m²`,10,y);y+=12;
+
+  // Tabel parcele
+  pdf.setFillColor(30,50,90);pdf.rect(8,y-5,lw,7,'F');
+  pdf.setFont('helvetica','bold');pdf.setFontSize(8);pdf.setTextColor(200,220,255);
+  const cols=[['Nr.',10,10],['Nr.Cad.',22,22],['UTR',46,14],['Suprafață',62,22],['Funcțiune',86,34],['POT%',122,14],['CUT',138,14],['H max',154,14],['Parcaje',170,20]];
+  cols.forEach(([t,x])=>pdf.text(t,x,y));y+=8;
+
+  S.parcels.forEach((p,i)=>{
+    if(y>ph-20){pdf.addPage();y=20;addHeader(pdf,'🔲 Raport Multiparcelă (continuare)',pdf.internal.getCurrentPageInfo().pageNumber);y=28;}
+    const r2=REGULI[p.utr]||{};
+    const pp=p.params||getDefaultParams(p.utr);
+    const bg=i%2===0?[248,249,252]:[255,255,255];
+    pdf.setFillColor(...bg);pdf.rect(8,y-5,lw,7,'F');
+    pdf.setFont('helvetica','normal');pdf.setFontSize(7.5);pdf.setTextColor(40,40,40);
+    const vals=[i+1,p.nrcad||'—',p.utr||'—',(p.area?Math.round(p.area)+' m²':'—'),FN_UTR[p.fn||S.vol.fn]?.label||'—',fmt(pp.pot,'%'),fmt(pp.cut),fmt(pp.h,' m'),calcParcaje(p.fn||S.vol.fn,p.area||0,0,0)];
+    vals.forEach((v,j)=>pdf.text(String(v||'—'),cols[j][1],y,{maxWidth:cols[j][2]-1}));
+    y+=8;
+  });
+
+  y+=10;
+  pdf.setFontSize(8);pdf.setTextColor(80,80,80);
+  pdf.text('* Valorile POT, CUT și H sunt conform parametrilor PUG sau modificați în tab Parametri.',10,y);y+=6;
+  pdf.text('* Necesarul de parcaje este calculat conform funcțiunii propuse.',10,y);
+}
+
+// ═══ INIT PDF BUTOANE ══════════════════════════════════════════════════════
+renderAll();
+
+
+</script>
+</body>
+</html>
