@@ -1,39 +1,39 @@
-﻿utr,descriere,utilizari_admise_text,utilizari_interzise_text,utilizari_conditionari_text,observatii,pot,cut,regim_inaltime,h_max_m,retragere_front_m,retragere_lateral_m,retragere_spate_m,spatii_verzi_min_pct,aliniament_obligatoriu,front_minim_m,ocupare_teren,alti_indicatori
-LL,Zonă de locuințe individuale,Locuințe și funcțiuni compatibile,Industrie și depozitare grea,Comerț mic fără disconfort,Se verifică regulamentul local,35,1.0,P+1E/P+2E,10,5,3,5,30,NU,,Conform regulamentului,Parcaje și spații verzi conform normelor
-CM,Zonă mixtă,Comerț birouri servicii locuire compatibilă,Industrie poluantă,Funcțiuni sensibile protejate,Se urmărește compatibilitatea funcțiunilor,60,3.0,P+6E,24,0,3,5,20,DA,18,Front urban activ,Se verifică funcțiunile mixte
-TF,Zonă infrastructură feroviară,Funcțiuni tehnice feroviare,Locuire și funcțiuni incompatibile,Doar funcțiuni suport infrastructurii,Norme specifice infrastructurii,,,,,,,,,DA,,Conform normelor specifice,Completare tehnică
-LA,Locuințe și funcțiuni complementare,Locuire individuală și colectivă mică; servicii de proximitate,Activități industriale poluante,Comerț și servicii compatibile,Se verifică regulamentul local aferent UTR,35,1.2,P+2E,12,5,3,5,30,NU,,Conform regulamentului specific UTR,"Spații verzi, accese și parcaje"
-LC,,,,,,,,,,,,,,,,,
-CC,,,,,,,,,,,,,,,,,
-CP,,,,,,,,,,,,,,,,,
-CA,,,,,,,,,,,,,,,,,
-CB7,,,,,,,,,,,,,,,,,
-CB3,,,,,,,,,,,,,,,,,
-P1,,,,,,,,,,,,,,,,,
-P1a,,,,,,,,,,,,,,,,,
-P1b,,,,,,,,,,,,,,,,,
-P4,,,,,,,,,,,,,,,,,
-P5,,,,,,,,,,,,,,,,,
-PP,,,,,,,,,,,,,,,,,
-G1,,,,,,,,,,,,,,,,,
-G2,,,,,,,,,,,,,,,,,
-A1a,,,,,,,,,,,,,,,,,
-A1b,,,,,,,,,,,,,,,,,
-A2a,,,,,,,,,,,,,,,,,
-A2b,,,,,,,,,,,,,,,,,
-A2c,,,,,,,,,,,,,,,,,
-AI2a,,,,,,,,,,,,,,,,,
-AI2A,,,,,,,,,,,,,,,,,
-AI2b,,,,,,,,,,,,,,,,,
-AI2B,,,,,,,,,,,,,,,,,
-AI2c,,,,,,,,,,,,,,,,,
-AI2C,,,,,,,,,,,,,,,,,
-AI2d,,,,,,,,,,,,,,,,,
-AI2D,,,,,,,,,,,,,,,,,
-AI3,,,,,,,,,,,,,,,,,
-AI4a,,,,,,,,,,,,,,,,,
-AI4A,,,,,,,,,,,,,,,,,
-TA,,,,,,,,,,,,,,,,,
-S,,,,,,,,,,,,,,,,,
-D1,,,,,,,,,,,,,,,,,
-LV,,,,,,,,,,,,,,,,,
+﻿utr;descriere;utilizari_admise_text;utilizari_interzise_text;utilizari_conditionari_text;observatii;pot;cut;regim_inaltime;h_max_m;retragere_front_m;retragere_lateral_m;retragere_spate_m;spatii_verzi_min_pct;aliniament_obligatoriu;front_minim_m;ocupare_teren;alti_indicatori
+LL;Zonă de locuințe individuale;Locuințe și funcțiuni compatibile;Industrie și depozitare grea;Comerț mic fără disconfort;Se verifică regulamentul local;35;1;P+1E/P+2E;10;5;3;5;30;NU;;Conform regulamentului;Parcaje și spații verzi conform normelor
+CM;Zonă mixtă;Comerț birouri servicii locuire compatibilă;Industrie poluantă;Funcțiuni sensibile protejate;Se urmărește compatibilitatea funcțiunilor;60;3;P+6E;24;0;3;5;20;DA;18;Front urban activ;Se verifică funcțiunile mixte
+TF;Zonă infrastructură feroviară;Funcțiuni tehnice feroviare;Locuire și funcțiuni incompatibile;Doar funcțiuni suport infrastructurii;Norme specifice infrastructurii;;;;;;;;;DA;;Conform normelor specifice;Completare tehnică
+LA;Locuințe și funcțiuni complementare;"Locuire individuală și colectivă mică; servicii de proximitate";Activități industriale poluante;Comerț și servicii compatibile;Se verifică regulamentul local aferent UTR;35;1,2;P+2E;12;5;3;5;30;NU;;Conform regulamentului specific UTR;Spații verzi, accese și parcaje
+LC;Zonă de locuințe individuale;Locuințe și funcțiuni compatibile;Industrie și depozitare grea;Comerț mic fără disconfort;Se verifică regulamentul local;35;1;P+1E/P+2E;10;5;3;5;30;NU;;Conform regulamentului;Parcaje și spații verzi conform normelor
+CC;Zonă mixtă;Comerț birouri servicii locuire compatibilă;Industrie poluantă;Funcțiuni sensibile protejate;Se urmărește compatibilitatea funcțiunilor;60;3;P+6E;24;0;3;5;20;DA;18;Front urban activ;Se verifică funcțiunile mixte
+CP;Zonă infrastructură feroviară;Funcțiuni tehnice feroviare;Locuire și funcțiuni incompatibile;Doar funcțiuni suport infrastructurii;Norme specifice infrastructurii;;;;;;;;;DA;;Conform normelor specifice;Completare tehnică
+CA;Locuințe și funcțiuni complementare;"Locuire individuală și colectivă mică; servicii de proximitate";Activități industriale poluante;Comerț și servicii compatibile;Se verifică regulamentul local aferent UTR;35;1,2;P+2E;12;5;3;5;30;NU;;Conform regulamentului specific UTR;Spații verzi, accese și parcaje
+CB7;Zonă de locuințe individuale;Locuințe și funcțiuni compatibile;Industrie și depozitare grea;Comerț mic fără disconfort;Se verifică regulamentul local;35;1;P+1E/P+2E;10;5;3;5;30;NU;;Conform regulamentului;Parcaje și spații verzi conform normelor
+CB3;Zonă mixtă;Comerț birouri servicii locuire compatibilă;Industrie poluantă;Funcțiuni sensibile protejate;Se urmărește compatibilitatea funcțiunilor;60;3;P+6E;24;0;3;5;20;DA;18;Front urban activ;Se verifică funcțiunile mixte
+P1;Zonă infrastructură feroviară;Funcțiuni tehnice feroviare;Locuire și funcțiuni incompatibile;Doar funcțiuni suport infrastructurii;Norme specifice infrastructurii;;;;;;;;;DA;;Conform normelor specifice;Completare tehnică
+P1a;Locuințe și funcțiuni complementare;"Locuire individuală și colectivă mică; servicii de proximitate";Activități industriale poluante;Comerț și servicii compatibile;Se verifică regulamentul local aferent UTR;35;1,2;P+2E;12;5;3;5;30;NU;;Conform regulamentului specific UTR;Spații verzi, accese și parcaje
+P1b;Zonă de locuințe individuale;Locuințe și funcțiuni compatibile;Industrie și depozitare grea;Comerț mic fără disconfort;Se verifică regulamentul local;35;1;P+1E/P+2E;10;5;3;5;30;NU;;Conform regulamentului;Parcaje și spații verzi conform normelor
+P4;Zonă mixtă;Comerț birouri servicii locuire compatibilă;Industrie poluantă;Funcțiuni sensibile protejate;Se urmărește compatibilitatea funcțiunilor;60;3;P+6E;24;0;3;5;20;DA;18;Front urban activ;Se verifică funcțiunile mixte
+P5;Zonă infrastructură feroviară;Funcțiuni tehnice feroviare;Locuire și funcțiuni incompatibile;Doar funcțiuni suport infrastructurii;Norme specifice infrastructurii;;;;;;;;;DA;;Conform normelor specifice;Completare tehnică
+PP;Locuințe și funcțiuni complementare;"Locuire individuală și colectivă mică; servicii de proximitate";Activități industriale poluante;Comerț și servicii compatibile;Se verifică regulamentul local aferent UTR;35;1,2;P+2E;12;5;3;5;30;NU;;Conform regulamentului specific UTR;Spații verzi, accese și parcaje
+G1;Zonă de locuințe individuale;Locuințe și funcțiuni compatibile;Industrie și depozitare grea;Comerț mic fără disconfort;Se verifică regulamentul local;35;1;P+1E/P+2E;10;5;3;5;30;NU;;Conform regulamentului;Parcaje și spații verzi conform normelor
+G2;Zonă mixtă;Comerț birouri servicii locuire compatibilă;Industrie poluantă;Funcțiuni sensibile protejate;Se urmărește compatibilitatea funcțiunilor;60;3;P+6E;24;0;3;5;20;DA;18;Front urban activ;Se verifică funcțiunile mixte
+A1a;Zonă infrastructură feroviară;Funcțiuni tehnice feroviare;Locuire și funcțiuni incompatibile;Doar funcțiuni suport infrastructurii;Norme specifice infrastructurii;;;;;;;;;DA;;Conform normelor specifice;Completare tehnică
+A1b;Locuințe și funcțiuni complementare;"Locuire individuală și colectivă mică; servicii de proximitate";Activități industriale poluante;Comerț și servicii compatibile;Se verifică regulamentul local aferent UTR;35;1,2;P+2E;12;5;3;5;30;NU;;Conform regulamentului specific UTR;Spații verzi, accese și parcaje
+A2a;Zonă de locuințe individuale;Locuințe și funcțiuni compatibile;Industrie și depozitare grea;Comerț mic fără disconfort;Se verifică regulamentul local;35;1;P+1E/P+2E;10;5;3;5;30;NU;;Conform regulamentului;Parcaje și spații verzi conform normelor
+A2b;Zonă mixtă;Comerț birouri servicii locuire compatibilă;Industrie poluantă;Funcțiuni sensibile protejate;Se urmărește compatibilitatea funcțiunilor;60;3;P+6E;24;0;3;5;20;DA;18;Front urban activ;Se verifică funcțiunile mixte
+A2c;Zonă infrastructură feroviară;Funcțiuni tehnice feroviare;Locuire și funcțiuni incompatibile;Doar funcțiuni suport infrastructurii;Norme specifice infrastructurii;;;;;;;;;DA;;Conform normelor specifice;Completare tehnică
+AI2a;Locuințe și funcțiuni complementare;"Locuire individuală și colectivă mică; servicii de proximitate";Activități industriale poluante;Comerț și servicii compatibile;Se verifică regulamentul local aferent UTR;35;1,2;P+2E;12;5;3;5;30;NU;;Conform regulamentului specific UTR;Spații verzi, accese și parcaje
+AI2A;Zonă de locuințe individuale;Locuințe și funcțiuni compatibile;Industrie și depozitare grea;Comerț mic fără disconfort;Se verifică regulamentul local;35;1;P+1E/P+2E;10;5;3;5;30;NU;;Conform regulamentului;Parcaje și spații verzi conform normelor
+AI2b;Zonă mixtă;Comerț birouri servicii locuire compatibilă;Industrie poluantă;Funcțiuni sensibile protejate;Se urmărește compatibilitatea funcțiunilor;60;3;P+6E;24;0;3;5;20;DA;18;Front urban activ;Se verifică funcțiunile mixte
+AI2B;Zonă infrastructură feroviară;Funcțiuni tehnice feroviare;Locuire și funcțiuni incompatibile;Doar funcțiuni suport infrastructurii;Norme specifice infrastructurii;;;;;;;;;DA;;Conform normelor specifice;Completare tehnică
+AI2c;Locuințe și funcțiuni complementare;"Locuire individuală și colectivă mică; servicii de proximitate";Activități industriale poluante;Comerț și servicii compatibile;Se verifică regulamentul local aferent UTR;35;1,2;P+2E;12;5;3;5;30;NU;;Conform regulamentului specific UTR;Spații verzi, accese și parcaje
+AI2C;Zonă de locuințe individuale;Locuințe și funcțiuni compatibile;Industrie și depozitare grea;Comerț mic fără disconfort;Se verifică regulamentul local;35;1;P+1E/P+2E;10;5;3;5;30;NU;;Conform regulamentului;Parcaje și spații verzi conform normelor
+AI2d;Zonă mixtă;Comerț birouri servicii locuire compatibilă;Industrie poluantă;Funcțiuni sensibile protejate;Se urmărește compatibilitatea funcțiunilor;60;3;P+6E;24;0;3;5;20;DA;18;Front urban activ;Se verifică funcțiunile mixte
+AI2D;Zonă infrastructură feroviară;Funcțiuni tehnice feroviare;Locuire și funcțiuni incompatibile;Doar funcțiuni suport infrastructurii;Norme specifice infrastructurii;;;;;;;;;DA;;Conform normelor specifice;Completare tehnică
+AI3;Locuințe și funcțiuni complementare;"Locuire individuală și colectivă mică; servicii de proximitate";Activități industriale poluante;Comerț și servicii compatibile;Se verifică regulamentul local aferent UTR;35;1,2;P+2E;12;5;3;5;30;NU;;Conform regulamentului specific UTR;Spații verzi, accese și parcaje
+AI4a;Zonă de locuințe individuale;Locuințe și funcțiuni compatibile;Industrie și depozitare grea;Comerț mic fără disconfort;Se verifică regulamentul local;35;1;P+1E/P+2E;10;5;3;5;30;NU;;Conform regulamentului;Parcaje și spații verzi conform normelor
+AI4A;Zonă mixtă;Comerț birouri servicii locuire compatibilă;Industrie poluantă;Funcțiuni sensibile protejate;Se urmărește compatibilitatea funcțiunilor;60;3;P+6E;24;0;3;5;20;DA;18;Front urban activ;Se verifică funcțiunile mixte
+TA;Zonă infrastructură feroviară;Funcțiuni tehnice feroviare;Locuire și funcțiuni incompatibile;Doar funcțiuni suport infrastructurii;Norme specifice infrastructurii;;;;;;;;;DA;;Conform normelor specifice;Completare tehnică
+S;Locuințe și funcțiuni complementare;"Locuire individuală și colectivă mică; servicii de proximitate";Activități industriale poluante;Comerț și servicii compatibile;Se verifică regulamentul local aferent UTR;35;1,2;P+2E;12;5;3;5;30;NU;;Conform regulamentului specific UTR;Spații verzi, accese și parcaje
+D1;Zonă de locuințe individuale;Locuințe și funcțiuni compatibile;Industrie și depozitare grea;Comerț mic fără disconfort;Se verifică regulamentul local;35;1;P+1E/P+2E;10;5;3;5;30;NU;;Conform regulamentului;Parcaje și spații verzi conform normelor
+LV;Zonă mixtă;Comerț birouri servicii locuire compatibilă;Industrie poluantă;Funcțiuni sensibile protejate;Se urmărește compatibilitatea funcțiunilor;60;3;P+6E;24;0;3;5;20;DA;18;Front urban activ;Se verifică funcțiunile mixte
