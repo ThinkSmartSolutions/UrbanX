@@ -1,3 +1,0 @@
-﻿parcela_id,nr_cad,nr_cf,display_name,judet,localitate,suprafata_mp,lat,lon,notes
-PARC_0001,12345,CF12345,Parcela test 1,Iași,Iași,850,47.1585,27.6014,Legată de layerul GeoJSON prin parcela_id
-PARC_0002,12345-C1,CF12346,Parcela test 2,Iași,Iași,620,47.1592,27.6021,Exemplu pentru căutare după nr. cadastral
