@@ -1960,21 +1960,25 @@ function updateDistanceLines(){
   const ctxFeats = S.ctx?.features||[];
   const parcelFeat = {type:'Feature',geometry:ap.geo.geometry,properties:{}};
 
-  // Volumele generate - luam doar baza (floor=0) pentru fiecare cladire
+  // Volumele generate - luam baza (floor=0) din TOATE parcelele
   const myBlds = {};
+  let bldKey = 0;
   volFeats.forEach(f=>{
     if((f.properties?.floor??0)!==0) return;
-    const k = f.properties?.bldIdx??0;
+    // Cheia unica = parcelIdx + bldIdx (pt multi-vol pe multi-parcele)
+    const pi = f.properties?.parcelIdx??0;
+    const bi = f.properties?.bldIdx??0;
+    const k = pi*100+bi;
     if(!myBlds[k]) myBlds[k]=f;
   });
-  // Daca nu avem bldIdx (volum unic), luam primul
+  // Fallback: volum unic fara proprietati
   if(Object.keys(myBlds).length===0 && volFeats.length>0){
     myBlds[0] = volFeats[0];
   }
   const myBldArr = Object.values(myBlds);
   if(!myBldArr.length) return;
 
-  // ── Distante intre volumele NOASTRE (multi-vol) ──────────────────────
+  // ── Distante intre volumele NOASTRE (orice nr de cladiri) ─────────────
   if(myBldArr.length>1){
     for(let i=0;i<myBldArr.length;i++){
       for(let j=i+1;j<myBldArr.length;j++){
@@ -1997,17 +2001,33 @@ function updateDistanceLines(){
     }
   }
 
-  // ── Cladiri direct adiacente parcelei ────────────────────────────────
-  // "Direct adiacente" = poligonul cladirii ctx intersecteaza sau e in 3m de parcela
+  // ── Cladiri direct adiacente parcelei/parcelelor ────────────────────
+  // Construim un poligon unificat din toate parcelele selectate
+  let combinedParcel = parcelFeat;
+  if(S.parcels.length > 1){
+    try{
+      let union = parcelFeat;
+      S.parcels.forEach(p=>{
+        if(!p.geo?.geometry) return;
+        const pf2 = {type:'Feature',geometry:p.geo.geometry,properties:{}};
+        try{ const u=turf.union(union,pf2); if(u?.geometry) union=u; }catch(e){}
+      });
+      combinedParcel = union;
+    }catch(e){}
+  }
+
   if(ctxFeats.length){
     const adjacentCtx = ctxFeats.filter(ctx=>{
       try{
-        // Excludem cladirile de pe parcela noastra
         const ctxCtr = turf.centerOfMass(ctx);
-        if(turf.booleanPointInPolygon(ctxCtr,parcelFeat)) return false;
-        // Verificam daca e adiacenta: buffer 3m in jurul parcelei
-        const buf = turf.buffer(parcelFeat, 3, {units:'meters'});
-        // Cladirea trebuie sa aiba macar un punct in buffer-ul parcelei
+        // Excludem cladirile care sunt pe oricare din parcelele noastre
+        for(const p of S.parcels){
+          if(!p.geo?.geometry) continue;
+          const pf2={type:'Feature',geometry:p.geo.geometry,properties:{}};
+          if(turf.booleanPointInPolygon(ctxCtr,pf2)) return false;
+        }
+        // Adiacenta = in buffer de 3m al parcelei combinate
+        const buf = turf.buffer(combinedParcel, 3, {units:'meters'});
         const ring = ctx.geometry?.coordinates?.[0]||[];
         return ring.some(pt=>turf.booleanPointInPolygon(turf.point(pt),buf));
       }catch(e){ return false; }
@@ -3726,11 +3746,13 @@ function centerOnParcel(){
 function genVolAll(){
   const feats=buildVolume();
   setSource('vol-src',{type:'FeatureCollection',features:feats});
-  S.vol.genDone=true;set3D(60,-20);ss('🏗 Volum unificat generat pentru toate parcelele!');
+  S.vol.genDone=true;
+  set3D(60,-20);
+  ss('🏗 Volum unificat generat pentru toate parcelele!');
+  setTimeout(updateDistanceLines, 400);
 }
 
 function genVolEach(){
-  // Generează volume separate pentru fiecare parcelă (cu funcțiuni individuale)
   const feats=[];
   const prevFn=S.vol.fn;
   S.parcels.forEach((p,pi)=>{
@@ -3740,7 +3762,10 @@ function genVolEach(){
     S.vol.fn=prevFn;
   });
   setSource('vol-src',{type:'FeatureCollection',features:feats});
-  S.vol.genDone=true;set3D(60,-20);ss('🏗 Volume individuale generate per parcelă!');
+  S.vol.genDone=true;
+  set3D(60,-20);
+  ss('🏗 Volume individuale generate per parcelă!');
+  setTimeout(updateDistanceLines, 400);
 }
 
 function removeParcel(i){
