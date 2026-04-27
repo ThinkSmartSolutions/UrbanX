@@ -129,6 +129,231 @@ canvas#c2d{width:100%;height:100%;display:block}
 #pdf-preview{background:#fff;border-radius:8px;margin-top:16px;overflow:hidden;display:none}
 
 
+/* ═══ AEDIS Modal ════════════════════════════════════════════════════════ */
+#aedis-modal {
+  position:fixed;top:0;right:-420px;width:420px;height:100vh;
+  z-index:500;background:#0a1628;
+  border-left:1px solid rgba(255,255,255,.1);
+  display:flex;flex-direction:column;
+  transition:right .3s cubic-bezier(.4,0,.2,1);
+  box-shadow:-4px 0 24px rgba(0,0,0,.5);
+}
+#aedis-modal.open { right:0; }
+
+/* Topbar button AEDIS */
+#btnAEDIS {
+  background:linear-gradient(135deg,#1e3a5f,#0d2137)!important;
+  border:1px solid rgba(212,175,55,.5)!important;
+  color:#d4af37!important;
+  font-weight:700!important;
+  letter-spacing:.5px!important;
+  position:relative;
+  overflow:hidden;
+}
+#btnAEDIS::before {
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(212,175,55,.1),transparent);
+  pointer-events:none;
+}
+#btnAEDIS:hover { border-color:#d4af37!important; background:linear-gradient(135deg,#2a4a7f,#1a3150)!important; }
+
+/* Header */
+#aedis-header {
+  padding:14px 16px 10px;
+  background:linear-gradient(180deg,#0d1f3c,#0a1628);
+  border-bottom:1px solid rgba(212,175,55,.3);
+  flex-shrink:0;
+}
+.aedis-title {
+  font-size:15px;font-weight:800;color:#d4af37;
+  letter-spacing:1.5px;display:flex;align-items:center;gap:8px;
+}
+.aedis-subtitle { font-size:10px;color:#64748b;margin-top:2px;letter-spacing:.5px; }
+
+/* Parcel info */
+.aedis-parcel-info {
+  margin:10px 16px 0;padding:10px 12px;
+  background:#080f1c;border-radius:10px;
+  border:1px solid rgba(255,255,255,.08);
+}
+.aedis-pi-row { display:flex;flex-wrap:wrap;gap:5px;align-items:center; }
+.aedis-pi-badge {
+  padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700;
+  background:rgba(255,255,255,.08);color:#94a3b8;
+}
+.aedis-pi-badge.blue{background:rgba(59,130,246,.15);color:#60a5fa;}
+.aedis-pi-badge.green{background:rgba(34,197,94,.15);color:#4ade80;}
+.aedis-pi-badge.orange{background:rgba(245,158,11,.15);color:#f59e0b;}
+
+/* Tabs */
+.aedis-tabs {
+  display:flex;gap:2px;padding:8px 10px;
+  background:#080f1c;border-bottom:1px solid rgba(255,255,255,.06);
+  flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+.aedis-tabs::-webkit-scrollbar{display:none}
+.aedis-tab {
+  flex-shrink:0;padding:7px 11px;border-radius:8px;border:none;
+  background:transparent;color:#64748b;cursor:pointer;
+  font-size:11px;font-weight:600;transition:all .15s;white-space:nowrap;
+}
+.aedis-tab.active{background:rgba(212,175,55,.15);color:#d4af37;}
+.aedis-tab:hover:not(.active){background:rgba(255,255,255,.05);color:#94a3b8;}
+
+/* Content */
+.aedis-content { flex:1;overflow-y:auto;padding:12px 14px;-webkit-overflow-scrolling:touch; }
+.aedis-section {
+  font-size:10px;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;color:#d4af37;
+  margin:14px 0 8px;padding-bottom:4px;
+  border-bottom:1px solid rgba(212,175,55,.2);
+}
+.aedis-section:first-child{margin-top:0;}
+
+/* Funcțiuni grid */
+.aedis-fn-grid { display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px; }
+.aedis-fn-btn {
+  padding:8px 10px;border-radius:9px;border:1px solid rgba(255,255,255,.12);
+  background:rgba(11,18,32,.8);color:#94a3b8;cursor:pointer;
+  font-size:11px;text-align:left;display:flex;align-items:center;gap:6px;
+  transition:all .15s;
+}
+.aedis-fn-btn.active{border-color:#d4af37;background:rgba(212,175,55,.12);color:#d4af37;}
+.aedis-fn-btn:hover:not(.active){background:rgba(255,255,255,.06);color:#e2e8f0;}
+.aedis-fn-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.aedis-fn-desc{font-size:11px;color:#64748b;padding:6px 8px;background:#080f1c;border-radius:7px;line-height:1.5;}
+
+/* Stiluri grid */
+.aedis-stil-grid { display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px; }
+.aedis-stil-btn {
+  padding:8px 6px;border-radius:9px;border:1px solid rgba(255,255,255,.12);
+  background:rgba(11,18,32,.8);color:#94a3b8;cursor:pointer;
+  font-size:10px;text-align:center;line-height:1.4;transition:all .15s;
+}
+.aedis-stil-btn strong{display:block;margin-bottom:2px;font-size:11px;}
+.aedis-stil-btn small{color:#475569;font-size:9px;}
+.aedis-stil-btn.active{border-color:#d4af37;background:rgba(212,175,55,.12);color:#d4af37;}
+.aedis-stil-btn.active small{color:#92704a;}
+
+/* Scenariu grid */
+.aedis-scen-grid { display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:10px; }
+.aedis-scen-btn {
+  padding:10px 8px;border-radius:9px;border:1px solid rgba(255,255,255,.12);
+  background:rgba(11,18,32,.8);color:#94a3b8;cursor:pointer;
+  font-size:11px;text-align:center;line-height:1.4;transition:all .15s;
+}
+.aedis-scen-btn small{display:block;font-size:9px;color:#475569;margin-top:2px;}
+.aedis-scen-btn.active{border-color:#3b82f6;background:rgba(59,130,246,.15);color:#60a5fa;}
+
+/* Acoperiș grid */
+.aedis-acop-grid { display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px; }
+.aedis-acop-btn {
+  padding:10px 6px;border-radius:10px;border:1px solid rgba(255,255,255,.12);
+  background:rgba(11,18,32,.8);color:#94a3b8;cursor:pointer;
+  font-size:10px;text-align:center;line-height:1.4;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  transition:all .15s;
+}
+.aedis-acop-btn strong{font-size:11px;}
+.aedis-acop-btn small{color:#475569;font-size:9px;}
+.aedis-acop-btn.active{border-color:#34d399;background:rgba(34,211,153,.12);color:#34d399;}
+
+/* Metrici */
+.aedis-g2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px;}
+.aedis-g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
+.aedis-metric{padding:10px;background:#080f1c;border-radius:8px;border:1px solid rgba(255,255,255,.06);}
+.aedis-ml{font-size:10px;color:#64748b;margin-bottom:4px;}
+.aedis-mv{font-size:16px;font-weight:700;color:#e2e8f0;}
+.aedis-mv.warn{color:#f59e0b;}
+.aedis-mv.blue{color:#60a5fa;}
+.aedis-mv.green{color:#34d399;}
+
+/* Rows */
+.aedis-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.aedis-lbl{font-size:11px;color:#94a3b8;min-width:80px;}
+.aedis-val{font-size:12px;font-weight:700;color:#d4af37;min-width:38px;text-align:right;}
+
+/* Toggle */
+.aedis-toggle{display:flex;align-items:center;gap:8px;cursor:pointer;padding:6px 0;}
+.aedis-toggle input{width:16px;height:16px;accent-color:#d4af37;}
+.aedis-toggle-label{font-size:12px;color:#94a3b8;}
+
+/* Summary box */
+.aedis-summary-box{
+  display:flex;gap:10px;flex-wrap:wrap;
+  padding:10px;background:#080f1c;border-radius:8px;
+  margin-top:6px;font-size:12px;color:#64748b;
+}
+.aedis-summary-box b{font-size:13px;}
+
+/* Context compare */
+.aedis-context-compare{margin-bottom:8px;}
+.aedis-cc-row{display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:11px;color:#64748b;}
+.aedis-cc-row span:first-child{min-width:100px;}
+.aedis-cc-row span:last-child{min-width:40px;text-align:right;}
+.aedis-cc-bar-wrap{flex:1;height:6px;background:#1e293b;border-radius:3px;overflow:hidden;}
+.aedis-cc-bar{height:100%;border-radius:3px;transition:width .3s;}
+
+/* Fn legend */
+.aedis-fn-legend{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;}
+.aedis-fn-row{display:flex;align-items:center;gap:4px;font-size:11px;color:#94a3b8;}
+.aedis-fn-sq{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+
+/* Existent box */
+.aedis-existent-box{
+  padding:10px;background:#1a1a00;border:1px solid rgba(245,158,11,.25);
+  border-radius:8px;margin-bottom:8px;
+}
+
+/* Table */
+.aedis-tbl{width:100%;border-collapse:collapse;font-size:11px;}
+.aedis-tbl th{padding:7px 8px;background:#0d1f3c;color:#94a3b8;text-align:left;font-weight:600;}
+.aedis-tbl td{padding:7px 8px;border-bottom:1px solid rgba(255,255,255,.05);color:#e2e8f0;}
+.aedis-tbl tr:hover td{background:rgba(255,255,255,.02);}
+
+/* Alerts */
+.aedis-warn{padding:8px 10px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:7px;font-size:11px;color:#f87171;margin-top:6px;}
+.aedis-ok{padding:8px 10px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:7px;font-size:11px;color:#4ade80;margin-top:6px;}
+
+/* Actions */
+.aedis-actions {
+  display:flex;gap:6px;padding:12px 14px;
+  border-top:1px solid rgba(255,255,255,.08);
+  background:#080f1c;flex-shrink:0;
+}
+.aedis-build-btn {
+  flex:1;padding:13px;border-radius:12px;border:none;
+  background:linear-gradient(135deg,#1e3a5f,#0d2137);
+  color:#d4af37;font-size:13px;font-weight:800;cursor:pointer;
+  letter-spacing:.5px;border:1px solid rgba(212,175,55,.4);
+  transition:all .2s;
+}
+.aedis-build-btn:hover{background:linear-gradient(135deg,#2a4a7f,#1a3150);border-color:#d4af37;}
+.aedis-dim-btn,.aedis-close-btn {
+  padding:13px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.12);
+  background:rgba(11,18,32,.8);color:#64748b;cursor:pointer;font-size:12px;
+}
+.aedis-dim-btn.active{border-color:#60a5fa;color:#60a5fa;background:rgba(59,130,246,.1);}
+.aedis-close-btn:hover{color:#f87171;border-color:rgba(239,68,68,.3);}
+
+/* Mobile responsive */
+@media(max-width:840px){
+  #aedis-modal{
+    width:100%!important;right:auto!important;
+    bottom:-100vh;top:auto;height:85vh;
+    border-left:none!important;border-top:2px solid rgba(212,175,55,.4);
+    border-radius:20px 20px 0 0;
+    transition:bottom .3s cubic-bezier(.4,0,.2,1)!important;
+  }
+  #aedis-modal.open{bottom:0!important;right:auto!important;}
+  .aedis-tabs{justify-content:flex-start;}
+  .aedis-fn-grid,.aedis-scen-grid{grid-template-columns:1fr 1fr;}
+  .aedis-stil-grid,.aedis-acop-grid{grid-template-columns:1fr 1fr 1fr;}
+  .aedis-build-btn{font-size:15px!important;min-height:52px!important;}
+  .aedis-tab{font-size:12px!important;padding:9px 12px!important;}
+}
+
 /* ═══ MOBILE UX — REDESIGN PREMIUM ═══════════════════════════════════════ */
 @media(max-width:840px){
   #panel{display:none!important}
@@ -319,6 +544,20 @@ canvas#c2d{width:100%;height:100%;display:block}
 <!-- FAB înlocuit cu mob-nav bar -->
 
 <div id="copy"><span>© UrbanX – FG · TSS</span><span>Mapbox GL · Cadastru · PUG Iași · OSM</span></div>
+<div id="aedis-modal">
+  <div id="aedis-header">
+    <div class="aedis-title">
+      <span style="font-size:18px">⚡</span>
+      AEDIS
+      <span style="font-size:11px;font-weight:400;color:#64748b;letter-spacing:0">Generator Volumetric Avansat</span>
+    </div>
+    <div class="aedis-subtitle">UrbanX · Analiză Urbanistică Completă</div>
+  </div>
+  <div id="aedis-body" style="flex:1;overflow:hidden;display:flex;flex-direction:column;">
+    <div style="padding:20px;color:#64748b;font-size:12px">Selectați o parcelă pe hartă și apăsați ⚡ AEDIS pentru a începe.</div>
+  </div>
+</div>
+
 <div id="fn-legend">
   <div class="fn-leg-title">Funcțiuni clădiri</div>
   <div class="fn-leg-row"><div class="fn-leg-sq" style="background:#7da87b"></div>Rezidențial colectiv</div>
@@ -2880,35 +3119,15 @@ function htmlProiect(){
   '</select>',
   '<div class="'+(fnVal.status==='ok'?'ok-box':fnVal.status==='warn'?'warn-box':'err-box')+'" style="font-size:11px">'+fnVal.msg+'</div>',
   // ── VOLUM 3D ──
-  '<div class="section">🎨 Stil arhitectural</div>',
-  `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:8px">${
-    Object.entries(ARCH_PALETTES).map(([k,v])=>
-      '<button onclick="setArchStyle(\''+k+'\')" style="padding:7px 3px;border-radius:8px;cursor:pointer;font-size:9px;text-align:center;line-height:1.3;border:1.5px solid '+
-      (S.vol.archStyle===k?'#d4af37':'rgba(255,255,255,.15)')+
-      ';background:'+(S.vol.archStyle===k?'rgba(212,175,55,.15)':'rgba(11,18,32,.7)')+
-      ';color:'+(S.vol.archStyle===k?'#d4af37':'#94a3b8')+'">'+v.label+'</button>'
-    ).join('')
-  }</div>`,
-  '<div class="card" style="background:#08152a;padding:10px;margin-bottom:8px">',
-  `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:6px">
-    <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer">
-      <input type="checkbox" ${S.vol.parterComercial?'checked':''} onchange="S.vol.parterComercial=this.checked;if(S.vol.genDone)genVol()" style="width:16px;height:16px;accent-color:#f59e0b">
-      <span style="color:#f59e0b">🏪 Parter comercial</span>
-    </label>
-    ${S.vol.parterComercial?'<span style="font-size:11px;color:#94a3b8">H parter: <b style=color:#f59e0b>'+(S.vol.hParter||4.5)+'m</b> <input type=range min=3 max=6 step=0.5 value='+(S.vol.hParter||4.5)+' oninput="S.vol.hParter=+this.value;if(S.vol.genDone)genVol()" style="width:60px;accent-color:#f59e0b;vertical-align:middle"></span>':''}
+  `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px;background:#080f1c;border-radius:10px;border:1px solid rgba(212,175,55,.2);margin-bottom:8px">
+    <div>
+      <div style="font-size:11px;font-weight:700;color:#d4af37">🏗 Volum brut — conform PUG</div>
+      <div style="font-size:10px;color:#64748b;margin-top:2px">Editează parametrii și generează volumul</div>
+    </div>
+    <button onclick="aedisOpen()" style="padding:7px 12px;border-radius:8px;border:1px solid rgba(212,175,55,.4);background:rgba(212,175,55,.1);color:#d4af37;cursor:pointer;font-size:11px;font-weight:700">⚡ AEDIS →</button>
   </div>`,
-  `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-    <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer">
-      <input type="checkbox" ${S.vol.retras?'checked':''} onchange="S.vol.retras=this.checked;if(S.vol.genDone)genVol()" style="width:16px;height:16px;accent-color:#3b82f6">
-      <span>🔝 Etaj retras</span>
-    </label>
-    ${S.vol.retras?'<span style="font-size:11px;color:#94a3b8">Retragere: <b style=color:#3b82f6>'+Math.round((S.vol.retragereEtaj||0.85)*100)+'%</b> <input type=range min=50 max=95 step=5 value='+Math.round((S.vol.retragereEtaj||0.85)*100)+' oninput="S.vol.retragereEtaj=+this.value/100;if(S.vol.genDone)genVol()" style="width:60px;accent-color:#3b82f6;vertical-align:middle"></span>':''}
-    <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer">
-      <input type="checkbox" ${S.vol.terasa?'checked':''} onchange="S.vol.terasa=this.checked;if(S.vol.genDone)genVol()" style="width:16px;height:16px;accent-color:#34d399">
-      <span>🏗 Terasă</span>
-    </label>
-  </div>`,
-  '</div>',
+
+
   '<div class="section">🏗 Volum 3D</div>',
   '<div class="card" style="background:#08152a">',
   '<div class="help" style="margin-bottom:6px">Nivelurile și înălțimea se setează în <b>Parametri urbanistici</b> mai jos (Nr. niveluri, H max). Aici setezi doar forma și generezi.</div>',
@@ -4957,6 +5176,819 @@ async function addScenariiPage(pdf){
     y+=7;
   });
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// AEDIS — Generator Volumetric Urbanistic Avansat
+// Integrat în UrbanX · Mapbox GL JS fill-extrusion
+// ═══════════════════════════════════════════════════════════════════════════
+
+// ── State AEDIS ────────────────────────────────────────────────────────────
+const AEDIS = {
+  open: false,
+  tab: 'functiune', // functiune | volum | acoperis | context | analiza
+
+  // Funcțiune și program
+  fn: 'rezidential_colectiv',
+  fnParter: 'comercial',        // funcțiune parter (dacă diferit)
+  parterDiferit: false,
+
+  // Stil arhitectural
+  stil: 'modern',
+  adaptContext: false,          // adaptare la contextul existent
+
+  // Compoziție volumetrică
+  corpuri: [                    // array de corpuri
+    {id:0, label:'Corp principal', h:12, niv:4, hNiv:3, retragere:1.0, fn:'rezidential_colectiv', color:'#cbd5e1'}
+  ],
+  corpActiv: 0,
+
+  // Acoperis
+  tipAcoperis: 'terasa_plata',  // terasa_plata | terasa_circulabila | sarpanta | mansarda | combinat
+  hSarpanta: 3.5,               // H coama sarpanta (m)
+  unghiSarpanta: 35,            // unghi (grade)
+  hMansarda: 2.8,               // H util mansarda
+  hAttic: 1.2,                  // H atic/parapet terasa
+
+  // Retrageri per etaj (array, index=etaj)
+  retrageriFineEtaje: {},       // {etaj: factor} ex: {3: 0.85, 4: 0.75}
+  activeRetragere: false,
+
+  // Context și scenarii
+  scenariu: 'demolare',         // demolare | extindere_h | extindere_v | inglobare
+  existentPOT: 0,               // POT existent calculat din ctx
+  existentCUT: 0,
+  existentH: 0,
+
+  // Analiză
+  showDim: true,                // etichete dimensionale
+  showShadow: false,            // simulare umbra (simplificata)
+  showSetbacks: true,           // aliniamente vizuale
+};
+
+// ── Funcțiuni AEDIS cu programe ───────────────────────────────────────────
+const AEDIS_FN = {
+  rezidential_colectiv: {
+    label:'🏠 Rezidențial colectiv', color:'#4ade80', parterColor:'#86efac',
+    hParter:3.0, hEtaj:2.8, hAttic:1.0,
+    desc:'Blocuri de locuințe. H standard 2.8m/etaj. Posibil parter comercial.',
+    stiluri:['modern','clasic','minimalist','adaptat_context']
+  },
+  locuinta_individuala: {
+    label:'🏡 Locuință individuală', color:'#86efac', parterColor:'#bbf7d0',
+    hParter:3.2, hEtaj:3.0, hAttic:0,
+    desc:'Case individuale. H generos 3m/etaj. Posibil mansardă.',
+    stiluri:['modern','clasic','traditional','rustic']
+  },
+  birouri: {
+    label:'🏢 Birouri / Office', color:'#38bdf8', parterColor:'#7dd3fc',
+    hParter:4.5, hEtaj:3.5, hAttic:1.5,
+    desc:'Clădiri de birouri. H parter 4.5m, etaje 3.5m. Posibil atriumuri.',
+    stiluri:['modern','inovator','corporatist','minimalist']
+  },
+  comercial: {
+    label:'🏬 Comercial / Retail', color:'#fb923c', parterColor:'#fdba74',
+    hParter:5.0, hEtaj:4.0, hAttic:1.5,
+    desc:'Spații comerciale. H parter generos 5m. Posibil mezanin.',
+    stiluri:['modern','inovator','industrial']
+  },
+  hotel: {
+    label:'🏨 Hotelier', color:'#e879f9', parterColor:'#f0abfc',
+    hParter:5.0, hEtaj:3.2, hAttic:2.0,
+    desc:'Hoteluri. Parter 5m (lobby/restaurant), etaje 3.2m.',
+    stiluri:['modern','clasic','boutique','inovator']
+  },
+  mixt: {
+    label:'🏙 Mixt (comercial+rezidential)', color:'#fbbf24', parterColor:'#fb923c',
+    hParter:4.5, hEtaj:3.0, hAttic:1.2,
+    desc:'Funcțiuni mixte. Parter comercial 4.5m + etaje rezidențiale.',
+    stiluri:['modern','inovator','adaptat_context']
+  },
+  industrie: {
+    label:'🏭 Industrial / Depozitare', color:'#94a3b8', parterColor:'#cbd5e1',
+    hParter:6.0, hEtaj:5.0, hAttic:0,
+    desc:'Hale industriale. H mare, deschideri libere.',
+    stiluri:['industrial','modern']
+  },
+  institutie: {
+    label:'🏛 Instituție publică', color:'#a78bfa', parterColor:'#c4b5fd',
+    hParter:4.5, hEtaj:3.5, hAttic:2.5,
+    desc:'Clădiri publice, instituții. H reprezentativ.',
+    stiluri:['clasic','modern','inovator','adaptat_context']
+  },
+};
+
+// ── Stiluri arhitecturale AEDIS ────────────────────────────────────────────
+const AEDIS_STIL = {
+  modern: {
+    label:'🏢 Modern', desc:'Fațade plane, ferestre mari, linii curate',
+    corpColor: (fn,i)=>{const c=AEDIS_FN[fn]?.color||'#94a3b8'; return i===0?c:lighten(c,i*8);},
+    parterFactor: 1.0, retragereFactor: 0.88, hasAttic: true,
+    aticH: 1.2, etajColor: (base,i,tot)=>mixColor(base,'#e2e8f0',i/tot*0.4)
+  },
+  inovator: {
+    label:'⚡ Inovator', desc:'Forme dinamice, retrageri expresive, console',
+    corpColor: (fn,i)=>{const c=AEDIS_FN[fn]?.color||'#94a3b8'; return i%2===0?c:lighten(c,15);},
+    parterFactor: 1.1, retragereFactor: 0.75, hasAttic: false,
+    aticH: 0, etajColor: (base,i,tot)=>i%2===0?base:lighten(base,20)
+  },
+  clasic: {
+    label:'🏛 Clasic', desc:'Soclu pronunțat, cornișe, proporții clasice',
+    corpColor: (fn,i)=>{const c=AEDIS_FN[fn]?.parterColor||'#d4a76a'; return i===0?c:darken(c,i*5);},
+    parterFactor: 0.9, retragereFactor: 0.95, hasAttic: true,
+    aticH: 2.0, etajColor: (base,i,tot)=>mixColor(base,'#fef9c3',0.3)
+  },
+  minimalist: {
+    label:'◼ Minimalist', desc:'Corp simplu, fara ornamente, materiale naturale',
+    corpColor: (fn,i)=>'#e2e8f0',
+    parterFactor: 1.0, retragereFactor: 1.0, hasAttic: false,
+    aticH: 0.8, etajColor: (base,i,tot)=>'#f1f5f9'
+  },
+  industrial: {
+    label:'🏭 Industrial', desc:'Metal, beton aparent, deschideri mari',
+    corpColor: (fn,i)=>'#64748b',
+    parterFactor: 1.2, retragereFactor: 1.0, hasAttic: false,
+    aticH: 0, etajColor: (base,i,tot)=>i%2===0?'#475569':'#64748b'
+  },
+  adaptat_context: {
+    label:'🌆 Adaptat context', desc:'Culori și proporții din contextul urban existent',
+    corpColor: (fn,i)=>{
+      const ctxFns = S.ctx?.features?.map(f=>f.properties?.fn)||[];
+      const domFn = ctxFns.sort((a,b)=>ctxFns.filter(v=>v===a).length-ctxFns.filter(v=>v===b).length).pop();
+      return BLD_COL[domFn]||AEDIS_FN[fn]?.color||'#94a3b8';
+    },
+    parterFactor: 1.0, retragereFactor: 0.92, hasAttic: true,
+    aticH: 1.0, etajColor: (base,i,tot)=>base
+  },
+};
+
+// ── Helpers culori ─────────────────────────────────────────────────────────
+function hexToRgb(hex){
+  const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  return [r,g,b];
+}
+function rgbToHex(r,g,b){
+  return '#'+[r,g,b].map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join('');
+}
+function lighten(hex,pct){
+  const [r,g,b]=hexToRgb(hex);
+  return rgbToHex(r+(255-r)*pct/100,g+(255-g)*pct/100,b+(255-b)*pct/100);
+}
+function darken(hex,pct){
+  const [r,g,b]=hexToRgb(hex);
+  return rgbToHex(r*(1-pct/100),g*(1-pct/100),b*(1-pct/100));
+}
+function mixColor(hex1,hex2,t){
+  const [r1,g1,b1]=hexToRgb(hex1),[r2,g2,b2]=hexToRgb(hex2);
+  return rgbToHex(r1+(r2-r1)*t,g1+(g2-g1)*t,b1+(b2-b1)*t);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// AEDIS BUILD — Generare volumetrie avansată
+// ═══════════════════════════════════════════════════════════════════════════
+function aedisBuild(){
+  const ap = S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry){ ss('⚠️ AEDIS: Selectați o parcelă mai întâi.'); return; }
+
+  const feats = [];
+  const params = ap.params || getDefaultParams(ap.utr);
+  const fp = buildFP(ap.geo.geometry, params);
+  if(!fp?.geometry){ ss('⚠️ AEDIS: Nu s-a putut calcula edificabilul.'); return; }
+
+  const fn = AEDIS.fn;
+  const fnDef = AEDIS_FN[fn] || AEDIS_FN.rezidential_colectiv;
+  const stilDef = AEDIS_STIL[AEDIS.stil] || AEDIS_STIL.modern;
+  const pA = ap.area || turf.area({type:'Feature',geometry:ap.geo.geometry,properties:{}});
+
+  // Calcule de baza
+  const hParter = AEDIS.parterDiferit ? (fnDef.hParter || 4.5) : (AEDIS.corpuri[0]?.hNiv||3.0);
+  const hEtaj = AEDIS.corpuri[0]?.hNiv || fnDef.hEtaj || 3.0;
+  const totalNiv = AEDIS.corpuri[0]?.niv || pN(params.niv) || 4;
+
+  // ── Scenariu: calcul POT/CUT existent ─────────────────────────────────
+  let baseH = 0;
+  let fpGeom = fp.geometry;
+
+  if(AEDIS.scenariu !== 'demolare' && S.ctx?.features?.length){
+    // Calculam POT/CUT existent din cladirile de pe parcela
+    const onParcel = S.ctx.features.filter(f=>{
+      try{
+        const ctr = turf.centerOfMass(f);
+        return turf.booleanPointInPolygon(ctr, {type:'Feature',geometry:ap.geo.geometry,properties:{}});
+      }catch(e){ return false; }
+    });
+
+    if(onParcel.length){
+      const existArea = onParcel.reduce((s,f)=>{try{return s+turf.area(f);}catch(e){return s;}},0);
+      AEDIS.existentPOT = Math.round(existArea/pA*100);
+      AEDIS.existentH = Math.round(Math.max(...onParcel.map(f=>f.properties?.h||0)));
+      AEDIS.existentCUT = 0;
+
+      if(AEDIS.scenariu==='extindere_v'){
+        // Extindem VERTICAL: plecam de la H maxim existent
+        baseH = AEDIS.existentH;
+        // Afisam si cladirile existente cu culoare distincta
+        onParcel.forEach(f=>{
+          feats.push({type:'Feature',
+            properties:{base:0,top:AEDIS.existentH,color:'#94a3b8',floor:-1,isExistent:true},
+            geometry:f.geometry});
+        });
+      } else if(AEDIS.scenariu==='extindere_h'){
+        // Extindem ORIZONTAL: reducem fp la zona libera
+        try{
+          let freeZone = fp;
+          onParcel.forEach(f=>{
+            try{
+              const diff = turf.difference(freeZone, f);
+              if(diff?.geometry && turf.area(diff) > 10) freeZone = diff;
+            }catch(e){}
+          });
+          fpGeom = freeZone.geometry;
+          // Afisam existentele
+          onParcel.forEach(f=>{
+            feats.push({type:'Feature',
+              properties:{base:0,top:f.properties?.h||7,color:'#94a3b8',floor:-1,isExistent:true},
+              geometry:f.geometry});
+          });
+        }catch(e){}
+      } else if(AEDIS.scenariu==='inglobare'){
+        // INGLOBARE: construim pe intregul edificabil, inglobam existentele
+        baseH = 0;
+        // Existentele sunt vizibile ca referinta
+        onParcel.forEach(f=>{
+          feats.push({type:'Feature',
+            properties:{base:0,top:f.properties?.h||7,color:'rgba(100,100,100,0.3)',floor:-1,isExistent:true},
+            geometry:f.geometry});
+        });
+      }
+    }
+  }
+
+  // ── Generare corpuri AEDIS ─────────────────────────────────────────────
+  const fpFeat = {type:'Feature',geometry:fpGeom,properties:{}};
+
+  // Corp principal cu retrageri fine per etaj
+  let currentH = baseH;
+
+  for(let i=0; i<totalNiv; i++){
+    const isLast = i===totalNiv-1;
+    const hEtajCrt = i===0 ? hParter : hEtaj;
+
+    // Retragere per etaj (configurabila)
+    let etajGeom = fpGeom;
+    const fineRetragere = AEDIS.retrageriFineEtaje[i] ?? (isLast && AEDIS.activeRetragere ? (stilDef.retragereFactor||0.88) : 1.0);
+
+    if(fineRetragere < 0.99){
+      try{
+        const sc = turf.transformScale(fpFeat, fineRetragere, {origin:turf.centerOfMass(fpFeat)});
+        if(sc?.geometry) etajGeom = sc.geometry;
+      }catch(e){}
+    }
+
+    // Culoare etaj
+    const baseColor = AEDIS.parterDiferit && i===0
+      ? (fnDef.parterColor||fnDef.color)
+      : (fnDef.color||'#94a3b8');
+    const etajColor = stilDef.etajColor
+      ? stilDef.etajColor(baseColor, i, totalNiv)
+      : lighten(baseColor, i*5);
+
+    feats.push({
+      type:'Feature',
+      properties:{
+        base: currentH,
+        top: currentH + hEtajCrt,
+        color: etajColor,
+        floor: i,
+        isLast,
+        fn: AEDIS.parterDiferit && i===0 ? AEDIS.fnParter : fn,
+        hEtaj: hEtajCrt,
+        parcelIdx: S.activeParcel??0
+      },
+      geometry: etajGeom
+    });
+
+    currentH += hEtajCrt;
+  }
+
+  // ── Acoperiș ──────────────────────────────────────────────────────────
+  const roofBase = currentH;
+  const fpSmall = turf.transformScale(fpFeat, 0.97, {origin:turf.centerOfMass(fpFeat)});
+
+  switch(AEDIS.tipAcoperis){
+    case 'terasa_plata':
+      // Terasa plata: slab subtire + parapet
+      feats.push({type:'Feature',
+        properties:{base:roofBase,top:roofBase+0.25,color:darken(AEDIS_FN[fn]?.color||'#94a3b8',20),floor:-10,roofType:'terasa'},
+        geometry:fpGeom});
+      // Parapet
+      if(AEDIS.hAttic>0){
+        feats.push({type:'Feature',
+          properties:{base:roofBase,top:roofBase+AEDIS.hAttic,color:darken(AEDIS_FN[fn]?.color||'#94a3b8',30),floor:-11,roofType:'parapet'},
+          geometry:fpGeom});
+        // Interior parapet (gol)
+        try{
+          const inner = turf.buffer(fpFeat,-0.4,{units:'meters'});
+          if(inner?.geometry){
+            feats.push({type:'Feature',
+              properties:{base:roofBase,top:roofBase+AEDIS.hAttic,color:'#0a1628',floor:-12,roofType:'parapet_inner'},
+              geometry:inner.geometry});
+          }
+        }catch(e){}
+      }
+      break;
+
+    case 'terasa_circulabila':
+      // Terasa cu borduri mai inalte + pavaj (culoare diferita)
+      feats.push({type:'Feature',
+        properties:{base:roofBase,top:roofBase+0.15,color:'#78716c',floor:-10,roofType:'pavaj'},
+        geometry:fpGeom});
+      feats.push({type:'Feature',
+        properties:{base:roofBase,top:roofBase+1.1,color:darken(AEDIS_FN[fn]?.color||'#94a3b8',25),floor:-11,roofType:'bordura'},
+        geometry:fpGeom});
+      try{
+        const inner = turf.buffer(fpFeat,-0.5,{units:'meters'});
+        if(inner?.geometry) feats.push({type:'Feature',
+          properties:{base:roofBase,top:roofBase+1.1,color:'#0a1628',floor:-12,roofType:'terasa_interior'},
+          geometry:inner.geometry});
+      }catch(e){}
+      break;
+
+    case 'sarpanta': {
+      // Sarpanta simulata: doua corpuri triunghiulare (un dreptunghi ngustat la varf)
+      const hCoama = AEDIS.hSarpanta||3.5;
+      // Corp sarpanta = corp redus progresiv in 4 pasi
+      for(let si=0;si<4;si++){
+        const f = 1 - si*0.25;
+        const sh = roofBase + si*(hCoama/4);
+        try{
+          const sc = turf.transformScale(fpFeat, Math.max(0.05,f), {origin:turf.centerOfMass(fpFeat)});
+          if(sc?.geometry) feats.push({type:'Feature',
+            properties:{base:sh,top:sh+hCoama/4,color:darken('#c4956a',si*5),floor:-10-si,roofType:'sarpanta'},
+            geometry:sc.geometry});
+        }catch(e){}
+      }
+      break;
+    }
+
+    case 'mansarda': {
+      // Mansarda: etaj retras H=mansarda + sarpanta mica deasupra
+      const retFact = 0.72;
+      try{
+        const sc = turf.transformScale(fpFeat, retFact, {origin:turf.centerOfMass(fpFeat)});
+        if(sc?.geometry){
+          feats.push({type:'Feature',
+            properties:{base:roofBase,top:roofBase+AEDIS.hMansarda,color:darken(AEDIS_FN[fn]?.color||'#94a3b8',10),floor:-10,roofType:'mansarda'},
+            geometry:sc.geometry});
+          // Sarpanta mica deasupra mansardei
+          const hCoama2=1.8;
+          for(let si=0;si<3;si++){
+            const f2 = retFact*(1-si*0.35);
+            try{
+              const sc2=turf.transformScale(fpFeat,Math.max(0.05,f2),{origin:turf.centerOfMass(fpFeat)});
+              if(sc2?.geometry) feats.push({type:'Feature',
+                properties:{base:roofBase+AEDIS.hMansarda+si*(hCoama2/3),top:roofBase+AEDIS.hMansarda+(si+1)*(hCoama2/3),color:'#a0785a',floor:-11-si,roofType:'sarpanta_mica'},
+                geometry:sc2.geometry});
+            }catch(e){}
+          }
+        }
+      }catch(e){}
+      break;
+    }
+
+    case 'combinat':
+      // Terasa + corp tehnic central
+      feats.push({type:'Feature',
+        properties:{base:roofBase,top:roofBase+0.2,color:'#475569',floor:-10,roofType:'terasa'},
+        geometry:fpGeom});
+      try{
+        const techGeom = turf.transformScale(fpFeat,0.3,{origin:turf.centerOfMass(fpFeat)});
+        if(techGeom?.geometry) feats.push({type:'Feature',
+          properties:{base:roofBase+0.2,top:roofBase+3.5,color:'#64748b',floor:-11,roofType:'corp_tehnic'},
+          geometry:techGeom.geometry});
+      }catch(e){}
+      break;
+  }
+
+  // ── Etichete dimensionale ─────────────────────────────────────────────
+  if(AEDIS.showDim){
+    aedisUpdateDimLabels(fp, totalNiv, hParter, hEtaj, currentH + (AEDIS.tipAcoperis!=='terasa_plata'?AEDIS.hSarpanta:0.25));
+  }
+
+  // Stocam si setam
+  S.vol._lastFeats = feats;
+  S.vol.genDone = true;
+  setSource('vol-src',{type:'FeatureCollection',features:feats});
+  set3D(60,-20);
+  setTimeout(updateDistanceLines, 400);
+  ss(`✅ AEDIS: ${totalNiv} niveluri · H=${(currentH-baseH).toFixed(1)}m · ${fnDef.label} · ${AEDIS_STIL[AEDIS.stil].label}`);
+}
+
+// ── Etichete dimensionale AEDIS ────────────────────────────────────────────
+function aedisUpdateDimLabels(fp, niv, hP, hE, hTot){
+  if(!fp?.geometry) return;
+  try{
+    const labels=[];
+    const ring = fp.geometry.coordinates[0];
+    const cx=ring.reduce((s,c)=>s+c[0],0)/ring.length;
+    const cy=ring.reduce((s,c)=>s+c[1],0)/ring.length;
+
+    // Eticheta totala in centru
+    labels.push({type:'Feature',geometry:{type:'Point',coordinates:[cx,cy]},
+      properties:{label:`H=${hTot.toFixed(1)}m\n${niv} niv.`,type:'total'}});
+
+    // Eticheta pe latura frontala
+    if(ring.length>2){
+      const mid=[(ring[0][0]+ring[1][0])/2,(ring[0][1]+ring[1][1])/2];
+      labels.push({type:'Feature',geometry:{type:'Point',coordinates:mid},
+        properties:{label:`P:${hP.toFixed(1)}m`,type:'parter'}});
+    }
+
+    setSource('ctx-labels-src',{type:'FeatureCollection',features:[
+      ...(S.ctx?._labels||[]),
+      ...labels
+    ]});
+  }catch(e){}
+}
+
+// ── Calcul POT/CUT existent pe parcelă ────────────────────────────────────
+function aedisCalcExistent(){
+  const ap = S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry || !S.ctx?.features?.length) return {pot:0,cut:0,h:0,n:0};
+
+  const pA = ap.area || turf.area({type:'Feature',geometry:ap.geo.geometry,properties:{}});
+  const onParcel = S.ctx.features.filter(f=>{
+    try{
+      const ctr=turf.centerOfMass(f);
+      return turf.booleanPointInPolygon(ctr,{type:'Feature',geometry:ap.geo.geometry,properties:{}});
+    }catch(e){return false;}
+  });
+
+  const totalSC = onParcel.reduce((s,f)=>{try{return s+turf.area(f);}catch(e){return s;}},0);
+  const maxH = onParcel.length ? Math.max(...onParcel.map(f=>f.properties?.h||0)) : 0;
+  const avgNiv = onParcel.length ? Math.round(onParcel.reduce((s,f)=>s+(f.properties?.lv||Math.round((f.properties?.h||0)/3)),0)/onParcel.length) : 0;
+
+  return {
+    pot: pA>0 ? Math.round(totalSC/pA*100) : 0,
+    cut: pA>0 ? Math.round(totalSC*avgNiv/pA*10)/10 : 0,
+    h: Math.round(maxH),
+    n: onParcel.length,
+    sc: Math.round(totalSC)
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// AEDIS UI — Panou modal
+// ═══════════════════════════════════════════════════════════════════════════
+function aedisOpen(){
+  AEDIS.open=true;
+  const modal=document.getElementById('aedis-modal');
+  if(modal) modal.classList.add('open');
+  aedisRender();
+}
+function aedisClose(){
+  AEDIS.open=false;
+  const modal=document.getElementById('aedis-modal');
+  if(modal) modal.classList.remove('open');
+}
+function aedisTab(t){
+  AEDIS.tab=t;
+  aedisRender();
+}
+
+function aedisRender(){
+  const body=document.getElementById('aedis-body');
+  if(!body) return;
+  try{ body.innerHTML=aedisGetContent(); }
+  catch(e){ body.innerHTML=`<div style="color:#f87171;padding:16px">Eroare: ${e.message}</div>`; }
+}
+
+function aedisGetContent(){
+  const ap=S.parcels[S.activeParcel??0];
+  const params=ap?.params||getDefaultParams(ap?.utr||'');
+  const existent=aedisCalcExistent();
+  const fnDef=AEDIS_FN[AEDIS.fn]||AEDIS_FN.rezidential_colectiv;
+  const totalNiv=AEDIS.corpuri[0]?.niv||pN(params.niv)||4;
+  const hParter=AEDIS.parterDiferit?(fnDef.hParter||4.5):(AEDIS.corpuri[0]?.hNiv||3.0);
+  const hEtaj=AEDIS.corpuri[0]?.hNiv||fnDef.hEtaj||3.0;
+  const hTot=hParter+(totalNiv-1)*hEtaj;
+
+  const tabs=[
+    {id:'functiune',icon:'🏢',label:'Funcțiune'},
+    {id:'volum',icon:'📐',label:'Volum'},
+    {id:'acoperis',icon:'🏠',label:'Acoperiș'},
+    {id:'context',icon:'🌆',label:'Context'},
+    {id:'analiza',icon:'📊',label:'Analiză'},
+  ];
+
+  const tabsHtml=`<div class="aedis-tabs">${tabs.map(t=>
+    `<button onclick="aedisTab('${t.id}')" class="aedis-tab${AEDIS.tab===t.id?' active':''}">${t.icon} ${t.label}</button>`
+  ).join('')}</div>`;
+
+  // ── Header info parcelă ──────────────────────────────────────────────
+  const headerHtml=ap?`
+  <div class="aedis-parcel-info">
+    <div class="aedis-pi-row">
+      <span class="aedis-pi-badge">${ap.nrcad||'—'}</span>
+      <span class="aedis-pi-badge blue">${ap.utr||'—'}</span>
+      <span class="aedis-pi-badge green">${ap.area?Math.round(ap.area)+' m²':'—'}</span>
+      ${existent.n>0?`<span class="aedis-pi-badge orange">Existent: ${existent.pot}% POT · H${existent.h}m</span>`:'<span class="aedis-pi-badge">Teren liber</span>'}
+    </div>
+    <div class="aedis-pi-row" style="margin-top:4px;font-size:10px;color:#64748b">
+      H propus: <b style="color:#d4af37">${hTot.toFixed(1)}m</b> · 
+      ${totalNiv} niveluri · ${fnDef.label}
+    </div>
+  </div>`:'<div style="color:#f59e0b;padding:8px;font-size:12px">⚠️ Selectați o parcelă mai întâi</div>';
+
+  let contentHtml='';
+
+  // ════════════════════════════════════════════════════════════════════
+  if(AEDIS.tab==='functiune'){
+    contentHtml=`
+    <div class="aedis-section">Funcțiunea principală</div>
+    <div class="aedis-fn-grid">
+      ${Object.entries(AEDIS_FN).map(([k,v])=>`
+        <button onclick="AEDIS.fn='${k}';aedisRender()" class="aedis-fn-btn${AEDIS.fn===k?' active':''}">
+          <span class="aedis-fn-dot" style="background:${v.color}"></span>
+          ${v.label}
+        </button>`).join('')}
+    </div>
+    <div class="aedis-fn-desc">${fnDef.desc}</div>
+
+    <div class="aedis-section">Parter cu funcțiune distinctă</div>
+    <label class="aedis-toggle">
+      <input type="checkbox" ${AEDIS.parterDiferit?'checked':''} onchange="AEDIS.parterDiferit=this.checked;aedisRender()">
+      <span class="aedis-toggle-label">Parter cu altă funcțiune (ex: comercial la bloc)</span>
+    </label>
+    ${AEDIS.parterDiferit?`
+    <div class="aedis-fn-grid" style="margin-top:8px">
+      ${['comercial','birouri','institutie'].map(k=>`
+        <button onclick="AEDIS.fnParter='${k}';aedisRender()" class="aedis-fn-btn${AEDIS.fnParter===k?' active':''}">
+          <span class="aedis-fn-dot" style="background:${AEDIS_FN[k].color}"></span>
+          ${AEDIS_FN[k].label}
+        </button>`).join('')}
+    </div>
+    <div class="aedis-row" style="margin-top:8px">
+      <span class="aedis-lbl">H parter (m)</span>
+      <input type="range" min="3" max="6.5" step="0.5" value="${fnDef.hParter||4.5}"
+        oninput="AEDIS.corpuri[0].hParter=+this.value;this.nextElementSibling.textContent=this.value+'m'"
+        style="flex:1;accent-color:#f59e0b">
+      <span class="aedis-val" style="color:#f59e0b">${fnDef.hParter||4.5}m</span>
+    </div>`:''}
+
+    <div class="aedis-section">Stil arhitectural</div>
+    <div class="aedis-stil-grid">
+      ${Object.entries(AEDIS_STIL).map(([k,v])=>`
+        <button onclick="AEDIS.stil='${k}';aedisRender()" class="aedis-stil-btn${AEDIS.stil===k?' active':''}">
+          ${v.label}<br><small>${v.desc}</small>
+        </button>`).join('')}
+    </div>
+    ${AEDIS.stil==='adaptat_context'&&(!S.ctx?.features?.length)?
+      '<div class="aedis-warn">⚠️ Generați contextul OSM mai întâi pentru adaptare automată</div>':
+      (AEDIS.stil==='adaptat_context'&&S.ctx?.features?.length?
+        `<div class="aedis-ok">✅ Context OSM disponibil: ${S.ctx.features.length} clădiri analizate</div>`:'')
+    }`;
+  }
+
+  // ════════════════════════════════════════════════════════════════════
+  else if(AEDIS.tab==='volum'){
+    const niv=AEDIS.corpuri[0]?.niv||4;
+    const hNiv=AEDIS.corpuri[0]?.hNiv||3.0;
+    contentHtml=`
+    <div class="aedis-section">Scenariu construcție</div>
+    <div class="aedis-scen-grid">
+      ${[
+        {id:'demolare',ico:'🏚',label:'Demolare',desc:'Teren liber, maxim PUG'},
+        {id:'extindere_h',ico:'🔗',label:'Ext. Orizontal',desc:'Lângă existente'},
+        {id:'extindere_v',ico:'🏗',label:'Ext. Vertical',desc:'Deasupra existentelor'},
+        {id:'inglobare',ico:'🏙',label:'Inglobare',desc:'Înglobează existentele'},
+      ].map(s=>`
+        <button onclick="AEDIS.scenariu='${s.id}';aedisRender()" class="aedis-scen-btn${AEDIS.scenariu===s.id?' active':''}">
+          ${s.ico} ${s.label}<br><small>${s.desc}</small>
+        </button>`).join('')}
+    </div>
+    ${existent.n>0?`
+    <div class="aedis-existent-box">
+      <div style="font-size:11px;font-weight:700;color:#f59e0b;margin-bottom:6px">📊 Situație existentă pe teren</div>
+      <div class="aedis-g3">
+        <div class="aedis-metric"><div class="aedis-ml">POT existent</div><div class="aedis-mv warn">${existent.pot}%</div></div>
+        <div class="aedis-metric"><div class="aedis-ml">H max existent</div><div class="aedis-mv warn">${existent.h}m</div></div>
+        <div class="aedis-metric"><div class="aedis-ml">SC existent</div><div class="aedis-mv">${existent.sc} m²</div></div>
+      </div>
+      <div style="font-size:10px;color:#64748b;margin-top:4px">Sursă: OpenStreetMap · poate fi incomplet</div>
+    </div>`:'<div class="aedis-ok" style="margin-top:8px">✅ Teren liber — fără construcții existente detectate</div>'}
+
+    <div class="aedis-section">Regim de înălțime</div>
+    <div class="aedis-g2">
+      <div>
+        <div class="aedis-lbl">Nr. niveluri</div>
+        <div style="display:flex;gap:4px;margin-top:4px">
+          ${[1,2,3,4,5,6,7,8,10,12].map(n=>`
+            <button onclick="AEDIS.corpuri[0].niv=${n};aedisRender()" 
+              style="padding:5px 7px;border-radius:6px;border:1px solid ${niv===n?'#d4af37':'rgba(255,255,255,.2)'};background:${niv===n?'rgba(212,175,55,.2)':'transparent'};color:${niv===n?'#d4af37':'#94a3b8'};cursor:pointer;font-size:11px;font-weight:700">${n}</button>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="aedis-row" style="margin-top:10px">
+      <span class="aedis-lbl">H/nivel (m)</span>
+      <input type="range" min="2.6" max="5.5" step="0.1" value="${hNiv}"
+        oninput="AEDIS.corpuri[0].hNiv=+this.value;aedisRender()"
+        style="flex:1;accent-color:#d4af37">
+      <span class="aedis-val">${hNiv.toFixed(1)}m</span>
+    </div>
+    <div class="aedis-summary-box">
+      <span>H total: <b style="color:#d4af37">${hTot.toFixed(1)}m</b></span>
+      <span>SC max: <b style="color:#3b82f6">${ap?.area?Math.round(ap.area*(pN(params.pot)||35)/100)+' m²':'—'}</b></span>
+      <span>SD max: <b style="color:#34d399">${ap?.area&&params.cut?Math.round(ap.area*(pN(params.cut)||1.2))+' mp.ADC':'—'}</b></span>
+    </div>
+
+    <div class="aedis-section">Retrageri fine per etaj</div>
+    <label class="aedis-toggle">
+      <input type="checkbox" ${AEDIS.activeRetragere?'checked':''} onchange="AEDIS.activeRetragere=this.checked;aedisRender()">
+      <span class="aedis-toggle-label">Activează retrageri individuale per etaj</span>
+    </label>
+    ${AEDIS.activeRetragere?`
+    <div style="margin-top:8px">
+      ${Array.from({length:Math.min(niv,8)},(_,i)=>`
+        <div class="aedis-row" style="margin-bottom:4px">
+          <span class="aedis-lbl" style="min-width:55px">${i===0?'P':('Et.'+i)}</span>
+          <input type="range" min="50" max="100" step="5" value="${Math.round((AEDIS.retrageriFineEtaje[i]??1.0)*100)}"
+            oninput="AEDIS.retrageriFineEtaje[${i}]=+this.value/100;aedisRender()"
+            style="flex:1;accent-color:#60a5fa">
+          <span class="aedis-val">${Math.round((AEDIS.retrageriFineEtaje[i]??1.0)*100)}%</span>
+        </div>`).join('')}
+    </div>`:''}`;
+  }
+
+  // ════════════════════════════════════════════════════════════════════
+  else if(AEDIS.tab==='acoperis'){
+    contentHtml=`
+    <div class="aedis-section">Tip acoperiș</div>
+    <div class="aedis-acop-grid">
+      ${[
+        {id:'terasa_plata',ico:'▬',label:'Terasă plată',desc:'Acoperiș plat cu parapet'},
+        {id:'terasa_circulabila',ico:'🏖',label:'Terasă circulabilă',desc:'Terasă accesibilă cu borduri'},
+        {id:'sarpanta',ico:'🏠',label:'Șarpantă',desc:'Acoperiș în două ape'},
+        {id:'mansarda',ico:'🏡',label:'Mansardă',desc:'Etaj înscris în șarpantă'},
+        {id:'combinat',ico:'🏢',label:'Combinat',desc:'Terasă + corp tehnic'},
+      ].map(a=>`
+        <button onclick="AEDIS.tipAcoperis='${a.id}';aedisRender()" class="aedis-acop-btn${AEDIS.tipAcoperis===a.id?' active':''}">
+          <span style="font-size:20px">${a.ico}</span>
+          <strong>${a.label}</strong>
+          <small>${a.desc}</small>
+        </button>`).join('')}
+    </div>
+
+    ${AEDIS.tipAcoperis==='sarpanta'||AEDIS.tipAcoperis==='mansarda'?`
+    <div class="aedis-section">Parametri șarpantă</div>
+    <div class="aedis-row">
+      <span class="aedis-lbl">H coamă (m)</span>
+      <input type="range" min="1.5" max="6" step="0.5" value="${AEDIS.hSarpanta}"
+        oninput="AEDIS.hSarpanta=+this.value;this.nextElementSibling.textContent=this.value+'m'"
+        style="flex:1;accent-color:#c4956a"><span class="aedis-val">${AEDIS.hSarpanta}m</span>
+    </div>
+    ${AEDIS.tipAcoperis==='mansarda'?`
+    <div class="aedis-row" style="margin-top:8px">
+      <span class="aedis-lbl">H util mansardă (m)</span>
+      <input type="range" min="2.2" max="3.5" step="0.1" value="${AEDIS.hMansarda}"
+        oninput="AEDIS.hMansarda=+this.value;this.nextElementSibling.textContent=this.value+'m'"
+        style="flex:1;accent-color:#c4956a"><span class="aedis-val">${AEDIS.hMansarda}m</span>
+    </div>`:''}
+    `:''}
+    ${AEDIS.tipAcoperis==='terasa_plata'||AEDIS.tipAcoperis==='terasa_circulabila'?`
+    <div class="aedis-section">Parapet / Atic</div>
+    <div class="aedis-row">
+      <span class="aedis-lbl">H parapet (m)</span>
+      <input type="range" min="0.5" max="2.5" step="0.1" value="${AEDIS.hAttic||1.2}"
+        oninput="AEDIS.hAttic=+this.value;this.nextElementSibling.textContent=this.value+'m'"
+        style="flex:1;accent-color:#34d399"><span class="aedis-val">${AEDIS.hAttic||1.2}m</span>
+    </div>`:''}`;
+  }
+
+  // ════════════════════════════════════════════════════════════════════
+  else if(AEDIS.tab==='context'){
+    const ctxN=S.ctx?.features?.length||0;
+    const fnCnt={};
+    (S.ctx?.features||[]).forEach(f=>{const fn=f.properties?.fn||'yes';fnCnt[fn]=(fnCnt[fn]||0)+1;});
+    const hArr=(S.ctx?.features||[]).map(f=>f.properties?.h||0);
+    const hMed=hArr.length?Math.round(hArr.reduce((s,h)=>s+h,0)/hArr.length):0;
+    const hMax=hArr.length?Math.round(Math.max(...hArr)):0;
+
+    contentHtml=`
+    <div class="aedis-section">Context urban existent</div>
+    ${ctxN>0?`
+    <div class="aedis-g3" style="margin-bottom:10px">
+      <div class="aedis-metric"><div class="aedis-ml">Clădiri context</div><div class="aedis-mv">${ctxN}</div></div>
+      <div class="aedis-metric"><div class="aedis-ml">H medie</div><div class="aedis-mv">${hMed}m</div></div>
+      <div class="aedis-metric"><div class="aedis-ml">H maximă</div><div class="aedis-mv warn">${hMax}m</div></div>
+    </div>
+    <div class="aedis-fn-legend">
+      ${Object.entries(fnCnt).sort((a,b)=>b[1]-a[1]).map(([fn,n])=>`
+        <div class="aedis-fn-row">
+          <span class="aedis-fn-sq" style="background:${BLD_COL[fn]||'#8a9ab0'}"></span>
+          ${BLD_LABELS?.[fn]||fn} (${n})
+        </div>`).join('')}
+    </div>
+    <div class="aedis-section" style="margin-top:10px">Raporturi față de context</div>
+    <div class="aedis-context-compare">
+      <div class="aedis-cc-row">
+        <span>H propusă</span>
+        <div class="aedis-cc-bar-wrap">
+          <div class="aedis-cc-bar" style="width:${Math.min(100,hTot/Math.max(1,hMax)*100)}%;background:${hTot>hMax*1.3?'#ef4444':hTot>hMax?'#f59e0b':'#34d399'}"></div>
+        </div>
+        <span style="color:${hTot>hMax*1.3?'#ef4444':hTot>hMax?'#f59e0b':'#34d399'};font-weight:700">${hTot.toFixed(1)}m</span>
+      </div>
+      <div class="aedis-cc-row">
+        <span>H max context</span>
+        <div class="aedis-cc-bar-wrap"><div class="aedis-cc-bar" style="width:100%;background:#60a5fa"></div></div>
+        <span style="color:#60a5fa;font-weight:700">${hMax}m</span>
+      </div>
+      <div class="aedis-cc-row">
+        <span>H medie context</span>
+        <div class="aedis-cc-bar-wrap"><div class="aedis-cc-bar" style="width:${Math.min(100,hMed/Math.max(1,hMax)*100)}%;background:#94a3b8"></div></div>
+        <span style="color:#94a3b8;font-weight:700">${hMed}m</span>
+      </div>
+    </div>
+    ${hTot>hMax*1.5?'<div class="aedis-warn">⚠️ H propusă depășește semnificativ contextul — impact peisagistic major</div>':
+      hTot>hMax*1.2?'<div class="aedis-warn" style="border-color:#f59e0b;color:#f59e0b">⚠️ H propusă depășește moderat contextul</div>':
+      '<div class="aedis-ok">✅ H propusă compatibilă cu contextul urban</div>'}`
+    :'<div class="aedis-warn">⚠️ Context OSM neîncărcat.<br>Selectați o parcelă și generați contextul mai întâi.</div>'}`;
+  }
+
+  // ════════════════════════════════════════════════════════════════════
+  else if(AEDIS.tab==='analiza'){
+    const r=S.rule||REGULI[ap?.utr||'']||{};
+    const niv=AEDIS.corpuri[0]?.niv||4;
+    const hNiv2=AEDIS.corpuri[0]?.hNiv||3.0;
+    const SC_propus=ap?.area?(ap.area*(pN(params.pot)||35)/100):0;
+    const SD_propus=ap?.area&&params.cut?(ap.area*pN(params.cut)):0;
+    const hTot2=hParter+(niv-1)*hNiv2;
+
+    contentHtml=`
+    <div class="aedis-section">Sinteză urbanistică propunere</div>
+    <table class="aedis-tbl">
+      <tr><th>Indicator</th><th>PUG</th><th>Propus</th><th>Status</th></tr>
+      <tr>
+        <td>POT (%)</td>
+        <td>${r.pot!=null?r.pot+'%':'—'}</td>
+        <td>${pN(params.pot)||'—'}%</td>
+        <td>${r.pot&&pN(params.pot)>r.pot?'⚠️':'✅'}</td>
+      </tr>
+      <tr>
+        <td>CUT (mp.ADC/mp)</td>
+        <td>${r.cut!=null?r.cut:'—'}</td>
+        <td>${pN(params.cut)||'—'}</td>
+        <td>${r.cut&&pN(params.cut)>r.cut?'⚠️':'✅'}</td>
+      </tr>
+      <tr>
+        <td>H total (m)</td>
+        <td>${r.h!=null?r.h+'m':'—'}</td>
+        <td>${hTot2.toFixed(1)}m</td>
+        <td>${r.h&&hTot2>r.h?'⚠️':'✅'}</td>
+      </tr>
+      <tr>
+        <td>Nr. niveluri</td>
+        <td>${r.niv!=null?r.niv+' et.':'—'}</td>
+        <td>${niv} et.</td>
+        <td>${r.niv&&niv>r.niv?'⚠️':'✅'}</td>
+      </tr>
+      <tr>
+        <td>SV (%)</td>
+        <td>${r.sv!=null?r.sv+'%':'—'}</td>
+        <td>${pN(params.sv)||'0'}%</td>
+        <td>${r.sv&&pN(params.sv)<r.sv?'⚠️':'✅'}</td>
+      </tr>
+    </table>
+
+    <div class="aedis-section" style="margin-top:10px">Suprafețe calculate</div>
+    <div class="aedis-g2">
+      <div class="aedis-metric"><div class="aedis-ml">Teren total</div><div class="aedis-mv">${ap?.area?Math.round(ap.area)+' m²':'—'}</div></div>
+      <div class="aedis-metric"><div class="aedis-ml">SC propusă</div><div class="aedis-mv blue">${Math.round(SC_propus)} m²</div></div>
+      <div class="aedis-metric"><div class="aedis-ml">SD propusă</div><div class="aedis-mv">${Math.round(SD_propus)} mp.ADC</div></div>
+      <div class="aedis-metric"><div class="aedis-ml">SV obligatorii</div><div class="aedis-mv green">${ap?.area?Math.round(ap.area*(pN(params.sv)||0)/100)+' m²':'—'}</div></div>
+    </div>
+    ${existent.n>0?`
+    <div class="aedis-section" style="margin-top:10px">Bilanț existent + propus</div>
+    <div class="aedis-g2">
+      <div class="aedis-metric"><div class="aedis-ml">POT existent</div><div class="aedis-mv warn">${existent.pot}%</div></div>
+      <div class="aedis-metric"><div class="aedis-ml">POT disponibil</div><div class="aedis-mv">${Math.max(0,(pN(params.pot)||35)-existent.pot)}%</div></div>
+    </div>`:''}`;
+  }
+
+  return `
+  ${headerHtml}
+  ${tabsHtml}
+  <div class="aedis-content">${contentHtml}</div>
+  <div class="aedis-actions">
+    <button onclick="aedisBuild()" class="aedis-build-btn">
+      ⚡ AEDIS — Generează Volum 3D
+    </button>
+    <button onclick="AEDIS.showDim=!AEDIS.showDim;aedisRender()" 
+      class="aedis-dim-btn${AEDIS.showDim?' active':''}">📏 Dim</button>
+    <button onclick="aedisClose()" class="aedis-close-btn">✕</button>
+  </div>`;
+}
+
 
 // ═══ INIT PDF BUTOANE ══════════════════════════════════════════════════════
 renderAll();
