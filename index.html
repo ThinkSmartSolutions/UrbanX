@@ -7,6 +7,7 @@
 eta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
 <title>UrbanX – PUG Iași</title>
 <link href="https://api.mapbox.com/mapbox-gl-js/v3.11.0/mapbox-gl.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;font-family:'Segoe UI',Arial,sans-serif;background:#0b1220;color:#e2e8f0;overflow:hidden}
@@ -4790,6 +4791,84 @@ async function exportFull(pdf, ap, r, p){
     ['Teren neconstruibil (aliniamente+SV)', Math.max(0,m2-SC_max-sv_m2)+' m²', 'Curți, circulații'],
   ];
   sfRows.forEach(row=>{ y=pdfRow(pdf,row,y,false,sfCols); });
+  // Pagina AEDIS (daca volumul 3D avansat a fost generat)
+  await exportAEDISPage(pdf);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// AEDIS PDF PAGE — Volumetrie avansată + AI Render
+// ═══════════════════════════════════════════════════════════════════════════
+async function exportAEDISPage(pdf){
+  if(!AEDIS3D.active && !FAL_AI.lastRender) return; // nimic de exportat
+  const pw = pdf.internal.pageSize.getWidth();
+  
+  pdf.addPage('a4','portrait');
+  pdfHeader(pdf,'AEDIS — Volumetrie Avansată',
+    AEDIS_STIL[AEDIS.stil]?.label + ' · ' + (AEDIS_FN[AEDIS.fn]?.label||''), 
+    pdf.internal.getCurrentPageInfo().pageNumber);
+  pdfFooter(pdf);
+  let y = 28;
+
+  // Screenshot Three.js / Mapbox cu volumul AEDIS
+  if(AEDIS3D.active){
+    try{
+      map.triggerRepaint();
+      await new Promise(r=>setTimeout(r,600));
+      const vc = await html2canvas($('map'),{useCORS:true,scale:1.5,logging:false});
+      pdf.addImage(vc.toDataURL('image/jpeg',.85),'JPEG',8,y,pw-16,68);
+      pdf.setDrawColor(212,175,55);pdf.setLineWidth(0.4);
+      pdf.rect(8,y,pw-16,68,'S');
+      pdf.setFontSize(7);pdf.setTextColor(100,116,139);
+      pdf.text('Volumetrie 3D generată cu AEDIS · Three.js · Mapbox GL JS', pw/2, y+70, {align:'center'});
+      y += 76;
+    }catch(e){ y += 4; }
+  }
+
+  // AI Render (daca disponibil)
+  if(FAL_AI.lastRender?.url){
+    y = pdfSection(pdf,'🎨 AI Render Fotorealist — Fal.ai FLUX.1', y);
+    try{
+      const imgH = AEDIS3D.active ? 62 : 90;
+      pdf.addImage(FAL_AI.lastRender.url,'JPEG',8,y,pw-16,imgH);
+      pdf.setDrawColor(212,175,55);pdf.setLineWidth(0.4);
+      pdf.rect(8,y,pw-16,imgH,'S');
+      y += imgH + 3;
+      pdf.setFontSize(7);pdf.setTextColor(100,116,139);
+      pdf.text('Generat cu Fal.ai FLUX.1 · ' + new Date(FAL_AI.lastRender.timestamp).toLocaleString('ro'), pw/2, y, {align:'center'});
+      y += 5;
+    }catch(e){ y += 3; }
+  }
+
+  // Parametri AEDIS
+  y = pdfSection(pdf,'⚡ Parametri AEDIS', y);
+  const ap = S.parcels[S.activeParcel??0];
+  const params2 = ap?.params||getDefaultParams(ap?.utr||'');
+  const fnDef = AEDIS_FN[AEDIS.fn]||AEDIS_FN.rezidential_colectiv;
+  const niv = AEDIS.corpuri[0]?.niv||4;
+  const hNiv = AEDIS.corpuri[0]?.hNiv||3.0;
+  const hP = AEDIS.parterDiferit?(fnDef.hParter||4.5):hNiv;
+  const hTot = hP + (niv-1)*hNiv;
+
+  const aedisRows = [
+    ['Funcțiune principală', fnDef.label.replace(/[🏠🏡🏢🏬🏨🏙🏭🏛]/g,'').trim()],
+    ['Stil arhitectural', AEDIS_STIL[AEDIS.stil]?.label||AEDIS.stil],
+    ['Nr. niveluri', niv + ' niveluri'],
+    ['H parter', hP.toFixed(1) + ' m'],
+    ['H etaj curent', hNiv.toFixed(1) + ' m'],
+    ['H total', hTot.toFixed(1) + ' m'],
+    ['Tip acoperiș', {terasa_plata:'Terasă plată',terasa_circulabila:'Terasă circulabilă',
+      sarpanta:'Șarpantă',mansarda:'Mansardă',combinat:'Combinat'}[AEDIS.tipAcoperis]||AEDIS.tipAcoperis],
+    ['Scenariu construcție', {demolare:'Demolare + Teren liber',extindere_h:'Extindere orizontală',
+      extindere_v:'Extindere verticală',inglobare:'Inglobare existente'}[AEDIS.scenariu]||AEDIS.scenariu],
+    ['Parter cu altă funcțiune', AEDIS.parterDiferit ? 
+      (AEDIS_FN[AEDIS.fnParter]?.label||AEDIS.fnParter) : 'Nu'],
+    ['Etaj retras', AEDIS.activeRetragere ? 
+      'Da (' + Math.round((AEDIS.retrageriFineEtaje[niv-1]||AEDIS_STIL[AEDIS.stil]?.retragereFactor||0.85)*100) + '%)' : 'Nu'],
+  ];
+
+  const cols2 = [85,100];
+  y = pdfRow(pdf,['Parametru AEDIS','Valoare'],y,true,cols2);
+  aedisRows.forEach(row=>{ y = pdfRow(pdf,row,y,false,cols2); });
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -5703,6 +5782,49 @@ function aedisOpen(){
   if(modal) modal.classList.add('open');
   aedisRender();
 }
+function aedisSetFalKey(){
+  const current = FAL_AI.apiKey ? '(setat)' : '(nesetat)';
+  const key = prompt('API key Fal.ai ' + current + '\nObțineți de pe: https://fal.ai/dashboard', '');
+  if(key !== null){
+    FAL_AI.apiKey = key.trim();
+    try{
+      if(FAL_AI.apiKey) localStorage.setItem('fal_api_key', FAL_AI.apiKey);
+      else localStorage.removeItem('fal_api_key');
+    }catch(e){}
+    if(FAL_AI.apiKey) ss('✅ API key Fal.ai setat și salvat.');
+    else ss('⚠️ API key șters.');
+    aedisRender();
+  }
+}
+
+function aedisResetAndRender(){
+  FAL_AI.apiKey='';
+  aedisCloseRenderOverlay();
+  aedisAIRender();
+}
+
+function aedisCloseRenderOverlay(){
+  var o=document.getElementById('aedis-render-overlay');
+  if(o) o.style.display='none';
+}
+
+function aedis3DRemove(){
+  try{
+    if(map.getLayer('aedis-3d-layer')) map.removeLayer('aedis-3d-layer');
+    AEDIS3D.active = false;
+    ss('AEDIS 3D: Volum șters.');
+  }catch(e){}
+}
+
+function aedisGenerateAll(){
+  // 1. Generam fill-extrusion (fallback instant, vizibil imediat)
+  aedisBuild();
+  // 2. Generam Three.js mesh (fotorealist, se suprapune)
+  aedis3DGenerate();
+  // 3. Actualizam distantele
+  setTimeout(updateDistanceLines, 600);
+}
+
 function aedisClose(){
   AEDIS.open=false;
   const modal=document.getElementById('aedis-modal');
@@ -6018,6 +6140,19 @@ function aedisGetContent(){
       </tr>
     </table>
 
+    <div class="aedis-section" style="margin-top:10px">🎨 AI Render fotorealist</div>
+    <div style="padding:10px;background:#080f1c;border-radius:8px;border:1px solid rgba(212,175,55,.2);margin-bottom:10px">
+      <div style="font-size:11px;color:#94a3b8;margin-bottom:8px">
+        Generează o randare fotorealistă a volumului propus direct din aplicație.
+        ${FAL_AI.lastRender ? '<span style=color:#4ade80>✅ Randare disponibilă</span>' : '<span style=color:#64748b>Nicio randare generată</span>'}
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button onclick="aedisAIRender()" style="padding:9px 16px;border-radius:8px;border:1px solid rgba(212,175,55,.4);background:rgba(212,175,55,.1);color:#d4af37;cursor:pointer;font-size:12px;font-weight:700">🎨 Generează AI Render</button>
+        ${FAL_AI.lastRender ? '<button onclick="aedisShowRender(FAL_AI.lastRender.url)" style="padding:9px 16px;border-radius:8px;border:1px solid rgba(74,222,128,.3);background:rgba(74,222,128,.1);color:#4ade80;cursor:pointer;font-size:12px">👁 Vezi Randarea</button>' : ''}
+        <button onclick="aedisSetFalKey()" style="padding:9px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:transparent;color:#64748b;cursor:pointer;font-size:11px">⚙ API Key</button>
+      </div>
+      <div style="font-size:10px;color:#475569;margin-top:6px">Fal.ai FLUX.1 · ~$0.003/randare · rezultat în ~5 secunde</div>
+    </div>
     <div class="aedis-section" style="margin-top:10px">Suprafețe calculate</div>
     <div class="aedis-g2">
       <div class="aedis-metric"><div class="aedis-ml">Teren total</div><div class="aedis-mv">${ap?.area?Math.round(ap.area)+' m²':'—'}</div></div>
@@ -6038,13 +6173,1053 @@ function aedisGetContent(){
   ${tabsHtml}
   <div class="aedis-content">${contentHtml}</div>
   <div class="aedis-actions">
-    <button onclick="aedisBuild()" class="aedis-build-btn">
+    <button onclick="aedisGenerateAll()" class="aedis-build-btn">
       ⚡ AEDIS — Generează Volum 3D
     </button>
+    <button onclick="aedisAIRender()" class="aedis-dim-btn" style="background:rgba(212,175,55,.15);border-color:rgba(212,175,55,.4);color:#d4af37">🎨 AI</button>
+    <button onclick="aedis3DExportGLTF()" class="aedis-dim-btn" title="Export .glb">📦</button>
     <button onclick="AEDIS.showDim=!AEDIS.showDim;aedisRender()" 
       class="aedis-dim-btn${AEDIS.showDim?' active':''}">📏 Dim</button>
     <button onclick="aedisClose()" class="aedis-close-btn">✕</button>
   </div>`;
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// AEDIS 3D — Three.js Custom Layer pentru Mapbox GL JS v3
+// Generare volumetrie fotorealistă cu materiale procedurale WebGL
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Incarcam Three.js r128 de pe CDN
+function aedisLoadThree(cb){
+  if(window.THREE){ cb(); return; }
+  const s=document.createElement('script');
+  s.src='https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+  s.onload=cb; s.onerror=()=>{ console.error('Three.js load failed'); };
+  document.head.appendChild(s);
+}
+
+// ── State Three.js layer ───────────────────────────────────────────────────
+const AEDIS3D = {
+  layer: null,       // Mapbox custom layer
+  renderer: null,
+  scene: null,
+  camera: null,
+  mesh: null,
+  active: false,
+  params: null,      // parametrii ultimei generari
+};
+
+// ── GLSL Shadere procedurale ───────────────────────────────────────────────
+const AEDIS_SHADERS = {
+
+  // Shader BETON APARENT
+  concrete: {
+    vert:`
+      varying vec3 vNormal;
+      varying vec3 vPosition;
+      varying vec2 vUv;
+      void main(){
+        vNormal = normalize(normalMatrix * normal);
+        vPosition = (modelViewMatrix * vec4(position,1.0)).xyz;
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+      }`,
+    frag:`
+      varying vec3 vNormal;
+      varying vec3 vPosition;
+      varying vec2 vUv;
+      uniform vec3 baseColor;
+      uniform float time;
+
+      float rand(vec2 co){ return fract(sin(dot(co,vec2(12.9898,78.233)))*43758.5453); }
+      float noise(vec2 p){
+        vec2 i=floor(p); vec2 f=fract(p);
+        float a=rand(i), b=rand(i+vec2(1,0)), c=rand(i+vec2(0,1)), d=rand(i+vec2(1,1));
+        vec2 u=f*f*(3.0-2.0*f);
+        return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;
+      }
+
+      void main(){
+        // Textura beton procedurala
+        vec2 uv = vUv * 8.0;
+        float n = noise(uv)*0.3 + noise(uv*3.0)*0.1 + noise(uv*9.0)*0.05;
+        vec3 concreteCol = baseColor + vec3(n-0.15)*0.25;
+
+        // Linii de cofrare orizontale
+        float lines = step(0.92, fract(vUv.y * 12.0));
+        concreteCol = mix(concreteCol, concreteCol*0.7, lines*0.4);
+
+        // Iluminare Phong simpla
+        vec3 L = normalize(vec3(1.0, 1.5, 1.0));
+        float diff = max(dot(vNormal, L), 0.0)*0.7 + 0.3;
+        vec3 col = concreteCol * diff;
+
+        // Ambient occlusion simpla in baza
+        float ao = smoothstep(0.0, 3.0, vPosition.z + 0.5);
+        col *= mix(0.7, 1.0, ao);
+
+        gl_FragColor = vec4(col, 1.0);
+      }`
+  },
+
+  // Shader STICLA REFLECTIVA
+  glass: {
+    vert:`
+      varying vec3 vNormal;
+      varying vec3 vPosition;
+      varying vec2 vUv;
+      void main(){
+        vNormal = normalize(normalMatrix * normal);
+        vPosition = (modelViewMatrix * vec4(position,1.0)).xyz;
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+      }`,
+    frag:`
+      varying vec3 vNormal;
+      varying vec3 vPosition;
+      varying vec2 vUv;
+      uniform vec3 baseColor;
+
+      float rand(vec2 co){ return fract(sin(dot(co,vec2(12.9898,78.233)))*43758.5453); }
+
+      void main(){
+        // Grila fereastra
+        vec2 cell = fract(vUv * vec2(4.0, 6.0));
+        float frame = step(0.9, cell.x) + step(0.9, cell.y);
+        float glassArea = 1.0 - min(frame, 1.0);
+
+        // Reflectie simpla (cerul albastru)
+        vec3 V = normalize(-vPosition);
+        vec3 R = reflect(-V, vNormal);
+        float skyMix = max(0.0, R.y);
+        vec3 skyCol = mix(vec3(0.3,0.5,0.8), vec3(0.8,0.9,1.0), skyMix);
+
+        // Sticla = mix intre reflexie si interior intunecat
+        vec3 glassCol = mix(baseColor * 0.3, skyCol, 0.5 + skyMix * 0.3);
+        vec3 frameCol = vec3(0.15, 0.15, 0.18); // cadru metalic
+
+        vec3 col = mix(frameCol, glassCol, glassArea);
+
+        // Highlight specular
+        vec3 L = normalize(vec3(1.5, 2.0, 1.0));
+        float spec = pow(max(dot(reflect(-L, vNormal), V), 0.0), 64.0);
+        col += vec3(spec * 0.4) * glassArea;
+
+        gl_FragColor = vec4(col, 0.85);
+      }`
+  },
+
+  // Shader LEMN / RIGLE VERTICALE
+  wood: {
+    vert:`
+      varying vec3 vNormal;
+      varying vec3 vPosition;
+      varying vec2 vUv;
+      void main(){
+        vNormal = normalize(normalMatrix * normal);
+        vPosition = (modelViewMatrix * vec4(position,1.0)).xyz;
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+      }`,
+    frag:`
+      varying vec3 vNormal;
+      varying vec3 vPosition;
+      varying vec2 vUv;
+      uniform vec3 baseColor;
+
+      float rand(vec2 co){ return fract(sin(dot(co,vec2(12.9898,78.233)))*43758.5453); }
+      float noise(vec2 p){
+        vec2 i=floor(p); vec2 f=fract(p);
+        float a=rand(i),b=rand(i+vec2(1,0)),c=rand(i+vec2(0,1)),d=rand(i+vec2(1,1));
+        vec2 u=f*f*(3.0-2.0*f);
+        return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;
+      }
+
+      void main(){
+        // Rigle verticale lemn
+        float riglaWidth = 0.05;
+        float riglaSpacing = 0.12;
+        float xNorm = fract(vUv.x / riglaSpacing);
+        float isRigla = step(1.0 - riglaWidth/riglaSpacing, xNorm);
+
+        // Grain lemn orizontal
+        vec2 grainUv = vec2(vUv.x * 3.0, vUv.y * 20.0);
+        float grain = noise(grainUv)*0.15 + noise(grainUv*2.0)*0.08;
+
+        // Culoare lemn variata per rigla (random per coloana)
+        float col_var = rand(vec2(floor(vUv.x / riglaSpacing), 0.0)) * 0.15;
+
+        vec3 woodBase = baseColor + vec3(col_var - 0.07) + vec3(grain - 0.1);
+        vec3 woodDark = woodBase * 0.7;
+        vec3 col = mix(woodDark, woodBase, isRigla);
+
+        // Iluminare
+        vec3 L = normalize(vec3(1.0, 1.5, 1.0));
+        float diff = max(dot(vNormal, L), 0.0)*0.6 + 0.4;
+        col *= diff;
+
+        gl_FragColor = vec4(col, 1.0);
+      }`
+  },
+
+  // Shader TENCUIALA / VOPSEA
+  plaster: {
+    vert:`
+      varying vec3 vNormal;
+      varying vec3 vPosition;
+      varying vec2 vUv;
+      void main(){
+        vNormal = normalize(normalMatrix * normal);
+        vPosition = (modelViewMatrix * vec4(position,1.0)).xyz;
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+      }`,
+    frag:`
+      varying vec3 vNormal;
+      varying vec3 vPosition;
+      varying vec2 vUv;
+      uniform vec3 baseColor;
+
+      float rand(vec2 co){ return fract(sin(dot(co,vec2(12.9898,78.233)))*43758.5453); }
+      float noise(vec2 p){
+        vec2 i=floor(p); vec2 f=fract(p);
+        float a=rand(i),b=rand(i+vec2(1,0)),c=rand(i+vec2(0,1)),d=rand(i+vec2(1,1));
+        vec2 u=f*f*(3.0-2.0*f);
+        return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;
+      }
+
+      void main(){
+        // Textura tencuiala fina
+        float n = noise(vUv*15.0)*0.06 + noise(vUv*40.0)*0.03;
+        vec3 col = baseColor + vec3(n - 0.045);
+
+        // Iluminare difuza
+        vec3 L = normalize(vec3(1.2, 2.0, 0.8));
+        float diff = max(dot(vNormal, L), 0.0)*0.65 + 0.35;
+        col *= diff;
+
+        // Specular slab (mat)
+        vec3 V = normalize(-vPosition);
+        float spec = pow(max(dot(reflect(-L,vNormal),V),0.0),8.0)*0.05;
+        col += vec3(spec);
+
+        gl_FragColor = vec4(col, 1.0);
+      }`
+  },
+
+  // Shader METAL / PANOURI
+  metal: {
+    vert:`
+      varying vec3 vNormal;
+      varying vec3 vPosition;
+      varying vec2 vUv;
+      void main(){
+        vNormal = normalize(normalMatrix * normal);
+        vPosition = (modelViewMatrix * vec4(position,1.0)).xyz;
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+      }`,
+    frag:`
+      varying vec3 vNormal;
+      varying vec3 vPosition;
+      varying vec2 vUv;
+      uniform vec3 baseColor;
+
+      void main(){
+        // Panouri metalice cu rosturi
+        vec2 cell = fract(vUv * vec2(2.0, 4.0));
+        float rost = step(0.96, cell.x) + step(0.96, cell.y);
+
+        vec3 metalCol = baseColor;
+
+        // Reflexie speculara metalica
+        vec3 V = normalize(-vPosition);
+        vec3 L = normalize(vec3(1.5, 2.0, 0.5));
+        float spec = pow(max(dot(reflect(-L, vNormal), V), 0.0), 32.0);
+        vec3 col = metalCol * (max(dot(vNormal, L), 0.0)*0.5 + 0.5) + vec3(spec*0.6);
+
+        // Rosturi inchise
+        col = mix(col, vec3(0.05), rost*0.7);
+
+        gl_FragColor = vec4(col, 1.0);
+      }`
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// AEDIS 3D BUILDER — construieste mesh Three.js din geometria parcelei
+// ═══════════════════════════════════════════════════════════════════════════
+
+function aedis3DBuild(parcelRing, params){
+  // parcelRing: array de [lng, lat] - conturul parcelei
+  // params: { niv, hParter, hEtaj, stil, fn, tipAcoperis, hSarpanta,
+  //           retrageriFineEtaje, parterDiferit, fnParter }
+  if(!window.THREE) return null;
+  const THREE = window.THREE;
+
+  const p = params;
+  const niv = p.niv || 4;
+  const hP = p.hParter || 3.0;
+  const hE = p.hEtaj || 3.0;
+  const stil = AEDIS_STIL[p.stil] || AEDIS_STIL.modern;
+
+  // Convertim coordonate geografice -> locale (metri)
+  const cx = parcelRing.reduce((s,c)=>s+c[0],0)/parcelRing.length;
+  const cy = parcelRing.reduce((s,c)=>s+c[1],0)/parcelRing.length;
+  const mLng = 111320 * Math.cos(cy * Math.PI/180);
+  const mLat = 111320;
+
+  const localRing = parcelRing.map(([lng,lat])=>[
+    (lng - cx) * mLng,
+    (lat - cy) * mLat
+  ]);
+
+  const group = new THREE.Group();
+
+  // ── Materiale per stil ────────────────────────────────────────────────
+  function makeShaderMat(shaderKey, colorHex, opacity=1.0){
+    const shader = AEDIS_SHADERS[shaderKey] || AEDIS_SHADERS.plaster;
+    const col = new THREE.Color(colorHex);
+    return new THREE.ShaderMaterial({
+      uniforms: {
+        baseColor: {value: new THREE.Vector3(col.r, col.g, col.b)},
+        time: {value: 0}
+      },
+      vertexShader: shader.vert,
+      fragmentShader: shader.frag,
+      transparent: opacity < 1.0,
+      opacity,
+      side: THREE.DoubleSide
+    });
+  }
+
+  // Material per stil si zona
+  const MAT = {
+    modern:   { parter:'concrete', etaj:'glass', accent:'metal', acoperis:'metal' },
+    inovator: { parter:'metal',    etaj:'glass', accent:'metal', acoperis:'concrete' },
+    clasic:   { parter:'concrete', etaj:'plaster', accent:'wood', acoperis:'plaster' },
+    minimalist:{ parter:'plaster', etaj:'plaster', accent:'glass', acoperis:'metal' },
+    industrial:{ parter:'concrete', etaj:'concrete', accent:'metal', acoperis:'metal' },
+    adaptat_context:{ parter:'plaster', etaj:'wood', accent:'glass', acoperis:'plaster' },
+  };
+  const matDef = MAT[p.stil] || MAT.modern;
+
+  // Culori per stil
+  const COLS = {
+    modern:    { parter:'#1e293b', etaj:'#94a3b8', accent:'#475569', acoperis:'#334155' },
+    inovator:  { parter:'#4c1d95', etaj:'#8b5cf6', accent:'#6d28d9', acoperis:'#1e1b4b' },
+    clasic:    { parter:'#78350f', etaj:'#fde68a', accent:'#a16207', acoperis:'#451a03' },
+    minimalist:{ parter:'#71717a', etaj:'#fafafa', accent:'#e4e4e7', acoperis:'#a1a1aa' },
+    industrial:{ parter:'#1c1917', etaj:'#57534e', accent:'#78716c', acoperis:'#0c0a09' },
+    adaptat_context:{ parter:'#475569', etaj:'#94a3b8', accent:'#64748b', acoperis:'#334155' },
+  };
+  const cols = COLS[p.stil] || COLS.modern;
+
+  // ── Helper: construieste peretii unui etaj ─────────────────────────────
+  function buildWalls(ring2D, baseH, topH, matKey, colorHex, opacity=1.0){
+    const mat = makeShaderMat(matKey, colorHex, opacity);
+    const meshGroup = new THREE.Group();
+    for(let i=0; i<ring2D.length-1; i++){
+      const [x1,y1] = ring2D[i];
+      const [x2,y2] = ring2D[i+1];
+      const len = Math.sqrt((x2-x1)**2+(y2-y1)**2);
+      if(len<0.1) continue;
+      const wallH = topH - baseH;
+
+      // Geometrie perete
+      const geo = new THREE.PlaneGeometry(len, wallH, 4, 4);
+      geo.computeVertexNormals();
+
+      const wall = new THREE.Mesh(geo, mat);
+
+      // Pozitionare perete
+      const mx = (x1+x2)/2, my = (y1+y2)/2;
+      wall.position.set(mx, baseH + wallH/2, my);
+
+      // Orientare
+      const ang = Math.atan2(y2-y1, x2-x1);
+      wall.rotation.y = -ang;
+
+      meshGroup.add(wall);
+    }
+    return meshGroup;
+  }
+
+  // ── Helper: construieste planseu (podea/tavan) ─────────────────────────
+  function buildSlab(ring2D, h, colorHex, thick=0.15){
+    const shape = new THREE.Shape();
+    shape.moveTo(ring2D[0][0], ring2D[0][1]);
+    for(let i=1;i<ring2D.length-1;i++) shape.lineTo(ring2D[i][0], ring2D[i][1]);
+    shape.closePath();
+
+    const geo = new THREE.ExtrudeGeometry(shape, {
+      depth: thick, bevelEnabled: false
+    });
+
+    const col = new THREE.Color(colorHex);
+    const mat = new THREE.MeshPhongMaterial({
+      color: col,
+      shininess: 20,
+      side: THREE.DoubleSide
+    });
+
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.rotation.x = Math.PI / 2;
+    mesh.position.y = h;
+    return mesh;
+  }
+
+  // ── Helper: retragere inel ─────────────────────────────────────────────
+  function shrinkRing(ring2D, factor){
+    const cx2 = ring2D.reduce((s,p)=>s+p[0],0)/ring2D.length;
+    const cy2 = ring2D.reduce((s,p)=>s+p[1],0)/ring2D.length;
+    return ring2D.map(([x,y])=>[cx2+(x-cx2)*factor, cy2+(y-cy2)*factor]);
+  }
+
+  // ── Generare etaje ─────────────────────────────────────────────────────
+  let currentH = 0;
+  let currentRing = localRing;
+
+  for(let i=0; i<niv; i++){
+    const hEtaj = i===0 ? hP : hE;
+    const topH = currentH + hEtaj;
+
+    // Retragere per etaj
+    const retFactor = p.retrageriFineEtaje?.[i] ?? (
+      i===niv-1 && p.activeRetragere ? (stil.retragereFactor||0.88) : 1.0
+    );
+    if(retFactor < 0.99 && i > 0){
+      currentRing = shrinkRing(localRing, retFactor);
+    }
+
+    // Tip material si culoare per etaj
+    const isLast = i === niv-1;
+    const matKey = i===0 ? matDef.parter : (isLast && retFactor<0.98 ? matDef.accent : matDef.etaj);
+    const colorHex = i===0 ? cols.parter :
+      (stil.floorColors ? stil.floorColors[Math.min(i,stil.floorColors.length-1)] : cols.etaj);
+
+    // Parter cu functiune diferita
+    const isParter = i===0 && p.parterDiferit;
+    const parterColor = isParter ? (AEDIS_FN[p.fnParter]?.color||cols.parter) : colorHex;
+    const parterMat = isParter ? 'glass' : matKey;
+
+    // Pereti etaj
+    const walls = buildWalls(currentRing, currentH, topH,
+      i===0 ? parterMat : matKey,
+      i===0 ? parterColor : colorHex
+    );
+    group.add(walls);
+
+    // Planseu (banda orizontala intre etaje - balcon simulat)
+    if(i < niv-1 && i > 0){
+      // Bandă de planseu + balcon
+      const balconRing = shrinkRing(currentRing, 1.05); // usor mai lat
+      const slabColor = p.stil==='modern' ? '#e2e8f0' : (p.stil==='clasic'?'#fef9c3':'#f1f5f9');
+      const slab = buildSlab(currentRing, topH, slabColor, 0.25);
+      group.add(slab);
+    }
+
+    currentH = topH;
+  }
+
+  // ── Planseu baza ────────────────────────────────────────────────────────
+  const baseSlab = buildSlab(localRing, 0, '#1a1a1a', 0.3);
+  group.add(baseSlab);
+
+  // ── Acoperiș ────────────────────────────────────────────────────────────
+  switch(p.tipAcoperis||'terasa_plata'){
+    case 'terasa_plata': {
+      const roofSlab = buildSlab(currentRing, currentH, cols.acoperis, 0.3);
+      group.add(roofSlab);
+      // Parapet
+      if((p.hAttic||1.2) > 0){
+        const parapet = buildWalls(currentRing, currentH, currentH+(p.hAttic||1.2),
+          matDef.acoperis, cols.acoperis);
+        group.add(parapet);
+      }
+      break;
+    }
+
+    case 'sarpanta': {
+      const hCoama = p.hSarpanta || 3.5;
+      // 4 niveluri progresiv mai mici
+      let roofRing = currentRing;
+      for(let si=0;si<4;si++){
+        const f = 1 - si*0.25;
+        const prevRing = roofRing;
+        roofRing = shrinkRing(localRing, Math.max(0.05, f));
+        const sh = currentH + si*(hCoama/4);
+        const walls = buildWalls(prevRing.map((p2,idx)=>[
+          (prevRing[idx][0]+roofRing[Math.min(idx,roofRing.length-1)][0])/2,
+          (prevRing[idx][1]+roofRing[Math.min(idx,roofRing.length-1)][1])/2
+        ]), sh, sh+hCoama/4, 'plaster', '#c4956a');
+        group.add(walls);
+        const s2 = buildSlab(roofRing, sh+hCoama/4, '#a0785a', 0.2);
+        group.add(s2);
+      }
+      break;
+    }
+
+    case 'mansarda': {
+      const mansRing = shrinkRing(localRing, 0.72);
+      const mansWalls = buildWalls(mansRing, currentH, currentH+(p.hMansarda||2.8),
+        matDef.etaj, cols.etaj);
+      group.add(mansWalls);
+      const mansSlab = buildSlab(mansRing, currentH+(p.hMansarda||2.8), cols.acoperis, 0.2);
+      group.add(mansSlab);
+      break;
+    }
+  }
+
+  return { group, cx, cy, mLng, mLat };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MAPBOX CUSTOM LAYER — integreaza Three.js in Mapbox
+// ═══════════════════════════════════════════════════════════════════════════
+
+function aedis3DCreateLayer(parcelRing, params){
+  const THREE = window.THREE;
+
+  let renderer, scene, camera, threeGroup;
+  let cx, cy, mLng, mLat;
+
+  const layer = {
+    id: 'aedis-3d-layer',
+    type: 'custom',
+    renderingMode: '3d',
+
+    onAdd(map, gl){
+      renderer = new THREE.WebGLRenderer({
+        canvas: map.getCanvas(),
+        context: gl,
+        antialias: true
+      });
+      renderer.autoClear = false;
+      renderer.shadowMap.enabled = false;
+      renderer.outputEncoding = THREE.sRGBEncoding;
+
+      scene = new THREE.Scene();
+      camera = new THREE.Camera();
+
+      // Iluminare
+      const ambLight = new THREE.AmbientLight(0xffffff, 0.6);
+      scene.add(ambLight);
+      const sunLight = new THREE.DirectionalLight(0xfff4e0, 1.2);
+      sunLight.position.set(1.5, 3, 1);
+      scene.add(sunLight);
+      const fillLight = new THREE.DirectionalLight(0x4080ff, 0.3);
+      fillLight.position.set(-1, 1, -1);
+      scene.add(fillLight);
+
+      // Construim mesh-ul
+      const result = aedis3DBuild(parcelRing, params);
+      if(!result){ console.error('AEDIS 3D: build failed'); return; }
+
+      threeGroup = result.group;
+      cx=result.cx; cy=result.cy; mLng=result.mLng; mLat=result.mLat;
+
+      scene.add(threeGroup);
+
+      AEDIS3D.renderer = renderer;
+      AEDIS3D.scene = scene;
+      AEDIS3D.camera = camera;
+      AEDIS3D.layer = layer;
+    },
+
+    render(gl, matrix){
+      // Calculam pozitia geografica -> coordonate Mapbox
+      const mercCenter = mapboxgl.MercatorCoordinate.fromLngLat(
+        {lng: cx, lat: cy}, 0
+      );
+      const scale = mercCenter.meterInMercatorCoordinateUnits();
+
+      // Matrix de transformare Three.js <- Mapbox
+      const m = new THREE.Matrix4().fromArray(matrix);
+      const l = new THREE.Matrix4()
+        .makeTranslation(mercCenter.x, mercCenter.y, mercCenter.z)
+        .scale(new THREE.Vector3(scale, -scale, scale));
+
+      camera.projectionMatrix = m.multiply(l);
+
+      renderer.resetState();
+      renderer.render(scene, camera);
+      map.triggerRepaint();
+    }
+  };
+
+  return layer;
+}
+
+// ── API Public AEDIS 3D ───────────────────────────────────────────────────
+function aedis3DGenerate(){
+  const ap = S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry){ ss('⚠️ AEDIS 3D: Selectați o parcelă.'); return; }
+
+  ss('⏳ AEDIS 3D: Se încarcă Three.js…');
+
+  aedisLoadThree(()=>{
+    ss('⏳ AEDIS 3D: Se construiește volumetria…');
+
+    // Curatam layer-ul anterior
+    try{
+      if(map.getLayer('aedis-3d-layer')) map.removeLayer('aedis-3d-layer');
+      AEDIS3D.active = false;
+      if(AEDIS3D.renderer){
+        AEDIS3D.renderer.dispose();
+        AEDIS3D.renderer = null;
+      }
+    }catch(e){}
+
+    // Extragem inelul parcelei
+    const geom = ap.geo.geometry;
+    const ring = geom.type==='Polygon'
+      ? geom.coordinates[0]
+      : geom.coordinates[0][0];
+
+    if(!ring?.length){ ss('⚠️ Geometrie parcelă invalidă.'); return; }
+
+    const params2 = ap.params || getDefaultParams(ap.utr||'');
+    const fnDef = AEDIS_FN[AEDIS.fn] || AEDIS_FN.rezidential_colectiv;
+    const niv = AEDIS.corpuri[0]?.niv || pN(params2.niv) || 4;
+    const hNiv = AEDIS.corpuri[0]?.hNiv || fnDef.hEtaj || 3.0;
+    const hParter = AEDIS.parterDiferit ? (fnDef.hParter||4.5) : hNiv;
+
+    const buildParams = {
+      niv, hParter, hEtaj: hNiv,
+      stil: AEDIS.stil, fn: AEDIS.fn,
+      fnParter: AEDIS.fnParter,
+      parterDiferit: AEDIS.parterDiferit,
+      tipAcoperis: AEDIS.tipAcoperis,
+      hSarpanta: AEDIS.hSarpanta,
+      hMansarda: AEDIS.hMansarda,
+      hAttic: AEDIS.hAttic||1.2,
+      retrageriFineEtaje: AEDIS.retrageriFineEtaje,
+      activeRetragere: AEDIS.activeRetragere,
+    };
+
+    try{
+      const layer = aedis3DCreateLayer(ring, buildParams);
+      if(!layer){ ss('❌ AEDIS 3D: Nu s-a putut crea layer-ul.'); return; }
+
+      map.addLayer(layer);
+      AEDIS3D.active = true;
+      AEDIS3D.params = buildParams;
+
+      set3D(55, -20);
+      ss('✅ AEDIS 3D: ' + niv + ' niveluri · H=' +
+        (hParter+(niv-1)*hNiv).toFixed(1) + 'm · ' +
+        AEDIS_STIL[AEDIS.stil].label + ' · ' + fnDef.label);
+    }catch(err){
+      console.error('AEDIS 3D error:', err);
+      ss('❌ AEDIS 3D: ' + err.message);
+    }
+  });
+}
+
+
+function aedisResetAndRender(){
+  FAL_AI.apiKey='';
+  aedisCloseRenderOverlay();
+  aedisAIRender();
+}
+
+function aedisCloseRenderOverlay(){
+  var o=document.getElementById('aedis-render-overlay');
+  if(o) o.style.display='none';
+}
+
+function aedis3DRemove(){
+  if(AEDIS3D.active){
+    try{ map.removeLayer('aedis-3d-layer'); }catch(e){}
+    AEDIS3D.active = false;
+    ss('AEDIS 3D: Volum șters.');
+  }
+}
+
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// AEDIS AI RENDER — Fal.ai FLUX.1 Integration
+// Screenshot Three.js/Mapbox → AI → Randare fotorealistă
+// ═══════════════════════════════════════════════════════════════════════════
+
+const FAL_AI = {
+  // Key incercat din localStorage la pornire (salvat anterior)
+  apiKey: (() => { try{ return localStorage.getItem('fal_api_key')||''; }catch(e){ return ''; } })(),
+  model: 'fal-ai/flux/schnell',  // FLUX.1 Schnell - rapid si economic
+  lastRender: null,
+  rendering: false,
+};
+
+// Prompt generator din datele AEDIS
+function aedisPromptBuild(){
+  const ap = S.parcels[S.activeParcel??0];
+  const fn = AEDIS_FN[AEDIS.fn] || AEDIS_FN.rezidential_colectiv;
+  const stil = AEDIS_STIL[AEDIS.stil] || AEDIS_STIL.modern;
+  const niv = AEDIS.corpuri[0]?.niv || 4;
+  const hNiv = AEDIS.corpuri[0]?.hNiv || 3.0;
+  const hTot = (AEDIS.parterDiferit?(AEDIS_FN[AEDIS.fn]?.hParter||4.5):hNiv)+(niv-1)*hNiv;
+  const uat = ap?.uat || 'Iași';
+  const acop = {
+    terasa_plata: 'flat roof with parapet',
+    terasa_circulabila: 'accessible green roof terrace',
+    sarpanta: 'pitched roof',
+    mansarda: 'mansard roof',
+    combinat: 'flat roof with technical penthouse',
+  }[AEDIS.tipAcoperis] || 'flat roof';
+
+  const stilDesc = {
+    modern: 'modern contemporary architecture, glass and steel facade, clean lines',
+    inovator: 'innovative dynamic architecture, bold forms, purple accent materials',
+    clasic: 'classical architecture, stone facade, warm earth tones, cornices',
+    minimalist: 'minimalist architecture, white concrete, pure volumes',
+    industrial: 'industrial architecture, corten steel, exposed concrete',
+    adaptat_context: 'contextual architecture matching surrounding urban fabric',
+  }[AEDIS.stil] || 'modern architecture';
+
+  return `Photorealistic architectural exterior render, ${fn.label.replace(/[🏠🏡🏢🏬🏨🏙🏭🏛]/g,'')} building, ${niv} floors, ${hTot.toFixed(0)}m height, ${stilDesc}, ${acop}, ${AEDIS.parterDiferit?'ground floor commercial with large glazing, ':''}urban context in ${uat} Romania, street view, mature trees, parked cars, pedestrians, golden hour lighting, soft shadows, photorealistic, 8k, architectural visualization, high quality render`;
+}
+
+// Screenshot din Mapbox canvas
+function aedisScreenshot(){
+  return new Promise((resolve, reject)=>{
+    try{
+      // Forteaza re-render Mapbox
+      map.triggerRepaint();
+      requestAnimationFrame(()=>{
+        const canvas = map.getCanvas();
+        // Obtinem dataURL din canvas
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+        resolve(dataUrl);
+      });
+    }catch(e){ reject(e); }
+  });
+}
+
+// AI Render principal
+async function aedisAIRender(){
+  if(FAL_AI.rendering){ ss('⏳ Randare în curs, așteptați...'); return; }
+
+  if(!FAL_AI.apiKey){
+    const msg = [
+      'API key Fal.ai lipsă.',
+      '',
+      'Obțineți gratuit (primești credite trial):',
+      '1. Mergeți pe https://fal.ai',
+      '2. Sign up / Log in',
+      '3. Dashboard → API Keys → New Key',
+      '4. Copiați key-ul și lipiți mai jos',
+      '',
+      'Introduceți API key:',
+    ].join('\n');
+    const key = prompt(msg, '');
+    if(!key){ ss('⚠️ AI Render: Anulat — API key lipsă.'); return; }
+    FAL_AI.apiKey = key.trim();
+    try{ localStorage.setItem('fal_api_key', FAL_AI.apiKey); }catch(e){}
+  }
+
+  FAL_AI.rendering = true;
+  ss('🎨 AEDIS AI Render: Se face screenshot...');
+
+  aedisScreenshot().then(screenshot=>{
+    const prompt = aedisPromptBuild();
+    ss('🎨 AEDIS AI Render: Se trimite la Fal.ai...');
+
+    // Apel Fal.ai
+    fetch('https://fal.run/fal-ai/flux/schnell', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Key ' + FAL_AI.apiKey,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        prompt: prompt,
+        image_size: 'landscape_16_9',
+        num_inference_steps: 4,
+        num_images: 1,
+        enable_safety_checker: true,
+      })
+    })
+    .then(r=>{
+      if(!r.ok) return r.text().then(t=>{ throw new Error('Fal.ai ' + r.status + ': ' + t.slice(0,150)); });
+      return r.json();
+    })
+    .then(data=>{
+      const imgUrl = data?.images?.[0]?.url;
+      if(!imgUrl) throw new Error('Nu s-a primit URL imagine de la Fal.ai');
+      FAL_AI.lastRender = { url: imgUrl, prompt, timestamp: new Date().toISOString() };
+      aedisShowRender(imgUrl);
+      aedisRender(); // actualizam tab Analiza
+      ss('✅ AEDIS AI Render: Randare completă!');
+    })
+    .catch(err=>{
+      console.error('AI Render error:', err);
+      // Afisam placeholder cu informatii
+      aedisShowRenderError(err.message, prompt);
+      ss('❌ AI Render eroare: ' + err.message.slice(0,80));
+    })
+    .finally(()=>{ FAL_AI.rendering = false; });
+  }).catch(err=>{
+    FAL_AI.rendering = false;
+    ss('❌ Screenshot eroare: ' + err.message);
+  });
+}
+
+function aedisShowRender(imgUrl){
+  let overlay = document.getElementById('aedis-render-overlay');
+  if(!overlay){
+    overlay = document.createElement('div');
+    overlay.id = 'aedis-render-overlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:20px';
+    document.body.appendChild(overlay);
+  }
+  const ts = FAL_AI.lastRender ? new Date(FAL_AI.lastRender.timestamp).toLocaleString('ro') : '';
+  overlay.innerHTML =
+    '<div style="position:relative;max-width:92vw;border-radius:12px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.8)">' +
+    '<img src="' + imgUrl + '" style="display:block;max-width:100%;max-height:76vh" alt="AEDIS AI Render" />' +
+    '<div style="position:absolute;top:12px;right:12px;display:flex;gap:8px">' +
+    '<a href="' + imgUrl + '" download="aedis-ai-render.jpg" style="padding:8px 14px;background:#d4af37;color:#000;border-radius:8px;text-decoration:none;font-size:12px;font-weight:700;display:flex;align-items:center;gap:4px">⬇ Descarcă</a>' +
+    '<button onclick="aedisCloseRenderOverlay()" style="padding:8px 14px;background:rgba(239,68,68,.9);color:#fff;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:700">✕ Închide</button>' +
+    '</div>' +
+    '</div>' +
+    '<div style="color:#64748b;font-size:10px;text-align:center;max-width:600px">' +
+    '🎨 AEDIS AI Render · Fal.ai FLUX.1 · ' + ts +
+    '</div>';
+  overlay.style.display = 'flex';
+}
+
+function aedisShowRenderError(errMsg, prompt){
+  let overlay = document.getElementById('aedis-render-overlay');
+  if(!overlay){
+    overlay = document.createElement('div');
+    overlay.id = 'aedis-render-overlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+    document.body.appendChild(overlay);
+  }
+
+  const box = document.createElement('div');
+  box.style.cssText = 'background:#0a1628;border:1px solid rgba(239,68,68,.4);border-radius:12px;padding:28px;max-width:480px;text-align:center';
+
+  const title = document.createElement('div');
+  title.style.cssText = 'font-size:32px;margin-bottom:12px';
+  title.textContent = '⚠️';
+  box.appendChild(title);
+
+  const errTitle = document.createElement('div');
+  errTitle.style.cssText = 'color:#f87171;font-size:14px;font-weight:700;margin-bottom:8px';
+  errTitle.textContent = 'AI Render eșuat';
+  box.appendChild(errTitle);
+
+  const errDetail = document.createElement('div');
+  errDetail.style.cssText = 'color:#64748b;font-size:11px;margin-bottom:16px;word-break:break-all';
+  errDetail.textContent = errMsg;
+  box.appendChild(errDetail);
+
+  const promptBox = document.createElement('div');
+  promptBox.style.cssText = 'color:#475569;font-size:10px;margin-bottom:20px;text-align:left;background:#080f1c;padding:10px;border-radius:6px';
+  promptBox.innerHTML = '<b style="color:#94a3b8">Prompt generat:</b><br>' + prompt.slice(0,200) + '...';
+  box.appendChild(promptBox);
+
+  const btns = document.createElement('div');
+  btns.style.cssText = 'display:flex;gap:8px;justify-content:center';
+
+  const btnReset = document.createElement('button');
+  btnReset.style.cssText = 'padding:9px 16px;background:#d4af37;color:#000;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:700';
+  btnReset.textContent = '🔑 Resetează key';
+  btnReset.onclick = aedisResetAndRender;
+  btns.appendChild(btnReset);
+
+  const btnClose = document.createElement('button');
+  btnClose.style.cssText = 'padding:9px 16px;background:rgba(239,68,68,.2);color:#f87171;border-radius:8px;border:1px solid rgba(239,68,68,.3);cursor:pointer;font-size:12px';
+  btnClose.textContent = '✕ Închide';
+  btnClose.onclick = aedisCloseRenderOverlay;
+  btns.appendChild(btnClose);
+
+  box.appendChild(btns);
+  overlay.innerHTML = '';
+  overlay.appendChild(box);
+  overlay.style.display = 'flex';
+}
+
+
+function aedisShowRender(imgUrl){
+  // Cream un overlay in AEDIS modal
+  let overlay = document.getElementById('aedis-render-overlay');
+  if(!overlay){
+    overlay = document.createElement('div');
+    overlay.id = 'aedis-render-overlay';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.9);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px';
+    document.body.appendChild(overlay);
+  }
+  overlay.innerHTML = 
+    '<div style="position:relative;max-width:90vw;max-height:80vh">' +
+    '<img src="' + imgUrl + '" style="max-width:100%;max-height:80vh;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.8)" />' +
+    '<div style="position:absolute;top:12px;right:12px;display:flex;gap:8px">' +
+    '<a href="' + imgUrl + '" download="aedis-render.jpg" style="padding:8px 14px;background:#d4af37;color:#000;border-radius:8px;text-decoration:none;font-size:12px;font-weight:700">⬇ Descarcă</a>' +
+    '<button onclick="aedisCloseRenderOverlay()" style="padding:8px 14px;background:#ef4444;color:#fff;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:700">✕ Închide</button>' +
+    '</div></div>' +
+    '<div style="color:#64748b;font-size:11px;max-width:600px;text-align:center">AI Render generat cu Fal.ai FLUX.1 · ' + new Date().toLocaleString('ro') + '</div>';
+  overlay.style.display = 'flex';
+}
+
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// AEDIS GLTF EXPORT — Export volum Three.js ca .glb cu metadata ANCPI
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function aedis3DExportGLTF(){
+  if(!AEDIS3D.active || !AEDIS3D.scene){
+    ss('⚠️ Generați mai întâi volumul AEDIS 3D pentru export.');
+    return;
+  }
+  if(!window.THREE){ ss('⚠️ Three.js nu este încărcat.'); return; }
+
+  ss('⏳ AEDIS Export: Se pregătește fișierul .glb...');
+
+  try{
+    // Incarcam GLTFExporter dinamic
+    const { GLTFExporter } = await import('https://unpkg.com/three@0.128.0/examples/jsm/exporters/GLTFExporter.js');
+    const exporter = new GLTFExporter();
+
+    const ap = S.parcels[S.activeParcel??0];
+    const params2 = ap?.params || getDefaultParams(ap?.utr||'');
+    const fn = AEDIS_FN[AEDIS.fn] || AEDIS_FN.rezidential_colectiv;
+    const niv = AEDIS.corpuri[0]?.niv || 4;
+    const hNiv2 = AEDIS.corpuri[0]?.hNiv || 3.0;
+    const hTot2 = (AEDIS.parterDiferit?(fn.hParter||4.5):hNiv2)+(niv-1)*hNiv2;
+
+    exporter.parse(
+      AEDIS3D.scene,
+      (result)=>{
+        // Download .glb
+        const blob = new Blob([result], {type:'application/octet-stream'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const nrcad = ap?.nrcad || 'parcela';
+        a.href = url;
+        a.download = `AEDIS_${nrcad}_${AEDIS.stil}_${niv}niv.glb`;
+        a.click();
+        URL.revokeObjectURL(url);
+        ss('✅ AEDIS Export: ' + a.download + ' descărcat!');
+      },
+      (err)=>{ console.error('GLTF Export error:', err); ss('❌ Export eroare: '+err.message); },
+      {
+        binary: true,
+        trs: false,
+        onlyVisible: true,
+        truncateDrawRange: true,
+        extras: {
+          urbanx_version: '2.0',
+          nr_cadastral: ap?.nrcad || '',
+          sup_acte: ap?.area ? Math.round(ap.area) : 0,
+          uat: ap?.uat || 'Iași',
+          utr: ap?.utr || '',
+          functiune: AEDIS.fn,
+          stil: AEDIS.stil,
+          nr_niveluri: niv,
+          h_total_m: parseFloat(hTot2.toFixed(1)),
+          pot_propus: pN(params2.pot) || 0,
+          cut_propus: pN(params2.cut) || 0,
+          acoperis: AEDIS.tipAcoperis,
+          scenariu: AEDIS.scenariu,
+          generated_at: new Date().toISOString(),
+          generator: 'UrbanX · AEDIS Platform',
+        }
+      }
+    );
+  }catch(err){
+    console.error('GLTF export error:', err);
+    ss('❌ Export GLTF eroare: ' + err.message);
+  }
+}
+
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PMTiles Protocol — suport pentru date cadastrale ANCPI locale
+// Scriptul PMTiles se incarca dinamic daca avem fisier .pmtiles
+// ═══════════════════════════════════════════════════════════════════════════
+
+const CADASTRU = {
+  hasPMTiles: false,
+  pmtilesUrl: null,   // setat de utilizator sau detectat automat
+  loaded: false,
+};
+
+// Initializare PMTiles (apelata la map load daca avem URL)
+function cadastruInitPMTiles(url){
+  if(!url) return;
+  CADASTRU.pmtilesUrl = url;
+
+  // Incarcam biblioteca PMTiles dinamic
+  const script = document.createElement('script');
+  script.src = 'https://unpkg.com/pmtiles@3.0.6/dist/pmtiles.js';
+  script.onload = ()=>{
+    try{
+      const { PMTiles, Protocol } = pmtiles;
+      const protocol = new Protocol();
+      mapboxgl.addProtocol('pmtiles', (request)=>{
+        const p = new PMTiles(CADASTRU.pmtilesUrl);
+        return protocol.tile(p, request);
+      });
+
+      // Adaugam sursa PMTiles
+      if(!map.getSource('parcele-pmtiles')){
+        map.addSource('parcele-pmtiles', {
+          type: 'vector',
+          url: 'pmtiles://' + CADASTRU.pmtilesUrl,
+        });
+
+        // Layer vizibil (sub parcel-fill existent)
+        map.addLayer({
+          id: 'parcele-pmtiles-fill',
+          type: 'fill',
+          source: 'parcele-pmtiles',
+          'source-layer': 'parcele',
+          paint: {
+            'fill-color': '#d4af37',
+            'fill-opacity': 0.05,
+          }
+        }, 'parcel-fill');
+
+        map.on('click', 'parcele-pmtiles-fill', (e)=>{
+          if(!e.features?.length) return;
+          const props = e.features[0].properties;
+          // Imbogatim parcela selectata cu date ANCPI oficiale
+          const ap = S.parcels[S.activeParcel??0];
+          if(ap){
+            ap.sup_acte = props.sup_acte || ap.area;
+            ap.sup_mas = props.sup_mas || ap.area;
+            ap.tarla = props.tarla || '';
+            ap.lot = props.lot || '';
+            ap.uat_cod = props.uat_cod || '';
+            ap.nr_cad_oficial = props.nr_cad || ap.nrcad;
+          }
+          ss('✅ Date ANCPI oficiale preluate: ' + (props.nr_cad||'—') + ' · ' + Math.round(props.sup_mas||0) + ' m²');
+          renderTab('utr');
+        });
+      }
+      CADASTRU.hasPMTiles = true;
+      CADASTRU.loaded = true;
+      console.log('PMTiles cadastru initialized:', url);
+    }catch(err){
+      console.warn('PMTiles init error:', err);
+    }
+  };
+  document.head.appendChild(script);
+}
+
+// Buton pentru incarcarea unui fisier PMTiles local
+function cadastruLoadPMTiles(){
+  const url = prompt(
+    'Introduceți URL-ul fișierului PMTiles ANCPI:\n' +
+    '(ex: https://site.ro/parcele.pmtiles sau /data/parcele.pmtiles)',
+    CADASTRU.pmtilesUrl || ''
+  );
+  if(url) cadastruInitPMTiles(url.trim());
 }
 
 
