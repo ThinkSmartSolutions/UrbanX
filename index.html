@@ -1271,7 +1271,17 @@ function addLayers(){
         S.parcels.push(parcelObj);
         S.activeParcel=S.parcels.length-1;
         ss('✅ Adăugată parcela '+nrcad+' | Total: '+S.parcels.length+' parcele');
-        // Zoom pe parcela adaugata
+        updateMap();
+        renderAll();
+        // Tab Multi pe desktop
+        if(window.innerWidth>840){
+          const tabM=document.getElementById('tab-multi');
+          if(tabM){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+            tabM.classList.add('active'); S.tab='multi';
+            const tc=document.getElementById('tc-multi');
+            if(tc) tc.innerHTML=getContent('multi');
+          }
+        }
         try{const bb=turf.bbox(parcelObj.geo);map.fitBounds([[bb[0],bb[1]],[bb[2],bb[3]]],{padding:80,maxZoom:19,duration:400});}catch(er){}
       } else {
         // SINGLE SELECT: inlocuim
@@ -2245,20 +2255,24 @@ function updateDistanceLines(){
     const k = pi*100+bi;
     if(!myBlds[k]) myBlds[k]=f;
   });
-  // Fallback: daca nu avem floor=0 etichetat, luam primele features unice ca baza
+  // Fallback: grupam dupa geometrie unica (fiecare geometrie diferita = cladire diferita)
   if(Object.keys(myBlds).length===0 && volFeats.length>0){
-    // Grupam dupa geometrie hash (primele 3 coordonate)
-    volFeats.forEach((f,fi)=>{
-      const coords = f.geometry?.coordinates?.[0];
-      if(!coords?.length) return;
-      const k = fi; // fiecare feature = potential cladire separata
-      if(!myBlds[k]) myBlds[k]=f;
-    });
-    // Daca tot multe, luam doar primul (volum unic)
-    if(Object.keys(myBlds).length>10){
-      const first=volFeats[0];
-      Object.keys(myBlds).forEach(k=>delete myBlds[k]);
-      myBlds[0]=first;
+    // Luam DOAR etajele pozitive (nu acoperis floor<0, nu existente floor=-1)
+    const pozitive = volFeats.filter(f=>((f.properties?.floor??0))>=0);
+    if(pozitive.length===0){
+      // Daca totul e acoperis, luam primul
+      myBlds[0]=volFeats[0];
+    } else {
+      // Grupam dupa hash-ul primelor coordonate ale geometriei = identificam cladirile unice
+      const geomGroups={};
+      pozitive.forEach(f=>{
+        const ring=f.geometry?.coordinates?.[0];
+        if(!ring?.length) return;
+        // Hash: primele 2 puncte rotunjite la 6 zecimale
+        const hash=ring[0]?.map(v=>v.toFixed(5)).join(',')+':'+ring[1]?.map(v=>v.toFixed(5)).join(',');
+        if(!geomGroups[hash]) geomGroups[hash]=f; // pastram primul etaj al fiecarei geometrii
+      });
+      Object.values(geomGroups).forEach((f,i)=>{ myBlds[i]=f; });
     }
   }
   const myBldArr = Object.values(myBlds);
@@ -5277,47 +5291,83 @@ const AEDIS_FN = {
   },
 };
 
-// ── Stiluri arhitecturale AEDIS ────────────────────────────────────────────
+// ── Stiluri arhitecturale AEDIS — paleta cu identitate vizuala clara ──────
 const AEDIS_STIL = {
   modern: {
-    label:'🏢 Modern', desc:'Fațade plane, ferestre mari, linii curate',
-    corpColor: (fn,i)=>{const c=AEDIS_FN[fn]?.color||'#94a3b8'; return i===0?c:lighten(c,i*8);},
-    parterFactor: 1.0, retragereFactor: 0.88, hasAttic: true,
-    aticH: 1.2, etajColor: (base,i,tot)=>mixColor(base,'#e2e8f0',i/tot*0.4)
+    label:'🏢 Modern', desc:'Fațade sticlă-oțel, etaje progresive, atic pronunțat',
+    // Parter: gri-antracit; etaje: progresie albastru-gri spre alb-sticla
+    floorColors: ['#334155','#475569','#64748b','#94a3b8','#cbd5e1','#e2e8f0','#f1f5f9','#ffffff'],
+    parterColor: '#1e293b',   // soclu inchis
+    aticColor: '#0f172a',     // atic negru mat
+    retragereFactor: 0.88, hasAttic: true, aticH: 1.4,
+    etajColor: (base,i,tot)=>{
+      const cols=['#1e293b','#334155','#475569','#64748b','#94a3b8','#cbd5e1','#e2e8f0','#f8fafc'];
+      return cols[Math.min(i,cols.length-1)];
+    }
   },
   inovator: {
-    label:'⚡ Inovator', desc:'Forme dinamice, retrageri expresive, console',
-    corpColor: (fn,i)=>{const c=AEDIS_FN[fn]?.color||'#94a3b8'; return i%2===0?c:lighten(c,15);},
-    parterFactor: 1.1, retragereFactor: 0.75, hasAttic: false,
-    aticH: 0, etajColor: (base,i,tot)=>i%2===0?base:lighten(base,20)
+    label:'⚡ Inovator', desc:'Alternare materiale, retrageri expresive, corp dinamic',
+    floorColors: ['#7c3aed','#6d28d9','#5b21b6','#4c1d95','#6d28d9','#7c3aed','#8b5cf6','#a78bfa'],
+    parterColor: '#4c1d95',
+    aticColor: '#2e1065',
+    retragereFactor: 0.72, hasAttic: false, aticH: 0,
+    etajColor: (base,i,tot)=>{
+      // Alternare violet-inchis / violet-mediu
+      const cols=['#4c1d95','#5b21b6','#6d28d9','#7c3aed','#8b5cf6','#7c3aed','#6d28d9','#5b21b6'];
+      return cols[i%cols.length];
+    }
   },
   clasic: {
-    label:'🏛 Clasic', desc:'Soclu pronunțat, cornișe, proporții clasice',
-    corpColor: (fn,i)=>{const c=AEDIS_FN[fn]?.parterColor||'#d4a76a'; return i===0?c:darken(c,i*5);},
-    parterFactor: 0.9, retragereFactor: 0.95, hasAttic: true,
-    aticH: 2.0, etajColor: (base,i,tot)=>mixColor(base,'#fef9c3',0.3)
+    label:'🏛 Clasic', desc:'Soclu pronunțat, cornișe, piatră naturală, proporții clasice',
+    floorColors: ['#92400e','#a16207','#b45309','#ca8a04','#d97706','#eab308','#fbbf24','#fde68a'],
+    parterColor: '#78350f',
+    aticColor: '#451a03',
+    retragereFactor: 0.96, hasAttic: true, aticH: 2.2,
+    etajColor: (base,i,tot)=>{
+      const cols=['#78350f','#92400e','#a16207','#b45309','#ca8a04','#d97706','#eab308','#fde68a'];
+      return cols[Math.min(i,cols.length-1)];
+    }
   },
   minimalist: {
-    label:'◼ Minimalist', desc:'Corp simplu, fara ornamente, materiale naturale',
-    corpColor: (fn,i)=>'#e2e8f0',
-    parterFactor: 1.0, retragereFactor: 1.0, hasAttic: false,
-    aticH: 0.8, etajColor: (base,i,tot)=>'#f1f5f9'
+    label:'◼ Minimalist', desc:'Beton alb, volume pure, fara ornamente, lumina naturala',
+    floorColors: ['#d4d4d8','#e4e4e7','#f4f4f5','#fafafa','#ffffff','#fafafa','#f4f4f5','#e4e4e7'],
+    parterColor: '#a1a1aa',
+    aticColor: '#71717a',
+    retragereFactor: 1.0, hasAttic: false, aticH: 0.6,
+    etajColor: (base,i,tot)=>{
+      const cols=['#a1a1aa','#d4d4d8','#e4e4e7','#f4f4f5','#fafafa','#f4f4f5','#e4e4e7','#d4d4d8'];
+      return cols[Math.min(i,cols.length-1)];
+    }
   },
   industrial: {
-    label:'🏭 Industrial', desc:'Metal, beton aparent, deschideri mari',
-    corpColor: (fn,i)=>'#64748b',
-    parterFactor: 1.2, retragereFactor: 1.0, hasAttic: false,
-    aticH: 0, etajColor: (base,i,tot)=>i%2===0?'#475569':'#64748b'
+    label:'🏭 Industrial', desc:'Corten, metal, beton brut, deschideri mari, H mare',
+    floorColors: ['#292524','#44403c','#57534e','#78716c','#a8a29e','#78716c','#57534e','#44403c'],
+    parterColor: '#1c1917',
+    aticColor: '#0c0a09',
+    retragereFactor: 1.0, hasAttic: false, aticH: 0,
+    etajColor: (base,i,tot)=>{
+      const cols=['#1c1917','#292524','#44403c','#57534e','#78716c','#a8a29e','#78716c','#57534e'];
+      return cols[i%cols.length];
+    }
   },
   adaptat_context: {
-    label:'🌆 Adaptat context', desc:'Culori și proporții din contextul urban existent',
-    corpColor: (fn,i)=>{
-      const ctxFns = S.ctx?.features?.map(f=>f.properties?.fn)||[];
-      const domFn = ctxFns.sort((a,b)=>ctxFns.filter(v=>v===a).length-ctxFns.filter(v=>v===b).length).pop();
-      return BLD_COL[domFn]||AEDIS_FN[fn]?.color||'#94a3b8';
-    },
-    parterFactor: 1.0, retragereFactor: 0.92, hasAttic: true,
-    aticH: 1.0, etajColor: (base,i,tot)=>base
+    label:'🌆 Adaptat context', desc:'Culori, H si proportii extrase din contextul urban analizat',
+    floorColors: ['#64748b','#94a3b8','#cbd5e1','#e2e8f0','#cbd5e1','#94a3b8','#64748b','#475569'],
+    parterColor: '#475569',
+    aticColor: '#334155',
+    retragereFactor: 0.92, hasAttic: true, aticH: 1.0,
+    etajColor: (base,i,tot)=>{
+      // Preia culoarea dominanta din context OSM
+      if(S.ctx?.features?.length){
+        const fns={};
+        S.ctx.features.forEach(f=>{const fn=f.properties?.fn||'yes';fns[fn]=(fns[fn]||0)+1;});
+        const domFn=Object.entries(fns).sort((a,b)=>b[1]-a[1])[0]?.[0]||'yes';
+        const base2=BLD_COL[domFn]||'#64748b';
+        const cols=['#334155','#475569','#64748b','#94a3b8','#cbd5e1'];
+        return mixColor(base2,cols[Math.min(i,cols.length-1)],0.5);
+      }
+      return ['#475569','#64748b','#94a3b8','#cbd5e1','#e2e8f0'][Math.min(i,4)];
+    }
   },
 };
 
@@ -5444,13 +5494,20 @@ function aedisBuild(){
       }catch(e){}
     }
 
-    // Culoare etaj
-    const baseColor = AEDIS.parterDiferit && i===0
-      ? (fnDef.parterColor||fnDef.color)
-      : (fnDef.color||'#94a3b8');
-    const etajColor = stilDef.etajColor
-      ? stilDef.etajColor(baseColor, i, totalNiv)
-      : lighten(baseColor, i*5);
+    // Culoare etaj - din paleta stilului arhitectural (nu din functiune)
+    // Parter = intotdeauna culoare distincta (soclu)
+    let etajColor;
+    if(i===0){
+      // Parter: culoare soclu din stil
+      etajColor = AEDIS.parterDiferit
+        ? (AEDIS_FN[AEDIS.fnParter]?.color||stilDef.parterColor||'#334155')
+        : (stilDef.parterColor||'#334155');
+    } else {
+      // Etaje: culoare din paleta stilului
+      etajColor = stilDef.etajColor
+        ? stilDef.etajColor(fnDef.color||'#94a3b8', i, totalNiv)
+        : (stilDef.floorColors?.[Math.min(i,stilDef.floorColors.length-1)]||lighten(fnDef.color||'#94a3b8',i*8));
+    }
 
     feats.push({
       type:'Feature',
@@ -5476,14 +5533,15 @@ function aedisBuild(){
 
   switch(AEDIS.tipAcoperis){
     case 'terasa_plata':
-      // Terasa plata: slab subtire + parapet
+      // Terasa plata: slab subtire vizibil + parapet cu culoare atic din stil
       feats.push({type:'Feature',
-        properties:{base:roofBase,top:roofBase+0.25,color:darken(AEDIS_FN[fn]?.color||'#94a3b8',20),floor:-10,roofType:'terasa'},
+        properties:{base:roofBase,top:roofBase+0.3,color:'#475569',floor:-10,roofType:'terasa'},
         geometry:fpGeom});
-      // Parapet
-      if(AEDIS.hAttic>0){
+      // Parapet - culoare atic din stil (mai inchis)
+      if((AEDIS.hAttic||1.2)>0){
+        const aticColor = stilDef.aticColor||darken(AEDIS_FN[fn]?.color||'#94a3b8',40);
         feats.push({type:'Feature',
-          properties:{base:roofBase,top:roofBase+AEDIS.hAttic,color:darken(AEDIS_FN[fn]?.color||'#94a3b8',30),floor:-11,roofType:'parapet'},
+          properties:{base:roofBase,top:roofBase+(AEDIS.hAttic||1.2),color:aticColor,floor:-11,roofType:'parapet'},
           geometry:fpGeom});
         // Interior parapet (gol)
         try{
