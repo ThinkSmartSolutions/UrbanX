@@ -3,7 +3,10 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
-<title>UrbanX – PUG Iași</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Expires" content="0"/>
+<title>UrbanX – PUG Iași v8773</title>
 <link href="https://api.mapbox.com/mapbox-gl-js/v3.11.0/mapbox-gl.css" rel="stylesheet"/>
 <link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.5.0/mapbox-gl-draw.css" rel="stylesheet"/>
 <style>
@@ -6127,34 +6130,50 @@ function aedis3DRemove(){
 // ── Demolare: filtrează existentele de pe parcelele active din ctx-src ────────
 function _aedisRemoveExistingFromCtx(){
   try{
-    // 1. Eliminăm din ctx-src (clădiri OSM)
+    // 1. Eliminăm din ctx-src (clădiri OSM pe parcelă)
     const src = map.getSource('ctx-src');
     if(src?._data?.features){
-      const filtered = src._data.features.filter(f=>{
+      src.setData({type:'FeatureCollection', features: src._data.features.filter(f=>{
         try{
           const ctr = turf.centerOfMass(f);
-          for(const p of S.parcels){
-            if(!p.geo?.geometry) continue;
-            if(turf.booleanPointInPolygon(ctr,{type:'Feature',geometry:p.geo.geometry,properties:{}}))
-              return false;
-          }
-          return true;
+          return !S.parcels.some(p=>{
+            if(!p.geo?.geometry) return false;
+            return turf.booleanPointInPolygon(ctr,{type:'Feature',geometry:p.geo.geometry,properties:{}});
+          });
         }catch(e){ return true; }
-      });
-      src.setData({type:'FeatureCollection', features:filtered});
+      })});
     }
-    
-    // 2. Eliminăm din vol-src featurile cu isExistent=true
+
+    // 2. Eliminăm din vol-src featurile existente
     const volSrc = map.getSource('vol-src');
     if(volSrc?._data?.features){
-      const volFiltered = volSrc._data.features.filter(f=>!f.properties?.isExistent);
-      volSrc.setData({type:'FeatureCollection', features:volFiltered});
+      volSrc.setData({type:'FeatureCollection',
+        features: volSrc._data.features.filter(f=>!f.properties?.isExistent)});
     }
-    
-    // 3. Resetăm baseH pentru generarea nouă (nu mai suprapunem pe existent)
+
+    // 3. Ascundem layerul cad-3d pe zona parcelei (setăm filtru de excludere)
+    // cad-3d afișează toate clădirile cadastrale — le filtrăm pe cele de pe parcelă
+    try{
+      const parcelNrs = S.parcels.map(p=>p.nrcad).filter(Boolean);
+      if(parcelNrs.length && map.getLayer('cad-3d')){
+        // Filtru: exclude parcelele selectate
+        map.setFilter('cad-3d', ['!', ['in', ['get','nrcad'], ['literal', parcelNrs]]]);
+      }
+    }catch(e){}
+
+    // 4. vol-src: setăm baseH=0 la generare
     AEDIS._forcedBaseH = 0;
-    ss('🔨 Demolare: teren curățat. Generați noul volum cu ⚡.');
+    ss('🔨 Demolare: clădiri eliminate. Generați noul volum cu ⚡.');
   }catch(e){ console.warn('_aedisRemoveExistingFromCtx error:', e.message); }
+}
+
+// Restaurăm filtrul cad-3d când ieșim din demolare
+function _aedisRestoreCad3D(){
+  try{
+    if(map.getLayer('cad-3d')){
+      map.setFilter('cad-3d', null); // elimină filtrul de excludere
+    }
+  }catch(e){}
 }
 
 function aedisGenerateAll(){
@@ -8384,15 +8403,14 @@ function _v3dBuild(ap){
       if(pts.length<3) return;
       const isRoof=floor<0||!!f.properties?.roofType;
       const isTop=!!f.properties?.isLast;
+      // Acoperișurile separate (floor<0) pot fi decalate — le ignorăm
+      // Capul volumului e vizibil ca fața de sus a prismei fiecărui etaj
+      if(isRoof) return;
       let mat;
-      if(isRoof){ mat=_v3dMatRoof(THREE,stilKey,V3D.texCache); }
-      else if(floor===0){ mat=_v3dMatParter(THREE,stilKey,V3D.texCache); }
+      if(floor===0){ mat=_v3dMatParter(THREE,stilKey,V3D.texCache); }
       else if(isTop){ mat=_v3dMatPenthouse(THREE,stilKey,V3D.texCache); }
       else{ mat=_v3dMatFloor(THREE,col,floor,stilKey,V3D.texCache); }
-      // Acoperiș: prismă plată de 0.2m exact la vârful clădirii
-      const meshBase = isRoof ? Math.max(0, top-0.2) : base;
-      const meshTop  = isRoof ? top : top;
-      const mesh=_v3dPrism(THREE,pts,meshBase,meshTop,mat);
+      const mesh=_v3dPrism(THREE,pts,base,top,mat);
       if(mesh){ mesh.castShadow=true; mesh.receiveShadow=true; scene.add(mesh); V3D.aedis.push(mesh); }
     }catch(e){ console.warn('AEDIS mesh:',e.message); }
   });
