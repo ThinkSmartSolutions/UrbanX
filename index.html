@@ -3106,7 +3106,15 @@ function getContent(tab){
 // ═══ HTML SEARCH ══════════════════════════════════════════════════════════
 function htmlSearch(){
   return`
-  <div class="section">📍 Coordonate GPS</div>
+  <div style="display:flex;gap:7px;margin-bottom:12px">
+    <button class="btn-g" onclick="aedisOpenLoisir()" style="flex:1;background:rgba(34,197,94,.18);border-color:rgba(34,197,94,.5);color:#4ade80;font-size:12px;padding:10px;font-weight:700">
+      🌿 LOISIR
+    </button>
+    <button class="btn-g" onclick="generateSolarStudy()" style="flex:1;background:rgba(251,191,36,.18);border-color:rgba(251,191,36,.5);color:#fbbf24;font-size:12px;padding:10px;font-weight:700">
+      ☀ Însorire
+    </button>
+  </div>
+    <div class="section">📍 Coordonate GPS</div>
   <div class="card">
     <input class="inp" id="inp-coord" placeholder="47.1585, 27.6014 (lat, lng)" value="${S._lastCoord||''}">
     <div class="help">Dublu-click pe hartă → completare automată. Funcționează pentru orice localitate din România.</div>
@@ -3151,43 +3159,7 @@ function htmlSearch(){
     ${S.parcels.length?`<div style="background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);border-radius:8px;padding:8px 10px;font-size:12px;color:#34d399;margin-top:4px">✅ <b>${S.parcels.length}</b> parcelă/parcele selectate — vezi tab <b>Multi</b> pentru detalii și generare volume</div>`:''}
 
 
-  <div class="section">🧭 Navigare hartă</div>
-  <div class="card">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-      <div style="background:#080f1c;border-radius:8px;padding:9px">
-        <div style="font-size:11px;font-weight:700;color:#d4af37;margin-bottom:5px">🖥 Desktop</div>
-        <div style="font-size:11px;color:#94a3b8;line-height:1.8">
-          Scroll → zoom<br>Drag → mișcare<br>Ctrl+drag → rotire<br>Shift+drag → înclinare
-        </div>
-      </div>
-      <div style="background:#080f1c;border-radius:8px;padding:9px">
-        <div style="font-size:11px;font-weight:700;color:#d4af37;margin-bottom:5px">📱 Mobile</div>
-        <div style="font-size:11px;color:#94a3b8;line-height:1.8">
-          Pinch → zoom<br>1 deget → mișcare<br>2 degete rotire → rotire<br>2 degete drag → înclinare
-        </div>
-      </div>
-    </div>
-    <div class="mob-only" style="margin-top:8px">
-      <div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:12px;color:#94a3b8">Înclinare 3D</span><span style="font-size:12px;color:#d4af37" id="sp-v">0°</span></div>
-      <input type="range" min="0" max="85" value="0" oninput="map.easeTo({pitch:+this.value,duration:80});document.getElementById('sp-v').textContent=this.value+'°'" style="width:100%;accent-color:#3b82f6;margin-bottom:10px">
-      <div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:12px;color:#94a3b8">Rotire</span><span style="font-size:12px;color:#d4af37" id="sb-v">0°</span></div>
-      <input type="range" min="0" max="360" value="0" oninput="map.easeTo({bearing:+this.value,duration:80});document.getElementById('sb-v').textContent=this.value+'°'" style="width:100%;accent-color:#d4af37;margin-bottom:10px">
-      <div class="btn-row">
-        <button class="btn-p" onclick="map.easeTo({pitch:60,bearing:-20,duration:600});toggleMobSheet()" style="flex:1">🏙 3D</button>
-        <button class="btn-s" onclick="map.easeTo({pitch:0,bearing:0,duration:400});toggleMobSheet()" style="flex:1">⬛ 2D plat</button>
-      </div>
-    </div>
-    <div class="desk-only" style="margin-top:6px;font-size:11px;color:#64748b">Pe desktop folosiți sliderele Pitch/Bearing din colțul dreapta-jos al hărții.</div>
-  </div>  </div>
-  <div class="section" style="margin-top:14px">⚡ Acțiuni Rapide</div>
-  <div class="card" style="display:flex;flex-direction:column;gap:7px">
-    <button class="btn-g" onclick="aedisOpenLoisir()" style="background:rgba(34,197,94,.18);border-color:rgba(34,197,94,.5);color:#4ade80;font-size:13px;padding:11px;width:100%">
-      🌿 LOISIR — Amenajare spații publice
-    </button>
-    <button class="btn-g" onclick="generateSolarStudy()" style="background:rgba(251,191,36,.18);border-color:rgba(251,191,36,.5);color:#fbbf24;font-size:13px;padding:11px;width:100%">
-      ☀ Studiu Însorire PDF
-    </button>
-  </div>`;
+  `;
 }
 
 // ═══ HTML UTR ══════════════════════════════════════════════════════════════
@@ -8415,16 +8387,17 @@ function _v3dBuild(ap){
       const fring=f.geometry.type==='Polygon'?f.geometry.coordinates[0]:f.geometry.coordinates[0][0];
       const pts=fring.slice(0,-1).map(toLoc);
       if(pts.length<3) return;
-      const isRoof = floor<0 || !!f.properties?.roofType || h<0.5;
+      // În viewer afișăm DOAR etajele solide (floor >= 0)
+      // Orice feature cu floor<0 este un acoperiș/atic din switch — skip
+      if(floor < 0) return;
+      if(h < 0.8) return;          // prea subțire → skip
+      if(pts.length < 4) return;   // geometrie degenerată → skip
       const isTop = !!f.properties?.isLast;
-      // Sărim acoperișuri și orice feature prea subțire (evităm mesh-uri degenerate)
-      if(isRoof) return;
-      // Sărim și poligoane cu prea puține puncte (evităm ace/triunghiuri)
-      if(pts.length < 4) return;
       let mat;
       if(floor===0){ mat=_v3dMatParter(THREE,stilKey,V3D.texCache); }
       else if(isTop){ mat=_v3dMatPenthouse(THREE,stilKey,V3D.texCache); }
       else{ mat=_v3dMatFloor(THREE,col,floor,stilKey,V3D.texCache); }
+      if(!mat){ return; }
       const mesh=_v3dPrism(THREE,pts,base,top,mat);
       if(mesh){ mesh.castShadow=true; mesh.receiveShadow=true; scene.add(mesh); V3D.aedis.push(mesh); }
     }catch(e){ console.warn('AEDIS mesh:',e.message); }
@@ -8494,10 +8467,13 @@ function _v3dAddStreets(THREE, scene, ring0, toLoc){
     const trMat = new THREE.MeshStandardMaterial({color:'#26384a',roughness:0.94,metalness:0,side:THREE.DoubleSide});
     const linMat= new THREE.MeshStandardMaterial({color:'#f0d060',roughness:0.9,metalness:0,side:THREE.DoubleSide});
 
-    const band = (mat,x,z,bw,bd,y=0.06)=>{
-      const g=new THREE.PlaneGeometry(bw,bd);
-      const m=new THREE.Mesh(g,mat); m.rotation.x=-Math.PI/2;
-      m.position.set(x,y,z); scene.add(m);
+    // Bandă stradă: dreptunghi în world space ca prismă subțire
+    const band = (mat,x,z,bw,bd,y=0.04)=>{
+      // Construim manual 4 colțuri în planul XZ
+      const hw=bw/2, hd=bd/2;
+      const corners=[[x-hw,z-hd],[x+hw,z-hd],[x+hw,z+hd],[x-hw,z+hd]];
+      const mesh=_v3dPrism(THREE,corners,y,y+0.12,mat);
+      if(mesh) scene.add(mesh);
     };
 
     // Banda stradă pe 4 laturi
@@ -8519,13 +8495,15 @@ function _v3dAddStreets(THREE, scene, ring0, toLoc){
     band(linMat, cx+off+sw/2, cz, 0.15, d+sw*4,  0.09);
 
     // Marcaj parcelă (pavaj distinct)
-    const shape=new THREE.Shape();
-    shape.moveTo(pts[0][0],pts[0][1]);
-    pts.slice(1,-1).forEach(([x,z])=>shape.lineTo(x,z));
-    shape.closePath();
-    const sg=new THREE.ShapeGeometry(shape);
-    const sm=new THREE.MeshStandardMaterial({color:'#1f3040',roughness:0.95,metalness:0,side:THREE.DoubleSide,transparent:true,opacity:0.8});
-    const smesh=new THREE.Mesh(sg,sm); smesh.rotation.x=-Math.PI/2; smesh.position.y=0.04; scene.add(smesh);
+    // Marcaj parcelă ca prismă subțire (fără rotații)
+    try{
+      const parcelPts2d = pts.slice(0,-1).map(([x,z])=>[x,z]);
+      if(parcelPts2d.length >= 3){
+        const pm=new THREE.MeshStandardMaterial({color:'#1f3040',roughness:0.95,metalness:0,transparent:true,opacity:0.8});
+        const pmesh=_v3dPrism(THREE,parcelPts2d,0.01,0.06,pm);
+        if(pmesh) scene.add(pmesh);
+      }
+    }catch(e){}
 
   }catch(e){ console.warn('Streets:', e.message); }
 }
