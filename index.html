@@ -12,7 +12,8 @@ html,body{height:100%;font-family:'Segoe UI',Arial,sans-serif;background:#0b1220
 #map{position:fixed;inset:0;z-index:0}
 
 /* TOPBAR */
-#topbar{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;gap:6px;padding:7px 10px;background:linear-gradient(180deg,rgba(8,37,74,.95),rgba(8,37,74,.7));backdrop-filter:blur(8px);flex-wrap:nowrap}
+#topbar{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;gap:6px;padding:7px 10px;background:linear-gradient(180deg,rgba(8,37,74,.95),rgba(8,37,74,.7));backdrop-filter:blur(8px);flex-wrap:nowrap;overflow-x:auto;-ms-overflow-style:none;scrollbar-width:none}
+#topbar::-webkit-scrollbar{display:none}
 .logo{color:#d4af37;font-weight:800;font-size:14px;letter-spacing:2px;margin-right:4px;white-space:nowrap}
 .tb-btn,.tb-sel{border:1px solid rgba(255,255,255,.2);background:rgba(11,18,32,.8);color:#e2e8f0;border-radius:8px;padding:6px 11px;font-size:12px;cursor:pointer;white-space:nowrap;transition:all .15s;min-height:34px}
 .tb-btn:hover{background:rgba(59,130,246,.35);border-color:#3b82f6}
@@ -485,6 +486,7 @@ canvas#c2d{width:100%;height:100%;display:block}
   <button class="tb-btn" id="btnLegend" title="Legendă funcțiuni clădiri" onclick="toggleFnLegend(this)">🎨 Legend</button>
   <button class="tb-btn" id="btnPanel" style="background:rgba(212,175,55,.2);border-color:#d4af37;color:#d4af37">☰</button>
   <button class="tb-btn" id="btnPDF" title="Export PDF / Raport">⬇ PDF</button>
+  <button class="tb-btn" onclick="generateSolarStudy()" title="Studiu însorire PDF" style="background:rgba(251,191,36,.15);border-color:rgba(251,191,36,.5);color:#fbbf24;font-size:11px;flex-shrink:0">☀ Însorire</button>
   <!-- Mobile: buton GPS și 3D/2D vizibile întotdeauna -->
 </div>
 
@@ -558,7 +560,15 @@ canvas#c2d{width:100%;height:100%;display:block}
   </button>
   <button class="mnav-btn" data-mt="indicatori" onclick="mobNavClick('indicatori',this)">
     <span class="mnav-icon">📊</span>
-    
+    <span class="mnav-label">Indicatori</span>
+  </button>
+  <button class="mnav-btn" onclick="aedisOpenLoisir()" style="color:#4ade80">
+    <span class="mnav-icon">🌿</span>
+    <span class="mnav-label">Loisir</span>
+  </button>
+  <button class="mnav-btn" onclick="generateSolarStudy()" style="color:#fbbf24">
+    <span class="mnav-icon">☀</span>
+    <span class="mnav-label">Însorire</span>
   </button>
 </nav>
 
@@ -631,7 +641,7 @@ canvas#c2d{width:100%;height:100%;display:block}
 
     <div style="display:flex;gap:8px;margin-top:16px">
       <button class="btn-p" onclick="runExport()" style="flex:1;font-size:15px;font-weight:700">⬇ Generează PDF</button>
-        <button class="tb-btn" onclick="generateSolarStudy()" title="Studiu însorire PDF" style="background:rgba(251,191,36,.15);border-color:rgba(251,191,36,.5);color:#fbbf24;font-size:12px">☀</button>
+        
       <button class="btn-s" onclick="$('pdf-modal').classList.remove('open')">Anulează</button>
     </div>
   </div>
@@ -8127,46 +8137,28 @@ function _v3dInit(ap){
         }catch(e){}
       }
 
-      // ── Pereți per latură — BoxGeometry subțire, DoubleSide, UV corecte ─
-      const wallMatDef = floor < 0
+      // ── AEDIS solid: ExtrudeGeometry cu material per etaj ──────────────
+      const wallMat = floor < 0
         ? PBR.roof
         : floor === 0 ? PBR.parter
         : f.properties?.isLast ? PBR.penthouse
         : _v3dFloorMat(THREE, colHex, floor, stilKey);
 
-      // Forțăm DoubleSide pe orice material
-      if(wallMatDef && wallMatDef.side !== undefined) wallMatDef.side = THREE.DoubleSide;
+      const solidShape = new THREE.Shape();
+      solidShape.moveTo(pts[0][0], pts[0][1]);
+      for(let i=1;i<pts.length-1;i++) solidShape.lineTo(pts[i][0],pts[i][1]);
+      solidShape.closePath();
 
-      for(let i=0;i<pts.length-1;i++){
-        const [x0,z0] = pts[i];
-        const [x1,z1] = pts[i+1];
-        const dx = x1-x0, dz = z1-z0;
-        const len = Math.sqrt(dx*dx+dz*dz);
-        if(len < 0.05) continue;
-
-        // BoxGeometry: width=lungime latură, height=h etaj, depth=grosime mică
-        // UV-urile pe fața frontală (width×height) sunt corecte automat
-        const wallGeo = new THREE.BoxGeometry(len, h, 0.15,
-          Math.max(1, Math.round(len/3)),   // segmente U
-          Math.max(1, Math.round(h/1.5)),   // segmente V
-          1
-        );
-        const wall = new THREE.Mesh(wallGeo, wallMatDef);
-
-        // Centrul peretelui în spațiu local
-        const cx_w = (x0+x1)/2;
-        const cz_w = (z0+z1)/2;
-        wall.position.set(cx_w, base + h/2, cz_w);
-
-        // Rotație corectă: peretele stă de-a lungul laturii
-        // atan2(dz, dx) = unghiul față de axa X în planul XZ
-        wall.rotation.y = -Math.atan2(dz, dx);
-
-        wall.castShadow  = true;
-        wall.receiveShadow = true;
-        scene.add(wall);
-        V3D.aedisMeshes.push(wall);
-      }
+      const extGeo = new THREE.ExtrudeGeometry(solidShape, {
+        depth: h, bevelEnabled: false
+      });
+      const solidMesh = new THREE.Mesh(extGeo, wallMat);
+      solidMesh.rotation.x = -Math.PI/2;
+      solidMesh.position.y = base;
+      solidMesh.castShadow = true;
+      solidMesh.receiveShadow = true;
+      scene.add(solidMesh);
+      V3D.aedisMeshes.push(solidMesh);
     }catch(e){ console.warn('AEDIS mesh error:', e.message); }
   });
 
@@ -8269,19 +8261,16 @@ function _v3dMakePBR(THREE, stilKey){
   const concTex  = makeConcreteTexture(d.parterCol, d.parterR);
   const metalTex = makeMetalTexture(d.roofCol);
 
-  const DS = THREE.DoubleSide;
   return {
     parter: new THREE.MeshStandardMaterial({
-      map:concTex, roughness:d.parterR, metalness:0.05, side:DS
+      map:concTex, roughness:d.parterR, metalness:0.05
     }),
     facade: null,
     penthouse: new THREE.MeshStandardMaterial({
-      map:metalTex, roughness:0.22, metalness:0.65,
-      color:d.roofCol, side:DS
+      map:metalTex, roughness:0.22, metalness:0.65, color:d.roofCol
     }),
     roof: new THREE.MeshStandardMaterial({
-      map:metalTex, roughness:d.roofR, metalness:d.roofM,
-      color:d.roofCol, side:DS
+      map:metalTex, roughness:d.roofR, metalness:d.roofM, color:d.roofCol
     })
   };
 }
@@ -8453,8 +8442,7 @@ function _v3dFloorMat(THREE, colorHex, floorIdx, stilKey){
   return new THREE.MeshStandardMaterial({
     map: tex,
     roughness: isGlass ? 0.06 : isIndustrial ? 0.4 : 0.75,
-    metalness: isGlass ? 0.10 : isIndustrial ? 0.5 : 0.02,
-    side: THREE.DoubleSide
+    metalness: isGlass ? 0.10 : isIndustrial ? 0.5 : 0.02
   });
 }
 
