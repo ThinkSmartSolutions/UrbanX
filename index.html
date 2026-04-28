@@ -1211,14 +1211,7 @@ function addLayers(){
     'fill-extrusion-color':['coalesce',['get','color'],'#f59e0b'],
     'fill-extrusion-height':['coalesce',['get','top'],9],
     'fill-extrusion-base':['coalesce',['get','base'],0],
-    'fill-extrusion-opacity':[
-      'case',
-      ['==',['get','roofType'],'parapet'], 0.97,
-      ['==',['get','roofType'],'terasa'],  0.85,
-      ['boolean',['get','isExistent'],false], 0.55,
-      ['<',['coalesce',['get','floor'],0], 0], 0.88,
-      0.94
-    ],
+    'fill-extrusion-opacity': 0.93,
     'fill-extrusion-vertical-gradient': true,
     'fill-extrusion-ambient-occlusion-intensity': 0.4,
     'fill-extrusion-ambient-occlusion-radius': 3.0
@@ -7792,6 +7785,9 @@ const V3D = {
 function _v3dDispose(){
   if(V3D.animFrame) cancelAnimationFrame(V3D.animFrame);
   if(V3D.renderer){ V3D.renderer.dispose(); V3D.renderer=null; }
+  // Dispose textures
+  Object.values(_v3dTexCache).forEach(t=>t.dispose());
+  Object.keys(_v3dTexCache).forEach(k=>delete _v3dTexCache[k]);
   V3D.scene=null; V3D.camera=null; V3D.controls=null;
   V3D.ctxMeshes=[]; V3D.aedisMeshes=[];
 }
@@ -7837,7 +7833,7 @@ function _v3dInit(ap){
 
   // ── Ground plane ─────────────────────────────────────────────────────────
   const groundGeo = new THREE.PlaneGeometry(500, 500);
-  const groundMat = new THREE.MeshLambertMaterial({ color:'#1a2332', side:THREE.DoubleSide });
+  const groundMat = new THREE.MeshStandardMaterial({ color:'#111827', roughness:0.95, metalness:0.0, side:THREE.DoubleSide });
   const ground = new THREE.Mesh(groundGeo, groundMat);
   ground.rotation.x = -Math.PI/2;
   ground.receiveShadow = true;
@@ -7885,7 +7881,7 @@ function _v3dInit(ap){
       const extGeo = new THREE.ExtrudeGeometry(shape,{
         depth: h, bevelEnabled:false
       });
-      const mat = new THREE.MeshLambertMaterial({ color: colHex });
+      const mat = new THREE.MeshStandardMaterial({ color: colHex, roughness:0.85, metalness:0.02 });
       const mesh = new THREE.Mesh(extGeo, mat);
       mesh.rotation.x = -Math.PI/2;
       mesh.receiveShadow = true;
@@ -7960,6 +7956,9 @@ function _v3dInit(ap){
     scene.add(new THREE.LineLoop(outGeo, outMat));
   }catch(e){}
 
+  // ── Incarcam strazile OSM (async, nu blocheaza render) ────────────────────
+  _v3dLoadStreets(cx, cy, toLocal, scene, THREE);
+
   // ── Camera position ───────────────────────────────────────────────────────
   const aedisH = aedisFeats.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||12;
   const parcelSize = Math.max(
@@ -7997,53 +7996,193 @@ function _v3dInit(ap){
 
 // ── PBR Materials per stil ────────────────────────────────────────────────────
 function _v3dMakePBR(THREE, stilKey){
+  // Textură beton procedurală pentru soclu/parter
+  function makeConcreteTexture(baseColor, roughVal){
+    const cv=document.createElement('canvas'); cv.width=256; cv.height=256;
+    const ctx=cv.getContext('2d');
+    ctx.fillStyle=baseColor; ctx.fillRect(0,0,256,256);
+    // Linii cofraj orizontale
+    ctx.strokeStyle='rgba(0,0,0,0.15)'; ctx.lineWidth=1;
+    for(let y=0;y<256;y+=24){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(256,y);ctx.stroke();}
+    // Noise beton
+    const id=ctx.getImageData(0,0,256,256);
+    for(let i=0;i<id.data.length;i+=4){
+      const n=(Math.random()-0.5)*18;
+      id.data[i]+=n;id.data[i+1]+=n;id.data[i+2]+=n;
+    }
+    ctx.putImageData(id,0,0);
+    const tex=new THREE.CanvasTexture(cv);
+    tex.wrapS=tex.wrapT=THREE.RepeatWrapping;
+    tex.repeat.set(2,2);
+    return tex;
+  }
+  // Textură metal pentru penthouse/atic
+  function makeMetalTexture(baseColor){
+    const cv=document.createElement('canvas'); cv.width=256; cv.height=256;
+    const ctx=cv.getContext('2d');
+    ctx.fillStyle=baseColor; ctx.fillRect(0,0,256,256);
+    // Linii panouri
+    ctx.strokeStyle='rgba(255,255,255,0.08)'; ctx.lineWidth=2;
+    for(let x=0;x<256;x+=32){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,256);ctx.stroke();}
+    const grd=ctx.createLinearGradient(0,0,256,0);
+    grd.addColorStop(0,'rgba(255,255,255,0.04)');
+    grd.addColorStop(0.5,'rgba(255,255,255,0.12)');
+    grd.addColorStop(1,'rgba(255,255,255,0.04)');
+    ctx.fillStyle=grd; ctx.fillRect(0,0,256,256);
+    const tex=new THREE.CanvasTexture(cv);
+    tex.wrapS=tex.wrapT=THREE.RepeatWrapping;
+    return tex;
+  }
+
   const defs = {
-    modern: {
-      parter:    {color:'#0f172a', roughness:0.7, metalness:0.1},
-      facade:    {color:'#1d4ed8', roughness:0.1, metalness:0.05},
-      penthouse: {color:'#0f172a', roughness:0.3, metalness:0.6},
-      roof:      {color:'#0c1a2e', roughness:0.5, metalness:0.4},
-    },
-    clasic: {
-      parter:    {color:'#3d1f08', roughness:0.9, metalness:0.0},
-      facade:    {color:'#a0522d', roughness:0.85, metalness:0.0},
-      penthouse: {color:'#6b3a10', roughness:0.8, metalness:0.0},
-      roof:      {color:'#2d1608', roughness:0.9, metalness:0.0},
-    },
-    minimalist: {
-      parter:    {color:'#27272a', roughness:0.8, metalness:0.0},
-      facade:    {color:'#e4e4e7', roughness:0.7, metalness:0.0},
-      penthouse: {color:'#52525b', roughness:0.6, metalness:0.1},
-      roof:      {color:'#3f3f46', roughness:0.5, metalness:0.2},
-    },
-    inovator: {
-      parter:    {color:'#2e1065', roughness:0.3, metalness:0.5},
-      facade:    {color:'#7c3aed', roughness:0.15, metalness:0.3},
-      penthouse: {color:'#1e1b4b', roughness:0.2, metalness:0.7},
-      roof:      {color:'#0e0b2e', roughness:0.4, metalness:0.6},
-    },
-    industrial: {
-      parter:    {color:'#0c0a09', roughness:0.6, metalness:0.5},
-      facade:    {color:'#44403c', roughness:0.5, metalness:0.4},
-      penthouse: {color:'#1c1917', roughness:0.4, metalness:0.7},
-      roof:      {color:'#0c0a09', roughness:0.3, metalness:0.8},
-    },
+    modern:     { parterCol:'#0f172a', roofCol:'#0c1a2e',   parterR:0.75, roofR:0.35, roofM:0.5 },
+    clasic:     { parterCol:'#3d1f08', roofCol:'#2d1608',   parterR:0.9,  roofR:0.85, roofM:0.0 },
+    minimalist: { parterCol:'#27272a', roofCol:'#3f3f46',   parterR:0.8,  roofR:0.45, roofM:0.2 },
+    inovator:   { parterCol:'#2e1065', roofCol:'#0e0b2e',   parterR:0.3,  roofR:0.25, roofM:0.7 },
+    industrial: { parterCol:'#0c0a09', roofCol:'#0c0a09',   parterR:0.55, roofR:0.2,  roofM:0.8 },
   };
   const d = defs[stilKey]||defs.modern;
-  const mk = (def) => new THREE.MeshStandardMaterial({
-    color: def.color, roughness: def.roughness, metalness: def.metalness
-  });
-  return { parter:mk(d.parter), facade:mk(d.facade), penthouse:mk(d.penthouse), roof:mk(d.roof) };
+
+  const concTex  = makeConcreteTexture(d.parterCol, d.parterR);
+  const metalTex = makeMetalTexture(d.roofCol);
+
+  return {
+    parter: new THREE.MeshStandardMaterial({
+      map:concTex, roughness:d.parterR, metalness:0.05
+    }),
+    facade: null, // folosit din _v3dFloorMat cu ferestre
+    penthouse: new THREE.MeshStandardMaterial({
+      map:metalTex, roughness:0.25, metalness:0.6,
+      color: d.roofCol
+    }),
+    roof: new THREE.MeshStandardMaterial({
+      map:metalTex, roughness:d.roofR, metalness:d.roofM,
+      color: d.roofCol
+    })
+  };
 }
 
+// Cache pentru texturi canvas (nu regenerăm per etaj)
+const _v3dTexCache = {};
+
 function _v3dFloorMat(THREE, colorHex, floorIdx, stilKey){
-  // Per-etaj material cu variatie de roughness/metalness pentru sticlă
-  const isGlass = ['modern','inovator'].includes(stilKey);
+  const isGlass   = ['modern','inovator'].includes(stilKey);
+  const isPlaster = ['clasic','minimalist','adaptat_context'].includes(stilKey);
+  const isIndustrial = stilKey === 'industrial';
+
+  // Generăm textură canvas cu ferestre
+  const cacheKey = stilKey + '_' + colorHex + '_' + (floorIdx%3);
+  if(!_v3dTexCache[cacheKey]){
+    const cv = document.createElement('canvas');
+    cv.width = 256; cv.height = 256;
+    const ctx = cv.getContext('2d');
+
+    // Fond fatada
+    ctx.fillStyle = colorHex;
+    ctx.fillRect(0,0,256,256);
+
+    if(isGlass){
+      // Grid ferestre sticla
+      const cols=4, rows=4;
+      const pw=256/cols, ph=256/rows;
+      const margin=pw*0.12;
+      for(let r=0;r<rows;r++) for(let cl=0;cl<cols;cl++){
+        // Interior fereastra - gradient sticla
+        const grd = ctx.createLinearGradient(
+          cl*pw+margin, r*ph+margin,
+          cl*pw+pw-margin, r*ph+ph-margin
+        );
+        const isLit = Math.random() > 0.35;
+        grd.addColorStop(0, isLit ? 'rgba(180,210,255,0.65)' : 'rgba(40,70,120,0.7)');
+        grd.addColorStop(0.5, isLit ? 'rgba(140,190,240,0.55)' : 'rgba(20,45,90,0.6)');
+        grd.addColorStop(1, isLit ? 'rgba(160,200,250,0.6)' : 'rgba(30,55,100,0.65)');
+        ctx.fillStyle = grd;
+        ctx.fillRect(cl*pw+margin, r*ph+margin, pw-margin*2, ph-margin*2);
+        // Frame metalic
+        ctx.strokeStyle = 'rgba(180,200,220,0.4)';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(cl*pw+margin, r*ph+margin, pw-margin*2, ph-margin*2);
+        // Cruce fereastra
+        ctx.strokeStyle = 'rgba(160,185,210,0.3)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(cl*pw+pw/2, r*ph+margin);
+        ctx.lineTo(cl*pw+pw/2, r*ph+ph-margin);
+        ctx.moveTo(cl*pw+margin, r*ph+ph/2);
+        ctx.lineTo(cl*pw+pw-margin, r*ph+ph/2);
+        ctx.stroke();
+      }
+      // Subtle reflection highlight
+      const refGrd = ctx.createLinearGradient(0,0,256,256);
+      refGrd.addColorStop(0,'rgba(255,255,255,0.06)');
+      refGrd.addColorStop(0.5,'rgba(255,255,255,0.0)');
+      refGrd.addColorStop(1,'rgba(255,255,255,0.04)');
+      ctx.fillStyle = refGrd; ctx.fillRect(0,0,256,256);
+
+    } else if(isPlaster){
+      // Tencuiala cu ferestre traditionale
+      const cols=3, rows=4;
+      const pw=256/cols, ph=256/rows;
+      const wx=pw*0.5, wy=ph*0.45;
+      for(let r=0;r<rows;r++) for(let cl=0;cl<cols;cl++){
+        const ox=cl*pw+(pw-wx)/2, oy=r*ph+(ph-wy)/2;
+        // Glaf
+        ctx.fillStyle='rgba(0,0,0,0.18)';
+        ctx.fillRect(ox-2,oy-2,wx+4,wy+4);
+        // Fereastra - arch top for clasic
+        if(stilKey==='clasic'){
+          ctx.beginPath();
+          ctx.rect(ox,oy+wx*0.2,wx,wy-wx*0.2);
+          ctx.arc(ox+wx/2,oy+wx*0.2,wx/2,Math.PI,0);
+          ctx.fillStyle=`rgba(180,200,220,0.5)`;
+          ctx.fill();
+        } else {
+          ctx.fillStyle=`rgba(180,200,225,0.45)`;
+          ctx.fillRect(ox,oy,wx,wy);
+        }
+        // Rama
+        ctx.strokeStyle='rgba(255,255,255,0.3)';
+        ctx.lineWidth=1.5;
+        ctx.strokeRect(ox,oy,wx,wy);
+      }
+      // Noise tencuiala
+      const imgData = ctx.getImageData(0,0,256,256);
+      for(let i=0;i<imgData.data.length;i+=4){
+        const n=(Math.random()-0.5)*12;
+        imgData.data[i]+=n; imgData.data[i+1]+=n; imgData.data[i+2]+=n;
+      }
+      ctx.putImageData(imgData,0,0);
+
+    } else if(isIndustrial){
+      // Panouri metalice + obloane
+      const cols=2, rows=3;
+      const pw=256/cols, ph=256/rows;
+      for(let r=0;r<rows;r++) for(let cl=0;cl<cols;cl++){
+        // Panel
+        ctx.strokeStyle='rgba(0,0,0,0.4)'; ctx.lineWidth=3;
+        ctx.strokeRect(cl*pw+4,r*ph+4,pw-8,ph-8);
+        // Nit-uri colt
+        [[8,8],[pw-8,8],[8,ph-8],[pw-8,ph-8]].forEach(([nx,ny])=>{
+          ctx.beginPath();
+          ctx.arc(cl*pw+nx,r*ph+ny,3,0,Math.PI*2);
+          ctx.fillStyle='rgba(0,0,0,0.35)'; ctx.fill();
+        });
+        // Fereastra industriala
+        ctx.fillStyle='rgba(120,150,180,0.3)';
+        ctx.fillRect(cl*pw+pw*0.2,r*ph+ph*0.25,pw*0.6,ph*0.35);
+      }
+    }
+
+    _v3dTexCache[cacheKey] = new THREE.CanvasTexture(cv);
+    _v3dTexCache[cacheKey].wrapS = THREE.RepeatWrapping;
+    _v3dTexCache[cacheKey].wrapT = THREE.RepeatWrapping;
+  }
+
+  const tex = _v3dTexCache[cacheKey];
   return new THREE.MeshStandardMaterial({
-    color: colorHex,
-    roughness: isGlass ? Math.max(0.05, 0.15 - floorIdx*0.01) : 0.8,
-    metalness: isGlass ? 0.08 : 0.0,
-    envMapIntensity: isGlass ? 0.6 : 0.1
+    map: tex,
+    roughness: isGlass ? 0.08 : isIndustrial ? 0.4 : 0.75,
+    metalness: isGlass ? 0.12 : isIndustrial ? 0.5 : 0.02,
   });
 }
 
@@ -8207,6 +8346,84 @@ function _v3dInitControls(canvas, camera, targetH){
   },{passive:false});
 
   V3D._updateCamera = updateCamera;
+}
+
+function _v3dLoadStreets(cx, cy, toLocal, scene, THREE){
+  const q = `[out:json][timeout:15];(
+    way["highway"~"^(primary|secondary|tertiary|residential|unclassified|service|footway|pedestrian|path|living_street|trunk)$"](around:180,${cy},${cx});
+  );out geom;`;
+
+  fetch('https://overpass-api.de/api/interpreter', {
+    method:'POST', body:q,
+    signal: AbortSignal.timeout(15000)
+  })
+  .then(r=>r.json())
+  .then(data=>{
+    if(!data.elements?.length) return;
+
+    // Latimi per tip strada (metri)
+    const widths = {
+      trunk:9, primary:7, secondary:6, tertiary:5,
+      residential:4, unclassified:4, service:3,
+      footway:1.5, pedestrian:2, path:1.2, living_street:3.5
+    };
+
+    data.elements.forEach(way=>{
+      if(!way.geometry?.length) return;
+      const hw = way.tags?.highway||'unclassified';
+      const w  = (widths[hw]||3) / 2;
+      const pts = way.geometry.map(p=>toLocal(p.lon, p.lat));
+      if(pts.length < 2) return;
+
+      // Culoare per tip strada
+      const colMap = {
+        trunk:'#1e3a5f', primary:'#1e3a5f', secondary:'#1a3350',
+        tertiary:'#152a40', residential:'#111f30',
+        footway:'#0d1a25', pedestrian:'#0d1a25',
+        service:'#0d1824', path:'#0a1520', living_street:'#111f30'
+      };
+      const col = colMap[hw]||'#111f30';
+
+      // Construim mesh latime variabila (ribbon)
+      const verts=[], indices=[], uvs=[];
+      for(let i=0;i<pts.length-1;i++){
+        const [x0,z0]=pts[i], [x1,z1]=pts[i+1];
+        const dx=x1-x0, dz=z1-z0;
+        const len=Math.sqrt(dx*dx+dz*dz);
+        if(len<0.01) continue;
+        const nx=-dz/len, nz=dx/len; // normala perpendiculara
+        const base=i*2;
+        verts.push(
+          x0+nx*w, 0.05, z0+nz*w,  // stanga
+          x0-nx*w, 0.05, z0-nz*w   // dreapta
+        );
+        if(i===pts.length-2){
+          verts.push(x1+nx*w,0.05,z1+nz*w, x1-nx*w,0.05,z1-nz*w);
+        }
+        uvs.push(0,i/pts.length, 1,i/pts.length);
+        if(i<pts.length-2){
+          indices.push(base,base+1,base+2, base+1,base+3,base+2);
+        }
+      }
+      if(!verts.length) return;
+
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(verts,3));
+      if(indices.length) geo.setIndex(indices);
+      geo.computeVertexNormals();
+
+      const mat = new THREE.MeshStandardMaterial({
+        color:col, roughness:0.95, metalness:0.0
+      });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.receiveShadow = true;
+      scene.add(mesh);
+      V3D.ctxMeshes.push(mesh); // trackam pentru toggle
+    });
+
+    _v3dStatus(`✅ Viewer 3D · ${V3D.aedisMeshes.length} vol. AEDIS · ${V3D.ctxMeshes.length} obiecte context · Drag rotire`);
+  })
+  .catch(e=>console.warn('Streets Overpass error:', e.message));
 }
 
 function _v3dResetCamera(){
