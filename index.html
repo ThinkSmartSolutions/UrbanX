@@ -2335,27 +2335,34 @@ function updateDistanceLines(){
 
   if(ctxFeats.length){
     const parcelCenter = turf.centerOfMass(combinedParcel);
-    const adjacentCtxAll = ctxFeats.filter(ctx=>{
+
+    // Pre-filtrăm: excludem clădirile de pe parcelele noastre
+    const ctxNotOwn = ctxFeats.filter(ctx=>{
       try{
         const ctxCtr = turf.centerOfMass(ctx);
-        // Excludem cladirile care sunt pe oricare din parcelele noastre
         for(const p of S.parcels){
           if(!p.geo?.geometry) continue;
           const pf2={type:'Feature',geometry:p.geo.geometry,properties:{}};
           if(turf.booleanPointInPolygon(ctxCtr,pf2)) return false;
         }
-        // Distanță față de parcelă — includem clădirile până la 60m
-        const ctxCtrDist = turf.distance(parcelCenter, ctxCtr, {units:'meters'});
-        if(ctxCtrDist > 60) return false;
-        return true;
+        // Pre-filtrare rapida: centroid max 150m (eliminam clădiri îndepărtate)
+        return turf.distance(parcelCenter, ctxCtr, {units:'meters'}) < 150;
       }catch(e){ return false; }
     });
-    // Limităm la max 6 clădiri cele mai apropiate pentru un UI curat
-    const adjacentCtx = adjacentCtxAll
-      .map(ctx=>{ try{ return {ctx, d:turf.distance(parcelCenter,turf.centerOfMass(ctx),{units:'meters'})}; }catch(e){return null;} })
-      .filter(Boolean)
-      .sort((a,b)=>a.d-b.d)
-      .slice(0,6)
+
+    // Calculăm distanța REALĂ (contur la contur) față de primul volum AEDIS
+    const firstVol = myBldArr[0];
+    const withDist = ctxNotOwn.map(ctx=>{
+      try{
+        const {dist} = minDistBetweenPolygons(firstVol, ctx);
+        return {ctx, dist};
+      }catch(e){ return {ctx, dist:999}; }
+    }).filter(x=>x.dist<100); // max 100m contur la contur
+
+    // Sortăm după distanță reală, luăm max 8 cei mai apropiați
+    const adjacentCtx = withDist
+      .sort((a,b)=>a.dist-b.dist)
+      .slice(0,8)
       .map(x=>x.ctx);
 
     // Pentru fiecare cladire adiacenta, calculam distanta minima fata de oricare volum generat
@@ -5954,7 +5961,12 @@ function aedisBuild(){
     setTimeout(updateDistanceLines, 400);
   }
 
-  ss(`✅ AEDIS: ${totalNiv} niveluri · H=${(currentH-baseH).toFixed(1)}m · ${fnDef.label} · ${AEDIS_STIL[AEDIS.stil].label}`);
+  const _lastNiv = AEDIS.corpuri[0]?.niv || 4;
+  const _lastHNiv = AEDIS.corpuri[0]?.hNiv || 3.0;
+  const _lastFnDef = AEDIS_FN[AEDIS.fn] || AEDIS_FN.rezidential_colectiv;
+  const _lastH = (AEDIS.parterDiferit?(_lastFnDef.hParter||4.5):_lastHNiv)+(_lastNiv-1)*_lastHNiv;
+  const _multiMsg = S.parcels.length>1 ? ` · ${S.parcels.length} parcele` : '';
+  ss(`✅ AEDIS: ${_lastNiv} niveluri · H=${_lastH.toFixed(1)}m · ${_lastFnDef.label} · ${AEDIS_STIL[AEDIS.stil]?.label||''}${_multiMsg}`);
 }
 
 // ── Etichete dimensionale AEDIS ────────────────────────────────────────────
@@ -7934,36 +7946,33 @@ function _v3dInit(ap){
       if(!fring||fring.length<3) return;
       const pts = fring.map(([lng,lat])=>toLocal(lng,lat));
 
-      // ── Plafon etaj (doar dacă e ultimul etaj sau acoperiș) ───────────────
+      // ── Acoperiș: ExtrudeGeometry plat (h=0.12) — coordonate corecte ────
       const isRoofFeature = floor < 0 || !!f.properties?.roofType;
       const isTopFloor    = !!f.properties?.isLast;
-      const showRoof = isRoofFeature || isTopFloor;
 
-      const shape = new THREE.Shape();
-      shape.moveTo(pts[0][0], pts[0][1]);
-      for(let i=1;i<pts.length-1;i++) shape.lineTo(pts[i][0], pts[i][1]);
-      shape.closePath();
+      if(isRoofFeature || isTopFloor){
+        try{
+          // Shape în XZ via ExtrudeGeometry cu depth mic
+          const roofShape = new THREE.Shape();
+          // pts[i]=[x,z] — shape în planul XY, rotit -PI/2 → planul XZ
+          roofShape.moveTo(pts[0][0], pts[0][1]);
+          for(let i=1;i<pts.length-1;i++) roofShape.lineTo(pts[i][0], pts[i][1]);
+          roofShape.closePath();
 
-      if(showRoof){
-        const roofMat2 = isRoofFeature ? PBR.roof : PBR.penthouse;
-        const roofGeo = new THREE.ShapeGeometry(shape);
-        const roofMesh = new THREE.Mesh(roofGeo, roofMat2);
-        roofMesh.rotation.x = -Math.PI/2;
-        roofMesh.position.y = top - 0.01;
-        roofMesh.receiveShadow = true;
-        roofMesh.castShadow = false;
-        scene.add(roofMesh);
-        V3D.aedisMeshes.push(roofMesh);
-      }
-
-      // Planșeu la sol (doar parter, o singura dată)
-      if(floor === 0 && base < 0.5){
-        const floorGeo = new THREE.ShapeGeometry(shape);
-        const floorMesh = new THREE.Mesh(floorGeo, PBR.parter);
-        floorMesh.rotation.x = Math.PI/2;
-        floorMesh.position.y = 0.02;
-        scene.add(floorMesh);
-        V3D.aedisMeshes.push(floorMesh);
+          const roofGeo = new THREE.ExtrudeGeometry(roofShape, {
+            depth: 0.20, bevelEnabled: false
+          });
+          const roofMat2 = isRoofFeature ? PBR.roof : PBR.penthouse;
+          const roofMesh = new THREE.Mesh(roofGeo, roofMat2);
+          // ExtrudeGeometry extrude pe Z → rotim -PI/2 pe X → extrude merge în jos (Y-)
+          roofMesh.rotation.x = -Math.PI/2;
+          // Plasăm exact la top, extrude-ul de 0.2m merge în jos (invizibil)
+          roofMesh.position.y = top;
+          roofMesh.castShadow = true;
+          roofMesh.receiveShadow = true;
+          scene.add(roofMesh);
+          V3D.aedisMeshes.push(roofMesh);
+        }catch(e){}
       }
 
       // ── Pereți per latură — BoxGeometry subțire, DoubleSide, UV corecte ─
@@ -8389,17 +8398,24 @@ function _v3dInitControls(canvas, camera, targetH){
   const THREE = window.THREE;
   let isDragging=false, isShift=false;
   let lastX=0, lastY=0;
-  let theta=Math.PI/4, phi=Math.PI/3.5;
-  let radius = V3D.camDist||60;
-  const target = V3D.camTarget||new THREE.Vector3(0,targetH*0.4,0);
+  // Stocam in V3D pentru a putea fi accesate din _v3dResetCamera
+  V3D.theta   = Math.PI/4;
+  V3D.phi     = Math.PI/3.5;
+  V3D.radius  = V3D.camDist||60;
+  V3D.target  = V3D.camTarget || new THREE.Vector3(0, targetH*0.4, 0);
+  V3D.initTheta  = V3D.theta;
+  V3D.initPhi    = V3D.phi;
+  V3D.initRadius = V3D.radius;
+  V3D.targetH    = targetH;
 
   function updateCamera(){
-    const x = radius * Math.sin(phi) * Math.sin(theta);
-    const y = radius * Math.cos(phi);
-    const z = radius * Math.sin(phi) * Math.cos(theta);
-    camera.position.set(target.x+x, target.y+y, target.z+z);
-    camera.lookAt(target);
+    const x = V3D.radius * Math.sin(V3D.phi) * Math.sin(V3D.theta);
+    const y = V3D.radius * Math.cos(V3D.phi);
+    const z = V3D.radius * Math.sin(V3D.phi) * Math.cos(V3D.theta);
+    camera.position.set(V3D.target.x+x, V3D.target.y+y, V3D.target.z+z);
+    camera.lookAt(V3D.target);
   }
+  V3D._forceUpdate = updateCamera;
   updateCamera();
 
   canvas.addEventListener('mousedown', e=>{ 
@@ -8418,11 +8434,11 @@ function _v3dInitControls(canvas, camera, targetH){
     if(isShift||e.buttons===4){
       const right = new THREE.Vector3(); 
       right.crossVectors(camera.getWorldDirection(new THREE.Vector3()), camera.up).normalize();
-      target.addScaledVector(right, -dx*radius*0.4);
-      target.y += dy*radius*0.4;
+      V3D.target.addScaledVector(right, -dx*V3D.radius*0.4);
+      V3D.target.y += dy*V3D.radius*0.4;
     } else {
-      theta -= dx;
-      phi = Math.max(0.08, Math.min(Math.PI/2.1, phi+dy));
+      V3D.theta -= dx;
+      V3D.phi = Math.max(0.08, Math.min(Math.PI/2.1, V3D.phi+dy));
     }
     updateCamera();
   };
@@ -8431,7 +8447,7 @@ function _v3dInitControls(canvas, camera, targetH){
   canvas.addEventListener('wheel', e=>{
     e.preventDefault();
     const factor = e.deltaY > 0 ? 1.08 : 0.93;
-    radius = Math.max(6, Math.min(250, radius*factor));
+    V3D.radius = Math.max(6, Math.min(250, V3D.radius*factor));
     updateCamera();
   },{passive:false});
 
@@ -8462,13 +8478,13 @@ function _v3dInitControls(canvas, camera, targetH){
     if(e.touches.length===1){
       const dx=(e.touches[0].clientX-lastTouchX)*0.006;
       const dy=(e.touches[0].clientY-lastTouchY)*0.006;
-      theta-=dx; phi=Math.max(0.1,Math.min(Math.PI/2-0.05,phi+dy));
+      V3D.theta-=dx; V3D.phi=Math.max(0.1,Math.min(Math.PI/2-0.05,V3D.phi+dy));
       lastTouchX=e.touches[0].clientX; lastTouchY=e.touches[0].clientY;
     } else if(e.touches.length===2){
       const dx=e.touches[0].clientX-e.touches[1].clientX;
       const dy=e.touches[0].clientY-e.touches[1].clientY;
       const dist=Math.sqrt(dx*dx+dy*dy);
-      radius=Math.max(8,Math.min(300,radius*(lastTouchDist/Math.max(1,dist))));
+      V3D.radius=Math.max(8,Math.min(300,V3D.radius*(lastTouchDist/Math.max(1,dist))));
       lastTouchDist=dist;
     }
     updateCamera();
@@ -8591,11 +8607,13 @@ function _v3dLoadStreets(cx, cy, toLocal, scene, THREE){
 }
 
 function _v3dResetCamera(){
-  if(!V3D._updateCamera) return;
-  const aedisH = (V3D.aedisMeshes.length ? 
-    V3D.aedisMeshes.reduce((m,mesh)=>Math.max(m,mesh.position.y+(mesh.geometry?.boundingBox?.max?.y||10)),0) : 12);
-  V3D.camDist = Math.max(40, aedisH*3);
-  V3D._updateCamera();
+  if(!V3D.initTheta) return;
+  V3D.theta  = V3D.initTheta;
+  V3D.phi    = V3D.initPhi;
+  V3D.radius = V3D.initRadius;
+  if(V3D.camTarget) V3D.target.copy(V3D.camTarget);
+  // Triggerăm updateCamera prin dispatch synthetic
+  if(V3D._forceUpdate) V3D._forceUpdate();
 }
 
 // ═══ INIT PDF BUTOANE ══════════════════════════════════════════════════════
