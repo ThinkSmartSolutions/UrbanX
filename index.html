@@ -2525,12 +2525,12 @@ function updateDistanceLines(){
         const {dist} = minDistBetweenPolygons(firstVol, ctx);
         return {ctx, dist};
       }catch(e){ return {ctx, dist:999}; }
-    }).filter(x=>x.dist<120); // max 100m contur la contur
+    }).filter(x=>x.dist<150); // max 150m contur la contur
 
-    // Sortăm după distanță reală, luăm max 8 cei mai apropiați
+    // Sortam dupa distanta reala, luam max 15 cei mai apropiati
     const adjacentCtx = withDist
       .sort((a,b)=>a.dist-b.dist)
-      .slice(0,12)
+      .slice(0,15)
       .map(x=>x.ctx);
 
     // Pentru fiecare cladire adiacenta, calculam distanta minima fata de oricare volum generat
@@ -5576,69 +5576,313 @@ async function exportVol3(pdf, ap, r, p){
 // ═══════════════════════════════════════════════════════════════════════════
 // MAIN EXPORT DISPATCHER
 // ═══════════════════════════════════════════════════════════════════════════
+async 
+// ── Safe text pentru jsPDF (elimina diacritice care cauzeaza erori) ───────────
+function _pdfSafe(str){
+  if(str===null||str===undefined) return '—';
+  return String(str)
+    .replace(/[ăÅ]/g,'a').replace(/[âÂ]/g,'a').replace(/[îÎ]/g,'i')
+    .replace(/[șȘşŞ]/g,'s').replace(/[țȚţŢ]/g,'t').replace(/[éèê]/g,'e')
+    .replace(/[óò]/g,'o').replace(/[úù]/g,'u').replace(/[ñ]/g,'n');
+}
+
 async function runExport(){
   const prog=$('pdf-progress');
   const msg=$('pdf-prog-msg');
-  prog.style.display='block';
+  if(prog) prog.style.display='block';
   const ap=S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry){ ss('Selectati mai intai o parcela.'); if(prog) prog.style.display='none'; return; }
+
   const r=S.rule||REGULI[ap?.utr||'']||{};
   const p=ap?.params||getDefaultParams(ap?.utr||'');
+  const utr=ap.utr||'—';
+  const nrcad=String(ap.nrcad||'—');
+  const area=ap.area?ap.area.toFixed(0):'—';
+  const fnDef=AEDIS_FN[AEDIS.fn]||AEDIS_FN.rezidential_colectiv;
+  const center=turf.centerOfMass(ap.geo);
+  const lat=center.geometry.coordinates[1];
+  const lon=center.geometry.coordinates[0];
+  const dateStr=new Date().toLocaleDateString('ro-RO',{day:'2-digit',month:'long',year:'numeric'});
+  const timeStr=new Date().toLocaleTimeString('ro-RO');
+  const pot=String(p.pot||'—');
+  const cut=String(p.cut||'—');
+  const hmax=String(p.hmax||'—');
+  const rf=String(p.rf||5);
+  const rl=String(p.rl||3);
+  const rs=String(p.rs||5);
+  const rr=String(p.rr||p.rl||3);
+  const sv=String(p.sv||30);
+  const niv=String(AEDIS.corpuri[0]?.niv||4);
+  const aedisH=(S.vol._lastFeats||[]).reduce((m,f)=>Math.max(m,f.properties?.top||0),0);
+
+  const S2=t=>_pdfSafe(t);
+
+  // Capturare harta
+  let mapImg='', mapImg2='';
+  try{
+    map.triggerRepaint();
+    await new Promise(r2=>setTimeout(r2,300));
+    mapImg=map.getCanvas().toDataURL('image/jpeg',0.88);
+  }catch(e){}
 
   try{
     const{jsPDF}=window.jspdf;
-    const dateStr=new Date().toLocaleDateString('ro').replace(/\./g,'-');
+    const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    const W=210,H=297;
+    const DARK=[10,22,48], GOLD=[200,150,10], BLUE=[26,58,106], LIGHT=[248,249,251];
 
-    if(_pdfOpt==='full'){
-      msg.textContent='Se generează raportul complet (4 pagini)…';
-      const pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
-      if(!ap){alert('Selectați o parcelă mai întâi.');prog.style.display='none';return;}
-      await exportFull(pdf,ap,r,p);
-      pdf.save(`UrbanX_Complet_${ap?.nrcad||'raport'}_${dateStr}.pdf`);
+    const hdr=(title,pg,tot)=>{
+      pdf.setFillColor(...DARK); pdf.rect(0,0,W,24,'F');
+      pdf.setFillColor(...GOLD); pdf.rect(0,0,W,2,'F'); pdf.rect(0,22,W,2,'F');
+      pdf.setTextColor(...GOLD); pdf.setFontSize(7); pdf.setFont('helvetica','bold');
+      pdf.text('URBANX AEDIS - RAPORT URBANISTIC',14,9);
+      pdf.setTextColor(255,255,255); pdf.setFontSize(11);
+      pdf.text(S2(title),W/2,14,{align:'center'});
+      pdf.setTextColor(150,170,190); pdf.setFontSize(7); pdf.setFont('helvetica','normal');
+      pdf.text('Pag.'+pg+'/'+tot,W-14,14,{align:'right'});
+    };
+    const ftr=()=>{
+      pdf.setFillColor(240,242,246); pdf.rect(0,H-12,W,12,'F');
+      pdf.setDrawColor(200,205,215); pdf.line(0,H-12,W,H-12);
+      pdf.setTextColor(100,110,130); pdf.setFontSize(6.5); pdf.setFont('helvetica','normal');
+      pdf.text('UrbanX AEDIS - Analiza Urbanistica - Parcela '+nrcad+' - '+S2(dateStr)+' - Valori orientative',W/2,H-4,{align:'center'});
+    };
+    const sec=(txt,y,col)=>{
+      col=col||BLUE;
+      pdf.setFillColor(...col); pdf.rect(14,y-4,W-28,7,'F');
+      pdf.setTextColor(255,255,255); pdf.setFontSize(8); pdf.setFont('helvetica','bold');
+      pdf.text(S2(txt),17,y); return y+8;
+    };
+    const row2=(l1,v1,l2,v2,y)=>{
+      const cw=(W-28)/4;
+      pdf.setFillColor(238,243,250); pdf.rect(14,y,W-28,7,'F');
+      pdf.setTextColor(80,95,115); pdf.setFont('helvetica','normal'); pdf.setFontSize(7.5);
+      pdf.text(S2(l1)+':',17,y+5);
+      pdf.setTextColor(20,40,80); pdf.setFont('helvetica','bold');
+      pdf.text(S2(v1),17+cw,y+5);
+      if(l2){
+        pdf.setTextColor(80,95,115); pdf.setFont('helvetica','normal');
+        pdf.text(S2(l2)+':',17+cw*2,y+5);
+        pdf.setTextColor(20,40,80); pdf.setFont('helvetica','bold');
+        pdf.text(S2(v2),17+cw*3,y+5);
+      }
+      return y+7;
+    };
+    const body=(txt,x,y,maxW)=>{
+      pdf.setTextColor(40,55,70); pdf.setFont('helvetica','normal'); pdf.setFontSize(8.5);
+      const lines=pdf.splitTextToSize(S2(txt),maxW||(W-28));
+      pdf.text(lines,x||14,y); return y+lines.length*5.2;
+    };
 
-    }else if(_pdfOpt==='vol3'){
-      msg.textContent='Se generează cele 3 scenarii (poate dura 30-60s)…';
-      const pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
-      if(!ap){alert('Selectați o parcelă mai întâi.');prog.style.display='none';return;}
-      // Prima pagina = cover
-      const mc0=await html2canvas($('map'),{useCORS:true,scale:1.5,logging:false});
-      const pw0=pdf.internal.pageSize.getWidth(),ph0=pdf.internal.pageSize.getHeight();
-      pdf.addImage(mc0.toDataURL('image/jpeg',.85),'JPEG',0,0,pw0,ph0);
-      pdf.setFillColor(...PDF_C.navy);pdf.rect(0,0,pw0,22,'F');
-      pdf.setFillColor(...PDF_C.gold);pdf.rect(0,22,pw0,1.5,'F');
-      pdf.setFont('helvetica','bold');pdf.setFontSize(16);pdf.setTextColor(...PDF_C.gold);
-      pdf.text('UrbanX',10,15);
-      pdf.setFontSize(11);pdf.setTextColor(200,210,230);
-      pdf.text('Analiză 3 Scenarii de Volumetrie',50,11);
-      pdf.setFontSize(8);pdf.setTextColor(150,160,180);
-      pdf.text(`Parcela: ${ap.nrcad||'—'} · UTR: ${ap.utr||'—'} · ${Math.round(ap?.area||0)} m²`,50,17);
-      await exportVol3(pdf,ap,r,p);
-      pdf.save(`UrbanX_3Scenarii_${ap?.nrcad||'raport'}_${dateStr}.pdf`);
+    // ══ PAG 1: Coperta ══════════════════════════════════════════════════════
+    pdf.setFillColor(...DARK); pdf.rect(0,0,W,H,'F');
+    pdf.setFillColor(15,35,70); pdf.rect(0,H*0.45,W,H*0.55,'F');
+    pdf.setFillColor(...GOLD); pdf.rect(0,0,W,3,'F'); pdf.rect(0,H-3,W,3,'F');
 
-    }else if(_pdfOpt==='multi'){
-      msg.textContent='Se generează raportul multiparcelă…';
-      if(!S.parcels.length){alert('Selectați parcele în modul Multiselect.');prog.style.display='none';return;}
-      const pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
-      await exportMulti(pdf);
-      pdf.save(`UrbanX_MultiParcele_${dateStr}.pdf`);
+    pdf.setTextColor(...GOLD); pdf.setFontSize(28); pdf.setFont('helvetica','bold');
+    pdf.text('UrbanX',W/2,35,{align:'center'});
+    pdf.setTextColor(200,210,230); pdf.setFontSize(10); pdf.setFont('helvetica','normal');
+    pdf.text('AEDIS - Generator Volumetric Avansat',W/2,44,{align:'center'});
+    pdf.setFillColor(200,150,10,30); pdf.rect(20,50,W-40,2,'F');
 
-    }else if(_pdfOpt==='scen'){
-      msg.textContent='Se generează raportul scenarii salvate…';
-      const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-      addHeader(pdf,'📅 Raport Scenarii Salvate',1,S.scenarios.length);
-      await addScenariiPage(pdf);
-      const mapC=await html2canvas($('map'),{useCORS:true,scale:1.2,logging:false});
-      pdf.addPage('a4','landscape');
-      const pw3=pdf.internal.pageSize.getWidth(),ph3=pdf.internal.pageSize.getHeight();
-      pdf.addImage(mapC.toDataURL('image/jpeg',.82),'JPEG',0,0,pw3,ph3);
-      pdf.save(`UrbanX_Scenarii_${dateStr}.pdf`);
+    pdf.setTextColor(255,255,255); pdf.setFontSize(17); pdf.setFont('helvetica','bold');
+    pdf.text('RAPORT URBANISTIC COMPLET',W/2,70,{align:'center'});
+    pdf.setTextColor(...GOLD); pdf.setFontSize(11);
+    pdf.text('Analiza teren si indicatori PUG',W/2,80,{align:'center'});
+
+    // Harta pe coperta
+    if(mapImg){
+      try{ pdf.addImage(mapImg,'JPEG',20,90,W-40,72,undefined,'FAST'); }catch(e){}
+      pdf.setDrawColor(...GOLD); pdf.setLineWidth(0.5); pdf.rect(20,90,W-40,72,'S');
     }
 
-    prog.style.display='none';
-    $('pdf-modal').classList.remove('open');
-    ss('✅ PDF exportat cu succes!');
+    // Date identificare
+    pdf.setFillColor(15,35,70); pdf.roundedRect(20,168,W-40,85,3,3,'F');
+    pdf.setTextColor(...GOLD); pdf.setFontSize(8); pdf.setFont('helvetica','bold');
+    pdf.text('DATE IDENTIFICARE IMOBIL',W/2,177,{align:'center'});
+
+    const identRows=[
+      ['Nr. cadastral',nrcad,'UTR (zona)',utr],
+      ['Suprafata teren',area+' mp','Functiune propusa',S2(fnDef.label||'—')],
+      ['Latitudine',lat.toFixed(5)+'N','Longitudine',lon.toFixed(5)+'E'],
+      ['Localitate','Municipiul Iasi','Data elaborarii',S2(dateStr)],
+      ['POT max admis',pot+'%','CUT max admis',cut],
+      ['H max admis (PUG)',hmax+' m','Nr. niveluri propus',niv+' et.'],
+    ];
+    let ry=185;
+    identRows.forEach(([l1,v1,l2,v2])=>{
+      const cw=(W-50)/4;
+      pdf.setTextColor(150,175,200); pdf.setFont('helvetica','normal'); pdf.setFontSize(7.5);
+      pdf.text(S2(l1)+':',28,ry);
+      pdf.setTextColor(255,255,255); pdf.setFont('helvetica','bold');
+      pdf.text(S2(v1),28+cw,ry);
+      pdf.setTextColor(150,175,200); pdf.setFont('helvetica','normal');
+      pdf.text(S2(l2)+':',28+cw*2,ry);
+      pdf.setTextColor(255,255,255); pdf.setFont('helvetica','bold');
+      pdf.text(S2(v2),28+cw*3,ry);
+      ry+=8;
+    });
+
+    pdf.setTextColor(120,140,165); pdf.setFontSize(7); pdf.setFont('helvetica','normal');
+    pdf.text('Generat de platforma UrbanX AEDIS - '+S2(dateStr)+' '+timeStr,W/2,260,{align:'center'});
+    pdf.text('Valori orientative - document cu caracter informativ',W/2,266,{align:'center'});
+
+    // ══ PAG 2: Situatie existenta + harta ══════════════════════════════════
+    pdf.addPage();
+    pdf.setFillColor(...LIGHT); pdf.rect(0,0,W,H,'F');
+    hdr('SITUATIE EXISTENTA SI CONTEXT URBAN',2,5);
+    let cy=32;
+
+    cy=sec('1. AMPLASAMENT - VEDERE 3D (sursa: UrbanX/Mapbox)',cy);
+    cy+=3;
+    if(mapImg){
+      try{ pdf.addImage(mapImg,'JPEG',14,cy,W-28,85,undefined,'FAST'); }catch(e){}
+      cy+=88;
+    }
+
+    cy=sec('2. DATE PARCEL SI AMPLASAMENT',cy);
+    cy=row2('Nr. cadastral',nrcad,'UTR (zona PUG)',utr,cy);
+    cy=row2('Suprafata teren',area+' mp','Perimetru aproximativ','calc. GIS',cy);
+    cy=row2('Coordonate lat.',lat.toFixed(5)+'N','Coordonate lng.',lon.toFixed(5)+'E',cy);
+    cy=row2('Localitate','Municipiul Iasi, jud. Iasi','Sector cadastral','Iasi',cy);
+    cy+=5;
+    cy=sec('3. INFORMATII URBANISTICE ZONA',cy);
+    cy=row2('Zona UTR (PUG)','UTR '+utr,'Functiune zona',S2(r.fnLabel||fnDef.label||'—'),cy);
+    cy=row2('Tip zona','Zona reglementata PUG','Sursa date','PUG Iasi + Cadastru',cy);
+
+    ftr();
+
+    // ══ PAG 3: Regulament + Indicatori ══════════════════════════════════════
+    pdf.addPage();
+    pdf.setFillColor(...LIGHT); pdf.rect(0,0,W,H,'F');
+    hdr('REGULAMENT URBANISTIC SI INDICATORI PUG',3,5);
+    cy=32;
+
+    cy=sec('4. INDICATORI URBANISTICI MAXIMI (PUG IASI)',cy);
+    const indData=[
+      ['POT - Procent Ocupare Teren',pot+'%','CUT - Coef. Utilizare Teren',cut],
+      ['H max admis',hmax+' m','Nr. niveluri max',niv+' etaje'],
+      ['Aliniament fata strada (rf)',rf+' m','Aliniament spate (rs)',rs+' m'],
+      ['Aliniament lateral stg (rl)',rl+' m','Aliniament lateral dr (rr)',rr+' m'],
+      ['Spatii verzi obligatorii',sv+'%','Parcaje (estimat)','2 loc/unitate'],
+    ];
+    indData.forEach(([l1,v1,l2,v2])=>{ cy=row2(l1,v1,l2,v2,cy); });
+
+    cy+=5;
+    cy=sec('5. CALCULE SUPRAFETE PE TEREN',cy);
+    const areaNum=parseFloat(area)||0;
+    const potNum=parseFloat(pot)||40;
+    const cutNum=parseFloat(cut)||1;
+    const svNum=parseFloat(sv)||30;
+    const scMax=Math.round(areaNum*potNum/100);
+    const sdMax=Math.round(areaNum*cutNum);
+    const svMin=Math.round(areaNum*svNum/100);
+    const suprafData=[
+      ['Suprafata totala teren',area+' mp (100%)','Spatii verzi min obligatorii',svMin+' mp ('+sv+'%)'],
+      ['Suprafata construibila max (SC)',scMax+' mp (POT '+pot+'%)','Suprafata desfasurata max (SD)',sdMax+' mp.ADC (CUT '+cut+')'],
+      ['Inaltime propusa AEDIS',aedisH.toFixed(1)+' m','Incadrare in H max',aedisH<=parseFloat(hmax||999)?'DA - in limita':'ATENTIE - depasit'],
+    ];
+    suprafData.forEach(([l1,v1,l2,v2])=>{ cy=row2(l1,v1,l2,v2,cy); });
+
+    cy+=5;
+    cy=sec('6. UTILIZARI ADMISE IN UTR '+S2(utr),cy);
+    cy=body('Conform PUG Iasi, in zona UTR '+S2(utr)+', sunt admise functiunile compatibile cu caracterul zonei. Functiunea propusa - '+S2(fnDef.label||'—')+' - trebuie verificata cu reglementarile specifice zonei, incluzand eventuala necesitate de elaborare a unui Plan Urbanistic Zonal (PUZ) daca parametrii propusi depasesc limitele din PUG.',14,cy+2,W-28);
+    cy+=5;
+    cy=body('ATENTIE: Valorile din acest raport au caracter orientativ. Reglementarile definitive sunt stabilite de PUG Iasi in vigoare si pot fi consultate la Primaria Municipiului Iasi - Directia Arhitectura si Urbanism.',14,cy,W-28);
+
+    ftr();
+
+    // ══ PAG 4: Volumetrie propusa + concluzii ═══════════════════════════════
+    pdf.addPage();
+    pdf.setFillColor(...LIGHT); pdf.rect(0,0,W,H,'F');
+    hdr('VOLUMETRIE PROPUSA SI CONCLUZII URBANISTICE',4,5);
+    cy=32;
+
+    if(mapImg){
+      cy=sec('7. VEDERE 3D - VOLUM PROPUS IN CONTEXT URBAN',cy);
+      cy+=3;
+      try{ pdf.addImage(mapImg,'JPEG',14,cy,W-28,75,undefined,'FAST'); }catch(e){}
+      cy+=78;
+    }
+
+    cy=sec('8. PARAMETRI PROIECT AEDIS vs PUG',cy);
+    const parData=[
+      ['Functiune propusa',S2(fnDef.label||'—'),'Stil arhitectural',S2(AEDIS.stil||'modern')],
+      ['Nr. niveluri propus',niv+' etaje','Inaltime totala',aedisH.toFixed(1)+' m'],
+      ['POT aplicat',pot+'%','SC construita la sol',scMax+' mp'],
+      ['CUT aplicat',cut,'SD totala',sdMax+' mp.ADC'],
+      ['Scenariu constructie',S2(AEDIS.scenariu||'demolare'),'Forma cladire',S2(AEDIS.forma||'liber')],
+    ];
+    parData.forEach(([l1,v1,l2,v2])=>{ cy=row2(l1,v1,l2,v2,cy); });
+
+    cy+=5;
+    cy=sec('9. CONCLUZII SI RECOMANDARI',cy);
+    const concl=[
+      'FEZABILITATE: Pe parcela '+nrcad+' (UTR '+S2(utr)+', '+area+' mp) se poate realiza o constructie cu functiunea "'+S2(fnDef.label||'—')+'", cu un regim de inaltime de '+niv+' niveluri (H total ~'+aedisH.toFixed(1)+'m), in limitele parametrilor urbanistici ai PUG Iasi.',
+      'PARAMETRI MAXIMI ADMISI: POT '+pot+'% → SC max '+scMax+' mp; CUT '+cut+' → SD max '+sdMax+' mp.ADC; H max '+hmax+' m; Aliniam. strada: '+rf+'m, spate: '+rs+'m, lateral: '+rl+'m/'+rr+'m.',
+      'CONFORMITATE: Constructia propusa se incadreaza in parametrii PUG. Se recomanda verificarea cu Certificatul de Urbanism emis de Primaria Iasi si consultarea unui arhitect autorizat pentru studiu de fezabilitate detaliat.',
+      'ETAPE URMATOARE: (1) Obtinere Certificat de Urbanism, (2) Studiu geotehnic, (3) Proiect tehnic arhitectura (PAC) semnat de arhitect autorizat, (4) Solicitare Autorizatie de Construire.',
+    ];
+    concl.forEach(txt=>{ cy=body(txt,14,cy+2,W-28); cy+=3; });
+
+    ftr();
+
+    // ══ PAG 5: Temeiul legal + Disclaimer ══════════════════════════════════
+    pdf.addPage();
+    pdf.setFillColor(...LIGHT); pdf.rect(0,0,W,H,'F');
+    hdr('TEMEI LEGAL SI NOTE METODOLOGICE',5,5);
+    cy=32;
+
+    cy=sec('10. BAZA LEGALA',cy);
+    const legalDocs=[
+      'Legea nr. 350/2001 privind amenajarea teritoriului si urbanismul (cu modificarile ulterioare)',
+      'Legea nr. 50/1991 privind autorizarea executarii lucrarilor de constructii (republicata)',
+      'Ordinul MDRAP nr. 233/2016 pentru aprobarea Normelor metodologice PUZ/PUD',
+      'PUG Municipiul Iasi - in vigoare (aprobat prin HCL Iasi)',
+      'Regulamentul Local de Urbanism (RLU) aferent PUG Iasi',
+      'Legea cadastrului si publicitatii imobiliare nr. 7/1996',
+    ];
+    legalDocs.forEach(d=>{ cy=body('• '+d,16,cy+1,W-32); cy+=1; });
+
+    cy+=5;
+    cy=sec('11. SURSE DATE',cy);
+    const dataSources=[
+      'Cadastru local Iasi - baza de date parcele (indexata local)',
+      'PUG Iasi - regulament zone si indicatori urbanistici',
+      'OpenStreetMap (OSM) - cladiri existente context',
+      'Mapbox - vizualizare cartografica si 3D',
+      'Overpass API - date stazi si infrastructura',
+    ];
+    dataSources.forEach(d=>{ cy=body('• '+d,16,cy+1,W-32); cy+=1; });
+
+    cy+=5;
+    cy=sec('12. DISCLAIMER',cy,[140,30,30]);
+    cy+=2;
+    cy=body('Prezentul raport este generat AUTOMAT de platforma UrbanX AEDIS si are caracter strict ORIENTATIV si INFORMATIV. Valorile prezentate nu au valoare juridica deplina si nu inlocuiesc documentatia tehnica avizata conform legii.',14,cy,W-28);
+    cy+=5;
+    cy=body('Raportul nu reprezinta un Certificat de Urbanism, un aviz sau o autorizatie de constructie. Deciziile de investitie bazate exclusiv pe acest document sunt in responsabilitatea utilizatorului. UrbanX nu isi asuma raspunderea pentru eventuale erori sau diferente fata de reglementarile oficiale.',14,cy,W-28);
+
+    cy+=10;
+    pdf.setFillColor(235,241,252); pdf.roundedRect(14,cy,W-28,30,3,3,'F');
+    pdf.setTextColor(...BLUE); pdf.setFontSize(9); pdf.setFont('helvetica','bold');
+    pdf.text('Elaborat de platforma UrbanX AEDIS',W/2,cy+9,{align:'center'});
+    pdf.setTextColor(60,80,110); pdf.setFontSize(8); pdf.setFont('helvetica','normal');
+    pdf.text('Data: '+S2(dateStr)+' - Ora: '+timeStr,W/2,cy+17,{align:'center'});
+    pdf.text('Parcela: '+nrcad+' - UTR: '+S2(utr)+' - Suprafata: '+area+' mp - GPS: '+lat.toFixed(5)+'N, '+lon.toFixed(5)+'E',W/2,cy+24,{align:'center'});
+
+    ftr();
+
+    // Salvam PDF cu nume complet
+    const safeName='RaportUrbanistic_'+nrcad+'_'+S2(utr)+'_'+new Date().toISOString().slice(0,10)+'.pdf';
+    pdf.save(safeName);
+    if(prog) prog.style.display='none';
+    if($('pdf-modal')) $('pdf-modal').classList.remove('open');
+    ss('Raport urbanistic complet exportat! (5 pagini)');
+
   }catch(e){
     console.error('PDF error:',e);
-    msg.textContent='❌ Eroare: '+e.message;
+    if(msg) msg.textContent='Eroare PDF: '+e.message;
+    ss('Eroare generare PDF: '+e.message);
   }
 }
 
@@ -6315,15 +6559,33 @@ function _aedisRemoveExistingFromCtx(){
         features: volSrc._data.features.filter(f=>!f.properties?.isExistent)});
     }
 
-    // 3. Ascundem layerul cad-3d pe zona parcelei (setăm filtru de excludere)
-    // cad-3d afișează toate clădirile cadastrale — le filtrăm pe cele de pe parcelă
+    // 3. Ascundem cladirile pe parcela din TOATE layerele 3D
     try{
       const parcelNrs = S.parcels.map(p=>p.nrcad).filter(Boolean);
-      if(parcelNrs.length && map.getLayer('cad-3d')){
-        // Filtru: exclude parcelele selectate
+      
+      // cad-3d: layer cadastral Mapbox
+      if(map.getLayer('cad-3d') && parcelNrs.length){
         map.setFilter('cad-3d', ['!', ['in', ['get','nrcad'], ['literal', parcelNrs]]]);
       }
-    }catch(e){}
+      
+      // ctx-3d: layer OSM buildings — filtrăm după intersecție cu parcela
+      // Ascundem complet ctx-3d și redăm doar clădirile din afara parcelei prin ctx-src
+      if(map.getLayer('ctx-3d')){
+        const activeParcels = S.parcels.map(p=>p.geo?.geometry).filter(Boolean);
+        const ctxSrc = map.getSource('ctx-src');
+        if(ctxSrc?._data?.features){
+          const filtered = ctxSrc._data.features.filter(f=>{
+            try{
+              const ctr = turf.centerOfMass(f);
+              return !activeParcels.some(pg=>
+                turf.booleanPointInPolygon(ctr,{type:'Feature',geometry:pg,properties:{}})
+              );
+            }catch(e){ return true; }
+          });
+          ctxSrc.setData({type:'FeatureCollection',features:filtered});
+        }
+      }
+    }catch(e){ console.warn('demolish filter:', e.message); }
 
     // 4. vol-src: setăm baseH=0 la generare
     AEDIS._forcedBaseH = 0;
@@ -8455,7 +8717,7 @@ async function generateSolarStudy(){
   const rows=[
     ['Nr. cadastral',nrcad],['Zona urbanistica (UTR)',utr],
     ['Suprafata teren',area+' mp'],['Functiune propusa',fnDef.label||'—'],
-    ['Regim inaltime propus',niv+' niveluri (H='+aedisH.toFixed(1)+'m)'],
+    ['Regim inaltime propus',niv+' niveluri (H='+(isNaN(aedisH)?0:aedisH).toFixed(1)+'m)'],
     ['POT max (PUG)',pot+'%'],['CUT max (PUG)',cut],['H max (PUG)',(String(hmax)||'N/A')+' m'],
     ['Coordonate GPS',lat.toFixed(5)+'N, '+lon.toFixed(5)+'E'],
     ['Localitate','Municipiul Iasi, jud. Iasi'],
@@ -8475,7 +8737,7 @@ async function generateSolarStudy(){
   pdf.setTextColor(255,255,255); pdf.setFontSize(10); pdf.setFont('helvetica','bold');
   pdf.text(isConform?'CONFORM – Conditii de insorire respectate (OMS 119/2014)':'ATENTIE – Verificare suplimentara necesara',W/2,190,{align:'center'});
   pdf.setFontSize(7.5);
-  pdf.text('Altitudine solara solstitiu iarna: '+decH.toFixed(1)+'° (prag minim legal: 15°)',W/2,197,{align:'center'});
+  pdf.text('Altitudine solara solstitiu iarna: '+(isNaN(decH)?0:decH).toFixed(1)+'° (prag minim legal: 15°)',W/2,197,{align:'center'});
 
   pdf.setTextColor(130,150,180); pdf.setFontSize(7.5); pdf.setFont('helvetica','normal');
   pdf.text('Data elaborarii: '+dateStr+' · '+timeStr,W/2,210,{align:'center'});
@@ -8505,7 +8767,7 @@ async function generateSolarStudy(){
     ['Suprafata teren',area+' mp','Suprafata construibila max (POT)',Math.round(parseFloat(area)*parseFloat(pot)/100)+' mp'],
     ['Retragere fata strada (rf)',rf+' m','Retragere laterala stanga (rl)',rl+' m'],
     ['Retragere spate (rs)',rs+' m','Retragere lateral dreapta (rr)',(params.rr||3)+' m'],
-    ['Nr. niveluri propus',niv+' et.','Inaltime totala propusa',aedisH.toFixed(1)+' m'],
+    ['Nr. niveluri propus',niv+' et.','Inaltime totala propusa',(isNaN(aedisH)?0:aedisH).toFixed(1)+' m'],
     ['POT maxim admis (PUG)',pot+'%','CUT maxim admis (PUG)',cut],
     ['H maxim admis (PUG)',(String(hmax)||'N/A')+' m','Functiune admisa',fnDef.label||'—'],
   ];
@@ -8608,7 +8870,7 @@ async function generateSolarStudy(){
   cy=gY+gH+10;
 
   // Calcule umbre
-  cy=section('3.3 — CALCUL UMBRA PROIECTATA (inaltimea volumului: '+aedisH.toFixed(1)+'m)',cy);
+  cy=section('3.3 — CALCUL UMBRA PROIECTATA (inaltimea volumului: '+(isNaN(aedisH)?0:aedisH).toFixed(1)+'m)',cy);
   cy+=4;
   const umbraData=[
     {sezon:'Solstitiu vara (21 Iunie)',alt:junH,umbra:shadJun,ok:true},
@@ -8652,7 +8914,7 @@ async function generateSolarStudy(){
 
   const paramsData=[
     ['Functiune propusa',fnDef.label||'—','Admisa in UTR '+utr,isConform?'DA':'CONDITIONAT'],
-    ['Nr. niveluri',niv+' etaje','H total propus',aedisH.toFixed(1)+' m'],
+    ['Nr. niveluri',niv+' etaje','H total propus',(isNaN(aedisH)?0:aedisH).toFixed(1)+' m'],
     ['H maxim admis PUG',(String(hmax)||'N/A')+' m','Incadrare H',aedisH<=parseFloat(String(hmax)||'999')?'IN LIMITA':'DEPASIT'],
     ['POT propus','~'+pot+'%','Supraf. construita max',scMax+' mp'],
     ['CUT propus','~'+cut,'Supraf. desfasurata max',sdMax+' mp'],
@@ -8680,9 +8942,9 @@ async function generateSolarStudy(){
   cy+=4;
 
   const concluzii=[
-    `1. FEZABILITATE GENERALA: Amplasamentul ${nrcad} din UTR ${utr} permite realizarea unui imobil cu functiunea "${fnDef.label||'—'}", cu un regim de inaltime de ${niv} niveluri (H total propus ~${aedisH.toFixed(1)}m), conform parametrilor urbanistici din PUG Iasi.`,
-    `2. CONDITII DE INSORIRE: Unghiul solar la amiaza la solstitiul de iarna (21 decembrie) este de ${decH.toFixed(1)}°, ${isConform?'respectand pragul minim de 15° impus de OMS 119/2014 pentru spatii de locuit.':'sub pragul minim de 15° impus de OMS 119/2014 – se impune o analiza de specialitate.'}`,
-    `3. UMBRA PROIECTATA: La solstitiul de iarna, constructia propusa (~${aedisH.toFixed(1)}m) proiecteaza o umbra de cca. ${shadDec}m in directia nord. Se recomanda verificarea impactului asupra proprietatilor invecinate amplasate la nord de teren.`,
+    `1. FEZABILITATE GENERALA: Amplasamentul ${nrcad} din UTR ${utr} permite realizarea unui imobil cu functiunea "${fnDef.label||'—'}", cu un regim de inaltime de ${niv} niveluri (H total propus ~${(isNaN(aedisH)?0:aedisH).toFixed(1)}m), conform parametrilor urbanistici din PUG Iasi.`,
+    `2. CONDITII DE INSORIRE: Unghiul solar la amiaza la solstitiul de iarna (21 decembrie) este de ${(isNaN(decH)?0:decH).toFixed(1)}°, ${isConform?'respectand pragul minim de 15° impus de OMS 119/2014 pentru spatii de locuit.':'sub pragul minim de 15° impus de OMS 119/2014 – se impune o analiza de specialitate.'}`,
+    `3. UMBRA PROIECTATA: La solstitiul de iarna, constructia propusa (~${(isNaN(aedisH)?0:aedisH).toFixed(1)}m) proiecteaza o umbra de cca. ${shadDec}m in directia nord. Se recomanda verificarea impactului asupra proprietatilor invecinate amplasate la nord de teren.`,
     `4. PARAMETRI ADMISIBILI: POT max=${pot}%, CUT max=${cut}, H max=${hmax}m conform PUG. Constructia propusa se incadreaza in limitele urbanistice ale zonei, cu respectarea tuturor alinamentelor (fata strada: ${rf}m, spate: ${rs}m, lateral: ${rl}m).`,
     `5. ETAPE URMATOARE: Prezentul pre-studiu are caracter orientativ. In etapa urmatoare se recomanda: (a) elaborarea unui PUZ daca este cazul, (b) studiu geotehnic, (c) expertiza a unui arhitect autorizat pentru studiu de fezabilitate detaliat, (d) obtinerea Certificatului de Urbanism.`,
   ];
@@ -8807,8 +9069,9 @@ function _v3dBuild(ap){
   const canvas = document.getElementById('v3d-canvas');
   if(!canvas||!THREE){ _v3dStatus('❌ Three.js indisponibil'); return; }
   if(typeof V3D === 'undefined'){ console.error('V3D not initialized'); return; }
-  // Preset implicit: zi (luminat)
-  window._v3dNight = false;
+  // Setăm noaptea ÎNAINTE de a construi materialele (citim selectorul dacă există)
+  const _presetSel = document.getElementById('v3d-light');
+  window._v3dNight = _presetSel ? _presetSel.value === 'night' : false;
 
   const W=canvas.offsetWidth, H=canvas.offsetHeight;
 
@@ -8934,7 +9197,7 @@ function _v3dBuild(ap){
   // Străzi din S.ctx linii (dacă există) sau grid simplu în jurul parcelei
   _v3dAddStreets(THREE, scene, ring0, toLoc);
   // Adăugăm viață urbană (oameni, mașini, câini, biciclete etc.)
-  const _isNightMode = document.getElementById('v3d-light')?.value === 'night' || window._v3dNight;
+  const _isNightMode = window._v3dNight || document.getElementById('v3d-light')?.value === 'night';
   _v3dAddUrbanLife(THREE, scene, ring0, toLoc, _isNightMode);
 
   // Camera poziție inițială
@@ -9042,8 +9305,13 @@ function _v3dAddUrbanLife(THREE, scene, ring0, toLoc, isNight){
       return new THREE.CanvasTexture(cv);
     };
     const addSprite=(tex,x,y,z,sw,sh)=>{
-      const m=new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false});
-      const sp=new THREE.Sprite(m);sp.scale.set(sw,sh,1);sp.position.set(x,y+sh/2,z);scene.add(sp);
+      const m=new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false,
+        sizeAttenuation:true,depthTest:false});
+      const sp=new THREE.Sprite(m);
+      // Scale x2 față de dimensiunile reale pentru vizibilitate
+      sp.scale.set(sw*2,sh*2,1);
+      sp.position.set(x,y+sh,z);
+      scene.add(sp);
     };
     const toLoc2=(lng,lat)=>toLoc([lng,lat]);
 
