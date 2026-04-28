@@ -471,7 +471,7 @@ canvas#c2d{width:100%;height:100%;display:block}
   <span class="logo">UrbanX</span>
   <button class="tb-btn" id="btnUTR">🗺 Zone UTR</button>
   <button class="tb-btn" id="btnGPS">📍 GPS</button>
-  <button class="tb-btn" onclick="aedisOpenLoisir()" style="background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.4);color:#4ade80" title="LOISIR — Amenajare spații publice">🌿 Loisir</button>
+  <button class="tb-btn" onclick="aedisOpenLoisir()" style="flex-shrink:0;background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.4);color:#4ade80" title="LOISIR — Amenajare spații publice">🌿 Loisir</button>
   <button class="tb-btn" id="btnMulti" title="Multiselect parcele">🔲 Multi</button>
   <select class="tb-sel" id="selBase">
     <option value="custom">Urban 3D</option>
@@ -486,7 +486,7 @@ canvas#c2d{width:100%;height:100%;display:block}
   <button class="tb-btn" id="btnLegend" title="Legendă funcțiuni clădiri" onclick="toggleFnLegend(this)">🎨 Legend</button>
   <button class="tb-btn" id="btnPanel" style="background:rgba(212,175,55,.2);border-color:#d4af37;color:#d4af37">☰</button>
   <button class="tb-btn" id="btnPDF" title="Export PDF / Raport">⬇ PDF</button>
-  <button class="tb-btn" onclick="generateSolarStudy()" title="Studiu însorire PDF" style="background:rgba(251,191,36,.15);border-color:rgba(251,191,36,.5);color:#fbbf24;font-size:11px;flex-shrink:0">☀ Însorire</button>
+  <button class="tb-btn" onclick="generateSolarStudy()" title="Studiu însorire PDF" style="flex-shrink:0;background:rgba(251,191,36,.15);border-color:rgba(251,191,36,.5);color:#fbbf24;font-size:11px;flex-shrink:0">☀ Însorire</button>
   <!-- Mobile: buton GPS și 3D/2D vizibile întotdeauna -->
 </div>
 
@@ -5732,245 +5732,245 @@ function aedisBuild(){
   for(const parcelaTmp of parcelsToGen){
     if(!parcelaTmp?.geo?.geometry) continue;
 
-  const params = parcelaTmp.params || getDefaultParams(parcelaTmp.utr);
-  const fp = buildFP(parcelaTmp.geo.geometry, params);
-  if(!fp?.geometry) continue;
-  const pA_loop = parcelaTmp.area || turf.area({type:'Feature',geometry:parcelaTmp.geo.geometry,properties:{}});
+    const params = parcelaTmp.params || getDefaultParams(parcelaTmp.utr);
+    const fp = buildFP(parcelaTmp.geo.geometry, params);
+    if(!fp?.geometry) continue;
+    const pA_loop = parcelaTmp.area || turf.area({type:'Feature',geometry:parcelaTmp.geo.geometry,properties:{}});
 
-  const fn = AEDIS.fn;
-  const fnDef = AEDIS_FN[fn] || AEDIS_FN.rezidential_colectiv;
-  const stilDef = AEDIS_STIL[AEDIS.stil] || AEDIS_STIL.modern;
-  const pA = pA_loop;
+    const fn = AEDIS.fn;
+    const fnDef = AEDIS_FN[fn] || AEDIS_FN.rezidential_colectiv;
+    const stilDef = AEDIS_STIL[AEDIS.stil] || AEDIS_STIL.modern;
+    const pA = pA_loop;
 
-  // Calcule de baza
-  const hParter = AEDIS.parterDiferit ? (fnDef.hParter || 4.5) : (AEDIS.corpuri[0]?.hNiv||3.0);
-  const hEtaj = AEDIS.corpuri[0]?.hNiv || fnDef.hEtaj || 3.0;
-  const totalNiv = AEDIS.corpuri[0]?.niv || pN(params.niv) || 4;
+    // Calcule de baza
+    const hParter = AEDIS.parterDiferit ? (fnDef.hParter || 4.5) : (AEDIS.corpuri[0]?.hNiv||3.0);
+    const hEtaj = AEDIS.corpuri[0]?.hNiv || fnDef.hEtaj || 3.0;
+    const totalNiv = AEDIS.corpuri[0]?.niv || pN(params.niv) || 4;
 
-  // ── Scenariu: calcul POT/CUT existent ─────────────────────────────────
-  let baseH = 0;
-  let fpGeom = fp.geometry;
+    // ── Scenariu: calcul POT/CUT existent ─────────────────────────────────
+    let baseH = 0;
+    let fpGeom = fp.geometry;
 
-  if(AEDIS.scenariu !== 'demolare' && S.ctx?.features?.length){
-    // Calculam POT/CUT existent din cladirile de pe parcela
-    const onParcel = S.ctx.features.filter(f=>{
-      try{
-        const ctr = turf.centerOfMass(f);
-        return turf.booleanPointInPolygon(ctr, {type:'Feature',geometry:parcelaTmp.geo.geometry,properties:{}});
-      }catch(e){ return false; }
-    });
-
-    if(onParcel.length){
-      const existArea = onParcel.reduce((s,f)=>{try{return s+turf.area(f);}catch(e){return s;}},0);
-      AEDIS.existentPOT = Math.round(existArea/pA*100);
-      AEDIS.existentH = Math.round(Math.max(...onParcel.map(f=>f.properties?.h||0)));
-      AEDIS.existentCUT = 0;
-
-      if(AEDIS.scenariu==='extindere_v'){
-        // Extindem VERTICAL: plecam de la H maxim existent
-        baseH = AEDIS.existentH;
-        // Afisam si cladirile existente cu culoare distincta
-        onParcel.forEach(f=>{
-          feats.push({type:'Feature',
-            properties:{base:0,top:AEDIS.existentH,color:'#94a3b8',floor:-1,isExistent:true},
-            geometry:f.geometry});
-        });
-      } else if(AEDIS.scenariu==='extindere_h'){
-        // Extindem ORIZONTAL: reducem fp la zona libera
+    if(AEDIS.scenariu !== 'demolare' && S.ctx?.features?.length){
+      // Calculam POT/CUT existent din cladirile de pe parcela
+      const onParcel = S.ctx.features.filter(f=>{
         try{
-          let freeZone = fp;
-          onParcel.forEach(f=>{
-            try{
-              const diff = turf.difference(freeZone, f);
-              if(diff?.geometry && turf.area(diff) > 10) freeZone = diff;
-            }catch(e){}
-          });
-          fpGeom = freeZone.geometry;
-          // Afisam existentele
+          const ctr = turf.centerOfMass(f);
+          return turf.booleanPointInPolygon(ctr, {type:'Feature',geometry:parcelaTmp.geo.geometry,properties:{}});
+        }catch(e){ return false; }
+      });
+
+      if(onParcel.length){
+        const existArea = onParcel.reduce((s,f)=>{try{return s+turf.area(f);}catch(e){return s;}},0);
+        AEDIS.existentPOT = Math.round(existArea/pA*100);
+        AEDIS.existentH = Math.round(Math.max(...onParcel.map(f=>f.properties?.h||0)));
+        AEDIS.existentCUT = 0;
+
+        if(AEDIS.scenariu==='extindere_v'){
+          // Extindem VERTICAL: plecam de la H maxim existent
+          baseH = AEDIS.existentH;
+          // Afisam si cladirile existente cu culoare distincta
           onParcel.forEach(f=>{
             feats.push({type:'Feature',
-              properties:{base:0,top:f.properties?.h||7,color:'#94a3b8',floor:-1,isExistent:true},
+              properties:{base:0,top:AEDIS.existentH,color:'#94a3b8',floor:-1,isExistent:true},
               geometry:f.geometry});
           });
-        }catch(e){}
-      } else if(AEDIS.scenariu==='inglobare'){
-        // INGLOBARE: construim pe intregul edificabil, inglobam existentele
-        baseH = 0;
-        // Existentele sunt vizibile ca referinta
-        onParcel.forEach(f=>{
-          feats.push({type:'Feature',
-            properties:{base:0,top:f.properties?.h||7,color:'rgba(100,100,100,0.3)',floor:-1,isExistent:true},
-            geometry:f.geometry});
-        });
-      }
-    }
-  }
-
-  // ── Generare corpuri AEDIS ─────────────────────────────────────────────
-  const fpFeat = {type:'Feature',geometry:fpGeom,properties:{}};
-
-  // Corp principal cu retrageri fine per etaj
-  let currentH = baseH;
-
-  for(let i=0; i<totalNiv; i++){
-    const isLast = i===totalNiv-1;
-    const hEtajCrt = i===0 ? hParter : hEtaj;
-
-    // Retragere per etaj (configurabila)
-    let etajGeom = fpGeom;
-    const fineRetragere = AEDIS.retrageriFineEtaje[i] ?? (isLast && AEDIS.activeRetragere ? (stilDef.retragereFactor||0.88) : 1.0);
-
-    if(fineRetragere < 0.99){
-      try{
-        const sc = turf.transformScale(fpFeat, fineRetragere, {origin:turf.centerOfMass(fpFeat)});
-        if(sc?.geometry) etajGeom = sc.geometry;
-      }catch(e){}
-    }
-    // Stocăm geometria etajului curent pentru acoperiș (vom folosi ultima geometrie)
-    if(isLast) AEDIS._lastFloorGeom = etajGeom;
-
-    // Culoare etaj - din paleta stilului arhitectural (nu din functiune)
-    // Parter = intotdeauna culoare distincta (soclu)
-    let etajColor;
-    if(i===0){
-      // Parter: culoare soclu din stil
-      etajColor = AEDIS.parterDiferit
-        ? (AEDIS_FN[AEDIS.fnParter]?.color||stilDef.parterColor||'#334155')
-        : (stilDef.parterColor||'#334155');
-    } else {
-      // Etaje: culoare din paleta stilului
-      etajColor = stilDef.etajColor
-        ? stilDef.etajColor(fnDef.color||'#94a3b8', i, totalNiv)
-        : (stilDef.floorColors?.[Math.min(i,stilDef.floorColors.length-1)]||lighten(fnDef.color||'#94a3b8',i*8));
-    }
-
-    feats.push({
-      type:'Feature',
-      properties:{
-        base: currentH,
-        top: currentH + hEtajCrt,
-        color: etajColor,
-        floor: i,
-        isLast,
-        isAedis: true,
-        isParter: i===0,
-        fn: AEDIS.parterDiferit && i===0 ? AEDIS.fnParter : fn,
-        hEtaj: hEtajCrt,
-        parcelIdx: S.activeParcel??0
-      },
-      geometry: etajGeom
-    });
-
-    currentH += hEtajCrt;
-  }
-
-  // ── Acoperiș ──────────────────────────────────────────────────────────
-  const roofBase = currentH;
-  const fpSmall = turf.transformScale(fpFeat, 0.97, {origin:turf.centerOfMass(fpFeat)});
-
-    const _roofFpGeom = AEDIS._lastFloorGeom || fpGeom;
-  switch(AEDIS.tipAcoperis){
-    case 'terasa_plata':
-      // Terasa plata: slab subtire vizibil + parapet cu culoare atic din stil
-      feats.push({type:'Feature',
-        properties:{base:roofBase,top:roofBase+0.3,color:'#475569',floor:-10,roofType:'terasa'},
-        geometry:_roofFpGeom});
-      // Parapet - culoare atic din stil (mai inchis)
-      if((AEDIS.hAttic||1.2)>0){
-        const aticColor = stilDef.aticColor||darken(AEDIS_FN[fn]?.color||'#94a3b8',40);
-        feats.push({type:'Feature',
-          properties:{base:roofBase,top:roofBase+(AEDIS.hAttic||1.2),color:aticColor,floor:-11,roofType:'parapet'},
-          geometry:_roofFpGeom});
-        // Interior parapet (gol)
-        try{
-          const inner = turf.buffer({type:'Feature',geometry:_roofFpGeom,properties:{}}, -0.4, {units:'meters'});
-          if(inner?.geometry){
+        } else if(AEDIS.scenariu==='extindere_h'){
+          // Extindem ORIZONTAL: reducem fp la zona libera
+          try{
+            let freeZone = fp;
+            onParcel.forEach(f=>{
+              try{
+                const diff = turf.difference(freeZone, f);
+                if(diff?.geometry && turf.area(diff) > 10) freeZone = diff;
+              }catch(e){}
+            });
+            fpGeom = freeZone.geometry;
+            // Afisam existentele
+            onParcel.forEach(f=>{
+              feats.push({type:'Feature',
+                properties:{base:0,top:f.properties?.h||7,color:'#94a3b8',floor:-1,isExistent:true},
+                geometry:f.geometry});
+            });
+          }catch(e){}
+        } else if(AEDIS.scenariu==='inglobare'){
+          // INGLOBARE: construim pe intregul edificabil, inglobam existentele
+          baseH = 0;
+          // Existentele sunt vizibile ca referinta
+          onParcel.forEach(f=>{
             feats.push({type:'Feature',
-              properties:{base:roofBase,top:roofBase+AEDIS.hAttic,color:'#0a1628',floor:-12,roofType:'parapet_inner'},
-              geometry:inner.geometry});
-          }
-        }catch(e){}
-      }
-      break;
-
-    case 'terasa_circulabila':
-      // Terasa cu borduri mai inalte + pavaj (culoare diferita)
-      feats.push({type:'Feature',
-        properties:{base:roofBase,top:roofBase+0.15,color:'#78716c',floor:-10,roofType:'pavaj'},
-        geometry:_roofFpGeom});
-      feats.push({type:'Feature',
-        properties:{base:roofBase,top:roofBase+1.1,color:darken(AEDIS_FN[fn]?.color||'#94a3b8',25),floor:-11,roofType:'bordura'},
-        geometry:_roofFpGeom});
-      try{
-        const inner = turf.buffer({type:'Feature',geometry:_roofFpGeom,properties:{}}, -0.5, {units:'meters'});
-        if(inner?.geometry) feats.push({type:'Feature',
-          properties:{base:roofBase,top:roofBase+1.1,color:'#0a1628',floor:-12,roofType:'terasa_interior'},
-          geometry:inner.geometry});
-      }catch(e){}
-      break;
-
-    case 'sarpanta': {
-      // Sarpanta simulata: doua corpuri triunghiulare (un dreptunghi ngustat la varf)
-      const hCoama = AEDIS.hSarpanta||3.5;
-      // Corp sarpanta = corp redus progresiv in 4 pasi
-      for(let si=0;si<4;si++){
-        const f = 1 - si*0.25;
-        const sh = roofBase + si*(hCoama/4);
-        try{
-          const sc = turf.transformScale(fpFeat, Math.max(0.05,f), {origin:turf.centerOfMass(fpFeat)});
-          if(sc?.geometry) feats.push({type:'Feature',
-            properties:{base:sh,top:sh+hCoama/4,color:darken('#c4956a',si*5),floor:-10-si,roofType:'sarpanta'},
-            geometry:sc.geometry});
-        }catch(e){}
-      }
-      break;
-    }
-
-    case 'mansarda': {
-      // Mansarda: etaj retras H=mansarda + sarpanta mica deasupra
-      const retFact = 0.72;
-      try{
-        const sc = turf.transformScale(fpFeat, retFact, {origin:turf.centerOfMass(fpFeat)});
-        if(sc?.geometry){
-          feats.push({type:'Feature',
-            properties:{base:roofBase,top:roofBase+AEDIS.hMansarda,color:darken(AEDIS_FN[fn]?.color||'#94a3b8',10),floor:-10,roofType:'mansarda'},
-            geometry:sc.geometry});
-          // Sarpanta mica deasupra mansardei
-          const hCoama2=1.8;
-          for(let si=0;si<3;si++){
-            const f2 = retFact*(1-si*0.35);
-            try{
-              const sc2=turf.transformScale(fpFeat,Math.max(0.05,f2),{origin:turf.centerOfMass(fpFeat)});
-              if(sc2?.geometry) feats.push({type:'Feature',
-                properties:{base:roofBase+AEDIS.hMansarda+si*(hCoama2/3),top:roofBase+AEDIS.hMansarda+(si+1)*(hCoama2/3),color:'#a0785a',floor:-11-si,roofType:'sarpanta_mica'},
-                geometry:sc2.geometry});
-            }catch(e){}
-          }
+              properties:{base:0,top:f.properties?.h||7,color:'rgba(100,100,100,0.3)',floor:-1,isExistent:true},
+              geometry:f.geometry});
+          });
         }
-      }catch(e){}
-      break;
+      }
     }
 
-    case 'combinat':
-      // Terasa + corp tehnic central
-      feats.push({type:'Feature',
-        properties:{base:roofBase,top:roofBase+0.2,color:'#475569',floor:-10,roofType:'terasa'},
-        geometry:_roofFpGeom});
-      try{
-        const techGeom = turf.transformScale(fpFeat,0.3,{origin:turf.centerOfMass(fpFeat)});
-        if(techGeom?.geometry) feats.push({type:'Feature',
-          properties:{base:roofBase+0.2,top:roofBase+3.5,color:'#64748b',floor:-11,roofType:'corp_tehnic'},
-          geometry:techGeom.geometry});
-      }catch(e){}
-      break;
-  }
+    // ── Generare corpuri AEDIS ─────────────────────────────────────────────
+    const fpFeat = {type:'Feature',geometry:fpGeom,properties:{}};
 
-  // ── Etichete dimensionale ─────────────────────────────────────────────
-  if(AEDIS.showDim){
-    aedisUpdateDimLabels(fp, totalNiv, hParter, hEtaj, currentH + (AEDIS.tipAcoperis!=='terasa_plata'?AEDIS.hSarpanta:0.25));
-  }
+    // Corp principal cu retrageri fine per etaj
+    let currentH = baseH;
 
-  // Stocam si setam
+    for(let i=0; i<totalNiv; i++){
+      const isLast = i===totalNiv-1;
+      const hEtajCrt = i===0 ? hParter : hEtaj;
+
+      // Retragere per etaj (configurabila)
+      let etajGeom = fpGeom;
+      const fineRetragere = AEDIS.retrageriFineEtaje[i] ?? (isLast && AEDIS.activeRetragere ? (stilDef.retragereFactor||0.88) : 1.0);
+
+      if(fineRetragere < 0.99){
+        try{
+          const sc = turf.transformScale(fpFeat, fineRetragere, {origin:turf.centerOfMass(fpFeat)});
+          if(sc?.geometry) etajGeom = sc.geometry;
+        }catch(e){}
+      }
+      // Stocăm geometria etajului curent pentru acoperiș (vom folosi ultima geometrie)
+      if(isLast) AEDIS._lastFloorGeom = etajGeom;
+
+      // Culoare etaj - din paleta stilului arhitectural (nu din functiune)
+      // Parter = intotdeauna culoare distincta (soclu)
+      let etajColor;
+      if(i===0){
+        // Parter: culoare soclu din stil
+        etajColor = AEDIS.parterDiferit
+          ? (AEDIS_FN[AEDIS.fnParter]?.color||stilDef.parterColor||'#334155')
+          : (stilDef.parterColor||'#334155');
+      } else {
+        // Etaje: culoare din paleta stilului
+        etajColor = stilDef.etajColor
+          ? stilDef.etajColor(fnDef.color||'#94a3b8', i, totalNiv)
+          : (stilDef.floorColors?.[Math.min(i,stilDef.floorColors.length-1)]||lighten(fnDef.color||'#94a3b8',i*8));
+      }
+
+      feats.push({
+        type:'Feature',
+        properties:{
+          base: currentH,
+          top: currentH + hEtajCrt,
+          color: etajColor,
+          floor: i,
+          isLast,
+          isAedis: true,
+          isParter: i===0,
+          fn: AEDIS.parterDiferit && i===0 ? AEDIS.fnParter : fn,
+          hEtaj: hEtajCrt,
+          parcelIdx: S.activeParcel??0
+        },
+        geometry: etajGeom
+      });
+
+      currentH += hEtajCrt;
+    }
+
+    // ── Acoperiș ──────────────────────────────────────────────────────────
+    const roofBase = currentH;
+    const fpSmall = turf.transformScale(fpFeat, 0.97, {origin:turf.centerOfMass(fpFeat)});
+
+      const _roofFpGeom = AEDIS._lastFloorGeom || fpGeom;
+    switch(AEDIS.tipAcoperis){
+      case 'terasa_plata':
+        // Terasa plata: slab subtire vizibil + parapet cu culoare atic din stil
+        feats.push({type:'Feature',
+          properties:{base:roofBase,top:roofBase+0.3,color:'#475569',floor:-10,roofType:'terasa'},
+          geometry:_roofFpGeom});
+        // Parapet - culoare atic din stil (mai inchis)
+        if((AEDIS.hAttic||1.2)>0){
+          const aticColor = stilDef.aticColor||darken(AEDIS_FN[fn]?.color||'#94a3b8',40);
+          feats.push({type:'Feature',
+            properties:{base:roofBase,top:roofBase+(AEDIS.hAttic||1.2),color:aticColor,floor:-11,roofType:'parapet'},
+            geometry:_roofFpGeom});
+          // Interior parapet (gol)
+          try{
+            const inner = turf.buffer({type:'Feature',geometry:_roofFpGeom,properties:{}}, -0.4, {units:'meters'});
+            if(inner?.geometry){
+              feats.push({type:'Feature',
+                properties:{base:roofBase,top:roofBase+AEDIS.hAttic,color:'#0a1628',floor:-12,roofType:'parapet_inner'},
+                geometry:inner.geometry});
+            }
+          }catch(e){}
+        }
+        break;
+
+      case 'terasa_circulabila':
+        // Terasa cu borduri mai inalte + pavaj (culoare diferita)
+        feats.push({type:'Feature',
+          properties:{base:roofBase,top:roofBase+0.15,color:'#78716c',floor:-10,roofType:'pavaj'},
+          geometry:_roofFpGeom});
+        feats.push({type:'Feature',
+          properties:{base:roofBase,top:roofBase+1.1,color:darken(AEDIS_FN[fn]?.color||'#94a3b8',25),floor:-11,roofType:'bordura'},
+          geometry:_roofFpGeom});
+        try{
+          const inner = turf.buffer({type:'Feature',geometry:_roofFpGeom,properties:{}}, -0.5, {units:'meters'});
+          if(inner?.geometry) feats.push({type:'Feature',
+            properties:{base:roofBase,top:roofBase+1.1,color:'#0a1628',floor:-12,roofType:'terasa_interior'},
+            geometry:inner.geometry});
+        }catch(e){}
+        break;
+
+      case 'sarpanta': {
+        // Sarpanta simulata: doua corpuri triunghiulare (un dreptunghi ngustat la varf)
+        const hCoama = AEDIS.hSarpanta||3.5;
+        // Corp sarpanta = corp redus progresiv in 4 pasi
+        for(let si=0;si<4;si++){
+          const f = 1 - si*0.25;
+          const sh = roofBase + si*(hCoama/4);
+          try{
+            const sc = turf.transformScale(fpFeat, Math.max(0.05,f), {origin:turf.centerOfMass(fpFeat)});
+            if(sc?.geometry) feats.push({type:'Feature',
+              properties:{base:sh,top:sh+hCoama/4,color:darken('#c4956a',si*5),floor:-10-si,roofType:'sarpanta'},
+              geometry:sc.geometry});
+          }catch(e){}
+        }
+        break;
+      }
+
+      case 'mansarda': {
+        // Mansarda: etaj retras H=mansarda + sarpanta mica deasupra
+        const retFact = 0.72;
+        try{
+          const sc = turf.transformScale(fpFeat, retFact, {origin:turf.centerOfMass(fpFeat)});
+          if(sc?.geometry){
+            feats.push({type:'Feature',
+              properties:{base:roofBase,top:roofBase+AEDIS.hMansarda,color:darken(AEDIS_FN[fn]?.color||'#94a3b8',10),floor:-10,roofType:'mansarda'},
+              geometry:sc.geometry});
+            // Sarpanta mica deasupra mansardei
+            const hCoama2=1.8;
+            for(let si=0;si<3;si++){
+              const f2 = retFact*(1-si*0.35);
+              try{
+                const sc2=turf.transformScale(fpFeat,Math.max(0.05,f2),{origin:turf.centerOfMass(fpFeat)});
+                if(sc2?.geometry) feats.push({type:'Feature',
+                  properties:{base:roofBase+AEDIS.hMansarda+si*(hCoama2/3),top:roofBase+AEDIS.hMansarda+(si+1)*(hCoama2/3),color:'#a0785a',floor:-11-si,roofType:'sarpanta_mica'},
+                  geometry:sc2.geometry});
+              }catch(e){}
+            }
+          }
+        }catch(e){}
+        break;
+      }
+
+      case 'combinat':
+        // Terasa + corp tehnic central
+        feats.push({type:'Feature',
+          properties:{base:roofBase,top:roofBase+0.2,color:'#475569',floor:-10,roofType:'terasa'},
+          geometry:_roofFpGeom});
+        try{
+          const techGeom = turf.transformScale(fpFeat,0.3,{origin:turf.centerOfMass(fpFeat)});
+          if(techGeom?.geometry) feats.push({type:'Feature',
+            properties:{base:roofBase+0.2,top:roofBase+3.5,color:'#64748b',floor:-11,roofType:'corp_tehnic'},
+            geometry:techGeom.geometry});
+        }catch(e){}
+        break;
+    }
+
+    // ── Etichete dimensionale ─────────────────────────────────────────────
+    if(AEDIS.showDim){
+      aedisUpdateDimLabels(fp, totalNiv, hParter, hEtaj, currentH + (AEDIS.tipAcoperis!=='terasa_plata'?AEDIS.hSarpanta:0.25));
+    }
+
+    // Stocam si setam
   } // end for parcelsToGen
 
   S.vol._lastFeats = feats;
@@ -8386,7 +8386,10 @@ function _v3dBuild(ap){
       else if(floor===0){ mat=_v3dMatParter(THREE,stilKey,V3D.texCache); }
       else if(isTop){ mat=_v3dMatPenthouse(THREE,stilKey,V3D.texCache); }
       else{ mat=_v3dMatFloor(THREE,col,floor,stilKey,V3D.texCache); }
-      const mesh=_v3dPrism(THREE,pts,base,top,mat);
+      // Acoperiș: prismă plată de 0.2m exact la vârful clădirii
+      const meshBase = isRoof ? Math.max(0, top-0.2) : base;
+      const meshTop  = isRoof ? top : top;
+      const mesh=_v3dPrism(THREE,pts,meshBase,meshTop,mat);
       if(mesh){ mesh.castShadow=true; mesh.receiveShadow=true; scene.add(mesh); V3D.aedis.push(mesh); }
     }catch(e){ console.warn('AEDIS mesh:',e.message); }
   });
