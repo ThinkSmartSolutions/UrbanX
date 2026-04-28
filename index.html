@@ -4244,6 +4244,21 @@ async function genVol(){
   }
   
   const feats = buildVolume();
+  // Adăugăm bldIdx explicit pentru distanțe multiple volume
+  {
+    const geomMap = {};
+    let bldCounter = 0;
+    feats.forEach(f=>{
+      if(f.properties?.floor < 0 || f.properties?.isExistent) return;
+      const ring = f.geometry?.coordinates?.[0];
+      if(!ring?.length) return;
+      const hash = ring[0]?.map(v=>(v||0).toFixed(5)).join(',')+':'+ring[1]?.map(v=>(v||0).toFixed(5)).join(',');
+      if(!(hash in geomMap)){ geomMap[hash] = bldCounter++; }
+      if(!f.properties) f.properties = {};
+      f.properties.bldIdx = geomMap[hash];
+      f.properties.parcelIdx = 0;
+    });
+  }
   S.vol._lastFeats = feats;
   setSource('vol-src',{type:'FeatureCollection',features:feats});
   S.vol._lastFeats = feats;  // Sincronizăm cu viewer-ul 3D
@@ -8326,9 +8341,10 @@ async function generateSolarStudy(){
   const params = ap.params || getDefaultParams(utr);
   const aedisH = S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||0;
   const niv = AEDIS.corpuri[0]?.niv||4;
-  const pot = params.pot||'N/A';
-  const cut = params.cut||'N/A';
-  const hmax = params.hmax||'N/A';
+  const pot = String(params.pot||'N/A');
+  const cut = String(params.cut||'N/A');
+  const hmax = String(params.hmax||'N/A');
+  const hmaxN = parseFloat(hmax)||0;
   const rf = params.rf||5;
   const rl = params.rl||3;
   const rs = params.rs||5;
@@ -8440,7 +8456,7 @@ async function generateSolarStudy(){
     ['Nr. cadastral',nrcad],['Zona urbanistica (UTR)',utr],
     ['Suprafata teren',area+' mp'],['Functiune propusa',fnDef.label||'—'],
     ['Regim inaltime propus',niv+' niveluri (H='+aedisH.toFixed(1)+'m)'],
-    ['POT max (PUG)',pot+'%'],['CUT max (PUG)',cut],['H max (PUG)',hmax+' m'],
+    ['POT max (PUG)',pot+'%'],['CUT max (PUG)',cut],['H max (PUG)',(String(hmax)||'N/A')+' m'],
     ['Coordonate GPS',lat.toFixed(5)+'N, '+lon.toFixed(5)+'E'],
     ['Localitate','Municipiul Iasi, jud. Iasi'],
   ];
@@ -8491,7 +8507,7 @@ async function generateSolarStudy(){
     ['Retragere spate (rs)',rs+' m','Retragere lateral dreapta (rr)',(params.rr||3)+' m'],
     ['Nr. niveluri propus',niv+' et.','Inaltime totala propusa',aedisH.toFixed(1)+' m'],
     ['POT maxim admis (PUG)',pot+'%','CUT maxim admis (PUG)',cut],
-    ['H maxim admis (PUG)',hmax+' m','Functiune admisa',fnDef.label||'—'],
+    ['H maxim admis (PUG)',(String(hmax)||'N/A')+' m','Functiune admisa',fnDef.label||'—'],
   ];
   const colW=(W-28)/4;
   tData.forEach((row,ri)=>{
@@ -8637,7 +8653,7 @@ async function generateSolarStudy(){
   const paramsData=[
     ['Functiune propusa',fnDef.label||'—','Admisa in UTR '+utr,isConform?'DA':'CONDITIONAT'],
     ['Nr. niveluri',niv+' etaje','H total propus',aedisH.toFixed(1)+' m'],
-    ['H maxim admis PUG',hmax+' m','Incadrare H',aedisH<=parseFloat(hmax||999)?'IN LIMITA':'DEPASIT'],
+    ['H maxim admis PUG',(String(hmax)||'N/A')+' m','Incadrare H',aedisH<=parseFloat(String(hmax)||'999')?'IN LIMITA':'DEPASIT'],
     ['POT propus','~'+pot+'%','Supraf. construita max',scMax+' mp'],
     ['CUT propus','~'+cut,'Supraf. desfasurata max',sdMax+' mp'],
     ['Retragere front stradal',rf+' m','Retragere spate',rs+' m'],
@@ -8790,8 +8806,9 @@ function _v3dBuild(ap){
   const THREE = window.THREE;
   const canvas = document.getElementById('v3d-canvas');
   if(!canvas||!THREE){ _v3dStatus('❌ Three.js indisponibil'); return; }
-  // Guard: V3D trebuie să existe
   if(typeof V3D === 'undefined'){ console.error('V3D not initialized'); return; }
+  // Preset implicit: zi (luminat)
+  window._v3dNight = false;
 
   const W=canvas.offsetWidth, H=canvas.offsetHeight;
 
@@ -8916,6 +8933,9 @@ function _v3dBuild(ap){
 
   // Străzi din S.ctx linii (dacă există) sau grid simplu în jurul parcelei
   _v3dAddStreets(THREE, scene, ring0, toLoc);
+  // Adăugăm viață urbană (oameni, mașini, câini, biciclete etc.)
+  const _isNightMode = document.getElementById('v3d-light')?.value === 'night' || window._v3dNight;
+  _v3dAddUrbanLife(THREE, scene, ring0, toLoc, _isNightMode);
 
   // Camera poziție inițială
   const maxH=Math.max(...(S.vol._lastFeats||[]).map(f=>f.properties?.top||0),8);
@@ -9005,6 +9025,145 @@ function _v3dAddStreets(THREE, scene, ring0, toLoc){
   });
 }
 
+
+
+// ── Viata urbana: oameni, masini, caini, biciclete, bancute, felinare ────────
+function _v3dAddUrbanLife(THREE, scene, ring0, toLoc, isNight){
+  try{
+    const cx=ring0.reduce((s,p)=>s+p[0],0)/ring0.length;
+    const cz=ring0.reduce((s,p)=>s+p[1],0)/ring0.length;
+    const pts=ring0.map(toLoc);
+    const xs=pts.map(([x])=>x),zs=pts.map(([,z])=>z);
+    const off=Math.max(Math.max(...xs)-Math.min(...xs),Math.max(...zs)-Math.min(...zs))*0.5+2;
+
+    const mkTex=(draw,cw,ch)=>{
+      const cv=document.createElement('canvas');cv.width=cw;cv.height=ch;
+      draw(cv.getContext('2d'),cw,ch);
+      return new THREE.CanvasTexture(cv);
+    };
+    const addSprite=(tex,x,y,z,sw,sh)=>{
+      const m=new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false});
+      const sp=new THREE.Sprite(m);sp.scale.set(sw,sh,1);sp.position.set(x,y+sh/2,z);scene.add(sp);
+    };
+    const toLoc2=(lng,lat)=>toLoc([lng,lat]);
+
+    // Om
+    const personDraw=(ctx,w,h,sk,cl,ha)=>{
+      ctx.clearRect(0,0,w,h);
+      ctx.fillStyle=cl;ctx.fillRect(w*.3,h*.35,w*.4,h*.4);
+      ctx.fillStyle=sk;ctx.beginPath();ctx.arc(w/2,h*.22,w*.17,0,6.28);ctx.fill();
+      ctx.fillStyle=ha;ctx.beginPath();ctx.arc(w/2,h*.17,w*.17,Math.PI,0);ctx.fill();
+      ctx.fillStyle=cl;ctx.fillRect(w*.3,h*.72,w*.15,h*.25);ctx.fillRect(w*.55,h*.72,w*.15,h*.25);
+      ctx.fillStyle=sk;ctx.fillRect(w*.12,h*.36,w*.18,h*.28);ctx.fillRect(w*.7,h*.36,w*.18,h*.28);
+    };
+    const pData=[['#f5d5b8','#224499','#3a2010'],['#c8a080','#992233','#111'],
+      ['#f0c8a0','#228844','#8b4513'],['#d4a882','#553399','#2c1810'],
+      ['#e8c8a0','#333','#111'],['#c0a070','#dd7700','#4a2a10']];
+    for(let i=0;i<10;i++){
+      const a=(i/10)*Math.PI*2,r=off+Math.random()*3;
+      const [lx,lz]=toLoc2(cx+r*Math.sin(a),cz+r*Math.cos(a));
+      const [sk,cl,ha]=pData[i%pData.length];
+      addSprite(mkTex((ctx,w,h)=>personDraw(ctx,w,h,sk,cl,ha),32,64),lx,0,lz,0.5,1.75);
+    }
+
+    // Mama cu carucior
+    const carucior=mkTex((ctx,w,h)=>{
+      ctx.clearRect(0,0,w,h);
+      ctx.fillStyle='#f0c0a0';ctx.beginPath();ctx.arc(w*.35,h*.2,w*.13,0,6.28);ctx.fill();
+      ctx.fillStyle='#cc6688';ctx.fillRect(w*.22,h*.32,w*.26,h*.35);
+      ctx.fillRect(w*.22,h*.65,w*.1,h*.25);ctx.fillRect(w*.38,h*.65,w*.1,h*.25);
+      ctx.fillStyle='#4466aa';ctx.fillRect(w*.52,h*.45,w*.36,h*.27);
+      ctx.fillStyle='#222';ctx.beginPath();ctx.arc(w*.6,h*.76,w*.08,0,6.28);ctx.fill();
+      ctx.arc(w*.8,h*.76,w*.08,0,6.28);ctx.fill();
+      ctx.fillStyle='#ffd0a0';ctx.beginPath();ctx.arc(w*.7,h*.48,w*.1,0,6.28);ctx.fill();
+    },64,64);
+    const ca=Math.random()*6.28,[clx,clz]=toLoc2(cx+(off+1)*Math.sin(ca),cz+(off+1)*Math.cos(ca));
+    addSprite(carucior,clx,0,clz,1.5,1.5);
+
+    // Beagle
+    const beagle=mkTex((ctx,w,h)=>{
+      ctx.clearRect(0,0,w,h);
+      ctx.fillStyle='#c8a060';ctx.fillRect(w*.2,h*.48,w*.5,h*.26);
+      ctx.beginPath();ctx.arc(w*.72,h*.44,w*.16,0,6.28);ctx.fill();
+      ctx.fillStyle='#3a2010';ctx.fillRect(w*.75,h*.38,w*.08,h*.22);ctx.fillRect(w*.58,h*.38,w*.08,h*.22);
+      ctx.fillStyle='#a08040';ctx.fillRect(w*.22,h*.72,w*.08,h*.2);ctx.fillRect(w*.36,h*.72,w*.08,h*.2);
+      ctx.fillRect(w*.52,h*.72,w*.08,h*.2);ctx.fillRect(w*.62,h*.72,w*.08,h*.2);
+      ctx.strokeStyle='#c8a060';ctx.lineWidth=3;
+      ctx.beginPath();ctx.moveTo(w*.2,h*.55);ctx.quadraticCurveTo(w*.06,h*.33,w*.13,h*.47);ctx.stroke();
+      ctx.fillStyle='#f0e8d0';ctx.fillRect(w*.68,h*.5,w*.12,w*.08);
+      ctx.fillStyle='#111';ctx.beginPath();ctx.arc(w*.78,h*.42,w*.03,0,6.28);ctx.fill();
+    },64,40);
+    const ba=Math.random()*6.28,[blx,blz]=toLoc2(cx+(off+0.5)*Math.sin(ba),cz+(off+0.5)*Math.cos(ba));
+    addSprite(beagle,blx,0,blz,1.2,0.75);
+
+    // Bicicleta
+    const bici=mkTex((ctx,w,h)=>{
+      ctx.clearRect(0,0,w,h);ctx.strokeStyle='#444';ctx.lineWidth=2;
+      ctx.beginPath();ctx.arc(w*.25,h*.7,w*.2,0,6.28);ctx.stroke();
+      ctx.beginPath();ctx.arc(w*.75,h*.7,w*.2,0,6.28);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(w*.25,h*.7);ctx.lineTo(w*.55,h*.4);ctx.lineTo(w*.75,h*.7);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(w*.55,h*.4);ctx.lineTo(w*.55,h*.65);ctx.lineTo(w*.75,h*.7);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(w*.55,h*.4);ctx.lineTo(w*.72,h*.35);ctx.stroke();
+      ctx.fillStyle='#2266aa';ctx.beginPath();ctx.arc(w*.5,h*.15,w*.12,0,6.28);ctx.fill();
+      ctx.fillRect(w*.38,h*.26,w*.24,h*.3);
+    },48,56);
+    for(let i=0;i<2;i++){
+      const a2=Math.random()*6.28,[bix,biz]=toLoc2(cx+(off+1.5+i)*Math.sin(a2),cz+(off+1.5+i)*Math.cos(a2));
+      addSprite(bici,bix,0,biz,1.2,1.4);
+    }
+
+    // Masini
+    const carCols=['#cc2222','#2244cc','#228844','#aaa','#111','#cc8800'];
+    for(let i=0;i<3;i++){
+      const col=carCols[Math.floor(Math.random()*carCols.length)];
+      const carTex=mkTex((ctx,w,h)=>{
+        ctx.clearRect(0,0,w,h);
+        ctx.fillStyle=col;ctx.fillRect(w*.1,h*.45,w*.8,h*.35);
+        ctx.fillRect(w*.22,h*.28,w*.56,h*.2);
+        ctx.fillStyle='rgba(150,210,255,0.7)';ctx.fillRect(w*.24,h*.3,w*.24,h*.16);ctx.fillRect(w*.52,h*.3,w*.24,h*.16);
+        ctx.fillStyle='#222';ctx.beginPath();ctx.arc(w*.22,h*.82,w*.12,0,6.28);ctx.fill();ctx.arc(w*.78,h*.82,w*.12,0,6.28);ctx.fill();
+        ctx.fillStyle='#666';ctx.beginPath();ctx.arc(w*.22,h*.82,w*.07,0,6.28);ctx.fill();ctx.arc(w*.78,h*.82,w*.07,0,6.28);ctx.fill();
+        if(isNight){ctx.fillStyle='rgba(255,255,180,.95)';ctx.fillRect(w*.82,h*.52,w*.08,h*.08);ctx.fillStyle='rgba(255,50,50,.95)';ctx.fillRect(w*.1,h*.52,w*.08,h*.08);}
+      },80,48);
+      const a3=Math.random()*6.28,r3=off+Math.random()*4+2;
+      const [cax,caz]=toLoc2(cx+r3*Math.sin(a3),cz+r3*Math.cos(a3));
+      addSprite(carTex,cax,0,caz,2.5,1.5);
+      if(isNight){
+        const fl=new THREE.PointLight('#ffffc0',0.5,8);fl.position.set(cax+0.5,0.6,caz);scene.add(fl);
+        const rl=new THREE.PointLight('#ff3030',0.3,5);rl.position.set(cax-0.5,0.6,caz);scene.add(rl);
+      }
+    }
+
+    // Banca
+    const banca=mkTex((ctx,w,h)=>{
+      ctx.clearRect(0,0,w,h);
+      ctx.fillStyle='#8b5e3c';ctx.fillRect(w*.1,h*.4,w*.8,h*.12);ctx.fillRect(w*.1,h*.55,w*.8,h*.08);
+      ctx.fillStyle='#555';ctx.fillRect(w*.12,h*.63,w*.1,h*.3);ctx.fillRect(w*.78,h*.63,w*.1,h*.3);
+      ctx.fillRect(w*.12,h*.35,w*.08,h*.2);ctx.fillRect(w*.8,h*.35,w*.08,h*.2);
+    },48,32);
+    for(let i=0;i<2;i++){
+      const a4=i*Math.PI+Math.random()*.5;
+      const [bnx,bnz]=toLoc2(cx+(off+.8)*Math.sin(a4),cz+(off+.8)*Math.cos(a4));
+      addSprite(banca,bnx,0,bnz,1.0,0.5);
+    }
+
+    // Felinare
+    for(let i=0;i<4;i++){
+      const a5=(i/4)*6.28;
+      const [fx,fz]=toLoc2(cx+(off+.3)*Math.sin(a5),cz+(off+.3)*Math.cos(a5));
+      const felinar=mkTex((ctx,w,h)=>{
+        ctx.clearRect(0,0,w,h);ctx.fillStyle='#666';ctx.fillRect(w*.44,h*.2,w*.12,h*.75);
+        ctx.fillStyle='#555';ctx.fillRect(w*.28,h*.2,w*.44,h*.06);
+        ctx.fillStyle=isNight?'#ffe066':'#ddd';ctx.beginPath();ctx.arc(w/2,h*.18,w*.15,0,6.28);ctx.fill();
+      },24,64);
+      addSprite(felinar,fx,0,fz,0.3,2.5);
+      if(isNight){
+        const pl=new THREE.PointLight('#ffee88',0.7,12);pl.position.set(fx,2.5,fz);scene.add(pl);
+      }
+    }
+
+  }catch(e){console.warn('UrbanLife:',e.message);}
+}
 
 function _v3dPrism(THREE,pts2d,base,top,mat){
   const n=pts2d.length; const h=top-base;
@@ -9205,7 +9364,8 @@ function _v3dApplyLight(preset,THREE,scene,r){
   sun.shadow.bias=-0.001; scene.add(sun);
   const fill=new THREE.DirectionalLight(p.fill.c,p.fill.i); fill.position.set(...p.fill.p); scene.add(fill);
   if(r) r.toneMappingExposure=p.exp;
-  
+  window._v3dNight = !!p.night;  // Setăm flag pentru materiale
+
   // Noapte: adăugăm lumini punctuale (stradă + interior clădiri)
   if(p.night && V3D.scene){
     // Lumini de stradă portocalii
