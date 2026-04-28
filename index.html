@@ -945,8 +945,12 @@ async function detectZoneTypeAsync(lat, lng, utr){
 
 // Fix #10: Detectare latura principala (front stradal) a parcelei
 // Returneaza bearing-ul fata de Nord al laturii celei mai apropiate de o strada publica
+// Guard: nu apelam Overpass detectRoadFront daca avem deja un request in zbor
+let _roadFrontInFlight = false;
 async function detectRoadFront(parcelGeo) {
   if(!parcelGeo?.geometry) return null;
+  if(_roadFrontInFlight) return null; // evitam 429
+  _roadFrontInFlight = true;
   try {
     const center = turf.centerOfMass(parcelGeo).geometry.coordinates;
     const cx = center[0], cy = center[1];
@@ -1027,7 +1031,10 @@ async function detectRoadFront(parcelGeo) {
     
   } catch(e) { 
     console.warn('detectRoadFront error:', e.message);
+    _roadFrontInFlight = false;
     return null; 
+  } finally {
+    _roadFrontInFlight = false;
   }
 }
 
@@ -1044,7 +1051,7 @@ function addLayers(){
 
   L({id:'utr-fill',type:'fill',source:'utr-src',paint:{'fill-color':['coalesce',['get','c'],'#6d28d9'],'fill-opacity':0.2}});
   L({id:'utr-line',type:'line',source:'utr-src',paint:{'line-color':['coalesce',['get','c'],'#6d28d9'],'line-width':1.5,'line-opacity':0.7}});
-  L({id:'utr-lbl',type:'symbol',source:'utr-src',minzoom:13,layout:{'text-field':['get','utr'],'text-size':11,'text-font':['DIN Pro Bold','Arial Unicode MS Bold']},paint:{'text-color':['coalesce',['get','c'],'#c4b5fd'],'text-halo-color':'rgba(0,0,0,.8)','text-halo-width':1.5}});
+  L({id:'utr-lbl',type:'symbol',source:'utr-src',minzoom:13,layout:{'text-field':['get','utr'],'text-size':11,'text-font':['DIN Offc Pro Bold','Arial Unicode MS Bold']},paint:{'text-color':['coalesce',['get','c'],'#c4b5fd'],'text-halo-color':'rgba(0,0,0,.8)','text-halo-width':1.5}});
 
   // Parcele cadastrale (multiselect)
   L({id:'parcel-fill',type:'fill',source:'parcel-src',paint:{'fill-color':['coalesce',['get','fc'],'#00e5b4'],'fill-opacity':0.22}});
@@ -1060,7 +1067,7 @@ function addLayers(){
         18, 15,
         20, 18
       ],
-      'text-font':['DIN Pro Bold','Arial Unicode MS Bold'],
+      'text-font':['DIN Offc Pro Bold','Arial Unicode MS Bold'],
       'text-anchor':'center',
       'text-allow-overlap':false,
       'text-ignore-placement':false,
@@ -1105,7 +1112,7 @@ function addLayers(){
     layout:{
       'text-field':['get','label'],
       'text-size':12,
-      'text-font':['DIN Pro Bold','Arial Unicode MS Bold'],
+      'text-font':['DIN Offc Pro Bold','Arial Unicode MS Bold'],
       'text-anchor':'center',
       'text-rotation-alignment':'map',
       'text-allow-overlap':true,
@@ -1123,7 +1130,7 @@ function addLayers(){
     layout:{
       'text-field':'▶',
       'text-size':18,
-      'text-font':['DIN Pro Bold','Arial Unicode MS Bold'],
+      'text-font':['DIN Offc Pro Bold','Arial Unicode MS Bold'],
       'text-rotation-alignment':'map',
       'text-rotate':['get','bearing'],
       'text-allow-overlap':true,
@@ -1139,7 +1146,11 @@ function addLayers(){
   L({id:'ctx-3d',type:'fill-extrusion',source:'ctx-src',paint:{
     'fill-extrusion-color':['coalesce',['get','col'],'#6b7280'],
     'fill-extrusion-height':['coalesce',['get','h'],7],
-    'fill-extrusion-base':0,'fill-extrusion-opacity':0.6
+    'fill-extrusion-base':0,
+    'fill-extrusion-opacity':0.52,
+    'fill-extrusion-vertical-gradient': true,
+    'fill-extrusion-ambient-occlusion-intensity': 0.3,
+    'fill-extrusion-ambient-occlusion-radius': 2.0
   }});
   // ── Linii distante intre cladiri ─────────────────────────────────────────
   L({id:'dist-line',type:'line',source:'dist-src',
@@ -1158,7 +1169,7 @@ function addLayers(){
     layout:{
       'text-field':['get','label'],
       'text-size':11,
-      'text-font':['DIN Pro Bold','Arial Unicode MS Bold'],
+      'text-font':['DIN Offc Pro Bold','Arial Unicode MS Bold'],
       'text-anchor':'center',
       'symbol-placement':'line-center',
       'text-allow-overlap':true
@@ -1180,7 +1191,7 @@ function addLayers(){
     layout:{
       'text-field':['concat',['get','h_label'],' | ',['get','fn_label']],
       'text-size':11,
-      'text-font':['DIN Pro Bold','Arial Unicode MS Bold'],
+      'text-font':['DIN Offc Pro Bold','Arial Unicode MS Bold'],
       'text-anchor':'center',
       'text-allow-overlap':false,
       'text-ignore-placement':false,
@@ -1197,8 +1208,28 @@ function addLayers(){
     'fill-extrusion-color':['coalesce',['get','color'],'#f59e0b'],
     'fill-extrusion-height':['coalesce',['get','top'],9],
     'fill-extrusion-base':['coalesce',['get','base'],0],
-    'fill-extrusion-opacity':0.92
+    'fill-extrusion-opacity':[
+      'case',
+      ['==',['get','roofType'],'parapet'], 0.97,
+      ['==',['get','roofType'],'terasa'],  0.85,
+      ['boolean',['get','isExistent'],false], 0.55,
+      ['<',['coalesce',['get','floor'],0], 0], 0.88,
+      0.94
+    ],
+    'fill-extrusion-vertical-gradient': true,
+    'fill-extrusion-ambient-occlusion-intensity': 0.4,
+    'fill-extrusion-ambient-occlusion-radius': 3.0
   }});
+
+  // AEDIS outline — fante clare pe marginile volumului propus
+  L({id:'vol-3d-outline',type:'line',source:'vol-src',
+    filter:['all',['boolean',['get','isAedis'],false],['==',['coalesce',['get','floor'],0],0]],
+    paint:{
+      'line-color':['coalesce',['get','color'],'#3b82f6'],
+      'line-width':['interpolate',['linear'],['zoom'],14,0.5,18,2,20,3],
+      'line-opacity':0.6
+    }
+  });
 
   if(map._ux) return; map._ux=true;
   map.on('click','ctx-3d',e=>{
@@ -2234,11 +2265,12 @@ function updateDistanceLines(){
   const ctxFeats = S.ctx?.features||[];
 
   // Volumele generate - luam baza (floor=0) din TOATE parcelele
+  // Excludem cladirile existente (floor=-1) si acoperisurile (floor<-1)
   const myBlds = {};
-  let bldKey = 0;
   volFeats.forEach(f=>{
-    if((f.properties?.floor??0)!==0) return;
-    // Cheia unica = parcelIdx + bldIdx (pt multi-vol pe multi-parcele)
+    const fl = f.properties?.floor??0;
+    if(fl !== 0) return; // doar parter (amprenta la sol)
+    if(f.properties?.isExistent) return; // excludem existentele
     const pi = f.properties?.parcelIdx??0;
     const bi = f.properties?.bldIdx??0;
     const k = pi*100+bi;
@@ -2330,25 +2362,30 @@ function updateDistanceLines(){
       .slice(0,6)
       .map(x=>x.ctx);
 
-    // Pentru fiecare cladire adiacenta, calculam distanta minima fata de FIECARE volum generat
+    // Pentru fiecare cladire adiacenta, calculam distanta minima fata de oricare volum generat
+    // O singura linie per vecin (cea mai scurta distanta dintre toti volumii nostri)
     adjacentCtx.forEach(ctx=>{
-      myBldArr.forEach((myBld,bi)=>{
+      let bestDist = Infinity, bestPt1 = null, bestPt2 = null, bestBi = 0;
+      myBldArr.forEach((myBld, bi)=>{
         try{
-          const {pt1,pt2,dist} = minDistBetweenPolygons(myBld,ctx);
-          if(!pt1||!pt2||dist>120) return; // distanță max 120m față de vecini
-          const minDist = S.vol.multiVolDist||6;
-          feats.push({
-            type:'Feature',
-            geometry:{type:'LineString',coordinates:[pt1,pt2]},
-            properties:{
-              type:'to_neighbor',
-              dist:dist,
-              label:dist.toFixed(1)+'m',
-              ok: dist>=minDist,
-              bldIdx: bi
-            }
-          });
+          const {pt1,pt2,dist} = minDistBetweenPolygons(myBld, ctx);
+          if(pt1 && pt2 && dist < bestDist){
+            bestDist = dist; bestPt1 = pt1; bestPt2 = pt2; bestBi = bi;
+          }
         }catch(e){}
+      });
+      if(!bestPt1 || bestDist > 80) return; // ignoram vecinii prea departe
+      const minDist = S.vol.multiVolDist||6;
+      feats.push({
+        type:'Feature',
+        geometry:{type:'LineString', coordinates:[bestPt1, bestPt2]},
+        properties:{
+          type:'to_neighbor',
+          dist: bestDist,
+          label: bestDist.toFixed(1)+'m',
+          ok: bestDist >= minDist,
+          bldIdx: bestBi
+        }
       });
     });
   }
@@ -2613,8 +2650,8 @@ function buildVolume(){
 // ═══ CONTEXT 3D ═══════════════════════════════════════════════════════════
 // Cod culori functiuni cladiri - conform practica urbanistica internationala
 const BLD_COL={
-  // Rezidential - nuante verzi/gri
-  residential:'#a3b899', apartments:'#7da87b', house:'#b8c9a3',
+  // Rezidential - gri-albăstrui neutru (nu concurează cu AEDIS)
+  residential:'#4a5568', apartments:'#4a5568', house:'#5a6a7a',
   // Comercial - portocaliu/galben
   commercial:'#e8a838', retail:'#f0823c', shop:'#f0823c',
   // Birouri/Servicii - albastru
@@ -2644,9 +2681,23 @@ const BLD_LABELS={
 // ── Cache context: evitam cereri repetate pentru aceeasi zona ─────────────
 const _CTX_CACHE = {};
 
+// Throttle: minimum 20s between Overpass calls for same parcel
+let _ctxLastCall = 0;
+let _ctxLastParcel = null;
+
 async function loadContext(){
   const ap = S.parcels[S.activeParcel??0];
   if(!ap?.geo?.geometry) return;
+  
+  // Debounce: daca acelasi teren, nu mai facem Overpass in mai putin de 20s
+  const now = Date.now();
+  const parcelKey = ap.nrcad || JSON.stringify(ap.geo?.geometry?.coordinates?.[0]?.[0]);
+  if(parcelKey === _ctxLastParcel && (now - _ctxLastCall) < 20000){
+    // Avem deja contextul - nu refacem request
+    if(S.ctx?.features?.length) return;
+  }
+  _ctxLastCall = now;
+  _ctxLastParcel = parcelKey;
   const c = turf.centerOfMass(ap.geo).geometry.coordinates;
   const r = Math.max(80, Number(S.vol.ctxR||200));
 
@@ -2814,6 +2865,7 @@ function _ctxApplyLabels(feats){
 
 // Reîncarcă forțat contextul (ignoră cache)
 async function loadContextForce(){
+  _ctxLastCall=0; _ctxLastParcel=null; // bypass cooldown
   const ap = S.parcels[S.activeParcel??0];
   if(!ap?.geo?.geometry){ ss('⚠️ Selectează o parcelă mai întâi'); return; }
   // Ștergem cache pentru zona curentă
@@ -3208,11 +3260,7 @@ function htmlProiect(){
       +'<span>'+label+(unit?' ('+unit+')':'')+'</span>'
       +'<span style="color:#475569;font-size:10px">PUG: <b>'+(vPUG!=null?vPUG:'-')+'</b></span>'
       +'</div>'
-      +'<input class="inp" type="number" value="'+v+'" min="0" step="0.1"'
-      +' oninput="updateParam(this.dataset.key,this.value,false)"'
-      +' onchange="updateParam(this.dataset.key,this.value,true)"'
-      +' data-key="'+key+'"'
-      +' style="margin-bottom:0;'+border+'" title="'+(hint||'')+'">'
+            +'<input class="inp" type="number" value="'+v+'" min="0"'      +' max="'+(key==='pot'?'100':key==='sv'?'95':key==='cut'?'20':key==='niv'?'50':key==='h'?'200':'50')+'"'      +' step="'+(key==='cut'?'0.1':'1')+'"'      +' oninput="updateParamLive(this.dataset.key,this.value)"'      +' onchange="updateParam(this.dataset.key,this.value,true)"'      +' data-key="'+key+'"'      +' style="margin-bottom:0;'+border+'" title="'+(hint||'')+'">'  
       +wMsg+mMsg+'</div>';
   }
 
@@ -4029,8 +4077,15 @@ function updateParam(key, val, rerender){
   const ap = S.parcels[S.activeParcel??0];
   if(!ap) return;
   if(!ap.params) ap.params = getDefaultParams(ap.utr);
-  const n = parseFloat(String(val).replace(',','.'));
+  let n = parseFloat(String(val).replace(',','.'));
   if(isNaN(n) || n < 0) return;
+  // Validare domeniu: POT max 100%, CUT max 20, H max 200m, niv max 50
+  if(key==='pot') n = Math.min(100, n);
+  if(key==='cut') n = Math.min(20, n);
+  if(key==='h')   n = Math.min(200, n);
+  if(key==='niv') n = Math.min(50, Math.round(n));
+  if(key==='rf'||key==='rl'||key==='rr'||key==='rs') n = Math.min(50, n);
+  if(key==='sv')  n = Math.min(95, n);
   ap.params[key] = n;
   // Fix #9: CUT creste → creste suprafata desfasurata → creste inaltimea/nivelurile
   if(key === 'niv'){
@@ -4105,7 +4160,11 @@ function updateParam(key, val, rerender){
   }
 }
 
-function updateParamLive(key, val){ updateParam(key, val, false); }
+let _paramDebounce = null;
+function updateParamLive(key, val){ 
+  clearTimeout(_paramDebounce);
+  _paramDebounce = setTimeout(()=>updateParam(key, val, false), 80);
+}
 
 function resetParams(){
   const ap = S.parcels[S.activeParcel??0];
@@ -5500,13 +5559,13 @@ const AEDIS_FN = {
 const AEDIS_STIL = {
   modern: {
     label:'🏢 Modern', desc:'Fațade sticlă-oțel, etaje progresive, atic pronunțat',
-    // Parter: gri-antracit; etaje: progresie albastru-gri spre alb-sticla
-    floorColors: ['#334155','#475569','#64748b','#94a3b8','#cbd5e1','#e2e8f0','#f1f5f9','#ffffff'],
-    parterColor: '#1e293b',   // soclu inchis
-    aticColor: '#0f172a',     // atic negru mat
+    floorColors: ['#1e3a5f','#1d4ed8','#2563eb','#3b82f6','#60a5fa','#93c5fd','#bfdbfe','#eff6ff'],
+    parterColor: '#0f172a',
+    aticColor: '#0c1a2e',
     retragereFactor: 0.88, hasAttic: true, aticH: 1.4,
     etajColor: (base,i,tot)=>{
-      const cols=['#1e293b','#334155','#475569','#64748b','#94a3b8','#cbd5e1','#e2e8f0','#f8fafc'];
+      // Progresie: soclu negru → albastru intens → albastru deschis (sticlă)
+      const cols=['#0f172a','#1e3a5f','#1d4ed8','#2563eb','#3b82f6','#60a5fa','#93c5fd','#bfdbfe'];
       return cols[Math.min(i,cols.length-1)];
     }
   },
@@ -5524,23 +5583,25 @@ const AEDIS_STIL = {
   },
   clasic: {
     label:'🏛 Clasic', desc:'Soclu pronunțat, cornișe, piatră naturală, proporții clasice',
-    floorColors: ['#92400e','#a16207','#b45309','#ca8a04','#d97706','#eab308','#fbbf24','#fde68a'],
-    parterColor: '#78350f',
-    aticColor: '#451a03',
+    floorColors: ['#44260a','#6b3a10','#8b4513','#a0522d','#b8732e','#c8914a','#d4a96a','#e8cfa0'],
+    parterColor: '#2d1608',
+    aticColor: '#1a0d04',
     retragereFactor: 0.96, hasAttic: true, aticH: 2.2,
     etajColor: (base,i,tot)=>{
-      const cols=['#78350f','#92400e','#a16207','#b45309','#ca8a04','#d97706','#eab308','#fde68a'];
+      // Piatră: soclu maro-inchis → ocru cald → crem luminos
+      const cols=['#2d1608','#44260a','#6b3a10','#8b4513','#a0522d','#c8914a','#d4a96a','#e8cfa0'];
       return cols[Math.min(i,cols.length-1)];
     }
   },
   minimalist: {
     label:'◼ Minimalist', desc:'Beton alb, volume pure, fara ornamente, lumina naturala',
-    floorColors: ['#d4d4d8','#e4e4e7','#f4f4f5','#fafafa','#ffffff','#fafafa','#f4f4f5','#e4e4e7'],
-    parterColor: '#a1a1aa',
-    aticColor: '#71717a',
+    floorColors: ['#52525b','#71717a','#a1a1aa','#d4d4d8','#e4e4e7','#f4f4f5','#fafafa','#ffffff'],
+    parterColor: '#3f3f46',
+    aticColor: '#27272a',
     retragereFactor: 1.0, hasAttic: false, aticH: 0.6,
     etajColor: (base,i,tot)=>{
-      const cols=['#a1a1aa','#d4d4d8','#e4e4e7','#f4f4f5','#fafafa','#f4f4f5','#e4e4e7','#d4d4d8'];
+      // Beton: soclu antracit → gri mediu → alb pur la ultimul etaj
+      const cols=['#3f3f46','#52525b','#71717a','#a1a1aa','#d4d4d8','#e4e4e7','#f4f4f5','#ffffff'];
       return cols[Math.min(i,cols.length-1)];
     }
   },
@@ -5722,6 +5783,8 @@ function aedisBuild(){
         color: etajColor,
         floor: i,
         isLast,
+        isAedis: true,
+        isParter: i===0,
         fn: AEDIS.parterDiferit && i===0 ? AEDIS.fnParter : fn,
         hEtaj: hEtajCrt,
         parcelIdx: S.activeParcel??0
@@ -5842,9 +5905,24 @@ function aedisBuild(){
   S.vol.genDone = true;
   S.vol._lastFeats = feats;
   setSource('vol-src',{type:'FeatureCollection',features:feats});
-  set3D(60,-20);
+  set3D(65,-25);
 
-  // Dacă nu avem context, îl încărcăm acum (Overpass sau Mapbox fallback)
+  // Zoom la parcela dupa generare
+  const ap2 = S.parcels[S.activeParcel??0];
+  if(ap2?.geo?.geometry){
+    try{
+      const bb = turf.bbox(ap2.geo);
+      const pad = Math.max(60, Math.min(120, (bb[2]-bb[0])*111320*0.3));
+      setTimeout(()=>{
+        map.fitBounds([[bb[0],bb[1]],[bb[2],bb[3]]],{
+          padding: pad, pitch: 65, bearing: -25,
+          maxZoom: 18, duration: 900
+        });
+      }, 200);
+    }catch(e){}
+  }
+
+  // Dacă nu avem context, îl încărcăm acum
   if(!S.ctx?.features?.length){
     loadContext().then(()=>{ setTimeout(updateDistanceLines, 300); });
   } else {
@@ -5946,16 +6024,20 @@ function aedis3DRemove(){
 }
 
 function aedisGenerateAll(){
-  // Generăm fill-extrusion Mapbox — se plasează corect pe orice parcelă
+  // Dezactivăm Three.js layer dacă era activ (evităm suprapunere cu fill-extrusion)
+  if(AEDIS3D.active){
+    try{ map.removeLayer('aedis-3d-layer'); }catch(e){}
+    if(AEDIS3D.renderer){ AEDIS3D.renderer.dispose(); AEDIS3D.renderer=null; }
+    AEDIS3D.active = false;
+  }
+  // Generăm fill-extrusion Mapbox — trăiește în același pipeline cu clădirile vecine
   aedisBuild();
-  // Contextul urban + distanțele (auto-load dacă nu există)
+  // Contextul urban + distanțele
   if(!S.ctx?.features?.length){
     loadContext().then(()=>{ setTimeout(updateDistanceLines, 300); });
   } else {
     setTimeout(updateDistanceLines, 400);
   }
-  // Three.js (AEDIS 3D vizual avansat) se generează SEPARAT, din butonul dedicat
-  // Nu îl apelăm automat pentru că poate deforma mesh-ul pe parcele complexe
 }
 
 function aedisClose(){
@@ -6307,12 +6389,11 @@ function aedisGetContent(){
   <div class="aedis-content">${contentHtml}</div>
   <div class="aedis-actions">
     <button onclick="aedisGenerateAll()" class="aedis-build-btn">
-      ⚡ AEDIS — Generează Volum 3D
+      ⚡ Generează Volum 3D în hartă
     </button>
-    <button onclick="aedisAIRender()" class="aedis-dim-btn" style="background:rgba(212,175,55,.15);border-color:rgba(212,175,55,.4);color:#d4af37">🎨 AI</button>
-    <button onclick="aedis3DExportGLTF()" class="aedis-dim-btn" title="Export .glb">📦</button>
+    <button onclick="aedisAIRender()" class="aedis-dim-btn" style="background:rgba(212,175,55,.15);border-color:rgba(212,175,55,.4);color:#d4af37;font-size:10px" title="AI Render fotorealist (necesită API key Fal.ai)">🎨 AI</button>
     <button onclick="AEDIS.showDim=!AEDIS.showDim;aedisRender()" 
-      class="aedis-dim-btn${AEDIS.showDim?' active':''}">📏 Dim</button>
+      class="aedis-dim-btn${AEDIS.showDim?' active':''}" title="Etichete dimensionale">📏</button>
     <button onclick="aedisClose()" class="aedis-close-btn">✕</button>
   </div>`;
 }
@@ -7214,28 +7295,101 @@ function aedisShowRender(imgUrl){
   if(!overlay){
     overlay = document.createElement('div');
     overlay.id = 'aedis-render-overlay';
-    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:20px';
     document.body.appendChild(overlay);
   }
+
   const ts = FAL_AI.lastRender ? new Date(FAL_AI.lastRender.timestamp).toLocaleString('ro') : new Date().toLocaleString('ro');
   const nrcad = (S.parcels[S.activeParcel??0]?.nrcad||'parcela').replace(/[^a-zA-Z0-9_]/g,'_');
   const filename = 'AEDIS_render_' + nrcad + '_' + Date.now() + '.jpg';
 
-  overlay.innerHTML =
-    '<div style="position:relative;max-width:92vw;border-radius:12px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.8)">' +
-    '<img id="aedis-render-img" src="' + imgUrl + '" style="display:block;max-width:100%;max-height:76vh" alt="AEDIS AI Render" />' +
-    '<div style="position:absolute;top:12px;right:12px;display:flex;gap:8px">' +
-    '<button onclick="aedisDownloadRender()" style="padding:8px 14px;background:#d4af37;color:#000;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:700;display:flex;align-items:center;gap:4px">⬇ Descarcă JPG</button>' +
-    '<button onclick="aedisCloseRenderOverlay()" style="padding:8px 14px;background:rgba(239,68,68,.9);color:#fff;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:700">✕ Închide</button>' +
-    '</div>' +
-    '</div>' +
-    '<div style="color:#64748b;font-size:10px;text-align:center;max-width:600px">' +
-    '🎨 AEDIS AI Render · Fal.ai FLUX.1 · ' + ts +
-    '</div>';
-  overlay.style.display = 'flex';
-  // salvam url si filename pentru download
-  overlay._imgUrl = imgUrl;
-  overlay._filename = filename;
+  // Facem screenshot din harta curenta (cu volumul 3D vizibil)
+  map.triggerRepaint();
+  requestAnimationFrame(()=>{
+    let mapDataUrl = '';
+    try{ mapDataUrl = map.getCanvas().toDataURL('image/jpeg', 0.92); }catch(e){}
+
+    overlay.style.cssText = 'position:fixed;inset:0;background:#000;z-index:9999;display:flex;flex-direction:column';
+
+    overlay.innerHTML = `
+      <div style="position:relative;flex:1;overflow:hidden;cursor:col-resize;user-select:none" id="aedis-slider-wrap">
+
+        <!-- Stanga: AI Render -->
+        <div id="aedis-sl-ai" style="position:absolute;inset:0;overflow:hidden">
+          <img src="${imgUrl}" style="width:100%;height:100%;object-fit:cover;object-position:center" alt="AI Render" />
+          <div style="position:absolute;bottom:12px;left:12px;background:rgba(212,175,55,.9);color:#000;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700">🎨 AI Render · FLUX.1</div>
+        </div>
+
+        <!-- Dreapta: Harta 3D (clip la dreapta sliderului) -->
+        <div id="aedis-sl-map" style="position:absolute;inset:0;overflow:hidden;clip-path:inset(0 0 0 50%)">
+          ${mapDataUrl
+            ? `<img src="${mapDataUrl}" style="width:100%;height:100%;object-fit:cover;object-position:center" alt="Hartă 3D" />`
+            : `<div style="width:100%;height:100%;background:#0b1220;display:flex;align-items:center;justify-content:center;color:#64748b;font-size:13px">Harta 3D</div>`
+          }
+          <div style="position:absolute;bottom:12px;right:12px;background:rgba(59,130,246,.9);color:#fff;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700">🗺 Hartă 3D · UrbanX</div>
+        </div>
+
+        <!-- Linia slider -->
+        <div id="aedis-sl-line" style="position:absolute;top:0;bottom:0;left:50%;width:3px;background:#fff;box-shadow:0 0 12px rgba(0,0,0,.7);transform:translateX(-50%);pointer-events:none"></div>
+
+        <!-- Handle slider -->
+        <div id="aedis-sl-handle" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:44px;background:#fff;border-radius:50%;box-shadow:0 4px 20px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;pointer-events:none;font-size:16px">⇄</div>
+      </div>
+
+      <!-- Bara bottom -->
+      <div style="background:#0a1220;border-top:1px solid rgba(212,175,55,.3);padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;gap:10px">
+        <div style="font-size:11px;color:#64748b">🎨 AEDIS AI Render · Fal.ai FLUX.1 · ${ts} · <span style="color:#94a3b8">Trage sliderele pentru comparație</span></div>
+        <div style="display:flex;gap:8px;flex-shrink:0">
+          <button onclick="aedisDownloadRender()" style="padding:7px 13px;background:#d4af37;color:#000;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:700">⬇ JPG</button>
+          <button onclick="aedisCloseRenderOverlay()" style="padding:7px 13px;background:rgba(239,68,68,.85);color:#fff;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:700">✕ Închide</button>
+        </div>
+      </div>
+    `;
+
+    overlay.style.display = 'flex';
+    overlay._imgUrl = imgUrl;
+    overlay._filename = filename;
+
+    // Initializare logica slider drag
+    _aedisSliderInit();
+  });
+}
+
+function _aedisSliderInit(){
+  const wrap = document.getElementById('aedis-slider-wrap');
+  const slMap = document.getElementById('aedis-sl-map');
+  const slLine = document.getElementById('aedis-sl-line');
+  const slHandle = document.getElementById('aedis-sl-handle');
+  if(!wrap || !slMap || !slLine || !slHandle) return;
+
+  let dragging = false;
+
+  function setPos(clientX){
+    const rect = wrap.getBoundingClientRect();
+    let pct = (clientX - rect.left) / rect.width;
+    pct = Math.max(0.02, Math.min(0.98, pct));
+    const pctPx = (pct * 100).toFixed(2) + '%';
+    // Stanga = AI render (vizibil mereu, clip de la dreapta)
+    // Dreapta = harta (clip de la stanga sliderului)
+    slMap.style.clipPath = 'inset(0 0 0 ' + pctPx + ')';
+    slLine.style.left = pctPx;
+    slHandle.style.left = pctPx;
+  }
+
+  wrap.addEventListener('mousedown', e=>{ dragging=true; setPos(e.clientX); });
+  window.addEventListener('mousemove', e=>{ if(dragging) setPos(e.clientX); });
+  window.addEventListener('mouseup', ()=>{ dragging=false; });
+
+  wrap.addEventListener('touchstart', e=>{ dragging=true; setPos(e.touches[0].clientX); },{passive:true});
+  window.addEventListener('touchmove', e=>{ if(dragging) setPos(e.touches[0].clientX); },{passive:true});
+  window.addEventListener('touchend', ()=>{ dragging=false; });
+
+  // Animatie initiala: slider gliseaza de la 80% la 50% la pornire
+  let animPct = 80;
+  const animInterval = setInterval(()=>{
+    animPct -= 2;
+    if(animPct <= 50){ animPct = 50; clearInterval(animInterval); }
+    setPos(wrap.getBoundingClientRect().left + wrap.getBoundingClientRect().width * animPct / 100);
+  }, 16);
 }
 
 // Download render prin fetch→blob (funcționează cross-origin, nu deschide tab nou)
