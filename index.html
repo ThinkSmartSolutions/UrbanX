@@ -8074,12 +8074,12 @@ function _v3dInit(ap){
       for(let i=1;i<pts.length-1;i++) shape.lineTo(pts[i][0], pts[i][1]);
       shape.closePath();
 
-      const extGeo = new THREE.ExtrudeGeometry(shape,{
-        depth: h, bevelEnabled:false
-      });
+      const ctxPts2d = pts.slice(0, pts.length > 0 && 
+        (pts[0][0]===pts[pts.length-1][0] && pts[0][1]===pts[pts.length-1][1]) 
+        ? pts.length-1 : pts.length);
       const mat = new THREE.MeshStandardMaterial({ color: colHex, roughness:0.85, metalness:0.02 });
-      const mesh = new THREE.Mesh(extGeo, mat);
-      mesh.rotation.x = -Math.PI/2;
+      const mesh = _v3dMakePrism(THREE, ctxPts2d, 0, h, mat);
+      if(!mesh){ return; }
       mesh.receiveShadow = true;
       mesh.castShadow = true;
       scene.add(mesh);
@@ -8087,79 +8087,47 @@ function _v3dInit(ap){
     }catch(e){}
   });
 
-  // ── AEDIS volume (PBR materials, pereți per latură) ─────────────────────
+  // ── AEDIS volume — BufferGeometry manual, coordonate World directe ────
+  // Fără rotații, fără ExtrudeGeometry cu axe confuze
+  // Fiecare etaj = prismă dreaptă: floor polygon la y=base, același la y=top, laterale între ele
   const stilKey = AEDIS.stil||'modern';
   const aedisFeats = S.vol._lastFeats||[];
   const PBR = _v3dMakePBR(THREE, stilKey);
 
   aedisFeats.forEach(f=>{
     if(!f.geometry || f.properties?.isExistent) return;
-    const base = f.properties?.base||0;
-    const top  = f.properties?.top||3;
-    const floor= f.properties?.floor??0;
+    const base   = f.properties?.base||0;
+    const top    = f.properties?.top||3;
+    const floor  = f.properties?.floor??0;
     const colHex = f.properties?.color||'#3b82f6';
     const h = top - base;
-    if(h <= 0) return;
+    if(h <= 0.01) return;
 
     try{
       const fring = f.geometry.type==='Polygon'
         ? f.geometry.coordinates[0]
         : f.geometry.coordinates[0][0];
       if(!fring||fring.length<3) return;
-      const pts = fring.map(([lng,lat])=>toLocal(lng,lat));
 
-      // ── Acoperiș: ExtrudeGeometry plat (h=0.12) — coordonate corecte ────
-      const isRoofFeature = floor < 0 || !!f.properties?.roofType;
-      const isTopFloor    = !!f.properties?.isLast;
+      // Convertim la coordonate locale [x, z] în planul orizontal
+      const pts2d = fring.slice(0,-1).map(([lng,lat])=>toLocal(lng,lat));
+      if(pts2d.length < 3) return;
 
-      if(isRoofFeature || isTopFloor){
-        try{
-          // Shape în XZ via ExtrudeGeometry cu depth mic
-          const roofShape = new THREE.Shape();
-          // pts[i]=[x,z] — shape în planul XY, rotit -PI/2 → planul XZ
-          roofShape.moveTo(pts[0][0], pts[0][1]);
-          for(let i=1;i<pts.length-1;i++) roofShape.lineTo(pts[i][0], pts[i][1]);
-          roofShape.closePath();
-
-          const roofGeo = new THREE.ExtrudeGeometry(roofShape, {
-            depth: 0.20, bevelEnabled: false
-          });
-          const roofMat2 = isRoofFeature ? PBR.roof : PBR.penthouse;
-          const roofMesh = new THREE.Mesh(roofGeo, roofMat2);
-          // ExtrudeGeometry extrude pe Z → rotim -PI/2 pe X → extrude merge în jos (Y-)
-          roofMesh.rotation.x = -Math.PI/2;
-          // Plasăm exact la top, extrude-ul de 0.2m merge în jos (invizibil)
-          roofMesh.position.y = top;
-          roofMesh.castShadow = true;
-          roofMesh.receiveShadow = true;
-          scene.add(roofMesh);
-          V3D.aedisMeshes.push(roofMesh);
-        }catch(e){}
-      }
-
-      // ── AEDIS solid: ExtrudeGeometry cu material per etaj ──────────────
-      const wallMat = floor < 0
+      const mat = floor < 0
         ? PBR.roof
         : floor === 0 ? PBR.parter
         : f.properties?.isLast ? PBR.penthouse
         : _v3dFloorMat(THREE, colHex, floor, stilKey);
 
-      const solidShape = new THREE.Shape();
-      solidShape.moveTo(pts[0][0], pts[0][1]);
-      for(let i=1;i<pts.length-1;i++) solidShape.lineTo(pts[i][0],pts[i][1]);
-      solidShape.closePath();
-
-      const extGeo = new THREE.ExtrudeGeometry(solidShape, {
-        depth: h, bevelEnabled: false
-      });
-      const solidMesh = new THREE.Mesh(extGeo, wallMat);
-      solidMesh.rotation.x = -Math.PI/2;
-      solidMesh.position.y = base;
-      solidMesh.castShadow = true;
-      solidMesh.receiveShadow = true;
-      scene.add(solidMesh);
-      V3D.aedisMeshes.push(solidMesh);
-    }catch(e){ console.warn('AEDIS mesh error:', e.message); }
+      // Construim prismă cu BufferGeometry
+      const mesh = _v3dMakePrism(THREE, pts2d, base, top, mat);
+      if(mesh){
+        mesh.castShadow    = true;
+        mesh.receiveShadow = true;
+        scene.add(mesh);
+        V3D.aedisMeshes.push(mesh);
+      }
+    }catch(e){ console.warn('AEDIS mesh:', e.message); }
   });
 
   // ── Parcel outline ────────────────────────────────────────────────────────
@@ -8210,6 +8178,107 @@ function _v3dInit(ap){
 }
 
 // ── PBR Materials per stil ────────────────────────────────────────────────────
+
+// ── _v3dMakePrism: prismă dreaptă din polygon 2D + înălțime ──────────────────
+// pts2d = [[x0,z0],[x1,z1],...] coordonate în planul XZ
+// base, top = înălțimi Y
+// Returnează THREE.Mesh cu UV corecte pe pereți laterali
+function _v3dMakePrism(THREE, pts2d, base, top, material){
+  const n   = pts2d.length;
+  const h   = top - base;
+  if(n < 3 || h <= 0) return null;
+
+  const positions = [];
+  const normals   = [];
+  const uvs       = [];
+  const indices   = [];
+
+  // ── Pereți laterali ─────────────────────────────────────────────────────
+  let uvU = 0;
+  for(let i = 0; i < n; i++){
+    const [x0, z0] = pts2d[i];
+    const [x1, z1] = pts2d[(i+1) % n];
+    const dx = x1-x0, dz = z1-z0;
+    const len = Math.sqrt(dx*dx + dz*dz);
+    if(len < 0.01) continue;
+
+    // Normal exterior = perpendicular pe latură, în planul XZ
+    const nx =  dz/len;
+    const nz = -dx/len;
+
+    const base_i = positions.length / 3;
+
+    // 4 vertices: BL, BR, TR, TL (bottom-left, bottom-right, top-right, top-left)
+    positions.push(
+      x0, base, z0,   // BL
+      x1, base, z1,   // BR
+      x1, top,  z1,   // TR
+      x0, top,  z0    // TL
+    );
+    normals.push(
+      nx,0,nz,  nx,0,nz,  nx,0,nz,  nx,0,nz
+    );
+    const u1 = uvU, u2 = uvU + len;
+    uvs.push(
+      u1, 0,
+      u2, 0,
+      u2, h,
+      u1, h
+    );
+    // 2 triunghiuri
+    indices.push(
+      base_i,   base_i+1, base_i+2,
+      base_i,   base_i+2, base_i+3
+    );
+    uvU += len;
+  }
+
+  // ── Fața de sus (acoperiș plat) ─────────────────────────────────────────
+  // Triangulare fan din primul vertex
+  const topBase = positions.length / 3;
+  for(let i = 0; i < n; i++){
+    const [x,z] = pts2d[i];
+    positions.push(x, top, z);
+    normals.push(0, 1, 0);
+    uvs.push(x * 0.05, z * 0.05); // scale UV pentru textură
+  }
+  for(let i = 1; i < n-1; i++){
+    indices.push(topBase, topBase+i, topBase+i+1);
+  }
+
+  // ── Fața de jos (fundație, invizibilă dar necesar pentru shadow) ─────────
+  const botBase = positions.length / 3;
+  for(let i = 0; i < n; i++){
+    const [x,z] = pts2d[i];
+    positions.push(x, base, z);
+    normals.push(0, -1, 0);
+    uvs.push(x * 0.05, z * 0.05);
+  }
+  for(let i = 1; i < n-1; i++){
+    indices.push(botBase, botBase+i+1, botBase+i); // winding invers
+  }
+
+  // ── Construiesc geometria ────────────────────────────────────────────────
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geo.setAttribute('normal',   new THREE.Float32BufferAttribute(normals,   3));
+  geo.setAttribute('uv',       new THREE.Float32BufferAttribute(uvs,       2));
+  geo.setIndex(indices);
+
+  // Normalizăm UV-urile pereților la 0-1 per etaj
+  const uvArr = geo.attributes.uv.array;
+  const wallUVcount = (positions.length/3 - n*2); // nr vertices pereti
+  if(uvU > 0){
+    for(let i = 0; i < wallUVcount; i++){
+      uvArr[i*2] /= uvU; // U: normalizat 0-1 pe perimetru
+      uvArr[i*2+1] /= Math.max(1, h); // V: normalizat 0-1 pe înălțime
+    }
+  }
+  geo.attributes.uv.needsUpdate = true;
+
+  return new THREE.Mesh(geo, material);
+}
+
 function _v3dMakePBR(THREE, stilKey){
   // Textură beton procedurală pentru soclu/parter
   function makeConcreteTexture(baseColor, roughVal){
@@ -8725,7 +8794,7 @@ function _v3dLoadStreets(cx, cy, toLocal, scene, THREE){
       const col = colMap[hw]||'#111f30';
 
       // Construim mesh latime variabila (ribbon)
-      const verts=[], indices=[], uvs=[];
+      const verts=[], normsArr=[], indices=[], uvs=[];
       for(let i=0;i<pts.length-1;i++){
         const [x0,z0]=pts[i], [x1,z1]=pts[i+1];
         const dx=x1-x0, dz=z1-z0;
@@ -8733,12 +8802,15 @@ function _v3dLoadStreets(cx, cy, toLocal, scene, THREE){
         if(len<0.01) continue;
         const nx=-dz/len, nz=dx/len;
         const base=i*2;
+        const sy=0.08; // Y constant
         verts.push(
-          x0+nx*w, 0.08, z0+nz*w,
-          x0-nx*w, 0.08, z0-nz*w
+          x0+nx*w, sy, z0+nz*w,
+          x0-nx*w, sy, z0-nz*w
         );
+        normsArr.push(0,1,0, 0,1,0);
         if(i===pts.length-2){
-          verts.push(x1+nx*w,0.08,z1+nz*w, x1-nx*w,0.08,z1-nz*w);
+          verts.push(x1+nx*w,sy,z1+nz*w, x1-nx*w,sy,z1-nz*w);
+          normsArr.push(0,1,0, 0,1,0);
         }
         uvs.push(0,i/pts.length, 1,i/pts.length);
         if(i<pts.length-2){
@@ -8749,8 +8821,8 @@ function _v3dLoadStreets(cx, cy, toLocal, scene, THREE){
 
       const geo = new THREE.BufferGeometry();
       geo.setAttribute('position', new THREE.Float32BufferAttribute(verts,3));
+      if(normsArr.length) geo.setAttribute('normal', new THREE.Float32BufferAttribute(normsArr,3));
       if(indices.length) geo.setIndex(indices);
-      geo.computeVertexNormals();
 
       const mat = new THREE.MeshStandardMaterial({
         color:col, roughness:0.95, metalness:0.0
