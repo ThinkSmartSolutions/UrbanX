@@ -5808,11 +5808,29 @@ function aedis3DRemove(){
 }
 
 function aedisGenerateAll(){
-  // 1. Generam fill-extrusion (fallback instant, vizibil imediat)
+  const ap = S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry){ ss('⚠️ AEDIS: Selectați o parcelă mai întâi.'); return; }
+
+  // Guard: avertizare parcela alungita (posibil drum, nu teren construibil)
+  try{
+    const bb = turf.bbox(ap.geo);
+    const mLng = 111320 * Math.cos((bb[1]+bb[3])/2 * Math.PI/180);
+    const w = (bb[2]-bb[0]) * mLng;
+    const h = (bb[3]-bb[1]) * 111320;
+    const ratio = Math.max(w,h) / Math.max(1, Math.min(w,h));
+    if(ratio > 8){
+      if(!confirm(`⚠️ Parcela selectată este foarte alungită (${Math.round(ratio)}:1).
+Posibil drum sau culoar tehnic, nu teren construibil.
+
+Continuați generarea?`)) return;
+    }
+  }catch(e){}
+
+  // 1. Generam fill-extrusion (fallback instant, vizibil imediat pe harta)
   aedisBuild();
-  // 2. Generam Three.js mesh (fotorealist, se suprapune)
+  // 2. Generam Three.js mesh (fotorealist cu materiale procedurale)
   aedis3DGenerate();
-  // 3. Actualizam distantele
+  // 3. Actualizam distantele fata de vecinii adiacenti
   setTimeout(updateDistanceLines, 600);
 }
 
@@ -6134,15 +6152,23 @@ function aedisGetContent(){
     <div class="aedis-section" style="margin-top:10px">🎨 AI Render fotorealist</div>
     <div style="padding:10px;background:#080f1c;border-radius:8px;border:1px solid rgba(212,175,55,.2);margin-bottom:10px">
       <div style="font-size:11px;color:#94a3b8;margin-bottom:8px">
-        Generează o randare fotorealistă a volumului propus direct din aplicație.
-        ${FAL_AI.lastRender ? '<span style=color:#4ade80>✅ Randare disponibilă</span>' : '<span style=color:#64748b>Nicio randare generată</span>'}
+        Randare fotorealistă din contextul real al hărții. Screenshot-ul curent al hărții e trimis ca referință vizuală.
+        ${FAL_AI.lastRender ? '<span style="color:#4ade80">✅ Randare disponibilă · ' + (FAL_AI.lastRender.model||'schnell') + '</span>' : '<span style="color:#64748b">Nicio randare generată</span>'}
+      </div>
+      <div style="display:flex;gap:5px;margin-bottom:8px">
+        <button onclick="FAL_AI.useProModel=false;aedisRender()" style="flex:1;padding:7px 6px;border-radius:7px;border:1px solid ${FAL_AI.useProModel?'rgba(255,255,255,.15)':'rgba(212,175,55,.5)'};background:${FAL_AI.useProModel?'transparent':'rgba(212,175,55,.12)'};color:${FAL_AI.useProModel?'#64748b':'#d4af37'};cursor:pointer;font-size:11px;font-weight:700">
+          ⚡ Preview<br><span style="font-size:9px;font-weight:400">Schnell ~3 sec</span>
+        </button>
+        <button onclick="FAL_AI.useProModel=true;aedisRender()" style="flex:1;padding:7px 6px;border-radius:7px;border:1px solid ${FAL_AI.useProModel?'rgba(59,130,246,.5)':'rgba(255,255,255,.15)'};background:${FAL_AI.useProModel?'rgba(59,130,246,.12)':'transparent'};color:${FAL_AI.useProModel?'#60a5fa':'#64748b'};cursor:pointer;font-size:11px;font-weight:700">
+          ✨ Pro<br><span style="font-size:9px;font-weight:400">Flux-Pro ~15 sec</span>
+        </button>
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap">
-        <button onclick="aedisAIRender()" style="padding:9px 16px;border-radius:8px;border:1px solid rgba(212,175,55,.4);background:rgba(212,175,55,.1);color:#d4af37;cursor:pointer;font-size:12px;font-weight:700">🎨 Generează AI Render</button>
-        ${FAL_AI.lastRender ? '<button onclick="aedisShowRender(FAL_AI.lastRender.url)" style="padding:9px 16px;border-radius:8px;border:1px solid rgba(74,222,128,.3);background:rgba(74,222,128,.1);color:#4ade80;cursor:pointer;font-size:12px">👁 Vezi Randarea</button>' : ''}
-        <button onclick="aedisSetFalKey()" style="padding:9px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:transparent;color:#64748b;cursor:pointer;font-size:11px">⚙ API Key</button>
+        <button onclick="aedisAIRender()" style="padding:9px 16px;border-radius:8px;border:1px solid rgba(212,175,55,.4);background:rgba(212,175,55,.15);color:#d4af37;cursor:pointer;font-size:12px;font-weight:700;flex:1">🎨 Generează Render</button>
+        ${FAL_AI.lastRender ? '<button onclick="aedisShowRender(FAL_AI.lastRender.url)" style="padding:9px 12px;border-radius:8px;border:1px solid rgba(74,222,128,.3);background:rgba(74,222,128,.1);color:#4ade80;cursor:pointer;font-size:12px">👁 Vezi</button>' : ''}
+        <button onclick="aedisSetFalKey()" style="padding:9px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:transparent;color:#64748b;cursor:pointer;font-size:11px" title="Configurare API Key">⚙</button>
       </div>
-      <div style="font-size:10px;color:#475569;margin-top:6px">Fal.ai FLUX.1 · ~$0.003/randare · rezultat în ~5 secunde</div>
+      <div style="font-size:10px;color:#475569;margin-top:6px">Fal.ai FLUX.1 · Image-to-image din harta curentă · Prompt generat automat din parametrii AEDIS</div>
     </div>
     <div class="aedis-section" style="margin-top:10px">Suprafețe calculate</div>
     <div class="aedis-g2">
@@ -6512,25 +6538,33 @@ function aedis3DBuild(parcelRing, params){
     const mat = makeShaderMat(matKey, colorHex, opacity);
     const meshGroup = new THREE.Group();
     for(let i=0; i<ring2D.length-1; i++){
-      const [x1,y1] = ring2D[i];
-      const [x2,y2] = ring2D[i+1];
-      const len = Math.sqrt((x2-x1)**2+(y2-y1)**2);
+      const [x1,z1] = ring2D[i];   // local coords: x=est, z=nord (Y=sus in Three.js)
+      const [x2,z2] = ring2D[i+1];
+      const len = Math.sqrt((x2-x1)**2+(z2-z1)**2);
       if(len<0.1) continue;
       const wallH = topH - baseH;
+      if(wallH<=0) continue;
 
-      // Geometrie perete
-      const geo = new THREE.PlaneGeometry(len, wallH, 4, 4);
+      // PlaneGeometry e implicit in planul XY (orizontal)
+      // Il rotim cu rotation.x = -PI/2 ca sa devina VERTICAL (in planul XZ)
+      // Apoi rotation.y = unghi de-a lungul perimetrului
+      const geo = new THREE.PlaneGeometry(len, wallH, Math.max(2,Math.round(len/1.5)), Math.max(2,Math.round(wallH/1.0)));
       geo.computeVertexNormals();
 
       const wall = new THREE.Mesh(geo, mat);
 
-      // Pozitionare perete
-      const mx = (x1+x2)/2, my = (y1+y2)/2;
-      wall.position.set(mx, baseH + wallH/2, my);
+      // Pozitie: centrul peretelui la inaltimea corecta
+      wall.position.set(
+        (x1+x2)/2,
+        baseH + wallH/2,  // Y = inaltime (vertical) in Three.js
+        (z1+z2)/2
+      );
 
-      // Orientare
-      const ang = Math.atan2(y2-y1, x2-x1);
+      // Rotatie: intai -PI/2 pe X (verticalizare), apoi unghiul pe Y (orientare)
+      const ang = Math.atan2(z2-z1, x2-x1);
+      wall.rotation.order = 'YXZ';
       wall.rotation.y = -ang;
+      wall.rotation.x = 0; // deja vertical dupa fix matrice render
 
       meshGroup.add(wall);
     }
@@ -6556,7 +6590,9 @@ function aedis3DBuild(parcelRing, params){
     });
 
     const mesh = new THREE.Mesh(geo, mat);
-    mesh.rotation.x = Math.PI / 2;
+    // rotation.x = -PI/2: shape XY -> planul XZ al lumii (Y=sus in Three.js)
+    // Cu +PI/2 shape-ul ar fi rasturnat sub sol; -PI/2 il pune corect la inaltimea h
+    mesh.rotation.x = -Math.PI / 2;
     mesh.position.y = h;
     return mesh;
   }
@@ -6720,17 +6756,19 @@ function aedis3DCreateLayer(parcelRing, params){
     },
 
     render(gl, matrix){
-      // Calculam pozitia geografica -> coordonate Mapbox
+      // Mapbox GL JS v3 — transform corect pentru Three.js
+      // BUGFIX: scale(-scale) pe Y cauza mesh inversat/deformat in GL v3
       const mercCenter = mapboxgl.MercatorCoordinate.fromLngLat(
         {lng: cx, lat: cy}, 0
       );
       const scale = mercCenter.meterInMercatorCoordinateUnits();
 
-      // Matrix de transformare Three.js <- Mapbox
       const m = new THREE.Matrix4().fromArray(matrix);
+      // Mapbox GL v3 foloseste sistem Y-up in spatiul mercator
+      // Nu negam Y — negarea era fix pentru v1/v2, in v3 produce inversare
       const l = new THREE.Matrix4()
         .makeTranslation(mercCenter.x, mercCenter.y, mercCenter.z)
-        .scale(new THREE.Vector3(scale, -scale, scale));
+        .scale(new THREE.Vector3(scale, scale, scale));
 
       camera.projectionMatrix = m.multiply(l);
 
@@ -6844,7 +6882,7 @@ const FAL_AI = {
   rendering: false,
 };
 
-// Prompt generator din datele AEDIS
+// Prompt generator din datele AEDIS — include context real urban
 function aedisPromptBuild(){
   const ap = S.parcels[S.activeParcel??0];
   const fn = AEDIS_FN[AEDIS.fn] || AEDIS_FN.rezidential_colectiv;
@@ -6853,24 +6891,81 @@ function aedisPromptBuild(){
   const hNiv = AEDIS.corpuri[0]?.hNiv || 3.0;
   const hTot = (AEDIS.parterDiferit?(AEDIS_FN[AEDIS.fn]?.hParter||4.5):hNiv)+(niv-1)*hNiv;
   const uat = ap?.uat || 'Iași';
+  const utr = ap?.utr || S.utr || '';
+  const area = ap?.area ? Math.round(ap.area) : 0;
+  const nrcad = ap?.nrcad || '';
+
+  // Context urban din clădirile vecine analizate
+  let ctxDesc = '';
+  if(S.ctx?.features?.length){
+    const hArr = S.ctx.features.map(f=>f.properties?.h||0).filter(h=>h>0);
+    if(hArr.length){
+      const hMed = Math.round(hArr.reduce((s,h)=>s+h,0)/hArr.length);
+      const hMax = Math.round(Math.max(...hArr));
+      ctxDesc = `surrounded by existing buildings averaging ${hMed}m height (max ${hMax}m), `;
+    }
+  }
+
+  // Tip acoperiș în engleză
   const acop = {
     terasa_plata: 'flat roof with parapet',
-    terasa_circulabila: 'accessible green roof terrace',
-    sarpanta: 'pitched roof',
-    mansarda: 'mansard roof',
+    terasa_circulabila: 'accessible green roof terrace with vegetation',
+    sarpanta: 'pitched gabled roof with tiles',
+    mansarda: 'mansard roof with dormers',
     combinat: 'flat roof with technical penthouse',
   }[AEDIS.tipAcoperis] || 'flat roof';
 
+  // Stil arhitectural detaliat
   const stilDesc = {
-    modern: 'modern contemporary architecture, glass and steel facade, clean lines',
-    inovator: 'innovative dynamic architecture, bold forms, purple accent materials',
-    clasic: 'classical architecture, stone facade, warm earth tones, cornices',
-    minimalist: 'minimalist architecture, white concrete, pure volumes',
-    industrial: 'industrial architecture, corten steel, exposed concrete',
-    adaptat_context: 'contextual architecture matching surrounding urban fabric',
+    modern: 'modern contemporary architecture, large glass curtain wall facade, aluminum frames, clean horizontal lines, recessed top floor',
+    inovator: 'innovative parametric architecture, dynamic angular volumes, mixed glass and metal panels, bold cantilever',
+    clasic: 'neoclassical architecture, stone-clad facade, cornice details, arched windows, warm limestone tones, Romanian interwar style',
+    minimalist: 'minimalist architecture, pure white smooth plaster, minimal openings, no ornamentation, strong geometric volumes',
+    industrial: 'industrial loft architecture, corten weathered steel panels, exposed concrete base, large industrial windows',
+    adaptat_context: 'contextual architecture, brick and plaster facade matching neighboring buildings, traditional Romanian urban scale',
   }[AEDIS.stil] || 'modern architecture';
 
-  return `Photorealistic architectural exterior render, ${fn.label.replace(/[🏠🏡🏢🏬🏨🏙🏭🏛]/g,'')} building, ${niv} floors, ${hTot.toFixed(0)}m height, ${stilDesc}, ${acop}, ${AEDIS.parterDiferit?'ground floor commercial with large glazing, ':''}urban context in ${uat} Romania, street view, mature trees, parked cars, pedestrians, golden hour lighting, soft shadows, photorealistic, 8k, architectural visualization, high quality render`;
+  // Funcțiune în engleză
+  const fnDesc = {
+    rezidential_colectiv: 'residential apartment building',
+    locuinta_individuala: 'individual family house',
+    birouri: 'office building',
+    comercial: 'commercial retail building',
+    hotelier: 'hotel building',
+    mixt: 'mixed-use building with ground floor commercial',
+    industrial: 'light industrial building',
+    institutie: 'public institutional building',
+  }[AEDIS.fn] || 'building';
+
+  // Parter diferit
+  const parterDesc = AEDIS.parterDiferit
+    ? 'ground floor with large commercial glazed storefronts and continuous arcade, '
+    : '';
+
+  // Locație reală
+  const locDesc = utr
+    ? `in ${uat} Romania, UTR zone ${utr}, `
+    : `in ${uat} Romania, `;
+
+  // Dimensiuni reale
+  const dimDesc = area > 0
+    ? `${area}sqm plot, ${niv}-story, ${hTot.toFixed(0)}m tall, `
+    : `${niv}-story, ${hTot.toFixed(0)}m tall, `;
+
+  return [
+    'Photorealistic architectural exterior render,',
+    fnDesc + ',',
+    dimDesc,
+    stilDesc + ',',
+    acop + ',',
+    parterDesc,
+    ctxDesc,
+    locDesc,
+    'street-level perspective view, golden hour warm light, soft long shadows,',
+    'mature street trees with full foliage, sidewalk with pedestrians,',
+    'parked cars on street, European urban street, high quality render,',
+    'architectural visualization, photorealistic, 8K, sharp focus, no watermark'
+  ].join(' ');
 }
 
 // Screenshot din Mapbox canvas
@@ -6918,36 +7013,52 @@ async function aedisAIRender(){
     const prompt = aedisPromptBuild();
     ss('🎨 AEDIS AI Render: Se trimite la Fal.ai...');
 
-    // Apel Fal.ai
-    fetch('https://fal.run/fal-ai/flux/schnell', {
+    // Alegem modelul: schnell (preview rapid) sau flux-pro (calitate)
+    const useProModel = FAL_AI.useProModel || false;
+    const modelEndpoint = useProModel
+      ? 'https://fal.run/fal-ai/flux-pro/v1.1'
+      : 'https://fal.run/fal-ai/flux/schnell';
+
+    // Payload de baza
+    const payload = {
+      prompt: prompt,
+      image_size: 'landscape_16_9',
+      num_inference_steps: useProModel ? 28 : 4,
+      num_images: 1,
+      enable_safety_checker: true,
+      guidance_scale: useProModel ? 3.5 : 1.0,
+    };
+
+    // Image-to-image: trimitem screenshot-ul hărtii ca referință de context
+    // Fal.ai flux/schnell suporta image_url ca referinta vizuala (strength 0.55)
+    // Asta ajuta modelul sa pastreze strada, copacii, cladirile vecine reale
+    if(screenshot && screenshot.length > 100){
+      payload.image_url = screenshot;
+      payload.strength = 0.65; // 65% AI, 35% context real din screenshot
+    }
+
+    fetch(modelEndpoint, {
       method: 'POST',
       headers: {
         'Authorization': 'Key ' + FAL_AI.apiKey,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        prompt: prompt,
-        image_size: 'landscape_16_9',
-        num_inference_steps: 4,
-        num_images: 1,
-        enable_safety_checker: true,
-      })
+      body: JSON.stringify(payload)
     })
     .then(r=>{
-      if(!r.ok) return r.text().then(t=>{ throw new Error('Fal.ai ' + r.status + ': ' + t.slice(0,150)); });
+      if(!r.ok) return r.text().then(t=>{ throw new Error('Fal.ai ' + r.status + ': ' + t.slice(0,200)); });
       return r.json();
     })
     .then(data=>{
       const imgUrl = data?.images?.[0]?.url;
       if(!imgUrl) throw new Error('Nu s-a primit URL imagine de la Fal.ai');
-      FAL_AI.lastRender = { url: imgUrl, prompt, timestamp: new Date().toISOString() };
+      FAL_AI.lastRender = { url: imgUrl, prompt, timestamp: new Date().toISOString(), model: useProModel?'flux-pro':'schnell' };
       aedisShowRender(imgUrl);
-      aedisRender(); // actualizam tab Analiza
-      ss('✅ AEDIS AI Render: Randare completă!');
+      aedisRender(); // actualizam tab Analiza cu noua randare
+      ss('✅ AEDIS AI Render: ' + (useProModel?'Calitate înaltă':'Preview rapid') + ' completă!');
     })
     .catch(err=>{
       console.error('AI Render error:', err);
-      // Afisam placeholder cu informatii
       aedisShowRenderError(err.message, prompt);
       ss('❌ AI Render eroare: ' + err.message.slice(0,80));
     })
