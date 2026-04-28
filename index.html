@@ -5930,12 +5930,16 @@ function aedis3DRemove(){
 }
 
 function aedisGenerateAll(){
-  // 1. Generam fill-extrusion (fallback instant, vizibil imediat)
+  // Generăm fill-extrusion Mapbox — se plasează corect pe orice parcelă
   aedisBuild();
-  // 2. Generam Three.js mesh (fotorealist, se suprapune)
-  aedis3DGenerate();
-  // 3. Actualizam distantele
-  setTimeout(updateDistanceLines, 600);
+  // Contextul urban + distanțele (auto-load dacă nu există)
+  if(!S.ctx?.features?.length){
+    loadContext().then(()=>{ setTimeout(updateDistanceLines, 300); });
+  } else {
+    setTimeout(updateDistanceLines, 400);
+  }
+  // Three.js (AEDIS 3D vizual avansat) se generează SEPARAT, din butonul dedicat
+  // Nu îl apelăm automat pentru că poate deforma mesh-ul pe parcele complexe
 }
 
 function aedisClose(){
@@ -6630,29 +6634,33 @@ function aedis3DBuild(parcelRing, params){
   const cols = COLS[p.stil] || COLS.modern;
 
   // ── Helper: construieste peretii unui etaj ─────────────────────────────
+  // Folosim BoxGeometry subțire (evită probleme de orientare PlaneGeometry)
   function buildWalls(ring2D, baseH, topH, matKey, colorHex, opacity=1.0){
     const mat = makeShaderMat(matKey, colorHex, opacity);
     const meshGroup = new THREE.Group();
+    const wallH = topH - baseH;
+    if(wallH <= 0) return meshGroup;
     for(let i=0; i<ring2D.length-1; i++){
-      const [x1,y1] = ring2D[i];
-      const [x2,y2] = ring2D[i+1];
-      const len = Math.sqrt((x2-x1)**2+(y2-y1)**2);
-      if(len<0.1) continue;
-      const wallH = topH - baseH;
+      const [x1,z1] = ring2D[i];   // Three.js Y-up: X=est, Z=nord, Y=sus
+      const [x2,z2] = ring2D[i+1];
+      const len = Math.sqrt((x2-x1)**2+(z2-z1)**2);
+      if(len < 0.05) continue;
 
-      // Geometrie perete
-      const geo = new THREE.PlaneGeometry(len, wallH, 4, 4);
-      geo.computeVertexNormals();
+      // BoxGeometry: width=len, height=wallH, depth=0.08 (grosime perete)
+      const geo = new THREE.BoxGeometry(len, wallH, 0.08, Math.ceil(len/2), Math.ceil(wallH), 1);
 
       const wall = new THREE.Mesh(geo, mat);
 
-      // Pozitionare perete
-      const mx = (x1+x2)/2, my = (y1+y2)/2;
-      wall.position.set(mx, baseH + wallH/2, my);
+      // Centrul peretelui
+      wall.position.set(
+        (x1+x2)/2,
+        baseH + wallH/2,  // Y = înălțime verticală
+        (z1+z2)/2
+      );
 
-      // Orientare
-      const ang = Math.atan2(y2-y1, x2-x1);
-      wall.rotation.y = -ang;
+      // Rotim în jurul axei Y (verticale) pentru a alinia peretele cu latura parcelei
+      // atan2(z2-z1, x2-x1) = unghiul față de axa X în planul XZ
+      wall.rotation.y = -Math.atan2(z2-z1, x2-x1);
 
       meshGroup.add(wall);
     }
@@ -6660,25 +6668,27 @@ function aedis3DBuild(parcelRing, params){
   }
 
   // ── Helper: construieste planseu (podea/tavan) ─────────────────────────
+  // ring2D = [[x,z],...] în spațiu local metri, Y-up
   function buildSlab(ring2D, h, colorHex, thick=0.15){
+    // Shape în planul XZ al Three.js (Y-up)
+    // ExtrudeGeometry lucrează în XY → rotim cu -PI/2 pe X → XY devine XZ
     const shape = new THREE.Shape();
+    // ring2D[i] = [x_metri, z_metri]
     shape.moveTo(ring2D[0][0], ring2D[0][1]);
-    for(let i=1;i<ring2D.length-1;i++) shape.lineTo(ring2D[i][0], ring2D[i][1]);
+    for(let i=1; i<ring2D.length-1; i++) shape.lineTo(ring2D[i][0], ring2D[i][1]);
     shape.closePath();
 
-    const geo = new THREE.ExtrudeGeometry(shape, {
-      depth: thick, bevelEnabled: false
-    });
+    const geo = new THREE.ExtrudeGeometry(shape, { depth: thick, bevelEnabled: false });
 
     const col = new THREE.Color(colorHex);
     const mat = new THREE.MeshPhongMaterial({
-      color: col,
-      shininess: 20,
-      side: THREE.DoubleSide
+      color: col, shininess: 30, side: THREE.DoubleSide
     });
 
     const mesh = new THREE.Mesh(geo, mat);
-    mesh.rotation.x = Math.PI / 2;
+    // rotation.x = -PI/2: shape XY → planul XZ (orizontal), extrude merge pe Y
+    // Plasăm la înălțimea h pe axa Y (sus)
+    mesh.rotation.x = -Math.PI / 2;
     mesh.position.y = h;
     return mesh;
   }
@@ -6842,20 +6852,14 @@ function aedis3DCreateLayer(parcelRing, params){
     },
 
     render(gl, matrix){
-      // Calculam pozitia geografica -> coordonate Mapbox
-      const mercCenter = mapboxgl.MercatorCoordinate.fromLngLat(
-        {lng: cx, lat: cy}, 0
-      );
+      const mercCenter = mapboxgl.MercatorCoordinate.fromLngLat({lng:cx, lat:cy}, 0);
       const scale = mercCenter.meterInMercatorCoordinateUnits();
-
-      // Matrix de transformare Three.js <- Mapbox
+      // Mapbox GL v3: Y-up, NU negam scale pe Y
       const m = new THREE.Matrix4().fromArray(matrix);
       const l = new THREE.Matrix4()
         .makeTranslation(mercCenter.x, mercCenter.y, mercCenter.z)
-        .scale(new THREE.Vector3(scale, -scale, scale));
-
+        .scale(new THREE.Vector3(scale, scale, scale));
       camera.projectionMatrix = m.multiply(l);
-
       renderer.resetState();
       renderer.render(scene, camera);
       map.triggerRepaint();
