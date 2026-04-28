@@ -7913,60 +7913,91 @@ function _v3dInit(ap){
     }catch(e){}
   });
 
-  // ── AEDIS volume (PBR materials) ──────────────────────────────────────────
+  // ── AEDIS volume (PBR materials, pereți per latură) ─────────────────────
   const stilKey = AEDIS.stil||'modern';
   const aedisFeats = S.vol._lastFeats||[];
-
-  // Materiale PBR per zona a clădirii
   const PBR = _v3dMakePBR(THREE, stilKey);
 
   aedisFeats.forEach(f=>{
     if(!f.geometry || f.properties?.isExistent) return;
     const base = f.properties?.base||0;
-    const top = f.properties?.top||3;
-    const floor = f.properties?.floor??0;
+    const top  = f.properties?.top||3;
+    const floor= f.properties?.floor??0;
     const colHex = f.properties?.color||'#3b82f6';
     const h = top - base;
     if(h <= 0) return;
 
     try{
-      const fring = f.geometry.type==='Polygon' ? f.geometry.coordinates[0]
+      const fring = f.geometry.type==='Polygon'
+        ? f.geometry.coordinates[0]
         : f.geometry.coordinates[0][0];
       if(!fring||fring.length<3) return;
       const pts = fring.map(([lng,lat])=>toLocal(lng,lat));
 
+      // ── Acoperiș (ShapeGeometry → UV corecte, fără ferestre) ────────────
       const shape = new THREE.Shape();
       shape.moveTo(pts[0][0], pts[0][1]);
       for(let i=1;i<pts.length-1;i++) shape.lineTo(pts[i][0], pts[i][1]);
       shape.closePath();
 
-      // Material: parter=beton/soclu, etaje=sticla/fatada, atic=metal
-      let mat;
-      if(floor < 0){
-        mat = PBR.roof;
-      } else if(floor === 0){
-        mat = PBR.parter;
-      } else if(f.properties?.isLast){
-        mat = PBR.penthouse;
-      } else {
-        mat = _v3dFloorMat(THREE, colHex, floor, stilKey);
+      const roofMat = (floor < 0 || f.properties?.roofType)
+        ? PBR.roof
+        : floor === 0 ? PBR.parter
+        : f.properties?.isLast ? PBR.penthouse
+        : PBR.roof;
+
+      // Planșeu superior
+      const roofGeo = new THREE.ShapeGeometry(shape);
+      const roofMesh = new THREE.Mesh(roofGeo, roofMat);
+      roofMesh.rotation.x = -Math.PI/2;
+      roofMesh.position.y = top;
+      roofMesh.receiveShadow = true;
+      scene.add(roofMesh);
+      V3D.aedisMeshes.push(roofMesh);
+
+      // Planșeu inferior (soclu vizibil doar la parter)
+      if(floor === 0){
+        const floorGeo = new THREE.ShapeGeometry(shape);
+        const floorMesh = new THREE.Mesh(floorGeo, PBR.parter);
+        floorMesh.rotation.x = Math.PI/2;
+        floorMesh.position.y = base + 0.02;
+        scene.add(floorMesh);
+        V3D.aedisMeshes.push(floorMesh);
       }
 
-      const extGeo = new THREE.ExtrudeGeometry(shape,{
-        depth: h, bevelEnabled: floor===0, 
-        bevelThickness: floor===0 ? 0.08 : 0,
-        bevelSize: floor===0 ? 0.06 : 0,
-        bevelSegments: 1
-      });
+      // ── Pereți per latură — UV corecte, textură ferestre pe verticală ───
+      const wallMat = floor < 0
+        ? PBR.roof
+        : floor === 0 ? PBR.parter
+        : f.properties?.isLast ? PBR.penthouse
+        : _v3dFloorMat(THREE, colHex, floor, stilKey);
 
-      const mesh = new THREE.Mesh(extGeo, mat);
-      mesh.rotation.x = -Math.PI/2;
-      mesh.position.y = base;
-      mesh.castShadow = true;
-      mesh.receiveShadow = true;
-      scene.add(mesh);
-      V3D.aedisMeshes.push(mesh);
-    }catch(e){}
+      for(let i=0;i<pts.length-1;i++){
+        const [x0,z0] = pts[i];
+        const [x1,z1] = pts[i+1];
+        const dx = x1-x0, dz = z1-z0;
+        const len = Math.sqrt(dx*dx+dz*dz);
+        if(len < 0.1) continue;
+
+        // PlaneGeometry cu UV corecte: U=0..1 pe lățime, V=0..1 pe înălțime
+        const wallGeo = new THREE.PlaneGeometry(len, h, 1, 1);
+        const wall = new THREE.Mesh(wallGeo, wallMat);
+
+        // Poziție: centrul peretelui
+        wall.position.set(
+          (x0+x1)/2,
+          base + h/2,
+          (z0+z1)/2
+        );
+        // Rotație: perpendicular pe direcția laturii
+        wall.rotation.y = Math.atan2(dx, dz);
+
+        wall.castShadow  = true;
+        wall.receiveShadow = true;
+        scene.add(wall);
+        V3D.aedisMeshes.push(wall);
+      }
+    }catch(e){ console.warn('AEDIS mesh error:', e.message); }
   });
 
   // ── Parcel outline ────────────────────────────────────────────────────────
@@ -8035,7 +8066,7 @@ function _v3dMakePBR(THREE, stilKey){
     ctx.putImageData(id,0,0);
     const tex=new THREE.CanvasTexture(cv);
     tex.wrapS=tex.wrapT=THREE.RepeatWrapping;
-    tex.repeat.set(1.2,1.0);
+    tex.repeat.set(1,1);
     return tex;
   }
   // Textură metal pentru penthouse/atic
@@ -8104,117 +8135,146 @@ function _v3dFloorMat(THREE, colorHex, floorIdx, stilKey){
     ctx.fillRect(0,0,256,256);
 
     if(isGlass){
-      // O singura fereastra per tile (512px) → repeat 1x per etaj pe fatada
       cv.width=512; cv.height=512;
-      // Fond fatada mai inchis decat colorHex (sticla nu e 100% transparenta)
-      ctx.fillStyle = colorHex; ctx.fillRect(0,0,512,512);
-      // Overlay inchis pentru adancime
-      ctx.fillStyle='rgba(0,0,0,0.35)'; ctx.fillRect(0,0,512,512);
 
-      // Fatada: 3 coloane x 3 randuri de ferestre per tile
-      const cols=3, rows=3;
-      const pw=512/cols, ph=512/rows;
-      const mx=pw*0.1, my=ph*0.1;
-      for(let r=0;r<rows;r++) for(let cl=0;cl<cols;cl++){
-        const x=cl*pw+mx, y=r*ph+my, w=pw-mx*2, h=ph-my*2;
-        // Glaf (umbra sub fereastra)
-        ctx.fillStyle='rgba(0,0,0,0.25)';
-        ctx.fillRect(x-2, y+h-4, w+4, 8);
-        // Fond sticla
-        const isLit = Math.random() > 0.4;
-        const grd = ctx.createLinearGradient(x,y,x+w,y+h);
-        if(isLit){
-          grd.addColorStop(0,'rgba(200,225,255,0.75)');
-          grd.addColorStop(0.4,'rgba(160,200,245,0.6)');
-          grd.addColorStop(1,'rgba(120,170,230,0.55)');
-        } else {
-          grd.addColorStop(0,'rgba(30,55,100,0.8)');
-          grd.addColorStop(1,'rgba(15,30,65,0.85)');
+      // Fond fatada — culoarea etajului, intunecata
+      const _r=parseInt(colorHex.slice(1,3),16)||30;
+      const _g=parseInt(colorHex.slice(3,5),16)||50;
+      const _b=parseInt(colorHex.slice(5,7),16)||90;
+      ctx.fillStyle=`rgb(${Math.max(0,_r-20)},${Math.max(0,_g-20)},${Math.max(0,_b-20)})`;
+      ctx.fillRect(0,0,512,512);
+
+      // Planseu sus + planșeu jos (structura)
+      ctx.fillStyle='rgba(0,0,0,0.5)';
+      ctx.fillRect(0,0,512,36);
+      ctx.fillRect(0,476,512,36);
+
+      // 2 coloane × 4 randuri de ferestre
+      const cols=2, rows=4;
+      const pw=256, ph=110;
+      const padX=22, padY=8;
+
+      for(let r=0;r<rows;r++){
+        for(let cl=0;cl<cols;cl++){
+          const x=cl*pw+padX, y=36+r*ph+padY;
+          const fw=pw-padX*2, fh=ph-padY*2;
+
+          // Glaf
+          ctx.fillStyle='rgba(0,0,0,0.35)';
+          ctx.fillRect(x-2,y+fh-2,fw+4,7);
+
+          // Sticla
+          const isLit = (cl*2+r+floorIdx)%4 !== 0;
+          const grd=ctx.createLinearGradient(x,y,x+fw,y+fh);
+          if(isLit){
+            grd.addColorStop(0,'rgba(170,210,250,0.85)');
+            grd.addColorStop(0.35,'rgba(130,185,240,0.72)');
+            grd.addColorStop(1,'rgba( 90,150,210,0.65)');
+          } else {
+            grd.addColorStop(0,'rgba(15,35,75,0.95)');
+            grd.addColorStop(1,'rgba( 8,20,50,0.90)');
+          }
+          ctx.fillStyle=grd; ctx.fillRect(x,y,fw,fh);
+
+          // Rama aluminiu
+          ctx.strokeStyle='rgba(190,210,230,0.6)';
+          ctx.lineWidth=3; ctx.strokeRect(x,y,fw,fh);
+
+          // Montant vertical
+          ctx.strokeStyle='rgba(160,185,210,0.35)';
+          ctx.lineWidth=1.5;
+          ctx.beginPath(); ctx.moveTo(x+fw/2,y); ctx.lineTo(x+fw/2,y+fh); ctx.stroke();
+
+          // Highlight reflexie
+          if(isLit){
+            ctx.strokeStyle='rgba(255,255,255,0.25)';
+            ctx.lineWidth=1.5;
+            ctx.beginPath(); ctx.moveTo(x+4,y+5); ctx.lineTo(x+fw*0.32,y+fh*0.3); ctx.stroke();
+          }
         }
-        ctx.fillStyle=grd; ctx.fillRect(x,y,w,h);
-        // Frame aluminiu
-        ctx.strokeStyle='rgba(200,215,230,0.6)';
-        ctx.lineWidth=2.5;
-        ctx.strokeRect(x,y,w,h);
-        // Montant vertical central
-        ctx.strokeStyle='rgba(180,200,220,0.4)';
-        ctx.lineWidth=1.5;
-        ctx.beginPath(); ctx.moveTo(x+w/2,y); ctx.lineTo(x+w/2,y+h); ctx.stroke();
-        // Reflection diagonal
-        ctx.strokeStyle='rgba(255,255,255,0.18)';
-        ctx.lineWidth=1;
-        ctx.beginPath(); ctx.moveTo(x+4,y+4); ctx.lineTo(x+w*0.35,y+h*0.35); ctx.stroke();
       }
-      // Banda orizontala intre etaje (planseul)
-      ctx.fillStyle='rgba(0,0,0,0.2)';
-      for(let r=1;r<rows;r++){
-        ctx.fillRect(0,r*(512/rows)-4,512,8);
-      }
+      // Montant structural central vertical
+      ctx.fillStyle='rgba(0,0,0,0.3)'; ctx.fillRect(253,36,6,440);
 
     } else if(isPlaster){
-      // Tencuiala cu ferestre traditionale
+      cv.width=512; cv.height=512;
+      // Fond tencuiala
+      ctx.fillStyle=colorHex; ctx.fillRect(0,0,512,512);
+      // Noise tencuiala fin
+      const id=ctx.getImageData(0,0,512,512);
+      for(let i=0;i<id.data.length;i+=4){
+        const n=(Math.random()-0.5)*20;
+        id.data[i]+=n; id.data[i+1]+=n; id.data[i+2]+=n;
+      }
+      ctx.putImageData(id,0,0);
+
+      // 3 col × 4 rând ferestre tradiționale
       const cols=3, rows=4;
-      const pw=256/cols, ph=256/rows;
-      const wx=pw*0.5, wy=ph*0.45;
-      for(let r=0;r<rows;r++) for(let cl=0;cl<cols;cl++){
-        const ox=cl*pw+(pw-wx)/2, oy=r*ph+(ph-wy)/2;
-        // Glaf
-        ctx.fillStyle='rgba(0,0,0,0.18)';
-        ctx.fillRect(ox-2,oy-2,wx+4,wy+4);
-        // Fereastra - arch top for clasic
-        if(stilKey==='clasic'){
+      const pw=512/cols, ph=512/rows;
+      const wx=pw*0.46, wy=ph*0.52;
+      for(let r=0;r<rows;r++){
+        for(let cl=0;cl<cols;cl++){
+          const ox=cl*pw+(pw-wx)/2, oy=r*ph+(ph-wy)*0.35;
+          // Glaf
+          ctx.fillStyle='rgba(0,0,0,0.2)';
+          ctx.fillRect(ox-3,oy+wy,wx+6,8);
+          // Pervaz fereastra
+          ctx.fillStyle='rgba(255,255,255,0.12)';
+          ctx.fillRect(ox-4,oy-4,wx+8,wy+8);
+          // Sticla
+          const grd=ctx.createLinearGradient(ox,oy,ox+wx,oy+wy);
+          grd.addColorStop(0,'rgba(150,190,220,0.6)');
+          grd.addColorStop(1,'rgba( 80,130,180,0.5)');
+          ctx.fillStyle=grd; ctx.fillRect(ox,oy,wx,wy);
+          // Rama
+          ctx.strokeStyle='rgba(220,215,200,0.7)'; ctx.lineWidth=2.5;
+          ctx.strokeRect(ox,oy,wx,wy);
+          // Cruce
+          ctx.strokeStyle='rgba(200,195,180,0.45)'; ctx.lineWidth=1.5;
           ctx.beginPath();
-          ctx.rect(ox,oy+wx*0.2,wx,wy-wx*0.2);
-          ctx.arc(ox+wx/2,oy+wx*0.2,wx/2,Math.PI,0);
-          ctx.fillStyle=`rgba(180,200,220,0.5)`;
-          ctx.fill();
-        } else {
-          ctx.fillStyle=`rgba(180,200,225,0.45)`;
-          ctx.fillRect(ox,oy,wx,wy);
+          ctx.moveTo(ox+wx/2,oy); ctx.lineTo(ox+wx/2,oy+wy);
+          ctx.moveTo(ox,oy+wy*0.45); ctx.lineTo(ox+wx,oy+wy*0.45);
+          ctx.stroke();
         }
-        // Rama
-        ctx.strokeStyle='rgba(255,255,255,0.3)';
-        ctx.lineWidth=1.5;
-        ctx.strokeRect(ox,oy,wx,wy);
       }
-      // Noise tencuiala
-      const imgData = ctx.getImageData(0,0,256,256);
-      for(let i=0;i<imgData.data.length;i+=4){
-        const n=(Math.random()-0.5)*12;
-        imgData.data[i]+=n; imgData.data[i+1]+=n; imgData.data[i+2]+=n;
-      }
-      ctx.putImageData(imgData,0,0);
+      // Linii cornisa orizontale
+      ctx.strokeStyle='rgba(0,0,0,0.15)'; ctx.lineWidth=2;
+      for(let r=1;r<rows;r++){ ctx.beginPath(); ctx.moveTo(0,r*ph); ctx.lineTo(512,r*ph); ctx.stroke(); }
 
     } else if(isIndustrial){
-      // Panouri metalice + obloane
-      const cols=2, rows=3;
-      const pw=256/cols, ph=256/rows;
-      for(let r=0;r<rows;r++) for(let cl=0;cl<cols;cl++){
-        // Panel
-        ctx.strokeStyle='rgba(0,0,0,0.4)'; ctx.lineWidth=3;
-        ctx.strokeRect(cl*pw+4,r*ph+4,pw-8,ph-8);
-        // Nit-uri colt
-        [[8,8],[pw-8,8],[8,ph-8],[pw-8,ph-8]].forEach(([nx,ny])=>{
-          ctx.beginPath();
-          ctx.arc(cl*pw+nx,r*ph+ny,3,0,Math.PI*2);
-          ctx.fillStyle='rgba(0,0,0,0.35)'; ctx.fill();
-        });
-        // Fereastra industriala
-        ctx.fillStyle='rgba(120,150,180,0.3)';
-        ctx.fillRect(cl*pw+pw*0.2,r*ph+ph*0.25,pw*0.6,ph*0.35);
+      cv.width=512; cv.height=512;
+      ctx.fillStyle=colorHex; ctx.fillRect(0,0,512,512);
+      // Rosturi panouri mari
+      ctx.strokeStyle='rgba(0,0,0,0.4)'; ctx.lineWidth=4;
+      for(let x=0;x<512;x+=128){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,512); ctx.stroke(); }
+      for(let y=0;y<512;y+=128){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(512,y); ctx.stroke(); }
+      // Highlight specular pe panouri
+      const grd=ctx.createLinearGradient(0,0,512,512);
+      grd.addColorStop(0,'rgba(255,255,255,0.07)');
+      grd.addColorStop(0.5,'rgba(255,255,255,0.0)');
+      grd.addColorStop(1,'rgba(255,255,255,0.04)');
+      ctx.fillStyle=grd; ctx.fillRect(0,0,512,512);
+      // Nit-uri colt panouri
+      for(let x=0;x<512;x+=128) for(let y=0;y<512;y+=128){
+        ctx.beginPath(); ctx.arc(x+6,y+6,4,0,Math.PI*2);
+        ctx.fillStyle='rgba(0,0,0,0.3)'; ctx.fill();
       }
+      // Ferestre industriale pe rand superior
+      for(let cl=0;cl<4;cl++){
+        const fx=cl*128+16, fy=16, fw=96, fh=60;
+        ctx.fillStyle='rgba(100,140,180,0.3)'; ctx.fillRect(fx,fy,fw,fh);
+        ctx.strokeStyle='rgba(150,170,190,0.5)'; ctx.lineWidth=2; ctx.strokeRect(fx,fy,fw,fh);
+      }
+
     }
 
     const t = new THREE.CanvasTexture(cv);
     t.wrapS = THREE.RepeatWrapping;
     t.wrapT = THREE.RepeatWrapping;
     // Repeat: sticla 1 tile per ~8m fatada; tencuiala 1 tile per ~4m
-    // Repeat mic = ferestre mai mari. 1.0 = un tile per fata (prea rar)
-    // 0.3 = ~3 ferestre per lățimea fațadei (bun pentru clădiri 10-20m)
-    t.repeat.set(
-      isGlass ? 0.35 : isIndustrial ? 0.3 : 0.45,
-      isGlass ? 0.55 : 0.65
-    );
+    // Cu PlaneGeometry (pereți separați), UV 0→1 acoperă exact un perete
+    // repeat=1 → un tile per perete (corect pentru orice dimensiune)
+    t.repeat.set(1, 1);
     _v3dTexCache[cacheKey] = t;
   }
 
@@ -8440,14 +8500,14 @@ function _v3dLoadStreets(cx, cy, toLocal, scene, THREE){
     way["highway"~"^(primary|secondary|tertiary|residential|unclassified|service|footway|pedestrian|path|living_street|trunk)$"](around:200,${cy},${cx});
   );out geom;`;
 
+  // Timeout scurt, retry o dată
   fetch('https://overpass-api.de/api/interpreter', {
-    method:'POST', body:q,
-    signal: AbortSignal.timeout(12000)
+    method:'POST', body:q, signal: AbortSignal.timeout(10000)
   })
-  .then(r=>{ if(!r.ok) throw new Error('Overpass '+r.status); return r.json(); })
+  .then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
   .then(data=>{
     if(!data.elements?.length){
-      _v3dStatus('⚠️ Străzi OSM indisponibile momentan (Overpass rate-limited) · rotire activă');
+      _v3dStatus('⚠️ Fără date stradale · drag pentru rotire');
       return;
     }
 
@@ -8513,7 +8573,10 @@ function _v3dLoadStreets(cx, cy, toLocal, scene, THREE){
 
     _v3dStatus(`✅ Viewer 3D · ${V3D.aedisMeshes.length} vol. AEDIS · ${V3D.ctxMeshes.length} obiecte context · Drag rotire`);
   })
-  .catch(e=>console.warn('Streets Overpass error:', e.message));
+  .catch(e=>{
+    console.warn('Streets Overpass error:', e.message);
+    _v3dStatus('✅ Viewer 3D · '+V3D.aedisMeshes.length+' vol. AEDIS · '+V3D.ctxMeshes.length+' obiecte context · Drag rotire');
+  });
 }
 
 function _v3dResetCamera(){
