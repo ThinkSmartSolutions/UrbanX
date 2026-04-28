@@ -3115,7 +3115,7 @@ function htmlSearch(){
   </div>
   <div class="section">🔢 Număr cadastral Iași</div>
   <div class="card">
-    <input class="inp" id="inp-cad" placeholder="Ex: 127835" oninput="onCadInput(this.value)" onkeydown="if(event.key==='Enter')doCad()">
+    <input class="inp" id="inp-cad" placeholder="Ex: 127835" inputmode="numeric" autocomplete="off" oninput="onCadInput(this.value);this.dataset.val=this.value" onkeydown="if(event.key==='Enter'){window._mobCadVal=this.value;doCad()}" onfocus="window._activeSearchCtx=this">
     <div id="cad-range" class="help" style="color:#34d399;margin:4px 0 8px"></div>
     <div class="btn-row">
       <button class="btn-p" onclick="doCad()" style="flex:1">🔍 Caută</button>
@@ -3914,9 +3914,12 @@ function onCadInput(val){
 }
 
 function doCad(){
-  // Pe mobile, elementul e în mob-body; pe desktop e în panel-body
-  const el = document.getElementById('inp-cad') || document.querySelector('#inp-cad');
-  const v=(el?.value||'').trim();
+  // Folosim elementul activ sau cel mai recent modificat
+  const el = window._activeSearchCtx?.id==='inp-cad' 
+    ? window._activeSearchCtx
+    : (document.getElementById('inp-cad') || document.querySelector('#inp-cad'));
+  const v=(window._mobCadVal||el?.value||'').trim();
+  window._mobCadVal = null; // reset
   if(!v)return;
   const key=v.toLowerCase().replace(/\s+/g,'');
   const found=S.cadIdx.get(key);
@@ -8265,23 +8268,22 @@ function aedisOpen3DViewer(){
   const hTot = ((AEDIS.parterDiferit?(fnDef.hParter||4.5):hNiv)+(niv-1)*hNiv).toFixed(1);
 
   ov.innerHTML = `
-    <div style="background:#080f1c;border-bottom:1px solid rgba(139,92,246,.3);padding:9px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0">
-      <div style="font-size:13px;font-weight:800;color:#a78bfa">🔭 AEDIS 3D Viewer</div>
-      <div style="font-size:11px;color:#64748b">${fnDef.label||''} · ${stilDef.label||''} · ${niv} niv. · H=${hTot}m</div>
-      <div style="flex:1"></div>
-      <select id="v3d-light" onchange="_v3dLight(this.value)" style="background:#0f172a;color:#e2e8f0;border:1px solid rgba(255,255,255,.15);border-radius:7px;padding:5px 10px;font-size:11px">
+    <div style="background:#080f1c;border-bottom:1px solid rgba(139,92,246,.3);padding:8px 12px;display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap">
+      <div style="font-size:12px;font-weight:800;color:#a78bfa;flex-shrink:0">🔭 AEDIS 3D</div>
+      <div style="font-size:10px;color:#64748b;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${fnDef.label||''} · ${niv} niv.</div>
+      <select id="v3d-light" onchange="_v3dLight(this.value)" style="background:#0f172a;color:#e2e8f0;border:1px solid rgba(255,255,255,.15);border-radius:7px;padding:4px 8px;font-size:10px;flex-shrink:0">
         <option value="day">☀ Zi</option>
         <option value="golden">🌅 Golden</option>
-        <option value="overcast">☁ Înnorat</option>
+        <option value="overcast">☁ Înnor.</option>
         <option value="night">🌙 Noapte</option>
       </select>
-      <select id="v3d-ctx" onchange="_v3dCtxViz(this.value)" style="background:#0f172a;color:#e2e8f0;border:1px solid rgba(255,255,255,.15);border-radius:7px;padding:5px 10px;font-size:11px">
-        <option value="show">Context vizibil</option>
+      <select id="v3d-ctx" onchange="_v3dCtxViz(this.value)" style="background:#0f172a;color:#e2e8f0;border:1px solid rgba(255,255,255,.15);border-radius:7px;padding:4px 8px;font-size:10px;flex-shrink:0">
+        <option value="show">Context</option>
         <option value="wire">Wireframe</option>
         <option value="hide">Ascunde</option>
       </select>
-      <button onclick="_v3dResetCam()" style="background:rgba(255,255,255,.06);color:#94a3b8;border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 10px;font-size:11px;cursor:pointer">⌂ Reset</button>
-      <button onclick="document.getElementById('aedis-3d-viewer-overlay').remove();_v3dCleanup()" style="background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3);border-radius:7px;padding:5px 10px;font-size:11px;cursor:pointer">✕ Închide</button>
+      <button onclick="_v3dResetCam()" style="background:rgba(255,255,255,.06);color:#94a3b8;border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:4px 10px;font-size:11px;cursor:pointer;flex-shrink:0">⌂</button>
+      <button onclick="document.getElementById('aedis-3d-viewer-overlay').remove();_v3dCleanup()" style="background:rgba(239,68,68,.8);color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0">✕</button>
     </div>
     <canvas id="v3d-canvas" style="flex:1;display:block;cursor:grab;touch-action:none"></canvas>
     <div id="v3d-status" style="position:absolute;bottom:10px;left:14px;font-size:10px;color:#475569;pointer-events:none">Se inițializează…</div>`;
@@ -8409,9 +8411,8 @@ function _v3dBuild(ap){
     const shape=new THREE.Shape(); shape.moveTo(pts[0][0],pts[0][1]);
     pts.slice(1,-1).forEach(([x,z])=>shape.lineTo(x,z)); shape.closePath();
     const geo=new THREE.ShapeGeometry(shape);
-    const mat=new THREE.MeshStandardMaterial({color:'#1a2535',roughness:0.97,metalness:0,transparent:true,opacity:0.85});
-    const m2=new THREE.Mesh(geo,mat); m2.rotation.x=-Math.PI/2; m2.position.y=0.03; scene.add(m2);
-  }catch(e){}
+    const mat=new THREE.MeshStandardMaterial({color:'#1a2535',roughness:0.97,metalness:0,transparent:true,opacity:0.85,side:THREE.DoubleSide});
+    const m2=new THREE.Mesh(geo,mat); m2.rotation.x=-Math.PI/2; m2.position.y=0.03; scene.add(m2);  }catch(e){}
 
   // Străzi din S.ctx linii (dacă există) sau grid simplu în jurul parcelei
   _v3dAddStreets(THREE, scene, ring0, toLoc);
@@ -8450,7 +8451,7 @@ function _v3dAddStreets(THREE, scene, ring0, toLoc){
   // + adăugăm o bandă de stradă la aliniamentul frontal al parcelei
 
   const streetMat = new THREE.MeshStandardMaterial({
-    color:'#1e2d3d', roughness:0.96, metalness:0
+    color:'#1e2d3d', roughness:0.96, metalness:0, side:THREE.DoubleSide
   });
 
   try{
@@ -8490,7 +8491,7 @@ function _v3dAddStreets(THREE, scene, ring0, toLoc){
     addStreet(cx + offset + streetW/2, cz + offset + streetW/2, streetW, streetW);
     
     // Trotuar (mai deschis)
-    const trotoarMat = new THREE.MeshStandardMaterial({color:'#253545', roughness:0.95, metalness:0});
+    const trotoarMat = new THREE.MeshStandardMaterial({color:'#253545', roughness:0.95, metalness:0, side:THREE.DoubleSide});
     const addTrotuar = (x,z,sw,sd) => {
       const geo = new THREE.PlaneGeometry(sw, sd);
       const m = new THREE.Mesh(geo, trotoarMat);
