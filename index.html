@@ -2242,8 +2242,21 @@ function updateDistanceLines(){
   const feats = [];
   // Folosim volumele stocate (mai fiabil decat getSource()._data)
   const volFeats = S.vol._lastFeats || (map.getSource('vol-src')?._data?.features) || [];
-  const ctxFeats = S.ctx?.features||[];
   const parcelFeat = {type:'Feature',geometry:ap.geo.geometry,properties:{}};
+
+  // Daca contextul nu e incarcat, il extragem din Mapbox rendered features
+  let ctxFeats = S.ctx?.features||[];
+  if(ctxFeats.length === 0){
+    const c = turf.centerOfMass(parcelFeat).geometry.coordinates;
+    const r = Math.max(100, Number(S.vol.ctxR||200));
+    const extracted = _extractMapboxBuildings(c, r);
+    if(extracted.length > 0){
+      S.ctx = {type:'FeatureCollection', features: extracted};
+      setSource('ctx-src', S.ctx);
+      _applyCtxLabels(extracted);
+      ctxFeats = extracted;
+    }
+  }
 
   // Volumele generate - luam baza (floor=0) din TOATE parcelele
   const myBlds = {};
@@ -2645,68 +2658,160 @@ const BLD_LABELS={
   garage:'Garaj',parking:'Parcare',sports:'Sport',
   yes:'Necunoscut'
 };
+// Cache simplu: evitam apeluri repetate pentru aceeasi zona
+const _ctxCache = {};
+
 async function loadContext(){
   const ap=S.parcels[S.activeParcel??0];
   if(!ap?.geo?.geometry)return;
   const c=turf.centerOfMass(ap.geo).geometry.coordinates;
   const r=Math.max(80,Number(S.vol.ctxR||200));
-  // ss('⏳ Context 3D OSM…'); // nu blocăm status bar
-  const q=`[out:json][timeout:10];(way["building"](around:${r},${c[1]},${c[0]}););out geom tags;`;
+
+  // Cache key: centru rotunjit la 3 zecimale + raza
+  const cacheKey = c[1].toFixed(3)+'_'+c[0].toFixed(3)+'_'+r;
+  if(_ctxCache[cacheKey]){
+    S.ctx = _ctxCache[cacheKey];
+    setSource('ctx-src', S.ctx);
+    _applyCtxLabels(S.ctx.features);
+    if(S.vol.genDone) setTimeout(updateDistanceLines, 200);
+    return;
+  }
+
+  // Incearca Overpass cu timeout scurt (6s) pe un singur endpoint
+  const q=`[out:json][timeout:6];(way["building"](around:${r},${c[1]},${c[0]}););out geom tags;`;
+  let feats = null;
+
   try{
-    // Încercăm mai multe endpoint-uri Overpass
-    const OVERPASS_ENDPOINTS = [
+    const ctrl = new AbortController();
+    const tid = setTimeout(()=>ctrl.abort(), 7000);
+    // Rotim intre 3 endpoints cu delay random ca sa evitam rate limit
+    const endpoints = [
       'https://overpass-api.de/api/interpreter',
       'https://lz4.overpass-api.de/api/interpreter',
       'https://z.overpass-api.de/api/interpreter'
     ];
-    let res = null, json = null;
-    for(const ep of OVERPASS_ENDPOINTS){
-      try{
-        const ctrl = new AbortController();
-        const tid = setTimeout(()=>ctrl.abort(), 12000);
-        res = await fetch(ep, {method:'POST', headers:{'Content-Type':'text/plain;charset=UTF-8'}, body:q, signal:ctrl.signal});
-        clearTimeout(tid);
-        if(res.ok){ json = await res.json(); break; }
-      }catch(e){ console.warn('Overpass endpoint failed:', ep, e.message); }
+    // Alegem un endpoint random ca sa distribuim cererile
+    const ep = endpoints[Math.floor(Math.random()*endpoints.length)];
+    const res = await fetch(ep, {
+      method:'POST',
+      headers:{'Content-Type':'text/plain;charset=UTF-8'},
+      body:q, signal:ctrl.signal
+    });
+    clearTimeout(tid);
+    if(res.ok){
+      const json = await res.json();
+      feats = _parseOverpassBuildings(json);
     }
-    if(!json) throw new Error('Toate endpoint-urile Overpass sunt indisponibile');
-    const feats=(json.elements||[]).filter(el=>el.type==='way'&&Array.isArray(el.geometry)&&el.geometry.length>=3).map(el=>{
+  }catch(e){
+    console.warn('Overpass failed, using Mapbox rendered features:', e.message);
+  }
+
+  // FALLBACK: daca Overpass a esuat (429, timeout, etc.)
+  // Extragem cladirile deja randate de Mapbox GL din viewport
+  if(!feats || feats.length === 0){
+    feats = _extractMapboxBuildings(c, r);
+    if(feats.length > 0){
+      ss('📍 Context din Mapbox GL: ' + feats.length + ' clădiri (Overpass indisponibil)');
+    } else {
+      ss('⚠️ Context urban: nicio clădire găsită în raza de ' + r + 'm');
+    }
+  } else {
+    ss('✅ Context OSM: ' + feats.length + ' clădiri');
+  }
+
+  const fc = {type:'FeatureCollection', features:feats};
+  S.ctx = fc;
+  _ctxCache[cacheKey] = fc; // salvam in cache
+  setSource('ctx-src', S.ctx);
+  _applyCtxLabels(feats);
+  if(S.vol.genDone) setTimeout(updateDistanceLines, 300);
+}
+
+// Parseaza raspunsul Overpass in features GeoJSON
+function _parseOverpassBuildings(json){
+  return (json.elements||[])
+    .filter(el=>el.type==='way'&&Array.isArray(el.geometry)&&el.geometry.length>=3)
+    .map(el=>{
       const ring=el.geometry.map(p=>[Number(p.lon),Number(p.lat)]);
       if(ring[0][0]!==ring.at(-1)[0]||ring[0][1]!==ring.at(-1)[1])ring.push(ring[0]);
       const lv=pN(el.tags?.['building:levels']);
       const ht=pN(el.tags?.height);
       const h=ht||(lv?lv*3.0:7);
       const fn=el.tags?.building||'yes';
-      return{type:'Feature',properties:{h,lv,fn,col:BLD_COL[fn]||BLD_COL['yes']||'#8a9ab0'},geometry:{type:'Polygon',coordinates:[ring]}};
+      return{type:'Feature',
+        properties:{h,lv,fn,col:BLD_COL[fn]||BLD_COL['yes']||'#8a9ab0'},
+        geometry:{type:'Polygon',coordinates:[ring]}};
     });
-    S.ctx={type:'FeatureCollection',features:feats};
-    setSource('ctx-src',S.ctx);
-    // Generam etichete pentru fiecare cladire: inaltime + functiune
+}
+
+// Extrage cladirile din Mapbox GL rendered features (fallback fara internet extern)
+function _extractMapboxBuildings(center, radiusM){
+  try{
+    const feats = [];
+    // queryRenderedFeatures pe layerele de cladiri din stilul curent
+    const rendered = map.queryRenderedFeatures(undefined, {
+      layers: ['building', 'building-extrusion', '3d-buildings']
+    });
+
+    // Filtram in raza dorita
+    const centerPt = turf.point(center);
+    const seen = new Set();
+
+    for(const f of rendered){
+      if(!f.geometry) continue;
+      try{
+        const geom = f.geometry;
+        // Calculam centrul si distanta
+        const ctr = turf.centerOfMass({type:'Feature',geometry:geom,properties:{}});
+        const dist = turf.distance(centerPt, ctr, {units:'meters'});
+        if(dist > radiusM) continue;
+
+        // Deduplicare dupa coordonate centru
+        const key = ctr.geometry.coordinates.map(v=>v.toFixed(5)).join(',');
+        if(seen.has(key)) continue;
+        seen.add(key);
+
+        // Extragem inaltimea din proprietatile Mapbox
+        const h = pN(f.properties?.height) || pN(f.properties?.render_height) ||
+                  pN(f.properties?.['building:levels'])*3 || 7;
+        const fn = f.properties?.building || 'yes';
+
+        feats.push({
+          type:'Feature',
+          properties:{h, lv:Math.round(h/3), fn, col:BLD_COL[fn]||'#8a9ab0'},
+          geometry: geom.type==='MultiPolygon'
+            ? {type:'Polygon', coordinates: geom.coordinates[0]}
+            : geom
+        });
+      }catch(e){}
+    }
+    return feats;
+  }catch(e){
+    console.warn('_extractMapboxBuildings error:', e.message);
+    return [];
+  }
+}
+
+// Aplicam etichetele pe harta
+function _applyCtxLabels(feats){
+  try{
     const labelFeats = feats.map(f=>{
       try{
         const ctr = turf.centerOfMass(f);
         const h = f.properties.h;
         const fn = f.properties.fn||'yes';
-        const fnLbl = (BLD_LABELS?.[fn]||fn);
-        const showFn = fn !== 'yes' && fnLbl !== 'Necunoscut';
-        return {
-          type:'Feature',
-          geometry: ctr.geometry,
+        const fnLbl = BLD_LABELS?.[fn]||fn;
+        const showFn = fn!=='yes' && fnLbl!=='Necunoscut';
+        return{type:'Feature', geometry:ctr.geometry,
           properties:{
-            h_label: h ? Math.round(h)+'m' : '',
-            fn_label: showFn ? (fnLbl.length>12 ? fnLbl.slice(0,12)+'.' : fnLbl) : 'Necunoscut',
-            col: f.properties.col||'#e2e8f0',
-            h: h||0
-          }
-        };
-      }catch(e){ return null; }
+            h_label: h?Math.round(h)+'m':'',
+            fn_label: showFn?(fnLbl.length>12?fnLbl.slice(0,12)+'.':fnLbl):'Necunoscut',
+            col: f.properties.col||'#e2e8f0', h:h||0
+          }};
+      }catch(e){return null;}
     }).filter(Boolean);
     setSource('ctx-labels-src',{type:'FeatureCollection',features:labelFeats});
-    const curSt=$('status').textContent;
-    ss(curSt.replace('⏳','✅')+` · ${feats.length} clădiri context`);
-    // Actualizam distantele fata de vecini dupa ce contextul e incarcat
-    if(S.vol.genDone) setTimeout(updateDistanceLines, 300);
-  }catch(e){ss($('status').textContent+' · Context OSM indisponibil');}
+  }catch(e){}
 }
 
 // ═══ POPUP ════════════════════════════════════════════════════════════════
@@ -5808,30 +5913,21 @@ function aedis3DRemove(){
 }
 
 function aedisGenerateAll(){
-  const ap = S.parcels[S.activeParcel??0];
-  if(!ap?.geo?.geometry){ ss('⚠️ AEDIS: Selectați o parcelă mai întâi.'); return; }
-
-  // Guard: avertizare parcela alungita (posibil drum, nu teren construibil)
-  try{
-    const bb = turf.bbox(ap.geo);
-    const mLng = 111320 * Math.cos((bb[1]+bb[3])/2 * Math.PI/180);
-    const w = (bb[2]-bb[0]) * mLng;
-    const h = (bb[3]-bb[1]) * 111320;
-    const ratio = Math.max(w,h) / Math.max(1, Math.min(w,h));
-    if(ratio > 8){
-      if(!confirm(`⚠️ Parcela selectată este foarte alungită (${Math.round(ratio)}:1).
-Posibil drum sau culoar tehnic, nu teren construibil.
-
-Continuați generarea?`)) return;
-    }
-  }catch(e){}
-
-  // 1. Generam fill-extrusion (fallback instant, vizibil imediat pe harta)
+  // Generam fill-extrusion Mapbox (plasare corecta pe parcela reala)
+  // Three.js e dezactivat pe harta — produce deformare pe parcele neregulate mari
+  // Three.js ramane activ DOAR pentru export GLB (aedis3DExportGLTF)
   aedisBuild();
-  // 2. Generam Three.js mesh (fotorealist cu materiale procedurale)
-  aedis3DGenerate();
-  // 3. Actualizam distantele fata de vecinii adiacenti
-  setTimeout(updateDistanceLines, 600);
+
+  // Incarcam contextul urban daca nu e deja disponibil
+  if(!S.ctx || !S.ctx.features?.length){
+    loadContext().then(()=>{
+      updateDistanceLines();
+    });
+  } else {
+    setTimeout(updateDistanceLines, 400);
+  }
+
+  ss('✅ AEDIS: Volum generat · ' + (AEDIS.corpuri[0]?.niv||4) + ' niveluri pe harta');
 }
 
 function aedisClose(){
@@ -6151,24 +6247,24 @@ function aedisGetContent(){
 
     <div class="aedis-section" style="margin-top:10px">🎨 AI Render fotorealist</div>
     <div style="padding:10px;background:#080f1c;border-radius:8px;border:1px solid rgba(212,175,55,.2);margin-bottom:10px">
-      <div style="font-size:11px;color:#94a3b8;margin-bottom:8px">
-        Randare fotorealistă din contextul real al hărții. Screenshot-ul curent al hărții e trimis ca referință vizuală.
-        ${FAL_AI.lastRender ? '<span style="color:#4ade80">✅ Randare disponibilă · ' + (FAL_AI.lastRender.model||'schnell') + '</span>' : '<span style="color:#64748b">Nicio randare generată</span>'}
+      <div style="font-size:11px;color:#94a3b8;margin-bottom:8px;line-height:1.5">
+        Randare din contextul real al hărții · Screenshot harta = referință vizuală<br>
+        ${FAL_AI.lastRender ? '<span style="color:#4ade80;font-weight:700">✅ Randare ' + (FAL_AI.lastRender.model||'schnell') + ' · ' + new Date(FAL_AI.lastRender.timestamp).toLocaleTimeString('ro') + '</span>' : '<span style="color:#64748b">Nicio randare generată</span>'}
       </div>
       <div style="display:flex;gap:5px;margin-bottom:8px">
-        <button onclick="FAL_AI.useProModel=false;aedisRender()" style="flex:1;padding:7px 6px;border-radius:7px;border:1px solid ${FAL_AI.useProModel?'rgba(255,255,255,.15)':'rgba(212,175,55,.5)'};background:${FAL_AI.useProModel?'transparent':'rgba(212,175,55,.12)'};color:${FAL_AI.useProModel?'#64748b':'#d4af37'};cursor:pointer;font-size:11px;font-weight:700">
-          ⚡ Preview<br><span style="font-size:9px;font-weight:400">Schnell ~3 sec</span>
+        <button onclick="FAL_AI.useHQ=false;aedisRender()" style="flex:1;padding:8px 6px;border-radius:7px;border:1px solid ${!FAL_AI.useHQ?'rgba(212,175,55,.6)':'rgba(255,255,255,.1)'};background:${!FAL_AI.useHQ?'rgba(212,175,55,.15)':'transparent'};color:${!FAL_AI.useHQ?'#d4af37':'#64748b'};cursor:pointer;font-size:11px;font-weight:700;text-align:center">
+          ⚡ Preview<br><span style="font-size:9px;font-weight:400;opacity:.7">Schnell ~3 sec</span>
         </button>
-        <button onclick="FAL_AI.useProModel=true;aedisRender()" style="flex:1;padding:7px 6px;border-radius:7px;border:1px solid ${FAL_AI.useProModel?'rgba(59,130,246,.5)':'rgba(255,255,255,.15)'};background:${FAL_AI.useProModel?'rgba(59,130,246,.12)':'transparent'};color:${FAL_AI.useProModel?'#60a5fa':'#64748b'};cursor:pointer;font-size:11px;font-weight:700">
-          ✨ Pro<br><span style="font-size:9px;font-weight:400">Flux-Pro ~15 sec</span>
+        <button onclick="FAL_AI.useHQ=true;aedisRender()" style="flex:1;padding:8px 6px;border-radius:7px;border:1px solid ${FAL_AI.useHQ?'rgba(59,130,246,.6)':'rgba(255,255,255,.1)'};background:${FAL_AI.useHQ?'rgba(59,130,246,.15)':'transparent'};color:${FAL_AI.useHQ?'#60a5fa':'#64748b'};cursor:pointer;font-size:11px;font-weight:700;text-align:center">
+          ✨ Pro HD<br><span style="font-size:9px;font-weight:400;opacity:.7">Flux-Pro ~15 sec</span>
         </button>
       </div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap">
-        <button onclick="aedisAIRender()" style="padding:9px 16px;border-radius:8px;border:1px solid rgba(212,175,55,.4);background:rgba(212,175,55,.15);color:#d4af37;cursor:pointer;font-size:12px;font-weight:700;flex:1">🎨 Generează Render</button>
+      <div style="display:flex;gap:6px">
+        <button onclick="aedisAIRender()" style="flex:1;padding:9px 12px;border-radius:8px;border:1px solid rgba(212,175,55,.5);background:rgba(212,175,55,.15);color:#d4af37;cursor:pointer;font-size:12px;font-weight:700">🎨 Generează Render</button>
         ${FAL_AI.lastRender ? '<button onclick="aedisShowRender(FAL_AI.lastRender.url)" style="padding:9px 12px;border-radius:8px;border:1px solid rgba(74,222,128,.3);background:rgba(74,222,128,.1);color:#4ade80;cursor:pointer;font-size:12px">👁 Vezi</button>' : ''}
-        <button onclick="aedisSetFalKey()" style="padding:9px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:transparent;color:#64748b;cursor:pointer;font-size:11px" title="Configurare API Key">⚙</button>
+        <button onclick="aedisSetFalKey()" title="API Key" style="padding:9px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:transparent;color:#64748b;cursor:pointer;font-size:12px">⚙</button>
       </div>
-      <div style="font-size:10px;color:#475569;margin-top:6px">Fal.ai FLUX.1 · Image-to-image din harta curentă · Prompt generat automat din parametrii AEDIS</div>
+      <div style="font-size:10px;color:#475569;margin-top:6px">Image-to-image din harta curentă · prompt din parametrii AEDIS + context vecini</div>
     </div>
     <div class="aedis-section" style="margin-top:10px">Suprafețe calculate</div>
     <div class="aedis-g2">
@@ -6538,33 +6634,25 @@ function aedis3DBuild(parcelRing, params){
     const mat = makeShaderMat(matKey, colorHex, opacity);
     const meshGroup = new THREE.Group();
     for(let i=0; i<ring2D.length-1; i++){
-      const [x1,z1] = ring2D[i];   // local coords: x=est, z=nord (Y=sus in Three.js)
-      const [x2,z2] = ring2D[i+1];
-      const len = Math.sqrt((x2-x1)**2+(z2-z1)**2);
+      const [x1,y1] = ring2D[i];
+      const [x2,y2] = ring2D[i+1];
+      const len = Math.sqrt((x2-x1)**2+(y2-y1)**2);
       if(len<0.1) continue;
       const wallH = topH - baseH;
-      if(wallH<=0) continue;
 
-      // PlaneGeometry e implicit in planul XY (orizontal)
-      // Il rotim cu rotation.x = -PI/2 ca sa devina VERTICAL (in planul XZ)
-      // Apoi rotation.y = unghi de-a lungul perimetrului
-      const geo = new THREE.PlaneGeometry(len, wallH, Math.max(2,Math.round(len/1.5)), Math.max(2,Math.round(wallH/1.0)));
+      // Geometrie perete
+      const geo = new THREE.PlaneGeometry(len, wallH, 4, 4);
       geo.computeVertexNormals();
 
       const wall = new THREE.Mesh(geo, mat);
 
-      // Pozitie: centrul peretelui la inaltimea corecta
-      wall.position.set(
-        (x1+x2)/2,
-        baseH + wallH/2,  // Y = inaltime (vertical) in Three.js
-        (z1+z2)/2
-      );
+      // Pozitionare perete
+      const mx = (x1+x2)/2, my = (y1+y2)/2;
+      wall.position.set(mx, baseH + wallH/2, my);
 
-      // Rotatie: intai -PI/2 pe X (verticalizare), apoi unghiul pe Y (orientare)
-      const ang = Math.atan2(z2-z1, x2-x1);
-      wall.rotation.order = 'YXZ';
+      // Orientare
+      const ang = Math.atan2(y2-y1, x2-x1);
       wall.rotation.y = -ang;
-      wall.rotation.x = 0; // deja vertical dupa fix matrice render
 
       meshGroup.add(wall);
     }
@@ -6590,9 +6678,7 @@ function aedis3DBuild(parcelRing, params){
     });
 
     const mesh = new THREE.Mesh(geo, mat);
-    // rotation.x = -PI/2: shape XY -> planul XZ al lumii (Y=sus in Three.js)
-    // Cu +PI/2 shape-ul ar fi rasturnat sub sol; -PI/2 il pune corect la inaltimea h
-    mesh.rotation.x = -Math.PI / 2;
+    mesh.rotation.x = Math.PI / 2;
     mesh.position.y = h;
     return mesh;
   }
@@ -6756,19 +6842,17 @@ function aedis3DCreateLayer(parcelRing, params){
     },
 
     render(gl, matrix){
-      // Mapbox GL JS v3 — transform corect pentru Three.js
-      // BUGFIX: scale(-scale) pe Y cauza mesh inversat/deformat in GL v3
+      // Calculam pozitia geografica -> coordonate Mapbox
       const mercCenter = mapboxgl.MercatorCoordinate.fromLngLat(
         {lng: cx, lat: cy}, 0
       );
       const scale = mercCenter.meterInMercatorCoordinateUnits();
 
+      // Matrix de transformare Three.js <- Mapbox
       const m = new THREE.Matrix4().fromArray(matrix);
-      // Mapbox GL v3 foloseste sistem Y-up in spatiul mercator
-      // Nu negam Y — negarea era fix pentru v1/v2, in v3 produce inversare
       const l = new THREE.Matrix4()
         .makeTranslation(mercCenter.x, mercCenter.y, mercCenter.z)
-        .scale(new THREE.Vector3(scale, scale, scale));
+        .scale(new THREE.Vector3(scale, -scale, scale));
 
       camera.projectionMatrix = m.multiply(l);
 
@@ -6882,90 +6966,79 @@ const FAL_AI = {
   rendering: false,
 };
 
-// Prompt generator din datele AEDIS — include context real urban
+// Prompt generator din datele AEDIS
 function aedisPromptBuild(){
   const ap = S.parcels[S.activeParcel??0];
   const fn = AEDIS_FN[AEDIS.fn] || AEDIS_FN.rezidential_colectiv;
-  const stil = AEDIS_STIL[AEDIS.stil] || AEDIS_STIL.modern;
   const niv = AEDIS.corpuri[0]?.niv || 4;
   const hNiv = AEDIS.corpuri[0]?.hNiv || 3.0;
   const hTot = (AEDIS.parterDiferit?(AEDIS_FN[AEDIS.fn]?.hParter||4.5):hNiv)+(niv-1)*hNiv;
   const uat = ap?.uat || 'Iași';
   const utr = ap?.utr || S.utr || '';
   const area = ap?.area ? Math.round(ap.area) : 0;
-  const nrcad = ap?.nrcad || '';
 
-  // Context urban din clădirile vecine analizate
-  let ctxDesc = '';
+  // Context real din cladirile vecine
+  let ctxStr = '';
   if(S.ctx?.features?.length){
-    const hArr = S.ctx.features.map(f=>f.properties?.h||0).filter(h=>h>0);
-    if(hArr.length){
-      const hMed = Math.round(hArr.reduce((s,h)=>s+h,0)/hArr.length);
-      const hMax = Math.round(Math.max(...hArr));
-      ctxDesc = `surrounded by existing buildings averaging ${hMed}m height (max ${hMax}m), `;
+    const hs = S.ctx.features.map(f=>f.properties?.h||0).filter(h=>h>2);
+    if(hs.length){
+      const hMed = Math.round(hs.reduce((s,h)=>s+h,0)/hs.length);
+      const hMax = Math.round(Math.max(...hs));
+      ctxStr = `neighboring buildings ${hMed}m average height max ${hMax}m, `;
     }
   }
 
-  // Tip acoperiș în engleză
   const acop = {
-    terasa_plata: 'flat roof with parapet',
-    terasa_circulabila: 'accessible green roof terrace with vegetation',
-    sarpanta: 'pitched gabled roof with tiles',
-    mansarda: 'mansard roof with dormers',
-    combinat: 'flat roof with technical penthouse',
-  }[AEDIS.tipAcoperis] || 'flat roof';
+    terasa_plata:'flat roof with parapet wall',
+    terasa_circulabila:'accessible rooftop terrace with greenery',
+    sarpanta:'pitched tile roof',
+    mansarda:'mansard roof with attic windows',
+    combinat:'flat roof with penthouse',
+  }[AEDIS.tipAcoperis]||'flat roof';
 
-  // Stil arhitectural detaliat
   const stilDesc = {
-    modern: 'modern contemporary architecture, large glass curtain wall facade, aluminum frames, clean horizontal lines, recessed top floor',
-    inovator: 'innovative parametric architecture, dynamic angular volumes, mixed glass and metal panels, bold cantilever',
-    clasic: 'neoclassical architecture, stone-clad facade, cornice details, arched windows, warm limestone tones, Romanian interwar style',
-    minimalist: 'minimalist architecture, pure white smooth plaster, minimal openings, no ornamentation, strong geometric volumes',
-    industrial: 'industrial loft architecture, corten weathered steel panels, exposed concrete base, large industrial windows',
-    adaptat_context: 'contextual architecture, brick and plaster facade matching neighboring buildings, traditional Romanian urban scale',
-  }[AEDIS.stil] || 'modern architecture';
+    modern:'contemporary modernist glass curtain wall facade, aluminum frames, recessed upper floor',
+    inovator:'parametric innovative architecture, angular bold volumes, mixed glass and corten panels',
+    clasic:'neoclassical Romanian style, limestone facade, cornice details, arched ground floor, warm beige stone',
+    minimalist:'minimalist pure white smooth render, minimal fenestration, no ornamentation, cubic volumes',
+    industrial:'industrial loft, weathered corten steel panels, exposed concrete base, large pivot windows',
+    adaptat_context:'contextual brick and plaster mixed facade, matching neighborhood scale and rhythm',
+  }[AEDIS.stil]||'modern glass facade';
 
-  // Funcțiune în engleză
   const fnDesc = {
-    rezidential_colectiv: 'residential apartment building',
-    locuinta_individuala: 'individual family house',
-    birouri: 'office building',
-    comercial: 'commercial retail building',
-    hotelier: 'hotel building',
-    mixt: 'mixed-use building with ground floor commercial',
-    industrial: 'light industrial building',
-    institutie: 'public institutional building',
-  }[AEDIS.fn] || 'building';
+    rezidential_colectiv:'residential apartment building',
+    locuinta_individuala:'family villa house',
+    birouri:'office building',
+    comercial:'commercial retail building',
+    hotelier:'hotel building',
+    mixt:'mixed-use building',
+    industrial:'light industrial building',
+    institutie:'public institutional building',
+  }[AEDIS.fn]||'building';
 
-  // Parter diferit
-  const parterDesc = AEDIS.parterDiferit
-    ? 'ground floor with large commercial glazed storefronts and continuous arcade, '
+  const parterStr = AEDIS.parterDiferit
+    ? 'ground floor with continuous commercial glazed storefronts, '
     : '';
 
-  // Locație reală
-  const locDesc = utr
-    ? `in ${uat} Romania, UTR zone ${utr}, `
-    : `in ${uat} Romania, `;
+  const locStr = utr
+    ? `Iași Romania UTR ${utr} zone, `
+    : 'Iași Romania, ';
 
-  // Dimensiuni reale
-  const dimDesc = area > 0
-    ? `${area}sqm plot, ${niv}-story, ${hTot.toFixed(0)}m tall, `
-    : `${niv}-story, ${hTot.toFixed(0)}m tall, `;
+  const dimStr = area>0 ? `${area}sqm plot footprint, ` : '';
 
   return [
-    'Photorealistic architectural exterior render,',
-    fnDesc + ',',
-    dimDesc,
-    stilDesc + ',',
-    acop + ',',
-    parterDesc,
-    ctxDesc,
-    locDesc,
-    'street-level perspective view, golden hour warm light, soft long shadows,',
-    'mature street trees with full foliage, sidewalk with pedestrians,',
-    'parked cars on street, European urban street, high quality render,',
-    'architectural visualization, photorealistic, 8K, sharp focus, no watermark'
-  ].join(' ');
+    `Photorealistic architectural render, ${fnDesc},`,
+    `${niv} floors ${hTot.toFixed(0)}m tall,`,
+    dimStr,
+    `${stilDesc},`,
+    `${acop},`,
+    parterStr,
+    ctxStr,
+    locStr,
+    'street-level perspective view, golden hour warm sunlight, long shadows,',
+    'sidewalk with pedestrians, parked cars, mature trees full foliage,',
+    'European urban street, high detail, photorealistic, 8K, sharp focus',
+  ].filter(Boolean).join(' ');
 }
 
 // Screenshot din Mapbox canvas
@@ -7011,33 +7084,34 @@ async function aedisAIRender(){
 
   aedisScreenshot().then(screenshot=>{
     const prompt = aedisPromptBuild();
-    ss('🎨 AEDIS AI Render: Se trimite la Fal.ai...');
+    const useHQ = FAL_AI.useHQ || false;
 
-    // Alegem modelul: schnell (preview rapid) sau flux-pro (calitate)
-    const useProModel = FAL_AI.useProModel || false;
-    const modelEndpoint = useProModel
+    ss('🎨 AEDIS AI Render: Se trimite la Fal.ai (' + (useHQ?'Pro ~15s':'Schnell ~3s') + ')...');
+
+    // Flux/schnell — rapid, suporta image_url ca referinta vizuala
+    // Flux-pro/v1.1 — calitate ridicata, image-to-image cu strength
+    const endpoint = useHQ
       ? 'https://fal.run/fal-ai/flux-pro/v1.1'
       : 'https://fal.run/fal-ai/flux/schnell';
 
-    // Payload de baza
+    // Payload cu screenshot harta ca referinta de context vizual
+    // strength 0.7 = 70% AI generation, 30% referinta screenshot
+    // Asta pastreaza strada, copacii, proportiile, contextul real
     const payload = {
-      prompt: prompt,
+      prompt,
       image_size: 'landscape_16_9',
-      num_inference_steps: useProModel ? 28 : 4,
+      num_inference_steps: useHQ ? 28 : 4,
       num_images: 1,
       enable_safety_checker: true,
-      guidance_scale: useProModel ? 3.5 : 1.0,
     };
 
-    // Image-to-image: trimitem screenshot-ul hărtii ca referință de context
-    // Fal.ai flux/schnell suporta image_url ca referinta vizuala (strength 0.55)
-    // Asta ajuta modelul sa pastreze strada, copacii, cladirile vecine reale
-    if(screenshot && screenshot.length > 100){
+    // Adaugam screenshot ca referinta vizuala daca e disponibil
+    if(screenshot && screenshot.startsWith('data:image')){
       payload.image_url = screenshot;
-      payload.strength = 0.65; // 65% AI, 35% context real din screenshot
+      payload.strength = 0.72; // 72% creatie noua, 28% context din harta
     }
 
-    fetch(modelEndpoint, {
+    fetch(endpoint, {
       method: 'POST',
       headers: {
         'Authorization': 'Key ' + FAL_AI.apiKey,
@@ -7052,10 +7126,14 @@ async function aedisAIRender(){
     .then(data=>{
       const imgUrl = data?.images?.[0]?.url;
       if(!imgUrl) throw new Error('Nu s-a primit URL imagine de la Fal.ai');
-      FAL_AI.lastRender = { url: imgUrl, prompt, timestamp: new Date().toISOString(), model: useProModel?'flux-pro':'schnell' };
+      FAL_AI.lastRender = {
+        url: imgUrl, prompt,
+        timestamp: new Date().toISOString(),
+        model: useHQ ? 'flux-pro' : 'schnell'
+      };
       aedisShowRender(imgUrl);
-      aedisRender(); // actualizam tab Analiza cu noua randare
-      ss('✅ AEDIS AI Render: ' + (useProModel?'Calitate înaltă':'Preview rapid') + ' completă!');
+      aedisRender();
+      ss('✅ AEDIS AI Render completă! (' + (useHQ?'Pro':'Preview') + ')');
     })
     .catch(err=>{
       console.error('AI Render error:', err);
