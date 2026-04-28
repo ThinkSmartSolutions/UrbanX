@@ -492,8 +492,8 @@ canvas#c2d{width:100%;height:100%;display:block}
   <div id="panel-tabs">
     <button class="ptab active" data-t="search">🔍 Căutare</button>
     <button class="ptab" data-t="utr">🗺 UTR</button>
-    <button class="ptab" data-t="indicatori">
-    <button class="ptab" data-t="proiect">🔍 Analiză</button>
+    <button class="ptab" data-t="indicatori">📊 Indicatori</button>
+    <button class="ptab" data-t="proiect">🏗 Analiză</button>
     <button class="ptab" data-t="multi">🔲 Multi</button>
     <button class="ptab" data-t="scen">📅 Scen.</button>
   </div>
@@ -5797,16 +5797,7 @@ function aedisSetFalKey(){
   }
 }
 
-function aedisResetAndRender(){
-  FAL_AI.apiKey='';
-  aedisCloseRenderOverlay();
-  aedisAIRender();
-}
-
-function aedisCloseRenderOverlay(){
-  var o=document.getElementById('aedis-render-overlay');
-  if(o) o.style.display='none';
-}
+// aedisResetAndRender și aedisCloseRenderOverlay — definite mai jos (versiunea unică)
 
 function aedis3DRemove(){
   try{
@@ -6967,28 +6958,7 @@ async function aedisAIRender(){
   });
 }
 
-function aedisShowRender(imgUrl){
-  let overlay = document.getElementById('aedis-render-overlay');
-  if(!overlay){
-    overlay = document.createElement('div');
-    overlay.id = 'aedis-render-overlay';
-    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:20px';
-    document.body.appendChild(overlay);
-  }
-  const ts = FAL_AI.lastRender ? new Date(FAL_AI.lastRender.timestamp).toLocaleString('ro') : '';
-  overlay.innerHTML =
-    '<div style="position:relative;max-width:92vw;border-radius:12px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.8)">' +
-    '<img src="' + imgUrl + '" style="display:block;max-width:100%;max-height:76vh" alt="AEDIS AI Render" />' +
-    '<div style="position:absolute;top:12px;right:12px;display:flex;gap:8px">' +
-    '<a href="' + imgUrl + '" download="aedis-ai-render.jpg" style="padding:8px 14px;background:#d4af37;color:#000;border-radius:8px;text-decoration:none;font-size:12px;font-weight:700;display:flex;align-items:center;gap:4px">⬇ Descarcă</a>' +
-    '<button onclick="aedisCloseRenderOverlay()" style="padding:8px 14px;background:rgba(239,68,68,.9);color:#fff;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:700">✕ Închide</button>' +
-    '</div>' +
-    '</div>' +
-    '<div style="color:#64748b;font-size:10px;text-align:center;max-width:600px">' +
-    '🎨 AEDIS AI Render · Fal.ai FLUX.1 · ' + ts +
-    '</div>';
-  overlay.style.display = 'flex';
-}
+// aedisShowRender — definit mai jos (versiunea unificată)
 
 function aedisShowRenderError(errMsg, prompt){
   let overlay = document.getElementById('aedis-render-overlay');
@@ -7044,24 +7014,56 @@ function aedisShowRenderError(errMsg, prompt){
 }
 
 
+// ── aedisShowRender — versiunea unificată cu download BLOB (fix cross-origin) ──
 function aedisShowRender(imgUrl){
-  // Cream un overlay in AEDIS modal
   let overlay = document.getElementById('aedis-render-overlay');
   if(!overlay){
     overlay = document.createElement('div');
     overlay.id = 'aedis-render-overlay';
-    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.9);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:20px';
     document.body.appendChild(overlay);
   }
-  overlay.innerHTML = 
-    '<div style="position:relative;max-width:90vw;max-height:80vh">' +
-    '<img src="' + imgUrl + '" style="max-width:100%;max-height:80vh;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.8)" />' +
+  const ts = FAL_AI.lastRender ? new Date(FAL_AI.lastRender.timestamp).toLocaleString('ro') : new Date().toLocaleString('ro');
+  const nrcad = (S.parcels[S.activeParcel??0]?.nrcad||'parcela').replace(/[^a-zA-Z0-9_]/g,'_');
+  const filename = 'AEDIS_render_' + nrcad + '_' + Date.now() + '.jpg';
+
+  overlay.innerHTML =
+    '<div style="position:relative;max-width:92vw;border-radius:12px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.8)">' +
+    '<img id="aedis-render-img" src="' + imgUrl + '" style="display:block;max-width:100%;max-height:76vh" alt="AEDIS AI Render" />' +
     '<div style="position:absolute;top:12px;right:12px;display:flex;gap:8px">' +
-    '<a href="' + imgUrl + '" download="aedis-render.jpg" style="padding:8px 14px;background:#d4af37;color:#000;border-radius:8px;text-decoration:none;font-size:12px;font-weight:700">⬇ Descarcă</a>' +
-    '<button onclick="aedisCloseRenderOverlay()" style="padding:8px 14px;background:#ef4444;color:#fff;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:700">✕ Închide</button>' +
-    '</div></div>' +
-    '<div style="color:#64748b;font-size:11px;max-width:600px;text-align:center">AI Render generat cu Fal.ai FLUX.1 · ' + new Date().toLocaleString('ro') + '</div>';
+    '<button onclick="aedisDownloadRender()" style="padding:8px 14px;background:#d4af37;color:#000;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:700;display:flex;align-items:center;gap:4px">⬇ Descarcă JPG</button>' +
+    '<button onclick="aedisCloseRenderOverlay()" style="padding:8px 14px;background:rgba(239,68,68,.9);color:#fff;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:700">✕ Închide</button>' +
+    '</div>' +
+    '</div>' +
+    '<div style="color:#64748b;font-size:10px;text-align:center;max-width:600px">' +
+    '🎨 AEDIS AI Render · Fal.ai FLUX.1 · ' + ts +
+    '</div>';
   overlay.style.display = 'flex';
+  // salvam url si filename pentru download
+  overlay._imgUrl = imgUrl;
+  overlay._filename = filename;
+}
+
+// Download render prin fetch→blob (funcționează cross-origin, nu deschide tab nou)
+function aedisDownloadRender(){
+  const overlay = document.getElementById('aedis-render-overlay');
+  const imgUrl = overlay?._imgUrl || FAL_AI.lastRender?.url;
+  if(!imgUrl){ ss('⚠️ Nu există render de descărcat.'); return; }
+  const nrcad = (S.parcels[S.activeParcel??0]?.nrcad||'parcela').replace(/[^a-zA-Z0-9_]/g,'_');
+  const filename = overlay?._filename || ('AEDIS_render_' + nrcad + '_' + Date.now() + '.jpg');
+  ss('⏳ Se descarcă randarea...');
+  fetch(imgUrl)
+    .then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.blob(); })
+    .then(blob=>{
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a);
+      setTimeout(()=>URL.revokeObjectURL(url), 8000);
+      ss('✅ Randare descărcată: ' + filename);
+    })
+    .catch(err=>{ ss('❌ Eroare download: ' + err.message); });
 }
 
 
