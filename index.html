@@ -2337,10 +2337,16 @@ function updateDistanceLines(){
           const pf2={type:'Feature',geometry:p.geo.geometry,properties:{}};
           if(turf.booleanPointInPolygon(ctxCtr,pf2)) return false;
         }
-        // Adiacenta = in buffer de 3m al parcelei combinate
-        const buf = turf.buffer(combinedParcel, 3, {units:'meters'});
-        const ring = ctx.geometry?.coordinates?.[0]||[];
-        return ring.some(pt=>turf.booleanPointInPolygon(turf.point(pt),buf));
+        // Distanță față de parcelă — includem clădirile până la 80m
+        // (acoperă strada opusă, nu doar vecinii lipiti)
+        const ctxCtrDist = turf.distance(
+          turf.centerOfMass(combinedParcel),
+          ctxCtr,
+          {units:'meters'}
+        );
+        if(ctxCtrDist > 80) return false;
+        // Verificăm că nu e chiar pe parcela noastră (deja exclus mai sus)
+        return true;
       }catch(e){ return false; }
     });
 
@@ -2349,7 +2355,7 @@ function updateDistanceLines(){
       myBldArr.forEach((myBld,bi)=>{
         try{
           const {pt1,pt2,dist} = minDistBetweenPolygons(myBld,ctx);
-          if(!pt1||!pt2||dist>80) return;
+          if(!pt1||!pt2||dist>120) return; // distanță max 120m față de vecini
           const minDist = S.vol.multiVolDist||6;
           feats.push({
             type:'Feature',
@@ -2739,31 +2745,47 @@ function _ctxFromMapbox(center, radiusM){
   const seen = new Set();
   const centerPt = turf.point(center);
 
-  // Layere posibile în funcție de stilul activ
-  // ctx-3d = mereu prezent (layerul nostru GeoJSON cu clădiri OSM deja încărcate)
-  // building, building-extrusion = în stilul streets/satellite Mapbox
-  const possibleLayers = ['ctx-3d', 'building', 'building-extrusion'];
+  // Layere posibile: ctx-3d (al nostru), building/building-extrusion (Mapbox native)
+  const possibleLayers = ['ctx-3d', 'building', 'building-extrusion', 'building-shadow'];
   const availableLayers = possibleLayers.filter(id=>{
     try{ return !!map.getLayer(id); }catch(e){ return false; }
   });
 
-  if(!availableLayers.length) return feats;
+  // Dacă ctx-3d e singurul disponibil dar e gol, nu are sens să-l interogăm
+  // Verificăm dacă are features
+  let ctxHasData = false;
+  try{
+    const ctxData = map.getSource('ctx-src')?._data;
+    ctxHasData = (ctxData?.features?.length||0) > 0;
+  }catch(e){}
+
+  // Layere de interogat: dacă ctx-3d e gol, excludem
+  const queryLayers = availableLayers.filter(id=>
+    id !== 'ctx-3d' || ctxHasData
+  );
+
+  if(!queryLayers.length){
+    console.warn('_ctxFromMapbox: niciun layer disponibil');
+    return feats;
+  }
 
   try{
-    const rendered = map.queryRenderedFeatures(undefined, {layers: availableLayers});
+    // Interogăm tot viewport-ul (undefined = tot ecranul)
+    const rendered = map.queryRenderedFeatures(undefined, {layers: queryLayers});
+
     for(const f of rendered){
       if(!f.geometry) continue;
       const geom = f.geometry.type==='MultiPolygon'
         ? {type:'Polygon', coordinates:f.geometry.coordinates[0]}
         : f.geometry;
       if(geom.type!=='Polygon') continue;
+      if(geom.coordinates[0]?.length < 3) continue;
 
       try{
         const ctr = turf.centerOfMass({type:'Feature',geometry:geom,properties:{}});
         const dist = turf.distance(centerPt, ctr, {units:'meters'});
-        if(dist > radiusM + 50) continue;
+        if(dist > radiusM + 100) continue; // puțin mai larg
 
-        // Deduplicare
         const key = ctr.geometry.coordinates.map(v=>v.toFixed(4)).join(',');
         if(seen.has(key)) continue;
         seen.add(key);
@@ -4009,6 +4031,12 @@ async function genVol(){
   ss(`🏗 Volum 3D generat!`);
   renderTab('volume');
   if(window.innerWidth<=840)$('mob-sheet')?.classList.remove('open');
+  // Distanțe față de vecini — dacă contextul lipsește, îl încărcăm mai întâi
+  if(!S.ctx?.features?.length){
+    loadContext().then(()=>{ setTimeout(updateDistanceLines, 300); });
+  } else {
+    setTimeout(updateDistanceLines, 300);
+  }
 }
 
 function clearVol(){
@@ -6957,6 +6985,62 @@ function aedis3DRemove(){
 
 
 
+// Export OBJ simplu din volumul fill-extrusion curent
+function _exportVolOBJ(){
+  const ap = S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry){ ss('⚠️ Selectați o parcelă mai întâi.'); return; }
+  const feats = S.vol._lastFeats || [];
+  if(!feats.length){ ss('⚠️ Generați mai întâi un volum AEDIS.'); return; }
+
+  const nrcad = ap.nrcad||'parcela';
+  const fn = AEDIS.fn||'cladire';
+  const niv = AEDIS.corpuri[0]?.niv||4;
+  const hTot = ((AEDIS.corpuri[0]?.niv||4)*(AEDIS.corpuri[0]?.hNiv||3.0)).toFixed(1);
+
+  // Luăm footprint din primul feature (parter)
+  const parter = feats.find(f=>f.properties?.floor===0) || feats[0];
+  if(!parter?.geometry) { ss('⚠️ Geometrie volum indisponibilă.'); return; }
+
+  const ring = parter.geometry.coordinates[0];
+  const cx = ring.reduce((s,c)=>s+c[0],0)/ring.length;
+  const cy = ring.reduce((s,c)=>s+c[1],0)/ring.length;
+  const mLng = 111320*Math.cos(cy*Math.PI/180);
+  const mLat = 111320;
+  const pts = ring.slice(0,-1).map(([lng,lat])=>[
+    ((lng-cx)*mLng).toFixed(3),
+    ((lat-cy)*mLat).toFixed(3)
+  ]);
+
+  let obj = `# AEDIS Export OBJ\n# Parcela: ${nrcad} · ${fn} · ${niv} niv · H=${hTot}m\n`;
+  obj += `# Generat: ${new Date().toLocaleString('ro-RO')}\n\n`;
+  obj += `mtllib aedis_${nrcad}.mtl\no Volum_${nrcad}\n\n`;
+
+  // Vertices bottom
+  pts.forEach(([x,y])=>{ obj += `v ${x} 0.000 ${y}\n`; });
+  // Vertices top
+  pts.forEach(([x,y])=>{ obj += `v ${x} ${hTot} ${y}\n`; });
+
+  const n = pts.length;
+  obj += `\nusemtl material_0\n`;
+  // Bottom face
+  obj += `f`; for(let i=n;i>=1;i--) obj += ` ${i}`; obj += `\n`;
+  // Top face
+  obj += `f`; for(let i=1;i<=n;i++) obj += ` ${n+i}`; obj += `\n`;
+  // Side walls
+  for(let i=0;i<n;i++){
+    const a=i+1, b=((i+1)%n)+1, c=b+n, d=a+n;
+    obj += `f ${a} ${b} ${c} ${d}\n`;
+  }
+
+  const blob = new Blob([obj],{type:'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download=`AEDIS_${nrcad}_${fn}_${niv}niv.obj`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),5000);
+  ss(`✅ Exportat: AEDIS_${nrcad}_${fn}_${niv}niv.obj`);
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // AEDIS AI RENDER — Fal.ai FLUX.1 Integration
 // Screenshot Three.js/Mapbox → AI → Randare fotorealistă
@@ -7199,8 +7283,10 @@ function aedisDownloadRender(){
 // ═══════════════════════════════════════════════════════════════════════════
 
 async function aedis3DExportGLTF(){
+  // Exportăm din vol-src (fill-extrusion) dacă Three.js nu e activ
   if(!AEDIS3D.active || !AEDIS3D.scene){
-    ss('⚠️ Generați mai întâi volumul AEDIS 3D pentru export.');
+    // Fallback: export OBJ simplu din geometria AEDIS curentă
+    _exportVolOBJ();
     return;
   }
   if(!window.THREE){ ss('⚠️ Three.js nu este încărcat.'); return; }
