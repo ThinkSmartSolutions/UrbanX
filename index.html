@@ -2,12 +2,9 @@
 <html lang="ro">
 <head>
 <meta charset="utf-8"/>
-<m
-
-eta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
 <title>UrbanX – PUG Iași</title>
 <link href="https://api.mapbox.com/mapbox-gl-js/v3.11.0/mapbox-gl.css" rel="stylesheet"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;font-family:'Segoe UI',Arial,sans-serif;background:#0b1220;color:#e2e8f0;overflow:hidden}
@@ -761,7 +758,7 @@ const UTR_COLORS={
   CB1:'#ddd6fe',CB2:'#c4b5fd',CB3:'#a78bfa',CB4:'#8b5cf6',CB5:'#7c3aed',CB6:'#6d28d9',CB7:'#4c1d95',
   D1:'#f9a8d4',EP6:'#ec4899',ET3:'#fbcfe8',
   TA:'#6b7280',TF:'#9ca3af',TP:'#4b5563',G1:'#d1d5db',G2:'#9ca3af',
-  P:'#4ade80',P1:'#bbf7d0',P1A:'#86efac',P1B:'#4ade80','P1A,P1B':'#34d399',P2:'#34d399',P3:'#6ee7b7',P4:'#fde68a',P5:'#fcd34d',P:'#4ade80',PP:'#064e3b',
+  P:'#4ade80',P1:'#bbf7d0',P1A:'#86efac',P1B:'#4ade80','P1A,P1B':'#34d399',P2:'#34d399',P3:'#6ee7b7',P4:'#fde68a',P5:'#fcd34d',PP:'#064e3b',
   AA:'#fef08a',S:'#fef9c3',
   AI1:'#fca5a5',AI2A:'#f87171',AI2B:'#ef4444',AI2C:'#dc2626',AI2D:'#b91c1c',AI3:'#991b1b',AI4:'#7f1d1d',AI4A:'#7f1d1d',AI5:'#450a0a',AI6:'#3b0a0a',
   'G/P9':'#d1fae5',T1B:'#374151'
@@ -820,7 +817,9 @@ const ARCH_PALETTES = {
 };
 
 function getArchPalette(){
-  return ARCH_PALETTES[S.vol.archStyle||'modern'] || ARCH_PALETTES.modern;
+  // Sync with AEDIS.stil if AEDIS is active, otherwise use S.vol.archStyle
+  const stilKey = (AEDIS?.open && AEDIS.stil) ? AEDIS.stil : (S.vol.archStyle||'modern');
+  return ARCH_PALETTES[stilKey] || ARCH_PALETTES.modern;
 }
 
 const FLOOR_COLORS=[
@@ -873,44 +872,29 @@ map.addControl(new mapboxgl.NavigationControl(),'top-left');
 // 2. Nominatim reverse geocoding -> UAT real (async)
 // 3. Daca nu e in PUG si Nominatim nu raspunde -> "In afara PUG Iasi"
 
-// Versiunea sincrona (folosita pentru UI instant) - doar pe baza UTR
-function detectZoneType(lat, lng, utr){
-  // UTR valid din PUG = oricare UTR nenul si nevid, DIFERIT de EXT/EXT_COM
-  // NU verificam daca e in REGULI (REGULI e incompleta)
-  // Verificam doar ca UTR-ul vine din PUG spatial lookup
+// Helper comun: verifică dacă UTR-ul provine din PUG
+function _checkPUGZone(utr){
   const utrClean = resolveUTR(utr||'');
-  const isFromPUG = utrClean && utrClean !== '—' && utrClean !== '' 
+  const isFromPUG = utrClean && utrClean !== '—' && utrClean !== ''
                     && utrClean !== 'EXT' && utrClean !== 'EXT_COM'
                     && utrClean !== '?' && utrClean !== '??';
+  return {utrClean, isFromPUG};
+}
+
+// Versiunea sincrona (folosita pentru UI instant) - doar pe baza UTR
+function detectZoneType(lat, lng, utr){
+  const {utrClean, isFromPUG} = _checkPUGZone(utr);
   if(isFromPUG){
-    return {
-      type:'intravilan',
-      utr: utrClean,
-      label:'🏙 Intravilan Municipiul Iași — UTR ' + utrClean,
-      color:'#34d399'
-    };
+    return {type:'intravilan', utr:utrClean, label:'🏙 Intravilan Municipiul Iași — UTR '+utrClean, color:'#34d399'};
   }
-  return {
-    type:'necunoscut',
-    utr: utrClean||'EXT_COM',
-    label:'📍 În afara PUG Municipiul Iași — se verifică UAT-ul…',
-    color:'#94a3b8'
-  };
+  return {type:'necunoscut', utr:utrClean||'EXT_COM', label:'📍 În afara PUG Municipiul Iași — se verifică UAT-ul…', color:'#94a3b8'};
 }
 
 // Versiunea async - interogheaza Nominatim pentru UAT real
 async function detectZoneTypeAsync(lat, lng, utr){
-  // Intai verificam PUG-ul
-  const utrCl = resolveUTR(utr||'');
-  const fromPUG = utrCl && utrCl!=='—' && utrCl!=='' && utrCl!=='EXT' && utrCl!=='EXT_COM' && utrCl!=='?' && utrCl!=='??';
+  const {utrClean: utrCl, isFromPUG: fromPUG} = _checkPUGZone(utr);
   if(fromPUG){
-    return {
-      type:'intravilan',
-      utr: utrCl,
-      label:'🏙 Intravilan Municipiul Iași — UTR ' + utrCl,
-      color:'#34d399',
-      uat:'Municipiul Iași'
-    };
+    return {type:'intravilan', utr:utrCl, label:'🏙 Intravilan Municipiul Iași — UTR '+utrCl, color:'#34d399', uat:'Municipiul Iași'};
   }
   
   // Nu e in PUG Iasi - interogam Nominatim pentru UAT real
@@ -1321,7 +1305,7 @@ map.on('load',()=>{addLayers();loadData();});
 map.on('error',(e)=>{console.error('Mapbox error:',e);ss('⚠️ Eroare hartă: '+e.error?.message);});
 // Fallback: dacă load nu s-a apelat în 10s, încercăm oricum
 setTimeout(()=>{
-  if(!S.cadData){
+  if(!S.pug && !S._dataLoading){
     console.warn('Map load timeout - trying anyway');
     try{addLayers();}catch(e){}
     loadData();
@@ -1532,13 +1516,7 @@ function buildFrontLayer(parcelGeo, fp, params, bearing){
         }
       }
       
-      // Stocam temporar fara rol - il determinam dupa ce avem toate laturile
-      const dLngC2 = (midX - cx) * Math.cos(cy * Math.PI/180);
-      const dLatC2 = midY - cy;
-      const dFromCenter2 = (Math.atan2(dLngC2, dLatC2) * 180/Math.PI + 360) % 360;
-      let diff2 = ((dFromCenter2 - brg) + 360) % 360;
-      if(diff2 > 180) diff2 = 360 - diff2;
-      sides.push({p1, p2, midX, midY, sideBrg, lenM, diff:diff2});
+      sides.push({p1, p2, midX, midY, sideBrg, lenM, diff});
     }
     
     // Parcela normala sau de colt: front = toate laturile cu diff < 70°
@@ -2328,7 +2306,8 @@ function updateDistanceLines(){
   }
 
   if(ctxFeats.length){
-    const adjacentCtx = ctxFeats.filter(ctx=>{
+    const parcelCenter = turf.centerOfMass(combinedParcel);
+    const adjacentCtxAll = ctxFeats.filter(ctx=>{
       try{
         const ctxCtr = turf.centerOfMass(ctx);
         // Excludem cladirile care sunt pe oricare din parcelele noastre
@@ -2337,18 +2316,19 @@ function updateDistanceLines(){
           const pf2={type:'Feature',geometry:p.geo.geometry,properties:{}};
           if(turf.booleanPointInPolygon(ctxCtr,pf2)) return false;
         }
-        // Distanță față de parcelă — includem clădirile până la 80m
-        // (acoperă strada opusă, nu doar vecinii lipiti)
-        const ctxCtrDist = turf.distance(
-          turf.centerOfMass(combinedParcel),
-          ctxCtr,
-          {units:'meters'}
-        );
-        if(ctxCtrDist > 80) return false;
-        // Verificăm că nu e chiar pe parcela noastră (deja exclus mai sus)
+        // Distanță față de parcelă — includem clădirile până la 60m
+        const ctxCtrDist = turf.distance(parcelCenter, ctxCtr, {units:'meters'});
+        if(ctxCtrDist > 60) return false;
         return true;
       }catch(e){ return false; }
     });
+    // Limităm la max 6 clădiri cele mai apropiate pentru un UI curat
+    const adjacentCtx = adjacentCtxAll
+      .map(ctx=>{ try{ return {ctx, d:turf.distance(parcelCenter,turf.centerOfMass(ctx),{units:'meters'})}; }catch(e){return null;} })
+      .filter(Boolean)
+      .sort((a,b)=>a.d-b.d)
+      .slice(0,6)
+      .map(x=>x.ctx);
 
     // Pentru fiecare cladire adiacenta, calculam distanta minima fata de FIECARE volum generat
     adjacentCtx.forEach(ctx=>{
@@ -4022,6 +4002,7 @@ async function genVol(){
   }
   
   const feats = buildVolume();
+  S.vol._lastFeats = feats;
   setSource('vol-src',{type:'FeatureCollection',features:feats});
   S.vol.genDone = true;
   set3D(60,-20);
@@ -4171,6 +4152,7 @@ function centerOnParcel(){
 
 function genVolAll(){
   const feats=buildVolume();
+  S.vol._lastFeats=feats;
   setSource('vol-src',{type:'FeatureCollection',features:feats});
   S.vol.genDone=true;
   set3D(60,-20);
@@ -4187,6 +4169,7 @@ function genVolEach(){
     feats.push(...pFeats.map(f=>({...f,properties:{...f.properties,parcelIdx:pi}})));
     S.vol.fn=prevFn;
   });
+  S.vol._lastFeats=feats;
   setSource('vol-src',{type:'FeatureCollection',features:feats});
   S.vol.genDone=true;
   set3D(60,-20);
@@ -4299,7 +4282,7 @@ function detectAndSetBearing(){
   }).catch(()=>ss('⚠️ Eroare la detectare stradă.'));
 }
 
-function setS(btn){ setScenariu(btn.getAttribute('data-s')); }
+function setS(btn){ if(btn?.getAttribute) setScenariu(btn.getAttribute('data-s')); else setScenariu(btn); }
 function setFC(n){ S.vol.frontCount=n; updateMap(); renderTab('proiect'); }
 function toggleMultiVol(){ 
   S.vol.multiVol=!S.vol.multiVol; 
@@ -4432,6 +4415,7 @@ document.querySelectorAll('.mtab').forEach(b=>b.onclick=()=>switchTab(b.dataset.
 
 // ═══ BOOTSTRAP ════════════════════════════════════════════════════════════
 async function loadData(){
+  S._dataLoading=true;
   ss('⏳ Se încarcă PUG…');
   try{
     const r=await fetch('./qGis_pug.iasi.geojson');
@@ -5342,7 +5326,7 @@ async function runExport(){
       pdf.setFontSize(11);pdf.setTextColor(200,210,230);
       pdf.text('Analiză 3 Scenarii de Volumetrie',50,11);
       pdf.setFontSize(8);pdf.setTextColor(150,160,180);
-      pdf.text(`Parcela: ${ap.nrcad||'—'} · UTR: ${ap.utr||'—'} · ${Math.round(m2||0)} m²`,50,17);
+      pdf.text(`Parcela: ${ap.nrcad||'—'} · UTR: ${ap.utr||'—'} · ${Math.round(ap?.area||0)} m²`,50,17);
       await exportVol3(pdf,ap,r,p);
       pdf.save(`UrbanX_3Scenarii_${ap?.nrcad||'raport'}_${dateStr}.pdf`);
 
@@ -5388,8 +5372,7 @@ function addHeader(pdf, title, pg, total){
     pdf.text('pag. '+pg+(total?' / '+total:''),pw-8,11,{align:'right'});}
 }
 
-async function addDataPage(pdf){ addHeader(pdf,'Indicatori',3); }
-async function addMultiPage(pdf){ /* acoperit de exportMulti */ }
+// addDataPage and addMultiPage removed - covered by exportFull/exportMulti
 async function addScenariiPage(pdf){
   const pw=pdf.internal.pageSize.getWidth();
   addHeader(pdf,'Scenarii salvate',1,S.scenarios.length);
@@ -5857,6 +5840,7 @@ function aedisBuild(){
   // Stocam si setam
   S.vol._lastFeats = feats;
   S.vol.genDone = true;
+  S.vol._lastFeats = feats;
   setSource('vol-src',{type:'FeatureCollection',features:feats});
   set3D(60,-20);
 
@@ -5952,9 +5936,13 @@ function aedisSetFalKey(){
 function aedis3DRemove(){
   try{
     if(map.getLayer('aedis-3d-layer')) map.removeLayer('aedis-3d-layer');
-    AEDIS3D.active = false;
-    ss('AEDIS 3D: Volum șters.');
   }catch(e){}
+  if(AEDIS3D.renderer){
+    AEDIS3D.renderer.dispose();
+    AEDIS3D.renderer = null;
+  }
+  AEDIS3D.active = false;
+  ss('AEDIS 3D: Volum șters.');
 }
 
 function aedisGenerateAll(){
@@ -6951,6 +6939,8 @@ function aedis3DGenerate(){
       map.addLayer(layer);
       AEDIS3D.active = true;
       AEDIS3D.params = buildParams;
+      // Afișăm contextul urban existent lângă volumul AEDIS 3D
+      try{ map.setLayoutProperty('ctx-3d','visibility','visible'); }catch(e){}
 
       set3D(55, -20);
       ss('✅ AEDIS 3D: ' + niv + ' niveluri · H=' +
@@ -6975,13 +6965,7 @@ function aedisCloseRenderOverlay(){
   if(o) o.style.display='none';
 }
 
-function aedis3DRemove(){
-  if(AEDIS3D.active){
-    try{ map.removeLayer('aedis-3d-layer'); }catch(e){}
-    AEDIS3D.active = false;
-    ss('AEDIS 3D: Volum șters.');
-  }
-}
+
 
 
 
