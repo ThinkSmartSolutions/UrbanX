@@ -3140,7 +3140,7 @@ function htmlSearch(){
     <input class="inp" id="inp-cad" placeholder="Ex: 127835" inputmode="numeric" autocomplete="off" oninput="onCadInput(this.value);window._mobCadVal=this.value;window._activeSearchCtx=this" onchange="window._mobCadVal=this.value" onkeydown="if(event.key==='Enter'){window._mobCadVal=this.value;doCad()}" onfocus="window._activeSearchCtx=this">
     <div id="cad-range" class="help" style="color:#34d399;margin:4px 0 8px"></div>
     <div class="btn-row">
-      <button class="btn-p" onclick="doCad()" style="flex:1">🔍 Caută</button>
+      <button class="btn-p" onclick="(function(){var e=document.querySelectorAll('#inp-cad');window._mobCadVal=e[e.length-1]?.value||'';doCad()})()" style="flex:1">🔍 Caută</button>
       <button class="btn-s" onclick="doReset()">🗑 Resetează tot</button>
     </div>
     <div class="res-box" id="cad-box"></div>
@@ -6571,13 +6571,13 @@ function aedisGetContent(){
       ⚡ Generează Volum 3D în hartă
     </button>
     <button onclick="aedisOpen3DViewer()" class="aedis-dim-btn" 
-      style="background:rgba(99,102,241,.2);border-color:rgba(139,92,246,.5);color:#a78bfa;font-size:10px;font-weight:700" 
-      title="AEDIS Volumetrie — viewer 3D isometric">🔭 3D</button>
+      style="background:rgba(99,102,241,.2);border-color:rgba(139,92,246,.5);color:#a78bfa;font-size:9px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 8px" 
+      title="Viewer 3D isometric">🔭<span style="font-size:8px">3D</span></button>
     <button onclick="aedisOpenLoisir()" class="aedis-dim-btn"
-      style="background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.4);color:#4ade80;font-size:10px;font-weight:700"
-      title="AEDIS Loisir — amenajare spații publice">🌿</button>
+      style="background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.4);color:#4ade80;font-size:9px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 8px"
+      title="LOISIR — Amenajare spații publice">🌿<span style="font-size:8px">Loisir</span></button>
     <button onclick="aedisAIRender()" class="aedis-dim-btn" style="background:rgba(212,175,55,.15);border-color:rgba(212,175,55,.4);color:#d4af37;font-size:10px" title="AI Render fotorealist (necesită API key Fal.ai)">🎨 AI</button>
-    <button onclick="generateSolarStudy()" class="aedis-dim-btn" style="background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.4);color:#fbbf24;font-size:10px" title="Studiu însorire PDF">☀</button>
+    <button onclick="generateSolarStudy()" class="aedis-dim-btn" style="background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.4);color:#fbbf24;font-size:9px;display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 8px" title="Studiu Însorire PDF">☀<span style="font-size:8px">Însorire</span></button>
     <button onclick="AEDIS.showDim=!AEDIS.showDim;aedisRender()" 
       class="aedis-dim-btn${AEDIS.showDim?' active':''}" title="Etichete dimensionale">📏</button>
     <button onclick="aedisClose()" class="aedis-close-btn">✕</button>
@@ -8520,6 +8520,9 @@ async function generateSolarStudy(){
 // AEDIS 3D VIEWER — Three.js, BufferGeometry corect
 // ═══════════════════════════════════════════════════════════════════════════
 
+var V3D = { r:null, scene:null, cam:null, af:null, ctx:[], aedis:[], texCache:{},
+  th:Math.PI/4, ph:Math.PI/3.2, rad:60, tx:new THREE.Vector3(0,6,0) };
+
 function aedisOpen3DViewer(){
   const ap = S.parcels[S.activeParcel??0];
   if(!ap?.geo?.geometry){ ss('⚠️ Selectați o parcelă mai întâi.'); return; }
@@ -8565,8 +8568,6 @@ function aedisOpen3DViewer(){
 }
 
 // ── State ──────────────────────────────────────────────────────────────────
-var V3D = { r:null, scene:null, cam:null, af:null, ctx:[], aedis:[], texCache:{},
-  th:Math.PI/4, ph:Math.PI/3.2, rad:60, tx:new THREE.Vector3(0,6,0) };
 
 function _v3dCleanup(){
   if(V3D.af) cancelAnimationFrame(V3D.af);
@@ -8727,7 +8728,6 @@ function _v3dBuild(ap){
 
 // ── Generare vizuală străzi în jurul parcelei ─────────────────────────────────
 function _v3dAddStreets(THREE, scene, ring0, toLoc){
-  // Generăm strada din geometria parcelei — fără Overpass, instant
   try{
     const pts = ring0.map(toLoc);
     const xs = pts.map(([x])=>x), zs = pts.map(([,z])=>z);
@@ -8735,50 +8735,39 @@ function _v3dAddStreets(THREE, scene, ring0, toLoc){
     const cz = (Math.min(...zs)+Math.max(...zs))/2;
     const w  = Math.max(...xs)-Math.min(...xs);
     const d  = Math.max(...zs)-Math.min(...zs);
-    const sw = 8, pw = 2; // stradă 8m, trotuar 2m
-    const off = Math.max(w,d)*0.5 + 1;
+    const sw=7, pw=1.8, h=0.10; // stradă 7m, trotuar 1.8m, înălțime prismă
 
     const stMat = new THREE.MeshLambertMaterial({color:'#8898a8'});
     const trMat = new THREE.MeshLambertMaterial({color:'#a8b8c8'});
-    const linMat= new THREE.MeshLambertMaterial({color:'#f0e060'});
+    const linMat= new THREE.MeshLambertMaterial({color:'#e8d860'});
 
-    // Bandă stradă: dreptunghi în world space ca prismă subțire
-    const band = (mat,x,z,bw,bd,y=0.04)=>{
-      // Construim manual 4 colțuri în planul XZ
-      const hw=bw/2, hd=bd/2;
+    const off = Math.max(w,d)*0.5 + 1;
+
+    // Funcție helper: bandă ca prismă (fără rotații, corect în world space)
+    const band=(mat,x,z,bw,bd)=>{
+      const hw=bw/2,hd=bd/2;
       const corners=[[x-hw,z-hd],[x+hw,z-hd],[x+hw,z+hd],[x-hw,z+hd]];
-      const mesh=_v3dPrism(THREE,corners,y,y+0.12,mat);
+      const mesh=_v3dPrism(THREE,corners,0.02,0.02+h,mat);
       if(mesh) scene.add(mesh);
     };
 
-    // Banda stradă pe 4 laturi
-    band(stMat, cx, cz-off-sw/2, w+sw*4, sw);    // față
-    band(stMat, cx, cz+off+sw/2, w+sw*4, sw);    // spate
-    band(stMat, cx-off-sw/2, cz, sw, d+sw*4);    // stânga
-    band(stMat, cx+off+sw/2, cz, sw, d+sw*4);    // dreapta
+    // Stradă pe 4 laturi
+    band(stMat, cx, cz-off-sw/2, w+sw*4, sw);
+    band(stMat, cx, cz+off+sw/2, w+sw*4, sw);
+    band(stMat, cx-off-sw/2, cz, sw, d+sw*4);
+    band(stMat, cx+off+sw/2, cz, sw, d+sw*4);
 
     // Trotuare
-    band(trMat, cx, cz-off-sw-pw/2, w+sw*2, pw, 0.07);
-    band(trMat, cx, cz+off+sw+pw/2, w+sw*2, pw, 0.07);
-    band(trMat, cx-off-sw-pw/2, cz, pw, d+sw*2,  0.07);
-    band(trMat, cx+off+sw+pw/2, cz, pw, d+sw*2,  0.07);
+    band(trMat, cx, cz-off-sw-pw/2, w+sw*2, pw);
+    band(trMat, cx, cz+off+sw+pw/2, w+sw*2, pw);
+    band(trMat, cx-off-sw-pw/2, cz, pw, d+sw*2);
+    band(trMat, cx+off+sw+pw/2, cz, pw, d+sw*2);
 
-    // Linie de centru stradă (galbenă, discontinuă simulată)
-    band(linMat, cx, cz-off-sw/2, w+sw*4, 0.15, 0.09);
-    band(linMat, cx, cz+off+sw/2, w+sw*4, 0.15, 0.09);
-    band(linMat, cx-off-sw/2, cz, 0.15, d+sw*4,  0.09);
-    band(linMat, cx+off+sw/2, cz, 0.15, d+sw*4,  0.09);
-
-    // Marcaj parcelă (pavaj distinct)
-    // Marcaj parcelă ca prismă subțire (fără rotații)
-    try{
-      const parcelPts2d = pts.slice(0,-1).map(([x,z])=>[x,z]);
-      if(parcelPts2d.length >= 3){
-        const pm=new THREE.MeshLambertMaterial({color:'#90c8a0',transparent:true,opacity:0.6});
-        const pmesh=_v3dPrism(THREE,parcelPts2d,0.01,0.06,pm);
-        if(pmesh) scene.add(pmesh);
-      }
-    }catch(e){}
+    // Linie centru (galbenă)
+    band(linMat, cx, cz-off-sw/2, w+sw*4, 0.18);
+    band(linMat, cx, cz+off+sw/2, w+sw*4, 0.18);
+    band(linMat, cx-off-sw/2, cz, 0.18, d+sw*4);
+    band(linMat, cx+off+sw/2, cz, 0.18, d+sw*4);
 
   }catch(e){ console.warn('Streets:', e.message); }
 }
