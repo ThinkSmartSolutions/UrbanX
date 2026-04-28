@@ -7840,7 +7840,7 @@ function _v3dInit(ap){
   // ── Scene ─────────────────────────────────────────────────────────────────
   const scene = new THREE.Scene();
   scene.background = new THREE.Color('#0d1b2a');
-  scene.fog = new THREE.Fog('#0d1b2a', 150, 400);
+  scene.fog = new THREE.Fog('#0d1b2a', 80, 280);
   V3D.scene = scene;
 
   // ── Camera ────────────────────────────────────────────────────────────────
@@ -7860,7 +7860,7 @@ function _v3dInit(ap){
   scene.add(ground);
 
   // ── Grid faint ────────────────────────────────────────────────────────────
-  const grid = new THREE.GridHelper(300, 60, '#1e3a5f', '#162032');
+  const grid = new THREE.GridHelper(400, 80, '#1a2d40', '#111e2a');
   grid.material.opacity = 0.4; grid.material.transparent = true;
   scene.add(grid);
 
@@ -7880,15 +7880,14 @@ function _v3dInit(ap){
     const h = f.properties?.h||6;
     const fn = f.properties?.fn||'yes';
     // Culoare neutra, usor variata per functiune
-    const ctxColors = {
-      residential:'#3d5068', apartments:'#384d65', house:'#435870',
-      commercial:'#5c4a28', retail:'#5a4022', shop:'#523c20',
-      office:'#2a4a5c', public:'#3a3560',
-      industrial:'#3d3d3d', warehouse:'#383838',
-      hotel:'#4a3550', school:'#3a5040',
-      church:'#504040', 'yes':'#3a4a58'
-    };
-    const colHex = ctxColors[fn]||'#3a4555';
+    // Vecini: gri-albăstrui neutru variată subtil per înălțime
+    // Nu folosim culoarea funcțiunii OSM — prea saturată, distrage de la AEDIS
+    const hBand = Math.min(7, Math.floor(h / 8)); // 0-7 benzi pe înălțime
+    const greyBase = [
+      '#2e3f50','#2a3b4c','#324555','#283848',
+      '#2c4058','#263550','#304252','#2a3c52'
+    ][hBand];
+    const colHex = greyBase;
 
     try{
       const fring = f.geometry.type==='Polygon' ? f.geometry.coordinates[0]
@@ -8036,7 +8035,7 @@ function _v3dMakePBR(THREE, stilKey){
     ctx.putImageData(id,0,0);
     const tex=new THREE.CanvasTexture(cv);
     tex.wrapS=tex.wrapT=THREE.RepeatWrapping;
-    tex.repeat.set(2,2);
+    tex.repeat.set(1.2,1.0);
     return tex;
   }
   // Textură metal pentru penthouse/atic
@@ -8058,11 +8057,11 @@ function _v3dMakePBR(THREE, stilKey){
   }
 
   const defs = {
-    modern:     { parterCol:'#0f172a', roofCol:'#0c1a2e',   parterR:0.75, roofR:0.35, roofM:0.5 },
-    clasic:     { parterCol:'#3d1f08', roofCol:'#2d1608',   parterR:0.9,  roofR:0.85, roofM:0.0 },
-    minimalist: { parterCol:'#27272a', roofCol:'#3f3f46',   parterR:0.8,  roofR:0.45, roofM:0.2 },
-    inovator:   { parterCol:'#2e1065', roofCol:'#0e0b2e',   parterR:0.3,  roofR:0.25, roofM:0.7 },
-    industrial: { parterCol:'#0c0a09', roofCol:'#0c0a09',   parterR:0.55, roofR:0.2,  roofM:0.8 },
+    modern:     { parterCol:'#0d1520', roofCol:'#0a1018', parterR:0.80, roofR:0.35, roofM:0.55 },
+    clasic:     { parterCol:'#2a1506', roofCol:'#1a0e04', parterR:0.92, roofR:0.88, roofM:0.00 },
+    minimalist: { parterCol:'#1c1c1f', roofCol:'#2a2a2e', parterR:0.85, roofR:0.50, roofM:0.15 },
+    inovator:   { parterCol:'#18112a', roofCol:'#0c0818', parterR:0.55, roofR:0.28, roofM:0.75 },
+    industrial: { parterCol:'#0a0908', roofCol:'#080706', parterR:0.58, roofR:0.22, roofM:0.82 },
   };
   const d = defs[stilKey]||defs.modern;
 
@@ -8107,7 +8106,10 @@ function _v3dFloorMat(THREE, colorHex, floorIdx, stilKey){
     if(isGlass){
       // O singura fereastra per tile (512px) → repeat 1x per etaj pe fatada
       cv.width=512; cv.height=512;
+      // Fond fatada mai inchis decat colorHex (sticla nu e 100% transparenta)
       ctx.fillStyle = colorHex; ctx.fillRect(0,0,512,512);
+      // Overlay inchis pentru adancime
+      ctx.fillStyle='rgba(0,0,0,0.35)'; ctx.fillRect(0,0,512,512);
 
       // Fatada: 3 coloane x 3 randuri de ferestre per tile
       const cols=3, rows=3;
@@ -8207,8 +8209,12 @@ function _v3dFloorMat(THREE, colorHex, floorIdx, stilKey){
     t.wrapS = THREE.RepeatWrapping;
     t.wrapT = THREE.RepeatWrapping;
     // Repeat: sticla 1 tile per ~8m fatada; tencuiala 1 tile per ~4m
-    t.repeat.set(isGlass ? 0.5 : isIndustrial ? 0.4 : 0.6,
-                 isGlass ? 1.0 : 0.8);
+    // Repeat mic = ferestre mai mari. 1.0 = un tile per fata (prea rar)
+    // 0.3 = ~3 ferestre per lățimea fațadei (bun pentru clădiri 10-20m)
+    t.repeat.set(
+      isGlass ? 0.35 : isIndustrial ? 0.3 : 0.45,
+      isGlass ? 0.55 : 0.65
+    );
     _v3dTexCache[cacheKey] = t;
   }
 
@@ -8400,18 +8406,50 @@ function _v3dInitControls(canvas, camera, targetH){
   V3D._updateCamera = updateCamera;
 }
 
+function _v3dAddParcelGround(toLocal, scene, THREE){
+  // Zona sol in jurul parcelei cu culori diferite (parcare, spatiu verde, trotuar)
+  // Extragem coordonatele parcelelor active
+  S.parcels.forEach(p=>{
+    if(!p.geo?.geometry) return;
+    const ring = p.geo.geometry.type==='Polygon'
+      ? p.geo.geometry.coordinates[0]
+      : p.geo.geometry.coordinates[0][0];
+    if(!ring?.length) return;
+    try{
+      const pts = ring.map(([lng,lat])=>toLocal(lng,lat));
+      // Zona parcelă = pavaj/asfalt deschis
+      const shape = new THREE.Shape();
+      shape.moveTo(pts[0][0], pts[0][1]);
+      for(let i=1;i<pts.length-1;i++) shape.lineTo(pts[i][0], pts[i][1]);
+      shape.closePath();
+      const geo = new THREE.ShapeGeometry(shape);
+      const mat = new THREE.MeshStandardMaterial({color:'#1a2535', roughness:0.97, metalness:0.0});
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.rotation.x = -Math.PI/2;
+      mesh.position.y = 0.02;
+      scene.add(mesh);
+    }catch(e){}
+  });
+}
+
 function _v3dLoadStreets(cx, cy, toLocal, scene, THREE){
-  const q = `[out:json][timeout:15];(
-    way["highway"~"^(primary|secondary|tertiary|residential|unclassified|service|footway|pedestrian|path|living_street|trunk)$"](around:180,${cy},${cx});
+  // Fallback instant: ground marking pe conturul parcelei
+  _v3dAddParcelGround(toLocal, scene, THREE);
+
+  const q = `[out:json][timeout:12];(
+    way["highway"~"^(primary|secondary|tertiary|residential|unclassified|service|footway|pedestrian|path|living_street|trunk)$"](around:200,${cy},${cx});
   );out geom;`;
 
   fetch('https://overpass-api.de/api/interpreter', {
     method:'POST', body:q,
-    signal: AbortSignal.timeout(15000)
+    signal: AbortSignal.timeout(12000)
   })
-  .then(r=>r.json())
+  .then(r=>{ if(!r.ok) throw new Error('Overpass '+r.status); return r.json(); })
   .then(data=>{
-    if(!data.elements?.length) return;
+    if(!data.elements?.length){
+      _v3dStatus('⚠️ Străzi OSM indisponibile momentan (Overpass rate-limited) · rotire activă');
+      return;
+    }
 
     // Latimi per tip strada (metri)
     const widths = {
