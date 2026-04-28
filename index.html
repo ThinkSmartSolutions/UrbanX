@@ -7934,63 +7934,72 @@ function _v3dInit(ap){
       if(!fring||fring.length<3) return;
       const pts = fring.map(([lng,lat])=>toLocal(lng,lat));
 
-      // ── Acoperiș (ShapeGeometry → UV corecte, fără ferestre) ────────────
+      // ── Plafon etaj (doar dacă e ultimul etaj sau acoperiș) ───────────────
+      const isRoofFeature = floor < 0 || !!f.properties?.roofType;
+      const isTopFloor    = !!f.properties?.isLast;
+      const showRoof = isRoofFeature || isTopFloor;
+
       const shape = new THREE.Shape();
       shape.moveTo(pts[0][0], pts[0][1]);
       for(let i=1;i<pts.length-1;i++) shape.lineTo(pts[i][0], pts[i][1]);
       shape.closePath();
 
-      const roofMat = (floor < 0 || f.properties?.roofType)
-        ? PBR.roof
-        : floor === 0 ? PBR.parter
-        : f.properties?.isLast ? PBR.penthouse
-        : PBR.roof;
+      if(showRoof){
+        const roofMat2 = isRoofFeature ? PBR.roof : PBR.penthouse;
+        const roofGeo = new THREE.ShapeGeometry(shape);
+        const roofMesh = new THREE.Mesh(roofGeo, roofMat2);
+        roofMesh.rotation.x = -Math.PI/2;
+        roofMesh.position.y = top - 0.01;
+        roofMesh.receiveShadow = true;
+        roofMesh.castShadow = false;
+        scene.add(roofMesh);
+        V3D.aedisMeshes.push(roofMesh);
+      }
 
-      // Planșeu superior
-      const roofGeo = new THREE.ShapeGeometry(shape);
-      const roofMesh = new THREE.Mesh(roofGeo, roofMat);
-      roofMesh.rotation.x = -Math.PI/2;
-      roofMesh.position.y = top;
-      roofMesh.receiveShadow = true;
-      scene.add(roofMesh);
-      V3D.aedisMeshes.push(roofMesh);
-
-      // Planșeu inferior (soclu vizibil doar la parter)
-      if(floor === 0){
+      // Planșeu la sol (doar parter, o singura dată)
+      if(floor === 0 && base < 0.5){
         const floorGeo = new THREE.ShapeGeometry(shape);
         const floorMesh = new THREE.Mesh(floorGeo, PBR.parter);
         floorMesh.rotation.x = Math.PI/2;
-        floorMesh.position.y = base + 0.02;
+        floorMesh.position.y = 0.02;
         scene.add(floorMesh);
         V3D.aedisMeshes.push(floorMesh);
       }
 
-      // ── Pereți per latură — UV corecte, textură ferestre pe verticală ───
-      const wallMat = floor < 0
+      // ── Pereți per latură — BoxGeometry subțire, DoubleSide, UV corecte ─
+      const wallMatDef = floor < 0
         ? PBR.roof
         : floor === 0 ? PBR.parter
         : f.properties?.isLast ? PBR.penthouse
         : _v3dFloorMat(THREE, colHex, floor, stilKey);
+
+      // Forțăm DoubleSide pe orice material
+      if(wallMatDef && wallMatDef.side !== undefined) wallMatDef.side = THREE.DoubleSide;
 
       for(let i=0;i<pts.length-1;i++){
         const [x0,z0] = pts[i];
         const [x1,z1] = pts[i+1];
         const dx = x1-x0, dz = z1-z0;
         const len = Math.sqrt(dx*dx+dz*dz);
-        if(len < 0.1) continue;
+        if(len < 0.05) continue;
 
-        // PlaneGeometry cu UV corecte: U=0..1 pe lățime, V=0..1 pe înălțime
-        const wallGeo = new THREE.PlaneGeometry(len, h, 1, 1);
-        const wall = new THREE.Mesh(wallGeo, wallMat);
-
-        // Poziție: centrul peretelui
-        wall.position.set(
-          (x0+x1)/2,
-          base + h/2,
-          (z0+z1)/2
+        // BoxGeometry: width=lungime latură, height=h etaj, depth=grosime mică
+        // UV-urile pe fața frontală (width×height) sunt corecte automat
+        const wallGeo = new THREE.BoxGeometry(len, h, 0.15,
+          Math.max(1, Math.round(len/3)),   // segmente U
+          Math.max(1, Math.round(h/1.5)),   // segmente V
+          1
         );
-        // Rotație: perpendicular pe direcția laturii
-        wall.rotation.y = Math.atan2(dx, dz);
+        const wall = new THREE.Mesh(wallGeo, wallMatDef);
+
+        // Centrul peretelui în spațiu local
+        const cx_w = (x0+x1)/2;
+        const cz_w = (z0+z1)/2;
+        wall.position.set(cx_w, base + h/2, cz_w);
+
+        // Rotație corectă: peretele stă de-a lungul laturii
+        // atan2(dz, dx) = unghiul față de axa X în planul XZ
+        wall.rotation.y = -Math.atan2(dz, dx);
 
         wall.castShadow  = true;
         wall.receiveShadow = true;
@@ -8099,18 +8108,19 @@ function _v3dMakePBR(THREE, stilKey){
   const concTex  = makeConcreteTexture(d.parterCol, d.parterR);
   const metalTex = makeMetalTexture(d.roofCol);
 
+  const DS = THREE.DoubleSide;
   return {
     parter: new THREE.MeshStandardMaterial({
-      map:concTex, roughness:d.parterR, metalness:0.05
+      map:concTex, roughness:d.parterR, metalness:0.05, side:DS
     }),
-    facade: null, // folosit din _v3dFloorMat cu ferestre
+    facade: null,
     penthouse: new THREE.MeshStandardMaterial({
-      map:metalTex, roughness:0.25, metalness:0.6,
-      color: d.roofCol
+      map:metalTex, roughness:0.22, metalness:0.65,
+      color:d.roofCol, side:DS
     }),
     roof: new THREE.MeshStandardMaterial({
       map:metalTex, roughness:d.roofR, metalness:d.roofM,
-      color: d.roofCol
+      color:d.roofCol, side:DS
     })
   };
 }
@@ -8283,6 +8293,7 @@ function _v3dFloorMat(THREE, colorHex, floorIdx, stilKey){
     map: tex,
     roughness: isGlass ? 0.06 : isIndustrial ? 0.4 : 0.75,
     metalness: isGlass ? 0.10 : isIndustrial ? 0.5 : 0.02,
+    side: THREE.DoubleSide
   });
 }
 
