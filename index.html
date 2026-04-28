@@ -3232,6 +3232,20 @@ function getContent(tab){
 function htmlSearch(){
   return`
   
+  <div class="section">📍 Coordonate GPS</div>
+  <div class="card">
+    <input class="inp" id="inp-coord" placeholder="47.1585, 27.6014 (lat, lng)" 
+      value="${S._lastCoord||''}"
+      onkeydown="if(event.key==='Enter'){var e=document.querySelectorAll('#inp-coord');e.forEach(el=>el.value=this.value);doCoord()}"
+      onfocus="window._activeSearchCtx=this"
+      oninput="window._activeSearchCtx=this">
+    <div class="help">Dublu-click pe hartă → completare automată. Funcționează pentru orice localitate din România.</div>
+    <div class="btn-row">
+      <button class="btn-p" style="flex:1" onclick="(function(){var e=document.querySelectorAll('#inp-coord');var v=e[e.length-1]?.value||'';e.forEach(el=>el.value=v);doCoord()})()">🎯 Mergi</button>
+      <button class="btn-s" onclick="if(navigator.geolocation)navigator.geolocation.getCurrentPosition(p=>{const v=p.coords.latitude.toFixed(6)+', '+p.coords.longitude.toFixed(6);document.querySelectorAll('#inp-coord').forEach(el=>el.value=v);doCoord()})">📡 GPS</button>
+    </div>
+  </div>
+  
   <div class="section">🏠 Adresă sau punct de interes</div>
   <div class="card">
     <input class="inp" id="inp-addr" placeholder="Str. Lascăr Catargi 54, Palas, Grand Hotel Traian…" oninput="doAddr(this.value)">
@@ -3723,6 +3737,15 @@ function doAddr(q){
   clearTimeout(_addrT);
   const box=document.querySelector('#addr-box');if(!box)return;
   if(!q||q.trim().length<2){box.innerHTML='';return;}
+  // Dacă input-ul arată ca coordonate GPS, apelăm doCoord direct
+  const coordPattern=/^-?\d+\.\d+[\s,;]+-?\d+\.\d+/;
+  if(coordPattern.test(q.trim())){
+    document.querySelectorAll('#inp-coord').forEach(el=>el.value=q.trim());
+    document.querySelectorAll('#inp-addr').forEach(el=>el.value='');
+    box.innerHTML='';
+    doCoord();
+    return;
+  }
   box.innerHTML=`<div class="re"><span class="spin"></span>Se caută…</div>`;
   _addrT=setTimeout(async()=>{
     try{
@@ -8744,7 +8767,7 @@ function _v3dBuild(ap){
     if(!f.geometry) return;
     const h=Math.max(2,f.properties?.h||6);
     const fn=f.properties?.fn||'yes';
-    const colMap={residential:'#8a9fb5',apartments:'#7a9aaa',house:'#9ab0c0',commercial:'#c89060',retail:'#d4905a',office:'#6888b0',public:'#7878b0',industrial:'#888888',warehouse:'#808080',hotel:'#9878a8',school:'#78a888','yes':'#8898a8'};
+    const colMap={residential:'#9ab5cc',apartments:'#8aadbe',house:'#aac0d0',commercial:'#d8a070',retail:'#e0a06a',office:'#7898c0',public:'#8888c0',industrial:'#989898',warehouse:'#909090',hotel:'#a888b8',school:'#88b898','yes':'#9aa8b8'};
     const col=colMap[fn]||'#8898b0';
     try{
       const fring=f.geometry.type==='Polygon'?f.geometry.coordinates[0]:f.geometry.coordinates[0][0];
@@ -8784,7 +8807,7 @@ function _v3dBuild(ap){
       let mat;
       if(isRoofSlab){
         // Terasă plată — culoare beton deschis
-        mat = new THREE.MeshLambertMaterial({color:'#8090a0'});
+        mat = new THREE.MeshLambertMaterial({color:'#c8d0d8'});
       } else if(floor===0){ mat=_v3dMatParter(THREE,stilKey,V3D.texCache); }
       else if(isTop){ mat=_v3dMatPenthouse(THREE,stilKey,V3D.texCache); }
       else{ mat=_v3dMatFloor(THREE,col,floor,stilKey,V3D.texCache); }
@@ -8954,29 +8977,45 @@ function _v3dMat(THREE, color, opts={}){
 }
 
 function _v3dMatParter(THREE, stil, cache){
+  // Parter distinct și vizibil — culori calde/saturate per stil
   const cols = {
-    modern:'#1a1a2e', clasic:'#2d1a0a', minimalist:'#1f1f22',
-    inovator:'#12082a', industrial:'#0d0d0d', default:'#1a1a2e'
+    modern:     '#2a4a6a',  // albastru-petrol
+    clasic:     '#6b3a1f',  // cărămiziu
+    minimalist: '#3a3a3a',  // gri antracit
+    inovator:   '#4a1a6a',  // violet
+    industrial: '#2a2a1a',  // olive închis
+    default:    '#2a3a4a'
   };
   return _v3dMat(THREE, cols[stil]||cols.default);
 }
 
 function _v3dMatFloor(THREE, colHex, floorIdx, stil, cache){
-  // Stilizat: culoarea din paleta AEDIS, ușor mai deschisă la etaje superioare
+  // Etaje: culoarea AEDIS amplificată — mai saturată, mai luminoasă
   const r=parseInt(colHex.slice(1,3)||'30',16);
-  const g=parseInt(colHex.slice(3,5)||'60',16);
-  const b=parseInt(colHex.slice(5,7)||'90',16);
-  const brighten = floorIdx * 6;
-  const rc=Math.min(255,r+brighten), gc=Math.min(255,g+brighten), bc=Math.min(255,b+brighten);
-  return _v3dMat(THREE, `rgb(${rc},${gc},${bc})`);
+  const g=parseInt(colHex.slice(3,5)||'80',16);
+  const b=parseInt(colHex.slice(5,7)||'c0',16);
+  // Amplificăm saturația: distanțăm față de gri
+  const avg=(r+g+b)/3;
+  const sat=1.4; // factor saturație
+  const brighten=floorIdx*8;
+  const rc=Math.min(255,Math.round(avg+(r-avg)*sat)+brighten);
+  const gc=Math.min(255,Math.round(avg+(g-avg)*sat)+brighten);
+  const bc=Math.min(255,Math.round(avg+(b-avg)*sat)+brighten);
+  return _v3dMat(THREE, `rgb(${Math.max(0,rc)},${Math.max(0,gc)},${Math.max(0,bc)})`);
 }
 
 function _v3dMatPenthouse(THREE, stil, cache){
+  // Penthouse: metal lustruit, distinct de etaje
   const cols = {
-    modern:'#0a1628', clasic:'#1a0c04', minimalist:'#252528',
-    inovator:'#0c0618', industrial:'#111111', default:'#0a1628'
+    modern:     '#304878',  // albastru-oțel
+    clasic:     '#483018',  // bronz
+    minimalist: '#505050',  // oțel
+    inovator:   '#380868',  // violet electric
+    industrial: '#304030',  // verde-militar
+    default:    '#304060'
   };
-  return _v3dMat(THREE, cols[stil]||cols.default);
+  const mat = new THREE.MeshLambertMaterial({color:cols[stil]||cols.default});
+  return mat;
 }
 
 function _v3dMatRoof(THREE, stil, cache){
@@ -9071,7 +9110,7 @@ function _v3dApplyLight(preset,THREE,scene,r){
   scene.children.filter(c=>c.isLight).forEach(l=>scene.remove(l));
   const P={
     day:   {sky:'#d0dff0',fog:'#d0dff0',amb:{c:'#ffffff',i:1.2},sun:{c:'#fff8e8',i:1.5,p:[80,120,60]},fill:{c:'#a0c0e0',i:0.6,p:[-60,40,-40]},exp:1.0,night:false},
-    golden:{sky:'#f0d8a0',fog:'#e8c880',amb:{c:'#ffe8c0',i:1.1},sun:{c:'#ff9040',i:1.6,p:[120,30,40]},fill:{c:'#c08040',i:0.5,p:[-40,60,-60]},exp:1.0,night:false},
+    golden:{sky:'#f5d090',fog:'#e8c070',amb:{c:'#ffe0a0',i:1.2},sun:{c:'#ff8020',i:2.0,p:[120,20,40]},fill:{c:'#d09050',i:0.6,p:[-40,60,-60]},exp:1.1,night:false},
     overcast:{sky:'#c0ccd8',fog:'#c0ccd8',amb:{c:'#d0dde8',i:1.4},sun:{c:'#c8d8e8',i:0.5,p:[40,100,40]},fill:{c:'#a0b0c0',i:0.6,p:[-40,50,-40]},exp:1.0,night:false},
     night: {sky:'#020408',fog:'#020408',amb:{c:'#0a1428',i:0.25},sun:{c:'#8090c0',i:0.15,p:[-40,60,20]},fill:{c:'#ff9030',i:0.8,p:[0,3,0]},exp:0.8,night:true},
   };
