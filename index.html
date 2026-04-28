@@ -2389,7 +2389,12 @@ function updateDistanceLines(){
     });
 
     // Calculăm distanța REALĂ (contur la contur) față de primul volum AEDIS
-    const firstVol = myBldArr[0];
+    // Dacă nu avem volume generate, folosim parcela ca referință pentru distanțe
+    const firstVol = myBldArr[0] || {
+      type:'Feature',
+      geometry: S.parcels[S.activeParcel??0]?.geo?.geometry || combinedParcel.geometry,
+      properties:{}
+    };
     const withDist = ctxNotOwn.map(ctx=>{
       try{
         const {dist} = minDistBetweenPolygons(firstVol, ctx);
@@ -3118,7 +3123,7 @@ function htmlSearch(){
   </div>
   <div class="section">🔢 Număr cadastral Iași</div>
   <div class="card">
-    <input class="inp" id="inp-cad" placeholder="Ex: 127835" inputmode="numeric" autocomplete="off" oninput="onCadInput(this.value);this.dataset.val=this.value" onkeydown="if(event.key==='Enter'){window._mobCadVal=this.value;doCad()}" onfocus="window._activeSearchCtx=this">
+    <input class="inp" id="inp-cad" placeholder="Ex: 127835" inputmode="numeric" autocomplete="off" oninput="onCadInput(this.value);window._mobCadVal=this.value;window._activeSearchCtx=this" onchange="window._mobCadVal=this.value" onkeydown="if(event.key==='Enter'){window._mobCadVal=this.value;doCad()}" onfocus="window._activeSearchCtx=this">
     <div id="cad-range" class="help" style="color:#34d399;margin:4px 0 8px"></div>
     <div class="btn-row">
       <button class="btn-p" onclick="doCad()" style="flex:1">🔍 Caută</button>
@@ -5739,20 +5744,20 @@ function aedisBuild(){
   for(const parcelaTmp of parcelsToGen){
     if(!parcelaTmp?.geo?.geometry) continue;
 
-    const params = parcelaTmp.params || getDefaultParams(parcelaTmp.utr);
-    const fp = buildFP(parcelaTmp.geo.geometry, params);
+    let params = parcelaTmp.params || getDefaultParams(parcelaTmp.utr);
+    let fp = buildFP(parcelaTmp.geo.geometry, params);
     if(!fp?.geometry) continue;
-    const pA_loop = parcelaTmp.area || turf.area({type:'Feature',geometry:parcelaTmp.geo.geometry,properties:{}});
+    let pA_loop = parcelaTmp.area || turf.area({type:'Feature',geometry:parcelaTmp.geo.geometry,properties:{}});
 
-    const fn = AEDIS.fn;
-    const fnDef = AEDIS_FN[fn] || AEDIS_FN.rezidential_colectiv;
-    const stilDef = AEDIS_STIL[AEDIS.stil] || AEDIS_STIL.modern;
-    const pA = pA_loop;
+    let fn = AEDIS.fn;
+    let fnDef = AEDIS_FN[fn] || AEDIS_FN.rezidential_colectiv;
+    let stilDef = AEDIS_STIL[AEDIS.stil] || AEDIS_STIL.modern;
+    let pA = pA_loop;
 
     // Calcule de baza
-    const hParter = AEDIS.parterDiferit ? (fnDef.hParter || 4.5) : (AEDIS.corpuri[0]?.hNiv||3.0);
-    const hEtaj = AEDIS.corpuri[0]?.hNiv || fnDef.hEtaj || 3.0;
-    const totalNiv = AEDIS.corpuri[0]?.niv || pN(params.niv) || 4;
+    let hParter = AEDIS.parterDiferit ? (fnDef.hParter || 4.5) : (AEDIS.corpuri[0]?.hNiv||3.0);
+    let hEtaj = AEDIS.corpuri[0]?.hNiv || fnDef.hEtaj || 3.0;
+    let totalNiv = AEDIS.corpuri[0]?.niv || pN(params.niv) || 4;
 
     // ── Scenariu: calcul POT/CUT existent ─────────────────────────────────
     let baseH = 0;
@@ -5814,7 +5819,7 @@ function aedisBuild(){
     }
 
     // ── Generare corpuri AEDIS ─────────────────────────────────────────────
-    const fpFeat = {type:'Feature',geometry:fpGeom,properties:{}};
+    let fpFeat = {type:'Feature',geometry:fpGeom,properties:{}};
 
     // Corp principal cu retrageri fine per etaj
     let currentH = baseH;
@@ -5872,8 +5877,8 @@ function aedisBuild(){
     }
 
     // ── Acoperiș ──────────────────────────────────────────────────────────
-    const roofBase = currentH;
-    const fpSmall = turf.transformScale(fpFeat, 0.97, {origin:turf.centerOfMass(fpFeat)});
+    let roofBase = currentH;
+    let fpSmall = turf.transformScale(fpFeat, 0.97, {origin:turf.centerOfMass(fpFeat)});
 
       const _roofFpGeom = AEDIS._lastFloorGeom || fpGeom;
     switch(AEDIS.tipAcoperis){
