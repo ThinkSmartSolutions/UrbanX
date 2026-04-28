@@ -5677,14 +5677,27 @@ function aedisBuild(){
   if(!ap?.geo?.geometry){ ss('⚠️ AEDIS: Selectați o parcelă mai întâi.'); return; }
 
   const feats = [];
-  const params = ap.params || getDefaultParams(ap.utr);
-  const fp = buildFP(ap.geo.geometry, params);
-  if(!fp?.geometry){ ss('⚠️ AEDIS: Nu s-a putut calcula edificabilul.'); return; }
+
+  // MULTIPARCEL: generăm pentru toate parcelele dacă sunt multiple selectate
+  const parcelsToGen = S.parcels.length > 1 ? S.parcels : [ap];
+  if(S.parcels.length > 1){
+    ss(`⏳ AEDIS: Generare pentru ${S.parcels.length} parcele…`);
+  }
+
+  // Procesăm parcela activă (sau toate în modul multi)
+  // Restul parcelelor folosesc aceeași configurație AEDIS (fn, stil, niv)
+  for(const parcelaTmp of parcelsToGen){
+    if(!parcelaTmp?.geo?.geometry) continue;
+
+  const params = parcelaTmp.params || getDefaultParams(parcelaTmp.utr);
+  const fp = buildFP(parcelaTmp.geo.geometry, params);
+  if(!fp?.geometry) continue;
+  const pA_loop = parcelaTmp.area || turf.area({type:'Feature',geometry:parcelaTmp.geo.geometry,properties:{}});
 
   const fn = AEDIS.fn;
   const fnDef = AEDIS_FN[fn] || AEDIS_FN.rezidential_colectiv;
   const stilDef = AEDIS_STIL[AEDIS.stil] || AEDIS_STIL.modern;
-  const pA = ap.area || turf.area({type:'Feature',geometry:ap.geo.geometry,properties:{}});
+  const pA = pA_loop;
 
   // Calcule de baza
   const hParter = AEDIS.parterDiferit ? (fnDef.hParter || 4.5) : (AEDIS.corpuri[0]?.hNiv||3.0);
@@ -5700,7 +5713,7 @@ function aedisBuild(){
     const onParcel = S.ctx.features.filter(f=>{
       try{
         const ctr = turf.centerOfMass(f);
-        return turf.booleanPointInPolygon(ctr, {type:'Feature',geometry:ap.geo.geometry,properties:{}});
+        return turf.booleanPointInPolygon(ctr, {type:'Feature',geometry:parcelaTmp.geo.geometry,properties:{}});
       }catch(e){ return false; }
     });
 
@@ -5912,9 +5925,10 @@ function aedisBuild(){
   }
 
   // Stocam si setam
+  } // end for parcelsToGen
+
   S.vol._lastFeats = feats;
   S.vol.genDone = true;
-  S.vol._lastFeats = feats;
   setSource('vol-src',{type:'FeatureCollection',features:feats});
   set3D(65,-25);
 
@@ -7707,6 +7721,9 @@ function aedisOpen3DViewer(){
     ss('⚠️ Generați mai întâi volumul AEDIS (⚡ butonul din panoul AEDIS).');
     return;
   }
+  // Multiparcel: status info
+  const nParcels = S.parcels.length;
+  const multiInfo = nParcels > 1 ? ` · ${nParcels} parcele` : '';
 
   // Creem overlay fullscreen
   let overlay = document.getElementById('aedis-3d-viewer-overlay');
@@ -7725,13 +7742,15 @@ function aedisOpen3DViewer(){
   const niv = AEDIS.corpuri[0]?.niv || 4;
   const hNiv = AEDIS.corpuri[0]?.hNiv || 3.0;
   const hTot = ((AEDIS.parterDiferit?(fnDef.hParter||4.5):hNiv)+(niv-1)*hNiv).toFixed(1);
+  const nParcels = S.parcels.length;
+  const multiInfo = nParcels > 1 ? ` · ${nParcels} parcele` : '';
 
   overlay.innerHTML = `
     <div style="background:linear-gradient(180deg,#080f1c,rgba(8,15,28,.9));
       border-bottom:1px solid rgba(139,92,246,.3);padding:10px 16px;
       display:flex;align-items:center;gap:12px;flex-shrink:0;z-index:1">
       <div style="font-size:13px;font-weight:800;color:#a78bfa;letter-spacing:1px">🔭 AEDIS 3D Viewer</div>
-      <div style="font-size:11px;color:#64748b">${fnDef.label||''} · ${stilDef.label||''} · ${niv} niv. · H=${hTot}m</div>
+      <div style="font-size:11px;color:#64748b">${fnDef.label||''} · ${stilDef.label||''} · ${niv} niv. · H=${hTot}m${multiInfo}</div>
       <div style="font-size:10px;color:#475569;margin-left:4px">
         <span style="color:#94a3b8">Drag</span> rotire · 
         <span style="color:#94a3b8">Scroll</span> zoom · 
@@ -7784,8 +7803,9 @@ const V3D = {
 
 function _v3dDispose(){
   if(V3D.animFrame) cancelAnimationFrame(V3D.animFrame);
+  if(V3D._cleanupControls) V3D._cleanupControls();
+  if(V3D._resizeObs) V3D._resizeObs.disconnect();
   if(V3D.renderer){ V3D.renderer.dispose(); V3D.renderer=null; }
-  // Dispose textures
   Object.values(_v3dTexCache).forEach(t=>t.dispose());
   Object.keys(_v3dTexCache).forEach(k=>delete _v3dTexCache[k]);
   V3D.scene=null; V3D.camera=null; V3D.controls=null;
@@ -7832,10 +7852,11 @@ function _v3dInit(ap){
   _v3dApplyLighting('day', THREE, scene);
 
   // ── Ground plane ─────────────────────────────────────────────────────────
-  const groundGeo = new THREE.PlaneGeometry(500, 500);
-  const groundMat = new THREE.MeshStandardMaterial({ color:'#111827', roughness:0.95, metalness:0.0, side:THREE.DoubleSide });
+  const groundGeo = new THREE.PlaneGeometry(600, 600);
+  const groundMat = new THREE.MeshStandardMaterial({ color:'#0d1520', roughness:0.98, metalness:0.0, side:THREE.DoubleSide });
   const ground = new THREE.Mesh(groundGeo, groundMat);
   ground.rotation.x = -Math.PI/2;
+  ground.position.y = -0.05; // usor sub cladiri
   ground.receiveShadow = true;
   scene.add(ground);
 
@@ -7861,11 +7882,14 @@ function _v3dInit(ap){
     const fn = f.properties?.fn||'yes';
     // Culoare neutra, usor variata per functiune
     const ctxColors = {
-      residential:'#2d3f52', apartments:'#2a3d50', commercial:'#3d3525',
-      retail:'#3d3525', office:'#25353d', industrial:'#2d2d2d',
-      'yes':'#2a3545'
+      residential:'#3d5068', apartments:'#384d65', house:'#435870',
+      commercial:'#5c4a28', retail:'#5a4022', shop:'#523c20',
+      office:'#2a4a5c', public:'#3a3560',
+      industrial:'#3d3d3d', warehouse:'#383838',
+      hotel:'#4a3550', school:'#3a5040',
+      church:'#504040', 'yes':'#3a4a58'
     };
-    const colHex = ctxColors[fn]||'#253040';
+    const colHex = ctxColors[fn]||'#3a4555';
 
     try{
       const fring = f.geometry.type==='Polygon' ? f.geometry.coordinates[0]
@@ -8082,42 +8106,49 @@ function _v3dFloorMat(THREE, colorHex, floorIdx, stilKey){
     ctx.fillRect(0,0,256,256);
 
     if(isGlass){
-      // Grid ferestre sticla
-      const cols=4, rows=4;
-      const pw=256/cols, ph=256/rows;
-      const margin=pw*0.12;
+      // O singura fereastra per tile (512px) → repeat 1x per etaj pe fatada
+      cv.width=512; cv.height=512;
+      ctx.fillStyle = colorHex; ctx.fillRect(0,0,512,512);
+
+      // Fatada: 3 coloane x 3 randuri de ferestre per tile
+      const cols=3, rows=3;
+      const pw=512/cols, ph=512/rows;
+      const mx=pw*0.1, my=ph*0.1;
       for(let r=0;r<rows;r++) for(let cl=0;cl<cols;cl++){
-        // Interior fereastra - gradient sticla
-        const grd = ctx.createLinearGradient(
-          cl*pw+margin, r*ph+margin,
-          cl*pw+pw-margin, r*ph+ph-margin
-        );
-        const isLit = Math.random() > 0.35;
-        grd.addColorStop(0, isLit ? 'rgba(180,210,255,0.65)' : 'rgba(40,70,120,0.7)');
-        grd.addColorStop(0.5, isLit ? 'rgba(140,190,240,0.55)' : 'rgba(20,45,90,0.6)');
-        grd.addColorStop(1, isLit ? 'rgba(160,200,250,0.6)' : 'rgba(30,55,100,0.65)');
-        ctx.fillStyle = grd;
-        ctx.fillRect(cl*pw+margin, r*ph+margin, pw-margin*2, ph-margin*2);
-        // Frame metalic
-        ctx.strokeStyle = 'rgba(180,200,220,0.4)';
-        ctx.lineWidth = 1.5;
-        ctx.strokeRect(cl*pw+margin, r*ph+margin, pw-margin*2, ph-margin*2);
-        // Cruce fereastra
-        ctx.strokeStyle = 'rgba(160,185,210,0.3)';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(cl*pw+pw/2, r*ph+margin);
-        ctx.lineTo(cl*pw+pw/2, r*ph+ph-margin);
-        ctx.moveTo(cl*pw+margin, r*ph+ph/2);
-        ctx.lineTo(cl*pw+pw-margin, r*ph+ph/2);
-        ctx.stroke();
+        const x=cl*pw+mx, y=r*ph+my, w=pw-mx*2, h=ph-my*2;
+        // Glaf (umbra sub fereastra)
+        ctx.fillStyle='rgba(0,0,0,0.25)';
+        ctx.fillRect(x-2, y+h-4, w+4, 8);
+        // Fond sticla
+        const isLit = Math.random() > 0.4;
+        const grd = ctx.createLinearGradient(x,y,x+w,y+h);
+        if(isLit){
+          grd.addColorStop(0,'rgba(200,225,255,0.75)');
+          grd.addColorStop(0.4,'rgba(160,200,245,0.6)');
+          grd.addColorStop(1,'rgba(120,170,230,0.55)');
+        } else {
+          grd.addColorStop(0,'rgba(30,55,100,0.8)');
+          grd.addColorStop(1,'rgba(15,30,65,0.85)');
+        }
+        ctx.fillStyle=grd; ctx.fillRect(x,y,w,h);
+        // Frame aluminiu
+        ctx.strokeStyle='rgba(200,215,230,0.6)';
+        ctx.lineWidth=2.5;
+        ctx.strokeRect(x,y,w,h);
+        // Montant vertical central
+        ctx.strokeStyle='rgba(180,200,220,0.4)';
+        ctx.lineWidth=1.5;
+        ctx.beginPath(); ctx.moveTo(x+w/2,y); ctx.lineTo(x+w/2,y+h); ctx.stroke();
+        // Reflection diagonal
+        ctx.strokeStyle='rgba(255,255,255,0.18)';
+        ctx.lineWidth=1;
+        ctx.beginPath(); ctx.moveTo(x+4,y+4); ctx.lineTo(x+w*0.35,y+h*0.35); ctx.stroke();
       }
-      // Subtle reflection highlight
-      const refGrd = ctx.createLinearGradient(0,0,256,256);
-      refGrd.addColorStop(0,'rgba(255,255,255,0.06)');
-      refGrd.addColorStop(0.5,'rgba(255,255,255,0.0)');
-      refGrd.addColorStop(1,'rgba(255,255,255,0.04)');
-      ctx.fillStyle = refGrd; ctx.fillRect(0,0,256,256);
+      // Banda orizontala intre etaje (planseul)
+      ctx.fillStyle='rgba(0,0,0,0.2)';
+      for(let r=1;r<rows;r++){
+        ctx.fillRect(0,r*(512/rows)-4,512,8);
+      }
 
     } else if(isPlaster){
       // Tencuiala cu ferestre traditionale
@@ -8173,16 +8204,20 @@ function _v3dFloorMat(THREE, colorHex, floorIdx, stilKey){
       }
     }
 
-    _v3dTexCache[cacheKey] = new THREE.CanvasTexture(cv);
-    _v3dTexCache[cacheKey].wrapS = THREE.RepeatWrapping;
-    _v3dTexCache[cacheKey].wrapT = THREE.RepeatWrapping;
+    const t = new THREE.CanvasTexture(cv);
+    t.wrapS = THREE.RepeatWrapping;
+    t.wrapT = THREE.RepeatWrapping;
+    // Repeat: sticla 1 tile per ~8m fatada; tencuiala 1 tile per ~4m
+    t.repeat.set(isGlass ? 0.5 : isIndustrial ? 0.4 : 0.6,
+                 isGlass ? 1.0 : 0.8);
+    _v3dTexCache[cacheKey] = t;
   }
 
   const tex = _v3dTexCache[cacheKey];
   return new THREE.MeshStandardMaterial({
     map: tex,
-    roughness: isGlass ? 0.08 : isIndustrial ? 0.4 : 0.75,
-    metalness: isGlass ? 0.12 : isIndustrial ? 0.5 : 0.02,
+    roughness: isGlass ? 0.06 : isIndustrial ? 0.4 : 0.75,
+    metalness: isGlass ? 0.10 : isIndustrial ? 0.5 : 0.02,
   });
 }
 
@@ -8294,29 +8329,47 @@ function _v3dInitControls(canvas, camera, targetH){
   canvas.addEventListener('mousedown', e=>{ 
     isDragging=true; isShift=e.shiftKey; lastX=e.clientX; lastY=e.clientY;
     canvas.style.cursor='grabbing';
+    e.preventDefault();
   });
-  window.addEventListener('mouseup', ()=>{ isDragging=false; canvas.style.cursor='grab'; });
-  window.addEventListener('mousemove', e=>{
+  // Mouseup pe window pentru a prinde release-ul în afara canvas-ului
+  const _onMouseUp = ()=>{ isDragging=false; canvas.style.cursor='grab'; };
+  window.addEventListener('mouseup', _onMouseUp);
+  
+  const _onMouseMove = e=>{
     if(!isDragging) return;
-    const dx=(e.clientX-lastX)*0.005, dy=(e.clientY-lastY)*0.005;
+    const dx=(e.clientX-lastX)*0.004, dy=(e.clientY-lastY)*0.004;
     lastX=e.clientX; lastY=e.clientY;
     if(isShift||e.buttons===4){
-      // Pan
       const right = new THREE.Vector3(); 
       right.crossVectors(camera.getWorldDirection(new THREE.Vector3()), camera.up).normalize();
-      target.addScaledVector(right, -dx*radius*0.5);
-      target.y += dy*radius*0.5;
+      target.addScaledVector(right, -dx*radius*0.4);
+      target.y += dy*radius*0.4;
     } else {
       theta -= dx;
-      phi = Math.max(0.1, Math.min(Math.PI/2-0.05, phi+dy));
+      phi = Math.max(0.08, Math.min(Math.PI/2.1, phi+dy));
     }
     updateCamera();
-  });
+  };
+  window.addEventListener('mousemove', _onMouseMove);
+
   canvas.addEventListener('wheel', e=>{
     e.preventDefault();
-    radius = Math.max(8, Math.min(300, radius*(1+e.deltaY*0.001)));
+    const factor = e.deltaY > 0 ? 1.08 : 0.93;
+    radius = Math.max(6, Math.min(250, radius*factor));
     updateCamera();
   },{passive:false});
+
+  // ESC sau click dreapta = stop drag
+  window.addEventListener('keydown', e=>{
+    if(e.key==='Escape') isDragging=false;
+  });
+  canvas.addEventListener('contextmenu', e=>{ e.preventDefault(); isDragging=false; });
+  
+  // Cleanup la dispose
+  V3D._cleanupControls = ()=>{
+    window.removeEventListener('mouseup', _onMouseUp);
+    window.removeEventListener('mousemove', _onMouseMove);
+  };
 
   // Touch
   let lastTouchDist=0, lastTouchX=0, lastTouchY=0;
@@ -8377,10 +8430,10 @@ function _v3dLoadStreets(cx, cy, toLocal, scene, THREE){
 
       // Culoare per tip strada
       const colMap = {
-        trunk:'#1e3a5f', primary:'#1e3a5f', secondary:'#1a3350',
-        tertiary:'#152a40', residential:'#111f30',
-        footway:'#0d1a25', pedestrian:'#0d1a25',
-        service:'#0d1824', path:'#0a1520', living_street:'#111f30'
+        trunk:'#374151', primary:'#374151', secondary:'#2d3748',
+        tertiary:'#252f3e', residential:'#1f2937',
+        footway:'#374151', pedestrian:'#374151',
+        service:'#1a2535', path:'#1a2535', living_street:'#1f2937'
       };
       const col = colMap[hw]||'#111f30';
 
@@ -8391,14 +8444,14 @@ function _v3dLoadStreets(cx, cy, toLocal, scene, THREE){
         const dx=x1-x0, dz=z1-z0;
         const len=Math.sqrt(dx*dx+dz*dz);
         if(len<0.01) continue;
-        const nx=-dz/len, nz=dx/len; // normala perpendiculara
+        const nx=-dz/len, nz=dx/len;
         const base=i*2;
         verts.push(
-          x0+nx*w, 0.05, z0+nz*w,  // stanga
-          x0-nx*w, 0.05, z0-nz*w   // dreapta
+          x0+nx*w, 0.08, z0+nz*w,
+          x0-nx*w, 0.08, z0-nz*w
         );
         if(i===pts.length-2){
-          verts.push(x1+nx*w,0.05,z1+nz*w, x1-nx*w,0.05,z1-nz*w);
+          verts.push(x1+nx*w,0.08,z1+nz*w, x1-nx*w,0.08,z1-nz*w);
         }
         uvs.push(0,i/pts.length, 1,i/pts.length);
         if(i<pts.length-2){
