@@ -7742,8 +7742,7 @@ function aedisOpen3DViewer(){
   const niv = AEDIS.corpuri[0]?.niv || 4;
   const hNiv = AEDIS.corpuri[0]?.hNiv || 3.0;
   const hTot = ((AEDIS.parterDiferit?(fnDef.hParter||4.5):hNiv)+(niv-1)*hNiv).toFixed(1);
-  const nParcels = S.parcels.length;
-  const multiInfo = nParcels > 1 ? ` · ${nParcels} parcele` : '';
+  // nParcels + multiInfo definite mai sus
 
   overlay.innerHTML = `
     <div style="background:linear-gradient(180deg,#080f1c,rgba(8,15,28,.9));
