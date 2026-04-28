@@ -3913,7 +3913,9 @@ function onCadInput(val){
 }
 
 function doCad(){
-  const v=(document.querySelector('#inp-cad')?.value||'').trim();
+  // Pe mobile, elementul e în mob-body; pe desktop e în panel-body
+  const el = document.getElementById('inp-cad') || document.querySelector('#inp-cad');
+  const v=(el?.value||'').trim();
   if(!v)return;
   const key=v.toLowerCase().replace(/\s+/g,'');
   const found=S.cadIdx.get(key);
@@ -6121,22 +6123,33 @@ function aedis3DRemove(){
 // ── Demolare: filtrează existentele de pe parcelele active din ctx-src ────────
 function _aedisRemoveExistingFromCtx(){
   try{
+    // 1. Eliminăm din ctx-src (clădiri OSM)
     const src = map.getSource('ctx-src');
-    if(!src?._data?.features) return;
-    const filtered = src._data.features.filter(f=>{
-      try{
-        const ctr = turf.centerOfMass(f);
-        // Păstrăm feature dacă NU e pe nicio parcelă activă
-        for(const p of S.parcels){
-          if(!p.geo?.geometry) continue;
-          if(turf.booleanPointInPolygon(ctr,{type:'Feature',geometry:p.geo.geometry,properties:{}}))
-            return false; // e pe parcelă → eliminăm
-        }
-        return true;
-      }catch(e){ return true; }
-    });
-    src.setData({type:'FeatureCollection', features:filtered});
-    ss('🔨 Demolare: existente eliminate de pe parcelă.');
+    if(src?._data?.features){
+      const filtered = src._data.features.filter(f=>{
+        try{
+          const ctr = turf.centerOfMass(f);
+          for(const p of S.parcels){
+            if(!p.geo?.geometry) continue;
+            if(turf.booleanPointInPolygon(ctr,{type:'Feature',geometry:p.geo.geometry,properties:{}}))
+              return false;
+          }
+          return true;
+        }catch(e){ return true; }
+      });
+      src.setData({type:'FeatureCollection', features:filtered});
+    }
+    
+    // 2. Eliminăm din vol-src featurile cu isExistent=true
+    const volSrc = map.getSource('vol-src');
+    if(volSrc?._data?.features){
+      const volFiltered = volSrc._data.features.filter(f=>!f.properties?.isExistent);
+      volSrc.setData({type:'FeatureCollection', features:volFiltered});
+    }
+    
+    // 3. Resetăm baseH pentru generarea nouă (nu mai suprapunem pe existent)
+    AEDIS._forcedBaseH = 0;
+    ss('🔨 Demolare: teren curățat. Generați noul volum cu ⚡.');
   }catch(e){ console.warn('_aedisRemoveExistingFromCtx error:', e.message); }
 }
 
@@ -6514,9 +6527,9 @@ function aedisGetContent(){
     <button onclick="aedisGenerateAll()" class="aedis-build-btn">
       ⚡ Generează Volum 3D în hartă
     </button>
-    <button onclick="aedisViewStandard3D()" class="aedis-dim-btn" 
+    <button onclick="aedisOpen3DViewer()" class="aedis-dim-btn" 
       style="background:rgba(99,102,241,.2);border-color:rgba(139,92,246,.5);color:#a78bfa;font-size:10px;font-weight:700" 
-      title="Vedere 3D Standard cu iluminare reală">🏙 3D</button>
+      title="Viewer 3D — volum în context urban">🔭 3D</button>
     <button onclick="aedisAIRender()" class="aedis-dim-btn" style="background:rgba(212,175,55,.15);border-color:rgba(212,175,55,.4);color:#d4af37;font-size:10px" title="AI Render fotorealist (necesită API key Fal.ai)">🎨 AI</button>
     <button onclick="generateSolarStudy()" class="aedis-dim-btn" style="background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.4);color:#fbbf24;font-size:10px" title="Studiu însorire PDF">☀</button>
     <button onclick="AEDIS.showDim=!AEDIS.showDim;aedisRender()" 
@@ -8223,6 +8236,390 @@ async function generateSolarStudy(){
   pdf.text(`UrbanX · AEDIS · ${new Date().toLocaleString('ro')}`,W/2,H-8,{align:'center'});
   pdf.save(`StudiuInsorire_${ap.nrcad||'parcela'}_${year}.pdf`);
   ss('✅ Studiu însorire generat! PDF descărcat.');
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// AEDIS 3D VIEWER — Three.js, BufferGeometry corect
+// ═══════════════════════════════════════════════════════════════════════════
+
+function aedisOpen3DViewer(){
+  const ap = S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry){ ss('⚠️ Selectați o parcelă mai întâi.'); return; }
+  if(!S.vol._lastFeats?.length){
+    ss('⚠️ Generați mai întâi volumul AEDIS (butonul ⚡).'); return;
+  }
+
+  let ov = document.getElementById('aedis-3d-viewer-overlay');
+  if(ov) ov.remove();
+  ov = document.createElement('div');
+  ov.id = 'aedis-3d-viewer-overlay';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:9998;background:#0a0e1a;display:flex;flex-direction:column';
+  document.body.appendChild(ov);
+
+  const niv = AEDIS.corpuri[0]?.niv||4;
+  const hNiv = AEDIS.corpuri[0]?.hNiv||3.0;
+  const fnDef = AEDIS_FN[AEDIS.fn]||AEDIS_FN.rezidential_colectiv;
+  const stilDef = AEDIS_STIL[AEDIS.stil]||AEDIS_STIL.modern;
+  const hTot = ((AEDIS.parterDiferit?(fnDef.hParter||4.5):hNiv)+(niv-1)*hNiv).toFixed(1);
+
+  ov.innerHTML = `
+    <div style="background:#080f1c;border-bottom:1px solid rgba(139,92,246,.3);padding:9px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0">
+      <div style="font-size:13px;font-weight:800;color:#a78bfa">🔭 AEDIS 3D Viewer</div>
+      <div style="font-size:11px;color:#64748b">${fnDef.label||''} · ${stilDef.label||''} · ${niv} niv. · H=${hTot}m</div>
+      <div style="flex:1"></div>
+      <select id="v3d-light" onchange="_v3dLight(this.value)" style="background:#0f172a;color:#e2e8f0;border:1px solid rgba(255,255,255,.15);border-radius:7px;padding:5px 10px;font-size:11px">
+        <option value="day">☀ Zi</option>
+        <option value="golden">🌅 Golden</option>
+        <option value="overcast">☁ Înnorat</option>
+        <option value="night">🌙 Noapte</option>
+      </select>
+      <select id="v3d-ctx" onchange="_v3dCtxViz(this.value)" style="background:#0f172a;color:#e2e8f0;border:1px solid rgba(255,255,255,.15);border-radius:7px;padding:5px 10px;font-size:11px">
+        <option value="show">Context vizibil</option>
+        <option value="wire">Wireframe</option>
+        <option value="hide">Ascunde</option>
+      </select>
+      <button onclick="_v3dResetCam()" style="background:rgba(255,255,255,.06);color:#94a3b8;border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 10px;font-size:11px;cursor:pointer">⌂ Reset</button>
+      <button onclick="document.getElementById('aedis-3d-viewer-overlay').remove();_v3dCleanup()" style="background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3);border-radius:7px;padding:5px 10px;font-size:11px;cursor:pointer">✕ Închide</button>
+    </div>
+    <canvas id="v3d-canvas" style="flex:1;display:block;cursor:grab;touch-action:none"></canvas>
+    <div id="v3d-status" style="position:absolute;bottom:10px;left:14px;font-size:10px;color:#475569;pointer-events:none">Se inițializează…</div>`;
+
+  aedisLoadThree(()=>{ setTimeout(()=>_v3dBuild(ap), 40); });
+}
+
+// ── State ──────────────────────────────────────────────────────────────────
+const V3D = { r:null, scene:null, cam:null, af:null, ctx:[], aedis:[], texCache:{},
+  th:Math.PI/4, ph:Math.PI/3.2, rad:60, tx:new THREE?.Vector3?.(0,6,0)||null };
+
+function _v3dCleanup(){
+  if(V3D.af) cancelAnimationFrame(V3D.af);
+  if(V3D.r){ V3D.r.dispose(); V3D.r=null; }
+  Object.values(V3D.texCache).forEach(t=>{ try{t.dispose();}catch(e){} });
+  V3D.texCache={}; V3D.scene=null; V3D.cam=null; V3D.ctx=[]; V3D.aedis=[];
+}
+
+function _v3dStatus(msg){ const el=document.getElementById('v3d-status'); if(el) el.textContent=msg; }
+
+// ── Build scene ────────────────────────────────────────────────────────────
+function _v3dBuild(ap){
+  const THREE = window.THREE;
+  const canvas = document.getElementById('v3d-canvas');
+  if(!canvas||!THREE){ _v3dStatus('❌ Three.js indisponibil'); return; }
+
+  const W=canvas.offsetWidth, H=canvas.offsetHeight;
+
+  // Renderer
+  const r = new THREE.WebGLRenderer({canvas,antialias:true,alpha:false});
+  r.setSize(W,H); r.setPixelRatio(Math.min(devicePixelRatio,2));
+  r.shadowMap.enabled=true; r.shadowMap.type=THREE.PCFSoftShadowMap;
+  r.toneMapping=THREE.ACESFilmicToneMapping; r.toneMappingExposure=1.1;
+  V3D.r=r;
+
+  // Scene
+  const scene=new THREE.Scene();
+  scene.background=new THREE.Color('#0d1b2a');
+  scene.fog=new THREE.FogExp2('#0d1b2a',0.004);
+  V3D.scene=scene;
+
+  // Camera
+  const cam=new THREE.PerspectiveCamera(45,W/H,0.5,800);
+  V3D.cam=cam;
+
+  // Lighting — zi
+  _v3dApplyLight('day',THREE,scene,r);
+
+  // Ground
+  const gGeo=new THREE.PlaneGeometry(600,600);
+  const gMat=new THREE.MeshStandardMaterial({color:'#111827',roughness:0.97,metalness:0});
+  const g=new THREE.Mesh(gGeo,gMat); g.rotation.x=-Math.PI/2; g.position.y=-0.05;
+  g.receiveShadow=true; scene.add(g);
+
+  // Grid
+  const grid=new THREE.GridHelper(400,80,'#1a2d40','#111e2a');
+  grid.material.opacity=0.35; grid.material.transparent=true; scene.add(grid);
+
+  // Coordonate locale
+  const ring0 = ap.geo.geometry.type==='Polygon'
+    ? ap.geo.geometry.coordinates[0]
+    : ap.geo.geometry.coordinates[0][0];
+  const cx=ring0.reduce((s,c)=>s+c[0],0)/ring0.length;
+  const cy2=ring0.reduce((s,c)=>s+c[1],0)/ring0.length;
+  const mLng=111320*Math.cos(cy2*Math.PI/180), mLat=111320;
+  const toLoc=([lng,lat])=>[(lng-cx)*mLng,(lat-cy2)*mLat];
+
+  // ── Context buildings ────────────────────────────────────────────────────
+  (S.ctx?.features||[]).forEach(f=>{
+    if(!f.geometry) return;
+    const h=Math.max(2,f.properties?.h||6);
+    const fn=f.properties?.fn||'yes';
+    const colMap={residential:'#2e3f52',apartments:'#2a3b4c',commercial:'#3a3020',
+      office:'#1e3040',industrial:'#2d2d2d','yes':'#283545'};
+    const col=colMap[fn]||'#283545';
+    try{
+      const fring=f.geometry.type==='Polygon'?f.geometry.coordinates[0]:f.geometry.coordinates[0][0];
+      const pts=fring.slice(0,-1).map(toLoc);
+      if(pts.length<3) return;
+      const mat=new THREE.MeshStandardMaterial({color:col,roughness:0.85,metalness:0.02});
+      const mesh=_v3dPrism(THREE,pts,0,h,mat);
+      if(mesh){ mesh.castShadow=true; mesh.receiveShadow=true; scene.add(mesh); V3D.ctx.push(mesh); }
+    }catch(e){}
+  });
+
+  // ── AEDIS volume ─────────────────────────────────────────────────────────
+  const stilKey=AEDIS.stil||'modern';
+  (S.vol._lastFeats||[]).forEach(f=>{
+    if(!f.geometry||f.properties?.isExistent) return;
+    const base=f.properties?.base||0;
+    const top=f.properties?.top||3;
+    const floor=f.properties?.floor??0;
+    const col=f.properties?.color||'#3b82f6';
+    const h=top-base; if(h<=0.01) return;
+    try{
+      const fring=f.geometry.type==='Polygon'?f.geometry.coordinates[0]:f.geometry.coordinates[0][0];
+      const pts=fring.slice(0,-1).map(toLoc);
+      if(pts.length<3) return;
+      const isRoof=floor<0||!!f.properties?.roofType;
+      const isTop=!!f.properties?.isLast;
+      let mat;
+      if(isRoof){ mat=_v3dMatRoof(THREE,stilKey,V3D.texCache); }
+      else if(floor===0){ mat=_v3dMatParter(THREE,stilKey,V3D.texCache); }
+      else if(isTop){ mat=_v3dMatPenthouse(THREE,stilKey,V3D.texCache); }
+      else{ mat=_v3dMatFloor(THREE,col,floor,stilKey,V3D.texCache); }
+      const mesh=_v3dPrism(THREE,pts,base,top,mat);
+      if(mesh){ mesh.castShadow=true; mesh.receiveShadow=true; scene.add(mesh); V3D.aedis.push(mesh); }
+    }catch(e){ console.warn('AEDIS mesh:',e.message); }
+  });
+
+  // Parcelă contur
+  try{
+    const pts=ring0.map(toLoc);
+    const verts=new Float32Array(pts.flatMap(([x,z])=>[x,0.2,z]));
+    const lg=new THREE.BufferGeometry(); lg.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));
+    scene.add(new THREE.LineLoop(lg,new THREE.LineBasicMaterial({color:'#00e5b4',opacity:0.7,transparent:true})));
+  }catch(e){}
+
+  // Camera poziție inițială
+  const maxH=Math.max(...(S.vol._lastFeats||[]).map(f=>f.properties?.top||0),8);
+  const parcelSz=Math.max(...ring0.map(([lng,lat])=>{const[x,z]=toLoc([lng,lat]);return Math.sqrt(x*x+z*z);}),10);
+  V3D.rad=Math.max(parcelSz*2.5,maxH*2.2,35);
+  if(!V3D.tx) V3D.tx=new THREE.Vector3(0,maxH*0.4,0);
+  else V3D.tx.set(0,maxH*0.4,0);
+  _v3dUpdateCam();
+
+  // Controls
+  _v3dControls(canvas,cam);
+
+  // Resize
+  const obs=new ResizeObserver(()=>{
+    if(!V3D.r) return;
+    const w=canvas.offsetWidth,h=canvas.offsetHeight;
+    V3D.r.setSize(w,h); V3D.cam.aspect=w/h; V3D.cam.updateProjectionMatrix();
+  });
+  obs.observe(canvas); V3D._obs=obs;
+
+  // Render loop
+  const render=()=>{ V3D.af=requestAnimationFrame(render); if(V3D.r&&V3D.scene&&V3D.cam) V3D.r.render(V3D.scene,V3D.cam); };
+  render();
+
+  _v3dStatus(`✅ ${V3D.aedis.length} volume AEDIS · ${V3D.ctx.length} clădiri context · Drag=rotire Scroll=zoom`);
+}
+
+// ── Prismă dreaptă — BufferGeometry direct în world space ─────────────────
+function _v3dPrism(THREE,pts2d,base,top,mat){
+  const n=pts2d.length; const h=top-base;
+  if(n<3||h<=0) return null;
+  const pos=[],nrm=[],uvArr=[],idx=[];
+  let uAcc=0;
+  // Pereți laterali
+  for(let i=0;i<n;i++){
+    const [x0,z0]=pts2d[i],[x1,z1]=pts2d[(i+1)%n];
+    const dx=x1-x0,dz=z1-z0,len=Math.sqrt(dx*dx+dz*dz);
+    if(len<0.01) continue;
+    const nx=dz/len,nz=-dx/len;
+    const b4=pos.length/3;
+    pos.push(x0,base,z0, x1,base,z1, x1,top,z1, x0,top,z0);
+    nrm.push(nx,0,nz, nx,0,nz, nx,0,nz, nx,0,nz);
+    uvArr.push(uAcc/100,0, (uAcc+len)/100,0, (uAcc+len)/100,h/10, uAcc/100,h/10);
+    idx.push(b4,b4+1,b4+2, b4,b4+2,b4+3);
+    uAcc+=len;
+  }
+  // Față sus (acoperiș)
+  const tb=pos.length/3;
+  for(let i=0;i<n;i++){ const[x,z]=pts2d[i]; pos.push(x,top,z); nrm.push(0,1,0); uvArr.push(x*0.05,z*0.05); }
+  for(let i=1;i<n-1;i++) idx.push(tb,tb+i,tb+i+1);
+  // Față jos
+  const bb2=pos.length/3;
+  for(let i=0;i<n;i++){ const[x,z]=pts2d[i]; pos.push(x,base,z); nrm.push(0,-1,0); uvArr.push(x*0.05,z*0.05); }
+  for(let i=1;i<n-1;i++) idx.push(bb2,bb2+i+1,bb2+i);
+  const geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  geo.setAttribute('normal',new THREE.Float32BufferAttribute(nrm,3));
+  geo.setAttribute('uv',new THREE.Float32BufferAttribute(uvArr,2));
+  geo.setIndex(idx);
+  return new THREE.Mesh(geo,mat);
+}
+
+// ── Materiale ──────────────────────────────────────────────────────────────
+function _v3dWinTex(THREE,cache,key,colHex,rows,cols,isNight){
+  const k=key+(isNight?'_n':'');
+  if(cache[k]) return cache[k];
+  const cv=document.createElement('canvas'); cv.width=512; cv.height=512;
+  const ctx=cv.getContext('2d');
+  // Fond fatadă
+  const r2=parseInt(colHex.slice(1,3)||'30',16),g2=parseInt(colHex.slice(3,5)||'50',16),b2=parseInt(colHex.slice(5,7)||'90',16);
+  ctx.fillStyle=`rgb(${Math.max(0,r2-20)},${Math.max(0,g2-20)},${Math.max(0,b2-20)})`; ctx.fillRect(0,0,512,512);
+  // Planseu sus/jos
+  ctx.fillStyle='rgba(0,0,0,0.45)'; ctx.fillRect(0,0,512,32); ctx.fillRect(0,480,512,32);
+  const pw=512/cols, ph=(512-64)/rows, px=pw*0.1, py=6;
+  for(let row=0;row<rows;row++) for(let col=0;col<cols;col++){
+    const x=col*pw+px, y=32+row*ph+py, fw=pw-px*2, fh=ph-py*2;
+    const lit = isNight ? (Math.random()>0.25) : ((col+row*cols)%3!==0);
+    ctx.fillStyle='rgba(0,0,0,0.2)'; ctx.fillRect(x-2,y+fh,fw+4,5);
+    const grd=ctx.createLinearGradient(x,y,x+fw,y+fh);
+    if(lit&&isNight){ grd.addColorStop(0,'rgba(255,240,180,0.9)'); grd.addColorStop(1,'rgba(220,200,120,0.8)'); }
+    else if(lit){ grd.addColorStop(0,'rgba(170,210,250,0.82)'); grd.addColorStop(1,'rgba(100,160,220,0.65)'); }
+    else { grd.addColorStop(0,'rgba(15,30,65,0.9)'); grd.addColorStop(1,'rgba(8,18,45,0.85)'); }
+    ctx.fillStyle=grd; ctx.fillRect(x,y,fw,fh);
+    ctx.strokeStyle='rgba(190,210,230,0.55)'; ctx.lineWidth=2.5; ctx.strokeRect(x,y,fw,fh);
+    ctx.strokeStyle='rgba(160,185,215,0.3)'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(x+fw/2,y); ctx.lineTo(x+fw/2,y+fh); ctx.stroke();
+    if(lit){ ctx.strokeStyle='rgba(255,255,255,0.2)'; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(x+3,y+4); ctx.lineTo(x+fw*0.3,y+fh*0.28); ctx.stroke(); }
+  }
+  const t=new THREE.CanvasTexture(cv); t.wrapS=t.wrapT=THREE.RepeatWrapping; t.repeat.set(1,1);
+  cache[k]=t; return t;
+}
+
+function _v3dMatParter(THREE,stil,cache){
+  const cols={modern:'#0d1520',clasic:'#2a1506',minimalist:'#1c1c1f',inovator:'#18112a',industrial:'#0a0908'};
+  const cv=document.createElement('canvas'); cv.width=256; cv.height=256;
+  const ctx=cv.getContext('2d'); const col=cols[stil]||'#1a1a2e';
+  ctx.fillStyle=col; ctx.fillRect(0,0,256,256);
+  ctx.strokeStyle='rgba(0,0,0,0.2)'; ctx.lineWidth=1;
+  for(let y=0;y<256;y+=24){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(256,y); ctx.stroke(); }
+  const id=ctx.getImageData(0,0,256,256);
+  for(let i=0;i<id.data.length;i+=4){const n=(Math.random()-0.5)*16;id.data[i]+=n;id.data[i+1]+=n;id.data[i+2]+=n;}
+  ctx.putImageData(id,0,0);
+  const t=new THREE.CanvasTexture(cv); t.wrapS=t.wrapT=THREE.RepeatWrapping;
+  return new THREE.MeshStandardMaterial({map:t,roughness:0.82,metalness:0.04});
+}
+
+function _v3dMatFloor(THREE,colHex,floorIdx,stil,cache){
+  const isNight=window._v3dNight||false;
+  const rows=4,cols=2;
+  const t=_v3dWinTex(THREE,cache,'floor_'+colHex+floorIdx,colHex,rows,cols,isNight);
+  const isGlass=['modern','inovator'].includes(stil);
+  return new THREE.MeshStandardMaterial({map:t,roughness:isGlass?0.06:0.75,metalness:isGlass?0.1:0.02,
+    emissive:isNight?new THREE.Color(0.04,0.06,0.1):new THREE.Color(0,0,0),
+    emissiveIntensity:isNight?0.5:0});
+}
+
+function _v3dMatPenthouse(THREE,stil,cache){
+  const cv=document.createElement('canvas'); cv.width=256; cv.height=128;
+  const ctx=cv.getContext('2d');
+  const roofCols={modern:'#0c1a2e',clasic:'#1a0e04',minimalist:'#2a2a2e',inovator:'#0c0818',industrial:'#080706'};
+  ctx.fillStyle=roofCols[stil]||'#0c1a2e'; ctx.fillRect(0,0,256,128);
+  ctx.strokeStyle='rgba(255,255,255,0.07)'; ctx.lineWidth=2;
+  for(let x=0;x<256;x+=32){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,128); ctx.stroke(); }
+  const grd=ctx.createLinearGradient(0,0,256,0);
+  grd.addColorStop(0,'rgba(255,255,255,0.04)'); grd.addColorStop(0.5,'rgba(255,255,255,0.1)'); grd.addColorStop(1,'rgba(255,255,255,0.04)');
+  ctx.fillStyle=grd; ctx.fillRect(0,0,256,128);
+  const t=new THREE.CanvasTexture(cv); t.wrapS=t.wrapT=THREE.RepeatWrapping;
+  return new THREE.MeshStandardMaterial({map:t,roughness:0.25,metalness:0.6});
+}
+
+function _v3dMatRoof(THREE,stil,cache){
+  const roofCols={modern:'#0c1a2e',clasic:'#1a0e04',minimalist:'#2a2a2e',inovator:'#0c0818',industrial:'#060606'};
+  const col=roofCols[stil]||'#111827';
+  return new THREE.MeshStandardMaterial({color:col,roughness:0.45,metalness:0.55});
+}
+
+// ── Iluminare ──────────────────────────────────────────────────────────────
+function _v3dApplyLight(preset,THREE,scene,r){
+  scene.children.filter(c=>c.isLight).forEach(l=>scene.remove(l));
+  const P={
+    day:   {sky:'#0d1b2a',fog:'#0d1b2a',amb:{c:'#b0c4de',i:0.7},sun:{c:'#fff5e0',i:2.2,p:[80,120,60]},fill:{c:'#4488aa',i:0.3,p:[-60,40,-40]},exp:1.1,night:false},
+    golden:{sky:'#1a0f08',fog:'#140c06',amb:{c:'#c8884a',i:0.5},sun:{c:'#ff9040',i:1.8,p:[120,30,40]},fill:{c:'#6040a0',i:0.4,p:[-40,60,-60]},exp:1.4,night:false},
+    overcast:{sky:'#1c2430',fog:'#1c2430',amb:{c:'#8899aa',i:1.1},sun:{c:'#c8d8e8',i:0.8,p:[40,100,40]},fill:{c:'#7788aa',i:0.5,p:[-40,50,-40]},exp:1.1,night:false},
+    night: {sky:'#020408',fog:'#020408',amb:{c:'#0a1428',i:0.25},sun:{c:'#8090c0',i:0.15,p:[-40,60,20]},fill:{c:'#ff9030',i:0.8,p:[0,3,0]},exp:0.8,night:true},
+  };
+  const p=P[preset]||P.day;
+  window._v3dNight=p.night;
+  if(scene.background) scene.background.set(p.sky);
+  if(scene.fog) scene.fog.color.set(p.fog);
+  const amb=new THREE.AmbientLight(p.amb.c,p.amb.i); scene.add(amb);
+  const sun=new THREE.DirectionalLight(p.sun.c,p.sun.i);
+  sun.position.set(...p.sun.p); sun.castShadow=true;
+  sun.shadow.mapSize.width=sun.shadow.mapSize.height=2048;
+  sun.shadow.camera.near=0.5; sun.shadow.camera.far=500;
+  [-120,120,-120,120].forEach((v,i)=>{ if(i<2) sun.shadow.camera['left right'.split(' ')[i]]=v; else sun.shadow.camera['top bottom'.split(' ')[i-2]]=v; });
+  sun.shadow.bias=-0.001; scene.add(sun);
+  const fill=new THREE.DirectionalLight(p.fill.c,p.fill.i); fill.position.set(...p.fill.p); scene.add(fill);
+  if(r) r.toneMappingExposure=p.exp;
+}
+
+function _v3dLight(preset){
+  if(!V3D.scene||!window.THREE) return;
+  _v3dApplyLight(preset,window.THREE,V3D.scene,V3D.r);
+  // Rebuildem materialele cu texturi de noapte/zi
+  if(V3D.texCache){ Object.values(V3D.texCache).forEach(t=>t.dispose()); V3D.texCache={}; }
+  // Actualizăm emissive pe meshurile AEDIS
+  V3D.aedis.forEach(m=>{
+    if(m.material?.map){ m.material.emissive=new THREE.Color(window._v3dNight?0.04:0,window._v3dNight?0.06:0,window._v3dNight?0.1:0); m.material.emissiveIntensity=window._v3dNight?0.5:0; m.material.needsUpdate=true; }
+  });
+}
+
+function _v3dCtxViz(mode){
+  V3D.ctx.forEach(m=>{
+    m.visible=mode!=='hide';
+    if(m.material) m.material.wireframe=mode==='wire';
+  });
+}
+
+// ── Orbit controls ─────────────────────────────────────────────────────────
+function _v3dUpdateCam(){
+  if(!V3D.cam||!V3D.tx) return;
+  const x=V3D.rad*Math.sin(V3D.ph)*Math.sin(V3D.th);
+  const y=V3D.rad*Math.cos(V3D.ph);
+  const z=V3D.rad*Math.sin(V3D.ph)*Math.cos(V3D.th);
+  V3D.cam.position.set(V3D.tx.x+x,V3D.tx.y+y,V3D.tx.z+z);
+  V3D.cam.lookAt(V3D.tx);
+}
+
+function _v3dResetCam(){
+  V3D.th=Math.PI/4; V3D.ph=Math.PI/3.2;
+  const maxH=Math.max(...(S.vol._lastFeats||[]).map(f=>f.properties?.top||0),8);
+  const ap=S.parcels[S.activeParcel??0];
+  const ring=ap?.geo?.geometry?.type==='Polygon'?ap.geo.geometry.coordinates[0]:ap?.geo?.geometry?.coordinates?.[0]?.[0]||[];
+  const cy2=ring.reduce?.((s,c)=>s+c[1],0)/(ring.length||1)||0;
+  const mLat=111320; const cx2=ring.reduce?.((s,c)=>s+c[0],0)/(ring.length||1)||0;
+  const mLng=111320*Math.cos(cy2*Math.PI/180);
+  const toLoc=([lng,lat])=>[(lng-cx2)*mLng,(lat-cy2)*mLat];
+  const pts=ring.map?.(toLoc)||[];
+  const parcelSz=Math.max(...pts.map(([x,z])=>Math.sqrt(x*x+z*z)),10);
+  V3D.rad=Math.max(parcelSz*2.5,maxH*2.2,35);
+  if(V3D.tx) V3D.tx.set(0,maxH*0.4,0);
+  _v3dUpdateCam();
+}
+
+function _v3dControls(canvas,cam){
+  let drag=false,shft=false,lx=0,ly=0;
+  const mu=()=>{drag=false;canvas.style.cursor='grab';};
+  canvas.addEventListener('mousedown',e=>{drag=true;shft=e.shiftKey;lx=e.clientX;ly=e.clientY;canvas.style.cursor='grabbing';e.preventDefault();});
+  const mm=e=>{if(!drag)return;const dx=(e.clientX-lx)*0.004,dy=(e.clientY-ly)*0.004;lx=e.clientX;ly=e.clientY;
+    if(shft||e.buttons===4){const r2=new THREE.Vector3();r2.crossVectors(cam.getWorldDirection(new THREE.Vector3()),cam.up).normalize();V3D.tx.addScaledVector(r2,-dx*V3D.rad*0.4);V3D.tx.y+=dy*V3D.rad*0.4;}
+    else{V3D.th-=dx;V3D.ph=Math.max(0.08,Math.min(Math.PI/2.05,V3D.ph+dy));}
+    _v3dUpdateCam();};
+  window.addEventListener('mousemove',mm); window.addEventListener('mouseup',mu);
+  window.addEventListener('keydown',e=>{if(e.key==='Escape')drag=false;});
+  canvas.addEventListener('contextmenu',e=>{e.preventDefault();drag=false;});
+  canvas.addEventListener('wheel',e=>{e.preventDefault();V3D.rad=Math.max(5,Math.min(300,V3D.rad*(e.deltaY>0?1.08:0.93)));_v3dUpdateCam();},{passive:false});
+  let ltd=0,ltx=0,lty=0;
+  canvas.addEventListener('touchstart',e=>{if(e.touches.length===1){drag=true;lx=e.touches[0].clientX;ly=e.touches[0].clientY;}if(e.touches.length===2){const dx=e.touches[0].clientX-e.touches[1].clientX,dy=e.touches[0].clientY-e.touches[1].clientY;ltd=Math.sqrt(dx*dx+dy*dy);}},{passive:true});
+  canvas.addEventListener('touchmove',e=>{e.preventDefault();if(e.touches.length===1&&drag){const dx=(e.touches[0].clientX-lx)*0.006,dy=(e.touches[0].clientY-ly)*0.006;V3D.th-=dx;V3D.ph=Math.max(0.08,Math.min(Math.PI/2.05,V3D.ph+dy));lx=e.touches[0].clientX;ly=e.touches[0].clientY;_v3dUpdateCam();}if(e.touches.length===2){const dx=e.touches[0].clientX-e.touches[1].clientX,dy=e.touches[0].clientY-e.touches[1].clientY;const d=Math.sqrt(dx*dx+dy*dy);V3D.rad=Math.max(5,Math.min(300,V3D.rad*(ltd/Math.max(1,d))));ltd=d;_v3dUpdateCam();}},{passive:false});
+  canvas.addEventListener('touchend',()=>{drag=false;});
+  V3D._cleanup=()=>{ window.removeEventListener('mousemove',mm); window.removeEventListener('mouseup',mu); };
 }
 
 // ═══ INIT PDF BUTOANE ══════════════════════════════════════════════════════
