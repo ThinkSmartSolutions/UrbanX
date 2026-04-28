@@ -471,7 +471,6 @@ canvas#c2d{width:100%;height:100%;display:block}
   <span class="logo">UrbanX</span>
   <button class="tb-btn" id="btnUTR">🗺 Zone UTR</button>
   <button class="tb-btn" id="btnGPS">📍 GPS</button>
-  <button class="tb-btn" onclick="aedisOpenLoisir()" style="flex-shrink:0;background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.4);color:#4ade80" title="LOISIR — Amenajare spații publice">🌿 Loisir</button>
   <button class="tb-btn" id="btnMulti" title="Multiselect parcele">🔲 Multi</button>
   <select class="tb-sel" id="selBase">
     <option value="custom">Urban 3D</option>
@@ -486,7 +485,9 @@ canvas#c2d{width:100%;height:100%;display:block}
   <button class="tb-btn" id="btnLegend" title="Legendă funcțiuni clădiri" onclick="toggleFnLegend(this)">🎨 Legend</button>
   <button class="tb-btn" id="btnPanel" style="background:rgba(212,175,55,.2);border-color:#d4af37;color:#d4af37">☰</button>
   <button class="tb-btn" id="btnPDF" title="Export PDF / Raport">⬇ PDF</button>
-  <button class="tb-btn" onclick="generateSolarStudy()" title="Studiu însorire PDF" style="flex-shrink:0;background:rgba(251,191,36,.15);border-color:rgba(251,191,36,.5);color:#fbbf24;font-size:11px;flex-shrink:0">☀ Însorire</button>
+  <button class="tb-btn" onclick="aedisOpenLoisir()" style="background:rgba(34,197,94,.2);border-color:rgba(34,197,94,.5);color:#4ade80;font-weight:700" title="LOISIR — Amenajare spații publice">🌿</button>
+  <button class="tb-btn" onclick="generateSolarStudy()" style="background:rgba(251,191,36,.2);border-color:rgba(251,191,36,.5);color:#fbbf24;font-weight:700" title="Studiu însorire PDF">☀</button>
+  
   <!-- Mobile: buton GPS și 3D/2D vizibile întotdeauna -->
 </div>
 
@@ -8402,6 +8403,19 @@ function _v3dBuild(ap){
     scene.add(new THREE.LineLoop(lg,new THREE.LineBasicMaterial({color:'#00e5b4',opacity:0.7,transparent:true})));
   }catch(e){}
 
+  // Marcaj parcelă pe sol (suprafață luminoasă)
+  try{
+    const pts=ring0.map(toLoc);
+    const shape=new THREE.Shape(); shape.moveTo(pts[0][0],pts[0][1]);
+    pts.slice(1,-1).forEach(([x,z])=>shape.lineTo(x,z)); shape.closePath();
+    const geo=new THREE.ShapeGeometry(shape);
+    const mat=new THREE.MeshStandardMaterial({color:'#1a2535',roughness:0.97,metalness:0,transparent:true,opacity:0.85});
+    const m2=new THREE.Mesh(geo,mat); m2.rotation.x=-Math.PI/2; m2.position.y=0.03; scene.add(m2);
+  }catch(e){}
+
+  // Străzi din S.ctx linii (dacă există) sau grid simplu în jurul parcelei
+  _v3dAddStreets(THREE, scene, ring0, toLoc);
+
   // Camera poziție inițială
   const maxH=Math.max(...(S.vol._lastFeats||[]).map(f=>f.properties?.top||0),8);
   const parcelSz=Math.max(...ring0.map(([lng,lat])=>{const[x,z]=toLoc([lng,lat]);return Math.sqrt(x*x+z*z);}),10);
@@ -8426,6 +8440,69 @@ function _v3dBuild(ap){
   render();
 
   _v3dStatus(`✅ ${V3D.aedis.length} volume AEDIS · ${V3D.ctx.length} clădiri context · Drag=rotire Scroll=zoom`);
+}
+
+
+// ── Generare vizuală străzi în jurul parcelei ─────────────────────────────────
+function _v3dAddStreets(THREE, scene, ring0, toLoc){
+  // Strategia: strada = zonă plată de culoare mai deschisă față de ground
+  // Folosim datele din S.ctx pentru a detecta "goluri" între clădiri
+  // + adăugăm o bandă de stradă la aliniamentul frontal al parcelei
+
+  const streetMat = new THREE.MeshStandardMaterial({
+    color:'#1e2d3d', roughness:0.96, metalness:0
+  });
+
+  try{
+    // Calculăm bounding box al parcelei
+    const pts = ring0.map(toLoc);
+    const xs = pts.map(([x])=>x), zs = pts.map(([,z])=>z);
+    const minX=Math.min(...xs), maxX=Math.max(...xs);
+    const minZ=Math.min(...zs), maxZ=Math.max(...zs);
+    const cx=(minX+maxX)/2, cz=(minZ+maxZ)/2;
+    const w=maxX-minX, d=maxZ-minZ;
+    
+    // Adăugăm benzi de stradă pe 4 laturi ale parcelei (simulează strada înconjurătoare)
+    const streetW = 8; // 8m lățime stradă
+    const pavement = 2; // 2m trotuar
+    const offset = Math.max(w,d)/2 + 1; // offset față de parcelă
+    
+    const addStreet = (x,z,sw,sd) => {
+      const geo = new THREE.PlaneGeometry(sw, sd);
+      const m = new THREE.Mesh(geo, streetMat);
+      m.rotation.x = -Math.PI/2; m.position.set(x, 0.04, z);
+      scene.add(m);
+    };
+    
+    // Stradă stânga
+    addStreet(cx - offset - streetW/2, cz, streetW, d + streetW*2);
+    // Stradă dreapta
+    addStreet(cx + offset + streetW/2, cz, streetW, d + streetW*2);
+    // Stradă față
+    addStreet(cx, cz - offset - streetW/2, w + streetW*2, streetW);
+    // Stradă spate
+    addStreet(cx, cz + offset + streetW/2, w + streetW*2, streetW);
+    
+    // Intersecții la colțuri
+    addStreet(cx - offset - streetW/2, cz - offset - streetW/2, streetW, streetW);
+    addStreet(cx + offset + streetW/2, cz - offset - streetW/2, streetW, streetW);
+    addStreet(cx - offset - streetW/2, cz + offset + streetW/2, streetW, streetW);
+    addStreet(cx + offset + streetW/2, cz + offset + streetW/2, streetW, streetW);
+    
+    // Trotuar (mai deschis)
+    const trotoarMat = new THREE.MeshStandardMaterial({color:'#253545', roughness:0.95, metalness:0});
+    const addTrotuar = (x,z,sw,sd) => {
+      const geo = new THREE.PlaneGeometry(sw, sd);
+      const m = new THREE.Mesh(geo, trotoarMat);
+      m.rotation.x = -Math.PI/2; m.position.set(x, 0.05, z);
+      scene.add(m);
+    };
+    addTrotuar(cx - offset + pavement/2, cz, pavement, d);
+    addTrotuar(cx + offset - pavement/2, cz, pavement, d);
+    addTrotuar(cx, cz - offset + pavement/2, w, pavement);
+    addTrotuar(cx, cz + offset - pavement/2, w, pavement);
+    
+  }catch(e){ console.warn('Streets error:', e.message); }
 }
 
 // ── Prismă dreaptă — BufferGeometry direct în world space ─────────────────
@@ -8533,9 +8610,9 @@ function _v3dMatPenthouse(THREE,stil,cache){
 }
 
 function _v3dMatRoof(THREE,stil,cache){
-  const roofCols={modern:'#0c1a2e',clasic:'#1a0e04',minimalist:'#2a2a2e',inovator:'#0c0818',industrial:'#060606'};
-  const col=roofCols[stil]||'#111827';
-  return new THREE.MeshStandardMaterial({color:col,roughness:0.45,metalness:0.55});
+  const roofCols={modern:'#1a2a3e',clasic:'#3a2010',minimalist:'#3a3a3e',inovator:'#1a1028',industrial:'#1a1818'};
+  const col=roofCols[stil]||'#1e2a3a';
+  return new THREE.MeshStandardMaterial({color:col,roughness:0.5,metalness:0.4});
 }
 
 // ── Iluminare ──────────────────────────────────────────────────────────────
