@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
 <title>UrbanX – PUG Iași</title>
 <link href="https://api.mapbox.com/mapbox-gl-js/v3.11.0/mapbox-gl.css" rel="stylesheet"/>
+<link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.5.0/mapbox-gl-draw.css" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;font-family:'Segoe UI',Arial,sans-serif;background:#0b1220;color:#e2e8f0;overflow:hidden}
@@ -439,6 +440,26 @@ canvas#c2d{width:100%;height:100%;display:block}
 .mapboxgl-popup-tip{display:none}
 .mapboxgl-popup-close-button{color:#94a3b8!important;font-size:18px!important;right:4px!important;top:4px!important;padding:0 6px!important;background:none!important;line-height:1.2!important}
 .mapboxgl-popup-close-button:hover{color:#fff!important;background:rgba(255,255,255,.1)!important;border-radius:4px!important}
+/* ── LOISIR ── */
+.loisir-mode-grid,.loisir-cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
+.loisir-mode-btn,.loisir-cat-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(11,18,32,.85);color:#94a3b8;font-size:11px;cursor:pointer;text-align:left;transition:all .15s}
+.loisir-mode-btn.active,.loisir-cat-btn.active{color:#fff;border-color:var(--loisir-color,#d4af37);background:color-mix(in srgb,var(--loisir-color,#d4af37) 22%,transparent)}
+.loisir-dot{width:10px;height:10px;border-radius:50%;background:var(--loisir-color,#d4af37);flex-shrink:0}
+.loisir-switch{width:34px;height:18px;border-radius:99px;background:#334155;position:relative;flex-shrink:0}
+.loisir-switch:after{content:'';position:absolute;width:14px;height:14px;left:2px;top:2px;border-radius:50%;background:#94a3b8;transition:.15s}
+.loisir-cat-btn.active .loisir-switch{background:var(--loisir-color,#d4af37)}
+.loisir-cat-btn.active .loisir-switch:after{left:18px;background:#fff}
+.loisir-box{padding:9px 10px;border-radius:8px;font-size:11px;line-height:1.45;margin-bottom:10px}
+.loisir-box.ok{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.35);color:#4ade80}
+.loisir-box.warn{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35);color:#fbbf24}
+.loisir-box.err{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.35);color:#f87171}
+.loisir-mini-actions{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.loisir-mini-btn{padding:8px 10px;border-radius:9px;border:1px solid rgba(255,255,255,.12);background:#0f172a;color:#94a3b8;font-size:11px;cursor:pointer}
+.loisir-mini-btn:hover{border-color:#d4af37;color:#d4af37}.loisir-file{display:none}
+#loisir-ai-preview{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:900;width:min(920px,94vw);max-height:82vh;background:#08111f;border:1px solid rgba(212,175,55,.45);border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.75);display:none;overflow:hidden}
+#loisir-ai-preview.open{display:block}.loisir-ai-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;background:linear-gradient(180deg,#0d1f3c,#08111f);border-bottom:1px solid rgba(212,175,55,.25)}
+.loisir-ai-title{color:#d4af37;font-weight:800;font-size:14px;letter-spacing:.04em}.loisir-ai-body{padding:12px}.loisir-ai-img{width:100%;max-height:68vh;object-fit:contain;border-radius:12px;background:#020617}.loisir-ai-close{background:none;border:1px solid rgba(255,255,255,.18);color:#94a3b8;border-radius:8px;padding:5px 10px;cursor:pointer}.loisir-ai-close:hover{color:#fff;border-color:#d4af37}
+
 </style>
 </head>
 <body>
@@ -449,6 +470,7 @@ canvas#c2d{width:100%;height:100%;display:block}
   <span class="logo">UrbanX</span>
   <button class="tb-btn" id="btnUTR">🗺 Zone UTR</button>
   <button class="tb-btn" id="btnGPS">📍 GPS</button>
+  <button class="tb-btn" onclick="aedisOpenLoisir()" style="background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.4);color:#4ade80" title="LOISIR — Amenajare spații publice">🌿 Loisir</button>
   <button class="tb-btn" id="btnMulti" title="Multiselect parcele">🔲 Multi</button>
   <select class="tb-sel" id="selBase">
     <option value="custom">Urban 3D</option>
@@ -609,12 +631,14 @@ canvas#c2d{width:100%;height:100%;display:block}
 
     <div style="display:flex;gap:8px;margin-top:16px">
       <button class="btn-p" onclick="runExport()" style="flex:1;font-size:15px;font-weight:700">⬇ Generează PDF</button>
+        <button class="tb-btn" onclick="generateSolarStudy()" title="Studiu însorire PDF" style="background:rgba(251,191,36,.15);border-color:rgba(251,191,36,.5);color:#fbbf24;font-size:12px">☀</button>
       <button class="btn-s" onclick="$('pdf-modal').classList.remove('open')">Anulează</button>
     </div>
   </div>
 </div>
 
 <script src="https://api.mapbox.com/mapbox-gl-js/v3.11.0/mapbox-gl.js"></script>
+<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.5.0/mapbox-gl-draw.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
@@ -2357,12 +2381,12 @@ function updateDistanceLines(){
         const {dist} = minDistBetweenPolygons(firstVol, ctx);
         return {ctx, dist};
       }catch(e){ return {ctx, dist:999}; }
-    }).filter(x=>x.dist<100); // max 100m contur la contur
+    }).filter(x=>x.dist<120); // max 100m contur la contur
 
     // Sortăm după distanță reală, luăm max 8 cei mai apropiați
     const adjacentCtx = withDist
       .sort((a,b)=>a.dist-b.dist)
-      .slice(0,8)
+      .slice(0,12)
       .map(x=>x.ctx);
 
     // Pentru fiecare cladire adiacenta, calculam distanta minima fata de oricare volum generat
@@ -5790,6 +5814,8 @@ function aedisBuild(){
         if(sc?.geometry) etajGeom = sc.geometry;
       }catch(e){}
     }
+    // Stocăm geometria etajului curent pentru acoperiș (vom folosi ultima geometrie)
+    if(isLast) AEDIS._lastFloorGeom = etajGeom;
 
     // Culoare etaj - din paleta stilului arhitectural (nu din functiune)
     // Parter = intotdeauna culoare distincta (soclu)
@@ -5830,21 +5856,22 @@ function aedisBuild(){
   const roofBase = currentH;
   const fpSmall = turf.transformScale(fpFeat, 0.97, {origin:turf.centerOfMass(fpFeat)});
 
+    const _roofFpGeom = AEDIS._lastFloorGeom || fpGeom;
   switch(AEDIS.tipAcoperis){
     case 'terasa_plata':
       // Terasa plata: slab subtire vizibil + parapet cu culoare atic din stil
       feats.push({type:'Feature',
         properties:{base:roofBase,top:roofBase+0.3,color:'#475569',floor:-10,roofType:'terasa'},
-        geometry:fpGeom});
+        geometry:_roofFpGeom});
       // Parapet - culoare atic din stil (mai inchis)
       if((AEDIS.hAttic||1.2)>0){
         const aticColor = stilDef.aticColor||darken(AEDIS_FN[fn]?.color||'#94a3b8',40);
         feats.push({type:'Feature',
           properties:{base:roofBase,top:roofBase+(AEDIS.hAttic||1.2),color:aticColor,floor:-11,roofType:'parapet'},
-          geometry:fpGeom});
+          geometry:_roofFpGeom});
         // Interior parapet (gol)
         try{
-          const inner = turf.buffer(fpFeat,-0.4,{units:'meters'});
+          const inner = turf.buffer({type:'Feature',geometry:_roofFpGeom,properties:{}}, -0.4, {units:'meters'});
           if(inner?.geometry){
             feats.push({type:'Feature',
               properties:{base:roofBase,top:roofBase+AEDIS.hAttic,color:'#0a1628',floor:-12,roofType:'parapet_inner'},
@@ -5858,12 +5885,12 @@ function aedisBuild(){
       // Terasa cu borduri mai inalte + pavaj (culoare diferita)
       feats.push({type:'Feature',
         properties:{base:roofBase,top:roofBase+0.15,color:'#78716c',floor:-10,roofType:'pavaj'},
-        geometry:fpGeom});
+        geometry:_roofFpGeom});
       feats.push({type:'Feature',
         properties:{base:roofBase,top:roofBase+1.1,color:darken(AEDIS_FN[fn]?.color||'#94a3b8',25),floor:-11,roofType:'bordura'},
-        geometry:fpGeom});
+        geometry:_roofFpGeom});
       try{
-        const inner = turf.buffer(fpFeat,-0.5,{units:'meters'});
+        const inner = turf.buffer({type:'Feature',geometry:_roofFpGeom,properties:{}}, -0.5, {units:'meters'});
         if(inner?.geometry) feats.push({type:'Feature',
           properties:{base:roofBase,top:roofBase+1.1,color:'#0a1628',floor:-12,roofType:'terasa_interior'},
           geometry:inner.geometry});
@@ -5916,7 +5943,7 @@ function aedisBuild(){
       // Terasa + corp tehnic central
       feats.push({type:'Feature',
         properties:{base:roofBase,top:roofBase+0.2,color:'#475569',floor:-10,roofType:'terasa'},
-        geometry:fpGeom});
+        geometry:_roofFpGeom});
       try{
         const techGeom = turf.transformScale(fpFeat,0.3,{origin:turf.centerOfMass(fpFeat)});
         if(techGeom?.geometry) feats.push({type:'Feature',
@@ -6025,11 +6052,31 @@ function aedisCalcExistent(){
 // ═══════════════════════════════════════════════════════════════════════════
 // AEDIS UI — Panou modal
 // ═══════════════════════════════════════════════════════════════════════════
+
+function aedisOpenLoisir(){
+  // Setăm modul AEDIS pe LOISIR
+  AEDIS.mode = 'loisir';
+  aedisOpen();
+}
+
 function aedisOpen(){
   AEDIS.open=true;
   const modal=document.getElementById('aedis-modal');
   if(modal) modal.classList.add('open');
   aedisRender();
+  // Mobile close button fix
+  if(window.innerWidth < 600){
+    let btn = document.getElementById('aedis-mob-x');
+    if(!btn){
+      btn = document.createElement('button');
+      btn.id='aedis-mob-x';
+      btn.textContent='✕';
+      btn.style.cssText='position:fixed;top:10px;left:10px;z-index:10001;background:rgba(239,68,68,.92);color:#fff;border:none;border-radius:50%;width:44px;height:44px;font-size:20px;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.5)';
+      btn.onclick=()=>{aedisClose();};
+      document.body.appendChild(btn);
+    }
+    btn.style.display='flex'; btn.style.alignItems='center'; btn.style.justifyContent='center';
+  }
 }
 function aedisSetFalKey(){
   const current = FAL_AI.apiKey ? '(setat)' : '(nesetat)';
@@ -6060,14 +6107,41 @@ function aedis3DRemove(){
   ss('AEDIS 3D: Volum șters.');
 }
 
+
+// ── Demolare: filtrează existentele de pe parcelele active din ctx-src ────────
+function _aedisRemoveExistingFromCtx(){
+  try{
+    const src = map.getSource('ctx-src');
+    if(!src?._data?.features) return;
+    const filtered = src._data.features.filter(f=>{
+      try{
+        const ctr = turf.centerOfMass(f);
+        // Păstrăm feature dacă NU e pe nicio parcelă activă
+        for(const p of S.parcels){
+          if(!p.geo?.geometry) continue;
+          if(turf.booleanPointInPolygon(ctr,{type:'Feature',geometry:p.geo.geometry,properties:{}}))
+            return false; // e pe parcelă → eliminăm
+        }
+        return true;
+      }catch(e){ return true; }
+    });
+    src.setData({type:'FeatureCollection', features:filtered});
+    ss('🔨 Demolare: existente eliminate de pe parcelă.');
+  }catch(e){ console.warn('_aedisRemoveExistingFromCtx error:', e.message); }
+}
+
 function aedisGenerateAll(){
-  // Dezactivăm Three.js layer dacă era activ (evităm suprapunere cu fill-extrusion)
+  // Dezactivăm Three.js layer dacă era activ
   if(AEDIS3D.active){
     try{ map.removeLayer('aedis-3d-layer'); }catch(e){}
     if(AEDIS3D.renderer){ AEDIS3D.renderer.dispose(); AEDIS3D.renderer=null; }
     AEDIS3D.active = false;
   }
-  // Generăm fill-extrusion Mapbox — trăiește în același pipeline cu clădirile vecine
+  // DEMOLARE: curăță contextul de pe parcelă (ascundem din ctx-src)
+  if(AEDIS.scenariu === 'demolare'){
+    _aedisRemoveExistingFromCtx();
+  }
+  // Generăm fill-extrusion Mapbox
   aedisBuild();
   // Contextul urban + distanțele
   if(!S.ctx?.features?.length){
@@ -6081,6 +6155,8 @@ function aedisClose(){
   AEDIS.open=false;
   const modal=document.getElementById('aedis-modal');
   if(modal) modal.classList.remove('open');
+  const btn = document.getElementById('aedis-mob-x');
+  if(btn) btn.style.display='none';
 }
 function aedisTab(t){
   AEDIS.tab=t;
@@ -7376,11 +7452,22 @@ function aedisShowRender(imgUrl){
       </div>
 
       <!-- Bara bottom -->
-      <div style="background:#0a1220;border-top:1px solid rgba(212,175,55,.3);padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;gap:10px">
-        <div style="font-size:11px;color:#64748b">🎨 AEDIS AI Render · Fal.ai FLUX.1 · ${ts} · <span style="color:#94a3b8">Trage sliderele pentru comparație</span></div>
-        <div style="display:flex;gap:8px;flex-shrink:0">
-          <button onclick="aedisDownloadRender()" style="padding:7px 13px;background:#d4af37;color:#000;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:700">⬇ JPG</button>
-          <button onclick="aedisCloseRenderOverlay()" style="padding:7px 13px;background:rgba(239,68,68,.85);color:#fff;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:700">✕ Închide</button>
+      <div style="background:#0a1220;border-top:1px solid rgba(212,175,55,.3);padding:8px 16px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;gap:10px">
+        <div style="font-size:11px;color:#64748b;flex:1">🎨 AEDIS AI Render · Fal.ai FLUX.1 · ${ts}</div>
+        <div style="display:flex;gap:6px;flex-shrink:0;align-items:center">
+          <span style="font-size:10px;color:#475569">AI Render:</span>
+          <button id="aedis-ai-pan-btn" onclick="_aedisAIPanMode()" 
+            style="padding:5px 10px;background:rgba(99,102,241,.2);color:#a78bfa;border:1px solid rgba(99,102,241,.4);border-radius:7px;font-size:11px;cursor:pointer">✋ Pan</button>
+          <button onclick="_aedisAIZoomIn()" 
+            style="padding:5px 10px;background:rgba(255,255,255,.08);color:#e2e8f0;border:1px solid rgba(255,255,255,.15);border-radius:7px;font-size:11px;cursor:pointer">🔍+</button>
+          <button onclick="_aedisAIZoomOut()" 
+            style="padding:5px 10px;background:rgba(255,255,255,.08);color:#e2e8f0;border:1px solid rgba(255,255,255,.15);border-radius:7px;font-size:11px;cursor:pointer">🔍-</button>
+          <button onclick="_aedisAIReset()" 
+            style="padding:5px 10px;background:rgba(255,255,255,.08);color:#94a3b8;border:1px solid rgba(255,255,255,.1);border-radius:7px;font-size:11px;cursor:pointer">⌂</button>
+          <button onclick="aedisDownloadRender()" 
+            style="padding:5px 11px;background:#d4af37;color:#000;border-radius:7px;border:none;cursor:pointer;font-size:11px;font-weight:700">⬇ JPG</button>
+          <button onclick="aedisCloseRenderOverlay()" 
+            style="padding:5px 11px;background:rgba(239,68,68,.85);color:#fff;border-radius:7px;border:none;cursor:pointer;font-size:11px;font-weight:700">✕</button>
         </div>
       </div>
     `;
@@ -7392,6 +7479,67 @@ function aedisShowRender(imgUrl){
     // Initializare logica slider drag
     _aedisSliderInit();
   });
+}
+
+// ── AI Render pan/zoom pe imaginea stânga ────────────────────────────────────
+const _AIIMG = { scale:1, dx:0, dy:0, panMode:false, dragging:false, lastX:0, lastY:0 };
+
+function _aedisAIApplyTransform(){
+  const img = document.getElementById('aedis-sl-ai')?.querySelector('img');
+  if(!img) return;
+  img.style.transform = `translate(${_AIIMG.dx}px,${_AIIMG.dy}px) scale(${_AIIMG.scale})`;
+  img.style.transformOrigin = 'center center';
+  img.style.transition = _AIIMG.dragging ? 'none' : 'transform .15s ease';
+}
+function _aedisAIPanMode(){
+  _AIIMG.panMode = !_AIIMG.panMode;
+  const btn = document.getElementById('aedis-ai-pan-btn');
+  if(btn) btn.style.background = _AIIMG.panMode ? 'rgba(99,102,241,.5)' : 'rgba(99,102,241,.2)';
+  const wrap = document.getElementById('aedis-slider-wrap');
+  if(wrap) wrap.style.cursor = _AIIMG.panMode ? 'move' : 'col-resize';
+}
+function _aedisAIZoomIn(){ _AIIMG.scale=Math.min(4,_AIIMG.scale*1.25); _aedisAIApplyTransform(); }
+function _aedisAIZoomOut(){ _AIIMG.scale=Math.max(0.5,_AIIMG.scale*0.8); _aedisAIApplyTransform(); }
+function _aedisAIReset(){ _AIIMG.scale=1; _AIIMG.dx=0; _AIIMG.dy=0; _aedisAIApplyTransform(); }
+
+function _aedisAIInitPan(){
+  const wrap = document.getElementById('aedis-slider-wrap');
+  if(!wrap) return;
+  wrap.addEventListener('mousedown', e=>{
+    if(!_AIIMG.panMode) return;
+    _AIIMG.dragging=true; _AIIMG.lastX=e.clientX; _AIIMG.lastY=e.clientY;
+    e.stopPropagation();
+  });
+  window.addEventListener('mousemove', e=>{
+    if(!_AIIMG.dragging||!_AIIMG.panMode) return;
+    _AIIMG.dx += e.clientX-_AIIMG.lastX;
+    _AIIMG.dy += e.clientY-_AIIMG.lastY;
+    _AIIMG.lastX=e.clientX; _AIIMG.lastY=e.clientY;
+    _aedisAIApplyTransform();
+  });
+  window.addEventListener('mouseup', ()=>{ _AIIMG.dragging=false; });
+  // Touch pan
+  wrap.addEventListener('touchstart', e=>{
+    if(!_AIIMG.panMode||e.touches.length!==1) return;
+    _AIIMG.dragging=true; _AIIMG.lastX=e.touches[0].clientX; _AIIMG.lastY=e.touches[0].clientY;
+  },{passive:true});
+  wrap.addEventListener('touchmove', e=>{
+    if(!_AIIMG.dragging||!_AIIMG.panMode) return;
+    e.preventDefault();
+    _AIIMG.dx += e.touches[0].clientX-_AIIMG.lastX;
+    _AIIMG.dy += e.touches[0].clientY-_AIIMG.lastY;
+    _AIIMG.lastX=e.touches[0].clientX; _AIIMG.lastY=e.touches[0].clientY;
+    _aedisAIApplyTransform();
+  },{passive:false});
+  // Scroll wheel zoom pe imaginea AI
+  wrap.addEventListener('wheel', e=>{
+    const rect = wrap.getBoundingClientRect();
+    const isLeft = e.clientX < rect.left + rect.width * 0.5;
+    if(!isLeft) return; // zoom doar pe latura AI
+    e.preventDefault();
+    _AIIMG.scale = Math.max(0.5, Math.min(4, _AIIMG.scale*(e.deltaY>0?0.9:1.1)));
+    _aedisAIApplyTransform();
+  },{passive:false});
 }
 
 function _aedisSliderInit(){
@@ -7430,6 +7578,10 @@ function _aedisSliderInit(){
     if(animPct <= 50){ animPct = 50; clearInterval(animInterval); }
     setPos(wrap.getBoundingClientRect().left + wrap.getBoundingClientRect().width * animPct / 100);
   }, 16);
+
+  // Resetam state pan/zoom la fiecare deschidere
+  _AIIMG.scale=1; _AIIMG.dx=0; _AIIMG.dy=0; _AIIMG.panMode=false;
+  _aedisAIInitPan();
 }
 
 // Download render prin fetch→blob (funcționează cross-origin, nu deschide tab nou)
@@ -8334,10 +8486,10 @@ function _v3dApplyLighting(preset, THREE, scene){
       fill: {color:'#7788aa', intensity:0.5, pos:[-40,50,-40]},
     },
     night: {
-      sky: '#050810', fog: '#050810',
-      ambient: {color:'#1a2a4a', intensity:0.3},
-      sun: {color:'#a0c0ff', intensity:0.2, pos:[-60,80,30]},
-      fill: {color:'#ff8820', intensity:0.6, pos:[0,2,0]}, // lampi stradale
+      sky: '#020408', fog: '#020408',
+      ambient: {color:'#0a1428', intensity:0.25},
+      sun: {color:'#8090c0', intensity:0.15, pos:[-40,60,20]},
+      fill: {color:'#ff9030', intensity:0.8, pos:[0,3,0]}, // lumina stradala calda
     },
   };
 
@@ -8378,6 +8530,29 @@ function _v3dApplyLighting(preset, THREE, scene){
 function _v3dSetLighting(preset){
   if(!V3D.scene||!window.THREE) return;
   _v3dApplyLighting(preset, window.THREE, V3D.scene);
+  // Noaptea: golim cache-ul de texturi → se re-generează cu mai multe ferestre aprinse
+  if(preset === 'night'){
+    Object.values(_v3dTexCache).forEach(t=>t.dispose());
+    Object.keys(_v3dTexCache).forEach(k=>delete _v3dTexCache[k]);
+    // Facem ferestrele mai luminoase (night mode = mai multe aprinse)
+    window._v3dNightMode = true;
+    // Regenerăm meshurile AEDIS cu texturile noi
+    _v3dRebuildAedisNight();
+  } else {
+    window._v3dNightMode = false;
+  }
+}
+
+function _v3dRebuildAedisNight(){
+  if(!V3D.aedisMeshes||!V3D.scene) return;
+  V3D.aedisMeshes.forEach(m=>{
+    if(m.material?.map && m.material.map.image?.tagName==='CANVAS'){
+      // Setăm emissive pentru a simula lumina din ferestre
+      m.material.emissive = new THREE.Color(0.05, 0.08, 0.15);
+      m.material.emissiveIntensity = 0.6;
+      m.material.needsUpdate = true;
+    }
+  });
 }
 
 function _v3dSetContext(mode){
@@ -8615,6 +8790,581 @@ function _v3dResetCamera(){
   // Triggerăm updateCamera prin dispatch synthetic
   if(V3D._forceUpdate) V3D._forceUpdate();
 }
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// STUDIU ÎNSORIRE — UrbanX / AEDIS
+// Calculează umbre solare pe parcela selectată, per lună, 4 momente/zi
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function generateSolarStudy(){
+  const ap = S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry){ ss('⚠️ Selectați o parcelă pentru studiu de însorire.'); return; }
+
+  ss('☀ Generare studiu însorire…');
+
+  // Coordonate parcelă
+  const center = turf.centerOfMass(ap.geo);
+  const lat = center.geometry.coordinates[1];
+  const lon = center.geometry.coordinates[0];
+  const year = new Date().getFullYear();
+
+  // Luni reprezentative + ore
+  const months = [
+    {m:1,  name:'Ianuarie',  color:'#93c5fd'},
+    {m:3,  name:'Martie',    color:'#6ee7b7'},
+    {m:6,  name:'Iunie',     color:'#fde047'},
+    {m:9,  name:'Septembrie',color:'#fb923c'},
+    {m:12, name:'Decembrie', color:'#c4b5fd'},
+  ];
+  const hours = [8, 10, 12, 14, 16];
+
+  // Calcul poziție soare (algoritm simplificat PSA)
+  function solarPosition(lat, lon, dateObj){
+    const D2R = Math.PI/180, R2D = 180/Math.PI;
+    const jd = Math.floor(365.25*(dateObj.getFullYear()-2000+4716))
+              + Math.floor(30.6001*(dateObj.getMonth()+2))
+              + dateObj.getDate() - 1524.5
+              + (dateObj.getHours()-2)/24; // UTC+2 Romania
+    const T = (jd-2451545.0)/36525;
+    const L0 = (280.46646+36000.76983*T)%360;
+    const M = (357.52911+35999.05029*T)*D2R;
+    const C = (1.914602-0.004817*T)*Math.sin(M)+(0.019993-0.000101*T)*Math.sin(2*M);
+    const sunLon = (L0+C)*D2R;
+    const obliq = (23.439291-0.013004*T)*D2R;
+    const dec = Math.asin(Math.sin(obliq)*Math.sin(sunLon))*R2D;
+    const eqT = 4*(L0+C - Math.atan2(Math.cos(obliq)*Math.sin(sunLon),Math.cos(sunLon))*R2D - lon);
+    const solarNoon = 12 - lon/15;
+    const ha = (dateObj.getHours() - solarNoon)*15;
+    const latR = lat*D2R, decR = dec*D2R, haR = ha*D2R;
+    const sinAlt = Math.sin(latR)*Math.sin(decR)+Math.cos(latR)*Math.cos(decR)*Math.cos(haR);
+    const altitude = Math.asin(sinAlt)*R2D;
+    const cosAz = (Math.sin(decR)-Math.sin(latR)*sinAlt)/(Math.cos(latR)*Math.cos(Math.asin(sinAlt)));
+    const azimuth = (Math.acos(Math.max(-1,Math.min(1,cosAz)))*R2D + (ha>0?180:0))%360;
+    return { altitude: Math.max(0, altitude), azimuth };
+  }
+
+  // Build PDF content
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({orientation:'landscape', unit:'mm', format:'a4'});
+  const W=297, H=210;
+
+  // ── Copertă ──
+  pdf.setFillColor(8,15,28); pdf.rect(0,0,W,H,'F');
+  pdf.setFillColor(212,175,55);
+  pdf.rect(0,0,W,6,'F');
+  pdf.rect(0,H-6,W,6,'F');
+  pdf.setTextColor(212,175,55);
+  pdf.setFontSize(28); pdf.setFont('helvetica','bold');
+  pdf.text('STUDIU DE ÎNSORIRE', W/2, 50, {align:'center'});
+  pdf.setTextColor(255,255,255);
+  pdf.setFontSize(16);
+  pdf.text(`Parcela: ${ap.nrcad||'—'}  ·  UTR: ${ap.utr||'—'}`, W/2, 65, {align:'center'});
+  pdf.setFontSize(11); pdf.setTextColor(148,163,184);
+  pdf.text(`Coordonate: ${lat.toFixed(6)}°N, ${lon.toFixed(6)}°E  ·  ${new Date().toLocaleDateString('ro')}`, W/2, 75, {align:'center'});
+  pdf.text('UrbanX · AEDIS · Studiu solar conform normelor urbanistice românești', W/2, 82, {align:'center'});
+
+  // Legendă ore
+  pdf.setFontSize(9); pdf.setTextColor(100,116,139);
+  pdf.text('Ore analizate:', 20, 100);
+  hours.forEach((h,i)=>{
+    pdf.setTextColor(255,220,50); pdf.text(`${h}:00`, 45+i*22, 100);
+  });
+  pdf.text('Luni reprezentative: Ianuarie · Martie · Iunie · Septembrie · Decembrie', 20, 107);
+
+  // ── Pagina 2: Diagrame altitudine solară ──
+  pdf.addPage('landscape');
+  pdf.setFillColor(8,15,28); pdf.rect(0,0,W,H,'F');
+  pdf.setFillColor(212,175,55); pdf.rect(0,0,W,5,'F');
+  pdf.setTextColor(212,175,55); pdf.setFontSize(14); pdf.setFont('helvetica','bold');
+  pdf.text('ALTITUDINE SOLARĂ — Ore și luni reprezentative', W/2, 14, {align:'center'});
+
+  // Tabel altitudini
+  const colW=38, rowH=9, startX=15, startY=22;
+  pdf.setFontSize(8); pdf.setFont('helvetica','bold');
+  pdf.setTextColor(212,175,55);
+  pdf.text('Lună \ Oră', startX, startY);
+  hours.forEach((h,i)=>pdf.text(`${h}:00`, startX+colW*(i+1)+colW/2, startY, {align:'center'}));
+
+  months.forEach((mo,mi)=>{
+    const y = startY + (mi+1)*rowH;
+    const d = new Date(year,mo.m-1,21,12,0,0);
+    pdf.setTextColor(200,200,220);
+    pdf.text(mo.name, startX, y);
+    hours.forEach((h,hi)=>{
+      d.setHours(h);
+      const pos = solarPosition(lat, lon, d);
+      const alt = pos.altitude;
+      const x = startX+colW*(hi+1)+colW/2;
+      const col = alt < 5 ? [100,100,120] : alt < 20 ? [200,160,60] : alt < 40 ? [240,200,60] : [255,240,100];
+      pdf.setTextColor(...col);
+      pdf.text(alt > 0 ? `${alt.toFixed(1)}°` : 'sub orizont', x, y, {align:'center'});
+    });
+  });
+
+  // Grafic altitudine maximă per lună
+  const chartX=15, chartY=75, chartW=260, chartH=80;
+  pdf.setFillColor(10,20,40); pdf.rect(chartX,chartY,chartW,chartH,'F');
+  pdf.setDrawColor(30,50,80); pdf.rect(chartX,chartY,chartW,chartH,'S');
+  pdf.setFontSize(8); pdf.setTextColor(148,163,184);
+  pdf.text('Altitudine solară maximă (amiaza solară) per lună — Iași (~47°N)', chartX+chartW/2, chartY-2, {align:'center'});
+
+  // Grid linii
+  [0,20,40,60].forEach(v=>{
+    const y2=chartY+chartH-v/70*chartH;
+    pdf.setDrawColor(30,50,80); pdf.line(chartX,y2,chartX+chartW,y2);
+    pdf.setTextColor(80,100,130); pdf.text(`${v}°`, chartX-6, y2+1);
+  });
+
+  // Linie altitudine per fiecare lună (ziua 21)
+  const allMonths=Array.from({length:12},(_,i)=>i+1);
+  const monthX = (m)=> chartX + (m-0.5)/12*chartW;
+  const monthY = (alt)=> chartY+chartH - Math.min(alt/70,1)*chartH;
+
+  pdf.setDrawColor(212,175,55); pdf.setLineWidth(0.8);
+  let prevX=null, prevY=null;
+  allMonths.forEach(m=>{
+    const d2=new Date(year,m-1,21,12,0,0);
+    const alt=solarPosition(lat,lon,d2).altitude;
+    const x2=monthX(m), y2=monthY(alt);
+    if(prevX!==null) pdf.line(prevX,prevY,x2,y2);
+    pdf.setFillColor(212,175,55);
+    pdf.circle(x2,y2,0.8,'F');
+    prevX=x2; prevY=y2;
+  });
+
+  // Etichete luni
+  ['I','F','M','A','M','I','I','A','S','O','N','D'].forEach((l,i)=>{
+    pdf.setTextColor(100,116,139); pdf.setFontSize(7);
+    pdf.text(l, monthX(i+1), chartY+chartH+5, {align:'center'});
+  });
+
+  // ── Pagina 3: Concluzii + reglementări ──
+  pdf.addPage('landscape');
+  pdf.setFillColor(8,15,28); pdf.rect(0,0,W,H,'F');
+  pdf.setFillColor(212,175,55); pdf.rect(0,0,W,5,'F');
+  pdf.setTextColor(212,175,55); pdf.setFontSize(14); pdf.setFont('helvetica','bold');
+  pdf.text('CONCLUZII & REGLEMENTĂRI — Însorire și umbre', W/2, 14, {align:'center'});
+
+  // Calcule concluzive
+  const junH = solarPosition(lat,lon,new Date(year,5,21,12,0,0)).altitude;
+  const decH = solarPosition(lat,lon,new Date(year,11,21,12,0,0)).altitude;
+  const aedisH = S.vol.genDone ? 
+    (S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||0) : 0;
+  const shadowLenJun = aedisH > 0 ? (aedisH/Math.tan(junH*Math.PI/180)).toFixed(1) : '—';
+  const shadowLenDec = aedisH > 0 && decH > 0 ? (aedisH/Math.tan(decH*Math.PI/180)).toFixed(1) : '—';
+
+  const concluzii = [
+    ['Altitudine solară maximă (21 Iunie, prânz)', `${junH.toFixed(1)}°`],
+    ['Altitudine solară minimă (21 Decembrie, prânz)', `${decH.toFixed(1)}°`],
+    ['Înălțime volum propus AEDIS', aedisH>0?`${aedisH.toFixed(1)}m`:'Niciun volum generat'],
+    ['Lungime umbră estimată — Vară (21 Iunie)', shadowLenJun+'m'],
+    ['Lungime umbră estimată — Iarnă (21 Decembrie)', shadowLenDec+'m'],
+    ['Zone cu risc de umbrire', decH < 15 ? '⚠ Risc ridicat (unghi solar scăzut iarna)' : '✓ Risc moderat'],
+    ['Ore de însorire estimată (Vară)', '14—16 ore/zi'],
+    ['Ore de însorire estimată (Iarnă)', '8—9 ore/zi'],
+  ];
+
+  let cy2=25;
+  concluzii.forEach(([label,val])=>{
+    pdf.setFontSize(10); pdf.setTextColor(148,163,184); pdf.text(label+':', 20, cy2);
+    pdf.setTextColor(255,255,255); pdf.text(val, 160, cy2);
+    cy2+=9;
+  });
+
+  pdf.setFontSize(8); pdf.setTextColor(100,116,139);
+  cy2+=5;
+  const regs=[
+    '• OMS 119/2014 & P118-99: minim 1,5—2 ore însorire directă/zi pentru locuințe la solstițiu de iarnă',
+    '• Distanța minimă între clădiri = H clădire cea mai înaltă (pentru însorire reciprocă)',
+    '• Calculul înălțimii maxime admise față de clădirile opuse: H_max = D_min × tan(α) unde α = alt. sol. min',
+    '• Studiu însorire conform Anexa 1 Ordinul 562/2003 — obligatoriu pentru zone protejate sau PUZ',
+    '• Valorile sunt orientative; studiu definitiv necesită software BIM/Rhino+Ladybug sau simulare CFD',
+  ];
+  regs.forEach(r=>{ pdf.text(r,20,cy2); cy2+=6; });
+
+  pdf.setTextColor(212,175,55); pdf.setFontSize(8);
+  pdf.text(`Generat de UrbanX · AEDIS · ${new Date().toLocaleString('ro')} · Date: calcul astronomic PSA simplificat`, W/2, H-8, {align:'center'});
+
+  pdf.save(`StudiuInsorire_${ap.nrcad||'parcela'}_${year}.pdf`);
+  ss('✅ Studiu însorire generat! PDF descărcat.');
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// LOISIR MODULE — Amenajare spații publice, riversides, parcuri
+// UrbanX Level 3 — integrat din index_level3_loisir
+// ═══════════════════════════════════════════════════════════════════════════
+
+const LOISIR_STATE = {
+  active:false, selectionMode:'axis', corridorMeters:45, bikeWidth:3, runWidth:2.5, walkWidth:3,
+  benchSpacing:25, lightingSpacing:30, vegetationDensity:75, userArea:null, userAxis:null,
+  importedArea:null, importedAxis:null, features:null, draw:null, lastValidation:null
+};
+
+const LOISIR_AI_STATE = {
+  rendering:false, lastScreenshot:null, lastPrompt:null, lastRender:null,
+  endpoint:''
+};
+
+function initLoisirDraw(){
+  if(LOISIR_STATE.draw || !map) return;
+  if(!window.MapboxDraw){ ss('❌ Mapbox Draw nu este încărcat. Verifică scriptul pluginului.'); return; }
+  LOISIR_STATE.draw = new MapboxDraw({
+    displayControlsDefault:false,
+    controls:{polygon:false,line_string:false,trash:false},
+    styles:[
+      {id:'loisir-draw-polygon-fill',type:'fill',filter:['all',['==','$type','Polygon']],paint:{'fill-color':'#d4af37','fill-opacity':0.18}},
+      {id:'loisir-draw-polygon-line',type:'line',filter:['all',['==','$type','Polygon']],paint:{'line-color':'#d4af37','line-width':2}},
+      {id:'loisir-draw-line',type:'line',filter:['all',['==','$type','LineString']],paint:{'line-color':'#0ea5e9','line-width':4}},
+      {id:'loisir-draw-point',type:'circle',filter:['all',['==','$type','Point']],paint:{'circle-radius':5,'circle-color':'#d4af37'}}
+    ]
+  });
+  try{ map.addControl(LOISIR_STATE.draw,'top-left'); }catch(e){}
+  map.on('draw.create', onLoisirDrawChange);
+  map.on('draw.update', onLoisirDrawChange);
+  map.on('draw.delete', onLoisirDrawChange);
+}
+
+function onLoisirDrawChange(){
+  const fc = LOISIR_STATE.draw?.getAll?.() || turf.featureCollection([]);
+  LOISIR_STATE.userArea = null; LOISIR_STATE.userAxis = null;
+  fc.features.forEach(f=>{
+    if(['Polygon','MultiPolygon'].includes(f.geometry?.type)) LOISIR_STATE.userArea = f;
+    if(['LineString','MultiLineString'].includes(f.geometry?.type)) LOISIR_STATE.userAxis = normalizeLoisirLine(f);
+  });
+  renderAedisLoisirPanel();
+}
+
+function openLoisirAedis(){
+  LOISIR_STATE.active = true;
+  initLoisirDraw();
+  const modal = $('aedis-modal'); if(modal) modal.classList.add('open');
+  renderAedisLoisirPanel();
+  ss('🌿 AEDIS LOISIR activ — definește zona prin axă, poligon sau GeoJSON.');
+}
+
+function renderAedisLoisirPanel(){
+  const body = $('aedis-body'); if(!body) return;
+  const hasArea = !!(LOISIR_STATE.userArea || LOISIR_STATE.importedArea);
+  const hasAxis = !!(LOISIR_STATE.userAxis || LOISIR_STATE.importedAxis);
+  body.innerHTML = `
+    <div class="aedis-mode-tabs">
+      <button class="aedis-mode-tab" onclick="aedisRender?.()">🏗 VOLUM 3D</button>
+      <button class="aedis-mode-tab active">🌿 LOISIR / AGREMENT</button>
+    </div>
+    <div class="aedis-content">
+      <div class="aedis-section">Scop amenajare</div>
+      <div class="loisir-box ok">Amenajare turistică și recreativă strict pe albia Bahluiului, maluri, taluzuri, promenadă și zone riverane publice. Nu demolează și nu ocupă clădiri existente, incinte private, blocuri sau parcele construite de peste stradă.</div>
+      <div class="aedis-section">1. Alege zona de amenajare</div>
+      <div class="loisir-mode-grid">
+        <button class="loisir-mode-btn ${LOISIR_STATE.selectionMode==='area'?'active':''}" style="--loisir-color:#d4af37" onclick="setLoisirSelectionMode('area')"><span>▰ Desenează poligon<br><small>mal, parc, taluz, zonă publică</small></span></button>
+        <button class="loisir-mode-btn ${LOISIR_STATE.selectionMode==='axis'?'active':''}" style="--loisir-color:#0ea5e9" onclick="setLoisirSelectionMode('axis')"><span>〰 Desenează axă râu<br><small>generează coridor automat</small></span></button>
+        <button class="loisir-mode-btn ${LOISIR_STATE.selectionMode==='import'?'active':''}" style="--loisir-color:#22c55e" onclick="setLoisirSelectionMode('import')"><span>⬆ Import GeoJSON<br><small>limită domeniu public / studiu</small></span></button>
+        <button class="loisir-mode-btn ${LOISIR_STATE.selectionMode==='view'?'active':''}" style="--loisir-color:#8b5cf6" onclick="setLoisirSelectionMode('view')"><span>◎ Vedere curentă<br><small>fallback rapid de concept</small></span></button>
+      </div>
+      <div class="loisir-mini-actions">
+        <button class="loisir-mini-btn" onclick="startDrawLoisirArea()">Desenează poligon</button>
+        <button class="loisir-mini-btn" onclick="startDrawLoisirAxis()">Desenează axă</button>
+        <button class="loisir-mini-btn" onclick="clearLoisirDraw()">Curăță desen</button>
+        <button class="loisir-mini-btn" onclick="$('loisirGeoJsonInput').click()">Import GeoJSON</button>
+        <input id="loisirGeoJsonInput" class="loisir-file" type="file" accept=".geojson,.json" onchange="importLoisirGeoJSON(event)">
+      </div>
+      <div class="${hasArea||hasAxis?'loisir-box ok':'loisir-box warn'}">${hasArea?'✅ Zonă de amenajare definită prin poligon.':hasAxis?'✅ Axă râu/promenadă definită. Coridorul se generează automat.':'⚠ Nu ai definit încă zona. Pentru domeniu public fără cadastru, recomand: desenează axa râului sau un poligon de studiu.'}</div>
+      <div class="aedis-section">2. Categorii amenajare</div>
+      <div class="loisir-cat-grid">${Object.entries(LOISIR_CATS).map(([k,c])=>`<button class="loisir-cat-btn ${c.enabled?'active':''}" style="--loisir-color:${c.color}" onclick="toggleLoisirCat('${k}')"><span style="display:flex;align-items:center;gap:7px"><span class="loisir-dot"></span><span>${c.icon} ${c.label}</span></span><span class="loisir-switch"></span></button>`).join('')}</div>
+      <div class="aedis-section">3. Parametri urbanistici</div>
+      <div class="aedis-row"><span class="aedis-lbl">Coridor râu</span><input class="inp" type="number" value="${LOISIR_STATE.corridorMeters}" onchange="LOISIR_STATE.corridorMeters=Number(this.value)||45"></div>
+      <div class="aedis-row"><span class="aedis-lbl">Pistă biciclete</span><input class="inp" type="number" value="${LOISIR_STATE.bikeWidth}" onchange="LOISIR_STATE.bikeWidth=Number(this.value)||3"></div>
+      <div class="aedis-row"><span class="aedis-lbl">Pistă alergare</span><input class="inp" type="number" value="${LOISIR_STATE.runWidth}" onchange="LOISIR_STATE.runWidth=Number(this.value)||2.5"></div>
+      <div class="aedis-row"><span class="aedis-lbl">Alei pietonale</span><input class="inp" type="number" value="${LOISIR_STATE.walkWidth}" onchange="LOISIR_STATE.walkWidth=Number(this.value)||3"></div>
+      <div class="aedis-row"><span class="aedis-lbl">Distanță bănci</span><input class="inp" type="number" value="${LOISIR_STATE.benchSpacing}" onchange="LOISIR_STATE.benchSpacing=Number(this.value)||25"></div>
+      <div class="aedis-row"><span class="aedis-lbl">Iluminat</span><input class="inp" type="number" value="${LOISIR_STATE.lightingSpacing}" onchange="LOISIR_STATE.lightingSpacing=Number(this.value)||30"></div>
+      <div class="aedis-row"><span class="aedis-lbl">Vegetație</span><input type="range" min="10" max="100" value="${LOISIR_STATE.vegetationDensity}" onchange="LOISIR_STATE.vegetationDensity=Number(this.value);renderAedisLoisirPanel()"><span class="aedis-val">${LOISIR_STATE.vegetationDensity}%</span></div>
+      <div class="loisir-box warn">Validare automată: obiectele care intersectează clădiri existente, drumuri sau zone în afara coridorului sunt eliminate înainte de randare.</div>
+    </div>
+    <div class="aedis-actions">
+      <button class="aedis-build-btn" onclick="generateLoisir3D()">🌿 GENEREAZĂ LOISIR 3D</button>
+      <button class="aedis-build-btn" onclick="renderLoisirAI()">✨ AI RENDER</button>
+      <button class="aedis-dim-btn" onclick="clearLoisir()">Șterge</button>
+      <button class="aedis-close-btn" onclick="$('aedis-modal').classList.remove('open')">✕</button>
+    </div>`;
+}
+
+function setLoisirSelectionMode(mode){ LOISIR_STATE.selectionMode = mode; renderAedisLoisirPanel(); }
+function toggleLoisirCat(key){ if(LOISIR_CATS[key]){ LOISIR_CATS[key].enabled=!LOISIR_CATS[key].enabled; renderAedisLoisirPanel(); } }
+function startDrawLoisirArea(){ initLoisirDraw(); if(!LOISIR_STATE.draw) return; LOISIR_STATE.selectionMode='area'; LOISIR_STATE.draw.changeMode('draw_polygon'); ss('✏️ Desenează poligonul zonei publice de amenajare.'); renderAedisLoisirPanel(); }
+function startDrawLoisirAxis(){ initLoisirDraw(); if(!LOISIR_STATE.draw) return; LOISIR_STATE.selectionMode='axis'; LOISIR_STATE.draw.changeMode('draw_line_string'); ss('〰 Desenează axa râului / promenadei. Coridorul va fi generat automat.'); renderAedisLoisirPanel(); }
+function clearLoisirDraw(){ if(LOISIR_STATE.draw) LOISIR_STATE.draw.deleteAll(); LOISIR_STATE.userArea=null; LOISIR_STATE.userAxis=null; LOISIR_STATE.importedArea=null; LOISIR_STATE.importedAxis=null; renderAedisLoisirPanel(); ss('🧹 Selecția LOISIR a fost curățată.'); }
+
+function importLoisirGeoJSON(event){
+  const file=event.target.files?.[0]; if(!file) return; const reader=new FileReader();
+  reader.onload=e=>{ try{
+    const geo=JSON.parse(e.target.result);
+    const fc=geo.type==='FeatureCollection'?geo:turf.featureCollection([geo.type==='Feature'?geo:turf.feature(geo)]);
+    LOISIR_STATE.importedArea=null; LOISIR_STATE.importedAxis=null;
+    fc.features.forEach(f=>{ if(['Polygon','MultiPolygon'].includes(f.geometry?.type)) LOISIR_STATE.importedArea=f; if(['LineString','MultiLineString'].includes(f.geometry?.type)) LOISIR_STATE.importedAxis=normalizeLoisirLine(f); });
+    LOISIR_STATE.selectionMode='import';
+    if(LOISIR_STATE.draw){ LOISIR_STATE.draw.deleteAll(); fc.features.forEach(f=>{try{LOISIR_STATE.draw.add(f);}catch(_){}}); }
+    renderAedisLoisirPanel(); ss('✅ GeoJSON LOISIR importat.');
+  }catch(err){ ss('❌ GeoJSON invalid: '+err.message); }};
+  reader.readAsText(file);
+}
+
+function normalizeLoisirLine(feature){
+  if(!feature?.geometry) return null;
+  if(feature.geometry.type==='LineString') return feature;
+  if(feature.geometry.type==='MultiLineString') return turf.lineString(feature.geometry.coordinates[0], feature.properties||{});
+  return feature;
+}
+function getLoisirFallbackAxis(){ const c=map.getCenter(); return turf.lineString([[c.lng-0.008,c.lat-0.002],[c.lng-0.004,c.lat-0.001],[c.lng,c.lat],[c.lng+0.004,c.lat+0.001],[c.lng+0.008,c.lat+0.002]],{source:'fallback_view_axis'}); }
+function getLoisirAxis(){
+  if(LOISIR_STATE.userAxis) return LOISIR_STATE.userAxis;
+  if(LOISIR_STATE.importedAxis) return LOISIR_STATE.importedAxis;
+  const area=LOISIR_STATE.userArea||LOISIR_STATE.importedArea;
+  if(area){ const b=turf.bbox(area), y=(b[1]+b[3])/2; return turf.lineString([[b[0],y],[(b[0]+b[2])/2,y],[b[2],y]],{source:'area_generated_axis'}); }
+  return getLoisirFallbackAxis();
+}
+function getLoisirProjectArea(){ const area=LOISIR_STATE.userArea||LOISIR_STATE.importedArea; if(area) return area; return turf.buffer(getLoisirAxis(),LOISIR_STATE.corridorMeters,{units:'meters'}); }
+function getLoisirCorridor(){
+  const riverLine=getLoisirAxis(); const projectArea=getLoisirProjectArea(); const riverBuffer=turf.buffer(riverLine,LOISIR_STATE.corridorMeters,{units:'meters'});
+  let allowedArea=riverBuffer; try{ allowedArea=turf.intersect(riverBuffer,projectArea)||projectArea; }catch(e){ allowedArea=projectArea||riverBuffer; }
+  return {riverLine,projectArea,riverBuffer,allowedArea};
+}
+
+function getExistingBuildingObstacles(){
+  const obstacles=[]; if(!map) return turf.featureCollection(obstacles);
+  const active=['building','3d-buildings','add-3d-buildings','osm-buildings','composite-building','building-extrusion'].filter(id=>map.getLayer(id));
+  if(active.length){ try{ map.queryRenderedFeatures({layers:active}).forEach(f=>{ if(['Polygon','MultiPolygon'].includes(f.geometry?.type)) obstacles.push(f); }); }catch(e){} }
+  if(S?.ctx?.features?.length){ S.ctx.features.forEach(f=>{ if(['Polygon','MultiPolygon'].includes(f.geometry?.type)) obstacles.push(f); }); }
+  return turf.featureCollection(obstacles);
+}
+function getRoadObstacles(){
+  const obstacles=[]; if(!map) return turf.featureCollection(obstacles);
+  const roadLayers=['road','road-primary','road-secondary','road-street','road-simple','road-label'].filter(id=>map.getLayer(id));
+  if(roadLayers.length){ try{ map.queryRenderedFeatures({layers:roadLayers}).forEach(f=>{ if(['LineString','MultiLineString'].includes(f.geometry?.type)){ const b=turf.buffer(f,4,{units:'meters'}); b.properties={type:'road_obstacle'}; obstacles.push(b); } }); }catch(e){} }
+  return turf.featureCollection(obstacles);
+}
+function collectLoisirObstacles(){ const b=getExistingBuildingObstacles(), r=getRoadObstacles(); return turf.featureCollection([...b.features,...r.features]); }
+function isLoisirObjectAllowed(feature,corridor,obstacles){
+  if(!feature||!corridor?.allowedArea) return false;
+  try{ const c=turf.center(feature); if(!turf.booleanPointInPolygon(c,corridor.allowedArea)) return false; for(const obs of obstacles.features){ try{ if(turf.booleanIntersects(feature,obs)) return false; }catch(e){} } return true; }catch(e){ return false; }
+}
+function addFeatureIfAllowed(features,feature,corridor,obstacles){ if(isLoisirObjectAllowed(feature,corridor,obstacles)) features.push(feature); }
+function safeLineOffset(line,meters){ try{return turf.lineOffset(line,meters,{units:'meters'});}catch(e){return line;} }
+
+function generateLoisirFeatures(){
+  const corridor=getLoisirCorridor(); const obstacles=collectLoisirObstacles(); const features=[]; let removed=0;
+  const pushAllowed=(f)=>{ const n=features.length; addFeatureIfAllowed(features,f,corridor,obstacles); if(features.length===n) removed++; };
+  features.push({...corridor.allowedArea,properties:{type:'loisir_allowed_area',label:'Zonă permisă amenajare',color:'#14532d',height:0.05}});
+  features.push({...corridor.riverLine,properties:{type:'river_axis',label:'Axă râu / promenadă',color:'#0ea5e9'}});
+  if(LOISIR_CATS.park.enabled) features.push({...corridor.allowedArea,properties:{type:'green_area',label:'Parc public / zonă verde',color:LOISIR_CATS.park.color,height:0.12}});
+  if(LOISIR_CATS.bike.enabled){ const f=safeLineOffset(corridor.riverLine,9); f.properties={type:'bike_path',label:'Pistă biciclete',width:LOISIR_STATE.bikeWidth,color:LOISIR_CATS.bike.color}; features.push(f); }
+  if(LOISIR_CATS.run.enabled){ const f=safeLineOffset(corridor.riverLine,14); f.properties={type:'run_path',label:'Pistă alergare',width:LOISIR_STATE.runWidth,color:LOISIR_CATS.run.color}; features.push(f); }
+  if(LOISIR_CATS.walk.enabled){ const f=safeLineOffset(corridor.riverLine,20); f.properties={type:'walk_path',label:'Alee pietonală',width:LOISIR_STATE.walkWidth,color:LOISIR_CATS.walk.color}; features.push(f); }
+  const length=turf.length(corridor.riverLine,{units:'meters'});
+  const placeBuffered=(catKey,type,label,start,step,dist,bearing,radius,height)=>{ if(!LOISIR_CATS[catKey]?.enabled) return; for(let d=start; d<length; d+=step){ const p=turf.along(corridor.riverLine,d,{units:'meters'}); const off=turf.transformTranslate(p,dist,bearing,{units:'meters'}); const f=turf.buffer(off,radius,{units:'meters'}); f.properties={type,label,color:LOISIR_CATS[catKey].color,height}; pushAllowed(f); } };
+  placeBuffered('benches','bench','Bancă',15,LOISIR_STATE.benchSpacing,12,90,1.2,0.45);
+  placeBuffered('lighting','light','Iluminat',10,LOISIR_STATE.lightingSpacing,17,90,0.7,4);
+  placeBuffered('cafenele','cafe','Cafenea / Pavilion',45,120,22,90,6,3.5);
+  placeBuffered('restaurante','restaurant','Restaurant / Terasă',90,180,28,90,9,4.5);
+  placeBuffered('playground','playground','Loc de joacă',70,220,24,-90,10,1.2);
+  placeBuffered('sport','sport','Fitness urban',110,240,26,-90,8,1.8);
+  placeBuffered('pontoon','pontoon','Ponton / Debarcader',60,220,0,90,7,0.6);
+  placeBuffered('belvedere','belvedere','Belvedere',35,160,18,-90,5,1.2);
+  LOISIR_STATE.lastValidation={removed,obstacles:obstacles.features.length,total:features.length};
+  return turf.featureCollection(features);
+}
+
+function generateLoisir3D(){
+  if(!map||!map.loaded()){ ss('⏳ Harta încă se încarcă. Reîncearcă după încărcare.'); return; }
+  clearLoisir(); const fc=generateLoisirFeatures(); LOISIR_STATE.features=fc;
+  map.addSource('loisir-features',{type:'geojson',data:fc});
+  map.addLayer({id:'loisir-area',type:'fill',source:'loisir-features',filter:['in',['get','type'],['literal',['loisir_allowed_area','green_area']]],paint:{'fill-color':['get','color'],'fill-opacity':['case',['==',['get','type'],'loisir_allowed_area'],0.12,0.35]}});
+  map.addLayer({id:'loisir-lines',type:'line',source:'loisir-features',filter:['in',['get','type'],['literal',['river_axis','bike_path','run_path','walk_path']]],paint:{'line-color':['get','color'],'line-width':['case',['==',['get','type'],'bike_path'],6,['==',['get','type'],'run_path'],5,['==',['get','type'],'walk_path'],5,3],'line-opacity':0.95}});
+  map.addLayer({id:'loisir-objects-3d',type:'fill-extrusion',source:'loisir-features',filter:['in',['get','type'],['literal',['bench','light','cafe','restaurant','pontoon','playground','sport','belvedere']]],paint:{'fill-extrusion-color':['get','color'],'fill-extrusion-height':['coalesce',['get','height'],1],'fill-extrusion-base':0,'fill-extrusion-opacity':0.9}});
+  map.addLayer({id:'loisir-labels',type:'symbol',source:'loisir-features',filter:['in',['get','type'],['literal',['bike_path','run_path','walk_path','bench','light','cafe','restaurant','pontoon','green_area','playground','sport','belvedere']]],layout:{'text-field':['get','label'],'text-size':12,'text-offset':[0,1.2],'text-anchor':'top','text-allow-overlap':false},paint:{'text-color':'#ffffff','text-halo-color':'#0b1220','text-halo-width':1.5}});
+  try{ map.fitBounds(turf.bbox(fc),{padding:80,pitch:60,duration:900}); }catch(e){ map.easeTo({pitch:60,bearing:map.getBearing(),duration:700}); }
+  const v=LOISIR_STATE.lastValidation||{}; ss(`✅ LOISIR generat: ${fc.features.length} elemente · eliminate ${v.removed||0} obiecte invalide · obstacole detectate ${v.obstacles||0}.`);
+}
+function clearLoisir(){ ['loisir-labels','loisir-objects-3d','loisir-lines','loisir-area'].forEach(id=>{try{if(map.getLayer(id))map.removeLayer(id);}catch(e){}}); try{if(map.getSource('loisir-features'))map.removeSource('loisir-features');}catch(e){} LOISIR_STATE.features=null; }
+
+function getEnabledLoisirLabels(){ return Object.values(LOISIR_CATS).filter(c=>c.enabled).map(c=>c.label).join(', '); }
+function getLoisirUrbanPrompt(){
+  return `Photorealistic urban design render of a riverside public leisure redevelopment in Iași, Romania, along the Bahlui river. STRICT RULES: do not demolish existing buildings, do not modify buildings across the street, do not place new buildings on private plots, keep existing blocks, roads and surrounding urban fabric unchanged, interventions only inside the defined river corridor, riverbed edges, embankments, public promenade and public green areas. DESIGN PROGRAM: ${getEnabledLoisirLabels()}. Include separated bicycle path and jogging path, pedestrian alleys, benches, lighting poles, trees, shrubs, public seating, small cafés/lightweight pavilions/terraces only where free, possible pontoon or small deck next to water. Contemporary European riverside regeneration, realistic stone paving, timber decks, corten accents, greenery, water reflections, daylight, realistic shadows, aerial oblique 3D map perspective, professional urban planning presentation, no towers, no megastructures, no demolition.`;
+}
+async function captureLoisirMapImage(){ map.triggerRepaint(); await new Promise(r=>setTimeout(r,500)); return map.getCanvas().toDataURL('image/jpeg',0.9); }
+function ensureFalKeyForLoisir(){
+  if(typeof FAL_AI==='undefined') throw new Error('FAL_AI nu este definit în aplicație.');
+  if(FAL_AI.apiKey) return true;
+  const key=prompt('API key Fal.ai lipsă. Introdu API key pentru AI Render LOISIR:', '');
+  if(!key) return false; FAL_AI.apiKey=key.trim(); try{localStorage.setItem('fal_api_key',FAL_AI.apiKey);}catch(e){} return !!FAL_AI.apiKey;
+}
+async function renderLoisirAI(){
+  try{
+    if(LOISIR_AI_STATE.rendering){ ss('⏳ AI Render LOISIR este deja în curs.'); return; }
+    if(!map||!map.loaded()){ ss('⏳ Harta încă se încarcă.'); return; }
+    if(!LOISIR_STATE.features) generateLoisir3D();
+    if(!LOISIR_STATE.features?.features?.length) throw new Error('Nu există geometrie LOISIR generată.');
+    LOISIR_AI_STATE.rendering=true; ss('✨ LOISIR AI Render: captură hartă și pregătire prompt...');
+    const screenshot=await captureLoisirMapImage(); const prompt=getLoisirUrbanPrompt(); LOISIR_AI_STATE.lastScreenshot=screenshot; LOISIR_AI_STATE.lastPrompt=prompt;
+    let imageUrl='';
+    if(LOISIR_AI_STATE.endpoint){
+      const res=await fetch(LOISIR_AI_STATE.endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'loisir_public_space',project:'UrbanX AEDIS LOISIR',city:'Iași',river:'Bahlui',prompt,screenshot,geojson:LOISIR_STATE.features,constraints:{no_demolition:true,preserve_existing_buildings:true,preserve_buildings_across_street:true,intervention_only_inside_defined_area:true,avoid_private_plots:true,avoid_roads:true,avoid_existing_buildings:true},categories:Object.entries(LOISIR_CATS).filter(([_,c])=>c.enabled).map(([key,c])=>({key,label:c.label,color:c.color})),camera:{pitch:map.getPitch(),bearing:map.getBearing(),zoom:map.getZoom(),center:map.getCenter()}})});
+      if(!res.ok) throw new Error('Endpoint AI Render '+res.status); const data=await res.json(); imageUrl=data.imageUrl||data.image_url||data.url||data.output?.[0]||data.images?.[0]?.url;
+    } else {
+      if(!ensureFalKeyForLoisir()){ ss('⚠️ AI Render LOISIR anulat — API key lipsă.'); return; }
+      ss('✨ LOISIR AI Render: se trimite la Fal.ai...');
+      const res=await fetch('https://fal.run/fal-ai/flux/schnell',{method:'POST',headers:{'Authorization':'Key '+FAL_AI.apiKey,'Content-Type':'application/json'},body:JSON.stringify({prompt,image_size:'landscape_16_9',num_inference_steps:4,num_images:1,enable_safety_checker:true})});
+      if(!res.ok){ const t=await res.text(); throw new Error('Fal.ai '+res.status+': '+t.slice(0,160)); }
+      const data=await res.json(); imageUrl=data?.images?.[0]?.url;
+    }
+    if(!imageUrl) throw new Error('AI Render nu a returnat URL imagine.');
+    LOISIR_AI_STATE.lastRender={url:imageUrl,prompt,timestamp:new Date().toISOString()}; showLoisirAIRender(imageUrl); ss('✅ AI Render LOISIR generat fotorealist.');
+  }catch(err){ console.error(err); ss('❌ AI Render LOISIR eșuat: '+err.message); }
+  finally{ LOISIR_AI_STATE.rendering=false; }
+}
+function showLoisirAIRender(imageUrl){ const modal=$('loisir-ai-preview'), img=$('loisir-ai-img'); if(!modal||!img){ window.open(imageUrl,'_blank'); return; } img.src=imageUrl; modal.classList.add('open'); }
+
+console.info('UrbanX AEDIS LOISIR module loaded');
+
+
+function setLoisirSelectionMode(mode){ LOISIR_STATE.selectionMode = mode; renderAedisLoisirPanel(); }
+function toggleLoisirCat(key){ if(LOISIR_CATS[key]){ LOISIR_CATS[key].enabled=!LOISIR_CATS[key].enabled; renderAedisLoisirPanel(); } }
+function startDrawLoisirArea(){ initLoisirDraw(); if(!LOISIR_STATE.draw) return; LOISIR_STATE.selectionMode='area'; LOISIR_STATE.draw.changeMode('draw_polygon'); ss('✏️ Desenează poligonul zonei publice de amenajare.'); renderAedisLoisirPanel(); }
+function startDrawLoisirAxis(){ initLoisirDraw(); if(!LOISIR_STATE.draw) return; LOISIR_STATE.selectionMode='axis'; LOISIR_STATE.draw.changeMode('draw_line_string'); ss('〰 Desenează axa râului / promenadei. Coridorul va fi generat automat.'); renderAedisLoisirPanel(); }
+function clearLoisirDraw(){ if(LOISIR_STATE.draw) LOISIR_STATE.draw.deleteAll(); LOISIR_STATE.userArea=null; LOISIR_STATE.userAxis=null; LOISIR_STATE.importedArea=null; LOISIR_STATE.importedAxis=null; renderAedisLoisirPanel(); ss('🧹 Selecția LOISIR a fost curățată.'); }
+
+function importLoisirGeoJSON(event){
+  const file=event.target.files?.[0]; if(!file) return; const reader=new FileReader();
+  reader.onload=e=>{ try{
+    const geo=JSON.parse(e.target.result);
+    const fc=geo.type==='FeatureCollection'?geo:turf.featureCollection([geo.type==='Feature'?geo:turf.feature(geo)]);
+    LOISIR_STATE.importedArea=null; LOISIR_STATE.importedAxis=null;
+    fc.features.forEach(f=>{ if(['Polygon','MultiPolygon'].includes(f.geometry?.type)) LOISIR_STATE.importedArea=f; if(['LineString','MultiLineString'].includes(f.geometry?.type)) LOISIR_STATE.importedAxis=normalizeLoisirLine(f); });
+    LOISIR_STATE.selectionMode='import';
+    if(LOISIR_STATE.draw){ LOISIR_STATE.draw.deleteAll(); fc.features.forEach(f=>{try{LOISIR_STATE.draw.add(f);}catch(_){}}); }
+    renderAedisLoisirPanel(); ss('✅ GeoJSON LOISIR importat.');
+  }catch(err){ ss('❌ GeoJSON invalid: '+err.message); }};
+  reader.readAsText(file);
+}
+
+function normalizeLoisirLine(feature){
+  if(!feature?.geometry) return null;
+  if(feature.geometry.type==='LineString') return feature;
+  if(feature.geometry.type==='MultiLineString') return turf.lineString(feature.geometry.coordinates[0], feature.properties||{});
+  return feature;
+}
+function getLoisirFallbackAxis(){ const c=map.getCenter(); return turf.lineString([[c.lng-0.008,c.lat-0.002],[c.lng-0.004,c.lat-0.001],[c.lng,c.lat],[c.lng+0.004,c.lat+0.001],[c.lng+0.008,c.lat+0.002]],{source:'fallback_view_axis'}); }
+function getLoisirAxis(){
+  if(LOISIR_STATE.userAxis) return LOISIR_STATE.userAxis;
+  if(LOISIR_STATE.importedAxis) return LOISIR_STATE.importedAxis;
+  const area=LOISIR_STATE.userArea||LOISIR_STATE.importedArea;
+  if(area){ const b=turf.bbox(area), y=(b[1]+b[3])/2; return turf.lineString([[b[0],y],[(b[0]+b[2])/2,y],[b[2],y]],{source:'area_generated_axis'}); }
+  return getLoisirFallbackAxis();
+}
+function getLoisirProjectArea(){ const area=LOISIR_STATE.userArea||LOISIR_STATE.importedArea; if(area) return area; return turf.buffer(getLoisirAxis(),LOISIR_STATE.corridorMeters,{units:'meters'}); }
+function getLoisirCorridor(){
+  const riverLine=getLoisirAxis(); const projectArea=getLoisirProjectArea(); const riverBuffer=turf.buffer(riverLine,LOISIR_STATE.corridorMeters,{units:'meters'});
+  let allowedArea=riverBuffer; try{ allowedArea=turf.intersect(riverBuffer,projectArea)||projectArea; }catch(e){ allowedArea=projectArea||riverBuffer; }
+  return {riverLine,projectArea,riverBuffer,allowedArea};
+}
+
+function getExistingBuildingObstacles(){
+  const obstacles=[]; if(!map) return turf.featureCollection(obstacles);
+  const active=['building','3d-buildings','add-3d-buildings','osm-buildings','composite-building','building-extrusion'].filter(id=>map.getLayer(id));
+  if(active.length){ try{ map.queryRenderedFeatures({layers:active}).forEach(f=>{ if(['Polygon','MultiPolygon'].includes(f.geometry?.type)) obstacles.push(f); }); }catch(e){} }
+  if(S?.ctx?.features?.length){ S.ctx.features.forEach(f=>{ if(['Polygon','MultiPolygon'].includes(f.geometry?.type)) obstacles.push(f); }); }
+  return turf.featureCollection(obstacles);
+}
+function getRoadObstacles(){
+  const obstacles=[]; if(!map) return turf.featureCollection(obstacles);
+  const roadLayers=['road','road-primary','road-secondary','road-street','road-simple','road-label'].filter(id=>map.getLayer(id));
+  if(roadLayers.length){ try{ map.queryRenderedFeatures({layers:roadLayers}).forEach(f=>{ if(['LineString','MultiLineString'].includes(f.geometry?.type)){ const b=turf.buffer(f,4,{units:'meters'}); b.properties={type:'road_obstacle'}; obstacles.push(b); } }); }catch(e){} }
+  return turf.featureCollection(obstacles);
+}
+function collectLoisirObstacles(){ const b=getExistingBuildingObstacles(), r=getRoadObstacles(); return turf.featureCollection([...b.features,...r.features]); }
+function isLoisirObjectAllowed(feature,corridor,obstacles){
+  if(!feature||!corridor?.allowedArea) return false;
+  try{ const c=turf.center(feature); if(!turf.booleanPointInPolygon(c,corridor.allowedArea)) return false; for(const obs of obstacles.features){ try{ if(turf.booleanIntersects(feature,obs)) return false; }catch(e){} } return true; }catch(e){ return false; }
+}
+function addFeatureIfAllowed(features,feature,corridor,obstacles){ if(isLoisirObjectAllowed(feature,corridor,obstacles)) features.push(feature); }
+function safeLineOffset(line,meters){ try{return turf.lineOffset(line,meters,{units:'meters'});}catch(e){return line;} }
+
+function generateLoisirFeatures(){
+  const corridor=getLoisirCorridor(); const obstacles=collectLoisirObstacles(); const features=[]; let removed=0;
+  const pushAllowed=(f)=>{ const n=features.length; addFeatureIfAllowed(features,f,corridor,obstacles); if(features.length===n) removed++; };
+  features.push({...corridor.allowedArea,properties:{type:'loisir_allowed_area',label:'Zonă permisă amenajare',color:'#14532d',height:0.05}});
+  features.push({...corridor.riverLine,properties:{type:'river_axis',label:'Axă râu / promenadă',color:'#0ea5e9'}});
+  if(LOISIR_CATS.park.enabled) features.push({...corridor.allowedArea,properties:{type:'green_area',label:'Parc public / zonă verde',color:LOISIR_CATS.park.color,height:0.12}});
+  if(LOISIR_CATS.bike.enabled){ const f=safeLineOffset(corridor.riverLine,9); f.properties={type:'bike_path',label:'Pistă biciclete',width:LOISIR_STATE.bikeWidth,color:LOISIR_CATS.bike.color}; features.push(f); }
+  if(LOISIR_CATS.run.enabled){ const f=safeLineOffset(corridor.riverLine,14); f.properties={type:'run_path',label:'Pistă alergare',width:LOISIR_STATE.runWidth,color:LOISIR_CATS.run.color}; features.push(f); }
+  if(LOISIR_CATS.walk.enabled){ const f=safeLineOffset(corridor.riverLine,20); f.properties={type:'walk_path',label:'Alee pietonală',width:LOISIR_STATE.walkWidth,color:LOISIR_CATS.walk.color}; features.push(f); }
+  const length=turf.length(corridor.riverLine,{units:'meters'});
+  const placeBuffered=(catKey,type,label,start,step,dist,bearing,radius,height)=>{ if(!LOISIR_CATS[catKey]?.enabled) return; for(let d=start; d<length; d+=step){ const p=turf.along(corridor.riverLine,d,{units:'meters'}); const off=turf.transformTranslate(p,dist,bearing,{units:'meters'}); const f=turf.buffer(off,radius,{units:'meters'}); f.properties={type,label,color:LOISIR_CATS[catKey].color,height}; pushAllowed(f); } };
+  placeBuffered('benches','bench','Bancă',15,LOISIR_STATE.benchSpacing,12,90,1.2,0.45);
+  placeBuffered('lighting','light','Iluminat',10,LOISIR_STATE.lightingSpacing,17,90,0.7,4);
+  placeBuffered('cafenele','cafe','Cafenea / Pavilion',45,120,22,90,6,3.5);
+  placeBuffered('restaurante','restaurant','Restaurant / Terasă',90,180,28,90,9,4.5);
+  placeBuffered('playground','playground','Loc de joacă',70,220,24,-90,10,1.2);
+  placeBuffered('sport','sport','Fitness urban',110,240,26,-90,8,1.8);
+  placeBuffered('pontoon','pontoon','Ponton / Debarcader',60,220,0,90,7,0.6);
+  placeBuffered('belvedere','belvedere','Belvedere',35,160,18,-90,5,1.2);
+  LOISIR_STATE.lastValidation={removed,obstacles:obstacles.features.length,total:features.length};
+  return turf.featureCollection(features);
+}
+
+function generateLoisir3D(){
+  if(!map||!map.loaded()){ ss('⏳ Harta încă se încarcă. Reîncearcă după încărcare.'); return; }
+  clearLoisir(); const fc=generateLoisirFeatures(); LOISIR_STATE.features=fc;
+  map.addSource('loisir-features',{type:'geojson',data:fc});
+  map.addLayer({id:'loisir-area',type:'fill',source:'loisir-features',filter:['in',['get','type'],['literal',['loisir_allowed_area','green_area']]],paint:{'fill-color':['get','color'],'fill-opacity':['case',['==',['get','type'],'loisir_allowed_area'],0.12,0.35]}});
+  map.addLayer({id:'loisir-lines',type:'line',source:'loisir-features',filter:['in',['get','type'],['literal',['river_axis','bike_path','run_path','walk_path']]],paint:{'line-color':['get','color'],'line-width':['case',['==',['get','type'],'bike_path'],6,['==',['get','type'],'run_path'],5,['==',['get','type'],'walk_path'],5,3],'line-opacity':0.95}});
+  map.addLayer({id:'loisir-objects-3d',type:'fill-extrusion',source:'loisir-features',filter:['in',['get','type'],['literal',['bench','light','cafe','restaurant','pontoon','playground','sport','belvedere']]],paint:{'fill-extrusion-color':['get','color'],'fill-extrusion-height':['coalesce',['get','height'],1],'fill-extrusion-base':0,'fill-extrusion-opacity':0.9}});
+  map.addLayer({id:'loisir-labels',type:'symbol',source:'loisir-features',filter:['in',['get','type'],['literal',['bike_path','run_path','walk_path','bench','light','cafe','restaurant','pontoon','green_area','playground','sport','belvedere']]],layout:{'text-field':['get','label'],'text-size':12,'text-offset':[0,1.2],'text-anchor':'top','text-allow-overlap':false},paint:{'text-color':'#ffffff','text-halo-color':'#0b1220','text-halo-width':1.5}});
+  try{ map.fitBounds(turf.bbox(fc),{padding:80,pitch:60,duration:900}); }catch(e){ map.easeTo({pitch:60,bearing:map.getBearing(),duration:700}); }
+  const v=LOISIR_STATE.lastValidation||{}; ss(`✅ LOISIR generat: ${fc.features.length} elemente · eliminate ${v.removed||0} obiecte invalide · obstacole detectate ${v.obstacles||0}.`);
+}
+function clearLoisir(){ ['loisir-labels','loisir-objects-3d','loisir-lines','loisir-area'].forEach(id=>{try{if(map.getLayer(id))map.removeLayer(id);}catch(e){}}); try{if(map.getSource('loisir-features'))map.removeSource('loisir-features');}catch(e){} LOISIR_STATE.features=null; }
+
+function getEnabledLoisirLabels(){ return Object.values(LOISIR_CATS).filter(c=>c.enabled).map(c=>c.label).join(', '); }
+function getLoisirUrbanPrompt(){
+  return `Photorealistic urban design render of a riverside public leisure redevelopment in Iași, Romania, along the Bahlui river. STRICT RULES: do not demolish existing buildings, do not modify buildings across the street, do not place new buildings on private plots, keep existing blocks, roads and surrounding urban fabric unchanged, interventions only inside the defined river corridor, riverbed edges, embankments, public promenade and public green areas. DESIGN PROGRAM: ${getEnabledLoisirLabels()}. Include separated bicycle path and jogging path, pedestrian alleys, benches, lighting poles, trees, shrubs, public seating, small cafés/lightweight pavilions/terraces only where free, possible pontoon or small deck next to water. Contemporary European riverside regeneration, realistic stone paving, timber decks, corten accents, greenery, water reflections, daylight, realistic shadows, aerial oblique 3D map perspective, professional urban planning presentation, no towers, no megastructures, no demolition.`;
+}
+async function captureLoisirMapImage(){ map.triggerRepaint(); await new Promise(r=>setTimeout(r,500)); return map.getCanvas().toDataURL('image/jpeg',0.9); }
+function ensureFalKeyForLoisir(){
+  if(typeof FAL_AI==='undefined') throw new Error('FAL_AI nu este definit în aplicație.');
+  if(FAL_AI.apiKey) return true;
+  const key=prompt('API key Fal.ai lipsă. Introdu API key pentru AI Render LOISIR:', '');
+  if(!key) return false; FAL_AI.apiKey=key.trim(); try{localStorage.setItem('fal_api_key',FAL_AI.apiKey);}catch(e){} return !!FAL_AI.apiKey;
+}
+async function renderLoisirAI(){
+  try{
+    if(LOISIR_AI_STATE.rendering){ ss('⏳ AI Render LOISIR este deja în curs.'); return; }
+    if(!map||!map.loaded()){ ss('⏳ Harta încă se încarcă.'); return; }
+    if(!LOISIR_STATE.features) generateLoisir3D();
+    if(!LOISIR_STATE.features?.features?.length) throw new Error('Nu există geometrie LOISIR generată.');
+    LOISIR_AI_STATE.rendering=true; ss('✨ LOISIR AI Render: captură hartă și pregătire prompt...');
+    const screenshot=await captureLoisirMapImage(); const prompt=getLoisirUrbanPrompt(); LOISIR_AI_STATE.lastScreenshot=screenshot; LOISIR_AI_STATE.lastPrompt=prompt;
+    let imageUrl='';
+    if(LOISIR_AI_STATE.endpoint){
+      const res=await fetch(LOISIR_AI_STATE.endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'loisir_public_space',project:'UrbanX AEDIS LOISIR',city:'Iași',river:'Bahlui',prompt,screenshot,geojson:LOISIR_STATE.features,constraints:{no_demolition:true,preserve_existing_buildings:true,preserve_buildings_across_street:true,intervention_only_inside_defined_area:true,avoid_private_plots:true,avoid_roads:true,avoid_existing_buildings:true},categories:Object.entries(LOISIR_CATS).filter(([_,c])=>c.enabled).map(([key,c])=>({key,label:c.label,color:c.color})),camera:{pitch:map.getPitch(),bearing:map.getBearing(),zoom:map.getZoom(),center:map.getCenter()}})});
+      if(!res.ok) throw new Error('Endpoint AI Render '+res.status); const data=await res.json(); imageUrl=data.imageUrl||data.image_url||data.url||data.output?.[0]||data.images?.[0]?.url;
+    } else {
+      if(!ensureFalKeyForLoisir()){ ss('⚠️ AI Render LOISIR anulat — API key lipsă.'); return; }
+      ss('✨ LOISIR AI Render: se trimite la Fal.ai...');
+      const res=await fetch('https://fal.run/fal-ai/flux/schnell',{method:'POST',headers:{'Authorization':'Key '+FAL_AI.apiKey,'Content-Type':'application/json'},body:JSON.stringify({prompt,image_size:'landscape_16_9',num_inference_steps:4,num_images:1,enable_safety_checker:true})});
+      if(!res.ok){ const t=await res.text(); throw new Error('Fal.ai '+res.status+': '+t.slice(0,160)); }
+      const data=await res.json(); imageUrl=data?.images?.[0]?.url;
+    }
+    if(!imageUrl) throw new Error('AI Render nu a returnat URL imagine.');
+    LOISIR_AI_STATE.lastRender={url:imageUrl,prompt,timestamp:new Date().toISOString()}; showLoisirAIRender(imageUrl); ss('✅ AI Render LOISIR generat fotorealist.');
+  }catch(err){ console.error(err); ss('❌ AI Render LOISIR eșuat: '+err.message); }
+  finally{ LOISIR_AI_STATE.rendering=false; }
+}
+function showLoisirAIRender(imageUrl){ const modal=$('loisir-ai-preview'), img=$('loisir-ai-img'); if(!modal||!img){ window.open(imageUrl,'_blank'); return; } img.src=imageUrl; modal.classList.add('open'); }
+
+
 
 // ═══ INIT PDF BUTOANE ══════════════════════════════════════════════════════
 renderAll();
