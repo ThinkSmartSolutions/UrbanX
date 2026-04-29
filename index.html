@@ -9516,7 +9516,7 @@ function _v3dAddUrbanLife(THREE, scene, ring0, toLoc, isNight){
         const fl=new THREE.PointLight('#ffffc0',0.5,8);fl.position.set(lcx+cp.ox+0.5,0.6,lcz+cp.oz);scene.add(fl);
         const rl=new THREE.PointLight('#ff3030',0.3,5);rl.position.set(lcx+cp.ox-0.5,0.6,lcz+cp.oz);scene.add(rl);
       }
-    }
+    });
 
     // Banca — pe trotuar față
     const banca=mkTex((ctx,w,h)=>{
