@@ -1405,7 +1405,8 @@ function getArchPalette(){
 // ═══ HARTĂ ════════════════════════════════════════════════════════════════
 const map=new mapboxgl.Map({
   container:'map',style:STYLES.custom,
-  center:[27.6014,47.1585],zoom:13,pitch:0,bearing:0,antialias:true
+  center:[27.6014,47.1585],zoom:13,pitch:0,bearing:0,antialias:true,
+  preserveDrawingBuffer:true
 });
 map.addControl(new mapboxgl.NavigationControl(),'top-left');
 
@@ -8795,7 +8796,7 @@ async function generateSolarStudy(){
   pdf.setTextColor(200,150,10); pdf.setFontSize(9); pdf.setFont('helvetica','bold');
   pdf.text('URBANX · AEDIS · PLATFORMA DE ANALIZA URBANISTICA',W/2,28,{align:'center'});
 
-  pdf.setFillColor(255,255,255,10); pdf.roundedRect(20,38,W-40,28,3,3,'F');
+  pdf.setFillColor(255,255,255); pdf.roundedRect(20,38,W-40,28,3,3,'F');
   pdf.setTextColor(10,22,48); pdf.setFontSize(18); pdf.setFont('helvetica','bold');
   pdf.text('PRE-STUDIU URBANISTIC',W/2,52,{align:'center'});
   pdf.text('DE INSORIRE',W/2,63,{align:'center'});
@@ -8953,7 +8954,7 @@ async function generateSolarStudy(){
     const alt=solarPos(lat,lon,d2).altitude;
     const x2=gX+(m-0.5)/12*gW,y2=gY+gH-Math.min(alt/70,1)*gH;
     if(px!==null)pdf.line(px,py,x2,y2);
-    pdf.setFillColor(26,58,106); pdf.circle(x2,y2,1,'F');
+    pdf.setFillColor(26,58,106); try{pdf.circle(x2,y2,1,'F');}catch(_){pdf.ellipse(x2,y2,1,1,'F');}
     px=x2;py=y2;
   });
   // Linie 15°
@@ -8974,7 +8975,8 @@ async function generateSolarStudy(){
   umbraData.forEach(({sezon,alt,umbra,ok},ri)=>{
     const bg=ri%2===0?[235,240,250]:[245,248,255];
     pdf.setFillColor(...bg); pdf.rect(14,cy,W-28,7,'F');
-    pdf.setFillColor(ok?[40,140,60]:[180,40,40]); pdf.rect(14,cy,3,7,'F');
+    const okCol = ok ? [40,140,60] : [180,40,40];
+    pdf.setFillColor(okCol[0],okCol[1],okCol[2]); pdf.rect(14,cy,3,7,'F');
     pdf.setTextColor(30,50,90); pdf.setFont('helvetica','normal'); pdf.setFontSize(7.5);
     pdf.text(sezon,20,cy+5);
     pdf.text('Alt: '+alt.toFixed(1)+'°',110,cy+5);
@@ -9393,10 +9395,8 @@ function _v3dAddUrbanLife(THREE, scene, ring0, toLoc, isNight){
     const lcz=(Math.min(...zs)+Math.max(...zs))/2;
     const lw=Math.max(...xs)-Math.min(...xs);
     const ld=Math.max(...zs)-Math.min(...zs);
-    const off=Math.max(lw,ld)*0.5+3;
-
-    // toLoc2 în spațiu LOCAL (nu geografic)
-    const placeAt=(lx,lz)=>[lx,lz]; // deja în coordonate locale
+    // Distanța față de fațadă: 5–18m în față (pe stradă)
+    const streetDist = Math.max(lw,ld)*0.5 + 7;
 
     const mkTex=(draw,cw,ch)=>{
       const cv=document.createElement('canvas');cv.width=cw;cv.height=ch;
@@ -9405,14 +9405,20 @@ function _v3dAddUrbanLife(THREE, scene, ring0, toLoc, isNight){
     };
     const addSprite=(tex,x,y,z,sw,sh)=>{
       const m=new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false,
-        sizeAttenuation:true,depthTest:false});
+        sizeAttenuation:true,depthTest:true});
       const sp=new THREE.Sprite(m);
-      // Scale x2 față de dimensiunile reale pentru vizibilitate
       sp.scale.set(sw*2,sh*2,1);
       sp.position.set(x,y+sh,z);
       scene.add(sp);
     };
-    const toLoc2=(lng,lat)=>toLoc([lng,lat]);
+
+    // Generăm 2 "fronturi stradale" — față și un lateral
+    // Frontul principal: Z pozitiv (față stradă)
+    // Lateral: X pozitiv
+    const fronts = [
+      { dx: 0,  dz: 1,  label: 'fata' },
+      { dx: 1,  dz: 0,  label: 'lateral' },
+    ];
 
     // Om
     const personDraw=(ctx,w,h,sk,cl,ha)=>{
@@ -9426,14 +9432,26 @@ function _v3dAddUrbanLife(THREE, scene, ring0, toLoc, isNight){
     const pData=[['#f5d5b8','#224499','#3a2010'],['#c8a080','#992233','#111'],
       ['#f0c8a0','#228844','#8b4513'],['#d4a882','#553399','#2c1810'],
       ['#e8c8a0','#333','#111'],['#c0a070','#dd7700','#4a2a10']];
-    for(let i=0;i<10;i++){
-      const a=(i/10)*Math.PI*2,r=off+Math.random()*3;
-      const [lx,lz]=[lcx+r*Math.sin(a), lcz+r*Math.cos(a)];
+
+    // 4 pietoni pe frontul stradal principal (față), espaciați
+    for(let i=0;i<4;i++){
+      const t = (i/(3)) - 0.5; // -0.5..0.5
+      const px = lcx + t * lw * 0.8;
+      const pz = lcz + streetDist + Math.random()*2;
       const [sk,cl,ha]=pData[i%pData.length];
-      addSprite(mkTex((ctx,w,h)=>personDraw(ctx,w,h,sk,cl,ha),32,64),lx,0,lz,0.5,1.75);
+      addSprite(mkTex((ctx,w,h)=>personDraw(ctx,w,h,sk,cl,ha),32,64),px,0,pz,0.5,1.75);
     }
 
-    // Mama cu carucior
+    // 2 pietoni pe lateral
+    for(let i=0;i<2;i++){
+      const t = (i-0.5)*0.4;
+      const px = lcx + streetDist + Math.random()*2;
+      const pz = lcz + t * ld * 0.8;
+      const [sk,cl,ha]=pData[(i+2)%pData.length];
+      addSprite(mkTex((ctx,w,h)=>personDraw(ctx,w,h,sk,cl,ha),32,64),px,0,pz,0.5,1.75);
+    }
+
+    // Mama cu carucior — pe trotuar față
     const carucior=mkTex((ctx,w,h)=>{
       ctx.clearRect(0,0,w,h);
       ctx.fillStyle='#f0c0a0';ctx.beginPath();ctx.arc(w*.35,h*.2,w*.13,0,6.28);ctx.fill();
@@ -9444,10 +9462,9 @@ function _v3dAddUrbanLife(THREE, scene, ring0, toLoc, isNight){
       ctx.arc(w*.8,h*.76,w*.08,0,6.28);ctx.fill();
       ctx.fillStyle='#ffd0a0';ctx.beginPath();ctx.arc(w*.7,h*.48,w*.1,0,6.28);ctx.fill();
     },64,64);
-    const ca=Math.random()*6.28,[clx,clz]=toLoc2(lcx+(off+1)*Math.sin(ca),lcz+(off+1)*Math.cos(ca));
-    addSprite(carucior,clx,0,clz,1.5,1.5);
+    addSprite(carucior, lcx - lw*0.25, 0, lcz + streetDist + 3, 1.5, 1.5);
 
-    // Beagle
+    // Beagle — pe trotuar față
     const beagle=mkTex((ctx,w,h)=>{
       ctx.clearRect(0,0,w,h);
       ctx.fillStyle='#c8a060';ctx.fillRect(w*.2,h*.48,w*.5,h*.26);
@@ -9460,10 +9477,9 @@ function _v3dAddUrbanLife(THREE, scene, ring0, toLoc, isNight){
       ctx.fillStyle='#f0e8d0';ctx.fillRect(w*.68,h*.5,w*.12,w*.08);
       ctx.fillStyle='#111';ctx.beginPath();ctx.arc(w*.78,h*.42,w*.03,0,6.28);ctx.fill();
     },64,40);
-    const ba=Math.random()*6.28,[blx,blz]=toLoc2(lcx+(off+0.5)*Math.sin(ba),lcz+(off+0.5)*Math.cos(ba));
-    addSprite(beagle,blx,0,blz,1.2,0.75);
+    addSprite(beagle, lcx + lw*0.2, 0, lcz + streetDist + 4, 1.2, 0.75);
 
-    // Bicicleta
+    // Bicicleta — pe pistă, față
     const bici=mkTex((ctx,w,h)=>{
       ctx.clearRect(0,0,w,h);ctx.strokeStyle='#444';ctx.lineWidth=2;
       ctx.beginPath();ctx.arc(w*.25,h*.7,w*.2,0,6.28);ctx.stroke();
@@ -9474,15 +9490,18 @@ function _v3dAddUrbanLife(THREE, scene, ring0, toLoc, isNight){
       ctx.fillStyle='#2266aa';ctx.beginPath();ctx.arc(w*.5,h*.15,w*.12,0,6.28);ctx.fill();
       ctx.fillRect(w*.38,h*.26,w*.24,h*.3);
     },48,56);
-    for(let i=0;i<2;i++){
-      const a2=Math.random()*6.28,[bix,biz]=toLoc2(lcx+(off+1.5+i)*Math.sin(a2),lcz+(off+1.5+i)*Math.cos(a2));
-      addSprite(bici,bix,0,biz,1.2,1.4);
-    }
+    addSprite(bici, lcx + lw*0.35, 0, lcz + streetDist + 5, 1.2, 1.4);
+    addSprite(bici, lcx - lw*0.35, 0, lcz + streetDist + 2, 1.2, 1.4);
 
-    // Masini
+    // Masini — parcate pe stradă, la distanță mai mare
     const carCols=['#cc2222','#2244cc','#228844','#aaa','#111','#cc8800'];
-    for(let i=0;i<3;i++){
-      const col=carCols[Math.floor(Math.random()*carCols.length)];
+    const carPositions = [
+      { ox: lw*0.5+4,  oz: streetDist+3 },  // față dreapta
+      { ox: -lw*0.5-4, oz: streetDist+3 },  // față stânga
+      { ox: streetDist+3, oz: ld*0.3 },     // lateral
+    ];
+    carPositions.forEach((cp,i)=>{
+      const col=carCols[i%carCols.length];
       const carTex=mkTex((ctx,w,h)=>{
         ctx.clearRect(0,0,w,h);
         ctx.fillStyle=col;ctx.fillRect(w*.1,h*.45,w*.8,h*.35);
@@ -9492,32 +9511,31 @@ function _v3dAddUrbanLife(THREE, scene, ring0, toLoc, isNight){
         ctx.fillStyle='#666';ctx.beginPath();ctx.arc(w*.22,h*.82,w*.07,0,6.28);ctx.fill();ctx.arc(w*.78,h*.82,w*.07,0,6.28);ctx.fill();
         if(isNight){ctx.fillStyle='rgba(255,255,180,.95)';ctx.fillRect(w*.82,h*.52,w*.08,h*.08);ctx.fillStyle='rgba(255,50,50,.95)';ctx.fillRect(w*.1,h*.52,w*.08,h*.08);}
       },80,48);
-      const a3=Math.random()*6.28,r3=off+Math.random()*4+2;
-      const [cax,caz]=[lcx+r3*Math.sin(a3), lcz+r3*Math.cos(a3)];
-      addSprite(carTex,cax,0,caz,2.5,1.5);
+      addSprite(carTex, lcx+cp.ox, 0, lcz+cp.oz, 2.5, 1.5);
       if(isNight){
-        const fl=new THREE.PointLight('#ffffc0',0.5,8);fl.position.set(cax+0.5,0.6,caz);scene.add(fl);
-        const rl=new THREE.PointLight('#ff3030',0.3,5);rl.position.set(cax-0.5,0.6,caz);scene.add(rl);
+        const fl=new THREE.PointLight('#ffffc0',0.5,8);fl.position.set(lcx+cp.ox+0.5,0.6,lcz+cp.oz);scene.add(fl);
+        const rl=new THREE.PointLight('#ff3030',0.3,5);rl.position.set(lcx+cp.ox-0.5,0.6,lcz+cp.oz);scene.add(rl);
       }
     }
 
-    // Banca
+    // Banca — pe trotuar față
     const banca=mkTex((ctx,w,h)=>{
       ctx.clearRect(0,0,w,h);
       ctx.fillStyle='#8b5e3c';ctx.fillRect(w*.1,h*.4,w*.8,h*.12);ctx.fillRect(w*.1,h*.55,w*.8,h*.08);
       ctx.fillStyle='#555';ctx.fillRect(w*.12,h*.63,w*.1,h*.3);ctx.fillRect(w*.78,h*.63,w*.1,h*.3);
       ctx.fillRect(w*.12,h*.35,w*.08,h*.2);ctx.fillRect(w*.8,h*.35,w*.08,h*.2);
     },48,32);
-    for(let i=0;i<2;i++){
-      const a4=i*Math.PI+Math.random()*.5;
-      const [bnx,bnz]=[lcx+(off+.8)*Math.sin(a4), lcz+(off+.8)*Math.cos(a4)];
-      addSprite(banca,bnx,0,bnz,1.0,0.5);
-    }
+    addSprite(banca, lcx + lw*0.3, 0, lcz + streetDist + 1, 1.0, 0.5);
+    addSprite(banca, lcx - lw*0.3, 0, lcz + streetDist + 1, 1.0, 0.5);
 
-    // Felinare
-    for(let i=0;i<4;i++){
-      const a5=(i/4)*6.28;
-      const [fx,fz]=[lcx+(off+.3)*Math.sin(a5), lcz+(off+.3)*Math.cos(a5)];
+    // Felinare — pe trotuar față + lateral
+    const felinarPositions = [
+      [lcx + lw*0.55, lcz + streetDist],
+      [lcx - lw*0.55, lcz + streetDist],
+      [lcx + streetDist, lcz + ld*0.4],
+      [lcx + streetDist, lcz - ld*0.4],
+    ];
+    felinarPositions.forEach(([fx,fz])=>{
       const felinar=mkTex((ctx,w,h)=>{
         ctx.clearRect(0,0,w,h);ctx.fillStyle='#666';ctx.fillRect(w*.44,h*.2,w*.12,h*.75);
         ctx.fillStyle='#555';ctx.fillRect(w*.28,h*.2,w*.44,h*.06);
@@ -9527,7 +9545,7 @@ function _v3dAddUrbanLife(THREE, scene, ring0, toLoc, isNight){
       if(isNight){
         const pl=new THREE.PointLight('#ffee88',0.7,12);pl.position.set(fx,2.5,fz);scene.add(pl);
       }
-    }
+    });
 
   }catch(e){console.warn('UrbanLife:',e.message);}
 }
