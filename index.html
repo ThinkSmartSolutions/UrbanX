@@ -3728,41 +3728,52 @@ function htmlMobRapoarte(){
 
 // ═══ HTML SEARCH ══════════════════════════════════════════════════════════
 function htmlSearch(){
+  // Preservăm valorile introduse anterior
+  const coordVal = window._lastCoordVal || S._lastCoord || '';
+  const addrVal  = window._lastAddrVal  || '';
+  const cadVal   = window._lastCadVal   || '';
+
   return`
-  
   <div class="section">📍 Coordonate GPS</div>
   <div class="card">
     <input class="inp" id="inp-coord" placeholder="47.1585, 27.6014 (lat, lng)" 
-      value="${S._lastCoord||''}"
-      onkeydown="if(event.key==='Enter'){var e=document.querySelectorAll('#inp-coord');e.forEach(el=>el.value=this.value);doCoord()}"
-      onfocus="window._activeSearchCtx=this"
-      oninput="window._activeSearchCtx=this">
+      value="${coordVal}"
+      oninput="window._lastCoordVal=this.value"
+      onkeydown="if(event.key==='Enter'){window._lastCoordVal=this.value;doCoord()}"
+      onfocus="window._activeSearchCtx=this">
     <div class="help">Dublu-click pe hartă → completare automată. Funcționează pentru orice localitate din România.</div>
     <div class="btn-row">
-      <button class="btn-p" style="flex:1" onclick="(function(){var e=document.querySelectorAll('#inp-coord');var v=e[e.length-1]?.value||'';e.forEach(el=>el.value=v);doCoord()})()">🎯 Mergi</button>
-      <button class="btn-s" onclick="if(navigator.geolocation)navigator.geolocation.getCurrentPosition(p=>{const v=p.coords.latitude.toFixed(6)+', '+p.coords.longitude.toFixed(6);document.querySelectorAll('#inp-coord').forEach(el=>el.value=v);doCoord()})">📡 GPS</button>
+      <button class="btn-p" style="flex:1" onclick="doCoord()">🎯 Mergi</button>
+      <button class="btn-s" onclick="if(navigator.geolocation)navigator.geolocation.getCurrentPosition(p=>{const v=p.coords.latitude.toFixed(6)+', '+p.coords.longitude.toFixed(6);document.getElementById('inp-coord').value=v;window._lastCoordVal=v;doCoord()})">📡 GPS</button>
     </div>
   </div>
-  
+
   <div class="section">🏠 Adresă sau punct de interes</div>
   <div class="card">
-    <input class="inp" id="inp-addr" placeholder="Str. Lascar Catargi 54, Palas, Grand Hotel Traian" 
-      oninput="doAddr(this.value);window._mobAddrVal=this.value" 
-      onchange="doAddr(this.value);window._mobAddrVal=this.value"
+    <input class="inp" id="inp-addr" placeholder="Str. Lascar Catargi 54, Palas, Grand Hotel Traian"
+      value="${addrVal}"
+      oninput="window._lastAddrVal=this.value;doAddr(this.value)"
+      onkeydown="if(event.key==='Enter'){window._lastAddrVal=this.value;doAddr(this.value)}"
       onfocus="window._activeSearchCtx=this">
     <div class="res-box" id="addr-box"></div>
     <div class="help">Funcționează pentru orice adresă sau POI din România și lume.</div>
   </div>
+
   <div class="section">🔢 Număr cadastral Iași</div>
   <div class="card">
-    <input class="inp" id="inp-cad" placeholder="Ex: 127835" inputmode="numeric" autocomplete="off" oninput="onCadInput(this.value);window._mobCadVal=this.value;window._activeSearchCtx=this" onchange="window._mobCadVal=this.value" onkeydown="if(event.key==='Enter'){window._mobCadVal=this.value;doCad()}" onfocus="window._activeSearchCtx=this">
-    <div id="cad-range" class="help" style="color:#34d399;margin:4px 0 8px"></div>
+    <input class="inp" id="inp-cad" placeholder="Ex: 127835" inputmode="numeric" autocomplete="off"
+      value="${cadVal}"
+      oninput="window._lastCadVal=this.value;onCadInput(this.value)"
+      onkeydown="if(event.key==='Enter'){window._lastCadVal=this.value;doCad()}"
+      onfocus="window._activeSearchCtx=this">
+    <div id="cad-range" class="help" style="color:#34d399;margin:4px 0 8px">✅ Disponibil: 60.000 – 183.379</div>
     <div class="btn-row">
-      <button class="btn-p" onclick="(function(){var e=document.querySelectorAll('#inp-cad');window._mobCadVal=e[e.length-1]?.value||'';doCad()})()" style="flex:1">🔍 Caută</button>
-      <button class="btn-s" onclick="doReset()">🗑 Resetează tot</button>
+      <button class="btn-p" onclick="window._lastCadVal=document.getElementById('inp-cad')?.value||window._lastCadVal||'';doCad()" style="flex:1">🔍 Caută</button>
+      <button class="btn-s" onclick="window._lastCadVal='';window._lastAddrVal='';window._lastCoordVal='';doReset();renderTab('search')">🗑 Resetează tot</button>
     </div>
     <div class="res-box" id="cad-box"></div>
   </div>
+
   <div class="section">📦 Parcele cadastrale</div>
   <div class="card">
     <div class="help" style="margin-bottom:8px">Selectează UAT și încarcă parcelele din zona vizibilă. Fișierul este mare — se filtrează doar zona hărții.</div>
@@ -3770,48 +3781,18 @@ function htmlSearch(){
       <button class="btn-p" onclick="doLoadLocalParcels()" style="flex:1;min-width:140px">📦 Parcele din zonă</button>
       <button class="btn-s" onclick="doClearParcels()" style="padding:9px 12px">✕ Șterge</button>
     </div>
-    <div class="help" style="color:#34d399" id="cadastru-status">
-      ⏳ Se încarcă cadastrul…
-    </div>
+    <div class="help" style="color:#34d399" id="cadastru-status">⏳ Se încarcă cadastrul…</div>
   </div>
+
   <div class="section">🔲 Multiselect parcele</div>
   <div class="card">
     <button onclick="toggleMulti(!S.multiMode);renderTab('search')" style="width:100%;padding:12px;border-radius:10px;border:2px solid ${S.multiMode?'#d4af37':'rgba(255,255,255,.2)'};background:${S.multiMode?'rgba(212,175,55,.2)':'rgba(11,18,32,.8)'};color:${S.multiMode?'#d4af37':'#94a3b8'};cursor:pointer;font-size:14px;font-weight:700;margin-bottom:8px;transition:all .2s">
       ${S.multiMode?'🟡 MULTISELECT ACTIV — click pe hartă adaugă parcele':'⬜ Activează Multiselect'}
     </button>
-    <div class="help" style="margin-bottom:6px">${S.multiMode?'<b style="color:#d4af37">Mod activ:</b> fiecare click pe hartă sau pe o parcelă adaugă la selecție. Dezactivează pentru a reveni la selecție unică.':'Activează pentru a selecta mai multe parcele simultan — util pentru comasare terenuri sau analiză comparativă.'}</div>
-    ${S.parcels.length?`<div style="background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);border-radius:8px;padding:8px 10px;font-size:12px;color:#34d399;margin-top:4px">✅ <b>${S.parcels.length}</b> parcelă/parcele selectate — vezi tab <b>Multi</b> pentru detalii și generare volume</div>`:''}
-
-
-  
-  <div class="section">🧭 Navigare hartă</div>
-  <div class="card">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-      <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px">
-        <div style="font-size:11px;font-weight:700;color:#d4af37;margin-bottom:6px">🖥 Desktop</div>
-        <div style="font-size:11px;color:#94a3b8;line-height:1.7">Scroll → zoom<br>Drag → mișcare<br>Ctrl+drag → rotire<br>Shift+drag → înclinare</div>
-      </div>
-      <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px">
-        <div style="font-size:11px;font-weight:700;color:#d4af37;margin-bottom:6px">📱 Mobile</div>
-        <div style="font-size:11px;color:#94a3b8;line-height:1.7">Pinch → zoom<br>1 deget → mișcare<br>2 degete rotire → rotire<br>2 degete drag → înclinare</div>
-      </div>
-    </div>
-    <div style="margin-bottom:6px">
-      <label style="font-size:11px;color:#94a3b8;display:flex;justify-content:space-between">Înclinare 3D <span id="pitch-val">0°</span></label>
-      <input type="range" min="0" max="70" value="0" style="width:100%;accent-color:#3b82f6" 
-        oninput="map.setPitch(+this.value);document.getElementById('pitch-val').textContent=this.value+'°'">
-    </div>
-    <div style="margin-bottom:10px">
-      <label style="font-size:11px;color:#94a3b8;display:flex;justify-content:space-between">Rotire <span id="bearing-val">0°</span></label>
-      <input type="range" min="-180" max="180" value="0" style="width:100%;accent-color:#d4af37"
-        oninput="map.setBearing(+this.value);document.getElementById('bearing-val').textContent=this.value+'°'">
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      <button class="btn-p" onclick="set3D(60,-20)">🏙 3D</button>
-      <button class="btn-g" onclick="set3D(0,0)">⬛ 2D plat</button>
-    </div>
-    <div class="help" style="margin-top:8px">Pe desktop folosiți sliderele Pitch/Bearing din colțul dreapta-jos al hărții.</div>
-  </div>`;
+    ${S.parcels.length?`<div style="background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);border-radius:8px;padding:8px 10px;font-size:12px;color:#34d399;margin-top:4px">✅ <b>${S.parcels.length}</b> parcelă/parcele selectate</div>`:''}
+  </div>
+  `;
+}
 }
 
 // ═══ HTML UTR ══════════════════════════════════════════════════════════════
@@ -4207,9 +4188,8 @@ function draw2D(){
 
 // ═══ ACȚIUNI ══════════════════════════════════════════════════════════════
 function doCoord(){
-  // Pe mobile querySelectorAll ia ultimul element (din mob-sheet)
-  const els=document.querySelectorAll('#inp-coord');
-  const raw=(els[els.length-1]?.value||'').trim();
+  const el=document.getElementById('inp-coord');
+  const raw=(window._lastCoordVal||el?.value||'').trim();
   const parts=raw.split(/[\s,;]+/).map(s=>parseFloat(s.trim())).filter(n=>isFinite(n));
   if(parts.length<2)return alert('Format: 47.1585, 27.6014 (lat, lng)');
   let lat=parts[0],lng=parts[1];
@@ -4566,12 +4546,8 @@ function onCadInput(val){
 }
 
 function doCad(){
-  // Folosim elementul activ sau cel mai recent modificat
-  const el = window._activeSearchCtx?.id==='inp-cad' 
-    ? window._activeSearchCtx
-    : (document.getElementById('inp-cad') || document.querySelector('#inp-cad'));
-  const v=(window._mobCadVal||el?.value||'').trim();
-  window._mobCadVal = null; // reset
+  const el = document.getElementById('inp-cad');
+  const v=(window._lastCadVal||el?.value||'').trim();
   if(!v)return;
   const key=v.toLowerCase().replace(/[\s+]/g,'').replace(/[^0-9]/g,'');
   
