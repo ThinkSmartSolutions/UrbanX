@@ -6073,14 +6073,21 @@ async function exportVol3(pdf, ap, r, p){
 // ═══════════════════════════════════════════════════════════════════════════
 // MAIN EXPORT DISPATCHER
 // ═══════════════════════════════════════════════════════════════════════════
-async 
 // ── Safe text pentru jsPDF (elimina diacritice care cauzeaza erori) ───────────
 function _pdfSafe(str){
   if(str===null||str===undefined) return '—';
   return String(str)
-    .replace(/[ăÅ]/g,'a').replace(/[âÂ]/g,'a').replace(/[îÎ]/g,'i')
-    .replace(/[șȘşŞ]/g,'s').replace(/[țȚţŢ]/g,'t').replace(/[éèê]/g,'e')
-    .replace(/[óò]/g,'o').replace(/[úù]/g,'u').replace(/[ñ]/g,'n');
+    // Eliminam emoji si caractere Unicode non-ASCII
+    .replace(/[\u{1F000}-\u{1FFFF}]/gu,'')  // emoji plane 1
+    .replace(/[\u2600-\u27FF]/g,'')           // misc symbols
+    .replace(/[\u{1F300}-\u{1F9FF}]/gu,'')   // emoji misc
+    .replace(/[^\x00-\xFF]/g,'')              // orice non-latin
+    // Diacritice romanesti → ASCII
+    .replace(/[ăĂ]/g,'a').replace(/[âÂ]/g,'a').replace(/[îÎ]/g,'i')
+    .replace(/[șȘşŞ]/g,'s').replace(/[țȚţŢ]/g,'t')
+    .replace(/[éèêë]/g,'e').replace(/[óòô]/g,'o')
+    .replace(/[úùû]/g,'u').replace(/[ñ]/g,'n')
+    .trim();
 }
 
 async function runExport(){
@@ -6104,7 +6111,9 @@ async function runExport(){
   const pot=String(p.pot||'—');
   const cut=String(p.cut||'—');
   const hmax=String(p.hmax||'—');
-  const rf=String(p.rf||5);
+  const rf=String(parseFloat(p.rf)||5);
+  const rl2=String(parseFloat(p.rl)||3);
+  const rs2=String(parseFloat(p.rs)||5);
   const rl=String(p.rl||3);
   const rs=String(p.rs||5);
   const rr=String(p.rr||p.rl||3);
@@ -6114,13 +6123,24 @@ async function runExport(){
 
   const S2=t=>_pdfSafe(t);
 
-  // Capturare harta
-  let mapImg='', mapImg2='';
+  // Capturare harta - asteptam ca WebGL sa redea complet
+  let mapImg='';
   try{
+    // Setam harta la vedere 3D pentru capture mai buna
+    map.triggerRepaint();
+    // Asteptam 3 frame-uri pentru WebGL
+    await new Promise(r2=>requestAnimationFrame(()=>requestAnimationFrame(()=>requestAnimationFrame(r2))));
+    await new Promise(r2=>setTimeout(r2,500));
     map.triggerRepaint();
     await new Promise(r2=>setTimeout(r2,300));
-    mapImg=map.getCanvas().toDataURL('image/jpeg',0.88);
-  }catch(e){}
+    const canvas = map.getCanvas();
+    if(canvas && canvas.width > 0){
+      mapImg = canvas.toDataURL('image/jpeg', 0.90);
+      // Verificam ca nu e negru (primii pixeli sa nu fie toti 0)
+      const ctx2 = canvas.getContext('webgl') || canvas.getContext('webgl2');
+      if(!mapImg || mapImg.length < 1000) mapImg = '';
+    }
+  }catch(e){ console.warn('Map capture:', e.message); }
 
   try{
     const{jsPDF}=window.jspdf;
@@ -6200,7 +6220,7 @@ async function runExport(){
 
     const identRows=[
       ['Nr. cadastral',nrcad,'UTR (zona)',utr],
-      ['Suprafata teren',area+' mp','Functiune propusa',S2(fnDef.label||'—')],
+      ['Suprafata teren',area+' mp','Functiune propusa',(S2(fnDef.label)||'Rezidential colectiv')],
       ['Latitudine',lat.toFixed(5)+'N','Longitudine',lon.toFixed(5)+'E'],
       ['Localitate','Municipiul Iasi','Data elaborarii',S2(dateStr)],
       ['POT max admis',pot+'%','CUT max admis',cut],
@@ -6283,7 +6303,7 @@ async function runExport(){
 
     cy+=5;
     cy=sec('6. UTILIZARI ADMISE IN UTR '+S2(utr),cy);
-    cy=body('Conform PUG Iasi, in zona UTR '+S2(utr)+', sunt admise functiunile compatibile cu caracterul zonei. Functiunea propusa - '+S2(fnDef.label||'—')+' - trebuie verificata cu reglementarile specifice zonei, incluzand eventuala necesitate de elaborare a unui Plan Urbanistic Zonal (PUZ) daca parametrii propusi depasesc limitele din PUG.',14,cy+2,W-28);
+    cy=body('Conform PUG Iasi, in zona UTR '+S2(utr)+', sunt admise functiunile compatibile cu caracterul zonei. Functiunea propusa - '+(S2(fnDef.label)||'Rezidential colectiv')+' - trebuie verificata cu reglementarile specifice zonei, incluzand eventuala necesitate de elaborare a unui Plan Urbanistic Zonal (PUZ) daca parametrii propusi depasesc limitele din PUG.',14,cy+2,W-28);
     cy+=5;
     cy=body('ATENTIE: Valorile din acest raport au caracter orientativ. Reglementarile definitive sunt stabilite de PUG Iasi in vigoare si pot fi consultate la Primaria Municipiului Iasi - Directia Arhitectura si Urbanism.',14,cy,W-28);
 
@@ -6304,7 +6324,7 @@ async function runExport(){
 
     cy=sec('8. PARAMETRI PROIECT AEDIS vs PUG',cy);
     const parData=[
-      ['Functiune propusa',S2(fnDef.label||'—'),'Stil arhitectural',S2(AEDIS.stil||'modern')],
+      ['Functiune propusa',(S2(fnDef.label)||'Rezidential colectiv'),'Stil arhitectural',S2(AEDIS.stil||'modern')],
       ['Nr. niveluri propus',niv+' etaje','Inaltime totala',aedisH.toFixed(1)+' m'],
       ['POT aplicat',pot+'%','SC construita la sol',scMax+' mp'],
       ['CUT aplicat',cut,'SD totala',sdMax+' mp.ADC'],
@@ -6315,7 +6335,7 @@ async function runExport(){
     cy+=5;
     cy=sec('9. CONCLUZII SI RECOMANDARI',cy);
     const concl=[
-      'FEZABILITATE: Pe parcela '+nrcad+' (UTR '+S2(utr)+', '+area+' mp) se poate realiza o constructie cu functiunea "'+S2(fnDef.label||'—')+'", cu un regim de inaltime de '+niv+' niveluri (H total ~'+aedisH.toFixed(1)+'m), in limitele parametrilor urbanistici ai PUG Iasi.',
+      'FEZABILITATE: Pe parcela '+nrcad+' (UTR '+S2(utr)+', '+area+' mp) se poate realiza o constructie cu functiunea "'+(S2(fnDef.label)||'Rezidential colectiv')+'", cu un regim de inaltime de '+niv+' niveluri (H total ~'+aedisH.toFixed(1)+'m), in limitele parametrilor urbanistici ai PUG Iasi.',
       'PARAMETRI MAXIMI ADMISI: POT '+pot+'% → SC max '+scMax+' mp; CUT '+cut+' → SD max '+sdMax+' mp.ADC; H max '+hmax+' m; Aliniam. strada: '+rf+'m, spate: '+rs+'m, lateral: '+rl+'m/'+rr+'m.',
       'CONFORMITATE: Constructia propusa se incadreaza in parametrii PUG. Se recomanda verificarea cu Certificatul de Urbanism emis de Primaria Iasi si consultarea unui arhitect autorizat pentru studiu de fezabilitate detaliat.',
       'ETAPE URMATOARE: (1) Obtinere Certificat de Urbanism, (2) Studiu geotehnic, (3) Proiect tehnic arhitectura (PAC) semnat de arhitect autorizat, (4) Solicitare Autorizatie de Construire.',
@@ -9366,11 +9386,17 @@ function _v3dAddStreets(THREE, scene, ring0, toLoc){
 // ── Viata urbana: oameni, masini, caini, biciclete, bancute, felinare ────────
 function _v3dAddUrbanLife(THREE, scene, ring0, toLoc, isNight){
   try{
-    const cx=ring0.reduce((s,p)=>s+p[0],0)/ring0.length;
-    const cz=ring0.reduce((s,p)=>s+p[1],0)/ring0.length;
+    // Calculăm în coordonate LOCALE (nu geografice)
     const pts=ring0.map(toLoc);
     const xs=pts.map(([x])=>x),zs=pts.map(([,z])=>z);
-    const off=Math.max(Math.max(...xs)-Math.min(...xs),Math.max(...zs)-Math.min(...zs))*0.5+2;
+    const lcx=(Math.min(...xs)+Math.max(...xs))/2;
+    const lcz=(Math.min(...zs)+Math.max(...zs))/2;
+    const lw=Math.max(...xs)-Math.min(...xs);
+    const ld=Math.max(...zs)-Math.min(...zs);
+    const off=Math.max(lw,ld)*0.5+3;
+
+    // toLoc2 în spațiu LOCAL (nu geografic)
+    const placeAt=(lx,lz)=>[lx,lz]; // deja în coordonate locale
 
     const mkTex=(draw,cw,ch)=>{
       const cv=document.createElement('canvas');cv.width=cw;cv.height=ch;
@@ -9402,7 +9428,7 @@ function _v3dAddUrbanLife(THREE, scene, ring0, toLoc, isNight){
       ['#e8c8a0','#333','#111'],['#c0a070','#dd7700','#4a2a10']];
     for(let i=0;i<10;i++){
       const a=(i/10)*Math.PI*2,r=off+Math.random()*3;
-      const [lx,lz]=toLoc2(cx+r*Math.sin(a),cz+r*Math.cos(a));
+      const [lx,lz]=[lcx+r*Math.sin(a), lcz+r*Math.cos(a)];
       const [sk,cl,ha]=pData[i%pData.length];
       addSprite(mkTex((ctx,w,h)=>personDraw(ctx,w,h,sk,cl,ha),32,64),lx,0,lz,0.5,1.75);
     }
@@ -9418,7 +9444,7 @@ function _v3dAddUrbanLife(THREE, scene, ring0, toLoc, isNight){
       ctx.arc(w*.8,h*.76,w*.08,0,6.28);ctx.fill();
       ctx.fillStyle='#ffd0a0';ctx.beginPath();ctx.arc(w*.7,h*.48,w*.1,0,6.28);ctx.fill();
     },64,64);
-    const ca=Math.random()*6.28,[clx,clz]=toLoc2(cx+(off+1)*Math.sin(ca),cz+(off+1)*Math.cos(ca));
+    const ca=Math.random()*6.28,[clx,clz]=toLoc2(lcx+(off+1)*Math.sin(ca),lcz+(off+1)*Math.cos(ca));
     addSprite(carucior,clx,0,clz,1.5,1.5);
 
     // Beagle
@@ -9434,7 +9460,7 @@ function _v3dAddUrbanLife(THREE, scene, ring0, toLoc, isNight){
       ctx.fillStyle='#f0e8d0';ctx.fillRect(w*.68,h*.5,w*.12,w*.08);
       ctx.fillStyle='#111';ctx.beginPath();ctx.arc(w*.78,h*.42,w*.03,0,6.28);ctx.fill();
     },64,40);
-    const ba=Math.random()*6.28,[blx,blz]=toLoc2(cx+(off+0.5)*Math.sin(ba),cz+(off+0.5)*Math.cos(ba));
+    const ba=Math.random()*6.28,[blx,blz]=toLoc2(lcx+(off+0.5)*Math.sin(ba),lcz+(off+0.5)*Math.cos(ba));
     addSprite(beagle,blx,0,blz,1.2,0.75);
 
     // Bicicleta
@@ -9449,7 +9475,7 @@ function _v3dAddUrbanLife(THREE, scene, ring0, toLoc, isNight){
       ctx.fillRect(w*.38,h*.26,w*.24,h*.3);
     },48,56);
     for(let i=0;i<2;i++){
-      const a2=Math.random()*6.28,[bix,biz]=toLoc2(cx+(off+1.5+i)*Math.sin(a2),cz+(off+1.5+i)*Math.cos(a2));
+      const a2=Math.random()*6.28,[bix,biz]=toLoc2(lcx+(off+1.5+i)*Math.sin(a2),lcz+(off+1.5+i)*Math.cos(a2));
       addSprite(bici,bix,0,biz,1.2,1.4);
     }
 
@@ -9467,7 +9493,7 @@ function _v3dAddUrbanLife(THREE, scene, ring0, toLoc, isNight){
         if(isNight){ctx.fillStyle='rgba(255,255,180,.95)';ctx.fillRect(w*.82,h*.52,w*.08,h*.08);ctx.fillStyle='rgba(255,50,50,.95)';ctx.fillRect(w*.1,h*.52,w*.08,h*.08);}
       },80,48);
       const a3=Math.random()*6.28,r3=off+Math.random()*4+2;
-      const [cax,caz]=toLoc2(cx+r3*Math.sin(a3),cz+r3*Math.cos(a3));
+      const [cax,caz]=[lcx+r3*Math.sin(a3), lcz+r3*Math.cos(a3)];
       addSprite(carTex,cax,0,caz,2.5,1.5);
       if(isNight){
         const fl=new THREE.PointLight('#ffffc0',0.5,8);fl.position.set(cax+0.5,0.6,caz);scene.add(fl);
@@ -9484,14 +9510,14 @@ function _v3dAddUrbanLife(THREE, scene, ring0, toLoc, isNight){
     },48,32);
     for(let i=0;i<2;i++){
       const a4=i*Math.PI+Math.random()*.5;
-      const [bnx,bnz]=toLoc2(cx+(off+.8)*Math.sin(a4),cz+(off+.8)*Math.cos(a4));
+      const [bnx,bnz]=[lcx+(off+.8)*Math.sin(a4), lcz+(off+.8)*Math.cos(a4)];
       addSprite(banca,bnx,0,bnz,1.0,0.5);
     }
 
     // Felinare
     for(let i=0;i<4;i++){
       const a5=(i/4)*6.28;
-      const [fx,fz]=toLoc2(cx+(off+.3)*Math.sin(a5),cz+(off+.3)*Math.cos(a5));
+      const [fx,fz]=[lcx+(off+.3)*Math.sin(a5), lcz+(off+.3)*Math.cos(a5)];
       const felinar=mkTex((ctx,w,h)=>{
         ctx.clearRect(0,0,w,h);ctx.fillStyle='#666';ctx.fillRect(w*.44,h*.2,w*.12,h*.75);
         ctx.fillStyle='#555';ctx.fillRect(w*.28,h*.2,w*.44,h*.06);
