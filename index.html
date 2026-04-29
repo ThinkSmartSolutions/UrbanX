@@ -7312,15 +7312,25 @@ function aedisGetContent(){
     <div class="aedis-section" style="margin-top:10px">🎨 AI Render fotorealist</div>
     <div style="padding:10px;background:#080f1c;border-radius:8px;border:1px solid rgba(212,175,55,.2);margin-bottom:10px">
       <div style="font-size:11px;color:#94a3b8;margin-bottom:8px">
-        Generează o randare fotorealistă a volumului propus direct din aplicație.
+        Randare fotorealistă bazată pe stilul, funcțiunea și parametrii AEDIS selectați.
         ${FAL_AI.lastRender ? '<span style=color:#4ade80>✅ Randare disponibilă</span>' : '<span style=color:#64748b>Nicio randare generată</span>'}
+      </div>
+      <!-- Toggle model calitate -->
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <label style="font-size:10px;color:#64748b">Model:</label>
+        <button onclick="FAL_AI.useDevModel=false;aedisRender()" style="padding:4px 10px;border-radius:6px;font-size:10px;cursor:pointer;border:1px solid ${!FAL_AI.useDevModel?'#d4af37':'rgba(255,255,255,.15)'};background:${!FAL_AI.useDevModel?'rgba(212,175,55,.15)':'transparent'};color:${!FAL_AI.useDevModel?'#d4af37':'#64748b'}">⚡ Schnell<br><span style="font-size:9px">rapid (~5s)</span></button>
+        <button onclick="FAL_AI.useDevModel=true;aedisRender()" style="padding:4px 10px;border-radius:6px;font-size:10px;cursor:pointer;border:1px solid ${FAL_AI.useDevModel?'#4ade80':'rgba(255,255,255,.15)'};background:${FAL_AI.useDevModel?'rgba(74,222,128,.12)':'transparent'};color:${FAL_AI.useDevModel?'#4ade80':'#64748b'}">✨ Dev<br><span style="font-size:9px">calitate max (~30s)</span></button>
+        <span style="font-size:9px;color:#475569;margin-left:4px">${FAL_AI.useDevModel?'~$0.025/randare':'~$0.003/randare'}</span>
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap">
         <button onclick="aedisAIRender()" style="padding:9px 16px;border-radius:8px;border:1px solid rgba(212,175,55,.4);background:rgba(212,175,55,.1);color:#d4af37;cursor:pointer;font-size:12px;font-weight:700">🎨 Generează AI Render</button>
         ${FAL_AI.lastRender ? '<button onclick="aedisShowRender(FAL_AI.lastRender.url)" style="padding:9px 16px;border-radius:8px;border:1px solid rgba(74,222,128,.3);background:rgba(74,222,128,.1);color:#4ade80;cursor:pointer;font-size:12px">👁 Vezi Randarea</button>' : ''}
         <button onclick="aedisSetFalKey()" style="padding:9px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:transparent;color:#64748b;cursor:pointer;font-size:11px">⚙ API Key</button>
+        <button onclick="ss('📋 Prompt: '+aedisPromptBuild().slice(0,200)+'...')" style="padding:9px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:transparent;color:#475569;cursor:pointer;font-size:11px" title="Preview prompt">👁 Prompt</button>
       </div>
-      <div style="font-size:10px;color:#475569;margin-top:6px">Fal.ai FLUX.1 · ~$0.003/randare · rezultat în ~5 secunde</div>
+      <div style="font-size:10px;color:#334155;margin-top:6px;line-height:1.5">
+        Prompt auto-generat din: stil ${AEDIS.stil||'modern'} · ${AEDIS.corpuri[0]?.niv||4} niv · ${AEDIS.tipAcoperis||'terasa'} · iluminare ${document.getElementById('v3d-light')?.value||'zi'} · context ${(S.parcels[S.activeParcel??0]?.uat)||'Iași'}
+      </div>
     </div>
     <div class="aedis-section" style="margin-top:10px">Suprafețe calculate</div>
     <div class="aedis-g2">
@@ -7843,29 +7853,88 @@ function _exportVolOBJ(){
 function aedisPromptBuild(){
   const ap = S.parcels[S.activeParcel??0];
   const fn = AEDIS_FN[AEDIS.fn] || AEDIS_FN.rezidential_colectiv;
-  const stil = AEDIS_STIL[AEDIS.stil] || AEDIS_STIL.modern;
+  const stilKey = AEDIS.stil || 'modern';
   const niv = AEDIS.corpuri[0]?.niv || 4;
   const hNiv = AEDIS.corpuri[0]?.hNiv || 3.0;
-  const hTot = (AEDIS.parterDiferit?(AEDIS_FN[AEDIS.fn]?.hParter||4.5):hNiv)+(niv-1)*hNiv;
+  const hParter = AEDIS.parterDiferit ? (AEDIS_FN[AEDIS.fn]?.hParter||4.5) : hNiv;
+  const hTot = hParter + (niv-1)*hNiv;
   const uat = ap?.uat || 'Iași';
-  const acop = {
-    terasa_plata: 'flat roof with parapet',
-    terasa_circulabila: 'accessible green roof terrace',
-    sarpanta: 'pitched roof',
-    mansarda: 'mansard roof',
-    combinat: 'flat roof with technical penthouse',
+  const area = ap?.area ? Math.round(ap.area) : 300;
+
+  // ── Descriere stil arhitectural ─────────────────────────────────────────
+  const stilDesc = {
+    modern:    'contemporary modern architecture, full-height glass curtain wall facade, aluminum cladding panels, horizontal floor bands, cantilevered balconies with glass railings, flat roof with parapet',
+    inovator:  'avant-garde innovative architecture, bold dynamic volumes, dark metal and glass facade, angular projections, rooftop terrace, dramatic lighting accents',
+    clasic:    'neoclassical architecture, stone and brick facade, pilasters, molded cornices, arched windows with stone surrounds, mansard or pitched roof with dormers',
+    minimalist:'pure minimalist architecture, smooth white concrete panels, flush frameless windows, recessed balconies, precise geometric volumes, flat green roof',
+    industrial:'industrial loft architecture, exposed corten steel and concrete, large industrial windows with steel frames, factory-style roof details, visible structural elements',
+    adaptat_context: 'contextual architecture harmonizing with surrounding buildings, local materials and proportions, traditional Romanian urban facade rhythm',
+  }[stilKey] || 'contemporary modern architecture';
+
+  // ── Materiale specifice ─────────────────────────────────────────────────
+  const matDesc = {
+    modern:    'polished concrete base, aluminum composite panels, structural glazing, brushed stainless steel accents',
+    inovator:  'dark anodized aluminum, floor-to-ceiling glass, black steel structure visible, metallic accent strips',
+    clasic:    'natural stone cladding, brick details, plaster with architectural moldings, copper or zinc roof',
+    minimalist:'white architectural concrete, matte glass, minimal reveals, seamless surfaces',
+    industrial:'weathered corten steel, exposed board-formed concrete, raw steel windows, galvanized details',
+    adaptat_context: 'local brick, plaster, traditional window proportions',
+  }[stilKey] || 'concrete and glass';
+
+  // ── Tip funcțiune ────────────────────────────────────────────────────────
+  const fnDesc = {
+    rezidential_colectiv: 'residential apartment block',
+    locuinta_individuala: 'single family villa',
+    birouri: 'office building',
+    comercial: 'retail commercial building',
+    mixt: 'mixed-use building with ground floor retail',
+    hotelier: 'hotel',
+    industrial: 'industrial facility',
+    institutie_publica: 'public institution building',
+  }[AEDIS.fn] || 'residential building';
+
+  // ── Elemente specifice ───────────────────────────────────────────────────
+  const parterExtra = AEDIS.parterDiferit
+    ? 'transparent ground floor with large shopfront glazing and arcade, commercial activity at street level, '
+    : '';
+  const balcExtra = ['modern','inovator','minimalist'].includes(stilKey)
+    ? 'with individual balconies on each apartment, glass balustrades, '
+    : '';
+  const etajRetras = AEDIS.activeRetragere
+    ? 'top floor set back creating a rooftop terrace, penthouse level, '
+    : '';
+  const acoperisDesc = {
+    terasa_plata: 'flat roof with white gravel finish and parapet',
+    terasa_circulabila: 'accessible rooftop garden terrace with greenery',
+    sarpanta: 'pitched tiled roof with dormers',
+    mansarda: 'mansard roof with attic windows',
+    combinat: 'flat roof with technical penthouse volume',
   }[AEDIS.tipAcoperis] || 'flat roof';
 
-  const stilDesc = {
-    modern: 'modern contemporary architecture, glass and steel facade, clean lines',
-    inovator: 'innovative dynamic architecture, bold forms, purple accent materials',
-    clasic: 'classical architecture, stone facade, warm earth tones, cornices',
-    minimalist: 'minimalist architecture, white concrete, pure volumes',
-    industrial: 'industrial architecture, corten steel, exposed concrete',
-    adaptat_context: 'contextual architecture matching surrounding urban fabric',
-  }[AEDIS.stil] || 'modern architecture';
+  // ── Condiții de lumină per ora zilei ─────────────────────────────────────
+  const lightV3D = document.getElementById('v3d-light')?.value || 'day';
+  const lightDesc = {
+    day:    'bright midday sunlight, sharp shadows, clear blue sky with light clouds',
+    golden: 'warm golden hour sunset lighting, long shadows, orange and amber sky tones',
+    overcast:'soft overcast diffuse lighting, no harsh shadows, cloudy sky',
+    night:  'dramatic nighttime, interior lights glowing through windows, street lamps, warm urban glow',
+  }[lightV3D] || 'natural daylight';
 
-  return `Photorealistic architectural exterior render, ${fn.label.replace(/[🏠🏡🏢🏬🏨🏙🏭🏛]/g,'')} building, ${niv} floors, ${hTot.toFixed(0)}m height, ${stilDesc}, ${acop}, ${AEDIS.parterDiferit?'ground floor commercial with large glazing, ':''}urban context in ${uat} Romania, street view, mature trees, parked cars, pedestrians, golden hour lighting, soft shadows, photorealistic, 8k, architectural visualization, high quality render`;
+  // ── Context urban ─────────────────────────────────────────────────────────
+  const ctxDesc = `urban street context in ${uat}, Romania, street-level pedestrian view, mature trees lining the sidewalk, parked cars, pedestrians walking`;
+
+  // ── Calitate render ────────────────────────────────────────────────────────
+  const quality = 'photorealistic architectural visualization, 8K resolution, depth of field, ray traced shadows, HDR lighting, architectural photography style, Lumion render quality, professional architectural CGI';
+
+  // ── Prompt final complet ─────────────────────────────────────────────────
+  return `${fnDesc}, ${niv} floors, ${hTot.toFixed(0)}m height, ${area}sqm footprint, ${stilDesc}, ${parterExtra}${balcExtra}${etajRetras}${acoperisDesc}, materials: ${matDesc}, ${ctxDesc}, ${lightDesc}, ${quality}, --no cartoon --no sketch --no diagram --no wireframe`;
+}
+
+// ── aedisAIRender cu FLUX.1-dev image-to-image (model mai bun) ────────────
+function aedisAIRenderModel(){
+  // Returnează modelul optim disponibil
+  // flux/dev = calitate superioară, flux/schnell = rapid
+  return FAL_AI.useDevModel ? 'fal-ai/flux/dev' : 'fal-ai/flux/schnell';
 }
 
 // Screenshot din Mapbox canvas
@@ -7907,14 +7976,15 @@ async function aedisAIRender(){
   }
 
   FAL_AI.rendering = true;
-  ss('🎨 AEDIS AI Render: Se face screenshot...');
+  ss('🎨 AEDIS AI Render: Se pregătește renderul arhitectural...');
 
   aedisScreenshot().then(screenshot=>{
     const prompt = aedisPromptBuild();
-    ss('🎨 AEDIS AI Render: Se trimite la Fal.ai...');
+    const model = aedisAIRenderModel();
+    const isDevModel = model.includes('dev');
+    ss('🎨 AI Render: Se trimite la Fal.ai (' + (isDevModel?'FLUX.1-dev, calitate max':'FLUX.1-schnell, rapid') + ')...');
 
-    // Apel Fal.ai
-    fetch('https://fal.run/fal-ai/flux/schnell', {
+    fetch('https://fal.run/' + model, {
       method: 'POST',
       headers: {
         'Authorization': 'Key ' + FAL_AI.apiKey,
@@ -7923,9 +7993,11 @@ async function aedisAIRender(){
       body: JSON.stringify({
         prompt: prompt,
         image_size: 'landscape_16_9',
-        num_inference_steps: 4,
+        num_inference_steps: isDevModel ? 28 : 4,
+        guidance_scale: isDevModel ? 3.5 : 0,
         num_images: 1,
         enable_safety_checker: true,
+        seed: Math.floor(Math.random()*99999),
       })
     })
     .then(r=>{
@@ -9404,11 +9476,15 @@ function _v3dBuild(ap){
       const mesh=_v3dPrism(THREE,pts,base,top,mat);
       if(mesh){
         mesh.castShadow=true; mesh.receiveShadow=true; scene.add(mesh); V3D.aedis.push(mesh);
-        // Contur muchii (edges) pentru claritate isometrică
-        _v3dAddEdges(THREE, mesh, scene, '#ffffff', 0.25);
-        // Ferestre 3D pe fațadă (doar etaje, nu parter și nu penthouse)
-        if(floor > 0 && !isTop){
+        // Contur muchii
+        _v3dAddEdges(THREE, mesh, scene, '#ffffff', 0.18);
+        // Ferestre pe TOATE etajele (inclusiv parter și penthouse dacă e destul spațiu)
+        if(floor >= 0 && h > 1.5){
           _v3dAddWindows(THREE, pts, base, top, scene, stilKey);
+        }
+        // Detalii acoperis: parapet + elemente tehnice
+        if(isRoofSlab && h >= 0.3){
+          _v3dAddRoofDetails(THREE, pts, base, top, scene, stilKey);
         }
       }
     }catch(e){ console.warn('AEDIS mesh:',e.message); }
@@ -9710,59 +9786,115 @@ function _v3dPrism(THREE,pts2d,base,top,mat){
   return new THREE.Mesh(geo,mat);
 }
 
-// ── Materiale isometrice stilizate ──────────────────────────────────────────
+// ── Detalii acoperis: parapet, elemente tehnice, scafe ─────────────────────
+function _v3dAddRoofDetails(THREE, pts2d, base, top, scene, stilKey){
+  if(pts2d.length < 3) return;
+  const pMat = new THREE.MeshStandardMaterial({
+    color:stilKey==='modern'?'#2a3a4a':stilKey==='minimalist'?'#d0d8e0':'#504030',
+    roughness:0.70, metalness:stilKey==='modern'?0.20:0.02
+  });
+  const techMat = new THREE.MeshStandardMaterial({color:'#606870',roughness:0.55,metalness:0.35});
+
+  const cx=pts2d.reduce((s,[x])=>s+x,0)/pts2d.length;
+  const cz=pts2d.reduce((s,[,z])=>s+z,0)/pts2d.length;
+
+  for(let i=0;i<pts2d.length;i++){
+    const [x0,z0]=pts2d[i],[x1,z1]=pts2d[(i+1)%pts2d.length];
+    const dx=x1-x0,dz=z1-z0,len=Math.sqrt(dx*dx+dz*dz);
+    if(len<1) continue;
+    const nx=dz/len,nz=-dx/len;
+    const ang=-Math.atan2(dz,dx);
+    const bx=(x0+x1)/2+nx*0.08, bz=(z0+z1)/2+nz*0.08;
+    // Parapet
+    const para=new THREE.Mesh(new THREE.BoxGeometry(len+0.12,0.55,0.22),pMat);
+    para.castShadow=true; para.position.set(bx,top+0.275,bz); para.rotation.y=ang; scene.add(para);
+    // Scafă la baza parapetului
+    const sc=new THREE.Mesh(new THREE.BoxGeometry(len+0.10,0.10,0.35),pMat);
+    sc.position.set(bx,top+0.05,bz+nz*0.06); sc.rotation.y=ang; scene.add(sc);
+  }
+
+  // Elemente tehnice pe acoperiș (ventilatii, casa lift)
+  try{
+    const techH = 1.8, techW = Math.min(2.5, 1.5);
+    const liftM=new THREE.Mesh(new THREE.BoxGeometry(techW,techH,techW*0.8),techMat);
+    liftM.castShadow=true; liftM.position.set(cx+1.0,top+0.55+techH/2,cz-0.5); scene.add(liftM);
+    // Ventilații mici
+    for(let v=0;v<3;v++){
+      const vm=new THREE.Mesh(new THREE.CylinderGeometry(0.18,0.22,0.6,8),techMat);
+      vm.position.set(cx-2+v*1.5,top+0.55+0.3,cz+1.0); scene.add(vm);
+    }
+  }catch(e){}
+}
+
+// ── Materiale corp îmbunătățite (MeshStandardMaterial cu PBR) ──────────────
 
 function _v3dMat(THREE, color, opts={}){
-  return new THREE.MeshLambertMaterial({
-    color, ...opts
+  return new THREE.MeshStandardMaterial({
+    color,
+    roughness: opts.roughness ?? 0.72,
+    metalness: opts.metalness ?? 0.04,
+    ...opts
   });
 }
 
 function _v3dMatParter(THREE, stil, cache){
-  // Parter distinct și vizibil — culori calde/saturate per stil
-  const cols = {
-    modern:     '#2a4a6a',  // albastru-petrol
-    clasic:     '#6b3a1f',  // cărămiziu
-    minimalist: '#3a3a3a',  // gri antracit
-    inovator:   '#4a1a6a',  // violet
-    industrial: '#2a2a1a',  // olive închis
-    default:    '#2a3a4a'
+  const k='parter_'+stil; if(cache[k]) return cache[k];
+  const M={
+    modern:    {color:'#1a2e42',roughness:0.40,metalness:0.50},
+    clasic:    {color:'#7a6040',roughness:0.78,metalness:0.02},
+    minimalist:{color:'#e0e8f0',roughness:0.85,metalness:0.00},
+    inovator:  {color:'#0e1830',roughness:0.20,metalness:0.75},
+    industrial:{color:'#2e2820',roughness:0.88,metalness:0.10},
+    default:   {color:'#1e2e3e',roughness:0.55,metalness:0.25},
   };
-  return _v3dMat(THREE, cols[stil]||cols.default);
+  const m=M[stil]||M.default;
+  return cache[k]=_v3dMat(THREE,m.color,{roughness:m.roughness,metalness:m.metalness});
 }
 
 function _v3dMatFloor(THREE, colHex, floorIdx, stil, cache){
-  const isNight = window._v3dNight||false;
-  // Etaje: culoarea AEDIS amplificată — mai saturată, mai luminoasă
+  const k=`floor_${stil}_${floorIdx}`; if(cache[k]) return cache[k];
+  const isNight=window._v3dNight||false;
   const r=parseInt(colHex.slice(1,3)||'30',16);
   const g=parseInt(colHex.slice(3,5)||'80',16);
   const b=parseInt(colHex.slice(5,7)||'c0',16);
-  // Amplificăm saturația: distanțăm față de gri
-  const avg=(r+g+b)/3;
-  const sat=1.4; // factor saturație
-  const brighten=floorIdx*8;
-  const rc=Math.min(255,Math.round(avg+(r-avg)*sat)+brighten);
-  const gc=Math.min(255,Math.round(avg+(g-avg)*sat)+brighten);
-  const bc=Math.min(255,Math.round(avg+(b-avg)*sat)+brighten);
-  return _v3dMat(THREE, `rgb(${Math.max(0,rc)},${Math.max(0,gc)},${Math.max(0,bc)})`);
+  const avg=(r+g+b)/3; const sat=1.5; const bright=floorIdx*5;
+  const rc=Math.min(255,Math.max(0,Math.round(avg+(r-avg)*sat)+bright));
+  const gc=Math.min(255,Math.max(0,Math.round(avg+(g-avg)*sat)+bright));
+  const bc=Math.min(255,Math.max(0,Math.round(avg+(b-avg)*sat)+bright));
+  const pbr={modern:{roughness:0.35,metalness:0.15},inovator:{roughness:0.20,metalness:0.40},
+    clasic:{roughness:0.80,metalness:0.00},minimalist:{roughness:0.90,metalness:0.00},
+    industrial:{roughness:0.85,metalness:0.08},default:{roughness:0.55,metalness:0.10}}[stil]||{roughness:0.55,metalness:0.10};
+  const mat=_v3dMat(THREE,`rgb(${rc},${gc},${bc})`,pbr);
+  if(isNight){mat.emissive=new THREE.Color(0.02,0.04,0.12);mat.emissiveIntensity=0.8;}
+  return cache[k]=mat;
 }
 
 function _v3dMatPenthouse(THREE, stil, cache){
-  // Penthouse: metal lustruit, distinct de etaje
-  const cols = {
-    modern:     '#304878',  // albastru-oțel
-    clasic:     '#483018',  // bronz
-    minimalist: '#505050',  // oțel
-    inovator:   '#380868',  // violet electric
-    industrial: '#304030',  // verde-militar
-    default:    '#304060'
+  const k='penthouse_'+stil; if(cache[k]) return cache[k];
+  const M={
+    modern:    {color:'#233855',roughness:0.25,metalness:0.55},
+    clasic:    {color:'#5c4020',roughness:0.72,metalness:0.02},
+    minimalist:{color:'#d0dae4',roughness:0.88,metalness:0.00},
+    inovator:  {color:'#0a1040',roughness:0.15,metalness:0.80},
+    industrial:{color:'#3a3020',roughness:0.82,metalness:0.12},
+    default:   {color:'#283850',roughness:0.40,metalness:0.35},
   };
-  const mat = new THREE.MeshLambertMaterial({color:cols[stil]||cols.default});
-  return mat;
+  const m=M[stil]||M.default;
+  return cache[k]=_v3dMat(THREE,m.color,{roughness:m.roughness,metalness:m.metalness});
 }
 
 function _v3dMatRoof(THREE, stil, cache){
-  return _v3dMat(THREE, '#1a1a2e');
+  const k='roof_'+stil; if(cache[k]) return cache[k];
+  const M={
+    modern:    {color:'#1a2232',roughness:0.55,metalness:0.30},
+    clasic:    {color:'#4a3820',roughness:0.80,metalness:0.00},
+    minimalist:{color:'#c8d4dc',roughness:0.82,metalness:0.00},
+    inovator:  {color:'#0e1628',roughness:0.30,metalness:0.50},
+    industrial:{color:'#2a2418',roughness:0.88,metalness:0.08},
+    default:   {color:'#1a1a2e',roughness:0.65,metalness:0.20},
+  };
+  const m=M[stil]||M.default;
+  return cache[k]=_v3dMat(THREE,m.color,{roughness:m.roughness,metalness:m.metalness});
 }
 
 // Adaugă contur alb la o prismă (edges highlight)
@@ -9781,74 +9913,189 @@ function _v3dAddEdges(THREE, mesh, scene, color='#ffffff', opacity=0.3){
 function _v3dAddWindows(THREE, pts2d, base, top, scene, stilKey){
   const h = top - base;
   if(h < 1 || pts2d.length < 3) return;
-  
-  const winCols = {
-    modern:'#4a90d9', clasic:'#87a0c8', minimalist:'#c8d8e8',
-    inovator:'#5050cc', industrial:'#809090', default:'#4a90d9'
-  };
-  const winCol = winCols[stilKey]||winCols.default;
   const isNight2 = window._v3dNight||false;
-  const winMat = new THREE.MeshLambertMaterial({
-    color: isNight2 ? '#ffcc44' : winCol, 
-    emissive: isNight2 ? new THREE.Color(0.4,0.25,0.02) : new THREE.Color(0,0,0),
-    emissiveIntensity: isNight2 ? 1.5 : 0.3
+
+  // ── Config per stil ────────────────────────────────────────────────────────
+  const cfg = {
+    modern:    { wW:1.10, wH:1.50, wGap:1.65, reveal:0.12, glassCol:'#3a7fc1', glassRef:0.55,
+                 frame:'#c8d4e0', frameD:0.08, hasBalc:true,  balcD:0.55, balcH:0.90, railH:0.85,
+                 pilW:0.0,  bandH:0.18, bandD:0.08, bandCol:'#d0d8e2', panelCol:'#e8eef4',
+                 floorH:() => 3.0 },
+    inovator:  { wW:1.30, wH:1.80, wGap:1.55, reveal:0.16, glassCol:'#2244cc', glassRef:0.70,
+                 frame:'#8090b0', frameD:0.10, hasBalc:true,  balcD:0.65, balcH:0.95, railH:0.90,
+                 pilW:0.0,  bandH:0.22, bandD:0.12, bandCol:'#6070a0', panelCol:'#1a2040',
+                 floorH:() => 3.3 },
+    clasic:    { wW:0.85, wH:1.30, wGap:1.80, reveal:0.18, glassCol:'#8899b0', glassRef:0.30,
+                 frame:'#d4c8a8', frameD:0.10, hasBalc:false, balcD:0.50, balcH:0.80, railH:0.75,
+                 pilW:0.18, bandH:0.28, bandD:0.14, bandCol:'#c8b890', panelCol:'#e8dcc0',
+                 floorH:() => 3.5 },
+    minimalist:{ wW:1.40, wH:1.70, wGap:1.50, reveal:0.06, glassCol:'#b0c8d8', glassRef:0.45,
+                 frame:'#e8eef2', frameD:0.04, hasBalc:true,  balcD:0.45, balcH:1.00, railH:0.95,
+                 pilW:0.0,  bandH:0.10, bandD:0.04, bandCol:'#e0e8ee', panelCol:'#f2f5f8',
+                 floorH:() => 3.2 },
+    industrial:{ wW:0.90, wH:1.20, wGap:2.00, reveal:0.20, glassCol:'#607080', glassRef:0.25,
+                 frame:'#888070', frameD:0.12, hasBalc:false, balcD:0.50, balcH:0.80, railH:0.75,
+                 pilW:0.20, bandH:0.25, bandD:0.16, bandCol:'#706858', panelCol:'#504840',
+                 floorH:() => 3.8 },
+  };
+  const C = cfg[stilKey] || cfg.modern;
+  const fH = C.floorH();
+  const nFloors = Math.max(1, Math.round(h / fH));
+  const realFH = h / nFloors;
+
+  // ── Materiale ───────────────────────────────────────────────────────────────
+  const glassMat = new THREE.MeshStandardMaterial({
+    color: isNight2 ? '#ffe880' : C.glassCol,
+    roughness: isNight2 ? 0.6 : 0.05,
+    metalness: isNight2 ? 0.1 : C.glassRef,
+    emissive: isNight2 ? new THREE.Color(0.5, 0.38, 0.04) : new THREE.Color(0.02, 0.05, 0.12),
+    emissiveIntensity: isNight2 ? 2.0 : 0.15,
+    transparent: !isNight2,
+    opacity: isNight2 ? 1.0 : 0.85,
+    envMapIntensity: 1.0
   });
-  const frameMat = new THREE.MeshLambertMaterial({color:'#e8eef4'});
+  const frameMat = new THREE.MeshStandardMaterial({
+    color: C.frame, roughness: 0.55, metalness: stilKey==='modern'?0.45:0.1
+  });
+  const bandMat = new THREE.MeshStandardMaterial({
+    color: C.bandCol, roughness: 0.78, metalness: 0.05
+  });
+  const panelMat = new THREE.MeshStandardMaterial({
+    color: C.panelCol, roughness: 0.82, metalness: 0.02
+  });
+  const balcMat = new THREE.MeshStandardMaterial({
+    color: C.bandCol, roughness: 0.70, metalness: stilKey==='modern'?0.35:0.05
+  });
+  const railMat = new THREE.MeshStandardMaterial({
+    color: stilKey==='modern'?'#c0ccd8':'#a09880',
+    roughness:0.30, metalness: stilKey==='modern'?0.75:0.15,
+    transparent:true, opacity:0.70
+  });
+  const spandrelMat = new THREE.MeshStandardMaterial({
+    color: isNight2 ? '#1a2840' : (stilKey==='modern'?'#1e3050':stilKey==='minimalist'?'#d8e0e8':'#302820'),
+    roughness:0.30, metalness:stilKey==='modern'?0.55:0.05,
+    emissive: isNight2?new THREE.Color(0.06,0.10,0.20):new THREE.Color(0,0,0),
+    emissiveIntensity: isNight2?1.2:0
+  });
 
-  const wW=0.8, wH=0.9, wD=0.08; // dimensiuni fereastră
-  const spacing=1.8; // distanță între ferestre
+  const mkMesh=(geo,mat,x,y,z,ry=0,cx=false)=>{
+    const m=new THREE.Mesh(geo,mat); m.castShadow=true; m.receiveShadow=true;
+    m.position.set(x,y,z); if(ry) m.rotation.y=ry; scene.add(m); return m;
+  };
 
-  for(let i=0;i<pts2d.length-1;i++){
-    const [x0,z0]=pts2d[i], [x1,z1]=pts2d[(i+1)%pts2d.length];
+  for(let si=0; si<pts2d.length; si++){
+    const [x0,z0]=pts2d[si], [x1,z1]=pts2d[(si+1)%pts2d.length];
     const dx=x1-x0, dz=z1-z0;
     const len=Math.sqrt(dx*dx+dz*dz);
-    if(len<2) continue;
-    const nx=dz/len, nz=-dx/len; // normal exterior
+    if(len<1.5) continue;
+    const ux=dx/len, uz=dz/len;       // vector de-a lungul laturii
+    const nx=dz/len, nz=-dx/len;      // normal exterior
     const ang=-Math.atan2(dz,dx);
 
-    // Câte ferestre pe această latură
-    const nWin=Math.max(1, Math.floor((len-1)/spacing));
-    const startU=(len-(nWin-1)*spacing)/2;
-
-    // Câte rânduri de ferestre pe înălțime
-    const nRows=Math.max(1, Math.floor(h/1.4));
-    const startV=0.5;
-
-    for(let row=0;row<nRows;row++){
-      for(let col=0;col<nWin;col++){
-        const u=startU+col*spacing;
-        const v=base+startV+row*1.4;
-        if(v+wH > top-0.2) continue;
-
-        const wx=x0+dx/len*u + nx*0.02;
-        const wz=z0+dz/len*u + nz*0.02;
-
-        // Geam
-        const geo=new THREE.BoxGeometry(wW,wH,wD);
-        const win=new THREE.Mesh(geo,winMat);
-        win.position.set(wx, v+wH/2, wz);
-        win.rotation.y=ang;
-        scene.add(win);
-
-        // Ramă
-        const fgeo=new THREE.BoxGeometry(wW+0.1,wH+0.1,wD*0.5);
-        const frame=new THREE.Mesh(fgeo,frameMat);
-        frame.position.set(wx-nx*0.03, v+wH/2, wz-nz*0.03);
-        frame.rotation.y=ang;
-        scene.add(frame);
+    // ── 1. Pilastri verticali (stiluri clasice/industriale) ──────────────────
+    if(C.pilW > 0){
+      const nPil = Math.floor(len / C.wGap)+1;
+      const pilGap = len / (nPil-1||1);
+      const pilMat = new THREE.MeshStandardMaterial({color:C.bandCol,roughness:0.72,metalness:0.04});
+      for(let p=0; p<nPil; p++){
+        const u = p * pilGap;
+        const px2 = x0+ux*u + nx*C.reveal;
+        const pz2 = z0+uz*u + nz*C.reveal;
+        const geo = new THREE.BoxGeometry(C.pilW, h, C.reveal*2+0.04);
+        mkMesh(geo, pilMat, px2, base+h/2, pz2, ang);
       }
     }
 
-    // Bandă orizontală de etaj (cornișă)
-    const cMat=new THREE.MeshLambertMaterial({color:'#d0d8e0'});
-    for(let row=1;row<nRows;row++){
-      const cv=base+row*1.4+startV-0.1;
-      if(cv>=top) break;
-      const cGeo=new THREE.BoxGeometry(len,0.12,0.15);
-      const corn=new THREE.Mesh(cGeo,cMat);
-      corn.position.set((x0+x1)/2, cv, (z0+z1)/2);
-      corn.rotation.y=ang;
-      scene.add(corn);
+    // ── 2. Benzi de planșeu (floor bands) ────────────────────────────────────
+    for(let fl=1; fl<nFloors; fl++){
+      const bY = base + fl*realFH;
+      const bx2 = (x0+x1)/2 + nx*(C.reveal + C.bandD/2);
+      const bz2 = (z0+z1)/2 + nz*(C.reveal + C.bandD/2);
+      const geo = new THREE.BoxGeometry(len, C.bandH, C.bandD);
+      mkMesh(geo, bandMat, bx2, bY, bz2, ang);
+    }
+    // Cornișă vârf
+    const cornY = base + h;
+    const cornBx = (x0+x1)/2 + nx*(C.reveal + C.bandD*1.2);
+    const cornBz = (z0+z1)/2 + nz*(C.reveal + C.bandD*1.2);
+    mkMesh(new THREE.BoxGeometry(len, C.bandH*1.6, C.bandD*1.8), bandMat, cornBx, cornY, cornBz, ang);
+
+    // ── 3. Module fereastră per etaj ─────────────────────────────────────────
+    const nWin = Math.max(1, Math.floor((len - C.wGap*0.5) / C.wGap));
+    const xStep = len / nWin;
+    const wOff = xStep / 2;
+
+    for(let fl=0; fl<nFloors; fl++){
+      const flBase = base + fl*realFH;
+      const flTop  = flBase + realFH;
+      const wBot   = flBase + (realFH - C.wH) * 0.42;
+      const wCy    = wBot + C.wH/2;
+      const spCy   = flBase + realFH*0.12;  // spandrel (fascia sub fereastră)
+
+      for(let wi=0; wi<nWin; wi++){
+        const u = wOff + wi*xStep;
+        // Centrul ferestrei pe fațadă
+        const wx = x0 + ux*u + nx*(C.reveal);
+        const wz = z0 + uz*u + nz*(C.reveal);
+
+        // 3a. Spandrel (panou opac sub/între ferestre)
+        const spW = xStep * 0.88;
+        mkMesh(new THREE.BoxGeometry(spW, realFH*0.22, 0.04), spandrelMat, wx, spCy, wz, ang);
+
+        // 3b. Ramă exterioară adâncă
+        mkMesh(new THREE.BoxGeometry(C.wW+0.14, C.wH+0.14, C.frameD*2), frameMat, wx, wCy, wz, ang);
+
+        // 3c. Geam
+        mkMesh(new THREE.BoxGeometry(C.wW, C.wH, 0.04), glassMat, wx+nx*0.02, wCy, wz+nz*0.02, ang);
+
+        // 3d. Montant vertical central (pentru ferestre late)
+        if(C.wW > 1.0){
+          mkMesh(new THREE.BoxGeometry(0.06, C.wH-0.06, 0.06), frameMat, wx, wCy, wz, ang);
+        }
+
+        // 3e. Traversă orizontală centrală
+        mkMesh(new THREE.BoxGeometry(C.wW+0.08, 0.06, 0.06), frameMat, wx, wCy, wz, ang);
+
+        // 3f. Pervaz (glaf) la baza ferestrei
+        const gGeo = new THREE.BoxGeometry(C.wW+0.25, 0.08, C.frameD*2.5);
+        mkMesh(gGeo, bandMat, wx, wBot-0.05, wz+nx*0.03, ang);
+
+        // 3g. Panou de umplere lateral (între ferestre)
+        const panW = xStep - C.wW - 0.18;
+        if(panW > 0.1){
+          const pnx = x0 + ux*(u + C.wW/2 + panW/2 + 0.09) + nx*C.reveal*0.5;
+          const pnz = z0 + uz*(u + C.wW/2 + panW/2 + 0.09) + nz*C.reveal*0.5;
+          mkMesh(new THREE.BoxGeometry(panW, C.wH*0.85, 0.04), panelMat, pnx, wCy, pnz, ang);
+        }
+
+        // ── 4. Balcon (etaje ≥1 și dacă stilul îl permite) ──────────────────
+        if(C.hasBalc && fl > 0 && fl < nFloors-1){
+          const balcX = x0 + ux*u + nx*(C.balcD/2 + C.reveal + 0.05);
+          const balcZ = z0 + uz*u + nz*(C.balcD/2 + C.reveal + 0.05);
+          const balcY = wBot - 0.08;
+
+          // Placa balconului
+          mkMesh(new THREE.BoxGeometry(C.wW+0.30, 0.12, C.balcD), balcMat, balcX, balcY, balcZ, ang);
+          // Picior / consolă sub placă
+          mkMesh(new THREE.BoxGeometry(C.wW*0.4, 0.30, C.balcD*0.7), balcMat, balcX, balcY-0.21, balcZ, ang);
+
+          // Balustradă — montanți verticali
+          const nRail = Math.floor((C.wW+0.30) / 0.25);
+          const rStep = (C.wW+0.28) / (nRail-1||1);
+          for(let ri=0; ri<=nRail; ri++){
+            const ru = -C.wW/2 - 0.12 + ri*rStep;
+            const rrx = x0 + ux*(u+ru) + nx*(C.balcD + C.reveal + 0.05);
+            const rrz = z0 + uz*(u+ru) + nz*(C.balcD + C.reveal + 0.05);
+            mkMesh(new THREE.BoxGeometry(0.04,C.railH,0.04), railMat, rrx, balcY+C.railH/2, rrz, ang);
+          }
+          // Mână curentă orizontală
+          mkMesh(new THREE.BoxGeometry(C.wW+0.30, 0.06, 0.06), railMat,
+            balcX, balcY+C.railH, balcZ, ang);
+          // Panou sticlă balcon (între montanți)
+          mkMesh(new THREE.BoxGeometry(C.wW+0.18, C.railH*0.75, 0.02), glassMat,
+            balcX, balcY+C.railH*0.45, balcZ, ang);
+        }
+      }
     }
   }
 }
