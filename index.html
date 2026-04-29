@@ -662,6 +662,535 @@ canvas#c2d{width:100%;height:100%;display:block}
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script>
+// ── State objects (moved to top for hoisting) ──────────────────────
+var FLOOR_COLORS=[
+  '#22d3ee','#34d399','#86efac','#fde68a','#fcd34d','#fb923c',
+  '#f97316', // Et6 - portocaliu intens
+  '#ef4444', // Et7 - roșu
+  '#dc2626', // Et8 - roșu intens
+  '#a855f7', // Et9 - violet
+  '#7c3aed', // Et10 - violet intens
+  '#ec4899'  // Et11+ - roz
+];
+var S={
+  pug:null,pugIdx:[],cadData:null,cadIdx:new Map(),
+  parcels:[],          // array de parcele selectate (multiselect)
+  activeParcel:null,   // parcela curentă (index în S.parcels)
+  utr:'',rule:{},ll:null,
+  ctx:null,popup:null,
+  tab:'search',multiMode:false,
+  bearing:0,
+  scenarios:JSON.parse(localStorage.getItem('ux16')||'[]'),
+  params:{},  // parametri urbanistici editabili per parcelă
+  vol:{fn:'locuinta_individuala',niv:4,hNiv:3.0,hOvr:'',fpF:0.9,retras:false,terasa:false,ctxR:200,onlyVol:true,genDone:false,
+    // #9 Scenarii constructie: 'liber'=demolare existenta, 'extindere_h'=extindere orizontal, 'extindere_v'=extindere vertical+orizontal
+    scenariuConstructie:'liber',
+    frontCount: 1,      // nr laturi stradale: 1=normal, 2=colt, 3=triplu front
+    multiVol: false,    // multiple cladiri pe edificabil
+    multiVolCount: 2,   // nr cladiri (2-6)
+    multiVolDist: 6,    // distanta minima intre cladiri (m) - indicator urbanistic
+    multiVolShape: 'rect' // 'rect'=dreptunghiuri | 'square'=patrate
+  },
+  svZone:null,  // Fix #11: zone spatii verzi (GeoJSON Feature sau null)
+  showFront:true  // vizualizare aliniamente pe hartă
+};
+var BLD_COL={
+  // Rezidential - gri-albăstrui neutru (nu concurează cu AEDIS)
+  residential:'#4a5568', apartments:'#4a5568', house:'#5a6a7a',
+  // Comercial - portocaliu/galben
+  commercial:'#e8a838', retail:'#f0823c', shop:'#f0823c',
+  // Birouri/Servicii - albastru
+  office:'#5b8dd9', services:'#6b9de8',
+  // Industrial - rosu inchis
+  industrial:'#c0453a', warehouse:'#b03c35',
+  // Institutii publice - violet
+  school:'#9b59b6', hospital:'#e74c8b', civic:'#8e44ad',
+  // Cultura/Religie - galben auriu
+  church:'#d4af37', cathedral:'#c8a020', religious:'#d4af37',
+  hotel:'#e67e22',
+  // Altele
+  garage:'#7f8c8d', parking:'#95a5a6', sports:'#27ae60',
+  yes:'#8a9ab0'  // necunoscut - gri albastru
+};
+var BLD_LABELS={
+  residential:'Rezidențial',apartments:'Rezidențial colectiv',house:'Locuință',
+  commercial:'Comercial',retail:'Comerț',shop:'Comerț',
+  office:'Birouri',services:'Servicii',
+  industrial:'Industrial',warehouse:'Depozit',
+  school:'Educație',hospital:'Sănătate',civic:'Instituție publică',
+  church:'Cult/Religie',hotel:'Hotelier',
+  garage:'Garaj',parking:'Parcare',sports:'Sport',
+  yes:'Necunoscut'
+};
+var _CTX_CACHE = {};
+var PDF_C = {
+  navy:    [8, 21, 42],
+  gold:    [212, 175, 55],
+  goldL:   [240, 210, 120],
+  white:   [255, 255, 255],
+  offwhite:[248, 249, 252],
+  gray1:   [240, 242, 245],
+  gray2:   [180, 190, 200],
+  gray3:   [100, 116, 139],
+  dark:    [20, 30, 50],
+  blue:    [59, 130, 246],
+  green:   [16, 185, 129],
+  orange:  [245, 158, 11],
+  red:     [239, 68, 68],
+  teal:    [0, 150, 136],
+};
+var AEDIS = {
+  open: false,
+  tab: 'functiune', // functiune | volum | acoperis | context | analiza
+
+  // Funcțiune și program
+  fn: 'rezidential_colectiv',
+  fnParter: 'comercial',        // funcțiune parter (dacă diferit)
+  parterDiferit: false,
+
+  // Stil arhitectural
+  stil: 'modern',
+  adaptContext: false,          // adaptare la contextul existent
+
+  // Compoziție volumetrică
+  corpuri: [                    // array de corpuri
+    {id:0, label:'Corp principal', h:12, niv:4, hNiv:3, retragere:1.0, fn:'rezidential_colectiv', color:'#cbd5e1'}
+  ],
+  corpActiv: 0,
+
+  // Acoperis
+  tipAcoperis: 'terasa_plata',  // terasa_plata | terasa_circulabila | sarpanta | mansarda | combinat
+  hSarpanta: 3.5,               // H coama sarpanta (m)
+  unghiSarpanta: 35,            // unghi (grade)
+  hMansarda: 2.8,               // H util mansarda
+  hAttic: 1.2,                  // H atic/parapet terasa
+
+  // Retrageri per etaj (array, index=etaj)
+  retrageriFineEtaje: {},       // {etaj: factor} ex: {3: 0.85, 4: 0.75}
+  activeRetragere: false,
+
+  // Context și scenarii
+  scenariu: 'demolare',         // demolare | extindere_h | extindere_v | inglobare
+  existentPOT: 0,               // POT existent calculat din ctx
+  existentCUT: 0,
+  existentH: 0,
+
+  // Analiză
+  showDim: true,                // etichete dimensionale
+  showShadow: false,            // simulare umbra (simplificata)
+  showSetbacks: true,           // aliniamente vizuale
+};
+var AEDIS_FN = {
+  rezidential_colectiv: {
+    label:'🏠 Rezidențial colectiv', color:'#4ade80', parterColor:'#86efac',
+    hParter:3.0, hEtaj:2.8, hAttic:1.0,
+    desc:'Blocuri de locuințe. H standard 2.8m/etaj. Posibil parter comercial.',
+    stiluri:['modern','clasic','minimalist','adaptat_context']
+  },
+  locuinta_individuala: {
+    label:'🏡 Locuință individuală', color:'#86efac', parterColor:'#bbf7d0',
+    hParter:3.2, hEtaj:3.0, hAttic:0,
+    desc:'Case individuale. H generos 3m/etaj. Posibil mansardă.',
+    stiluri:['modern','clasic','traditional','rustic']
+  },
+  birouri: {
+    label:'🏢 Birouri / Office', color:'#38bdf8', parterColor:'#7dd3fc',
+    hParter:4.5, hEtaj:3.5, hAttic:1.5,
+    desc:'Clădiri de birouri. H parter 4.5m, etaje 3.5m. Posibil atriumuri.',
+    stiluri:['modern','inovator','corporatist','minimalist']
+  },
+  comercial: {
+    label:'🏬 Comercial / Retail', color:'#fb923c', parterColor:'#fdba74',
+    hParter:5.0, hEtaj:4.0, hAttic:1.5,
+    desc:'Spații comerciale. H parter generos 5m. Posibil mezanin.',
+    stiluri:['modern','inovator','industrial']
+  },
+  hotel: {
+    label:'🏨 Hotelier', color:'#e879f9', parterColor:'#f0abfc',
+    hParter:5.0, hEtaj:3.2, hAttic:2.0,
+    desc:'Hoteluri. Parter 5m (lobby/restaurant), etaje 3.2m.',
+    stiluri:['modern','clasic','boutique','inovator']
+  },
+  mixt: {
+    label:'🏙 Mixt (comercial+rezidential)', color:'#fbbf24', parterColor:'#fb923c',
+    hParter:4.5, hEtaj:3.0, hAttic:1.2,
+    desc:'Funcțiuni mixte. Parter comercial 4.5m + etaje rezidențiale.',
+    stiluri:['modern','inovator','adaptat_context']
+  },
+  industrie: {
+    label:'🏭 Industrial / Depozitare', color:'#94a3b8', parterColor:'#cbd5e1',
+    hParter:6.0, hEtaj:5.0, hAttic:0,
+    desc:'Hale industriale. H mare, deschideri libere.',
+    stiluri:['industrial','modern']
+  },
+  institutie: {
+    label:'🏛 Instituție publică', color:'#a78bfa', parterColor:'#c4b5fd',
+    hParter:4.5, hEtaj:3.5, hAttic:2.5,
+    desc:'Clădiri publice, instituții. H reprezentativ.',
+    stiluri:['clasic','modern','inovator','adaptat_context']
+  },
+};
+var AEDIS_STIL = {
+  modern: {
+    label:'🏢 Modern', desc:'Fațade sticlă-oțel, etaje progresive, atic pronunțat',
+    floorColors: ['#1e3a5f','#1d4ed8','#2563eb','#3b82f6','#60a5fa','#93c5fd','#bfdbfe','#eff6ff'],
+    parterColor: '#0f172a',
+    aticColor: '#0c1a2e',
+    retragereFactor: 0.88, hasAttic: true, aticH: 1.4,
+    etajColor: (base,i,tot)=>{
+      // Progresie: soclu negru → albastru intens → albastru deschis (sticlă)
+      const cols=['#0f172a','#1e3a5f','#1d4ed8','#2563eb','#3b82f6','#60a5fa','#93c5fd','#bfdbfe'];
+      return cols[Math.min(i,cols.length-1)];
+    }
+  },
+  inovator: {
+    label:'⚡ Inovator', desc:'Alternare materiale, retrageri expresive, corp dinamic',
+    floorColors: ['#7c3aed','#6d28d9','#5b21b6','#4c1d95','#6d28d9','#7c3aed','#8b5cf6','#a78bfa'],
+    parterColor: '#4c1d95',
+    aticColor: '#2e1065',
+    retragereFactor: 0.72, hasAttic: false, aticH: 0,
+    etajColor: (base,i,tot)=>{
+      // Alternare violet-inchis / violet-mediu
+      const cols=['#4c1d95','#5b21b6','#6d28d9','#7c3aed','#8b5cf6','#7c3aed','#6d28d9','#5b21b6'];
+      return cols[i%cols.length];
+    }
+  },
+  clasic: {
+    label:'🏛 Clasic', desc:'Soclu pronunțat, cornișe, piatră naturală, proporții clasice',
+    floorColors: ['#44260a','#6b3a10','#8b4513','#a0522d','#b8732e','#c8914a','#d4a96a','#e8cfa0'],
+    parterColor: '#2d1608',
+    aticColor: '#1a0d04',
+    retragereFactor: 0.96, hasAttic: true, aticH: 2.2,
+    etajColor: (base,i,tot)=>{
+      // Piatră: soclu maro-inchis → ocru cald → crem luminos
+      const cols=['#2d1608','#44260a','#6b3a10','#8b4513','#a0522d','#c8914a','#d4a96a','#e8cfa0'];
+      return cols[Math.min(i,cols.length-1)];
+    }
+  },
+  minimalist: {
+    label:'◼ Minimalist', desc:'Beton alb, volume pure, fara ornamente, lumina naturala',
+    floorColors: ['#52525b','#71717a','#a1a1aa','#d4d4d8','#e4e4e7','#f4f4f5','#fafafa','#ffffff'],
+    parterColor: '#3f3f46',
+    aticColor: '#27272a',
+    retragereFactor: 1.0, hasAttic: false, aticH: 0.6,
+    etajColor: (base,i,tot)=>{
+      // Beton: soclu antracit → gri mediu → alb pur la ultimul etaj
+      const cols=['#3f3f46','#52525b','#71717a','#a1a1aa','#d4d4d8','#e4e4e7','#f4f4f5','#ffffff'];
+      return cols[Math.min(i,cols.length-1)];
+    }
+  },
+  industrial: {
+    label:'🏭 Industrial', desc:'Corten, metal, beton brut, deschideri mari, H mare',
+    floorColors: ['#292524','#44403c','#57534e','#78716c','#a8a29e','#78716c','#57534e','#44403c'],
+    parterColor: '#1c1917',
+    aticColor: '#0c0a09',
+    retragereFactor: 1.0, hasAttic: false, aticH: 0,
+    etajColor: (base,i,tot)=>{
+      const cols=['#1c1917','#292524','#44403c','#57534e','#78716c','#a8a29e','#78716c','#57534e'];
+      return cols[i%cols.length];
+    }
+  },
+  adaptat_context: {
+    label:'🌆 Adaptat context', desc:'Culori, H si proportii extrase din contextul urban analizat',
+    floorColors: ['#64748b','#94a3b8','#cbd5e1','#e2e8f0','#cbd5e1','#94a3b8','#64748b','#475569'],
+    parterColor: '#475569',
+    aticColor: '#334155',
+    retragereFactor: 0.92, hasAttic: true, aticH: 1.0,
+    etajColor: (base,i,tot)=>{
+      // Preia culoarea dominanta din context OSM
+      if(S.ctx?.features?.length){
+        const fns={};
+        S.ctx.features.forEach(f=>{const fn=f.properties?.fn||'yes';fns[fn]=(fns[fn]||0)+1;});
+        const domFn=Object.entries(fns).sort((a,b)=>b[1]-a[1])[0]?.[0]||'yes';
+        const base2=BLD_COL[domFn]||'#64748b';
+        const cols=['#334155','#475569','#64748b','#94a3b8','#cbd5e1'];
+        return mixColor(base2,cols[Math.min(i,cols.length-1)],0.5);
+      }
+      return ['#475569','#64748b','#94a3b8','#cbd5e1','#e2e8f0'][Math.min(i,4)];
+    }
+  },
+};
+var AEDIS3D = {
+  layer: null,       // Mapbox custom layer
+  renderer: null,
+  scene: null,
+  camera: null,
+  mesh: null,
+  active: false,
+  params: null,      // parametrii ultimei generari
+};
+var AEDIS_SHADERS = {
+
+  // Shader BETON APARENT
+  concrete: {
+    vert:`
+      varying vec3 vNormal;
+      varying vec3 vPosition;
+      varying vec2 vUv;
+      void main(){
+        vNormal = normalize(normalMatrix * normal);
+        vPosition = (modelViewMatrix * vec4(position,1.0)).xyz;
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+      }`,
+    frag:`
+      varying vec3 vNormal;
+      varying vec3 vPosition;
+      varying vec2 vUv;
+      uniform vec3 baseColor;
+      uniform float time;
+
+      float rand(vec2 co){ return fract(sin(dot(co,vec2(12.9898,78.233)))*43758.5453); }
+      float noise(vec2 p){
+        vec2 i=floor(p); vec2 f=fract(p);
+        float a=rand(i), b=rand(i+vec2(1,0)), c=rand(i+vec2(0,1)), d=rand(i+vec2(1,1));
+        vec2 u=f*f*(3.0-2.0*f);
+        return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;
+      }
+
+      void main(){
+        // Textura beton procedurala
+        vec2 uv = vUv * 8.0;
+        float n = noise(uv)*0.3 + noise(uv*3.0)*0.1 + noise(uv*9.0)*0.05;
+        vec3 concreteCol = baseColor + vec3(n-0.15)*0.25;
+
+        // Linii de cofrare orizontale
+        float lines = step(0.92, fract(vUv.y * 12.0));
+        concreteCol = mix(concreteCol, concreteCol*0.7, lines*0.4);
+
+        // Iluminare Phong simpla
+        vec3 L = normalize(vec3(1.0, 1.5, 1.0));
+        float diff = max(dot(vNormal, L), 0.0)*0.7 + 0.3;
+        vec3 col = concreteCol * diff;
+
+        // Ambient occlusion simpla in baza
+        float ao = smoothstep(0.0, 3.0, vPosition.z + 0.5);
+        col *= mix(0.7, 1.0, ao);
+
+        gl_FragColor = vec4(col, 1.0);
+      }`
+  },
+
+  // Shader STICLA REFLECTIVA
+  glass: {
+    vert:`
+      varying vec3 vNormal;
+      varying vec3 vPosition;
+      varying vec2 vUv;
+      void main(){
+        vNormal = normalize(normalMatrix * normal);
+        vPosition = (modelViewMatrix * vec4(position,1.0)).xyz;
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+      }`,
+    frag:`
+      varying vec3 vNormal;
+      varying vec3 vPosition;
+      varying vec2 vUv;
+      uniform vec3 baseColor;
+
+      float rand(vec2 co){ return fract(sin(dot(co,vec2(12.9898,78.233)))*43758.5453); }
+
+      void main(){
+        // Grila fereastra
+        vec2 cell = fract(vUv * vec2(4.0, 6.0));
+        float frame = step(0.9, cell.x) + step(0.9, cell.y);
+        float glassArea = 1.0 - min(frame, 1.0);
+
+        // Reflectie simpla (cerul albastru)
+        vec3 V = normalize(-vPosition);
+        vec3 R = reflect(-V, vNormal);
+        float skyMix = max(0.0, R.y);
+        vec3 skyCol = mix(vec3(0.3,0.5,0.8), vec3(0.8,0.9,1.0), skyMix);
+
+        // Sticla = mix intre reflexie si interior intunecat
+        vec3 glassCol = mix(baseColor * 0.3, skyCol, 0.5 + skyMix * 0.3);
+        vec3 frameCol = vec3(0.15, 0.15, 0.18); // cadru metalic
+
+        vec3 col = mix(frameCol, glassCol, glassArea);
+
+        // Highlight specular
+        vec3 L = normalize(vec3(1.5, 2.0, 1.0));
+        float spec = pow(max(dot(reflect(-L, vNormal), V), 0.0), 64.0);
+        col += vec3(spec * 0.4) * glassArea;
+
+        gl_FragColor = vec4(col, 0.85);
+      }`
+  },
+
+  // Shader LEMN / RIGLE VERTICALE
+  wood: {
+    vert:`
+      varying vec3 vNormal;
+      varying vec3 vPosition;
+      varying vec2 vUv;
+      void main(){
+        vNormal = normalize(normalMatrix * normal);
+        vPosition = (modelViewMatrix * vec4(position,1.0)).xyz;
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+      }`,
+    frag:`
+      varying vec3 vNormal;
+      varying vec3 vPosition;
+      varying vec2 vUv;
+      uniform vec3 baseColor;
+
+      float rand(vec2 co){ return fract(sin(dot(co,vec2(12.9898,78.233)))*43758.5453); }
+      float noise(vec2 p){
+        vec2 i=floor(p); vec2 f=fract(p);
+        float a=rand(i),b=rand(i+vec2(1,0)),c=rand(i+vec2(0,1)),d=rand(i+vec2(1,1));
+        vec2 u=f*f*(3.0-2.0*f);
+        return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;
+      }
+
+      void main(){
+        // Rigle verticale lemn
+        float riglaWidth = 0.05;
+        float riglaSpacing = 0.12;
+        float xNorm = fract(vUv.x / riglaSpacing);
+        float isRigla = step(1.0 - riglaWidth/riglaSpacing, xNorm);
+
+        // Grain lemn orizontal
+        vec2 grainUv = vec2(vUv.x * 3.0, vUv.y * 20.0);
+        float grain = noise(grainUv)*0.15 + noise(grainUv*2.0)*0.08;
+
+        // Culoare lemn variata per rigla (random per coloana)
+        float col_var = rand(vec2(floor(vUv.x / riglaSpacing), 0.0)) * 0.15;
+
+        vec3 woodBase = baseColor + vec3(col_var - 0.07) + vec3(grain - 0.1);
+        vec3 woodDark = woodBase * 0.7;
+        vec3 col = mix(woodDark, woodBase, isRigla);
+
+        // Iluminare
+        vec3 L = normalize(vec3(1.0, 1.5, 1.0));
+        float diff = max(dot(vNormal, L), 0.0)*0.6 + 0.4;
+        col *= diff;
+
+        gl_FragColor = vec4(col, 1.0);
+      }`
+  },
+
+  // Shader TENCUIALA / VOPSEA
+  plaster: {
+    vert:`
+      varying vec3 vNormal;
+      varying vec3 vPosition;
+      varying vec2 vUv;
+      void main(){
+        vNormal = normalize(normalMatrix * normal);
+        vPosition = (modelViewMatrix * vec4(position,1.0)).xyz;
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+      }`,
+    frag:`
+      varying vec3 vNormal;
+      varying vec3 vPosition;
+      varying vec2 vUv;
+      uniform vec3 baseColor;
+
+      float rand(vec2 co){ return fract(sin(dot(co,vec2(12.9898,78.233)))*43758.5453); }
+      float noise(vec2 p){
+        vec2 i=floor(p); vec2 f=fract(p);
+        float a=rand(i),b=rand(i+vec2(1,0)),c=rand(i+vec2(0,1)),d=rand(i+vec2(1,1));
+        vec2 u=f*f*(3.0-2.0*f);
+        return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;
+      }
+
+      void main(){
+        // Textura tencuiala fina
+        float n = noise(vUv*15.0)*0.06 + noise(vUv*40.0)*0.03;
+        vec3 col = baseColor + vec3(n - 0.045);
+
+        // Iluminare difuza
+        vec3 L = normalize(vec3(1.2, 2.0, 0.8));
+        float diff = max(dot(vNormal, L), 0.0)*0.65 + 0.35;
+        col *= diff;
+
+        // Specular slab (mat)
+        vec3 V = normalize(-vPosition);
+        float spec = pow(max(dot(reflect(-L,vNormal),V),0.0),8.0)*0.05;
+        col += vec3(spec);
+
+        gl_FragColor = vec4(col, 1.0);
+      }`
+  },
+
+  // Shader METAL / PANOURI
+  metal: {
+    vert:`
+      varying vec3 vNormal;
+      varying vec3 vPosition;
+      varying vec2 vUv;
+      void main(){
+        vNormal = normalize(normalMatrix * normal);
+        vPosition = (modelViewMatrix * vec4(position,1.0)).xyz;
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+      }`,
+    frag:`
+      varying vec3 vNormal;
+      varying vec3 vPosition;
+      varying vec2 vUv;
+      uniform vec3 baseColor;
+
+      void main(){
+        // Panouri metalice cu rosturi
+        vec2 cell = fract(vUv * vec2(2.0, 4.0));
+        float rost = step(0.96, cell.x) + step(0.96, cell.y);
+
+        vec3 metalCol = baseColor;
+
+        // Reflexie speculara metalica
+        vec3 V = normalize(-vPosition);
+        vec3 L = normalize(vec3(1.5, 2.0, 0.5));
+        float spec = pow(max(dot(reflect(-L, vNormal), V), 0.0), 32.0);
+        vec3 col = metalCol * (max(dot(vNormal, L), 0.0)*0.5 + 0.5) + vec3(spec*0.6);
+
+        // Rosturi inchise
+        col = mix(col, vec3(0.05), rost*0.7);
+
+        gl_FragColor = vec4(col, 1.0);
+      }`
+  }
+};
+var FAL_AI = {
+  // Key incercat din localStorage la pornire (salvat anterior)
+  apiKey: (() => { try{ return localStorage.getItem('fal_api_key')||''; }catch(e){ return ''; } })(),
+  model: 'fal-ai/flux/schnell',  // FLUX.1 Schnell - rapid si economic
+  lastRender: null,
+  rendering: false,
+};
+var _AIIMG = { scale:1, dx:0, dy:0, panMode:false, dragging:false, lastX:0, lastY:0 };
+var CADASTRU = {
+  hasPMTiles: false,
+  pmtilesUrl: null,   // setat de utilizator sau detectat automat
+  loaded: false,
+};
+var SOLAR = {
+  date: new Date(),
+  hour: 14,    // ora implicita: 14:00 (lumina buna)
+  active: false
+};
+var LOISIR_STATE = {
+  active:false, selectionMode:'axis', corridorMeters:45, bikeWidth:3, runWidth:2.5, walkWidth:3,
+  benchSpacing:25, lightingSpacing:30, vegetationDensity:75, userArea:null, userAxis:null,
+  importedArea:null, importedAxis:null, features:null, draw:null, lastValidation:null
+};
+var LOISIR_AI_STATE = {
+  rendering:false, lastScreenshot:null, lastPrompt:null, lastRender:null,
+  endpoint:''
+};
+var V3D = { r:null, scene:null, cam:null, af:null, ctx:[], aedis:[], texCache:{},
+  th:Math.PI/4, ph:Math.PI/3.2, rad:60, tx:null };
+var SV = {
+  open: false,
+  showVolume: true,
+  currentPos: null,   // {lat, lng, heading, pitch}
+  positions: [],      // puncte sugerate in jurul parcelei
+};
+// ─────────────────────────────────────────────────────────────────
+
 // Error handler global
 window.onerror = function(msg,src,line,col,err){
   document.getElementById('status').textContent = '❌ Eroare JS: '+msg+' (L'+line+')';
@@ -868,39 +1397,10 @@ function getArchPalette(){
   return ARCH_PALETTES[stilKey] || ARCH_PALETTES.modern;
 }
 
-var FLOOR_COLORS=[
-  '#22d3ee','#34d399','#86efac','#fde68a','#fcd34d','#fb923c',
-  '#f97316', // Et6 - portocaliu intens
-  '#ef4444', // Et7 - roșu
-  '#dc2626', // Et8 - roșu intens
-  '#a855f7', // Et9 - violet
-  '#7c3aed', // Et10 - violet intens
-  '#ec4899'  // Et11+ - roz
-];
+// FLOOR_COLORS moved to top
 
 // ═══ STATE ════════════════════════════════════════════════════════════════
-var S={
-  pug:null,pugIdx:[],cadData:null,cadIdx:new Map(),
-  parcels:[],          // array de parcele selectate (multiselect)
-  activeParcel:null,   // parcela curentă (index în S.parcels)
-  utr:'',rule:{},ll:null,
-  ctx:null,popup:null,
-  tab:'search',multiMode:false,
-  bearing:0,
-  scenarios:JSON.parse(localStorage.getItem('ux16')||'[]'),
-  params:{},  // parametri urbanistici editabili per parcelă
-  vol:{fn:'locuinta_individuala',niv:4,hNiv:3.0,hOvr:'',fpF:0.9,retras:false,terasa:false,ctxR:200,onlyVol:true,genDone:false,
-    // #9 Scenarii constructie: 'liber'=demolare existenta, 'extindere_h'=extindere orizontal, 'extindere_v'=extindere vertical+orizontal
-    scenariuConstructie:'liber',
-    frontCount: 1,      // nr laturi stradale: 1=normal, 2=colt, 3=triplu front
-    multiVol: false,    // multiple cladiri pe edificabil
-    multiVolCount: 2,   // nr cladiri (2-6)
-    multiVolDist: 6,    // distanta minima intre cladiri (m) - indicator urbanistic
-    multiVolShape: 'rect' // 'rect'=dreptunghiuri | 'square'=patrate
-  },
-  svZone:null,  // Fix #11: zone spatii verzi (GeoJSON Feature sau null)
-  showFront:true  // vizualizare aliniamente pe hartă
-};
+// S moved to top
 
 // ═══ HARTĂ ════════════════════════════════════════════════════════════════
 const map=new mapboxgl.Map({
@@ -2820,37 +3320,11 @@ function buildVolume(){
 
 // ═══ CONTEXT 3D ═══════════════════════════════════════════════════════════
 // Cod culori functiuni cladiri - conform practica urbanistica internationala
-var BLD_COL={
-  // Rezidential - gri-albăstrui neutru (nu concurează cu AEDIS)
-  residential:'#4a5568', apartments:'#4a5568', house:'#5a6a7a',
-  // Comercial - portocaliu/galben
-  commercial:'#e8a838', retail:'#f0823c', shop:'#f0823c',
-  // Birouri/Servicii - albastru
-  office:'#5b8dd9', services:'#6b9de8',
-  // Industrial - rosu inchis
-  industrial:'#c0453a', warehouse:'#b03c35',
-  // Institutii publice - violet
-  school:'#9b59b6', hospital:'#e74c8b', civic:'#8e44ad',
-  // Cultura/Religie - galben auriu
-  church:'#d4af37', cathedral:'#c8a020', religious:'#d4af37',
-  hotel:'#e67e22',
-  // Altele
-  garage:'#7f8c8d', parking:'#95a5a6', sports:'#27ae60',
-  yes:'#8a9ab0'  // necunoscut - gri albastru
-};
+// BLD_COL moved to top
 // Descrieri pentru legenda
-var BLD_LABELS={
-  residential:'Rezidențial',apartments:'Rezidențial colectiv',house:'Locuință',
-  commercial:'Comercial',retail:'Comerț',shop:'Comerț',
-  office:'Birouri',services:'Servicii',
-  industrial:'Industrial',warehouse:'Depozit',
-  school:'Educație',hospital:'Sănătate',civic:'Instituție publică',
-  church:'Cult/Religie',hotel:'Hotelier',
-  garage:'Garaj',parking:'Parcare',sports:'Sport',
-  yes:'Necunoscut'
-};
+// BLD_LABELS moved to top
 // ── Cache context: evitam cereri repetate pentru aceeasi zona ─────────────
-var _CTX_CACHE = {};
+// _CTX_CACHE moved to top
 
 // Throttle: minimum 20s between Overpass calls for same parcel
 let _ctxLastCall = 0;
@@ -4815,22 +5289,7 @@ function showPdfModal(){
 // ═══════════════════════════════════════════════════════════════════════════
 
 // ── Paleta de culori pentru PDF ──────────────────────────────────────────
-var PDF_C = {
-  navy:    [8, 21, 42],
-  gold:    [212, 175, 55],
-  goldL:   [240, 210, 120],
-  white:   [255, 255, 255],
-  offwhite:[248, 249, 252],
-  gray1:   [240, 242, 245],
-  gray2:   [180, 190, 200],
-  gray3:   [100, 116, 139],
-  dark:    [20, 30, 50],
-  blue:    [59, 130, 246],
-  green:   [16, 185, 129],
-  orange:  [245, 158, 11],
-  red:     [239, 68, 68],
-  teal:    [0, 150, 136],
-};
+// PDF_C moved to top
 
 // ── Header premium pe fiecare pagina ─────────────────────────────────────
 function pdfHeader(pdf, title, subtitle, pg, total){
@@ -5968,181 +6427,13 @@ async function addScenariiPage(pdf){
 // ═══════════════════════════════════════════════════════════════════════════
 
 // ── State AEDIS ────────────────────────────────────────────────────────────
-var AEDIS = {
-  open: false,
-  tab: 'functiune', // functiune | volum | acoperis | context | analiza
-
-  // Funcțiune și program
-  fn: 'rezidential_colectiv',
-  fnParter: 'comercial',        // funcțiune parter (dacă diferit)
-  parterDiferit: false,
-
-  // Stil arhitectural
-  stil: 'modern',
-  adaptContext: false,          // adaptare la contextul existent
-
-  // Compoziție volumetrică
-  corpuri: [                    // array de corpuri
-    {id:0, label:'Corp principal', h:12, niv:4, hNiv:3, retragere:1.0, fn:'rezidential_colectiv', color:'#cbd5e1'}
-  ],
-  corpActiv: 0,
-
-  // Acoperis
-  tipAcoperis: 'terasa_plata',  // terasa_plata | terasa_circulabila | sarpanta | mansarda | combinat
-  hSarpanta: 3.5,               // H coama sarpanta (m)
-  unghiSarpanta: 35,            // unghi (grade)
-  hMansarda: 2.8,               // H util mansarda
-  hAttic: 1.2,                  // H atic/parapet terasa
-
-  // Retrageri per etaj (array, index=etaj)
-  retrageriFineEtaje: {},       // {etaj: factor} ex: {3: 0.85, 4: 0.75}
-  activeRetragere: false,
-
-  // Context și scenarii
-  scenariu: 'demolare',         // demolare | extindere_h | extindere_v | inglobare
-  existentPOT: 0,               // POT existent calculat din ctx
-  existentCUT: 0,
-  existentH: 0,
-
-  // Analiză
-  showDim: true,                // etichete dimensionale
-  showShadow: false,            // simulare umbra (simplificata)
-  showSetbacks: true,           // aliniamente vizuale
-};
+// AEDIS moved to top
 
 // ── Funcțiuni AEDIS cu programe ───────────────────────────────────────────
-var AEDIS_FN = {
-  rezidential_colectiv: {
-    label:'🏠 Rezidențial colectiv', color:'#4ade80', parterColor:'#86efac',
-    hParter:3.0, hEtaj:2.8, hAttic:1.0,
-    desc:'Blocuri de locuințe. H standard 2.8m/etaj. Posibil parter comercial.',
-    stiluri:['modern','clasic','minimalist','adaptat_context']
-  },
-  locuinta_individuala: {
-    label:'🏡 Locuință individuală', color:'#86efac', parterColor:'#bbf7d0',
-    hParter:3.2, hEtaj:3.0, hAttic:0,
-    desc:'Case individuale. H generos 3m/etaj. Posibil mansardă.',
-    stiluri:['modern','clasic','traditional','rustic']
-  },
-  birouri: {
-    label:'🏢 Birouri / Office', color:'#38bdf8', parterColor:'#7dd3fc',
-    hParter:4.5, hEtaj:3.5, hAttic:1.5,
-    desc:'Clădiri de birouri. H parter 4.5m, etaje 3.5m. Posibil atriumuri.',
-    stiluri:['modern','inovator','corporatist','minimalist']
-  },
-  comercial: {
-    label:'🏬 Comercial / Retail', color:'#fb923c', parterColor:'#fdba74',
-    hParter:5.0, hEtaj:4.0, hAttic:1.5,
-    desc:'Spații comerciale. H parter generos 5m. Posibil mezanin.',
-    stiluri:['modern','inovator','industrial']
-  },
-  hotel: {
-    label:'🏨 Hotelier', color:'#e879f9', parterColor:'#f0abfc',
-    hParter:5.0, hEtaj:3.2, hAttic:2.0,
-    desc:'Hoteluri. Parter 5m (lobby/restaurant), etaje 3.2m.',
-    stiluri:['modern','clasic','boutique','inovator']
-  },
-  mixt: {
-    label:'🏙 Mixt (comercial+rezidential)', color:'#fbbf24', parterColor:'#fb923c',
-    hParter:4.5, hEtaj:3.0, hAttic:1.2,
-    desc:'Funcțiuni mixte. Parter comercial 4.5m + etaje rezidențiale.',
-    stiluri:['modern','inovator','adaptat_context']
-  },
-  industrie: {
-    label:'🏭 Industrial / Depozitare', color:'#94a3b8', parterColor:'#cbd5e1',
-    hParter:6.0, hEtaj:5.0, hAttic:0,
-    desc:'Hale industriale. H mare, deschideri libere.',
-    stiluri:['industrial','modern']
-  },
-  institutie: {
-    label:'🏛 Instituție publică', color:'#a78bfa', parterColor:'#c4b5fd',
-    hParter:4.5, hEtaj:3.5, hAttic:2.5,
-    desc:'Clădiri publice, instituții. H reprezentativ.',
-    stiluri:['clasic','modern','inovator','adaptat_context']
-  },
-};
+// AEDIS_FN moved to top
 
 // ── Stiluri arhitecturale AEDIS — paleta cu identitate vizuala clara ──────
-var AEDIS_STIL = {
-  modern: {
-    label:'🏢 Modern', desc:'Fațade sticlă-oțel, etaje progresive, atic pronunțat',
-    floorColors: ['#1e3a5f','#1d4ed8','#2563eb','#3b82f6','#60a5fa','#93c5fd','#bfdbfe','#eff6ff'],
-    parterColor: '#0f172a',
-    aticColor: '#0c1a2e',
-    retragereFactor: 0.88, hasAttic: true, aticH: 1.4,
-    etajColor: (base,i,tot)=>{
-      // Progresie: soclu negru → albastru intens → albastru deschis (sticlă)
-      const cols=['#0f172a','#1e3a5f','#1d4ed8','#2563eb','#3b82f6','#60a5fa','#93c5fd','#bfdbfe'];
-      return cols[Math.min(i,cols.length-1)];
-    }
-  },
-  inovator: {
-    label:'⚡ Inovator', desc:'Alternare materiale, retrageri expresive, corp dinamic',
-    floorColors: ['#7c3aed','#6d28d9','#5b21b6','#4c1d95','#6d28d9','#7c3aed','#8b5cf6','#a78bfa'],
-    parterColor: '#4c1d95',
-    aticColor: '#2e1065',
-    retragereFactor: 0.72, hasAttic: false, aticH: 0,
-    etajColor: (base,i,tot)=>{
-      // Alternare violet-inchis / violet-mediu
-      const cols=['#4c1d95','#5b21b6','#6d28d9','#7c3aed','#8b5cf6','#7c3aed','#6d28d9','#5b21b6'];
-      return cols[i%cols.length];
-    }
-  },
-  clasic: {
-    label:'🏛 Clasic', desc:'Soclu pronunțat, cornișe, piatră naturală, proporții clasice',
-    floorColors: ['#44260a','#6b3a10','#8b4513','#a0522d','#b8732e','#c8914a','#d4a96a','#e8cfa0'],
-    parterColor: '#2d1608',
-    aticColor: '#1a0d04',
-    retragereFactor: 0.96, hasAttic: true, aticH: 2.2,
-    etajColor: (base,i,tot)=>{
-      // Piatră: soclu maro-inchis → ocru cald → crem luminos
-      const cols=['#2d1608','#44260a','#6b3a10','#8b4513','#a0522d','#c8914a','#d4a96a','#e8cfa0'];
-      return cols[Math.min(i,cols.length-1)];
-    }
-  },
-  minimalist: {
-    label:'◼ Minimalist', desc:'Beton alb, volume pure, fara ornamente, lumina naturala',
-    floorColors: ['#52525b','#71717a','#a1a1aa','#d4d4d8','#e4e4e7','#f4f4f5','#fafafa','#ffffff'],
-    parterColor: '#3f3f46',
-    aticColor: '#27272a',
-    retragereFactor: 1.0, hasAttic: false, aticH: 0.6,
-    etajColor: (base,i,tot)=>{
-      // Beton: soclu antracit → gri mediu → alb pur la ultimul etaj
-      const cols=['#3f3f46','#52525b','#71717a','#a1a1aa','#d4d4d8','#e4e4e7','#f4f4f5','#ffffff'];
-      return cols[Math.min(i,cols.length-1)];
-    }
-  },
-  industrial: {
-    label:'🏭 Industrial', desc:'Corten, metal, beton brut, deschideri mari, H mare',
-    floorColors: ['#292524','#44403c','#57534e','#78716c','#a8a29e','#78716c','#57534e','#44403c'],
-    parterColor: '#1c1917',
-    aticColor: '#0c0a09',
-    retragereFactor: 1.0, hasAttic: false, aticH: 0,
-    etajColor: (base,i,tot)=>{
-      const cols=['#1c1917','#292524','#44403c','#57534e','#78716c','#a8a29e','#78716c','#57534e'];
-      return cols[i%cols.length];
-    }
-  },
-  adaptat_context: {
-    label:'🌆 Adaptat context', desc:'Culori, H si proportii extrase din contextul urban analizat',
-    floorColors: ['#64748b','#94a3b8','#cbd5e1','#e2e8f0','#cbd5e1','#94a3b8','#64748b','#475569'],
-    parterColor: '#475569',
-    aticColor: '#334155',
-    retragereFactor: 0.92, hasAttic: true, aticH: 1.0,
-    etajColor: (base,i,tot)=>{
-      // Preia culoarea dominanta din context OSM
-      if(S.ctx?.features?.length){
-        const fns={};
-        S.ctx.features.forEach(f=>{const fn=f.properties?.fn||'yes';fns[fn]=(fns[fn]||0)+1;});
-        const domFn=Object.entries(fns).sort((a,b)=>b[1]-a[1])[0]?.[0]||'yes';
-        const base2=BLD_COL[domFn]||'#64748b';
-        const cols=['#334155','#475569','#64748b','#94a3b8','#cbd5e1'];
-        return mixColor(base2,cols[Math.min(i,cols.length-1)],0.5);
-      }
-      return ['#475569','#64748b','#94a3b8','#cbd5e1','#e2e8f0'][Math.min(i,4)];
-    }
-  },
-};
+// AEDIS_STIL moved to top
 
 // ── Helpers culori ─────────────────────────────────────────────────────────
 function hexToRgb(hex){
@@ -7059,252 +7350,10 @@ function aedisLoadThree(cb){
 }
 
 // ── State Three.js layer ───────────────────────────────────────────────────
-var AEDIS3D = {
-  layer: null,       // Mapbox custom layer
-  renderer: null,
-  scene: null,
-  camera: null,
-  mesh: null,
-  active: false,
-  params: null,      // parametrii ultimei generari
-};
+// AEDIS3D moved to top
 
 // ── GLSL Shadere procedurale ───────────────────────────────────────────────
-var AEDIS_SHADERS = {
-
-  // Shader BETON APARENT
-  concrete: {
-    vert:`
-      varying vec3 vNormal;
-      varying vec3 vPosition;
-      varying vec2 vUv;
-      void main(){
-        vNormal = normalize(normalMatrix * normal);
-        vPosition = (modelViewMatrix * vec4(position,1.0)).xyz;
-        vUv = uv;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
-      }`,
-    frag:`
-      varying vec3 vNormal;
-      varying vec3 vPosition;
-      varying vec2 vUv;
-      uniform vec3 baseColor;
-      uniform float time;
-
-      float rand(vec2 co){ return fract(sin(dot(co,vec2(12.9898,78.233)))*43758.5453); }
-      float noise(vec2 p){
-        vec2 i=floor(p); vec2 f=fract(p);
-        float a=rand(i), b=rand(i+vec2(1,0)), c=rand(i+vec2(0,1)), d=rand(i+vec2(1,1));
-        vec2 u=f*f*(3.0-2.0*f);
-        return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;
-      }
-
-      void main(){
-        // Textura beton procedurala
-        vec2 uv = vUv * 8.0;
-        float n = noise(uv)*0.3 + noise(uv*3.0)*0.1 + noise(uv*9.0)*0.05;
-        vec3 concreteCol = baseColor + vec3(n-0.15)*0.25;
-
-        // Linii de cofrare orizontale
-        float lines = step(0.92, fract(vUv.y * 12.0));
-        concreteCol = mix(concreteCol, concreteCol*0.7, lines*0.4);
-
-        // Iluminare Phong simpla
-        vec3 L = normalize(vec3(1.0, 1.5, 1.0));
-        float diff = max(dot(vNormal, L), 0.0)*0.7 + 0.3;
-        vec3 col = concreteCol * diff;
-
-        // Ambient occlusion simpla in baza
-        float ao = smoothstep(0.0, 3.0, vPosition.z + 0.5);
-        col *= mix(0.7, 1.0, ao);
-
-        gl_FragColor = vec4(col, 1.0);
-      }`
-  },
-
-  // Shader STICLA REFLECTIVA
-  glass: {
-    vert:`
-      varying vec3 vNormal;
-      varying vec3 vPosition;
-      varying vec2 vUv;
-      void main(){
-        vNormal = normalize(normalMatrix * normal);
-        vPosition = (modelViewMatrix * vec4(position,1.0)).xyz;
-        vUv = uv;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
-      }`,
-    frag:`
-      varying vec3 vNormal;
-      varying vec3 vPosition;
-      varying vec2 vUv;
-      uniform vec3 baseColor;
-
-      float rand(vec2 co){ return fract(sin(dot(co,vec2(12.9898,78.233)))*43758.5453); }
-
-      void main(){
-        // Grila fereastra
-        vec2 cell = fract(vUv * vec2(4.0, 6.0));
-        float frame = step(0.9, cell.x) + step(0.9, cell.y);
-        float glassArea = 1.0 - min(frame, 1.0);
-
-        // Reflectie simpla (cerul albastru)
-        vec3 V = normalize(-vPosition);
-        vec3 R = reflect(-V, vNormal);
-        float skyMix = max(0.0, R.y);
-        vec3 skyCol = mix(vec3(0.3,0.5,0.8), vec3(0.8,0.9,1.0), skyMix);
-
-        // Sticla = mix intre reflexie si interior intunecat
-        vec3 glassCol = mix(baseColor * 0.3, skyCol, 0.5 + skyMix * 0.3);
-        vec3 frameCol = vec3(0.15, 0.15, 0.18); // cadru metalic
-
-        vec3 col = mix(frameCol, glassCol, glassArea);
-
-        // Highlight specular
-        vec3 L = normalize(vec3(1.5, 2.0, 1.0));
-        float spec = pow(max(dot(reflect(-L, vNormal), V), 0.0), 64.0);
-        col += vec3(spec * 0.4) * glassArea;
-
-        gl_FragColor = vec4(col, 0.85);
-      }`
-  },
-
-  // Shader LEMN / RIGLE VERTICALE
-  wood: {
-    vert:`
-      varying vec3 vNormal;
-      varying vec3 vPosition;
-      varying vec2 vUv;
-      void main(){
-        vNormal = normalize(normalMatrix * normal);
-        vPosition = (modelViewMatrix * vec4(position,1.0)).xyz;
-        vUv = uv;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
-      }`,
-    frag:`
-      varying vec3 vNormal;
-      varying vec3 vPosition;
-      varying vec2 vUv;
-      uniform vec3 baseColor;
-
-      float rand(vec2 co){ return fract(sin(dot(co,vec2(12.9898,78.233)))*43758.5453); }
-      float noise(vec2 p){
-        vec2 i=floor(p); vec2 f=fract(p);
-        float a=rand(i),b=rand(i+vec2(1,0)),c=rand(i+vec2(0,1)),d=rand(i+vec2(1,1));
-        vec2 u=f*f*(3.0-2.0*f);
-        return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;
-      }
-
-      void main(){
-        // Rigle verticale lemn
-        float riglaWidth = 0.05;
-        float riglaSpacing = 0.12;
-        float xNorm = fract(vUv.x / riglaSpacing);
-        float isRigla = step(1.0 - riglaWidth/riglaSpacing, xNorm);
-
-        // Grain lemn orizontal
-        vec2 grainUv = vec2(vUv.x * 3.0, vUv.y * 20.0);
-        float grain = noise(grainUv)*0.15 + noise(grainUv*2.0)*0.08;
-
-        // Culoare lemn variata per rigla (random per coloana)
-        float col_var = rand(vec2(floor(vUv.x / riglaSpacing), 0.0)) * 0.15;
-
-        vec3 woodBase = baseColor + vec3(col_var - 0.07) + vec3(grain - 0.1);
-        vec3 woodDark = woodBase * 0.7;
-        vec3 col = mix(woodDark, woodBase, isRigla);
-
-        // Iluminare
-        vec3 L = normalize(vec3(1.0, 1.5, 1.0));
-        float diff = max(dot(vNormal, L), 0.0)*0.6 + 0.4;
-        col *= diff;
-
-        gl_FragColor = vec4(col, 1.0);
-      }`
-  },
-
-  // Shader TENCUIALA / VOPSEA
-  plaster: {
-    vert:`
-      varying vec3 vNormal;
-      varying vec3 vPosition;
-      varying vec2 vUv;
-      void main(){
-        vNormal = normalize(normalMatrix * normal);
-        vPosition = (modelViewMatrix * vec4(position,1.0)).xyz;
-        vUv = uv;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
-      }`,
-    frag:`
-      varying vec3 vNormal;
-      varying vec3 vPosition;
-      varying vec2 vUv;
-      uniform vec3 baseColor;
-
-      float rand(vec2 co){ return fract(sin(dot(co,vec2(12.9898,78.233)))*43758.5453); }
-      float noise(vec2 p){
-        vec2 i=floor(p); vec2 f=fract(p);
-        float a=rand(i),b=rand(i+vec2(1,0)),c=rand(i+vec2(0,1)),d=rand(i+vec2(1,1));
-        vec2 u=f*f*(3.0-2.0*f);
-        return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;
-      }
-
-      void main(){
-        // Textura tencuiala fina
-        float n = noise(vUv*15.0)*0.06 + noise(vUv*40.0)*0.03;
-        vec3 col = baseColor + vec3(n - 0.045);
-
-        // Iluminare difuza
-        vec3 L = normalize(vec3(1.2, 2.0, 0.8));
-        float diff = max(dot(vNormal, L), 0.0)*0.65 + 0.35;
-        col *= diff;
-
-        // Specular slab (mat)
-        vec3 V = normalize(-vPosition);
-        float spec = pow(max(dot(reflect(-L,vNormal),V),0.0),8.0)*0.05;
-        col += vec3(spec);
-
-        gl_FragColor = vec4(col, 1.0);
-      }`
-  },
-
-  // Shader METAL / PANOURI
-  metal: {
-    vert:`
-      varying vec3 vNormal;
-      varying vec3 vPosition;
-      varying vec2 vUv;
-      void main(){
-        vNormal = normalize(normalMatrix * normal);
-        vPosition = (modelViewMatrix * vec4(position,1.0)).xyz;
-        vUv = uv;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
-      }`,
-    frag:`
-      varying vec3 vNormal;
-      varying vec3 vPosition;
-      varying vec2 vUv;
-      uniform vec3 baseColor;
-
-      void main(){
-        // Panouri metalice cu rosturi
-        vec2 cell = fract(vUv * vec2(2.0, 4.0));
-        float rost = step(0.96, cell.x) + step(0.96, cell.y);
-
-        vec3 metalCol = baseColor;
-
-        // Reflexie speculara metalica
-        vec3 V = normalize(-vPosition);
-        vec3 L = normalize(vec3(1.5, 2.0, 0.5));
-        float spec = pow(max(dot(reflect(-L, vNormal), V), 0.0), 32.0);
-        vec3 col = metalCol * (max(dot(vNormal, L), 0.0)*0.5 + 0.5) + vec3(spec*0.6);
-
-        // Rosturi inchise
-        col = mix(col, vec3(0.05), rost*0.7);
-
-        gl_FragColor = vec4(col, 1.0);
-      }`
-  }
-};
+// AEDIS_SHADERS moved to top
 
 // ═══════════════════════════════════════════════════════════════════════════
 // AEDIS 3D BUILDER — construieste mesh Three.js din geometria parcelei
@@ -7756,13 +7805,7 @@ function _exportVolOBJ(){
 // Screenshot Three.js/Mapbox → AI → Randare fotorealistă
 // ═══════════════════════════════════════════════════════════════════════════
 
-var FAL_AI = {
-  // Key incercat din localStorage la pornire (salvat anterior)
-  apiKey: (() => { try{ return localStorage.getItem('fal_api_key')||''; }catch(e){ return ''; } })(),
-  model: 'fal-ai/flux/schnell',  // FLUX.1 Schnell - rapid si economic
-  lastRender: null,
-  rendering: false,
-};
+// FAL_AI moved to top
 
 // Prompt generator din datele AEDIS
 function aedisPromptBuild(){
@@ -8025,7 +8068,7 @@ function aedisShowRender(imgUrl){
 }
 
 // ── AI Render pan/zoom pe imaginea stânga ────────────────────────────────────
-var _AIIMG = { scale:1, dx:0, dy:0, panMode:false, dragging:false, lastX:0, lastY:0 };
+// _AIIMG moved to top
 
 function _aedisAIApplyTransform(){
   const img = document.getElementById('aedis-sl-ai')?.querySelector('img');
@@ -8230,11 +8273,7 @@ async function aedis3DExportGLTF(){
 // Scriptul PMTiles se incarca dinamic daca avem fisier .pmtiles
 // ═══════════════════════════════════════════════════════════════════════════
 
-var CADASTRU = {
-  hasPMTiles: false,
-  pmtilesUrl: null,   // setat de utilizator sau detectat automat
-  loaded: false,
-};
+// CADASTRU moved to top
 
 // Initializare PMTiles (apelata la map load daca avem URL)
 function cadastruInitPMTiles(url){
@@ -8313,11 +8352,7 @@ function cadastruLoadPMTiles(){
 // ═══ ILUMINARE SOLARA — Mapbox Standard ══════════════════════════════════════
 // Controlul umbrei solare: ora zilei + anotimpul → umbra se mișcă pe clădiri
 
-var SOLAR = {
-  date: new Date(),
-  hour: 14,    // ora implicita: 14:00 (lumina buna)
-  active: false
-};
+// SOLAR moved to top
 
 function _applyStandardLighting(){
   SOLAR.active = true;
@@ -8461,16 +8496,9 @@ function _aedisZoom3D(ap){
 // LOISIR MODULE — Amenajare spații publice, riversides, parcuri
 // ═══════════════════════════════════════════════════════════════════════════
 
-var LOISIR_STATE = {
-  active:false, selectionMode:'axis', corridorMeters:45, bikeWidth:3, runWidth:2.5, walkWidth:3,
-  benchSpacing:25, lightingSpacing:30, vegetationDensity:75, userArea:null, userAxis:null,
-  importedArea:null, importedAxis:null, features:null, draw:null, lastValidation:null
-};
+// LOISIR_STATE moved to top
 
-var LOISIR_AI_STATE = {
-  rendering:false, lastScreenshot:null, lastPrompt:null, lastRender:null,
-  endpoint:''
-};
+// LOISIR_AI_STATE moved to top
 
 
 function setLoisirSelectionMode(mode){ LOISIR_STATE.selectionMode = mode; renderAedisLoisirPanel(); }
@@ -9051,8 +9079,7 @@ async function generateSolarStudy(){
 // AEDIS 3D VIEWER — Three.js, BufferGeometry corect
 // ═══════════════════════════════════════════════════════════════════════════
 
-var V3D = { r:null, scene:null, cam:null, af:null, ctx:[], aedis:[], texCache:{},
-  th:Math.PI/4, ph:Math.PI/3.2, rad:60, tx:null };
+// V3D moved to top
 
 function aedisOpen3DViewer(){
   const ap = S.parcels[S.activeParcel??0];
@@ -9869,12 +9896,7 @@ renderAll();
 // ═══ STREET VIEW ══════════════════════════════════════════════════════════════
 // Embed Google Street View panoramic + proiecție siluetă volum AEDIS
 
-var SV = {
-  open: false,
-  showVolume: true,
-  currentPos: null,   // {lat, lng, heading, pitch}
-  positions: [],      // puncte sugerate in jurul parcelei
-};
+// SV moved to top
 
 function svOpen(){
   const ap = S.parcels[S.activeParcel??0];
