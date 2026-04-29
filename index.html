@@ -3792,6 +3792,39 @@ function htmlSearch(){
     </button>
     ${S.parcels.length?`<div style="background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);border-radius:8px;padding:8px 10px;font-size:12px;color:#34d399;margin-top:4px">✅ <b>${S.parcels.length}</b> parcelă/parcele selectate</div>`:''}
   </div>
+
+  <div class="section">🗺 Navigare hartă</div>
+  <div class="card">
+    <div class="help" style="margin-bottom:8px">Vedere și orientare rapidă a hărții.</div>
+    <div class="btn-row" style="margin-bottom:8px">
+      <button class="btn-p" onclick="set3D(60,-20)" style="flex:1">🏙 3D</button>
+      <button class="btn-s" onclick="set2D()" style="flex:1">⬛ 2D</button>
+      <button class="btn-s" onclick="map.easeTo({bearing:0,duration:600})" style="flex:1">🧭 Nord</button>
+    </div>
+    <div class="help" style="margin-bottom:6px">Stil hartă:</div>
+    <div class="g3" style="margin-bottom:8px">
+      <button class="btn-s" onclick="map.setStyle('${window.STYLES?.custom||''}');document.getElementById('selBase').value='custom';ss('🌆 Urban 3D activ')" style="font-size:11px;padding:7px 4px">🌆 Urban 3D</button>
+      <button class="btn-s" onclick="(()=>{const sel=document.getElementById('selBase');if(sel){sel.value='standard';sel.dispatchEvent(new Event('change'));}})();ss('☀ Standard 3D activ')" style="font-size:11px;padding:7px 4px">☀ Standard</button>
+      <button class="btn-s" onclick="(()=>{const sel=document.getElementById('selBase');if(sel){sel.value='sat';sel.dispatchEvent(new Event('change'));}})();ss('🛰 Satelitar activ')" style="font-size:11px;padding:7px 4px">🛰 Satelit</button>
+    </div>
+    <div class="help" style="margin-bottom:6px">Pitch / Bearing manual:</div>
+    <div style="margin-bottom:4px">
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:#94a3b8;margin-bottom:2px"><span>Pitch (înclinare)</span><span id="pitchV2">0°</span></div>
+      <input type="range" id="slPitch2" min="0" max="85" value="0" style="width:100%;accent-color:#3b82f6"
+        oninput="const v=+this.value;map.easeTo({pitch:v,duration:150});document.getElementById('pitchV2').textContent=v+'°';document.getElementById('pitchV').textContent=v+'°';">
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:#94a3b8;margin-bottom:2px"><span>Bearing (rotire)</span><span id="bearV2">0°</span></div>
+      <input type="range" id="slBearing2" min="0" max="360" value="0" style="width:100%;accent-color:#3b82f6"
+        oninput="const v=+this.value;map.easeTo({bearing:v,duration:150});document.getElementById('bearV2').textContent=v+'°';document.getElementById('bearV').textContent=v+'°';">
+    </div>
+  </div>
+
+  <div class="section">📋 Acțiuni rapide</div>
+  <div class="card" style="display:flex;flex-direction:column;gap:8px">
+    <button class="btn-g" onclick="showPdfModal?showPdfModal():runExport()" style="font-size:13px;padding:10px">📄 Raport Urbanistic PDF</button>
+    <button class="btn-g" onclick="generateSolarStudy()" style="font-size:13px;padding:10px;background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.4);color:#fbbf24">☀ Pre-Studiu Însorire PDF</button>
+  </div>
   `;
 }
 
@@ -6344,14 +6377,20 @@ async function runExport(){
     pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
     hdr('VEDERI 3D — ILUMINARE ZI / NOAPTE / GOLDEN HOUR',2);
     let cy=30;const half=(W-32)/2;
-    if(v3dImgs.day&&v3dImgs.day.length>500){
+    const hasV3d=v3dImgs.day&&v3dImgs.day.length>500;
+    if(hasV3d){
       cy=addImg(v3dImgs.day,14,cy,half,56,'FIG. 1 — Viewer 3D AEDIS · Iluminare ZI');
       if(v3dImgs.night&&v3dImgs.night.length>500)addImg(v3dImgs.night,14+half+4,cy-62,half,56,'FIG. 2 — Viewer 3D AEDIS · Iluminare NOAPTE');
-    }else if(mapImg3D&&mapImg3D.length>500){cy=addImg(mapImg3D,14,cy,W-28,65,'FIG. 1 — Vedere 3D Mapbox · Context urban');}
+    }else if(mapImg3D&&mapImg3D.length>500){cy=addImg(mapImg3D,14,cy,half,56,'FIG. 1 — Vedere 3D urbana (pitch 62°) · Context urban');
+      if(mapImgLat&&mapImgLat.length>500)addImg(mapImgLat,14+half+4,cy-62,half,56,'FIG. 2 — Vedere laterala (bearing 90°) · Context E-V');}
     cy+=2;
-    if(v3dImgs.golden&&v3dImgs.golden.length>500){
+    if(hasV3d&&v3dImgs.golden&&v3dImgs.golden.length>500){
       cy=addImg(v3dImgs.golden,14,cy,half,56,'FIG. 3 — Viewer 3D · Golden Hour');
       if(v3dImgs.overcast&&v3dImgs.overcast.length>500)addImg(v3dImgs.overcast,14+half+4,cy-62,half,56,'FIG. 4 — Viewer 3D · Cer acoperit');
+      cy+=6;
+    }else if(!hasV3d&&mapImgFront&&mapImgFront.length>500){
+      cy=addImg(mapImgFront,14,cy,half,52,'FIG. 3 — Vedere frontala (bearing 0°) · Context N-S');
+      if(mapImgAerial&&mapImgAerial.length>500)addImg(mapImgAerial,14+half+4,cy-58,half,52,'FIG. 4 — Vedere aeriana (pitch 70°, bearing 45°)');
       cy+=6;
     }
     if(mapStdImg&&mapStdImg.length>500)cy=addImg(mapStdImg,14,cy,W-28,50,'FIG. 5 — Mapbox Standard 3D · Iluminare PBR');
@@ -6364,9 +6403,9 @@ async function runExport(){
     pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
     hdr('SITUATIE EXISTENTA SI CONTEXT URBAN',3);cy=30;
     cy=sec('1. AMPLASAMENT — VEDERE 3D CONTEXTUALA (pitch 62°)',cy);cy+=2;
-    cy=addImg(mapImg3D,14,cy,W-28,68,'FIG. 7 — Vedere 3D principala · Volumul propus (albastru) in contextul urban real · Sursa: UrbanX/Mapbox GL JS');cy+=2;
+    cy=addImg(mapImg3D,14,cy,W-28,70,'FIG. 7 — Vedere 3D principala · Volumul propus (albastru) in contextul urban real · Sursa: UrbanX/Mapbox GL JS');cy+=3;
     cy=sec('2. PLAN 2D — ORTOGONAL (vedere de sus, pitch=0°)',cy);cy+=2;
-    cy=addImg(mapImg2D,14,cy,W-28,60,'FIG. 8 — Plan 2D ortogonal · Parcela marcata + contextul construit existent · Sursa: UrbanX/Mapbox GL JS');cy+=4;
+    cy=addImg(mapImg2D,14,cy,W-28,62,'FIG. 8 — Plan 2D ortogonal · Parcela marcata + contextul construit existent · Sursa: UrbanX/Mapbox GL JS');cy+=5;
     cy=sec('3. DATE PARCELA SI AMPLASAMENT',cy);
     cy=row2('Nr. cadastral',nrcad,'UTR (zona PUG)',utr,cy);
     cy=row2('Suprafata teren',area+' mp','Perimetru aprox.','calc. GIS',cy);
@@ -6466,8 +6505,8 @@ async function runExport(){
      ['Spatii verzi min oblig.',svMin+' mp ('+sv+'%)','Nr. ap. estimat',scMax>0?Math.floor(scMax*parseInt(niv)*0.9/55)+' ap.':'—']
     ].forEach(([l1,v1,l2,v2])=>{cy=row2(l1,v1,l2,v2,cy);});cy+=6;
     cy=sec('13. VEDERI SUPLIMENTARE VOLUM PROPUS',cy);cy+=2;
-    const imgA=v3dImgs.front||mapImgFront||mapImg3D;
-    const imgB=v3dImgs.topdown||mapImgAerial||v3dImgs.day;
+    const imgA=v3dImgs.front||mapImgFront||(mapImg3D!==mapImg2D?mapImg3D:null);
+    const imgB=v3dImgs.topdown||mapImgAerial||(v3dImgs.day&&v3dImgs.day!==imgA?v3dImgs.day:mapImgBack);
     if(imgA&&imgA.length>500){
       addImg(imgA,14,cy,half,52,'FIG. 12 — Vedere frontala / viewer 3D');
       if(imgB&&imgB.length>500)addImg(imgB,14+half+4,cy,half,52,'FIG. 13 — Vedere aeriana / top-down');
@@ -9094,6 +9133,7 @@ async function generateSolarStudy(){
   const mapImg3D=await capMap(62,-25);
   const mapImg2D=await capMap(0,0);
   const mapImgLat=await capMap(58,90);
+  const mapImgFront=await capMap(55,0);
 
   // Standard 3D
   ss('Se capteaza Mapbox Standard 3D...');
@@ -9215,19 +9255,26 @@ async function generateSolarStudy(){
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
   hdr('VIZUALIZARE 3D — ILUMINARE ZI / NOAPTE / GOLDEN HOUR',2);
   let cy=30;const half=(W-32)/2;
-  if(v3dDayImg&&v3dDayImg.length>500){
+  const hasV3dS=v3dDayImg&&v3dDayImg.length>500;
+  if(hasV3dS){
     cy=addImg(v3dDayImg,14,cy,half,56,'FIG. 1 — Viewer 3D AEDIS · Iluminare ZI');
     if(v3dNightImg&&v3dNightImg.length>500)addImg(v3dNightImg,14+half+4,cy-62,half,56,'FIG. 2 — Viewer 3D AEDIS · Iluminare NOAPTE');
-  }else if(mapImg3D&&mapImg3D.length>500){cy=addImg(mapImg3D,14,cy,W-28,65,'FIG. 1 — Vedere 3D Mapbox · Context urban');}
+  }else if(mapImg3D&&mapImg3D.length>500){
+    cy=addImg(mapImg3D,14,cy,half,56,'FIG. 1 — Vedere 3D (pitch 62°) · Context urban');
+    if(mapImg2D&&mapImg2D.length>500)addImg(mapImg2D,14+half+4,cy-62,half,56,'FIG. 2 — Plan 2D ortogonal · Context urban');
+  }
   cy+=2;
-  if(v3dGoldenImg&&v3dGoldenImg.length>500){
+  if(hasV3dS&&v3dGoldenImg&&v3dGoldenImg.length>500){
     cy=addImg(v3dGoldenImg,14,cy,half,56,'FIG. 3 — Viewer 3D · Golden Hour');
     if(v3dOvercastImg&&v3dOvercastImg.length>500)addImg(v3dOvercastImg,14+half+4,cy-62,half,56,'FIG. 4 — Viewer 3D · Cer acoperit');
+    cy+=6;
+  }else if(!hasV3dS&&mapImgLat&&mapImgLat.length>500){
+    cy=addImg(mapImgLat,14,cy,half,52,'FIG. 3 — Vedere laterala (bearing 90°)');
+    if(mapImgFront&&mapImgFront.length>500)addImg(mapImgFront,14+half+4,cy-58,half,52,'FIG. 4 — Vedere frontala (bearing 0°)');
     cy+=6;
   }
   if(aiImg&&aiImg.length>500)cy=addImg(aiImg,14,cy,W-28,50,'FIG. 5 — AI Render fotorealist · Fal.ai FLUX.1');
   if(mapStdImg&&mapStdImg.length>500)cy=addImg(mapStdImg,14,cy,W-28,50,'FIG. 6 — Mapbox Standard 3D · Iluminare PBR · Umbre reale');
-  else if(!v3dDayImg&&mapImg3D&&mapImg3D.length>500)cy=addImg(mapImg3D,14,cy,W-28,50,'FIG. 6 — Vedere 3D Mapbox Urban 3D · Context urban');
   cy=Math.max(cy,252);cy=sec('NOTE TEHNICE — CONDITII DE ILUMINARE SIMULATE',cy);
   body('Vizualizarile 3D sunt generate cu motorul Three.js r128 cu iluminare PBR (Physically Based Rendering), shadere GLSL procedurale (beton, sticla reflectiva, metal, tencuiala) si lumini directionale simulate conform pozitiei soarelui la latitudinea '+lat.toFixed(2)+'N. Preset ZI corespunde orelor 10-14, Golden Hour rasaritului/apusului, Noapte simuleaza iluminatul artificial. Vizualizarile au caracter ilustrativ.',14,cy+2,W-28);
   ftr();
@@ -9236,12 +9283,12 @@ async function generateSolarStudy(){
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
   hdr('SITUATIE EXISTENTA — PLANURI DIN HARTA',3);cy=30;
   cy=sec('FIG. 6 — AMPLASAMENT SI CONTEXT URBAN (vedere de sus)',cy);cy+=2;
-  cy=addImg(mapImg2D,14,cy,W-28,78,'Sursa: UrbanX/Mapbox GL JS · Vedere ortogonala (pitch=0°) · Parcela marcata');cy+=2;
+  cy=addImg(mapImg2D,14,cy,W-28,80,'Sursa: UrbanX/Mapbox GL JS · Vedere ortogonala (pitch=0°) · Parcela marcata');cy+=3;
   cy=sec('FIG. 7 — VEDERE 3D IN CONTEXT (pitch 62°)',cy);cy+=2;
-  cy=addImg(mapImg3D,14,cy,W-28,72,'Sursa: UrbanX/Mapbox GL JS · Vedere 3D cu volumul propus in context urban');
+  cy=addImg(mapImg3D,14,cy,W-28,74,'Sursa: UrbanX/Mapbox GL JS · Vedere 3D cu volumul propus in context urban');
   if(mapImgLat&&mapImgLat.length>500){
-    cy+=2;cy=sec('FIG. 8 — VEDERE LATERALA',cy);cy+=2;
-    cy=addImg(mapImgLat,14,cy,half,45,'Vedere laterala (bearing 90°)');
+    cy+=3;cy=sec('FIG. 8 — VEDERE LATERALA',cy);cy+=2;
+    cy=addImg(mapImgLat,14,cy,half,46,'Vedere laterala (bearing 90°)');
   }
   cy=Math.max(cy,245);cy=sec('DATE PARCEL SI AMPLASAMENT',cy);
   cy=row2s('Nr. cadastral',nrcad,'UTR (zona PUG)',utr,cy+4);
