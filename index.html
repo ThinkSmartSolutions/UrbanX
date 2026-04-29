@@ -3793,7 +3793,6 @@ function htmlSearch(){
   </div>
   `;
 }
-}
 
 // ═══ HTML UTR ══════════════════════════════════════════════════════════════
 function htmlUTR(){
@@ -9300,7 +9299,7 @@ async function generateSolarStudy(){
     pdf.setFillColor(...(ok?[35,140,65]:[190,45,45]));pdf.rect(14,cy,3,9,'F');
     pdf.setTextColor(30,50,90);pdf.setFont('helvetica','bold');pdf.setFontSize(7.5);pdf.text(S2(luna),19,cy+6);
     pdf.setTextColor(60,80,120);pdf.setFont('helvetica','normal');pdf.text(alt,85,cy+6);
-    pdf.setTextColor(ok?[25,120,50]:[170,35,35]);pdf.setFont('helvetica','bold');pdf.text(S2(dur),110,cy+6);
+    pdf.setTextColor(...(ok?[25,120,50]:[170,35,35]));pdf.setFont('helvetica','bold');pdf.text(S2(dur),110,cy+6);
     pdf.setTextColor(80,95,115);pdf.setFont('helvetica','normal');pdf.setFontSize(6.5);pdf.text(S2(obs),150,cy+6,{maxWidth:50});
     cy+=9;
   });
@@ -9577,8 +9576,7 @@ function _v3dBuild(ap){
   // Adăugăm viață urbană (oameni, mașini, câini, biciclete etc.)
   const _isNightMode = window._v3dNight || document.getElementById('v3d-light')?.value === 'night';
   _v3dAddUrbanLife(THREE, scene, ring0, toLoc, _isNightMode);
-  // Adăugăm liniile de distanță față de vecini (din dist-src Mapbox)
-  _v3dAddDistanceLines(THREE, scene, toLoc);
+  // Distanțele sunt afișate în harta Mapbox, NU în viewer 3D (simplitate vizuală)
 
   // Camera poziție inițială
   const maxH=Math.max(...(S.vol._lastFeats||[]).map(f=>f.properties?.top||0),8);
