@@ -6466,9 +6466,9 @@ async function runExport(){
         pdf.setFillColor(...(ok?[35,140,65]:[190,45,45])); pdf.rect(14,cy,3,7.5,'F');
         pdf.setTextColor(30,50,90); pdf.setFont('helvetica','normal'); pdf.setFontSize(7.5);
         pdf.text(String(ri+1),17,cy+5);
-        pdf.setTextColor(ok?[25,120,50]:[170,35,35]); pdf.setFont('helvetica','bold');
+        pdf.setTextColor(...(ok?[25,120,50]:[170,35,35])); pdf.setFont('helvetica','bold');
         pdf.text(pr.dist.toFixed(1)+' m',35,cy+5);
-        pdf.setTextColor(ok?[25,120,50]:[170,35,35]); pdf.setFont('helvetica','normal');
+        pdf.setTextColor(...(ok?[25,120,50]:[170,35,35])); pdf.setFont('helvetica','normal');
         pdf.text(ok?'CONFORM':'SUB MINIM',80,cy+5);
         pdf.setTextColor(70,90,120); pdf.setFontSize(6.5);
         pdf.text(ok?'Distanta minima respectata (min. '+minD+'m)':'Distanta sub minimul admis de '+minD+'m — verificati',110,cy+5,{maxWidth:82});
@@ -6571,7 +6571,7 @@ async function runExport(){
       pdf.setFillColor(...(ok?[35,140,65]:[190,45,45])); pdf.rect(14,cy,3,9,'F');
       pdf.setTextColor(30,50,90); pdf.setFont('helvetica','bold'); pdf.setFontSize(7.5);
       pdf.text(S2(l),19,cy+6);
-      pdf.setTextColor(ok?[25,100,50]:[155,35,35]); pdf.setFont('helvetica','normal'); pdf.setFontSize(7);
+      pdf.setTextColor(...(ok?[25,100,50]:[155,35,35])); pdf.setFont('helvetica','normal'); pdf.setFontSize(7);
       pdf.text(S2(v),90,cy+6,{maxWidth:112});
       cy+=9;
     });
@@ -7660,8 +7660,8 @@ function aedisGetContent(){
       title="LOISIR — Amenajare spații publice">🌿<span style="font-size:8px">Loisir</span></button>
     <button onclick="aedisAIRender()" class="aedis-dim-btn" style="background:rgba(212,175,55,.15);border-color:rgba(212,175,55,.4);color:#d4af37;font-size:10px" title="AI Render fotorealist (necesită API key Fal.ai)">🎨 AI</button>
     <button onclick="generateSolarStudy()" class="aedis-dim-btn" style="background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.4);color:#fbbf24;font-size:9px;display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 8px" title="Studiu Însorire PDF">☀<span style="font-size:8px">Însorire</span></button>
-    <button onclick="AEDIS.showDim=!AEDIS.showDim;aedisRender()" 
-      class="aedis-dim-btn${AEDIS.showDim?' active':''}" title="Etichete dimensionale ON/OFF" style="font-size:9px;display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 8px">📏<span style="font-size:8px">Cote</span></button>
+    <button onclick="if(!S.vol.genDone){ss('Genereaza mai intai volumul 3D (butonul ⚡).');}else{AEDIS.showDim=!AEDIS.showDim;aedisRender();}" 
+      class="aedis-dim-btn${AEDIS.showDim?' active':''}" title="Cote dimensionale H/niveluri pe volum&#013;Necesita generare volum 3D (⚡) mai intai." style="font-size:9px;display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 8px">📐<span style="font-size:8px">Cote</span></button>
     <button onclick="aedisClose()" class="aedis-close-btn">✕</button>
   </div>`;
 }
@@ -9404,7 +9404,7 @@ async function generateSolarStudy(){
 
   [0,15,30,45,60,70].forEach(v=>{
     const yg=gY+gH-v/72*gH;
-    pdf.setDrawColor(v===15?[200,55,55]:[200,210,228]); pdf.setLineWidth(v===15?0.8:0.25);
+    pdf.setDrawColor(...(v===15?[200,55,55]:[200,210,228])); pdf.setLineWidth(v===15?0.8:0.25);
     pdf.line(gX,yg,gX+gW,yg);
     pdf.setTextColor(90,110,140); pdf.setFontSize(6); pdf.setFont('helvetica','normal');
     pdf.text(v+'°',gX-5,yg+1.5,{align:'right'});
@@ -9436,7 +9436,7 @@ async function generateSolarStudy(){
   [6,12].forEach(m=>{
     const alt=solarPos(lat,lon,new Date(year,m-1,21,12,0,0)).altitude;
     const xx=gX+(m-0.5)/12*gW, yy=gY+gH-alt/72*gH;
-    pdf.setTextColor(m===6?[30,130,50]:[200,55,55]); pdf.setFontSize(5.5);
+    pdf.setTextColor(...(m===6?[30,130,50]:[200,55,55])); pdf.setFontSize(5.5);
     pdf.text(alt.toFixed(1)+'°',xx,yy-3,{align:'center'});
   });
 
@@ -9569,7 +9569,7 @@ async function generateSolarStudy(){
     pdf.text(S2(luna),17,cy+6);
     pdf.setFont('helvetica','normal');
     pdf.text(altM,80,cy+6);
-    pdf.setTextColor(ri===3?[200,55,55]:[35,130,45]); pdf.setFont('helvetica','bold');
+    pdf.setTextColor(...(ri===3?[200,55,55]:[35,130,45])); pdf.setFont('helvetica','bold');
     pdf.text(durata,105,cy+6);
     pdf.setTextColor(70,85,110); pdf.setFont('helvetica','normal'); pdf.setFontSize(6.5);
     pdf.text(S2(obs),135,cy+6,{maxWidth:65});
@@ -9631,7 +9631,7 @@ async function generateSolarStudy(){
     pdf.setFillColor(...(ok?[35,140,65]:[200,50,50])); pdf.rect(14,cy,3,9,'F');
     pdf.setTextColor(30,50,90); pdf.setFont('helvetica','bold'); pdf.setFontSize(7.5);
     pdf.text(S2(label),19,cy+6);
-    pdf.setTextColor(ok?[30,120,55]:[180,35,35]); pdf.setFont('helvetica','normal'); pdf.setFontSize(7);
+    pdf.setTextColor(...(ok?[30,120,55]:[180,35,35])); pdf.setFont('helvetica','normal'); pdf.setFontSize(7);
     pdf.text(S2(val),90,cy+6,{maxWidth:112});
     cy+=9;
   });
