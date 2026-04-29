@@ -3679,8 +3679,13 @@ function renderAll(){
   // Mobile sync
   const mb=$('mob-body');
   if(mb){
-    if(window.innerWidth<=840){
-      // Pe mobile: actualizam intotdeauna mob-body
+    const hasFocus = mb.querySelector('#inp-addr:focus,#inp-cad:focus,#inp-coord:focus');
+    const addrBox = mb.querySelector('#addr-box');
+    const hasAddrResults = addrBox && addrBox.innerHTML.trim() && !addrBox.innerHTML.includes('Se caută');
+    // Nu re-randam dacă utilizatorul tocmai caută (focus pe input adresă cu rezultate)
+    if(hasFocus || hasAddrResults) {
+      // Nimic - păstrăm DOM-ul curent cu rezultatele
+    } else if(window.innerWidth<=840){
       mb.innerHTML=getContent(S.tab);
     } else if($('mob-sheet')?.classList.contains('open')){
       mb.innerHTML=getContent(S.tab);
@@ -3871,14 +3876,24 @@ function htmlSearch(){
 
   <div class="section">🏠 Adresă sau punct de interes</div>
   <div class="card">
-    <input class="inp" id="inp-addr" placeholder="Str. Lascar Catargi 54, Palas, Grand Hotel Traian"
+    <input class="inp" id="inp-addr"
+      placeholder="Str. Lascar Catargi 54, Palas, Hotel Traian…"
       value="${addrVal}"
+      autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+      inputmode="search"
       oninput="window._lastAddrVal=this.value;doAddr(this.value)"
-      onkeydown="if(event.key==='Enter'){window._lastAddrVal=this.value;doAddr(this.value)}"
-      onfocus="window._activeSearchCtx=this">
-    <div class="res-box" id="addr-box">${window._pendingAddrResults?.length?window._pendingAddrResults.map((it,i)=>`<div class='ri' onclick='pickAddr(${i})' style='-webkit-tap-highlight-color:transparent'><div style='font-size:13px;font-weight:600;color:#e2e8f0'>${esc(it.text)}</div><div style='font-size:11px;color:#64748b'>${esc((it.place_name||'').slice(0,80))}</div></div>`).join(''):''}
-    </div>
-    <div class="help">Funcționează pentru orice adresă sau POI din România și lume.</div>
+      onkeydown="if(event.key==='Enter'){event.preventDefault();window._lastAddrVal=this.value;doAddr(this.value)}"
+      onfocus="window._activeSearchCtx=this;if(this.value&&this.value.length>1)doAddr(this.value)"
+      style="margin-bottom:0">
+    ${(()=>{
+      // Restaurăm rezultatele dacă există (după re-render DOM)
+      const pending = window._pendingAddrHtml || (window._pendingAddrResults?.length
+        ? window._pendingAddrResults.map((it,i)=>`<div class='ri' onclick='pickAddr(${i})' style='-webkit-tap-highlight-color:transparent;padding:12px 11px'><div style='font-size:14px;font-weight:600;color:#e2e8f0'>${esc(it.text)}</div><div style='font-size:12px;color:#64748b;margin-top:2px'>${esc((it.place_name||'').slice(0,80))}</div></div>`).join('')
+        : '');
+      if(addrVal && pending) return `<div class="res-box" id="addr-box" style="margin-top:4px">${pending}</div>`;
+      return `<div class="res-box" id="addr-box" style="margin-top:4px;${addrVal?'':'display:none'}"></div>`;
+    })()}
+    <div class="help" style="margin-top:6px">Adresă, stradă, POI — orice localitate din România și lume.</div>
   </div>
 
   <div class="section">🔢 Număr cadastral Iași</div>
@@ -4370,127 +4385,116 @@ let _addrT=null;
 function doAddr(q){
   clearTimeout(_addrT);
   if(!q||q.trim().length<2){
-    const b=document.getElementById('addr-box');if(b)b.innerHTML='';return;
+    _addrSetBox('');return;
   }
   // Coordonate GPS → redirect la doCoord
   if(/^-?\d+\.\d+[\s,;]+-?\d+\.\d+/.test(q.trim())){
     const el=document.getElementById('inp-coord');
     if(el) el.value=q.trim();
     window._lastCoordVal=q.trim();
-    const b=document.getElementById('addr-box');if(b)b.innerHTML='';
-    doCoord(); return;
+    _addrSetBox('');doCoord();return;
   }
-  // Arătăm spinner imediat dacă boxul există
-  const boxNow=document.getElementById('addr-box');
-  if(boxNow) boxNow.innerHTML=`<div class="re"><span class="spin"></span>Se caută…</div>`;
+  _addrSetBox(`<div class="re"><span class="spin"></span>Se caută…</div>`);
 
   _addrT=setTimeout(async()=>{
     try{
-      const ctr = map.getCenter();
+      const ctr=map.getCenter();
       const TOKEN='pk.eyJ1IjoiZWk4aHRlciIsImEiOiJjajhhNGtiN3YwOW50MnFwOHBnOGJtcjVtIn0.dT4Ld3v1GoeQRCaIzxNn2g';
-      const isNearIasi = Math.abs(ctr.lat-47.16)<0.15 && Math.abs(ctr.lng-27.58)<0.2;
-      const qEnhanced = isNearIasi && !q.toLowerCase().includes('iași') && !q.toLowerCase().includes('iasi')
-        ? q + ' Iași' : q;
-      const viewbox = isNearIasi
-        ? '27.45,47.22,27.72,47.10'
-        : `${ctr.lng-0.3},${ctr.lat+0.3},${ctr.lng+0.3},${ctr.lat-0.3}`;
-      const nomUrl = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=8&q=${encodeURIComponent(qEnhanced)}&viewbox=${viewbox}&bounded=${isNearIasi?1:0}&countrycodes=ro&addressdetails=1&accept-language=ro`;
-      const mbUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?access_token=${TOKEN}&language=ro&limit=5&proximity=${ctr.lng.toFixed(4)},${ctr.lat.toFixed(4)}&bbox=27.40,47.05,27.75,47.28&types=address,poi,place,locality`;
+      const isNearIasi=Math.abs(ctr.lat-47.16)<0.15&&Math.abs(ctr.lng-27.58)<0.2;
+      const qEnh=isNearIasi&&!/ia[sș]i/i.test(q)?q+' Iași':q;
+      const viewbox=isNearIasi?'27.45,47.22,27.72,47.10':`${ctr.lng-0.3},${ctr.lat+0.3},${ctr.lng+0.3},${ctr.lat-0.3}`;
 
-      const [nomRes, mbRes] = await Promise.allSettled([
-        fetch(nomUrl, {headers:{'Accept-Language':'ro','User-Agent':'UrbanX/1.0'}}).then(r=>r.json()),
-        fetch(mbUrl).then(r=>r.json())
+      // NOTĂ: fără User-Agent customizat — blocat de CORS preflight pe iOS/Android
+      const nomUrl=`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=8&q=${encodeURIComponent(qEnh)}&viewbox=${viewbox}&bounded=${isNearIasi?1:0}&countrycodes=ro&addressdetails=1&accept-language=ro`;
+      const mbUrl=`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?access_token=${TOKEN}&language=ro&limit=5&proximity=${ctr.lng.toFixed(4)},${ctr.lat.toFixed(4)}&bbox=27.40,47.05,27.75,47.28&types=address,poi,place,locality`;
+
+      const [nomRes,mbRes]=await Promise.allSettled([
+        fetch(nomUrl).then(r=>{if(!r.ok)throw new Error('Nominatim '+r.status);return r.json();}),
+        fetch(mbUrl).then(r=>{if(!r.ok)throw new Error('Mapbox '+r.status);return r.json();})
       ]);
 
-      // Combinăm rezultatele - Nominatim primul (mai bun pentru POI locale)
-      const combined = [];
-
-      if(nomRes.status==='fulfilled' && Array.isArray(nomRes.value)){
-        nomRes.value.forEach(it=>{
-          combined.push({
-            text: it.name||it.display_name.split(',')[0],
-            place_name: it.display_name,
-            center: [parseFloat(it.lon), parseFloat(it.lat)],
-            source: 'OSM',
-            type: it.type||it.class||''
-          });
-        });
+      const combined=[];
+      if(nomRes.status==='fulfilled'&&Array.isArray(nomRes.value)){
+        nomRes.value.forEach(it=>combined.push({
+          text:it.name||it.display_name.split(',')[0],
+          place_name:it.display_name,
+          center:[parseFloat(it.lon),parseFloat(it.lat)],
+          source:'OSM',type:it.type||it.class||''
+        }));
       }
-
-      if(mbRes.status==='fulfilled' && mbRes.value?.features){
+      if(mbRes.status==='fulfilled'&&mbRes.value?.features){
         mbRes.value.features.forEach(it=>{
-          // Evităm duplicate
-          const isDup = combined.some(c=>
-            Math.abs(c.center[0]-it.center[0])<0.001 &&
-            Math.abs(c.center[1]-it.center[1])<0.001
-          );
+          const isDup=combined.some(c=>Math.abs(c.center[0]-it.center[0])<0.001&&Math.abs(c.center[1]-it.center[1])<0.001);
           if(!isDup) combined.push({
-            text: it.text||it.place_name.split(',')[0],
-            place_name: it.place_name,
-            center: it.center,
-            source: 'MB',
-            type: it.place_type?.[0]||''
+            text:it.text||it.place_name.split(',')[0],
+            place_name:it.place_name,
+            center:it.center,source:'MB',type:it.place_type?.[0]||''
           });
         });
       }
-
-      // Sortam dupa distanta fata de centrul curent al hartii
       combined.sort((a,b)=>{
         const da=Math.pow(a.center[0]-ctr.lng,2)+Math.pow(a.center[1]-ctr.lat,2);
         const db=Math.pow(b.center[0]-ctr.lng,2)+Math.pow(b.center[1]-ctr.lat,2);
         return da-db;
       });
-      console.log('Căutare:', q, '→', combined.length, 'rezultate (Nominatim+Mapbox)');
 
-      // Re-căutăm boxul DUPĂ fetch (DOM poate fi re-renderat pe mobil)
-      const box = document.getElementById('addr-box');
+      window._addrI=combined;
+      window._pendingAddrResults=combined;
 
       if(!combined.length){
-        if(box) box.innerHTML=`<div class="re">Niciun rezultat pentru "<b>${esc(q)}</b>".<br><small>Încercați: "Teatrul Național Iași", "Hotel Traian Iași"</small></div>`;
-        else ss('Niciun rezultat pentru: '+q);
+        _addrSetBox(`<div class="re">Niciun rezultat pentru "<b>${esc(q)}</b>".<br><small>Încercați: "Teatrul Național Iași", "Hotel Traian Iași"</small></div>`);
         return;
       }
 
-      window._addrI = combined;
-      const html2 = combined.map((it,i)=>`
-        <div class="ri" onclick="pickAddr(${i})" style="-webkit-tap-highlight-color:transparent">
-          <div style="font-size:13px;font-weight:600;color:#e2e8f0">${esc(it.text)}</div>
-          <div style="font-size:11px;color:#64748b">${esc(it.place_name.length>80?it.place_name.slice(0,80)+'…':it.place_name)}</div>
+      const html2=combined.map((it,i)=>`
+        <div class="ri" onclick="pickAddr(${i})" style="-webkit-tap-highlight-color:transparent;padding:12px 11px">
+          <div style="font-size:14px;font-weight:600;color:#e2e8f0">${esc(it.text)}</div>
+          <div style="font-size:12px;color:#64748b;margin-top:2px">${esc((it.place_name||'').length>80?(it.place_name||'').slice(0,80)+'…':(it.place_name||''))}</div>
         </div>`).join('');
 
-      if(box){
-        box.innerHTML = html2;
-      } else {
-        // Pe mobil dacă boxul nu e în DOM, afișăm rezultatele ca notificare și navigăm la primul
-        ss('📍 '+combined[0].text+' — tap pentru navigare');
-        // Salvăm rezultatele și le afișăm la próxima render
-        window._pendingAddrResults = combined;
-        // Navigăm direct la primul rezultat
-        if(combined.length===1) pickAddr(0);
-      }
+      _addrSetBox(html2);
+      // Auto-selectăm dacă e un singur rezultat
+      if(combined.length===1) pickAddr(0);
+
     }catch(e){
-      console.error('Geocoding error:',e);
-      const box2=document.getElementById('addr-box');
-      if(box2) box2.innerHTML=`<div class="re">Eroare geocodare: ${esc(e.message)}</div>`;
-      else ss('Eroare căutare: '+e.message);
+      console.error('Geocoding:',e);
+      _addrSetBox(`<div class="re">Eroare: ${esc(e.message)}</div>`);
     }
-  },300);
+  },350);
+}
+
+// Scrie în addr-box oriunde s-ar afla (desktop tc-search sau mob-body)
+function _addrSetBox(html2){
+  let found = false;
+  const box = document.getElementById('addr-box');
+  if(box){
+    box.innerHTML = html2;
+    box.style.display = html2 ? 'block' : 'none';
+    found = true;
+  }
+  // Stocăm întotdeauna pentru restaurare după re-render
+  window._pendingAddrHtml = html2 || null;
+  if(!html2) window._pendingAddrResults = null;
+  return found;
 }
 
 function pickAddr(i){
-  const it=window._addrI?.[i];if(!it)return;
+  const it=(window._addrI||window._pendingAddrResults)?.[i];if(!it)return;
   const[lng,lat]=it.center;
+  const label=it.text||it.place_name.split(',')[0];
   // Curățăm boxul și câmpul
-  const box=document.getElementById('addr-box');if(box)box.innerHTML='';
+  _addrSetBox('');
+  window._pendingAddrResults=null;
+  window._addrI=null;
   const inp=document.getElementById('inp-addr');
-  if(inp){ inp.value=it.text||it.place_name.split(',')[0]; window._lastAddrVal=inp.value; }
-  // Închidem panoul mobil
+  if(inp){ inp.value=label; window._lastAddrVal=label; }
+  // Închidem panoul mobil + ascundem keyboard iOS
   if(window.innerWidth<=840){
     document.getElementById('mob-sheet')?.classList.remove('open');
-    // iOS: ascundem keyboard-ul
     inp?.blur();
+    document.activeElement?.blur();
   }
-  goToLocation(lat, lng, it.text||it.place_name.split(',')[0]);
+  goToLocation(lat, lng, label);
 }
 
 // ═══ CAUTARE DEFINITIVA - fara ANCPI ca sursa primara ════════════════════
