@@ -9295,12 +9295,22 @@ function aedisOpen3DViewer(){
         <option value="hide">Ascunde</option>
       </select>
       <button onclick="_v3dResetCam()" style="background:rgba(255,255,255,.06);color:#94a3b8;border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:4px 10px;font-size:11px;cursor:pointer;flex-shrink:0">⌂</button>
+      <button onclick="_v3dRefreshDistances()" title="Refresh distante vecini" style="background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.3);border-radius:7px;padding:4px 10px;font-size:11px;cursor:pointer;flex-shrink:0">📏 Distanțe</button>
       <button onclick="document.getElementById('aedis-3d-viewer-overlay').remove();_v3dCleanup()" style="background:rgba(20,30,60,.9);color:#a78bfa;border:1px solid rgba(139,92,246,.4);border-radius:8px;padding:6px 16px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0">✕ Inchide</button>
     </div>
     <canvas id="v3d-canvas" style="flex:1;display:block;cursor:grab;touch-action:none"></canvas>
     <div id="v3d-status" style="position:absolute;bottom:10px;left:14px;font-size:10px;color:#475569;pointer-events:none">Se inițializează…</div>`;
 
-  aedisLoadThree(()=>{ setTimeout(()=>_v3dBuild(ap), 40); });
+  // Asigurăm că distanțele sunt calculate ÎNAINTE de a deschide viewer-ul
+  // Dacă dist-src e gol, calculăm acum și așteptăm
+  const distFeatsNow = map.getSource('dist-src')?._data?.features||[];
+  if(!distFeatsNow.length && S.vol.genDone){
+    // Calculăm sincron și așteptăm 300ms pentru populare
+    updateDistanceLines();
+    aedisLoadThree(()=>{ setTimeout(()=>_v3dBuild(ap), 400); });
+  } else {
+    aedisLoadThree(()=>{ setTimeout(()=>_v3dBuild(ap), 40); });
+  }
 }
 
 // ── State ──────────────────────────────────────────────────────────────────
@@ -9623,9 +9633,22 @@ function _v3dCaptureSilent(ap){
 function _v3dAddDistanceLines(THREE, scene, toLoc){
   try{
     const distFeats = map.getSource('dist-src')?._data?.features;
-    if(!distFeats?.length) return;
+    if(!distFeats?.length){
+      console.log('_v3dAddDistanceLines: dist-src gol, se recalculeaza...');
+      updateDistanceLines();
+      // Retry după 500ms
+      setTimeout(()=>{
+        const feats2 = map.getSource('dist-src')?._data?.features;
+        if(feats2?.length && V3D.scene && V3D.r && V3D.cam){
+          _v3dAddDistanceLines(THREE, V3D.scene, toLoc);
+          V3D.r.render(V3D.scene, V3D.cam);
+        }
+      }, 500);
+      return;
+    }
 
     const minDist = S.vol.multiVolDist || 6;
+    let count = 0;
 
     distFeats.forEach(f=>{
       if(f.geometry?.type !== 'LineString') return;
@@ -9636,62 +9659,96 @@ function _v3dAddDistanceLines(THREE, scene, toLoc){
       const label = f.properties?.label || dist.toFixed(1)+'m';
       const type = f.properties?.type || 'to_neighbor';
       const ok = dist >= minDist;
-
-      // Culori: verde=OK, roșu=sub minim, galben=între volume proprii
       const col = type==='between_own' ? '#fbbf24' : ok ? '#34d399' : '#f87171';
 
-      // Convertim coordonatele geografice în locale
-      const pts3D = coords.map(c=>toLoc(c));
+      try{
+        // Convertim coordonatele geografice → locale Three.js
+        const pts3D = coords.map(c=>toLoc(c));
+        if(pts3D.some(p=>!p||isNaN(p[0])||isNaN(p[1]))) return;
 
-      // Linie 3D la înălțimea y=0.3 (deasupra solului)
-      const yLine = 0.3;
-      const positions = new Float32Array(pts3D.flatMap(([x,z])=>[x, yLine, z]));
-      const geo = new THREE.BufferGeometry();
-      geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-      const mat = new THREE.LineBasicMaterial({
-        color: col,
-        linewidth: 2,
-        transparent: true,
-        opacity: 0.85,
-        depthTest: false  // mereu vizibil
-      });
-      scene.add(new THREE.Line(geo, mat));
+        // Linie la y=0.4m, cu depthTest:false (mereu deasupra solului/clădirii)
+        const yLine = 0.4;
+        const positions = new Float32Array(pts3D.flatMap(([x,z])=>[x, yLine, z]));
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+        const mat = new THREE.LineBasicMaterial({color:col, linewidth:2, transparent:true, opacity:0.92, depthTest:false});
+        const line = new THREE.Line(geo, mat);
+        line.renderOrder = 999; // forțat deasupra
+        scene.add(line);
 
-      // Punct la capete (mici sfere)
-      [pts3D[0], pts3D[pts3D.length-1]].forEach(([x,z])=>{
-        const sg = new THREE.SphereGeometry(0.12, 6, 6);
-        const sm = new THREE.MeshBasicMaterial({color:col, depthTest:false});
-        const sp = new THREE.Mesh(sg, sm);
-        sp.position.set(x, yLine, z);
-        scene.add(sp);
-      });
+        // Sfere la capete
+        [pts3D[0], pts3D[pts3D.length-1]].forEach(([x,z])=>{
+          const sg = new THREE.SphereGeometry(0.15, 6, 6);
+          const sm = new THREE.MeshBasicMaterial({color:col, depthTest:false});
+          const sp = new THREE.Mesh(sg, sm);
+          sp.position.set(x, yLine, z); sp.renderOrder=1000; scene.add(sp);
+        });
 
-      // Etichetă text 3D (sprite canvas cu distanța)
-      const midPt = pts3D[Math.floor(pts3D.length/2)];
-      const [mx, mz] = midPt;
-      const cv = document.createElement('canvas');
-      cv.width = 96; cv.height = 32;
-      const ctx2 = cv.getContext('2d');
-      // Fundal
-      ctx2.fillStyle = type==='between_own' ? 'rgba(20,12,0,0.85)' : ok ? 'rgba(0,20,12,0.85)' : 'rgba(20,0,0,0.85)';
-      ctx2.beginPath();
-      ctx2.roundRect(2, 4, 92, 24, 8);
-      ctx2.fill();
-      // Text
-      ctx2.fillStyle = col;
-      ctx2.font = 'bold 14px Arial,sans-serif';
-      ctx2.textAlign = 'center';
-      ctx2.textBaseline = 'middle';
-      ctx2.fillText(label, 48, 16);
+        // Etichetă distanță — sprite canvas
+        const midIdx = Math.floor(pts3D.length/2);
+        const [mx, mz] = pts3D[midIdx];
+        const cv = document.createElement('canvas');
+        cv.width=112; cv.height=36;
+        const ctx2 = cv.getContext('2d');
+        // Fundal rotunjit
+        ctx2.fillStyle = type==='between_own'?'rgba(30,18,0,0.92)':ok?'rgba(0,28,15,0.92)':'rgba(30,0,0,0.92)';
+        if(ctx2.roundRect){ ctx2.beginPath();ctx2.roundRect(2,3,108,30,10);ctx2.fill(); }
+        else{ ctx2.fillRect(2,3,108,30); }
+        // Text distanță
+        ctx2.fillStyle = col;
+        ctx2.font = 'bold 16px Arial,sans-serif';
+        ctx2.textAlign = 'center'; ctx2.textBaseline = 'middle';
+        ctx2.shadowColor = 'rgba(0,0,0,0.8)'; ctx2.shadowBlur = 3;
+        ctx2.fillText(label, 56, 18);
 
-      const tex = new THREE.CanvasTexture(cv);
-      const spMat = new THREE.SpriteMaterial({map:tex, transparent:true, depthTest:false, sizeAttenuation:true});
-      const sp2 = new THREE.Sprite(spMat);
-      sp2.scale.set(3.0, 1.0, 1);
-      sp2.position.set(mx, yLine + 0.8, mz);
-      scene.add(sp2);
+        const tex = new THREE.CanvasTexture(cv);
+        const spMat = new THREE.SpriteMaterial({map:tex, transparent:true, depthTest:false, sizeAttenuation:true});
+        const sp2 = new THREE.Sprite(spMat);
+        sp2.scale.set(4.0, 1.2, 1);
+        sp2.position.set(mx, yLine+1.2, mz);
+        sp2.renderOrder = 1001;
+        scene.add(sp2);
+        count++;
+      }catch(e2){ console.warn('dist line error:',e2.message); }
     });
+
+    console.log(`_v3dAddDistanceLines: ${count}/${distFeats.length} linii randate in viewer 3D`);
   }catch(e){ console.warn('_v3dAddDistanceLines:', e.message); }
+}
+
+
+// ── Refresh distanțe în viewer 3D ──────────────────────────────────────────
+function _v3dRefreshDistances(){
+  if(!V3D.scene||!V3D.r||!V3D.cam){ ss('⚠️ Viewer 3D nu e activ.'); return; }
+  const ap=S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry) return;
+
+  // Recalculăm distanțele în Mapbox
+  updateDistanceLines();
+
+  // Așteptăm să se populeze dist-src, apoi adăugăm liniile în scenă
+  setTimeout(()=>{
+    // Ştergem liniile vechi (identificate prin renderOrder 999+)
+    const toRemove=[];
+    V3D.scene.children.forEach(obj=>{
+      if(obj.renderOrder>=999) toRemove.push(obj);
+    });
+    toRemove.forEach(obj=>V3D.scene.remove(obj));
+
+    // Reconstruim toLoc pentru parcela curentă
+    const ring0=ap.geo.geometry.type==='Polygon'
+      ?ap.geo.geometry.coordinates[0]:ap.geo.geometry.coordinates[0][0];
+    const cx=ring0.reduce((s,c)=>s+c[0],0)/ring0.length;
+    const cy2=ring0.reduce((s,c)=>s+c[1],0)/ring0.length;
+    const mLng=111320*Math.cos(cy2*Math.PI/180),mLat=111320;
+    const toLoc=([lng,lat])=>[(lng-cx)*mLng,(lat-cy2)*mLat];
+
+    _v3dAddDistanceLines(window.THREE, V3D.scene, toLoc);
+    V3D.r.render(V3D.scene, V3D.cam);
+
+    const n=map.getSource('dist-src')?._data?.features?.length||0;
+    ss('📏 Distanțe actualizate în viewer 3D: '+n+' linii');
+  }, 600);
 }
 
 
