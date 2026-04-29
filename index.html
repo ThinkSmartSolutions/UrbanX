@@ -441,6 +441,15 @@ canvas#c2d{width:100%;height:100%;display:block}
   max-width:260px!important;
   box-shadow:0 8px 32px rgba(0,0,0,.8)!important;
 }
+/* Cote dimensionale AEDIS — HTML markers deasupra volumului 3D */
+.mapboxgl-marker[style*="pointer-events:none"]{
+  z-index:9999!important;
+  pointer-events:none!important;
+}
+.aedis-dim-marker-wrap{
+  animation:dimFadeIn .25s ease;
+}
+@keyframes dimFadeIn{from{opacity:0;transform:scale(0.85);}to{opacity:1;transform:scale(1);}}
 .mapboxgl-popup-tip{display:none}
 .mapboxgl-popup-close-button{color:#94a3b8!important;font-size:18px!important;right:4px!important;top:4px!important;padding:0 6px!important;background:none!important;line-height:1.2!important}
 .mapboxgl-popup-close-button:hover{color:#fff!important;background:rgba(255,255,255,.1)!important;border-radius:4px!important}
@@ -1755,26 +1764,8 @@ function addLayers(){
   // ── Etichete dimensionale AEDIS (cote H, niveluri) — layer dedicat ─────
   // Source separata: 'aedis-dim-src' cu features {label, type:'aedis_dim'}
   map.addSource('aedis-dim-src',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
-  L({id:'aedis-dim-label',type:'symbol',source:'aedis-dim-src',
-    minzoom:14,
-    layout:{
-      'text-field':['get','label'],
-      'text-size':['interpolate',['linear'],['zoom'],15,12,18,16,20,20],
-      'text-font':['DIN Offc Pro Bold','Arial Unicode MS Bold'],
-      'text-anchor':'center',
-      'text-allow-overlap':true,
-      'text-ignore-placement':true,
-      'symbol-placement':'point',
-      'text-offset':[0,0],
-      'text-max-width':8
-    },
-    paint:{
-      'text-color':'#d4af37',
-      'text-halo-color':'rgba(0,0,0,.95)',
-      'text-halo-width':2.5,
-      'text-opacity':1.0
-    }
-  });
+  // NOTE: afisajul real se face via HTML markers (vezi aedisUpdateDimLabels)
+  // Layer-ul e pastrat pt compatibilitate dar afisajul principal e overlay HTML
   L({id:'vol-3d',type:'fill-extrusion',source:'vol-src',paint:{
     'fill-extrusion-color':['coalesce',['get','color'],'#f59e0b'],
     'fill-extrusion-height':['coalesce',['get','top'],9],
@@ -7047,8 +7038,14 @@ function aedisBuild(){
     }
 
     // ── Etichete dimensionale ─────────────────────────────────────────────
+    aedisClearDimLabels(); // sterge markerii anteriori
     if(AEDIS.showDim){
-      aedisUpdateDimLabels(fp, totalNiv, hParter, hEtaj, currentH + (AEDIS.tipAcoperis!=='terasa_plata'?AEDIS.hSarpanta:0.25));
+      // hTot = inaltimea finala a cladirii (inclusiv atic/sarpanta)
+      const hTotFinal = currentH
+        + (AEDIS.tipAcoperis==='sarpanta'?(AEDIS.hSarpanta||3.5)
+          :AEDIS.tipAcoperis==='mansarda'?(AEDIS.hMansarda||2.8)
+          :(AEDIS.hAttic||1.2));
+      aedisUpdateDimLabels(fp, totalNiv, hParter, hEtaj, hTotFinal);
     }
 
     // Stocam si setam
@@ -7089,51 +7086,114 @@ function aedisBuild(){
   ss(`✅ AEDIS: ${AEDIS.corpuri[0]?.niv||4} niveluri · H=${((AEDIS.parterDiferit?(AEDIS_FN[AEDIS.fn]?.hParter||4.5):(AEDIS.corpuri[0]?.hNiv||3.0))+(((AEDIS.corpuri[0]?.niv||4)-1)*(AEDIS.corpuri[0]?.hNiv||3.0))).toFixed(1)}m · ${AEDIS_FN[AEDIS.fn]?.label||''} · ${AEDIS_STIL[AEDIS.stil]?.label||''}${S.parcels.length>1?' · '+S.parcels.length+' parcele':''}`);
 }
 
-// ── Etichete dimensionale AEDIS ────────────────────────────────────────────
+// ── Etichete dimensionale AEDIS — HTML Markers (mereu deasupra volumului 3D) ───
+// Markers HTML sunt renderizati peste canvas, nu sunt acoperiti de fill-extrusion
+const _dimMarkers = []; // array de mapboxgl.Marker activi
+
 function aedisUpdateDimLabels(fp, niv, hP, hE, hTot){
-  if(!fp?.geometry) return;
+  // Stergem markerii anteriori
+  _dimMarkers.forEach(m=>m.remove());
+  _dimMarkers.length=0;
+
+  if(!fp?.geometry || !AEDIS.showDim) return;
   try{
-    const labels=[];
     const ring = fp.geometry.coordinates[0];
     const cx=ring.reduce((s,c)=>s+c[0],0)/ring.length;
     const cy=ring.reduce((s,c)=>s+c[1],0)/ring.length;
 
-    // Centru cladire: H total + niveluri (mare, auriu)
-    labels.push({type:'Feature',
-      geometry:{type:'Point',coordinates:[cx,cy]},
-      properties:{label:`H=${hTot.toFixed(1)}m\n${niv} niv.`,type:'aedis_dim'}
-    });
+    // Helper: creeaza un marker HTML stilizat
+    const mkMarker=(html, lng, lat)=>{
+      const el=document.createElement('div');
+      el.innerHTML=html;
+      el.style.cssText='pointer-events:none;z-index:9999';
+      const m=new mapboxgl.Marker({element:el,anchor:'center'})
+        .setLngLat([lng,lat])
+        .addTo(map);
+      _dimMarkers.push(m);
+      return m;
+    };
 
-    // Lateral stanga: inaltime parter
+    const labelBox=(lines, accent='#d4af37', icon='')=>`
+      <div class="aedis-dim-marker-wrap" style="
+        background:rgba(6,10,22,0.93);
+        border:2px solid ${accent};
+        border-radius:9px;
+        padding:5px 11px 5px 9px;
+        font-family:'Segoe UI',Arial,sans-serif;
+        font-weight:800;
+        white-space:nowrap;
+        box-shadow:0 3px 16px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.06);
+        line-height:1.35;
+        text-align:center;
+        position:relative;
+      ">${icon?`<div style="font-size:11px;margin-bottom:2px">${icon}</div>`:''}${lines.map(([txt,col,sz])=>
+        `<div style="color:${col};font-size:${sz}px;letter-spacing:0.04em;text-shadow:0 1px 4px rgba(0,0,0,0.9)">${txt}</div>`
+      ).join('')}</div>`;
+
+    // 1. Deasupra centrului clădirii — eticheta principala: H total + nr niveluri
+    mkMarker(labelBox([
+      [`H = ${hTot.toFixed(1)} m`, '#d4af37', 15],
+      [`${niv} ${niv==1?'nivel':'niveluri'}`, '#94a3b8', 11],
+    ], '#d4af37', '🏢'), cx, cy);
+
+    // 2. Pe latura frontala stanga — EXTERIOR clădirii: H parter
     if(ring.length>2){
-      const mid1=[(ring[0][0]+ring[1][0])/2,(ring[0][1]+ring[1][1])/2];
-      labels.push({type:'Feature',
-        geometry:{type:'Point',coordinates:mid1},
-        properties:{label:`P:${hP.toFixed(1)}m`,type:'aedis_dim'}
-      });
+      const lx=(ring[0][0]+ring[1][0])/2;
+      const ly=(ring[0][1]+ring[1][1])/2;
+      const dx=ring[1][0]-ring[0][0], dy=ring[1][1]-ring[0][1];
+      const len=Math.sqrt(dx*dx+dy*dy)||1;
+      const scale=0.00015; // ~17m offset exterior
+      const ox=-dy/len*scale, oy=dx/len*scale;
+      mkMarker(labelBox([
+        ['PARTER', '#60a5fa', 9],
+        [`${hP.toFixed(1)} m`, '#60a5fa', 14],
+      ], '#3b82f6', '📏'), lx+ox, ly+oy);
     }
 
-    // Lateral dreapta: inaltime etaj
+    // 3. Pe latura dreapta — EXTERIOR: H etaj curent
     if(ring.length>3){
-      const mid2=[(ring[2][0]+ring[3][0])/2,(ring[2][1]+ring[3][1])/2];
-      labels.push({type:'Feature',
-        geometry:{type:'Point',coordinates:mid2},
-        properties:{label:`E:${hE.toFixed(1)}m`,type:'aedis_dim'}
-      });
+      const lx2=(ring[2][0]+ring[3][0])/2;
+      const ly2=(ring[2][1]+ring[3][1])/2;
+      const dx2=ring[3][0]-ring[2][0], dy2=ring[3][1]-ring[2][1];
+      const len2=Math.sqrt(dx2*dx2+dy2*dy2)||1;
+      const scale2=0.00015;
+      const ox2=-dy2/len2*scale2, oy2=dx2/len2*scale2;
+      mkMarker(labelBox([
+        ['ETAJ', '#34d399', 9],
+        [`${hE.toFixed(1)} m`, '#34d399', 14],
+      ], '#10b981', '📐'), lx2+ox2, ly2+oy2);
     }
 
-    // Scriem in source-ul dedicat AEDIS dim
-    try{ map.getSource('aedis-dim-src')?.setData({type:'FeatureCollection',features:labels}); }catch(e){}
+    // 4. Colț exterior față-stânga — SC amprenta
+    if(ring.length>1){
+      let scVal='—';
+      try{
+        const ap=S.parcels[S.activeParcel??0];
+        if(ap?.area){
+          const potN=parseFloat(ap.params?.pot||S.rule?.pot||0);
+          if(potN>0) scVal=Math.round(ap.area*potN/100)+' mp';
+        }
+      }catch(e){}
+      // Coltul exterior al parcelei
+      const cLng=ring[0][0]-0.0001;
+      const cLat=ring[0][1]+0.0001;
+      mkMarker(labelBox([
+        ['SC max', '#f59e0b', 9],
+        [scVal, '#f59e0b', 13],
+      ], '#f59e0b', '🏗'), cLng, cLat);
+    }
 
-    // Si in ctx-labels-src (pt compatibilitate)
-    setSource('ctx-labels-src',{type:'FeatureCollection',features:[
-      ...(S.ctx?._labels||[]),
-      ...labels
-    ]});
-  }catch(e){}
+    // Scriem si in source pt compatibilitate cu PDF
+    try{ map.getSource('aedis-dim-src')?.setData({type:'FeatureCollection',features:[
+      {type:'Feature',geometry:{type:'Point',coordinates:[cx,cy]},properties:{label:`H=${hTot.toFixed(1)}m/${niv}niv`}},
+    ]}); }catch(e){}
+
+  }catch(e){ console.warn('dimLabels:',e.message); }
 }
 
 function aedisClearDimLabels(){
+  _dimMarkers.forEach(m=>m.remove());
+  _dimMarkers.length=0;
   try{ map.getSource('aedis-dim-src')?.setData({type:'FeatureCollection',features:[]}); }catch(e){}
 }
 
@@ -7679,7 +7739,7 @@ function aedisGetContent(){
       title="LOISIR — Amenajare spații publice">🌿<span style="font-size:8px">Loisir</span></button>
     <button onclick="aedisAIRender()" class="aedis-dim-btn" style="background:rgba(212,175,55,.15);border-color:rgba(212,175,55,.4);color:#d4af37;font-size:10px" title="AI Render fotorealist (necesită API key Fal.ai)">🎨 AI</button>
     <button onclick="generateSolarStudy()" class="aedis-dim-btn" style="background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.4);color:#fbbf24;font-size:9px;display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 8px" title="Studiu Însorire PDF">☀<span style="font-size:8px">Însorire</span></button>
-    <button onclick="if(!S.vol.genDone){ss('⚠️ Genereaza mai intai volumul 3D (butonul ⚡).');}else{AEDIS.showDim=!AEDIS.showDim;aedisRender();try{map.setLayoutProperty('aedis-dim-label','visibility',AEDIS.showDim?'visible':'none');}catch(e){}ss(AEDIS.showDim?'📐 Cote dimensionale ACTIVE pe hartă':'📐 Cote dimensionale dezactivate');}" 
+    <button onclick="if(!S.vol.genDone){ss('⚠️ Genereaza mai intai volumul 3D (butonul ⚡).');}else{AEDIS.showDim=!AEDIS.showDim;if(!AEDIS.showDim){aedisClearDimLabels();}else{aedisGenerateAll();}aedisRender();ss(AEDIS.showDim?'📐 Cote dimensionale ACTIVE — H total, Parter, Etaj, SC':'📐 Cote dezactivate');}" 
       class="aedis-dim-btn${AEDIS.showDim?' active':''}" title="Cote H/niveluri pe volum — apasa dupa ⚡" style="font-size:9px;display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 8px;${AEDIS.showDim?'border-color:#d4af37;background:rgba(212,175,55,.2);color:#d4af37;':''}">📐<span style="font-size:8px">Cote</span></button>
     <button onclick="aedisClose()" class="aedis-close-btn">✕</button>
   </div>`;
