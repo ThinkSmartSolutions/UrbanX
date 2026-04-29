@@ -6317,7 +6317,7 @@ async function runExport(){
     pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');
     pdf.setFillColor(12,28,60);pdf.rect(0,H*0.42,W,H*0.58,'F');
     pdf.setFillColor(...GOLD);pdf.rect(0,0,W,2.5,'F');pdf.rect(0,H-2.5,W,2.5,'F');
-    const coverImg=v3dImgs.day||mapImg3D;
+    const coverImg=mapImg3D||v3dImgs.day;  // Harta 3D prima - impact vizual mai mare
     if(coverImg&&coverImg.length>500){try{pdf.addImage(coverImg,'JPEG',0,0,W,H*0.44,undefined,'FAST');}catch(e){}}
     pdf.setFillColor(...DARK);pdf.rect(0,H*0.38,W,H*0.07,'F');
     pdf.setTextColor(...GOLD);pdf.setFontSize(26);pdf.setFont('helvetica','bold');pdf.text('UrbanX',W/2,H*0.48,{align:'center'});
@@ -6479,6 +6479,30 @@ async function runExport(){
     }
     if(aiImg&&aiImg.length>500)cy=addImg(aiImg,14,cy,W-28,58,'FIG. 14 — AI Render fotorealist · Fal.ai FLUX.1 · Propunere volumetrica');
     ftr();
+
+    // ══ PAG 7 (optionala): PAGINA DEDICATA AI RENDER (daca exista) ═══════════
+    if(aiImg&&aiImg.length>500){
+      pdf.addPage();pdf.setFillColor(8,12,24);pdf.rect(0,0,W,H,'F');
+      pdf.setFillColor(...GOLD);pdf.rect(0,0,W,2,'F');pdf.rect(0,H-2,W,2,'F');
+      // AI Render full page cu impact maxim
+      try{pdf.addImage(aiImg,'JPEG',0,20,W,H*0.68,undefined,'FAST');}catch(e){}
+      pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.5);pdf.rect(0,20,W,H*0.68,'S');
+      pdf.setFillColor(8,12,24);pdf.rect(0,H*0.68+18,W,H*0.32-16,'F');
+      pdf.setTextColor(...GOLD);pdf.setFontSize(14);pdf.setFont('helvetica','bold');
+      pdf.text('PROPUNERE VOLUMETRICA — AI RENDER',W/2,H*0.72,{align:'center'});
+      pdf.setTextColor(190,205,230);pdf.setFontSize(9);pdf.setFont('helvetica','normal');
+      const prompt=aedisPromptBuild().slice(0,160)+'...';
+      pdf.text('Stil: '+S2(AEDIS.stil||'modern')+' · Functiune: '+S2(fnDef.label)+' · '+niv+' niveluri · H='+aedisH.toFixed(1)+'m',W/2,H*0.735,{align:'center'});
+      pdf.setFillColor(15,25,50);pdf.roundedRect(14,H*0.755,W-28,30,2,2,'F');
+      pdf.setTextColor(140,160,190);pdf.setFontSize(7);
+      const promptLines=pdf.splitTextToSize('Prompt AI: '+S2(prompt),W-36);
+      pdf.text(promptLines.slice(0,3),21,H*0.768);
+      pdf.setTextColor(...GOLD);pdf.setFontSize(8);pdf.setFont('helvetica','bold');
+      pdf.text('Randare generata cu Fal.ai FLUX.1 · Rezultat cu caracter ilustrativ · UrbanX AEDIS',W/2,H*0.860,{align:'center'});
+      pdf.setTextColor(100,120,150);pdf.setFontSize(7);pdf.setFont('helvetica','normal');
+      pdf.text('Parcela: '+nrcad+' · '+S2(dateStr),W/2,H*0.875,{align:'center'});
+      ftr();
+    }
 
     // ══ PAG 7: CONCLUZII DETALIATE ════════════════════════════════════════════
     pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
@@ -9073,7 +9097,7 @@ async function generateSolarStudy(){
   pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');
   pdf.setFillColor(12,28,60);pdf.rect(0,H*0.42,W,H*0.58,'F');
   pdf.setFillColor(...GOLD);pdf.rect(0,0,W,2.5,'F');pdf.rect(0,H-2.5,W,2.5,'F');
-  const covImg=v3dDayImg||mapImg3D;
+  const covImg=mapImg3D||v3dDayImg;  // Harta 3D prima - impact vizual mai mare
   if(covImg&&covImg.length>500){try{pdf.addImage(covImg,'JPEG',0,0,W,H*0.44,undefined,'FAST');}catch(e){}}
   pdf.setFillColor(...DARK);pdf.rect(0,H*0.38,W,H*0.07,'F');
   pdf.setTextColor(...GOLD);pdf.setFontSize(7.5);pdf.setFont('helvetica','bold');pdf.text('URBANX · AEDIS · PLATFORMA DE ANALIZA URBANISTICA',W/2,H*0.50,{align:'center'});
@@ -9191,7 +9215,120 @@ async function generateSolarStudy(){
   pdf.text(oraStart&&oraEnd?'Interval insorire directa (alt>15°): '+oraStart.ora+' – '+oraEnd.ora+' · Umbra maxima la amiaza: '+shadDec+'m spre nord':'Altitudinea sub 15° toata ziua — sub pragul OMS 119/2014',17,cy+6);
   ftr();
 
-  // ══ PAG 5: PARAMETRI URBANISTICI + CONFORMITATE ═══════════════════════════
+  // ══ PAG 5: GRAFIC CURBA ANUALA + DIAGRAMA TRAIECTORII SOLARE ════════════
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
+  hdr('GRAFIC ALTITUDINI ANUALE + SCHEMA TRAIECTORII SOLARE',5);cy=30;
+
+  // 4.2 — GRAFIC ALTITUDINE MAXIMA LA AMIAZA
+  cy=sec('4.2 — GRAFIC ALTITUDINE MAXIMA LA AMIAZA (21 ale lunii) · LATITUDINE '+lat.toFixed(2)+'°N',cy);cy+=4;
+  const gX=22,gY=cy,gW=W-44,gH=58;
+  pdf.setFillColor(228,235,248);pdf.rect(gX,gY,gW,gH,'F');
+  pdf.setDrawColor(200,210,228);pdf.rect(gX,gY,gW,gH,'S');
+  // Linii orizontale de referință
+  [0,15,30,45,60,70].forEach(v=>{
+    const yg=gY+gH-v/72*gH;
+    pdf.setDrawColor(v===15?200:200,v===15?55:210,v===15?55:228);
+    pdf.setLineWidth(v===15?0.8:0.25);pdf.line(gX,yg,gX+gW,yg);
+    pdf.setTextColor(90,110,140);pdf.setFontSize(6);pdf.setFont('helvetica','normal');
+    pdf.text(v+'°',gX-5,yg+1.5,{align:'right'});
+    if(v===15){pdf.setTextColor(200,55,55);pdf.setFontSize(5.5);pdf.text('min legal OMS 119',gX+1,yg-1);}
+  });
+  // Etichete luni
+  const mL=['Ian','Feb','Mar','Apr','Mai','Iun','Iul','Aug','Sep','Oct','Nov','Dec'];
+  mL.forEach((l,i)=>{pdf.setTextColor(80,100,130);pdf.setFontSize(6);pdf.text(l,gX+(i+0.5)/12*gW,gY+gH+4,{align:'center'});});
+  // Curba altitudine
+  pdf.setDrawColor(...BLUE);pdf.setLineWidth(1.4);
+  let ppx=null,ppy=null;
+  Array.from({length:12},(_,i)=>i+1).forEach(m=>{
+    const alt=solarPos(lat,lon,new Date(year,m-1,21,12,0,0)).altitude;
+    const xx=gX+(m-0.5)/12*gW, yy=gY+gH-Math.min(alt/72,1)*gH;
+    if(ppx!==null)pdf.line(ppx,ppy,xx,yy);
+    pdf.setFillColor(...BLUE);try{pdf.circle(xx,yy,1.2,'F');}catch(_){pdf.ellipse(xx,yy,1.2,1.2,'F');}
+    ppx=xx;ppy=yy;
+  });
+  // Linie 15° prag OMS
+  const y15=gY+gH-15/72*gH;
+  pdf.setDrawColor(200,55,55);pdf.setLineWidth(0.8);pdf.setLineDashPattern([3,1.5],0);
+  pdf.line(gX,y15,gX+gW,y15);pdf.setLineDashPattern([],0);
+  // Marcăm valorile extreme
+  [6,12].forEach(m=>{
+    const alt=solarPos(lat,lon,new Date(year,m-1,21,12,0,0)).altitude;
+    const xx=gX+(m-0.5)/12*gW,yy=gY+gH-alt/72*gH;
+    pdf.setTextColor(...(m===6?[30,130,50]:[200,55,55]));pdf.setFontSize(6);
+    pdf.text(alt.toFixed(1)+'°',xx,yy-3,{align:'center'});
+  });
+  cy=gY+gH+12;
+
+  // 4.3 — SCHEMA TRAIECTORII SOLARE (21 Iunie vs 21 Decembrie)
+  cy=sec('4.3 — SCHEMA SOLARA — TRAIECTORII (21 Iunie vs 21 Decembrie)',cy);cy+=4;
+  const sx=W/2,sy=cy+45,sr=62;
+  // Elipsă orizont
+  pdf.setFillColor(220,230,248);pdf.ellipse(sx,sy,sr,sr*0.38,'F');
+  pdf.setDrawColor(180,195,220);pdf.setLineWidth(0.5);pdf.ellipse(sx,sy,sr,sr*0.38,'S');
+  // Traiectorie vară (portocaliu)
+  pdf.setDrawColor(200,150,10);pdf.setLineWidth(2);
+  const pts6=[];
+  for(let h=5;h<=19;h+=0.5){
+    const alt=solarPos(lat,lon,new Date(year,5,21,h,0,0)).altitude;
+    if(alt<0.5)continue;
+    const az=(h-5)/(19-5);
+    pts6.push([sx-sr+az*sr*2, sy-alt/75*sr*0.8]);
+  }
+  for(let i=1;i<pts6.length;i++)pdf.line(pts6[i-1][0],pts6[i-1][1],pts6[i][0],pts6[i][1]);
+  // Traiectorie iarnă (albastru)
+  pdf.setDrawColor(26,58,106);pdf.setLineWidth(1.8);
+  const pts12=[];
+  for(let h=7;h<=17;h+=0.5){
+    const alt=solarPos(lat,lon,new Date(year,11,21,h,0,0)).altitude;
+    if(alt<0.5)continue;
+    const az=(h-7)/(17-7);
+    pts12.push([sx-sr*0.7+az*sr*1.4, sy-alt/75*sr*0.8]);
+  }
+  for(let i=1;i<pts12.length;i++)pdf.line(pts12[i-1][0],pts12[i-1][1],pts12[i][0],pts12[i][1]);
+  // Clădire schematic
+  const bh=Math.min(aedisH/3,14);
+  pdf.setFillColor(50,70,120);pdf.rect(sx-6,sy-bh,12,bh,'F');
+  pdf.setFillColor(...GOLD);pdf.rect(sx-7,sy,14,1.5,'F');
+  // Umbra iarnă
+  if(aedisH>0&&decH>0.5){
+    const shLen=Math.min(parseFloat(shadDec)||30,sr*0.88);
+    pdf.setDrawColor(100,120,180);pdf.setLineWidth(0.5);
+    pdf.line(sx-7,sy,sx-7+shLen*0.6,sy+3);
+    pdf.line(sx+7,sy,sx+7+shLen*0.6,sy+3);
+    pdf.setTextColor(70,90,160);pdf.setFontSize(6.5);pdf.setFont('helvetica','normal');
+    pdf.text('Umbra iarna ~'+shadDec+'m',sx+shLen*0.3,sy+6);
+  }
+  // Etichete
+  pdf.setTextColor(80,95,115);pdf.setFontSize(6.5);
+  pdf.text('E (Rasarit)',sx-sr-2,sy+4,{align:'right'});
+  pdf.text('V (Apus)',sx+sr+2,sy+4,{align:'left'});
+  pdf.text('S (Sud)',sx,sy+sr*0.42+5,{align:'center'});
+  // Legendă
+  pdf.setDrawColor(200,150,10);pdf.setLineWidth(2);pdf.line(sx-50,sy+26,sx-40,sy+26);
+  pdf.setTextColor(180,120,10);pdf.setFontSize(6.5);pdf.text('Traiectorie 21 Iunie (vara)',sx-38,sy+28);
+  pdf.setDrawColor(26,58,106);pdf.line(sx-50,sy+33,sx-40,sy+33);
+  pdf.setTextColor(26,58,106);pdf.text('Traiectorie 21 Decembrie (iarna)',sx-38,sy+35);
+  cy=sy+sr*0.5+20;
+
+  // 4.4 — DURATA INSORIRE
+  cy=sec('4.4 — DURATA INSORIRE DIRECTA (ore/zi) LA SOLSTITII',cy);cy+=3;
+  const insData=[
+    {luna:'Solstitiu vara (21 Iunie)',alt:junH.toFixed(1)+'°',dur:'~14h 00min',obs:'Insorire maxima anuala — radiatii UV intense',ok:true},
+    {luna:'Echinoct primavara (21 Mar.)',alt:marH.toFixed(1)+'°',dur:'~12h 00min',obs:'Tranzitie — insorire normala',ok:true},
+    {luna:'Echinoct toamna (21 Sep.)',alt:solarPos(lat,lon,new Date(year,8,21,12,0,0)).altitude.toFixed(1)+'°',dur:'~12h 00min',obs:'Tranzitie — insorire normala',ok:true},
+    {luna:'Solstitiu iarna (21 Dec.)',alt:decH.toFixed(1)+'°',dur:'~8h 30min',obs:'Insorire minima — verificare OMS 119/2014',ok:isConform},
+  ];
+  insData.forEach(({luna,alt,dur,obs,ok},ri)=>{
+    const bg=ri===3?(isConform?[235,248,240]:[250,235,235]):ri%2===0?[235,240,250]:[245,248,255];
+    pdf.setFillColor(...bg);pdf.rect(14,cy,W-28,9,'F');
+    pdf.setFillColor(...(ok?[35,140,65]:[190,45,45]));pdf.rect(14,cy,3,9,'F');
+    pdf.setTextColor(30,50,90);pdf.setFont('helvetica','bold');pdf.setFontSize(7.5);pdf.text(S2(luna),19,cy+6);
+    pdf.setTextColor(60,80,120);pdf.setFont('helvetica','normal');pdf.text(alt,85,cy+6);
+    pdf.setTextColor(ok?[25,120,50]:[170,35,35]);pdf.setFont('helvetica','bold');pdf.text(S2(dur),110,cy+6);
+    pdf.setTextColor(80,95,115);pdf.setFont('helvetica','normal');pdf.setFontSize(6.5);pdf.text(S2(obs),150,cy+6,{maxWidth:50});
+    cy+=9;
+  });
+  ftr();
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
   hdr('PARAMETRI URBANISTICI SI ANALIZA CONFORMITATE',5);cy=30;
   pdf.setFillColor(...cfCol);pdf.roundedRect(14,cy,W-28,14,2,2,'F');
@@ -9666,22 +9803,33 @@ function _v3dAddDistanceLines(THREE, scene, toLoc){
         const pts3D = coords.map(c=>toLoc(c));
         if(pts3D.some(p=>!p||isNaN(p[0])||isNaN(p[1]))) return;
 
-        // Linie la y=0.4m, cu depthTest:false (mereu deasupra solului/clădirii)
+        // Linie la y=0.4m - folosim LineSegments cu depthTest:false și renderOrder mare
         const yLine = 0.4;
         const positions = new Float32Array(pts3D.flatMap(([x,z])=>[x, yLine, z]));
         const geo = new THREE.BufferGeometry();
         geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-        const mat = new THREE.LineBasicMaterial({color:col, linewidth:2, transparent:true, opacity:0.92, depthTest:false});
+
+        // LineBasicMaterial cu depthTest:false
+        const mat = new THREE.LineBasicMaterial({
+          color: new THREE.Color(col),
+          linewidth: 3,
+          transparent: false,
+          depthTest: false,
+          depthWrite: false
+        });
         const line = new THREE.Line(geo, mat);
-        line.renderOrder = 999; // forțat deasupra
+        line.renderOrder = 999;
+        line.onBeforeRender = (renderer)=>{ renderer.clearDepth(); }; // forțat deasupra
         scene.add(line);
 
-        // Sfere la capete
+        // Sfere la capete — vizibile mereu
         [pts3D[0], pts3D[pts3D.length-1]].forEach(([x,z])=>{
-          const sg = new THREE.SphereGeometry(0.15, 6, 6);
-          const sm = new THREE.MeshBasicMaterial({color:col, depthTest:false});
+          const sg = new THREE.SphereGeometry(0.20, 6, 6);
+          const sm = new THREE.MeshBasicMaterial({color:new THREE.Color(col), depthTest:false, depthWrite:false});
           const sp = new THREE.Mesh(sg, sm);
-          sp.position.set(x, yLine, z); sp.renderOrder=1000; scene.add(sp);
+          sp.position.set(x, yLine, z); sp.renderOrder=1000;
+          sp.onBeforeRender = (r2)=>{ r2.clearDepth(); };
+          scene.add(sp);
         });
 
         // Etichetă distanță — sprite canvas
