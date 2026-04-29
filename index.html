@@ -1751,6 +1751,30 @@ function addLayers(){
       'text-opacity':0.95
     }
   });
+
+  // ── Etichete dimensionale AEDIS (cote H, niveluri) — layer dedicat ─────
+  // Source separata: 'aedis-dim-src' cu features {label, type:'aedis_dim'}
+  map.addSource('aedis-dim-src',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
+  L({id:'aedis-dim-label',type:'symbol',source:'aedis-dim-src',
+    minzoom:14,
+    layout:{
+      'text-field':['get','label'],
+      'text-size':['interpolate',['linear'],['zoom'],15,12,18,16,20,20],
+      'text-font':['DIN Offc Pro Bold','Arial Unicode MS Bold'],
+      'text-anchor':'center',
+      'text-allow-overlap':true,
+      'text-ignore-placement':true,
+      'symbol-placement':'point',
+      'text-offset':[0,0],
+      'text-max-width':8
+    },
+    paint:{
+      'text-color':'#d4af37',
+      'text-halo-color':'rgba(0,0,0,.95)',
+      'text-halo-width':2.5,
+      'text-opacity':1.0
+    }
+  });
   L({id:'vol-3d',type:'fill-extrusion',source:'vol-src',paint:{
     'fill-extrusion-color':['coalesce',['get','color'],'#f59e0b'],
     'fill-extrusion-height':['coalesce',['get','top'],9],
@@ -6128,89 +6152,65 @@ async function runExport(){
     try{ const c=map.getCanvas(); return c.width>0?c.toDataURL('image/jpeg',0.90):''; }catch(e){ return ''; }
   };
 
-  // 1. Vista 3D principala (pitch 62°)
-  if(msg) msg.textContent='Captura 3D principala...';
+  // 1. Vista 3D principala (pitch 62°, bearing -20°)
+  if(msg) msg.textContent='Captura Mapbox 3D principala...';
   map.easeTo({pitch:62,bearing:-20,duration:0});
   let mapImg3D = await captureMap();
 
-  // 2. Vista 2D ortogonala (top)
-  if(msg) msg.textContent='Captura 2D plan...';
+  // 2. Vista 2D ortogonala (top, pitch 0°)
+  if(msg) msg.textContent='Captura 2D plan cadastral...';
   map.easeTo({pitch:0,bearing:0,duration:0});
   let mapImg2D = await captureMap();
 
-  // 3. Vista cu distante (zoom mai strans, top)
-  if(msg) msg.textContent='Captura distante...';
+  // 3. Vista distante — zoom pe parcela, pitch 0°
+  if(msg) msg.textContent='Captura plan distante...';
   let mapImgDist='';
   try{
     if(ap?.geo?.geometry){
       const bb=turf.bbox(ap.geo);
-      map.fitBounds([[bb[0],bb[1]],[bb[2],bb[3]]],{padding:120,pitch:0,bearing:0,duration:0,maxZoom:18});
-      await waitFrames(5); await wait(600);
+      map.fitBounds([[bb[0],bb[1]],[bb[2],bb[3]]],{padding:100,pitch:0,bearing:0,duration:0,maxZoom:18});
+      await waitFrames(5); await wait(700);
       map.triggerRepaint(); await waitFrames(3); await wait(400);
       mapImgDist = map.getCanvas().toDataURL('image/jpeg',0.90);
     }
   }catch(e){}
 
-  // 4. Vista context 3D lat (bearing 90°)
-  if(msg) msg.textContent='Captura context lateral...';
+  // 4. Vista laterala (bearing 90°, pitch 58°)
+  if(msg) msg.textContent='Captura vedere laterala...';
   map.easeTo({pitch:58,bearing:90,duration:0});
   let mapImgLat = await captureMap();
 
-  // 5. Vista context frontal (bearing 0°)
+  // 5. Vista frontala (bearing 0°, pitch 55°)
   map.easeTo({pitch:55,bearing:0,duration:0});
   let mapImgFront = await captureMap();
 
-  // 6. Viewer 3D AEDIS - ZI
-  if(msg) msg.textContent='Captura viewer 3D zi...';
-  let v3dDayImg='';
-  try{
-    if(V3D.r&&V3D.scene&&V3D.cam){
-      _v3dApplyLight('day',window.THREE,V3D.scene,V3D.r);
-      await wait(80); V3D.r.render(V3D.scene,V3D.cam);
-      v3dDayImg=document.getElementById('v3d-canvas')?.toDataURL('image/jpeg',0.92)||'';
-    }
-  }catch(e){}
+  // 6. Vista aerial oblique (bearing 45°, pitch 70° — mai dramatica)
+  if(msg) msg.textContent='Captura vedere aeriana...';
+  map.easeTo({pitch:70,bearing:45,duration:0});
+  let mapImgAerial = await captureMap();
 
-  // 7. Viewer 3D - NOAPTE
-  if(msg) msg.textContent='Captura viewer 3D noapte...';
-  let v3dNightImg='';
-  try{
-    if(V3D.r&&V3D.scene&&V3D.cam){
-      _v3dApplyLight('night',window.THREE,V3D.scene,V3D.r);
-      await wait(80); V3D.r.render(V3D.scene,V3D.cam);
-      v3dNightImg=document.getElementById('v3d-canvas')?.toDataURL('image/jpeg',0.92)||'';
-      _v3dApplyLight('day',window.THREE,V3D.scene,V3D.r);
-    }
-  }catch(e){}
+  // 7. Vista spate (bearing 180°, pitch 55°)
+  map.easeTo({pitch:55,bearing:180,duration:0});
+  let mapImgBack = await captureMap();
 
-  // 8. Viewer 3D - GOLDEN HOUR
-  let v3dGoldImg='';
-  try{
-    if(V3D.r&&V3D.scene&&V3D.cam){
-      _v3dApplyLight('golden',window.THREE,V3D.scene,V3D.r);
-      await wait(80); V3D.r.render(V3D.scene,V3D.cam);
-      v3dGoldImg=document.getElementById('v3d-canvas')?.toDataURL('image/jpeg',0.92)||'';
-      _v3dApplyLight('day',window.THREE,V3D.scene,V3D.r);
-    }
-  }catch(e){}
+  // Revenim la vista principala
+  try{ map.easeTo({pitch:62,bearing:-20,duration:0}); }catch(e){}
 
-  // 9. Viewer 3D - OVERCAST
-  let v3dOvercastImg='';
+  // 8-14. Viewer 3D AEDIS — toate preseturile pe canvas offscreen
+  if(msg) msg.textContent='Se initiateaza viewer 3D offscreen...';
+  let v3dImgs = {};
   try{
-    if(V3D.r&&V3D.scene&&V3D.cam){
-      _v3dApplyLight('overcast',window.THREE,V3D.scene,V3D.r);
-      await wait(80); V3D.r.render(V3D.scene,V3D.cam);
-      v3dOvercastImg=document.getElementById('v3d-canvas')?.toDataURL('image/jpeg',0.92)||'';
-      _v3dApplyLight('day',window.THREE,V3D.scene,V3D.r);
-      V3D.r.render(V3D.scene,V3D.cam);
+    if(S.vol._lastFeats?.length){
+      if(msg) msg.textContent='Captura viewer 3D (zi/noapte/golden/overcast)...';
+      v3dImgs = await _v3dCaptureSilent(ap);
     }
-  }catch(e){}
+  }catch(e){ console.warn('V3D capture failed:',e.message); }
 
-  // 10. AI Render
+  // 15. AI Render daca exista
   let aiImg='';
   try{ if(FAL_AI?.lastRender?.url) aiImg=FAL_AI.lastRender.url; }catch(e){}
 
-  // 11. Mapbox Standard 3D daca activ
+  // 16. Mapbox Standard 3D daca activ
   let mapStdImg='';
   try{
     if(document.getElementById('selBase')?.value==='standard'){
@@ -6218,9 +6218,6 @@ async function runExport(){
       await captureMap(); mapStdImg=map.getCanvas().toDataURL('image/jpeg',0.88);
     }
   }catch(e){}
-
-  // Revenim la vista principala
-  try{ map.easeTo({pitch:62,bearing:-20,duration:500}); }catch(e){}
 
   if(msg) msg.textContent='Se compileaza PDF-ul (8 pagini)...';
 
@@ -6295,7 +6292,7 @@ async function runExport(){
     pdf.setFillColor(...GOLD); pdf.rect(0,0,W,2.5,'F'); pdf.rect(0,H-2.5,W,2.5,'F');
 
     // Imagine 3D pe coperta
-    const coverImg = mapImg3D||v3dDayImg;
+    const coverImg = v3dImgs.day||mapImg3D;
     if(coverImg&&coverImg.length>500){
       try{ pdf.addImage(coverImg,'JPEG',0,0,W,H*0.44,undefined,'FAST'); }catch(e){}
       pdf.setFillColor(...DARK);
@@ -6359,21 +6356,22 @@ async function runExport(){
 
     const half=(W-32)/2;
     // ZI si NOAPTE side by side
-    if(v3dDayImg&&v3dDayImg.length>500){
-      cy=addImg(v3dDayImg,14,cy,half,56,'FIG. 1 — Viewer 3D AEDIS · Iluminare ZI (ambient PBR)');
-      if(v3dNightImg&&v3dNightImg.length>500){
-        addImg(v3dNightImg,14+half+4,cy-62,half,56,'FIG. 2 — Viewer 3D AEDIS · Iluminare NOAPTE');
+    // FIG 1+2: Viewer ZI + NOAPTE side by side
+    if(v3dImgs.day&&v3dImgs.day.length>500){
+      cy=addImg(v3dImgs.day,14,cy,half,56,'FIG. 1 — Viewer 3D AEDIS · Iluminare ZI · Shadere PBR');
+      if(v3dImgs.night&&v3dImgs.night.length>500){
+        addImg(v3dImgs.night,14+half+4,cy-62,half,56,'FIG. 2 — Viewer 3D AEDIS · Iluminare NOAPTE (ferestre aprinse)');
       }
     } else if(mapImg3D&&mapImg3D.length>500){
       cy=addImg(mapImg3D,14,cy,W-28,65,'FIG. 1 — Vedere 3D Mapbox · Volumul propus in context urban');
     }
     cy+=2;
 
-    // GOLDEN si OVERCAST side by side
-    if(v3dGoldImg&&v3dGoldImg.length>500){
-      cy=addImg(v3dGoldImg,14,cy,half,56,'FIG. 3 — Viewer 3D AEDIS · Golden Hour (apus/rasarit)');
-      if(v3dOvercastImg&&v3dOvercastImg.length>500){
-        addImg(v3dOvercastImg,14+half+4,cy-62,half,56,'FIG. 4 — Viewer 3D AEDIS · Cer acoperit (overcast)');
+    // FIG 3+4: GOLDEN HOUR + OVERCAST side by side
+    if(v3dImgs.golden&&v3dImgs.golden.length>500){
+      cy=addImg(v3dImgs.golden,14,cy,half,56,'FIG. 3 — Viewer 3D AEDIS · Golden Hour (apus/rasarit)');
+      if(v3dImgs.overcast&&v3dImgs.overcast.length>500){
+        addImg(v3dImgs.overcast,14+half+4,cy-62,half,56,'FIG. 4 — Viewer 3D AEDIS · Cer acoperit (overcast)');
       }
       cy+=6;
     }
@@ -6605,7 +6603,7 @@ async function runExport(){
     cy=sec('13. VEDERI SUPLIMENTARE VOLUM PROPUS',cy);
     cy+=2;
     // Folosim vederi diferite de cele de pe pag 2
-    const imgA=mapImgFront||mapImg3D, imgB=mapImgLat||v3dDayImg;
+    const imgA=v3dImgs.front||mapImgFront||mapImg3D; const imgB=v3dImgs.topdown||mapImgLat||mapImg3D;
     if(imgA&&imgA.length>500){
       addImg(imgA,14,cy,half,50,'FIG. 12 — Vedere frontala · Propunere volumetrica');
       if(imgB&&imgB.length>500){
@@ -7100,22 +7098,43 @@ function aedisUpdateDimLabels(fp, niv, hP, hE, hTot){
     const cx=ring.reduce((s,c)=>s+c[0],0)/ring.length;
     const cy=ring.reduce((s,c)=>s+c[1],0)/ring.length;
 
-    // Eticheta totala in centru
-    labels.push({type:'Feature',geometry:{type:'Point',coordinates:[cx,cy]},
-      properties:{label:`H=${hTot.toFixed(1)}m\n${niv} niv.`,type:'total'}});
+    // Centru cladire: H total + niveluri (mare, auriu)
+    labels.push({type:'Feature',
+      geometry:{type:'Point',coordinates:[cx,cy]},
+      properties:{label:`H=${hTot.toFixed(1)}m\n${niv} niv.`,type:'aedis_dim'}
+    });
 
-    // Eticheta pe latura frontala
+    // Lateral stanga: inaltime parter
     if(ring.length>2){
-      const mid=[(ring[0][0]+ring[1][0])/2,(ring[0][1]+ring[1][1])/2];
-      labels.push({type:'Feature',geometry:{type:'Point',coordinates:mid},
-        properties:{label:`P:${hP.toFixed(1)}m`,type:'parter'}});
+      const mid1=[(ring[0][0]+ring[1][0])/2,(ring[0][1]+ring[1][1])/2];
+      labels.push({type:'Feature',
+        geometry:{type:'Point',coordinates:mid1},
+        properties:{label:`P:${hP.toFixed(1)}m`,type:'aedis_dim'}
+      });
     }
 
+    // Lateral dreapta: inaltime etaj
+    if(ring.length>3){
+      const mid2=[(ring[2][0]+ring[3][0])/2,(ring[2][1]+ring[3][1])/2];
+      labels.push({type:'Feature',
+        geometry:{type:'Point',coordinates:mid2},
+        properties:{label:`E:${hE.toFixed(1)}m`,type:'aedis_dim'}
+      });
+    }
+
+    // Scriem in source-ul dedicat AEDIS dim
+    try{ map.getSource('aedis-dim-src')?.setData({type:'FeatureCollection',features:labels}); }catch(e){}
+
+    // Si in ctx-labels-src (pt compatibilitate)
     setSource('ctx-labels-src',{type:'FeatureCollection',features:[
       ...(S.ctx?._labels||[]),
       ...labels
     ]});
   }catch(e){}
+}
+
+function aedisClearDimLabels(){
+  try{ map.getSource('aedis-dim-src')?.setData({type:'FeatureCollection',features:[]}); }catch(e){}
 }
 
 // ── Calcul POT/CUT existent pe parcelă ────────────────────────────────────
@@ -7660,8 +7679,8 @@ function aedisGetContent(){
       title="LOISIR — Amenajare spații publice">🌿<span style="font-size:8px">Loisir</span></button>
     <button onclick="aedisAIRender()" class="aedis-dim-btn" style="background:rgba(212,175,55,.15);border-color:rgba(212,175,55,.4);color:#d4af37;font-size:10px" title="AI Render fotorealist (necesită API key Fal.ai)">🎨 AI</button>
     <button onclick="generateSolarStudy()" class="aedis-dim-btn" style="background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.4);color:#fbbf24;font-size:9px;display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 8px" title="Studiu Însorire PDF">☀<span style="font-size:8px">Însorire</span></button>
-    <button onclick="if(!S.vol.genDone){ss('Genereaza mai intai volumul 3D (butonul ⚡).');}else{AEDIS.showDim=!AEDIS.showDim;aedisRender();}" 
-      class="aedis-dim-btn${AEDIS.showDim?' active':''}" title="Cote dimensionale H/niveluri pe volum&#013;Necesita generare volum 3D (⚡) mai intai." style="font-size:9px;display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 8px">📐<span style="font-size:8px">Cote</span></button>
+    <button onclick="if(!S.vol.genDone){ss('⚠️ Genereaza mai intai volumul 3D (butonul ⚡).');}else{AEDIS.showDim=!AEDIS.showDim;aedisRender();try{map.setLayoutProperty('aedis-dim-label','visibility',AEDIS.showDim?'visible':'none');}catch(e){}ss(AEDIS.showDim?'📐 Cote dimensionale ACTIVE pe hartă':'📐 Cote dimensionale dezactivate');}" 
+      class="aedis-dim-btn${AEDIS.showDim?' active':''}" title="Cote H/niveluri pe volum — apasa dupa ⚡" style="font-size:9px;display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 8px;${AEDIS.showDim?'border-color:#d4af37;background:rgba(212,175,55,.2);color:#d4af37;':''}">📐<span style="font-size:8px">Cote</span></button>
     <button onclick="aedisClose()" class="aedis-close-btn">✕</button>
   </div>`;
 }
@@ -9055,85 +9074,54 @@ async function generateSolarStudy(){
   const shadMar=aedisH>0&&marH>0.5?(aedisH/Math.tan(marH*Math.PI/180)).toFixed(1):'—';
 
   // ── Capturam imagini multiple ─────────────────────────────────────────────
-  // Helper: asteapta N frame-uri + ms
   const wait = (ms) => new Promise(r=>setTimeout(r,ms));
   const waitFrames = async (n=3) => { for(let i=0;i<n;i++) await new Promise(r=>requestAnimationFrame(r)); };
-
-  // 1. Harta Mapbox 2D (top view)
-  let mapImg2D = '';
-  try{
-    const savedPitch = map.getPitch(), savedBearing = map.getBearing();
-    map.easeTo({pitch:0,bearing:0,duration:0});
+  const captureMapAt = async (pitch, bearing) => {
+    map.easeTo({pitch,bearing,duration:0});
     await waitFrames(4); await wait(400);
     map.triggerRepaint(); await waitFrames(3); await wait(300);
-    mapImg2D = map.getCanvas().toDataURL('image/jpeg',0.88);
-    map.easeTo({pitch:savedPitch,bearing:savedBearing,duration:0});
-  }catch(e){ console.warn('2D capture:',e.message); }
+    try{ return map.getCanvas().toDataURL('image/jpeg',0.88); }catch(e){ return ''; }
+  };
 
-  // 2. Harta Mapbox 3D (pitch 60°)
-  let mapImg3D = '';
-  try{
-    map.easeTo({pitch:62,bearing:-25,duration:0});
-    await waitFrames(4); await wait(500);
-    map.triggerRepaint(); await waitFrames(3); await wait(400);
-    mapImg3D = map.getCanvas().toDataURL('image/jpeg',0.88);
-  }catch(e){ console.warn('3D capture:',e.message); }
+  // 1. Harta Mapbox 3D principala (pitch 62°, bearing -25°)
+  ss('Se captureaza imagini 3D pentru studiu...');
+  let mapImg3D = await captureMapAt(62, -25);
 
-  // 3. Viewer 3D AEDIS - preset ZI
-  let v3dDayImg = '';
+  // 2. Harta Mapbox 2D top
+  let mapImg2D = await captureMapAt(0, 0);
+
+  // 3. Mapbox bearing 90° (lateral E-V)
+  let mapImgLat = await captureMapAt(58, 90);
+
+  // 4. Mapbox bearing 180° (spate)
+  let mapImgBack = await captureMapAt(55, 180);
+
+  // 5. Mapbox aerial oblique (pitch 70°, bearing 45°)
+  let mapImgAerial = await captureMapAt(70, 45);
+
+  // Revenim la vista principala
+  try{ map.easeTo({pitch:62,bearing:-25,duration:0}); }catch(e){}
+
+  // 6-12. Viewer 3D offscreen — toate preseturile
+  let v3dImgs = {};
   try{
-    if(V3D.r && V3D.scene && V3D.cam){
-      _v3dApplyLight('day', window.THREE, V3D.scene, V3D.r);
-      await wait(100);
-      V3D.r.render(V3D.scene, V3D.cam);
-      v3dDayImg = document.getElementById('v3d-canvas')?.toDataURL('image/jpeg',0.90)||'';
+    if(S.vol._lastFeats?.length){
+      ss('Se captureaza viewer 3D (zi/noapte/golden/overcast)...');
+      v3dImgs = await _v3dCaptureSilent(ap);
     }
-  }catch(e){ console.warn('V3D day:',e.message); }
+  }catch(e){ console.warn('V3D silent capture failed:',e.message); }
 
-  // 4. Viewer 3D AEDIS - preset NOAPTE
-  let v3dNightImg = '';
-  try{
-    if(V3D.r && V3D.scene && V3D.cam){
-      _v3dApplyLight('night', window.THREE, V3D.scene, V3D.r);
-      await wait(100);
-      V3D.r.render(V3D.scene, V3D.cam);
-      v3dNightImg = document.getElementById('v3d-canvas')?.toDataURL('image/jpeg',0.90)||'';
-      // Revenim la zi
-      _v3dApplyLight('day', window.THREE, V3D.scene, V3D.r);
-      V3D.r.render(V3D.scene, V3D.cam);
-    }
-  }catch(e){ console.warn('V3D night:',e.message); }
+  // Shorthand aliases
+  const v3dDayImg    = v3dImgs.day     || '';
+  const v3dNightImg  = v3dImgs.night   || '';
+  const v3dGoldenImg = v3dImgs.golden  || '';
+  const v3dOvercastImg=v3dImgs.overcast|| '';
 
-  // 5. Viewer 3D - preset GOLDEN HOUR (apus)
-  let v3dGoldenImg = '';
-  try{
-    if(V3D.r && V3D.scene && V3D.cam){
-      _v3dApplyLight('golden', window.THREE, V3D.scene, V3D.r);
-      await wait(100);
-      V3D.r.render(V3D.scene, V3D.cam);
-      v3dGoldenImg = document.getElementById('v3d-canvas')?.toDataURL('image/jpeg',0.90)||'';
-      _v3dApplyLight('day', window.THREE, V3D.scene, V3D.r);
-    }
-  }catch(e){}
-
-  // 6. Viewer 3D - preset OVERCAST (acoperit)
-  let v3dOvercastImg = '';
-  try{
-    if(V3D.r && V3D.scene && V3D.cam){
-      _v3dApplyLight('overcast', window.THREE, V3D.scene, V3D.r);
-      await wait(100);
-      V3D.r.render(V3D.scene, V3D.cam);
-      v3dOvercastImg = document.getElementById('v3d-canvas')?.toDataURL('image/jpeg',0.90)||'';
-      _v3dApplyLight('day', window.THREE, V3D.scene, V3D.r);
-      V3D.r.render(V3D.scene, V3D.cam);
-    }
-  }catch(e){}
-
-  // 7. AI Render daca exista
+  // 13. AI Render daca exista
   let aiImg = '';
   try{ if(FAL_AI?.lastRender?.url) aiImg = FAL_AI.lastRender.url; }catch(e){}
 
-  // 8. Mapbox Standard 3D cu iluminare solara (daca disponibil)
+  // 14. Mapbox Standard 3D cu iluminare solara (daca disponibil)
   let mapStdImg = '';
   try{
     const selBase = document.getElementById('selBase');
@@ -9932,6 +9920,154 @@ function _v3dBuild(ap){
   render();
 
   _v3dStatus(`✅ ${V3D.aedis.length} volume AEDIS · ${V3D.ctx.length} clădiri context · Drag=rotire Scroll=zoom`);
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// _v3dCaptureSilent — construieste viewer 3D pe canvas OFFSCREEN (invizibil)
+// captureaza toate preseturile de lumina, returneaza {day,night,golden,overcast}
+// NU afecteaza UI-ul, NU deschide overlay
+// ═══════════════════════════════════════════════════════════════════════════
+async function _v3dCaptureSilent(ap){
+  if(!ap?.geo?.geometry || !S.vol._lastFeats?.length) return {};
+  return new Promise((resolve)=>{
+    aedisLoadThree(async()=>{
+      const THREE = window.THREE;
+      // Canvas offscreen 1400x900
+      const canvas = document.createElement('canvas');
+      canvas.width=1400; canvas.height=900;
+      canvas.style.cssText='position:fixed;top:-9999px;left:-9999px;width:1400px;height:900px;z-index:-1';
+      document.body.appendChild(canvas);
+
+      try{
+        const r = new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,preserveDrawingBuffer:true});
+        r.setSize(1400,900); r.setPixelRatio(1);
+        r.shadowMap.enabled=true; r.shadowMap.type=THREE.PCFSoftShadowMap;
+        r.toneMapping=THREE.ACESFilmicToneMapping; r.toneMappingExposure=1.1;
+
+        const scene=new THREE.Scene();
+        scene.background=new THREE.Color('#c8d8e8');
+        scene.fog=new THREE.FogExp2('#c8d8e8',0.003);
+        const cam=new THREE.PerspectiveCamera(45,1400/900,0.5,800);
+
+        // Ground + grid
+        const gGeo=new THREE.PlaneGeometry(600,600);
+        const gMat=new THREE.MeshStandardMaterial({color:'#111827',roughness:0.97,metalness:0});
+        const g=new THREE.Mesh(gGeo,gMat); g.rotation.x=-Math.PI/2; g.position.y=-0.05;
+        g.receiveShadow=true; scene.add(g);
+        const grid=new THREE.GridHelper(400,80,'#90a8b8','#a0b8c8');
+        grid.material.opacity=0.35; grid.material.transparent=true; scene.add(grid);
+
+        // Coordonate locale
+        const ring0=ap.geo.geometry.type==='Polygon'?ap.geo.geometry.coordinates[0]:ap.geo.geometry.coordinates[0][0];
+        const cx=ring0.reduce((s,c)=>s+c[0],0)/ring0.length;
+        const cy2=ring0.reduce((s,c)=>s+c[1],0)/ring0.length;
+        const mLng=111320*Math.cos(cy2*Math.PI/180), mLat=111320;
+        const toLoc=([lng,lat])=>[(lng-cx)*mLng,(lat-cy2)*mLat];
+
+        // Context buildings
+        (S.ctx?.features||[]).forEach(f=>{
+          if(!f.geometry) return;
+          const h=Math.max(2,f.properties?.h||6);
+          const col='#8898b0';
+          try{
+            const ring=f.geometry.type==='Polygon'?f.geometry.coordinates[0]:f.geometry.coordinates[0][0];
+            const pts=ring.map(toLoc);
+            const mat=new THREE.MeshLambertMaterial({color:col});
+            const mesh=_v3dPrism(THREE,pts,0,h,mat);
+            if(mesh){ mesh.castShadow=true; mesh.receiveShadow=true; scene.add(mesh); }
+          }catch(e){}
+        });
+
+        // AEDIS volumes
+        const stilKey=AEDIS.stil||'modern';
+        const tmpCache={};
+        const tmpAedis=[];
+        S.vol._lastFeats.forEach(f=>{
+          if(f.properties?.isExistent||!f.geometry) return;
+          const base=f.properties?.base||0, top=f.properties?.top||3;
+          const col=f.properties?.color||'#3b82f6';
+          const floor=f.properties?.floor??0;
+          try{
+            const ring=f.geometry.type==='Polygon'?f.geometry.coordinates[0]:f.geometry.coordinates[0][0];
+            const pts=ring.map(toLoc);
+            let mat;
+            if(floor===0) mat=_v3dMatParter(THREE,stilKey,tmpCache);
+            else if(floor<0) mat=_v3dMatRoof(THREE,stilKey,tmpCache);
+            else mat=_v3dMatFloor(THREE,col,floor,stilKey,tmpCache);
+            if(!mat) return;
+            const mesh=_v3dPrism(THREE,pts,base,top,mat);
+            if(mesh){ mesh.castShadow=true; mesh.receiveShadow=true; scene.add(mesh); tmpAedis.push(mesh);
+              _v3dAddEdges(THREE,mesh,scene,'#ffffff',0.25);
+              if(floor>0) _v3dAddWindows(THREE,pts,base,top,scene,stilKey);
+            }
+          }catch(e){}
+        });
+
+        // Parcel outline
+        try{
+          const pts=ring0.map(toLoc);
+          const verts=new Float32Array(pts.flatMap(([x,z])=>[x,0.2,z]));
+          const lg=new THREE.BufferGeometry(); lg.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));
+          scene.add(new THREE.LineLoop(lg,new THREE.LineBasicMaterial({color:'#00e5b4',opacity:0.7,transparent:true})));
+        }catch(e){}
+
+        // Camera setup
+        const maxH=Math.max(...(S.vol._lastFeats||[]).map(f=>f.properties?.top||0),8);
+        const parcelSz=Math.max(...ring0.map(([lng,lat])=>{const[x,z]=toLoc([lng,lat]);return Math.sqrt(x*x+z*z);}),10);
+        const rad=Math.max(parcelSz*2.5,maxH*2.2,35);
+        const tx=new THREE.Vector3(0,maxH*0.4,0);
+
+        // Helper: set camera angle and render
+        const setCam=(theta,phi)=>{
+          const x=rad*Math.sin(phi)*Math.sin(theta);
+          const y=rad*Math.cos(phi);
+          const z=rad*Math.sin(phi)*Math.cos(theta);
+          cam.position.set(tx.x+x,tx.y+y,tx.z+z);
+          cam.lookAt(tx);
+          cam.aspect=1400/900; cam.updateProjectionMatrix();
+        };
+
+        const capture=(preset,theta,phi)=>{
+          _v3dApplyLight(preset,THREE,scene,r);
+          setCam(theta,phi);
+          // Rebuild windows emissive if night
+          r.render(scene,cam);
+          r.render(scene,cam); // double render for shadow stability
+          return canvas.toDataURL('image/jpeg',0.92);
+        };
+
+        const wait=ms=>new Promise(res=>setTimeout(res,ms));
+
+        // Capture multiple presets + angles
+        await wait(50);
+        const day    = capture('day',    Math.PI/4,  Math.PI/3.2);
+        await wait(30);
+        const night  = capture('night',  Math.PI/4,  Math.PI/3.2);
+        await wait(30);
+        const golden = capture('golden', Math.PI*1.1,Math.PI/3.5);
+        await wait(30);
+        const overcast=capture('overcast',Math.PI/4,  Math.PI/2.8);
+        await wait(30);
+        // Extra angle: front view
+        const front  = capture('day',    Math.PI,    Math.PI/3.0);
+        await wait(30);
+        // Extra angle: top-down
+        const topdown= capture('day',    Math.PI/4,  0.15);
+        await wait(30);
+        // Extra: night from different angle
+        const nightAlt=capture('night',  -Math.PI/3, Math.PI/3.0);
+
+        r.dispose();
+        canvas.remove();
+        resolve({day,night,golden,overcast,front,topdown,nightAlt});
+      }catch(e){
+        console.warn('_v3dCaptureSilent error:',e.message);
+        try{ canvas.remove(); }catch(_){}
+        resolve({});
+      }
+    });
+  });
 }
 
 
