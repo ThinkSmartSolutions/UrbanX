@@ -118,6 +118,34 @@ canvas#c2d{width:100%;height:100%;display:block}
 .fn-leg-row{display:flex;align-items:center;gap:5px;margin:2px 0;color:#e2e8f0;font-size:10px}
 .fn-leg-sq{width:10px;height:10px;border-radius:2px;flex-shrink:0}
 .fn-leg-title{font-size:11px;font-weight:700;color:#d4af37;margin-bottom:4px}
+/* MOB SEARCH OVERLAY — rezultate căutare fix pe mobil */
+#mob-search-overlay{
+  display:none;
+  position:fixed;
+  left:0;right:0;
+  z-index:10000;
+  background:#0f172a;
+  border-top:2px solid rgba(212,175,55,.5);
+  border-bottom:1px solid rgba(255,255,255,.08);
+  max-height:45vh;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  box-shadow:0 -4px 24px rgba(0,0,0,.6);
+}
+#mob-search-overlay.active{display:block;}
+#mob-search-overlay .mob-ov-header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 16px 6px;
+  font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em;
+}
+#mob-search-overlay .ri{
+  padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.06);
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+  active-color:rgba(59,130,246,.2);
+}
+#mob-search-overlay .ri:active{background:rgba(59,130,246,.15);}
+#mob-search-overlay .ri:last-child{border-bottom:none;}
+#mob-search-overlay .re{padding:14px 16px;font-size:13px;color:#64748b;}
 #copy{position:fixed;bottom:0;left:0;right:0;z-index:70;background:rgba(8,37,74,.8);color:rgba(212,175,55,.6);display:flex;justify-content:space-between;padding:4px 12px;font-size:10px}
 
 /* PDF MODAL */
@@ -571,6 +599,16 @@ canvas#c2d{width:100%;height:100%;display:block}
     <span class="mnav-label">Rapoarte</span>
   </button>
 </nav>
+
+<!-- OVERLAY FIX rezultate căutare mobil -->
+<div id="mob-search-overlay">
+  <div class="mob-ov-header">
+    <span id="mob-ov-title">Rezultate</span>
+    <button onclick="mobSearchOverlayClose()" 
+      style="background:none;border:none;color:#64748b;font-size:18px;cursor:pointer;padding:0 4px;line-height:1">✕</button>
+  </div>
+  <div id="mob-ov-content"></div>
+</div>
 
 <!-- Buton flotant mobile failsafe -->
 <!-- FAB înlocuit cu mob-nav bar -->
@@ -3679,14 +3717,9 @@ function renderAll(){
   // Mobile sync
   const mb=$('mob-body');
   if(mb){
-    const hasFocus = mb.querySelector('#inp-addr:focus,#inp-cad:focus,#inp-coord:focus');
-    const addrBox = mb.querySelector('#addr-box');
-    const hasAddrResults = addrBox && addrBox.innerHTML.trim() && !addrBox.innerHTML.includes('Se caută');
-    // Nu re-randam dacă utilizatorul tocmai caută (focus pe input adresă cu rezultate)
-    if(hasFocus || hasAddrResults) {
-      // Nimic - păstrăm DOM-ul curent cu rezultatele
-    } else if(window.innerWidth<=840){
+    if(window.innerWidth<=840){
       mb.innerHTML=getContent(S.tab);
+      // Overlay-ul de căutare (addr/cad) e separat de mob-body → nu e afectat
     } else if($('mob-sheet')?.classList.contains('open')){
       mb.innerHTML=getContent(S.tab);
     }
@@ -3737,6 +3770,52 @@ function htmlMobRapoarte(){
   `;
 }
 
+
+// ═══ MOB SEARCH OVERLAY — rezultate căutare fix pe mobil ══════════════════
+// Poziționează overlayul chiar deasupra tastaturii iOS/Android
+function mobSearchOverlayShow(title, contentHtml){
+  const ov = document.getElementById('mob-search-overlay');
+  const ovContent = document.getElementById('mob-ov-content');
+  const ovTitle = document.getElementById('mob-ov-title');
+  if(!ov||!ovContent) return;
+
+  ovTitle && (ovTitle.textContent = title||'Rezultate');
+  ovContent.innerHTML = contentHtml;
+  ov.classList.add('active');
+
+  // Poziționăm overlay deasupra tastaturii
+  // Pe iOS: window.visualViewport.height = înălțimea vizibilă (fără tastatură)
+  function positionOverlay(){
+    const vvh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+    const keyboardH = window.innerHeight - vvh;
+    ov.style.bottom = Math.max(72, keyboardH + 72) + 'px'; // 72 = mob-nav height
+    ov.style.top = 'auto';
+  }
+  positionOverlay();
+
+  // Actualizăm la resize (tastatură apare/dispare)
+  if(window.visualViewport){
+    window._ovVVListener = positionOverlay;
+    window.visualViewport.addEventListener('resize', window._ovVVListener);
+  }
+}
+
+function mobSearchOverlayClose(){
+  const ov = document.getElementById('mob-search-overlay');
+  if(ov) ov.classList.remove('active');
+  if(window.visualViewport && window._ovVVListener){
+    window.visualViewport.removeEventListener('resize', window._ovVVListener);
+    window._ovVVListener = null;
+  }
+}
+
+function mobSearchOverlayUpdate(contentHtml){
+  const ovContent = document.getElementById('mob-ov-content');
+  if(ovContent) ovContent.innerHTML = contentHtml;
+  const ov = document.getElementById('mob-search-overlay');
+  if(ov && contentHtml) ov.classList.add('active');
+  else if(ov && !contentHtml) ov.classList.remove('active');
+}
 
 // ═══ SHORTCUT ACTIONS CATALOG ══════════════════════════════════════════════
 const SHORTCUT_CATALOG = [
@@ -3881,9 +3960,10 @@ function htmlSearch(){
       value="${addrVal}"
       autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
       inputmode="search"
-      oninput="window._lastAddrVal=this.value;doAddr(this.value)"
+      oninput="window._lastAddrVal=this.value;if(this.value.length<2)mobSearchOverlayClose();else doAddr(this.value)"
       onkeydown="if(event.key==='Enter'){event.preventDefault();window._lastAddrVal=this.value;doAddr(this.value)}"
       onfocus="window._activeSearchCtx=this;if(this.value&&this.value.length>1)doAddr(this.value)"
+      onblur="setTimeout(()=>{if(!document.getElementById('mob-search-overlay')?.matches(':hover')){}},200)"
       style="margin-bottom:0">
     ${(()=>{
       // Restaurăm rezultatele dacă există (după re-render DOM)
@@ -3901,8 +3981,8 @@ function htmlSearch(){
     <input class="inp" id="inp-cad" placeholder="Ex: 127835" inputmode="numeric" autocomplete="off"
       value="${cadVal}"
       oninput="window._lastCadVal=this.value;onCadInput(this.value)"
-      onkeydown="if(event.key==='Enter'){window._lastCadVal=this.value;doCad()}"
-      onfocus="window._activeSearchCtx=this">
+      onkeydown="if(event.key==='Enter'){event.preventDefault();window._lastCadVal=this.value;doCad();mobSearchOverlayClose()}"
+      onfocus="window._activeSearchCtx=this;if(this.value&&this.value.length>=2)onCadInput(this.value)">
     <div id="cad-range" class="help" style="color:#34d399;margin:4px 0 8px">✅ Disponibil: 60.000 – 183.379</div>
     <div class="btn-row">
       <button class="btn-p" onclick="window._lastCadVal=document.getElementById('inp-cad')?.value||window._lastCadVal||'';doCad()" style="flex:1">🔍 Caută</button>
@@ -4395,6 +4475,9 @@ function doAddr(q){
     _addrSetBox('');doCoord();return;
   }
   _addrSetBox(`<div class="re"><span class="spin"></span>Se caută…</div>`);
+  if(window.innerWidth<=840 && document.getElementById('mob-search-overlay')){
+    mobSearchOverlayShow('📍 Adrese & POI', `<div class="re"><span class="spin"></span>Se caută <b>${q}</b>…</div>`);
+  }
 
   _addrT=setTimeout(async()=>{
     try{
@@ -4463,29 +4546,41 @@ function doAddr(q){
   },350);
 }
 
-// Scrie în addr-box oriunde s-ar afla (desktop tc-search sau mob-body)
+// Scrie în addr-box — desktop: în DOM inline; mobil: overlay fix
 function _addrSetBox(html2){
-  let found = false;
-  const box = document.getElementById('addr-box');
-  if(box){
-    box.innerHTML = html2;
-    box.style.display = html2 ? 'block' : 'none';
-    found = true;
+  const isMob = window.innerWidth <= 840;
+
+  if(isMob){
+    // Pe mobil folosim overlay-ul fix (nu e afectat de re-render mob-body)
+    if(html2){
+      mobSearchOverlayShow('📍 Adrese & POI', html2);
+    } else {
+      mobSearchOverlayClose();
+    }
+  } else {
+    // Desktop: scriem direct în addr-box din DOM
+    const box = document.getElementById('addr-box');
+    if(box){
+      box.innerHTML = html2 || '';
+      box.style.display = html2 ? 'block' : 'none';
+    }
   }
-  // Stocăm întotdeauna pentru restaurare după re-render
+  // Stocăm pentru restaurare după re-render DOM
   window._pendingAddrHtml = html2 || null;
   if(!html2) window._pendingAddrResults = null;
-  return found;
 }
 
 function pickAddr(i){
   const it=(window._addrI||window._pendingAddrResults)?.[i];if(!it)return;
   const[lng,lat]=it.center;
-  const label=it.text||it.place_name.split(',')[0];
-  // Curățăm boxul și câmpul
+  const label=it.text||(it.place_name||'').split(',')[0];
+  // Curățăm
   _addrSetBox('');
+  mobSearchOverlayClose();
   window._pendingAddrResults=null;
+  window._pendingAddrHtml=null;
   window._addrI=null;
+  // Setăm valoarea în input
   const inp=document.getElementById('inp-addr');
   if(inp){ inp.value=label; window._lastAddrVal=label; }
   // Închidem panoul mobil + ascundem keyboard iOS
@@ -4692,13 +4787,31 @@ async function goToLocation(lat, lng, label){
 let _cadTimer = null;
 function onCadInput(val){
   clearTimeout(_cadTimer);
-  const box = document.querySelector('#cad-box');
-  if(!box) return;
-  const v = val.trim();
-  if(v.length < 2){ box.innerHTML=''; return; }
-  
+  const isMob = window.innerWidth <= 840;
+  const v = (val||'').trim();
+
+  // Golit — închidem
+  if(v.length < 2){
+    if(isMob) mobSearchOverlayClose();
+    else { const b=document.querySelector('#cad-box'); if(b) b.innerHTML=''; }
+    return;
+  }
+
+  const setCadBox = (htmlStr) => {
+    if(isMob){
+      if(htmlStr) mobSearchOverlayShow('🔢 Cadastru Iași', htmlStr);
+      else mobSearchOverlayClose();
+    } else {
+      const box = document.querySelector('#cad-box');
+      if(box) box.innerHTML = htmlStr || '';
+    }
+  };
+
   _cadTimer = setTimeout(()=>{
-    if(!S.cadIdx?.size){ box.innerHTML='<div class="re">Cadastrul se încarcă...</div>'; return; }
+    if(!S.cadIdx?.size){
+      setCadBox('<div class="re">⏳ Cadastrul se încarcă…</div>');
+      return;
+    }
     const key = v.toLowerCase().replace(/\s+/g,'');
     const res=[];
     const starts=[],contains=[];
@@ -4707,18 +4820,20 @@ function onCadInput(val){
       else if(k.startsWith(key))starts.push(f);
       else if(k.includes(key))contains.push(f);
     }
-    if(!res.length)res.push(...starts.slice(0,10),...contains.slice(0,5));
+    if(!res.length) res.push(...starts.slice(0,10),...contains.slice(0,5));
     if(!res.length){
-      box.innerHTML = `<div class="re">Niciun nr. cadastral cu "${esc(v)}"</div>`;
+      setCadBox(`<div class="re">Niciun nr. cadastral cu "<b>${esc(v)}</b>"</div>`);
       return;
     }
     window._cadR = res;
-    box.innerHTML = res.map((f,i)=>`
-      <div class="ri" onclick="pickCad(${i})">
-        <span style="font-weight:700;color:#e2e8f0">${esc(f.properties?.nrcad||'-')}</span>
-        <span class="badge b-b" style="padding:1px 6px;font-size:10px;margin-left:5px">${esc(f.properties?.utr||'?')}</span>
-        <span style="font-size:10px;color:#64748b;margin-left:4px">~${Math.round(f.properties?.SHAPE_Area||0)} m²</span>
+    const cadHtml = res.map((f,i)=>`
+      <div class="ri" onclick="pickCad(${i});mobSearchOverlayClose()"
+        style="padding:13px 16px;display:flex;align-items:center;gap:8px">
+        <span style="font-weight:800;font-size:15px;color:#e2e8f0">${esc(f.properties?.nrcad||'-')}</span>
+        <span class="badge b-b" style="padding:2px 8px;font-size:11px">${esc(f.properties?.utr||'?')}</span>
+        <span style="font-size:11px;color:#64748b;margin-left:auto">~${Math.round(f.properties?.SHAPE_Area||0)} m²</span>
       </div>`).join('');
+    setCadBox(cadHtml);
   }, 200);
 }
 
@@ -4904,6 +5019,8 @@ function doReset(){
   // Curățăm inputurile
   document.querySelectorAll('#inp-addr,#inp-cad,#inp-coord').forEach(el=>el.value='');
   document.querySelectorAll('#addr-box,#cad-box').forEach(el=>el.innerHTML='');
+  mobSearchOverlayClose();
+  window._pendingAddrResults=null;window._pendingAddrHtml=null;window._addrI=null;
   window._addrI=null;window._cadR=null;
   // Nu avem nevoie de refresh - resetăm starea complet
   renderAll();
