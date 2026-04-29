@@ -771,6 +771,17 @@ var AEDIS = {
   showDim: true,                // etichete dimensionale
   showShadow: false,            // simulare umbra (simplificata)
   showSetbacks: true,           // aliniamente vizuale
+
+  // Forma planimetrica clădire
+  forma: 'auto',               // auto | patrat | dreptunghi | L | U | T | curte | bara
+  formaRatio: 0.35,            // grosimea brațelor pentru L/U/T (0.2–0.5 din bbox)
+
+  // Fatada: balcoane + perete cortina
+  balcoane: false,             // activare balcoane
+  balconAdancime: 1.5,         // adâncime balcon (m)
+  balconLaturi: ['S','E'],     // laturile cu balcoane
+  peretelCortina: false,       // activare perete cortina
+  cortinaProcent: 60,          // % fatada acoperita de cortina
 };
 var AEDIS_FN = {
   rezidential_colectiv: {
@@ -2462,65 +2473,62 @@ function buildFP(geom, paramsOrUtr){
       }
     }
 
-    // ── Forma clădire: pătrat/dreptunghi înscris în edificabil ────────────
-    if(AEDIS.forma === 'patrat' || AEDIS.forma === 'dreptunghi'){
+    // ── Forma clădire: pătrat/dreptunghi/L/U/T/curte/bara ─────────────────
+    if(AEDIS.forma && AEDIS.forma !== 'auto'){
       try{
         const bbox = turf.bbox(zone);
         const zCx = (bbox[0]+bbox[2])/2;
         const zCy = (bbox[1]+bbox[3])/2;
         const zA2 = turf.area(zone);
-        
         const mLng2 = 111320*Math.cos(zCy*Math.PI/180);
         const mLat2 = 111320;
-        
-        // Dimensiunile bounding box în metri
         const bboxW = (bbox[2]-bbox[0])*mLng2;
         const bboxH = (bbox[3]-bbox[1])*mLat2;
-        
-        let rectW, rectH;
-        if(AEDIS.forma === 'patrat'){
-          // Pătrat cu aria = aria edificabilului (limitat la bounding box)
-          const side = Math.min(Math.sqrt(zA2), bboxW*0.9, bboxH*0.9);
-          rectW = side; rectH = side;
-        } else {
-          // Dreptunghi cu raport 1:1.5, aria = aria edificabilului
-          rectH = Math.min(Math.sqrt(zA2/1.5), bboxH*0.9);
-          rectW = Math.min(rectH*1.5, bboxW*0.9);
+        const brg2 = (S.bearing||0)*Math.PI/180;
+        const cosB=Math.cos(brg2), sinB=Math.sin(brg2);
+        const ratio = Math.max(0.2, Math.min(0.5, AEDIS.formaRatio||0.35));
+        const rot=([dx,dy])=>[zCx+(dx*cosB-dy*sinB)/mLng2, zCy+(dx*sinB+dy*cosB)/mLat2];
+        const poly=(pts)=>({type:'Feature',geometry:{type:'Polygon',coordinates:[[...pts.map(rot),rot(pts[0])]]},properties:{}});
+        let shapeFeat=null;
+        const W=bboxW*0.9, H=bboxH*0.9;
+        const hw=W/2, hh=H/2;
+        const t=ratio;
+        if(AEDIS.forma==='patrat'){
+          const s=Math.min(Math.sqrt(zA2),W,H); const hs=s/2;
+          shapeFeat=poly([[-hs,-hh],[hs,-hh],[hs,hh],[-hs,hh]]);
+        }else if(AEDIS.forma==='dreptunghi'){
+          shapeFeat=poly([[-hw,-hh],[hw,-hh],[hw,hh],[-hw,hh]]);
+        }else if(AEDIS.forma==='bara'){
+          const bw=Math.min(hw,hh*1.5), bh=Math.min(hh,hw/1.5)*0.4;
+          shapeFeat=poly([[-bw,-bh],[bw,-bh],[bw,bh],[-bw,bh]]);
+        }else if(AEDIS.forma==='L'){
+          const tw=W*t, th=H*t;
+          shapeFeat=poly([[-hw,-hh],[hw,-hh],[hw,-hh+th],[-hw+tw,-hh+th],[-hw+tw,hh],[-hw,hh]]);
+        }else if(AEDIS.forma==='U'){
+          const tw=W*t, th=H*t;
+          shapeFeat={type:'Feature',geometry:{type:'Polygon',coordinates:[[
+            rot([-hw,-hh]),rot([hw,-hh]),rot([hw,hh]),rot([hw-tw,hh]),rot([hw-tw,-hh+th]),
+            rot([-hw+tw,-hh+th]),rot([-hw+tw,hh]),rot([-hw,hh]),rot([-hw,-hh])
+          ]]},properties:{}};
+        }else if(AEDIS.forma==='T'){
+          const tw=W*t, th=H*t;
+          shapeFeat=poly([[-hw,-hh],[hw,-hh],[hw,-hh+th],[tw/2,-hh+th],[tw/2,hh],[-tw/2,hh],[-tw/2,-hh+th],[-hw,-hh+th]]);
+        }else if(AEDIS.forma==='curte'){
+          const tw=W*t, th=H*t;
+          const outer=[[-hw,-hh],[hw,-hh],[hw,hh],[-hw,hh],[-hw,-hh]];
+          const inner=[[-(hw-tw),-(hh-th)],[hw-tw,-(hh-th)],[hw-tw,hh-th],[-(hw-tw),hh-th],[-(hw-tw),-(hh-th)]];
+          shapeFeat={type:'Feature',geometry:{type:'Polygon',coordinates:[outer.map(rot),inner.map(rot).reverse()]},properties:{}};
         }
-        
-        // Convertim în grade
-        const halfW = (rectW/mLng2)/2;
-        const halfH = (rectH/mLat2)/2;
-        
-        // Dreptunghi aliniat cu bearing-ul stradal
-        const brg2 = (S.bearing||0) * Math.PI/180;
-        const cos = Math.cos(brg2), sin = Math.sin(brg2);
-        
-        // Colțurile dreptunghiului rotit cu bearing-ul
-        const corners = [
-          [-halfW*cos - halfH*sin + zCx, -halfW*sin + halfH*cos + zCy],
-          [ halfW*cos - halfH*sin + zCx,  halfW*sin + halfH*cos + zCy],
-          [ halfW*cos + halfH*sin + zCx,  halfW*sin - halfH*cos + zCy],
-          [-halfW*cos + halfH*sin + zCx, -halfW*sin - halfH*cos + zCy],
-        ];
-        corners.push(corners[0]); // close ring
-        
-        const rectFeat = {type:'Feature', geometry:{type:'Polygon', coordinates:[corners]}, properties:{}};
-        
-        // Intersectăm cu zona edificabilă pentru a respecta alinamentele
-        try{
-          const intersected = turf.intersect(rectFeat, zone);
-          if(intersected?.geometry && turf.area(intersected) > zA2*0.1){
-            return intersected;
-          }
-        }catch(e2){}
-        
-        // Fallback: dreptunghi simplu dacă intersecția eșuează
-        return rectFeat;
-      }catch(e2){
-        console.warn('buildFP forma error:', e2.message);
-      }
+        if(shapeFeat?.geometry){
+          try{
+            const isct=turf.intersect(shapeFeat,zone);
+            if(isct?.geometry&&turf.area(isct)>zA2*0.05) return isct;
+          }catch(e3){}
+          return shapeFeat;
+        }
+      }catch(e2){ console.warn('buildFP forma error:', e2.message); }
     }
+
 
     return zone;
   }catch(e){
@@ -2667,65 +2675,62 @@ function buildFP(geom, paramsOrUtr){
       }catch(e){}
     }
 
-    // ── Forma clădire: pătrat/dreptunghi înscris în edificabil ────────────
-    if(AEDIS.forma === 'patrat' || AEDIS.forma === 'dreptunghi'){
+    // ── Forma clădire: pătrat/dreptunghi/L/U/T/curte/bara ─────────────────
+    if(AEDIS.forma && AEDIS.forma !== 'auto'){
       try{
         const bbox = turf.bbox(zone);
         const zCx = (bbox[0]+bbox[2])/2;
         const zCy = (bbox[1]+bbox[3])/2;
         const zA2 = turf.area(zone);
-        
         const mLng2 = 111320*Math.cos(zCy*Math.PI/180);
         const mLat2 = 111320;
-        
-        // Dimensiunile bounding box în metri
         const bboxW = (bbox[2]-bbox[0])*mLng2;
         const bboxH = (bbox[3]-bbox[1])*mLat2;
-        
-        let rectW, rectH;
-        if(AEDIS.forma === 'patrat'){
-          // Pătrat cu aria = aria edificabilului (limitat la bounding box)
-          const side = Math.min(Math.sqrt(zA2), bboxW*0.9, bboxH*0.9);
-          rectW = side; rectH = side;
-        } else {
-          // Dreptunghi cu raport 1:1.5, aria = aria edificabilului
-          rectH = Math.min(Math.sqrt(zA2/1.5), bboxH*0.9);
-          rectW = Math.min(rectH*1.5, bboxW*0.9);
+        const brg2 = (S.bearing||0)*Math.PI/180;
+        const cosB=Math.cos(brg2), sinB=Math.sin(brg2);
+        const ratio = Math.max(0.2, Math.min(0.5, AEDIS.formaRatio||0.35));
+        const rot=([dx,dy])=>[zCx+(dx*cosB-dy*sinB)/mLng2, zCy+(dx*sinB+dy*cosB)/mLat2];
+        const poly=(pts)=>({type:'Feature',geometry:{type:'Polygon',coordinates:[[...pts.map(rot),rot(pts[0])]]},properties:{}});
+        let shapeFeat=null;
+        const W=bboxW*0.9, H=bboxH*0.9;
+        const hw=W/2, hh=H/2;
+        const t=ratio;
+        if(AEDIS.forma==='patrat'){
+          const s=Math.min(Math.sqrt(zA2),W,H); const hs=s/2;
+          shapeFeat=poly([[-hs,-hh],[hs,-hh],[hs,hh],[-hs,hh]]);
+        }else if(AEDIS.forma==='dreptunghi'){
+          shapeFeat=poly([[-hw,-hh],[hw,-hh],[hw,hh],[-hw,hh]]);
+        }else if(AEDIS.forma==='bara'){
+          const bw=Math.min(hw,hh*1.5), bh=Math.min(hh,hw/1.5)*0.4;
+          shapeFeat=poly([[-bw,-bh],[bw,-bh],[bw,bh],[-bw,bh]]);
+        }else if(AEDIS.forma==='L'){
+          const tw=W*t, th=H*t;
+          shapeFeat=poly([[-hw,-hh],[hw,-hh],[hw,-hh+th],[-hw+tw,-hh+th],[-hw+tw,hh],[-hw,hh]]);
+        }else if(AEDIS.forma==='U'){
+          const tw=W*t, th=H*t;
+          shapeFeat={type:'Feature',geometry:{type:'Polygon',coordinates:[[
+            rot([-hw,-hh]),rot([hw,-hh]),rot([hw,hh]),rot([hw-tw,hh]),rot([hw-tw,-hh+th]),
+            rot([-hw+tw,-hh+th]),rot([-hw+tw,hh]),rot([-hw,hh]),rot([-hw,-hh])
+          ]]},properties:{}};
+        }else if(AEDIS.forma==='T'){
+          const tw=W*t, th=H*t;
+          shapeFeat=poly([[-hw,-hh],[hw,-hh],[hw,-hh+th],[tw/2,-hh+th],[tw/2,hh],[-tw/2,hh],[-tw/2,-hh+th],[-hw,-hh+th]]);
+        }else if(AEDIS.forma==='curte'){
+          const tw=W*t, th=H*t;
+          const outer=[[-hw,-hh],[hw,-hh],[hw,hh],[-hw,hh],[-hw,-hh]];
+          const inner=[[-(hw-tw),-(hh-th)],[hw-tw,-(hh-th)],[hw-tw,hh-th],[-(hw-tw),hh-th],[-(hw-tw),-(hh-th)]];
+          shapeFeat={type:'Feature',geometry:{type:'Polygon',coordinates:[outer.map(rot),inner.map(rot).reverse()]},properties:{}};
         }
-        
-        // Convertim în grade
-        const halfW = (rectW/mLng2)/2;
-        const halfH = (rectH/mLat2)/2;
-        
-        // Dreptunghi aliniat cu bearing-ul stradal
-        const brg2 = (S.bearing||0) * Math.PI/180;
-        const cos = Math.cos(brg2), sin = Math.sin(brg2);
-        
-        // Colțurile dreptunghiului rotit cu bearing-ul
-        const corners = [
-          [-halfW*cos - halfH*sin + zCx, -halfW*sin + halfH*cos + zCy],
-          [ halfW*cos - halfH*sin + zCx,  halfW*sin + halfH*cos + zCy],
-          [ halfW*cos + halfH*sin + zCx,  halfW*sin - halfH*cos + zCy],
-          [-halfW*cos + halfH*sin + zCx, -halfW*sin - halfH*cos + zCy],
-        ];
-        corners.push(corners[0]); // close ring
-        
-        const rectFeat = {type:'Feature', geometry:{type:'Polygon', coordinates:[corners]}, properties:{}};
-        
-        // Intersectăm cu zona edificabilă pentru a respecta alinamentele
-        try{
-          const intersected = turf.intersect(rectFeat, zone);
-          if(intersected?.geometry && turf.area(intersected) > zA2*0.1){
-            return intersected;
-          }
-        }catch(e2){}
-        
-        // Fallback: dreptunghi simplu dacă intersecția eșuează
-        return rectFeat;
-      }catch(e2){
-        console.warn('buildFP forma error:', e2.message);
-      }
+        if(shapeFeat?.geometry){
+          try{
+            const isct=turf.intersect(shapeFeat,zone);
+            if(isct?.geometry&&turf.area(isct)>zA2*0.05) return isct;
+          }catch(e3){}
+          return shapeFeat;
+        }
+      }catch(e2){ console.warn('buildFP forma error:', e2.message); }
     }
+
 
     return zone;
   }catch(e){
@@ -3791,39 +3796,6 @@ function htmlSearch(){
       ${S.multiMode?'🟡 MULTISELECT ACTIV — click pe hartă adaugă parcele':'⬜ Activează Multiselect'}
     </button>
     ${S.parcels.length?`<div style="background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);border-radius:8px;padding:8px 10px;font-size:12px;color:#34d399;margin-top:4px">✅ <b>${S.parcels.length}</b> parcelă/parcele selectate</div>`:''}
-  </div>
-
-  <div class="section">🗺 Navigare hartă</div>
-  <div class="card">
-    <div class="help" style="margin-bottom:8px">Vedere și orientare rapidă a hărții.</div>
-    <div class="btn-row" style="margin-bottom:8px">
-      <button class="btn-p" onclick="set3D(60,-20)" style="flex:1">🏙 3D</button>
-      <button class="btn-s" onclick="set2D()" style="flex:1">⬛ 2D</button>
-      <button class="btn-s" onclick="map.easeTo({bearing:0,duration:600})" style="flex:1">🧭 Nord</button>
-    </div>
-    <div class="help" style="margin-bottom:6px">Stil hartă:</div>
-    <div class="g3" style="margin-bottom:8px">
-      <button class="btn-s" onclick="map.setStyle('${window.STYLES?.custom||''}');document.getElementById('selBase').value='custom';ss('🌆 Urban 3D activ')" style="font-size:11px;padding:7px 4px">🌆 Urban 3D</button>
-      <button class="btn-s" onclick="(()=>{const sel=document.getElementById('selBase');if(sel){sel.value='standard';sel.dispatchEvent(new Event('change'));}})();ss('☀ Standard 3D activ')" style="font-size:11px;padding:7px 4px">☀ Standard</button>
-      <button class="btn-s" onclick="(()=>{const sel=document.getElementById('selBase');if(sel){sel.value='sat';sel.dispatchEvent(new Event('change'));}})();ss('🛰 Satelitar activ')" style="font-size:11px;padding:7px 4px">🛰 Satelit</button>
-    </div>
-    <div class="help" style="margin-bottom:6px">Pitch / Bearing manual:</div>
-    <div style="margin-bottom:4px">
-      <div style="display:flex;justify-content:space-between;font-size:10px;color:#94a3b8;margin-bottom:2px"><span>Pitch (înclinare)</span><span id="pitchV2">0°</span></div>
-      <input type="range" id="slPitch2" min="0" max="85" value="0" style="width:100%;accent-color:#3b82f6"
-        oninput="const v=+this.value;map.easeTo({pitch:v,duration:150});document.getElementById('pitchV2').textContent=v+'°';document.getElementById('pitchV').textContent=v+'°';">
-    </div>
-    <div>
-      <div style="display:flex;justify-content:space-between;font-size:10px;color:#94a3b8;margin-bottom:2px"><span>Bearing (rotire)</span><span id="bearV2">0°</span></div>
-      <input type="range" id="slBearing2" min="0" max="360" value="0" style="width:100%;accent-color:#3b82f6"
-        oninput="const v=+this.value;map.easeTo({bearing:v,duration:150});document.getElementById('bearV2').textContent=v+'°';document.getElementById('bearV').textContent=v+'°';">
-    </div>
-  </div>
-
-  <div class="section">📋 Acțiuni rapide</div>
-  <div class="card" style="display:flex;flex-direction:column;gap:8px">
-    <button class="btn-g" onclick="showPdfModal?showPdfModal():runExport()" style="font-size:13px;padding:10px">📄 Raport Urbanistic PDF</button>
-    <button class="btn-g" onclick="generateSolarStudy()" style="font-size:13px;padding:10px;background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.4);color:#fbbf24">☀ Pre-Studiu Însorire PDF</button>
   </div>
   `;
 }
@@ -6377,20 +6349,14 @@ async function runExport(){
     pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
     hdr('VEDERI 3D — ILUMINARE ZI / NOAPTE / GOLDEN HOUR',2);
     let cy=30;const half=(W-32)/2;
-    const hasV3d=v3dImgs.day&&v3dImgs.day.length>500;
-    if(hasV3d){
+    if(v3dImgs.day&&v3dImgs.day.length>500){
       cy=addImg(v3dImgs.day,14,cy,half,56,'FIG. 1 — Viewer 3D AEDIS · Iluminare ZI');
       if(v3dImgs.night&&v3dImgs.night.length>500)addImg(v3dImgs.night,14+half+4,cy-62,half,56,'FIG. 2 — Viewer 3D AEDIS · Iluminare NOAPTE');
-    }else if(mapImg3D&&mapImg3D.length>500){cy=addImg(mapImg3D,14,cy,half,56,'FIG. 1 — Vedere 3D urbana (pitch 62°) · Context urban');
-      if(mapImgLat&&mapImgLat.length>500)addImg(mapImgLat,14+half+4,cy-62,half,56,'FIG. 2 — Vedere laterala (bearing 90°) · Context E-V');}
+    }else if(mapImg3D&&mapImg3D.length>500){cy=addImg(mapImg3D,14,cy,W-28,65,'FIG. 1 — Vedere 3D Mapbox · Context urban');}
     cy+=2;
-    if(hasV3d&&v3dImgs.golden&&v3dImgs.golden.length>500){
+    if(v3dImgs.golden&&v3dImgs.golden.length>500){
       cy=addImg(v3dImgs.golden,14,cy,half,56,'FIG. 3 — Viewer 3D · Golden Hour');
       if(v3dImgs.overcast&&v3dImgs.overcast.length>500)addImg(v3dImgs.overcast,14+half+4,cy-62,half,56,'FIG. 4 — Viewer 3D · Cer acoperit');
-      cy+=6;
-    }else if(!hasV3d&&mapImgFront&&mapImgFront.length>500){
-      cy=addImg(mapImgFront,14,cy,half,52,'FIG. 3 — Vedere frontala (bearing 0°) · Context N-S');
-      if(mapImgAerial&&mapImgAerial.length>500)addImg(mapImgAerial,14+half+4,cy-58,half,52,'FIG. 4 — Vedere aeriana (pitch 70°, bearing 45°)');
       cy+=6;
     }
     if(mapStdImg&&mapStdImg.length>500)cy=addImg(mapStdImg,14,cy,W-28,50,'FIG. 5 — Mapbox Standard 3D · Iluminare PBR');
@@ -6403,9 +6369,9 @@ async function runExport(){
     pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
     hdr('SITUATIE EXISTENTA SI CONTEXT URBAN',3);cy=30;
     cy=sec('1. AMPLASAMENT — VEDERE 3D CONTEXTUALA (pitch 62°)',cy);cy+=2;
-    cy=addImg(mapImg3D,14,cy,W-28,70,'FIG. 7 — Vedere 3D principala · Volumul propus (albastru) in contextul urban real · Sursa: UrbanX/Mapbox GL JS');cy+=3;
+    cy=addImg(mapImg3D,14,cy,W-28,68,'FIG. 7 — Vedere 3D principala · Volumul propus (albastru) in contextul urban real · Sursa: UrbanX/Mapbox GL JS');cy+=2;
     cy=sec('2. PLAN 2D — ORTOGONAL (vedere de sus, pitch=0°)',cy);cy+=2;
-    cy=addImg(mapImg2D,14,cy,W-28,62,'FIG. 8 — Plan 2D ortogonal · Parcela marcata + contextul construit existent · Sursa: UrbanX/Mapbox GL JS');cy+=5;
+    cy=addImg(mapImg2D,14,cy,W-28,60,'FIG. 8 — Plan 2D ortogonal · Parcela marcata + contextul construit existent · Sursa: UrbanX/Mapbox GL JS');cy+=4;
     cy=sec('3. DATE PARCELA SI AMPLASAMENT',cy);
     cy=row2('Nr. cadastral',nrcad,'UTR (zona PUG)',utr,cy);
     cy=row2('Suprafata teren',area+' mp','Perimetru aprox.','calc. GIS',cy);
@@ -6505,8 +6471,8 @@ async function runExport(){
      ['Spatii verzi min oblig.',svMin+' mp ('+sv+'%)','Nr. ap. estimat',scMax>0?Math.floor(scMax*parseInt(niv)*0.9/55)+' ap.':'—']
     ].forEach(([l1,v1,l2,v2])=>{cy=row2(l1,v1,l2,v2,cy);});cy+=6;
     cy=sec('13. VEDERI SUPLIMENTARE VOLUM PROPUS',cy);cy+=2;
-    const imgA=v3dImgs.front||mapImgFront||(mapImg3D!==mapImg2D?mapImg3D:null);
-    const imgB=v3dImgs.topdown||mapImgAerial||(v3dImgs.day&&v3dImgs.day!==imgA?v3dImgs.day:mapImgBack);
+    const imgA=v3dImgs.front||mapImgFront||mapImg3D;
+    const imgB=v3dImgs.topdown||mapImgAerial||v3dImgs.day;
     if(imgA&&imgA.length>500){
       addImg(imgA,14,cy,half,52,'FIG. 12 — Vedere frontala / viewer 3D');
       if(imgB&&imgB.length>500)addImg(imgB,14+half+4,cy,half,52,'FIG. 13 — Vedere aeriana / top-down');
@@ -6772,6 +6738,12 @@ function aedisBuild(){
   const ap = S.parcels[S.activeParcel??0];
   if(!ap?.geo?.geometry){ ss('⚠️ AEDIS: Selectați o parcelă mai întâi.'); return; }
 
+  // FIX DEMOLARE: la fiecare build în scenariu demolare, eliminăm clădirile existente de pe parcelă
+  // înainte de a adăuga noul volum
+  if(AEDIS.scenariu === 'demolare'){
+    _aedisRemoveExistingFromCtx();
+  }
+
   const feats = [];
 
   // MULTIPARCEL: generăm pentru toate parcelele dacă sunt multiple selectate
@@ -7026,6 +6998,65 @@ function aedisBuild(){
     // Stocam si setam
   } // end for parcelsToGen
 
+  // ── Generare balcoane ───────────────────────────────────────────────────
+  if(AEDIS.balcoane && feats.length > 0){
+    try{
+      const ap3 = S.parcels[S.activeParcel??0];
+      if(ap3?.geo?.geometry){
+        const etajFeats = feats.filter(f=>!f.properties?.isExistent&&(f.properties?.floor??0)>=1);
+        const adanc = Math.max(0.5, AEDIS.balconAdancime||1.5);
+        const laturi = AEDIS.balconLaturi||['S'];
+        etajFeats.slice(0,Math.min(etajFeats.length, 20)).forEach(ef=>{
+          if(!ef.geometry?.coordinates?.[0]) return;
+          const ring = ef.geometry.coordinates[0];
+          const base = ef.properties.base||0;
+          const top = base + 0.15; // placa balcon subtire
+          // Calculam directia fiecarei laturi si adaugam balcoanele
+          for(let si=0;si<ring.length-1;si++){
+            const p1=ring[si], p2=ring[(si+1)%ring.length];
+            const midLng=(p1[0]+p2[0])/2, midLat=(p1[1]+p2[1])/2;
+            // Directia laturii (bearing 0=N, 90=E, 180=S, 270=V)
+            const dx=(p2[0]-p1[0])*111320*Math.cos(midLat*Math.PI/180);
+            const dy=(p2[1]-p1[1])*111320;
+            const bearing = ((Math.atan2(dx,dy)*180/Math.PI)+360)%360;
+            // Detectam daca e N/E/S/V (in 45° de la directia nominala)
+            const dirLabel = bearing<45||bearing>=315?'N':bearing<135?'E':bearing<225?'S':'V';
+            if(!laturi.includes(dirLabel)) continue;
+            // Normalele spre exterior
+            const len = Math.sqrt(dx*dx+dy*dy);
+            if(len<0.5) continue;
+            const nx=dy/len, ny=-dx/len;
+            const mLng=111320*Math.cos(midLat*Math.PI/180), mLat2=111320;
+            const offset=adanc;
+            // Balcon = dreptunghi proiectat pe latură
+            const lLen=Math.min(len,12)*0.8; // max 12m latime balcon
+            const midDx=(p2[0]-p1[0])/2*0.8, midDy=(p2[1]-p1[1])/2*0.8;
+            const bl=[p1[0]+midDx*(1-lLen/len*2),p1[1]+midDy*(1-lLen/len*2)];
+            const br=[p1[0]+midDx*(1+lLen/len*2),p1[1]+midDy*(1+lLen/len*2)];
+            const tl=[bl[0]+nx*offset/mLng, bl[1]+ny*offset/mLat2];
+            const tr=[br[0]+nx*offset/mLng, br[1]+ny*offset/mLat2];
+            feats.push({type:'Feature',
+              properties:{base:base-0.15,top:top,color:'#93c5fd',floor:ef.properties.floor,isBalcon:true},
+              geometry:{type:'Polygon',coordinates:[[bl,br,tr,tl,bl]]}});
+          }
+        });
+      }
+    }catch(e){ console.warn('balcoane err:', e.message); }
+  }
+
+  // ── Perete cortina: modificam culoarea etajelor la sticla reflectiva ───
+  if(AEDIS.peretelCortina){
+    const pct = (AEDIS.cortinaProcent||60)/100;
+    const stilDef2 = AEDIS_STIL[AEDIS.stil]||AEDIS_STIL.modern;
+    feats.filter(f=>!f.properties?.isExistent&&(f.properties?.floor??0)>=0&&!f.properties?.isBalcon)
+      .forEach(f=>{
+        if(Math.random()<pct){
+          f.properties.color = '#7dd3fc'; // sticla albastru deschis
+          f.properties.peretelCortina = true;
+        }
+      });
+  }
+
   S.vol._lastFeats = feats;
   S.vol.genDone = true;
   setSource('vol-src',{type:'FeatureCollection',features:feats});
@@ -7263,7 +7294,11 @@ function aedisGenerateAll(){
   aedisBuild();
   // Contextul urban + distanțele
   if(!S.ctx?.features?.length){
-    loadContext().then(()=>{ setTimeout(updateDistanceLines, 300); });
+    loadContext().then(()=>{
+      // Re-aplicăm filtrarea pentru demolare după reîncărcarea contextului
+      if(AEDIS.scenariu === 'demolare') _aedisRemoveExistingFromCtx();
+      setTimeout(updateDistanceLines, 300);
+    });
   } else {
     setTimeout(updateDistanceLines, 400);
   }
@@ -7402,6 +7437,34 @@ function aedisGetContent(){
       </div>
       <div style="font-size:10px;color:#64748b;margin-top:4px">Sursă: OpenStreetMap · poate fi incomplet</div>
     </div>`:'<div class="aedis-ok" style="margin-top:8px">✅ Teren liber — fără construcții existente detectate</div>'}
+
+    <div class="aedis-section">Forma planimetrică</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px">
+      ${[
+        {id:'auto',ico:'🏗',label:'Auto',desc:'Urmărește edificabilul'},
+        {id:'dreptunghi',ico:'▬',label:'Dreptunghi',desc:'Corp simplu'},
+        {id:'patrat',ico:'■',label:'Pătrat',desc:'Corp pătrat'},
+        {id:'bara',ico:'━',label:'Bară',desc:'Corp lung îngust'},
+        {id:'L',ico:'⌐',label:'Corp L',desc:'Formă L'},
+        {id:'U',ico:'⊓',label:'Corp U',desc:'Formă U/potcoavă'},
+        {id:'T',ico:'⊤',label:'Corp T',desc:'Formă T'},
+        {id:'curte',ico:'⬜',label:'Curte int.',desc:'Curte interioară'},
+      ].map(f=>`
+        <button onclick="AEDIS.forma='${f.id}';aedisRender();if(S.vol.genDone||AEDIS3D.active)aedisGenerateAll()"
+          title="${f.desc}"
+          style="padding:8px 4px;border-radius:9px;border:2px solid ${AEDIS.forma===f.id?'#d4af37':'rgba(255,255,255,.15)'};background:${AEDIS.forma===f.id?'rgba(212,175,55,.15)':'rgba(11,18,32,.8)'};color:${AEDIS.forma===f.id?'#d4af37':'#94a3b8'};cursor:pointer;font-size:18px;text-align:center;line-height:1.2;transition:all .15s">
+          <div style="font-size:18px">${f.ico}</div>
+          <div style="font-size:9px;margin-top:2px;font-weight:700">${f.label}</div>
+        </button>`).join('')}
+    </div>
+    ${(AEDIS.forma==='L'||AEDIS.forma==='U'||AEDIS.forma==='T'||AEDIS.forma==='curte')?`
+    <div class="aedis-row" style="margin-bottom:10px">
+      <span class="aedis-lbl">Grosime brațe</span>
+      <input type="range" min="20" max="50" step="5" value="${Math.round((AEDIS.formaRatio||0.35)*100)}"
+        oninput="AEDIS.formaRatio=+this.value/100;document.getElementById('aedis-ratio-val').textContent=this.value+'%';if(S.vol.genDone||AEDIS3D.active)aedisGenerateAll()"
+        style="flex:1;accent-color:#d4af37">
+      <span class="aedis-val" id="aedis-ratio-val">${Math.round((AEDIS.formaRatio||0.35)*100)}%</span>
+    </div>`:''}
 
     <div class="aedis-section">Regim de înălțime</div>
     <div class="aedis-g2">
@@ -7585,6 +7648,49 @@ function aedisGetContent(){
         <td>${r.sv&&pN(params.sv)<r.sv?'⚠️':'✅'}</td>
       </tr>
     </table>
+
+    <div class="aedis-section" style="margin-top:10px">🏗 Elemente de fațadă</div>
+    <div style="background:#080f1c;border-radius:10px;padding:12px;border:1px solid rgba(255,255,255,.08);margin-bottom:10px">
+      <!-- BALCOANE -->
+      <label class="aedis-toggle" style="margin-bottom:8px">
+        <input type="checkbox" ${AEDIS.balcoane?'checked':''} onchange="AEDIS.balcoane=this.checked;aedisRender();if(S.vol.genDone||AEDIS3D.active)aedisGenerateAll()">
+        <span class="aedis-toggle-label" style="font-weight:700;color:#e2e8f0">🏠 Balcoane</span>
+      </label>
+      ${AEDIS.balcoane?`
+      <div class="aedis-row" style="margin-bottom:6px">
+        <span class="aedis-lbl">Adâncime (m)</span>
+        <input type="range" min="0.8" max="2.5" step="0.1" value="${AEDIS.balconAdancime||1.5}"
+          oninput="AEDIS.balconAdancime=+this.value;document.getElementById('balc-adanc').textContent=this.value+'m';if(S.vol.genDone||AEDIS3D.active)aedisGenerateAll()"
+          style="flex:1;accent-color:#3b82f6">
+        <span class="aedis-val" id="balc-adanc">${(AEDIS.balconAdancime||1.5).toFixed(1)}m</span>
+      </div>
+      <div style="font-size:10px;color:#94a3b8;margin-bottom:6px">Laturi cu balcoane:</div>
+      <div style="display:flex;gap:5px;margin-bottom:8px">
+        ${['N','E','S','V'].map(l=>`
+          <button onclick="(()=>{const a=AEDIS.balconLaturi;const i=a.indexOf('${l}');if(i>=0)a.splice(i,1);else a.push('${l}');aedisRender();if(S.vol.genDone||AEDIS3D.active)aedisGenerateAll()})()"
+            style="flex:1;padding:6px 2px;border-radius:7px;border:1px solid ${(AEDIS.balconLaturi||[]).includes('${l}')?'#3b82f6':'rgba(255,255,255,.15)'};background:${(AEDIS.balconLaturi||[]).includes('${l}')?'rgba(59,130,246,.2)':'rgba(11,18,32,.8)'};color:${(AEDIS.balconLaturi||[]).includes('${l}')?'#60a5fa':'#64748b'};cursor:pointer;font-size:12px;font-weight:700">
+            ${l}
+          </button>`).join('')}
+      </div>`:''}
+
+      <!-- SEPARATOR -->
+      <div style="border-top:1px solid rgba(255,255,255,.06);margin:8px 0"></div>
+
+      <!-- PERETE CORTINA -->
+      <label class="aedis-toggle" style="margin-bottom:8px">
+        <input type="checkbox" ${AEDIS.peretelCortina?'checked':''} onchange="AEDIS.peretelCortina=this.checked;aedisRender();if(S.vol.genDone||AEDIS3D.active)aedisGenerateAll()">
+        <span class="aedis-toggle-label" style="font-weight:700;color:#e2e8f0">🪟 Perete cortină (curtain wall)</span>
+      </label>
+      ${AEDIS.peretelCortina?`
+      <div class="aedis-row" style="margin-bottom:4px">
+        <span class="aedis-lbl">Acoperire fațadă</span>
+        <input type="range" min="30" max="100" step="5" value="${AEDIS.cortinaProcent||60}"
+          oninput="AEDIS.cortinaProcent=+this.value;document.getElementById('cortina-pct').textContent=this.value+'%';if(S.vol.genDone||AEDIS3D.active)aedisGenerateAll()"
+          style="flex:1;accent-color:#38bdf8">
+        <span class="aedis-val" id="cortina-pct">${AEDIS.cortinaProcent||60}%</span>
+      </div>
+      <div style="font-size:10px;color:#64748b;line-height:1.4">Perete cortină = fațadă din sticlă/aluminiu pe toată înălțimea. Afectează stilul arhitectural și randarea AI.</div>`:''}
+    </div>
 
     <div class="aedis-section" style="margin-top:10px">🎨 AI Render fotorealist</div>
     <div style="padding:10px;background:#080f1c;border-radius:8px;border:1px solid rgba(212,175,55,.2);margin-bottom:10px">
@@ -8174,8 +8280,14 @@ function aedisPromptBuild(){
   const parterExtra = AEDIS.parterDiferit
     ? 'transparent ground floor with large shopfront glazing and arcade, commercial activity at street level, '
     : '';
-  const balcExtra = ['modern','inovator','minimalist'].includes(stilKey)
-    ? 'with individual balconies on each apartment, glass balustrades, '
+  const balcExtra = AEDIS.balcoane
+    ? `prominent balconies on ${(AEDIS.balconLaturi||['S']).join(',')} facades, depth ${(AEDIS.balconAdancime||1.5).toFixed(1)}m, glass railings, `
+    : (['modern','inovator','minimalist'].includes(stilKey)?'with individual balconies on each apartment, glass balustrades, ':'');
+  const cortinaExtra = AEDIS.peretelCortina
+    ? `full-height curtain wall glazing covering ${AEDIS.cortinaProcent||60}% of facade, floor-to-ceiling structural glass panels, reflective glass, `
+    : '';
+  const formaExtra = AEDIS.forma && AEDIS.forma!=='auto'
+    ? `building footprint in ${{'patrat':'square','dreptunghi':'rectangular','L':'L-shaped','U':'U-shaped courtyard building','T':'T-shaped','curte':'hollow square with interior courtyard','bara':'elongated bar building'}[AEDIS.forma]||AEDIS.forma} plan, `
     : '';
   const etajRetras = AEDIS.activeRetragere
     ? 'top floor set back creating a rooftop terrace, penthouse level, '
@@ -8204,7 +8316,7 @@ function aedisPromptBuild(){
   const quality = 'photorealistic architectural visualization, 8K resolution, depth of field, ray traced shadows, HDR lighting, architectural photography style, Lumion render quality, professional architectural CGI';
 
   // ── Prompt final complet ─────────────────────────────────────────────────
-  return `${fnDesc}, ${niv} floors, ${hTot.toFixed(0)}m height, ${area}sqm footprint, ${stilDesc}, ${parterExtra}${balcExtra}${etajRetras}${acoperisDesc}, materials: ${matDesc}, ${ctxDesc}, ${lightDesc}, ${quality}, --no cartoon --no sketch --no diagram --no wireframe`;
+  return `${fnDesc}, ${niv} floors, ${hTot.toFixed(0)}m height, ${area}sqm footprint, ${formaExtra}${stilDesc}, ${parterExtra}${balcExtra}${cortinaExtra}${etajRetras}${acoperisDesc}, materials: ${matDesc}, ${ctxDesc}, ${lightDesc}, ${quality}, --no cartoon --no sketch --no diagram --no wireframe`;
 }
 
 // ── aedisAIRender cu FLUX.1-dev image-to-image (model mai bun) ────────────
@@ -9133,7 +9245,6 @@ async function generateSolarStudy(){
   const mapImg3D=await capMap(62,-25);
   const mapImg2D=await capMap(0,0);
   const mapImgLat=await capMap(58,90);
-  const mapImgFront=await capMap(55,0);
 
   // Standard 3D
   ss('Se capteaza Mapbox Standard 3D...');
@@ -9255,26 +9366,19 @@ async function generateSolarStudy(){
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
   hdr('VIZUALIZARE 3D — ILUMINARE ZI / NOAPTE / GOLDEN HOUR',2);
   let cy=30;const half=(W-32)/2;
-  const hasV3dS=v3dDayImg&&v3dDayImg.length>500;
-  if(hasV3dS){
+  if(v3dDayImg&&v3dDayImg.length>500){
     cy=addImg(v3dDayImg,14,cy,half,56,'FIG. 1 — Viewer 3D AEDIS · Iluminare ZI');
     if(v3dNightImg&&v3dNightImg.length>500)addImg(v3dNightImg,14+half+4,cy-62,half,56,'FIG. 2 — Viewer 3D AEDIS · Iluminare NOAPTE');
-  }else if(mapImg3D&&mapImg3D.length>500){
-    cy=addImg(mapImg3D,14,cy,half,56,'FIG. 1 — Vedere 3D (pitch 62°) · Context urban');
-    if(mapImg2D&&mapImg2D.length>500)addImg(mapImg2D,14+half+4,cy-62,half,56,'FIG. 2 — Plan 2D ortogonal · Context urban');
-  }
+  }else if(mapImg3D&&mapImg3D.length>500){cy=addImg(mapImg3D,14,cy,W-28,65,'FIG. 1 — Vedere 3D Mapbox · Context urban');}
   cy+=2;
-  if(hasV3dS&&v3dGoldenImg&&v3dGoldenImg.length>500){
+  if(v3dGoldenImg&&v3dGoldenImg.length>500){
     cy=addImg(v3dGoldenImg,14,cy,half,56,'FIG. 3 — Viewer 3D · Golden Hour');
     if(v3dOvercastImg&&v3dOvercastImg.length>500)addImg(v3dOvercastImg,14+half+4,cy-62,half,56,'FIG. 4 — Viewer 3D · Cer acoperit');
-    cy+=6;
-  }else if(!hasV3dS&&mapImgLat&&mapImgLat.length>500){
-    cy=addImg(mapImgLat,14,cy,half,52,'FIG. 3 — Vedere laterala (bearing 90°)');
-    if(mapImgFront&&mapImgFront.length>500)addImg(mapImgFront,14+half+4,cy-58,half,52,'FIG. 4 — Vedere frontala (bearing 0°)');
     cy+=6;
   }
   if(aiImg&&aiImg.length>500)cy=addImg(aiImg,14,cy,W-28,50,'FIG. 5 — AI Render fotorealist · Fal.ai FLUX.1');
   if(mapStdImg&&mapStdImg.length>500)cy=addImg(mapStdImg,14,cy,W-28,50,'FIG. 6 — Mapbox Standard 3D · Iluminare PBR · Umbre reale');
+  else if(!v3dDayImg&&mapImg3D&&mapImg3D.length>500)cy=addImg(mapImg3D,14,cy,W-28,50,'FIG. 6 — Vedere 3D Mapbox Urban 3D · Context urban');
   cy=Math.max(cy,252);cy=sec('NOTE TEHNICE — CONDITII DE ILUMINARE SIMULATE',cy);
   body('Vizualizarile 3D sunt generate cu motorul Three.js r128 cu iluminare PBR (Physically Based Rendering), shadere GLSL procedurale (beton, sticla reflectiva, metal, tencuiala) si lumini directionale simulate conform pozitiei soarelui la latitudinea '+lat.toFixed(2)+'N. Preset ZI corespunde orelor 10-14, Golden Hour rasaritului/apusului, Noapte simuleaza iluminatul artificial. Vizualizarile au caracter ilustrativ.',14,cy+2,W-28);
   ftr();
@@ -9283,12 +9387,12 @@ async function generateSolarStudy(){
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
   hdr('SITUATIE EXISTENTA — PLANURI DIN HARTA',3);cy=30;
   cy=sec('FIG. 6 — AMPLASAMENT SI CONTEXT URBAN (vedere de sus)',cy);cy+=2;
-  cy=addImg(mapImg2D,14,cy,W-28,80,'Sursa: UrbanX/Mapbox GL JS · Vedere ortogonala (pitch=0°) · Parcela marcata');cy+=3;
+  cy=addImg(mapImg2D,14,cy,W-28,78,'Sursa: UrbanX/Mapbox GL JS · Vedere ortogonala (pitch=0°) · Parcela marcata');cy+=2;
   cy=sec('FIG. 7 — VEDERE 3D IN CONTEXT (pitch 62°)',cy);cy+=2;
-  cy=addImg(mapImg3D,14,cy,W-28,74,'Sursa: UrbanX/Mapbox GL JS · Vedere 3D cu volumul propus in context urban');
+  cy=addImg(mapImg3D,14,cy,W-28,72,'Sursa: UrbanX/Mapbox GL JS · Vedere 3D cu volumul propus in context urban');
   if(mapImgLat&&mapImgLat.length>500){
-    cy+=3;cy=sec('FIG. 8 — VEDERE LATERALA',cy);cy+=2;
-    cy=addImg(mapImgLat,14,cy,half,46,'Vedere laterala (bearing 90°)');
+    cy+=2;cy=sec('FIG. 8 — VEDERE LATERALA',cy);cy+=2;
+    cy=addImg(mapImgLat,14,cy,half,45,'Vedere laterala (bearing 90°)');
   }
   cy=Math.max(cy,245);cy=sec('DATE PARCEL SI AMPLASAMENT',cy);
   cy=row2s('Nr. cadastral',nrcad,'UTR (zona PUG)',utr,cy+4);
