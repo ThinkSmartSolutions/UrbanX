@@ -1724,20 +1724,21 @@ function addLayers(){
   L({id:'dist-label',type:'symbol',source:'dist-src',
     layout:{
       'text-field':['get','label'],
-      'text-size':11,
-      'text-font':['DIN Offc Pro Bold','Arial Unicode MS Bold'],
+      'text-size':['interpolate',['linear'],['zoom'],14,11,17,14,19,16],
+      'text-font':['Open Sans Bold','Arial Unicode MS Bold'],
       'text-anchor':'center',
       'symbol-placement':'line-center',
-      'text-allow-overlap':true
+      'text-allow-overlap':true,
+      'text-ignore-placement':true
     },
     paint:{
       'text-color':['case',
-        ['==',['get','type'],'between_own'],'#f59e0b',
+        ['==',['get','type'],'between_own'],'#fbbf24',
         ['==',['get','ok'],true],'#34d399',
-        '#ef4444'
+        '#f87171'
       ],
-      'text-halo-color':'rgba(0,0,0,.9)',
-      'text-halo-width':2
+      'text-halo-color':'rgba(0,0,0,.95)',
+      'text-halo-width':2.5
     }
   });
   // ── Etichete cladiri context (inaltime + functiune) ─────────────────────
@@ -5137,7 +5138,18 @@ function setMVS(s){ if(s&&s.getAttribute) s=s.getAttribute('data-s');
   renderTab('proiect'); 
 }
 function setScenariu(s){
+  const prev = S.vol.scenariuConstructie;
   S.vol.scenariuConstructie=s;
+
+  // Sincronizăm și AEDIS.scenariu
+  AEDIS.scenariu = (s==='liber'?'demolare':s==='extindere_h'?'extindere_h':s==='extindere_v'?'extindere_v':'inglobare');
+
+  // Dacă trecem la un scenariu non-demolare, restaurăm clădirile ascunse
+  if(prev==='liber' && s!=='liber'){
+    _aedisRestoreBuildingLayers();
+    try{ map.setLayoutProperty('ctx-3d','visibility','visible'); }catch(e){}
+  }
+
   if(S.vol.genDone){const f=buildVolume();setSource('vol-src',{type:'FeatureCollection',features:f});}
   renderTab('proiect');
 }
@@ -7349,6 +7361,19 @@ function _aedisRestoreCad3D(){
   }catch(e){}
 }
 
+// Restaurăm toate layerele de clădiri ascunse în modul demolare
+function _aedisRestoreBuildingLayers(){
+  const builtinBuildingLayers = [
+    'building','building-extrusion','3d-buildings','add-3d-buildings',
+    'osm-buildings','composite-building','building-shadow',
+    'building-outline','poi-label'
+  ];
+  builtinBuildingLayers.forEach(lid=>{
+    try{ if(map.getLayer(lid)) map.setLayoutProperty(lid,'visibility','visible'); }catch(e){}
+  });
+  _aedisRestoreCad3D();
+}
+
 function aedisGenerateAll(){
   // Verificăm că avem o parcelă selectată
   if(!S.parcels?.length || !S.parcels[S.activeParcel??0]?.geo?.geometry){
@@ -7364,10 +7389,38 @@ function aedisGenerateAll(){
     if(AEDIS3D.renderer){ AEDIS3D.renderer.dispose(); AEDIS3D.renderer=null; }
     AEDIS3D.active = false;
   }
-  // DEMOLARE: curăță contextul de pe parcelă (ascundem din ctx-src)
+
   if(AEDIS.scenariu === 'demolare'){
+    // ── DEMOLARE: ascundem TOATE sursele de clădiri de pe parcelă ──────────
     _aedisRemoveExistingFromCtx();
+
+    // Ascundem layerele built-in Mapbox care redau cladirile OSM/3D tiles
+    // (acestea nu sunt controlate de ctx-src)
+    const builtinBuildingLayers = [
+      'building','building-extrusion','3d-buildings','add-3d-buildings',
+      'osm-buildings','composite-building','building-shadow',
+      'building-outline','poi-label'
+    ];
+    builtinBuildingLayers.forEach(lid=>{
+      try{ if(map.getLayer(lid)) map.setLayoutProperty(lid,'visibility','none'); }catch(e){}
+    });
+
+    // ctx-3d: ascundem complet în modul demolare
+    try{ map.setLayoutProperty('ctx-3d','visibility','none'); }catch(e){}
+    // vol-3d rămâne vizibil (new volume)
+    try{ map.setLayoutProperty('vol-3d','visibility','visible'); }catch(e){}
+
+    ss('🔨 Demolare: teren liber. Se generează volumul nou...');
+
+  } else if(AEDIS.scenariu === 'extindere_h' || AEDIS.scenariu === 'extindere_v'){
+    // ── EXTINDERE: arătăm clădirile existente ──────────────────────────────
+    _aedisRestoreBuildingLayers();
+    try{ map.setLayoutProperty('ctx-3d','visibility','visible'); }catch(e){}
+  } else if(AEDIS.scenariu === 'inglobare'){
+    _aedisRestoreBuildingLayers();
+    try{ map.setLayoutProperty('ctx-3d','visibility','visible'); }catch(e){}
   }
+
   // Generăm fill-extrusion Mapbox
   aedisBuild();
   // Contextul urban + distanțele
@@ -9869,8 +9922,22 @@ function _v3dBuild(ap){
   const toLoc=([lng,lat])=>[(lng-cx)*mLng,(lat-cy2)*mLat];
 
   // ── Context buildings ────────────────────────────────────────────────────
+  const _isDemolare = AEDIS.scenariu === 'demolare';
   (S.ctx?.features||[]).forEach(f=>{
     if(!f.geometry) return;
+
+    // În modul DEMOLARE: excludem clădirile de pe parcelă din viewer
+    if(_isDemolare && S.parcels?.length){
+      try{
+        const ctr=turf.centerOfMass(f);
+        const onParcel=S.parcels.some(p=>{
+          if(!p.geo?.geometry) return false;
+          return turf.booleanPointInPolygon(ctr,{type:'Feature',geometry:p.geo.geometry,properties:{}});
+        });
+        if(onParcel) return; // skip — demolate
+      }catch(e){}
+    }
+
     const h=Math.max(2,f.properties?.h||6);
     const fn=f.properties?.fn||'yes';
     const colMap={residential:'#9ab5cc',apartments:'#8aadbe',house:'#aac0d0',commercial:'#d8a070',retail:'#e0a06a',office:'#7898c0',public:'#8888c0',industrial:'#989898',warehouse:'#909090',hotel:'#a888b8',school:'#88b898','yes':'#9aa8b8'};
