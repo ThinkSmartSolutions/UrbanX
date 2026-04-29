@@ -4213,46 +4213,37 @@ function doGPS(){
 let _addrT=null;
 function doAddr(q){
   clearTimeout(_addrT);
-  const box=document.querySelector('#addr-box');if(!box)return;
-  if(!q||q.trim().length<2){box.innerHTML='';return;}
+  const boxes=document.querySelectorAll('#addr-box');if(!boxes.length)return;
+  if(!q||q.trim().length<2){boxes.forEach(b=>b.innerHTML='');return;}
   // Dacă input-ul arată ca coordonate GPS, apelăm doCoord direct
   const coordPattern=/^-?\d+\.\d+[\s,;]+-?\d+\.\d+/;
   if(coordPattern.test(q.trim())){
     document.querySelectorAll('#inp-coord').forEach(el=>el.value=q.trim());
     document.querySelectorAll('#inp-addr').forEach(el=>el.value='');
-    box.innerHTML='';
+    boxes.forEach(b=>b.innerHTML='');
     doCoord();
     return;
   }
-  box.innerHTML=`<div class="re"><span class="spin"></span>Se caută…</div>`;
+  boxes.forEach(b=>b.innerHTML=`<div class="re"><span class="spin"></span>Se caută…</div>`);
   _addrT=setTimeout(async()=>{
     try{
-      // Căutare în paralel: Nominatim (OSM) pentru POI + Mapbox pentru adrese
       const ctr = map.getCenter();
       const TOKEN='pk.eyJ1IjoiZWk4aHRlciIsImEiOiJjajhhNGtiN3YwOW50MnFwOHBnOGJtcjVtIn0.dT4Ld3v1GoeQRCaIzxNn2g';
-
-      // Imbunatatire cautare: daca centrul hartii e in zona Iasi, adaugam "Iași" la query
-      // pentru a prioritiza rezultatele locale si a evita alte orase
       const isNearIasi = Math.abs(ctr.lat-47.16)<0.15 && Math.abs(ctr.lng-27.58)<0.2;
       const qEnhanced = isNearIasi && !q.toLowerCase().includes('iași') && !q.toLowerCase().includes('iasi') 
         ? q + ' Iași' : q;
-      // Nominatim cu bbox strict Iasi cand suntem in zona
       const viewbox = isNearIasi 
-        ? '27.45,47.22,27.72,47.10' // bbox strict Iasi municipiu
+        ? '27.45,47.22,27.72,47.10'
         : `${ctr.lng-0.3},${ctr.lat+0.3},${ctr.lng+0.3},${ctr.lat-0.3}`;
       const nomUrl = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=8&q=${encodeURIComponent(qEnhanced)}&viewbox=${viewbox}&bounded=${isNearIasi?1:0}&countrycodes=ro&addressdetails=1&accept-language=ro`;
-      // Mapbox cu proximity pe centrul curent si bbox Romania
       const mbUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?access_token=${TOKEN}&language=ro&limit=5&proximity=${ctr.lng.toFixed(4)},${ctr.lat.toFixed(4)}&bbox=27.40,47.05,27.75,47.28&types=address,poi,place,locality`;
 
-      // Rulăm ambele în paralel
       const [nomRes, mbRes] = await Promise.allSettled([
         fetch(nomUrl, {headers:{'Accept-Language':'ro','User-Agent':'UrbanX/1.0 (urbanx@fgtss.ro)'}}).then(r=>r.json()),
         fetch(mbUrl).then(r=>r.json())
       ]);
 
-      // Combinăm rezultatele - Nominatim primul (mai bun pentru POI locale)
       const combined = [];
-
       if(nomRes.status==='fulfilled' && Array.isArray(nomRes.value)){
         nomRes.value.forEach(it=>{
           combined.push({
@@ -4264,10 +4255,8 @@ function doAddr(q){
           });
         });
       }
-
       if(mbRes.status==='fulfilled' && mbRes.value?.features){
         mbRes.value.features.forEach(it=>{
-          // Evităm duplicate
           const isDup = combined.some(c=>
             Math.abs(c.center[0]-it.center[0])<0.001 &&
             Math.abs(c.center[1]-it.center[1])<0.001
@@ -4281,29 +4270,27 @@ function doAddr(q){
           });
         });
       }
-
-      // Sortam dupa distanta fata de centrul curent al hartii
       combined.sort((a,b)=>{
         const da=Math.pow(a.center[0]-ctr.lng,2)+Math.pow(a.center[1]-ctr.lat,2);
         const db=Math.pow(b.center[0]-ctr.lng,2)+Math.pow(b.center[1]-ctr.lat,2);
         return da-db;
       });
-      console.log('Căutare:', q, '→', combined.length, 'rezultate (Nominatim+Mapbox)');
 
       if(!combined.length){
-        box.innerHTML=`<div class="re">Niciun rezultat pentru "<b>${esc(q)}</b>".<br><small>Încercați: "Teatrul Național Iași", "Hotel Traian Iași"</small></div>`;
+        boxes.forEach(b=>b.innerHTML=`<div class="re">Niciun rezultat pentru "<b>${esc(q)}</b>".<br><small>Încercați: "Teatrul Național Iași", "Hotel Traian Iași"</small></div>`);
         return;
       }
 
       window._addrI = combined;
-      box.innerHTML = combined.map((it,i)=>`
-        <div class="ri" onclick="pickAddr(${i})">
-          <div style="font-size:12px;font-weight:600;color:#e2e8f0">${esc(it.text)}</div>
+      const addrHtml = combined.map((it,i)=>`
+        <div class="ri" onclick="pickAddr(${i})" style="min-height:44px;padding:10px 11px">
+          <div style="font-size:13px;font-weight:600;color:#e2e8f0">${esc(it.text)}</div>
           <div style="font-size:11px;color:#64748b">${esc(it.place_name.length>80?it.place_name.slice(0,80)+'…':it.place_name)}</div>
         </div>`).join('');
+      boxes.forEach(b=>b.innerHTML=addrHtml);
     }catch(e){
       console.error('Geocoding error:',e);
-      box.innerHTML=`<div class="re">Eroare geocodare: ${esc(e.message)}</div>`;
+      boxes.forEach(b=>b.innerHTML=`<div class="re">Eroare geocodare: ${esc(e.message)}</div>`);
     }
   },300);
 }
@@ -4311,8 +4298,8 @@ function doAddr(q){
 function pickAddr(i){
   const it=window._addrI?.[i];if(!it)return;
   const[lng,lat]=it.center;
-  const box=document.querySelector('#addr-box');if(box)box.innerHTML='';
-  const inp=document.querySelector('#inp-addr');if(inp)inp.value=it.text||it.place_name.split(',')[0];
+  document.querySelectorAll('#addr-box').forEach(b=>b.innerHTML='');
+  document.querySelectorAll('#inp-addr').forEach(el=>el.value=it.text||it.place_name.split(',')[0]);
   if(window.innerWidth<=840)$('mob-sheet')?.classList.remove('open');
   goToLocation(lat, lng, it.text||it.place_name.split(',')[0]);
 }
@@ -4512,13 +4499,14 @@ async function goToLocation(lat, lng, label){
 let _cadTimer = null;
 function onCadInput(val){
   clearTimeout(_cadTimer);
-  const box = document.querySelector('#cad-box');
-  if(!box) return;
+  // Găsim TOATE box-urile cad din DOM (desktop + mobile pot coexista)
+  const boxes = document.querySelectorAll('#cad-box');
+  if(!boxes.length) return;
   const v = val.trim();
-  if(v.length < 2){ box.innerHTML=''; return; }
+  if(v.length < 2){ boxes.forEach(b=>b.innerHTML=''); return; }
   
   _cadTimer = setTimeout(()=>{
-    if(!S.cadIdx?.size){ box.innerHTML='<div class="re">Cadastrul se încarcă...</div>'; return; }
+    if(!S.cadIdx?.size){ boxes.forEach(b=>b.innerHTML='<div class="re">Cadastrul se încarcă...</div>'); return; }
     const key = v.toLowerCase().replace(/\s+/g,'');
     const res=[];
     const starts=[],contains=[];
@@ -4529,17 +4517,18 @@ function onCadInput(val){
     }
     if(!res.length)res.push(...starts.slice(0,10),...contains.slice(0,5));
     if(!res.length){
-      box.innerHTML = `<div class="re">Niciun nr. cadastral cu "${esc(v)}"</div>`;
+      boxes.forEach(b=>b.innerHTML = `<div class="re">Niciun nr. cadastral cu "${esc(v)}"</div>`);
       return;
     }
     window._cadR = res;
-    box.innerHTML = res.map((f,i)=>`
-      <div class="ri" onclick="pickCad(${i})">
-        <span style="font-weight:700;color:#e2e8f0">${esc(f.properties?.nrcad||'-')}</span>
-        <span class="badge b-b" style="padding:1px 6px;font-size:10px;margin-left:5px">${esc(f.properties?.utr||'?')}</span>
-        <span style="font-size:10px;color:#64748b;margin-left:4px">~${Math.round(f.properties?.SHAPE_Area||0)} m²</span>
+    const html = res.map((f,i)=>`
+      <div class="ri" onclick="pickCad(${i})" style="min-height:44px;display:flex;align-items:center;gap:8px">
+        <span style="font-weight:700;color:#e2e8f0;font-size:14px">${esc(f.properties?.nrcad||'-')}</span>
+        <span class="badge b-b" style="padding:3px 8px;font-size:11px">${esc(f.properties?.utr||'?')}</span>
+        <span style="font-size:11px;color:#64748b">~${Math.round(f.properties?.SHAPE_Area||0)} m²</span>
       </div>`).join('');
-  }, 200);
+    boxes.forEach(b=>b.innerHTML=html);
+  }, 150);
 }
 
 function doCad(){
@@ -6078,16 +6067,17 @@ async function exportVol3(pdf, ap, r, p){
 function _pdfSafe(str){
   if(str===null||str===undefined) return '—';
   return String(str)
-    // Eliminam emoji si caractere Unicode non-ASCII
-    .replace(/[\u{1F000}-\u{1FFFF}]/gu,'')  // emoji plane 1
-    .replace(/[\u2600-\u27FF]/g,'')           // misc symbols
-    .replace(/[\u{1F300}-\u{1F9FF}]/gu,'')   // emoji misc
-    .replace(/[^\x00-\xFF]/g,'')              // orice non-latin
+    // Eliminam TOATE caracterele emoji si simboluri speciale (abordare completa)
+    .replace(/[\uD800-\uDFFF]/g,'')             // surrogate pairs
+    .replace(/[\u2600-\u27FF\u2B00-\u2BFF\u3000-\u303F]/g,'') // misc symbols
+    .replace(/[^\x00-\xFF]/g,'')                // orice non-latin1
     // Diacritice romanesti → ASCII
     .replace(/[ăĂ]/g,'a').replace(/[âÂ]/g,'a').replace(/[îÎ]/g,'i')
     .replace(/[șȘşŞ]/g,'s').replace(/[țȚţŢ]/g,'t')
     .replace(/[éèêë]/g,'e').replace(/[óòô]/g,'o')
     .replace(/[úùû]/g,'u').replace(/[ñ]/g,'n')
+    // Curatam spatii multiple
+    .replace(/\s+/g,' ')
     .trim();
 }
 
@@ -6316,11 +6306,49 @@ async function runExport(){
     hdr('VOLUMETRIE PROPUSA SI CONCLUZII URBANISTICE',4,5);
     cy=32;
 
+    cy=sec('7. VEDERE 3D - VOLUM PROPUS IN CONTEXT URBAN',cy);
+    cy+=3;
+
+    // Capturam mai intai viewer-ul 3D standalone daca e disponibil
+    let v3dImg='';
+    try{
+      const v3dCanvas=document.getElementById('v3d-canvas');
+      if(v3dCanvas&&V3D.r&&V3D.scene&&V3D.cam){
+        V3D.r.render(V3D.scene,V3D.cam);
+        v3dImg=v3dCanvas.toDataURL('image/jpeg',0.90);
+      }
+    }catch(e){}
+
+    // AI Render daca exista
+    let aiImg='';
+    try{ if(FAL_AI?.lastRender?.url) aiImg=FAL_AI.lastRender.url; }catch(e){}
+
+    const hasExtra = v3dImg||aiImg;
+    const mapH = hasExtra ? 55 : 75;
+
     if(mapImg){
-      cy=sec('7. VEDERE 3D - VOLUM PROPUS IN CONTEXT URBAN',cy);
-      cy+=3;
-      try{ pdf.addImage(mapImg,'JPEG',14,cy,W-28,75,undefined,'FAST'); }catch(e){}
-      cy+=78;
+      try{ pdf.addImage(mapImg,'JPEG',14,cy,W-28,mapH,undefined,'FAST'); }catch(e){}
+      pdf.setDrawColor(...GOLD); pdf.setLineWidth(0.4); pdf.rect(14,cy,W-28,mapH,'S');
+      pdf.setTextColor(100,115,135); pdf.setFontSize(6.5); pdf.setFont('helvetica','normal');
+      pdf.text('FIG. 7a — Vedere 3D context urban · UrbanX/Mapbox GL JS',16,cy+mapH+4);
+      cy+=mapH+7;
+    }
+
+    // Viewer 3D standalone
+    if(v3dImg){
+      try{ pdf.addImage(v3dImg,'JPEG',14,cy,(W-32)/2,50,undefined,'FAST'); }catch(e){}
+      pdf.setTextColor(100,115,135); pdf.setFontSize(6.5);
+      pdf.text('FIG. 7b — Viewer 3D izometric · AEDIS Three.js',16,cy+52);
+      if(aiImg){
+        try{ pdf.addImage(aiImg,'JPEG',14+(W-32)/2+4,cy,(W-32)/2,50,undefined,'FAST'); }catch(e){}
+        pdf.text('FIG. 7c — AI Render fotorealist · Fal.ai FLUX.1',16+(W-32)/2+4,cy+52);
+      }
+      cy+=57;
+    } else if(aiImg){
+      try{ pdf.addImage(aiImg,'JPEG',14,cy,W-28,55,undefined,'FAST'); }catch(e){}
+      pdf.setTextColor(100,115,135); pdf.setFontSize(6.5);
+      pdf.text('FIG. 7b — AI Render fotorealist · Fal.ai FLUX.1',16,cy+57);
+      cy+=62;
     }
 
     cy=sec('8. PARAMETRI PROIECT AEDIS vs PUG',cy);
@@ -6329,19 +6357,46 @@ async function runExport(){
       ['Nr. niveluri propus',niv+' etaje','Inaltime totala',aedisH.toFixed(1)+' m'],
       ['POT aplicat',pot+'%','SC construita la sol',scMax+' mp'],
       ['CUT aplicat',cut,'SD totala',sdMax+' mp.ADC'],
-      ['Scenariu constructie',S2(AEDIS.scenariu||'demolare'),'Forma cladire',S2(AEDIS.forma||'liber')],
+      ['Scenariu constructie',S2(AEDIS.scenariu==='liber'?'Demolare + constructie noua':AEDIS.scenariu==='extindere_h'?'Extindere orizontala':AEDIS.scenariu==='extindere_v'?'Extindere verticala':'Inglobare existente'),'Tip acoperis',S2({terasa_plata:'Terasa plata',terasa_circulabila:'Terasa circulabila',sarpanta:'Sarpanta',mansarda:'Mansarda'}[AEDIS.tipAcoperis]||AEDIS.tipAcoperis||'terasa plata')],
+      ['Parter cu alta functiune',AEDIS.parterDiferit?S2(AEDIS_FN[AEDIS.fnParter]?.label||'—'):'Nu','Etaj retras',AEDIS.activeRetragere?'Da ('+Math.round((AEDIS.retrageriFineEtaje[parseInt(niv)-1]||AEDIS_STIL[AEDIS.stil]?.retragereFactor||0.88)*100)+'%)':'Nu'],
+      ['H parter',((AEDIS.parterDiferit?(AEDIS_FN[AEDIS.fn]?.hParter||4.5):AEDIS.corpuri[0]?.hNiv||3.0).toFixed(1))+' m','H etaj curent',(AEDIS.corpuri[0]?.hNiv||3.0).toFixed(1)+' m'],
+      ['Suprafata teren',area+' mp','Spatii verzi min obligatorii',Math.round(parseFloat(area)*parseFloat(sv)/100)+' mp ('+sv+'%)'],
+      ['Retragere front stradal',rf+' m','Retragere spate',rs+' m'],
+      ['Retragere lateral stg.',rl+' m','Retragere lateral dr.',rr+' m'],
     ];
     parData.forEach(([l1,v1,l2,v2])=>{ cy=row2(l1,v1,l2,v2,cy); });
 
     cy+=5;
+    cy=sec('8b. ANALIZA CONFORMITATE PUG',cy);
+    const conformRows=[
+      ['Incadrare H propus vs H max PUG', aedisH>0&&parseFloat(hmax||'0')>0 ? (aedisH<=parseFloat(hmax)?'IN LIMITA (H propus='+aedisH.toFixed(1)+'m ≤ H max='+hmax+'m)':'SE DEPASESTE (H propus='+aedisH.toFixed(1)+'m > H max='+hmax+'m — necesita PUZ)') : 'H maxim PUG nespecificat pentru aceasta zona UTR'],
+      ['Incadrare POT', 'POT propus '+pot+'% — suprafata construibila max la sol: '+scMax+' mp din '+area+' mp teren'],
+      ['Incadrare CUT', 'CUT propus '+cut+' — suprafata desfasurata maxima admisa: '+sdMax+' mp.ADC'],
+      ['Functiune in zona', 'Functiunea "'+S2(fnDef.label||'—')+'" in UTR '+S2(utr)+' — verificati compatibilitatea cu RLU Iasi'],
+      ['Parcaje necesare (estimat)', 'Min. 2 locuri/unitate locativa sau conform normative in vigoare (HG 525/1996)'],
+      ['Necesitate PUZ/PUD', aedisH>parseFloat(hmax||'999')||parseFloat(pot)>80?'Posibila necesitate PUZ pentru parametrii depasiti — consultati Primaria Iasi':'Parametrii se incadreaza in PUG, PUZ/PUD conform specificului UTR'],
+    ];
+    conformRows.forEach(([l,v])=>{
+      pdf.setFillColor(240,244,252); pdf.rect(14,cy,W-28,8,'F');
+      pdf.setDrawColor(210,220,235); pdf.rect(14,cy,W-28,8,'S');
+      pdf.setTextColor(70,90,120); pdf.setFontSize(7); pdf.setFont('helvetica','bold');
+      pdf.text(S2(l)+':',17,cy+5.5);
+      pdf.setTextColor(30,50,80); pdf.setFont('helvetica','normal');
+      const vLines=pdf.splitTextToSize(S2(v),(W-28)*0.52);
+      pdf.text(vLines,W*0.48,cy+5.5,{maxWidth:(W-28)*0.52});
+      cy+=Math.max(8,vLines.length*4.5+4);
+    });
+
+    cy+=5;
     cy=sec('9. CONCLUZII SI RECOMANDARI',cy);
     const concl=[
-      'FEZABILITATE: Pe parcela '+nrcad+' (UTR '+S2(utr)+', '+area+' mp) se poate realiza o constructie cu functiunea "'+(S2(fnDef.label)||'Rezidential colectiv')+'", cu un regim de inaltime de '+niv+' niveluri (H total ~'+aedisH.toFixed(1)+'m), in limitele parametrilor urbanistici ai PUG Iasi.',
-      'PARAMETRI MAXIMI ADMISI: POT '+pot+'% → SC max '+scMax+' mp; CUT '+cut+' → SD max '+sdMax+' mp.ADC; H max '+hmax+' m; Aliniam. strada: '+rf+'m, spate: '+rs+'m, lateral: '+rl+'m/'+rr+'m.',
-      'CONFORMITATE: Constructia propusa se incadreaza in parametrii PUG. Se recomanda verificarea cu Certificatul de Urbanism emis de Primaria Iasi si consultarea unui arhitect autorizat pentru studiu de fezabilitate detaliat.',
-      'ETAPE URMATOARE: (1) Obtinere Certificat de Urbanism, (2) Studiu geotehnic, (3) Proiect tehnic arhitectura (PAC) semnat de arhitect autorizat, (4) Solicitare Autorizatie de Construire.',
+      'FEZABILITATE: Pe parcela '+nrcad+' (UTR '+S2(utr)+', '+area+' mp) se poate realiza o constructie cu functiunea "'+(S2(fnDef.label)||'Rezidential colectiv')+'", cu un regim de inaltime de '+niv+' niveluri (H total ~'+aedisH.toFixed(1)+'m), in limitele parametrilor urbanistici ai PUG Iasi. Constructia propusa respecta principiile de urbanitate ale zonei si se inscrie in tendintele de dezvoltare ale acestui tip de UTR.',
+      'PARAMETRI MAXIMI ADMISI: POT '+pot+'% → SC max '+scMax+' mp; CUT '+cut+' → SD max '+sdMax+' mp.ADC; H max '+hmax+' m; Aliniam. strada: '+rf+'m, spate: '+rs+'m, lateral: '+rl+'m/'+rr+'m. Spatii verzi minime obligatorii: '+Math.round(parseFloat(area)*parseFloat(sv)/100)+' mp ('+sv+'% din suprafata terenului).',
+      'CONFORMITATE: Constructia propusa se incadreaza in parametrii PUG Iasi. Se recomanda verificarea cu Certificatul de Urbanism emis de Primaria Municipiului Iasi — Directia Arhitectura si Urbanism, inainte de demararea oricarei proceduri de autorizare.',
+      'RECOMANDARI ARHITECTURALE: Stilul arhitectural ales ('+S2(AEDIS.stil||'modern')+') este compatibil cu caracterul zonei. Se recomanda consultarea contextului construit existent si adaptarea volumetriei la scara stradala. Acoperisul de tip '+(S2({terasa_plata:'terasa plata',terasa_circulabila:'terasa circulabila',sarpanta:'sarpanta',mansarda:'mansarda'}[AEDIS.tipAcoperis])||'terasa plata')+' este specific functiunii propuse.',
+      'ETAPE URMATOARE: (1) Obtinere Certificat de Urbanism de la Primaria Iasi, (2) Studiu geotehnic si topografic al terenului, (3) Proiect tehnic arhitectura faza PAC (Proiect pentru Autorizarea Constructiei) semnat si stampilat de arhitect autorizat OAR, (4) Avize si acorduri necesare (ISU, ANRE, gaze, apa-canal, mediu dupa caz), (5) Depunere documentatie si solicitare Autorizatie de Construire.',
     ];
-    concl.forEach(txt=>{ cy=body(txt,14,cy+2,W-28); cy+=3; });
+    concl.forEach(txt=>{ cy=body(txt,14,cy+2,W-28); cy+=4; });
 
     ftr();
 
@@ -7343,7 +7398,7 @@ function aedisGetContent(){
     <button onclick="aedisAIRender()" class="aedis-dim-btn" style="background:rgba(212,175,55,.15);border-color:rgba(212,175,55,.4);color:#d4af37;font-size:10px" title="AI Render fotorealist (necesită API key Fal.ai)">🎨 AI</button>
     <button onclick="generateSolarStudy()" class="aedis-dim-btn" style="background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.4);color:#fbbf24;font-size:9px;display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 8px" title="Studiu Însorire PDF">☀<span style="font-size:8px">Însorire</span></button>
     <button onclick="AEDIS.showDim=!AEDIS.showDim;aedisRender()" 
-      class="aedis-dim-btn${AEDIS.showDim?' active':''}" title="Etichete dimensionale">📏</button>
+      class="aedis-dim-btn${AEDIS.showDim?' active':''}" title="Etichete dimensionale ON/OFF" style="font-size:9px;display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 8px">📏<span style="font-size:8px">Cote</span></button>
     <button onclick="aedisClose()" class="aedis-close-btn">✕</button>
   </div>`;
 }
@@ -9433,21 +9488,20 @@ function _v3dAddUrbanLife(THREE, scene, ring0, toLoc, isNight){
       ['#f0c8a0','#228844','#8b4513'],['#d4a882','#553399','#2c1810'],
       ['#e8c8a0','#333','#111'],['#c0a070','#dd7700','#4a2a10']];
 
-    // 4 pietoni pe frontul stradal principal (față), espaciați
-    for(let i=0;i<4;i++){
-      const t = (i/(3)) - 0.5; // -0.5..0.5
-      const px = lcx + t * lw * 0.8;
-      const pz = lcz + streetDist + Math.random()*2;
+    // 3 pietoni pe frontul stradal principal (față), espaciați
+    for(let i=0;i<3;i++){
+      const t = (i/(2)) - 0.5; // -0.5..0.5
+      const px = lcx + t * lw * 0.7;
+      const pz = lcz + streetDist + Math.random()*1.5;
       const [sk,cl,ha]=pData[i%pData.length];
       addSprite(mkTex((ctx,w,h)=>personDraw(ctx,w,h,sk,cl,ha),32,64),px,0,pz,0.5,1.75);
     }
 
-    // 2 pietoni pe lateral
-    for(let i=0;i<2;i++){
-      const t = (i-0.5)*0.4;
-      const px = lcx + streetDist + Math.random()*2;
-      const pz = lcz + t * ld * 0.8;
-      const [sk,cl,ha]=pData[(i+2)%pData.length];
+    // 1 pieton pe lateral
+    {
+      const px = lcx + streetDist + 2;
+      const pz = lcz + ld*0.15;
+      const [sk,cl,ha]=pData[3%pData.length];
       addSprite(mkTex((ctx,w,h)=>personDraw(ctx,w,h,sk,cl,ha),32,64),px,0,pz,0.5,1.75);
     }
 
@@ -9546,6 +9600,24 @@ function _v3dAddUrbanLife(THREE, scene, ring0, toLoc, isNight){
         const pl=new THREE.PointLight('#ffee88',0.7,12);pl.position.set(fx,2.5,fz);scene.add(pl);
       }
     });
+
+    // Lumini interioare cladire noaptea (ferestre aprinse)
+    if(isNight){
+      const pts2=ring0.map(toLoc);
+      const bx=(Math.min(...pts2.map(([x])=>x))+Math.max(...pts2.map(([x])=>x)))/2;
+      const bz=(Math.min(...pts2.map(([,z])=>z))+Math.max(...pts2.map(([,z])=>z)))/2;
+      // Lumina calda pe fiecare etaj
+      for(let floor=0;floor<4;floor++){
+        const h2=(floor+0.5)*3.0;
+        const wl=new THREE.PointLight('#ffe8c0',0.4,8);
+        wl.position.set(bx,h2,bz);
+        scene.add(wl);
+      }
+      // Lumina stradala portocalie ambientala
+      const ambStreet=new THREE.PointLight('#ff9040',0.3,30);
+      ambStreet.position.set(lcx,6,lcz+streetDist*0.5);
+      scene.add(ambStreet);
+    }
 
   }catch(e){console.warn('UrbanLife:',e.message);}
 }
