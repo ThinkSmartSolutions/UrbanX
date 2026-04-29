@@ -4801,6 +4801,7 @@ function pickCad(i){
     S.parcels=[parcelObj];S.activeParcel=0;
     S.utr=utr;S.rule=REGULI[utr]||{};
     S.ctx=null;S.vol.genDone=false;
+    try{_aedisRestoreCad3D();}catch(e){}
     clearSource('vol-src');clearSource('ctx-src');
     try{const bb=turf.bbox(f);map.fitBounds([[bb[0],bb[1]],[bb[2],bb[3]]],{padding:80,maxZoom:19,duration:700});}catch(e){}
     const isApproxP = f.properties?.approx;
@@ -4895,9 +4896,11 @@ async function doLoadLocalParcels(){
 
 
 function doReset(){
+  try{_aedisRestoreCad3D();}catch(e){}
   S.parcels=[];S.activeParcel=null;S.utr='';S.rule={};S.ll=null;S.ctx=null;S.vol.genDone=false;
   if(S.popup){S.popup.remove();S.popup=null;}
   ['parcel-src','vol-src','fp-src','ctx-src','utr-src'].forEach(clearSource);
+  try{_aedisRestoreCad3D();}catch(e){}  // curăță mask demolare
   // Curățăm inputurile
   document.querySelectorAll('#inp-addr,#inp-cad,#inp-coord').forEach(el=>el.value='');
   document.querySelectorAll('#addr-box,#cad-box').forEach(el=>el.innerHTML='');
@@ -7356,71 +7359,141 @@ function aedis3DRemove(){
 }
 
 
-// ── Demolare: filtrează existentele de pe parcelele active din ctx-src ────────
+// ── Demolare: elimină TOATE clădirile existente de pe parcelă ─────────────
+// Strategia: mask layer + filtrare GeoJSON + filtre pe layere native Mapbox
 function _aedisRemoveExistingFromCtx(){
   try{
-    // 1. Eliminăm din ctx-src (clădiri OSM pe parcelă)
-    const src = map.getSource('ctx-src');
-    if(src?._data?.features){
-      src.setData({type:'FeatureCollection', features: src._data.features.filter(f=>{
+    const parcels = S.parcels.filter(p=>p.geo?.geometry);
+    if(!parcels.length) return;
+
+    // ── 1. Filtrăm ctx-src (GeoJSON OSM) ────────────────────────────────────
+    const ctxSrc = map.getSource('ctx-src');
+    if(ctxSrc?._data?.features){
+      ctxSrc.setData({type:'FeatureCollection', features: ctxSrc._data.features.filter(f=>{
         try{
           const ctr = turf.centerOfMass(f);
-          return !S.parcels.some(p=>{
-            if(!p.geo?.geometry) return false;
-            return turf.booleanPointInPolygon(ctr,{type:'Feature',geometry:p.geo.geometry,properties:{}});
-          });
+          return !parcels.some(p=>
+            turf.booleanPointInPolygon(ctr,{type:'Feature',geometry:p.geo.geometry,properties:{}}));
         }catch(e){ return true; }
       })});
     }
 
-    // 2. Eliminăm din vol-src featurile existente
+    // ── 2. Eliminăm isExistent din vol-src ──────────────────────────────────
     const volSrc = map.getSource('vol-src');
     if(volSrc?._data?.features){
       volSrc.setData({type:'FeatureCollection',
         features: volSrc._data.features.filter(f=>!f.properties?.isExistent)});
     }
 
-    // 3. Ascundem cladirile pe parcela din TOATE layerele 3D
+    // ── 3. MASK LAYER: adăugăm un fill-extrusion solid pe footprint parcelei
+    // care acoperă orice clădire nativă Mapbox (tile-uri vectoriale) ────────
     try{
-      const parcelNrs = S.parcels.map(p=>p.nrcad).filter(Boolean);
-      
-      // cad-3d: layer cadastral Mapbox
-      if(map.getLayer('cad-3d') && parcelNrs.length){
-        map.setFilter('cad-3d', ['!', ['in', ['get','nrcad'], ['literal', parcelNrs]]]);
-      }
-      
-      // ctx-3d: layer OSM buildings — filtrăm după intersecție cu parcela
-      // Ascundem complet ctx-3d și redăm doar clădirile din afara parcelei prin ctx-src
-      if(map.getLayer('ctx-3d')){
-        const activeParcels = S.parcels.map(p=>p.geo?.geometry).filter(Boolean);
-        const ctxSrc = map.getSource('ctx-src');
-        if(ctxSrc?._data?.features){
-          const filtered = ctxSrc._data.features.filter(f=>{
-            try{
-              const ctr = turf.centerOfMass(f);
-              return !activeParcels.some(pg=>
-                turf.booleanPointInPolygon(ctr,{type:'Feature',geometry:pg,properties:{}})
-              );
-            }catch(e){ return true; }
-          });
-          ctxSrc.setData({type:'FeatureCollection',features:filtered});
-        }
-      }
-    }catch(e){ console.warn('demolish filter:', e.message); }
+      const maskGeoJSON = {
+        type:'FeatureCollection',
+        features: parcels.map(p=>({
+          type:'Feature',
+          geometry: p.geo.geometry,
+          properties:{ h: 300 } // înălțime mare — acoperă orice clădire
+        }))
+      };
 
-    // 4. vol-src: setăm baseH=0 la generare
+      // Sursa mask
+      if(map.getSource('demolish-mask-src')){
+        map.getSource('demolish-mask-src').setData(maskGeoJSON);
+      } else {
+        map.addSource('demolish-mask-src',{type:'geojson', data: maskGeoJSON});
+      }
+
+      // Layer mask — culoare egală cu fondul hărții (negru/dark)
+      // Poziționat sub vol-3d dar deasupra layerelor native de building
+      if(!map.getLayer('demolish-mask')){
+        // Inserăm înainte de vol-3d (sau la final dacă nu există)
+        const beforeLayer = map.getLayer('vol-3d') ? 'vol-3d' : undefined;
+        map.addLayer({
+          id: 'demolish-mask',
+          type: 'fill-extrusion',
+          source: 'demolish-mask-src',
+          paint: {
+            'fill-extrusion-color': '#070d1a',   // culoarea fundalului hărții
+            'fill-extrusion-height': ['get','h'],
+            'fill-extrusion-base': 0,
+            'fill-extrusion-opacity': 1.0
+          }
+        }, beforeLayer);
+      } else {
+        // Actualizăm sursa dacă layerul există deja
+        map.getSource('demolish-mask-src')?.setData(maskGeoJSON);
+      }
+    }catch(e){ console.warn('mask layer err:', e.message); }
+
+    // ── 4. Filtrăm layerele native Mapbox de building cu bbox ───────────────
+    try{
+      const allBbox = parcels.reduce((bb, p)=>{
+        const b = turf.bbox(p.geo);
+        return [Math.min(bb[0],b[0]),Math.min(bb[1],b[1]),Math.max(bb[2],b[2]),Math.max(bb[3],b[3])];
+      }, [Infinity,Infinity,-Infinity,-Infinity]);
+
+      // Filter geografic: exclude clădirile al căror centroid e în bbox
+      const bboxFilter = ['any',
+        ['<', ['get','longitude'], allBbox[0]],
+        ['<', ['get','latitude'],  allBbox[1]],
+        ['>', ['get','longitude'], allBbox[2]],
+        ['>', ['get','latitude'],  allBbox[3]]
+      ];
+
+      // Încercăm să aplicăm filtrul pe layerele native cunoscute
+      const nativeBuildingLayers = [
+        'building','building-extrusion','3d-buildings','add-3d-buildings',
+        'osm-buildings','composite-building','building-shadow'
+      ];
+      nativeBuildingLayers.forEach(id=>{
+        try{
+          if(map.getLayer(id)){
+            // Salvăm filtrul original dacă nu l-am salvat deja
+            if(!map._demolishOrigFilters) map._demolishOrigFilters = {};
+            if(!map._demolishOrigFilters[id]){
+              map._demolishOrigFilters[id] = map.getFilter(id);
+            }
+            map.setFilter(id, bboxFilter);
+          }
+        }catch(e2){}
+      });
+    }catch(e){ console.warn('native filter err:', e.message); }
+
+    // ── 5. Forțăm re-render ─────────────────────────────────────────────────
+    map.triggerRepaint();
     AEDIS._forcedBaseH = 0;
-    ss('🔨 Demolare: clădiri eliminate. Generați noul volum cu ⚡.');
+    AEDIS._demolishActive = true;
+    ss('🔨 Demolare aplicată — teren liber. Generați volumul cu ⚡.');
   }catch(e){ console.warn('_aedisRemoveExistingFromCtx error:', e.message); }
 }
 
-// Restaurăm filtrul cad-3d când ieșim din demolare
+// Restaurăm starea normală când ieșim din demolare
 function _aedisRestoreCad3D(){
   try{
-    if(map.getLayer('cad-3d')){
-      map.setFilter('cad-3d', null); // elimină filtrul de excludere
+    AEDIS._demolishActive = false;
+
+    // Eliminăm mask layer
+    try{
+      if(map.getLayer('demolish-mask')) map.removeLayer('demolish-mask');
+      if(map.getSource('demolish-mask-src')) map.removeSource('demolish-mask-src');
+    }catch(e){}
+
+    // Restaurăm filtrele originale pe layerele native
+    if(map._demolishOrigFilters){
+      Object.entries(map._demolishOrigFilters).forEach(([id, origFilter])=>{
+        try{ if(map.getLayer(id)) map.setFilter(id, origFilter); }catch(e){}
+      });
+      map._demolishOrigFilters = null;
     }
-  }catch(e){}
+
+    // Restaurăm ctx-src complet
+    if(S.ctx?.features?.length){
+      try{ setSource('ctx-src', S.ctx); }catch(e){}
+    }
+
+    map.triggerRepaint();
+  }catch(e){ console.warn('_aedisRestoreCad3D:', e.message); }
 }
 
 function aedisGenerateAll(){
@@ -7575,7 +7648,7 @@ function aedisGetContent(){
         {id:'extindere_v',ico:'🏗',label:'Ext. Vertical',desc:'Deasupra existentelor'},
         {id:'inglobare',ico:'🏙',label:'Inglobare',desc:'Înglobează existentele'},
       ].map(s=>`
-        <button onclick="AEDIS.scenariu='${s.id}';aedisRender()" class="aedis-scen-btn${AEDIS.scenariu===s.id?' active':''}">
+        <button onclick="(()=>{if(AEDIS._demolishActive&&'${s.id}'!=='demolare')_aedisRestoreCad3D();AEDIS.scenariu='${s.id}';aedisRender()})()" class="aedis-scen-btn${AEDIS.scenariu===s.id?' active':''}">
           ${s.ico} ${s.label}<br><small>${s.desc}</small>
         </button>`).join('')}
     </div>
