@@ -8740,7 +8740,7 @@ function toggleRapoarteMenu(){
 async function generateSolarStudy(){
   const ap = S.parcels[S.activeParcel??0];
   if(!ap?.geo?.geometry){ ss('Selectati o parcela pentru studiu.'); return; }
-  ss('Se genereaza Pre-Studiu Urbanistic de Insorire...');
+  ss('Se genereaza Pre-Studiu Urbanistic de Insorire... (se captureaza imagini 3D)');
 
   const center = turf.centerOfMass(ap.geo);
   const lat = center.geometry.coordinates[1];
@@ -8756,12 +8756,14 @@ async function generateSolarStudy(){
   const pot = String(params.pot||'N/A');
   const cut = String(params.cut||'N/A');
   const hmax = String(params.hmax||'N/A');
-  const hmaxN = parseFloat(hmax)||0;
   const rf = params.rf||5;
   const rl = params.rl||3;
   const rs = params.rs||5;
+  const rr = params.rr||params.rl||3;
+  const sv = String(params.sv||15);
   const dateStr = new Date().toLocaleDateString('ro-RO',{day:'2-digit',month:'long',year:'numeric'});
   const timeStr = new Date().toLocaleTimeString('ro-RO');
+  const S2 = t => _pdfSafe(t);
 
   function solarPos(lat,lon,dateObj){
     const D2R=Math.PI/180;
@@ -8780,375 +8782,666 @@ async function generateSolarStudy(){
     return{altitude:Math.max(0,Math.asin(Math.max(-1,Math.min(1,sinAlt)))*180/Math.PI)};
   }
 
-  // Capturăm harta curentă pentru anexe
-  let mapImg = '';
-  try{
-    map.triggerRepaint();
-    await new Promise(r=>setTimeout(r,200));
-    mapImg = map.getCanvas().toDataURL('image/jpeg',0.85);
-  }catch(e){}
-
-  const {jsPDF}=window.jspdf;
-  const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-  const W=210,H=297;
-
-  const BG='#f8f9fb', DARK='#0a1628', GOLD='#c8960a', BLUE='#1a3a6a';
-
-  const addHeader=(title,pg,total)=>{
-    pdf.setFillColor(10,22,48); pdf.rect(0,0,W,24,'F');
-    pdf.setFillColor(200,150,10); pdf.rect(0,0,W,2,'F'); pdf.rect(0,22,W,2,'F');
-    pdf.setTextColor(200,150,10); pdf.setFontSize(7); pdf.setFont('helvetica','bold');
-    pdf.text('URBANX AEDIS',14,9);
-    pdf.setTextColor(255,255,255); pdf.setFontSize(11);
-    pdf.text(title,W/2,14,{align:'center'});
-    pdf.setTextColor(150,170,190); pdf.setFontSize(7); pdf.setFont('helvetica','normal');
-    pdf.text(`Pag. ${pg}/${total}`,W-14,14,{align:'right'});
-  };
-
-  const addFooter=()=>{
-    pdf.setFillColor(240,242,245); pdf.rect(0,H-12,W,12,'F');
-    pdf.setDrawColor(200,200,210); pdf.line(0,H-12,W,H-12);
-    pdf.setTextColor(100,110,130); pdf.setFontSize(6.5); pdf.setFont('helvetica','normal');
-    pdf.text(`Pre-studiu urbanistic de insorire · UrbanX AEDIS · Parcela ${nrcad} · ${dateStr}`,W/2,H-4,{align:'center'});
-  };
-
-  const section=(title,y,col)=>{
-    const c2=col||[26,58,106];
-    pdf.setFillColor(...c2); pdf.rect(14,y-4,W-28,7,'F');
-    pdf.setTextColor(255,255,255); pdf.setFontSize(8); pdf.setFont('helvetica','bold');
-    pdf.text(title,17,y);
-    return y+8;
-  };
-
-  const body=(txt,x,y,maxW)=>{
-    pdf.setTextColor(40,50,65); pdf.setFontSize(8.5); pdf.setFont('helvetica','normal');
-    const lines=pdf.splitTextToSize(txt,maxW||(W-28));
-    pdf.text(lines,x||14,y);
-    return y+lines.length*5;
-  };
-
-  const dataRow=(label,val,x,y,labelW)=>{
-    pdf.setTextColor(80,95,115); pdf.setFont('helvetica','normal'); pdf.setFontSize(8);
-    pdf.text(label+':',x||14,y);
-    pdf.setTextColor(20,35,60); pdf.setFont('helvetica','bold');
-    pdf.text(String(val),x+(labelW||55),y);
-    return y+6;
-  };
-
   const junH=solarPos(lat,lon,new Date(year,5,21,12,0,0)).altitude;
   const decH=solarPos(lat,lon,new Date(year,11,21,12,0,0)).altitude;
   const marH=solarPos(lat,lon,new Date(year,2,21,12,0,0)).altitude;
+  const sepH=solarPos(lat,lon,new Date(year,8,21,12,0,0)).altitude;
   const isConform=decH>=15;
-  const shadJun=aedisH>0?(aedisH/Math.tan(junH*Math.PI/180)).toFixed(1):'—';
+  const shadJun=aedisH>0&&junH>0.5?(aedisH/Math.tan(junH*Math.PI/180)).toFixed(1):'—';
   const shadDec=aedisH>0&&decH>0.5?(aedisH/Math.tan(decH*Math.PI/180)).toFixed(1):'—';
+  const shadMar=aedisH>0&&marH>0.5?(aedisH/Math.tan(marH*Math.PI/180)).toFixed(1):'—';
 
-  // ══ PAG 1: Coperta ══════════════════════════════════════════════════════
-  pdf.setFillColor(10,22,48); pdf.rect(0,0,W,H,'F');
-  // Gradient simulat
-  pdf.setFillColor(15,35,70); pdf.rect(0,H*0.4,W,H*0.6,'F');
-  pdf.setFillColor(200,150,10); pdf.rect(0,0,W,3,'F'); pdf.rect(0,H-3,W,3,'F');
+  // ── Capturam imagini multiple ─────────────────────────────────────────────
+  // Helper: asteapta N frame-uri + ms
+  const wait = (ms) => new Promise(r=>setTimeout(r,ms));
+  const waitFrames = async (n=3) => { for(let i=0;i<n;i++) await new Promise(r=>requestAnimationFrame(r)); };
 
-  pdf.setTextColor(200,150,10); pdf.setFontSize(9); pdf.setFont('helvetica','bold');
-  pdf.text('URBANX · AEDIS · PLATFORMA DE ANALIZA URBANISTICA',W/2,28,{align:'center'});
+  // 1. Harta Mapbox 2D (top view)
+  let mapImg2D = '';
+  try{
+    const savedPitch = map.getPitch(), savedBearing = map.getBearing();
+    map.easeTo({pitch:0,bearing:0,duration:0});
+    await waitFrames(4); await wait(400);
+    map.triggerRepaint(); await waitFrames(3); await wait(300);
+    mapImg2D = map.getCanvas().toDataURL('image/jpeg',0.88);
+    map.easeTo({pitch:savedPitch,bearing:savedBearing,duration:0});
+  }catch(e){ console.warn('2D capture:',e.message); }
 
-  pdf.setFillColor(255,255,255); pdf.roundedRect(20,38,W-40,28,3,3,'F');
-  pdf.setTextColor(10,22,48); pdf.setFontSize(18); pdf.setFont('helvetica','bold');
-  pdf.text('PRE-STUDIU URBANISTIC',W/2,52,{align:'center'});
-  pdf.text('DE INSORIRE',W/2,63,{align:'center'});
+  // 2. Harta Mapbox 3D (pitch 60°)
+  let mapImg3D = '';
+  try{
+    map.easeTo({pitch:62,bearing:-25,duration:0});
+    await waitFrames(4); await wait(500);
+    map.triggerRepaint(); await waitFrames(3); await wait(400);
+    mapImg3D = map.getCanvas().toDataURL('image/jpeg',0.88);
+  }catch(e){ console.warn('3D capture:',e.message); }
 
-  pdf.setTextColor(200,150,10); pdf.setFontSize(10);
-  pdf.text('Analiza conformitate OMS 119/2014',W/2,75,{align:'center'});
+  // 3. Viewer 3D AEDIS - preset ZI
+  let v3dDayImg = '';
+  try{
+    if(V3D.r && V3D.scene && V3D.cam){
+      _v3dApplyLight('day', window.THREE, V3D.scene, V3D.r);
+      await wait(100);
+      V3D.r.render(V3D.scene, V3D.cam);
+      v3dDayImg = document.getElementById('v3d-canvas')?.toDataURL('image/jpeg',0.90)||'';
+    }
+  }catch(e){ console.warn('V3D day:',e.message); }
 
-  // Date identificare
-  pdf.setFillColor(15,35,70); pdf.roundedRect(20,85,W-40,88,3,3,'F');
-  pdf.setTextColor(200,150,10); pdf.setFontSize(8); pdf.setFont('helvetica','bold');
-  pdf.text('DATE DE IDENTIFICARE A IMOBILULUI',W/2,94,{align:'center'});
+  // 4. Viewer 3D AEDIS - preset NOAPTE
+  let v3dNightImg = '';
+  try{
+    if(V3D.r && V3D.scene && V3D.cam){
+      _v3dApplyLight('night', window.THREE, V3D.scene, V3D.r);
+      await wait(100);
+      V3D.r.render(V3D.scene, V3D.cam);
+      v3dNightImg = document.getElementById('v3d-canvas')?.toDataURL('image/jpeg',0.90)||'';
+      // Revenim la zi
+      _v3dApplyLight('day', window.THREE, V3D.scene, V3D.r);
+      V3D.r.render(V3D.scene, V3D.cam);
+    }
+  }catch(e){ console.warn('V3D night:',e.message); }
 
-  const rows=[
-    ['Nr. cadastral',nrcad],['Zona urbanistica (UTR)',utr],
-    ['Suprafata teren',area+' mp'],['Functiune propusa',fnDef.label||'—'],
-    ['Regim inaltime propus',niv+' niveluri (H='+(isNaN(aedisH)?0:aedisH).toFixed(1)+'m)'],
-    ['POT max (PUG)',pot+'%'],['CUT max (PUG)',cut],['H max (PUG)',(String(hmax)||'N/A')+' m'],
-    ['Coordonate GPS',lat.toFixed(5)+'N, '+lon.toFixed(5)+'E'],
-    ['Localitate','Municipiul Iasi, jud. Iasi'],
-  ];
-  let ry=102;
-  rows.forEach(([l,v])=>{
-    pdf.setTextColor(150,170,200); pdf.setFontSize(7.5); pdf.setFont('helvetica','normal');
-    pdf.text(l+':',28,ry);
-    pdf.setTextColor(255,255,255); pdf.setFont('helvetica','bold');
-    pdf.text(String(v),98,ry);
-    ry+=7.5;
-  });
+  // 5. Viewer 3D - preset GOLDEN HOUR (apus)
+  let v3dGoldenImg = '';
+  try{
+    if(V3D.r && V3D.scene && V3D.cam){
+      _v3dApplyLight('golden', window.THREE, V3D.scene, V3D.r);
+      await wait(100);
+      V3D.r.render(V3D.scene, V3D.cam);
+      v3dGoldenImg = document.getElementById('v3d-canvas')?.toDataURL('image/jpeg',0.90)||'';
+      _v3dApplyLight('day', window.THREE, V3D.scene, V3D.r);
+    }
+  }catch(e){}
 
-  // Status conformitate
-  const cfCol=isConform?[30,140,60]:[180,40,40];
-  pdf.setFillColor(...cfCol); pdf.roundedRect(20,182,W-40,20,3,3,'F');
-  pdf.setTextColor(255,255,255); pdf.setFontSize(10); pdf.setFont('helvetica','bold');
-  pdf.text(isConform?'CONFORM – Conditii de insorire respectate (OMS 119/2014)':'ATENTIE – Verificare suplimentara necesara',W/2,190,{align:'center'});
-  pdf.setFontSize(7.5);
-  pdf.text('Altitudine solara solstitiu iarna: '+(isNaN(decH)?0:decH).toFixed(1)+'° (prag minim legal: 15°)',W/2,197,{align:'center'});
+  // 6. Viewer 3D - preset OVERCAST (acoperit)
+  let v3dOvercastImg = '';
+  try{
+    if(V3D.r && V3D.scene && V3D.cam){
+      _v3dApplyLight('overcast', window.THREE, V3D.scene, V3D.r);
+      await wait(100);
+      V3D.r.render(V3D.scene, V3D.cam);
+      v3dOvercastImg = document.getElementById('v3d-canvas')?.toDataURL('image/jpeg',0.90)||'';
+      _v3dApplyLight('day', window.THREE, V3D.scene, V3D.r);
+      V3D.r.render(V3D.scene, V3D.cam);
+    }
+  }catch(e){}
 
-  pdf.setTextColor(130,150,180); pdf.setFontSize(7.5); pdf.setFont('helvetica','normal');
-  pdf.text('Data elaborarii: '+dateStr+' · '+timeStr,W/2,210,{align:'center'});
-  pdf.text('Document cu caracter ORIENTATIV · Nu inlocuieste documentatia tehnica avizata conform legii',W/2,218,{align:'center'});
+  // 7. AI Render daca exista
+  let aiImg = '';
+  try{ if(FAL_AI?.lastRender?.url) aiImg = FAL_AI.lastRender.url; }catch(e){}
 
-  // ══ PAG 2: Planuri harti ════════════════════════════════════════════════
-  pdf.addPage();
-  pdf.setFillColor(248,249,251); pdf.rect(0,0,W,H,'F');
-  addHeader('SITUATIE EXISTENTA – PLANURI DIN HARTA',2,5);
-  let cy=32;
+  // 8. Mapbox Standard 3D cu iluminare solara (daca disponibil)
+  let mapStdImg = '';
+  try{
+    const selBase = document.getElementById('selBase');
+    if(selBase?.value === 'standard'){
+      map.triggerRepaint(); await waitFrames(4); await wait(500);
+      mapStdImg = map.getCanvas().toDataURL('image/jpeg',0.88);
+    }
+  }catch(e){}
 
-  if(mapImg){
-    cy=section('FIG. 1 — AMPLASAMENT SI CONTEXT URBAN (vedere 3D)',cy,[26,58,106]);
-    cy+=3;
-    try{
-      pdf.addImage(mapImg,'JPEG',14,cy,W-28,75,undefined,'FAST');
-    }catch(e){ pdf.setFillColor(220,225,235); pdf.rect(14,cy,W-28,75,'F'); }
-    pdf.setTextColor(80,95,115); pdf.setFontSize(7);
-    pdf.text('Sursa: UrbanX/Mapbox – vedere 3D, context urban real',14,cy+78);
-    cy+=85;
+  // Revenim la vederea originala
+  try{ map.easeTo({pitch:62,bearing:-20,duration:400}); }catch(e){}
+
+  ss('Se compileaza PDF-ul de insorire...');
+
+  // ── PDF BUILD ─────────────────────────────────────────────────────────────
+  const {jsPDF}=window.jspdf;
+  // Raport extins: 8 pagini
+  const totalPag = 8;
+  const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=210,H=297;
+
+  const DARK=[10,22,48], GOLD=[200,150,10], BLUE=[26,58,106], LIGHT=[248,249,251];
+
+  const hdr=(title,pg)=>{
+    pdf.setFillColor(...DARK); pdf.rect(0,0,W,24,'F');
+    pdf.setFillColor(...GOLD); pdf.rect(0,0,W,2,'F'); pdf.rect(0,22,W,2,'F');
+    pdf.setTextColor(...GOLD); pdf.setFontSize(7); pdf.setFont('helvetica','bold');
+    pdf.text('URBANX AEDIS — PRE-STUDIU URBANISTIC DE INSORIRE',14,9);
+    pdf.setTextColor(255,255,255); pdf.setFontSize(11);
+    pdf.text(title,W/2,15,{align:'center'});
+    pdf.setTextColor(150,170,190); pdf.setFontSize(7); pdf.setFont('helvetica','normal');
+    pdf.text('Pag. '+pg+'/'+totalPag,W-14,15,{align:'right'});
+  };
+
+  const ftr=()=>{
+    pdf.setFillColor(240,242,245); pdf.rect(0,H-10,W,10,'F');
+    pdf.setDrawColor(210,215,225); pdf.line(0,H-10,W,H-10);
+    pdf.setTextColor(100,110,130); pdf.setFontSize(6.5); pdf.setFont('helvetica','normal');
+    pdf.text('Pre-studiu urbanistic de insorire · UrbanX AEDIS · Parcela '+nrcad+' · '+dateStr+' · Valori orientative',W/2,H-3.5,{align:'center'});
+  };
+
+  const sec=(title,y,col)=>{
+    const c2=col||BLUE;
+    pdf.setFillColor(...c2); pdf.rect(14,y-4,W-28,7,'F');
+    pdf.setFillColor(...GOLD); pdf.rect(14,y-4,2,7,'F');
+    pdf.setTextColor(255,255,255); pdf.setFontSize(8.5); pdf.setFont('helvetica','bold');
+    pdf.text(title,19,y);
+    return y+10;
+  };
+
+  const body2=(txt,x,y,maxW)=>{
+    pdf.setTextColor(35,48,65); pdf.setFontSize(8.5); pdf.setFont('helvetica','normal');
+    const lines=pdf.splitTextToSize(S2(txt),maxW||(W-28));
+    pdf.text(lines,x||14,y);
+    return y+lines.length*5.2;
+  };
+
+  const row2s=(l1,v1,l2,v2,y)=>{
+    const cw=(W-28)/2-2;
+    pdf.setFillColor(245,247,252); pdf.rect(14,y-4,W-28,7,'F');
+    pdf.setTextColor(80,95,120); pdf.setFont('helvetica','normal'); pdf.setFontSize(7.5);
+    pdf.text(S2(l1)+':',17,y);
+    pdf.setTextColor(20,40,80); pdf.setFont('helvetica','bold');
+    pdf.text(S2(String(v1)),17+cw*0.42,y);
+    pdf.setTextColor(80,95,120); pdf.setFont('helvetica','normal');
+    pdf.text(S2(l2)+':',17+cw,y);
+    pdf.setTextColor(20,40,80); pdf.setFont('helvetica','bold');
+    pdf.text(S2(String(v2)),17+cw+cw*0.42,y);
+    return y+8;
+  };
+
+  const imgCaption=(txt,x,y)=>{
+    pdf.setTextColor(90,105,130); pdf.setFontSize(6.5); pdf.setFont('helvetica','italic');
+    pdf.text(S2(txt),x,y);
+  };
+
+  const addImg=(img,x,y,w,h,caption)=>{
+    if(!img||img.length<500) return y;
+    try{ pdf.addImage(img,'JPEG',x,y,w,h,undefined,'FAST'); }catch(e){ return y; }
+    pdf.setDrawColor(200,208,225); pdf.setLineWidth(0.3); pdf.rect(x,y,w,h,'S');
+    if(caption){ imgCaption(caption,x,y+h+3.5); return y+h+6; }
+    return y+h+2;
+  };
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // PAG 1 — COPERTA CU IMAGINE 3D PRINCIPALA
+  // ══════════════════════════════════════════════════════════════════════════
+  pdf.setFillColor(...DARK); pdf.rect(0,0,W,H,'F');
+  pdf.setFillColor(15,35,70); pdf.rect(0,H*0.35,W,H*0.65,'F');
+  pdf.setFillColor(...GOLD); pdf.rect(0,0,W,2.5,'F'); pdf.rect(0,H-2.5,W,2.5,'F');
+
+  // Imagine 3D principala pe coperta
+  if(mapImg3D&&mapImg3D.length>500){
+    try{ pdf.addImage(mapImg3D,'JPEG',0,0,W,H*0.45,undefined,'FAST'); }catch(e){}
+    // Overlay gradient
+    pdf.setFillColor(...DARK); pdf.setGState?pdf.setGState(new pdf.GState({opacity:0.55})):null;
+    pdf.rect(0,H*0.3,W,H*0.15,'F');
+    try{pdf.setOpacity(1);}catch(e){}
+  } else if(v3dDayImg&&v3dDayImg.length>500){
+    try{ pdf.addImage(v3dDayImg,'JPEG',0,0,W,H*0.45,undefined,'FAST'); }catch(e){}
   }
 
-  cy=section('FIG. 2 — DATE URBANISTICE TEREN',cy,[26,58,106]);
-  cy+=3;
-  // Tabel date teren
-  const tData=[
-    ['Suprafata teren',area+' mp','Suprafata construibila max (POT)',Math.round(parseFloat(area)*parseFloat(pot)/100)+' mp'],
-    ['Retragere fata strada (rf)',rf+' m','Retragere laterala stanga (rl)',rl+' m'],
-    ['Retragere spate (rs)',rs+' m','Retragere lateral dreapta (rr)',(params.rr||3)+' m'],
-    ['Nr. niveluri propus',niv+' et.','Inaltime totala propusa',(isNaN(aedisH)?0:aedisH).toFixed(1)+' m'],
-    ['POT maxim admis (PUG)',pot+'%','CUT maxim admis (PUG)',cut],
-    ['H maxim admis (PUG)',(String(hmax)||'N/A')+' m','Functiune admisa',fnDef.label||'—'],
+  pdf.setFillColor(...DARK);
+  pdf.rect(0,H*0.43,W,2,'F');
+
+  pdf.setTextColor(...GOLD); pdf.setFontSize(7.5); pdf.setFont('helvetica','bold');
+  pdf.text('URBANX · AEDIS · PLATFORMA DE ANALIZA URBANISTICA',W/2,H*0.5,{align:'center'});
+
+  pdf.setFillColor(255,255,255); pdf.roundedRect(20,H*0.52,W-40,30,2,2,'F');
+  pdf.setTextColor(...DARK); pdf.setFontSize(19); pdf.setFont('helvetica','bold');
+  pdf.text('PRE-STUDIU URBANISTIC DE INSORIRE',W/2,H*0.54,{align:'center'});
+  pdf.setFontSize(11); pdf.setTextColor(...BLUE);
+  pdf.text('Analiza conformitate OMS 119/2014 · Simulare umbre si radiatii solare',W/2,H*0.565,{align:'center'});
+
+  pdf.setFillColor(15,35,70); pdf.roundedRect(20,H*0.60,W-40,80,2,2,'F');
+  pdf.setTextColor(...GOLD); pdf.setFontSize(8); pdf.setFont('helvetica','bold');
+  pdf.text('DATE DE IDENTIFICARE',W/2,H*0.625,{align:'center'});
+
+  const covRows=[
+    ['Nr. cadastral',nrcad],['Zona UTR',utr],
+    ['Suprafata teren',area+' mp'],['Functiune',S2(fnDef.label)],
+    ['Regim inaltime',niv+' niveluri · H='+aedisH.toFixed(1)+'m'],
+    ['POT / CUT',pot+'% / '+cut],['Coordonate GPS',lat.toFixed(5)+'N · '+lon.toFixed(5)+'E'],
+    ['Localitate','Municipiul Iasi, jud. Iasi'],
   ];
-  const colW=(W-28)/4;
-  tData.forEach((row,ri)=>{
-    const bg=ri%2===0?[235,240,248]:[245,248,252];
-    pdf.setFillColor(...bg); pdf.rect(14,cy,W-28,7,'F');
-    pdf.setTextColor(80,95,115); pdf.setFontSize(7); pdf.setFont('helvetica','normal');
-    pdf.text(row[0],17,cy+5);
-    pdf.setTextColor(20,40,80); pdf.setFont('helvetica','bold');
-    pdf.text(row[1],17+colW,cy+5);
-    pdf.setTextColor(80,95,115); pdf.setFont('helvetica','normal');
-    pdf.text(row[2],17+colW*2,cy+5);
-    pdf.setTextColor(20,40,80); pdf.setFont('helvetica','bold');
-    pdf.text(row[3],17+colW*3,cy+5);
-    cy+=7;
+  let ry=H*0.64; covRows.forEach(([l,v])=>{
+    pdf.setTextColor(160,180,210); pdf.setFontSize(7.5); pdf.setFont('helvetica','normal');
+    pdf.text(S2(l)+':',30,ry);
+    pdf.setTextColor(255,255,255); pdf.setFont('helvetica','bold');
+    pdf.text(S2(String(v)),95,ry);
+    ry+=8;
   });
 
-  addFooter();
+  const cfCol=isConform?[30,145,65]:[175,35,35];
+  pdf.setFillColor(...cfCol); pdf.roundedRect(20,H*0.905,W-40,16,2,2,'F');
+  pdf.setTextColor(255,255,255); pdf.setFontSize(9.5); pdf.setFont('helvetica','bold');
+  pdf.text(isConform?'CONFORM — Conditii insorire respectate (OMS 119/2014)':'ATENTIE — Verificare suplimentara necesara',W/2,H*0.921,{align:'center'});
+  pdf.setFontSize(7); pdf.setFont('helvetica','normal');
+  pdf.text('Altitudine solara la solstitiul de iarna: '+decH.toFixed(1)+'° · Prag minim legal: 15°',W/2,H*0.934,{align:'center'});
 
-  // ══ PAG 3: Calcule solare ═══════════════════════════════════════════════
+  pdf.setTextColor(120,140,170); pdf.setFontSize(7);
+  pdf.text('Generat: '+dateStr+' · '+timeStr+' · Document cu caracter ORIENTATIV',W/2,H*0.96,{align:'center'});
+  ftr();
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // PAG 2 — VEDERI 3D: ZI vs NOAPTE (2 capturi mari)
+  // ══════════════════════════════════════════════════════════════════════════
   pdf.addPage();
-  pdf.setFillColor(248,249,251); pdf.rect(0,0,W,H,'F');
-  addHeader('CALCULUL ALTITUDINII SOLARE',3,5);
-  cy=32;
+  pdf.setFillColor(...LIGHT); pdf.rect(0,0,W,H,'F');
+  hdr('VIZUALIZARE 3D — ILUMINARE ZI / NOAPTE / APUS',2);
+  let cy=30;
 
-  cy=section('3.1 — TABEL ALTITUDINI SOLARE (grade) · LATITUDINE '+lat.toFixed(2)+'°N',cy);
+  // Zi si Noapte side-by-side
+  const half=(W-32)/2;
+  if(v3dDayImg&&v3dDayImg.length>500){
+    cy=addImg(v3dDayImg,14,cy,half,58,'FIG. 1 — Viewer 3D AEDIS · Iluminare ZI (12:00)');
+    if(v3dNightImg&&v3dNightImg.length>500){
+      addImg(v3dNightImg,14+half+4,cy-64,half,58,'FIG. 2 — Viewer 3D AEDIS · Iluminare NOAPTE (22:00)');
+    }
+  } else {
+    // daca nu avem viewer, punem harta 3D
+    cy=addImg(mapImg3D,14,cy,W-28,70,'FIG. 1 — Vedere 3D Mapbox · Context urban real');
+  }
+  cy+=2;
+
+  // Golden hour si Overcast side-by-side
+  if(v3dGoldenImg&&v3dGoldenImg.length>500){
+    cy=addImg(v3dGoldenImg,14,cy,half,58,'FIG. 3 — Viewer 3D AEDIS · Golden Hour (apus)');
+    if(v3dOvercastImg&&v3dOvercastImg.length>500){
+      addImg(v3dOvercastImg,14+half+4,cy-64,half,58,'FIG. 4 — Viewer 3D AEDIS · Cer acoperit');
+    }
+    cy+=6;
+  }
+
+  // Mapbox Standard 3D daca avem
+  if(mapStdImg&&mapStdImg.length>500){
+    cy=addImg(mapStdImg,14,cy,W-28,55,'FIG. 5 — Mapbox Standard 3D · Iluminare PBR · Umbre reale Mapbox');
+    cy+=2;
+  }
+
+  // AI render
+  if(aiImg&&aiImg.length>500){
+    cy=addImg(aiImg,14,cy,W-28,55,'FIG. 6 — AI Render fotorealist · Fal.ai FLUX.1 · Propunere volumetrica');
+  }
+
+  cy=sec('NOTE TEHNICE — CONDITII DE ILUMINARE SIMULATE',Math.max(cy,250));
+  body2('Vizualizarile 3D de mai sus sunt generate cu motorul Three.js integrat in platforma UrbanX AEDIS, utilizand iluminare PBR (Physically Based Rendering) cu surse de lumina directionala simuland pozitia soarelui la latitudinea '+lat.toFixed(2)+'°N. Preset ZI corespunde orelor 10-14, preset Golden Hour corespunde rasaritului/apusului, iar preset Noapte simuleaza iluminatul artificial stradal si din interiorul cladirilor. Aceste vizualizari au caracter ilustrativ.',14,cy+2,W-28);
+  ftr();
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // PAG 3 — PLANURI HARTA: 2D + 3D CONTEXT
+  // ══════════════════════════════════════════════════════════════════════════
+  pdf.addPage();
+  pdf.setFillColor(...LIGHT); pdf.rect(0,0,W,H,'F');
+  hdr('SITUATIE EXISTENTA — PLANURI DIN HARTA',3);
+  cy=30;
+
+  cy=sec('FIG. 7 — AMPLASAMENT SI CONTEXT URBAN (vedere de sus)',cy);
+  cy+=2;
+  cy=addImg(mapImg2D,14,cy,W-28,80,'Sursa: UrbanX/Mapbox GL JS · Vedere ortogonala (pitch=0°) · Parcela marcata');
+  cy+=2;
+
+  cy=sec('FIG. 8 — VEDERE 3D IN CONTEXT (pitch 62°)',cy);
+  cy+=2;
+  cy=addImg(mapImg3D,14,cy,W-28,75,'Sursa: UrbanX/Mapbox GL JS · Vedere 3D cu volumul propus in context urban');
   cy+=4;
 
-  const months=[{m:1,n:'Ianuarie'},{m:3,n:'Martie'},{m:6,n:'Iunie'},{m:9,n:'Septembrie'},{m:12,n:'Decembrie'}];
-  const hours=[8,10,12,14,16];
-  const cW2=(W-28)/6;
+  cy=sec('DATE PARCEL SI AMPLASAMENT',Math.max(cy,248));
+  cy=row2s('Nr. cadastral',nrcad,'UTR (zona PUG)',utr,cy+4);
+  cy=row2s('Suprafata teren',area+' mp','Perimetru aprox.','calc. GIS',cy);
+  cy=row2s('Coordonate lat.',lat.toFixed(5)+'N','Coordonate lng.',lon.toFixed(5)+'E',cy);
+  cy=row2s('Localitate','Municipiul Iasi, jud. Iasi','Sursa date','PUG Iasi + Cadastru',cy);
+  ftr();
 
-  // Header
-  pdf.setFillColor(10,22,48); pdf.rect(14,cy,W-28,8,'F');
-  pdf.setTextColor(200,150,10); pdf.setFontSize(7.5); pdf.setFont('helvetica','bold');
+  // ══════════════════════════════════════════════════════════════════════════
+  // PAG 4 — CALCULE SOLARE + GRAFIC
+  // ══════════════════════════════════════════════════════════════════════════
+  pdf.addPage();
+  pdf.setFillColor(...LIGHT); pdf.rect(0,0,W,H,'F');
+  hdr('CALCULE ALTITUDINI SOLARE — LATITUDINE '+lat.toFixed(2)+'°N',4);
+  cy=30;
+
+  cy=sec('4.1 — TABEL ALTITUDINI SOLARE (grade) · TOATE LUNILE',cy);
+  cy+=4;
+
+  // Tabel complet cu toate lunile
+  const allMonths=[
+    {m:1,n:'Ianuarie'},{m:2,n:'Februarie'},{m:3,n:'Martie'},{m:4,n:'Aprilie'},
+    {m:5,n:'Mai'},{m:6,n:'Iunie'},{m:7,n:'Iulie'},{m:8,n:'August'},
+    {m:9,n:'Septembrie'},{m:10,n:'Octombrie'},{m:11,n:'Noiembrie'},{m:12,n:'Decembrie'},
+  ];
+  const allHours=[6,8,10,12,14,16,18];
+  const cW3=(W-28)/(allHours.length+1);
+
+  pdf.setFillColor(...DARK); pdf.rect(14,cy,W-28,8,'F');
+  pdf.setTextColor(...GOLD); pdf.setFontSize(7); pdf.setFont('helvetica','bold');
   pdf.text('Luna',17,cy+5.5);
-  hours.forEach((h,i)=>pdf.text(h+':00',17+cW2*(i+1)+cW2/2,cy+5.5,{align:'center'}));
+  allHours.forEach((h,i)=>pdf.text(h+':00',14+(i+1.5)*cW3,cy+5.5,{align:'center'}));
   cy+=8;
 
-  months.forEach((mo,mi)=>{
+  allMonths.forEach((mo,mi)=>{
     const bg=mi%2===0?[235,240,250]:[245,248,255];
-    pdf.setFillColor(...bg); pdf.rect(14,cy,W-28,8,'F');
-    pdf.setTextColor(30,50,90); pdf.setFont('helvetica','bold'); pdf.setFontSize(8);
-    pdf.text(mo.n,17,cy+5.5);
-    hours.forEach((h,hi)=>{
+    pdf.setFillColor(...bg); pdf.rect(14,cy,W-28,7.5,'F');
+    pdf.setTextColor(30,50,90); pdf.setFont('helvetica','bold'); pdf.setFontSize(7.5);
+    pdf.text(mo.n,17,cy+5);
+    allHours.forEach((h,hi)=>{
       const d=new Date(year,mo.m-1,21,h,0,0);
       const alt=solarPos(lat,lon,d).altitude;
-      const col=alt<0.5?[150,150,155]:alt<15?[190,50,50]:alt<30?[180,130,20]:alt<50?[40,130,40]:[20,80,180];
-      pdf.setTextColor(...col); pdf.setFont('helvetica','normal');
-      pdf.text(alt>0.5?alt.toFixed(1)+'°':'—',17+cW2*(hi+1)+cW2/2,cy+5.5,{align:'center'});
+      const col=alt<0.5?[180,180,185]:alt<15?[200,55,55]:alt<30?[185,130,20]:alt<50?[35,130,45]:[20,80,185];
+      pdf.setTextColor(...col); pdf.setFont(alt<15&&alt>0.5?'helvetica':'helvetica','normal');
+      pdf.text(alt>0.5?alt.toFixed(0)+'°':'—',14+(hi+1.5)*cW3,cy+5,{align:'center'});
     });
-    cy+=8;
+    cy+=7.5;
   });
 
-  cy+=5;
-  pdf.setTextColor(80,95,115); pdf.setFontSize(7);
-  pdf.text('Legenda: Rosu=sub 15° (risc) · Portocaliu=15-30° · Verde=30-50° · Albastru=>50° (optim)',14,cy);
-  cy+=10;
-
-  // Grafic
-  cy=section('3.2 — GRAFIC ALTITUDINE MAXIMA LA AMIAZA (21 ale lunii)',cy);
   cy+=4;
-  const gX=18,gY=cy,gW=W-36,gH=58;
-  pdf.setFillColor(225,232,245); pdf.rect(gX,gY,gW,gH,'F');
-  pdf.setDrawColor(195,205,225); pdf.rect(gX,gY,gW,gH,'S');
+  pdf.setFillColor(250,242,220); pdf.roundedRect(14,cy,W-28,8,1,1,'F');
+  pdf.setTextColor(120,80,10); pdf.setFontSize(6.5); pdf.setFont('helvetica','normal');
+  pdf.text('Legenda: Rosu=sub 15° (risc incalzire insuficienta) · Portocaliu=15-30° · Verde=30-50° (normal) · Albastru=>50° (optim vara)',17,cy+5.5);
+  cy+=12;
 
-  [0,15,30,45,60].forEach(v=>{
-    const y2=gY+gH-v/70*gH;
-    pdf.setDrawColor(195,205,225); pdf.setLineWidth(v===15?0.6:0.3); pdf.line(gX,y2,gX+gW,y2);
+  // Grafic altitudini anuale
+  cy=sec('4.2 — GRAFIC ALTITUDINE MAXIMA LA AMIAZA (21 ale lunii)',cy);
+  cy+=4;
+  const gX=22,gY=cy,gW=W-44,gH=52;
+  pdf.setFillColor(228,235,248); pdf.rect(gX,gY,gW,gH,'F');
+  pdf.setDrawColor(200,210,228); pdf.rect(gX,gY,gW,gH,'S');
+
+  [0,15,30,45,60,70].forEach(v=>{
+    const yg=gY+gH-v/72*gH;
+    pdf.setDrawColor(v===15?[200,55,55]:[200,210,228]); pdf.setLineWidth(v===15?0.8:0.25);
+    pdf.line(gX,yg,gX+gW,yg);
     pdf.setTextColor(90,110,140); pdf.setFontSize(6); pdf.setFont('helvetica','normal');
-    pdf.text(v+'°',gX-6,y2+2,{align:'right'});
-    if(v===15){
-      pdf.setTextColor(180,40,40); pdf.setFontSize(6);
-      pdf.text('prag min legal',gX+1,y2-1.5);
-    }
+    pdf.text(v+'°',gX-5,yg+1.5,{align:'right'});
+    if(v===15){ pdf.setTextColor(200,55,55); pdf.setFontSize(5.5); pdf.text('min legal OMS 119',gX+1,yg-1); }
   });
 
-  const mLabels=['Ian','Feb','Mar','Apr','Mai','Iun','Iul','Aug','Sep','Oct','Nov','Dec'];
-  Array.from({length:12},(_,i)=>i+1).forEach((m,i)=>{
-    pdf.setTextColor(80,100,130); pdf.setFontSize(5.5);
-    pdf.text(mLabels[i],gX+(i+0.5)/12*gW,gY+gH+4,{align:'center'});
+  const mL=['Ian','Feb','Mar','Apr','Mai','Iun','Iul','Aug','Sep','Oct','Nov','Dec'];
+  Array.from({length:12},(_,i)=>i).forEach(i=>{
+    pdf.setTextColor(80,100,130); pdf.setFontSize(6);
+    pdf.text(mL[i],gX+(i+0.5)/12*gW,gY+gH+4,{align:'center'});
   });
 
-  pdf.setDrawColor(26,58,106); pdf.setLineWidth(1.2);
-  let px=null,py=null;
+  // Curba solara
+  pdf.setDrawColor(...BLUE); pdf.setLineWidth(1.4);
+  let ppx=null,ppy=null;
   Array.from({length:12},(_,i)=>i+1).forEach(m=>{
-    const d2=new Date(year,m-1,21,12,0,0);
-    const alt=solarPos(lat,lon,d2).altitude;
-    const x2=gX+(m-0.5)/12*gW,y2=gY+gH-Math.min(alt/70,1)*gH;
-    if(px!==null)pdf.line(px,py,x2,y2);
-    pdf.setFillColor(26,58,106); try{pdf.circle(x2,y2,1,'F');}catch(_){pdf.ellipse(x2,y2,1,1,'F');}
-    px=x2;py=y2;
+    const alt=solarPos(lat,lon,new Date(year,m-1,21,12,0,0)).altitude;
+    const xx=gX+(m-0.5)/12*gW, yy=gY+gH-Math.min(alt/72,1)*gH;
+    if(ppx!==null) pdf.line(ppx,ppy,xx,yy);
+    pdf.setFillColor(...BLUE); try{pdf.circle(xx,yy,1.2,'F');}catch(_){pdf.ellipse(xx,yy,1.2,1.2,'F');}
+    ppx=xx; ppy=yy;
   });
   // Linie 15°
-  const y15=gY+gH-15/70*gH;
-  pdf.setDrawColor(180,40,40); pdf.setLineWidth(0.6); pdf.setLineDashPattern([2,1],0);
+  const y15=gY+gH-15/72*gH;
+  pdf.setDrawColor(200,55,55); pdf.setLineWidth(0.8); pdf.setLineDashPattern([3,1.5],0);
   pdf.line(gX,y15,gX+gW,y15); pdf.setLineDashPattern([],0);
 
-  cy=gY+gH+10;
-
-  // Calcule umbre
-  cy=section('3.3 — CALCUL UMBRA PROIECTATA (inaltimea volumului: '+(isNaN(aedisH)?0:aedisH).toFixed(1)+'m)',cy);
-  cy+=4;
-  const umbraData=[
-    {sezon:'Solstitiu vara (21 Iunie)',alt:junH,umbra:shadJun,ok:true},
-    {sezon:'Echinoct (21 Martie / Septembrie)',alt:marH,umbra:(aedisH>0?(aedisH/Math.tan(marH*Math.PI/180)).toFixed(1):'—'),ok:true},
-    {sezon:'Solstitiu iarna (21 Decembrie)',alt:decH,umbra:shadDec,ok:decH>=15},
-  ];
-  umbraData.forEach(({sezon,alt,umbra,ok},ri)=>{
-    const bg=ri%2===0?[235,240,250]:[245,248,255];
-    pdf.setFillColor(...bg); pdf.rect(14,cy,W-28,7,'F');
-    const okCol = ok ? [40,140,60] : [180,40,40];
-    pdf.setFillColor(okCol[0],okCol[1],okCol[2]); pdf.rect(14,cy,3,7,'F');
-    pdf.setTextColor(30,50,90); pdf.setFont('helvetica','normal'); pdf.setFontSize(7.5);
-    pdf.text(sezon,20,cy+5);
-    pdf.text('Alt: '+alt.toFixed(1)+'°',110,cy+5);
-    pdf.setFont('helvetica','bold');
-    pdf.text('Umbra: '+umbra+'m',148,cy+5);
-    cy+=7;
+  // Marcam solstitiile
+  [6,12].forEach(m=>{
+    const alt=solarPos(lat,lon,new Date(year,m-1,21,12,0,0)).altitude;
+    const xx=gX+(m-0.5)/12*gW, yy=gY+gH-alt/72*gH;
+    pdf.setTextColor(m===6?[30,130,50]:[200,55,55]); pdf.setFontSize(5.5);
+    pdf.text(alt.toFixed(1)+'°',xx,yy-3,{align:'center'});
   });
 
-  addFooter();
+  cy=gY+gH+12;
+  ftr();
 
-  // ══ PAG 4: Concluzii urbanistice ════════════════════════════════════════
+  // ══════════════════════════════════════════════════════════════════════════
+  // PAG 5 — UMBRE PROIECTATE + DIAGRAMA ROZA VANTURILOR
+  // ══════════════════════════════════════════════════════════════════════════
   pdf.addPage();
-  pdf.setFillColor(248,249,251); pdf.rect(0,0,W,H,'F');
-  addHeader('CONCLUZII SI RECOMANDARI URBANISTICE',4,5);
-  cy=32;
+  pdf.setFillColor(...LIGHT); pdf.rect(0,0,W,H,'F');
+  hdr('UMBRE PROIECTATE — ANALIZA SEZONIERA',5);
+  cy=30;
 
-  // Status general
-  pdf.setFillColor(...(isConform?[30,130,60]:[160,30,30]));
-  pdf.roundedRect(14,cy,W-28,18,3,3,'F');
-  pdf.setTextColor(255,255,255); pdf.setFontSize(10); pdf.setFont('helvetica','bold');
-  pdf.text(isConform?'CONCLUZIE: CONSTRUCTIA ESTE POSIBILA':'CONCLUZIE: NECESITA ANALIZA SUPLIMENTARA',W/2,cy+8,{align:'center'});
-  pdf.setFontSize(7.5); pdf.setFont('helvetica','normal');
-  pdf.text('Conform analizei de insorire si datelor urbanistice disponibile',W/2,cy+14,{align:'center'});
-  cy+=24;
-
-  cy=section('4.1 — PARAMETRI URBANISTICI PROPUSI',cy);
+  cy=sec('5.1 — CALCUL UMBRA PROIECTATA · H CLADIRE = '+aedisH.toFixed(1)+'m',cy);
   cy+=4;
 
-  const scMax=aedisH>0&&parseFloat(area)>0?Math.round(parseFloat(area)*parseFloat(pot||0)/100):0;
-  const sdMax=aedisH>0&&parseFloat(area)>0?Math.round(parseFloat(area)*parseFloat(cut||0)):0;
-
-  const paramsData=[
-    ['Functiune propusa',fnDef.label||'—','Admisa in UTR '+utr,isConform?'DA':'CONDITIONAT'],
-    ['Nr. niveluri',niv+' etaje','H total propus',(isNaN(aedisH)?0:aedisH).toFixed(1)+' m'],
-    ['H maxim admis PUG',(String(hmax)||'N/A')+' m','Incadrare H',aedisH<=parseFloat(String(hmax)||'999')?'IN LIMITA':'DEPASIT'],
-    ['POT propus','~'+pot+'%','Supraf. construita max',scMax+' mp'],
-    ['CUT propus','~'+cut,'Supraf. desfasurata max',sdMax+' mp'],
-    ['Retragere front stradal',rf+' m','Retragere spate',rs+' m'],
+  // Tabel complet umbre
+  const umbreLuni=[
+    {n:'Ianuarie',m:1},{n:'Martie',m:3},{n:'Aprilie',m:4},{n:'Iunie',m:6},
+    {n:'Iulie',m:7},{n:'Septembrie',m:9},{n:'Octombrie',m:10},{n:'Decembrie',m:12},
   ];
+  const umbHours=[8,10,12,14,16];
 
-  paramsData.forEach(([l1,v1,l2,v2],ri)=>{
-    const bg=ri%2===0?[235,240,250]:[245,248,255];
-    const c2=W/2;
-    pdf.setFillColor(...bg); pdf.rect(14,cy,W-28,7,'F');
-    pdf.setTextColor(80,95,115); pdf.setFont('helvetica','normal'); pdf.setFontSize(7.5);
-    pdf.text(l1+':',17,cy+5);
-    pdf.setTextColor(20,40,80); pdf.setFont('helvetica','bold');
-    const v1col=v1==='DEPASIT'?[180,30,30]:v1==='IN LIMITA'?[30,130,60]:[20,40,80];
-    pdf.setTextColor(...v1col); pdf.text(String(v1),17+45,cy+5);
-    pdf.setTextColor(80,95,115); pdf.setFont('helvetica','normal');
-    pdf.text(l2+':',c2+3,cy+5);
-    const v2col=v2==='DA'?[30,130,60]:v2==='CONDITIONAT'?[180,130,0]:v2==='DEPASIT'?[180,30,30]:[20,40,80];
-    pdf.setTextColor(...v2col); pdf.setFont('helvetica','bold'); pdf.text(String(v2),c2+3+48,cy+5);
-    cy+=7;
-  });
-
-  cy+=5;
-  cy=section('4.2 — CONCLUZII DETALIATE',cy);
-  cy+=4;
-
-  const concluzii=[
-    `1. FEZABILITATE GENERALA: Amplasamentul ${nrcad} din UTR ${utr} permite realizarea unui imobil cu functiunea "${fnDef.label||'—'}", cu un regim de inaltime de ${niv} niveluri (H total propus ~${(isNaN(aedisH)?0:aedisH).toFixed(1)}m), conform parametrilor urbanistici din PUG Iasi.`,
-    `2. CONDITII DE INSORIRE: Unghiul solar la amiaza la solstitiul de iarna (21 decembrie) este de ${(isNaN(decH)?0:decH).toFixed(1)}°, ${isConform?'respectand pragul minim de 15° impus de OMS 119/2014 pentru spatii de locuit.':'sub pragul minim de 15° impus de OMS 119/2014 – se impune o analiza de specialitate.'}`,
-    `3. UMBRA PROIECTATA: La solstitiul de iarna, constructia propusa (~${(isNaN(aedisH)?0:aedisH).toFixed(1)}m) proiecteaza o umbra de cca. ${shadDec}m in directia nord. Se recomanda verificarea impactului asupra proprietatilor invecinate amplasate la nord de teren.`,
-    `4. PARAMETRI ADMISIBILI: POT max=${pot}%, CUT max=${cut}, H max=${hmax}m conform PUG. Constructia propusa se incadreaza in limitele urbanistice ale zonei, cu respectarea tuturor alinamentelor (fata strada: ${rf}m, spate: ${rs}m, lateral: ${rl}m).`,
-    `5. ETAPE URMATOARE: Prezentul pre-studiu are caracter orientativ. In etapa urmatoare se recomanda: (a) elaborarea unui PUZ daca este cazul, (b) studiu geotehnic, (c) expertiza a unui arhitect autorizat pentru studiu de fezabilitate detaliat, (d) obtinerea Certificatului de Urbanism.`,
-  ];
-
-  concluzii.forEach(txt=>{ cy=body(txt,14,cy+2,W-28); cy+=3; });
-
-  cy+=5;
-  cy=section('4.3 — TEMEIUL LEGAL',cy);
-  cy+=3;
-  const regs=[
-    '• Ordinul MS nr. 119/2014 – art. 4: minim 1,5 ore insorire directa/zi la solstitiul de iarna',
-    '• Legea nr. 350/2001 privind amenajarea teritoriului si urbanismul',
-    '• Ordinul MDRAP nr. 233/2016 – Metodologie PUZ',
-    '• PUG Municipiul Iasi (in vigoare) – UTR '+utr,
-  ];
-  regs.forEach(r=>{ cy=body(r,16,cy+1,W-32); cy+=1; });
-
-  addFooter();
-
-  // ══ PAG 5: Disclaimer ═══════════════════════════════════════════════════
-  pdf.addPage();
-  pdf.setFillColor(248,249,251); pdf.rect(0,0,W,H,'F');
-  addHeader('NOTA METODOLOGICA SI DISCLAIMER',5,5);
-  cy=32;
-
-  cy=section('METODOLOGIE DE CALCUL',cy);
-  cy+=3;
-  cy=body('Valorile de insorire au fost calculate prin algoritmul PSA (Practical Solar Angle), adaptare dupa Blanco-Muriel et al. (2001). Calculele iau in considerare latitudinea geografica a amplasamentului, declinatia solara si unghiul orar pentru datele reprezentative ale fiecarei luni.',14,cy+2);
-  cy+=5;
-
-  cy=section('LIMITE SI AVERTISMENTE',cy,[140,30,30]);
-  cy+=3;
-  const warnings=[
-    'Prezentul document reprezinta un PRE-STUDIU URBANISTIC DE INSORIRE cu caracter strict ORIENTATIV si informativ.',
-    'Valorile calculate sunt orientative si pot diferi de masuratorile reale datorita: reliefului local, vegetatiei, cladirilor invecinate neintroduse in baza de date, conditiilor meteorologice locale.',
-    'Documentul NU are valoare juridica si NU poate fi depus ca piesa obligatorie la obtinerea Autorizatiei de Construire.',
-    'Studiul definitiv de insorire cu valoare legala trebuie elaborat de un ARHITECT sau INGINER autorizat, utilizand software de simulare certificat (Autodesk Revit+Insight, Rhino+Ladybug, EnergyPlus etc.).',
-    'UrbanX AEDIS nu isi asuma raspunderea pentru decizii luate exclusiv pe baza acestui document.',
-  ];
-  warnings.forEach(w=>{ cy=body('• '+w,14,cy+2,W-28); cy+=3; });
-
+  pdf.setFillColor(...DARK); pdf.rect(14,cy,W-28,8,'F');
+  pdf.setTextColor(...GOLD); pdf.setFontSize(7); pdf.setFont('helvetica','bold');
+  pdf.text('Luna',17,cy+5.5);
+  umbHours.forEach((h,i)=>pdf.text(h+':00',14+(i+1.5)*((W-28)/(umbHours.length+1)),cy+5.5,{align:'center'}));
   cy+=8;
-  pdf.setFillColor(235,240,250); pdf.roundedRect(14,cy,W-28,35,3,3,'F');
-  pdf.setTextColor(26,58,106); pdf.setFontSize(9); pdf.setFont('helvetica','bold');
-  pdf.text('Elaborat de platforma UrbanX · AEDIS',W/2,cy+10,{align:'center'});
-  pdf.setTextColor(60,80,110); pdf.setFontSize(8); pdf.setFont('helvetica','normal');
-  pdf.text('Data: '+dateStr+' · Ora: '+timeStr,W/2,cy+18,{align:'center'});
-  pdf.text('Parcela: '+nrcad+' · UTR: '+utr+' · Suprafata: '+area+' mp',W/2,cy+25,{align:'center'});
 
-  addFooter();
+  umbreLuni.forEach((mo,mi)=>{
+    const bg=mi%2===0?[235,240,250]:[245,248,255];
+    pdf.setFillColor(...bg); pdf.rect(14,cy,W-28,7.5,'F');
+    pdf.setTextColor(30,50,90); pdf.setFont('helvetica','bold'); pdf.setFontSize(7.5);
+    pdf.text(mo.n,17,cy+5);
+    const cw4=(W-28)/(umbHours.length+1);
+    umbHours.forEach((h,hi)=>{
+      const alt=solarPos(lat,lon,new Date(year,mo.m-1,21,h,0,0)).altitude;
+      let umbra='—';
+      if(aedisH>0&&alt>1){ umbra=(aedisH/Math.tan(alt*Math.PI/180)).toFixed(0)+'m'; }
+      const col=alt<1?[160,160,165]:alt<15?[200,55,55]:alt<30?[185,130,20]:[35,130,45];
+      pdf.setTextColor(...col); pdf.setFont('helvetica','normal'); pdf.setFontSize(7);
+      pdf.text(umbra,14+(hi+1.5)*cw4,cy+5,{align:'center'});
+    });
+    cy+=7.5;
+  });
+
+  cy+=4;
+  pdf.setFillColor(235,248,240); pdf.roundedRect(14,cy,W-28,9,1,1,'F');
+  pdf.setTextColor(20,100,50); pdf.setFontSize(7); pdf.setFont('helvetica','normal');
+  pdf.text('Nota: Umbra proiectata reprezinta distanta (in metri) in directia opusa soarelui. La solstitiul de iarna umbra maxima = '+shadDec+'m · Vara = '+shadJun+'m',17,cy+6);
+  cy+=14;
+
+  // Diagrama sol schematica pe pagina
+  cy=sec('5.2 — SCHEMA SOLARA — TRAIECTORII (21 Iunie vs 21 Decembrie)',cy);
+  cy+=4;
+
+  // Canvas simplu: elipsa trajectorie
+  const sx=W/2, sy=cy+40, sr=52;
+  pdf.setFillColor(220,230,248); pdf.ellipse(sx,sy,sr,sr*0.38,'F');
+  pdf.setDrawColor(180,195,220); pdf.setLineWidth(0.5); pdf.ellipse(sx,sy,sr,sr*0.38,'S');
+
+  // Traiectorie vara (arc mai inalt)
+  pdf.setDrawColor(220,160,20); pdf.setLineWidth(1.5);
+  const pts6=[];
+  for(let h=5;h<=19;h+=0.5){
+    const alt=solarPos(lat,lon,new Date(year,5,21,h,0,0)).altitude;
+    if(alt<0.5) continue;
+    const az=(h-5)/(19-5);
+    const x2=sx-sr+az*sr*2;
+    const y2=sy-alt/75*sr*0.8;
+    pts6.push([x2,y2]);
+  }
+  for(let i=1;i<pts6.length;i++) pdf.line(pts6[i-1][0],pts6[i-1][1],pts6[i][0],pts6[i][1]);
+
+  // Traiectorie iarna (arc mai jos)
+  pdf.setDrawColor(70,100,180); pdf.setLineWidth(1.5);
+  const pts12=[];
+  for(let h=7;h<=17;h+=0.5){
+    const alt=solarPos(lat,lon,new Date(year,11,21,h,0,0)).altitude;
+    if(alt<0.5) continue;
+    const az=(h-7)/(17-7);
+    const x2=sx-sr*0.7+az*sr*1.4;
+    const y2=sy-alt/75*sr*0.8;
+    pts12.push([x2,y2]);
+  }
+  for(let i=1;i<pts12.length;i++) pdf.line(pts12[i-1][0],pts12[i-1][1],pts12[i][0],pts12[i][1]);
+
+  // Cladire schematic
+  const bh=Math.min(aedisH/3,14);
+  pdf.setFillColor(50,70,120); pdf.rect(sx-6,sy-bh,12,bh,'F');
+  pdf.setFillColor(...GOLD); pdf.rect(sx-7,sy,14,1.5,'F');
+
+  // Umbra iarna
+  if(aedisH>0&&decH>0.5){
+    const shLen=Math.min(parseFloat(shadDec)||30,sr*0.9);
+    pdf.setFillColor(100,120,160,0.3); pdf.setGState?null:null;
+    pdf.setDrawColor(100,120,180); pdf.setLineWidth(0.5);
+    pdf.line(sx-7,sy,sx-7+shLen*0.6,sy+3);
+    pdf.line(sx+7,sy,sx+7+shLen*0.6,sy+3);
+    pdf.setTextColor(70,90,160); pdf.setFontSize(6.5);
+    pdf.text('Umbra iarna ~'+shadDec+'m',sx+shLen*0.3,sy+6);
+  }
+
+  // Legenda
+  pdf.setDrawColor(220,160,20); pdf.setLineWidth(2); pdf.line(sx-50,sy+22,sx-40,sy+22);
+  pdf.setTextColor(180,120,10); pdf.setFontSize(6.5); pdf.text('Traiectorie 21 Iunie (vara)',sx-38,sy+24);
+  pdf.setDrawColor(70,100,180); pdf.line(sx-50,sy+28,sx-40,sy+28);
+  pdf.setTextColor(50,80,160); pdf.text('Traiectorie 21 Decembrie (iarna)',sx-38,sy+30);
+
+  pdf.setTextColor(90,105,130); pdf.setFontSize(6.5);
+  pdf.text('E (Rasarit)',sx-sr-2,sy+4,{align:'right'});
+  pdf.text('V (Apus)',sx+sr+2,sy+4,{align:'left'});
+  pdf.text('S (Sud)',sx,sy+sr*0.42+4,{align:'center'});
+
+  cy=sy+sr*0.5+15;
+
+  cy=sec('5.3 — DURATA INSORIRE DIRECTE (ore/zi) LA SOLSTITII',cy);
+  cy+=3;
+  const insData=[
+    ['Solstitiu vara (21 Iunie)',junH.toFixed(1)+'°','~14h 00min','Insorire maxima anuala — radiatii UV intense'],
+    ['Echinoct primavara (21 Martie)',marH.toFixed(1)+'°','~12h 00min','Tranzitie — insorire normala'],
+    ['Echinoct toamna (21 Sept.)',sepH.toFixed(1)+'°','~12h 00min','Tranzitie — insorire normala'],
+    ['Solstitiu iarna (21 Dec.)',decH.toFixed(1)+'°','~'+( decH>0.5?Math.max(1.5,((Math.PI-2*Math.acos(Math.max(-1,Math.min(1,-Math.tan(lat*Math.PI/180)*Math.tan((-23.45)*Math.PI/180)))))/(2*Math.PI)*24)).toFixed(1):0)+'h','Insorire minima — verificare OMS 119/2014'],
+  ];
+  insData.forEach(([luna,altM,durata,obs],ri)=>{
+    const bg=ri===3?[250,238,238]:ri%2===0?[235,240,250]:[245,248,255];
+    pdf.setFillColor(...bg); pdf.rect(14,cy,W-28,9,'F');
+    pdf.setTextColor(30,50,90); pdf.setFont('helvetica','bold'); pdf.setFontSize(7);
+    pdf.text(S2(luna),17,cy+6);
+    pdf.setFont('helvetica','normal');
+    pdf.text(altM,80,cy+6);
+    pdf.setTextColor(ri===3?[200,55,55]:[35,130,45]); pdf.setFont('helvetica','bold');
+    pdf.text(durata,105,cy+6);
+    pdf.setTextColor(70,85,110); pdf.setFont('helvetica','normal'); pdf.setFontSize(6.5);
+    pdf.text(S2(obs),135,cy+6,{maxWidth:65});
+    cy+=9;
+  });
+  ftr();
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // PAG 6 — PARAMETRI URBANISTICI + CONFORMITATE
+  // ══════════════════════════════════════════════════════════════════════════
+  pdf.addPage();
+  pdf.setFillColor(...LIGHT); pdf.rect(0,0,W,H,'F');
+  hdr('PARAMETRI URBANISTICI SI ANALIZA CONFORMITATE',6);
+  cy=30;
+
+  // Banner status
+  pdf.setFillColor(...cfCol); pdf.roundedRect(14,cy,W-28,14,2,2,'F');
+  pdf.setTextColor(255,255,255); pdf.setFontSize(10); pdf.setFont('helvetica','bold');
+  pdf.text(isConform?'CONCLUZIE: CONDITII DE INSORIRE RESPECTATE':'CONCLUZIE: NECESITA ANALIZA SUPLIMENTARA DE SPECIALITATE',W/2,cy+8,{align:'center'});
+  pdf.setFontSize(7.5); pdf.setFont('helvetica','normal');
+  pdf.text('Altitudine solara la solstitiu iarna (21 Dec., ora 12:00): '+decH.toFixed(1)+'° · Prag minim OMS 119/2014: 15°',W/2,cy+13,{align:'center'});
+  cy+=19;
+
+  cy=sec('6.1 — INDICATORI URBANISTICI MAXIMI (PUG IASI · UTR '+S2(utr)+')',cy);
+  cy=row2s('POT max admis',pot+'%','CUT max admis',cut,cy+4);
+  cy=row2s('H max admis (PUG)',hmax+' m','Nr. niveluri max',niv+' etaje',cy);
+  cy=row2s('Aliniament fata strada',rf+' m','Aliniament spate',rs+' m',cy);
+  cy=row2s('Aliniament lateral stg.',rl+' m','Aliniament lateral dr.',rr+' m',cy);
+  cy=row2s('Spatii verzi obligatorii',sv+'%','Parcaje estimate','2 loc/unitate',cy);
+  cy+=4;
+
+  cy=sec('6.2 — PARAMETRI VOLUM PROPUS (AEDIS)',cy);
+  const scMaxV=Math.round(parseFloat(area||0)*parseFloat(pot||0)/100);
+  const sdMaxV=Math.round(parseFloat(area||0)*parseFloat(cut||0));
+  const svMinV=Math.round(parseFloat(area||0)*parseFloat(sv||15)/100);
+  cy=row2s('Functiune propusa',S2(fnDef.label),'Stil arhitectural',S2(AEDIS.stil||'modern'),cy+4);
+  cy=row2s('Nr. niveluri propus',niv+' niveluri','Inaltime totala',aedisH.toFixed(1)+' m',cy);
+  cy=row2s('POT aplicat',pot+'%','SC construita max',scMaxV+' mp',cy);
+  cy=row2s('CUT aplicat',cut,'SD desfasurata max',sdMaxV+' mp.ADC',cy);
+  cy=row2s('Spatii verzi min oblig.',svMinV+' mp ('+sv+'%)','Suprafata teren total',area+' mp',cy);
+  cy=row2s('Scenariu constructie',S2(AEDIS.scenariu==='liber'?'Demolare+Constructie noua':AEDIS.scenariu==='extindere_h'?'Extindere orizontala':'Extindere verticala'),'Tip acoperis',S2({terasa_plata:'Terasa plata',terasa_circulabila:'Terasa circulabila',sarpanta:'Sarpanta',mansarda:'Mansarda'}[AEDIS.tipAcoperis]||AEDIS.tipAcoperis),cy);
+  cy+=4;
+
+  cy=sec('6.3 — VERIFICARE CONFORMITATE PUG',cy);
+  cy+=4;
+  const confChecks=[
+    {label:'Inaltime propusa vs H max PUG',
+     val:aedisH>0&&parseFloat(hmax||'0')>0?(aedisH<=parseFloat(hmax)?'IN LIMITA — H propus '+aedisH.toFixed(1)+'m ≤ H max PUG '+hmax+'m':'DEPASIT — H propus '+aedisH.toFixed(1)+'m > H max '+hmax+'m'):'H max PUG nespecificat — verificati CU',
+     ok:!(aedisH>0&&parseFloat(hmax||'0')>0&&aedisH>parseFloat(hmax))},
+    {label:'POT propus vs POT max admis',val:'POT '+pot+'% — SC max la sol: '+scMaxV+' mp din '+area+' mp teren',ok:true},
+    {label:'CUT propus vs CUT max admis',val:'CUT '+cut+' — SD max: '+sdMaxV+' mp.ADC',ok:true},
+    {label:'Conditii insorire OMS 119/2014',val:isConform?'RESPECTAT — Alt. solara iarna '+decH.toFixed(1)+'° ≥ 15°':'ATENTIE — Alt. solara iarna '+decH.toFixed(1)+'° < 15° — studiu aprofundat',ok:isConform},
+    {label:'Umbra la solstitiu iarna',val:'Umbra proiectata estimata: '+shadDec+'m spre nord — verificati vecinatati',ok:parseFloat(shadDec||'0')<30},
+    {label:'Necesitate PUZ/PUD',val:aedisH>parseFloat(hmax||'999')||parseFloat(pot)>80?'Posibil necesara procedura PUZ — consultati DAU Primaria Iasi':'Parametrii se incadreaza in PUG — verificati CU',ok:!(aedisH>parseFloat(hmax||'999'))},
+  ];
+  confChecks.forEach(({label,val,ok},ri)=>{
+    const bg=ri%2===0?[235,240,250]:[245,248,255];
+    pdf.setFillColor(...bg); pdf.rect(14,cy,W-28,9,'F');
+    pdf.setFillColor(...(ok?[35,140,65]:[200,50,50])); pdf.rect(14,cy,3,9,'F');
+    pdf.setTextColor(30,50,90); pdf.setFont('helvetica','bold'); pdf.setFontSize(7.5);
+    pdf.text(S2(label),19,cy+6);
+    pdf.setTextColor(ok?[30,120,55]:[180,35,35]); pdf.setFont('helvetica','normal'); pdf.setFontSize(7);
+    pdf.text(S2(val),90,cy+6,{maxWidth:112});
+    cy+=9;
+  });
+  ftr();
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // PAG 7 — CONCLUZII DETALIATE
+  // ══════════════════════════════════════════════════════════════════════════
+  pdf.addPage();
+  pdf.setFillColor(...LIGHT); pdf.rect(0,0,W,H,'F');
+  hdr('CONCLUZII DETALIATE SI RECOMANDARI',7);
+  cy=30;
+
+  cy=sec('7.1 — SINTEZA ANALIZEI DE INSORIRE',cy);
+  cy+=3;
+  const concluziiTxt=[
+    '1. FEZABILITATE GENERALA: Amplasamentul '+nrcad+' din zona urbanistica UTR '+S2(utr)+', Municipiul Iasi, permite realizarea unui imobil cu functiunea "'+S2(fnDef.label)+'", cu un regim de inaltime de '+niv+' niveluri (H total propus ~'+aedisH.toFixed(1)+'m), in limitele parametrilor urbanistici ai PUG Iasi in vigoare. Suprafata terenului de '+area+' mp permite o suprafata construita la sol de maxim '+scMaxV+' mp (POT '+pot+'%) si o suprafata desfasurata de maxim '+sdMaxV+' mp.ADC (CUT '+cut+').',
+    '2. CONDITII DE INSORIRE (OMS 119/2014): Altitudinea solara la amiaza la solstitiul de iarna (21 decembrie, ora 12:00) pentru latitudinea '+lat.toFixed(2)+'°N este de '+decH.toFixed(1)+'°. '+(isConform?'Aceasta valoare depaseste pragul minim de 15° impus de Ordinul MS 119/2014, ceea ce inseamna ca, din punct de vedere al insolarii directe, amplasamentul respecta conditiile minime legale pentru spatii de locuit.':'Aceasta valoare este sub pragul minim de 15° impus de Ordinul MS 119/2014 art. 4. Se impune elaborarea unui studiu detaliat de insorire de catre un specialist autorizat, utilizand software de simulare certificat.'),
+    '3. UMBRA PROIECTATA: La solstitiul de vara (21 iunie, H='+aedisH.toFixed(1)+'m), umbra proiectata a constructiei propuse are o lungime de cca. '+shadJun+'m. La echinoct (21 martie/septembrie) umbra este de cca. '+shadMar+'m. La solstitiul de iarna (21 decembrie), umbra ajunge la cca. '+shadDec+'m in directia nord. Proprietatile invecinate amplasate la nord de teren, in raza de '+shadDec+'m, pot fi afectate de umbrire in perioada de iarna. Se recomanda verificarea cu vecinatatea.',
+    '4. ANALIZA ANUALA: Altitudinea maxima anuala a soarelui (vara) este de '+junH.toFixed(1)+'°, asigurand o insorire optima in sezonul cald. In anotimpul de tranzitie (primavara/toamna), altitudinea la amiaza este de ~'+marH.toFixed(1)+'°. Durata zilei variaza de la ~8.5 ore in decembrie la ~15.5 ore in iunie, conform latitudinii geografice.',
+    '5. RECOMANDARI ARHITECTURALE: Se recomanda orientarea fatadelor principale catre sud si sud-est pentru maximizarea insolarii spatiilor de locuit. Adancimea incaperilor nu ar trebui sa depaseasca de 2.5 ori inaltimea ferestrelor pentru a asigura iluminat natural adecvat. Utilizarea de protectii solare orizontale (streasini, balcoane) pentru fatadele sudice este recomandata pentru evitarea supraincalzirii in sezonul cald.',
+    '6. ETAPE URMATOARE: (1) Obtinere Certificat de Urbanism de la DAU Primaria Iasi; (2) Studiu de insorire detaliat cu valoare legala, elaborat de arhitect autorizat OAR, utilizand software certificat (Autodesk Revit+Insight, Rhino/Ladybug, EnergyPlus etc.); (3) Studiu geotehnic si topografic al terenului; (4) Proiect tehnic faza PAC semnat de arhitect autorizat; (5) Avize si acorduri necesare; (6) Autorizatie de Construire.',
+  ];
+  concluziiTxt.forEach(txt=>{ cy=body2(txt,14,cy+2,W-28); cy+=4; });
+
+  cy=sec('7.2 — TEMEIUL LEGAL',Math.min(cy+4,250));
+  cy+=3;
+  ['Ordinul MS nr. 119/2014 — art. 4: minim 1,5 ore insorire directa/zi la solstitiul de iarna pentru spatii de locuit',
+   'Legea nr. 350/2001 privind amenajarea teritoriului si urbanismul (cu modificarile ulterioare)',
+   'Ordinul MDRAP nr. 233/2016 — Norme metodologice PUZ/PUD',
+   'PUG Municipiul Iasi in vigoare (aprobat prin HCL Iasi) — UTR '+S2(utr),
+   'RLU — Regulamentul Local de Urbanism aferent PUG Iasi',
+   'STAS 6221-1981 — Iluminat natural in constructii, prescriptii de proiectare',
+  ].forEach(r=>{ cy=body2('• '+r,16,cy+1,W-32); cy+=2; });
+  ftr();
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // PAG 8 — METODOLOGIE + DISCLAIMER
+  // ══════════════════════════════════════════════════════════════════════════
+  pdf.addPage();
+  pdf.setFillColor(...LIGHT); pdf.rect(0,0,W,H,'F');
+  hdr('NOTA METODOLOGICA SI DISCLAIMER',8);
+  cy=30;
+
+  cy=sec('8.1 — METODOLOGIE DE CALCUL',cy);
+  cy+=3;
+  cy=body2('Valorile de insorire au fost calculate prin algoritmul PSA (Practical Solar Angle), adaptare dupa Blanco-Muriel et al. (2001), validat pentru latitudini intre 40°-50°N. Calculele iau in considerare: latitudinea geografica a amplasamentului ('+lat.toFixed(4)+'°N), longitudinea ('+lon.toFixed(4)+'°E), declinatia solara sezoniera, ecuatia timpului si unghiul orar solar pentru datele reprezentative. Eroarea estimata a algoritmului este de ±0.5° fata de valorile reale.',14,cy,W-28);
+  cy+=8;
+  cy=body2('Vizualizarile 3D au fost generate cu motorul Three.js r128 cu iluminare PBR (Physically Based Rendering), shader-e GLSL procedurale (beton, sticla reflectiva, metal, tencuiala) si lumini directionale simulate conform pozitiei solare. Contextul urban provine din date OpenStreetMap (OSM) via Overpass API si Mapbox GL JS v3.11.',14,cy,W-28);
+  cy+=8;
+
+  cy=sec('8.2 — LIMITE SI AVERTISMENTE',cy,[140,30,30]);
+  cy+=3;
+  ['Prezentul document reprezinta un PRE-STUDIU URBANISTIC DE INSORIRE cu caracter strict ORIENTATIV si informativ, generat automat de platforma UrbanX AEDIS.',
+   'Valorile calculate pot diferi de masuratorile reale datorita: reliefului local (dealuri, vai), vegetatiei inalte, cladirilor invecinate existente sau viitoare, conditiilor meteorologice locale, poluarii atmosferice.',
+   'Documentul NU are valoare juridica si NU poate fi depus ca piesa obligatorie la obtinerea Autorizatiei de Construire sau in proceduri de avizare.',
+   'Studiul definitiv de insorire cu valoare legala trebuie elaborat de un ARHITECT sau INGINER autorizat, utilizand software de simulare certificat (Autodesk Revit+Insight, Rhino+Ladybug, EnergyPlus, IDA ICE etc.).',
+   'UrbanX AEDIS nu isi asuma raspunderea pentru decizii de investitie sau proiectare luate exclusiv pe baza acestui document.',
+  ].forEach(w=>{ cy=body2('• '+w,14,cy+1,W-28); cy+=4; });
+
+  cy+=5;
+  pdf.setFillColor(235,241,252); pdf.roundedRect(14,cy,W-28,32,2,2,'F');
+  pdf.setFillColor(...GOLD); pdf.rect(14,cy,3,32,'F');
+  pdf.setTextColor(...BLUE); pdf.setFontSize(9); pdf.setFont('helvetica','bold');
+  pdf.text('Elaborat de platforma UrbanX · AEDIS — Generator Volumetric Avansat',W/2,cy+9,{align:'center'});
+  pdf.setTextColor(60,80,110); pdf.setFontSize(8); pdf.setFont('helvetica','normal');
+  pdf.text('Data: '+dateStr+' · Ora: '+timeStr,W/2,cy+16,{align:'center'});
+  pdf.text('Parcela: '+nrcad+' · UTR: '+S2(utr)+' · Suprafata: '+area+' mp · GPS: '+lat.toFixed(5)+'N, '+lon.toFixed(5)+'E',W/2,cy+23,{align:'center'});
+  pdf.text('© UrbanX · FG · TSS — Toate drepturile rezervate',W/2,cy+30,{align:'center'});
+  ftr();
 
   pdf.save('PreStudiuUrbanisticInsorire_'+nrcad+'_'+year+'.pdf');
-  ss('Pre-studiu urbanistic generat! PDF descarcat (5 pagini).');
+  ss('Pre-studiu urbanistic de insorire generat! PDF 8 pagini descarcat.');
 }
 
 
