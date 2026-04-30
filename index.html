@@ -10282,7 +10282,7 @@ async function generateNoiseStudy(){
   const vecini=S.ctx?.features||[];
   const parcelCtr=turf.centerOfMass(ap.geo).geometry.coordinates;
   const surse=vecini.filter(f=>{
-    const d=turf.distance({type:'Feature',geometry:{type:'Point',coordinates:parcelCtr}},{type:'Feature',geometry:{type:'Point',coordinates:turf.centerOfMass(f).geometry.coordinates},{units:'meters'});
+    const d=turf.distance({type:'Feature',geometry:{type:'Point',coordinates:parcelCtr}},{type:'Feature',geometry:{type:'Point',coordinates:turf.centerOfMass(f).geometry.coordinates}},{units:'meters'});
     return d<200;
   }).map(f=>{
     const fn=f.properties?.fn||'yes';
