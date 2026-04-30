@@ -7491,6 +7491,35 @@ function aedisBuild(){
 }
 
 // ── Etichete dimensionale AEDIS ────────────────────────────────────────────
+function _aedisToggleDimLabels(){
+  // Dacă showDim e acum false → golim sursa de etichete
+  // Dacă showDim e acum true → recalculăm etichetele
+  try{
+    const dimSrc = map.getSource('aedis-dim-src');
+    if(!dimSrc) return;
+    if(!AEDIS.showDim){
+      // Ascundem: golim sursa
+      dimSrc.setData({type:'FeatureCollection',features:[]});
+    } else {
+      // Afișăm: recalculăm din ultimul footprint
+      const ap = S.parcels[S.activeParcel??0];
+      if(!ap?.geo?.geometry || !S.vol.genDone) return;
+      const params = ap.params || getDefaultParams(ap.utr||'');
+      const fnDef = AEDIS_FN[AEDIS.fn] || AEDIS_FN.rezidential_colectiv;
+      const totalNiv = AEDIS.corpuri[0]?.niv || pN(params.niv) || 4;
+      const hParter = AEDIS.parterDiferit ? (fnDef.hParter||4.5) : (AEDIS.corpuri[0]?.hNiv||3.0);
+      const hEtaj = AEDIS.corpuri[0]?.hNiv || fnDef.hEtaj || 3.0;
+      // Reconstruim footprint din lastFeats
+      const parterFeat = (S.vol._lastFeats||[]).find(f=>f.properties?.floor===0&&!f.properties?.isExistent);
+      if(parterFeat){
+        const fp = {type:'Feature',geometry:parterFeat.geometry,properties:{}};
+        const hTot = hParter+(totalNiv-1)*hEtaj;
+        aedisUpdateDimLabels(fp, totalNiv, hParter, hEtaj, hTot);
+      }
+    }
+  }catch(e){ console.warn('_aedisToggleDimLabels:', e.message); }
+}
+
 function aedisUpdateDimLabels(fp, niv, hP, hE, hTot){
   if(!fp?.geometry) return;
   try{
@@ -8148,8 +8177,8 @@ function aedisGetContent(){
       title="LOISIR — Amenajare spații publice">🌿<span style="font-size:8px">Loisir</span></button>
     <button onclick="aedisAIRender()" class="aedis-dim-btn" style="background:rgba(212,175,55,.15);border-color:rgba(212,175,55,.4);color:#d4af37;font-size:10px" title="AI Render fotorealist (necesită API key Fal.ai)">🎨 AI</button>
     <button onclick="generateSolarStudy()" class="aedis-dim-btn" style="background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.4);color:#fbbf24;font-size:9px;display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 8px" title="Studiu Însorire PDF">☀<span style="font-size:8px">Însorire</span></button>
-    <button onclick="AEDIS.showDim=!AEDIS.showDim;aedisRender()" 
-      class="aedis-dim-btn${AEDIS.showDim?' active':''}" title="Etichete dimensionale">📏</button>
+    <button onclick="AEDIS.showDim=!AEDIS.showDim;aedisRender();_aedisToggleDimLabels()" 
+      class="aedis-dim-btn${AEDIS.showDim?' active':''}" title="Etichete dimensionale (toggle)">📏</button>
     <button onclick="aedisClose()" class="aedis-close-btn">✕</button>
   </div>`;
 }
@@ -10227,7 +10256,10 @@ function aedisOpen3DViewer(){
         <option value="hide">Ascunde</option>
       </select>
       <button onclick="_v3dResetCam()" style="background:rgba(255,255,255,.06);color:#94a3b8;border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:4px 10px;font-size:11px;cursor:pointer;flex-shrink:0">⌂</button>
-      <button onclick="_v3dRefreshDistances()" title="Refresh distante vecini" style="background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.3);border-radius:7px;padding:4px 10px;font-size:11px;cursor:pointer;flex-shrink:0">📏 Distanțe</button>
+      <button id="v3d-dist-btn" onclick="_v3dToggleDistances()" title="Toggle distanțe vecini"
+        style="background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.3);border-radius:7px;padding:4px 10px;font-size:11px;cursor:pointer;flex-shrink:0">
+        📏 Distanțe
+      </button>
       <button onclick="document.getElementById('aedis-3d-viewer-overlay').remove();_v3dCleanup()" style="background:rgba(20,30,60,.9);color:#a78bfa;border:1px solid rgba(139,92,246,.4);border-radius:8px;padding:6px 16px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0">✕ Inchide</button>
     </div>
     <canvas id="v3d-canvas" style="flex:1;display:block;cursor:grab;touch-action:none"></canvas>
@@ -10251,7 +10283,7 @@ function _v3dCleanup(){
   if(V3D.af) cancelAnimationFrame(V3D.af);
   if(V3D.r){ V3D.r.dispose(); V3D.r=null; }
   Object.values(V3D.texCache).forEach(t=>{ try{t.dispose();}catch(e){} });
-  V3D.texCache={}; V3D.scene=null; V3D.cam=null; V3D.ctx=[]; V3D.aedis=[];
+  V3D.texCache={}; V3D.scene=null; V3D.cam=null; V3D.ctx=[]; V3D.aedis=[]; V3D.distShown=false;
 }
 
 function _v3dStatus(msg){ const el=document.getElementById('v3d-status'); if(el) el.textContent=msg; }
@@ -10660,24 +10692,44 @@ function _v3dAddDistanceLines(THREE, scene, toLoc){
 
 
 // ── Refresh distanțe în viewer 3D ──────────────────────────────────────────
-function _v3dRefreshDistances(){
+// Șterge liniile de distanță din scenă (renderOrder >= 999)
+function _v3dClearDistLines(){
+  if(!V3D.scene) return;
+  const toRemove=[];
+  V3D.scene.children.forEach(obj=>{ if(obj.renderOrder>=999) toRemove.push(obj); });
+  toRemove.forEach(obj=>V3D.scene.remove(obj));
+}
+
+// Toggle distanțe: afișează dacă ascunse, ascunde dacă afișate
+function _v3dToggleDistances(){
   if(!V3D.scene||!V3D.r||!V3D.cam){ ss('⚠️ Viewer 3D nu e activ.'); return; }
+
+  const btn = document.getElementById('v3d-dist-btn');
+
+  if(V3D.distShown){
+    // ASCUNDE: eliminăm liniile din scenă
+    _v3dClearDistLines();
+    V3D.distShown = false;
+    if(btn){
+      btn.style.background = 'rgba(52,211,153,.1)';
+      btn.style.borderColor = 'rgba(52,211,153,.3)';
+      btn.style.color = '#34d399';
+      btn.textContent = '📏 Distanțe';
+    }
+    V3D.r.render(V3D.scene, V3D.cam);
+    ss('📏 Distanțe ascunse');
+    return;
+  }
+
+  // AFIȘEAZĂ: calculăm și adăugăm liniile
   const ap=S.parcels[S.activeParcel??0];
   if(!ap?.geo?.geometry) return;
 
-  // Recalculăm distanțele în Mapbox
   updateDistanceLines();
 
-  // Așteptăm să se populeze dist-src, apoi adăugăm liniile în scenă
   setTimeout(()=>{
-    // Ştergem liniile vechi (identificate prin renderOrder 999+)
-    const toRemove=[];
-    V3D.scene.children.forEach(obj=>{
-      if(obj.renderOrder>=999) toRemove.push(obj);
-    });
-    toRemove.forEach(obj=>V3D.scene.remove(obj));
+    _v3dClearDistLines();
 
-    // Reconstruim toLoc pentru parcela curentă
     const ring0=ap.geo.geometry.type==='Polygon'
       ?ap.geo.geometry.coordinates[0]:ap.geo.geometry.coordinates[0][0];
     const cx=ring0.reduce((s,c)=>s+c[0],0)/ring0.length;
@@ -10687,11 +10739,22 @@ function _v3dRefreshDistances(){
 
     _v3dAddDistanceLines(window.THREE, V3D.scene, toLoc);
     V3D.r.render(V3D.scene, V3D.cam);
+    V3D.distShown = true;
+
+    if(btn){
+      btn.style.background = 'rgba(52,211,153,.25)';
+      btn.style.borderColor = 'rgba(52,211,153,.8)';
+      btn.style.color = '#fff';
+      btn.innerHTML = '📏 Distanțe ✓';
+    }
 
     const n=map.getSource('dist-src')?._data?.features?.length||0;
-    ss('📏 Distanțe actualizate în viewer 3D: '+n+' linii');
-  }, 600);
+    ss('📏 Distanțe afișate în viewer 3D: '+n+' linii');
+  }, 400);
 }
+
+// Alias pentru compatibilitate
+function _v3dRefreshDistances(){ _v3dToggleDistances(); }
 
 
 // ── Generare vizuală străzi în jurul parcelei ─────────────────────────────────
