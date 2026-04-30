@@ -3035,10 +3035,11 @@ function updateDistanceLines(){
   const volFeats = S.vol._lastFeats || (map.getSource('vol-src')?._data?.features) || [];
   const parcelFeat = {type:'Feature',geometry:ap.geo.geometry,properties:{}};
 
-  // Dacă S.ctx e gol (Overpass a eșuat), încercăm să extragem din Mapbox acum
+  // Dacă S.ctx e gol (Overpass a eșuat), extragem din Mapbox cu raza extinsă
   if(!S.ctx?.features?.length){
     const c = turf.centerOfMass(parcelFeat).geometry.coordinates;
-    const extracted = _ctxFromMapbox(c, Math.max(100, Number(S.vol.ctxR||200)));
+    // Raza 250m — suficientă pentru toate vecinătățile relevante
+    const extracted = _ctxFromMapbox(c, Math.max(200, Number(S.vol.ctxR||250)));
     if(extracted.length){
       S.ctx = {type:'FeatureCollection', features:extracted};
       setSource('ctx-src', S.ctx);
@@ -3133,7 +3134,7 @@ function updateDistanceLines(){
           if(turf.booleanPointInPolygon(ctxCtr,pf2)) return false;
         }
         // Pre-filtrare rapida: centroid max 150m (eliminam clădiri îndepărtate)
-        return turf.distance(parcelCenter, ctxCtr, {units:'meters'}) < 150;
+        return turf.distance(parcelCenter, ctxCtr, {units:'meters'}) < 200;
       }catch(e){ return false; }
     });
 
@@ -3154,7 +3155,7 @@ function updateDistanceLines(){
     // Sortam dupa distanta reala, luam max 15 cei mai apropiati
     const adjacentCtx = withDist
       .sort((a,b)=>a.dist-b.dist)
-      .slice(0,15)
+      .slice(0,20)
       .map(x=>x.ctx);
 
     // Pentru fiecare cladire adiacenta, calculam distanta minima fata de oricare volum generat
@@ -3169,7 +3170,7 @@ function updateDistanceLines(){
           }
         }catch(e){}
       });
-      if(!bestPt1 || bestDist > 80) return; // ignoram vecinii prea departe
+      if(!bestPt1 || bestDist > 120) return; // ignoram vecinii prea departe (120m)
       const minDist = S.vol.multiVolDist||6;
       feats.push({
         type:'Feature',
@@ -4308,7 +4309,7 @@ function htmlProiect(){
   '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px">',
   '<label style="display:flex;gap:5px;align-items:center;cursor:pointer;font-size:13px"><input type="checkbox" '+(S.vol.retras?'checked':'')+' onchange="S.vol.retras=this.checked;if(S.vol.genDone){const f=buildVolume();setSource(\'vol-src\',{type:\'FeatureCollection\',features:f});}"> Etaj retras</label>',
   '<label style="display:flex;gap:5px;align-items:center;cursor:pointer;font-size:13px"><input type="checkbox" '+(S.vol.terasa?'checked':'')+' onchange="S.vol.terasa=this.checked;if(S.vol.genDone){const f=buildVolume();setSource(\'vol-src\',{type:\'FeatureCollection\',features:f});}"> Terasă</label>',
-  '<label style="display:flex;gap:5px;align-items:center;cursor:pointer;font-size:13px"><input type="checkbox" '+(S.vol.onlyVol?'checked':'')+' onchange="S.vol.onlyVol=this.checked;map.setLayoutProperty(\'ctx-3d\',\'visibility\',this.checked?\'none\':\'visible\')"> Doar volumul meu</label>',
+  '<label style="display:flex;gap:5px;align-items:center;cursor:pointer;font-size:13px"><input type="checkbox" '+(S.vol.onlyVol?'checked':'')+' onchange="S.vol.onlyVol=this.checked;_setCtxVisibility()"> Doar volumul meu</label>',
   '</div>',
   '<div class="btn-row">',
   '<button class="btn-p" onclick="genVol()" style="flex:1;font-size:14px">🏗 Generează volum 3D</button>',
@@ -5156,7 +5157,7 @@ async function genVol(){
   set3D(60,-20);
   
   const colMsg = ap?._fpAdj ? ` · ⚠️ Footprint ajustat (coliziuni cu clădiri existente eliminate)` : '';
-  try{map.setLayoutProperty('ctx-3d','visibility',S.vol.onlyVol?'none':'visible');}catch(e){}
+  _setCtxVisibility();
   ss(`🏗 Volum 3D generat!`);
   renderTab('volume');
   if(window.innerWidth<=840)$('mob-sheet')?.classList.remove('open');
@@ -6425,7 +6426,7 @@ async function exportVol3(pdf, ap, r, p){
   S.vol.scenariuConstructie=origScen;
   const featsOrig=buildVolume();
   setSource('vol-src',{type:'FeatureCollection',features:featsOrig});
-  try{map.setLayoutProperty('ctx-3d','visibility',S.vol.onlyVol?'none':'visible');}catch(e){}
+  try{_setCtxVisibility();}catch(e){}
 
   // ── Pagina comparatie ────────────────────────────────────────────────────
   pdf.addPage('a4','portrait');
@@ -7187,16 +7188,13 @@ function aedisBuild(){
         AEDIS.existentCUT = 0;
 
         if(AEDIS.scenariu==='extindere_v'){
-          // Extindem VERTICAL: plecam de la H maxim existent
           baseH = AEDIS.existentH;
-          // Afisam si cladirile existente cu culoare distincta
           onParcel.forEach(f=>{
             feats.push({type:'Feature',
               properties:{base:0,top:AEDIS.existentH,color:'#94a3b8',floor:-1,isExistent:true},
               geometry:f.geometry});
           });
         } else if(AEDIS.scenariu==='extindere_h'){
-          // Extindem ORIZONTAL: reducem fp la zona libera
           try{
             let freeZone = fp;
             onParcel.forEach(f=>{
@@ -7206,7 +7204,6 @@ function aedisBuild(){
               }catch(e){}
             });
             fpGeom = freeZone.geometry;
-            // Afisam existentele
             onParcel.forEach(f=>{
               feats.push({type:'Feature',
                 properties:{base:0,top:f.properties?.h||7,color:'#94a3b8',floor:-1,isExistent:true},
@@ -7214,15 +7211,14 @@ function aedisBuild(){
             });
           }catch(e){}
         } else if(AEDIS.scenariu==='inglobare'){
-          // INGLOBARE: construim pe intregul edificabil, inglobam existentele
           baseH = 0;
-          // Existentele sunt vizibile ca referinta
           onParcel.forEach(f=>{
             feats.push({type:'Feature',
               properties:{base:0,top:f.properties?.h||7,color:'rgba(100,100,100,0.3)',floor:-1,isExistent:true},
               geometry:f.geometry});
           });
         }
+        // DEMOLARE: nu adăugăm niciun isExistent — terenul e liber
       }
     }
 
@@ -7547,6 +7543,15 @@ function aedisCalcExistent(){
   };
 }
 
+// ── Helper: setează visibility ctx-3d respectând scenariul demolare ─────────
+function _setCtxVisibility(){
+  const visible = !S.vol.onlyVol
+    && AEDIS.scenariu !== 'demolare'
+    && !AEDIS._demolishActive;
+  try{ map.setLayoutProperty('ctx-3d','visibility', visible ? 'visible' : 'none'); }catch(e){}
+  return visible;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // AEDIS UI — Panou modal
 // ═══════════════════════════════════════════════════════════════════════════
@@ -7656,7 +7661,7 @@ function _aedisRestoreCad3D(){
 
     // Restaurăm ctx-3d vizibil (dacă nu e onlyVol)
     try{
-      map.setLayoutProperty('ctx-3d','visibility', S.vol.onlyVol ? 'none' : 'visible');
+      _setCtxVisibility();
     }catch(e){}
 
     // Restaurăm ctx-src cu toate clădirile (din S.ctx complet)
@@ -8617,13 +8622,10 @@ function aedis3DGenerate(){
       map.addLayer(layer);
       AEDIS3D.active = true;
       AEDIS3D.params = buildParams;
-          // Contextul urban: vizibil doar dacă NU suntem în scenariu demolare
-      if(AEDIS.scenariu !== 'demolare'){
-        try{ map.setLayoutProperty('ctx-3d','visibility','visible'); }catch(e){}
-      } else {
-        // Demolare = teren liber → ascundem ctx-3d
-        try{ map.setLayoutProperty('ctx-3d','visibility','none'); }catch(e){}
-        if(AEDIS._demolishActive) _aedisRemoveExistingFromCtx();
+          // Contextul urban: _setCtxVisibility respectă automat scenariul demolare
+      _setCtxVisibility();
+      if(AEDIS.scenariu === 'demolare' && AEDIS._demolishActive){
+        _aedisRemoveExistingFromCtx();
       }
 
       set3D(55, -20);
