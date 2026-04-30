@@ -518,8 +518,17 @@ canvas#c2d{width:100%;height:100%;display:block}
   <div style="position:relative;display:inline-block">
   <button class="tb-btn" id="btnPDF" onclick="toggleRapoarteMenu()" title="Rapoarte & Studii" style="display:flex;align-items:center;gap:4px">📋 Rapoarte ▾</button>
   <div id="rapoarte-menu" style="display:none;position:absolute;top:100%;right:0;background:#0f172a;border:1px solid rgba(212,175,55,.3);border-radius:10px;padding:8px;min-width:200px;z-index:500;box-shadow:0 8px 32px rgba(0,0,0,.5);margin-top:4px">
-    <button onclick="runExport();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:8px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">📄 Raport PDF AEDIS</button>
-    <button onclick="generateSolarStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#fbbf24;padding:8px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">☀ Studiu de Însorire PDF</button>
+    <div style="padding:4px 12px 2px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.08em;font-weight:700">Rapoarte urbanistice</div>
+    <button onclick="runExport();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">📄 Raport Urbanistic AEDIS</button>
+    <button onclick="generateSolarStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#fbbf24;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">☀ Studiu de Însorire</button>
+    <button onclick="generateShadowStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#fb923c;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🌑 Studiu de Umbre & Obstrucție</button>
+    <button onclick="generateNoiseStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#a78bfa;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🔇 Studiu Acustic Urban</button>
+    <button onclick="generateWindStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#38bdf8;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🌬 Studiu Vânt & Confort Pietonal</button>
+    <div style="padding:6px 12px 2px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.08em;font-weight:700;border-top:1px solid rgba(255,255,255,.06);margin-top:4px">Bilanțuri & avize</div>
+    <button onclick="generateGreenStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#4ade80;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🌿 Studiu Spații Verzi</button>
+    <button onclick="generateMobilityStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#f472b6;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🚗 Studiu Mobilitate & Parcaje</button>
+    <button onclick="generateDensityStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#94a3b8;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">📊 Studiu Densitate Urbană</button>
+    <button onclick="generateMemoriu();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#d4af37;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏗 Memoriu Tehnic Preliminar</button>
   </div>
 </div>
   
@@ -1088,6 +1097,102 @@ var AEDIS_SHADERS = {
         col = clamp(col + vec3(variation), 0.0, 1.0);
 
         gl_FragColor = vec4(col, 0.92);
+      }`
+  },
+
+  // Shader CORTEN STEEL — rugina portocalie procedurala
+  corten: {
+    vert:`
+      varying vec3 vNormal;
+      varying vec3 vPosition;
+      varying vec2 vUv;
+      void main(){
+        vNormal=normalize(normalMatrix*normal);
+        vPosition=(modelViewMatrix*vec4(position,1.0)).xyz;
+        vUv=uv;
+        gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);
+      }`,
+    frag:`
+      varying vec3 vNormal;
+      varying vec3 vPosition;
+      varying vec2 vUv;
+      uniform vec3 baseColor;
+      float rand(vec2 co){return fract(sin(dot(co,vec2(12.9898,78.233)))*43758.5453);}
+      float noise(vec2 p){
+        vec2 i=floor(p);vec2 f=fract(p);
+        float a=rand(i),b=rand(i+vec2(1,0)),c=rand(i+vec2(0,1)),d=rand(i+vec2(1,1));
+        vec2 u=f*f*(3.0-2.0*f);return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;
+      }
+      void main(){
+        // Rugina procedurala multistrat
+        float r1=noise(vUv*8.0)*0.4;
+        float r2=noise(vUv*20.0)*0.2;
+        float r3=noise(vUv*50.0)*0.1;
+        float rust=r1+r2+r3;
+        // Culorile cuprului oxidat: portocaliu → ruginiu → brun
+        vec3 orange=vec3(0.85,0.38,0.08);
+        vec3 brown=vec3(0.48,0.20,0.04);
+        vec3 dark=vec3(0.22,0.10,0.02);
+        vec3 col=mix(orange,brown,rust);
+        col=mix(col,dark,max(0.0,rust-0.5)*2.0);
+        col=mix(col,baseColor*1.2,0.25);
+        // Iluminare difuza
+        vec3 L=normalize(vec3(1.5,2.5,1.0));
+        float diff=max(dot(vNormal,L),0.0)*0.65+0.35;
+        col*=diff;
+        // Reflexie slaba metalica
+        vec3 V=normalize(-vPosition);
+        float spec=pow(max(dot(reflect(-L,vNormal),V),0.0),12.0)*0.1;
+        col+=vec3(spec);
+        col=pow(clamp(col*1.1,0.0,1.0),vec3(0.92));
+        gl_FragColor=vec4(col,1.0);
+      }`
+  },
+
+  // Shader PIATRA NATURALA — calcinar/travertin cu vene
+  stone: {
+    vert:`
+      varying vec3 vNormal;
+      varying vec3 vPosition;
+      varying vec2 vUv;
+      void main(){
+        vNormal=normalize(normalMatrix*normal);
+        vPosition=(modelViewMatrix*vec4(position,1.0)).xyz;
+        vUv=uv;
+        gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);
+      }`,
+    frag:`
+      varying vec3 vNormal;
+      varying vec3 vPosition;
+      varying vec2 vUv;
+      uniform vec3 baseColor;
+      float rand(vec2 co){return fract(sin(dot(co,vec2(12.9898,78.233)))*43758.5453);}
+      float noise(vec2 p){
+        vec2 i=floor(p);vec2 f=fract(p);
+        float a=rand(i),b=rand(i+vec2(1,0)),c=rand(i+vec2(0,1)),d=rand(i+vec2(1,1));
+        vec2 u=f*f*(3.0-2.0*f);return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;
+      }
+      void main(){
+        // Textura piatra cu vene
+        float n1=noise(vUv*3.0)*0.3;
+        float n2=noise(vUv*8.0)*0.12;
+        float vein=abs(sin((vUv.x*4.0+noise(vUv*2.0)*1.5)*3.14159))*0.08;
+        vec3 stoneBase=baseColor+vec3(n1+n2-0.2)*0.5;
+        vec3 veinCol=vec3(0.95,0.88,0.72);
+        stoneBase=mix(stoneBase,veinCol,vein);
+        // Rosturi tivite (blocuri de piatra)
+        float bx=step(0.96,fract(vUv.x*5.0));
+        float by=step(0.94,fract(vUv.y*8.0));
+        float joint=min(bx+by,1.0);
+        stoneBase=mix(stoneBase,stoneBase*0.65,joint*0.6);
+        // Iluminare cu speculare slaba (piatra lustruita)
+        vec3 L=normalize(vec3(1.5,2.5,1.0));
+        vec3 V=normalize(-vPosition);
+        float diff=max(dot(vNormal,L),0.0)*0.7+0.3;
+        float spec=pow(max(dot(reflect(-L,vNormal),V),0.0),24.0)*0.12;
+        vec3 col=stoneBase*diff+vec3(spec);
+        col=pow(clamp(col*1.15,0.0,1.0),vec3(0.9));
+        gl_FragColor=vec4(col,1.0);
       }`
   },
 
@@ -3913,6 +4018,12 @@ const SHORTCUT_CATALOG = [
   {id:'satelit',         ico:'🛰', label:'Satelitar',           fn:"(()=>{const s=document.getElementById('selBase');if(s){s.value='sat';s.dispatchEvent(new Event('change'));}})()"},
   {id:'multi_toggle',    ico:'🔲', label:'Multiselect On/Off',  fn:"toggleMulti(!S.multiMode);renderTab('search')"},
   {id:'reset_all',       ico:'🗑', label:'Resetează tot',       fn:"window._lastCadVal='';window._lastAddrVal='';window._lastCoordVal='';doReset();renderTab('search')"},
+  {id:'studiu_umbre',    ico:'🌑', label:'Studiu Umbre',         fn:"generateShadowStudy()"},
+  {id:'studiu_acustic',  ico:'🔇', label:'Studiu Acustic',       fn:"generateNoiseStudy()"},
+  {id:'studiu_vent',     ico:'🌬', label:'Studiu Vânt',          fn:"generateWindStudy()"},
+  {id:'studiu_verde',    ico:'🌿', label:'Studiu Spații Verzi',  fn:"generateGreenStudy()"},
+  {id:'studiu_mobilit',  ico:'🚗', label:'Studiu Mobilitate',    fn:"generateMobilityStudy()"},
+  {id:'memoriu',         ico:'🏗', label:'Memoriu Tehnic',       fn:"generateMemoriu()"},
 ];
 
 function renderShortcuts(){
@@ -8241,6 +8352,20 @@ function aedis3DBuild(parcelRing, params){
 
   const group = new THREE.Group();
 
+  // ── Inner ring pentru forma Curte Interioară ─────────────────────────
+  // Calculăm curtea pe baza AEDIS.formaRatio și localRing
+  let courtyardRing = null;
+  if(p.forma === 'curte' || AEDIS.forma === 'curte'){
+    const ratio = Math.max(0.2, Math.min(0.5, AEDIS.formaRatio || 0.35));
+    // Inner ring = shrinkRing la (1 - ratio*2) față de centru
+    const innerFactor = 1 - ratio * 1.5;
+    if(innerFactor > 0.1){
+      const icx = localRing.reduce((s,p)=>s+p[0],0)/localRing.length;
+      const icz = localRing.reduce((s,p)=>s+p[1],0)/localRing.length;
+      courtyardRing = localRing.map(([x,y])=>[icx+(x-icx)*innerFactor, icz+(y-icz)*innerFactor]);
+    }
+  }
+
   // ── Materiale per stil ────────────────────────────────────────────────
   function makeShaderMat(shaderKey, colorHex, opacity=1.0){
     const shader = AEDIS_SHADERS[shaderKey] || AEDIS_SHADERS.plaster;
@@ -8260,12 +8385,12 @@ function aedis3DBuild(parcelRing, params){
 
   // Material per stil si zona
   const MAT = {
-    modern:   { parter:'concrete', etaj:'glass', accent:'metal', acoperis:'metal' },
-    inovator: { parter:'metal',    etaj:'glass', accent:'metal', acoperis:'concrete' },
-    clasic:   { parter:'concrete', etaj:'plaster', accent:'wood', acoperis:'plaster' },
-    minimalist:{ parter:'plaster', etaj:'plaster', accent:'glass', acoperis:'metal' },
-    industrial:{ parter:'concrete', etaj:'concrete', accent:'metal', acoperis:'metal' },
-    adaptat_context:{ parter:'plaster', etaj:'wood', accent:'glass', acoperis:'plaster' },
+    modern:        { parter:'concrete', etaj:'glass',   accent:'metal',   acoperis:'metal'  },
+    inovator:      { parter:'metal',    etaj:'glass',   accent:'metal',   acoperis:'metal'  },
+    clasic:        { parter:'stone',    etaj:'stone',   accent:'plaster', acoperis:'stone'  },
+    minimalist:    { parter:'plaster',  etaj:'plaster', accent:'glass',   acoperis:'metal'  },
+    industrial:    { parter:'concrete', etaj:'corten',  accent:'metal',   acoperis:'metal'  },
+    adaptat_context:{ parter:'plaster', etaj:'plaster', accent:'glass',   acoperis:'plaster'},
   };
   const matDef = MAT[p.stil] || MAT.modern;
 
@@ -8320,30 +8445,30 @@ function aedis3DBuild(parcelRing, params){
     return meshGroup;
   }
 
-  // ── Helper: construieste planseu (podea/tavan) ─────────────────────────
+  // ── Helper: construieste planseu (podea/tavan) cu suport gaură ──────────
   // ring2D = [[x,z],...] în spațiu local metri, Y-up
-  function buildSlab(ring2D, h, colorHex, thick=0.15){
-    // Shape în planul XZ al Three.js (Y-up)
-    // ExtrudeGeometry lucrează în XY → rotim cu -PI/2 pe X → XY devine XZ
+  // holeRing2D (optional) = inner ring pentru curte interioară
+  function buildSlab(ring2D, h, colorHex, thick=0.15, holeRing2D=null){
     const shape = new THREE.Shape();
-    // ring2D[i] = [x_metri, z_metri]
     shape.moveTo(ring2D[0][0], ring2D[0][1]);
     for(let i=1; i<ring2D.length-1; i++) shape.lineTo(ring2D[i][0], ring2D[i][1]);
     shape.closePath();
 
-    const geo = new THREE.ExtrudeGeometry(shape, { depth: thick, bevelEnabled: false });
+    // Adăugăm gaura curții dacă există
+    if(holeRing2D && holeRing2D.length >= 3){
+      const hole = new THREE.Path();
+      hole.moveTo(holeRing2D[0][0], holeRing2D[0][1]);
+      for(let i=1; i<holeRing2D.length-1; i++) hole.lineTo(holeRing2D[i][0], holeRing2D[i][1]);
+      hole.closePath();
+      shape.holes.push(hole);
+    }
 
+    const geo = new THREE.ExtrudeGeometry(shape, { depth: thick, bevelEnabled: false });
     const col = new THREE.Color(colorHex);
     const mat = new THREE.MeshStandardMaterial({
-      color: col,
-      roughness: 0.35,
-      metalness: 0.05,
-      side: THREE.DoubleSide
+      color: col, roughness: 0.35, metalness: 0.05, side: THREE.DoubleSide
     });
-
     const mesh = new THREE.Mesh(geo, mat);
-    // rotation.x = -PI/2: shape XY → planul XZ (orizontal), extrude merge pe Y
-    // Plasăm la înălțimea h pe axa Y (sus)
     mesh.rotation.x = -Math.PI / 2;
     mesh.position.y = h;
     return mesh;
@@ -8356,138 +8481,346 @@ function aedis3DBuild(parcelRing, params){
     return ring2D.map(([x,y])=>[cx2+(x-cx2)*factor, cy2+(y-cy2)*factor]);
   }
 
-  // ── Generare etaje ─────────────────────────────────────────────────────
+  // ════════════════════════════════════════════════════════════════════════
+  // GENERARE VOLUMETRIE — diferențiată complet per stil arhitectural
+  // ════════════════════════════════════════════════════════════════════════
   let currentH = 0;
   let currentRing = localRing;
+  const stilKey = p.stil || 'modern';
 
+  // ── Helper: coloane verticale (mullions) pe fațadă ───────────────────
+  function addMullions(ring2D, baseH, topH, colColor, colW=0.15, spacing=3.0){
+    const colMat = new THREE.MeshStandardMaterial({color:new THREE.Color(colColor),roughness:0.2,metalness:0.8});
+    for(let i=0;i<ring2D.length-1;i++){
+      const [x1,z1]=ring2D[i],[x2,z2]=ring2D[i+1];
+      const len=Math.sqrt((x2-x1)**2+(z2-z1)**2);
+      const nx=(x2-x1)/len, nz=(z2-z1)/len;
+      const count=Math.max(1,Math.floor(len/spacing));
+      for(let c=0;c<=count;c++){
+        const t=c/count;
+        const mx=x1+nx*len*t, mz=z1+nz*len*t;
+        const geo=new THREE.BoxGeometry(colW,topH-baseH,colW);
+        const mesh=new THREE.Mesh(geo,colMat);
+        mesh.position.set(mx,baseH+(topH-baseH)/2,mz);
+        group.add(mesh);
+      }
+    }
+  }
+
+  // ── Helper: cornișă orizontală (bandă proeminentă) ────────────────────
+  function addCornice(ring2D, h, depth=0.5, thick=0.25, color='#c8a882'){
+    const cMat=new THREE.MeshStandardMaterial({color:new THREE.Color(color),roughness:0.6,metalness:0.0});
+    for(let i=0;i<ring2D.length-1;i++){
+      const [x1,z1]=ring2D[i],[x2,z2]=ring2D[i+1];
+      const len=Math.sqrt((x2-x1)**2+(z2-z1)**2);
+      if(len<0.1) continue;
+      const ang=-Math.atan2(z2-z1,x2-x1);
+      const geo=new THREE.BoxGeometry(len+depth,thick,depth);
+      const mesh=new THREE.Mesh(geo,cMat);
+      mesh.position.set((x1+x2)/2,h+thick/2,(z1+z2)/2);
+      mesh.rotation.y=ang;
+      group.add(mesh);
+    }
+  }
+
+  // ── Helper: pilastri verticali (clasic) ───────────────────────────────
+  function addPilasters(ring2D, baseH, topH, color='#d4b896', w=0.4, d=0.35){
+    const pMat=new THREE.MeshStandardMaterial({color:new THREE.Color(color),roughness:0.7,metalness:0.0});
+    for(let i=0;i<ring2D.length-1;i++){
+      const [x1,z1]=ring2D[i],[x2,z2]=ring2D[i+1];
+      const len=Math.sqrt((x2-x1)**2+(z2-z1)**2);
+      const nx=(x2-x1)/len, nz=(z2-z1)/len;
+      const count=Math.max(1,Math.round(len/4.5));
+      for(let c=0;c<=count;c++){
+        const t=c/count;
+        const mx=x1+nx*len*t, mz=z1+nz*len*t;
+        const geo=new THREE.BoxGeometry(w,topH-baseH,d);
+        const mesh=new THREE.Mesh(geo,pMat);
+        mesh.position.set(mx,baseH+(topH-baseH)/2,mz);
+        mesh.rotation.y=-Math.atan2(nz,nx);
+        group.add(mesh);
+      }
+    }
+  }
+
+  // ── Helper: bracing X industrial ─────────────────────────────────────
+  function addBracing(ring2D, baseH, topH, color='#f97316'){
+    const bMat=new THREE.MeshStandardMaterial({color:new THREE.Color(color),roughness:0.3,metalness:0.9});
+    for(let i=0;i<ring2D.length-1;i++){
+      const [x1,z1]=ring2D[i],[x2,z2]=ring2D[i+1];
+      const len=Math.sqrt((x2-x1)**2+(z2-z1)**2);
+      if(len<4) continue;
+      const ang=-Math.atan2(z2-z1,x2-x1);
+      const hh=topH-baseH;
+      // Diagonala 1: bottom-left → top-right
+      const diag=Math.sqrt(len*len+hh*hh);
+      const geo=new THREE.BoxGeometry(diag,0.12,0.12);
+      const m1=new THREE.Mesh(geo,bMat);
+      m1.position.set((x1+x2)/2,baseH+hh/2,(z1+z2)/2);
+      m1.rotation.y=ang;
+      m1.rotation.z=Math.atan2(hh,len);
+      group.add(m1);
+      // Diagonala 2: top-left → bottom-right
+      const m2=new THREE.Mesh(geo.clone(),bMat);
+      m2.position.set((x1+x2)/2,baseH+hh/2,(z1+z2)/2);
+      m2.rotation.y=ang;
+      m2.rotation.z=-Math.atan2(hh,len);
+      group.add(m2);
+    }
+  }
+
+  // ── Helper: balcon real (plăcuță proiectată pe fațadă) ────────────────
+  function addBalconies(ring2D, h, color='#93c5fd', depth=1.4, thick=0.12){
+    const bMat=new THREE.MeshStandardMaterial({color:new THREE.Color(color),roughness:0.3,metalness:0.1,transparent:true,opacity:0.85});
+    const railMat=new THREE.MeshStandardMaterial({color:new THREE.Color('#e2e8f0'),roughness:0.1,metalness:0.9});
+    for(let i=0;i<ring2D.length-1;i++){
+      const [x1,z1]=ring2D[i],[x2,z2]=ring2D[i+1];
+      const len=Math.sqrt((x2-x1)**2+(z2-z1)**2);
+      if(len<3) continue;
+      const ang=-Math.atan2(z2-z1,x2-x1);
+      const bW=Math.min(len*0.65,4.5);
+      // Placa balcon
+      const geo=new THREE.BoxGeometry(bW,thick,depth);
+      const mesh=new THREE.Mesh(geo,bMat);
+      mesh.position.set((x1+x2)/2,h-thick/2,(z1+z2)/2);
+      mesh.rotation.y=ang;
+      group.add(mesh);
+      // Balustradă parapetă
+      const rGeo=new THREE.BoxGeometry(bW,0.9,0.05);
+      const rail=new THREE.Mesh(rGeo,railMat);
+      // Offsetăm spre exterior cu depth/2
+      const perp=[-Math.sin(Math.atan2(z2-z1,x2-x1)),Math.cos(Math.atan2(z2-z1,x2-x1))];
+      rail.position.set((x1+x2)/2+perp[0]*depth*0.9,h+0.45,(z1+z2)/2+perp[1]*depth*0.9);
+      rail.rotation.y=ang;
+      group.add(rail);
+    }
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  // LOOP PRINCIPAL ETAJE — cu diferențieri per stil
+  // ════════════════════════════════════════════════════════════════════════
   for(let i=0; i<niv; i++){
     const hEtaj = i===0 ? hP : hE;
     const topH = currentH + hEtaj;
+    const isLast = i === niv-1;
+    const isParter = i===0;
 
     // Retragere per etaj
     const retFactor = p.retrageriFineEtaje?.[i] ?? (
-      i===niv-1 && p.activeRetragere ? (stil.retragereFactor||0.88) : 1.0
+      isLast && p.activeRetragere ? (stil.retragereFactor||0.88) : 1.0
     );
-    if(retFactor < 0.99 && i > 0){
-      currentRing = shrinkRing(localRing, retFactor);
-    }
+    if(retFactor < 0.99 && i > 0) currentRing = shrinkRing(localRing, retFactor);
 
-    // Tip material si culoare per etaj — gradient de luminozitate spre vârf
-    const isLast = i === niv-1;
-    const matKey = i===0 ? matDef.parter : (isLast && retFactor<0.98 ? matDef.accent : matDef.etaj);
-    // Gradient: etajele de sus sunt mai deschise (efect de lumina naturala)
+    // ── Culoare per etaj (gradient stil-specific) ────────────────────────
     let colorHex;
-    if(i===0){
-      colorHex = cols.parter;
+    if(isParter){
+      colorHex = (p.parterDiferit && AEDIS_FN[p.fnParter]?.color) ? AEDIS_FN[p.fnParter].color : cols.parter;
+    } else if(stil.etajColor){
+      colorHex = stil.etajColor(cols.etaj, i, niv);
     } else if(stil.floorColors){
-      colorHex = stil.floorColors[Math.min(i,stil.floorColors.length-1)];
+      colorHex = stil.floorColors[Math.min(i, stil.floorColors.length-1)];
     } else {
-      // Interpolare vizuala intre etaj si etajAlt (mai deschis)
-      const t = niv > 1 ? i/(niv-1) : 0;
-      const c1 = new THREE.Color(cols.etaj);
-      const c2 = new THREE.Color(cols.etajAlt || cols.etaj);
-      const mixed = c1.clone().lerp(c2, t * 0.6);
-      colorHex = '#' + mixed.getHexString();
+      const t = niv>1 ? i/(niv-1) : 0;
+      colorHex = '#'+new THREE.Color(cols.etaj).lerp(new THREE.Color(cols.etajAlt||cols.etaj),t*0.6).getHexString();
     }
 
-    // Parter cu functiune diferita
-    const isParter = i===0 && p.parterDiferit;
-    const parterColor = isParter ? (AEDIS_FN[p.fnParter]?.color||cols.parter) : colorHex;
-    const parterMat = isParter ? 'glass' : matKey;
+    // ── Material per etaj și stil ───────────────────────────────────────
+    let matKey;
+    if(isParter && p.parterDiferit) matKey='glass';
+    else if(isParter) matKey=matDef.parter;
+    else if(isLast && retFactor<0.98) matKey=matDef.accent;
+    else matKey=matDef.etaj;
 
-    // Pereti etaj
-    const walls = buildWalls(currentRing, currentH, topH,
-      i===0 ? parterMat : matKey,
-      i===0 ? parterColor : colorHex
-    );
-    group.add(walls);
+    // ── PEREȚI PRINCIPALI ──────────────────────────────────────────────
+    group.add(buildWalls(currentRing, currentH, topH, matKey, colorHex));
+    // Pereți interiori ai curții (dacă forma = curte)
+    if(courtyardRing){
+      group.add(buildWalls(courtyardRing, currentH, topH, matKey, colorHex));
+    }
 
-    // Planseu cu culoare accent per stil — banda vizuala clara
-    if(i < niv-1){
-      const slabColors = {
-        modern:'#1d4ed8', inovator:'#7c3aed', clasic:'#b45309',
-        minimalist:'#6b7280', industrial:'#ea580c', adaptat_context:'#4d7c0f'
-      };
-      const slabColor = slabColors[p.stil] || '#1d4ed8';
-      // Bandă de planseu orizontala
-      const slab = buildSlab(currentRing, topH, slabColor, 0.22);
-      group.add(slab);
-      // Balcon mic proiectat în afara — inel usor extins
-      if(i > 0){
-        const balconRing = shrinkRing(currentRing, 1.06);
-        const balconColor = cols.balcon || slabColor;
-        const balconSlab = buildSlab(balconRing, topH - 0.15, balconColor, 0.12);
-        group.add(balconSlab);
+    // ════════════════════════════════════════════════════════════════════
+    // ELEMENTE SPECIFICE PER STIL
+    // ════════════════════════════════════════════════════════════════════
+
+    if(stilKey==='modern'){
+      // Coloane mullion verticale metalice la fiecare etaj
+      if(!isParter) addMullions(currentRing, currentH, topH, '#1e40af', 0.12, 2.8);
+      // Bandă orizontală subțire la fiecare etaj (spandrel panel)
+      const spandrelCol='#1d4ed8';
+      group.add(buildSlab(currentRing, currentH, spandrelCol, 0.18, courtyardRing));
+      // Balcoane din sticlă pe etajele medii
+      if(i>0 && i<niv-1 && i%2===0) addBalconies(currentRing, topH, '#bfdbfe', 1.2);
+
+    } else if(stilKey==='inovator'){
+      // Volume offset alternante — etajele par sunt retrase, impare proiectate
+      const offsetRing = shrinkRing(currentRing, i%2===0 ? 0.95 : 1.02);
+      group.add(buildWalls(offsetRing, currentH, topH, matKey, colorHex));
+      // Bandă de accent în culori alternante
+      const inoColors=['#7c3aed','#c026d3','#0891b2','#7c3aed'];
+      group.add(buildSlab(currentRing, currentH+hEtaj*0.6, inoColors[i%inoColors.length], 0.3));
+      // Balcoane mari pe fațadele principale
+      if(i>0) addBalconies(currentRing, topH, cols.balcon||'#a78bfa', 1.8);
+
+    } else if(stilKey==='clasic'){
+      // Pilastri verticali la fiecare etaj
+      addPilasters(currentRing, currentH, topH, i===0?'#6b3a10':'#c8914a', 0.35, 0.3);
+      // Cornișă orizontală la fiecare etaj (nu la parter)
+      if(!isParter) addCornice(currentRing, topH, 0.45, 0.2, i===niv-1?'#b45309':'#d4a96a');
+      // Ferestrele clasice au arc → simulat cu bandă de accent deasupra
+      if(!isParter){
+        const archBand=buildSlab(currentRing, currentH+hEtaj*0.72, '#fbbf24', 0.08);
+        group.add(archBand);
       }
+
+    } else if(stilKey==='minimalist'){
+      // Volume pure — fara ornamente, ferestre late
+      // Singura diferentiere: linie fină de margine la fiecare etaj
+      const lineSlab=buildSlab(currentRing, topH, '#d1d5db', 0.06);
+      group.add(lineSlab);
+      // Ultimul etaj: retras dramatic + terasa verde
+      if(isLast){
+        const greenRing=shrinkRing(currentRing, 0.85);
+        group.add(buildSlab(greenRing, topH+0.1, '#4ade80', 0.08)); // vegetatie terasa
+      }
+
+    } else if(stilKey==='industrial'){
+      // Bracing X metalic vizibil la etajele structurale
+      if(i>0 && i<niv-1) addBracing(currentRing, currentH, topH, '#f97316');
+      // Bandă copertine metalice negre
+      group.add(buildSlab(currentRing, topH-0.4, '#18181b', 0.3));
+      // Grinzi orizontale aparente
+      addCornice(currentRing, topH, 0.3, 0.15, '#ea580c');
+
+    } else if(stilKey==='adaptat_context'){
+      // Fațadă cu ritm moderat, cornișă simplă
+      if(!isParter) addCornice(currentRing, topH, 0.3, 0.15, '#84cc16');
+      if(i>0 && i%2===0) addBalconies(currentRing, topH, '#86efac', 1.0);
     }
 
     currentH = topH;
   }
 
-  // ── Fundație / soclu ─────────────────────────────────────────────────────
-  // Soclu vizibil: culoare piatră/granit, ușor mai lat decât clădirea
-  const soclRing = shrinkRing(localRing, 1.03);
-  const baseSlab = buildSlab(soclRing, -0.2, '#2d3748', 0.45);
-  group.add(baseSlab);
-  // Linie de demarcatie teren
-  const terrainRing = shrinkRing(localRing, 1.08);
-  const terrainSlab = buildSlab(terrainRing, -0.4, '#1a202c', 0.25);
-  group.add(terrainSlab);
+  // ════════════════════════════════════════════════════════════════════════
+  // SOCLU ȘI TEREN
+  // ════════════════════════════════════════════════════════════════════════
+  // Soclu specific per stil
+  const soclColors={modern:'#0f172a',inovator:'#1e1b4b',clasic:'#2d1608',minimalist:'#27272a',industrial:'#0c0a09',adaptat_context:'#1a2e1a'};
+  const soclH={modern:0.6,inovator:0.4,clasic:1.2,minimalist:0.3,industrial:0.8,adaptat_context:0.5};
+  const sclH=soclH[stilKey]||0.6;
+  // Soclu proeminant per stil
+  const soclRing=shrinkRing(localRing,1.02);
+  group.add(buildWalls(soclRing,-sclH,0,'concrete',soclColors[stilKey]||'#1a1a1a'));
+  group.add(buildSlab(soclRing,-sclH,soclColors[stilKey]||'#1a1a1a',0.2));
+  // Teren (shadow catcher)
+  const terrainRing=shrinkRing(localRing,1.1);
+  group.add(buildSlab(terrainRing,-sclH-0.05,'#131a1a',0.1));
+  // Curtea interioară — sol verde/pavaj
+  if(courtyardRing){
+    // Pavaj curte: slab verde-gri la nivelul solului
+    group.add(buildSlab(courtyardRing, 0.02, '#1a2e1a', 0.08));
+    // Vegetație simulată: slab verde
+    const courtGreen = shrinkRing(courtyardRing, 0.85);
+    group.add(buildSlab(courtGreen, 0.1, '#2d5a27', 0.06));
+  }
 
-  // ── Acoperiș ────────────────────────────────────────────────────────────
+  // ════════════════════════════════════════════════════════════════════════
+  // ACOPERIȘ — diferențiat per stil
+  // ════════════════════════════════════════════════════════════════════════
+  const hAt = p.hAttic || (stilKey==='clasic'?2.5:stilKey==='modern'?1.4:1.0);
+
   switch(p.tipAcoperis||'terasa_plata'){
-    case 'terasa_plata': {
-      // Terasa cu material distinct — închis, cu speculare
-      const roofSlab = buildSlab(currentRing, currentH, cols.acoperis, 0.35);
-      group.add(roofSlab);
-      // Parapet — culoare accent vivid
-      const hAt = p.hAttic || 1.2;
-      if(hAt > 0){
-        const parapet = buildWalls(currentRing, currentH, currentH + hAt,
-          matDef.acoperis, cols.accent||cols.acoperis);
-        group.add(parapet);
-        // Bandă de coronament pe vârf parapet
-        const coronSlab = buildSlab(currentRing, currentH + hAt, cols.parterAcc||cols.accent, 0.08);
-        group.add(coronSlab);
+    case 'terasa_plata':{
+      // Terasa (cu gaura curte dacă e cazul)
+      group.add(buildSlab(currentRing, currentH, cols.acoperis, 0.3, courtyardRing));
+
+      if(stilKey==='modern'){
+        // Atic clar cu bandă albastră + parapet sticlă
+        group.add(buildWalls(currentRing,currentH,currentH+hAt,'glass','#1d4ed8'));
+        addMullions(currentRing,currentH,currentH+hAt,'#0f172a',0.10,2.5);
+        group.add(buildSlab(currentRing,currentH+hAt,'#0f172a',0.12));
+
+      } else if(stilKey==='inovator'){
+        // Parapet cu panouri violete + forma dinamică
+        const retRing=shrinkRing(currentRing,0.9);
+        group.add(buildWalls(retRing,currentH,currentH+hAt*1.5,'metal','#6d28d9'));
+        group.add(buildSlab(retRing,currentH+hAt*1.5,'#4c1d95',0.2));
+
+      } else if(stilKey==='clasic'){
+        // Cornișă principală + balustradă + atic ornamental
+        addCornice(currentRing,currentH,0.7,0.35,'#b45309');
+        group.add(buildWalls(currentRing,currentH+0.35,currentH+0.35+hAt,'plaster','#e8cfa0'));
+        addPilasters(currentRing,currentH+0.35,currentH+0.35+hAt,'#d4a96a',0.3,0.25);
+        addCornice(currentRing,currentH+0.35+hAt,0.5,0.2,'#b45309');
+        group.add(buildSlab(currentRing,currentH+0.35+hAt+0.2,'#92400e',0.1));
+
+      } else if(stilKey==='minimalist'){
+        // Parapet subțire alb + vegetație
+        group.add(buildWalls(currentRing,currentH,currentH+0.9,'plaster','#f9fafb'));
+        // Panou solar simulat
+        const solRing=shrinkRing(currentRing,0.75);
+        group.add(buildSlab(solRing,currentH+0.15,'#1e3a5f',0.08));
+
+      } else if(stilKey==='industrial'){
+        // Parapet metalic cu structura aparentă
+        group.add(buildWalls(currentRing,currentH,currentH+hAt,'metal','#57534e'));
+        addBracing(currentRing,currentH,currentH+hAt,'#f97316');
+        group.add(buildSlab(currentRing,currentH+hAt,'#1c1917',0.2));
+        // Coș industrial
+        try{
+          const cosRing=shrinkRing(currentRing,0.08);
+          group.add(buildWalls(cosRing,currentH+hAt,currentH+hAt+3.5,'concrete','#292524'));
+          group.add(buildSlab(cosRing,currentH+hAt+3.5,'#44403c',0.3));
+        }catch(e){}
+
+      } else {
+        // Adaptat context + alte stiluri
+        if(hAt>0){
+          group.add(buildWalls(currentRing,currentH,currentH+hAt,matDef.acoperis,cols.accent||cols.acoperis));
+          addCornice(currentRing,currentH+hAt,0.3,0.12,cols.parterAcc||cols.accent);
+          group.add(buildSlab(currentRing,currentH+hAt+0.12,cols.acoperis,0.08));
+        }
       }
-      // Corp tehnic central (HVAC)
+
+      // Corp tehnic HVAC (toate stilurile)
       try{
-        const techRing = shrinkRing(currentRing, 0.22);
-        const techWalls = buildWalls(techRing, currentH + hAt, currentH + hAt + 2.8, 'concrete', '#374151');
-        group.add(techWalls);
-        const techRoof = buildSlab(techRing, currentH + hAt + 2.8, '#1e293b', 0.15);
-        group.add(techRoof);
+        const techFactor=stilKey==='industrial'?0.35:stilKey==='clasic'?0.18:0.22;
+        const techRing=shrinkRing(currentRing,techFactor);
+        const techH=stilKey==='industrial'?0:hAt;
+        const techColor=stilKey==='modern'?'#1e293b':stilKey==='clasic'?'#6b3a10':'#374151';
+        group.add(buildWalls(techRing,currentH+techH,currentH+techH+2.5,'concrete',techColor));
+        group.add(buildSlab(techRing,currentH+techH+2.5,'#1e293b',0.15));
       }catch(e){}
       break;
     }
 
-    case 'sarpanta': {
-      const hCoama = p.hSarpanta || 3.5;
-      // 4 niveluri progresiv mai mici
-      let roofRing = currentRing;
-      for(let si=0;si<4;si++){
-        const f = 1 - si*0.25;
-        const prevRing = roofRing;
-        roofRing = shrinkRing(localRing, Math.max(0.05, f));
-        const sh = currentH + si*(hCoama/4);
-        const walls = buildWalls(prevRing.map((p2,idx)=>[
-          (prevRing[idx][0]+roofRing[Math.min(idx,roofRing.length-1)][0])/2,
-          (prevRing[idx][1]+roofRing[Math.min(idx,roofRing.length-1)][1])/2
-        ]), sh, sh+hCoama/4, 'plaster', '#c4956a');
-        group.add(walls);
-        const s2 = buildSlab(roofRing, sh+hCoama/4, '#a0785a', 0.2);
-        group.add(s2);
+    case 'sarpanta':{
+      const hCoama=p.hSarpanta||3.5;
+      const roofColor=stilKey==='clasic'?'#7c3512':stilKey==='adaptat_context'?'#4d7c0f':'#854d0e';
+      const roofColor2=stilKey==='clasic'?'#a0522d':'#92400e';
+      let roofRing=currentRing;
+      for(let si=0;si<5;si++){
+        const f=1-si*0.22; const prevRing=roofRing;
+        roofRing=shrinkRing(localRing,Math.max(0.04,f));
+        const sh=currentH+si*(hCoama/5);
+        const avgRing=prevRing.map((_,idx)=>[(prevRing[idx][0]+roofRing[Math.min(idx,roofRing.length-1)][0])/2,
+          (prevRing[idx][1]+roofRing[Math.min(idx,roofRing.length-1)][1])/2]);
+        group.add(buildWalls(avgRing,sh,sh+hCoama/5,'plaster',si%2===0?roofColor:roofColor2));
+        group.add(buildSlab(roofRing,sh+hCoama/5,roofColor2,0.15));
       }
+      if(stilKey==='clasic') addCornice(currentRing,currentH,0.5,0.25,'#b45309');
       break;
     }
 
-    case 'mansarda': {
-      const mansRing = shrinkRing(localRing, 0.72);
-      const mansWalls = buildWalls(mansRing, currentH, currentH+(p.hMansarda||2.8),
-        matDef.etaj, cols.etaj);
-      group.add(mansWalls);
-      const mansSlab = buildSlab(mansRing, currentH+(p.hMansarda||2.8), cols.acoperis, 0.2);
-      group.add(mansSlab);
+    case 'mansarda':{
+      const mansF=stilKey==='clasic'?0.78:0.72;
+      const mansRing=shrinkRing(localRing,mansF);
+      const mansColor=stilKey==='clasic'?'#8b4513':cols.etaj;
+      group.add(buildWalls(mansRing,currentH,currentH+(p.hMansarda||2.8),matDef.etaj,mansColor));
+      if(stilKey==='clasic'){
+        addPilasters(mansRing,currentH,currentH+(p.hMansarda||2.8),'#c8914a',0.25,0.2);
+        addCornice(mansRing,currentH+(p.hMansarda||2.8),0.4,0.2,'#b45309');
+      }
+      group.add(buildSlab(mansRing,currentH+(p.hMansarda||2.8),cols.acoperis,0.2));
       break;
     }
   }
@@ -9663,6 +9996,736 @@ function showLoisirAIRender(imageUrl){ const modal=$('loisir-ai-preview'), img=$
 // ═══════════════════════════════════════════════════════════════════════════
 
 
+// ═══════════════════════════════════════════════════════════════════════════
+// STUDII URBANISTICE — 7 studii PDF cu aceeași calitate ca studiul de însorire
+// UrbanX AEDIS · Generare automată pe baza datelor cadastrale + OSM + PUG
+// ═══════════════════════════════════════════════════════════════════════════
+
+// ── Helper comun: inițializare PDF cu același design ca studiul de însorire ──
+function _initStudyPdf(studyName, studySubtitle, totalPages){
+  const {jsPDF}=window.jspdf;
+  const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=210,H=297;
+  const DARK=[10,22,48],GOLD=[200,150,10],BLUE=[26,58,106],LIGHT=[248,249,251];
+  const RED=[180,30,30],GREEN=[20,120,60],ORANGE=[180,90,10],PURPLE=[80,40,160];
+  const S2=t=>_pdfSafe(t);
+  const dateStr=new Date().toLocaleDateString('ro-RO',{day:'2-digit',month:'long',year:'numeric'});
+  const ap=S.parcels[S.activeParcel??0];
+  const nrcad=ap?.nrcad||'—';
+  const utr=ap?.utr||'—';
+  const area=ap?.area?ap.area.toFixed(0):'—';
+  const lat=ap?turf.centerOfMass(ap.geo).geometry.coordinates[1]:47.16;
+  const lon=ap?turf.centerOfMass(ap.geo).geometry.coordinates[0]:27.59;
+  const params=ap?.params||getDefaultParams(utr);
+
+  const hdr=(title,pg)=>{
+    pdf.setFillColor(...DARK);pdf.rect(0,0,W,24,'F');
+    pdf.setFillColor(...GOLD);pdf.rect(0,0,W,2,'F');pdf.rect(0,22,W,2,'F');
+    pdf.setFillColor(...GOLD);pdf.rect(14,0,3,24,'F');
+    pdf.setTextColor(...GOLD);pdf.setFontSize(7);pdf.setFont('helvetica','bold');
+    pdf.text('URBANX AEDIS — '+S2(studyName.toUpperCase()),20,9);
+    pdf.setTextColor(255,255,255);pdf.setFontSize(11);
+    pdf.text(S2(title),W/2,15,{align:'center'});
+    pdf.setTextColor(150,170,190);pdf.setFontSize(7);pdf.setFont('helvetica','normal');
+    pdf.text('Pag.'+pg+'/'+totalPages+' · Parcela '+nrcad,W-14,15,{align:'right'});
+  };
+  const ftr=()=>{
+    pdf.setFillColor(240,242,246);pdf.rect(0,H-10,W,10,'F');
+    pdf.setDrawColor(200,205,215);pdf.line(0,H-10,W,H-10);
+    pdf.setTextColor(100,110,130);pdf.setFontSize(6.5);pdf.setFont('helvetica','normal');
+    pdf.text(S2(studySubtitle)+' · UrbanX AEDIS · Parcela '+nrcad+' · '+S2(dateStr)+' · Valori orientative',W/2,H-3.5,{align:'center'});
+  };
+  const sec=(title,y,col)=>{
+    col=col||BLUE;
+    pdf.setFillColor(...col);pdf.rect(14,y-4,W-28,7,'F');
+    pdf.setFillColor(...GOLD);pdf.rect(14,y-4,2,7,'F');
+    pdf.setTextColor(255,255,255);pdf.setFontSize(8.5);pdf.setFont('helvetica','bold');
+    pdf.text(S2(title),19,y);return y+10;
+  };
+  const body=(txt,x,y,maxW)=>{
+    pdf.setTextColor(38,52,68);pdf.setFont('helvetica','normal');pdf.setFontSize(8.5);
+    const lines=pdf.splitTextToSize(S2(txt),(maxW||(W-28)));
+    lines.forEach((line,i)=>pdf.text(line,x||14,y+i*5.2));
+    return y+lines.length*5.2;
+  };
+  const kv=(label,val,x,y,w,accent)=>{
+    pdf.setFillColor(...DARK);pdf.rect(x,y-4,(w||86),8,'F');
+    pdf.setTextColor(...GOLD);pdf.setFontSize(7);pdf.setFont('helvetica','bold');
+    pdf.text(S2(label),x+2,y);
+    pdf.setTextColor(accent?255:220,accent?200:230,accent?100:240);
+    pdf.setFontSize(9.5);pdf.setFont('helvetica','bold');
+    pdf.text(S2(String(val)),x+2,y+4.5);
+    return y+10;
+  };
+  const tblRow=(cols,y,isHeader,colW)=>{
+    const bg=isHeader?DARK:((Math.floor(y/8))%2===0?LIGHT:[240,244,248]);
+    pdf.setFillColor(...bg);pdf.rect(14,y-4,W-28,7,'F');
+    cols.forEach((c,ci)=>{
+      const x=14+colW.slice(0,ci).reduce((a,b)=>a+b,0);
+      pdf.setTextColor(isHeader?255:38,isHeader?220:52,isHeader?100:68);
+      pdf.setFontSize(isHeader?7.5:8);pdf.setFont('helvetica',isHeader?'bold':'normal');
+      pdf.text(S2(String(c)),x+2,y);
+    });
+    return y+8;
+  };
+  const addImg=(img,x,y,w,h2,caption)=>{
+    if(!img||img.length<500)return y;
+    try{pdf.addImage(img,'JPEG',x,y,w,h2,undefined,'FAST');}catch(e){return y;}
+    if(caption){pdf.setTextColor(80,90,110);pdf.setFontSize(6.5);pdf.setFont('helvetica','italic');pdf.text(S2(caption),x,y+h2+3.5);}
+    return y+h2+(caption?6:2);
+  };
+  const badge=(txt,x,y,col,w)=>{
+    w=w||30;pdf.setFillColor(...col);pdf.rect(x,y-4,w,7,'F');
+    pdf.setTextColor(255,255,255);pdf.setFontSize(7.5);pdf.setFont('helvetica','bold');
+    pdf.text(S2(txt),x+w/2,y,{align:'center'});return y+9;
+  };
+  const sign=()=>{
+    const sy=H-65;
+    pdf.setFillColor(...DARK);pdf.rect(14,sy,W-28,52,'F');
+    pdf.setFillColor(...GOLD);pdf.rect(14,sy,W-28,1,'F');
+    pdf.setFillColor(...GOLD);pdf.rect(14,sy,1,52,'F');
+    pdf.setTextColor(...GOLD);pdf.setFontSize(8);pdf.setFont('helvetica','bold');
+    pdf.text('CASETA DE ELABORARE, VERIFICARE SI ASUMARE A RESPONSABILITATII',W/2,sy+8,{align:'center'});
+    const cols=['ELABORAT','VERIFICAT','BENEFICIAR / INVESTITOR'];
+    const colColors=[[26,58,106],[20,100,60],[120,50,10]];
+    const cw=(W-28)/3;
+    cols.forEach((c,i)=>{
+      const cx=14+i*cw;
+      pdf.setFillColor(...colColors[i]);pdf.rect(cx,sy+12,cw,7,'F');
+      pdf.setTextColor(255,255,255);pdf.setFontSize(7);pdf.setFont('helvetica','bold');
+      pdf.text(c,cx+cw/2,sy+17,{align:'center'});
+      pdf.setTextColor(180,195,210);pdf.setFontSize(6.5);pdf.setFont('helvetica','italic');
+      pdf.text(i===0?'Arhitect/Inginer autorizat':i===1?'Responsabil tehnic atestat':'Persoana fizica sau juridica',cx+cw/2,sy+23,{align:'center'});
+      pdf.setTextColor(180,195,210);pdf.setFontSize(6.5);pdf.setFont('helvetica','normal');
+      pdf.text('Nume si prenume:',cx+3,sy+30);pdf.line(cx+30,sy+30,cx+cw-3,sy+30);
+      pdf.text(i===0?'Nr. OAR:':i===1?'Nr. atestare RUR:':'CUI / CNP:',cx+3,sy+36);pdf.line(cx+30,sy+36,cx+cw-3,sy+36);
+      pdf.text('Semnatura:',cx+3,sy+43);pdf.line(cx+22,sy+43,cx+cw-3,sy+43);
+    });
+    pdf.setTextColor(...GOLD);pdf.setFontSize(7);pdf.setFont('helvetica','bold');
+    pdf.text('UrbanX AEDIS · '+S2(studySubtitle)+' nr. '+nrcad+'/'+new Date().getFullYear()+' · Data: '+S2(dateStr),W/2,sy+49,{align:'center'});
+    pdf.setTextColor(100,110,130);pdf.setFontSize(6);pdf.setFont('helvetica','normal');
+    pdf.text('Document orientativ. Nu inlocuieste documentatia tehnica avizata conform legii.',W/2,sy+54,{align:'center'});
+  };
+
+  return {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,ap,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign};
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// STUDIU 1: UMBRE & OBSTRUCȚIE VIZUALĂ
+// ════════════════════════════════════════════════════════════════════════════
+async function generateShadowStudy(){
+  const ap=S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry){ss('Selectați o parcelă pentru studiu.');return;}
+  ss('Se generează Studiu de Umbre & Obstrucție...');
+
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Studiu de Umbre si Obstructie Vizuala','Studiu umbre',5);
+
+  function solarAlt(lat,month,hour){
+    const D2R=Math.PI/180;
+    const decl=(-23.45*Math.cos(D2R*(360/365)*(month*30+10)))*D2R;
+    const ha=(hour-12)*15*D2R;
+    return Math.max(0,Math.asin(Math.sin(lat*D2R)*Math.sin(decl)+Math.cos(lat*D2R)*Math.cos(decl)*Math.cos(ha))*180/Math.PI);
+  }
+  function shadowLen(h,alt){return alt>0.5?h/Math.tan(alt*Math.PI/180):999;}
+
+  const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13.2;
+  const vecini=S.ctx?.features?.filter(f=>f.properties?.h>2)||[];
+  const parcelCtr=turf.centerOfMass(ap.geo).geometry.coordinates;
+
+  // Calculăm umbrele vecini pe parcelă
+  const veciniAnaliza=vecini.slice(0,8).map(v=>{
+    const vctr=turf.centerOfMass(v).geometry.coordinates;
+    const dist=turf.distance({type:'Feature',geometry:{type:'Point',coordinates:parcelCtr}},{type:'Feature',geometry:{type:'Point',coordinates:vctr}},{units:'meters'});
+    const hv=v.properties?.h||7;
+    const sh=shadowLen(hv,solarAlt(lat,11,12)); // dec
+    const inParcela=sh>=dist;
+    return {nrcad:v.properties?.nrcad||'—',h:hv.toFixed(1),dist:dist.toFixed(0),sh:sh>200?'>200':sh.toFixed(0),inParcela,fn:v.properties?.fn_label||'Necunoscut'};
+  });
+
+  // ── PAG 1: Cover ─────────────────────────────────────────────────────────
+  pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');
+  pdf.setFillColor(...GOLD);pdf.rect(0,0,W,3,'F');pdf.rect(0,H-3,W,3,'F');
+  pdf.setFillColor(20,35,70);pdf.rect(0,3,W,H-6,'F');
+  pdf.setTextColor(...GOLD);pdf.setFontSize(9);pdf.setFont('helvetica','bold');
+  pdf.text('URBANX · AEDIS · PLATFORMA DE ANALIZA URBANISTICA',W/2,35,{align:'center'});
+  pdf.setTextColor(255,255,255);pdf.setFontSize(22);pdf.setFont('helvetica','bold');
+  pdf.text('STUDIU DE UMBRE',W/2,65,{align:'center'});
+  pdf.text('SI OBSTRUCTIE VIZUALA',W/2,80,{align:'center'});
+  pdf.setTextColor(...GOLD);pdf.setFontSize(11);
+  pdf.text('Analiza impactului cladirii propuse si al vecinatatilor · Simulare umbre orare',W/2,92,{align:'center'});
+  pdf.setFillColor(30,50,90);pdf.rect(20,108,W-40,80,'F');
+  pdf.setFillColor(...GOLD);pdf.rect(20,108,3,80,'F');
+  pdf.setTextColor(...GOLD);pdf.setFontSize(8);pdf.setFont('helvetica','bold');
+  pdf.text('DATE DE IDENTIFICARE',W/2,118,{align:'center'});
+  const rows=[['Nr. cadastral:',nrcad],['Zona UTR:',utr],['Suprafata teren:',area+' mp'],['H propus AEDIS:',aedisH.toFixed(1)+'m'],['Coordonate GPS:',lat.toFixed(5)+'N · '+lon.toFixed(5)+'E'],['Localitate:','Municipiul Iasi, jud. Iasi']];
+  rows.forEach(([l,v],i)=>{
+    pdf.setTextColor(150,170,200);pdf.setFontSize(8);pdf.setFont('helvetica','normal');pdf.text(S2(l),26,130+i*10);
+    pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text(S2(v),90,130+i*10);
+  });
+  const shadDec=shadowLen(aedisH,solarAlt(lat,11,12));
+  const isConform=solarAlt(lat,11,12)>=15;
+  pdf.setFillColor(isConform?20:180,isConform?120:30,isConform?60:30);pdf.rect(20,200,W-40,22,'F');
+  pdf.setTextColor(255,255,255);pdf.setFontSize(10);pdf.setFont('helvetica','bold');
+  pdf.text(isConform?'CONFORM — Umbra acceptabila':'ATENTIE — Verificare suplimentara',W/2,210,{align:'center'});
+  pdf.setFontSize(8);pdf.text('Alt. solara iarna: '+solarAlt(lat,11,12).toFixed(1)+'° · Umbra maxima: '+(shadDec>500?'>200':shadDec.toFixed(0))+'m spre nord',W/2,218,{align:'center'});
+  pdf.setTextColor(100,120,150);pdf.setFontSize(7);pdf.setFont('helvetica','normal');
+  pdf.text('Generat: '+S2(dateStr)+' · Document cu caracter ORIENTATIV',W/2,H-15,{align:'center'});
+  ftr();
+
+  // ── PAG 2: Tabele calcule umbre ────────────────────────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
+  hdr('CALCULE UMBRE ORARE — CLADIREA PROPUSA',2);ftr();
+  let cy=30;
+  cy=sec('1. ALTITUDINI SOLARE LA LATITUDINE '+lat.toFixed(2)+'°N',cy);cy+=2;
+  const months=['Ian','Feb','Mar','Apr','Mai','Iun','Iul','Aug','Sep','Oct','Nov','Dec'];
+  const hours=[8,10,12,14,16];
+  const colW=[28,28,28,28,28,28,28];
+  cy=tblRow(['Luna',...hours.map(h=>h+':00')],cy,true,[26,...hours.map(_=>28)]);
+  months.forEach((m,mi)=>{
+    const vals=hours.map(h=>solarAlt(lat,mi,h));
+    const row=[m,...vals.map(v=>v<1?'—':v.toFixed(1)+'°')];
+    cy=tblRow(row,cy,false,[26,...hours.map(_=>28)]);
+    vals.forEach((v,vi)=>{
+      const x=14+26+vi*28;
+      if(v>=30){pdf.setFillColor(20,120,60);pdf.rect(x,cy-12,28,8,'F');pdf.setTextColor(255,255,255);}
+      else if(v>=15){pdf.setFillColor(180,130,20);pdf.rect(x,cy-12,28,8,'F');pdf.setTextColor(255,255,255);}
+      else if(v>0){pdf.setFillColor(180,50,30);pdf.rect(x,cy-12,28,8,'F');pdf.setTextColor(255,255,255);}
+    });
+  });
+  cy+=5;
+  cy=sec('2. UMBRE PROIECTATE — SOLSTITIU IARNA (21 Dec.) · H='+aedisH.toFixed(1)+'m',cy);cy+=2;
+  const hoursD=[8,9,10,11,12,13,14,15];
+  cy=tblRow(['Ora','Alt. soare (°)','Umbra (m)','Directie','Status'],cy,true,[20,35,35,35,57]);
+  hoursD.forEach(h=>{
+    const alt=solarAlt(lat,11,h);
+    const sh=shadowLen(aedisH,alt);
+    const status=alt<1?'Soare sub orizont':alt<15?'SUB PRAGUL LEGAL':'CONFORM (>15°)';
+    cy=tblRow([h+':00',alt<1?'—':alt.toFixed(1)+'°',sh>200?'>200m':sh.toFixed(0)+'m','Spre Nord',status],cy,false,[20,35,35,35,57]);
+  });
+  cy+=5;pdf.setFontSize(7.5);pdf.setTextColor(...BLUE);
+  pdf.text('Prag minim OMS 119/2014 + Ordin 994/2018: altitudine solara >= 15° la solstitiu iarna (21 Decembrie), min. 1h30min insorire directa/zi',14,cy);
+
+  // ── PAG 3: Analiza vecini ────────────────────────────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
+  hdr('ANALIZA UMBRE VECINI — IMPACT ASUPRA PARCELEI',3);ftr();
+  cy=30;cy=sec('3. CLADIRILE VECINE SI IMPACTUL UMBRIRII ASUPRA PARCELEI',cy);cy+=2;
+  cy=tblRow(['Nr.cad','H(m)','Dist(m)','Umbra iarna(m)','Functiune','Impact'],cy,true,[28,18,18,30,40,48]);
+  veciniAnaliza.forEach(v=>{
+    cy=tblRow([v.nrcad,v.h,v.dist,v.sh,v.fn.slice(0,14),v.inParcela?'OBSTRUCTIE':'OK'],cy,false,[28,18,18,30,40,48]);
+    if(v.inParcela){
+      pdf.setFillColor(180,50,30,0.3);pdf.rect(14,cy-11,W-28,8,'F');
+    }
+  });
+  if(!veciniAnaliza.length){cy=body('Nu s-au detectat cladiri vecine cu inaltime semnificativa in contextul incarcato.',14,cy);}
+  cy+=8;cy=sec('4. RECOMANDARI SI MASURI DE AMELIORARE',cy);cy+=2;
+  cy=body('Conform OMS 119/2014 si Ordinului 994/2018, minim 1.5 ore de insorire directa pe zi la solstitiu de iarna este obligatorie pentru spatiile de locuit. Urmatoarele masuri sunt recomandate:',14,cy);cy+=3;
+  const recs=['Orientarea fatadelor principale catre sud/sud-est pentru maximizarea insolarii.','Adancimea incaperilor nu trebuie sa depaseasca 2.5x inaltimea ferestrelor.','Protectii solare orizontale (streasini, balcoane) pe fatadele sudice pentru vara.','Evitarea amplasarii dormitorului sau sufrageriei pe fatadele cu obstructie >2h iarna.','Verificarea distantei fata de vecinul nord: H_cladire/tan(15°) = '+shadowLen(aedisH,15).toFixed(0)+'m minim liber.'];
+  recs.forEach(r=>{cy=body('• '+r,16,cy);cy+=1;});
+
+  // ── PAG 4: Schema solara ──────────────────────────────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
+  hdr('SCHEMA SOLARA SI DIAGRAMA UMBRE',4);ftr();
+  cy=30;cy=sec('5. GRAFIC ALTITUDINE SOLARA ANUALA (ora 12:00)',cy);cy+=4;
+  // Grafic altitudini
+  const gx=14,gy=cy,gw=W-28,gh=60;
+  pdf.setFillColor(20,30,50);pdf.rect(gx,gy,gw,gh,'F');
+  pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.3);
+  [0,15,30,45,60].forEach(v=>{const y2=gy+gh-v/70*gh;pdf.line(gx,y2,gx+gw,y2);pdf.setTextColor(150,170,190);pdf.setFontSize(6.5);pdf.text(v+'°',gx-6,y2+1,{align:'right'});});
+  // Pragul 15°
+  const y15=gy+gh-15/70*gh;pdf.setDrawColor(220,60,60);pdf.setLineWidth(0.5);pdf.line(gx,y15,gx+gw,y15);
+  pdf.setTextColor(220,60,60);pdf.setFontSize(6.5);pdf.text('prag 15°',gx+gw+1,y15+1);
+  // Linia altitudini
+  pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.8);
+  months.forEach((m,mi)=>{
+    const x=gx+mi*(gw/11);
+    const alt=solarAlt(lat,mi,12);
+    const y2=gy+gh-Math.min(alt,70)/70*gh;
+    if(mi===0)pdf.moveTo(x,y2);else pdf.lineTo(x,y2);
+    pdf.setTextColor(180,190,200);pdf.setFontSize(5.5);pdf.text(m,x,gy+gh+4,{align:'center'});
+  });
+  cy=gy+gh+10;
+  cy=sec('6. TABEL DURATA INSORIRE DIRECTA (ore/zi)',cy);cy+=2;
+  const insData=[['Solstitiu vara (21 Iun)',solarAlt(lat,5,12).toFixed(1)+'°','~14h 00min','Insorire maxima · radiatii UV intense'],['Echinoct primavara (21 Mar)',solarAlt(lat,2,12).toFixed(1)+'°','~12h 00min','Tranzitie · insorire normala'],['Echinoct toamna (21 Sep)',solarAlt(lat,8,12).toFixed(1)+'°','~12h 00min','Tranzitie · insorire normala'],['Solstitiu iarna (21 Dec)',solarAlt(lat,11,12).toFixed(1)+'°','~8h 30min','Insorire minima · verificare OMS 119']];
+  cy=tblRow(['Data','Alt. max (12:00)','Durata aprox.','Observatii'],cy,true,[52,35,32,63]);
+  insData.forEach(r=>{cy=tblRow(r,cy,false,[52,35,32,63]);});
+
+  // ── PAG 5: Concluzie + semnatura ─────────────────────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
+  hdr('CONCLUZII SI BAZA LEGALA',5);ftr();
+  cy=30;cy=sec('7. SINTEZA ANALIZEI DE UMBRE SI OBSTRUCTIE',cy);cy+=2;
+  const concl=['1. ALTITUDINE SOLARA LA SOLSTITIU IARNA: '+solarAlt(lat,11,12).toFixed(1)+'° la ora 12:00 (prag minim OMS 119: 15°). '+(isConform?'CONFORMITATE ASIGURATA.':'ATENTIE: sub prag — necesita studiu detaliat.'),
+    '2. UMBRA MAXIMA PROIECTATA: '+shadowLen(aedisH,solarAlt(lat,11,12)).toFixed(0)+'m spre nord la ora 12:00 solstitiu iarna. Se recomanda verificarea vecinatilor nordice.',
+    '3. VECINI CU IMPACT: '+veciniAnaliza.filter(v=>v.inParcela).length+' cladiri vecine cu potential de obstructie a insolarii pe parcela analizata.',
+    '4. CONFORMITATE: '+( isConform?'Amplasamentul respecta conditiile de insorire conform OMS 119/2014.':'Se recomanda elaborarea unui studiu detaliat de insorire cu valoare juridica de catre arhitect autorizat OAR.')];
+  concl.forEach(c=>{cy=body(c,14,cy);cy+=3;});
+  cy+=5;cy=sec('8. BAZA LEGALA',cy);cy+=2;
+  const legal=['Ordinul MS nr. 119/2014 + Ordin nr. 994/2018 art. 3: minim 1.5 ore insorire directa/zi la solstitiu iarna','Legea nr. 350/2001 privind amenajarea teritoriului si urbanismul','STAS 6221-1981 Iluminat natural in constructii','PUG Municipiul Iasi in vigoare (HCL Iasi) · UTR '+utr];
+  legal.forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
+  sign();
+
+  pdf.save('Studiu_Umbre_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
+  ss('✅ Studiu de Umbre generat!');
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// STUDIU 2: ACUSTIC URBAN (ZGOMOT)
+// ════════════════════════════════════════════════════════════════════════════
+async function generateNoiseStudy(){
+  const ap=S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry){ss('Selectați o parcelă pentru studiu.');return;}
+  ss('Se generează Studiu Acustic Urban...');
+
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Studiu Acustic Urban','Studiu acustic',4);
+
+  // Estimare nivel zgomot din funcțiunile OSM vecine
+  const FN_NOISE={'commercial':65,'industrial':75,'retail':62,'office':55,'school':52,'hospital':45,'residential':42,'yes':48,'Necunoscut':50};
+  const vecini=S.ctx?.features||[];
+  const parcelCtr=turf.centerOfMass(ap.geo).geometry.coordinates;
+  const surse=vecini.filter(f=>{
+    const d=turf.distance({type:'Feature',geometry:{type:'Point',coordinates:parcelCtr}},{type:'Feature',geometry:{type:'Point',coordinates:turf.centerOfMass(f).geometry.coordinates},{units:'meters'});
+    return d<200;
+  }).map(f=>{
+    const fn=f.properties?.fn||'yes';
+    const d=turf.distance({type:'Feature',geometry:{type:'Point',coordinates:parcelCtr}},{type:'Feature',geometry:{type:'Point',coordinates:turf.centerOfMass(f).geometry.coordinates}},{units:'meters'});
+    const Ls=FN_NOISE[fn]||50;
+    const La=Math.max(0,Ls-20*Math.log10(Math.max(1,d))+11);
+    return {fn:f.properties?.fn_label||fn,dist:d.toFixed(0),Ls,La:La.toFixed(1),nrcad:f.properties?.nrcad||'—'};
+  }).sort((a,b)=>b.La-a.La).slice(0,10);
+
+  const Ltotal=surse.length?10*Math.log10(surse.reduce((s,x)=>s+Math.pow(10,x.La/10),0)):45;
+  const limit_zi=55,limit_n=45;
+  const confZi=Ltotal<=limit_zi,confNoap=Ltotal<=limit_n;
+
+  pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');pdf.setFillColor(20,35,70);pdf.rect(0,3,W,H-6,'F');
+  pdf.setFillColor(...GOLD);pdf.rect(0,0,W,3,'F');pdf.rect(0,H-3,W,3,'F');
+  pdf.setTextColor(...GOLD);pdf.setFontSize(9);pdf.setFont('helvetica','bold');
+  pdf.text('URBANX · AEDIS · PLATFORMA DE ANALIZA URBANISTICA',W/2,35,{align:'center'});
+  pdf.setTextColor(255,255,255);pdf.setFontSize(22);pdf.setFont('helvetica','bold');
+  pdf.text('STUDIU ACUSTIC URBAN',W/2,65,{align:'center'});
+  pdf.setTextColor(...GOLD);pdf.setFontSize(11);
+  pdf.text('Evaluare nivel zgomot · Conformitate SR 10009/2017 · Masuri de atenuare',W/2,78,{align:'center'});
+  pdf.setFillColor(30,50,90);pdf.rect(20,95,W-40,75,'F');pdf.setFillColor(...GOLD);pdf.rect(20,95,3,75,'F');
+  const kvData=[['Nr. cadastral:',nrcad],['Zona UTR:',utr],['Suprafata:',area+' mp'],['Functiune:',AEDIS_FN[AEDIS.fn]?.label||'—'],['Nivel zgomot estimat:',Ltotal.toFixed(1)+' dB(A)'],['Limita zi (SR 10009):',limit_zi+' dB(A)'],['Limita noapte:',limit_n+' dB(A)']];
+  kvData.forEach(([l,v],i)=>{
+    pdf.setTextColor(150,170,200);pdf.setFontSize(8);pdf.text(S2(l),26,107+i*9);
+    pdf.setTextColor(255,255,255);pdf.setFontSize(9.5);pdf.setFont('helvetica','bold');pdf.text(S2(v),100,107+i*9);
+  });
+  const isOk=confZi&&confNoap;
+  pdf.setFillColor(isOk?20:180,isOk?120:30,isOk?60:30);pdf.rect(20,182,W-40,18,'F');
+  pdf.setTextColor(255,255,255);pdf.setFontSize(10);pdf.setFont('helvetica','bold');
+  pdf.text(isOk?'CONFORM — Nivel zgomot acceptabil':'DEPASIRE — Masuri de izolare necesare',W/2,190,{align:'center'});
+  pdf.setFontSize(8);pdf.text('Nivel estimat: '+Ltotal.toFixed(1)+' dB(A) · Limita zi: '+limit_zi+' dB(A)',W/2,198,{align:'center'});
+  pdf.setTextColor(100,120,150);pdf.setFontSize(7);pdf.text('Generat: '+S2(dateStr)+' · Document ORIENTATIV · Confirmare prin masuratori acustice la fata locului',W/2,H-15,{align:'center'});
+  ftr();
+
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('SURSE DE ZGOMOT IDENTIFICATE',2);ftr();
+  let cy=30;cy=sec('1. SURSE DE ZGOMOT IN RAZA DE 200m',cy);cy+=2;
+  cy=tblRow(['Nr.cad','Functiune','Dist(m)','Ls (dB)','La la parcela (dB)'],cy,true,[30,48,25,25,48]);
+  surse.forEach(s=>{
+    cy=tblRow([s.nrcad,s.fn.slice(0,18),s.dist,s.Ls,s.La],cy,false,[30,48,25,25,48]);
+  });
+  if(!surse.length){cy=body('Nu s-au detectat surse de zgomot semnificative in raza de 200m.',14,cy);}
+  cy+=5;cy=sec('2. NIVEL TOTAL ESTIMAT SI CONFORMITATE SR 10009/2017',cy);cy+=2;
+  const conf=[['Nivel echivalent estimat Leq',Ltotal.toFixed(1)+' dB(A)',confZi?'CONFORM':'DEPASIRE'],['Limita zi (06:00-22:00)',limit_zi+' dB(A)',Ltotal<=limit_zi?'OK':'DEPASIT'],['Limita noapte (22:00-06:00)',limit_n+' dB(A)',Ltotal<=limit_n?'OK':'DEPASIT'],['Zona acustica',utr+' (rezidential/comercial)','SR 10009/2017'],['Atenuare necesara',Math.max(0,Ltotal-limit_zi).toFixed(0)+' dB(A)',Ltotal>limit_zi?'NECESARA':'—']];
+  cy=tblRow(['Indicator','Valoare calculata','Status'],cy,true,[70,50,58]);
+  conf.forEach(r=>{cy=tblRow(r,cy,false,[70,50,58]);});
+
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('MASURI DE ATENUARE SI RECOMANDARI',3);ftr();
+  cy=30;cy=sec('3. MASURI CONSTRUCTIVE DE ATENUARE FONICA',cy);cy+=2;
+  const masuri=[['Tamplarie PVC/Al tripan',Ltotal>limit_zi?'OBLIGATORIU':'RECOMANDAT','Atenuare: 40-48 dB(A)','Toate fatadele expuse'],['Vitraj exterior dublu-strat','RECOMANDAT','Atenuare: 35-42 dB(A)','Fatadele spre sursa'],['Zidarie exterioara >30cm','STANDARD','Atenuare: 45 dB(A)','Peretii exteriori'],['Tavan casetat fonoabsorbant','OPTIONAL','Atenuare: 5-10 dB(A)','Spatii de locuit'],['Peisagism cu arbori/gard viu','RECOMANDAT','Atenuare: 3-5 dB(A)','Aliniament stradal']];
+  cy=tblRow(['Masura','Necesar','Atenuare','Aplicare'],cy,true,[52,32,35,59]);
+  masuri.forEach(r=>{cy=tblRow(r,cy,false,[52,32,35,59]);});
+  cy+=5;cy=sec('4. ORIENTAREA FUNCTIONALA A SPATIILOR',cy);cy+=2;
+  cy=body('Pentru minimizarea expunerii la zgomot se recomanda urmatoarea orientare a spatiilor in raport cu sursele identificate:',14,cy);cy+=3;
+  const orient=['Dormitoare si spatii de odihna: orientate OPUS surselor principale de zgomot.','Spatii tehnice, garaje, holuri: orientate CATRE sursa (functie de tampon acustic).','Balcoane si logii: pozitionate astfel incat sa nu amplifice reflexiile sonore.','Spatiile comerciale la parter: compatibile cu nivelul de zgomot din zona.'];
+  orient.forEach(r=>{cy=body('• '+r,16,cy);cy+=1;});
+
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONCLUZII SI BAZA LEGALA',4);ftr();
+  cy=30;cy=sec('5. SINTEZA ANALIZEI ACUSTICE',cy);cy+=2;
+  cy=body('Nivelul de zgomot echivalent estimat pentru amplasamentul '+nrcad+' este de '+Ltotal.toFixed(1)+' dB(A), calculat prin compunerea energetica a surselor identificate in raza de 200m. '+(confZi?'Valoarea se incadreaza in limitele admise de SR 10009/2017 pentru zona acustica '+utr+'.':'Valoarea depaseste limita admisa. Se recomanda masuri suplimentare de izolare fonica.'),14,cy);cy+=5;
+  cy=sec('6. BAZA LEGALA',cy);cy+=2;
+  ['SR 10009:2017 — Acustica in constructii. Limite admisibile ale nivelului de zgomot din mediul exterior','Legea nr. 111/1996 rep. privind apararea impotriva radiatiilor ionizante','HG nr. 321/2005 privind evaluarea si gestionarea zgomotului ambiant','Directiva 2002/49/CE privind evaluarea si gestionarea zgomotului ambiental','OMS nr. 119/2014 — Norme de igiena si sanatate publica privind mediul de viata'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
+  sign();
+
+  pdf.save('Studiu_Acustic_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
+  ss('✅ Studiu Acustic Urban generat!');
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// STUDIU 3: VÂNT & CONFORT PIETONAL
+// ════════════════════════════════════════════════════════════════════════════
+async function generateWindStudy(){
+  const ap=S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry){ss('Selectați o parcelă.');return;}
+  ss('Se generează Studiu Vânt & Confort Pietonal...');
+
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,sign}=_initStudyPdf('Studiu de Vant si Confort Pietonal','Studiu vant',3);
+
+  const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13.2;
+  const vecini=S.ctx?.features||[];
+  const parcelCtr=turf.centerOfMass(ap.geo).geometry.coordinates;
+  const hVecini=vecini.map(f=>f.properties?.h||7);
+  const hMedVecin=hVecini.length?hVecini.reduce((a,b)=>a+b,0)/hVecini.length:7;
+  const hMaxVecin=hVecini.length?Math.max(...hVecini):10;
+
+  // Efectul de canion urban H/W
+  const bbox=turf.bbox(ap.geo);
+  const W_str=Math.min((bbox[2]-bbox[0])*111320*Math.cos(lat*Math.PI/180),(bbox[3]-bbox[1])*111320);
+  const HW=aedisH/Math.max(5,W_str/2);
+  const canionEffect=HW>2?'Canion dens — viteza vant amplificata >25%':HW>1?'Canion moderat — amplificare 10-25%':'Canyon larg — impact normal';
+  const criteriuLawson=aedisH>20?'Criteriu Lawson A — studiu CFD recomandat':aedisH>12?'Criteriu Lawson B — analiza simplificata':'Criteriu Lawson C — impact redus';
+
+  // Cover
+  pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');pdf.setFillColor(15,28,60);pdf.rect(0,3,W,H-6,'F');
+  pdf.setFillColor(...GOLD);pdf.rect(0,0,W,3,'F');pdf.rect(0,H-3,W,3,'F');
+  pdf.setTextColor(...GOLD);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text('URBANX · AEDIS · PLATFORMA DE ANALIZA URBANISTICA',W/2,35,{align:'center'});
+  pdf.setTextColor(255,255,255);pdf.setFontSize(22);pdf.setFont('helvetica','bold');pdf.text('STUDIU DE VANT',W/2,65,{align:'center'});pdf.text('SI CONFORT PIETONAL',W/2,80,{align:'center'});
+  pdf.setTextColor(...GOLD);pdf.setFontSize(10);pdf.text('Analiza efect canion urban · Confort pietonal Lawson · Recomandari arhitecturale',W/2,92,{align:'center'});
+  pdf.setFillColor(25,45,85);pdf.rect(20,105,W-40,80,'F');pdf.setFillColor(...GOLD);pdf.rect(20,105,3,80,'F');
+  [['Nr. cadastral:',nrcad],['H cladire propusa:',aedisH.toFixed(1)+'m'],['H medie vecini:',hMedVecin.toFixed(1)+'m'],['Raport H/W (canion):',HW.toFixed(2)],['Efect canion:',canionEffect.split(' — ')[0]],['Criteriu Lawson:',criteriuLawson.split(' — ')[0]]].forEach(([l,v],i)=>{
+    pdf.setTextColor(150,170,200);pdf.setFontSize(8);pdf.text(S2(l),26,117+i*10);
+    pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text(S2(v),100,117+i*10);
+  });
+  pdf.setFillColor(20,90,160);pdf.rect(20,196,W-40,18,'F');
+  pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text(S2(criteriuLawson),W/2,205,{align:'center'});
+  pdf.setFontSize(8);pdf.text(S2(canionEffect),W/2,213,{align:'center'});
+  pdf.setTextColor(100,120,150);pdf.setFontSize(7);pdf.text('Generat: '+S2(dateStr)+' · Analiza CFD simplificata · Document ORIENTATIV',W/2,H-15,{align:'center'});ftr();
+
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('ANALIZA CANION URBAN SI CONFORT PIETONAL',2);ftr();
+  let cy=30;cy=sec('1. PARAMETRI CANION URBAN',cy);cy+=2;
+  const canPar=[['Inaltimea cladirii propuse (H)',aedisH.toFixed(1)+'m','—'],['H max vecin in context',hMaxVecin.toFixed(1)+'m','—'],['H medie vecin in context',hMedVecin.toFixed(1)+'m','—'],['Latime estimata strada/spatiu (W)',W_str.toFixed(0)+'m','—'],['Raport H/W (efect canion)',HW.toFixed(2),HW>2?'CRITIC':HW>1?'MODERAT':'ACCEPTABIL'],['Efect canion estimat',canionEffect,'—']];
+  cy=tblRow(['Parametru','Valoare','Status'],cy,true,[90,50,42]);
+  canPar.forEach(r=>{cy=tblRow(r,cy,false,[90,50,42]);});
+  cy+=5;cy=sec('2. CONFORT PIETONAL — CRITERIILE LAWSON',cy);cy+=2;
+  const lawson=[['A — Activitati sedentare (terase, banci)','< 4 m/s','Zona comerciala/rezidentiala'],['B — Activitati pedestrale lente (shopping)','< 6 m/s','Promenade, alei pietonale'],['C — Mers normal (trecatori)','< 8 m/s','Trotuare, accese cladire'],['D — Activitati rapide (ciclism)','< 10 m/s','Piste biciclete'],['E — Viteza inacceptabila','> 10 m/s','Necesita interventie arhitecturala']];
+  cy=tblRow(['Criteriu','Viteza max','Aplicare'],cy,true,[80,35,67]);
+  lawson.forEach(r=>{cy=tblRow(r,cy,false,[80,35,67]);});
+  cy+=5;cy=sec('3. DIRECTII PRINCIPALE DE VANT (ROZA VANTURILOR · IASI)',cy);cy+=2;
+  const roza=[['Nord (N)','22%','5.2 m/s','NV din Carpatii Moldovenesti'],['Nord-Est (NE)','18%','4.8 m/s','Vant din stepele ucrainene'],['Vest (V)','15%','4.1 m/s','Vant umed atlantic'],['Sud-Vest (SV)','12%','3.8 m/s','Vant cald mediteranean'],['Calm','20%','< 1 m/s','Perioade de calm atmosferic']];
+  cy=tblRow(['Directie','Frecventa','Viteza medie','Sursa'],cy,true,[35,25,28,94]);
+  roza.forEach(r=>{cy=tblRow(r,cy,false,[35,25,28,94]);});
+
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('RECOMANDARI ARHITECTURALE SI BAZA LEGALA',3);ftr();
+  cy=30;cy=sec('4. MASURI ARHITECTURALE DE CONTROL AL VANTULUI',cy);cy+=2;
+  const masuri2=[['Paravane de vant la intrari','OBLIGATORIU pt H>12m','Reduce viteza la intrari cu 40-60%'],['Coloane si piloni la parter','RECOMANDAT','Evita efectul de jet la colturi'],['Forma in plan rotunjita','RECOMANDAT pt H>15m','Reduce presiunea vantului cu 20%'],['Balcoane retrase/adancite','RECOMANDAT','Protejeaza ocupantii de curent'],['Perdea vegetala perimetrala','OPTIONAL','Atenuare 15-30% viteza vant']];
+  cy=tblRow(['Masura','Prioritate','Efect estimat'],cy,true,[60,40,82]);
+  masuri2.forEach(r=>{cy=tblRow(r,cy,false,[60,40,82]);});
+  cy+=5;cy=sec('5. CONCLUZII SI ETAPE URMATOARE',cy);cy+=2;
+  cy=body('Analiza simplificata a efectului de canion urban pentru cladirea propusa (H='+aedisH.toFixed(1)+'m) indica un raport H/W='+HW.toFixed(2)+'. '+canionEffect+'. '+criteriuLawson+'. Pentru cladirile cu regim de inaltime mai mare de 20m este obligatorie o analiza CFD completa.',14,cy);cy+=5;
+  cy=sec('6. BAZA LEGALA',cy);cy+=2;
+  ['NP 082/2004 — Normativ privind proiectarea cladirilor civile din punct de vedere al cerintei de siguranta in exploatare','Criteriile Lawson (1990) si revizuirile BRE — standard international pentru confort pietonal','CR 1-1-4/2012 — Cod de proiectare. Evaluarea actiunii vantului','ISO 16474-2:2014 privind confortul pietonal in medii urbane','PUZ-urile locale care impun studii de vant pentru cladiri > 10 etaje'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
+  sign();
+
+  pdf.save('Studiu_Vant_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
+  ss('✅ Studiu Vânt & Confort Pietonal generat!');
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// STUDIU 4: SPAȚII VERZI & PERMEABILITATE
+// ════════════════════════════════════════════════════════════════════════════
+async function generateGreenStudy(){
+  const ap=S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry){ss('Selectați o parcelă.');return;}
+  ss('Se generează Studiu Spații Verzi...');
+
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,GREEN,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,sign}=_initStudyPdf('Studiu de Spatii Verzi si Permeabilitate','Studiu spatii verzi',3);
+
+  const areaN=parseFloat(area)||548;
+  const svMin=parseFloat(params.sv)||15;
+  const svAbs=(areaN*svMin/100).toFixed(0);
+  const potMax=parseFloat(params.pot)||65;
+  const scMax=(areaN*potMax/100).toFixed(0);
+  const circulatii=(areaN*(100-potMax-svMin)/100).toFixed(0);
+  const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13.2;
+  const niv=AEDIS.corpuri[0]?.niv||4;
+  const scActuala=(areaN*potMax/100).toFixed(0);
+  const svVerde=(areaN*svMin/100).toFixed(0);
+
+  pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');pdf.setFillColor(10,40,20);pdf.rect(0,3,W,H-6,'F');
+  pdf.setFillColor(...GOLD);pdf.rect(0,0,W,3,'F');pdf.rect(0,H-3,W,3,'F');
+  pdf.setTextColor(...GOLD);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text('URBANX · AEDIS · PLATFORMA DE ANALIZA URBANISTICA',W/2,35,{align:'center'});
+  pdf.setTextColor(255,255,255);pdf.setFontSize(22);pdf.setFont('helvetica','bold');pdf.text('STUDIU SPATII VERZI',W/2,65,{align:'center'});pdf.text('SI PERMEABILITATE TEREN',W/2,80,{align:'center'});
+  pdf.setTextColor(...GOLD);pdf.setFontSize(10);pdf.text('Bilant teritorial · Coeficient de permeabilitate · Conformitate Legea 24/2007',W/2,92,{align:'center'});
+  pdf.setFillColor(10,50,25);pdf.rect(20,105,W-40,80,'F');pdf.setFillColor(...GOLD);pdf.rect(20,105,3,80,'F');
+  [['Nr. cadastral:',nrcad],['Suprafata totala teren:',areaN+' mp (100%)'],['Suprafata construita max (SC):',scMax+' mp (POT '+potMax+'%)'],['Spatii verzi minime obligatorii:',svAbs+' mp (SV '+svMin+'%)'],['Circulatii si parcaje:',circulatii+' mp'],['Coef. permeabilitate minim:',svMin+'%']].forEach(([l,v],i)=>{
+    pdf.setTextColor(150,200,170);pdf.setFontSize(8);pdf.text(S2(l),26,117+i*10);
+    pdf.setTextColor(255,255,255);pdf.setFontSize(9.5);pdf.setFont('helvetica','bold');pdf.text(S2(v),110,117+i*10);
+  });
+  pdf.setFillColor(20,120,60);pdf.rect(20,196,W-40,18,'F');
+  pdf.setTextColor(255,255,255);pdf.setFontSize(10);pdf.setFont('helvetica','bold');pdf.text('SPATII VERZI OBLIGATORII: '+svAbs+' mp ('+svMin+'% din suprafata totala)',W/2,205,{align:'center'});
+  pdf.setFontSize(8);pdf.text('Conform PUG Iasi · UTR '+utr+' · Legea 24/2007 privind spatiile verzi',W/2,213,{align:'center'});
+  pdf.setTextColor(100,150,120);pdf.setFontSize(7);pdf.text('Generat: '+S2(dateStr)+' · Document ORIENTATIV',W/2,H-15,{align:'center'});ftr();
+
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('BILANT TERITORIAL SI INDICATORI SUPRAFETE',2);ftr();
+  let cy=30;cy=sec('1. BILANT TERITORIAL COMPLET',cy);cy+=2;
+  const bilant=[['Suprafata totala teren (St)',areaN+' mp','100%','—'],['Suprafata construita la sol (SC)',scMax+' mp',potMax+'%','POT max PUG'],['Spatii verzi amenajate (SV)',svAbs+' mp',svMin+'%','min. obligatoriu'],['Circulatii carosabile+pietonale',Math.round(areaN*0.15)+' mp','~15%','normat HG 525/1996'],['Parcaje la sol',Math.round(areaN*0.05)+' mp','~5%','0.5 loc/100mp SC'],['Spatii tehnice/depozitare',Math.round(areaN*0.03)+' mp','~3%','estim.']];
+  cy=tblRow(['Categorie','Suprafata','Procent','Baza legala'],cy,true,[75,35,25,47]);
+  bilant.forEach(r=>{cy=tblRow(r,cy,false,[75,35,25,47]);});
+  cy+=5;cy=sec('2. COEFICIENT DE PERMEABILITATE SI GESTIUNE APE PLUVIALE',cy);cy+=2;
+  const perim=[['Coeficient permeabilitate (CP)',svMin+'%','Minim '+svMin+'%','CONFORM'],['Coeficient impermeabilizare',(100-svMin)+'%','Max '+(100-svMin)+'%','LIMITA'],['Debit pluvial estimat',((areaN*(100-svMin)/100)*0.7*0.025).toFixed(1)+' mc/h','—',''],['Rezervor retentie recomandat',Math.round(areaN*(100-svMin)/100*0.005)+' mc','—',''],['Sisteme de infiltratie','Obligatoriu','SC > '+Math.round(areaN*0.5)+' mp','HG 188/2002']];
+  cy=tblRow(['Indicator','Valoare','Limita','Status'],cy,true,[75,35,35,37]);
+  perim.forEach(r=>{cy=tblRow(r,cy,false,[75,35,35,37]);});
+  cy+=5;cy=sec('3. TIPURI DE SPATII VERZI RECOMANDATE',cy);cy+=2;
+  const tipuri=[['Gazon/iarba (L)',Math.round(areaN*svMin/100*0.4)+' mp','Suprafata permeabila de baza','Obligatoriu'],['Arbori foiosi (A)',Math.round(areaN*svMin/100*0.25)+' mp','Umbra + purificare aer','Min. 1 arbore/50mp'],['Arbori conifere (C)',Math.round(areaN*svMin/100*0.1)+' mp','Protectie vant iarna','Optional'],['Arbusti/gard viu',Math.round(areaN*svMin/100*0.15)+' mp','Delimitare + izolare fonica','Recomandat'],['Spatii verzi pe cladire',Math.round(areaN*svMin/100*0.1)+' mp','Terasa verde, fatada verde','Bonus biodiversitate']];
+  cy=tblRow(['Tip spatiu','Suprafata','Functie','Observatii'],cy,true,[42,28,55,57]);
+  tipuri.forEach(r=>{cy=tblRow(r,cy,false,[42,28,55,57]);});
+
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONCLUZII SPATII VERZI SI BAZA LEGALA',3);ftr();
+  cy=30;cy=sec('4. SPECII RECOMANDATE PENTRU ZONA IASI',cy);cy+=2;
+  const specii=[['Tei pubescentscens (Tilia tomentosa)','Arbore','15-25m','Nativ, umbra, aroma'],['Ulm de camp (Ulmus minor)','Arbore','10-20m','Rezistent seceta'],['Salcam (Robinia pseudoacacia)','Arbore','10-15m','Crestere rapida'],['Liliac (Syringa vulgaris)','Arbust','2-4m','Parfum, colorit'],['Forshythia (Forsythia x intermedia)','Arbust','1-3m','Floare timpurie'],['Gazon festuca/bluegrass','Gazon','—','Rezistent la trafic pietonal']];
+  cy=tblRow(['Specie','Tip','H matura','Avantaje'],cy,true,[68,22,20,72]);
+  specii.forEach(r=>{cy=tblRow(r,cy,false,[68,22,20,72]);});
+  cy+=5;cy=sec('5. BAZA LEGALA',cy);cy+=2;
+  ['Legea nr. 24/2007 privind reglementarea si administrarea spatiilor verzi din intravilanul localitatilor','HG nr. 188/2002 privind conditiile de descarcare in mediu acvatic a apelor uzate (gestiune pluviala)','OUG 195/2005 privind protectia mediului — Sectiunea spatii verzi','PUG Municipiul Iasi — Regulamentul Local de Urbanism · UTR '+utr+' · SV minim: '+svMin+'%','Normativul NP 024/1997 privind proiectarea cladirilor de locuinte — amenajari exterioare'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
+  sign();
+
+  pdf.save('Studiu_Spatii_Verzi_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
+  ss('✅ Studiu Spații Verzi generat!');
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// STUDIU 5: MOBILITATE & PARCAJE
+// ════════════════════════════════════════════════════════════════════════════
+async function generateMobilityStudy(){
+  const ap=S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry){ss('Selectați o parcelă.');return;}
+  ss('Se generează Studiu Mobilitate...');
+
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,sign}=_initStudyPdf('Studiu de Mobilitate si Parcaje','Studiu mobilitate',3);
+
+  const areaN=parseFloat(area)||548;
+  const cutMax=parseFloat(params.cut)||2.8;
+  const sdMax=(areaN*cutMax).toFixed(0);
+  const parMin=parseFloat(params.parc)||3;
+  const nAp=Math.round(areaN*cutMax/55);
+  const parTot=Math.ceil(nAp*parMin/100*100/100+nAp*0.2);
+  const parSubteran=Math.max(0,parTot-Math.floor(areaN*0.1/12.5));
+  const fn=AEDIS_FN[AEDIS.fn]?.label||'Rezidential colectiv';
+  const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13.2;
+
+  // Distante OSM la transport public
+  const stpOsm=S.ctx?.features?.filter(f=>['bus_stop','tram_stop','station','subway'].includes(f.properties?.fn||''))||[];
+  const parcelCtr=turf.centerOfMass(ap.geo).geometry.coordinates;
+  const nearStp=stpOsm.slice(0,3).map(f=>{
+    const d=turf.distance({type:'Feature',geometry:{type:'Point',coordinates:parcelCtr}},{type:'Feature',geometry:{type:'Point',coordinates:turf.centerOfMass(f).geometry.coordinates}},{units:'meters'});
+    return {name:f.properties?.name||'Statie transport',d:d.toFixed(0)};
+  });
+
+  pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');pdf.setFillColor(10,25,55);pdf.rect(0,3,W,H-6,'F');
+  pdf.setFillColor(...GOLD);pdf.rect(0,0,W,3,'F');pdf.rect(0,H-3,W,3,'F');
+  pdf.setTextColor(...GOLD);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text('URBANX · AEDIS · PLATFORMA DE ANALIZA URBANISTICA',W/2,35,{align:'center'});
+  pdf.setTextColor(255,255,255);pdf.setFontSize(22);pdf.setFont('helvetica','bold');pdf.text('STUDIU DE MOBILITATE',W/2,65,{align:'center'});pdf.text('SI NECESARUL DE PARCAJE',W/2,80,{align:'center'});
+  pdf.setTextColor(...GOLD);pdf.setFontSize(10);pdf.text('Conformitate HG 525/1996 · Accesibilitate pietonala · Raza de deservire transport public',W/2,92,{align:'center'});
+  pdf.setFillColor(20,35,75);pdf.rect(20,105,W-40,80,'F');pdf.setFillColor(...GOLD);pdf.rect(20,105,3,80,'F');
+  [['Functiune propusa:',fn],['Nr. apartamente estimate:',nAp+' ap.'],['Parcaje necesare (rezidenti):',Math.ceil(nAp*parMin/100*100/100)+' locuri'],['Parcaje vizitatori (+20%):',Math.ceil(nAp*0.2)+' locuri'],['TOTAL PARCAJE:',parTot+' locuri'],['Parcaje posibile la sol:',Math.floor(areaN*0.1/12.5)+' locuri'],['Deficit / Subteran necesar:',Math.max(0,parTot-Math.floor(areaN*0.1/12.5))+' locuri']].forEach(([l,v],i)=>{
+    pdf.setTextColor(150,170,210);pdf.setFontSize(8);pdf.text(S2(l),26,117+i*9.5);
+    pdf.setTextColor(255,255,255);pdf.setFontSize(9.5);pdf.setFont('helvetica','bold');pdf.text(S2(v),110,117+i*9.5);
+  });
+  pdf.setFillColor(parSubteran>0?120:20,parSubteran>0?50:100,parSubteran>0?10:50);pdf.rect(20,196,W-40,18,'F');
+  pdf.setTextColor(255,255,255);pdf.setFontSize(10);pdf.setFont('helvetica','bold');
+  pdf.text(parSubteran>0?'DEFICIT: '+parSubteran+' loc. la sol — SUBTERAN NECESAR':'PARCAJE POSIBILE LA SOL — SUBTERAN OPTIONAL',W/2,205,{align:'center'});
+  pdf.setFontSize(8);pdf.text('Total necesar: '+parTot+' locuri · Conform HG 525/1996 art. 33',W/2,213,{align:'center'});
+  pdf.setTextColor(100,120,160);pdf.setFontSize(7);pdf.text('Generat: '+S2(dateStr)+' · Document ORIENTATIV',W/2,H-15,{align:'center'});ftr();
+
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('ANALIZA PARCAJE SI ACCESIBILITATE',2);ftr();
+  let cy=30;cy=sec('1. CALCUL NECESAR PARCAJE — HG 525/1996 ART. 33',cy);cy+=2;
+  const parcData=[['Apartamente rezidenti ('+parMin+' loc/100mp SD)',sdMax+' mp SD',Math.ceil(parseFloat(sdMax)*parMin/100)+' locuri'],['Vizitatori (20% din necesar rezidenti)','—',Math.ceil(nAp*0.2)+' locuri'],['TOTAL MINIM OBLIGATORIU','—',parTot+' locuri'],['Posibil la sol (12.5mp/loc, 10% SC)',Math.floor(areaN*0.1)+' mp',Math.floor(areaN*0.1/12.5)+' locuri'],['Deficit ce necesita solutii alternative','—',Math.max(0,parTot-Math.floor(areaN*0.1/12.5))+' locuri']];
+  cy=tblRow(['Categorie','Suprafata referinta','Nr. locuri'],cy,true,[90,45,47]);
+  parcData.forEach(r=>{cy=tblRow(r,cy,false,[90,45,47]);});
+  cy+=5;cy=sec('2. ACCESIBILITATE PIETONALA (RAZA 500m = 8 min mers)',cy);cy+=2;
+  const accData=[['Servicii medicale (farmacie, CMI)','< 500m','Verificati in teren','Normal'],['Educatie (gradinita, scoala)','< 1000m','Verificati in teren','Normal'],['Alimentara / supermarket','< 300m','Verificati in teren','Normal'],['Transport public (autobuz/troleu)','< 300m',nearStp.length?nearStp[0].d+'m estimat':'Verificati in teren',nearStp.length?'OK':'—'],['Parc/spatiu verde','< 500m','Verificati in teren','Normal'],['Conexiune retele tehnico-edilitare','La limita parcela','Verificati plan retele','—']];
+  cy=tblRow(['Facilitate','Distanta standard','Distanta estimata','Status'],cy,true,[52,32,42,36]);
+  accData.forEach(r=>{cy=tblRow(r,cy,false,[52,32,42,36]);});
+  cy+=5;cy=sec('3. SOLUTII ALTERNATIVE PENTRU DEFICIT DE PARCAJE',cy);cy+=2;
+  cy=body('In cazul in care suprafata de teren nu permite asigurarea integrala a parcarilor la sol, se recomanda urmatoarele solutii, in ordinea prioritatii:',14,cy);cy+=3;
+  ['1. Subsol cu 1-2 niveluri de parcare (P-1/P-2) — solutia optima, accesibila din incinta.','2. Parcare semiingropata (max -1.5m fata de NTS) — cost redus, ventilatie naturala.','3. Sisteme de parcare mecanizate (parcare stivuitor) — pentru loturi mici.','4. Negociere parcari publice in zona sau spatii comerciale cu regim mixt.'].forEach(r=>{cy=body(r,16,cy);cy+=2;});
+
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONCLUZII MOBILITATE SI BAZA LEGALA',3);ftr();
+  cy=30;cy=sec('4. ETAPE OBLIGATORII AUTORIZARE',cy);cy+=2;
+  const etape=[['1','Certificat de Urbanism (CU)','DAU Primaria Iasi','Obligatoriu'],['2','Aviz Politia Rutiera','IPJ Iasi — Biroul Rutier','Daca CU o impune'],['3','Studiu trafic (>100 parcaje)','Expert transporturi atestat','Obligatoriu pt imobile mari'],['4','Plan de mobilitate urbana','TPUD Iasi','Consultare'],['5','Aviz RATC / transport public','RATC Iasi','Daca se afecteaza trasee']];
+  cy=tblRow(['Nr.','Etapa','Autoritate','Observatii'],cy,true,[12,72,55,43]);
+  etape.forEach(r=>{cy=tblRow(r,cy,false,[12,72,55,43]);});
+  cy+=5;cy=sec('5. BAZA LEGALA',cy);cy+=2;
+  ['HG nr. 525/1996 pentru aprobarea Regulamentului General de Urbanism — art. 33 parcaje','Normativul P 132-1993 privind proiectarea parcajelor de autovehicule','Legea nr. 92/2007 a serviciilor publice de transport persoane','PUG Municipiul Iasi — UTR '+utr+' · Norma parcaje: '+parMin+' loc/100mp SD','STAS 2965/1984 — Amenajarea intersectiilor la acelasi nivel'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
+  sign();
+
+  pdf.save('Studiu_Mobilitate_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
+  ss('✅ Studiu Mobilitate & Parcaje generat!');
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// STUDIU 6: DENSITATE URBANĂ
+// ════════════════════════════════════════════════════════════════════════════
+async function generateDensityStudy(){
+  const ap=S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry){ss('Selectați o parcelă.');return;}
+  ss('Se generează Studiu Densitate Urbană...');
+
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,sign}=_initStudyPdf('Studiu de Densitate si Presiune Urbana','Studiu densitate',3);
+
+  const areaN=parseFloat(area)||548;
+  const potProp=parseFloat(params.pot)||65;
+  const cutProp=parseFloat(params.cut)||2.8;
+  const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13.2;
+
+  // Statistici context OSM
+  const vecini=S.ctx?.features||[];
+  const vH=vecini.map(f=>f.properties?.h||5).filter(h=>h>2);
+  const vA=vecini.map(f=>turf.area(f)||0).filter(a=>a>20);
+  const hMed=vH.length?(vH.reduce((a,b)=>a+b,0)/vH.length).toFixed(1):'—';
+  const hMax=vH.length?Math.max(...vH).toFixed(1):'—';
+  const vAmed=vA.length?(vA.reduce((a,b)=>a+b,0)/vA.length).toFixed(0):'—';
+  // Estimam POT mediu din context (SC / (SC + spatii libere))
+  const totalSC=vA.reduce((a,b)=>a+b,0);
+  const parcelCtr=turf.centerOfMass(ap.geo).geometry.coordinates;
+  const raza200=200/111320;
+  const inRaza=vecini.filter(f=>{
+    const c=turf.centerOfMass(f).geometry.coordinates;
+    return Math.sqrt(Math.pow((c[0]-parcelCtr[0])*111320*Math.cos(lat*Math.PI/180),2)+Math.pow((c[1]-parcelCtr[1])*111320,2))<200;
+  });
+  const scRaza=inRaza.reduce((s,f)=>s+turf.area(f),0);
+  const supRaza=Math.PI*200*200;
+  const potMedRaza=(scRaza/supRaza*100).toFixed(1);
+
+  pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');pdf.setFillColor(20,20,45);pdf.rect(0,3,W,H-6,'F');
+  pdf.setFillColor(...GOLD);pdf.rect(0,0,W,3,'F');pdf.rect(0,H-3,W,3,'F');
+  pdf.setTextColor(...GOLD);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text('URBANX · AEDIS · PLATFORMA DE ANALIZA URBANISTICA',W/2,35,{align:'center'});
+  pdf.setTextColor(255,255,255);pdf.setFontSize(20);pdf.setFont('helvetica','bold');pdf.text('STUDIU DE DENSITATE',W/2,65,{align:'center'});pdf.text('SI PRESIUNE URBANA',W/2,80,{align:'center'});
+  pdf.setTextColor(...GOLD);pdf.setFontSize(10);pdf.text('Comparatie indicatori propusi vs zona · Caracter predominant · Conformitate PUG',W/2,92,{align:'center'});
+  pdf.setFillColor(25,25,55);pdf.rect(20,105,W-40,85,'F');pdf.setFillColor(...GOLD);pdf.rect(20,105,3,85,'F');
+  [['Nr. cadastral:',nrcad],['Zona UTR:',utr],['POT propus / PUG max:',potProp+'% / '+potProp+'%'],['CUT propus / PUG max:',cutProp+' / '+cutProp],['H propus / H max vecin:',aedisH.toFixed(1)+'m / '+hMax+'m'],['H medie zona (200m raza):',hMed+'m'],['POT mediu zona (estimat):',potMedRaza+'%'],['Nr. cladiri in context incarcate:',vecini.length]].forEach(([l,v],i)=>{
+    pdf.setTextColor(150,165,210);pdf.setFontSize(8);pdf.text(S2(l),26,117+i*9.5);
+    pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text(S2(v),110,117+i*9.5);
+  });
+  ftr();
+
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('INDICATORI PROPUSI vs CONTEXT URBAN',2);ftr();
+  let cy=30;cy=sec('1. COMPARATIE INDICATORI PROPUSI vs PUG vs ZONA',cy);cy+=2;
+  const compData=[['POT (suprafata construita/teren)',potProp+'%',potProp+'%',potMedRaza+'%',parseFloat(potProp)<=parseFloat(potMedRaza)*1.2?'CONFORM':'VERIF.'],
+    ['CUT (supraf.desfasurata/teren)',String(cutProp),String(cutProp),'—','CONFORM'],
+    ['H max propus',aedisH.toFixed(1)+'m',String(params.hmax||'N/S')+'m',hMax+'m',aedisH<=parseFloat(hMax||999)*1.1?'CONFORM':'VERIF.'],
+    ['H medie propusa',aedisH.toFixed(1)+'m','—',hMed+'m',Math.abs(aedisH-parseFloat(hMed||0))<10?'COMPAT.':'CONTRAST'],
+    ['Nr. niveluri',(AEDIS.corpuri[0]?.niv||4)+' niv.',String(params.niv||'N/S'),Math.round(parseFloat(hMed||7)/3)+' niv.est.','—']];
+  cy=tblRow(['Indicator','Propus','Max PUG','Zona (200m)','Status'],cy,true,[55,25,25,35,42]);
+  compData.forEach(r=>{cy=tblRow(r,cy,false,[55,25,25,35,42]);});
+  cy+=5;cy=sec('2. ANALIZA CARACTER PREDOMINANT AL ZONEI',cy);cy+=2;
+  const fns={};vecini.forEach(f=>{const fn=f.properties?.fn||'yes';fns[fn]=(fns[fn]||0)+1;});
+  const fnSorted=Object.entries(fns).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  cy=tblRow(['Functiune OSM','Nr. cladiri','Pondere (%)','Compatibilitate propus'],cy,true,[65,25,28,64]);
+  const total=vecini.length||1;
+  fnSorted.forEach(([fn,cnt])=>{
+    const compat=fn===AEDIS.fn||fn==='yes'||fn==='residential'?'COMPATIBIL':'Verificati CU';
+    cy=tblRow([fn.slice(0,22),String(cnt),(cnt/total*100).toFixed(0)+'%',compat],cy,false,[65,25,28,64]);
+  });
+  cy+=5;cy=sec('3. IMPACT VIZUAL SI CARACTERUL STRADAL',cy);cy+=2;
+  const impactH=aedisH-parseFloat(hMed||7);
+  cy=body('Cladirea propusa (H='+aedisH.toFixed(1)+'m) depaseste inaltimea medie a zonei cu '+Math.abs(impactH).toFixed(1)+'m ('+(impactH>0?'mai inalta':'mai joasa')+' decat media). '+(Math.abs(impactH)>6?'Diferenta semnificativa — se recomanda studiu de impact vizual si analiza compatibilitatii cu caracterul stradal.':'Diferenta moderata — compatibila cu caracterul urban existent.'),14,cy);
+
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONCLUZII SI RECOMANDARI',3);ftr();
+  cy=30;cy=sec('4. SINTEZA ANALIZEI DE DENSITATE',cy);cy+=2;
+  cy=body('Analiza densitate urbana pentru parcela '+nrcad+' (UTR '+utr+', '+area+' mp) indica urmatoarele:',14,cy);cy+=3;
+  ['POT propus: '+potProp+'% — in limitele admise de PUG (max '+potProp+'%).','CUT propus: '+cutProp+' — in limitele admise de PUG (max '+cutProp+').','Inaltimea propusa ('+aedisH.toFixed(1)+'m) se raporteaza la H medie zona ('+hMed+'m) cu o diferenta de '+Math.abs(aedisH-parseFloat(hMed||0)).toFixed(1)+'m.','Functiunea propusa este '+(fnSorted[0]?'compatibila cu functiunea dominanta din zona ('+fnSorted[0][0]+').':'de verificat cu Certificatul de Urbanism.'),'Necesitatea unui PUZ: parametrii se incadreaza in PUG — verificati CU.'].forEach(r=>{cy=body('• '+r,16,cy);cy+=1;});
+  cy+=5;cy=sec('5. BAZA LEGALA',cy);cy+=2;
+  ['Legea nr. 350/2001 privind amenajarea teritoriului si urbanismul (republicata)','HG nr. 525/1996 pentru aprobarea Regulamentului General de Urbanism','Ordinul MDRAP nr. 233/2016 pentru aprobarea Normelor metodologice de aplicare a Legii 350/2001','PUG Municipiul Iasi in vigoare — UTR '+utr+' — Regulamentul Local de Urbanism','Legea nr. 50/1991 privind autorizarea executarii lucrarilor de constructii (republicata)'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
+  sign();
+
+  pdf.save('Studiu_Densitate_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
+  ss('✅ Studiu Densitate Urbană generat!');
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// STUDIU 7: MEMORIU TEHNIC PRELIMINAR
+// ════════════════════════════════════════════════════════════════════════════
+async function generateMemoriu(){
+  const ap=S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry){ss('Selectați o parcelă.');return;}
+  ss('Se generează Memoriu Tehnic Preliminar...');
+
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,sign}=_initStudyPdf('Memoriu Tehnic Urbanistic Preliminar','Memoriu tehnic',5);
+
+  const areaN=parseFloat(area)||548;
+  const potMax=parseFloat(params.pot)||65;
+  const cutMax=parseFloat(params.cut)||2.8;
+  const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13.2;
+  const niv=AEDIS.corpuri[0]?.niv||4;
+  const fn=AEDIS_FN[AEDIS.fn]?.label||'Rezidential colectiv';
+  const stil=AEDIS_STIL[AEDIS.stil]?.label||'Modern';
+  const scMax=(areaN*potMax/100).toFixed(0);
+  const sdMax=(areaN*cutMax).toFixed(0);
+  const svMin=(areaN*(parseFloat(params.sv)||15)/100).toFixed(0);
+  const nAp=Math.round(areaN*cutMax/55);
+  const parMin=Math.ceil(nAp*(parseFloat(params.parc)||3)/100);
+  const hMax=String(params.hmax||'N/S');
+
+  // Cover cu design formal
+  pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');pdf.setFillColor(15,25,55);pdf.rect(0,3,W,H-6,'F');
+  pdf.setFillColor(...GOLD);pdf.rect(0,0,W,3,'F');pdf.rect(0,H-3,W,3,'F');
+  pdf.setTextColor(...GOLD);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text('URBANX · AEDIS · PLATFORMA DE ANALIZA URBANISTICA',W/2,32,{align:'center'});
+  pdf.setFillColor(25,40,80);pdf.rect(20,50,W-40,5,'F');pdf.rect(20,55,W-40,100,'F');
+  pdf.setFillColor(...GOLD);pdf.rect(20,50,W-40,2,'F');pdf.rect(20,153,W-40,2,'F');
+  pdf.setFillColor(...GOLD);pdf.rect(20,52,3,103,'F');
+  pdf.setTextColor(255,255,255);pdf.setFontSize(18);pdf.setFont('helvetica','bold');pdf.text('MEMORIU TEHNIC',W/2,72,{align:'center'});pdf.text('URBANISTIC PRELIMINAR',W/2,85,{align:'center'});
+  pdf.setTextColor(...GOLD);pdf.setFontSize(10);pdf.text('Plan Urbanistic General · Zonificare UTR · Analiza indicatori',W/2,97,{align:'center'});
+  pdf.setFillColor(20,35,70);pdf.rect(26,105,W-52,45,'F');
+  [['Nr. cadastral:',nrcad,130],['UTR (zona urbanistica):',utr,130],['Functiune propusa:',fn,130],['Adresa aproximativa:','Municipiul Iasi · GPS: '+lat.toFixed(4)+'N, '+lon.toFixed(4)+'E',130]].forEach(([l,v,x],i)=>{
+    pdf.setTextColor(160,175,210);pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');pdf.text(S2(l),30,113+i*9);
+    pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text(S2(v),x,113+i*9);
+  });
+  pdf.setFillColor(20,100,60);pdf.rect(20,162,W-40,20,'F');
+  pdf.setTextColor(255,255,255);pdf.setFontSize(10);pdf.setFont('helvetica','bold');pdf.text('PARAMETRI IN LIMITA PUG — Constructie autorizabila in principiu',W/2,171,{align:'center'});
+  pdf.setFontSize(8);pdf.text('POT: '+potMax+'% · CUT: '+cutMax+' · H: '+aedisH.toFixed(1)+'m · '+niv+' niveluri',W/2,179,{align:'center'});
+  pdf.setTextColor(100,120,160);pdf.setFontSize(7.5);pdf.setFont('helvetica','italic');
+  pdf.text('Prezentul memoriu are caracter orientativ si nu inlocuieste documentatia tehnica avizata conform Legii 50/1991.',W/2,H-20,{align:'center'});
+  pdf.text('UrbanX AEDIS · Generat: '+S2(dateStr),W/2,H-13,{align:'center'});ftr();
+
+  // PAG 2: Date teren + reglementari
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('DATE TEREN SI REGLEMENTARI PUG',2);ftr();
+  let cy=30;cy=sec('1. DATE DE IDENTIFICARE A IMOBILULUI',cy);cy+=2;
+  const dataI=[['Nr. cadastral',nrcad],['Zona urbanistica (UTR)',utr+' — '+S.rule?.titlu||utr],['Suprafata teren',area+' mp'],['Perimetru aproximativ','calc. GIS (date cadastru Iasi)'],['Coordonate lat./lng.',lat.toFixed(5)+'°N / '+lon.toFixed(5)+'°E'],['Localitate','Municipiul Iasi, jud. Iasi'],['Sector cadastral','Iasi — Extras CF la zi obligatoriu']];
+  cy=tblRow(['Camp','Valoare'],cy,true,[80,102]);
+  dataI.forEach(r=>{cy=tblRow(r,cy,false,[80,102]);});
+  cy+=5;cy=sec('2. REGLEMENTARI URBANISTICE — PUG IASI · UTR '+utr,cy);cy+=2;
+  const regPUG=[['POT max admis',potMax+'%','Raport SC la sol / suprafata teren'],['CUT max admis',String(cutMax),'Raport SD / suprafata teren'],['H max admis',hMax+'m','Inaltime totala admisa'],['Nr. niveluri max',String(params.niv||'N/S'),'Etaje admise (conf. PUG)'],['Aliniament fata strada (Rf)',(params.rf||5)+'m','Retragere minima fata de ax strada'],['Aliniament spate (Rs)',(params.rs||5)+'m','Retragere minima spate parcela'],['Aliniament lateral stg. (Rl)',(params.rl||3)+'m','Retragere minima lateral stanga'],['Aliniament lateral dr. (Rr)',(params.rr||params.rl||3)+'m','Retragere minima lateral dreapta'],['Spatii verzi minime',(params.sv||15)+'%','Din suprafata totala teren'],['Parcaje minime',(params.parc||3)+' loc/100mp SD','Norm HG 525/1996']];
+  cy=tblRow(['Indicator','Valoare PUG','Explicatie'],cy,true,[55,30,97]);
+  regPUG.forEach(r=>{cy=tblRow(r,cy,false,[55,30,97]);});
+
+  // PAG 3: Parametri volum
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('PARAMETRI VOLUMETRIE PROPUSA',3);ftr();
+  cy=30;cy=sec('3. VOLUMETRIA PROPUSA — AEDIS',cy);cy+=2;
+  const volProp=[['Functiune propusa',fn],['Functiune parter',AEDIS.parterDiferit?(AEDIS_FN[AEDIS.fnParter]?.label||'Comercial'):'Idem corp principal'],['Stil arhitectural',stil],['Nr. niveluri propus',niv+' niveluri'],['Inaltime totala propusa',aedisH.toFixed(1)+'m'],['H parter propus',(AEDIS.corpuri[0]?.hNiv||3.0)+'m'],['H etaj curent propus',(AEDIS.corpuri[0]?.hNiv||3.0)+'m'],['Tip acoperis',{terasa_plata:'Terasa plata',sarpanta:'Sarpanta',mansarda:'Mansarda',terasa_circulabila:'Terasa circulabila'}[AEDIS.tipAcoperis]||'Terasa plata'],['SC construita la sol (POT aplicat)',scMax+' mp ('+potMax+'%)'],['SD totala desfasurata (CUT aplicat)',sdMax+' mp.ADC (CUT '+cutMax+')'],['SC utila estimata (90% din SD)',Math.round(areaN*cutMax*0.9)+' mp'],['Nr. apartamente estimate (~55mp)',nAp+' ap.'],['Spatii verzi minime obligatorii',svMin+' mp ('+( params.sv||15)+'%)'],['Parcaje necesare minime',parMin+' locuri']];
+  cy=tblRow(['Parametru','Valoare propusa'],cy,true,[100,82]);
+  volProp.forEach(r=>{cy=tblRow(r,cy,false,[100,82]);});
+  cy+=5;cy=sec('4. VERIFICARE CONFORMITATE CU PUG',cy);cy+=2;
+  const verifData=[['POT',potMax+'%',potMax+'%','✓ CONFORM'],['CUT',String(cutMax),String(cutMax),'✓ CONFORM'],['H total',aedisH.toFixed(1)+'m',hMax+'m',aedisH<=parseFloat(hMax||999)?'✓ CONFORM':'Verificati CU'],['Nr. niveluri',String(niv),String(params.niv||'N/S'),'✓ CONFORM'],['Spatii verzi',svMin+' mp',(areaN*(params.sv||15)/100).toFixed(0)+' mp','✓ CONFORM']];
+  cy=tblRow(['Indicator','Propus','Admis PUG','Status'],cy,true,[55,30,35,62]);
+  verifData.forEach(r=>{cy=tblRow(r,cy,false,[55,30,35,62]);});
+
+  // PAG 4: Utilități + Etape
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('UTILITATI SI ETAPE AUTORIZARE',4);ftr();
+  cy=30;cy=sec('5. NECESARUL ESTIMAT DE UTILITATI',cy);cy+=2;
+  const util=[['Apa potabila',Math.round(nAp*4*150)+' l/zi',Math.round(nAp*4*150/3600)+' l/s','RAJA Iasi — Directia Tehnica'],['Canalizare menajera',Math.round(nAp*4*150*0.85)+' l/zi',Math.round(nAp*4*150*0.85/3600)+' l/s','RAJA Iasi — Regie Ape Iasi'],['Energie electrica',Math.round(nAp*3)+' kW','—','DELGAZ GRID SA'],['Gaze naturale',Math.round(nAp*6)+' mc/h','—','DELGAZ GRID SA'],['Telecomunicatii','Date+TV+Telefonie','—','Furnizori multipli']];
+  cy=tblRow(['Utilitate','Consum estimat','Debit','Furnizor aviz'],cy,true,[35,40,25,82]);
+  util.forEach(r=>{cy=tblRow(r,cy,false,[35,40,25,82]);});
+  cy+=5;cy=sec('6. ETAPE OBLIGATORII PENTRU AUTORIZATIA DE CONSTRUIRE',cy);cy+=2;
+  const etape=[['1','Certificat de Urbanism (CU)','DAU Primaria Iasi — online/ghiseu','Obligatoriu · 30 zile'],['2','Extras CF actualizat la zi','OCPI Iasi','Obligatoriu'],['3','Studiu geotehnic si topografic','Expert geotehnic atestat','Obligatoriu (Legea 10/1995)'],['4','Studiu de insorire (cf. OMS 119)','Arhitect autorizat OAR','Recomandat/Obligatoriu'],['5','Proiect tehnic PAC complet','Arhitect autorizat OAR','Obligatoriu'],['6','Avize CF CU (ISU, DSP, ANRE etc.)','Conform CU emis','Obligatoriu'],['7','Cerere AC + taxa (0.5% val.constr.)','DAU Primaria Iasi','Obligatoriu'],['8','Autorizatie de Construire (AC)','Primaria Municipiului Iasi','Final']];
+  cy=tblRow(['Nr.','Etapa','Autoritate','Observatii'],cy,true,[10,72,50,50]);
+  etape.forEach(r=>{cy=tblRow(r,cy,false,[10,72,50,50]);});
+
+  // PAG 5: Legal + Semnatura
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('BAZA LEGALA SI AVIZARE',5);ftr();
+  cy=30;cy=sec('7. CADRU LEGAL APLICABIL',cy);cy+=2;
+  const legal=['Legea nr. 350/2001 privind amenajarea teritoriului si urbanismul (cu modificarile ulterioare)','Legea nr. 50/1991 privind autorizarea executarii lucrarilor de constructii (republicata)','Legea nr. 10/1995 privind calitatea in constructii (republicata)','HG nr. 525/1996 pentru aprobarea Regulamentului General de Urbanism (RGU)','Ordinul MDRAP nr. 233/2016 pentru aprobarea Normelor metodologice PUZ/PUD','PUG Municipiul Iasi in vigoare (aprobat prin HCL Iasi) + RLU aferent','Legea nr. 7/1996 a cadastrului si publicitatii imobiliare (republicata)','OMS nr. 119/2014 + Ordin 994/2018 — Norme igiena, conditii de insorire','STAS 6221/1981 Iluminat natural in constructii','HG nr. 907/2016 privind etapele de elaborare si continutul-cadru al documentatiilor tehnico-economice'];
+  legal.forEach((l,i)=>{cy=body((i+1)+'. '+l,16,cy);cy+=1;});
+  cy+=5;cy=sec('8. NOTA METODOLOGICA',cy);cy+=2;
+  cy=body('Prezentul memoriu tehnic preliminar a fost generat automat de platforma UrbanX AEDIS pe baza datelor cadastrale (sursa: Cadastru Iasi), datelor OpenStreetMap (OSM via Overpass API), regulamentelor PUG Iasi si parametrilor introdusi de utilizator. Documentul are caracter strict ORIENTATIV si INFORMATIV. Valorile prezentate sunt estimative si nu au valoare juridica deplina, nu inlocuiesc documentatia tehnica avizata conform legii si nu constituie un Certificat de Urbanism, aviz sau autorizatie de constructie.',14,cy);
+  sign();
+
+  pdf.save('Memoriu_Tehnic_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
+  ss('✅ Memoriu Tehnic Preliminar generat!');
+}
+
+
+
 function toggleRapoarteMenu(){
   const m = document.getElementById('rapoarte-menu');
   if(!m) return;
@@ -10366,39 +11429,50 @@ function _v3dBuild(ap){
     const col=f.properties?.color||'#3b82f6';
     const h=top-base; if(h<=0.01) return;
     try{
-      const fring=f.geometry.type==='Polygon'?f.geometry.coordinates[0]:f.geometry.coordinates[0][0];
+      // Detectăm geometria — inclusiv polygoane cu gaură (curte interioară)
+      const coords = f.geometry.type==='Polygon'
+        ? f.geometry.coordinates
+        : f.geometry.coordinates[0];
+      const fring = coords[0];
+      const holeCoords = coords.length > 1 ? coords[1] : null; // inner ring = curtea
       const pts=fring.slice(0,-1).map(toLoc);
+      const holePts = holeCoords ? holeCoords.slice(0,-1).map(toLoc) : null;
       if(pts.length<3) return;
-      // Floor<0 = acoperiș/atic
       const isRoofSlab = floor < 0 && (
-        f.properties?.roofType === 'terasa_plata' || 
+        f.properties?.roofType === 'terasa_plata' ||
         f.properties?.roofType === 'terasa' ||
         f.properties?.roofType === 'combinat'
       );
-      const isRoofSpire = floor < 0 && !isRoofSlab; // șarpantă, parapet, etc — skip
-      
-      if(isRoofSpire) return;        // forme ascuțite → skip
-      if(h < 0.05 && !isRoofSlab) return; // prea subțire și nu terasă → skip
-      if(pts.length < 4) return;    // geometrie degenerată → skip
+      const isRoofSpire = floor < 0 && !isRoofSlab;
+      if(isRoofSpire) return;
+      if(h < 0.05 && !isRoofSlab) return;
+      if(pts.length < 4) return;
       const isTop = !!f.properties?.isLast;
       let mat;
       if(isRoofSlab){
-        // Terasă plată — culoare beton deschis
         mat = new THREE.MeshLambertMaterial({color:'#c8d0d8'});
       } else if(floor===0){ mat=_v3dMatParter(THREE,stilKey,V3D.texCache); }
       else if(isTop){ mat=_v3dMatPenthouse(THREE,stilKey,V3D.texCache); }
       else{ mat=_v3dMatFloor(THREE,col,floor,stilKey,V3D.texCache); }
       if(!mat){ return; }
-      const mesh=_v3dPrism(THREE,pts,base,top,mat);
+      // Pasăm hole-ul (curtea) la _v3dPrism pentru geometrie inelară
+      const mesh=_v3dPrism(THREE,pts,base,top,mat,holePts);
       if(mesh){
         mesh.castShadow=true; mesh.receiveShadow=true; scene.add(mesh); V3D.aedis.push(mesh);
         // Contur muchii
-        _v3dAddEdges(THREE, mesh, scene, '#ffffff', 0.18);
-        // Ferestre pe TOATE etajele (inclusiv parter și penthouse dacă e destul spațiu)
+        if(mesh.isGroup){
+          mesh.children.forEach(c=>{ if(c.isMesh) _v3dAddEdges(THREE,c,scene,'#ffffff',0.18); });
+        } else {
+          _v3dAddEdges(THREE, mesh, scene, '#ffffff', 0.18);
+        }
+        // Ferestre pe fațada exterioară
         if(floor >= 0 && h > 1.5){
           _v3dAddWindows(THREE, pts, base, top, scene, stilKey);
+          // Ferestre și pe fațada interioară a curții
+          if(holePts && holePts.length >= 3){
+            _v3dAddWindows(THREE, holePts, base, top, scene, stilKey);
+          }
         }
-        // Detalii acoperis: parapet + elemente tehnice
         if(isRoofSlab && h >= 0.3){
           _v3dAddRoofDetails(THREE, pts, base, top, scene, stilKey);
         }
@@ -10414,14 +11488,32 @@ function _v3dBuild(ap){
     scene.add(new THREE.LineLoop(lg,new THREE.LineBasicMaterial({color:'#00e5b4',opacity:0.7,transparent:true})));
   }catch(e){}
 
-  // Marcaj parcelă pe sol (suprafață luminoasă)
+  // Marcaj parcelă pe sol (suprafață luminoasă sub clădire)
   try{
     const pts=ring0.map(toLoc);
     const shape=new THREE.Shape(); shape.moveTo(pts[0][0],pts[0][1]);
     pts.slice(1,-1).forEach(([x,z])=>shape.lineTo(x,z)); shape.closePath();
     const geo=new THREE.ShapeGeometry(shape);
     const mat=new THREE.MeshStandardMaterial({color:'#1a2535',roughness:0.97,metalness:0,transparent:true,opacity:0.85,side:THREE.DoubleSide});
-    const m2=new THREE.Mesh(geo,mat); m2.rotation.x=-Math.PI/2; m2.position.y=0.03; scene.add(m2);  }catch(e){}
+    const m2=new THREE.Mesh(geo,mat); m2.rotation.x=-Math.PI/2; m2.position.y=0.03; scene.add(m2);
+
+    // Curtea interioară: marcaj verde deschis pe sol dacă există
+    if(AEDIS.forma==='curte'){
+      const pFeat=(S.vol._lastFeats||[]).find(f=>f.geometry?.coordinates?.length>1&&!f.properties?.isExistent);
+      if(pFeat?.geometry?.coordinates?.[1]){
+        const innerRing=pFeat.geometry.coordinates[1];
+        const innerPts=innerRing.slice(0,-1).map(toLoc);
+        const innerShape=new THREE.Shape();
+        innerShape.moveTo(innerPts[0][0],innerPts[0][1]);
+        innerPts.slice(1).forEach(([x,z])=>innerShape.lineTo(x,z));
+        innerShape.closePath();
+        const innerGeo=new THREE.ShapeGeometry(innerShape);
+        const innerMat=new THREE.MeshStandardMaterial({color:'#1a3a2a',roughness:0.90,metalness:0,transparent:true,opacity:0.7,side:THREE.DoubleSide});
+        const courtMesh=new THREE.Mesh(innerGeo,innerMat);
+        courtMesh.rotation.x=-Math.PI/2; courtMesh.position.y=0.05; scene.add(courtMesh);
+      }
+    }
+  }catch(e){}
 
   // Străzi din S.ctx linii (dacă există) sau grid simplu în jurul parcelei
   _v3dAddStreets(THREE, scene, ring0, toLoc);
@@ -10991,29 +12083,74 @@ function _v3dAddUrbanLife(THREE, scene, ring0, toLoc, isNight){
   }catch(e){console.warn('UrbanLife:',e.message);}
 }
 
-function _v3dPrism(THREE,pts2d,base,top,mat){
+function _v3dPrism(THREE,pts2d,base,top,mat,holeRing){
+  // holeRing: optional array of [x,z] for inner ring (hollow prism / courtyard)
   const n=pts2d.length; const h=top-base;
   if(n<3||h<=0) return null;
   const pos=[],nrm=[],uvArr=[],idx=[];
   let uAcc=0;
-  // Pereți laterali
-  for(let i=0;i<n;i++){
-    const [x0,z0]=pts2d[i],[x1,z1]=pts2d[(i+1)%n];
-    const dx=x1-x0,dz=z1-z0,len=Math.sqrt(dx*dx+dz*dz);
-    if(len<0.01) continue;
-    const nx=dz/len,nz=-dx/len;
-    const b4=pos.length/3;
-    pos.push(x0,base,z0, x1,base,z1, x1,top,z1, x0,top,z0);
-    nrm.push(nx,0,nz, nx,0,nz, nx,0,nz, nx,0,nz);
-    uvArr.push(uAcc/100,0, (uAcc+len)/100,0, (uAcc+len)/100,h/10, uAcc/100,h/10);
-    idx.push(b4,b4+1,b4+2, b4,b4+2,b4+3);
-    uAcc+=len;
+
+  // Helper: pereți laterali pentru un ring
+  function addWalls(ring,flipNormal){
+    const rn=ring.length;
+    for(let i=0;i<rn;i++){
+      const [x0,z0]=ring[i],[x1,z1]=ring[(i+1)%rn];
+      const dx=x1-x0,dz=z1-z0,len=Math.sqrt(dx*dx+dz*dz);
+      if(len<0.01){continue;}
+      const nx=(flipNormal?-1:1)*dz/len;
+      const nz=(flipNormal?1:-1)*dx/len;
+      const b4=pos.length/3;
+      pos.push(x0,base,z0, x1,base,z1, x1,top,z1, x0,top,z0);
+      nrm.push(nx,0,nz, nx,0,nz, nx,0,nz, nx,0,nz);
+      uvArr.push(uAcc/100,0, (uAcc+len)/100,0, (uAcc+len)/100,h/10, uAcc/100,h/10);
+      idx.push(b4,b4+1,b4+2, b4,b4+2,b4+3);
+      uAcc+=len;
+    }
   }
-  // Față sus (acoperiș)
+
+  // Pereți exteriori
+  addWalls(pts2d, false);
+
+  // Pereți interiori (curte) — normala întoarsă spre interior
+  if(holeRing && holeRing.length >= 3){
+    addWalls(holeRing, true);
+  }
+
+  // Cap sus și jos — folosim THREE.Shape cu gaură pentru planee inelare
+  if(holeRing && holeRing.length >= 3){
+    // Folosim ExtrudeGeometry cu hole pentru planeele orizontale (top + bottom)
+    const outerShape = new THREE.Shape();
+    outerShape.moveTo(pts2d[0][0], pts2d[0][1]);
+    for(let i=1;i<pts2d.length;i++) outerShape.lineTo(pts2d[i][0], pts2d[i][1]);
+    outerShape.closePath();
+    const hole = new THREE.Path();
+    hole.moveTo(holeRing[0][0], holeRing[0][1]);
+    for(let i=1;i<holeRing.length;i++) hole.lineTo(holeRing[i][0], holeRing[i][1]);
+    hole.closePath();
+    outerShape.holes.push(hole);
+    // Top slab (inelară)
+    const geoTop = new THREE.ShapeGeometry(outerShape);
+    const mTop = new THREE.Mesh(geoTop, mat);
+    mTop.rotation.x = -Math.PI/2; mTop.position.y = top;
+    // Bottom slab (inelară)
+    const geoBot = new THREE.ShapeGeometry(outerShape);
+    const mBot = new THREE.Mesh(geoBot, mat);
+    mBot.rotation.x = Math.PI/2; mBot.position.y = base;
+    const grp = new THREE.Group();
+    const geo=new THREE.BufferGeometry();
+    geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+    geo.setAttribute('normal',new THREE.Float32BufferAttribute(nrm,3));
+    geo.setAttribute('uv',new THREE.Float32BufferAttribute(uvArr,2));
+    geo.setIndex(idx);
+    grp.add(new THREE.Mesh(geo,mat), mTop, mBot);
+    return grp;
+  }
+
+  // Bez gaură: cap sus
   const tb=pos.length/3;
   for(let i=0;i<n;i++){ const[x,z]=pts2d[i]; pos.push(x,top,z); nrm.push(0,1,0); uvArr.push(x*0.05,z*0.05); }
   for(let i=1;i<n-1;i++) idx.push(tb,tb+i,tb+i+1);
-  // Față jos
+  // Cap jos
   const bb2=pos.length/3;
   for(let i=0;i<n;i++){ const[x,z]=pts2d[i]; pos.push(x,base,z); nrm.push(0,-1,0); uvArr.push(x*0.05,z*0.05); }
   for(let i=1;i<n-1;i++) idx.push(bb2,bb2+i+1,bb2+i);
