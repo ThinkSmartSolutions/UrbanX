@@ -1997,7 +1997,15 @@ setTimeout(()=>{
   }
 },10000);
 ;
-map.on('style.load',()=>setTimeout(()=>{addLayers();updateMap();},200));
+map.on('style.load',()=>setTimeout(()=>{
+  addLayers();
+  updateMap();
+  // Restaurăm sursele după orice schimbare de stil (inclusiv shortcut-urile din nav)
+  if(S.ctx?.features?.length) try{setSource('ctx-src',S.ctx);}catch(e){}
+  if(S.vol._lastFeats?.length) try{setSource('vol-src',{type:'FeatureCollection',features:S.vol._lastFeats});}catch(e){}
+  if(S.vol._lastDistFeats?.length) try{setSource('dist-src',{type:'FeatureCollection',features:S.vol._lastDistFeats});}catch(e){}
+  try{map.setLayoutProperty('ctx-3d','visibility',S.vol.onlyVol?'none':'visible');}catch(e){}
+},250));
 
 // CLICK pe hartă → DOAR selectează (NU generează volum automat)
 // FIX MULTISELECT: Mapbox GL fires layer handlers THEN generic handler in same tick
@@ -3176,7 +3184,12 @@ function updateDistanceLines(){
     });
   }
 
-  try{ setSource('dist-src',{type:'FeatureCollection',features:feats}); }catch(e){}
+  try{
+    const distGeoJSON = {type:'FeatureCollection',features:feats};
+    setSource('dist-src', distGeoJSON);
+    // Salvăm pentru restaurare după schimbare stil
+    S.vol._lastDistFeats = feats;
+  }catch(e){}
 }
 
 // Calculeaza distanta minima si punctele corespunzatoare intre doua poligoane
@@ -5525,6 +5538,67 @@ safeOn('btnPanel',()=>{
 });
 if($('btnMobClose'))$('btnMobClose').onclick=toggleMobSheet;
 
+// ═══ RESTAURARE COMPLETĂ DUPĂ SCHIMBARE STIL HARTĂ ══════════════════════════
+// Apelat după orice map.setStyle() — reîncarcă TOATE sursele și layerele
+function _restoreAfterStyleLoad(styleKey){
+  try{
+    addLayers();
+    updateMap();
+
+    // Vol-src: volumul AEDIS generat
+    if(S.vol.genDone){
+      if(S.vol._lastFeats?.length){
+        setSource('vol-src',{type:'FeatureCollection',features:S.vol._lastFeats});
+      } else {
+        try{ const feats=buildVolume(); setSource('vol-src',{type:'FeatureCollection',features:feats}); }catch(e){}
+      }
+    }
+
+    // Ctx-src: contextul urban OSM
+    if(S.ctx?.features?.length){
+      setSource('ctx-src', S.ctx);
+    }
+    try{ map.setLayoutProperty('ctx-3d','visibility',S.vol.onlyVol?'none':'visible'); }catch(e){}
+
+    // Demolare: re-aplicăm masca
+    if(AEDIS._demolishActive){
+      setTimeout(()=>{ try{_aedisRemoveExistingFromCtx();}catch(e){} }, 150);
+    }
+
+    // ★ DISTANȚE: restaurăm dist-src cu featurile salvate
+    if(S.vol._lastDistFeats?.length){
+      try{
+        setSource('dist-src',{type:'FeatureCollection',features:S.vol._lastDistFeats});
+      }catch(e){}
+    } else if(S.vol.genDone){
+      // Nu avem cache → recalculăm
+      setTimeout(()=>{ try{updateDistanceLines();}catch(e){} }, 500);
+    }
+
+    // Aedis-dim-src: etichete dimensionale AEDIS
+    if(S.vol.genDone){
+      const dimSrc = map.getSource('aedis-dim-src');
+      if(dimSrc && !dimSrc._data?.features?.length){
+        setTimeout(()=>{ try{updateDistanceLines();}catch(e){} }, 600);
+      }
+    }
+
+    // Standard style: iluminare solara
+    if(styleKey==='standard'){
+      try{ _applyStandardLighting(); }catch(e){}
+      setTimeout(renderSolarControl, 500);
+    } else {
+      SOLAR.active = false;
+      const sc = document.getElementById('solar-ctrl');
+      if(sc) sc.remove();
+    }
+
+    renderTab('proiect');
+  }catch(err){
+    console.warn('_restoreAfterStyleLoad:', err.message);
+  }
+}
+
 $('selBase').onchange=e=>{
   const v=e.target.value;
   // Fix #8: predefinit "Doar volumul meu" ACTIV în Urban3D, INACTIV în Streets/Satelitar
@@ -5537,30 +5611,7 @@ $('selBase').onchange=e=>{
   // Re-add layers after style change
   map.once('style.load',()=>{
     setTimeout(()=>{
-      addLayers();
-      updateMap();
-      if(S.vol.genDone){
-        // AEDIS: re-push last feats
-        if(S.vol._lastFeats?.length){
-          setSource('vol-src',{type:'FeatureCollection',features:S.vol._lastFeats});
-        } else {
-          const feats=buildVolume();
-          setSource('vol-src',{type:'FeatureCollection',features:feats});
-        }
-      }
-      if(S.ctx) setSource('ctx-src',S.ctx);
-      map.setLayoutProperty('ctx-3d','visibility',S.vol.onlyVol?'none':'visible');
-
-      // Standard style: activam iluminare solara + umbre reale
-      if(v==='standard'){
-        _applyStandardLighting();
-        setTimeout(renderSolarControl, 500);
-      } else {
-        SOLAR.active = false;
-        const sc = document.getElementById('solar-ctrl');
-        if(sc) sc.remove();
-      }
-      renderTab('proiect');
+      _restoreAfterStyleLoad(v);
     },300);
   });
 };
@@ -6513,6 +6564,8 @@ async function runExport(){
         // Re-adăugăm layerele după schimbare stil
         try{ addLayers(); if(S.ctx) setSource('ctx-src',S.ctx); updateMap(); }catch(e){}
         if(S.vol._lastFeats?.length) try{ setSource('vol-src',{type:'FeatureCollection',features:S.vol._lastFeats}); }catch(e){}
+        // Restaurăm și dist-src
+        if(S.vol._lastDistFeats?.length) try{ setSource('dist-src',{type:'FeatureCollection',features:S.vol._lastDistFeats}); }catch(e){}
         await waitF(6); await wait(800); map.triggerRepaint(); await waitF(4); await wait(600);
         resolve();
       });
@@ -7445,6 +7498,8 @@ function aedisBuild(){
   const _lastH = (AEDIS.parterDiferit?(_lastFnDef.hParter||4.5):_lastHNiv)+(_lastNiv-1)*_lastHNiv;
   const _multiMsg = S.parcels.length>1 ? ` · ${S.parcels.length} parcele` : '';
   ss(`✅ AEDIS: ${AEDIS.corpuri[0]?.niv||4} niveluri · H=${((AEDIS.parterDiferit?(AEDIS_FN[AEDIS.fn]?.hParter||4.5):(AEDIS.corpuri[0]?.hNiv||3.0))+(((AEDIS.corpuri[0]?.niv||4)-1)*(AEDIS.corpuri[0]?.hNiv||3.0))).toFixed(1)}m · ${AEDIS_FN[AEDIS.fn]?.label||''} · ${AEDIS_STIL[AEDIS.stil]?.label||''}${S.parcels.length>1?' · '+S.parcels.length+' parcele':''}`);
+  // Actualizăm distanțele imediat după generare (nu doar async în aedisGenerateAll)
+  setTimeout(()=>{ try{updateDistanceLines();}catch(e){} }, 400);
 }
 
 // ── Etichete dimensionale AEDIS ────────────────────────────────────────────
@@ -9704,6 +9759,7 @@ async function generateSolarStudy(){
       map.once('style.load',async()=>{
         try{addLayers();if(S.ctx)setSource('ctx-src',S.ctx);updateMap();}catch(e){}
         if(S.vol._lastFeats?.length) try{setSource('vol-src',{type:'FeatureCollection',features:S.vol._lastFeats});}catch(e){}
+        if(S.vol._lastDistFeats?.length) try{setSource('dist-src',{type:'FeatureCollection',features:S.vol._lastDistFeats});}catch(e){}
         await waitF(6);await wait(800);map.triggerRepaint();await waitF(4);await wait(600);res();
       });
       map.setStyle(STYLES[styleKey]||STYLES.custom);
