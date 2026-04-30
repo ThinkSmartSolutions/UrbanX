@@ -1744,7 +1744,7 @@ function addLayers(){
   });
   L({id:'ctx-3d',type:'fill-extrusion',source:'ctx-src',paint:{
     'fill-extrusion-color':['coalesce',['get','col'],'#6b7280'],
-    'fill-extrusion-height':['coalesce',['to-number',['get','h'],0],7],
+    'fill-extrusion-height':['coalesce',['case',['has','h'],['to-number',['get','h']],7],7],
     'fill-extrusion-base':0,
     'fill-extrusion-opacity':0.52,
     'fill-extrusion-vertical-gradient': true,
@@ -1925,7 +1925,17 @@ function addLayers(){
   });
 }
 
-map.on('load',()=>{addLayers();loadData();});
+map.on('load',()=>{
+  addLayers();
+  loadData();
+  // Curățăm demolish-mask la reload (nu persistă între sesiuni dar stilul poate)
+  setTimeout(()=>{
+    try{
+      if(map.getLayer('demolish-mask')) map.removeLayer('demolish-mask');
+      if(map.getSource('demolish-mask-src')) map.removeSource('demolish-mask-src');
+    }catch(e){}
+  }, 500);
+});
 map.on('error',(e)=>{console.error('Mapbox error:',e);ss('⚠️ Eroare hartă: '+e.error?.message);});
 // Fallback: dacă load nu s-a apelat în 10s, încercăm oricum
 setTimeout(()=>{
@@ -2559,11 +2569,14 @@ function buildFP(geom, paramsOrUtr){
           shapeFeat={type:'Feature',geometry:{type:'Polygon',coordinates:[outer.map(rot),inner.map(rot).reverse()]},properties:{}};
         }
         if(shapeFeat?.geometry){
-          try{
-            const isct=turf.intersect(shapeFeat,zone);
-            if(isct?.geometry&&turf.area(isct)>zA2*0.05) return isct;
-          }catch(e3){}
-          return shapeFeat;
+          const shapeArea=turf.area(shapeFeat);
+          if(shapeArea<=zA2*3){
+            try{
+              const isct=turf.intersect(shapeFeat,zone);
+              if(isct?.geometry&&turf.area(isct)>zA2*0.05) return isct;
+            }catch(e3){}
+            return shapeFeat;
+          } // else: aria prea mare → fallback la zone
         }
       }catch(e2){ console.warn('buildFP forma error:', e2.message); }
     }
@@ -2761,11 +2774,14 @@ function buildFP(geom, paramsOrUtr){
           shapeFeat={type:'Feature',geometry:{type:'Polygon',coordinates:[outer.map(rot),inner.map(rot).reverse()]},properties:{}};
         }
         if(shapeFeat?.geometry){
-          try{
-            const isct=turf.intersect(shapeFeat,zone);
-            if(isct?.geometry&&turf.area(isct)>zA2*0.05) return isct;
-          }catch(e3){}
-          return shapeFeat;
+          const shapeArea=turf.area(shapeFeat);
+          if(shapeArea<=zA2*3){
+            try{
+              const isct=turf.intersect(shapeFeat,zone);
+              if(isct?.geometry&&turf.area(isct)>zA2*0.05) return isct;
+            }catch(e3){}
+            return shapeFeat;
+          } // else: aria prea mare → fallback la zone
         }
       }catch(e2){ console.warn('buildFP forma error:', e2.message); }
     }
@@ -7141,24 +7157,28 @@ function aedisBuild(){
           : (stilDef.floorColors?.[Math.min(i,stilDef.floorColors.length-1)]||lighten(fnDef.color||'#94a3b8',i*8));
       }
 
-      feats.push({
-        type:'Feature',
-        properties:{
-          base: currentH,
-          top: currentH + hEtajCrt,
-          color: etajColor,
-          floor: i,
-          isLast,
-          isAedis: true,
-          isParter: i===0,
-          fn: AEDIS.parterDiferit && i===0 ? AEDIS.fnParter : fn,
-          hEtaj: hEtajCrt,
-          parcelIdx: S.activeParcel??0
-        },
-        geometry: etajGeom
-      });
+      const _base = Number(currentH)||0;
+      const _top = _base + (Number(hEtajCrt)||3.0);
+      if(_top > _base && _top < 500 && etajGeom){ // sanity check: max 500m, top>base
+        feats.push({
+          type:'Feature',
+          properties:{
+            base: _base,
+            top: _top,
+            color: etajColor,
+            floor: i,
+            isLast,
+            isAedis: true,
+            isParter: i===0,
+            fn: AEDIS.parterDiferit && i===0 ? AEDIS.fnParter : fn,
+            hEtaj: Number(hEtajCrt)||3.0,
+            parcelIdx: S.activeParcel??0
+          },
+          geometry: etajGeom
+        });
+      }
 
-      currentH += hEtajCrt;
+      currentH = _top;
     }
 
     // ── Acoperiș ──────────────────────────────────────────────────────────
@@ -7332,6 +7352,18 @@ function aedisBuild(){
   S.vol._lastFeats = feats;
   S.vol.genDone = true;
   setSource('vol-src',{type:'FeatureCollection',features:feats});
+
+  // Curățăm demolish-mask după ce volumul e generat
+  // (masca și-a făcut treaba la pasul de demolare, acum vol-3d acoperă terenul)
+  // Lăsăm masca activa pentru a continua să ascundă clădirile native sub vol
+  // DAR o facem transparentă optic dacă vol-src acoperă zona
+  try{
+    if(AEDIS.scenariu==='demolare' && map.getLayer('demolish-mask')){
+      // Redu opacitatea măștii — vol-3d e deasupra ei și o acoperă
+      map.setPaintProperty('demolish-mask','fill-extrusion-opacity',0.98);
+    }
+  }catch(e){}
+
   set3D(65,-25);
 
   // Zoom la parcela dupa generare
@@ -7510,7 +7542,7 @@ function _aedisRemoveExistingFromCtx(){
         features: parcels.map(p=>({
           type:'Feature',
           geometry: p.geo.geometry,
-          properties:{ h: 300 } // înălțime mare — acoperă orice clădire
+          properties:{ h: 150 } // înălțime suficientă pentru clădiri urbane normale
         }))
       };
 
@@ -7543,39 +7575,9 @@ function _aedisRemoveExistingFromCtx(){
       }
     }catch(e){ console.warn('mask layer err:', e.message); }
 
-    // ── 4. Filtrăm layerele native Mapbox de building cu bbox ───────────────
-    try{
-      const allBbox = parcels.reduce((bb, p)=>{
-        const b = turf.bbox(p.geo);
-        return [Math.min(bb[0],b[0]),Math.min(bb[1],b[1]),Math.max(bb[2],b[2]),Math.max(bb[3],b[3])];
-      }, [Infinity,Infinity,-Infinity,-Infinity]);
-
-      // Filter geografic: exclude clădirile al căror centroid e în bbox
-      const bboxFilter = ['any',
-        ['<', ['get','longitude'], allBbox[0]],
-        ['<', ['get','latitude'],  allBbox[1]],
-        ['>', ['get','longitude'], allBbox[2]],
-        ['>', ['get','latitude'],  allBbox[3]]
-      ];
-
-      // Încercăm să aplicăm filtrul pe layerele native cunoscute
-      const nativeBuildingLayers = [
-        'building','building-extrusion','3d-buildings','add-3d-buildings',
-        'osm-buildings','composite-building','building-shadow'
-      ];
-      nativeBuildingLayers.forEach(id=>{
-        try{
-          if(map.getLayer(id)){
-            // Salvăm filtrul original dacă nu l-am salvat deja
-            if(!map._demolishOrigFilters) map._demolishOrigFilters = {};
-            if(!map._demolishOrigFilters[id]){
-              map._demolishOrigFilters[id] = map.getFilter(id);
-            }
-            map.setFilter(id, bboxFilter);
-          }
-        }catch(e2){}
-      });
-    }catch(e){ console.warn('native filter err:', e.message); }
+    // ── 4. Layerele native Mapbox de building nu pot fi filtrate geografic
+    // (nu au longitude/latitude ca properties în tile-uri vectoriale)
+    // Masca de la pasul 3 acoperă oricum orice clădire nativă sub ea.
 
     // ── 5. Forțăm re-render ─────────────────────────────────────────────────
     map.triggerRepaint();
@@ -7596,13 +7598,7 @@ function _aedisRestoreCad3D(){
       if(map.getSource('demolish-mask-src')) map.removeSource('demolish-mask-src');
     }catch(e){}
 
-    // Restaurăm filtrele originale pe layerele native
-    if(map._demolishOrigFilters){
-      Object.entries(map._demolishOrigFilters).forEach(([id, origFilter])=>{
-        try{ if(map.getLayer(id)) map.setFilter(id, origFilter); }catch(e){}
-      });
-      map._demolishOrigFilters = null;
-    }
+    // Layerele native nu au filtru customizat → nimic de restaurat
 
     // Restaurăm ctx-src complet
     if(S.ctx?.features?.length){
