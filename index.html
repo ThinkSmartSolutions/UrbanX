@@ -991,23 +991,34 @@ var AEDIS_SHADERS = {
       }
 
       void main(){
-        // Textura beton procedurala
-        vec2 uv = vUv * 8.0;
-        float n = noise(uv)*0.3 + noise(uv*3.0)*0.1 + noise(uv*9.0)*0.05;
-        vec3 concreteCol = baseColor + vec3(n-0.15)*0.25;
+        // Textura beton cu variatie multipla
+        vec2 uv = vUv * 6.0;
+        float n1 = noise(uv) * 0.25;
+        float n2 = noise(uv * 4.0) * 0.08;
+        float n3 = noise(uv * 12.0) * 0.04;
+        vec3 concreteCol = baseColor + vec3(n1+n2+n3 - 0.18) * 0.4;
+        // Saturatie usor crescuta pentru vizibilitate
+        float lum = dot(concreteCol, vec3(0.299,0.587,0.114));
+        concreteCol = mix(vec3(lum), concreteCol, 1.3);
 
-        // Linii de cofrare orizontale
-        float lines = step(0.92, fract(vUv.y * 12.0));
-        concreteCol = mix(concreteCol, concreteCol*0.7, lines*0.4);
+        // Linii cofrare cu grosime variabila
+        float panel = step(0.94, fract(vUv.y * 10.0));
+        float panelV = step(0.97, fract(vUv.x * 4.0));
+        concreteCol = mix(concreteCol, concreteCol*0.65, (panel + panelV) * 0.5);
 
-        // Iluminare Phong simpla
-        vec3 L = normalize(vec3(1.0, 1.5, 1.0));
-        float diff = max(dot(vNormal, L), 0.0)*0.7 + 0.3;
-        vec3 col = concreteCol * diff;
-
-        // Ambient occlusion simpla in baza
-        float ao = smoothstep(0.0, 3.0, vPosition.z + 0.5);
-        col *= mix(0.7, 1.0, ao);
+        // Iluminare cu 2 lumini + ambient colorat
+        vec3 L1 = normalize(vec3(1.5, 2.5, 1.0)); // soare
+        vec3 L2 = normalize(vec3(-0.5, 0.8, -1.0)); // cer fill
+        vec3 V = normalize(-vPosition);
+        float diff1 = max(dot(vNormal, L1), 0.0);
+        float diff2 = max(dot(vNormal, L2), 0.0) * 0.3;
+        // Specular pe suprafata umeda/lustruita
+        float spec = pow(max(dot(reflect(-L1, vNormal), V), 0.0), 16.0) * 0.15;
+        vec3 ambCol = vec3(0.12, 0.16, 0.22); // ambient albastru-rece
+        vec3 col = concreteCol * (ambCol + vec3(diff1 * 0.75 + diff2)) + vec3(spec);
+        // Exposure boost
+        col = col * 1.3;
+        col = pow(clamp(col, 0.0, 1.0), vec3(0.9)); // gamma
 
         gl_FragColor = vec4(col, 1.0);
       }`
@@ -1034,29 +1045,49 @@ var AEDIS_SHADERS = {
       float rand(vec2 co){ return fract(sin(dot(co,vec2(12.9898,78.233)))*43758.5453); }
 
       void main(){
-        // Grila fereastra
-        vec2 cell = fract(vUv * vec2(4.0, 6.0));
-        float frame = step(0.9, cell.x) + step(0.9, cell.y);
-        float glassArea = 1.0 - min(frame, 1.0);
+        // Grila fereastra cu variatie
+        vec2 cell = fract(vUv * vec2(5.0, 8.0));
+        float frameX = step(0.88, cell.x);
+        float frameY = step(0.88, cell.y);
+        float frame = min(frameX + frameY, 1.0);
+        float glassArea = 1.0 - frame;
 
-        // Reflectie simpla (cerul albastru)
+        // Reflexie cer dinamic — gradient albastru-auriu
         vec3 V = normalize(-vPosition);
         vec3 R = reflect(-V, vNormal);
         float skyMix = max(0.0, R.y);
-        vec3 skyCol = mix(vec3(0.3,0.5,0.8), vec3(0.8,0.9,1.0), skyMix);
+        // Cer albastru profund cu nuante de apus
+        vec3 skyZenith = vec3(0.05, 0.35, 0.85);
+        vec3 skyHorizon = vec3(0.65, 0.78, 0.95);
+        vec3 sunGlow = vec3(1.0, 0.75, 0.3);
+        vec3 skyCol = mix(skyHorizon, skyZenith, pow(skyMix, 0.5));
+        // Efect soare pe reflexie
+        float sunMask = max(0.0, dot(R, normalize(vec3(1.5, 2.0, 0.5))));
+        skyCol += sunGlow * pow(sunMask, 8.0) * 0.6;
 
-        // Sticla = mix intre reflexie si interior intunecat
-        vec3 glassCol = mix(baseColor * 0.3, skyCol, 0.5 + skyMix * 0.3);
-        vec3 frameCol = vec3(0.15, 0.15, 0.18); // cadru metalic
+        // Interiorul — galben cald (lumina de birou/apartament)
+        vec3 interiorCol = vec3(0.95, 0.85, 0.6) * baseColor * 0.8;
+        // Mix interior/exterior: sticla reflecta mai mult din unghi
+        float fresnel = 1.0 - abs(dot(V, vNormal));
+        vec3 glassCol = mix(interiorCol, skyCol, 0.4 + fresnel * 0.5);
+
+        // Cadru metalic — aluminiu lucios
+        vec3 frameCol = vec3(0.55, 0.60, 0.65);
+        float frameSpec = pow(max(dot(reflect(-normalize(vec3(1.5,2.0,1.0)), vNormal), V), 0.0), 32.0);
+        frameCol += vec3(0.3) * frameSpec;
 
         vec3 col = mix(frameCol, glassCol, glassArea);
 
-        // Highlight specular
-        vec3 L = normalize(vec3(1.5, 2.0, 1.0));
-        float spec = pow(max(dot(reflect(-L, vNormal), V), 0.0), 64.0);
-        col += vec3(spec * 0.4) * glassArea;
+        // Specular puternic pe sticla
+        vec3 L = normalize(vec3(1.5, 2.5, 1.0));
+        float spec = pow(max(dot(reflect(-L, vNormal), V), 0.0), 128.0);
+        col += vec3(1.0, 0.98, 0.9) * spec * 0.7 * glassArea;
 
-        gl_FragColor = vec4(col, 0.85);
+        // Variatie usoara per modul geam (fara a fi uniform)
+        float variation = rand(floor(vUv * vec2(5.0, 8.0))) * 0.08 - 0.04;
+        col = clamp(col + vec3(variation), 0.0, 1.0);
+
+        gl_FragColor = vec4(col, 0.92);
       }`
   },
 
@@ -1140,19 +1171,24 @@ var AEDIS_SHADERS = {
       }
 
       void main(){
-        // Textura tencuiala fina
-        float n = noise(vUv*15.0)*0.06 + noise(vUv*40.0)*0.03;
-        vec3 col = baseColor + vec3(n - 0.045);
+        // Tencuiala texturata — granulatie fina multistrat
+        float n1 = noise(vUv*40.0)*0.06;
+        float n2 = noise(vUv*10.0)*0.04;
+        vec3 col = baseColor + vec3(n1+n2-0.05);
+        // Saturatie crescuta pentru prezentare
+        float lum = dot(col, vec3(0.299,0.587,0.114));
+        col = mix(vec3(lum), col, 1.4);
 
-        // Iluminare difuza
-        vec3 L = normalize(vec3(1.2, 2.0, 0.8));
-        float diff = max(dot(vNormal, L), 0.0)*0.65 + 0.35;
-        col *= diff;
-
-        // Specular slab (mat)
+        // Iluminare cu 2 surse (soare + fill albastru)
+        vec3 L1 = normalize(vec3(1.5, 2.5, 1.0));
+        vec3 L2 = normalize(vec3(-0.5, 1.0, -1.0));
         vec3 V = normalize(-vPosition);
-        float spec = pow(max(dot(reflect(-L,vNormal),V),0.0),8.0)*0.05;
-        col += vec3(spec);
+        float diff1 = max(dot(vNormal, L1), 0.0);
+        float diff2 = max(dot(vNormal, L2), 0.0)*0.25;
+        float spec = pow(max(dot(reflect(-L1,vNormal),V),0.0),8.0)*0.05;
+        vec3 amb = vec3(0.08,0.12,0.18);
+        col = col*(amb + vec3(diff1*0.8+diff2)) + vec3(spec);
+        col = pow(clamp(col*1.25,0.0,1.0), vec3(0.9));
 
         gl_FragColor = vec4(col, 1.0);
       }`
@@ -1177,21 +1213,36 @@ var AEDIS_SHADERS = {
       uniform vec3 baseColor;
 
       void main(){
-        // Panouri metalice cu rosturi
+        // Metal anodizat / aluminiu lustruit cu rosturi
         vec2 cell = fract(vUv * vec2(2.0, 4.0));
         float rost = step(0.96, cell.x) + step(0.96, cell.y);
 
-        vec3 metalCol = baseColor;
-
-        // Reflexie speculara metalica
         vec3 V = normalize(-vPosition);
-        vec3 L = normalize(vec3(1.5, 2.0, 0.5));
-        float spec = pow(max(dot(reflect(-L, vNormal), V), 0.0), 32.0);
-        vec3 col = metalCol * (max(dot(vNormal, L), 0.0)*0.5 + 0.5) + vec3(spec*0.6);
+        vec3 L1 = normalize(vec3(1.5, 2.5, 1.0));
+        vec3 L2 = normalize(vec3(-0.5, 1.0, -1.5));
+        vec3 H1 = normalize(L1+V);
 
+        // Reflexie cer pe suprafata metalica
+        vec3 R = reflect(-V, vNormal);
+        float skyR = max(0.0, R.y);
+        vec3 envCol = mix(vec3(0.3,0.5,0.9), vec3(0.9,0.95,1.0), skyR);
+        envCol += vec3(1.0,0.8,0.3)*pow(max(0.0,dot(R,L1)),6.0)*0.5;
+
+        float diff = max(dot(vNormal,L1),0.0)*0.35+0.1;
+        vec3 col = mix(baseColor*diff, envCol, 0.55);
+
+        // Specular metalic puternic
+        float spec1 = pow(max(dot(vNormal,H1),0.0),200.0);
+        float spec2 = pow(max(dot(reflect(-L2,vNormal),V),0.0),60.0);
+        col += vec3(1.0,0.98,0.92)*spec1*1.2 + vec3(0.5,0.7,1.0)*spec2*0.4;
+
+        // Striuri anodizare
+        float stripes = 0.04*(sin(vUv.y*80.0)*0.5+0.5);
+        col += vec3(stripes)*0.06;
         // Rosturi inchise
         col = mix(col, vec3(0.05), rost*0.7);
 
+        col = pow(clamp(col*1.2,0.0,1.0), vec3(0.88));
         gl_FragColor = vec4(col, 1.0);
       }`
   }
@@ -8176,14 +8227,20 @@ function aedis3DBuild(parcelRing, params){
   };
   const matDef = MAT[p.stil] || MAT.modern;
 
-  // Culori per stil
+  // Culori per stil — vii, contrast ridicat, pentru prezentare arhitecturală
   const COLS = {
-    modern:    { parter:'#1e293b', etaj:'#94a3b8', accent:'#475569', acoperis:'#334155' },
-    inovator:  { parter:'#4c1d95', etaj:'#8b5cf6', accent:'#6d28d9', acoperis:'#1e1b4b' },
-    clasic:    { parter:'#78350f', etaj:'#fde68a', accent:'#a16207', acoperis:'#451a03' },
-    minimalist:{ parter:'#71717a', etaj:'#fafafa', accent:'#e4e4e7', acoperis:'#a1a1aa' },
-    industrial:{ parter:'#1c1917', etaj:'#57534e', accent:'#78716c', acoperis:'#0c0a09' },
-    adaptat_context:{ parter:'#475569', etaj:'#94a3b8', accent:'#64748b', acoperis:'#334155' },
+    modern:    { parter:'#1e3a5f', etaj:'#c8daf5', accent:'#3b82f6', acoperis:'#1d4ed8',
+                 parterAcc:'#60a5fa', etajAlt:'#dbeafe', balcon:'#93c5fd' },
+    inovator:  { parter:'#2e1065', etaj:'#a78bfa', accent:'#7c3aed', acoperis:'#4c1d95',
+                 parterAcc:'#c4b5fd', etajAlt:'#ede9fe', balcon:'#8b5cf6' },
+    clasic:    { parter:'#7c2d12', etaj:'#fef3c7', accent:'#d97706', acoperis:'#92400e',
+                 parterAcc:'#fbbf24', etajAlt:'#fffbeb', balcon:'#f59e0b' },
+    minimalist:{ parter:'#374151', etaj:'#f9fafb', accent:'#6b7280', acoperis:'#d1d5db',
+                 parterAcc:'#e5e7eb', etajAlt:'#ffffff', balcon:'#9ca3af' },
+    industrial:{ parter:'#18181b', etaj:'#71717a', accent:'#f97316', acoperis:'#3f3f46',
+                 parterAcc:'#fb923c', etajAlt:'#a1a1aa', balcon:'#f97316' },
+    adaptat_context:{ parter:'#365314', etaj:'#d9f99d', accent:'#84cc16', acoperis:'#4d7c0f',
+                 parterAcc:'#a3e635', etajAlt:'#f7fee7', balcon:'#86efac' },
   };
   const cols = COLS[p.stil] || COLS.modern;
 
@@ -8235,8 +8292,11 @@ function aedis3DBuild(parcelRing, params){
     const geo = new THREE.ExtrudeGeometry(shape, { depth: thick, bevelEnabled: false });
 
     const col = new THREE.Color(colorHex);
-    const mat = new THREE.MeshPhongMaterial({
-      color: col, shininess: 30, side: THREE.DoubleSide
+    const mat = new THREE.MeshStandardMaterial({
+      color: col,
+      roughness: 0.35,
+      metalness: 0.05,
+      side: THREE.DoubleSide
     });
 
     const mesh = new THREE.Mesh(geo, mat);
@@ -8270,11 +8330,23 @@ function aedis3DBuild(parcelRing, params){
       currentRing = shrinkRing(localRing, retFactor);
     }
 
-    // Tip material si culoare per etaj
+    // Tip material si culoare per etaj — gradient de luminozitate spre vârf
     const isLast = i === niv-1;
     const matKey = i===0 ? matDef.parter : (isLast && retFactor<0.98 ? matDef.accent : matDef.etaj);
-    const colorHex = i===0 ? cols.parter :
-      (stil.floorColors ? stil.floorColors[Math.min(i,stil.floorColors.length-1)] : cols.etaj);
+    // Gradient: etajele de sus sunt mai deschise (efect de lumina naturala)
+    let colorHex;
+    if(i===0){
+      colorHex = cols.parter;
+    } else if(stil.floorColors){
+      colorHex = stil.floorColors[Math.min(i,stil.floorColors.length-1)];
+    } else {
+      // Interpolare vizuala intre etaj si etajAlt (mai deschis)
+      const t = niv > 1 ? i/(niv-1) : 0;
+      const c1 = new THREE.Color(cols.etaj);
+      const c2 = new THREE.Color(cols.etajAlt || cols.etaj);
+      const mixed = c1.clone().lerp(c2, t * 0.6);
+      colorHex = '#' + mixed.getHexString();
+    }
 
     // Parter cu functiune diferita
     const isParter = i===0 && p.parterDiferit;
@@ -8288,33 +8360,62 @@ function aedis3DBuild(parcelRing, params){
     );
     group.add(walls);
 
-    // Planseu (banda orizontala intre etaje - balcon simulat)
-    if(i < niv-1 && i > 0){
-      // Bandă de planseu + balcon
-      const balconRing = shrinkRing(currentRing, 1.05); // usor mai lat
-      const slabColor = p.stil==='modern' ? '#e2e8f0' : (p.stil==='clasic'?'#fef9c3':'#f1f5f9');
-      const slab = buildSlab(currentRing, topH, slabColor, 0.25);
+    // Planseu cu culoare accent per stil — banda vizuala clara
+    if(i < niv-1){
+      const slabColors = {
+        modern:'#1d4ed8', inovator:'#7c3aed', clasic:'#b45309',
+        minimalist:'#6b7280', industrial:'#ea580c', adaptat_context:'#4d7c0f'
+      };
+      const slabColor = slabColors[p.stil] || '#1d4ed8';
+      // Bandă de planseu orizontala
+      const slab = buildSlab(currentRing, topH, slabColor, 0.22);
       group.add(slab);
+      // Balcon mic proiectat în afara — inel usor extins
+      if(i > 0){
+        const balconRing = shrinkRing(currentRing, 1.06);
+        const balconColor = cols.balcon || slabColor;
+        const balconSlab = buildSlab(balconRing, topH - 0.15, balconColor, 0.12);
+        group.add(balconSlab);
+      }
     }
 
     currentH = topH;
   }
 
-  // ── Planseu baza ────────────────────────────────────────────────────────
-  const baseSlab = buildSlab(localRing, 0, '#1a1a1a', 0.3);
+  // ── Fundație / soclu ─────────────────────────────────────────────────────
+  // Soclu vizibil: culoare piatră/granit, ușor mai lat decât clădirea
+  const soclRing = shrinkRing(localRing, 1.03);
+  const baseSlab = buildSlab(soclRing, -0.2, '#2d3748', 0.45);
   group.add(baseSlab);
+  // Linie de demarcatie teren
+  const terrainRing = shrinkRing(localRing, 1.08);
+  const terrainSlab = buildSlab(terrainRing, -0.4, '#1a202c', 0.25);
+  group.add(terrainSlab);
 
   // ── Acoperiș ────────────────────────────────────────────────────────────
   switch(p.tipAcoperis||'terasa_plata'){
     case 'terasa_plata': {
-      const roofSlab = buildSlab(currentRing, currentH, cols.acoperis, 0.3);
+      // Terasa cu material distinct — închis, cu speculare
+      const roofSlab = buildSlab(currentRing, currentH, cols.acoperis, 0.35);
       group.add(roofSlab);
-      // Parapet
-      if((p.hAttic||1.2) > 0){
-        const parapet = buildWalls(currentRing, currentH, currentH+(p.hAttic||1.2),
-          matDef.acoperis, cols.acoperis);
+      // Parapet — culoare accent vivid
+      const hAt = p.hAttic || 1.2;
+      if(hAt > 0){
+        const parapet = buildWalls(currentRing, currentH, currentH + hAt,
+          matDef.acoperis, cols.accent||cols.acoperis);
         group.add(parapet);
+        // Bandă de coronament pe vârf parapet
+        const coronSlab = buildSlab(currentRing, currentH + hAt, cols.parterAcc||cols.accent, 0.08);
+        group.add(coronSlab);
       }
+      // Corp tehnic central (HVAC)
+      try{
+        const techRing = shrinkRing(currentRing, 0.22);
+        const techWalls = buildWalls(techRing, currentH + hAt, currentH + hAt + 2.8, 'concrete', '#374151');
+        group.add(techWalls);
+        const techRoof = buildSlab(techRing, currentH + hAt + 2.8, '#1e293b', 0.15);
+        group.add(techRoof);
+      }catch(e){}
       break;
     }
 
@@ -8380,15 +8481,46 @@ function aedis3DCreateLayer(parcelRing, params){
       scene = new THREE.Scene();
       camera = new THREE.Camera();
 
-      // Iluminare
-      const ambLight = new THREE.AmbientLight(0xffffff, 0.6);
+      // ── Iluminare cinematografică cu 4 surse + ton mapping ──────────────
+      // Renderer settings pentru calitate maximă
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.4;
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+      // Ambient sky — albastru atmosferic cald
+      const ambLight = new THREE.HemisphereLight(0xc8deff, 0x8b6914, 0.7);
       scene.add(ambLight);
-      const sunLight = new THREE.DirectionalLight(0xfff4e0, 1.2);
-      sunLight.position.set(1.5, 3, 1);
+
+      // Soare principal — auriu-alb, unghi de după-amiază
+      const sunLight = new THREE.DirectionalLight(0xfff2cc, 2.8);
+      sunLight.position.set(3.0, 5.0, 2.0);
+      sunLight.castShadow = true;
+      sunLight.shadow.mapSize.width = 2048;
+      sunLight.shadow.mapSize.height = 2048;
+      sunLight.shadow.camera.far = 500;
+      sunLight.shadow.camera.near = 0.1;
+      sunLight.shadow.camera.left = -80;
+      sunLight.shadow.camera.right = 80;
+      sunLight.shadow.camera.top = 80;
+      sunLight.shadow.camera.bottom = -80;
+      sunLight.shadow.bias = -0.002;
       scene.add(sunLight);
-      const fillLight = new THREE.DirectionalLight(0x4080ff, 0.3);
-      fillLight.position.set(-1, 1, -1);
+
+      // Fill light — cer opus soarelui, albastru rece
+      const fillLight = new THREE.DirectionalLight(0x6ab0ff, 0.9);
+      fillLight.position.set(-2.0, 2.0, -1.5);
       scene.add(fillLight);
+
+      // Back light / rim — contur dramatic din spate
+      const rimLight = new THREE.DirectionalLight(0xffd6a0, 0.6);
+      rimLight.position.set(-0.5, 1.5, -3.0);
+      scene.add(rimLight);
+
+      // Ground bounce — lumina reflectata de sol (warm)
+      const groundLight = new THREE.DirectionalLight(0xc4a45a, 0.35);
+      groundLight.position.set(0, -1, 0);
+      scene.add(groundLight);
 
       // Construim mesh-ul
       const result = aedis3DBuild(parcelRing, params);
@@ -8477,8 +8609,15 @@ function aedis3DGenerate(){
       map.addLayer(layer);
       AEDIS3D.active = true;
       AEDIS3D.params = buildParams;
-      // Afișăm contextul urban existent lângă volumul AEDIS 3D
-      try{ map.setLayoutProperty('ctx-3d','visibility','visible'); }catch(e){}
+      // Contextul urban: vizibil doar dacă NU suntem în scenariu demolare
+      if(AEDIS.scenariu !== 'demolare'){
+        try{ map.setLayoutProperty('ctx-3d','visibility','visible'); }catch(e){}
+      } else {
+        // Demolare = teren liber → ascundem clădirile existente și din viewer
+        try{ map.setLayoutProperty('ctx-3d','visibility','none'); }catch(e){}
+        // Re-aplicăm masca dacă există
+        if(AEDIS._demolishActive) _aedisRemoveExistingFromCtx();
+      }
 
       set3D(55, -20);
       ss('✅ AEDIS 3D: ' + niv + ' niveluri · H=' +
