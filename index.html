@@ -1838,7 +1838,7 @@ function addLayers(){
   // ── Etichete cladiri context (inaltime + functiune) ─────────────────────
   L({id:'ctx-height-label',type:'symbol',source:'ctx-labels-src',
     minzoom:17,
-    filter:['any',['>', ['get','h'], 10], ['!=', ['get','fn_label'], 'Necunoscut']],
+    filter:['any',['all',['has','h'],['>', ['to-number',['get','h'],0], 10]], ['!=', ['coalesce',['get','fn_label'],'Necunoscut'], 'Necunoscut']],
     layout:{
       'text-field':['concat',['get','h_label'],' | ',['get','fn_label']],
       'text-size':11,
@@ -2004,7 +2004,8 @@ map.on('style.load',()=>setTimeout(()=>{
   if(S.ctx?.features?.length) try{setSource('ctx-src',S.ctx);}catch(e){}
   if(S.vol._lastFeats?.length) try{setSource('vol-src',{type:'FeatureCollection',features:S.vol._lastFeats});}catch(e){}
   if(S.vol._lastDistFeats?.length) try{setSource('dist-src',{type:'FeatureCollection',features:S.vol._lastDistFeats});}catch(e){}
-  try{map.setLayoutProperty('ctx-3d','visibility',S.vol.onlyVol?'none':'visible');}catch(e){}
+  const _ctxVis = !S.vol.onlyVol && AEDIS.scenariu!=='demolare' && !AEDIS._demolishActive;
+  try{map.setLayoutProperty('ctx-3d','visibility',_ctxVis?'visible':'none');}catch(e){}
 },250));
 
 // CLICK pe hartă → DOAR selectează (NU generează volum automat)
@@ -5558,9 +5559,11 @@ function _restoreAfterStyleLoad(styleKey){
     if(S.ctx?.features?.length){
       setSource('ctx-src', S.ctx);
     }
-    try{ map.setLayoutProperty('ctx-3d','visibility',S.vol.onlyVol?'none':'visible'); }catch(e){}
+    // Ctx-3d visibility: ascuns la demolare, ascuns dacă onlyVol, vizibil altfel
+    const ctxVisible = !S.vol.onlyVol && AEDIS.scenariu !== 'demolare' && !AEDIS._demolishActive;
+    try{ map.setLayoutProperty('ctx-3d','visibility', ctxVisible ? 'visible' : 'none'); }catch(e){}
 
-    // Demolare: re-aplicăm masca
+    // Demolare: re-aplicăm filtrarea ctx-src (fără mask layer)
     if(AEDIS._demolishActive){
       setTimeout(()=>{ try{_aedisRemoveExistingFromCtx();}catch(e){} }, 150);
     }
@@ -7457,17 +7460,6 @@ function aedisBuild(){
   S.vol.genDone = true;
   setSource('vol-src',{type:'FeatureCollection',features:feats});
 
-  // Curățăm demolish-mask după ce volumul e generat
-  // (masca și-a făcut treaba la pasul de demolare, acum vol-3d acoperă terenul)
-  // Lăsăm masca activa pentru a continua să ascundă clădirile native sub vol
-  // DAR o facem transparentă optic dacă vol-src acoperă zona
-  try{
-    if(AEDIS.scenariu==='demolare' && map.getLayer('demolish-mask')){
-      // Redu opacitatea măștii — vol-3d e deasupra ei și o acoperă
-      map.setPaintProperty('demolish-mask','fill-extrusion-opacity',0.98);
-    }
-  }catch(e){}
-
   set3D(65,-25);
 
   // Zoom la parcela dupa generare
@@ -7614,14 +7606,16 @@ function aedis3DRemove(){
 }
 
 
-// ── Demolare: elimină TOATE clădirile existente de pe parcelă ─────────────
-// Strategia: mask layer + filtrare GeoJSON + filtre pe layere native Mapbox
+// ── Demolare: elimină clădirile existente de pe parcelă din toate sursele ─
+// Strategie simplă și robustă: filtrare GeoJSON + ctx-3d hidden
+// FĂRĂ mask layer (creează turnuri vizibile în orice stil de hartă)
 function _aedisRemoveExistingFromCtx(){
   try{
     const parcels = S.parcels.filter(p=>p.geo?.geometry);
     if(!parcels.length) return;
 
-    // ── 1. Filtrăm ctx-src (GeoJSON OSM) ────────────────────────────────────
+    // ── 1. Filtrăm ctx-src (GeoJSON OSM încărcat de noi) ────────────────────
+    // Eliminăm clădirile al căror centru e pe parcelă
     const ctxSrc = map.getSource('ctx-src');
     if(ctxSrc?._data?.features){
       ctxSrc.setData({type:'FeatureCollection', features: ctxSrc._data.features.filter(f=>{
@@ -7640,56 +7634,18 @@ function _aedisRemoveExistingFromCtx(){
         features: volSrc._data.features.filter(f=>!f.properties?.isExistent)});
     }
 
-    // ── 3. MASK LAYER: adăugăm un fill-extrusion solid pe footprint parcelei
-    // care acoperă orice clădire nativă Mapbox (tile-uri vectoriale) ────────
-    try{
-      const maskGeoJSON = {
-        type:'FeatureCollection',
-        features: parcels.map(p=>({
-          type:'Feature',
-          geometry: p.geo.geometry,
-          properties:{ h: 150 } // înălțime suficientă pentru clădiri urbane normale
-        }))
-      };
+    // ── 3. Ascundem ctx-3d complet pe zona parcelei
+    // Cel mai simplu și fără artefacte: ctx-3d none, vol-3d acoperă zona
+    try{ map.setLayoutProperty('ctx-3d','visibility','none'); }catch(e){}
 
-      // Sursa mask
-      if(map.getSource('demolish-mask-src')){
-        map.getSource('demolish-mask-src').setData(maskGeoJSON);
-      } else {
-        map.addSource('demolish-mask-src',{type:'geojson', data: maskGeoJSON});
-      }
+    // ── 4. Clădirile native Mapbox (tile-uri vectoriale) nu pot fi eliminate
+    // programatic. Ele vor fi acoperite vizual de vol-3d după generare.
+    // Dacă utilizatorul nu a generat volumul încă, îl rugăm să genereze.
 
-      // Layer mask — culoare egală cu fondul hărții (negru/dark)
-      // Poziționat sub vol-3d dar deasupra layerelor native de building
-      if(!map.getLayer('demolish-mask')){
-        // Inserăm înainte de vol-3d (sau la final dacă nu există)
-        const beforeLayer = map.getLayer('vol-3d') ? 'vol-3d' : undefined;
-        map.addLayer({
-          id: 'demolish-mask',
-          type: 'fill-extrusion',
-          source: 'demolish-mask-src',
-          paint: {
-            'fill-extrusion-color': '#070d1a',   // culoarea fundalului hărții
-            'fill-extrusion-height': ['get','h'],
-            'fill-extrusion-base': 0,
-            'fill-extrusion-opacity': 1.0
-          }
-        }, beforeLayer);
-      } else {
-        // Actualizăm sursa dacă layerul există deja
-        map.getSource('demolish-mask-src')?.setData(maskGeoJSON);
-      }
-    }catch(e){ console.warn('mask layer err:', e.message); }
-
-    // ── 4. Layerele native Mapbox de building nu pot fi filtrate geografic
-    // (nu au longitude/latitude ca properties în tile-uri vectoriale)
-    // Masca de la pasul 3 acoperă oricum orice clădire nativă sub ea.
-
-    // ── 5. Forțăm re-render ─────────────────────────────────────────────────
     map.triggerRepaint();
     AEDIS._forcedBaseH = 0;
     AEDIS._demolishActive = true;
-    ss('🔨 Demolare aplicată — teren liber. Generați volumul cu ⚡.');
+    ss('🔨 Demolare aplicată — context eliminat. Generați volumul cu ⚡ pentru a acoperi terenul.');
   }catch(e){ console.warn('_aedisRemoveExistingFromCtx error:', e.message); }
 }
 
@@ -7698,15 +7654,12 @@ function _aedisRestoreCad3D(){
   try{
     AEDIS._demolishActive = false;
 
-    // Eliminăm mask layer
+    // Restaurăm ctx-3d vizibil (dacă nu e onlyVol)
     try{
-      if(map.getLayer('demolish-mask')) map.removeLayer('demolish-mask');
-      if(map.getSource('demolish-mask-src')) map.removeSource('demolish-mask-src');
+      map.setLayoutProperty('ctx-3d','visibility', S.vol.onlyVol ? 'none' : 'visible');
     }catch(e){}
 
-    // Layerele native nu au filtru customizat → nimic de restaurat
-
-    // Restaurăm ctx-src complet
+    // Restaurăm ctx-src cu toate clădirile (din S.ctx complet)
     if(S.ctx?.features?.length){
       try{ setSource('ctx-src', S.ctx); }catch(e){}
     }
@@ -8664,13 +8617,12 @@ function aedis3DGenerate(){
       map.addLayer(layer);
       AEDIS3D.active = true;
       AEDIS3D.params = buildParams;
-      // Contextul urban: vizibil doar dacă NU suntem în scenariu demolare
+          // Contextul urban: vizibil doar dacă NU suntem în scenariu demolare
       if(AEDIS.scenariu !== 'demolare'){
         try{ map.setLayoutProperty('ctx-3d','visibility','visible'); }catch(e){}
       } else {
-        // Demolare = teren liber → ascundem clădirile existente și din viewer
+        // Demolare = teren liber → ascundem ctx-3d
         try{ map.setLayoutProperty('ctx-3d','visibility','none'); }catch(e){}
-        // Re-aplicăm masca dacă există
         if(AEDIS._demolishActive) _aedisRemoveExistingFromCtx();
       }
 
