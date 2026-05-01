@@ -3876,47 +3876,56 @@ function buildVolume(){
     
     if(scenariu === 'liber'){
       // DEMOLARE: teren complet liber
-      // Salvăm backup S.ctx
       if(!S._ctxBackup && S.ctx?.features?.length){
         S._ctxBackup = JSON.parse(JSON.stringify(S.ctx));
       }
 
-      // 1. Ascundem ctx-3d (clădirile noastre din Overpass)
+      // 1. Ascundem ctx-3d (clădirile noastre)
       try{map.setLayoutProperty('ctx-3d','visibility','none');}catch(e){}
 
-      // 2. Filtrăm layerele NATIVE Mapbox folosind bbox-ul parcelei
-      // setFilter exclude clădirile al căror centru e în interiorul parcelei
+      // 2. Detectăm DINAMIC toate layerele de clădiri din stilul activ și le filtrăm
       try{
         const bbox = turf.bbox(p.geo);
         const [minLng, minLat, maxLng, maxLat] = bbox;
-        // Filter: exclude featurile cu centrul în bbox-ul parcelei
-        const excludeFilter = [
-          'any',
-          ['<', ['get', 'longitude'], minLng - 0.00001],
-          ['>', ['get', 'longitude'], maxLng + 0.00001],
-          ['<', ['get', 'latitude'],  minLat - 0.00001],
-          ['>', ['get', 'latitude'],  maxLat + 0.00001]
-        ];
-        // Salvăm filtrele originale
-        if(!S._nativeFilters) S._nativeFilters = {};
-        ['building','building-extrusion','3d-buildings','add-3d-buildings'].forEach(id=>{
-          try{
-            if(map.getLayer(id)){
-              if(!S._nativeFilters[id]) S._nativeFilters[id] = map.getFilter(id);
-              map.setFilter(id, excludeFilter);
-            }
-          }catch(e){}
-        });
-      }catch(e){}
+        const pad = 0.0001;
 
-      // 3. Mască vizuală (fill plat) pentru a acoperi solul parcelei
+        // Găsim toate layerele de tip fill-extrusion din hartă (= clădiri 3D)
+        const allLayers = map.getStyle()?.layers || [];
+        const bldLayers = allLayers.filter(l =>
+          l.type === 'fill-extrusion' &&
+          l.id !== 'vol-3d' &&
+          l.id !== 'ctx-3d' &&
+          l.id !== 'demolish-mask'
+        );
+
+        console.log('UrbanX demolish: found building layers:', bldLayers.map(l=>l.id));
+
+        if(!S._nativeFilters) S._nativeFilters = {};
+        bldLayers.forEach(l => {
+          try{
+            S._nativeFilters[l.id] = map.getFilter(l.id) || null;
+            // Excludem featurile din bbox-ul parcelei
+            const origFilter = S._nativeFilters[l.id];
+            const bboxExclude = ['!', ['within', {
+              type: 'Feature',
+              geometry: p.geo.geometry,
+              properties: {}
+            }]];
+            const newFilter = origFilter
+              ? ['all', origFilter, bboxExclude]
+              : bboxExclude;
+            map.setFilter(l.id, newFilter);
+          }catch(e){ console.warn('filter err', l.id, e.message); }
+        });
+      }catch(e){ console.warn('demolish filter error:', e.message); }
+
+      // 3. Mască fill pentru sol
       try{
-        const pGeom = p.geo.geometry;
         if(map.getLayer('demolish-mask')) map.removeLayer('demolish-mask');
         if(map.getSource('demolish-mask-src')) map.removeSource('demolish-mask-src');
         const baseStyle = document.getElementById('selBase')?.value || 'custom';
         const maskColor = baseStyle === 'sat' ? '#1a3020' : baseStyle === 'streets' ? '#dde8e0' : '#0d1926';
-        map.addSource('demolish-mask-src',{type:'geojson',data:{type:'FeatureCollection',features:[{type:'Feature',geometry:pGeom,properties:{}}]}});
+        map.addSource('demolish-mask-src',{type:'geojson',data:{type:'FeatureCollection',features:[{type:'Feature',geometry:p.geo.geometry,properties:{}}]}});
         map.addLayer({id:'demolish-mask',type:'fill',source:'demolish-mask-src',paint:{'fill-color':maskColor,'fill-opacity':1}});
         try{ map.moveLayer('vol-3d'); map.moveLayer('vol-3d-outline'); }catch(e){}
       }catch(e){}
