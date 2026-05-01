@@ -683,6 +683,15 @@ canvas#c2d{width:100%;height:100%;display:block}
   <button class="tb-btn" id="btnUTR">🗺 Zone UTR</button>
   <button class="tb-btn" id="btnGPS">📍 GPS</button>
   <button class="tb-btn" id="btnMulti" title="Multiselect parcele">🔲 Multi</button>
+  <button onclick="_adminOpen()" id="btn-admin" title="Panou Admin" style="
+    display:none;background:rgba(212,175,55,.15);border:1px solid rgba(212,175,55,.4);
+    color:#d4af37;border-radius:7px;padding:4px 10px;cursor:pointer;
+    font-size:11px;font-weight:700;flex-shrink:0;transition:all .2s;
+    align-items:center;gap:4px;
+  " onmouseover="this.style.background='rgba(212,175,55,.3)'"
+     onmouseout="this.style.background='rgba(212,175,55,.15)'">
+    ⚙️ Admin
+  </button>
   <button onclick="_authLogout()" title="Deconectare" style="
     background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);
     color:#f87171;border-radius:7px;padding:4px 10px;cursor:pointer;
@@ -1681,6 +1690,10 @@ const SUPABASE_URL  = 'https://xzctxxchdykowysqjzkq.supabase.co';
 const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6Y3R4eGNoZHlrb3d5c3FqemtxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2Mzg4NzAsImV4cCI6MjA5MzIxNDg3MH0.6ffZgWVs8PmDB8tNg1UmGmvHZQrNv6zhr6BE9fTmyS0';
 
 let _supabase = null;
+// ── ADMIN CONFIG ─────────────────────────────────────────────────────────────
+const ADMIN_EMAILS = ['3dtravelsoftart@gmail.com']; // adaugă emailuri admin aici
+let _isAdmin = false;
+
 let _authUser = null;
 let _authMode = 'login'; // 'login' | 'register'
 
@@ -1802,6 +1815,8 @@ async function _authForgot() {
 // Autentificare reușită — ascundem overlay-ul
 function _authSuccess(user) {
   _authUser = user;
+  _isAdmin = user?.email && ADMIN_EMAILS.includes(user.email);
+
   const ov = document.getElementById('auth-overlay');
   if(ov) {
     ov.style.transition = 'opacity .4s ease';
@@ -1814,7 +1829,11 @@ function _authSuccess(user) {
     const shortEmail = user.email.split('@')[0];
     userLbl.textContent = shortEmail.length > 10 ? shortEmail.slice(0,10)+'…' : shortEmail;
   }
-  console.log('✅ UrbanX Auth OK:', user?.email || user?.id);
+  // Buton Admin în topbar (doar pentru admini)
+  const adminBtn = document.getElementById('btn-admin');
+  if(adminBtn) adminBtn.style.display = _isAdmin ? 'flex' : 'none';
+
+  console.log('✅ UrbanX Auth OK:', user?.email || user?.id, _isAdmin ? '[ADMIN]' : '');
 }
 
 // Logout
@@ -14096,6 +14115,270 @@ function svProjectVolume(pos){
     )) + 'm';
 }
 
+</script>
+
+<!-- ── ADMIN PANEL ──────────────────────────────────────────────────────── -->
+<div id="admin-overlay" onclick="if(event.target===this)_adminClose()" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);align-items:center;justify-content:center">
+  <div style="background:#0f172a;border:1px solid rgba(212,175,55,.4);border-radius:16px;width:min(680px,96vw);max-height:88vh;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,.7)">
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,.1);flex-shrink:0">
+      <div>
+        <div style="font-size:16px;font-weight:800;color:#d4af37;letter-spacing:.04em">⚙️ Panou Administrare</div>
+        <div style="font-size:11px;color:#64748b;margin-top:3px">UrbanX · Acces restricționat · <span id="adm-logged-as" style="color:#94a3b8"></span></div>
+      </div>
+      <button onclick="_adminClose()" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#f87171;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:12px;font-weight:600">✕ Închide</button>
+    </div>
+
+    <!-- Body scrollabil -->
+    <div style="flex:1;overflow-y:auto;padding:18px 22px;display:flex;flex-direction:column;gap:16px">
+
+      <!-- Stats -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+        <div style="background:#080f1c;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px;text-align:center">
+          <div style="font-size:24px;font-weight:800;color:#3b82f6" id="adm-total">—</div>
+          <div style="font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-top:3px">Total</div>
+        </div>
+        <div style="background:#080f1c;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px;text-align:center">
+          <div style="font-size:24px;font-weight:800;color:#34d399" id="adm-confirmed">—</div>
+          <div style="font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-top:3px">Confirmați</div>
+        </div>
+        <div style="background:#080f1c;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px;text-align:center">
+          <div style="font-size:24px;font-weight:800;color:#fbbf24" id="adm-pending">—</div>
+          <div style="font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-top:3px">Neconfirmați</div>
+        </div>
+        <div style="background:#080f1c;border:1px solid rgba(212,175,55,.15);border-radius:10px;padding:12px;text-align:center">
+          <div style="font-size:24px;font-weight:800;color:#d4af37" id="adm-admins">—</div>
+          <div style="font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-top:3px">Admini</div>
+        </div>
+      </div>
+
+      <!-- Tabel utilizatori -->
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em">Utilizatori înregistrați</div>
+          <button onclick="_adminLoadUsers()" id="adm-reload-btn" style="background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.3);color:#60a5fa;border-radius:7px;padding:5px 12px;font-size:11px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:5px">🔄 Reîncarcă</button>
+        </div>
+        <div id="adm-msg" style="font-size:12px;margin-bottom:8px"></div>
+        <div id="adm-users" style="border:1px solid rgba(255,255,255,.08);border-radius:10px;overflow:hidden;min-height:60px">
+          <div style="padding:24px;text-align:center;color:#64748b;font-size:12px">Se încarcă lista de utilizatori...</div>
+        </div>
+      </div>
+
+      <!-- Invită user nou -->
+      <div style="background:#080f1c;border:1px solid rgba(59,130,246,.2);border-radius:10px;padding:14px">
+        <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">✉️ Invită utilizator nou</div>
+        <div style="display:flex;gap:8px">
+          <input id="adm-invite-email" type="email" placeholder="email@exemplu.ro" style="flex:1;padding:9px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#0b1220;color:#e2e8f0;font-size:13px;outline:none" onkeydown="if(event.key==='Enter')_adminInvite()">
+          <button onclick="_adminInvite()" style="background:rgba(59,130,246,.2);border:1px solid rgba(59,130,246,.4);color:#60a5fa;border-radius:8px;padding:9px 16px;cursor:pointer;font-size:12px;font-weight:700;white-space:nowrap">Invită</button>
+        </div>
+        <div id="adm-invite-msg" style="font-size:11px;margin-top:7px"></div>
+      </div>
+
+      <!-- Setare rol -->
+      <div style="background:#080f1c;border:1px solid rgba(212,175,55,.15);border-radius:10px;padding:14px">
+        <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">👑 Schimbă rol utilizator</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input id="adm-role-email" type="email" placeholder="email@exemplu.ro" style="flex:1;min-width:180px;padding:9px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#0b1220;color:#e2e8f0;font-size:13px;outline:none">
+          <select id="adm-role-sel" style="padding:9px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#0b1220;color:#e2e8f0;font-size:13px;outline:none">
+            <option value="admin">👑 Admin</option>
+            <option value="user" selected>👤 User</option>
+          </select>
+          <button onclick="_adminSetRole()" style="background:rgba(212,175,55,.15);border:1px solid rgba(212,175,55,.4);color:#d4af37;border-radius:8px;padding:9px 16px;cursor:pointer;font-size:12px;font-weight:700;white-space:nowrap">Aplică</button>
+        </div>
+        <div id="adm-role-msg" style="font-size:11px;margin-top:7px"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// ── ADMIN PANEL — complet funcțional cu Supabase RPC ─────────────────────
+
+function _adminOpen() {
+  if(!_isAdmin) return;
+  const ov = document.getElementById('admin-overlay');
+  if(ov) ov.style.display = 'flex';
+  const lbl = document.getElementById('adm-logged-as');
+  if(lbl) lbl.textContent = 'logat ca ' + (_authUser?.email || '');
+  _adminLoadUsers();
+}
+
+function _adminClose() {
+  const ov = document.getElementById('admin-overlay');
+  if(ov) ov.style.display = 'none';
+}
+
+async function _adminLoadUsers() {
+  const msg       = document.getElementById('adm-msg');
+  const container = document.getElementById('adm-users');
+  const btn       = document.getElementById('adm-reload-btn');
+  if(!_supabase) { _admMsg(msg, '⚠ Supabase neconfigurat.', 'warn'); return; }
+
+  if(btn) btn.disabled = true;
+  _admMsg(msg, '⏳ Se încarcă...', 'info');
+
+  try {
+    // Încercăm RPC-ul securizat (necesită SQL setup rulat)
+    const { data: rpcData, error: rpcErr } = await _supabase.rpc('list_all_users');
+
+    if(!rpcErr && rpcData) {
+      _adminRender(rpcData, msg, container);
+      _admMsg(msg, '✓ Date actualizate via RPC securizat', 'ok');
+    } else {
+      // Fallback: SELECT direct pe profiles (funcționează dacă RLS permite)
+      const { data: profData, error: profErr } = await _supabase
+        .from('profiles').select('*').order('created_at', { ascending: false }).limit(100);
+
+      if(!profErr && profData) {
+        _adminRender(profData, msg, container);
+        _admMsg(msg, '✓ Date din tabela profiles', 'ok');
+      } else {
+        // Ultimul fallback: afișăm doar userul curent
+        _admMsg(msg, '⚠ ' + (profErr?.message || rpcErr?.message || 'Eroare necunoscută') + ' — se afișează doar userul curent.', 'warn');
+        _adminRender(_authUser ? [{
+          id: _authUser.id, email: _authUser.email,
+          role: 'admin', confirmed: true,
+          created_at: new Date().toISOString(), last_sign_in: new Date().toISOString()
+        }] : [], null, container);
+      }
+    }
+  } catch(e) {
+    _admMsg(msg, '❌ Eroare: ' + e.message, 'err');
+  } finally {
+    if(btn) btn.disabled = false;
+  }
+}
+
+function _adminRender(users, msg, container) {
+  const total     = users.length;
+  const confirmed = users.filter(u => u.confirmed !== false && u.email_confirmed_at !== null).length;
+  const pending   = total - confirmed;
+  const admins    = users.filter(u => u.role === 'admin').length;
+
+  document.getElementById('adm-total').textContent     = total;
+  document.getElementById('adm-confirmed').textContent = confirmed;
+  document.getElementById('adm-pending').textContent   = pending;
+  document.getElementById('adm-admins').textContent    = admins;
+
+  if(!total) {
+    container.innerHTML = '<div style="padding:24px;text-align:center;color:#64748b;font-size:12px">Niciun utilizator găsit.<br>Rulează SQL setup-ul din Supabase.</div>';
+    return;
+  }
+
+  container.innerHTML = `
+    <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead>
+        <tr style="background:#060d18;position:sticky;top:0">
+          <th style="padding:9px 11px;text-align:left;color:#64748b;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid rgba(255,255,255,.08)">Email</th>
+          <th style="padding:9px 11px;text-align:left;color:#64748b;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid rgba(255,255,255,.08)">Rol</th>
+          <th style="padding:9px 11px;text-align:left;color:#64748b;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid rgba(255,255,255,.08)">Status</th>
+          <th style="padding:9px 11px;text-align:left;color:#64748b;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid rgba(255,255,255,.08)">Înregistrat</th>
+          <th style="padding:9px 11px;text-align:center;color:#64748b;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid rgba(255,255,255,.08)">Acțiuni</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${users.map(u => {
+          const email     = u.email || '—';
+          const isAdmin   = u.role === 'admin';
+          const isCurrent = u.email === _authUser?.email;
+          const isConf    = u.confirmed !== false;
+          const dateStr   = u.created_at ? new Date(u.created_at).toLocaleDateString('ro-RO') : '—';
+          return `<tr style="border-bottom:1px solid rgba(255,255,255,.04);transition:background .1s${isCurrent ? ';background:rgba(59,130,246,.06)' : ''}" onmouseover="this.style.background='rgba(255,255,255,.03)'" onmouseout="this.style.background='${isCurrent ? 'rgba(59,130,246,.06)' : 'transparent'}'">
+            <td style="padding:9px 11px;color:#e2e8f0;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+              ${email}
+              ${isCurrent ? '<span style="font-size:9px;background:rgba(59,130,246,.2);color:#60a5fa;border-radius:999px;padding:1px 6px;margin-left:4px;font-weight:700">TU</span>' : ''}
+            </td>
+            <td style="padding:9px 11px">
+              ${isAdmin
+                ? '<span style="font-size:10px;background:rgba(212,175,55,.15);color:#d4af37;border-radius:999px;padding:2px 9px;font-weight:700">👑 Admin</span>'
+                : '<span style="font-size:10px;background:rgba(100,116,139,.12);color:#94a3b8;border-radius:999px;padding:2px 9px;font-weight:600">👤 User</span>'}
+            </td>
+            <td style="padding:9px 11px">
+              ${isConf
+                ? '<span style="color:#34d399;font-size:11px;font-weight:600">✓ Confirmat</span>'
+                : '<span style="color:#fbbf24;font-size:11px;font-weight:600">⏳ Neconfirmat</span>'}
+            </td>
+            <td style="padding:9px 11px;color:#64748b;font-size:11px">${dateStr}</td>
+            <td style="padding:9px 11px;text-align:center">
+              ${!isCurrent ? `<button onclick="_adminQuickRole('${u.id}','${email}','${isAdmin ? 'user' : 'admin'}')" style="font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid ${isAdmin ? 'rgba(239,68,68,.3)' : 'rgba(212,175,55,.3)'};background:${isAdmin ? 'rgba(239,68,68,.1)' : 'rgba(212,175,55,.1)'};color:${isAdmin ? '#f87171' : '#d4af37'};cursor:pointer;font-weight:600">${isAdmin ? '↓ User' : '↑ Admin'}</button>` : '<span style="font-size:10px;color:#334155">—</span>'}
+            </td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
+}
+
+async function _adminQuickRole(userId, email, newRole) {
+  if(!confirm(`Schimbi rolul lui ${email} în "${newRole}"?`)) return;
+  const msg = document.getElementById('adm-msg');
+  try {
+    const { error } = await _supabase.rpc('set_user_role', { target_id: userId, new_role: newRole });
+    if(error) throw error;
+    _admMsg(msg, `✅ ${email} → ${newRole}`, 'ok');
+    // Actualizăm și ADMIN_EMAILS local
+    if(newRole === 'admin' && !ADMIN_EMAILS.includes(email)) ADMIN_EMAILS.push(email);
+    if(newRole === 'user') { const i = ADMIN_EMAILS.indexOf(email); if(i > -1) ADMIN_EMAILS.splice(i,1); }
+    setTimeout(() => _adminLoadUsers(), 600);
+  } catch(e) {
+    _admMsg(msg, '❌ ' + e.message, 'err');
+  }
+}
+
+async function _adminSetRole() {
+  const email  = document.getElementById('adm-role-email').value.trim();
+  const role   = document.getElementById('adm-role-sel').value;
+  const msg    = document.getElementById('adm-role-msg');
+  if(!email) { _admMsg(msg, '⚠ Introduceți un email.', 'warn'); return; }
+
+  try {
+    // Găsim ID-ul userului după email
+    const { data: prof, error: pErr } = await _supabase
+      .from('profiles').select('id').eq('email', email).single();
+    if(pErr || !prof) throw new Error('User negăsit în profiles.');
+
+    const { error } = await _supabase.rpc('set_user_role', { target_id: prof.id, new_role: role });
+    if(error) throw error;
+    _admMsg(msg, `✅ ${email} setat ca ${role}`, 'ok');
+    document.getElementById('adm-role-email').value = '';
+    setTimeout(() => _adminLoadUsers(), 600);
+  } catch(e) {
+    _admMsg(msg, '❌ ' + e.message, 'err');
+  }
+}
+
+async function _adminInvite() {
+  const email = document.getElementById('adm-invite-email').value.trim();
+  const msg   = document.getElementById('adm-invite-msg');
+  if(!email || !email.includes('@')) { _admMsg(msg, '⚠ Email invalid.', 'warn'); return; }
+  if(!_supabase) { _admMsg(msg, '⚠ Supabase neconfigurat.', 'warn'); return; }
+
+  try {
+    // Supabase trimite magic link / invite email
+    const { error } = await _supabase.auth.admin?.inviteUserByEmail?.(email) ||
+      await _supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
+    if(error) throw error;
+    _admMsg(msg, `✅ Invitație trimisă la ${email}`, 'ok');
+    document.getElementById('adm-invite-email').value = '';
+    setTimeout(() => _adminLoadUsers(), 1500);
+  } catch(e) {
+    // Fallback informativ dacă admin API nu e disponibil cu anon key
+    _admMsg(msg, `⚠ ${e.message}. Invitați manual din Supabase Dashboard → Authentication → Users → Add user.`, 'warn');
+  }
+}
+
+function _admMsg(el, txt, type) {
+  if(!el) return;
+  const colors = { ok: '#34d399', warn: '#fbbf24', err: '#f87171', info: '#60a5fa' };
+  el.style.color = colors[type] || '#94a3b8';
+  el.textContent = txt;
+}
+
+// Escape închide panoul
+document.addEventListener('keydown', e => { if(e.key === 'Escape') _adminClose(); });
+
+// Încarcă userii automat la deschidere (apelat din _adminOpen)
 </script>
 </body>
 </html>
