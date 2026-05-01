@@ -3868,19 +3868,22 @@ function buildVolume(){
     let efectivNiv = rNiv;            // niveluri efective de construit
     
     if(scenariu === 'liber'){
-      // DEMOLARE: teren complet liber — eliminăm clădirile existente
+      // DEMOLARE: teren complet liber — eliminăm clădirile existente DOAR din randare
+      // IMPORTANT: Nu modificăm S.ctx — salvăm backup și ascundem layerul
+      if(!S._ctxBackup && S.ctx?.features?.length){
+        S._ctxBackup = JSON.parse(JSON.stringify(S.ctx));
+      }
       try{map.setLayoutProperty('ctx-3d','visibility','none');}catch(e){}
-      // Eliminăm și din ctx-src (GeoJSON) clădirile de pe parcelă
+      // Filtrăm DOAR sursa de randare, nu S.ctx
       try{
-        const ctxSrc=map.getSource('ctx-src');
-        if(ctxSrc?._data?.features){
+        if(S._ctxBackup?.features){
           const pFeat={type:'Feature',geometry:p.geo.geometry,properties:{}};
-          ctxSrc.setData({type:'FeatureCollection',features:ctxSrc._data.features.filter(f=>{
+          const filtered = S._ctxBackup.features.filter(f=>{
             try{
-              return !turf.booleanPointInPolygon(
-                turf.centerOfMass(f),pFeat);
+              return !turf.booleanPointInPolygon(turf.centerOfMass(f),pFeat);
             }catch(e){return true;}
-          })});
+          });
+          setSource('ctx-src',{type:'FeatureCollection',features:filtered});
         }
       }catch(e){}
       volumeGeom = fp.geometry;
@@ -3896,6 +3899,8 @@ function buildVolume(){
       }
       
     } else if(scenariu === 'extindere_h'){
+      // La schimbarea scenariului din liber → restaurăm backup-ul
+      if(S._ctxBackup?.features?.length){ S.ctx = S._ctxBackup; S._ctxBackup = null; }
       // EXTINDERE ORIZONTALA: construim pe zona libera, langa existente
       // Cladirile existente raman vizibile
       try{map.setLayoutProperty('ctx-3d','visibility','visible');}catch(e){}
@@ -3923,6 +3928,8 @@ function buildVolume(){
       }
       
     } else if(scenariu === 'extindere_v'){
+      // La schimbarea scenariului din liber → restaurăm backup-ul
+      if(S._ctxBackup?.features?.length){ S.ctx = S._ctxBackup; S._ctxBackup = null; }
       // EXTINDERE VERTICALA + ORIZONTALA: corp nou integrat
       try{map.setLayoutProperty('ctx-3d','visibility','visible');}catch(e){}
       // Footprint = intreaga zona construibila (poate include si zona cladirilor existente)
@@ -8449,12 +8456,18 @@ function _aedisRestoreCad3D(){
   try{
     AEDIS._demolishActive = false;
 
+    // Restaurăm S.ctx din backup (dacă a fost salvat la demolare)
+    if(S._ctxBackup?.features?.length){
+      S.ctx = S._ctxBackup;
+      S._ctxBackup = null;
+    }
+
     // Restaurăm ctx-3d vizibil (dacă nu e onlyVol)
     try{
       _setCtxVisibility();
     }catch(e){}
 
-    // Restaurăm ctx-src cu toate clădirile (din S.ctx complet)
+    // Restaurăm ctx-src cu toate clădirile
     if(S.ctx?.features?.length){
       try{ setSource('ctx-src', S.ctx); }catch(e){}
     }
