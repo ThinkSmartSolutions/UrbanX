@@ -4261,10 +4261,10 @@ function htmlSearch(){
       value="${addrVal}"
       autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
       inputmode="search"
-      oninput="window._lastAddrVal=this.value;if(this.value.length<2)mobSearchOverlayClose();else doAddr(this.value)"
-      onkeydown="if(event.key==='Enter'){event.preventDefault();window._lastAddrVal=this.value;doAddr(this.value)}"
-      onfocus="window._activeSearchCtx=this;if(this.value&&this.value.length>1)doAddr(this.value)"
-      onblur="setTimeout(()=>{if(!document.getElementById('mob-search-overlay')?.matches(':hover')){}},200)"
+      oninput="window._lastAddrVal=this.value;_addrOnInput(this.value)"
+      onkeydown="if(event.key==='Enter'){event.preventDefault();clearTimeout(window._addrT);window._lastAddrVal=this.value;doAddr(this.value,true)}"
+      onfocus="window._activeSearchCtx=this"
+      onblur="setTimeout(()=>{ const v=this.value; if(v&&v.length>=4&&window._lastAddrSearch!==v) doAddr(v,true); },300)"
       style="margin-bottom:0">
     ${(()=>{
       // Restaurăm rezultatele dacă există (după re-render DOM)
@@ -4763,7 +4763,42 @@ function doGPS(){
 }
 
 let _addrT=null;
-function doAddr(q){
+// Logică input adresă — caută DOAR când utilizatorul s-a oprit
+function _addrOnInput(val){
+  clearTimeout(window._addrT);
+  window._lastAddrVal = val;
+
+  if(!val || val.length < 2){
+    mobSearchOverlayClose();
+    _addrSetBox('');
+    return;
+  }
+
+  // Detectăm dacă textul pare incomplet:
+  // - se termină cu o cifră singulară (ex: "Str X 5" → poate urma "5A" sau "55")
+  // - se termină cu o literă după spațiu (ex: "Str Lascar C" → poate urma "Catargi")
+  // - are mai puțin de 5 caractere
+  const seemsIncomplete = val.length < 5
+    || /\s[A-Za-zÀ-ÿ]{1,3}$/.test(val)   // ultimul cuvânt e scurt (inițiale, prescurtare)
+    || /\s\d{1,2}$/.test(val);             // număr de 1-2 cifre la final (poate urma "A", "bis")
+
+  // Dacă pare incomplet → așteptăm mai mult (1500ms)
+  // Dacă pare complet → așteptăm mai puțin (900ms)
+  const delay = seemsIncomplete ? 1500 : 900;
+
+  // Arătăm hint că se va căuta
+  if(val.length >= 3){
+    _addrSetBox(`<div class="re" style="color:#64748b;font-size:12px">
+      ⌨️ Continuați să scrieți sau apăsați <b>Enter</b> pentru a căuta…
+    </div>`);
+  }
+
+  window._addrT = setTimeout(()=>{
+    if(window._lastAddrVal === val) doAddr(val, false);
+  }, delay);
+}
+
+function doAddr(q, immediate){
   clearTimeout(_addrT);
   if(!q||q.trim().length<2){
     _addrSetBox('');return;
@@ -4775,9 +4810,10 @@ function doAddr(q){
     window._lastCoordVal=q.trim();
     _addrSetBox('');doCoord();return;
   }
-  _addrSetBox(`<div class="re"><span class="spin"></span>Se caută…</div>`);
+  window._lastAddrSearch = q; // marcăm că am căutat această valoare
+  _addrSetBox(`<div class="re"><span class="spin"></span>Se caută <b>${esc(q)}</b>…</div>`);
   if(window.innerWidth<=840 && document.getElementById('mob-search-overlay')){
-    mobSearchOverlayShow('📍 Adrese & POI', `<div class="re"><span class="spin"></span>Se caută <b>${q}</b>…</div>`);
+    mobSearchOverlayShow('📍 Adrese & POI', `<div class="re"><span class="spin"></span>Se caută <b>${esc(q)}</b>…</div>`);
   }
 
   _addrT=setTimeout(async()=>{
@@ -4837,14 +4873,13 @@ function doAddr(q){
         </div>`).join('');
 
       _addrSetBox(html2);
-      // Auto-selectăm dacă e un singur rezultat
-      if(combined.length===1) pickAddr(0);
+      // Nu auto-selectăm — utilizatorul alege explicit
 
     }catch(e){
       console.error('Geocoding:',e);
       _addrSetBox(`<div class="re">Eroare: ${esc(e.message)}</div>`);
     }
-  },350);
+  },0); // debounce gestionat de _addrOnInput
 }
 
 // Scrie în addr-box — desktop: în DOM inline; mobil: overlay fix
