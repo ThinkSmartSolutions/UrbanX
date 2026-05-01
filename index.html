@@ -3880,53 +3880,31 @@ function buildVolume(){
         S._ctxBackup = JSON.parse(JSON.stringify(S.ctx));
       }
 
-      // 1. Ascundem ctx-3d (clădirile noastre)
+      // 1. Ascundem DOAR ctx-3d (clădirile noastre din Overpass)
       try{map.setLayoutProperty('ctx-3d','visibility','none');}catch(e){}
 
-      // 2. Detectăm DINAMIC toate layerele de clădiri din stilul activ și le filtrăm
-      try{
-        const bbox = turf.bbox(p.geo);
-        const [minLng, minLat, maxLng, maxLat] = bbox;
-        const pad = 0.0001;
-
-        // Găsim toate layerele de tip fill-extrusion din hartă (= clădiri 3D)
-        const allLayers = map.getStyle()?.layers || [];
-        const bldLayers = allLayers.filter(l =>
-          l.type === 'fill-extrusion' &&
-          l.id !== 'vol-3d' &&
-          l.id !== 'ctx-3d' &&
-          l.id !== 'demolish-mask'
-        );
-
-        console.log('UrbanX demolish: found building layers:', bldLayers.map(l=>l.id));
-
-        if(!S._nativeFilters) S._nativeFilters = {};
-        bldLayers.forEach(l => {
-          try{
-            S._nativeFilters[l.id] = map.getFilter(l.id) || null;
-            // Excludem featurile din bbox-ul parcelei
-            const origFilter = S._nativeFilters[l.id];
-            const bboxExclude = ['!', ['within', {
-              type: 'Feature',
-              geometry: p.geo.geometry,
-              properties: {}
-            }]];
-            const newFilter = origFilter
-              ? ['all', origFilter, bboxExclude]
-              : bboxExclude;
-            map.setFilter(l.id, newFilter);
-          }catch(e){ console.warn('filter err', l.id, e.message); }
-        });
-      }catch(e){ console.warn('demolish filter error:', e.message); }
-
-      // 3. Mască fill pentru sol
+      // 2. Mască fill-extrusion înaltă — acoperă clădirile native de pe parcelă
+      // Nu atingem layerele native globale (nu dispare tot contextul)
       try{
         if(map.getLayer('demolish-mask')) map.removeLayer('demolish-mask');
         if(map.getSource('demolish-mask-src')) map.removeSource('demolish-mask-src');
         const baseStyle = document.getElementById('selBase')?.value || 'custom';
         const maskColor = baseStyle === 'sat' ? '#1a3020' : baseStyle === 'streets' ? '#dde8e0' : '#0d1926';
         map.addSource('demolish-mask-src',{type:'geojson',data:{type:'FeatureCollection',features:[{type:'Feature',geometry:p.geo.geometry,properties:{}}]}});
-        map.addLayer({id:'demolish-mask',type:'fill',source:'demolish-mask-src',paint:{'fill-color':maskColor,'fill-opacity':1}});
+        // fill-extrusion cu H=500m — acoperă orice clădire nativă de pe parcelă
+        // Layerul e adăugat după vol-3d deci e deasupra tuturor nativelor
+        map.addLayer({
+          id:'demolish-mask',
+          type:'fill-extrusion',
+          source:'demolish-mask-src',
+          paint:{
+            'fill-extrusion-color': maskColor,
+            'fill-extrusion-height': 500,
+            'fill-extrusion-base': 0,
+            'fill-extrusion-opacity': 1.0
+          }
+        });
+        // vol-3d trebuie să fie deasupra măștii
         try{ map.moveLayer('vol-3d'); map.moveLayer('vol-3d-outline'); }catch(e){}
       }catch(e){}
       volumeGeom = fp.geometry;
@@ -3945,7 +3923,6 @@ function buildVolume(){
       // La schimbarea scenariului din liber → restaurăm backup-ul și ștergem masca
       if(S._ctxBackup?.features?.length){ S.ctx = S._ctxBackup; S._ctxBackup = null; }
       try{ if(map.getLayer('demolish-mask')) map.removeLayer('demolish-mask'); if(map.getSource('demolish-mask-src')) map.removeSource('demolish-mask-src'); }catch(e){}
-      if(S._nativeFilters){ Object.entries(S._nativeFilters).forEach(([id,f])=>{try{if(map.getLayer(id))map.setFilter(id,f||null);}catch(e){}}); S._nativeFilters=null; }
       // EXTINDERE ORIZONTALA: construim pe zona libera, langa existente
       // Cladirile existente raman vizibile
       try{map.setLayoutProperty('ctx-3d','visibility','visible');}catch(e){}
@@ -3976,7 +3953,6 @@ function buildVolume(){
       // La schimbarea scenariului din liber → restaurăm backup-ul și ștergem masca
       if(S._ctxBackup?.features?.length){ S.ctx = S._ctxBackup; S._ctxBackup = null; }
       try{ if(map.getLayer('demolish-mask')) map.removeLayer('demolish-mask'); if(map.getSource('demolish-mask-src')) map.removeSource('demolish-mask-src'); }catch(e){}
-      if(S._nativeFilters){ Object.entries(S._nativeFilters).forEach(([id,f])=>{try{if(map.getLayer(id))map.setFilter(id,f||null);}catch(e){}}); S._nativeFilters=null; }
       // EXTINDERE VERTICALA + ORIZONTALA: corp nou integrat
       try{map.setLayoutProperty('ctx-3d','visibility','visible');}catch(e){}
       // Footprint = intreaga zona construibila (poate include si zona cladirilor existente)
@@ -8513,14 +8489,6 @@ function _aedisRestoreCad3D(){
     if(S._ctxBackup?.features?.length){
       S.ctx = S._ctxBackup;
       S._ctxBackup = null;
-    }
-
-    // Restaurăm filtrele originale ale layerelor native Mapbox
-    if(S._nativeFilters){
-      Object.entries(S._nativeFilters).forEach(([id, filter])=>{
-        try{ if(map.getLayer(id)) map.setFilter(id, filter || null); }catch(e){}
-      });
-      S._nativeFilters = null;
     }
 
     // Restaurăm ctx-3d vizibil (dacă nu e onlyVol)
