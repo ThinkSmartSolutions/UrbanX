@@ -3886,6 +3886,27 @@ function buildVolume(){
           setSource('ctx-src',{type:'FeatureCollection',features:filtered});
         }
       }catch(e){}
+      // Mască de demolare — acoperă clădirile native Mapbox cu fill-extrusion înalt
+      try{
+        const pGeom = p.geo.geometry;
+        if(map.getLayer('demolish-mask')) map.removeLayer('demolish-mask');
+        if(map.getSource('demolish-mask-src')) map.removeSource('demolish-mask-src');
+        // Culoarea terenului depinde de stilul activ
+        const baseStyle = document.getElementById('selBase')?.value || 'custom';
+        const maskColor = baseStyle === 'sat' ? '#1a3a1a' : baseStyle === 'streets' ? '#f0ebe3' : '#0e1a2b';
+        map.addSource('demolish-mask-src',{type:'geojson',data:{type:'FeatureCollection',features:[{type:'Feature',geometry:pGeom,properties:{h:150}}]}});
+        map.addLayer({
+          id:'demolish-mask',
+          type:'fill-extrusion',
+          source:'demolish-mask-src',
+          paint:{
+            'fill-extrusion-color': maskColor,
+            'fill-extrusion-height':150,
+            'fill-extrusion-base':0,
+            'fill-extrusion-opacity':1.0
+          }
+        },'vol-3d'); // sub volumul nou
+      }catch(e){}
       volumeGeom = fp.geometry;
       baseH = 0;
       efectivNiv = rNiv;
@@ -3899,8 +3920,9 @@ function buildVolume(){
       }
       
     } else if(scenariu === 'extindere_h'){
-      // La schimbarea scenariului din liber → restaurăm backup-ul
+      // La schimbarea scenariului din liber → restaurăm backup-ul și ștergem masca
       if(S._ctxBackup?.features?.length){ S.ctx = S._ctxBackup; S._ctxBackup = null; }
+      try{ if(map.getLayer('demolish-mask')) map.removeLayer('demolish-mask'); if(map.getSource('demolish-mask-src')) map.removeSource('demolish-mask-src'); }catch(e){}
       // EXTINDERE ORIZONTALA: construim pe zona libera, langa existente
       // Cladirile existente raman vizibile
       try{map.setLayoutProperty('ctx-3d','visibility','visible');}catch(e){}
@@ -3928,8 +3950,9 @@ function buildVolume(){
       }
       
     } else if(scenariu === 'extindere_v'){
-      // La schimbarea scenariului din liber → restaurăm backup-ul
+      // La schimbarea scenariului din liber → restaurăm backup-ul și ștergem masca
       if(S._ctxBackup?.features?.length){ S.ctx = S._ctxBackup; S._ctxBackup = null; }
+      try{ if(map.getLayer('demolish-mask')) map.removeLayer('demolish-mask'); if(map.getSource('demolish-mask-src')) map.removeSource('demolish-mask-src'); }catch(e){}
       // EXTINDERE VERTICALA + ORIZONTALA: corp nou integrat
       try{map.setLayoutProperty('ctx-3d','visibility','visible');}catch(e){}
       // Footprint = intreaga zona construibila (poate include si zona cladirilor existente)
@@ -8455,6 +8478,12 @@ function _aedisRemoveExistingFromCtx(){
 function _aedisRestoreCad3D(){
   try{
     AEDIS._demolishActive = false;
+
+    // Ștergem masca de demolare (acoperă clădirile native Mapbox)
+    try{
+      if(map.getLayer('demolish-mask')) map.removeLayer('demolish-mask');
+      if(map.getSource('demolish-mask-src')) map.removeSource('demolish-mask-src');
+    }catch(e){}
 
     // Restaurăm S.ctx din backup (dacă a fost salvat la demolare)
     if(S._ctxBackup?.features?.length){
