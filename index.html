@@ -3504,9 +3504,21 @@ function buildVolume(){
     let efectivNiv = rNiv;            // niveluri efective de construit
     
     if(scenariu === 'liber'){
-      // DEMOLARE: teren complet liber - cladirile existente sunt demolate
-      // Ascundem contextul 3D pentru a vizualiza terenul curat
+      // DEMOLARE: teren complet liber — eliminăm clădirile existente
       try{map.setLayoutProperty('ctx-3d','visibility','none');}catch(e){}
+      // Eliminăm și din ctx-src (GeoJSON) clădirile de pe parcelă
+      try{
+        const ctxSrc=map.getSource('ctx-src');
+        if(ctxSrc?._data?.features){
+          const pFeat={type:'Feature',geometry:p.geo.geometry,properties:{}};
+          ctxSrc.setData({type:'FeatureCollection',features:ctxSrc._data.features.filter(f=>{
+            try{
+              return !turf.booleanPointInPolygon(
+                turf.centerOfMass(f),pFeat);
+            }catch(e){return true;}
+          })});
+        }
+      }catch(e){}
       volumeGeom = fp.geometry;
       baseH = 0;
       efectivNiv = rNiv;
@@ -4104,7 +4116,7 @@ function mobSearchOverlayUpdate(contentHtml){
 const SHORTCUT_CATALOG = [
   {id:'raport_pdf',      ico:'📄', label:'Raport Urbanistic',   fn:"showPdfModal?showPdfModal():runExport()"},
   {id:'studiu_insorire', ico:'☀',  label:'Studiu Însorire',     fn:"generateSolarStudy()"},
-  {id:'aedis_open',      ico:'⚡', label:'Deschide AEDIS',      fn:"aedisOpen()"},
+  {id:'aedis_open',      ico:'⚡', label:'Urban3D',              fn:"aedisOpen()"},
   {id:'genVol',          ico:'🏗', label:'Generează Volum 3D',  fn:"genVol()"},
   {id:'parcele_zona',    ico:'📦', label:'Parcele din Zonă',     fn:"doLoadLocalParcels()"},
   {id:'loisir',          ico:'🌿', label:'LOISIR',              fn:"aedisOpenLoisir()"},
@@ -7341,10 +7353,11 @@ function aedisBuild(){
   const ap = S.parcels[S.activeParcel??0];
   if(!ap?.geo?.geometry){ ss('⚠️ Selectați o parcelă mai întâi.'); return; }
 
-  // FIX DEMOLARE: la fiecare build în scenariu demolare, eliminăm clădirile existente de pe parcelă
-  // înainte de a adăuga noul volum
+  // DEMOLARE: eliminăm clădirile existente înainte de build
   if(AEDIS.scenariu === 'demolare'){
     _aedisRemoveExistingFromCtx();
+    // Dezactivăm și ctx-3d complet (clădiri native Mapbox tile)
+    try{map.setLayoutProperty('ctx-3d','visibility','none');}catch(e){}
   }
 
   const feats = [];
@@ -7693,8 +7706,10 @@ function aedisBuild(){
   const _lastH = (AEDIS.parterDiferit?(_lastFnDef.hParter||4.5):_lastHNiv)+(_lastNiv-1)*_lastHNiv;
   const _multiMsg = S.parcels.length>1 ? ` · ${S.parcels.length} parcele` : '';
   ss(`✅ AEDIS: ${AEDIS.corpuri[0]?.niv||4} niveluri · H=${((AEDIS.parterDiferit?(AEDIS_FN[AEDIS.fn]?.hParter||4.5):(AEDIS.corpuri[0]?.hNiv||3.0))+(((AEDIS.corpuri[0]?.niv||4)-1)*(AEDIS.corpuri[0]?.hNiv||3.0))).toFixed(1)}m · ${AEDIS_FN[AEDIS.fn]?.label||''} · ${AEDIS_STIL[AEDIS.stil]?.label||''}${S.parcels.length>1?' · '+S.parcels.length+' parcele':''}`);
-  // Actualizăm distanțele imediat după generare (nu doar async în aedisGenerateAll)
+  // Actualizăm distanțele imediat după generare
   setTimeout(()=>{ try{updateDistanceLines();}catch(e){} }, 400);
+  // Dacă viewer e deschis, rebuild rapid (fără recreare completă)
+  if(AEDIS3D.active) setTimeout(()=>{ try{_v3dRebuildFast();}catch(e){} }, 200);
 }
 
 // ── Etichete dimensionale AEDIS ────────────────────────────────────────────
@@ -7796,6 +7811,72 @@ function aedisOpenLoisir(){
   // Setăm modul AEDIS pe LOISIR
   AEDIS.mode = 'loisir';
   aedisOpen();
+}
+
+// Rebuild rapid viewer: doar mesh-urile AEDIS, fără recreare completă
+function _v3dRebuildFast(){
+  const ap=S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry||!V3D.scene||!V3D.r||!V3D.cam) return false;
+  if(!S.vol._lastFeats?.length) return false;
+  V3D.texCache={};
+  // Ştergem DOAR mesh-urile AEDIS
+  V3D.aedis.forEach(m=>{
+    V3D.scene.remove(m);
+    try{m.geometry?.dispose();if(Array.isArray(m.material))m.material.forEach(t=>t.dispose());else m.material?.dispose();}catch(e){}
+  });
+  V3D.aedis=[];
+  // Curăță liniile de muchie (EdgesGeometry)
+  const rm=[];
+  V3D.scene.children.forEach(c=>{if(c.isLineSegments&&c.renderOrder<999)rm.push(c);});
+  rm.forEach(c=>V3D.scene.remove(c));
+
+  const ring0=ap.geo.geometry.type==='Polygon'?ap.geo.geometry.coordinates[0]:ap.geo.geometry.coordinates[0][0];
+  const cx=ring0.reduce((s,c)=>s+c[0],0)/ring0.length;
+  const cy2=ring0.reduce((s,c)=>s+c[1],0)/ring0.length;
+  const mLng=111320*Math.cos(cy2*Math.PI/180),mLat=111320;
+  const toLoc=([lng,lat])=>[(lng-cx)*mLng,(lat-cy2)*mLat];
+  const THREE=window.THREE;
+  const stilKey=AEDIS.stil||'modern';
+  const COLS_V={modern:{e:'#c8daf5',p:'#1a2e42'},inovator:{e:'#c0c8ff',p:'#0e1830'},
+    clasic:{e:'#f0dcb0',p:'#5a4020'},minimalist:{e:'#e8f0f8',p:'#d8e4ee'},
+    industrial:{e:'#d0c8b8',p:'#201810'},adaptat_context:{e:'#d0eccc',p:'#1a3018'}};
+  const cv=COLS_V[stilKey]||COLS_V.modern;
+
+  (S.vol._lastFeats||[]).forEach(f=>{
+    if(!f.geometry||f.properties?.isExistent) return;
+    const base=f.properties?.base||0,top=f.properties?.top||3,floor=f.properties?.floor??0;
+    const h=top-base; if(h<=0.01) return;
+    const rt=f.properties?.roofType||'';
+    const isMans=floor<=-10&&(rt==='mansarda'||rt==='sarpanta_mica');
+    const isSarp=floor<0&&(rt==='sarpanta'||rt==='sarpanta_mica');
+    const isRoofSlab=floor<0&&(rt==='terasa_plata'||rt==='terasa'||rt==='combinat');
+    if(floor<0&&!isRoofSlab&&!isMans&&!isSarp) return;
+    const coords=f.geometry.type==='Polygon'?f.geometry.coordinates:f.geometry.coordinates[0];
+    const pts=coords[0].slice(0,-1).map(toLoc);
+    const holePts=coords.length>1?coords[1].slice(0,-1).map(toLoc):null;
+    if(pts.length<3) return;
+    let mat;
+    try{
+      if(isRoofSlab) mat=new THREE.MeshLambertMaterial({color:'#c8d0d8'});
+      else if(isMans||isSarp){const rc={modern:'#2a3a50',clasic:'#7c3512',minimalist:'#c8d0d8',inovator:'#2a1a60',industrial:'#3a2818',adaptat_context:'#4a6030'};mat=new THREE.MeshStandardMaterial({color:new THREE.Color(rc[stilKey]||'#5a4030'),roughness:0.80,metalness:0.05});}
+      else if(floor===0) mat=_v3dMatParter(THREE,stilKey,V3D.texCache);
+      else if(f.properties?.isLast) mat=_v3dMatPenthouse(THREE,stilKey,V3D.texCache);
+      else mat=_v3dMatFloor(THREE,floor===0?cv.p:cv.e,floor,stilKey,V3D.texCache);
+      if(!mat) return;
+      const mesh=_v3dPrism(THREE,pts,base,top,mat,holePts);
+      if(!mesh) return;
+      mesh.castShadow=true;mesh.receiveShadow=true;
+      V3D.scene.add(mesh);V3D.aedis.push(mesh);
+      if(mesh.isGroup)mesh.children.forEach(c=>{if(c.isMesh)_v3dAddEdges(THREE,c,V3D.scene,'#ffffff',0.18);});
+      else _v3dAddEdges(THREE,mesh,V3D.scene,'#ffffff',0.18);
+      if(floor>=0&&h>1.5){
+        _v3dAddWindows(THREE,pts,base,top,V3D.scene,stilKey);
+        if(holePts&&holePts.length>=3)_v3dAddWindows(THREE,holePts,base,top,V3D.scene,stilKey);
+      }
+    }catch(e){console.warn('fast rebuild:',e.message);}
+  });
+  V3D.r.render(V3D.scene,V3D.cam);
+  return true;
 }
 
 function aedisOpen(){
@@ -8010,7 +8091,7 @@ function aedisGetContent(){
     <div class="aedis-section">Funcțiunea principală</div>
     <div class="aedis-fn-grid">
       ${Object.entries(AEDIS_FN).map(([k,v])=>`
-        <button onclick="AEDIS.fn='${k}';V3D.texCache={};aedisRender();if(AEDIS3D.active&&S.vol.genDone)setTimeout(()=>_v3dBuild(S.parcels[S.activeParcel??0]),100)" class="aedis-fn-btn${AEDIS.fn===k?' active':''}">
+        <button onclick="AEDIS.fn='${k}';aedisRender();if(AEDIS3D.active&&S.vol.genDone)_v3dRebuildFast()" class="aedis-fn-btn${AEDIS.fn===k?' active':''}">
           <span class="aedis-fn-dot" style="background:${v.color}"></span>
           ${v.label}
         </button>`).join('')}
@@ -8041,7 +8122,7 @@ function aedisGetContent(){
     <div class="aedis-section">Stil arhitectural</div>
     <div class="aedis-stil-grid">
       ${Object.entries(AEDIS_STIL).map(([k,v])=>`
-        <button onclick="AEDIS.stil='${k}';V3D.texCache={};aedisRender();if(AEDIS3D.active&&S.vol.genDone)setTimeout(()=>_v3dBuild(S.parcels[S.activeParcel??0]),100)" class="aedis-stil-btn${AEDIS.stil===k?' active':''}">
+        <button onclick="AEDIS.stil='${k}';aedisRender();if(AEDIS3D.active&&S.vol.genDone)_v3dRebuildFast()" class="aedis-stil-btn${AEDIS.stil===k?' active':''}">
           ${v.label}<br><small>${v.desc}</small>
         </button>`).join('')}
     </div>
