@@ -530,6 +530,148 @@ canvas#c2d{width:100%;height:100%;display:block}
 </style>
 </head>
 <body>
+
+<!-- ══ LOGIN OVERLAY ════════════════════════════════════════════════════ -->
+<div id="auth-overlay" style="
+  position:fixed;inset:0;z-index:99999;
+  background:linear-gradient(135deg,#050c18 0%,#0b1628 50%,#0d1f3a 100%);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Segoe UI',system-ui,sans-serif;
+">
+  <!-- Grid bg -->
+  <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:48px 48px;pointer-events:none"></div>
+
+  <!-- Gold lines decor -->
+  <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,#d4af37,transparent)"></div>
+  <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#d4af37,transparent)"></div>
+
+  <div style="position:relative;z-index:1;width:100%;max-width:420px;padding:20px">
+
+    <!-- Card -->
+    <div id="auth-card" style="
+      background:rgba(15,25,41,.95);
+      border:1px solid rgba(212,175,55,.25);
+      border-radius:16px;padding:36px 32px;
+      box-shadow:0 32px 80px rgba(0,0,0,.6);
+      backdrop-filter:blur(12px);
+    ">
+      <!-- Logo -->
+      <div style="text-align:center;margin-bottom:28px">
+        <div style="
+          width:60px;height:60px;margin:0 auto 14px;
+          background:#172233;border:1.5px solid #d4af37;border-radius:14px;
+          display:flex;align-items:center;justify-content:center;
+          font-size:28px;font-weight:900;color:#fff;font-family:'Arial Black',sans-serif;
+          box-shadow:0 0 30px rgba(212,175,55,.2);
+        ">X</div>
+        <div style="font-size:22px;font-weight:800;color:#fff;letter-spacing:.04em">UrbanX</div>
+        <div style="font-size:11px;color:#d4af37;letter-spacing:.15em;text-transform:uppercase;margin-top:4px">Platformă Urbanistică</div>
+      </div>
+
+      <!-- Tabs: Login / Register -->
+      <div style="display:flex;background:#0b1628;border-radius:9px;padding:3px;margin-bottom:24px;gap:2px">
+        <button id="tab-login" onclick="_authTab('login')" style="
+          flex:1;padding:8px;border:none;border-radius:7px;cursor:pointer;
+          font-size:13px;font-weight:700;transition:all .2s;
+          background:#1e2d42;color:#fff;
+        ">Autentificare</button>
+        <button id="tab-register" onclick="_authTab('register')" style="
+          flex:1;padding:8px;border:none;border-radius:7px;cursor:pointer;
+          font-size:13px;font-weight:700;transition:all .2s;
+          background:transparent;color:#64748b;
+        ">Înregistrare</button>
+      </div>
+
+      <!-- Email input -->
+      <div style="margin-bottom:12px">
+        <label style="font-size:11px;color:#94a3b8;font-weight:600;letter-spacing:.05em;display:block;margin-bottom:5px">EMAIL</label>
+        <input id="auth-email" type="email" placeholder="email@exemplu.ro" style="
+          width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+          border-radius:8px;padding:11px 14px;color:#fff;font-size:13px;
+          font-family:inherit;outline:none;transition:border-color .2s;box-sizing:border-box;
+        " onfocus="this.style.borderColor='rgba(212,175,55,.5)'" onblur="this.style.borderColor='rgba(255,255,255,.1)'"
+           onkeydown="if(event.key==='Enter')_authSubmit()">
+      </div>
+
+      <!-- Password input -->
+      <div style="margin-bottom:6px">
+        <label style="font-size:11px;color:#94a3b8;font-weight:600;letter-spacing:.05em;display:block;margin-bottom:5px">PAROLĂ</label>
+        <div style="position:relative">
+          <input id="auth-pass" type="password" placeholder="Minim 8 caractere" style="
+            width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+            border-radius:8px;padding:11px 40px 11px 14px;color:#fff;font-size:13px;
+            font-family:inherit;outline:none;transition:border-color .2s;box-sizing:border-box;
+          " onfocus="this.style.borderColor='rgba(212,175,55,.5)'" onblur="this.style.borderColor='rgba(255,255,255,.1)'"
+             onkeydown="if(event.key==='Enter')_authSubmit()">
+          <span onclick="const i=document.getElementById('auth-pass');i.type=i.type==='password'?'text':'password'" style="
+            position:absolute;right:12px;top:50%;transform:translateY(-50%);
+            cursor:pointer;font-size:16px;color:#475569;user-select:none
+          ">👁</span>
+        </div>
+      </div>
+
+      <!-- Forgot password -->
+      <div id="auth-forgot-wrap" style="text-align:right;margin-bottom:20px">
+        <span onclick="_authForgot()" style="font-size:11px;color:#d4af37;cursor:pointer;text-decoration:none">
+          Ai uitat parola?
+        </span>
+      </div>
+
+      <!-- Error / Info message -->
+      <div id="auth-msg" style="
+        display:none;padding:9px 12px;border-radius:7px;
+        font-size:12px;margin-bottom:14px;font-weight:500;
+      "></div>
+
+      <!-- Submit button -->
+      <button id="auth-btn" onclick="_authSubmit()" style="
+        width:100%;padding:12px;background:#d4af37;border:none;border-radius:9px;
+        color:#0b0f1a;font-weight:800;font-size:14px;cursor:pointer;
+        font-family:inherit;transition:all .2s;letter-spacing:.02em;
+      " onmouseover="this.style.background='#f0cc6a';this.style.transform='translateY(-1px)'"
+         onmouseout="this.style.background='#d4af37';this.style.transform=''">
+        🔐 Autentificare
+      </button>
+
+      <!-- Divider -->
+      <div style="display:flex;align-items:center;gap:10px;margin:18px 0">
+        <div style="flex:1;height:1px;background:rgba(255,255,255,.08)"></div>
+        <span style="font-size:11px;color:#334155">sau</span>
+        <div style="flex:1;height:1px;background:rgba(255,255,255,.08)"></div>
+      </div>
+
+      <!-- Google OAuth -->
+      <button onclick="_authGoogle()" style="
+        width:100%;padding:10px;background:rgba(255,255,255,.05);
+        border:1px solid rgba(255,255,255,.1);border-radius:9px;
+        color:#e2e8f0;font-size:13px;font-weight:600;cursor:pointer;
+        font-family:inherit;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:10px;
+      " onmouseover="this.style.background='rgba(255,255,255,.1)'"
+         onmouseout="this.style.background='rgba(255,255,255,.05)'">
+        <svg width="18" height="18" viewBox="0 0 18 18">
+          <path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z"/>
+          <path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 0 1-7.18-2.54H1.83v2.07A8 8 0 0 0 8.98 17z"/>
+          <path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 0 1 0-3.04V5.41H1.83a8 8 0 0 0 0 7.18l2.67-2.07z"/>
+          <path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 0 0 1.83 5.4L4.5 7.49a4.77 4.77 0 0 1 4.48-3.3z"/>
+        </svg>
+        Continuă cu Google
+      </button>
+
+      <!-- Footer -->
+      <div style="text-align:center;margin-top:20px;font-size:10px;color:#1e293b;line-height:1.6">
+        UrbanX · TSS·FG · Acces restricționat<br>
+        <span style="color:#0f172a">Produs în curs de dezvoltare și cercetare</span>
+      </div>
+    </div>
+
+    <!-- Version tag -->
+    <div style="text-align:center;margin-top:14px;font-size:10px;color:#1e3a5f;letter-spacing:.08em">
+      UrbanX v1.0 · TRL 3 → SaaS
+    </div>
+  </div>
+</div>
+<!-- ══ END LOGIN OVERLAY ════════════════════════════════════════════════ -->
+
 <div id="map"></div>
 
 <!-- TOPBAR -->
@@ -541,6 +683,16 @@ canvas#c2d{width:100%;height:100%;display:block}
   <button class="tb-btn" id="btnUTR">🗺 Zone UTR</button>
   <button class="tb-btn" id="btnGPS">📍 GPS</button>
   <button class="tb-btn" id="btnMulti" title="Multiselect parcele">🔲 Multi</button>
+  <button onclick="_authLogout()" title="Deconectare" style="
+    background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);
+    color:#f87171;border-radius:7px;padding:4px 10px;cursor:pointer;
+    font-size:11px;font-weight:600;flex-shrink:0;transition:all .2s;
+    display:flex;align-items:center;gap:4px;
+  " onmouseover="this.style.background='rgba(239,68,68,.2)'"
+     onmouseout="this.style.background='rgba(239,68,68,.1)'"
+     id="btn-logout">
+    🚪 <span id="auth-user-label">Ieșire</span>
+  </button>
   <select class="tb-sel" id="selBase">
     <option value="custom">Urban 3D</option>
     <option value="standard">☀ Standard 3D ✦</option>
@@ -779,6 +931,8 @@ canvas#c2d{width:100%;height:100%;display:block}
   </div>
 </div>
 
+<!-- Supabase Auth SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://api.mapbox.com/mapbox-gl-js/v3.11.0/mapbox-gl.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.5.0/mapbox-gl-draw.js"></script>
@@ -1514,6 +1668,197 @@ const fmt=(v,s='')=>v!=null&&!isNaN(v)?`${v}${s}`:'—';
 
 // ═══ MAPBOX ═══════════════════════════════════════════════════════════════
 mapboxgl.accessToken='pk.eyJ1IjoiZWk4aHRlciIsImEiOiJjajhhNGtiN3YwOW50MnFwOHBnOGJtcjVtIn0.dT4Ld3v1GoeQRCaIzxNn2g';
+
+// ════════════════════════════════════════════════════════════════════════
+// SUPABASE AUTH — UrbanX
+// IMPORTANT: înlocuiți SUPABASE_URL și SUPABASE_ANON_KEY cu valorile
+// din Settings → API în dashboard-ul vostru Supabase
+// ════════════════════════════════════════════════════════════════════════
+const SUPABASE_URL  = 'https://xzctxxchdykowysqjzkq.supabase.co';
+// Noul format Supabase: folosiți "Publishable key" (sb_publishable_...)
+// din Settings → API Keys → Publishable key → Copy
+// NU folosiți Secret key (sb_secret_...) — aceea rămâne pe server
+const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6Y3R4eGNoZHlrb3d5c3FqemtxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2Mzg4NzAsImV4cCI6MjA5MzIxNDg3MH0.6ffZgWVs8PmDB8tNg1UmGmvHZQrNv6zhr6BE9fTmyS0';
+
+let _supabase = null;
+let _authUser = null;
+let _authMode = 'login'; // 'login' | 'register'
+
+// Inițializare Supabase
+function _initSupabase() {
+  try {
+    if(typeof supabase === 'undefined') return false;
+    if(SUPABASE_KEY.startsWith('sb_publishable_')) {
+      console.error('UrbanX Auth: Folosiți Legacy anon key (eyJ...) nu sb_publishable_!');
+      return false;
+    }
+    _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    return true;
+  } catch(e) {
+    console.warn('Supabase init failed:', e.message);
+    return false;
+  }
+}
+
+// Toggle tab login/register
+function _authTab(mode) {
+  _authMode = mode;
+  const isLogin = mode === 'login';
+  document.getElementById('tab-login').style.background    = isLogin ? '#1e2d42' : 'transparent';
+  document.getElementById('tab-login').style.color         = isLogin ? '#fff' : '#64748b';
+  document.getElementById('tab-register').style.background = !isLogin ? '#1e2d42' : 'transparent';
+  document.getElementById('tab-register').style.color      = !isLogin ? '#fff' : '#64748b';
+  document.getElementById('auth-btn').textContent          = isLogin ? '🔐 Autentificare' : '✅ Creare cont';
+  document.getElementById('auth-forgot-wrap').style.display = isLogin ? 'block' : 'none';
+  _authMsg('');
+}
+
+// Afișare mesaj
+function _authMsg(txt, isErr) {
+  const el = document.getElementById('auth-msg');
+  if(!txt){ el.style.display='none'; return; }
+  el.style.display = 'block';
+  el.style.background = isErr ? 'rgba(239,68,68,.15)' : 'rgba(34,197,94,.12)';
+  el.style.border = `1px solid ${isErr ? 'rgba(239,68,68,.3)' : 'rgba(34,197,94,.3)'}`;
+  el.style.color = isErr ? '#fca5a5' : '#86efac';
+  el.textContent = txt;
+}
+
+// Login / Register
+async function _authSubmit() {
+  if(SUPABASE_URL.includes('INLOCUIESTE') || SUPABASE_KEY.includes('INLOCUIESTE')) {
+    // Demo mode — Supabase neconfigurat, bypass cu warning
+    _authMsg('⚠ Mod demo — conectați Supabase pentru autentificare reală', false);
+    setTimeout(() => _authSuccess({ email: 'demo@urbanx.ro', id: 'demo' }), 900);
+    return;
+  }
+  if(!_supabase) { _authMsg('Eroare: Supabase indisponibil.', true); return; }
+
+  const email = document.getElementById('auth-email').value.trim();
+  const pass  = document.getElementById('auth-pass').value;
+  const btn   = document.getElementById('auth-btn');
+
+  if(!email || !pass) { _authMsg('Completați email și parola.', true); return; }
+  if(pass.length < 8) { _authMsg('Parola trebuie să aibă minim 8 caractere.', true); return; }
+
+  btn.textContent = '⏳ Se procesează…';
+  btn.disabled = true;
+  _authMsg('');
+
+  try {
+    let res;
+    if(_authMode === 'login') {
+      res = await _supabase.auth.signInWithPassword({ email, password: pass });
+    } else {
+      res = await _supabase.auth.signUp({ email, password: pass });
+    }
+
+    if(res.error) {
+      const msgs = {
+        'Invalid login credentials': 'Email sau parolă incorectă.',
+        'Email not confirmed': 'Confirmați email-ul înainte de login.',
+        'User already registered': 'Contul există deja — autentificați-vă.',
+        'Password should be at least 6 characters': 'Parola prea scurtă (minim 8 caractere).',
+      };
+      _authMsg(msgs[res.error.message] || res.error.message, true);
+    } else if(_authMode === 'register' && !res.data?.session) {
+      _authMsg('✅ Cont creat! Verificați email-ul pentru confirmare.', false);
+    } else {
+      _authSuccess(res.data.user);
+    }
+  } catch(e) {
+    _authMsg('Eroare conexiune: ' + e.message, true);
+  }
+
+  btn.disabled = false;
+  btn.textContent = _authMode === 'login' ? '🔐 Autentificare' : '✅ Creare cont';
+}
+
+// Google OAuth
+async function _authGoogle() {
+  if(!_supabase || SUPABASE_URL.includes('INLOCUIESTE') || SUPABASE_KEY.includes('INLOCUIESTE')) {
+    _authMsg('OAuth Google necesită Supabase configurat.', true); return;
+  }
+  const { error } = await _supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.href }
+  });
+  if(error) _authMsg(error.message, true);
+}
+
+// Forgot password
+async function _authForgot() {
+  const email = document.getElementById('auth-email').value.trim();
+  if(!email) { _authMsg('Introduceți email-ul pentru resetare parolă.', true); return; }
+  if(!_supabase || SUPABASE_URL.includes('INLOCUIESTE') || SUPABASE_KEY.includes('INLOCUIESTE')) {
+    _authMsg('Reset parolă necesită Supabase configurat.', true); return;
+  }
+  const { error } = await _supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.href
+  });
+  _authMsg(error ? error.message : '✅ Email de resetare trimis! Verificați inbox-ul.', !!error);
+}
+
+// Autentificare reușită — ascundem overlay-ul
+function _authSuccess(user) {
+  _authUser = user;
+  const ov = document.getElementById('auth-overlay');
+  if(ov) {
+    ov.style.transition = 'opacity .4s ease';
+    ov.style.opacity = '0';
+    setTimeout(() => { ov.style.display = 'none'; }, 420);
+  }
+  // Afișăm email-ul în topbar
+  const userLbl = document.getElementById('auth-user-label');
+  if(userLbl && user?.email) {
+    const shortEmail = user.email.split('@')[0];
+    userLbl.textContent = shortEmail.length > 10 ? shortEmail.slice(0,10)+'…' : shortEmail;
+  }
+  console.log('✅ UrbanX Auth OK:', user?.email || user?.id);
+}
+
+// Logout
+function _authLogout() {
+  if(_supabase) _supabase.auth.signOut();
+  _authUser = null;
+  const ov = document.getElementById('auth-overlay');
+  if(ov) { ov.style.display='flex'; ov.style.opacity='1'; }
+  document.getElementById('auth-email').value = '';
+  document.getElementById('auth-pass').value  = '';
+  _authTab('login');
+}
+
+// ── Startup: verificăm sesiunea existentă ──────────────────────────────
+(async function _authInit() {
+  const ok = _initSupabase();
+
+  if(!ok || SUPABASE_URL.includes('INLOCUIESTE')) {
+    // Supabase neconfigurat — afișăm overlay în mod demo
+    // Utilizatorul poate intra apăsând butonul (bypass automat)
+    return;
+  }
+
+  try {
+    // Verificăm dacă există o sesiune activă (după refresh pagină)
+    const { data: { session } } = await _supabase.auth.getSession();
+    if(session?.user) {
+      _authSuccess(session.user);
+      return;
+    }
+
+    // Ascultăm schimbările de auth state (după OAuth redirect)
+    _supabase.auth.onAuthStateChange((event, session) => {
+      if(event === 'SIGNED_IN' && session?.user) {
+        _authSuccess(session.user);
+      } else if(event === 'SIGNED_OUT') {
+        _authLogout();
+      }
+    });
+  } catch(e) {
+    console.warn('Auth check failed:', e.message);
+  }
+})();
+
 var STYLES={
   custom:'mapbox://styles/ei8hter/clftn1bs7001l01qkclbhwzzq',
   standard:'mapbox://styles/mapbox/standard',
