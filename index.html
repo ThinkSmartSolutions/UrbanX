@@ -683,25 +683,6 @@ canvas#c2d{width:100%;height:100%;display:block}
   <button class="tb-btn" id="btnUTR">🗺 Zone UTR</button>
   <button class="tb-btn" id="btnGPS">📍 GPS</button>
   <button class="tb-btn" id="btnMulti" title="Multiselect parcele">🔲 Multi</button>
-  <button onclick="_adminOpen()" id="btn-admin" title="Panou Admin" style="
-    display:none;background:rgba(212,175,55,.15);border:1px solid rgba(212,175,55,.4);
-    color:#d4af37;border-radius:7px;padding:4px 10px;cursor:pointer;
-    font-size:11px;font-weight:700;flex-shrink:0;transition:all .2s;
-    align-items:center;gap:4px;
-  " onmouseover="this.style.background='rgba(212,175,55,.3)'"
-     onmouseout="this.style.background='rgba(212,175,55,.15)'">
-    ⚙️ Admin
-  </button>
-  <button onclick="_authLogout()" title="Deconectare" style="
-    background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);
-    color:#f87171;border-radius:7px;padding:4px 10px;cursor:pointer;
-    font-size:11px;font-weight:600;flex-shrink:0;transition:all .2s;
-    display:flex;align-items:center;gap:4px;
-  " onmouseover="this.style.background='rgba(239,68,68,.2)'"
-     onmouseout="this.style.background='rgba(239,68,68,.1)'"
-     id="btn-logout">
-    🚪 <span id="auth-user-label">Ieșire</span>
-  </button>
   <select class="tb-sel" id="selBase">
     <option value="custom">Urban 3D</option>
     <option value="standard">☀ Standard 3D ✦</option>
@@ -730,7 +711,28 @@ canvas#c2d{width:100%;height:100%;display:block}
     <button onclick="generateMemoriu();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#d4af37;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏗 Memoriu Tehnic Preliminar</button>
   </div>
 </div>
-  
+
+  <!-- Butoane Admin & Cont — dreapta topbar -->
+  <button onclick="_adminOpen()" id="btn-admin" title="Panou Admin" style="
+    display:none;background:rgba(212,175,55,.15);border:1px solid rgba(212,175,55,.4);
+    color:#d4af37;border-radius:7px;padding:4px 10px;cursor:pointer;
+    font-size:11px;font-weight:700;flex-shrink:0;transition:all .2s;
+    align-items:center;gap:4px;
+  " onmouseover="this.style.background='rgba(212,175,55,.3)'"
+     onmouseout="this.style.background='rgba(212,175,55,.15)'">
+    ⚙️ Admin
+  </button>
+  <button onclick="_authLogout()" title="Deconectare" style="
+    background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);
+    color:#f87171;border-radius:7px;padding:4px 10px;cursor:pointer;
+    font-size:11px;font-weight:600;flex-shrink:0;transition:all .2s;
+    display:flex;align-items:center;gap:4px;
+  " onmouseover="this.style.background='rgba(239,68,68,.2)'"
+     onmouseout="this.style.background='rgba(239,68,68,.1)'"
+     id="btn-logout">
+    🚪 <span id="auth-user-label">Ieșire</span>
+  </button>
+
   <!-- Mobile: buton GPS și 3D/2D vizibile întotdeauna -->
 </div>
 
@@ -3874,6 +3876,10 @@ function buildVolume(){
         S._ctxBackup = JSON.parse(JSON.stringify(S.ctx));
       }
       try{map.setLayoutProperty('ctx-3d','visibility','none');}catch(e){}
+      // Ascundem și clădirile native Mapbox (Standard 3D le are ca layere separate)
+      ['building','building-extrusion','3d-buildings','add-3d-buildings'].forEach(id=>{
+        try{ if(map.getLayer(id)) map.setLayoutProperty(id,'visibility','none'); }catch(e){}
+      });
       // Filtrăm DOAR sursa de randare, nu S.ctx
       try{
         if(S._ctxBackup?.features){
@@ -3886,26 +3892,27 @@ function buildVolume(){
           setSource('ctx-src',{type:'FeatureCollection',features:filtered});
         }
       }catch(e){}
-      // Mască de demolare — acoperă clădirile native Mapbox cu fill-extrusion înalt
+      // Mască de demolare — acoperă clădirile native Mapbox
+      // Folosim fill (2D) nu fill-extrusion pentru a nu interfera cu volumul 3D
       try{
         const pGeom = p.geo.geometry;
         if(map.getLayer('demolish-mask')) map.removeLayer('demolish-mask');
         if(map.getSource('demolish-mask-src')) map.removeSource('demolish-mask-src');
-        // Culoarea terenului depinde de stilul activ
         const baseStyle = document.getElementById('selBase')?.value || 'custom';
-        const maskColor = baseStyle === 'sat' ? '#1a3a1a' : baseStyle === 'streets' ? '#f0ebe3' : '#0e1a2b';
-        map.addSource('demolish-mask-src',{type:'geojson',data:{type:'FeatureCollection',features:[{type:'Feature',geometry:pGeom,properties:{h:150}}]}});
+        const maskColor = baseStyle === 'sat' ? '#1a3020' : baseStyle === 'streets' ? '#e8e0d4' : '#0d1926';
+        map.addSource('demolish-mask-src',{type:'geojson',data:{type:'FeatureCollection',features:[{type:'Feature',geometry:pGeom,properties:{}}]}});
+        // fill-extrusion cu înălțime mică (0.5m) — acoperă solul și clădirile joase Mapbox
+        // Plasat ÎNAINTE de vol-3d în stack
         map.addLayer({
           id:'demolish-mask',
-          type:'fill-extrusion',
+          type:'fill',
           source:'demolish-mask-src',
           paint:{
-            'fill-extrusion-color': maskColor,
-            'fill-extrusion-height':150,
-            'fill-extrusion-base':0,
-            'fill-extrusion-opacity':1.0
+            'fill-color': maskColor,
+            'fill-opacity': 1.0,
+            'fill-antialias': false
           }
-        },'vol-3d'); // sub volumul nou
+        },'ctx-3d'); // sub ctx-3d și sub vol-3d
       }catch(e){}
       volumeGeom = fp.geometry;
       baseH = 0;
@@ -3923,6 +3930,7 @@ function buildVolume(){
       // La schimbarea scenariului din liber → restaurăm backup-ul și ștergem masca
       if(S._ctxBackup?.features?.length){ S.ctx = S._ctxBackup; S._ctxBackup = null; }
       try{ if(map.getLayer('demolish-mask')) map.removeLayer('demolish-mask'); if(map.getSource('demolish-mask-src')) map.removeSource('demolish-mask-src'); }catch(e){}
+      ['building','building-extrusion','3d-buildings','add-3d-buildings'].forEach(id=>{try{if(map.getLayer(id))map.setLayoutProperty(id,'visibility','visible');}catch(e){}});
       // EXTINDERE ORIZONTALA: construim pe zona libera, langa existente
       // Cladirile existente raman vizibile
       try{map.setLayoutProperty('ctx-3d','visibility','visible');}catch(e){}
@@ -3953,6 +3961,7 @@ function buildVolume(){
       // La schimbarea scenariului din liber → restaurăm backup-ul și ștergem masca
       if(S._ctxBackup?.features?.length){ S.ctx = S._ctxBackup; S._ctxBackup = null; }
       try{ if(map.getLayer('demolish-mask')) map.removeLayer('demolish-mask'); if(map.getSource('demolish-mask-src')) map.removeSource('demolish-mask-src'); }catch(e){}
+      ['building','building-extrusion','3d-buildings','add-3d-buildings'].forEach(id=>{try{if(map.getLayer(id))map.setLayoutProperty(id,'visibility','visible');}catch(e){}});
       // EXTINDERE VERTICALA + ORIZONTALA: corp nou integrat
       try{map.setLayoutProperty('ctx-3d','visibility','visible');}catch(e){}
       // Footprint = intreaga zona construibila (poate include si zona cladirilor existente)
@@ -8490,6 +8499,11 @@ function _aedisRestoreCad3D(){
       S.ctx = S._ctxBackup;
       S._ctxBackup = null;
     }
+
+    // Restaurăm și layerele native Mapbox (ascunse la demolare)
+    ['building','building-extrusion','3d-buildings','add-3d-buildings'].forEach(id=>{
+      try{ if(map.getLayer(id)) map.setLayoutProperty(id,'visibility','visible'); }catch(e){}
+    });
 
     // Restaurăm ctx-3d vizibil (dacă nu e onlyVol)
     try{
