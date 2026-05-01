@@ -7920,7 +7920,61 @@ function _v3dRebuildFast(){
   V3D._raf = requestAnimationFrame(()=>{
     if(V3D.r && V3D.scene && V3D.cam) V3D.r.render(V3D.scene, V3D.cam);
   });
+  // Actualizăm legenda cu valorile curente
+  _v3dUpdateLegend();
   return true;
+}
+
+// Actualizează legenda contextuală din viewer
+function _v3dUpdateLegend(){
+  const leg = document.getElementById('v3d-legend');
+  if(!leg) return;
+  const niv2 = AEDIS.corpuri[0]?.niv||4;
+  const hNiv2 = AEDIS.corpuri[0]?.hNiv||3.0;
+  const fnDef2 = AEDIS_FN[AEDIS.fn]||AEDIS_FN.rezidential_colectiv;
+  const hP2 = AEDIS.parterDiferit?(fnDef2.hParter||4.5):hNiv2;
+  const hTot2 = (hP2+(niv2-1)*hNiv2).toFixed(1);
+  const stilLabel2 = AEDIS_STIL[AEDIS.stil]?.label||'Modern';
+  const etajRetras2 = AEDIS.activeRetragere && (AEDIS_STIL[AEDIS.stil]?.retragereFactor||1)<0.98;
+  const etajeNorm2 = niv2-1-(etajRetras2?1:0);
+  const acoperis2 = {terasa_plata:'Terasă plată',terasa_circulabila:'Terasă circulabilă',sarpanta:'Șarpantă',mansarda:'Mansardă',combinat:'Combinat'}[AEDIS.tipAcoperis]||'Terasă plată';
+  const forma2 = {patrat:'Formă pătrat',dreptunghi:'Dreptunghi',L:'Formă L',U:'Formă U',T:'Formă T',curte:'Curte interioară',bara:'Bară'}[AEDIS.forma||'auto']||'';
+
+  let etajStr2 = [];
+  if(AEDIS.parterDiferit) etajStr2.push('Parter '+(AEDIS_FN[AEDIS.fnParter]?.label||''));
+  else etajStr2.push('Parter');
+  if(etajeNorm2>0) etajStr2.push(etajeNorm2+(etajeNorm2===1?' etaj':' etaje'));
+  if(etajRetras2) etajStr2.push('+ etaj retras');
+
+  leg.innerHTML = \`
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+      <span style="font-size:15px">\${fnDef2.icon||'🏢'}</span>
+      <div>
+        <div style="font-size:12px;font-weight:800;color:#d4af37;letter-spacing:0.03em">\${fnDef2.label||'Clădire'}</div>
+        <div style="font-size:9.5px;color:#64748b;letter-spacing:0.04em;text-transform:uppercase">\${stilLabel2}</div>
+      </div>
+    </div>
+    <div style="height:1px;background:rgba(212,175,55,0.15);margin:6px 0"></div>
+    <div style="display:flex;flex-direction:column;gap:3px">
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:10px;color:#38bdf8;font-weight:700;min-width:40px">\${hTot2}m</span>
+        <span style="font-size:10px;color:#94a3b8">\${etajStr2.join(' · ')}</span>
+      </div>
+      \${forma2?'<div style="display:flex;align-items:center;gap:6px"><span style="font-size:9px;color:#64748b;min-width:40px">Formă</span><span style="font-size:10px;color:#94a3b8">'+forma2+'</span></div>':''}
+      \${AEDIS.peretelCortina?'<div style="display:flex;align-items:center;gap:6px"><span style="font-size:9px;color:#64748b;min-width:40px">Fațadă</span><span style="font-size:10px;color:#60a5fa">Perete cortină '+( AEDIS.cortinaProcent||60)+'%</span></div>':''}
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:9px;color:#64748b;min-width:40px">Acoperiș</span>
+        <span style="font-size:10px;color:#94a3b8">\${acoperis2}</span>
+      </div>
+    </div>
+    <div style="height:1px;background:rgba(212,175,55,0.15);margin:6px 0"></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <div style="text-align:center"><div style="font-size:11px;font-weight:700;color:#d4af37">\${niv2}</div><div style="font-size:8px;color:#475569;text-transform:uppercase">niveluri</div></div>
+      <div style="text-align:center"><div style="font-size:11px;font-weight:700;color:#38bdf8">\${hNiv2}m</div><div style="font-size:8px;color:#475569;text-transform:uppercase">H etaj</div></div>
+      <div style="text-align:center"><div style="font-size:11px;font-weight:700;color:#4ade80">\${S.parcels[S.activeParcel??0]?.area?.toFixed(0)||'—'}mp</div><div style="font-size:8px;color:#475569;text-transform:uppercase">teren</div></div>
+      <div style="text-align:center"><div style="font-size:11px;font-weight:700;color:#f472b6">\${S.parcels[S.activeParcel??0]?.utr||'—'}</div><div style="font-size:8px;color:#475569;text-transform:uppercase">UTR</div></div>
+    </div>
+  \`;
 }
 
 function aedisOpen(){
@@ -11565,30 +11619,146 @@ function aedisOpen3DViewer(){
   const stilDef = AEDIS_STIL[AEDIS.stil]||AEDIS_STIL.modern;
   const hTot = ((AEDIS.parterDiferit?(fnDef.hParter||4.5):hNiv)+(niv-1)*hNiv).toFixed(1);
 
-  ov.innerHTML = `
-    <div style="background:#080f1c;border-bottom:1px solid rgba(139,92,246,.3);padding:8px 12px;display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap">
-      <div style="font-size:12px;font-weight:800;color:#a78bfa;flex-shrink:0">🔭 Urban3D</div>
-      <div style="font-size:10px;color:#64748b;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${fnDef.label||''} · ${niv} niv.</div>
-      <select id="v3d-light" onchange="_v3dLight(this.value)" style="background:#0f172a;color:#e2e8f0;border:1px solid rgba(255,255,255,.15);border-radius:7px;padding:4px 8px;font-size:10px;flex-shrink:0">
+  // ── Calculăm detaliile pentru legendă ────────────────────────────────────
+  const etajRetras = Object.keys(AEDIS.retrageriFineEtaje||{}).length > 0
+    || (AEDIS.activeRetragere && (AEDIS_STIL[AEDIS.stil]?.retragereFactor||1)<0.98);
+  const etajRetrasNiv = AEDIS.activeRetragere ? niv : null;
+  const parterLabel = AEDIS.parterDiferit
+    ? (AEDIS_FN[AEDIS.fnParter]?.label||'Parter diferit')
+    : null;
+  const acoperisLabel = {
+    terasa_plata:'Terasă plată', terasa_circulabila:'Terasă circulabilă',
+    sarpanta:'Șarpantă', mansarda:'Mansardă', combinat:'Combinat'
+  }[AEDIS.tipAcoperis]||'Terasă plată';
+  const hP = AEDIS.parterDiferit ? (fnDef.hParter||4.5) : hNiv;
+  const multiParc = S.parcels.length > 1 ? ` · ${S.parcels.length} parcele` : '';
+  const formaLabel = {
+    auto:'', patrat:'Formă pătrat', dreptunghi:'Formă dreptunghi',
+    L:'Formă L', U:'Formă U', T:'Formă T', curte:'Curte interioară', bara:'Bară'
+  }[AEDIS.forma||'auto'];
+  const hasCortina = AEDIS.peretelCortina;
+
+  // Construim textul de legendă: "Parter + 3 etaje + etaj retras"
+  const etajStr = (() => {
+    let parts = [];
+    if(AEDIS.parterDiferit) parts.push('Parter ' + (AEDIS_FN[AEDIS.fnParter]?.label||''));
+    else parts.push('Parter');
+    const etajeNorm = niv - 1 - (etajRetras ? 1 : 0);
+    if(etajeNorm > 0) parts.push(etajeNorm + (etajeNorm===1?' etaj':' etaje'));
+    if(etajRetras) parts.push('+ etaj retras');
+    return parts.join(' · ');
+  })();
+
+  ov.innerHTML = \`
+    <!-- TOPBAR VIEWER -->
+    <div style="background:#07101e;border-bottom:1px solid rgba(139,92,246,.25);padding:7px 10px;display:flex;align-items:center;gap:6px;flex-shrink:0;flex-wrap:wrap">
+      <div style="font-size:12px;font-weight:800;color:#a78bfa;flex-shrink:0;display:flex;align-items:center;gap:5px">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" style="width:16px;height:16px"><defs><linearGradient id="vlbg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1e2c42"/><stop offset="1" stop-color="#070d16"/></linearGradient><linearGradient id="vlg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe08a"/><stop offset="0.5" stop-color="#d69e36"/><stop offset="1" stop-color="#9b641d"/></linearGradient></defs><rect width="1024" height="1024" rx="210" fill="url(#vlbg)"/><path d="M180 280h260l135 232-135 232H180l150-232z" fill="#f6f8fc"/><path d="M610 282h235L710 485H540z" fill="url(#vlg)"/><path d="M540 539h170l135 203H610z" fill="url(#vlg)"/></svg>
+        Urban3D
+      </div>
+      <select id="v3d-light" onchange="_v3dLight(this.value)" style="background:#0f172a;color:#e2e8f0;border:1px solid rgba(255,255,255,.12);border-radius:7px;padding:3px 7px;font-size:10px;flex-shrink:0">
         <option value="day">☀ Zi</option>
         <option value="golden">🌅 Golden</option>
         <option value="overcast">☁ Înnor.</option>
         <option value="night">🌙 Noapte</option>
       </select>
-      <select id="v3d-ctx" onchange="_v3dCtxViz(this.value)" style="background:#0f172a;color:#e2e8f0;border:1px solid rgba(255,255,255,.15);border-radius:7px;padding:4px 8px;font-size:10px;flex-shrink:0">
+      <select id="v3d-ctx" onchange="_v3dCtxViz(this.value)" style="background:#0f172a;color:#e2e8f0;border:1px solid rgba(255,255,255,.12);border-radius:7px;padding:3px 7px;font-size:10px;flex-shrink:0">
         <option value="show">Context</option>
         <option value="wire">Wireframe</option>
         <option value="hide">Ascunde</option>
       </select>
-      <button onclick="_v3dResetCam()" style="background:rgba(255,255,255,.06);color:#94a3b8;border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:4px 10px;font-size:11px;cursor:pointer;flex-shrink:0">⌂</button>
-      <button id="v3d-dist-btn" onclick="_v3dToggleDistances()" title="Toggle distanțe vecini"
-        style="background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.3);border-radius:7px;padding:4px 10px;font-size:11px;cursor:pointer;flex-shrink:0">
-        📏 Distanțe
-      </button>
-      <button onclick="document.getElementById('aedis-3d-viewer-overlay').remove();_v3dCleanup()" style="background:rgba(20,30,60,.9);color:#a78bfa;border:1px solid rgba(139,92,246,.4);border-radius:8px;padding:6px 16px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0">✕ Inchide</button>
+      <button onclick="_v3dResetCam()" title="Reset cameră" style="background:rgba(255,255,255,.05);color:#94a3b8;border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:3px 9px;font-size:11px;cursor:pointer;flex-shrink:0">⌂</button>
+      <button id="v3d-dist-btn" onclick="_v3dToggleDistances()" title="Toggle distanțe vecini" style="background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.3);border-radius:7px;padding:3px 9px;font-size:11px;cursor:pointer;flex-shrink:0">📏</button>
+      <div style="flex:1"></div>
+      <button onclick="document.getElementById('aedis-3d-viewer-overlay').remove();_v3dCleanup()" style="background:rgba(20,30,60,.9);color:#a78bfa;border:1px solid rgba(139,92,246,.4);border-radius:8px;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0">✕ Închide</button>
     </div>
-    <canvas id="v3d-canvas" style="flex:1;display:block;cursor:grab;touch-action:none"></canvas>
-    <div id="v3d-status" style="position:absolute;bottom:10px;left:14px;font-size:10px;color:#475569;pointer-events:none">Se inițializează…</div>`;
+
+    <!-- CANVAS -->
+    <canvas id="v3d-canvas" style="flex:1;display:block;cursor:grab;touch-action:none;min-height:0"></canvas>
+
+    <!-- LEGENDĂ CONTEXTUALĂ — colț stânga jos -->
+    <div id="v3d-legend" style="position:absolute;bottom:32px;left:12px;
+      background:rgba(7,12,26,0.88);border:1px solid rgba(212,175,55,0.25);
+      border-radius:10px;padding:10px 14px;pointer-events:none;
+      backdrop-filter:blur(6px);max-width:260px;min-width:180px">
+
+      <!-- Titlu funcțiune + stil -->
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+        <span style="font-size:15px">\${fnDef.icon||'🏢'}</span>
+        <div>
+          <div style="font-size:12px;font-weight:800;color:#d4af37;letter-spacing:0.03em">\${fnDef.label||'Clădire'}</div>
+          <div style="font-size:9.5px;color:#64748b;letter-spacing:0.04em;text-transform:uppercase">\${AEDIS_STIL[AEDIS.stil]?.label||'Modern'}</div>
+        </div>
+      </div>
+
+      <!-- Separator -->
+      <div style="height:1px;background:rgba(212,175,55,0.15);margin:6px 0"></div>
+
+      <!-- Detalii volumetrice -->
+      <div style="display:flex;flex-direction:column;gap:3px">
+        <!-- Înălțime + regim -->
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:10px;color:#38bdf8;font-weight:700;min-width:40px">\${hTot}m</span>
+          <span style="font-size:10px;color:#94a3b8">\${etajStr}</span>
+        </div>
+
+        <!-- Forma + cortina dacă e cazul -->
+        \${formaLabel ? \`<div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:9px;color:#64748b;min-width:40px">Formă</span>
+          <span style="font-size:10px;color:#94a3b8">\${formaLabel}</span>
+        </div>\` : ''}
+
+        \${hasCortina ? \`<div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:9px;color:#64748b;min-width:40px">Fațadă</span>
+          <span style="font-size:10px;color:#60a5fa">Perete cortină \${AEDIS.cortinaProcent||60}%</span>
+        </div>\` : ''}
+
+        <!-- Acoperiș -->
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:9px;color:#64748b;min-width:40px">Acoperiș</span>
+          <span style="font-size:10px;color:#94a3b8">\${acoperisLabel}</span>
+        </div>
+
+        <!-- Parcele multiple -->
+        \${S.parcels.length>1 ? \`<div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:9px;color:#64748b;min-width:40px">Parcele</span>
+          <span style="font-size:10px;color:#4ade80">\${S.parcels.length} parcele selectate</span>
+        </div>\` : ''}
+      </div>
+
+      <!-- Separator -->
+      <div style="height:1px;background:rgba(212,175,55,0.15);margin:6px 0"></div>
+
+      <!-- Indicatori cheie -->
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <div style="text-align:center">
+          <div style="font-size:11px;font-weight:700;color:#d4af37">\${niv}</div>
+          <div style="font-size:8px;color:#475569;text-transform:uppercase">niveluri</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:11px;font-weight:700;color:#38bdf8">\${hNiv}m</div>
+          <div style="font-size:8px;color:#475569;text-transform:uppercase">H etaj</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:11px;font-weight:700;color:#4ade80">\${S.parcels[S.activeParcel??0]?.area?.toFixed(0)||'—'}mp</div>
+          <div style="font-size:8px;color:#475569;text-transform:uppercase">teren</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:11px;font-weight:700;color:#f472b6">\${S.parcels[S.activeParcel??0]?.utr||'—'}</div>
+          <div style="font-size:8px;color:#475569;text-transform:uppercase">UTR</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATUS jos dreapta -->
+    <div id="v3d-status" style="position:absolute;bottom:10px;right:12px;font-size:9px;color:#334155;pointer-events:none;text-align:right">Se inițializează…</div>
+    <!-- Watermark UrbanX -->
+    <div style="position:absolute;bottom:10px;left:12px;display:flex;align-items:center;gap:4px;pointer-events:none;opacity:0.4">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" style="width:13px;height:13px"><defs><linearGradient id="vwm" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1e2c42"/><stop offset="1" stop-color="#070d16"/></linearGradient><linearGradient id="vwmg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe08a"/><stop offset="0.5" stop-color="#d69e36"/><stop offset="1" stop-color="#9b641d"/></linearGradient></defs><rect width="1024" height="1024" rx="210" fill="url(#vwm)"/><path d="M180 280h260l135 232-135 232H180l150-232z" fill="#f6f8fc"/><path d="M610 282h235L710 485H540z" fill="url(#vwmg)"/><path d="M540 539h170l135 203H610z" fill="url(#vwmg)"/></svg>
+      <span style="font-size:9px;font-weight:700;color:#d4af37">UrbanX</span>
+      <span style="font-size:7px;color:#334155">TSS·FG</span>
+    </div>
+  \`;
 
   // Asigurăm că distanțele sunt calculate ÎNAINTE de a deschide viewer-ul
   // Dacă dist-src e gol, calculăm acum și așteptăm
