@@ -3879,34 +3879,10 @@ function buildVolume(){
       if(!S._ctxBackup && S.ctx?.features?.length){
         S._ctxBackup = JSON.parse(JSON.stringify(S.ctx));
       }
-
-      // 1. Ascundem DOAR ctx-3d (clădirile noastre din Overpass)
+      // Ascundem ctx-3d (clădirile noastre din Overpass)
       try{map.setLayoutProperty('ctx-3d','visibility','none');}catch(e){}
-
-      // 2. Mască fill-extrusion înaltă — acoperă clădirile native de pe parcelă
-      // Nu atingem layerele native globale (nu dispare tot contextul)
-      try{
-        if(map.getLayer('demolish-mask')) map.removeLayer('demolish-mask');
-        if(map.getSource('demolish-mask-src')) map.removeSource('demolish-mask-src');
-        const baseStyle = document.getElementById('selBase')?.value || 'custom';
-        const maskColor = baseStyle === 'sat' ? '#1a3020' : baseStyle === 'streets' ? '#dde8e0' : '#0d1926';
-        map.addSource('demolish-mask-src',{type:'geojson',data:{type:'FeatureCollection',features:[{type:'Feature',geometry:p.geo.geometry,properties:{}}]}});
-        // fill-extrusion cu H=500m — acoperă orice clădire nativă de pe parcelă
-        // Layerul e adăugat după vol-3d deci e deasupra tuturor nativelor
-        map.addLayer({
-          id:'demolish-mask',
-          type:'fill-extrusion',
-          source:'demolish-mask-src',
-          paint:{
-            'fill-extrusion-color': maskColor,
-            'fill-extrusion-height': 500,
-            'fill-extrusion-base': 0,
-            'fill-extrusion-opacity': 1.0
-          }
-        });
-        // vol-3d trebuie să fie deasupra măștii
-        try{ map.moveLayer('vol-3d'); map.moveLayer('vol-3d-outline'); }catch(e){}
-      }catch(e){}
+      // Curățăm orice mască anterioară
+      try{if(map.getLayer('demolish-mask'))map.removeLayer('demolish-mask');if(map.getSource('demolish-mask-src'))map.removeSource('demolish-mask-src');}catch(e){}
       volumeGeom = fp.geometry;
       baseH = 0;
       efectivNiv = rNiv;
@@ -5968,7 +5944,6 @@ function genVolAll(){
   S.vol._lastFeats=feats;
   setSource('vol-src',{type:'FeatureCollection',features:feats});
   S.vol.genDone=true;
-  try{if(map.getLayer("demolish-mask"))map.removeLayer("demolish-mask");if(map.getSource("demolish-mask-src"))map.removeSource("demolish-mask-src");}catch(e){}
   set3D(60,-20);
   ss('🏗 Volum unificat generat pentru toate parcelele!');
   setTimeout(updateDistanceLines, 400);
@@ -5986,7 +5961,6 @@ function genVolEach(){
   S.vol._lastFeats=feats;
   setSource('vol-src',{type:'FeatureCollection',features:feats});
   S.vol.genDone=true;
-  try{if(map.getLayer("demolish-mask"))map.removeLayer("demolish-mask");if(map.getSource("demolish-mask-src"))map.removeSource("demolish-mask-src");}catch(e){}
   set3D(60,-20);
   ss('🏗 Volume individuale generate per parcelă!');
   setTimeout(updateDistanceLines, 400);
@@ -7048,7 +7022,6 @@ async function exportVol3(pdf, ap, r, p){
     const feats=buildVolume();
     setSource('vol-src',{type:'FeatureCollection',features:feats});
     S.vol.genDone=true;
-  try{if(map.getLayer("demolish-mask"))map.removeLayer("demolish-mask");if(map.getSource("demolish-mask-src"))map.removeSource("demolish-mask-src");}catch(e){}
     // Calculam si afisam distantele fata de vecinii adiacenti
     setTimeout(updateDistanceLines, 300);
     try{map.setLayoutProperty('ctx-3d','visibility',sc.ctxViz?'visible':'none');}catch(e){}
@@ -8122,7 +8095,6 @@ function aedisBuild(){
 
   S.vol._lastFeats = feats;
   S.vol.genDone = true;
-  try{if(map.getLayer("demolish-mask"))map.removeLayer("demolish-mask");if(map.getSource("demolish-mask-src"))map.removeSource("demolish-mask-src");}catch(e){}
   setSource('vol-src',{type:'FeatureCollection',features:feats});
 
   set3D(65,-25);
@@ -12049,8 +12021,9 @@ function aedisOpen3DViewer(){
     ss('⚠️ Generați mai întâi volumul 3D (butonul ⚡).'); return;
   }
 
-  // Viewer-ul are z-index:9998 și acoperă tot ecranul inclusiv topbar-ul
-  // Nu mai ascundem topbar-ul — viewer-ul îl acoperă natural prin z-index
+  // Ascundem topbar-ul principal când viewer-ul e deschis
+  const _tb = document.getElementById('topbar');
+  if(_tb) _tb.style.display = 'none';
 
   let ov = document.getElementById('aedis-3d-viewer-overlay');
   if(ov) ov.remove();
@@ -12225,6 +12198,9 @@ function _v3dCleanup(){
   if(V3D.r){ V3D.r.dispose(); V3D.r=null; }
   Object.values(V3D.texCache).forEach(t=>{ try{t.dispose();}catch(e){} });
   V3D.texCache={}; V3D.scene=null; V3D.cam=null; V3D.ctx=[]; V3D.aedis=[]; V3D.distShown=false;
+  // Restaurăm topbar-ul
+  const _tb = document.getElementById('topbar');
+  if(_tb) _tb.style.display = 'flex';
 }
 
 function _v3dStatus(msg){ const el=document.getElementById('v3d-status'); if(el) el.textContent=msg; }
