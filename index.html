@@ -7,6 +7,20 @@
 <meta http-equiv="Pragma" content="no-cache"/>
 <meta http-equiv="Expires" content="0"/>
 <title>UrbanX – PUG Iași</title>
+<meta name="description" content="UrbanX AEDIS — Generator volumetric urbanistic avansat. Analiză cadastrală, PUG, indicatori urbanistici, studii de specialitate și vizualizare 3D pentru Municipiul Iași.">
+<link rel="icon" href="./favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="./favicon.svg">
+<link rel="icon" type="image/png" sizes="96x96" href="./favicon-96x96.png">
+<link rel="icon" type="image/png" sizes="48x48" href="./favicon-48x48.png">
+<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+<link rel="manifest" href="./site.webmanifest">
+<meta name="theme-color" content="#0b0f1a">
+<meta name="application-name" content="UrbanX AEDIS">
+<meta name="apple-mobile-web-app-title" content="UrbanX">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link href="https://api.mapbox.com/mapbox-gl-js/v3.11.0/mapbox-gl.css" rel="stylesheet"/>
 <link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.5.0/mapbox-gl-draw.css" rel="stylesheet"/>
 <style>
@@ -10282,7 +10296,7 @@ async function generateNoiseStudy(){
   const vecini=S.ctx?.features||[];
   const parcelCtr=turf.centerOfMass(ap.geo).geometry.coordinates;
   const surse=vecini.filter(f=>{
-    const d=turf.distance({type:'Feature',geometry:{type:'Point',coordinates:parcelCtr}},{type:'Feature',geometry:{type:'Point',coordinates:turf.centerOfMass(f).geometry.coordinates}},{units:'meters'});
+    const d=turf.distance({type:'Feature',geometry:{type:'Point',coordinates:parcelCtr}},{type:'Feature',geometry:{type:'Point',coordinates:turf.centerOfMass(f).geometry.coordinates},{units:'meters'});
     return d<200;
   }).map(f=>{
     const fn=f.properties?.fn||'yes';
@@ -11383,15 +11397,30 @@ function _v3dBuild(ap){
   // Lighting — zi
   _v3dApplyLight('day',THREE,scene,r);
 
-  // Ground
-  const gGeo=new THREE.PlaneGeometry(600,600);
-  const gMat=new THREE.MeshStandardMaterial({color:'#111827',roughness:0.97,metalness:0});
-  const g=new THREE.Mesh(gGeo,gMat); g.rotation.x=-Math.PI/2; g.position.y=-0.05;
-  g.receiveShadow=true; scene.add(g);
-
-  // Grid
-  const grid=new THREE.GridHelper(400,80,'#90a8b8','#a0b8c8');
-  grid.material.opacity=0.35; grid.material.transparent=true; scene.add(grid);
+  // Ground procesuală pavaj
+  (()=>{
+    const cv2=document.createElement('canvas'); cv2.width=256; cv2.height=256;
+    const gctx=cv2.getContext('2d');
+    gctx.fillStyle='#141e2c'; gctx.fillRect(0,0,256,256);
+    gctx.strokeStyle='#0a1218'; gctx.lineWidth=1;
+    [32,64,96,128,160,192,224].forEach(v=>{
+      gctx.beginPath();gctx.moveTo(v,0);gctx.lineTo(v,256);gctx.stroke();
+      gctx.beginPath();gctx.moveTo(0,v);gctx.lineTo(256,v);gctx.stroke();
+    });
+    for(let n=0;n<600;n++){
+      gctx.fillStyle=`rgba(255,255,255,${Math.random()*0.025})`;
+      gctx.fillRect(Math.random()*256,Math.random()*256,1.5,1.5);
+    }
+    const gTex=new THREE.CanvasTexture(cv2);
+    gTex.wrapS=gTex.wrapT=THREE.RepeatWrapping; gTex.repeat.set(20,20);
+    const gMat=new THREE.MeshStandardMaterial({map:gTex,roughness:0.90,metalness:0.02,envMapIntensity:0.2});
+    const g=new THREE.Mesh(new THREE.PlaneGeometry(600,600),gMat);
+    g.rotation.x=-Math.PI/2; g.position.y=-0.05; g.receiveShadow=true; scene.add(g);
+  })();
+  // Grid subtil
+  const grid=new THREE.GridHelper(400,100,'#1e3048','#111c28');
+  grid.material.opacity=0.4; grid.material.transparent=true;
+  grid.position.y=0.01; scene.add(grid);
 
   // Coordonate locale
   const ring0 = ap.geo.geometry.type==='Polygon'
@@ -11407,13 +11436,16 @@ function _v3dBuild(ap){
     if(!f.geometry) return;
     const h=Math.max(2,f.properties?.h||6);
     const fn=f.properties?.fn||'yes';
-    const colMap={residential:'#9ab5cc',apartments:'#8aadbe',house:'#aac0d0',commercial:'#d8a070',retail:'#e0a06a',office:'#7898c0',public:'#8888c0',industrial:'#989898',warehouse:'#909090',hotel:'#a888b8',school:'#88b898','yes':'#9aa8b8'};
+    const colMap={residential:'#b0c8e0',apartments:'#a0bcd4',house:'#c0d0e4',commercial:'#e8a84a',retail:'#f0b040',office:'#5090d0',public:'#7080c8',industrial:'#8890a0',warehouse:'#808898',hotel:'#c090d0',school:'#88c898','yes':'#90a8c0'};
     const col=colMap[fn]||'#8898b0';
+    const isNight2=window._v3dNight||false;
     try{
       const fring=f.geometry.type==='Polygon'?f.geometry.coordinates[0]:f.geometry.coordinates[0][0];
       const pts=fring.slice(0,-1).map(toLoc);
       if(pts.length<3) return;
-      const mat=new THREE.MeshStandardMaterial({color:col,roughness:0.85,metalness:0.02});
+      const mat=new THREE.MeshStandardMaterial({color:col,roughness:0.75,metalness:0.05,
+        emissive:isNight2?new THREE.Color(0.02,0.04,0.10):new THREE.Color(0,0,0),
+        emissiveIntensity:isNight2?0.5:0});
       const mesh=_v3dPrism(THREE,pts,0,h,mat);
       if(mesh){ mesh.castShadow=true; mesh.receiveShadow=true; scene.add(mesh); V3D.ctx.push(mesh); }
     }catch(e){}
@@ -12021,24 +12053,80 @@ function _v3dAddUrbanLife(THREE, scene, ring0, toLoc, isNight){
       addSprite(bici,bix,0,biz,1.2,1.4);
     }
 
-    // Mașini — parcate pe stradă, în afara parcelei
-    const carCols=['#cc2222','#2244cc','#228844','#aaa','#111','#cc8800'];
-    for(let i=0;i<3;i++){
-      const col=carCols[Math.floor(Math.random()*carCols.length)];
-      const carTex=mkTex((ctx,w,h)=>{
-        ctx.clearRect(0,0,w,h);
-        ctx.fillStyle=col;ctx.fillRect(w*.1,h*.45,w*.8,h*.35);
-        ctx.fillRect(w*.22,h*.28,w*.56,h*.2);
-        ctx.fillStyle='rgba(150,210,255,0.7)';ctx.fillRect(w*.24,h*.3,w*.24,h*.16);ctx.fillRect(w*.52,h*.3,w*.24,h*.16);
-        ctx.fillStyle='#222';ctx.beginPath();ctx.arc(w*.22,h*.82,w*.12,0,6.28);ctx.fill();ctx.arc(w*.78,h*.82,w*.12,0,6.28);ctx.fill();
-        ctx.fillStyle='#666';ctx.beginPath();ctx.arc(w*.22,h*.82,w*.07,0,6.28);ctx.fill();ctx.arc(w*.78,h*.82,w*.07,0,6.28);ctx.fill();
-        if(isNight){ctx.fillStyle='rgba(255,255,180,.95)';ctx.fillRect(w*.82,h*.52,w*.08,h*.08);ctx.fillStyle='rgba(255,50,50,.95)';ctx.fillRect(w*.1,h*.52,w*.08,h*.08);}
-      },80,48);
-      const [cax,caz]=safePt(lw*0.5+8, lw*0.5+20);
-      addSprite(carTex,cax,0,caz,2.5,1.5);
+    // ── Mașini 3D reale (BoxGeometry) cu faruri ─────────────────────────────
+    const carPalette=[
+      {body:'#cc2222',glass:'#60a0c0',wheel:'#222',trim:'#aaa'},
+      {body:'#1a3aaa',glass:'#80b0d0',wheel:'#333',trim:'#c0c8d8'},
+      {body:'#1a7a3a',glass:'#70b090',wheel:'#222',trim:'#b0c0b0'},
+      {body:'#888898',glass:'#90b0c8',wheel:'#222',trim:'#c8c8d0'},
+      {body:'#111118',glass:'#4878a0',wheel:'#181818',trim:'#606070'},
+      {body:'#b07010',glass:'#a0c0a0',wheel:'#222',trim:'#d0a840'},
+    ];
+    for(let i=0;i<4;i++){
+      const [cax,caz]=safePt(lw*0.5+6,lw*0.5+22);
+      const cp=carPalette[i%carPalette.length];
+      const carAngle=Math.random()*Math.PI*2;
+      const carGrp=new THREE.Group();
+
+      // Caroserie principală (sedan shape: 2 box-uri)
+      const bodyMat=new THREE.MeshStandardMaterial({color:new THREE.Color(cp.body),roughness:0.25,metalness:0.75});
+      const cabinMat=new THREE.MeshStandardMaterial({color:new THREE.Color(cp.body),roughness:0.28,metalness:0.70});
+      const glassMat2=new THREE.MeshStandardMaterial({color:new THREE.Color(cp.glass),roughness:0.05,metalness:0.8,transparent:true,opacity:0.7,
+        emissive:isNight?new THREE.Color(0.1,0.15,0.25):new THREE.Color(0,0,0.02),emissiveIntensity:isNight?0.8:0.1});
+      const wheelMat=new THREE.MeshStandardMaterial({color:new THREE.Color(cp.wheel),roughness:0.85,metalness:0.1});
+      const hubMat=new THREE.MeshStandardMaterial({color:new THREE.Color(cp.trim),roughness:0.2,metalness:0.9});
+      const headlightMat=new THREE.MeshStandardMaterial({color:new THREE.Color('#fffde0'),roughness:0.05,metalness:0.3,
+        emissive:isNight?new THREE.Color(0.9,0.85,0.5):new THREE.Color(0.05,0.05,0.02),emissiveIntensity:isNight?4.0:0.2});
+      const taillightMat=new THREE.MeshStandardMaterial({color:new THREE.Color('#ff2020'),roughness:0.1,metalness:0.2,
+        emissive:isNight?new THREE.Color(0.8,0.02,0.02):new THREE.Color(0.1,0,0),emissiveIntensity:isNight?3.5:0.1});
+
+      // Corp jos (caroserie)
+      const body=new THREE.Mesh(new THREE.BoxGeometry(3.8,0.7,1.8),bodyMat);
+      body.position.set(0,0.55,0); carGrp.add(body);
+      // Habitaclu (mai îngust și mai înalt)
+      const cabin=new THREE.Mesh(new THREE.BoxGeometry(2.2,0.65,1.65),cabinMat);
+      cabin.position.set(-0.2,1.12,0); carGrp.add(cabin);
+      // Geamuri habitaclu
+      const winF=new THREE.Mesh(new THREE.BoxGeometry(1.0,0.50,0.03),glassMat2);
+      winF.position.set(0.58,1.10,0.84); carGrp.add(winF);
+      const winR=new THREE.Mesh(new THREE.BoxGeometry(0.85,0.45,0.03),glassMat2);
+      winR.position.set(-0.55,1.10,0.84); carGrp.add(winR);
+      const winB=new THREE.Mesh(new THREE.BoxGeometry(0.03,0.48,1.58),glassMat2);
+      winB.position.set(-1.30,1.10,0); carGrp.add(winB);
+      // Faruri față
+      const hlL=new THREE.Mesh(new THREE.BoxGeometry(0.03,0.20,0.30),headlightMat);
+      hlL.position.set(1.92,0.65,0.55); carGrp.add(hlL);
+      const hlR=new THREE.Mesh(new THREE.BoxGeometry(0.03,0.20,0.30),headlightMat);
+      hlR.position.set(1.92,0.65,-0.55); carGrp.add(hlR);
+      // Stopuri spate
+      const tlL=new THREE.Mesh(new THREE.BoxGeometry(0.03,0.18,0.28),taillightMat);
+      tlL.position.set(-1.92,0.68,0.55); carGrp.add(tlL);
+      const tlR=new THREE.Mesh(new THREE.BoxGeometry(0.03,0.18,0.28),taillightMat);
+      tlR.position.set(-1.92,0.68,-0.55); carGrp.add(tlR);
+      // Roți (4)
+      [[1.1,0.30,1.0],[-1.1,0.30,1.0],[1.1,0.30,-1.0],[-1.1,0.30,-1.0]].forEach(([wx2,wy,wz2])=>{
+        const tyre=new THREE.Mesh(new THREE.CylinderGeometry(0.30,0.30,0.22,14),wheelMat);
+        tyre.rotation.z=Math.PI/2; tyre.position.set(wx2,wy,wz2); carGrp.add(tyre);
+        const hub=new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.16,0.24,8),hubMat);
+        hub.rotation.z=Math.PI/2; hub.position.set(wx2,wy,wz2); carGrp.add(hub);
+      });
+      // Umbra sub mașina
+      const shadow=new THREE.Mesh(new THREE.PlaneGeometry(4.2,2.2),
+        new THREE.MeshStandardMaterial({color:'#000000',transparent:true,opacity:0.25,roughness:1}));
+      shadow.rotation.x=-Math.PI/2; shadow.position.set(0,0.01,0); carGrp.add(shadow);
+
+      carGrp.position.set(cax,0,caz);
+      carGrp.rotation.y=carAngle;
+      carGrp.castShadow=true; carGrp.receiveShadow=true;
+      scene.add(carGrp);
+
+      // Faruri + stopuri ca PointLight noaptea
       if(isNight){
-        const fl=new THREE.PointLight('#ffffc0',0.5,8);fl.position.set(cax+0.5,0.6,caz);scene.add(fl);
-        const rl=new THREE.PointLight('#ff3030',0.3,5);rl.position.set(cax-0.5,0.6,caz);scene.add(rl);
+        const fDir=new THREE.Vector3(Math.cos(carAngle),0,Math.sin(carAngle));
+        const fl2=new THREE.PointLight('#fffce0',1.8,14,2);
+        fl2.position.set(cax+fDir.x*2.0,0.65,caz+fDir.z*2.0); scene.add(fl2);
+        const rl2=new THREE.PointLight('#ff1010',0.8,7,2);
+        rl2.position.set(cax-fDir.x*2.0,0.65,caz-fDir.z*2.0); scene.add(rl2);
       }
     }
 
@@ -12054,30 +12142,74 @@ function _v3dAddUrbanLife(THREE, scene, ring0, toLoc, isNight){
       addSprite(banca,bnx,0,bnz,1.0,0.5);
     }
 
-    // Felinare — pe trotuar, în afara parcelei
-    for(let i=0;i<4;i++){
-      const [fx,fz]=safePt(lw*0.5+3, lw*0.5+8);
-      const felinar=mkTex((ctx,w,h)=>{
-        ctx.clearRect(0,0,w,h);ctx.fillStyle='#666';ctx.fillRect(w*.44,h*.2,w*.12,h*.75);
-        ctx.fillStyle='#555';ctx.fillRect(w*.28,h*.2,w*.44,h*.06);
-        ctx.fillStyle=isNight?'#ffe066':'#ddd';ctx.beginPath();ctx.arc(w/2,h*.18,w*.15,0,6.28);ctx.fill();
-      },24,64);
-      addSprite(felinar,fx,0,fz,0.3,2.5);
+    // ── Felinare 3D ────────────────────────────────────────────────────────
+    const poleMatL=new THREE.MeshStandardMaterial({color:'#556070',roughness:0.6,metalness:0.5});
+    const armMatL=new THREE.MeshStandardMaterial({color:'#445060',roughness:0.6,metalness:0.5});
+    const bulbMat=new THREE.MeshStandardMaterial({color:new THREE.Color(isNight?'#ffee80':'#e0d8c0'),
+      roughness:0.1,metalness:0.2,emissive:new THREE.Color(isNight?0.9:0.1,isNight?0.8:0.08,isNight?0.1:0),
+      emissiveIntensity:isNight?3.0:0.2});
+    for(let i=0;i<5;i++){
+      const [fx,fz]=safePt(lw*0.5+2.5,lw*0.5+9);
+      const fGrp=new THREE.Group();
+      // Stâlp
+      const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.07,4.5,8),poleMatL);
+      pole.position.set(0,2.25,0); fGrp.add(pole);
+      // Braț curbat
+      const arm=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,0.9,6),armMatL);
+      arm.rotation.z=Math.PI/2*0.3; arm.position.set(0.35,4.4,0); fGrp.add(arm);
+      // Corp felinar
+      const lamp=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.14,0.28,8),
+        new THREE.MeshStandardMaterial({color:'#383830',roughness:0.5,metalness:0.6}));
+      lamp.position.set(0.62,4.28,0); fGrp.add(lamp);
+      // Bec
+      const bulb=new THREE.Mesh(new THREE.SphereGeometry(0.09,8,8),bulbMat);
+      bulb.position.set(0.62,4.14,0); fGrp.add(bulb);
+
+      fGrp.position.set(fx,0,fz);
+      fGrp.rotation.y=Math.random()*Math.PI*2;
+      scene.add(fGrp);
       if(isNight){
-        const pl=new THREE.PointLight('#ffee88',0.7,12);pl.position.set(fx,2.5,fz);scene.add(pl);
+        const pl=new THREE.PointLight('#ffdd66',1.4,18,1.5);
+        pl.position.set(fx+0.62*Math.cos(fGrp.rotation.y),4.3,fz+0.62*Math.sin(fGrp.rotation.y));
+        scene.add(pl);
       }
     }
 
-    // Lumini interioare cladire noaptea
+    // ── Arbori simple ─────────────────────────────────────────────────────
+    const trunkMat=new THREE.MeshStandardMaterial({color:'#5a3a1a',roughness:0.9,metalness:0});
+    const foliagePalette=['#2d6b2a','#3a7a30','#255020','#4a8540','#1e5018'];
+    for(let i=0;i<5;i++){
+      const [tx,tz]=safePt(lw*0.5+3,lw*0.5+12);
+      const treeH=3.5+Math.random()*2.5;
+      const treeGrp=new THREE.Group();
+      // Trunchi
+      const trunk=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.18,treeH*0.4,7),trunkMat);
+      trunk.position.set(0,treeH*0.2,0); treeGrp.add(trunk);
+      // Coroana (3 sfere suprapuse)
+      const fCol=foliagePalette[i%foliagePalette.length];
+      const fMat=new THREE.MeshStandardMaterial({color:new THREE.Color(fCol),roughness:0.95,metalness:0});
+      [[0,treeH*0.75,0,1.0],[0.15,treeH*0.6,-0.1,0.8],[-0.1,treeH*0.55,0.15,0.75]].forEach(([ox,oy,oz,r])=>{
+        const sp=new THREE.Mesh(new THREE.SphereGeometry(r,7,7),fMat);
+        sp.position.set(ox,oy,oz); treeGrp.add(sp);
+      });
+      treeGrp.position.set(tx,0,tz);
+      treeGrp.castShadow=true;
+      scene.add(treeGrp);
+    }
+
+    // ── Lumini interioare clădire noaptea ─────────────────────────────────
     if(isNight){
-      const bx=(minX+maxX)/2, bz2=(minZ+maxZ)/2;
-      for(let floor=0;floor<4;floor++){
-        const h2=(floor+0.5)*3.0;
-        const wl=new THREE.PointLight('#ffe8c0',0.4,8);
-        wl.position.set(bx,h2,bz2); scene.add(wl);
+      const bxC=(minX+maxX)/2, bzC=(minZ+maxZ)/2;
+      const nFlN=Math.min(8,Math.round((maxX-minX)/3));
+      for(let fl=0;fl<nFlN;fl++){
+        const hy=(fl+0.5)*3.0;
+        const wl=new THREE.PointLight('#ffe4a0',0.35,9,1.5);
+        wl.position.set(bxC+(Math.random()-0.5)*4,hy,bzC+(Math.random()-0.5)*4);
+        scene.add(wl);
       }
-      const amb=new THREE.PointLight('#ff9040',0.3,30);
-      amb.position.set(lcx,6,lcz+lw*0.5+8); scene.add(amb);
+      // Lumina stradală ambientă (portocaliu sodiu)
+      const street=new THREE.PointLight('#ff8820',0.5,35,1.2);
+      street.position.set(lcx,5,lcz+lw*0.5+10); scene.add(street);
     }
 
   }catch(e){console.warn('UrbanLife:',e.message);}
@@ -12214,34 +12346,70 @@ function _v3dMat(THREE, color, opts={}){
 }
 
 function _v3dMatParter(THREE, stil, cache){
-  const k='parter_'+stil; if(cache[k]) return cache[k];
-  const M={
-    modern:    {color:'#1a2e42',roughness:0.40,metalness:0.50},
-    clasic:    {color:'#7a6040',roughness:0.78,metalness:0.02},
-    minimalist:{color:'#e0e8f0',roughness:0.85,metalness:0.00},
-    inovator:  {color:'#0e1830',roughness:0.20,metalness:0.75},
-    industrial:{color:'#2e2820',roughness:0.88,metalness:0.10},
-    default:   {color:'#1e2e3e',roughness:0.55,metalness:0.25},
+  const fn = AEDIS.fn || 'rezidential_colectiv';
+  const k=`parter_${stil}_${fn}`; if(cache[k]) return cache[k];
+  const isNight=window._v3dNight||false;
+  // Parter per funcțiune — comercial=vitrina sticla, birouri=inchis, rezidential=tencuiala
+  const byFn={
+    birouri:              {color:'#0a1828',roughness:0.10,metalness:0.85},
+    hotel:                {color:'#1a2c40',roughness:0.20,metalness:0.55},
+    comercial:            {color:'#0a1420',roughness:0.05,metalness:0.90}, // vitrina totala
+    rezidential_colectiv: {color:'#1a2e42',roughness:0.40,metalness:0.40},
+    locuinta_individuala: {color:'#c0b090',roughness:0.82,metalness:0.00},
+    industrial_depozitare:{color:'#2a2010',roughness:0.90,metalness:0.05},
+    institutie_publica:   {color:'#304868',roughness:0.45,metalness:0.30},
+    mixt:                 {color:'#0e1e30',roughness:0.12,metalness:0.80},
   };
-  const m=M[stil]||M.default;
-  return cache[k]=_v3dMat(THREE,m.color,{roughness:m.roughness,metalness:m.metalness});
+  const bySt={
+    clasic:    {color:'#5a4020',roughness:0.80,metalness:0.02},
+    minimalist:{color:'#d8e4ee',roughness:0.88,metalness:0.00},
+    industrial:{color:'#201810',roughness:0.92,metalness:0.08},
+  };
+  const m = byFn[fn] || bySt[stil] || {color:'#1e2e3e',roughness:0.50,metalness:0.30};
+  const mat=_v3dMat(THREE,m.color,{roughness:m.roughness,metalness:m.metalness});
+  if(isNight && ['comercial','birouri','mixt'].includes(fn)){
+    mat.emissive=new THREE.Color(0.05,0.10,0.25); mat.emissiveIntensity=1.2;
+  }
+  return cache[k]=mat;
 }
 
 function _v3dMatFloor(THREE, colHex, floorIdx, stil, cache){
-  const k=`floor_${stil}_${floorIdx}`; if(cache[k]) return cache[k];
+  const fn = AEDIS.fn || 'rezidential_colectiv';
+  const k=`floor_${stil}_${fn}_${floorIdx}`; if(cache[k]) return cache[k];
   const isNight=window._v3dNight||false;
-  const r=parseInt(colHex.slice(1,3)||'30',16);
-  const g=parseInt(colHex.slice(3,5)||'80',16);
-  const b=parseInt(colHex.slice(5,7)||'c0',16);
-  const avg=(r+g+b)/3; const sat=1.5; const bright=floorIdx*5;
-  const rc=Math.min(255,Math.max(0,Math.round(avg+(r-avg)*sat)+bright));
-  const gc=Math.min(255,Math.max(0,Math.round(avg+(g-avg)*sat)+bright));
-  const bc=Math.min(255,Math.max(0,Math.round(avg+(b-avg)*sat)+bright));
-  const pbr={modern:{roughness:0.35,metalness:0.15},inovator:{roughness:0.20,metalness:0.40},
-    clasic:{roughness:0.80,metalness:0.00},minimalist:{roughness:0.90,metalness:0.00},
-    industrial:{roughness:0.85,metalness:0.08},default:{roughness:0.55,metalness:0.10}}[stil]||{roughness:0.55,metalness:0.10};
-  const mat=_v3dMat(THREE,`rgb(${rc},${gc},${bc})`,pbr);
-  if(isNight){mat.emissive=new THREE.Color(0.02,0.04,0.12);mat.emissiveIntensity=0.8;}
+  const isCW = AEDIS.peretelCortina || ['birouri','comercial','hotel','mixt'].includes(fn);
+
+  // Culori de baza per stil + functiune — mai saturate si mai vii
+  const baseColors = {
+    modern:     {r:180,g:210,b:245},
+    inovator:   {r:160,g:170,b:255},
+    clasic:     {r:240,g:220,b:175},
+    minimalist: {r:235,g:240,b:248},
+    industrial: {r:200,g:185,b:160},
+    adaptat_context:{r:210,g:235,b:200},
+  };
+  const bc2 = baseColors[stil] || baseColors.modern;
+  // Gradient luminos spre vârf
+  const t = floorIdx / Math.max(1, AEDIS.corpuri[0]?.niv || 4);
+  const bright = Math.round(t * 25);
+  const rc=Math.min(255, bc2.r + bright);
+  const gc=Math.min(255, bc2.g + bright);
+  const bcc=Math.min(255, bc2.b + bright);
+
+  const pbr={
+    modern:    {roughness:isCW?0.08:0.30,metalness:isCW?0.65:0.12},
+    inovator:  {roughness:0.18,metalness:0.45},
+    clasic:    {roughness:0.82,metalness:0.00},
+    minimalist:{roughness:0.88,metalness:0.00},
+    industrial:{roughness:0.80,metalness:0.10},
+    default:   {roughness:0.50,metalness:0.12},
+  }[stil]||{roughness:0.50,metalness:0.12};
+
+  const mat=_v3dMat(THREE,`rgb(${rc},${gc},${bcc})`,pbr);
+  if(isNight){
+    mat.emissive=new THREE.Color(0.03,0.05,0.15);
+    mat.emissiveIntensity=0.6;
+  }
   return cache[k]=mat;
 }
 
@@ -12285,76 +12453,121 @@ function _v3dAddEdges(THREE, mesh, scene, color='#ffffff', opacity=0.3){
   }catch(e){}
 }
 
-// Ferestre stilizate direct pe prismă (BoxGeometry mici pe fațadă)
+// Ferestre stilizate direct pe prismă — corelate cu STIL + FUNCȚIUNE + PERETE CORTINĂ
 function _v3dAddWindows(THREE, pts2d, base, top, scene, stilKey){
   const h = top - base;
   if(h < 1 || pts2d.length < 3) return;
   const isNight2 = window._v3dNight||false;
+  const fn = AEDIS.fn || 'rezidential_colectiv';
+  const hasCurtainWall = AEDIS.peretelCortina ||
+    ['birouri','hotel','comercial','mixt'].includes(fn) ||
+    (fn === 'rezidential_colectiv' && (stilKey === 'inovator' || stilKey === 'modern') && AEDIS.cortinaProcent >= 60);
 
-  // ── Config per stil ────────────────────────────────────────────────────────
-  const cfg = {
-    modern:    { wW:1.10, wH:1.50, wGap:1.65, reveal:0.12, glassCol:'#3a7fc1', glassRef:0.55,
-                 frame:'#c8d4e0', frameD:0.08, hasBalc:true,  balcD:0.55, balcH:0.90, railH:0.85,
-                 pilW:0.0,  bandH:0.18, bandD:0.08, bandCol:'#d0d8e2', panelCol:'#e8eef4',
-                 floorH:() => 3.0 },
-    inovator:  { wW:1.30, wH:1.80, wGap:1.55, reveal:0.16, glassCol:'#2244cc', glassRef:0.70,
-                 frame:'#8090b0', frameD:0.10, hasBalc:true,  balcD:0.65, balcH:0.95, railH:0.90,
-                 pilW:0.0,  bandH:0.22, bandD:0.12, bandCol:'#6070a0', panelCol:'#1a2040',
-                 floorH:() => 3.3 },
-    clasic:    { wW:0.85, wH:1.30, wGap:1.80, reveal:0.18, glassCol:'#8899b0', glassRef:0.30,
-                 frame:'#d4c8a8', frameD:0.10, hasBalc:false, balcD:0.50, balcH:0.80, railH:0.75,
-                 pilW:0.18, bandH:0.28, bandD:0.14, bandCol:'#c8b890', panelCol:'#e8dcc0',
-                 floorH:() => 3.5 },
-    minimalist:{ wW:1.40, wH:1.70, wGap:1.50, reveal:0.06, glassCol:'#b0c8d8', glassRef:0.45,
-                 frame:'#e8eef2', frameD:0.04, hasBalc:true,  balcD:0.45, balcH:1.00, railH:0.95,
-                 pilW:0.0,  bandH:0.10, bandD:0.04, bandCol:'#e0e8ee', panelCol:'#f2f5f8',
-                 floorH:() => 3.2 },
-    industrial:{ wW:0.90, wH:1.20, wGap:2.00, reveal:0.20, glassCol:'#607080', glassRef:0.25,
-                 frame:'#888070', frameD:0.12, hasBalc:false, balcD:0.50, balcH:0.80, railH:0.75,
-                 pilW:0.20, bandH:0.25, bandD:0.16, bandCol:'#706858', panelCol:'#504840',
-                 floorH:() => 3.8 },
+  // ── Config per STIL (baza) ────────────────────────────────────────────────
+  const cfgByStil = {
+    modern:    { wW:1.10, wH:1.50, wGap:1.65, reveal:0.10, glassCol:'#2a6fb8', glassRef:0.65,
+                 frame:'#b8cce0', frameD:0.07, hasBalc:true,  balcD:0.55, balcH:0.90, railH:0.85,
+                 pilW:0.0,  bandH:0.16, bandD:0.07, bandCol:'#1a3a6a', panelCol:'#c8daf0', floorH:()=>3.0 },
+    inovator:  { wW:1.30, wH:1.80, wGap:1.55, reveal:0.14, glassCol:'#1a30bb', glassRef:0.75,
+                 frame:'#6878b8', frameD:0.09, hasBalc:true,  balcD:0.65, balcH:0.95, railH:0.90,
+                 pilW:0.0,  bandH:0.20, bandD:0.10, bandCol:'#4a5898', panelCol:'#0e1838', floorH:()=>3.3 },
+    clasic:    { wW:0.85, wH:1.30, wGap:1.80, reveal:0.18, glassCol:'#7088a8', glassRef:0.25,
+                 frame:'#c8b880', frameD:0.10, hasBalc:false, balcD:0.50, balcH:0.80, railH:0.75,
+                 pilW:0.20, bandH:0.28, bandD:0.14, bandCol:'#b89870', panelCol:'#dac890', floorH:()=>3.5 },
+    minimalist:{ wW:1.50, wH:1.80, wGap:1.55, reveal:0.05, glassCol:'#90b8cc', glassRef:0.50,
+                 frame:'#d8e4ea', frameD:0.03, hasBalc:true,  balcD:0.45, balcH:1.00, railH:0.95,
+                 pilW:0.0,  bandH:0.08, bandD:0.03, bandCol:'#ccd8e0', panelCol:'#eef2f6', floorH:()=>3.2 },
+    industrial:{ wW:0.90, wH:1.20, wGap:2.10, reveal:0.22, glassCol:'#486070', glassRef:0.20,
+                 frame:'#706858', frameD:0.14, hasBalc:false, balcD:0.50, balcH:0.80, railH:0.75,
+                 pilW:0.22, bandH:0.22, bandD:0.14, bandCol:'#cc6020', panelCol:'#382818', floorH:()=>3.8 },
   };
-  const C = cfg[stilKey] || cfg.modern;
+
+  // ── Override per FUNCȚIUNE ────────────────────────────────────────────────
+  const cfgByFn = {
+    birouri:              { wW:1.40, wH:2.40, wGap:1.55, hasBalc:false, glassCol:'#2060a0', glassRef:0.80, reveal:0.06, frame:'#8090a8', panelCol:'#1a2840', bandCol:'#1e3060', bandH:0.14, curtainForce:true },
+    hotel:                { wW:1.00, wH:1.60, wGap:1.50, hasBalc:true,  glassCol:'#4878a8', glassRef:0.55, balcD:0.70, bandCol:'#c8a040', panelCol:'#2a1c10', bandH:0.20 },
+    comercial:            { wW:2.20, wH:2.60, wGap:2.40, hasBalc:false, glassCol:'#60a8d0', glassRef:0.70, reveal:0.04, frame:'#c0c8d0', panelCol:'#d8e4ee', bandH:0.12, curtainForce:true },
+    rezidential_colectiv: { wW:1.10, wH:1.40, wGap:1.60, hasBalc:true,  glassCol:'#4888b8', glassRef:0.45, balcD:0.60, balcH:0.90 },
+    locuinta_individuala: { wW:0.90, wH:1.20, wGap:1.80, hasBalc:false, glassCol:'#6090a0', glassRef:0.35 },
+    industrial_depozitare:{ wW:1.20, wH:0.80, wGap:2.50, hasBalc:false, glassCol:'#506070', glassRef:0.18, pilW:0.25, bandCol:'#cc6020' },
+    institutie_publica:   { wW:1.00, wH:1.50, wGap:1.70, hasBalc:false, glassCol:'#5580a0', glassRef:0.40, pilW:0.15, bandCol:'#8090b0', bandH:0.24 },
+    mixt:                 { wW:1.30, wH:2.00, wGap:1.60, hasBalc:true,  glassCol:'#3070b8', glassRef:0.65 },
+  };
+
+  const baseC = cfgByStil[stilKey] || cfgByStil.modern;
+  const fnC   = cfgByFn[fn] || {};
+  // Merge: fn override pe baseC
+  const C = { ...baseC, ...fnC };
+
+  // Perete cortină forțat: dacă fn o cere sau toggle activ
+  const isCurtainWall = hasCurtainWall || C.curtainForce;
   const fH = C.floorH();
   const nFloors = Math.max(1, Math.round(h / fH));
   const realFH = h / nFloors;
 
-  // ── Materiale ───────────────────────────────────────────────────────────────
+  // ── Materiale dinamice (zi/noapte/curtain wall) ──────────────────────────
+  // Variatie aleatoare per geam (unele aprinse, altele nu - noaptea)
+  const _rng = (seed) => { let x=Math.sin(seed+1)*43758.5453; return x-Math.floor(x); };
+
   const glassMat = new THREE.MeshStandardMaterial({
-    color: isNight2 ? '#ffe880' : C.glassCol,
-    roughness: isNight2 ? 0.6 : 0.05,
-    metalness: isNight2 ? 0.1 : C.glassRef,
-    emissive: isNight2 ? new THREE.Color(0.5, 0.38, 0.04) : new THREE.Color(0.02, 0.05, 0.12),
-    emissiveIntensity: isNight2 ? 2.0 : 0.15,
-    transparent: !isNight2,
-    opacity: isNight2 ? 1.0 : 0.85,
-    envMapIntensity: 1.0
+    color: new THREE.Color(isNight2 ? '#ffe890' : C.glassCol),
+    roughness: isNight2 ? 0.55 : (isCurtainWall ? 0.04 : 0.08),
+    metalness: isNight2 ? 0.05 : C.glassRef,
+    emissive: new THREE.Color(isNight2 ? 0.55 : 0.03, isNight2 ? 0.42 : 0.06, isNight2 ? 0.04 : 0.18),
+    emissiveIntensity: isNight2 ? 2.8 : (isCurtainWall ? 0.35 : 0.18),
+    transparent: true,
+    opacity: isNight2 ? 0.98 : (isCurtainWall ? 0.82 : 0.88),
+    side: THREE.FrontSide
+  });
+  // Geam stins noaptea (unele apartamente)
+  const glassDarkMat = new THREE.MeshStandardMaterial({
+    color: new THREE.Color(isNight2 ? '#0a1428' : C.glassCol),
+    roughness: 0.08, metalness: C.glassRef,
+    emissive: new THREE.Color(0,0,0), emissiveIntensity: 0,
+    transparent: true, opacity: 0.85
+  });
+  // Geam galben cald (bucătărie/living aprins)
+  const glassWarmMat = new THREE.MeshStandardMaterial({
+    color: new THREE.Color(isNight2 ? '#ffcc44' : C.glassCol),
+    roughness: 0.6, metalness: 0.05,
+    emissive: new THREE.Color(0.5, 0.32, 0.02), emissiveIntensity: isNight2 ? 3.2 : 0.1,
+    transparent: true, opacity: 0.95
   });
   const frameMat = new THREE.MeshStandardMaterial({
-    color: C.frame, roughness: 0.55, metalness: stilKey==='modern'?0.45:0.1
+    color: new THREE.Color(C.frame||'#a8b8c8'),
+    roughness: isCurtainWall ? 0.25 : 0.55,
+    metalness: isCurtainWall ? 0.75 : (stilKey==='modern'?0.45:0.08)
   });
   const bandMat = new THREE.MeshStandardMaterial({
-    color: C.bandCol, roughness: 0.78, metalness: 0.05
+    color: new THREE.Color(C.bandCol||'#1e3060'),
+    roughness: isCurtainWall ? 0.20 : 0.72,
+    metalness: isCurtainWall ? 0.80 : 0.08,
+    emissive: isNight2 ? new THREE.Color(0.04,0.06,0.15) : new THREE.Color(0,0,0),
+    emissiveIntensity: isNight2 ? 0.8 : 0
   });
   const panelMat = new THREE.MeshStandardMaterial({
-    color: C.panelCol, roughness: 0.82, metalness: 0.02
+    color: new THREE.Color(C.panelCol||'#c0ccd8'),
+    roughness: isCurtainWall ? 0.18 : 0.78,
+    metalness: isCurtainWall ? 0.65 : 0.04
   });
   const balcMat = new THREE.MeshStandardMaterial({
-    color: C.bandCol, roughness: 0.70, metalness: stilKey==='modern'?0.35:0.05
+    color: new THREE.Color(C.bandCol||'#1e3060'),
+    roughness: 0.55, metalness: stilKey==='modern'?0.45:0.08
   });
   const railMat = new THREE.MeshStandardMaterial({
-    color: stilKey==='modern'?'#c0ccd8':'#a09880',
-    roughness:0.30, metalness: stilKey==='modern'?0.75:0.15,
-    transparent:true, opacity:0.70
+    color: new THREE.Color(isCurtainWall?'#a8c0d8':stilKey==='modern'?'#b8ccd8':'#988870'),
+    roughness: 0.20, metalness: isCurtainWall?0.85:stilKey==='modern'?0.80:0.15,
+    transparent: true, opacity: isCurtainWall ? 0.60 : 0.75
   });
   const spandrelMat = new THREE.MeshStandardMaterial({
-    color: isNight2 ? '#1a2840' : (stilKey==='modern'?'#1e3050':stilKey==='minimalist'?'#d8e0e8':'#302820'),
-    roughness:0.30, metalness:stilKey==='modern'?0.55:0.05,
-    emissive: isNight2?new THREE.Color(0.06,0.10,0.20):new THREE.Color(0,0,0),
-    emissiveIntensity: isNight2?1.2:0
+    color: new THREE.Color(isNight2 ? '#0e1c38' : (isCurtainWall?'#0a1830':C.panelCol||'#1e2838')),
+    roughness: isCurtainWall ? 0.15 : 0.28,
+    metalness: isCurtainWall ? 0.90 : 0.50,
+    emissive: isNight2 ? new THREE.Color(0.08,0.12,0.28) : new THREE.Color(0,0,0),
+    emissiveIntensity: isNight2 ? 1.6 : 0
   });
 
-  const mkMesh=(geo,mat,x,y,z,ry=0,cx=false)=>{
+  const mkMesh=(geo,mat,x,y,z,ry=0)=>{
     const m=new THREE.Mesh(geo,mat); m.castShadow=true; m.receiveShadow=true;
     m.position.set(x,y,z); if(ry) m.rotation.y=ry; scene.add(m); return m;
   };
@@ -12364,112 +12577,161 @@ function _v3dAddWindows(THREE, pts2d, base, top, scene, stilKey){
     const dx=x1-x0, dz=z1-z0;
     const len=Math.sqrt(dx*dx+dz*dz);
     if(len<1.5) continue;
-    const ux=dx/len, uz=dz/len;       // vector de-a lungul laturii
-    const nx=dz/len, nz=-dx/len;      // normal exterior
+    const ux=dx/len, uz=dz/len;
+    const nx=dz/len, nz=-dx/len;
     const ang=-Math.atan2(dz,dx);
+    const midX=(x0+x1)/2, midZ=(z0+z1)/2;
 
-    // ── 1. Pilastri verticali (stiluri clasice/industriale) ──────────────────
+    // ════════════════════════════════════════════════════════════════════════
+    // MOD PERETE CORTINĂ — geam full-height cu mullioni verticali și orizontali
+    // ════════════════════════════════════════════════════════════════════════
+    if(isCurtainWall){
+      const mullW=0.08, mullD=0.12;
+      const transomH=0.10, transomD=0.08;
+      const nPanels=Math.max(2, Math.floor(len/1.5));
+      const panW=len/nPanels;
+      const mullMat=new THREE.MeshStandardMaterial({color:'#6080a0',roughness:0.18,metalness:0.88});
+      const transMat=new THREE.MeshStandardMaterial({color:'#5070a0',roughness:0.20,metalness:0.85,
+        emissive:isNight2?new THREE.Color(0.02,0.04,0.12):new THREE.Color(0,0,0),emissiveIntensity:isNight2?0.6:0});
+
+      // Geam de fundal full-height (un singur panel pe toată fațada)
+      const bgGeo=new THREE.BoxGeometry(len-0.06, h-0.06, 0.03);
+      const bgMat=new THREE.MeshStandardMaterial({
+        color:new THREE.Color(isNight2?'#1a2840':'#1a4070'),
+        roughness:0.05,metalness:0.90,
+        emissive:new THREE.Color(isNight2?0.04:0.01,isNight2?0.08:0.02,isNight2?0.20:0.08),
+        emissiveIntensity:isNight2?1.2:0.3,transparent:true,opacity:0.92});
+      mkMesh(bgGeo,bgMat,midX+nx*C.reveal,base+h/2,midZ+nz*C.reveal,ang);
+
+      // Mullioni verticali
+      for(let p=0;p<=nPanels;p++){
+        const u=p*panW;
+        const mx2=x0+ux*u+nx*(C.reveal+mullD/2);
+        const mz2=z0+uz*u+nz*(C.reveal+mullD/2);
+        mkMesh(new THREE.BoxGeometry(mullW,h+0.1,mullD),mullMat,mx2,base+h/2,mz2,ang);
+      }
+      // Traverse orizontale (transom) la fiecare etaj
+      for(let fl=0;fl<=nFloors;fl++){
+        const ty=base+fl*realFH;
+        const tx2=midX+nx*(C.reveal+transomD/2);
+        const tz2=midZ+nz*(C.reveal+transomD/2);
+        mkMesh(new THREE.BoxGeometry(len+0.06,transomH,transomD+0.04),transMat,tx2,ty,tz2,ang);
+      }
+      // Panouri de geam individuale cu variatie noapte
+      for(let p=0;p<nPanels;p++){
+        for(let fl=0;fl<nFloors;fl++){
+          const u=(p+0.5)*panW;
+          const gx=x0+ux*u+nx*C.reveal;
+          const gz=z0+uz*u+nz*C.reveal;
+          const gy=base+fl*realFH+realFH*0.5;
+          const gW=panW-mullW-0.04, gH=realFH-transomH-0.04;
+          // Variatie noaptea: unele geamuri aprinse (galben), altele stinse
+          const seed=(si*100+p*13+fl*7);
+          const rnd=_rng(seed);
+          let gMat=glassMat;
+          if(isNight2){
+            gMat = rnd<0.55 ? glassWarmMat : (rnd<0.80 ? glassMat : glassDarkMat);
+          }
+          mkMesh(new THREE.BoxGeometry(gW,gH,0.025),gMat,gx,gy,gz,ang);
+          // Punct de lumina interior noaptea (1 din 3 geamuri)
+          if(isNight2 && rnd<0.4){
+            const pl=new THREE.PointLight(rnd<0.2?'#ffe8a0':'#fff0d0',0.25,5);
+            pl.position.set(gx-nx*0.5,gy,gz-nz*0.5); scene.add(pl);
+          }
+        }
+      }
+      continue; // skip window module pentru curtain wall
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    // MOD FERESTRE CLASICE — pilastri, benzi, module individuale
+    // ════════════════════════════════════════════════════════════════════════
+
+    // 1. Pilastri verticali (clasic/industrial)
     if(C.pilW > 0){
-      const nPil = Math.floor(len / C.wGap)+1;
-      const pilGap = len / (nPil-1||1);
-      const pilMat = new THREE.MeshStandardMaterial({color:C.bandCol,roughness:0.72,metalness:0.04});
-      for(let p=0; p<nPil; p++){
-        const u = p * pilGap;
-        const px2 = x0+ux*u + nx*C.reveal;
-        const pz2 = z0+uz*u + nz*C.reveal;
-        const geo = new THREE.BoxGeometry(C.pilW, h, C.reveal*2+0.04);
-        mkMesh(geo, pilMat, px2, base+h/2, pz2, ang);
+      const nPil=Math.floor(len/C.wGap)+1;
+      const pilGap=len/(nPil-1||1);
+      const pilMat=new THREE.MeshStandardMaterial({color:new THREE.Color(C.bandCol),roughness:0.72,metalness:0.06});
+      for(let p=0;p<nPil;p++){
+        const u=p*pilGap;
+        mkMesh(new THREE.BoxGeometry(C.pilW,h,C.reveal*2+0.04),pilMat,
+          x0+ux*u+nx*C.reveal,base+h/2,z0+uz*u+nz*C.reveal,ang);
       }
     }
 
-    // ── 2. Benzi de planșeu (floor bands) ────────────────────────────────────
-    for(let fl=1; fl<nFloors; fl++){
-      const bY = base + fl*realFH;
-      const bx2 = (x0+x1)/2 + nx*(C.reveal + C.bandD/2);
-      const bz2 = (z0+z1)/2 + nz*(C.reveal + C.bandD/2);
-      const geo = new THREE.BoxGeometry(len, C.bandH, C.bandD);
-      mkMesh(geo, bandMat, bx2, bY, bz2, ang);
+    // 2. Benzi orizontale de planșeu
+    for(let fl=1;fl<nFloors;fl++){
+      const bY=base+fl*realFH;
+      mkMesh(new THREE.BoxGeometry(len,C.bandH,C.bandD),bandMat,
+        midX+nx*(C.reveal+C.bandD/2),bY,midZ+nz*(C.reveal+C.bandD/2),ang);
     }
     // Cornișă vârf
-    const cornY = base + h;
-    const cornBx = (x0+x1)/2 + nx*(C.reveal + C.bandD*1.2);
-    const cornBz = (z0+z1)/2 + nz*(C.reveal + C.bandD*1.2);
-    mkMesh(new THREE.BoxGeometry(len, C.bandH*1.6, C.bandD*1.8), bandMat, cornBx, cornY, cornBz, ang);
+    mkMesh(new THREE.BoxGeometry(len,C.bandH*1.6,C.bandD*1.8),bandMat,
+      midX+nx*(C.reveal+C.bandD*1.2),base+h,midZ+nz*(C.reveal+C.bandD*1.2),ang);
 
-    // ── 3. Module fereastră per etaj ─────────────────────────────────────────
-    const nWin = Math.max(1, Math.floor((len - C.wGap*0.5) / C.wGap));
-    const xStep = len / nWin;
-    const wOff = xStep / 2;
+    // 3. Module fereastră per etaj
+    const nWin=Math.max(1,Math.floor((len-C.wGap*0.5)/C.wGap));
+    const xStep=len/nWin;
+    const wOff=xStep/2;
 
-    for(let fl=0; fl<nFloors; fl++){
-      const flBase = base + fl*realFH;
-      const flTop  = flBase + realFH;
-      const wBot   = flBase + (realFH - C.wH) * 0.42;
-      const wCy    = wBot + C.wH/2;
-      const spCy   = flBase + realFH*0.12;  // spandrel (fascia sub fereastră)
+    for(let fl=0;fl<nFloors;fl++){
+      const flBase=base+fl*realFH;
+      const wBot=flBase+(realFH-C.wH)*0.42;
+      const wCy=wBot+C.wH/2;
+      const spCy=flBase+realFH*0.12;
 
-      for(let wi=0; wi<nWin; wi++){
-        const u = wOff + wi*xStep;
-        // Centrul ferestrei pe fațadă
-        const wx = x0 + ux*u + nx*(C.reveal);
-        const wz = z0 + uz*u + nz*(C.reveal);
+      for(let wi=0;wi<nWin;wi++){
+        const u=wOff+wi*xStep;
+        const wx=x0+ux*u+nx*C.reveal;
+        const wz=z0+uz*u+nz*C.reveal;
 
-        // 3a. Spandrel (panou opac sub/între ferestre)
-        const spW = xStep * 0.88;
-        mkMesh(new THREE.BoxGeometry(spW, realFH*0.22, 0.04), spandrelMat, wx, spCy, wz, ang);
-
-        // 3b. Ramă exterioară adâncă
-        mkMesh(new THREE.BoxGeometry(C.wW+0.14, C.wH+0.14, C.frameD*2), frameMat, wx, wCy, wz, ang);
-
-        // 3c. Geam
-        mkMesh(new THREE.BoxGeometry(C.wW, C.wH, 0.04), glassMat, wx+nx*0.02, wCy, wz+nz*0.02, ang);
-
-        // 3d. Montant vertical central (pentru ferestre late)
-        if(C.wW > 1.0){
-          mkMesh(new THREE.BoxGeometry(0.06, C.wH-0.06, 0.06), frameMat, wx, wCy, wz, ang);
+        // Spandrel
+        mkMesh(new THREE.BoxGeometry(xStep*0.88,realFH*0.22,0.04),spandrelMat,wx,spCy,wz,ang);
+        // Ramă
+        mkMesh(new THREE.BoxGeometry(C.wW+0.14,C.wH+0.14,C.frameD*2),frameMat,wx,wCy,wz,ang);
+        // Geam cu variatie noapte
+        const seed2=(si*100+wi*13+fl*7);
+        const rnd2=_rng(seed2);
+        let wMat=glassMat;
+        if(isNight2) wMat=rnd2<0.5?glassWarmMat:rnd2<0.8?glassMat:glassDarkMat;
+        mkMesh(new THREE.BoxGeometry(C.wW,C.wH,0.04),wMat,wx+nx*0.02,wCy,wz+nz*0.02,ang);
+        // Montant + traversă
+        if(C.wW>1.0) mkMesh(new THREE.BoxGeometry(0.06,C.wH-0.06,0.06),frameMat,wx,wCy,wz,ang);
+        mkMesh(new THREE.BoxGeometry(C.wW+0.08,0.06,0.06),frameMat,wx,wCy,wz,ang);
+        // Pervaz
+        mkMesh(new THREE.BoxGeometry(C.wW+0.25,0.08,C.frameD*2.5),bandMat,wx,wBot-0.05,wz+nx*0.03,ang);
+        // Panou lateral
+        const panW2=xStep-C.wW-0.18;
+        if(panW2>0.1){
+          mkMesh(new THREE.BoxGeometry(panW2,C.wH*0.85,0.04),panelMat,
+            x0+ux*(u+C.wW/2+panW2/2+0.09)+nx*C.reveal*0.5,wCy,
+            z0+uz*(u+C.wW/2+panW2/2+0.09)+nz*C.reveal*0.5,ang);
+        }
+        // Lumina interioara noaptea
+        if(isNight2 && rnd2<0.4){
+          const pl=new THREE.PointLight('#ffe8b0',0.20,4);
+          pl.position.set(wx-nx*0.4,wCy,wz-nz*0.4); scene.add(pl);
         }
 
-        // 3e. Traversă orizontală centrală
-        mkMesh(new THREE.BoxGeometry(C.wW+0.08, 0.06, 0.06), frameMat, wx, wCy, wz, ang);
-
-        // 3f. Pervaz (glaf) la baza ferestrei
-        const gGeo = new THREE.BoxGeometry(C.wW+0.25, 0.08, C.frameD*2.5);
-        mkMesh(gGeo, bandMat, wx, wBot-0.05, wz+nx*0.03, ang);
-
-        // 3g. Panou de umplere lateral (între ferestre)
-        const panW = xStep - C.wW - 0.18;
-        if(panW > 0.1){
-          const pnx = x0 + ux*(u + C.wW/2 + panW/2 + 0.09) + nx*C.reveal*0.5;
-          const pnz = z0 + uz*(u + C.wW/2 + panW/2 + 0.09) + nz*C.reveal*0.5;
-          mkMesh(new THREE.BoxGeometry(panW, C.wH*0.85, 0.04), panelMat, pnx, wCy, pnz, ang);
-        }
-
-        // ── 4. Balcon (etaje ≥1 și dacă stilul îl permite) ──────────────────
-        if(C.hasBalc && fl > 0 && fl < nFloors-1){
-          const balcX = x0 + ux*u + nx*(C.balcD/2 + C.reveal + 0.05);
-          const balcZ = z0 + uz*u + nz*(C.balcD/2 + C.reveal + 0.05);
-          const balcY = wBot - 0.08;
-
-          // Placa balconului
-          mkMesh(new THREE.BoxGeometry(C.wW+0.30, 0.12, C.balcD), balcMat, balcX, balcY, balcZ, ang);
-          // Picior / consolă sub placă
-          mkMesh(new THREE.BoxGeometry(C.wW*0.4, 0.30, C.balcD*0.7), balcMat, balcX, balcY-0.21, balcZ, ang);
-
-          // Balustradă — montanți verticali
-          const nRail = Math.floor((C.wW+0.30) / 0.25);
-          const rStep = (C.wW+0.28) / (nRail-1||1);
-          for(let ri=0; ri<=nRail; ri++){
-            const ru = -C.wW/2 - 0.12 + ri*rStep;
-            const rrx = x0 + ux*(u+ru) + nx*(C.balcD + C.reveal + 0.05);
-            const rrz = z0 + uz*(u+ru) + nz*(C.balcD + C.reveal + 0.05);
-            mkMesh(new THREE.BoxGeometry(0.04,C.railH,0.04), railMat, rrx, balcY+C.railH/2, rrz, ang);
+        // 4. Balcon
+        if(C.hasBalc && fl>0 && fl<nFloors-1){
+          const bD=C.balcD||0.6;
+          const balcX=x0+ux*u+nx*(bD/2+C.reveal+0.05);
+          const balcZ=z0+uz*u+nz*(bD/2+C.reveal+0.05);
+          const balcY=wBot-0.08;
+          mkMesh(new THREE.BoxGeometry(C.wW+0.30,0.12,bD),balcMat,balcX,balcY,balcZ,ang);
+          mkMesh(new THREE.BoxGeometry(C.wW*0.4,0.30,bD*0.7),balcMat,balcX,balcY-0.21,balcZ,ang);
+          const nRail=Math.floor((C.wW+0.30)/0.25);
+          const rStep2=(C.wW+0.28)/(nRail-1||1);
+          for(let ri=0;ri<=nRail;ri++){
+            const ru=-C.wW/2-0.12+ri*rStep2;
+            mkMesh(new THREE.BoxGeometry(0.04,C.railH||0.85,0.04),railMat,
+              x0+ux*(u+ru)+nx*(bD+C.reveal+0.05),balcY+(C.railH||0.85)/2,
+              z0+uz*(u+ru)+nz*(bD+C.reveal+0.05),ang);
           }
-          // Mână curentă orizontală
-          mkMesh(new THREE.BoxGeometry(C.wW+0.30, 0.06, 0.06), railMat,
-            balcX, balcY+C.railH, balcZ, ang);
-          // Panou sticlă balcon (între montanți)
-          mkMesh(new THREE.BoxGeometry(C.wW+0.18, C.railH*0.75, 0.02), glassMat,
-            balcX, balcY+C.railH*0.45, balcZ, ang);
+          mkMesh(new THREE.BoxGeometry(C.wW+0.30,0.06,0.06),railMat,balcX,balcY+(C.railH||0.85),balcZ,ang);
+          mkMesh(new THREE.BoxGeometry(C.wW+0.18,(C.railH||0.85)*0.75,0.02),glassMat,
+            balcX,balcY+(C.railH||0.85)*0.45,balcZ,ang);
         }
       }
     }
@@ -12480,10 +12742,42 @@ function _v3dAddWindows(THREE, pts2d, base, top, scene, stilKey){
 function _v3dApplyLight(preset,THREE,scene,r){
   scene.children.filter(c=>c.isLight).forEach(l=>scene.remove(l));
   const P={
-    day:   {sky:'#d0dff0',fog:'#d0dff0',amb:{c:'#ffffff',i:1.2},sun:{c:'#fff8e8',i:1.5,p:[80,120,60]},fill:{c:'#a0c0e0',i:0.6,p:[-60,40,-40]},exp:1.0,night:false},
-    golden:{sky:'#f5d090',fog:'#e8c070',amb:{c:'#ffe0a0',i:1.2},sun:{c:'#ff8020',i:2.0,p:[120,20,40]},fill:{c:'#d09050',i:0.6,p:[-40,60,-60]},exp:1.1,night:false},
-    overcast:{sky:'#c0ccd8',fog:'#c0ccd8',amb:{c:'#d0dde8',i:1.4},sun:{c:'#c8d8e8',i:0.5,p:[40,100,40]},fill:{c:'#a0b0c0',i:0.6,p:[-40,50,-40]},exp:1.0,night:false},
-    night: {sky:'#020408',fog:'#020408',amb:{c:'#0a1428',i:0.2},sun:{c:'#4060a0',i:0.1,p:[-40,60,20]},fill:{c:'#ff8020',i:0.6,p:[0,5,0]},exp:0.75,night:true},
+    day:{
+      sky:'#c8daf0',fog:'#d4e4f4',
+      amb:{c:'#b8d0f0',i:0.7},        // HemisphereLight sky
+      gnd:{c:'#8b7050',i:0.4},         // HemisphereLight ground
+      sun:{c:'#fff5d0',i:3.2,p:[100,140,80]},
+      fill:{c:'#6090d0',i:0.8,p:[-80,60,-60]},
+      rim:{c:'#ffd090',i:0.5,p:[-20,30,-100]},
+      exp:1.3,night:false,fog:false
+    },
+    golden:{
+      sky:'#f0b060',fog:'#e09040',
+      amb:{c:'#ffa040',i:0.8},
+      gnd:{c:'#603010',i:0.3},
+      sun:{c:'#ff6010',i:3.5,p:[140,18,60]},
+      fill:{c:'#a05020',i:0.6,p:[-60,40,-80]},
+      rim:{c:'#ffcc80',i:1.0,p:[0,20,-120]},
+      exp:1.4,night:false,fog:false
+    },
+    overcast:{
+      sky:'#a8b8c8',fog:'#b0c0cc',
+      amb:{c:'#c0ccd8',i:1.6},
+      gnd:{c:'#707880',i:0.3},
+      sun:{c:'#c0d0e0',i:0.8,p:[40,120,40]},
+      fill:{c:'#90a8b8',i:0.8,p:[-40,60,-40]},
+      rim:{c:'#c8d4dc',i:0.3,p:[0,40,-80]},
+      exp:1.1,night:false,fog:true
+    },
+    night:{
+      sky:'#010306',fog:'#010306',
+      amb:{c:'#080f20',i:0.15},
+      gnd:{c:'#020408',i:0.1},
+      sun:{c:'#1830a0',i:0.3,p:[-80,80,40]},
+      fill:{c:'#ff7020',i:1.2,p:[0,3,0]},  // lumina stradala portocalie
+      rim:{c:'#2040c0',i:0.5,p:[60,40,-80]},
+      exp:0.9,night:true,fog:true
+    },
   };
   const p=P[preset]||P.day;
   window._v3dNight=p.night;
