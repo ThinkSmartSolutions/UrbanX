@@ -11634,15 +11634,14 @@ function aedisOpen3DViewer(){
     ss('⚠️ Generați mai întâi volumul 3D (butonul ⚡).'); return;
   }
 
-  // Ascundem topbar-ul principal când viewer-ul e deschis (nu are rost acolo)
-  const _topbar = document.getElementById('topbar');
-  if(_topbar) _topbar.style.display = 'none';
+  // Viewer-ul are z-index:9998 și acoperă tot ecranul inclusiv topbar-ul
+  // Nu mai ascundem topbar-ul — viewer-ul îl acoperă natural prin z-index
 
   let ov = document.getElementById('aedis-3d-viewer-overlay');
   if(ov) ov.remove();
   ov = document.createElement('div');
   ov.id = 'aedis-3d-viewer-overlay';
-  ov.style.cssText = 'position:fixed;inset:0;z-index:9998;background:#0a0e1a;display:flex;flex-direction:column';
+  ov.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;background:#0a0e1a;display:flex;flex-direction:column;overflow:hidden';
   document.body.appendChild(ov);
 
   const niv = AEDIS.corpuri[0]?.niv||4;
@@ -11807,9 +11806,6 @@ function aedisOpen3DViewer(){
 // ── State ──────────────────────────────────────────────────────────────────
 
 function _v3dCleanup(){
-  // Restaurăm topbar-ul principal la închiderea viewer-ului
-  const _tb = document.getElementById('topbar');
-  if(_tb) _tb.style.display = '';
   if(V3D.af) cancelAnimationFrame(V3D.af);
   if(V3D.r){ V3D.r.dispose(); V3D.r=null; }
   Object.values(V3D.texCache).forEach(t=>{ try{t.dispose();}catch(e){} });
