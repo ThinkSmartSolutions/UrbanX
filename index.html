@@ -911,7 +911,7 @@ canvas#c2d{width:100%;height:100%;display:block}
   <div id="pdf-box">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
       <h2 style="color:#d4af37;font-size:18px;font-weight:800">📄 Export Raport UrbanX</h2>
-      <button onclick="$('pdf-modal').classList.remove('open')" style="background:none;border:1px solid rgba(255,255,255,.2);color:#94a3b8;border-radius:8px;padding:5px 12px;cursor:pointer;font-size:13px">✕</button>
+      <button onclick="_g('pdf-modal').classList.remove('open')" style="background:none;border:1px solid rgba(255,255,255,.2);color:#94a3b8;border-radius:8px;padding:5px 12px;cursor:pointer;font-size:13px">✕</button>
     </div>
     <p style="font-size:12px;color:#64748b;margin-bottom:16px">Alege tipul de raport. Harta se captează din vederea curentă — poziționează-te înainte de export.</p>
 
@@ -942,7 +942,7 @@ canvas#c2d{width:100%;height:100%;display:block}
     <div style="display:flex;gap:8px;margin-top:16px">
       <button class="btn-p" onclick="runExport()" style="flex:1;font-size:15px;font-weight:700">⬇ Generează PDF</button>
         
-      <button class="btn-s" onclick="$('pdf-modal').classList.remove('open')">Anulează</button>
+      <button class="btn-s" onclick="_g('pdf-modal').classList.remove('open')">Anulează</button>
     </div>
   </div>
 </div>
@@ -1656,8 +1656,8 @@ window.addEventListener('unhandledrejection',function(e){
 });
 
 // ═══ URBANX v16 ═══════════════════════════════════════════════════════════
-const $=id=>document.getElementById(id);
-const ss=t=>{$('status').textContent=t};
+const _g=id=>document.getElementById(id);
+const ss=t=>{_g('status').textContent=t};
 const esc=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const pN=v=>{const n=Number(String(v??'').replace(',','.'));return Number.isFinite(n)&&n>=0?n:null};
 const normU=v=>String(v??'').trim().replace(/[?\s]/g,'').toUpperCase();
@@ -2515,7 +2515,7 @@ function addLayers(){
       // Mobile: deschidem automat tab Proiect
       if(window.innerWidth<=840){
         S.tab='proiect';
-        const sh=$('mob-sheet'), mb=$('mob-body');
+        const sh=_g('mob-sheet'), mb=_g('mob-body');
         if(sh&&mb){mb.innerHTML=getContent('proiect');sh.classList.add('open');
           document.querySelectorAll('.mnav-btn').forEach(b=>b.classList.toggle('active',b.dataset.mt==='proiect'));}
       }
@@ -2586,8 +2586,8 @@ map.on('dblclick',e=>{
   document.querySelectorAll('#inp-coord').forEach(el=>el.value=coordStr);
   e.preventDefault();
 });
-map.on('pitch',()=>{const p=Math.round(map.getPitch());$('pitchV').textContent=p+'°';$('slPitch').value=p;});
-map.on('rotate',()=>{const b=((Math.round(map.getBearing())%360)+360)%360;$('bearV').textContent=b+'°';$('slBearing').value=b;});
+map.on('pitch',()=>{const p=Math.round(map.getPitch());_g('pitchV').textContent=p+'°';_g('slPitch').value=p;});
+map.on('rotate',()=>{const b=((Math.round(map.getBearing())%360)+360)%360;_g('bearV').textContent=b+'°';_g('slBearing').value=b;});
 
 // ═══ CLICK HARTĂ ══════════════════════════════════════════════════════════
 // onMapClick: click direct pe harta (nu din geocoding)
@@ -3875,49 +3875,49 @@ function buildVolume(){
     let efectivNiv = rNiv;            // niveluri efective de construit
     
     if(scenariu === 'liber'){
-      // DEMOLARE: teren complet liber — eliminăm clădirile existente DOAR din randare
-      // IMPORTANT: Nu modificăm S.ctx — salvăm backup și ascundem layerul
+      // DEMOLARE: teren complet liber
+      // Salvăm backup S.ctx
       if(!S._ctxBackup && S.ctx?.features?.length){
         S._ctxBackup = JSON.parse(JSON.stringify(S.ctx));
       }
+
+      // 1. Ascundem ctx-3d (clădirile noastre din Overpass)
       try{map.setLayoutProperty('ctx-3d','visibility','none');}catch(e){}
-      // Filtrăm DOAR sursa de randare, nu S.ctx
+
+      // 2. Filtrăm layerele NATIVE Mapbox folosind bbox-ul parcelei
+      // setFilter exclude clădirile al căror centru e în interiorul parcelei
       try{
-        if(S._ctxBackup?.features){
-          const pFeat={type:'Feature',geometry:p.geo.geometry,properties:{}};
-          const filtered = S._ctxBackup.features.filter(f=>{
-            try{
-              return !turf.booleanPointInPolygon(turf.centerOfMass(f),pFeat);
-            }catch(e){return true;}
-          });
-          setSource('ctx-src',{type:'FeatureCollection',features:filtered});
-        }
+        const bbox = turf.bbox(p.geo);
+        const [minLng, minLat, maxLng, maxLat] = bbox;
+        // Filter: exclude featurile cu centrul în bbox-ul parcelei
+        const excludeFilter = [
+          'any',
+          ['<', ['get', 'longitude'], minLng - 0.00001],
+          ['>', ['get', 'longitude'], maxLng + 0.00001],
+          ['<', ['get', 'latitude'],  minLat - 0.00001],
+          ['>', ['get', 'latitude'],  maxLat + 0.00001]
+        ];
+        // Salvăm filtrele originale
+        if(!S._nativeFilters) S._nativeFilters = {};
+        ['building','building-extrusion','3d-buildings','add-3d-buildings'].forEach(id=>{
+          try{
+            if(map.getLayer(id)){
+              if(!S._nativeFilters[id]) S._nativeFilters[id] = map.getFilter(id);
+              map.setFilter(id, excludeFilter);
+            }
+          }catch(e){}
+        });
       }catch(e){}
-      // Mască de demolare — acoperă clădirile native Mapbox 3D
-      // Folosim fill-extrusion cu H mare plasat DUPĂ vol-3d (deasupra tuturor)
+
+      // 3. Mască vizuală (fill plat) pentru a acoperi solul parcelei
       try{
         const pGeom = p.geo.geometry;
         if(map.getLayer('demolish-mask')) map.removeLayer('demolish-mask');
         if(map.getSource('demolish-mask-src')) map.removeSource('demolish-mask-src');
         const baseStyle = document.getElementById('selBase')?.value || 'custom';
         const maskColor = baseStyle === 'sat' ? '#1a3020' : baseStyle === 'streets' ? '#dde8e0' : '#0d1926';
-        map.addSource('demolish-mask-src',{type:'geojson',data:{
-          type:'FeatureCollection',
-          features:[{type:'Feature',geometry:pGeom,properties:{}}]
-        }});
-        // Adăugăm DUPĂ toate layerele (ultimul = deasupra) — acoperă orice clădire nativă
-        map.addLayer({
-          id:'demolish-mask',
-          type:'fill-extrusion',
-          source:'demolish-mask-src',
-          paint:{
-            'fill-extrusion-color': maskColor,
-            'fill-extrusion-height': 0.5,   // doar sol — nu interferează cu vol-3d al nostru
-            'fill-extrusion-base': 0,
-            'fill-extrusion-opacity': 1.0
-          }
-        }); // fără beforeLayer = cel mai de sus
-        // Mutăm vol-3d deasupra măștii
+        map.addSource('demolish-mask-src',{type:'geojson',data:{type:'FeatureCollection',features:[{type:'Feature',geometry:pGeom,properties:{}}]}});
+        map.addLayer({id:'demolish-mask',type:'fill',source:'demolish-mask-src',paint:{'fill-color':maskColor,'fill-opacity':1}});
         try{ map.moveLayer('vol-3d'); map.moveLayer('vol-3d-outline'); }catch(e){}
       }catch(e){}
       volumeGeom = fp.geometry;
@@ -3936,6 +3936,7 @@ function buildVolume(){
       // La schimbarea scenariului din liber → restaurăm backup-ul și ștergem masca
       if(S._ctxBackup?.features?.length){ S.ctx = S._ctxBackup; S._ctxBackup = null; }
       try{ if(map.getLayer('demolish-mask')) map.removeLayer('demolish-mask'); if(map.getSource('demolish-mask-src')) map.removeSource('demolish-mask-src'); }catch(e){}
+      if(S._nativeFilters){ Object.entries(S._nativeFilters).forEach(([id,f])=>{try{if(map.getLayer(id))map.setFilter(id,f||null);}catch(e){}}); S._nativeFilters=null; }
       // EXTINDERE ORIZONTALA: construim pe zona libera, langa existente
       // Cladirile existente raman vizibile
       try{map.setLayoutProperty('ctx-3d','visibility','visible');}catch(e){}
@@ -3966,6 +3967,7 @@ function buildVolume(){
       // La schimbarea scenariului din liber → restaurăm backup-ul și ștergem masca
       if(S._ctxBackup?.features?.length){ S.ctx = S._ctxBackup; S._ctxBackup = null; }
       try{ if(map.getLayer('demolish-mask')) map.removeLayer('demolish-mask'); if(map.getSource('demolish-mask-src')) map.removeSource('demolish-mask-src'); }catch(e){}
+      if(S._nativeFilters){ Object.entries(S._nativeFilters).forEach(([id,f])=>{try{if(map.getLayer(id))map.setFilter(id,f||null);}catch(e){}}); S._nativeFilters=null; }
       // EXTINDERE VERTICALA + ORIZONTALA: corp nou integrat
       try{map.setLayoutProperty('ctx-3d','visibility','visible');}catch(e){}
       // Footprint = intreaga zona construibila (poate include si zona cladirilor existente)
@@ -4417,12 +4419,12 @@ function renderAll(){
   document.querySelectorAll('.tc').forEach(c=>c.classList.toggle('active',c.id===`tc-${S.tab}`));
   document.querySelectorAll('.mtab').forEach(b=>b.classList.toggle('active',b.dataset.mt===S.tab));
   // Mobile sync
-  const mb=$('mob-body');
+  const mb=_g('mob-body');
   if(mb){
     if(window.innerWidth<=840){
       mb.innerHTML=getContent(S.tab);
       // Overlay-ul de căutare (addr/cad) e separat de mob-body → nu e afectat
-    } else if($('mob-sheet')?.classList.contains('open')){
+    } else if(_g('mob-sheet')?.classList.contains('open')){
       mb.innerHTML=getContent(S.tab);
     }
   }
@@ -5119,7 +5121,7 @@ function htmlScen(){
 
 // ═══ DRAW 2D ═══════════════════════════════════════════════════════════════
 function draw2D(){
-  const cv=$('c2d');if(!cv)return;
+  const cv=_g('c2d');if(!cv)return;
   const ap=S.parcels[S.activeParcel??0];
   if(!ap?.geo?.geometry){cv.getContext('2d').clearRect(0,0,cv.width,cv.height);return;}
   const fp=buildFP(ap.geo.geometry,ap.params||ap.utr);
@@ -5156,7 +5158,7 @@ function doCoord(){
   if(!looksLike_lat(lat)||!looksLike_lng(lng)){
     return alert('Coordonate in afara Romaniei. Format: 47.1585, 27.6014');
   }
-  if(window.innerWidth<=840)$('mob-sheet')?.classList.remove('open');
+  if(window.innerWidth<=840)_g('mob-sheet')?.classList.remove('open');
   goToLocation(lat, lng, lat.toFixed(5)+', '+lng.toFixed(5));
 }
 
@@ -5164,7 +5166,7 @@ function doGPS(){
   if(!navigator.geolocation)return alert('GPS necesită HTTPS.');
   ss('📍 Se detectează locația…');
   navigator.geolocation.getCurrentPosition(
-    p=>{$('mob-sheet')?.classList.remove('open');goToLocation(p.coords.latitude,p.coords.longitude,'Locația mea GPS');},
+    p=>{_g('mob-sheet')?.classList.remove('open');goToLocation(p.coords.latitude,p.coords.longitude,'Locația mea GPS');},
     e=>{ss('❌ GPS: '+e.message);}
   ,{enableHighAccuracy:true,timeout:15000,maximumAge:0});
 }
@@ -5508,8 +5510,8 @@ async function goToLocation(lat, lng, label){
     // Pe mobile: deschidem automat tab-ul Proiect dupa selectie
     if(window.innerWidth<=840){
       S.tab='proiect';
-      const sh=$('mob-sheet');
-      const mb=$('mob-body');
+      const sh=_g('mob-sheet');
+      const mb=_g('mob-body');
       if(sh && mb){
         mb.innerHTML=getContent('proiect');
         sh.classList.add('open');
@@ -5626,7 +5628,7 @@ function doCad(){
     if(box)box.innerHTML='';
     const[lng,lat]=found.geometry.coordinates;
     onMapClick(lat,lng);
-    if(window.innerWidth<=840)$('mob-sheet')?.classList.remove('open');
+    if(window.innerWidth<=840)_g('mob-sheet')?.classList.remove('open');
   } else {
     // Fallback: caută prefixe
     const res=[];for(const[k,f]of S.cadIdx){if(k.startsWith(key)||k.includes(key))res.push(f);if(res.length>=15)break;}
@@ -5646,7 +5648,7 @@ function doCad(){
 function pickCad(i){
   const f=window._cadR?.[i];if(!f)return;
   const b=document.querySelector('#cad-box');if(b)b.innerHTML='';
-  if(window.innerWidth<=840)$('mob-sheet')?.classList.remove('open');
+  if(window.innerWidth<=840)_g('mob-sheet')?.classList.remove('open');
   
   // Dacă avem poligon real din zona încărcată, îl selectăm direct
   if(f.geometry?.type==='Polygon'||f.geometry?.type==='MultiPolygon'){
@@ -5821,7 +5823,7 @@ async function genVol(){
   _setCtxVisibility();
   ss(`🏗 Volum 3D generat!`);
   renderTab('volume');
-  if(window.innerWidth<=840)$('mob-sheet')?.classList.remove('open');
+  if(window.innerWidth<=840)_g('mob-sheet')?.classList.remove('open');
   // Distanțe față de vecini — dacă contextul lipsește, îl încărcăm mai întâi
   if(!S.ctx?.features?.length){
     loadContext().then(()=>{ setTimeout(updateDistanceLines, 300); });
@@ -6012,14 +6014,14 @@ function clearAll(){
 
 function toggleMulti(v){
   S.multiMode=v;
-  $('btnMulti')?.classList.toggle('multi-on',v);
+  _g('btnMulti')?.classList.toggle('multi-on',v);
   renderTab('search');
 }
 
 function set3D(pitch=60,bearing=-20){
   map.easeTo({pitch,bearing,duration:800,zoom:Math.max(map.getZoom(),16)});
-  $('pitchV').textContent=pitch+'°';$('slPitch').value=pitch;
-  $('bearV').textContent=((bearing+360)%360)+'°';$('slBearing').value=((bearing+360)%360);
+  _g('pitchV').textContent=pitch+'°';_g('slPitch').value=pitch;
+  _g('bearV').textContent=((bearing+360)%360)+'°';_g('slBearing').value=((bearing+360)%360);
 }
 function toggleFnLegend(btn){
   const leg=document.getElementById('fn-legend');
@@ -6031,7 +6033,7 @@ function toggleFnLegend(btn){
     map.setLayoutProperty('ctx-height-label','visibility',visible?'visible':'none');
   }catch(e){}
 }
-function set2D(){map.easeTo({pitch:0,bearing:0,duration:600});$('pitchV').textContent='0°';$('slPitch').value=0;$('bearV').textContent='0°';$('slBearing').value=0;}
+function set2D(){map.easeTo({pitch:0,bearing:0,duration:600});_g('pitchV').textContent='0°';_g('slPitch').value=0;_g('bearV').textContent='0°';_g('slBearing').value=0;}
 
 function switchTab(t){
   S.tab=t;
@@ -6039,7 +6041,7 @@ function switchTab(t){
   document.querySelectorAll('.tc').forEach(c=>c.classList.toggle('active',c.id===`tc-${t}`));
   document.querySelectorAll('.mtab').forEach(b=>b.classList.toggle('active',b.dataset.mt===t));
   renderTab(t);
-  const mb=$('mob-body');if(mb&&$('mob-sheet')?.classList.contains('open'))mb.innerHTML=getContent(t);
+  const mb=_g('mob-body');if(mb&&_g('mob-sheet')?.classList.contains('open'))mb.innerHTML=getContent(t);
   setTimeout(draw2D,60);
 }
 
@@ -6047,8 +6049,8 @@ function switchTab(t){
 let utrOpen=false;
 function toggleUTR(){
   utrOpen=!utrOpen;
-  $('btnUTR').classList.toggle('on',utrOpen);
-  $('utr-drawer').classList.toggle('open',utrOpen);
+  _g('btnUTR').classList.toggle('on',utrOpen);
+  _g('utr-drawer').classList.toggle('open',utrOpen);
   if(!utrOpen){clearSource('utr-src');return;}
   if(!S.pug)return;
   const fc={type:'FeatureCollection',features:S.pug.features.map(f=>({...f,properties:{...f.properties,utr:normU(f.properties?.utr||''),c:ucol(normU(f.properties?.utr||''))}}))};
@@ -6057,9 +6059,9 @@ function toggleUTR(){
   ss(`🗺 ${S.pug.features.length} zone UTR`);
   const utrMap={};
   S.pug.features.forEach(f=>{const u=normU(f.properties?.utr||'');if(u&&u!=='?'&&u!=='??')utrMap[u]=(utrMap[u]||0)+1;});
-  const chips=$('utr-chips');
+  const chips=_g('utr-chips');
   if(chips)chips.innerHTML=Object.keys(utrMap).sort().map(u=>`<span class="utr-chip" style="background:${ucol(u)}22;border-color:${ucol(u)};color:${ucol(u)}" onclick="selectUTR('${u}')" title="${esc(REGULI[u]?.d||u)} · ${utrMap[u]} zone">${u}</span>`).join('');
-  const leg=$('utr-leg');if(leg)leg.textContent=`${Object.keys(utrMap).length} tipuri UTR · ${S.pug.features.length} zone · Click pe UTR pentru detalii și zoom`;
+  const leg=_g('utr-leg');if(leg)leg.textContent=`${Object.keys(utrMap).length} tipuri UTR · ${S.pug.features.length} zone · Click pe UTR pentru detalii și zoom`;
 }
 
 function selectUTR(utr){
@@ -6068,7 +6070,7 @@ function selectUTR(utr){
   setSource('utr-src',{type:'FeatureCollection',features:feats.map(f=>({...f,properties:{...f.properties,utr,c:ucol(utr)}}))});
   if(feats.length){const bb=turf.bbox({type:'FeatureCollection',features:feats});map.fitBounds([[bb[0],bb[1]],[bb[2],bb[3]]],{padding:60,duration:700});}
   S.utr=utr;S.rule=REGULI[utr]||{};
-  utrOpen=false;$('utr-drawer').classList.remove('open');$('btnUTR').classList.remove('on');
+  utrOpen=false;_g('utr-drawer').classList.remove('open');_g('btnUTR').classList.remove('on');
   switchTab('utr');
   ss(`🗺 UTR ${utr} — ${esc(REGULI[utr]?.d||'')} · ${feats.length} zone`);
 }
@@ -6193,13 +6195,13 @@ safeOn('btnPanel',()=>{
   if(window.innerWidth<=840){
     toggleMobSheet();
   } else {
-    const p=$('panel');
+    const p=_g('panel');
     p.classList.toggle('hidden');
     const isHidden=p.classList.contains('hidden');
     p.style.display=isHidden?'none':'flex';
   }
 });
-if($('btnMobClose'))$('btnMobClose').onclick=toggleMobSheet;
+if(_g('btnMobClose'))_g('btnMobClose').onclick=toggleMobSheet;
 
 // ═══ RESTAURARE COMPLETĂ DUPĂ SCHIMBARE STIL HARTĂ ══════════════════════════
 // Apelat după orice map.setStyle() — reîncarcă TOATE sursele și layerele
@@ -6264,7 +6266,7 @@ function _restoreAfterStyleLoad(styleKey){
   }
 }
 
-$('selBase').onchange=e=>{
+_g('selBase').onchange=e=>{
   const v=e.target.value;
   // Fix #8: predefinit "Doar volumul meu" ACTIV în Urban3D, INACTIV în Streets/Satelitar
   if(v==='custom'){
@@ -6280,8 +6282,8 @@ $('selBase').onchange=e=>{
     },300);
   });
 };
-if($('slPitch'))$('slPitch').oninput=()=>{const v=+$('slPitch').value;map.easeTo({pitch:v,duration:150});if($('pitchV'))$('pitchV').textContent=v+'°';};
-if($('slBearing'))$('slBearing').oninput=()=>{const v=+$('slBearing').value;map.easeTo({bearing:v,duration:150});if($('bearV'))$('bearV').textContent=v+'°';};
+if(_g('slPitch'))_g('slPitch').oninput=()=>{const v=+_g('slPitch').value;map.easeTo({pitch:v,duration:150});if(_g('pitchV'))_g('pitchV').textContent=v+'°';};
+if(_g('slBearing'))_g('slBearing').oninput=()=>{const v=+_g('slBearing').value;map.easeTo({bearing:v,duration:150});if(_g('bearV'))_g('bearV').textContent=v+'°';};
 
 // Tab switching
 document.querySelectorAll('.ptab').forEach(b=>{
@@ -6359,8 +6361,8 @@ function selectPdfOpt(opt){
 }
 
 function showPdfModal(){
-  $('pdf-modal').classList.add('open');
-  $('pdf-progress').style.display='none';
+  _g('pdf-modal').classList.add('open');
+  _g('pdf-progress').style.display='none';
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -6507,7 +6509,7 @@ async function exportFull(pdf, ap, r, p){
   const fnVal = valFunctiune(S.vol.fn, ap?.utr);
 
   // ── PAGINA 1: Cover + Harta ─────────────────────────────────────────────
-  const mapCanvas = await html2canvas($('map'),{useCORS:true,scale:1.8,logging:false});
+  const mapCanvas = await html2canvas(_g('map'),{useCORS:true,scale:1.8,logging:false});
   pdf.addImage(mapCanvas.toDataURL('image/jpeg',.88),'JPEG',0,0,pw,ph);
   // Overlay gradient jos
   pdf.setFillColor(8,21,42);
@@ -6739,7 +6741,7 @@ async function exportFull(pdf, ap, r, p){
   // Screenshot volumetrie (captam vederea curenta)
   const vol_h = 70;
   try{
-    const vc=await html2canvas($('map'),{useCORS:true,scale:1.2,logging:false});
+    const vc=await html2canvas(_g('map'),{useCORS:true,scale:1.2,logging:false});
     pdf.addImage(vc.toDataURL('image/jpeg',.82),'JPEG',8,y,pw-16,vol_h);
     pdf.setDrawColor(...PDF_C.gold);pdf.setLineWidth(0.5);
     pdf.rect(8,y,pw-16,vol_h,'S');
@@ -6802,7 +6804,7 @@ async function exportAEDISPage(pdf){
     try{
       map.triggerRepaint();
       await new Promise(r=>setTimeout(r,600));
-      const vc = await html2canvas($('map'),{useCORS:true,scale:1.5,logging:false});
+      const vc = await html2canvas(_g('map'),{useCORS:true,scale:1.5,logging:false});
       pdf.addImage(vc.toDataURL('image/jpeg',.85),'JPEG',8,y,pw-16,68);
       pdf.setDrawColor(212,175,55);pdf.setLineWidth(0.4);
       pdf.rect(8,y,pw-16,68,'S');
@@ -6869,7 +6871,7 @@ async function exportMulti(pdf){
   const totalArea = parcele.reduce((s,p)=>s+(p.area||0),0);
 
   // ── PAGINA 1: Cover + harta cu toate parcelele ──────────────────────────
-  const mc = await html2canvas($('map'),{useCORS:true,scale:1.8,logging:false});
+  const mc = await html2canvas(_g('map'),{useCORS:true,scale:1.8,logging:false});
   pdf.addImage(mc.toDataURL('image/jpeg',.88),'JPEG',0,0,pw,ph);
   pdf.setFillColor(...PDF_C.navy);
   pdf.rect(0,0,pw,22,'F');
@@ -7017,7 +7019,7 @@ async function exportMulti(pdf){
 
   // ── PAGINA FINALA: Harta satelit/streets ───────────────────────────────
   pdf.addPage('a4','landscape');
-  const mc2=await html2canvas($('map'),{useCORS:true,scale:1.5,logging:false});
+  const mc2=await html2canvas(_g('map'),{useCORS:true,scale:1.5,logging:false});
   const pw2=pdf.internal.pageSize.getWidth(),ph2=pdf.internal.pageSize.getHeight();
   pdf.addImage(mc2.toDataURL('image/jpeg',.85),'JPEG',0,0,pw2,ph2);
   pdfHeader(pdf,'PLAN HARTĂ — PARCELE SELECTATE','',pdf.internal.getCurrentPageInfo().pageNumber);
@@ -7058,7 +7060,7 @@ async function exportVol3(pdf, ap, r, p){
     setTimeout(updateDistanceLines, 300);
     try{map.setLayoutProperty('ctx-3d','visibility',sc.ctxViz?'visible':'none');}catch(e){}
     await new Promise(r=>setTimeout(r,1200));
-    const mc=await html2canvas($('map'),{useCORS:true,scale:1.6,logging:false});
+    const mc=await html2canvas(_g('map'),{useCORS:true,scale:1.6,logging:false});
     const pw2=pdf.internal.pageSize.getWidth(),ph2=pdf.internal.pageSize.getHeight();
     pdf.addImage(mc.toDataURL('image/jpeg',.88),'JPEG',0,0,pw2,ph2);
     // Header overlay
@@ -7171,8 +7173,8 @@ function _pdfSafe(str){
 }
 
 async function runExport(){
-  const prog=$('pdf-progress');
-  const msg=$('pdf-prog-msg');
+  const prog=_g('pdf-progress');
+  const msg=_g('pdf-prog-msg');
   if(prog) prog.style.display='block';
   const ap=S.parcels[S.activeParcel??0];
   if(!ap?.geo?.geometry){ ss('Selectati mai intai o parcela.'); if(prog) prog.style.display='none'; return; }
@@ -7716,7 +7718,7 @@ async function runExport(){
     const safeName='RaportUrbanistic_'+nrcad+'_'+S2(utr)+'_'+new Date().toISOString().slice(0,10)+'.pdf';
     pdf.save(safeName);
     if(prog) prog.style.display='none';
-    if($('pdf-modal')) $('pdf-modal').classList.remove('open');
+    if(_g('pdf-modal')) _g('pdf-modal').classList.remove('open');
     ss('Raport urbanistic complet exportat! (8 pagini, capturi multiple)');
 
   }catch(e){
@@ -8502,6 +8504,14 @@ function _aedisRestoreCad3D(){
     if(S._ctxBackup?.features?.length){
       S.ctx = S._ctxBackup;
       S._ctxBackup = null;
+    }
+
+    // Restaurăm filtrele originale ale layerelor native Mapbox
+    if(S._nativeFilters){
+      Object.entries(S._nativeFilters).forEach(([id, filter])=>{
+        try{ if(map.getLayer(id)) map.setFilter(id, filter || null); }catch(e){}
+      });
+      S._nativeFilters = null;
     }
 
     // Restaurăm ctx-3d vizibil (dacă nu e onlyVol)
@@ -10708,7 +10718,7 @@ async function renderLoisirAI(){
   }catch(err){ console.error(err); ss('❌ AI Render LOISIR eșuat: '+err.message); }
   finally{ LOISIR_AI_STATE.rendering=false; }
 }
-function showLoisirAIRender(imageUrl){ const modal=$('loisir-ai-preview'), img=$('loisir-ai-img'); if(!modal||!img){ window.open(imageUrl,'_blank'); return; } img.src=imageUrl; modal.classList.add('open'); }
+function showLoisirAIRender(imageUrl){ const modal=_g('loisir-ai-preview'), img=_g('loisir-ai-img'); if(!modal||!img){ window.open(imageUrl,'_blank'); return; } img.src=imageUrl; modal.classList.add('open'); }
 
 
 
