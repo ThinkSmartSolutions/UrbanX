@@ -657,6 +657,13 @@ canvas#c2d{width:100%;height:100%;display:block}
 <!-- Buton flotant mobile failsafe -->
 <!-- FAB înlocuit cu mob-nav bar -->
 
+<!-- Disclaimer dev banner -->
+<div id="dev-disclaimer" style="position:fixed;bottom:26px;left:50%;transform:translateX(-50%);z-index:69;
+  background:rgba(10,15,30,0.80);border:1px solid rgba(212,175,55,0.30);border-radius:8px;
+  padding:3px 12px;font-size:9.5px;color:#64748b;pointer-events:none;white-space:nowrap;
+  backdrop-filter:blur(4px);letter-spacing:0.02em;max-width:90vw;text-align:center;overflow:hidden;text-overflow:ellipsis">
+  ⚗️ <strong style="color:#d4af37">UrbanX AEDIS</strong> — Produs aflat în curs de dezvoltare și cercetare. Valorile au caracter orientativ.
+</div>
 <div id="copy"><span>© UrbanX – FG · TSS</span><span>Mapbox GL · Cadastru · PUG Iași · OSM</span></div>
 <div id="aedis-modal">
   <div id="aedis-header">
@@ -3278,18 +3285,29 @@ function updateDistanceLines(){
       }catch(e){ return false; }
     });
 
-    // Calculăm distanța REALĂ (contur la contur) față de primul volum AEDIS
-    // Dacă nu avem volume generate, folosim parcela ca referință pentru distanțe
-    const firstVol = myBldArr[0] || {
+    // Calculăm distanța REALĂ față de CEL MAI APROPIAT volum AEDIS
+    // (nu doar primul — important pentru multiselect cu mai multe clădiri)
+    const fallbackVol = {
       type:'Feature',
-      geometry: S.parcels[S.activeParcel??0]?.geo?.geometry || combinedParcel.geometry,
+      geometry: combinedParcel.geometry,
       properties:{}
     };
     const withDist = ctxNotOwn.map(ctx=>{
       try{
-        const {dist} = minDistBetweenPolygons(firstVol, ctx);
-        return {ctx, dist};
-      }catch(e){ return {ctx, dist:999}; }
+        // Găsim distanța minimă față de oricare din volumele generate
+        let minDist = 999;
+        const volsToCheck = myBldArr.length > 0 ? myBldArr : [fallbackVol];
+        for(const vol of volsToCheck){
+          try{
+            const {dist} = minDistBetweenPolygons(vol, ctx);
+            if(dist < minDist) minDist = dist;
+            if(minDist < 5) break; // e suficient de aproape, nu mai căutăm
+          }catch(e){}
+        }
+        return {ctx, dist:minDist, closestVol: volsToCheck.find(v=>{
+          try{ return Math.abs(minDistBetweenPolygons(v,ctx).dist - minDist) < 0.5; }catch(e){return false;}
+        }) || volsToCheck[0]};
+      }catch(e){ return {ctx, dist:999, closestVol: fallbackVol}; }
     }).filter(x=>x.dist<150); // max 150m contur la contur
 
     // Sortam dupa distanta reala, luam max 15 cei mai apropiati
@@ -4936,7 +4954,7 @@ async function goToLocation(lat, lng, label){
       if(ratio > 5) shapeWarning = '<br><small style="color:#f59e0b">⚠️ Parcelă alungită ('+Math.round(ratio)+':1) — posibil drum/culoar public</small>';
     }catch(e){}
     const zoneInfo2 = detectZoneType(lat, lng, effectiveUtr||utr);
-    const ancpiLink = nrcad&&nrcad!=='—' ? `<br><a href="https://geoportal.ancpi.ro/geoportal/imobile/eterra.html" target="_blank" style="color:#60a5fa;font-size:11px">🔗 Verifică forma exactă pe geo.ancpi.ro</a>` : '';
+    const ancpiLink = nrcad&&nrcad!=='—' ? `<br><a href="https://geoportal.ancpi.ro/imobile.html" target="_blank" style="color:#60a5fa;font-size:11px">🔗 Verifică forma exactă pe geo.ancpi.ro</a>` : '';
     const zoneTag = `<br><span style="font-size:11px;color:${zoneInfo2.color}">${zoneInfo2.label}</span>`;
     popup(`<b>${popupTitle}</b><br>${nrcad&&nrcad!=='—'?'':'Cad: <b>'+esc(nrcad)+'</b><br>'}UTR: <b>${esc(effectiveUtr||utr||'—')}</b><br>Suprafață: <b>${area} m²</b>${zoneTag}<br><small style="color:#34d399">📐 Cadastru local</small>${shapeWarning}${ancpiLink}`,popupPos);
     ss(`✅ ${esc(label||nrcad)} | Parcelă: ${nrcad} | UTR: ${utr||'—'} | ${area} m²`);
@@ -10068,7 +10086,7 @@ function _initStudyPdf(studyName, studySubtitle, totalPages){
     pdf.setFillColor(240,242,246);pdf.rect(0,H-10,W,10,'F');
     pdf.setDrawColor(200,205,215);pdf.line(0,H-10,W,H-10);
     pdf.setTextColor(100,110,130);pdf.setFontSize(6.5);pdf.setFont('helvetica','normal');
-    pdf.text(S2(studySubtitle)+' · UrbanX AEDIS · Parcela '+nrcad+' · '+S2(dateStr)+' · Valori orientative',W/2,H-3.5,{align:'center'});
+    pdf.text(S2(studySubtitle)+' · UrbanX AEDIS · Parcela '+nrcad+' · '+S2(dateStr)+' · Valori orientative · Produs în curs de dezvoltare',W/2,H-3.5,{align:'center'});
   };
   const sec=(title,y,col)=>{
     col=col||BLUE;
@@ -11497,19 +11515,24 @@ function _v3dBuild(ap){
       const pts=fring.slice(0,-1).map(toLoc);
       const holePts = holeCoords ? holeCoords.slice(0,-1).map(toLoc) : null;
       if(pts.length<3) return;
+      const roofType = f.properties?.roofType || '';
       const isRoofSlab = floor < 0 && (
-        f.properties?.roofType === 'terasa_plata' ||
-        f.properties?.roofType === 'terasa' ||
-        f.properties?.roofType === 'combinat'
+        roofType==='terasa_plata' || roofType==='terasa' || roofType==='combinat'
       );
-      const isRoofSpire = floor < 0 && !isRoofSlab;
-      if(isRoofSpire) return;
-      if(h < 0.05 && !isRoofSlab) return;
-      if(pts.length < 4) return;
+      const isMansarda = floor <= -10 && (roofType==='mansarda' || roofType==='sarpanta_mica');
+      const isSarpanta = floor < 0 && (roofType==='sarpanta' || roofType==='sarpanta_mica');
+      const isRoofSpire = floor < 0 && !isRoofSlab && !isMansarda && !isSarpanta;
+      if(isRoofSpire) return; // skip elemente geometrice fără semnificație vizuală
+      if(h < 0.05 && !isRoofSlab && !isMansarda && !isSarpanta) return;
+      if(pts.length < 3) return;
       const isTop = !!f.properties?.isLast;
       let mat;
       if(isRoofSlab){
         mat = new THREE.MeshLambertMaterial({color:'#c8d0d8'});
+      } else if(isMansarda || isSarpanta){
+        // Mansardă/șarpantă: material teracotă/slate
+        const roofCols={modern:'#2a3a50',clasic:'#7c3512',minimalist:'#c8d0d8',inovator:'#2a1a60',industrial:'#3a2818',adaptat_context:'#4a6030'};
+        mat = new THREE.MeshStandardMaterial({color:new THREE.Color(roofCols[stilKey]||'#5a4030'),roughness:0.80,metalness:0.05});
       } else if(floor===0){ mat=_v3dMatParter(THREE,stilKey,V3D.texCache); }
       else if(isTop){ mat=_v3dMatPenthouse(THREE,stilKey,V3D.texCache); }
       else{ mat=_v3dMatFloor(THREE,col,floor,stilKey,V3D.texCache); }
