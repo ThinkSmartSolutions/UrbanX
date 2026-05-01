@@ -7019,9 +7019,20 @@ async function runExport(){
     pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
     hdr('SITUATIE EXISTENTA SI CONTEXT URBAN',3);cy=30;
     cy=sec('1. AMPLASAMENT — VEDERE 3D CONTEXTUALA (pitch 62°)',cy);cy+=2;
-    cy=addImg(mapImg3D,14,cy,W-28,68,'FIG. 7 — Vedere 3D principala · Volumul propus (albastru) in contextul urban real · Sursa: UrbanX/Mapbox GL JS');cy+=2;
+    // Guard: mapImg3D diferit de mapImg2D (evitam duplicate)
+    if(mapImg3D&&mapImg3D.length>500){
+      cy=addImg(mapImg3D,14,cy,W-28,68,'FIG. 7 — Vedere 3D principala · Volumul propus (albastru) in contextul urban real · Sursa: UrbanX/Mapbox GL JS');cy+=2;
+    }
     cy=sec('2. PLAN 2D — ORTOGONAL (vedere de sus, pitch=0°)',cy);cy+=2;
-    cy=addImg(mapImg2D,14,cy,W-28,60,'FIG. 8 — Plan 2D ortogonal · Parcela marcata + contextul construit existent · Sursa: UrbanX/Mapbox GL JS');cy+=4;
+    // Adăugăm mapImg2D doar dacă e diferit de mapImg3D
+    const _img2DValid=mapImg2D&&mapImg2D.length>500&&mapImg2D!==mapImg3D;
+    if(_img2DValid){
+      cy=addImg(mapImg2D,14,cy,W-28,60,'FIG. 8 — Plan 2D ortogonal · Parcela marcata + contextul construit existent · Sursa: UrbanX/Mapbox GL JS');cy+=4;
+    } else if(!mapImg2D||mapImg2D.length<500){
+      pdf.setTextColor(100,120,150);pdf.setFontSize(8);pdf.setFont('helvetica','italic');
+      pdf.text('(Captură 2D indisponibilă — deschideți platforma și activați vederea 2D)',W/2,cy+8,{align:'center'});
+      cy+=20;
+    }
     cy=sec('3. DATE PARCELA SI AMPLASAMENT',cy);
     cy=row2('Nr. cadastral',nrcad,'UTR (zona PUG)',utr,cy);
     cy=row2('Suprafata teren',area+' mp','Perimetru aprox.','calc. GIS',cy);
@@ -8488,14 +8499,23 @@ function aedisGetContent(){
           style="flex:1;accent-color:#3b82f6">
         <span class="aedis-val" id="balc-adanc">${(AEDIS.balconAdancime||1.5).toFixed(1)}m</span>
       </div>
-      <div style="font-size:10px;color:#94a3b8;margin-bottom:6px">Laturi cu balcoane:</div>
-      <div style="display:flex;gap:5px;margin-bottom:8px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <span style="font-size:10px;color:#94a3b8">Amplasare balcoane pe laturi:</span>
+        <span style="font-size:10px;font-weight:700;color:#60a5fa">${(AEDIS.balconLaturi||[]).length} / 4 laturi</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:8px">
         ${['N','E','S','V'].map(l=>`
           <button onclick="(()=>{const a=AEDIS.balconLaturi;const i=a.indexOf('${l}');if(i>=0)a.splice(i,1);else a.push('${l}');aedisRender();if(S.vol.genDone||AEDIS3D.active)aedisGenerateAll()})()"
-            style="flex:1;padding:6px 2px;border-radius:7px;border:1px solid ${(AEDIS.balconLaturi||[]).includes('${l}')?'#3b82f6':'rgba(255,255,255,.15)'};background:${(AEDIS.balconLaturi||[]).includes('${l}')?'rgba(59,130,246,.2)':'rgba(11,18,32,.8)'};color:${(AEDIS.balconLaturi||[]).includes('${l}')?'#60a5fa':'#64748b'};cursor:pointer;font-size:12px;font-weight:700">
+            style="padding:7px 2px;border-radius:7px;border:1px solid ${(AEDIS.balconLaturi||[]).includes('${l}')?'#3b82f6':'rgba(255,255,255,.12)'};background:${(AEDIS.balconLaturi||[]).includes('${l}')?'rgba(59,130,246,.25)':'rgba(11,18,32,.6)'};color:${(AEDIS.balconLaturi||[]).includes('${l}')?'#93c5fd':'#475569'};cursor:pointer;font-size:11px;font-weight:800;transition:all .15s">
             ${l}
           </button>`).join('')}
-      </div>`:''}
+        <button onclick="(()=>{const all=['N','E','S','V'];const cur=AEDIS.balconLaturi||[];AEDIS.balconLaturi=cur.length===4?[]:all;aedisRender();if(S.vol.genDone||AEDIS3D.active)aedisGenerateAll()})()"
+          style="padding:7px 2px;border-radius:7px;border:1px solid ${(AEDIS.balconLaturi||[]).length===4?'#22c55e':'rgba(255,255,255,.12)'};background:${(AEDIS.balconLaturi||[]).length===4?'rgba(34,197,94,.2)':'rgba(11,18,32,.6)'};color:${(AEDIS.balconLaturi||[]).length===4?'#86efac':'#475569'};cursor:pointer;font-size:9px;font-weight:800">
+          Toate
+        </button>
+      </div>
+      <div style="font-size:9px;color:#475569;margin-bottom:4px">Selectați 1, 2, 3 sau toate laturile · depinde de forma și vecinătăți</div>
+      `:''}
 
       <!-- SEPARATOR -->
       <div style="border-top:1px solid rgba(255,255,255,.06);margin:8px 0"></div>
@@ -11286,8 +11306,16 @@ async function generateSolarStudy(){
   cy=sec('FIG. 7 — VEDERE 3D IN CONTEXT (pitch 62°)',cy);cy+=2;
   cy=addImg(mapImg3D,14,cy,W-28,72,'Sursa: UrbanX/Mapbox GL JS · Vedere 3D cu volumul propus in context urban');
   if(mapImgLat&&mapImgLat.length>500){
-    cy+=2;cy=sec('FIG. 8 — VEDERE LATERALA',cy);cy+=2;
-    cy=addImg(mapImgLat,14,cy,half,45,'Vedere laterala (bearing 90°)');
+    cy+=2;cy=sec('FIG. 8 — VEDERE LATERALA / FRONTALA',cy);cy+=2;
+    // Dacă avem și vedere frontală, le punem alături; altfel centrăm singura imagine
+    if(mapImgFront&&mapImgFront.length>500){
+      cy=addImg(mapImgLat,14,cy,half,45,'FIG. 8a — Vedere laterala (bearing 90°) · Context E-V');
+      addImg(mapImgFront,14+half+4,cy-51,half,45,'FIG. 8b — Vedere frontala (bearing 0°) · Context N-S');
+    } else {
+      // Centram singura imagine (lățime mai mare, centrat pe pagină)
+      const xCenter=(W-half)/2;
+      cy=addImg(mapImgLat,xCenter,cy,half,45,'FIG. 8 — Vedere laterala (bearing 90°) · Context E-V');
+    }
   }
   cy=Math.max(cy,245);cy=sec('DATE PARCEL SI AMPLASAMENT',cy);
   cy=row2s('Nr. cadastral',nrcad,'UTR (zona PUG)',utr,cy+4);
@@ -11606,6 +11634,10 @@ function aedisOpen3DViewer(){
     ss('⚠️ Generați mai întâi volumul 3D (butonul ⚡).'); return;
   }
 
+  // Ascundem topbar-ul principal când viewer-ul e deschis (nu are rost acolo)
+  const _topbar = document.getElementById('topbar');
+  if(_topbar) _topbar.style.display = 'none';
+
   let ov = document.getElementById('aedis-3d-viewer-overlay');
   if(ov) ov.remove();
   ov = document.createElement('div');
@@ -11775,6 +11807,9 @@ function aedisOpen3DViewer(){
 // ── State ──────────────────────────────────────────────────────────────────
 
 function _v3dCleanup(){
+  // Restaurăm topbar-ul principal la închiderea viewer-ului
+  const _tb = document.getElementById('topbar');
+  if(_tb) _tb.style.display = '';
   if(V3D.af) cancelAnimationFrame(V3D.af);
   if(V3D.r){ V3D.r.dispose(); V3D.r=null; }
   Object.values(V3D.texCache).forEach(t=>{ try{t.dispose();}catch(e){} });
