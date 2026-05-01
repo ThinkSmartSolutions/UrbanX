@@ -5802,6 +5802,11 @@ async function genVol(){
   setSource('vol-src',{type:'FeatureCollection',features:feats});
   S.vol._lastFeats = feats;  // Sincronizăm cu viewer-ul 3D
   S.vol.genDone = true;
+  // Ștergem masca de demolare — volumul generat acoperă acum zona
+  try{
+    if(map.getLayer('demolish-mask')) map.removeLayer('demolish-mask');
+    if(map.getSource('demolish-mask-src')) map.removeSource('demolish-mask-src');
+  }catch(e){}
   set3D(60,-20);
   
   const colMsg = ap?._fpAdj ? ` · ⚠️ Footprint ajustat (coliziuni cu clădiri existente eliminate)` : '';
@@ -5963,6 +5968,7 @@ function genVolAll(){
   S.vol._lastFeats=feats;
   setSource('vol-src',{type:'FeatureCollection',features:feats});
   S.vol.genDone=true;
+  try{if(map.getLayer("demolish-mask"))map.removeLayer("demolish-mask");if(map.getSource("demolish-mask-src"))map.removeSource("demolish-mask-src");}catch(e){}
   set3D(60,-20);
   ss('🏗 Volum unificat generat pentru toate parcelele!');
   setTimeout(updateDistanceLines, 400);
@@ -5980,6 +5986,7 @@ function genVolEach(){
   S.vol._lastFeats=feats;
   setSource('vol-src',{type:'FeatureCollection',features:feats});
   S.vol.genDone=true;
+  try{if(map.getLayer("demolish-mask"))map.removeLayer("demolish-mask");if(map.getSource("demolish-mask-src"))map.removeSource("demolish-mask-src");}catch(e){}
   set3D(60,-20);
   ss('🏗 Volume individuale generate per parcelă!');
   setTimeout(updateDistanceLines, 400);
@@ -7041,6 +7048,7 @@ async function exportVol3(pdf, ap, r, p){
     const feats=buildVolume();
     setSource('vol-src',{type:'FeatureCollection',features:feats});
     S.vol.genDone=true;
+  try{if(map.getLayer("demolish-mask"))map.removeLayer("demolish-mask");if(map.getSource("demolish-mask-src"))map.removeSource("demolish-mask-src");}catch(e){}
     // Calculam si afisam distantele fata de vecinii adiacenti
     setTimeout(updateDistanceLines, 300);
     try{map.setLayoutProperty('ctx-3d','visibility',sc.ctxViz?'visible':'none');}catch(e){}
@@ -8114,6 +8122,7 @@ function aedisBuild(){
 
   S.vol._lastFeats = feats;
   S.vol.genDone = true;
+  try{if(map.getLayer("demolish-mask"))map.removeLayer("demolish-mask");if(map.getSource("demolish-mask-src"))map.removeSource("demolish-mask-src");}catch(e){}
   setSource('vol-src',{type:'FeatureCollection',features:feats});
 
   set3D(65,-25);
