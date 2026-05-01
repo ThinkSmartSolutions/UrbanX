@@ -11732,12 +11732,12 @@ function _v3dBuild(ap){
     const floor=f.properties?.floor??0;
     // Culoarea din COLS[stilKey] curent, NU din f.properties.color (care poate fi veche)
     const COLS_V={
-      modern:{etaj:'#c8daf5',parter:'#1a2e42'},
-      inovator:{etaj:'#c0c8ff',parter:'#0e1830'},
-      clasic:{etaj:'#f0dcb0',parter:'#5a4020'},
-      minimalist:{etaj:'#e8f0f8',parter:'#d8e4ee'},
-      industrial:{etaj:'#d0c8b8',parter:'#201810'},
-      adaptat_context:{etaj:'#d0eccc',parter:'#1a3018'},
+      modern:         {etaj:'#b8d0f0',parter:'#0a1828'},
+      inovator:       {etaj:'#9090e0',parter:'#080820'},
+      clasic:         {etaj:'#e8d090',parter:'#4a2a08'},
+      minimalist:     {etaj:'#f0f4f8',parter:'#e0e8f0'},
+      industrial:     {etaj:'#b08060',parter:'#1a0e08'},
+      adaptat_context:{etaj:'#c0d8b0',parter:'#182810'},
     };
     const cv=COLS_V[stilKey]||COLS_V.modern;
     const col = floor===0 ? cv.parter : (f.properties?.color||cv.etaj);
@@ -12637,22 +12637,26 @@ function _v3dMatParter(THREE, stil, cache){
   const k=`parter_${stil}_${fn}`; if(cache[k]) return cache[k];
   const isNight=window._v3dNight||false;
   // Parter per funcțiune — comercial=vitrina sticla, birouri=inchis, rezidential=tencuiala
+  // Parter: stilul prevalează față de funcțiune pentru aspectul vizual
+  const bySt={
+    modern:          {color:'#0a1828',roughness:0.25,metalness:0.60}, // sticlă/metal navy
+    inovator:        {color:'#08082a',roughness:0.15,metalness:0.75}, // negru-violet
+    clasic:          {color:'#4a2a08',roughness:0.82,metalness:0.02}, // piatră brună
+    minimalist:      {color:'#d8e4ee',roughness:0.90,metalness:0.00}, // beton alb
+    industrial:      {color:'#1a0e08',roughness:0.92,metalness:0.08}, // beton ruginiu
+    adaptat_context: {color:'#182810',roughness:0.75,metalness:0.05}, // cărămidă verde
+  };
   const byFn={
     birouri:              {color:'#0a1828',roughness:0.10,metalness:0.85},
     hotel:                {color:'#1a2c40',roughness:0.20,metalness:0.55},
-    comercial:            {color:'#0a1420',roughness:0.05,metalness:0.90}, // vitrina totala
-    rezidential_colectiv: {color:'#1a2e42',roughness:0.40,metalness:0.40},
+    comercial:            {color:'#0a1420',roughness:0.05,metalness:0.90},
+    rezidential_colectiv: null, // din bySt
     locuinta_individuala: {color:'#c0b090',roughness:0.82,metalness:0.00},
     industrial_depozitare:{color:'#2a2010',roughness:0.90,metalness:0.05},
     institutie_publica:   {color:'#304868',roughness:0.45,metalness:0.30},
     mixt:                 {color:'#0e1e30',roughness:0.12,metalness:0.80},
   };
-  const bySt={
-    clasic:    {color:'#5a4020',roughness:0.80,metalness:0.02},
-    minimalist:{color:'#d8e4ee',roughness:0.88,metalness:0.00},
-    industrial:{color:'#201810',roughness:0.92,metalness:0.08},
-  };
-  const m = byFn[fn] || bySt[stil] || {color:'#1e2e3e',roughness:0.50,metalness:0.30};
+  const m = bySt[stil] || byFn[fn] || {color:'#1e2e3e',roughness:0.50,metalness:0.30};
   const mat=_v3dMat(THREE,m.color,{roughness:m.roughness,metalness:m.metalness});
   if(isNight && ['comercial','birouri','mixt'].includes(fn)){
     mat.emissive=new THREE.Color(0.05,0.10,0.25); mat.emissiveIntensity=1.2;
@@ -12668,12 +12672,12 @@ function _v3dMatFloor(THREE, colHex, floorIdx, stil, cache){
 
   // Culori de baza per stil + functiune — mai saturate si mai vii
   const baseColors = {
-    modern:     {r:180,g:210,b:245},
-    inovator:   {r:160,g:170,b:255},
-    clasic:     {r:240,g:220,b:175},
-    minimalist: {r:235,g:240,b:248},
-    industrial: {r:200,g:185,b:160},
-    adaptat_context:{r:210,g:235,b:200},
+    modern:          {r:184,g:208,b:240}, // albastru steel
+    inovator:        {r:144,g:144,b:224}, // violet/indigo
+    clasic:          {r:232,g:208,b:144}, // crem/piatră calcaroasă
+    minimalist:      {r:240,g:244,b:248}, // alb pur
+    industrial:      {r:176,g:128,b:96},  // bej ruginiu/corten
+    adaptat_context: {r:192,g:216,b:176}, // verde-pământiu
   };
   const bc2 = baseColors[stil] || baseColors.modern;
   // Gradient luminos spre vârf
@@ -12746,33 +12750,46 @@ function _v3dAddWindows(THREE, pts2d, base, top, scene, stilKey){
   if(h < 1 || pts2d.length < 3) return;
   const isNight2 = window._v3dNight||false;
   const fn = AEDIS.fn || 'rezidential_colectiv';
+  // Curtain wall DOAR dacă: toggle explicit SAU stil tehnic + funcțiune specifică
+  // Stilul CLASIC/MINIMALIST/INDUSTRIAL nu au niciodată curtain wall automat
+  const stilAllowsCurtain = ['modern','inovator'].includes(stilKey);
+  const fnWantsCurtain = ['birouri','comercial'].includes(fn); // doar birouri și comercial
   const hasCurtainWall = AEDIS.peretelCortina ||
-    ['birouri','hotel','comercial','mixt'].includes(fn) ||
-    (fn === 'rezidential_colectiv' && (stilKey === 'inovator' || stilKey === 'modern') && AEDIS.cortinaProcent >= 60);
+    (stilAllowsCurtain && fnWantsCurtain) ||
+    (fn === 'rezidential_colectiv' && stilKey === 'inovator' && AEDIS.cortinaProcent >= 80);
 
   // ── Config per STIL (baza) ────────────────────────────────────────────────
   const cfgByStil = {
-    modern:    { wW:1.10, wH:1.50, wGap:1.65, reveal:0.10, glassCol:'#2a6fb8', glassRef:0.65,
-                 frame:'#b8cce0', frameD:0.07, hasBalc:true,  balcD:0.55, balcH:0.90, railH:0.85,
-                 pilW:0.0,  bandH:0.16, bandD:0.07, bandCol:'#1a3a6a', panelCol:'#c8daf0', floorH:()=>3.0 },
-    inovator:  { wW:1.30, wH:1.80, wGap:1.55, reveal:0.14, glassCol:'#1a30bb', glassRef:0.75,
-                 frame:'#6878b8', frameD:0.09, hasBalc:true,  balcD:0.65, balcH:0.95, railH:0.90,
-                 pilW:0.0,  bandH:0.20, bandD:0.10, bandCol:'#4a5898', panelCol:'#0e1838', floorH:()=>3.3 },
-    clasic:    { wW:0.85, wH:1.30, wGap:1.80, reveal:0.18, glassCol:'#7088a8', glassRef:0.25,
-                 frame:'#c8b880', frameD:0.10, hasBalc:false, balcD:0.50, balcH:0.80, railH:0.75,
-                 pilW:0.20, bandH:0.28, bandD:0.14, bandCol:'#b89870', panelCol:'#dac890', floorH:()=>3.5 },
-    minimalist:{ wW:1.50, wH:1.80, wGap:1.55, reveal:0.05, glassCol:'#90b8cc', glassRef:0.50,
-                 frame:'#d8e4ea', frameD:0.03, hasBalc:true,  balcD:0.45, balcH:1.00, railH:0.95,
-                 pilW:0.0,  bandH:0.08, bandD:0.03, bandCol:'#ccd8e0', panelCol:'#eef2f6', floorH:()=>3.2 },
-    industrial:{ wW:0.90, wH:1.20, wGap:2.10, reveal:0.22, glassCol:'#486070', glassRef:0.20,
-                 frame:'#706858', frameD:0.14, hasBalc:false, balcD:0.50, balcH:0.80, railH:0.75,
-                 pilW:0.22, bandH:0.22, bandD:0.14, bandCol:'#cc6020', panelCol:'#382818', floorH:()=>3.8 },
+    // MODERN: ferestre late cu cadru metalic subțire, balcoane din sticlă, spandrel albastru
+    modern:    { wW:1.20, wH:1.55, wGap:1.60, reveal:0.08, glassCol:'#3a80c8', glassRef:0.70,
+                 frame:'#90b0cc', frameD:0.06, hasBalc:true,  balcD:0.55, balcH:0.88, railH:0.85,
+                 pilW:0.0,  bandH:0.14, bandD:0.06, bandCol:'#1e3a6a', panelCol:'#c0d8f0', floorH:()=>3.0 },
+    // INOVATOR: ferestre aproape full-height, cadru violet, balcoane mari, panouri negre
+    inovator:  { wW:1.40, wH:1.90, wGap:1.50, reveal:0.12, glassCol:'#2040d0', glassRef:0.80,
+                 frame:'#5060b0', frameD:0.08, hasBalc:true,  balcD:0.75, balcH:1.00, railH:0.95,
+                 pilW:0.0,  bandH:0.18, bandD:0.08, bandCol:'#3a2880', panelCol:'#08102a', floorH:()=>3.3 },
+    // CLASIC: ferestre mici cu arc, cadru auriu gros, pilastri proeminenți, cornișe
+    clasic:    { wW:0.80, wH:1.20, wGap:2.00, reveal:0.22, glassCol:'#6878a0', glassRef:0.20,
+                 frame:'#d4b860', frameD:0.14, hasBalc:false, balcD:0.45, balcH:0.75, railH:0.70,
+                 pilW:0.28, bandH:0.35, bandD:0.18, bandCol:'#c8a040', panelCol:'#e8d090', floorH:()=>3.5 },
+    // MINIMALIST: ferestre extrem de late, cadru invizibil, zero ornamente, benzi fine
+    minimalist:{ wW:1.65, wH:1.85, wGap:1.70, reveal:0.04, glassCol:'#a0c8e0', glassRef:0.55,
+                 frame:'#e0eaf0', frameD:0.02, hasBalc:true,  balcD:0.50, balcH:1.05, railH:1.00,
+                 pilW:0.0,  bandH:0.05, bandD:0.02, bandCol:'#d0dce8', panelCol:'#f0f4f8', floorH:()=>3.2 },
+    // INDUSTRIAL: ferestre mici cu zăbrele, cadru portocaliu, pilastri masivi de oțel
+    industrial:{ wW:0.80, wH:1.00, wGap:2.20, reveal:0.28, glassCol:'#384858', glassRef:0.15,
+                 frame:'#905020', frameD:0.18, hasBalc:false, balcD:0.45, balcH:0.75, railH:0.70,
+                 pilW:0.30, bandH:0.30, bandD:0.20, bandCol:'#d05010', panelCol:'#281808', floorH:()=>3.8 },
+    // ADAPTAT: ferestre moderate, culori din context, balcoane simple
+    adaptat_context:{ wW:1.00, wH:1.40, wGap:1.75, reveal:0.14, glassCol:'#5090a0', glassRef:0.40,
+                 frame:'#80a870', frameD:0.09, hasBalc:true,  balcD:0.55, balcH:0.85, railH:0.80,
+                 pilW:0.08, bandH:0.20, bandD:0.10, bandCol:'#4a8040', panelCol:'#d0e8c0', floorH:()=>3.1 },
   };
 
   // ── Override per FUNCȚIUNE ────────────────────────────────────────────────
   const cfgByFn = {
     birouri:              { wW:1.40, wH:2.40, wGap:1.55, hasBalc:false, glassCol:'#2060a0', glassRef:0.80, reveal:0.06, frame:'#8090a8', panelCol:'#1a2840', bandCol:'#1e3060', bandH:0.14, curtainForce:true },
-    hotel:                { wW:1.00, wH:1.60, wGap:1.50, hasBalc:true,  glassCol:'#4878a8', glassRef:0.55, balcD:0.70, bandCol:'#c8a040', panelCol:'#2a1c10', bandH:0.20 },
+    hotel:                { wW:1.00, wH:1.65, wGap:1.55, hasBalc:true,  glassCol:'#4878a8', glassRef:0.55, balcD:0.75, bandCol:'#c8a040', panelCol:'#2a1c10', bandH:0.22 }, // fara curtainForce — stilul decide
     comercial:            { wW:2.20, wH:2.60, wGap:2.40, hasBalc:false, glassCol:'#60a8d0', glassRef:0.70, reveal:0.04, frame:'#c0c8d0', panelCol:'#d8e4ee', bandH:0.12, curtainForce:true },
     rezidential_colectiv: { wW:1.10, wH:1.40, wGap:1.60, hasBalc:true,  glassCol:'#4888b8', glassRef:0.45, balcD:0.60, balcH:0.90 },
     locuinta_individuala: { wW:0.90, wH:1.20, wGap:1.80, hasBalc:false, glassCol:'#6090a0', glassRef:0.35 },
