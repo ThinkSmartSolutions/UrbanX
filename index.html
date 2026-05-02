@@ -5360,7 +5360,7 @@ async function goToLocation(lat, lng, label){
       S.parcels=[parcelObj]; S.activeParcel=0;
       S.utr=utr; S.rule=REGULI[utr]||{};
       S.ctx=null; S.vol.genDone=false; S._ctxBackup=null; S._styleBeforeDemo=null;
-      try{clearSource('vol-src');clearSource('fp-src');clearSource('ctx-src');map.setLayoutProperty("ctx-3d","visibility","visible");}catch(e){}
+      try{clearSource('vol-src');clearSource('fp-src');clearSource('ctx-src');map.setLayoutProperty("ctx-3d","visibility","visible");_demolishRestoreNative();}catch(e){}
     } else {
       const isDup=nrcad&&nrcad!=='—'&&S.parcels.some(p=>p.nrcad===nrcad);
       if(!isDup){S.parcels.push(parcelObj);S.activeParcel=S.parcels.length-1;}
@@ -5787,9 +5787,9 @@ async function genVol(){
 function clearVol(){
   clearSource('vol-src');
   S.vol.genDone=false;
-  // Restaurăm starea dacă eram în demolare
   if(S._ctxBackup?.features?.length){ S.ctx = S._ctxBackup; try{setSource('ctx-src',S.ctx);}catch(e){} }
   S._ctxBackup=null;
+  _demolishRestoreNative();
   if(S._styleBeforeDemo){
     const prev = S._styleBeforeDemo; S._styleBeforeDemo=null;
     const sel = document.getElementById('selBase');
@@ -6145,25 +6145,20 @@ function setScenariu(s){
     if(!S._ctxBackup && S.ctx?.features?.length){
       S._ctxBackup = JSON.parse(JSON.stringify(S.ctx));
     }
-    // Schimbăm la Urban3D dacă nu suntem deja (singuru stil unde controlăm clădirile)
-    const selBase = document.getElementById('selBase');
-    if(selBase && selBase.value !== 'custom'){
-      S._styleBeforeDemo = selBase.value;
-      selBase.value = 'custom';
-      map.setStyle(STYLES['custom']);
-      map.once('style.load', ()=>{
-        setTimeout(()=>{ _restoreAfterStyleLoad('custom'); _setCtxVisibility(); }, 400);
-      });
-    } else {
-      _setCtxVisibility(); // ascunde ctx-3d
-    }
+    // Ascundem ctx-3d
+    _setCtxVisibility();
+    // Ascundem TOATE layerele fill-extrusion native din stilul activ (clădiri Mapbox)
+    _demolishHideNative();
+
   } else {
     // Restaurăm backup ctx
     if(S._ctxBackup?.features?.length){
       S.ctx = S._ctxBackup; S._ctxBackup = null;
       try{ setSource('ctx-src', S.ctx); }catch(e){}
     }
-    // Restaurăm stilul original
+    // Restaurăm layerele native ascunse
+    _demolishRestoreNative();
+    // Restaurăm stilul original dacă a fost schimbat
     if(S._styleBeforeDemo){
       const prevStyle = S._styleBeforeDemo; S._styleBeforeDemo = null;
       const selBase = document.getElementById('selBase');
@@ -6173,7 +6168,7 @@ function setScenariu(s){
         setTimeout(()=>{ _restoreAfterStyleLoad(prevStyle); _setCtxVisibility(); }, 400);
       });
     } else {
-      _setCtxVisibility(); // arată ctx-3d
+      _setCtxVisibility();
     }
   }
 
@@ -6182,6 +6177,33 @@ function setScenariu(s){
     setSource('vol-src',{type:'FeatureCollection',features:f});
   }
   renderTab('proiect');
+}
+
+// Ascunde toate layerele de clădiri native din stilul Mapbox activ
+function _demolishHideNative(){
+  try{
+    const layers = map.getStyle()?.layers || [];
+    S._hiddenNativeLayers = S._hiddenNativeLayers || [];
+    layers.forEach(l => {
+      if(l.type === 'fill-extrusion' && l.id !== 'vol-3d' && l.id !== 'ctx-3d'){
+        try{
+          map.setLayoutProperty(l.id, 'visibility', 'none');
+          if(!S._hiddenNativeLayers.includes(l.id)) S._hiddenNativeLayers.push(l.id);
+        }catch(e){}
+      }
+    });
+    console.log('UrbanX: hidden layers for demo:', S._hiddenNativeLayers);
+  }catch(e){ console.warn('_demolishHideNative:', e.message); }
+}
+
+// Restaurează layerele native ascunse la demolare
+function _demolishRestoreNative(){
+  try{
+    (S._hiddenNativeLayers || []).forEach(id => {
+      try{ map.setLayoutProperty(id, 'visibility', 'visible'); }catch(e){}
+    });
+    S._hiddenNativeLayers = [];
+  }catch(e){}
 }
 function loadScen(i){const sc=S.scenarios[i];if(!sc)return;Object.assign(S.vol,{fn:sc.fn||'locuinta_individuala',niv:sc.niv||4});renderAll();ss('📦 Scenariu încărcat.');}
 
@@ -12069,7 +12091,7 @@ function aedisOpen3DViewer(){
   if(ov) ov.remove();
   ov = document.createElement('div');
   ov.id = 'aedis-3d-viewer-overlay';
-  ov.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;background:#0a0e1a;display:flex;flex-direction:column;overflow:hidden';
+  ov.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;background:#0a0e1a;display:flex;flex-direction:column;overflow:hidden;isolation:isolate';
   document.body.appendChild(ov);
 
   const niv = AEDIS.corpuri[0]?.niv||4;
@@ -12110,7 +12132,7 @@ function aedisOpen3DViewer(){
 
   ov.innerHTML = `
     <!-- TOPBAR VIEWER -->
-    <div style="background:#07101e;border-bottom:1px solid rgba(139,92,246,.25);padding:7px 10px;display:flex;align-items:center;gap:6px;flex-shrink:0;flex-wrap:wrap">
+    <div style="background:#07101e;border-bottom:1px solid rgba(139,92,246,.25);padding:7px 10px;display:flex;align-items:center;gap:6px;flex-shrink:0;flex-wrap:wrap;position:relative;z-index:2">
       <div style="font-size:12px;font-weight:800;color:#a78bfa;flex-shrink:0;display:flex;align-items:center;gap:5px">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" style="width:16px;height:16px"><defs><linearGradient id="vlbg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1e2c42"/><stop offset="1" stop-color="#070d16"/></linearGradient><linearGradient id="vlg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe08a"/><stop offset="0.5" stop-color="#d69e36"/><stop offset="1" stop-color="#9b641d"/></linearGradient></defs><rect width="1024" height="1024" rx="210" fill="url(#vlbg)"/><path d="M180 280h260l135 232-135 232H180l150-232z" fill="#f6f8fc"/><path d="M610 282h235L710 485H540z" fill="url(#vlg)"/><path d="M540 539h170l135 203H610z" fill="url(#vlg)"/></svg>
         Urban3D
