@@ -10924,6 +10924,51 @@ async function _captureStudyMaps(ap, statusFn){
   // Revenire la vedere principală
   await capMap(62, -20);
 
+  st('Captură hartă amplasament (Standard 3D)...');
+  let imgLocation = '';
+  try{
+    await new Promise(resolve => {
+      map.once('style.load', async () => {
+        try{ addLayers(); if(S.ctx) setSource('ctx-src',S.ctx); updateMap(); }catch(e){}
+        if(S.vol._lastFeats?.length) try{ setSource('vol-src',{type:'FeatureCollection',features:S.vol._lastFeats}); }catch(e){}
+        await waitF(8); await wait(1200); map.triggerRepaint(); await waitF(4); await wait(800);
+        resolve();
+      });
+      map.setStyle(STYLES['standard']);
+      const selBase = document.getElementById('selBase');
+      if(selBase) selBase.value = 'standard';
+    });
+    const ctr = turf.centerOfMass(ap.geo).geometry.coordinates;
+    map.easeTo({center:ctr, zoom:17, pitch:55, bearing:-20, duration:0});
+    await waitF(6); await wait(900); map.triggerRepaint(); await waitF(4); await wait(700);
+    imgLocation = map.getCanvas().toDataURL('image/jpeg', 0.92);
+    // Revenim la Urban 3D
+    await new Promise(resolve => {
+      map.once('style.load', async () => {
+        try{ addLayers(); if(S.ctx) setSource('ctx-src',S.ctx); updateMap(); }catch(e){}
+        if(S.vol._lastFeats?.length) try{ setSource('vol-src',{type:'FeatureCollection',features:S.vol._lastFeats}); }catch(e){}
+        await waitF(6); await wait(800); map.triggerRepaint(); await waitF(4); await wait(600);
+        resolve();
+      });
+      map.setStyle(STYLES['custom']);
+      const selBase = document.getElementById('selBase');
+      if(selBase) selBase.value = 'custom';
+    });
+  }catch(e){ console.warn('Standard 3D capture:', e.message); imgLocation = img3D; }
+
+  st('Captură hartă oraș (zoom out)...');
+  let imgCity = '';
+  try{
+    const ctr = turf.centerOfMass(ap.geo).geometry.coordinates;
+    map.easeTo({center:ctr, zoom:12, pitch:0, bearing:0, duration:0});
+    await waitF(6); await wait(900); map.triggerRepaint(); await waitF(4); await wait(700);
+    imgCity = map.getCanvas().toDataURL('image/jpeg', 0.92);
+    // Revenim pe parcelă
+    const bb = turf.bbox(ap.geo);
+    map.fitBounds([[bb[0],bb[1]],[bb[2],bb[3]]],{padding:80, duration:0, maxZoom:18});
+    await waitF(4); await wait(400);
+  }catch(e){ imgCity = img2D; }
+
   st('Captură viewer 3D architectural...');
   let v3dDay='', v3dNight='', v3dGolden='', v3dOvercast='';
   try{
@@ -10936,9 +10981,9 @@ async function _captureStudyMaps(ap, statusFn){
     }
   }catch(e){ console.warn('v3d capture:', e.message); }
 
-  const imgStandard = imgAerial || img3D;
+  const imgStandard = imgLocation || imgAerial || img3D;
 
-  return {img3D, img2D, imgDist, imgLat, imgFront, imgAerial, imgBack, imgStandard, v3dDay, v3dNight, v3dGolden, v3dOvercast};
+  return {img3D, img2D, imgDist, imgLat, imgFront, imgAerial, imgBack, imgStandard, imgLocation, imgCity, v3dDay, v3dNight, v3dGolden, v3dOvercast};
 }
 
 function _initStudyPdf(studyName, studySubtitle, totalPages){
@@ -11105,6 +11150,14 @@ async function generateShadowStudy(){
   pdf.setFontSize(7.5);pdf.text('Prag OMS 119/2014: altitudine solara min. 15° la solstitiu iarna · Valoare calculata: '+solarAlt(lat,11,12).toFixed(1)+'°',W/2,228,{align:'center'});
   pdf.setTextColor(100,120,150);pdf.setFontSize(7);pdf.setFont('helvetica','normal');
   pdf.text('Generat: '+S2(dateStr)+' · Document orientativ · UrbanX TSS·FG',W/2,H-12,{align:'center'});
+  if(caps.imgLocation&&caps.imgLocation.length>500){
+    try{
+      pdf.addImage(caps.imgLocation,'JPEG',14,H-72,W-28,58,undefined,'FAST');
+      pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.4);pdf.rect(14,H-72,W-28,58,'S');
+      pdf.setTextColor(...GOLD);pdf.setFontSize(6);pdf.setFont('helvetica','bold');
+      pdf.text('AMPLASAMENT · '+S2(nrcad)+' · UTR '+S2(utr)+' · Sursa: Mapbox Standard 3D',W/2,H-75,{align:'center'});
+    }catch(e){}
+  }
   ftr();
 
   // PAG 2: Vedere 3D + analiza context
@@ -11202,6 +11255,34 @@ async function generateShadowStudy(){
    'PUG Municipiul Iasi in vigoare (HCL Iasi) — UTR '+utr+' — Regulamentul Local de Urbanism.',
    'Ghidul privind insorirea cladirilor GT 043-2002 — INCERC Bucuresti.'
   ].forEach(l=>{cy=body('• '+l,16,cy);cy+=2;});
+  // Harta orasului inainte de concluzii
+  if(caps.imgCity&&caps.imgCity.length>500){
+    cy+=3;
+    pdf.setFillColor(...DARK);pdf.rect(14,cy-3,W-28,4,'F');
+    pdf.setFillColor(...GOLD);pdf.rect(14,cy-3,W-28,1,'F');
+    pdf.setTextColor(...GOLD);pdf.setFontSize(7);pdf.setFont('helvetica','bold');
+    pdf.text('INCADRARE IN CONTEXTUL URBAN AL MUNICIPIULUI IASI',W/2,cy+4,{align:'center'});
+    cy+=8;
+    try{pdf.addImage(caps.imgCity,'JPEG',14,cy,W-28,52,undefined,'FAST');}catch(e){}
+    pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.4);pdf.rect(14,cy,W-28,52,'S');
+    pdf.setTextColor(80,90,110);pdf.setFontSize(6);pdf.setFont('helvetica','italic');
+    pdf.text('FIG. — Harta urbana · Zoom 12 · Incadrare amplasament in Municipiul Iasi · Sursa: UrbanX',W/2,cy+55,{align:'center'});
+    cy+=60;
+  }
+  // Harta orasului inainte de concluzii
+  if(caps.imgCity&&caps.imgCity.length>500){
+    cy+=3;
+    pdf.setFillColor(...DARK);pdf.rect(14,cy-3,W-28,4,'F');
+    pdf.setFillColor(...GOLD);pdf.rect(14,cy-3,W-28,1,'F');
+    pdf.setTextColor(...GOLD);pdf.setFontSize(7);pdf.setFont('helvetica','bold');
+    pdf.text('INCADRARE IN CONTEXTUL URBAN AL MUNICIPIULUI IASI',W/2,cy+4,{align:'center'});
+    cy+=8;
+    try{pdf.addImage(caps.imgCity,'JPEG',14,cy,W-28,52,undefined,'FAST');}catch(e){}
+    pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.4);pdf.rect(14,cy,W-28,52,'S');
+    pdf.setTextColor(80,90,110);pdf.setFontSize(6);pdf.setFont('helvetica','italic');
+    pdf.text('FIG. — Harta urbana · Zoom 12 · Incadrare amplasament in Municipiul Iasi · Sursa: UrbanX',W/2,cy+55,{align:'center'});
+    cy+=60;
+  }
   sign();
   pdf.save('Studiu_Umbre_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
   ss('Studiu de Umbre generat!');
@@ -11347,6 +11428,16 @@ async function generateWindStudy(){
   pdf.setFillColor(30,50,90);pdf.rect(20,112,W-40,80,'F');pdf.setFillColor(...GOLD);pdf.rect(20,112,3,80,'F');
   [['Nr. cadastral:',nrcad],['Zona UTR:',utr],['Suprafata teren:',area+' mp'],['H propus:',aedisH.toFixed(1)+'m'],['H medie zona:',hMed.toFixed(1)+'m'],['Raport H/Hmedio:',((aedisH/Math.max(1,hMed)).toFixed(2))],['Directie vant predominanta:','NE (iarna) / SV (vara)'],['Viteza vant de referinta:','V0=25m/s (zona II STAS 10101)']].forEach(([l,v],i)=>{pdf.setTextColor(150,170,200);pdf.setFontSize(8);pdf.setFont('helvetica','normal');pdf.text(S2(l),26,124+i*9.5);pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text(S2(v),96,124+i*9.5);});
   pdf.setTextColor(100,120,150);pdf.setFontSize(7);pdf.text('Generat: '+S2(dateStr)+' · Document orientativ · UrbanX TSS·FG',W/2,H-12,{align:'center'});
+  // Harta amplasament pe cover (Standard 3D) - banda jos
+  if(caps.imgLocation&&caps.imgLocation.length>500){
+    try{
+      pdf.addImage(caps.imgLocation,'JPEG',14,H-72,W-28,58,undefined,'FAST');
+      pdf.setFillColor(10,20,40);pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.5);
+      pdf.rect(14,H-72,W-28,58,'S');
+      pdf.setTextColor(...GOLD);pdf.setFontSize(6);pdf.setFont('helvetica','bold');
+      pdf.text('AMPLASAMENT · '+S2(nrcad)+' · UTR '+S2(utr)+' · Sursa: Mapbox Standard 3D',W/2,H-75,{align:'center'});
+    }catch(e){}
+  }
   ftr();
 
   // PAG 2: Vedere 3D + analiza context vant
@@ -11398,6 +11489,20 @@ async function generateWindStudy(){
   cy=body('Amplasamentul '+nrcad+' prezinta o expunere '+(aedisH>hMed*1.3?'RIDICATA':'MODERATA')+' la actiunea vantului, avand in vedere inaltimea propusa de '+aedisH.toFixed(1)+'m fata de contextul construit cu H medie '+hMed.toFixed(1)+'m. Directia dominanta a vantului la Iasi este NE (iarna, frecventa ~35%) si SV (vara, frecventa ~25%). Se recomanda elaborarea unui studiu CFD (Computational Fluid Dynamics) in faza DTAC/PAC pentru cladirile cu H>28m sau in zone cu densitate urbana ridicata.',14,cy);cy+=4;
   cy=sec('6. BAZA LEGALA',cy);cy+=2;
   ['STAS 10101/20-1990 — Actiunea vantului. Incarcari din vant.','SR EN 1991-1-4:2006 — Eurocod 1: Actiuni asupra structurilor. Actiuni ale vantului.','Ghidul privind confortul pietonal si actiunea vantului in mediul construit — INCERC 2008.','PUG Municipiul Iasi — UTR '+utr+' — Regulamentul Local de Urbanism.','Legea nr. 50/1991 republicata privind autorizarea executarii lucrarilor de constructii.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
+  // Harta orasului inainte de concluzii
+  if(caps.imgCity&&caps.imgCity.length>500){
+    cy+=3;
+    pdf.setFillColor(...DARK);pdf.rect(14,cy-3,W-28,4,'F');
+    pdf.setFillColor(...GOLD);pdf.rect(14,cy-3,W-28,1,'F');
+    pdf.setTextColor(...GOLD);pdf.setFontSize(7);pdf.setFont('helvetica','bold');
+    pdf.text('INCADRARE IN CONTEXTUL URBAN AL MUNICIPIULUI IASI',W/2,cy+4,{align:'center'});
+    cy+=8;
+    try{pdf.addImage(caps.imgCity,'JPEG',14,cy,W-28,52,undefined,'FAST');}catch(e){}
+    pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.4);pdf.rect(14,cy,W-28,52,'S');
+    pdf.setTextColor(80,90,110);pdf.setFontSize(6);pdf.setFont('helvetica','italic');
+    pdf.text('FIG. — Harta urbana · Zoom 12 · Incadrare amplasament in Municipiul Iasi · Sursa: UrbanX',W/2,cy+55,{align:'center'});
+    cy+=60;
+  }
   sign();
 
   // PAG 6: Semnatura
@@ -11440,6 +11545,16 @@ async function generateGreenStudy(){
   pdf.setFillColor(30,50,90);pdf.rect(20,112,W-40,80,'F');pdf.setFillColor(...GOLD);pdf.rect(20,112,3,80,'F');
   [['Nr. cadastral:',nrcad],['Zona UTR:',utr],['Suprafata teren:',area+' mp'],['SV minim PUG ('+params?.sv+'%):',svMin+' mp'],['SV obligatoriu (min 20%):',svObl+' mp'],['Suprafata construita max (POT '+potMax+'%):',scMax+' mp'],['Suprafata libera estimata:',Math.max(0,areaNum-scMax)+' mp'],['H propus:',aedisH.toFixed(1)+'m']].forEach(([l,v],i)=>{pdf.setTextColor(150,170,200);pdf.setFontSize(8);pdf.setFont('helvetica','normal');pdf.text(S2(l),26,124+i*9.5);pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text(S2(v),106,124+i*9.5);});
   pdf.setTextColor(100,120,150);pdf.setFontSize(7);pdf.text('Generat: '+S2(dateStr)+' · Document orientativ · UrbanX TSS·FG',W/2,H-12,{align:'center'});
+  // Harta amplasament pe cover (Standard 3D) - banda jos
+  if(caps.imgLocation&&caps.imgLocation.length>500){
+    try{
+      pdf.addImage(caps.imgLocation,'JPEG',14,H-72,W-28,58,undefined,'FAST');
+      pdf.setFillColor(10,20,40);pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.5);
+      pdf.rect(14,H-72,W-28,58,'S');
+      pdf.setTextColor(...GOLD);pdf.setFontSize(6);pdf.setFont('helvetica','bold');
+      pdf.text('AMPLASAMENT · '+S2(nrcad)+' · UTR '+S2(utr)+' · Sursa: Mapbox Standard 3D',W/2,H-75,{align:'center'});
+    }catch(e){}
+  }
   ftr();
 
   // PAG 2: Vedere 3D + bilanturi
@@ -11487,6 +11602,20 @@ async function generateGreenStudy(){
   [['Tei argintiu (Tilia tomentosa)','Mare (H 20m)','Aliniamente stradale','Umbra, aroma, rezistenta urbana'],['Frasin comun (Fraxinus excelsior)','Mare (H 25m)','Spatii largi, parcuri','Crestere rapida, coroana ampla'],['Artar campestru (Acer campestre)','Medie (H 10m)','Garduri vii, parcele','Colorit toamna, toleranta poluare'],['Soc negru (Sambucus nigra)','Mica (H 4m)','Umplere, biodiversitate','Fructe pentru fauna'],['Lavanda (Lavandula sp.)','Mica (<1m)','Borduri, terase','Aroma, rezistenta seceta'],['Iederá (Hedera helix)','Agatarotre','Fatade verzi verticale','Termoizolatie, estetica']].forEach(r=>{cy=tblRow(r,cy,false,[50,25,45,58]);});
   cy+=3;cy=sec('5. BAZA LEGALA',cy);cy+=2;
   ['Legea nr. 24/2007 privind reglementarea si administrarea spatiilor verzi din intravilanul localitatilor.','NP 133/2013 — Normativ privind proiectarea, executia si exploatarea sistemelor de alimentare cu apa si canalizare (permeabilitate).','PUG Municipiul Iasi in vigoare (HCL Iasi) — UTR '+utr+' — Spatii verzi minime obligatorii.','Ordinul MDRT nr. 2701/2010 — Metodologie de informare si consultare a publicului cu privire la documentatii de urbanism.','Legea nr. 292/2018 privind evaluarea impactului anumitor proiecte publice si private asupra mediului.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
+  // Harta orasului inainte de concluzii
+  if(caps.imgCity&&caps.imgCity.length>500){
+    cy+=3;
+    pdf.setFillColor(...DARK);pdf.rect(14,cy-3,W-28,4,'F');
+    pdf.setFillColor(...GOLD);pdf.rect(14,cy-3,W-28,1,'F');
+    pdf.setTextColor(...GOLD);pdf.setFontSize(7);pdf.setFont('helvetica','bold');
+    pdf.text('INCADRARE IN CONTEXTUL URBAN AL MUNICIPIULUI IASI',W/2,cy+4,{align:'center'});
+    cy+=8;
+    try{pdf.addImage(caps.imgCity,'JPEG',14,cy,W-28,52,undefined,'FAST');}catch(e){}
+    pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.4);pdf.rect(14,cy,W-28,52,'S');
+    pdf.setTextColor(80,90,110);pdf.setFontSize(6);pdf.setFont('helvetica','italic');
+    pdf.text('FIG. — Harta urbana · Zoom 12 · Incadrare amplasament in Municipiul Iasi · Sursa: UrbanX',W/2,cy+55,{align:'center'});
+    cy+=60;
+  }
   sign();
 
   // PAG 6: Semnatura
@@ -11532,6 +11661,16 @@ async function generateMobilityStudy(){
   pdf.setFillColor(30,50,90);pdf.rect(20,112,W-40,80,'F');pdf.setFillColor(...GOLD);pdf.rect(20,112,3,80,'F');
   [['Nr. cadastral:',nrcad],['Zona UTR:',utr],['Suprafata teren:',area+' mp'],['Functiune propusa:',fnLabel],['Nr. niveluri propus:',niv+' niv.'],['SD estimata:',sdEst+' mp'],['Locuinte estimate:',locuinteEst+' apartamente'],['Parcaje obligatorii (min):',pkObl+' locuri']].forEach(([l,v],i)=>{pdf.setTextColor(150,170,200);pdf.setFontSize(8);pdf.setFont('helvetica','normal');pdf.text(S2(l),26,124+i*9.5);pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text(S2(v),100,124+i*9.5);});
   pdf.setTextColor(100,120,150);pdf.setFontSize(7);pdf.text('Generat: '+S2(dateStr)+' · Document orientativ · UrbanX TSS·FG',W/2,H-12,{align:'center'});
+  // Harta amplasament pe cover (Standard 3D) - banda jos
+  if(caps.imgLocation&&caps.imgLocation.length>500){
+    try{
+      pdf.addImage(caps.imgLocation,'JPEG',14,H-72,W-28,58,undefined,'FAST');
+      pdf.setFillColor(10,20,40);pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.5);
+      pdf.rect(14,H-72,W-28,58,'S');
+      pdf.setTextColor(...GOLD);pdf.setFontSize(6);pdf.setFont('helvetica','bold');
+      pdf.text('AMPLASAMENT · '+S2(nrcad)+' · UTR '+S2(utr)+' · Sursa: Mapbox Standard 3D',W/2,H-75,{align:'center'});
+    }catch(e){}
+  }
   ftr();
 
   // PAG 2: Vedere 3D + accese identificate
@@ -11581,6 +11720,20 @@ async function generateMobilityStudy(){
   cy=body('Functiunea propusa ('+fnLabel+') pentru parcela '+nrcad+' ('+area+' mp, UTR '+utr+') necesita asigurarea a minimum '+pkObl+' locuri de parcare conform NP 051/2012 si PUG Iasi. Se recomanda solutia cu parcare subterana ('+pkSub+' locuri) pentru eficientizarea utilizarii suprafetei la sol si maximizarea spatiilor verzi.',14,cy);cy+=4;
   cy=sec('6. BAZA LEGALA',cy);cy+=2;
   ['NP 051/2012 (revizuit) — Normativ privind adaptarea cladirilor civile si spatiului urban la necesitatile persoanelor cu handicap.','STAS 10144/3-1991 — Calculul si proiectarea parcajelor pentru autoturisme.','HG nr. 525/1996 — Regulament General de Urbanism, art. 33 Parcaje.','PUG Municipiul Iasi (HCL Iasi) — UTR '+utr+' — Parcaje minime obligatorii.','Legea nr. 448/2006 privind protectia si promovarea drepturilor persoanelor cu handicap.','Normativul NP 061/2002 privind proiectarea si executarea sistemelor de iluminat artificial.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
+  // Harta orasului inainte de concluzii
+  if(caps.imgCity&&caps.imgCity.length>500){
+    cy+=3;
+    pdf.setFillColor(...DARK);pdf.rect(14,cy-3,W-28,4,'F');
+    pdf.setFillColor(...GOLD);pdf.rect(14,cy-3,W-28,1,'F');
+    pdf.setTextColor(...GOLD);pdf.setFontSize(7);pdf.setFont('helvetica','bold');
+    pdf.text('INCADRARE IN CONTEXTUL URBAN AL MUNICIPIULUI IASI',W/2,cy+4,{align:'center'});
+    cy+=8;
+    try{pdf.addImage(caps.imgCity,'JPEG',14,cy,W-28,52,undefined,'FAST');}catch(e){}
+    pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.4);pdf.rect(14,cy,W-28,52,'S');
+    pdf.setTextColor(80,90,110);pdf.setFontSize(6);pdf.setFont('helvetica','italic');
+    pdf.text('FIG. — Harta urbana · Zoom 12 · Incadrare amplasament in Municipiul Iasi · Sursa: UrbanX',W/2,cy+55,{align:'center'});
+    cy+=60;
+  }
   sign();
 
   // PAG 6: Semnatura
@@ -11627,6 +11780,16 @@ async function generateDensityStudy(){
   pdf.setFillColor(30,50,90);pdf.rect(20,112,W-40,80,'F');pdf.setFillColor(...GOLD);pdf.rect(20,112,3,80,'F');
   [['Nr. cadastral:',nrcad],['Zona UTR:',utr],['Suprafata teren:',area+' mp'],['POT propus / PUG max:',potProp+'% / '+potProp+'%'],['CUT propus / PUG max:',cutProp+' / '+cutProp],['H propus / H max vecin:',aedisH.toFixed(1)+'m / '+(hMed*1.5).toFixed(1)+'m'],['H medie zona (200m raza):',hMed.toFixed(1)+'m'],['Nr. cladiri in context incarcat:',vecini.length+' buc.']].forEach(([l,v],i)=>{pdf.setTextColor(150,170,200);pdf.setFontSize(8);pdf.setFont('helvetica','normal');pdf.text(S2(l),26,124+i*9.5);pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text(S2(v),108,124+i*9.5);});
   pdf.setTextColor(100,120,150);pdf.setFontSize(7);pdf.text('Generat: '+S2(dateStr)+' · Document orientativ · UrbanX TSS·FG',W/2,H-12,{align:'center'});
+  // Harta amplasament pe cover (Standard 3D) - banda jos
+  if(caps.imgLocation&&caps.imgLocation.length>500){
+    try{
+      pdf.addImage(caps.imgLocation,'JPEG',14,H-72,W-28,58,undefined,'FAST');
+      pdf.setFillColor(10,20,40);pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.5);
+      pdf.rect(14,H-72,W-28,58,'S');
+      pdf.setTextColor(...GOLD);pdf.setFontSize(6);pdf.setFont('helvetica','bold');
+      pdf.text('AMPLASAMENT · '+S2(nrcad)+' · UTR '+S2(utr)+' · Sursa: Mapbox Standard 3D',W/2,H-75,{align:'center'});
+    }catch(e){}
+  }
   ftr();
 
   // PAG 2: Vedere 3D + comparatie indicatori
@@ -11678,6 +11841,20 @@ async function generateDensityStudy(){
   cy=body('Analiza de densitate pentru parcela '+nrcad+' (UTR '+utr+', '+area+' mp) indica ca parametrii propusi — POT '+potProp+'%, CUT '+cutProp+', H='+aedisH.toFixed(1)+'m, '+fnLabel+' — '+(potProp<=parseFloat(params?.pot||50)&&cutProp<=parseFloat(params?.cut||3)?'se incadreaza in limitele PUG, nu necesita PUZ.':'depasesc parametrii PUG, necesita elaborarea unui PUZ sau PUD conform Legii 350/2001.')+' Functiunea propusa este '+(fnSorted[0]&&(fnSorted[0][0]==='yes'||fnSorted[0][0]==='residential'||fnSorted[0][0]==='apartments')?'compatibila':'partial compatibila')+' cu caracterul predominant al zonei.',14,cy);cy+=4;
   cy=sec('5. BAZA LEGALA',cy);cy+=2;
   ['Legea nr. 350/2001 privind amenajarea teritoriului si urbanismul (republicata 2022).','HG nr. 525/1996 — Regulamentul General de Urbanism, cu modificarile ulterioare.','Ordinul MDRAP nr. 233/2016 pentru aprobarea Normelor metodologice de aplicare a Legii 350/2001.','PUG Municipiul Iasi in vigoare (HCL Iasi) — UTR '+utr+' — Regulamentul Local de Urbanism.','Legea nr. 50/1991 republicata privind autorizarea executarii lucrarilor de constructii.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
+  // Harta orasului inainte de concluzii
+  if(caps.imgCity&&caps.imgCity.length>500){
+    cy+=3;
+    pdf.setFillColor(...DARK);pdf.rect(14,cy-3,W-28,4,'F');
+    pdf.setFillColor(...GOLD);pdf.rect(14,cy-3,W-28,1,'F');
+    pdf.setTextColor(...GOLD);pdf.setFontSize(7);pdf.setFont('helvetica','bold');
+    pdf.text('INCADRARE IN CONTEXTUL URBAN AL MUNICIPIULUI IASI',W/2,cy+4,{align:'center'});
+    cy+=8;
+    try{pdf.addImage(caps.imgCity,'JPEG',14,cy,W-28,52,undefined,'FAST');}catch(e){}
+    pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.4);pdf.rect(14,cy,W-28,52,'S');
+    pdf.setTextColor(80,90,110);pdf.setFontSize(6);pdf.setFont('helvetica','italic');
+    pdf.text('FIG. — Harta urbana · Zoom 12 · Incadrare amplasament in Municipiul Iasi · Sursa: UrbanX',W/2,cy+55,{align:'center'});
+    cy+=60;
+  }
   sign();
 
   // PAG 6: Semnatura
@@ -11727,6 +11904,14 @@ async function generateMemoriu(){
   pdf.setFillColor(30,50,90);pdf.rect(20,110,W-40,100,'F');pdf.setFillColor(...GOLD);pdf.rect(20,110,3,100,'F');
   [['Nr. cadastral:',nrcad],['Zona UTR:',utr],['Suprafata teren:',area+' mp'],['Coordonate GPS:',lat.toFixed(5)+'N / '+lon.toFixed(5)+'E'],['Functiune propusa:',fnLabel],['Regim inaltime propus:',niv+(niv===1?' nivel':niv<4?' niveluri':' niveluri')],['H total propus:',aedisH.toFixed(1)+' m'],['Stil arhitectural:',stilLabel],['Suprafata construita estimata:',scEst+' mp (POT '+params?.pot+'%)'],['Suprafata desfasurata estimata:',sdEst+' mp (CUT '+params?.cut+')'],['Spatii verzi minime:',svMin+' mp ('+params?.sv+'% din teren)'],['Parcaje obligatorii:',pkObl+' locuri']].forEach(([l,v],i)=>{pdf.setTextColor(150,170,200);pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');pdf.text(S2(l),26,122+i*8);pdf.setTextColor(255,255,255);pdf.setFontSize(8.5);pdf.setFont('helvetica','bold');pdf.text(S2(v),100,122+i*8);});
   pdf.setTextColor(100,120,150);pdf.setFontSize(7);pdf.text('Generat: '+S2(dateStr)+' · Document orientativ · UrbanX TSS·FG · Valori estimative',W/2,H-12,{align:'center'});
+  if(caps.imgLocation&&caps.imgLocation.length>500){
+    try{
+      pdf.addImage(caps.imgLocation,'JPEG',14,H-72,W-28,58,undefined,'FAST');
+      pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.4);pdf.rect(14,H-72,W-28,58,'S');
+      pdf.setTextColor(...GOLD);pdf.setFontSize(6);pdf.setFont('helvetica','bold');
+      pdf.text('AMPLASAMENT · '+S2(nrcad)+' · UTR '+S2(utr)+' · Sursa: Mapbox Standard 3D',W/2,H-75,{align:'center'});
+    }catch(e){}
+  }
   ftr();
 
   // PAG 2: Vedere 3D principala + date teren
@@ -11789,6 +11974,20 @@ async function generateMemoriu(){
   cy=sec('8. BAZA LEGALA',cy);cy+=2;
   ['Legea nr. 50/1991 republicata — Autorizarea executarii lucrarilor de constructii.','Legea nr. 350/2001 — Amenajarea teritoriului si urbanismul (republicata).','HG nr. 525/1996 — Regulamentul General de Urbanism.','Ordinul MLPAT nr. 91/1991 n — Formular si continut documentatii pentru autorizatii.','Ordinul MDRAP nr. 233/2016 — Norme metodologice Legea 350/2001.','PUG Municipiul Iasi in vigoare (HCL Iasi) — UTR '+utr+' — Regulamentul Local de Urbanism.','Legea nr. 10/1995 republicata — Calitatea in constructii.','SR EN 1990:2004 — Eurocod 0: Baze de proiectare a structurilor.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
   cy+=4;cy=body('NOTA: Prezentul memoriu tehnic preliminar a fost generat automat de platforma UrbanX pe baza datelor cadastrale disponibile si a parametrilor introdusi de utilizator. Documentul are caracter strict ORIENTATIV si INFORMATIV. Nu inlocuieste documentatia tehnica avizata conform legii si nu constituie un Certificat de Urbanism, aviz sau autorizatie de constructie.',14,cy);
+  // Harta orasului inainte de concluzii
+  if(caps.imgCity&&caps.imgCity.length>500){
+    cy+=3;
+    pdf.setFillColor(...DARK);pdf.rect(14,cy-3,W-28,4,'F');
+    pdf.setFillColor(...GOLD);pdf.rect(14,cy-3,W-28,1,'F');
+    pdf.setTextColor(...GOLD);pdf.setFontSize(7);pdf.setFont('helvetica','bold');
+    pdf.text('INCADRARE IN CONTEXTUL URBAN AL MUNICIPIULUI IASI',W/2,cy+4,{align:'center'});
+    cy+=8;
+    try{pdf.addImage(caps.imgCity,'JPEG',14,cy,W-28,52,undefined,'FAST');}catch(e){}
+    pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.4);pdf.rect(14,cy,W-28,52,'S');
+    pdf.setTextColor(80,90,110);pdf.setFontSize(6);pdf.setFont('helvetica','italic');
+    pdf.text('FIG. — Harta urbana · Zoom 12 · Incadrare amplasament in Municipiul Iasi · Sursa: UrbanX',W/2,cy+55,{align:'center'});
+    cy+=60;
+  }
   sign();
 
   // PAG 8: Semnatura
