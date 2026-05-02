@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache"/>
 <meta http-equiv="Expires" content="0"/>
 <title>UrbanX – PUG Iași</title>
-<meta name="description" content="UrbanX — Platformă de Analiză Urbanistică Avansată. Analiză cadastrală, PUG, indicatori urbanistici, studii de specialitate și vizualizare 3D">
+<meta name="description" content="UrbanX — Platformă de Analiză Urbanistică Avansată. Analiză cadastrală, PUG, indicatori urbanistici, studii de specialitate și vizualizare 3D pentru Municipiul Iași.">
 <!-- UrbanX Favicon & PWA -->
 <link rel="icon" href="/UrbanX/favicon.ico" sizes="any">
 <link rel="icon" type="image/svg+xml" href="/UrbanX/favicon.svg">
@@ -3571,9 +3571,6 @@ function buildMultiVolume(p, fp, params, pi){
   const wDeg = E-W, hDeg = N-S2;
   const wM = wDeg*111320*Math.cos(((S2+N)/2)*Math.PI/180);
   const hM = hDeg*111320;
-  
-  const distDegLng = dist/( 111320*Math.cos(((S2+N)/2)*Math.PI/180));
-  const distDegLat = dist/111320;
   
   let cols = Math.ceil(Math.sqrt(n * wM/Math.max(1,hM)));
   let rows = Math.ceil(n/Math.max(1,cols));
