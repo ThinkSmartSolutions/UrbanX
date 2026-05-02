@@ -12123,7 +12123,7 @@ function aedisOpen3DViewer(){
 
   // Ascundem topbar-ul principal și harta când viewer-ul e deschis
   const _tb = document.getElementById('topbar');
-  if(_tb) _tb.style.cssText += ';display:none!important';
+  if(_tb){ _tb.setAttribute('data-display-before', _tb.style.display||''); _tb.style.setProperty('display','none','important'); }
   const _mapDiv = document.getElementById('map');
   if(_mapDiv) _mapDiv.style.visibility = 'hidden';
 
@@ -12302,7 +12302,7 @@ function _v3dCleanup(){
   V3D.texCache={}; V3D.scene=null; V3D.cam=null; V3D.ctx=[]; V3D.aedis=[]; V3D.distShown=false;
   // Restaurăm topbar-ul și harta
   const _tb = document.getElementById('topbar');
-  if(_tb) _tb.style.display = 'flex';
+  if(_tb){ _tb.style.removeProperty('display'); }
   const _mapDiv = document.getElementById('map');
   if(_mapDiv) _mapDiv.style.visibility = 'visible';
 }
@@ -12397,8 +12397,17 @@ function _v3dBuild(ap){
   const toLoc=([lng,lat])=>[(lng-cx)*mLng,(lat-cy2)*mLat];
 
   // ── Context buildings ────────────────────────────────────────────────────
+  const _isDemo = S.vol.scenariuConstructie === 'liber';
+  const _parcelFeat = _isDemo ? {type:'Feature', geometry: ap.geo.geometry, properties:{}} : null;
   (S.ctx?.features||[]).forEach(f=>{
     if(!f.geometry) return;
+    // Dacă suntem în scenariul Demolare, excludem clădirile de pe parcelă
+    if(_isDemo && _parcelFeat){
+      try{
+        const overlap = turf.intersect(_parcelFeat, {type:'Feature',geometry:f.geometry,properties:{}});
+        if(overlap && turf.area(overlap) > 5) return; // clădire pe parcelă — skip
+      }catch(e){}
+    }
     const h=Math.max(2,f.properties?.h||6);
     const fn=f.properties?.fn||'yes';
     const colMap={residential:'#b0c8e0',apartments:'#a0bcd4',house:'#c0d0e4',commercial:'#e8a84a',retail:'#f0b040',office:'#5090d0',public:'#7080c8',industrial:'#8890a0',warehouse:'#808898',hotel:'#c090d0',school:'#88c898','yes':'#90a8c0'};
