@@ -3579,10 +3579,32 @@ function buildMultiVolume(p, fp, params, pi){
   let rows = Math.ceil(n/Math.max(1,cols));
   while(cols*rows < n) rows++;
   
-  const cellW = (wDeg - distDegLng*(cols+1)) / cols;
-  const cellH = (hDeg - distDegLat*(rows+1)) / rows;
+  // Auto-reducere distanță dacă nu încap clădirile pe parcelă
+  let distDegLng = dist/( 111320*Math.cos(((S2+N)/2)*Math.PI/180));
+  let distDegLat = dist/111320;
+  let cellW = (wDeg - distDegLng*(cols+1)) / cols;
+  let cellH = (hDeg - distDegLat*(rows+1)) / rows;
   
-  if(cellW<=0||cellH<=0) return feats;
+  // Dacă nu încap, reducem distanța progresiv până funcționează
+  if(cellW<=0||cellH<=0){
+    for(let tryDist = dist*0.7; tryDist >= 1; tryDist -= 0.5){
+      distDegLng = tryDist/(111320*Math.cos(((S2+N)/2)*Math.PI/180));
+      distDegLat = tryDist/111320;
+      cellW = (wDeg - distDegLng*(cols+1)) / cols;
+      cellH = (hDeg - distDegLat*(rows+1)) / rows;
+      if(cellW>0 && cellH>0) break;
+    }
+  }
+  // Dacă tot nu încap, reducem nr de clădiri
+  if(cellW<=0||cellH<=0){
+    // Încearcă cu mai puțin coloane
+    cols = 1; rows = n;
+    distDegLng = dist/(111320*Math.cos(((S2+N)/2)*Math.PI/180));
+    distDegLat = dist/111320;
+    cellW = (wDeg - distDegLng*(cols+1)) / cols;
+    cellH = (hDeg - distDegLat*(rows+1)) / rows;
+  }
+  if(cellW<=0||cellH<=0) return feats; // chiar nu încap
   
   const side = (shape==='square'||shape==='patrat') ? Math.min(cellW,cellH) : null;
   const ratio = Math.max(0.25, Math.min(0.5, AEDIS.formaRatio||0.35));
@@ -8518,7 +8540,8 @@ function _v3dRebuildFast(){
     const isMans=floor<=-10&&(rt==='mansarda'||rt==='sarpanta_mica');
     const isSarp=floor<0&&(rt==='sarpanta'||rt==='sarpanta_mica');
     const isRoofSlab=floor<0&&(rt==='terasa_plata'||rt==='terasa'||rt==='combinat');
-    if(floor<0&&!isRoofSlab&&!isMans&&!isSarp) return;
+    const isPenthouse=floor<0&&(rt==='penthouse'||rt==='penthouse_terasa');
+    if(floor<0&&!isRoofSlab&&!isMans&&!isSarp&&!isPenthouse) return;
     const coords=f.geometry.type==='Polygon'?f.geometry.coordinates:f.geometry.coordinates[0];
     const pts=coords[0].slice(0,-1).map(toLoc);
     const holePts=coords.length>1?coords[1].slice(0,-1).map(toLoc):null;
@@ -8526,7 +8549,10 @@ function _v3dRebuildFast(){
     let mat;
     try{
       if(isRoofSlab) mat=new THREE.MeshLambertMaterial({color:'#c8d0d8'});
-      else if(isMans||isSarp){const rc={modern:'#2a3a50',clasic:'#7c3512',minimalist:'#c8d0d8',inovator:'#2a1a60',industrial:'#3a2818',adaptat_context:'#4a6030'};mat=new THREE.MeshStandardMaterial({color:new THREE.Color(rc[stilKey]||'#5a4030'),roughness:0.80,metalness:0.05});}
+      else if(isPenthouse){
+        mat=_v3dMatPenthouse(THREE,stilKey,V3D.texCache);
+      }
+      else if(isMans||isSarp){const rc={modern:'#2a3a50',clasic:'#7c3512',minimalist:'#c8d0d8',inovator:'#2a1a60',industrial:'#3a2818',adaptat_context:'#4a6030',contemporary:'#1a4020',deconstructivist:'#2a0a40'};mat=new THREE.MeshStandardMaterial({color:new THREE.Color(rc[stilKey]||'#5a4030'),roughness:0.80,metalness:0.05});}
       else if(floor===0) mat=_v3dMatParter(THREE,stilKey,V3D.texCache);
       else if(f.properties?.isLast) mat=_v3dMatPenthouse(THREE,stilKey,V3D.texCache);
       else mat=_v3dMatFloor(THREE,floor===0?cv.p:cv.e,floor,stilKey,V3D.texCache);
@@ -13143,17 +13169,19 @@ function _v3dBuild(ap){
       );
       const isMansarda = floor <= -10 && (roofType==='mansarda' || roofType==='sarpanta_mica');
       const isSarpanta = floor < 0 && (roofType==='sarpanta' || roofType==='sarpanta_mica');
-      const isRoofSpire = floor < 0 && !isRoofSlab && !isMansarda && !isSarpanta;
-      if(isRoofSpire) return; // skip elemente geometrice fără semnificație vizuală
-      if(h < 0.05 && !isRoofSlab && !isMansarda && !isSarpanta) return;
+      const isPenthouse2 = floor < 0 && (roofType==='penthouse' || roofType==='penthouse_terasa');
+      const isRoofSpire = floor < 0 && !isRoofSlab && !isMansarda && !isSarpanta && !isPenthouse2;
+      if(isRoofSpire) return;
+      if(h < 0.05 && !isRoofSlab && !isMansarda && !isSarpanta && !isPenthouse2) return;
       if(pts.length < 3) return;
       const isTop = !!f.properties?.isLast;
       let mat;
       if(isRoofSlab){
         mat = new THREE.MeshLambertMaterial({color:'#c8d0d8'});
+      } else if(isPenthouse2){
+        mat = _v3dMatPenthouse(THREE,stilKey,V3D.texCache);
       } else if(isMansarda || isSarpanta){
-        // Mansardă/șarpantă: material teracotă/slate
-        const roofCols={modern:'#2a3a50',clasic:'#7c3512',minimalist:'#c8d0d8',inovator:'#2a1a60',industrial:'#3a2818',adaptat_context:'#4a6030'};
+        const roofCols={modern:'#2a3a50',clasic:'#7c3512',minimalist:'#c8d0d8',inovator:'#2a1a60',industrial:'#3a2818',adaptat_context:'#4a6030',contemporary:'#1a4020',deconstructivist:'#2a0a40'};
         mat = new THREE.MeshStandardMaterial({color:new THREE.Color(roofCols[stilKey]||'#5a4030'),roughness:0.80,metalness:0.05});
       } else if(floor===0){ mat=_v3dMatParter(THREE,stilKey,V3D.texCache); }
       else if(isTop){ mat=_v3dMatPenthouse(THREE,stilKey,V3D.texCache); }
