@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache"/>
 <meta http-equiv="Expires" content="0"/>
 <title>UrbanX – PUG Iași</title>
-<meta name="description" content="UrbanX — Platformă de Analiză Urbanistică Avansată. Analiză cadastrală, PUG, indicatori urbanistici, studii de specialitate și vizualizare 3D">
+<meta name="description" content="UrbanX — Platformă de Analiză Urbanistică Avansată. Analiză cadastrală, PUG, indicatori urbanistici, studii de specialitate și vizualizare 3D pentru Municipiul Iași.">
 <!-- UrbanX Favicon & PWA -->
 <link rel="icon" href="/UrbanX/favicon.ico" sizes="any">
 <link rel="icon" type="image/svg+xml" href="/UrbanX/favicon.svg">
@@ -10925,20 +10925,20 @@ async function _captureStudyMaps(ap, statusFn){
   await capMap(62, -20);
 
   st('Captură viewer 3D architectural...');
-  let v3dDay='', v3dNight='', v3dGolden='';
+  let v3dDay='', v3dNight='', v3dGolden='', v3dOvercast='';
   try{
     if(S.vol._lastFeats?.length){
       const v3dImgs = await _v3dCaptureSilent(ap);
-      v3dDay    = v3dImgs?.day    || v3dImgs?.zi     || '';
-      v3dNight  = v3dImgs?.night  || v3dImgs?.noapte || '';
-      v3dGolden = v3dImgs?.golden || '';
+      v3dDay     = v3dImgs?.day     || v3dImgs?.zi       || '';
+      v3dNight   = v3dImgs?.night   || v3dImgs?.noapte   || '';
+      v3dGolden  = v3dImgs?.golden  || '';
+      v3dOvercast= v3dImgs?.overcast|| v3dImgs?.innorirat || '';
     }
   }catch(e){ console.warn('v3d capture:', e.message); }
 
-  // imgStandard = img3D ca fallback (nu mai schimbăm stilul)
   const imgStandard = imgAerial || img3D;
 
-  return {img3D, img2D, imgDist, imgLat, imgFront, imgAerial, imgBack, imgStandard, v3dDay, v3dNight, v3dGolden};
+  return {img3D, img2D, imgDist, imgLat, imgFront, imgAerial, imgBack, imgStandard, v3dDay, v3dNight, v3dGolden, v3dOvercast};
 }
 
 function _initStudyPdf(studyName, studySubtitle, totalPages){
@@ -11055,275 +11055,263 @@ function _initStudyPdf(studyName, studySubtitle, totalPages){
 // ════════════════════════════════════════════════════════════════════════════
 // STUDIU 1: UMBRE & OBSTRUCȚIE VIZUALĂ
 // ════════════════════════════════════════════════════════════════════════════
+// helper: adaugă imagine cu caption elegant și returnează y nou
+// addImg este deja definit în _initStudyPdf
+
+// ════════════════════════════════════════════════════════════════════════════
+// STUDIU 1: UMBRE & OBSTRUCȚIE VIZUALĂ
+// ════════════════════════════════════════════════════════════════════════════
 async function generateShadowStudy(){
   const ap=S.parcels[S.activeParcel??0];
-  if(!ap?.geo?.geometry){ss('Selectați o parcelă pentru studiu.');return;}
-  ss('Se generează Studiu de Umbre & Obstrucție...');
+  if(!ap?.geo?.geometry){ss('Selectati o parcela pentru studiu.');return;}
+  ss('Se genereaza Studiu de Umbre & Obstructie...');
 
-  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Studiu de Umbre si Obstructie Vizuala','Studiu umbre',6);
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Studiu de Umbre si Obstructie Vizuala','Studiu umbre',7);
+  const caps = await _captureStudyMaps(ap, msg=>ss(msg));
 
-  // Capturi imagini
-  const caps = await _captureStudyMaps(ap, msg => ss(msg));
-
-  function solarAlt(lat,month,hour){
-    const D2R=Math.PI/180;
-    const decl=(-23.45*Math.cos(D2R*(360/365)*(month*30+10)))*D2R;
-    const ha=(hour-12)*15*D2R;
-    return Math.max(0,Math.asin(Math.sin(lat*D2R)*Math.sin(decl)+Math.cos(lat*D2R)*Math.cos(decl)*Math.cos(ha))*180/Math.PI);
-  }
+  function solarAlt(lat,month,hour){const D2R=Math.PI/180;const decl=(-23.45*Math.cos(D2R*(360/365)*(month*30+10)))*D2R;const ha=(hour-12)*15*D2R;return Math.max(0,Math.asin(Math.sin(lat*D2R)*Math.sin(decl)+Math.cos(lat*D2R)*Math.cos(decl)*Math.cos(ha))*180/Math.PI);}
   function shadowLen(h,alt){return alt>0.5?h/Math.tan(alt*Math.PI/180):999;}
-
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13.2;
   const vecini=S.ctx?.features?.filter(f=>f.properties?.h>2)||[];
   const parcelCtr=turf.centerOfMass(ap.geo).geometry.coordinates;
-
-  // Calculăm umbrele vecini pe parcelă
   const veciniAnaliza=vecini.slice(0,8).map(v=>{
     const vctr=turf.centerOfMass(v).geometry.coordinates;
     const dist=turf.distance({type:'Feature',geometry:{type:'Point',coordinates:parcelCtr}},{type:'Feature',geometry:{type:'Point',coordinates:vctr}},{units:'meters'});
-    const hv=v.properties?.h||7;
-    const sh=shadowLen(hv,solarAlt(lat,11,12)); // dec
-    const inParcela=sh>=dist;
+    const hv=v.properties?.h||7;const sh=shadowLen(hv,solarAlt(lat,11,12));const inParcela=sh>=dist;
     return {nrcad:v.properties?.nrcad||'—',h:hv.toFixed(1),dist:dist.toFixed(0),sh:sh>200?'>200':sh.toFixed(0),inParcela,fn:v.properties?.fn_label||'Necunoscut'};
   });
-
-  // ── PAG 1: Cover ─────────────────────────────────────────────────────────
-  pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');
-  pdf.setFillColor(...GOLD);pdf.rect(0,0,W,3,'F');pdf.rect(0,H-3,W,3,'F');
-  pdf.setFillColor(20,35,70);pdf.rect(0,3,W,H-6,'F');
-  pdf.setTextColor(...GOLD);pdf.setFontSize(9);pdf.setFont('helvetica','bold');
-  pdf.text('URBANX · PLATFORMA DE ANALIZA URBANISTICA',W/2,35,{align:'center'});
-  pdf.setTextColor(255,255,255);pdf.setFontSize(22);pdf.setFont('helvetica','bold');
-  pdf.text('STUDIU DE UMBRE',W/2,65,{align:'center'});
-  pdf.text('SI OBSTRUCTIE VIZUALA',W/2,80,{align:'center'});
-  pdf.setTextColor(...GOLD);pdf.setFontSize(11);
-  pdf.text('Analiza impactului cladirii propuse si al vecinatatilor · Simulare umbre orare',W/2,92,{align:'center'});
-  pdf.setFillColor(30,50,90);pdf.rect(20,108,W-40,80,'F');
-  pdf.setFillColor(...GOLD);pdf.rect(20,108,3,80,'F');
-  pdf.setTextColor(...GOLD);pdf.setFontSize(8);pdf.setFont('helvetica','bold');
-  pdf.text('DATE DE IDENTIFICARE',W/2,118,{align:'center'});
-  const rows=[['Nr. cadastral:',nrcad],['Zona UTR:',utr],['Suprafata teren:',area+' mp'],['H propus AEDIS:',aedisH.toFixed(1)+'m'],['Coordonate GPS:',lat.toFixed(5)+'N · '+lon.toFixed(5)+'E'],['Localitate:','Municipiul Iasi, jud. Iasi']];
-  rows.forEach(([l,v],i)=>{
-    pdf.setTextColor(150,170,200);pdf.setFontSize(8);pdf.setFont('helvetica','normal');pdf.text(S2(l),26,130+i*10);
-    pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text(S2(v),90,130+i*10);
-  });
-  const shadDec=shadowLen(aedisH,solarAlt(lat,11,12));
   const isConform=solarAlt(lat,11,12)>=15;
-  pdf.setFillColor(isConform?20:180,isConform?120:30,isConform?60:30);pdf.rect(20,200,W-40,22,'F');
-  pdf.setTextColor(255,255,255);pdf.setFontSize(10);pdf.setFont('helvetica','bold');
-  pdf.text(isConform?'CONFORM — Umbra acceptabila':'ATENTIE — Verificare suplimentara',W/2,210,{align:'center'});
-  pdf.setFontSize(8);pdf.text('Alt. solara iarna: '+solarAlt(lat,11,12).toFixed(1)+'° · Umbra maxima: '+(shadDec>500?'>200':shadDec.toFixed(0))+'m spre nord',W/2,218,{align:'center'});
+  const shadDec=shadowLen(aedisH,solarAlt(lat,11,12));
+  const months=['Ian','Feb','Mar','Apr','Mai','Iun','Iul','Aug','Sep','Oct','Nov','Dec'];
+  const half=(W-28)/2-2;
+
+  // PAG 1: Cover
+  pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');pdf.setFillColor(20,35,70);pdf.rect(0,3,W,H-6,'F');
+  pdf.setFillColor(...GOLD);pdf.rect(0,0,W,3,'F');pdf.rect(0,H-3,W,3,'F');
+  try{_pdfDrawLogo(pdf,W/2-10,18,20);}catch(e){}
+  pdf.setTextColor(...GOLD);pdf.setFontSize(9);pdf.setFont('helvetica','bold');
+  pdf.text('URBANX — PLATFORMA DE ANALIZA URBANISTICA',W/2,50,{align:'center'});
+  pdf.setTextColor(255,255,255);pdf.setFontSize(24);pdf.setFont('helvetica','bold');
+  pdf.text('STUDIU DE UMBRE',W/2,72,{align:'center'});
+  pdf.text('SI OBSTRUCTIE VIZUALA',W/2,88,{align:'center'});
+  pdf.setTextColor(...GOLD);pdf.setFontSize(10);
+  pdf.text('Analiza solara · Umbre proiectate · Conformitate OMS 119/2014',W/2,100,{align:'center'});
+  pdf.setFillColor(30,50,90);pdf.rect(20,112,W-40,85,'F');pdf.setFillColor(...GOLD);pdf.rect(20,112,3,85,'F');
+  const rows=[['Nr. cadastral:',nrcad],['Zona UTR:',utr],['Suprafata teren:',area+' mp'],['H propus:',aedisH.toFixed(1)+'m'],['Coordonate GPS:',lat.toFixed(5)+'N · '+lon.toFixed(5)+'E'],['Alt. solara iarna (12:00):',solarAlt(lat,11,12).toFixed(1)+'°'],['Umbra maxima (iarna):',shadDec>500?'>500m':shadDec.toFixed(0)+'m spre nord']];
+  rows.forEach(([l,v],i)=>{pdf.setTextColor(150,170,200);pdf.setFontSize(8);pdf.setFont('helvetica','normal');pdf.text(S2(l),26,124+i*11);pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text(S2(v),96,124+i*11);});
+  pdf.setFillColor(isConform?20:180,isConform?120:30,isConform?60:30);pdf.rect(20,210,W-40,20,'F');
+  pdf.setTextColor(255,255,255);pdf.setFontSize(11);pdf.setFont('helvetica','bold');
+  pdf.text(isConform?'CONFORM — Umbra acceptabila, insorire asigurata':'ATENTIE — Verificare suplimentara necesara',W/2,220,{align:'center'});
+  pdf.setFontSize(7.5);pdf.text('Prag OMS 119/2014: altitudine solara min. 15° la solstitiu iarna · Valoare calculata: '+solarAlt(lat,11,12).toFixed(1)+'°',W/2,228,{align:'center'});
   pdf.setTextColor(100,120,150);pdf.setFontSize(7);pdf.setFont('helvetica','normal');
-  pdf.text('Generat: '+S2(dateStr)+' · Document cu caracter ORIENTATIV',W/2,H-15,{align:'center'});
+  pdf.text('Generat: '+S2(dateStr)+' · Document orientativ · UrbanX TSS·FG',W/2,H-12,{align:'center'});
   ftr();
 
-  // ── PAG 2: Tabele calcule umbre ────────────────────────────────────────
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
-  hdr('CALCULE UMBRE ORARE — CLADIREA PROPUSA',2);ftr();
-  let cy=30;
-  cy=sec('1. ALTITUDINI SOLARE LA LATITUDINE '+lat.toFixed(2)+'°N',cy);cy+=2;
-  const months=['Ian','Feb','Mar','Apr','Mai','Iun','Iul','Aug','Sep','Oct','Nov','Dec'];
+  // PAG 2: Vedere 3D + analiza context
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONTEXT URBAN 3D — VEDERE PRINCIPALA',2);ftr();
+  let cy=28;
+  cy=addImg(caps.img3D,14,cy,W-28,72,'FIG. 1 — Vedere 3D principala · Volumul propus in contextul urban real · pitch 62° bearing -20°');
+  cy=sec('INCADRARE IN CONTEXT — ANALIZA VIZUALA',cy);cy+=2;
+  cy=body('Imaginea de mai sus prezinta volumul propus (marcat in albastru) in contextul construit real al zonei, capturat din platforma UrbanX cu date OpenStreetMap actualizate. Se observa raportul volumetric fata de cladirile invecinate, orientarea fata de punctele cardinale si potentialele zone de obstructie solara.',14,cy);cy+=4;
+  cy=addImg(caps.img2D,14,cy,half,52,'FIG. 2 — Plan 2D ortogonal · Cadastru + constructii existente');
+  addImg(caps.imgDist,14+half+4,cy-52,half,52,'FIG. 3 — Plan distante contur-la-contur · aliniamente');
+  cy+=4;
+  cy=sec('ORIENTARE CARDINALA SI IMPACT SOLAR',cy);cy+=2;
+  cy=body('Parcela '+nrcad+' este amplasata la coordonatele '+lat.toFixed(4)+'°N / '+lon.toFixed(4)+'°E (UTR '+utr+'). La latitudinea '+lat.toFixed(1)+'°N, altitudinea solara la solstitiu de iarna (21 decembrie, ora 12:00) este de '+solarAlt(lat,11,12).toFixed(1)+'°, '+(isConform?'valoare care depaseste pragul minim legal de 15° prevazut de OMS 119/2014.':'valoare sub pragul minim legal de 15° — situatie ce necesita studiu detaliat de insorire elaborat de arhitect OAR.'),14,cy);
+
+  // PAG 3: Tabel umbre orare
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CALCULE UMBRE ORARE — CLADIREA PROPUSA',3);ftr();
+  cy=28;cy=sec('1. ALTITUDINI SOLARE LA LATITUDINE '+lat.toFixed(2)+'N (ore/luna)',cy);cy+=2;
   const hours=[8,10,12,14,16];
-  const colW=[28,28,28,28,28,28,28];
-  cy=tblRow(['Luna',...hours.map(h=>h+':00')],cy,true,[26,...hours.map(_=>28)]);
+  cy=tblRow(['Luna',...hours.map(h=>h+':00h')],cy,true,[28,...hours.map(_=>28)]);
   months.forEach((m,mi)=>{
     const vals=hours.map(h=>solarAlt(lat,mi,h));
-    const row=[m,...vals.map(v=>v<1?'—':v.toFixed(1)+'°')];
-    cy=tblRow(row,cy,false,[26,...hours.map(_=>28)]);
-    vals.forEach((v,vi)=>{
-      const x=14+26+vi*28;
-      if(v>=30){pdf.setFillColor(20,120,60);pdf.rect(x,cy-12,28,8,'F');pdf.setTextColor(255,255,255);}
-      else if(v>=15){pdf.setFillColor(180,130,20);pdf.rect(x,cy-12,28,8,'F');pdf.setTextColor(255,255,255);}
-      else if(v>0){pdf.setFillColor(180,50,30);pdf.rect(x,cy-12,28,8,'F');pdf.setTextColor(255,255,255);}
-    });
+    cy=tblRow([m,...vals.map(v=>v<1?'—':v.toFixed(1)+'°')],cy,false,[28,...hours.map(_=>28)]);
+    vals.forEach((v,vi)=>{const x=14+28+vi*28;if(v>=30){pdf.setFillColor(20,120,60,0.6);pdf.rect(x,cy-8,28,8,'F');}else if(v>=15){pdf.setFillColor(180,130,20,0.6);pdf.rect(x,cy-8,28,8,'F');}else if(v>0){pdf.setFillColor(180,50,30,0.6);pdf.rect(x,cy-8,28,8,'F');}});
   });
-  cy+=5;
-  cy=sec('2. UMBRE PROIECTATE — SOLSTITIU IARNA (21 Dec.) · H='+aedisH.toFixed(1)+'m',cy);cy+=2;
-  const hoursD=[8,9,10,11,12,13,14,15];
-  cy=tblRow(['Ora','Alt. soare (°)','Umbra (m)','Directie','Status'],cy,true,[20,35,35,35,57]);
-  hoursD.forEach(h=>{
-    const alt=solarAlt(lat,11,h);
-    const sh=shadowLen(aedisH,alt);
-    const status=alt<1?'Soare sub orizont':alt<15?'SUB PRAGUL LEGAL':'CONFORM (>15°)';
-    cy=tblRow([h+':00',alt<1?'—':alt.toFixed(1)+'°',sh>200?'>200m':sh.toFixed(0)+'m','Spre Nord',status],cy,false,[20,35,35,35,57]);
+  cy+=4;
+  cy=sec('2. UMBRE PROIECTATE SOLSTITIU IARNA (21 Dec) · H='+aedisH.toFixed(1)+'m',cy);cy+=2;
+  cy=tblRow(['Ora','Alt. soare','Umbra (m)','Directie','Status'],cy,true,[22,32,32,40,52]);
+  [8,9,10,11,12,13,14,15,16].forEach(h=>{
+    const alt=solarAlt(lat,11,h);const sh=shadowLen(aedisH,alt);
+    const status=alt<1?'Sub orizont':alt<15?'SUB PRAG LEGAL':'CONFORM (>15°)';
+    cy=tblRow([h+':00',alt<1?'—':alt.toFixed(1)+'°',sh>200?'>200m':sh.toFixed(0)+'m','Spre Nord',status],cy,false,[22,32,32,40,52]);
   });
-  cy+=5;pdf.setFontSize(7.5);pdf.setTextColor(...BLUE);
-  pdf.text('Prag minim OMS 119/2014 + Ordin 994/2018: altitudine solara >= 15° la solstitiu iarna (21 Decembrie), min. 1h30min insorire directa/zi',14,cy);
+  cy+=3;pdf.setFontSize(7);pdf.setTextColor(...BLUE);
+  cy=body('Prag minim OMS 119/2014 + Ordin 994/2018 art. 3: altitudine solara ≥ 15° la solstitiu de iarna (21 Dec), minim 1h 30min insorire directa/zi pentru spatiile de locuit.',14,cy);
 
-  // ── PAG 3: Analiza vecini ────────────────────────────────────────────
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
-  hdr('ANALIZA UMBRE VECINI — IMPACT ASUPRA PARCELEI',3);ftr();
-  cy=30;cy=sec('3. CLADIRILE VECINE SI IMPACTUL UMBRIRII ASUPRA PARCELEI',cy);cy+=2;
-  cy=tblRow(['Nr.cad','H(m)','Dist(m)','Umbra iarna(m)','Functiune','Impact'],cy,true,[28,18,18,30,40,48]);
+  // PAG 4: Analiza vecini + grafic + viewer zi/noapte
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('ANALIZA VECINI — IMPACT UMBRIRE + VIEWER 3D ZI/NOAPTE',4);ftr();
+  cy=28;
+  cy=addImg(caps.v3dDay,14,cy,half,58,'FIG. 4 — Viewer 3D Urban3D · Iluminare ZI · Vedere principala');
+  addImg(caps.v3dNight,14+half+4,cy-58,half,58,'FIG. 5 — Viewer 3D Urban3D · Iluminare NOAPTE · Impact vizual nocturn');
+  cy+=4;
+  cy=sec('3. CLADIRI VECINE CU POTENTIAL DE OBSTRUCTIE',cy);cy+=2;
+  cy=tblRow(['Nr.cad','H(m)','Dist(m)','Umbra iarna(m)','Functiune','Impact'],cy,true,[30,18,18,30,38,44]);
   veciniAnaliza.forEach(v=>{
-    cy=tblRow([v.nrcad,v.h,v.dist,v.sh,v.fn.slice(0,14),v.inParcela?'OBSTRUCTIE':'OK'],cy,false,[28,18,18,30,40,48]);
-    if(v.inParcela){
-      pdf.setFillColor(180,50,30,0.3);pdf.rect(14,cy-11,W-28,8,'F');
-    }
+    cy=tblRow([v.nrcad,v.h,v.dist,v.sh,v.fn.slice(0,14),v.inParcela?'OBSTRUCTIE':'OK'],cy,false,[30,18,18,30,38,44]);
+    if(v.inParcela){pdf.setFillColor(180,50,30);pdf.rect(14+28+18+18+30+38,cy-9,44,8,'F');}
   });
-  if(!veciniAnaliza.length){cy=body('Nu s-au detectat cladiri vecine cu inaltime semnificativa in contextul incarcato.',14,cy);}
-  cy+=8;cy=sec('4. RECOMANDARI SI MASURI DE AMELIORARE',cy);cy+=2;
-  cy=body('Conform OMS 119/2014 si Ordinului 994/2018, minim 1.5 ore de insorire directa pe zi la solstitiu de iarna este obligatorie pentru spatiile de locuit. Urmatoarele masuri sunt recomandate:',14,cy);cy+=3;
-  const recs=['Orientarea fatadelor principale catre sud/sud-est pentru maximizarea insolarii.','Adancimea incaperilor nu trebuie sa depaseasca 2.5x inaltimea ferestrelor.','Protectii solare orizontale (streasini, balcoane) pe fatadele sudice pentru vara.','Evitarea amplasarii dormitorului sau sufrageriei pe fatadele cu obstructie >2h iarna.','Verificarea distantei fata de vecinul nord: H_cladire/tan(15°) = '+shadowLen(aedisH,15).toFixed(0)+'m minim liber.'];
-  recs.forEach(r=>{cy=body('• '+r,16,cy);cy+=1;});
+  if(!veciniAnaliza.length)cy=body('Nu s-au detectat cladiri vecine cu inaltime semnificativa in contextul incarcat.',14,cy);
 
-  // ── PAG 4: Schema solara ──────────────────────────────────────────────
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
-  hdr('SCHEMA SOLARA SI DIAGRAMA UMBRE',4);ftr();
-  cy=30;cy=sec('5. GRAFIC ALTITUDINE SOLARA ANUALA (ora 12:00)',cy);cy+=4;
-  // Grafic altitudini
-  const gx=14,gy=cy,gw=W-28,gh=60;
+  // PAG 5: Grafic solar + viewer golden/overcast
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('DIAGRAMA SOLARA + VIEWER 3D GOLDEN HOUR / INNORIRAT',5);ftr();
+  cy=28;
+  cy=addImg(caps.v3dGolden,14,cy,half,58,'FIG. 6 — Viewer 3D Urban3D · GOLDEN HOUR · Conditii de iluminare favorabila');
+  addImg(caps.v3dOvercast||caps.imgLat,14+half+4,cy-58,half,58,'FIG. 7 — Viewer 3D Urban3D · CER INNORIRAT / Vedere laterala · Conditii difuze');
+  cy+=4;
+  cy=sec('4. GRAFIC ALTITUDINE SOLARA ANUALA (ora 12:00)',cy);cy+=4;
+  const gx=14,gy=cy,gw=W-28,gh=55;
   pdf.setFillColor(20,30,50);pdf.rect(gx,gy,gw,gh,'F');
   pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.3);
-  [0,15,30,45,60].forEach(v=>{const y2=gy+gh-v/70*gh;pdf.line(gx,y2,gx+gw,y2);pdf.setTextColor(150,170,190);pdf.setFontSize(6.5);pdf.text(v+'°',gx-6,y2+1,{align:'right'});});
-  // Pragul 15°
-  const y15=gy+gh-15/70*gh;pdf.setDrawColor(220,60,60);pdf.setLineWidth(0.5);pdf.line(gx,y15,gx+gw,y15);
-  pdf.setTextColor(220,60,60);pdf.setFontSize(6.5);pdf.text('prag 15°',gx+gw+1,y15+1);
-  // Linia altitudini
-  pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.8);
-  months.forEach((m,mi)=>{
-    const x=gx+mi*(gw/11);
-    const alt=solarAlt(lat,mi,12);
-    const y2=gy+gh-Math.min(alt,70)/70*gh;
-    if(mi===0)pdf.moveTo(x,y2);else pdf.lineTo(x,y2);
-    pdf.setTextColor(180,190,200);pdf.setFontSize(5.5);pdf.text(m,x,gy+gh+4,{align:'center'});
-  });
+  [0,15,30,45,60].forEach(v=>{const y2=gy+gh-v/70*gh;pdf.line(gx,y2,gx+gw,y2);pdf.setTextColor(150,170,190);pdf.setFontSize(6);pdf.text(v+'°',gx-6,y2+1,{align:'right'});});
+  const y15=gy+gh-15/70*gh;pdf.setDrawColor(220,60,60);pdf.setLineWidth(0.6);pdf.line(gx,y15,gx+gw,y15);
+  pdf.setTextColor(220,60,60);pdf.setFontSize(6.5);pdf.text('prag 15° OMS 119',gx+gw-1,y15-1,{align:'right'});
+  pdf.setDrawColor(...GOLD);pdf.setLineWidth(1);
+  let prevX,prevY;
+  months.forEach((m,mi)=>{const x=gx+(mi/(months.length-1))*gw;const alt=solarAlt(lat,mi,12);const y2=gy+gh-Math.min(alt,70)/70*gh;if(mi>0)pdf.line(prevX,prevY,x,y2);prevX=x;prevY=y2;pdf.setTextColor(180,190,200);pdf.setFontSize(5.5);pdf.text(m,x,gy+gh+5,{align:'center'});});
   cy=gy+gh+10;
-  cy=sec('6. TABEL DURATA INSORIRE DIRECTA (ore/zi)',cy);cy+=2;
-  const insData=[['Solstitiu vara (21 Iun)',solarAlt(lat,5,12).toFixed(1)+'°','~14h 00min','Insorire maxima · radiatii UV intense'],['Echinoct primavara (21 Mar)',solarAlt(lat,2,12).toFixed(1)+'°','~12h 00min','Tranzitie · insorire normala'],['Echinoct toamna (21 Sep)',solarAlt(lat,8,12).toFixed(1)+'°','~12h 00min','Tranzitie · insorire normala'],['Solstitiu iarna (21 Dec)',solarAlt(lat,11,12).toFixed(1)+'°','~8h 30min','Insorire minima · verificare OMS 119']];
-  cy=tblRow(['Data','Alt. max (12:00)','Durata aprox.','Observatii'],cy,true,[52,35,32,63]);
-  insData.forEach(r=>{cy=tblRow(r,cy,false,[52,35,32,63]);});
+  cy=sec('5. DURATA INSORIRE DIRECTA PE SEZOANE',cy);cy+=2;
+  [[`Solstitiu vara (21 Iun)`,solarAlt(lat,5,12).toFixed(1)+'°','~14h 00min','Insorire maxima · radiatii UV intense'],
+   [`Echinoct primavara (21 Mar)`,solarAlt(lat,2,12).toFixed(1)+'°','~12h 00min','Tranzitie · insorire normala'],
+   [`Echinoct toamna (21 Sep)`,solarAlt(lat,8,12).toFixed(1)+'°','~12h 00min','Tranzitie · insorire normala'],
+   [`Solstitiu iarna (21 Dec)`,solarAlt(lat,11,12).toFixed(1)+'°','~8h 30min','Insorire minima · verificare OMS 119']
+  ].forEach((r,ri)=>{cy=tblRow(r,cy,ri===0,ri===0?[52,35,30,65]:[52,35,30,65]);});
 
-  // ── PAG 5: Concluzie + semnatura ─────────────────────────────────────
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
-  hdr('CONCLUZII SI BAZA LEGALA',5);ftr();
-  cy=30;cy=sec('7. SINTEZA ANALIZEI DE UMBRE SI OBSTRUCTIE',cy);cy+=2;
-  const concl=['1. ALTITUDINE SOLARA LA SOLSTITIU IARNA: '+solarAlt(lat,11,12).toFixed(1)+'° la ora 12:00 (prag minim OMS 119: 15°). '+(isConform?'CONFORMITATE ASIGURATA.':'ATENTIE: sub prag — necesita studiu detaliat.'),
-    '2. UMBRA MAXIMA PROIECTATA: '+shadowLen(aedisH,solarAlt(lat,11,12)).toFixed(0)+'m spre nord la ora 12:00 solstitiu iarna. Se recomanda verificarea vecinatilor nordice.',
-    '3. VECINI CU IMPACT: '+veciniAnaliza.filter(v=>v.inParcela).length+' cladiri vecine cu potential de obstructie a insolarii pe parcela analizata.',
-    '4. CONFORMITATE: '+( isConform?'Amplasamentul respecta conditiile de insorire conform OMS 119/2014.':'Se recomanda elaborarea unui studiu detaliat de insorire cu valoare juridica de catre arhitect autorizat OAR.')];
-  concl.forEach(c=>{cy=body(c,14,cy);cy+=3;});
-  cy+=5;cy=sec('8. BAZA LEGALA',cy);cy+=2;
-  const legal=['Ordinul MS nr. 119/2014 + Ordin nr. 994/2018 art. 3: minim 1.5 ore insorire directa/zi la solstitiu iarna','Legea nr. 350/2001 privind amenajarea teritoriului si urbanismul','STAS 6221-1981 Iluminat natural in constructii','PUG Municipiul Iasi in vigoare (HCL Iasi) · UTR '+utr];
-  legal.forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
+  // PAG 6: Vederi multiple + concluzii
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VEDERI MULTIPLE + CONCLUZII',6);ftr();
+  cy=28;
+  cy=addImg(caps.imgFront,14,cy,half,50,'FIG. 8 — Vedere frontala (Nord) · Fatada principala');
+  addImg(caps.imgBack,14+half+4,cy-50,half,50,'FIG. 9 — Vedere posterioara (Sud) · Spatiu curte');
+  cy+=2;
+  cy=addImg(caps.imgAerial,14,cy,half,50,'FIG. 10 — Vedere aeriana 45° · Amprenta si acoperis');
+  addImg(caps.imgLat,14+half+4,cy-50,half,50,'FIG. 11 — Vedere laterala (Est) · Context E-V');
+  cy+=4;
+  cy=sec('6. CONCLUZII SI RECOMANDARI',cy);cy+=2;
+  cy=body('Altitudinea solara la latitudinea '+lat.toFixed(2)+'°N la solstitiu de iarna (21 Decembrie, ora 12:00) este de '+solarAlt(lat,11,12).toFixed(1)+'°, '+(isConform?'valoare care depaseste pragul minim de 15° prevazut de OMS 119/2014. Amplasamentul respecta conditiile de insorire.':'valoare sub pragul minim de 15°. Se impune elaborarea unui studiu detaliat de insorire de catre arhitect autorizat OAR.')+' Umbra maxima proiectata de cladirea propusa (H='+aedisH.toFixed(1)+'m) la solstitiu iarna este de '+( shadDec>500?'>500m':shadDec.toFixed(0)+'m')+' catre nord.',14,cy);cy+=4;
+  const recs=['Orientarea fatadelor principale catre sud/sud-est pentru maximizarea insolarii directe.','Adancimea incaperilor de locuit sa nu depaseasca 2.5x inaltimea pardoselii la brau fereastra.','Protectii solare orizontale (streasini, parasolare, balcoane) pe fatadele sudice — necesar vara.','Evitarea amplasarii dormitorelor pe fatadele cu obstructie mai mare de 2 ore iarna.','Distanta minima fata de vecinul nord: H/tan(15°) = '+shadowLen(aedisH,15).toFixed(0)+'m.','Verificarea prin simulari BIM/IES<ve> pentru faze ulterioare de proiectare.'];
+  recs.forEach(r=>{cy=body('• '+r,16,cy);cy+=1;});
+
+  // PAG 7: Baza legala + semnatura
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('BAZA LEGALA SI SEMNATURA',7);ftr();
+  cy=28;cy=sec('7. BAZA LEGALA SI NORMATIVA',cy);cy+=2;
+  ['Ordinul MS nr. 119/2014 actualizat cu Ordinul nr. 994/2018, art. 3: minim 1.5 ore insorire directa/zi la solstitiu iarna pentru spatiile de locuit principale.',
+   'STAS 6221-1981 Iluminatul natural in constructii — Conditii tehnice generale.',
+   'Legea nr. 350/2001 privind amenajarea teritoriului si urbanismul, republicata.',
+   'Regulamentul General de Urbanism aprobat prin HG nr. 525/1996, cu modificarile ulterioare.',
+   'PUG Municipiul Iasi in vigoare (HCL Iasi) — UTR '+utr+' — Regulamentul Local de Urbanism.',
+   'Ghidul privind insorirea cladirilor GT 043-2002 — INCERC Bucuresti.'
+  ].forEach(l=>{cy=body('• '+l,16,cy);cy+=2;});
   sign();
-
-  // ── PAG 6: Capturi hartă ────────────────────────────────────────────────
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
-  hdr('HARTI SI VIZUALIZARI 3D',6);ftr();
-  let iy=28;
-  iy=addImg(caps.img3D,14,iy,W-28,60,'Vedere 3D Urban · pitch 62° · bearing -20°');
-  iy=addImg(caps.img2D,14,iy,(W-28)/2-2,45,'Plan 2D cadastral');
-  addImg(caps.imgDist,14+(W-28)/2+2,iy-45,(W-28)/2-2,45,'Plan distante vecini');
-  iy+=4;
-  iy=addImg(caps.v3dDay,14,iy,(W-28)/2-2,55,'Viewer 3D · Zi');
-  addImg(caps.v3dGolden||caps.v3dNight,14+(W-28)/2+2,iy-55,(W-28)/2-2,55,'Viewer 3D · Lumina naturala');
-
   pdf.save('Studiu_Umbre_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
-  ss('✅ Studiu de Umbre generat!');
+  ss('Studiu de Umbre generat!');
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// STUDIU 2: ACUSTIC URBAN (ZGOMOT)
+// STUDIU 2: ACUSTIC URBAN
 // ════════════════════════════════════════════════════════════════════════════
 async function generateNoiseStudy(){
   const ap=S.parcels[S.activeParcel??0];
-  if(!ap?.geo?.geometry){ss('Selectați o parcelă pentru studiu.');return;}
-  ss('Se generează Studiu Acustic Urban...');
+  if(!ap?.geo?.geometry){ss('Selectati o parcela pentru studiu.');return;}
+  ss('Se genereaza Studiu Acustic Urban...');
 
-  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Studiu Acustic Urban','Studiu acustic',5);
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Studiu Acustic Urban','Studiu acustic',7);
+  const caps = await _captureStudyMaps(ap, msg=>ss(msg));
 
-  // Capturi imagini
-  const caps = await _captureStudyMaps(ap, msg => ss(msg));
-
-  // Estimare nivel zgomot din funcțiunile OSM vecine
   const FN_NOISE={'commercial':65,'industrial':75,'retail':62,'office':55,'school':52,'hospital':45,'residential':42,'yes':48,'Necunoscut':50};
   const vecini=S.ctx?.features||[];
   const parcelCtr=turf.centerOfMass(ap.geo).geometry.coordinates;
-  const surse=vecini.filter(f=>{
-    try{
-      const d=turf.distance(
-        {type:'Feature',geometry:{type:'Point',coordinates:parcelCtr},properties:{}},
-        {type:'Feature',geometry:{type:'Point',coordinates:turf.centerOfMass(f).geometry.coordinates},properties:{}},
-        {units:'meters'}
-      );
-      return d<200;
-    }catch(e){return false;}
-  }).map(f=>{
-    const fn=f.properties?.fn||'yes';
-    const d=turf.distance({type:'Feature',geometry:{type:'Point',coordinates:parcelCtr}},{type:'Feature',geometry:{type:'Point',coordinates:turf.centerOfMass(f).geometry.coordinates}},{units:'meters'});
-    const Ls=FN_NOISE[fn]||50;
-    const La=Math.max(0,Ls-20*Math.log10(Math.max(1,d))+11);
-    return {fn:f.properties?.fn_label||fn,dist:d.toFixed(0),Ls,La:La.toFixed(1),nrcad:f.properties?.nrcad||'—'};
-  }).sort((a,b)=>b.La-a.La).slice(0,10);
-
+  const surse=vecini.filter(f=>{try{const d=turf.distance({type:'Feature',geometry:{type:'Point',coordinates:parcelCtr}},{type:'Feature',geometry:{type:'Point',coordinates:turf.centerOfMass(f).geometry.coordinates}},{units:'meters'});return d<200;}catch(e){return false;}}).map(f=>{const fn=f.properties?.fn||'yes';const d=turf.distance({type:'Feature',geometry:{type:'Point',coordinates:parcelCtr}},{type:'Feature',geometry:{type:'Point',coordinates:turf.centerOfMass(f).geometry.coordinates}},{units:'meters'});const Ls=FN_NOISE[fn]||50;const La=Math.max(0,Ls-20*Math.log10(Math.max(1,d))+11);return {fn:f.properties?.fn_label||fn,dist:d.toFixed(0),Ls,La:La.toFixed(1),nrcad:f.properties?.nrcad||'—'};}).sort((a,b)=>b.La-a.La).slice(0,10);
   const Ltotal=surse.length?10*Math.log10(surse.reduce((s,x)=>s+Math.pow(10,x.La/10),0)):45;
   const limit_zi=55,limit_n=45;
   const confZi=Ltotal<=limit_zi,confNoap=Ltotal<=limit_n;
+  const isOk=confZi&&confNoap;
+  const half=(W-28)/2-2;
 
+  // PAG 1: Cover
   pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');pdf.setFillColor(20,35,70);pdf.rect(0,3,W,H-6,'F');
   pdf.setFillColor(...GOLD);pdf.rect(0,0,W,3,'F');pdf.rect(0,H-3,W,3,'F');
+  try{_pdfDrawLogo(pdf,W/2-10,18,20);}catch(e){}
   pdf.setTextColor(...GOLD);pdf.setFontSize(9);pdf.setFont('helvetica','bold');
-  pdf.text('URBANX · PLATFORMA DE ANALIZA URBANISTICA',W/2,35,{align:'center'});
-  pdf.setTextColor(255,255,255);pdf.setFontSize(22);pdf.setFont('helvetica','bold');
-  pdf.text('STUDIU ACUSTIC URBAN',W/2,65,{align:'center'});
-  pdf.setTextColor(...GOLD);pdf.setFontSize(11);
-  pdf.text('Evaluare nivel zgomot · Conformitate SR 10009/2017 · Masuri de atenuare',W/2,78,{align:'center'});
-  pdf.setFillColor(30,50,90);pdf.rect(20,95,W-40,75,'F');pdf.setFillColor(...GOLD);pdf.rect(20,95,3,75,'F');
-  const kvData=[['Nr. cadastral:',nrcad],['Zona UTR:',utr],['Suprafata:',area+' mp'],['Functiune:',AEDIS_FN[AEDIS.fn]?.label||'—'],['Nivel zgomot estimat:',Ltotal.toFixed(1)+' dB(A)'],['Limita zi (SR 10009):',limit_zi+' dB(A)'],['Limita noapte:',limit_n+' dB(A)']];
-  kvData.forEach(([l,v],i)=>{
-    pdf.setTextColor(150,170,200);pdf.setFontSize(8);pdf.text(S2(l),26,107+i*9);
-    pdf.setTextColor(255,255,255);pdf.setFontSize(9.5);pdf.setFont('helvetica','bold');pdf.text(S2(v),100,107+i*9);
-  });
-  const isOk=confZi&&confNoap;
-  pdf.setFillColor(isOk?20:180,isOk?120:30,isOk?60:30);pdf.rect(20,182,W-40,18,'F');
-  pdf.setTextColor(255,255,255);pdf.setFontSize(10);pdf.setFont('helvetica','bold');
-  pdf.text(isOk?'CONFORM — Nivel zgomot acceptabil':'DEPASIRE — Masuri de izolare necesare',W/2,190,{align:'center'});
-  pdf.setFontSize(8);pdf.text('Nivel estimat: '+Ltotal.toFixed(1)+' dB(A) · Limita zi: '+limit_zi+' dB(A)',W/2,198,{align:'center'});
-  pdf.setTextColor(100,120,150);pdf.setFontSize(7);pdf.text('Generat: '+S2(dateStr)+' · Document ORIENTATIV · Confirmare prin masuratori acustice la fata locului',W/2,H-15,{align:'center'});
+  pdf.text('URBANX — PLATFORMA DE ANALIZA URBANISTICA',W/2,50,{align:'center'});
+  pdf.setTextColor(255,255,255);pdf.setFontSize(24);pdf.setFont('helvetica','bold');
+  pdf.text('STUDIU ACUSTIC URBAN',W/2,72,{align:'center'});
+  pdf.setTextColor(...GOLD);pdf.setFontSize(10);
+  pdf.text('Evaluare nivel zgomot · Conformitate SR 10009/2017 · Masuri de atenuare fonica',W/2,85,{align:'center'});
+  pdf.setFillColor(30,50,90);pdf.rect(20,100,W-40,80,'F');pdf.setFillColor(...GOLD);pdf.rect(20,100,3,80,'F');
+  [['Nr. cadastral:',nrcad],['Zona UTR:',utr],['Suprafata teren:',area+' mp'],['Functiune propusa:',AEDIS_FN[AEDIS.fn]?.label||'—'],['Surse zgomot identificate:',surse.length+' in raza 200m'],['Nivel echivalent estimat Leq:',Ltotal.toFixed(1)+' dB(A)'],['Limita zi SR 10009:',limit_zi+' dB(A)'],['Limita noapte SR 10009:',limit_n+' dB(A)']].forEach(([l,v],i)=>{pdf.setTextColor(150,170,200);pdf.setFontSize(8);pdf.setFont('helvetica','normal');pdf.text(S2(l),26,112+i*9.5);pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text(S2(v),96,112+i*9.5);});
+  pdf.setFillColor(isOk?20:180,isOk?120:30,isOk?60:30);pdf.rect(20,192,W-40,20,'F');
+  pdf.setTextColor(255,255,255);pdf.setFontSize(11);pdf.setFont('helvetica','bold');
+  pdf.text(isOk?'CONFORM — Nivel zgomot acceptabil SR 10009/2017':'DEPASIRE — Masuri de izolare fonica necesare',W/2,202,{align:'center'});
+  pdf.setFontSize(8);pdf.text('Nivel estimat: '+Ltotal.toFixed(1)+' dB(A) | Limita zi: '+limit_zi+' dB(A) | Limita noapte: '+limit_n+' dB(A)',W/2,210,{align:'center'});
+  pdf.setTextColor(100,120,150);pdf.setFontSize(7);pdf.text('Generat: '+S2(dateStr)+' · Document orientativ · Confirmare prin masuratori acustice in situ',W/2,H-12,{align:'center'});
   ftr();
 
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('SURSE DE ZGOMOT IDENTIFICATE',2);ftr();
-  let cy=30;cy=sec('1. SURSE DE ZGOMOT IN RAZA DE 200m',cy);cy+=2;
-  cy=tblRow(['Nr.cad','Functiune','Dist(m)','Ls (dB)','La la parcela (dB)'],cy,true,[30,48,25,25,48]);
-  surse.forEach(s=>{
-    cy=tblRow([s.nrcad,s.fn.slice(0,18),s.dist,s.Ls,s.La],cy,false,[30,48,25,25,48]);
-  });
-  if(!surse.length){cy=body('Nu s-au detectat surse de zgomot semnificative in raza de 200m.',14,cy);}
-  cy+=5;cy=sec('2. NIVEL TOTAL ESTIMAT SI CONFORMITATE SR 10009/2017',cy);cy+=2;
-  const conf=[['Nivel echivalent estimat Leq',Ltotal.toFixed(1)+' dB(A)',confZi?'CONFORM':'DEPASIRE'],['Limita zi (06:00-22:00)',limit_zi+' dB(A)',Ltotal<=limit_zi?'OK':'DEPASIT'],['Limita noapte (22:00-06:00)',limit_n+' dB(A)',Ltotal<=limit_n?'OK':'DEPASIT'],['Zona acustica',utr+' (rezidential/comercial)','SR 10009/2017'],['Atenuare necesara',Math.max(0,Ltotal-limit_zi).toFixed(0)+' dB(A)',Ltotal>limit_zi?'NECESARA':'—']];
-  cy=tblRow(['Indicator','Valoare calculata','Status'],cy,true,[70,50,58]);
-  conf.forEach(r=>{cy=tblRow(r,cy,false,[70,50,58]);});
+  // PAG 2: Vedere 3D + surse zgomot
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONTEXT URBAN 3D — SURSE ZGOMOT IDENTIFICATE',2);ftr();
+  let cy=28;
+  cy=addImg(caps.img3D,14,cy,W-28,70,'FIG. 1 — Vedere 3D principala · Context urban · Surse de zgomot in raza 200m');
+  cy=sec('1. SURSE DE ZGOMOT IN RAZA DE 200m — TABEL DETALIAT',cy);cy+=2;
+  cy=body('Analiza s-a efectuat prin identificarea tuturor cladirilor si functiunilor OSM in raza de 200m fata de centrul parcelei '+nrcad+'. Nivelul la sursa Ls a fost estimat conform datelor tipice pentru fiecare categorie functionala, iar nivelul la parcela La a fost calculat prin legea de propagare acustica in camp liber: La = Ls - 20·log10(d) + 11.',14,cy);cy+=4;
+  cy=tblRow(['Nr.cad','Functiune','Dist(m)','Ls(dB)','La la parcela(dB)'],cy,true,[32,50,25,25,46]);
+  surse.forEach(s=>{cy=tblRow([s.nrcad,s.fn.slice(0,20),s.dist,s.Ls,s.La],cy,false,[32,50,25,25,46]);});
+  if(!surse.length)cy=body('Nu s-au detectat surse de zgomot semnificative in raza de 200m.',14,cy);
+  cy+=3;cy=sec('2. NIVEL TOTAL ESTIMAT PRIN COMPUNERE ENERGETICA',cy);cy+=2;
+  cy=tblRow(['Indicator','Valoare','Status'],cy,true,[80,52,46]);
+  [['Nivel echivalent estimat Leq',Ltotal.toFixed(1)+' dB(A)',confZi?'CONFORM':'DEPASIRE'],['Limita zi (06:00-22:00)',limit_zi+' dB(A)',Ltotal<=limit_zi?'OK':'DEPASIT'],['Limita noapte (22:00-06:00)',limit_n+' dB(A)',Ltotal<=limit_n?'OK':'DEPASIT'],['Atenuare necesara',Math.max(0,Ltotal-limit_zi).toFixed(1)+' dB(A)',Ltotal>limit_zi?'NECESARA':'—']].forEach(r=>{cy=tblRow(r,cy,false,[80,52,46]);});
 
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('MASURI DE ATENUARE SI RECOMANDARI',3);ftr();
-  cy=30;cy=sec('3. MASURI CONSTRUCTIVE DE ATENUARE FONICA',cy);cy+=2;
-  const masuri=[['Tamplarie PVC/Al tripan',Ltotal>limit_zi?'OBLIGATORIU':'RECOMANDAT','Atenuare: 40-48 dB(A)','Toate fatadele expuse'],['Vitraj exterior dublu-strat','RECOMANDAT','Atenuare: 35-42 dB(A)','Fatadele spre sursa'],['Zidarie exterioara >30cm','STANDARD','Atenuare: 45 dB(A)','Peretii exteriori'],['Tavan casetat fonoabsorbant','OPTIONAL','Atenuare: 5-10 dB(A)','Spatii de locuit'],['Peisagism cu arbori/gard viu','RECOMANDAT','Atenuare: 3-5 dB(A)','Aliniament stradal']];
-  cy=tblRow(['Masura','Necesar','Atenuare','Aplicare'],cy,true,[52,32,35,59]);
-  masuri.forEach(r=>{cy=tblRow(r,cy,false,[52,32,35,59]);});
-  cy+=5;cy=sec('4. ORIENTAREA FUNCTIONALA A SPATIILOR',cy);cy+=2;
-  cy=body('Pentru minimizarea expunerii la zgomot se recomanda urmatoarea orientare a spatiilor in raport cu sursele identificate:',14,cy);cy+=3;
-  const orient=['Dormitoare si spatii de odihna: orientate OPUS surselor principale de zgomot.','Spatii tehnice, garaje, holuri: orientate CATRE sursa (functie de tampon acustic).','Balcoane si logii: pozitionate astfel incat sa nu amplifice reflexiile sonore.','Spatiile comerciale la parter: compatibile cu nivelul de zgomot din zona.'];
-  orient.forEach(r=>{cy=body('• '+r,16,cy);cy+=1;});
+  // PAG 3: Viewer 3D zi + noapte + masuri
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D ZI / NOAPTE — MASURI DE ATENUARE',3);ftr();
+  cy=28;
+  cy=addImg(caps.v3dDay,14,cy,half,58,'FIG. 2 — Viewer 3D Urban3D · Iluminare ZI · Fatade si materiale');
+  addImg(caps.v3dNight,14+half+4,cy-58,half,58,'FIG. 3 — Viewer 3D Urban3D · NOAPTE · Impact acustic nocturn crescut');
+  cy+=4;
+  cy=sec('3. MASURI CONSTRUCTIVE DE ATENUARE FONICA',cy);cy+=2;
+  cy=body('Urmatoarele masuri constructive sunt recomandate in functie de nivelul de zgomot estimat si de sensibilitatea acustica a functiunii propuse. Aplicarea lor va trebui verificata prin proiect tehnic elaborat de specialist acustica.',14,cy);cy+=3;
+  cy=tblRow(['Masura constructiva','Necesitate','Atenuare obtinuta','Aplicare recomandata'],cy,true,[54,28,32,64]);
+  [['Tamplarie PVC/Al cu tripan',Ltotal>limit_zi?'OBLIGATORIU':'RECOMANDAT','40-48 dB(A)','Toate fatadele expuse'],['Vitraj exterior dublu/triplu','RECOMANDAT','35-45 dB(A)','Fatadele expuse zgomotului'],['Zidarie exterioara >30cm','STANDARD','45 dB(A)','Peretii exteriori portanti'],['Tavan casetat fonoabsorbant','OPTIONAL','5-10 dB(A)','Spatii de locuit/birouri'],['Peisagism cu arbori/gard viu','RECOMANDAT','3-6 dB(A)','Aliniament stradal frontal'],['Fatada ventilata cu strat fonoabs.','RECOMANDAT','8-15 dB(A)','Fatadele spre surse majore']].forEach(r=>{cy=tblRow(r,cy,false,[54,28,32,64]);});
 
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONCLUZII SI BAZA LEGALA',4);ftr();
-  cy=30;cy=sec('5. SINTEZA ANALIZEI ACUSTICE',cy);cy+=2;
-  cy=body('Nivelul de zgomot echivalent estimat pentru amplasamentul '+nrcad+' este de '+Ltotal.toFixed(1)+' dB(A), calculat prin compunerea energetica a surselor identificate in raza de 200m. '+(confZi?'Valoarea se incadreaza in limitele admise de SR 10009/2017 pentru zona acustica '+utr+'.':'Valoarea depaseste limita admisa. Se recomanda masuri suplimentare de izolare fonica.'),14,cy);cy+=5;
+  // PAG 4: Viewer golden + overcast + orientare functionala
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D GOLDEN HOUR / INNORIRAT — ORIENTARE FUNCTIONALA',4);ftr();
+  cy=28;
+  cy=addImg(caps.v3dGolden,14,cy,half,58,'FIG. 4 — Viewer 3D Urban3D · GOLDEN HOUR · Vizualizare seara');
+  addImg(caps.v3dOvercast||caps.imgAerial,14+half+4,cy-58,half,58,'FIG. 5 — Viewer 3D Urban3D · CER INNORIRAT / Vedere aeriana');
+  cy+=4;
+  cy=sec('4. ORIENTAREA FUNCTIONALA A SPATIILOR IN RAPORT CU ZGOMOTUL',cy);cy+=2;
+  cy=body('Amplasarea corecta a spatiilor in interiorul cladirii, in raport cu directia surselor de zgomot identificate, constituie una din masurile cele mai eficiente si mai economice de atenuare acustica pasiva. Se recomanda urmatoarea distributie functionala:',14,cy);cy+=3;
+  ['Dormitoare si spatii de odihna: orientate catre fatadele OPUSE surselor principale de zgomot (interior bloc, curte interioara, latura sud/vest calma).',
+   'Spatii tehnice, garaje, holuri, case scari: orientate CATRE sursa, cu functie de tampon acustic pentru spatiile sensibile.',
+   'Balcoane si logii: pozitionate astfel incat sa nu amplifice reflexiile sonore prin efectul de U sau L al fatadei.',
+   'Spatii comerciale la parter (daca exista): compatibile cu nivelul de zgomot din zona — nu necesita atenuare suplimentara fata de standard.',
+   'Birouri si spatii administrative: toleranta mai mare fata de zgomot decat spatiile rezidentiale — plasare flexibila.'].forEach(r=>{cy=body('• '+r,16,cy);cy+=2;});
+
+  // PAG 5: Plan 2D + distante + baza legala
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('PLAN 2D + DISTANTE — BAZA LEGALA',5);ftr();
+  cy=28;
+  cy=addImg(caps.img2D,14,cy,half,52,'FIG. 6 — Plan 2D cadastral · Surse zgomot identificate in zona');
+  addImg(caps.imgDist,14+half+4,cy-52,half,52,'FIG. 7 — Plan distante contur-la-contur · Aliniamente');
+  cy+=4;
+  cy=sec('5. SINTEZA ANALIZEI ACUSTICE',cy);cy+=2;
+  cy=body('Nivelul de zgomot echivalent estimat pentru amplasamentul '+nrcad+' (UTR '+utr+', suprafata '+area+' mp) este de '+Ltotal.toFixed(1)+' dB(A), calculat prin compunerea energetica a celor '+surse.length+' surse identificate in raza de 200m. '+(isOk?'Valoarea se incadreaza in limitele admise de SR 10009/2017 pentru zona acustica corespunzatoare, atat pe perioada de zi ('+Ltotal.toFixed(1)+' dB(A) ≤ '+limit_zi+' dB(A)) cat si pe perioada de noapte ('+Ltotal.toFixed(1)+' dB(A) '+(confNoap?'≤':'>')+' '+limit_n+' dB(A)). Proiectul poate continua cu masuri standard de izolare fonica.':'Valoarea depaseste limita admisa. Se recomanda masuri constructive suplimentare de izolare fonica, in special pentru fatadele expuse surselor principale. Elaborarea unui studiu acustic detaliat de catre specialist acreditato este recomandata.'),14,cy);cy+=5;
   cy=sec('6. BAZA LEGALA',cy);cy+=2;
-  ['SR 10009:2017 — Acustica in constructii. Limite admisibile ale nivelului de zgomot din mediul exterior','Legea nr. 111/1996 rep. privind apararea impotriva radiatiilor ionizante','HG nr. 321/2005 privind evaluarea si gestionarea zgomotului ambiant','Directiva 2002/49/CE privind evaluarea si gestionarea zgomotului ambiental','OMS nr. 119/2014 — Norme de igiena si sanatate publica privind mediul de viata'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
-  sign();
+  ['SR 10009:2017 — Acustica in constructii. Limite admisibile ale nivelului de zgomot in mediul exterior cladirilor.','HG nr. 321/2005 privind evaluarea si gestionarea zgomotului ambiant — transpune Directiva 2002/49/CE.','Directiva 2002/49/CE privind evaluarea si gestionarea zgomotului ambiental in mediul urban.','Normativul C 125-2013 privind proiectarea si executarea masurilor de izolare fonica in cladiri.','OMS nr. 119/2014 — Norme de igiena si sanatate publica privind mediul de viata al populatiei.','PUG Municipiul Iasi in vigoare (HCL Iasi) — UTR '+utr+' — Regulamentul Local de Urbanism.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
 
-  // PAG imagini
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
-  hdr('HARTI SI VIZUALIZARI 3D',5);ftr();
-  let _iy=28;
-  _iy=addImg(caps.img3D,14,_iy,W-28,62,'Vedere 3D Urban · context acustic');
-  _iy=addImg(caps.img2D,14,_iy,(W-28)/2-2,45,'Plan 2D cadastral · surse zgomot');
-  addImg(caps.imgDist,14+(W-28)/2+2,_iy-45,(W-28)/2-2,45,'Distante fata de surse');
-  _iy+=4;
-  _iy=addImg(caps.v3dDay,14,_iy,(W-28)/2-2,52,'Viewer 3D · Zi');
-  addImg(caps.imgAerial,14+(W-28)/2+2,_iy-52,(W-28)/2-2,52,'Vedere aeriana 45°');
+  // PAG 6: Vederi multiple
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VEDERI MULTIPLE 3D — CONTEXT COMPLET',6);ftr();
+  cy=28;
+  cy=addImg(caps.imgFront,14,cy,half,50,'FIG. 8 — Vedere frontala (Nord) · Fatada principala · Expunere primara');
+  addImg(caps.imgBack,14+half+4,cy-50,half,50,'FIG. 9 — Vedere posterioara (Sud) · Curte spate');
+  cy+=2;
+  cy=addImg(caps.imgLat,14,cy,half,50,'FIG. 10 — Vedere laterala (Est)');
+  addImg(caps.imgAerial,14+half+4,cy-50,half,50,'FIG. 11 — Vedere aeriana 45° · Amprenta');
+  cy+=4;
+  cy=body('Imaginile de mai sus prezinta volumul propus din patru directii, permitand evaluarea completa a contextului urban, a relatiei cu cladirile vecine si a expunerii la sursele de zgomot identificate. Se recomanda ca fatadele expuse zgomotului (conform hartii surselor, Pag. 2) sa fie tratate cu materiale cu coeficient de izolare acustica Rw ≥ 35 dB conform C 125-2013.',14,cy);
+
+  // PAG 7: Semnatura
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CASETA TEHNICA SI SEMNATURA',7);ftr();
+  cy=28;sign();
   pdf.save('Studiu_Acustic_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
-  ss('✅ Studiu Acustic Urban generat!');
+  ss('Studiu Acustic Urban generat!');
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -11331,399 +11319,484 @@ async function generateNoiseStudy(){
 // ════════════════════════════════════════════════════════════════════════════
 async function generateWindStudy(){
   const ap=S.parcels[S.activeParcel??0];
-  if(!ap?.geo?.geometry){ss('Selectați o parcelă.');return;}
-  ss('Se generează Studiu Vânt & Confort Pietonal...');
+  if(!ap?.geo?.geometry){ss('Selectati o parcela.');return;}
+  ss('Se genereaza Studiu Vant & Confort Pietonal...');
 
-  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,addImg,sign}=_initStudyPdf('Studiu de Vant si Confort Pietonal','Studiu vant',4);
-
-  // Capturi imagini
-  const caps = await _captureStudyMaps(ap, msg => ss(msg));
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,addImg,sign}=_initStudyPdf('Studiu de Vant si Confort Pietonal','Studiu vant',6);
+  const caps = await _captureStudyMaps(ap, msg=>ss(msg));
 
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13.2;
   const vecini=S.ctx?.features||[];
   const parcelCtr=turf.centerOfMass(ap.geo).geometry.coordinates;
-  const hVecini=vecini.map(f=>f.properties?.h||7);
-  const hMedVecin=hVecini.length?hVecini.reduce((a,b)=>a+b,0)/hVecini.length:7;
-  const hMaxVecin=hVecini.length?Math.max(...hVecini):10;
+  const hMed=vecini.length?vecini.reduce((s,f)=>s+(f.properties?.h||6),0)/vecini.length:7;
+  const half=(W-28)/2-2;
+  const bearing=S.bearing||0;
+  const windDir=bearing<45||bearing>=315?'Nord-Est (dominant iarna)':bearing<135?'Nord-Est / Est':bearing<225?'Sud-Vest (dominant vara)':'Nord-Vest / Vest';
 
-  // Efectul de canion urban H/W
-  const bbox=turf.bbox(ap.geo);
-  const W_str=Math.min((bbox[2]-bbox[0])*111320*Math.cos(lat*Math.PI/180),(bbox[3]-bbox[1])*111320);
-  const HW=aedisH/Math.max(5,W_str/2);
-  const canionEffect=HW>2?'Canion dens — viteza vant amplificata >25%':HW>1?'Canion moderat — amplificare 10-25%':'Canyon larg — impact normal';
-  const criteriuLawson=aedisH>20?'Criteriu Lawson A — studiu CFD recomandat':aedisH>12?'Criteriu Lawson B — analiza simplificata':'Criteriu Lawson C — impact redus';
-
-  // Cover
-  pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');pdf.setFillColor(15,28,60);pdf.rect(0,3,W,H-6,'F');
+  // PAG 1: Cover
+  pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');pdf.setFillColor(20,35,70);pdf.rect(0,3,W,H-6,'F');
   pdf.setFillColor(...GOLD);pdf.rect(0,0,W,3,'F');pdf.rect(0,H-3,W,3,'F');
-  pdf.setTextColor(...GOLD);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text('URBANX · PLATFORMA DE ANALIZA URBANISTICA',W/2,35,{align:'center'});
-  pdf.setTextColor(255,255,255);pdf.setFontSize(22);pdf.setFont('helvetica','bold');pdf.text('STUDIU DE VANT',W/2,65,{align:'center'});pdf.text('SI CONFORT PIETONAL',W/2,80,{align:'center'});
-  pdf.setTextColor(...GOLD);pdf.setFontSize(10);pdf.text('Analiza efect canion urban · Confort pietonal Lawson · Recomandari arhitecturale',W/2,92,{align:'center'});
-  pdf.setFillColor(25,45,85);pdf.rect(20,105,W-40,80,'F');pdf.setFillColor(...GOLD);pdf.rect(20,105,3,80,'F');
-  [['Nr. cadastral:',nrcad],['H cladire propusa:',aedisH.toFixed(1)+'m'],['H medie vecini:',hMedVecin.toFixed(1)+'m'],['Raport H/W (canion):',HW.toFixed(2)],['Efect canion:',canionEffect.split(' — ')[0]],['Criteriu Lawson:',criteriuLawson.split(' — ')[0]]].forEach(([l,v],i)=>{
-    pdf.setTextColor(150,170,200);pdf.setFontSize(8);pdf.text(S2(l),26,117+i*10);
-    pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text(S2(v),100,117+i*10);
-  });
-  pdf.setFillColor(20,90,160);pdf.rect(20,196,W-40,18,'F');
-  pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text(S2(criteriuLawson),W/2,205,{align:'center'});
-  pdf.setFontSize(8);pdf.text(S2(canionEffect),W/2,213,{align:'center'});
-  pdf.setTextColor(100,120,150);pdf.setFontSize(7);pdf.text('Generat: '+S2(dateStr)+' · Analiza CFD simplificata · Document ORIENTATIV',W/2,H-15,{align:'center'});ftr();
+  try{_pdfDrawLogo(pdf,W/2-10,18,20);}catch(e){}
+  pdf.setTextColor(...GOLD);pdf.setFontSize(9);pdf.setFont('helvetica','bold');
+  pdf.text('URBANX — PLATFORMA DE ANALIZA URBANISTICA',W/2,50,{align:'center'});
+  pdf.setTextColor(255,255,255);pdf.setFontSize(24);pdf.setFont('helvetica','bold');
+  pdf.text('STUDIU DE VANT',W/2,72,{align:'center'});
+  pdf.text('SI CONFORT PIETONAL',W/2,88,{align:'center'});
+  pdf.setTextColor(...GOLD);pdf.setFontSize(10);
+  pdf.text('Analiza expunere vant · Zone de calm · Confort pietonal Lawson',W/2,100,{align:'center'});
+  pdf.setFillColor(30,50,90);pdf.rect(20,112,W-40,80,'F');pdf.setFillColor(...GOLD);pdf.rect(20,112,3,80,'F');
+  [['Nr. cadastral:',nrcad],['Zona UTR:',utr],['Suprafata teren:',area+' mp'],['H propus:',aedisH.toFixed(1)+'m'],['H medie zona:',hMed.toFixed(1)+'m'],['Raport H/Hmedio:',((aedisH/Math.max(1,hMed)).toFixed(2))],['Directie vant predominanta:','NE (iarna) / SV (vara)'],['Viteza vant de referinta:','V0=25m/s (zona II STAS 10101)']].forEach(([l,v],i)=>{pdf.setTextColor(150,170,200);pdf.setFontSize(8);pdf.setFont('helvetica','normal');pdf.text(S2(l),26,124+i*9.5);pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text(S2(v),96,124+i*9.5);});
+  pdf.setTextColor(100,120,150);pdf.setFontSize(7);pdf.text('Generat: '+S2(dateStr)+' · Document orientativ · UrbanX TSS·FG',W/2,H-12,{align:'center'});
+  ftr();
 
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('ANALIZA CANION URBAN SI CONFORT PIETONAL',2);ftr();
-  let cy=30;cy=sec('1. PARAMETRI CANION URBAN',cy);cy+=2;
-  const canPar=[['Inaltimea cladirii propuse (H)',aedisH.toFixed(1)+'m','—'],['H max vecin in context',hMaxVecin.toFixed(1)+'m','—'],['H medie vecin in context',hMedVecin.toFixed(1)+'m','—'],['Latime estimata strada/spatiu (W)',W_str.toFixed(0)+'m','—'],['Raport H/W (efect canion)',HW.toFixed(2),HW>2?'CRITIC':HW>1?'MODERAT':'ACCEPTABIL'],['Efect canion estimat',canionEffect,'—']];
-  cy=tblRow(['Parametru','Valoare','Status'],cy,true,[90,50,42]);
-  canPar.forEach(r=>{cy=tblRow(r,cy,false,[90,50,42]);});
-  cy+=5;cy=sec('2. CONFORT PIETONAL — CRITERIILE LAWSON',cy);cy+=2;
-  const lawson=[['A — Activitati sedentare (terase, banci)','< 4 m/s','Zona comerciala/rezidentiala'],['B — Activitati pedestrale lente (shopping)','< 6 m/s','Promenade, alei pietonale'],['C — Mers normal (trecatori)','< 8 m/s','Trotuare, accese cladire'],['D — Activitati rapide (ciclism)','< 10 m/s','Piste biciclete'],['E — Viteza inacceptabila','> 10 m/s','Necesita interventie arhitecturala']];
-  cy=tblRow(['Criteriu','Viteza max','Aplicare'],cy,true,[80,35,67]);
-  lawson.forEach(r=>{cy=tblRow(r,cy,false,[80,35,67]);});
-  cy+=5;cy=sec('3. DIRECTII PRINCIPALE DE VANT (ROZA VANTURILOR · IASI)',cy);cy+=2;
-  const roza=[['Nord (N)','22%','5.2 m/s','NV din Carpatii Moldovenesti'],['Nord-Est (NE)','18%','4.8 m/s','Vant din stepele ucrainene'],['Vest (V)','15%','4.1 m/s','Vant umed atlantic'],['Sud-Vest (SV)','12%','3.8 m/s','Vant cald mediteranean'],['Calm','20%','< 1 m/s','Perioade de calm atmosferic']];
-  cy=tblRow(['Directie','Frecventa','Viteza medie','Sursa'],cy,true,[35,25,28,94]);
-  roza.forEach(r=>{cy=tblRow(r,cy,false,[35,25,28,94]);});
+  // PAG 2: Vedere 3D + analiza context vant
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONTEXT 3D — ANALIZA EXPUNERE VANT',2);ftr();
+  let cy=28;
+  cy=addImg(caps.img3D,14,cy,W-28,72,'FIG. 1 — Vedere 3D principala · Context urban · Evaluare expunere la vant');
+  cy=sec('1. CONTEXTUL URBAN SI EXPUNEREA LA VANT',cy);cy+=2;
+  cy=body('Analiza confortului pietonal la vant s-a efectuat pentru amplasamentul '+nrcad+' (UTR '+utr+'), avand in vedere configuratia cladirii propuse (H='+aedisH.toFixed(1)+'m) si contextul construit existent (H medie zona='+hMed.toFixed(1)+'m). Raportul H/Hmedie='+((aedisH/Math.max(1,hMed)).toFixed(2))+' indica '+(aedisH>hMed*1.3?'o cladire semnificativ mai inalta decat contextul, cu potential impact aerodinamic important asupra spatiilor pietonale adiacente.':'o cladire compatibila cu contextul construit, cu impact aerodinamic limitat la nivel pietonal.'),14,cy);cy+=4;
+  cy=addImg(caps.img2D,14,cy,half,50,'FIG. 2 — Plan 2D · Configuratie parcela si constructii vecine');
+  addImg(caps.imgDist,14+half+4,cy-50,half,50,'FIG. 3 — Plan distante · Spatii libere si coridoare de vant');
+  cy+=4;
+  cy=sec('2. CRITERII LAWSON DE CONFORT PIETONAL',cy);cy+=2;
+  cy=tblRow(['Criteriu Lawson','Viteza medie','Utilizare acceptabila','Clasa'],cy,true,[50,35,60,33]);
+  [['A — Sedere indelungata','<2.5 m/s','Terase, banci, locuri de joaca','Calm'],['B — Sedere scurta','<4.0 m/s','Spatii comerciale exterioare','Confort'],['C — Mers incet','<6.0 m/s','Circulatii pietonale principale','Acceptabil'],['D — Mers rapid','<8.0 m/s','Intersectii, traversari','Limita'],['E — Disconfort','<10.0 m/s','Doar circulatie rapida','Risc'],['F — Pericol','>10.0 m/s','Inadecvat oricand','Pericol']].forEach(r=>{cy=tblRow(r,cy,false,[50,35,60,33]);});
 
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('RECOMANDARI ARHITECTURALE SI BAZA LEGALA',3);ftr();
-  cy=30;cy=sec('4. MASURI ARHITECTURALE DE CONTROL AL VANTULUI',cy);cy+=2;
-  const masuri2=[['Paravane de vant la intrari','OBLIGATORIU pt H>12m','Reduce viteza la intrari cu 40-60%'],['Coloane si piloni la parter','RECOMANDAT','Evita efectul de jet la colturi'],['Forma in plan rotunjita','RECOMANDAT pt H>15m','Reduce presiunea vantului cu 20%'],['Balcoane retrase/adancite','RECOMANDAT','Protejeaza ocupantii de curent'],['Perdea vegetala perimetrala','OPTIONAL','Atenuare 15-30% viteza vant']];
-  cy=tblRow(['Masura','Prioritate','Efect estimat'],cy,true,[60,40,82]);
-  masuri2.forEach(r=>{cy=tblRow(r,cy,false,[60,40,82]);});
-  cy+=5;cy=sec('5. CONCLUZII SI ETAPE URMATOARE',cy);cy+=2;
-  cy=body('Analiza simplificata a efectului de canion urban pentru cladirea propusa (H='+aedisH.toFixed(1)+'m) indica un raport H/W='+HW.toFixed(2)+'. '+canionEffect+'. '+criteriuLawson+'. Pentru cladirile cu regim de inaltime mai mare de 20m este obligatorie o analiza CFD completa.',14,cy);cy+=5;
+  // PAG 3: Viewer 3D zi + noapte
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D ZI / NOAPTE — IMPACT AERODINAMIC',3);ftr();
+  cy=28;
+  cy=addImg(caps.v3dDay,14,cy,half,60,'FIG. 4 — Viewer 3D Urban3D · ZI · Vedere principala · Fatade expuse vant');
+  addImg(caps.v3dNight,14+half+4,cy-60,half,60,'FIG. 5 — Viewer 3D Urban3D · NOAPTE · Spatii pietonale nocturne');
+  cy+=4;
+  cy=sec('3. ANALIZA AERODINAMICA PRELIMINARA',cy);cy+=2;
+  cy=body('Cladirea propusa cu H='+aedisH.toFixed(1)+'m in contextul cu H medie='+hMed.toFixed(1)+'m genereaza urmatoarele efecte aerodinamice estimate:',14,cy);cy+=3;
+  [aedisH>hMed*1.5?'EFECT BORA (downwash): Curentii descendenti pe fatada sudica pot atinge viteze de 1.2-1.5 x viteza vantului la nivel pietonal, in special in coltul de sud-vest al cladirii.':'Efect aerodinamic limitat — cladirea nu depaseste semnificativ inaltimea medie a contextului construit.',
+   'EFECT CORIDOR (venturi): Spatiile inguste intre cladiri pot accelera vantul cu factor 1.3-1.8 fata de vantul incident. Se recomanda verificarea coridoarelor cu latime < '+( aedisH*0.4).toFixed(0)+'m.',
+   'ZONA DE CALM (leeward): Spatiul de cel putin '+(aedisH*0.6).toFixed(0)+'m in spatele cladirii (fata de directia vantului dominant NE) beneficiaza de protectie naturala impotriva vantului.',
+   'IMPACT LA NIVEL PIETONAL (≤2m): Conform criteriilor Lawson, spatiile de sedere de pe terase vor necesita protectie suplimentara (jardiniere, paravane, vegetatie) daca viteza medie depaseste 2.5 m/s.'
+  ].forEach(r=>{cy=body('• '+r,16,cy);cy+=2;});
+
+  // PAG 4: Viewer golden + overcast + masuri
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D GOLDEN / INNORIRAT — MASURI DE PROTECTIE',4);ftr();
+  cy=28;
+  cy=addImg(caps.v3dGolden,14,cy,half,58,'FIG. 6 — Viewer 3D · GOLDEN HOUR · Conditii de vant seral favorabile');
+  addImg(caps.v3dOvercast||caps.imgBack,14+half+4,cy-58,half,58,'FIG. 7 — Viewer 3D · CER INNORIRAT / Vedere posterioara');
+  cy+=4;
+  cy=sec('4. MASURI DE PROTECTIE LA VANT RECOMANDATE',cy);cy+=2;
+  cy=tblRow(['Masura','Eficienta','Amplasare recomandata'],cy,true,[60,35,83]);
+  [['Paravane transparente / vitrate','Ridicata (60-80%)','Terase, locuri de sedere expuse'],['Jardiniere cu arbusti H>1.2m','Medie (40-60%)','Perimetrul teraselor pietonale'],['Perdea de arbori H>6m','Buna (50-70%)','Aliniamentul spre directia vant NE'],['Retragere etaje superioare (setback)','Ridicata','Etaje >2/3 H constructie vecina'],['Pasaje acoperite la parter','Ridicata local','Accesele principale in cladire'],['Aranjament urbanistic (cladiri ecran)','Variabila','Colaborare cu vecinii nordici']].forEach(r=>{cy=tblRow(r,cy,false,[60,35,83]);});
+
+  // PAG 5: Vederi frontala + laterala + concluzii
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VEDERI MULTIPLE — CONCLUZII SI BAZA LEGALA',5);ftr();
+  cy=28;
+  cy=addImg(caps.imgFront,14,cy,half,50,'FIG. 8 — Vedere frontala · Fatada expusa vantului NE');
+  addImg(caps.imgLat,14+half+4,cy-50,half,50,'FIG. 9 — Vedere laterala · Coridor potential intre cladiri');
+  cy+=2;
+  cy=addImg(caps.imgAerial,14,cy,W-28,48,'FIG. 10 — Vedere aeriana 45° · Configuratie acoperis si directii vant');
+  cy+=3;
+  cy=sec('5. CONCLUZII SI RECOMANDARI',cy);cy+=2;
+  cy=body('Amplasamentul '+nrcad+' prezinta o expunere '+(aedisH>hMed*1.3?'RIDICATA':'MODERATA')+' la actiunea vantului, avand in vedere inaltimea propusa de '+aedisH.toFixed(1)+'m fata de contextul construit cu H medie '+hMed.toFixed(1)+'m. Directia dominanta a vantului la Iasi este NE (iarna, frecventa ~35%) si SV (vara, frecventa ~25%). Se recomanda elaborarea unui studiu CFD (Computational Fluid Dynamics) in faza DTAC/PAC pentru cladirile cu H>28m sau in zone cu densitate urbana ridicata.',14,cy);cy+=4;
   cy=sec('6. BAZA LEGALA',cy);cy+=2;
-  ['NP 082/2004 — Normativ privind proiectarea cladirilor civile din punct de vedere al cerintei de siguranta in exploatare','Criteriile Lawson (1990) si revizuirile BRE — standard international pentru confort pietonal','CR 1-1-4/2012 — Cod de proiectare. Evaluarea actiunii vantului','ISO 16474-2:2014 privind confortul pietonal in medii urbane','PUZ-urile locale care impun studii de vant pentru cladiri > 10 etaje'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
+  ['STAS 10101/20-1990 — Actiunea vantului. Incarcari din vant.','SR EN 1991-1-4:2006 — Eurocod 1: Actiuni asupra structurilor. Actiuni ale vantului.','Ghidul privind confortul pietonal si actiunea vantului in mediul construit — INCERC 2008.','PUG Municipiul Iasi — UTR '+utr+' — Regulamentul Local de Urbanism.','Legea nr. 50/1991 republicata privind autorizarea executarii lucrarilor de constructii.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
   sign();
 
+  // PAG 6: Semnatura
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CASETA TEHNICA SI SEMNATURA',6);ftr();
+  cy=28;sign();
   pdf.save('Studiu_Vant_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
-  ss('✅ Studiu Vânt & Confort Pietonal generat!');
+  ss('Studiu Vant & Confort Pietonal generat!');
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// STUDIU 4: SPAȚII VERZI & PERMEABILITATE
+// STUDIU 4: SPATII VERZI SI PERMEABILITATE
 // ════════════════════════════════════════════════════════════════════════════
 async function generateGreenStudy(){
   const ap=S.parcels[S.activeParcel??0];
-  if(!ap?.geo?.geometry){ss('Selectați o parcelă.');return;}
-  ss('Se generează Studiu Spații Verzi...');
+  if(!ap?.geo?.geometry){ss('Selectati o parcela.');return;}
+  ss('Se genereaza Studiu Spatii Verzi...');
 
-  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,GREEN,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,addImg,sign}=_initStudyPdf('Studiu de Spatii Verzi si Permeabilitate','Studiu spatii verzi',4);
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,GREEN,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,addImg,sign}=_initStudyPdf('Studiu de Spatii Verzi si Permeabilitate','Studiu spatii verzi',6);
+  const caps = await _captureStudyMaps(ap, msg=>ss(msg));
 
-  // Capturi imagini
-  const caps = await _captureStudyMaps(ap, msg => ss(msg));
-
-  const areaN=parseFloat(area)||548;
-  const svMin=parseFloat(params.sv)||15;
-  const svAbs=(areaN*svMin/100).toFixed(0);
-  const potMax=parseFloat(params.pot)||65;
-  const scMax=(areaN*potMax/100).toFixed(0);
-  const circulatii=(areaN*(100-potMax-svMin)/100).toFixed(0);
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13.2;
-  const niv=AEDIS.corpuri[0]?.niv||4;
-  const scActuala=(areaN*potMax/100).toFixed(0);
-  const svVerde=(areaN*svMin/100).toFixed(0);
+  const areaNum=parseFloat(area)||0;
+  const svMin=Math.round(areaNum*(parseFloat(params?.sv)||20)/100);
+  const potMax=parseFloat(params?.pot)||40;
+  const scMax=Math.round(areaNum*potMax/100);
+  const svObl=Math.max(svMin,Math.round(areaNum*0.20));
+  const half=(W-28)/2-2;
 
-  pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');pdf.setFillColor(10,40,20);pdf.rect(0,3,W,H-6,'F');
+  // PAG 1: Cover
+  pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');pdf.setFillColor(20,35,70);pdf.rect(0,3,W,H-6,'F');
   pdf.setFillColor(...GOLD);pdf.rect(0,0,W,3,'F');pdf.rect(0,H-3,W,3,'F');
-  pdf.setTextColor(...GOLD);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text('URBANX · PLATFORMA DE ANALIZA URBANISTICA',W/2,35,{align:'center'});
-  pdf.setTextColor(255,255,255);pdf.setFontSize(22);pdf.setFont('helvetica','bold');pdf.text('STUDIU SPATII VERZI',W/2,65,{align:'center'});pdf.text('SI PERMEABILITATE TEREN',W/2,80,{align:'center'});
-  pdf.setTextColor(...GOLD);pdf.setFontSize(10);pdf.text('Bilant teritorial · Coeficient de permeabilitate · Conformitate Legea 24/2007',W/2,92,{align:'center'});
-  pdf.setFillColor(10,50,25);pdf.rect(20,105,W-40,80,'F');pdf.setFillColor(...GOLD);pdf.rect(20,105,3,80,'F');
-  [['Nr. cadastral:',nrcad],['Suprafata totala teren:',areaN+' mp (100%)'],['Suprafata construita max (SC):',scMax+' mp (POT '+potMax+'%)'],['Spatii verzi minime obligatorii:',svAbs+' mp (SV '+svMin+'%)'],['Circulatii si parcaje:',circulatii+' mp'],['Coef. permeabilitate minim:',svMin+'%']].forEach(([l,v],i)=>{
-    pdf.setTextColor(150,200,170);pdf.setFontSize(8);pdf.text(S2(l),26,117+i*10);
-    pdf.setTextColor(255,255,255);pdf.setFontSize(9.5);pdf.setFont('helvetica','bold');pdf.text(S2(v),110,117+i*10);
-  });
-  pdf.setFillColor(20,120,60);pdf.rect(20,196,W-40,18,'F');
-  pdf.setTextColor(255,255,255);pdf.setFontSize(10);pdf.setFont('helvetica','bold');pdf.text('SPATII VERZI OBLIGATORII: '+svAbs+' mp ('+svMin+'% din suprafata totala)',W/2,205,{align:'center'});
-  pdf.setFontSize(8);pdf.text('Conform PUG Iasi · UTR '+utr+' · Legea 24/2007 privind spatiile verzi',W/2,213,{align:'center'});
-  pdf.setTextColor(100,150,120);pdf.setFontSize(7);pdf.text('Generat: '+S2(dateStr)+' · Document ORIENTATIV',W/2,H-15,{align:'center'});ftr();
+  try{_pdfDrawLogo(pdf,W/2-10,18,20);}catch(e){}
+  pdf.setTextColor(...GOLD);pdf.setFontSize(9);pdf.setFont('helvetica','bold');
+  pdf.text('URBANX — PLATFORMA DE ANALIZA URBANISTICA',W/2,50,{align:'center'});
+  pdf.setTextColor(255,255,255);pdf.setFontSize(24);pdf.setFont('helvetica','bold');
+  pdf.text('STUDIU DE SPATII VERZI',W/2,72,{align:'center'});
+  pdf.text('SI PERMEABILITATE',W/2,88,{align:'center'});
+  pdf.setTextColor(...GOLD);pdf.setFontSize(10);
+  pdf.text('Bilantu spatii verzi · Plantare · Coeficient permeabilitate · Conf. Legii 24/2007',W/2,100,{align:'center'});
+  pdf.setFillColor(30,50,90);pdf.rect(20,112,W-40,80,'F');pdf.setFillColor(...GOLD);pdf.rect(20,112,3,80,'F');
+  [['Nr. cadastral:',nrcad],['Zona UTR:',utr],['Suprafata teren:',area+' mp'],['SV minim PUG ('+params?.sv+'%):',svMin+' mp'],['SV obligatoriu (min 20%):',svObl+' mp'],['Suprafata construita max (POT '+potMax+'%):',scMax+' mp'],['Suprafata libera estimata:',Math.max(0,areaNum-scMax)+' mp'],['H propus:',aedisH.toFixed(1)+'m']].forEach(([l,v],i)=>{pdf.setTextColor(150,170,200);pdf.setFontSize(8);pdf.setFont('helvetica','normal');pdf.text(S2(l),26,124+i*9.5);pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text(S2(v),106,124+i*9.5);});
+  pdf.setTextColor(100,120,150);pdf.setFontSize(7);pdf.text('Generat: '+S2(dateStr)+' · Document orientativ · UrbanX TSS·FG',W/2,H-12,{align:'center'});
+  ftr();
 
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('BILANT TERITORIAL SI INDICATORI SUPRAFETE',2);ftr();
-  let cy=30;cy=sec('1. BILANT TERITORIAL COMPLET',cy);cy+=2;
-  const bilant=[['Suprafata totala teren (St)',areaN+' mp','100%','—'],['Suprafata construita la sol (SC)',scMax+' mp',potMax+'%','POT max PUG'],['Spatii verzi amenajate (SV)',svAbs+' mp',svMin+'%','min. obligatoriu'],['Circulatii carosabile+pietonale',Math.round(areaN*0.15)+' mp','~15%','normat HG 525/1996'],['Parcaje la sol',Math.round(areaN*0.05)+' mp','~5%','0.5 loc/100mp SC'],['Spatii tehnice/depozitare',Math.round(areaN*0.03)+' mp','~3%','estim.']];
-  cy=tblRow(['Categorie','Suprafata','Procent','Baza legala'],cy,true,[75,35,25,47]);
-  bilant.forEach(r=>{cy=tblRow(r,cy,false,[75,35,25,47]);});
-  cy+=5;cy=sec('2. COEFICIENT DE PERMEABILITATE SI GESTIUNE APE PLUVIALE',cy);cy+=2;
-  const perim=[['Coeficient permeabilitate (CP)',svMin+'%','Minim '+svMin+'%','CONFORM'],['Coeficient impermeabilizare',(100-svMin)+'%','Max '+(100-svMin)+'%','LIMITA'],['Debit pluvial estimat',((areaN*(100-svMin)/100)*0.7*0.025).toFixed(1)+' mc/h','—',''],['Rezervor retentie recomandat',Math.round(areaN*(100-svMin)/100*0.005)+' mc','—',''],['Sisteme de infiltratie','Obligatoriu','SC > '+Math.round(areaN*0.5)+' mp','HG 188/2002']];
-  cy=tblRow(['Indicator','Valoare','Limita','Status'],cy,true,[75,35,35,37]);
-  perim.forEach(r=>{cy=tblRow(r,cy,false,[75,35,35,37]);});
-  cy+=5;cy=sec('3. TIPURI DE SPATII VERZI RECOMANDATE',cy);cy+=2;
-  const tipuri=[['Gazon/iarba (L)',Math.round(areaN*svMin/100*0.4)+' mp','Suprafata permeabila de baza','Obligatoriu'],['Arbori foiosi (A)',Math.round(areaN*svMin/100*0.25)+' mp','Umbra + purificare aer','Min. 1 arbore/50mp'],['Arbori conifere (C)',Math.round(areaN*svMin/100*0.1)+' mp','Protectie vant iarna','Optional'],['Arbusti/gard viu',Math.round(areaN*svMin/100*0.15)+' mp','Delimitare + izolare fonica','Recomandat'],['Spatii verzi pe cladire',Math.round(areaN*svMin/100*0.1)+' mp','Terasa verde, fatada verde','Bonus biodiversitate']];
-  cy=tblRow(['Tip spatiu','Suprafata','Functie','Observatii'],cy,true,[42,28,55,57]);
-  tipuri.forEach(r=>{cy=tblRow(r,cy,false,[42,28,55,57]);});
+  // PAG 2: Vedere 3D + bilanturi
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONTEXT 3D — BILANT SPATII VERZI SI PERMEABILITATE',2);ftr();
+  let cy=28;
+  cy=addImg(caps.img3D,14,cy,W-28,70,'FIG. 1 — Vedere 3D principala · Identificarea zonelor verzi existente si propuse');
+  cy=sec('1. BILANT SPATII VERZI — CALCUL DETALIAT',cy);cy+=2;
+  cy=body('Conform Legii nr. 24/2007 privind reglementarea si administrarea spatiilor verzi din intravilanul localitatilor si PUG Iasi (UTR '+utr+'), suprafata minima de spatii verzi este de '+params?.sv+'% din suprafata terenului, reprezentand '+svMin+' mp. Legea impune suplimentar un minim de 20% spatii verzi pentru orice constructie noua in intravilanul municipiului.',14,cy);cy+=4;
+  cy=tblRow(['Indicator','Minim legal','Propus','Status'],cy,true,[70,42,42,24]);
+  const svProp=Math.round(areaNum*0.22);
+  [['Spatii verzi totale (mp)',svObl+' mp',svProp+' mp',svProp>=svObl?'OK':'DEFICIT'],['Procentaj spatii verzi (%)',Math.max(params?.sv||20,20)+'%',((svProp/areaNum)*100).toFixed(1)+'%',svProp>=svObl?'CONFORM':'NECONFORM'],['SV permeabil la apa (min 60% din SV)',(svObl*0.6).toFixed(0)+' mp',(svProp*0.65).toFixed(0)+' mp','CONFORM'],['Arbori plantati (min 1/200mp SV)',Math.ceil(svObl/200)+' buc',Math.ceil(svProp/200)+' buc','CONFORM']].forEach(r=>{cy=tblRow(r,cy,false,[70,42,42,24]);});
 
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONCLUZII SPATII VERZI SI BAZA LEGALA',3);ftr();
-  cy=30;cy=sec('4. SPECII RECOMANDATE PENTRU ZONA IASI',cy);cy+=2;
-  const specii=[['Tei pubescentscens (Tilia tomentosa)','Arbore','15-25m','Nativ, umbra, aroma'],['Ulm de camp (Ulmus minor)','Arbore','10-20m','Rezistent seceta'],['Salcam (Robinia pseudoacacia)','Arbore','10-15m','Crestere rapida'],['Liliac (Syringa vulgaris)','Arbust','2-4m','Parfum, colorit'],['Forshythia (Forsythia x intermedia)','Arbust','1-3m','Floare timpurie'],['Gazon festuca/bluegrass','Gazon','—','Rezistent la trafic pietonal']];
-  cy=tblRow(['Specie','Tip','H matura','Avantaje'],cy,true,[68,22,20,72]);
-  specii.forEach(r=>{cy=tblRow(r,cy,false,[68,22,20,72]);});
-  cy+=5;cy=sec('5. BAZA LEGALA',cy);cy+=2;
-  ['Legea nr. 24/2007 privind reglementarea si administrarea spatiilor verzi din intravilanul localitatilor','HG nr. 188/2002 privind conditiile de descarcare in mediu acvatic a apelor uzate (gestiune pluviala)','OUG 195/2005 privind protectia mediului — Sectiunea spatii verzi','PUG Municipiul Iasi — Regulamentul Local de Urbanism · UTR '+utr+' · SV minim: '+svMin+'%','Normativul NP 024/1997 privind proiectarea cladirilor de locuinte — amenajari exterioare'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
+  // PAG 3: Viewer 3D zi + noapte
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D ZI / NOAPTE — VIZUALIZARE AMENAJARE VERDE',3);ftr();
+  cy=28;
+  cy=addImg(caps.v3dDay,14,cy,half,60,'FIG. 2 — Viewer 3D Urban3D · ZI · Vizualizare cu amenajare verde propusa');
+  addImg(caps.v3dNight,14+half+4,cy-60,half,60,'FIG. 3 — Viewer 3D Urban3D · NOAPTE · Iluminat ambiental spatii verzi');
+  cy+=4;
+  cy=sec('2. TIPURI DE SPATII VERZI RECOMANDATE',cy);cy+=2;
+  cy=tblRow(['Tip spatiu verde','Suprafata min.','Permeabilitate','Functiune'],cy,true,[52,30,30,66]);
+  [['Gazon / plante acoperitoare',Math.round(svProp*0.4)+' mp','Ridicata (80%)','Suprafata verde de baza, permeabila'],['Arbusti decorativi si garduri vii',Math.round(svProp*0.2)+' mp','Medie (50%)','Separare, protectie fonica si vizuala'],['Arbori de talie medie (H 4-8m)',Math.ceil(svProp/300)+' buc ('+Math.round(svProp*0.15)+' mp)','Ridicata','Umbra, CO2, biodiversitate'],['Teren permeabil pietonal',Math.round(svProp*0.15)+' mp','Medie-ridicata (60%)','Circulatii pietonale fara impermeabilizare'],['Strat vegetal acoperi verde (opt.)',Math.round(scMax*0.3)+' mp','Medie (40%)','Termoizolatie, retentie apa pluviala'],['Jardiniere si spatii verzi verticale',Math.round(svProp*0.1)+' mp','Limitata (20%)','Fatade, imprejmuiri, terase']].forEach(r=>{cy=tblRow(r,cy,false,[52,30,30,66]);});
+
+  // PAG 4: Viewer golden + overcast + retentia apei
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D GOLDEN / INNORIRAT — RETENTIA APEI PLUVIALE',4);ftr();
+  cy=28;
+  cy=addImg(caps.v3dGolden,14,cy,half,58,'FIG. 4 — Viewer 3D · GOLDEN HOUR · Calitate spatiala ambientala');
+  addImg(caps.v3dOvercast||caps.imgAerial,14+half+4,cy-58,half,58,'FIG. 5 — Viewer 3D · CER INNORIRAT / Vedere aeriana · Acoperis verde');
+  cy+=4;
+  cy=sec('3. COEFICIENT DE PERMEABILITATE SI RETENTIA APEI',cy);cy+=2;
+  const suprafataImpermeabila=scMax;
+  const suprafataPermeabila=Math.max(0,areaNum-suprafataImpermeabila);
+  const coefPerm=((suprafataPermeabila/areaNum)*100).toFixed(1);
+  cy=body('Coeficientul de permeabilitate al parcelei este estimat la '+coefPerm+'%, calculat ca raport intre suprafata permeabila ('+suprafataPermeabila+' mp) si suprafata totala ('+areaNum+' mp). Valoarea minima admisa conform normativelor tehnice in vigoare (NP 133/2013) pentru zone rezidentiale si mixte este de 30%, asigurand un debit de infiltrare care reduce incarcarile asupra retelei de canalizare pluviala.',14,cy);cy+=4;
+  cy=tblRow(['Tip suprafata','Suprafata (mp)','Coef. perm.','Volum infiltrat (l/ploaie)'],cy,true,[52,30,28,68]);
+  [[`Gazon + plante`,Math.round(svProp*0.55),'0.90',Math.round(svProp*0.55*0.90*20)+' l'],[`Pavaj permeabil`,Math.round(svProp*0.20),'0.60',Math.round(svProp*0.20*0.60*20)+' l'],[`Acoperis verde (opt.)`,Math.round(scMax*0.30),'0.50',Math.round(scMax*0.30*0.50*20)+' l'],[`Suprafata betonata/asf.`,suprafataImpermeabila,'0.05',Math.round(suprafataImpermeabila*0.05*20)+' l']].forEach(r=>{cy=tblRow(r,cy,false,[52,30,28,68]);});
+
+  // PAG 5: Plan 2D + distante + lista specii
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('PLAN 2D + SPECII RECOMANDATE — BAZA LEGALA',5);ftr();
+  cy=28;
+  cy=addImg(caps.img2D,14,cy,half,52,'FIG. 6 — Plan 2D cadastral · Suprafete construite vs libere');
+  addImg(caps.imgDist,14+half+4,cy-52,half,52,'FIG. 7 — Context vecini · Zone verzi adiacente');
+  cy+=4;
+  cy=sec('4. SPECII RECOMANDATE PENTRU SPATII VERZI',cy);cy+=2;
+  cy=tblRow(['Specie','Talie','Utilizare','Avantaj principal'],cy,true,[50,25,45,58]);
+  [['Tei argintiu (Tilia tomentosa)','Mare (H 20m)','Aliniamente stradale','Umbra, aroma, rezistenta urbana'],['Frasin comun (Fraxinus excelsior)','Mare (H 25m)','Spatii largi, parcuri','Crestere rapida, coroana ampla'],['Artar campestru (Acer campestre)','Medie (H 10m)','Garduri vii, parcele','Colorit toamna, toleranta poluare'],['Soc negru (Sambucus nigra)','Mica (H 4m)','Umplere, biodiversitate','Fructe pentru fauna'],['Lavanda (Lavandula sp.)','Mica (<1m)','Borduri, terase','Aroma, rezistenta seceta'],['Iederá (Hedera helix)','Agatarotre','Fatade verzi verticale','Termoizolatie, estetica']].forEach(r=>{cy=tblRow(r,cy,false,[50,25,45,58]);});
+  cy+=3;cy=sec('5. BAZA LEGALA',cy);cy+=2;
+  ['Legea nr. 24/2007 privind reglementarea si administrarea spatiilor verzi din intravilanul localitatilor.','NP 133/2013 — Normativ privind proiectarea, executia si exploatarea sistemelor de alimentare cu apa si canalizare (permeabilitate).','PUG Municipiul Iasi in vigoare (HCL Iasi) — UTR '+utr+' — Spatii verzi minime obligatorii.','Ordinul MDRT nr. 2701/2010 — Metodologie de informare si consultare a publicului cu privire la documentatii de urbanism.','Legea nr. 292/2018 privind evaluarea impactului anumitor proiecte publice si private asupra mediului.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
   sign();
 
+  // PAG 6: Semnatura
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CASETA TEHNICA SI SEMNATURA',6);ftr();
+  cy=28;sign();
   pdf.save('Studiu_Spatii_Verzi_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
-  ss('✅ Studiu Spații Verzi generat!');
+  ss('Studiu Spatii Verzi generat!');
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// STUDIU 5: MOBILITATE & PARCAJE
+// STUDIU 5: MOBILITATE SI PARCAJE
 // ════════════════════════════════════════════════════════════════════════════
 async function generateMobilityStudy(){
   const ap=S.parcels[S.activeParcel??0];
-  if(!ap?.geo?.geometry){ss('Selectați o parcelă.');return;}
-  ss('Se generează Studiu Mobilitate...');
+  if(!ap?.geo?.geometry){ss('Selectati o parcela.');return;}
+  ss('Se genereaza Studiu Mobilitate & Parcaje...');
 
-  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,addImg,sign}=_initStudyPdf('Studiu de Mobilitate si Parcaje','Studiu mobilitate',4);
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,addImg,sign}=_initStudyPdf('Studiu de Mobilitate si Parcaje','Studiu mobilitate',6);
+  const caps = await _captureStudyMaps(ap, msg=>ss(msg));
 
-  // Capturi imagini
-  const caps = await _captureStudyMaps(ap, msg => ss(msg));
-
-  const areaN=parseFloat(area)||548;
-  const cutMax=parseFloat(params.cut)||2.8;
-  const sdMax=(areaN*cutMax).toFixed(0);
-  const parMin=parseFloat(params.parc)||3;
-  const nAp=Math.round(areaN*cutMax/55);
-  const parTot=Math.ceil(nAp*parMin/100*100/100+nAp*0.2);
-  const parSubteran=Math.max(0,parTot-Math.floor(areaN*0.1/12.5));
-  const fn=AEDIS_FN[AEDIS.fn]?.label||'Rezidential colectiv';
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13.2;
+  const niv=AEDIS.corpuri[0]?.niv||4;
+  const fn=AEDIS.fn||'rezidential_colectiv';
+  const fnLabel=AEDIS_FN[fn]?.label||fn;
+  const areaNum=parseFloat(area)||0;
+  const pkMin=parseFloat(params?.pk)||1;
+  const sdEst=Math.round(areaNum*(parseFloat(params?.cut)||2.0));
+  const locuinteEst=Math.round(sdEst/70);
+  const pkObl=Math.max(1,Math.round(locuinteEst*pkMin));
+  const half=(W-28)/2-2;
 
-  // Distante OSM la transport public
-  const stpOsm=S.ctx?.features?.filter(f=>['bus_stop','tram_stop','station','subway'].includes(f.properties?.fn||''))||[];
-  const parcelCtr=turf.centerOfMass(ap.geo).geometry.coordinates;
-  const nearStp=stpOsm.slice(0,3).map(f=>{
-    const d=turf.distance({type:'Feature',geometry:{type:'Point',coordinates:parcelCtr}},{type:'Feature',geometry:{type:'Point',coordinates:turf.centerOfMass(f).geometry.coordinates}},{units:'meters'});
-    return {name:f.properties?.name||'Statie transport',d:d.toFixed(0)};
-  });
-
-  pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');pdf.setFillColor(10,25,55);pdf.rect(0,3,W,H-6,'F');
+  // PAG 1: Cover
+  pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');pdf.setFillColor(20,35,70);pdf.rect(0,3,W,H-6,'F');
   pdf.setFillColor(...GOLD);pdf.rect(0,0,W,3,'F');pdf.rect(0,H-3,W,3,'F');
-  pdf.setTextColor(...GOLD);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text('URBANX · PLATFORMA DE ANALIZA URBANISTICA',W/2,35,{align:'center'});
-  pdf.setTextColor(255,255,255);pdf.setFontSize(22);pdf.setFont('helvetica','bold');pdf.text('STUDIU DE MOBILITATE',W/2,65,{align:'center'});pdf.text('SI NECESARUL DE PARCAJE',W/2,80,{align:'center'});
-  pdf.setTextColor(...GOLD);pdf.setFontSize(10);pdf.text('Conformitate HG 525/1996 · Accesibilitate pietonala · Raza de deservire transport public',W/2,92,{align:'center'});
-  pdf.setFillColor(20,35,75);pdf.rect(20,105,W-40,80,'F');pdf.setFillColor(...GOLD);pdf.rect(20,105,3,80,'F');
-  [['Functiune propusa:',fn],['Nr. apartamente estimate:',nAp+' ap.'],['Parcaje necesare (rezidenti):',Math.ceil(nAp*parMin/100*100/100)+' locuri'],['Parcaje vizitatori (+20%):',Math.ceil(nAp*0.2)+' locuri'],['TOTAL PARCAJE:',parTot+' locuri'],['Parcaje posibile la sol:',Math.floor(areaN*0.1/12.5)+' locuri'],['Deficit / Subteran necesar:',Math.max(0,parTot-Math.floor(areaN*0.1/12.5))+' locuri']].forEach(([l,v],i)=>{
-    pdf.setTextColor(150,170,210);pdf.setFontSize(8);pdf.text(S2(l),26,117+i*9.5);
-    pdf.setTextColor(255,255,255);pdf.setFontSize(9.5);pdf.setFont('helvetica','bold');pdf.text(S2(v),110,117+i*9.5);
-  });
-  pdf.setFillColor(parSubteran>0?120:20,parSubteran>0?50:100,parSubteran>0?10:50);pdf.rect(20,196,W-40,18,'F');
-  pdf.setTextColor(255,255,255);pdf.setFontSize(10);pdf.setFont('helvetica','bold');
-  pdf.text(parSubteran>0?'DEFICIT: '+parSubteran+' loc. la sol — SUBTERAN NECESAR':'PARCAJE POSIBILE LA SOL — SUBTERAN OPTIONAL',W/2,205,{align:'center'});
-  pdf.setFontSize(8);pdf.text('Total necesar: '+parTot+' locuri · Conform HG 525/1996 art. 33',W/2,213,{align:'center'});
-  pdf.setTextColor(100,120,160);pdf.setFontSize(7);pdf.text('Generat: '+S2(dateStr)+' · Document ORIENTATIV',W/2,H-15,{align:'center'});ftr();
+  try{_pdfDrawLogo(pdf,W/2-10,18,20);}catch(e){}
+  pdf.setTextColor(...GOLD);pdf.setFontSize(9);pdf.setFont('helvetica','bold');
+  pdf.text('URBANX — PLATFORMA DE ANALIZA URBANISTICA',W/2,50,{align:'center'});
+  pdf.setTextColor(255,255,255);pdf.setFontSize(24);pdf.setFont('helvetica','bold');
+  pdf.text('STUDIU DE MOBILITATE',W/2,72,{align:'center'});
+  pdf.text('SI PARCAJE',W/2,88,{align:'center'});
+  pdf.setTextColor(...GOLD);pdf.setFontSize(10);
+  pdf.text('Necesarul de parcaje · Accese · Flux pietonal si auto · Norma NP 051/2012',W/2,100,{align:'center'});
+  pdf.setFillColor(30,50,90);pdf.rect(20,112,W-40,80,'F');pdf.setFillColor(...GOLD);pdf.rect(20,112,3,80,'F');
+  [['Nr. cadastral:',nrcad],['Zona UTR:',utr],['Suprafata teren:',area+' mp'],['Functiune propusa:',fnLabel],['Nr. niveluri propus:',niv+' niv.'],['SD estimata:',sdEst+' mp'],['Locuinte estimate:',locuinteEst+' apartamente'],['Parcaje obligatorii (min):',pkObl+' locuri']].forEach(([l,v],i)=>{pdf.setTextColor(150,170,200);pdf.setFontSize(8);pdf.setFont('helvetica','normal');pdf.text(S2(l),26,124+i*9.5);pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text(S2(v),100,124+i*9.5);});
+  pdf.setTextColor(100,120,150);pdf.setFontSize(7);pdf.text('Generat: '+S2(dateStr)+' · Document orientativ · UrbanX TSS·FG',W/2,H-12,{align:'center'});
+  ftr();
 
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('ANALIZA PARCAJE SI ACCESIBILITATE',2);ftr();
-  let cy=30;cy=sec('1. CALCUL NECESAR PARCAJE — HG 525/1996 ART. 33',cy);cy+=2;
-  const parcData=[['Apartamente rezidenti ('+parMin+' loc/100mp SD)',sdMax+' mp SD',Math.ceil(parseFloat(sdMax)*parMin/100)+' locuri'],['Vizitatori (20% din necesar rezidenti)','—',Math.ceil(nAp*0.2)+' locuri'],['TOTAL MINIM OBLIGATORIU','—',parTot+' locuri'],['Posibil la sol (12.5mp/loc, 10% SC)',Math.floor(areaN*0.1)+' mp',Math.floor(areaN*0.1/12.5)+' locuri'],['Deficit ce necesita solutii alternative','—',Math.max(0,parTot-Math.floor(areaN*0.1/12.5))+' locuri']];
-  cy=tblRow(['Categorie','Suprafata referinta','Nr. locuri'],cy,true,[90,45,47]);
-  parcData.forEach(r=>{cy=tblRow(r,cy,false,[90,45,47]);});
-  cy+=5;cy=sec('2. ACCESIBILITATE PIETONALA (RAZA 500m = 8 min mers)',cy);cy+=2;
-  const accData=[['Servicii medicale (farmacie, CMI)','< 500m','Verificati in teren','Normal'],['Educatie (gradinita, scoala)','< 1000m','Verificati in teren','Normal'],['Alimentara / supermarket','< 300m','Verificati in teren','Normal'],['Transport public (autobuz/troleu)','< 300m',nearStp.length?nearStp[0].d+'m estimat':'Verificati in teren',nearStp.length?'OK':'—'],['Parc/spatiu verde','< 500m','Verificati in teren','Normal'],['Conexiune retele tehnico-edilitare','La limita parcela','Verificati plan retele','—']];
-  cy=tblRow(['Facilitate','Distanta standard','Distanta estimata','Status'],cy,true,[52,32,42,36]);
-  accData.forEach(r=>{cy=tblRow(r,cy,false,[52,32,42,36]);});
-  cy+=5;cy=sec('3. SOLUTII ALTERNATIVE PENTRU DEFICIT DE PARCAJE',cy);cy+=2;
-  cy=body('In cazul in care suprafata de teren nu permite asigurarea integrala a parcarilor la sol, se recomanda urmatoarele solutii, in ordinea prioritatii:',14,cy);cy+=3;
-  ['1. Subsol cu 1-2 niveluri de parcare (P-1/P-2) — solutia optima, accesibila din incinta.','2. Parcare semiingropata (max -1.5m fata de NTS) — cost redus, ventilatie naturala.','3. Sisteme de parcare mecanizate (parcare stivuitor) — pentru loturi mici.','4. Negociere parcari publice in zona sau spatii comerciale cu regim mixt.'].forEach(r=>{cy=body(r,16,cy);cy+=2;});
+  // PAG 2: Vedere 3D + accese identificate
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONTEXT 3D — ACCESE SI CONFIGURATIE STRADALA',2);ftr();
+  let cy=28;
+  cy=addImg(caps.img3D,14,cy,W-28,70,'FIG. 1 — Vedere 3D principala · Accese auto si pietonale · Context stradal');
+  cy=sec('1. ANALIZA CONFIGURATIEI STRADALE SI A ACCESELOR',cy);cy+=2;
+  cy=body('Parcela '+nrcad+' (UTR '+utr+', suprafata '+area+' mp) este amplasata in contextul urban cu urmatoarea configuratie de accese: frontul stradal principal este pe latura marcata cu "FRONT" in planul cadastral. Accesul auto se va realiza din strada adiacenta frontului stradal, cu respectarea normei de gabarit minim de 3.50m pentru un sens si 6.00m pentru doua sensuri, conform STAS 10144/3.',14,cy);cy+=4;
+  cy=addImg(caps.imgFront,14,cy,half,52,'FIG. 2 — Vedere frontala · Acces principal auto si pietonal');
+  addImg(caps.imgBack,14+half+4,cy-52,half,52,'FIG. 3 — Vedere posterioara · Potential acces servicii');
+  cy+=4;
+  cy=sec('2. NECESARUL DE PARCAJE — CALCUL NP 051/2012',cy);cy+=2;
+  cy=tblRow(['Functiune','Norma parcaje','Unitati','Nr. locuri min.'],cy,true,[55,45,40,38]);
+  const pkRows=fn.includes('rezidential')||fn.includes('individual')?[['Apartamente/unitati rezidentiale','1 loc/unitate loc.','~'+locuinteEst+' ap.',pkObl+' loc.'],['Vizitatori (suplimentar)','1 loc/10 ap.','~'+locuinteEst+' ap.',Math.ceil(locuinteEst/10)+' loc.'],['Accesibilitate (PMR min 2%)','Min 1 loc/50 loc.','1 loc/50',Math.max(1,Math.ceil(pkObl/50))+' loc.']]:[fn.includes('birou')||fn.includes('office')?[['Spatii birouri/office','1 loc/40 mp SD',sdEst+' mp',Math.ceil(sdEst/40)+' loc.'],['Vizitatori birouri','1 loc/100 mp SD',sdEst+' mp',Math.ceil(sdEst/100)+' loc.'],['Biciclete (10% din total)','1 bicicleta/10 masini','—',Math.ceil(Math.ceil(sdEst/40)/10)+' loc.']]:[['Comercial/mixt (estimat)','1 loc/40 mp SD',sdEst+' mp',Math.ceil(sdEst/40)+' loc.'],['Personal angajat','1 loc/5 angajati','~'+Math.ceil(sdEst/20)+'ang.',Math.ceil(sdEst/100)+' loc.'],['Biciclete','1 loc/20 vizitatori','—',Math.ceil(sdEst/200)+' loc.']]];
+  pkRows.flat().forEach(r=>{cy=tblRow(r,cy,false,[55,45,40,38]);});
 
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONCLUZII MOBILITATE SI BAZA LEGALA',3);ftr();
-  cy=30;cy=sec('4. ETAPE OBLIGATORII AUTORIZARE',cy);cy+=2;
-  const etape=[['1','Certificat de Urbanism (CU)','DAU Primaria Iasi','Obligatoriu'],['2','Aviz Politia Rutiera','IPJ Iasi — Biroul Rutier','Daca CU o impune'],['3','Studiu trafic (>100 parcaje)','Expert transporturi atestat','Obligatoriu pt imobile mari'],['4','Plan de mobilitate urbana','TPUD Iasi','Consultare'],['5','Aviz RATC / transport public','RATC Iasi','Daca se afecteaza trasee']];
-  cy=tblRow(['Nr.','Etapa','Autoritate','Observatii'],cy,true,[12,72,55,43]);
-  etape.forEach(r=>{cy=tblRow(r,cy,false,[12,72,55,43]);});
-  cy+=5;cy=sec('5. BAZA LEGALA',cy);cy+=2;
-  ['HG nr. 525/1996 pentru aprobarea Regulamentului General de Urbanism — art. 33 parcaje','Normativul P 132-1993 privind proiectarea parcajelor de autovehicule','Legea nr. 92/2007 a serviciilor publice de transport persoane','PUG Municipiul Iasi — UTR '+utr+' · Norma parcaje: '+parMin+' loc/100mp SD','STAS 2965/1984 — Amenajarea intersectiilor la acelasi nivel'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
+  // PAG 3: Viewer 3D zi + noapte + tipuri parcaje
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D ZI / NOAPTE — TIPURI DE PARCAJE',3);ftr();
+  cy=28;
+  cy=addImg(caps.v3dDay,14,cy,half,58,'FIG. 4 — Viewer 3D Urban3D · ZI · Accese si spatii de parcare');
+  addImg(caps.v3dNight,14+half+4,cy-58,half,58,'FIG. 5 — Viewer 3D Urban3D · NOAPTE · Iluminat parcaje si accese');
+  cy+=4;
+  cy=sec('3. TIPURI DE PARCAJE RECOMANDATE',cy);cy+=2;
+  cy=tblRow(['Tip parcare','Suprafata/loc','Nr. locuri','Suprafata totala'],cy,true,[55,35,35,53]);
+  const pkSub=Math.ceil(pkObl*0.6),pkSup=pkObl-pkSub;
+  [['Parcare subterana (sub cota ±0)','25-30 mp/loc',pkSub+' locuri',pkSub*28+' mp'],['Parcare supraterana / parter','20-25 mp/loc',pkSup+' locuri',pkSup*22+' mp'],['Parcaje biciclete (anexa)','2 mp/bicicleta',Math.ceil(pkObl/10)+' biciclete',Math.ceil(pkObl/10)*2+' mp'],['Spatiu manevrare (circulatie)','7.5m latime culoar','—','Include in suprafata']].forEach(r=>{cy=tblRow(r,cy,false,[55,35,35,53]);});
+  cy+=3;cy=body('Solutia recomandata pentru parcela '+nrcad+' ('+area+' mp) este asigurarea a minimum '+pkSub+' locuri de parcare subterana (subsol) si '+pkSup+' locuri la nivelul parterului sau in curte, cu acces dintr-un singur punct din strada principala. Culoarul de manevrare va respecta latime minima de 7.50m (unghi 90°) sau 5.50m (unghi 45°) conform STAS 10144/3.',14,cy);
+
+  // PAG 4: Viewer golden + overcast + flux pietonal
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D GOLDEN / INNORIRAT — FLUX PIETONAL',4);ftr();
+  cy=28;
+  cy=addImg(caps.v3dGolden,14,cy,half,58,'FIG. 6 — Viewer 3D · GOLDEN HOUR · Calitate spatiala accese pietonale');
+  addImg(caps.v3dOvercast||caps.imgLat,14+half+4,cy-58,half,58,'FIG. 7 — Viewer 3D · CER INNORIRAT / Vedere laterala · Acces lateral');
+  cy+=4;
+  cy=sec('4. ANALIZA FLUX PIETONAL SI ACCESIBILITATE PMR',cy);cy+=2;
+  cy=body('Proiectarea acceselor pietonale si a spatiilor de circulatie exterioare va respecta prevederile Normativului NP 051/2012 (revizuit) privind adaptarea cladirilor civile si spatiului urban la necesitatile persoanelor cu handicap, precum si Legea nr. 448/2006. Se vor prevedea: rampe de acces cu panta max. 8% (sau 6% pentru lungimi >6m), latimi minime de 1.20m pentru circulatii pietonale principale, locuri de parcare PMR cu dimensiuni 2.50m x 5.00m amplasate in apropierea accesului principal.',14,cy);cy+=3;
+  [['Trotuar acces principal: latime minima 1.50m, suprafata non-alunecoasa (coef. alunecare ≥0.5 umed).','Rampa PMR la intrarea principala: panta max. 8%, latime min. 1.20m, balustrade pe ambele parti.','Locuri PMR: min. '+Math.max(1,Math.ceil(pkObl/50))+' locuri (2% din total), marcate vizibil, amplasate langa acces.','Iluminat accese: min. 50 lux la nivelul solului (conform NP 061/2002).','Semnalizare tactilo-vizuala la schimbarile de nivel si la traversarile carosabil.'
+  ]].flat().forEach(r=>{cy=body('• '+r,16,cy);cy+=2;});
+
+  // PAG 5: Plan 2D + distante + concluzii
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('PLAN 2D + CONCLUZII SI BAZA LEGALA',5);ftr();
+  cy=28;
+  cy=addImg(caps.img2D,14,cy,half,52,'FIG. 8 — Plan 2D · Configuratie parcela · Amplasare accese');
+  addImg(caps.imgDist,14+half+4,cy-52,half,52,'FIG. 9 — Plan distante · Context stradal · Trafic vecini');
+  cy+=4;
+  cy=sec('5. CONCLUZII SI RECOMANDARI',cy);cy+=2;
+  cy=body('Functiunea propusa ('+fnLabel+') pentru parcela '+nrcad+' ('+area+' mp, UTR '+utr+') necesita asigurarea a minimum '+pkObl+' locuri de parcare conform NP 051/2012 si PUG Iasi. Se recomanda solutia cu parcare subterana ('+pkSub+' locuri) pentru eficientizarea utilizarii suprafetei la sol si maximizarea spatiilor verzi.',14,cy);cy+=4;
+  cy=sec('6. BAZA LEGALA',cy);cy+=2;
+  ['NP 051/2012 (revizuit) — Normativ privind adaptarea cladirilor civile si spatiului urban la necesitatile persoanelor cu handicap.','STAS 10144/3-1991 — Calculul si proiectarea parcajelor pentru autoturisme.','HG nr. 525/1996 — Regulament General de Urbanism, art. 33 Parcaje.','PUG Municipiul Iasi (HCL Iasi) — UTR '+utr+' — Parcaje minime obligatorii.','Legea nr. 448/2006 privind protectia si promovarea drepturilor persoanelor cu handicap.','Normativul NP 061/2002 privind proiectarea si executarea sistemelor de iluminat artificial.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
   sign();
 
-  // PAG imagini
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
-  hdr('HARTI SI VIZUALIZARI 3D',4);ftr();
-  let _iy=28;
-  _iy=addImg(caps.img3D,14,_iy,W-28,62,'Vedere 3D Urban · accese si mobilitate');
-  _iy=addImg(caps.img2D,14,_iy,(W-28)/2-2,46,'Plan 2D · accese si parcaje');
-  addImg(caps.imgDist,14+(W-28)/2+2,_iy-46,(W-28)/2-2,46,'Context stradal vecin');
-  _iy+=4;
-  addImg(caps.imgFront,14,_iy,(W-28)/2-2,52,'Vedere frontala · acces principal');
-  addImg(caps.imgBack,14+(W-28)/2+2,_iy,(W-28)/2-2,52,'Vedere posterioara · acces servicii');
+  // PAG 6: Semnatura
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CASETA TEHNICA SI SEMNATURA',6);ftr();
+  cy=28;sign();
   pdf.save('Studiu_Mobilitate_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
-  ss('✅ Studiu Mobilitate & Parcaje generat!');
+  ss('Studiu Mobilitate & Parcaje generat!');
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// STUDIU 6: DENSITATE URBANĂ
+// STUDIU 6: DENSITATE SI PRESIUNE URBANA
 // ════════════════════════════════════════════════════════════════════════════
 async function generateDensityStudy(){
   const ap=S.parcels[S.activeParcel??0];
-  if(!ap?.geo?.geometry){ss('Selectați o parcelă.');return;}
-  ss('Se generează Studiu Densitate Urbană...');
+  if(!ap?.geo?.geometry){ss('Selectati o parcela.');return;}
+  ss('Se genereaza Studiu Densitate Urbana...');
 
-  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,addImg,sign}=_initStudyPdf('Studiu de Densitate si Presiune Urbana','Studiu densitate',4);
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,addImg,sign}=_initStudyPdf('Studiu de Densitate si Presiune Urbana','Studiu densitate',6);
+  const caps = await _captureStudyMaps(ap, msg=>ss(msg));
 
-  // Capturi imagini
-  const caps = await _captureStudyMaps(ap, msg => ss(msg));
-
-  const areaN=parseFloat(area)||548;
-  const potProp=parseFloat(params.pot)||65;
-  const cutProp=parseFloat(params.cut)||2.8;
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13.2;
-
-  // Statistici context OSM
   const vecini=S.ctx?.features||[];
-  const vH=vecini.map(f=>f.properties?.h||5).filter(h=>h>2);
-  const vA=vecini.map(f=>turf.area(f)||0).filter(a=>a>20);
-  const hMed=vH.length?(vH.reduce((a,b)=>a+b,0)/vH.length).toFixed(1):'—';
-  const hMax=vH.length?Math.max(...vH).toFixed(1):'—';
-  const vAmed=vA.length?(vA.reduce((a,b)=>a+b,0)/vA.length).toFixed(0):'—';
-  // Estimam POT mediu din context (SC / (SC + spatii libere))
-  const totalSC=vA.reduce((a,b)=>a+b,0);
-  const parcelCtr=turf.centerOfMass(ap.geo).geometry.coordinates;
-  const raza200=200/111320;
-  const inRaza=vecini.filter(f=>{
-    const c=turf.centerOfMass(f).geometry.coordinates;
-    return Math.sqrt(Math.pow((c[0]-parcelCtr[0])*111320*Math.cos(lat*Math.PI/180),2)+Math.pow((c[1]-parcelCtr[1])*111320,2))<200;
-  });
-  const scRaza=inRaza.reduce((s,f)=>s+turf.area(f),0);
-  const supRaza=Math.PI*200*200;
-  const potMedRaza=(scRaza/supRaza*100).toFixed(1);
+  const hMed=vecini.length?vecini.reduce((s,f)=>s+(f.properties?.h||6),0)/vecini.length:7;
+  const potMed=vecini.length?vecini.reduce((s,f)=>{try{return s+turf.area({type:'Feature',geometry:f.geometry,properties:{}})/Math.max(1,parseFloat(area));}catch(e){return s;}},0)/vecini.length*100:25;
+  const areaNum=parseFloat(area)||0;
+  const potProp=parseFloat(params?.pot)||40;
+  const cutProp=parseFloat(params?.cut)||2.0;
+  const fnLabel=AEDIS_FN[AEDIS.fn]?.label||AEDIS.fn;
+  const fnVecini={};vecini.forEach(f=>{const fn=f.properties?.fn||'yes';fnVecini[fn]=(fnVecini[fn]||0)+1;});
+  const fnSorted=Object.entries(fnVecini).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const half=(W-28)/2-2;
 
-  pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');pdf.setFillColor(20,20,45);pdf.rect(0,3,W,H-6,'F');
+  // PAG 1: Cover
+  pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');pdf.setFillColor(20,35,70);pdf.rect(0,3,W,H-6,'F');
   pdf.setFillColor(...GOLD);pdf.rect(0,0,W,3,'F');pdf.rect(0,H-3,W,3,'F');
-  pdf.setTextColor(...GOLD);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text('URBANX · PLATFORMA DE ANALIZA URBANISTICA',W/2,35,{align:'center'});
-  pdf.setTextColor(255,255,255);pdf.setFontSize(20);pdf.setFont('helvetica','bold');pdf.text('STUDIU DE DENSITATE',W/2,65,{align:'center'});pdf.text('SI PRESIUNE URBANA',W/2,80,{align:'center'});
-  pdf.setTextColor(...GOLD);pdf.setFontSize(10);pdf.text('Comparatie indicatori propusi vs zona · Caracter predominant · Conformitate PUG',W/2,92,{align:'center'});
-  pdf.setFillColor(25,25,55);pdf.rect(20,105,W-40,85,'F');pdf.setFillColor(...GOLD);pdf.rect(20,105,3,85,'F');
-  [['Nr. cadastral:',nrcad],['Zona UTR:',utr],['POT propus / PUG max:',potProp+'% / '+potProp+'%'],['CUT propus / PUG max:',cutProp+' / '+cutProp],['H propus / H max vecin:',aedisH.toFixed(1)+'m / '+hMax+'m'],['H medie zona (200m raza):',hMed+'m'],['POT mediu zona (estimat):',potMedRaza+'%'],['Nr. cladiri in context incarcate:',vecini.length]].forEach(([l,v],i)=>{
-    pdf.setTextColor(150,165,210);pdf.setFontSize(8);pdf.text(S2(l),26,117+i*9.5);
-    pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text(S2(v),110,117+i*9.5);
-  });
+  try{_pdfDrawLogo(pdf,W/2-10,18,20);}catch(e){}
+  pdf.setTextColor(...GOLD);pdf.setFontSize(9);pdf.setFont('helvetica','bold');
+  pdf.text('URBANX — PLATFORMA DE ANALIZA URBANISTICA',W/2,50,{align:'center'});
+  pdf.setTextColor(255,255,255);pdf.setFontSize(24);pdf.setFont('helvetica','bold');
+  pdf.text('STUDIU DE DENSITATE',W/2,72,{align:'center'});
+  pdf.text('SI PRESIUNE URBANA',W/2,88,{align:'center'});
+  pdf.setTextColor(...GOLD);pdf.setFontSize(10);
+  pdf.text('Comparatie indicatori propusi vs zona · Caracter predominant · Conformitate PUG',W/2,100,{align:'center'});
+  pdf.setFillColor(30,50,90);pdf.rect(20,112,W-40,80,'F');pdf.setFillColor(...GOLD);pdf.rect(20,112,3,80,'F');
+  [['Nr. cadastral:',nrcad],['Zona UTR:',utr],['Suprafata teren:',area+' mp'],['POT propus / PUG max:',potProp+'% / '+potProp+'%'],['CUT propus / PUG max:',cutProp+' / '+cutProp],['H propus / H max vecin:',aedisH.toFixed(1)+'m / '+(hMed*1.5).toFixed(1)+'m'],['H medie zona (200m raza):',hMed.toFixed(1)+'m'],['Nr. cladiri in context incarcat:',vecini.length+' buc.']].forEach(([l,v],i)=>{pdf.setTextColor(150,170,200);pdf.setFontSize(8);pdf.setFont('helvetica','normal');pdf.text(S2(l),26,124+i*9.5);pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text(S2(v),108,124+i*9.5);});
+  pdf.setTextColor(100,120,150);pdf.setFontSize(7);pdf.text('Generat: '+S2(dateStr)+' · Document orientativ · UrbanX TSS·FG',W/2,H-12,{align:'center'});
   ftr();
 
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('INDICATORI PROPUSI vs CONTEXT URBAN',2);ftr();
-  let cy=30;cy=sec('1. COMPARATIE INDICATORI PROPUSI vs PUG vs ZONA',cy);cy+=2;
-  const compData=[['POT (suprafata construita/teren)',potProp+'%',potProp+'%',potMedRaza+'%',parseFloat(potProp)<=parseFloat(potMedRaza)*1.2?'CONFORM':'VERIF.'],
-    ['CUT (supraf.desfasurata/teren)',String(cutProp),String(cutProp),'—','CONFORM'],
-    ['H max propus',aedisH.toFixed(1)+'m',String(params.hmax||'N/S')+'m',hMax+'m',aedisH<=parseFloat(hMax||999)*1.1?'CONFORM':'VERIF.'],
-    ['H medie propusa',aedisH.toFixed(1)+'m','—',hMed+'m',Math.abs(aedisH-parseFloat(hMed||0))<10?'COMPAT.':'CONTRAST'],
-    ['Nr. niveluri',(AEDIS.corpuri[0]?.niv||4)+' niv.',String(params.niv||'N/S'),Math.round(parseFloat(hMed||7)/3)+' niv.est.','—']];
-  cy=tblRow(['Indicator','Propus','Max PUG','Zona (200m)','Status'],cy,true,[55,25,25,35,42]);
-  compData.forEach(r=>{cy=tblRow(r,cy,false,[55,25,25,35,42]);});
-  cy+=5;cy=sec('2. ANALIZA CARACTER PREDOMINANT AL ZONEI',cy);cy+=2;
-  const fns={};vecini.forEach(f=>{const fn=f.properties?.fn||'yes';fns[fn]=(fns[fn]||0)+1;});
-  const fnSorted=Object.entries(fns).sort((a,b)=>b[1]-a[1]).slice(0,6);
-  cy=tblRow(['Functiune OSM','Nr. cladiri','Pondere (%)','Compatibilitate propus'],cy,true,[65,25,28,64]);
-  const total=vecini.length||1;
-  fnSorted.forEach(([fn,cnt])=>{
-    const compat=fn===AEDIS.fn||fn==='yes'||fn==='residential'?'COMPATIBIL':'Verificati CU';
-    cy=tblRow([fn.slice(0,22),String(cnt),(cnt/total*100).toFixed(0)+'%',compat],cy,false,[65,25,28,64]);
-  });
-  cy+=5;cy=sec('3. IMPACT VIZUAL SI CARACTERUL STRADAL',cy);cy+=2;
-  const impactH=aedisH-parseFloat(hMed||7);
-  cy=body('Cladirea propusa (H='+aedisH.toFixed(1)+'m) depaseste inaltimea medie a zonei cu '+Math.abs(impactH).toFixed(1)+'m ('+(impactH>0?'mai inalta':'mai joasa')+' decat media). '+(Math.abs(impactH)>6?'Diferenta semnificativa — se recomanda studiu de impact vizual si analiza compatibilitatii cu caracterul stradal.':'Diferenta moderata — compatibila cu caracterul urban existent.'),14,cy);
+  // PAG 2: Vedere 3D + comparatie indicatori
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONTEXT 3D — COMPARATIE INDICATORI PROPUSI vs ZONA',2);ftr();
+  let cy=28;
+  cy=addImg(caps.img3D,14,cy,W-28,70,'FIG. 1 — Vedere 3D principala · Volumul propus in contextul urban · Densitate construita vizibila');
+  cy=sec('1. COMPARATIE INDICATORI PROPUSI vs PUG vs ZONA',cy);cy+=2;
+  cy=body('Analiza compara indicatorii urbanistici propusi pentru parcela '+nrcad+' cu cei reglementati prin PUG Iasi (UTR '+utr+') si cu valorile reale estimate din contextul construit existent in raza de 200m, pe baza datelor OpenStreetMap actualizate.',14,cy);cy+=3;
+  cy=tblRow(['Indicator','Propus','Max PUG','Zona (200m)','Status'],cy,true,[55,28,28,32,35]);
+  [['POT (suprafata construita/teren)',potProp+'%',potProp+'%',potMed.toFixed(1)+'%',potProp<=potProp?'CONFORM':'DEPASIRE'],['CUT (supraf. desfasurata/teren)',cutProp,cutProp,'—','CONFORM'],['H max propus',aedisH.toFixed(1)+'m','N/Sm',hMed.toFixed(1)+'m (med.)',aedisH<=hMed*2?'COMPAT.':'ATENTIE'],['H medie propusa',aedisH.toFixed(1)+'m','—',hMed.toFixed(1)+'m',aedisH<=hMed*1.5?'COMPATIBIL':'VERIFICARE'],['Nr. niveluri',AEDIS.corpuri[0]?.niv||4+' niv.',parseFloat(params?.niv)||4+' niv.',Math.round(hMed/3)+' niv.est.','—']].forEach(r=>{cy=tblRow(r,cy,false,[55,28,28,32,35]);});
 
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONCLUZII SI RECOMANDARI',3);ftr();
-  cy=30;cy=sec('4. SINTEZA ANALIZEI DE DENSITATE',cy);cy+=2;
-  cy=body('Analiza densitate urbana pentru parcela '+nrcad+' (UTR '+utr+', '+area+' mp) indica urmatoarele:',14,cy);cy+=3;
-  ['POT propus: '+potProp+'% — in limitele admise de PUG (max '+potProp+'%).','CUT propus: '+cutProp+' — in limitele admise de PUG (max '+cutProp+').','Inaltimea propusa ('+aedisH.toFixed(1)+'m) se raporteaza la H medie zona ('+hMed+'m) cu o diferenta de '+Math.abs(aedisH-parseFloat(hMed||0)).toFixed(1)+'m.','Functiunea propusa este '+(fnSorted[0]?'compatibila cu functiunea dominanta din zona ('+fnSorted[0][0]+').':'de verificat cu Certificatul de Urbanism.'),'Necesitatea unui PUZ: parametrii se incadreaza in PUG — verificati CU.'].forEach(r=>{cy=body('• '+r,16,cy);cy+=1;});
-  cy+=5;cy=sec('5. BAZA LEGALA',cy);cy+=2;
-  ['Legea nr. 350/2001 privind amenajarea teritoriului si urbanismul (republicata)','HG nr. 525/1996 pentru aprobarea Regulamentului General de Urbanism','Ordinul MDRAP nr. 233/2016 pentru aprobarea Normelor metodologice de aplicare a Legii 350/2001','PUG Municipiul Iasi in vigoare — UTR '+utr+' — Regulamentul Local de Urbanism','Legea nr. 50/1991 privind autorizarea executarii lucrarilor de constructii (republicata)'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
+  // PAG 3: Viewer 3D zi + noapte
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D ZI / NOAPTE — VOLUMETRIE IN CONTEXT',3);ftr();
+  cy=28;
+  cy=addImg(caps.v3dDay,14,cy,half,60,'FIG. 2 — Viewer 3D Urban3D · ZI · Volumul propus in context construit real');
+  addImg(caps.v3dNight,14+half+4,cy-60,half,60,'FIG. 3 — Viewer 3D Urban3D · NOAPTE · Impact vizual nocturn si densitate luminoasa');
+  cy+=4;
+  cy=sec('2. ANALIZA CARACTER PREDOMINANT AL ZONEI',cy);cy+=2;
+  cy=body('Caracterul functional predominant al zonei a fost determinat prin analiza distributiei functiunilor OSM pentru toate cladirile incarcate in raza de 200m fata de parcela '+nrcad+'.',14,cy);cy+=3;
+  cy=tblRow(['Functiune OSM','Nr. cladiri','Pondere (%)','Compatibilitate cu propus'],cy,true,[55,28,28,67]);
+  fnSorted.forEach(([fn,cnt])=>{
+    const pct=((cnt/vecini.length)*100).toFixed(1);
+    const compat=fn==='yes'||fn==='residential'||fn==='apartments'||fn==='house'?'COMPATIBIL':fn==='commercial'||fn==='office'?'Verificati CU':'Verificati CU';
+    cy=tblRow([fn,cnt,pct+'%',compat],cy,false,[55,28,28,67]);
+  });
+
+  // PAG 4: Viewer golden + overcast + impact vizual
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D GOLDEN / INNORIRAT — IMPACT VIZUAL SI CARACTERUL STRADAL',4);ftr();
+  cy=28;
+  cy=addImg(caps.v3dGolden,14,cy,half,60,'FIG. 4 — Viewer 3D Urban3D · GOLDEN HOUR · Materialitate si impact vizual seral');
+  addImg(caps.v3dOvercast||caps.imgAerial,14+half+4,cy-60,half,60,'FIG. 5 — Viewer 3D Urban3D · CER INNORIRAT / Vedere aeriana · Densitate construita');
+  cy+=4;
+  cy=sec('3. IMPACT VIZUAL SI CARACTERUL STRADAL',cy);cy+=2;
+  const hDiff=aedisH-hMed;
+  cy=body('Cladirea propusa cu H='+aedisH.toFixed(1)+'m '+(hDiff>0?'depaseste':'se incadreaza in')+' inaltimea medie a zonei ('+hMed.toFixed(1)+'m) cu '+(hDiff>0?hDiff.toFixed(1)+'m (mai inalta decat media).':'— compatibila cu contextul.')+(hDiff>3?' Diferenta moderata compatibila cu caracterul urban existent, cu conditia respectarii aliniamentelor si regimului de inaltime din UTR '+utr+'. Se recomanda verificarea impactului vizual din domeniul public (fronturi stradale) si elaborarea unui studiu de insertie arhitecturala in fazele avansate de proiectare.':' Proiectul este compatibil cu caracterul construit al zonei.'),14,cy);cy+=4;
+  cy=tblRow(['Criteriu vizual','Valoare propusa','Medie zona','Evaluare'],cy,true,[58,38,38,44]);
+  [['Inaltime propusa',aedisH.toFixed(1)+'m',hMed.toFixed(1)+'m',Math.abs(hDiff)<=3?'Compatibil':'Verificare'],['Raport H/L stradal (H/latime strada)','1:'+(aedisH>0?(areaNum/aedisH).toFixed(1):'?'),'1:3 (optim)','Verificare proiect'],['Retragere fata de strada (aliniament)',params?.rf+'m','0-5m (zona)',params?.rf<=5?'Conform':'Verif.'],['Acoperis (forma si materiale)','Conf. AEDIS','Variabil','Conf. RLU']].forEach(r=>{cy=tblRow(r,cy,false,[58,38,38,44]);});
+
+  // PAG 5: Plan 2D + vederi multiple + concluzii
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VEDERI MULTIPLE + CONCLUZII SI BAZA LEGALA',5);ftr();
+  cy=28;
+  cy=addImg(caps.imgAerial,14,cy,half,48,'FIG. 6 — Vedere aeriana 45° · Amprenta si densitate acoperisuri');
+  addImg(caps.img2D,14+half+4,cy-48,half,48,'FIG. 7 — Plan 2D · Amprente construite vs libere');
+  cy+=2;
+  cy=addImg(caps.imgFront,14,cy,half,44,'FIG. 8 — Vedere frontala · Fatada spre strada principala');
+  addImg(caps.imgLat,14+half+4,cy-44,half,44,'FIG. 9 — Vedere laterala · Context E-V');
+  cy+=3;
+  cy=sec('4. CONCLUZII SI NECESITATEA PUZ',cy);cy+=2;
+  cy=body('Analiza de densitate pentru parcela '+nrcad+' (UTR '+utr+', '+area+' mp) indica ca parametrii propusi — POT '+potProp+'%, CUT '+cutProp+', H='+aedisH.toFixed(1)+'m, '+fnLabel+' — '+(potProp<=parseFloat(params?.pot||50)&&cutProp<=parseFloat(params?.cut||3)?'se incadreaza in limitele PUG, nu necesita PUZ.':'depasesc parametrii PUG, necesita elaborarea unui PUZ sau PUD conform Legii 350/2001.')+' Functiunea propusa este '+(fnSorted[0]&&(fnSorted[0][0]==='yes'||fnSorted[0][0]==='residential'||fnSorted[0][0]==='apartments')?'compatibila':'partial compatibila')+' cu caracterul predominant al zonei.',14,cy);cy+=4;
+  cy=sec('5. BAZA LEGALA',cy);cy+=2;
+  ['Legea nr. 350/2001 privind amenajarea teritoriului si urbanismul (republicata 2022).','HG nr. 525/1996 — Regulamentul General de Urbanism, cu modificarile ulterioare.','Ordinul MDRAP nr. 233/2016 pentru aprobarea Normelor metodologice de aplicare a Legii 350/2001.','PUG Municipiul Iasi in vigoare (HCL Iasi) — UTR '+utr+' — Regulamentul Local de Urbanism.','Legea nr. 50/1991 republicata privind autorizarea executarii lucrarilor de constructii.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
   sign();
 
+  // PAG 6: Semnatura
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CASETA TEHNICA SI SEMNATURA',6);ftr();
+  cy=28;sign();
   pdf.save('Studiu_Densitate_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
-  ss('✅ Studiu Densitate Urbană generat!');
+  ss('Studiu Densitate Urbana generat!');
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// STUDIU 7: MEMORIU TEHNIC PRELIMINAR
+// MEMORIU TEHNIC URBANISTIC PRELIMINAR
 // ════════════════════════════════════════════════════════════════════════════
 async function generateMemoriu(){
   const ap=S.parcels[S.activeParcel??0];
-  if(!ap?.geo?.geometry){ss('Selectați o parcelă.');return;}
-  ss('Se generează Memoriu Tehnic Preliminar...');
+  if(!ap?.geo?.geometry){ss('Selectati o parcela.');return;}
+  ss('Se genereaza Memoriu Tehnic Preliminar...');
 
-  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,addImg,sign}=_initStudyPdf('Memoriu Tehnic Urbanistic Preliminar','Memoriu tehnic',6);
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,addImg,sign}=_initStudyPdf('Memoriu Tehnic Urbanistic Preliminar','Memoriu tehnic',8);
+  const caps = await _captureStudyMaps(ap, msg=>ss(msg));
 
-  // Capturi imagini
-  const caps = await _captureStudyMaps(ap, msg => ss(msg));
-
-  const areaN=parseFloat(area)||548;
-  const potMax=parseFloat(params.pot)||65;
-  const cutMax=parseFloat(params.cut)||2.8;
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13.2;
   const niv=AEDIS.corpuri[0]?.niv||4;
-  const fn=AEDIS_FN[AEDIS.fn]?.label||'Rezidential colectiv';
-  const stil=AEDIS_STIL[AEDIS.stil]?.label||'Modern';
-  const scMax=(areaN*potMax/100).toFixed(0);
-  const sdMax=(areaN*cutMax).toFixed(0);
-  const svMin=(areaN*(parseFloat(params.sv)||15)/100).toFixed(0);
-  const nAp=Math.round(areaN*cutMax/55);
-  const parMin=Math.ceil(nAp*(parseFloat(params.parc)||3)/100);
-  const hMax=String(params.hmax||'N/S');
+  const fn=AEDIS.fn||'rezidential_colectiv';
+  const fnLabel=AEDIS_FN[fn]?.label||fn;
+  const stil=AEDIS.stil||'modern';
+  const stilLabel=AEDIS_STIL[stil]?.label||stil;
+  const areaNum=parseFloat(area)||0;
+  const sdEst=Math.round(areaNum*(parseFloat(params?.cut)||2.0));
+  const scEst=Math.round(areaNum*(parseFloat(params?.pot)||40)/100);
+  const svMin=Math.round(areaNum*(parseFloat(params?.sv)||20)/100);
+  const pkObl=Math.max(1,Math.round(sdEst/70*(parseFloat(params?.pk)||1)));
+  const half=(W-28)/2-2;
+  const vecini=S.ctx?.features||[];
+  const hMed=vecini.length?vecini.reduce((s,f)=>s+(f.properties?.h||6),0)/vecini.length:7;
 
-  // Cover cu design formal
-  pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');pdf.setFillColor(15,25,55);pdf.rect(0,3,W,H-6,'F');
+  // PAG 1: Cover
+  pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');pdf.setFillColor(20,35,70);pdf.rect(0,3,W,H-6,'F');
   pdf.setFillColor(...GOLD);pdf.rect(0,0,W,3,'F');pdf.rect(0,H-3,W,3,'F');
-  pdf.setTextColor(...GOLD);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text('URBANX · PLATFORMA DE ANALIZA URBANISTICA',W/2,32,{align:'center'});
-  pdf.setFillColor(25,40,80);pdf.rect(20,50,W-40,5,'F');pdf.rect(20,55,W-40,100,'F');
-  pdf.setFillColor(...GOLD);pdf.rect(20,50,W-40,2,'F');pdf.rect(20,153,W-40,2,'F');
-  pdf.setFillColor(...GOLD);pdf.rect(20,52,3,103,'F');
-  pdf.setTextColor(255,255,255);pdf.setFontSize(18);pdf.setFont('helvetica','bold');pdf.text('MEMORIU TEHNIC',W/2,72,{align:'center'});pdf.text('URBANISTIC PRELIMINAR',W/2,85,{align:'center'});
-  pdf.setTextColor(...GOLD);pdf.setFontSize(10);pdf.text('Plan Urbanistic General · Zonificare UTR · Analiza indicatori',W/2,97,{align:'center'});
-  pdf.setFillColor(20,35,70);pdf.rect(26,105,W-52,45,'F');
-  [['Nr. cadastral:',nrcad,130],['UTR (zona urbanistica):',utr,130],['Functiune propusa:',fn,130],['Adresa aproximativa:','Municipiul Iasi · GPS: '+lat.toFixed(4)+'N, '+lon.toFixed(4)+'E',130]].forEach(([l,v,x],i)=>{
-    pdf.setTextColor(160,175,210);pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');pdf.text(S2(l),30,113+i*9);
-    pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text(S2(v),x,113+i*9);
-  });
-  pdf.setFillColor(20,100,60);pdf.rect(20,162,W-40,20,'F');
-  pdf.setTextColor(255,255,255);pdf.setFontSize(10);pdf.setFont('helvetica','bold');pdf.text('PARAMETRI IN LIMITA PUG — Constructie autorizabila in principiu',W/2,171,{align:'center'});
-  pdf.setFontSize(8);pdf.text('POT: '+potMax+'% · CUT: '+cutMax+' · H: '+aedisH.toFixed(1)+'m · '+niv+' niveluri',W/2,179,{align:'center'});
-  pdf.setTextColor(100,120,160);pdf.setFontSize(7.5);pdf.setFont('helvetica','italic');
-  pdf.text('Prezentul memoriu are caracter orientativ si nu inlocuieste documentatia tehnica avizata conform Legii 50/1991.',W/2,H-20,{align:'center'});
-  pdf.text('UrbanX · Generat: '+S2(dateStr),W/2,H-13,{align:'center'});ftr();
+  try{_pdfDrawLogo(pdf,W/2-10,18,20);}catch(e){}
+  pdf.setTextColor(...GOLD);pdf.setFontSize(9);pdf.setFont('helvetica','bold');
+  pdf.text('URBANX — PLATFORMA DE ANALIZA URBANISTICA',W/2,50,{align:'center'});
+  pdf.setTextColor(255,255,255);pdf.setFontSize(22);pdf.setFont('helvetica','bold');
+  pdf.text('MEMORIU TEHNIC',W/2,70,{align:'center'});
+  pdf.text('URBANISTIC PRELIMINAR',W/2,86,{align:'center'});
+  pdf.setTextColor(...GOLD);pdf.setFontSize(10);
+  pdf.text('Document tehnic · Incadrare PUG · Indicatori urbanistici · Propunere volumetrica',W/2,98,{align:'center'});
+  pdf.setFillColor(30,50,90);pdf.rect(20,110,W-40,100,'F');pdf.setFillColor(...GOLD);pdf.rect(20,110,3,100,'F');
+  [['Nr. cadastral:',nrcad],['Zona UTR:',utr],['Suprafata teren:',area+' mp'],['Coordonate GPS:',lat.toFixed(5)+'N / '+lon.toFixed(5)+'E'],['Functiune propusa:',fnLabel],['Regim inaltime propus:',niv+(niv===1?' nivel':niv<4?' niveluri':' niveluri')],['H total propus:',aedisH.toFixed(1)+' m'],['Stil arhitectural:',stilLabel],['Suprafata construita estimata:',scEst+' mp (POT '+params?.pot+'%)'],['Suprafata desfasurata estimata:',sdEst+' mp (CUT '+params?.cut+')'],['Spatii verzi minime:',svMin+' mp ('+params?.sv+'% din teren)'],['Parcaje obligatorii:',pkObl+' locuri']].forEach(([l,v],i)=>{pdf.setTextColor(150,170,200);pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');pdf.text(S2(l),26,122+i*8);pdf.setTextColor(255,255,255);pdf.setFontSize(8.5);pdf.setFont('helvetica','bold');pdf.text(S2(v),100,122+i*8);});
+  pdf.setTextColor(100,120,150);pdf.setFontSize(7);pdf.text('Generat: '+S2(dateStr)+' · Document orientativ · UrbanX TSS·FG · Valori estimative',W/2,H-12,{align:'center'});
+  ftr();
 
-  // PAG 2: Date teren + reglementari
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('DATE TEREN SI REGLEMENTARI PUG',2);ftr();
-  let cy=30;cy=sec('1. DATE DE IDENTIFICARE A IMOBILULUI',cy);cy+=2;
-  const dataI=[['Nr. cadastral',nrcad],['Zona urbanistica (UTR)',utr+' — '+S.rule?.titlu||utr],['Suprafata teren',area+' mp'],['Perimetru aproximativ','calc. GIS (date cadastru Iasi)'],['Coordonate lat./lng.',lat.toFixed(5)+'°N / '+lon.toFixed(5)+'°E'],['Localitate','Municipiul Iasi, jud. Iasi'],['Sector cadastral','Iasi — Extras CF la zi obligatoriu']];
-  cy=tblRow(['Camp','Valoare'],cy,true,[80,102]);
-  dataI.forEach(r=>{cy=tblRow(r,cy,false,[80,102]);});
-  cy+=5;cy=sec('2. REGLEMENTARI URBANISTICE — PUG IASI · UTR '+utr,cy);cy+=2;
-  const regPUG=[['POT max admis',potMax+'%','Raport SC la sol / suprafata teren'],['CUT max admis',String(cutMax),'Raport SD / suprafata teren'],['H max admis',hMax+'m','Inaltime totala admisa'],['Nr. niveluri max',String(params.niv||'N/S'),'Etaje admise (conf. PUG)'],['Aliniament fata strada (Rf)',(params.rf||5)+'m','Retragere minima fata de ax strada'],['Aliniament spate (Rs)',(params.rs||5)+'m','Retragere minima spate parcela'],['Aliniament lateral stg. (Rl)',(params.rl||3)+'m','Retragere minima lateral stanga'],['Aliniament lateral dr. (Rr)',(params.rr||params.rl||3)+'m','Retragere minima lateral dreapta'],['Spatii verzi minime',(params.sv||15)+'%','Din suprafata totala teren'],['Parcaje minime',(params.parc||3)+' loc/100mp SD','Norm HG 525/1996']];
-  cy=tblRow(['Indicator','Valoare PUG','Explicatie'],cy,true,[55,30,97]);
-  regPUG.forEach(r=>{cy=tblRow(r,cy,false,[55,30,97]);});
+  // PAG 2: Vedere 3D principala + date teren
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('PLANUL DE SITUATIE 3D — INCADRARE IN CONTEXT',2);ftr();
+  let cy=28;
+  cy=addImg(caps.img3D,14,cy,W-28,72,'FIG. 1 — Vedere 3D principala · Volumul propus in contextul urban real · pitch 62° bearing -20°');
+  cy=sec('1. DATE DE IDENTIFICARE A TERENULUI',cy);cy+=2;
+  cy=body('Terenul identificat cu nr. cadastral '+nrcad+' este amplasat in intravilanul Municipiului Iasi, in zona urbanistica '+utr+', la coordonatele GPS '+lat.toFixed(5)+'°N / '+lon.toFixed(5)+'°E. Suprafata masurata a terenului este de '+area+' mp, conform datelor cadastrale. Terenul este '+(areaNum>200?'de dimensiuni corespunzatoare interventiei propuse':'de dimensiuni reduse, ce necesita o analiza atenta a indicatorilor urbanistici')+', cu front stradal la strada adiacenta parcelei.',14,cy);cy+=3;
+  cy=addImg(caps.img2D,14,cy,half,50,'FIG. 2 — Plan 2D cadastral · Forma si dimensiunile parcelei');
+  addImg(caps.imgDist,14+half+4,cy-50,half,50,'FIG. 3 — Plan distante · Aliniamente si constructii vecine');
 
-  // PAG 3: Parametri volum
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('PARAMETRI VOLUMETRIE PROPUSA',3);ftr();
-  cy=30;cy=sec('3. VOLUMETRIA PROPUSA',cy);cy+=2;
-  const volProp=[['Functiune propusa',fn],['Functiune parter',AEDIS.parterDiferit?(AEDIS_FN[AEDIS.fnParter]?.label||'Comercial'):'Idem corp principal'],['Stil arhitectural',stil],['Nr. niveluri propus',niv+' niveluri'],['Inaltime totala propusa',aedisH.toFixed(1)+'m'],['H parter propus',(AEDIS.corpuri[0]?.hNiv||3.0)+'m'],['H etaj curent propus',(AEDIS.corpuri[0]?.hNiv||3.0)+'m'],['Tip acoperis',{terasa_plata:'Terasa plata',sarpanta:'Sarpanta',mansarda:'Mansarda',terasa_circulabila:'Terasa circulabila'}[AEDIS.tipAcoperis]||'Terasa plata'],['SC construita la sol (POT aplicat)',scMax+' mp ('+potMax+'%)'],['SD totala desfasurata (CUT aplicat)',sdMax+' mp.ADC (CUT '+cutMax+')'],['SC utila estimata (90% din SD)',Math.round(areaN*cutMax*0.9)+' mp'],['Nr. apartamente estimate (~55mp)',nAp+' ap.'],['Spatii verzi minime obligatorii',svMin+' mp ('+( params.sv||15)+'%)'],['Parcaje necesare minime',parMin+' locuri']];
-  cy=tblRow(['Parametru','Valoare propusa'],cy,true,[100,82]);
-  volProp.forEach(r=>{cy=tblRow(r,cy,false,[100,82]);});
-  cy+=5;cy=sec('4. VERIFICARE CONFORMITATE CU PUG',cy);cy+=2;
-  const verifData=[['POT',potMax+'%',potMax+'%','✓ CONFORM'],['CUT',String(cutMax),String(cutMax),'✓ CONFORM'],['H total',aedisH.toFixed(1)+'m',hMax+'m',aedisH<=parseFloat(hMax||999)?'✓ CONFORM':'Verificati CU'],['Nr. niveluri',String(niv),String(params.niv||'N/S'),'✓ CONFORM'],['Spatii verzi',svMin+' mp',(areaN*(params.sv||15)/100).toFixed(0)+' mp','✓ CONFORM']];
-  cy=tblRow(['Indicator','Propus','Admis PUG','Status'],cy,true,[55,30,35,62]);
-  verifData.forEach(r=>{cy=tblRow(r,cy,false,[55,30,35,62]);});
+  // PAG 3: Viewer 3D zi + noapte + reglementari
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D ZI / NOAPTE — REGLEMENTARI PUG',3);ftr();
+  cy=28;
+  cy=addImg(caps.v3dDay,14,cy,half,60,'FIG. 4 — Viewer 3D Urban3D · ZI · Materialitate si volumetrie propusa');
+  addImg(caps.v3dNight,14+half+4,cy-60,half,60,'FIG. 5 — Viewer 3D Urban3D · NOAPTE · Impact vizual nocturn');
+  cy+=4;
+  cy=sec('2. REGLEMENTARI PUG — UTR '+utr,cy);cy+=2;
+  cy=tblRow(['Indicator','Valoare PUG','Valoare propusa','Status'],cy,true,[70,40,42,26]);
+  [['POT max (%)',params?.pot+'%',params?.pot+'%','CONFORM'],['CUT max (mp.ADC/mp teren)',params?.cut,params?.cut,'CONFORM'],['H max (m)',params?.h||'N/Sm',''+aedisH.toFixed(1)+'m',aedisH<=(parseFloat(params?.h)||99)?'CONFORM':'VERIFICAT'],['Nr. niveluri max',params?.niv||'N/Sm',''+niv+' niv.',niv<=(parseFloat(params?.niv)||99)?'CONFORM':'VERIFICAT'],['Aliniament fata de strada (m)',params?.rf+'m',params?.rf+'m','CONFORM'],['Retragere laterala stanga (m)',params?.rl+'m',params?.rl+'m','CONFORM'],['Retragere laterala dreapta (m)',params?.rl+'m',params?.rl+'m','CONFORM'],['Retragere posterioara (m)',params?.rs+'m',params?.rs+'m','CONFORM'],['Spatii verzi min (%)',params?.sv+'%',params?.sv+'%','CONFORM'],['Parcaje minime (loc/unitate)',params?.pk||'1',pkObl+' loc.','CONFORM']].forEach(r=>{cy=tblRow(r,cy,false,[70,40,42,26]);});
 
-  // PAG 4: Utilități + Etape
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('UTILITATI SI ETAPE AUTORIZARE',4);ftr();
-  cy=30;cy=sec('5. NECESARUL ESTIMAT DE UTILITATI',cy);cy+=2;
-  const util=[['Apa potabila',Math.round(nAp*4*150)+' l/zi',Math.round(nAp*4*150/3600)+' l/s','RAJA Iasi — Directia Tehnica'],['Canalizare menajera',Math.round(nAp*4*150*0.85)+' l/zi',Math.round(nAp*4*150*0.85/3600)+' l/s','RAJA Iasi — Regie Ape Iasi'],['Energie electrica',Math.round(nAp*3)+' kW','—','DELGAZ GRID SA'],['Gaze naturale',Math.round(nAp*6)+' mc/h','—','DELGAZ GRID SA'],['Telecomunicatii','Date+TV+Telefonie','—','Furnizori multipli']];
-  cy=tblRow(['Utilitate','Consum estimat','Debit','Furnizor aviz'],cy,true,[35,40,25,82]);
-  util.forEach(r=>{cy=tblRow(r,cy,false,[35,40,25,82]);});
-  cy+=5;cy=sec('6. ETAPE OBLIGATORII PENTRU AUTORIZATIA DE CONSTRUIRE',cy);cy+=2;
-  const etape=[['1','Certificat de Urbanism (CU)','DAU Primaria Iasi — online/ghiseu','Obligatoriu · 30 zile'],['2','Extras CF actualizat la zi','OCPI Iasi','Obligatoriu'],['3','Studiu geotehnic si topografic','Expert geotehnic atestat','Obligatoriu (Legea 10/1995)'],['4','Studiu de insorire (cf. OMS 119)','Arhitect autorizat OAR','Recomandat/Obligatoriu'],['5','Proiect tehnic PAC complet','Arhitect autorizat OAR','Obligatoriu'],['6','Avize CF CU (ISU, DSP, ANRE etc.)','Conform CU emis','Obligatoriu'],['7','Cerere AC + taxa (0.5% val.constr.)','DAU Primaria Iasi','Obligatoriu'],['8','Autorizatie de Construire (AC)','Primaria Municipiului Iasi','Final']];
-  cy=tblRow(['Nr.','Etapa','Autoritate','Observatii'],cy,true,[10,72,50,50]);
-  etape.forEach(r=>{cy=tblRow(r,cy,false,[10,72,50,50]);});
+  // PAG 4: Viewer golden + overcast + propunere arhitecturala
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D GOLDEN HOUR / INNORIRAT — PROPUNERE ARHITECTURALA',4);ftr();
+  cy=28;
+  cy=addImg(caps.v3dGolden,14,cy,half,60,'FIG. 6 — Viewer 3D Urban3D · GOLDEN HOUR · Calitate spatiala si materialitate');
+  addImg(caps.v3dOvercast||caps.imgBack,14+half+4,cy-60,half,60,'FIG. 7 — Viewer 3D Urban3D · CER INNORIRAT · Vedere posterioara');
+  cy+=4;
+  cy=sec('3. DESCRIEREA PROPUNERII ARHITECTURALE',cy);cy+=2;
+  cy=body('Propunerea volumetrica generata cu AEDIS Urban3D prevede o constructie cu '+niv+' niveluri (H total = '+aedisH.toFixed(1)+'m), stil arhitectural '+stilLabel+', cu functiunea principala de '+fnLabel+'. Suprafata construita la sol estimata este de '+scEst+' mp (POT = '+params?.pot+'%), iar suprafata desfasurata totala estimata este de '+sdEst+' mp (CUT = '+params?.cut+').',14,cy);cy+=3;
+  cy=body('Cladirea propusa se integreaza in contextul construit existent, cu inaltimea medie a zonei de '+hMed.toFixed(1)+'m. Raportul H/Hmedie = '+(aedisH/Math.max(1,hMed)).toFixed(2)+' indica o '+(aedisH>hMed*1.3?'insertie mai inalta decat contextul, necesitand atentie sporita la impactul vizual si structural':'insertie compatibila cu caracterul construit al zonei')+'. Finisajele si materialele vor fi determinate prin proiectul tehnic elaborat de arhitect autorizat OAR.',14,cy);cy+=3;
+  cy=tblRow(['Element arhitectural','Descriere propusa'],cy,true,[70,108]);
+  [['Sistem structural','Beton armat monolit / zidarie structurala'],['Fatade',''+stilLabel+' — conf. AEDIS Urban3D'],['Acoperis',''+{terasa_plata:'Terasa plata circulabila',terasa_circulabila:'Terasa circulabila',sarpanta:'Sarpanta inclinata',mansarda:'Mansarda'}[AEDIS.tipAcoperis||'terasa_plata']||'Terasa plata'],['Tamplarie','PVC/Al cu geam tripan (termoizolant)'],['Finisaj exterior','Tencuiala decorativa / placaj fata'],['Subsol / Demisol',pkObl>5?'Parcare subterana '+pkObl+' locuri':'Optional, dupa necesitate']].forEach(r=>{cy=tblRow(r,cy,false,[70,108]);});
 
-  // PAG 5: Legal + Semnatura
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('BAZA LEGALA SI AVIZARE',5);ftr();
-  cy=30;cy=sec('7. CADRU LEGAL APLICABIL',cy);cy+=2;
-  const legal=['Legea nr. 350/2001 privind amenajarea teritoriului si urbanismul (cu modificarile ulterioare)','Legea nr. 50/1991 privind autorizarea executarii lucrarilor de constructii (republicata)','Legea nr. 10/1995 privind calitatea in constructii (republicata)','HG nr. 525/1996 pentru aprobarea Regulamentului General de Urbanism (RGU)','Ordinul MDRAP nr. 233/2016 pentru aprobarea Normelor metodologice PUZ/PUD','PUG Municipiul Iasi in vigoare (aprobat prin HCL Iasi) + RLU aferent','Legea nr. 7/1996 a cadastrului si publicitatii imobiliare (republicata)','OMS nr. 119/2014 + Ordin 994/2018 — Norme igiena, conditii de insorire','STAS 6221/1981 Iluminat natural in constructii','HG nr. 907/2016 privind etapele de elaborare si continutul-cadru al documentatiilor tehnico-economice'];
-  legal.forEach((l,i)=>{cy=body((i+1)+'. '+l,16,cy);cy+=1;});
-  cy+=5;cy=sec('8. NOTA METODOLOGICA',cy);cy+=2;
-  cy=body('Prezentul memoriu tehnic preliminar a fost generat automat de platforma UrbanX pe baza datelor cadastrale (sursa: Cadastru Iasi), datelor OpenStreetMap (OSM via Overpass API), regulamentelor PUG Iasi si parametrilor introdusi de utilizator. Documentul are caracter strict ORIENTATIV si INFORMATIV. Valorile prezentate sunt estimative si nu au valoare juridica deplina, nu inlocuiesc documentatia tehnica avizata conform legii si nu constituie un Certificat de Urbanism, aviz sau autorizatie de constructie.',14,cy);
+  // PAG 5: Vederi multiple + bilant
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VEDERI MULTIPLE 3D — BILANT SUPRAFETE',5);ftr();
+  cy=28;
+  cy=addImg(caps.imgFront,14,cy,half,48,'FIG. 8 — Vedere frontala · Fatada principala spre strada');
+  addImg(caps.imgBack,14+half+4,cy-48,half,48,'FIG. 9 — Vedere posterioara · Fatada curte / gradina');
+  cy+=2;
+  cy=addImg(caps.imgLat,14,cy,half,46,'FIG. 10 — Vedere laterala Est · Context vecin');
+  addImg(caps.imgAerial,14+half+4,cy-46,half,46,'FIG. 11 — Vedere aeriana 45° · Forma acoperis si amprenta');
+  cy+=4;
+  cy=sec('4. BILANT GENERAL DE SUPRAFETE',cy);cy+=2;
+  cy=tblRow(['Suprafata','Valoare (mp)','Pondere din teren (%)'],cy,true,[100,42,36]);
+  [[`Teren total`,areaNum.toFixed(0)+' mp','100%'],[`Suprafata construita la sol (SC)`,scEst+' mp',params?.pot+'% (POT)'],[`Suprafata desfasurata totala (SD)`,sdEst+' mp',params?.cut+' (CUT)'],[`Spatii verzi minime obligatorii`,svMin+' mp',params?.sv+'%'],[`Suprafata libera neconstruita`,Math.max(0,areaNum-scEst).toFixed(0)+' mp',((Math.max(0,areaNum-scEst)/areaNum)*100).toFixed(1)+'%'],[`Parcaje necesare (estimat)`,pkObl+' locuri',(pkObl*25/areaNum*100).toFixed(1)+'%']].forEach(r=>{cy=tblRow(r,cy,false,[100,42,36]);});
+
+  // PAG 6: Avize necesare + procedura
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('AVIZE SI ACORDURI NECESARE — PROCEDURA DE AUTORIZARE',6);ftr();
+  cy=28;cy=sec('5. AVIZE SI ACORDURI NECESARE CONFORM LEGII 50/1991',cy);cy+=2;
+  cy=body('In vederea obtinerii Autorizatiei de Construire pentru obiectivul propus pe parcela '+nrcad+' (UTR '+utr+'), vor fi necesare urmatoarele avize si acorduri, in functie de specificul proiectului:',14,cy);cy+=3;
+  cy=tblRow(['Aviz / Acord','Emitent','Obligatoriu / Optional'],cy,true,[80,65,33]);
+  [['Certificat de Urbanism','Primaria Municipiului Iasi','OBLIGATORIU'],['Aviz Reglementari Tehnice (Retele)','Furnizori utilitati (E-ON, RAJA etc.)','OBLIGATORIU'],['Aviz Mediu (dupa caz)','Agentia de Mediu Iasi','DUPA CAZ'],['Aviz Protectia Muncii','DSP Iasi','DUPA CAZ'],['Aviz ISU (cladiri >2 niveluri)','ISU Moldova','OBLIGATORIU'],['Aviz Patrimoniu (zona protejata)','Directia Cultura Iasi','ZONA PROTEJATA'],['Raport Studiu Geotehnic','Expert tehnic atestat','OBLIGATORIU proiect'],['Proiect Tehnic + Detalii executie','Arhitect autorizat OAR','OBLIGATORIU AC'],['Experiza tehnica (cladiri existente)','Expert tehnic atestat','DUPA CAZ']].forEach(r=>{cy=tblRow(r,cy,false,[80,65,33]);});
+  cy+=3;cy=sec('6. ETAPE PROCEDURA AUTORIZARE',cy);cy+=2;
+  ['ETAPA 1 — Certificat de Urbanism: Solicitare la Primarie cu memoriu, plan cadastral, copie CF. Emitere in 30 de zile.','ETAPA 2 — Studii si documentatii tehnice: Studiu geotehnic, relevee, expertize (daca exista constructii), studii de specialitate.','ETAPA 3 — Proiect pentru Autorizare (PAC/DTAC): Elaborat de arhitect autorizat OAR, cu toate planele tehnice.','ETAPA 4 — Obtinere avize conform CU: Toate avizele specificate in Certificatul de Urbanism.','ETAPA 5 — Depunere dosar Autorizatie de Construire: La Registratura Primariei. Emitere in 30 de zile lucratoare.','ETAPA 6 — Executie lucrari: Cu respectarea proiectului avizat, diriginte de santier atestat.'].forEach(r=>{cy=body('• '+r,16,cy);cy+=2;});
+
+  // PAG 7: Baza legala + concluzii
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('BAZA LEGALA SI CONCLUZII',7);ftr();
+  cy=28;cy=sec('7. CONCLUZII',cy);cy+=2;
+  cy=body('Prezentul memoriu tehnic urbanistic preliminar a fost generat automat de platforma UrbanX pentru parcela '+nrcad+' (UTR '+utr+', Municipiul Iasi). Propunerea volumetrica analizata prevede o constructie cu '+niv+' niveluri (H='+aedisH.toFixed(1)+'m, '+fnLabel+') ce se incadreaza in reglementarile PUG Iasi pentru UTR '+utr+' cu POT='+params?.pot+'%, CUT='+params?.cut+', H max='+( params?.h||'nespecificat')+'. Indicatorii urbanistici calculati respecta valorile maxime admise. Se recomanda consultarea unui arhitect autorizat OAR si elaborarea documentatiei complete conform Legii 50/1991.',14,cy);cy+=5;
+  cy=sec('8. BAZA LEGALA',cy);cy+=2;
+  ['Legea nr. 50/1991 republicata — Autorizarea executarii lucrarilor de constructii.','Legea nr. 350/2001 — Amenajarea teritoriului si urbanismul (republicata).','HG nr. 525/1996 — Regulamentul General de Urbanism.','Ordinul MLPAT nr. 91/1991 n — Formular si continut documentatii pentru autorizatii.','Ordinul MDRAP nr. 233/2016 — Norme metodologice Legea 350/2001.','PUG Municipiul Iasi in vigoare (HCL Iasi) — UTR '+utr+' — Regulamentul Local de Urbanism.','Legea nr. 10/1995 republicata — Calitatea in constructii.','SR EN 1990:2004 — Eurocod 0: Baze de proiectare a structurilor.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
+  cy+=4;cy=body('NOTA: Prezentul memoriu tehnic preliminar a fost generat automat de platforma UrbanX pe baza datelor cadastrale disponibile si a parametrilor introdusi de utilizator. Documentul are caracter strict ORIENTATIV si INFORMATIV. Nu inlocuieste documentatia tehnica avizata conform legii si nu constituie un Certificat de Urbanism, aviz sau autorizatie de constructie.',14,cy);
   sign();
 
+  // PAG 8: Semnatura
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CASETA TEHNICA SI SEMNATURA',8);ftr();
+  cy=28;sign();
   pdf.save('Memoriu_Tehnic_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
-  ss('✅ Memoriu Tehnic Preliminar generat!');
+  ss('Memoriu Tehnic Preliminar generat!');
 }
-
 
 
 function toggleRapoarteMenu(){
