@@ -747,7 +747,7 @@ canvas#c2d{width:100%;height:100%;display:block}
 <div id="utr-drawer">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px">
     <b style="color:#d4af37">🗺 Zone UTR — PUG Iași · Click pe UTR pentru a-l evidenția și a vedea regulamentul</b>
-    <button class="btn-s" id="btnCloseUTR" style="padding:3px 9px;font-size:11px">✕</button>
+    <button id="btnCloseUTR" onclick="hideUTRDrawer()" title="Ascunde bara — UTR-urile rămân pe hartă (Esc)" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:#f87171;border-radius:7px;padding:5px 14px;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;letter-spacing:.05em">✕ Ascunde bara</button>
   </div>
   <div id="utr-chips"></div>
   <div id="utr-leg" style="margin-top:6px;font-size:11px;color:#64748b"></div>
@@ -4344,7 +4344,9 @@ function popup(html,lngLat){
 }
 
 // Buton global de închidere popup (keyboard ESC)
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.popup){S.popup.remove();S.popup=null;}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.popup){S.popup.remove();S.popup=null;}
+  if(e.key==='Escape'&&document.getElementById('utr-drawer')?.classList.contains('open')) hideUTRDrawer();
+});
 
 // ═══ PARCAJE ══════════════════════════════════════════════════════════════
 function calcParcaje(fn,area,nrApart,nrCam){
@@ -6136,6 +6138,11 @@ function toggleUTR(){
   const chips=_g('utr-chips');
   if(chips)chips.innerHTML=Object.keys(utrMap).sort().map(u=>`<span class="utr-chip" style="background:${ucol(u)}22;border-color:${ucol(u)};color:${ucol(u)}" onclick="selectUTR('${u}')" title="${esc(REGULI[u]?.d||u)} · ${utrMap[u]} zone">${u}</span>`).join('');
   const leg=_g('utr-leg');if(leg)leg.textContent=`${Object.keys(utrMap).length} tipuri UTR · ${S.pug.features.length} zone · Click pe UTR pentru detalii și zoom`;
+}
+
+// Ascunde doar bara — UTR-urile rămân vizibile pe hartă
+function hideUTRDrawer(){
+  _g('utr-drawer').classList.remove('open');
 }
 
 function selectUTR(utr){
