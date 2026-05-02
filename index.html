@@ -3890,7 +3890,7 @@ function buildVolume(){
     } else if(scenariu === 'extindere_h'){
       // EXTINDERE ORIZONTALA: construim pe zona libera, langa existente
       // Cladirile existente raman vizibile
-      try{map.setLayoutProperty('ctx-3d','visibility','visible');}catch(e){}
+      // ctx-3d visibility managed by _setCtxVisibility()
       // Zona libera = footprint minus cladirile existente
       let zonaLibera = fp;
       existingBlds.forEach(bld=>{
@@ -3916,7 +3916,7 @@ function buildVolume(){
       
     } else if(scenariu === 'extindere_v'){
       // EXTINDERE VERTICALA + ORIZONTALA: corp nou integrat
-      try{map.setLayoutProperty('ctx-3d','visibility','visible');}catch(e){}
+      // ctx-3d visibility managed by _setCtxVisibility()
       // Footprint = intreaga zona construibila (poate include si zona cladirilor existente)
       // Volumul porneste de la sol si inglobeaza tot
       // Cladirile existente sunt "absorbite" in noul corp
@@ -6138,63 +6138,45 @@ function setMVS(s){ if(s&&s.getAttribute) s=s.getAttribute('data-s');
   renderTab('proiect'); 
 }
 function setScenariu(s){
-  const prev = S.vol.scenariuConstructie || 'liber';
   S.vol.scenariuConstructie = s;
 
-  // ── Side effects pe hartă ────────────────────────────────────────────────
   if(s === 'liber'){
-    // DEMOLARE: salvăm backup ctx și schimbăm la Urban3D (singurul stil unde
-    // putem ascunde complet clădirile existente de pe parcelă)
+    // Salvăm backup ctx
     if(!S._ctxBackup && S.ctx?.features?.length){
       S._ctxBackup = JSON.parse(JSON.stringify(S.ctx));
     }
-    // Schimbăm la Urban3D dacă nu suntem deja
+    // Schimbăm la Urban3D dacă nu suntem deja (singuru stil unde controlăm clădirile)
     const selBase = document.getElementById('selBase');
     if(selBase && selBase.value !== 'custom'){
-      S._styleBeforeDemo = selBase.value; // salvăm stilul original
+      S._styleBeforeDemo = selBase.value;
       selBase.value = 'custom';
       map.setStyle(STYLES['custom']);
       map.once('style.load', ()=>{
-        setTimeout(()=>{
-          _restoreAfterStyleLoad('custom');
-          // după reload stil, ascundem ctx-3d
-          try{ map.setLayoutProperty('ctx-3d','visibility','none'); }catch(e){}
-        }, 400);
+        setTimeout(()=>{ _restoreAfterStyleLoad('custom'); _setCtxVisibility(); }, 400);
       });
     } else {
-      // Deja Urban3D — ascundem direct
-      try{ map.setLayoutProperty('ctx-3d','visibility','none'); }catch(e){}
+      _setCtxVisibility(); // ascunde ctx-3d
     }
   } else {
-    // EXTINDERE sau alt scenariu — restaurăm
-    // Restaurăm ctx backup dacă vine din demolare
+    // Restaurăm backup ctx
     if(S._ctxBackup?.features?.length){
-      S.ctx = S._ctxBackup;
-      S._ctxBackup = null;
+      S.ctx = S._ctxBackup; S._ctxBackup = null;
       try{ setSource('ctx-src', S.ctx); }catch(e){}
     }
-    // Restaurăm stilul original dacă a fost schimbat
+    // Restaurăm stilul original
     if(S._styleBeforeDemo){
-      const prevStyle = S._styleBeforeDemo;
-      S._styleBeforeDemo = null;
+      const prevStyle = S._styleBeforeDemo; S._styleBeforeDemo = null;
       const selBase = document.getElementById('selBase');
-      if(selBase){ selBase.value = prevStyle; }
+      if(selBase) selBase.value = prevStyle;
       map.setStyle(STYLES[prevStyle] || STYLES.custom);
       map.once('style.load', ()=>{
-        setTimeout(()=>{ _restoreAfterStyleLoad(prevStyle); }, 400);
+        setTimeout(()=>{ _restoreAfterStyleLoad(prevStyle); _setCtxVisibility(); }, 400);
       });
     } else {
-      // Arătăm ctx-3d
-      try{ map.setLayoutProperty('ctx-3d','visibility','visible'); }catch(e){}
+      _setCtxVisibility(); // arată ctx-3d
     }
-    // Curățăm demolish-mask dacă există
-    try{
-      if(map.getLayer('demolish-mask')) map.removeLayer('demolish-mask');
-      if(map.getSource('demolish-mask-src')) map.removeSource('demolish-mask-src');
-    }catch(e){}
   }
 
-  // ── Regenerăm volumul ────────────────────────────────────────────────────
   if(S.vol.genDone){
     const f = buildVolume();
     setSource('vol-src',{type:'FeatureCollection',features:f});
@@ -8275,6 +8257,7 @@ function aedisCalcExistent(){
 // ── Helper: setează visibility ctx-3d respectând scenariul demolare ─────────
 function _setCtxVisibility(){
   const visible = !S.vol.onlyVol
+    && S.vol.scenariuConstructie !== 'liber'
     && AEDIS.scenariu !== 'demolare'
     && !AEDIS._demolishActive;
   try{ map.setLayoutProperty('ctx-3d','visibility', visible ? 'visible' : 'none'); }catch(e){}
