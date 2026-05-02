@@ -1054,11 +1054,18 @@ var AEDIS = {
   corpActiv: 0,
 
   // Acoperis
-  tipAcoperis: 'terasa_plata',  // terasa_plata | terasa_circulabila | sarpanta | mansarda | combinat
+  tipAcoperis: 'terasa_plata',  // terasa_plata | terasa_circulabila | sarpanta | mansarda | combinat | penthouse
   hSarpanta: 3.5,               // H coama sarpanta (m)
   unghiSarpanta: 35,            // unghi (grade)
   hMansarda: 2.8,               // H util mansarda
   hAttic: 1.2,                  // H atic/parapet terasa
+  // Penthouse
+  penthouseActiv: false,        // adaugă penthouse deasupra ultimului etaj
+  penthouseRetragere: 2.5,      // retragere penthouse față de atic (m) — pe toate laturile
+  penthouseH: 3.2,              // înălțime penthouse (m)
+  penthouseSuprafataFactor: 0.5, // factor suprafață terasă penthouse (0.3–0.8)
+  // Retragere atic (pe 4 laturi independent)
+  aticRetragere: {front:0, spate:0, stanga:0, dreapta:0}, // retragere atic față de corp (m)
 
   // Retrageri per etaj (array, index=etaj)
   retrageriFineEtaje: {},       // {etaj: factor} ex: {3: 0.85, 4: 0.75}
@@ -1138,81 +1145,125 @@ var AEDIS_FN = {
 };
 var AEDIS_STIL = {
   modern: {
-    label:'🏢 Modern', desc:'Fațade sticlă-oțel, etaje progresive, atic pronunțat',
-    floorColors: ['#1e3a5f','#1d4ed8','#2563eb','#3b82f6','#60a5fa','#93c5fd','#bfdbfe','#eff6ff'],
-    parterColor: '#0f172a',
-    aticColor: '#0c1a2e',
+    label:'🏢 Modern', desc:'Sticlă-oțel, etaje progresive, atic pronunțat, bandouri orizontale',
+    floorColors: ['#0f172a','#1e3a5f','#1d4ed8','#2563eb','#3b82f6','#60a5fa','#93c5fd','#bfdbfe'],
+    parterColor: '#0f172a',   // soclu negru mat
+    aticColor:   '#0c1a2e',
+    windowColor: '#7dd3fc',   // geam albastru deschis
+    bandColor:   '#1e40af',   // bandouri orizontale albastru intens
     retragereFactor: 0.88, hasAttic: true, aticH: 1.4,
+    cortinaProcent: 70,
     etajColor: (base,i,tot)=>{
-      // Progresie: soclu negru → albastru intens → albastru deschis (sticlă)
       const cols=['#0f172a','#1e3a5f','#1d4ed8','#2563eb','#3b82f6','#60a5fa','#93c5fd','#bfdbfe'];
       return cols[Math.min(i,cols.length-1)];
     }
   },
   inovator: {
-    label:'⚡ Inovator', desc:'Alternare materiale, retrageri expresive, corp dinamic',
-    floorColors: ['#7c3aed','#6d28d9','#5b21b6','#4c1d95','#6d28d9','#7c3aed','#8b5cf6','#a78bfa'],
-    parterColor: '#4c1d95',
-    aticColor: '#2e1065',
-    retragereFactor: 0.72, hasAttic: false, aticH: 0,
+    label:'⚡ Inovator', desc:'Volum dinamic, retrageri expresive, contrast violet-auriu, fațade unghiulare',
+    floorColors: ['#3b0764','#581c87','#6b21a8','#7c3aed','#8b5cf6','#a78bfa','#c4b5fd','#ede9fe'],
+    parterColor: '#1e1b4b',
+    aticColor:   '#d4af37',   // atic auriu — contrast puternic
+    windowColor: '#fde68a',   // geam auriu-cald
+    bandColor:   '#d4af37',   // bandouri aurii
+    retragereFactor: 0.68, hasAttic: false, aticH: 0,
+    cortinaProcent: 40,
     etajColor: (base,i,tot)=>{
-      // Alternare violet-inchis / violet-mediu
-      const cols=['#4c1d95','#5b21b6','#6d28d9','#7c3aed','#8b5cf6','#7c3aed','#6d28d9','#5b21b6'];
-      return cols[i%cols.length];
+      // Alternare expresivă violet/auriu
+      return i%3===0?'#d4af37':['#3b0764','#6b21a8','#8b5cf6','#7c3aed','#a78bfa'][Math.min(i,4)];
     }
   },
   clasic: {
-    label:'🏛 Clasic', desc:'Soclu pronunțat, cornișe, piatră naturală, proporții clasice',
-    floorColors: ['#44260a','#6b3a10','#8b4513','#a0522d','#b8732e','#c8914a','#d4a96a','#e8cfa0'],
-    parterColor: '#2d1608',
-    aticColor: '#1a0d04',
-    retragereFactor: 0.96, hasAttic: true, aticH: 2.2,
+    label:'🏛 Clasic', desc:'Piatră naturală, soclu masiv, cornișe, proporții clasice, coloane',
+    floorColors: ['#1a0a02','#3b1a08','#6b3a10','#8b4513','#a0522d','#c8914a','#d4a96a','#e8cfa0'],
+    parterColor: '#1a0a02',   // soclu piatră neagră
+    aticColor:   '#3b1a08',
+    windowColor: '#fef3c7',   // geam cald-fildeș
+    bandColor:   '#92400e',   // cornișe cărămizii
+    retragereFactor: 0.97, hasAttic: true, aticH: 2.5,
+    cortinaProcent: 20,
     etajColor: (base,i,tot)=>{
-      // Piatră: soclu maro-inchis → ocru cald → crem luminos
-      const cols=['#2d1608','#44260a','#6b3a10','#8b4513','#a0522d','#c8914a','#d4a96a','#e8cfa0'];
+      const cols=['#1a0a02','#3b1a08','#6b3a10','#8b4513','#a0522d','#c8914a','#d4a96a','#e8cfa0'];
       return cols[Math.min(i,cols.length-1)];
     }
   },
   minimalist: {
-    label:'◼ Minimalist', desc:'Beton alb, volume pure, fara ornamente, lumina naturala',
-    floorColors: ['#52525b','#71717a','#a1a1aa','#d4d4d8','#e4e4e7','#f4f4f5','#fafafa','#ffffff'],
-    parterColor: '#3f3f46',
-    aticColor: '#27272a',
-    retragereFactor: 1.0, hasAttic: false, aticH: 0.6,
+    label:'◼ Minimalist', desc:'Beton alb-alb, volume pure fără ornamente, suprafețe plate, goluri precise',
+    floorColors: ['#27272a','#3f3f46','#52525b','#71717a','#a1a1aa','#d4d4d8','#f4f4f5','#ffffff'],
+    parterColor: '#18181b',   // soclu antracit închis
+    aticColor:   '#09090b',
+    windowColor: '#f0f9ff',   // geam alb-rece
+    bandColor:   '#27272a',   // fără bandouri — volum pur
+    retragereFactor: 1.0, hasAttic: false, aticH: 0.5,
+    cortinaProcent: 50,
     etajColor: (base,i,tot)=>{
-      // Beton: soclu antracit → gri mediu → alb pur la ultimul etaj
-      const cols=['#3f3f46','#52525b','#71717a','#a1a1aa','#d4d4d8','#e4e4e7','#f4f4f5','#ffffff'];
-      return cols[Math.min(i,cols.length-1)];
+      // Gradient lin de la antracit la alb pur
+      const t = tot>1 ? i/(tot-1) : 0;
+      const v = Math.round(24 + t*231);
+      return `rgb(${v},${v},${v})`;
     }
   },
   industrial: {
-    label:'🏭 Industrial', desc:'Corten, metal, beton brut, deschideri mari, H mare',
-    floorColors: ['#292524','#44403c','#57534e','#78716c','#a8a29e','#78716c','#57534e','#44403c'],
-    parterColor: '#1c1917',
-    aticColor: '#0c0a09',
+    label:'🏭 Industrial', desc:'Corten ruginiu, metal expus, beton brut, structură vizibilă, H mare',
+    floorColors: ['#0c0a09','#1c1917','#292524','#44403c','#57534e','#78716c','#a8a29e','#d6d3d1'],
+    parterColor: '#0c0a09',
+    aticColor:   '#7c2d12',   // atic corten ruginiu — accent distinct
+    windowColor: '#fbbf24',   // geam metalic-auriu
+    bandColor:   '#9a3412',   // structură corten
     retragereFactor: 1.0, hasAttic: false, aticH: 0,
+    cortinaProcent: 30,
     etajColor: (base,i,tot)=>{
-      const cols=['#1c1917','#292524','#44403c','#57534e','#78716c','#a8a29e','#78716c','#57534e'];
-      return cols[i%cols.length];
+      // Corten alternant — rugini + gri metalic
+      const cortenCols=['#0c0a09','#431407','#7c2d12','#9a3412','#57534e','#44403c','#78716c','#57534e'];
+      return cortenCols[i%cortenCols.length];
     }
   },
   adaptat_context: {
-    label:'🌆 Adaptat context', desc:'Culori, H si proportii extrase din contextul urban analizat',
-    floorColors: ['#64748b','#94a3b8','#cbd5e1','#e2e8f0','#cbd5e1','#94a3b8','#64748b','#475569'],
-    parterColor: '#475569',
-    aticColor: '#334155',
+    label:'🌆 Adaptat context', desc:'Culori, H și proporții extrase din contextul urban analizat',
+    floorColors: ['#334155','#475569','#64748b','#94a3b8','#cbd5e1','#e2e8f0','#f1f5f9','#f8fafc'],
+    parterColor: '#1e293b',
+    aticColor:   '#334155',
+    windowColor: '#bae6fd',
+    bandColor:   '#475569',
     retragereFactor: 0.92, hasAttic: true, aticH: 1.0,
+    cortinaProcent: 45,
     etajColor: (base,i,tot)=>{
-      // Preia culoarea dominanta din context OSM
       if(S.ctx?.features?.length){
         const fns={};
         S.ctx.features.forEach(f=>{const fn=f.properties?.fn||'yes';fns[fn]=(fns[fn]||0)+1;});
         const domFn=Object.entries(fns).sort((a,b)=>b[1]-a[1])[0]?.[0]||'yes';
         const base2=BLD_COL[domFn]||'#64748b';
-        const cols=['#334155','#475569','#64748b','#94a3b8','#cbd5e1'];
-        return mixColor(base2,cols[Math.min(i,cols.length-1)],0.5);
+        return mixColor(base2,['#334155','#475569','#64748b','#94a3b8','#cbd5e1'][Math.min(i,4)],0.5);
       }
-      return ['#475569','#64748b','#94a3b8','#cbd5e1','#e2e8f0'][Math.min(i,4)];
+      return ['#1e293b','#334155','#475569','#64748b','#94a3b8'][Math.min(i,4)];
+    }
+  },
+  contemporary: {
+    label:'🌿 Contemporan', desc:'Fațade verzi/lemn, retrageri verzi la terase, materiale calde + sticlă',
+    floorColors: ['#14532d','#15803d','#16a34a','#22c55e','#4ade80','#86efac','#bbf7d0','#dcfce7'],
+    parterColor: '#052e16',
+    aticColor:   '#166534',
+    windowColor: '#d9f99d',   // geam verde-cald
+    bandColor:   '#65a30d',   // brâie verzi
+    retragereFactor: 0.82, hasAttic: true, aticH: 1.8,
+    cortinaProcent: 35,
+    etajColor: (base,i,tot)=>{
+      // Verde închis → verde deschis (terase) cu bandouri lemn
+      return i%2===0?['#052e16','#14532d','#15803d','#16a34a'][Math.min(i/2,3)]:['#78350f','#92400e','#b45309'][Math.min(Math.floor(i/2),2)];
+    }
+  },
+  deconstructivist: {
+    label:'🔷 Deconstructivist', desc:'Volume fragmentate, unghiuri ne-ortogonale, contrast puternic, expresivitate maximă',
+    floorColors: ['#1e0a3c','#312e81','#3730a3','#4338ca','#4f46e5','#6366f1','#818cf8','#a5b4fc'],
+    parterColor: '#09090b',
+    aticColor:   '#dc2626',   // atic roșu — accent agresiv
+    windowColor: '#fca5a5',   // geam roz-roșu
+    bandColor:   '#dc2626',   // elemente roșii
+    retragereFactor: 0.60, hasAttic: false, aticH: 0,
+    cortinaProcent: 55,
+    etajColor: (base,i,tot)=>{
+      // Fragmentare: alternare indigo/violet/roșu accent
+      const cols=['#09090b','#1e0a3c','#312e81','#dc2626','#4338ca','#dc2626','#4f46e5','#312e81'];
+      return cols[i%cols.length];
     }
   },
 };
@@ -6160,23 +6211,35 @@ function setArchStyle(s){
   if(S.vol.genDone){const f=buildVolume();setSource('vol-src',{type:'FeatureCollection',features:f});}
   renderTab('proiect');
 }
+// Debounce pentru regenerare volum — evită apeluri multiple rapide
+let _mvDebounce = null;
+function _mvRegen(){
+  clearTimeout(_mvDebounce);
+  _mvDebounce = setTimeout(()=>{
+    if(S.vol.genDone){
+      const f = buildVolume();
+      setSource('vol-src',{type:'FeatureCollection',features:f});
+      setTimeout(updateDistanceLines, 150);
+    }
+  }, 80);
+}
+
+function setMVC(n){ 
+  S.vol.multiVolCount=n;
+  _mvRegen();
+  renderTab('proiect'); 
+}
+function setMVS(s){ if(s&&s.getAttribute) s=s.getAttribute('data-s'); 
+  S.vol.multiVolShape=s;
+  _mvRegen();
+  renderTab('proiect'); 
+}
 function updateMVDist(v){
   S.vol.multiVolDist=v;
   const el=document.getElementById('mvd-val');
   if(el) el.textContent=v+'m';
-  if(S.vol.genDone){const f=buildVolume();setSource('vol-src',{type:'FeatureCollection',features:f});}
-  updateDistanceLines();
+  _mvRegen();
   updateMap();
-}
-function setMVC(n){ 
-  S.vol.multiVolCount=n; 
-  if(S.vol.genDone){const f=buildVolume();setSource('vol-src',{type:'FeatureCollection',features:f});}
-  renderTab('proiect'); 
-}
-function setMVS(s){ if(s&&s.getAttribute) s=s.getAttribute('data-s'); 
-  S.vol.multiVolShape=s; 
-  if(S.vol.genDone){const f=buildVolume();setSource('vol-src',{type:'FeatureCollection',features:f});}
-  renderTab('proiect'); 
 }
 function setScenariu(s){
   S.vol.scenariuConstructie = s;
@@ -8166,6 +8229,32 @@ function aedisBuild(){
         break;
     }
 
+    // ── PENTHOUSE (opțional, deasupra ultimului etaj) ─────────────────────
+    if(AEDIS.penthouseActiv){
+      try{
+        const pRet = Math.max(1, AEDIS.penthouseRetragere||2.5);
+        const pH   = Math.max(2.4, AEDIS.penthouseH||3.2);
+        const pF   = Math.max(0.25, Math.min(0.85, AEDIS.penthouseSuprafataFactor||0.5));
+        // Retragere uniformă pe toate laturile
+        const pGeom = turf.buffer({type:'Feature',geometry:fp.geometry,properties:{}}, -pRet, {units:'meters'});
+        if(pGeom?.geometry){
+          // Scalăm la factorul de suprafață dorit
+          const pScaled = turf.transformScale({type:'Feature',geometry:pGeom.geometry,properties:{}}, pF/1.0, {origin:turf.centerOfMass({type:'Feature',geometry:pGeom.geometry,properties:{}})});
+          if(pScaled?.geometry){
+            const pBase = roofBase + 0.3;
+            const pColor = AEDIS_STIL[AEDIS.stil]?.parterColor || '#0f172a';
+            feats.push({type:'Feature',
+              properties:{base:pBase, top:pBase+pH, color:pColor, floor:-20, roofType:'penthouse'},
+              geometry:pScaled.geometry});
+            // Terasă deasupra penthouse
+            feats.push({type:'Feature',
+              properties:{base:pBase+pH, top:pBase+pH+0.3, color:'#475569', floor:-21, roofType:'penthouse_terasa'},
+              geometry:pScaled.geometry});
+          }
+        }
+      }catch(e){}
+    }
+
     // ── Etichete dimensionale ─────────────────────────────────────────────
     if(AEDIS.showDim){
       aedisUpdateDimLabels(fp, totalNiv, hParter, hEtaj, currentH + (AEDIS.tipAcoperis!=='terasa_plata'?AEDIS.hSarpanta:0.25));
@@ -8464,7 +8553,7 @@ function _v3dUpdateLegend(){
   const stilLabel2 = AEDIS_STIL[AEDIS.stil]?.label||'Modern';
   const etajRetras2 = AEDIS.activeRetragere && (AEDIS_STIL[AEDIS.stil]?.retragereFactor||1)<0.98;
   const etajeNorm2 = niv2-1-(etajRetras2?1:0);
-  const acoperis2 = {terasa_plata:'Terasă plată',terasa_circulabila:'Terasă circulabilă',sarpanta:'Șarpantă',mansarda:'Mansardă',combinat:'Combinat'}[AEDIS.tipAcoperis]||'Terasă plată';
+  const acoperis2 = {terasa_plata:'Terasă plată',terasa_circulabila:'Terasă circulabilă',sarpanta:'Șarpantă',mansarda:'Mansardă',combinat:'Combinat',penthouse:'Penthouse'}[AEDIS.tipAcoperis]||'Terasă plată';
   const forma2 = {patrat:'Formă pătrat',dreptunghi:'Dreptunghi',L:'Formă L',U:'Formă U',T:'Formă T',curte:'Curte interioară',bara:'Bară'}[AEDIS.forma||'auto']||'';
 
   let etajStr2 = [];
@@ -8473,35 +8562,55 @@ function _v3dUpdateLegend(){
   if(etajeNorm2>0) etajStr2.push(etajeNorm2+(etajeNorm2===1?' etaj':' etaje'));
   if(etajRetras2) etajStr2.push('+ etaj retras');
 
+  const ap2 = S.parcels[S.activeParcel??0];
+  const sc2 = ap2?.area ? Math.round(ap2.area * (ap2.params?.pot||40)/100) : null;
+  const sd2 = ap2?.area ? Math.round(ap2.area * (ap2.params?.cut||2.0)) : null;
+
   leg.innerHTML = `
-    <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
-      <span style="font-size:15px">${fnDef2.icon||'🏢'}</span>
-      <div>
-        <div style="font-size:12px;font-weight:800;color:#d4af37;letter-spacing:0.03em">${fnDef2.label||'Clădire'}</div>
-        <div style="font-size:9.5px;color:#64748b;letter-spacing:0.04em;text-transform:uppercase">${stilLabel2}</div>
-      </div>
-    </div>
-    <div style="height:1px;background:rgba(212,175,55,0.15);margin:6px 0"></div>
-    <div style="display:flex;flex-direction:column;gap:3px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
       <div style="display:flex;align-items:center;gap:6px">
-        <span style="font-size:10px;color:#38bdf8;font-weight:700;min-width:40px">${hTot2}m</span>
-        <span style="font-size:10px;color:#94a3b8">${etajStr2.join(' · ')}</span>
+        <span style="font-size:15px">${fnDef2.icon||'🏢'}</span>
+        <div>
+          <div style="font-size:12px;font-weight:800;color:#d4af37;letter-spacing:0.03em">${fnDef2.label||'Clădire'}</div>
+          <div style="font-size:9.5px;color:#64748b;letter-spacing:0.04em;text-transform:uppercase">${stilLabel2}</div>
+        </div>
       </div>
-      ${forma2?'<div style="display:flex;align-items:center;gap:6px"><span style="font-size:9px;color:#64748b;min-width:40px">Formă</span><span style="font-size:10px;color:#94a3b8">'+forma2+'</span></div>':''}
-      ${AEDIS.peretelCortina?'<div style="display:flex;align-items:center;gap:6px"><span style="font-size:9px;color:#64748b;min-width:40px">Fațadă</span><span style="font-size:10px;color:#60a5fa">Perete cortină '+( AEDIS.cortinaProcent||60)+'%</span></div>':''}
-      <div style="display:flex;align-items:center;gap:6px">
-        <span style="font-size:9px;color:#64748b;min-width:40px">Acoperiș</span>
-        <span style="font-size:10px;color:#94a3b8">${acoperis2}</span>
-      </div>
+      <button onclick="this.closest('#v3d-legend').classList.toggle('collapsed')"
+        style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#64748b;border-radius:5px;padding:2px 7px;font-size:10px;cursor:pointer;flex-shrink:0"
+        title="Ascunde/arată legenda">⊟</button>
     </div>
-    <div style="height:1px;background:rgba(212,175,55,0.15);margin:6px 0"></div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <div style="text-align:center"><div style="font-size:11px;font-weight:700;color:#d4af37">${niv2}</div><div style="font-size:8px;color:#475569;text-transform:uppercase">niveluri</div></div>
-      <div style="text-align:center"><div style="font-size:11px;font-weight:700;color:#38bdf8">${hNiv2}m</div><div style="font-size:8px;color:#475569;text-transform:uppercase">H etaj</div></div>
-      <div style="text-align:center"><div style="font-size:11px;font-weight:700;color:#4ade80">${S.parcels[S.activeParcel??0]?.area?.toFixed(0)||'—'}mp</div><div style="font-size:8px;color:#475569;text-transform:uppercase">teren</div></div>
-      <div style="text-align:center"><div style="font-size:11px;font-weight:700;color:#f472b6">${S.parcels[S.activeParcel??0]?.utr||'—'}</div><div style="font-size:8px;color:#475569;text-transform:uppercase">UTR</div></div>
+    <div class="v3d-legend-body">
+      <div style="height:1px;background:rgba(212,175,55,0.15);margin:5px 0"></div>
+      <div style="display:flex;flex-direction:column;gap:3px">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:11px;color:#38bdf8;font-weight:800;min-width:42px">${hTot2}m</span>
+          <span style="font-size:10px;color:#94a3b8">${etajStr2.join(' · ')}</span>
+        </div>
+        ${forma2?`<div style="display:flex;align-items:center;gap:6px"><span style="font-size:9px;color:#64748b;min-width:42px">Formă</span><span style="font-size:10px;color:#94a3b8">${forma2}</span></div>`:''}
+        ${AEDIS.peretelCortina?`<div style="display:flex;align-items:center;gap:6px"><span style="font-size:9px;color:#64748b;min-width:42px">Fațadă</span><span style="font-size:10px;color:#60a5fa">Perete cortină ${AEDIS.cortinaProcent||60}%</span></div>`:''}
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:9px;color:#64748b;min-width:42px">Acoperiș</span>
+          <span style="font-size:10px;color:#94a3b8">${acoperis2}${AEDIS.penthouseActiv?' + Penthouse':''}</span>
+        </div>
+      </div>
+      <div style="height:1px;background:rgba(212,175,55,0.15);margin:5px 0"></div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;text-align:center">
+        <div><div style="font-size:12px;font-weight:800;color:#d4af37">${niv2}</div><div style="font-size:7px;color:#475569;text-transform:uppercase">niv.</div></div>
+        <div><div style="font-size:12px;font-weight:800;color:#38bdf8">${hTot2}m</div><div style="font-size:7px;color:#475569;text-transform:uppercase">H total</div></div>
+        <div><div style="font-size:12px;font-weight:800;color:#4ade80">${sc2||'—'}mp</div><div style="font-size:7px;color:#475569;text-transform:uppercase">SC</div></div>
+        <div><div style="font-size:12px;font-weight:800;color:#f472b6">${ap2?.utr||'—'}</div><div style="font-size:7px;color:#475569;text-transform:uppercase">UTR</div></div>
+      </div>
+      ${sd2?`<div style="margin-top:4px;font-size:9px;color:#64748b;text-align:center">SD estimat: <span style="color:#a78bfa;font-weight:700">${sd2} mp</span> · H etaj: <span style="color:#38bdf8;font-weight:700">${hNiv2}m</span></div>`:''}
     </div>
   `;
+
+  // CSS pentru collapsed state
+  if(!document.getElementById('v3d-legend-css')){
+    const st = document.createElement('style');
+    st.id = 'v3d-legend-css';
+    st.textContent = `#v3d-legend.collapsed .v3d-legend-body{display:none}`;
+    document.head.appendChild(st);
+  }
 }
 
 function aedisOpen(){
@@ -8761,10 +8870,15 @@ function aedisGetContent(){
 
     <div class="aedis-section">Stil arhitectural</div>
     <div class="aedis-stil-grid">
-      ${Object.entries(AEDIS_STIL).map(([k,v])=>`
+      ${Object.entries(AEDIS_STIL).map(([k,v])=>{
+        const swatches = v.floorColors.slice(0,5).map(c=>`<span style="display:inline-block;width:8px;height:8px;background:${c};border-radius:1px;margin:0 1px"></span>`).join('');
+        return `
         <button onclick="AEDIS.stil='${k}';aedisRender();if(_v3dIsOpen())_v3dRebuildFast()" class="aedis-stil-btn${AEDIS.stil===k?' active':''}">
-          ${v.label}<br><small>${v.desc}</small>
-        </button>`).join('')}
+          ${v.label}<br>
+          <div style="margin:3px 0">${swatches}</div>
+          <small style="opacity:0.7">${v.desc}</small>
+        </button>`;
+      }).join('')}
     </div>
     ${AEDIS.stil==='adaptat_context'&&(!S.ctx?.features?.length)?
       '<div class="aedis-warn">⚠️ Generați contextul OSM mai întâi pentru adaptare automată</div>':
@@ -8907,15 +9021,59 @@ function aedisGetContent(){
         style="flex:1;accent-color:#c4956a"><span class="aedis-val">${AEDIS.hMansarda}m</span>
     </div>`:''}
     `:''}
-    ${AEDIS.tipAcoperis==='terasa_plata'||AEDIS.tipAcoperis==='terasa_circulabila'?`
+    ${AEDIS.tipAcoperis==='terasa_plata'||AEDIS.tipAcoperis==='terasa_circulabila'||AEDIS.tipAcoperis==='combinat'?`
     <div class="aedis-section">Parapet / Atic</div>
     <div class="aedis-row">
       <span class="aedis-lbl">H parapet (m)</span>
       <input type="range" min="0.5" max="2.5" step="0.1" value="${AEDIS.hAttic||1.2}"
-        oninput="AEDIS.hAttic=+this.value;this.nextElementSibling.textContent=this.value+'m'"
+        oninput="AEDIS.hAttic=+this.value;this.nextElementSibling.textContent=this.value+'m';aedisRender()"
         style="flex:1;accent-color:#34d399"><span class="aedis-val">${AEDIS.hAttic||1.2}m</span>
-    </div>`:''}`;
-  }
+    </div>`:''}
+
+    <div class="aedis-section">🏙 Penthouse</div>
+    <label class="aedis-toggle">
+      <input type="checkbox" ${AEDIS.penthouseActiv?'checked':''} onchange="AEDIS.penthouseActiv=this.checked;aedisRender()">
+      <span class="aedis-toggle-label">Adaugă penthouse deasupra ultimului etaj</span>
+    </label>
+    ${AEDIS.penthouseActiv?`
+    <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px">
+      <div class="aedis-row">
+        <span class="aedis-lbl">Retragere față de atic (m)</span>
+        <input type="range" min="1" max="8" step="0.5" value="${AEDIS.penthouseRetragere||2.5}"
+          oninput="AEDIS.penthouseRetragere=+this.value;this.nextElementSibling.textContent=this.value+'m';aedisRender()"
+          style="flex:1;accent-color:#d4af37"><span class="aedis-val">${AEDIS.penthouseRetragere||2.5}m</span>
+      </div>
+      <div class="aedis-row">
+        <span class="aedis-lbl">Înălțime penthouse (m)</span>
+        <input type="range" min="2.4" max="5" step="0.2" value="${AEDIS.penthouseH||3.2}"
+          oninput="AEDIS.penthouseH=+this.value;this.nextElementSibling.textContent=this.value+'m';aedisRender()"
+          style="flex:1;accent-color:#d4af37"><span class="aedis-val">${AEDIS.penthouseH||3.2}m</span>
+      </div>
+      <div class="aedis-row">
+        <span class="aedis-lbl">Suprafață penthouse (%)</span>
+        <input type="range" min="25" max="85" step="5" value="${Math.round((AEDIS.penthouseSuprafataFactor||0.5)*100)}"
+          oninput="AEDIS.penthouseSuprafataFactor=+this.value/100;this.nextElementSibling.textContent=this.value+'%';aedisRender()"
+          style="flex:1;accent-color:#d4af37"><span class="aedis-val">${Math.round((AEDIS.penthouseSuprafataFactor||0.5)*100)}%</span>
+      </div>
+      <div style="font-size:10px;color:#64748b;padding:6px 8px;background:rgba(212,175,55,.05);border-radius:6px;border:1px solid rgba(212,175,55,.15)">
+        💡 Suprafața terasei = ${Math.round((1-(AEDIS.penthouseSuprafataFactor||0.5))*100)}% din ultimul etaj (zona liberă în jurul penthouse-ului)
+      </div>
+    </div>`:''}
+
+    <div class="aedis-section">↔ Retragere atic per latură</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
+      ${['front','spate','stanga','dreapta'].map(side=>{
+        const labels={front:'↑ Față (stradă)',spate:'↓ Spate',stanga:'← Stânga',dreapta:'→ Dreapta'};
+        const val=(AEDIS.aticRetragere||{})[side]||0;
+        return `<div style="background:rgba(0,0,0,.2);border-radius:8px;padding:8px">
+          <div style="font-size:10px;color:#94a3b8;margin-bottom:4px">${labels[side]}</div>
+          <input type="range" min="0" max="5" step="0.5" value="${val}"
+            oninput="if(!AEDIS.aticRetragere)AEDIS.aticRetragere={};AEDIS.aticRetragere['${side}']=+this.value;this.nextElementSibling.textContent=this.value+'m';aedisRender()"
+            style="width:100%;accent-color:#38bdf8">
+          <div style="font-size:11px;color:#38bdf8;font-weight:700;margin-top:2px">${val}m</div>
+        </div>`;
+      }).join('')}
+    </div>`
 
   // ════════════════════════════════════════════════════════════════════
   else if(AEDIS.tab==='context'){
@@ -13813,28 +13971,20 @@ function _v3dMatParter(THREE, stil, cache){
   const fn = AEDIS.fn || 'rezidential_colectiv';
   const k=`parter_${stil}_${fn}`; if(cache[k]) return cache[k];
   const isNight=window._v3dNight||false;
-  // Parter per funcțiune — comercial=vitrina sticla, birouri=inchis, rezidential=tencuiala
-  // Parter: stilul prevalează față de funcțiune pentru aspectul vizual
-  const bySt={
-    modern:          {color:'#0a1828',roughness:0.25,metalness:0.60}, // sticlă/metal navy
-    inovator:        {color:'#08082a',roughness:0.15,metalness:0.75}, // negru-violet
-    clasic:          {color:'#4a2a08',roughness:0.82,metalness:0.02}, // piatră brună
-    minimalist:      {color:'#d8e4ee',roughness:0.90,metalness:0.00}, // beton alb
-    industrial:      {color:'#1a0e08',roughness:0.92,metalness:0.08}, // beton ruginiu
-    adaptat_context: {color:'#182810',roughness:0.75,metalness:0.05}, // cărămidă verde
-  };
-  const byFn={
-    birouri:              {color:'#0a1828',roughness:0.10,metalness:0.85},
-    hotel:                {color:'#1a2c40',roughness:0.20,metalness:0.55},
-    comercial:            {color:'#0a1420',roughness:0.05,metalness:0.90},
-    rezidential_colectiv: null, // din bySt
-    locuinta_individuala: {color:'#c0b090',roughness:0.82,metalness:0.00},
-    industrial_depozitare:{color:'#2a2010',roughness:0.90,metalness:0.05},
-    institutie_publica:   {color:'#304868',roughness:0.45,metalness:0.30},
-    mixt:                 {color:'#0e1e30',roughness:0.12,metalness:0.80},
-  };
-  const m = bySt[stil] || byFn[fn] || {color:'#1e2e3e',roughness:0.50,metalness:0.30};
-  const mat=_v3dMat(THREE,m.color,{roughness:m.roughness,metalness:m.metalness});
+  const stilDef = AEDIS_STIL[stil] || AEDIS_STIL.modern;
+  const parterCol = stilDef.parterColor || '#0a1828';
+  // PBR per stil — fiecare stil are rugozitate și metalicitate distinctă
+  const pbr = {
+    modern:          {roughness:0.20, metalness:0.65},
+    inovator:        {roughness:0.12, metalness:0.78},
+    clasic:          {roughness:0.85, metalness:0.02},
+    minimalist:      {roughness:0.92, metalness:0.00},
+    industrial:      {roughness:0.88, metalness:0.15},
+    adaptat_context: {roughness:0.72, metalness:0.05},
+    contemporary:    {roughness:0.78, metalness:0.03},
+    deconstructivist:{roughness:0.10, metalness:0.82},
+  }[stil] || {roughness:0.50, metalness:0.30};
+  const mat=_v3dMat(THREE, parterCol, pbr);
   if(isNight && ['comercial','birouri','mixt'].includes(fn)){
     mat.emissive=new THREE.Color(0.05,0.10,0.25); mat.emissiveIntensity=1.2;
   }
@@ -13846,53 +13996,52 @@ function _v3dMatFloor(THREE, colHex, floorIdx, stil, cache){
   const k=`floor_${stil}_${fn}_${floorIdx}`; if(cache[k]) return cache[k];
   const isNight=window._v3dNight||false;
   const isCW = AEDIS.peretelCortina || ['birouri','comercial','hotel','mixt'].includes(fn);
+  const stilDef = AEDIS_STIL[stil] || AEDIS_STIL.modern;
+  const niv = AEDIS.corpuri[0]?.niv || 4;
+  const t = floorIdx / Math.max(1, niv);
 
-  // Culori de baza per stil + functiune — mai saturate si mai vii
-  const baseColors = {
-    modern:          {r:184,g:208,b:240}, // albastru steel
-    inovator:        {r:144,g:144,b:224}, // violet/indigo
-    clasic:          {r:232,g:208,b:144}, // crem/piatră calcaroasă
-    minimalist:      {r:240,g:244,b:248}, // alb pur
-    industrial:      {r:176,g:128,b:96},  // bej ruginiu/corten
-    adaptat_context: {r:192,g:216,b:176}, // verde-pământiu
-  };
-  const bc2 = baseColors[stil] || baseColors.modern;
-  // Gradient luminos spre vârf
-  const t = floorIdx / Math.max(1, AEDIS.corpuri[0]?.niv || 4);
-  const bright = Math.round(t * 25);
-  const rc=Math.min(255, bc2.r + bright);
-  const gc=Math.min(255, bc2.g + bright);
-  const bcc=Math.min(255, bc2.b + bright);
+  // Folosim etajColor din stilDef dacă există
+  let baseColor = colHex || '#4080c0';
+  if(stilDef.etajColor) {
+    try{ baseColor = stilDef.etajColor(null, floorIdx, niv); }catch(e){}
+  }
 
-  const pbr={
-    modern:    {roughness:isCW?0.08:0.30,metalness:isCW?0.65:0.12},
-    inovator:  {roughness:0.18,metalness:0.45},
-    clasic:    {roughness:0.82,metalness:0.00},
-    minimalist:{roughness:0.88,metalness:0.00},
-    industrial:{roughness:0.80,metalness:0.10},
-    default:   {roughness:0.50,metalness:0.12},
-  }[stil]||{roughness:0.50,metalness:0.12};
+  // PBR distinct per stil — asta face diferența vizuală mare
+  const pbr = {
+    modern:          {roughness: isCW?0.06:0.22, metalness: isCW?0.72:0.18},
+    inovator:        {roughness: 0.15, metalness: 0.55},
+    clasic:          {roughness: 0.84, metalness: 0.01},
+    minimalist:      {roughness: 0.90, metalness: 0.00},
+    industrial:      {roughness: 0.78, metalness: 0.18},
+    adaptat_context: {roughness: 0.68, metalness: 0.08},
+    contemporary:    {roughness: 0.72, metalness: 0.04},
+    deconstructivist:{roughness: 0.12, metalness: 0.70},
+  }[stil] || {roughness:0.50, metalness:0.12};
 
-  const mat=_v3dMat(THREE,`rgb(${rc},${gc},${bcc})`,pbr);
+  const mat=_v3dMat(THREE, baseColor, pbr);
   if(isNight){
-    mat.emissive=new THREE.Color(0.03,0.05,0.15);
-    mat.emissiveIntensity=0.6;
+    const nc = stilDef.windowColor || '#7dd3fc';
+    const c = new THREE.Color(nc);
+    mat.emissive = c; mat.emissiveIntensity = 0.4;
   }
   return cache[k]=mat;
 }
 
 function _v3dMatPenthouse(THREE, stil, cache){
   const k='penthouse_'+stil; if(cache[k]) return cache[k];
-  const M={
-    modern:    {color:'#233855',roughness:0.25,metalness:0.55},
-    clasic:    {color:'#5c4020',roughness:0.72,metalness:0.02},
-    minimalist:{color:'#d0dae4',roughness:0.88,metalness:0.00},
-    inovator:  {color:'#0a1040',roughness:0.15,metalness:0.80},
-    industrial:{color:'#3a3020',roughness:0.82,metalness:0.12},
-    default:   {color:'#283850',roughness:0.40,metalness:0.35},
-  };
-  const m=M[stil]||M.default;
-  return cache[k]=_v3dMat(THREE,m.color,{roughness:m.roughness,metalness:m.metalness});
+  const stilDef = AEDIS_STIL[stil] || AEDIS_STIL.modern;
+  const col = stilDef.aticColor || stilDef.parterColor || '#1a2232';
+  const pbr = {
+    modern:          {roughness:0.22, metalness:0.60},
+    inovator:        {roughness:0.10, metalness:0.82},
+    clasic:          {roughness:0.78, metalness:0.02},
+    minimalist:      {roughness:0.90, metalness:0.00},
+    industrial:      {roughness:0.82, metalness:0.15},
+    adaptat_context: {roughness:0.65, metalness:0.08},
+    contemporary:    {roughness:0.70, metalness:0.03},
+    deconstructivist:{roughness:0.08, metalness:0.88},
+  }[stil] || {roughness:0.40, metalness:0.35};
+  return cache[k]=_v3dMat(THREE, col, pbr);
 }
 
 function _v3dMatRoof(THREE, stil, cache){
