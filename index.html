@@ -2565,7 +2565,7 @@ map.on('style.load',()=>setTimeout(()=>{
   if(S.ctx?.features?.length) try{setSource('ctx-src',S.ctx);}catch(e){}
   if(S.vol._lastFeats?.length) try{setSource('vol-src',{type:'FeatureCollection',features:S.vol._lastFeats});}catch(e){}
   if(S.vol._lastDistFeats?.length) try{setSource('dist-src',{type:'FeatureCollection',features:S.vol._lastDistFeats});}catch(e){}
-  const _ctxVis = !S.vol.onlyVol && AEDIS.scenariu!=='demolare' && !AEDIS._demolishActive;
+  const _ctxVis = !S.vol.onlyVol && S.vol.scenariuConstructie !== 'liber' && AEDIS.scenariu!=='demolare' && !AEDIS._demolishActive;
   try{map.setLayoutProperty('ctx-3d','visibility',_ctxVis?'visible':'none');}catch(e){}
 },250));
 
@@ -3875,18 +3875,10 @@ function buildVolume(){
     let efectivNiv = rNiv;            // niveluri efective de construit
     
     if(scenariu === 'liber'){
-      // DEMOLARE: teren complet liber
-      if(!S._ctxBackup && S.ctx?.features?.length){
-        S._ctxBackup = JSON.parse(JSON.stringify(S.ctx));
-      }
-      // Ascundem ctx-3d (clădirile noastre din Overpass)
-      try{map.setLayoutProperty('ctx-3d','visibility','none');}catch(e){}
-      // Curățăm orice mască anterioară
-      try{if(map.getLayer('demolish-mask'))map.removeLayer('demolish-mask');if(map.getSource('demolish-mask-src'))map.removeSource('demolish-mask-src');}catch(e){}
+      // DEMOLARE: teren complet liber — footprint maxim, fara cladiri existente
       volumeGeom = fp.geometry;
       baseH = 0;
       efectivNiv = rNiv;
-      // Limitam la CUT
       if(cut && cut > 0){
         const SDmax = pA * cut;
         const fpA2 = turf.area(fp);
@@ -3896,9 +3888,6 @@ function buildVolume(){
       }
       
     } else if(scenariu === 'extindere_h'){
-      // La schimbarea scenariului din liber → restaurăm backup-ul și ștergem masca
-      if(S._ctxBackup?.features?.length){ S.ctx = S._ctxBackup; S._ctxBackup = null; }
-      try{ if(map.getLayer('demolish-mask')) map.removeLayer('demolish-mask'); if(map.getSource('demolish-mask-src')) map.removeSource('demolish-mask-src'); }catch(e){}
       // EXTINDERE ORIZONTALA: construim pe zona libera, langa existente
       // Cladirile existente raman vizibile
       try{map.setLayoutProperty('ctx-3d','visibility','visible');}catch(e){}
@@ -3926,9 +3915,6 @@ function buildVolume(){
       }
       
     } else if(scenariu === 'extindere_v'){
-      // La schimbarea scenariului din liber → restaurăm backup-ul și ștergem masca
-      if(S._ctxBackup?.features?.length){ S.ctx = S._ctxBackup; S._ctxBackup = null; }
-      try{ if(map.getLayer('demolish-mask')) map.removeLayer('demolish-mask'); if(map.getSource('demolish-mask-src')) map.removeSource('demolish-mask-src'); }catch(e){}
       // EXTINDERE VERTICALA + ORIZONTALA: corp nou integrat
       try{map.setLayoutProperty('ctx-3d','visibility','visible');}catch(e){}
       // Footprint = intreaga zona construibila (poate include si zona cladirilor existente)
@@ -5373,8 +5359,8 @@ async function goToLocation(lat, lng, label){
     if(!S.multiMode){
       S.parcels=[parcelObj]; S.activeParcel=0;
       S.utr=utr; S.rule=REGULI[utr]||{};
-      S.ctx=null; S.vol.genDone=false;
-      try{clearSource('vol-src');clearSource('fp-src');clearSource('ctx-src');}catch(e){}
+      S.ctx=null; S.vol.genDone=false; S._ctxBackup=null; S._styleBeforeDemo=null;
+      try{clearSource('vol-src');clearSource('fp-src');clearSource('ctx-src');map.setLayoutProperty("ctx-3d","visibility","visible");}catch(e){}
     } else {
       const isDup=nrcad&&nrcad!=='—'&&S.parcels.some(p=>p.nrcad===nrcad);
       if(!isDup){S.parcels.push(parcelObj);S.activeParcel=S.parcels.length-1;}
@@ -5799,7 +5785,19 @@ async function genVol(){
 }
 
 function clearVol(){
-  clearSource('vol-src');S.vol.genDone=false;renderTab('proiect');
+  clearSource('vol-src');
+  S.vol.genDone=false;
+  // Restaurăm starea dacă eram în demolare
+  if(S._ctxBackup?.features?.length){ S.ctx = S._ctxBackup; try{setSource('ctx-src',S.ctx);}catch(e){} }
+  S._ctxBackup=null;
+  if(S._styleBeforeDemo){
+    const prev = S._styleBeforeDemo; S._styleBeforeDemo=null;
+    const sel = document.getElementById('selBase');
+    if(sel){ sel.value=prev; map.setStyle(STYLES[prev]||STYLES.custom); map.once('style.load',()=>setTimeout(()=>_restoreAfterStyleLoad(prev),400)); }
+  } else {
+    try{ map.setLayoutProperty('ctx-3d','visibility','visible'); }catch(e){}
+  }
+  renderTab('proiect');
 }
 
 // ── Actualizare parametri urbanistici editabili ────────────────────────────
@@ -6140,8 +6138,67 @@ function setMVS(s){ if(s&&s.getAttribute) s=s.getAttribute('data-s');
   renderTab('proiect'); 
 }
 function setScenariu(s){
-  S.vol.scenariuConstructie=s;
-  if(S.vol.genDone){const f=buildVolume();setSource('vol-src',{type:'FeatureCollection',features:f});}
+  const prev = S.vol.scenariuConstructie || 'liber';
+  S.vol.scenariuConstructie = s;
+
+  // ── Side effects pe hartă ────────────────────────────────────────────────
+  if(s === 'liber'){
+    // DEMOLARE: salvăm backup ctx și schimbăm la Urban3D (singurul stil unde
+    // putem ascunde complet clădirile existente de pe parcelă)
+    if(!S._ctxBackup && S.ctx?.features?.length){
+      S._ctxBackup = JSON.parse(JSON.stringify(S.ctx));
+    }
+    // Schimbăm la Urban3D dacă nu suntem deja
+    const selBase = document.getElementById('selBase');
+    if(selBase && selBase.value !== 'custom'){
+      S._styleBeforeDemo = selBase.value; // salvăm stilul original
+      selBase.value = 'custom';
+      map.setStyle(STYLES['custom']);
+      map.once('style.load', ()=>{
+        setTimeout(()=>{
+          _restoreAfterStyleLoad('custom');
+          // după reload stil, ascundem ctx-3d
+          try{ map.setLayoutProperty('ctx-3d','visibility','none'); }catch(e){}
+        }, 400);
+      });
+    } else {
+      // Deja Urban3D — ascundem direct
+      try{ map.setLayoutProperty('ctx-3d','visibility','none'); }catch(e){}
+    }
+  } else {
+    // EXTINDERE sau alt scenariu — restaurăm
+    // Restaurăm ctx backup dacă vine din demolare
+    if(S._ctxBackup?.features?.length){
+      S.ctx = S._ctxBackup;
+      S._ctxBackup = null;
+      try{ setSource('ctx-src', S.ctx); }catch(e){}
+    }
+    // Restaurăm stilul original dacă a fost schimbat
+    if(S._styleBeforeDemo){
+      const prevStyle = S._styleBeforeDemo;
+      S._styleBeforeDemo = null;
+      const selBase = document.getElementById('selBase');
+      if(selBase){ selBase.value = prevStyle; }
+      map.setStyle(STYLES[prevStyle] || STYLES.custom);
+      map.once('style.load', ()=>{
+        setTimeout(()=>{ _restoreAfterStyleLoad(prevStyle); }, 400);
+      });
+    } else {
+      // Arătăm ctx-3d
+      try{ map.setLayoutProperty('ctx-3d','visibility','visible'); }catch(e){}
+    }
+    // Curățăm demolish-mask dacă există
+    try{
+      if(map.getLayer('demolish-mask')) map.removeLayer('demolish-mask');
+      if(map.getSource('demolish-mask-src')) map.removeSource('demolish-mask-src');
+    }catch(e){}
+  }
+
+  // ── Regenerăm volumul ────────────────────────────────────────────────────
+  if(S.vol.genDone){
+    const f = buildVolume();
+    setSource('vol-src',{type:'FeatureCollection',features:f});
+  }
   renderTab('proiect');
 }
 function loadScen(i){const sc=S.scenarios[i];if(!sc)return;Object.assign(S.vol,{fn:sc.fn||'locuinta_individuala',niv:sc.niv||4});renderAll();ss('📦 Scenariu încărcat.');}
