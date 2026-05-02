@@ -51,6 +51,7 @@ html,body{height:100%;font-family:'Segoe UI',Arial,sans-serif;background:#0b1220
 
 /* TOPBAR */
 #topbar{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;gap:6px;padding:7px 10px;background:linear-gradient(180deg,rgba(8,37,74,.95),rgba(8,37,74,.7));backdrop-filter:blur(8px);flex-wrap:nowrap;overflow-x:auto;-ms-overflow-style:none;scrollbar-width:none}
+#topbar.viewer-open,#topbar.viewer-open *{display:none!important;visibility:hidden!important;pointer-events:none!important}
 #topbar::-webkit-scrollbar{display:none}
 .logo{color:#d4af37;font-weight:800;font-size:14px;letter-spacing:2px;margin-right:4px;white-space:nowrap}
 .tb-btn,.tb-sel{border:1px solid rgba(255,255,255,.2);background:rgba(11,18,32,.8);color:#e2e8f0;border-radius:8px;padding:6px 11px;font-size:12px;cursor:pointer;white-space:nowrap;transition:all .15s;min-height:34px}
@@ -3418,6 +3419,8 @@ function buildFP(geom, paramsOrUtr){
 
 function checkCollisions(fp){
   if(!fp?.geometry) return {fp, collisions:0};
+  // În scenariul Demolare, terenul e liber — nu verificăm coliziuni
+  if(S.vol.scenariuConstructie === 'liber') return {fp, collisions:0};
   
   // Sursa 1: clădiri din contextul OSM (S.ctx)
   // Sursa 2: clădiri din stilul Mapbox (queryRenderedFeatures)
@@ -3500,11 +3503,13 @@ function buildMultiVolume(p, fp, params, pi){
   const totH = niv*hNiv;
   const n = S.vol.multiVolCount||2;
   const dist = S.vol.multiVolDist||6;
-  const shape = S.vol.multiVolShape||'rect';
+  // Forma: dacă e auto, preia din AEDIS.forma; altfel din setarea multiVolShape
+  const shape = (S.vol.multiVolShape==='auto') ? (AEDIS.forma||'rect') : (S.vol.multiVolShape||'rect');
+  const isDemo = S.vol.scenariuConstructie === 'liber';
   
   // Suprafata totala disponibila
   const fpArea = turf.area(fp);
-  const distInDeg = dist/111320; // distanta intre cladiri in grade
+  const distInDeg = dist/111320;
   
   // Bbox al edificabilului
   const bb = turf.bbox(fp);
@@ -3513,25 +3518,20 @@ function buildMultiVolume(p, fp, params, pi){
   const wM = wDeg*111320*Math.cos(((S2+N)/2)*Math.PI/180);
   const hM = hDeg*111320;
   
-  // Distribuim cladirile in grid pe edificabil
-  // Calculam dimensiunile fiecarei cladiri
   const distDegLng = dist/( 111320*Math.cos(((S2+N)/2)*Math.PI/180));
   const distDegLat = dist/111320;
   
-  // Grid: cols x rows cu sum = n
   let cols = Math.ceil(Math.sqrt(n * wM/Math.max(1,hM)));
   let rows = Math.ceil(n/Math.max(1,cols));
-  // Ajustam sa avem exact n cladiri
   while(cols*rows < n) rows++;
   
-  // Dimensiunea unei cladiri (in grade)
   const cellW = (wDeg - distDegLng*(cols+1)) / cols;
   const cellH = (hDeg - distDegLat*(rows+1)) / rows;
   
-  if(cellW<=0||cellH<=0) return feats; // nu incap cladirile
+  if(cellW<=0||cellH<=0) return feats;
   
-  // Daca shape=square, facem celulele patrate
-  const side = shape==='square' ? Math.min(cellW,cellH) : null;
+  const side = (shape==='square'||shape==='patrat') ? Math.min(cellW,cellH) : null;
+  const ratio = Math.max(0.25, Math.min(0.5, AEDIS.formaRatio||0.35));
   
   let bldCount = 0;
   for(let r=0;r<rows&&bldCount<n;r++){
@@ -3540,37 +3540,52 @@ function buildMultiVolume(p, fp, params, pi){
       const by = S2 + distDegLat*(r+1) + cellH*r;
       const bw = side||cellW;
       const bh = side||cellH;
-      // Centram daca e patrat
       const offsetX = side ? (cellW-side)/2 : 0;
       const offsetY = side ? (cellH-side)/2 : 0;
+      const x0=bx+offsetX, y0=by+offsetY, x1=x0+bw, y1=y0+bh;
+      const ax=bw*ratio, ay=bh*ratio; // dimensiuni aripi pentru L/U/T
+
+      // Generăm geometria în funcție de formă
+      let coords;
+      if(shape==='L'){
+        coords=[[x0,y0],[x1,y0],[x1,y0+ay],[x0+ax,y0+ay],[x0+ax,y1],[x0,y1],[x0,y0]];
+      } else if(shape==='U'){
+        coords=[[x0,y0],[x1,y0],[x1,y1],[x1-ax,y1],[x1-ax,y0+ay],[x0+ax,y0+ay],[x0+ax,y1],[x0,y1],[x0,y0]];
+      } else if(shape==='T'){
+        const tw=bw*0.35;
+        coords=[[x0,y0],[x1,y0],[x1,y0+ay],[x0+(bw+tw)/2,y0+ay],[x0+(bw+tw)/2,y1],[x0+(bw-tw)/2,y1],[x0+(bw-tw)/2,y0+ay],[x0,y0+ay],[x0,y0]];
+      } else if(shape==='bara'){
+        const barW=bw*0.3;
+        coords=[[x0+(bw-barW)/2,y0],[x0+(bw+barW)/2,y0],[x0+(bw+barW)/2,y1],[x0+(bw-barW)/2,y1],[x0+(bw-barW)/2,y0]];
+      } else {
+        // rect / dreptunghi / auto / default
+        coords=[[x0,y0],[x1,y0],[x1,y1],[x0,y1],[x0,y0]];
+      }
       
-      const bldPoly = {
-        type:'Feature',
-        geometry:{type:'Polygon',coordinates:[[
-          [bx+offsetX, by+offsetY],
-          [bx+offsetX+bw, by+offsetY],
-          [bx+offsetX+bw, by+offsetY+bh],
-          [bx+offsetX, by+offsetY+bh],
-          [bx+offsetX, by+offsetY]
-        ]]},
-        properties:{}
-      };
+      const bldPoly = {type:'Feature',geometry:{type:'Polygon',coordinates:[coords]},properties:{}};
       
-      // Intersectam cu edificabilul (cladirea nu iese din edificabil)
       try{
-        const inter = turf.intersect(fp, bldPoly);
+        let inter = turf.intersect(fp, bldPoly);
         if(!inter?.geometry||turf.area(inter)<5) continue;
-        const bldFeat = inter;
         
-        // Generare etaje
+        // În scenariul Demolare nu verificăm coliziuni cu existentele
+        if(!isDemo && S.ctx?.features?.length){
+          S.ctx.features.forEach(existing=>{
+            if(!existing.geometry) return;
+            try{
+              const ov = turf.intersect(inter, {type:'Feature',geometry:existing.geometry,properties:{}});
+              if(ov && turf.area(ov) > 1){
+                const diff = turf.difference(inter, {type:'Feature',geometry:existing.geometry,properties:{}});
+                if(diff?.geometry && turf.area(diff) > 5) inter = diff;
+              }
+            }catch(e){}
+          });
+        }
+        
         for(let i=0;i<niv;i++){
           const base=i*hNiv, top=Math.min((i+1)*hNiv, totH);
           const color=FLOOR_COLORS[Math.min(i,FLOOR_COLORS.length-1)];
-          feats.push({
-            type:'Feature',
-            properties:{base,top,color,floor:i,parcelIdx:pi,bldIdx:bldCount},
-            geometry:bldFeat.geometry
-          });
+          feats.push({type:'Feature',properties:{base,top,color,floor:i,parcelIdx:pi,bldIdx:bldCount},geometry:inter.geometry});
         }
         bldCount++;
       }catch(e){}
@@ -6098,8 +6113,12 @@ function htmlMultiVolUI(){
     '<div style="display:flex;gap:4px">'+nBtns+'</div></div>',
     '<div><div class="ml" style="font-size:11px;margin-bottom:4px">Formă clădiri</div>',
     '<div style="display:flex;gap:4px">',
+    '<button onclick="setMVS(this.dataset.s)" data-s="auto" style="'+btnStyle(ms==='auto','#f59e0b')+';font-size:11px">⚡ Auto</button>',
     '<button onclick="setMVS(this.dataset.s)" data-s="rect" style="'+btnStyle(ms==='rect','#f59e0b')+';font-size:11px">▬ Dreptunghi</button>',
     '<button onclick="setMVS(this.dataset.s)" data-s="square" style="'+btnStyle(ms==='square','#f59e0b')+';font-size:11px">■ Pătrat</button>',
+    '<button onclick="setMVS(this.dataset.s)" data-s="L" style="'+btnStyle(ms==='L','#f59e0b')+';font-size:11px">⌐ Formă L</button>',
+    '<button onclick="setMVS(this.dataset.s)" data-s="U" style="'+btnStyle(ms==='U','#f59e0b')+';font-size:11px">⊓ Formă U</button>',
+    '<button onclick="setMVS(this.dataset.s)" data-s="T" style="'+btnStyle(ms==='T','#f59e0b')+';font-size:11px">⊤ Formă T</button>',
     '</div></div>',
     '</div>',
     '<div class="ml" style="font-size:11px;margin-bottom:4px">Distanță minimă între clădiri (m) — indicator urbanistic</div>',
@@ -12123,7 +12142,7 @@ function aedisOpen3DViewer(){
 
   // Ascundem topbar-ul principal și harta când viewer-ul e deschis
   const _tb = document.getElementById('topbar');
-  if(_tb){ _tb.setAttribute('data-display-before', _tb.style.display||''); _tb.style.setProperty('display','none','important'); }
+  if(_tb) _tb.classList.add('viewer-open');
   const _mapDiv = document.getElementById('map');
   if(_mapDiv) _mapDiv.style.visibility = 'hidden';
 
@@ -12302,7 +12321,7 @@ function _v3dCleanup(){
   V3D.texCache={}; V3D.scene=null; V3D.cam=null; V3D.ctx=[]; V3D.aedis=[]; V3D.distShown=false;
   // Restaurăm topbar-ul și harta
   const _tb = document.getElementById('topbar');
-  if(_tb){ _tb.style.removeProperty('display'); }
+  if(_tb) _tb.classList.remove('viewer-open');
   const _mapDiv = document.getElementById('map');
   if(_mapDiv) _mapDiv.style.visibility = 'visible';
 }
