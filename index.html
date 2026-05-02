@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache"/>
 <meta http-equiv="Expires" content="0"/>
 <title>UrbanX – PUG Iași</title>
-<meta name="description" content="UrbanX — Platformă de Analiză Urbanistică Avansată. Analiză cadastrală, PUG, indicatori urbanistici, studii de specialitate și vizualizare 3D">
+<meta name="description" content="UrbanX — Platformă de Analiză Urbanistică Avansată. Analiză cadastrală, PUG, indicatori urbanistici, studii de specialitate și vizualizare 3D pentru Municipiul Iași.">
 <!-- UrbanX Favicon & PWA -->
 <link rel="icon" href="/UrbanX/favicon.ico" sizes="any">
 <link rel="icon" type="image/svg+xml" href="/UrbanX/favicon.svg">
@@ -8072,6 +8072,16 @@ function aedisBuild(){
     // ── Generare corpuri AEDIS ─────────────────────────────────────────────
     let fpFeat = {type:'Feature',geometry:fpGeom,properties:{}};
 
+    // ── MULTIPLE VOLUME: dacă S.vol.multiVol e activ, distribuim N clădiri ──
+    if(S.vol.multiVol){
+      const mvParams = {...params, niv: totalNiv};
+      const multiFeats = buildMultiVolume(parcelaTmp,
+        {type:'Feature',geometry:fpGeom,properties:{}},
+        mvParams, 0);
+      feats.push(...multiFeats);
+      continue; // trecem la parcela următoare
+    }
+
     // Corp principal cu retrageri fine per etaj
     let currentH = baseH;
 
@@ -8618,6 +8628,25 @@ function _v3dUpdateLegend(){
 
 function aedisOpen(){
   AEDIS.open=true;
+
+  // ── Sincronizăm setările din Volum 3D → Urban3D ───────────────────────
+  // Niveluri și H etaj
+  const ap = S.parcels[S.activeParcel??0];
+  const params = ap?.params || getDefaultParams(ap?.utr||'');
+  const nivFromVol = pN(params.niv) || 4;
+  const hNivFromVol = Number(S.vol.hNiv||3.0);
+  if(AEDIS.corpuri[0]){
+    AEDIS.corpuri[0].niv  = nivFromVol;
+    AEDIS.corpuri[0].hNiv = hNivFromVol;
+  }
+  // Funcțiune
+  if(S.vol.fn && AEDIS_FN[S.vol.fn]) AEDIS.fn = S.vol.fn;
+  // Scenariu constructie
+  if(S.vol.scenariuConstructie) AEDIS.scenariu = S.vol.scenariuConstructie==='liber'?'demolare':S.vol.scenariuConstructie;
+  // Multiple volume
+  AEDIS._multiVol = S.vol.multiVol || false;
+  AEDIS._multiVolCount = S.vol.multiVolCount || 2;
+
   const modal=document.getElementById('aedis-modal');
   if(modal) modal.classList.add('open');
   aedisRender();
@@ -8628,7 +8657,7 @@ function aedisOpen(){
       btn = document.createElement('button');
       btn.id='aedis-mob-x';
       btn.textContent='✕';
-            btn.style.cssText='position:fixed;top:12px;left:12px;z-index:10001;background:rgba(15,25,50,.85);color:#a78bfa;border:1px solid rgba(139,92,246,.4);border-radius:50%;width:32px;height:32px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);box-shadow:0 2px 8px rgba(0,0,0,.3)';
+      btn.style.cssText='position:fixed;top:12px;left:12px;z-index:10001;background:rgba(15,25,50,.85);color:#a78bfa;border:1px solid rgba(139,92,246,.4);border-radius:50%;width:32px;height:32px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);box-shadow:0 2px 8px rgba(0,0,0,.3)';
       btn.onclick=()=>{aedisClose();};
       document.body.appendChild(btn);
     }
@@ -8788,6 +8817,18 @@ function aedisTab(t){
 }
 
 function aedisRender(){
+  // ── Sincronizăm AEDIS cu setările din Volum 3D la fiecare render ─────
+  const ap = S.parcels[S.activeParcel??0];
+  const params = ap?.params || getDefaultParams(ap?.utr||'');
+  const nivFromVol = pN(params.niv) || 4;
+  const hNivFromVol = Number(S.vol.hNiv||3.0);
+  if(AEDIS.corpuri[0]){
+    if(!AEDIS._nivOverride) AEDIS.corpuri[0].niv  = nivFromVol;
+    if(!AEDIS._hNivOverride) AEDIS.corpuri[0].hNiv = hNivFromVol;
+  }
+  if(S.vol.fn && AEDIS_FN[S.vol.fn] && !AEDIS._fnOverride) AEDIS.fn = S.vol.fn;
+  if(S.vol.scenariuConstructie && !AEDIS._scenariuOverride)
+    AEDIS.scenariu = S.vol.scenariuConstructie==='liber'?'demolare':S.vol.scenariuConstructie;
   // Invalidăm cache materiale viewer dacă stilul/funcțiunea s-au schimbat
   if(typeof _v3dIsOpen!=='undefined' && _v3dIsOpen() && V3D?.texCache){
     V3D.texCache={};
@@ -9268,9 +9309,14 @@ function aedisGetContent(){
   ${headerHtml}
   ${tabsHtml}
   <div class="aedis-content">${contentHtml}</div>
+  ${S.vol.multiVol ? `
+  <div style="background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.4);border-radius:8px;padding:8px 12px;margin:6px 0;font-size:11px;color:#fbbf24;display:flex;align-items:center;gap:8px">
+    <span>🔲</span>
+    <span><b>Multiple Volume activ:</b> ${S.vol.multiVolCount||2} clădiri · ${S.vol.multiVolShape||'rect'} · distanță ${S.vol.multiVolDist||6}m — Generează pentru a aplica</span>
+  </div>` : ''}
   <div class="aedis-actions">
     <button onclick="aedisGenerateAll()" class="aedis-build-btn">
-      ⚡ Generează Volum 3D în hartă
+      ${S.vol.multiVol ? `⚡ Generează ${S.vol.multiVolCount||2} Volume 3D în hartă` : '⚡ Generează Volum 3D în hartă'}
     </button>
     <button onclick="aedisOpen3DViewer()" class="aedis-dim-btn" 
       style="background:rgba(99,102,241,.2);border-color:rgba(139,92,246,.5);color:#a78bfa;font-size:9px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 8px" 
