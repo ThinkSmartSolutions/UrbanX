@@ -52,6 +52,8 @@ html,body{height:100%;font-family:'Segoe UI',Arial,sans-serif;background:#0b1220
 /* TOPBAR */
 #topbar{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;gap:6px;padding:7px 10px;background:linear-gradient(180deg,rgba(8,37,74,.95),rgba(8,37,74,.7));backdrop-filter:blur(8px);flex-wrap:nowrap;overflow-x:auto;-ms-overflow-style:none;scrollbar-width:none}
 #topbar.viewer-open,#topbar.viewer-open *{display:none!important;visibility:hidden!important;pointer-events:none!important}
+#topbar.viewer-bg{background:#07101e!important;border-bottom:1px solid rgba(139,92,246,.25)!important}
+#topbar.viewer-bg .tb-btn,#topbar.viewer-bg .tb-sel,#topbar.viewer-bg .logo{color:#a78bfa!important;border-color:rgba(139,92,246,.3)!important;background:rgba(139,92,246,.08)!important}
 #topbar::-webkit-scrollbar{display:none}
 .logo{color:#d4af37;font-weight:800;font-size:14px;letter-spacing:2px;margin-right:4px;white-space:nowrap}
 .tb-btn,.tb-sel{border:1px solid rgba(255,255,255,.2);background:rgba(11,18,32,.8);color:#e2e8f0;border-radius:8px;padding:6px 11px;font-size:12px;cursor:pointer;white-space:nowrap;transition:all .15s;min-height:34px}
@@ -700,22 +702,7 @@ canvas#c2d{width:100%;height:100%;display:block}
   <button class="tb-btn" id="btnSV" onclick="svOpen()" title="Street View — Perspectivă pietonală">🚶 SV</button>
   <button class="tb-btn" id="btnLegend" title="Legendă funcțiuni clădiri" onclick="toggleFnLegend(this)">🎨 Legend</button>
   <button class="tb-btn" id="btnPanel" style="background:rgba(212,175,55,.2);border-color:#d4af37;color:#d4af37">☰</button>
-  <div style="position:relative;display:inline-block">
-  <button class="tb-btn" id="btnPDF" onclick="toggleRapoarteMenu()" title="Rapoarte & Studii" style="display:flex;align-items:center;gap:4px">📋 Rapoarte ▾</button>
-  <div id="rapoarte-menu" style="display:none;position:absolute;top:100%;right:0;background:#0f172a;border:1px solid rgba(212,175,55,.3);border-radius:10px;padding:8px;min-width:200px;z-index:500;box-shadow:0 8px 32px rgba(0,0,0,.5);margin-top:4px">
-    <div style="padding:4px 12px 2px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.08em;font-weight:700">Rapoarte urbanistice</div>
-    <button onclick="runExport();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">📄 Raport Urbanistic</button>
-    <button onclick="generateSolarStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#fbbf24;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">☀ Studiu de Însorire</button>
-    <button onclick="generateShadowStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#fb923c;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🌑 Studiu de Umbre & Obstrucție</button>
-    <button onclick="generateNoiseStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#a78bfa;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🔇 Studiu Acustic Urban</button>
-    <button onclick="generateWindStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#38bdf8;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🌬 Studiu Vânt & Confort Pietonal</button>
-    <div style="padding:6px 12px 2px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.08em;font-weight:700;border-top:1px solid rgba(255,255,255,.06);margin-top:4px">Bilanțuri & avize</div>
-    <button onclick="generateGreenStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#4ade80;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🌿 Studiu Spații Verzi</button>
-    <button onclick="generateMobilityStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#f472b6;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🚗 Studiu Mobilitate & Parcaje</button>
-    <button onclick="generateDensityStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#94a3b8;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">📊 Studiu Densitate Urbană</button>
-    <button onclick="generateMemoriu();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#d4af37;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏗 Memoriu Tehnic Preliminar</button>
-  </div>
-</div>
+  <button class="tb-btn" id="btnPDF" onclick="toggleRapoarteMenu()" title="Rapoarte & Studii" style="display:flex;align-items:center;gap:4px;position:relative">📋 Rapoarte ▾</button>
 
   <!-- Butoane Admin & Cont — dreapta topbar, în interiorul #topbar -->
   <button onclick="_adminOpen()" id="btn-admin" title="Panou Admin" style="
@@ -737,6 +724,21 @@ canvas#c2d{width:100%;height:100%;display:block}
      id="btn-logout">
     🚪 <span id="auth-user-label">Ieșire</span>
   </button>
+</div>
+
+<!-- RAPOARTE DROPDOWN — direct pe body pentru a evita overflow clipping din topbar -->
+<div id="rapoarte-menu" style="display:none;position:fixed;background:#0f172a;border:1px solid rgba(212,175,55,.3);border-radius:10px;padding:8px;min-width:220px;z-index:9000;box-shadow:0 8px 32px rgba(0,0,0,.6)">
+  <div style="padding:4px 12px 6px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.08em;font-weight:700">Rapoarte urbanistice</div>
+  <button onclick="runExport();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">📄 Raport Urbanistic Complet</button>
+  <button onclick="generateSolarStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#fbbf24;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">☀ Studiu de Însorire</button>
+  <button onclick="generateShadowStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#fb923c;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🌑 Studiu Umbre & Obstrucție</button>
+  <button onclick="generateNoiseStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#a78bfa;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🔇 Studiu Acustic Urban</button>
+  <button onclick="generateWindStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#38bdf8;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🌬 Studiu Vânt & Confort Pietonal</button>
+  <div style="padding:6px 12px 2px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.08em;font-weight:700;border-top:1px solid rgba(255,255,255,.06);margin-top:4px">Bilanțuri & avize</div>
+  <button onclick="generateGreenStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#4ade80;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🌿 Studiu Spații Verzi</button>
+  <button onclick="generateMobilityStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#f472b6;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🚗 Studiu Mobilitate & Parcaje</button>
+  <button onclick="generateDensityStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#94a3b8;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">📊 Studiu Densitate Urbană</button>
+  <button onclick="generateMemoriu();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#d4af37;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏗 Memoriu Tehnic Preliminar</button>
 </div>
 
 <div id="status">⏳ Se încarcă…</div>
@@ -11735,20 +11737,37 @@ async function generateMemoriu(){
 
 function toggleRapoarteMenu(){
   const m = document.getElementById('rapoarte-menu');
+  const btn = document.getElementById('btnPDF');
   if(!m) return;
   const isOpen = m.style.display !== 'none';
-  m.style.display = isOpen ? 'none' : 'block';
-  if(!isOpen){
-    // Închidem la click în afară
-    setTimeout(()=>{
-      document.addEventListener('click', function close(e){
-        if(!document.getElementById('rapoarte-menu')?.contains(e.target)){
-          document.getElementById('rapoarte-menu').style.display='none';
-          document.removeEventListener('click', close);
-        }
-      });
-    }, 50);
+  if(isOpen){
+    m.style.display = 'none';
+    return;
   }
+  // Poziționăm dropdown-ul fix față de buton
+  if(btn){
+    const r = btn.getBoundingClientRect();
+    m.style.top  = (r.bottom + 6) + 'px';
+    m.style.left = Math.max(8, r.right - m.offsetWidth || r.right - 224) + 'px';
+    // Ajustăm după render ca să nu iasă din ecran
+    m.style.display = 'block';
+    requestAnimationFrame(()=>{
+      const mr = m.getBoundingClientRect();
+      if(mr.right > window.innerWidth - 8) m.style.left = (window.innerWidth - mr.width - 8) + 'px';
+      if(mr.left < 8) m.style.left = '8px';
+    });
+  } else {
+    m.style.display = 'block';
+  }
+  // Închidem la click în afară
+  setTimeout(()=>{
+    document.addEventListener('click', function close(e){
+      if(!m.contains(e.target) && e.target.id !== 'btnPDF'){
+        m.style.display = 'none';
+        document.removeEventListener('click', close);
+      }
+    });
+  }, 50);
 }
 
 async function generateSolarStudy(){
@@ -12307,7 +12326,7 @@ function aedisOpen3DViewer(){
 
   // Ascundem topbar-ul principal și harta când viewer-ul e deschis
   const _tb = document.getElementById('topbar');
-  if(_tb) _tb.classList.add('viewer-open');
+  if(_tb) _tb.classList.add('viewer-bg');
   const _mapDiv = document.getElementById('map');
   if(_mapDiv) _mapDiv.style.visibility = 'hidden';
 
@@ -12487,6 +12506,7 @@ function _v3dCleanup(){
   // Restaurăm topbar-ul
   const _tb = document.getElementById('topbar');
   if(_tb) _tb.classList.remove('viewer-open');
+  if(_tb) _tb.classList.remove('viewer-bg');
   // Restaurăm harta
   const _mapDiv = document.getElementById('map');
   if(_mapDiv) _mapDiv.style.visibility = 'visible';
