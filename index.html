@@ -4000,10 +4000,13 @@ function buildVolume(){
     }
     
     // ── Multiple volume pe edificabil ────────────────────────────────────
+    // Funcționează în ORICE scenariu (liber/extindere_h/extindere_v)
     if(S.vol.multiVol && fp?.geometry){
-      const multiFeats = buildMultiVolume(p, fp, params, pi);
+      // Trecem volumeGeom ca fp pentru multiVolume — respectă scenariul curent
+      const fpForMulti = volumeGeom ? {type:'Feature',geometry:volumeGeom,properties:{}} : fp;
+      const multiFeats = buildMultiVolume(p, fpForMulti, params, pi);
       feats.push(...multiFeats);
-      return; // sarim generarea volumului unic (return in forEach = continue)
+      return;
     }
 
     // ── Generare 3D cu stil arhitectural ────────────────────────────────
