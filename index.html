@@ -6147,8 +6147,9 @@ function setScenariu(s){
     }
     // Ascundem ctx-3d
     _setCtxVisibility();
-    // Ascundem TOATE layerele fill-extrusion native din stilul activ (clădiri Mapbox)
-    _demolishHideNative();
+    // Ascundem clădirile native DOAR pe parcelă (Clip Layer)
+    const ap = S.parcels[S.activeParcel??0];
+    _demolishHideNative(ap?.geo?.geometry || null);
 
   } else {
     // Restaurăm backup ctx
@@ -6179,31 +6180,49 @@ function setScenariu(s){
   renderTab('proiect');
 }
 
-// Ascunde toate layerele de clădiri native din stilul Mapbox activ
-function _demolishHideNative(){
+// Ascunde clădirile native DOAR pe parcelă folosind Clip Layer (Mapbox GL JS v3+)
+function _demolishHideNative(parcelGeometry){
   try{
-    const layers = map.getStyle()?.layers || [];
-    S._hiddenNativeLayers = S._hiddenNativeLayers || [];
-    layers.forEach(l => {
-      if(l.type === 'fill-extrusion' && l.id !== 'vol-3d' && l.id !== 'ctx-3d'){
-        try{
-          map.setLayoutProperty(l.id, 'visibility', 'none');
-          if(!S._hiddenNativeLayers.includes(l.id)) S._hiddenNativeLayers.push(l.id);
-        }catch(e){}
-      }
-    });
-    console.log('UrbanX: hidden layers for demo:', S._hiddenNativeLayers);
-  }catch(e){ console.warn('_demolishHideNative:', e.message); }
+    // Ștergem clip-ul anterior dacă există
+    _demolishRestoreNative();
+    if(!parcelGeometry) return;
+
+    // Clip layer — exclude clădirile 3D native doar în zona parcelei
+    if(!map.getSource('demo-clip-src')){
+      map.addSource('demo-clip-src', {
+        type: 'geojson',
+        data: { type: 'Feature', geometry: parcelGeometry, properties: {} }
+      });
+    } else {
+      map.getSource('demo-clip-src').setData(
+        { type: 'Feature', geometry: parcelGeometry, properties: {} }
+      );
+    }
+
+    if(!map.getLayer('demo-clip-layer')){
+      map.addLayer({
+        id: 'demo-clip-layer',
+        type: 'clip',
+        source: 'demo-clip-src',
+        layout: {
+          'clip-layer-types': ['model', 'symbol', 'fill-extrusion']
+        }
+      });
+    }
+    console.log('UrbanX: clip layer applied for demolition');
+  }catch(e){
+    console.warn('_demolishHideNative clip failed:', e.message);
+    // Fallback: nu facem nimic — clădirile vor apărea sub volum
+  }
 }
 
-// Restaurează layerele native ascunse la demolare
+// Restaurează — șterge clip layer
 function _demolishRestoreNative(){
   try{
-    (S._hiddenNativeLayers || []).forEach(id => {
-      try{ map.setLayoutProperty(id, 'visibility', 'visible'); }catch(e){}
-    });
-    S._hiddenNativeLayers = [];
+    if(map.getLayer('demo-clip-layer')) map.removeLayer('demo-clip-layer');
+    if(map.getSource('demo-clip-src')) map.removeSource('demo-clip-src');
   }catch(e){}
+  S._hiddenNativeLayers = [];
 }
 function loadScen(i){const sc=S.scenarios[i];if(!sc)return;Object.assign(S.vol,{fn:sc.fn||'locuinta_individuala',niv:sc.niv||4});renderAll();ss('📦 Scenariu încărcat.');}
 
@@ -12083,9 +12102,11 @@ function aedisOpen3DViewer(){
     ss('⚠️ Generați mai întâi volumul 3D (butonul ⚡).'); return;
   }
 
-  // Ascundem topbar-ul principal când viewer-ul e deschis
+  // Ascundem topbar-ul principal și harta când viewer-ul e deschis
   const _tb = document.getElementById('topbar');
   if(_tb) _tb.style.display = 'none';
+  const _mapDiv = document.getElementById('map');
+  if(_mapDiv) _mapDiv.style.visibility = 'hidden';
 
   let ov = document.getElementById('aedis-3d-viewer-overlay');
   if(ov) ov.remove();
@@ -12260,9 +12281,11 @@ function _v3dCleanup(){
   if(V3D.r){ V3D.r.dispose(); V3D.r=null; }
   Object.values(V3D.texCache).forEach(t=>{ try{t.dispose();}catch(e){} });
   V3D.texCache={}; V3D.scene=null; V3D.cam=null; V3D.ctx=[]; V3D.aedis=[]; V3D.distShown=false;
-  // Restaurăm topbar-ul
+  // Restaurăm topbar-ul și harta
   const _tb = document.getElementById('topbar');
   if(_tb) _tb.style.display = 'flex';
+  const _mapDiv = document.getElementById('map');
+  if(_mapDiv) _mapDiv.style.visibility = 'visible';
 }
 
 function _v3dStatus(msg){ const el=document.getElementById('v3d-status'); if(el) el.textContent=msg; }
