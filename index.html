@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache"/>
 <meta http-equiv="Expires" content="0"/>
 <title>UrbanX – PUG Iași</title>
-<meta name="description" content="UrbanX — Platformă de Analiză Urbanistică Avansată. Analiză cadastrală, PUG, indicatori urbanistici, studii de specialitate și vizualizare 3D">
+<meta name="description" content="UrbanX — Platformă de Analiză Urbanistică Avansată. Analiză cadastrală, PUG, indicatori urbanistici, studii de specialitate și vizualizare 3D pentru Municipiul Iași.">
 <!-- UrbanX Favicon & PWA -->
 <link rel="icon" href="/UrbanX/favicon.ico" sizes="any">
 <link rel="icon" type="image/svg+xml" href="/UrbanX/favicon.svg">
@@ -6382,7 +6382,7 @@ function loadScen(i){const sc=S.scenarios[i];if(!sc)return;Object.assign(S.vol,{
 // Butoane topbar - null-safe pentru toate
 const safeOn=(id,fn)=>{const el=document.getElementById(id);if(el)el.onclick=fn;else console.warn('Missing element:',id);};
 safeOn('btnUTR',toggleUTR);
-safeOn('btnCloseUTR',toggleUTR);
+safeOn('btnCloseUTR',hideUTRDrawer);
 safeOn('btnGPS',doGPS);
 // btnANCPI eliminat
 safeOn('btnMulti',()=>{S.multiMode=!S.multiMode;const bm=document.getElementById('btnMulti');if(bm)bm.classList.toggle('multi-on',S.multiMode);const cm=document.getElementById('chkMulti');if(cm)cm.checked=S.multiMode;renderTab('search');ss(S.multiMode?'🔲 Multiselect ACTIV':'Multiselect dezactivat.');});
