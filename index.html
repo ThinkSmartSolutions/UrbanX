@@ -10855,6 +10855,99 @@ function _pdfDrawLogo(pdf, x, y, size){
 // ═══════════════════════════════════════════════════════════════════════════
 
 // ── Helper comun: inițializare PDF cu același design ca studiul de însorire ──
+// ════════════════════════════════════════════════════════════════════════════
+// HELPER: Captură standard imagini hartă + viewer pentru toate studiile
+// Returnează: {img3D, img2D, imgDist, imgLat, imgFront, imgAerial, v3dDay, v3dNight, v3dGolden}
+// ════════════════════════════════════════════════════════════════════════════
+async function _captureStudyMaps(ap, statusFn){
+  const st = statusFn || (msg => ss(msg));
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  const waitF = async (n=3) => { for(let i=0;i<n;i++) await new Promise(r => requestAnimationFrame(r)); };
+  const origStyle = document.getElementById('selBase')?.value || 'custom';
+
+  const capMap = async (pitch, bearing, extraWait=0) => {
+    map.easeTo({pitch, bearing, duration:0});
+    await waitF(5); await wait(500+extraWait); map.triggerRepaint(); await waitF(4); await wait(400);
+    try{ const c=map.getCanvas(); return c.width>0 ? c.toDataURL('image/jpeg',0.90) : ''; }catch(e){ return ''; }
+  };
+
+  const switchStyle = async (styleKey) => {
+    return new Promise(resolve => {
+      if(document.getElementById('selBase')?.value === styleKey){ resolve(); return; }
+      map.once('style.load', async () => {
+        try{ addLayers(); if(S.ctx) setSource('ctx-src',S.ctx); updateMap(); }catch(e){}
+        if(S.vol._lastFeats?.length) try{ setSource('vol-src',{type:'FeatureCollection',features:S.vol._lastFeats}); }catch(e){}
+        if(S.vol._lastDistFeats?.length) try{ setSource('dist-src',{type:'FeatureCollection',features:S.vol._lastDistFeats}); }catch(e){}
+        await waitF(6); await wait(800); map.triggerRepaint(); await waitF(4); await wait(600);
+        resolve();
+      });
+      map.setStyle(STYLES[styleKey]||STYLES.custom);
+      if(document.getElementById('selBase')) document.getElementById('selBase').value = styleKey;
+    });
+  };
+
+  // Centrăm pe parcelă
+  try{
+    const bb = turf.bbox(ap.geo);
+    map.fitBounds([[bb[0],bb[1]],[bb[2],bb[3]]],{padding:80, duration:0, maxZoom:18});
+    await waitF(4); await wait(400);
+  }catch(e){}
+
+  st('Captură Urban 3D vedere principală...');
+  await switchStyle('custom');
+  const img3D = await capMap(62, -20, 200);
+
+  st('Captură plan 2D cadastral...');
+  const img2D = await capMap(0, 0);
+
+  st('Captură plan distanțe...');
+  let imgDist = '';
+  try{
+    const bb = turf.bbox(ap.geo);
+    map.fitBounds([[bb[0],bb[1]],[bb[2],bb[3]]],{padding:100,pitch:0,bearing:0,duration:0,maxZoom:18});
+    await waitF(5); await wait(700); map.triggerRepaint(); await waitF(4); await wait(500);
+    imgDist = map.getCanvas().toDataURL('image/jpeg',0.90);
+  }catch(e){}
+
+  st('Captură vederi laterale...');
+  const imgLat    = await capMap(58,  90);
+  const imgFront  = await capMap(55,   0);
+  const imgAerial = await capMap(70,  45);
+  const imgBack   = await capMap(55, 180);
+
+  st('Captură Mapbox Standard 3D...');
+  let imgStandard = '';
+  try{
+    await switchStyle('standard');
+    const ctr = turf.centerOfMass(ap.geo).geometry.coordinates;
+    map.easeTo({center:ctr, zoom:17, pitch:60, bearing:-20, duration:0});
+    await waitF(6); await wait(1000); map.triggerRepaint(); await waitF(4); await wait(800);
+    imgStandard = map.getCanvas().toDataURL('image/jpeg',0.90);
+  }catch(e){}
+
+  st('Revenire Urban 3D...');
+  await switchStyle('custom');
+  try{ map.easeTo({pitch:62, bearing:-20, duration:0}); }catch(e){}
+
+  st('Captură viewer 3D...');
+  let v3dDay='', v3dNight='', v3dGolden='';
+  try{
+    if(S.vol._lastFeats?.length){
+      const v3dImgs = await _v3dCaptureSilent(ap);
+      v3dDay    = v3dImgs?.day    || v3dImgs?.zi     || '';
+      v3dNight  = v3dImgs?.night  || v3dImgs?.noapte || '';
+      v3dGolden = v3dImgs?.golden || '';
+    }
+  }catch(e){}
+
+  // Restaurăm stilul original
+  if(origStyle !== 'custom'){
+    try{ await switchStyle(origStyle); }catch(e){}
+  }
+
+  return {img3D, img2D, imgDist, imgLat, imgFront, imgAerial, imgBack, imgStandard, v3dDay, v3dNight, v3dGolden};
+}
+
 function _initStudyPdf(studyName, studySubtitle, totalPages){
   const {jsPDF}=window.jspdf;
   const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
@@ -10974,7 +11067,10 @@ async function generateShadowStudy(){
   if(!ap?.geo?.geometry){ss('Selectați o parcelă pentru studiu.');return;}
   ss('Se generează Studiu de Umbre & Obstrucție...');
 
-  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Studiu de Umbre si Obstructie Vizuala','Studiu umbre',5);
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Studiu de Umbre si Obstructie Vizuala','Studiu umbre',6);
+
+  // Capturi imagini
+  const caps = await _captureStudyMaps(ap, msg => ss(msg));
 
   function solarAlt(lat,month,hour){
     const D2R=Math.PI/180;
@@ -11119,6 +11215,17 @@ async function generateShadowStudy(){
   legal.forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
   sign();
 
+  // ── PAG 6: Capturi hartă ────────────────────────────────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
+  hdr('HARTI SI VIZUALIZARI 3D',6);ftr();
+  let iy=28;
+  iy=addImg(caps.img3D,14,iy,W-28,60,'Vedere 3D Urban · pitch 62° · bearing -20°');
+  iy=addImg(caps.img2D,14,iy,(W-28)/2-2,45,'Plan 2D cadastral');
+  addImg(caps.imgDist,14+(W-28)/2+2,iy-45,(W-28)/2-2,45,'Plan distante vecini');
+  iy+=4;
+  iy=addImg(caps.v3dDay,14,iy,(W-28)/2-2,55,'Viewer 3D · Zi');
+  addImg(caps.v3dGolden||caps.v3dNight,14+(W-28)/2+2,iy-55,(W-28)/2-2,55,'Viewer 3D · Lumina naturala');
+
   pdf.save('Studiu_Umbre_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
   ss('✅ Studiu de Umbre generat!');
 }
@@ -11131,7 +11238,10 @@ async function generateNoiseStudy(){
   if(!ap?.geo?.geometry){ss('Selectați o parcelă pentru studiu.');return;}
   ss('Se generează Studiu Acustic Urban...');
 
-  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Studiu Acustic Urban','Studiu acustic',4);
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Studiu Acustic Urban','Studiu acustic',5);
+
+  // Capturi imagini
+  const caps = await _captureStudyMaps(ap, msg => ss(msg));
 
   // Estimare nivel zgomot din funcțiunile OSM vecine
   const FN_NOISE={'commercial':65,'industrial':75,'retail':62,'office':55,'school':52,'hospital':45,'residential':42,'yes':48,'Necunoscut':50};
@@ -11209,6 +11319,16 @@ async function generateNoiseStudy(){
   ['SR 10009:2017 — Acustica in constructii. Limite admisibile ale nivelului de zgomot din mediul exterior','Legea nr. 111/1996 rep. privind apararea impotriva radiatiilor ionizante','HG nr. 321/2005 privind evaluarea si gestionarea zgomotului ambiant','Directiva 2002/49/CE privind evaluarea si gestionarea zgomotului ambiental','OMS nr. 119/2014 — Norme de igiena si sanatate publica privind mediul de viata'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
   sign();
 
+  // PAG imagini
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
+  hdr('HARTI SI VIZUALIZARI 3D',5);ftr();
+  let _iy=28;
+  _iy=addImg(caps.img3D,14,_iy,W-28,62,'Vedere 3D Urban · context acustic');
+  _iy=addImg(caps.img2D,14,_iy,(W-28)/2-2,45,'Plan 2D cadastral · surse zgomot');
+  addImg(caps.imgDist,14+(W-28)/2+2,_iy-45,(W-28)/2-2,45,'Distante fata de surse');
+  _iy+=4;
+  _iy=addImg(caps.v3dDay,14,_iy,(W-28)/2-2,52,'Viewer 3D · Zi');
+  addImg(caps.imgAerial,14+(W-28)/2+2,_iy-52,(W-28)/2-2,52,'Vedere aeriana 45°');
   pdf.save('Studiu_Acustic_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
   ss('✅ Studiu Acustic Urban generat!');
 }
@@ -11221,7 +11341,10 @@ async function generateWindStudy(){
   if(!ap?.geo?.geometry){ss('Selectați o parcelă.');return;}
   ss('Se generează Studiu Vânt & Confort Pietonal...');
 
-  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,sign}=_initStudyPdf('Studiu de Vant si Confort Pietonal','Studiu vant',3);
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,addImg,sign}=_initStudyPdf('Studiu de Vant si Confort Pietonal','Studiu vant',4);
+
+  // Capturi imagini
+  const caps = await _captureStudyMaps(ap, msg => ss(msg));
 
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13.2;
   const vecini=S.ctx?.features||[];
@@ -11290,7 +11413,10 @@ async function generateGreenStudy(){
   if(!ap?.geo?.geometry){ss('Selectați o parcelă.');return;}
   ss('Se generează Studiu Spații Verzi...');
 
-  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,GREEN,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,sign}=_initStudyPdf('Studiu de Spatii Verzi si Permeabilitate','Studiu spatii verzi',3);
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,GREEN,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,addImg,sign}=_initStudyPdf('Studiu de Spatii Verzi si Permeabilitate','Studiu spatii verzi',4);
+
+  // Capturi imagini
+  const caps = await _captureStudyMaps(ap, msg => ss(msg));
 
   const areaN=parseFloat(area)||548;
   const svMin=parseFloat(params.sv)||15;
@@ -11353,7 +11479,10 @@ async function generateMobilityStudy(){
   if(!ap?.geo?.geometry){ss('Selectați o parcelă.');return;}
   ss('Se generează Studiu Mobilitate...');
 
-  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,sign}=_initStudyPdf('Studiu de Mobilitate si Parcaje','Studiu mobilitate',3);
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,addImg,sign}=_initStudyPdf('Studiu de Mobilitate si Parcaje','Studiu mobilitate',4);
+
+  // Capturi imagini
+  const caps = await _captureStudyMaps(ap, msg => ss(msg));
 
   const areaN=parseFloat(area)||548;
   const cutMax=parseFloat(params.cut)||2.8;
@@ -11411,6 +11540,16 @@ async function generateMobilityStudy(){
   ['HG nr. 525/1996 pentru aprobarea Regulamentului General de Urbanism — art. 33 parcaje','Normativul P 132-1993 privind proiectarea parcajelor de autovehicule','Legea nr. 92/2007 a serviciilor publice de transport persoane','PUG Municipiul Iasi — UTR '+utr+' · Norma parcaje: '+parMin+' loc/100mp SD','STAS 2965/1984 — Amenajarea intersectiilor la acelasi nivel'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
   sign();
 
+  // PAG imagini
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
+  hdr('HARTI SI VIZUALIZARI 3D',4);ftr();
+  let _iy=28;
+  _iy=addImg(caps.img3D,14,_iy,W-28,62,'Vedere 3D Urban · accese si mobilitate');
+  _iy=addImg(caps.img2D,14,_iy,(W-28)/2-2,46,'Plan 2D · accese si parcaje');
+  addImg(caps.imgDist,14+(W-28)/2+2,_iy-46,(W-28)/2-2,46,'Context stradal vecin');
+  _iy+=4;
+  addImg(caps.imgFront,14,_iy,(W-28)/2-2,52,'Vedere frontala · acces principal');
+  addImg(caps.imgBack,14+(W-28)/2+2,_iy,(W-28)/2-2,52,'Vedere posterioara · acces servicii');
   pdf.save('Studiu_Mobilitate_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
   ss('✅ Studiu Mobilitate & Parcaje generat!');
 }
@@ -11423,7 +11562,10 @@ async function generateDensityStudy(){
   if(!ap?.geo?.geometry){ss('Selectați o parcelă.');return;}
   ss('Se generează Studiu Densitate Urbană...');
 
-  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,sign}=_initStudyPdf('Studiu de Densitate si Presiune Urbana','Studiu densitate',3);
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,addImg,sign}=_initStudyPdf('Studiu de Densitate si Presiune Urbana','Studiu densitate',4);
+
+  // Capturi imagini
+  const caps = await _captureStudyMaps(ap, msg => ss(msg));
 
   const areaN=parseFloat(area)||548;
   const potProp=parseFloat(params.pot)||65;
@@ -11503,7 +11645,10 @@ async function generateMemoriu(){
   if(!ap?.geo?.geometry){ss('Selectați o parcelă.');return;}
   ss('Se generează Memoriu Tehnic Preliminar...');
 
-  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,sign}=_initStudyPdf('Memoriu Tehnic Urbanistic Preliminar','Memoriu tehnic',5);
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,addImg,sign}=_initStudyPdf('Memoriu Tehnic Urbanistic Preliminar','Memoriu tehnic',6);
+
+  // Capturi imagini
+  const caps = await _captureStudyMaps(ap, msg => ss(msg));
 
   const areaN=parseFloat(area)||548;
   const potMax=parseFloat(params.pot)||65;
