@@ -6205,10 +6205,22 @@ function _demolishHideNative(parcelGeometry){
         type: 'clip',
         source: 'demo-clip-src',
         layout: {
-          'clip-layer-types': ['model', 'symbol', 'fill-extrusion']
+          'clip-layer-types': ['model', 'symbol']
         }
       });
     }
+    // fill-extrusion nu poate fi clipped — ascundem selectiv cu filter
+    // Găsim layerele fill-extrusion și le filtrăm să excludă parcela
+    const allLayers = map.getStyle()?.layers || [];
+    allLayers.forEach(l => {
+      if(l.type === 'fill-extrusion' && l.id !== 'vol-3d' && l.id !== 'ctx-3d' && l.id !== 'demolish-mask'){
+        try{
+          if(!S._hiddenNativeLayers) S._hiddenNativeLayers = {};
+          S._hiddenNativeLayers[l.id] = map.getFilter(l.id) ?? null;
+          map.setFilter(l.id, ['!', ['within', parcelGeometry]]);
+        }catch(e){ console.warn('filter', l.id, e.message); }
+      }
+    });
     console.log('UrbanX: clip layer applied for demolition');
   }catch(e){
     console.warn('_demolishHideNative clip failed:', e.message);
@@ -6216,13 +6228,20 @@ function _demolishHideNative(parcelGeometry){
   }
 }
 
-// Restaurează — șterge clip layer
+// Restaurează — șterge clip layer și restaurează filtrele
 function _demolishRestoreNative(){
   try{
     if(map.getLayer('demo-clip-layer')) map.removeLayer('demo-clip-layer');
     if(map.getSource('demo-clip-src')) map.removeSource('demo-clip-src');
   }catch(e){}
-  S._hiddenNativeLayers = [];
+  try{
+    if(S._hiddenNativeLayers){
+      Object.entries(S._hiddenNativeLayers).forEach(([id, filter])=>{
+        try{ if(map.getLayer(id)) map.setFilter(id, filter); }catch(e){}
+      });
+      S._hiddenNativeLayers = null;
+    }
+  }catch(e){}
 }
 function loadScen(i){const sc=S.scenarios[i];if(!sc)return;Object.assign(S.vol,{fn:sc.fn||'locuinta_individuala',niv:sc.niv||4});renderAll();ss('📦 Scenariu încărcat.');}
 
@@ -12104,7 +12123,7 @@ function aedisOpen3DViewer(){
 
   // Ascundem topbar-ul principal și harta când viewer-ul e deschis
   const _tb = document.getElementById('topbar');
-  if(_tb) _tb.style.display = 'none';
+  if(_tb) _tb.style.cssText += ';display:none!important';
   const _mapDiv = document.getElementById('map');
   if(_mapDiv) _mapDiv.style.visibility = 'hidden';
 
