@@ -10864,74 +10864,67 @@ function _pdfDrawLogo(pdf, x, y, size){
 async function _captureStudyMaps(ap, statusFn){
   const st = statusFn || (msg => ss(msg));
   const wait = ms => new Promise(r => setTimeout(r, ms));
-  const waitF = async (n=3) => { for(let i=0;i<n;i++) await new Promise(r => requestAnimationFrame(r)); };
-  const origStyle = document.getElementById('selBase')?.value || 'custom';
+  const waitF = async (n=4) => { for(let i=0;i<n;i++) await new Promise(r => requestAnimationFrame(r)); };
 
-  const capMap = async (pitch, bearing, extraWait=0) => {
-    map.easeTo({pitch, bearing, duration:0});
-    await waitF(5); await wait(500+extraWait); map.triggerRepaint(); await waitF(4); await wait(400);
-    try{ const c=map.getCanvas(); return c.width>0 ? c.toDataURL('image/jpeg',0.90) : ''; }catch(e){ return ''; }
-  };
-
-  const switchStyle = async (styleKey) => {
-    return new Promise(resolve => {
-      if(document.getElementById('selBase')?.value === styleKey){ resolve(); return; }
+  // Asigurăm că suntem pe Urban 3D (stilul nostru principal)
+  const selBase = document.getElementById('selBase');
+  if(selBase && selBase.value !== 'custom'){
+    await new Promise(resolve => {
       map.once('style.load', async () => {
         try{ addLayers(); if(S.ctx) setSource('ctx-src',S.ctx); updateMap(); }catch(e){}
         if(S.vol._lastFeats?.length) try{ setSource('vol-src',{type:'FeatureCollection',features:S.vol._lastFeats}); }catch(e){}
-        if(S.vol._lastDistFeats?.length) try{ setSource('dist-src',{type:'FeatureCollection',features:S.vol._lastDistFeats}); }catch(e){}
-        await waitF(6); await wait(800); map.triggerRepaint(); await waitF(4); await wait(600);
+        await waitF(8); await wait(1200); map.triggerRepaint(); await waitF(4); await wait(600);
         resolve();
       });
-      map.setStyle(STYLES[styleKey]||STYLES.custom);
-      if(document.getElementById('selBase')) document.getElementById('selBase').value = styleKey;
+      map.setStyle(STYLES['custom']);
+      selBase.value = 'custom';
     });
-  };
+  }
 
   // Centrăm pe parcelă
   try{
     const bb = turf.bbox(ap.geo);
     map.fitBounds([[bb[0],bb[1]],[bb[2],bb[3]]],{padding:80, duration:0, maxZoom:18});
-    await waitF(4); await wait(400);
+    await waitF(6); await wait(600);
   }catch(e){}
 
-  st('Captură Urban 3D vedere principală...');
-  await switchStyle('custom');
-  const img3D = await capMap(62, -20, 200);
+  const capMap = async (pitch, bearing, extraWait=0) => {
+    try{
+      map.easeTo({pitch, bearing, duration:0});
+      await waitF(6); await wait(700+extraWait); map.triggerRepaint(); await waitF(4); await wait(500);
+      const c = map.getCanvas();
+      return c.width > 0 ? c.toDataURL('image/jpeg', 0.92) : '';
+    }catch(e){ return ''; }
+  };
 
-  st('Captură plan 2D cadastral...');
-  const img2D = await capMap(0, 0);
+  st('Captură 3D principală...');
+  const img3D = await capMap(62, -20, 300);
+
+  st('Captură plan 2D...');
+  const img2D = await capMap(0, 0, 200);
 
   st('Captură plan distanțe...');
   let imgDist = '';
   try{
     const bb = turf.bbox(ap.geo);
-    map.fitBounds([[bb[0],bb[1]],[bb[2],bb[3]]],{padding:100,pitch:0,bearing:0,duration:0,maxZoom:18});
-    await waitF(5); await wait(700); map.triggerRepaint(); await waitF(4); await wait(500);
-    imgDist = map.getCanvas().toDataURL('image/jpeg',0.90);
+    map.fitBounds([[bb[0],bb[1]],[bb[2],bb[3]]],{padding:120, pitch:0, bearing:0, duration:0, maxZoom:18});
+    await waitF(6); await wait(800); map.triggerRepaint(); await waitF(4); await wait(600);
+    imgDist = map.getCanvas().toDataURL('image/jpeg', 0.92);
+    // Re-centrăm pentru capturile 3D
+    map.fitBounds([[bb[0],bb[1]],[bb[2],bb[3]]],{padding:80, duration:0, maxZoom:18});
+    await waitF(4); await wait(400);
   }catch(e){}
 
-  st('Captură vederi laterale...');
+  st('Capturi vederi 3D...');
   const imgLat    = await capMap(58,  90);
   const imgFront  = await capMap(55,   0);
   const imgAerial = await capMap(70,  45);
   const imgBack   = await capMap(55, 180);
 
-  st('Captură Mapbox Standard 3D...');
-  let imgStandard = '';
-  try{
-    await switchStyle('standard');
-    const ctr = turf.centerOfMass(ap.geo).geometry.coordinates;
-    map.easeTo({center:ctr, zoom:17, pitch:60, bearing:-20, duration:0});
-    await waitF(6); await wait(1000); map.triggerRepaint(); await waitF(4); await wait(800);
-    imgStandard = map.getCanvas().toDataURL('image/jpeg',0.90);
-  }catch(e){}
+  // Revenire la vedere principală
+  await capMap(62, -20);
 
-  st('Revenire Urban 3D...');
-  await switchStyle('custom');
-  try{ map.easeTo({pitch:62, bearing:-20, duration:0}); }catch(e){}
-
-  st('Captură viewer 3D...');
+  st('Captură viewer 3D architectural...');
   let v3dDay='', v3dNight='', v3dGolden='';
   try{
     if(S.vol._lastFeats?.length){
@@ -10940,12 +10933,10 @@ async function _captureStudyMaps(ap, statusFn){
       v3dNight  = v3dImgs?.night  || v3dImgs?.noapte || '';
       v3dGolden = v3dImgs?.golden || '';
     }
-  }catch(e){}
+  }catch(e){ console.warn('v3d capture:', e.message); }
 
-  // Restaurăm stilul original
-  if(origStyle !== 'custom'){
-    try{ await switchStyle(origStyle); }catch(e){}
-  }
+  // imgStandard = img3D ca fallback (nu mai schimbăm stilul)
+  const imgStandard = imgAerial || img3D;
 
   return {img3D, img2D, imgDist, imgLat, imgFront, imgAerial, imgBack, imgStandard, v3dDay, v3dNight, v3dGolden};
 }
