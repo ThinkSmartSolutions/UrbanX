@@ -543,10 +543,28 @@ function addLayers(){
       setSource('vol-src', {type:'FeatureCollection', features:f});
     }
 
-    // Feedback vizual
-    ss('✅ Front stradal setat pe latura selectată (' + newBrg + '°) — ' +
-      (props.role==='front'?'era deja front':
-       props.role==='posterior'?'era spate':'era lateral'));
+    // ── Toast confirmare vizuala ─────────────────────────────────────────
+    const roleLabel = props.role==='front'    ? 'era deja FRONT' :
+                      props.role==='posterior'? 'era SPATE' :
+                      props.role==='lateral_stg'?'era LATERAL stânga':'era LATERAL dreapta';
+    
+    // Toast flotant pe hartă
+    let toast = document.getElementById('front-toast');
+    if(!toast){
+      toast = document.createElement('div');
+      toast.id = 'front-toast';
+      toast.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);'+
+        'background:rgba(212,175,55,0.95);color:#0e1828;font-weight:800;font-size:14px;'+
+        'padding:10px 20px;border-radius:24px;z-index:9999;pointer-events:none;'+
+        'box-shadow:0 4px 20px rgba(0,0,0,.5);transition:opacity .3s';
+      document.body.appendChild(toast);
+    }
+    toast.textContent = '✅ Front stradal setat → ' + newBrg + '°';
+    toast.style.opacity = '1';
+    clearTimeout(toast._t);
+    toast._t = setTimeout(()=>{ toast.style.opacity='0'; }, 2000);
+    
+    ss('✅ Front stradal setat pe latura (' + roleLabel + ') → ' + newBrg + '°');
   });
   map.on('click','parcel-fill',e=>{
     const f=e.features?.[0];if(!f)return;
@@ -831,11 +849,11 @@ function buildFrontLayer(parcelGeo, fp, params, bearing){
       let role, color, setback, setbackLabel;
       if(diff < 55){
         // Latura orientată spre strada principală = FRONT
-        role = 'front'; color = '#d4af37'; setback = rf;
+        role = 'front'; color = '#FFD700'; setback = rf;  // galben auriu intens
         setbackLabel = rf > 0 ? `rf=${rf}m` : 'calcan';
       } else if(diff > 125){
         // Latura opusă frontului = POSTERIOR (spate)
-        role = 'posterior'; color = '#f87171'; setback = rs;
+        role = 'posterior'; color = '#FF4444'; setback = rs;  // rosu aprins
         setbackLabel = rs > 0 ? `rs=${rs}m` : 'calcan';
       } else {
         // Laturi laterale - stânga vs dreapta față de front
@@ -883,8 +901,8 @@ function buildFrontLayer(parcelGeo, fp, params, bearing){
         const vy=(side.midY-cy)*111320;
         const fx=Math.sin(brg*Math.PI/180), fy=Math.cos(brg*Math.PI/180);
         const cross=fx*vy-fy*vx;
-        if(cross>0){role='lateral_stg';color='#60a5fa';setback=rl;setbackLabel=rl>0?`rl=${rl}m`:'calcan';}
-        else{role='lateral_dr';color='#a78bfa';setback=rr;setbackLabel=rr>0?`rr=${rr}m`:'calcan';}
+        if(cross>0){role='lateral_stg';color='#22D3EE';setback=rl;setbackLabel=rl>0?`rl=${rl}m`:'calcan';}  // cyan
+        else{role='lateral_dr';color='#C084FC';setback=rr;setbackLabel=rr>0?`rr=${rr}m`:'calcan';}  // violet deschis
       }
       Object.assign(side,{role,color,setback,setbackLabel,dFromCenter});
     });
