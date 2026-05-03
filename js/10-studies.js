@@ -1,5 +1,4 @@
 // UrbanX — Studii si rapoarte urbanistice
-// Modul extras din index_v4.html
 
 async function generateShadowStudy(){
   const ap=S.parcels[S.activeParcel??0];
@@ -1964,4 +1963,353 @@ async function generateIstoricStudy(){
   ss('✅ Studiu Istoric & Patrimoniu generat!');
 }
 
+
+// ── Topbar dropdown menus ────────────────────────────────────────────────
+function _closeAllMenus(){
+  const v=document.getElementById('viz-menu');
+  const t=document.getElementById('tools-menu');
+  if(v) v.style.display='none';
+  if(t) t.style.display='none';
+}
+function _toggleVizMenu(e){
+  if(e){ e.stopPropagation(); e.preventDefault(); }
+  const m=document.getElementById('viz-menu');
+  const t=document.getElementById('tools-menu');
+  if(!m) return;
+  if(t) t.style.display='none';
+  if(m.style.display==='block'){
+    m.style.display='none';
+  } else {
+    // Poziționare sub butonul apăsat
+    const btn=(e&&e.currentTarget)||document.querySelector('#viz-group button');
+    if(btn){
+      const r=btn.getBoundingClientRect();
+      m.style.left=r.left+'px';
+      m.style.top=(r.bottom+2)+'px';
+    }
+    m.style.display='block';
+  }
+}
+function _toggleToolsMenu(e){
+  if(e){ e.stopPropagation(); e.preventDefault(); }
+  const m=document.getElementById('tools-menu');
+  const v=document.getElementById('viz-menu');
+  if(!m) return;
+  if(v) v.style.display='none';
+  if(m.style.display==='block'){
+    m.style.display='none';
+  } else {
+    const btn=(e&&e.currentTarget)||document.querySelector('#tools-group button');
+    if(btn){
+      const r=btn.getBoundingClientRect();
+      m.style.left=r.left+'px';
+      m.style.top=(r.bottom+2)+'px';
+    }
+    m.style.display='block';
+  }
+}
+// Închide la click în afara meniurilor — cu delay pentru a nu anula deschiderea
+document.addEventListener('click',function(e){
+  setTimeout(function(){
+    if(!e.target.closest('#viz-group')&&!e.target.closest('#viz-menu')){
+      const m=document.getElementById('viz-menu');if(m)m.style.display='none';
+    }
+    if(!e.target.closest('#tools-group')&&!e.target.closest('#tools-menu')){
+      const m=document.getElementById('tools-menu');if(m)m.style.display='none';
+    }
+  },50);
+});
+
+function toggleRapoarteMenu(){
+  const m = document.getElementById('rapoarte-menu');
+  const btn = document.getElementById('btnPDF');
+  if(!m) return;
+  const isOpen = m.style.display !== 'none';
+  if(isOpen){
+    m.style.display = 'none';
+    return;
+  }
+  // Poziționăm dropdown-ul fix față de buton
+  if(btn){
+    const r = btn.getBoundingClientRect();
+    m.style.top  = (r.bottom + 6) + 'px';
+    m.style.left = Math.max(8, r.right - m.offsetWidth || r.right - 224) + 'px';
+    // Ajustăm după render ca să nu iasă din ecran
+    m.style.display = 'block';
+    requestAnimationFrame(()=>{
+      const mr = m.getBoundingClientRect();
+      if(mr.right > window.innerWidth - 8) m.style.left = (window.innerWidth - mr.width - 8) + 'px';
+      if(mr.left < 8) m.style.left = '8px';
+    });
+  } else {
+    m.style.display = 'block';
+  }
+  // Închidem la click în afară
+  setTimeout(()=>{
+    document.addEventListener('click', function close(e){
+      if(!m.contains(e.target) && e.target.id !== 'btnPDF'){
+        m.style.display = 'none';
+        document.removeEventListener('click', close);
+      }
+    });
+  }, 50);
+}
+
+async function generateSolarStudy(){
+  const ap=S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry){ss('Selectați o parcelă pentru studiu.');return;}
+  ss('Se generează Studiu de Însorire — se capturează imagini...');
+
+  const d=_initStudyPdf('Pre-Studiu Urbanistic de Însorire','Studiu însorire OMS 119/2014',8);
+  const {pdf,W,H,DARK,DARK2,GOLD,GOLD2,BLUE,BLUE2,LIGHT,LIGHT2,RED,GREEN,ORANGE,GRAY,GRAY2,GRAY3,
+    S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,
+    hdr,ftr,sec,subsec,body,tblRow,addImg,kv,badge,divider,bullet,concluzii,sign,cover}=d;
+
+  // ── Calcule solare ────────────────────────────────────────────────────
+  const year=new Date().getFullYear();
+  const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||parseFloat(params.h)||10;
+  const niv=AEDIS.corpuri[0]?.niv||4;
+  const fnLabel=(AEDIS_FN[AEDIS.fn]||AEDIS_FN.rezidential_colectiv).label||'Rezidențial';
+
+  const solarAlt=(latD,doy,hour)=>{
+    const D2R=Math.PI/180;
+    const decl=-23.45*Math.cos(D2R*(360/365)*(doy+10));
+    const ha=(hour-12)*15;
+    const sinAlt=Math.sin(latD*D2R)*Math.sin(decl*D2R)+Math.cos(latD*D2R)*Math.cos(decl*D2R)*Math.cos(ha*D2R);
+    return Math.max(0,Math.asin(Math.max(-1,Math.min(1,sinAlt)))*180/Math.PI);
+  };
+  const shadowLen=(h,alt)=>alt>0.5?(h/Math.tan(alt*Math.PI/180)).toFixed(1):'—';
+  const sunrise=(latD,doy)=>{
+    const D2R=Math.PI/180;
+    const decl=-23.45*Math.cos(D2R*(360/365)*(doy+10));
+    const cosH=-Math.tan(latD*D2R)*Math.tan(decl*D2R);
+    if(cosH>1) return null;if(cosH<-1) return 0;
+    return 12-Math.acos(cosH)/D2R/15;
+  };
+
+  // Zilele cheie
+  const days={
+    iarna:{doy:355,label:'Solstițiu iarnă (21 dec)'},
+    primavara:{doy:80,label:'Echinox primăvară (21 mar)'},
+    vara:{doy:172,label:'Solstițiu vară (21 iun)'},
+    toamna:{doy:264,label:'Echinox toamnă (23 sep)'},
+  };
+  const solarData={};
+  Object.entries(days).forEach(([key,{doy,label}])=>{
+    const hours=[6,7,8,9,10,11,12,13,14,15,16,17,18];
+    const alts=hours.map(h=>solarAlt(lat,doy,h));
+    const maxAlt=Math.max(...alts);
+    const sr=sunrise(lat,doy);
+    const ss2=sr?24-sr:null;
+    const oreSoare=sr?((ss2-sr)).toFixed(1):null;
+    solarData[key]={doy,label,alts,maxAlt,hours,sr,ss2,oreSoare,
+      shadAt12:shadowLen(aedisH,solarAlt(lat,doy,12)),
+      alt12:solarAlt(lat,doy,12).toFixed(1)
+    };
+  });
+
+  const isConform=solarData.iarna.maxAlt>=15;
+  const oreMinIarna=solarData.iarna.alts.filter(a=>a>=15).length;
+  const oreMaxVara=solarData.vara.alts.filter(a=>a>5).length;
+
+  const caps=await _captureStudyMaps(ap,msg=>ss(msg));
+  ss('Se compilează PDF-ul...');
+
+  // ════════════════════════════════════════════════════════════
+  // PAG 1 — COPERTĂ
+  // ════════════════════════════════════════════════════════════
+  cover(
+    'Analiză conformitate OMS 119/2014 · Simulare umbre · Bilanț solar',
+    caps.imgLocation||caps.img3D,
+    [['H clădire propusă',aedisH.toFixed(1)+' m'],['Funcțiune',fnLabel],
+     ['Alt. sol. iarnă',solarData.iarna.alt12+'° (min. 15°)'],
+     ['Conformitate OMS 119',isConform?'DA — CONFORM':'NU — VERIFICARE']],
+    isConform,
+    isConform?'✅ CONFORM OMS 119/2014 — Însorire minimă asigurată':'⚠️ VERIFICARE NECESARĂ — Alt. solară sub 15° la solstițiu iarnă'
+  );
+
+  // ════════════════════════════════════════════════════════════
+  // PAG 2 — VEDERE 3D PRINCIPALĂ + PARAMETRI
+  // ════════════════════════════════════════════════════════════
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
+  hdr('VEDERE 3D PRINCIPALĂ — CONTEXT URBAN ȘI AMPLASAMENT',2);ftr();
+  let cy=30;
+
+  // Imagine 3D mare - full width
+  cy=addImg(caps.img3D,14,cy,W-28,100,'FIG. 1 — Vedere 3D Urban · Amplasament parcelă '+nrcad+' · UTR '+utr+' · '+uat+' · Perspectivă 62° pitch');cy+=2;
+
+  // Imagini mici laterale
+  const hw=(W-28-4)/2;
+  cy=addImg(caps.imgLocation,14,cy,hw,55,'FIG. 2 — Plan amplasament · Structura stradală · Vecinătăți imediate');
+  addImg(caps.imgCity,14+hw+4,cy-55,hw,55,'FIG. 3 — Hartă '+uat+' · Încadrare în context urban');
+  cy+=5;
+
+  cy=sec('1. DATE GENERALE PARCELĂ ȘI CONSTRUCȚIE PROPUSĂ',cy);
+  cy=body('Prezentul Pre-Studiu de Însorire analizează condițiile de iluminare naturală pentru parcela cu nr. cadastral '+nrcad+', situată în '+uat+', județul '+judet+', zona UTR '+utr+' ('+S2(REGULI[utr]?.d||'—')+'). Studiul verifică conformitatea cu prevederile OMS nr. 119/2014 și Ord. MS nr. 994/2018 privind normele de igienă și sănătate publică. Parametrii climatici au fost calculați pe baza coordonatelor GPS ale amplasamentului ('+lat.toFixed(5)+'°N, '+lon.toFixed(5)+'°E, latitudine pentru zonele temperate ale României).',14,cy);cy+=4;
+
+  // Grid parametri
+  const colW3=[(W-28)/3,(W-28)/3,(W-28)/3];
+  cy=tblRow(['PARAMETRU','VALOARE PUG','PROPUS'],cy,true,[80,55,47]);
+  [['Suprafață teren (ST)',area+' mp',area+' mp'],
+   ['POT max admis',params.pot+'%',params.pot+'%'],
+   ['CUT max admis',String(params.cut),'—'],
+   ['H max admis',params.h?params.h+'m':'—',aedisH.toFixed(1)+'m'],
+   ['Nr. niveluri max',params.niv?String(params.niv):'—',String(niv)],
+   ['Retragere față (rf)',params.rf+'m',params.rf+'m'],
+   ['Retragere spate (rs)',params.rs+'m',params.rs+'m'],
+   ['Retragere lateral (rl)',params.rl+'m',params.rl+'m'],
+   ['Spații verzi min',params.sv+'%',params.sv+'%'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[80,55,47]));
+
+  // ════════════════════════════════════════════════════════════
+  // PAG 3 — ANALIZĂ SOLARĂ DETALIATĂ
+  // ════════════════════════════════════════════════════════════
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
+  hdr('ANALIZĂ SOLARĂ — DATE ASTRONOMICE ȘI ÎNSORIRE ANUALĂ',3);ftr();
+  cy=30;
+
+  // Viewer 3D zi/noapte
+  cy=addImg(caps.v3dDay,14,cy,hw,68,'FIG. 4 — Viewer 3D · ZI · Expunere solară · Umbra clădirii');
+  addImg(caps.v3dNight,14+hw+4,cy-68,hw,68,'FIG. 5 — Viewer 3D · NOAPTE · Iluminat artificial estimat');
+  cy+=4;
+
+  cy=sec('2. DATE ASTRONOMICE — LATITUDINE '+lat.toFixed(2)+'°N',cy);
+  cy=body('Analiza solară utilizează algoritmul NOAA pentru calculul poziției solare, adaptat la coordonatele geografice ale amplasamentului. Latitudinea de '+lat.toFixed(2)+'°N plasează '+uat+' în zona temperată nordică, cu variație sezonieră semnificativă a unghiului solar ('+solarData.iarna.maxAlt.toFixed(1)+'° iarna vs. '+solarData.vara.maxAlt.toFixed(1)+'° vara).',14,cy);cy+=4;
+
+  cy=tblRow(['Sezon / Zi cheie','Alt. la 12:00','Alt. max.','Răsărit','Apus','Ore soare','Umbră (H='+aedisH.toFixed(1)+'m)'],cy,true,[42,22,20,18,18,22,40]);
+  Object.values(solarData).forEach(sd=>{
+    const sr=sd.sr?((Math.floor(sd.sr)+':'+(Math.round((sd.sr%1)*60)).toString().padStart(2,'0'))):'—';
+    const ss3=sd.ss2?((Math.floor(sd.ss2)+':'+(Math.round((sd.ss2%1)*60)).toString().padStart(2,'0'))):'—';
+    cy=tblRow([sd.label,sd.alt12+'°',sd.maxAlt.toFixed(1)+'°',sr,ss3,(sd.oreSoare||'—')+'h',sd.shadAt12+'m'],cy,false,[42,22,20,18,18,22,40]);
+  });
+  cy+=4;
+
+  cy=sec('3. BILANȚ ORAR DE ÎNSORIRE — TOATE ANOTIMPURILE',cy);
+  cy=body('Tabelul de mai jos prezintă altitudinea solară la fiecare oră pentru cele 4 momente cheie ale anului. Valorile ≥15° (evidențiate) reprezintă condiții de însorire conformă OMS 119/2014. Calculul ia în considerare declinația solară și unghiul orar pentru latitudinea amplasamentului.',14,cy);cy+=4;
+
+  const hours12=[7,8,9,10,11,12,13,14,15,16,17];
+  const hColW=[22,...hours12.map(()=>16)];
+  cy=tblRow(['Sezon / Oră',...hours12.map(h=>h+':00')],cy,true,hColW);
+  Object.values(solarData).forEach(sd=>{
+    const vals=hours12.map(h=>{
+      const idx=sd.hours.indexOf(h);
+      const alt=idx>=0?sd.alts[idx]:0;
+      return alt>0?alt.toFixed(0)+'°':'—';
+    });
+    cy=tblRow([sd.label,...vals],cy,false,hColW);
+  });
+
+  // ════════════════════════════════════════════════════════════
+  // PAG 4 — CONFORMITATE OMS 119/2014 + GOLDEN HOUR
+  // ════════════════════════════════════════════════════════════
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
+  hdr('CONFORMITATE OMS 119/2014 — UMBRE PROIECTATE',4);ftr();
+  cy=30;
+
+  cy=addImg(caps.v3dGolden,14,cy,hw,68,'FIG. 6 — Viewer 3D · GOLDEN HOUR · Însorire laterală 45°');
+  addImg(caps.v3dOvercast,14+hw+4,cy-68,hw,68,'FIG. 7 — Viewer 3D · ÎNNORAT · Impact umbrit');
+  cy+=4;
+
+  // Status conformitate mare
+  const statCol=isConform?GREEN:RED;
+  pdf.setFillColor(...statCol);pdf.rect(14,cy,W-28,14,'F');
+  pdf.setFillColor(...GOLD);pdf.rect(14,cy,3,14,'F');
+  pdf.setTextColor(255,255,255);pdf.setFontSize(10);pdf.setFont('helvetica','bold');
+  pdf.text(isConform?'✓ CONFORM OMS 119/2014 — Altitudine solară ≥15° la solstițiu de iarnă':'✗ NECONFORM — Altitudine solară '+solarData.iarna.maxAlt.toFixed(1)+'° < 15° cerut de OMS 119/2014',W/2,cy+9,{align:'center'});
+  cy+=18;
+
+  cy=sec('4. VERIFICARE CONFORMITATE OMS 119/2014',cy);
+  cy=body('Conform OMS nr. 119/2014 (Norme de igienă privind mediul de viață al populației), orice spațiu locuit sau cu destinație similară trebuie să beneficieze de iluminat natural direct timp de minimum 1.5 ore pe zi la solstițiul de iarnă, cu unghi solar de minimum 15° față de orizont. Verificarea se efectuează pentru ziua de 21 decembrie (solstițiul de iarnă), ora 12:00 (prânz solar).',14,cy);cy+=3;
+
+  cy=tblRow(['Criteriu OMS 119/2014','Valoare calculată','Prag minim','Diferență','Status'],cy,true,[65,35,28,25,29]);
+  [['Alt. solară solstițiu iarnă (12:00)',solarData.iarna.alt12+'°','≥ 15°',(solarData.iarna.maxAlt-15).toFixed(1)+'°',isConform?'CONFORM':'NECONFORM'],
+   ['Ore însorire iarnă (alt ≥15°)',oreMinIarna+'h/zi','≥ 1.5h/zi',(oreMinIarna-1.5).toFixed(1)+'h',oreMinIarna>=1.5?'CONFORM':'NECONFORM'],
+   ['Ore însorire vară',oreMaxVara+'h/zi','informativ','—','INFO'],
+   ['Umbrire la 12:00 iarnă',solarData.iarna.shadAt12+'m','conform H prop.','—','INFO'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[65,35,28,25,29],[
+    r[4]==='CONFORM'?[220,240,225]:r[4]==='NECONFORM'?[240,220,220]:LIGHT
+  ]));cy+=4;
+
+  cy=sec('5. CALCULUL UMBREI PROIECTATE',cy);
+  cy=body('Lungimea umbrei proiectate la sol de clădirea propusă (H='+aedisH.toFixed(1)+'m) a fost calculată prin formula: L = H / tan(α), unde α este altitudinea solară la momentul analizat. Valorile cele mai defavorabile apar la solstițiul de iarnă când unghiul solar este minim.',14,cy);cy+=3;
+
+  cy=tblRow(['Momentul','Alt. solară','Umbră proiectată (H='+aedisH.toFixed(1)+'m)','Observații'],cy,true,[50,30,60,42]);
+  Object.values(solarData).forEach(sd=>{
+    cy=tblRow([sd.label.split('(')[0].trim(),sd.alt12+'°',sd.shadAt12+'m spre nord','Influențează '+Math.round(parseFloat(sd.shadAt12||0)/5)+' loturi vecine est.'],cy,false,[50,30,60,42]);
+  });
+
+  // ════════════════════════════════════════════════════════════
+  // PAG 5 — VEDERI MULTIPLE + CONTEXT VECINĂTĂȚI
+  // ════════════════════════════════════════════════════════════
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
+  hdr('VEDERI MULTIPLE — EXPUNERE SOLARĂ ȘI CONTEXT VECINI',5);ftr();
+  cy=30;
+
+  cy=addImg(caps.imgFront,14,cy,hw,58,'FIG. 8 — Vedere frontală (Nord-Sud) · Front stradal · Umbra față de stradă');
+  addImg(caps.imgLat,14+hw+4,cy-58,hw,58,'FIG. 9 — Vedere laterală · Umbra față de proprietăți vecine');
+  cy+=3;
+  cy=addImg(caps.imgAerial,14,cy,hw,58,'FIG. 10 — Vedere aeriană 45° · Amprenta umbrei pe teren');
+  addImg(caps.imgBack,14+hw+4,cy-58,hw,58,'FIG. 11 — Vedere posterioară · Umbra spre curtea interioară/spate');
+  cy+=4;
+
+  cy=sec('6. ANALIZA CONTEXTULUI URBAN — CLĂDIRI VECINE',cy);
+  const ctxBlds=S.ctx?.features?.filter(f=>f.geometry)?.slice(0,8)||[];
+  if(ctxBlds.length>0){
+    cy=body('Au fost identificate '+ctxBlds.length+' clădiri în contextul imediat al parcelei '+nrcad+', conform datelor OSM. Înălțimile acestora influențează condițiile de însorire prin obstrucție reciprocă. Datele de mai jos prezintă estimările disponibile:',14,cy);cy+=3;
+    cy=tblRow(['ID','Nr.cad','Suprafață (mp)','H estimată (m)','Funcțiune','Dist. aprox.'],cy,true,[10,30,30,25,40,47]);
+    ctxBlds.forEach((b,i)=>{
+      const bArea=Math.round(turf.area({type:'Feature',geometry:b.geometry,properties:{}}));
+      const bH=b.properties?.h||Math.round(parseFloat(b.properties?.levels||'2')*3)||6;
+      const dist=Math.round(turf.distance(turf.centerOfMass(ap.geo),turf.centerOfMass({type:'Feature',geometry:b.geometry,properties:{}}),{units:'meters'}));
+      cy=tblRow([(i+1).toString(),b.properties?.nrcad||'OSM',bArea+' mp',bH+'m',b.properties?.fn_label||b.properties?.building||'—',dist+'m'],cy,false,[10,30,30,25,40,47]);
+    });
+  } else {
+    cy=body('Nu s-au identificat clădiri în contextul imediat din baza de date OSM. Se recomandă verificare in situ și la Primăria '+uat+' — DAU.',14,cy);
+  }
+
+  // ════════════════════════════════════════════════════════════
+  // PAG 6 — HARTĂ ORAȘ + BAZA LEGALĂ
+  // ════════════════════════════════════════════════════════════
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
+  hdr('HARTĂ ORAȘ — ÎNCADRARE TERITORIALĂ',6);ftr();
+  cy=30;
+
+  cy=addImg(caps.imgCity,14,cy,W-28,70,'FIG. 12 — Harta '+uat+' · Încadrare amplasament în contextul urban · Rețea stradală principală');cy+=4;
+
+  cy=sec('7. BAZA LEGISLATIVĂ ȘI NORMATIVĂ',cy);
+  cy=bullet([
+    'OMS nr. 119/2014 — Norme de igienă și sănătate publică privind mediul de viață al populației (Cap. II — Locuințe).',
+    'Ordinul MS nr. 994/2018 pentru modificarea OMS 119/2014 — Actualizarea normelor de însorire.',
+    'Legea nr. 50/1991 republicată — Autorizarea executării lucrărilor de construcții (art. 7 — studii obligatorii).',
+    'HG nr. 525/1996 — Regulamentul General de Urbanism (art. 17 — Amplasarea față de aliniament și vecinătăți).',
+    'SR EN 17037:2019 — Iluminare naturală în clădiri (standard european, adoptat în România).',
+    'PUG '+uat+' în vigoare — UTR '+utr+' — Regulamentul Local de Urbanism: H max '+( params.h||'—')+'m, POT max '+params.pot+'%, CUT max '+params.cut+'.',
+    'P100-1/2013 — Cod de proiectare seismică (zona '+getSeismConfig().zona+', ag='+getSeismConfig().ag+'g) — influențează structura și implicit H propus.',
+  ],14,cy);cy+=2;
+
+  cy=divider(cy);
+  cy=sec('8. CONCLUZII ȘI RECOMANDĂRI',cy,isConform?GREEN:RED);
+  cy=concluzii([
+    isConform
+      ? 'Amplasamentul este CONFORM cu prevederile OMS 119/2014. Altitudinea solară la solstițiul de iarnă (21 dec, 12:00) este de '+solarData.iarna.alt12+'°, peste pragul minim de 15°. Însorirea minimă de 1.5 ore/zi este asigurată în cele mai defavorabile condiții sezoniere.'
+      : 'Amplasamentul NECESITĂ VERIFICARE suplimentară. Altitudinea solară de '+solarData.iarna.alt12+'° la solstițiu iarnă este sub pragul de 15° OMS 119/2014. Se recomandă studiu detaliat de însorire cu simulare 3D și consultarea expertului în fizica construcțiilor.',
+    'Umbra proiectată la solstițiu de iarnă (12:00) are lungimea estimată de '+solarData.iarna.shadAt12+'m. La solstițiu de vară, umbra se reduce la '+solarData.vara.shadAt12+'m. Aceste valori trebuie coroborate cu distanțele față de proprietățile vecine (rf='+params.rf+'m, rl='+params.rl+'m, rs='+params.rs+'m conform PUG).',
+    'Clădirea propusă cu H='+aedisH.toFixed(1)+'m și '+niv+' niveluri beneficiază de '+solarData.vara.oreSoare+' ore de însorire directă la solstițiu de vară și '+oreMinIarna+' ore/zi la solstițiu de iarnă (altitudine ≥15°).',
+    'Se recomandă orientarea principală a ferestrelor camere de locuit spre Sud-Sud-Est (±30°) pentru maximizarea câștigului solar pasiv în sezonul rece și reducerea supraîncălzirii în sezonul cald.',
+    'Înaintea obținerii Autorizației de Construire se impune elaborarea unui Studiu Detaliat de Însorire cu simulare 3D certificată, semnat de arhitect autorizat OAR, conform Legii 50/1991.',
+  ],cy);
+
+  sign();
+
+  pdf.save('Studiu_Insorire_'+nrcad+'_'+year+'.pdf');
+  ss('✅ Studiu de Însorire generat! (8 pagini)');
+}
+
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// AEDIS 3D VIEWER — Three.js, BufferGeometry corect
+// ═══════════════════════════════════════════════════════════════════════════
+
+// V3D moved to top
 

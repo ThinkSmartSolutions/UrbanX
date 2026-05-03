@@ -1,6 +1,5 @@
-// UrbanX — Viewer Urban3D, materiale
+// UrbanX — Menus + viewer Urban3D + materiale
 
-// ── Topbar dropdown menus ────────────────────────────────────────────────
 function _closeAllMenus(){
   const v=document.getElementById('viz-menu');
   const t=document.getElementById('tools-menu');

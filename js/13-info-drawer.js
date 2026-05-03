@@ -1,6 +1,5 @@
-// UrbanX — RAPORT_INFO, info drawer
+// UrbanX — RAPORT_INFO, info drawer, Street View
 
-<script>
 
 // ═══ STREET VIEW ══════════════════════════════════════════════════════════════
 // Embed Google Street View panoramic + proiecție siluetă volum AEDIS
