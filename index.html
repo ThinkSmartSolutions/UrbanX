@@ -1731,7 +1731,7 @@ var LOISIR_AI_STATE = {
   endpoint:''
 };
 var V3D = { r:null, scene:null, cam:null, af:null, ctx:[], aedis:[], texCache:{},
-  th:Math.PI/4, ph:Math.PI/3.2, rad:60, tx:null };
+  th:Math.PI/4, ph:Math.PI/2.4, rad:45, tx:null };
 var SV = {
   open: false,
   showVolume: true,
@@ -9929,9 +9929,9 @@ function _v3dRebuildFast(){
   const toLoc=([lng,lat])=>[(lng-cx)*mLng,(lat-cy2)*mLat];
   const THREE=window.THREE;
   const stilKey=AEDIS.stil||'modern';
-  const COLS_V={modern:{e:'#c8daf5',p:'#1a2e42'},inovator:{e:'#c0c8ff',p:'#0e1830'},
-    clasic:{e:'#f0dcb0',p:'#5a4020'},minimalist:{e:'#e8f0f8',p:'#d8e4ee'},
-    industrial:{e:'#d0c8b8',p:'#201810'},adaptat_context:{e:'#d0eccc',p:'#1a3018'}};
+  const COLS_V={modern:{e:'#c8dff8',p:'#0d2040'},inovator:{e:'#a0a8f0',p:'#0c1035'},
+    clasic:{e:'#f0d8a0',p:'#5c3010'},minimalist:{e:'#f4f8fc',p:'#d0dcea'},
+    industrial:{e:'#c09870',p:'#1e1008'},adaptat_context:{e:'#c8e0b8',p:'#1c3014'}};
   const cv=COLS_V[stilKey]||COLS_V.modern;
 
   (S.vol._lastFeats||[]).forEach(f=>{
@@ -17740,6 +17740,8 @@ function aedisOpen3DViewer(){
         <option value="hide">Ascunde</option>
       </select>
       <button onclick="_v3dResetCam()" title="Reset cameră" style="background:rgba(255,255,255,.05);color:#94a3b8;border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:3px 9px;font-size:11px;cursor:pointer;flex-shrink:0">⌂</button>
+      <button onclick="V3D.rad=Math.max(V3D.rad*0.65,8);_v3dUpdateCam()" title="Zoom in" style="background:rgba(59,130,246,.1);color:#60a5fa;border:1px solid rgba(59,130,246,.2);border-radius:7px;padding:3px 9px;font-size:13px;cursor:pointer;flex-shrink:0">＋</button>
+      <button onclick="V3D.rad=Math.min(V3D.rad*1.4,300);_v3dUpdateCam()" title="Zoom out" style="background:rgba(59,130,246,.1);color:#60a5fa;border:1px solid rgba(59,130,246,.2);border-radius:7px;padding:3px 9px;font-size:13px;cursor:pointer;flex-shrink:0">－</button>
       <button id="v3d-dist-btn" onclick="_v3dToggleDistances()" title="Toggle distanțe vecini" style="background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.3);border-radius:7px;padding:3px 9px;font-size:11px;cursor:pointer;flex-shrink:0">📏</button>
       <div style="flex:1"></div>
       <button onclick="document.getElementById('aedis-3d-viewer-overlay').remove();_v3dCleanup()" style="background:rgba(20,30,60,.9);color:#a78bfa;border:1px solid rgba(139,92,246,.4);border-radius:8px;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0">✕ Închide</button>
@@ -17887,8 +17889,8 @@ function _v3dBuild(ap){
 
   // Scene
   const scene=new THREE.Scene();
-  scene.background=new THREE.Color('#d8eaf8');
-  scene.fog=new THREE.FogExp2('#d8eaf8',0.002);
+  scene.background=new THREE.Color('#c8dff5');
+  scene.fog=new THREE.FogExp2('#c8dff5',0.0008);
   V3D.scene=scene;
 
   // Camera
@@ -17923,14 +17925,14 @@ function _v3dBuild(ap){
   (()=>{
     const cv2=document.createElement('canvas'); cv2.width=256; cv2.height=256;
     const gctx=cv2.getContext('2d');
-    gctx.fillStyle='#9ab0c0'; gctx.fillRect(0,0,256,256);
-    gctx.strokeStyle='#7a9aaa'; gctx.lineWidth=1;
+    gctx.fillStyle='#6a8a9a'; gctx.fillRect(0,0,256,256);
+    gctx.strokeStyle='#556e7e'; gctx.lineWidth=1;
     [32,64,96,128,160,192,224].forEach(v=>{
       gctx.beginPath();gctx.moveTo(v,0);gctx.lineTo(v,256);gctx.stroke();
       gctx.beginPath();gctx.moveTo(0,v);gctx.lineTo(256,v);gctx.stroke();
     });
-    for(let n=0;n<600;n++){
-      gctx.fillStyle=`rgba(255,255,255,${Math.random()*0.025})`;
+    for(let n=0;n<400;n++){
+      gctx.fillStyle=`rgba(255,255,255,${Math.random()*0.03})`;
       gctx.fillRect(Math.random()*256,Math.random()*256,1.5,1.5);
     }
     const gTex=new THREE.CanvasTexture(cv2);
@@ -17940,8 +17942,8 @@ function _v3dBuild(ap){
     g.rotation.x=-Math.PI/2; g.position.y=-0.05; g.receiveShadow=true; scene.add(g);
   })();
   // Grid subtil
-  const grid=new THREE.GridHelper(400,100,'#90b0c8','#7898b0');
-  grid.material.opacity=0.4; grid.material.transparent=true;
+  const grid=new THREE.GridHelper(400,100,'#4a6a80','#3a5060');
+  grid.material.opacity=0.35; grid.material.transparent=true;
   grid.position.y=0.01; scene.add(grid);
 
   // Coordonate locale
@@ -17994,12 +17996,12 @@ function _v3dBuild(ap){
     const floor=f.properties?.floor??0;
     // Culoarea din COLS[stilKey] curent, NU din f.properties.color (care poate fi veche)
     const COLS_V={
-      modern:         {etaj:'#b8d0f0',parter:'#0a1828'},
-      inovator:       {etaj:'#9090e0',parter:'#080820'},
-      clasic:         {etaj:'#e8d090',parter:'#4a2a08'},
-      minimalist:     {etaj:'#f0f4f8',parter:'#e0e8f0'},
-      industrial:     {etaj:'#b08060',parter:'#1a0e08'},
-      adaptat_context:{etaj:'#c0d8b0',parter:'#182810'},
+      modern:         {etaj:'#c8dff8',parter:'#0d2040'},
+      inovator:       {etaj:'#a0a8f0',parter:'#0c1035'},
+      clasic:         {etaj:'#f0d8a0',parter:'#5c3010'},
+      minimalist:     {etaj:'#f4f8fc',parter:'#d0dcea'},
+      industrial:     {etaj:'#c09870',parter:'#1e1008'},
+      adaptat_context:{etaj:'#c8e0b8',parter:'#1c3014'},
     };
     const cv=COLS_V[stilKey]||COLS_V.modern;
     const col = floor===0 ? cv.parter : (f.properties?.color||cv.etaj);
@@ -19302,46 +19304,52 @@ function _v3dApplyLight(preset,THREE,scene,r){
   scene.children.filter(c=>c.isLight).forEach(l=>scene.remove(l));
   const P={
     day:{
-      sky:'#d8ecff',fog:'#ddeeff',
-      amb:{c:'#c8e0ff',i:1.2},
-      gnd:{c:'#a09060',i:0.5},
-      sun:{c:'#fff8e0',i:4.5,p:[100,140,80]},
-      fill:{c:'#80b8f0',i:1.2,p:[-80,60,-60]},
-      rim:{c:'#ffe8a0',i:0.8,p:[-20,30,-100]},
-      exp:1.6,night:false,fog:false
+      sky:'#c8dff5',fog:'#c8dff5',
+      amb:{c:'#d0e8ff',i:1.4},
+      gnd:{c:'#a09060',i:0.6},
+      sun:{c:'#fff8e0',i:5.5,p:[100,140,80]},
+      fill:{c:'#80b8f0',i:1.4,p:[-80,60,-60]},
+      rim:{c:'#ffe8a0',i:1.0,p:[-20,30,-100]},
+      exp:1.8,night:false,fog:false
     },
     golden:{
       sky:'#f0b060',fog:'#e09040',
-      amb:{c:'#ffa040',i:0.8},
-      gnd:{c:'#603010',i:0.3},
-      sun:{c:'#ff6010',i:3.5,p:[140,18,60]},
-      fill:{c:'#a05020',i:0.6,p:[-60,40,-80]},
-      rim:{c:'#ffcc80',i:1.0,p:[0,20,-120]},
-      exp:1.4,night:false,fog:false
+      amb:{c:'#ffa040',i:0.9},
+      gnd:{c:'#603010',i:0.4},
+      sun:{c:'#ff6010',i:4.5,p:[140,18,60]},
+      fill:{c:'#a05020',i:0.8,p:[-60,40,-80]},
+      rim:{c:'#ffcc80',i:1.2,p:[0,20,-120]},
+      exp:1.6,night:false,fog:false
     },
     overcast:{
       sky:'#a8b8c8',fog:'#b0c0cc',
-      amb:{c:'#c0ccd8',i:1.6},
-      gnd:{c:'#707880',i:0.3},
-      sun:{c:'#c0d0e0',i:0.8,p:[40,120,40]},
-      fill:{c:'#90a8b8',i:0.8,p:[-40,60,-40]},
-      rim:{c:'#c8d4dc',i:0.3,p:[0,40,-80]},
-      exp:1.1,night:false,fog:true
+      amb:{c:'#c0ccd8',i:1.8},
+      gnd:{c:'#707880',i:0.4},
+      sun:{c:'#c0d0e0',i:1.2,p:[40,120,40]},
+      fill:{c:'#90a8b8',i:1.0,p:[-40,60,-40]},
+      rim:{c:'#c8d4dc',i:0.5,p:[0,40,-80]},
+      exp:1.3,night:false,fog:true
     },
     night:{
-      sky:'#010306',fog:'#010306',
-      amb:{c:'#080f20',i:0.15},
-      gnd:{c:'#020408',i:0.1},
-      sun:{c:'#1830a0',i:0.3,p:[-80,80,40]},
-      fill:{c:'#ff7020',i:1.2,p:[0,3,0]},  // lumina stradala portocalie
-      rim:{c:'#2040c0',i:0.5,p:[60,40,-80]},
-      exp:0.9,night:true,fog:true
+      sky:'#06090f',fog:'#06090f',
+      amb:{c:'#10204a',i:0.4},
+      gnd:{c:'#050a12',i:0.2},
+      sun:{c:'#2040c0',i:0.6,p:[-80,80,40]},
+      fill:{c:'#ff7020',i:1.8,p:[0,3,0]},
+      rim:{c:'#2040c0',i:0.8,p:[60,40,-80]},
+      exp:1.1,night:true,fog:true
     },
   };
   const p=P[preset]||P.day;
   window._v3dNight=p.night;
   if(scene.background) scene.background.set(p.sky);
-  if(scene.fog) scene.fog.color.set(p.fog);
+  // Fog: dezactivat la zi/golden, activ la overcast/noapte cu densitate mică
+  if(p.fog){
+    if(!scene.fog) scene.fog=new THREE.FogExp2(p.sky,0.0006);
+    else { scene.fog.color.set(p.fog); scene.fog.density=0.0006; }
+  } else {
+    scene.fog=null; // fără fog la zi — clădirile sunt vizibile clar
+  }
   const amb=new THREE.AmbientLight(p.amb.c,p.amb.i); scene.add(amb);
   const sun=new THREE.DirectionalLight(p.sun.c,p.sun.i);
   sun.position.set(...p.sun.p); sun.castShadow=true;
@@ -19355,17 +19363,27 @@ function _v3dApplyLight(preset,THREE,scene,r){
 
   // Noapte: adăugăm lumini punctuale (stradă + interior clădiri)
   if(p.night && V3D.scene){
-    // Lumini de stradă portocalii
-    const streetLights = [[-30,8,0],[30,8,0],[0,8,-30],[0,8,30],[-30,8,-30],[30,8,30]];
+    // Lumini de stradă portocalii — acoperă mai mult teren
+    const streetLights = [
+      [-50,10,0],[50,10,0],[0,10,-50],[0,10,50],
+      [-50,10,-50],[50,10,50],[-50,10,50],[50,10,-50],
+      [0,10,0] // centru
+    ];
     streetLights.forEach(([x,y,z])=>{
-      const pl = new THREE.PointLight('#ff9040', 0.8, 45);
+      const pl = new THREE.PointLight('#ff9840', 1.2, 80);
       pl.position.set(x,y,z);
       V3D.scene.add(pl);
     });
-    // Lumină ambientală interioară (simulează ferestre aprinse)
-    const intLight = new THREE.PointLight('#ffe880', 1.2, 30);
-    intLight.position.set(0, 8, 0);
-    V3D.scene.add(intLight);
+    // Lumini calde interioare (ferestre aprinse)
+    [[0,6,0],[-20,8,10],[20,8,-10]].forEach(([x,y,z])=>{
+      const il = new THREE.PointLight('#ffe080', 1.8, 50);
+      il.position.set(x,y,z);
+      V3D.scene.add(il);
+    });
+    // Lumină albastră lunară de sus
+    const moon = new THREE.DirectionalLight('#4060c0', 0.8);
+    moon.position.set(50,120,-30);
+    V3D.scene.add(moon);
   }
 }
 
@@ -19398,7 +19416,7 @@ function _v3dUpdateCam(){
 }
 
 function _v3dResetCam(){
-  V3D.th=Math.PI/4; V3D.ph=Math.PI/3.2;
+  V3D.th=Math.PI/4; V3D.ph=Math.PI/2.4;
   const maxH=Math.max(...(S.vol._lastFeats||[]).map(f=>f.properties?.top||0),8);
   const ap=S.parcels[S.activeParcel??0];
   const ring=ap?.geo?.geometry?.type==='Polygon'?ap.geo.geometry.coordinates[0]:ap?.geo?.geometry?.coordinates?.[0]?.[0]||[];
@@ -19408,10 +19426,11 @@ function _v3dResetCam(){
   const toLoc=([lng,lat])=>[(lng-cx2)*mLng,(lat-cy2)*mLat];
   const pts=ring.map?.(toLoc)||[];
   const parcelSz=Math.max(...pts.map(([x,z])=>Math.sqrt(x*x+z*z)),10);
-  V3D.rad=Math.max(parcelSz*2.5,maxH*2.2,35);
-  if(!V3D.tx) V3D.tx = new THREE.Vector3(0, maxH*0.4, 0);
-  else V3D.tx.set(0, maxH*0.4, 0);
-  if(V3D.tx) V3D.tx.set(0,maxH*0.4,0);
+  // Raza mai mică: 1.8x parcela (era 2.5x) — clădirile ocupă mai mult din ecran
+  V3D.rad=Math.max(parcelSz*1.8,maxH*2.0,25);
+  if(!V3D.tx) V3D.tx = new THREE.Vector3(0, maxH*0.35, 0);
+  else V3D.tx.set(0, maxH*0.35, 0);
+  if(V3D.tx) V3D.tx.set(0,maxH*0.35,0);
   _v3dUpdateCam();
 }
 
