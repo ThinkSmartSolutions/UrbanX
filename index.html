@@ -17878,44 +17878,44 @@ function _admRenderGuide(body){
     ${[
       {ico:'🗺',title:'Adăugare UAT nou — flux complet GitHub',color:'#38bdf8',steps:[
         '<b>Obții datele de la primărie sau OCPI:</b> harta PUG (SHP/DXF/PDF georef.) + Regulamentul Local de Urbanism (RLU) în format CSV/Excel/Word.',
-        '<b>Convertești PUG în QGIS:</b> Layer → Export → Save Features As → GeoJSON, CRS: EPSG:4326 (WGS84). Câmp obligatoriu în attributes: <code style="color:#fbbf24">utr</code> (codul zonei, ex: "P1", "CM", "AI2A").',
-        '<b>Generezi reguli.json</b> din CSV-ul RLU. Script în repo: <code style="color:#fbbf24">tools/gen_reguli.py pug_reguli.csv > reguli.json</code>. Sau completezi manual după formatul: <code style="color:#fbbf24">{"P1":{"d":"Locuințe","pot":35,"cut":1.2,"niv":2,"h":10,"rf":5,"rl":3,"rs":5,"sv":30,"pk":2}}</code>',
-        '<b>Generezi cadastru_index.json</b> din exportul ANCPI: <code style="color:#fbbf24">tools/gen_cadastru_index.py export_ancpi.csv > cadastru_index.json</code>. Format rezultat: <code style="color:#fbbf24">{"173583":[27.601,47.158],...}</code>',
-        '<b>Creezi folderul în GitHub:</b> în repo → Add file → Create new file → scrii <code style="color:#fbbf24">data/municipiul-bacau/meta.json</code> (GitHub creează automat folderul).',
-        '<b>Urci cele 4 fișiere</b> în <code style="color:#fbbf24">data/&#123;uat-id&#125;/</code>: pug.geojson, cadastru_index.json, reguli.json, meta.json — prin Upload files sau git push.',
-        '<b>Actualizezi UAT_REGISTRY</b> în index.html: găsești entry-ul UAT-ului (ex: "municipiul-bacau"), schimbi <code style="color:#4ade80">status:\'empty\'</code> → <code style="color:#4ade80">status:\'complet\'</code>.',
+        '<b>Convertești PUG în QGIS:</b> Layer → Export → Save Features As → GeoJSON, CRS: EPSG:4326 (WGS84). Câmp obligatoriu în attributes: <code style='color:#fbbf24'>utr</code> (codul zonei, ex: "P1", "CM", "AI2A").',
+        '<b>Generezi reguli.json</b> din CSV-ul RLU. Script în repo: <code style='color:#fbbf24'>tools/gen_reguli.py pug_reguli.csv > reguli.json</code>. Sau completezi manual după formatul: <code style='color:#fbbf24'>{"P1":{"d":"Locuințe","pot":35,"cut":1.2,"niv":2,"h":10,"rf":5,"rl":3,"rs":5,"sv":30,"pk":2}}</code>',
+        '<b>Generezi cadastru_index.json</b> din exportul ANCPI: <code style='color:#fbbf24'>tools/gen_cadastru_index.py export_ancpi.csv > cadastru_index.json</code>. Format rezultat: <code style='color:#fbbf24'>{"173583":[27.601,47.158],...}</code>',
+        '<b>Creezi folderul în GitHub:</b> în repo → Add file → Create new file → scrii <code style='color:#fbbf24'>data/municipiul-bacau/meta.json</code> (GitHub creează automat folderul).',
+        '<b>Urci cele 4 fișiere</b> în <code style='color:#fbbf24'>data/&#123;uat-id&#125;/</code>: pug.geojson, cadastru_index.json, reguli.json, meta.json — prin Upload files sau git push.',
+        '<b>Actualizezi UAT_REGISTRY</b> în index.html: găsești entry-ul UAT-ului (ex: "municipiul-bacau"), schimbi <code style='color:#4ade80'>status:\'empty\'</code> → <code style='color:#4ade80'>status:\'complet\'</code>.',
         '<b>GitHub Pages se actualizează automat</b> în 1-2 minute după push. Testezi: selectezi UAT-ul din 📍 → PUG se încarcă pe hartă.',
       ]},
       {ico:'📁',title:'Structura folderelor în GitHub repo',color:'#a78bfa',steps:[
-        '<code style="color:#fbbf24">data/municipiul-iasi/</code> — date complete existente (pug.geojson, cadastru_index.json, reguli.json)',
-        '<code style="color:#fbbf24">data/municipiul-bacau/</code> — de creat când ai datele',
-        '<code style="color:#fbbf24">data/municipiul-suceava/</code> — de creat când ai datele',
-        '<code style="color:#fbbf24">tools/</code> — scripturi Python pentru conversie (gen_reguli.py, gen_cadastru_index.py, validate_pug.py)',
+        '<code style='color:#fbbf24'>data/municipiul-iasi/</code> — date complete existente (pug.geojson, cadastru_index.json, reguli.json)',
+        '<code style='color:#fbbf24'>data/municipiul-bacau/</code> — de creat când ai datele',
+        '<code style='color:#fbbf24'>data/municipiul-suceava/</code> — de creat când ai datele',
+        '<code style='color:#fbbf24'>tools/</code> — scripturi Python pentru conversie (gen_reguli.py, gen_cadastru_index.py, validate_pug.py)',
         '<b>NU mai pune fișiere direct în root</b> — qGis_pug.iasi.geojson și cadastru_index.json din root sunt menținute doar ca fallback temporar până la migrare completă.',
       ]},
       {ico:'📋',title:'Format fișiere — referință rapidă',color:'#4ade80',steps:[
-        '<b>pug.geojson</b> — FeatureCollection de Polygon/MultiPolygon. Câmp obligatoriu: <code style="color:#fbbf24">utr</code>. Opțional: <code style="color:#fbbf24">denumire</code>, <code style="color:#fbbf24">regim_h</code>, <code style="color:#fbbf24">indici</code>.',
-        '<b>cadastru_index.json</b> — obiect JSON simplu: <code style="color:#fbbf24">{"NR_CAD":[lng,lat],...}</code>. Dimensiune tipică: 1-5MB pentru un municipiu.',
-        '<b>reguli.json</b> — obiect JSON: <code style="color:#fbbf24">{"UTR":{"d":"desc","pot":40,"cut":2.0,"niv":4,"h":16,"rf":5,"rl":3,"rs":5,"sv":25,"pk":1}}</code>. Câmpuri opționale: ao, fm, ua, uc, ui.',
-        '<b>meta.json</b> — info UAT: <code style="color:#fbbf24">{"id":"municipiul-bacau","label":"Municipiul Bacău","judet":"Bacău","status":"complet","sursa_pug":"Primăria Bacău, HCL 123/2020","data_actualizare":"2024-01"}</code>',
+        '<b>pug.geojson</b> — FeatureCollection de Polygon/MultiPolygon. Câmp obligatoriu: <code style='color:#fbbf24'>utr</code>. Opțional: <code style='color:#fbbf24'>denumire</code>, <code style='color:#fbbf24'>regim_h</code>, <code style='color:#fbbf24'>indici</code>.',
+        '<b>cadastru_index.json</b> — obiect JSON simplu: <code style='color:#fbbf24'>{"NR_CAD":[lng,lat],...}</code>. Dimensiune tipică: 1-5MB pentru un municipiu.',
+        '<b>reguli.json</b> — obiect JSON: <code style='color:#fbbf24'>{"UTR":{"d":"desc","pot":40,"cut":2.0,"niv":4,"h":16,"rf":5,"rl":3,"rs":5,"sv":25,"pk":1}}</code>. Câmpuri opționale: ao, fm, ua, uc, ui.',
+        '<b>meta.json</b> — info UAT: <code style='color:#fbbf24'>{"id":"municipiul-bacau","label":"Municipiul Bacău","judet":"Bacău","status":"complet","sursa_pug":"Primăria Bacău, HCL 123/2020","data_actualizare":"2024-01"}</code>',
       ]},
       {ico:'🔄',title:'Actualizare date existente',color:'#fbbf24',steps:[
-        'Înlocuiești fișierul direct în GitHub: navighezi la <code style="color:#fbbf24">data/&#123;uat-id&#125;/pug.geojson</code> → Edit (creion) sau Upload → Commit changes.',
-        'SAU prin git: <code style="color:#fbbf24">git add data/municipiul-iasi/pug.geojson && git commit -m "Update PUG Iași v2" && git push</code>',
+        'Înlocuiești fișierul direct în GitHub: navighezi la <code style='color:#fbbf24'>data/&#123;uat-id&#125;/pug.geojson</code> → Edit (creion) sau Upload → Commit changes.',
+        'SAU prin git: <code style='color:#fbbf24'>git add data/municipiul-iasi/pug.geojson && git commit -m "Update PUG Iași v2" && git push</code>',
         'GitHub Pages se actualizează automat. Utilizatorii văd noile date după Ctrl+Shift+R (hard refresh).',
-        'Dacă actualizezi reguli.json, schimbi și <code style="color:#fbbf24">data_actualizare</code> în meta.json pentru tracking.',
+        'Dacă actualizezi reguli.json, schimbi și <code style='color:#fbbf24'>data_actualizare</code> în meta.json pentru tracking.',
       ]},
       {ico:'👥',title:'Gestionare utilizatori',color:'#fb923c',steps:[
         'Tab <b>Utilizatori</b> → statistici + tabel cu toți userii înregistrați (email, rol, status confirmare, dată).',
         '<b>Invitație:</b> introduce email → buton Invită → userul primește email cu link de confirmare.',
-        '<b>Roluri:</b> <code style="color:#fbbf24">admin</code> = acces complet + panou Admin | <code style="color:#fbbf24">user</code> = acces standard la platformă.',
+        '<b>Roluri:</b> <code style='color:#fbbf24'>admin</code> = acces complet + panou Admin | <code style='color:#fbbf24'>user</code> = acces standard la platformă.',
         '<b>Confirmare manuală</b> (dacă emailul nu ajunge): Supabase Dashboard → Authentication → Users → Edit → Confirm.',
         '<b>Resetare parolă:</b> Supabase Dashboard → Authentication → Users → Send recovery email.',
       ]},
-        '<b>PUG nu se încarcă:</b> Testează URL direct: <code style="color:#fbbf24">https://thinksmartsolutions.github.io/UrbanX/data/&#123;id&#125;/pug.geojson</code> — trebuie să returneze JSON valid.',
+        '<b>PUG nu se încarcă:</b> Testează URL direct: <code style='color:#fbbf24'>https://thinksmartsolutions.github.io/UrbanX/data/&#123;id&#125;/pug.geojson</code> — trebuie să returneze JSON valid.',
         '<b>UTR-uri fără culoare:</b> Câmpul "utr" lipsește sau are alt nume în GeoJSON. Verifică în QGIS: Open Attribute Table → caută coloana cu codurile de zonă.',
         '<b>Parcele nu se găsesc:</b> Numărul cadastral nu există în cadastru_index.json. Adaugă manual sau regenerează din export ANCPI mai complet.',
-        '<b>Reguli greșite:</b> Valorile pot, cut, h trebuie să fie numere (nu string). Validează cu: <code style="color:#fbbf24">tools/validate_reguli.py data/&#123;id&#125;/reguli.json</code>',
+        '<b>Reguli greșite:</b> Valorile pot, cut, h trebuie să fie numere (nu string). Validează cu: <code style='color:#fbbf24'>tools/validate_reguli.py data/&#123;id&#125;/reguli.json</code>',
         '<b>GitHub Pages 404:</b> Verifică că fișierul e în branch "main" și că GitHub Pages e setat pe main/root.',
       ]},
     ].map(s=>`
@@ -17924,7 +17924,7 @@ function _admRenderGuide(body){
         ${s.steps.map((step,i)=>`
           <div style="display:flex;gap:10px;margin-bottom:7px;align-items:flex-start">
             <span style="background:rgba(255,255,255,.06);color:#64748b;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;margin-top:1px">${i+1}</span>
-            <span style="color:#94a3b8;font-size:11px;line-height:1.6">${step}</span>
+            <span style='color:#94a3b8;font-size:11px;line-height:1.6'>${step}</span>
           </div>`).join('')}
       </div>`).join('')}
   `;
