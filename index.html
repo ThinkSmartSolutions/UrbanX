@@ -775,6 +775,7 @@ canvas#c2d{width:100%;height:100%;display:block}
   <button onclick="generateExistingBldStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#fb7185;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏚 Studiu Construcții Existente</button>
   <button onclick="generateGeotehnicalStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#a78bfa;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🪨 Pre-Studiu Geotehnic</button>
   <button onclick="generateTrafficStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#34d399;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🚦 Studiu de Impact Trafic</button>
+  <button onclick="generateEnvironmentalImpact();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#4ade80;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px;font-weight:700" onmouseover="this.style.background='rgba(74,222,128,.08)'" onmouseout="this.style.background='none'">🌿 Studiu de Impact asupra Mediului (EIM)</button>
   <button onclick="generateIstoricStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#f59e0b;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏛 Studiu Patrimoniu & Istoric</button>
   <button onclick="_lotExportPDF();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#c084fc;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏘 Plan de Lotizare PDF</button>
 </div>
@@ -6716,12 +6717,73 @@ const UAT_REGISTRY = {
       linii_tramvai:['1','3','7','9','13'],
       linii_autobuz:['4','5','6','11','16','28','36','43'],
     },
-    // Mediu (studiu spații verzi)
+    // Mediu — date pentru EIM și studiu spații verzi
     mediu:{
       sv_minim_procent:20,
-      parc_cel_mai_apropiat:'Parcul Expoziției',
-      arie_protejata_apropiere:null,
-      norm:'Legea 24/2007 + HG 1.093/2006',
+      parc_cel_mai_apropiat:'Parcul Expoziției (0.8km)',
+      parcuri_principale:['Parcul Expoziției','Parcul Copou','Parcul Ciric','Parcul Palat'],
+      arie_protejata_apropiere:null, km_arie_protejata:null,
+      natura2000_proximitate:['ROSCI0105 Lunca Prutului — 35km','ROSPA0070 Lunca Mijlocie a Prutului — 38km'],
+      // Calitate aer (Agenția pentru Protecția Mediului Iași — APM IS)
+      aer:{
+        apm:'APM Iași', apmWeb:'http://apmis.anpm.ro',
+        statii_monitoring:['Iași-Copou (IS-1)','Iași-Tătărași (IS-2)','Iași-Tudor Vladimirescu (IS-3)'],
+        poluanti_principali:['NO2 (trafic)','PM10/PM2.5 (trafic + încălzire)','CO (trafic)'],
+        NO2_medie_anuala:28, // μg/m³ (limita UE: 40)
+        PM10_medie_anuala:22, // μg/m³ (limita UE: 40)
+        calitate_generala:'Moderată — influențată de trafic urban și încălzire rezidențială',
+        norm:'Legea 104/2011 + Dir. 2008/50/CE (CAFE)',
+      },
+      // Apă
+      apa:{
+        operator:'APAVITAL SA Iași',
+        sursa_apa_potabila:'Sursa Timișești (râul Moldova) + Sursa Prut',
+        retea_canalizare:true, grad_conectare:92, // %
+        receptori_naturali:['Râul Bahlui','Râul Nicolina','Râul Jijia'],
+        calitate_bahlui:'Stare ecologică moderată (cl. III)',
+        risc_inundabil_bahlui:'Zonă de risc — Plan de Management Bazin Prut-Bârlad',
+        norm:'Legea 107/1996 + Dir. 2000/60/CE (WFD)',
+      },
+      // Sol
+      sol:{
+        tip_sol_predominant:'Cernoziom degradat, argilă prăfoasă',
+        contaminare_cunoscuta:'Zone industriale Copou-Socola — investigare în curs',
+        permeabilitate:'Scăzută-Medie (0.5-2.0 m/zi)',
+        eroziune:'Risc scăzut în intravilanul plat; risc mediu pe versanții Copou',
+        norm:'OUG 195/2005 + Ord. 184/1997 (Evaluare impact)',
+      },
+      // Deșeuri
+      deseuri:{
+        operator_salubritate:'Serviciul Public de Exploatare a Patrimoniului Municipiului Iași',
+        depozit_conform:'Depozitul Ecologic Iași (Roșcani)',
+        colectare_selectiva:true,
+        rata_reciclare_est:28, // %
+        norm:'Legea 211/2011 (deșeuri) + Dir. 2008/98/CE',
+      },
+      // Zgomot și vibrații
+      zgomot_vibratii:{
+        harta_strategica_zgomot:true,
+        surse_principale:['Trafic rutier (Bld. Independenței, str. Sărăriei)','CFR (gara Iași)'],
+        zone_sensibile:['Spitale','Școli','Grădinițe','Zone rezidențiale liniștite'],
+      },
+      // Date socio-economice (INS)
+      ins:{
+        populatie:290422, // 2021, recensamant
+        densitate_pop:1850, // loc/km²
+        suprafata_intravilam:5619, // ha
+        rata_somaj:3.2, // %
+        venit_mediu_lunar:4200, // RON net
+        sursa:'INS — Recensământ 2021 + Fișă localitate 2023',
+        ins_web:'https://statistici.insse.ro',
+      },
+      // Conectivitate date externe
+      api:{
+        apm_url:'http://apmis.anpm.ro/calitateaer',
+        ins_fisa:'https://statistici.insse.ro/shop/index.jsp?page=tempo2&lang=ro&query=populatie+iasi',
+        retim_url:null,
+        primaria_url:'https://www.primaria-iasi.ro/portal',
+      },
+      norm:'Legea 292/2018 (EIM) + OUG 195/2005 (Protecția mediului) + Legea 24/2007 (SV)',
     },
   },
 
@@ -7425,6 +7487,20 @@ function getZgomotConfig(){ return S_UAT.zgomot||{zona_acustica:'II',Lzsn_limita
 function getVantConfig(){ return S_UAT.vant||{zona:'III',v_ref:30,presiune_vant:0.55,directie_dominanta:'NV',norm:'CR 1-1-4/2012',factor_teren:'II'}; }
 function getTraficConfig(){ return S_UAT.trafic||{viteza_proiectare:50,TMA_ref:8000,norm_parcaje:'NP 051/2012 rev.'}; }
 function getMediuConfig(){ return S_UAT.mediu||{sv_minim_procent:20,norm:'Legea 24/2007'}; }
+function getEIMConfig(){
+  const m=S_UAT.mediu||{};
+  return {
+    aer:   m.aer   ||{apm:'APM Județean',poluanti_principali:['NO2','PM10'],calitate_generala:'Moderată',norm:'Legea 104/2011'},
+    apa:   m.apa   ||{operator:'Operator regional APA',sursa_apa_potabila:'Verificare locală',retea_canalizare:true,norm:'Legea 107/1996'},
+    sol:   m.sol   ||{tip_sol_predominant:'Verificare necesară',permeabilitate:'Medie',norm:'OUG 195/2005'},
+    deseuri:m.deseuri||{operator_salubritate:'Operator local',colectare_selectiva:true,norm:'Legea 211/2011'},
+    ins:   m.ins   ||{populatie:null,densitate_pop:null,sursa:'INS — statistici.insse.ro'},
+    natura2000:m.natura2000_proximitate||[],
+    arii_protejate:m.arie_protejata_apropiere||null,
+    api:   m.api   ||{ins_fisa:'https://statistici.insse.ro',primaria_url:'#'},
+    norm:  m.norm  ||'OUG 195/2005 + Legea 292/2018',
+  };
+}
 
 // ── Schimbare UAT ─────────────────────────────────────────────────────────
 async function switchUAT(uatId){
@@ -14421,6 +14497,8 @@ async function generateNoiseStudy(){
   ss('Se genereaza Studiu Acustic Urban...');
 
   const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Studiu Acustic Urban','Studiu acustic',7);
+  const zgomot=getZgomotConfig();
+  const vant=getVantConfig();
   const caps = await _captureStudyMaps(ap, msg=>ss(msg));
 
   const FN_NOISE={'commercial':65,'industrial':75,'retail':62,'office':55,'school':52,'hospital':45,'residential':42,'yes':48,'Necunoscut':50};
@@ -14528,6 +14606,8 @@ async function generateWindStudy(){
   ss('Se genereaza Studiu Vant & Confort Pietonal...');
 
   const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,addImg,sign}=_initStudyPdf('Studiu de Vant si Confort Pietonal','Studiu vant',6);
+  const vantCfg=getVantConfig();
+  const zgomotCfg=getZgomotConfig();
   const caps = await _captureStudyMaps(ap, msg=>ss(msg));
 
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13.2;
@@ -15417,6 +15497,8 @@ async function generateGeotehnicalStudy(){
   ss('Se generează Pre-Studiu Geotehnic...');
 
   const {pdf,W,H,DARK,GOLD,LIGHT,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,tblRow,addImg,sign}=_initStudyPdf('Pre-Studiu Geotehnic Preliminar','Pre-studiu geotehnic',5);
+  const seismCfg=getSeismConfig();
+  const hidroCfg=getHidroConfig();
   const caps=await _captureStudyMaps(ap,msg=>ss(msg));
 
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13;
@@ -15528,6 +15610,7 @@ async function generateTrafficStudy(){
   ss('Se generează Studiu de Trafic...');
 
   const {pdf,W,H,DARK,GOLD,LIGHT,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,tblRow,addImg,sign}=_initStudyPdf('Studiu de Impact asupra Traficului','Studiu trafic',5);
+  const traficCfg=getTraficConfig();
   const caps=await _captureStudyMaps(ap,msg=>ss(msg));
 
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13;
@@ -15690,6 +15773,333 @@ async function _cimecGetMapImage(lon, lat, radiusM, widthPx=800, heightPx=600){
   }catch(e){}
   // Fallback: folosim img element (bypass CORS pentru afișare)
   return null;
+}
+
+async function generateEnvironmentalImpact(){
+  const ap=S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry){ss('Selectați o parcelă pentru Studiul de Impact asupra Mediului.');return;}
+  ss('Se generează Studiu de Impact asupra Mediului (EIM)...');
+
+  const d=_initStudyPdf('Studiu de Impact asupra Mediului','EIM — Legea 292/2018 + OUG 195/2005',10);
+  const {pdf,W,H,DARK,DARK2,GOLD,GOLD2,BLUE,BLUE2,LIGHT,LIGHT2,RED,GREEN,ORANGE,GRAY,GRAY2,GRAY3,
+    S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,
+    hdr,ftr,sec,subsec,body,tblRow,addImg,kv,badge,divider,bullet,concluzii,sign,cover}=d;
+
+  const caps=await _captureStudyMaps(ap,m=>ss(m));
+  const eim=getEIMConfig();
+  const mediu=getMediuConfig();
+  const seism=getSeismConfig();
+  const hidro=getHidroConfig();
+  const vant=getVantConfig();
+  const zgomot=getZgomotConfig();
+  const trafic=getTraficConfig();
+  const aedisH=S.vol._lastFeats?.reduce((m2,f)=>Math.max(m2,f.properties?.top||0),0)||parseFloat(params.h)||10;
+  const niv=AEDIS.corpuri[0]?.niv||Math.round(aedisH/3)||3;
+  const fnLabel=(AEDIS_FN[AEDIS.fn]||AEDIS_FN.rezidential_colectiv).label||'Rezidențial';
+  const scMax=parseFloat(area)*(parseFloat(params.pot)||40)/100;
+  const svMin=parseFloat(area)*(parseFloat(params.sv)||20)/100;
+
+  // ─── PAG 1: COPERTĂ ──────────────────────────────────────────────────────
+  cover(
+    'Analiză impact: aer · apă · sol · zgomot · biodiversitate · populație',
+    caps.imgCity||caps.img3D,
+    [['Funcțiune propusă',fnLabel],['Suprafață construită est.',scMax.toFixed(0)+' mp'],
+     ['Spații verzi min.',svMin.toFixed(0)+' mp ('+params.sv+'%)'],
+     ['Nivel seismic','Zona '+seism.zona+', ag='+seism.ag+'g']],
+    true,
+    'Document de evaluare preliminară — EIM conform Legea 292/2018 și OUG 195/2005'
+  );
+
+  // ─── PAG 2: CONTEXT AMPLASAMENT + VEDERE 3D ──────────────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
+  hdr('CONTEXT AMPLASAMENT — VEDERE 3D ȘI ÎNCADRARE TERITORIALĂ',2);ftr();
+  let cy=30;
+  cy=addImg(caps.img3D,14,cy,W-28,95,'FIG. 1 — Vedere 3D amplasament · Contextul urban construit · '+uat+' · UTR '+utr);cy+=2;
+
+  const hw=(W-32)/2;
+  cy=addImg(caps.imgLocation,14,cy,hw,52,'FIG. 2 — Plan amplasament cadastral');
+  addImg(caps.imgCity,14+hw+4,cy-52,hw,52,'FIG. 3 — Încadrare în '+uat);
+  cy+=3;
+
+  cy=sec('1. DATE DE IDENTIFICARE A PROIECTULUI',cy);
+  cy=body('Prezentul Studiu de Evaluare a Impactului asupra Mediului (EIM) a fost elaborat în conformitate cu prevederile Legii nr. 292/2018 privind evaluarea impactului anumitor proiecte publice și private asupra mediului, OUG nr. 195/2005 privind protecția mediului, aprobată cu modificări prin Legea nr. 265/2006, și a Ordinului nr. 863/2002 privind aprobarea ghidurilor metodologice pentru etapele procedurii-cadru de evaluare a impactului asupra mediului.',14,cy);cy+=3;
+
+  const colW2=[(W-28)/2,(W-28)/2];
+  cy=tblRow(['PARAMETRU','VALOARE'],cy,true,[90,92]);
+  [['Titular proiect','Beneficiar — de completat'],
+   ['Amplasament',nrcad+', '+uat+', jud. '+judet],
+   ['Coordonate GPS',lat.toFixed(5)+'°N, '+lon.toFixed(5)+'°E'],
+   ['Suprafață teren',area+' mp ('+( parseFloat(area)/10000).toFixed(4)+' ha)'],
+   ['Zonă urbanistică (UTR)',utr+' — '+(REGULI[utr]?.d||'conform PUG')],
+   ['Funcțiune propusă',fnLabel],
+   ['Regim înălțime propus','H max '+aedisH.toFixed(1)+'m / '+niv+' niveluri'],
+   ['Suprafață construită est.',scMax.toFixed(0)+' mp (POT '+params.pot+'%)'],
+   ['Suprafață spații verzi min.',svMin.toFixed(0)+' mp ('+params.sv+'%)'],
+   ['Autoritate emitentă aviz mediu','APM '+judet+' — '+(eim.aer.apm)],
+  ].forEach(r=>cy=tblRow(r,cy,false,[90,92]));
+
+  // ─── PAG 3: CADRU LEGISLATIV COMPLET ────────────────────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
+  hdr('CADRUL LEGISLATIV ȘI NORMATIV',3);ftr();
+  cy=30;
+
+  cy=sec('2. BAZA LEGISLATIVĂ — MEDIU ȘI URBANISM',cy);
+  cy=subsec('2.1 Legislație primară națională',cy);
+  cy=bullet([
+    'Legea nr. 292/2018 — Evaluarea impactului anumitor proiecte publice și private asupra mediului (transpune Dir. 2011/92/UE + 2014/52/UE).',
+    'OUG nr. 195/2005 privind protecția mediului, aprobată prin Legea nr. 265/2006 — cadrul general al protecției mediului în România.',
+    'Legea nr. 104/2011 privind calitatea aerului înconjurător (transpune Dir. 2008/50/CE CAFE). Valori limită NO2, PM10, PM2.5, SO2.',
+    'Legea nr. 107/1996 — Legea apelor, cu modificările ulterioare. Protecția resurselor de apă de suprafață și subterane.',
+    'Legea nr. 211/2011 privind regimul deșeurilor (transpune Dir. 2008/98/CE) — ierarhia deșeurilor, colectare selectivă.',
+    'Legea nr. 24/2007 republicată privind reglementarea și administrarea spațiilor verzi din intravilanul localităților.',
+    'OUG nr. 57/2007 privind regimul ariilor naturale protejate (Natura 2000) — procedura de evaluare adecvată.',
+    'HG nr. 321/2005 privind evaluarea și gestionarea zgomotului ambiental (transpune Dir. 2002/49/CE).',
+  ],14,cy);cy+=3;
+
+  cy=subsec('2.2 Ordine și norme tehnice aplicabile',cy);
+  cy=bullet([
+    'Ordinul MMP nr. 863/2002 — Ghiduri metodologice pentru procedura EIM (IM-1, IM-2, IM-3, IM-4, IM-5, IM-6).',
+    'Ordinul MAPM nr. 1798/2007 — Procedura de emitere a autorizației de mediu.',
+    'OMS nr. 119/2014 — Norme de igienă și sănătate publică privind mediul de viață al populației.',
+    'SR 10009:2017 — Acustică în construcții. Limite admisibile ale nivelului de zgomot în mediul exterior.',
+    'NP 074/2014 — Normativ privind principiile, exigențele și metodele cercetării geotehnice.',
+    'P100-1/2013 — Cod de proiectare seismică. Zona seismică '+seism.zona+', ag='+seism.ag+'g.',
+    'HG nr. 188/2002 modificat prin HG nr. 352/2005 — Norme privind condițiile de descărcare a apelor uzate.',
+    'STAS 12574-87 — Aer în zone protejate. Condiții de calitate.',
+    'Legea nr. 350/2001 republicată — Amenajarea teritoriului și urbanismul. PUG '+uat+' în vigoare.',
+    'Legea nr. 50/1991 republicată — Autorizarea executării lucrărilor de construcții. Art. 7 — studii obligatorii AC.',
+  ],14,cy);cy+=3;
+
+  cy=subsec('2.3 Directive europene de referință',cy);
+  cy=bullet([
+    'Directiva 2011/92/UE (EIA) + Directiva 2014/52/UE (amendamentă) — Evaluarea impactului proiectelor.',
+    'Directiva 2008/50/CE (CAFE) — Calitatea aerului înconjurător și un aer mai curat pentru Europa.',
+    'Directiva 2000/60/CE (WFD) — Cadrul politicii UE în domeniul apei.',
+    'Directiva 92/43/CEE (Habitate) + Directiva 2009/147/CE (Păsări) — Natura 2000.',
+    'Directiva 2002/49/CE — Evaluarea și gestionarea zgomotului ambiental.',
+  ],14,cy);
+
+  // ─── PAG 4: FACTORI DE MEDIU — AER & APĂ ────────────────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
+  hdr('FACTORI DE MEDIU — AER, APĂ, SOL',4);ftr();
+  cy=30;
+
+  cy=addImg(caps.img3D,14,cy,W-28,65,'FIG. 4 — Vedere 3D perspectivă · Contextul construit și spațiile libere');cy+=3;
+
+  cy=sec('3. EVALUAREA IMPACTULUI ASUPRA AERULUI',cy);
+  cy=subsec('3.1 Starea actuală — calitatea aerului',cy);
+  cy=body('Calitatea aerului în '+uat+' este monitorizată prin rețeaua națională de monitoring gestionată de '+eim.aer.apm+'. Poluanții principali identificați în zona de influență sunt: '+eim.aer.poluanti_principali.join(', ')+'. Calitatea generală: '+eim.aer.calitate_generala+'. Valorile de referință respectă prevederile Legii nr. 104/2011 și Directivei 2008/50/CE.',14,cy);cy+=3;
+  cy=tblRow(['Poluant','Valoare estimată','Limita legală (an)','Limita legală (zi)','Status'],cy,true,[35,32,35,35,45]);
+  [['NO2 (dioxid azot)',(eim.aer.NO2_medie_anuala||'—')+' μg/m³','40 μg/m³','200 μg/m³ (h)','sub limită'],
+   ['PM10 (pulberi grosiere)',(eim.aer.PM10_medie_anuala||'—')+' μg/m³','40 μg/m³','50 μg/m³','sub limită'],
+   ['PM2.5 (pulberi fine)','—','25 μg/m³','—','verificare'],
+   ['CO (monoxid carbon)','—','10.000 μg/m³','—','sub limită'],
+   ['O3 (ozon)','—','120 μg/m³ (8h)','—','sezonier'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[35,32,35,35,45]));cy+=3;
+
+  cy=subsec('3.2 Impactul proiectului asupra aerului',cy);
+  cy=tblRow(['Faza','Sursa de poluare','Poluanți generați','Magnitudine','Măsuri mitigation'],cy,true,[25,45,35,22,55]);
+  [['CONSTRUCȚIE','Utilaje șantier, transport materiale','NOx, PM10, CO','Temporară','Stropire șantier; program orar limitat; acoperire transport'],
+   ['CONSTRUCȚIE','Lucrări de terasament','PM10, PM2.5','Temporară','Bariere anti-praf; umezire teren'],
+   ['OPERARE','Trafic generat de utilizatori','NOx, PM, CO','Permanentă redusă','Parcaje suficiente; acces transport public'],
+   ['OPERARE','Centrale termice / climatizare','NOx, SO2 (mic)','Minimă','Echipamente eficiente energetic; gaze naturale'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[25,45,35,22,55]));cy+=4;
+
+  cy=sec('4. EVALUAREA IMPACTULUI ASUPRA APEI',cy);
+  cy=body('Rețeaua de apă și canalizare în '+uat+' este operată de '+eim.apa.operator+'. Sursa de apă potabilă: '+eim.apa.sursa_apa_potabila+'. Gradul de conectare la rețeaua de canalizare: '+(eim.apa.grad_conectare||'—')+'%. Receptorii naturali: '+(eim.apa.receptori_naturali||[]).join(', ')+'.',14,cy);cy+=3;
+  cy=tblRow(['Faza','Tip impact','Receptor','Magnitudine','Măsuri'],cy,true,[22,48,35,22,55]);
+  [['CONSTRUCȚIE','Ape pluviale cu suspensii din șantier','Rețea canalizare',  'Temporară','Decantoare temporare; bazine colectare'],
+   ['CONSTRUCȚIE','Ape uzate personal șantier','Rețea canalizare','Temporară','Toalete ecologice; racord provizoriu'],
+   ['OPERARE','Ape uzate menajere','Rețea canalizare','Permanentă','Racord canalizare obligatoriu; contor apă'],
+   ['OPERARE','Ape pluviale de pe acoperișuri/terase','Rețea pluvială','Permanentă','Sisteme recuperare apă pluvială recomandate'],
+   ['OPERARE','Impermeabilizare teren (reducere infiltrare)','Ape subterane','Redusă','SV permeabile min. '+svMin.toFixed(0)+' mp; pavaje drenante'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[22,48,35,22,55]));
+
+  // ─── PAG 5: SOL, DEȘEURI, BIODIVERSITATE ───────────────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
+  hdr('FACTORI DE MEDIU — SOL, DEȘEURI, BIODIVERSITATE',5);ftr();
+  cy=30;
+
+  cy=addImg(caps.v3dDay||caps.imgFront,14,cy,hw,55,'FIG. 5 — Volum propus · Amprentă la sol · Spații verzi');
+  addImg(caps.imgLat||caps.img2D,14+hw+4,cy-55,hw,55,'FIG. 6 — Plan 2D · Suprafețe permeabile/impermeabile');
+  cy+=3;
+
+  cy=sec('5. EVALUAREA IMPACTULUI ASUPRA SOLULUI',cy);
+  cy=body('Tipul predominant de sol în zona amplasamentului: '+eim.sol.tip_sol_predominant+'. Permeabilitate: '+eim.sol.permeabilitate+'. Risc eroziune: '+eim.sol.eroziune+'. Impermeabilizarea terenului prin construcție afectează funcțiile pedologice și capacitatea de infiltrare a precipitațiilor.',14,cy);cy+=3;
+  const imp_procent=parseFloat(params.pot)||40;
+  const perm_procent=100-imp_procent;
+  cy=tblRow(['Categorie suprafață','Suprafață (mp)','% din teren','Impact sol','Măsuri compensare'],cy,true,[40,28,20,28,66]);
+  [['Construcție (amprenta la sol)',scMax.toFixed(0),(imp_procent*.6).toFixed(1)+'%','Impermeabilizare totală','Fundație eficientă; drenaj perimetral'],
+   ['Alei, parcări, platforme',(parseFloat(area)*0.15).toFixed(0),(15).toFixed(1)+'%','Impermeabilizare parțială','Pavaje drenante; rigole colectare'],
+   ['Spații verzi obligatorii',svMin.toFixed(0),params.sv+'%','Impact minim','Plantare conform plan peisagistic'],
+   ['Spații verzi suplimentare recomandate',(parseFloat(area)*(perm_procent/100-parseFloat(params.sv)/100)).toFixed(0),'—','Pozitiv','Acoperișuri verzi; grădini comunitare'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[40,28,20,28,66]));cy+=4;
+
+  cy=sec('6. MANAGEMENTUL DEȘEURILOR',cy);
+  cy=body('Operatorul de salubritate în '+uat+': '+eim.deseuri.operator_salubritate+'. Colectare selectivă: '+(eim.deseuri.colectare_selectiva?'DA':'NU')+'. Depozit conform: '+(eim.deseuri.depozit_conform||'Verificare locală')+'. Rata estimată de reciclare: '+(eim.deseuri.rata_reciclare_est||'—')+'%.',14,cy);cy+=3;
+  cy=tblRow(['Tip deșeu','Faza','Cantitate estimată','Cod EWC','Valorificare'],cy,true,[40,22,30,20,70]);
+  [['Pământ excavat, steril de construcție','Construcție',Math.round(parseFloat(area)*0.5)+' mc','17 05 04','Refolosire umpluturi; depozit autorizat'],
+   ['Betoane, cărămizi, materiale demolări','Construcție',Math.round(scMax*0.1)+' tone','17 01 07','Reciclare agregate; depozit autorizat'],
+   ['Ambalaje (hârtie, plastic, metal)','Construcție','10-20 mc','15 01','Colectare selectivă — operator autorizat'],
+   ['Deșeuri menajere utilizatori','Operare',Math.round(niv*15*0.5)+' kg/zi','20 03 01','Colectare selectivă — program municipal'],
+   ['Nămol fosă septică (dacă e cazul)','Operare','—','20 03 04','Vidanjare — operator autorizat'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[40,22,30,20,70]));cy+=4;
+
+  cy=sec('7. BIODIVERSITATE ȘI ARII PROTEJATE',cy);
+  const areProtejate=eim.arii_protejate;
+  const natura2000=eim.natura2000||[];
+  cy=body('Amplasamentul se află în intravilanul '+uat+'. '+(areProtejate?'ATENȚIE: Arie naturală protejată în proximitate: '+areProtejate+'. Se impune Evaluare Adecvată conform OUG 57/2007 și Dir. Habitate 92/43/CEE.':'Nu s-au identificat arii naturale protejate în zona imediată a amplasamentului. ')+
+    (natura2000.length>0?'Site-uri Natura 2000 în proximitate: '+natura2000.join(', ')+'. Verificare obligatorie distanță față de limita sitului.':''),14,cy);cy+=3;
+  cy=tblRow(['Factor','Stare actuală','Impact construcție','Impact operare','Măsuri mitigation'],cy,true,[35,35,28,28,56]);
+  [['Vegetație arboricolă','Verificare teren','Posibilă tăiere','Minim','Plan de plantare compensatorie'],
+   ['Faună urbană','Pasări, insecte','Temporar disturb','Redus','Plantare specii native; căsuțe pasări'],
+   ['Conectivitate ecologică','Culoar urban','Fragmentare loc.','Redus','SV continue; specii locale'],
+   ['Arii Natura 2000',(natura2000.length>0?'Prezente proxim':'Absente în 5km'),'Evaluare adecvată','Evaluare adecvată',natura2000.length>0?'Evaluare Adecvată obligatorie':'Nu este necesară EA'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[35,35,28,28,56]));
+
+  // ─── PAG 6: ZGOMOT, VIBRAȚII, CÂMPURI ELECTROMAGNETICE ─────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
+  hdr('ZGOMOT, VIBRAȚII ȘI CÂMPURI ELECTROMAGNETICE',6);ftr();
+  cy=30;
+
+  cy=addImg(caps.imgFront||caps.img3D,14,cy,W-28,65,'FIG. 7 — Vedere frontală · Surse de zgomot identificate în context');cy+=3;
+
+  cy=sec('8. EVALUAREA IMPACTULUI ACUSTIC',cy);
+  cy=body('Zona acustică: '+zgomot.zona_acustica+'. Limite maxime admise conform SR 10009:2017: Lzsn = '+zgomot.Lzsn_limita+' dB(A) (zi-seară-noapte), Lnoapte = '+zgomot.Lnoapte_limita+' dB(A). Surse principale de zgomot identificate: '+( zgomot.surse_principale||[]).join('; ')+'.',14,cy);cy+=3;
+  cy=tblRow(['Sursă zgomot','Faza','Nivel estimat (dB)','Recept. sensibili','Măsuri'],cy,true,[40,20,25,35,62]);
+  [['Utilaje construcție (excavări, betonare)','Construcție','75-85 dB(A)','Vecini, școli','Program 07:00-19:00; ecrane fonice temporare'],
+   ['Transport materiale construcție','Construcție','65-75 dB(A)','Riverani','Rute stabilite; restricție noapte'],
+   ['Trafic suplimentar generat (utilizatori)','Operare','55-65 dB(A)','Vecini','Gestiune accese; parcaje suficiente'],
+   ['Instalații tehnice (HVAC, pompe)','Operare','40-55 dB(A)','Vecini direcți','Encapsulare; amplasare pe acoperiș cu atenuare'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[40,20,25,35,62]));cy+=3;
+
+  cy=sec('9. VIBRAȚII ȘI CÂMPURI ELECTROMAGNETICE',cy);
+  cy=body('Vibrații în faza de construcție: lucrările de compactare, batere piloți sau excavații mecanice pot genera vibrații cu impact pe clădirile vecine. Se aplică SR EN ISO 4866:2011 și limitele din NP 080/2003 pentru protecția construcțiilor. Câmpuri electromagnetice: instalațiile electrice interioare și transformatoarele vor respecta Directiva 2013/35/UE și normele ANRE.',14,cy);cy+=3;
+  cy=tblRow(['Tip vibrație','Faza','Frecvență (Hz)','Impact posibil','Măsuri'],cy,true,[45,20,25,40,52]);
+  [['Compactare teren','Construcție','10-80 Hz','Fisuri tencuială vecini','Monitorizare vibrații; program evitare ore sensibile'],
+   ['Transport greu pe fundații','Construcție','5-30 Hz','Fisuri mici','Rute ocolitoare clădiri vechi'],
+   ['Funcționare normală clădire','Operare','<5 Hz','Neglijabil','Standard'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[45,20,25,40,52]));
+
+  // ─── PAG 7: PEISAJ URBAN, SĂNĂTATE, DATE SOCIO-ECONOMICE ───────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
+  hdr('PEISAJ URBAN, SĂNĂTATE PUBLICĂ ȘI IMPACT SOCIO-ECONOMIC',7);ftr();
+  cy=30;
+
+  const ins=eim.ins||{};
+  cy=addImg(caps.imgAerial||caps.img3D,14,cy,hw,55,'FIG. 8 — Vedere aeriană · Impact vizual în peisajul urban');
+  addImg(caps.v3dGolden||caps.imgBack,14+hw+4,cy-55,hw,55,'FIG. 9 — Randare · Integrare arhitecturală');
+  cy+=4;
+
+  cy=sec('10. IMPACT VIZUAL ȘI PEISAJ URBAN',cy);
+  cy=body('Clădirea propusă (H='+aedisH.toFixed(1)+'m, '+niv+' niveluri, funcțiune '+fnLabel+') se integrează în contextul urban al UTR '+utr+' conform PUG '+uat+' (H max admis: '+params.h+'m, POT max: '+params.pot+'%, CUT max: '+params.cut+'). Impactul vizual este estimat ca '+( aedisH<=parseFloat(params.h)*0.8?'REDUS — clădire sub regimul maxim admis':'MODERAT — clădire la regimul maxim admis')+'. Se recomandă studiu de însorire și umbre pentru vecinătăți imediate.',14,cy);cy+=4;
+
+  cy=sec('11. SĂNĂTATE PUBLICĂ',cy);
+  cy=tblRow(['Factor sănătate','Standard aplicabil','Conformitate estimată','Acțiuni necesare'],cy,true,[50,50,35,47]);
+  [['Calitate aer interior','Ord. MS 536/1997','Conformă','Ventilație mecanică sau naturală cert.'],
+   ['Confort termic','SR EN ISO 7730:2006','Conformă','Izolare termică cf. C107-2005'],
+   ['Iluminat natural (însorire)','OMS 119/2014 — min. 1.5h/zi','Verificare studiu însorire','Studiu Însorire detaliat obligatoriu'],
+   ['Radiatii non-ionizante','Dir. 2013/35/UE','Conformă','Distanțe față de posturi trafo'],
+   ['Apă potabilă','Legea 458/2002','Conformă','Racord rețea publică '+eim.apa.operator],
+   ['Ape uzate','HG 188/2002','Conformă','Racord obligatoriu rețea canalizare'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[50,50,35,47]));cy+=4;
+
+  cy=sec('12. IMPACT SOCIO-ECONOMIC — DATE INS',cy);
+  cy=body('Date demografice și socio-economice '+(ins.sursa||'INS')+' pentru '+uat+': Populație: '+(ins.populatie?ins.populatie.toLocaleString():' — verificare statistici.insse.ro')+(ins.densitate_pop?' · Densitate: '+ins.densitate_pop+' loc/km²':'')+'. '+(ins.rata_somaj?'Rata șomaj: '+ins.rata_somaj+'% · ':'')+( ins.venit_mediu_lunar?'Venit mediu net: '+ins.venit_mediu_lunar+' RON/lună. ':'')+
+    'Proiectul propus contribuie pozitiv la indicatorii socio-economici locali prin crearea de noi funcțiuni, locuri de muncă în faza de construcție și stimularea activității economice locale.',14,cy);cy+=3;
+  cy=tblRow(['Indicator','Valoare locală','Impact proiect','Calificare'],cy,true,[50,40,50,42]);
+  [['Locuri muncă construcție (est.)','—',Math.round(parseFloat(area)/50)+' persoane/lună','Pozitiv temporar'],
+   ['Locuri muncă exploatare (est.)','—',Math.round(niv*2)+' persoane','Pozitiv permanent'],
+   ['Valoare impozit clădire estimat','—',(parseFloat(area)*aedisH/3*15*0.001).toFixed(0)+' RON/an','Pozitiv buget local'],
+   ['Consum apă estimat','—',Math.round(niv*3*150)+'L/zi','Solicitare rețea'],
+   ['Deșeuri menajere generate','—',Math.round(niv*3*0.5)+' kg/zi','Planificat reciclare'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[50,40,50,42]));
+
+  // ─── PAG 8: MĂSURI DE REDUCERE IMPACT ───────────────────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
+  hdr('MĂSURI DE REDUCERE A IMPACTULUI — PLAN DE MANAGEMENT',8);ftr();
+  cy=30;
+
+  cy=sec('13. PLAN DE MANAGEMENT AL MEDIULUI (PMM)',cy);
+  cy=body('Planul de Management al Mediului (PMM) stabilește măsurile concrete de prevenire, reducere și compensare a impactului negativ identificat, conform cerințelor procedurii EIM (Ord. 863/2002). PMM va fi actualizat în fazele de proiectare tehnică, autorizare și execuție.',14,cy);cy+=3;
+
+  cy=subsec('13.1 Faza de Construcție',cy);
+  cy=bullet([
+    'AER: Stropire zilnică a suprafețelor expuse; acoperire cu prelate a materialelor pulverulente; inspecție lunară utilaje (norme Euro V/VI); program de lucru 07:00-19:00 L-V.',
+    'APĂ: Instalare decantoare temporare pentru ape pluviale șantier; toalete ecologice vidanjabile; interzicere descărcare ape uzate pe teren.',
+    'SOL: Depozitare temporară pământ excavat în incintă; colectare uleiuri uzate utilaje (contract firmă autorizată); refacere teren afectat după finalizare.',
+    'DEȘEURI: Contract firmă autorizată transport deșeuri construcție; containere separate pe tipuri (beton, metal, lemn, plastic); raportare lunară cantități.',
+    'ZGOMOT: Ecrane fonice mobile pe latura spre vecini sensibili; evaluare vibrații pentru clădirile adiacente vechi (>50 ani); notificare prealabilă primărie.',
+    'BIODIVERSITATE: Transplantare arbori de valoare înainte de demolare (min. 30 zile înainte); compensare arbori tăiați (2 arbori noi / 1 arbore tăiat).',
+  ],14,cy);cy+=2;
+
+  cy=subsec('13.2 Faza de Operare',cy);
+  cy=bullet([
+    'AER: Centrale termice cu randament >90%; filtre HEPA pentru instalații ventilație; spații verzi cu specii fixatoare CO2 (min. '+svMin.toFixed(0)+' mp).',
+    'APĂ: Contor individual apă; sisteme economizoare (reducere 30%); recuperare apă pluvială pentru irigații; separator hidrocarb. la parcaje.',
+    'SOL: Pavaje permeabile min. 20% din suprafața circulabilă; substrat permeabil sub SV; groapă compost (recomandare).',
+    'DEȘEURI: Spații colectare selectivă dedicate (4 fracții min.); contract salubritate conform; depozitare conformă normelor.',
+    'ENERGIE: Clasa energetică min. B (NZEB pentru clădiri noi cf. Legea 372/2005); panouri solare termice/fotovoltaice recomandate.',
+    'MOBILITATE: Rastele biciclete; stație reîncărcare vehicule electrice (minim 1 stație la 10 locuri parcaj); acces transport public.',
+  ],14,cy);cy+=3;
+
+  cy=sec('14. MONITORIZARE POST-CONSTRUCȚIE',cy);
+  cy=tblRow(['Parametru monitorizat','Frecvență','Responsabil','Autoritate raportare','Metodă'],cy,true,[38,20,28,30,66]);
+  [['Calitate aer (NO2, PM10)','Anual (primii 3 ani)','Beneficiar','APM '+judet,'Stații mobile sau laborator autorizat'],
+   ['Zgomot ambiental','La recepție + an 1','Beneficiar','Primăria '+uat,'Măsurători tip I conform SR ISO 1996'],
+   ['Consum apă și ape uzate','Lunar','Beneficiar',''+eim.apa.operator,'Citire contor; analize periodice'],
+   ['Cantități deșeuri','Trimestrial','Beneficiar','APM '+judet,'Registru deșeuri (Legea 211/2011)'],
+   ['Starea spațiilor verzi','Sezonier','Beneficiar','Primăria '+uat,'Inventar vegetație; suprafețe SV'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[38,20,28,30,66]));
+
+  // ─── PAG 9: ALTERNATIVE ȘI SCENARII ────────────────────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
+  hdr('ANALIZA ALTERNATIVELOR ȘI SCENARIUL ZERO',9);ftr();
+  cy=30;
+
+  cy=sec('15. SCENARIUL ZERO (NEIMPLEMENTARE)',cy);
+  cy=body('Scenariul zero presupune neimplementarea proiectului și menținerea stării actuale a amplasamentului. Această alternativă este analizată obligatoriu în cadrul procedurii EIM conform Anexei IV a Directivei 2011/92/UE.',14,cy);cy+=3;
+  cy=tblRow(['Factor de mediu','Stare actuală','Scenariul Zero (10 ani)','Proiect propus (10 ani)','Concluzie'],cy,true,[28,28,38,38,50]);
+  [['Calitate aer','Moderată','Fără modificare','Impact minor construcție','Proiect superior'],
+   ['Calitate apă','Bună','Fără modificare','Impact minor; măsuri','Echivalent/superior'],
+   ['Sol','Teren vacant/degradat','Posibil degradare','Impermeabilizare controlată','Comparabil'],
+   ['Spații verzi','Minim/absent','Fără SV','Min. '+svMin.toFixed(0)+' mp SV nou','Proiect superior'],
+   ['Zgomot','Nivel actual','Fără modificare','Temporar +5dB construcție','Echivalent operare'],
+   ['Valoare economică','Teren neutilizat','Depreciere','Creștere valoare','Proiect superior'],
+   ['Funcționalitate urbană','Absent','Absent','Funcțiune '+fnLabel,'Proiect superior'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[28,28,38,38,50]));cy+=4;
+
+  cy=sec('16. ALTERNATIVE STUDIATE',cy);
+  cy=bullet([
+    'A0 — Scenariul ZERO: Neintervenție. Impact negativ pe termen lung prin deteriorarea terenului; pierdere valoare proprietate; absența funcțiunii.',
+    'A1 — Scenariul propus: Construcție conform PUG (UTR '+utr+', H='+aedisH.toFixed(1)+'m, POT='+params.pot+'%). Impact pozitiv socio-economic; impact negativ minor în construcție, mitigabil.',
+    'A2 — Alternativă funcțională: Altă destinație funcțională pe același amplasament (ex: spațiu verde public). Impact mediu mai bun, dar lipsă funcționale urbanistice.',
+    'A3 — Alternativă de amplasament: Alt teren în aceeași zonă UTR. Analiză necesară dacă amplasamentul actual prezintă riscuri necompensabile.',
+  ],14,cy);cy+=3;
+
+  cy=body('Concluzie alternativă recomandată: Scenariul A1 (propunerea de față) prezintă raportul optim cost/beneficiu din perspectiva mediului și a utilizării terenului, cu condiția implementării integrale a Planului de Management al Mediului.',14,cy);
+
+  // ─── PAG 10: CONCLUZII + SEMNĂTURĂ ──────────────────────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
+  hdr('CONCLUZII GENERALE ȘI SEMNĂTURĂ',10);ftr();
+  cy=30;
+
+  cy=addImg(caps.imgCity||caps.img3D,14,cy,W-28,55,'FIG. 10 — Harta '+uat+' · Încadrare amplasament în contextul urban general');cy+=3;
+
+  cy=concluzii([
+    'Proiectul nu se încadrează în categoriile de proiecte cu impact semnificativ obligatoriu pentru EIM complet (Anexa I a Legii 292/2018), dar necesită Acord de Mediu emis de APM '+judet+' pe baza Notificării de Mediu conform Anexei nr. 1 la Ord. MAPM 1798/2007.',
+    'Impactul asupra calității aerului este TEMPORAR și REVERSIBIL în faza de construcție. În faza de operare impactul este NESEMNIFICATIV cu condiția respectării normelor de eficiență energetică și a asigurării accesului la transport public.',
+    'Impactul asupra resurselor de apă este CONTROLABIL prin racordarea obligatorie la rețeaua de apă-canal '+(eim.apa.operator||'operator local')+' și prin implementarea sistemelor de separare ape pluviale/uzate.',
+    'Impermeabilizarea solului pe suprafața de '+(scMax).toFixed(0)+' mp ('+params.pot+'% POT) este parțial compensată de spațiile verzi obligatorii de min. '+svMin.toFixed(0)+' mp ('+params.sv+'% din teren), conform PUG '+uat+' UTR '+utr+'.',
+    'Nu s-au identificat arii naturale protejate în imediata vecinătate a amplasamentului '+(eim.natura2000.length>0?'— EXCEPȚIE: Site Natura 2000 '+eim.natura2000[0]+' necesită verificarea necesității Evaluării Adecvate (OUG 57/2007)':'— Procedura de Evaluare Adecvată nu este necesară')+'.',
+    'Impactul acustic depășește temporar limitele SR 10009:2017 în faza de construcție (75-85 dB față de 60 dB limită); se impun măsuri obligatorii: program de lucru 07-19, ecrane fonice, notificare vecini cu min. 5 zile înainte.',
+    'Impactul socio-economic al proiectului este POZITIV: '+Math.round(parseFloat(area)/50)+' locuri de muncă temporar în construcție, funcțiune utilă '+fnLabel+' în context urban, creștere valoare proprietăți adiacente.',
+    'Documentul prezent are caracter PRELIMINAR și ORIENTATIV. EIM complet va fi elaborat de expert acreditat RM (responsabil de mediu) și va include capitolele suplimentare prevăzute de Ord. 863/2002 (hărți, modele dispersie, consultare public etc.).',
+  ],cy);
+
+  sign();
+  pdf.save('Studiu_EIM_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
+  ss('✅ Studiu de Impact asupra Mediului generat! (10 pagini)');
 }
 
 async function generateIstoricStudy(){
