@@ -263,7 +263,7 @@ function addLayers(){
   L({id:'lot-demo-hatch',type:'fill',source:'lot-demo-src',paint:{
     'fill-color':'#ef4444',
     'fill-opacity':['case',['get','marked'],0.15,0],
-    'fill-pattern':undefined
+    'fill-pattern':null
   }});
   L({id:'lotizare-label',type:'symbol',source:'lotizare-label-src',minzoom:14,layout:{
     'text-field':['get','label'],'text-size':11,
