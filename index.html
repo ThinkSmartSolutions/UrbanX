@@ -7055,6 +7055,9 @@ async function switchUAT(uatId){
 
   S_UAT = {id:uatId, ...cfg};
 
+  // Actualizăm titlul paginii dinamic
+  document.title = `UrbanX – ${cfg.short||cfg.label}`;
+
   // Actualizăm indicator UI
   const el=document.getElementById('uat-indicator');
   if(el) el.textContent=S_UAT.short||S_UAT.label;
@@ -7113,8 +7116,7 @@ async function autoDetectUAT(lat, lng){
     const cfgNorm=(cfg.short||cfg.label).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
     if(cfgNorm.includes(cityNorm)||cityNorm.includes(cfgNorm.replace('municipiul ',''))) {
       if(id!==S_UAT.id) switchUAT(id);
-      return;
-    }
+      return;    }
   }
   // UAT neconfigurat — notificăm
   const el=document.getElementById('uat-indicator');
