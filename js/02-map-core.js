@@ -312,6 +312,11 @@ function addLayers(){
 
   // ── Aliniamente vizuale pe hartă ──────────────────────────────────────
   // front-src conține: latura frontală, laterale, posterior, cu distanțe
+  // Layer invizibil gros pentru click pe laturi (zona de click mai mare)
+  L({id:'front-parcel-click',type:'line',source:'front-src',
+    filter:['==',['get','type'],'parcel_side'],
+    paint:{'line-color':'transparent','line-width':14,'line-opacity':0}
+  });
   L({id:'front-parcel-line',type:'line',source:'front-src',
     filter:['==',['get','type'],'parcel_side'],
     paint:{
@@ -476,6 +481,59 @@ function addLayers(){
   map.on('mouseleave','vol-3d',()=>map.getCanvas().style.cursor='');
   map.on('mouseenter','parcel-fill',()=>map.getCanvas().style.cursor='pointer');
   map.on('mouseleave','parcel-fill',()=>map.getCanvas().style.cursor='');
+
+  // ── Click pe latura parcelei → setează frontul stradal ──────────────────
+  map.on('mouseenter','front-parcel-click',()=>{
+    map.getCanvas().style.cursor='crosshair';
+  });
+  map.on('mouseleave','front-parcel-click',()=>{
+    map.getCanvas().style.cursor='';
+  });
+  map.on('click','front-parcel-click',(e)=>{
+    if(!e.features?.length) return;
+    const feat = e.features[0];
+    const props = feat.properties;
+    if(props.type !== 'parcel_side') return;
+    e.stopPropagation();
+
+    // Calculam bearing-ul spre aceasta latura (directia frontului)
+    const ap = S.parcels[S.activeParcel??0];
+    if(!ap?.geo?.geometry) return;
+
+    const ring = ap.geo.geometry.type==='Polygon'
+      ? ap.geo.geometry.coordinates[0]
+      : ap.geo.geometry.coordinates[0][0];
+    const cx = ring.reduce((s,c)=>s+c[0],0)/ring.length;
+    const cy2 = ring.reduce((s,c)=>s+c[1],0)/ring.length;
+
+    const midX = props.midX || (e.lngLat.lng);
+    const midY = props.midY || (e.lngLat.lat);
+
+    // Bearing de la centru la latura clickata = directia noului front
+    const dLng = (midX - cx) * Math.cos(cy2 * Math.PI/180);
+    const dLat = midY - cy2;
+    const newBrg = Math.round((Math.atan2(dLng, dLat) * 180/Math.PI + 360) % 360);
+
+    S.bearing = newBrg;
+    if(ap.params) {
+      // Actualizam si in UI
+      const bearingEl = document.getElementById('bearing-slider');
+      if(bearingEl) { bearingEl.value = newBrg; bearingEl.dispatchEvent(new Event('input')); }
+      const bearingVal = document.getElementById('bearing-value');
+      if(bearingVal) bearingVal.textContent = newBrg + '°';
+    }
+
+    updateMap();
+    if(S.vol.genDone) {
+      const f = buildVolume();
+      setSource('vol-src', {type:'FeatureCollection', features:f});
+    }
+
+    // Feedback vizual
+    ss('✅ Front stradal setat pe latura selectată (' + newBrg + '°) — ' +
+      (props.role==='front'?'era deja front':
+       props.role==='posterior'?'era spate':'era lateral'));
+  });
   map.on('click','parcel-fill',e=>{
     const f=e.features?.[0];if(!f)return;
     // FIX: block generic handler for this click
@@ -814,7 +872,7 @@ function buildFrontLayer(parcelGeo, fp, params, bearing){
         if(cross>0){role='lateral_stg';color='#60a5fa';setback=rl;setbackLabel=rl>0?`rl=${rl}m`:'calcan';}
         else{role='lateral_dr';color='#a78bfa';setback=rr;setbackLabel=rr>0?`rr=${rr}m`:'calcan';}
       }
-      Object.assign(side,{role,color,setback,setbackLabel});
+      Object.assign(side,{role,color,setback,setbackLabel,dFromCenter});
     });
     
     // ── Desenăm laturile colorate ────────────────────────────────────────
@@ -822,7 +880,8 @@ function buildFrontLayer(parcelGeo, fp, params, bearing){
       features.push({
         type:'Feature',
         geometry:{type:'LineString', coordinates:[side.p1, side.p2]},
-        properties:{type:'parcel_side', role:side.role, color:side.color}
+        properties:{type:'parcel_side', role:side.role, color:side.color,
+          sideIdx:side.i, midX:side.midX, midY:side.midY, bearing:side.dFromCenter||0}
       });
       
       // ── Etichetă cu distanța aliniamentului ─────────────────────────
