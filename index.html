@@ -754,30 +754,29 @@ canvas#c2d{width:100%;height:100%;display:block}
   <button id="btnLotizare" onclick="toggleLotizare();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#a78bfa;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏘 Lotizare teren</button>
   <button id="btnCimec" onclick="showCimecWidget();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#fbbf24;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏛 LMI Monumente</button>
   <button id="btnBilant" onclick="toggleBilant();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#4ade80;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">📐 Bilanț edificabil</button>
-  <button id="btnPanel" onclick="safeOn&&safeOn('btnPanel',null);document.getElementById('btnPanel')?.dispatchEvent(new Event('click'));_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">☰ Panou lateral</button>
 </div>
 
 <!-- RAPOARTE DROPDOWN — direct pe body pentru a evita overflow clipping din topbar -->
-<div id="rapoarte-menu" style="display:none;position:fixed;background:#0f172a;border:1px solid rgba(212,175,55,.3);border-radius:10px;padding:8px;min-width:220px;z-index:9000;box-shadow:0 8px 32px rgba(0,0,0,.6)">
-  <div style="padding:4px 12px 6px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.08em;font-weight:700">Rapoarte urbanistice</div>
-  <button onclick="runExport();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">📄 Raport Urbanistic Complet</button>
+<div id="rapoarte-menu" style="display:none;position:fixed;background:#0f172a;border:1px solid rgba(212,175,55,.3);border-radius:10px;padding:8px;min-width:240px;z-index:9000;box-shadow:0 8px 32px rgba(0,0,0,.6)">
+  <div style="padding:4px 12px 6px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.08em;font-weight:700">Rapoarte principale</div>
+  <button onclick="runExport();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px;font-weight:600" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">📄 Raport Urbanistic Complet</button>
+  <button onclick="_lotExportPDF();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#c084fc;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏘 Plan de Lotizare PDF</button>
+  <button onclick="generateMemoriu();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#d4af37;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏗 Memoriu Tehnic Preliminar</button>
+  <div style="padding:6px 12px 2px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.08em;font-weight:700;border-top:1px solid rgba(255,255,255,.06);margin-top:4px">Studii tehnice</div>
   <button onclick="generateSolarStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#fbbf24;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">☀ Studiu de Însorire</button>
   <button onclick="generateShadowStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#fb923c;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🌑 Studiu Umbre & Obstrucție</button>
   <button onclick="generateNoiseStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#a78bfa;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🔇 Studiu Acustic Urban</button>
   <button onclick="generateWindStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#38bdf8;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🌬 Studiu Vânt & Confort Pietonal</button>
-  <div style="padding:6px 12px 2px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.08em;font-weight:700;border-top:1px solid rgba(255,255,255,.06);margin-top:4px">Bilanțuri & avize</div>
   <button onclick="generateGreenStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#4ade80;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🌿 Studiu Spații Verzi</button>
   <button onclick="generateMobilityStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#f472b6;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🚗 Studiu Mobilitate & Parcaje</button>
   <button onclick="generateDensityStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#94a3b8;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">📊 Studiu Densitate Urbană</button>
-  <button onclick="generateMemoriu();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#d4af37;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏗 Memoriu Tehnic Preliminar</button>
-  <div style="padding:6px 12px 2px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.08em;font-weight:700;border-top:1px solid rgba(255,255,255,.06);margin-top:4px">Studii speciale</div>
+  <div style="padding:6px 12px 2px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.08em;font-weight:700;border-top:1px solid rgba(255,255,255,.06);margin-top:4px">Studii speciale & avize</div>
   <button onclick="generateAACR();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#60a5fa;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">✈ Studiu AACR (Aviz Aeroport)</button>
   <button onclick="generateExistingBldStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#fb7185;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏚 Studiu Construcții Existente</button>
   <button onclick="generateGeotehnicalStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#a78bfa;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🪨 Pre-Studiu Geotehnic</button>
   <button onclick="generateTrafficStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#34d399;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🚦 Studiu de Impact Trafic</button>
-  <button onclick="generateEnvironmentalImpact();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#4ade80;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px;font-weight:700" onmouseover="this.style.background='rgba(74,222,128,.08)'" onmouseout="this.style.background='none'">🌿 Studiu de Impact asupra Mediului (EIM)</button>
   <button onclick="generateIstoricStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#f59e0b;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏛 Studiu Patrimoniu & Istoric</button>
-  <button onclick="_lotExportPDF();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#c084fc;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏘 Plan de Lotizare PDF</button>
+  <button onclick="generateEnvironmentalImpact();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#86efac;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(134,239,172,.06)'" onmouseout="this.style.background='none'">🌿 Studiu Impact Mediu (EIM)</button>
 </div>
 
 <div id="status">⏳ Se încarcă…</div>
@@ -809,6 +808,7 @@ canvas#c2d{width:100%;height:100%;display:block}
     <button class="ptab" data-t="proiect">🏗 Analiză</button>
     <button class="ptab" data-t="multi">🔲 Multi</button>
     <button class="ptab" data-t="scen">📅 Scen.</button>
+    <button class="ptab" data-t="rapoarte">📋 Rapoarte</button>
   </div>
   <div id="panel-body">
     <div class="tc active" id="tc-search"></div>
@@ -817,6 +817,7 @@ canvas#c2d{width:100%;height:100%;display:block}
     <div class="tc" id="tc-proiect"></div>
     <div class="tc" id="tc-multi"></div>
     <div class="tc" id="tc-scen"></div>
+    <div class="tc" id="tc-rapoarte"></div>
   </div>
 </div>
 
@@ -856,10 +857,6 @@ canvas#c2d{width:100%;height:100%;display:block}
   <button class="mnav-btn" data-mt="multi" onclick="mobNavClick('multi',this)">
     <span class="mnav-icon">🔲</span>
     <span class="mnav-label">Multi</span>
-  </button>
-  <button class="mnav-btn" data-mt="bilant" onclick="toggleBilant()">
-    <span style="font-size:18px">📐</span>
-    <span style="font-size:9px">Bilanț</span>
   </button>
   <button class="mnav-btn" data-mt="rapoarte" onclick="mobNavClick('rapoarte',this)">
     <span class="mnav-icon">📋</span>
@@ -4414,9 +4411,14 @@ function htmlMobRapoarte(){
   return`
   <div class="section">📋 Rapoarte & Studii Urbane</div>
   ${warn}
-  <div style="font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Rapoarte urbanistice</div>
+  <div style="font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Rapoarte principale</div>
   <div class="card" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">
     ${btn('runExport()','255,255,255','📄','Raport Urbanistic Complet','POT, CUT, H, funcțiuni, aliniamente')}
+    ${btn('_lotExportPDF()','192,132,252','🏘','Plan de Lotizare PDF','Export plan ansamblu rezidential')}
+    ${btn('generateMemoriu()','212,175,55','🏗','Memoriu Tehnic Preliminar','Document tehnic complet avize')}
+  </div>
+  <div style="font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Studii tehnice</div>
+  <div class="card" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">
     ${btn('generateSolarStudy()','251,191,36','☀','Studiu de Însorire','Ore soare, bilanț solar, OMS 119')}
     ${btn('generateShadowStudy()','251,146,60','🌑','Studiu Umbre & Obstrucție','Umbre proiectate, distanțe critice')}
     ${btn('generateNoiseStudy()','167,139,250','🔇','Studiu Acustic Urban','Zgomot, SR 10009/2017')}
@@ -4424,16 +4426,15 @@ function htmlMobRapoarte(){
     ${btn('generateGreenStudy()','74,222,128','🌿','Studiu Spații Verzi','SV necesar, plantare, permeabilitate')}
     ${btn('generateMobilityStudy()','244,114,182','🚗','Studiu Mobilitate & Parcaje','Parcaje, accese, NP 051')}
     ${btn('generateDensityStudy()','148,163,184','📊','Studiu Densitate Urbană','CUT zonal, POT vecini')}
-    ${btn('generateMemoriu()','212,175,55','🏗','Memoriu Tehnic Preliminar','Document tehnic complet avize')}
   </div>
-  <div style="font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Studii speciale</div>
+  <div style="font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Studii speciale & avize</div>
   <div class="card" style="display:flex;flex-direction:column;gap:6px">
     ${btn('generateAACR()','96,165,250','✈','Studiu AACR — Aviz Aeroport','ICAO Anexa 14, H maxim admis')}
     ${btn('generateExistingBldStudy()','251,113,133','🏚','Studiu Construcții Existente','Inventar, scenarii intervenție')}
     ${btn('generateGeotehnicalStudy()','167,139,250','🪨','Pre-Studiu Geotehnic','Seismicitate, NFA, fundare')}
     ${btn('generateTrafficStudy()','52,211,153','🚦','Studiu Impact Trafic','Trafic generat, parcaje, ITE')}
     ${btn('generateIstoricStudy()','245,158,11','🏛','Studiu Patrimoniu & Istoric','LMI, zone protejate, avize MCID')}
-    ${btn('_lotExportPDF()','192,132,252','🏘','Plan de Lotizare PDF','Export plan ansamblu rezidential')}
+    ${btn('generateEnvironmentalImpact()','134,239,172','🌿','Studiu Impact Mediu (EIM)','Impact asupra mediului, APM')}
   </div>`;
 }
 
