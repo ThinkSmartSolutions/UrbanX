@@ -1258,7 +1258,7 @@ function getUATListComplete(){ return getUATList().filter(u=>u.status==='complet
 function getUATListAvailable(){ return getUATList().filter(u=>u.status!=='empty'); }
 
 // ── Starea UAT activ ──────────────────────────────────────────────────────
-let S_UAT = {
+var S_UAT = {
   id:'municipiul-iasi',
   ...UAT_REGISTRY['municipiul-iasi'],
 };
@@ -5402,3 +5402,33 @@ function aedisResetAndRender(){
   aedisAIRender();
 }
 
+
+// ── toggleRapoarteMenu — definit aici pentru a fi disponibil la init ──────
+function toggleRapoarteMenu(){
+  const m = document.getElementById('rapoarte-menu');
+  const btn = document.getElementById('btnPDF');
+  if(!m) return;
+  const isOpen = m.style.display !== 'none';
+  if(isOpen){ m.style.display='none'; return; }
+  if(btn){
+    const r = btn.getBoundingClientRect();
+    m.style.top  = (r.bottom + 6) + 'px';
+    m.style.left = Math.max(8, r.right - m.offsetWidth || r.right - 224) + 'px';
+    m.style.display = 'block';
+    requestAnimationFrame(()=>{
+      const mr = m.getBoundingClientRect();
+      if(mr.right > window.innerWidth - 8) m.style.left = (window.innerWidth - mr.width - 8) + 'px';
+      if(mr.left < 8) m.style.left = '8px';
+    });
+  } else {
+    m.style.display = 'block';
+  }
+  setTimeout(()=>{
+    document.addEventListener('click', function close(e){
+      if(!m.contains(e.target) && e.target.id !== 'btnPDF'){
+        m.style.display='none';
+        document.removeEventListener('click', close);
+      }
+    });
+  }, 10);
+}
