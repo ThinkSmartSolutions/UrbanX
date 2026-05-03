@@ -2355,7 +2355,8 @@ function addLayers(){
   const E={type:'FeatureCollection',features:[]};
   ['parcel-src','utr-src','ctx-src','vol-src','fp-src','sv-src','front-src','ctx-labels-src','dist-src','aedis-dim-src',
    'bilant-src','edificabil-src','setback-src',
-   'lotizare-src','lotizare-drum-src','lotizare-label-src'].forEach(id=>{
+   'lotizare-src','lotizare-drum-src','lotizare-label-src',
+   'lot-drum-edit-src','lot-drum-vert-src'].forEach(id=>{
     if(!map.getSource(id)) map.addSource(id,{type:'geojson',data:E});
   });
   const L=(spec)=>{if(!map.getLayer(spec.id))map.addLayer(spec);};
@@ -2390,6 +2391,26 @@ function addLayers(){
   }});
   L({id:'lotizare-drum-line',type:'line',source:'lotizare-drum-src',paint:{
     'line-color':'#cbd5e1','line-width':1
+  }});
+  // Layer editor circulații custom
+  L({id:'lot-drum-edit-line',type:'line',source:'lot-drum-edit-src',paint:{
+    'line-color':['coalesce',['get','color'],'#38bdf8'],
+    'line-width':['coalesce',['get','lineW'],4],
+    'line-opacity':0.85,
+    'line-dasharray':[2,1]
+  }});
+  L({id:'lot-drum-edit-case',type:'line',source:'lot-drum-edit-src',paint:{
+    'line-color':['coalesce',['get','caseColor'],'#0f172a'],
+    'line-width':['coalesce',['get','caseW'],8],
+    'line-opacity':0.4
+  },'before':'lot-drum-edit-line'});
+  L({id:'lot-drum-edit-vert',type:'circle',source:'lot-drum-vert-src',paint:{
+    'circle-radius':6,'circle-color':'#38bdf8',
+    'circle-stroke-width':2,'circle-stroke-color':'#0f172a'
+  }});
+  L({id:'lot-drum-edit-vert-sel',type:'circle',source:'lot-drum-vert-src',filter:['==',['get','sel'],true],paint:{
+    'circle-radius':9,'circle-color':'#fbbf24',
+    'circle-stroke-width':2,'circle-stroke-color':'#0f172a'
   }});
   L({id:'lotizare-label',type:'symbol',source:'lotizare-label-src',minzoom:14,layout:{
     'text-field':['get','label'],'text-size':10,
@@ -13340,8 +13361,8 @@ let _lotizareActive = false;
 const _LOT = {
   lotAria: 400,
   drumLat: 6,
-  drumProcent: 20,      // % din teren pt circulații (0 = calculat din lățime)
-  drumMod: 'ambele',    // 'latime' | 'procent' | 'ambele' (min dintre cele două)
+  drumProcent: 20,
+  drumMod: 'ambele',
   strategie: 'grid',
 
   tipMix: { individuala:40, insiruita:30, duplex:20, bloc:10 },
@@ -13381,9 +13402,27 @@ const _LOT = {
     }
   },
 
+  // ── Editor circulații ─────────────────────────────────────────────────
+  // Fiecare drum = {id, tip, coords:[[lng,lat],[lng,lat],...], latime}
+  // tip: 'principal' | 'secundar' | 'acces' | 'pietonal'
+  _drumCustom: [],      // drumuri definite manual de utilizator
+  _drumEditMode: null,  // null | 'draw' | 'move' | 'delete'
+  _drumDrawing: null,   // drum în curs de desenare
+  _drumSelected: null,  // id drum selectat pentru move/delete
+  _drumNextId: 1,
+
+  // ── Stare generată ────────────────────────────────────────────────────
   _loturi: [],
   _drumuri: [],
-  _bilant: null
+  _bilant: null,
+
+  // Config drum per tip
+  drumTipuri: {
+    principal: {label:'Drum principal',  latime:7, color:'#94a3b8', opacity:0.6},
+    secundar:  {label:'Drum secundar',   latime:5, color:'#64748b', opacity:0.5},
+    acces:     {label:'Alee acces',      latime:3.5,color:'#475569', opacity:0.4},
+    pietonal:  {label:'Cale pietonală',  latime:2, color:'#38bdf8', opacity:0.35},
+  }
 };
 
 // ─── Toggle ───────────────────────────────────────────────────────────────
@@ -13414,8 +13453,8 @@ function _showLotizarePanel(){
         <button onclick="toggleLotizare()" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#f87171;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0">✕ Închide</button>
       </div>
       <div style="display:flex;gap:2px;background:rgba(255,255,255,.04);border-radius:8px;padding:3px" id="lot-tabs">
-        ${[['p','⚙ Parametri'],['m','🏡 Mix'],['r','📊 Rezultat'],['f','💰 Financiar'],['x','📄 Export']].map(([id,l],i)=>`
-          <button onclick="_lotTab('${id}')" id="ltab-${id}" style="flex:1;border:none;background:${i===0?'rgba(167,139,250,.2)':'none'};color:${i===0?'#a78bfa':'#64748b'};border-radius:6px;padding:5px 1px;font-size:${mob?8:9}px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .15s">${l}</button>`).join('')}
+        ${[['p','⚙ Parametri'],['c','🛣 Circulații'],['m','🏡 Mix'],['r','📊 Rezultat'],['f','💰 Financiar'],['x','📄 Export']].map(([id,l],i)=>`
+          <button onclick="_lotTab('${id}')" id="ltab-${id}" style="flex:1;border:none;background:${i===0?'rgba(167,139,250,.2)':'none'};color:${i===0?'#a78bfa':'#64748b'};border-radius:6px;padding:5px 1px;font-size:${mob?7:8.5}px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .15s">${l}</button>`).join('')}
       </div>
     </div>
     <div id="lot-content" style="overflow-y:auto;padding:12px 16px;flex:1">${_lotHtmlParametri()}</div>
@@ -13436,11 +13475,63 @@ function _lotTab(tab){
   });
   const c=document.getElementById('lot-content');
   if(!c) return;
-  const map2={'p':_lotHtmlParametri,'m':_lotHtmlMix,'r':_lotHtmlRezultat,'f':_lotHtmlFinanciar,'x':_lotHtmlExport};
+  const map2={'p':_lotHtmlParametri,'c':_lotHtmlCirculatii,'m':_lotHtmlMix,'r':_lotHtmlRezultat,'f':_lotHtmlFinanciar,'x':_lotHtmlExport};
   c.innerHTML = (map2[tab]||_lotHtmlParametri)();
 }
 
 // ─── TAB: Parametri ───────────────────────────────────────────────────────
+function _lotHtmlCirculatii(){
+  const tipuri = _LOT.drumTipuri;
+  const hasCustom = _LOT._drumCustom.length > 0;
+  return `
+    <div style="margin-bottom:10px">
+      <div style="font-size:10px;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">✏️ Desenează circulații pe hartă</div>
+      <div style="font-size:9px;color:#475569;margin-bottom:8px;line-height:1.5">
+        Selectează tipul, apasă butonul, click pe hartă pentru puncte.<br>
+        <b style="color:#a78bfa">Enter</b> sau dublu-click = finalizare · <b style="color:#a78bfa">Esc</b> = anulare · <b style="color:#a78bfa">Backspace</b> = șterge ultimul punct
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px">
+        ${Object.entries(tipuri).map(([tip,cfg])=>`
+          <button onclick="_lotDrumEditorStart('${tip}')"
+            style="background:rgba(255,255,255,.05);border:1px solid ${cfg.color}44;color:${cfg.color};border-radius:8px;padding:8px 6px;font-size:10px;font-weight:700;cursor:pointer;text-align:left;transition:all .15s"
+            onmouseover="this.style.background='rgba(255,255,255,.1)'"
+            onmouseout="this.style.background='rgba(255,255,255,.05)'">
+            <div style="font-size:11px;margin-bottom:2px">✏️ ${cfg.label}</div>
+            <div style="font-size:9px;opacity:.7">Lățime: ${cfg.latime}m</div>
+          </button>`).join('')}
+      </div>
+    </div>
+
+    <div style="border-top:1px solid rgba(255,255,255,.07);padding-top:10px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div style="font-size:10px;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:.06em">Circulații definite</div>
+        ${hasCustom?`<button onclick="_lotDrumEditorClear()" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);color:#f87171;border-radius:5px;padding:2px 8px;font-size:9px;cursor:pointer">🗑 Șterge toate</button>`:''}
+      </div>
+      <div id="lot-drum-list">
+        ${hasCustom ? _LOT._drumCustom.map(d=>{
+            const cfg=tipuri[d.tip]||tipuri.secundar;
+            return `<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+              <span style="width:10px;height:10px;border-radius:50%;background:${cfg.color};flex-shrink:0"></span>
+              <span style="flex:1;color:#e2e8f0;font-size:10px">${cfg.label} (${d.coords.length} pct · ${d.latime}m)</span>
+              <button onclick="_lotDrumEditorDelete('${d.id}')" style="background:rgba(239,68,68,.15);border:none;color:#f87171;border-radius:4px;padding:2px 7px;font-size:9px;cursor:pointer">🗑</button>
+            </div>`;
+          }).join('')
+          : '<div style="color:#475569;font-size:10px;text-align:center;padding:8px">Nicio circulație desenată manual<br><span style="font-size:9px">Fără circulații custom = generare automată</span></div>'
+        }
+      </div>
+    </div>
+
+    <div style="background:rgba(56,189,248,.05);border:1px solid rgba(56,189,248,.15);border-radius:8px;padding:10px">
+      <div style="font-size:9px;color:#38bdf8;font-weight:700;margin-bottom:5px">ℹ️ Cum funcționează</div>
+      <div style="font-size:9px;color:#64748b;line-height:1.6">
+        • <b style="color:#94a3b8">Fără circulații custom</b> → sistem generează automat drum principal + secundare<br>
+        • <b style="color:#94a3b8">Cu circulații custom</b> → loturile se calculează în jurul drumurilor tale<br>
+        • <b style="color:#94a3b8">Recalcul automat</b> la fiecare modificare (dacă planul e generat)<br>
+        • <b style="color:#94a3b8">Loturi de margine</b> se adaptează la forma parcelei
+      </div>
+    </div>`;
+}
+
 function _lotHtmlParametri(){
   const ap=S.parcels[S.activeParcel??0];
   return `
@@ -13817,62 +13908,232 @@ function runLotizare(){
 }
 
 // ─── Generator geometrii ──────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+// EDITOR CIRCULAȚII — desenare interactivă pe hartă
+// ═══════════════════════════════════════════════════════════════════════════
+
+function _lotDrumEditorStart(tip){
+  _LOT._drumEditMode = 'draw';
+  _LOT._drumDrawTip  = tip || 'secundar';
+  _LOT._drumDrawCoords = [];
+  map.getCanvas().style.cursor = 'crosshair';
+  ss('✏️ Click pe hartă pentru a desena drumul · Enter sau dublu-click = finalizare · Esc = anulare');
+  _lotDrumEditorBind();
+}
+
+function _lotDrumEditorBind(){
+  map._lotClickHandler = (e) => {
+    if(_LOT._drumEditMode !== 'draw') return;
+    const pt = [e.lngLat.lng, e.lngLat.lat];
+    _LOT._drumDrawCoords.push(pt);
+    _lotDrumEditorRefreshPreview();
+  };
+  map._lotDblClickHandler = (e) => {
+    e.preventDefault();
+    _lotDrumEditorFinish();
+  };
+  map._lotKeyHandler = (e) => {
+    if(e.key==='Escape') _lotDrumEditorCancel();
+    if(e.key==='Enter') _lotDrumEditorFinish();
+    if(e.key==='Backspace' || e.key==='Delete'){
+      if(_LOT._drumDrawCoords.length > 1) {
+        _LOT._drumDrawCoords.pop();
+        _lotDrumEditorRefreshPreview();
+      }
+    }
+  };
+  map.on('click', map._lotClickHandler);
+  map.on('dblclick', map._lotDblClickHandler);
+  document.addEventListener('keydown', map._lotKeyHandler);
+}
+
+function _lotDrumEditorUnbind(){
+  if(map._lotClickHandler) map.off('click', map._lotClickHandler);
+  if(map._lotDblClickHandler) map.off('dblclick', map._lotDblClickHandler);
+  if(map._lotKeyHandler) document.removeEventListener('keydown', map._lotKeyHandler);
+  map._lotClickHandler = null;
+  map._lotDblClickHandler = null;
+  map._lotKeyHandler = null;
+}
+
+function _lotDrumEditorRefreshPreview(){
+  const coords = _LOT._drumDrawCoords;
+  if(coords.length < 1){ setSource('lot-drum-edit-src',{type:'FeatureCollection',features:[]}); return; }
+  const cfg = _LOT.drumTipuri[_LOT._drumDrawTip] || _LOT.drumTipuri.secundar;
+  const lineW = Math.max(2, cfg.latime / 2);
+
+  // Linie preview + vertices existente
+  const features = [];
+  if(coords.length >= 2){
+    features.push({type:'Feature',geometry:{type:'LineString',coordinates:coords},
+      properties:{color:cfg.color, lineW:lineW+2, caseColor:'#0f172a', caseW:lineW+6, tip:_LOT._drumDrawTip}});
+  }
+  setSource('lot-drum-edit-src',{type:'FeatureCollection',features});
+
+  // Vertices
+  const verts = coords.map((c,i)=>({type:'Feature',
+    geometry:{type:'Point',coordinates:c},
+    properties:{idx:i, sel: i===coords.length-1}}));
+  setSource('lot-drum-vert-src',{type:'FeatureCollection',features:verts});
+}
+
+function _lotDrumEditorFinish(){
+  const coords = _LOT._drumDrawCoords;
+  if(coords.length < 2){ _lotDrumEditorCancel(); return; }
+  const cfg = _LOT.drumTipuri[_LOT._drumDrawTip] || _LOT.drumTipuri.secundar;
+
+  const drum = {
+    id: 'drum_' + (_LOT._drumNextId++),
+    tip: _LOT._drumDrawTip,
+    coords: [...coords],
+    latime: cfg.latime,
+    label: cfg.label,
+  };
+  _LOT._drumCustom.push(drum);
+
+  _lotDrumEditorCancel();
+  _lotDrumEditorRefreshAllLines();
+  // Recalcul automat dacă există plan generat
+  if(_LOT._loturi.length > 0) runLotizare();
+  ss('✅ '+drum.label+' adăugat ('+coords.length+' puncte)');
+  _lotDrumEditorUpdatePanel();
+}
+
+function _lotDrumEditorCancel(){
+  _LOT._drumEditMode = null;
+  _LOT._drumDrawCoords = [];
+  map.getCanvas().style.cursor = '';
+  _lotDrumEditorUnbind();
+  _lotDrumEditorRefreshAllLines();
+  setSource('lot-drum-vert-src',{type:'FeatureCollection',features:[]});
+}
+
+function _lotDrumEditorDelete(drumId){
+  _LOT._drumCustom = _LOT._drumCustom.filter(d=>d.id!==drumId);
+  _lotDrumEditorRefreshAllLines();
+  if(_LOT._loturi.length > 0) runLotizare();
+  _lotDrumEditorUpdatePanel();
+  ss('🗑 Drum șters');
+}
+
+function _lotDrumEditorClear(){
+  _LOT._drumCustom = [];
+  _lotDrumEditorRefreshAllLines();
+  if(_LOT._loturi.length > 0) runLotizare();
+  _lotDrumEditorUpdatePanel();
+  ss('🗑 Toate circulațiile manuale șterse');
+}
+
+function _lotDrumEditorRefreshAllLines(){
+  const features = [];
+  _LOT._drumCustom.forEach(d=>{
+    const cfg = _LOT.drumTipuri[d.tip] || _LOT.drumTipuri.secundar;
+    const lw = Math.max(2, d.latime/2);
+    features.push({type:'Feature',
+      geometry:{type:'LineString',coordinates:d.coords},
+      properties:{id:d.id, color:cfg.color, lineW:lw+2, caseColor:'#0f172a', caseW:lw+6, tip:d.tip}});
+  });
+  setSource('lot-drum-edit-src',{type:'FeatureCollection',features});
+}
+
+function _lotDrumEditorUpdatePanel(){
+  const el = document.getElementById('lot-drum-list');
+  if(!el) return;
+  if(_LOT._drumCustom.length===0){
+    el.innerHTML='<div style="color:#475569;font-size:10px;text-align:center;padding:8px">Nicio circulație desenată manual</div>';
+    return;
+  }
+  el.innerHTML = _LOT._drumCustom.map(d=>{
+    const cfg = _LOT.drumTipuri[d.tip]||_LOT.drumTipuri.secundar;
+    return `<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+      <span style="width:10px;height:10px;border-radius:50%;background:${cfg.color};flex-shrink:0"></span>
+      <span style="flex:1;color:#e2e8f0;font-size:10px">${cfg.label} (${d.coords.length} pct · ${d.latime}m)</span>
+      <button onclick="_lotDrumEditorDelete('${d.id}')" style="background:rgba(239,68,68,.15);border:none;color:#f87171;border-radius:4px;padding:2px 7px;font-size:9px;cursor:pointer">🗑</button>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// GENERARE LOTURI — MODULARĂ, UMPLU COMPLET PARCELA
+// ═══════════════════════════════════════════════════════════════════════════
+
 function _genLotizareGeom(fpFeat, loturiPerTip, drumFract){
   const loturi=[], drumuri=[];
   const bbox2=turf.bbox(fpFeat);
   const cy=(bbox2[1]+bbox2[3])/2;
   const mLng=111320*Math.cos(cy*Math.PI/180), mLat=111320;
   const wDeg=bbox2[2]-bbox2[0], hDeg=bbox2[3]-bbox2[1];
-  const wM=wDeg*mLng, hM=hDeg*mLat;
   const fpArea=turf.area(fpFeat);
-
-  // Dimensiuni lot în grade
   const lotW=Math.sqrt(_LOT.lotAria)/mLng;
   const lotH=Math.sqrt(_LOT.lotAria)/mLat;
   const drumLatDeg=_LOT.drumLat/mLat;
 
-  // Grid complet peste tot bbox-ul parcelei
-  const cols=Math.max(1, Math.floor(wDeg/lotW));
-  const rows=Math.max(1, Math.floor(hDeg/lotH));
-
-  // Lista tipuri
-  const lista=[];
-  ['individuala','insiruita','duplex','bloc'].forEach(tip=>{
-    for(let i=0;i<(loturiPerTip[tip]||0);i++) lista.push(tip);
+  // ── 1. Construim poligoane drumuri ──────────────────────────────────────
+  // A) Drumuri custom desenate manual
+  _LOT._drumCustom.forEach(d=>{
+    const coords = d.coords;
+    if(coords.length < 2) return;
+    const latDeg = d.latime / mLat;
+    // Buffer liniar → poligon drum
+    try{
+      const line = {type:'Feature',geometry:{type:'LineString',coordinates:coords},properties:{}};
+      const buf = turf.buffer(line, d.latime/2, {units:'meters'});
+      if(!buf?.geometry) return;
+      const inter = turf.intersect(fpFeat, buf);
+      if(inter?.geometry) drumuri.push({...inter,properties:{tip:d.tip,id:d.id}});
+    }catch(e){}
   });
-  if(!lista.length) return {loturi,drumuri};
 
-  // Drum principal orizontal la 1/3 din înălțime (lasă 2/3 pentru loturi)
-  const drumY=bbox2[1]+hDeg*0.33;
-  const drumPrinc={type:'Feature',geometry:{type:'Polygon',coordinates:[[
-    [bbox2[0],drumY],[bbox2[2],drumY],
-    [bbox2[2],drumY+drumLatDeg],[bbox2[0],drumY+drumLatDeg],[bbox2[0],drumY]
-  ]]},properties:{tip:'drum_principal'}};
-  try{
-    const di=turf.intersect(fpFeat,drumPrinc);
-    if(di?.geometry) drumuri.push({...di,properties:{tip:'drum_principal'}});
-  }catch(e){}
+  // B) Dacă nu există drumuri custom, generăm automat
+  if(_LOT._drumCustom.length === 0){
+    // Drum principal orizontal la 1/3
+    const drumY = bbox2[1]+hDeg*0.33;
+    const dp={type:'Feature',geometry:{type:'Polygon',coordinates:[[
+      [bbox2[0],drumY],[bbox2[2],drumY],
+      [bbox2[2],drumY+drumLatDeg],[bbox2[0],drumY+drumLatDeg],[bbox2[0],drumY]
+    ]]},properties:{tip:'drum_principal'}};
+    try{const di=turf.intersect(fpFeat,dp);if(di?.geometry)drumuri.push({...di,properties:{tip:'drum_principal'}});}catch(e){}
 
-  // Scanăm TOT grid-ul
-  let idx=0;
-  const ocupat=new Array(rows*cols).fill(false);
-
-  for(let r=0;r<rows&&idx<lista.length;r++){
-    const y0=bbox2[1]+r*lotH;
-    const y1=y0+lotH;
-    // Sărim rândul care se suprapune cu drumul principal
-    if(y0<drumY+drumLatDeg&&y1>drumY) continue;
-
-    // Drum secundar la fiecare 3 rânduri
-    if(r>0&&r%3===0){
+    // Drumuri secundare
+    const cols=Math.max(1,Math.floor(wDeg/lotW));
+    const rows=Math.max(1,Math.floor(hDeg/lotH));
+    for(let r=3;r<rows;r+=3){
+      const y0=bbox2[1]+r*lotH;
+      if(y0<drumY+drumLatDeg&&y0+drumLatDeg*0.5>drumY) continue;
       const ds={type:'Feature',geometry:{type:'Polygon',coordinates:[[
         [bbox2[0],y0],[bbox2[2],y0],
         [bbox2[2],y0+drumLatDeg*0.5],[bbox2[0],y0+drumLatDeg*0.5],[bbox2[0],y0]
       ]]},properties:{tip:'drum_secundar'}};
       try{const di=turf.intersect(fpFeat,ds);if(di?.geometry)drumuri.push({...di,properties:{tip:'drum_secundar'}});}catch(e){}
     }
+  }
 
-    for(let c=0;c<cols&&idx<lista.length;c++){
+  // ── 2. Calculăm zona rămasă pentru loturi (parcela minus drumuri) ──────
+  let terenDisponibil = fpFeat;
+  drumuri.forEach(d=>{
+    try{
+      const diff = turf.difference(terenDisponibil, d);
+      if(diff?.geometry) terenDisponibil = diff;
+    }catch(e){}
+  });
+
+  // ── 3. Grid adaptiv care UMPLE COMPLET terenul disponibil ──────────────
+  const cols2=Math.max(1,Math.floor(wDeg/lotW));
+  const rows2=Math.max(1,Math.floor(hDeg/lotH));
+
+  const lista=[];
+  ['individuala','insiruita','duplex','bloc'].forEach(tip=>{
+    for(let i=0;i<(loturiPerTip[tip]||0);i++) lista.push(tip);
+  });
+  if(!lista.length) return {loturi,drumuri};
+
+  let idx=0;
+
+  for(let r=0;r<rows2&&idx<lista.length;r++){
+    const y0=bbox2[1]+r*lotH;
+    const y1=y0+lotH;
+
+    for(let c=0;c<cols2&&idx<lista.length;c++){
       const x0=bbox2[0]+c*lotW;
       const x1=x0+lotW;
       const tip=lista[idx];
@@ -13883,16 +14144,46 @@ function _genLotizareGeom(fpFeat, loturiPerTip, drumFract){
       ]]},properties:{tip,color:t.color,borderColor:t.borderColor}};
 
       try{
-        const inter=turf.intersect(fpFeat,lotPoly);
-        if(inter?.geometry&&turf.area(inter)>_LOT.lotAria*0.15){
-          loturi.push({...inter,properties:lotPoly.properties});
+        // Intersectăm cu TERENUL DISPONIBIL (după scăderea drumurilor)
+        const inter=turf.intersect(terenDisponibil, lotPoly);
+        if(!inter?.geometry) continue;
+
+        const interArea = turf.area(inter);
+        const lotAriaMin = _LOT.lotAria * 0.15; // minim 15% pentru a fi valid
+
+        if(interArea < lotAriaMin) continue; // lot prea mic — sărim
+
+        // MODULABIL: dacă lotul e parțial (margine), îl extindem să umple golul
+        const lotAreaTarget = _LOT.lotAria;
+
+        if(interArea >= lotAreaTarget * 0.85){
+          // Lot complet sau aproape complet → OK
+          loturi.push({...inter, properties:{...lotPoly.properties, area:Math.round(interArea)}});
           idx++;
+        } else if(interArea >= lotAriaMin){
+          // Lot de margine parțial → îl comasăm cu vecinul sau îl lăsăm ca lot redus
+          // Verificăm dacă e lotul de final al listei sau e izolat
+          const isLastInRow = c === cols2-1 || x1 >= bbox2[2]-lotW*0.3;
+          const isEdgeLot = c===0 || r===0 || r===rows2-1;
+
+          if(isEdgeLot || isLastInRow){
+            // Lot de margine → acceptăm chiar și parțial, îi ajustăm tipul dacă e prea mic
+            const tipAdj = interArea < 200 ? 'insiruita' : tip;
+            const tAdj = _LOT.tipuri[tipAdj]||t;
+            loturi.push({...inter, properties:{
+              ...lotPoly.properties,
+              tip:tipAdj, color:tAdj.color, borderColor:tAdj.borderColor,
+              area:Math.round(interArea), partial:true
+            }});
+            idx++;
+          }
+          // Altfel: lot interior prea mic → golul va fi consumat de lotul următor extins
         }
-        // dacă e prea mic, îl sărim fără a consuma din listă
       }catch(e){}
     }
   }
-  return {loturi,drumuri};
+
+  return {loturi, drumuri};
 }
 
 // ─── Export PDF ───────────────────────────────────────────────────────────
