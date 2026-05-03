@@ -710,37 +710,17 @@ canvas#c2d{width:100%;height:100%;display:block}
   <button class="tb-btn" onclick="document.getElementById('btnPanel')?.click()" title="Arată/ascunde panou" style="background:rgba(212,175,55,.2);border-color:#d4af37;color:#d4af37;font-size:16px">☰</button>
 
   <!-- Grup 2: Vizualizare dropdown -->
-  <div style="position:relative" id="viz-group">
+  <div id="viz-group">
     <button class="tb-btn" onclick="_toggleVizMenu(event)" title="Vizualizare hartă" style="display:flex;align-items:center;gap:4px">
       🏙 Vizualizare ▾
     </button>
-    <div id="viz-menu" style="display:none;position:absolute;top:42px;left:0;background:rgba(7,14,28,.97);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:6px;min-width:180px;z-index:9000;box-shadow:0 8px 32px rgba(0,0,0,.6);backdrop-filter:blur(12px)">
-      <div style="padding:4px 8px 6px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700">Perspectivă</div>
-      <button id="btn3D" onclick="set3D(60,-20);_toggleVizMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:6px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏙 Vedere 3D (60°)</button>
-      <button id="btn2D" onclick="set3D(0,0);_toggleVizMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:6px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">⬛ Vedere 2D (plan)</button>
-      <button id="btnSV" onclick="svOpen();_toggleVizMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:6px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🚶 Street View</button>
-      <button id="btnLegend" onclick="toggleFnLegend(this);_toggleVizMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:6px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🎨 Legendă funcțiuni</button>
-      <div style="padding:6px 8px 2px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.06);margin-top:4px">Stil hartă</div>
-      <select class="tb-sel" id="selBase" onchange="_toggleVizMenu()" style="width:100%;margin:4px 0;background:rgba(255,255,255,.06);border:none;border-radius:6px;color:#e2e8f0;padding:6px 10px;font-size:12px">
-        <option value="custom">🌆 Urban 3D</option>
-        <option value="standard">☀ Standard 3D ✦</option>
-        <option value="streets">🗺 Streets</option>
-        <option value="sat">🛰 Satelitar</option>
-      </select>
-    </div>
   </div>
 
   <!-- Grup 3: Instrumente dropdown -->
-  <div style="position:relative" id="tools-group">
+  <div id="tools-group">
     <button class="tb-btn" onclick="_toggleToolsMenu(event)" title="Instrumente analiză" style="display:flex;align-items:center;gap:4px">
       🔧 Instrumente ▾
     </button>
-    <div id="tools-menu" style="display:none;position:absolute;top:42px;left:0;background:rgba(7,14,28,.97);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:6px;min-width:200px;z-index:9000;box-shadow:0 8px 32px rgba(0,0,0,.6);backdrop-filter:blur(12px)">
-      <button id="btnLotizare" onclick="toggleLotizare();_toggleToolsMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#a78bfa;padding:6px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏘 Lotizare teren</button>
-      <button id="btnCimec" onclick="showCimecWidget();_toggleToolsMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#fbbf24;padding:6px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏛 LMI Monumente</button>
-      <button id="btnBilant" onclick="toggleBilant();_toggleToolsMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#4ade80;padding:6px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">📐 Bilanț edificabil</button>
-      <button id="btnPanel" onclick="togglePanel&&togglePanel();_toggleToolsMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:6px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">☰ Panou lateral</button>
-    </div>
   </div>
 
   <!-- Rapoarte (rămâne vizibil — acțiunea principală) -->
@@ -751,6 +731,30 @@ canvas#c2d{width:100%;height:100%;display:block}
   <button onclick="_authLogout()" title="Deconectare" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#f87171;border-radius:7px;padding:4px 10px;cursor:pointer;font-size:11px;font-weight:600;flex-shrink:0;display:flex;align-items:center;gap:4px" onmouseover="this.style.background='rgba(239,68,68,.2)'" onmouseout="this.style.background='rgba(239,68,68,.1)'" id="btn-logout">
     🚪 <span id="auth-user-label">Ieșire</span>
   </button>
+</div>
+
+<!-- VIZ MENU — fixed, outside topbar -->
+<div id="viz-menu" style="display:none;position:fixed;top:48px;background:rgba(7,14,28,.97);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:6px;min-width:190px;z-index:9100;box-shadow:0 8px 32px rgba(0,0,0,.7);backdrop-filter:blur(12px)">
+  <div style="padding:4px 8px 5px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700">Perspectivă</div>
+  <button id="btn3D" onclick="set3D(60,-20);_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏙 Vedere 3D (60°)</button>
+  <button id="btn2D" onclick="set3D(0,0);_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">⬛ Vedere 2D (plan)</button>
+  <button id="btnSV" onclick="svOpen();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🚶 Street View</button>
+  <button id="btnLegend" onclick="toggleFnLegend(this);_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🎨 Legendă funcțiuni</button>
+  <div style="padding:5px 8px 2px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.06);margin-top:3px">Stil hartă</div>
+  <select class="tb-sel" id="selBase" style="display:block;width:calc(100% - 4px);margin:4px 2px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#e2e8f0;padding:6px 8px;font-size:12px;cursor:pointer">
+    <option value="custom">🌆 Urban 3D</option>
+    <option value="standard">☀ Standard 3D ✦</option>
+    <option value="streets">🗺 Streets</option>
+    <option value="sat">🛰 Satelitar</option>
+  </select>
+</div>
+
+<!-- TOOLS MENU — fixed, outside topbar -->
+<div id="tools-menu" style="display:none;position:fixed;top:48px;background:rgba(7,14,28,.97);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:6px;min-width:210px;z-index:9100;box-shadow:0 8px 32px rgba(0,0,0,.7);backdrop-filter:blur(12px)">
+  <button id="btnLotizare" onclick="toggleLotizare();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#a78bfa;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏘 Lotizare teren</button>
+  <button id="btnCimec" onclick="showCimecWidget();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#fbbf24;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏛 LMI Monumente</button>
+  <button id="btnBilant" onclick="toggleBilant();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#4ade80;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">📐 Bilanț edificabil</button>
+  <button id="btnPanel" onclick="safeOn&&safeOn('btnPanel',null);document.getElementById('btnPanel')?.dispatchEvent(new Event('click'));_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">☰ Panou lateral</button>
 </div>
 
 <!-- RAPOARTE DROPDOWN — direct pe body pentru a evita overflow clipping din topbar -->
@@ -15555,32 +15559,59 @@ async function generateIstoricStudy(){
 
 
 // ── Topbar dropdown menus ────────────────────────────────────────────────
+function _closeAllMenus(){
+  const v=document.getElementById('viz-menu');
+  const t=document.getElementById('tools-menu');
+  if(v) v.style.display='none';
+  if(t) t.style.display='none';
+}
 function _toggleVizMenu(e){
-  if(e) e.stopPropagation();
+  if(e){ e.stopPropagation(); e.preventDefault(); }
   const m=document.getElementById('viz-menu');
   const t=document.getElementById('tools-menu');
   if(!m) return;
-  const open=m.style.display==='none'||m.style.display==='';
   if(t) t.style.display='none';
-  m.style.display=open?'block':'none';
+  if(m.style.display==='block'){
+    m.style.display='none';
+  } else {
+    // Poziționare sub butonul apăsat
+    const btn=(e&&e.currentTarget)||document.querySelector('#viz-group button');
+    if(btn){
+      const r=btn.getBoundingClientRect();
+      m.style.left=r.left+'px';
+      m.style.top=(r.bottom+2)+'px';
+    }
+    m.style.display='block';
+  }
 }
 function _toggleToolsMenu(e){
-  if(e) e.stopPropagation();
+  if(e){ e.stopPropagation(); e.preventDefault(); }
   const m=document.getElementById('tools-menu');
   const v=document.getElementById('viz-menu');
   if(!m) return;
-  const open=m.style.display==='none'||m.style.display==='';
   if(v) v.style.display='none';
-  m.style.display=open?'block':'none';
+  if(m.style.display==='block'){
+    m.style.display='none';
+  } else {
+    const btn=(e&&e.currentTarget)||document.querySelector('#tools-group button');
+    if(btn){
+      const r=btn.getBoundingClientRect();
+      m.style.left=r.left+'px';
+      m.style.top=(r.bottom+2)+'px';
+    }
+    m.style.display='block';
+  }
 }
-// Close dropdowns on outside click
-document.addEventListener('click',e=>{
-  if(!e.target.closest('#viz-group')) { const m=document.getElementById('viz-menu'); if(m) m.style.display='none'; }
-  if(!e.target.closest('#tools-group')) { const m=document.getElementById('tools-menu'); if(m) m.style.display='none'; }
-});
-document.addEventListener('DOMContentLoaded',()=>{
-  document.getElementById('viz-group')?.addEventListener('click',e=>e.stopPropagation());
-  document.getElementById('tools-group')?.addEventListener('click',e=>e.stopPropagation());
+// Închide la click în afara meniurilor — cu delay pentru a nu anula deschiderea
+document.addEventListener('click',function(e){
+  setTimeout(function(){
+    if(!e.target.closest('#viz-group')&&!e.target.closest('#viz-menu')){
+      const m=document.getElementById('viz-menu');if(m)m.style.display='none';
+    }
+    if(!e.target.closest('#tools-group')&&!e.target.closest('#tools-menu')){
+      const m=document.getElementById('tools-menu');if(m)m.style.display='none';
+    }
+  },50);
 });
 
 function toggleRapoarteMenu(){
