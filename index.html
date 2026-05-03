@@ -8264,7 +8264,7 @@ async function exportFull(pdf, ap, r, p){
   pdf.setFont('helvetica','bold');pdf.setFontSize(16);pdf.setTextColor(...PDF_C.gold);
   pdf.text('UrbanX', 10, 15);
   pdf.setFontSize(9);pdf.setTextColor(180,180,200);
-  pdf.text('Analiză Urbanistică · PUG Iași', 52, 10);
+  pdf.text('Analiza Urbanistica - PUG Iasi', 52, 10);
   pdf.setFontSize(7.5);pdf.setTextColor(140,150,170);
   pdf.text(new Date().toLocaleDateString('ro',{day:'2-digit',month:'long',year:'numeric'}), 52, 16.5);
   // Info jos
@@ -8463,7 +8463,7 @@ async function exportFull(pdf, ap, r, p){
     });
   } else {
     pdf.setFont('helvetica','italic');pdf.setFontSize(9);pdf.setTextColor(...PDF_C.gray3);
-    pdf.text('Context urban neîncărcat. Selectați un teren și apăsați Generează Volum 3D pentru a încărca contextul.', 10, y+10, {maxWidth:pw-20});
+    pdf.text('Context urban neincarcat. Selectati un teren si apasati Genereaza Volum 3D pentru a incarca contextul.', 10, y+10, {maxWidth:pw-20});
   }
 
   // ── PAGINA 4: Proiect + Volum ───────────────────────────────────────────
@@ -8543,7 +8543,7 @@ async function exportAEDISPage(pdf){
       pdf.setDrawColor(212,175,55);pdf.setLineWidth(0.4);
       pdf.rect(8,y,pw-16,68,'S');
       pdf.setFontSize(7);pdf.setTextColor(100,116,139);
-      pdf.text('Volumetrie 3D generată cu UrbanX · Three.js · Mapbox GL JS', pw/2, y+70, {align:'center'});
+      pdf.text('Volumetrie 3D generata cu UrbanX - Three.js - Mapbox GL JS', pw/2, y+70, {align:'center'});
       y += 76;
     }catch(e){ y += 4; }
   }
@@ -8614,7 +8614,7 @@ async function exportMulti(pdf){
   pdf.setFont('helvetica','bold');pdf.setFontSize(16);pdf.setTextColor(...PDF_C.gold);
   pdf.text('UrbanX', 10, 15);
   pdf.setFontSize(10);pdf.setTextColor(200,210,230);
-  pdf.text('Raport Multiparcelă', 50, 11);
+  pdf.text('Raport Multiparcela', 50, 11);
   pdf.setFontSize(8);pdf.setTextColor(150,160,180);
   pdf.text(new Date().toLocaleDateString('ro',{day:'2-digit',month:'long',year:'numeric'}), 50, 17);
   // Info josul hartii
@@ -8891,18 +8891,34 @@ async function exportVol3(pdf, ap, r, p){
 // ═══════════════════════════════════════════════════════════════════════════
 // ── Safe text pentru jsPDF (elimina diacritice care cauzeaza erori) ───────────
 function _pdfSafe(str){
-  if(str===null||str===undefined) return '—';
+  if(str===null||str===undefined) return '';
   return String(str)
-    // Eliminam emoji si caractere Unicode non-ASCII
-    .replace(/[\u{1F000}-\u{1FFFF}]/gu,'')  // emoji plane 1
-    .replace(/[\u2600-\u27FF]/g,'')           // misc symbols
-    .replace(/[\u{1F300}-\u{1F9FF}]/gu,'')   // emoji misc
-    .replace(/[^\x00-\xFF]/g,'')              // orice non-latin
-    // Diacritice romanesti → ASCII
-    .replace(/[ăĂ]/g,'a').replace(/[âÂ]/g,'a').replace(/[îÎ]/g,'i')
-    .replace(/[șȘşŞ]/g,'s').replace(/[țȚţŢ]/g,'t')
-    .replace(/[éèêë]/g,'e').replace(/[óòô]/g,'o')
-    .replace(/[úùû]/g,'u').replace(/[ñ]/g,'n')
+    // ── Diacritice românești — ambele forme Unicode (cu și fără cedilă) ──
+    .replace(/[ăÃã]/g,'a').replace(/[âÂ]/g,'a')
+    .replace(/[îÎ]/g,'i')
+    .replace(/[șȘşŞ]/g,'s')
+    .replace(/[țȚţŢ]/g,'t')
+    // ── Alte diacritice europene comune ──
+    .replace(/[àáäÀÁÄ]/g,'a').replace(/[èéêëÈÉÊË]/g,'e')
+    .replace(/[ìíîïÌÍÎÏ]/g,'i').replace(/[òóôöÒÓÔÖ]/g,'o')
+    .replace(/[ùúûüÙÚÛÜ]/g,'u').replace(/[ñÑ]/g,'n')
+    .replace(/[çÇ]/g,'c').replace(/[ýÝ]/g,'y')
+    .replace(/[ßẞ]/g,'ss').replace(/[æÆ]/g,'ae').replace(/[øØ]/g,'o')
+    // ── Semne tipografice → ASCII ──
+    .replace(/[„""''‚]/g,'"').replace(/[–—]/g,'-')
+    .replace(/[…]/g,'...').replace(/[•·]/g,'*')
+    .replace(/[×]/g,'x').replace(/[÷]/g,'/')
+    .replace(/[©]/g,'(c)').replace(/[®]/g,'(R)').replace(/[™]/g,'(TM)')
+    .replace(/[°]/g,' gr.').replace(/[±]/g,'+/-')
+    .replace(/[²]/g,'2').replace(/[³]/g,'3').replace(/[¹]/g,'1')
+    .replace(/[½]/g,'1/2').replace(/[¼]/g,'1/4').replace(/[¾]/g,'3/4')
+    .replace(/[µ]/g,'u').replace(/[§]/g,'par.').replace(/[¶]/g,'alin.')
+    .replace(/[←→↑↓↔]/g,'->')
+    // ── Emoji și simboluri Unicode ──
+    .replace(/[\u{1F000}-\u{1FFFF}]/gu,'').replace(/[\u2600-\u27FF]/g,'')
+    .replace(/[\u{1F300}-\u{1F9FF}]/gu,'').replace(/[\u{1FA00}-\u{1FFFF}]/gu,'')
+    // ── Orice alt non-Latin1 rămas ──
+    .replace(/[^\x00-\xFF]/g,'')
     .trim();
 }
 
@@ -9173,7 +9189,7 @@ async function runExport(){
       cy=addImg(mapImg2D,14,cy,W-28,60,'FIG. 8 — Plan 2D ortogonal · Parcela marcata + contextul construit existent · Sursa: UrbanX/Mapbox GL JS');cy+=4;
     } else if(!mapImg2D||mapImg2D.length<500){
       pdf.setTextColor(100,120,150);pdf.setFontSize(8);pdf.setFont('helvetica','italic');
-      pdf.text('(Captură 2D indisponibilă — deschideți platforma și activați vederea 2D)',W/2,cy+8,{align:'center'});
+      pdf.text('(Captura 2D indisponibila - deschideti platforma si activati vederea 2D)',W/2,cy+8,{align:'center'});
       cy+=20;
     }
     cy=sec('3. DATE PARCELA SI AMPLASAMENT',cy);
@@ -14462,7 +14478,7 @@ function _initStudyPdf(studyName, studySubtitle, totalPages){
     pdf.text('URBANX',14,H-4.5);
     pdf.setTextColor(...GRAY2);pdf.setFontSize(6);pdf.setFont('helvetica','normal');
     pdf.text(S2(studySubtitle)+' · '+S2(uat)+' · Parcela '+S2(nrcad)+' · '+S2(dateStr),W/2,H-4.5,{align:'center'});
-    pdf.text('Valori orientative · În curs de dezvoltare · TSS·FG',W-14,H-4.5,{align:'right'});
+    pdf.text('Valori orientative - In curs de dezvoltare - TSS-FG',W-14,H-4.5,{align:'right'});
   };
   const sec=(title,y,col)=>{
     const bg=col||BLUE;
@@ -14479,10 +14495,32 @@ function _initStudyPdf(studyName, studySubtitle, totalPages){
   };
   const body=(txt,x,y,maxW,fontSize,lineH)=>{
     pdf.setTextColor(26,38,56);pdf.setFont('helvetica','normal');
-    pdf.setFontSize(fontSize||8.5);const lh=lineH||5.4;
-    const lines=pdf.splitTextToSize(S2(txt),(maxW||(W-28)));
-    lines.forEach((line,i)=>pdf.text(line,x||14,(y||28)+i*lh));
-    return (y||28)+lines.length*lh+2;
+    const fs=fontSize||8.5;
+    pdf.setFontSize(fs);
+    const lh=lineH||(fs*0.65);
+    const mx=maxW||(W-28);
+    const ox=x||14;
+    const oy=y||28;
+    const lines=pdf.splitTextToSize(S2(txt),mx);
+    lines.forEach((line,i)=>{
+      const isLast = i===lines.length-1;
+      // Justify: distribuim spatiile uniform pe linii complete
+      if(!isLast && line.trim().length>0){
+        const words=line.split(' ').filter(w=>w.length>0);
+        if(words.length>1){
+          const textW=pdf.getTextWidth(words.join(''));
+          const spaceW=(mx-textW)/(words.length-1);
+          let cx=ox;
+          words.forEach((w,wi)=>{
+            pdf.text(w,cx,oy+i*lh);
+            cx+=pdf.getTextWidth(w)+spaceW;
+          });
+          return;
+        }
+      }
+      pdf.text(line,ox,oy+i*lh);
+    });
+    return oy+lines.length*lh+2;
   };
   const tblRow=(cols,y,isHeader,colW,rowColors)=>{
     const rowH=8;
@@ -14502,7 +14540,7 @@ function _initStudyPdf(studyName, studySubtitle, totalPages){
     if(!img||img.length<500){
       pdf.setFillColor(...LIGHT2);pdf.rect(x,y,w,h2,'F');
       pdf.setTextColor(...GRAY2);pdf.setFontSize(8);pdf.setFont('helvetica','italic');
-      pdf.text('Captură indisponibilă',x+w/2,y+h2/2,{align:'center'});
+      pdf.text('Captura indisponibila',x+w/2,y+h2/2,{align:'center'});
       if(caption){pdf.setFontSize(6);pdf.setTextColor(...GRAY);pdf.text(S2(caption),x+2,y+h2+3.5);}
       return y+h2+(caption?7:3);
     }
@@ -14519,7 +14557,7 @@ function _initStudyPdf(studyName, studySubtitle, totalPages){
       }
     }catch(e){
       pdf.setFillColor(...LIGHT2);pdf.rect(x,y,w,h2,'F');
-      pdf.setTextColor(...GRAY2);pdf.setFontSize(8);pdf.text('Captură indisponibilă',x+w/2,y+h2/2,{align:'center'});
+      pdf.setTextColor(...GRAY2);pdf.setFontSize(8);pdf.text('Captura indisponibila',x+w/2,y+h2/2,{align:'center'});
     }
     return y+h2+5;
   };
@@ -14542,28 +14580,62 @@ function _initStudyPdf(studyName, studySubtitle, totalPages){
     pdf.line(14,y,W-14,y);return y+4;
   };
   const bullet=(items,x,y,col)=>{
+    const ox=(x||14)+5;
+    const maxW=W-ox-14;
     items.forEach(item=>{
       if(y>H-18) return;
-      pdf.setFillColor(...(col||GOLD));pdf.circle((x||14)+1.5,y-1,0.8,'F');
-      pdf.setTextColor(26,38,56);pdf.setFontSize(8);pdf.setFont('helvetica','normal');
-      const lines=pdf.splitTextToSize(S2(item),W-30);
-      lines.forEach((l,i)=>pdf.text(l,(x||14)+5,y+i*4.8));
-      y+=lines.length*4.8+2;
+      pdf.setFillColor(...(col||GOLD));pdf.circle((x||14)+1.5,y-1,0.9,'F');
+      pdf.setTextColor(26,38,56);pdf.setFontSize(8.5);pdf.setFont('helvetica','normal');
+      const lines=pdf.splitTextToSize(S2(item),maxW);
+      lines.forEach((l,i)=>{
+        const isLast=i===lines.length-1;
+        if(!isLast&&l.trim().length>0){
+          const words=l.split(' ').filter(w=>w.length>0);
+          if(words.length>1){
+            const tw=pdf.getTextWidth(words.join(''));
+            const sw=(maxW-tw)/(words.length-1);
+            let cx=ox;
+            words.forEach(w=>{pdf.text(w,cx,y+i*5.2);cx+=pdf.getTextWidth(w)+sw;});
+            return;
+          }
+        }
+        pdf.text(l,ox,y+i*5.2);
+      });
+      y+=lines.length*5.2+2.5;
     });return y+2;
   };
   const concluzii=(items,y)=>{
-    y=sec('CONCLUZII ȘI RECOMANDĂRI',y,GREEN);
-    y=body('Pe baza analizei efectuate pentru parcela '+nrcad+' (UTR '+utr+', suprafață '+area+' mp), '+uat+', se formulează următoarele concluzii și recomandări:',14,y);
-    y+=2;
+    y=sec('CONCLUZII SI RECOMANDARI',y,GREEN);
+    y=body('Pe baza analizei efectuate pentru parcela '+S2(nrcad)+' (UTR '+S2(utr)+', suprafata '+S2(area)+' mp), '+S2(uat)+', se formuleaza urmatoarele concluzii si recomandari:',14,y);
+    y+=3;
     items.forEach((item,i)=>{
-      if(y>H-20) return;
-      pdf.setFillColor(...GOLD);pdf.rect(14,y-3,5,5,'F');
-      pdf.setTextColor(255,255,255);pdf.setFontSize(7);pdf.setFont('helvetica','bold');
-      pdf.text(String(i+1),16.2,y+0.5);
+      if(y>H-22){
+        pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
+        ftr();y=18;
+      }
+      // Număr în pătrat auriu
+      pdf.setFillColor(...GOLD);pdf.rect(14,y-3.5,6,6,'F');
+      pdf.setTextColor(10,18,38);pdf.setFontSize(7);pdf.setFont('helvetica','bold');
+      pdf.text(String(i+1),16.8,y+0.8,{align:'center'});
+      // Text justify
       pdf.setTextColor(26,38,56);pdf.setFontSize(8.5);pdf.setFont('helvetica','normal');
-      const lines=pdf.splitTextToSize(S2(item),W-32);
-      lines.forEach((l,li)=>pdf.text(l,22,y+li*5));
-      y+=lines.length*5+4;
+      const lines=pdf.splitTextToSize(S2(item),W-36);
+      const lh=5.3;
+      lines.forEach((l,li)=>{
+        const isLast=li===lines.length-1;
+        if(!isLast&&l.trim().length>0){
+          const words=l.split(' ').filter(w=>w.length>0);
+          if(words.length>1){
+            const tw=pdf.getTextWidth(words.join(''));
+            const sw=((W-36)-tw)/(words.length-1);
+            let cx=23;
+            words.forEach(w=>{pdf.text(w,cx,y+li*lh);cx+=pdf.getTextWidth(w)+sw;});
+            return;
+          }
+        }
+        pdf.text(l,23,y+li*lh);
+      });
+      y+=lines.length*lh+5;
     });
     return y+4;
   };
@@ -14573,7 +14645,7 @@ function _initStudyPdf(studyName, studySubtitle, totalPages){
     pdf.setFillColor(...GOLD);pdf.rect(14,sy,W-28,2,'F');
     pdf.setFillColor(...GOLD);pdf.rect(14,sy,2,58,'F');
     pdf.setTextColor(...GOLD);pdf.setFontSize(7.5);pdf.setFont('helvetica','bold');
-    pdf.text('CASETA DE ELABORARE, VERIFICARE ȘI ASUMARE A RESPONSABILITĂȚII',W/2,sy+9,{align:'center'});
+    pdf.text('CASETA DE ELABORARE, VERIFICARE SI ASUMARE A RESPONSABILITATII',W/2,sy+9,{align:'center'});
     pdf.setDrawColor(...GOLD2);pdf.setLineWidth(0.3);pdf.line(14,sy+12,W-14,sy+12);
     const cols=['ELABORAT','VERIFICAT','BENEFICIAR / INVESTITOR'];
     [[22,52,100],[16,108,52],[172,82,6]].forEach((c,i)=>{
@@ -14591,11 +14663,11 @@ function _initStudyPdf(studyName, studySubtitle, totalPages){
     for(let i=0;i<3;i++){
       const cx=14+i*(W-28)/3+2;
       pdf.setDrawColor(...GRAY3);pdf.line(cx,sy+50,cx+(W-28)/3-4,sy+50);
-      pdf.setFontSize(6);pdf.setTextColor(...GRAY2);pdf.text('Semnătură și ștampilă',cx,sy+54);
+      pdf.setFontSize(6);pdf.setTextColor(...GRAY2);pdf.text('Semnatura si stampila',cx,sy+54);
     }
     pdf.setFillColor(...RED);pdf.rect(14,sy+56,W-28,4,'F');
     pdf.setTextColor(255,255,255);pdf.setFontSize(5.5);pdf.setFont('helvetica','bold');
-    pdf.text('Document orientativ și preliminar. Nu înlocuiește documentațiile tehnice avizate conform Legii 50/1991 și Legii 350/2001. UrbanX TSS·FG',W/2,sy+59.5,{align:'center'});
+    pdf.text('Document orientativ si preliminar. Nu inlocuieste documentatiile tehnice avizate conform Legii 50/1991 si Legii 350/2001. UrbanX TSS-FG',W/2,sy+59.5,{align:'center'});
   };
   const cover=(subtitle2,coverImg,kpiRows,statusOk,statusText)=>{
     pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');
@@ -14607,7 +14679,7 @@ function _initStudyPdf(studyName, studySubtitle, totalPages){
       pdf.setTextColor(...GOLD);pdf.setFontSize(28);pdf.setFont('helvetica','bold');pdf.text('UrbanX',W/2,42,{align:'center'});
     }
     pdf.setTextColor(...GOLD2);pdf.setFontSize(8.5);pdf.setFont('helvetica','bold');
-    pdf.text('URBANX — PLATFORMĂ NAȚIONALĂ DE ANALIZĂ URBANISTICĂ',W/2,50,{align:'center'});
+    pdf.text('URBANX - PLATFORMA NATIONALA DE ANALIZA URBANISTICA',W/2,50,{align:'center'});
     pdf.setTextColor(255,255,255);pdf.setFontSize(20);pdf.setFont('helvetica','bold');
     pdf.text(S2(studyName.toUpperCase()),W/2,68,{align:'center'});
     if(subtitle2){
@@ -14652,9 +14724,26 @@ function _initStudyPdf(studyName, studySubtitle, totalPages){
     ftr();
   };
 
+  // ── Helper: pagina nouă cu header/footer ──────────────────────────────
+  const newPage=(title,pgNum)=>{
+    pdf.addPage();
+    pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
+    if(title&&pgNum) hdr(title,pgNum);
+    ftr();
+    return 30; // y start
+  };
+
+  // ── Verifică overflow și mută pe pagina nouă dacă e cazul ─────────────
+  const checkY=(y,needed,title,pgNum)=>{
+    if(y+( needed||20) > H-18){
+      return newPage(title||'continuare',pgNum||'—');
+    }
+    return y;
+  };
+
   return {pdf,W,H,DARK,DARK2,GOLD,GOLD2,BLUE,BLUE2,LIGHT,LIGHT2,RED,GREEN,ORANGE,PURPLE,GRAY,GRAY2,GRAY3,
     S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,
-    hdr,ftr,sec,subsec,body,tblRow,addImg,kv,badge,divider,bullet,concluzii,sign,cover};
+    hdr,ftr,sec,subsec,body,tblRow,addImg,kv,badge,divider,bullet,concluzii,sign,cover,newPage,checkY};
 }
 
 
