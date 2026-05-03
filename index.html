@@ -214,6 +214,67 @@ canvas#c2d{width:100%;height:100%;display:block}
 }
 #aedis-modal.open { right:0; }
 
+/* ═══ Info Drawer Rapoarte ══════════════════════════════════════════════════ */
+#info-drawer-backdrop{
+  position:fixed;inset:0;z-index:8500;background:rgba(0,0,0,0);
+  pointer-events:none;transition:background .25s
+}
+#info-drawer-backdrop.open{background:rgba(0,0,0,.45);pointer-events:auto}
+#info-drawer{
+  position:fixed;top:0;right:-420px;width:420px;max-width:96vw;height:100vh;
+  z-index:8600;background:#07101e;border-left:1px solid rgba(212,175,55,.25);
+  display:flex;flex-direction:column;
+  transition:right .28s cubic-bezier(.4,0,.2,1);
+  box-shadow:-8px 0 40px rgba(0,0,0,.6)
+}
+#info-drawer.open{right:0}
+#info-drawer-head{
+  display:flex;align-items:center;gap:10px;padding:14px 16px;
+  border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0;
+  background:#07101e
+}
+#info-drawer-body{flex:1;overflow-y:auto;padding:18px 18px 32px}
+.idr-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:10px;font-weight:700;padding:3px 9px;border-radius:999px;
+  text-transform:uppercase;letter-spacing:.06em
+}
+.idr-badge.obligatoriu{background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3)}
+.idr-badge.recomandat{background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.25)}
+.idr-badge.optional{background:rgba(100,116,139,.15);color:#94a3b8;border:1px solid rgba(100,116,139,.25)}
+.idr-section{
+  font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+  color:#475569;margin:18px 0 7px
+}
+.idr-section:first-of-type{margin-top:0}
+.idr-text{font-size:13px;color:#cbd5e1;line-height:1.6}
+.idr-list{margin:0;padding:0 0 0 16px}
+.idr-list li{font-size:12px;color:#94a3b8;line-height:1.7}
+.idr-output-row{
+  display:flex;align-items:center;gap:8px;padding:8px 10px;
+  background:rgba(255,255,255,.03);border-radius:8px;margin-bottom:5px
+}
+.idr-output-ico{font-size:15px;flex-shrink:0}
+.idr-output-txt{font-size:12px;color:#94a3b8}
+.idr-nu-row{
+  display:flex;align-items:flex-start;gap:7px;padding:7px 10px;
+  background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);
+  border-radius:8px;margin-bottom:5px
+}
+.idr-nu-txt{font-size:12px;color:#f87171;line-height:1.5}
+#info-drawer-gen-btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;padding:13px;border-radius:11px;border:none;cursor:pointer;
+  font-size:14px;font-weight:700;font-family:inherit;
+  background:linear-gradient(135deg,#1e3a6e,#0d2040);
+  color:#d4af37;border:1px solid rgba(212,175,55,.4);
+  transition:all .15s;margin-top:20px
+}
+#info-drawer-gen-btn:hover{background:linear-gradient(135deg,#2a4a7f,#1a3150);border-color:#d4af37}
+@media(max-width:600px){
+  #info-drawer{width:100%;max-width:100%;right:-100%}
+}
+
 /* Topbar button Urban3D */
 #btnAEDIS {
   background:linear-gradient(135deg,#1e3a5f,#0d2137)!important;
@@ -757,26 +818,90 @@ canvas#c2d{width:100%;height:100%;display:block}
 </div>
 
 <!-- RAPOARTE DROPDOWN — direct pe body pentru a evita overflow clipping din topbar -->
-<div id="rapoarte-menu" style="display:none;position:fixed;background:#0f172a;border:1px solid rgba(212,175,55,.3);border-radius:10px;padding:8px;min-width:240px;z-index:9000;box-shadow:0 8px 32px rgba(0,0,0,.6)">
+<div id="rapoarte-menu" style="display:none;position:fixed;background:#0f172a;border:1px solid rgba(212,175,55,.3);border-radius:10px;padding:8px;min-width:260px;z-index:9000;box-shadow:0 8px 32px rgba(0,0,0,.6)">
   <div style="padding:4px 12px 6px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.08em;font-weight:700">Rapoarte principale</div>
-  <button onclick="runExport();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px;font-weight:600" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">📄 Raport Urbanistic Complet</button>
-  <button onclick="_lotExportPDF();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#c084fc;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏘 Plan de Lotizare PDF</button>
-  <button onclick="generateMemoriu();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#d4af37;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏗 Memoriu Tehnic Preliminar</button>
+  <div style="display:flex;align-items:center;gap:2px;padding:2px 4px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'" style="border-radius:6px">
+    <button onclick="runExport();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#e2e8f0;padding:5px 8px;cursor:pointer;border-radius:6px;font-size:12px;font-weight:600">📄 Raport Urbanistic Complet</button>
+    <button onclick="infoDrawerOpen('raport_complet')" title="Află mai multe" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#64748b;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37';this.style.borderColor='rgba(212,175,55,.4)'" onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,.1)'">ⓘ</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:2px;padding:2px 4px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+    <button onclick="_lotExportPDF();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#c084fc;padding:5px 8px;cursor:pointer;border-radius:6px;font-size:12px">🏘 Plan de Lotizare PDF</button>
+    <button onclick="infoDrawerOpen('lotizare')" title="Află mai multe" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#64748b;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37';this.style.borderColor='rgba(212,175,55,.4)'" onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,.1)'">ⓘ</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:2px;padding:2px 4px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+    <button onclick="generateMemoriu();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#d4af37;padding:5px 8px;cursor:pointer;border-radius:6px;font-size:12px">🏗 Memoriu Tehnic Preliminar</button>
+    <button onclick="infoDrawerOpen('memoriu')" title="Află mai multe" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#64748b;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37';this.style.borderColor='rgba(212,175,55,.4)'" onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,.1)'">ⓘ</button>
+  </div>
   <div style="padding:6px 12px 2px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.08em;font-weight:700;border-top:1px solid rgba(255,255,255,.06);margin-top:4px">Studii tehnice</div>
-  <button onclick="generateSolarStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#fbbf24;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">☀ Studiu de Însorire</button>
-  <button onclick="generateShadowStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#fb923c;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🌑 Studiu Umbre & Obstrucție</button>
-  <button onclick="generateNoiseStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#a78bfa;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🔇 Studiu Acustic Urban</button>
-  <button onclick="generateWindStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#38bdf8;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🌬 Studiu Vânt & Confort Pietonal</button>
-  <button onclick="generateGreenStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#4ade80;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🌿 Studiu Spații Verzi</button>
-  <button onclick="generateMobilityStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#f472b6;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🚗 Studiu Mobilitate & Parcaje</button>
-  <button onclick="generateDensityStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#94a3b8;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">📊 Studiu Densitate Urbană</button>
+  <div style="display:flex;align-items:center;gap:2px;padding:2px 4px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+    <button onclick="generateSolarStudy();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#fbbf24;padding:5px 8px;cursor:pointer;border-radius:6px;font-size:12px">☀ Studiu de Însorire</button>
+    <button onclick="infoDrawerOpen('insorire')" title="Află mai multe" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#64748b;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37';this.style.borderColor='rgba(212,175,55,.4)'" onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,.1)'">ⓘ</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:2px;padding:2px 4px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+    <button onclick="generateShadowStudy();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#fb923c;padding:5px 8px;cursor:pointer;border-radius:6px;font-size:12px">🌑 Studiu Umbre & Obstrucție</button>
+    <button onclick="infoDrawerOpen('umbre')" title="Află mai multe" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#64748b;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37';this.style.borderColor='rgba(212,175,55,.4)'" onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,.1)'">ⓘ</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:2px;padding:2px 4px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+    <button onclick="generateNoiseStudy();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#a78bfa;padding:5px 8px;cursor:pointer;border-radius:6px;font-size:12px">🔇 Studiu Acustic Urban</button>
+    <button onclick="infoDrawerOpen('acustic')" title="Află mai multe" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#64748b;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37';this.style.borderColor='rgba(212,175,55,.4)'" onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,.1)'">ⓘ</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:2px;padding:2px 4px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+    <button onclick="generateWindStudy();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#38bdf8;padding:5px 8px;cursor:pointer;border-radius:6px;font-size:12px">🌬 Studiu Vânt & Confort Pietonal</button>
+    <button onclick="infoDrawerOpen('vant')" title="Află mai multe" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#64748b;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37';this.style.borderColor='rgba(212,175,55,.4)'" onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,.1)'">ⓘ</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:2px;padding:2px 4px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+    <button onclick="generateGreenStudy();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#4ade80;padding:5px 8px;cursor:pointer;border-radius:6px;font-size:12px">🌿 Studiu Spații Verzi</button>
+    <button onclick="infoDrawerOpen('verde')" title="Află mai multe" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#64748b;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37';this.style.borderColor='rgba(212,175,55,.4)'" onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,.1)'">ⓘ</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:2px;padding:2px 4px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+    <button onclick="generateMobilityStudy();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#f472b6;padding:5px 8px;cursor:pointer;border-radius:6px;font-size:12px">🚗 Studiu Mobilitate & Parcaje</button>
+    <button onclick="infoDrawerOpen('mobilitate')" title="Află mai multe" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#64748b;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37';this.style.borderColor='rgba(212,175,55,.4)'" onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,.1)'">ⓘ</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:2px;padding:2px 4px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+    <button onclick="generateDensityStudy();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#94a3b8;padding:5px 8px;cursor:pointer;border-radius:6px;font-size:12px">📊 Studiu Densitate Urbană</button>
+    <button onclick="infoDrawerOpen('densitate')" title="Află mai multe" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#64748b;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37';this.style.borderColor='rgba(212,175,55,.4)'" onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,.1)'">ⓘ</button>
+  </div>
   <div style="padding:6px 12px 2px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.08em;font-weight:700;border-top:1px solid rgba(255,255,255,.06);margin-top:4px">Studii speciale & avize</div>
-  <button onclick="generateAACR();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#60a5fa;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">✈ Studiu AACR (Aviz Aeroport)</button>
-  <button onclick="generateExistingBldStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#fb7185;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏚 Studiu Construcții Existente</button>
-  <button onclick="generateGeotehnicalStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#a78bfa;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🪨 Pre-Studiu Geotehnic</button>
-  <button onclick="generateTrafficStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#34d399;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🚦 Studiu de Impact Trafic</button>
-  <button onclick="generateIstoricStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#f59e0b;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏛 Studiu Patrimoniu & Istoric</button>
-  <button onclick="generateEnvironmentalImpact();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#86efac;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(134,239,172,.06)'" onmouseout="this.style.background='none'">🌿 Studiu Impact Mediu (EIM)</button>
+  <div style="display:flex;align-items:center;gap:2px;padding:2px 4px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+    <button onclick="generateAACR();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#60a5fa;padding:5px 8px;cursor:pointer;border-radius:6px;font-size:12px">✈ Studiu AACR (Aviz Aeroport)</button>
+    <button onclick="infoDrawerOpen('aacr')" title="Află mai multe" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#64748b;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37';this.style.borderColor='rgba(212,175,55,.4)'" onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,.1)'">ⓘ</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:2px;padding:2px 4px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+    <button onclick="generateExistingBldStudy();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#fb7185;padding:5px 8px;cursor:pointer;border-radius:6px;font-size:12px">🏚 Studiu Construcții Existente</button>
+    <button onclick="infoDrawerOpen('existente')" title="Află mai multe" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#64748b;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37';this.style.borderColor='rgba(212,175,55,.4)'" onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,.1)'">ⓘ</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:2px;padding:2px 4px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+    <button onclick="generateGeotehnicalStudy();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#a78bfa;padding:5px 8px;cursor:pointer;border-radius:6px;font-size:12px">🪨 Pre-Studiu Geotehnic</button>
+    <button onclick="infoDrawerOpen('geotehnic')" title="Află mai multe" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#64748b;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37';this.style.borderColor='rgba(212,175,55,.4)'" onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,.1)'">ⓘ</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:2px;padding:2px 4px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+    <button onclick="generateTrafficStudy();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#34d399;padding:5px 8px;cursor:pointer;border-radius:6px;font-size:12px">🚦 Studiu de Impact Trafic</button>
+    <button onclick="infoDrawerOpen('trafic')" title="Află mai multe" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#64748b;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37';this.style.borderColor='rgba(212,175,55,.4)'" onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,.1)'">ⓘ</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:2px;padding:2px 4px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+    <button onclick="generateIstoricStudy();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#f59e0b;padding:5px 8px;cursor:pointer;border-radius:6px;font-size:12px">🏛 Studiu Patrimoniu & Istoric</button>
+    <button onclick="infoDrawerOpen('patrimoniu')" title="Află mai multe" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#64748b;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37';this.style.borderColor='rgba(212,175,55,.4)'" onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,.1)'">ⓘ</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:2px;padding:2px 4px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+    <button onclick="generateEnvironmentalImpact();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#86efac;padding:5px 8px;cursor:pointer;border-radius:6px;font-size:12px">🌿 Studiu Impact Mediu (EIM)</button>
+    <button onclick="infoDrawerOpen('eim')" title="Află mai multe" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#64748b;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37';this.style.borderColor='rgba(212,175,55,.4)'" onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,.1)'">ⓘ</button>
+  </div>
+</div>
+
+<!-- ═══ INFO DRAWER RAPOARTE ══════════════════════════════════════════════ -->
+<div id="info-drawer-backdrop" onclick="infoDrawerClose()"></div>
+<div id="info-drawer">
+  <div id="info-drawer-head">
+    <span id="info-drawer-ico" style="font-size:22px;flex-shrink:0">📄</span>
+    <div style="flex:1;min-width:0">
+      <div id="info-drawer-title" style="font-size:14px;font-weight:700;color:#e2e8f0;line-height:1.2"></div>
+      <div id="info-drawer-badge-wrap" style="margin-top:5px"></div>
+    </div>
+    <button onclick="infoDrawerClose()" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#f87171;border-radius:7px;padding:5px 12px;cursor:pointer;font-size:12px;font-weight:600;flex-shrink:0">✕</button>
+  </div>
+  <div id="info-drawer-body">
+    <!-- conținut dinamic -->
+  </div>
 </div>
 
 <div id="status">⏳ Se încarcă…</div>
@@ -4404,37 +4529,41 @@ function getContent(tab){
 function htmlMobRapoarte(){
   const hasParcel = !!(S.parcels[S.activeParcel??0]?.geo?.geometry);
   const warn = hasParcel ? '' : '<div style="background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);border-radius:8px;padding:10px;font-size:12px;color:#fbbf24;margin-bottom:10px">⚠️ Selectați mai întâi o parcelă de pe hartă</div>';
-  const btn=(onclick,color,ico,label,desc)=>`<button onclick="${onclick}" style="font-size:11px;padding:10px;background:rgba(${color},.12);border:1px solid rgba(${color},.35);color:rgb(${color});border-radius:10px;display:flex;align-items:center;gap:9px;text-align:left;width:100%;cursor:pointer">
-    <span style="font-size:18px;flex-shrink:0">${ico}</span>
-    <span><b>${label}</b><br><small style="opacity:.65">${desc}</small></span>
-  </button>`;
+  const btn=(onclick,color,ico,label,desc,infoKey)=>`
+  <div style="display:flex;align-items:stretch;gap:5px">
+    <button onclick="${onclick}" style="flex:1;font-size:11px;padding:10px;background:rgba(${color},.10);border:1px solid rgba(${color},.30);color:rgb(${color});border-radius:10px;display:flex;align-items:center;gap:9px;text-align:left;cursor:pointer">
+      <span style="font-size:18px;flex-shrink:0">${ico}</span>
+      <span><b>${label}</b><br><small style="opacity:.65">${desc}</small></span>
+    </button>
+    <button onclick="infoDrawerOpen('${infoKey}')" title="Detalii studiu" style="background:rgba(${color},.08);border:1px solid rgba(${color},.25);color:rgba(${color},.8);border-radius:10px;padding:0 12px;cursor:pointer;font-size:13px;flex-shrink:0;font-weight:700">ⓘ</button>
+  </div>`;
   return`
   <div class="section">📋 Rapoarte & Studii Urbane</div>
   ${warn}
   <div style="font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Rapoarte principale</div>
   <div class="card" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">
-    ${btn('runExport()','255,255,255','📄','Raport Urbanistic Complet','POT, CUT, H, funcțiuni, aliniamente')}
-    ${btn('_lotExportPDF()','192,132,252','🏘','Plan de Lotizare PDF','Export plan ansamblu rezidential')}
-    ${btn('generateMemoriu()','212,175,55','🏗','Memoriu Tehnic Preliminar','Document tehnic complet avize')}
+    ${btn('runExport()','255,255,255','📄','Raport Urbanistic Complet','POT, CUT, H, funcțiuni, aliniamente','raport_complet')}
+    ${btn('_lotExportPDF()','192,132,252','🏘','Plan de Lotizare PDF','Export plan ansamblu rezidential','lotizare')}
+    ${btn('generateMemoriu()','212,175,55','🏗','Memoriu Tehnic Preliminar','Document tehnic complet avize','memoriu')}
   </div>
   <div style="font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Studii tehnice</div>
   <div class="card" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">
-    ${btn('generateSolarStudy()','251,191,36','☀','Studiu de Însorire','Ore soare, bilanț solar, OMS 119')}
-    ${btn('generateShadowStudy()','251,146,60','🌑','Studiu Umbre & Obstrucție','Umbre proiectate, distanțe critice')}
-    ${btn('generateNoiseStudy()','167,139,250','🔇','Studiu Acustic Urban','Zgomot, SR 10009/2017')}
-    ${btn('generateWindStudy()','56,189,248','🌬','Studiu Vânt & Confort Pietonal','Criteriu Lawson, zone calm')}
-    ${btn('generateGreenStudy()','74,222,128','🌿','Studiu Spații Verzi','SV necesar, plantare, permeabilitate')}
-    ${btn('generateMobilityStudy()','244,114,182','🚗','Studiu Mobilitate & Parcaje','Parcaje, accese, NP 051')}
-    ${btn('generateDensityStudy()','148,163,184','📊','Studiu Densitate Urbană','CUT zonal, POT vecini')}
+    ${btn('generateSolarStudy()','251,191,36','☀','Studiu de Însorire','Ore soare, bilanț solar, OMS 119','insorire')}
+    ${btn('generateShadowStudy()','251,146,60','🌑','Studiu Umbre & Obstrucție','Umbre proiectate, distanțe critice','umbre')}
+    ${btn('generateNoiseStudy()','167,139,250','🔇','Studiu Acustic Urban','Zgomot, SR 10009/2017','acustic')}
+    ${btn('generateWindStudy()','56,189,248','🌬','Studiu Vânt & Confort Pietonal','Criteriu Lawson, zone calm','vant')}
+    ${btn('generateGreenStudy()','74,222,128','🌿','Studiu Spații Verzi','SV necesar, plantare, permeabilitate','verde')}
+    ${btn('generateMobilityStudy()','244,114,182','🚗','Studiu Mobilitate & Parcaje','Parcaje, accese, NP 051','mobilitate')}
+    ${btn('generateDensityStudy()','148,163,184','📊','Studiu Densitate Urbană','CUT zonal, POT vecini','densitate')}
   </div>
   <div style="font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Studii speciale & avize</div>
   <div class="card" style="display:flex;flex-direction:column;gap:6px">
-    ${btn('generateAACR()','96,165,250','✈','Studiu AACR — Aviz Aeroport','ICAO Anexa 14, H maxim admis')}
-    ${btn('generateExistingBldStudy()','251,113,133','🏚','Studiu Construcții Existente','Inventar, scenarii intervenție')}
-    ${btn('generateGeotehnicalStudy()','167,139,250','🪨','Pre-Studiu Geotehnic','Seismicitate, NFA, fundare')}
-    ${btn('generateTrafficStudy()','52,211,153','🚦','Studiu Impact Trafic','Trafic generat, parcaje, ITE')}
-    ${btn('generateIstoricStudy()','245,158,11','🏛','Studiu Patrimoniu & Istoric','LMI, zone protejate, avize MCID')}
-    ${btn('generateEnvironmentalImpact()','134,239,172','🌿','Studiu Impact Mediu (EIM)','Impact asupra mediului, APM')}
+    ${btn('generateAACR()','96,165,250','✈','Studiu AACR — Aviz Aeroport','ICAO Anexa 14, H maxim admis','aacr')}
+    ${btn('generateExistingBldStudy()','251,113,133','🏚','Studiu Construcții Existente','Inventar, scenarii intervenție','existente')}
+    ${btn('generateGeotehnicalStudy()','167,139,250','🪨','Pre-Studiu Geotehnic','Seismicitate, NFA, fundare','geotehnic')}
+    ${btn('generateTrafficStudy()','52,211,153','🚦','Studiu Impact Trafic','Trafic generat, parcaje, ITE','trafic')}
+    ${btn('generateIstoricStudy()','245,158,11','🏛','Studiu Patrimoniu & Istoric','LMI, zone protejate, avize MCID','patrimoniu')}
+    ${btn('generateEnvironmentalImpact()','134,239,172','🌿','Studiu Impact Mediu (EIM)','Impact asupra mediului, APM','eim')}
   </div>`;
 }
 
@@ -20227,6 +20356,351 @@ function svProjectVolume(pos){
     )) + 'm';
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// INFO DRAWER — Catalog rapoarte cu descrieri complete
+// ═══════════════════════════════════════════════════════════════════════════
+
+const RAPORT_INFO = {
+  raport_complet: {
+    ico: '📄', label: 'Raport Urbanistic Complet',
+    badge: 'recomandat', badgeLabel: 'Raport de bază',
+    color: '226,232,240',
+    fn: 'runExport()',
+    ce: 'Sintetizează toți parametrii urbanistici ai parcelei selectate într-un document PDF complet: indicatori PUG, reglementări UTR, bilanț suprafețe, volumetrie propusă și contextul cadastral. Este documentul de referință pentru orice proiect de construire.',
+    dece: 'Certificatul de Urbanism emis de Primărie face trimitere la indicatorii PUG. Acest raport îi documentează și îi interpretează în raport cu volumetria propusă, oferind arhitectului și beneficiarului o imagine clară înainte de a angaja cheltuieli de proiectare.',
+    legal: 'Legea 50/1991 · Legea 350/2001 · PUG în vigoare · Regulament Local de Urbanism',
+    output: [
+      { ico: '📐', txt: 'Fișă parcela: suprafață, UTR, coordonate GPS' },
+      { ico: '📊', txt: 'Indicatori urbanistici: POT, CUT, H max, aliniamente' },
+      { ico: '🏗', txt: 'Bilanț volumetrie propusă vs. admis PUG' },
+      { ico: '🗺', txt: 'Capturi hartă 3D și plan de situație' },
+      { ico: '✅', txt: 'Verificare conformitate automată per criteriu' },
+    ],
+    nu: ['Nu este un aviz sau document oficial — nu înlocuiește Certificatul de Urbanism', 'Nu se aplică parcelelor fără număr cadastral identificat'],
+  },
+  lotizare: {
+    ico: '🏘', label: 'Plan de Lotizare PDF',
+    badge: 'recomandat', badgeLabel: 'Proiect de lotizare',
+    color: '192,132,252',
+    fn: '_lotExportPDF()',
+    ce: 'Generează documentația PDF pentru parcelarea unui teren în loturi rezidențiale individuale. Include planul de situație cu loturi și circulații interioare, bilanțul suprafețelor, distribuția pe tipuri de locuință, analiza financiară preliminară (ROI estimat) și verificarea conformității cu PUG.',
+    dece: 'Parcelarea unui teren necesită documentație tehnică pentru obținerea Autorizației de Construire și pentru dezlipirea cadastrală la ANCPI. Planul de lotizare este documentul de bază pe care îl prezinți Primăriei, topografului și notarului.',
+    legal: 'Legea 50/1991 (art. 3) · Legea 7/1996 (cadastru) · Legea 350/2001 · NP 051/2012 (parcaje)',
+    output: [
+      { ico: '🗺', txt: 'Plan de situație 2D cu loturi și circulații interioare' },
+      { ico: '📊', txt: 'Bilanț suprafețe: loturi, drumuri, spații verzi' },
+      { ico: '🏠', txt: 'Distribuție tipuri locuință: individuală, înșiruită, duplex, bloc mic' },
+      { ico: '💰', txt: 'Analiză financiară: cost construcție, preț vânzare, ROI estimat' },
+      { ico: '✅', txt: 'Verificare conformitate: lot minim, lățime drum, eficiență teren' },
+      { ico: '🏙', txt: 'Vederi 3D: zi, golden hour, noapte' },
+    ],
+    nu: ['Necesită activarea modulului Lotizare din meniul Instrumente înainte de generare', 'Nu înlocuiește documentația cadastrală întocmită de topograf autorizat ANCPI'],
+  },
+  memoriu: {
+    ico: '🏗', label: 'Memoriu Tehnic Preliminar',
+    badge: 'recomandat', badgeLabel: 'Dosar avizare',
+    color: '212,175,55',
+    fn: 'generateMemoriu()',
+    ce: 'Redactează memoriul tehnic preliminar al proiectului de construire, care descrie în limbaj tehnico-juridic: amplasamentul, funcțiunea propusă, regimul de înălțime, soluția arhitecturală de principiu, conformitatea cu PUG și lista avizelor necesare.',
+    dece: 'Memoriul tehnic este documentul obligatoriu din dosarul pentru Certificatul de Urbanism și Autorizația de Construire. Fără el, Primăria nu poate procesa solicitarea. Varianta preliminară accelerează consultările cu arhitectul și identifică din timp avizele de obținut.',
+    legal: 'Legea 50/1991 · HG 907/2016 (conținut-cadru proiecte) · Ordinul MDRAP 839/2009',
+    output: [
+      { ico: '📝', txt: 'Date de identificare amplasament și beneficiar' },
+      { ico: '🏗', txt: 'Descriere soluție arhitecturală și volum propus' },
+      { ico: '📋', txt: 'Conformitate cu indicatorii PUG (POT, CUT, H, aliniamente)' },
+      { ico: '📋', txt: 'Listă avize și acorduri necesare pentru autorizare' },
+      { ico: '⚠️', txt: 'Observații și riscuri identificate preliminar' },
+    ],
+    nu: ['Document orientativ — nu înlocuiește memoriul tehnic semnat de arhitect cu drept de semnătură', 'Textul generat necesită verificare și adaptare de către proiectant'],
+  },
+  insorire: {
+    ico: '☀', label: 'Studiu de Însorire',
+    badge: 'obligatoriu', badgeLabel: 'Avizare clădiri noi',
+    color: '251,191,36',
+    fn: 'generateSolarStudy()',
+    ce: 'Analizează câte ore de radiație solară directă primesc fațadele și spațiile interioare ale construcției propuse. Calculează bilanțul solar pe anotimpuri, verifică respectarea duratei minime de însorire impuse de normative și identifică fațadele deficitare.',
+    dece: 'Normativele românești (C 107, OMS 119/2014) impun un minim de 1,5 ore de însorire/zi pentru încăperile de locuit, la solstițiul de iarnă. Autoritățile de sănătate publică solicită acest studiu în dosarul de avizare pentru orice clădire rezidențială.',
+    legal: 'OMS 119/2014 (norme igienă) · C 107/2005 · SR 6221 · HG 525/1996 (RGU art. 17)',
+    output: [
+      { ico: '☀', txt: 'Bilanț ore însorire per fațadă (N/S/E/V) la solstițiu de iarnă' },
+      { ico: '📊', txt: 'Grafic însorire pe luni: minim, mediu, maxim' },
+      { ico: '✅', txt: 'Verificare conformitate OMS 119: CONFORM / ATENȚIE per cameră' },
+      { ico: '🗺', txt: 'Captură 3D cu orientarea solară și umbra la ora 12:00' },
+      { ico: '💡', txt: 'Recomandări arhitecturale pentru îmbunătățirea însoriri' },
+    ],
+    nu: ['Nu se aplică clădirilor industriale, depozite, birouri fără camere de locuit', 'Rezultatele sunt orientative — studiul definitiv se realizează cu software specializat (Heliodon, EnergyPlus)'],
+  },
+  umbre: {
+    ico: '🌑', label: 'Studiu Umbre & Obstrucție',
+    badge: 'obligatoriu', badgeLabel: 'Protecție vecini',
+    color: '251,146,60',
+    fn: 'generateShadowStudy()',
+    ce: 'Calculează umbrele proiectate de volumul propus asupra parcelelor și clădirilor adiacente. Determină la ce ore și în ce perioade ale anului umbra construcției tale afectează vecinii, fereastra de însorire a acestora și spațiile publice din proximitate.',
+    dece: 'Este documentul cel mai frecvent solicitat de vecini și de Primărie în cadrul contestațiilor la autorizație. Demonstrează că proiectul respectă dreptul vecinilor la însorire (min. 1,5 ore/zi) și că nu creează obstacole vizuale sau de ventilație în zona de protecție.',
+    legal: 'OMS 119/2014 · C 107/2005 · Legea 50/1991 art. 27 (drept de contestație vecini) · SR 6221',
+    output: [
+      { ico: '🌑', txt: 'Harta umbrelor la ore critice: 9:00, 12:00, 15:00' },
+      { ico: '📊', txt: 'Tabel impact per vecin: ore afectate, procentaj fațadă obstruată' },
+      { ico: '✅', txt: 'Verificare conformitate: CONFORM / DEPĂȘIRE limită admisă' },
+      { ico: '🗺', txt: 'Vederi 3D cu proiecția umbrei la solstițiu de iarnă și vară' },
+      { ico: '📐', txt: 'Distanțe critice calculate față de ferestrele vecinilor' },
+    ],
+    nu: ['Nu se aplică parcelelor izolate fără vecini cu ferestre orientate spre amplasament', 'Nu înlocuiește expertiza tehnică a unui specialist certificat în cazul litigiilor'],
+  },
+  acustic: {
+    ico: '🔇', label: 'Studiu Acustic Urban',
+    badge: 'obligatoriu', badgeLabel: 'Zone cu trafic / industrie',
+    color: '167,139,250',
+    fn: 'generateNoiseStudy()',
+    ce: 'Evaluează nivelul de zgomot la care va fi expusă clădirea propusă, provenind din sursele din proximitate: trafic rutier, feroviar, activități industriale sau comerciale. Verifică dacă nivelul de zgomot la fațadă respectă limitele admise și recomandă soluții de izolare.',
+    dece: 'SR 10009/2017 și Legea 121/2019 (poluare fonică) impun limite stricte de zgomot pentru locuințe. APM și DSP solicită studiul acustic în dosarul de avizare pentru clădirile amplasate în zone cu trafic intens sau în apropierea surselor industriale.',
+    legal: 'SR 10009/2017 · Legea 121/2019 (zgomot ambiental) · HG 321/2005 · Directiva UE 2002/49/CE',
+    output: [
+      { ico: '🔇', txt: 'Niveluri zgomot Lday/Lnight la fiecare fațadă (dB)' },
+      { ico: '📊', txt: 'Harta acustică în raza 200m cu identificarea surselor' },
+      { ico: '✅', txt: 'Verificare conformitate SR 10009: CONFORM / DEPĂȘIRE' },
+      { ico: '🏗', txt: 'Recomandări: grosime geam, izolație fațadă, bariere fonice' },
+      { ico: '📋', txt: 'Clasificare zone acustice conform PUG' },
+    ],
+    nu: ['Nu se aplică în zone rurale fără surse semnificative de zgomot la 200m', 'Evaluarea utilizează modele simplificate — studiul definitiv necesită măsurători in situ'],
+  },
+  vant: {
+    ico: '🌬', label: 'Studiu Vânt & Confort Pietonal',
+    badge: 'recomandat', badgeLabel: 'Clădiri >P+3E',
+    color: '56,189,248',
+    fn: 'generateWindStudy()',
+    ce: 'Analizează efectele aerodinamice ale construcției propuse asupra confortului pietonal în spațiile publice adiacente. Identifică zonele cu curenți de aer accelerați sau turbulențe la nivelul solului, utilizând criteriile Lawson pentru clasificarea confortului pietonal.',
+    dece: 'Clădirile înalte sau cu forme complexe pot accelera vântul la nivelul solului la valori de 2-3 ori mai mari decât viteza naturală, creând disconfort sau pericol pietonal. Unele Primării și studii de impact solicită această analiză pentru clădiri peste P+3E sau cu suprafață frontală mare.',
+    legal: 'SR 13330/2014 (acțiunea vântului) · EN 1991-1-4 · Criteriu Lawson (standard internațional)',
+    output: [
+      { ico: '🌬', txt: 'Clasificare Lawson per zonă: Calm / Confort / Acceptabil / Risc / Pericol' },
+      { ico: '🗺', txt: 'Harta curenților la nivelul solului în raza 50m' },
+      { ico: '📊', txt: 'Viteze medii vânt per direcție și sezon (8 direcții)' },
+      { ico: '✅', txt: 'Verificare confort spații publice și intrări clădire' },
+      { ico: '💡', txt: 'Recomandări: plantatii, pergole, deflectoare pentru reducerea turbulențelor' },
+    ],
+    nu: ['Mai puțin relevant pentru clădiri mici (P, P+1E) în zone protejate de vânt', 'Simularea CFD completă necesită software specializat (Ansys Fluent, OpenFOAM)'],
+  },
+  verde: {
+    ico: '🌿', label: 'Studiu Spații Verzi',
+    badge: 'obligatoriu', badgeLabel: 'Toate proiectele',
+    color: '74,222,128',
+    fn: 'generateGreenStudy()',
+    ce: 'Calculează suprafața de spații verzi necesară conform UTR și o compară cu cea disponibilă pe parcelă după implantarea volumului propus. Identifică tipurile de vegetație admise, suprafețele permeabile și soluțiile de compensare dacă minimul nu este atins.',
+    dece: 'Legea 24/2007 și PUG impun un procent minim de spații verzi pe lot (uzual 20-40% din suprafața parcelei). Primăria respinge documentațiile care nu respectă acest minim sau care nu dovedesc suprafețele verzi prin planuri și calcule.',
+    legal: 'Legea 24/2007 (spații verzi) · HG 525/1996 art. 15 · PUG local · OMS 119/2014',
+    output: [
+      { ico: '🌿', txt: 'Bilanț SV: necesar conform UTR vs. propus pe parcelă (mp și %)' },
+      { ico: '📊', txt: 'Suprafață permeabilă vs. impermeabilă (asfalt, dale, beton)' },
+      { ico: '🌳', txt: 'Plantații recomandate: arbori, arbuști, covor vegetal' },
+      { ico: '✅', txt: 'Verificare conformitate: CONFORM / DEFICIT · soluții compensare' },
+      { ico: '💧', txt: 'Coeficient de permeabilitate și gestionare ape pluviale' },
+    ],
+    nu: ['Nu înlocuiește planul de amenajare peisagistică semnat de peisagist autorizat', 'Valorile sunt calculate pe baza suprafeței de construire estimate, nu a proiectului tehnic definitiv'],
+  },
+  mobilitate: {
+    ico: '🚗', label: 'Studiu Mobilitate & Parcaje',
+    badge: 'obligatoriu', badgeLabel: 'Toate proiectele',
+    color: '244,114,182',
+    fn: 'generateMobilityStudy()',
+    ce: 'Calculează numărul minim de locuri de parcare impus de NP 051 în funcție de tipul și suprafața construcției, verifică dacă accesele auto și pietonale respectă normativele și identifică impactul traficului generat de proiect asupra rețelei stradale existente.',
+    dece: 'Primăria refuză autorizația dacă proiectul nu asigură parcajele minime pe lot sau dacă accesele nu respectă normativele (lățime intrare, raza de întoarcere, vizibilitate). Este unul dintre cele mai frecvente motive de respingere a dosarelor de avizare.',
+    legal: 'NP 051/2012 (normativ parcaje) · HG 525/1996 · SR 13330/2014 · Regulament Local Urbanism',
+    output: [
+      { ico: '🚗', txt: 'Necesar parcaje: nr. locuri per funcțiune conform NP 051' },
+      { ico: '📐', txt: 'Dimensionare acces auto: lățime, rază întoarcere, vizibilitate' },
+      { ico: '🚶', txt: 'Accese pietonale: lățimi, conexiune trotuar, accesibilitate PMR' },
+      { ico: '📊', txt: 'Trafic generat: vehicule/oră la intrare și ieșire' },
+      { ico: '✅', txt: 'Verificare conformitate NP 051: CONFORM / DEFICIT locuri' },
+    ],
+    nu: ['Nu înlocuiește studiul de trafic complet pentru proiecte mari (>50 apartamente)', 'Calculul parcajelor pentru funcțiuni mixte complexe necesită verificare manuală'],
+  },
+  densitate: {
+    ico: '📊', label: 'Studiu Densitate Urbană',
+    badge: 'optional', badgeLabel: 'Analiză comparativă',
+    color: '148,163,184',
+    fn: 'generateDensityStudy()',
+    ce: 'Analizează densitatea construită a parcelei propuse în raport cu contextul urban imediat (200-500m). Calculează POT și CUT medii ale vecinilor, compară cu indicatorii propuși și evaluează dacă proiectul se încadrează coerent în țesutul urban existent.',
+    dece: 'Consiliile locale și comisiile de avizare pot respinge proiecte care, deși respectă PUG, creează discontinuități vizuale sau densități excesive față de contextul construit existent. Studiul demonstrează coerența urbanistică a proiectului cu vecinătatea sa.',
+    legal: 'Legea 350/2001 · Ghid metodologic PUZ 2016 · Regulament Local Urbanism',
+    output: [
+      { ico: '📊', txt: 'POT și CUT mediu al vecinilor în raza 200m și 500m' },
+      { ico: '📐', txt: 'Comparație regim înălțime: propus vs. context (H mediu vecini)' },
+      { ico: '🗺', txt: 'Hartă densitate construită cu codificare cromatică' },
+      { ico: '✅', txt: 'Poziționare proiect față de media zonei: sub / la / peste' },
+      { ico: '💡', txt: 'Argumentare urbanistică pentru eventuale derogări de la PUG' },
+    ],
+    nu: ['Studiul are valoare orientativă în absența unui PUZ aprobat pentru zonă', 'Datele OSM pot fi incomplete în zone cu construcții recente neactualizate'],
+  },
+  aacr: {
+    ico: '✈', label: 'Studiu AACR — Aviz Aeroport',
+    badge: 'obligatoriu', badgeLabel: 'Zone aeroportuare',
+    color: '96,165,250',
+    fn: 'generateAACR()',
+    ce: 'Verifică dacă înălțimea construcției propuse depășește suprafețele de limitare a obstacolelor definite de ICAO Anexa 14 și HG 930/2016 în raport cu cel mai apropiat aeroport. Calculează înălțimea maximă admisă și dacă este necesar avizul ROMATSA.',
+    dece: 'Orice construcție situată în zona de protecție aeronautică a unui aeroport trebuie să obțină avizul AACR (Autoritatea Aeronautică Civilă Română) înainte de Autorizația de Construire. Construirea fără acest aviz atrage demolarea pe cheltuiala proprietarului.',
+    legal: 'HG 930/2016 · Legea 233/2016 (Codul Aerian) · ICAO Anexa 14 ed.8 · Legea 50/1991 art.7 · OMAI 14/2007',
+    output: [
+      { ico: '✈', txt: 'Distanța față de pragul pistei și aeroportul ICAO identificat' },
+      { ico: '📐', txt: 'Înălțime maximă admisă AACR calculată (formula ICAO)' },
+      { ico: '✅', txt: 'Verdict: CONFORM / DEPĂȘIRE cu indicarea marjei (metri)' },
+      { ico: '📋', txt: 'Suprafața ICAO aplicabilă: De cursă / De abordare / Conică / Orizontală' },
+      { ico: '📝', txt: 'Procedura obținere aviz ROMATSA: etape și documente necesare' },
+    ],
+    nu: ['Se aplică NUMAI parcelelor situate în zona de protecție a unui aeroport (uzual <15km)', 'Nu înlocuiește avizul oficial AACR/ROMATSA obligatoriu pentru dosarul AC'],
+  },
+  existente: {
+    ico: '🏚', label: 'Studiu Construcții Existente',
+    badge: 'recomandat', badgeLabel: 'Parcele cu construcții',
+    color: '251,113,133',
+    fn: 'generateExistingBldStudy()',
+    ce: 'Inventariază construcțiile existente pe parcelă identificate din surse OSM și satelitare, estimează suprafața construită existentă și propune scenarii de intervenție: demolare totală, extindere orizontală/verticală, mansardare, reconversie sau înglobare.',
+    dece: 'Înainte de a proiecta, trebuie să știi ce există pe teren și ce se poate face cu clădirile existente. Demolarea necesită autorizație separată; extinderea implică verificarea structurii existente. Studiul clarifică scenariul optim economic și tehnic înainte de angajarea proiectantului.',
+    legal: 'Legea 50/1991 (demolare) · HG 907/2016 · Legea 422/2001 (monumente) · OUG 57/2020',
+    output: [
+      { ico: '🏚', txt: 'Inventar construcții existente: suprafață, regim înălțime estimat, funcțiune' },
+      { ico: '📊', txt: 'Bilanț: suprafață ocupată vs. teren disponibil pentru construire' },
+      { ico: '🔧', txt: 'Scenarii propuse: demolare / extindere / mansardare / reconversie' },
+      { ico: '💰', txt: 'Estimare cost demolare vs. cost reabilitare per scenariu' },
+      { ico: '⚠️', txt: 'Avertismente: monumente istorice, zone protejate, servituți' },
+    ],
+    nu: ['Datele OSM pot fi incomplete sau depășite — verificarea in situ este obligatorie', 'Nu evaluează starea structurală a clădirilor (necesită expertiză tehnică)'],
+  },
+  geotehnic: {
+    ico: '🪨', label: 'Pre-Studiu Geotehnic',
+    badge: 'obligatoriu', badgeLabel: 'Proiecte cu fundații',
+    color: '167,139,250',
+    fn: 'generateGeotehnicalStudy()',
+    ce: 'Oferă o evaluare preliminară a condițiilor geotehnice ale amplasamentului: seismicitate (zonă seismică, Tc, ag), tipul de teren estimat, nivelul freatic probabil și tipul de fundare recomandat, pe baza datelor publice disponibile pentru zona geografică respectivă.',
+    dece: 'Proiectul de rezistență nu poate fi elaborat fără studiu geotehnic. Banca finanțatoare și Primăria îl solicită în dosar. Varianta preliminară ajută arhitectul și investitorul să estimeze din timp costurile de fundare (fundație directă vs. piloți vs. baretă) înainte de comanda studiului oficial.',
+    legal: 'NP 074/2014 (normativ geotehnic) · P 100-1/2013 (seismicitate) · SR EN 1997-1 (Eurocode 7) · Legea 10/1995',
+    output: [
+      { ico: '🗺', txt: 'Zonă seismică: ag și Tc conform P 100-1/2013 pentru UAT' },
+      { ico: '🪨', txt: 'Tip teren estimat și capacitate portantă orientativă (kPa)' },
+      { ico: '💧', txt: 'Nivel freatic probabil și risc de inundabilitate' },
+      { ico: '🏗', txt: 'Tip fundare recomandat: directă / indirectă / radier general' },
+      { ico: '📋', txt: 'Avize necesare: Studiu geo oficial, aviz ANAR dacă e cazul' },
+    ],
+    nu: ['Nu înlocuiește studiul geotehnic oficial realizat de geotehnician autorizat cu foraje', 'Datele de teren estimate sunt orientative — condiționatele reale pot diferi semnificativ'],
+  },
+  trafic: {
+    ico: '🚦', label: 'Studiu de Impact Trafic',
+    badge: 'obligatoriu', badgeLabel: 'Proiecte >20 unități',
+    color: '52,211,153',
+    fn: 'generateTrafficStudy()',
+    ce: 'Estimează traficul auto și pietonal generat de proiect (vehicule/oră la orele de vârf), evaluează capacitatea rețelei stradale adiacente de a prelua fluxul suplimentar și propune măsuri de management al traficului pentru integrarea proiectului fără degradarea nivelului de serviciu stradal.',
+    dece: 'Primăriile și Consiliile Județene solicită studiul de impact asupra traficului pentru proiectele care generează mai mult de 50-100 vehicule/zi. Fără el, autorizația poate fi condiționată sau respinsă, mai ales în zone cu infrastructură stradală saturată.',
+    legal: 'Normativ AND 600/2010 · HG 525/1996 · SR 13330/2014 · Ghid ITE (Institute of Transportation Engineers)',
+    output: [
+      { ico: '🚦', txt: 'Trafic generat: vehicule/oră la vârful de dimineață și seară' },
+      { ico: '🗺', txt: 'Harta intersecțiilor afectate în raza 300m' },
+      { ico: '📊', txt: 'Nivel de serviciu (LOS A-F) pentru accesele principale' },
+      { ico: '🏗', txt: 'Măsuri propuse: sensuri, semaforizare, marcaje, sens giratoriu' },
+      { ico: '🚶', txt: 'Trafic pietonal generat și conexiuni la rețeaua de transport public' },
+    ],
+    nu: ['Nu se aplică proiectelor mici (1-5 unități) cu acces direct din stradă existentă', 'Modelarea detaliată a intersecțiilor necesită software specializat (VISSIM, SIDRA)'],
+  },
+  patrimoniu: {
+    ico: '🏛', label: 'Studiu Patrimoniu & Istoric',
+    badge: 'obligatoriu', badgeLabel: 'Zone protejate / LMI',
+    color: '245,158,11',
+    fn: 'generateIstoricStudy()',
+    ce: 'Verifică dacă parcela sau vecinătățile sale se află în zone de protecție ale monumentelor istorice (LMI), în situri arheologice, în zone construite protejate (ZCP) sau în zone de interes etnografic. Identifică restricțiile de construire aplicabile și avizele obligatorii.',
+    dece: 'Construirea în zona de protecție a unui monument istoric fără avizul DJCPN (Direcția Județeană pentru Cultură) este contravenție și poate atrage și demolarea. Verificarea prealabilă evită cheltuieli inutile dacă terenul se dovedește a fi în zonă protejată.',
+    legal: 'Legea 422/2001 (monumente istorice) · OG 43/2000 (situri arheologice) · Legea 350/2001 · HG 493/2004',
+    output: [
+      { ico: '🏛', txt: 'Verificare LMI: monumente istorice în raza 200m cu cod și categorie' },
+      { ico: '🗺', txt: 'Zone de protecție: ZCP, sit arheologic, rezervație arhitecturală' },
+      { ico: '⚠️', txt: 'Restricții aplicabile: înălțime, materiale, culori, retrageri speciale' },
+      { ico: '📋', txt: 'Avize necesare: DJCPN, MCID, Comisia Națională a Monumentelor' },
+      { ico: '🔍', txt: 'Surse verificate: CIMEC, RGIS, PUG zonă protejată' },
+    ],
+    nu: ['Nu înlocuiește expertiza istorică realizată de specialist atestat MCID', 'Lista LMI se actualizează periodic — verificați întotdeauna pe cimec.ro înainte de depunerea dosarului'],
+  },
+  eim: {
+    ico: '🌿', label: 'Studiu Impact asupra Mediului (EIM)',
+    badge: 'obligatoriu', badgeLabel: 'Proiecte cu impact semnificativ',
+    color: '134,239,172',
+    fn: 'generateEnvironmentalImpact()',
+    ce: 'Evaluează impactul proiectului de construire asupra factorilor de mediu: aer, apă, sol, biodiversitate, peisaj și populație. Identifică măsurile de prevenire și reducere a impactului negativ, conform metodologiei APM (Agenția pentru Protecția Mediului).',
+    dece: 'Legea 292/2018 și HG 1076/2004 impun Acordul de Mediu emis de APM pentru proiectele care depășesc anumite praguri (suprafață, funcțiune, localizare în zone sensibile). Fără acord de mediu, AC nu poate fi emisă. Studiul preliminar ajută la identificarea din timp a obligațiilor de mediu.',
+    legal: 'Legea 292/2018 (evaluare mediu) · HG 1076/2004 · OUG 195/2005 · Directiva UE 2011/92/UE (EIA)',
+    output: [
+      { ico: '🌿', txt: 'Factori de mediu analizați: aer, apă, sol, biodiversitate, peisaj' },
+      { ico: '⚠️', txt: 'Identificare impacte semnificative în faza de construire și exploatare' },
+      { ico: '🔧', txt: 'Măsuri de reducere impact: colectare deșeuri, gestionare ape uzate' },
+      { ico: '📋', txt: 'Procedura APM: dacă necesită acord de mediu simplu sau EIM complet' },
+      { ico: '🗺', txt: 'Verificare Natura 2000: situri protejate în raza 5km' },
+    ],
+    nu: ['Nu înlocuiește Raportul EIM complet realizat de evaluator de mediu acreditat', 'Studiul preliminar nu este acceptat de APM ca documentație oficială de avizare'],
+  },
+};
+
+function infoDrawerOpen(key) {
+  const d = RAPORT_INFO[key];
+  if(!d) return;
+  // Închidem meniurile dropdown înainte
+  toggleRapoarteMenu(true);
+  const drawer = document.getElementById('info-drawer');
+  const backdrop = document.getElementById('info-drawer-backdrop');
+  const titleEl = document.getElementById('info-drawer-title');
+  const badgeWrap = document.getElementById('info-drawer-badge-wrap');
+  const ico = document.getElementById('info-drawer-ico');
+  const body = document.getElementById('info-drawer-body');
+  if(!drawer) return;
+
+  ico.textContent = d.ico;
+  titleEl.textContent = d.label;
+
+  const badgeColors = {
+    obligatoriu: 'obligatoriu',
+    recomandat: 'recomandat',
+    optional: 'optional'
+  };
+  badgeWrap.innerHTML = `<span class="idr-badge ${badgeColors[d.badge]||'optional'}">${d.badgeLabel}</span>`;
+
+  const outputRows = (d.output||[]).map(o =>
+    `<div class="idr-output-row"><span class="idr-output-ico">${o.ico}</span><span class="idr-output-txt">${o.txt}</span></div>`
+  ).join('');
+  const nuRows = (d.nu||[]).map(n =>
+    `<div class="idr-nu-row"><span style="font-size:13px;flex-shrink:0">✕</span><span class="idr-nu-txt">${n}</span></div>`
+  ).join('');
+
+  body.innerHTML = `
+    <div class="idr-section">Ce analizează</div>
+    <p class="idr-text">${d.ce}</p>
+
+    <div class="idr-section">De ce este necesar</div>
+    <p class="idr-text">${d.dece}</p>
+
+    <div class="idr-section">Bază legală</div>
+    <p class="idr-text" style="font-size:12px;color:#64748b">${d.legal}</p>
+
+    <div class="idr-section">Ce primești în raport</div>
+    ${outputRows}
+
+    <div class="idr-section">Când NU se aplică</div>
+    ${nuRows}
+
+    <button id="info-drawer-gen-btn" onclick="${d.fn};infoDrawerClose()">
+      ${d.ico} Generează ${d.label}
+    </button>
+    <p style="font-size:10px;color:#334155;text-align:center;margin-top:8px">Document orientativ · UrbanX TSS·FG · Valori preliminare</p>
+  `;
+
+  drawer.classList.add('open');
+  backdrop.classList.add('open');
+}
+
+function infoDrawerClose() {
+  document.getElementById('info-drawer')?.classList.remove('open');
+  document.getElementById('info-drawer-backdrop')?.classList.remove('open');
+}
+
+// Escape key closes drawer
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape') infoDrawerClose();
+});
 </script>
 
 <!-- ── ADMIN PANEL ──────────────────────────────────────────────────────── -->
