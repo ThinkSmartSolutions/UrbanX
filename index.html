@@ -7899,6 +7899,10 @@ function showCimecWidget(){
   const statusColor = inZona ? '#ef4444' : '#4ade80';
   const statusText  = inZona ? 'ATENȚIE — Amplasament în zonă protejată LMI!' : 'Fără zone protejate identificate local';
 
+  // URL-uri
+  const googleEmbedUrl = 'https://maps.google.com/maps?q='+lat+','+lon+'&z=17&output=embed&hl=ro';
+  const cimecDirectUrl = 'https://map.cimec.ro/Mapserver/';
+
   div.innerHTML =
     // Header
     '<div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">'+
@@ -7955,11 +7959,7 @@ function showCimecWidget(){
         : ''
       )+
 
-      // Harta embed — Google Maps centrat pe parcela (functioneaza garantat)
-      // + link direct catre CIMEC Mapserver (deschis in tab nou)
-      const googleEmbedUrl = 'https://maps.google.com/maps?q='+lat+','+lon+'&z=17&output=embed&hl=ro';
-      const cimecDirectUrl = 'https://map.cimec.ro/Mapserver/';
-
+      // Harta embed — Google Maps centrat pe parcela
       '<div style="margin-bottom:12px">'+
         '<div style="font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">🗺 Hartă amplasament (Google Maps)</div>'+
         '<div style="position:relative;border-radius:8px;overflow:hidden;border:1px solid rgba(212,175,55,.2)">'+
