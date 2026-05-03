@@ -312,10 +312,10 @@ function addLayers(){
 
   // ── Aliniamente vizuale pe hartă ──────────────────────────────────────
   // front-src conține: latura frontală, laterale, posterior, cu distanțe
-  // Layer invizibil gros pentru click pe laturi (zona de click mai mare)
+  // Layer gros pentru click/touch pe laturi
   L({id:'front-parcel-click',type:'line',source:'front-src',
     filter:['==',['get','type'],'parcel_side'],
-    paint:{'line-color':'transparent','line-width':14,'line-opacity':0}
+    paint:{'line-color':'rgba(255,255,255,0.01)','line-width':20,'line-opacity':0.01}
   });
   L({id:'front-parcel-line',type:'line',source:'front-src',
     filter:['==',['get','type'],'parcel_side'],
@@ -503,14 +503,16 @@ function addLayers(){
   map.on('mouseleave','front-parcel-click',()=>{
     map.getCanvas().style.cursor='';
   });
-  map.on('click','front-parcel-click',(e)=>{
-    if(!e.features?.length) return;
-    const feat = e.features[0];
-    const props = feat.properties;
-    if(props.type !== 'parcel_side') return;
-    e.stopPropagation();
+  // Handler pe ambele layere pentru siguranta
+  function _handleSideClick(e){
+    const feats = map.queryRenderedFeatures(e.point, {layers:['front-parcel-click','front-parcel-line']});
+    if(!feats?.length) return;
+    const feat = feats.find(f=>f.properties?.type==='parcel_side');
+    if(!feat) return;
+    e.preventDefault && e.preventDefault();
+    if(e.stopPropagation) e.stopPropagation();
 
-    // Calculam bearing-ul spre aceasta latura (directia frontului)
+    const props = feat.properties;
     const ap = S.parcels[S.activeParcel??0];
     if(!ap?.geo?.geometry) return;
 
@@ -519,53 +521,43 @@ function addLayers(){
       : ap.geo.geometry.coordinates[0][0];
     const cx = ring.reduce((s,c)=>s+c[0],0)/ring.length;
     const cy2 = ring.reduce((s,c)=>s+c[1],0)/ring.length;
-
-    const midX = props.midX || (e.lngLat.lng);
-    const midY = props.midY || (e.lngLat.lat);
-
-    // Bearing de la centru la latura clickata = directia noului front
+    const midX = props.midX ?? e.lngLat.lng;
+    const midY = props.midY ?? e.lngLat.lat;
     const dLng = (midX - cx) * Math.cos(cy2 * Math.PI/180);
     const dLat = midY - cy2;
     const newBrg = Math.round((Math.atan2(dLng, dLat) * 180/Math.PI + 360) % 360);
 
     S.bearing = newBrg;
-    if(ap.params) {
-      // Actualizam si in UI
-      const bearingEl = document.getElementById('bearing-slider');
-      if(bearingEl) { bearingEl.value = newBrg; bearingEl.dispatchEvent(new Event('input')); }
-      const bearingVal = document.getElementById('bearing-value');
-      if(bearingVal) bearingVal.textContent = newBrg + '°';
-    }
+    const bearingEl = document.getElementById('bearing-slider');
+    if(bearingEl){ bearingEl.value=newBrg; bearingEl.dispatchEvent(new Event('input')); }
+    const bearingVal = document.getElementById('bearing-value');
+    if(bearingVal) bearingVal.textContent = newBrg + '°';
 
     updateMap();
-    if(S.vol.genDone) {
-      const f = buildVolume();
-      setSource('vol-src', {type:'FeatureCollection', features:f});
+    if(S.vol.genDone){
+      const f2 = buildVolume();
+      setSource('vol-src',{type:'FeatureCollection',features:f2});
     }
 
-    // ── Toast confirmare vizuala ─────────────────────────────────────────
-    const roleLabel = props.role==='front'    ? 'era deja FRONT' :
-                      props.role==='posterior'? 'era SPATE' :
-                      props.role==='lateral_stg'?'era LATERAL stânga':'era LATERAL dreapta';
-    
-    // Toast flotant pe hartă
     let toast = document.getElementById('front-toast');
     if(!toast){
       toast = document.createElement('div');
       toast.id = 'front-toast';
-      toast.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);'+
-        'background:rgba(212,175,55,0.95);color:#0e1828;font-weight:800;font-size:14px;'+
-        'padding:10px 20px;border-radius:24px;z-index:9999;pointer-events:none;'+
-        'box-shadow:0 4px 20px rgba(0,0,0,.5);transition:opacity .3s';
+      toast.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);'+
+        'background:rgba(212,175,55,0.97);color:#0e1828;font-weight:800;font-size:15px;'+
+        'padding:12px 24px;border-radius:28px;z-index:9999;pointer-events:none;'+
+        'box-shadow:0 4px 24px rgba(0,0,0,.6);transition:opacity .4s';
       document.body.appendChild(toast);
     }
-    toast.textContent = '✅ Front stradal setat → ' + newBrg + '°';
-    toast.style.opacity = '1';
+    toast.textContent = '✅ Front stradal: ' + newBrg + '°';
+    toast.style.opacity='1';
     clearTimeout(toast._t);
-    toast._t = setTimeout(()=>{ toast.style.opacity='0'; }, 2000);
-    
-    ss('✅ Front stradal setat pe latura (' + roleLabel + ') → ' + newBrg + '°');
-  });
+    toast._t = setTimeout(()=>{ toast.style.opacity='0'; }, 2500);
+    ss('✅ Front stradal setat → ' + newBrg + '°');
+  }
+
+  map.on('click','front-parcel-click', _handleSideClick);
+  map.on('click','front-parcel-line', _handleSideClick);
   map.on('click','parcel-fill',e=>{
     const f=e.features?.[0];if(!f)return;
     // FIX: block generic handler for this click
@@ -631,6 +623,74 @@ function addLayers(){
       popup('<b>'+(S.multiMode?'➕ Adăugată':isApprox?'⚠️ Aproximativ':'✅ Selectată')+'</b><br>Cad: <b>'+nrcad+'</b><br>UTR: <b>'+(utr||'—')+'</b><br>Suprafață: <b>'+area+' m²</b>',popupLngLat);
       updateMap(); renderAll();
       if(!S.multiMode) loadContext();
+      
+      // ── Auto-detect front stradal dupa selectare parcela ─────────────────
+      if(!S.multiMode && parcelObj?.geo?.geometry){
+        setTimeout(async ()=>{
+          try{
+            const brg = await detectRoadFront(parcelObj.geo);
+            if(brg !== null){
+              S.bearing = brg;
+              // Detectam daca e parcela de colt (2 fronturi)
+              const ring2 = parcelObj.geo.geometry.type==='Polygon'
+                ? parcelObj.geo.geometry.coordinates[0]
+                : parcelObj.geo.geometry.coordinates[0][0];
+              const cx2 = ring2.reduce((s,c)=>s+c[0],0)/ring2.length;
+              const cy3 = ring2.reduce((s,c)=>s+c[1],0)/ring2.length;
+              const mLng2 = 111320*Math.cos(cy3*Math.PI/180);
+              // Calculam distante laturi la strada
+              const center2 = turf.centerOfMass(parcelObj.geo).geometry.coordinates;
+              // Detectam numarul de fronturi din frontSides
+              // (reutilizam logica din detectRoadFront - deja rulat mai sus)
+              // Simplu: daca parcela are unghi la strada, setam 2 fete
+              const q2 = `[out:json][timeout:6];(way["highway"~"residential|secondary|tertiary|primary|unclassified"](around:80,${cy3},${cx2}););out geom;`;
+              try{
+                const r2 = await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:q2,signal:AbortSignal.timeout(6000)});
+                if(r2.ok){
+                  const j2 = await r2.json();
+                  const roads2 = (j2.elements||[]).filter(el=>el.geometry?.length>=2);
+                  if(roads2.length >= 2){
+                    // Doua strazi distincte langa parcela = colț
+                    const sideDists2 = [];
+                    for(let i=0;i<ring2.length-1;i++){
+                      const pm1=ring2[i],pm2=ring2[i+1];
+                      const mx2=(pm1[0]+pm2[0])/2, my2=(pm1[1]+pm2[1])/2;
+                      let minD2=Infinity;
+                      for(const road of roads2){
+                        try{
+                          const np2=turf.nearestPointOnLine({type:'Feature',geometry:{type:'LineString',coordinates:road.geometry.map(p=>[p.lon,p.lat])},properties:{}},turf.point([mx2,my2]));
+                          const dM2=turf.distance(turf.point([mx2,my2]),np2,{units:'meters'});
+                          if(dM2<minD2)minD2=dM2;
+                        }catch(e){}
+                      }
+                      sideDists2.push(minD2);
+                    }
+                    const minD2=Math.min(...sideDists2);
+                    const frontCount2=sideDists2.filter(d=>d<=minD2*1.8).length;
+                    if(frontCount2>=2){
+                      S.vol.frontCount=2;
+                    } else {
+                      S.vol.frontCount=1;
+                    }
+                  }
+                }
+              }catch(e2){}
+              
+              // Actualizam slider bearing in UI
+              document.querySelectorAll('input[type=range]').forEach(el=>{
+                if(el.id==='bearing-slider'||el.oninput?.toString().includes('S.bearing')){
+                  el.value=brg; el.dispatchEvent(new Event('input'));
+                }
+              });
+              const bv=document.getElementById('bearing-value');
+              if(bv) bv.textContent=brg+'°';
+              updateMap();
+              renderAll();
+              ss('🧭 Front detectat automat: '+brg+'°'+(S.vol.frontCount===2?' · Parcelă de colț':''));
+            }
+          }catch(e){}
+        }, 800); // delay mic sa se incarce contextul mai intai
+      }
     } else {
       const idx=parseInt(f.properties.pidx||'0');
       if(idx<S.parcels.length){S.activeParcel=idx;renderAll();}
