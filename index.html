@@ -7853,88 +7853,136 @@ function _lmiFormatMonument(feat){
 // ── Afișare widget CIMEC în panel Analiza ───────────────────────────────
 let _cimecWidgetData = null;
 
-async function showCimecWidget(){
+function showCimecWidget(){
   const ap=S.parcels[S.activeParcel??0];
-  if(!ap?.geo?.geometry){ss('Selectati o parcela pentru analiza LMI.');return;}
+  if(!ap?.geo?.geometry){ss('Selectati o parcela.');return;}
   const ctr=turf.centerOfMass(ap.geo).geometry.coordinates;
-  const lon=ctr[0].toFixed(5), lat=ctr[1].toFixed(5);
-  const nrcad=ap.nrcad||'—';
+  const lon=ctr[0].toFixed(5);
+  const lat=ctr[1].toFixed(5);
+  const nrcad=ap.nrcad||'?';
   const uatLabel=getUATLabel();
+
+  // URL-uri directe catre CIMEC si alte resurse (fara fetch/CORS)
+  const cimecMapUrl  = 'https://map.cimec.ro/Mapserver/map?center='+lon+','+lat+'&zoom=16';
+  const culturaUrl   = 'https://www.cultura.ro/lista-monumentelor-istorice/';
+  const googleUrl    = 'https://www.google.com/maps/search/monumente+istorice/@'+lat+','+lon+',16z';
+  const wikiUrl      = 'https://ro.wikipedia.org/wiki/Special:Search?search=monumente+istorice+'+encodeURIComponent(uatLabel);
+
+  // Date locale din UAT_REGISTRY
+  const lmiCfg = getLmiConfig();
+  const zoneLocal = lmiCfg.zone_protejate||[];
+  const monLocal  = lmiCfg.monumente_reprezentative||[];
+
+  // Calcul distante zone locale
+  const zonesWithDist = zoneLocal.map(z=>{
+    try{
+      const d=Math.round(turf.distance(
+        {type:'Feature',geometry:{type:'Point',coordinates:ctr},properties:{}},
+        {type:'Feature',geometry:{type:'Point',coordinates:z.centru},properties:{}},
+        {units:'meters'}
+      ));
+      return {...z, dist:d, inZona:d<z.raza};
+    }catch(e){return {...z,dist:null,inZona:false};}
+  }).sort((a,b)=>(a.dist||9999)-(b.dist||9999));
+
+  const inZona = zonesWithDist.some(z=>z.inZona);
 
   document.getElementById('cimec-widget')?.remove();
   const div=document.createElement('div');
   div.id='cimec-widget';
   const mob=window.innerWidth<841;
-  div.style.cssText='position:fixed;top:56px;'+(mob?'left:4px;right:4px':'left:50%;transform:translateX(-50%);width:min(580px,94vw)')+';z-index:9200;background:rgba(7,12,24,.97);border:1px solid rgba(212,175,55,.3);border-radius:14px;overflow:hidden;box-shadow:0 16px 48px rgba(0,0,0,.7);backdrop-filter:blur(16px);font-family:system-ui,sans-serif';
+  div.style.cssText='position:fixed;top:56px;'+(mob?'left:4px;right:4px;':'left:50%;transform:translateX(-50%);width:min(640px,95vw);')+
+    'z-index:9200;background:rgba(7,12,24,.97);border:1px solid rgba(212,175,55,.3);border-radius:14px;overflow:hidden;'+
+    'box-shadow:0 16px 48px rgba(0,0,0,.75);backdrop-filter:blur(16px);font-family:system-ui,sans-serif;max-height:88vh;display:flex;flex-direction:column';
 
-  // Incercam CIMEC WFS live
-  ss('Interogare CIMEC LMI live...');
-  const data = await _lmiQueryCimec(parseFloat(lon), parseFloat(lat), 1.5);
-  const all = [...(data.monumente||[]),...(data.zone||[]),...(data.situri||[])].map(_lmiFormatMonument);
-  all.forEach(m=>{
-    if(!m.coords) return;
-    const c=Array.isArray(m.coords[0])?m.coords[0]:m.coords;
-    try{m.dist=Math.round(turf.distance(
-      {type:'Feature',geometry:{type:'Point',coordinates:[parseFloat(lon),parseFloat(lat)]},properties:{}},
-      {type:'Feature',geometry:{type:'Point',coordinates:c},properties:{}},
-      {units:'meters'}
-    ));}catch(e){m.dist=null;}
-  });
-  all.sort((a,b)=>(a.dist||9999)-(b.dist||9999));
+  // Status badge
+  const statusColor = inZona ? '#ef4444' : '#4ade80';
+  const statusText  = inZona ? 'ATENȚIE — Amplasament în zonă protejată LMI!' : 'Fără zone protejate identificate local';
 
-  // Link-uri directe utile indiferent de CORS
-  const cimecMapUrl='https://map.cimec.ro/Mapserver/map?center='+lon+','+lat+'&zoom=14';
-  const culturaUrl='https://www.cultura.ro/lista-monumentelor-istorice/';
-  const googleUrl='https://www.google.com/maps/search/monumente+istorice/@'+lat+','+lon+',15z';
-
-  let itemsHtml='';
-  if(all.length>0){
-    itemsHtml='<div style="padding:6px 12px 4px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.06em;font-weight:700">'+all.length+' monumente identificate (raza 1.5km)</div>';
-    itemsHtml+=all.slice(0,12).map(m=>{
-      const distBadge=m.dist!=null?'<span style="color:#38bdf8;font-size:10px;font-weight:700;margin-left:auto;flex-shrink:0">'+m.dist+'m</span>':'';
-      const catBadge=m.categorie&&m.categorie!='—'?'<span style="font-size:8px;color:#64748b;margin-left:6px">'+m.categorie+'</span>':'';
-      const zonaProt=m.zonaProtectie&&m.zonaProtectie!='—'?'<div style="color:#fbbf24;font-size:8px;margin-top:2px">Zona prot.: '+m.zonaProtectie+'</div>':'';
-      const adresa=m.adresa&&m.adresa!='—'?'<div style="color:#475569;font-size:8px">'+m.adresa+'</div>':'';
-      return '<div style="padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.05)">'+
-        '<div style="display:flex;align-items:flex-start;gap:6px">'+
-        '<div style="flex:1">'+
-        '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px">'+
-        '<span style="color:#d4af37;font-size:9px;font-weight:700">'+m.cod+'</span>'+catBadge+'</div>'+
-        '<div style="color:#e2e8f0;font-size:11px;font-weight:700;margin:2px 0">'+m.denumire+'</div>'+
-        '<div style="color:#64748b;font-size:9px">'+m.localitate+(m.judet&&m.judet!='—'?', jud. '+m.judet:'')+(m.datare&&m.datare!='—'?' · '+m.datare:'')+'</div>'+
-        zonaProt+adresa+
-        '</div>'+distBadge+'</div></div>';
-    }).join('');
-  } else {
-    const corsNote=!data.ok?'<div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:8px 12px;font-size:10px;color:#f87171;margin:8px 12px">CIMEC WFS blocat de CORS (restrictie server). Folositi link-urile de mai jos pentru verificare directa.</div>':'';
-    itemsHtml=corsNote+'<div style="padding:12px;text-align:center;color:#64748b;font-size:11px">Nu s-au identificat monumente in raza de 1.5km'+(data.ok?' (date live CIMEC)':' (CORS blocat)')+'.</div>';
-  }
-
-  div.innerHTML=
-    '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.07)">'+
+  div.innerHTML =
+    // Header
+    '<div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">'+
       '<div>'+
-        '<span style="color:#d4af37;font-weight:800;font-size:13px">🏛 LMI — Monumente Istorice</span>'+
-        '<div style="color:#475569;font-size:9px;margin-top:1px">'+uatLabel+' · Parcela '+nrcad+' · '+lat+'N, '+lon+'E</div>'+
+        '<div style="color:#d4af37;font-weight:800;font-size:13px">🏛 LMI — Monumente Istorice</div>'+
+        '<div style="color:#475569;font-size:9px;margin-top:1px">'+uatLabel+' · Parcela '+nrcad+' · '+lat+'°N, '+lon+'°E</div>'+
       '</div>'+
-      '<button id="cimec-close-btn" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#f87171;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:700;cursor:pointer">✕</button>'+
+      '<button id="cimec-close-btn" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#f87171;border-radius:6px;padding:3px 10px;font-size:11px;font-weight:700;cursor:pointer">✕</button>'+
     '</div>'+
-    '<div style="max-height:55vh;overflow-y:auto">'+
-      itemsHtml+
+    // Status
+    '<div style="padding:10px 16px;background:'+statusColor+'18;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0">'+
+      '<span style="color:'+statusColor+';font-size:11px;font-weight:700">'+statusText+'</span>'+
     '</div>'+
-    '<div style="padding:10px 12px;border-top:1px solid rgba(255,255,255,.07);display:flex;flex-direction:column;gap:5px">'+
-      '<div style="font-size:9px;color:#475569;text-transform:uppercase;font-weight:700;margin-bottom:2px">Verificare directa</div>'+
-      '<div style="display:flex;gap:6px;flex-wrap:wrap">'+
-        '<a href="'+culturaUrl+'" target="_blank" style="color:#60a5fa;font-size:10px;font-weight:600;text-decoration:none;background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.25);border-radius:5px;padding:4px 8px">📋 LMI cultura.ro</a>'+
-        '<a href="'+cimecMapUrl+'" target="_blank" style="color:#a78bfa;font-size:10px;font-weight:600;text-decoration:none;background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.25);border-radius:5px;padding:4px 8px">🗺 Harta CIMEC</a>'+
-        '<a href="'+googleUrl+'" target="_blank" style="color:#4ade80;font-size:10px;font-weight:600;text-decoration:none;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.25);border-radius:5px;padding:4px 8px">📍 Google Maps</a>'+
+    // Body scrollabil
+    '<div style="overflow-y:auto;flex:1;padding:12px 16px">'+
+
+      // Zone locale din UAT_REGISTRY
+      (zonesWithDist.length>0 ?
+        '<div style="margin-bottom:12px">'+
+          '<div style="font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Zone protejate locale (date UAT_REGISTRY)</div>'+
+          zonesWithDist.map(z=>
+            '<div style="background:rgba(255,255,255,.04);border:1px solid '+(z.inZona?'rgba(239,68,68,.3)':'rgba(255,255,255,.07)')+';border-radius:8px;padding:8px 10px;margin-bottom:5px">'+
+              '<div style="display:flex;justify-content:space-between;align-items:flex-start">'+
+                '<div>'+
+                  '<div style="color:#d4af37;font-size:9px;font-weight:700">'+z.cod+'</div>'+
+                  '<div style="color:#e2e8f0;font-size:11px;font-weight:600;margin:2px 0">'+z.desc+'</div>'+
+                  '<div style="color:#64748b;font-size:9px">'+z.tip+' · Raza: '+z.raza+'m · Aviz: '+(z.aviz||'DJCPN')+'</div>'+
+                '</div>'+
+                '<div style="text-align:right;flex-shrink:0;margin-left:8px">'+
+                  '<div style="color:'+(z.inZona?'#ef4444':'#4ade80')+';font-size:10px;font-weight:700">'+(z.dist!==null?z.dist+'m':'—')+'</div>'+
+                  '<div style="font-size:8px;color:'+(z.inZona?'#ef4444':'#64748b')+'">'+(z.inZona?'ÎN ZONĂ':'în afară')+'</div>'+
+                '</div>'+
+              '</div>'+
+            '</div>'
+          ).join('')+
+        '</div>'
+        : '<div style="color:#475569;font-size:10px;padding:6px 0 10px">Nicio zonă protejată în UAT_REGISTRY pentru '+uatLabel+'.</div>'
+      )+
+
+      // Monumente reprezentative
+      (monLocal.length>0 ?
+        '<div style="margin-bottom:12px">'+
+          '<div style="font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Monumente reprezentative (date locale)</div>'+
+          monLocal.map(m=>
+            '<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:rgba(212,175,55,.06);border-radius:6px;margin-bottom:3px">'+
+              '<span style="color:#d4af37;font-size:9px;font-weight:700;flex-shrink:0">'+m.cod.split('-').slice(-1)[0]+'</span>'+
+              '<div style="flex:1">'+
+                '<div style="color:#e2e8f0;font-size:10px;font-weight:600">'+m.denumire+'</div>'+
+                '<div style="color:#64748b;font-size:8px">Cat. '+(m.categorie||'—')+' · '+(m.adresa||'—')+'</div>'+
+              '</div>'+
+            '</div>'
+          ).join('')+
+        '</div>'
+        : ''
+      )+
+
+      // IFRAME harta CIMEC — centrat pe parcelă
+      '<div style="margin-bottom:12px">'+
+        '<div style="font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">🗺 Hartă CIMEC live — '+uatLabel+' (centru: '+lat+', '+lon+')</div>'+
+        '<div style="position:relative;border-radius:8px;overflow:hidden;border:1px solid rgba(212,175,55,.2)">'+
+          '<iframe src="'+cimecMapUrl+'" style="width:100%;height:320px;border:none;display:block" loading="lazy" title="Harta CIMEC Monumente Istorice"></iframe>'+
+          '<div style="position:absolute;bottom:6px;right:6px">'+
+            '<a href="'+cimecMapUrl+'" target="_blank" style="background:rgba(7,12,24,.9);color:#d4af37;font-size:9px;font-weight:700;text-decoration:none;padding:4px 8px;border-radius:5px;border:1px solid rgba(212,175,55,.3)">⛶ Deschide complet</a>'+
+          '</div>'+
+        '</div>'+
       '</div>'+
-      '<div style="font-size:8.5px;color:#334155;margin-top:3px">Sursa: CIMEC Institutul National al Patrimoniului · LMI 2015+actualizari · map.cimec.ro</div>'+
+
+    '</div>'+
+    // Footer linkuri
+    '<div style="padding:10px 16px;border-top:1px solid rgba(255,255,255,.07);flex-shrink:0">'+
+      '<div style="font-size:9px;color:#475569;font-weight:700;text-transform:uppercase;margin-bottom:6px">Verificare suplimentară</div>'+
+      '<div style="display:flex;gap:5px;flex-wrap:wrap">'+
+        '<a href="'+culturaUrl+'" target="_blank" style="color:#60a5fa;font-size:10px;font-weight:600;text-decoration:none;background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.25);border-radius:5px;padding:4px 9px">📋 LMI cultura.ro</a>'+
+        '<a href="'+googleUrl+'" target="_blank" style="color:#4ade80;font-size:10px;font-weight:600;text-decoration:none;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.25);border-radius:5px;padding:4px 9px">📍 Google Maps</a>'+
+        '<a href="'+wikiUrl+'" target="_blank" style="color:#a78bfa;font-size:10px;font-weight:600;text-decoration:none;background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.25);border-radius:5px;padding:4px 9px">📖 Wikipedia</a>'+
+      '</div>'+
+      '<div style="font-size:8px;color:#334155;margin-top:6px">Sursa: CIMEC — Institutul Național al Patrimoniului · map.cimec.ro · LMI 2015+actualizări</div>'+
     '</div>';
 
   document.body.appendChild(div);
   document.getElementById('cimec-close-btn')?.addEventListener('click',()=>div.remove());
-  ss('🏛 LMI: '+(all.length>0?all.length+' monumente identificate':'verificati link-urile de mai jos'));
+  ss('🏛 LMI: '+(inZona?'ATENȚIE zonă protejată!':'hartă CIMEC deschisă'));
 }
+
 
 
 async function loadData(uatId){
