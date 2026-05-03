@@ -702,7 +702,9 @@ canvas#c2d{width:100%;height:100%;display:block}
   <button class="tb-btn" id="btnSV" onclick="svOpen()" title="Street View — Perspectivă pietonală">🚶 SV</button>
   <button class="tb-btn" id="btnLegend" title="Legendă funcțiuni clădiri" onclick="toggleFnLegend(this)">🎨 Legend</button>
   <button class="tb-btn" id="btnPanel" style="background:rgba(212,175,55,.2);border-color:#d4af37;color:#d4af37">☰</button>
+  <button class="tb-btn" onclick="showUATSelector()" title="Schimbă UAT-ul activ" style="display:flex;align-items:center;gap:4px;border-color:rgba(212,175,55,.3)">📍 <span id="uat-indicator">Iași</span></button>
   <button class="tb-btn" id="btnLotizare" onclick="toggleLotizare()" title="Lotizare teren — ansamblu rezidențial" style="display:flex;align-items:center;gap:4px">🏘 Lotizare</button>
+  <button class="tb-btn" id="btnCimec" onclick="showCimecWidget()" title="Monumente istorice CIMEC live" style="display:flex;align-items:center;gap:4px">🏛 LMI</button>
   <button class="tb-btn" id="btnBilant" onclick="toggleBilant()" title="Bilanț edificabil" style="display:flex;align-items:center;gap:4px">📐 Bilanț</button>
   <button class="tb-btn" id="btnPDF" onclick="toggleRapoarteMenu()" title="Rapoarte & Studii" style="display:flex;align-items:center;gap:4px;position:relative">📋 Rapoarte ▾</button>
 
@@ -6580,11 +6582,935 @@ document.querySelectorAll('.ptab').forEach(b=>{
 document.querySelectorAll('.mtab').forEach(b=>b.onclick=()=>switchTab(b.dataset.mt));
 
 // ═══ BOOTSTRAP ════════════════════════════════════════════════════════════
-async function loadData(){
+// ════════════════════════════════════════════════════════════════════════════
+// REGISTRU UAT — Multi-UAT România
+// Adaugă UAT-uri noi în UAT_REGISTRY când ai datele disponibile.
+// Structura: fiecare UAT are un folder data/{id}/ cu fișierele necesare.
+// Status: 'complet' | 'pug_only' | 'partial' | 'empty'
+// ════════════════════════════════════════════════════════════════════════════
+
+const UAT_REGISTRY = {
+
+  // ── Municipii cu date complete ──────────────────────────────────────────
+  'municipiul-iasi': {
+    label:'Municipiul Iași', short:'Iași',
+    judet:'Iași', judetCode:'IS', siruta:'179132',
+    center:[27.6014,47.1585], zoom:13,
+    pugFile:'./qGis_pug.iasi.geojson',
+    cadastruIndex:'./cadastru_index.json',
+    reguliFile:null, // regulile sunt hardcodate în REGULI — vor fi mutate în reguli.json
+    status:'complet',
+    primar:'Primăria Municipiului Iași',
+    daU:'DAU — Direcția Arhitectură și Urbanism',
+    djcpn:'DJCPN Iași',
+    cjPut:'CJ Iași',
+    aeroport:{icao:'LRIA',prag08:[27.6199,47.1782],prag26:[27.6470,47.1731],elevatie:397,
+      pistA_curs:83,pistB_curs:263,
+      reglementare:'HG 930/2016 + Legea 233/2016'},
+    seism:{zona:'E',ag:0.20,Tc:1.6,MSK:'VII-VIII',norm:'P100-1/2013'},
+    hidro:{nfa:'1.5-4.0m',tip_sol:'Loess, argilă prăfoasă',portanta:'150-200 kPa'},
+    cimecRadius:1000, // raza interogare CIMEC (m)
+  },
+
+  // ── Template — se completează când ai datele ────────────────────────────
+  // Copiază blocul de mai jos și completează câmpurile pentru fiecare UAT nou
+
+  'municipiul-cluj-napoca': {
+    label:'Municipiul Cluj-Napoca', short:'Cluj-Napoca',
+    judet:'Cluj', judetCode:'CJ', siruta:'54984',
+    center:[23.5989,46.7712], zoom:13,
+    pugFile:'./data/cluj-napoca/pug.geojson',          // → de adăugat
+    cadastruIndex:'./data/cluj-napoca/cadastru_index.json',
+    reguliFile:'./data/cluj-napoca/reguli.json',
+    status:'empty', // schimbă în 'complet' când ai fișierele
+    primar:'Primăria Municipiului Cluj-Napoca',
+    daU:'Direcția Generală de Urbanism Cluj-Napoca',
+    djcpn:'DJCPN Cluj',
+    aeroport:{icao:'LRCL',prag08:[23.6860,46.7853],prag26:[23.7102,46.7791],elevatie:322},
+    seism:{zona:'F',ag:0.10,Tc:0.7,MSK:'VI-VII',norm:'P100-1/2013'},
+    hidro:{nfa:'2.0-5.0m',tip_sol:'Argilă, pietriș',portanta:'180-250 kPa'},
+    cimecRadius:1000,
+  },
+
+  'municipiul-timisoara': {
+    label:'Municipiul Timișoara', short:'Timișoara',
+    judet:'Timiș', judetCode:'TM', siruta:'318670',
+    center:[21.2087,45.7489], zoom:13,
+    pugFile:'./data/timisoara/pug.geojson',
+    cadastruIndex:'./data/timisoara/cadastru_index.json',
+    reguliFile:'./data/timisoara/reguli.json',
+    status:'empty',
+    primar:'Primăria Municipiului Timișoara',
+    daU:'Direcția Urbanism Timișoara',
+    djcpn:'DJCPN Timiș',
+    aeroport:{icao:'LRTR',prag08:[21.3376,45.8099],prag26:[21.3194,45.8051],elevatie:348},
+    seism:{zona:'E',ag:0.20,Tc:1.0,MSK:'VII',norm:'P100-1/2013'},
+    hidro:{nfa:'1.0-3.0m',tip_sol:'Aluviuni, nisip',portanta:'120-180 kPa'},
+    cimecRadius:1000,
+  },
+
+  'municipiul-brasov': {
+    label:'Municipiul Brașov', short:'Brașov',
+    judet:'Brașov', judetCode:'BV', siruta:'40198',
+    center:[25.5976,45.6427], zoom:13,
+    pugFile:'./data/brasov/pug.geojson',
+    cadastruIndex:'./data/brasov/cadastru_index.json',
+    reguliFile:'./data/brasov/reguli.json',
+    status:'empty',
+    primar:'Primăria Municipiului Brașov',
+    daU:'Direcția Urbanism și Amenajarea Teritoriului',
+    djcpn:'DJCPN Brașov',
+    aeroport:null, // Aeroportul Brașov-Ghimbav LRBV în construcție
+    seism:{zona:'D',ag:0.25,Tc:1.0,MSK:'VIII',norm:'P100-1/2013'},
+    hidro:{nfa:'2.0-6.0m',tip_sol:'Argilă, pietriș mounos',portanta:'150-220 kPa'},
+    cimecRadius:1000,
+  },
+
+  'municipiul-constanta': {
+    label:'Municipiul Constanța', short:'Constanța',
+    judet:'Constanța', judetCode:'CT', siruta:'60928',
+    center:[28.6573,44.1733], zoom:13,
+    pugFile:'./data/constanta/pug.geojson',
+    cadastruIndex:'./data/constanta/cadastru_index.json',
+    reguliFile:'./data/constanta/reguli.json',
+    status:'empty',
+    primar:'Primăria Municipiului Constanța',
+    daU:'Direcția Urbanism Constanța',
+    djcpn:'DJCPN Constanța',
+    aeroport:{icao:'LRCK',prag08:[28.4881,44.2183],prag26:[28.5144,44.2083],elevatie:59},
+    seism:{zona:'C',ag:0.35,Tc:0.7,MSK:'VIII',norm:'P100-1/2013'},
+    hidro:{nfa:'1.5-4.0m',tip_sol:'Loess, calcar',portanta:'200-300 kPa'},
+    cimecRadius:1500,
+  },
+
+  'municipiul-craiova': {
+    label:'Municipiul Craiova', short:'Craiova',
+    judet:'Dolj', judetCode:'DJ', siruta:'66500',
+    center:[23.8093,44.3302], zoom:13,
+    pugFile:'./data/craiova/pug.geojson',
+    cadastruIndex:'./data/craiova/cadastru_index.json',
+    reguliFile:'./data/craiova/reguli.json',
+    status:'empty',
+    primar:'Primăria Municipiului Craiova',
+    daU:'Direcția Urbanism Craiova',
+    djcpn:'DJCPN Dolj',
+    aeroport:{icao:'LRCV',prag08:[23.8886,44.3181],prag26:[23.8750,44.3200],elevatie:192},
+    seism:{zona:'C',ag:0.35,Tc:1.6,MSK:'VIII',norm:'P100-1/2013'},
+    hidro:{nfa:'1.0-3.5m',tip_sol:'Aluviuni, argilă',portanta:'130-200 kPa'},
+    cimecRadius:1000,
+  },
+
+  'municipiul-galati': {
+    label:'Municipiul Galați', short:'Galați',
+    judet:'Galați', judetCode:'GL', siruta:'95024',
+    center:[28.0500,45.4354], zoom:13,
+    pugFile:'./data/galati/pug.geojson',
+    cadastruIndex:'./data/galati/cadastru_index.json',
+    reguliFile:'./data/galati/reguli.json',
+    status:'empty',
+    primar:'Primăria Municipiului Galați',
+    daU:'Direcția Urbanism Galați',
+    djcpn:'DJCPN Galați',
+    aeroport:null,
+    seism:{zona:'B',ag:0.40,Tc:1.6,MSK:'VIII-IX',norm:'P100-1/2013'},
+    hidro:{nfa:'0.5-2.5m',tip_sol:'Aluviuni Dunăre',portanta:'100-160 kPa'},
+    cimecRadius:1000,
+  },
+
+  'municipiul-bucuresti': {
+    label:'Municipiul București', short:'București',
+    judet:'Ilfov', judetCode:'B', siruta:'179141',
+    center:[26.0974,44.4268], zoom:12,
+    pugFile:'./data/bucuresti/pug.geojson',
+    cadastruIndex:'./data/bucuresti/cadastru_index.json',
+    reguliFile:'./data/bucuresti/reguli.json',
+    status:'empty',
+    primar:'Primăria Generală a Municipiului București',
+    daU:'PMUD — Planul de Mobilitate Urbană Durabilă',
+    djcpn:'DJCPN București',
+    aeroport:{icao:'LROP',prag08:[26.0851,44.5722],prag26:[26.1063,44.5711],elevatie:314},
+    seism:{zona:'B',ag:0.30,Tc:1.6,MSK:'VIII',norm:'P100-1/2013'},
+    hidro:{nfa:'1.0-4.0m',tip_sol:'Argilă, nisip',portanta:'150-200 kPa'},
+    cimecRadius:2000,
+  },
+
+  // ════════════════════════════════════════════════════════════════════════
+  // MOLDOVA — Județul Iași + județele adiacente
+  // ════════════════════════════════════════════════════════════════════════
+
+  // ── Județul Botoșani ────────────────────────────────────────────────────
+  'municipiul-botosani': {
+    label:'Municipiul Botoșani', short:'Botoșani',
+    judet:'Botoșani', judetCode:'BT', siruta:'29980',
+    center:[26.6697,47.7479], zoom:13,
+    pugFile:'./data/botosani/pug.geojson',
+    cadastruIndex:'./data/botosani/cadastru_index.json',
+    reguliFile:'./data/botosani/reguli.json',
+    status:'empty',
+    primar:'Primăria Municipiului Botoșani',
+    daU:'Serviciul Urbanism și Amenajarea Teritoriului',
+    djcpn:'DJCPN Botoșani',
+    aeroport:null, // Aeroportul Botoșani — mic, trafic redus
+    seism:{zona:'E',ag:0.20,Tc:1.6,MSK:'VII',norm:'P100-1/2013'},
+    hidro:{nfa:'2.0-5.0m',tip_sol:'Loess, argilă prăfoasă (Câmpia Moldovei)',portanta:'140-190 kPa'},
+    note:'Reședința județului Botoșani. Centru comercial și cultural al nordului Moldovei.',
+    cimecRadius:1000,
+  },
+  'oras-dorohoi': {
+    label:'Orașul Dorohoi', short:'Dorohoi',
+    judet:'Botoșani', judetCode:'BT', siruta:'30027',
+    center:[26.3975,47.9572], zoom:13,
+    pugFile:'./data/dorohoi/pug.geojson',
+    cadastruIndex:'./data/dorohoi/cadastru_index.json',
+    reguliFile:'./data/dorohoi/reguli.json',
+    status:'empty',
+    primar:'Primăria Orașului Dorohoi',
+    daU:'Compartiment Urbanism',
+    djcpn:'DJCPN Botoșani',
+    aeroport:null,
+    seism:{zona:'E',ag:0.20,Tc:1.6,MSK:'VII',norm:'P100-1/2013'},
+    hidro:{nfa:'2.5-5.0m',tip_sol:'Loess, argilă',portanta:'130-180 kPa'},
+    cimecRadius:800,
+  },
+
+  // ── Județul Suceava ─────────────────────────────────────────────────────
+  'municipiul-suceava': {
+    label:'Municipiul Suceava', short:'Suceava',
+    judet:'Suceava', judetCode:'SV', siruta:'285386',
+    center:[26.2531,47.6535], zoom:13,
+    pugFile:'./data/suceava/pug.geojson',
+    cadastruIndex:'./data/suceava/cadastru_index.json',
+    reguliFile:'./data/suceava/reguli.json',
+    status:'empty',
+    primar:'Primăria Municipiului Suceava',
+    daU:'Direcția de Urbanism și Amenajarea Teritoriului',
+    djcpn:'DJCPN Suceava',
+    aeroport:{icao:'LRSV',prag08:[26.3542,47.6874],prag26:[26.3699,47.6887],elevatie:1375,
+      note:'Aeroportul Ștefan cel Mare Suceava — trafic internațional'},
+    seism:{zona:'E',ag:0.20,Tc:1.0,MSK:'VII',norm:'P100-1/2013'},
+    hidro:{nfa:'2.0-6.0m',tip_sol:'Argilă, pietriș (vale Suceava)',portanta:'160-220 kPa'},
+    note:'Fostă reședință a Moldovei medievale. Zone UNESCO în proximitate (Mănăstirile din Bucovina).',
+    cimecRadius:1500, // raza mai mare — densitate mare monumente istorice
+  },
+  'municipiul-falticeni': {
+    label:'Municipiul Fălticeni', short:'Fălticeni',
+    judet:'Suceava', judetCode:'SV', siruta:'285402',
+    center:[26.3022,47.4581], zoom:13,
+    pugFile:'./data/falticeni/pug.geojson',
+    cadastruIndex:'./data/falticeni/cadastru_index.json',
+    reguliFile:'./data/falticeni/reguli.json',
+    status:'empty',
+    primar:'Primăria Municipiului Fălticeni',
+    daU:'Compartiment Urbanism Fălticeni',
+    djcpn:'DJCPN Suceava',
+    aeroport:null,
+    seism:{zona:'E',ag:0.20,Tc:1.0,MSK:'VII',norm:'P100-1/2013'},
+    hidro:{nfa:'2.5-5.5m',tip_sol:'Argilă, loess',portanta:'150-200 kPa'},
+    cimecRadius:1000,
+  },
+  'municipiul-radauti': {
+    label:'Municipiul Rădăuți', short:'Rădăuți',
+    judet:'Suceava', judetCode:'SV', siruta:'285561',
+    center:[25.9192,47.8456], zoom:13,
+    pugFile:'./data/radauti/pug.geojson',
+    cadastruIndex:'./data/radauti/cadastru_index.json',
+    reguliFile:'./data/radauti/reguli.json',
+    status:'empty',
+    primar:'Primăria Municipiului Rădăuți',
+    daU:'Compartiment Urbanism',
+    djcpn:'DJCPN Suceava',
+    aeroport:null,
+    seism:{zona:'E',ag:0.20,Tc:1.0,MSK:'VII',norm:'P100-1/2013'},
+    hidro:{nfa:'1.5-4.0m',tip_sol:'Argilă, pietriș glaciar',portanta:'160-220 kPa'},
+    note:'Depresiunea Rădăuți. Monumente istorice importante (Mănăstirea Bogdana).',
+    cimecRadius:1200,
+  },
+
+  // ── Județul Neamț ───────────────────────────────────────────────────────
+  'municipiul-piatra-neamt': {
+    label:'Municipiul Piatra-Neamț', short:'Piatra-Neamț',
+    judet:'Neamț', judetCode:'NT', siruta:'209890',
+    center:[26.3726,46.9264], zoom:13,
+    pugFile:'./data/piatra-neamt/pug.geojson',
+    cadastruIndex:'./data/piatra-neamt/cadastru_index.json',
+    reguliFile:'./data/piatra-neamt/reguli.json',
+    status:'empty',
+    primar:'Primăria Municipiului Piatra-Neamț',
+    daU:'Direcția de Urbanism și Amenajarea Teritoriului',
+    djcpn:'DJCPN Neamț',
+    aeroport:null, // Aeroportul Roman-Iași cel mai apropiat
+    seism:{zona:'E',ag:0.20,Tc:1.0,MSK:'VII',norm:'P100-1/2013'},
+    hidro:{nfa:'3.0-8.0m',tip_sol:'Pietriș, argilă (vale Bistrița)',portanta:'180-260 kPa'},
+    note:'Municipiu montan pe Valea Bistriței. Relief accidentat — studii geotehnice speciale necesare pe versanți.',
+    cimecRadius:1200,
+  },
+  'municipiul-roman': {
+    label:'Municipiul Roman', short:'Roman',
+    judet:'Neamț', judetCode:'NT', siruta:'209912',
+    center:[26.9265,46.9219], zoom:13,
+    pugFile:'./data/roman/pug.geojson',
+    cadastruIndex:'./data/roman/cadastru_index.json',
+    reguliFile:'./data/roman/reguli.json',
+    status:'empty',
+    primar:'Primăria Municipiului Roman',
+    daU:'Direcția de Urbanism Roman',
+    djcpn:'DJCPN Neamț',
+    aeroport:null,
+    seism:{zona:'E',ag:0.20,Tc:1.6,MSK:'VII',norm:'P100-1/2013'},
+    hidro:{nfa:'1.5-4.0m',tip_sol:'Aluviuni Moldova, argilă',portanta:'150-210 kPa'},
+    note:'Municipiu la confluența Moldovei cu Siretul. Centru industrial și comercial.',
+    cimecRadius:1000,
+  },
+  'oras-targu-neamt': {
+    label:'Orașul Târgu-Neamț', short:'Târgu-Neamț',
+    judet:'Neamț', judetCode:'NT', siruta:'209985',
+    center:[26.3672,47.1989], zoom:13,
+    pugFile:'./data/targu-neamt/pug.geojson',
+    cadastruIndex:'./data/targu-neamt/cadastru_index.json',
+    reguliFile:'./data/targu-neamt/reguli.json',
+    status:'empty',
+    primar:'Primăria Orașului Târgu-Neamț',
+    daU:'Compartiment Urbanism',
+    djcpn:'DJCPN Neamț',
+    aeroport:null,
+    seism:{zona:'E',ag:0.20,Tc:1.0,MSK:'VII',norm:'P100-1/2013'},
+    hidro:{nfa:'3.0-7.0m',tip_sol:'Argilă, pietriș',portanta:'160-220 kPa'},
+    note:'Cetatea Neamțului în proximitate. Zonă de interes turistic și patrimoniu.',
+    cimecRadius:1500,
+  },
+
+  // ── Județul Bacău ────────────────────────────────────────────────────────
+  'municipiul-bacau': {
+    label:'Municipiul Bacău', short:'Bacău',
+    judet:'Bacău', judetCode:'BC', siruta:'21562',
+    center:[26.9130,46.5670], zoom:13,
+    pugFile:'./data/bacau/pug.geojson',
+    cadastruIndex:'./data/bacau/cadastru_index.json',
+    reguliFile:'./data/bacau/reguli.json',
+    status:'empty',
+    primar:'Primăria Municipiului Bacău',
+    daU:'Direcția de Urbanism și Amenajarea Teritoriului Bacău',
+    djcpn:'DJCPN Bacău',
+    aeroport:{icao:'LRBC',prag08:[26.9101,46.5216],prag26:[26.9236,46.5196],elevatie:524,
+      note:'Aeroportul Bacău — trafic internațional'},
+    seism:{zona:'D',ag:0.25,Tc:1.6,MSK:'VII-VIII',norm:'P100-1/2013'},
+    hidro:{nfa:'1.5-4.0m',tip_sol:'Aluviuni Bistrița/Siret, nisip',portanta:'160-220 kPa'},
+    note:'Municipiu reședință de județ. Aeroport internațional. Zonă seismică moderată.',
+    cimecRadius:1000,
+  },
+  'municipiul-onesti': {
+    label:'Municipiul Onești', short:'Onești',
+    judet:'Bacău', judetCode:'BC', siruta:'21624',
+    center:[26.7833,46.2500], zoom:13,
+    pugFile:'./data/onesti/pug.geojson',
+    cadastruIndex:'./data/onesti/cadastru_index.json',
+    reguliFile:'./data/onesti/reguli.json',
+    status:'empty',
+    primar:'Primăria Municipiului Onești',
+    daU:'Compartiment Urbanism Onești',
+    djcpn:'DJCPN Bacău',
+    aeroport:null,
+    seism:{zona:'D',ag:0.25,Tc:1.0,MSK:'VII-VIII',norm:'P100-1/2013'},
+    hidro:{nfa:'2.0-5.0m',tip_sol:'Argilă, pietriș',portanta:'170-230 kPa'},
+    note:'Municipiu industrial pe Valea Trotușului. Platformă petrochimică.',
+    cimecRadius:800,
+  },
+  'municipiul-moinesti': {
+    label:'Municipiul Moinești', short:'Moinești',
+    judet:'Bacău', judetCode:'BC', siruta:'21598',
+    center:[26.4803,46.4667], zoom:13,
+    pugFile:'./data/moinesti/pug.geojson',
+    cadastruIndex:'./data/moinesti/cadastru_index.json',
+    reguliFile:'./data/moinesti/reguli.json',
+    status:'empty',
+    primar:'Primăria Municipiului Moinești',
+    daU:'Compartiment Urbanism',
+    djcpn:'DJCPN Bacău',
+    aeroport:null,
+    seism:{zona:'D',ag:0.25,Tc:1.0,MSK:'VII-VIII',norm:'P100-1/2013'},
+    hidro:{nfa:'2.5-6.0m',tip_sol:'Argilă, pietriș subcarpatic',portanta:'160-220 kPa'},
+    cimecRadius:800,
+  },
+
+  // ── Județul Vaslui ───────────────────────────────────────────────────────
+  'municipiul-vaslui': {
+    label:'Municipiul Vaslui', short:'Vaslui',
+    judet:'Vaslui', judetCode:'VS', siruta:'330379',
+    center:[27.7305,46.6409], zoom:13,
+    pugFile:'./data/vaslui/pug.geojson',
+    cadastruIndex:'./data/vaslui/cadastru_index.json',
+    reguliFile:'./data/vaslui/reguli.json',
+    status:'empty',
+    primar:'Primăria Municipiului Vaslui',
+    daU:'Serviciul de Urbanism și Amenajarea Teritoriului',
+    djcpn:'DJCPN Vaslui',
+    aeroport:null,
+    seism:{zona:'E',ag:0.20,Tc:1.6,MSK:'VII',norm:'P100-1/2013'},
+    hidro:{nfa:'2.0-5.0m',tip_sol:'Argilă prăfoasă, loess (Podișul Central Moldovenesc)',portanta:'140-200 kPa'},
+    note:'Reședința județului Vaslui. Câmpia de Vest a Moldovei — teren relativ plan.',
+    cimecRadius:1000,
+  },
+  'municipiul-barlad': {
+    label:'Municipiul Bârlad', short:'Bârlad',
+    judet:'Vaslui', judetCode:'VS', siruta:'330388',
+    center:[27.6726,46.2281], zoom:13,
+    pugFile:'./data/barlad/pug.geojson',
+    cadastruIndex:'./data/barlad/cadastru_index.json',
+    reguliFile:'./data/barlad/reguli.json',
+    status:'empty',
+    primar:'Primăria Municipiului Bârlad',
+    daU:'Compartiment Urbanism Bârlad',
+    djcpn:'DJCPN Vaslui',
+    aeroport:null,
+    seism:{zona:'E',ag:0.20,Tc:1.6,MSK:'VII',norm:'P100-1/2013'},
+    hidro:{nfa:'2.0-4.5m',tip_sol:'Aluviuni Bârlad, argilă',portanta:'150-210 kPa'},
+    note:'Al doilea municipiu al județului. Pe râul Bârlad.',
+    cimecRadius:1000,
+  },
+  'municipiul-husi': {
+    label:'Municipiul Huși', short:'Huși',
+    judet:'Vaslui', judetCode:'VS', siruta:'330424',
+    center:[28.0539,46.6789], zoom:13,
+    pugFile:'./data/husi/pug.geojson',
+    cadastruIndex:'./data/husi/cadastru_index.json',
+    reguliFile:'./data/husi/reguli.json',
+    status:'empty',
+    primar:'Primăria Municipiului Huși',
+    daU:'Compartiment Urbanism Huși',
+    djcpn:'DJCPN Vaslui',
+    aeroport:null,
+    seism:{zona:'E',ag:0.20,Tc:1.6,MSK:'VII',norm:'P100-1/2013'},
+    hidro:{nfa:'2.5-5.5m',tip_sol:'Argilă, loess (Dealul Huși)',portanta:'140-190 kPa'},
+    note:'Municipiu viticol la granița cu Moldova (Rep. Moldova). Zona Podgoria Huși.',
+    cimecRadius:1000,
+  },
+
+  // ── Județul Galați (Sudul Moldovei) ─────────────────────────────────────
+  'municipiul-tecuci': {
+    label:'Municipiul Tecuci', short:'Tecuci',
+    judet:'Galați', judetCode:'GL', siruta:'95060',
+    center:[27.4281,45.8506], zoom:13,
+    pugFile:'./data/tecuci/pug.geojson',
+    cadastruIndex:'./data/tecuci/cadastru_index.json',
+    reguliFile:'./data/tecuci/reguli.json',
+    status:'empty',
+    primar:'Primăria Municipiului Tecuci',
+    daU:'Compartiment Urbanism Tecuci',
+    djcpn:'DJCPN Galați',
+    aeroport:null,
+    seism:{zona:'C',ag:0.30,Tc:1.6,MSK:'VIII',norm:'P100-1/2013'},
+    hidro:{nfa:'1.5-3.5m',tip_sol:'Aluviuni Tecuci, argilă',portanta:'140-200 kPa'},
+    note:'Municipiu la poarta Moldovei spre Muntenia. Zonă seismică mai activă.',
+    cimecRadius:800,
+  },
+
+  // ── Județul Vrancea (limita Moldovei) ────────────────────────────────────
+  'municipiul-focsani': {
+    label:'Municipiul Focșani', short:'Focșani',
+    judet:'Vrancea', judetCode:'VN', siruta:'162044',
+    center:[27.1856,45.6977], zoom:13,
+    pugFile:'./data/focsani/pug.geojson',
+    cadastruIndex:'./data/focsani/cadastru_index.json',
+    reguliFile:'./data/focsani/reguli.json',
+    status:'empty',
+    primar:'Primăria Municipiului Focșani',
+    daU:'Direcția de Urbanism Focșani',
+    djcpn:'DJCPN Vrancea',
+    aeroport:null,
+    seism:{zona:'B',ag:0.35,Tc:1.6,MSK:'VIII-IX',norm:'P100-1/2013',
+      note:'Zonă seismică foarte activă — aproape de epicentrul Vrancea'},
+    hidro:{nfa:'1.0-3.0m',tip_sol:'Aluviuni Putna/Milcov',portanta:'140-200 kPa'},
+    note:'⚠️ ATENȚIE: Zonă seismică maximă Vrancea! Studii geotehnice și seismice obligatorii pentru orice construcție.',
+    cimecRadius:1000,
+  },
+};
+
+// ── Funcții helper UAT ────────────────────────────────────────────────────
+function getUATById(id){ return UAT_REGISTRY[id]||null; }
+function getUATList(){ return Object.entries(UAT_REGISTRY).map(([id,c])=>({id,...c})); }
+function getUATListComplete(){ return getUATList().filter(u=>u.status==='complet'); }
+function getUATListAvailable(){ return getUATList().filter(u=>u.status!=='empty'); }
+
+// ── Starea UAT activ ──────────────────────────────────────────────────────
+let S_UAT = {
+  id:'municipiul-iasi',
+  ...UAT_REGISTRY['municipiul-iasi'],
+};
+
+function getActiveUAT(){ return S_UAT; }
+function getUATLabel(){ return S_UAT.label||'Localitate'; }
+function getUATShort(){ return S_UAT.short||S_UAT.label||''; }
+function getUATJudet(){ return S_UAT.judet||''; }
+function getUATJudetCode(){ return S_UAT.judetCode||''; }
+function getPrimar(){ return S_UAT.primar||'Primăria Locală'; }
+function getDAU(){ return S_UAT.daU||'Departamentul Urbanism'; }
+function getAeroprtConfig(){ return S_UAT.aeroport||null; }
+function getSeismConfig(){ return S_UAT.seism||{zona:'E',ag:0.20,Tc:1.6,MSK:'VII-VIII'}; }
+function getHidroConfig(){ return S_UAT.hidro||{nfa:'2-4m',tip_sol:'Verificare necesară'}; }
+
+// ── Schimbare UAT ─────────────────────────────────────────────────────────
+async function switchUAT(uatId){
+  const cfg = UAT_REGISTRY[uatId];
+  if(!cfg){ ss('⚠️ UAT necunoscut: '+uatId); return; }
+
+  S_UAT = {id:uatId, ...cfg};
+
+  // Actualizăm indicator UI
+  const el=document.getElementById('uat-indicator');
+  if(el) el.textContent=S_UAT.short||S_UAT.label;
+
+  // Navigăm la centrul UAT-ului
+  if(cfg.center) map.flyTo({center:cfg.center, zoom:cfg.zoom||13, duration:1500});
+
+  // Încărcăm datele UAT-ului dacă sunt disponibile
+  if(cfg.status!=='empty'){
+    await loadData(uatId);
+    ss(`✅ UAT activ: ${cfg.label} (${cfg.status})`);
+  } else {
+    // Reset PUG — UAT fără date
+    S.pug=null; S.pugIdx=[];
+    setSource('utr-src',{type:'FeatureCollection',features:[]});
+    ss(`📍 ${cfg.label} — PUG indisponibil. Contribuie cu date: github.com/tss-fg/urbanx-data`);
+  }
+
+  // Actualizăm REGULI cu regulile UAT-ului dacă există reguli.json
+  if(cfg.reguliFile){
+    try{
+      const r=await fetch(cfg.reguliFile);
+      if(r.ok){
+        const newReguli=await r.json();
+        Object.assign(REGULI,newReguli);
+        ss(`📋 Reguli PUG ${cfg.label} încărcate (${Object.keys(newReguli).length} UTR-uri)`);
+      }
+    }catch(e){}
+  }
+}
+
+// ── Detectare automată UAT din coordonate ────────────────────────────────
+async function detectUATFromCoords(lat, lng){
+  try{
+    const url=`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`;
+    const r=await fetch(url,{headers:{'Accept-Language':'ro'},signal:AbortSignal.timeout(5000)});
+    if(!r.ok) return null;
+    const d=await r.json();
+    const addr=d.address||{};
+    return {
+      city:addr.city||addr.town||addr.village||addr.municipality||'',
+      county:addr.county||'',
+      postcode:addr.postcode||'',
+      country:addr.country_code?.toUpperCase()||'RO',
+      label:(addr.city||addr.town||'')+(addr.county?', '+addr.county:''),
+    };
+  }catch(e){return null;}
+}
+
+async function autoDetectUAT(lat, lng){
+  const info=await detectUATFromCoords(lat,lng);
+  if(!info||info.country!=='RO') return;
+  const cityNorm=info.city.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  // Caută în registry
+  for(const [id,cfg] of Object.entries(UAT_REGISTRY)){
+    const cfgNorm=(cfg.short||cfg.label).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    if(cfgNorm.includes(cityNorm)||cityNorm.includes(cfgNorm.replace('municipiul ',''))) {
+      if(id!==S_UAT.id) switchUAT(id);
+      return;
+    }
+  }
+  // UAT neconfigurat — notificăm
+  const el=document.getElementById('uat-indicator');
+  if(el) el.textContent=info.city||'?';
+  ss(`📍 ${info.label} — UAT neconfigurat în UrbanX. Contribuie: github.com/tss-fg/urbanx-data`);
+}
+
+// ── Widget selector UAT ───────────────────────────────────────────────────
+function showUATSelector(){
+  const existing=document.getElementById('uat-selector');
+  if(existing){existing.remove();return;}
+  const div=document.createElement('div');
+  div.id='uat-selector';
+  const mob=window.innerWidth<841;
+  div.style.cssText=`position:fixed;${mob?'bottom:72px;left:4px;right:4px':'top:56px;right:20px;width:400px'};z-index:9200;background:rgba(7,12,24,.97);border:1px solid rgba(212,175,55,.3);border-radius:14px;padding:0;max-height:82vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(0,0,0,.7);backdrop-filter:blur(16px);font-family:system-ui,sans-serif`;
+
+  // Grupăm pe regiuni
+  const REGIUNI = {
+    'Moldova — Iași + zona':     ['municipiul-iasi'],
+    'Moldova — Botoșani':        ['municipiul-botosani','oras-dorohoi'],
+    'Moldova — Suceava':         ['municipiul-suceava','municipiul-falticeni','municipiul-radauti'],
+    'Moldova — Neamț':           ['municipiul-piatra-neamt','municipiul-roman','oras-targu-neamt'],
+    'Moldova — Bacău':           ['municipiul-bacau','municipiul-onesti','municipiul-moinesti'],
+    'Moldova — Vaslui':          ['municipiul-vaslui','municipiul-barlad','municipiul-husi'],
+    'Moldova — Galați/Vrancea':  ['municipiul-galati','municipiul-tecuci','municipiul-focsani'],
+    'Transilvania':              ['municipiul-cluj-napoca','municipiul-brasov'],
+    'Vest':                      ['municipiul-timisoara'],
+    'Sud/Oltenia':               ['municipiul-craiova'],
+    'Sud-Est':                   ['municipiul-constanta'],
+    'București':                 ['municipiul-bucuresti'],
+  };
+
+  const statusBadge=(s)=>{
+    const map={complet:'✅ Complet',pug_only:'🗺 PUG',partial:'⚠ Parțial',empty:'⭕ Gol'};
+    const col={complet:'#4ade80',pug_only:'#fbbf24',partial:'#fbbf24',empty:'#334155'};
+    return `<span style="font-size:8px;padding:2px 6px;border-radius:4px;font-weight:700;color:${col[s]||'#475569'};background:${col[s]||'#475569'}22">${map[s]||s}</span>`;
+  };
+
+  const uatRows = (ids)=>ids.map(id=>{
+    const u=UAT_REGISTRY[id]; if(!u) return '';
+    return `<div onclick="switchUAT('${id}');document.getElementById('uat-selector').remove()"
+      style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:8px;cursor:pointer;border:1px solid ${id===S_UAT.id?'rgba(212,175,55,.4)':'rgba(255,255,255,.05)'};background:${id===S_UAT.id?'rgba(212,175,55,.07)':'transparent'};margin-bottom:2px;transition:background .15s"
+      onmouseover="this.style.background='rgba(255,255,255,.04)'" onmouseout="this.style.background='${id===S_UAT.id?'rgba(212,175,55,.07)':'transparent'}'">
+      <div>
+        <span style="color:${id===S_UAT.id?'#d4af37':'#e2e8f0'};font-size:11px;font-weight:${id===S_UAT.id?'800':'600'}">${u.label}</span>
+        ${u.note?`<div style="color:#475569;font-size:8px;margin-top:1px;max-width:240px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${u.note.substring(0,60)}</div>`:''}
+      </div>
+      <div style="display:flex;align-items:center;gap:4px">
+        ${statusBadge(u.status)}
+        ${id===S_UAT.id?'<span style="color:#d4af37;font-size:10px">●</span>':''}
+      </div>
+    </div>`;
+  }).join('');
+
+  const regionSections=Object.entries(REGIUNI).map(([reg,ids])=>{
+    const rows=uatRows(ids);
+    if(!rows) return '';
+    return `<div style="margin-bottom:10px">
+      <div style="font-size:8.5px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700;padding:4px 4px 4px 0;border-bottom:1px solid rgba(255,255,255,.05);margin-bottom:4px">${reg}</div>
+      ${rows}
+    </div>`;
+  }).join('');
+
+  div.innerHTML=`
+    <div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+      <div>
+        <span style="color:#d4af37;font-weight:800;font-size:13px">📍 Selectează UAT</span>
+        <span style="color:#475569;font-size:9px;margin-left:6px">${Object.keys(UAT_REGISTRY).length} UAT-uri</span>
+      </div>
+      <button onclick="document.getElementById('uat-selector').remove()" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#f87171;border-radius:7px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer">✕</button>
+    </div>
+    <div style="overflow-y:auto;padding:10px 12px;flex:1">
+      ${regionSections}
+      <div style="margin-top:10px;padding:10px;background:rgba(212,175,55,.04);border:1px solid rgba(212,175,55,.12);border-radius:8px">
+        <div style="font-size:9px;color:#d4af37;font-weight:700;margin-bottom:4px">📦 Contribuie cu date pentru UAT-ul tău</div>
+        <div style="font-size:8.5px;color:#64748b">PUG georeferențiat + cadastru index + reguli PUG</div>
+        <div style="font-size:8.5px;color:#60a5fa;margin-top:3px">Format: data/{uat-id}/ · github.com/tss-fg/urbanx-data</div>
+      </div>
+    </div>`;
+  document.body.appendChild(div);
+}
+
+// ── LMI cultura.ro + CIMEC ───────────────────────────────────────────────
+async function _lmiQueryCimec(lon, lat, radiusKm=1){
+  const R=radiusKm/111.32;
+  const bbox=`${lon-R},${lat-R},${lon+R},${lat+R}`;
+  const results={monumente:[],zone:[],situri:[],ok:false};
+  const layers=[
+    {typename:'LMI_Puncte',  key:'monumente'},
+    {typename:'LMI_Poligoane',key:'zone'},
+    {typename:'Situri_Arh',  key:'situri'},
+  ];
+  for(const lq of layers){
+    try{
+      const url=`https://map.cimec.ro/Mapserver/wfs?SERVICE=WFS&VERSION=1.1.0&REQUEST=GetFeature`+
+        `&TYPENAME=${lq.typename}&BBOX=${bbox},EPSG:4326&SRSNAME=EPSG:4326`+
+        `&OUTPUTFORMAT=application/json&maxFeatures=100`;
+      const r=await fetch(url,{signal:AbortSignal.timeout(10000)});
+      if(r.ok&&(r.headers.get('content-type')||'').includes('json')){
+        const d=await r.json(); results[lq.key]=d.features||[]; results.ok=true;
+      }
+    }catch(e){}
+  }
+  return results;
+}
+
+function _lmiFormatMonument(feat){
+  const p=feat.properties||{};
+  const get=(...keys)=>{ for(const k of keys){const v=p[k]||p[k.toLowerCase()]||p[k.toUpperCase()]; if(v&&v!=='None') return v;} return '—'; };
+  return {
+    cod:get('cod_lmi','cod','COD_LMI'),
+    denumire:get('denumire','DENUMIRE','name','Denumire'),
+    localitate:get('localitate','LOCALITATE','city'),
+    judet:get('judet','JUDET','county'),
+    categorie:get('categorie','CATEGORIE','cat'),
+    datare:get('datare','DATARE','date'),
+    adresa:get('adresa','ADRESA','address'),
+    zonaProtectie:get('zona_protectie','ZONA_PROTECTIE','zona_prot','raza_protectie'),
+    stare:get('stare','STARE'),
+    coords:feat.geometry?.coordinates||null,
+    dist:null,
+  };
+}
+
+async function showCimecWidget(){
+  const ap=S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry){ss('Selectați o parcelă.');return;}
+  const ctr=turf.centerOfMass(ap.geo).geometry.coordinates;
+  ss('🏛 Interogare CIMEC + LMI...');
+  const data=await _lmiQueryCimec(ctr[0],ctr[1],1);
+  const all=[...data.monumente,...data.zone,...data.situri].map(_lmiFormatMonument);
+  all.forEach(m=>{
+    if(!m.coords) return;
+    const c=Array.isArray(m.coords[0])?m.coords[0]:m.coords;
+    try{m.dist=Math.round(turf.distance({type:'Feature',geometry:{type:'Point',coordinates:ctr},properties:{}},{type:'Feature',geometry:{type:'Point',coordinates:c},properties:{}},{units:'meters'}));}catch(e){}
+  });
+  all.sort((a,b)=>(a.dist||9999)-(b.dist||9999));
+  document.getElementById('cimec-widget')?.remove();
+  const div=document.createElement('div');div.id='cimec-widget';
+  const mob=window.innerWidth<841;
+  div.style.cssText=`position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:9100;background:rgba(7,12,24,.97);border:1px solid rgba(212,175,55,.3);border-radius:14px;padding:0;max-width:min(600px,95vw);width:100%;max-height:80vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 16px 48px rgba(0,0,0,.7);backdrop-filter:blur(16px);font-family:system-ui,sans-serif`;
+  div.innerHTML=`
+    <div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0;display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <span style="color:#d4af37;font-weight:800;font-size:13px">🏛 LMI — Monumente Istorice</span>
+        <span style="color:#475569;font-size:10px;margin-left:8px">${data.ok?'CIMEC live':'indisponibil'} · 1km · ${all.length} rezultate</span>
+      </div>
+      <button onclick="document.getElementById('cimec-widget').remove()" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#f87171;border-radius:7px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer">✕</button>
+    </div>
+    <div style="overflow-y:auto;padding:12px 16px;flex:1">
+      ${!data.ok?`<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:8px;padding:10px;font-size:10px;color:#f87171;margin-bottom:10px">CIMEC WFS indisponibil — <a href="https://map.cimec.ro/Mapserver/" target="_blank" style="color:#60a5fa">map.cimec.ro</a></div>`:''}
+      ${all.length===0?`<div style="color:#475569;text-align:center;padding:20px;font-size:11px">
+        ${data.ok?'✅ Niciun monument LMI în raza de 1km':'Verificați manual:'}
+        <br><a href="https://www.cultura.ro/lista-monumentelor-istorice/" target="_blank" style="color:#60a5fa;display:block;margin-top:6px">📋 Lista LMI completă — cultura.ro</a>
+        <a href="https://map.cimec.ro/Mapserver/" target="_blank" style="color:#60a5fa;display:block;margin-top:4px">🗺 Hartă CIMEC</a>
+      </div>`:all.slice(0,15).map(m=>`
+        <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px;border:1px solid rgba(212,175,55,.1);margin-bottom:5px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+            <div><span style="color:#d4af37;font-size:9px;font-weight:700">${m.cod}</span><span style="color:#475569;font-size:9px;margin-left:6px">${m.categorie}</span></div>
+            ${m.dist!==null?`<span style="color:#38bdf8;font-size:10px;font-weight:700">${m.dist}m</span>`:''}
+          </div>
+          <div style="color:#e2e8f0;font-size:11px;font-weight:700;margin-bottom:3px">${m.denumire}</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <span style="color:#64748b;font-size:9px">${m.localitate}${m.judet&&m.judet!=='—'?', '+m.judet:''}</span>
+            ${m.datare!=='—'?`<span style="color:#64748b;font-size:9px">📅 ${m.datare}</span>`:''}
+            ${m.zonaProtectie!=='—'?`<span style="color:#fbbf24;font-size:9px;font-weight:700">🔒 Zonă prot.: ${m.zonaProtectie}</span>`:''}
+          </div>
+          ${m.adresa!=='—'?`<div style="color:#475569;font-size:8.5px;margin-top:3px">📍 ${m.adresa}</div>`:''}
+        </div>`).join('')}
+      <div style="margin-top:10px;padding:8px 10px;border-top:1px solid rgba(255,255,255,.06)">
+        <a href="https://www.cultura.ro/lista-monumentelor-istorice/" target="_blank" style="color:#60a5fa;font-size:9px;display:block;margin-bottom:3px">📋 Lista completă LMI — cultura.ro</a>
+        <a href="https://map.cimec.ro/Mapserver/" target="_blank" style="color:#60a5fa;font-size:9px;display:block">🗺 Hartă interactivă CIMEC</a>
+      </div>
+    </div>`;
+  document.body.appendChild(div);
+  ss(`🏛 ${all.length} monumente LMI identificate`);
+}
+
+function getActiveUAT(){ return S_UAT; }
+function getUATLabel(){ return S_UAT.label || 'Localitate'; }
+function getUATJudet(){ return S_UAT.judet || ''; }
+function getPrimar(){ return S_UAT.config?.primar || 'Primăria Locală'; }
+function getAeroprtConfig(){ return S_UAT.config?.aeroport || null; }
+function getSeismConfig(){ return S_UAT.config?.seism || {zona:'E',ag:0.20,Tc:1.6,MSK:'VII-VIII'}; }
+
+// Detectare automată UAT din coordonate (reverse geocoding Nominatim)
+async function detectUATFromCoords(lat, lng){
+  try{
+    const url=`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`;
+    const r=await fetch(url,{headers:{'Accept-Language':'ro'}});
+    if(!r.ok) return null;
+    const d=await r.json();
+    const addr=d.address||{};
+    const city=addr.city||addr.town||addr.village||addr.municipality||'';
+    const county=addr.county||addr.state||'';
+    const postcode=addr.postcode||'';
+    return {
+      city, county, postcode,
+      raw: addr,
+      label: city+(county?', '+county:''),
+      country: addr.country_code?.toUpperCase()||'RO'
+    };
+  }catch(e){ return null; }
+}
+
+// Actualizare UAT când utilizatorul navighează pe hartă
+async function updateUATFromLocation(lat, lng){
+  const info = await detectUATFromCoords(lat, lng);
+  if(!info || info.country!=='RO') return;
+
+  const cityNorm = info.city.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+
+  // Caută în UAT_CONFIG
+  let matched = null;
+  for(const [id, cfg] of Object.entries(UAT_CONFIG)){
+    if(id==='_template') continue;
+    const cfgNorm = cfg.label.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    if(cfgNorm.includes(cityNorm)||cityNorm.includes(cfgNorm.split(' ').pop())){
+      matched={id,cfg}; break;
+    }
+  }
+
+  if(matched){
+    S_UAT = {id:matched.id, config:matched.cfg, label:matched.cfg.label, judet:matched.cfg.judet, judetCode:matched.cfg.judetCode};
+  } else {
+    // UAT neconfigurat — creem unul dinamic cu date minime
+    S_UAT = {
+      id:'dynamic-'+cityNorm,
+      config:{...UAT_CONFIG._template, label:info.city, judet:info.county, pugFile:null, cadastruIndex:null},
+      label:info.city, judet:info.county, judetCode:'',
+      _dynamic:true, _raw:info
+    };
+  }
+
+  // Actualizăm UI
+  const uatEl=document.getElementById('uat-indicator');
+  if(uatEl) uatEl.textContent=S_UAT.label;
+
+  // Dacă PUG-ul UAT-ului nou e diferit de cel încărcat, notificăm
+  if(matched && matched.cfg.pugFile && matched.cfg.pugFile!==S_UAT.config?.pugFile){
+    ss(`📍 UAT detectat: ${S_UAT.label} — PUG disponibil`);
+    // loadDataForUAT(matched.id); // dezactivat până la implementare completă per UAT
+  } else if(S_UAT._dynamic){
+    ss(`📍 ${S_UAT.label}, ${S_UAT.judet} — PUG local indisponibil. Parametrii se preiau din ANCPI/IGRP.`);
+  }
+}
+
+// ── LMI cultura.ro — interogare CIMEC WFS cu câmpuri complete ────────────
+async function _lmiQueryCimec(lon, lat, radiusKm=2){
+  const R=radiusKm/111.32;
+  const bbox=`${lon-R},${lat-R},${lon+R},${lat+R}`;
+  const results={monumente:[],zone:[],situri:[],ok:false,source:'CIMEC WFS'};
+
+  // Layerele CIMEC cu câmpuri LMI complete
+  const layerQueries=[
+    {typename:'LMI_Puncte',  key:'monumente'},
+    {typename:'LMI_Poligoane',key:'zone'},
+    {typename:'Situri_Arh',  key:'situri'},
+  ];
+
+  for(const lq of layerQueries){
+    try{
+      const url=`https://map.cimec.ro/Mapserver/wfs?SERVICE=WFS&VERSION=1.1.0&REQUEST=GetFeature`+
+        `&TYPENAME=${lq.typename}&BBOX=${bbox},EPSG:4326&SRSNAME=EPSG:4326`+
+        `&OUTPUTFORMAT=application/json&maxFeatures=100`;
+      const r=await fetch(url,{signal:AbortSignal.timeout(10000)});
+      if(r.ok){
+        const ct=r.headers.get('content-type')||'';
+        if(ct.includes('json')){
+          const d=await r.json();
+          results[lq.key]=d.features||[];
+          results.ok=true;
+        }
+      }
+    }catch(e){}
+  }
+
+  // Fallback: WFS alternativ cu GML
+  if(!results.ok){
+    try{
+      const url=`https://map.cimec.ro/Mapserver/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo`+
+        `&QUERY_LAYERS=LMI_Puncte&LAYERS=LMI_Puncte`+
+        `&BBOX=${bbox}&CRS=EPSG:4326&WIDTH=100&HEIGHT=100`+
+        `&I=50&J=50&INFO_FORMAT=application/json`;
+      const r=await fetch(url,{signal:AbortSignal.timeout(6000)});
+      if(r.ok) results.ok=true;
+    }catch(e){}
+  }
+
+  return results;
+}
+
+// Formatare monument LMI pentru afișare
+function _lmiFormatMonument(feat){
+  const p=feat.properties||{};
+  // Câmpuri standard CIMEC LMI
+  return {
+    cod:      p.cod_lmi   ||p.COD_LMI   ||p.Cod_LMI   ||p.cod     ||'—',
+    denumire: p.denumire  ||p.DENUMIRE  ||p.Denumire  ||p.name    ||'Monument nedenumit',
+    localitate:p.localitate||p.LOCALITATE||p.Localitate||p.city   ||'—',
+    judet:    p.judet     ||p.JUDET     ||p.Judet     ||p.county  ||'—',
+    categorie:p.categorie ||p.CATEGORIE ||p.Categorie ||p.cat     ||'—',
+    datare:   p.datare    ||p.DATARE    ||p.Datare    ||p.date    ||'—',
+    adresa:   p.adresa    ||p.ADRESA    ||p.Adresa    ||p.address ||'—',
+    zonaProtectie: p.zona_protectie||p.ZONA_PROTECTIE||'100m (default)',
+    stare:    p.stare     ||p.STARE     ||'—',
+    descriere:p.descriere ||p.DESCRIERE ||'',
+    coords:   feat.geometry?.coordinates||null,
+  };
+}
+
+// ── Afișare widget CIMEC în panel Analiza ───────────────────────────────
+let _cimecWidgetData = null;
+
+async function showCimecWidget(){
+  const ap=S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry){ss('Selectați mai întâi o parcelă.');return;}
+  const ctr=turf.centerOfMass(ap.geo).geometry.coordinates;
+  ss('🏛 Se interogă CIMEC pentru monumente istorice...');
+
+  const data = await _lmiQueryCimec(ctr[0],ctr[1],1);
+  _cimecWidgetData = data;
+
+  const allMonumente = [...data.monumente,...data.zone,...data.situri].map(_lmiFormatMonument);
+
+  // Calculăm distanțe
+  allMonumente.forEach(m=>{
+    if(m.coords){
+      const coords=Array.isArray(m.coords[0])?m.coords[0]:m.coords;
+      try{m.dist=Math.round(turf.distance({type:'Feature',geometry:{type:'Point',coordinates:ctr},properties:{}},{type:'Feature',geometry:{type:'Point',coordinates:coords},properties:{}},{units:'meters'}));}catch(e){m.dist=null;}
+    }
+  });
+  allMonumente.sort((a,b)=>(a.dist||9999)-(b.dist||9999));
+
+  // Popup widget
+  const existing=document.getElementById('cimec-widget');
+  if(existing) existing.remove();
+
+  const div=document.createElement('div');
+  div.id='cimec-widget';
+  div.style.cssText=`position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:9100;background:rgba(7,12,24,.97);border:1px solid rgba(212,175,55,.3);border-radius:14px;padding:0;max-width:min(600px,95vw);width:100%;max-height:80vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 16px 48px rgba(0,0,0,.7);backdrop-filter:blur(16px);font-family:system-ui,sans-serif`;
+
+  div.innerHTML=`
+    <div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0;display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <span style="color:#d4af37;font-weight:800;font-size:13px">🏛 CIMEC — Monumente Istorice</span>
+        <span style="color:#475569;font-size:10px;margin-left:8px">${data.ok?'Date live':'Date indisponibile'} · raza 1km · ${allMonumente.length} rezultate</span>
+      </div>
+      <button onclick="document.getElementById('cimec-widget').remove()" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#f87171;border-radius:7px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer">✕</button>
+    </div>
+    <div style="overflow-y:auto;padding:12px 16px;flex:1">
+      ${!data.ok?`<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:8px;padding:10px;font-size:11px;color:#f87171;margin-bottom:10px">
+        ⚠️ CIMEC WFS indisponibil. Verificați: <a href="https://map.cimec.ro/Mapserver/" target="_blank" style="color:#60a5fa">map.cimec.ro</a> și <a href="https://www.cultura.ro/lista-monumentelor-istorice/" target="_blank" style="color:#60a5fa">cultura.ro/LMI</a>
+      </div>`:''}
+      ${allMonumente.length===0?`<div style="color:#475569;text-align:center;padding:20px;font-size:12px">
+        ${data.ok?'✅ Nu s-au identificat monumente în raza de 1km':'🔄 Verificați manual pe cultura.ro/lista-monumentelor-istorice'}
+        <br><a href="https://www.cultura.ro/lista-monumentelor-istorice/" target="_blank" style="color:#60a5fa;font-size:11px;margin-top:6px;display:block">→ Lista Monumentelor Istorice (cultura.ro)</a>
+        <a href="https://map.cimec.ro/Mapserver/" target="_blank" style="color:#60a5fa;font-size:11px;margin-top:4px;display:block">→ Hartă interactivă CIMEC</a>
+      </div>`:`
+      <div style="display:flex;flex-direction:column;gap:6px">
+        ${allMonumente.slice(0,15).map(m=>`
+          <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px;border:1px solid rgba(212,175,55,.12)">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px">
+              <div>
+                <span style="color:#d4af37;font-size:10px;font-weight:700">${m.cod}</span>
+                <span style="color:#64748b;font-size:9px;margin-left:6px">${m.categorie}</span>
+              </div>
+              ${m.dist!==null?`<span style="color:#38bdf8;font-size:10px;font-weight:700">${m.dist}m</span>`:''}
+            </div>
+            <div style="color:#e2e8f0;font-size:11px;font-weight:700;margin-bottom:3px">${m.denumire}</div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <span style="color:#64748b;font-size:9px">${m.localitate}${m.judet?', '+m.judet:''}</span>
+              ${m.datare&&m.datare!=='—'?`<span style="color:#64748b;font-size:9px">📅 ${m.datare}</span>`:''}
+              ${m.zonaProtectie&&m.zonaProtectie!=='—'?`<span style="color:#fbbf24;font-size:9px">🔒 Zonă protecție: ${m.zonaProtectie}</span>`:''}
+            </div>
+            ${m.adresa&&m.adresa!=='—'?`<div style="color:#475569;font-size:9px;margin-top:3px">📍 ${m.adresa}</div>`:''}
+          </div>`).join('')}
+      </div>`}
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.06)">
+        <a href="https://www.cultura.ro/lista-monumentelor-istorice/" target="_blank" style="color:#60a5fa;font-size:10px;display:block;margin-bottom:4px">📋 Lista completă LMI — cultura.ro</a>
+        <a href="https://map.cimec.ro/Mapserver/" target="_blank" style="color:#60a5fa;font-size:10px;display:block">🗺 Hartă interactivă CIMEC — map.cimec.ro</a>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(div);
+  ss(`🏛 ${allMonumente.length} monumente identificate în raza de 1km`);
+}
+
+async function loadData(uatId){
+  const uatCfg = (uatId && UAT_CONFIG[uatId]) ? UAT_CONFIG[uatId] : S_UAT.config;
+  const pugFile = uatCfg?.pugFile || './qGis_pug.iasi.geojson';
+  const cadFile = uatCfg?.cadastruIndex || './cadastru_index.json';
   S._dataLoading=true;
   ss('⏳ Se încarcă PUG…');
   try{
-    const r=await fetch('./qGis_pug.iasi.geojson');
+    const r=await fetch(pugFile);
     if(!r.ok)throw new Error('lipsă');
     S.pug=await r.json();
     S.pugIdx=[];
@@ -6602,7 +7528,7 @@ async function loadData(){
     S.cadHasPolygons = false;
     S.cadData = {features:[]};
     try{
-      const ri = await fetch('./cadastru_index.json');
+      const ri = await fetch(cadFile);
       if(ri.ok){
         const cadIdx = await ri.json(); // {nrcad: [lng, lat]}
         let _nrMin=Infinity,_nrMax=0;
@@ -7679,7 +8605,7 @@ async function runExport(){
     const covR=[['Nr. cadastral',nrcad],['UTR (zona urbanistica)',utr],['Suprafata teren',area+' mp'],
       ['Functiune propusa',S2(fnDef.label)],['Regim inaltime',niv+' niveluri · H ~'+aedisH.toFixed(1)+'m'],
       ['POT max / CUT max',pot+'% / '+cut],['Aliniamente rf/rs/rl-rr',rf+'m/'+rs+'m/'+rl+'m-'+rr+'m'],
-      ['Coordonate GPS',lat.toFixed(5)+'N · '+lon.toFixed(5)+'E'],['Localitate','Municipiul Iasi, jud. Iasi']];
+      ['Coordonate GPS',lat.toFixed(5)+'N · '+lon.toFixed(5)+'E'],['Localitate',getUATLabel()+', jud. '+getUATJudet()]];
     let ry2=H*0.596;covR.forEach(([l,v])=>{
       pdf.setTextColor(150,175,210);pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');pdf.text(S2(l)+':',28,ry2);
       pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.text(S2(String(v)),92,ry2);ry2+=8.2;});
@@ -7734,10 +8660,10 @@ async function runExport(){
     cy=row2('Nr. cadastral',nrcad,'UTR (zona PUG)',utr,cy);
     cy=row2('Suprafata teren',area+' mp','Perimetru aprox.','calc. GIS',cy);
     cy=row2('Coordonate lat.',lat.toFixed(5)+'N','Coordonate lng.',lon.toFixed(5)+'E',cy);
-    cy=row2('Localitate','Municipiul Iasi, jud. Iasi','Sector cadastral','Iasi',cy);
+    cy=row2('Localitate',getUATLabel()+', jud. '+getUATJudet(),'Sector cadastral',S2(getUATJudet()),cy);
     cy+=4;cy=sec('4. INFORMATII URBANISTICE ZONA',cy);
     cy=row2('Zona UTR (PUG)','UTR '+utr,'Functiune zona',S2(r.fnLabel||fnDef.label||'—'),cy);
-    cy=row2('Tip zona','Zona reglementata PUG','Sursa date','PUG Iasi + Cadastru',cy);
+    cy=row2('Tip zona','Zona reglementata PUG','Sursa date','PUG '+getUATLabel()+' + Cadastru',cy);
     ftr();
 
     // ══ PAG 4: DISTANTE + VEDERI LATERALE ════════════════════════════════════
@@ -7797,7 +8723,7 @@ async function runExport(){
      ['SC utila estimata (90%)',Math.round(scMax*0.9)+' mp','Nr. apartamente est. (~55mp)',scMax>0?Math.floor(scMax*parseInt(niv)*0.9/55)+' ap.':'—']
     ].forEach(([l1,v1,l2,v2])=>{cy=row2(l1,v1,l2,v2,cy);});cy+=5;
     cy=sec('10. UTILIZARI ADMISE IN UTR '+S2(utr),cy);cy+=3;
-    cy=body('Conform PUG Iasi, in zona UTR '+S2(utr)+', sunt admise functiunile compatibile cu caracterul zonei. Functiunea propusa "'+S2(fnDef.label)+'" necesita verificare cu Certificatul de Urbanism emis de Primaria Municipiului Iasi — DAU (Directia Arhitectura si Urbanism), inainte de demararea oricarei proceduri de autorizare.',14,cy,W-28);cy+=5;
+    cy=body('Conform PUG '+getUATLabel()+', in zona UTR '+S2(utr)+', sunt admise functiunile compatibile cu caracterul zonei. Functiunea propusa "'+S2(fnDef.label)+'" necesita verificare cu Certificatul de Urbanism emis de '+getPrimar()+', inainte de demararea oricarei proceduri de autorizare.',14,cy,W-28);cy+=5;
     cy=sec('11. ANALIZA CONFORMITATE COMPLETA',cy);cy+=3;
     [[isOk,'Inaltime propusa vs H max PUG',parseFloat(hmax||'0')>0?(aedisH<=parseFloat(hmax)?'IN LIMITA — H propus '+aedisH.toFixed(1)+'m ≤ H max '+hmax+'m':'DEPASIT — H propus '+aedisH.toFixed(1)+'m > H max '+hmax+'m'):'H max PUG nespecificat'],
      [true,'Incadrare POT','POT '+pot+'% → SC max la sol: '+scMax+' mp din '+area+' mp teren'],
@@ -12971,7 +13897,7 @@ async function generateShadowStudy(){
    'STAS 6221-1981 Iluminatul natural in constructii — Conditii tehnice generale.',
    'Legea nr. 350/2001 privind amenajarea teritoriului si urbanismul, republicata.',
    'Regulamentul General de Urbanism aprobat prin HG nr. 525/1996, cu modificarile ulterioare.',
-   'PUG Municipiul Iasi in vigoare (HCL Iasi) — UTR '+utr+' — Regulamentul Local de Urbanism.',
+   'PUG '+getUATLabel()+' in vigoare — UTR '+utr+' — Regulamentul Local de Urbanism.',
    'Ghidul privind insorirea cladirilor GT 043-2002 — INCERC Bucuresti.'
   ].forEach(l=>{cy=body('• '+l,16,cy);cy+=2;});
   // Harta orasului inainte de concluzii
@@ -13094,7 +14020,7 @@ async function generateNoiseStudy(){
   cy=sec('5. SINTEZA ANALIZEI ACUSTICE',cy);cy+=2;
   cy=body('Nivelul de zgomot echivalent estimat pentru amplasamentul '+nrcad+' (UTR '+utr+', suprafata '+area+' mp) este de '+Ltotal.toFixed(1)+' dB(A), calculat prin compunerea energetica a celor '+surse.length+' surse identificate in raza de 200m. '+(isOk?'Valoarea se incadreaza in limitele admise de SR 10009/2017 pentru zona acustica corespunzatoare, atat pe perioada de zi ('+Ltotal.toFixed(1)+' dB(A) ≤ '+limit_zi+' dB(A)) cat si pe perioada de noapte ('+Ltotal.toFixed(1)+' dB(A) '+(confNoap?'≤':'>')+' '+limit_n+' dB(A)). Proiectul poate continua cu masuri standard de izolare fonica.':'Valoarea depaseste limita admisa. Se recomanda masuri constructive suplimentare de izolare fonica, in special pentru fatadele expuse surselor principale. Elaborarea unui studiu acustic detaliat de catre specialist acreditato este recomandata.'),14,cy);cy+=5;
   cy=sec('6. BAZA LEGALA',cy);cy+=2;
-  ['SR 10009:2017 — Acustica in constructii. Limite admisibile ale nivelului de zgomot in mediul exterior cladirilor.','HG nr. 321/2005 privind evaluarea si gestionarea zgomotului ambiant — transpune Directiva 2002/49/CE.','Directiva 2002/49/CE privind evaluarea si gestionarea zgomotului ambiental in mediul urban.','Normativul C 125-2013 privind proiectarea si executarea masurilor de izolare fonica in cladiri.','OMS nr. 119/2014 — Norme de igiena si sanatate publica privind mediul de viata al populatiei.','PUG Municipiul Iasi in vigoare (HCL Iasi) — UTR '+utr+' — Regulamentul Local de Urbanism.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
+  ['SR 10009:2017 — Acustica in constructii. Limite admisibile ale nivelului de zgomot in mediul exterior cladirilor.','HG nr. 321/2005 privind evaluarea si gestionarea zgomotului ambiant — transpune Directiva 2002/49/CE.','Directiva 2002/49/CE privind evaluarea si gestionarea zgomotului ambiental in mediul urban.','Normativul C 125-2013 privind proiectarea si executarea masurilor de izolare fonica in cladiri.','OMS nr. 119/2014 — Norme de igiena si sanatate publica privind mediul de viata al populatiei.','PUG '+getUATLabel()+' in vigoare — UTR '+utr+' — Regulamentul Local de Urbanism.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
 
   // PAG 6: Vederi multiple
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VEDERI MULTIPLE 3D — CONTEXT COMPLET',6);ftr();
@@ -13207,7 +14133,7 @@ async function generateWindStudy(){
   cy=sec('5. CONCLUZII SI RECOMANDARI',cy);cy+=2;
   cy=body('Amplasamentul '+nrcad+' prezinta o expunere '+(aedisH>hMed*1.3?'RIDICATA':'MODERATA')+' la actiunea vantului, avand in vedere inaltimea propusa de '+aedisH.toFixed(1)+'m fata de contextul construit cu H medie '+hMed.toFixed(1)+'m. Directia dominanta a vantului la Iasi este NE (iarna, frecventa ~35%) si SV (vara, frecventa ~25%). Se recomanda elaborarea unui studiu CFD (Computational Fluid Dynamics) in faza DTAC/PAC pentru cladirile cu H>28m sau in zone cu densitate urbana ridicata.',14,cy);cy+=4;
   cy=sec('6. BAZA LEGALA',cy);cy+=2;
-  ['STAS 10101/20-1990 — Actiunea vantului. Incarcari din vant.','SR EN 1991-1-4:2006 — Eurocod 1: Actiuni asupra structurilor. Actiuni ale vantului.','Ghidul privind confortul pietonal si actiunea vantului in mediul construit — INCERC 2008.','PUG Municipiul Iasi — UTR '+utr+' — Regulamentul Local de Urbanism.','Legea nr. 50/1991 republicata privind autorizarea executarii lucrarilor de constructii.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
+  ['STAS 10101/20-1990 — Actiunea vantului. Incarcari din vant.','SR EN 1991-1-4:2006 — Eurocod 1: Actiuni asupra structurilor. Actiuni ale vantului.','Ghidul privind confortul pietonal si actiunea vantului in mediul construit — INCERC 2008.','PUG '+getUATLabel()+' — UTR '+utr+' — Regulamentul Local de Urbanism.','Legea nr. 50/1991 republicata privind autorizarea executarii lucrarilor de constructii.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
   // Harta orasului inainte de concluzii
   if(caps.imgCity&&caps.imgCity.length>500){
     cy+=3;
@@ -13281,7 +14207,7 @@ async function generateGreenStudy(){
   let cy=28;
   cy=addImg(caps.img3D,14,cy,W-28,70,'FIG. 1 — Vedere 3D principala · Identificarea zonelor verzi existente si propuse');
   cy=sec('1. BILANT SPATII VERZI — CALCUL DETALIAT',cy);cy+=2;
-  cy=body('Conform Legii nr. 24/2007 privind reglementarea si administrarea spatiilor verzi din intravilanul localitatilor si PUG Iasi (UTR '+utr+'), suprafata minima de spatii verzi este de '+params?.sv+'% din suprafata terenului, reprezentand '+svMin+' mp. Legea impune suplimentar un minim de 20% spatii verzi pentru orice constructie noua in intravilanul municipiului.',14,cy);cy+=4;
+  cy=body('Conform Legii nr. 24/2007 privind reglementarea si administrarea spatiilor verzi din intravilanul localitatilor si PUG '+getUATLabel()+' (UTR '+utr+'), suprafata minima de spatii verzi este de '+params?.sv+'% din suprafata terenului, reprezentand '+svMin+' mp. Legea impune suplimentar un minim de 20% spatii verzi pentru orice constructie noua in intravilanul municipiului.',14,cy);cy+=4;
   cy=tblRow(['Indicator','Minim legal','Propus','Status'],cy,true,[70,42,42,24]);
   const svProp=Math.round(areaNum*0.22);
   [['Spatii verzi totale (mp)',svObl+' mp',svProp+' mp',svProp>=svObl?'OK':'DEFICIT'],['Procentaj spatii verzi (%)',Math.max(params?.sv||20,20)+'%',((svProp/areaNum)*100).toFixed(1)+'%',svProp>=svObl?'CONFORM':'NECONFORM'],['SV permeabil la apa (min 60% din SV)',(svObl*0.6).toFixed(0)+' mp',(svProp*0.65).toFixed(0)+' mp','CONFORM'],['Arbori plantati (min 1/200mp SV)',Math.ceil(svObl/200)+' buc',Math.ceil(svProp/200)+' buc','CONFORM']].forEach(r=>{cy=tblRow(r,cy,false,[70,42,42,24]);});
@@ -13320,7 +14246,7 @@ async function generateGreenStudy(){
   cy=tblRow(['Specie','Talie','Utilizare','Avantaj principal'],cy,true,[50,25,45,58]);
   [['Tei argintiu (Tilia tomentosa)','Mare (H 20m)','Aliniamente stradale','Umbra, aroma, rezistenta urbana'],['Frasin comun (Fraxinus excelsior)','Mare (H 25m)','Spatii largi, parcuri','Crestere rapida, coroana ampla'],['Artar campestru (Acer campestre)','Medie (H 10m)','Garduri vii, parcele','Colorit toamna, toleranta poluare'],['Soc negru (Sambucus nigra)','Mica (H 4m)','Umplere, biodiversitate','Fructe pentru fauna'],['Lavanda (Lavandula sp.)','Mica (<1m)','Borduri, terase','Aroma, rezistenta seceta'],['Iederá (Hedera helix)','Agatarotre','Fatade verzi verticale','Termoizolatie, estetica']].forEach(r=>{cy=tblRow(r,cy,false,[50,25,45,58]);});
   cy+=3;cy=sec('5. BAZA LEGALA',cy);cy+=2;
-  ['Legea nr. 24/2007 privind reglementarea si administrarea spatiilor verzi din intravilanul localitatilor.','NP 133/2013 — Normativ privind proiectarea, executia si exploatarea sistemelor de alimentare cu apa si canalizare (permeabilitate).','PUG Municipiul Iasi in vigoare (HCL Iasi) — UTR '+utr+' — Spatii verzi minime obligatorii.','Ordinul MDRT nr. 2701/2010 — Metodologie de informare si consultare a publicului cu privire la documentatii de urbanism.','Legea nr. 292/2018 privind evaluarea impactului anumitor proiecte publice si private asupra mediului.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
+  ['Legea nr. 24/2007 privind reglementarea si administrarea spatiilor verzi din intravilanul localitatilor.','NP 133/2013 — Normativ privind proiectarea, executia si exploatarea sistemelor de alimentare cu apa si canalizare (permeabilitate).','PUG '+getUATLabel()+' in vigoare — UTR '+utr+' — Spatii verzi minime obligatorii.','Ordinul MDRT nr. 2701/2010 — Metodologie de informare si consultare a publicului cu privire la documentatii de urbanism.','Legea nr. 292/2018 privind evaluarea impactului anumitor proiecte publice si private asupra mediului.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
   // Harta orasului inainte de concluzii
   if(caps.imgCity&&caps.imgCity.length>500){
     cy+=3;
@@ -13436,9 +14362,9 @@ async function generateMobilityStudy(){
   addImg(caps.imgDist,14+half+4,cy-52,half,52,'FIG. 9 — Plan distante · Context stradal · Trafic vecini');
   cy+=4;
   cy=sec('5. CONCLUZII SI RECOMANDARI',cy);cy+=2;
-  cy=body('Functiunea propusa ('+fnLabel+') pentru parcela '+nrcad+' ('+area+' mp, UTR '+utr+') necesita asigurarea a minimum '+pkObl+' locuri de parcare conform NP 051/2012 si PUG Iasi. Se recomanda solutia cu parcare subterana ('+pkSub+' locuri) pentru eficientizarea utilizarii suprafetei la sol si maximizarea spatiilor verzi.',14,cy);cy+=4;
+  cy=body('Functiunea propusa ('+fnLabel+') pentru parcela '+nrcad+' ('+area+' mp, UTR '+utr+') necesita asigurarea a minimum '+pkObl+' locuri de parcare conform NP 051/2012 si PUG '+getUATLabel()+'. Se recomanda solutia cu parcare subterana ('+pkSub+' locuri) pentru eficientizarea utilizarii suprafetei la sol si maximizarea spatiilor verzi.',14,cy);cy+=4;
   cy=sec('6. BAZA LEGALA',cy);cy+=2;
-  ['NP 051/2012 (revizuit) — Normativ privind adaptarea cladirilor civile si spatiului urban la necesitatile persoanelor cu handicap.','STAS 10144/3-1991 — Calculul si proiectarea parcajelor pentru autoturisme.','HG nr. 525/1996 — Regulament General de Urbanism, art. 33 Parcaje.','PUG Municipiul Iasi (HCL Iasi) — UTR '+utr+' — Parcaje minime obligatorii.','Legea nr. 448/2006 privind protectia si promovarea drepturilor persoanelor cu handicap.','Normativul NP 061/2002 privind proiectarea si executarea sistemelor de iluminat artificial.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
+  ['NP 051/2012 (revizuit) — Normativ privind adaptarea cladirilor civile si spatiului urban la necesitatile persoanelor cu handicap.','STAS 10144/3-1991 — Calculul si proiectarea parcajelor pentru autoturisme.','HG nr. 525/1996 — Regulament General de Urbanism, art. 33 Parcaje.','PUG '+getUATLabel()+' (HCL local) — UTR '+utr+' — Parcaje minime obligatorii.','Legea nr. 448/2006 privind protectia si promovarea drepturilor persoanelor cu handicap.','Normativul NP 061/2002 privind proiectarea si executarea sistemelor de iluminat artificial.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
   // Harta orasului inainte de concluzii
   if(caps.imgCity&&caps.imgCity.length>500){
     cy+=3;
@@ -13516,7 +14442,7 @@ async function generateDensityStudy(){
   let cy=28;
   cy=addImg(caps.img3D,14,cy,W-28,70,'FIG. 1 — Vedere 3D principala · Volumul propus in contextul urban · Densitate construita vizibila');
   cy=sec('1. COMPARATIE INDICATORI PROPUSI vs PUG vs ZONA',cy);cy+=2;
-  cy=body('Analiza compara indicatorii urbanistici propusi pentru parcela '+nrcad+' cu cei reglementati prin PUG Iasi (UTR '+utr+') si cu valorile reale estimate din contextul construit existent in raza de 200m, pe baza datelor OpenStreetMap actualizate.',14,cy);cy+=3;
+  cy=body('Analiza compara indicatorii urbanistici propusi pentru parcela '+nrcad+' cu cei reglementati prin PUG '+getUATLabel()+' (UTR '+utr+') si cu valorile reale estimate din contextul construit existent in raza de 200m, pe baza datelor OpenStreetMap actualizate.',14,cy);cy+=3;
   cy=tblRow(['Indicator','Propus','Max PUG','Zona (200m)','Status'],cy,true,[55,28,28,32,35]);
   [['POT (suprafata construita/teren)',potProp+'%',potProp+'%',potMed.toFixed(1)+'%',potProp<=potProp?'CONFORM':'DEPASIRE'],['CUT (supraf. desfasurata/teren)',cutProp,cutProp,'—','CONFORM'],['H max propus',aedisH.toFixed(1)+'m','N/Sm',hMed.toFixed(1)+'m (med.)',aedisH<=hMed*2?'COMPAT.':'ATENTIE'],['H medie propusa',aedisH.toFixed(1)+'m','—',hMed.toFixed(1)+'m',aedisH<=hMed*1.5?'COMPATIBIL':'VERIFICARE'],['Nr. niveluri',AEDIS.corpuri[0]?.niv||4+' niv.',parseFloat(params?.niv)||4+' niv.',Math.round(hMed/3)+' niv.est.','—']].forEach(r=>{cy=tblRow(r,cy,false,[55,28,28,32,35]);});
 
@@ -13559,7 +14485,7 @@ async function generateDensityStudy(){
   cy=sec('4. CONCLUZII SI NECESITATEA PUZ',cy);cy+=2;
   cy=body('Analiza de densitate pentru parcela '+nrcad+' (UTR '+utr+', '+area+' mp) indica ca parametrii propusi — POT '+potProp+'%, CUT '+cutProp+', H='+aedisH.toFixed(1)+'m, '+fnLabel+' — '+(potProp<=parseFloat(params?.pot||50)&&cutProp<=parseFloat(params?.cut||3)?'se incadreaza in limitele PUG, nu necesita PUZ.':'depasesc parametrii PUG, necesita elaborarea unui PUZ sau PUD conform Legii 350/2001.')+' Functiunea propusa este '+(fnSorted[0]&&(fnSorted[0][0]==='yes'||fnSorted[0][0]==='residential'||fnSorted[0][0]==='apartments')?'compatibila':'partial compatibila')+' cu caracterul predominant al zonei.',14,cy);cy+=4;
   cy=sec('5. BAZA LEGALA',cy);cy+=2;
-  ['Legea nr. 350/2001 privind amenajarea teritoriului si urbanismul (republicata 2022).','HG nr. 525/1996 — Regulamentul General de Urbanism, cu modificarile ulterioare.','Ordinul MDRAP nr. 233/2016 pentru aprobarea Normelor metodologice de aplicare a Legii 350/2001.','PUG Municipiul Iasi in vigoare (HCL Iasi) — UTR '+utr+' — Regulamentul Local de Urbanism.','Legea nr. 50/1991 republicata privind autorizarea executarii lucrarilor de constructii.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
+  ['Legea nr. 350/2001 privind amenajarea teritoriului si urbanismul (republicata 2022).','HG nr. 525/1996 — Regulamentul General de Urbanism, cu modificarile ulterioare.','Ordinul MDRAP nr. 233/2016 pentru aprobarea Normelor metodologice de aplicare a Legii 350/2001.','PUG '+getUATLabel()+' in vigoare — UTR '+utr+' — Regulamentul Local de Urbanism.','Legea nr. 50/1991 republicata privind autorizarea executarii lucrarilor de constructii.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
   // Harta orasului inainte de concluzii
   if(caps.imgCity&&caps.imgCity.length>500){
     cy+=3;
@@ -13691,7 +14617,7 @@ async function generateMemoriu(){
   cy=28;cy=sec('7. CONCLUZII',cy);cy+=2;
   cy=body('Prezentul memoriu tehnic urbanistic preliminar a fost generat automat de platforma UrbanX pentru parcela '+nrcad+' (UTR '+utr+', Municipiul Iasi). Propunerea volumetrica analizata prevede o constructie cu '+niv+' niveluri (H='+aedisH.toFixed(1)+'m, '+fnLabel+') ce se incadreaza in reglementarile PUG Iasi pentru UTR '+utr+' cu POT='+params?.pot+'%, CUT='+params?.cut+', H max='+( params?.h||'nespecificat')+'. Indicatorii urbanistici calculati respecta valorile maxime admise. Se recomanda consultarea unui arhitect autorizat OAR si elaborarea documentatiei complete conform Legii 50/1991.',14,cy);cy+=5;
   cy=sec('8. BAZA LEGALA',cy);cy+=2;
-  ['Legea nr. 50/1991 republicata — Autorizarea executarii lucrarilor de constructii.','Legea nr. 350/2001 — Amenajarea teritoriului si urbanismul (republicata).','HG nr. 525/1996 — Regulamentul General de Urbanism.','Ordinul MLPAT nr. 91/1991 n — Formular si continut documentatii pentru autorizatii.','Ordinul MDRAP nr. 233/2016 — Norme metodologice Legea 350/2001.','PUG Municipiul Iasi in vigoare (HCL Iasi) — UTR '+utr+' — Regulamentul Local de Urbanism.','Legea nr. 10/1995 republicata — Calitatea in constructii.','SR EN 1990:2004 — Eurocod 0: Baze de proiectare a structurilor.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
+  ['Legea nr. 50/1991 republicata — Autorizarea executarii lucrarilor de constructii.','Legea nr. 350/2001 — Amenajarea teritoriului si urbanismul (republicata).','HG nr. 525/1996 — Regulamentul General de Urbanism.','Ordinul MLPAT nr. 91/1991 n — Formular si continut documentatii pentru autorizatii.','Ordinul MDRAP nr. 233/2016 — Norme metodologice Legea 350/2001.','PUG '+getUATLabel()+' in vigoare — UTR '+utr+' — Regulamentul Local de Urbanism.','Legea nr. 10/1995 republicata — Calitatea in constructii.','SR EN 1990:2004 — Eurocod 0: Baze de proiectare a structurilor.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
   cy+=4;cy=body('NOTA: Prezentul memoriu tehnic preliminar a fost generat automat de platforma UrbanX pe baza datelor cadastrale disponibile si a parametrilor introdusi de utilizator. Documentul are caracter strict ORIENTATIV si INFORMATIV. Nu inlocuieste documentatia tehnica avizata conform legii si nu constituie un Certificat de Urbanism, aviz sau autorizatie de constructie.',14,cy);
   // Harta orasului inainte de concluzii
   if(caps.imgCity&&caps.imgCity.length>500){
@@ -14206,7 +15132,7 @@ async function generateTrafficStudy(){
   cy=28;
   if(caps.imgCity){cy=addImg(caps.imgCity,14,cy,W-28,50,'FIG. 7 — Harta Municipiului Iași · Retea stradala si acces principal');cy+=4;}
   cy=sec('5. BAZA LEGALA',cy);cy+=2;
-  ['NP 051/2012 — Normativ privind adaptarea cladirilor civile si spatiului urban la necesitatile persoanelor cu handicap.','STAS 10144/3-1991 — Calculul si proiectarea parcajelor pentru autoturisme.','HG nr. 525/1996 — Regulamentul General de Urbanism, art. 33 Parcaje.','Ordinul MT nr. 45/1998 — Norme tehnice privind proiectarea, construirea si modernizarea drumurilor.','PUG Municipiul Iasi — UTR '+utr+' — Reglementari accese si parcaje.','Legea nr. 82/1998 — Codul Rutier, art. 72: Iesirile din incinte.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
+  ['NP 051/2012 — Normativ privind adaptarea cladirilor civile si spatiului urban la necesitatile persoanelor cu handicap.','STAS 10144/3-1991 — Calculul si proiectarea parcajelor pentru autoturisme.','HG nr. 525/1996 — Regulamentul General de Urbanism, art. 33 Parcaje.','Ordinul MT nr. 45/1998 — Norme tehnice privind proiectarea, construirea si modernizarea drumurilor.','PUG '+getUATLabel()+' — UTR '+utr+' — Reglementari accese si parcaje.','Legea nr. 82/1998 — Codul Rutier, art. 72: Iesirile din incinte.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
   sign();
   pdf.save('Studiu_Trafic_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
   ss('✅ Studiu de Trafic generat!');
@@ -14680,7 +15606,7 @@ async function generateSolarStudy(){
   pdf.setTextColor(...GOLD);pdf.setFontSize(8);pdf.setFont('helvetica','bold');pdf.text('DATE DE IDENTIFICARE',W/2,H*0.620,{align:'center'});
   const covR=[['Nr. cadastral',nrcad],['Zona UTR',utr],['Suprafata teren',area+' mp'],['Functiune',S2(fnDef.label)],
     ['Regim inaltime',niv+' niveluri · H='+aedisH.toFixed(1)+'m'],['POT / CUT',pot+'% / '+cut],
-    ['Coordonate GPS',lat.toFixed(5)+'N · '+lon.toFixed(5)+'E'],['Localitate','Municipiul Iasi, jud. Iasi']];
+    ['Coordonate GPS',lat.toFixed(5)+'N · '+lon.toFixed(5)+'E'],['Localitate',getUATLabel()+', jud. '+getUATJudet()]];
   let ry=H*0.635;covR.forEach(([l,v])=>{
     pdf.setTextColor(150,175,210);pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');pdf.text(S2(l)+':',30,ry);
     pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.text(S2(String(v)),95,ry);ry+=8;});
@@ -14736,7 +15662,7 @@ async function generateSolarStudy(){
   cy=row2s('Nr. cadastral',nrcad,'UTR (zona PUG)',utr,cy+4);
   cy=row2s('Suprafata teren',area+' mp','Perimetru aprox.','calc. GIS',cy);
   cy=row2s('Coordonate lat.',lat.toFixed(5)+'N','Coordonate lng.',lon.toFixed(5)+'E',cy);
-  cy=row2s('Localitate','Municipiul Iasi, jud. Iasi','Sursa date','PUG Iasi + Cadastru',cy);
+  cy=row2s('Localitate',getUATLabel()+', jud. '+getUATJudet(),'Sursa date','PUG '+getUATLabel()+' + Cadastru',cy);
   ftr();
 
   // ══ PAG 4: CALCULE SOLARE + PLANȘĂ ORARĂ ═════════════════════════════════
@@ -14952,7 +15878,7 @@ async function generateSolarStudy(){
   cy=sec('7.2 — BAZA LEGALA',Math.min(cy+4,240));cy+=3;
   ['Ordinul MS nr. 119/2014 + Ordin nr. 994/2018 — art. 3: minim 1,5 ore insorire directa/zi la solstitiu iarna',
    'Legea nr. 350/2001 privind amenajarea teritoriului si urbanismul','Ordinul MDRAP nr. 233/2016 — Norme metodologice PUZ/PUD',
-   'PUG Municipiul Iasi in vigoare (HCL Iasi) — UTR '+S2(utr),'STAS 6221-1981 — Iluminat natural in constructii'
+   'PUG '+getUATLabel()+' in vigoare — UTR '+S2(utr),'STAS 6221-1981 — Iluminat natural in constructii'
   ].forEach(r=>{cy=body('• '+r,16,cy+1,W-32);cy+=2;});
   cy+=5;
   pdf.setFillColor(235,240,250);pdf.roundedRect(14,cy,W-28,32,2,2,'F');
