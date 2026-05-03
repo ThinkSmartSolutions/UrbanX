@@ -12452,76 +12452,79 @@ function runLotizare(){
 }
 
 // ─── Generator geometrii ──────────────────────────────────────────────────
-function _genLotizareGeom(fpFeat,loturiPerTip,drumFract){
-  const loturi=[],drumuri=[];
+function _genLotizareGeom(fpFeat, loturiPerTip, drumFract){
+  const loturi=[], drumuri=[];
   const bbox2=turf.bbox(fpFeat);
-  const cx=(bbox2[0]+bbox2[2])/2,cy=(bbox2[1]+bbox2[3])/2;
-  const mLng=111320*Math.cos(cy*Math.PI/180),mLat=111320;
-  const wDeg=bbox2[2]-bbox2[0],hDeg=bbox2[3]-bbox2[1];
-  const wM=wDeg*mLng,hM=hDeg*mLat;
-  const isLS=wM>hM;
+  const cy=(bbox2[1]+bbox2[3])/2;
+  const mLng=111320*Math.cos(cy*Math.PI/180), mLat=111320;
+  const wDeg=bbox2[2]-bbox2[0], hDeg=bbox2[3]-bbox2[1];
+  const wM=wDeg*mLng, hM=hDeg*mLat;
+  const fpArea=turf.area(fpFeat);
 
-  // Drum principal (orientat pe axa lungă)
-  const drumFracHalf=drumFract/2;
-  const drumFeat={type:'Feature',geometry:{type:'Polygon',coordinates:[[
-    isLS?[bbox2[0],cy-drumFracHalf*hDeg]:[cx-drumFracHalf*wDeg,bbox2[1]],
-    isLS?[bbox2[2],cy-drumFracHalf*hDeg]:[cx+drumFracHalf*wDeg,bbox2[1]],
-    isLS?[bbox2[2],cy+drumFracHalf*hDeg]:[cx+drumFracHalf*wDeg,bbox2[3]],
-    isLS?[bbox2[0],cy+drumFracHalf*hDeg]:[cx-drumFracHalf*wDeg,bbox2[3]],
-    isLS?[bbox2[0],cy-drumFracHalf*hDeg]:[cx-drumFracHalf*wDeg,bbox2[1]],
-  ]]},properties:{tip:'drum_principal'}};
-  try{const di=turf.intersect(fpFeat,drumFeat);if(di?.geometry)drumuri.push({...di,properties:{tip:'drum_principal'}});}catch(e){}
+  // Dimensiuni lot în grade
+  const lotW=Math.sqrt(_LOT.lotAria)/mLng;
+  const lotH=Math.sqrt(_LOT.lotAria)/mLat;
+  const drumLatDeg=_LOT.drumLat/mLat;
 
-  // Construim lista tipuri
+  // Grid complet peste tot bbox-ul parcelei
+  const cols=Math.max(1, Math.floor(wDeg/lotW));
+  const rows=Math.max(1, Math.floor(hDeg/lotH));
+
+  // Lista tipuri
   const lista=[];
-  const ordine=['individuala','insiruita','duplex','bloc'];
-  ordine.forEach(tip=>{for(let i=0;i<(loturiPerTip[tip]||0);i++)lista.push(tip);});
+  ['individuala','insiruita','duplex','bloc'].forEach(tip=>{
+    for(let i=0;i<(loturiPerTip[tip]||0);i++) lista.push(tip);
+  });
   if(!lista.length) return {loturi,drumuri};
 
-  // Grid în cele 2 zone (sus/jos față de drum)
-  const lotW=Math.sqrt(_LOT.lotAria)/mLng,lotH=Math.sqrt(_LOT.lotAria)/mLat;
-  const cols=Math.max(1,Math.floor(wDeg/lotW));
+  // Drum principal orizontal la 1/3 din înălțime (lasă 2/3 pentru loturi)
+  const drumY=bbox2[1]+hDeg*0.33;
+  const drumPrinc={type:'Feature',geometry:{type:'Polygon',coordinates:[[
+    [bbox2[0],drumY],[bbox2[2],drumY],
+    [bbox2[2],drumY+drumLatDeg],[bbox2[0],drumY+drumLatDeg],[bbox2[0],drumY]
+  ]]},properties:{tip:'drum_principal'}};
+  try{
+    const di=turf.intersect(fpFeat,drumPrinc);
+    if(di?.geometry) drumuri.push({...di,properties:{tip:'drum_principal'}});
+  }catch(e){}
+
+  // Scanăm TOT grid-ul
   let idx=0;
+  const ocupat=new Array(rows*cols).fill(false);
 
-  for(let zone=0;zone<2&&idx<lista.length;zone++){
-    const yStart=zone===0?cy+drumFracHalf*hDeg:bbox2[1];
-    const yEnd=zone===0?bbox2[3]:cy-drumFracHalf*hDeg;
-    const zoneH=Math.abs(yEnd-yStart);
-    const zoneRows=Math.max(1,Math.floor(zoneH/lotH));
+  for(let r=0;r<rows&&idx<lista.length;r++){
+    const y0=bbox2[1]+r*lotH;
+    const y1=y0+lotH;
+    // Sărim rândul care se suprapune cu drumul principal
+    if(y0<drumY+drumLatDeg&&y1>drumY) continue;
 
-    for(let r=0;r<zoneRows&&idx<lista.length;r++){
-      const y0=yStart+r*lotH*(zone===0?1:1);
-      const y1=y0+lotH;
-      if(zone===0&&y1>bbox2[3]) continue;
-      if(zone===1&&y0<bbox2[1]) continue;
+    // Drum secundar la fiecare 3 rânduri
+    if(r>0&&r%3===0){
+      const ds={type:'Feature',geometry:{type:'Polygon',coordinates:[[
+        [bbox2[0],y0],[bbox2[2],y0],
+        [bbox2[2],y0+drumLatDeg*0.5],[bbox2[0],y0+drumLatDeg*0.5],[bbox2[0],y0]
+      ]]},properties:{tip:'drum_secundar'}};
+      try{const di=turf.intersect(fpFeat,ds);if(di?.geometry)drumuri.push({...di,properties:{tip:'drum_secundar'}});}catch(e){}
+    }
 
-      // Drum secondar ogni rând (eccetto il primo)
-      if(r>0){
-        const dsy=zone===0?y0:y0;
-        const ds={type:'Feature',geometry:{type:'Polygon',coordinates:[[
-          [bbox2[0],dsy-lotH*0.05],[bbox2[2],dsy-lotH*0.05],
-          [bbox2[2],dsy+lotH*0.05],[bbox2[0],dsy+lotH*0.05],
-          [bbox2[0],dsy-lotH*0.05]
-        ]]},properties:{tip:'drum_secundar'}};
-        try{const di=turf.intersect(fpFeat,ds);if(di?.geometry)drumuri.push({...di,properties:{tip:'drum_secundar'}});}catch(e){}
-      }
+    for(let c=0;c<cols&&idx<lista.length;c++){
+      const x0=bbox2[0]+c*lotW;
+      const x1=x0+lotW;
+      const tip=lista[idx];
+      const t=_LOT.tipuri[tip]||_LOT.tipuri.individuala;
 
-      for(let c=0;c<cols&&idx<lista.length;c++){
-        const x0=bbox2[0]+c*lotW,x1=x0+lotW;
-        if(x1>bbox2[2]) continue;
-        const tip=lista[idx];
-        const t=_LOT.tipuri[tip]||_LOT.tipuri.individuala;
-        const lotPoly={type:'Feature',geometry:{type:'Polygon',coordinates:[[
-          [x0,y0],[x1,y0],[x1,y1],[x0,y1],[x0,y0]
-        ]]},properties:{tip,color:t.color,borderColor:t.borderColor}};
-        try{
-          const inter=turf.intersect(fpFeat,lotPoly);
-          if(inter?.geometry&&turf.area(inter)>_LOT.lotAria*0.25){
-            loturi.push({...inter,properties:lotPoly.properties});
-            idx++;
-          } else idx++;
-        }catch(e){idx++;}
-      }
+      const lotPoly={type:'Feature',geometry:{type:'Polygon',coordinates:[[
+        [x0,y0],[x1,y0],[x1,y1],[x0,y1],[x0,y0]
+      ]]},properties:{tip,color:t.color,borderColor:t.borderColor}};
+
+      try{
+        const inter=turf.intersect(fpFeat,lotPoly);
+        if(inter?.geometry&&turf.area(inter)>_LOT.lotAria*0.15){
+          loturi.push({...inter,properties:lotPoly.properties});
+          idx++;
+        }
+        // dacă e prea mic, îl sărim fără a consuma din listă
+      }catch(e){}
     }
   }
   return {loturi,drumuri};
