@@ -72,7 +72,7 @@ html,body{height:100%;font-family:'Segoe UI',Arial,sans-serif;background:#0b1220
 .utr-chip:hover{opacity:.8;transform:scale(1.05)}
 
 /* PANEL */
-#panel{position:fixed;top:0;right:0;bottom:0;z-index:80;width:420px;background:rgba(10,16,30,.97);border-left:1px solid rgba(255,255,255,.1);display:flex;flex-direction:column;backdrop-filter:blur(12px)}
+#panel{position:fixed;top:0;right:0;bottom:0;z-index:80;width:420px;background:rgba(10,16,30,.97);border-left:1px solid rgba(255,255,255,.1);display:flex;flex-direction:column;backdrop-filter:blur(12px);transition:right .25s ease}
 #panel-tabs{display:flex;background:#08152a;border-bottom:1px solid rgba(255,255,255,.1);padding-top:48px;overflow-x:auto;flex-shrink:0;-ms-overflow-style:none;scrollbar-width:none}
 #panel-tabs::-webkit-scrollbar{display:none}
 .ptab{flex-shrink:0;padding:10px 14px;font-size:12px;font-weight:700;text-align:center;cursor:pointer;color:#64748b;border-bottom:2px solid transparent;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none;transition:all .15s;letter-spacing:.02em}
@@ -1021,6 +1021,8 @@ var S={
   shortcuts:JSON.parse(localStorage.getItem('ux_shortcuts')||'["raport_pdf","studiu_insorire"]'),
   params:{},  // parametri urbanistici editabili per parcelă
   vol:{fn:'locuinta_individuala',niv:4,hNiv:3.0,hOvr:'',fpF:0.9,retras:false,terasa:false,ctxR:200,onlyVol:true,genDone:false,
+    perSideMode:false,   // false = mod clasic rf/rl/rs, true = aliniament per latura
+    sideSetbacks:{},     // {sideIndex: valoare_m} — override per latura
     // #9 Scenarii constructie: 'liber'=demolare existenta, 'extindere_h'=extindere orizontal, 'extindere_v'=extindere vertical+orizontal
     scenariuConstructie:'liber',
     frontCount: 1,      // nr laturi stradale: 1=normal, 2=colt, 3=triplu front
@@ -3108,261 +3110,6 @@ function updateMap(){
 // 3. Reconstruim poligonul din laturile translatate → edificabil continuu
 // 4. Aplicăm POT dacă e depășit
 
-function buildFP(geom, paramsOrUtr){
-  if(!geom) return null;
-  const p = typeof paramsOrUtr==='object' ? paramsOrUtr : getDefaultParams(paramsOrUtr);
-  try{
-    const pf = {type:'Feature', geometry:geom, properties:{}};
-    const pA = turf.area(pf);
-    if(pA < 1) return pf;
-
-    const rf = Math.max(0, pN(p.rf)||0);
-    const rl = Math.max(0, pN(p.rl)||0);
-    const rr = Math.max(0, pN(p.rr)??pN(p.rl)??0);
-    const rs = Math.max(0, pN(p.rs)||0);
-    const sv = Math.max(0, Math.min(100, pN(p.sv)||0));
-    const brg = S.bearing || 0;
-
-    // POT efectiv (redus de SV)
-    const pot = pN(p.pot);
-    const pot_ef = pot > 0 ? Math.min(pot, 100-sv) : (100-sv);
-    const SC_max = pA * pot_ef / 100;
-
-    const ring = geom.type==='Polygon'
-      ? geom.coordinates[0]
-      : geom.coordinates[0][0];
-    if(!ring||ring.length<3) return pf;
-
-    const cx = ring.reduce((s,c)=>s+c[0],0)/ring.length;
-    const cy = ring.reduce((s,c)=>s+c[1],0)/ring.length;
-    const mLng = 111320*Math.cos(cy*Math.PI/180);
-    const mLat = 111320;
-
-    // ── Rolul fiecărei laturi ─────────────────────────────────────────────
-    const fc = S.vol?.frontCount||1;
-    const FTHRESH = fc>=3 ? 150 : fc===2 ? 110 : 65;
-
-    const sides = [];
-    for(let i=0;i<ring.length-1;i++){
-      const p1=ring[i], p2=ring[i+1];
-      const mx=(p1[0]+p2[0])/2, my=(p1[1]+p2[1])/2;
-      const dLn=(mx-cx)*mLng, dLt=(my-cy)*mLat;
-      const dir=(Math.atan2(dLn,dLt)*180/Math.PI+360)%360;
-      let diff=((dir-brg)+360)%360;
-      if(diff>180)diff=360-diff;
-      sides.push({i,diff,p1,p2,mx,my});
-    }
-    const frontSet = new Set(sides.filter(s=>s.diff<FTHRESH).map(s=>s.i));
-    if(frontSet.size===0) frontSet.add(sides.reduce((a,b)=>a.diff<b.diff?a:b).i);
-    const nonFront = sides.filter(s=>!frontSet.has(s.i));
-    const postIdx = nonFront.length>0
-      ? nonFront.reduce((a,b)=>a.diff>b.diff?a:b).i : -1;
-
-    function getSetback(sideIdx, mx, my){
-      if(frontSet.has(sideIdx)) return rf;
-      if(sideIdx===postIdx) return rs;
-      const vx=(mx-cx)*mLng, vy=(my-cy)*mLat;
-      const fx=Math.sin(brg*Math.PI/180), fy=Math.cos(brg*Math.PI/180);
-      return (fx*vy-fy*vx)>0 ? rl : rr;
-    }
-
-    // ── METODA CORECTA: translam fiecare latură spre interior ─────────────
-    // Pentru fiecare latură a parcelei:
-    //   - calculăm normala interioară (perpendiculară, spre centru)
-    //   - translăm latura cu setback-ul corespunzător
-    // Apoi calculăm intersecțiile laturilor translatate → noul poligon
-    
-    // Pas 1: calculăm laturile translatate (ca drepte infinite)
-    // sb=0 → calcan = latura rămâne pe limita de proprietate (nu translatăm)
-    const offsetLines = [];
-    for(let i=0;i<ring.length-1;i++){
-      const p1=ring[i], p2=ring[i+1];
-      const mx=(p1[0]+p2[0])/2, my=(p1[1]+p2[1])/2;
-      const sb = getSetback(i, mx, my);
-      
-      const dx=(p2[0]-p1[0])*mLng, dy=(p2[1]-p1[1])*mLat;
-      const len=Math.sqrt(dx*dx+dy*dy);
-      if(len<0.01){ offsetLines.push(null); continue; }
-      
-      let offx=0, offy=0;
-      if(sb>0){
-        // Normala spre interior
-        let nx=-dy/len, ny=dx/len;
-        if(nx*(cx-p1[0])*mLng+ny*(cy-p1[1])*mLat<0){nx=-nx;ny=-ny;}
-        offx=nx*sb/mLng; offy=ny*sb/mLat;
-      }
-      // sb=0: calcan → latura rămâne exactă pe limita parcelei
-      offsetLines.push({
-        px: p1[0]+offx, py: p1[1]+offy,
-        dx: p2[0]-p1[0], dy: p2[1]-p1[1],
-        sb
-      });
-    }
-    
-    // Pas 2: intersectăm laturile consecutive translatate
-    // Intersecția a două drepte: P1+t*D1 = P2+s*D2
-    function lineIntersect(l1, l2){
-      if(!l1||!l2) return null;
-      const dx=l2.px-l1.px, dy=l2.py-l1.py;
-      const denom=l1.dx*l2.dy-l1.dy*l2.dx;
-      if(Math.abs(denom)<1e-12) return null; // paralele
-      const t=(dx*l2.dy-dy*l2.dx)/denom;
-      return [l1.px+t*l1.dx, l1.py+t*l1.dy];
-    }
-    
-    const newRing = [];
-    const n=offsetLines.length;
-    for(let i=0;i<n;i++){
-      const l1=offsetLines[i];
-      const l2=offsetLines[(i+1)%n];
-      if(!l1||!l2){
-        // Latură lipsă → folosim punctul original translatat
-        if(l1){
-          const sb=l1.sb;
-          const p=ring[i+1];
-          const midX=(ring[i][0]+p[0])/2, midY=(ring[i][1]+p[1])/2;
-          const vx=(midX-cx)*mLng, vy=(midY-cy)*mLat;
-          const vlen=Math.sqrt(vx*vx+vy*vy);
-          if(vlen>0) newRing.push([p[0]+(vx/vlen)*(sb/mLng), p[1]+(vy/vlen)*(sb/mLat)]);
-          else newRing.push(p);
-        }
-        continue;
-      }
-      const pt=lineIntersect(l1,l2);
-      if(pt) newRing.push(pt);
-    }
-    
-    if(newRing.length<3){
-      // Fallback: buffer negativ uniform cu minimul setback-urilor
-      const minSb=Math.min(rf,rl,rr,rs);
-      if(minSb>0){
-        const buf=turf.buffer(pf,-minSb,{units:'meters',steps:1});
-        if(buf?.geometry&&turf.area(buf)>pA*0.02) return buf;
-      }
-      return pf;
-    }
-    
-    // Inchidem inelul
-    newRing.push(newRing[0]);
-    
-    let zone={type:'Feature',geometry:{type:'Polygon',coordinates:[newRing]},properties:{}};
-    
-    // Verificam ca zona e valida si in interiorul parcelei
-    try{
-      const inter=turf.intersect(pf, zone);
-      if(inter?.geometry && turf.area(inter)>pA*0.01) zone=inter;
-    }catch(e){}
-    
-    // ── POT: dacă zona depășește SC_max ───────────────────────────────────
-    const zA=turf.area(zone);
-    if(SC_max>0&&SC_max<zA-1){
-      // Scalare POT directionala: laturile cu setback=0 raman fixe pe limita
-      // Scalarea se face spre laturile cu setback>0 (nu centric)
-      const fixedSides = sides.filter(s=>{
-        const sb = frontSet.has(s.i)?rf:s.i===postIdx?rs:
-          ((s.mx-cx)*mLng*Math.sin(brg*Math.PI/180)+(s.my-cy)*mLat*Math.cos(brg*Math.PI/180)>0?rl:rr);
-        return sb===0; // latura fixa = calcan = setback 0
-      });
-      
-      if(fixedSides.length===0){
-        // Fara laturi fixe: scalare centrica clasica
-        const sf=Math.sqrt(SC_max/zA);
-        try{
-          const sc=turf.transformScale(zone,Math.max(0.05,sf),{origin:turf.centerOfMass(zone)});
-          if(sc?.geometry&&turf.area(sc)>0.5) zone=sc;
-        }catch(e){}
-      } else {
-        // Cu laturi fixe: scalare directionala
-        // Gasim un punct "ancora" pe laturile fixe (centrul lor)
-        // si scalăm de la acel punct
-        try{
-          // Ancora = centrul geometric al laturilor fixe
-          let ancX=0,ancY=0,ancN=0;
-          fixedSides.forEach(s=>{ancX+=s.mx;ancY+=s.my;ancN++;});
-          if(ancN>0){
-            ancX/=ancN; ancY/=ancN;
-            const sf=Math.sqrt(SC_max/zA);
-            const anchor=turf.point([ancX,ancY]);
-            const sc=turf.transformScale(zone,Math.max(0.05,sf),{origin:anchor});
-            if(sc?.geometry&&turf.area(sc)>0.5) zone=sc;
-          }
-        }catch(e){
-          // Fallback centrica
-          const sf=Math.sqrt(SC_max/zA);
-          try{
-            const sc=turf.transformScale(zone,Math.max(0.05,sf),{origin:turf.centerOfMass(zone)});
-            if(sc?.geometry&&turf.area(sc)>0.5) zone=sc;
-          }catch(e2){}
-        }
-      }
-    }
-
-    // ── Forma clădire: pătrat/dreptunghi/L/U/T/curte/bara ─────────────────
-    if(AEDIS.forma && AEDIS.forma !== 'auto'){
-      try{
-        const bbox = turf.bbox(zone);
-        const zCx = (bbox[0]+bbox[2])/2;
-        const zCy = (bbox[1]+bbox[3])/2;
-        const zA2 = turf.area(zone);
-        const mLng2 = 111320*Math.cos(zCy*Math.PI/180);
-        const mLat2 = 111320;
-        const bboxW = (bbox[2]-bbox[0])*mLng2;
-        const bboxH = (bbox[3]-bbox[1])*mLat2;
-        const brg2 = (S.bearing||0)*Math.PI/180;
-        const cosB=Math.cos(brg2), sinB=Math.sin(brg2);
-        const ratio = Math.max(0.2, Math.min(0.5, AEDIS.formaRatio||0.35));
-        const rot=([dx,dy])=>[zCx+(dx*cosB-dy*sinB)/mLng2, zCy+(dx*sinB+dy*cosB)/mLat2];
-        const poly=(pts)=>({type:'Feature',geometry:{type:'Polygon',coordinates:[[...pts.map(rot),rot(pts[0])]]},properties:{}});
-        let shapeFeat=null;
-        const W=bboxW*0.9, H=bboxH*0.9;
-        const hw=W/2, hh=H/2;
-        const t=ratio;
-        if(AEDIS.forma==='patrat'){
-          const s=Math.min(Math.sqrt(zA2),W,H); const hs=s/2;
-          shapeFeat=poly([[-hs,-hh],[hs,-hh],[hs,hh],[-hs,hh]]);
-        }else if(AEDIS.forma==='dreptunghi'){
-          shapeFeat=poly([[-hw,-hh],[hw,-hh],[hw,hh],[-hw,hh]]);
-        }else if(AEDIS.forma==='bara'){
-          const bw=Math.min(hw,hh*1.5), bh=Math.min(hh,hw/1.5)*0.4;
-          shapeFeat=poly([[-bw,-bh],[bw,-bh],[bw,bh],[-bw,bh]]);
-        }else if(AEDIS.forma==='L'){
-          const tw=W*t, th=H*t;
-          shapeFeat=poly([[-hw,-hh],[hw,-hh],[hw,-hh+th],[-hw+tw,-hh+th],[-hw+tw,hh],[-hw,hh]]);
-        }else if(AEDIS.forma==='U'){
-          const tw=W*t, th=H*t;
-          shapeFeat={type:'Feature',geometry:{type:'Polygon',coordinates:[[
-            rot([-hw,-hh]),rot([hw,-hh]),rot([hw,hh]),rot([hw-tw,hh]),rot([hw-tw,-hh+th]),
-            rot([-hw+tw,-hh+th]),rot([-hw+tw,hh]),rot([-hw,hh]),rot([-hw,-hh])
-          ]]},properties:{}};
-        }else if(AEDIS.forma==='T'){
-          const tw=W*t, th=H*t;
-          shapeFeat=poly([[-hw,-hh],[hw,-hh],[hw,-hh+th],[tw/2,-hh+th],[tw/2,hh],[-tw/2,hh],[-tw/2,-hh+th],[-hw,-hh+th]]);
-        }else if(AEDIS.forma==='curte'){
-          const tw=W*t, th=H*t;
-          const outer=[[-hw,-hh],[hw,-hh],[hw,hh],[-hw,hh],[-hw,-hh]];
-          const inner=[[-(hw-tw),-(hh-th)],[hw-tw,-(hh-th)],[hw-tw,hh-th],[-(hw-tw),hh-th],[-(hw-tw),-(hh-th)]];
-          shapeFeat={type:'Feature',geometry:{type:'Polygon',coordinates:[outer.map(rot),inner.map(rot).reverse()]},properties:{}};
-        }
-        if(shapeFeat?.geometry){
-          const shapeArea=turf.area(shapeFeat);
-          if(shapeArea<=zA2*3){
-            try{
-              const isct=turf.intersect(shapeFeat,zone);
-              if(isct?.geometry&&turf.area(isct)>zA2*0.05) return isct;
-            }catch(e3){}
-            return shapeFeat;
-          } // else: aria prea mare → fallback la zone
-        }
-      }catch(e2){ console.warn('buildFP forma error:', e2.message); }
-    }
-
-
-    return zone;
-  }catch(e){
-    console.warn('buildFP error:',e.message);
-    return {type:'Feature',geometry:geom,properties:{}};
-  }
-}
 
 
 function buildFP(geom, paramsOrUtr){
@@ -3427,13 +3174,19 @@ function buildFP(geom, paramsOrUtr){
     let zone = {type:'Feature', geometry:geom, properties:{}};
 
     for(const side of sides){
-      const setback = frontSet.has(side.i) ? rf
-        : side.i===postIdx ? rs
-        : (() => {
-            const vx=(side.mx-cx)*mLng, vy=(side.my-cy)*mLat;
-            const fx=Math.sin(brg*Math.PI/180), fy=Math.cos(brg*Math.PI/180);
-            return (fx*vy-fy*vx)>0 ? rl : rr;
-          })();
+      // ── Aliniament per latură (mod avansat) sau clasic rf/rl/rs ──────────
+      let setback;
+      if(S.vol.perSideMode && S.vol.sideSetbacks && side.i in S.vol.sideSetbacks){
+        setback = Math.max(0, Number(S.vol.sideSetbacks[side.i])||0);
+      } else {
+        setback = frontSet.has(side.i) ? rf
+          : side.i===postIdx ? rs
+          : (() => {
+              const vx=(side.mx-cx)*mLng, vy=(side.my-cy)*mLat;
+              const fx=Math.sin(brg*Math.PI/180), fy=Math.cos(brg*Math.PI/180);
+              return (fx*vy-fy*vx)>0 ? rl : rr;
+            })();
+      }
 
       if(setback<=0) continue; // calcan - nu taiem
 
@@ -3482,8 +3235,10 @@ function buildFP(geom, paramsOrUtr){
     }
 
     // ── POT: daca edificabilul depaseste SC_max, scalare centrica ─────────
-    const zA=turf.area(zone);
-    if(SC_max>0 && SC_max<zA-1){
+    // DAR: daca toate aliniamentele sunt 0 (calcan complet), edificabilul = intreaga parcela
+    const allCalcan = [rf,rl,rr,rs].every(v=>v===0);
+
+    if(!allCalcan && SC_max>0 && SC_max<zA-1){
       const sf=Math.sqrt(SC_max/zA);
       try{
         const sc=turf.transformScale(zone,Math.max(0.05,sf),{origin:turf.centerOfMass(zone)});
@@ -3491,10 +3246,8 @@ function buildFP(geom, paramsOrUtr){
       }catch(e){}
     }
 
-    // ── Factor amprentă design (vizual, nu urbanistic) ────────────────────
-    // Nu aplicam reducerea daca toate aliniamentele sunt 0 (calcan pe toate laturile)
-    const allCalcan = [rf,rl,rr,rs].every(v=>v===0);
-    const fpF=allCalcan ? 1.0 : Math.max(0.5,Math.min(1,Number(S.vol.fpF||0.95)));
+    // ── Factor amprentă design (fpF) — nu aplicam daca aliniamente=0 ──────
+    const fpF = allCalcan ? 1.0 : Math.max(0.5,Math.min(1,Number(S.vol.fpF||0.95)));
     if(fpF<0.98){
       try{
         const sc2=turf.transformScale(zone,fpF,{origin:turf.centerOfMass(zone)});
@@ -5183,14 +4936,81 @@ function htmlProiect(){
   '<div class="g2">'+pf('POT max (%)','pot','%','Procent ocupare teren — maxim')+pf('CUT max (mp.ADC/mp)','cut','','Coeficient utilizare — maxim')+'</div>',
   '<div class="g2">'+pf('Nr. niveluri max','niv','et.','Număr maxim de niveluri admis')+'<div>'+'<div class="ml" style="display:flex;justify-content:space-between">'+'<span>H total (m)</span>'+'<span style="color:#475569;font-size:10px">PUG: <b>'+(r.h||'-')+'m</b></span>'+'</div>'+'<div class="inp" style="background:#04090f;color:#d4af37;font-weight:700;cursor:default;padding:10px 12px;margin-bottom:0">'+((pN(ap.params?.niv)||1)*Number(S.vol.hNiv||3)).toFixed(1)+' m = '+(pN(ap.params?.niv)||1)+' et. × '+Number(S.vol.hNiv||3)+'m'+(r.h&&((pN(ap.params?.niv)||1)*Number(S.vol.hNiv||3))>r.h?' ⚠ PUG: '+r.h+'m':'')+'</div></div></div>',
   '<div class="section" style="margin-top:8px">Aliniamente minime (metri de la construcție la limita terenului)</div>',
-  '<div class="g2">',
-  pf('Față stradă (rf)','rf','m','Distanța minimă de la construcție la limita orientată spre stradă'),
-  pf('Posterior / spate (rs)','rs','m','Distanța minimă de la construcție la limita posterioară'),
+  // Toggle mod clasic / per latură
+  '<div style="display:flex;gap:6px;margin-bottom:8px;align-items:center">'+
+    '<button onclick="S.vol.perSideMode=false;updateMap();renderTab(\'proiect\')" '+
+      'style="flex:1;padding:5px 8px;border-radius:7px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid '+(S.vol.perSideMode?'rgba(255,255,255,.15)':'#d4af37')+';background:'+(S.vol.perSideMode?'rgba(11,18,32,.6)':'rgba(212,175,55,.2)')+';color:'+(S.vol.perSideMode?'#64748b':'#d4af37')+'">'+
+      '⚡ Mod clasic (rf/rs/rl)</button>'+
+    '<button onclick="S.vol.perSideMode=true;if(!S.vol.sideSetbacks)S.vol.sideSetbacks={};updateMap();renderTab(\'proiect\')" '+
+      'style="flex:1;padding:5px 8px;border-radius:7px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid '+(S.vol.perSideMode?'#38bdf8':'rgba(255,255,255,.15)')+';background:'+(S.vol.perSideMode?'rgba(56,189,248,.15)':'rgba(11,18,32,.6)')+';color:'+(S.vol.perSideMode?'#38bdf8':'#64748b')+'">'+
+      '🔧 Per latură (avansat)</button>'+
   '</div>',
-  '<div class="g2">',
-  pf('Lateral stânga (rl)','rl','m','Distanța la limita laterală stângă (0 = construcție pe limita terenului / calcan)'),
-  pf('Lateral dreapta (rr)','rr','m','Distanța la limita laterală dreaptă (0 = calcan)'),
-  '</div>',
+  // Mod clasic
+  ...(S.vol.perSideMode ? [] : [
+    '<div class="g2">',
+    pf('Față stradă (rf)','rf','m','Distanța minimă de la construcție la limita orientată spre stradă'),
+    pf('Posterior / spate (rs)','rs','m','Distanța minimă de la construcție la limita posterioară'),
+    '</div>',
+    '<div class="g2">',
+    pf('Lateral stânga (rl)','rl','m','Distanța la limita laterală stângă (0 = construcție pe limita terenului / calcan)'),
+    pf('Lateral dreapta (rr)','rr','m','Distanța la limita laterală dreaptă (0 = calcan)'),
+    '</div>',
+  ]),
+  // Mod per latură
+  ...(S.vol.perSideMode && ap?.geo ? [
+    '<div class="help" style="margin-bottom:8px;color:#38bdf8">Setează aliniamentul pentru fiecare latură individual. 0 = calcan (pe limita proprietății). Laturile sunt numerotate în sensul acelor de ceasornic.</div>',
+    (()=>{
+      // Calculăm laturile parcelei
+      try{
+        const ring=ap.geo.geometry.type==='Polygon'
+          ? ap.geo.geometry.coordinates[0]
+          : ap.geo.geometry.coordinates[0][0];
+        if(!ring||ring.length<3) return '<div style="color:#f87171;font-size:10px">Geometrie invalidă</div>';
+        const cx=ring.reduce((s,c)=>s+c[0],0)/ring.length;
+        const cy2=ring.reduce((s,c)=>s+c[1],0)/ring.length;
+        const mLng2=111320*Math.cos(cy2*Math.PI/180);
+        const mLat2=111320;
+        const brg=S.bearing||0;
+        const FTHRESH=S.vol.frontCount>=3?150:S.vol.frontCount===2?110:65;
+
+        let html='<div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">';
+        for(let i=0;i<ring.length-1;i++){
+          const p1=ring[i],p2=ring[i+1];
+          const mx=(p1[0]+p2[0])/2, my=(p1[1]+p2[1])/2;
+          const dLn=(mx-cx)*mLng2, dLt=(my-cy2)*mLat2;
+          const dir=(Math.atan2(dLn,dLt)*180/Math.PI+360)%360;
+          let diff=((dir-brg)+360)%360;
+          if(diff>180)diff=360-diff;
+          const isFront=diff<FTHRESH;
+          const sideLen=Math.sqrt(Math.pow((p2[0]-p1[0])*mLng2,2)+Math.pow((p2[1]-p1[1])*mLat2,2));
+          const curVal=S.vol.sideSetbacks&&(i in S.vol.sideSetbacks)?S.vol.sideSetbacks[i]:'';
+          const defaultVal=isFront?(ap.params?.rf??REGULI[ap.utr]?.rf??5):(ap.params?.rs??REGULI[ap.utr]?.rs??5);
+          const sideColor=isFront?'#d4af37':'#60a5fa';
+          html+=`<div style="background:rgba(255,255,255,.04);border:1px solid ${sideColor}44;border-radius:7px;padding:7px">
+            <div style="font-size:9px;color:${sideColor};font-weight:700;margin-bottom:3px">
+              Latura ${i+1} ${isFront?'🟡 FRONT':''} · ${sideLen.toFixed(0)}m
+            </div>
+            <input type="number" min="0" max="30" step="0.5" value="${curVal}" placeholder="${defaultVal}"
+              style="width:100%;background:#04090f;border:1px solid rgba(255,255,255,.15);color:#e2e8f0;border-radius:5px;padding:4px 7px;font-size:12px"
+              oninput="if(!S.vol.sideSetbacks)S.vol.sideSetbacks={};S.vol.sideSetbacks[${i}]=+this.value||0;updateMap();if(S.vol.genDone){const f=buildVolume();setSource('vol-src',{type:'FeatureCollection',features:f});}">
+            <div style="font-size:8px;color:#475569;margin-top:2px">PUG implicit: ${defaultVal}m · 0=calcan</div>
+          </div>`;
+        }
+        html+='</div>';
+        html+=`<div style="margin-top:6px;display:flex;gap:5px">
+          <button onclick="S.vol.sideSetbacks={};updateMap();if(S.vol.genDone){const f=buildVolume();setSource('vol-src',{type:'FeatureCollection',features:f});}renderTab('proiect')"
+            style="flex:1;padding:5px;border:1px solid rgba(255,255,255,.15);background:rgba(11,18,32,.6);color:#94a3b8;border-radius:6px;font-size:10px;cursor:pointer">
+            🔄 Reset toate la implicit
+          </button>
+          <button onclick="${[...Array(ring.length-1).keys()].map(i=>'S.vol.sideSetbacks['+i+']=0;').join('')}updateMap();if(S.vol.genDone){const f=buildVolume();setSource('vol-src',{type:'FeatureCollection',features:f});}renderTab('proiect')"
+            style="flex:1;padding:5px;border:1px solid rgba(255,255,255,.15);background:rgba(11,18,32,.6);color:#94a3b8;border-radius:6px;font-size:10px;cursor:pointer">
+            ⬛ Toate calcan (0)
+          </button>
+        </div>`;
+        return html;
+      }catch(e){return '<div style="color:#f87171;font-size:10px">Eroare calcul laturi: '+e.message+'</div>';}
+    })(),
+  ] : []),
   '<div class="section" style="margin-top:8px">Spații verzi și parcaje (minime)</div>',
   '<div class="g2">'+pf('Spații verzi (%)','sv','%','% din suprafața terenului — reduce suprafața construibilă')+pf('Parcaje (loc/100mp)','pk','','Locuri parcare minime per 100mp')+'</div>',
   '<div class="btn-row" style="margin-top:10px">',
@@ -7606,7 +7426,10 @@ function showUATSelector(){
   const div=document.createElement('div');
   div.id='uat-selector';
   const mob=window.innerWidth<841;
-  div.style.cssText=`position:fixed;${mob?'bottom:72px;left:4px;right:4px':'top:56px;right:20px;width:400px'};z-index:9200;background:rgba(7,12,24,.97);border:1px solid rgba(212,175,55,.3);border-radius:14px;padding:0;max-height:82vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(0,0,0,.7);backdrop-filter:blur(16px);font-family:system-ui,sans-serif`;
+  const uatPanel=document.getElementById('panel');
+  const uatPanelVis=uatPanel&&uatPanel.offsetWidth>0&&getComputedStyle(uatPanel).display!=='none';
+  const uatRight=mob?null:(uatPanelVis?434:20);
+  div.style.cssText=`position:fixed;${mob?'bottom:72px;left:4px;right:4px':'top:56px;right:'+uatRight+'px;width:400px'};z-index:9200;background:rgba(7,12,24,.97);border:1px solid rgba(212,175,55,.3);border-radius:14px;padding:0;max-height:82vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(0,0,0,.7);backdrop-filter:blur(16px);font-family:system-ui,sans-serif`;
 
   // Grupăm pe regiuni
   const REGIUNI = {
@@ -12816,16 +12639,53 @@ let _bilantDragActive = false;
 let _bilantDragSide = null;
 
 // ── Toggle principal ───────────────────────────────────────────────────────
+// ── Gestionare panouri flotante — evitare suprapunere cu #panel ──────────
+function _floatPanelOpen(panelId, width){
+  // Când un panou flotant se deschide, împingem #panel la stânga
+  const panel = document.getElementById('panel');
+  if(!panel) return;
+  const panelVisible = panel.style.display !== 'none' && 
+                       getComputedStyle(panel).display !== 'none' &&
+                       panel.offsetWidth > 0;
+  if(panelVisible){
+    const offset = (width||440) + 10;
+    panel.style.right = offset + 'px';
+    panel.dataset.floatOffset = offset;
+  }
+}
+function _floatPanelClose(panelId){
+  // Când se închide panoul flotant, restaurăm #panel
+  // Verificăm că nu mai e niciun alt panou deschis
+  const otherOpen = ['lotizare-panel','bilant-panel','cimec-widget','uat-selector']
+    .filter(id => id !== panelId)
+    .some(id => {
+      const el = document.getElementById(id);
+      return el && el.offsetParent !== null;
+    });
+  if(!otherOpen){
+    const panel = document.getElementById('panel');
+    if(panel) panel.style.right = '0px';
+  }
+}
+
 function toggleBilant(){
   _bilantActive = !_bilantActive;
   const btn = document.getElementById('btnBilant');
   if(btn) btn.classList.toggle('on', _bilantActive);
-  if(_bilantActive) updateBilant();
-  else {
+  if(_bilantActive){
+    // Ascunde fp-src (portocaliu) când Bilanțul e activ — edificabil-src (verde) îl înlocuiește
+    try{map.setLayoutProperty('fp-fill','visibility','none');}catch(e){}
+    try{map.setLayoutProperty('fp-line','visibility','none');}catch(e){}
+    updateBilant();
+  } else {
+    // Restaurează fp-src
+    try{map.setLayoutProperty('fp-fill','visibility','visible');}catch(e){}
+    try{map.setLayoutProperty('fp-line','visibility','visible');}catch(e){}
     setSource('setback-src',{type:'FeatureCollection',features:[]});
     setSource('edificabil-src',{type:'FeatureCollection',features:[]});
     setSource('bilant-src',{type:'FeatureCollection',features:[]});
     document.getElementById('bilant-panel')?.remove();
+    _floatPanelClose('bilant-panel');
   }
 }
 
@@ -12926,9 +12786,13 @@ function _showBilantPanel(ap, parcelArea, edificabilArea, volArea, sdReal, param
   const isMobile = window.innerWidth < 841;
   const div = document.createElement('div');
   div.id = 'bilant-panel';
+  // Pe desktop: plasăm la stânga panoului lateral, în josul ecranului
+  const bPanel = document.getElementById('panel');
+  const bPanelVis = bPanel && bPanel.offsetWidth>0 && getComputedStyle(bPanel).display!=='none';
+  const bRight = isMobile ? null : (bPanelVis ? 434 : 20);
   div.style.cssText = `
     position:fixed;
-    ${isMobile?'bottom:72px;left:4px;right:4px;':'bottom:20px;right:20px;width:460px;'}
+    ${isMobile?'bottom:72px;left:4px;right:4px;':'bottom:20px;right:'+bRight+'px;width:460px;'}
     z-index:8500;background:rgba(7,12,24,.97);
     border:1px solid rgba(34,197,94,.3);border-radius:16px;
     padding:0;box-shadow:0 12px 40px rgba(0,0,0,.7);
@@ -13510,6 +13374,7 @@ function toggleLotizare(){
     ['lotizare-src','lotizare-drum-src','lotizare-label-src'].forEach(s=>
       setSource(s,{type:'FeatureCollection',features:[]}));
     document.getElementById('lotizare-panel')?.remove();
+    _floatPanelClose('lotizare-panel');
   }
 }
 
@@ -13518,9 +13383,15 @@ function _showLotizarePanel(){
   document.getElementById('lotizare-panel')?.remove();
   const ap = S.parcels[S.activeParcel??0];
   const mob = window.innerWidth<841;
+  const panelW = 440;
+  // Pe desktop: plasăm la stânga panoului lateral
+  const panel = document.getElementById('panel');
+  const panelVis = panel && panel.offsetWidth>0 && getComputedStyle(panel).display!=='none';
+  const rightPos = mob ? null : (panelVis ? (420+14) : 20);
+
   const div = document.createElement('div');
   div.id='lotizare-panel';
-  div.style.cssText=`position:fixed;${mob?'bottom:72px;left:4px;right:4px':'top:56px;right:20px;width:430px'};z-index:8600;background:rgba(7,12,24,.97);border:1px solid rgba(167,139,250,.35);border-radius:16px;padding:0;box-shadow:0 12px 48px rgba(0,0,0,.75);backdrop-filter:blur(16px);font-family:system-ui,sans-serif;max-height:${mob?'82':'88'}vh;overflow:hidden;display:flex;flex-direction:column`;
+  div.style.cssText=`position:fixed;${mob?'bottom:72px;left:4px;right:4px':'top:56px;right:'+rightPos+'px;width:'+panelW+'px'};z-index:8600;background:rgba(7,12,24,.97);border:1px solid rgba(167,139,250,.35);border-radius:16px;padding:0;box-shadow:0 12px 48px rgba(0,0,0,.75);backdrop-filter:blur(16px);font-family:system-ui,sans-serif;max-height:${mob?'82':'88'}vh;overflow:hidden;display:flex;flex-direction:column`;
 
   div.innerHTML=`
     <div style="padding:12px 16px 0;flex-shrink:0">
