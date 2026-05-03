@@ -13342,7 +13342,10 @@ const _LOT = {
     }
   },
 
-  // ── Editor circulații ─────────────────────────────────────────────────
+  // ── Override parametri per proiect ────────────────────────────────────
+  // Utilizatorul poate modifica orice parametru pentru sesiunea curentă
+  // Format: {individuala: {niv:3, sc:45, hMax:10}, bloc: {niv:5, ...}, ...}
+  tipOverride: {},
   // Fiecare drum = {id, tip, coords:[[lng,lat],[lng,lat],...], latime}
   // tip: 'principal' | 'secundar' | 'acces' | 'pietonal'
   _drumCustom: [],      // drumuri definite manual de utilizator
@@ -13403,8 +13406,8 @@ function _showLotizarePanel(){
       </div>
       ${!ap?'<div style="color:#f87171;font-size:10px;padding:4px 0 6px">⚠️ Selectați mai întâi o parcelă pe hartă!</div>':''}
       <div style="display:flex;gap:2px;background:rgba(255,255,255,.04);border-radius:8px;padding:3px" id="lot-tabs">
-        ${[['p','⚙ Param'],['c','🛣 Circulații'],['m','🏡 Mix'],['r','📊 Rezultat'],['f','💰 Financiar'],['x','📄 Export']].map(([id,l],i)=>`
-          <button onclick="_lotTab('${id}')" id="ltab-${id}" style="flex:1;border:none;background:${i===0?'rgba(167,139,250,.2)':'none'};color:${i===0?'#a78bfa':'#64748b'};border-radius:6px;padding:5px 1px;font-size:${mob?7:8}px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .15s">${l}</button>`).join('')}
+        ${[['p','⚙ Param'],['t','🏢 Tipuri'],['c','🛣 Circulații'],['m','🏡 Mix'],['r','📊 Rezultat'],['f','💰 Financiar'],['x','📄 Export']].map(([id,l],i)=>`
+          <button onclick="_lotTab('${id}')" id="ltab-${id}" style="flex:1;border:none;background:${i===0?'rgba(167,139,250,.2)':'none'};color:${i===0?'#a78bfa':'#64748b'};border-radius:6px;padding:5px 1px;font-size:${mob?6.5:7.5}px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .15s">${l}</button>`).join('')}
       </div>
     </div>
     <div id="lot-content" style="overflow-y:auto;padding:12px 16px;flex:1">${_lotHtmlParametri()}</div>
@@ -13425,7 +13428,7 @@ function _showLotizarePanel(){
 }
 
 function _lotTab(tab){
-  ['p','c','m','r','f','x'].forEach(t=>{
+  ['p','t','c','m','r','f','x'].forEach(t=>{
     const b=document.getElementById('ltab-'+t);
     if(!b) return;
     b.style.background = t===tab?'rgba(167,139,250,.2)':'none';
@@ -13433,13 +13436,26 @@ function _lotTab(tab){
   });
   const c=document.getElementById('lot-content');
   if(!c) return;
-  const map2={'p':_lotHtmlParametri,'c':_lotHtmlCirculatii,'m':_lotHtmlMix,'r':_lotHtmlRezultat,'f':_lotHtmlFinanciar,'x':_lotHtmlExport};
+  const map2={'p':_lotHtmlParametri,'t':_lotHtmlTipuri,'c':_lotHtmlCirculatii,'m':_lotHtmlMix,'r':_lotHtmlRezultat,'f':_lotHtmlFinanciar,'x':_lotHtmlExport};
   c.innerHTML = (map2[tab]||_lotHtmlParametri)();
 }
 
 // ─── TAB: Parametri ───────────────────────────────────────────────────────
 // ─── Helpers lotizare ────────────────────────────────────────────────────
-function _lotSetDemolare(){
+// ─── Helpers lotizare ────────────────────────────────────────────────────
+// Returnează parametrii efectivi per tip (override > default)
+function _lotGetTip(tipKey){
+  const def = _LOT.tipuri[tipKey]||_LOT.tipuri.individuala;
+  const ov  = _LOT.tipOverride[tipKey]||{};
+  return {...def, ...ov};
+}
+// Actualizare override + recalcul live
+function _lotSetTipParam(tipKey, param, val){
+  if(!_LOT.tipOverride[tipKey]) _LOT.tipOverride[tipKey]={};
+  _LOT.tipOverride[tipKey][param] = val;
+  // Recalcul live dacă planul e generat
+  if(_LOT._loturi.length>0) runLotizare();
+}
   // Setează toate aliniamentele la 0 — construcție pe limita proprietății
   const ap=S.parcels[S.activeParcel??0];
   if(!ap) return;
@@ -13521,6 +13537,135 @@ function _lotHtmlCirculatii(){
         • <b style="color:#94a3b8">Loturi de margine</b> se adaptează la forma parcelei
       </div>
     </div>`;
+}
+
+function _lotHtmlTipuri(){
+  return Object.entries(_LOT.tipuri).map(([key, def])=>{
+    const ov = _LOT.tipOverride[key]||{};
+    const t  = {...def, ...ov}; // parametri efectivi
+    const hasOverride = Object.keys(ov).length > 0;
+
+    // Calcul H total din niv + hNiv
+    const hNiv = ov.hNiv || def.hNiv || 3.0;
+    const hTotal = (t.niv * hNiv).toFixed(1);
+    const hParter = ov.hParter || def.hParter || 3.0;
+    const hRetras = ov.hasRetras !== undefined ? ov.hasRetras : false;
+
+    return `
+    <div style="background:rgba(255,255,255,.04);border:1px solid ${hasOverride?t.color+'66':'rgba(255,255,255,.07)'};border-radius:12px;padding:12px;margin-bottom:10px;border-left:3px solid ${t.color}">
+
+      <!-- Header tip -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:18px">${def.icon}</span>
+          <div>
+            <div style="color:#e2e8f0;font-size:12px;font-weight:800">${def.label}</div>
+            <div style="color:#475569;font-size:9px">${def.desc}</div>
+          </div>
+        </div>
+        ${hasOverride?`<button onclick="delete _LOT.tipOverride['${key}'];_lotTab('t')" style="font-size:9px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);color:#f87171;border-radius:5px;padding:2px 7px;cursor:pointer">↩ Reset</button>`:'<span style="font-size:8px;color:#334155">PUG implicit</span>'}
+      </div>
+
+      <!-- Regim înălțime -->
+      <div style="background:rgba(0,0,0,.25);border-radius:8px;padding:8px 10px;margin-bottom:8px">
+        <div style="font-size:9px;color:#d4af37;font-weight:700;text-transform:uppercase;margin-bottom:6px">Regim de înălțime</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px">
+
+          <!-- Nr. niveluri -->
+          <div>
+            <div style="font-size:9px;color:#64748b;margin-bottom:3px">Nr. niveluri (fără parter)</div>
+            <div style="display:flex;gap:3px;flex-wrap:wrap">
+              ${[0,1,2,3,4,5,6,7].map(n=>`
+                <button onclick="_lotSetTipParam('${key}','niv',${n+1});_lotTab('t')"
+                  style="padding:4px 7px;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;
+                  border:1px solid ${t.niv===(n+1)?t.color:'rgba(255,255,255,.12)'};
+                  background:${t.niv===(n+1)?t.color+'33':'rgba(11,18,32,.8)'};
+                  color:${t.niv===(n+1)?t.color:'#64748b'}">
+                  ${n===0?'P':('P+'+n+'E')}
+                </button>`).join('')}
+            </div>
+          </div>
+
+          <!-- Etaj retras -->
+          <div>
+            <div style="font-size:9px;color:#64748b;margin-bottom:3px">Etaj retras/mansardă</div>
+            <div style="display:flex;gap:4px">
+              <button onclick="_lotSetTipParam('${key}','hasRetras',false);_lotTab('t')"
+                style="flex:1;padding:5px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;
+                border:1px solid ${!hRetras?t.color:'rgba(255,255,255,.12)'};
+                background:${!hRetras?t.color+'22':'rgba(11,18,32,.8)'};
+                color:${!hRetras?t.color:'#64748b'}">Fără</button>
+              <button onclick="_lotSetTipParam('${key}','hasRetras',true);_lotTab('t')"
+                style="flex:1;padding:5px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;
+                border:1px solid ${hRetras?t.color:'rgba(255,255,255,.12)'};
+                background:${hRetras?t.color+'22':'rgba(11,18,32,.8)'};
+                color:${hRetras?t.color:'#64748b'}">+1 Retras</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Înălțimi etaje -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <div>
+            <div style="font-size:9px;color:#64748b;margin-bottom:3px">H parter (m)</div>
+            <input type="number" min="2.5" max="6" step="0.1" value="${hParter}"
+              style="width:100%;background:#04090f;border:1px solid rgba(255,255,255,.15);color:#e2e8f0;border-radius:5px;padding:5px 8px;font-size:12px"
+              oninput="_lotSetTipParam('${key}','hParter',+this.value)">
+          </div>
+          <div>
+            <div style="font-size:9px;color:#64748b;margin-bottom:3px">H etaj curent (m)</div>
+            <input type="number" min="2.5" max="5" step="0.1" value="${hNiv}"
+              style="width:100%;background:#04090f;border:1px solid rgba(255,255,255,.15);color:#e2e8f0;border-radius:5px;padding:5px 8px;font-size:12px"
+              oninput="_lotSetTipParam('${key}','hNiv',+this.value);_lotTab('t')">
+          </div>
+        </div>
+
+        <!-- H total calculat -->
+        <div style="margin-top:6px;background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.2);border-radius:6px;padding:5px 8px;display:flex;justify-content:space-between">
+          <span style="font-size:9px;color:#64748b">H total estimat:</span>
+          <span style="color:#d4af37;font-size:11px;font-weight:800">
+            ${(parseFloat(hParter) + Math.max(0,t.niv-1)*parseFloat(hNiv) + (hRetras?2.5:0)).toFixed(1)}m
+            ${hRetras?' (+etaj retras)':''}
+          </span>
+        </div>
+      </div>
+
+      <!-- Suprafețe și retrageri -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px">
+        <div>
+          <div style="font-size:9px;color:#64748b;margin-bottom:3px">POT lot (%)</div>
+          <input type="number" min="10" max="100" step="5" value="${t.sc}"
+            style="width:100%;background:#04090f;border:1px solid rgba(255,255,255,.15);color:#e2e8f0;border-radius:5px;padding:4px 7px;font-size:12px"
+            oninput="_lotSetTipParam('${key}','sc',+this.value)">
+        </div>
+        <div>
+          <div style="font-size:9px;color:#64748b;margin-bottom:3px">Ret. față (m)</div>
+          <input type="number" min="0" max="20" step="0.5" value="${t.retF}"
+            style="width:100%;background:#04090f;border:1px solid rgba(255,255,255,.15);color:#e2e8f0;border-radius:5px;padding:4px 7px;font-size:12px"
+            oninput="_lotSetTipParam('${key}','retF',+this.value)">
+        </div>
+        <div>
+          <div style="font-size:9px;color:#64748b;margin-bottom:3px">Sup. utilă/ap (mp)</div>
+          <input type="number" min="30" max="300" step="5" value="${t.suprafUtila}"
+            style="width:100%;background:#04090f;border:1px solid rgba(255,255,255,.15);color:#e2e8f0;border-radius:5px;padding:4px 7px;font-size:12px"
+            oninput="_lotSetTipParam('${key}','suprafUtila',+this.value)">
+        </div>
+      </div>
+
+      <!-- Rezumat regim -->
+      <div style="margin-top:8px;padding:6px 8px;background:rgba(255,255,255,.03);border-radius:6px;font-size:9px;color:#64748b">
+        Regim: <b style="color:#94a3b8">${t.niv===1?'Parter':'P+'+(t.niv-1)+'E'}${hRetras?'+Retras':''}</b>
+        · H≈<b style="color:#d4af37">${(parseFloat(hParter) + Math.max(0,t.niv-1)*parseFloat(hNiv) + (hRetras?2.5:0)).toFixed(1)}m</b>
+        · POT <b style="color:#94a3b8">${t.sc}%</b>
+        · <b style="color:#94a3b8">${t.suprafUtila}mp/ap</b>
+        · Retragere față <b style="color:#94a3b8">${t.retF}m</b>
+      </div>
+    </div>`;
+  }).join('') +
+  `<button onclick="Object.keys(_LOT.tipuri).forEach(k=>_LOT.tipOverride[k]={});_lotTab('t')"
+    style="width:100%;padding:8px;background:rgba(100,116,139,.1);border:1px solid rgba(100,116,139,.2);color:#64748b;border-radius:8px;font-size:10px;cursor:pointer;margin-top:4px">
+    ↩ Reset toți parametrii la valorile implicite
+  </button>`;
 }
 
 function _lotHtmlParametri(){
@@ -13844,7 +13989,7 @@ function runLotizare(){
     const terenLoturi=loturi.reduce((s,l)=>{try{return s+turf.area(l);}catch(e){return s;}},0);
     const terenDrum=Math.max(0,fpArea-terenLoturi);
     const eficienta=terenLoturi/Math.max(1,fpArea);
-    const totalUnitati=Object.entries(loturiPerTip).reduce((s,[k,n])=>s+(n*(_LOT.tipuri[k]?.niv||1)),0);
+    const totalUnitati=Object.entries(loturiPerTip).reduce((s,[k,n])=>s+(n*(_lotGetTip(k)?.niv||1)),0);
 
     // Financiar
     const utr=ap.utr||'default';
@@ -13853,7 +13998,7 @@ function runLotizare(){
     let costConstrTotal=0,venituriTotal=0;
     const perTip={};
     Object.entries(loturiPerTip).forEach(([k,count])=>{
-      const t=_LOT.tipuri[k];if(!t||count===0)return;
+      const t=_lotGetTip(k);if(!t||count===0)return;
       const unitati=count*t.niv;
       const sdTotal=count*t.suprafUtila*t.niv;
       const scMax=count*(_LOT.lotAria*t.sc/100);
@@ -14128,7 +14273,7 @@ function _genLotizareGeom(fpFeat, loturiPerTip, drumFract){
       const x0=bbox2[0]+c*lotW;
       const x1=x0+lotW;
       const tip=lista[idx];
-      const t=_LOT.tipuri[tip]||_LOT.tipuri.individuala;
+      const t=_lotGetTip(tip)||_LOT.tipuri.individuala;
 
       const lotPoly={type:'Feature',geometry:{type:'Polygon',coordinates:[[
         [x0,y0],[x1,y0],[x1,y1],[x0,y1],[x0,y0]
