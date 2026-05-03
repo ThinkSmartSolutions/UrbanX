@@ -1025,78 +1025,85 @@ function buildFP(geom, paramsOrUtr){
     const postIdx = nonFront.length>0
       ? nonFront.reduce((a,b)=>a.diff>b.diff?a:b).i : -1;
 
-    // ── Edificabil = parcela minus benzile de retragere ───────────────────
-    // METODA CORECTA: pentru fiecare latura aplicam o banda de excludere
-    // Banda e trimisa perpendicular pe latura, cu latimea = setback-ul
-    // Scadem TOATE benzile din parcela simultan (nu secvential)
-    // Asta produce O SINGURA zona construibila continua
+    // ── Edificabil = parcela minus retrageri ─────────────────────────────
+    // METODA ROBUSTA: buffer negativ uniform cu valoarea minima,
+    // plus difference pentru laturile cu setback mai mare.
+    // Buffer negativ functioneaza corect pe orice forma de parcela.
 
+    // Calculam setback-ul per latura
+    const sideSetbacks = sides.map(side => {
+      if(S.vol.perSideMode && S.vol.sideSetbacks && side.i in S.vol.sideSetbacks){
+        return Math.max(0, Number(S.vol.sideSetbacks[side.i])||0);
+      }
+      if(frontSet.has(side.i)) return rf;
+      if(side.i===postIdx) return rs;
+      const vx=(side.mx-cx)*mLng, vy=(side.my-cy)*mLat;
+      const fx=Math.sin(brg*Math.PI/180), fy=Math.cos(brg*Math.PI/180);
+      return (fx*vy-fy*vx)>0 ? rl : rr;
+    });
+
+    const allCalcanCheck = sideSetbacks.every(s=>s===0);
     let zone = {type:'Feature', geometry:geom, properties:{}};
 
-    for(const side of sides){
-      // ── Aliniament per latură (mod avansat) sau clasic rf/rl/rs ──────────
-      let setback;
-      if(S.vol.perSideMode && S.vol.sideSetbacks && side.i in S.vol.sideSetbacks){
-        setback = Math.max(0, Number(S.vol.sideSetbacks[side.i])||0);
-      } else {
-        setback = frontSet.has(side.i) ? rf
-          : side.i===postIdx ? rs
-          : (() => {
-              const vx=(side.mx-cx)*mLng, vy=(side.my-cy)*mLat;
-              const fx=Math.sin(brg*Math.PI/180), fy=Math.cos(brg*Math.PI/180);
-              return (fx*vy-fy*vx)>0 ? rl : rr;
-            })();
+    if(!allCalcanCheck){
+      // PASUL 1: buffer negativ cu valoarea minima (cel mai mic setback > 0)
+      const minSb = Math.min(...sideSetbacks.filter(s=>s>0));
+      if(minSb > 0){
+        try{
+          const buf = turf.buffer(zone, -minSb, {units:'meters'});
+          if(buf?.geometry && turf.area(buf) > pA*0.01) zone = buf;
+        }catch(e){ console.warn('buffer negativ esuat:', e.message); }
       }
 
-      if(setback<=0) continue; // calcan - nu taiem
+      // PASUL 2: pentru laturile cu setback > minSb, aplicam difference suplimentar
+      for(let si=0; si<sides.length; si++){
+        const side = sides[si];
+        const sb = sideSetbacks[si];
+        const extraSb = sb - minSb;
+        if(extraSb <= 0.1) continue; // deja acoperit de buffer
 
-      try{
-        // Vector perpendicular spre INTERIOR (spre centru)
-        const {p1,p2} = side;
-        const dx=(p2[0]-p1[0])*mLng, dy=(p2[1]-p1[1])*mLat;
-        const len=Math.sqrt(dx*dx+dy*dy);
-        if(len<0.01) continue;
-        let nx=-dy/len, ny=dx/len;
-        // Asiguram ca normala e spre centru
-        if(nx*(cx-p1[0])*mLng + ny*(cy-p1[1])*mLat < 0){nx=-nx;ny=-ny;}
-        // Setback in grade geografice
-        const sbx=nx*setback/mLng, sby=ny*setback/mLat;
-        // Extensie laterala sa acopere colturi
-        const ext=0.001;
-        const ux=(p2[0]-p1[0])/(len/mLng)*ext;
-        const uy=(p2[1]-p1[1])/(len/mLat)*ext;
-        // Banda de excludere
-        const band={type:'Feature',geometry:{type:'Polygon',coordinates:[[
-          [p1[0]-ux, p1[1]-uy],
-          [p2[0]+ux, p2[1]+uy],
-          [p2[0]+ux+sbx, p2[1]+uy+sby],
-          [p1[0]-ux+sbx, p1[1]-uy+sby],
-          [p1[0]-ux, p1[1]-uy]
-        ]]},properties:{}};
-
-        const diff = turf.difference(zone, band);
-        // Acceptam rezultatul doar daca e un singur polygon (nu fragmenteaza)
-        if(diff?.geometry){
-          const tp = diff.geometry.type;
-          if(tp==='Polygon'){
-            if(turf.area(diff)>pA*0.02) zone=diff;
-          } else if(tp==='MultiPolygon'){
-            // Luam cel mai mare fragment
-            const biggest = diff.geometry.coordinates.reduce((a,b)=>{
-              const fa={type:'Feature',geometry:{type:'Polygon',coordinates:a},properties:{}};
-              const fb={type:'Feature',geometry:{type:'Polygon',coordinates:b},properties:{}};
-              return turf.area(fa)>=turf.area(fb)?a:b;
-            });
-            const bigFeat={type:'Feature',geometry:{type:'Polygon',coordinates:biggest},properties:{}};
-            if(turf.area(bigFeat)>pA*0.02) zone=bigFeat;
+        try{
+          const {p1,p2} = side;
+          const dx=(p2[0]-p1[0])*mLng, dy=(p2[1]-p1[1])*mLat;
+          const len=Math.sqrt(dx*dx+dy*dy);
+          if(len<0.01) continue;
+          let nx=-dy/len, ny=dx/len;
+          if(nx*(cx-p1[0])*mLng + ny*(cy-p1[1])*mLat < 0){nx=-nx;ny=-ny;}
+          // Banda suplimentara (diferenta de setback)
+          const sbx=nx*sb/mLng, sby=ny*sb/mLat;
+          const ext=0.001;
+          const ux=(p2[0]-p1[0])/(len/mLng)*ext;
+          const uy=(p2[1]-p1[1])/(len/mLat)*ext;
+          const band={type:'Feature',geometry:{type:'Polygon',coordinates:[[
+            [p1[0]-ux, p1[1]-uy],
+            [p2[0]+ux, p2[1]+uy],
+            [p2[0]+ux+sbx, p2[1]+uy+sby],
+            [p1[0]-ux+sbx, p1[1]-uy+sby],
+            [p1[0]-ux, p1[1]-uy]
+          ]]},properties:{}};
+          const diff = turf.difference(zone, band);
+          if(diff?.geometry){
+            const tp = diff.geometry.type;
+            if(tp==='Polygon'){
+              if(turf.area(diff)>pA*0.01) zone=diff;
+            } else if(tp==='MultiPolygon'){
+              const biggest = diff.geometry.coordinates.reduce((a,b)=>{
+                const fa={type:'Feature',geometry:{type:'Polygon',coordinates:a},properties:{}};
+                const fb={type:'Feature',geometry:{type:'Polygon',coordinates:b},properties:{}};
+                return turf.area(fa)>=turf.area(fb)?a:b;
+              });
+              const bigFeat={type:'Feature',geometry:{type:'Polygon',coordinates:biggest},properties:{}};
+              if(turf.area(bigFeat)>pA*0.01) zone=bigFeat;
+            }
           }
-        }
-      }catch(e){}
+        }catch(e){}
+      }
     }
 
     // ── POT: daca edificabilul depaseste SC_max, scalare centrica ─────────
     // DAR: daca toate aliniamentele sunt 0 (calcan complet), edificabilul = intreaga parcela
-    const allCalcan = [rf,rl,rr,rs].every(v=>v===0);
+    const allCalcan = allCalcanCheck;
+    const zA = turf.area(zone);
 
     if(!allCalcan && SC_max>0 && SC_max<zA-1){
       const sf=Math.sqrt(SC_max/zA);
