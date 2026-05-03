@@ -538,6 +538,12 @@ canvas#c2d{width:100%;height:100%;display:block}
 .cod-auriu{color:#fbbf24;font-family:monospace;background:rgba(251,191,36,.08);padding:1px 4px;border-radius:3px}
 .cod-verde{color:#4ade80;font-family:monospace;background:rgba(74,222,128,.08);padding:1px 4px;border-radius:3px}
 .step-txt{color:#94a3b8;font-size:11px;line-height:1.6}
+.adm-guide-header{font-size:13px;font-weight:800;color:#d4af37;margin-bottom:10px;padding:10px 14px;background:rgba(212,175,55,.06);border:1px solid rgba(212,175,55,.2);border-radius:10px}
+.adm-guide-sec{background:#080f1c;border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:14px;margin-bottom:8px}
+.adm-guide-sec-title{font-size:12px;font-weight:800;margin-bottom:10px}
+.adm-guide-step{display:flex;gap:10px;margin-bottom:7px;align-items:flex-start}
+.adm-guide-num{background:rgba(255,255,255,.06);color:#64748b;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;margin-top:1px}
+.adm-guide-txt{color:#94a3b8;font-size:11px;line-height:1.6}
 </style>
 </head>
 <body>
@@ -17873,65 +17879,71 @@ function _admRenderUAT(body){
 }
 
 function _admRenderGuide(body){
-  body.innerHTML=`
-    <div style="background:rgba(212,175,55,.06);border:1px solid rgba(212,175,55,.2);border-radius:10px;padding:14px;margin-bottom:4px">
-      <div style="font-size:13px;font-weight:800;color:#d4af37;margin-bottom:6px">📖 Ghid complet administrator UrbanX</div>
-      <div style="font-size:10px;color:#64748b">Referință rapidă pentru toate operațiunile administrative</div>
-    </div>
+  const S = [
+    {t:'Adaugare UAT nou — flux complet GitHub', c:'#38bdf8', ico:'Map',
+     steps:[
+      'Obtii datele de la primarie sau OCPI: harta PUG (SHP/DXF/PDF georef.) + Regulamentul Local de Urbanism (RLU) in format CSV/Excel/Word.',
+      'Convertesti PUG in QGIS: Layer > Export > Save Features As > GeoJSON, CRS: EPSG:4326 (WGS84). Camp obligatoriu in attributes: utr (codul zonei, ex: P1, CM, AI2A).',
+      'Generezi reguli.json din CSV-ul RLU. Script in repo: tools/gen_reguli.py pug_reguli.csv > reguli.json',
+      'Generezi cadastru_index.json din exportul ANCPI: tools/gen_cadastru_index.py export_ancpi.csv > cadastru_index.json',
+      'Creezi folderul in GitHub: in repo > Add file > Create new file > scrii data/municipiul-bacau/meta.json (GitHub creeaza automat folderul).',
+      'Urci cele 4 fisiere in data/{uat-id}/: pug.geojson, cadastru_index.json, reguli.json, meta.json',
+      'Actualizezi UAT_REGISTRY in index.html: schimbi status:"empty" in status:"complet" si completezi pugFile si cadastruIndex.',
+      'GitHub Pages se actualizeaza automat in 1-2 minute dupa push. Testezi: selectezi UAT-ul din butonul Iasi > PUG se incarca pe harta.',
+    ]},
+    {t:'Structura folderelor in GitHub repo', c:'#a78bfa', ico:'Folder',
+     steps:[
+      'data/municipiul-iasi/ — date complete existente (pug.geojson, cadastru_index.json, reguli.json)',
+      'data/municipiul-bacau/ — de creat cand ai datele',
+      'data/municipiul-suceava/ — de creat cand ai datele',
+      'tools/ — scripturi Python pentru conversie (gen_reguli.py, gen_cadastru_index.py, validate_pug.py)',
+      'NU mai pune fisiere direct in root — fisierele vechi sunt mentinute doar ca fallback temporar.',
+    ]},
+    {t:'Format fisiere — referinta rapida', c:'#4ade80', ico:'File',
+     steps:[
+      'pug.geojson — FeatureCollection de Polygon/MultiPolygon. Camp obligatoriu: utr. Optional: denumire, regim_h, indici.',
+      'cadastru_index.json — obiect JSON simplu: {"NR_CAD":[lng,lat],...}. Dimensiune tipica: 1-5MB pentru un municipiu.',
+      'reguli.json — obiect JSON: {"UTR":{"d":"desc","pot":40,"cut":2.0,"niv":4,"h":16,"rf":5,"rl":3,"rs":5,"sv":25,"pk":1}}',
+      'meta.json — info UAT: {"id":"municipiul-bacau","label":"Municipiul Bacau","judet":"Bacau","status":"complet","data_actualizare":"2024-01"}',
+    ]},
+    {t:'Actualizare date existente', c:'#fbbf24', ico:'Refresh',
+     steps:[
+      'Inlocuiesti fisierul direct in GitHub: navigezi la data/{uat-id}/pug.geojson > Edit (creion) sau Upload > Commit changes.',
+      'SAU prin git: git add data/municipiul-iasi/pug.geojson && git commit -m "Update PUG Iasi v2" && git push',
+      'GitHub Pages se actualizeaza automat. Utilizatorii vad noile date dupa Ctrl+Shift+R (hard refresh).',
+      'Daca actualizezi reguli.json, schimbi si data_actualizare in meta.json pentru tracking.',
+    ]},
+    {t:'Gestionare utilizatori', c:'#fb923c', ico:'Users',
+     steps:[
+      'Tab Utilizatori > statistici + tabel cu toti userii inregistrati (email, rol, status confirmare, data).',
+      'Invitatie: introduce email > buton Invita > userul primeste email cu link de confirmare.',
+      'Roluri: admin = acces complet + panou Admin | user = acces standard la platforma.',
+      'Confirmare manuala (daca emailul nu ajunge): Supabase Dashboard > Authentication > Users > Edit > Confirm.',
+      'Resetare parola: Supabase Dashboard > Authentication > Users > Send recovery email.',
+    ]},
+    {t:'Troubleshooting', c:'#f87171', ico:'Fix',
+     steps:[
+      'PUG nu se incarca: Testeaza URL direct: https://thinksmartsolutions.github.io/UrbanX/data/{id}/pug.geojson — trebuie sa returneze JSON valid.',
+      'UTR-uri fara culoare: Campul utr lipseste sau are alt nume in GeoJSON. Verifica in QGIS: Open Attribute Table > cauta coloana cu codurile de zona.',
+      'Parcele nu se gasesc: Numarul cadastral nu exista in cadastru_index.json. Adauga manual sau regenereaza din export ANCPI mai complet.',
+      'Reguli gresite: Valorile pot, cut, h trebuie sa fie numere (nu string). Valideaza cu: tools/validate_reguli.py data/{id}/reguli.json',
+      'GitHub Pages 404: Verifica ca fisierul e in branch main si ca GitHub Pages e setat pe main/root.',
+    ]},
+  ];
 
-    ${[
-      {ico:'🗺',title:'Adăugare UAT nou — flux complet GitHub',color:'#38bdf8',steps:[
-        '<b>Obții datele de la primărie sau OCPI:</b> harta PUG (SHP/DXF/PDF georef.) + Regulamentul Local de Urbanism (RLU) în format CSV/Excel/Word.',
-        '<b>Convertești PUG în QGIS:</b> Layer → Export → Save Features As → GeoJSON, CRS: EPSG:4326 (WGS84). Câmp obligatoriu în attributes: <code class="cod-auriu">utr</code> (codul zonei, ex: "P1", "CM", "AI2A").',
-        '<b>Generezi reguli.json</b> din CSV-ul RLU. Script în repo: <code class="cod-auriu">tools/gen_reguli.py pug_reguli.csv > reguli.json</code>. Sau completezi manual după formatul: <code class="cod-auriu">{"P1":{"d":"Locuințe","pot":35,"cut":1.2,"niv":2,"h":10,"rf":5,"rl":3,"rs":5,"sv":30,"pk":2}}</code>',
-        '<b>Generezi cadastru_index.json</b> din exportul ANCPI: <code class="cod-auriu">tools/gen_cadastru_index.py export_ancpi.csv > cadastru_index.json</code>. Format rezultat: <code class="cod-auriu">{"173583":[27.601,47.158],...}</code>',
-        '<b>Creezi folderul în GitHub:</b> în repo → Add file → Create new file → scrii <code class="cod-auriu">data/municipiul-bacau/meta.json</code> (GitHub creează automat folderul).',
-        '<b>Urci cele 4 fișiere</b> în <code class="cod-auriu">data/&#123;uat-id&#125;/</code>: pug.geojson, cadastru_index.json, reguli.json, meta.json — prin Upload files sau git push.',
-        '<b>Actualizezi UAT_REGISTRY</b> în index.html: găsești entry-ul UAT-ului (ex: "municipiul-bacau"), schimbi <code class="cod-verde">status:\'empty\'</code> → <code class="cod-verde">status:\'complet\'</code>.',
-        '<b>GitHub Pages se actualizează automat</b> în 1-2 minute după push. Testezi: selectezi UAT-ul din 📍 → PUG se încarcă pe hartă.',
-      ]},
-      {ico:'📁',title:'Structura folderelor în GitHub repo',color:'#a78bfa',steps:[
-        '<code class="cod-auriu">data/municipiul-iasi/</code> — date complete existente (pug.geojson, cadastru_index.json, reguli.json)',
-        '<code class="cod-auriu">data/municipiul-bacau/</code> — de creat când ai datele',
-        '<code class="cod-auriu">data/municipiul-suceava/</code> — de creat când ai datele',
-        '<code class="cod-auriu">tools/</code> — scripturi Python pentru conversie (gen_reguli.py, gen_cadastru_index.py, validate_pug.py)',
-        '<b>NU mai pune fișiere direct în root</b> — qGis_pug.iasi.geojson și cadastru_index.json din root sunt menținute doar ca fallback temporar până la migrare completă.',
-      ]},
-      {ico:'📋',title:'Format fișiere — referință rapidă',color:'#4ade80',steps:[
-        '<b>pug.geojson</b> — FeatureCollection de Polygon/MultiPolygon. Câmp obligatoriu: <code class="cod-auriu">utr</code>. Opțional: <code class="cod-auriu">denumire</code>, <code class="cod-auriu">regim_h</code>, <code class="cod-auriu">indici</code>.',
-        '<b>cadastru_index.json</b> — obiect JSON simplu: <code class="cod-auriu">{"NR_CAD":[lng,lat],...}</code>. Dimensiune tipică: 1-5MB pentru un municipiu.',
-        '<b>reguli.json</b> — obiect JSON: <code class="cod-auriu">{"UTR":{"d":"desc","pot":40,"cut":2.0,"niv":4,"h":16,"rf":5,"rl":3,"rs":5,"sv":25,"pk":1}}</code>. Câmpuri opționale: ao, fm, ua, uc, ui.',
-        '<b>meta.json</b> — info UAT: <code class="cod-auriu">{"id":"municipiul-bacau","label":"Municipiul Bacău","judet":"Bacău","status":"complet","sursa_pug":"Primăria Bacău, HCL 123/2020","data_actualizare":"2024-01"}</code>',
-      ]},
-      {ico:'🔄',title:'Actualizare date existente',color:'#fbbf24',steps:[
-        'Înlocuiești fișierul direct în GitHub: navighezi la <code class="cod-auriu">data/&#123;uat-id&#125;/pug.geojson</code> → Edit (creion) sau Upload → Commit changes.',
-        'SAU prin git: <code class="cod-auriu">git add data/municipiul-iasi/pug.geojson && git commit -m "Update PUG Iași v2" && git push</code>',
-        'GitHub Pages se actualizează automat. Utilizatorii văd noile date după Ctrl+Shift+R (hard refresh).',
-        'Dacă actualizezi reguli.json, schimbi și <code class="cod-auriu">data_actualizare</code> în meta.json pentru tracking.',
-      ]},
-      {ico:'👥',title:'Gestionare utilizatori',color:'#fb923c',steps:[
-        'Tab <b>Utilizatori</b> → statistici + tabel cu toți userii înregistrați (email, rol, status confirmare, dată).',
-        '<b>Invitație:</b> introduce email → buton Invită → userul primește email cu link de confirmare.',
-        '<b>Roluri:</b> <code class="cod-auriu">admin</code> = acces complet + panou Admin | <code class="cod-auriu">user</code> = acces standard la platformă.',
-        '<b>Confirmare manuală</b> (dacă emailul nu ajunge): Supabase Dashboard → Authentication → Users → Edit → Confirm.',
-        '<b>Resetare parolă:</b> Supabase Dashboard → Authentication → Users → Send recovery email.',
-      ]},
-        '<b>PUG nu se încarcă:</b> Testează URL direct: <code class="cod-auriu">https://thinksmartsolutions.github.io/UrbanX/data/&#123;id&#125;/pug.geojson</code> — trebuie să returneze JSON valid.',
-        '<b>UTR-uri fără culoare:</b> Câmpul "utr" lipsește sau are alt nume în GeoJSON. Verifică în QGIS: Open Attribute Table → caută coloana cu codurile de zonă.',
-        '<b>Parcele nu se găsesc:</b> Numărul cadastral nu există în cadastru_index.json. Adaugă manual sau regenerează din export ANCPI mai complet.',
-        '<b>Reguli greșite:</b> Valorile pot, cut, h trebuie să fie numere (nu string). Validează cu: <code class="cod-auriu">tools/validate_reguli.py data/&#123;id&#125;/reguli.json</code>',
-        '<b>GitHub Pages 404:</b> Verifică că fișierul e în branch "main" și că GitHub Pages e setat pe main/root.',
-      ]},
-    ].map(s=>`
-      <div style="background:#080f1c;border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:14px;margin-bottom:8px">
-        <div style="font-size:12px;font-weight:800;color:${s.color};margin-bottom:10px">${s.ico} ${s.title}</div>
-        ${s.steps.map((step,i)=>`
-          <div style="display:flex;gap:10px;margin-bottom:7px;align-items:flex-start">
-            <span style="background:rgba(255,255,255,.06);color:#64748b;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;margin-top:1px">${i+1}</span>
-            <span class="step-txt">${step}</span>
-          </div>`).join('')}
-      </div>`).join('')}
-  `;
+  let html = '<div class="adm-guide-header">📖 Ghid complet administrator UrbanX</div>';
+  S.forEach(sec=>{
+    html += '<div class="adm-guide-sec">';
+    html += '<div class="adm-guide-sec-title" style="color:'+sec.c+'">'+sec.ico+' — '+sec.t+'</div>';
+    sec.steps.forEach((step,i)=>{
+      html += '<div class="adm-guide-step">';
+      html += '<span class="adm-guide-num">'+( i+1)+'</span>';
+      html += '<span class="adm-guide-txt">'+step+'</span>';
+      html += '</div>';
+    });
+    html += '</div>';
+  });
+  body.innerHTML = html;
 }
 
 function _adminClose() {
