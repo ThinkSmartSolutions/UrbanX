@@ -2429,10 +2429,14 @@ function addLayers(){
     'fill-pattern':undefined
   }});
   L({id:'lotizare-label',type:'symbol',source:'lotizare-label-src',minzoom:14,layout:{
-    'text-field':['get','label'],'text-size':10,
+    'text-field':['get','label'],'text-size':11,
     'text-font':['DIN Offc Pro Bold','Arial Unicode MS Bold'],
-    'text-anchor':'center','text-allow-overlap':true
-  },paint:{'text-color':['get','color'],'text-halo-color':'rgba(0,0,0,.9)','text-halo-width':2}});
+    'text-anchor':'center',
+    'text-allow-overlap':false,   // NU suprapune labeluri
+    'text-ignore-placement':false,
+    'text-max-width':6,
+    'text-line-height':1.2,
+  },paint:{'text-color':['get','color'],'text-halo-color':'rgba(0,0,0,.95)','text-halo-width':2.5}});
 
   // Parcele cadastrale (multiselect)
   L({id:'parcel-fill',type:'fill',source:'parcel-src',paint:{'fill-color':['coalesce',['get','fc'],'#00e5b4'],'fill-opacity':0.22}});
@@ -3075,12 +3079,12 @@ function updateMap(){
   }
   
   // Footprint și aliniamente vizuale pentru parcela activă
+  // Ascundem când lotizarea e activă (evită suprapunere cu labelurile loturilor)
   const ap=S.parcels[S.activeParcel??0];
-  if(ap?.geo?.geometry){
+  if(ap?.geo?.geometry && !_lotizareActive){
     const fp = buildFP(ap.geo.geometry, ap.params||ap.utr);
     if(fp?.geometry){
       setSource('fp-src',{type:'FeatureCollection',features:[fp]});
-      // Vizualizare aliniamente: laturi colorate + săgeată front + etichete
       const frontFC = buildFrontLayer(ap.geo, fp, ap.params||getDefaultParams(ap.utr), S.bearing);
       setSource('front-src', frontFC);
     } else {
@@ -3091,6 +3095,11 @@ function updateMap(){
     clearSource('fp-src');
     clearSource('front-src');
   }
+  // Vizibilitate layers front/setback — ascunse când lotizare e activă
+  const _frontVis = !_lotizareActive;
+  ['front-parcel-line','front-setback-line','front-label','front-arrow'].forEach(lid=>{
+    try{map.setLayoutProperty(lid,'visibility',_frontVis?'visible':'none');}catch(e){}
+  });
 
   // Context
   setSource('ctx-src',S.ctx);
@@ -13392,9 +13401,13 @@ function toggleLotizare(){
   else {
     ['lotizare-src','lotizare-drum-src','lotizare-label-src'].forEach(s=>
       setSource(s,{type:'FeatureCollection',features:[]}));
-    // Curăță demolări vizuale (marcajele rămân în _LOT.demoIds pentru reutilizare)
     setSource('lot-demo-src',{type:'FeatureCollection',features:[]});
-    if(_LOT.demoMode) _lotDemoModeToggle(); // oprește modul marcare dacă e activ
+    if(_LOT.demoMode) _lotDemoModeToggle();
+    // Restaurează front/setback layers
+    ['front-parcel-line','front-setback-line','front-label','front-arrow'].forEach(lid=>{
+      try{map.setLayoutProperty(lid,'visibility','visible');}catch(e){}
+    });
+    updateMap();
     // Curăță și viewer-ul 3D dacă era generat de lotizare
     if(S.vol._lastFeats?.[0]?.properties?.isLotizare){
       clearSource('vol-src');
@@ -14435,10 +14448,18 @@ function runLotizare(){
     // ── Afișare hartă 2D ──────────────────────────────────────────────────
     setSource('lotizare-src',{type:'FeatureCollection',features:loturi});
     setSource('lotizare-drum-src',{type:'FeatureCollection',features:drumuri});
-    const labels=loturi.map(l=>{
-      const t=_LOT.tipuri[l.properties.tip]||_LOT.tipuri.individuala;
+    const labels=loturi.map((l,li)=>{
+      const tip=l.properties.tip||'individuala';
+      const t=_LOT.tipuri[tip]||_LOT.tipuri.individuala;
+      const tv=_lotGetTip(tip);
+      const a=Math.round(turf.area(l));
+      const reg=tv.niv===1?'P':('P+'+(tv.niv-1)+'E');
+      // Label concis: nr. lot + suprafata + regim
       return {type:'Feature',geometry:turf.centerOfMass(l).geometry,
-        properties:{label:t.icon+'\n'+Math.round(turf.area(l))+'mp',color:t.color}};
+        properties:{
+          label:'L'+(li+1)+'\n'+a+'mp\n'+reg,
+          color:t.color
+        }};
     });
     setSource('lotizare-label-src',{type:'FeatureCollection',features:labels});
 
