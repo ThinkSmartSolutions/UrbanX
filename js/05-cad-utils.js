@@ -1,7 +1,5 @@
-// UrbanX — UTR helpers, switchTab, parametri
-// Modul extras din index_v4.html
+// UrbanX — UTR helpers, parcele din zona
 
-}
 
 async function doLoadLocalParcels(){
   const bb = map.getBounds();
@@ -340,3 +338,8 @@ function removeParcel(i){
 }
 
 function clearAll(){
+  S.parcels=[];S.activeParcel=null;S.vol.genDone=false;
+  ['parcel-src','vol-src','fp-src'].forEach(clearSource);
+  renderAll();ss('Toate parcelele șterse.');
+}
+

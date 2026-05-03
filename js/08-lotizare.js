@@ -1,5 +1,4 @@
-// UrbanX — Lotizare teren, generator, export
-// Modul extras din index_v4.html
+// UrbanX — Generator lotizare, export
 
 let _lotizareActive = false;
 

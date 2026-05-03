@@ -1,5 +1,4 @@
-// UrbanX — Panel lateral, tab-uri, HTML UI
-// Modul extras din index_v4.html
+// UrbanX — Panel, tab-uri, HTML UI
 
 let _ctxLastParcel = null;
 

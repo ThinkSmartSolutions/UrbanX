@@ -1,5 +1,4 @@
-// UrbanX — Menus, viewer Urban3D, V3D, materiale
-// Modul extras din index_v4.html
+// UrbanX — Viewer Urban3D, materiale
 
 // ── Topbar dropdown menus ────────────────────────────────────────────────
 function _closeAllMenus(){

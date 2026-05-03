@@ -1,10 +1,4 @@
-// UrbanX — Urban3D modal, 3D, FAL.AI, LOISIR
-// Modul extras din index_v4.html
-
-  S.parcels=[];S.activeParcel=null;S.vol.genDone=false;
-  ['parcel-src','vol-src','fp-src'].forEach(clearSource);
-  renderAll();ss('Toate parcelele șterse.');
-}
+// UrbanX — Urban3D, UAT_REGISTRY, FAL.AI
 
 function toggleMulti(v){
   S.multiMode=v;

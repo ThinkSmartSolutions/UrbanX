@@ -1,5 +1,4 @@
 // UrbanX — Mapbox, layere, volume, context
-// Modul extras din index_v4.html
 
 const map=new mapboxgl.Map({
   container:'map',style:STYLES.custom,

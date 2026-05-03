@@ -1,6 +1,6 @@
-// UrbanX — RAPORT_INFO, info drawer, Street View
-// Modul extras din index_v4.html
+// UrbanX — RAPORT_INFO, info drawer
 
+<script>
 
 // ═══ STREET VIEW ══════════════════════════════════════════════════════════════
 // Embed Google Street View panoramic + proiecție siluetă volum AEDIS

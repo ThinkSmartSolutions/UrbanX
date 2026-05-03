@@ -1,5 +1,4 @@
-// UrbanX — PDF logo, capturi, bilant edificabil
-// Modul extras din index_v4.html
+// UrbanX — PDF logo, capturi, bilant
 
 function _pdfDrawLogo(pdf, x, y, size){
   const s = size || 10;

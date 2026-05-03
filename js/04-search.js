@@ -1,5 +1,4 @@
 // UrbanX — Cautare cadastru, adresa, GPS
-// Modul extras din index_v4.html
 
 function draw2D(){
   const cv=_g('c2d');if(!cv)return;
@@ -568,3 +567,4 @@ function doClearParcels(){
   const elC=document.getElementById('cadastru-status');
   if(elC) elC.textContent='Parcele șterse. Apasă "Parcele din zonă" pentru reîncărcare.';
   ss('Parcele șterse. Folosiți "Parcele din zonă" pentru a reîncărca.');
+}
