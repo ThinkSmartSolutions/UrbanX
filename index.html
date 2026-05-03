@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache"/>
 <meta http-equiv="Expires" content="0"/>
 <title>UrbanX – PUG Iași</title>
-<meta name="description" content="UrbanX — Platformă de Analiză Urbanistică Avansată. Analiză cadastrală, PUG, indicatori urbanistici, studii de specialitate și vizualizare 3D">
+<meta name="description" content="UrbanX — Platformă de Analiză Urbanistică Avansată. Analiză cadastrală, PUG, indicatori urbanistici, studii de specialitate și vizualizare 3D pentru Municipiul Iași.">
 <!-- UrbanX Favicon & PWA -->
 <link rel="icon" href="/UrbanX/favicon.ico" sizes="any">
 <link rel="icon" type="image/svg+xml" href="/UrbanX/favicon.svg">
@@ -702,6 +702,8 @@ canvas#c2d{width:100%;height:100%;display:block}
   <button class="tb-btn" id="btnSV" onclick="svOpen()" title="Street View — Perspectivă pietonală">🚶 SV</button>
   <button class="tb-btn" id="btnLegend" title="Legendă funcțiuni clădiri" onclick="toggleFnLegend(this)">🎨 Legend</button>
   <button class="tb-btn" id="btnPanel" style="background:rgba(212,175,55,.2);border-color:#d4af37;color:#d4af37">☰</button>
+  <button class="tb-btn" id="btnLotizare" onclick="toggleLotizare()" title="Lotizare teren — ansamblu rezidențial" style="display:flex;align-items:center;gap:4px">🏘 Lotizare</button>
+  <button class="tb-btn" id="btnBilant" onclick="toggleBilant()" title="Bilanț edificabil" style="display:flex;align-items:center;gap:4px">📐 Bilanț</button>
   <button class="tb-btn" id="btnPDF" onclick="toggleRapoarteMenu()" title="Rapoarte & Studii" style="display:flex;align-items:center;gap:4px;position:relative">📋 Rapoarte ▾</button>
 
   <!-- Butoane Admin & Cont — dreapta topbar, în interiorul #topbar -->
@@ -739,6 +741,13 @@ canvas#c2d{width:100%;height:100%;display:block}
   <button onclick="generateMobilityStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#f472b6;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🚗 Studiu Mobilitate & Parcaje</button>
   <button onclick="generateDensityStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#94a3b8;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">📊 Studiu Densitate Urbană</button>
   <button onclick="generateMemoriu();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#d4af37;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏗 Memoriu Tehnic Preliminar</button>
+  <div style="padding:6px 12px 2px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.08em;font-weight:700;border-top:1px solid rgba(255,255,255,.06);margin-top:4px">Studii speciale</div>
+  <button onclick="generateAACR();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#60a5fa;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">✈ Studiu AACR (Aviz Aeroport)</button>
+  <button onclick="generateExistingBldStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#fb7185;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏚 Studiu Construcții Existente</button>
+  <button onclick="generateGeotehnicalStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#a78bfa;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🪨 Pre-Studiu Geotehnic</button>
+  <button onclick="generateTrafficStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#34d399;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🚦 Studiu de Impact Trafic</button>
+  <button onclick="generateIstoricStudy();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#f59e0b;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏛 Studiu Patrimoniu & Istoric</button>
+  <button onclick="_lotExportPDF();toggleRapoarteMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#c084fc;padding:7px 12px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏘 Plan de Lotizare PDF</button>
 </div>
 
 <div id="status">⏳ Se încarcă…</div>
@@ -817,6 +826,10 @@ canvas#c2d{width:100%;height:100%;display:block}
   <button class="mnav-btn" data-mt="multi" onclick="mobNavClick('multi',this)">
     <span class="mnav-icon">🔲</span>
     <span class="mnav-label">Multi</span>
+  </button>
+  <button class="mnav-btn" data-mt="bilant" onclick="toggleBilant()">
+    <span style="font-size:18px">📐</span>
+    <span style="font-size:9px">Bilanț</span>
   </button>
   <button class="mnav-btn" data-mt="rapoarte" onclick="mobNavClick('rapoarte',this)">
     <span class="mnav-icon">📋</span>
@@ -2310,7 +2323,9 @@ async function detectRoadFront(parcelGeo) {
 // ═══ MAP INIT ════════════════════════════════════════════════════════════
 function addLayers(){
   const E={type:'FeatureCollection',features:[]};
-  ['parcel-src','utr-src','ctx-src','vol-src','fp-src','sv-src','front-src','ctx-labels-src','dist-src','aedis-dim-src'].forEach(id=>{
+  ['parcel-src','utr-src','ctx-src','vol-src','fp-src','sv-src','front-src','ctx-labels-src','dist-src','aedis-dim-src',
+   'bilant-src','edificabil-src','setback-src',
+   'lotizare-src','lotizare-drum-src','lotizare-label-src'].forEach(id=>{
     if(!map.getSource(id)) map.addSource(id,{type:'geojson',data:E});
   });
   const L=(spec)=>{if(!map.getLayer(spec.id))map.addLayer(spec);};
@@ -2318,6 +2333,39 @@ function addLayers(){
   L({id:'utr-fill',type:'fill',source:'utr-src',paint:{'fill-color':['coalesce',['get','c'],'#6d28d9'],'fill-opacity':0.2}});
   L({id:'utr-line',type:'line',source:'utr-src',paint:{'line-color':['coalesce',['get','c'],'#6d28d9'],'line-width':1.5,'line-opacity':0.7}});
   L({id:'utr-lbl',type:'symbol',source:'utr-src',minzoom:13,layout:{'text-field':['get','utr'],'text-size':11,'text-font':['DIN Offc Pro Bold','Arial Unicode MS Bold']},paint:{'text-color':['coalesce',['get','c'],'#c4b5fd'],'text-halo-color':'rgba(0,0,0,.8)','text-halo-width':1.5}});
+
+  // ── Bilanț edificabil — zone colorate ────────────────────────────────────
+  // Zona neconstruibilă (retrageri) — roșu semi-transparent
+  L({id:'setback-fill',type:'fill',source:'setback-src',paint:{'fill-color':['coalesce',['get','color'],'#ef4444'],'fill-opacity':0.25}});
+  L({id:'setback-line',type:'line',source:'setback-src',paint:{'line-color':['coalesce',['get','color'],'#ef4444'],'line-width':1,'line-dasharray':[2,2]}});
+  // Edificabil disponibil — verde
+  L({id:'edificabil-fill',type:'fill',source:'edificabil-src',paint:{'fill-color':'#22c55e','fill-opacity':0.18}});
+  L({id:'edificabil-line',type:'line',source:'edificabil-src',paint:{'line-color':'#22c55e','line-width':2,'line-dasharray':[4,2]}});
+  // Bilanț labels — procente pe hartă
+  L({id:'bilant-label',type:'symbol',source:'bilant-src',minzoom:14,layout:{
+    'text-field':['get','label'],'text-size':12,
+    'text-font':['DIN Offc Pro Bold','Arial Unicode MS Bold'],
+    'text-anchor':'center','text-allow-overlap':true
+  },paint:{'text-color':['get','color'],'text-halo-color':'rgba(0,0,0,.85)','text-halo-width':2}});
+
+  // ── Lotizare layers ─────────────────────────────────────────────────────
+  L({id:'lotizare-fill',type:'fill',source:'lotizare-src',paint:{
+    'fill-color':['coalesce',['get','color'],'#a78bfa'],'fill-opacity':0.25
+  }});
+  L({id:'lotizare-line',type:'line',source:'lotizare-src',paint:{
+    'line-color':['coalesce',['get','borderColor'],'#7c3aed'],'line-width':1.5
+  }});
+  L({id:'lotizare-drum-fill',type:'fill',source:'lotizare-drum-src',paint:{
+    'fill-color':'#94a3b8','fill-opacity':0.4
+  }});
+  L({id:'lotizare-drum-line',type:'line',source:'lotizare-drum-src',paint:{
+    'line-color':'#cbd5e1','line-width':1
+  }});
+  L({id:'lotizare-label',type:'symbol',source:'lotizare-label-src',minzoom:14,layout:{
+    'text-field':['get','label'],'text-size':10,
+    'text-font':['DIN Offc Pro Bold','Arial Unicode MS Bold'],
+    'text-anchor':'center','text-allow-overlap':true
+  },paint:{'text-color':['get','color'],'text-halo-color':'rgba(0,0,0,.9)','text-halo-width':2}});
 
   // Parcele cadastrale (multiselect)
   L({id:'parcel-fill',type:'fill',source:'parcel-src',paint:{'fill-color':['coalesce',['get','fc'],'#00e5b4'],'fill-opacity':0.22}});
@@ -4016,6 +4064,40 @@ function buildVolume(){
         const fpA4 = turf.area(fp);
         efectivNiv = fpA4 > 0 ? Math.max(1, Math.min(rNiv, Math.floor(SDmax / Math.max(1, fpA4)))) : rNiv;
       }
+    } else if(scenariu === 'mansardare'){
+      // MANSARDARE: adăugăm etaj/mansardă PESTE clădirile existente
+      if(existingBlds.length){
+        let union={type:'Feature',geometry:existingBlds[0].geometry,properties:{}};
+        existingBlds.slice(1).forEach(bld=>{try{const u=turf.union(union,{type:'Feature',geometry:bld.geometry,properties:{}});if(u?.geometry)union=u;}catch(e){}});
+        try{const inter=turf.intersect(fp,union);if(inter?.geometry&&turf.area(inter)>5)volumeGeom=inter.geometry;else volumeGeom=fp.geometry;}catch(e){volumeGeom=fp.geometry;}
+      } else volumeGeom=fp.geometry;
+      baseH = existingH > 0 ? existingH : 0;
+      efectivNiv = Math.max(1, rNiv - Math.max(0, Math.round(existingH/hNiv)));
+
+    } else if(scenariu === 'consolidare'){
+      // CONSOLIDARE/REABILITARE: redăm volumul existent (fără volum nou)
+      if(existingBlds.length){
+        let union={type:'Feature',geometry:existingBlds[0].geometry,properties:{}};
+        existingBlds.slice(1).forEach(bld=>{try{const u=turf.union(union,{type:'Feature',geometry:bld.geometry,properties:{}});if(u?.geometry)union=u;}catch(e){}});
+        volumeGeom=union.geometry;
+      } else volumeGeom=fp.geometry;
+      baseH=0;
+      efectivNiv = existingH>0 ? Math.max(1,Math.round(existingH/hNiv)) : rNiv;
+
+    } else if(scenariu === 'reconversie'){
+      // RECONVERSIE: același volum, funcțiune nouă
+      if(existingBlds.length){
+        let union={type:'Feature',geometry:existingBlds[0].geometry,properties:{}};
+        existingBlds.slice(1).forEach(bld=>{try{const u=turf.union(union,{type:'Feature',geometry:bld.geometry,properties:{}});if(u?.geometry)union=u;}catch(e){}});
+        volumeGeom=union.geometry;
+      } else volumeGeom=fp.geometry;
+      baseH=0;
+      efectivNiv=existingH>0?Math.max(1,Math.round(existingH/hNiv)):rNiv;
+
+    } else if(scenariu === 'inglobare'){
+      // ÎNGLOBARE: corp nou care cuprinde și existentele
+      volumeGeom=fp.geometry; baseH=0;
+      if(cut&&cut>0){const SDmax=pA*cut;const fpA5=turf.area(fp);efectivNiv=fpA5>0?Math.max(1,Math.min(rNiv,Math.floor(SDmax/Math.max(1,fpA5)))):rNiv;}
     }
     
     // ── Multiple volume pe edificabil ────────────────────────────────────
@@ -4498,39 +4580,35 @@ function getContent(tab){
 function htmlMobRapoarte(){
   const hasParcel = !!(S.parcels[S.activeParcel??0]?.geo?.geometry);
   const warn = hasParcel ? '' : '<div style="background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);border-radius:8px;padding:10px;font-size:12px;color:#fbbf24;margin-bottom:10px">⚠️ Selectați mai întâi o parcelă de pe hartă</div>';
+  const btn=(onclick,color,ico,label,desc)=>`<button onclick="${onclick}" style="font-size:11px;padding:10px;background:rgba(${color},.12);border:1px solid rgba(${color},.35);color:rgb(${color});border-radius:10px;display:flex;align-items:center;gap:9px;text-align:left;width:100%;cursor:pointer">
+    <span style="font-size:18px;flex-shrink:0">${ico}</span>
+    <span><b>${label}</b><br><small style="opacity:.65">${desc}</small></span>
+  </button>`;
   return`
   <div class="section">📋 Rapoarte & Studii Urbane</div>
   ${warn}
-  <div class="card" style="display:flex;flex-direction:column;gap:8px">
-    <button class="btn-p" onclick="runExport()" style="font-size:13px;padding:12px;display:flex;align-items:center;gap:8px">
-      📄 <span><b>Raport Urbanistic Complet</b><br><small style="opacity:.7">POT, CUT, H, aliniamente, funcțiuni</small></span>
-    </button>
-    <button class="btn-p" onclick="generateSolarStudy()" style="font-size:13px;padding:12px;background:rgba(251,191,36,.15);border-color:#fbbf24;color:#fbbf24;display:flex;align-items:center;gap:8px">
-      ☀️ <span><b>Studiu de Însorire</b><br><small style="opacity:.7">Ore de soare, obstrucții, bilanț</small></span>
-    </button>
-    <button class="btn-p" onclick="generateShadowStudy()" style="font-size:13px;padding:12px;background:rgba(251,146,60,.15);border-color:#fb923c;color:#fb923c;display:flex;align-items:center;gap:8px">
-      🌑 <span><b>Studiu de Umbre & Obstrucție</b><br><small style="opacity:.7">Umbre proiectate, distanțe critice</small></span>
-    </button>
-    <button class="btn-p" onclick="generateNoiseStudy()" style="font-size:13px;padding:12px;background:rgba(167,139,250,.15);border-color:#a78bfa;color:#a78bfa;display:flex;align-items:center;gap:8px">
-      🔇 <span><b>Studiu Acustic Urban</b><br><small style="opacity:.7">Nivel zgomot, conformitate SR 10009</small></span>
-    </button>
-    <button class="btn-p" onclick="generateWindStudy()" style="font-size:13px;padding:12px;background:rgba(56,189,248,.15);border-color:#38bdf8;color:#38bdf8;display:flex;align-items:center;gap:8px">
-      🌬 <span><b>Studiu Vânt & Confort Pietonal</b><br><small style="opacity:.7">Expunere vânt, zone de adăpost</small></span>
-    </button>
-    <button class="btn-p" onclick="generateGreenStudy()" style="font-size:13px;padding:12px;background:rgba(74,222,128,.15);border-color:#4ade80;color:#4ade80;display:flex;align-items:center;gap:8px">
-      🌿 <span><b>Studiu Spații Verzi</b><br><small style="opacity:.7">SV necesar, plantare, bilanț</small></span>
-    </button>
-    <button class="btn-p" onclick="generateMobilityStudy()" style="font-size:13px;padding:12px;background:rgba(244,114,182,.15);border-color:#f472b6;color:#f472b6;display:flex;align-items:center;gap:8px">
-      🚗 <span><b>Studiu Mobilitate & Parcaje</b><br><small style="opacity:.7">Locuri parcare, accese, flux</small></span>
-    </button>
-    <button class="btn-p" onclick="generateDensityStudy()" style="font-size:13px;padding:12px;background:rgba(148,163,184,.15);border-color:#94a3b8;color:#94a3b8;display:flex;align-items:center;gap:8px">
-      📊 <span><b>Studiu Densitate Urbană</b><br><small style="opacity:.7">CUT zonal, POT vecini, comparativ</small></span>
-    </button>
-    <button class="btn-p" onclick="generateMemoriu()" style="font-size:13px;padding:12px;background:rgba(212,175,55,.15);border-color:#d4af37;color:#d4af37;display:flex;align-items:center;gap:8px">
-      🏗 <span><b>Memoriu Tehnic Preliminar</b><br><small style="opacity:.7">Document tehnic complet pentru avize</small></span>
-    </button>
+  <div style="font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Rapoarte urbanistice</div>
+  <div class="card" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">
+    ${btn('runExport()','255,255,255','📄','Raport Urbanistic Complet','POT, CUT, H, funcțiuni, aliniamente')}
+    ${btn('generateSolarStudy()','251,191,36','☀','Studiu de Însorire','Ore soare, bilanț solar, OMS 119')}
+    ${btn('generateShadowStudy()','251,146,60','🌑','Studiu Umbre & Obstrucție','Umbre proiectate, distanțe critice')}
+    ${btn('generateNoiseStudy()','167,139,250','🔇','Studiu Acustic Urban','Zgomot, SR 10009/2017')}
+    ${btn('generateWindStudy()','56,189,248','🌬','Studiu Vânt & Confort Pietonal','Criteriu Lawson, zone calm')}
+    ${btn('generateGreenStudy()','74,222,128','🌿','Studiu Spații Verzi','SV necesar, plantare, permeabilitate')}
+    ${btn('generateMobilityStudy()','244,114,182','🚗','Studiu Mobilitate & Parcaje','Parcaje, accese, NP 051')}
+    ${btn('generateDensityStudy()','148,163,184','📊','Studiu Densitate Urbană','CUT zonal, POT vecini')}
+    ${btn('generateMemoriu()','212,175,55','🏗','Memoriu Tehnic Preliminar','Document tehnic complet avize')}
   </div>
-  `;
+  <div style="font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Studii speciale</div>
+  <div class="card" style="display:flex;flex-direction:column;gap:6px">
+    ${btn('generateAACR()','96,165,250','✈','Studiu AACR — Aviz Aeroport','ICAO Anexa 14, H maxim admis')}
+    ${btn('generateExistingBldStudy()','251,113,133','🏚','Studiu Construcții Existente','Inventar, scenarii intervenție')}
+    ${btn('generateGeotehnicalStudy()','167,139,250','🪨','Pre-Studiu Geotehnic','Seismicitate, NFA, fundare')}
+    ${btn('generateTrafficStudy()','52,211,153','🚦','Studiu Impact Trafic','Trafic generat, parcaje, ITE')}
+    ${btn('generateIstoricStudy()','245,158,11','🏛','Studiu Patrimoniu & Istoric','LMI, zone protejate, avize MCID')}
+    ${btn('_lotExportPDF()','192,132,252','🏘','Plan de Lotizare PDF','Export plan ansamblu rezidential')}
+  </div>`;
+}
 }
 
 
@@ -5006,16 +5084,27 @@ function htmlProiect(){
   '<div class="section">🏗 Scenariu construcție</div>',
   '<div class="card" style="background:#08152a;margin-bottom:8px">',
   '<div class="help" style="margin-bottom:8px">Alege cum gestionezi clădirile existente pe teren:</div>',
-  '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px">',
+  '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;margin-bottom:5px">',
   '<button onclick="setS(this)" data-s="liber" style="padding:8px 4px;border-radius:9px;cursor:pointer;font-size:10px;text-align:center;border:2px solid '+((S.vol.scenariuConstructie==='liber'||!S.vol.scenariuConstructie)?'#d4af37':'rgba(255,255,255,.15)')+';background:'+((S.vol.scenariuConstructie==='liber'||!S.vol.scenariuConstructie)?'rgba(212,175,55,.15)':'rgba(11,18,32,.8)')+';color:#e2e8f0">🏚 Demolare<br><small>Teren liber</small></button>',
   '<button onclick="setS(this)" data-s="extindere_h" style="padding:8px 4px;border-radius:9px;cursor:pointer;font-size:10px;text-align:center;border:2px solid '+(S.vol.scenariuConstructie==='extindere_h'?'#3b82f6':'rgba(255,255,255,.15)')+';background:'+(S.vol.scenariuConstructie==='extindere_h'?'rgba(59,130,246,.15)':'rgba(11,18,32,.8)')+';color:#e2e8f0">🔗 Extindere<br><small>Orizontal</small></button>',
   '<button onclick="setS(this)" data-s="extindere_v" style="padding:8px 4px;border-radius:9px;cursor:pointer;font-size:10px;text-align:center;border:2px solid '+(S.vol.scenariuConstructie==='extindere_v'?'#34d399':'rgba(255,255,255,.15)')+';background:'+(S.vol.scenariuConstructie==='extindere_v'?'rgba(52,211,153,.15)':'rgba(11,18,32,.8)')+';color:#e2e8f0">🏗 Extindere<br><small>V+H</small></button>',
   '<button onclick="toggleMultiVol()" style="padding:8px 4px;border-radius:9px;cursor:pointer;font-size:10px;text-align:center;border:2px solid '+(S.vol.multiVol?'#f59e0b':'rgba(255,255,255,.15)')+';background:'+(S.vol.multiVol?'rgba(245,158,11,.15)':'rgba(11,18,32,.8)')+';color:#e2e8f0">🏙 Multiple<br><small>Volume</small></button>',
+  '</div>',
+  '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px">',
+  '<button onclick="setS(this)" data-s="mansardare" style="padding:8px 4px;border-radius:9px;cursor:pointer;font-size:10px;text-align:center;border:2px solid '+(S.vol.scenariuConstructie==='mansardare'?'#f472b6':'rgba(255,255,255,.15)')+';background:'+(S.vol.scenariuConstructie==='mansardare'?'rgba(244,114,182,.15)':'rgba(11,18,32,.8)')+';color:#e2e8f0">🏠 Mansardare<br><small>Supraetajare</small></button>',
+  '<button onclick="setS(this)" data-s="consolidare" style="padding:8px 4px;border-radius:9px;cursor:pointer;font-size:10px;text-align:center;border:2px solid '+(S.vol.scenariuConstructie==='consolidare'?'#fb923c':'rgba(255,255,255,.15)')+';background:'+(S.vol.scenariuConstructie==='consolidare'?'rgba(251,146,60,.15)':'rgba(11,18,32,.8)')+';color:#e2e8f0">🔧 Consolidare<br><small>Reabilitare</small></button>',
+  '<button onclick="setS(this)" data-s="reconversie" style="padding:8px 4px;border-radius:9px;cursor:pointer;font-size:10px;text-align:center;border:2px solid '+(S.vol.scenariuConstructie==='reconversie'?'#a78bfa':'rgba(255,255,255,.15)')+';background:'+(S.vol.scenariuConstructie==='reconversie'?'rgba(167,139,250,.15)':'rgba(11,18,32,.8)')+';color:#e2e8f0">🔄 Reconversie<br><small>Funcțională</small></button>',
+  '<button onclick="setS(this)" data-s="inglobare" style="padding:8px 4px;border-radius:9px;cursor:pointer;font-size:10px;text-align:center;border:2px solid '+(S.vol.scenariuConstructie==='inglobare'?'#38bdf8':'rgba(255,255,255,.15)')+';background:'+(S.vol.scenariuConstructie==='inglobare'?'rgba(56,189,248,.15)':'rgba(11,18,32,.8)')+';color:#e2e8f0">🏛 Înglobare<br><small>Corp nou+exist.</small></button>',
+  '</div>',
   ...(S.vol.multiVol ? htmlMultiVolUI() : []),
-  '<div class="help" style="margin-top:5px;font-size:10px">'+
-    (S.vol.scenariuConstructie==='extindere_h'?'Volum pe zona liberă, lângă existente.':
-    S.vol.scenariuConstructie==='extindere_v'?'Corp nou integrat vertical și orizontal.':
-    'Demolare existente. Teren liber conform PUG.')+'</div>',
+  '<div class="help" style="margin-top:6px;font-size:10px;padding:6px 8px;background:rgba(255,255,255,.03);border-radius:7px">'+
+    (S.vol.scenariuConstructie==='extindere_h'?'🔗 Volum nou pe zona liberă, lângă clădirile existente care rămân.':
+    S.vol.scenariuConstructie==='extindere_v'?'🏗 Corp nou integrat vertical și orizontal cu existentele.':
+    S.vol.scenariuConstructie==='mansardare'?'🏠 Adaugă mansardă/etaj peste clădirile existente. Supraetajare parțială sau totală.':
+    S.vol.scenariuConstructie==='consolidare'?'🔧 Clădirile existente se reabilitează și consolidează structural. Fără demolare.':
+    S.vol.scenariuConstructie==='reconversie'?'🔄 Schimbare funcțiune fără demolare. Reamenajare interioară + eventuale intervenții exterioare.':
+    S.vol.scenariuConstructie==='inglobare'?'🏛 Clădirile existente sunt înglobate într-un corp arhitectural nou extins.':
+    '🏚 Toate construcțiile existente se demolează. Teren complet liber conform PUG.')+'</div>',
   '</div>',
   // ── ORIENTARE ──
   '<div class="section">🧭 Front stradal — Orientare față de Nord</div>',
@@ -5874,8 +5963,10 @@ async function genVol(){
   }
   S.vol._lastFeats = feats;
   setSource('vol-src',{type:'FeatureCollection',features:feats});
-  S.vol._lastFeats = feats;  // Sincronizăm cu viewer-ul 3D
+  S.vol._lastFeats = feats;
   S.vol.genDone = true;
+  setTimeout(updateDistanceLines, 150);
+  setTimeout(updateBilant, 300); // auto-refresh bilant daca e activ
   // Ștergem masca de demolare — volumul generat acoperă acum zona
   try{
     if(map.getLayer('demolish-mask')) map.removeLayer('demolish-mask');
@@ -11224,6 +11315,1390 @@ async function _captureStudyMaps(ap, statusFn){
   return {img3D, img2D, imgDist, imgLat, imgFront, imgAerial, imgBack, imgStandard, imgLocation, imgCity, v3dDay, v3dNight, v3dGolden, v3dOvercast};
 }
 
+// ════════════════════════════════════════════════════════════════════════════
+// BILANȚ EDIFICABIL AVANSAT — Analiză completă proiectant/proprietar
+// ════════════════════════════════════════════════════════════════════════════
+
+// ── Date de piață UTR (€/mp estimat) ─────────────────────────────────────
+const MARKET_DATA = {
+  // Preț teren €/mp estimat per tip UTR
+  landPrice: {
+    'CM':900,'CC':800,'CB1':700,'CB2':650,'CB3':600,'CB4':550,'CB5':500,
+    'P1':350,'P2':320,'P3':300,'P4':280,'P5':260,'P1A':380,'P1B':360,
+    'P2A':330,'P2B':310,'P2C':290,'P3':300,
+    'AI2A':200,'AI2B':180,'AI2C':160,'AI3':140,
+    'LV':250,'LA':230,'LL':220,'LC':210,
+    'default':300
+  },
+  // Cost construcție €/mp SD per funcțiune
+  buildCost: {
+    'rezidential_colectiv':750,'locuinta_individuala':900,'birouri':850,
+    'comercial':700,'hotel':1100,'mixt':780,'industrial_depozitare':400,
+    'institutie_publica':950,'default':750
+  },
+  // Preț vânzare €/mp util per funcțiune
+  salePrice: {
+    'rezidential_colectiv':1400,'locuinta_individuala':1200,'birouri':1100,
+    'comercial':1800,'hotel':2200,'mixt':1500,'default':1300
+  },
+  // Suprafață medie unitate (mp) per funcțiune
+  unitSize: {
+    'rezidential_colectiv':65,'locuinta_individuala':120,'birouri':45,
+    'comercial':80,'hotel':30,'mixt':60,'default':65
+  }
+};
+
+// ── State global bilanț ────────────────────────────────────────────────────
+let _bilantActive = false;
+let _bilantScenarii = []; // scenarii salvate pentru comparator
+let _bilantDragActive = false;
+let _bilantDragSide = null;
+
+// ── Toggle principal ───────────────────────────────────────────────────────
+function toggleBilant(){
+  _bilantActive = !_bilantActive;
+  const btn = document.getElementById('btnBilant');
+  if(btn) btn.classList.toggle('on', _bilantActive);
+  if(_bilantActive) updateBilant();
+  else {
+    setSource('setback-src',{type:'FeatureCollection',features:[]});
+    setSource('edificabil-src',{type:'FeatureCollection',features:[]});
+    setSource('bilant-src',{type:'FeatureCollection',features:[]});
+    document.getElementById('bilant-panel')?.remove();
+  }
+}
+
+// ── Calcul central bilanț ──────────────────────────────────────────────────
+function updateBilant(){
+  if(!_bilantActive) return;
+  const ap = S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry) return;
+
+  const parcelGeom = ap.geo.geometry;
+  const params = ap.params || getDefaultParams(ap.utr||'');
+  const fp = buildFP(parcelGeom, params);
+  if(!fp?.geometry) return;
+
+  const parcelFeat = {type:'Feature',geometry:parcelGeom,properties:{}};
+  const parcelArea = turf.area(parcelFeat);
+  const edificabilArea = turf.area(fp);
+
+  // Suprafața construită reală (etaj 0)
+  const volFeats = S.vol._lastFeats?.filter(f=>f.properties?.floor===0)||[];
+  const volArea = volFeats.reduce((s,f)=>{
+    try{return s+turf.area({type:'Feature',geometry:f.geometry,properties:{}});}catch(e){return s;}
+  },0);
+
+  // SD reală (suma tuturor etajelor)
+  const sdReal = (S.vol._lastFeats||[]).reduce((s,f)=>{
+    if((f.properties?.floor||0)<0) return s;
+    try{return s+turf.area({type:'Feature',geometry:f.geometry,properties:{}});}catch(e){return s;}
+  },0);
+
+  // Retrageri overlay
+  try{
+    const diff=turf.difference(parcelFeat,fp);
+    if(diff?.geometry) setSource('setback-src',{type:'FeatureCollection',features:[
+      {type:'Feature',geometry:diff.geometry,properties:{color:'#ef4444'}}
+    ]});
+  }catch(e){}
+
+  setSource('edificabil-src',{type:'FeatureCollection',features:[
+    {type:'Feature',geometry:fp.geometry,properties:{}}
+  ]});
+
+  // Labels pe hartă
+  const fpCtr = turf.centerOfMass(fp);
+  const parCtr = turf.centerOfMass(parcelFeat);
+  const bilantFeats = [
+    {type:'Feature',geometry:fpCtr.geometry,properties:{
+      label:`🟢 ${Math.round(edificabilArea)}mp\n${((edificabilArea/parcelArea)*100).toFixed(0)}% edificabil`,color:'#4ade80'}},
+    {type:'Feature',geometry:parCtr.geometry,properties:{
+      label:`🔴 ${Math.round(parcelArea-edificabilArea)}mp\n${(((parcelArea-edificabilArea)/parcelArea)*100).toFixed(0)}% retrageri`,color:'#f87171'}},
+  ];
+  if(volArea>0) bilantFeats.push({type:'Feature',geometry:fpCtr.geometry,properties:{
+    label:`🔵 ${Math.round(volArea)}mp\n${((volArea/parcelArea)*100).toFixed(0)}% construit`,color:'#60a5fa'}});
+  setSource('bilant-src',{type:'FeatureCollection',features:bilantFeats});
+
+  _showBilantPanel(ap, parcelArea, edificabilArea, volArea, sdReal, params);
+}
+
+// ── Panel principal ────────────────────────────────────────────────────────
+function _showBilantPanel(ap, parcelArea, edificabilArea, volArea, sdReal, params){
+  document.getElementById('bilant-panel')?.remove();
+
+  const utr = ap.utr||'default';
+  const fn = AEDIS.fn||'rezidential_colectiv';
+  const potMax = parseFloat(params?.pot)||40;
+  const cutMax = parseFloat(params?.cut)||2.0;
+  const nivMax = parseInt(params?.niv)||4;
+  const retrageriArea = parcelArea - edificabilArea;
+  const pctEdif = ((edificabilArea/parcelArea)*100).toFixed(1);
+  const pctRetrag = ((retrageriArea/parcelArea)*100).toFixed(1);
+  const pctVol = volArea>0?((volArea/parcelArea)*100).toFixed(1):'0';
+  const pctUtil = edificabilArea>0&&volArea>0?((volArea/edificabilArea)*100).toFixed(0):'0';
+  const scMax = parcelArea*potMax/100;
+  const sdMax = parcelArea*cutMax;
+
+  // Eficiență edificabil
+  const efEdif = ((edificabilArea/parcelArea)*100).toFixed(0);
+  const efComment = efEdif>=75?'Excelent — parcelă regulată':
+    efEdif>=60?'Bun — pierderi moderate':
+    efEdif>=45?'Moderat — formă neregulată':
+    'Slab — parcelă dificilă, considerați PUZ';
+
+  // Date financiare
+  const landPricePerSqm = MARKET_DATA.landPrice[utr]||MARKET_DATA.landPrice.default;
+  const buildCostPerSqm = MARKET_DATA.buildCost[fn]||MARKET_DATA.buildCost.default;
+  const salePricePerSqm = MARKET_DATA.salePrice[fn]||MARKET_DATA.salePrice.default;
+  const unitSz = MARKET_DATA.unitSize[fn]||MARKET_DATA.unitSize.default;
+
+  // Scenarii financiare
+  const scenarii = _calcScenarii(parcelArea, edificabilArea, params, fn, landPricePerSqm, buildCostPerSqm, salePricePerSqm, unitSz);
+
+  // Vecini pentru comasare
+  const vecini = _getVeciniPentruComasare(ap);
+
+  // Umbrire vecini
+  const umbrire = _calcUmbrireVecini(ap, volArea>0?S.vol._lastFeats:null);
+
+  const isMobile = window.innerWidth < 841;
+  const div = document.createElement('div');
+  div.id = 'bilant-panel';
+  div.style.cssText = `
+    position:fixed;
+    ${isMobile?'bottom:72px;left:4px;right:4px;':'bottom:20px;right:20px;width:460px;'}
+    z-index:8500;background:rgba(7,12,24,.97);
+    border:1px solid rgba(34,197,94,.3);border-radius:16px;
+    padding:0;box-shadow:0 12px 40px rgba(0,0,0,.7);
+    backdrop-filter:blur(16px);font-family:system-ui,sans-serif;
+    max-height:${isMobile?'82vh':'85vh'};overflow:hidden;display:flex;flex-direction:column;
+  `;
+
+  // Tabs sistem
+  div.innerHTML = `
+    <!-- Header -->
+    <div style="padding:12px 16px 0;flex-shrink:0">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span style="color:#d4af37;font-weight:800;font-size:13px">📐 Bilanț Edificabil · <span style="color:#94a3b8;font-weight:400">${ap.nrcad||'parcela'} · UTR ${utr}</span></span>
+        <button onclick="toggleBilant()" style="background:none;border:none;color:#475569;font-size:18px;cursor:pointer;line-height:1">✕</button>
+      </div>
+
+      <!-- Bara proporții -->
+      <div style="height:8px;border-radius:4px;overflow:hidden;display:flex;gap:1px;margin-bottom:6px">
+        ${volArea>0?`<div style="width:${pctVol}%;background:#3b82f6;min-width:2px;border-radius:3px 0 0 3px"></div>`:''}
+        <div style="width:${Math.max(0,parseFloat(pctEdif)-parseFloat(pctVol)).toFixed(1)}%;background:#22c55e;min-width:2px${!volArea?';border-radius:3px 0 0 3px':''}"></div>
+        <div style="flex:1;background:#ef4444;border-radius:0 3px 3px 0"></div>
+      </div>
+      <div style="display:flex;gap:10px;font-size:9px;margin-bottom:10px">
+        ${volArea>0?`<span style="color:#60a5fa">🔵 Construit ${pctVol}%</span>`:''}
+        <span style="color:#4ade80">🟢 Edificabil ${pctEdif}%</span>
+        <span style="color:#f87171">🔴 Retrageri ${pctRetrag}%</span>
+        ${volArea>0?`<span style="color:#fbbf24">⚡ Util. edificabil ${pctUtil}%</span>`:''}
+      </div>
+
+      <!-- Tabs -->
+      <div style="display:flex;gap:2px;background:rgba(255,255,255,.04);border-radius:8px;padding:3px;" id="bilant-tabs">
+        ${[['bilant','📊 Bilanț'],['financiar','💰 Financiar'],['scenarii','⚡ Scenarii'],['umbrire','🌑 Umbrire'],['comasare','🔗 Comasare']].map(([id,label])=>
+          `<button onclick="_bilantTab('${id}')" id="btab-${id}"
+            style="flex:1;border:none;background:${id==='bilant'?'rgba(34,197,94,.2)':'none'};
+            color:${id==='bilant'?'#4ade80':'#64748b'};border-radius:6px;padding:5px 2px;
+            font-size:${isMobile?'8.5':'9'}px;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap"
+          >${label}</button>`
+        ).join('')}
+      </div>
+    </div>
+
+    <!-- Content scrollabil -->
+    <div id="bilant-content" style="overflow-y:auto;padding:12px 16px;flex:1">
+      ${_bilantTabBilant(parcelArea,edificabilArea,volArea,sdReal,params,efEdif,efComment,scMax,sdMax,pctEdif,pctRetrag,pctVol)}
+    </div>
+  `;
+  document.body.appendChild(div);
+
+  // Stocăm datele pentru tabs
+  div._data = {ap,parcelArea,edificabilArea,volArea,sdReal,params,fn,utr,
+    landPricePerSqm,buildCostPerSqm,salePricePerSqm,unitSz,
+    scenarii,vecini,umbrire,scMax,sdMax,potMax,cutMax,nivMax,
+    pctEdif,pctRetrag,pctVol,pctUtil,efEdif,efComment};
+}
+
+function _bilantTab(tab){
+  const div = document.getElementById('bilant-panel');
+  if(!div) return;
+  const d = div._data;
+  // Update tab buttons
+  ['bilant','financiar','scenarii','umbrire','comasare'].forEach(t=>{
+    const btn=document.getElementById('btab-'+t);
+    if(!btn) return;
+    const active = t===tab;
+    btn.style.background = active?'rgba(34,197,94,.2)':'none';
+    btn.style.color = active?'#4ade80':'#64748b';
+  });
+  const content = document.getElementById('bilant-content');
+  if(!content) return;
+  if(tab==='bilant') content.innerHTML=_bilantTabBilant(d.parcelArea,d.edificabilArea,d.volArea,d.sdReal,d.params,d.efEdif,d.efComment,d.scMax,d.sdMax,d.pctEdif,d.pctRetrag,d.pctVol);
+  else if(tab==='financiar') content.innerHTML=_bilantTabFinanciar(d);
+  else if(tab==='scenarii') content.innerHTML=_bilantTabScenarii(d);
+  else if(tab==='umbrire') content.innerHTML=_bilantTabUmbrire(d);
+  else if(tab==='comasare') content.innerHTML=_bilantTabComasare(d);
+}
+
+// ── TAB 1: Bilanț suprafețe ────────────────────────────────────────────────
+function _bilantTabBilant(parcelArea,edificabilArea,volArea,sdReal,params,efEdif,efComment,scMax,sdMax,pctEdif,pctRetrag,pctVol){
+  const retrageriArea=parcelArea-edificabilArea;
+  const potMax=parseFloat(params?.pot)||40;
+  const potReal=parcelArea>0?((volArea/parcelArea)*100).toFixed(1):'—';
+  const sdMax2=parcelArea*(parseFloat(params?.cut)||2);
+  return `
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:10px">
+      ${[
+        ['Teren total',Math.round(parcelArea)+' mp','#94a3b8'],
+        ['Edificabil',Math.round(edificabilArea)+' mp','#4ade80'],
+        ['Retrageri',Math.round(retrageriArea)+' mp','#f87171'],
+        ['POT max PUG',params?.pot+'%','#fbbf24'],
+        ['SC max admisă',Math.round(scMax)+' mp','#fbbf24'],
+        ['SD max admisă',Math.round(sdMax2)+' mp','#a78bfa'],
+        ['SC construită',Math.round(volArea)+' mp','#60a5fa'],
+        ['SD construită',Math.round(sdReal)+' mp','#818cf8'],
+        ['POT real',potReal+'%',parseFloat(potReal)<=potMax?'#4ade80':'#f87171'],
+      ].map(([l,v,c])=>`<div style="background:rgba(255,255,255,.04);border-radius:8px;padding:8px;text-align:center;border:1px solid rgba(255,255,255,.05)">
+        <div style="font-size:11px;font-weight:700;color:${c}">${v}</div>
+        <div style="font-size:8px;color:#475569;margin-top:2px">${l}</div>
+      </div>`).join('')}
+    </div>
+
+    <!-- Eficiență edificabil -->
+    <div style="background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.2);border-radius:10px;padding:10px;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="color:#4ade80;font-size:11px;font-weight:700">Eficiență edificabil: ${efEdif}%</span>
+        <span style="font-size:9px;color:#64748b">${efComment}</span>
+      </div>
+      <div style="height:6px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden">
+        <div style="height:100%;width:${efEdif}%;background:${efEdif>=75?'#4ade80':efEdif>=60?'#fbbf24':'#ef4444'};border-radius:3px;transition:width .5s"></div>
+      </div>
+    </div>
+
+    <!-- Retrageri detaliate -->
+    <div style="font-size:10px;color:#d4af37;font-weight:700;margin-bottom:6px">↔ Retrageri PUG aplicate</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px;margin-bottom:10px">
+      ${[['↑ Față',params?.rf+'m','#fbbf24'],['↓ Spate',params?.rs+'m','#60a5fa'],
+         ['← Stânga',params?.rl+'m','#a78bfa'],['→ Dreapta',(params?.rr||params?.rl)+'m','#34d399']
+      ].map(([l,v,c])=>`<div style="background:rgba(255,255,255,.04);border-radius:7px;padding:6px;text-align:center">
+        <div style="font-size:12px;font-weight:700;color:${c}">${v}</div>
+        <div style="font-size:8px;color:#475569">${l}</div>
+      </div>`).join('')}
+    </div>
+
+    <!-- Acțiuni rapide -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px">
+      <button onclick="_bilantMaximizare()" style="background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#4ade80;border-radius:8px;padding:8px 4px;font-size:10px;font-weight:700;cursor:pointer">⚡ Maximizează</button>
+      <button onclick="_bilantOptimizeForma()" style="background:rgba(212,175,55,.12);border:1px solid rgba(212,175,55,.3);color:#d4af37;border-radius:8px;padding:8px 4px;font-size:10px;font-weight:700;cursor:pointer">🔲 Formă optimă</button>
+      <button onclick="_bilantExportClipboard()" style="background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);color:#818cf8;border-radius:8px;padding:8px 4px;font-size:10px;font-weight:700;cursor:pointer">📋 Copiază</button>
+    </div>
+  `;
+}
+
+// ── TAB 2: Financiar ───────────────────────────────────────────────────────
+function _bilantTabFinanciar(d){
+  const {parcelArea,edificabilArea,sdReal,params,fn,utr,landPricePerSqm,buildCostPerSqm,salePricePerSqm,unitSz,scMax,sdMax,potMax,cutMax,nivMax} = d;
+  const scenarii = d.scenarii;
+
+  return `
+    <div style="font-size:10px;color:#fbbf24;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px">
+      💰 Analiză financiară preliminară
+      <span style="font-size:8px;color:#475569;font-weight:400">Estimativ · confirmare cu evaluator autorizat</span>
+    </div>
+
+    <!-- Valoare teren estimată -->
+    <div style="background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.2);border-radius:10px;padding:10px;margin-bottom:10px">
+      <div style="font-size:10px;color:#fbbf24;font-weight:700;margin-bottom:8px">🏗 Valoare teren estimată · UTR ${utr}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px">
+        ${[
+          ['Preț/mp teren',landPricePerSqm+'€/mp','#fbbf24'],
+          ['Valoare totală teren',(Math.round(parcelArea*landPricePerSqm/1000))+'k€','#fbbf24'],
+          ['Preț/mp edificabil',(Math.round(parcelArea*landPricePerSqm/Math.max(1,edificabilArea)))+'€/mp','#f59e0b'],
+        ].map(([l,v,c])=>`<div style="text-align:center;padding:6px;background:rgba(255,255,255,.04);border-radius:7px">
+          <div style="font-size:11px;font-weight:700;color:${c}">${v}</div>
+          <div style="font-size:8px;color:#475569">${l}</div>
+        </div>`).join('')}
+      </div>
+    </div>
+
+    <!-- Scenarii ROI -->
+    <div style="font-size:10px;color:#4ade80;font-weight:700;margin-bottom:6px">📈 Scenarii ROI per regim de înălțime</div>
+    <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:10px">
+      ${scenarii.map((sc,i)=>`
+        <div onclick="_applyBilantScenariu(${sc.niv})" style="background:rgba(255,255,255,.04);border-radius:9px;padding:9px 11px;cursor:pointer;border:1px solid rgba(255,255,255,.06);transition:all .15s"
+          onmouseover="this.style.borderColor='rgba(34,197,94,.3)';this.style.background='rgba(34,197,94,.05)'"
+          onmouseout="this.style.borderColor='rgba(255,255,255,.06)';this.style.background='rgba(255,255,255,.04)'">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+            <span style="color:#e2e8f0;font-size:11px;font-weight:700">${sc.label}</span>
+            <span style="color:${sc.roi>=20?'#4ade80':sc.roi>=12?'#fbbf24':'#f87171'};font-size:12px;font-weight:800">ROI ${sc.roi}%</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px">
+            ${[['Invest.',sc.investStr],['Venituri',sc.venituriStr],['Profit',sc.profitStr],['Unități',sc.unitati+' ap/buc']].map(([l,v])=>
+              `<div style="text-align:center"><div style="font-size:10px;font-weight:700;color:#94a3b8">${v}</div><div style="font-size:7.5px;color:#475569">${l}</div></div>`
+            ).join('')}
+          </div>
+          <div style="margin-top:4px;height:3px;background:rgba(255,255,255,.06);border-radius:2px">
+            <div style="height:100%;width:${Math.min(100,sc.roi*2)}%;background:${sc.roi>=20?'#4ade80':sc.roi>=12?'#fbbf24':'#ef4444'};border-radius:2px"></div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+
+    <div style="font-size:8.5px;color:#334155;text-align:center;padding:6px;border-top:1px solid rgba(255,255,255,.05)">
+      ⚠️ Valori estimative. Nu includ taxe, avize, proiectare (~15-20% din construcție). Confirmare cu evaluator autorizat ANEVAR.
+    </div>
+  `;
+}
+
+function _calcScenarii(parcelArea, edificabilArea, params, fn, landPrice, buildCost, salePrice, unitSz){
+  const potMax=parseFloat(params?.pot)||40;
+  const cutMax=parseFloat(params?.cut)||2.0;
+  const nivMax=parseInt(params?.niv)||4;
+  const terrainVal = parcelArea * landPrice;
+  const scMax = Math.min(edificabilArea, parcelArea*potMax/100);
+
+  return [1,2,Math.min(4,nivMax),Math.min(6,nivMax+2)].map(niv=>{
+    const sc = scMax * (niv===1?1.0:niv===2?0.9:niv<=4?0.78:0.65);
+    const sd = sc * niv * 0.85; // eficiență plan (coridoare, pereți)
+    const invest = terrainVal + sd*buildCost*(1+0.18); // +18% proiectare/avize/taxe
+    const unitati = Math.floor(sd/unitSz);
+    const venituri = sd * salePrice * 0.90;
+    const profit = venituri - invest;
+    const roi = invest>0?Math.round((profit/invest)*100):0;
+    const fmt = v=>v>=1000000?(v/1000000).toFixed(2)+'M€':(v/1000).toFixed(0)+'k€';
+    return {
+      niv, label:niv===1?'Parter (P)':niv===2?'P+1 etaj':`P+${niv-1} etaje (${niv} niv.)`,
+      sc:Math.round(sc),sd:Math.round(sd),invest:Math.round(invest),
+      venituri:Math.round(venituri),profit:Math.round(profit),roi,unitati,
+      investStr:fmt(invest),venituriStr:fmt(venituri),profitStr:fmt(profit)
+    };
+  });
+}
+
+// ── TAB 3: Scenarii comparator ─────────────────────────────────────────────
+function _bilantTabScenarii(d){
+  const {parcelArea,edificabilArea,params,fn,scenarii} = d;
+
+  return `
+    <div style="font-size:10px;color:#d4af37;font-weight:700;margin-bottom:8px">⚡ Scenarii de utilizare — Click pentru a aplica</div>
+    ${scenarii.map(sc=>`
+      <div onclick="_applyBilantScenariu(${sc.niv})" style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px 12px;cursor:pointer;border:1px solid rgba(255,255,255,.06);margin-bottom:5px;transition:all .15s"
+        onmouseover="this.style.borderColor='rgba(212,175,55,.4)';this.style.background='rgba(212,175,55,.04)'"
+        onmouseout="this.style.borderColor='rgba(255,255,255,.06)';this.style.background='rgba(255,255,255,.04)'">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span style="color:#fbbf24;font-size:12px;font-weight:800">${sc.label}</span>
+          <span style="background:${sc.roi>=20?'rgba(34,197,94,.2)':sc.roi>=12?'rgba(251,191,36,.2)':'rgba(239,68,68,.2)'};
+            color:${sc.roi>=20?'#4ade80':sc.roi>=12?'#fbbf24':'#f87171'};
+            border-radius:5px;padding:2px 8px;font-size:10px;font-weight:700">ROI ${sc.roi}%</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:5px">
+          ${[['SC',sc.sc+' mp'],['SD',sc.sd+' mp'],['Unități',sc.unitati+' buc'],
+             ['Investiție',sc.investStr],['Venituri',sc.venituriStr],['Profit',sc.profitStr]
+          ].map(([l,v])=>`<div style="text-align:center;padding:5px;background:rgba(255,255,255,.03);border-radius:6px">
+            <div style="font-size:10px;font-weight:700;color:#e2e8f0">${v}</div>
+            <div style="font-size:7.5px;color:#475569">${l}</div>
+          </div>`).join('')}
+        </div>
+        <div style="text-align:right;font-size:9px;color:#22c55e;font-weight:600">→ Click pentru a aplica</div>
+      </div>
+    `).join('')}
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:8px">
+      <button onclick="_bilantMaximizare()" style="background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#4ade80;border-radius:8px;padding:9px;font-size:10px;font-weight:700;cursor:pointer">⚡ Maximizează SC</button>
+      <button onclick="_bilantOptimizeForma()" style="background:rgba(212,175,55,.12);border:1px solid rgba(212,175,55,.3);color:#d4af37;border-radius:8px;padding:9px;font-size:10px;font-weight:700;cursor:pointer">🔲 Formă optimă automată</button>
+    </div>
+  `;
+}
+
+// ── TAB 4: Umbrire vecini ──────────────────────────────────────────────────
+function _bilantTabUmbrire(d){
+  const {ap, umbrire} = d;
+  const lat = ap?.geo ? turf.centerOfMass(ap.geo).geometry.coordinates[1] : 47.16;
+  const hProp = S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13;
+
+  const solarAlt=(lat,month,hour)=>{
+    const D2R=Math.PI/180;
+    const decl=(-23.45*Math.cos(D2R*(360/365)*(month*30+10)))*D2R;
+    const ha=(hour-12)*15*D2R;
+    return Math.max(0,Math.asin(Math.sin(lat*D2R)*Math.sin(decl)+Math.cos(lat*D2R)*Math.cos(decl)*Math.cos(ha))*180/Math.PI);
+  };
+  const shadowLen=(h,alt)=>alt>0.5?h/Math.tan(alt*Math.PI/180):999;
+
+  const altDec=solarAlt(lat,11,12);
+  const altIun=solarAlt(lat,5,12);
+  const shaDec=shadowLen(hProp,altDec);
+  const shaIun=shadowLen(hProp,altIun);
+  const isConform=altDec>=15;
+
+  const hoursOk=[];
+  for(let h=7;h<=17;h++){const a=solarAlt(lat,11,h);if(a>=15)hoursOk.push(h);}
+
+  return `
+    <div style="background:rgba(${isConform?'34,197,94':'239,68,68'},.1);border:1px solid rgba(${isConform?'34,197,94':'239,68,68'},.3);border-radius:10px;padding:10px;margin-bottom:10px">
+      <div style="font-size:12px;font-weight:800;color:${isConform?'#4ade80':'#f87171'};margin-bottom:4px">
+        ${isConform?'✅ CONFORM OMS 119/2014':'⚠️ VERIFICARE NECESARĂ'}
+      </div>
+      <div style="font-size:10px;color:#94a3b8">Alt. solară solstițiu iarnă (12:00): <b style="color:#fbbf24">${altDec.toFixed(1)}°</b> · Prag minim: <b>15°</b></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">
+      ${[
+        ['H propus',hProp.toFixed(1)+'m','#60a5fa'],
+        ['Latitudine',lat.toFixed(2)+'°N','#94a3b8'],
+        ['Umbră Dec (12:00)',shaDec>200?'>200m':shaDec.toFixed(0)+'m','#f87171'],
+        ['Umbră Iun (12:00)',shaIun>200?'>200m':shaIun.toFixed(0)+'m','#fbbf24'],
+        ['Alt. solară Dec',altDec.toFixed(1)+'°',altDec>=15?'#4ade80':'#f87171'],
+        ['Ore însorire Dec',hoursOk.length+'h ('+( hoursOk[0]||'—')+':00-'+(hoursOk[hoursOk.length-1]||'—')+':00)','#fbbf24'],
+      ].map(([l,v,c])=>`<div style="background:rgba(255,255,255,.04);border-radius:8px;padding:8px;text-align:center">
+        <div style="font-size:11px;font-weight:700;color:${c}">${v}</div>
+        <div style="font-size:8px;color:#475569">${l}</div>
+      </div>`).join('')}
+    </div>
+
+    <div style="font-size:10px;color:#d4af37;font-weight:700;margin-bottom:6px">🌑 Umbre orare · Solstițiu iarnă · H=${hProp.toFixed(1)}m</div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:3px;margin-bottom:10px">
+      ${[8,9,10,12,14,15,16].map(h=>{
+        const alt=solarAlt(lat,11,h);
+        const sh=shadowLen(hProp,alt);
+        const ok=alt>=15;
+        return `<div style="background:rgba(${ok?'34,197,94':'239,68,68'},.12);border-radius:6px;padding:5px;text-align:center;border:1px solid rgba(${ok?'34,197,94':'239,68,68'},.2)">
+          <div style="font-size:9px;color:#64748b">${h}:00</div>
+          <div style="font-size:10px;font-weight:700;color:${ok?'#4ade80':'#f87171'}">${alt<0.5?'—':alt.toFixed(0)+'°'}</div>
+          <div style="font-size:8px;color:#475569">${sh>200?'>200':sh.toFixed(0)}m</div>
+        </div>`;
+      }).join('')}
+    </div>
+
+    ${umbrire.length>0?`
+    <div style="font-size:10px;color:#d4af37;font-weight:700;margin-bottom:6px">🏘 Vecini potențial umbriți</div>
+    <div style="display:flex;flex-direction:column;gap:3px">
+      ${umbrire.slice(0,5).map(v=>`
+        <div style="display:flex;justify-content:space-between;background:rgba(255,255,255,.04);border-radius:7px;padding:6px 9px">
+          <span style="color:#94a3b8;font-size:10px">${v.nrcad}</span>
+          <span style="color:#f87171;font-size:10px">${v.dist.toFixed(0)}m distanță</span>
+          <span style="color:${v.impact==='IMPACT'?'#f87171':'#4ade80'};font-size:10px;font-weight:700">${v.impact}</span>
+        </div>
+      `).join('')}
+    </div>`:'<div style="color:#475569;font-size:10px;text-align:center;padding:10px">Nu s-au detectat vecini cu impact semnificativ</div>'}
+  `;
+}
+
+function _calcUmbrireVecini(ap, volFeats){
+  if(!ap?.geo?.geometry||!S.ctx?.features) return [];
+  const ctr=turf.centerOfMass(ap.geo).geometry.coordinates;
+  const hProp=volFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13;
+  return S.ctx.features
+    .filter(f=>f.geometry)
+    .map(f=>{
+      try{
+        const vc=turf.centerOfMass({type:'Feature',geometry:f.geometry,properties:{}}).geometry.coordinates;
+        const dist=turf.distance({type:'Feature',geometry:{type:'Point',coordinates:ctr},properties:{}},
+          {type:'Feature',geometry:{type:'Point',coordinates:vc},properties:{}},{units:'meters'});
+        const impact=dist<hProp*1.5?'IMPACT':'OK';
+        return {nrcad:f.properties?.nrcad||'—',dist,impact,h:f.properties?.h||6};
+      }catch(e){return null;}
+    })
+    .filter(x=>x&&x.dist<100)
+    .sort((a,b)=>a.dist-b.dist);
+}
+
+// ── TAB 5: Comasare parcele ────────────────────────────────────────────────
+function _bilantTabComasare(d){
+  const {ap, parcelArea, edificabilArea, params, vecini} = d;
+  const potMax=parseFloat(params?.pot)||40;
+
+  if(!vecini||vecini.length===0) return `
+    <div style="color:#475569;font-size:11px;text-align:center;padding:20px">
+      <div style="font-size:24px;margin-bottom:8px">🔗</div>
+      Nu s-au detectat parcele vecine cu date disponibile.<br>
+      <span style="font-size:9px">Selectați o parcelă cu context OSM încărcat.</span>
+    </div>`;
+
+  return `
+    <div style="font-size:10px;color:#a78bfa;font-weight:700;margin-bottom:8px">
+      🔗 Potențial comasare — Parcele adiacente identificate
+    </div>
+    <div style="background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.2);border-radius:10px;padding:10px;margin-bottom:10px">
+      <div style="font-size:11px;color:#e2e8f0;margin-bottom:4px">Parcela curentă: <b style="color:#a78bfa">${Math.round(parcelArea)} mp · Edificabil ${Math.round(edificabilArea)} mp</b></div>
+      <div style="font-size:9.5px;color:#64748b">Prin comasare cu parcelele de mai jos crești edificabilul și poți accesa indicatori superiori.</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:10px">
+      ${vecini.slice(0,5).map(v=>{
+        const combined=parcelArea+(v.area||0);
+        const gainEdif=Math.round((combined*potMax/100)-edificabilArea);
+        const gainPct=edificabilArea>0?((gainEdif/edificabilArea)*100).toFixed(0):'—';
+        return `
+          <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px;border:1px solid rgba(255,255,255,.06)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+              <span style="color:#a78bfa;font-size:11px;font-weight:700">Nr. ${v.nrcad}</span>
+              <span style="color:#4ade80;font-size:10px;font-weight:700">+${gainPct}% edificabil</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px">
+              ${[
+                ['Suprafață parcelă',Math.round(v.area||0)+' mp'],
+                ['Teren combinat',Math.round(combined)+' mp'],
+                ['Câștig edificabil','+'+gainEdif+' mp'],
+              ].map(([l,v])=>`<div style="text-align:center;padding:4px;background:rgba(255,255,255,.03);border-radius:5px">
+                <div style="font-size:10px;font-weight:700;color:#e2e8f0">${v}</div>
+                <div style="font-size:7.5px;color:#475569">${l}</div>
+              </div>`).join('')}
+            </div>
+            <div style="margin-top:5px;font-size:8.5px;color:#475569">
+              SC max combinat: <b style="color:#fbbf24">${Math.round(combined*potMax/100)} mp</b> vs. actual: <b>${Math.round(parcelArea*potMax/100)} mp</b>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+    <div style="font-size:8.5px;color:#334155;text-align:center;padding:6px">
+      Comasarea necesită acordul proprietarilor vecini și procedura cadastrală conform Legii 7/1996.
+    </div>
+  `;
+}
+
+function _getVeciniPentruComasare(ap){
+  if(!ap?.geo?.geometry||!S.ctx?.features) return [];
+  const parcelFeat={type:'Feature',geometry:ap.geo.geometry,properties:{}};
+  return S.ctx.features
+    .filter(f=>f.geometry)
+    .map(f=>{
+      try{
+        const inter=turf.intersect(parcelFeat,{type:'Feature',geometry:f.geometry,properties:{}});
+        // dacă sunt adiacente (intersecție linie sau punct)
+        const area=turf.area({type:'Feature',geometry:f.geometry,properties:{}});
+        if(area>20) return {nrcad:f.properties?.nrcad||'—',area,geo:f.geometry};
+        return null;
+      }catch(e){
+        // încearcă distanță
+        try{
+          const dist=turf.distance(turf.centerOfMass(parcelFeat),
+            turf.centerOfMass({type:'Feature',geometry:f.geometry,properties:{}}),{units:'meters'});
+          if(dist<15){
+            const area=turf.area({type:'Feature',geometry:f.geometry,properties:{}});
+            return {nrcad:f.properties?.nrcad||'—',area,geo:f.geometry};
+          }
+        }catch(e2){}
+        return null;
+      }
+    })
+    .filter(x=>x&&x.area>20)
+    .sort((a,b)=>b.area-a.area);
+}
+
+// ── Acțiuni ────────────────────────────────────────────────────────────────
+function _applyBilantScenariu(niv){
+  const ap=S.parcels[S.activeParcel??0];
+  if(!ap){ss('Selectați o parcelă.');return;}
+  if(ap.params) ap.params.niv=niv;
+  if(AEDIS.corpuri[0]) AEDIS.corpuri[0].niv=niv;
+  S.vol.hNiv=3.0;
+  const feats=buildVolume();
+  setSource('vol-src',{type:'FeatureCollection',features:feats});
+  S.vol.genDone=true;
+  setTimeout(()=>{updateDistanceLines();updateBilant();},150);
+  ss(`⚡ Scenariu ${niv} niveluri aplicat!`);
+}
+
+function _bilantMaximizare(){
+  const ap=S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry){ss('Selectați o parcelă.');return;}
+  AEDIS.forma='auto';
+  const feats=buildVolume();
+  setSource('vol-src',{type:'FeatureCollection',features:feats});
+  S.vol.genDone=true;
+  setTimeout(()=>{updateDistanceLines();updateBilant();},150);
+  ss('⚡ Edificabil maximizat!');
+}
+
+function _bilantOptimizeForma(){
+  const ap=S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry){ss('Selectați o parcelă.');return;}
+  const params=ap.params||getDefaultParams(ap.utr||'');
+  const forme=['auto','dreptunghi','L','U','T','bara','patrat'];
+  let best='auto',bestArea=0;
+  const savedForma=AEDIS.forma;
+  forme.forEach(f=>{
+    try{AEDIS.forma=f;const fp=buildFP(ap.geo.geometry,params);const a=fp?turf.area(fp):0;if(a>bestArea){bestArea=a;best=f;}}catch(e){}
+  });
+  AEDIS.forma=best;
+  const feats=buildVolume();
+  setSource('vol-src',{type:'FeatureCollection',features:feats});
+  S.vol.genDone=true;
+  setTimeout(()=>{updateDistanceLines();updateBilant();},150);
+  ss(`🔲 Formă optimă: ${best} · SC≈${Math.round(bestArea)}mp`);
+}
+
+function _bilantExportClipboard(){
+  const ap=S.parcels[S.activeParcel??0];
+  if(!ap){ss('Selectați o parcelă.');return;}
+  const params=ap.params||getDefaultParams(ap.utr||'');
+  const pA=turf.area({type:'Feature',geometry:ap.geo.geometry,properties:{}});
+  const fp=buildFP(ap.geo.geometry,params);
+  const eA=fp?turf.area(fp):0;
+  const utr=ap.utr||'—';
+  const landPx=MARKET_DATA.landPrice[utr]||MARKET_DATA.landPrice.default;
+  const txt=[
+    `BILANȚ EDIFICABIL URBANX`,
+    `Nr. cadastral: ${ap.nrcad||'—'} | UTR: ${utr}`,
+    `Suprafață teren: ${Math.round(pA)} mp`,
+    `Edificabil: ${Math.round(eA)} mp (${((eA/pA)*100).toFixed(1)}%)`,
+    `Retrageri: ${Math.round(pA-eA)} mp (${(((pA-eA)/pA)*100).toFixed(1)}%)`,
+    `Retrageri: F=${params.rf}m | S=${params.rs}m | L=${params.rl}m`,
+    `POT max: ${params.pot}% | CUT: ${params.cut} | H: ${params.h||'—'}m | Niv: ${params.niv||'—'}`,
+    `SC max: ${Math.round(pA*parseFloat(params.pot)/100)} mp | SD max: ${Math.round(pA*parseFloat(params.cut))} mp`,
+    `Valoare teren est.: ${Math.round(pA*landPx/1000)}k€ (${landPx}€/mp)`,
+    `Generat: ${new Date().toLocaleString('ro-RO')} | UrbanX TSS·FG`,
+  ].join('\n');
+  navigator.clipboard?.writeText(txt).then(()=>ss('📋 Bilanț copiat!')).catch(()=>{alert(txt);});
+}
+
+
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// SISTEM LOTIZARE TEREN — Ansamblu rezidențial
+// ════════════════════════════════════════════════════════════════════════════
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// SISTEM LOTIZARE TEREN v2 — Ansamblu rezidențial complet
+// Circulații: lățime + procentaj + scenarii auto
+// Tipuri: toate active by default
+// Rezultate: hartă, bilanț, financiar, PUG, PDF
+// ════════════════════════════════════════════════════════════════════════════
+
+let _lotizareActive = false;
+
+const _LOT = {
+  lotAria: 400,
+  drumLat: 6,
+  drumProcent: 20,      // % din teren pt circulații (0 = calculat din lățime)
+  drumMod: 'ambele',    // 'latime' | 'procent' | 'ambele' (min dintre cele două)
+  strategie: 'grid',
+
+  tipMix: { individuala:40, insiruita:30, duplex:20, bloc:10 },
+
+  tipuri: {
+    individuala: {
+      label:'Casă individuală', icon:'🏡',
+      lotMin:300, lotMax:1500, lotDefault:450,
+      sc:35, hMax:8, niv:2, retF:5, retS:4, retL:3,
+      color:'#4ade80', borderColor:'#16a34a',
+      pretConstr:900, pretVanzare:1400, suprafUtila:130,
+      desc:'Lot propriu, grădină, garaj'
+    },
+    insiruita: {
+      label:'Casă înșiruită', icon:'🏘',
+      lotMin:150, lotMax:400, lotDefault:220,
+      sc:60, hMax:9, niv:2, retF:4, retS:3, retL:0,
+      color:'#60a5fa', borderColor:'#2563eb',
+      pretConstr:800, pretVanzare:1250, suprafUtila:110,
+      desc:'Calcan lateral, front mic, eficient'
+    },
+    duplex: {
+      label:'Duplex (2 familii)', icon:'🏠',
+      lotMin:250, lotMax:600, lotDefault:320,
+      sc:50, hMax:8, niv:2, retF:4, retS:3, retL:0,
+      color:'#fbbf24', borderColor:'#d97706',
+      pretConstr:820, pretVanzare:1300, suprafUtila:120,
+      desc:'2 unități pe lot comun'
+    },
+    bloc: {
+      label:'Bloc mic (4-8 ap)', icon:'🏢',
+      lotMin:600, lotMax:3000, lotDefault:900,
+      sc:40, hMax:15, niv:4, retF:6, retS:5, retL:4,
+      color:'#a78bfa', borderColor:'#7c3aed',
+      pretConstr:750, pretVanzare:1350, suprafUtila:65,
+      desc:'Regim S+P+3E, max 8 ap'
+    }
+  },
+
+  _loturi: [],
+  _drumuri: [],
+  _bilant: null
+};
+
+// ─── Toggle ───────────────────────────────────────────────────────────────
+function toggleLotizare(){
+  _lotizareActive = !_lotizareActive;
+  document.getElementById('btnLotizare')?.classList.toggle('on', _lotizareActive);
+  if(_lotizareActive) _showLotizarePanel();
+  else {
+    ['lotizare-src','lotizare-drum-src','lotizare-label-src'].forEach(s=>
+      setSource(s,{type:'FeatureCollection',features:[]}));
+    document.getElementById('lotizare-panel')?.remove();
+  }
+}
+
+// ─── Panel principal ──────────────────────────────────────────────────────
+function _showLotizarePanel(){
+  document.getElementById('lotizare-panel')?.remove();
+  const ap = S.parcels[S.activeParcel??0];
+  const mob = window.innerWidth<841;
+  const div = document.createElement('div');
+  div.id='lotizare-panel';
+  div.style.cssText=`position:fixed;${mob?'bottom:72px;left:4px;right:4px':'top:56px;right:20px;width:430px'};z-index:8600;background:rgba(7,12,24,.97);border:1px solid rgba(167,139,250,.35);border-radius:16px;padding:0;box-shadow:0 12px 48px rgba(0,0,0,.75);backdrop-filter:blur(16px);font-family:system-ui,sans-serif;max-height:${mob?'82':'88'}vh;overflow:hidden;display:flex;flex-direction:column`;
+
+  div.innerHTML=`
+    <div style="padding:12px 16px 0;flex-shrink:0">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="color:#a78bfa;font-weight:800;font-size:13px">🏘 Lotizare · <span style="color:#64748b;font-weight:400;font-size:11px">${ap?ap.nrcad+' · '+Math.round(ap.area||0)+'mp':'selectați parcela'}</span></span>
+        <button onclick="toggleLotizare()" style="background:none;border:none;color:#475569;font-size:18px;cursor:pointer;line-height:1">✕</button>
+      </div>
+      <div style="display:flex;gap:2px;background:rgba(255,255,255,.04);border-radius:8px;padding:3px" id="lot-tabs">
+        ${[['p','⚙ Parametri'],['m','🏡 Mix'],['r','📊 Rezultat'],['f','💰 Financiar'],['x','📄 Export']].map(([id,l],i)=>`
+          <button onclick="_lotTab('${id}')" id="ltab-${id}" style="flex:1;border:none;background:${i===0?'rgba(167,139,250,.2)':'none'};color:${i===0?'#a78bfa':'#64748b'};border-radius:6px;padding:5px 1px;font-size:${mob?8:9}px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .15s">${l}</button>`).join('')}
+      </div>
+    </div>
+    <div id="lot-content" style="overflow-y:auto;padding:12px 16px;flex:1">${_lotHtmlParametri()}</div>
+    <div style="padding:10px 16px;border-top:1px solid rgba(255,255,255,.07);flex-shrink:0">
+      <button onclick="runLotizare()" style="width:100%;background:linear-gradient(135deg,#6d28d9,#4c1d95);border:1px solid #7c3aed;color:#fff;border-radius:10px;padding:12px;font-size:13px;font-weight:800;cursor:pointer;letter-spacing:.03em;transition:opacity .15s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+        🏘 Generează Plan Lotizare
+      </button>
+    </div>`;
+  document.body.appendChild(div);
+}
+
+function _lotTab(tab){
+  ['p','m','r','f','x'].forEach(t=>{
+    const b=document.getElementById('ltab-'+t);
+    if(!b) return;
+    b.style.background = t===tab?'rgba(167,139,250,.2)':'none';
+    b.style.color = t===tab?'#a78bfa':'#64748b';
+  });
+  const c=document.getElementById('lot-content');
+  if(!c) return;
+  const map2={'p':_lotHtmlParametri,'m':_lotHtmlMix,'r':_lotHtmlRezultat,'f':_lotHtmlFinanciar,'x':_lotHtmlExport};
+  c.innerHTML = (map2[tab]||_lotHtmlParametri)();
+}
+
+// ─── TAB: Parametri ───────────────────────────────────────────────────────
+function _lotHtmlParametri(){
+  const ap=S.parcels[S.activeParcel??0];
+  return `
+  ${!ap?`<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:8px 10px;font-size:10px;color:#f87171;margin-bottom:10px">⚠️ Selectați mai întâi o parcelă de pe hartă</div>`:''}
+
+  <div style="font-size:10px;color:#fbbf24;font-weight:700;margin-bottom:6px">📐 Suprafață lot (mp/lot)</div>
+  <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:7px">
+    ${[300,400,500,600,800,1000].map(v=>`<button onclick="_LOT.lotAria=${v};_lotTab('p')" style="background:${_LOT.lotAria===v?'rgba(251,191,36,.25)':'rgba(255,255,255,.06)'};border:1px solid ${_LOT.lotAria===v?'#fbbf24':'rgba(255,255,255,.1)'};color:${_LOT.lotAria===v?'#fbbf24':'#94a3b8'};border-radius:7px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer">${v}mp</button>`).join('')}
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+    <span style="font-size:10px;color:#64748b;min-width:68px">Personalizat:</span>
+    <input type="number" value="${_LOT.lotAria}" min="100" max="5000" step="50"
+      oninput="_LOT.lotAria=+this.value"
+      style="flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#fbbf24;border-radius:7px;padding:5px 9px;font-size:12px;font-weight:700">
+    <span style="color:#fbbf24;font-size:11px;font-weight:700">${_LOT.lotAria} mp</span>
+  </div>
+
+  <div style="font-size:10px;color:#38bdf8;font-weight:700;margin-bottom:6px">🛣 Circulații interioare</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:8px">
+    ${[['latime','📏 Lățime fixă','Drum = lățimea setată'],['procent','📊 Procentaj','Drum = X% din teren'],['ambele','🔀 Ambele (min)','Cel mai restrictiv']].map(([v,l,d])=>`
+      <button onclick="_LOT.drumMod='${v}';_lotTab('p')" style="background:${_LOT.drumMod===v?'rgba(56,189,248,.2)':'rgba(255,255,255,.04)'};border:1px solid ${_LOT.drumMod===v?'#38bdf8':'rgba(255,255,255,.08)'};border-radius:8px;padding:7px 4px;cursor:pointer;text-align:center">
+        <div style="color:${_LOT.drumMod===v?'#38bdf8':'#e2e8f0'};font-size:10px;font-weight:700">${l}</div>
+        <div style="color:#475569;font-size:8px;margin-top:2px">${d}</div>
+      </button>`).join('')}
+  </div>
+
+  ${_LOT.drumMod!=='procent'?`
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+    <span style="font-size:10px;color:#64748b;min-width:80px">Lățime drum:</span>
+    <input type="range" min="3" max="12" step="0.5" value="${_LOT.drumLat}"
+      oninput="_LOT.drumLat=+this.value;this.nextElementSibling.textContent=this.value+'m'"
+      style="flex:1;accent-color:#38bdf8">
+    <span style="color:#38bdf8;font-size:12px;font-weight:700;min-width:35px">${_LOT.drumLat}m</span>
+  </div>
+  <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px">
+    ${[4,5,6,7,8,10].map(v=>`<button onclick="_LOT.drumLat=${v};_lotTab('p')" style="background:${_LOT.drumLat===v?'rgba(56,189,248,.2)':'rgba(255,255,255,.05)'};border:1px solid ${_LOT.drumLat===v?'#38bdf8':'rgba(255,255,255,.08)'};color:${_LOT.drumLat===v?'#38bdf8':'#64748b'};border-radius:6px;padding:4px 9px;font-size:10px;font-weight:700;cursor:pointer">${v}m</button>`).join('')}
+  </div>`:''}
+
+  ${_LOT.drumMod!=='latime'?`
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+    <span style="font-size:10px;color:#64748b;min-width:80px">% drum din teren:</span>
+    <input type="range" min="5" max="40" step="1" value="${_LOT.drumProcent}"
+      oninput="_LOT.drumProcent=+this.value;this.nextElementSibling.textContent=this.value+'%'"
+      style="flex:1;accent-color:#38bdf8">
+    <span style="color:#38bdf8;font-size:12px;font-weight:700;min-width:35px">${_LOT.drumProcent}%</span>
+  </div>`:''}
+
+  <div style="background:rgba(56,189,248,.07);border-radius:7px;padding:7px 10px;font-size:9px;color:#475569;margin-bottom:12px">
+    💡 <b style="color:#38bdf8">Un sens:</b> min 3.5m &nbsp;|&nbsp; <b style="color:#38bdf8">Două sensuri:</b> min 6m &nbsp;|&nbsp; <b style="color:#38bdf8">Cu trotuare:</b> min 8m &nbsp;|&nbsp; <b style="color:#38bdf8">Bulevard:</b> 12m+
+  </div>
+
+  <div style="font-size:10px;color:#34d399;font-weight:700;margin-bottom:6px">🧭 Strategie generare loturi</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
+    ${[['grid','📏 Grilă regulată','Loturi egale în rânduri'],['strip','➡ Fâșii paralele','Loturi alungite, front la drum'],['adaptiv','🔄 Adaptiv','Urmărește forma parcelei'],['radial','◉ Periferic','Loturi pe conturul parcelei']].map(([v,l,d])=>`
+      <button onclick="_LOT.strategie='${v}';_lotTab('p')" style="background:${_LOT.strategie===v?'rgba(52,211,153,.15)':'rgba(255,255,255,.04)'};border:1px solid ${_LOT.strategie===v?'#34d399':'rgba(255,255,255,.08)'};border-radius:8px;padding:8px;cursor:pointer;text-align:left">
+        <div style="color:${_LOT.strategie===v?'#34d399':'#e2e8f0'};font-size:10px;font-weight:700">${l}</div>
+        <div style="color:#475569;font-size:8.5px;margin-top:2px">${d}</div>
+      </button>`).join('')}
+  </div>`;
+}
+
+// ─── TAB: Mix tipuri ──────────────────────────────────────────────────────
+function _lotHtmlMix(){
+  const total=Object.values(_LOT.tipMix).reduce((s,v)=>s+v,0);
+  return `
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <span style="font-size:10px;color:#d4af37;font-weight:700">🏡 Mix tipuri locuințe</span>
+    <span style="font-size:12px;font-weight:800;color:${total===100?'#4ade80':'#f87171'}">${total}% ${total===100?'✓':'≠100'}</span>
+  </div>
+  ${total!==100?`<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:8px;padding:7px 10px;font-size:10px;color:#f87171;margin-bottom:8px">Totalul trebuie să fie 100% (acum ${total}%)</div>`:''}
+
+  ${Object.entries(_LOT.tipuri).map(([k,t])=>`
+    <div style="background:rgba(255,255,255,.04);border-radius:11px;padding:11px;border:1px solid rgba(255,255,255,.06);margin-bottom:6px;border-left:3px solid ${_LOT.tipMix[k]>0?t.color:'rgba(255,255,255,.1)'}">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+        <label style="display:flex;align-items:center;gap:7px;cursor:pointer">
+          <input type="checkbox" ${_LOT.tipMix[k]>0?'checked':''} onchange="if(!this.checked){_LOT.tipMix['${k}']=0;_lotTab('m')}else{_LOT.tipMix['${k}']=25;_lotTab('m')}" style="accent-color:${t.color};width:16px;height:16px">
+          <span style="font-size:13px">${t.icon}</span>
+          <div>
+            <div style="color:#e2e8f0;font-size:11px;font-weight:700">${t.label}</div>
+            <div style="color:#475569;font-size:8.5px">${t.desc}</div>
+          </div>
+        </label>
+        <span style="color:${t.color};font-size:16px;font-weight:800;min-width:38px;text-align:right" id="mix-v-${k}">${_LOT.tipMix[k]}%</span>
+      </div>
+      <input type="range" min="0" max="100" step="5" value="${_LOT.tipMix[k]}"
+        oninput="_LOT.tipMix['${k}']=+this.value;document.getElementById('mix-v-${k}').textContent=this.value+'%'"
+        style="width:100%;accent-color:${t.color};margin-bottom:7px">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:3px">
+        ${[['Lot',t.lotDefault+'mp'],['SC',t.sc+'%'],['H',t.hMax+'m'],['Retrag.F',t.retF+'m']].map(([l,v])=>`
+          <div style="text-align:center;padding:4px;background:rgba(255,255,255,.03);border-radius:5px">
+            <div style="font-size:10px;font-weight:700;color:#94a3b8">${v}</div>
+            <div style="font-size:7.5px;color:#475569">${l}</div>
+          </div>`).join('')}
+      </div>
+    </div>`).join('')}
+
+  <div style="font-size:10px;color:#64748b;font-weight:700;margin:10px 0 6px">⚡ Preset-uri rapide</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
+    ${[
+      ['100% Individual',{individuala:100,insiruita:0,duplex:0,bloc:0}],
+      ['100% Înșiruite',{individuala:0,insiruita:100,duplex:0,bloc:0}],
+      ['Mix clasic (50+30+20)',{individuala:50,insiruita:30,duplex:20,bloc:0}],
+      ['Mix urban (30+40+20+10)',{individuala:30,insiruita:40,duplex:20,bloc:10}],
+      ['Duplex dominant',{individuala:20,insiruita:20,duplex:60,bloc:0}],
+      ['Mixt cu bloc',{individuala:25,insiruita:25,duplex:25,bloc:25}],
+    ].map(([l,mix])=>`
+      <button onclick="Object.assign(_LOT.tipMix,${JSON.stringify(mix)});_lotTab('m')"
+        style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:8px;text-align:left;cursor:pointer;transition:border-color .15s"
+        onmouseover="this.style.borderColor='rgba(167,139,250,.4)'" onmouseout="this.style.borderColor='rgba(255,255,255,.08)'">
+        <div style="color:#e2e8f0;font-size:10px;font-weight:700">${l}</div>
+      </button>`).join('')}
+  </div>`;
+}
+
+// ─── TAB: Rezultat ────────────────────────────────────────────────────────
+function _lotHtmlRezultat(){
+  if(!_LOT._bilant) return `<div style="color:#475569;font-size:12px;text-align:center;padding:24px">
+    <div style="font-size:32px;margin-bottom:10px">🏘</div>
+    Apasă <b style="color:#a78bfa">Generează Plan Lotizare</b>
+  </div>`;
+  const b=_LOT._bilant;
+  const ap=S.parcels[S.activeParcel??0];
+  const pA=ap?.area||0;
+
+  return `
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:10px">
+    ${[
+      ['Total loturi',b.totalLoturi+' buc','#a78bfa'],
+      ['Teren loturi',Math.round(b.terenLoturi)+' mp','#4ade80'],
+      ['Teren drum+alei',Math.round(b.terenDrum)+' mp','#38bdf8'],
+      ['Eficiență',(b.eficienta*100).toFixed(0)+'%','#fbbf24'],
+      ['Lot mediu',Math.round(b.lotMediu)+' mp','#94a3b8'],
+      ['Unități totale',b.totalUnitati+' buc','#f472b6'],
+    ].map(([l,v,c])=>`<div style="background:rgba(255,255,255,.04);border-radius:9px;padding:8px;text-align:center">
+      <div style="font-size:13px;font-weight:800;color:${c}">${v}</div>
+      <div style="font-size:8px;color:#475569;margin-top:2px">${l}</div>
+    </div>`).join('')}
+  </div>
+
+  <div style="font-size:10px;color:#d4af37;font-weight:700;margin-bottom:6px">Distribuție per tip</div>
+  ${Object.entries(b.perTip).filter(([,v])=>v.count>0).map(([k,v])=>{
+    const t=_LOT.tipuri[k];
+    const pct=pA>0?((v.count*_LOT.lotAria/pA)*100).toFixed(0):'—';
+    return `<div style="background:rgba(255,255,255,.04);border-radius:9px;padding:9px;border-left:3px solid ${t.color};margin-bottom:5px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+        <span style="color:#e2e8f0;font-size:11px;font-weight:700">${t.icon} ${t.label}</span>
+        <span style="color:${t.color};font-size:13px;font-weight:800">${v.count} loturi · ${pct}%</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:3px">
+        ${[['Suprafață',Math.round(v.suprafataTotala)+' mp'],['SC max',Math.round(v.scMax)+' mp'],['Unități',v.unitati+' buc'],['ROI',v.roi+'%']].map(([l,val])=>`
+          <div style="text-align:center;padding:4px;background:rgba(255,255,255,.03);border-radius:5px">
+            <div style="font-size:10px;font-weight:700;color:#94a3b8">${val}</div>
+            <div style="font-size:7.5px;color:#475569">${l}</div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  }).join('')}
+
+  <div style="font-size:10px;color:#38bdf8;font-weight:700;margin:10px 0 6px">✅ Verificare PUG</div>
+  ${b.verificari.map(v=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 9px;background:rgba(255,255,255,.03);border-radius:7px;margin-bottom:3px">
+      <span style="font-size:13px">${v.ok?'✅':'⚠️'}</span>
+      <span style="color:#94a3b8;font-size:10px;flex:1">${v.label}</span>
+      <span style="color:${v.ok?'#4ade80':'#fbbf24'};font-size:10px;font-weight:700">${v.value}</span>
+    </div>`).join('')}
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:10px">
+    <button onclick="runLotizare()" style="background:rgba(167,139,250,.15);border:1px solid rgba(167,139,250,.3);color:#a78bfa;border-radius:8px;padding:9px;font-size:10px;font-weight:700;cursor:pointer">🔄 Regenerează</button>
+    <button onclick="_lotTab('x')" style="background:rgba(212,175,55,.12);border:1px solid rgba(212,175,55,.3);color:#d4af37;border-radius:8px;padding:9px;font-size:10px;font-weight:700;cursor:pointer">📄 Export PDF</button>
+  </div>`;
+}
+
+// ─── TAB: Financiar ───────────────────────────────────────────────────────
+function _lotHtmlFinanciar(){
+  if(!_LOT._bilant) return `<div style="color:#475569;font-size:11px;text-align:center;padding:24px">Generați planul mai întâi.</div>`;
+  const b=_LOT._bilant;
+  const ap=S.parcels[S.activeParcel??0];
+  const utr=ap?.utr||'default';
+  const landPx=MARKET_DATA?.landPrice?.[utr]||300;
+  const terenVal=(ap?.area||0)*landPx;
+
+  return `
+  <div style="background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.2);border-radius:11px;padding:11px;margin-bottom:10px">
+    <div style="font-size:10px;color:#fbbf24;font-weight:700;margin-bottom:8px">💰 Rezumat financiar ansamblu</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
+      ${[
+        ['Valoare teren',Math.round(terenVal/1000)+'k€','#fbbf24'],
+        ['Cost construcție',Math.round(b.costConstrTotal/1000)+'k€','#94a3b8'],
+        ['Venituri estimate',Math.round(b.venituriTotal/1000)+'k€','#4ade80'],
+        ['Profit estimat',Math.round(b.profitTotal/1000)+'k€',b.profitTotal>0?'#4ade80':'#f87171'],
+        ['ROI total',b.roi+'%',b.roi>=20?'#4ade80':b.roi>=12?'#fbbf24':'#f87171'],
+        ['Profit/lot mediu',Math.round(b.profitTotal/Math.max(1,b.totalLoturi)/1000)+'k€','#a78bfa'],
+      ].map(([l,v,c])=>`<div style="text-align:center;padding:8px;background:rgba(255,255,255,.04);border-radius:8px">
+        <div style="font-size:13px;font-weight:800;color:${c}">${v}</div>
+        <div style="font-size:8px;color:#475569">${l}</div>
+      </div>`).join('')}
+    </div>
+  </div>
+
+  <div style="height:8px;border-radius:4px;overflow:hidden;display:flex;margin-bottom:6px">
+    <div style="width:${Math.min(80,(terenVal/Math.max(1,b.venituriTotal)*100)).toFixed(0)}%;background:#fbbf24;min-width:3px" title="Teren"></div>
+    <div style="flex:1;background:rgba(255,255,255,.06)"></div>
+    <div style="width:${Math.min(80,(b.profitTotal/Math.max(1,b.venituriTotal)*100)).toFixed(0)}%;background:#4ade80;min-width:3px" title="Profit"></div>
+  </div>
+
+  <div style="font-size:10px;color:#4ade80;font-weight:700;margin:10px 0 6px">📈 Detalii per tip locuință</div>
+  ${Object.entries(b.perTip).filter(([,v])=>v.count>0).map(([k,v])=>{
+    const t=_LOT.tipuri[k];
+    return `<div style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px;border-left:3px solid ${t.color};margin-bottom:6px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+        <span style="color:#e2e8f0;font-size:11px;font-weight:700">${t.icon} ${t.label} · ${v.count} buc</span>
+        <span style="color:${v.profit>0?'#4ade80':'#f87171'};font-size:11px;font-weight:800">${Math.round(v.profit/1000)}k€</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:3px">
+        ${[['Invest.',Math.round(v.cost/1000)+'k€'],['Venituri',Math.round(v.venit/1000)+'k€'],['Profit',Math.round(v.profit/1000)+'k€'],['ROI',v.roi+'%']].map(([l,val])=>`
+          <div style="text-align:center;padding:4px;background:rgba(255,255,255,.03);border-radius:5px">
+            <div style="font-size:10px;font-weight:700;color:#94a3b8">${val}</div>
+            <div style="font-size:7.5px;color:#475569">${l}</div>
+          </div>`).join('')}
+      </div>
+      <div style="margin-top:5px;height:3px;background:rgba(255,255,255,.06);border-radius:2px">
+        <div style="height:100%;width:${Math.min(100,v.roi*2)}%;background:${v.roi>=20?'#4ade80':v.roi>=12?'#fbbf24':'#ef4444'};border-radius:2px"></div>
+      </div>
+    </div>`;
+  }).join('')}
+  <div style="font-size:8px;color:#334155;text-align:center;padding:6px;margin-top:4px">
+    ⚠️ Estimativ. Nu include taxe, avize, branșamente (~5-8%). Confirmare cu evaluator ANEVAR.
+  </div>`;
+}
+
+// ─── TAB: Export ─────────────────────────────────────────────────────────
+function _lotHtmlExport(){
+  const hasBilant=!!_LOT._bilant;
+  return `
+  <div style="font-size:10px;color:#d4af37;font-weight:700;margin-bottom:10px">📄 Export documente</div>
+  ${!hasBilant?`<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:8px;padding:8px 10px;font-size:10px;color:#f87171;margin-bottom:10px">⚠️ Generați planul de lotizare mai întâi</div>`:''}
+
+  <div style="display:flex;flex-direction:column;gap:6px">
+    <button onclick="_lotExportPDF()" ${!hasBilant?'disabled':''} style="background:${hasBilant?'rgba(212,175,55,.15)':'rgba(255,255,255,.03)'};border:1px solid ${hasBilant?'rgba(212,175,55,.3)':'rgba(255,255,255,.06)'};color:${hasBilant?'#d4af37':'#334155'};border-radius:10px;padding:12px;font-size:11px;font-weight:700;cursor:${hasBilant?'pointer':'not-allowed'};text-align:left">
+      📄 <b>Export PDF complet</b><br>
+      <span style="font-size:9px;opacity:.7">Cover + Plan situație (hartă) + Bilanț suprafețe + Analiză financiară + Verificare PUG</span>
+    </button>
+    <button onclick="_lotExportClipboard()" ${!hasBilant?'disabled':''} style="background:${hasBilant?'rgba(99,102,241,.15)':'rgba(255,255,255,.03)'};border:1px solid ${hasBilant?'rgba(99,102,241,.3)':'rgba(255,255,255,.06)'};color:${hasBilant?'#818cf8':'#334155'};border-radius:10px;padding:12px;font-size:11px;font-weight:700;cursor:${hasBilant?'pointer':'not-allowed'};text-align:left">
+      📋 <b>Copiază bilanț (text)</b><br>
+      <span style="font-size:9px;opacity:.7">Tabel sumar pentru clipboard — pastă în Word/Excel</span>
+    </button>
+    <button onclick="runLotizare()" style="background:rgba(167,139,250,.15);border:1px solid rgba(167,139,250,.3);color:#a78bfa;border-radius:10px;padding:12px;font-size:11px;font-weight:700;cursor:pointer;text-align:left">
+      🔄 <b>Regenerează plan</b><br>
+      <span style="font-size:9px;opacity:.7">Recalculează cu parametrii curenți</span>
+    </button>
+  </div>`;
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// MOTOR GENERARE
+// ════════════════════════════════════════════════════════════════════════════
+function runLotizare(){
+  const ap=S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry){ss('⚠️ Selectați o parcelă de pe hartă.');return;}
+
+  const totalMix=Object.values(_LOT.tipMix).reduce((s,v)=>s+v,0);
+  if(totalMix===0){ss('⚠️ Selectați cel puțin un tip de locuință.');return;}
+
+  ss('🏘 Se generează planul de lotizare...');
+
+  try{
+    const pFeat={type:'Feature',geometry:ap.geo.geometry,properties:{}};
+    const pArea=turf.area(pFeat);
+    const params=ap.params||getDefaultParams(ap.utr||'');
+
+    // Edificabil (cu retrageri față de stradă)
+    const fp=buildFP(ap.geo.geometry,params)||pFeat;
+    const fpArea=turf.area(fp);
+
+    // Suprafață drum
+    let drumAreaFract;
+    if(_LOT.drumMod==='latime'){
+      // Estimare din lățime: drum serpentit prin teren
+      const bbox2=turf.bbox(fp);
+      const wM=(bbox2[2]-bbox2[0])*111320*Math.cos(((bbox2[1]+bbox2[3])/2)*Math.PI/180);
+      const hM=(bbox2[3]-bbox2[1])*111320;
+      const lotDim=Math.sqrt(_LOT.lotAria);
+      const nrDrum=Math.max(1,Math.ceil(Math.min(wM,hM)/(lotDim+_LOT.drumLat)));
+      drumAreaFract=Math.min(0.40, nrDrum*_LOT.drumLat*Math.max(wM,hM)/fpArea);
+    } else if(_LOT.drumMod==='procent'){
+      drumAreaFract=_LOT.drumProcent/100;
+    } else {
+      // ambele — min
+      const bbox2=turf.bbox(fp);
+      const wM=(bbox2[2]-bbox2[0])*111320*Math.cos(((bbox2[1]+bbox2[3])/2)*Math.PI/180);
+      const hM=(bbox2[3]-bbox2[1])*111320;
+      const lotDim=Math.sqrt(_LOT.lotAria);
+      const nrDrum=Math.max(1,Math.ceil(Math.min(wM,hM)/(lotDim+_LOT.drumLat)));
+      const fractLat=Math.min(0.40,nrDrum*_LOT.drumLat*Math.max(wM,hM)/fpArea);
+      const fractPct=_LOT.drumProcent/100;
+      drumAreaFract=Math.max(fractLat,fractPct); // max = mai conservator
+    }
+
+    const terenUtil=fpArea*(1-drumAreaFract);
+    const nrLoturiTotal=Math.max(1,Math.floor(terenUtil/_LOT.lotAria));
+
+    // Distribuire loturi per tip
+    const loturiPerTip={};
+    let ramas=nrLoturiTotal;
+    const tipuriActiv=Object.entries(_LOT.tipMix).filter(([,v])=>v>0);
+    tipuriActiv.forEach(([k,pct],i)=>{
+      if(i===tipuriActiv.length-1) loturiPerTip[k]=ramas;
+      else{const n=Math.max(0,Math.round(nrLoturiTotal*pct/totalMix));loturiPerTip[k]=n;ramas-=n;}
+    });
+    Object.keys(_LOT.tipuri).forEach(k=>{if(!loturiPerTip[k])loturiPerTip[k]=0;});
+
+    // Generare geometrii
+    const {loturi,drumuri}=_genLotizareGeom(fp,loturiPerTip,drumAreaFract);
+
+    // Bilanț
+    const terenLoturi=loturi.reduce((s,l)=>{try{return s+turf.area(l);}catch(e){return s;}},0);
+    const terenDrum=Math.max(0,fpArea-terenLoturi);
+    const eficienta=terenLoturi/Math.max(1,fpArea);
+    const totalUnitati=Object.entries(loturiPerTip).reduce((s,[k,n])=>s+(n*(_LOT.tipuri[k]?.niv||1)),0);
+
+    // Financiar
+    const utr=ap.utr||'default';
+    const landPx=MARKET_DATA?.landPrice?.[utr]||300;
+    const terenVal=pArea*landPx;
+    let costConstrTotal=0,venituriTotal=0;
+    const perTip={};
+    Object.entries(loturiPerTip).forEach(([k,count])=>{
+      const t=_LOT.tipuri[k];if(!t||count===0)return;
+      const unitati=count*t.niv;
+      const sdTotal=count*t.suprafUtila*t.niv;
+      const scMax=count*(_LOT.lotAria*t.sc/100);
+      const cost=sdTotal*t.pretConstr*1.18;
+      const venit=sdTotal*t.pretVanzare*0.92;
+      const profit=venit-cost-(count*_LOT.lotAria*landPx);
+      const roi=Math.round((profit/Math.max(1,cost+count*_LOT.lotAria*landPx))*100);
+      costConstrTotal+=cost;venituriTotal+=venit;
+      perTip[k]={count,unitati,suprafataTotala:count*_LOT.lotAria,scMax,cost,venit,profit,roi};
+    });
+    const profitTotal=venituriTotal-terenVal-costConstrTotal;
+    const roi=Math.round((profitTotal/Math.max(1,terenVal+costConstrTotal))*100);
+
+    // Verificări
+    const verificari=[
+      {label:'Lot ≥ 150mp (min legal)',value:_LOT.lotAria+'mp',ok:_LOT.lotAria>=150},
+      {label:'Drum ≥ 3.5m (un sens)',value:_LOT.drumLat+'m',ok:_LOT.drumLat>=3.5},
+      {label:'Drum ≥ 6m (două sensuri)',value:_LOT.drumLat+'m',ok:_LOT.drumLat>=6},
+      {label:'Loturi generate',value:loturi.length+' buc',ok:loturi.length>0},
+      {label:'Eficiență utilizare (>60%)',value:(eficienta*100).toFixed(0)+'%',ok:eficienta>0.6},
+      {label:'Suprafață drum (<35%)',value:(drumAreaFract*100).toFixed(0)+'%',ok:drumAreaFract<0.35},
+    ];
+
+    _LOT._loturi=loturi;_LOT._drumuri=drumuri;
+    _LOT._bilant={totalLoturi:loturi.length,terenLoturi,terenDrum,eficienta,lotMediu:terenLoturi/Math.max(1,loturi.length),totalUnitati,perTip,verificari,costConstrTotal,venituriTotal,profitTotal,roi};
+
+    // Afișare hartă
+    setSource('lotizare-src',{type:'FeatureCollection',features:loturi});
+    setSource('lotizare-drum-src',{type:'FeatureCollection',features:drumuri});
+    const labels=loturi.map(l=>{
+      const t=_LOT.tipuri[l.properties.tip]||_LOT.tipuri.individuala;
+      return {type:'Feature',geometry:turf.centerOfMass(l).geometry,
+        properties:{label:t.icon+'\n'+Math.round(turf.area(l))+'mp',color:t.color}};
+    });
+    setSource('lotizare-label-src',{type:'FeatureCollection',features:labels});
+
+    try{const bb=turf.bbox(pFeat);map.fitBounds([[bb[0],bb[1]],[bb[2],bb[3]]],{padding:60,duration:700});}catch(e){}
+    ss(`🏘 ${loturi.length} loturi · ${totalUnitati} unități · ROI ${roi}%`);
+    _showLotizarePanel();setTimeout(()=>_lotTab('r'),80);
+
+  }catch(e){console.error('Lotizare:',e);ss('⚠️ Eroare: '+e.message);}
+}
+
+// ─── Generator geometrii ──────────────────────────────────────────────────
+function _genLotizareGeom(fpFeat,loturiPerTip,drumFract){
+  const loturi=[],drumuri=[];
+  const bbox2=turf.bbox(fpFeat);
+  const cx=(bbox2[0]+bbox2[2])/2,cy=(bbox2[1]+bbox2[3])/2;
+  const mLng=111320*Math.cos(cy*Math.PI/180),mLat=111320;
+  const wDeg=bbox2[2]-bbox2[0],hDeg=bbox2[3]-bbox2[1];
+  const wM=wDeg*mLng,hM=hDeg*mLat;
+  const isLS=wM>hM;
+
+  // Drum principal (orientat pe axa lungă)
+  const drumFracHalf=drumFract/2;
+  const drumFeat={type:'Feature',geometry:{type:'Polygon',coordinates:[[
+    isLS?[bbox2[0],cy-drumFracHalf*hDeg]:[cx-drumFracHalf*wDeg,bbox2[1]],
+    isLS?[bbox2[2],cy-drumFracHalf*hDeg]:[cx+drumFracHalf*wDeg,bbox2[1]],
+    isLS?[bbox2[2],cy+drumFracHalf*hDeg]:[cx+drumFracHalf*wDeg,bbox2[3]],
+    isLS?[bbox2[0],cy+drumFracHalf*hDeg]:[cx-drumFracHalf*wDeg,bbox2[3]],
+    isLS?[bbox2[0],cy-drumFracHalf*hDeg]:[cx-drumFracHalf*wDeg,bbox2[1]],
+  ]]},properties:{tip:'drum_principal'}};
+  try{const di=turf.intersect(fpFeat,drumFeat);if(di?.geometry)drumuri.push({...di,properties:{tip:'drum_principal'}});}catch(e){}
+
+  // Construim lista tipuri
+  const lista=[];
+  const ordine=['individuala','insiruita','duplex','bloc'];
+  ordine.forEach(tip=>{for(let i=0;i<(loturiPerTip[tip]||0);i++)lista.push(tip);});
+  if(!lista.length) return {loturi,drumuri};
+
+  // Grid în cele 2 zone (sus/jos față de drum)
+  const lotW=Math.sqrt(_LOT.lotAria)/mLng,lotH=Math.sqrt(_LOT.lotAria)/mLat;
+  const cols=Math.max(1,Math.floor(wDeg/lotW));
+  let idx=0;
+
+  for(let zone=0;zone<2&&idx<lista.length;zone++){
+    const yStart=zone===0?cy+drumFracHalf*hDeg:bbox2[1];
+    const yEnd=zone===0?bbox2[3]:cy-drumFracHalf*hDeg;
+    const zoneH=Math.abs(yEnd-yStart);
+    const zoneRows=Math.max(1,Math.floor(zoneH/lotH));
+
+    for(let r=0;r<zoneRows&&idx<lista.length;r++){
+      const y0=yStart+r*lotH*(zone===0?1:1);
+      const y1=y0+lotH;
+      if(zone===0&&y1>bbox2[3]) continue;
+      if(zone===1&&y0<bbox2[1]) continue;
+
+      // Drum secondar ogni rând (eccetto il primo)
+      if(r>0){
+        const dsy=zone===0?y0:y0;
+        const ds={type:'Feature',geometry:{type:'Polygon',coordinates:[[
+          [bbox2[0],dsy-lotH*0.05],[bbox2[2],dsy-lotH*0.05],
+          [bbox2[2],dsy+lotH*0.05],[bbox2[0],dsy+lotH*0.05],
+          [bbox2[0],dsy-lotH*0.05]
+        ]]},properties:{tip:'drum_secundar'}};
+        try{const di=turf.intersect(fpFeat,ds);if(di?.geometry)drumuri.push({...di,properties:{tip:'drum_secundar'}});}catch(e){}
+      }
+
+      for(let c=0;c<cols&&idx<lista.length;c++){
+        const x0=bbox2[0]+c*lotW,x1=x0+lotW;
+        if(x1>bbox2[2]) continue;
+        const tip=lista[idx];
+        const t=_LOT.tipuri[tip]||_LOT.tipuri.individuala;
+        const lotPoly={type:'Feature',geometry:{type:'Polygon',coordinates:[[
+          [x0,y0],[x1,y0],[x1,y1],[x0,y1],[x0,y0]
+        ]]},properties:{tip,color:t.color,borderColor:t.borderColor}};
+        try{
+          const inter=turf.intersect(fpFeat,lotPoly);
+          if(inter?.geometry&&turf.area(inter)>_LOT.lotAria*0.25){
+            loturi.push({...inter,properties:lotPoly.properties});
+            idx++;
+          } else idx++;
+        }catch(e){idx++;}
+      }
+    }
+  }
+  return {loturi,drumuri};
+}
+
+// ─── Export PDF ───────────────────────────────────────────────────────────
+async function _lotExportPDF(){
+  if(!_LOT._bilant){ss('Generați planul mai întâi.');return;}
+  ss('📄 Se generează PDF...');
+  const ap=S.parcels[S.activeParcel??0];
+  const b=_LOT._bilant;
+  const {jsPDF}=window.jspdf;
+  const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=210,H=297;
+  const DARK=[7,12,28],GOLD=[212,175,55],LIGHT=[245,247,252],BLUE=[50,80,140];
+  const S2=s=>(s||'').toString();
+
+  // PAG 1: Cover
+  pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');
+  pdf.setFillColor(15,25,55);pdf.rect(0,3,W,H-6,'F');
+  pdf.setFillColor(...GOLD);pdf.rect(0,0,W,4,'F');pdf.rect(0,H-4,W,4,'F');
+  pdf.setTextColor(...GOLD);pdf.setFontSize(9);pdf.setFont('helvetica','bold');
+  pdf.text('URBANX — PLATFORMA DE ANALIZA URBANISTICA',W/2,48,{align:'center'});
+  pdf.setTextColor(255,255,255);pdf.setFontSize(22);
+  pdf.text('PLAN DE LOTIZARE',W/2,68,{align:'center'});
+  pdf.text('ANSAMBLU REZIDENTIAL',W/2,84,{align:'center'});
+  pdf.setTextColor(...GOLD);pdf.setFontSize(9);
+  pdf.text('Mobilare urbana · Bilant suprafete · Verificare PUG · Analiza financiara',W/2,96,{align:'center'});
+
+  pdf.setFillColor(20,35,70);pdf.rect(20,108,W-40,108,'F');
+  pdf.setFillColor(...GOLD);pdf.rect(20,108,3,108,'F');
+  [['Nr. cadastral',ap?.nrcad||'—'],['UTR',ap?.utr||'—'],
+   ['Suprafata teren',Math.round(ap?.area||0)+' mp'],
+   ['Suprafata/lot',_LOT.lotAria+' mp'],
+   ['Latimea drumului',_LOT.drumLat+'m (mod: '+_LOT.drumMod+')'],
+   ['Total loturi',b.totalLoturi+' buc'],['Total unitati',b.totalUnitati+' buc'],
+   ['Eficienta utilizare',((b.eficienta||0)*100).toFixed(0)+'%'],
+   ['ROI estimat',b.roi+'%'],['Data',new Date().toLocaleDateString('ro-RO')],
+  ].forEach(([l,v],i)=>{
+    pdf.setTextColor(150,170,200);pdf.setFontSize(8);pdf.setFont('helvetica','normal');
+    pdf.text(S2(l)+':',26,120+i*10);
+    pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');
+    pdf.text(S2(v),100,120+i*10);
+  });
+  pdf.setTextColor(80,100,130);pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');
+  pdf.text('Document orientativ. UrbanX TSS·FG · '+new Date().getFullYear(),W/2,H-14,{align:'center'});
+
+  // PAG 2: Plan situatie cu captura harta
+  try{
+    const bb=turf.bbox({type:'Feature',geometry:ap.geo.geometry,properties:{}});
+    map.fitBounds([[bb[0],bb[1]],[bb[2],bb[3]]],{padding:50,duration:0,pitch:0,bearing:0});
+    await new Promise(r=>setTimeout(r,800));
+    map.triggerRepaint();
+    await new Promise(r=>setTimeout(r,600));
+    const img=map.getCanvas().toDataURL('image/jpeg',0.92);
+    if(img.length>500){
+      pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
+      pdf.setFillColor(...BLUE);pdf.rect(0,0,W,14,'F');
+      pdf.setTextColor(255,255,255);pdf.setFontSize(10);pdf.setFont('helvetica','bold');
+      pdf.text('PLAN DE SITUATIE — LOTIZARE',W/2,9.5,{align:'center'});
+      pdf.addImage(img,'JPEG',10,18,W-20,125);
+      pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.5);pdf.rect(10,18,W-20,125,'S');
+
+      // Legendă
+      let lx=10,ly=148;
+      pdf.setFontSize(8);pdf.setFont('helvetica','bold');pdf.setTextColor(50,60,90);
+      pdf.text('LEGENDA:',lx,ly);ly+=5;
+      const culori=[['Casă individuală',[74,222,128]],['Casă înșiruită',[96,165,250]],['Duplex',[251,191,36]],['Bloc mic',[167,139,250]],['Drum/circulații',[148,163,184]]];
+      culori.forEach(([l2,c])=>{
+        pdf.setFillColor(...c);pdf.rect(lx,ly-3,6,4,'F');
+        pdf.setFont('helvetica','normal');pdf.setTextColor(50,60,90);
+        pdf.text(S2(l2),lx+8,ly);
+        lx+=42;if(lx>170){lx=10;ly+=7;}
+      });
+
+      ly+=10;
+      pdf.setFont('helvetica','bold');pdf.setTextColor(50,80,140);pdf.setFontSize(8.5);
+      pdf.text('DATE GENERALE:',14,ly);ly+=5;
+      [['Suprafata teren',Math.round(ap?.area||0)+' mp'],
+       ['Suprafata lotizabila',Math.round(b.terenLoturi+b.terenDrum)+' mp'],
+       ['Suprafata loturi',Math.round(b.terenLoturi)+' mp  ('+((b.eficienta||0)*100).toFixed(0)+'%)'],
+       ['Suprafata drum',Math.round(b.terenDrum)+' mp'],
+      ].forEach(([l2,v])=>{
+        pdf.setFont('helvetica','normal');pdf.setFontSize(8);pdf.setTextColor(60,70,90);
+        pdf.text(S2(l2)+': '+S2(v),16,ly);ly+=5;
+      });
+    }
+  }catch(e){console.warn('Captură hartă:',e);}
+
+  // PAG 3: Bilanț + distribuție per tip
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
+  pdf.setFillColor(...BLUE);pdf.rect(0,0,W,14,'F');
+  pdf.setTextColor(255,255,255);pdf.setFontSize(10);pdf.setFont('helvetica','bold');
+  pdf.text('BILANT SUPRAFETE SI DISTRIBUTIE LOTURI',W/2,9.5,{align:'center'});
+
+  let cy2=22;
+  const secTit=(t)=>{pdf.setFillColor(225,232,245);pdf.rect(10,cy2-4,W-20,8,'F');pdf.setFont('helvetica','bold');pdf.setFontSize(8.5);pdf.setTextColor(50,80,140);pdf.text(t,12,cy2);cy2+=7;};
+  const row=(cells,isH,widths)=>{
+    if(isH){pdf.setFillColor(50,80,140);pdf.rect(10,cy2-4,W-20,7,'F');pdf.setTextColor(255,255,255);}
+    else{pdf.setFillColor(cy2%16<8?244:250,cy2%16<8?246:252,cy2%16<8?252:255);pdf.rect(10,cy2-4,W-20,6.5,'F');pdf.setTextColor(50,60,80);}
+    pdf.setFont('helvetica',isH?'bold':'normal');pdf.setFontSize(7.5);
+    let x=12;cells.forEach((c,i)=>{pdf.text(S2(c),x,cy2);x+=widths[i];});
+    cy2+=isH?7:6.5;
+  };
+
+  secTit('1. BILANT GENERAL');
+  row(['Indicator','Suprafata','Pondere'],true,[90,50,40]);
+  [['Teren total',Math.round(ap?.area||0)+' mp','100%'],
+   ['Suprafata loturi (edificabil)',Math.round(b.terenLoturi)+' mp',((b.eficienta||0)*100).toFixed(1)+'%'],
+   ['Suprafata drum + alei',Math.round(b.terenDrum)+' mp',(((b.terenDrum)/(b.terenLoturi+b.terenDrum))*100).toFixed(1)+'%'],
+   ['Nr. loturi total',b.totalLoturi+' buc','—'],
+   ['Nr. unitati locative',b.totalUnitati+' buc','—'],
+   ['Lot mediu',Math.round(b.lotMediu)+' mp','—'],
+  ].forEach(r=>row(r,false,[90,50,40]));
+
+  cy2+=6;secTit('2. DISTRIBUTIE PER TIP LOCUINTA');
+  row(['Tip','Loturi','Suprafata','SC max','Unitati'],true,[52,22,35,30,30]);
+  Object.entries(b.perTip).filter(([,v])=>v.count>0).forEach(([k,v])=>{
+    row([_LOT.tipuri[k]?.label||k,v.count+' buc',Math.round(v.suprafataTotala)+' mp',Math.round(v.scMax)+' mp',v.unitati+' buc'],false,[52,22,35,30,30]);
+  });
+
+  cy2+=6;secTit('3. VERIFICARE CONFORMITATE PUG');
+  row(['Criteriu','Valoare','Status'],true,[100,50,30]);
+  b.verificari.forEach(v=>row([v.label,v.value,v.ok?'CONFORM':'VERIFICATI'],false,[100,50,30]));
+
+  // PAG 4: Financiar
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
+  pdf.setFillColor(...BLUE);pdf.rect(0,0,W,14,'F');
+  pdf.setTextColor(255,255,255);pdf.setFontSize(10);pdf.setFont('helvetica','bold');
+  pdf.text('ANALIZA FINANCIARA PRELIMINARA',W/2,9.5,{align:'center'});
+  cy2=22;
+
+  secTit('1. REZUMAT FINANCIAR');
+  row(['Indicator','Valoare'],true,[120,60]);
+  const utr=ap?.utr||'default';const lPx=MARKET_DATA?.landPrice?.[utr]||300;
+  [['Valoare teren estimata ('+lPx+'€/mp)',Math.round((ap?.area||0)*lPx/1000)+'k€'],
+   ['Cost constructie total (cu +18% avize/proiectare)',Math.round(b.costConstrTotal/1000)+'k€'],
+   ['Venituri totale estimate (vanzare)',Math.round(b.venituriTotal/1000)+'k€'],
+   ['Profit estimat',Math.round(b.profitTotal/1000)+'k€'],
+   ['ROI (Return on Investment)',b.roi+'%'],
+   ['Profit mediu per lot',Math.round(b.profitTotal/Math.max(1,b.totalLoturi)/1000)+'k€'],
+  ].forEach(r=>row(r,false,[120,60]));
+
+  cy2+=6;secTit('2. DETALII FINANCIARE PER TIP LOCUINTA');
+  row(['Tip','Loturi','Investitie','Venituri','Profit','ROI'],true,[42,18,33,33,30,22]);
+  Object.entries(b.perTip).filter(([,v])=>v.count>0).forEach(([k,v])=>{
+    row([_LOT.tipuri[k]?.label||k,v.count,Math.round(v.cost/1000)+'k€',Math.round(v.venit/1000)+'k€',Math.round(v.profit/1000)+'k€',v.roi+'%'],false,[42,18,33,33,30,22]);
+  });
+
+  cy2+=10;
+  pdf.setFont('helvetica','italic');pdf.setFontSize(7.5);pdf.setTextColor(120,130,150);
+  pdf.text('* Valori estimative. Nu includ taxe notariale, avize, bransamente (~5-8% suplimentar). Confirmare cu evaluator autorizat ANEVAR.',12,cy2);cy2+=5;
+  pdf.text('* Preturile de constructie si vanzare sunt valori medii de piata pentru zona UTR '+S2(ap?.utr||'—')+', an '+new Date().getFullYear()+'.',12,cy2);
+
+  pdf.save('Plan_Lotizare_'+(ap?.nrcad||'teren')+'_'+new Date().getFullYear()+'.pdf');
+  ss('✅ PDF Plan Lotizare generat!');
+}
+
+function _lotExportClipboard(){
+  if(!_LOT._bilant){ss('Generați planul mai întâi.');return;}
+  const ap=S.parcels[S.activeParcel??0];
+  const b=_LOT._bilant;
+  const lines=[
+    'PLAN LOTIZARE URBANX',
+    `Nr.cad: ${ap?.nrcad||'—'} | UTR: ${ap?.utr||'—'} | Teren: ${Math.round(ap?.area||0)}mp`,
+    `Suprafata/lot: ${_LOT.lotAria}mp | Drum: ${_LOT.drumLat}m (${_LOT.drumMod})`,
+    `Total loturi: ${b.totalLoturi} buc | Total unitati: ${b.totalUnitati}`,
+    `Teren loturi: ${Math.round(b.terenLoturi)}mp | Teren drum: ${Math.round(b.terenDrum)}mp`,
+    `Eficienta: ${((b.eficienta||0)*100).toFixed(0)}% | ROI: ${b.roi}%`,
+    '---',
+    ...Object.entries(b.perTip).filter(([,v])=>v.count>0).map(([k,v])=>
+      `${_LOT.tipuri[k]?.label}: ${v.count} loturi / ${v.unitati} unitati / ROI ${v.roi}%`
+    ),
+    '---',
+    `Investitie totala: ${Math.round(b.costConstrTotal/1000)}k€ | Venituri: ${Math.round(b.venituriTotal/1000)}k€ | Profit: ${Math.round(b.profitTotal/1000)}k€`,
+    `Generat: ${new Date().toLocaleString('ro-RO')} | UrbanX TSS·FG`,
+  ].join('\n');
+  navigator.clipboard?.writeText(lines).then(()=>ss('📋 Bilanț copiat!')).catch(()=>alert(lines));
+}
+
 function _initStudyPdf(studyName, studySubtitle, totalPages){
   const {jsPDF}=window.jspdf;
   const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
@@ -12233,6 +13708,599 @@ async function generateMemoriu(){
   cy=28;sign();
   pdf.save('Memoriu_Tehnic_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
   ss('Memoriu Tehnic Preliminar generat!');
+}
+
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// RAPOARTE NOI: AACR + Istoric/Patrimoniu + Construcții Existente + Geotehnică + Trafic
+// ════════════════════════════════════════════════════════════════════════════
+
+// ── AACR: Aviz Aeroport Iași ───────────────────────────────────────────────
+// Date publice: Aeroport Iași (LRIA) ICAO, pistă 08/26 (083°/263°)
+// Coordonate prag pistă 08: 47.1782°N 27.6199°E
+// Coordonate prag pistă 26: 47.1731°N 27.6470°E
+// H obstacol maxim conform PANS-OPS ICAO Doc 8168
+const AACR_DATA = {
+  aeroport: 'Aeroportul Internațional Iași (LRIA)',
+  pistA_curs: 83,   // QFU 08 (83°)
+  pistB_curs: 263,  // QFU 26 (263°)
+  pragA: [27.6199, 47.1782],  // prag 08
+  pragB: [27.6470, 47.1731],  // prag 26
+  elevatie: 397,    // ft AMSL (121m)
+  // Suprafețe ICAO Anexa 14 (pentru aeroport cod 4C)
+  suprafete: {
+    conicala: {panta:5, baza:600, inaltime:100, dist:2500},  // suprafața conică
+    orizontalaInterna: {raza:4000, inaltime:45},              // suprafața orizontală internă
+    cursa: {lungime:60000, latimePista:120, panta:100},       // suprafața de cursă
+    decolare: {lungime:15000, panta:2, latimeDivergenta:0.5}, // suprafața de decolare
+  },
+  reglementare: 'HG nr. 930/2016 + Legea nr. 233/2016 + OMAI 14/2007 + ICAO Anexa 14 (ed. 8)',
+};
+
+async function generateAACR(){
+  const ap=S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry){ss('Selectați o parcelă pentru studiu AACR.');return;}
+  ss('Se generează Studiu AACR...');
+
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,addImg,sign}=_initStudyPdf('Studiu de Evaluare Aeronautica (AACR)','Studiu AACR',7);
+  const caps = await _captureStudyMaps(ap, msg=>ss(msg));
+
+  // Calcul distanță față de praguri pistă
+  const parcelPt = {type:'Feature',geometry:{type:'Point',coordinates:[lon,lat]},properties:{}};
+  const distA = turf.distance(parcelPt,{type:'Feature',geometry:{type:'Point',coordinates:AACR_DATA.pragA},properties:{}},{units:'meters'});
+  const distB = turf.distance(parcelPt,{type:'Feature',geometry:{type:'Point',coordinates:AACR_DATA.pragB},properties:{}},{units:'meters'});
+  const distMin = Math.min(distA, distB);
+  const pragAproape = distA < distB ? '08 (curs 083°)' : '26 (curs 263°)';
+
+  // Calculul înălțimii maxime admise conform suprafeței de limitare
+  // Suprafața conică: pantă 5% față de cerc la 600m de prag
+  const elevAerop = AACR_DATA.elevatie * 0.3048; // ft → m (121m)
+  let hMaxAdmis = 999;
+  let suprafataAplicabila = '';
+  let metodaCalcH = '';
+
+  if(distMin < 3000) {
+    // În zona de decolare/aterizare — suprafața de cursă (1:100)
+    hMaxAdmis = Math.max(0, elevAerop + distMin * 0.01);
+    suprafataAplicabila = 'Suprafața de cursă (panta 1%)';
+    metodaCalcH = `H_max = ${elevAerop.toFixed(0)}m (elev. pistă) + ${distMin.toFixed(0)}m × 0.01 = ${hMaxAdmis.toFixed(1)}m`;
+  } else if(distMin < 4000) {
+    // Suprafața de abordare
+    hMaxAdmis = elevAerop + 45 + (distMin-600)*0.05;
+    suprafataAplicabila = 'Suprafața de abordare internă';
+    metodaCalcH = `H_max = ${elevAerop.toFixed(0)} + 45 + (${distMin.toFixed(0)}-600)×0.05 = ${hMaxAdmis.toFixed(1)}m`;
+  } else if(distMin < 7000) {
+    // Suprafața conică
+    hMaxAdmis = elevAerop + 45 + (distMin-4000)*0.05;
+    suprafataAplicabila = 'Suprafața conică ICAO (5%)';
+    metodaCalcH = `H_max = ${elevAerop.toFixed(0)} + 45 + (${distMin.toFixed(0)}-4000)×0.05 = ${hMaxAdmis.toFixed(1)}m`;
+  } else {
+    hMaxAdmis = 999;
+    suprafataAplicabila = 'În afara zonelor de restricție AACR';
+    metodaCalcH = 'Amplasamentul este în afara suprafețelor de limitare ICAO (dist. > 7km)';
+  }
+
+  const hPropus = S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||parseFloat(params.h)||13;
+  const isConform = hPropus <= hMaxAdmis;
+  const half=(W-28)/2-2;
+
+  // PAG 1: Cover
+  pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');pdf.setFillColor(10,25,55);pdf.rect(0,3,W,H-6,'F');
+  pdf.setFillColor(...GOLD);pdf.rect(0,0,W,3,'F');pdf.rect(0,H-3,W,3,'F');
+  try{_pdfDrawLogo&&_pdfDrawLogo(pdf,W/2-10,18,20);}catch(e){}
+  pdf.setTextColor(...GOLD);pdf.setFontSize(9);pdf.setFont('helvetica','bold');
+  pdf.text('URBANX — PLATFORMA DE ANALIZA URBANISTICA',W/2,50,{align:'center'});
+  pdf.setTextColor(255,255,255);pdf.setFontSize(20);
+  pdf.text('STUDIU DE EVALUARE',W/2,68,{align:'center'});
+  pdf.text('AERONAUTICA (AACR)',W/2,82,{align:'center'});
+  pdf.setTextColor(...GOLD);pdf.setFontSize(9);
+  pdf.text('Evaluare ICAO Anexa 14 · HG 930/2016 · Suprafete de limitare obstacole',W/2,93,{align:'center'});
+  pdf.setFillColor(20,35,70);pdf.rect(20,103,W-40,85,'F');pdf.setFillColor(...GOLD);pdf.rect(20,103,3,85,'F');
+  [['Nr. cadastral:',nrcad],['Zona UTR:',utr],['Coordonate:',lat.toFixed(5)+'N / '+lon.toFixed(5)+'E'],
+   ['Aeroport:',AACR_DATA.aeroport],['Dist. prag '+pragAproape+':',distMin.toFixed(0)+' m'],
+   ['H propus:',hPropus.toFixed(1)+' m (față de teren)'],
+   ['H maxim admis AACR:',hMaxAdmis>200?'FĂRĂ RESTRICȚIE':hMaxAdmis.toFixed(1)+' m AMSL'],
+   ['Suprafata aplicabila:',suprafataAplicabila],
+  ].forEach(([l,v],i)=>{
+    pdf.setTextColor(150,170,200);pdf.setFontSize(8);pdf.setFont('helvetica','normal');pdf.text(S2(l),26,113+i*10);
+    pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text(S2(v),98,113+i*10);
+  });
+  pdf.setFillColor(isConform?20:180,isConform?120:30,isConform?60:30);pdf.rect(20,198,W-40,18,'F');
+  pdf.setTextColor(255,255,255);pdf.setFontSize(11);pdf.setFont('helvetica','bold');
+  pdf.text(isConform?'CONFORM — H propus sub limita AACR':'DEPĂȘIRE — Aviz AACR obligatoriu / Reducere H necesară',W/2,207,{align:'center'});
+  if(caps.imgLocation){try{pdf.addImage(caps.imgLocation,'JPEG',14,H-72,W-28,58,undefined,'FAST');pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.4);pdf.rect(14,H-72,W-28,58,'S');pdf.setTextColor(...GOLD);pdf.setFontSize(6);pdf.text('AMPLASAMENT · '+S2(nrcad)+' · '+S2(utr),W/2,H-75,{align:'center'});}catch(e){}}
+  ftr();
+
+  // PAG 2: Hartă context + calcule
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONTEXT AERONAUTIC — VEDERE 3D SI PLAN AMPLASAMENT',2);ftr();
+  let cy=28;
+  cy=addImg(caps.img3D,14,cy,W-28,68,'FIG. 1 — Vedere 3D amplasament · Context urban · Înălțime propusă față de vecinii și aeroportul Iași');
+  cy=sec('1. DATE AERONAUTICE AEROPORT IAȘI (LRIA)',cy);cy+=2;
+  cy=tblRow(['Parametru','Valoare','Sursă'],cy,true,[80,60,38]);
+  [['Cod ICAO',AACR_DATA.aeroport.split('(')[1]?.replace(')','')+'','ICAO / ROMATSA'],
+   ['Pistă',`08/26 (${AACR_DATA.pistA_curs}°/${AACR_DATA.pistB_curs}°)`,'AIP Romania AD 2'],
+   ['Elevație pistă',AACR_DATA.elevatie+' ft AMSL ('+elevAerop.toFixed(0)+'m)','AIP Romania'],
+   ['Distanță prag '+pragAproape,distMin.toFixed(0)+' m','Calcul UrbanX GPS'],
+   ['Distanță prag 08',distA.toFixed(0)+' m','Calcul UrbanX GPS'],
+   ['Distanță prag 26',distB.toFixed(0)+' m','Calcul UrbanX GPS'],
+   ['Suprafata aplicabila',suprafataAplicabila,'ICAO Anexa 14'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[80,60,38]));
+  cy+=4;cy=sec('2. CALCUL ÎNĂLȚIME MAXIMĂ ADMISĂ',cy);cy+=2;
+  cy=body('Metodologie de calcul conform ICAO Anexa 14 (ediția 8) și HG nr. 930/2016 privind stabilirea și aplicarea suprafețelor de limitare a înălțimilor obstacolelor în vederea navigației aeriene. Formula aplicată: '+metodaCalcH,14,cy);
+  cy+=4;
+  cy=tblRow(['Indicator','Valoare propusă','Limită AACR','Diferență','Status'],cy,true,[52,35,35,30,25]);
+  cy=tblRow(['H clădire propusă',hPropus.toFixed(1)+'m',hMaxAdmis>200?'—':hMaxAdmis.toFixed(1)+'m',hMaxAdmis>200?'—':(hMaxAdmis-hPropus).toFixed(1)+'m',isConform?'CONFORM':'DEPĂȘIRE'],cy,false,[52,35,35,30,25]);
+  cy=tblRow(['Dist. față de aeroport',distMin.toFixed(0)+'m','—','—',distMin>7000?'OK':'Verificare'],cy,false,[52,35,35,30,25]);
+
+  // PAG 3: Viewer 3D + plan 2D
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D ZI/NOAPTE — VIZUALIZARE ÎNĂLȚIME PROPUSĂ',3);ftr();
+  cy=28;
+  cy=addImg(caps.v3dDay,14,cy,half,60,'FIG. 2 — Viewer 3D · ZI · Înălțimea propusă față de context');
+  addImg(caps.v3dNight,14+half+4,cy-60,half,60,'FIG. 3 — Viewer 3D · NOAPTE · Balizaj luminos obligatoriu?');
+  cy+=4;
+  cy=sec('3. OBLIGAȚII CONFORM HG 930/2016 ȘI ICAO',cy);cy+=2;
+  const obs = [
+    distMin<2000?'OBLIGATORIU: Aviz AACR de la ROMATSA înainte de solicitarea Autorizației de Construire.':'RECOMANDAT: Notificare ROMATSA pentru înregistrarea obstacolului.',
+    hPropus>45?'BALIZAJ OBLIGATORIU: Obstacole > 45m deasupra solului sau a terenului înconjurător se balizează diurn (vopsire alb/portocaliu) și nocturn (lumini roșii intermitente).':'Balizajul nu este obligatoriu dacă H < 45m față de teren.',
+    distMin<3000?'ZONĂ PROTEJATĂ: Amplasamentul se află în zona imediată a suprafețelor de aterizare/decolare. Orice construcție necesită studiu aeronautic detaliat de expert AACR.':'',
+    'Documentele necesare: Aviz AACR (ROMATSA/AACR București) + Plan de situație cu cote absolute + Fișă ICAO obstacol.',
+    'Timp mediu obținere aviz AACR: 30-45 zile lucrătoare. Taxă: conform tarif ROMATSA în vigoare.',
+  ].filter(Boolean);
+  obs.forEach(o=>{cy=body('• '+o,16,cy);cy+=2;});
+
+  // PAG 4: Vederi multiple + golden/overcast
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VEDERI MULTIPLE 3D + GOLDEN/INNORIRAT',4);ftr();
+  cy=28;
+  cy=addImg(caps.v3dGolden,14,cy,half,56,'FIG. 4 — Viewer 3D · GOLDEN HOUR · Vizibilitate aeriană');
+  addImg(caps.v3dOvercast||caps.imgAerial,14+half+4,cy-56,half,56,'FIG. 5 — Viewer 3D · INNORIRAT / Vedere aeriana');
+  cy+=4;
+  cy=addImg(caps.imgFront,14,cy,half,48,'FIG. 6 — Vedere frontală · Înălțime față de stradă');
+  addImg(caps.imgLat,14+half+4,cy-48,half,48,'FIG. 7 — Vedere laterală · Context înălțimi vecini');
+  cy+=4;
+  cy=sec('4. SUPRAFEȚELE DE LIMITARE ICAO APLICABILE',cy);cy+=2;
+  cy=tblRow(['Suprafață','Dimensiuni','Pantă','Înălțime max'],cy,true,[55,50,25,47]);
+  [['Conică (Anexa 14 Tab.3-1)','Raza 4000m de la prag','5%','100m deas. orizont. interne'],
+   ['Orizontală internă','R=4000m față de ARP','—','45m deas. elevației pistă'],
+   ['De cursă','L=60km, l=initial 120m','1%','Progresiv cu distanța'],
+   ['De abordare','L=3000m (interiora)','3.33%','—'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[55,50,25,47]));
+
+  // PAG 5: Plan 2D + distante + harta oras
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('PLAN 2D + CONTEXT URBAN + HARTA ORAS',5);ftr();
+  cy=28;
+  cy=addImg(caps.img2D,14,cy,half,50,'FIG. 8 — Plan 2D cadastral · Amplasament față de piste');
+  addImg(caps.imgDist,14+half+4,cy-50,half,50,'FIG. 9 — Plan distanțe · Aliniamente și vecini');
+  cy+=4;
+  if(caps.imgCity){cy=addImg(caps.imgCity,14,cy,W-28,50,'FIG. 10 — Hartă Iași · Incadrare amplasament față de aeroportul LRIA');cy+=4;}
+  cy=sec('5. PROCEDURA OBȚINERE AVIZ AACR',cy);cy+=2;
+  ['ETAPA 1 — Documentație tehnică: Plan de situație cu cote absolute (Stereo 70 + cote AMSL), fișă tehnică clădire cu H maxim față de NMM.','ETAPA 2 — Solicitare aviz ROMATSA: Depunere documentație la ROMATSA București (str. Ion Ionescu de la Brad nr. 10). Timp: 30-45 zile.','ETAPA 3 — Aviz AACR positiv: Se anexează la dosarul pentru Autorizație de Construire (art. 7 din Legea 50/1991).','ETAPA 4 — Post-construcție: Obligația înregistrării obstacolului în baza de date ICAO/ROMATSA după finalizare.'].forEach(e=>{cy=body(e,16,cy);cy+=2;});
+
+  // PAG 6: Baza legala
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('BAZA LEGALA SI REGLEMENTARI AACR',6);ftr();
+  cy=28;cy=sec('6. BAZA LEGALA',cy);cy+=2;
+  ['HG nr. 930/2016 privind stabilirea și aplicarea suprafețelor de limitare a înălțimilor obstacolelor.','Legea nr. 233/2016 — Codul Aerian al României.','OMAI nr. 14/2007 privind avizarea construcțiilor din zona aeroportuară.','ICAO Anexa 14 — Aerodromuri, ediția 8 (2018) — Suprafețe de limitare obstacole.','ICAO Doc 8168 PANS-OPS — Proceduri de zbor instrument.','AIP România — AD 2 LRIA — Date aeronautice aeroport Iași.',
+   'Legea nr. 50/1991 republicată — art. 7: Aviz AACR obligatoriu pentru construcțiile din zone aeroportuare.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=2;});
+  if(caps.imgCity){cy+=4;cy=addImg(caps.imgCity,14,cy,W-28,52,'FIG. 11 — Incadrare în Municipiul Iași față de Aeroportul LRIA');}
+  sign();
+
+  // PAG 7: Semnatura
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CASETA TEHNICA SI SEMNATURA',7);ftr();
+  cy=28;sign();
+  pdf.save('Studiu_AACR_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
+  ss('✅ Studiu AACR generat!');
+}
+
+// ── STUDIU CONSTRUCȚII EXISTENTE ─────────────────────────────────────────
+async function generateExistingBldStudy(){
+  const ap=S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry){ss('Selectați o parcelă.');return;}
+  ss('Se generează Studiu Construcții Existente...');
+
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,kv,tblRow,addImg,sign}=_initStudyPdf('Studiu Constructii Existente pe Amplasament','Constructii existente',5);
+  const caps=await _captureStudyMaps(ap,msg=>ss(msg));
+
+  const parcelFeat={type:'Feature',geometry:ap.geo.geometry,properties:{}};
+  const pArea=turf.area(parcelFeat);
+  const existingBlds=[];
+  if(S.ctx?.features?.length){
+    S.ctx.features.forEach(bld=>{
+      if(!bld.geometry) return;
+      try{
+        const ov=turf.intersect(parcelFeat,{type:'Feature',geometry:bld.geometry,properties:{}});
+        if(ov&&turf.area(ov)>5) existingBlds.push(bld);
+      }catch(e){}
+    });
+  }
+  const totalAreaExist=existingBlds.reduce((s,b)=>{try{return s+turf.area({type:'Feature',geometry:b.geometry,properties:{}});}catch(e){return s;}},0);
+  const hMedExist=existingBlds.length?existingBlds.reduce((s,b)=>s+(b.properties?.h||6),0)/existingBlds.length:0;
+  const potExist=pArea>0?(totalAreaExist/pArea*100).toFixed(1):'0';
+  const cutExist=existingBlds.length?existingBlds.reduce((s,b)=>{try{return s+turf.area({type:'Feature',geometry:b.geometry,properties:{}})*Math.round((b.properties?.h||3)/3);}catch(e){return s;}},0)/pArea:0;
+  const half=(W-28)/2-2;
+
+  // PAG 1: Cover
+  pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');pdf.setFillColor(10,25,55);pdf.rect(0,3,W,H-6,'F');
+  pdf.setFillColor(...GOLD);pdf.rect(0,0,W,3,'F');pdf.rect(0,H-3,W,3,'F');
+  pdf.setTextColor(...GOLD);pdf.setFontSize(9);pdf.setFont('helvetica','bold');
+  pdf.text('URBANX — PLATFORMA DE ANALIZA URBANISTICA',W/2,50,{align:'center'});
+  pdf.setTextColor(255,255,255);pdf.setFontSize(22);
+  pdf.text('STUDIU CONSTRUCTII',W/2,68,{align:'center'});
+  pdf.text('EXISTENTE PE AMPLASAMENT',W/2,84,{align:'center'});
+  pdf.setTextColor(...GOLD);pdf.setFontSize(9);
+  pdf.text('Identificare · Inventariere · Analiza scenarii interventie · Scenarii constructie',W/2,96,{align:'center'});
+  pdf.setFillColor(20,35,70);pdf.rect(20,108,W-40,80,'F');pdf.setFillColor(...GOLD);pdf.rect(20,108,3,80,'F');
+  [['Nr. cadastral:',nrcad],['Zona UTR:',utr],['Suprafata teren:',area+' mp'],
+   ['Nr. constructii identificate:',existingBlds.length+' buc (date OSM)'],
+   ['Suprafata construita existenta:',Math.round(totalAreaExist)+' mp'],
+   ['POT actual (constructii exist.):',potExist+'%'],['CUT actual estimat:',cutExist.toFixed(2)],
+   ['H medie existenta:',hMedExist.toFixed(1)+' m'],
+  ].forEach(([l,v],i)=>{
+    pdf.setTextColor(150,170,200);pdf.setFontSize(8);pdf.setFont('helvetica','normal');pdf.text(S2(l),26,118+i*9.5);
+    pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text(S2(v),100,118+i*9.5);
+  });
+  if(caps.imgLocation){try{pdf.addImage(caps.imgLocation,'JPEG',14,H-72,W-28,58,undefined,'FAST');pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.4);pdf.rect(14,H-72,W-28,58,'S');pdf.setTextColor(...GOLD);pdf.setFontSize(6);pdf.text('AMPLASAMENT · '+S2(nrcad),W/2,H-75,{align:'center'});}catch(e){}}
+  ftr();
+
+  // PAG 2: Harta 3D + inventar
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VEDERE 3D + INVENTAR CONSTRUCTII EXISTENTE',2);ftr();
+  let cy=28;
+  cy=addImg(caps.img3D,14,cy,W-28,68,'FIG. 1 — Vedere 3D · Constructii existente pe amplasament · Galben=vecinii · Albastru=parcela analizata');
+  cy=sec('1. INVENTAR CONSTRUCTII EXISTENTE (DATE OSM)',cy);cy+=2;
+  if(existingBlds.length===0){
+    cy=body('Nu s-au identificat construcții existente pe parcela '+nrcad+' în baza de date OpenStreetMap. Aceasta nu exclude existența unor construcții neînregistrate în OSM — se recomandă verificare prin ridicare topografică la fața locului.',14,cy);
+  } else {
+    cy=tblRow(['Nr.','Nr.cad/ID','Suprafata','H(m)','Etaje est.','Functiune','Stare est.'],cy,true,[12,32,25,18,22,35,34]);
+    existingBlds.forEach((b,i)=>{
+      const bArea=turf.area({type:'Feature',geometry:b.geometry,properties:{}});
+      const bH=b.properties?.h||6;const bNiv=Math.max(1,Math.round(bH/3));
+      const bFn=b.properties?.fn_label||b.properties?.fn||'Necunoscut';
+      cy=tblRow([(i+1).toString(),b.properties?.nrcad||'OSM',Math.round(bArea)+' mp',bH.toFixed(0)+'m',bNiv+' niv.',bFn.slice(0,14),'Verificare'],cy,false,[12,32,25,18,22,35,34]);
+    });
+    cy+=3;
+    cy=tblRow(['TOTAL','',Math.round(totalAreaExist)+' mp',hMedExist.toFixed(1)+'m','—','—','POT='+potExist+'%'],cy,true,[12,32,25,18,22,35,34]);
+  }
+
+  // PAG 3: Scenarii intervenție
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('SCENARII DE INTERVENTIE — COMPARATIV',3);ftr();
+  cy=28;
+  cy=addImg(caps.img2D,14,cy,half,50,'FIG. 2 — Plan 2D cadastral · Amprente constructii existente');
+  addImg(caps.imgDist,14+half+4,cy-50,half,50,'FIG. 3 — Plan distante · Aliniamente existente');
+  cy+=4;cy=sec('2. SCENARII DE INTERVENȚIE DISPONIBILE',cy);cy+=2;
+  const potMax=parseFloat(params?.pot)||40;const cutMax=parseFloat(params?.cut)||2;
+  const scHeight=24;
+  cy=tblRow(['Scenariu','Descriere','SC propusă','CUT propus','Avantaje principale'],cy,true,[30,55,22,22,48]);
+  [
+    ['🏚 Demolare','Construcții demolate complet, teren liber',Math.round(pArea*potMax/100)+' mp',(potMax*parseFloat(params?.niv||4)/100).toFixed(1),'Flexibilitate maximă, PUG integral'],
+    ['🔧 Consolidare','Reabilitare fără demolare',Math.round(totalAreaExist)+' mp',cutExist.toFixed(1),'Fără taxă demolare, timp mai scurt'],
+    ['🔗 Extindere H','Construcție nouă lângă existente',Math.round(pArea*potMax/100)+' mp',cutMax.toFixed(1),'Etape, investiție eșalonată'],
+    ['🏗 Extindere V+H','Suprainălțare + extindere orizontală',Math.round(pArea*potMax/100)+' mp',cutMax.toFixed(1),'Maximizare CUT, eficiență teren'],
+    ['🏠 Mansardare','Etaj nou peste existente',Math.round(totalAreaExist)+' mp',(cutExist+totalAreaExist/pArea).toFixed(1),'Cost redus, modificare minimă'],
+    ['🔄 Reconversie','Schimbare funcțiune, fără demolare',Math.round(totalAreaExist)+' mp',cutExist.toFixed(1),'Rapid, fără demolare, avize simplificate'],
+    ['🏛 Înglobare','Corp nou cuprinde existentele',Math.round(pArea*potMax/100)+' mp',cutMax.toFixed(1),'Utilizare maximă edificabil + H nou'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[30,55,22,22,48]));
+
+  // PAG 4: Viewer 3D + golden/overcast + recomandari
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D + RECOMANDARI TEHNICE',4);ftr();
+  cy=28;
+  cy=addImg(caps.v3dDay,14,cy,half,55,'FIG. 4 — Viewer 3D · ZI · Volumul propus față de existente');
+  addImg(caps.v3dNight||caps.v3dGolden,14+half+4,cy-55,half,55,'FIG. 5 — Viewer 3D · NOAPTE/GOLDEN · Impact vizual');
+  cy+=4;cy=sec('3. RECOMANDĂRI TEHNICE',cy);cy+=2;
+  cy=body('Pe baza analizei OSM și a parametrilor PUG (UTR '+utr+', POT max '+potMax+'%, CUT max '+cutMax+'), situația actuală a amplasamentului '+nrcad+' cu '+(existingBlds.length?existingBlds.length+' construcții identificate (SC='+Math.round(totalAreaExist)+'mp, POT='+potExist+'%, H med='+hMedExist.toFixed(1)+'m)':'0 construcții identificate în OSM')+' permite o serie de scenarii de intervenție, în funcție de obiectivele investitorului:',14,cy);cy+=4;
+  ['Dacă obiectivul este maximizarea SD și a numărului de unități funcționale: scenariul DEMOLARE + construcție nouă conform PUG maxim (POT '+potMax+'%, CUT '+cutMax+').','Dacă obiectivul este minimizarea costurilor și timpul scurt: scenariul RECONVERSIE sau CONSOLIDARE, cu menținerea structurii existente.','Dacă clădirile existente au valoare arhitecturală sau istorică: verificare în Lista Monumentelor Istorice (LMI) înainte de orice demolare.','Certificat de Urbanism obligatoriu pentru clarificarea regimului juridic al construcțiilor existente și a obligațiilor legale.'].forEach(r=>{cy=body('• '+r,16,cy);cy+=2;});
+
+  // PAG 5: Harta oras + baza legala + semnaturi
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('HARTA ORAS + BAZA LEGALA + SEMNATURA',5);ftr();
+  cy=28;
+  if(caps.imgCity){cy=addImg(caps.imgCity,14,cy,W-28,50,'FIG. 6 — Harta Municipiului Iași · Incadrare amplasament în contextul urban');cy+=4;}
+  cy=sec('4. BAZA LEGALA',cy);cy+=2;
+  ['Legea nr. 50/1991 republicată — Autorizarea executării lucrărilor de construcții.','Legea nr. 10/1995 republicată — Calitatea în construcții (consolidare, expertiză).','Ordinul MDLPL nr. 839/2009 — Norme metodologice de aplicare a Legii 50/1991.','Legea nr. 422/2001 republicată — Protejarea monumentelor istorice (dacă e cazul).','HG nr. 525/1996 — Regulamentul General de Urbanism.','PUG Municipiul Iași în vigoare — UTR '+utr+' — Regulamentul Local de Urbanism.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
+  sign();
+  pdf.save('Studiu_Constructii_Existente_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
+  ss('✅ Studiu Construcții Existente generat!');
+}
+
+// ── STUDIU GEOTEHNIC PRELIMINAR ────────────────────────────────────────────
+async function generateGeotehnicalStudy(){
+  const ap=S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry){ss('Selectați o parcelă.');return;}
+  ss('Se generează Pre-Studiu Geotehnic...');
+
+  const {pdf,W,H,DARK,GOLD,LIGHT,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,tblRow,addImg,sign}=_initStudyPdf('Pre-Studiu Geotehnic Preliminar','Pre-studiu geotehnic',5);
+  const caps=await _captureStudyMaps(ap,msg=>ss(msg));
+
+  const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13;
+  const pArea=parseFloat(area)||0;
+  // Date zonare seismică România — Iași în zona seismică E (ag=0.20g, Tc=1.6s conform P100-1/2013)
+  const seism={zona:'E',ag:0.20,Tc:1.6,MSK:'VII-VIII',norm:'P100-1/2013'};
+  // Date hidrologie estimative zona Iași
+  const hidro={nfa:'1.5-4.0m (estimat, verificare foraje)','tip_sol':'Argilă prăfoasă, loess (depozite cuaternare)','portanta':'150-200 kPa (estimat)','adancFund':'1.2-2.0m (sub cota de îngheț)'};
+  const half=(W-28)/2-2;
+
+  // PAG 1: Cover
+  pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');pdf.setFillColor(10,25,55);pdf.rect(0,3,W,H-6,'F');
+  pdf.setFillColor(...GOLD);pdf.rect(0,0,W,3,'F');pdf.rect(0,H-3,W,3,'F');
+  pdf.setTextColor(...GOLD);pdf.setFontSize(9);pdf.setFont('helvetica','bold');
+  pdf.text('URBANX — PLATFORMA DE ANALIZA URBANISTICA',W/2,50,{align:'center'});
+  pdf.setTextColor(255,255,255);pdf.setFontSize(22);
+  pdf.text('PRE-STUDIU GEOTEHNIC',W/2,68,{align:'center'});pdf.text('PRELIMINAR',W/2,84,{align:'center'});
+  pdf.setTextColor(...GOLD);pdf.setFontSize(9);
+  pdf.text('Zonare seismica · Tip teren · Adancime fundare · Nivel freatic · NP 074/2014',W/2,96,{align:'center'});
+  pdf.setFillColor(20,35,70);pdf.rect(20,108,W-40,80,'F');pdf.setFillColor(...GOLD);pdf.rect(20,108,3,80,'F');
+  [['Nr. cadastral:',nrcad],['UTR:',utr],['Suprafata:',area+' mp'],['H propus:',aedisH.toFixed(1)+'m'],
+   ['Zona seismica:',seism.zona+' (ag='+seism.ag+'g, Tc='+seism.Tc+'s)'],
+   ['Intensitate MSK:',seism.MSK],['Tip sol estimat:',hidro.tip_sol],['NFA estimat:',hidro.nfa],
+  ].forEach(([l,v],i)=>{
+    pdf.setTextColor(150,170,200);pdf.setFontSize(8);pdf.setFont('helvetica','normal');pdf.text(S2(l),26,118+i*9.5);
+    pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text(S2(v),100,118+i*9.5);
+  });
+  if(caps.imgLocation){try{pdf.addImage(caps.imgLocation,'JPEG',14,H-72,W-28,58,undefined,'FAST');pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.4);pdf.rect(14,H-72,W-28,58,'S');pdf.setTextColor(...GOLD);pdf.setFontSize(6);pdf.text('AMPLASAMENT · '+S2(nrcad),W/2,H-75,{align:'center'});}catch(e){}}
+  ftr();
+
+  // PAG 2: Harta + zonare seismica
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONTEXT GEOTEHNIC — ZONARE SEISMICA SI TEREN',2);ftr();
+  let cy=28;
+  cy=addImg(caps.img3D,14,cy,W-28,68,'FIG. 1 — Vedere 3D amplasament · Context geomorfologic local · Iași (Podișul Moldovei)');
+  cy=sec('1. ZONARE SEISMICĂ — P100-1/2013',cy);cy+=2;
+  cy=tblRow(['Parametru seismic','Valoare','Semnificatie'],cy,true,[60,45,73]);
+  [['Zona seismică',seism.zona,'Hazard seismic mediu-ridicat'],
+   ['Accelerație proiectare ag',seism.ag+'g (≈'+Math.round(seism.ag*9.81)+'m/s²)','IMR = 225 ani (probabilitate 20%/50ani)'],
+   ['Perioadă colț Tc',seism.Tc+' s','Spectru de răspuns zonal Iași'],
+   ['Intensitate MacroSeismică MSK',seism.MSK,'Grad seismic estimat'],
+   ['Normativ aplicabil','P100-1/2013 + P100-3/2019','Proiectare antiseismică'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[60,45,73]));
+  cy+=4;cy=sec('2. CARACTERISTICI GEOTEHNICE ESTIMATE ZONA IAȘI',cy);cy+=2;
+  cy=body('Amplasamentul se situează pe Podișul Moldovei, substratul geologic fiind format din depozite cuaternare (loess, argile prăfoase, nisipuri) peste substrate terțiare (argile, marne). Valorile de mai jos sunt ESTIMATIVE pentru zona geografică largă și necesită confirmare prin studiu geotehnic detaliat (minim 3 foraje/sondaje pe amplasament).',14,cy);cy+=4;
+  cy=tblRow(['Parametru','Valoare estimata zona','Obs.'],cy,true,[65,65,48]);
+  [['Tip depozit cuaternar','Loess, argila prafoasa','Litorinean-Wurm'],
+   ['Portanta convenționala p_conv','150-200 kPa','Terenuri normale'],
+   ['Adancime fundare min.','1.20-2.00m','Sub cota de inghet (-0.90m Iasi)'],
+   ['Nivel freatic estimat (NFA)','1.5-4.0m de la CT','Variabil sezonier ±0.5m'],
+   ['Umflare/tasare potential','Moderat (argile contractile)','Verificare in situ'],
+   ['Agresivitate chimica','Neagresiv (pH normal)','Verificare apa freatică'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[65,65,48]));
+
+  // PAG 3: Viewer + categorii geotehnice
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D + CATEGORII GEOTEHNICE SI FUNDARE',3);ftr();
+  cy=28;
+  cy=addImg(caps.v3dDay,14,cy,half,55,'FIG. 2 — Viewer 3D · ZI · Structura propusă H='+aedisH.toFixed(1)+'m');
+  addImg(caps.v3dGolden||caps.img2D,14+half+4,cy-55,half,55,'FIG. 3 — Vedere 2D / Golden · Plan fundații estimat');
+  cy+=4;cy=sec('3. CATEGORIA GEOTEHNICĂ (NP 074/2014)',cy);cy+=2;
+  const catGeo=aedisH>28?'3 — Complexă':aedisH>10?'2 — Curentă':'1 — Simplă';
+  cy=body('Conform NP 074/2014, proiectul se încadrează în categoria geotehnică '+catGeo+' (H='+aedisH.toFixed(1)+'m, suprafața construită ~'+Math.round(pArea*parseFloat(params?.pot||35)/100)+'mp). Aceasta implică:',14,cy);cy+=3;
+  (catGeo.includes('3')?
+    ['Studiu geotehnic detaliat obligatoriu cu min. 5 foraje geotehnice și 3 sondaje CPT.','Expertiză geotehnică semnată de expert AICPS categoria III.','Monitorizare pe toată durata execuției lucrărilor de fundații.']:
+  catGeo.includes('2')?
+    ['Studiu geotehnic obligatoriu cu min. 3 foraje geotehnice (adâncime min. 6-8m).','Verificare geotehnică de categoria II (expert geotehnician certificat).','Documentație completă prezentată la obținerea AC.']:
+    ['Studiu geotehnic simplificat (min. 1-2 foraje sau trial pit-uri).','Nu necesită expert geotehnician, dar se recomandă.']
+  ).forEach(r=>{cy=body('• '+r,16,cy);cy+=2;});
+  cy+=3;cy=sec('4. TIPURI DE FUNDAȚII RECOMANDATE',cy);cy+=2;
+  cy=tblRow(['Tip fundatie','Aplicabilitate','Cond. utilizare'],cy,true,[55,45,78]);
+  [['Fundații izolate din BA','P≤4 etaje, teren bun','P_conv>150kPa, NFA>2m adâncime fund.'],
+   ['Fundații continue (radier)','P≤4 etaje, teren slab sau NFA ridicat','Dacă argile contractile sau NFA<1.5m'],
+   ['Fundații pe piloți forati','P>4 etaje sau teren slab','Când p_conv<100kPa sau H>28m'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[55,45,78]));
+
+  // PAG 4: Vederi multiple + sapaturi
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VEDERI MULTIPLE + SAPATURA SI ADANCIME FUNDARE',4);ftr();
+  cy=28;
+  cy=addImg(caps.imgFront,14,cy,half,48,'FIG. 4 — Vedere frontala · Dimensionare sapatura');
+  addImg(caps.imgBack,14+half+4,cy-48,half,48,'FIG. 5 — Vedere posterioara · Acces excavatie');
+  cy+=2;
+  cy=addImg(caps.imgAerial,14,cy,half,44,'FIG. 6 — Vedere aeriana 45° · Amprenta fundatii');
+  addImg(caps.img2D,14+half+4,cy-44,half,44,'FIG. 7 — Plan 2D · Corelatie fundatii-parcela');
+  cy+=4;cy=sec('5. CERINTE EXCAVATIE SI SAPATURI',cy);cy+=2;
+  const adFund=1.5;const adSap=adFund+0.5;
+  cy=tblRow(['Parametru','Valoare estimata','Obs.'],cy,true,[70,50,58]);
+  [['Adancime sapaturi',adSap.toFixed(1)+' m','Sub NFA estimat (verificare)'],
+   ['Epuismente necesare','Posibil (NFA 1.5-4m)','Pompare 1-2 zile inainte de turnare'],
+   ['Taluzare sapaturi','1:1 la 1:1.5 (argile)','Sau sprijiniri la H>2m'],
+   ['Cofraje pierdute','RECOMANDAT','La contact cu argile sensibile la apa'],
+   ['Protectie antigeliva','Obligatoriu sub -0.90m','Cota de inghet zona Iasi'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[70,50,58]));
+
+  // PAG 5: Harta oras + baza legala
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('HARTA ORAS + BAZA LEGALA + SEMNATURA',5);ftr();
+  cy=28;
+  if(caps.imgCity){cy=addImg(caps.imgCity,14,cy,W-28,50,'FIG. 8 — Harta Municipiului Iași · Geomorfologie locala');cy+=4;}
+  cy=sec('6. BAZA LEGALA SI NOTA DE AVERTIZARE',cy);cy+=2;
+  cy=body('IMPORTANT: Prezentul pre-studiu geotehnic are caracter STRICT ORIENTATIV și se bazează exclusiv pe date statistice pentru zona geografică largă a Municipiului Iași (Podișul Moldovei). Nu înlocuiește studiul geotehnic detaliat obligatoriu conform NP 074/2014, realizat de specialist geotehnician autorizat cu foraje/sondaje pe amplasamentul specific.',14,cy);cy+=4;
+  ['NP 074/2014 — Normativ privind principiile, exigențele și metodele cercetării geotehnice.','SR EN 1997-1:2004 — Eurocod 7: Proiectarea geotehnică. Reguli generale.','P100-1/2013 — Cod de proiectare seismică. Prevederi pentru clădiri.','P100-3/2019 — Cod de proiectare seismică. Evaluarea și proiectarea clădirilor existente.','STAS 1242/1-89 — Teren de fundare. Principii generale de cercetare.','Legea nr. 10/1995 republicată — Calitatea în construcții. Cerința A: Rezistență mecanică și stabilitate.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
+  sign();
+  pdf.save('PreStudiu_Geotehnic_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
+  ss('✅ Pre-Studiu Geotehnic generat!');
+}
+
+// ── STUDIU TRAFIC ────────────────────────────────────────────────────────
+async function generateTrafficStudy(){
+  const ap=S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry){ss('Selectați o parcelă.');return;}
+  ss('Se generează Studiu de Trafic...');
+
+  const {pdf,W,H,DARK,GOLD,LIGHT,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,tblRow,addImg,sign}=_initStudyPdf('Studiu de Impact asupra Traficului','Studiu trafic',5);
+  const caps=await _captureStudyMaps(ap,msg=>ss(msg));
+
+  const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13;
+  const niv=AEDIS.corpuri[0]?.niv||4;
+  const fn=AEDIS.fn||'rezidential_colectiv';
+  const fnLabel=AEDIS_FN[fn]?.label||fn;
+  const pArea=parseFloat(area)||0;
+  const sdEst=Math.round(pArea*(parseFloat(params?.cut)||2.0));
+  // Estimare trafic generat (conf. ITE Trip Generation, adaptat RO)
+  const unitatiEst=Math.round(sdEst/70);
+  const TRAFIC_GEN={
+    rezidential_colectiv:{zi_ora_varf:unitatiEst*0.35,zi_total:unitatiEst*3.5,noapte:unitatiEst*0.05,factor:'0.35 v/ap/oră vârf'},
+    locuinta_individuala:{zi_ora_varf:unitatiEst*0.5,zi_total:unitatiEst*4.0,noapte:unitatiEst*0.05,factor:'0.5 v/casă/oră vârf'},
+    birouri:{zi_ora_varf:Math.round(sdEst/25)*0.15,zi_total:Math.round(sdEst/25)*1.5,noapte:0,factor:'0.15 v/angajat/oră'},
+    comercial:{zi_ora_varf:Math.round(sdEst/40)*0.4,zi_total:Math.round(sdEst/40)*4,noapte:Math.round(sdEst/40)*0.1,factor:'0.4 v/100mp/oră'},
+    default:{zi_ora_varf:unitatiEst*0.35,zi_total:unitatiEst*3.5,noapte:0,factor:'—'},
+  };
+  const tg=TRAFIC_GEN[fn]||TRAFIC_GEN.default;
+  const pkObl=Math.max(1,Math.round(unitatiEst*(parseFloat(params?.pk)||1)));
+  const half=(W-28)/2-2;
+
+  // PAG 1: Cover
+  pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');pdf.setFillColor(10,25,55);pdf.rect(0,3,W,H-6,'F');
+  pdf.setFillColor(...GOLD);pdf.rect(0,0,W,3,'F');pdf.rect(0,H-3,W,3,'F');
+  pdf.setTextColor(...GOLD);pdf.setFontSize(9);pdf.setFont('helvetica','bold');
+  pdf.text('URBANX — PLATFORMA DE ANALIZA URBANISTICA',W/2,50,{align:'center'});
+  pdf.setTextColor(255,255,255);pdf.setFontSize(22);
+  pdf.text('STUDIU DE IMPACT',W/2,68,{align:'center'});pdf.text('ASUPRA TRAFICULUI',W/2,84,{align:'center'});
+  pdf.setTextColor(...GOLD);pdf.setFontSize(9);
+  pdf.text('Generare trafic · Impact retea · Parcaje · ITE · Norme romanesti',W/2,96,{align:'center'});
+  pdf.setFillColor(20,35,70);pdf.rect(20,108,W-40,80,'F');pdf.setFillColor(...GOLD);pdf.rect(20,108,3,80,'F');
+  [['Nr. cadastral:',nrcad],['UTR:',utr],['Funcțiune propusă:',fnLabel],['Niveluri:',niv+' niv.'],
+   ['SD estimată:',sdEst+' mp'],['Unități estimate:',unitatiEst+' ap/buc'],
+   ['Trafic generat (oră vârf):',Math.round(tg.zi_ora_varf)+' vehicule/oră'],
+   ['Parcaje obligatorii:',pkObl+' locuri'],
+  ].forEach(([l,v],i)=>{
+    pdf.setTextColor(150,170,200);pdf.setFontSize(8);pdf.setFont('helvetica','normal');pdf.text(S2(l),26,118+i*9.5);
+    pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text(S2(v),100,118+i*9.5);
+  });
+  if(caps.imgLocation){try{pdf.addImage(caps.imgLocation,'JPEG',14,H-72,W-28,58,undefined,'FAST');pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.4);pdf.rect(14,H-72,W-28,58,'S');pdf.setTextColor(...GOLD);pdf.setFontSize(6);pdf.text('AMPLASAMENT · '+S2(nrcad),W/2,H-75,{align:'center'});}catch(e){}}
+  ftr();
+
+  // PAG 2: Harta + trafic generat
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONTEXT URBAN 3D — ACCESE SI TRAFIC',2);ftr();
+  let cy=28;
+  cy=addImg(caps.img3D,14,cy,W-28,68,'FIG. 1 — Vedere 3D principala · Retea stradala si accese vehicule · Context urban');
+  cy=sec('1. TRAFIC GENERAT DE OBIECTIV',cy);cy+=2;
+  cy=body('Traficul generat de proiect a fost estimat conform metodologiei ITE (Institute of Transportation Engineers), adaptată la condițiile locale românești. Funcțiunea propusă ('+fnLabel+') cu '+unitatiEst+' unități/angajați și SD='+sdEst+'mp va genera în ora de vârf PM (16:00-18:00) aproximativ '+Math.round(tg.zi_ora_varf)+' vehicule/oră intrare+ieșire.',14,cy);cy+=4;
+  cy=tblRow(['Interval orar','Trafic generat','Directie','Observatii'],cy,true,[42,38,42,56]);
+  [['Ora varf dimineata (7-9h)',Math.round(tg.zi_ora_varf*0.8)+' v/h','60% intrare','Naveta domiciliu-serviciu'],
+   ['Ora varf seara (16-18h)',Math.round(tg.zi_ora_varf)+' v/h','60% iesire','Varf maxim zi'],
+   ['Interval noapte (22-6h)',Math.round(tg.noapte)+' v/h','50/50','Nivel redus'],
+   ['Total zi (24h)',Math.round(tg.zi_total)+' vehicule/zi','—','Estimat ITE'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[42,38,42,56]));
+  cy+=4;cy=sec('2. NECESARUL DE PARCAJE (NP 051/2012)',cy);cy+=2;
+  cy=tblRow(['Categorie','Norma','Nr. unitati','Locuri necesare'],cy,true,[55,38,35,50]);
+  [[fnLabel+' (rezidential/birouri)','1 loc/unitate',unitatiEst+' ap',pkObl+' locuri'],
+   ['Vizitatori (rezidential)','1 loc/10 ap',unitatiEst+' ap',Math.ceil(unitatiEst/10)+' locuri'],
+   ['PMR (min 2%)','1 loc/50 locuri',pkObl+' total',Math.max(1,Math.ceil(pkObl/50))+' locuri'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[55,38,35,50]));
+
+  // PAG 3: Viewer 3D + accese
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D ZI/NOAPTE — ACCESE AUTO SI PIETONALE',3);ftr();
+  cy=28;
+  cy=addImg(caps.v3dDay,14,cy,half,56,'FIG. 2 — Viewer 3D · ZI · Acces principal auto si pietonal');
+  addImg(caps.v3dNight,14+half+4,cy-56,half,56,'FIG. 3 — Viewer 3D · NOAPTE · Iluminat accese si parcaje');
+  cy+=4;cy=sec('3. ACCESE RECOMANDATE',cy);cy+=2;
+  ['Acces auto principal: un singur acces de pe strada principală, latime min. 6.0m (doua sensuri) sau 3.5m (un sens), cu vizibilitate min. 30m pe ambele directii.','Acces pietonal: separat de accesul auto, latime min. 1.5m, cu facilităti pentru PMR (rampă, suprafata non-alunecoasă).','Acces servicii (dacă existent): pe latura laterală sau posterioară, latime min. 3.5m.','Platforma parcare: min. 4.50m×2.50m/loc (perpendicular) sau 5.50m lungime/loc+culoar 7.5m (90°).','Semaforizare: nu se impune la acest nivel de trafic (<100v/h), dar se recomandă studiu de intersecție.'].forEach(r=>{cy=body('• '+r,16,cy);cy+=2;});
+
+  // PAG 4: Plan 2D + golden + baza legala
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('PLAN 2D + GOLDEN HOUR + CONCLUZII',4);ftr();
+  cy=28;
+  cy=addImg(caps.imgFront,14,cy,half,50,'FIG. 4 — Vedere frontala · Front stradal si acces auto');
+  addImg(caps.v3dGolden||caps.imgAerial,14+half+4,cy-50,half,50,'FIG. 5 — Vedere aeriana / Golden · Amplasare parcaje');
+  cy+=4;cy=addImg(caps.img2D,14,cy,W-28,50,'FIG. 6 — Plan 2D · Configuratie stradala si accese');
+  cy+=4;cy=sec('4. CONCLUZII',cy);cy+=2;
+  cy=body('Proiectul propus pe parcela '+nrcad+' ('+fnLabel+', '+sdEst+'mp SD) va genera un trafic suplimentar estimat de '+Math.round(tg.zi_ora_varf)+' vehicule/oră în ora de vârf. Impactul asupra rețelei stradale locale este '+(tg.zi_ora_varf<50?'REDUS':'MODERAT')+' și poate fi gestionat prin asigurarea a minimum '+pkObl+' locuri de parcare pe parcela și amenajarea corespunzătoare a acceselor.',14,cy);
+
+  // PAG 5: Harta oras + baza legala
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('HARTA ORAS + BAZA LEGALA + SEMNATURA',5);ftr();
+  cy=28;
+  if(caps.imgCity){cy=addImg(caps.imgCity,14,cy,W-28,50,'FIG. 7 — Harta Municipiului Iași · Retea stradala si acces principal');cy+=4;}
+  cy=sec('5. BAZA LEGALA',cy);cy+=2;
+  ['NP 051/2012 — Normativ privind adaptarea cladirilor civile si spatiului urban la necesitatile persoanelor cu handicap.','STAS 10144/3-1991 — Calculul si proiectarea parcajelor pentru autoturisme.','HG nr. 525/1996 — Regulamentul General de Urbanism, art. 33 Parcaje.','Ordinul MT nr. 45/1998 — Norme tehnice privind proiectarea, construirea si modernizarea drumurilor.','PUG Municipiul Iasi — UTR '+utr+' — Reglementari accese si parcaje.','Legea nr. 82/1998 — Codul Rutier, art. 72: Iesirile din incinte.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
+  sign();
+  pdf.save('Studiu_Trafic_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
+  ss('✅ Studiu de Trafic generat!');
+}
+
+// ── STUDIU ISTORIC / PATRIMONIU ────────────────────────────────────────────
+async function generateIstoricStudy(){
+  const ap=S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry){ss('Selectați o parcelă.');return;}
+  ss('Se generează Studiu Istoric & Patrimoniu...');
+
+  const {pdf,W,H,DARK,GOLD,LIGHT,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,tblRow,addImg,sign}=_initStudyPdf('Studiu Istoric si de Patrimoniu Urban','Studiu patrimoniu',5);
+  const caps=await _captureStudyMaps(ap,msg=>ss(msg));
+
+  // Zonele protejate istorice în Iași (date publice, LMI 2015)
+  const ZONE_PROTEJATE_IASI=[
+    {zona:'IS-II-s-B-04093',tip:'Zonă construită protejată',centru:[27.5817,47.1597],raza:800,desc:'Centrul Istoric Iași — Piața Unirii și zona adiacentă'},
+    {zona:'IS-II-s-B-04094',tip:'Ansamblu urban',centru:[27.5835,47.1634],raza:500,desc:'Bulevardul Ștefan cel Mare și Sfânt'},
+    {zona:'IS-II-s-B-04095',tip:'Zonă protejată',centru:[27.5789,47.1612],raza:400,desc:'Zona Palat Roznovanu și Primăria Iași'},
+    {zona:'IS-II-s-B-04096',tip:'Ansamblu arhitectural',centru:[27.5854,47.1587],raza:300,desc:'Universitatea Alexandru Ioan Cuza'},
+  ];
+  const parcelCtr=[lon,lat];
+  const distZone=ZONE_PROTEJATE_IASI.map(z=>{
+    const d=turf.distance({type:'Feature',geometry:{type:'Point',coordinates:parcelCtr},properties:{}},{type:'Feature',geometry:{type:'Point',coordinates:z.centru},properties:{}},{units:'meters'});
+    return {...z,dist:d,inZona:d<z.raza};
+  });
+  const inZonaProtejata=distZone.some(z=>z.inZona);
+  const zonaAproape=distZone.reduce((a,b)=>a.dist<b.dist?a:b);
+  const half=(W-28)/2-2;
+
+  // PAG 1: Cover
+  pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');pdf.setFillColor(10,25,55);pdf.rect(0,3,W,H-6,'F');
+  pdf.setFillColor(...GOLD);pdf.rect(0,0,W,3,'F');pdf.rect(0,H-3,W,3,'F');
+  pdf.setTextColor(...GOLD);pdf.setFontSize(9);pdf.setFont('helvetica','bold');
+  pdf.text('URBANX — PLATFORMA DE ANALIZA URBANISTICA',W/2,50,{align:'center'});
+  pdf.setTextColor(255,255,255);pdf.setFontSize(20);
+  pdf.text('STUDIU ISTORIC',W/2,68,{align:'center'});pdf.text('SI DE PATRIMONIU URBAN',W/2,84,{align:'center'});
+  pdf.setTextColor(...GOLD);pdf.setFontSize(9);
+  pdf.text('Zone protejate LMI · Monumente istorice · Restrictii constructive · Avize MCID',W/2,96,{align:'center'});
+  pdf.setFillColor(20,35,70);pdf.rect(20,108,W-40,80,'F');pdf.setFillColor(...GOLD);pdf.rect(20,108,3,80,'F');
+  [['Nr. cadastral:',nrcad],['UTR:',utr],['Coordonate:',lat.toFixed(5)+'N / '+lon.toFixed(5)+'E'],
+   ['In zona protejata LMI:',inZonaProtejata?'DA — Restricții suplimentare!':'NU (verificare suplimentara rec.)'],
+   ['Cea mai apropiata zona prot.:',zonaAproape.zona],
+   ['Distanta:',Math.round(zonaAproape.dist)+' m'],
+   ['Tip zona:',zonaAproape.tip],
+  ].forEach(([l,v],i)=>{
+    pdf.setTextColor(150,170,200);pdf.setFontSize(8);pdf.setFont('helvetica','normal');pdf.text(S2(l),26,118+i*9.5);
+    pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text(S2(v),100,118+i*9.5);
+  });
+  pdf.setFillColor(inZonaProtejata?180:20,inZonaProtejata?30:120,inZonaProtejata?30:60);pdf.rect(20,195,W-40,18,'F');
+  pdf.setTextColor(255,255,255);pdf.setFontSize(11);pdf.setFont('helvetica','bold');
+  pdf.text(inZonaProtejata?'ATENȚIE — Amplasament în zonă protejată LMI!':'ÎN AFARA zonelor protejate identificate (verificare recomandată)',W/2,204,{align:'center'});
+  if(caps.imgLocation){try{pdf.addImage(caps.imgLocation,'JPEG',14,H-72,W-28,58,undefined,'FAST');pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.4);pdf.rect(14,H-72,W-28,58,'S');pdf.setTextColor(...GOLD);pdf.setFontSize(6);pdf.text('AMPLASAMENT · '+S2(nrcad),W/2,H-75,{align:'center'});}catch(e){}}
+  ftr();
+
+  // PAG 2: Context 3D + analiza zone
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONTEXT URBAN 3D — ZONE PROTEJATE LMI IASI',2);ftr();
+  let cy=28;
+  cy=addImg(caps.img3D,14,cy,W-28,68,'FIG. 1 — Vedere 3D amplasament · Context urban · Proximitata zone istorice protejate');
+  cy=sec('1. ANALIZA ZONE PROTEJATE ÎN RAZA DE 2KM',cy);cy+=2;
+  cy=tblRow(['Cod LMI','Tip','Dist.(m)','Status','Descriere'],cy,true,[30,30,18,20,80]);
+  distZone.forEach(z=>cy=tblRow([z.zona.split('-').pop(),z.tip.split(' ')[0],Math.round(z.dist)+'m',z.inZona?'ÎN ZONA':'în afară',z.desc.slice(0,32)],cy,false,[30,30,18,20,80]));
+  cy+=4;cy=sec('2. MONUMENTE ISTORICE IDENTIFICATE ÎN CONTEXT',cy);cy+=2;
+  cy=body('Identificarea monumentelor istorice din Lista Monumentelor Istorice (LMI 2015 + actualizări) în raza de 500m față de amplasamentul '+nrcad+' este obligatorie înainte de orice intervenție. Prezentul studiu utilizează date de referință pentru Municipiul Iași. Se recomandă verificarea actualizată a LMI pe site-ul Ministerului Culturii (culture.ro) și consultarea DJCPN Iași.',14,cy);
+
+  // PAG 3: Viewer + restrictii
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D + RESTRICTII CONSTRUCTIVE IN ZONE PROTEJATE',3);ftr();
+  cy=28;
+  cy=addImg(caps.v3dDay,14,cy,half,56,'FIG. 2 — Viewer 3D · ZI · Integrare volumetrica in context istoric');
+  addImg(caps.v3dGolden||caps.imgAerial,14+half+4,cy-56,half,56,'FIG. 3 — Viewer 3D · GOLDEN HOUR · Materialitate si impact vizual');
+  cy+=4;cy=sec('3. RESTRICȚII CONSTRUCTIVE ÎN ZONE PROTEJATE',cy);cy+=2;
+  cy=tblRow(['Criteriu','Cerinta','Aviz necesar'],cy,true,[65,70,43]);
+  [['Inălțime maximă','Conf. UTR + aviz DJCPN','DJCPN Iași'],
+   ['Materiale fatade','Tencuiala traditionala/piatră/caramida','DJCPN + MCID'],
+   ['Culori fatade','Paletă cromatică aprobată zona','DJCPN'],
+   ['Tamplarie exterior','Lemn / metal fara PVC vizibil','DJCPN'],
+   ['Reclame/firmă','Limitat, conf. Reg. local publicitate','Primarie Iasi'],
+   ['Demolare','Studiu istorico-arhitectural obligatoriu','MCID + DJCPN'],
+   ['Consolidare','Plan conservare/restaurare','Expert AICPS + DJCPN'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[65,70,43]));
+  cy+=4;cy=body('DJCPN = Direcția Județeană pentru Cultură și Patrimoniu Național Iași. MCID = Ministerul Culturii și Identității. Avizele se solicită conform Legii 422/2001 și Ordinului 2828/2015.',14,cy);
+
+  // PAG 4: Vederi multiple + procedura
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VEDERI MULTIPLE + PROCEDURA AVIZARE PATRIMONIU',4);ftr();
+  cy=28;
+  cy=addImg(caps.imgFront,14,cy,half,48,'FIG. 4 — Vedere frontala · Fatada si insertie in front stradal');
+  addImg(caps.imgBack,14+half+4,cy-48,half,48,'FIG. 5 — Vedere posterioara · Curte interior');
+  cy+=2;cy=addImg(caps.img2D,14,cy,W-28,46,'FIG. 6 — Plan 2D · Incadrare in tesut urban historic');
+  cy+=4;cy=sec('4. PROCEDURA AVIZARE MCID/DJCPN',cy);cy+=2;
+  ['ETAPA 1 — Studiu istorico-arhitectural: Elaborat de arhitect specialist CP atestat MCID. Include istoricul construcțiilor, analiza stilistică, valoare arhitecturală.','ETAPA 2 — Consultare DJCPN Iași: Depunere memoriu + planșe + studiu istorico-arhitectural pentru aviz preliminar (30 zile).','ETAPA 3 — Comisia Zonală a Monumentelor (CZ 5 — IAȘI): Aviz pentru intervenții în zone protejate (45-60 zile).','ETAPA 4 — Aviz MCID (dacă e cazul): Pentru monumente de categoria A (45-90 zile).','ETAPA 5 — Integrare în documentația AC: Avizul DJCPN/MCID se anexează la dosarul Autorizației de Construire.'].forEach(e=>{cy=body(e,16,cy);cy+=2;});
+
+  // PAG 5: Harta oras + baza legala
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('HARTA ORAS + BAZA LEGALA + SEMNATURA',5);ftr();
+  cy=28;
+  if(caps.imgCity){cy=addImg(caps.imgCity,14,cy,W-28,50,'FIG. 7 — Harta Municipiului Iași · Zone protejate si monumente istorice identificate');cy+=4;}
+  cy=sec('5. BAZA LEGALA',cy);cy+=2;
+  ['Legea nr. 422/2001 republicată — Protejarea monumentelor istorice.','Ordinul MCID nr. 2828/2015 — Lista Monumentelor Istorice (LMI 2015).','Ordinul MCID nr. 2682/2003 — Metodologia de elaborare a documentatiilor de avizare.','HG nr. 593/2011 — Regulamentul de organizare și funcționare a Comisiei Naționale a Monumentelor.','Legea nr. 350/2001 republicată — Amenajarea teritoriului și urbanismul (PUZ zone protejate).','Carta de la Veneția (1964) + Carta de la Cracovia (2000) — Principii internaționale restaurare.','PUG Municipiul Iași — Regulament UTR '+utr+' — Restricții zone de protecție monumente.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
+  sign();
+  pdf.save('Studiu_Patrimoniu_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
+  ss('✅ Studiu Istoric & Patrimoniu generat!');
 }
 
 
