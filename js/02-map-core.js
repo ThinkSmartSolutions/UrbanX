@@ -321,8 +321,18 @@ function addLayers(){
     filter:['==',['get','type'],'parcel_side'],
     paint:{
       'line-color':['coalesce',['get','color'],'#ffffff'],
-      'line-width':['case',['==',['get','role'],'front'],5,3],
-      'line-opacity':0.9
+      'line-width':['case',['==',['get','role'],'front'],6,4],
+      'line-opacity':0.95,
+      'line-gap-width':0
+    }
+  });
+  // Halo alb in spatele liniei pentru vizibilitate
+  L({id:'front-parcel-halo',type:'line',source:'front-src',
+    filter:['==',['get','type'],'parcel_side'],
+    paint:{
+      'line-color':'rgba(0,0,0,0.6)',
+      'line-width':['case',['==',['get','role'],'front'],10,7],
+      'line-opacity':0.5
     }
   });
   L({id:'front-setback-line',type:'line',source:'front-src',
@@ -483,8 +493,12 @@ function addLayers(){
   map.on('mouseleave','parcel-fill',()=>map.getCanvas().style.cursor='');
 
   // ── Click pe latura parcelei → setează frontul stradal ──────────────────
-  map.on('mouseenter','front-parcel-click',()=>{
+  map.on('mouseenter','front-parcel-click',(e)=>{
     map.getCanvas().style.cursor='crosshair';
+    if(!e.features?.length) return;
+    const role = e.features[0].properties?.role;
+    const roleLabel = role==='front'?'FRONT (stradă)':role==='posterior'?'SPATE':role==='lateral_stg'?'LATERAL stânga':'LATERAL dreapta';
+    ss('🖱 Click pe această latură (' + roleLabel + ') pentru a seta ca FRONT STRADAL');
   });
   map.on('mouseleave','front-parcel-click',()=>{
     map.getCanvas().style.cursor='';

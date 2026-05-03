@@ -915,7 +915,7 @@ function htmlProiect(){
   '</div>',
   // ── ORIENTARE ──
   '<div class="section">🧭 Front stradal — Orientare față de Nord</div>',
-  '<div class="help" style="margin-bottom:6px">Bearing = direcția în care privește <b>fațada principală</b> (spre stradă). <b>0°=Nord, 90°=Est, 180°=Sud, 270°=Vest</b>. Aliniamentul rf se aplică pe această latură.</div>',
+  '<div class="help" style="margin-bottom:6px;background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.25);border-radius:6px;padding:6px 8px">'+'<b style="color:#d4af37">👆 Click direct pe o latură a parcelei</b> pentru a seta frontul stradal.'+'<br><span style="color:#94a3b8;font-size:10px">Sau folosește butoanele Nord/Sud/Est/Vest de mai jos. '+'Bearing = direcția spre stradă. 0°=Nord, 90°=Est, 180°=Sud, 270°=Vest.</span></div>',
   '<button class="btn-s" onclick="detectAndSetBearing()" style="margin-bottom:8px;width:100%">🔍 Auto-detectează frontul stradal</button>',
   '<div style="display:flex;gap:6px;margin-bottom:8px;align-items:center">',
   '<span style="font-size:11px;color:#94a3b8;flex-shrink:0">Nr. fronturi stradale:</span>',
