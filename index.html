@@ -14213,15 +14213,100 @@ async function generateTrafficStudy(){
 }
 
 // ── STUDIU ISTORIC / PATRIMONIU ────────────────────────────────────────────
+// ── CIMEC WMS live query ────────────────────────────────────────────────────
+// map.cimec.ro oferă WMS public CORS-enabled pentru monumente istorice
+const CIMEC_WMS = 'https://map.cimec.ro/Mapserver/wms';
+const CIMEC_LAYERS = {
+  monumente: 'monumente',        // Monumente istorice punctuale
+  zone: 'zone_construite',       // Zone construite protejate
+  situri: 'situri_arheologice',  // Situri arheologice
+  rezervatii: 'rezervatii',      // Rezervații arhitecturale
+};
+
+async function _cimecQueryWFS(lon, lat, radiusM){
+  // WFS GetFeature în raza amplasamentului
+  const bbox = [
+    lon - radiusM/111320,
+    lat - radiusM/111320,
+    lon + radiusM/111320,
+    lat + radiusM/111320
+  ].join(',');
+
+  const results = { monumente:[], zone:[], situri:[], error:null };
+
+  // Interogăm layerele principale
+  const queries = [
+    { layer:'LMI_Puncte', key:'monumente' },
+    { layer:'LMI_Zone',   key:'zone' },
+    { layer:'Situri_Arh', key:'situri' },
+  ];
+
+  for(const q of queries){
+    try{
+      const url = `${CIMEC_WMS}?SERVICE=WFS&VERSION=1.1.0&REQUEST=GetFeature`+
+        `&TYPENAME=${q.layer}&BBOX=${bbox},EPSG:4326&SRSNAME=EPSG:4326`+
+        `&OUTPUTFORMAT=application/json&maxFeatures=50`;
+      const resp = await fetch(url, {signal:AbortSignal.timeout(8000)});
+      if(resp.ok){
+        const data = await resp.json();
+        results[q.key] = data.features||[];
+      }
+    }catch(e){ /* silent fallback */ }
+  }
+
+  // Fallback: WMS GetFeatureInfo
+  if(!results.monumente.length && !results.zone.length){
+    results.error = 'CIMEC WFS indisponibil — se folosesc date locale';
+  }
+
+  return results;
+}
+
+async function _cimecGetMapImage(lon, lat, radiusM, widthPx=400, heightPx=300){
+  // WMS GetMap — obținem imagine cu monumentele marcate
+  const margin = radiusM*1.5/111320;
+  const bbox = `${lon-margin},${lat-margin},${lon+margin},${lat+margin}`;
+  const layers = Object.values(CIMEC_LAYERS).join(',');
+  const url = `${CIMEC_WMS}?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap`+
+    `&LAYERS=LMI_Puncte,LMI_Zone,Situri_Arh`+
+    `&BBOX=${bbox}&CRS=EPSG:4326`+
+    `&WIDTH=${widthPx}&HEIGHT=${heightPx}`+
+    `&FORMAT=image/png&TRANSPARENT=true&STYLES=`;
+  try{
+    const resp = await fetch(url, {signal:AbortSignal.timeout(10000)});
+    if(resp.ok && resp.headers.get('content-type')?.includes('image')){
+      const blob = await resp.blob();
+      return await new Promise(res=>{
+        const reader = new FileReader();
+        reader.onload = ()=>res(reader.result);
+        reader.readAsDataURL(blob);
+      });
+    }
+  }catch(e){}
+  return null;
+}
+
 async function generateIstoricStudy(){
   const ap=S.parcels[S.activeParcel??0];
   if(!ap?.geo?.geometry){ss('Selectați o parcelă.');return;}
-  ss('Se generează Studiu Istoric & Patrimoniu...');
+  ss('Se generează Studiu Istoric & Patrimoniu — interogare CIMEC...');
 
-  const {pdf,W,H,DARK,GOLD,LIGHT,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,tblRow,addImg,sign}=_initStudyPdf('Studiu Istoric si de Patrimoniu Urban','Studiu patrimoniu',5);
-  const caps=await _captureStudyMaps(ap,msg=>ss(msg));
+  const {pdf,W,H,DARK,GOLD,LIGHT,S2,dateStr,nrcad,utr,area,lat,lon,params,hdr,ftr,sec,body,tblRow,addImg,sign}=_initStudyPdf('Studiu Istoric si de Patrimoniu Urban','Studiu patrimoniu',6);
 
-  // Zonele protejate istorice în Iași (date publice, LMI 2015)
+  // ── Interogare LIVE CIMEC ──────────────────────────────────────────────
+  ss('Interogare CIMEC WMS/WFS (monumente.ro)...');
+  const [cimecData, cimecImg, caps] = await Promise.all([
+    _cimecQueryWFS(lon, lat, 1000),
+    _cimecGetMapImage(lon, lat, 1000, 800, 600),
+    _captureStudyMaps(ap, msg=>ss(msg)),
+  ]);
+
+  const cimecMonumente = cimecData.monumente||[];
+  const cimecZone     = cimecData.zone||[];
+  const cimecSituri   = cimecData.situri||[];
+  const cimecOK       = !cimecData.error;
+
+  // ── Date locale fallback ───────────────────────────────────────────────
   const ZONE_PROTEJATE_IASI=[
     {zona:'IS-II-s-B-04093',tip:'Zonă construită protejată',centru:[27.5817,47.1597],raza:800,desc:'Centrul Istoric Iași — Piața Unirii și zona adiacentă'},
     {zona:'IS-II-s-B-04094',tip:'Ansamblu urban',centru:[27.5835,47.1634],raza:500,desc:'Bulevardul Ștefan cel Mare și Sfânt'},
@@ -14233,8 +14318,13 @@ async function generateIstoricStudy(){
     const d=turf.distance({type:'Feature',geometry:{type:'Point',coordinates:parcelCtr},properties:{}},{type:'Feature',geometry:{type:'Point',coordinates:z.centru},properties:{}},{units:'meters'});
     return {...z,dist:d,inZona:d<z.raza};
   });
-  const inZonaProtejata=distZone.some(z=>z.inZona);
+
+  // Combinăm date CIMEC live + date locale
+  const inZonaProtejataCimec = cimecZone.length>0||cimecMonumente.length>0||cimecSituri.length>0;
+  const inZonaProtejataLocal = distZone.some(z=>z.inZona);
+  const inZonaProtejata = inZonaProtejataCimec || inZonaProtejataLocal;
   const zonaAproape=distZone.reduce((a,b)=>a.dist<b.dist?a:b);
+  const half=(W-28)/2-2;
   const half=(W-28)/2-2;
 
   // PAG 1: Cover
@@ -14249,31 +14339,91 @@ async function generateIstoricStudy(){
   pdf.setFillColor(20,35,70);pdf.rect(20,108,W-40,80,'F');pdf.setFillColor(...GOLD);pdf.rect(20,108,3,80,'F');
   [['Nr. cadastral:',nrcad],['UTR:',utr],['Coordonate:',lat.toFixed(5)+'N / '+lon.toFixed(5)+'E'],
    ['In zona protejata LMI:',inZonaProtejata?'DA — Restricții suplimentare!':'NU (verificare suplimentara rec.)'],
-   ['Cea mai apropiata zona prot.:',zonaAproape.zona],
-   ['Distanta:',Math.round(zonaAproape.dist)+' m'],
-   ['Tip zona:',zonaAproape.tip],
+   ['Cea mai apropiata zona prot.:',zonaAproape.zona],['Distanta:',Math.round(zonaAproape.dist)+' m'],
+   ['Monument CIMEC în 1km:',cimecMonumente.length>0?cimecMonumente.length+' identificate':'0 (date live CIMEC)'],
+   ['Surs date patrimoniu:',cimecOK?'CIMEC WMS live + date locale':'Date locale LMI 2015'],
   ].forEach(([l,v],i)=>{
     pdf.setTextColor(150,170,200);pdf.setFontSize(8);pdf.setFont('helvetica','normal');pdf.text(S2(l),26,118+i*9.5);
     pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text(S2(v),100,118+i*9.5);
   });
-  pdf.setFillColor(inZonaProtejata?180:20,inZonaProtejata?30:120,inZonaProtejata?30:60);pdf.rect(20,195,W-40,18,'F');
+  pdf.setFillColor(inZonaProtejata?180:20,inZonaProtejata?30:120,inZonaProtejata?30:60);pdf.rect(20,198,W-40,18,'F');
   pdf.setTextColor(255,255,255);pdf.setFontSize(11);pdf.setFont('helvetica','bold');
-  pdf.text(inZonaProtejata?'ATENȚIE — Amplasament în zonă protejată LMI!':'ÎN AFARA zonelor protejate identificate (verificare recomandată)',W/2,204,{align:'center'});
+  pdf.text(inZonaProtejata?'ATENȚIE — Amplasament în zonă protejată LMI!':'ÎN AFARA zonelor protejate identificate (verificare recomandată)',W/2,207,{align:'center'});
   if(caps.imgLocation){try{pdf.addImage(caps.imgLocation,'JPEG',14,H-72,W-28,58,undefined,'FAST');pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.4);pdf.rect(14,H-72,W-28,58,'S');pdf.setTextColor(...GOLD);pdf.setFontSize(6);pdf.text('AMPLASAMENT · '+S2(nrcad),W/2,H-75,{align:'center'});}catch(e){}}
   ftr();
 
-  // PAG 2: Context 3D + analiza zone
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONTEXT URBAN 3D — ZONE PROTEJATE LMI IASI',2);ftr();
+  // PAG 2: Hartă CIMEC live + zone protejate
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('HARTĂ CIMEC — MONUMENTE ISTORICE LIVE (1km rază)',2);ftr();
   let cy=28;
-  cy=addImg(caps.img3D,14,cy,W-28,68,'FIG. 1 — Vedere 3D amplasament · Context urban · Proximitata zone istorice protejate');
-  cy=sec('1. ANALIZA ZONE PROTEJATE ÎN RAZA DE 2KM',cy);cy+=2;
+  if(cimecImg){
+    try{
+      pdf.addImage(cimecImg,'PNG',14,cy,W-28,90,undefined,'FAST');
+      pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.5);pdf.rect(14,cy,W-28,90,'S');
+      cy+=93;
+      pdf.setFontSize(7);pdf.setTextColor(80,100,130);pdf.setFont('helvetica','italic');
+      pdf.text('Sursă hartă: CIMEC — Institutul Național al Patrimoniului, map.cimec.ro/Mapserver · Date live '+S2(dateStr),W/2,cy,{align:'center'});
+      cy+=5;
+    }catch(e){ cy=addImg(caps.img3D,14,cy,W-28,68,'FIG. 1 — Vedere 3D amplasament (harta CIMEC indisponibilă)'); }
+  } else {
+    cy=addImg(caps.img3D,14,cy,W-28,68,'FIG. 1 — Vedere 3D amplasament · Context urban · (Hartă CIMEC: verificați map.cimec.ro)');
+  }
+
+  cy=sec(`1. DATE LIVE CIMEC — ${cimecOK?'INTEROGARE REUȘITĂ':'FALLBACK DATE LOCALE'}`,cy);cy+=2;
+  if(!cimecOK){
+    cy=body('⚠️ '+cimecData.error+'. Datele afișate provin din baza locală UrbanX (LMI 2015). Pentru date actualizate consultați: map.cimec.ro și culture.ro.',14,cy);cy+=3;
+  }
+
+  // Monumente CIMEC live
+  if(cimecMonumente.length>0){
+    cy=sec('MONUMENTE IDENTIFICATE ÎN RAZA DE 1KM — CIMEC LIVE',cy);cy+=2;
+    cy=tblRow(['Cod LMI','Denumire','Localitate','Categorie','Dist.'],cy,true,[28,60,30,30,20]);
+    cimecMonumente.slice(0,12).forEach(m=>{
+      const p=m.properties||{};
+      const coords=m.geometry?.coordinates||[lon,lat];
+      const dist=turf.distance({type:'Feature',geometry:{type:'Point',coordinates:[lon,lat]},properties:{}},
+        {type:'Feature',geometry:{type:'Point',coordinates:Array.isArray(coords[0])?coords[0]:coords},properties:{}},{units:'meters'});
+      cy=tblRow([
+        S2(p.cod_lmi||p.COD_LMI||'—').slice(0,12),
+        S2(p.denumire||p.DENUMIRE||'Monument').slice(0,28),
+        S2(p.localitate||p.LOCALITATE||'Iași').slice(0,14),
+        S2(p.categorie||p.CATEGORIE||'—').slice(0,14),
+        Math.round(dist)+'m'
+      ],cy,false,[28,60,30,30,20]);
+    });
+    cy+=3;
+  } else {
+    cy=body(cimecOK?'Nu s-au identificat monumente înregistrate în CIMEC în raza de 1km față de amplasament.':
+      'Date CIMEC live indisponibile. Verificați manual: map.cimec.ro',14,cy);cy+=3;
+  }
+
+  // Zone locale
+  cy=sec('2. ZONE PROTEJATE — DATE LOCALE LMI IAȘI',cy);cy+=2;
   cy=tblRow(['Cod LMI','Tip','Dist.(m)','Status','Descriere'],cy,true,[30,30,18,20,80]);
   distZone.forEach(z=>cy=tblRow([z.zona.split('-').pop(),z.tip.split(' ')[0],Math.round(z.dist)+'m',z.inZona?'ÎN ZONA':'în afară',z.desc.slice(0,32)],cy,false,[30,30,18,20,80]));
-  cy+=4;cy=sec('2. MONUMENTE ISTORICE IDENTIFICATE ÎN CONTEXT',cy);cy+=2;
-  cy=body('Identificarea monumentelor istorice din Lista Monumentelor Istorice (LMI 2015 + actualizări) în raza de 500m față de amplasamentul '+nrcad+' este obligatorie înainte de orice intervenție. Prezentul studiu utilizează date de referință pentru Municipiul Iași. Se recomandă verificarea actualizată a LMI pe site-ul Ministerului Culturii (culture.ro) și consultarea DJCPN Iași.',14,cy);
+
+  // PAG 3: Context 3D + situri arheologice
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONTEXT URBAN 3D — SITURI ARHEOLOGICE SI RESTRICTII',3);ftr();
+  cy=28;
+  cy=addImg(caps.img3D,14,cy,W-28,65,'FIG. 2 — Vedere 3D amplasament · Context urban · Proximitate zone istorice protejate');
+  if(cimecSituri.length>0){
+    cy=sec('3. SITURI ARHEOLOGICE IDENTIFICATE — CIMEC LIVE',cy);cy+=2;
+    cy=tblRow(['Cod','Denumire sit','Epocă','Dist.'],cy,true,[25,80,40,30]);
+    cimecSituri.slice(0,8).forEach(s=>{
+      const p=s.properties||{};
+      const coords=s.geometry?.coordinates||[lon,lat];
+      const dist=turf.distance({type:'Feature',geometry:{type:'Point',coordinates:[lon,lat]},properties:{}},
+        {type:'Feature',geometry:{type:'Point',coordinates:Array.isArray(coords[0])?coords[0]:coords},properties:{}},{units:'meters'});
+      cy=tblRow([S2(p.cod||'—').slice(0,12),S2(p.denumire||'Sit arheologic').slice(0,38),S2(p.epoca||'—').slice(0,18),Math.round(dist)+'m'],cy,false,[25,80,40,30]);
+    });cy+=3;
+    cy=body('⚠️ ATENȚIE SITURI ARHEOLOGICE: Prezența siturilor arheologice în raza de 1km impune RAPORT DE DIAGNOSTIC ARHEOLOGIC înainte de orice lucrare de terasament, conform Legii 422/2001 art. 49-53.',14,cy);cy+=3;
+  }
+  cy=sec('4. MONUMENTE ISTORICE IDENTIFICATE ÎN CONTEXT',cy);cy+=2;
+  cy=body(cimecOK&&cimecMonumente.length>0?
+    'Au fost identificate '+cimecMonumente.length+' monumente înregistrate în CIMEC în raza de 1km față de amplasamentul '+nrcad+' (UTR '+utr+'). Orice intervenție în proximitatea acestora necesită avizul DJCPN Iași și, după caz, al Comisiei Zonale a Monumentelor (CZ 5 — IAȘI).':
+    'Identificarea monumentelor istorice din Lista Monumentelor Istorice (LMI 2015 + actualizări) în raza de 500m față de amplasamentul '+nrcad+' este obligatorie înainte de orice intervenție. Prezentul studiu utilizează date de referință pentru Municipiul Iași. Se recomandă verificarea actualizată pe map.cimec.ro și culture.ro.',14,cy);
 
   // PAG 3: Viewer + restrictii
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D + RESTRICTII CONSTRUCTIVE IN ZONE PROTEJATE',3);ftr();
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D + RESTRICTII CONSTRUCTIVE IN ZONE PROTEJATE',4);ftr();
   cy=28;
   cy=addImg(caps.v3dDay,14,cy,half,56,'FIG. 2 — Viewer 3D · ZI · Integrare volumetrica in context istoric');
   addImg(caps.v3dGolden||caps.imgAerial,14+half+4,cy-56,half,56,'FIG. 3 — Viewer 3D · GOLDEN HOUR · Materialitate si impact vizual');
@@ -14290,7 +14440,7 @@ async function generateIstoricStudy(){
   cy+=4;cy=body('DJCPN = Direcția Județeană pentru Cultură și Patrimoniu Național Iași. MCID = Ministerul Culturii și Identității. Avizele se solicită conform Legii 422/2001 și Ordinului 2828/2015.',14,cy);
 
   // PAG 4: Vederi multiple + procedura
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VEDERI MULTIPLE + PROCEDURA AVIZARE PATRIMONIU',4);ftr();
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VEDERI MULTIPLE + PROCEDURA AVIZARE PATRIMONIU',5);ftr();
   cy=28;
   cy=addImg(caps.imgFront,14,cy,half,48,'FIG. 4 — Vedere frontala · Fatada si insertie in front stradal');
   addImg(caps.imgBack,14+half+4,cy-48,half,48,'FIG. 5 — Vedere posterioara · Curte interior');
@@ -14298,11 +14448,11 @@ async function generateIstoricStudy(){
   cy+=4;cy=sec('4. PROCEDURA AVIZARE MCID/DJCPN',cy);cy+=2;
   ['ETAPA 1 — Studiu istorico-arhitectural: Elaborat de arhitect specialist CP atestat MCID. Include istoricul construcțiilor, analiza stilistică, valoare arhitecturală.','ETAPA 2 — Consultare DJCPN Iași: Depunere memoriu + planșe + studiu istorico-arhitectural pentru aviz preliminar (30 zile).','ETAPA 3 — Comisia Zonală a Monumentelor (CZ 5 — IAȘI): Aviz pentru intervenții în zone protejate (45-60 zile).','ETAPA 4 — Aviz MCID (dacă e cazul): Pentru monumente de categoria A (45-90 zile).','ETAPA 5 — Integrare în documentația AC: Avizul DJCPN/MCID se anexează la dosarul Autorizației de Construire.'].forEach(e=>{cy=body(e,16,cy);cy+=2;});
 
-  // PAG 5: Harta oras + baza legala
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('HARTA ORAS + BAZA LEGALA + SEMNATURA',5);ftr();
+  // PAG 6: Harta oras + baza legala
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('HARTA ORAS + BAZA LEGALA + SEMNATURA',6);ftr();
   cy=28;
   if(caps.imgCity){cy=addImg(caps.imgCity,14,cy,W-28,50,'FIG. 7 — Harta Municipiului Iași · Zone protejate si monumente istorice identificate');cy+=4;}
-  cy=sec('5. BAZA LEGALA',cy);cy+=2;
+  cy=sec('6. BAZA LEGALA',cy);cy+=2;
   ['Legea nr. 422/2001 republicată — Protejarea monumentelor istorice.','Ordinul MCID nr. 2828/2015 — Lista Monumentelor Istorice (LMI 2015).','Ordinul MCID nr. 2682/2003 — Metodologia de elaborare a documentatiilor de avizare.','HG nr. 593/2011 — Regulamentul de organizare și funcționare a Comisiei Naționale a Monumentelor.','Legea nr. 350/2001 republicată — Amenajarea teritoriului și urbanismul (PUZ zone protejate).','Carta de la Veneția (1964) + Carta de la Cracovia (2000) — Principii internaționale restaurare.','PUG Municipiul Iași — Regulament UTR '+utr+' — Restricții zone de protecție monumente.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
   sign();
   pdf.save('Studiu_Patrimoniu_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
