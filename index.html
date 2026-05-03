@@ -6,8 +6,8 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
 <meta http-equiv="Pragma" content="no-cache"/>
 <meta http-equiv="Expires" content="0"/>
-<title>UrbanX – PUG Iași</title>
-<meta name="description" content="UrbanX — Platformă de Analiză Urbanistică Avansată. Analiză cadastrală, PUG, indicatori urbanistici, studii de specialitate și vizualizare 3D pentru Municipiul Iași.">
+<title>UrbanX – Platformă de Analiză Urbanistică</title>
+<meta name="description" content="UrbanX — Platformă națională de analiză urbanistică avansată. Analiză cadastrală, PUG, indicatori urbanistici, studii de specialitate și vizualizare 3D pentru orice UAT din România.">
 <!-- UrbanX Favicon & PWA -->
 <link rel="icon" href="/UrbanX/favicon.ico" sizes="any">
 <link rel="icon" type="image/svg+xml" href="/UrbanX/favicon.svg">
@@ -18195,7 +18195,206 @@ function _adminOpen() {
   if(ov) ov.style.display = 'flex';
   const lbl = document.getElementById('adm-logged-as');
   if(lbl) lbl.textContent = 'logat ca ' + (_authUser?.email || '');
-  _adminLoadUsers();
+
+  // Adăugăm tabs dacă nu există
+  if(!document.getElementById('adm-tabs')){
+    const header = ov.querySelector('[style*="border-bottom"]');
+    const body   = ov.querySelector('[style*="overflow-y:auto"]');
+    if(header && body){
+      // Tabs bar
+      const tabBar = document.createElement('div');
+      tabBar.id='adm-tabs';
+      tabBar.style.cssText='display:flex;gap:2px;padding:8px 22px 0;background:#080f1c;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.06)';
+      tabBar.innerHTML=[
+        ['users','👥 Utilizatori'],
+        ['uat','🗺 UAT & Date'],
+        ['guide','📖 Ghid Admin'],
+      ].map(([id,l])=>`<button id="adm-tab-${id}" onclick="_admTab('${id}')"
+        style="padding:7px 14px;border:none;border-radius:8px 8px 0 0;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;background:transparent;color:#475569;border-bottom:2px solid transparent"
+        >${l}</button>`).join('');
+      header.insertAdjacentElement('afterend', tabBar);
+    }
+  }
+
+  _admTab('users');
+}
+
+function _admTab(tab){
+  // Stiluri tabs
+  ['users','uat','guide'].forEach(t=>{
+    const btn=document.getElementById('adm-tab-'+t);
+    if(!btn) return;
+    const active=t===tab;
+    btn.style.background=active?'#0f172a':'transparent';
+    btn.style.color=active?'#d4af37':'#475569';
+    btn.style.borderBottom=active?'2px solid #d4af37':'2px solid transparent';
+  });
+  // Conținut
+  const body=document.querySelector('#admin-overlay [style*="overflow-y:auto"]');
+  if(!body) return;
+  if(tab==='users'){
+    body.innerHTML=`
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+        ${[['adm-total','—','#3b82f6','Total'],['adm-confirmed','—','#34d399','Confirmați'],
+           ['adm-pending','—','#fbbf24','Neconfirmați'],['adm-admins','—','#d4af37','Admini']].map(([id,v,c,l])=>`
+          <div style="background:#080f1c;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px;text-align:center">
+            <div style="font-size:24px;font-weight:800;color:${c}" id="${id}">${v}</div>
+            <div style="font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-top:3px">${l}</div>
+          </div>`).join('')}
+      </div>
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em">Utilizatori înregistrați</div>
+          <button onclick="_adminLoadUsers()" id="adm-reload-btn" style="background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.3);color:#60a5fa;border-radius:7px;padding:5px 12px;font-size:11px;cursor:pointer;font-weight:600">🔄 Reîncarcă</button>
+        </div>
+        <div id="adm-msg" style="font-size:12px;margin-bottom:8px"></div>
+        <div id="adm-users" style="border:1px solid rgba(255,255,255,.08);border-radius:10px;overflow:hidden;min-height:60px">
+          <div style="padding:24px;text-align:center;color:#64748b;font-size:12px">Se încarcă...</div>
+        </div>
+      </div>
+      <div style="background:#080f1c;border:1px solid rgba(59,130,246,.2);border-radius:10px;padding:14px">
+        <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">✉️ Invită utilizator nou</div>
+        <div style="display:flex;gap:8px">
+          <input id="adm-invite-email" type="email" placeholder="email@exemplu.ro" style="flex:1;padding:9px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#0b1220;color:#e2e8f0;font-size:13px;outline:none" onkeydown="if(event.key==='Enter')_adminInvite()">
+          <button onclick="_adminInvite()" style="background:rgba(59,130,246,.2);border:1px solid rgba(59,130,246,.4);color:#60a5fa;border-radius:8px;padding:9px 16px;cursor:pointer;font-size:12px;font-weight:700">Invită</button>
+        </div>
+        <div id="adm-invite-msg" style="font-size:11px;margin-top:7px"></div>
+      </div>
+      <div style="background:#080f1c;border:1px solid rgba(212,175,55,.15);border-radius:10px;padding:14px">
+        <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">👑 Schimbă rol utilizator</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input id="adm-role-email" type="email" placeholder="email@exemplu.ro" style="flex:1;min-width:180px;padding:9px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#0b1220;color:#e2e8f0;font-size:13px;outline:none">
+          <select id="adm-role-sel" style="padding:9px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#0b1220;color:#e2e8f0;font-size:13px;outline:none">
+            <option value="admin">👑 Admin</option>
+            <option value="user" selected>👤 User</option>
+          </select>
+          <button onclick="_adminSetRole()" style="background:rgba(212,175,55,.15);border:1px solid rgba(212,175,55,.4);color:#d4af37;border-radius:8px;padding:9px 16px;cursor:pointer;font-size:12px;font-weight:700">Aplică</button>
+        </div>
+        <div id="adm-role-msg" style="font-size:11px;margin-top:7px"></div>
+      </div>`;
+    _adminLoadUsers();
+  } else if(tab==='uat'){
+    _admRenderUAT(body);
+  } else if(tab==='guide'){
+    _admRenderGuide(body);
+  }
+}
+
+function _admRenderUAT(body){
+  const list=Object.entries(UAT_REGISTRY);
+  const complet=list.filter(([,u])=>u.status==='complet').length;
+  const total=list.length;
+  body.innerHTML=`
+    <!-- Stats UAT -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+      ${[['Total UAT',total,'#94a3b8'],['✅ Complet',complet,'#4ade80'],['⭕ Incomplete',total-complet,'#fbbf24']].map(([l,v,c])=>`
+        <div style="background:#080f1c;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px;text-align:center">
+          <div style="font-size:22px;font-weight:800;color:${c}">${v}</div>
+          <div style="font-size:10px;color:#64748b;margin-top:3px">${l}</div>
+        </div>`).join('')}
+    </div>
+
+    <!-- UAT activ -->
+    <div style="background:rgba(212,175,55,.07);border:1px solid rgba(212,175,55,.25);border-radius:10px;padding:14px">
+      <div style="font-size:11px;color:#d4af37;font-weight:700;margin-bottom:8px">📍 UAT ACTIV CURENT</div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="color:#e2e8f0;font-size:14px;font-weight:800">${S_UAT.label}</div>
+          <div style="color:#64748b;font-size:10px;margin-top:2px">jud. ${S_UAT.judet} · status: <span style="color:${S_UAT.status==='complet'?'#4ade80':'#fbbf24'}">${S_UAT.status}</span></div>
+        </div>
+        <button onclick="showUATSelector();_adminClose()" style="background:rgba(212,175,55,.15);border:1px solid rgba(212,175,55,.3);color:#d4af37;border-radius:8px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer">🔄 Schimbă UAT</button>
+      </div>
+    </div>
+
+    <!-- Lista UAT-uri -->
+    <div>
+      <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Toate UAT-urile configurate</div>
+      <div style="display:flex;flex-direction:column;gap:3px;max-height:260px;overflow-y:auto">
+        ${list.map(([id,u])=>`
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#080f1c;border-radius:8px;border:1px solid rgba(255,255,255,.05)">
+            <div>
+              <span style="color:#e2e8f0;font-size:11px;font-weight:600">${u.label}</span>
+              <span style="color:#334155;font-size:9px;margin-left:6px">${id}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px">
+              ${u.aeroport?'<span title="Aeroport" style="font-size:10px">✈</span>':''}
+              <span style="font-size:8px;padding:2px 7px;border-radius:4px;font-weight:700;
+                background:${u.status==='complet'?'rgba(34,197,94,.15)':'rgba(100,116,139,.1)'};
+                color:${u.status==='complet'?'#4ade80':'#475569'}">
+                ${u.status==='complet'?'✅ Complet':'⭕ Gol'}
+              </span>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    <!-- Cum adaugi un UAT -->
+    <div style="background:#080f1c;border:1px solid rgba(56,189,248,.2);border-radius:10px;padding:14px">
+      <div style="font-size:11px;font-weight:700;color:#38bdf8;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">➕ Cum adaugi date pentru un UAT nou</div>
+      ${['1. Exportezi harta PUG din QGIS ca <code style="color:#fbbf24;background:rgba(251,191,36,.1);padding:1px 4px;border-radius:3px">GeoJSON</code> cu proiecție WGS84 (EPSG:4326). Câmp obligatoriu: <code style="color:#fbbf24">utr</code> (codul zonei urbanistice).',
+        '2. Generezi <code style="color:#fbbf24;background:rgba(251,191,36,.1);padding:1px 4px;border-radius:3px">cadastru_index.json</code> — dicționar <code style="color:#fbbf24">{nrcad: [lng, lat]}</code> pentru căutare rapidă parcele.',
+        '3. Creezi <code style="color:#fbbf24;background:rgba(251,191,36,.1);padding:1px 4px;border-radius:3px">reguli.json</code> cu parametrii PUG per UTR: <code style="color:#fbbf24">{&quot;P1&quot;:{&quot;d&quot;:&quot;...&quot;,&quot;pot&quot;:35,&quot;cut&quot;:1.2,&quot;niv&quot;:2,...}}</code>',
+        '4. Plasezi fișierele în <code style="color:#fbbf24;background:rgba(251,191,36,.1);padding:1px 4px;border-radius:3px">data/{uat-id}/</code> în repo GitHub.',
+        '5. În <code style="color:#fbbf24">UAT_REGISTRY</code> din index.html: schimbi <code style="color:#4ade80">status:\'empty\'</code> → <code style="color:#4ade80">status:\'complet\'</code> și completezi <code style="color:#fbbf24">pugFile</code>, <code style="color:#fbbf24">cadastruIndex</code>, <code style="color:#fbbf24">reguliFile</code> cu căile corecte.',
+        '6. Testezi: apeși butonul 📍 din topbar, selectezi UAT-ul → harta PUG se încarcă automat.'
+      ].map((s,i)=>`<div style="display:flex;gap:10px;margin-bottom:8px;align-items:flex-start">
+          <span style="background:rgba(56,189,248,.15);color:#38bdf8;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;margin-top:1px">${i+1}</span>
+          <span style="color:#94a3b8;font-size:11px;line-height:1.6">${s}</span>
+        </div>`).join('')}
+    </div>`;
+}
+
+function _admRenderGuide(body){
+  body.innerHTML=`
+    <div style="background:rgba(212,175,55,.06);border:1px solid rgba(212,175,55,.2);border-radius:10px;padding:14px;margin-bottom:4px">
+      <div style="font-size:13px;font-weight:800;color:#d4af37;margin-bottom:6px">📖 Ghid complet administrator UrbanX</div>
+      <div style="font-size:10px;color:#64748b">Referință rapidă pentru toate operațiunile administrative</div>
+    </div>
+
+    ${[
+      {ico:'🗺',title:'Adăugare UAT nou',color:'#38bdf8',steps:[
+        'Obții harta PUG georeferențiată de la primărie sau din arhivă OCPI. Format acceptat: SHP, DXF, GeoJSON.',
+        'Convertești în QGIS la GeoJSON WGS84 (EPSG:4326). Câmpuri necesare: <b>utr</b> (cod zonă), opțional: <b>denumire</b>, <b>regim_h</b>.',
+        'Generezi cadastru_index.json din fișierul CSV ANCPI: script Python disponibil în repo → <b>tools/gen_cadastru_index.py</b>',
+        'Creezi reguli.json cu parametrii RLU (Regulament Local de Urbanism) — POT, CUT, H, retrageri, SV, parcaje per UTR.',
+        'Plasezi în <b>data/{uat-id}/</b> și actualizezi <b>UAT_REGISTRY</b> în index.html: status → complet.',
+        'Deploy pe GitHub Pages: git add . && git commit -m "Add UAT {uat-id}" && git push',
+      ]},
+      {ico:'📋',title:'Adăugare reguli PUG (reguli.json)',color:'#a78bfa',steps:[
+        'Formatul unui UTR în reguli.json: <code style="color:#fbbf24">{"P1":{"d":"Locuințe individuale","pot":35,"cut":1.2,"niv":2,"h":10,"rf":5,"rl":3,"rs":5,"sv":30,"pk":2}}</code>',
+        'Câmpuri obligatorii: d (descriere), pot (%), cut, niv (etaje), h (H max m), rf (retragere față), rl (lateral), rs (spate), sv (spații verzi %), pk (parcaje).',
+        'Câmpuri opționale: ao (autorizare organisme DA/NU), fm (H max față de vecini), ua/uc/ui (funcțiuni admise/condiț./interzise).',
+        'Validezi cu: <b>tools/validate_reguli.py reguli.json</b> — verifică câmpurile lipsă și valorile aberante.',
+      ]},
+      {ico:'🏗',title:'Actualizare cadastru',color:'#4ade80',steps:[
+        'Fișierul cadastru_index.json mapează numărul cadastral la coordonatele centrului parcelei.',
+        'Format: <code style="color:#fbbf24">{"173583":[27.6014,47.1585],"173584":[27.6020,47.1587],...}</code>',
+        'Se generează din exportul CSV ANCPI (coloana nrcad + X_coord + Y_coord) cu scriptul din repo.',
+        'Pentru geometrii complete (poligoane parcele) se folosește cadastru_polygons.geojson — fișier mai mare (~50MB).',
+      ]},
+      {ico:'👥',title:'Gestionare utilizatori',color:'#fb923c',steps:[
+        'Tab Utilizatori → tabelul cu toți userii înregistrați, roluri, dată confirmare.',
+        'Invitație: introduce email → buton Invită → userul primește email cu link confirmare.',
+        'Roluri: <b>admin</b> = acces complet + panou admin | <b>user</b> = acces standard la platformă.',
+        'Confirmare manuală (dacă emailul nu funcționează): Supabase Dashboard → Authentication → Users → Edit.',
+      ]},
+      {ico:'🔧',title:'Troubleshooting frecvent',color:'#f87171',steps:[
+        '<b>PUG nu se încarcă:</b> Verifică că pugFile din UAT_REGISTRY există pe server și e JSON valid. Testează direct în browser: https://thinksmartsolutions.github.io/UrbanX/data/{id}/pug.geojson',
+        '<b>UTR-urile nu apar colorat:</b> Verifică că câmpul "utr" există în properties ale GeoJSON-ului. Normalizare automată: uppercase, fără spații.',
+        '<b>Parcela nu se găsește:</b> Numărul cadastral lipsește din cadastru_index.json. Adaugă-l manual sau regenerează indexul.',
+        '<b>Parametrii PUG greșiți:</b> Verifică reguli.json sau REGULI din index.html. pot, cut, h trebuie să fie numere, nu string-uri.',
+        '<b>CIMEC WFS timeout:</b> Normal — server CIMEC indisponibil uneori. Fallback automat la date locale.',
+      ]},
+    ].map(s=>`
+      <div style="background:#080f1c;border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:14px;margin-bottom:8px">
+        <div style="font-size:12px;font-weight:800;color:${s.color};margin-bottom:10px">${s.ico} ${s.title}</div>
+        ${s.steps.map((step,i)=>`
+          <div style="display:flex;gap:10px;margin-bottom:7px;align-items:flex-start">
+            <span style="background:rgba(255,255,255,.06);color:#64748b;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;margin-top:1px">${i+1}</span>
+            <span style="color:#94a3b8;font-size:11px;line-height:1.6">${step}</span>
+          </div>`).join('')}
+      </div>`).join('')}
+  `;
 }
 
 function _adminClose() {
