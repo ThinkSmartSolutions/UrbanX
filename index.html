@@ -2358,6 +2358,7 @@ function addLayers(){
   ['parcel-src','utr-src','ctx-src','vol-src','fp-src','sv-src','front-src','ctx-labels-src','dist-src','aedis-dim-src',
    'bilant-src','edificabil-src','setback-src',
    'lotizare-src','lotizare-drum-src','lotizare-label-src',
+   'lot-demo-src',        // clădiri existente marcate pentru demolare
    'lot-drum-edit-src','lot-drum-vert-src'].forEach(id=>{
     if(!map.getSource(id)) map.addSource(id,{type:'geojson',data:E});
   });
@@ -2413,6 +2414,19 @@ function addLayers(){
   L({id:'lot-drum-edit-vert-sel',type:'circle',source:'lot-drum-vert-src',filter:['==',['get','sel'],true],paint:{
     'circle-radius':9,'circle-color':'#fbbf24',
     'circle-stroke-width':2,'circle-stroke-color':'#0f172a'
+  }});
+  // ── Layer clădiri marcate pentru demolare ─────────────────────────────
+  L({id:'lot-demo-fill',type:'fill',source:'lot-demo-src',paint:{
+    'fill-color':'#ef4444','fill-opacity':0.35
+  }});
+  L({id:'lot-demo-line',type:'line',source:'lot-demo-src',paint:{
+    'line-color':'#ef4444','line-width':2,'line-dasharray':[3,2]
+  }});
+  // Hașuri diagonale roșii (simulare prin pattern de linii)
+  L({id:'lot-demo-hatch',type:'fill',source:'lot-demo-src',paint:{
+    'fill-color':'#ef4444',
+    'fill-opacity':['case',['get','marked'],0.15,0],
+    'fill-pattern':undefined
   }});
   L({id:'lotizare-label',type:'symbol',source:'lotizare-label-src',minzoom:14,layout:{
     'text-field':['get','label'],'text-size':10,
@@ -13342,7 +13356,9 @@ const _LOT = {
     }
   },
 
-  // ── Override parametri per proiect ────────────────────────────────────
+  // ── Clădiri existente marcate pentru demolare ─────────────────────────
+  demoIds: new Set(),     // Set de indecși din S.ctx.features marcate demo
+  demoMode: false,        // true = click pe hartă marchează/demarchează clădiri
   // Utilizatorul poate modifica orice parametru pentru sesiunea curentă
   // Format: {individuala: {niv:3, sc:45, hMax:10}, bloc: {niv:5, ...}, ...}
   tipOverride: {},
@@ -13376,6 +13392,9 @@ function toggleLotizare(){
   else {
     ['lotizare-src','lotizare-drum-src','lotizare-label-src'].forEach(s=>
       setSource(s,{type:'FeatureCollection',features:[]}));
+    // Curăță demolări vizuale (marcajele rămân în _LOT.demoIds pentru reutilizare)
+    setSource('lot-demo-src',{type:'FeatureCollection',features:[]});
+    if(_LOT.demoMode) _lotDemoModeToggle(); // oprește modul marcare dacă e activ
     // Curăță și viewer-ul 3D dacă era generat de lotizare
     if(S.vol._lastFeats?.[0]?.properties?.isLotizare){
       clearSource('vol-src');
@@ -13412,8 +13431,8 @@ function _showLotizarePanel(){
       </div>
       ${!ap?'<div style="color:#f87171;font-size:10px;padding:4px 0 6px">⚠️ Selectați mai întâi o parcelă pe hartă!</div>':''}
       <div style="display:flex;gap:2px;background:rgba(255,255,255,.04);border-radius:8px;padding:3px" id="lot-tabs">
-        ${[['p','⚙ Param'],['t','🏢 Tipuri'],['c','🛣 Circulații'],['m','🏡 Mix'],['r','📊 Rezultat'],['f','💰 Financiar'],['x','📄 Export']].map(([id,l],i)=>`
-          <button onclick="_lotTab('${id}')" id="ltab-${id}" style="flex:1;border:none;background:${i===0?'rgba(167,139,250,.2)':'none'};color:${i===0?'#a78bfa':'#64748b'};border-radius:6px;padding:5px 1px;font-size:${mob?6.5:7.5}px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .15s">${l}</button>`).join('')}
+        ${[['p','⚙ Param'],['t','🏢 Tipuri'],['d','🏚 Demolare'],['c','🛣 Circulații'],['m','🏡 Mix'],['r','📊 Rezultat'],['f','💰 Financiar'],['x','📄 Export']].map(([id,l],i)=>`
+          <button onclick="_lotTab('${id}')" id="ltab-${id}" style="flex:1;border:none;background:${i===0?'rgba(167,139,250,.2)':'none'};color:${i===0?'#a78bfa':'#64748b'};border-radius:6px;padding:5px 1px;font-size:${mob?6:7}px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .15s">${l}</button>`).join('')}
       </div>
     </div>
     <div id="lot-content" style="overflow-y:auto;padding:12px 16px;flex:1">${_lotHtmlParametri()}</div>
@@ -13437,7 +13456,7 @@ function _showLotizarePanel(){
 }
 
 function _lotTab(tab){
-  ['p','t','c','m','r','f','x'].forEach(t=>{
+  ['p','t','d','c','m','r','f','x'].forEach(t=>{
     const b=document.getElementById('ltab-'+t);
     if(!b) return;
     b.style.background = t===tab?'rgba(167,139,250,.2)':'none';
@@ -13445,7 +13464,7 @@ function _lotTab(tab){
   });
   const c=document.getElementById('lot-content');
   if(!c) return;
-  const map2={'p':_lotHtmlParametri,'t':_lotHtmlTipuri,'c':_lotHtmlCirculatii,'m':_lotHtmlMix,'r':_lotHtmlRezultat,'f':_lotHtmlFinanciar,'x':_lotHtmlExport};
+  const map2={'p':_lotHtmlParametri,'t':_lotHtmlTipuri,'d':_lotHtmlDemolare,'c':_lotHtmlCirculatii,'m':_lotHtmlMix,'r':_lotHtmlRezultat,'f':_lotHtmlFinanciar,'x':_lotHtmlExport};
   c.innerHTML = (map2[tab]||_lotHtmlParametri)();
 }
 
@@ -13505,6 +13524,127 @@ function _lotOpenUrban3D(){
   ss('🏙 Urban3D — Plan de lotizare · '+_LOT._loturi.length+' volume');
 }
 
+// ── Activare mod marcare demolare ────────────────────────────────────────
+function _lotDemoModeToggle(){
+  _LOT.demoMode = !_LOT.demoMode;
+  map.getCanvas().style.cursor = _LOT.demoMode ? 'crosshair' : '';
+  if(_LOT.demoMode){
+    map._lotDemoClick = (e) => {
+      // Găsim clădiri sub cursor din ctx-src
+      const feats = map.queryRenderedFeatures(e.point, {layers:['ctx-3d']});
+      if(!feats.length){
+        // Căutăm în S.ctx manual după distanță
+        if(!S.ctx?.features?.length) return;
+        const ap = S.parcels[S.activeParcel??0];
+        if(!ap) return;
+        const clickPt = [e.lngLat.lng, e.lngLat.lat];
+        S.ctx.features.forEach((f,idx)=>{
+          if(!f.geometry) return;
+          try{
+            const ptFeat={type:'Feature',geometry:{type:'Point',coordinates:clickPt},properties:{}};
+            const bldFeat={type:'Feature',geometry:f.geometry,properties:{}};
+            // Verifică dacă punctul e în interiorul clădirii
+            if(turf.booleanPointInPolygon(ptFeat, bldFeat)){
+              if(_LOT.demoIds.has(idx)) _LOT.demoIds.delete(idx);
+              else _LOT.demoIds.add(idx);
+              _lotDemoRefresh();
+            }
+          }catch(e2){}
+        });
+        return;
+      }
+      feats.forEach(f=>{
+        const idx = S.ctx?.features?.findIndex(cf=>
+          cf.geometry === f.geometry ||
+          JSON.stringify(cf.geometry?.coordinates) === JSON.stringify(f.geometry?.coordinates)
+        );
+        if(idx>=0){
+          if(_LOT.demoIds.has(idx)) _LOT.demoIds.delete(idx);
+          else _LOT.demoIds.add(idx);
+        }
+      });
+      _lotDemoRefresh();
+    };
+    map.on('click', map._lotDemoClick);
+    ss('🏚 Mod demolare activ — click pe clădiri pentru a le marca/demarca');
+  } else {
+    if(map._lotDemoClick){ map.off('click', map._lotDemoClick); map._lotDemoClick=null; }
+    ss('✅ Mod demolare dezactivat — '+_LOT.demoIds.size+' clădiri marcate');
+  }
+  // Refresh buton în panou
+  const btn = document.getElementById('lot-demo-btn');
+  if(btn){
+    btn.style.background = _LOT.demoMode ? 'rgba(239,68,68,.3)' : 'rgba(239,68,68,.12)';
+    btn.style.borderColor = _LOT.demoMode ? '#ef4444' : 'rgba(239,68,68,.25)';
+    btn.textContent = _LOT.demoMode ? '🏚 Stop marcare' : '🏚 Marchează demolări';
+  }
+}
+
+function _lotDemoRefresh(){
+  // Actualizează layer-ul vizual roșu pentru clădirile marcate
+  const demoFeats = [];
+  if(S.ctx?.features){
+    S.ctx.features.forEach((f,idx)=>{
+      if(_LOT.demoIds.has(idx) && f.geometry){
+        demoFeats.push({...f, properties:{...f.properties, marked:true}});
+      }
+    });
+  }
+  setSource('lot-demo-src',{type:'FeatureCollection',features:demoFeats});
+  // Actualizează counter în panou
+  const cnt = document.getElementById('lot-demo-count');
+  if(cnt) cnt.textContent = _LOT.demoIds.size+' clăd. marcate';
+  _lotDemoUpdatePanel();
+}
+
+function _lotDemoClearAll(){
+  _LOT.demoIds.clear();
+  _lotDemoRefresh();
+  ss('🗑 Toate marcajele de demolare șterse');
+}
+
+function _lotDemoMarkAll(){
+  // Marchează toate clădirile de pe parcela activă
+  const ap = S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry || !S.ctx?.features?.length) return;
+  S.ctx.features.forEach((f,idx)=>{
+    if(!f.geometry) return;
+    try{
+      const parcelFeat={type:'Feature',geometry:ap.geo.geometry,properties:{}};
+      const bldFeat={type:'Feature',geometry:f.geometry,properties:{}};
+      const overlap=turf.intersect(parcelFeat,bldFeat);
+      if(overlap && turf.area(overlap)>5) _LOT.demoIds.add(idx);
+    }catch(e){}
+  });
+  _lotDemoRefresh();
+  ss('🏚 '+_LOT.demoIds.size+' clădiri de pe parcelă marcate pentru demolare');
+}
+
+function _lotDemoUpdatePanel(){
+  const el = document.getElementById('lot-demo-list');
+  if(!el) return;
+  if(_LOT.demoIds.size===0){
+    el.innerHTML='<div style="color:#475569;font-size:10px;text-align:center;padding:6px">Nicio clădire marcată</div>';
+    return;
+  }
+  let html='';
+  _LOT.demoIds.forEach(idx=>{
+    const f=S.ctx?.features?.[idx];
+    if(!f) return;
+    const h=f.properties?.h||'?';
+    const fn=f.properties?.fn||'—';
+    try{
+      const a=Math.round(turf.area({type:'Feature',geometry:f.geometry,properties:{}}));
+      html+=`<div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+        <span style="color:#ef4444;font-size:10px">🏚</span>
+        <span style="flex:1;color:#fca5a5;font-size:10px">${fn} · ${a}mp · H${h}m</span>
+        <button onclick="_LOT.demoIds.delete(${idx});_lotDemoRefresh()" style="background:none;border:none;color:#64748b;cursor:pointer;font-size:10px">✕</button>
+      </div>`;
+    }catch(e){}
+  });
+  el.innerHTML=html||'<div style="color:#475569;font-size:10px">—</div>';
+}
+
 function _lotSetDemolare(){
   const ap=S.parcels[S.activeParcel??0];
   if(!ap){ss('Selectati o parcela mai intai.');return;}
@@ -13552,6 +13692,71 @@ function _lotResetParams(){
     b.style.color=t==='p'?'#a78bfa':'#64748b';
   });
   ss('↩ Parametri resetati la valorile PUG pentru UTR '+(ap.utr||''));
+}
+
+function _lotHtmlDemolare(){
+  const hasCladiri = S.ctx?.features?.length > 0;
+  const nDemo = _LOT.demoIds.size;
+  return `
+    <!-- Status vizual -->
+    <div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:10px 12px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <span style="color:#fca5a5;font-size:11px;font-weight:800">🏚 Clădiri pentru demolare</span>
+        <span id="lot-demo-count" style="color:#ef4444;font-size:11px;font-weight:800">${nDemo} clăd. marcate</span>
+      </div>
+      <div style="font-size:9px;color:#64748b;line-height:1.5">
+        Marchează clădirile existente pe teren care vor fi demolate.<br>
+        La generarea lotizării, acestea sunt <b style="color:#fca5a5">ignorate complet</b> din calcule.
+      </div>
+    </div>
+
+    <!-- Butoane acțiune -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px">
+      <button id="lot-demo-btn" onclick="_lotDemoModeToggle()"
+        style="background:${_LOT.demoMode?'rgba(239,68,68,.3)':'rgba(239,68,68,.12)'};
+               border:1px solid ${_LOT.demoMode?'#ef4444':'rgba(239,68,68,.25)'};
+               color:#fca5a5;border-radius:8px;padding:9px;font-size:10px;font-weight:700;cursor:pointer">
+        ${_LOT.demoMode?'🛑 Stop marcare':'🏚 Marchează demolări'}
+      </button>
+      <button onclick="_lotDemoMarkAll()"
+        style="background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.25);
+               color:#fbbf24;border-radius:8px;padding:9px;font-size:10px;font-weight:700;cursor:pointer">
+        🏘 Toate de pe parcelă
+      </button>
+    </div>
+
+    ${!hasCladiri?`
+      <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px;text-align:center;margin-bottom:8px">
+        <div style="color:#64748b;font-size:10px">Nicio clădire în context.</div>
+        <div style="color:#475569;font-size:9px;margin-top:3px">Apasă Context 3D din tab Analiză pentru a încărca clădirile existente.</div>
+      </div>`:''}
+
+    <!-- Lista clădiri marcate -->
+    <div style="border-top:1px solid rgba(255,255,255,.07);padding-top:8px;margin-bottom:8px">
+      <div style="font-size:9px;color:#475569;font-weight:700;text-transform:uppercase;margin-bottom:5px">Clădiri marcate pentru demolare</div>
+      <div id="lot-demo-list" style="max-height:150px;overflow-y:auto">
+        ${nDemo===0
+          ? '<div style="color:#475569;font-size:10px;text-align:center;padding:6px">Nicio clădire marcată</div>'
+          : ''}
+      </div>
+      ${nDemo>0?`<button onclick="_lotDemoClearAll()" style="width:100%;margin-top:6px;padding:5px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#f87171;border-radius:6px;font-size:9px;cursor:pointer">🗑 Șterge toate marcajele</button>`:''}
+    </div>
+
+    <!-- Legendă vizuală -->
+    <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:10px">
+      <div style="font-size:9px;color:#94a3b8;font-weight:700;text-transform:uppercase;margin-bottom:8px">Legendă hartă</div>
+      ${[
+        ['rgba(239,68,68,.4)','border:2px dashed #ef4444','Clădire marcată pentru demolare'],
+        ['rgba(255,180,0,.15)','border:1px solid #d4af37','Parcelă activă selectată'],
+        ['rgba(34,197,94,.15)','border:1px solid #22c55e','Edificabil disponibil (după retrageri)'],
+        ['rgba(167,139,250,.25)','border:1px solid #7c3aed','Loturi propuse (după lotizare)'],
+        ['rgba(148,163,184,.4)','border:1px solid #94a3b8','Circulații interioare'],
+      ].map(([bg,brd,lbl])=>`
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:5px">
+          <div style="width:16px;height:12px;border-radius:2px;background:${bg};${brd};flex-shrink:0"></div>
+          <span style="font-size:9px;color:#64748b">${lbl}</span>
+        </div>`).join('')}
+    </div>`;
 }
 
 function _lotHtmlCirculatii(){
@@ -14141,6 +14346,8 @@ function runLotizare(){
     const params=ap.params||getDefaultParams(ap.utr||'');
 
     // Edificabil (cu retrageri față de stradă)
+    // Dacă există clădiri marcate pentru demolare → le excludem din calcul
+    // (tratate ca teren liber, nu mai influențează edificabilul)
     const fp=buildFP(ap.geo.geometry,params)||pFeat;
     const fpArea=turf.area(fp);
 
