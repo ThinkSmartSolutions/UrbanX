@@ -13376,6 +13376,12 @@ function toggleLotizare(){
   else {
     ['lotizare-src','lotizare-drum-src','lotizare-label-src'].forEach(s=>
       setSource(s,{type:'FeatureCollection',features:[]}));
+    // Curăță și viewer-ul 3D dacă era generat de lotizare
+    if(S.vol._lastFeats?.[0]?.properties?.isLotizare){
+      clearSource('vol-src');
+      S.vol.genDone = false;
+      S.vol._lastFeats = null;
+    }
     document.getElementById('lotizare-panel')?.remove();
     _floatPanelClose('lotizare-panel');
   }
@@ -13419,6 +13425,9 @@ function _showLotizarePanel(){
         <button onclick="_lotResetParams()" title="Resetează la valorile PUG" style="flex:1;background:rgba(100,116,139,.1);border:1px solid rgba(100,116,139,.25);color:#94a3b8;border-radius:8px;padding:8px;font-size:11px;font-weight:700;cursor:pointer">
           ↩ Reset PUG
         </button>
+        <button onclick="if(_LOT._loturi.length>0){_lotBuild3D(_LOT._loturi,_LOT._drumuri);map.easeTo({pitch:55,duration:600});ss('🏙 Viewer 3D actualizat');}else{ss('Generează planul mai întâi');}" title="Vizualizare 3D" style="background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.25);color:#38bdf8;border-radius:8px;padding:8px;font-size:14px;cursor:pointer">
+          🏙
+        </button>
       </div>
       <button onclick="runLotizare()" style="width:100%;background:linear-gradient(135deg,#6d28d9,#4c1d95);border:1px solid #7c3aed;color:#fff;border-radius:10px;padding:12px;font-size:13px;font-weight:800;cursor:pointer;letter-spacing:.03em" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
         🏘 Generează Plan Lotizare
@@ -13456,6 +13465,7 @@ function _lotSetTipParam(tipKey, param, val){
   // Recalcul live dacă planul e generat
   if(_LOT._loturi.length>0) runLotizare();
 }
+function _lotSetDemolare(){
   // Setează toate aliniamentele la 0 — construcție pe limita proprietății
   const ap=S.parcels[S.activeParcel??0];
   if(!ap) return;
@@ -13537,6 +13547,138 @@ function _lotHtmlCirculatii(){
         • <b style="color:#94a3b8">Loturi de margine</b> se adaptează la forma parcelei
       </div>
     </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// LOTIZARE → VIEWER 3D
+// Generează volume 3D pentru fiecare lot și le trimite în vol-src
+// ═══════════════════════════════════════════════════════════════════════════
+function _lotBuild3D(loturi, drumuri){
+  if(!loturi?.length){ clearSource('vol-src'); return; }
+
+  const feats3D = [];
+  const pal = getArchPalette ? getArchPalette() : {
+    etaje:['#7c9bcc','#8faacc','#a3b8cc','#b7c6cc','#c4d0cc','#d0dacc','#dce5cc','#e8efcc'],
+    retras:'#c8d8e8', terasa:'#708090', comercial:'#d4a44c'
+  };
+
+  loturi.forEach((lot, lotIdx) => {
+    const tipKey = lot.properties?.tip || 'individuala';
+    const t = _lotGetTip(tipKey);
+    if(!lot.geometry) return;
+
+    // Parametri per tip (cu override)
+    const ov = _LOT.tipOverride[tipKey] || {};
+    const niv     = Math.max(1, t.niv || 2);
+    const hNiv    = Math.max(2.4, ov.hNiv || t.hNiv || 3.0);
+    const hParter = Math.max(2.4, ov.hParter || t.hParter || 3.0);
+    const hasRetras = ov.hasRetras || false;
+    const hasComercial = tipKey === 'bloc' && (ov.parterComercial !== false);
+
+    // Footprint del lot — aplicăm retragerea față din tipul de locuință
+    const lotFeat = {type:'Feature', geometry:lot.geometry, properties:{}};
+    let fpGeom = lot.geometry; // implicit = lotul integral
+    try {
+      // Retragere față de drumul din lot (retF din tipul de construcție)
+      const retF = t.retF || 0;
+      const retL = t.retL || 0;
+      if(retF > 0 || retL > 0) {
+        const buf = turf.buffer(lotFeat, -(Math.max(retF,retL)/2), {units:'meters'});
+        if(buf?.geometry && turf.area(buf) > 10) fpGeom = buf.geometry;
+      }
+    } catch(e){}
+
+    // Culori per tip
+    const tipColors = {
+      individuala: {etaje:['#4ade80','#6ee89a','#88f0b0'], retras:'#a0f0c0'},
+      insiruita:   {etaje:['#60a5fa','#7ab8fb','#93cafc'], retras:'#acdbfd'},
+      duplex:      {etaje:['#fbbf24','#fcc93c','#fdd154'], retras:'#fdd97c'},
+      bloc:        {etaje:['#a78bfa','#b5a0fb','#c3b5fc'], retras:'#d1c9fd', comercial:'#f59e0b'},
+    };
+    const colors = tipColors[tipKey] || tipColors.individuala;
+
+    // Generare etaje
+    for(let i = 0; i < niv; i++){
+      let base, top, color, geom = fpGeom;
+
+      if(i === 0){
+        base = 0;
+        top  = hParter;
+        color = (hasComercial && tipKey==='bloc') ? colors.comercial : colors.etaje[0];
+      } else {
+        base  = hParter + (i-1)*hNiv;
+        top   = base + hNiv;
+        color = colors.etaje[Math.min(i, colors.etaje.length-1)];
+      }
+
+      // Etaj retras (ultimul etaj)
+      const isLast = i === niv-1 && niv > 1;
+      if(hasRetras && isLast){
+        try{
+          const sc = turf.transformScale(
+            {type:'Feature',geometry:fpGeom,properties:{}},
+            0.80, {origin:turf.centerOfMass({type:'Feature',geometry:fpGeom,properties:{}})}
+          );
+          if(sc?.geometry){ geom = sc.geometry; color = colors.retras; }
+        }catch(e){}
+      }
+
+      feats3D.push({
+        type:'Feature',
+        geometry: geom,
+        properties:{
+          base, top, color,
+          floor: i,
+          parcelIdx: lotIdx,
+          lotTip: tipKey,
+          isLotizare: true,
+          isRetras: hasRetras && isLast,
+          isComercial: i===0 && hasComercial,
+          scenariu: 'liber'
+        }
+      });
+    }
+
+    // Etaj retras suplimentar (dacă hasRetras)
+    if(hasRetras){
+      const lastBase = hParter + Math.max(0, niv-1)*hNiv;
+      try{
+        const sc = turf.transformScale(
+          {type:'Feature',geometry:fpGeom,properties:{}},
+          0.75, {origin:turf.centerOfMass({type:'Feature',geometry:fpGeom,properties:{}})}
+        );
+        if(sc?.geometry){
+          feats3D.push({
+            type:'Feature',
+            geometry: sc.geometry,
+            properties:{base:lastBase, top:lastBase+2.8, color:colors.retras,
+              floor:niv, parcelIdx:lotIdx, lotTip:tipKey, isLotizare:true, isRetras:true, scenariu:'liber'}
+          });
+        }
+      }catch(e){}
+    }
+  });
+
+  // Drumuri ca volume plate (h=0.15m — bordura/carosabil vizibil)
+  drumuri?.forEach((drum, di) => {
+    if(!drum.geometry) return;
+    feats3D.push({
+      type:'Feature',
+      geometry: drum.geometry,
+      properties:{base:0, top:0.15, color:'#475569',
+        floor:-10, parcelIdx:-1, lotTip:'drum', isLotizare:true, scenariu:'liber'}
+    });
+  });
+
+  // Trimite în vol-src — viewer-ul 3D redă automat
+  setSource('vol-src', {type:'FeatureCollection', features:feats3D});
+  S.vol.genDone = true;
+  S.vol._lastFeats = feats3D;
+
+  // Switch automat la vedere 3D
+  if(map.getPitch() < 20){
+    map.easeTo({pitch:45, duration:600});
+  }
 }
 
 function _lotHtmlTipuri(){
@@ -14026,7 +14168,7 @@ function runLotizare(){
     _LOT._loturi=loturi;_LOT._drumuri=drumuri;
     _LOT._bilant={totalLoturi:loturi.length,terenLoturi,terenDrum,eficienta,lotMediu:terenLoturi/Math.max(1,loturi.length),totalUnitati,perTip,verificari,costConstrTotal,venituriTotal,profitTotal,roi};
 
-    // Afișare hartă
+    // ── Afișare hartă 2D ──────────────────────────────────────────────────
     setSource('lotizare-src',{type:'FeatureCollection',features:loturi});
     setSource('lotizare-drum-src',{type:'FeatureCollection',features:drumuri});
     const labels=loturi.map(l=>{
@@ -14035,6 +14177,9 @@ function runLotizare(){
         properties:{label:t.icon+'\n'+Math.round(turf.area(l))+'mp',color:t.color}};
     });
     setSource('lotizare-label-src',{type:'FeatureCollection',features:labels});
+
+    // ── Generare volume 3D → vol-src ──────────────────────────────────────
+    _lotBuild3D(loturi, drumuri);
 
     try{const bb=turf.bbox(pFeat);map.fitBounds([[bb[0],bb[1]],[bb[2],bb[3]]],{padding:60,duration:700});}catch(e){}
     ss(`🏘 ${loturi.length} loturi · ${totalUnitati} unități · ROI ${roi}%`);
