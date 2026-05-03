@@ -13506,12 +13506,13 @@ function _lotOpenUrban3D(){
 }
 
 function _lotSetDemolare(){
-  // Setează toate aliniamentele la 0 — construcție pe limita proprietății
   const ap=S.parcels[S.activeParcel??0];
-  if(!ap) return;
+  if(!ap){ss('Selectati o parcela mai intai.');return;}
   if(!ap.params) ap.params=getDefaultParams(ap.utr||'');
+  // Setează toate aliniamentele la 0
   ap.params.rf=0; ap.params.rs=0; ap.params.rl=0; ap.params.rr=0;
-  // Și în modul per latură
+  ap.params.sv=0; // și SV la 0 pentru edificabil maxim
+  // Modul per latură — toate la 0
   if(ap.geo?.geometry){
     const ring=ap.geo.geometry.type==='Polygon'
       ? ap.geo.geometry.coordinates[0]
@@ -13522,19 +13523,35 @@ function _lotSetDemolare(){
     }
   }
   updateMap();
-  _lotTab('p');
-  ss('🏚 Retrageri setate la 0 — construcție pe limita proprietății');
+  // Re-render complet panel — astfel inputurile afișează noile valori 0
+  const c=document.getElementById('lot-content');
+  if(c) c.innerHTML=_lotHtmlParametri();
+  // Highlight tab Param
+  ['p','t','c','m','r','f','x'].forEach(t=>{
+    const b=document.getElementById('ltab-'+t);
+    if(!b) return;
+    b.style.background=t==='p'?'rgba(167,139,250,.2)':'none';
+    b.style.color=t==='p'?'#a78bfa':'#64748b';
+  });
+  ss('🏚 Demolare: toate retrageri = 0 · Edificabil = parcela integrala');
 }
 
 function _lotResetParams(){
   const ap=S.parcels[S.activeParcel??0];
-  if(!ap) return;
+  if(!ap){ss('Selectati o parcela mai intai.');return;}
   ap.params=getDefaultParams(ap.utr||'');
   S.vol.sideSetbacks={};
   S.vol.perSideMode=false;
   updateMap();
-  _lotTab('p');
-  ss('↩ Parametri resetați la valorile PUG');
+  const c=document.getElementById('lot-content');
+  if(c) c.innerHTML=_lotHtmlParametri();
+  ['p','t','c','m','r','f','x'].forEach(t=>{
+    const b=document.getElementById('ltab-'+t);
+    if(!b) return;
+    b.style.background=t==='p'?'rgba(167,139,250,.2)':'none';
+    b.style.color=t==='p'?'#a78bfa':'#64748b';
+  });
+  ss('↩ Parametri resetati la valorile PUG pentru UTR '+(ap.utr||''));
 }
 
 function _lotHtmlCirculatii(){
