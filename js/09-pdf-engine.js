@@ -21,8 +21,7 @@ function _initStudyPdf(studyName, studySubtitle, totalPages){
   const nrcad=ap?.nrcad||'\u2014';
   const utr=ap?.utr||'\u2014';
   const area=ap?.area?ap.area.toFixed(0):'\u2014';
-  const lat=ap?turf.centerOfMass(ap.geo).geometry.coordinates[1]:47.16;
-  const lon=ap?turf.centerOfMass(ap.geo).geometry.coordinates[0]:27.59;
+  let lat=47.16, lon=27.59; try{ if(ap?.geo?.geometry){ const _c=turf.centerOfMass(ap.geo).geometry.coordinates; if(!isNaN(_c[0])&&!isNaN(_c[1])){ lon=_c[0]; lat=_c[1]; } } }catch(e){}
   const params=ap?.params||getDefaultParams(utr);
   const uat=getUATLabel();
   const judet=getUATJudet();
@@ -445,8 +444,7 @@ function _initStudyPdf(studyName, studySubtitle, totalPages){
   const nrcad=ap?.nrcad||'\u2014';
   const utr=ap?.utr||'\u2014';
   const area=ap?.area?ap.area.toFixed(0):'\u2014';
-  const lat=ap?turf.centerOfMass(ap.geo).geometry.coordinates[1]:47.16;
-  const lon=ap?turf.centerOfMass(ap.geo).geometry.coordinates[0]:27.59;
+  let lat=47.16, lon=27.59; try{ if(ap?.geo?.geometry){ const _c=turf.centerOfMass(ap.geo).geometry.coordinates; if(!isNaN(_c[0])&&!isNaN(_c[1])){ lon=_c[0]; lat=_c[1]; } } }catch(e){}
   const params=ap?.params||getDefaultParams(utr);
   const uat=getUATLabel();
   const judet=getUATJudet();
