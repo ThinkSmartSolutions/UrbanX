@@ -783,6 +783,9 @@ function _v3dBuild(ap){
     }
   }catch(e){}
 
+  // Lotizare geometry (loturi, drum, circulații, verde, parcare)
+  _v3dAddLotizareGeometry(THREE, scene, toLoc);
+
   // Străzi din S.ctx linii (dacă există) sau grid simplu în jurul parcelei
   _v3dAddStreets(THREE, scene, ring0, toLoc);
   // Adăugăm viață urbană (oameni, mașini, câini, biciclete etc.)
@@ -1118,6 +1121,228 @@ function _v3dRefreshDistances(){ _v3dToggleDistances(); }
 
 
 // ── Generare vizuală străzi în jurul parcelei ─────────────────────────────────
+// ═══ LOTIZARE 3D ══════════════════════════════════════════════════════════
+// Randează în viewer: loturi, drum, circulații, spații verzi, parcaje
+// Citește direct din sursele Mapbox populate de 08-lotizare.js
+
+function _v3dAddLotizareGeometry(THREE, scene, toLoc){
+
+  // ── Helpers materiale ─────────────────────────────────────────────────
+  function _matDrum(){
+    const cv=document.createElement('canvas'); cv.width=128; cv.height=256;
+    const ctx=cv.getContext('2d');
+    // Asfalt
+    ctx.fillStyle='#3a4a5a'; ctx.fillRect(0,0,128,256);
+    // Granulație
+    for(let i=0;i<600;i++){
+      ctx.fillStyle=`rgba(0,0,0,${Math.random()*.1})`;
+      ctx.fillRect(Math.random()*128,Math.random()*256,1.5,1.5);
+    }
+    // Linie mediană galbenă (punctată)
+    ctx.strokeStyle='#d4af37'; ctx.lineWidth=2; ctx.setLineDash([16,10]);
+    ctx.beginPath(); ctx.moveTo(64,0); ctx.lineTo(64,256); ctx.stroke();
+    // Borduri albe
+    ctx.strokeStyle='rgba(255,255,255,.25)'; ctx.lineWidth=2; ctx.setLineDash([]);
+    ctx.beginPath(); ctx.moveTo(6,0); ctx.lineTo(6,256); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(122,0); ctx.lineTo(122,256); ctx.stroke();
+    const t=new THREE.CanvasTexture(cv);
+    t.wrapS=t.wrapT=THREE.RepeatWrapping; t.repeat.set(1,2);
+    return new THREE.MeshStandardMaterial({map:t,roughness:.9,metalness:.04,envMapIntensity:.1});
+  }
+
+  function _matVerde(){
+    const cv=document.createElement('canvas'); cv.width=64; cv.height=64;
+    const ctx=cv.getContext('2d');
+    ctx.fillStyle='#1c4d2e'; ctx.fillRect(0,0,64,64);
+    for(let i=0;i<300;i++){
+      const g=Math.floor(Math.random()*50+55);
+      ctx.fillStyle=`rgba(10,${g},20,.35)`;
+      ctx.fillRect(Math.random()*64,Math.random()*64,2,3);
+    }
+    // Câteva linii cu iarbă
+    ctx.strokeStyle='rgba(50,160,60,.3)'; ctx.lineWidth=1;
+    for(let i=0;i<12;i++){
+      const x=Math.random()*64, y=Math.random()*64;
+      ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+Math.random()*4-2,y-6); ctx.stroke();
+    }
+    const t=new THREE.CanvasTexture(cv);
+    t.wrapS=t.wrapT=THREE.RepeatWrapping; t.repeat.set(4,4);
+    return new THREE.MeshStandardMaterial({map:t,roughness:.95,metalness:0});
+  }
+
+  function _matParcare(){
+    const cv=document.createElement('canvas'); cv.width=128; cv.height=128;
+    const ctx=cv.getContext('2d');
+    ctx.fillStyle='#252d3a'; ctx.fillRect(0,0,128,128);
+    // Zgomot asfalt
+    for(let i=0;i<200;i++){
+      ctx.fillStyle=`rgba(255,255,255,${Math.random()*.05})`;
+      ctx.fillRect(Math.random()*128,Math.random()*128,1.5,1.5);
+    }
+    // Linii locuri de parcare (portret)
+    ctx.strokeStyle='rgba(226,232,240,.7)'; ctx.lineWidth=1.5; ctx.setLineDash([]);
+    for(let x=0;x<=128;x+=32){
+      ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,128); ctx.stroke();
+    }
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(128,0); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0,128); ctx.lineTo(128,128); ctx.stroke();
+    // Simbol "P"
+    ctx.fillStyle='rgba(148,163,184,.55)';
+    ctx.font='bold 18px Arial'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('P',64,64);
+    const t=new THREE.CanvasTexture(cv);
+    t.wrapS=t.wrapT=THREE.RepeatWrapping; t.repeat.set(2,2);
+    return new THREE.MeshStandardMaterial({map:t,roughness:.85,metalness:.05});
+  }
+
+  function _matLot(color){
+    return new THREE.MeshStandardMaterial({
+      color: color||'#a78bfa',
+      roughness:.9, metalness:0,
+      transparent:true, opacity:.22,
+      side:THREE.DoubleSide
+    });
+  }
+
+  // Construiește o suprafață plată din poligon GeoJSON
+  function _flatPoly(ring, yPos, mat){
+    try{
+      const pts=ring.slice(0,-1).map(toLoc);
+      if(pts.length<3) return;
+      const shape=new THREE.Shape();
+      shape.moveTo(pts[0][0],pts[0][1]);
+      pts.slice(1).forEach(([x,z])=>shape.lineTo(x,z));
+      shape.closePath();
+      const geo=new THREE.ShapeGeometry(shape);
+      const m=new THREE.Mesh(geo,mat);
+      m.rotation.x=-Math.PI/2; m.position.y=yPos;
+      m.receiveShadow=true; scene.add(m);
+    }catch(e){}
+  }
+
+  // Contur luminat (bordura lot)
+  function _lotOutline(ring, y, color){
+    try{
+      const pts=ring.slice(0,-1).map(toLoc);
+      const verts=new Float32Array(pts.flatMap(([x,z])=>[x,y,z]));
+      const lg=new THREE.BufferGeometry();
+      lg.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));
+      scene.add(new THREE.LineLoop(lg,new THREE.LineBasicMaterial({
+        color:color||'#7c3aed',opacity:.55,transparent:true
+      })));
+    }catch(e){}
+  }
+
+  // Helper: detectează dacă o culoare hex e în zona verde
+  function _isGreen(hex){
+    if(!hex||hex[0]!=='#') return false;
+    const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+    return g > r+30 && g > b+20 && g > 80;
+  }
+  // Helper: detectează dacă e gri (parcare / drum)
+  function _isGray(hex){
+    if(!hex||hex[0]!=='#') return false;
+    const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+    return Math.max(r,g,b)-Math.min(r,g,b)<25 && r<160;
+  }
+
+  // ── 1. Loturi din lotizare-src ─────────────────────────────────────────
+  try{
+    const src=map.getSource('lotizare-src');
+    const feats=(src?._data?.features)||[];
+    const matDrum0=_matDrum(), matVerde0=_matVerde(), matParcare0=_matParcare();
+    feats.forEach(f=>{
+      if(!f.geometry) return;
+      const tip=(f.properties?.tip||f.properties?.type||f.properties?.categorie||'').toLowerCase();
+      const color=f.properties?.color||f.properties?.fillColor||'#a78bfa';
+      const borderColor=f.properties?.borderColor||color;
+      const isVerde=tip.includes('verde')||tip==='sv'||tip.includes('green')||_isGreen(color);
+      const isParcare=tip.includes('parcare')||tip==='pk'||tip.includes('parking');
+      const isDrum=tip.includes('drum')||tip.includes('road')||tip.includes('str');
+      const ring=f.geometry.type==='Polygon'
+        ?f.geometry.coordinates[0]
+        :f.geometry.coordinates[0][0];
+      if(!ring||ring.length<3) return;
+      if(isVerde){
+        _flatPoly(ring,0.06,matVerde0);
+        _lotOutline(ring,0.08,'#16a34a');
+      } else if(isParcare){
+        _flatPoly(ring,0.06,matParcare0);
+        _lotOutline(ring,0.08,'#94a3b8');
+      } else if(isDrum){
+        _flatPoly(ring,0.08,matDrum0);
+        _lotOutline(ring,0.10,'#cbd5e1');
+      } else {
+        // Lot clădire — suprafață colorată semitransparentă
+        _flatPoly(ring,0.04,_matLot(color));
+        _lotOutline(ring,0.05,borderColor);
+      }
+    });
+  }catch(e){ console.warn('v3d lotizare-src:',e.message); }
+
+  // ── 2. Drum principal din lotizare-drum-src ────────────────────────────
+  try{
+    const drumSrc=map.getSource('lotizare-drum-src');
+    const drumFeats=(drumSrc?._data?.features)||[];
+    if(drumFeats.length){
+      const matD=_matDrum();
+      drumFeats.forEach(f=>{
+        if(!f.geometry) return;
+        const rings=f.geometry.type==='Polygon'
+          ?f.geometry.coordinates
+          :f.geometry.coordinates[0];
+        const ring=rings[0];
+        if(!ring||ring.length<3) return;
+        _flatPoly(ring,0.09,matD);
+        // Bordură drum
+        _lotOutline(ring,0.11,'#94a3b8');
+        // Trotuar (offset interior mic cu culoare deschisă)
+        try{
+          const pts=ring.slice(0,-1).map(toLoc);
+          const cx2=pts.reduce((s,[x])=>s+x,0)/pts.length;
+          const cz2=pts.reduce((s,[,z])=>s+z,0)/pts.length;
+          const trotPts=pts.map(([x,z])=>[x+(cx2-x)*.07, z+(cz2-z)*.07]);
+          const verts=new Float32Array(trotPts.flatMap(([x,z])=>[x,0.095,z]));
+          const lg=new THREE.BufferGeometry();
+          lg.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));
+          scene.add(new THREE.LineLoop(lg,new THREE.LineBasicMaterial({
+            color:'#e2e8f0',opacity:.35,transparent:true
+          })));
+        }catch(e2){}
+      });
+    }
+  }catch(e){ console.warn('v3d lotizare-drum-src:',e.message); }
+
+  // ── 3. Circulații custom din lot-drum-edit-src (linii → benzi 3D) ──────
+  try{
+    const editSrc=map.getSource('lot-drum-edit-src');
+    const editFeats=(editSrc?._data?.features)||[];
+    editFeats.forEach(f=>{
+      if(!f.geometry) return;
+      const color=f.properties?.color||'#38bdf8';
+      const lineWM=Math.max(2,f.properties?.lineW||4); // lățime în metri (approx px→m)
+      const mat=new THREE.MeshLambertMaterial({color,transparent:true,opacity:.75});
+      let lines=[];
+      if(f.geometry.type==='LineString') lines=[f.geometry.coordinates];
+      else if(f.geometry.type==='MultiLineString') lines=f.geometry.coordinates;
+      lines.forEach(coords=>{
+        const pts2d=coords.map(([lng,lat])=>toLoc([lng,lat]));
+        if(pts2d.length<2) return;
+        const hw=lineWM/2;
+        for(let i=0;i<pts2d.length-1;i++){
+          const[x0,z0]=pts2d[i],[x1,z1]=pts2d[i+1];
+          const dx=x1-x0,dz=z1-z0,len=Math.sqrt(dx*dx+dz*dz);
+          if(len<0.1) continue;
+          const nx=dz/len,nz=-dx/len;
+          const corners=[[x0+nx*hw,z0+nz*hw],[x1+nx*hw,z1+nz*hw],[x1-nx*hw,z1-nz*hw],[x0-nx*hw,z0-nz*hw]];
+          const mesh=_v3dPrism(THREE,corners,0.07,0.13,mat);
+          if(mesh){ mesh.receiveShadow=true; scene.add(mesh); }
+        }
+      });
+    });
+  }catch(e){ console.warn('v3d lot-drum-edit-src:',e.message); }
+}
+
 function _v3dAddStreets(THREE, scene, ring0, toLoc){
   // Strada vine EXCLUSIV din date OSM reale (Overpass)
   // Dacă Overpass e indisponibil, NU desenăm nimic inventat

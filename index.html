@@ -596,6 +596,152 @@ canvas#c2d{width:100%;height:100%;display:block}
 .loisir-ai-title{color:#d4af37;font-weight:800;font-size:14px;letter-spacing:.04em}.loisir-ai-body{padding:12px}.loisir-ai-img{width:100%;max-height:68vh;object-fit:contain;border-radius:12px;background:#020617}.loisir-ai-close{background:none;border:1px solid rgba(255,255,255,.18);color:#94a3b8;border-radius:8px;padding:5px 10px;cursor:pointer}.loisir-ai-close:hover{color:#fff;border-color:#d4af37}
 
 
+/* ═══ LOTIZARE MODAL — Split-view desktop + Bottom sheet mobile ════════════ */
+
+/* Desktop ≥841px: panoul apare în dreapta, harta rămâne vizibilă stânga */
+@media(min-width:841px){
+  #lot-modal{
+    position:fixed!important;
+    top:48px!important;
+    right:0!important;
+    left:auto!important;
+    bottom:0!important;
+    width:460px!important;
+    max-width:38vw!important;
+    min-width:360px!important;
+    height:auto!important;
+    max-height:calc(100vh - 48px)!important;
+    border-radius:0!important;
+    border-left:2px solid rgba(139,92,246,.4)!important;
+    border-top:none!important;
+    border-right:none!important;
+    border-bottom:none!important;
+    box-shadow:-8px 0 40px rgba(0,0,0,.6)!important;
+    transform:none!important;
+    margin:0!important;
+    /* harta se decalează automat prin padding-right pe #map — vezi JS */
+    z-index:350!important;
+    display:flex!important;
+    flex-direction:column!important;
+    overflow:hidden!important;
+  }
+  /* Butonul de închidere lotizare — fixat top-right în panou */
+  #lot-modal .lot-close-btn,
+  #lot-modal [onclick*="closeLot"],
+  #lot-modal [onclick*="toggleLot"]{
+    position:sticky!important;
+    top:0!important;
+    z-index:1!important;
+  }
+  /* Scrollable content */
+  #lot-modal > *:not(:first-child){
+    overflow-y:auto;
+    flex:1;
+  }
+  /* Butonul "Generează Plan" sticky bottom */
+  #lot-gen-btn,
+  #lot-modal .lot-gen-plan{
+    position:sticky!important;
+    bottom:0!important;
+    z-index:2!important;
+    flex-shrink:0!important;
+  }
+  /* Harta se inchide putin din dreapta cand lotizare e deschis */
+  body.lot-open #map{
+    right:460px!important;
+    right:min(460px,38vw)!important;
+    transition:right .25s ease!important;
+  }
+  body.lot-open .mapboxgl-ctrl-top-right{
+    right:calc(min(460px,38vw) + 8px)!important;
+  }
+}
+
+/* Tablet 601-840px: side-sheet 50% latime */
+@media(min-width:601px) and (max-width:840px){
+  #lot-modal{
+    position:fixed!important;
+    top:52px!important;
+    right:0!important;
+    left:auto!important;
+    bottom:72px!important;
+    width:50vw!important;
+    max-width:340px!important;
+    height:auto!important;
+    border-radius:16px 0 0 16px!important;
+    border-left:2px solid rgba(139,92,246,.5)!important;
+    border-top:1px solid rgba(255,255,255,.1)!important;
+    border-right:none!important;
+    box-shadow:-6px 0 30px rgba(0,0,0,.7)!important;
+    transform:none!important;
+    z-index:350!important;
+    display:flex!important;
+    flex-direction:column!important;
+    overflow:hidden!important;
+  }
+}
+
+/* Mobile ≤600px: bottom sheet, harta vizibila sus */
+@media(max-width:600px){
+  #lot-modal{
+    position:fixed!important;
+    bottom:72px!important;
+    left:0!important;
+    right:0!important;
+    top:auto!important;
+    width:100%!important;
+    max-width:100%!important;
+    /* Înălțime max 55vh — harta ocupă restul */
+    height:55vh!important;
+    max-height:55vh!important;
+    border-radius:20px 20px 0 0!important;
+    border-top:2px solid rgba(139,92,246,.5)!important;
+    border-left:none!important;
+    border-right:none!important;
+    border-bottom:none!important;
+    box-shadow:0 -8px 40px rgba(0,0,0,.7)!important;
+    transform:none!important;
+    z-index:350!important;
+    display:flex!important;
+    flex-direction:column!important;
+    overflow:hidden!important;
+  }
+  /* Handle de drag vizibil pe mobil */
+  #lot-modal::before{
+    content:'';
+    display:block;
+    width:40px;height:4px;
+    background:rgba(139,92,246,.5);
+    border-radius:2px;
+    margin:10px auto 6px;
+    flex-shrink:0;
+  }
+  /* Harta NU se acoperă — lotizare ocupă jos 55vh */
+  body.lot-open #map{
+    bottom:calc(55vh + 72px)!important;
+    transition:bottom .25s ease!important;
+  }
+}
+
+/* Conținut scrollabil intern */
+#lot-modal .lot-body,
+#lot-modal .lot-scroll,
+#lot-modal [id*="lot-tabs-body"],
+#lot-modal [id*="lot-content"]{
+  overflow-y:auto!important;
+  -webkit-overflow-scrolling:touch!important;
+  flex:1!important;
+}
+
+/* Header lotizare — sticky */
+#lot-modal .lot-header,
+#lot-modal > div:first-child{
+  flex-shrink:0!important;
+  position:sticky!important;
+  top:0!important;
+  z-index:5!important;
+}
+
 .cod-auriu{color:#fbbf24;font-family:monospace;background:rgba(251,191,36,.08);padding:1px 4px;border-radius:3px}
 .cod-verde{color:#4ade80;font-family:monospace;background:rgba(74,222,128,.08);padding:1px 4px;border-radius:3px}
 .step-txt{color:#94a3b8;font-size:11px;line-height:1.6}
@@ -1135,6 +1281,42 @@ canvas#c2d{width:100%;height:100%;display:block}
 <script src="js/12-admin.js?v=1777871955"></script>
 <script src="js/13-info-drawer.js?v=1777871955"></script>
 
+<script>
+// ── Lotizare layout: decalează harta când panoul e vizibil ─────────────────
+(function(){
+  // ID-urile posibile generate de 08-lotizare.js
+  const LOT_IDS = ['lot-modal','lotizare-modal','lot-panel','lotizare-panel','lot-overlay'];
+  
+  function _getLotModal(){
+    for(const id of LOT_IDS){
+      const el = document.getElementById(id);
+      if(el) return el;
+    }
+    // Fallback: orice element fix cu z-index > 300 care conține text "Lotizare" în titlu
+    return document.querySelector('[id*="lot"][id*="modal"],[id*="lotizare"]');
+  }
+  
+  function _applyLotOpen(){
+    const m = _getLotModal();
+    if(!m) return;
+    const cs = window.getComputedStyle(m);
+    const visible = cs.display !== 'none' && cs.visibility !== 'hidden' && cs.opacity !== '0';
+    document.body.classList.toggle('lot-open', visible);
+    if(window.innerWidth >= 841 && window.map){
+      const w = Math.min(460, Math.round(window.innerWidth * 0.38));
+      const mapEl = document.getElementById('map');
+      if(mapEl) mapEl.style.right = visible ? w+'px' : '';
+      if(visible) setTimeout(()=>{ try{window.map.resize();}catch(e){} }, 300);
+    }
+  }
+  
+  // Observer pe body — prinde apariția/dispariția modalului și schimbări de style
+  const obs = new MutationObserver(_applyLotOpen);
+  obs.observe(document.body, {childList:true, subtree:true, attributes:true, attributeFilter:['style','class']});
+  
+  // Expunem global ca 08-lotizare.js să îl poată apela explicit după open/close
+  window._lotLayoutSync = _applyLotOpen;
+})();
 </script>
 
 <!-- ═══ STREET VIEW MODAL ══════════════════════════════════════════════════ -->
