@@ -1773,7 +1773,10 @@ async function generateExistingBldStudy(){
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D + RECOMANDARI TEHNICE',4);ftr();
   cy=28;
   cy=addImg(caps.v3dDay,14,cy,half,55,'FIG. 4 — Viewer 3D · ZI · Volumul propus față de existente');
-  addImg(caps.v3dNight||caps.v3dGolden,14+half+4,cy-55,half,55,'FIG. 5 — Viewer 3D · NOAPTE/GOLDEN · Impact vizual');
+  addImg(caps.v3dNight,14+half+4,cy-55,half,55,'FIG. 5 — Viewer 3D · NOAPTE · Impact vizual nocturn');
+  cy+=3;
+  cy=addImg(caps.v3dGolden,14,cy,half,55,'FIG. 6 — Viewer 3D · GOLDEN HOUR · Materialitate si impact vizual');
+  addImg(caps.v3dOvercast||caps.imgAerial,14+half+4,cy-55,half,55,'FIG. 7 — Viewer 3D · CER INNORIRAT · Vedere aeriana');
   cy+=4;cy=sec('3. RECOMANDĂRI TEHNICE',cy);cy+=2;
   cy=body('Pe baza analizei OSM și a parametrilor PUG (UTR '+utr+', POT max '+potMax+'%, CUT max '+cutMax+'), situația actuală a amplasamentului '+nrcad+' cu '+(existingBlds.length?existingBlds.length+' construcții identificate (SC='+Math.round(totalAreaExist)+'mp, POT='+potExist+'%, H med='+hMedExist.toFixed(1)+'m)':'0 construcții identificate în OSM')+' permite o serie de scenarii de intervenție, în funcție de obiectivele investitorului:',14,cy);cy+=4;
   ['Dacă obiectivul este maximizarea SD și a numărului de unități funcționale: scenariul DEMOLARE + construcție nouă conform PUG maxim (POT '+potMax+'%, CUT '+cutMax+').','Dacă obiectivul este minimizarea costurilor și timpul scurt: scenariul RECONVERSIE sau CONSOLIDARE, cu menținerea structurii existente.','Dacă clădirile existente au valoare arhitecturală sau istorică: verificare în Lista Monumentelor Istorice (LMI) înainte de orice demolare.','Certificat de Urbanism obligatoriu pentru clarificarea regimului juridic al construcțiilor existente și a obligațiilor legale.'].forEach(r=>{cy=body('• '+r,16,cy);cy+=2;});
@@ -1946,7 +1949,10 @@ async function generateGeotehnicalStudy(){
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D + CATEGORII GEOTEHNICE SI FUNDARE',3);ftr();
   cy=28;
   cy=addImg(caps.v3dDay,14,cy,half,55,'FIG. 2 — Viewer 3D · ZI · Structura propusă H='+aedisH.toFixed(1)+'m');
-  addImg(caps.v3dGolden||caps.img2D,14+half+4,cy-55,half,55,'FIG. 3 — Vedere 2D / Golden · Plan fundații estimat');
+  addImg(caps.v3dNight,14+half+4,cy-55,half,55,'FIG. 3 — Viewer 3D · NOAPTE · Iluminat artificial + fundatii');
+  cy+=3;
+  cy=addImg(caps.v3dGolden,14,cy,half,55,'FIG. 4 — Viewer 3D · GOLDEN HOUR · Context zona');
+  addImg(caps.v3dOvercast||caps.img2D,14+half+4,cy-55,half,55,'FIG. 5 — Viewer 3D · INNORIRAT / Plan 2D · Amplasament fundatii');
   cy+=4;cy=sec('3. CATEGORIA GEOTEHNICĂ (NP 074/2014)',cy);cy+=2;
   const catGeo=aedisH>28?'3 — Complexă':aedisH>10?'2 — Curentă':'1 — Simplă';
   cy=body('Conform NP 074/2014, proiectul se încadrează în categoria geotehnică '+catGeo+' (H='+aedisH.toFixed(1)+'m, suprafața construită ~'+Math.round(pArea*parseFloat(params?.pot||35)/100)+'mp). Aceasta implică:',14,cy);cy+=3;
@@ -2179,7 +2185,10 @@ async function generateTrafficStudy(){
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('PLAN 2D + GOLDEN HOUR + CONCLUZII',4);ftr();
   cy=28;
   cy=addImg(caps.imgFront,14,cy,half,50,'FIG. 4 — Vedere frontala · Front stradal si acces auto');
-  addImg(caps.v3dGolden||caps.imgAerial,14+half+4,cy-50,half,50,'FIG. 5 — Vedere aeriana / Golden · Amplasare parcaje');
+  addImg(caps.v3dGolden,14+half+4,cy-50,half,50,'FIG. 5 — Viewer 3D · GOLDEN HOUR · Amplasare parcaje');
+  cy+=3;
+  cy=addImg(caps.v3dOvercast||caps.imgAerial,14,cy,half,50,'FIG. 6 — Viewer 3D · CER INNORIRAT · Vedere aeriana');
+  addImg(caps.imgDist||caps.img2D,14+half+4,cy-50,half,50,'FIG. 7 — Plan distante · Retrageri accese');
   cy+=4;cy=addImg(caps.img2D,14,cy,W-28,50,'FIG. 6 — Plan 2D · Configuratie stradala si accese');
   cy+=4;cy=sec('4. CONCLUZII',cy);cy+=2;
   cy=body('Proiectul propus pe parcela '+nrcad+' ('+fnLabel+', '+sdEst+'mp SD) va genera un trafic suplimentar estimat de '+Math.round(tg.zi_ora_varf)+' vehicule/oră în ora de vârf. Impactul asupra rețelei stradale locale este '+(tg.zi_ora_varf<50?'REDUS':'MODERAT')+' și poate fi gestionat prin asigurarea a minimum '+pkObl+' locuri de parcare pe parcela și amenajarea corespunzătoare a acceselor.',14,cy);
@@ -2779,7 +2788,10 @@ async function generateSSF(){
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VEDERE 3D NOAPTE — CONCLUZII FINALE SSF',12);ftr();
   cy=28;
   const half=(W-28)/2-2;
-  cy=addImg(caps.v3dNight,14,cy,half,65,'FIG. 5 — Viewer 3D NOAPTE · Iluminat de securitate + accese');
+  cy=addImg(caps.v3dNight,14,cy,half,65,'FIG. 5 — Viewer 3D · NOAPTE · Iluminat de securitate + accese');
+  addImg(caps.v3dGolden||caps.imgFront,14+half+4,cy-65,half,65,'FIG. 6 — Viewer 3D · GOLDEN HOUR · Fatade si accese ISU');
+  cy+=3;
+  cy=addImg(caps.v3dOvercast||caps.imgAerial,14,cy,W-28,55,'FIG. 7 — Viewer 3D · CER INNORIRAT · Vedere aeriana amplasament');
   addImg(caps.imgCity,14+half+4,cy-65,half,65,'FIG. 6 — Harta '+S2(uat)+' · Amplasament in context urban');
   cy+=4;
   cy=sec('12. CONCLUZII FINALE — SCENARIU DE SIGURANTA LA FOC',cy);cy+=2;
@@ -3086,7 +3098,10 @@ async function generateEnvironmentalImpact(){
 
   const ins=eim.ins||{};
   cy=addImg(caps.imgAerial||caps.img3D,14,cy,hw,55,'FIG. 8 — Vedere aeriană · Impact vizual în peisajul urban');
-  addImg(caps.v3dGolden||caps.imgBack,14+hw+4,cy-55,hw,55,'FIG. 9 — Randare · Integrare arhitecturală');
+  addImg(caps.v3dNight,14+hw+4,cy-55,hw,55,'FIG. 6 — Viewer 3D · NOAPTE · Iluminat nocturn');
+  cy+=3;
+  cy=addImg(caps.v3dGolden,14,cy,hw,55,'FIG. 7 — Viewer 3D · GOLDEN HOUR · Integrare arhitecturala');
+  addImg(caps.v3dOvercast||caps.imgBack,14+hw+4,cy-55,hw,55,'FIG. 8 — Viewer 3D · CER INNORIRAT · Context real');
   cy+=4;
 
   cy=sec('10. IMPACT VIZUAL ȘI PEISAJ URBAN',cy);
@@ -3393,7 +3408,10 @@ async function generateIstoricStudy(){
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D + RESTRICTII CONSTRUCTIVE IN ZONE PROTEJATE',4);ftr();
   cy=28;
   cy=addImg(caps.v3dDay,14,cy,half,56,'FIG. 2 — Viewer 3D · ZI · Integrare volumetrica in context istoric');
-  addImg(caps.v3dGolden||caps.imgAerial,14+half+4,cy-56,half,56,'FIG. 3 — Viewer 3D · GOLDEN HOUR · Materialitate si impact vizual');
+  addImg(caps.v3dNight,14+half+4,cy-56,half,56,'FIG. 3 — Viewer 3D · NOAPTE · Impact nocturn context istoric');
+  cy+=3;
+  cy=addImg(caps.v3dGolden,14,cy,half,56,'FIG. 4 — Viewer 3D · GOLDEN HOUR · Materialitate si impact vizual');
+  addImg(caps.v3dOvercast||caps.imgAerial,14+half+4,cy-56,half,56,'FIG. 5 — Viewer 3D · INNORIRAT · Context patrimonial');
   cy+=4;cy=sec('3. RESTRICȚII CONSTRUCTIVE ÎN ZONE PROTEJATE',cy);cy+=2;
   cy=tblRow(['Criteriu','Cerinta','Aviz necesar'],cy,true,[65,70,43]);
   [['Inălțime maximă','Conf. UTR + aviz DJCPN','DJCPN Iași'],
@@ -4235,7 +4253,8 @@ async function generateStudiuFezabilitate(paramOverrides){
   cy=33;
   cy=addImg(caps.v3dDay,14,cy,half,58,'FIG. 7 — Viewer 3D Urban3D · ZI · Volumetrie propusă în context real');
   addImg(caps.v3dNight,14+half+4,cy-58,half,58,'FIG. 8 — Viewer 3D Urban3D · NOAPTE · Impact nocturn');cy+=3;
-  cy=addImg(caps.v3dGolden,14,cy,half,52,'FIG. 9 — Viewer 3D Urban3D · GOLDEN HOUR · Fatade și umbre');
+  cy=addImg(caps.v3dGolden,14,cy,half,52,'FIG. 9 — Viewer 3D Urban3D · GOLDEN HOUR · Fatade si umbre');
+  addImg(caps.v3dOvercast||caps.imgAerial,14+half+4,cy-52,half,52,'FIG. 10 — Viewer 3D Urban3D · CER INNORIRAT · Context real');
   addImg(caps.imgBack,14+half+4,cy-52,half,52,'FIG. 10 — Vedere posterioară · Curte + spații verzi');cy+=3;
   cy=sec('11. BILANȚ FINAL SUPRAFEȚE — SCENARIUL S2 RECOMANDAT',cy);cy+=2;
   cy=tblRow(['Suprafață','Valoare calculată','% din ST','Status'],cy,true,[65,42,22,53]);
@@ -5152,40 +5171,46 @@ async function runExport(){
     cy+=barH+4;
   });
 
-  // ══ PAG 3: PLAN 2D + VEDERE 3D + CONTEXT PARCELĂ ════════════════════════
+  // ══ PAG 3: VIEWER 3D — TOATE 4 VARIANTE + PLAN 2D ════════════════════════
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
-  hdr('PLAN 2D + VOLUMETRIE 3D + DATE CONTEXT',3);ftr();
+  hdr('VIEWER 3D — ZI / NOAPTE / GOLDEN HOUR / iNNORATFOG + PLAN 2D',3);ftr();
   cy=28;
   const half=(W-32)/2;
-  // 3D day
-  if((v3d.day||img3D)&&(v3d.day||img3D).length>500){
-    try{
-      pdf.addImage(v3d.day||img3D,'JPEG',14,cy,half,62,undefined,'FAST');
-      pdf.setDrawColor(200,208,225);pdf.setLineWidth(0.3);pdf.rect(14,cy,half,62,'S');
-      pdf.setTextColor(90,105,130);pdf.setFontSize(6.5);pdf.setFont('helvetica','italic');
-      pdf.text('FIG. 1 — Volumetrie 3D propusa · Vedere principala',14,cy+65);
-    }catch(e){}
+  const _rowH=55;
+  // Rând 1: ZI + NOAPTE
+  if(v3d.day&&v3d.day.length>500){
+    try{pdf.addImage(v3d.day,'JPEG',14,cy,half,_rowH,undefined,'FAST');pdf.setDrawColor(196,148,8);pdf.setLineWidth(0.4);pdf.rect(14,cy,half,_rowH,'S');}catch(e){}
+    pdf.setTextColor(90,105,130);pdf.setFontSize(6.5);pdf.setFont('helvetica','italic');
+    pdf.text('FIG. 1 — Viewer 3D · ZI · Iluminare naturala directa',14,cy+_rowH+3.5);
   }
-  // 3D night or golden
-  const img2nd=v3d.golden||v3d.night||img2D;
-  if(img2nd&&img2nd.length>500){
-    try{
-      pdf.addImage(img2nd,'JPEG',14+half+4,cy,half,62,undefined,'FAST');
-      pdf.setDrawColor(200,208,225);pdf.setLineWidth(0.3);pdf.rect(14+half+4,cy,half,62,'S');
-      pdf.setTextColor(90,105,130);pdf.setFontSize(6.5);pdf.setFont('helvetica','italic');
-      pdf.text('FIG. 2 — Volumetrie 3D · '+(v3d.golden?'Golden Hour':v3d.night?'Noapte':'Plan 2D'),14+half+4,cy+65);
-    }catch(e){}
+  if(v3d.night&&v3d.night.length>500){
+    try{pdf.addImage(v3d.night,'JPEG',14+half+4,cy,half,_rowH,undefined,'FAST');pdf.setDrawColor(20,50,98);pdf.setLineWidth(0.4);pdf.rect(14+half+4,cy,half,_rowH,'S');}catch(e){}
+    pdf.setTextColor(90,105,130);pdf.setFontSize(6.5);pdf.setFont('helvetica','italic');
+    pdf.text('FIG. 2 — Viewer 3D · NOAPTE · Iluminat artificial',14+half+4,cy+_rowH+3.5);
   }
-  cy+=70;
+  cy+=_rowH+8;
+  // Rând 2: GOLDEN + ÎNNORAT
+  if(v3d.golden&&v3d.golden.length>500){
+    try{pdf.addImage(v3d.golden,'JPEG',14,cy,half,_rowH,undefined,'FAST');pdf.setDrawColor(196,100,8);pdf.setLineWidth(0.4);pdf.rect(14,cy,half,_rowH,'S');}catch(e){}
+    pdf.setTextColor(90,105,130);pdf.setFontSize(6.5);pdf.setFont('helvetica','italic');
+    pdf.text('FIG. 3 — Viewer 3D · GOLDEN HOUR · Ora magica',14,cy+_rowH+3.5);
+  }
+  const _ov=v3d.overcast||v3d.nightAlt;
+  if(_ov&&_ov.length>500){
+    try{pdf.addImage(_ov,'JPEG',14+half+4,cy,half,_rowH,undefined,'FAST');pdf.setDrawColor(100,115,135);pdf.setLineWidth(0.4);pdf.rect(14+half+4,cy,half,_rowH,'S');}catch(e){}
+    pdf.setTextColor(90,105,130);pdf.setFontSize(6.5);pdf.setFont('helvetica','italic');
+    pdf.text('FIG. 4 — Viewer 3D · CER INNORIRAT · Iluminare difuza',14+half+4,cy+_rowH+3.5);
+  }
+  cy+=_rowH+10;
   // Plan 2D
   if(img2D&&img2D.length>500){
     try{
-      pdf.addImage(img2D,'JPEG',14,cy,W-28,58,undefined,'FAST');
-      pdf.setDrawColor(200,208,225);pdf.setLineWidth(0.3);pdf.rect(14,cy,W-28,58,'S');
+      pdf.addImage(img2D,'JPEG',14,cy,W-28,52,undefined,'FAST');
+      pdf.setDrawColor(200,208,225);pdf.setLineWidth(0.3);pdf.rect(14,cy,W-28,52,'S');
       pdf.setTextColor(90,105,130);pdf.setFontSize(6.5);pdf.setFont('helvetica','italic');
-      pdf.text('FIG. 3 — Plan 2D ortogonal · Parcelă + context urban · Sursa: UrbanX/Mapbox',14,cy+61);
+      pdf.text('FIG. 5 — Plan 2D ortogonal · Parcela + context urban · Sursa: UrbanX/Mapbox',14,cy+55);
     }catch(e){}
-    cy+=65;
+    cy+=59;
   }
   // Date sintetice parcelă
   cy=sec('4. DATE SINTETICE PARCELĂ',cy);
