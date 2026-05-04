@@ -1178,11 +1178,25 @@ function runLotizare(){
 // ═══════════════════════════════════════════════════════════════════════════
 
 function _lotDrumEditorStart(tip){
+  // Dacă deja desenăm un alt tip, oprim mai întâi
+  if(_LOT._drumEditMode === 'draw') _lotDrumEditorCancel();
+
   _LOT._drumEditMode = 'draw';
   _LOT._drumDrawTip  = tip || 'secundar';
   _LOT._drumDrawCoords = [];
   map.getCanvas().style.cursor = 'crosshair';
   const cfg = _LOT.drumTipuri[tip]||_LOT.drumTipuri.secundar;
+
+  // ── Overlay transparent peste hartă — blochează interacțiunile obișnuite ──
+  // Asigurăm că click-urile ajung la handlerul nostru, nu la alte elemente
+  let overlay = document.getElementById('lot-draw-overlay');
+  if(!overlay){
+    overlay = document.createElement('div');
+    overlay.id = 'lot-draw-overlay';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:1;cursor:crosshair;pointer-events:none;';
+    document.body.appendChild(overlay);
+  }
+  overlay.style.pointerEvents = 'none'; // nu blocăm mouse-ul, doar marcăm starea
 
   // ── Mesaj status (statusbar + banner în panou) ──────────────────────
   ss('✏️ ' + cfg.label + ': click/tap pe HARTĂ pentru puncte · Enter=finalizare · Esc=anulare');
@@ -1238,38 +1252,96 @@ function _lotDrawBannerShow(cfg){
 }
 
 function _lotDrumEditorBind(){
-  map._lotClickHandler = (e) => {
+  const canvas = map.getCanvas();
+
+  // ── Click pe CANVAS cu capture:true ─────────────────────────────────────
+  // Prin capture:true, handlerul nostru rulează PRIMUL, înaintea oricărui
+  // alt handler Mapbox (selectare parcelă, popup-uri etc.)
+  // stopImmediatePropagation() blochează toți ceilalți handleri → nu mai
+  // ieșim accidental din modul de desen
+  map._lotCanvasClick = (e) => {
     if(_LOT._drumEditMode !== 'draw') return;
-    const pt = [e.lngLat.lng, e.lngLat.lat];
-    _LOT._drumDrawCoords.push(pt);
+    // Blocăm propagarea → parcelele, popup-urile NU se activează
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    // Convertim coordonate ecran → geografice Mapbox
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX || e.touches?.[0]?.clientX) - rect.left;
+    const y = (e.clientY || e.touches?.[0]?.clientY) - rect.top;
+    if(isNaN(x)||isNaN(y)) return;
+    const lngLat = map.unproject([x, y]);
+    _LOT._drumDrawCoords.push([lngLat.lng, lngLat.lat]);
     _lotDrumEditorRefreshPreview();
   };
-  map._lotDblClickHandler = (e) => {
+
+  // ── Touch (mobile) ──────────────────────────────────────────────────────
+  // Pe mobil touchend e mai rapid decât click și nu are delay de 300ms
+  map._lotCanvasTouch = (e) => {
+    if(_LOT._drumEditMode !== 'draw') return;
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    e.preventDefault(); // previne zoom dublu-tap
+    const touch = e.changedTouches?.[0];
+    if(!touch) return;
+    const rect = canvas.getBoundingClientRect();
+    const lngLat = map.unproject([touch.clientX - rect.left, touch.clientY - rect.top]);
+    _LOT._drumDrawCoords.push([lngLat.lng, lngLat.lat]);
+    _lotDrumEditorRefreshPreview();
+  };
+
+  // ── Dublu-click / dublu-tap = finalizare ───────────────────────────────
+  map._lotCanvasDbl = (e) => {
+    if(_LOT._drumEditMode !== 'draw') return;
+    e.stopPropagation();
+    e.stopImmediatePropagation();
     e.preventDefault();
+    // Eliminăm ultimul punct adăugat de click-ul simplu al dbl-click
+    if(_LOT._drumDrawCoords.length > 1) _LOT._drumDrawCoords.pop();
     _lotDrumEditorFinish();
   };
+
+  // ── Keyboard ────────────────────────────────────────────────────────────
   map._lotKeyHandler = (e) => {
-    if(e.key==='Escape') _lotDrumEditorCancel();
-    if(e.key==='Enter') _lotDrumEditorFinish();
-    if(e.key==='Backspace' || e.key==='Delete'){
-      if(_LOT._drumDrawCoords.length > 1) {
+    if(_LOT._drumEditMode !== 'draw') return;
+    if(e.key==='Escape'){ e.stopPropagation(); _lotDrumEditorCancel(); }
+    if(e.key==='Enter'){  e.stopPropagation(); _lotDrumEditorFinish(); }
+    if(e.key==='Backspace'||e.key==='Delete'){
+      e.stopPropagation();
+      if(_LOT._drumDrawCoords.length > 1){
         _LOT._drumDrawCoords.pop();
         _lotDrumEditorRefreshPreview();
       }
     }
   };
-  map.on('click', map._lotClickHandler);
-  map.on('dblclick', map._lotDblClickHandler);
-  document.addEventListener('keydown', map._lotKeyHandler);
+
+  // ── Înregistrare ────────────────────────────────────────────────────────
+  // capture:true → primul în lanțul de propagare
+  canvas.addEventListener('click',    map._lotCanvasClick, {capture:true});
+  canvas.addEventListener('touchend', map._lotCanvasTouch, {capture:true, passive:false});
+  canvas.addEventListener('dblclick', map._lotCanvasDbl,   {capture:true});
+  document.addEventListener('keydown', map._lotKeyHandler,  {capture:false});
+
+  // Dezactivăm double-click zoom al hărții pe durata desenului
+  map._lotDblZoomWasEnabled = map.doubleClickZoom?.isEnabled?.() ?? true;
+  map.doubleClickZoom?.disable?.();
 }
 
 function _lotDrumEditorUnbind(){
-  if(map._lotClickHandler) map.off('click', map._lotClickHandler);
-  if(map._lotDblClickHandler) map.off('dblclick', map._lotDblClickHandler);
-  if(map._lotKeyHandler) document.removeEventListener('keydown', map._lotKeyHandler);
+  const canvas = map.getCanvas();
+  if(map._lotCanvasClick) canvas.removeEventListener('click',    map._lotCanvasClick, {capture:true});
+  if(map._lotCanvasTouch) canvas.removeEventListener('touchend', map._lotCanvasTouch, {capture:true});
+  if(map._lotCanvasDbl)   canvas.removeEventListener('dblclick', map._lotCanvasDbl,   {capture:true});
+  if(map._lotKeyHandler)  document.removeEventListener('keydown', map._lotKeyHandler, {capture:false});
+  map._lotCanvasClick = null;
+  map._lotCanvasTouch = null;
+  map._lotCanvasDbl   = null;
+  map._lotKeyHandler  = null;
+  // Restaurăm double-click zoom
+  if(map._lotDblZoomWasEnabled !== false) map.doubleClickZoom?.enable?.();
+  map._lotDblZoomWasEnabled = null;
+  // Păstrăm compatibilitate cu codul care verifică _lotClickHandler
   map._lotClickHandler = null;
   map._lotDblClickHandler = null;
-  map._lotKeyHandler = null;
 }
 
 function _lotDrumEditorRefreshPreview(){
@@ -1319,6 +1391,9 @@ function _lotDrumEditorCancel(){
   _LOT._drumEditMode = null;
   _LOT._drumDrawCoords = [];
   map.getCanvas().style.cursor = '';
+  // Curăță overlay
+  const overlay = document.getElementById('lot-draw-overlay');
+  if(overlay) overlay.remove();
   // Ascundem bannerul de desen activ
   const b = document.getElementById('lot-draw-banner');
   if(b) b.style.display = 'none';

@@ -632,11 +632,6 @@ function _v3dBuild(ap){
   grid.material.opacity=0.35; grid.material.transparent=true;
   grid.position.y=0.01; scene.add(grid);
 
-  // ── Zone colorate: parcelă, edificabil, retrageri, SV, parcaje ──────────
-  _v3dAddZones(THREE, scene, toLoc, ap, params);
-  // Legendă
-  setTimeout(_v3dAddLegend, 300);
-
   // Coordonate locale
   const ring0 = ap.geo.geometry.type==='Polygon'
     ? ap.geo.geometry.coordinates[0]
@@ -645,6 +640,12 @@ function _v3dBuild(ap){
   const cy2=ring0.reduce((s,c)=>s+c[1],0)/ring0.length;
   const mLng=111320*Math.cos(cy2*Math.PI/180), mLat=111320;
   const toLoc=([lng,lat])=>[(lng-cx)*mLng,(lat-cy2)*mLat];
+
+  // ── Zone colorate: parcelă, edificabil, retrageri, SV, parcaje ──────────
+  // IMPORTANT: _v3dAddZones trebuie apelat DUPĂ definirea lui toLoc
+  _v3dAddZones(THREE, scene, toLoc, ap, params);
+  // Legendă
+  setTimeout(_v3dAddLegend, 300);
 
   // ── Context buildings ────────────────────────────────────────────────────
   const _isDemo = S.vol.scenariuConstructie === 'liber';
