@@ -84,7 +84,7 @@ function toggleLotizare(){
       try{ setSource(src,{type:'FeatureCollection',features:[]}); }catch(e){}
     });
     ['aedis-dim-line','aedis-dim-label'].forEach(lid=>{
-      try{ map.setLayoutProperty(lid,'visibility','none'); }catch(e){}
+      try{ if(map.getLayer(lid)) map.setLayoutProperty(lid,'visibility','none'); }catch(e){}
     });
   }
   if(_lotizareActive) _showLotizarePanel();

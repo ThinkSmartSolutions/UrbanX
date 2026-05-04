@@ -3442,7 +3442,7 @@ async function generateStudiuFezabilitate(){
   const costTeren=Math.round(areaNum*800);  // ~800 EUR/mp teren
   const costTotal=Math.round((costConstr+costTeren)*1.25); // +25% diverse+TVA
   const venitAn=Math.round(sdTotal*0.85*50*12); // 50 EUR/mp/luna chirie
-  const rentabilitate=(venitAn/(costTotal/1000)).toFixed(1); // % randament brut
+  const rentabilitate=((venitAn/costTotal)*100).toFixed(1); // % randament brut anual
 
   // Functiune
   const fnLabel=(params?.fn_label||'Locuire colectivă / Mixt');
@@ -3520,9 +3520,9 @@ async function generateStudiuFezabilitate(){
   const sc1=Math.round(scMax*0.7), sda1=Math.round(sdTotal*0.7);
   const sc2=scMax, sda2=sdTotal;
   const sc3=Math.round(scMax*0.9), sda3=Math.round(sdTotal*1.1);
-  [['S1 — Conservator',sc1+' mp',sda1+' mp',Math.round(aedisH*0.75)+'m',Math.round(sda1*700/1000)+' kEUR',((sda1*0.85*50*12)/(sda1*700*1.25/1000)).toFixed(1)+'%'],
-   ['S2 — Recomandat ★',sc2+' mp',sda2+' mp',aedisH.toFixed(0)+'m',Math.round(sda2*700/1000)+' kEUR',((sda2*0.85*50*12)/(sda2*700*1.25/1000)).toFixed(1)+'%'],
-   ['S3 — Maxim RLU',sc3+' mp',sda3+' mp',params?.h||aedisH.toFixed(0)+'m',Math.round(sda3*700/1000)+' kEUR',((sda3*0.85*50*12)/(sda3*700*1.25/1000)).toFixed(1)+'%'],
+  [['S1 — Conservator',sc1+' mp',sda1+' mp',Math.round(aedisH*0.75)+'m',Math.round(sda1*700/1000)+' kEUR',((sda1*0.85*50*12)/((sda1*700*1.25+costTeren)/1000)).toFixed(1)+'%'],
+   ['S2 — Recomandat ★',sc2+' mp',sda2+' mp',aedisH.toFixed(0)+'m',Math.round(sda2*700/1000)+' kEUR',((sda2*0.85*50*12)/((sda2*700*1.25+costTeren)/1000)).toFixed(1)+'%'],
+   ['S3 — Maxim RLU',sc3+' mp',sda3+' mp',params?.h||aedisH.toFixed(0)+'m',Math.round(sda3*700/1000)+' kEUR',((sda3*0.85*50*12)/((sda3*700*1.25+costTeren)/1000)).toFixed(1)+'%'],
   ].forEach((r,i)=>{cy=tblRow(r,cy,false,[30,22,24,22,44,40]);if(i===1){pdf.setFillColor(14,80,40);pdf.rect(14,cy-8,W-28,8,'F');}});
   cy+=4;
   cy=sec('4.1. PROGRAMUL DE INVESTIȚIE RECOMANDAT (SCENARIUL S2)',cy);cy+=2;
@@ -3558,7 +3558,7 @@ async function generateStudiuFezabilitate(){
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('ANALIZA FINANCIARĂ — SURSE DE FINANȚARE — ANALIZA COST-BENEFICIU',6);ftr();
   cy=33;
   cy=sec('6. ANALIZA FINANCIARĂ A INVESTIȚIEI',cy);cy+=2;
-  cy=tblRow(['An','Inv. totalizată (EUR)','Venit estimat (EUR)','Cheltuieli op. (EUR)','Cash flow net (EUR)','Recuperare cum.'],cy,true,[15,46,38,38,40,05]);
+  cy=tblRow(['An','Inv. totalizată (EUR)','Venit estimat (EUR)','Cheltuieli op. (EUR)','Cash flow net (EUR)','Recuperare cum.'],cy,true,[14,40,36,36,38,18]);
   const cfRows=[0,1,2,3,4,5,7,10,15,20];
   cfRows.forEach(an=>{
     const invCum=an===0?costTotal:0;
@@ -3566,7 +3566,7 @@ async function generateStudiuFezabilitate(){
     const chelt=an===0?0:Math.round(ven*0.25);
     const cf=an===0?-costTotal:ven-chelt;
     const recup=Math.min(100,Math.round((ven*(an||1)-costTotal)/costTotal*100+100));
-    cy=tblRow(['An '+(an||0),an===0?'-'+costTotal.toLocaleString():'-',an===0?'-':ven.toLocaleString(),an===0?'-':chelt.toLocaleString(),cf.toLocaleString(),an===0?'0%':recup+'%'],cy,false,[15,46,38,38,40,05]);
+    cy=tblRow(['An '+(an||0),an===0?'-'+costTotal.toLocaleString():'-',an===0?'-':ven.toLocaleString(),an===0?'-':chelt.toLocaleString(),cf.toLocaleString(),an===0?'0%':recup+'%'],cy,false,[14,40,36,36,38,18]);
   });
   cy+=4;
   cy=sec('6.1. SURSE DE FINANȚARE IDENTIFICATE',cy);cy+=2;
