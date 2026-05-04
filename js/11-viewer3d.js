@@ -1266,29 +1266,8 @@ function _v3dAddZones(THREE, scene, toLoc, ap){
     }
 
     // ── 1. PARCELĂ — contur auriu GROS + piloni la colțuri ───────────────
-    const ring0 = ap.geo.geometry.type==='Polygon'
-      ? ap.geo.geometry.coordinates[0]
-      : ap.geo.geometry.coordinates[0][0];
-
-    // Ribbon gros auriu (lățime 0.5m, perete H=0.4m)
-    const parcelRibbon = makeThickOutline(ring0, '#d4af37', 0.05, 0.35, 0.4);
-    if(parcelRibbon){ parcelRibbon.renderOrder=50; scene.add(parcelRibbon); }
-
-    // Piloni la colțuri — NU mai adăugăm fill (acoperă clădirile)
-    const pts0 = ring0.map(c=>toLoc(c));
-    pts0.forEach(([x,z],i)=>{
-      const isMain = i < 4 || i % Math.max(1,Math.floor(pts0.length/4)) === 0;
-      if(!isMain && pts0.length > 8) return;
-      const pole = makeCornerPole(x, z, '#f59e0b', isMain?3.0:1.8, isMain?0.22:0.14);
-      if(pole) scene.add(pole);
-      const sg = new THREE.SphereGeometry(isMain?0.35:0.20, 6, 6);
-      const sm = new THREE.MeshBasicMaterial({color:new THREE.Color('#fbbf24'), depthTest:false, depthWrite:false});
-      const sp = new THREE.Mesh(sg, sm);
-      sp.position.set(x, isMain?3.0:1.8, z);
-      sp.renderOrder = 61;
-      scene.add(sp);
-    });
-    // FĂRĂ parcelFill — acoperă clădirile
+    // Parcela: nu mai desenăm conturul în viewer — încurcă vizualizarea
+    // Forma parcelei e vizibilă din retrageri + edificabil
 
     // ── 2. EDIFICABIL — contur violet fără fill ───────────────────────────
     try{
@@ -1337,81 +1316,80 @@ function _v3dAddLegend(){
     const existing = document.getElementById('v3d-legend');
     if(existing) existing.remove();
 
-    // ── Date bilanț din AEDIS și parcela activă ──────────────────────────
-    const ap = S?.parcels?.[S?.activeParcel??0];
-    const params = ap?.params || getDefaultParams?.(ap?.utr) || {};
-    const area = ap?.area ? ap.area.toFixed(0) : '—';
-    const utr  = ap?.utr || '—';
-    const aedisH = S?.vol?._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||0;
-    const scEst  = area !== '—' ? Math.round(parseFloat(area)*(parseFloat(params.pot||35)/100)) : '—';
-    const sdEst  = area !== '—' ? Math.round(parseFloat(area)*parseFloat(params.cut||1.0)) : '—';
-    const svEst  = area !== '—' ? Math.round(parseFloat(area)*(parseFloat(params.sv||20)/100)) : '—';
-    const pkEst  = sdEst !== '—' ? Math.max(2, Math.ceil(sdEst/80)) : '—';
+    // ── Date bilanț — surse directe ─────────────────────────────────────
+    const ap     = S?.parcels?.[S?.activeParcel??0];
+    const utr    = ap?.utr || AEDIS?.utr || '—';
+    // Suprafata teren — din parcelă activă sau multiselect
+    const totalArea = S?.parcels?.reduce((s,p)=>s+(p.area||0), 0) || ap?.area || 0;
+    const area   = totalArea > 0 ? Math.round(totalArea).toLocaleString() : '—';
+
+    // Parametri RLU — cauta in mai multe surse
+    const params = ap?.params || getDefaultParams?.(utr) || {};
+    const potVal = parseFloat(params.POT||params.pot||params.Pot||AEDIS?.pot||35);
+    const cutVal = parseFloat(params.CUT||params.cut||params.Cut||AEDIS?.cut||1.0);
+    const svVal  = parseFloat(params.SV||params.sv||params.Sv||20);
+    const hMax   = params.H||params.h||params.Hmax||AEDIS?.hMax||'—';
+
+    // Suprafețe calculate — din volumele generate sau estimat
+    const volFeats = S?.vol?._lastFeats||[];
+    const aedisH   = volFeats.reduce((m,f)=>Math.max(m,f.properties?.top||0),0) || 0;
+    // SC reală din amprenta (etaj 0 = parter)
+    let scReal = 0;
+    try{
+      volFeats.filter(f=>f.properties?.floor===0 && !f.properties?.isExistent).forEach(f=>{
+        try{ scReal += turf.area({type:'Feature',geometry:f.geometry,properties:{}}); }catch(e){}
+      });
+    }catch(e){}
+    // SD reală (suma tuturor etajelor pozitive)
+    let sdReal = 0;
+    try{
+      volFeats.filter(f=>(f.properties?.floor>=0) && !f.properties?.isExistent && !(f.properties?.floor<0)).forEach(f=>{
+        try{ sdReal += turf.area({type:'Feature',geometry:f.geometry,properties:{}}); }catch(e){}
+      });
+    }catch(e){}
+
+    const scShow = scReal > 0 ? Math.round(scReal).toLocaleString()
+                 : totalArea > 0 ? Math.round(totalArea*potVal/100).toLocaleString() : '—';
+    const sdShow = sdReal > 0 ? Math.round(sdReal).toLocaleString()
+                 : totalArea > 0 ? Math.round(totalArea*cutVal).toLocaleString() : '—';
+    const svShow = totalArea > 0 ? Math.round(totalArea*svVal/100).toLocaleString() : '—';
+    const pkMin  = sdReal > 0 ? Math.max(2, Math.ceil(sdReal/80))
+                 : totalArea > 0 ? Math.max(2, Math.ceil(totalArea*cutVal/80)) : '—';
+    const hShow  = aedisH > 0 ? aedisH.toFixed(1)+'m' : (hMax !== '—' ? hMax+'m' : '—');
     const minDist = S?.vol?.multiVolDist || 6;
 
     const legend = document.createElement('div');
     legend.id = 'v3d-legend';
     legend.style.cssText = `
       position:absolute; bottom:36px; left:10px; z-index:50;
-      background:rgba(5,12,25,0.94); border:1px solid rgba(212,175,55,.3);
-      border-radius:10px; padding:10px 12px; font-size:10px;
-      color:#e2e8f0; pointer-events:none; backdrop-filter:blur(12px);
-      min-width:175px; box-shadow:0 4px 20px rgba(0,0,0,.6);
+      background:rgba(5,12,25,0.95); border:1px solid rgba(212,175,55,.35);
+      border-radius:10px; padding:10px 13px; font-size:10px;
+      color:#e2e8f0; pointer-events:none; backdrop-filter:blur(14px);
+      min-width:180px; box-shadow:0 4px 24px rgba(0,0,0,.65);
     `;
     legend.innerHTML = `
-      <!-- Bilanț suprafețe -->
-      <div style="font-size:9px;color:#d4af37;text-transform:uppercase;letter-spacing:.08em;font-weight:700;margin-bottom:7px;border-bottom:1px solid rgba(212,175,55,.2);padding-bottom:4px">
-        📐 Bilanț orientativ · UTR ${utr}
+      <div style="font-size:9px;color:#d4af37;text-transform:uppercase;letter-spacing:.08em;font-weight:700;margin-bottom:6px;border-bottom:1px solid rgba(212,175,55,.25);padding-bottom:5px">
+        📐 Bilanț · UTR <span style="color:#fbbf24">${utr}</span>
       </div>
-      <div style="display:flex;flex-direction:column;gap:3px;margin-bottom:8px">
-        <div style="display:flex;justify-content:space-between;gap:12px">
-          <span style="color:#64748b">Teren (ST)</span>
-          <span style="color:#fbbf24;font-weight:700">${area} mp</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;gap:12px">
-          <span style="color:#64748b">SC (POT ${params.pot||'—'}%)</span>
-          <span style="color:#e2e8f0">${scEst !== '—' ? scEst+' mp' : '—'}</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;gap:12px">
-          <span style="color:#64748b">SD (CUT ${params.cut||'—'})</span>
-          <span style="color:#e2e8f0">${sdEst !== '—' ? sdEst+' mp' : '—'}</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;gap:12px">
-          <span style="color:#64748b">H propus</span>
-          <span style="color:#38bdf8;font-weight:700">${aedisH > 0 ? aedisH.toFixed(1)+'m' : (params.h ? params.h+'m' : '—')}</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;gap:12px">
-          <span style="color:#64748b">SV min (${params.sv||'—'}%)</span>
-          <span style="color:#4ade80">${svEst !== '—' ? svEst+' mp' : '—'}</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;gap:12px">
-          <span style="color:#64748b">Parcaje min</span>
-          <span style="color:#a78bfa">${pkEst} locuri</span>
-        </div>
+      <div style="display:grid;grid-template-columns:auto auto;gap:2px 10px;margin-bottom:9px">
+        <span style="color:#64748b">Teren (ST)</span>
+        <span style="color:#fbbf24;font-weight:700;text-align:right">${area} mp</span>
+        <span style="color:#64748b">SC · POT ${potVal}%</span>
+        <span style="color:#e2e8f0;text-align:right">${scShow} mp</span>
+        <span style="color:#64748b">SD · CUT ${cutVal}</span>
+        <span style="color:#e2e8f0;text-align:right">${sdShow} mp</span>
+        <span style="color:#64748b">H propus</span>
+        <span style="color:#38bdf8;font-weight:700;text-align:right">${hShow}</span>
+        <span style="color:#64748b">SV min ${svVal}%</span>
+        <span style="color:#4ade80;text-align:right">${svShow} mp</span>
+        <span style="color:#64748b">Parcaje min</span>
+        <span style="color:#a78bfa;text-align:right">${pkMin} loc.</span>
       </div>
-      <!-- Zone legend -->
-      <div style="font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.08em;font-weight:700;margin-bottom:5px;border-top:1px solid rgba(255,255,255,.06);padding-top:6px">
-        Zonare viewer 3D
-      </div>
-      <div style="display:flex;flex-direction:column;gap:3px;margin-bottom:7px">
-        <div style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:2px;background:#f59e0b;flex-shrink:0"></span><span style="color:#cbd5e1">Parcelă proprie</span></div>
-        <div style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:2px;background:#a78bfa;flex-shrink:0"></span><span style="color:#cbd5e1">Edificabil</span></div>
-        <div style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:2px;background:#ef4444;flex-shrink:0"></span><span style="color:#cbd5e1">Retrageri rf/rl/rs</span></div>
-      </div>
-      <!-- Distanțe legend -->
-      <div style="border-top:1px solid rgba(255,255,255,.06);padding-top:6px">
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">
-          <span style="color:#22c55e;font-size:13px;line-height:1;width:12px">✓</span>
-          <span style="color:#22c55e">Distanță conformă (≥${minDist}m)</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">
-          <span style="color:#ef4444;font-size:13px;line-height:1;width:12px">⚠</span>
-          <span style="color:#ef4444">Sub minim (${minDist}m)</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:6px">
-          <span style="color:#f59e0b;font-size:13px;line-height:1;width:12px">↔</span>
-          <span style="color:#f59e0b">Între volume proprii</span>
-        </div>
+      <div style="font-size:9px;color:#334155;text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-bottom:4px;border-top:1px solid rgba(255,255,255,.06);padding-top:5px">Distanțe</div>
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <div style="display:flex;align-items:center;gap:5px"><span style="color:#22c55e;font-size:12px;width:12px">✓</span><span style="color:#22c55e;font-size:9px">Conformă (≥${minDist}m)</span></div>
+        <div style="display:flex;align-items:center;gap:5px"><span style="color:#ef4444;font-size:12px;width:12px">⚠</span><span style="color:#ef4444;font-size:9px">Sub minim (${minDist}m)</span></div>
+        <div style="display:flex;align-items:center;gap:5px"><span style="color:#f59e0b;font-size:12px;width:12px">↔</span><span style="color:#f59e0b;font-size:9px">Între volume proprii</span></div>
       </div>
     `;
     const container = document.getElementById('v3d-canvas')?.parentElement;
