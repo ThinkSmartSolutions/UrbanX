@@ -951,10 +951,10 @@ function buildFrontLayer(parcelGeo, fp, params, bearing){
     sides.forEach((side,si)=>{
       let role, color, setback, setbackLabel;
       if(flFrontSet.has(si)){
-        role='front'; color='#d4af37'; setback=rf;
+        role='front'; color='#FFD700'; setback=rf;
         setbackLabel=rf>0?`rf=${rf}m`:'calcan';
       } else if(si===flPostIdx){
-        role='posterior'; color='#f87171'; setback=rs;
+        role='posterior'; color='#FF4444'; setback=rs;
         setbackLabel=rs>0?`rs=${rs}m`:'calcan';
       } else {
         const vx=(side.midX-cx)*111320*Math.cos(cy*Math.PI/180);
@@ -964,7 +964,8 @@ function buildFrontLayer(parcelGeo, fp, params, bearing){
         if(cross>0){role='lateral_stg';color='#22D3EE';setback=rl;setbackLabel=rl>0?`rl=${rl}m`:'calcan';}  // cyan
         else{role='lateral_dr';color='#C084FC';setback=rr;setbackLabel=rr>0?`rr=${rr}m`:'calcan';}  // violet deschis
       }
-      Object.assign(side,{role,color,setback,setbackLabel,dFromCenter});
+      const dFromCenterSide = (Math.atan2((side.midX-cx)*Math.cos(cy*Math.PI/180),(side.midY-cy))*180/Math.PI+360)%360;
+      Object.assign(side,{role,color,setback,setbackLabel,dFromCenter:dFromCenterSide});
     });
     
     // ── Desenăm laturile colorate ────────────────────────────────────────
@@ -985,8 +986,7 @@ function buildFrontLayer(parcelGeo, fp, params, bearing){
         geometry:{type:'Point', coordinates:[side.midX, side.midY]},
         properties:{
           type:'label',
-          label:`${labelTxt}
-${side.role==='front'?'🟡FRONT':side.role==='posterior'?'🔴spate':side.role==='lateral_stg'?'🔵stg':'🟣dr'}`,
+          label:`${side.role==='front'?'🟡 FRONT':''}${side.role==='posterior'?'🔴 SPATE':''}${side.role==='lateral_stg'?'🔵 STG':''}${side.role==='lateral_dr'?'🟣 DR':''} ${labelTxt}`,
           color: side.color
         }
       });

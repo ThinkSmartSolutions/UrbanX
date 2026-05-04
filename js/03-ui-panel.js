@@ -914,25 +914,56 @@ function htmlProiect(){
     '🏚 Toate construcțiile existente se demolează. Teren complet liber conform PUG.')+'</div>',
   '</div>',
   // ── ORIENTARE ──
-  '<div class="section">🧭 Front stradal — Orientare față de Nord</div>',
-  '<div class="help" style="margin-bottom:6px;background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.25);border-radius:6px;padding:6px 8px">'+'<b style="color:#d4af37">👆 Click direct pe o latură a parcelei</b> pentru a seta frontul stradal.'+'<br><span style="color:#94a3b8;font-size:10px">Sau folosește butoanele Nord/Sud/Est/Vest de mai jos. '+'Bearing = direcția spre stradă. 0°=Nord, 90°=Est, 180°=Sud, 270°=Vest.</span></div>',
-  '<button class="btn-s" onclick="detectAndSetBearing()" style="margin-bottom:8px;width:100%">🔍 Auto-detectează frontul stradal</button>',
-  '<div style="display:flex;gap:6px;margin-bottom:8px;align-items:center">',
-  '<span style="font-size:11px;color:#94a3b8;flex-shrink:0">Nr. fronturi stradale:</span>',
-  '<button onclick="setFC(1)" style="flex:1;padding:6px;border-radius:6px;border:1px solid '+(S.vol.frontCount===1?'#d4af37':'rgba(255,255,255,.15)')+';background:'+(S.vol.frontCount===1?'rgba(212,175,55,.2)':'rgba(11,18,32,.6)')+';color:'+(S.vol.frontCount===1?'#d4af37':'#64748b')+';cursor:pointer;font-size:11px">1 față</button>',
-  '<button onclick="setFC(2)" style="flex:1;padding:6px;border-radius:6px;border:1px solid '+(S.vol.frontCount===2?'#d4af37':'rgba(255,255,255,.15)')+';background:'+(S.vol.frontCount===2?'rgba(212,175,55,.2)':'rgba(11,18,32,.6)')+';color:'+(S.vol.frontCount===2?'#d4af37':'#64748b')+';cursor:pointer;font-size:11px">2 fețe (colț)</button>',
-  '<button onclick="setFC(3)" style="flex:1;padding:6px;border-radius:6px;border:1px solid '+(S.vol.frontCount===3?'#d4af37':'rgba(255,255,255,.15)')+';background:'+(S.vol.frontCount===3?'rgba(212,175,55,.2)':'rgba(11,18,32,.6)')+';color:'+(S.vol.frontCount===3?'#d4af37':'#64748b')+';cursor:pointer;font-size:11px">3+ fețe</button>',
-  '</div>',
-  `<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px;margin-bottom:8px;text-align:center;font-size:10px">
-    <button onclick="S.bearing=0;updateMap();if(S.vol.genDone){const f=buildVolume();setSource('vol-src',{type:'FeatureCollection',features:f});}renderTab('proiect')" style="padding:5px 2px;border-radius:6px;border:1px solid ${Math.abs(S.bearing)<45||S.bearing>315?'#d4af37':'rgba(255,255,255,.15)'};background:${Math.abs(S.bearing)<45||S.bearing>315?'rgba(212,175,55,.2)':'rgba(11,18,32,.6)'};color:${Math.abs(S.bearing)<45||S.bearing>315?'#d4af37':'#64748b'};cursor:pointer">↑ Nord 0°</button>
-    <button onclick="S.bearing=90;updateMap();if(S.vol.genDone){const f=buildVolume();setSource('vol-src',{type:'FeatureCollection',features:f});}renderTab('proiect')" style="padding:5px 2px;border-radius:6px;border:1px solid ${S.bearing>=45&&S.bearing<135?'#d4af37':'rgba(255,255,255,.15)'};background:${S.bearing>=45&&S.bearing<135?'rgba(212,175,55,.2)':'rgba(11,18,32,.6)'};color:${S.bearing>=45&&S.bearing<135?'#d4af37':'#64748b'};cursor:pointer">→ Est 90°</button>
-    <button onclick="S.bearing=180;updateMap();if(S.vol.genDone){const f=buildVolume();setSource('vol-src',{type:'FeatureCollection',features:f});}renderTab('proiect')" style="padding:5px 2px;border-radius:6px;border:1px solid ${S.bearing>=135&&S.bearing<225?'#d4af37':'rgba(255,255,255,.15)'};background:${S.bearing>=135&&S.bearing<225?'rgba(212,175,55,.2)':'rgba(11,18,32,.6)'};color:${S.bearing>=135&&S.bearing<225?'#d4af37':'#64748b'};cursor:pointer">↓ Sud 180°</button>
-    <button onclick="S.bearing=270;updateMap();if(S.vol.genDone){const f=buildVolume();setSource('vol-src',{type:'FeatureCollection',features:f});}renderTab('proiect')" style="padding:5px 2px;border-radius:6px;border:1px solid ${S.bearing>=225&&S.bearing<315?'#d4af37':'rgba(255,255,255,.15)'};background:${S.bearing>=225&&S.bearing<315?'rgba(212,175,55,.2)':'rgba(11,18,32,.6)'};color:${S.bearing>=225&&S.bearing<315?'#d4af37':'#64748b'};cursor:pointer">← Vest 270°</button>
+  '<div class="section">🧭 Front stradal — spre ce direcție este strada?</div>',
+  // Legenda culori
+  `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;padding:7px 10px;background:rgba(11,18,32,.8);border-radius:8px;border:1px solid rgba(255,255,255,.08)">
+    <span style="font-size:10px;color:#94a3b8;width:100%;margin-bottom:2px;font-weight:600;letter-spacing:.5px">LEGENDĂ LATURI PE HARTĂ:</span>
+    <span style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:#FFD700"><span style="width:22px;height:5px;background:#FFD700;border-radius:3px;display:inline-block;box-shadow:0 0 6px #FFD700"></span>🟡 FRONT stradal</span>
+    <span style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:#FF4444"><span style="width:22px;height:5px;background:#FF4444;border-radius:3px;display:inline-block;box-shadow:0 0 6px #FF4444"></span>🔴 SPATE</span>
+    <span style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:#22D3EE"><span style="width:22px;height:5px;background:#22D3EE;border-radius:3px;display:inline-block;box-shadow:0 0 6px #22D3EE"></span>🔵 Lateral stg</span>
+    <span style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:#C084FC"><span style="width:22px;height:5px;background:#C084FC;border-radius:3px;display:inline-block;box-shadow:0 0 6px #C084FC"></span>🟣 Lateral dr</span>
   </div>`,
-  '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">',
-  '<input type="range" min="0" max="360" value="'+S.bearing+'" oninput="S.bearing=(+this.value)%360;this.nextElementSibling.textContent=S.bearing+\'°\';updateMap();if(S.vol.genDone){const f=buildVolume();setSource(\'vol-src\',{type:\'FeatureCollection\',features:f});}" style="flex:1;accent-color:#d4af37">',
-  '<span style="color:#d4af37;font-size:13px;font-weight:700;min-width:42px">'+S.bearing+'°</span>',
+  // Rozetă + butoane directie
+  `<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:10px">
+    <div style="position:relative;width:90px;height:90px;flex-shrink:0">
+      <div style="position:absolute;inset:0;border-radius:50%;border:2px solid rgba(255,255,255,.12);background:rgba(8,15,32,.95)"></div>
+      <div style="position:absolute;top:50%;left:0;right:0;height:1px;background:rgba(255,255,255,.08);transform:translateY(-50%)"></div>
+      <div style="position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(255,255,255,.08);transform:translateX(-50%)"></div>
+      <div style="position:absolute;top:50%;left:50%;width:0;height:0;transform-origin:0 0;transform:rotate(${S.bearing}deg) translate(-50%,-100%);pointer-events:none;margin-top:-4px">
+        <div style="width:4px;height:28px;background:linear-gradient(to bottom,#FFD700,rgba(255,215,0,.2));border-radius:2px;transform:translateX(-50%)"></div>
+        <div style="width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:9px solid #FFD700;transform:translateX(-50%) translateY(-28px)"></div>
+      </div>
+      <div style="position:absolute;top:50%;left:50%;width:8px;height:8px;background:#FFD700;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 8px #FFD700"></div>
+      <div style="position:absolute;top:3px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:700;color:#64748b">N</div>
+      <div style="position:absolute;bottom:3px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:700;color:#64748b">S</div>
+      <div style="position:absolute;right:4px;top:50%;transform:translateY(-50%);font-size:9px;font-weight:700;color:#64748b">E</div>
+      <div style="position:absolute;left:4px;top:50%;transform:translateY(-50%);font-size:9px;font-weight:700;color:#64748b">V</div>
+    </div>
+    <div style="flex:1">
+      <div style="font-size:10px;color:#94a3b8;margin-bottom:5px">Strada este spre:</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-bottom:6px">
+        ${[['↑ Nord','0'],['→ Est','90'],['↓ Sud','180'],['← Vest','270'],['↗ NE','45'],['↘ SE','135'],['↙ SV','225'],['↖ NV','315']].map(([lbl,deg])=>{
+          const diff=Math.abs(((S.bearing-+deg)+360)%360);
+          const active=diff<30||diff>330;
+          return \`<button onclick="setBearing(\${deg})" style="padding:5px 4px;border-radius:6px;border:1px solid \${active?'#FFD700':'rgba(255,255,255,.1)'};background:\${active?'rgba(255,215,0,.15)':'rgba(11,18,32,.7)'};color:\${active?'#FFD700':'#64748b'};cursor:pointer;font-size:11px;font-weight:\${active?'700':'400'}">\${lbl}</button>\`;
+        }).join('')}
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <input id="bearing-slider" type="range" min="0" max="359" value="${S.bearing}" 
+          oninput="setBearing(+this.value)" 
+          style="flex:1;accent-color:#FFD700;height:3px">
+        <span id="bearing-value" style="color:#FFD700;font-size:13px;font-weight:700;min-width:38px">${S.bearing}°</span>
+      </div>
+    </div>
+  </div>`,
+  '<button class="btn-s" onclick="detectAndSetBearing()" style="margin-bottom:8px;width:100%;background:rgba(34,211,238,.08);border-color:rgba(34,211,238,.4);color:#22D3EE">🔍 Auto-detectează frontul din OSM</button>',
+  '<div style="display:flex;gap:4px;margin-bottom:10px">',
+  '<span style="font-size:11px;color:#94a3b8;flex-shrink:0;line-height:32px">Fronturi:</span>',
+  '<button onclick="setFC(1)" style="flex:1;padding:6px;border-radius:6px;border:1px solid '+(S.vol.frontCount===1?'#FFD700':'rgba(255,255,255,.12)')+';background:'+(S.vol.frontCount===1?'rgba(255,215,0,.12)':'rgba(11,18,32,.6)')+';color:'+(S.vol.frontCount===1?'#FFD700':'#64748b')+';cursor:pointer;font-size:11px;font-weight:'+(S.vol.frontCount===1?'700':'400')+'">1 față</button>',
+  '<button onclick="setFC(2)" style="flex:1;padding:6px;border-radius:6px;border:1px solid '+(S.vol.frontCount===2?'#FFD700':'rgba(255,255,255,.12)')+';background:'+(S.vol.frontCount===2?'rgba(255,215,0,.12)':'rgba(11,18,32,.6)')+';color:'+(S.vol.frontCount===2?'#FFD700':'#64748b')+';cursor:pointer;font-size:11px;font-weight:'+(S.vol.frontCount===2?'700':'400')+'">2 (colț)</button>',
+  '<button onclick="setFC(3)" style="flex:1;padding:6px;border-radius:6px;border:1px solid '+(S.vol.frontCount===3?'#FFD700':'rgba(255,255,255,.12)')+';background:'+(S.vol.frontCount===3?'rgba(255,215,0,.12)':'rgba(11,18,32,.6)')+';color:'+(S.vol.frontCount===3?'#FFD700':'#64748b')+';cursor:pointer;font-size:11px;font-weight:'+(S.vol.frontCount===3?'700':'400')+'">3+ fețe</button>',
   '</div>',
+
   // ── PARAMETRI URBANISTICI ──
   '<div class="section">⚙️ Parametri urbanistici editabili</div>',
   '<div class="card" style="background:#08152a">',

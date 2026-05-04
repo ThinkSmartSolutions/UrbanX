@@ -98,6 +98,20 @@ function detectAndSetBearing(){
   }).catch(()=>ss('⚠️ Eroare la detectare stradă.'));
 }
 
+function setBearing(deg){
+  S.bearing = Math.round((+deg + 360) % 360);
+  const sl = document.getElementById('bearing-slider');
+  const vl = document.getElementById('bearing-value');
+  if(sl){ sl.value = S.bearing; }
+  if(vl){ vl.textContent = S.bearing + '°'; }
+  updateMap();
+  if(S.vol.genDone){
+    const f = buildVolume();
+    setSource('vol-src', {type:'FeatureCollection', features:f});
+  }
+  renderTab('proiect');
+}
+
 function setS(btn){ if(btn?.getAttribute) setScenariu(btn.getAttribute('data-s')); else setScenariu(btn); }
 function setFC(n){ S.vol.frontCount=n; updateMap(); renderTab('proiect'); }
 function toggleMultiVol(){ 
