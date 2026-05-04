@@ -105,30 +105,9 @@
   }
 
   // ─── 3. RE-WIRING BUTOANE GENERATE (dacă au onclick inline) ────────────
-  function rewireGenerateButtons(){
-    // Mapare onclick text → funcție corectă
-    const mapping = {
-      'generateIstoricStudy':    window.generateIstoricStudy,
-      'generateExistingBldStudy':window.generateExistingBldStudy,
-      'generateEnvironmentalImpact':window.generateEnvironmentalImpact,
-      'generateStudiuFezabilitate':window.generateStudiuFezabilitate,
-    };
-    Object.entries(mapping).forEach(([fnName, fn]) => {
-      if(typeof fn !== 'function') return;
-      document.querySelectorAll(`[onclick*="${fnName}"]`).forEach(el => {
-        if(el._rewired) return;
-        el.addEventListener('click', async (e) => {
-          e.preventDefault();
-          try { await fn(); }
-          catch(err) {
-            console.error('['+fnName+']', err);
-            if(typeof ss === 'function') ss('⚠️ Eroare: '+err.message);
-          }
-        });
-        el._rewired = true;
-      });
-    });
-  }
+  // rewireGenerateButtons() ELIMINAT — adăuga addEventListener pe butoane care
+  // aveau deja onclick="generateXxx()" → dublu download la fiecare studiu
+  // Butoanele din index.html au deja handleri corecți, nu mai e nevoie de rewire
 
   // ─── Init + MutationObserver ─────────────────────────────────────────────
   let _initDone = false;
@@ -137,7 +116,6 @@
     _initDone = true;
     doRename();
     injectFezabilitate();
-    rewireGenerateButtons();
     console.log('[UrbanX fixes-audit v2] ✅ Patches applied');
   }
 
@@ -153,7 +131,6 @@
     if(muts.some(m => m.addedNodes.length)){
       doRename();
       injectFezabilitate();
-      rewireGenerateButtons();
     }
   }).observe(document.body, {childList:true, subtree:true});
 
