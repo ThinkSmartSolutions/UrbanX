@@ -118,7 +118,7 @@ async function genVol(){
       if(f.properties?.floor < 0 || f.properties?.isExistent) return;
       const ring = f.geometry?.coordinates?.[0];
       if(!ring?.length) return;
-      const hash = ring[0]?.map(v=>(v||0).toFixed(5)).join(',')+':'+ring[1]?.map(v=>(v||0).toFixed(5)).join(',');
+      const hash = ring[0]?.map(v=>(+v||0).toFixed(5)).join(',')+':'+ring[1]?.map(v=>(+v||0).toFixed(5)).join(',');
       if(!(hash in geomMap)){ geomMap[hash] = bldCounter++; }
       if(!f.properties) f.properties = {};
       f.properties.bldIdx = geomMap[hash];

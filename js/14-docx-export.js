@@ -145,9 +145,16 @@ function _showExtraDrawer(key){
   return true;
 }
 
-// Override infoDrawerOpen pentru key-urile noi
+// Override infoDrawerOpen — 13-info-drawer.js handles ISU/Amplasament/Fezabilitate natively
+// This override is kept as fallback only for older contexts
 const _origInfoDrawerOpen = window.infoDrawerOpen;
 window.infoDrawerOpen = function(key){
+  // If RAPORT_INFO (13-info-drawer.js) already handles this key, use it directly
+  if(typeof RAPORT_INFO !== 'undefined' && RAPORT_INFO[key]){
+    if(typeof _origInfoDrawerOpen === 'function') _origInfoDrawerOpen(key);
+    return;
+  }
+  // Fallback: use our _STUDII_EXTRA for any key not in RAPORT_INFO
   if(_STUDII_EXTRA[key]){ _showExtraDrawer(key); return; }
   if(typeof _origInfoDrawerOpen === 'function') _origInfoDrawerOpen(key);
   else { console.warn('infoDrawerOpen: key not found:', key); }
