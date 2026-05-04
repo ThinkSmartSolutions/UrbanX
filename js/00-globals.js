@@ -1178,3 +1178,32 @@ if(typeof mapboxgl === 'undefined' || typeof mapboxgl.Map !== 'function'){
   });
   throw new Error('mapboxgl not loaded');
 }
+
+// ═══ iOS TOUCH FIX — delegator global pentru butoane ══════════════════════
+// Pe iOS Safari, onclick nu se declanșează pe <button> generate dinamic
+// dacă părintele nu are cursor:pointer sau handler touch.
+// Soluția: un singur listener pe document care interceptează touchend
+// și apelează click() pe butonul țintă.
+document.addEventListener('touchend', function(e){
+  const btn = e.target.closest('button');
+  if(!btn) return;
+  // Nu interferam cu butoanele care au deja ontouchstart explicit
+  if(btn.getAttribute('ontouchstart') || btn.getAttribute('ontouchend')) return;
+  // Simulăm click dacă touch-ul nu s-a mișcat (nu e scroll)
+  const touch = e.changedTouches[0];
+  if(!touch) return;
+  const dx = touch.clientX - (btn._touchStartX||touch.clientX);
+  const dy = touch.clientY - (btn._touchStartY||touch.clientY);
+  if(Math.abs(dx) < 10 && Math.abs(dy) < 10){
+    e.preventDefault();
+    btn.click();
+  }
+}, {passive: false});
+
+document.addEventListener('touchstart', function(e){
+  const btn = e.target.closest('button');
+  if(!btn) return;
+  const touch = e.touches[0];
+  btn._touchStartX = touch.clientX;
+  btn._touchStartY = touch.clientY;
+}, {passive: true});
