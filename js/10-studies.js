@@ -4404,12 +4404,32 @@ async function generateStudiuAmplasament(){
   if(!ap?.geo?.geometry){ss('Selectați o parcelă pentru studiu.');return;}
   ss('Se generează Studiu de Amplasament...');
 
-  const d=_initStudyPdf('Studiu de Amplasament și Analiză Teritorială','Studiu amplasament · Document fundament',12);
+  // ── Ascunde lotizare de pe hartă înainte de captură ───────────────────────
+  const _lotSrcs=['lotizare-src','lotizare-drum-src','lotizare-label-src','lot-demo-src'];
+  const _lotLayerVis={};
+  _lotSrcs.forEach(s=>{
+    ['fill','line','label','symbol'].forEach(sfx=>{
+      const lid=s.replace('-src','')+'-'+sfx;
+      try{const v=map.getLayoutProperty(lid,'visibility')||'visible';_lotLayerVis[lid]=v;map.setLayoutProperty(lid,'visibility','none');}catch(e){}
+    });
+  });
+  // Ascunde și layer-ele principale de lotizare
+  ['lotizare-fill','lotizare-line','lotizare-drum-fill','lotizare-drum-line',
+   'lotizare-label','lot-demo-fill','lot-demo-line'].forEach(lid=>{
+    try{const v=map.getLayoutProperty(lid,'visibility')||'visible';_lotLayerVis[lid]=v;map.setLayoutProperty(lid,'visibility','none');}catch(e){}
+  });
+
+  const d=_initStudyPdf('Studiu de Amplasament si Analiza Teritoriala','Studiu amplasament · Document fundament',13);
   const {pdf,W,H,DARK,DARK2,NAVY,GOLD,GOLD2,GOLD3,BLUE,BLUE2,TEAL,LIGHT,LIGHT2,LIGHT3,
     RED,GREEN,ORANGE,PURPLE,GRAY,GRAY2,GRAY3,GRAY4,WHITE,
     S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,
-    hdr,ftr,sec,subsec,body,tblRow,addImg,kv,badge,divider,bullet,concluzii,sign,cover,newPage,checkY}=d;
+    hdr,ftr,sec,subsec,body,tblRow,addImg,kv,badge,divider,bullet,concluzii,sign,cover,newPage,checkY,smartPage}=d;
   const caps=await _captureStudyMaps(ap, msg=>ss(msg));
+
+  // ── Restaurează lotizare după captură ─────────────────────────────────────
+  Object.entries(_lotLayerVis).forEach(([lid,v])=>{
+    try{map.setLayoutProperty(lid,'visibility',v);}catch(e){}
+  });
 
   // ── Date de bază ──────────────────────────────────────────────────────────
   const areaNum=parseFloat(area)||300;
@@ -4488,17 +4508,63 @@ async function generateStudiuAmplasament(){
   // ═══════════════════════════════════════════════════════════════════════════
   cover(
     'Document fundament · Baza tuturor studiilor de specialitate',
-    caps.img3D,
+    caps.v3dDay||caps.img3D,
     [['Funcțiune dominantă UTR',fnLabel],['Document','Studiu de Amplasament'],['Rol','Fundament comun studii specialitate']],
     true,
     'OK STUDIU DE AMPLASAMENT — DATE PRIMARE · DOCUMENT FUNDAMENT'
   );
 
   // ═══════════════════════════════════════════════════════════════════════════
+  // PAG 2: VIEWER 3D — TOATE 4 VARIANTE DE ILUMINARE (ZI/NOAPTE/GOLDEN/ÎNTUNECAT)
+  // ═══════════════════════════════════════════════════════════════════════════
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D URBAN3D — ZI / NOAPTE / GOLDEN HOUR / iNTUNECAT',3);ftr();
+  let cy=28;
+  const half2=(W-32)/2;
+  pdf.setFontSize(8);pdf.setTextColor(...GRAY2);pdf.setFont('helvetica','italic');
+  pdf.text('Vizualizari 3D generate cu motorul Urban3D (Three.js) · Materiale PBR · Iluminare simulata · Nr.cad '+nrcad+' · UTR '+S2(utr),W/2,cy+2,{align:'center'});
+  cy+=8;
+
+  // Rând 1: ZI + NOAPTE
+  const v3dDay=caps.v3dDay, v3dNight=caps.v3dNight, v3dGolden=caps.v3dGolden, v3dOvercast=caps.v3dOvercast||caps.v3dNightAlt;
+  const rowH=62;
+  if(v3dDay&&v3dDay.length>500){
+    try{pdf.addImage(v3dDay,'JPEG',14,cy,half2,rowH,undefined,'FAST');pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.5);pdf.rect(14,cy,half2,rowH,'S');}catch(e){}
+    pdf.setTextColor(...GOLD2);pdf.setFontSize(6.5);pdf.setFont('helvetica','bold');
+    pdf.text('FIG. 1 — Viewer 3D · ZI · Iluminare naturala directa · Materiale AEDIS',16,cy+rowH+4);
+  }
+  if(v3dNight&&v3dNight.length>500){
+    try{pdf.addImage(v3dNight,'JPEG',14+half2+4,cy,half2,rowH,undefined,'FAST');pdf.setDrawColor(...NAVY);pdf.setLineWidth(0.5);pdf.rect(14+half2+4,cy,half2,rowH,'S');}catch(e){}
+    pdf.setTextColor(...GOLD2);pdf.setFontSize(6.5);pdf.setFont('helvetica','bold');
+    pdf.text('FIG. 2 — Viewer 3D · NOAPTE · Iluminat artificial · Ferestre luminoase',16+half2+4,cy+rowH+4);
+  }
+  cy+=rowH+10;
+
+  // Rând 2: GOLDEN HOUR + ÎNTUNECAT/OVERCAST
+  if(v3dGolden&&v3dGolden.length>500){
+    try{pdf.addImage(v3dGolden,'JPEG',14,cy,half2,rowH,undefined,'FAST');pdf.setDrawColor(...ORANGE);pdf.setLineWidth(0.5);pdf.rect(14,cy,half2,rowH,'S');}catch(e){}
+    pdf.setTextColor(...GOLD2);pdf.setFontSize(6.5);pdf.setFont('helvetica','bold');
+    pdf.text('FIG. 3 — Viewer 3D · GOLDEN HOUR · Ora magica · Impact vizual maxim',16,cy+rowH+4);
+  }
+  if(v3dOvercast&&v3dOvercast.length>500){
+    try{pdf.addImage(v3dOvercast,'JPEG',14+half2+4,cy,half2,rowH,undefined,'FAST');pdf.setDrawColor(...GRAY);pdf.setLineWidth(0.5);pdf.rect(14+half2+4,cy,half2,rowH,'S');}catch(e){}
+    pdf.setTextColor(...GOLD2);pdf.setFontSize(6.5);pdf.setFont('helvetica','bold');
+    pdf.text('FIG. 4 — Viewer 3D · CER iNNORATFOG · Iluminare difuza · Context real',16+half2+4,cy+rowH+4);
+  }
+  cy+=rowH+14;
+
+  // Legendă iluminare
+  pdf.setFillColor(...DARK2);pdf.rect(14,cy,W-28,22,'F');pdf.setFillColor(...GOLD);pdf.rect(14,cy,3,22,'F');
+  pdf.setTextColor(...GOLD);pdf.setFontSize(7.5);pdf.setFont('helvetica','bold');
+  pdf.text('NOTA TEHNICA — VIZUALIZARE 3D URBAN3D',18,cy+7);
+  pdf.setTextColor(...GRAY2);pdf.setFontSize(7);pdf.setFont('helvetica','normal');
+  pdf.text('Vizualizarile 3D sunt generate cu motorul Three.js r128 integrat in platforma UrbanX, cu materiale PBR (Physically Based Rendering).',18,cy+14);
+  pdf.text('Iluminarea simuleaza pozitia soarelui la latitudinea '+lat.toFixed(2)+'N. Contextul urban provine din date OpenStreetMap + Mapbox GL JS.',18,cy+20);
+
+  // ═══════════════════════════════════════════════════════════════════════════
   // PAG 2: IDENTIFICARE COMPLETĂ + SITUAȚIE JURIDICĂ
   // ═══════════════════════════════════════════════════════════════════════════
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('IDENTIFICARE PARCELĂ — SITUAȚIE JURIDICĂ ȘI CADASTRALĂ',2);ftr();
-  let cy=33;
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('IDENTIFICARE PARCELĂ — SITUAȚIE JURIDICĂ ȘI CADASTRALĂ',3);ftr();
+  cy=33;
   cy=sec('1. DATE COMPLETE DE IDENTIFICARE A AMPLASAMENTULUI',cy);cy+=2;
   const kw=(W-28-9)/4;
   kv('NR. CADASTRAL',nrcad,14,cy,kw,GOLD);
@@ -4528,7 +4594,7 @@ async function generateStudiuAmplasament(){
   // ═══════════════════════════════════════════════════════════════════════════
   // PAG 3: PARAMETRI URBANISTICI PUG COMPLET
   // ═══════════════════════════════════════════════════════════════════════════
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('PARAMETRI URBANISTICI PUG — UTR '+utr+' — REGLEMENTĂRI COMPLETE',3);ftr();
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('PARAMETRI URBANISTICI PUG — UTR '+utr+' — REGLEMENTĂRI COMPLETE',4);ftr();
   cy=33;
   cy=sec('2. PARAMETRI URBANISTICI COMPLET — UTR '+utr+' — PUG '+uat.toUpperCase(),cy);cy+=2;
   cy=body('Regulamentul Local de Urbanism al '+uat+' (aprobat prin HCL, în vigoare) stabilește pentru zona UTR '+utr+' următorii indicatori și reglementări urbanistice. Acești parametri constituie baza legală pentru toate studiile și proiectele de specialitate elaborate pentru amplasamentul '+nrcad+'.',14,cy);cy+=4;
@@ -4551,7 +4617,7 @@ async function generateStudiuAmplasament(){
   // ═══════════════════════════════════════════════════════════════════════════
   // PAG 4: CONTEXT URBAN — VECINĂTĂȚI + FRONTURI STRADALE
   // ═══════════════════════════════════════════════════════════════════════════
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONTEXT URBAN — VECINĂTĂȚI, FRONTURI STRADALE, CARACTERUL ZONEI',4);ftr();
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONTEXT URBAN — VECINĂTĂȚI, FRONTURI STRADALE, CARACTERUL ZONEI',5);ftr();
   cy=33;
   const half=(W-28)/2-2;
   cy=addImg(caps.img3D,14,cy,half,62,'FIG. 3 — Vedere 3D principală · Volumetrie context · Mapbox Standard 3D');
@@ -4583,7 +4649,7 @@ async function generateStudiuAmplasament(){
   // ═══════════════════════════════════════════════════════════════════════════
   // PAG 5: INFRASTRUCTURĂ TEHNICO-EDILITARĂ
   // ═══════════════════════════════════════════════════════════════════════════
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('INFRASTRUCTURĂ TEHNICO-EDILITARĂ — REȚELE ȘI UTILITĂȚI',5);ftr();
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('INFRASTRUCTURĂ TEHNICO-EDILITARĂ — REȚELE ȘI UTILITĂȚI',6);ftr();
   cy=33;
   cy=sec('4. REȚELE TEHNICO-EDILITARE EXISTENTE ÎN ZONĂ',cy);cy+=2;
   cy=body('Datele privind rețelele tehnico-edilitare disponibile în zona amplasamentului '+nrcad+' sunt preluate din configurația UAT '+uat+' și din datele publice ale operatorilor de utilități. Distanțele exacte față de rețelele existente și posibilitățile de branșare se verifică obligatoriu prin cerere de informare la fiecare operator, anterior elaborării proiectului tehnic.',14,cy);cy+=4;
@@ -4612,7 +4678,7 @@ async function generateStudiuAmplasament(){
   // ═══════════════════════════════════════════════════════════════════════════
   // PAG 6: MONUMENTE, ZONE PROTEJATE, SERVITUȚI
   // ═══════════════════════════════════════════════════════════════════════════
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('MONUMENTE ISTORICE, ZONE PROTEJATE — SERVITUȚI DE UTILITATE PUBLICĂ',6);ftr();
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('MONUMENTE ISTORICE, ZONE PROTEJATE — SERVITUȚI DE UTILITATE PUBLICĂ',7);ftr();
   cy=33;
   cy=sec('5. MONUMENTE ISTORICE ȘI ZONE CONSTRUITE PROTEJATE',cy);cy+=2;
   cy=tblRow(['Tip protecție','Prezență în zonă','Distanță estimată','Implicație juridică'],cy,true,[55,42,35,50]);
@@ -4642,7 +4708,7 @@ async function generateStudiuAmplasament(){
   // ═══════════════════════════════════════════════════════════════════════════
   // PAG 7: ACCESE + MOBILITATE + TRANSPORT PUBLIC
   // ═══════════════════════════════════════════════════════════════════════════
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('ACCESE — MOBILITATE URBANĂ — TRANSPORT PUBLIC',7);ftr();
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('ACCESE — MOBILITATE URBANĂ — TRANSPORT PUBLIC',8);ftr();
   cy=33;
   cy=addImg(caps.imgCity,14,cy,W-28,55,'FIG. 5 — Harta mobilitate · '+S2(uat)+' · Accese + rețea transport public · Sursa: UrbanX');
   cy+=3;
@@ -4676,7 +4742,7 @@ async function generateStudiuAmplasament(){
   // ═══════════════════════════════════════════════════════════════════════════
   // PAG 8: RISCURI NATURALE — SEISMIC, INUNDAȚII, ALUNECARE
   // ═══════════════════════════════════════════════════════════════════════════
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('RISCURI NATURALE — SEISMIC, INUNDAȚII, ALUNECĂRI DE TEREN',8);ftr();
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('RISCURI NATURALE — SEISMIC, INUNDAȚII, ALUNECĂRI DE TEREN',9);ftr();
   cy=33;
   cy=sec('7. ANALIZA RISCURILOR NATURALE RELEVANTE PENTRU AMPLASAMENT',cy);cy+=2;
   // ─── Seismic ───────────────────────────────────────────────────────────────
@@ -4713,7 +4779,7 @@ async function generateStudiuAmplasament(){
   // ═══════════════════════════════════════════════════════════════════════════
   // PAG 9: DATE CLIMATICE + ÎNSORIRE + VÂNT + ZGOMOT
   // ═══════════════════════════════════════════════════════════════════════════
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('DATE CLIMATICE — ÎNSORIRE, VÂNT, TEMPERATURI, PRECIPITAȚII',9);ftr();
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('DATE CLIMATICE — ÎNSORIRE, VÂNT, TEMPERATURI, PRECIPITAȚII',10);ftr();
   cy=33;
   cy=sec('8. DATE CLIMATICE DE REFERINȚĂ — ZONA '+S2(uat).toUpperCase(),cy);cy+=2;
 
@@ -4756,7 +4822,7 @@ async function generateStudiuAmplasament(){
   // ═══════════════════════════════════════════════════════════════════════════
   // PAG 10: RESTRICȚII CUMULATE — DIAGRAMA STUDII NECESARE
   // ═══════════════════════════════════════════════════════════════════════════
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('RESTRICȚII CUMULATE — STUDII OBLIGATORII ȘI RECOMANDATE',10);ftr();
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('RESTRICȚII CUMULATE — STUDII OBLIGATORII ȘI RECOMANDATE',11);ftr();
   cy=33;
   cy=sec('9. RESTRICȚII CUMULATE IDENTIFICATE PENTRU AMPLASAMENT',cy);cy+=2;
   cy=body('Pe baza tuturor datelor analizate în prezentul studiu de amplasament (cadastru, PUG, vecinătăți, monumente, riscuri naturale, climatice, infrastructură), se identifică următoarele restricții cumulate care trebuie respectate în elaborarea oricărui studiu sau proiect de specialitate pentru amplasamentul '+nrcad+' (UTR '+utr+').',14,cy);cy+=4;
@@ -4783,7 +4849,7 @@ async function generateStudiuAmplasament(){
   // ═══════════════════════════════════════════════════════════════════════════
   // PAG 11: DATE MEDIU + ESTIMARE FINANCIARĂ PRIMARĂ
   // ═══════════════════════════════════════════════════════════════════════════
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('DATE MEDIU ÎNCONJURĂTOR — ESTIMARE FINANCIARĂ PRIMARĂ',11);ftr();
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('DATE MEDIU ÎNCONJURĂTOR — ESTIMARE FINANCIARĂ PRIMARĂ',12);ftr();
   cy=33;
   cy=sec('10. DATE DE MEDIU ÎNCONJURĂTOR — CONF. EIM',cy);cy+=2;
   cy=tblRow(['Factor de mediu','Date de referință','Operator/Instituție','Normă'],cy,true,[42,72,42,26]);
@@ -4814,7 +4880,7 @@ async function generateStudiuAmplasament(){
   // ═══════════════════════════════════════════════════════════════════════════
   // PAG 12: CONCLUZII GENERALE + BAZA LEGALĂ + SEMNĂTURĂ
   // ═══════════════════════════════════════════════════════════════════════════
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONCLUZII GENERALE — BAZA LEGALĂ COMPLETĂ — SEMNĂTURĂ',12);ftr();
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONCLUZII GENERALE — BAZA LEGALĂ COMPLETĂ — SEMNĂTURĂ',13);ftr();
   cy=33;
   cy=sec('11. CONCLUZII GENERALE — STUDIU DE AMPLASAMENT',cy);cy+=2;
   cy=body('Prezentul Studiu de Amplasament și Analiză Teritorială pentru parcela cu nr. cadastral '+nrcad+' (suprafața '+area+' mp, UTR '+utr+', '+uat+', jud. '+judet+') constituie documentul fundament pentru elaborarea tuturor studiilor tehnice de specialitate ulterioare. A fost realizat prin platforma digitală UrbanX pe baza datelor cadastrale, a Registrului PUG, a datelor S_UAT și a bazei de date LMI locale. Are caracter STRICT ORIENTATIV.',14,cy);cy+=4;

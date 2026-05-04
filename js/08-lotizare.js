@@ -89,17 +89,19 @@ function toggleLotizare(){
   }
   if(_lotizareActive) _showLotizarePanel();
   else {
-    ['lotizare-src','lotizare-drum-src','lotizare-label-src'].forEach(s=>
-      setSource(s,{type:'FeatureCollection',features:[]}));
-    setSource('lot-demo-src',{type:'FeatureCollection',features:[]});
+    // IMPORTANT: NU ștergem sursele la închidere — propunerea lotizare rămâne vizibilă
+    // Sursele se curăță DOAR la Reset explicit sau la selectare parcelă nouă
+    // ['lotizare-src','lotizare-drum-src','lotizare-label-src'].forEach(s=>
+    //   setSource(s,{type:'FeatureCollection',features:[]}));
+    // setSource('lot-demo-src',{type:'FeatureCollection',features:[]});
     if(_LOT.demoMode) _lotDemoModeToggle();
     // Restaurează front/setback layers
     ['front-parcel-line','front-setback-line','front-label','front-arrow'].forEach(lid=>{
       try{map.setLayoutProperty(lid,'visibility','visible');}catch(e){}
     });
     updateMap();
-    // Curăță și viewer-ul 3D dacă era generat de lotizare
-    if(S.vol._lastFeats?.[0]?.properties?.isLotizare){
+    // Curăță viewer-ul 3D DOAR dacă era generat de lotizare și nu există o propunere salvată
+    if(S.vol._lastFeats?.[0]?.properties?.isLotizare && !S.vol._lotizareSaved){
       clearSource('vol-src');
       S.vol.genDone = false;
       S.vol._lastFeats = null;
