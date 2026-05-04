@@ -4815,6 +4815,7 @@ async function generateStudiuAmplasament(){
   cy=33;
   cy=sec('11. CONCLUZII GENERALE — STUDIU DE AMPLASAMENT',cy);cy+=2;
   cy=body('Prezentul Studiu de Amplasament și Analiză Teritorială pentru parcela cu nr. cadastral '+nrcad+' (suprafața '+area+' mp, UTR '+utr+', '+uat+', jud. '+judet+') constituie documentul fundament pentru elaborarea tuturor studiilor tehnice de specialitate ulterioare. A fost realizat prin platforma digitală UrbanX pe baza datelor cadastrale, a Registrului PUG, a datelor S_UAT și a bazei de date LMI locale. Are caracter STRICT ORIENTATIV.',14,cy);cy+=4;
+  const catGeoF=aedisH>28?'3 — Complexă':aedisH>10?'2 — Curentă':'1 — Simplă';
   cy=tblRow(['Aspect verificat','Concluzie','Documentație impusă'],cy,true,[60,60,62]);
   [['Indicatori PUG (POT/CUT/H/SV/Pk)','Conf. RLU UTR '+utr,'Proiect DTAC + memoriu'],
    ['Însorire OMS 119/2014',isConformSolar?'Alt. sol. '+altDec12.toFixed(1)+'° ≥ 15° CONFORM':'Alt. sol. '+altDec12.toFixed(1)+'° < 15° — studiu OAR','Studiu însorire la PAC'],
@@ -4825,8 +4826,6 @@ async function generateStudiuAmplasament(){
    ['Infrastructură tehnico-edilitară','Rețele disponibile în zonă','Avize operatori la CU/PAC'],
    ['Studiu geotehnic',catGeoF,'NP 074/2014 — expert geotehnician'],
   ].forEach(r=>cy=tblRow(r,cy,false,[60,60,62]));
-
-  const catGeoF=aedisH>28?'3 — Complexă':aedisH>10?'2 — Curentă':'1 — Simplă';
   cy+=4;
   cy=sec('11.1. BAZA LEGALĂ',cy);cy+=2;
   ['Legea nr. 350/2001 privind amenajarea teritoriului și urbanismul, republicată.','Legea nr. 50/1991 republicată — autorizarea executării lucrărilor de construcții.','HG nr. 525/1996 — Regulamentul General de Urbanism, cu modificările ulterioare.','Legea nr. 422/2001 privind protejarea monumentelor istorice, republicată.','P100-1/2013 — Cod de proiectare seismică. Prevederi pentru clădiri.','CR 1-1-4/2012 — Cod de proiectare. Acțiunea vântului.','OMS nr. 119/2014 + Ord. 994/2018 — Norme igienă și însorire.','NP 074/2014 — Normativ privind cercetarea geotehnică.','HG 930/2016 — Avizare construcții în zone aeronautice.','PUG '+uat+' în vigoare — UTR '+utr+' — RLU.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
