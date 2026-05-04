@@ -269,7 +269,7 @@ function _initStudyPdf(studyName, studySubtitle, totalPages){
     pdf.setFillColor(...GOLD);pdf.rect(14,sy,W-28,2.5,'F');
     pdf.setFillColor(...GOLD);pdf.rect(14,sy,2.5,62,'F');
     pdf.setTextColor(...GOLD3);pdf.setFontSize(7.5);pdf.setFont('helvetica','bold');
-    pdf.text('CASET\u0102 DE ELABORARE, VERIFICARE \u0218I ASUMARE A RESPONSABILIT\u0102\u021AII',W/2,sy+10,{align:'center'});
+    pdf.text('CASETA DE ELABORARE, VERIFICARE SI ASUMARE A RESPONSABILITATII',W/2,sy+10,{align:'center'});
     pdf.setDrawColor(...GOLD2);pdf.setLineWidth(0.3);pdf.line(17,sy+13,W-17,sy+13);
     const roles=['ELABORAT','VERIFICAT','BENEFICIAR / INVESTITOR'];
     const roleColors=[BLUE,GREEN,ORANGE];
@@ -289,11 +289,11 @@ function _initStudyPdf(studyName, studySubtitle, totalPages){
       const cw=(W-28)/3,cx=14+i*cw+3;
       pdf.setDrawColor(...GRAY3);pdf.setLineWidth(0.3);pdf.line(cx,sy+52,cx+cw-6,sy+52);
       pdf.setFontSize(6);pdf.setTextColor(...GRAY2);
-      pdf.text('Semn\u0103tur\u0103 \u0219i \u0219tampil\u0103',cx,sy+56.5);
+      pdf.text('Semnatura si stampila',cx,sy+56.5);
     }
     pdf.setFillColor(...RED);pdf.rect(14,sy+59,W-28,5,'F');
     pdf.setTextColor(255,255,255);pdf.setFontSize(5.8);pdf.setFont('helvetica','bold');
-    pdf.text('Document orientativ \u0219i preliminar. Nu \u00eenlocuie\u0219te documenta\u021biile tehnice avizate conform Legii 50/1991 \u0219i Legii 350/2001. UrbanX TSS-FG',W/2,sy+62.5,{align:'center'});
+    pdf.text('Document orientativ si preliminar. Nu inlocuieste documentatiile tehnice avizate conf. Legii 50/1991 si Legii 350/2001. UrbanX TSS-FG',W/2,sy+62.5,{align:'center'});
   };
 
   // Coperta premium
@@ -307,7 +307,7 @@ function _initStudyPdf(studyName, studySubtitle, totalPages){
       pdf.setTextColor(...GOLD);pdf.setFontSize(32);pdf.setFont('helvetica','bold');pdf.text('UrbanX',W/2,44,{align:'center'});
     }
     pdf.setTextColor(...GOLD2);pdf.setFontSize(8);pdf.setFont('helvetica','bold');
-    pdf.text('URBANX \u2014 PLATFORM\u0102 NA\u021AIONAL\u0102 DE ANALIZ\u0102 URBANISTIC\u0102',W/2,50,{align:'center'});
+    pdf.text('URBANX - PLATFORMA NATIONALA DE ANALIZA URBANISTICA',W/2,50,{align:'center'});
     pdf.setFillColor(...GOLD);pdf.rect(W/2-40,54,80,1,'F');
     pdf.setTextColor(255,255,255);pdf.setFontSize(20);pdf.setFont('helvetica','bold');
     pdf.text(S2(studyName.toUpperCase()),W/2,67,{align:'center'});
@@ -612,8 +612,8 @@ function _initStudyPdf(studyName, studySubtitle, totalPages){
 
   // Concluzii cu numerotare eleganta
   const concluzii=(items,y)=>{
-    y=sec('CONCLUZII \u0218I RECOMAND\u0102RI',y,GREEN);
-    y=body('Pe baza analizei efectuate pentru parcela '+S2(nrcad)+' (UTR '+S2(utr)+', suprafa\u021ba '+S2(area)+' mp), '+S2(uat)+', se formuleaz\u0103 urm\u0103toarele concluzii \u0219i recomand\u0103ri:',14,y);
+    y=sec('CONCLUZII SI RECOMANDARI',y,GREEN);
+    y=body('Pe baza analizei efectuate pentru parcela '+S2(nrcad)+' (UTR '+S2(utr)+', suprafa\u021ba '+S2(area)+' mp), '+S2(uat)+', se formuleaza urmatoarele concluzii si recomandari:',14,y);
     y+=4;
     items.forEach((item,i)=>{
       if(y>H-28){pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');ftr();y=20;}
@@ -648,7 +648,7 @@ function _initStudyPdf(studyName, studySubtitle, totalPages){
     pdf.setFillColor(...GOLD);pdf.rect(14,sy,W-28,2.5,'F');
     pdf.setFillColor(...GOLD);pdf.rect(14,sy,2.5,62,'F');
     pdf.setTextColor(...GOLD3);pdf.setFontSize(7.5);pdf.setFont('helvetica','bold');
-    pdf.text('CASET\u0102 DE ELABORARE, VERIFICARE \u0218I ASUMARE A RESPONSABILIT\u0102\u021AII',W/2,sy+10,{align:'center'});
+    pdf.text('CASETA DE ELABORARE, VERIFICARE SI ASUMARE A RESPONSABILITATII',W/2,sy+10,{align:'center'});
     pdf.setDrawColor(...GOLD2);pdf.setLineWidth(0.3);pdf.line(17,sy+13,W-17,sy+13);
     const roles=['ELABORAT','VERIFICAT','BENEFICIAR / INVESTITOR'];
     const roleColors=[BLUE,GREEN,ORANGE];
@@ -668,11 +668,11 @@ function _initStudyPdf(studyName, studySubtitle, totalPages){
       const cw=(W-28)/3,cx=14+i*cw+3;
       pdf.setDrawColor(...GRAY3);pdf.setLineWidth(0.3);pdf.line(cx,sy+52,cx+cw-6,sy+52);
       pdf.setFontSize(6);pdf.setTextColor(...GRAY2);
-      pdf.text('Semn\u0103tur\u0103 \u0219i \u0219tampil\u0103',cx,sy+56.5);
+      pdf.text('Semnatura si stampila',cx,sy+56.5);
     }
     pdf.setFillColor(...RED);pdf.rect(14,sy+59,W-28,5,'F');
     pdf.setTextColor(255,255,255);pdf.setFontSize(5.8);pdf.setFont('helvetica','bold');
-    pdf.text('Document orientativ \u0219i preliminar. Nu \u00eenlocuie\u0219te documenta\u021biile tehnice avizate conform Legii 50/1991 \u0219i Legii 350/2001. UrbanX TSS-FG',W/2,sy+62.5,{align:'center'});
+    pdf.text('Document orientativ si preliminar. Nu inlocuieste documentatiile tehnice avizate conf. Legii 50/1991 si Legii 350/2001. UrbanX TSS-FG',W/2,sy+62.5,{align:'center'});
   };
 
   // Coperta premium
@@ -686,7 +686,7 @@ function _initStudyPdf(studyName, studySubtitle, totalPages){
       pdf.setTextColor(...GOLD);pdf.setFontSize(32);pdf.setFont('helvetica','bold');pdf.text('UrbanX',W/2,44,{align:'center'});
     }
     pdf.setTextColor(...GOLD2);pdf.setFontSize(8);pdf.setFont('helvetica','bold');
-    pdf.text('URBANX \u2014 PLATFORM\u0102 NA\u021AIONAL\u0102 DE ANALIZ\u0102 URBANISTIC\u0102',W/2,50,{align:'center'});
+    pdf.text('URBANX - PLATFORMA NATIONALA DE ANALIZA URBANISTICA',W/2,50,{align:'center'});
     pdf.setFillColor(...GOLD);pdf.rect(W/2-40,54,80,1,'F');
     pdf.setTextColor(255,255,255);pdf.setFontSize(20);pdf.setFont('helvetica','bold');
     pdf.text(S2(studyName.toUpperCase()),W/2,67,{align:'center'});

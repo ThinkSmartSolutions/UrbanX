@@ -2830,7 +2830,9 @@ function _v3dApplyLight(preset,THREE,scene,r){
   window._v3dNight = !!p.night;  // Setăm flag pentru materiale
 
   // Noapte: adăugăm lumini punctuale spectaculoase
-  if(p.night && V3D.scene){
+  // IMPORTANT: folosim 'scene' (param), nu V3D.scene — funcționează și în capture silent
+  const _nightScene = scene; // scene poate fi scena capture sau V3D.scene
+  if(p.night && _nightScene){
     // ── Lumini de stradă — sodium portocaliu (stâlpi pe perimetru) ──────
     const streetPos=[
       [-40,9,-2],[40,9,-2],[0,9,-42],[0,9,42],
@@ -2840,7 +2842,7 @@ function _v3dApplyLight(preset,THREE,scene,r){
     streetPos.forEach(([x,y,z])=>{
       const pl=new THREE.PointLight('#ff9020',1.8,55,1.8);
       pl.position.set(x,y,z);
-      V3D.scene.add(pl);
+      _nightScene.add(pl);
     });
 
     // ── Lumini calde ferestre AEDIS — distribuite pe înălțimea clădirii ─
@@ -2849,7 +2851,7 @@ function _v3dApplyLight(preset,THREE,scene,r){
       [[-2,yy,2],[2,yy,-2],[0,yy,0],[-3,yy,-3],[3,yy,3]].forEach(([x,y,z])=>{
         const il=new THREE.PointLight('#ffcc60', 0.7+Math.random()*0.5, 22, 1.5);
         il.position.set(x,y,z);
-        V3D.scene.add(il);
+        _nightScene.add(il);
       });
     }
 
@@ -2857,14 +2859,14 @@ function _v3dApplyLight(preset,THREE,scene,r){
     [[-5,1.5,5],[5,1.5,-5],[-5,1.5,-5],[5,1.5,5],[0,1.5,7],[0,1.5,-7]].forEach(([x,y,z])=>{
       const vl=new THREE.PointLight('#fff0c0',2.5,20,1.8);
       vl.position.set(x,y,z);
-      V3D.scene.add(vl);
+      _nightScene.add(vl);
     });
 
     // ── Lumină lunară albăstruie din înalt ────────────────────────────
     const moon=new THREE.DirectionalLight('#4070d8',0.6);
     moon.position.set(-80,200,60);
     moon.castShadow=false;
-    V3D.scene.add(moon);
+    _nightScene.add(moon);
 
     // ── Fog densitate mică — ceață ușoară nocturnă ────────────────────
     if(scene.fog){ scene.fog.density=0.0012; }
