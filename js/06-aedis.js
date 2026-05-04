@@ -302,7 +302,7 @@ function _demolishRestoreNative(){
     }
   }catch(e){}
 }
-function loadScen(i){const sc=S.scenarios[i];if(!sc)return;Object.assign(S.vol,{fn:sc.fn||'locuinta_individuala',niv:sc.niv||4});renderAll();ss('📦 Scenariu încărcat.');}
+function loadScen(i){const sc=S.scenarios[i];if(!sc)return;Object.assign(S.vol,{fn:sc.fn||'locuinta_individuala',niv:sc.niv||4});if(typeof renderAll==="function")renderAll();ss('📦 Scenariu încărcat.');}
 
 // ═══ BUTOANE GLOBALE ═══════════════════════════════════════════════════════
 // Butoane topbar - null-safe pentru toate
@@ -1860,7 +1860,7 @@ async function loadData(uatId){
     S.cadData={type:'FeatureCollection',features:[]};
     ss(`✅ ${S.pug?.features?.length||0} zone PUG încărcate`);
   }
-  renderAll();
+  if(typeof renderAll === "function") renderAll(); else if(typeof renderTab === "function") renderTab(S.tab||"search");
   ensureFAB();
   // Afișăm range nrcad disponibil
   setTimeout(()=>{

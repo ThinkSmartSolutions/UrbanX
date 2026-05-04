@@ -942,11 +942,14 @@ function htmlProiect(){
     <div style="flex:1">
       <div style="font-size:10px;color:#94a3b8;margin-bottom:5px">Strada este spre:</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-bottom:6px">
-        ${[['↑ Nord','0'],['→ Est','90'],['↓ Sud','180'],['← Vest','270'],['↗ NE','45'],['↘ SE','135'],['↙ SV','225'],['↖ NV','315']].map(([lbl,deg])=>{
-          const diff=Math.abs(((S.bearing-+deg)+360)%360);
-          const active=diff<30||diff>330;
-          return \`<button onclick="setBearing(\${deg})" style="padding:5px 4px;border-radius:6px;border:1px solid \${active?'#FFD700':'rgba(255,255,255,.1)'};background:\${active?'rgba(255,215,0,.15)':'rgba(11,18,32,.7)'};color:\${active?'#FFD700':'#64748b'};cursor:pointer;font-size:11px;font-weight:\${active?'700':'400'}">\${lbl}</button>\`;
-        }).join('')}
+        <button onclick="setBearing(0)" style="padding:5px 4px;border-radius:6px;cursor:pointer;font-size:11px;border:1px solid rgba(255,255,255,.1);background:rgba(11,18,32,.7);color:#64748b" id="brg-0">↑ Nord</button>
+        <button onclick="setBearing(90)" style="padding:5px 4px;border-radius:6px;cursor:pointer;font-size:11px;border:1px solid rgba(255,255,255,.1);background:rgba(11,18,32,.7);color:#64748b" id="brg-90">→ Est</button>
+        <button onclick="setBearing(180)" style="padding:5px 4px;border-radius:6px;cursor:pointer;font-size:11px;border:1px solid rgba(255,255,255,.1);background:rgba(11,18,32,.7);color:#64748b" id="brg-180">↓ Sud</button>
+        <button onclick="setBearing(270)" style="padding:5px 4px;border-radius:6px;cursor:pointer;font-size:11px;border:1px solid rgba(255,255,255,.1);background:rgba(11,18,32,.7);color:#64748b" id="brg-270">← Vest</button>
+        <button onclick="setBearing(45)" style="padding:5px 4px;border-radius:6px;cursor:pointer;font-size:11px;border:1px solid rgba(255,255,255,.1);background:rgba(11,18,32,.7);color:#64748b" id="brg-45">↗ NE</button>
+        <button onclick="setBearing(135)" style="padding:5px 4px;border-radius:6px;cursor:pointer;font-size:11px;border:1px solid rgba(255,255,255,.1);background:rgba(11,18,32,.7);color:#64748b" id="brg-135">↘ SE</button>
+        <button onclick="setBearing(225)" style="padding:5px 4px;border-radius:6px;cursor:pointer;font-size:11px;border:1px solid rgba(255,255,255,.1);background:rgba(11,18,32,.7);color:#64748b" id="brg-225">↙ SV</button>
+        <button onclick="setBearing(315)" style="padding:5px 4px;border-radius:6px;cursor:pointer;font-size:11px;border:1px solid rgba(255,255,255,.1);background:rgba(11,18,32,.7);color:#64748b" id="brg-315">↖ NV</button>
       </div>
       <div style="display:flex;align-items:center;gap:6px">
         <input id="bearing-slider" type="range" min="0" max="359" value="${S.bearing}" 
