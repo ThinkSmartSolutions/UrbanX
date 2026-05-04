@@ -952,11 +952,15 @@ function _v3dCaptureSilent(ap){
       // Camera setup
       const maxH=Math.max(...(S.vol._lastFeats||[]).map(f=>f.properties?.top||0),8);
       const parcelSz=Math.max(...ring0.map(c=>{const[x,z]=toLoc(c);return Math.sqrt(x*x+z*z);}),10);
-      // Rază adaptivă: aproape de clădire dar fără să intrăm în ea
-      // Pentru parcele mari factorul crește să vedem tot ansamblul
-      const sizeFactor = parcelSz > 80 ? 2.0 : parcelSz > 40 ? 1.8 : 1.6;
+      // Rază apropiată: clădirea umple cadrul indiferent de zoom-ul hărții
+      // day/golden/overcast: 1.6x parcela (era 2.5x) — impact vizual maxim
+      // night: și mai aproape (1.3x) — fațadele luminate ocupă tot cadrul
+      // Rază adaptivă per dimensiunea parcelei
+      const sizeFactor = parcelSz > 80 ? 2.0 : parcelSz > 40 ? 1.8 : 1.5;
       const radDay  =Math.max(parcelSz*sizeFactor, maxH*2.2, 25);
-      const radNight=Math.max(parcelSz*(sizeFactor-0.2), maxH*2.0, 20);
+      // Noapte: raza mai mică decât zi pentru a vedea fațadele luminate
+      // dar nu mai mică de maxH*1.8 ca să nu intrăm în clădire
+      const radNight=Math.max(parcelSz*(sizeFactor*0.65), maxH*1.8, 20);
       const tx=new THREE.Vector3(0,maxH*0.35,0);
 
       const setCam=(theta,phi,customRad)=>{
@@ -978,7 +982,8 @@ function _v3dCaptureSilent(ap){
       // 7 preseturi — unghiuri optimizate pentru impact vizual consistent
       // phi mic = unghi jos (perspectivă dramatică, ca în viewer manual)
       const day      =doCapture('day',     Math.PI/4,   Math.PI/3.5,  radDay);
-      const night    =doCapture('night',   Math.PI/4,   Math.PI/3.8,  radNight);
+      // Noapte: unghi mai jos (PI/4.5) și orientare frontală (PI/5) — fațadele domină cadrul
+      const night    =doCapture('night',   Math.PI/5,   Math.PI/4.5,  radNight);
       const golden   =doCapture('golden',  Math.PI*1.1, Math.PI/3.8,  radDay);
       const overcast =doCapture('overcast',Math.PI/4,   Math.PI/3.2,  radDay);
       const front    =doCapture('day',     Math.PI,     Math.PI/3.2,  radDay);
