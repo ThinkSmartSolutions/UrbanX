@@ -1614,7 +1614,7 @@ async function generateAACR(){
   cy=body('Suprafetele aeronautice definite in ICAO Anexa 14 (editia a 8-a) pentru aeroportul '+AACR_DATA.aeroport+' (cod indicator 4C) sunt calculate geometric in functie de coordonatele pragurilor de pista, orientarea pistei si cotele relative ale amplasamentului fata de cota pistei. Verificarile de mai jos determina daca constructia propusa (H='+aedisH.toFixed(1)+'m) penetreaza vreuna dintre suprafetele de protectie.',14,cy);cy+=4;
   cy=sec('8.1. SUPRAFATA CONICA — ICAO ANEXA 14 TABELUL 4-1',cy);cy+=2;
   const elevAerop2=AACR_DATA.elevatie*0.3048;
-  const hPropus=aedisH+ap?.params?.altSol||aedisH;
+  const hPropusICOA=aedisH;
   cy=tblRow(['Parametru suprafata conica','Valoare normativa','Aplicabila amplasament','Status'],cy,true,[60,40,48,34]);
   [['Cota de baza (la extremitatea OLS)','Cota pista + 45m',elevAerop2.toFixed(0)+'m + 45m = '+(elevAerop2+45).toFixed(0)+'m','Informativ'],
    ['Raza suprafetei orizontale interioare','4000m fata de centrul pistei',Math.min(distA,distB).toFixed(0)+'m distanta min.','Verificare'],
@@ -3382,7 +3382,8 @@ async function generateSolarStudy(){
     'generateNoiseStudy','generateWindStudy','generateGreenStudy',
     'generateMobilityStudy','generateDensityStudy','generateMemoriu',
     'generateEnvironmentalImpact','generateAviatie','generateGeotehnic',
-    'generateTrafficStudy'
+    'generateTrafficStudy',
+    'generateStudiuFezabilitate'
   ];
   toWrap.forEach(name=>{
     const orig = window[name];
@@ -3407,3 +3408,290 @@ async function generateSolarStudy(){
 
 // V3D moved to top
 
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// STUDIU DE PREFEZABILITATE / FEZABILITATE / DALI
+// HG 907/2016 — Legea 500/2002 — Legea 98/2016
+// ════════════════════════════════════════════════════════════════════════════
+
+async function generateStudiuFezabilitate(){
+  const ap=S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry){ss('Selectați o parcelă pentru studiu.');return;}
+  ss('Se generează Studiu de Fezabilitate / DALI...');
+
+  const d=_initStudyPdf('Studiu de Prefezabilitate / Fezabilitate / DALI','SF-DALI · HG 907/2016',12);
+  const {pdf,W,H,DARK,DARK2,NAVY,GOLD,GOLD2,GOLD3,BLUE,BLUE2,TEAL,LIGHT,LIGHT2,LIGHT3,
+    RED,GREEN,ORANGE,PURPLE,GRAY,GRAY2,GRAY3,GRAY4,WHITE,
+    S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,
+    hdr,ftr,sec,subsec,body,tblRow,addImg,kv,badge,divider,bullet,concluzii,sign,cover,newPage,checkY}=d;
+  const caps=await _captureStudyMaps(ap, msg=>ss(msg));
+
+  // Date de baza
+  const areaNum=parseFloat(area)||300;
+  const scMax=Math.round(areaNum*parseFloat(params?.pot||35)/100);
+  const sdTotal=Math.round(areaNum*parseFloat(params?.cut||1.0));
+  const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13.2;
+  const niv=Math.max(1,Math.ceil(aedisH/3));
+  const svMin=Math.round(areaNum*parseFloat(params?.sv||20)/100);
+  const pkMin=Math.max(2,Math.ceil(sdTotal/120)*parseInt(params?.pk||1));
+  const latN=lat.toFixed(4),lonE=lon.toFixed(4);
+
+  // Indicatori financiari estimativi
+  const costConstr=Math.round(sdTotal*700); // ~700 EUR/mp SD
+  const costTeren=Math.round(areaNum*800);  // ~800 EUR/mp teren
+  const costTotal=Math.round((costConstr+costTeren)*1.25); // +25% diverse+TVA
+  const venitAn=Math.round(sdTotal*0.85*50*12); // 50 EUR/mp/luna chirie
+  const rentabilitate=(venitAn/(costTotal/1000)).toFixed(1); // % randament brut
+
+  // Functiune
+  const fnLabel=(params?.fn_label||'Locuire colectivă / Mixt');
+
+  // ── PAG 1: COVER ──────────────────────────────────────────────────────────
+  cover(
+    'Studiu de Fezabilitate · DALI · conf. HG 907/2016',
+    caps.img3D,
+    [['Funcțiune propusă',fnLabel],['Tip studiu','SF / DALI · HG 907/2016'],['Faza','Pre-proiectare orientativă']],
+    true,
+    '✓ STUDIU ORIENTATIV — PREFEZABILITATE URBANISTICĂ DIGITALĂ'
+  );
+
+  // ── PAG 2: DATE DE IDENTIFICARE + INDICATORI URBANISTICI ─────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('DATE DE IDENTIFICARE ȘI INDICATORI URBANISTICI PUG',2);ftr();
+  let cy=33;
+  cy=sec('1. DATE DE IDENTIFICARE A INVESTIȚIEI',cy);cy+=2;
+  // KPI-uri
+  const kw=(W-28-9)/4;
+  kv('NR. CADASTRAL',nrcad,14,cy,kw,GOLD);
+  kv('SUPRAFAȚĂ TEREN',areaNum+'mp',14+kw+3,cy,kw,BLUE);
+  kv('UTR / ZONĂ',utr,14+(kw+3)*2,cy,kw,TEAL);
+  kv('REGIM H MAX',params?.h?params.h+'m':'N/S',14+(kw+3)*3,cy,kw,ORANGE);
+  cy+=22;
+  kv('POT MAX',params?.pot+'%',14,cy,kw,GOLD);
+  kv('CUT MAX',String(params?.cut),14+kw+3,cy,kw,BLUE);
+  kv('SV MINIM',params?.sv+'%',14+(kw+3)*2,cy,kw,GREEN);
+  kv('PARCAJE MIN',params?.pk+' loc/unit',14+(kw+3)*3,cy,kw,PURPLE);
+  cy+=24;
+  cy=sec('2. PARAMETRI TEHNICI ESTIMATIVI AI INVESTIȚIEI',cy);cy+=2;
+  cy=tblRow(['Parametru','Valoare estimativă','Baza de calcul','Obs.'],cy,true,[70,38,55,19]);
+  [['Suprafață construită la sol (SC)',scMax+' mp (POT='+params?.pot+'%)','RLU UTR '+utr,'Estimativ'],
+   ['Suprafață desfășurată totală (SDA)',sdTotal+' mp (CUT='+params?.cut+')','RLU UTR '+utr,'Estimativ'],
+   ['Înălțime maximă propusă',aedisH.toFixed(1)+' m (P+'+(niv-1)+' niv.)','Conf. AEDIS 3D','Orientativ'],
+   ['Suprafețe verzi minime',svMin+' mp ('+params?.sv+'%)','RLU UTR '+utr,'Obligatoriu'],
+   ['Parcaje minime obligatorii',pkMin+' locuri ('+params?.pk+'/unitate)','NP 051/2012','Verificare'],
+   ['Retragere față stradă',params?.rf+' m','RLU UTR '+utr,'Obligatoriu'],
+   ['Retragere laterală',params?.rl+' m','RLU UTR '+utr,'Obligatoriu'],
+   ['Retragere spate',params?.rs+' m','RLU UTR '+utr,'Obligatoriu'],
+   ['Coordonate GPS',latN+'°N / '+lonE+'°E','UrbanX GIS','Cadastru'],
+   ['UAT / Județ',uat+' / '+judet,'SIRUTA','Registru'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[70,38,55,19]));
+  cy+=3;
+  cy=addImg(caps.imgLocation,14,cy,W-28,50,'FIG. 1 — Amplasament · Vedere ortofoto cu limite parcelă · Sursa: UrbanX + Mapbox');
+
+  // ── PAG 3: SITUAȚIA EXISTENTĂ + CONTEXT URBAN 3D ─────────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('SITUAȚIA EXISTENTĂ — CONTEXT URBAN ȘI REGLEMENTĂRI PUG',3);ftr();
+  cy=33;
+  const half=(W-28)/2-2;
+  cy=addImg(caps.img3D,14,cy,half,60,'FIG. 2 — Vedere 3D principal · Volumul propus în context urban real · Mapbox Standard 3D');
+  addImg(caps.img2D,14+half+4,cy-60,half,60,'FIG. 3 — Plan 2D ortogonal · Parcelă + clădiri existente în 200m rază');
+  cy+=3;
+  cy=sec('3. DESCRIEREA SITUAȚIEI EXISTENTE',cy);cy+=2;
+  cy=body('Amplasamentul cu nr. cadastral '+nrcad+' este situat în '+uat+', județul '+judet+', zona UTR '+utr+' conform PUG aprobat. Suprafața terenului este de '+areaNum+' mp. Terenul se află la coordonatele GPS '+latN+'°N / '+lonE+'°E. Funcțiunea urbană dominantă a zonei UTR '+utr+' este "'+fnLabel+'" conform Regulamentului Local de Urbanism în vigoare.',14,cy);cy+=3;
+  cy=sec('3.1. REGLEMENTĂRI PUG APLICABILE — UTR '+utr,cy);cy+=2;
+  cy=tblRow(['Indicator PUG','Valoare RLU','Semnificație','Restricții'],cy,true,[40,30,70,42]);
+  [['POT max',''+params?.pot+'%','Max. '+scMax+' mp SC la sol (din '+areaNum+' mp teren)','Nu se depășește'],
+   ['CUT max',''+params?.cut,'Max. '+sdTotal+' mp SDA totală','Nu se depășește'],
+   ['H max',''+( params?.h||'N/S')+'m','Conf. PUG + R.H. stradal','Verificare AACR'],
+   ['SV min',''+params?.sv+'%','Min. '+svMin+' mp spații verzi pe parcela','Obligatoriu'],
+   ['Parcaje',''+params?.pk+' loc/unitate','Min. '+pkMin+' locuri conform NP 051/2012','Obligatoriu'],
+   ['Retrageri','rf='+params?.rf+'m, rl='+params?.rl+'m, rs='+params?.rs+'m','Minim față de limitele de proprietate','Obligatoriu'],
+   ['Funcțiuni admise','Conf. UTR '+utr,'Conform PUG '+uat+' în vigoare','Verificare PUG'],
+   ['Funcțiuni interzise','Conf. UTR '+utr,'Conform PUG '+uat+' în vigoare','Obligatoriu'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[40,30,70,42]));
+
+  // ── PAG 4: PROPUNEREA DE INVESTIȚIE — VARIANTE TEHNICE ───────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('PROPUNEREA DE INVESTIȚIE — VARIANTE TEHNICE COMPARATE',4);ftr();
+  cy=33;
+  cy=addImg(caps.imgFront,14,cy,half,55,'FIG. 4 — Vedere frontală (stradă) · Volumetrie propusă · Regim P+'+(niv-1));
+  addImg(caps.imgAerial,14+half+4,cy-55,half,55,'FIG. 5 — Vedere aeriană 45° · Amprenta + acoperis + context imediat');
+  cy+=3;
+  cy=sec('4. DESCRIEREA INVESTIȚIEI — VARIANTE DE SCENARII',cy);cy+=2;
+  cy=tblRow(['Scenariu','SC (mp)','SDA (mp)','H max (m)','Cost estimat','Rentabilitate'],cy,true,[30,22,24,22,44,40]);
+  const sc1=Math.round(scMax*0.7), sda1=Math.round(sdTotal*0.7);
+  const sc2=scMax, sda2=sdTotal;
+  const sc3=Math.round(scMax*0.9), sda3=Math.round(sdTotal*1.1);
+  [['S1 — Conservator',sc1+' mp',sda1+' mp',Math.round(aedisH*0.75)+'m',Math.round(sda1*700/1000)+' kEUR',((sda1*0.85*50*12)/(sda1*700*1.25/1000)).toFixed(1)+'%'],
+   ['S2 — Recomandat ★',sc2+' mp',sda2+' mp',aedisH.toFixed(0)+'m',Math.round(sda2*700/1000)+' kEUR',((sda2*0.85*50*12)/(sda2*700*1.25/1000)).toFixed(1)+'%'],
+   ['S3 — Maxim RLU',sc3+' mp',sda3+' mp',params?.h||aedisH.toFixed(0)+'m',Math.round(sda3*700/1000)+' kEUR',((sda3*0.85*50*12)/(sda3*700*1.25/1000)).toFixed(1)+'%'],
+  ].forEach((r,i)=>{cy=tblRow(r,cy,false,[30,22,24,22,44,40]);if(i===1){pdf.setFillColor(14,80,40);pdf.rect(14,cy-8,W-28,8,'F');}});
+  cy+=4;
+  cy=sec('4.1. PROGRAMUL DE INVESTIȚIE RECOMANDAT (SCENARIUL S2)',cy);cy+=2;
+  cy=body('Scenariul S2 (recomandat) propune valorificarea optimă a indicatorilor PUG pentru UTR '+utr+', cu o suprafață construită la sol de '+sc2+' mp (POT='+params?.pot+'%) și o suprafață desfășurată totală de '+sda2+' mp (CUT='+params?.cut+'). Regimul de înălțime propus este P+'+(niv-1)+' (H='+aedisH.toFixed(1)+'m), compatibil cu caracterul urban al zonei și cu cerințele de insorire (OMS 119/2014).',14,cy);cy+=3;
+  cy=body('Funcțiunile prevăzute în cadrul investiției propuse sunt: '+fnLabel+'. Distribuția spațiilor pe niveluri va fi stabilită în proiectul tehnic, respectând prevederile PUG '+uat+', RLU UTR '+utr+' și legislația specifică funcțiunii (Legea 50/1991, Normativ I7 pentru instalații electrice, NP 064/2002 pentru parcaje etc.).',14,cy);
+
+  // ── PAG 5: INDICATORI TEHNICO-ECONOMICI ──────────────────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('INDICATORI TEHNICO-ECONOMICI — ESTIMARE ORIENTATIVĂ',5);ftr();
+  cy=33;
+  cy=sec('5. INDICATORI TEHNICO-ECONOMICI CONFORM HG 907/2016',cy);cy+=2;
+  cy=body('Indicatorii tehnico-economici de mai jos sunt STRICT ORIENTATIVI și au ca scop sprijinirea deciziei de investiție. Valorile exacte se stabilesc prin studiu de fezabilitate detaliat, cu deviz elaborat de proiectant autorizat, pe baza Proiectului Tehnic (PT) aprobat.',14,cy);cy+=4;
+  cy=tblRow(['Indicator tehnico-economic','UM','Valoare estimativă','Baza de calcul'],cy,true,[80,18,42,42]);
+  [['Suprafață teren (ST)',         'mp',areaNum+'','Extras CF'],
+   ['Suprafață construită la sol (SC)','mp',scMax+'','POT='+params?.pot+'% x ST'],
+   ['Suprafață desfășurată totală (SDA)','mp',sdTotal+'','CUT='+params?.cut+' x ST'],
+   ['Suprafață spații verzi (SV)','mp',svMin+'','SV='+params?.sv+'% x ST (min.)'],
+   ['Nr. niveluri (regim înălțime)','niv.','P+'+(niv-1),'Conf. AEDIS / RLU'],
+   ['Înălțime maximă (Hmax)','m',aedisH.toFixed(1),'Conf. AEDIS orientativ'],
+   ['Nr. locuri parcare obligatorii','locuri',pkMin+'','NP 051/2012 + RLU'],
+   ['Valoare estimativă construcție','EUR',costConstr.toLocaleString(),'700 EUR/mp SDA'],
+   ['Valoare estimativă teren','EUR',costTeren.toLocaleString(),'800 EUR/mp teren'],
+   ['Diverse, neprevăzute, proiectare (25%)','EUR',Math.round((costConstr+costTeren)*0.25).toLocaleString(),'25% total construire+teren'],
+   ['VALOARE TOTALĂ INVESTIȚIE','EUR',costTotal.toLocaleString(),'Total estimativ'],
+   ['Valoare investiție / mp SDA','EUR/mp',Math.round(costTotal/sdTotal)+'','Indicele de cost /mp SDA'],
+   ['Venit estimat anual (chirie)','EUR/an',venitAn.toLocaleString(),'50 EUR/mp/lună × 85% ocupare'],
+   ['Randament brut (ROI brut anual)','%',rentabilitate,'Venit anual / Inv. totală'],
+   ['Perioadă estimată recuperare investiție','ani',Math.ceil(costTotal/venitAn)+'','Payback period simplu'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[80,18,42,42]));
+  cy+=4;
+  cy=body('NOTĂ: Valorile financiare sunt estimate la prețuri de piață 2024-2025 pentru zona '+uat+'. Devizul exact poate varia cu ±25-35% față de estimarea orientativă. Costul efectiv se stabilește prin ofertare detaliată pe baza Proiectului Tehnic aprobat.',14,cy);
+
+  // ── PAG 6: ANALIZA FINANCIARĂ + SURSE FINANȚARE ──────────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('ANALIZA FINANCIARĂ — SURSE DE FINANȚARE — ANALIZA COST-BENEFICIU',6);ftr();
+  cy=33;
+  cy=sec('6. ANALIZA FINANCIARĂ A INVESTIȚIEI',cy);cy+=2;
+  cy=tblRow(['An','Inv. totalizată (EUR)','Venit estimat (EUR)','Cheltuieli op. (EUR)','Cash flow net (EUR)','Recuperare cum.'],cy,true,[15,46,38,38,40,05]);
+  const cfRows=[0,1,2,3,4,5,7,10,15,20];
+  cfRows.forEach(an=>{
+    const invCum=an===0?costTotal:0;
+    const ven=an===0?0:Math.round(venitAn*(1+0.03*an));
+    const chelt=an===0?0:Math.round(ven*0.25);
+    const cf=an===0?-costTotal:ven-chelt;
+    const recup=Math.min(100,Math.round((ven*(an||1)-costTotal)/costTotal*100+100));
+    cy=tblRow(['An '+(an||0),an===0?'-'+costTotal.toLocaleString():'-',an===0?'-':ven.toLocaleString(),an===0?'-':chelt.toLocaleString(),cf.toLocaleString(),an===0?'0%':recup+'%'],cy,false,[15,46,38,38,40,05]);
+  });
+  cy+=4;
+  cy=sec('6.1. SURSE DE FINANȚARE IDENTIFICATE',cy);cy+=2;
+  cy=tblRow(['Sursă de finanțare','Tip','% din total','Valoare est. (EUR)','Condiții principale'],cy,true,[55,25,18,42,42]);
+  [['Fonduri proprii investitor','Propriu',Math.round(costTotal*0.3/1000)+'0 kEUR'+'/100 kEUR',''+Math.round(costTotal*0.3).toLocaleString(),'Minim 20-30% capital propriu'],
+   ['Credit bancar (ipotecar)','Bancar',Math.round(costTotal*0.5/1000)+'0 kEUR',''+Math.round(costTotal*0.5).toLocaleString(),'Dobândă 6-9% (2024), termen 15-25 ani'],
+   ['Fonduri europene (POR 2021-2027)','UE','-','-','Conf. axa prioritară — eligibilitate specifică'],
+   ['Leasing imobiliar','Financiar','-','-','Alternativă credit clasic — termen 10-20 ani'],
+   ['Parteneriat public-privat (PPP)','Mixt','-','-','Dacă investiție de interes public'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[55,25,18,42,42]));
+
+  // ── PAG 7: ANALIZA RISC + IPOTEZE ──────────────────────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('MATRICEA DE RISC — IPOTEZE ȘI SCENARII',7);ftr();
+  cy=33;
+  cy=sec('7. MATRICEA DE RISC A INVESTIȚIEI',cy);cy+=2;
+  cy=tblRow(['Tip risc','Probabilitate','Impact','Nivel risc','Măsuri de mitigare'],cy,true,[50,30,28,25,49]);
+  [['Risc urbanistic (modificare PUG)','Redusă (5%)','Major','Scăzut','Verificare PUG în vigoare + CU înainte de achiziție teren'],
+   ['Risc tehnic geotehnic (teren slab)','Medie (20%)','Major','Mediu','Studiu geotehnic detaliat înainte de proiect structural'],
+   ['Risc de permitting (avize întârziate)','Medie (30%)','Mediu','Mediu','Pregătire dosar complet + consultant autorizații'],
+   ['Risc financiar (creștere costuri constr.)','Ridicată (40%)','Major','Ridicat','Rezervă contingență 15-20% + contracte cu prețuri ferme'],
+   ['Risc de piață (cerere imobiliară)','Medie (25%)','Major','Mediu','Analiză de piață detaliată + pre-vânzări / pre-închirieri'],
+   ['Risc juridic (litigii proprietate)','Redusă (5%)','Major','Scăzut','Verificare completă CF + expertiză juridică teren'],
+   ['Risc de mediu (contaminare teren)','Redusă (10%)','Mediu','Scăzut','Investigare istorică teren + studiu geo-chimic dacă industrial'],
+   ['Risc seismic (P100-1/2013 zona '+getSeismConfig().zona+')','Certitudine','Variabil','Mediu','Structură antiseismică conform P100-1/2013 — proiect rezistență'],
+   ['Risc construire ilegal','Zero','Major','Zero','Respectare strictă AC + PT aprobat + diriginte de șantier'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[50,30,28,25,49]));
+  cy+=3;
+  cy=sec('7.1. IPOTEZE DE CALCUL UTILIZATE',cy);cy+=2;
+  ['Prețul de construcție estimat: 700 EUR/mp SDA (prețuri 2024-2025, nivel mediu calitate bună, zona '+uat+').','Prețul de achiziție teren: 800 EUR/mp (estimare piață 2024, UTR '+utr+' intravilanul '+uat+').','Chiriile de referință: 50 EUR/mp/lună (utilizare mixtă birouri/comercial/locuire).','Rata de ocupare asumată: 85% din SDA (conservator).','Creșterea anuală a chiriei: 3% (inflație + indexare euro).','Cheltuielile operaționale estimate: 25% din venituri (administrare, mentenanță, asigurări, impozit).','Dobânda de finanțare bancară: 7% anual (estimare 2024-2025).','Orizontul de analiză: 20 ani pentru NPV și IRR.'].forEach(r=>{cy=body('• '+r,16,cy);cy+=2;});
+
+  // ── PAG 8: CALENDAR IMPLEMENTARE + PROCEDURI ─────────────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CALENDARUL IMPLEMENTĂRII — ETAPE ȘI PROCEDURI LEGALE',8);ftr();
+  cy=33;
+  cy=sec('8. CALENDARUL DE IMPLEMENTARE A INVESTIȚIEI — CONF. HG 907/2016',cy);cy+=2;
+  cy=tblRow(['Fază / Etapă','Durată estim.','Documente necesare','Responsabil'],cy,true,[40,22,90,30]);
+  [['FAZA 0 — Pre-achiziție teren','0-2 luni','Verificare CF + Plan cadastral + PUG + CU informativ','Beneficiar + jurist'],
+   ['FAZA 1 — Achiziție / asigurare teren','1-3 luni','Contract vânzare-cumpărare autentificat + Intabulare CF','Beneficiar + notar'],
+   ['FAZA 2 — Certificat Urbanism (CU)','1-2 luni','Cerere CU + Plan situație + Acte proprietate','Beneficiar la Primărie'],
+   ['FAZA 3 — Studii de bază','2-4 luni','Studiu geotehnic + Relevee + Studii de specialitate din CU','Specialiști atestați'],
+   ['FAZA 4 — Proiect PAC/DTAC','3-6 luni','DTAC complet + toate planele + memorii tehnice','Arhitect OAR + ingineri'],
+   ['FAZA 5 — Obținere avize','2-4 luni','Avize din CU: ISU, E-ON, RAJA, AACR, DJCPN etc.','Arhitect + beneficiar'],
+   ['FAZA 6 — Autorizație de Construire (AC)','1-2 luni','Dosar AC complet la Primăria '+uat,'Beneficiar'],
+   ['FAZA 7 — Proiect Tehnic (PT) + DDE','3-6 luni','PT complet + detalii de execuție','Arhitect OAR + ingineri'],
+   ['FAZA 8 — Licitație antreprenor','1-3 luni','Caiet sarcini + documentație licitație','Beneficiar + jurist'],
+   ['FAZA 9 — Execuție construcție',Math.round(sdTotal/300)+'-'+Math.round(sdTotal/200)+' luni','Contract antreprenor + diriginte + RTE','Antreprenor CL/CQ'],
+   ['FAZA 10 — Recepție + Intabulare','1-2 luni','Comisie recepție + PV recepție + CF actualizat','Beneficiar + comisie'],
+   ['TOTAL ESTIMAT','~'+(12+Math.ceil(sdTotal/200))+'-'+(24+Math.ceil(sdTotal/150))+' luni','—','—'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[40,22,90,30]));
+
+  // ── PAG 9: AVIZE ȘI ACORDURI NECESARE ────────────────────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('AVIZE ȘI ACORDURI NECESARE — DOCUMENTE DE AUTORIZARE',9);ftr();
+  cy=33;
+  cy=sec('9. AVIZE ȘI ACORDURI OBLIGATORII — CONFORM LEGII 50/1991',cy);cy+=2;
+  cy=body('Lista completă a avizelor și acordurilor necesare se stabilește prin Certificatul de Urbanism emis de Primăria '+uat+'. Lista de mai jos cuprinde avizele tipice pentru funcțiunea '+fnLabel+' în UTR '+utr+', zona '+uat+', și este orientativă — poate fi completată prin CU.',14,cy);cy+=4;
+  cy=tblRow(['Aviz / Acord','Emitent','Obligativitate','Termen emitere'],cy,true,[70,52,30,30]);
+  [['E-ON Moldova / Furnizor electricitate','E-ON Moldova SA','Obligatoriu','30-60 zile'],
+   ['Delgaz Grid (gaz natural, dacă se prevede)','Delgaz Grid SA','Obligatoriu (dacă gaz)','30-60 zile'],
+   ['RAJA SA Iași (apă-canal)','RAJA SA Iași','Obligatoriu','30-60 zile'],
+   ['ISU Moldova (P.S.I.) — la P+3 sau S>600mp','ISU Moldova','Obligatoriu conf. norme','30-60 zile'],
+   ['AACR / ROMATSA (dacă în zona de protecție aeroport)','ROMATSA + AACR','Dacă dist.<15km LRIA','30-90 zile'],
+   ['DJCPN Iași (dacă în ZCP sau zonă protecție monument)','DJCPN Iași — Str. A. Panu 25','Dacă UTR cu patrimoniu','30-60 zile'],
+   ['APM Iași (dacă suprafață >1000mp SD sau pe curs de apă)','APM Iași','Dacă se depășesc praguri','30-60 zile'],
+   ['Primăria Municipiului Iași — DAU','PMI — DAU','Consultare înainte de PAC','15-30 zile'],
+   ['Direcția de Sănătate Publică (DSP) Iași','DSP Iași','La locuire + dotări medicale','15-30 zile'],
+   ['Operatori telecomunicații (Orange, Telekom etc.)','Operatori multipli','Dacă traversare rețele','15-30 zile'],
+   ['CFR / CNADNR (dacă adiacentă cale ferată / drum național)','CFR / CNADNR','Dacă adjacentă','30-60 zile'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[70,52,30,30]));
+  cy+=3;
+  cy=addImg(caps.imgCity,14,cy,W-28,45,'FIG. 6 — Harta Municipiului Iași · Amplasament + context urban general');
+
+  // ── PAG 10: DESPRE DALI — DOCUMENTAȚIE AVIZARE LUCRĂRI INTERVENȚIE ────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('DALI — DOCUMENTAȚIE DE AVIZARE A LUCRĂRILOR DE INTERVENȚIE',10);ftr();
+  cy=33;
+  cy=sec('10. DALI — DOCUMENTAȚIE DE AVIZARE A LUCRĂRILOR DE INTERVENȚIE',cy);cy+=2;
+  cy=body('DALI (Documentația de Avizare a Lucrărilor de Intervenție) este documentul tehnico-economic specific INTERVENȚIILOR pe construcțiile existente, echivalentul Studiului de Fezabilitate (SF) pentru construcțiile noi, reglementat de HG 907/2016, Anexa nr. 5. DALI este obligatorie pentru obținerea finanțărilor din fonduri publice (PNRR, POR, PNI) și pentru investițiile co-finanțate public-privat. Prezentul document orientativ UrbanX nu înlocuiește DALI întocmit de consultant autorizat.',14,cy);cy+=4;
+  cy=sec('10.1. CONȚINUT-CADRU DALI — CONF. HG 907/2016, ANEXA 5',cy);cy+=2;
+  cy=tblRow(['Secțiune DALI','Conținut principal','Cine elaborează'],cy,true,[40,100,42]);
+  [['A. INFORMAȚII GENERALE','Date investiție, localizare, CUI beneficiar, faza de finanțare','Beneficiar + consultant'],
+   ['B. DATE TEHNICE ALE INVESTIȚIEI','Starea tehnică a clădirii existente, expertiză tehnică, audit energetic','Expert tehnic AICPS + auditor energetic'],
+   ['C. SCENARII TEHNICO-ECONOMICE','Min. 2 scenarii de intervenție cu costuri și avantaje comparative','Proiectant + devizier'],
+   ['D. ANALIZA OPȚIUNILOR','Comparație scenarii + recomandare scenariu optim','Proiectant + beneficiar'],
+   ['E. ANALIZA FINANCIARĂ','Indicatori financiari: VAN, RIR, RBC, Payback','Economist + consultant'],
+   ['F. ANALIZA ECONOMICĂ','Costuri și beneficii economice pentru investiții publice','Economist'],
+   ['G. JUSTIFICAREA SOLUȚIEI','Argumentația alegerii scenariului recomandat','Proiectant'],
+   ['H. INDICATORI DE MONITORIZARE','KPI-uri de urmărit post-investiție','Beneficiar + PMU'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[40,100,42]));
+  cy+=3;
+  cy=body('DIFERENȚA SF vs. DALI: Studiul de Fezabilitate (SF) se aplică CONSTRUCȚIILOR NOI, iar DALI se aplică exclusiv INTERVENȚIILOR PE CLĂDIRI EXISTENTE (reabilitare, consolidare, modernizare, extindere). Ambele sunt reglementate de HG 907/2016 și sunt obligatorii pentru proiectele finanțate din fonduri publice sau credite garantate de stat.',14,cy);
+
+  // ── PAG 11: VEDERI 3D + BILANȚ FINAL ────────────────────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VEDERI 3D VOLUMETRIE PROPUSĂ — BILANȚ SUPRAFEȚE FINAL',11);ftr();
+  cy=33;
+  cy=addImg(caps.v3dDay,14,cy,half,58,'FIG. 7 — Viewer 3D Urban3D · ZI · Volumetrie propusă în context real');
+  addImg(caps.v3dNight,14+half+4,cy-58,half,58,'FIG. 8 — Viewer 3D Urban3D · NOAPTE · Impact nocturn');cy+=3;
+  cy=addImg(caps.v3dGolden,14,cy,half,52,'FIG. 9 — Viewer 3D Urban3D · GOLDEN HOUR · Fatade și umbre');
+  addImg(caps.imgBack,14+half+4,cy-52,half,52,'FIG. 10 — Vedere posterioară · Curte + spații verzi');cy+=3;
+  cy=sec('11. BILANȚ FINAL SUPRAFEȚE — SCENARIUL S2 RECOMANDAT',cy);cy+=2;
+  cy=tblRow(['Suprafață','Valoare calculată','% din ST','Status'],cy,true,[65,42,22,53]);
+  [['Suprafață teren (ST)',areaNum+' mp','100%','Conform CF'],
+   ['Suprafață construită la sol (SC)',scMax+' mp',''+params?.pot+'%','CONFORM POT max='+params?.pot+'%'],
+   ['Suprafață desfășurată totală (SDA)',sdTotal+' mp','CUT='+params?.cut,'CONFORM CUT max='+params?.cut],
+   ['Suprafețe verzi (SV)',svMin+' mp',''+params?.sv+'%','CONFORM SV min='+params?.sv+'%'],
+   ['Suprafețe parcaje la sol',pkMin*30+' mp est.',''+Math.round(pkMin*30/areaNum*100)+'%','Verificare proiect'],
+   ['Suprafețe circulații + alei',Math.round(areaNum*0.08)+' mp est.','~8%','Proiect peisagistic'],
+   ['Suprafețe libere',Math.max(0,areaNum-scMax-svMin-pkMin*30-Math.round(areaNum*0.08))+' mp','—','Proiect specific'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[65,42,22,53]));
+
+  // ── PAG 12: BAZA LEGALĂ + CONCLUZII + SEMNĂTURĂ ──────────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('BAZA LEGALĂ COMPLETĂ — CONCLUZII — CASETA TEHNICĂ',12);ftr();
+  cy=33;
+  cy=sec('12. CONCLUZII FINALE — STUDIU DE PREFEZABILITATE / FEZABILITATE',cy);cy+=2;
+  cy=body('Prezentul Studiu de Prefezabilitate / Fezabilitate / DALI pentru amplasamentul cu nr. cadastral '+nrcad+' (UTR '+utr+', suprafața '+areaNum+' mp, '+uat+', jud. '+judet+') are caracter STRICT ORIENTATIV și a fost generat digital prin platforma UrbanX. Documentul sintetizează indicatorii tehnico-economici estimativi ai investiției propuse (SD total='+sdTotal+' mp, H='+aedisH.toFixed(1)+'m, valoare totală estimată ~'+costTotal.toLocaleString()+' EUR) și nu înlocuiește Studiul de Fezabilitate sau DALI elaborat de consultant autorizat conform HG 907/2016.',14,cy);cy+=3;
+  cy=tblRow(['Indicator cheie','Valoare','Status'],cy,true,[80,52,50]);
+  [['Valoare totală investiție estimativă','~'+costTotal.toLocaleString()+' EUR','Orientativ ±30%'],
+   ['Suprafață desfășurată (SDA)',sdTotal+' mp','Conf. CUT='+params?.cut],
+   ['Randament brut estimat (ROI)',rentabilitate+'%/an','La 50 EUR/mp/lună'],
+   ['Perioadă de recuperare investiție',Math.ceil(costTotal/venitAn)+' ani','Payback simplu'],
+   ['Conformitate indicatori PUG','CONFORM (orientativ)','Verificare obligatorie CU'],
+   ['Studiu geotehnic','OBLIGATORIU','Înainte de proiectare structurală'],
+   ['Tip documentație obligatorie','SF (construcție nouă) / DALI (intervenție)','HG 907/2016'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[80,52,50]));
+  cy+=4;
+  cy=sec('12.1. BAZA LEGALĂ COMPLETĂ',cy);cy+=2;
+  ['HG nr. 907/2016 privind etapele de elaborare și conținutul-cadru al documentațiilor tehnico-economice.','Legea nr. 500/2002 privind finanțele publice — Capitolul privind investițiile publice.','Legea nr. 98/2016 privind achizițiile publice — art. 22 (studii de fezabilitate).','OUG nr. 114/2011 privind atribuirea anumitor contracte de achiziții publice în domeniile apărare și securitate.','Legea nr. 50/1991 republicată — autorizarea executării lucrărilor de construcții.','Legea nr. 350/2001 privind amenajarea teritoriului și urbanismul, republicată.','NP 074/2014 — Normativ privind principiile, exigențele și metodele cercetării geotehnice.','P100-1/2013 — Cod de proiectare seismică. Prevederi pentru clădiri (zona '+getSeismConfig().zona+').','Legea nr. 10/1995 republicată — Calitatea în construcții.','PUG '+uat+' în vigoare — UTR '+utr+' — Regulamentul Local de Urbanism.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=2;});
+  sign();
+  pdf.save('SF_DALI_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
+  ss('✅ Studiu Fezabilitate / DALI generat!');
+}
