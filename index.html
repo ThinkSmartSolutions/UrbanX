@@ -494,9 +494,6 @@ canvas#c2d{width:100%;height:100%;display:block}
   #panel{display:none!important}
   #ctrl3d{display:none!important}
   #btnPDF{display:none!important}
-  #btnMulti{display:none!important}
-  #btnUTR{display:none!important}
-  #btnGPS{display:none!important}
   /* #btnPanel vizibil in topbar */
   #mob-fab{display:none!important}
 
@@ -1468,24 +1465,9 @@ canvas#c2d{width:100%;height:100%;display:block}
 
 
 <script>
-// iOS Safari touch fix — global delegator
-// Rulează imediat, independent de modulele JS
 (function(){
-  document.addEventListener('touchstart', function(e){
-    const btn = e.target.closest('button');
-    if(btn){ btn._txS=e.touches[0].clientX; btn._tyS=e.touches[0].clientY; }
-  }, {passive:true});
-  document.addEventListener('touchend', function(e){
-    const btn = e.target.closest('button');
-    if(!btn) return;
-    // Skip dacă butonul are deja handler touch explicit
-    if(btn.getAttribute('ontouchstart')||btn.getAttribute('ontouchend')) return;
-    const t=e.changedTouches[0];
-    if(!t) return;
-    const dx=Math.abs(t.clientX-(btn._txS||t.clientX));
-    const dy=Math.abs(t.clientY-(btn._tyS||t.clientY));
-    if(dx<12&&dy<12){ e.preventDefault(); btn.click(); }
-  }, {passive:false});
+  document.addEventListener('touchstart',function(e){const b=e.target.closest('button');if(b){b._txS=e.touches[0].clientX;b._tyS=e.touches[0].clientY;}},{passive:true});
+  document.addEventListener('touchend',function(e){const b=e.target.closest('button');if(!b)return;const t=e.changedTouches[0];if(!t)return;const dx=Math.abs(t.clientX-(b._txS||t.clientX)),dy=Math.abs(t.clientY-(b._tyS||t.clientY));if(dx<12&&dy<12){e.preventDefault();b.click();}},{passive:false});
 })();
 </script>
 </body>
