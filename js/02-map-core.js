@@ -937,7 +937,7 @@ function buildFrontLayer(parcelGeo, fp, params, bearing){
     
     // Parcela normala sau de colt: front = toate laturile cu diff < 70°
     const fc2 = S.vol?.frontCount||1;
-    const FTHRESH = fc2>=3 ? 150 : fc2===2 ? 110 : 65;
+    const FTHRESH = fc2>=3 ? 150 : fc2===2 ? 100 : 40;
     const PTHRESH = fc2>=2 ? 170 : 120;
     const flFrontSet = new Set(sides.map((s,i)=>({s,i})).filter(({s})=>s.diff<FTHRESH).map(({i})=>i));
     // Daca nicio latura nu e sub prag (unghi ciudat), luam cea mai apropiata
@@ -1156,7 +1156,7 @@ function buildFP(geom, paramsOrUtr){
 
     // ── Determinam rolul fiecarei laturi ─────────────────────────────────
     const fc = S.vol?.frontCount||1;
-    const FTHRESH = fc>=3 ? 150 : fc===2 ? 110 : 65;
+    const FTHRESH = fc>=3 ? 150 : fc===2 ? 100 : 40;
 
     const sides = [];
     for(let i=0;i<ring.length-1;i++){
