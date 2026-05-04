@@ -3916,9 +3916,13 @@ async function generateSolarStudy(){
 // HG 907/2016 — Legea 500/2002 — Legea 98/2016
 // ════════════════════════════════════════════════════════════════════════════
 
-async function generateStudiuFezabilitate(){
+async function generateStudiuFezabilitate(paramOverrides){
   const ap=S.parcels[S.activeParcel??0];
   if(!ap?.geo?.geometry){ss('Selectați o parcelă pentru studiu.');return;}
+  // Dacă nu avem overrides (chemat direct din buton), deschidem modalul de parametri
+  if(!paramOverrides){
+    if(typeof showSFParamsModal==='function'){showSFParamsModal();return;}
+  }
   ss('Se generează Studiu de Fezabilitate / DALI...');
 
   const d=_initStudyPdf('Studiu de Prefezabilitate / Fezabilitate / DALI','SF-DALI · HG 907/2016',15);
@@ -3938,15 +3942,18 @@ async function generateStudiuFezabilitate(){
   const pkMin=Math.max(2,Math.ceil(sdTotal/120)*parseInt(params?.pk||1));
   const latN=lat.toFixed(4),lonE=lon.toFixed(4);
 
-  // ── Prețuri dinamice per UAT (din getFinanciarConfig) ──────────────────
+  // ── Prețuri dinamice per UAT — cu suport pentru overrides utilizator ──
   const _fc = getFinanciarConfig();
-  const _pretConstr = _fc.pretConstructie;  // EUR/mp SDA
-  const _pretTeren  = _fc.pretTeren;        // EUR/mp teren
-  const _chirieRef  = _fc.chirieRef;        // EUR/mp/lună
+  const _p  = paramOverrides||{};
+  const _pretConstr = parseFloat(_p.pretConstr  || _fc.pretConstructie);
+  const _pretTeren  = parseFloat(_p.pretTeren   || _fc.pretTeren);
+  const _chirieRef  = parseFloat(_p.chirieRef   || _fc.chirieRef);
+  const _pretVanzare= parseFloat(_p.pretVanzare || _fc.pretVanzare || _pretConstr*1.4);
+  const _rataOcup   = parseFloat(_p.rataOcupare || 85) / 100;
   const costConstr=Math.round(sdTotal*_pretConstr);
   const costTeren=Math.round(areaNum*_pretTeren);
   const costTotal=Math.round((costConstr+costTeren)*1.25); // +25% diverse+TVA+proiectare
-  const venitAn=Math.round(sdTotal*0.85*_chirieRef*12);
+  const venitAn=Math.round(sdTotal*_rataOcup*_chirieRef*12);
   const rentabilitate=((venitAn/costTotal)*100).toFixed(1); // % randament brut anual
 
   // Functiune
