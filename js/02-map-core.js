@@ -263,7 +263,7 @@ function addLayers(){
   L({id:'lot-demo-hatch',type:'fill',source:'lot-demo-src',paint:{
     'fill-color':'#ef4444',
     'fill-opacity':['case',['get','marked'],0.15,0],
-    'fill-pattern':null
+    'fill-opacity':0
   }});
   L({id:'lotizare-label',type:'symbol',source:'lotizare-label-src',minzoom:14,layout:{
     'text-field':['get','label'],'text-size':11,
@@ -986,7 +986,7 @@ function buildFrontLayer(parcelGeo, fp, params, bearing){
         geometry:{type:'Point', coordinates:[side.midX, side.midY]},
         properties:{
           type:'label',
-          label:`${side.role==='front'?'🟡 FRONT':''}${side.role==='posterior'?'🔴 SPATE':''}${side.role==='lateral_stg'?'🔵 STG':''}${side.role==='lateral_dr'?'🟣 DR':''} ${labelTxt}`,
+          label:`${side.role==='front'?'FRONT':''}${side.role==='posterior'?'SPATE':''}${side.role==='lateral_stg'?'STG':''}${side.role==='lateral_dr'?'DR':''} ${labelTxt}`,
           color: side.color
         }
       });
