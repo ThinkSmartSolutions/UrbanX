@@ -2411,7 +2411,6 @@ async function generateSSF(){
   const {pdf,W,H,DARK,GOLD,LIGHT,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,tblRow,addImg,sign}=_initStudyPdf('Scenariu de Siguranta la Foc','SSF',12);
   const RED=[180,20,20], GREEN=[15,100,40], ORANGE=[180,90,10];
   const caps=await _captureStudyMaps(ap,msg=>ss(msg));
-  const uat=getUATLabel();const judet=getUATJudet();
 
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13;
   const niv=AEDIS.corpuri[0]?.niv||4;
