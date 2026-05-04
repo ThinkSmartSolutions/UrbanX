@@ -774,6 +774,151 @@ function htmlIndicatori(){
 }
 
 // ═══ HTML PROIECT (Parametri + Volum unificate) ══════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
+// UI — 3 Scenarii Constructive
+// ═══════════════════════════════════════════════════════════════════════════
+function _htmlScenarii3(){
+  if(!S.vol3) S.vol3 = {generated:false,active:null,activeTab:'optim',
+    pug:{feats:[],metrics:{},params:{}},
+    max:{feats:[],metrics:{},params:{}},
+    optim:{feats:[],metrics:{},params:{}}};
+  const v3  = S.vol3;
+  const tab = v3.activeTab || 'optim';
+  const gen = v3.generated;
+  const act = v3.active;
+  const C   = {pug:'#3b82f6',max:'#f59e0b',optim:'#34d399'};
+  const IC  = {pug:'🔵',max:'🟠',optim:'🟢'};
+  const LB  = {pug:'PUG',max:'Maxim',optim:'Optim'};
+  const DESC= {
+    pug:  'Parametrii <b>exacti din PUG</b> pentru UTR-ul acestei parcele. Scenariul de referință legal.',
+    max:  '<b>Limita maximă</b> admisă: POT maxim, retrageri minime, calcan lateral. Scenariul cel mai agresiv.',
+    optim:'Numărul de niveluri cu <b>ROI estimat maxim</b>. Balanță construcție — piață — cost teren.'
+  };
+
+  // ── Butoane selecție tab ──────────────────────────────────────────────
+  const tabBtns = ['pug','max','optim'].map(k=>{
+    const on = tab===k;
+    return '<button onclick="S.vol3.activeTab=\''+k+'\';renderTab(\'proiect\')" '
+      +'style="flex:1;padding:9px 2px;border-radius:9px;border:2px solid '+(on?C[k]:'rgba(255,255,255,.08)')+';'
+      +'background:'+(on?C[k]+'18':'rgba(11,18,32,.6)')+';'
+      +'color:'+(on?C[k]:'#475569')+';cursor:pointer;font-size:10px;font-weight:800;'
+      +'display:flex;flex-direction:column;align-items:center;gap:3px;transition:all .15s">'
+      +'<span style="font-size:18px">'+IC[k]+'</span>'
+      +'<span>'+LB[k]+'</span>'
+      +(gen && v3[k]?.metrics?.niv ? '<span style="font-size:9px;opacity:.7">'+v3[k].metrics.niv+'niv·'+v3[k].metrics.hTot+'m</span>' : '')
+      +'</button>';
+  }).join('');
+
+  // ── Butoane generare ──────────────────────────────────────────────────
+  const btnSingle = '<button onclick="generateSingleScenariu(\''+tab+'\')" '
+    +'style="flex:1;padding:10px 8px;border-radius:9px;border:1px solid '+C[tab]+';'
+    +'background:'+C[tab]+'18;color:'+C[tab]+';cursor:pointer;font-size:11px;font-weight:800">'
+    +'⚡ '+IC[tab]+' '+LB[tab]
+    +'</button>';
+
+  const btnAll = '<button onclick="generateAllScenarii()" '
+    +'style="flex:1;padding:10px 8px;border-radius:9px;'
+    +'background:linear-gradient(135deg,rgba(37,99,235,.35),rgba(217,119,6,.25),rgba(5,150,105,.35));'
+    +'border:1px solid rgba(255,255,255,.18);color:#e2e8f0;cursor:pointer;font-size:11px;font-weight:800">'
+    +'⚡ Toate 3 simultan'
+    +'</button>';
+
+  // ── Tabel comparator ─────────────────────────────────────────────────
+  function cRow(label, fn, highlight, bestIsOptim){
+    const mP = v3.pug.metrics   || {};
+    const mM = v3.max.metrics   || {};
+    const mO = v3.optim.metrics || {};
+    const vals = [fn(mP), fn(mM), fn(mO)];
+    const nums = vals.map(v=>parseFloat(v)||0);
+    const maxN = Math.max(...nums);
+    return '<tr style="border-bottom:1px solid rgba(255,255,255,.04)">'
+      +'<td style="padding:6px 8px;color:#475569;font-size:10px;white-space:nowrap">'+label+'</td>'
+      +vals.map((v,i)=>{
+        const col = [C.pug,C.max,C.optim][i];
+        const isHighlight = highlight && nums[i]===maxN && maxN>0;
+        const isBest = bestIsOptim && i===2;
+        return '<td style="text-align:center;padding:6px 8px;font-weight:'+(isHighlight||isBest?800:500)+';'
+          +'color:'+(isBest?'#34d399':isHighlight?'#fbbf24':'#e2e8f0')+';white-space:nowrap">'
+          +(isBest?'★ ':'')+v+'</td>';
+      }).join('')
+      +'</tr>';
+  }
+
+  const comparator = !gen ? '' :
+    '<div style="background:#04090f;border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px 12px;margin-top:10px;overflow-x:auto">'
+    +'<div style="font-size:9px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Comparator indicatori</div>'
+    +'<table style="width:100%;border-collapse:collapse;font-size:11px">'
+    +'<thead><tr style="border-bottom:1px solid rgba(255,255,255,.1)">'
+    +'<th style="text-align:left;padding:6px 8px;color:#334155;font-size:9px;font-weight:700;text-transform:uppercase">Indicator</th>'
+    +['pug','max','optim'].map(k=>'<th style="text-align:center;padding:6px 8px;color:'+C[k]+';font-size:11px">'+IC[k]+' '+LB[k]+'</th>').join('')
+    +'</tr></thead>'
+    +'<tbody>'
+    +cRow('Niveluri',        m=>m.niv  ? m.niv+'niv' : '—', false, false)
+    +cRow('H total',         m=>m.hTot ? m.hTot+'m'  : '—', false, false)
+    +cRow('SC la sol',       m=>m.scMp ? m.scMp+'mp' : '—', true,  false)
+    +cRow('SD totală',       m=>m.sdMp ? m.sdMp+'mp' : '—', true,  false)
+    +cRow('POT real',        m=>m.potReal>=0 ? m.potReal+'%' : '—', true, false)
+    +cRow('SV minim (mp)',   m=>m.svMp ? m.svMp+'mp' : '—', false, false)
+    +cRow('Parcaje necesare',m=>m.pkNec>=0 ? m.pkNec+' loc' : '—', false, false)
+    +cRow('ROI estimat',     m=>m.roi  ? m.roi+'%'   : '—', false, true)
+    +'</tbody></table>'
+    +'</div>';
+
+  // ── Toggle vizualizare pe hartă ───────────────────────────────────────
+  const vizBtns = !gen ? '' :
+    '<div style="margin-top:10px">'
+    +'<div style="font-size:9px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Vizualizare hartă</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px">'
+    +['pug','max','optim'].map(k=>{
+      const on = act===k;
+      return '<button onclick="_setActiveScenario3(\''+k+'\')" '
+        +'style="padding:7px 2px;border-radius:7px;border:1px solid '+(on?C[k]:'rgba(255,255,255,.08)')+';'
+        +'background:'+(on?C[k]+'20':'transparent')+';color:'+(on?C[k]:'#475569')+';'
+        +'cursor:pointer;font-size:10px;font-weight:700">'+IC[k]+' '+k.toUpperCase()+'</button>';
+    }).join('')
+    +'<button onclick="_setActiveScenario3(\'all\')" '
+    +'style="padding:7px 2px;border-radius:7px;border:1px solid '+(act==='all'?'#d4af37':'rgba(255,255,255,.08)')+';'
+    +'background:'+(act==='all'?'rgba(212,175,55,.12)':'transparent')+';'
+    +'color:'+(act==='all'?'#d4af37':'#475569')+';cursor:pointer;font-size:10px;font-weight:700">◉ Toate</button>'
+    +'</div>'
+    +'<div style="font-size:9px;color:#334155;margin-top:5px">◉ Toate = stivă colorată: 🔵 PUG · 🟠 Maxim · 🟢 Optim</div>'
+    +'</div>';
+
+  // ── Asamblare ─────────────────────────────────────────────────────────
+  return '<div class="card" style="background:#06111f;border:1px solid rgba(59,130,246,.22);padding:12px;margin-bottom:10px">'
+
+    // Header
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
+    +'<div style="font-size:12px;font-weight:800;color:#d4af37;letter-spacing:.04em">⚡ SCENARII CONSTRUCTIVE</div>'
+    +(gen
+      ? '<span style="font-size:9px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.25);color:#34d399;border-radius:999px;padding:2px 9px">✓ generate</span>'
+      : '<span style="font-size:9px;color:#334155">selectați un scenariu și generați</span>'
+    )
+    +'</div>'
+
+    // Selector tab
+    +'<div style="display:flex;gap:5px;margin-bottom:10px">'
+    +tabBtns
+    +'</div>'
+
+    // Descriere
+    +'<div style="font-size:11px;color:#64748b;line-height:1.55;padding:8px 10px;background:#04090f;'
+    +'border-radius:7px;border-left:2px solid '+C[tab]+';margin-bottom:10px">'
+    +DESC[tab]
+    +'</div>'
+
+    // Butoane
+    +'<div style="display:flex;gap:6px">'
+    +btnSingle+btnAll
+    +'</div>'
+
+    // Comparator + viz
+    +comparator
+    +vizBtns
+
+    +'</div>';
+}
+
 function htmlProiect(){
   const ap = S.parcels[S.activeParcel??0];
   if(!ap) return '<div class="card"><div style="color:#64748b">Selectează un teren pe hartă.</div></div>';
@@ -834,6 +979,10 @@ function htmlProiect(){
   const overCut = sD_max && sD_calc > sD_max;
 
   return [
+  // ── SCENARII CONSTRUCTIVE (nou) ──
+  _htmlScenarii3(),
+  // ── SEPARATOR ──
+  '<div style="height:1px;background:rgba(255,255,255,.05);margin:0 0 8px"></div>',
   // ── CALCULE LIVE ──
   '<div class="card" style="background:#0a1628;border-color:rgba(212,175,55,.3)">',
   '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:6px"><div style="font-size:12px;font-weight:700;color:#d4af37">📐 Calcule live — '+esc(ap.nrcad||'?')+' · UTR: '+esc(ap.utr||'—')+'</div><div id="zone-badge" style="font-size:10px;padding:2px 8px;border-radius:20px;border:1px solid #34d39955;background:#34d39915;color:#34d399">Detectare zonă…</div></div>','<div id="live-calcule" style="font-size:11px;color:#94a3b8;margin-bottom:8px;padding:5px 8px;background:#080f1c;border-radius:6px">Modifică parametrii pentru a vedea calculele live</div>',

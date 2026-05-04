@@ -5446,3 +5446,298 @@ function toggleRapoarteMenu(){
     });
   }, 10);
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SISTEM 3 SCENARII CONSTRUCTIVE — PUG Automat · Maxim · Optim
+// Generează și compară 3 scenarii simultan pe aceeași parcelă
+// ═══════════════════════════════════════════════════════════════════════════
+
+const SCEN3 = {
+  COLS:  {pug:'#3b82f6', max:'#f59e0b', optim:'#34d399'},
+  DARK:  {pug:'#1d4ed8', max:'#b45309', optim:'#047857'},
+  ICONS: {pug:'🔵', max:'🟠', optim:'🟢'},
+  LABELS:{pug:'PUG Automat', max:'Maxim', optim:'Optim'},
+  DESC:  {
+    pug:  'Parametrii <b>exacti din PUG</b> — regulamentul urbanistic în vigoare pentru acest UTR. Scenariul de referință legal.',
+    max:  'Limita <b>maximă admisă</b> — POT la maxim, retrageri minime, calcan lateral. Cel mai agresiv scenariu legal.',
+    optim:'<b>ROI maxim estimat</b> — numărul de niveluri care maximizează raportul profit/investiție. Nu neapărat cel mai înalt.'
+  }
+};
+
+// Lazy init state vol3
+function _initVol3(){
+  if(!S.vol3) S.vol3 = {
+    generated:false, active:null, activeTab:'optim',
+    pug:  {feats:[], metrics:{}, params:{}},
+    max:  {feats:[], metrics:{}, params:{}},
+    optim:{feats:[], metrics:{}, params:{}}
+  };
+  return S.vol3;
+}
+
+// ── Adaugă sursele și layer-ul combinat (lazy) ─────────────────────────────
+function _ensureVol3Sources(){
+  if(window._vol3Ready) return;
+  try{
+    const E={type:'FeatureCollection',features:[]};
+    if(!map.getSource('vol-scen-src')) map.addSource('vol-scen-src',{type:'geojson',data:E});
+    if(!map.getLayer('vol-scen-3d')){
+      map.addLayer({
+        id:'vol-scen-3d', type:'fill-extrusion', source:'vol-scen-src',
+        paint:{
+          'fill-extrusion-color':['match',['get','scenariu3'],
+            'pug','#2563eb','max','#d97706','optim','#059669','#94a3b8'],
+          'fill-extrusion-height':['get','top'],
+          'fill-extrusion-base':['get','base'],
+          'fill-extrusion-opacity':0.52,
+          'fill-extrusion-vertical-gradient':true
+        }
+      });
+      // Ascundem inițial — afișăm doar în modul "Toate"
+      map.setLayoutProperty('vol-scen-3d','visibility','none');
+    }
+    window._vol3Ready = true;
+  }catch(e){ console.warn('vol3 sources init:',e.message); }
+}
+
+// ── Construiește parametrii pentru fiecare scenariu ────────────────────────
+function _buildParamsForScenario(ap, mode){
+  const utr = resolveUTR(ap.utr||'');
+  const r   = REGULI[utr]||{};
+  const base= ap.params || getDefaultParams(ap.utr);
+  // Valori de baza (PUG sau fallback)
+  const pot = r.pot  ?? base.pot  ?? 50;
+  const cut = r.cut  ?? base.cut  ?? 1.5;
+  const niv = r.niv  ?? base.niv  ?? 2;
+  const h   = r.h    ?? base.h    ?? 9;
+  const rf  = r.rf   ?? base.rf   ?? 5;
+  const rl  = r.rl   ?? base.rl   ?? 3;
+  const rs  = r.rs   ?? base.rs   ?? 5;
+  const sv  = r.sv   ?? base.sv   ?? 20;
+  const pk  = r.pk   ?? base.pk   ?? 1;
+
+  if(mode === 'pug'){
+    return {pot, cut, niv, h, rf, rl, rr:rl, rs, sv, pk};
+  }
+
+  if(mode === 'max'){
+    return {
+      pot: Math.min(pot, 80),       // POT la maxim permis (fără PUZ)
+      cut, niv, h,
+      rf:  Math.max(1, rf - 1),     // Retragere față -1m față de PUG
+      rl:  0,                        // Calcan lateral
+      rr:  0,                        // Calcan lateral
+      rs:  Math.max(2, rs - 1),     // Retragere spate -1m
+      sv:  Math.max(5, sv - 5),     // SV la minim tolerabil
+      pk
+    };
+  }
+
+  if(mode === 'optim'){
+    // Iterăm prin număr de niveluri (1 → max_niv) și căutăm ROI maxim
+    const pugP = _buildParamsForScenario(ap, 'pug');
+    const maxNiv = Math.max(1, pN(pugP.niv)||2);
+    const m2 = ap.area || 0;
+
+    // Estimăm SC din footprint PUG
+    let scEst = m2 * Math.min((pugP.pot||50)/100, 0.75);
+    try{
+      const fp = ap.geo?.geometry ? buildFP(ap.geo.geometry, pugP) : null;
+      if(fp?.geometry){
+        const fpA = turf.area(fp);
+        scEst = Math.min(fpA, m2*(pugP.pot||50)/100);
+      }
+    }catch(e){}
+
+    const LAND_EUR_M2 = 250; // estimat eur/m2 teren
+    const landVal = m2 * LAND_EUR_M2;
+
+    let bestROI = -Infinity, bestNiv = 1;
+    for(let n = 1; n <= maxNiv; n++){
+      const sd   = scEst * n;
+      const util = sd * 0.78; // 78% din SD = suprafață utilă vandabilă
+      // Cost crește neliniar: structuri înalte sunt mai scumpe
+      const costM2 = n <= 2 ? 870 : n <= 4 ? 980 : 1250;
+      // Preț vânzare scade pentru blocuri înalte (piață > cerere)
+      const revM2  = n <= 2 ? 1520 : n <= 4 ? 1320 : 1150;
+      const cost = util * costM2;
+      const rev  = util * revM2;
+      const roi  = (rev - cost) / (cost + landVal) * 100;
+      if(roi > bestROI){ bestROI = roi; bestNiv = n; }
+    }
+
+    return {
+      ...pugP,
+      niv: bestNiv,
+      h: +(bestNiv * Number(S.vol.hNiv||3)).toFixed(1)
+    };
+  }
+
+  return {...base};
+}
+
+// ── Calculează metricile pentru un set de features generat ─────────────────
+function _computeMetrics3(feats, params, ap){
+  const m2   = ap.area || 0;
+  const hNiv = Number(S.vol.hNiv||3);
+  const niv  = pN(params.niv)||1;
+  const hTot = (niv * hNiv).toFixed(1);
+
+  // SC real = suma amprentelor la sol (floor=0)
+  let scMp = 0;
+  feats.filter(f=>f.properties?.floor===0&&!f.properties?.isExistent)
+       .forEach(f=>{ try{ scMp += turf.area({type:'Feature',geometry:f.geometry,properties:{}}); }catch(e){} });
+  scMp = Math.round(scMp);
+
+  const sdMp    = scMp * niv;
+  const potReal = m2 > 0 ? Math.round(scMp/m2*100) : 0;
+  const svMp    = Math.round(m2 * (params.sv||20) / 100);
+  const pkNec   = Math.ceil(scMp * niv / 100 * (params.pk||0));
+
+  // ROI estimat (același algoritm ca optimizarea)
+  const landVal = m2 * 250;
+  const util    = sdMp * 0.78;
+  const costM2  = niv <= 2 ? 870 : niv <= 4 ? 980 : 1250;
+  const revM2   = niv <= 2 ? 1520 : niv <= 4 ? 1320 : 1150;
+  const cost    = util * costM2;
+  const rev     = util * revM2;
+  const roi     = cost > 0 ? Math.round((rev - cost)/(cost + landVal)*100) : 0;
+
+  return {niv, hTot, scMp, sdMp, potReal, svMp, pkNec, roi};
+}
+
+// ── Generează volumul pentru un scenariu (fără a schimba state-ul global) ──
+function _buildVolumeForScenario(ap, mode){
+  const params = _buildParamsForScenario(ap, mode);
+
+  // Salvăm state-ul curent
+  const savedParams  = ap.params ? JSON.parse(JSON.stringify(ap.params)) : null;
+  const savedScen    = S.vol.scenariuConstructie;
+  const savedMulti   = S.vol.multiVol;
+  const savedForma   = AEDIS.forma;
+  const savedRetras  = S.vol.retras;
+
+  // Setăm starea pentru acest scenariu
+  ap.params              = {...params};
+  S.vol.scenariuConstructie = 'liber';   // clean slate pentru comparație
+  S.vol.multiVol         = false;         // un singur volum pentru claritate
+  AEDIS.forma            = 'dreptunghi'; // formă simplă pentru comparator
+  S.vol.retras           = false;
+
+  // Generăm
+  let feats = [];
+  try{ feats = buildVolume(); }catch(e){ console.warn('buildVolume scenario '+mode+':', e.message); }
+
+  // Marcăm cu scenariu
+  feats.forEach(f=>{ f.properties.scenariu3 = mode; });
+
+  // Restaurăm state-ul
+  ap.params              = savedParams;
+  S.vol.scenariuConstructie = savedScen;
+  S.vol.multiVol         = savedMulti;
+  AEDIS.forma            = savedForma;
+  S.vol.retras           = savedRetras;
+
+  return {feats, params, metrics: _computeMetrics3(feats, params, ap)};
+}
+
+// ── Generează un singur scenariu ───────────────────────────────────────────
+function generateSingleScenariu(mode){
+  const v3 = _initVol3();
+  if(!mode) mode = v3.activeTab || 'pug';
+  const ap = S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry){ ss('⚠️ Selectați o parcelă mai întâi.'); return; }
+
+  _ensureVol3Sources();
+  ss('⚡ Generez ' + (SCEN3.LABELS[mode]||mode) + '…');
+
+  const result = _buildVolumeForScenario(ap, mode);
+  v3[mode]    = result;
+  v3.active   = mode;
+  v3.generated = !!(v3.pug.feats.length && v3.max.feats.length && v3.optim.feats.length);
+
+  // Activăm pe hartă
+  S.vol._lastFeats = result.feats;
+  S.vol.genDone    = true;
+  setSource('vol-src', {type:'FeatureCollection', features: result.feats});
+  _vol3SyncSources();
+
+  // Asigurăm că layer-ul principal e vizibil, cel comparat ascuns
+  try{ map.setLayoutProperty('vol-scen-3d','visibility','none'); }catch(e){}
+  try{ map.setLayoutProperty('vol-3d','visibility','visible'); }catch(e){}
+
+  set3D(65,-25);
+  const m = result.metrics;
+  ss(`✅ ${SCEN3.ICONS[mode]} ${SCEN3.LABELS[mode]}: ${m.niv} niv · H=${m.hTot}m · SC=${m.scMp}mp · ROI≈${m.roi}%`);
+  renderTab('proiect');
+  try{
+    const bb=turf.bbox(ap.geo);
+    map.fitBounds([[bb[0],bb[1]],[bb[2],bb[3]]],{padding:80,pitch:65,bearing:-25,maxZoom:18,duration:800});
+  }catch(e){}
+}
+
+// ── Generează toate 3 scenariile simultan ──────────────────────────────────
+function generateAllScenarii(){
+  const v3 = _initVol3();
+  const ap = S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry){ ss('⚠️ Selectați o parcelă mai întâi.'); return; }
+
+  _ensureVol3Sources();
+  ss('⚡ Generez 3 scenarii…');
+
+  ['pug','max','optim'].forEach(mode=>{
+    v3[mode] = _buildVolumeForScenario(ap, mode);
+  });
+
+  v3.generated = true;
+  v3.active    = 'all';
+
+  // vol-src arată scenariul Optim ca implicit
+  S.vol._lastFeats = v3.optim.feats;
+  S.vol.genDone    = true;
+  setSource('vol-src', {type:'FeatureCollection', features: v3.optim.feats});
+  _vol3SyncSources();
+
+  // Afișăm layerul combinat
+  try{ map.setLayoutProperty('vol-scen-3d','visibility','visible'); }catch(e){}
+  try{ map.setLayoutProperty('vol-3d','visibility','none'); }catch(e){}
+
+  set3D(65,-25);
+  const p=v3.pug.metrics, mx=v3.max.metrics, o=v3.optim.metrics;
+  ss(`✅ PUG: ${p.niv}niv·${p.hTot}m · MAX: ${mx.niv}niv·${mx.hTot}m · OPTIM: ${o.niv}niv·ROI≈${o.roi}%`);
+  renderTab('proiect');
+  try{
+    const bb=turf.bbox(ap.geo);
+    map.fitBounds([[bb[0],bb[1]],[bb[2],bb[3]]],{padding:80,pitch:65,bearing:-25,maxZoom:18,duration:900});
+  }catch(e){}
+}
+
+// ── Comută scenariu activ vizibil pe hartă ────────────────────────────────
+function _setActiveScenario3(key){
+  const v3 = _initVol3();
+  if(!v3.generated && key !== 'none') return;
+  v3.active = key;
+
+  if(key === 'all'){
+    _vol3SyncSources();
+    try{ map.setLayoutProperty('vol-scen-3d','visibility','visible'); }catch(e){}
+    try{ map.setLayoutProperty('vol-3d','visibility','none'); }catch(e){}
+  } else {
+    const feats = v3[key]?.feats || [];
+    setSource('vol-src', {type:'FeatureCollection', features:feats});
+    S.vol._lastFeats = feats;
+    try{ map.setLayoutProperty('vol-scen-3d','visibility','none'); }catch(e){}
+    try{ map.setLayoutProperty('vol-3d','visibility','visible'); }catch(e){}
+  }
+  renderTab('proiect');
+  if(typeof _v3dIsOpen==='function' && _v3dIsOpen())
+    setTimeout(()=>{ try{_v3dRebuildFast();}catch(e){} },200);
+}
+
+// ── Sincronizează sursa combinată ──────────────────────────────────────────
+function _vol3SyncSources(){
+  const v3 = _initVol3();
+  const all = [...(v3.pug.feats||[]),...(v3.max.feats||[]),...(v3.optim.feats||[])];
+  try{ setSource('vol-scen-src',{type:'FeatureCollection',features:all}); }catch(e){}
+}
+
