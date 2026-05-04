@@ -632,6 +632,11 @@ function _v3dBuild(ap){
   grid.material.opacity=0.35; grid.material.transparent=true;
   grid.position.y=0.01; scene.add(grid);
 
+  // ── Zone colorate: parcelă, edificabil, retrageri, SV, parcaje ──────────
+  _v3dAddZones(THREE, scene, toLoc, ap, params);
+  // Legendă
+  setTimeout(_v3dAddLegend, 300);
+
   // Coordonate locale
   const ring0 = ap.geo.geometry.type==='Polygon'
     ? ap.geo.geometry.coordinates[0]
@@ -965,7 +970,6 @@ function _v3dAddDistanceLines(THREE, scene, toLoc){
     if(!distFeats?.length){
       console.log('_v3dAddDistanceLines: dist-src gol, se recalculeaza...');
       updateDistanceLines();
-      // Retry după 500ms
       setTimeout(()=>{
         const feats2 = map.getSource('dist-src')?._data?.features;
         if(feats2?.length && V3D.scene && V3D.r && V3D.cam){
@@ -984,76 +988,300 @@ function _v3dAddDistanceLines(THREE, scene, toLoc){
       const coords = f.geometry.coordinates;
       if(coords.length < 2) return;
 
-      const dist = f.properties?.dist ?? 0;
+      const dist  = f.properties?.dist ?? 0;
       const label = f.properties?.label || dist.toFixed(1)+'m';
-      const type = f.properties?.type || 'to_neighbor';
-      const ok = dist >= minDist;
-      const col = type==='between_own' ? '#fbbf24' : ok ? '#34d399' : '#f87171';
+      const type  = f.properties?.type || 'to_neighbor';
+      const ok    = dist >= minDist;
+
+      // ── Culori clare, distincte per tip ──────────────────────────────
+      // between_own  = galben-auriu  (distanță între volumele proprii)
+      // to_neighbor  = verde aprins (ok) / roșu aprins (prea aproape)
+      const col     = type==='between_own' ? '#f59e0b' : ok ? '#22c55e' : '#ef4444';
+      const colBg   = type==='between_own' ? 'rgba(40,24,0,0.95)'
+                    : ok                   ? 'rgba(0,40,18,0.95)'
+                    :                        'rgba(50,0,0,0.95)';
+      const colBrd  = type==='between_own' ? '#fbbf24' : ok ? '#4ade80' : '#f87171';
+      const icon    = type==='between_own' ? '↔' : ok ? '✓' : '⚠';
 
       try{
-        // Convertim coordonatele geografice → locale Three.js
         const pts3D = coords.map(c=>toLoc(c));
         if(pts3D.some(p=>!p||isNaN(p[0])||isNaN(p[1]))) return;
 
-        // Linie la y=0.4m - folosim LineSegments cu depthTest:false și renderOrder mare
-        const yLine = 0.4;
+        const yLine = 0.5;
+
+        // ── Linie principală — mai groasă, dashed-look via segmente ──────
         const positions = new Float32Array(pts3D.flatMap(([x,z])=>[x, yLine, z]));
         const geo = new THREE.BufferGeometry();
         geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-
-        // LineBasicMaterial cu depthTest:false
         const mat = new THREE.LineBasicMaterial({
           color: new THREE.Color(col),
-          linewidth: 3,
-          transparent: false,
+          linewidth: 4,
+          transparent: true,
+          opacity: 0.95,
           depthTest: false,
           depthWrite: false
         });
         const line = new THREE.Line(geo, mat);
         line.renderOrder = 999;
-        line.onBeforeRender = (renderer)=>{ renderer.clearDepth(); }; // forțat deasupra
+        line.onBeforeRender = (renderer)=>{ renderer.clearDepth(); };
         scene.add(line);
 
-        // Sfere la capete — vizibile mereu
+        // ── Sfere mari la capete ──────────────────────────────────────────
         [pts3D[0], pts3D[pts3D.length-1]].forEach(([x,z])=>{
-          const sg = new THREE.SphereGeometry(0.20, 6, 6);
-          const sm = new THREE.MeshBasicMaterial({color:new THREE.Color(col), depthTest:false, depthWrite:false});
+          const sg = new THREE.SphereGeometry(0.30, 8, 8);
+          const sm = new THREE.MeshBasicMaterial({
+            color: new THREE.Color(col),
+            depthTest: false, depthWrite: false
+          });
           const sp = new THREE.Mesh(sg, sm);
-          sp.position.set(x, yLine, z); sp.renderOrder=1000;
+          sp.position.set(x, yLine, z);
+          sp.renderOrder = 1000;
           sp.onBeforeRender = (r2)=>{ r2.clearDepth(); };
           scene.add(sp);
         });
 
-        // Etichetă distanță — sprite canvas
-        const midIdx = Math.floor(pts3D.length/2);
+        // ── Etichetă MARE, clară ─────────────────────────────────────────
+        const midIdx = Math.floor(pts3D.length / 2);
         const [mx, mz] = pts3D[midIdx];
+
         const cv = document.createElement('canvas');
-        cv.width=112; cv.height=36;
+        cv.width = 220; cv.height = 64;
         const ctx2 = cv.getContext('2d');
-        // Fundal rotunjit
-        ctx2.fillStyle = type==='between_own'?'rgba(30,18,0,0.92)':ok?'rgba(0,28,15,0.92)':'rgba(30,0,0,0.92)';
-        if(ctx2.roundRect){ ctx2.beginPath();ctx2.roundRect(2,3,108,30,10);ctx2.fill(); }
-        else{ ctx2.fillRect(2,3,108,30); }
-        // Text distanță
-        ctx2.fillStyle = col;
-        ctx2.font = 'bold 16px Arial,sans-serif';
-        ctx2.textAlign = 'center'; ctx2.textBaseline = 'middle';
-        ctx2.shadowColor = 'rgba(0,0,0,0.8)'; ctx2.shadowBlur = 3;
-        ctx2.fillText(label, 56, 18);
+
+        // Fundal rotunjit cu border colorat
+        ctx2.shadowColor = 'rgba(0,0,0,0.7)';
+        ctx2.shadowBlur = 8;
+        ctx2.fillStyle = colBg;
+        if(ctx2.roundRect){
+          ctx2.beginPath(); ctx2.roundRect(3, 3, 214, 58, 14); ctx2.fill();
+        } else {
+          ctx2.fillRect(3, 3, 214, 58);
+        }
+        // Border colorat
+        ctx2.shadowBlur = 0;
+        ctx2.strokeStyle = colBrd;
+        ctx2.lineWidth = 3;
+        if(ctx2.roundRect){
+          ctx2.beginPath(); ctx2.roundRect(3, 3, 214, 58, 14); ctx2.stroke();
+        } else {
+          ctx2.strokeRect(3, 3, 214, 58);
+        }
+
+        // Icon stânga
+        ctx2.font = 'bold 26px Arial,sans-serif';
+        ctx2.fillStyle = colBrd;
+        ctx2.textAlign = 'center';
+        ctx2.textBaseline = 'middle';
+        ctx2.fillText(icon, 26, 32);
+
+        // Separator vertical
+        ctx2.strokeStyle = 'rgba(255,255,255,0.15)';
+        ctx2.lineWidth = 1;
+        ctx2.beginPath(); ctx2.moveTo(48, 10); ctx2.lineTo(48, 54); ctx2.stroke();
+
+        // Valoare distanță — mare și clară
+        ctx2.fillStyle = '#ffffff';
+        ctx2.font = 'bold 28px Arial,sans-serif';
+        ctx2.textAlign = 'center';
+        ctx2.shadowColor = 'rgba(0,0,0,0.9)';
+        ctx2.shadowBlur = 4;
+        ctx2.fillText(label, 135, 24);
+
+        // Sub-label tip
+        ctx2.fillStyle = colBrd;
+        ctx2.font = 'bold 14px Arial,sans-serif';
+        ctx2.shadowBlur = 2;
+        const subLabel = type === 'between_own' ? 'între volume' : ok ? 'conformă' : 'sub minim!';
+        ctx2.fillText(subLabel, 135, 48);
 
         const tex = new THREE.CanvasTexture(cv);
-        const spMat = new THREE.SpriteMaterial({map:tex, transparent:true, depthTest:false, sizeAttenuation:true});
+        const spMat = new THREE.SpriteMaterial({
+          map: tex,
+          transparent: true,
+          depthTest: false,
+          sizeAttenuation: true
+        });
         const sp2 = new THREE.Sprite(spMat);
-        sp2.scale.set(4.0, 1.2, 1);
-        sp2.position.set(mx, yLine+1.2, mz);
+        // Scale MARE — labelele se văd clar
+        sp2.scale.set(9.0, 2.6, 1);
+        sp2.position.set(mx, yLine + 2.0, mz);
         sp2.renderOrder = 1001;
         scene.add(sp2);
         count++;
-      }catch(e2){ console.warn('dist line error:',e2.message); }
+      }catch(e2){ console.warn('dist line error:', e2.message); }
     });
 
     console.log(`_v3dAddDistanceLines: ${count}/${distFeats.length} linii randate in viewer 3D`);
   }catch(e){ console.warn('_v3dAddDistanceLines:', e.message); }
+}
+
+// ── Zone colorate în viewer 3D (retrageri, edificabil, SV, parcaje) ─────────
+function _v3dAddZones(THREE, scene, toLoc, ap, params){
+  try{
+    // Helper: creează un mesh plan colorat dintr-un polygon geografic
+    function makeZoneMesh(ringCoords, color, opacity, yPos){
+      try{
+        const pts = ringCoords.map(c=>toLoc(c));
+        if(pts.length < 3) return null;
+        // Triangulare simplă (ear-clipping pentru convex/simplu)
+        const shape = new THREE.Shape();
+        shape.moveTo(pts[0][0], pts[0][1]);
+        for(let i=1;i<pts.length;i++) shape.lineTo(pts[i][0], pts[i][1]);
+        shape.closePath();
+        const geo = new THREE.ShapeGeometry(shape);
+        // Rotire XY→XZ
+        const pos = geo.attributes.position;
+        for(let i=0;i<pos.count;i++){
+          const x=pos.getX(i), y=pos.getY(i);
+          pos.setXYZ(i, x, yPos||0.02, -y);
+        }
+        pos.needsUpdate=true; geo.computeVertexNormals();
+        const mat = new THREE.MeshBasicMaterial({
+          color: new THREE.Color(color),
+          transparent: true,
+          opacity: opacity||0.25,
+          depthWrite: false,
+          side: THREE.DoubleSide
+        });
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.renderOrder = 10;
+        return mesh;
+      }catch(e){ return null; }
+    }
+
+    // Helper: linie de contur colorată
+    function makeOutline(ringCoords, color, yPos, thickness){
+      try{
+        const pts = ringCoords.map(c=>toLoc(c));
+        const positions = new Float32Array(pts.flatMap(([x,z])=>[x, yPos||0.08, z]));
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+        const mat = new THREE.LineBasicMaterial({
+          color: new THREE.Color(color),
+          linewidth: thickness||2,
+          transparent: true, opacity: 0.9,
+          depthTest: false, depthWrite: false
+        });
+        const line = new THREE.LineLoop(geo, mat);
+        line.renderOrder = 20;
+        return line;
+      }catch(e){ return null; }
+    }
+
+    // ── 1. PARCELĂ — contur auriu distinct ────────────────────────────────
+    const ring0 = ap.geo.geometry.type==='Polygon'
+      ? ap.geo.geometry.coordinates[0]
+      : ap.geo.geometry.coordinates[0][0];
+    const parcelOutline = makeOutline(ring0, '#d4af37', 0.15, 3);
+    if(parcelOutline) scene.add(parcelOutline);
+    // Fill semi-transparent
+    const parcelFill = makeZoneMesh(ring0, '#d4af37', 0.06, 0.01);
+    if(parcelFill) scene.add(parcelFill);
+
+    // ── 2. EDIFICABIL — zona construibilă (retrageri aplicate) ────────────
+    try{
+      const edFeats = map.getSource('edificabil-src')?._data?.features||[];
+      edFeats.forEach(f=>{
+        if(!f.geometry) return;
+        const rings = f.geometry.type==='Polygon'
+          ? [f.geometry.coordinates[0]]
+          : f.geometry.coordinates.map(p=>p[0]);
+        rings.forEach(ring=>{
+          const fill = makeZoneMesh(ring, '#7c3aed', 0.20, 0.03);
+          if(fill) scene.add(fill);
+          const outline = makeOutline(ring, '#a78bfa', 0.20, 3);
+          if(outline) scene.add(outline);
+        });
+      });
+    }catch(e){}
+
+    // ── 3. RETRAGERI — zone de retragere față/lateral/spate ──────────────
+    try{
+      const setbackFeats = map.getSource('setback-src')?._data?.features||[];
+      setbackFeats.forEach(f=>{
+        if(!f.geometry) return;
+        const col = f.properties?.color||'#ef4444';
+        const rings = f.geometry.type==='Polygon'
+          ? [f.geometry.coordinates[0]]
+          : f.geometry.coordinates.map(p=>p[0]);
+        rings.forEach(ring=>{
+          const fill = makeZoneMesh(ring, col, 0.18, 0.04);
+          if(fill) scene.add(fill);
+          const outline = makeOutline(ring, col, 0.12, 2);
+          if(outline) scene.add(outline);
+        });
+      });
+    }catch(e){}
+
+    // ── 4. SPAȚII VERZI — zona SV ─────────────────────────────────────────
+    try{
+      const svFeats = map.getSource('sv-src')?._data?.features||[];
+      svFeats.forEach(f=>{
+        if(!f.geometry) return;
+        const rings = f.geometry.type==='Polygon'
+          ? [f.geometry.coordinates[0]]
+          : f.geometry.coordinates.map(p=>p[0]);
+        rings.forEach(ring=>{
+          const fill = makeZoneMesh(ring, '#22c55e', 0.30, 0.05);
+          if(fill) scene.add(fill);
+          const outline = makeOutline(ring, '#4ade80', 0.12, 2);
+          if(outline) scene.add(outline);
+        });
+      });
+    }catch(e){}
+
+    // ── 5. PARCAJE — zona parcaje ─────────────────────────────────────────
+    try{
+      const fpFeats = map.getSource('fp-src')?._data?.features||[];
+      fpFeats.filter(f=>f.properties?.tip==='parcare'||f.properties?.type==='parcare').forEach(f=>{
+        if(!f.geometry) return;
+        const rings = f.geometry.type==='Polygon'
+          ? [f.geometry.coordinates[0]]
+          : f.geometry.coordinates.map(p=>p[0]);
+        rings.forEach(ring=>{
+          const fill = makeZoneMesh(ring, '#f97316', 0.30, 0.05);
+          if(fill) scene.add(fill);
+          const outline = makeOutline(ring, '#fb923c', 0.12, 2);
+          if(outline) scene.add(outline);
+        });
+      });
+    }catch(e){}
+
+  }catch(e){ console.warn('_v3dAddZones:', e.message); }
+}
+
+// ── Legendă viewer 3D ─────────────────────────────────────────────────────
+function _v3dAddLegend(){
+  try{
+    const existing = document.getElementById('v3d-legend');
+    if(existing) existing.remove();
+    const legend = document.createElement('div');
+    legend.id = 'v3d-legend';
+    legend.style.cssText = `
+      position:absolute; bottom:36px; left:10px; z-index:50;
+      background:rgba(7,14,28,0.92); border:1px solid rgba(255,255,255,0.12);
+      border-radius:10px; padding:8px 12px; font-size:10px;
+      color:#e2e8f0; pointer-events:none; backdrop-filter:blur(8px);
+      min-width:160px; box-shadow:0 4px 16px rgba(0,0,0,0.5);
+    `;
+    legend.innerHTML = `
+      <div style="font-size:9px;color:#64748b;text-transform:uppercase;letter-spacing:.08em;font-weight:700;margin-bottom:6px">Legendă viewer 3D</div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <div style="display:flex;align-items:center;gap:7px"><span style="width:14px;height:14px;border-radius:3px;background:#d4af37;flex-shrink:0;border:2px solid #fbbf24"></span><span>Parcelă proprie</span></div>
+        <div style="display:flex;align-items:center;gap:7px"><span style="width:14px;height:14px;border-radius:3px;background:rgba(124,58,237,0.5);flex-shrink:0;border:2px solid #a78bfa"></span><span>Edificabil (zona construibilă)</span></div>
+        <div style="display:flex;align-items:center;gap:7px"><span style="width:14px;height:14px;border-radius:3px;background:rgba(239,68,68,0.4);flex-shrink:0;border:2px solid #ef4444"></span><span>Retrageri (rf / rl / rs)</span></div>
+        <div style="display:flex;align-items:center;gap:7px"><span style="width:14px;height:14px;border-radius:3px;background:rgba(34,197,94,0.5);flex-shrink:0;border:2px solid #4ade80"></span><span>Spații verzi</span></div>
+        <div style="display:flex;align-items:center;gap:7px"><span style="width:14px;height:14px;border-radius:3px;background:rgba(249,115,22,0.5);flex-shrink:0;border:2px solid #fb923c"></span><span>Parcaje</span></div>
+        <div style="border-top:1px solid rgba(255,255,255,0.08);margin:4px 0;padding-top:4px">
+          <div style="display:flex;align-items:center;gap:7px"><span style="color:#22c55e;font-size:14px;line-height:1">✓</span><span style="color:#22c55e">Distanță conformă</span></div>
+          <div style="display:flex;align-items:center;gap:7px"><span style="color:#ef4444;font-size:14px;line-height:1">⚠</span><span style="color:#ef4444">Sub minim (${S.vol.multiVolDist||6}m)</span></div>
+          <div style="display:flex;align-items:center;gap:7px"><span style="color:#f59e0b;font-size:14px;line-height:1">↔</span><span style="color:#f59e0b">Între volume proprii</span></div>
+        </div>
+      </div>
+    `;
+    const container = document.getElementById('v3d-canvas')?.parentElement;
+    if(container) container.appendChild(legend);
+  }catch(e){ console.warn('_v3dAddLegend:', e.message); }
 }
 
 
