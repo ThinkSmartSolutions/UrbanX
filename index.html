@@ -1033,6 +1033,10 @@ canvas#c2d{width:100%;height:100%;display:block}
     <button onclick="infoDrawerOpen('eim')" title="Află mai multe" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#64748b;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37';this.style.borderColor='rgba(212,175,55,.4)'" onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,.1)'">ⓘ</button>
   </div>
   <div style="display:flex;align-items:center;gap:2px;padding:2px 4px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+    <button onclick="generateStudiuAmplasament();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#818cf8;padding:5px 8px;cursor:pointer;border-radius:6px;font-size:12px">🗺 Studiu de Amplasament & Teritoriu</button>
+    <button onclick="infoDrawerOpen('amplasament')" title="Află mai multe" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#64748b;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37';this.style.borderColor='rgba(212,175,55,.4)'" onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,.1)'">ⓘ</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:2px;padding:2px 4px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
     <button onclick="generateSSF();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#f87171;padding:5px 8px;cursor:pointer;border-radius:6px;font-size:12px">🔥 Studiu Siguranță la Foc (ISU)</button>
     <button onclick="infoDrawerOpen('isu')" title="Află mai multe" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#64748b;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37';this.style.borderColor='rgba(212,175,55,.4)'" onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,.1)'">ⓘ</button>
   </div>
@@ -1278,20 +1282,20 @@ canvas#c2d{width:100%;height:100%;display:block}
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <!-- UrbanX JS Modules — ordinea de incarcare e importanta -->
-<script src="js/00-globals.js?v=1777871955"></script>
-<script src="js/02-map-core.js?v=1777871955"></script>
-<script src="js/03-ui-panel.js?v=1777871955"></script>
-<script src="js/04-search.js?v=1777871955"></script>
-<script src="js/05-cad-utils.js?v=1777871955"></script>
-<script src="js/06-aedis.js?v=1777871955"></script>
-<script src="js/07-pdf-utils.js?v=1777871955"></script>
-<script src="js/08-lotizare.js?v=1777871955"></script>
-<script src="js/09-pdf-engine.js?v=1777871955"></script>
-<script src="js/10-studies.js?v=1777871955"></script>
-<script src="js/11-viewer3d.js?v=1777871955"></script>
-<script src="js/12-admin.js?v=1777871955"></script>
+<script src="js/00-globals.js?v=2026050401"></script>
+<script src="js/02-map-core.js?v=2026050401"></script>
+<script src="js/03-ui-panel.js?v=2026050401"></script>
+<script src="js/04-search.js?v=2026050401"></script>
+<script src="js/05-cad-utils.js?v=2026050401"></script>
+<script src="js/06-aedis.js?v=2026050401"></script>
+<script src="js/07-pdf-utils.js?v=2026050401"></script>
+<script src="js/08-lotizare.js?v=2026050401"></script>
+<script src="js/09-pdf-engine.js?v=2026050401"></script>
+<script src="js/10-studies.js?v=2026050401"></script>
+<script src="js/11-viewer3d.js?v=2026050401"></script>
+<script src="js/12-admin.js?v=2026050401"></script>
 <script src="js/14-docx-export.js"></script>
-<script src="js/13-info-drawer.js?v=1777871955"></script>
+<script src="js/13-info-drawer.js?v=2026050401"></script>
 
 <script>
 // ── Lotizare layout: decalează harta când panoul e vizibil ─────────────────
