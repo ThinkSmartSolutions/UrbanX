@@ -1371,17 +1371,28 @@ function _v3dAddLegend(){
 
     const legend = document.createElement('div');
     legend.id = 'v3d-legend';
+    const _legMinimized = window._v3dLegendMin || false;
     legend.style.cssText = `
       position:absolute; bottom:36px; left:10px; z-index:50;
       background:rgba(5,12,25,0.95); border:1px solid rgba(212,175,55,.35);
-      border-radius:10px; padding:10px 13px; font-size:10px;
-      color:#e2e8f0; pointer-events:none; backdrop-filter:blur(14px);
-      min-width:180px; box-shadow:0 4px 24px rgba(0,0,0,.65);
+      border-radius:10px; padding:8px 13px; font-size:10px;
+      color:#e2e8f0; pointer-events:all; backdrop-filter:blur(14px);
+      min-width:${_legMinimized?'120':'180'}px; box-shadow:0 4px 24px rgba(0,0,0,.65);
+      cursor:pointer; user-select:none;
     `;
+    legend.title = 'Click pentru minimizare/expandare';
+    legend.onclick = () => {
+      window._v3dLegendMin = !window._v3dLegendMin;
+      _v3dAddLegend();
+    };
     legend.innerHTML = `
-      <div style="font-size:9px;color:#d4af37;text-transform:uppercase;letter-spacing:.08em;font-weight:700;margin-bottom:6px;border-bottom:1px solid rgba(212,175,55,.25);padding-bottom:5px">
-        📐 Bilanț · UTR <span style="color:#fbbf24">${utr}</span>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:${_legMinimized?'0':'6px'};${_legMinimized?'':'border-bottom:1px solid rgba(212,175,55,.25);padding-bottom:5px'}">
+        <span style="font-size:9px;color:#d4af37;text-transform:uppercase;letter-spacing:.08em;font-weight:700">
+          📐 Bilanț · UTR <span style="color:#fbbf24">${utr}</span>
+        </span>
+        <span style="color:#64748b;font-size:14px;margin-left:8px;line-height:1">${_legMinimized?'＋':'－'}</span>
       </div>
+      ${_legMinimized ? '' : `
       <div style="display:grid;grid-template-columns:auto auto;gap:2px 10px;margin-bottom:9px">
         <span style="color:#64748b">Teren (ST)</span>
         <span style="color:#fbbf24;font-weight:700;text-align:right">${area} mp</span>
@@ -1402,6 +1413,7 @@ function _v3dAddLegend(){
         <div style="display:flex;align-items:center;gap:5px"><span style="color:#ef4444;font-size:12px;width:12px">⚠</span><span style="color:#ef4444;font-size:9px">Sub minim (${minDist}m)</span></div>
         <div style="display:flex;align-items:center;gap:5px"><span style="color:#f59e0b;font-size:12px;width:12px">↔</span><span style="color:#f59e0b;font-size:9px">Între volume proprii</span></div>
       </div>
+      `}
     `;
     const container = document.getElementById('v3d-canvas')?.parentElement;
     if(container) container.appendChild(legend);
