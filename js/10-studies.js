@@ -3921,6 +3921,14 @@ async function generateStudiuFezabilitate(paramOverrides){
   // Dacă nu avem overrides (chemat direct din buton), deschidem modalul de parametri
   if(!paramOverrides){
     if(typeof showSFParamsModal==='function'){showSFParamsModal();return;}
+    // Fallback daca 14-docx-export.js nu e incarcat - genereaza PDF cu valorile default
+  }
+  // Fallback getFinanciarConfig daca nu e definit
+  if(typeof getFinanciarConfig==='undefined'){
+    window.getFinanciarConfig=function(){
+      const f=(typeof S_UAT!=='undefined'&&S_UAT.financiar)?S_UAT.financiar:{};
+      return {pretConstructie:f.pretConstructie||700,pretTeren:f.pretTeren||800,chirieRef:f.chirieRef||50,pretVanzare:f.pretVanzare||1800};
+    };
   }
   ss('Se generează Studiu de Fezabilitate / DALI...');
 

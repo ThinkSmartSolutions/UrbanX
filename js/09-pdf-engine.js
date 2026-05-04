@@ -149,7 +149,7 @@ function _initStudyPdf(studyName, studySubtitle, totalPages){
     let maxLines=1;
     cols.forEach((c,ci)=>{
       if(!colW[ci]) return;
-      const lines=pdf.splitTextToSize(S2(String(c??'\u2014')),colW[ci]-4);
+      const lines=pdf.splitTextToSize(S2(String(c??'\u2014')),Math.max(5,colW[ci]-4));
       maxLines=Math.max(maxLines,lines.length);
     });
     const rowH=Math.max(isHeader?8.5:8,maxLines*lineH+(isHeader?3:2));
@@ -164,10 +164,12 @@ function _initStudyPdf(studyName, studySubtitle, totalPages){
       pdf.setDrawColor(...GRAY4);pdf.setLineWidth(0.15);pdf.line(14,y-5.5+rowH,W-14,y-5.5+rowH);
     }
     cols.forEach((c,ci)=>{
-      const xc=14+colW.slice(0,ci).reduce((a,b)=>a+b,0)+(isHeader&&ci===0?5:3);
+      const cw=colW[ci];if(!cw)return; // skip col if no width defined
+      const xc=14+colW.slice(0,ci).reduce((a,b)=>a+(b||0),0)+(isHeader&&ci===0?5:3);
+      if(isNaN(xc)||xc<0||xc>200)return; // guard NaN coordinates
       pdf.setFontSize(fs);pdf.setFont('helvetica',isHeader?'bold':'normal');
       pdf.setTextColor(...(isHeader?GOLD3:[26,38,56]));
-      const lines=pdf.splitTextToSize(S2(String(c??'\u2014')),colW[ci]-5);
+      const lines=pdf.splitTextToSize(S2(String(c??'\u2014')),Math.max(5,cw-5));
       lines.forEach((l,li)=>pdf.text(l,xc,y+li*lineH));
     });
     return y+rowH;

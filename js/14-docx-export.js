@@ -1,3 +1,17 @@
+// ── FALLBACK getFinanciarConfig (daca nu e definita in 00-globals) ──────────
+if(typeof getFinanciarConfig === 'undefined'){
+  window.getFinanciarConfig = function(){
+    // Încearcă să preia din S_UAT dacă există, altfel defaulturi naționale
+    const f = (typeof S_UAT !== 'undefined' && S_UAT.financiar) ? S_UAT.financiar : {};
+    return {
+      pretConstructie: f.pretConstructie || 700,   // EUR/mp SDA
+      pretTeren:       f.pretTeren       || 800,   // EUR/mp teren
+      chirieRef:       f.chirieRef       || 50,    // EUR/mp/luna
+      pretVanzare:     f.pretVanzare     || 1800,  // EUR/mp vanzare
+    };
+  };
+}
+
 // UrbanX — Motor export Word (.docx) + Modal parametri editabili
 // Foloseste biblioteca docx.js (Office Open XML, browser-compatible)
 // ════════════════════════════════════════════════════════════════════════════
