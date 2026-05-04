@@ -1,36 +1,124 @@
-// ── PATCH: Adaugă intrările lipsă în info drawer ────────────────────────────
-// Aceasta extinde obiectul de date din 13-info-drawer.js pentru studiile noi
-window.addEventListener('DOMContentLoaded', ()=>{
-  // Așteaptă ca 13-info-drawer.js să se încarce
-  setTimeout(()=>{
-    if(typeof window.STUDII_INFO !== 'undefined'){
-      if(!window.STUDII_INFO.isu) window.STUDII_INFO.isu = {
-        titlu:'Studiu de Siguranță la Foc (ISU)',ico:'🔥',
-        culoare:'248,113,113',
-        desc:'Analiză P118-1/2015 + P118-2/2013: categorie pericol incendiu, grad de rezistență la foc, căi de acces ISU, hidranți, evacuare, necesitatea avizului ISU Moldova.',
-        pagini:12, norma:'P118-1/2015 + P118-2/2013 + Legea 307/2006',
-        aviz:'ISU Moldova (obligatoriu dacă H>8m sau SD>600mp)',
-        continut:['Clasificare clădire: categorie pericol, grad rezistență la foc','Căi de acces ISU (min. 3.5m lățime, max. 80m de la intrare)','Hidranți exteriori și interiori','Sisteme de detecție, alarmare și stingere incendiu','Evacuare persoane: distanțe, număr scări, lățimi','Procedura aviz ISU: documente necesare, termen']
-      };
-      if(!window.STUDII_INFO.fezabilitate) window.STUDII_INFO.fezabilitate = {
-        titlu:'Studiu de Fezabilitate / DALI',ico:'📊',
-        culoare:'212,175,55',
-        desc:'Studiu tehnico-economic conform HG 907/2016. Variante tehnice, indicatori financiari editabili (preț construcție, teren, chirie), analiză financiară, matrice risc, calendar implementare, avize. Export PDF și Word (.doc) cu parametri personalizabili.',
-        pagini:15, norma:'HG 907/2016 + Legea 50/1991 + Legea 350/2001',
-        aviz:'Certificat Urbanism + toate avizele din CU',
-        continut:['Indicatori urbanistici PUG (POT/CUT/H/SV/Pk)','Variante tehnice S1/S2/S3 comparate','Indicatori financiari EDITABILI (preț constr., teren, chirie, vânzare)','Analiză cash flow pe 20 ani','Matrice risc investiție','Calendar implementare 10 faze','Sinteza studii tehnice (trafic, ISU, însorire, vânt, geo)','Optimizări recomandate + buget total recalculat','Export Word (.doc) editabil cu parametri personalizați']
-      };
-      if(!window.STUDII_INFO.amplasament) window.STUDII_INFO.amplasament = {
-        titlu:'Studiu de Amplasament & Teritoriu',ico:'🗺',
-        culoare:'129,140,248',
-        desc:'Document fundament pentru toate studiile tehnice. Analiză teritorială completă: PUG, patrimoniu LMI, seismicitate, vânt, zgomot, însorire, geotehnică, aeronautic, mediu, financiar. 12 pagini integrate.',
-        pagini:12, norma:'Legea 350/2001 + HG 525/1996 + toate normele tehnice',
-        aviz:'Certificat Urbanism (primul pas)',
-        continut:['Incadrare în PUG și RLU — toți indicatorii','Analiză patrimoniu LMI + zone protejate','Seismicitate P100-1/2013','Vânt CR 1-1-4/2012 + zgomot SR 10009','Însorire OMS 119/2014','Pre-evaluare geotehnică NP 074/2014','Aeronautic AACR/ROMATSA','Impact mediu (EIM) + hidrologic','Financiar orientativ (preț construcție, ROI estimat)','Dashboard studii necesare obligatorii','Concluzii integrate — toate domeniile']
-      };
-    }
-  }, 500);
-});
+// ── PATCH: Info drawer pentru ISU, Fezabilitate, Amplasament ─────────────────
+// Preia direct controlul elementelor HTML ale drawer-ului existent
+const _STUDII_EXTRA = {
+  isu: {
+    ico:'🔥', titlu:'Studiu de Siguranță la Foc (ISU)',
+    culoare:'f87171', pagini:12,
+    desc:'Analiză completă de securitate la incendiu conform P118-1/2015 + P118-2/2013. Necesară pentru obținerea Avizului ISU Moldova (obligatoriu dacă H>8m sau suprafața >600mp).',
+    norma:'P118-1/2015 · P118-2/2013 · Legea 307/2006',
+    aviz:'Aviz ISU Moldova — obligatoriu dacă H>8m sau SD>600mp',
+    continut:[
+      'Clasificarea clădirii: categorie pericol incendiu (A-E), grad de rezistență la foc (I-V)',
+      'Căi de acces ISU: lățime min. 3.5m (1 veh.) / 5.5m (2 veh.), distanță max. 80m de la intrare',
+      'Hidranți exteriori și interiori — necesitate, amplasament, debit',
+      'Sisteme detecție-alarmare-stingere incendiu (DASI) — când sunt obligatorii',
+      'Evacuare persoane: distanțe maxime, număr scări, lățimi coridoare (min. 1.2m)',
+      'Compartimentare la foc: pereți, planșee, uși rezistente la foc',
+      'Procedura aviz ISU: documente, taxe, termen emitere (30-60 zile)',
+      'Acces scară pompieri (obligatorie la H>28m)',
+    ]
+  },
+  fezabilitate: {
+    ico:'📊', titlu:'Studiu de Fezabilitate / DALI',
+    culoare:'d4af37', pagini:15,
+    desc:'Studiu tehnico-economic conform HG 907/2016. Parametri financiari EDITABILI: preț construcție, teren, chirie, vânzare. Export PDF și Word (.doc). 15 pagini cu analiză completă + sinteză studii tehnice.',
+    norma:'HG 907/2016 · Legea 50/1991 · Legea 350/2001',
+    aviz:'Certificat Urbanism + avize din CU (ISU, E-ON, RAJA, ROMATSA etc.)',
+    continut:[
+      'Indicatori urbanistici PUG: POT/CUT/H/SV/Pk conf. RLU UTR',
+      'Variante tehnice S1/S2/S3 comparate cu costuri și rentabilitate',
+      'Indicatori financiari EDITABILI înainte de generare (preț constr., teren, chirie, vânzare)',
+      'Analiză cash flow pe 20 ani + ROI brut + Payback period',
+      'Matrice risc investiție (urbanistic, geotehnic, permitting, financiar, piață)',
+      'Calendar implementare 10 faze (CU → AC → Execuție → Recepție)',
+      'Sinteza studii tehnice: trafic, ISU, însorire, vânt, zgomot, geotehnică',
+      'Optimizări recomandate + buget total recalculat inclusiv studii și avize',
+      'Baza legală completă (HG 907/2016, NP 074, P100-1/2013, etc.)',
+      'Export Word (.doc) editabil — deschis cu Microsoft Word sau LibreOffice',
+    ]
+  },
+  amplasament: {
+    ico:'🗺', titlu:'Studiu de Amplasament & Teritoriu',
+    culoare:'818cf8', pagini:12,
+    desc:'Documentul fundament care integrează TOATE analizele pentru un amplasament. 12 pagini cu PUG, patrimoniu, seismicitate, vânt, zgomot, însorire, geotehnică, aeronautic, mediu, financiar și dashboard studii obligatorii.',
+    norma:'Legea 350/2001 · HG 525/1996 · toate normele tehnice',
+    aviz:'Primul pas: Certificat Urbanism (listează toate avizele necesare)',
+    continut:[
+      'Indicatori PUG + RLU: POT/CUT/H/SV/Pk/retrageri/funcțiuni admise',
+      'Patrimoniu LMI: zone protejate + monumente + procedura aviz DJCPN',
+      'Seismicitate P100-1/2013: zona seismică, ag, Tc, categoria geotehnică',
+      'Vânt CR 1-1-4/2012 + zgomot SR 10009 + însorire OMS 119/2014',
+      'Pre-evaluare geotehnică NP 074/2014 + nivel freatic estimat',
+      'Aeronautic AACR/ROMATSA: distanță la aeroport, aviz necesar',
+      'Impact mediu (EIM): aer, apă, sol, deșeuri, Natura 2000',
+      'Estimare financiară primară: cost construcție, teren, ROI',
+      'Dashboard studii necesare: 🔴 obligatoriu / REC. recomandat / OK',
+      'Concluzii integrate — toate domeniile pe o singură pagină',
+    ]
+  }
+};
+
+function _showExtraDrawer(key){
+  const d=_STUDII_EXTRA[key];
+  if(!d) return false;
+  const ico=document.getElementById('info-drawer-ico');
+  const title=document.getElementById('info-drawer-title');
+  const body=document.getElementById('info-drawer-body');
+  const backdrop=document.getElementById('info-drawer-backdrop');
+  const drawer=document.getElementById('info-drawer');
+  if(!body||!drawer) return false;
+
+  if(ico) ico.textContent=d.ico;
+  if(title) title.textContent=d.titlu;
+
+  const badge_wrap=document.getElementById('info-drawer-badge-wrap');
+  if(badge_wrap) badge_wrap.innerHTML=`
+    <span style="font-size:10px;background:rgba(${_hexToRgb(d.culoare)},.15);color:#${d.culoare};border-radius:999px;padding:2px 10px;font-weight:700">${d.pagini} pagini</span>
+    <span style="font-size:10px;background:rgba(255,255,255,.06);color:#64748b;border-radius:999px;padding:2px 10px;margin-left:4px">${d.norma.split('·')[0].trim()}</span>
+  `;
+
+  body.innerHTML=`
+    <p style="color:#94a3b8;font-size:12px;line-height:1.6;margin-bottom:16px">${d.desc}</p>
+    <div style="background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.2);border-radius:8px;padding:10px 14px;margin-bottom:16px">
+      <div style="font-size:9px;color:#d4af37;font-weight:700;letter-spacing:.08em;margin-bottom:6px">AVIZ PRINCIPAL</div>
+      <div style="font-size:11px;color:#e2e8f0">${d.aviz}</div>
+    </div>
+    <div style="font-size:9px;color:#475569;font-weight:700;letter-spacing:.08em;margin-bottom:8px">CONȚINUT DOCUMENT</div>
+    <ul style="padding:0;margin:0;list-style:none">
+      ${d.continut.map(item=>`<li style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:11px;color:#94a3b8;line-height:1.4">
+        <span style="color:#d4af37;flex-shrink:0;margin-top:1px">›</span>
+        <span>${item}</span>
+      </li>`).join('')}
+    </ul>
+    ${key==='fezabilitate'?`<div style="margin-top:16px">
+      <button onclick="generateStudiuFezabilitate();document.getElementById('info-drawer-backdrop').click()"
+        style="width:100%;padding:10px;background:rgba(212,175,55,.15);border:1px solid rgba(212,175,55,.4);color:#d4af37;border-radius:8px;font-weight:700;cursor:pointer;font-size:12px">
+        📊 Deschide Studiu Fezabilitate
+      </button>
+    </div>`:''}
+  `;
+
+  if(backdrop) backdrop.classList.add('open');
+  if(drawer) drawer.classList.add('open');
+  return true;
+}
+
+function _hexToRgb(hex){
+  const r=parseInt(hex.slice(0,2),16),g=parseInt(hex.slice(2,4),16),b=parseInt(hex.slice(4,6),16);
+  return `${r},${g},${b}`;
+}
+
+// Override infoDrawerOpen pentru key-urile noi
+const _origInfoDrawerOpen = window.infoDrawerOpen;
+window.infoDrawerOpen = function(key){
+  if(_STUDII_EXTRA[key]){ _showExtraDrawer(key); return; }
+  if(typeof _origInfoDrawerOpen === 'function') _origInfoDrawerOpen(key);
+  else { console.warn('infoDrawerOpen: key not found:', key); }
+};
+
+// ── MEMORIE PARAMETRI FEZABILITATE ───────────────────────────────────────────
+// Salvează ultima configurare pentru sesiune — modalul se redeschide cu valorile tale
+let _sfLastParams = {};
 
 // UrbanX — Export Word (.doc) fără dependențe externe
 // Generează documente editabile HTML→Word cu CSS Office-compatible
@@ -473,6 +561,10 @@ function showSFParamsModal(){
   const utr=ap?.utr||'—';
   const uat=getUATLabel();
 
+  // Folosește ultima configurare dacă există, altfel defaulturi UAT
+  const lastP = _sfLastParams||{};
+  const def = (key, fallback) => lastP[key] ?? fallback;
+
   const modal=document.createElement('div');
   modal.id='sf-params-modal';
   modal.style.cssText=`
@@ -481,38 +573,52 @@ function showSFParamsModal(){
     padding:24px 28px;width:520px;max-width:95vw;max-height:90vh;
     overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,0.7);font-family:Calibri,sans-serif;
   `;
+
+  const hasLastParams = Object.keys(lastP).some(k=>lastP[k]!=null);
+
   modal.innerHTML=`
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
       <div>
-        <div style="color:#C49206;font-size:10px;font-weight:bold;letter-spacing:1px;">URBANX · STUDIU FEZABILITATE</div>
+        <div style="color:#C49206;font-size:10px;font-weight:bold;letter-spacing:1px;">URBANX · STUDIU FEZABILITATE / DALI</div>
         <div style="color:#fff;font-size:15px;font-weight:bold;margin-top:2px;">Parametri de generare</div>
-        <div style="color:#7890b0;font-size:11px;margin-top:2px;">UTR ${utr} · ${uat} · Valorile implicite sunt medii statistice UAT</div>
+        <div style="color:#7890b0;font-size:11px;margin-top:2px;">UTR ${utr} · ${uat}</div>
       </div>
       <button onclick="document.getElementById('sf-params-modal').remove()"
         style="background:none;border:none;color:#7890b0;font-size:18px;cursor:pointer;padding:4px 8px;">✕</button>
     </div>
-    <div style="border-top:1px solid #1e3a5f;padding-top:16px;">
-      <div style="color:#C49206;font-size:10px;font-weight:bold;letter-spacing:1px;margin-bottom:12px;">PARAMETRI FINANCIARI EDITABILI</div>
-      ${_sfParamRow('pretConstr','Preț construcție (EUR/mp SDA)',_fc.pretConstructie,'700 EUR/mp = standard Iași 2024-2025')}
-      ${_sfParamRow('pretTeren','Preț teren (EUR/mp)',_fc.pretTeren,'Introduceți prețul real negociat / evaluat')}
-      ${_sfParamRow('chirieRef','Chirie referință (EUR/mp/lună)',_fc.chirieRef,'Chirie estimată sau negociată')}
-      ${_sfParamRow('pretVanzare','Preț vânzare (EUR/mp)',Math.round((_fc.pretConstructie||700)*1.4),'Dacă se vinde în loc de închiriat')}
-      ${_sfParamRow('rataOcupare','Rată ocupare estimată (%)',85,'85% = standard conservator')}
+
+    <div style="background:rgba(20,50,98,.4);border:1px solid rgba(32,70,136,.6);border-radius:6px;padding:10px 12px;margin-bottom:16px;font-size:11px;color:#7890b0;line-height:1.5">
+      <span style="color:#C49206;font-weight:bold">Cum se folosește:</span>
+      Modifică valorile de mai jos, apoi apasă <b style="color:#fff">Generează PDF</b> sau <b style="color:#34d399">Generează Word</b>.
+      Valorile rămân salvate pentru sesiunea curentă.
+      ${hasLastParams?'<br><span style="color:#34d399">✓ Se folosesc valorile modificate anterior.</span>':'<br><span style="color:#94a3b8">Valorile implicite sunt medii statistice pentru '+uat+'.</span>'}
     </div>
+
+    <div style="border-top:1px solid #1e3a5f;padding-top:16px;">
+      <div style="color:#C49206;font-size:10px;font-weight:bold;letter-spacing:1px;margin-bottom:12px;">PARAMETRI FINANCIARI</div>
+      ${_sfParamRow('pretConstr','Preț construcție (EUR/mp SDA)',def('pretConstr',_fc.pretConstructie),_fc.pretConstructie,'Standard Iași 2024-2025')}
+      ${_sfParamRow('pretTeren','Preț teren (EUR/mp)',def('pretTeren',_fc.pretTeren),_fc.pretTeren,'Introduceți prețul real negociat / evaluat')}
+      ${_sfParamRow('chirieRef','Chirie referință (EUR/mp/lună)',def('chirieRef',_fc.chirieRef),_fc.chirieRef,'Chirie estimată sau negociată / conform piață')}
+      ${_sfParamRow('pretVanzare','Preț vânzare (EUR/mp)',def('pretVanzare',Math.round((_fc.pretConstructie||700)*1.4)),Math.round((_fc.pretConstructie||700)*1.4),'Dacă se vinde în loc de închiriat')}
+      ${_sfParamRow('rataOcupare','Rată ocupare estimată (%)',def('rataOcupare',85),85,'85% = conservator · 95% = optimist')}
+    </div>
+
     <div style="border-top:1px solid #1e3a5f;padding-top:16px;margin-top:8px;">
-      <div style="color:#C49206;font-size:10px;font-weight:bold;letter-spacing:1px;margin-bottom:12px;">GENERARE DOCUMENT</div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
         <button onclick="_sfGeneratePDF()" style="flex:1;min-width:180px;background:#14326A;color:#fff;
-          border:1px solid #C49206;border-radius:5px;padding:10px 14px;cursor:pointer;font-size:13px;font-weight:bold;">
+          border:1px solid #C49206;border-radius:5px;padding:11px 14px;cursor:pointer;font-size:13px;font-weight:bold;">
           📄 Generează PDF
         </button>
         <button onclick="_sfGenerateDocx()" style="flex:1;min-width:180px;background:#0E6432;color:#fff;
-          border:1px solid #C49206;border-radius:5px;padding:10px 14px;cursor:pointer;font-size:13px;font-weight:bold;">
+          border:1px solid #C49206;border-radius:5px;padding:11px 14px;cursor:pointer;font-size:13px;font-weight:bold;">
           📝 Generează Word (.doc)
         </button>
       </div>
-      <div style="color:#5A6878;font-size:10px;margin-top:10px;line-height:1.4;">
-        PDF = document final cu grafică UrbanX · Word = document editabil, deschis cu Microsoft Word sau LibreOffice
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <button onclick="_sfResetParams()" style="flex:1;background:none;border:1px solid rgba(255,255,255,.1);
+          color:#64748b;border-radius:5px;padding:6px;cursor:pointer;font-size:11px;">
+          ↺ Resetează la valorile UAT
+        </button>
       </div>
     </div>
   `;
@@ -520,45 +626,57 @@ function showSFParamsModal(){
 
   setTimeout(()=>{
     document.addEventListener('click',function handler(e){
-      if(!modal.contains(e.target)){modal.remove();document.removeEventListener('click',handler);}
+      if(!modal.contains(e.target)&&modal.isConnected){
+        modal.remove();document.removeEventListener('click',handler);
+      }
     });
   },300);
 }
 
-function _sfParamRow(id,label,defaultVal,hint){
+function _sfParamRow(id,label,currentVal,defaultVal,hint){
+  const isModified=currentVal!==defaultVal;
   return `
     <div style="margin-bottom:12px;">
-      <label style="display:block;color:#a0b4cc;font-size:11px;margin-bottom:4px;">${label}</label>
-      <input id="sfp-${id}" type="number" value="${defaultVal}"
-        style="width:100%;background:#0a1628;border:1px solid #1e3a5f;color:#fff;
+      <label style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <span style="color:#a0b4cc;font-size:11px;">${label}</span>
+        ${isModified?'<span style="font-size:9px;color:#34d399;font-weight:bold;background:rgba(52,211,153,.1);padding:1px 6px;border-radius:4px">MODIFICAT</span>':'<span style="font-size:9px;color:#475569">implicit UAT</span>'}
+      </label>
+      <input id="sfp-${id}" type="number" value="${currentVal}"
+        style="width:100%;background:#0a1628;border:1px solid ${isModified?'#34d399':'#1e3a5f'};color:#fff;
         padding:7px 10px;border-radius:4px;font-size:13px;box-sizing:border-box;"
-        onfocus="this.style.borderColor='#C49206'" onblur="this.style.borderColor='#1e3a5f'">
-      <div style="color:#5A6878;font-size:10px;margin-top:2px;">${hint}</div>
+        onfocus="this.style.borderColor='#C49206'"
+        onblur="this.style.borderColor=this.value!='${defaultVal}'?'#34d399':'#1e3a5f'">
+      <div style="color:#5A6878;font-size:10px;margin-top:2px;">${hint} · <span style="color:#475569">implicit: ${defaultVal}</span></div>
     </div>
   `;
 }
 
 function _sfGetParams(){
-  const get=id=>{const v=document.getElementById('sfp-'+id)?.value;return v?parseFloat(v):null;};
-  return {
-    pretConstr:  get('pretConstr'),
-    pretTeren:   get('pretTeren'),
-    chirieRef:   get('chirieRef'),
-    pretVanzare: get('pretVanzare'),
-    rataOcupare: get('rataOcupare'),
+  const get=id=>{
+    const el=document.getElementById('sfp-'+id);
+    if(!el) return null;
+    const v=parseFloat(el.value);
+    return isNaN(v)?null:v;
   };
+  return {pretConstr:get('pretConstr'),pretTeren:get('pretTeren'),chirieRef:get('chirieRef'),pretVanzare:get('pretVanzare'),rataOcupare:get('rataOcupare')};
+}
+
+function _sfResetParams(){
+  _sfLastParams={};
+  document.getElementById('sf-params-modal')?.remove();
+  showSFParamsModal();
 }
 
 async function _sfGeneratePDF(){
   const params=_sfGetParams();
+  _sfLastParams={...params}; // Salvează pentru sesiune
   document.getElementById('sf-params-modal')?.remove();
-  window._sfParamOverride=params;
   await generateStudiuFezabilitate(params);
-  window._sfParamOverride=null;
 }
 
 async function _sfGenerateDocx(){
   const params=_sfGetParams();
+  _sfLastParams={...params}; // Salvează pentru sesiune
   document.getElementById('sf-params-modal')?.remove();
   await generateFezabilitateDocx(params);
 }
