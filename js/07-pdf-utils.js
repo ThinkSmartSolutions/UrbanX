@@ -38,6 +38,25 @@ async function _captureStudyMaps(ap, statusFn){
   const wait = ms => new Promise(r => setTimeout(r, ms));
   const waitF = async (n=4) => { for(let i=0;i<n;i++) await new Promise(r => requestAnimationFrame(r)); };
 
+  // ── Helper: zoom optim bazat pe suprafața parcelei ──────────────────────
+  // Garantează că parcela + contextul imediat sunt vizibile la orice dimensiune
+  const _optimalZoom = (area_mp) => {
+    // area_mp → zoom Mapbox care arată parcela + ~50m împrejur
+    if(area_mp <   200) return 19.5;
+    if(area_mp <   500) return 19.0;
+    if(area_mp <  1500) return 18.5;
+    if(area_mp <  4000) return 18.0;
+    if(area_mp < 10000) return 17.5;
+    if(area_mp < 30000) return 17.0;
+    return 16.5;
+  };
+  const parcelArea = ap.area || (()=>{ try{ return turf.area(ap.geo); }catch(e){ return 1000; } })();
+  const zoomClose  = _optimalZoom(parcelArea);       // zoom aproape — vederi 3D, amplasament
+  const zoomMedium = Math.max(zoomClose - 1.5, 15);  // zoom mediu — context urban imediat
+  const zoomCity   = 13.5;                           // zoom oraș — încadrare teritorială (era 12 → prea departe)
+  const ctr = turf.centerOfMass(ap.geo).geometry.coordinates;
+  const bb  = turf.bbox(ap.geo);
+
   // Asigurăm că suntem pe Urban 3D (stilul nostru principal)
   const selBase = document.getElementById('selBase');
   if(selBase && selBase.value !== 'custom'){
@@ -53,16 +72,17 @@ async function _captureStudyMaps(ap, statusFn){
     });
   }
 
-  // Centrăm pe parcelă
+  // Centrăm pe parcelă — zoom optim, nu maxZoom:18 fix
   try{
-    const bb = turf.bbox(ap.geo);
-    map.fitBounds([[bb[0],bb[1]],[bb[2],bb[3]]],{padding:80, duration:0, maxZoom:18});
+    map.easeTo({center:ctr, zoom:zoomClose, pitch:0, bearing:0, duration:0});
     await waitF(6); await wait(600);
   }catch(e){}
 
-  const capMap = async (pitch, bearing, extraWait=0) => {
+  // capMap — setează pitch/bearing și face captură, cu zoom constant pe parcelă
+  const capMap = async (pitch, bearing, extraWait=0, customZoom) => {
     try{
-      map.easeTo({pitch, bearing, duration:0});
+      const z = customZoom || zoomClose;
+      map.easeTo({center:ctr, zoom:z, pitch, bearing, duration:0});
       await waitF(6); await wait(700+extraWait); map.triggerRepaint(); await waitF(4); await wait(500);
       const c = map.getCanvas();
       return c.width > 0 ? c.toDataURL('image/jpeg', 0.92) : '';
@@ -78,12 +98,12 @@ async function _captureStudyMaps(ap, statusFn){
   st('Captură plan distanțe...');
   let imgDist = '';
   try{
-    const bb = turf.bbox(ap.geo);
-    map.fitBounds([[bb[0],bb[1]],[bb[2],bb[3]]],{padding:120, pitch:0, bearing:0, duration:0, maxZoom:18});
+    // Plan distanțe: zoom ușor mai depărtat ca să vedem vecinii
+    map.easeTo({center:ctr, zoom:zoomMedium, pitch:0, bearing:0, duration:0});
     await waitF(6); await wait(800); map.triggerRepaint(); await waitF(4); await wait(600);
     imgDist = map.getCanvas().toDataURL('image/jpeg', 0.92);
-    // Re-centrăm pentru capturile 3D
-    map.fitBounds([[bb[0],bb[1]],[bb[2],bb[3]]],{padding:80, duration:0, maxZoom:18});
+    // Re-centrăm pe parcelă
+    map.easeTo({center:ctr, zoom:zoomClose, pitch:0, bearing:0, duration:0});
     await waitF(4); await wait(400);
   }catch(e){}
 
@@ -110,8 +130,8 @@ async function _captureStudyMaps(ap, statusFn){
       const selBase = document.getElementById('selBase');
       if(selBase) selBase.value = 'standard';
     });
-    const ctr = turf.centerOfMass(ap.geo).geometry.coordinates;
-    map.easeTo({center:ctr, zoom:17, pitch:55, bearing:-20, duration:0});
+    // zoom optim calculat — nu fix zoom:17
+    map.easeTo({center:ctr, zoom:zoomClose, pitch:55, bearing:-20, duration:0});
     await waitF(6); await wait(900); map.triggerRepaint(); await waitF(4); await wait(700);
     imgLocation = map.getCanvas().toDataURL('image/jpeg', 0.92);
     // Revenim la Urban 3D
@@ -128,16 +148,15 @@ async function _captureStudyMaps(ap, statusFn){
     });
   }catch(e){ console.warn('Standard 3D capture:', e.message); imgLocation = img3D; }
 
-  st('Captură hartă oraș (zoom out)...');
+  st('Captură hartă oraș (încadrare teritorială)...');
   let imgCity = '';
   try{
-    const ctr = turf.centerOfMass(ap.geo).geometry.coordinates;
-    map.easeTo({center:ctr, zoom:12, pitch:0, bearing:0, duration:0});
+    // zoom 13.5 în loc de 12 — orașul e vizibil dar parcela nu se pierde în zgomot
+    map.easeTo({center:ctr, zoom:zoomCity, pitch:0, bearing:0, duration:0});
     await waitF(6); await wait(900); map.triggerRepaint(); await waitF(4); await wait(700);
     imgCity = map.getCanvas().toDataURL('image/jpeg', 0.92);
     // Revenim pe parcelă
-    const bb = turf.bbox(ap.geo);
-    map.fitBounds([[bb[0],bb[1]],[bb[2],bb[3]]],{padding:80, duration:0, maxZoom:18});
+    map.easeTo({center:ctr, zoom:zoomClose, pitch:0, bearing:0, duration:0});
     await waitF(4); await wait(400);
   }catch(e){ imgCity = img2D; }
 

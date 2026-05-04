@@ -952,32 +952,38 @@ function _v3dCaptureSilent(ap){
       // Camera setup
       const maxH=Math.max(...(S.vol._lastFeats||[]).map(f=>f.properties?.top||0),8);
       const parcelSz=Math.max(...ring0.map(c=>{const[x,z]=toLoc(c);return Math.sqrt(x*x+z*z);}),10);
-      const rad=Math.max(parcelSz*2.5,maxH*2.2,35);
-      const tx=new THREE.Vector3(0,maxH*0.4,0);
+      // Rază apropiată: clădirea umple cadrul indiferent de zoom-ul hărții
+      // day/golden/overcast: 1.6x parcela (era 2.5x) — impact vizual maxim
+      // night: și mai aproape (1.3x) — fațadele luminate ocupă tot cadrul
+      const radDay  =Math.max(parcelSz*1.6, maxH*1.8, 22);
+      const radNight=Math.max(parcelSz*1.3, maxH*1.5, 18);
+      const tx=new THREE.Vector3(0,maxH*0.35,0);
 
-      const setCam=(theta,phi)=>{
-        const x=rad*Math.sin(phi)*Math.sin(theta);
-        const y=rad*Math.cos(phi);
-        const z=rad*Math.sin(phi)*Math.cos(theta);
+      const setCam=(theta,phi,customRad)=>{
+        const r2=customRad||radDay;
+        const x=r2*Math.sin(phi)*Math.sin(theta);
+        const y=r2*Math.cos(phi);
+        const z=r2*Math.sin(phi)*Math.cos(theta);
         cam.position.set(tx.x+x,tx.y+y,tx.z+z);
         cam.lookAt(tx); cam.aspect=W2/H2; cam.updateProjectionMatrix();
       };
 
-      const doCapture=(preset,theta,phi)=>{
+      const doCapture=(preset,theta,phi,customRad)=>{
         _v3dApplyLight(preset,THREE,scene,r);
-        setCam(theta,phi);
+        setCam(theta,phi,customRad);
         r.render(scene,cam); r.render(scene,cam);
         try{ return canvas.toDataURL('image/jpeg',0.92); }catch(e){ return ''; }
       };
 
-      // 7 preseturi — unghiuri diferite
-      const day      =doCapture('day',     Math.PI/4,   Math.PI/3.2);
-      const night    =doCapture('night',   Math.PI/4,   Math.PI/3.2);
-      const golden   =doCapture('golden',  Math.PI*1.1, Math.PI/3.5);
-      const overcast =doCapture('overcast',Math.PI/4,   Math.PI/2.8);
-      const front    =doCapture('day',     Math.PI,     Math.PI/3.0);
-      const topdown  =doCapture('day',     Math.PI/4,   0.15);
-      const nightAlt =doCapture('night',   -Math.PI/3,  Math.PI/3.0);
+      // 7 preseturi — unghiuri optimizate pentru impact vizual consistent
+      // phi mic = unghi jos (perspectivă dramatică, ca în viewer manual)
+      const day      =doCapture('day',     Math.PI/4,   Math.PI/3.5,  radDay);
+      const night    =doCapture('night',   Math.PI/4,   Math.PI/3.8,  radNight);
+      const golden   =doCapture('golden',  Math.PI*1.1, Math.PI/3.8,  radDay);
+      const overcast =doCapture('overcast',Math.PI/4,   Math.PI/3.2,  radDay);
+      const front    =doCapture('day',     Math.PI,     Math.PI/3.2,  radDay);
+      const topdown  =doCapture('day',     Math.PI/4,   0.18,         radDay);
+      const nightAlt =doCapture('night',   -Math.PI/3,  Math.PI/3.5,  radNight);
 
       r.dispose();
       canvas.remove();
