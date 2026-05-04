@@ -78,6 +78,15 @@ const _LOT = {
 function toggleLotizare(){
   _lotizareActive = !_lotizareActive;
   document.getElementById('btnLotizare')?.classList.toggle('on', _lotizareActive);
+  if(_lotizareActive){
+    // Ascundem layerele care ar zgomota harta în modul lotizare
+    ['dist-src','aedis-dim-src'].forEach(src=>{
+      try{ setSource(src,{type:'FeatureCollection',features:[]}); }catch(e){}
+    });
+    ['aedis-dim-line','aedis-dim-label'].forEach(lid=>{
+      try{ map.setLayoutProperty(lid,'visibility','none'); }catch(e){}
+    });
+  }
   if(_lotizareActive) _showLotizarePanel();
   else {
     ['lotizare-src','lotizare-drum-src','lotizare-label-src'].forEach(s=>
@@ -456,22 +465,31 @@ function _lotHtmlDemolare(){
 function _lotHtmlCirculatii(){
   const tipuri = _LOT.drumTipuri;
   const hasCustom = _LOT._drumCustom.length > 0;
+  const isDrawing = _LOT._drumEditMode === 'draw';
+  const activeTip = isDrawing ? _LOT._drumDrawTip : null;
+
   return `
     <div style="margin-bottom:10px">
       <div style="font-size:10px;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">✏️ Desenează circulații pe hartă</div>
       <div style="font-size:9px;color:#475569;margin-bottom:8px;line-height:1.5">
-        Selectează tipul, apasă butonul, click pe hartă pentru puncte.<br>
+        Selectează tipul, apasă butonul, ${window.innerWidth<841?'<b style="color:#a78bfa">tap pe hartă</b> (zona de sus)':'<b style="color:#a78bfa">click pe hartă</b>'} pentru puncte.<br>
         <b style="color:#a78bfa">Enter</b> sau dublu-click = finalizare · <b style="color:#a78bfa">Esc</b> = anulare · <b style="color:#a78bfa">Backspace</b> = șterge ultimul punct
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px">
-        ${Object.entries(tipuri).map(([tip,cfg])=>`
-          <button onclick="_lotDrumEditorStart('${tip}')"
-            style="background:rgba(255,255,255,.05);border:1px solid ${cfg.color}44;color:${cfg.color};border-radius:8px;padding:8px 6px;font-size:10px;font-weight:700;cursor:pointer;text-align:left;transition:all .15s"
+        ${Object.entries(tipuri).map(([tip,cfg])=>{
+          const isActive = activeTip === tip;
+          return `<button onclick="_lotDrumEditorStart('${tip}')"
+            style="background:${isActive?cfg.color+'33':'rgba(255,255,255,.05)'};
+              border:${isActive?'2px solid '+cfg.color:'1px solid '+cfg.color+'44'};
+              color:${cfg.color};border-radius:8px;padding:8px 6px;font-size:10px;
+              font-weight:700;cursor:pointer;text-align:left;transition:all .15s"
             onmouseover="this.style.background='rgba(255,255,255,.1)'"
-            onmouseout="this.style.background='rgba(255,255,255,.05)'">
-            <div style="font-size:11px;margin-bottom:2px">✏️ ${cfg.label}</div>
+            onmouseout="this.style.background='${isActive?cfg.color+'33':'rgba(255,255,255,.05)'}'"
+          >
+            <div style="font-size:11px;margin-bottom:2px">${isActive?'✏️ ACTIV — ':''} ${cfg.label}</div>
             <div style="font-size:9px;opacity:.7">Lățime: ${cfg.latime}m</div>
-          </button>`).join('')}
+          </button>`;
+        }).join('')}
       </div>
     </div>
 
@@ -1164,8 +1182,59 @@ function _lotDrumEditorStart(tip){
   _LOT._drumDrawTip  = tip || 'secundar';
   _LOT._drumDrawCoords = [];
   map.getCanvas().style.cursor = 'crosshair';
-  ss('✏️ Click pe hartă pentru a desena drumul · Enter sau dublu-click = finalizare · Esc = anulare');
+  const cfg = _LOT.drumTipuri[tip]||_LOT.drumTipuri.secundar;
+
+  // ── Mesaj status (statusbar + banner în panou) ──────────────────────
+  ss('✏️ ' + cfg.label + ': click/tap pe HARTĂ pentru puncte · Enter=finalizare · Esc=anulare');
+
+  // Banner vizibil direct în panoul lotizare (vital pe mobile)
+  _lotDrawBannerShow(cfg);
+
   _lotDrumEditorBind();
+}
+
+// Afișează banner "modul desen activ" în panoul lotizare
+function _lotDrawBannerShow(cfg){
+  let banner = document.getElementById('lot-draw-banner');
+  if(!banner){
+    banner = document.createElement('div');
+    banner.id = 'lot-draw-banner';
+    // Îl inserăm DEASUPRA conținutului lot-content
+    const content = document.getElementById('lot-content');
+    if(content) content.parentNode.insertBefore(banner, content);
+  }
+  banner.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:8px;'
+    + 'background:rgba(167,139,250,.18);border-top:2px solid '+(cfg?.color||'#a78bfa')+';'
+    + 'border-bottom:1px solid rgba(167,139,250,.25);padding:10px 16px;flex-shrink:0;'
+    + 'animation:lot-pulse .9s ease-in-out infinite alternate';
+  banner.innerHTML =
+    '<div>'
+    + '<div style="font-size:12px;font-weight:800;color:#a78bfa">✏️ MOD DESEN ACTIV</div>'
+    + '<div style="font-size:10px;color:#94a3b8;margin-top:2px">'
+    + (window.innerWidth < 841
+        ? '👆 Tap pe hartă (sus) pentru puncte'
+        : '🖱 Click pe hartă pentru puncte')
+    + ' · Enter=gata · Esc=anulare</div>'
+    + '</div>'
+    + '<div style="display:flex;gap:6px">'
+    + '<button onclick="_lotDrumEditorFinish()" style="background:rgba(52,211,153,.2);border:1px solid #34d399;color:#34d399;border-radius:7px;padding:6px 12px;cursor:pointer;font-size:11px;font-weight:700">✅ Gata</button>'
+    + '<button onclick="_lotDrumEditorCancel()" style="background:rgba(239,68,68,.15);border:1px solid #ef4444;color:#f87171;border-radius:7px;padding:6px 12px;cursor:pointer;font-size:11px;font-weight:700">✕ Anulare</button>'
+    + '</div>';
+
+  // Injectăm animația CSS dacă nu există
+  if(!document.getElementById('lot-draw-anim-css')){
+    const st = document.createElement('style');
+    st.id = 'lot-draw-anim-css';
+    st.textContent = '@keyframes lot-pulse{from{opacity:.85}to{opacity:1}}';
+    document.head.appendChild(st);
+  }
+
+  // Pe mobile, scrollăm la top pentru a fi vizibil
+  const content2 = document.getElementById('lot-content');
+  if(content2) content2.scrollTop = 0;
+  // Scroll panoul însuși la top
+  const panel = document.getElementById('lotizare-panel');
+  if(panel) panel.scrollTop = 0;
 }
 
 function _lotDrumEditorBind(){
@@ -1250,6 +1319,9 @@ function _lotDrumEditorCancel(){
   _LOT._drumEditMode = null;
   _LOT._drumDrawCoords = [];
   map.getCanvas().style.cursor = '';
+  // Ascundem bannerul de desen activ
+  const b = document.getElementById('lot-draw-banner');
+  if(b) b.style.display = 'none';
   _lotDrumEditorUnbind();
   _lotDrumEditorRefreshAllLines();
   setSource('lot-drum-vert-src',{type:'FeatureCollection',features:[]});
@@ -1287,7 +1359,7 @@ function _lotDrumEditorUpdatePanel(){
   const el = document.getElementById('lot-drum-list');
   if(!el) return;
   if(_LOT._drumCustom.length===0){
-    el.innerHTML='<div style="color:#475569;font-size:10px;text-align:center;padding:8px">Nicio circulație desenată manual</div>';
+    el.innerHTML='<div style="color:#475569;font-size:10px;text-align:center;padding:8px">Nicio circulație desenată manual<br><span style="font-size:9px">Fără circulații custom = generare automată</span></div>';
     return;
   }
   el.innerHTML = _LOT._drumCustom.map(d=>{
@@ -1298,6 +1370,13 @@ function _lotDrumEditorUpdatePanel(){
       <button onclick="_lotDrumEditorDelete('${d.id}')" style="background:rgba(239,68,68,.15);border:none;color:#f87171;border-radius:4px;padding:2px 7px;font-size:9px;cursor:pointer">🗑</button>
     </div>`;
   }).join('');
+  // Refresh butoane tip (actualizare stare activ/inactiv)
+  const lotContent = document.getElementById('lot-content');
+  if(lotContent && _LOT._drumEditMode !== 'draw'){
+    // Forțăm re-render al tabului Circulații dacă e activ
+    const activeTab = document.querySelector('#lot-tabs button[style*="rgba(167,139,250"]');
+    // Nu re-render complet, doar actualizăm lista de circulații
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

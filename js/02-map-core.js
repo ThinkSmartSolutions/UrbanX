@@ -312,10 +312,10 @@ function addLayers(){
 
   // ── Aliniamente vizuale pe hartă ──────────────────────────────────────
   // front-src conține: latura frontală, laterale, posterior, cu distanțe
-  // Layer gros pentru click/touch pe laturi
+  // Layer gros pentru click/touch pe laturi — 36px pentru touch precis pe mobile
   L({id:'front-parcel-click',type:'line',source:'front-src',
     filter:['==',['get','type'],'parcel_side'],
-    paint:{'line-color':'rgba(255,255,255,0.01)','line-width':20,'line-opacity':0.01}
+    paint:{'line-color':'rgba(255,255,255,0.01)','line-width':36,'line-opacity':0.01}
   });
   L({id:'front-parcel-line',type:'line',source:'front-src',
     filter:['==',['get','type'],'parcel_side'],
@@ -558,6 +558,16 @@ function addLayers(){
 
   map.on('click','front-parcel-click', _handleSideClick);
   map.on('click','front-parcel-line', _handleSideClick);
+  // Touch fallback pentru mobile (touchend = tap fără scroll)
+  map.on('touchend','front-parcel-click', _handleSideClick);
+  map.on('touchend','front-parcel-line', _handleSideClick);
+  // Afișăm mesaj persistent pe mobile (nu există hover)
+  if('ontouchstart' in window){
+    setTimeout(()=>{
+      const ap0 = S.parcels[S.activeParcel??0];
+      if(ap0?.geo?.geometry) ss('👆 Tap pe o latură colorată a parcelei pentru a seta FRONT STRADAL');
+    }, 800);
+  }
   map.on('click','parcel-fill',e=>{
     const f=e.features?.[0];if(!f)return;
     // FIX: block generic handler for this click
@@ -1344,6 +1354,15 @@ function buildFP(geom, paramsOrUtr){
       }catch(e2){ console.warn('buildFP forma error:', e2.message); }
     }
 
+
+    // ── CLIP FINAL: edificabilul nu poate ieși niciodată din parcelă ─────────
+    // transformScale, fpF și forma pot produce geometrii ușor în afara parcelei
+    // Intersecția finală garantează respectarea limitei cadastrale
+    try{
+      const parcelFeat = {type:'Feature', geometry:geom, properties:{}};
+      const clipped = turf.intersect(zone, parcelFeat);
+      if(clipped?.geometry && turf.area(clipped) > pA * 0.02) zone = clipped;
+    }catch(e){ console.warn('buildFP clip final:', e.message); }
 
     return zone;
   }catch(e){
