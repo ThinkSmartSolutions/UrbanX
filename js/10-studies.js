@@ -155,12 +155,12 @@ async function generateShadowStudy(){
     pdf.setFillColor(...DARK);pdf.rect(14,cy-3,W-28,4,'F');
     pdf.setFillColor(...GOLD);pdf.rect(14,cy-3,W-28,1,'F');
     pdf.setTextColor(...GOLD);pdf.setFontSize(7);pdf.setFont('helvetica','bold');
-    pdf.text('INCADRARE IN CONTEXTUL URBAN AL MUNICIPIULUI IASI',W/2,cy+4,{align:'center'});
+    pdf.text('INCADRARE IN CONTEXTUL URBAN — '+S2(uat).toUpperCase(),W/2,cy+4,{align:'center'});
     cy+=8;
     try{pdf.addImage(caps.imgCity,'JPEG',14,cy,W-28,52,undefined,'FAST');}catch(e){}
     pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.4);pdf.rect(14,cy,W-28,52,'S');
     pdf.setTextColor(80,90,110);pdf.setFontSize(6);pdf.setFont('helvetica','italic');
-    pdf.text('FIG. — Harta urbana · Zoom 12 · Incadrare amplasament in Municipiul Iasi · Sursa: UrbanX',W/2,cy+55,{align:'center'});
+    pdf.text('FIG. — Harta urbana · Zoom 12 · Incadrare amplasament in '+S2(uat)+' · Sursa: UrbanX',W/2,cy+55,{align:'center'});
     cy+=60;
   }
   // Harta orasului inainte de concluzii
@@ -169,12 +169,12 @@ async function generateShadowStudy(){
     pdf.setFillColor(...DARK);pdf.rect(14,cy-3,W-28,4,'F');
     pdf.setFillColor(...GOLD);pdf.rect(14,cy-3,W-28,1,'F');
     pdf.setTextColor(...GOLD);pdf.setFontSize(7);pdf.setFont('helvetica','bold');
-    pdf.text('INCADRARE IN CONTEXTUL URBAN AL MUNICIPIULUI IASI',W/2,cy+4,{align:'center'});
+    pdf.text('INCADRARE IN CONTEXTUL URBAN — '+S2(uat).toUpperCase(),W/2,cy+4,{align:'center'});
     cy+=8;
     try{pdf.addImage(caps.imgCity,'JPEG',14,cy,W-28,52,undefined,'FAST');}catch(e){}
     pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.4);pdf.rect(14,cy,W-28,52,'S');
     pdf.setTextColor(80,90,110);pdf.setFontSize(6);pdf.setFont('helvetica','italic');
-    pdf.text('FIG. — Harta urbana · Zoom 12 · Incadrare amplasament in Municipiul Iasi · Sursa: UrbanX',W/2,cy+55,{align:'center'});
+    pdf.text('FIG. — Harta urbana · Zoom 12 · Incadrare amplasament in '+S2(uat)+' · Sursa: UrbanX',W/2,cy+55,{align:'center'});
     cy+=60;
   }
 
@@ -398,9 +398,9 @@ async function generateNoiseStudy(){
   // PAG 9: Harta zgomot + plan monitorizare
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('HARTA ZGOMOT URBANA — PLAN DE MONITORIZARE ACUSTICA',9);ftr();
   cy=28;
-  cy=addImg(caps.imgCity,14,cy,W-28,55,'FIG. — Harta Municipiului Iasi · Zonare acustica · Surse principale de zgomot');cy+=4;
+  cy=addImg(caps.imgCity,14,cy,W-28,55,'\1'+S2(uat)+'\2');cy+=4;
   cy=sec('9. HARTA ZGOMOT STRATEGIC — DATE DE REFERINTA UAT '+getUATLabel().toUpperCase(),cy);cy+=2;
-  cy=body('Municipiul Iasi a elaborat Harta Strategica de Zgomot conform HG 321/2005 (transpune Directiva 2002/49/CE). Datele de referinta pentru UTR '+utr+' indica o zona acustica de tip '+getZgomotConfig().zona_acustica+' cu limite: Lzsn='+getZgomotConfig().Lzsn_limita+' dB(A) zi-seara-noapte si Lnoapte='+getZgomotConfig().Lnoapte_limita+' dB(A) noaptea. Sursele principale de zgomot in zona includ: '+(getZgomotConfig().surse_principale||[]).join(', ')+'.',14,cy);cy+=4;
+  cy=body(S2(uat)+' a elaborat Harta Strategica de Zgomot conform HG 321/2005 (transpune Directiva 2002/49/CE). Datele de referinta pentru UTR '+utr+' indica o zona acustica de tip '+getZgomotConfig().zona_acustica+' cu limite: Lzsn='+getZgomotConfig().Lzsn_limita+' dB(A) zi-seara-noapte si Lnoapte='+getZgomotConfig().Lnoapte_limita+' dB(A) noaptea. Sursele principale de zgomot in zona includ: '+(getZgomotConfig().surse_principale||[]).join(', ')+'.',14,cy);cy+=4;
   cy=sec('9.1. PLAN DE MONITORIZARE ACUSTICA PE DURATA EXECUTIEI',cy);cy+=2;
   cy=tblRow(['Faza','Masuratori obligatorii','Frecventa','Responsabil'],cy,true,[40,75,35,32]);
   [['Autorizare / PAC','Studiu acustic detaliat (specialist RENAR)','O singura data','Proiectant'],
@@ -543,12 +543,12 @@ async function generateWindStudy(){
     pdf.setFillColor(...DARK);pdf.rect(14,cy-3,W-28,4,'F');
     pdf.setFillColor(...GOLD);pdf.rect(14,cy-3,W-28,1,'F');
     pdf.setTextColor(...GOLD);pdf.setFontSize(7);pdf.setFont('helvetica','bold');
-    pdf.text('INCADRARE IN CONTEXTUL URBAN AL MUNICIPIULUI IASI',W/2,cy+4,{align:'center'});
+    pdf.text('INCADRARE IN CONTEXTUL URBAN — '+S2(uat).toUpperCase(),W/2,cy+4,{align:'center'});
     cy+=8;
     try{pdf.addImage(caps.imgCity,'JPEG',14,cy,W-28,52,undefined,'FAST');}catch(e){}
     pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.4);pdf.rect(14,cy,W-28,52,'S');
     pdf.setTextColor(80,90,110);pdf.setFontSize(6);pdf.setFont('helvetica','italic');
-    pdf.text('FIG. — Harta urbana · Zoom 12 · Incadrare amplasament in Municipiul Iasi · Sursa: UrbanX',W/2,cy+55,{align:'center'});
+    pdf.text('FIG. — Harta urbana · Zoom 12 · Incadrare amplasament in '+S2(uat)+' · Sursa: UrbanX',W/2,cy+55,{align:'center'});
     cy+=60;
   }
   sign();
@@ -587,7 +587,7 @@ async function generateWindStudy(){
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('ANALIZA SEZONIERA VANT — DIRECTII DOMINANTE SI TRANDAFIR VANT',8);ftr();
   cy=28;
   cy=sec('8. ANALIZA SEZONIERA A REGIMULUI DE VANT — ZONA IASI / MOLDOVA',cy);cy+=2;
-  cy=body('Zona Moldovei, implicit Municipiul Iasi, este caracterizata printr-un regim de vant specific ariei de tranzitie intre campie si deal. Conform datelor ANM pentru statia meteorologica Iasi, directiile dominante variaza sezonier: vara predomina vanturile din directia nord-vest si vest (asociate fronturilor atlantice reci), iar iarna predomina crivatul (vant din nord-est, rece si uscat, de origine continental-continental). Viteza medie anuala la 10m este de 3.5-4.5 m/s, cu rafale ce pot depasi 20-25 m/s in episoade de viscol.',14,cy);cy+=4;
+  cy=body(S2(uat)+' este caracterizata printr-un regim de vant specific ariei de tranzitie intre campie si deal. Conform datelor ANM pentru statia meteorologica Iasi, directiile dominante variaza sezonier: vara predomina vanturile din directia nord-vest si vest (asociate fronturilor atlantice reci), iar iarna predomina crivatul (vant din nord-est, rece si uscat, de origine continental-continental). Viteza medie anuala la 10m este de 3.5-4.5 m/s, cu rafale ce pot depasi 20-25 m/s in episoade de viscol.',14,cy);cy+=4;
   cy=tblRow(['Sezon','Directie dominanta','Viteza medie (m/s)','Viteza max (m/s)','Caracter'],cy,true,[30,45,40,40,27]);
   [['Iarna (Dec-Feb)','NE — Crivat','5-8','20-30','Rece, uscat, viscol posibil'],
    ['Primavara (Mar-Mai)','NV, V','4-6','15-20','Schimbator, umed'],
@@ -744,12 +744,12 @@ async function generateGreenStudy(){
     pdf.setFillColor(...DARK);pdf.rect(14,cy-3,W-28,4,'F');
     pdf.setFillColor(...GOLD);pdf.rect(14,cy-3,W-28,1,'F');
     pdf.setTextColor(...GOLD);pdf.setFontSize(7);pdf.setFont('helvetica','bold');
-    pdf.text('INCADRARE IN CONTEXTUL URBAN AL MUNICIPIULUI IASI',W/2,cy+4,{align:'center'});
+    pdf.text('INCADRARE IN CONTEXTUL URBAN — '+S2(uat).toUpperCase(),W/2,cy+4,{align:'center'});
     cy+=8;
     try{pdf.addImage(caps.imgCity,'JPEG',14,cy,W-28,52,undefined,'FAST');}catch(e){}
     pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.4);pdf.rect(14,cy,W-28,52,'S');
     pdf.setTextColor(80,90,110);pdf.setFontSize(6);pdf.setFont('helvetica','italic');
-    pdf.text('FIG. — Harta urbana · Zoom 12 · Incadrare amplasament in Municipiul Iasi · Sursa: UrbanX',W/2,cy+55,{align:'center'});
+    pdf.text('FIG. — Harta urbana · Zoom 12 · Incadrare amplasament in '+S2(uat)+' · Sursa: UrbanX',W/2,cy+55,{align:'center'});
     cy+=60;
   }
   sign();
@@ -956,12 +956,12 @@ async function generateMobilityStudy(){
     pdf.setFillColor(...DARK);pdf.rect(14,cy-3,W-28,4,'F');
     pdf.setFillColor(...GOLD);pdf.rect(14,cy-3,W-28,1,'F');
     pdf.setTextColor(...GOLD);pdf.setFontSize(7);pdf.setFont('helvetica','bold');
-    pdf.text('INCADRARE IN CONTEXTUL URBAN AL MUNICIPIULUI IASI',W/2,cy+4,{align:'center'});
+    pdf.text('INCADRARE IN CONTEXTUL URBAN — '+S2(uat).toUpperCase(),W/2,cy+4,{align:'center'});
     cy+=8;
     try{pdf.addImage(caps.imgCity,'JPEG',14,cy,W-28,52,undefined,'FAST');}catch(e){}
     pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.4);pdf.rect(14,cy,W-28,52,'S');
     pdf.setTextColor(80,90,110);pdf.setFontSize(6);pdf.setFont('helvetica','italic');
-    pdf.text('FIG. — Harta urbana · Zoom 12 · Incadrare amplasament in Municipiul Iasi · Sursa: UrbanX',W/2,cy+55,{align:'center'});
+    pdf.text('FIG. — Harta urbana · Zoom 12 · Incadrare amplasament in '+S2(uat)+' · Sursa: UrbanX',W/2,cy+55,{align:'center'});
     cy+=60;
   }
   sign();
@@ -1044,7 +1044,7 @@ async function generateMobilityStudy(){
   ].forEach(r=>cy=tblRow(r,cy,false,[70,42,42,28]));
   cy+=4;
   cy=sec('10.1. BAZA LEGALA',cy);cy+=2;
-  ['NP 051/2012 rev. — Normativ privind adaptarea cladirilor civile si spatiului urban la necesitatile PMR.','STAS 10144/3-91 — Calculul si proiectarea parcajelor pentru autoturisme.','HG nr. 525/1996 RGU, art. 33 — Parcaje si garaje.','Regulamentul UE 2023/1804 privind infrastructura pentru vehicule electrice.','PUG '+getUATLabel()+' (HCL local) — UTR '+utr+' — Parcaje minime obligatorii.','Legea nr. 448/2006 privind protectia persoanelor cu handicap, actualizata.','SR 4032-1:2001 — Lucrari de drumuri. Terminologie.','PMUD '+getUATLabel()+' — Plan de Mobilitate Urbana Durabila.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=2;});
+  ['NP 051/2012 rev. — Normativ privind adaptarea cladirilor civile si spatiului urban la necesitatile PMR.','STAS 10144/3-91 — Calculul si proiectarea parcajelor pentru autoturisme.','HG nr. 525/1996 RGU, art. 33 — Parcaje si garaje.','Regulamentul UE 2023/1804 privind infrastructura pentru vehicule electrice.','PUG '+getUATLabel()+' (HCL local) — UTR '+utr+' — Parcaje minime obligatorii.','Legea nr. 448/2006 privind protectia persoanelor cu handicap, actualizata.','SR 4032-1:2001 — Lucrari de drumuri. Terminologie.','PMUD '+S2(uat)+' — Plan de Mobilitate Urbana Durabila.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=2;});
 
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CASETA TEHNICA SI SEMNATURA',10);ftr();
   cy=28;sign();
@@ -1156,12 +1156,12 @@ async function generateDensityStudy(){
     pdf.setFillColor(...DARK);pdf.rect(14,cy-3,W-28,4,'F');
     pdf.setFillColor(...GOLD);pdf.rect(14,cy-3,W-28,1,'F');
     pdf.setTextColor(...GOLD);pdf.setFontSize(7);pdf.setFont('helvetica','bold');
-    pdf.text('INCADRARE IN CONTEXTUL URBAN AL MUNICIPIULUI IASI',W/2,cy+4,{align:'center'});
+    pdf.text('INCADRARE IN CONTEXTUL URBAN — '+S2(uat).toUpperCase(),W/2,cy+4,{align:'center'});
     cy+=8;
     try{pdf.addImage(caps.imgCity,'JPEG',14,cy,W-28,52,undefined,'FAST');}catch(e){}
     pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.4);pdf.rect(14,cy,W-28,52,'S');
     pdf.setTextColor(80,90,110);pdf.setFontSize(6);pdf.setFont('helvetica','italic');
-    pdf.text('FIG. — Harta urbana · Zoom 12 · Incadrare amplasament in Municipiul Iasi · Sursa: UrbanX',W/2,cy+55,{align:'center'});
+    pdf.text('FIG. — Harta urbana · Zoom 12 · Incadrare amplasament in '+S2(uat)+' · Sursa: UrbanX',W/2,cy+55,{align:'center'});
     cy+=60;
   }
   sign();
@@ -1214,8 +1214,8 @@ async function generateDensityStudy(){
   const apaProp=locProp*150;const canProp=locProp*120;const elProp=locProp*3.5;
   cy=body('Cresterea densitatii urbane prin construirea amplasamentului '+nrcad+' genereaza necesitati suplimentare de infrastructura tehnico-edilitara. Estimarile de mai jos se bazeaza pe '+locProp+' unitati locative/de utilizare (SD estimat='+Math.round(parseFloat(area)*parseFloat(params?.cut||1.0))+' mp, regim H='+aedisH.toFixed(1)+'m).',14,cy);cy+=4;
   cy=tblRow(['Infrastructura','Consum estimat/zi','Capacitate necesara','Operator local'],cy,true,[55,42,42,43]);
-  [['Apa potabila',apaProp+' l/zi ('+locProp+' pers x 150l)','Conf. STAS 1478/90','RAJA SA Iasi'],
-   ['Ape uzate menajere',canProp+' l/zi (80% din apa)','Conf. NTPA 002','RAJA SA Iasi'],
+  [['Apa potabila',apaProp+' l/zi ('+locProp+' pers x 150l)','Conf. STAS 1478/90',(S_UAT.mediu?.apa?.operator||'Operatorul local apa-canal')],
+   ['Ape uzate menajere',canProp+' l/zi (80% din apa)','Conf. NTPA 002',(S_UAT.mediu?.apa?.operator||'Operatorul local apa-canal')],
    ['Energie electrica',elProp.toFixed(1)+' kW cerinta ('+locProp+' unit. x 3.5kW)','Conf. NTE 007','E-ON Moldova'],
    ['Gaz natural',Math.round(locProp*0.5)+' mc/h varf (iarna)','Conf. NP 037','Delgaz Grid'],
    ['Telecomunicatii','1 cablu/unitate','Conf. instalatii','Operatori multipli'],
@@ -1223,7 +1223,7 @@ async function generateDensityStudy(){
   ].forEach(r=>cy=tblRow(r,cy,false,[55,42,42,43]));
   cy+=4;
   cy=sec('9.1. CERINTE OBTINERE AVIZE UTILITATI',cy);cy+=2;
-  ['Aviz E-ON Moldova (energie electrica): Cerere + plan de situatie + necesarul de putere.','Aviz Delgaz Grid (gaz natural): Cerere + plan amplasament + necesarul de gaz (daca se utilizeaza).','Aviz RAJA SA Iasi (apa-canal): Cerere + plan retele existente + necesarul de apa si ape uzate.','Aviz Orange/Telekom/alti operatori (telecomunicatii): Optional — la cerere.','Aviz Termoelectrica/CUMIS (termoficare): Daca se prevede racordare la reteaua de termoficare.','Aviz Salubris SA Iasi (deseuri): Zona de colectare + amplasare recipiente colectare selectiva.'].forEach(r=>{cy=body('• '+r,16,cy);cy+=2;});
+  ['Aviz furnizor electricitate '+S2(judet)+' (E-ON/Enel/CEZ/DEER cf. judet): Cerere + plan situatie + necesarul de putere.','Aviz Delgaz Grid (gaz natural): Cerere + plan amplasament + necesarul de gaz (daca se utilizeaza).','Aviz RAJA SA Iasi (apa-canal): Cerere + plan retele existente + necesarul de apa si ape uzate.','Aviz Orange/Telekom/alti operatori (telecomunicatii): Optional — la cerere.','Aviz Termoelectrica/CUMIS (termoficare): Daca se prevede racordare la reteaua de termoficare.','Aviz Salubris SA Iasi (deseuri): Zona de colectare + amplasare recipiente colectare selectiva.'].forEach(r=>{cy=body('• '+r,16,cy);cy+=2;});
 
   // PAG 10: Baza legala + concluzii densitate
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('BAZA LEGALA COMPLETA — CONCLUZII STUDIU DENSITATE',10);ftr();
@@ -1349,7 +1349,7 @@ async function generateMemoriu(){
   cy=28;cy=sec('5. AVIZE SI ACORDURI NECESARE CONFORM LEGII 50/1991',cy);cy+=2;
   cy=body('In vederea obtinerii Autorizatiei de Construire pentru obiectivul propus pe parcela '+nrcad+' (UTR '+utr+'), vor fi necesare urmatoarele avize si acorduri, in functie de specificul proiectului:',14,cy);cy+=3;
   cy=tblRow(['Aviz / Acord','Emitent','Obligatoriu / Optional'],cy,true,[80,65,33]);
-  [['Certificat de Urbanism','Primaria Municipiului Iasi','OBLIGATORIU'],['Aviz Reglementari Tehnice (Retele)','Furnizori utilitati (E-ON, RAJA etc.)','OBLIGATORIU'],['Aviz Mediu (dupa caz)','Agentia de Mediu Iasi','DUPA CAZ'],['Aviz Protectia Muncii','DSP Iasi','DUPA CAZ'],['Aviz ISU (cladiri >2 niveluri)','ISU Moldova','OBLIGATORIU'],['Aviz Patrimoniu (zona protejata)','Directia Cultura Iasi','ZONA PROTEJATA'],['Raport Studiu Geotehnic','Expert tehnic atestat','OBLIGATORIU proiect'],['Proiect Tehnic + Detalii executie','Arhitect autorizat OAR','OBLIGATORIU AC'],['Experiza tehnica (cladiri existente)','Expert tehnic atestat','DUPA CAZ']].forEach(r=>{cy=tblRow(r,cy,false,[80,65,33]);});
+  [['Certificat de Urbanism',('Primaria '+S2(uat)),'OBLIGATORIU'],['Aviz Reglementari Tehnice (Retele)','Furnizori utilitati (E-ON, RAJA etc.)','OBLIGATORIU'],['Aviz Mediu (dupa caz)','Agentia de Mediu Iasi','DUPA CAZ'],['Aviz Protectia Muncii','DSP Iasi','DUPA CAZ'],['Aviz ISU (cladiri >2 niveluri)','ISU Moldova','OBLIGATORIU'],['Aviz Patrimoniu (zona protejata)','Directia Cultura Iasi','ZONA PROTEJATA'],['Raport Studiu Geotehnic','Expert tehnic atestat','OBLIGATORIU proiect'],['Proiect Tehnic + Detalii executie','Arhitect autorizat OAR','OBLIGATORIU AC'],['Experiza tehnica (cladiri existente)','Expert tehnic atestat','DUPA CAZ']].forEach(r=>{cy=tblRow(r,cy,false,[80,65,33]);});
   cy+=3;cy=sec('6. ETAPE PROCEDURA AUTORIZARE',cy);cy+=2;
   ['ETAPA 1 — Certificat de Urbanism: Solicitare la Primarie cu memoriu, plan cadastral, copie CF. Emitere in 30 de zile.','ETAPA 2 — Studii si documentatii tehnice: Studiu geotehnic, relevee, expertize (daca exista constructii), studii de specialitate.','ETAPA 3 — Proiect pentru Autorizare (PAC/DTAC): Elaborat de arhitect autorizat OAR, cu toate planele tehnice.','ETAPA 4 — Obtinere avize conform CU: Toate avizele specificate in Certificatul de Urbanism.','ETAPA 5 — Depunere dosar Autorizatie de Construire: La Registratura Primariei. Emitere in 30 de zile lucratoare.','ETAPA 6 — Executie lucrari: Cu respectarea proiectului avizat, diriginte de santier atestat.'].forEach(r=>{cy=body('• '+r,16,cy);cy+=2;});
 
@@ -1366,12 +1366,12 @@ async function generateMemoriu(){
     pdf.setFillColor(...DARK);pdf.rect(14,cy-3,W-28,4,'F');
     pdf.setFillColor(...GOLD);pdf.rect(14,cy-3,W-28,1,'F');
     pdf.setTextColor(...GOLD);pdf.setFontSize(7);pdf.setFont('helvetica','bold');
-    pdf.text('INCADRARE IN CONTEXTUL URBAN AL MUNICIPIULUI IASI',W/2,cy+4,{align:'center'});
+    pdf.text('INCADRARE IN CONTEXTUL URBAN — '+S2(uat).toUpperCase(),W/2,cy+4,{align:'center'});
     cy+=8;
     try{pdf.addImage(caps.imgCity,'JPEG',14,cy,W-28,52,undefined,'FAST');}catch(e){}
     pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.4);pdf.rect(14,cy,W-28,52,'S');
     pdf.setTextColor(80,90,110);pdf.setFontSize(6);pdf.setFont('helvetica','italic');
-    pdf.text('FIG. — Harta urbana · Zoom 12 · Incadrare amplasament in Municipiul Iasi · Sursa: UrbanX',W/2,cy+55,{align:'center'});
+    pdf.text('FIG. — Harta urbana · Zoom 12 · Incadrare amplasament in '+S2(uat)+' · Sursa: UrbanX',W/2,cy+55,{align:'center'});
     cy+=60;
   }
   sign();
@@ -1412,7 +1412,7 @@ async function generateMemoriu(){
    ['2 — Studii','Studiu geotehnic + relevee + expertize (daca exist. construct.)','30-60 zile','Specialisti atestati'],
    ['3 — PAC/DTAC','Proiect Autorizare + DTAC complet cu toate planele','60-120 zile','Arhitect OAR'],
    ['4 — Avize','Toate avizele specificate in CU obtinute','30-90 zile','Arhitect/beneficiar'],
-   ['5 — AC','Dosar Autorizatie de Construire depus la Primarie','30 zile lucrat.','Primaria Mun. Iasi'],
+   ['5 — AC','Dosar Autorizatie de Construire depus la Primarie','30 zile lucrat.',('Primaria '+S2(uat))],
    ['6 — Executie','Lucrari cu diriginte santier atestat, conform proiect avizat','Cf. deviz','Antreprenor CL+CQ'],
    ['7 — Receptie','Receptie la terminarea lucrarilor, intabulare','La finalizare','Comisie receptie'],
   ].forEach(r=>cy=tblRow(r,cy,false,[40,70,35,37]));
@@ -1444,7 +1444,7 @@ async function generateMemoriu(){
 // Coordonate prag pistă 26: 47.1731°N 27.6470°E
 // H obstacol maxim conform PANS-OPS ICAO Doc 8168
 const AACR_DATA = {
-  aeroport: 'Aeroportul Internațional Iași (LRIA)',
+  aeroport: (getAeroprtConfig()?.nume || 'Aeroportul Internațional Iași (LRIA)'),
   pistA_curs: 83,   // QFU 08 (83°)
   pistB_curs: 263,  // QFU 26 (263°)
   pragA: [27.6199, 47.1782],  // prag 08
@@ -1537,7 +1537,7 @@ async function generateAACR(){
   // PAG 2: Hartă context + calcule
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONTEXT AERONAUTIC — VEDERE 3D SI PLAN AMPLASAMENT',2);ftr();
   let cy=28;
-  cy=addImg(caps.img3D,14,cy,W-28,68,'FIG. 1 — Vedere 3D amplasament · Context urban · Înălțime propusă față de vecinii și aeroportul Iași');
+  cy=addImg(caps.img3D,14,cy,W-28,68,'\1'+S2(uat)+'\2');
   cy=sec('1. DATE AERONAUTICE AEROPORT IAȘI (LRIA)',cy);cy+=2;
   cy=tblRow(['Parametru','Valoare','Sursă'],cy,true,[80,60,38]);
   [['Cod ICAO',AACR_DATA.aeroport.split('(')[1]?.replace(')','')+'','ICAO / ROMATSA'],
@@ -1594,7 +1594,7 @@ async function generateAACR(){
   cy=addImg(caps.img2D,14,cy,half,50,'FIG. 8 — Plan 2D cadastral · Amplasament față de piste');
   addImg(caps.imgDist,14+half+4,cy-50,half,50,'FIG. 9 — Plan distanțe · Aliniamente și vecini');
   cy+=4;
-  if(caps.imgCity){cy=addImg(caps.imgCity,14,cy,W-28,50,'FIG. 10 — Hartă Iași · Incadrare amplasament față de aeroportul LRIA');cy+=4;}
+  if(caps.imgCity){cy=addImg(caps.imgCity,14,cy,W-28,50,'\1'+S2(uat)+'\2');cy+=4;}
   cy=sec('5. PROCEDURA OBȚINERE AVIZ AACR',cy);cy+=2;
   ['ETAPA 1 — Documentație tehnică: Plan de situație cu cote absolute (Stereo 70 + cote AMSL), fișă tehnică clădire cu H maxim față de NMM.','ETAPA 2 — Solicitare aviz ROMATSA: Depunere documentație la ROMATSA București (str. Ion Ionescu de la Brad nr. 10). Timp: 30-45 zile.','ETAPA 3 — Aviz AACR positiv: Se anexează la dosarul pentru Autorizație de Construire (art. 7 din Legea 50/1991).','ETAPA 4 — Post-construcție: Obligația înregistrării obstacolului în baza de date ICAO/ROMATSA după finalizare.'].forEach(e=>{cy=body(e,16,cy);cy+=2;});
 
@@ -1603,7 +1603,7 @@ async function generateAACR(){
   cy=28;cy=sec('6. BAZA LEGALA',cy);cy+=2;
   ['HG nr. 930/2016 privind stabilirea și aplicarea suprafețelor de limitare a înălțimilor obstacolelor.','Legea nr. 233/2016 — Codul Aerian al României.','OMAI nr. 14/2007 privind avizarea construcțiilor din zona aeroportuară.','ICAO Anexa 14 — Aerodromuri, ediția 8 (2018) — Suprafețe de limitare obstacole.','ICAO Doc 8168 PANS-OPS — Proceduri de zbor instrument.','AIP România — AD 2 LRIA — Date aeronautice aeroport Iași.',
    'Legea nr. 50/1991 republicată — art. 7: Aviz AACR obligatoriu pentru construcțiile din zone aeroportuare.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=2;});
-  if(caps.imgCity){cy+=4;cy=addImg(caps.imgCity,14,cy,W-28,52,'FIG. 11 — Incadrare în Municipiul Iași față de Aeroportul LRIA');}
+  if(caps.imgCity){cy+=4;cy=addImg(caps.imgCity,14,cy,W-28,52,'\1'+S2(uat)+'\2');}
   sign();
 
   // PAG 7: Semnatura
@@ -1639,18 +1639,18 @@ async function generateAACR(){
   cy=28;
   cy=sec('9. PROCEDURA DE AVIZARE AERONAUTICA — ETAPE SI DOCUMENTE',cy);cy+=2;
   cy=tblRow(['Etapa','Institutie','Documente necesare','Termen'],cy,true,[18,42,80,24]);
-  [['1','Primaria Mun. Iasi','Depunere cerere Certificat Urbanism — in rubrica se specifica proximitatea aeroportului','5-30 zile'],
+  [['1',('Primaria '+S2(uat)),'Depunere cerere Certificat Urbanism — in rubrica se specifica proximitatea aeroportului','5-30 zile'],
    ['2','ROMATSA SA','Cerere aviz aeronautic + coordonate GPS + cota absoluta constructie + plan de situatie','30-90 zile'],
    ['3','AACR','Verificare date + aviz favorabil/cu conditii/nefavorabil','30-60 zile'],
    ['4','ISU Moldova','Aviz PSI daca H>28m sau constructie colectiva','30-60 zile'],
-   ['5','Primaria Iasi','Autorizatie de Construire cu toate avizele incluse','30 zile lucr.'],
+   ['5',('Primaria '+S2(uat)),'Autorizatie de Construire cu toate avizele incluse','30 zile lucr.'],
   ].forEach(r=>cy=tblRow(r,cy,false,[18,42,80,24]));
   cy+=4;
   cy=sec('9.1. DATE DE CONTACT INSTITUTII AVIZATOARE AERONAUTICE',cy);cy+=2;
   cy=tblRow(['Institutie','Contact','Adresa','Obs.'],cy,true,[50,55,55,22]);
   [['ROMATSA SA — Centrul Tehnic','Tel: 021-316.94.20','Calea Serban Voda 22, Bucuresti','Aviz obligatoriu'],
    ['Autoritatea Aeronautica Civila Romana (AACR)','Tel: 021-269.30.00','Bd. Dinicu Golescu 38, Bucuresti','Autorizare activitati'],
-   ['Aeroportul International Iasi (LRIA)','Tel: 0232-271.590','Calea Chisinaului 9, Iasi','Consultare initiala'],
+   [(getAeroprtConfig()?.nume||'Aeroport local'),'—','Conf. aeroport '+S2(uat),'Consultare initiala'],
    ['Inspectoratul de Aviatie Civila','Tel: 021-316.94.20','B-dul Unirii 32, Bucuresti','Supraveghere'],
   ].forEach(r=>cy=tblRow(r,cy,false,[50,55,55,22]));
   cy+=4;
@@ -1779,7 +1779,7 @@ async function generateExistingBldStudy(){
   // PAG 5: Harta oras + baza legala + semnaturi
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('HARTA ORAS + BAZA LEGALA + SEMNATURA',5);ftr();
   cy=28;
-  if(caps.imgCity){cy=addImg(caps.imgCity,14,cy,W-28,50,'FIG. 6 — Harta Municipiului Iași · Incadrare amplasament în contextul urban');cy+=4;}
+  if(caps.imgCity){cy=addImg(caps.imgCity,14,cy,W-28,50,'FIG. N — Harta '+S2(uat)+' · Incadrare amplasament în contextul urban');cy+=4;}
   cy=sec('4. BAZA LEGALA',cy);cy+=2;
   ['Legea nr. 50/1991 republicată — Autorizarea executării lucrărilor de construcții.','Legea nr. 10/1995 republicată — Calitatea în construcții (consolidare, expertiză).','Ordinul MDLPL nr. 839/2009 — Norme metodologice de aplicare a Legii 50/1991.','Legea nr. 422/2001 republicată — Protejarea monumentelor istorice (dacă e cazul).','HG nr. 525/1996 — Regulamentul General de Urbanism.','PUG Municipiul Iași în vigoare — UTR '+utr+' — Regulamentul Local de Urbanism.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
   // PAG 6: Analiza structurala si stare tehnica
@@ -1920,7 +1920,7 @@ async function generateGeotehnicalStudy(){
   // PAG 2: Harta + zonare seismica
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONTEXT GEOTEHNIC — ZONARE SEISMICA SI TEREN',2);ftr();
   let cy=28;
-  cy=addImg(caps.img3D,14,cy,W-28,68,'FIG. 1 — Vedere 3D amplasament · Context geomorfologic local · Iași (Podișul Moldovei)');
+  cy=addImg(caps.img3D,14,cy,W-28,68,'\1'+S2(uat)+'\2');
   cy=sec('1. ZONARE SEISMICĂ — P100-1/2013',cy);cy+=2;
   cy=tblRow(['Parametru seismic','Valoare','Semnificatie'],cy,true,[60,45,73]);
   [['Zona seismică',seism.zona,'Hazard seismic mediu-ridicat'],
@@ -1982,7 +1982,7 @@ async function generateGeotehnicalStudy(){
   // PAG 5: Harta oras + baza legala
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('HARTA ORAS + BAZA LEGALA + SEMNATURA',5);ftr();
   cy=28;
-  if(caps.imgCity){cy=addImg(caps.imgCity,14,cy,W-28,50,'FIG. 8 — Harta Municipiului Iași · Geomorfologie locala');cy+=4;}
+  if(caps.imgCity){cy=addImg(caps.imgCity,14,cy,W-28,50,'FIG. 8 — Harta '+S2(uat)+' · Geomorfologie locala');cy+=4;}
   cy=sec('6. BAZA LEGALA SI NOTA DE AVERTIZARE',cy);cy+=2;
   cy=body('IMPORTANT: Prezentul pre-studiu geotehnic are caracter STRICT ORIENTATIV și se bazează exclusiv pe date statistice pentru zona geografică largă a Municipiului Iași (Podișul Moldovei). Nu înlocuiește studiul geotehnic detaliat obligatoriu conform NP 074/2014, realizat de specialist geotehnician autorizat cu foraje/sondaje pe amplasamentul specific.',14,cy);cy+=4;
   ['NP 074/2014 — Normativ privind principiile, exigențele și metodele cercetării geotehnice.','SR EN 1997-1:2004 — Eurocod 7: Proiectarea geotehnică. Reguli generale.','P100-1/2013 — Cod de proiectare seismică. Prevederi pentru clădiri.','P100-3/2019 — Cod de proiectare seismică. Evaluarea și proiectarea clădirilor existente.','STAS 1242/1-89 — Teren de fundare. Principii generale de cercetare.','Legea nr. 10/1995 republicată — Calitatea în construcții. Cerința A: Rezistență mecanică și stabilitate.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
@@ -2185,7 +2185,7 @@ async function generateTrafficStudy(){
   // PAG 5: Harta oras + baza legala
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('HARTA ORAS + BAZA LEGALA + SEMNATURA',5);ftr();
   cy=28;
-  if(caps.imgCity){cy=addImg(caps.imgCity,14,cy,W-28,50,'FIG. 7 — Harta Municipiului Iași · Retea stradala si acces principal');cy+=4;}
+  if(caps.imgCity){cy=addImg(caps.imgCity,14,cy,W-28,50,'FIG. N — Harta '+S2(uat)+' · Retea stradala si acces principal');cy+=4;}
   cy=sec('5. BAZA LEGALA',cy);cy+=2;
   ['NP 051/2012 — Normativ privind adaptarea cladirilor civile si spatiului urban la necesitatile persoanelor cu handicap.','STAS 10144/3-1991 — Calculul si proiectarea parcajelor pentru autoturisme.','HG nr. 525/1996 — Regulamentul General de Urbanism, art. 33 Parcaje.','Ordinul MT nr. 45/1998 — Norme tehnice privind proiectarea, construirea si modernizarea drumurilor.','PUG '+getUATLabel()+' — UTR '+utr+' — Reglementari accese si parcaje.','Legea nr. 82/1998 — Codul Rutier, art. 72: Iesirile din incinte.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
 
@@ -2276,7 +2276,7 @@ async function generateTrafficStudy(){
   cy+=3;
   cy=sec('9.1. ACCESIBILITATE TRANSPORT PUBLIC RATC IASI',cy);cy+=2;
   cy=body('Reducerea traficului generat este proportionala cu proximitatea statiilor de transport public. Amplasamentele la < 400m de o statie RATC (tramvai/troleibuz/autobuz) au cu 15-25% mai putin trafic generat de autoturisme. Se recomanda verificarea existentei statiilor RATC Iasi in proximitate si asigurarea legaturilor pietonale accesibile PMR (trotuar min. 1.5m, rampe, pavaj tactil).',14,cy);cy+=3;
-  cy=addImg(caps.imgCity,14,cy,W-28,50,'FIG. — Harta Municipiului Iasi · Amplasament + retea transport public RATC');
+  cy=addImg(caps.imgCity,14,cy,W-28,50,'\1'+S2(uat)+'\2');
 
   // PAG 10: Baza legala trafic + concluzii
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('BAZA LEGALA COMPLETA — CONCLUZII STUDIU TRAFIC',10);ftr();
@@ -2877,7 +2877,7 @@ async function generateIstoricStudy(){
   // PAG 6: Harta oras + baza legala
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('HARTA ORAS + BAZA LEGALA + SEMNATURA',6);ftr();
   cy=28;
-  if(caps.imgCity){cy=addImg(caps.imgCity,14,cy,W-28,50,'FIG. 7 — Harta Municipiului Iași · Zone protejate si monumente istorice identificate');cy+=4;}
+  if(caps.imgCity){cy=addImg(caps.imgCity,14,cy,W-28,50,'FIG. N — Harta '+S2(uat)+' · Zone protejate si monumente istorice identificate');cy+=4;}
   cy=sec('6. BAZA LEGALA',cy);cy+=2;
   ['Legea nr. 422/2001 republicată — Protejarea monumentelor istorice.','Ordinul MCID nr. 2828/2015 — Lista Monumentelor Istorice (LMI 2015).','Ordinul MCID nr. 2682/2003 — Metodologia de elaborare a documentatiilor de avizare.','HG nr. 593/2011 — Regulamentul de organizare și funcționare a Comisiei Naționale a Monumentelor.','Legea nr. 350/2001 republicată — Amenajarea teritoriului și urbanismul (PUZ zone protejate).','Carta de la Veneția (1964) + Carta de la Cracovia (2000) — Principii internaționale restaurare.','PUG Municipiul Iași — Regulament UTR '+utr+' — Restricții zone de protecție monumente.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
 
@@ -2902,7 +2902,7 @@ async function generateIstoricStudy(){
    ['4','Propunere arhitecturala (schita concept + section)','DJCPN Iasi','—'],
    ['5','Relevee constructie existenta (daca interv. pe cladire existenta)','DJCPN Iasi','—'],
    ['6','Aviz DJCPN emis (favorabil / cu conditii / nefavorabil)','Beneficiar / arhitect','30-60 zile'],
-   ['7','Includere aviz in dosarul pentru Autorizatia de Construire','Primaria Mun. Iasi','Cf. CU'],
+   ['7','Includere aviz in dosarul pentru Autorizatia de Construire',('Primaria '+S2(uat)),'Cf. CU'],
   ].forEach(r=>cy=tblRow(r,cy,false,[15,95,45,27]));
 
   // PAG 8: Monumente reprezentative + restrictii arhitecturale
@@ -2935,8 +2935,8 @@ async function generateIstoricStudy(){
   cy=sec('9. LISTA COMPLETA DOCUMENTE NECESARE PENTRU AC IN ZONE PROTEJATE',cy);cy+=2;
   cy=body('In cazul in care amplasamentul '+nrcad+' se afla in zona construita protejata sau in zona de protectie a unui monument inscris in LMI, lista documentelor pentru Autorizatia de Construire se extinde conform Legii 50/1991 art. 7, completata cu Legea 422/2001 si Ordinul MCID 2828/2015.',14,cy);cy+=4;
   cy=tblRow(['Nr.','Document necesar pentru AC in ZCP','Emitent','Termen'],cy,true,[10,105,45,22]);
-  [['1','Certificat de Urbanism (cu mentionarea obligatorie avize patrimoniu)','Primaria Mun. Iasi','10-30 zile'],
-   ['2','Aviz DJCPN Iasi (obligatoriu in ZCP sau zona de protectie monument)','DJCPN Iasi (Str. A. Panu 25)','30-60 zile'],
+  [['1','Certificat de Urbanism (cu mentionarea obligatorie avize patrimoniu)',('Primaria '+S2(uat)),'10-30 zile'],
+   ['2','Aviz DJCPN Iasi (obligatoriu in ZCP sau zona de protectie monument)',(S2(getDJCPN())||'DJCPN '+S2(judet)),'30-60 zile'],
    ['3','Aviz CNMI (pt. monumente clasa A sau extinderi semnificative)','CNMI Bucuresti','60-90 zile'],
    ['4','Studiu Istoric si Arhitectural elaborat de expert acreditat MCID','Expert acreditat MCID','30-60 zile'],
    ['5','Relevee arhitecturale ale constructiei existente (daca se intervine)','Arhitect/topograf','15-30 zile'],
@@ -3437,11 +3437,15 @@ async function generateStudiuFezabilitate(){
   const pkMin=Math.max(2,Math.ceil(sdTotal/120)*parseInt(params?.pk||1));
   const latN=lat.toFixed(4),lonE=lon.toFixed(4);
 
-  // Indicatori financiari estimativi
-  const costConstr=Math.round(sdTotal*700); // ~700 EUR/mp SD
-  const costTeren=Math.round(areaNum*800);  // ~800 EUR/mp teren
-  const costTotal=Math.round((costConstr+costTeren)*1.25); // +25% diverse+TVA
-  const venitAn=Math.round(sdTotal*0.85*50*12); // 50 EUR/mp/luna chirie
+  // ── Prețuri dinamice per UAT (din getFinanciarConfig) ──────────────────
+  const _fc = getFinanciarConfig();
+  const _pretConstr = _fc.pretConstructie;  // EUR/mp SDA
+  const _pretTeren  = _fc.pretTeren;        // EUR/mp teren
+  const _chirieRef  = _fc.chirieRef;        // EUR/mp/lună
+  const costConstr=Math.round(sdTotal*_pretConstr);
+  const costTeren=Math.round(areaNum*_pretTeren);
+  const costTotal=Math.round((costConstr+costTeren)*1.25); // +25% diverse+TVA+proiectare
+  const venitAn=Math.round(sdTotal*0.85*_chirieRef*12);
   const rentabilitate=((venitAn/costTotal)*100).toFixed(1); // % randament brut anual
 
   // Functiune
@@ -3556,12 +3560,12 @@ async function generateStudiuFezabilitate(){
    ['Nr. niveluri (regim înălțime)','niv.','P+'+(niv-1),'Conf. AEDIS / RLU'],
    ['Înălțime maximă (Hmax)','m',aedisH.toFixed(1),'Conf. AEDIS orientativ'],
    ['Nr. locuri parcare obligatorii','locuri',pkMin+'','NP 051/2012 + RLU'],
-   ['Valoare estimativă construcție','EUR',costConstr.toLocaleString(),'700 EUR/mp SDA'],
-   ['Valoare estimativă teren','EUR',costTeren.toLocaleString(),'800 EUR/mp teren'],
+   ['Valoare estimativă construcție','EUR',costConstr.toLocaleString(),(_fc.pretConstructie+' EUR/mp SDA')],
+   ['Valoare estimativă teren','EUR',costTeren.toLocaleString(),(_fc.pretTeren+' EUR/mp teren')],
    ['Diverse, neprevăzute, proiectare (25%)','EUR',Math.round((costConstr+costTeren)*0.25).toLocaleString(),'25% total construire+teren'],
    ['VALOARE TOTALĂ INVESTIȚIE','EUR',costTotal.toLocaleString(),'Total estimativ'],
    ['Valoare investiție / mp SDA','EUR/mp',Math.round(costTotal/sdTotal)+'','Indicele de cost /mp SDA'],
-   ['Venit estimat anual (chirie)','EUR/an',venitAn.toLocaleString(),'50 EUR/mp/lună × 85% ocupare'],
+   ['Venit estimat anual (chirie)','EUR/an',venitAn.toLocaleString(),(_fc.chirieRef+' EUR/mp/lună × 85% ocupare')],
    ['Randament brut (ROI brut anual)','%',rentabilitate,'Venit anual / Inv. totală'],
    ['Perioadă estimată recuperare investiție','ani',Math.ceil(costTotal/venitAn)+'','Payback period simplu'],
   ].forEach(r=>cy=tblRow(r,cy,false,[80,18,42,42]));
@@ -3636,9 +3640,9 @@ async function generateStudiuFezabilitate(){
   cy=sec('9. AVIZE ȘI ACORDURI OBLIGATORII — CONFORM LEGII 50/1991',cy);cy+=2;
   cy=body('Lista completă a avizelor și acordurilor necesare se stabilește prin Certificatul de Urbanism emis de Primăria '+uat+'. Lista de mai jos cuprinde avizele tipice pentru funcțiunea '+fnLabel+' în UTR '+utr+', zona '+uat+', și este orientativă — poate fi completată prin CU.',14,cy);cy+=4;
   cy=tblRow(['Aviz / Acord','Emitent','Obligativitate','Termen emitere'],cy,true,[70,52,30,30]);
-  [['E-ON Moldova / Furnizor electricitate','E-ON Moldova SA','Obligatoriu','30-60 zile'],
+  [[(_fc.operatorEnerg||'Furnizor electricitate'),'Conf. UAT '+S2(uat),'Obligatoriu','30-60 zile'],
    ['Delgaz Grid (gaz natural, dacă se prevede)','Delgaz Grid SA','Obligatoriu (dacă gaz)','30-60 zile'],
-   ['RAJA SA Iași (apă-canal)','RAJA SA Iași','Obligatoriu','30-60 zile'],
+   [(_fc.operatorApa||'Operator apă-canal'),S2(uat),'Obligatoriu','30-60 zile'],
    ['ISU Moldova (P.S.I.) — la P+3 sau S>600mp','ISU Moldova','Obligatoriu conf. norme','30-60 zile'],
    ['AACR / ROMATSA (dacă în zona de protecție aeroport)','ROMATSA + AACR','Dacă dist.<15km LRIA','30-90 zile'],
    ['DJCPN Iași (dacă în ZCP sau zonă protecție monument)','DJCPN Iași — Str. A. Panu 25','Dacă UTR cu patrimoniu','30-60 zile'],
@@ -3649,7 +3653,7 @@ async function generateStudiuFezabilitate(){
    ['CFR / CNADNR (dacă adiacentă cale ferată / drum național)','CFR / CNADNR','Dacă adjacentă','30-60 zile'],
   ].forEach(r=>cy=tblRow(r,cy,false,[70,52,30,30]));
   cy+=3;
-  cy=addImg(caps.imgCity,14,cy,W-28,45,'FIG. 6 — Harta Municipiului Iași · Amplasament + context urban general');
+  cy=addImg(caps.imgCity,14,cy,W-28,45,'FIG. 6 — Harta '+S2(uat)+' · Amplasament + context urban general');
 
   // ── PAG 10: DESPRE DALI — DOCUMENTAȚIE AVIZARE LUCRĂRI INTERVENȚIE ────────
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('DALI — DOCUMENTAȚIE DE AVIZARE A LUCRĂRILOR DE INTERVENȚIE',10);ftr();

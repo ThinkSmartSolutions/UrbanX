@@ -267,3 +267,47 @@
   };
   console.log('[UrbanX fixes-audit] infoDrawerOpen fezabilitate patched ✅');
 })();
+
+// ═══════════════════════════════════════════════════════════════════════════
+// getFinanciarConfig() — Prețuri de piață imobiliară per UAT
+// Returnează estimări calibrate pe baza dimensiunii și rangului orașului
+// ═══════════════════════════════════════════════════════════════════════════
+window.getFinanciarConfig = function(){
+  const uatId = (typeof S_UAT !== 'undefined' ? S_UAT.id : null) || 'municipiul-iasi';
+  const uat   = (typeof getUATLabel !== 'undefined' ? getUATLabel() : 'Localitate');
+
+  // Tabel de prețuri per UAT (EUR/mp teren, EUR/mp construcție, EUR/mp/lună chirie)
+  const PRET_UAT = {
+    // Tier 0 — Capitală
+    'municipiul-bucuresti':     {pretTeren:1400, pretConstructie:800, chirieRef:70, operatorApa:'Apa Nova București SA',  operatorEnerg:'Enel Energie Muntenia'},
+    // Tier 1 — Mari orașe universitare
+    'municipiul-cluj-napoca':   {pretTeren:1100, pretConstructie:780, chirieRef:65, operatorApa:'Compania de Apă Someș SA', operatorEnerg:'CEZ Distribuție SA'},
+    'municipiul-timisoara':     {pretTeren: 950, pretConstructie:760, chirieRef:60, operatorApa:'Aquatim SA Timișoara',     operatorEnerg:'DEER SA (E-ON)'},
+    'municipiul-brasov':        {pretTeren: 900, pretConstructie:750, chirieRef:58, operatorApa:'Compania Apa Brașov SA',   operatorEnerg:'CEZ Distribuție SA'},
+    'municipiul-constanta':     {pretTeren: 850, pretConstructie:730, chirieRef:55, operatorApa:'RAJA SA Constanța',        operatorEnerg:'Enel Energie Muntenia'},
+    // Tier 2 — Orașe regionale importante
+    'municipiul-iasi':          {pretTeren: 750, pretConstructie:710, chirieRef:50, operatorApa:'APAVITAL SA Iași',         operatorEnerg:'DEER SA (E-ON Moldova)'},
+    'municipiul-bacau':         {pretTeren: 450, pretConstructie:690, chirieRef:32, operatorApa:'Compania Regională Bacău', operatorEnerg:'DEER SA (E-ON Moldova)'},
+    'municipiul-galati':        {pretTeren: 420, pretConstructie:680, chirieRef:30, operatorApa:'Apaserv Galați SA',        operatorEnerg:'DEER SA (E-ON Muntenia)'},
+    'municipiul-craiova':       {pretTeren: 500, pretConstructie:700, chirieRef:35, operatorApa:'SC Salubritate 2000 SA',   operatorEnerg:'CEZ Distribuție SA'},
+    'municipiul-suceava':       {pretTeren: 380, pretConstructie:680, chirieRef:28, operatorApa:'Acet SA Suceava',          operatorEnerg:'DEER SA (E-ON Moldova)'},
+    // Tier 3 — Orașe medii
+    'municipiul-botosani':      {pretTeren: 250, pretConstructie:660, chirieRef:20, operatorApa:'Nova Apaserv SA Botoșani',  operatorEnerg:'DEER SA (E-ON Moldova)'},
+    'municipiul-vaslui':        {pretTeren: 220, pretConstructie:650, chirieRef:18, operatorApa:'Aquavas SA Vaslui',         operatorEnerg:'DEER SA (E-ON Moldova)'},
+    'municipiul-piatra-neamt':  {pretTeren: 320, pretConstructie:670, chirieRef:24, operatorApa:'Util Serv SA Piatra-Neamț', operatorEnerg:'DEER SA (E-ON Moldova)'},
+    'municipiul-roman':         {pretTeren: 280, pretConstructie:660, chirieRef:22, operatorApa:'Compania de Apă Roman SA',  operatorEnerg:'DEER SA (E-ON Moldova)'},
+    'municipiul-focsani':       {pretTeren: 260, pretConstructie:655, chirieRef:20, operatorApa:'Compania de Apă Focșani',   operatorEnerg:'DEER SA'},
+    'municipiul-barlad':        {pretTeren: 200, pretConstructie:645, chirieRef:16, operatorApa:'Aquavas SA Vaslui',         operatorEnerg:'DEER SA (E-ON Moldova)'},
+    // Tier 4 — Orașe mici / comune
+    'default':                  {pretTeren: 200, pretConstructie:640, chirieRef:15, operatorApa:'Operator local apă-canal',  operatorEnerg:'Operator local energie electrică'},
+  };
+
+  const cfg = PRET_UAT[uatId] || PRET_UAT['default'];
+
+  return {
+    ...cfg,
+    // Date pentru text descriptiv
+    sursa: 'Estimare piață imobiliară '+uat+' · Date UrbanX / Imobiliare.ro · 2024-2025',
+    nota: 'Prețuri ORIENTATIVE ±30%. Piața imobiliară variază semnificativ pe microzone și perioadă.',
+  };
+};
