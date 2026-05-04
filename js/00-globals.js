@@ -820,14 +820,21 @@ function _initSupabase() {
 
 // Toggle tab login/register
 function _authTab(mode) {
-  _authMode = mode;
-  const isLogin = mode === 'login';
-  document.getElementById('tab-login').style.background    = isLogin ? '#1e2d42' : 'transparent';
-  document.getElementById('tab-login').style.color         = isLogin ? '#fff' : '#64748b';
-  document.getElementById('tab-register').style.background = !isLogin ? '#1e2d42' : 'transparent';
-  document.getElementById('tab-register').style.color      = !isLogin ? '#fff' : '#64748b';
-  document.getElementById('auth-btn').textContent          = isLogin ? '🔐 Autentificare' : '✅ Creare cont';
-  document.getElementById('auth-forgot-wrap').style.display = isLogin ? 'block' : 'none';
+  // ── INVITE-ONLY: tab-ul Register afișează mesaj, nu formular ────────────
+  if(mode === 'register'){
+    _authMsg('🔒 Acces pe bază de invitație — contactați administratorul UrbanX pentru un cont.', true);
+    // Nu schimbăm modul — rămânem pe login
+    return;
+  }
+  _authMode = 'login';
+  document.getElementById('tab-login').style.background    = '#1e2d42';
+  document.getElementById('tab-login').style.color         = '#fff';
+  document.getElementById('tab-register').style.background = 'transparent';
+  document.getElementById('tab-register').style.color      = '#475569';
+  document.getElementById('tab-register').style.cursor     = 'default';
+  document.getElementById('tab-register').title            = 'Acces pe invitație — contactați admin';
+  document.getElementById('auth-btn').textContent          = '🔐 Autentificare';
+  document.getElementById('auth-forgot-wrap').style.display = 'block';
   _authMsg('');
 }
 
@@ -868,7 +875,13 @@ async function _authSubmit() {
     if(_authMode === 'login') {
       res = await _supabase.auth.signInWithPassword({ email, password: pass });
     } else {
-      res = await _supabase.auth.signUp({ email, password: pass });
+      // ── INVITE-ONLY: înregistrările publice sunt DEZACTIVATE ────────────
+      // Conturile noi se creează EXCLUSIV prin invitație de la admin.
+      // Admin-ul trimite invitații din panoul Admin → Utilizatori → Invită.
+      _authMsg('🔒 Accesul este pe bază de invitație. Contactați administratorul pentru un cont.', true);
+      btn.disabled = false;
+      btn.textContent = '✅ Creare cont';
+      return;
     }
 
     if(res.error) {

@@ -238,28 +238,45 @@ async function _adminLoadUsers() {
   _admMsg(msg, '⏳ Se încarcă...', 'info');
 
   try {
-    // Încercăm RPC-ul securizat (necesită SQL setup rulat)
+    // RPC securizat — necesită SQL setup (supabase-setup.sql)
     const { data: rpcData, error: rpcErr } = await _supabase.rpc('list_all_users');
 
     if(!rpcErr && rpcData) {
       _adminRender(rpcData, msg, container);
       _admMsg(msg, '✓ Date actualizate via RPC securizat', 'ok');
     } else {
-      // Fallback: SELECT direct pe profiles (funcționează dacă RLS permite)
+      // Fallback: SELECT direct pe profiles
       const { data: profData, error: profErr } = await _supabase
         .from('profiles').select('*').order('created_at', { ascending: false }).limit(100);
 
-      if(!profErr && profData) {
+      if(!profErr && profData?.length) {
         _adminRender(profData, msg, container);
-        _admMsg(msg, '✓ Date din tabela profiles', 'ok');
+        _admMsg(msg, '✓ Date din tabela profiles (RPC indisponibil)', 'ok');
       } else {
-        // Ultimul fallback: afișăm doar userul curent
-        _admMsg(msg, '⚠ ' + (profErr?.message || rpcErr?.message || 'Eroare necunoscută') + ' — se afișează doar userul curent.', 'warn');
-        _adminRender(_authUser ? [{
-          id: _authUser.id, email: _authUser.email,
-          role: 'admin', confirmed: true,
-          created_at: new Date().toISOString(), last_sign_in: new Date().toISOString()
-        }] : [], null, container);
+        // RPC lipsește — afișăm instrucțiuni setup
+        const isRpcMissing = rpcErr?.message?.includes('Could not find') || rpcErr?.code === '404' || rpcErr?.code === 'PGRST202';
+        if(isRpcMissing || rpcErr?.message?.includes('400')){
+          container.innerHTML = `
+            <div style="padding:20px 24px;color:#fbbf24">
+              <div style="font-size:13px;font-weight:700;margin-bottom:8px">⚙️ Setup SQL necesar în Supabase</div>
+              <div style="font-size:11px;color:#94a3b8;line-height:1.7;margin-bottom:12px">
+                Funcțiile RPC <code style="color:#a78bfa">list_all_users</code> și <code style="color:#a78bfa">set_user_role</code> nu sunt create.<br>
+                Rulează <b style="color:#fff">supabase-setup.sql</b> în Supabase → SQL Editor.
+              </div>
+              <a href="https://supabase.com/dashboard/project/_/sql" target="_blank"
+                style="display:inline-block;padding:7px 14px;background:rgba(59,130,246,.2);border:1px solid rgba(59,130,246,.4);color:#60a5fa;border-radius:7px;font-size:11px;font-weight:700;text-decoration:none">
+                🔗 Deschide SQL Editor →
+              </a>
+            </div>`;
+          _admMsg(msg, '⚠ RPC functions lipsesc — rulează supabase-setup.sql', 'warn');
+        } else {
+          _admMsg(msg, '⚠ ' + (profErr?.message || rpcErr?.message || 'Eroare necunoscută'), 'warn');
+          _adminRender(_authUser ? [{
+            id: _authUser.id, email: _authUser.email,
+            role: 'admin', confirmed: true,
+            created_at: new Date().toISOString()
+          }] : [], null, container);
+        }
       }
     }
   } catch(e) {
