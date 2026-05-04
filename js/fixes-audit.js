@@ -170,6 +170,18 @@
       .replace(/\u201d/g,'"')   // " ghilimele dreapta
       .replace(/\u00ab/g,'<<')  // «
       .replace(/\u00bb/g,'>>')  // »
+      .replace(/\u2022/g,'-')   // bullet •
+      .replace(/\u2023/g,'-')   // ‣ bullet
+      .replace(/\u25cf/g,'*')   // ● circle
+      .replace(/\u2713/g,'v')   // ✓ checkmark
+      .replace(/\u2714/g,'v')   // ✔ heavy checkmark
+      .replace(/\u2716/g,'x')   // ✖ X
+      .replace(/\u2605/g,'*')   // ★ star
+      .replace(/\u2606/g,'*')   // ☆ star
+      .replace(/\u2190/g,'<-')  // ← left arrow
+      .replace(/\u2192/g,'->')  // → right arrow
+      .replace(/\u2194/g,'<->') // ↔ arrows
+      .replace(/\u00b7/g,'.')   // · middle dot
       .replace(/\u20ac/g,'EUR') // € simbol
       .replace(/\u2248/g,'~')   // ≈ aproximativ
       .replace(/\u2264/g,'<=')  // ≤
@@ -197,4 +209,61 @@
     console.log('[UrbanX fixes-audit] _pdfSafe definit ✅');
   }
 
+})();
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PATCH: Info Drawer pentru Pre-Studiu Fezabilitate / DALI
+// ═══════════════════════════════════════════════════════════════════════════
+(function _patchInfoDrawerFezabilitate(){
+  // Interceptăm infoDrawerOpen pentru 'fezabilitate'
+  const _origInfoDrawer = window.infoDrawerOpen;
+  window.infoDrawerOpen = function(id){
+    if(id === 'fezabilitate'){
+      // Construim manual drawer-ul pentru SF/DALI
+      const drawer = document.getElementById('info-drawer');
+      const backdrop = document.getElementById('info-drawer-backdrop');
+      const ico = document.getElementById('info-drawer-ico');
+      const title = document.getElementById('info-drawer-title');
+      const badge = document.getElementById('info-drawer-badge-wrap');
+      const body = document.getElementById('info-drawer-body');
+      if(!drawer) return;
+
+      if(ico) ico.textContent = '📊';
+      if(title) title.textContent = 'Pre-Studiu Fezabilitate / DALI';
+      if(badge) badge.innerHTML = `
+        <span style="background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.4);color:#f59e0b;border-radius:5px;padding:2px 8px;font-size:9px;font-weight:700">HG 907/2016</span>
+        <span style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:#22c55e;border-radius:5px;padding:2px 8px;font-size:9px;margin-left:4px">12 PAGINI</span>
+        <span style="background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.3);color:#a78bfa;border-radius:5px;padding:2px 8px;font-size:9px;margin-left:4px">ORIENTATIV</span>
+      `;
+      if(body) body.innerHTML = `
+        <p style="color:#94a3b8;font-size:12px;line-height:1.7;margin-bottom:12px">
+          Studiu de <b style="color:#e2e8f0">Prefezabilitate / Fezabilitate / DALI</b> conform <b style="color:#f59e0b">HG 907/2016</b> privind etapele de elaborare și conținutul-cadru al documentațiilor tehnico-economice.
+        </p>
+        <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px;margin-bottom:10px">
+          <div style="font-size:10px;color:#64748b;font-weight:700;text-transform:uppercase;margin-bottom:6px">Conținut (12 pagini)</div>
+          ${[
+            ['📋','Date de identificare + indicatori PUG'],
+            ['🏙','Situația existentă + context urban 3D'],
+            ['📐','3 scenarii tehnice comparate (S1/S2/S3)'],
+            ['💰','Indicatori tehnico-economici estimativi'],
+            ['📈','Cash-flow pe 20 ani + surse finanțare'],
+            ['⚠️','Matrice de risc (9 categorii)'],
+            ['📅','Calendar implementare (10 faze)'],
+            ['📝','11 avize și acorduri necesare'],
+            ['🏛','Diferența SF vs DALI + conținut DALI'],
+            ['✅','Baza legală completă HG 907/2016'],
+          ].map(([i,t])=>`<div style="display:flex;gap:7px;align-items:flex-start;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04)"><span>${i}</span><span style="color:#cbd5e1;font-size:11px">${t}</span></div>`).join('')}
+        </div>
+        <div style="background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:10px;font-size:10px;color:#94a3b8;line-height:1.6">
+          <b style="color:#f59e0b">NOTĂ:</b> Document cu caracter <b style="color:#e2e8f0">STRICT ORIENTATIV</b>. Nu înlocuiește SF sau DALI elaborat de consultant autorizat. Valorile financiare au precizie ±30%.
+        </div>
+      `;
+      if(backdrop){ backdrop.style.display='block'; }
+      if(drawer){ drawer.classList.add('open'); drawer.style.display='flex'; }
+      return;
+    }
+    // Pentru orice alt id, apelăm funcția originală
+    if(typeof _origInfoDrawer === 'function') _origInfoDrawer.call(this, id);
+  };
+  console.log('[UrbanX fixes-audit] infoDrawerOpen fezabilitate patched ✅');
 })();

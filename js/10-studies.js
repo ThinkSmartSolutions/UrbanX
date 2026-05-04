@@ -3523,7 +3523,21 @@ async function generateStudiuFezabilitate(){
   [['S1 — Conservator',sc1+' mp',sda1+' mp',Math.round(aedisH*0.75)+'m',Math.round(sda1*700/1000)+' kEUR',((sda1*0.85*50*12)/((sda1*700*1.25+costTeren)/1000)).toFixed(1)+'%'],
    ['S2 — Recomandat ★',sc2+' mp',sda2+' mp',aedisH.toFixed(0)+'m',Math.round(sda2*700/1000)+' kEUR',((sda2*0.85*50*12)/((sda2*700*1.25+costTeren)/1000)).toFixed(1)+'%'],
    ['S3 — Maxim RLU',sc3+' mp',sda3+' mp',params?.h||aedisH.toFixed(0)+'m',Math.round(sda3*700/1000)+' kEUR',((sda3*0.85*50*12)/((sda3*700*1.25+costTeren)/1000)).toFixed(1)+'%'],
-  ].forEach((r,i)=>{cy=tblRow(r,cy,false,[30,22,24,22,44,40]);if(i===1){pdf.setFillColor(14,80,40);pdf.rect(14,cy-8,W-28,8,'F');}});
+  ].forEach((r,i)=>{
+    if(i===1){
+      // S2 RECOMANDAT: linie verde stânga (3mm) + text "★" în culoare verde
+      const cyBefore=cy;
+      cy=tblRow(r,cy,false,[30,22,24,22,44,40]);
+      // Border stânga verde aprins — desenat DUPĂ row (nu acoperă text)
+      pdf.setFillColor(34,197,94);
+      pdf.rect(14,cyBefore-5.5,3.5,cy-cyBefore+5.5,'F');
+      // Linie orizontală subtilă verde sub S2
+      pdf.setDrawColor(34,197,94);pdf.setLineWidth(0.6);
+      pdf.line(14,cy-1,W-14,cy-1);
+    } else {
+      cy=tblRow(r,cy,false,[30,22,24,22,44,40]);
+    }
+  });
   cy+=4;
   cy=sec('4.1. PROGRAMUL DE INVESTIȚIE RECOMANDAT (SCENARIUL S2)',cy);cy+=2;
   cy=body('Scenariul S2 (recomandat) propune valorificarea optimă a indicatorilor PUG pentru UTR '+utr+', cu o suprafață construită la sol de '+sc2+' mp (POT='+params?.pot+'%) și o suprafață desfășurată totală de '+sda2+' mp (CUT='+params?.cut+'). Regimul de înălțime propus este P+'+(niv-1)+' (H='+aedisH.toFixed(1)+'m), compatibil cu caracterul urban al zonei și cu cerințele de insorire (OMS 119/2014).',14,cy);cy+=3;
