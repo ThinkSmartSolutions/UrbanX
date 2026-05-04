@@ -939,9 +939,15 @@ function buildFrontLayer(parcelGeo, fp, params, bearing){
     const fc2 = S.vol?.frontCount||1;
     const FTHRESH = fc2>=3 ? 150 : fc2===2 ? 100 : 40;
     const PTHRESH = fc2>=2 ? 170 : 120;
-    const flFrontSet = new Set(sides.map((s,i)=>({s,i})).filter(({s})=>s.diff<FTHRESH).map(({i})=>i));
-    // Daca nicio latura nu e sub prag (unghi ciudat), luam cea mai apropiata
-    if(flFrontSet.size===0) flFrontSet.add(sides.reduce((bi,s,i)=>s.diff<sides[bi].diff?i:bi, 0));
+    // La 1 fata: STRICT o singura latura (cea cu diff minim)
+    const flFrontSet = new Set();
+    if(fc2===1){
+      const bestIdx = sides.reduce((bi,s,i)=>s.diff<sides[bi].diff?i:bi, 0);
+      flFrontSet.add(bestIdx);
+    } else {
+      sides.forEach((s,i)=>{ if(s.diff<FTHRESH) flFrontSet.add(i); });
+      if(flFrontSet.size===0) flFrontSet.add(sides.reduce((bi,s,i)=>s.diff<sides[bi].diff?i:bi, 0));
+    }
     const flPostCands = sides.map((s,i)=>({...s,i})).filter(({diff,i})=>diff>=PTHRESH&&!flFrontSet.has(i));
     const flPostIdx = flPostCands.length>0
       ? flPostCands.reduce((a,b)=>a.diff>b.diff?a:b).i
@@ -1170,8 +1176,14 @@ function buildFP(geom, paramsOrUtr){
     }
 
     // Front = laturi cu diff < FTHRESH; posterior = latura cu max diff (non-front)
-    const frontSet = new Set(sides.filter(s=>s.diff<FTHRESH).map(s=>s.i));
-    if(frontSet.size===0) frontSet.add(sides.reduce((a,b)=>a.diff<b.diff?a:b).i);
+    // La 1 fata: STRICT o singura latura - cea cu diff minim
+    const frontSet = new Set();
+    if(fc===1){
+      frontSet.add(sides.reduce((a,b)=>a.diff<b.diff?a:b).i);
+    } else {
+      sides.filter(s=>s.diff<FTHRESH).forEach(s=>frontSet.add(s.i));
+      if(frontSet.size===0) frontSet.add(sides.reduce((a,b)=>a.diff<b.diff?a:b).i);
+    }
     const nonFront = sides.filter(s=>!frontSet.has(s.i));
     const postIdx = nonFront.length>0
       ? nonFront.reduce((a,b)=>a.diff>b.diff?a:b).i : -1;
