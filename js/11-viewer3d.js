@@ -1119,18 +1119,16 @@ function _v3dAddDistanceLines(THREE, scene, toLoc){
 // ── Zone colorate în viewer 3D (retrageri, edificabil, SV, parcaje) ─────────
 function _v3dAddZones(THREE, scene, toLoc, ap){
   try{
-    // Helper: creează un mesh plan colorat dintr-un polygon geografic
+    // Helper: mesh plan colorat dintr-un polygon
     function makeZoneMesh(ringCoords, color, opacity, yPos){
       try{
         const pts = ringCoords.map(c=>toLoc(c));
         if(pts.length < 3) return null;
-        // Triangulare simplă (ear-clipping pentru convex/simplu)
         const shape = new THREE.Shape();
         shape.moveTo(pts[0][0], pts[0][1]);
         for(let i=1;i<pts.length;i++) shape.lineTo(pts[i][0], pts[i][1]);
         shape.closePath();
         const geo = new THREE.ShapeGeometry(shape);
-        // Rotire XY→XZ
         const pos = geo.attributes.position;
         for(let i=0;i<pos.count;i++){
           const x=pos.getX(i), y=pos.getY(i);
@@ -1139,10 +1137,8 @@ function _v3dAddZones(THREE, scene, toLoc, ap){
         pos.needsUpdate=true; geo.computeVertexNormals();
         const mat = new THREE.MeshBasicMaterial({
           color: new THREE.Color(color),
-          transparent: true,
-          opacity: opacity||0.25,
-          depthWrite: false,
-          side: THREE.DoubleSide
+          transparent: true, opacity: opacity||0.25,
+          depthWrite: false, side: THREE.DoubleSide
         });
         const mesh = new THREE.Mesh(geo, mat);
         mesh.renderOrder = 10;
@@ -1150,8 +1146,82 @@ function _v3dAddZones(THREE, scene, toLoc, ap){
       }catch(e){ return null; }
     }
 
-    // Helper: linie de contur colorată
-    function makeOutline(ringCoords, color, yPos, thickness){
+    // ── Helper: contur GROS ca ribbon de mesh-uri ─────────────────────────
+    // linewidth în WebGL e mereu 1px — simulăm linie groasă cu quads
+    function makeThickOutline(ringCoords, color, yBase, halfW, heightH){
+      try{
+        const pts = ringCoords.map(c=>toLoc(c));
+        const n = pts.length;
+        const group = new THREE.Group();
+        const mat = new THREE.MeshBasicMaterial({
+          color: new THREE.Color(color),
+          transparent: true, opacity: 0.95,
+          depthTest: false, depthWrite: false,
+          side: THREE.DoubleSide
+        });
+
+        for(let i=0;i<n-1;i++){
+          const [x1,z1] = pts[i];
+          const [x2,z2] = pts[i+1];
+          const dx=x2-x1, dz=z2-z1;
+          const len = Math.sqrt(dx*dx+dz*dz);
+          if(len < 0.01) continue;
+          const nx=-dz/len, nz=dx/len; // normal perpendicular
+
+          // Quad plan orizontal (ribbon la sol)
+          const verts = new Float32Array([
+            x1-nx*halfW, yBase,     z1-nz*halfW,
+            x1+nx*halfW, yBase,     z1+nz*halfW,
+            x2+nx*halfW, yBase,     z2+nz*halfW,
+            x2-nx*halfW, yBase,     z2-nz*halfW,
+          ]);
+          const idx = new Uint16Array([0,1,2, 0,2,3]);
+          const geo = new THREE.BufferGeometry();
+          geo.setAttribute('position', new THREE.Float32BufferAttribute(verts,3));
+          geo.setIndex(new THREE.BufferAttribute(idx,1));
+          geo.computeVertexNormals();
+          const m = new THREE.Mesh(geo, mat);
+          m.renderOrder = 50;
+          group.add(m);
+
+          // Perete vertical pe contur (H = heightH m)
+          if(heightH > 0){
+            const vv = new Float32Array([
+              x1-nx*halfW*0.3, yBase,       z1-nz*halfW*0.3,
+              x1-nx*halfW*0.3, yBase+heightH, z1-nz*halfW*0.3,
+              x2-nx*halfW*0.3, yBase+heightH, z2-nz*halfW*0.3,
+              x2-nx*halfW*0.3, yBase,       z2-nz*halfW*0.3,
+            ]);
+            const gi = new THREE.BufferGeometry();
+            gi.setAttribute('position', new THREE.Float32BufferAttribute(vv,3));
+            gi.setIndex(new THREE.BufferAttribute(new Uint16Array([0,1,2,0,2,3]),1));
+            gi.computeVertexNormals();
+            const mi = new THREE.Mesh(gi, mat);
+            mi.renderOrder = 50;
+            group.add(mi);
+          }
+        }
+        return group;
+      }catch(e){ return null; }
+    }
+
+    // ── Helper: pilon la colț ─────────────────────────────────────────────
+    function makeCornerPole(x, z, color, h, r){
+      try{
+        const geo = new THREE.CylinderGeometry(r||0.25, r||0.25, h||3.5, 6);
+        const mat = new THREE.MeshBasicMaterial({
+          color: new THREE.Color(color),
+          depthTest: false, depthWrite: false
+        });
+        const m = new THREE.Mesh(geo, mat);
+        m.position.set(x, (h||3.5)/2, z);
+        m.renderOrder = 60;
+        return m;
+      }catch(e){ return null; }
+    }
+
+    // ── Helper: linie simplă (pentru retrageri/zone secundare) ────────────
+    function makeSimpleLine(ringCoords, color, yPos){
       try{
         const pts = ringCoords.map(c=>toLoc(c));
         const positions = new Float32Array(pts.flatMap(([x,z])=>[x, yPos||0.08, z]));
@@ -1159,8 +1229,7 @@ function _v3dAddZones(THREE, scene, toLoc, ap){
         geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
         const mat = new THREE.LineBasicMaterial({
           color: new THREE.Color(color),
-          linewidth: thickness||2,
-          transparent: true, opacity: 0.9,
+          transparent: true, opacity: 0.85,
           depthTest: false, depthWrite: false
         });
         const line = new THREE.LineLoop(geo, mat);
@@ -1169,17 +1238,37 @@ function _v3dAddZones(THREE, scene, toLoc, ap){
       }catch(e){ return null; }
     }
 
-    // ── 1. PARCELĂ — contur auriu distinct ────────────────────────────────
+    // ── 1. PARCELĂ — contur auriu GROS + piloni la colțuri ───────────────
     const ring0 = ap.geo.geometry.type==='Polygon'
       ? ap.geo.geometry.coordinates[0]
       : ap.geo.geometry.coordinates[0][0];
-    const parcelOutline = makeOutline(ring0, '#d4af37', 0.15, 3);
-    if(parcelOutline) scene.add(parcelOutline);
-    // Fill semi-transparent
-    const parcelFill = makeZoneMesh(ring0, '#d4af37', 0.06, 0.01);
+
+    // Ribbon gros auriu (lățime 0.5m, perete H=0.4m)
+    const parcelRibbon = makeThickOutline(ring0, '#d4af37', 0.05, 0.35, 0.4);
+    if(parcelRibbon){ parcelRibbon.renderOrder=50; scene.add(parcelRibbon); }
+
+    // Piloni la fiecare colț
+    const pts0 = ring0.map(c=>toLoc(c));
+    pts0.forEach(([x,z],i)=>{
+      // Alternăm: piloni mai mari la primele 4 colțuri (definitorii)
+      const isMain = i < 4 || i % Math.max(1,Math.floor(pts0.length/4)) === 0;
+      if(!isMain && pts0.length > 8) return; // nu desenăm fiecare colț dacă prea mulți
+      const pole = makeCornerPole(x, z, '#f59e0b', isMain?3.0:1.8, isMain?0.22:0.14);
+      if(pole) scene.add(pole);
+      // Sferă strălucitoare în vârf
+      const sg = new THREE.SphereGeometry(isMain?0.35:0.20, 6, 6);
+      const sm = new THREE.MeshBasicMaterial({color:new THREE.Color('#fbbf24'), depthTest:false, depthWrite:false});
+      const sp = new THREE.Mesh(sg, sm);
+      sp.position.set(x, isMain?3.0:1.8, z);
+      sp.renderOrder = 61;
+      scene.add(sp);
+    });
+
+    // Fill parcelă — ușor auriu semi-transparent
+    const parcelFill = makeZoneMesh(ring0, '#d4af37', 0.07, 0.01);
     if(parcelFill) scene.add(parcelFill);
 
-    // ── 2. EDIFICABIL — zona construibilă (retrageri aplicate) ────────────
+    // ── 2. EDIFICABIL — zona construibilă ────────────────────────────────
     try{
       const edFeats = map.getSource('edificabil-src')?._data?.features||[];
       edFeats.forEach(f=>{
@@ -1190,13 +1279,14 @@ function _v3dAddZones(THREE, scene, toLoc, ap){
         rings.forEach(ring=>{
           const fill = makeZoneMesh(ring, '#7c3aed', 0.20, 0.03);
           if(fill) scene.add(fill);
-          const outline = makeOutline(ring, '#a78bfa', 0.20, 3);
+          // Contur edificabil — ribbon mai subțire violet
+          const outline = makeThickOutline(ring, '#a78bfa', 0.03, 0.18, 0.15);
           if(outline) scene.add(outline);
         });
       });
     }catch(e){}
 
-    // ── 3. RETRAGERI — zone de retragere față/lateral/spate ──────────────
+    // ── 3. RETRAGERI ─────────────────────────────────────────────────────
     try{
       const setbackFeats = map.getSource('setback-src')?._data?.features||[];
       setbackFeats.forEach(f=>{
@@ -1208,13 +1298,13 @@ function _v3dAddZones(THREE, scene, toLoc, ap){
         rings.forEach(ring=>{
           const fill = makeZoneMesh(ring, col, 0.18, 0.04);
           if(fill) scene.add(fill);
-          const outline = makeOutline(ring, col, 0.12, 2);
+          const outline = makeSimpleLine(ring, col, 0.10);
           if(outline) scene.add(outline);
         });
       });
     }catch(e){}
 
-    // ── 4. SPAȚII VERZI — zona SV ─────────────────────────────────────────
+    // ── 4. SPAȚII VERZI ───────────────────────────────────────────────────
     try{
       const svFeats = map.getSource('sv-src')?._data?.features||[];
       svFeats.forEach(f=>{
@@ -1225,13 +1315,13 @@ function _v3dAddZones(THREE, scene, toLoc, ap){
         rings.forEach(ring=>{
           const fill = makeZoneMesh(ring, '#22c55e', 0.30, 0.05);
           if(fill) scene.add(fill);
-          const outline = makeOutline(ring, '#4ade80', 0.12, 2);
+          const outline = makeSimpleLine(ring, '#4ade80', 0.12);
           if(outline) scene.add(outline);
         });
       });
     }catch(e){}
 
-    // ── 5. PARCAJE — zona parcaje ─────────────────────────────────────────
+    // ── 5. PARCAJE ────────────────────────────────────────────────────────
     try{
       const fpFeats = map.getSource('fp-src')?._data?.features||[];
       fpFeats.filter(f=>f.properties?.tip==='parcare'||f.properties?.type==='parcare').forEach(f=>{
@@ -1242,7 +1332,7 @@ function _v3dAddZones(THREE, scene, toLoc, ap){
         rings.forEach(ring=>{
           const fill = makeZoneMesh(ring, '#f97316', 0.30, 0.05);
           if(fill) scene.add(fill);
-          const outline = makeOutline(ring, '#fb923c', 0.12, 2);
+          const outline = makeSimpleLine(ring, '#fb923c', 0.12);
           if(outline) scene.add(outline);
         });
       });
@@ -2269,8 +2359,10 @@ function _v3dMatParter(THREE, stil, cache){
     deconstructivist:{roughness:0.10, metalness:0.82},
   }[stil] || {roughness:0.50, metalness:0.30};
   const mat=_v3dMat(THREE, parterCol, pbr);
-  if(isNight && ['comercial','birouri','mixt'].includes(fn)){
-    mat.emissive=new THREE.Color(0.05,0.10,0.25); mat.emissiveIntensity=1.2;
+  if(isNight && ['comercial','birouri','mixt','hotel','retail'].includes(fn)){
+    mat.emissive=new THREE.Color(0.08,0.18,0.45); mat.emissiveIntensity=3.5;
+  } else if(isNight){
+    mat.emissive=new THREE.Color(0.02,0.05,0.15); mat.emissiveIntensity=1.2;
   }
   return cache[k]=mat;
 }
@@ -2306,7 +2398,8 @@ function _v3dMatFloor(THREE, colHex, floorIdx, stil, cache){
   if(isNight){
     const nc = stilDef.windowColor || '#7dd3fc';
     const c = new THREE.Color(nc);
-    mat.emissive = c; mat.emissiveIntensity = 0.4;
+    mat.emissive = c;
+    mat.emissiveIntensity = 2.8; // mai puternic pentru ferestre vizibile
   }
   return cache[k]=mat;
 }
@@ -2427,8 +2520,8 @@ function _v3dAddWindows(THREE, pts2d, base, top, scene, stilKey){
     color: new THREE.Color(isNight2 ? '#ffe890' : C.glassCol),
     roughness: isNight2 ? 0.55 : (isCurtainWall ? 0.03 : 0.06),
     metalness: isNight2 ? 0.05 : (isCurtainWall ? 0.55 : C.glassRef),
-    emissive: new THREE.Color(isNight2 ? 0.55 : 0.06, isNight2 ? 0.42 : 0.12, isNight2 ? 0.04 : 0.28),
-    emissiveIntensity: isNight2 ? 2.8 : (isCurtainWall ? 0.75 : 0.25),
+    emissive: new THREE.Color(isNight2 ? 0.85 : 0.06, isNight2 ? 0.68 : 0.12, isNight2 ? 0.06 : 0.28),
+    emissiveIntensity: isNight2 ? 5.5 : (isCurtainWall ? 0.75 : 0.25),
     transparent: true,
     opacity: isNight2 ? 0.98 : (isCurtainWall ? 0.78 : 0.88),
     side: THREE.FrontSide
@@ -2684,13 +2777,13 @@ function _v3dApplyLight(preset,THREE,scene,r){
       exp:1.3,night:false,fog:true
     },
     night:{
-      sky:'#06090f',fog:'#06090f',
-      amb:{c:'#10204a',i:0.4},
-      gnd:{c:'#050a12',i:0.2},
-      sun:{c:'#2040c0',i:0.6,p:[-80,80,40]},
-      fill:{c:'#ff7020',i:1.8,p:[0,3,0]},
-      rim:{c:'#2040c0',i:0.8,p:[60,40,-80]},
-      exp:1.1,night:true,fog:true
+      sky:'#02040c',fog:'#03060f',
+      amb:{c:'#08102a',i:0.12},   // aproape negru — NUMAI emissive-ul luminează
+      gnd:{c:'#020408',i:0.05},
+      sun:{c:'#1a3080',i:0.3,p:[-40,120,30]}, // lună slabă, albăstruie, din sus
+      fill:{c:'#0a1840',i:0.2,p:[-60,80,-40]}, // fill lunar — NU la sol
+      rim:{c:'#2050c0',i:0.15,p:[60,50,-80]},
+      exp:0.55,night:true,fog:true   // exposure scăzut → contrast dramatic
     },
   };
   const p=P[preset]||P.day;
@@ -2714,29 +2807,78 @@ function _v3dApplyLight(preset,THREE,scene,r){
   if(r) r.toneMappingExposure=p.exp;
   window._v3dNight = !!p.night;  // Setăm flag pentru materiale
 
-  // Noapte: adăugăm lumini punctuale (stradă + interior clădiri)
+  // Noapte: adăugăm lumini punctuale spectaculoase
   if(p.night && V3D.scene){
-    // Lumini de stradă portocalii — acoperă mai mult teren
-    const streetLights = [
-      [-50,10,0],[50,10,0],[0,10,-50],[0,10,50],
-      [-50,10,-50],[50,10,50],[-50,10,50],[50,10,-50],
-      [0,10,0] // centru
+    // ── Lumini de stradă — sodium portocaliu (stâlpi pe perimetru) ──────
+    const streetPos=[
+      [-40,9,-2],[40,9,-2],[0,9,-42],[0,9,42],
+      [-40,9,-42],[40,9,42],[-40,9,42],[40,9,-42],
+      [-20,8,20],[-20,8,-20],[20,8,20],[20,8,-20]
     ];
-    streetLights.forEach(([x,y,z])=>{
-      const pl = new THREE.PointLight('#ff9840', 1.2, 80);
+    streetPos.forEach(([x,y,z])=>{
+      const pl=new THREE.PointLight('#ff9020',1.8,55,1.8);
       pl.position.set(x,y,z);
       V3D.scene.add(pl);
     });
-    // Lumini calde interioare (ferestre aprinse)
-    [[0,6,0],[-20,8,10],[20,8,-10]].forEach(([x,y,z])=>{
-      const il = new THREE.PointLight('#ffe080', 1.8, 50);
-      il.position.set(x,y,z);
-      V3D.scene.add(il);
+
+    // ── Lumini calde ferestre AEDIS — distribuite pe înălțimea clădirii ─
+    const maxH=Math.max(...(S.vol._lastFeats||[]).map(f=>f.properties?.top||0),8);
+    for(let yy=3; yy<maxH; yy+=3.2){
+      [[-2,yy,2],[2,yy,-2],[0,yy,0],[-3,yy,-3],[3,yy,3]].forEach(([x,y,z])=>{
+        const il=new THREE.PointLight('#ffcc60', 0.7+Math.random()*0.5, 22, 1.5);
+        il.position.set(x,y,z);
+        V3D.scene.add(il);
+      });
+    }
+
+    // ── Lumini vitrine parter — alb-cald mai intens ───────────────────
+    [[-5,1.5,5],[5,1.5,-5],[-5,1.5,-5],[5,1.5,5],[0,1.5,7],[0,1.5,-7]].forEach(([x,y,z])=>{
+      const vl=new THREE.PointLight('#fff0c0',2.5,20,1.8);
+      vl.position.set(x,y,z);
+      V3D.scene.add(vl);
     });
-    // Lumină albastră lunară de sus
-    const moon = new THREE.DirectionalLight('#4060c0', 0.8);
-    moon.position.set(50,120,-30);
+
+    // ── Lumină lunară albăstruie din înalt ────────────────────────────
+    const moon=new THREE.DirectionalLight('#4070d8',0.6);
+    moon.position.set(-80,200,60);
+    moon.castShadow=false;
     V3D.scene.add(moon);
+
+    // ── Fog densitate mică — ceață ușoară nocturnă ────────────────────
+    if(scene.fog){ scene.fog.density=0.0012; }
+
+    // ── Actualizare emissive materiale existente (schimbare din dropdown) ─
+    scene.traverse(obj=>{
+      if(!obj.isMesh || !obj.material) return;
+      const m=obj.material;
+      if(!m.emissive) return;
+      // Detectăm dacă e fereastră (emissive intens) sau corp clădire
+      const isWindow = m.emissiveIntensity > 0.5;
+      if(isWindow){
+        m.emissiveIntensity = Math.max(m.emissiveIntensity, 3.5);
+      } else if(m.emissiveIntensity === 0){
+        // Corp clădire — adaugăm strat minim pentru a nu fi complet negru
+        if(m.color){
+          const c = m.color.clone().multiplyScalar(0.04);
+          m.emissive.copy(c);
+          m.emissiveIntensity = 1.0;
+        }
+      }
+      m.needsUpdate = true;
+    });
+  } else if(!p.night && V3D.scene){
+    // ── Resetare emissive la zi ────────────────────────────────────────
+    scene.traverse(obj=>{
+      if(!obj.isMesh || !obj.material) return;
+      const m=obj.material;
+      if(!m.emissive) return;
+      // Resetăm doar materialele care nu sunt ferestre native (au emissive mare)
+      if(m.emissiveIntensity > 0 && m.emissiveIntensity < 1.5){
+        m.emissive.set(0,0,0);
+        m.emissiveIntensity = 0;
+        m.needsUpdate = true;
+      }
+    });
   }
 }
 
