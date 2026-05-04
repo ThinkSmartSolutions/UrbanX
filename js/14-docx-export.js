@@ -1,111 +1,148 @@
 // ── PATCH: Info drawer pentru ISU, Fezabilitate, Amplasament ─────────────────
-// Preia direct controlul elementelor HTML ale drawer-ului existent
+// Template identic cu AACR: CE ANALIZEAZĂ / DE CE E NECESAR / BAZA LEGALĂ /
+// CE PRIMEȘTI ÎN RAPORT / CÂND NU SE APLICĂ + buton Generează
 const _STUDII_EXTRA = {
+
   isu: {
     ico:'🔥', titlu:'Studiu de Siguranță la Foc (ISU)',
-    culoare:'f87171', pagini:12,
-    desc:'Analiză completă de securitate la incendiu conform P118-1/2015 + P118-2/2013. Necesară pentru obținerea Avizului ISU Moldova (obligatoriu dacă H>8m sau suprafața >600mp).',
-    norma:'P118-1/2015 · P118-2/2013 · Legea 307/2006',
-    aviz:'Aviz ISU Moldova — obligatoriu dacă H>8m sau SD>600mp',
-    continut:[
-      'Clasificarea clădirii: categorie pericol incendiu (A-E), grad de rezistență la foc (I-V)',
-      'Căi de acces ISU: lățime min. 3.5m (1 veh.) / 5.5m (2 veh.), distanță max. 80m de la intrare',
-      'Hidranți exteriori și interiori — necesitate, amplasament, debit',
-      'Sisteme detecție-alarmare-stingere incendiu (DASI) — când sunt obligatorii',
-      'Evacuare persoane: distanțe maxime, număr scări, lățimi coridoare (min. 1.2m)',
-      'Compartimentare la foc: pereți, planșee, uși rezistente la foc',
-      'Procedura aviz ISU: documente, taxe, termen emitere (30-60 zile)',
-      'Acces scară pompieri (obligatorie la H>28m)',
-    ]
+    badge:'SECURITATE INCENDIU', badgeColor:'#ef4444',
+    pagini:12, norma:'P118-1/2015',
+    ce_analizeaza:'Verifică dacă clădirea propusă respectă normele de securitate la incendiu conform P118-1/2015 și P118-2/2013. Calculează categoria de pericol de incendiu, gradul de rezistență la foc necesar, dimensionează căile de evacuare și determină dacă este obligatoriu avizul ISU Moldova înainte de Autorizația de Construire.',
+    de_ce:'Orice clădire cu înălțime mai mare de 8m sau suprafață desfășurată mai mare de 600mp necesită obținerea Avizului de Securitate la Incendiu de la ISU Moldova înainte de emiterea Autorizației de Construire. Construirea fără acest aviz atrage oprirea lucrărilor și aplicarea de amenzi contravenționale.',
+    baza_legala:['P118-1/2015 — Normativ privind securitatea la incendiu a construcțiilor','P118-2/2013 — Normativ privind securitatea la incendiu a instalațiilor de stingere','Legea nr. 307/2006 privind apărarea împotriva incendiilor','Ordinul MAI nr. 163/2007 — Norme generale de apărare împotriva incendiilor','Legea nr. 50/1991 art. 7 — Autorizația de Construire cu aviz ISU'],
+    ce_primesti:[
+      {ico:'🏗', txt:'Clasificarea clădirii: categorie pericol incendiu (A-E) și grad de rezistență la foc (I-V)'},
+      {ico:'🚒', txt:'Căi de acces ISU: lățime min. 3.5m (1 vehicul) / 5.5m (2 vehicule), distanță max. 80m'},
+      {ico:'💧', txt:'Hidranți exteriori și interiori — necesitate, amplasament, debit de calcul'},
+      {ico:'🔔', txt:'Sisteme DASI (detecție-alarmare-stingere incendiu) — când sunt obligatorii'},
+      {ico:'🚪', txt:'Evacuare persoane: distanțe maxime, număr scări, lățimi coridoare (min. 1.2m)'},
+      {ico:'🧱', txt:'Compartimentare la foc: pereți, planșee, uși rezistente la foc — REI minim'},
+      {ico:'📋', txt:'Procedura aviz ISU: documente necesare, taxe, termen emitere (30-60 zile)'},
+      {ico:'🪜', txt:'Scară pompieri — obligatorie la H>28m, cu specificații de montaj'},
+    ],
+    cand_nu:[
+      'Clădiri cu H≤8m ȘI suprafață desfășurată ≤600mp fără funcțiuni cu pericol special',
+      'Construcții provizorii sau anexe gospodărești fără funcțiune publică',
+      'Nu înlocuiește avizul oficial ISU Moldova obligatoriu pentru dosarul AC',
+    ],
+    btn_label:'Generează Studiu ISU (12 pagini)',
+    btn_fn:'generateSSF()',
   },
-  fezabilitate: {
-    ico:'📊', titlu:'Studiu de Fezabilitate / DALI',
-    culoare:'d4af37', pagini:15,
-    desc:'Studiu tehnico-economic conform HG 907/2016. Parametri financiari EDITABILI: preț construcție, teren, chirie, vânzare. Export PDF și Word (.doc). 15 pagini cu analiză completă + sinteză studii tehnice.',
-    norma:'HG 907/2016 · Legea 50/1991 · Legea 350/2001',
-    aviz:'Certificat Urbanism + avize din CU (ISU, E-ON, RAJA, ROMATSA etc.)',
-    continut:[
-      'Indicatori urbanistici PUG: POT/CUT/H/SV/Pk conf. RLU UTR',
-      'Variante tehnice S1/S2/S3 comparate cu costuri și rentabilitate',
-      'Indicatori financiari EDITABILI înainte de generare (preț constr., teren, chirie, vânzare)',
-      'Analiză cash flow pe 20 ani + ROI brut + Payback period',
-      'Matrice risc investiție (urbanistic, geotehnic, permitting, financiar, piață)',
-      'Calendar implementare 10 faze (CU → AC → Execuție → Recepție)',
-      'Sinteza studii tehnice: trafic, ISU, însorire, vânt, zgomot, geotehnică',
-      'Optimizări recomandate + buget total recalculat inclusiv studii și avize',
-      'Baza legală completă (HG 907/2016, NP 074, P100-1/2013, etc.)',
-      'Export Word (.doc) editabil — deschis cu Microsoft Word sau LibreOffice',
-    ]
-  },
+
   amplasament: {
     ico:'🗺', titlu:'Studiu de Amplasament & Teritoriu',
-    culoare:'818cf8', pagini:12,
-    desc:'Documentul fundament care integrează TOATE analizele pentru un amplasament. 12 pagini cu PUG, patrimoniu, seismicitate, vânt, zgomot, însorire, geotehnică, aeronautic, mediu, financiar și dashboard studii obligatorii.',
-    norma:'Legea 350/2001 · HG 525/1996 · toate normele tehnice',
-    aviz:'Primul pas: Certificat Urbanism (listează toate avizele necesare)',
-    continut:[
-      'Indicatori PUG + RLU: POT/CUT/H/SV/Pk/retrageri/funcțiuni admise',
-      'Patrimoniu LMI: zone protejate + monumente + procedura aviz DJCPN',
-      'Seismicitate P100-1/2013: zona seismică, ag, Tc, categoria geotehnică',
-      'Vânt CR 1-1-4/2012 + zgomot SR 10009 + însorire OMS 119/2014',
-      'Pre-evaluare geotehnică NP 074/2014 + nivel freatic estimat',
-      'Aeronautic AACR/ROMATSA: distanță la aeroport, aviz necesar',
-      'Impact mediu (EIM): aer, apă, sol, deșeuri, Natura 2000',
-      'Estimare financiară primară: cost construcție, teren, ROI',
-      'Dashboard studii necesare: 🔴 obligatoriu / REC. recomandat / OK',
-      'Concluzii integrate — toate domeniile pe o singură pagină',
-    ]
-  }
+    badge:'DOCUMENT FUNDAMENT', badgeColor:'#818cf8',
+    pagini:12, norma:'Legea 350/2001',
+    ce_analizeaza:'Analizează amplasamentul în 12 domenii tehnice integrate: indicatori PUG, situație juridică, infrastructură edilitară, patrimoniu LMI, servituți, mobilitate, seismicitate, însorire, vânt, zgomot, geotehnică, impact mediu și estimare financiară. Constituie documentul fundament pe baza căruia se elaborează toate studiile de specialitate ulterioare.',
+    de_ce:'Studiul de Amplasament este documentul de referință recomandat înainte de elaborarea oricărei documentații de autorizare. Centralizează toate informațiile tehnice relevante despre amplasament și determină automat lista studiilor obligatorii și avizelor necesare, economisind timp și evitând surprize în procesul de autorizare.',
+    baza_legala:['Legea nr. 350/2001 privind amenajarea teritoriului și urbanismul','HG nr. 525/1996 — Regulamentul General de Urbanism','P100-1/2013 — Cod de proiectare seismică (zonare seismică, ag, Tc)','CR 1-1-4/2012 — Cod de proiectare. Acțiunea vântului','OMS nr. 119/2014 + Ord. 994/2018 — Norme igienă și însorire','NP 074/2014 — Normativ privind cercetarea geotehnică','HG 930/2016 + Legea 233/2016 — Avizare construcții în zone aeronautice','Legea nr. 422/2001 privind protejarea monumentelor istorice'],
+    ce_primesti:[
+      {ico:'📐', txt:'Indicatori PUG complet: POT/CUT/H/SV/Pk/retrageri + bilanț suprafețe'},
+      {ico:'⚖️', txt:'Situație juridică cadastrală: CF, servituți, acces, sarcini'},
+      {ico:'🔌', txt:'Infrastructură tehnico-edilitară: rețele disponibile, consumuri estimate, costuri branșare'},
+      {ico:'🏛', txt:'Patrimoniu LMI: zone protejate, monumente, distanțe, procedura aviz DJCPN'},
+      {ico:'🌍', txt:'Seismicitate P100-1/2013: zona seismică, ag, Tc, categoria geotehnică'},
+      {ico:'☀️', txt:'Însorire OMS 119/2014: altitudine solară 21 dec., conformitate, umbră proiectată'},
+      {ico:'💨', txt:'Vânt CR 1-1-4/2012: presiune vânt qp(H), zona, clasificare Davenport'},
+      {ico:'🔊', txt:'Zgomot SR 10009:2017: surse identificate, nivel echivalent Leq, conformitate'},
+      {ico:'🪨', txt:'Geotehnică NP 074/2014: profil geologic, nivel freatic, capacitate portantă'},
+      {ico:'✈️', txt:'Aeronautic AACR/ROMATSA: distanță aeroport, H max admisă ICAO, aviz necesar'},
+      {ico:'🌿', txt:'Impact mediu: aer, apă, sol, deșeuri, arii protejate, Natura 2000'},
+      {ico:'📊', txt:'Dashboard studii necesare: 12 domenii cu verdict OBLIGATORIU/RECOMANDAT/OK'},
+      {ico:'💶', txt:'Estimare financiară primară: cost construcție, teren, ROI orientativ'},
+    ],
+    cand_nu:[
+      'Nu există excepții — recomandat pentru orice investiție imobiliară indiferent de dimensiune',
+      'Nu înlocuiește studiile tehnice de specialitate individuale obligatorii prin lege',
+      'Valorile sunt orientative — verificarea obligatorie la ANCPI, Primărie și operatori utilități',
+    ],
+    btn_label:'Generează Studiu Amplasament (12 pagini)',
+    btn_fn:'generateStudiuAmplasament()',
+  },
+
+  fezabilitate: {
+    ico:'📊', titlu:'Studiu de Fezabilitate / DALI',
+    badge:'TEHNICO-ECONOMIC', badgeColor:'#d4af37',
+    pagini:15, norma:'HG 907/2016',
+    ce_analizeaza:'Analizează viabilitatea economică a investiției imobiliare prin calcule financiare cu parametri personalizabili: preț construcție, preț teren, chirie de referință, preț vânzare și rată de ocupare. Compară 3 variante tehnice (conservatoare/recomandat/maxim), calculează randamentul brut, payback-ul și profitul estimat la vânzare. Exportabil în format PDF și Word (.doc) editabil.',
+    de_ce:'Studiul de Fezabilitate / DALI (Documentație de Avizare a Lucrărilor de Intervenție) este obligatoriu conform HG 907/2016 pentru proiectele cu finanțare publică. Pentru investițiile private, constituie instrumentul esențial de decizie: validează sau infirmă oportunitatea economică a investiției înainte de cheltuielile de proiectare.',
+    baza_legala:['HG nr. 907/2016 — Etapele elaborării documentațiilor tehnico-economice','Legea nr. 50/1991 republicată — Autorizarea executării lucrărilor de construcții','Legea nr. 350/2001 — Amenajarea teritoriului și urbanismul','NP 074/2014 — Normativ privind cercetarea geotehnică','P100-1/2013 — Cod de proiectare seismică','OMS 119/2014 + Ord. 994/2018 — Norme igienă și însorire','NP 051/2012 rev. — Normativ privind parcajele'],
+    ce_primesti:[
+      {ico:'🔢', txt:'Indicatori urbanistici PUG: POT/CUT/H/SV/Pk conf. RLU UTR — bilanț suprafețe'},
+      {ico:'⚖️', txt:'3 variante tehnice comparate: S1 conservator / S2 recomandat / S3 maxim RLU'},
+      {ico:'✏️', txt:'Parametri financiari EDITABILI: preț construcție, teren, chirie, vânzare, rată ocupare'},
+      {ico:'📈', txt:'Analiză cash flow pe 20 ani cu scenarii de chirie și vânzare'},
+      {ico:'💶', txt:'ROI brut, payback period și profit estimat la vânzare — cu valorile tale'},
+      {ico:'⚠️', txt:'Matrice de risc a investiției: urbanistic, geotehnic, permitting, financiar, piață'},
+      {ico:'🗓', txt:'Calendar de implementare pe 10 faze: de la CU la Recepție + Intabulare CF'},
+      {ico:'🔧', txt:'Optimizări arhitecturale recomandate + buget total recalculat cu studii și avize'},
+      {ico:'🔗', txt:'Sinteză studii tehnice: trafic, ISU, însorire, vânt, zgomot, geotehnică'},
+      {ico:'📝', txt:'Export Word (.doc) editabil — deschis cu Microsoft Word sau LibreOffice'},
+    ],
+    cand_nu:[
+      'Obligatoriu prin lege NUMAI pentru proiecte cu finanțare publică (HG 907/2016)',
+      'Pentru investiții private este recomandat, nu impus prin lege',
+      'Valorile financiare sunt orientative ±25-30% — devizul definitiv necesită proiect tehnic complet',
+    ],
+    btn_label:'Generează Studiu Fezabilitate / DALI',
+    btn_fn:'generateStudiuFezabilitate()',
+  },
 };
 
 function _showExtraDrawer(key){
   const d=_STUDII_EXTRA[key];
   if(!d) return false;
-  const ico=document.getElementById('info-drawer-ico');
-  const title=document.getElementById('info-drawer-title');
-  const body=document.getElementById('info-drawer-body');
-  const backdrop=document.getElementById('info-drawer-backdrop');
   const drawer=document.getElementById('info-drawer');
+  const backdrop=document.getElementById('info-drawer-backdrop');
+  const icoEl=document.getElementById('info-drawer-ico');
+  const titleEl=document.getElementById('info-drawer-title');
+  const badgeWrap=document.getElementById('info-drawer-badge-wrap');
+  const body=document.getElementById('info-drawer-body');
   if(!body||!drawer) return false;
 
-  if(ico) ico.textContent=d.ico;
-  if(title) title.textContent=d.titlu;
-
-  const badge_wrap=document.getElementById('info-drawer-badge-wrap');
-  if(badge_wrap) badge_wrap.innerHTML=`
-    <span style="font-size:10px;background:rgba(${_hexToRgb(d.culoare)},.15);color:#${d.culoare};border-radius:999px;padding:2px 10px;font-weight:700">${d.pagini} pagini</span>
-    <span style="font-size:10px;background:rgba(255,255,255,.06);color:#64748b;border-radius:999px;padding:2px 10px;margin-left:4px">${d.norma.split('·')[0].trim()}</span>
+  if(icoEl) icoEl.textContent=d.ico;
+  if(titleEl) titleEl.textContent=d.titlu;
+  if(badgeWrap) badgeWrap.innerHTML=`
+    <span style="font-size:10px;background:rgba(212,175,55,.15);color:#d4af37;border-radius:999px;padding:2px 10px;font-weight:700;margin-right:5px">${d.pagini} pagini</span>
+    <span style="font-size:10px;background:${d.badgeColor}22;color:${d.badgeColor};border-radius:999px;padding:2px 10px;font-weight:700;border:1px solid ${d.badgeColor}44">${d.badge}</span>
+    <span style="font-size:10px;background:rgba(255,255,255,.06);color:#64748b;border-radius:999px;padding:2px 10px;margin-left:4px">${d.norma}</span>
   `;
 
-  body.innerHTML=`
-    <p style="color:#94a3b8;font-size:12px;line-height:1.6;margin-bottom:16px">${d.desc}</p>
-    <div style="background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.2);border-radius:8px;padding:10px 14px;margin-bottom:16px">
-      <div style="font-size:9px;color:#d4af37;font-weight:700;letter-spacing:.08em;margin-bottom:6px">AVIZ PRINCIPAL</div>
-      <div style="font-size:11px;color:#e2e8f0">${d.aviz}</div>
-    </div>
-    <div style="font-size:9px;color:#475569;font-weight:700;letter-spacing:.08em;margin-bottom:8px">CONȚINUT DOCUMENT</div>
-    <ul style="padding:0;margin:0;list-style:none">
-      ${d.continut.map(item=>`<li style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:11px;color:#94a3b8;line-height:1.4">
-        <span style="color:#d4af37;flex-shrink:0;margin-top:1px">›</span>
-        <span>${item}</span>
-      </li>`).join('')}
-    </ul>
-    ${key==='fezabilitate'?`<div style="margin-top:16px">
-      <button onclick="generateStudiuFezabilitate();document.getElementById('info-drawer-backdrop').click()"
-        style="width:100%;padding:10px;background:rgba(212,175,55,.15);border:1px solid rgba(212,175,55,.4);color:#d4af37;border-radius:8px;font-weight:700;cursor:pointer;font-size:12px">
-        📊 Deschide Studiu Fezabilitate
-      </button>
-    </div>`:''}
-  `;
+  const sect=(label,content)=>`
+    <div style="margin-bottom:20px">
+      <div style="font-size:9px;color:#64748b;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">${label}</div>
+      ${content}
+    </div>`;
+
+  const listItems=(items)=>
+    `<ul style="padding:0;margin:0;list-style:none">${items.map(item=>`
+      <li style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+        <span style="font-size:16px;flex-shrink:0;margin-top:1px">${item.ico}</span>
+        <span style="font-size:12px;color:#94a3b8;line-height:1.4">${item.txt}</span>
+      </li>`).join('')}</ul>`;
+
+  const xList=(items)=>
+    items.map(txt=>`
+      <div style="display:flex;gap:8px;align-items:flex-start;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);border-radius:8px;padding:8px 12px;margin-bottom:6px">
+        <span style="color:#f87171;font-size:14px;flex-shrink:0">✕</span>
+        <span style="font-size:12px;color:#f87171;line-height:1.4">${txt}</span>
+      </div>`).join('');
+
+  body.innerHTML=
+    sect('CE ANALIZEAZĂ',`<p style="font-size:13px;color:#e2e8f0;line-height:1.6;margin:0">${d.ce_analizeaza}</p>`) +
+    sect('DE CE ESTE NECESAR',`<p style="font-size:13px;color:#94a3b8;line-height:1.6;margin:0">${d.de_ce}</p>`) +
+    sect('BAZA LEGALĂ',`<div style="font-size:11px;color:#64748b;line-height:1.8">${d.baza_legala.map(l=>`<div>· ${l}</div>`).join('')}</div>`) +
+    sect('CE PRIMEȘTI ÎN RAPORT', listItems(d.ce_primesti)) +
+    sect('CÂND NU SE APLICĂ', xList(d.cand_nu)) +
+    `<button onclick="${d.btn_fn}" style="width:100%;padding:14px;background:linear-gradient(135deg,#1a3a7a,#0e2448);
+      border:1px solid rgba(212,175,55,.4);border-radius:10px;color:#d4af37;font-size:13px;
+      font-weight:700;cursor:pointer;letter-spacing:.02em;margin-top:4px">
+      ${d.ico} ${d.btn_label}
+    </button>`;
 
   if(backdrop) backdrop.classList.add('open');
   if(drawer) drawer.classList.add('open');
   return true;
-}
-
-function _hexToRgb(hex){
-  const r=parseInt(hex.slice(0,2),16),g=parseInt(hex.slice(2,4),16),b=parseInt(hex.slice(4,6),16);
-  return `${r},${g},${b}`;
 }
 
 // Override infoDrawerOpen pentru key-urile noi
