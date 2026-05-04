@@ -952,11 +952,11 @@ function _v3dCaptureSilent(ap){
       // Camera setup
       const maxH=Math.max(...(S.vol._lastFeats||[]).map(f=>f.properties?.top||0),8);
       const parcelSz=Math.max(...ring0.map(c=>{const[x,z]=toLoc(c);return Math.sqrt(x*x+z*z);}),10);
-      // Rază apropiată: clădirea umple cadrul indiferent de zoom-ul hărții
-      // day/golden/overcast: 1.6x parcela (era 2.5x) — impact vizual maxim
-      // night: și mai aproape (1.3x) — fațadele luminate ocupă tot cadrul
-      const radDay  =Math.max(parcelSz*1.6, maxH*1.8, 22);
-      const radNight=Math.max(parcelSz*1.3, maxH*1.5, 18);
+      // Rază adaptivă: aproape de clădire dar fără să intrăm în ea
+      // Pentru parcele mari factorul crește să vedem tot ansamblul
+      const sizeFactor = parcelSz > 80 ? 2.0 : parcelSz > 40 ? 1.8 : 1.6;
+      const radDay  =Math.max(parcelSz*sizeFactor, maxH*2.2, 25);
+      const radNight=Math.max(parcelSz*(sizeFactor-0.2), maxH*2.0, 20);
       const tx=new THREE.Vector3(0,maxH*0.35,0);
 
       const setCam=(theta,phi,customRad)=>{
