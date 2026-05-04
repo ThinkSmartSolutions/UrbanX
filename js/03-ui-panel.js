@@ -93,8 +93,18 @@ function _ctxFromMapbox(center, radiusM){
   const seen = new Set();
   const centerPt = turf.point(center);
 
-  // Layere posibile: ctx-3d (al nostru), building/building-extrusion (Mapbox native)
-  const possibleLayers = ['ctx-3d', 'building', 'building-extrusion', 'building-shadow'];
+  // Layere posibile — extinse pentru compatibilitate mobile și toate stilurile Mapbox
+  const possibleLayers = [
+    'ctx-3d',
+    // Mapbox Standard / Streets v12
+    'building', 'building-extrusion', 'building-shadow',
+    // Mapbox Standard 3D (noul stil)
+    'building-outline', 'building-part', '3d-buildings',
+    // Mapbox Satellite / Dark / Light
+    'composite_building', 'mapbox-satellite-building',
+    // Custom UrbanX style layers
+    'urban-buildings', 'buildings-3d', 'fill-extrusion'
+  ];
   const availableLayers = possibleLayers.filter(id=>{
     try{ return !!map.getLayer(id); }catch(e){ return false; }
   });
@@ -113,7 +123,25 @@ function _ctxFromMapbox(center, radiusM){
   );
 
   if(!queryLayers.length){
-    console.warn('_ctxFromMapbox: niciun layer disponibil');
+    // Fallback mobil: interogăm FĂRĂ filtru de layer, luăm tot ce are geometrie Polygon
+    console.warn('_ctxFromMapbox: niciun layer specific — fallback fara filtru');
+    try{
+      const allFeats = map.queryRenderedFeatures(undefined);
+      for(const f of allFeats){
+        if(!f.geometry || (f.geometry.type!=='Polygon' && f.geometry.type!=='MultiPolygon')) continue;
+        if(!(f.properties?.height||f.properties?.render_height||f.properties?.['building:levels']||f.properties?.h||f.layer?.type==='fill-extrusion')) continue;
+        const geom = f.geometry.type==='MultiPolygon'?{type:'Polygon',coordinates:f.geometry.coordinates[0]}:f.geometry;
+        try{
+          const ctr=turf.centerOfMass({type:'Feature',geometry:geom,properties:{}});
+          const dist=turf.distance(centerPt,ctr,{units:'meters'});
+          if(dist>radiusM+150) continue;
+          const key=ctr.geometry.coordinates.map(v=>v.toFixed(4)).join(',');
+          if(seen.has(key)) continue; seen.add(key);
+          const h=pN(f.properties?.height)||pN(f.properties?.render_height)||(pN(f.properties?.['building:levels'])||0)*3||7;
+          feats.push({type:'Feature',properties:{h,lv:Math.round(h/3),fn:f.properties?.building||'yes',col:'#8a9ab0'},geometry:geom});
+        }catch(e){}
+      }
+    }catch(e){ console.warn('_ctxFromMapbox fallback total error:', e.message); }
     return feats;
   }
 
@@ -415,6 +443,12 @@ function htmlMobRapoarte(){
     ${btn('generateTrafficStudy()','52,211,153','🚦','Studiu Impact Trafic','Trafic generat, parcaje, ITE','trafic')}
     ${btn('generateIstoricStudy()','245,158,11','🏛','Studiu Patrimoniu & Istoric','LMI, zone protejate, avize MCID','patrimoniu')}
     ${btn('generateEnvironmentalImpact()','134,239,172','🌿','Studiu Impact Mediu (EIM)','Impact asupra mediului, APM','eim')}
+    ${btn('generateStudiuAmplasament()','129,140,248','🗺','Studiu de Amplasament & Teritoriu','Document fundament, 13 domenii','amplasament')}
+    ${btn('generateSSF()','248,113,113','🔥','Studiu Siguranță la Foc (ISU)','Aviz ISU Moldova, P118','isu')}
+  </div>
+  <div style="font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin:10px 0 6px">Studii tehnico-economice</div>
+  <div class="card" style="display:flex;flex-direction:column;gap:6px">
+    ${btn('generateStudiuFezabilitate()','212,175,55','📊','Studiu Fezabilitate / DALI','Viabilitate economică, HG 907/2016','fezabilitate')}
   </div>`;
 }
 
@@ -1041,16 +1075,16 @@ function htmlProiect(){
   '<div class="card" style="background:#08152a;margin-bottom:8px">',
   '<div class="help" style="margin-bottom:8px">Alege cum gestionezi clădirile existente pe teren:</div>',
   '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;margin-bottom:5px">',
-  '<button onclick="setS(this)" data-s="liber" style="padding:8px 4px;border-radius:9px;cursor:pointer;font-size:10px;text-align:center;border:2px solid '+((S.vol.scenariuConstructie==='liber'||!S.vol.scenariuConstructie)?'#d4af37':'rgba(255,255,255,.15)')+';background:'+((S.vol.scenariuConstructie==='liber'||!S.vol.scenariuConstructie)?'rgba(212,175,55,.15)':'rgba(11,18,32,.8)')+';color:#e2e8f0">🏚 Demolare<br><small>Teren liber</small></button>',
-  '<button onclick="setS(this)" data-s="extindere_h" style="padding:8px 4px;border-radius:9px;cursor:pointer;font-size:10px;text-align:center;border:2px solid '+(S.vol.scenariuConstructie==='extindere_h'?'#3b82f6':'rgba(255,255,255,.15)')+';background:'+(S.vol.scenariuConstructie==='extindere_h'?'rgba(59,130,246,.15)':'rgba(11,18,32,.8)')+';color:#e2e8f0">🔗 Extindere<br><small>Orizontal</small></button>',
-  '<button onclick="setS(this)" data-s="extindere_v" style="padding:8px 4px;border-radius:9px;cursor:pointer;font-size:10px;text-align:center;border:2px solid '+(S.vol.scenariuConstructie==='extindere_v'?'#34d399':'rgba(255,255,255,.15)')+';background:'+(S.vol.scenariuConstructie==='extindere_v'?'rgba(52,211,153,.15)':'rgba(11,18,32,.8)')+';color:#e2e8f0">🏗 Extindere<br><small>V+H</small></button>',
-  '<button onclick="toggleMultiVol()" style="padding:8px 4px;border-radius:9px;cursor:pointer;font-size:10px;text-align:center;border:2px solid '+(S.vol.multiVol?'#f59e0b':'rgba(255,255,255,.15)')+';background:'+(S.vol.multiVol?'rgba(245,158,11,.15)':'rgba(11,18,32,.8)')+';color:#e2e8f0">🏙 Multiple<br><small>Volume</small></button>',
+  '<button onclick="setS(this)" ontouchend="event.preventDefault();setS(this)" data-s="liber" style="touch-action:manipulation;-webkit-tap-highlight-color:transparent;padding:8px 4px;border-radius:9px;cursor:pointer;font-size:10px;text-align:center;border:2px solid '+((S.vol.scenariuConstructie==='liber'||!S.vol.scenariuConstructie)?'#d4af37':'rgba(255,255,255,.15)')+';background:'+((S.vol.scenariuConstructie==='liber'||!S.vol.scenariuConstructie)?'rgba(212,175,55,.15)':'rgba(11,18,32,.8)')+';color:#e2e8f0">🏚 Demolare<br><small>Teren liber</small></button>',
+  '<button onclick="setS(this)" ontouchend="event.preventDefault();setS(this)" data-s="extindere_h" style="touch-action:manipulation;-webkit-tap-highlight-color:transparent;padding:8px 4px;border-radius:9px;cursor:pointer;font-size:10px;text-align:center;border:2px solid '+(S.vol.scenariuConstructie==='extindere_h'?'#3b82f6':'rgba(255,255,255,.15)')+';background:'+(S.vol.scenariuConstructie==='extindere_h'?'rgba(59,130,246,.15)':'rgba(11,18,32,.8)')+';color:#e2e8f0">🔗 Extindere<br><small>Orizontal</small></button>',
+  '<button onclick="setS(this)" ontouchend="event.preventDefault();setS(this)" data-s="extindere_v" style="touch-action:manipulation;-webkit-tap-highlight-color:transparent;padding:8px 4px;border-radius:9px;cursor:pointer;font-size:10px;text-align:center;border:2px solid '+(S.vol.scenariuConstructie==='extindere_v'?'#34d399':'rgba(255,255,255,.15)')+';background:'+(S.vol.scenariuConstructie==='extindere_v'?'rgba(52,211,153,.15)':'rgba(11,18,32,.8)')+';color:#e2e8f0">🏗 Extindere<br><small>V+H</small></button>',
+  '<button onclick="toggleMultiVol()" ontouchend="event.preventDefault();toggleMultiVol()" style="touch-action:manipulation;-webkit-tap-highlight-color:transparent;padding:8px 4px;border-radius:9px;cursor:pointer;font-size:10px;text-align:center;border:2px solid '+(S.vol.multiVol?'#f59e0b':'rgba(255,255,255,.15)')+';background:'+(S.vol.multiVol?'rgba(245,158,11,.15)':'rgba(11,18,32,.8)')+';color:#e2e8f0">🏙 Multiple<br><small>Volume</small></button>',
   '</div>',
   '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px">',
-  '<button onclick="setS(this)" data-s="mansardare" style="padding:8px 4px;border-radius:9px;cursor:pointer;font-size:10px;text-align:center;border:2px solid '+(S.vol.scenariuConstructie==='mansardare'?'#f472b6':'rgba(255,255,255,.15)')+';background:'+(S.vol.scenariuConstructie==='mansardare'?'rgba(244,114,182,.15)':'rgba(11,18,32,.8)')+';color:#e2e8f0">🏠 Mansardare<br><small>Supraetajare</small></button>',
-  '<button onclick="setS(this)" data-s="consolidare" style="padding:8px 4px;border-radius:9px;cursor:pointer;font-size:10px;text-align:center;border:2px solid '+(S.vol.scenariuConstructie==='consolidare'?'#fb923c':'rgba(255,255,255,.15)')+';background:'+(S.vol.scenariuConstructie==='consolidare'?'rgba(251,146,60,.15)':'rgba(11,18,32,.8)')+';color:#e2e8f0">🔧 Consolidare<br><small>Reabilitare</small></button>',
-  '<button onclick="setS(this)" data-s="reconversie" style="padding:8px 4px;border-radius:9px;cursor:pointer;font-size:10px;text-align:center;border:2px solid '+(S.vol.scenariuConstructie==='reconversie'?'#a78bfa':'rgba(255,255,255,.15)')+';background:'+(S.vol.scenariuConstructie==='reconversie'?'rgba(167,139,250,.15)':'rgba(11,18,32,.8)')+';color:#e2e8f0">🔄 Reconversie<br><small>Funcțională</small></button>',
-  '<button onclick="setS(this)" data-s="inglobare" style="padding:8px 4px;border-radius:9px;cursor:pointer;font-size:10px;text-align:center;border:2px solid '+(S.vol.scenariuConstructie==='inglobare'?'#38bdf8':'rgba(255,255,255,.15)')+';background:'+(S.vol.scenariuConstructie==='inglobare'?'rgba(56,189,248,.15)':'rgba(11,18,32,.8)')+';color:#e2e8f0">🏛 Înglobare<br><small>Corp nou+exist.</small></button>',
+  '<button onclick="setS(this)" ontouchend="event.preventDefault();setS(this)" data-s="mansardare" style="touch-action:manipulation;-webkit-tap-highlight-color:transparent;padding:8px 4px;border-radius:9px;cursor:pointer;font-size:10px;text-align:center;border:2px solid '+(S.vol.scenariuConstructie==='mansardare'?'#f472b6':'rgba(255,255,255,.15)')+';background:'+(S.vol.scenariuConstructie==='mansardare'?'rgba(244,114,182,.15)':'rgba(11,18,32,.8)')+';color:#e2e8f0">🏠 Mansardare<br><small>Supraetajare</small></button>',
+  '<button onclick="setS(this)" ontouchend="event.preventDefault();setS(this)" data-s="consolidare" style="touch-action:manipulation;-webkit-tap-highlight-color:transparent;padding:8px 4px;border-radius:9px;cursor:pointer;font-size:10px;text-align:center;border:2px solid '+(S.vol.scenariuConstructie==='consolidare'?'#fb923c':'rgba(255,255,255,.15)')+';background:'+(S.vol.scenariuConstructie==='consolidare'?'rgba(251,146,60,.15)':'rgba(11,18,32,.8)')+';color:#e2e8f0">🔧 Consolidare<br><small>Reabilitare</small></button>',
+  '<button onclick="setS(this)" ontouchend="event.preventDefault();setS(this)" data-s="reconversie" style="touch-action:manipulation;-webkit-tap-highlight-color:transparent;padding:8px 4px;border-radius:9px;cursor:pointer;font-size:10px;text-align:center;border:2px solid '+(S.vol.scenariuConstructie==='reconversie'?'#a78bfa':'rgba(255,255,255,.15)')+';background:'+(S.vol.scenariuConstructie==='reconversie'?'rgba(167,139,250,.15)':'rgba(11,18,32,.8)')+';color:#e2e8f0">🔄 Reconversie<br><small>Funcțională</small></button>',
+  '<button onclick="setS(this)" ontouchend="event.preventDefault();setS(this)" data-s="inglobare" style="touch-action:manipulation;-webkit-tap-highlight-color:transparent;padding:8px 4px;border-radius:9px;cursor:pointer;font-size:10px;text-align:center;border:2px solid '+(S.vol.scenariuConstructie==='inglobare'?'#38bdf8':'rgba(255,255,255,.15)')+';background:'+(S.vol.scenariuConstructie==='inglobare'?'rgba(56,189,248,.15)':'rgba(11,18,32,.8)')+';color:#e2e8f0">🏛 Înglobare<br><small>Corp nou+exist.</small></button>',
   '</div>',
   ...(S.vol.multiVol ? htmlMultiVolUI() : []),
   '<div class="help" style="margin-top:6px;font-size:10px;padding:6px 8px;background:rgba(255,255,255,.03);border-radius:7px">'+
