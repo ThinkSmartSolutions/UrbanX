@@ -560,9 +560,28 @@ function _v3dBuild(ap){
   const canvas = document.getElementById('v3d-canvas');
   if(!canvas||!THREE){ _v3dStatus('❌ Three.js indisponibil'); return; }
   if(typeof V3D === 'undefined'){ console.error('V3D not initialized'); return; }
-  // Setăm noaptea ÎNAINTE de a construi materialele (citim selectorul dacă există)
-  const _presetSel = document.getElementById('v3d-light');
-  window._v3dNight = _presetSel ? _presetSel.value === 'night' : false;
+  window._v3dNight = document.getElementById('v3d-light')?.value === 'night' || false;
+
+  // ── Asigurăm context 3D înainte de build ─────────────────────────────────
+  // Dacă S.ctx e gol (Overpass a eșuat) → extragem din Mapbox rendered tiles
+  const _ctxCount = S.ctx?.features?.length || 0;
+  if(_ctxCount < 3 && typeof _ctxFromMapbox === 'function'){
+    try{
+      const center = ap.geo.geometry.type === 'Polygon'
+        ? ap.geo.geometry.coordinates[0].reduce(
+            (acc,c,_,arr)=>([acc[0]+c[0]/arr.length, acc[1]+c[1]/arr.length]),
+            [0,0])
+        : ap.geo.geometry.coordinates[0][0].reduce(
+            (acc,c,_,arr)=>([acc[0]+c[0]/arr.length, acc[1]+c[1]/arr.length]),
+            [0,0]);
+      const radius = Math.max(300, Number(S.vol.ctxR||350));
+      const extracted = _ctxFromMapbox(center, radius);
+      if(extracted?.length > _ctxCount){
+        S.ctx = {type:'FeatureCollection', features: extracted};
+        console.log(`[V3D] Context din Mapbox: ${extracted.length} clădiri (Overpass indisponibil)`);
+      }
+    }catch(e){ console.warn('[V3D] Fallback context error:', e.message); }
+  }
 
   const W=canvas.offsetWidth, H=canvas.offsetHeight;
 
@@ -873,6 +892,14 @@ function _v3dCaptureSilent(ap){
       const cy2=ring0.reduce((s,c)=>s+c[1],0)/ring0.length;
       const mLng=111320*Math.cos(cy2*Math.PI/180), mLat=111320;
       const toLoc=([lng,lat])=>[(lng-cx)*mLng,(lat-cy2)*mLat];
+
+      // Fallback context din Mapbox dacă Overpass a eșuat
+      if(!(S.ctx?.features?.length >= 3) && typeof _ctxFromMapbox === 'function'){
+        try{
+          const extracted = _ctxFromMapbox([cx, cy2], 350);
+          if(extracted?.length) S.ctx = {type:'FeatureCollection', features:extracted};
+        }catch(e){}
+      }
 
       // Clădiri context
       const tmpCache={};
