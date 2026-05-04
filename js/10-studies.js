@@ -17,7 +17,9 @@ async function generateShadowStudy(){
     const vctr=turf.centerOfMass(v).geometry.coordinates;
     const dist=turf.distance({type:'Feature',geometry:{type:'Point',coordinates:parcelCtr}},{type:'Feature',geometry:{type:'Point',coordinates:vctr}},{units:'meters'});
     const hv=v.properties?.h||7;const sh=shadowLen(hv,solarAlt(lat,11,12));const inParcela=sh>=dist;
-    return {nrcad:v.properties?.nrcad||'—',h:hv.toFixed(1),dist:dist.toFixed(0),sh:sh>200?'>200':sh.toFixed(0),inParcela,fn:v.properties?.fn_label||'Necunoscut'};
+    const _osmFn=v.properties?.fn_label||v.properties?.building_use||(v.properties?.building&&v.properties.building!=='yes'?('Cld.'+v.properties.building):null)||v.properties?.amenity||v.properties?.shop||'Constructie OSM';
+    const _osmId=v.properties?.nrcad||(v.properties?.id?'OSM '+String(v.properties.id).slice(-6):null)||('Cld.'+dist.toFixed(0)+'m');
+    return {nrcad:_osmId,h:hv.toFixed(1),dist:dist.toFixed(0),sh:sh>200?'>200':sh.toFixed(0),inParcela,fn:_osmFn};
   });
   const isConform=solarAlt(lat,11,12)>=15;
   const shadDec=shadowLen(aedisH,solarAlt(lat,11,12));
@@ -4433,8 +4435,9 @@ async function generateStudiuAmplasament(){
     const vc=turf.centerOfMass(v).geometry.coordinates;
     const dist=turf.distance({type:'Feature',geometry:{type:'Point',coordinates:parcelCtr}},
       {type:'Feature',geometry:{type:'Point',coordinates:vc}},{units:'meters'});
-    return {nrcad:v.properties?.nrcad||'—',h:(v.properties?.h||0).toFixed(1),
-      fn:v.properties?.fn_label||'Necunoscut',dist:dist.toFixed(0)};
+    const _osmFn2=v.properties?.fn_label||v.properties?.building_use||(v.properties?.building&&v.properties.building!=='yes'?('Cld.'+v.properties.building):null)||v.properties?.amenity||'Constructie OSM';
+    const _osmId2=v.properties?.nrcad||(v.properties?.id?'OSM '+String(v.properties.id).slice(-6):null)||('Cld.'+Math.round(dist)+'m');
+    return {nrcad:_osmId2,h:(v.properties?.h||0).toFixed(1),fn:_osmFn2,dist:dist.toFixed(0)};
   }).sort((a,b)=>a.dist-b.dist);
 
   // ── Monumente LMI din zona ────────────────────────────────────────────────

@@ -1,3 +1,37 @@
+// ── PATCH: Adaugă intrările lipsă în info drawer ────────────────────────────
+// Aceasta extinde obiectul de date din 13-info-drawer.js pentru studiile noi
+window.addEventListener('DOMContentLoaded', ()=>{
+  // Așteaptă ca 13-info-drawer.js să se încarce
+  setTimeout(()=>{
+    if(typeof window.STUDII_INFO !== 'undefined'){
+      if(!window.STUDII_INFO.isu) window.STUDII_INFO.isu = {
+        titlu:'Studiu de Siguranță la Foc (ISU)',ico:'🔥',
+        culoare:'248,113,113',
+        desc:'Analiză P118-1/2015 + P118-2/2013: categorie pericol incendiu, grad de rezistență la foc, căi de acces ISU, hidranți, evacuare, necesitatea avizului ISU Moldova.',
+        pagini:12, norma:'P118-1/2015 + P118-2/2013 + Legea 307/2006',
+        aviz:'ISU Moldova (obligatoriu dacă H>8m sau SD>600mp)',
+        continut:['Clasificare clădire: categorie pericol, grad rezistență la foc','Căi de acces ISU (min. 3.5m lățime, max. 80m de la intrare)','Hidranți exteriori și interiori','Sisteme de detecție, alarmare și stingere incendiu','Evacuare persoane: distanțe, număr scări, lățimi','Procedura aviz ISU: documente necesare, termen']
+      };
+      if(!window.STUDII_INFO.fezabilitate) window.STUDII_INFO.fezabilitate = {
+        titlu:'Studiu de Fezabilitate / DALI',ico:'📊',
+        culoare:'212,175,55',
+        desc:'Studiu tehnico-economic conform HG 907/2016. Variante tehnice, indicatori financiari editabili (preț construcție, teren, chirie), analiză financiară, matrice risc, calendar implementare, avize. Export PDF și Word (.doc) cu parametri personalizabili.',
+        pagini:15, norma:'HG 907/2016 + Legea 50/1991 + Legea 350/2001',
+        aviz:'Certificat Urbanism + toate avizele din CU',
+        continut:['Indicatori urbanistici PUG (POT/CUT/H/SV/Pk)','Variante tehnice S1/S2/S3 comparate','Indicatori financiari EDITABILI (preț constr., teren, chirie, vânzare)','Analiză cash flow pe 20 ani','Matrice risc investiție','Calendar implementare 10 faze','Sinteza studii tehnice (trafic, ISU, însorire, vânt, geo)','Optimizări recomandate + buget total recalculat','Export Word (.doc) editabil cu parametri personalizați']
+      };
+      if(!window.STUDII_INFO.amplasament) window.STUDII_INFO.amplasament = {
+        titlu:'Studiu de Amplasament & Teritoriu',ico:'🗺',
+        culoare:'129,140,248',
+        desc:'Document fundament pentru toate studiile tehnice. Analiză teritorială completă: PUG, patrimoniu LMI, seismicitate, vânt, zgomot, însorire, geotehnică, aeronautic, mediu, financiar. 12 pagini integrate.',
+        pagini:12, norma:'Legea 350/2001 + HG 525/1996 + toate normele tehnice',
+        aviz:'Certificat Urbanism (primul pas)',
+        continut:['Incadrare în PUG și RLU — toți indicatorii','Analiză patrimoniu LMI + zone protejate','Seismicitate P100-1/2013','Vânt CR 1-1-4/2012 + zgomot SR 10009','Însorire OMS 119/2014','Pre-evaluare geotehnică NP 074/2014','Aeronautic AACR/ROMATSA','Impact mediu (EIM) + hidrologic','Financiar orientativ (preț construcție, ROI estimat)','Dashboard studii necesare obligatorii','Concluzii integrate — toate domeniile']
+      };
+    }
+  }, 500);
+});
+
 // UrbanX — Export Word (.doc) fără dependențe externe
 // Generează documente editabile HTML→Word cu CSS Office-compatible
 // ════════════════════════════════════════════════════════════════════════════
