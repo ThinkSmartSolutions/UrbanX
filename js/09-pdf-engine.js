@@ -777,6 +777,10 @@ function _initStudyPdf(studyName, studySubtitle, totalPages){
     if(y+(needed||20)>H-16) return newPage(title||'continuare',pgNum||'\u2014');
     return y;
   };
+  const smartPage=(cy,title,pgNum,minUsed)=>{
+    if(cy<(minUsed||80)) return cy+8;
+    return newPage(title,pgNum);
+  };
 
   return {
     pdf,W,H,DARK,DARK2,NAVY,GOLD,GOLD2,GOLD3,BLUE,BLUE2,TEAL,LIGHT,LIGHT2,LIGHT3,
