@@ -3261,9 +3261,14 @@ async function generateIstoricStudy(){
     pdf.setTextColor(150,170,200);pdf.setFontSize(8);pdf.setFont('helvetica','normal');pdf.text(S2(l),26,118+i*9.5);
     pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text(S2(v),100,118+i*9.5);
   });
-  pdf.setFillColor(inZonaProtejata?180:20,inZonaProtejata?30:120,inZonaProtejata?30:60);pdf.rect(20,198,W-40,18,'F');
-  pdf.setTextColor(255,255,255);pdf.setFontSize(11);pdf.setFont('helvetica','bold');
-  pdf.text(inZonaProtejata?'ATENȚIE — Amplasament în zonă protejată LMI!':'ÎN AFARA zonelor protejate identificate (verificare recomandată)',W/2,207,{align:'center'});
+  // Status bar — text wrappat automat să nu depășească pagina
+  const _stText=inZonaProtejata?'ATENȚIE — Amplasament în zonă protejată LMI — Restricții suplimentare de autorizare!':'ÎN AFARA zonelor protejate identificate (verificare recomandată — date CIMEC + LMI 2015)';
+  pdf.setFontSize(9.5);pdf.setFont('helvetica','bold');
+  const _stLines=pdf.splitTextToSize(_stText,W-50);
+  const _stH=Math.max(16,_stLines.length*6.5+7);
+  pdf.setFillColor(inZonaProtejata?180:20,inZonaProtejata?30:120,inZonaProtejata?30:60);pdf.rect(20,198,W-40,_stH,'F');
+  pdf.setTextColor(255,255,255);
+  _stLines.forEach((l,i)=>pdf.text(l,W/2,206+i*6.5,{align:'center'}));
   if(caps.imgLocation){try{pdf.addImage(caps.imgLocation,'JPEG',14,H-72,W-28,58,undefined,'FAST');pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.4);pdf.rect(14,H-72,W-28,58,'S');pdf.setTextColor(...GOLD);pdf.setFontSize(6);pdf.text('AMPLASAMENT · '+S2(nrcad),W/2,H-75,{align:'center'});}catch(e){}}
   ftr();
 
@@ -3346,7 +3351,41 @@ async function generateIstoricStudy(){
   cy=sec('4. MONUMENTE ISTORICE IDENTIFICATE ÎN CONTEXT',cy);cy+=2;
   cy=body(cimecOK&&cimecMonumente.length>0?
     'Au fost identificate '+cimecMonumente.length+' monumente înregistrate în CIMEC în raza de 1km față de amplasamentul '+nrcad+' (UTR '+utr+'). Orice intervenție în proximitatea acestora necesită avizul DJCPN Iași și, după caz, al Comisiei Zonale a Monumentelor (CZ 5 — IAȘI).':
-    'Identificarea monumentelor istorice din Lista Monumentelor Istorice (LMI 2015 + actualizări) în raza de 500m față de amplasamentul '+nrcad+' este obligatorie înainte de orice intervenție. Prezentul studiu utilizează date de referință pentru Municipiul Iași. Se recomandă verificarea actualizată pe map.cimec.ro și culture.ro.',14,cy);
+    'Identificarea monumentelor istorice din Lista Monumentelor Istorice (LMI 2015 + actualizări) în raza de 500m față de amplasamentul '+nrcad+' este obligatorie înainte de orice intervenție. Prezentul studiu utilizează date de referință pentru Municipiul Iași. Se recomandă verificarea actualizată pe map.cimec.ro și culture.ro.',14,cy);cy+=4;
+
+  // Dacă nu există date CIMEC — completăm pagina cu conținut util
+  if(!cimecMonumente.length && !cimecSituri.length){
+    cy=sec('4.1. ZONE PROTEJATE LMI — DISTANȚE DE LA AMPLASAMENT',cy);cy+=2;
+    if(distZone.length>0){
+      cy=tblRow(['Cod LMI / Zonă','Tip zonă protejată','Distanță (m)','Status față de rază','Implicații'],cy,true,[32,40,22,30,58]);
+      distZone.sort((a,b)=>a.dist-b.dist).slice(0,10).forEach(z=>{
+        const implicatii=z.inZona?'Aviz DJCPN OBLIGATORIU':z.dist<500?'Consultare DJCPN recomandată':z.dist<1000?'Verificare PUG recomandată':'Fără restricții identificate';
+        cy=tblRow([
+          S2(z.cod||z.zona||'—').slice(0,14),
+          S2(z.tip||'Zonă protejată').slice(0,22),
+          Math.round(z.dist)+'m',
+          z.inZona?'ÎN ZONĂ ⚠':'în afara razei',
+          S2(implicatii)
+        ],cy,false,[32,40,22,30,58]);
+        if(z.inZona){pdf.setFillColor(180,50,20);pdf.rect(14,cy-8,W-28,8,'F');pdf.setTextColor(255,255,255);}
+      });
+      cy+=4;
+    } else {
+      cy=body('Nu au fost identificate zone construite protejate (ZCP) locale în baza de date UrbanX pentru această zonă. Verificarea este recomandată direct la DJCPN Iași și pe platforma map.cimec.ro.',14,cy);cy+=4;
+    }
+    cy=sec('4.2. CHECKLIST VERIFICARE PATRIMONIU — PAȘI OBLIGATORII',cy);cy+=2;
+    cy=tblRow(['Nr.','Verificare obligatorie','Resursa','Status'],cy,true,[10,90,55,27]);
+    [['1','Verificare harta CIMEC live — monumente în 500m față de amplasament','map.cimec.ro','Manual'],
+     ['2','Verificare LMI actualizată — lista națională a monumentelor','lege5.ro / cultura.ro','Manual'],
+     ['3','Verificare PUG Iași — UTR '+utr+' — zone cu regim special de construire','urbanx.ro / Primăria Iași','Efectuat'],
+     ['4','Verificare față de Zonele Construite Protejate din PUG Iași','DAU Primăria Iași — Planșe P4','Manual'],
+     ['5','Solicitare informare prealabilă DJCPN Iași (înainte de Certificat Urbanism)','Str. Anastasie Panu 25, Iași','Dacă zona incertă'],
+     ['6','Verificare registru RNMI (Registrul Național al Monumentelor Istorice)','patrimoniu.gov.ro','Manual'],
+     ['7','Verificare față de siturile arheologice din RAN (Repertoriul Arheologic)','ran.cimec.ro','Manual'],
+    ].forEach(r=>cy=tblRow(r,cy,false,[10,90,55,27]));
+    cy+=4;
+    cy=body('CONCLUZIE VERIFICARE AUTOMATĂ: Amplasamentul '+nrcad+' (UTR '+utr+') NU a fost identificat automat în nicio zonă construită protejată prin baza de date UrbanX. Totuși, această verificare automată NU înlocuiește verificarea manuală obligatorie la DJCPN Iași și pe map.cimec.ro înainte de elaborarea oricărei documentații de autorizare.',14,cy);cy+=3;
+  }
 
   // PAG 3: Viewer + restrictii
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D + RESTRICTII CONSTRUCTIVE IN ZONE PROTEJATE',4);ftr();

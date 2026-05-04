@@ -405,12 +405,23 @@ function _initStudyPdf(studyName, studySubtitle, totalPages){
     }
     return y;
   };
+  // smartPage — pagină nouă DOAR dacă pagina curentă e suficient de plină (>80mm conținut)
+  // Folosit în studii pentru a evita pagini pe jumătate când conținut dinamic lipsește
+  // Dacă cy < 80, NU adaugă pagină nouă — continuă pe aceeași pagină
+  const smartPage=(cy,title,pgNum,minUsed)=>{
+    const minY = minUsed||80; // min mm folosiți pe pagina curentă înainte să sară
+    if(cy < minY){
+      // Pagina e aproape goală — nu adăugăm pagină nouă, doar un separator
+      return cy + 8;
+    }
+    return newPage(title, pgNum);
+  };
 
   return {
     pdf,W,H,DARK,DARK2,NAVY,GOLD,GOLD2,GOLD3,BLUE,BLUE2,TEAL,LIGHT,LIGHT2,LIGHT3,
     RED,GREEN,ORANGE,PURPLE,GRAY,GRAY2,GRAY3,GRAY4,WHITE,
     S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,
-    hdr,ftr,sec,subsec,body,tblRow,addImg,kv,badge,divider,bullet,concluzii,sign,cover,newPage,checkY
+    hdr,ftr,sec,subsec,body,tblRow,addImg,kv,badge,divider,bullet,concluzii,sign,cover,newPage,checkY,smartPage
   };
 }
 
@@ -771,7 +782,7 @@ function _initStudyPdf(studyName, studySubtitle, totalPages){
     pdf,W,H,DARK,DARK2,NAVY,GOLD,GOLD2,GOLD3,BLUE,BLUE2,TEAL,LIGHT,LIGHT2,LIGHT3,
     RED,GREEN,ORANGE,PURPLE,GRAY,GRAY2,GRAY3,GRAY4,WHITE,
     S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,
-    hdr,ftr,sec,subsec,body,tblRow,addImg,kv,badge,divider,bullet,concluzii,sign,cover,newPage,checkY
+    hdr,ftr,sec,subsec,body,tblRow,addImg,kv,badge,divider,bullet,concluzii,sign,cover,newPage,checkY,smartPage
   };
 }
 
