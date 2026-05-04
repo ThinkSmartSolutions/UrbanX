@@ -128,38 +128,107 @@ function htmlMultiVolUI(){
     'padding:6px 2px;border-radius:6px;border:1px solid '+(active?col:'rgba(255,255,255,.2)')+
     ';background:'+(active?col.replace(')',', 0.2)').replace('rgb','rgba'):'transparent')+
     ';color:'+(active?col:'#94a3b8')+';cursor:pointer;font-size:12px;font-weight:700;flex:1';
-  
+
   const nBtns = [2,3,4,6].map(n=>
     '<button onclick="setMVC('+n+')" style="'+btnStyle(mv===n,'#f59e0b')+'">'+n+'</button>'
   ).join('');
-  
+
   return [
     '<div class="card" style="background:#08152a;margin-top:6px;padding:12px">',
-    '<div style="font-size:12px;font-weight:700;color:#f59e0b;margin-bottom:10px">🏙 Multiple clădiri pe edificabil</div>',
+    '<div style="font-size:12px;font-weight:700;color:#f59e0b;margin-bottom:10px">Multiple clădiri pe edificabil</div>',
     '<div class="g2" style="margin-bottom:10px">',
     '<div><div class="ml" style="font-size:11px;margin-bottom:4px">Nr. clădiri pe parcelă</div>',
     '<div style="display:flex;gap:4px">'+nBtns+'</div></div>',
-    '<div><div class="ml" style="font-size:11px;margin-bottom:4px">Formă clădiri</div>',
-    '<div style="display:flex;gap:4px">',
-    '<button onclick="setMVS(this.dataset.s)" data-s="auto" style="'+btnStyle(ms==='auto','#f59e0b')+';font-size:11px">⚡ Auto</button>',
-    '<button onclick="setMVS(this.dataset.s)" data-s="rect" style="'+btnStyle(ms==='rect','#f59e0b')+';font-size:11px">▬ Dreptunghi</button>',
-    '<button onclick="setMVS(this.dataset.s)" data-s="square" style="'+btnStyle(ms==='square','#f59e0b')+';font-size:11px">■ Pătrat</button>',
-    '<button onclick="setMVS(this.dataset.s)" data-s="L" style="'+btnStyle(ms==='L','#f59e0b')+';font-size:11px">⌐ Formă L</button>',
-    '<button onclick="setMVS(this.dataset.s)" data-s="U" style="'+btnStyle(ms==='U','#f59e0b')+';font-size:11px">⊓ Formă U</button>',
-    '<button onclick="setMVS(this.dataset.s)" data-s="T" style="'+btnStyle(ms==='T','#f59e0b')+';font-size:11px">⊤ Formă T</button>',
+    '<div><div class="ml" style="font-size:11px;margin-bottom:4px">Formă globală clădiri</div>',
+    '<div style="display:flex;flex-wrap:wrap;gap:3px">',
+    '<button onclick="setMVS(\'auto\')" style="'+btnStyle(ms==='auto','#f59e0b')+';font-size:11px;padding:5px 3px">⚡ Auto</button>',
+    '<button onclick="setMVS(\'rect\')" style="'+btnStyle(ms==='rect','#f59e0b')+';font-size:11px;padding:5px 3px">▬ Dreptunghi</button>',
+    '<button onclick="setMVS(\'square\')" style="'+btnStyle(ms==='square','#f59e0b')+';font-size:11px;padding:5px 3px">■ Pătrat</button>',
+    '<button onclick="setMVS(\'L\')" style="'+btnStyle(ms==='L','#f59e0b')+';font-size:11px;padding:5px 3px">⌐ Formă L</button>',
+    '<button onclick="setMVS(\'U\')" style="'+btnStyle(ms==='U','#f59e0b')+';font-size:11px;padding:5px 3px">⊓ Formă U</button>',
+    '<button onclick="setMVS(\'T\')" style="'+btnStyle(ms==='T','#f59e0b')+';font-size:11px;padding:5px 3px">⊤ Formă T</button>',
     '</div></div>',
     '</div>',
-    '<div class="ml" style="font-size:11px;margin-bottom:4px">Distanță minimă între clădiri (m) — indicator urbanistic</div>',
-    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">',
+    '<div class="ml" style="font-size:11px;margin-bottom:4px">Distanță minimă între clădiri (m)</div>',
+    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">',
     '<input type="range" min="0.5" max="24" step="0.5" value="'+md+'" oninput="updateMVDist(+this.value)" style="flex:1;accent-color:#f59e0b">',
     '<span id="mvd-val" style="color:#f59e0b;font-weight:700;min-width:35px">'+md+'m</span>',
     '</div>',
-    '<div class="ok-box" style="font-size:10px;padding:8px;margin-top:4px">',
-    '📐 Distanța se aplică: <b>între clădirile generate</b> pe parcelă (portocaliu pe hartă) + ',
-    '<b>față de clădirile vecine</b> existente (verde=ok / roșu=prea aproape)',
     '</div>',
-    '</div>'
+    htmlPerBldgUI(),  // Panel editare individuală per clădire
   ];
+}
+
+// ── Post-procesare height overrides ──────────────────────────────────────────
+// Grupează features pe clădiri după proximitate centroid și aplică H per clădire
+function _applyMVPerBuildingHeights(feats, perBld, globalNiv, globalHNiv){
+  if(!feats?.length || !perBld?.some(b=>b?.niv!=null||b?.hNiv!=null)) return feats;
+  try{
+    // Identifică N clustere de features după centroid
+    const centers = feats
+      .filter(f=>f.properties?.floor===0)
+      .map(f=>({ctr:turf.centerOfMass(f).geometry.coordinates, feat:f}));
+
+    // Sortăm centrele stânga-dreapta, sus-jos (ordine consistentă)
+    centers.sort((a,b)=> a.ctr[0]-b.ctr[0] || a.ctr[1]-b.ctr[1]);
+
+    const clusterRadius = 30; // m — raza de grupare per clădire
+    const clusters = [];
+    centers.forEach(c=>{
+      const existing = clusters.find(cl=>
+        turf.distance({type:'Feature',geometry:{type:'Point',coordinates:cl.ctr},properties:{}},
+          {type:'Feature',geometry:{type:'Point',coordinates:c.ctr},properties:{}},{units:'meters'}) < clusterRadius
+      );
+      if(existing) existing.feats.push(c.feat);
+      else clusters.push({ctr:c.ctr, feats:[c.feat]});
+    });
+
+    if(clusters.length < 2) return feats; // nu s-au identificat clădiri separate
+
+    // Construiește mapă centroid→buildingIdx
+    const ctrMap = [];
+    clusters.forEach((cl,idx)=>{
+      ctrMap.push({ctr:cl.ctr, idx});
+    });
+
+    // Funcție ce determină indexul clădirii pentru un feature
+    const getBldIdx = f => {
+      const fc = turf.centerOfMass(f).geometry.coordinates;
+      let best = 0, bestD = Infinity;
+      ctrMap.forEach(cm=>{
+        const d = Math.abs(fc[0]-cm.ctr[0])*111000 + Math.abs(fc[1]-cm.ctr[1])*111000;
+        if(d<bestD){bestD=d; best=cm.idx;}
+      });
+      return best;
+    };
+
+    // Reconstruiește features cu heights corecte per clădire
+    const maxOrigTop = Math.max(...feats.map(f=>f.properties?.top||0));
+    const result = feats.map(f=>{
+      const bIdx = getBldIdx(f);
+      const bCfg = perBld[bIdx] || {};
+      const origNiv = globalNiv || 4;
+      const origHNiv = globalHNiv || 3.0;
+      const newNiv = bCfg.niv ?? origNiv;
+      const newHNiv = bCfg.hNiv ?? origHNiv;
+      if(newNiv === origNiv && newHNiv === origHNiv) return f; // neschimbat
+      const scaleFactor = (newNiv * newHNiv) / (origNiv * origHNiv);
+
+      // Scalăm bazele și topurile vertical
+      const newBase = (f.properties.base||0) * scaleFactor;
+      const newTop  = (f.properties.top||0) * scaleFactor;
+
+      // Omitem features care depășesc noul H maxim
+      if(newBase > newNiv * newHNiv + 2) return null;
+
+      return {...f, properties:{...f.properties, base:parseFloat(newBase.toFixed(3)), top:parseFloat(newTop.toFixed(3))}};
+    }).filter(Boolean);
+
+    return result;
+  }catch(e){
+    console.warn('_applyMVPerBuildingHeights error:', e);
+    return feats;
+  }
 }
 function setArchStyle(s){
   S.vol.archStyle=s;
@@ -181,6 +250,9 @@ function _mvRegen(){
 
 function setMVC(n){ 
   S.vol.multiVolCount=n;
+  // Inițializăm / redimensionăm array-ul per-building
+  if(!S.vol.multiVolPerBldg) S.vol.multiVolPerBldg=[];
+  while(S.vol.multiVolPerBldg.length < n) S.vol.multiVolPerBldg.push({});
   _mvRegen();
   renderTab('proiect'); 
 }
@@ -189,6 +261,8 @@ function setMVS(s){ if(s&&s.getAttribute) s=s.getAttribute('data-s');
   _mvRegen();
   renderTab('proiect'); 
 }
+
+// Per-building param setters
 function updateMVDist(v){
   S.vol.multiVolDist=v;
   const el=document.getElementById('mvd-val');
@@ -3441,9 +3515,30 @@ function aedisBuild(){
     // ── MULTIPLE VOLUME: dacă S.vol.multiVol e activ, distribuim N clădiri ──
     if(S.vol.multiVol){
       const mvParams = {...params, niv: totalNiv};
-      const multiFeats = buildMultiVolume(parcelaTmp,
-        {type:'Feature',geometry:fpGeom,properties:{}},
-        mvParams, 0);
+      let multiFeats = [];
+      try{
+        multiFeats = buildMultiVolume(parcelaTmp,
+          {type:'Feature',geometry:fpGeom,properties:{}},
+          mvParams, 0);
+      }catch(e){
+        console.warn('buildMultiVolume error (shape fallback la rect):', e.message);
+        // Fallback la dreptunghi simplu dacă forma complexă crează eroare
+        const origShape = S.vol.multiVolShape;
+        S.vol.multiVolShape = 'rect';
+        try{
+          multiFeats = buildMultiVolume(parcelaTmp,
+            {type:'Feature',geometry:fpGeom,properties:{}},
+            mvParams, 0);
+        }catch(e2){ multiFeats = []; }
+        S.vol.multiVolShape = origShape;
+        ss('⚠️ Forma selectată a generat eroare — s-a folosit dreptunghi. Încearcă altă formă.');
+      }
+      // Aplică H/niv personalizat per clădire dacă există
+      // Aplică H/niv per clădire din sistemul existent (S.vol.multiVolPerBldg)
+      const perBldg = S.vol.multiVolPerBldg||[];
+      if(multiFeats.length && perBldg.some(b=>b?.niv!=null||b?.hNiv!=null)){
+        multiFeats = _applyMVPerBuildingHeights(multiFeats, perBldg, totalNiv, hEtaj);
+      }
       feats.push(...multiFeats);
       continue; // trecem la parcela următoare
     }
