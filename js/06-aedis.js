@@ -133,9 +133,9 @@ function htmlPerBldgUI(){
     return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;padding:6px 8px;background:#0d1f3c;border-radius:6px;border:1px solid rgba(245,158,11,0.2)">'+
       '<span style="color:#f59e0b;font-weight:700;font-size:11px;min-width:60px">Corp '+(i+1)+'</span>'+
       '<div style="flex:1"><div style="font-size:10px;color:#94a3b8;margin-bottom:2px">Niveluri</div>'+
-      '<input type="number" min="1" max="50" value="'+niv+'" oninput="setBldgParam('+i+','niv',+this.value)" style="width:100%;background:#081526;border:1px solid rgba(245,158,11,0.3);color:#fff;border-radius:4px;padding:3px 6px;font-size:12px"></div>'+
+      '<input type="number" min="1" max="50" value="'+niv+'" oninput="setBldgParam('+i+',\'niv\',+this.value)" style="width:100%;background:#081526;border:1px solid rgba(245,158,11,0.3);color:#fff;border-radius:4px;padding:3px 6px;font-size:12px"></div>'+
       '<div style="flex:1"><div style="font-size:10px;color:#94a3b8;margin-bottom:2px">H/nivel (m)</div>'+
-      '<input type="number" min="2" max="6" step="0.1" value="'+h+'" oninput="setBldgParam('+i+','hNiv',+this.value)" style="width:100%;background:#081526;border:1px solid rgba(245,158,11,0.3);color:#fff;border-radius:4px;padding:3px 6px;font-size:12px"></div>'+
+      '<input type="number" min="2" max="6" step="0.1" value="'+h+'" oninput="setBldgParam('+i+',\'hNiv\',+this.value)" style="width:100%;background:#081526;border:1px solid rgba(245,158,11,0.3);color:#fff;border-radius:4px;padding:3px 6px;font-size:12px"></div>'+
       '</div>';
   }).join('');
   return '<div class="card" style="background:#08152a;margin-top:6px;padding:12px"><div style="font-size:12px;font-weight:700;color:#f59e0b;margin-bottom:8px">Editare individuala per corp</div>'+rows+'</div>';
