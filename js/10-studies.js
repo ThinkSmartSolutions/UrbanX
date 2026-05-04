@@ -194,7 +194,7 @@ async function generateShadowStudy(){
     const sinA=Math.sin(lat*D2R)*Math.sin(decl*D2R)+Math.cos(lat*D2R)*Math.cos(decl*D2R)*Math.cos(ha*D2R);
     const cosA=-(Math.cos(lat*D2R)*Math.sin(decl*D2R)-Math.sin(lat*D2R)*Math.cos(decl*D2R)*Math.cos(ha*D2R))/Math.sqrt(1-sinA*sinA);
     const az=h>=12?(Math.acos(Math.max(-1,Math.min(1,cosA)))*180/Math.PI):(360-Math.acos(Math.max(-1,Math.min(1,cosA)))*180/Math.PI);
-    const regime=alt<1?'Sub orizont':alt<15?'⚠ Sub prag':'✓ Conform';
+    const regime=alt<1?'Sub orizont':alt<15?'ATN Sub prag':'OK Conform';
     cy=tblRow([h+':00',(isNaN(az)?'—':az.toFixed(0)+'°'),alt<1?'—':alt.toFixed(1)+'°',sh>500?'>500':sh<1?'—':sh.toFixed(0)+'m',regime,alt>0?'DA':'NU'],cy,false,[20,30,28,28,35,41]);
   });
   cy+=4;
@@ -209,7 +209,7 @@ async function generateShadowStudy(){
     const sunset=cosH>1?null:(cosH<-1?24:12+Math.acos(cosH)/D2R/15);
     const totalH=sunrise&&sunset?((sunset-sunrise).toFixed(1)+'h'):'—';
     const oreConf=[6,7,8,9,10,11,12,13,14,15,16,17,18].filter(h=>solarAlt(lat,mi,h)>=15).length;
-    const status=oreConf>=4?'✓ Bun':oreConf>=2?'⚠ Limita':'✗ Insuficient';
+    const status=oreConf>=4?'OK Bun':oreConf>=2?'ATN Limita':'NU Insuficient';
     const rsStr=sunrise?Math.floor(sunrise)+':'+(Math.round((sunrise%1)*60)).toString().padStart(2,'0'):'—';
     const apusStr=sunset?Math.floor(sunset)+':'+(Math.round((sunset%1)*60)).toString().padStart(2,'0'):'—';
     cy=tblRow([m,rsStr,apusStr,totalH,oreConf+'h',status],cy,false,[25,28,28,35,35,31]);
@@ -1676,7 +1676,7 @@ async function generateAACR(){
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CASETA TEHNICA SI SEMNATURA',10);ftr();
   cy=28;sign();
   pdf.save('Studiu_AACR_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
-  ss('✅ Studiu AACR generat!');
+  ss('OK Studiu AACR generat!');
 }
 
 // ── STUDIU CONSTRUCȚII EXISTENTE ─────────────────────────────────────────
@@ -1758,13 +1758,13 @@ async function generateExistingBldStudy(){
   const scHeight=24;
   cy=tblRow(['Scenariu','Descriere','SC propusă','CUT propus','Avantaje principale'],cy,true,[30,55,22,22,48]);
   [
-    ['🏚 Demolare','Construcții demolate complet, teren liber',Math.round(pArea*potMax/100)+' mp',(potMax*parseFloat(params?.niv||4)/100).toFixed(1),'Flexibilitate maximă, PUG integral'],
-    ['🔧 Consolidare','Reabilitare fără demolare',Math.round(totalAreaExist)+' mp',cutExist.toFixed(1),'Fără taxă demolare, timp mai scurt'],
-    ['🔗 Extindere H','Construcție nouă lângă existente',Math.round(pArea*potMax/100)+' mp',cutMax.toFixed(1),'Etape, investiție eșalonată'],
-    ['🏗 Extindere V+H','Suprainălțare + extindere orizontală',Math.round(pArea*potMax/100)+' mp',cutMax.toFixed(1),'Maximizare CUT, eficiență teren'],
-    ['🏠 Mansardare','Etaj nou peste existente',Math.round(totalAreaExist)+' mp',(cutExist+totalAreaExist/pArea).toFixed(1),'Cost redus, modificare minimă'],
-    ['🔄 Reconversie','Schimbare funcțiune, fără demolare',Math.round(totalAreaExist)+' mp',cutExist.toFixed(1),'Rapid, fără demolare, avize simplificate'],
-    ['🏛 Înglobare','Corp nou cuprinde existentele',Math.round(pArea*potMax/100)+' mp',cutMax.toFixed(1),'Utilizare maximă edificabil + H nou'],
+    ['Demol. Demolare','Construcții demolate complet, teren liber',Math.round(pArea*potMax/100)+' mp',(potMax*parseFloat(params?.niv||4)/100).toFixed(1),'Flexibilitate maximă, PUG integral'],
+    ['Consol. Consolidare','Reabilitare fără demolare',Math.round(totalAreaExist)+' mp',cutExist.toFixed(1),'Fără taxă demolare, timp mai scurt'],
+    ['Extind.H Extindere H','Construcție nouă lângă existente',Math.round(pArea*potMax/100)+' mp',cutMax.toFixed(1),'Etape, investiție eșalonată'],
+    ['Extind.V Extindere V+H','Suprainălțare + extindere orizontală',Math.round(pArea*potMax/100)+' mp',cutMax.toFixed(1),'Maximizare CUT, eficiență teren'],
+    ['Mansard. Mansardare','Etaj nou peste existente',Math.round(totalAreaExist)+' mp',(cutExist+totalAreaExist/pArea).toFixed(1),'Cost redus, modificare minimă'],
+    ['Reconvers. Reconversie','Schimbare funcțiune, fără demolare',Math.round(totalAreaExist)+' mp',cutExist.toFixed(1),'Rapid, fără demolare, avize simplificate'],
+    ['Inglobare Înglobare','Corp nou cuprinde existentele',Math.round(pArea*potMax/100)+' mp',cutMax.toFixed(1),'Utilizare maximă edificabil + H nou'],
   ].forEach(r=>cy=tblRow(r,cy,false,[30,55,22,22,48]));
 
   // PAG 4: Viewer 3D + golden/overcast + recomandari
@@ -1875,7 +1875,7 @@ async function generateExistingBldStudy(){
   ['Legea nr. 50/1991 republicata — Autorizarea executarii lucrarilor de constructii.','P 130/1999 — Normativ privind urmarirea comportarii in timp a constructiilor.','NP 131/2014 — Normativ privind expertizarea tehnica a constructiilor existente.','P100-3/2019 — Cod de proiectare seismica. Evaluarea si proiectarea cladirilor existente.','HG 1061/2008 — Transportul deseurilor periculoase si nepericuloase.','OUG 92/2021 — Regimul deseurilor. Transpunere Directiva 2008/98/CE.','Legea 10/1995 republicata — Calitatea in constructii.','PUG '+getUATLabel()+' in vigoare — UTR '+utr+' — Regulamentul Local de Urbanism.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=2;});
   sign();
   pdf.save('Studiu_Constructii_Existente_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
-  ss('✅ Studiu Construcții Existente generat!');
+  ss('OK Studiu Construcții Existente generat!');
 }
 
 // ── STUDIU GEOTEHNIC PRELIMINAR ────────────────────────────────────────────
@@ -2093,7 +2093,7 @@ async function generateGeotehnicalStudy(){
   ['NP 074/2014 — Normativ privind principiile, exigentele si metodele cercetarii geotehnice.','SR EN 1997-1:2004 (Eurocod 7) — Proiectarea geotehnica. Reguli generale.','SR EN 1997-2:2007 — Eurocod 7. Investigarea si incercarea terenului.','P100-1/2013 — Cod de proiectare seismica. Prevederi pentru cladiri. Revizuire 2022.','P100-3/2019 — Cod de proiectare seismica. Evaluarea si proiectarea cladirilor existente.','STAS 1242/1-89 — Teren de fundare. Principii generale de cercetare.','STAS 3300/1-85 — Teren de fundare. Principii de calcul.','SR EN 1998-5:2004 (Eurocod 8) — Proiectare seismica. Fundatii, structuri de sustinere si aspecte geotehnice.','Legea 10/1995 republicata — Calitatea in constructii. Cerinta A: Rezistenta mecanica si stabilitate.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=2;});
   sign();
   pdf.save('PreStudiu_Geotehnic_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
-  ss('✅ Pre-Studiu Geotehnic generat!');
+  ss('OK Pre-Studiu Geotehnic generat!');
 }
 
 // ── STUDIU TRAFIC ────────────────────────────────────────────────────────
@@ -2398,7 +2398,7 @@ async function generateTrafficStudy(){
   cy=body('ATENTIE: Avizul ISU este obligatoriu INAINTE de obtinerea Autorizatiei de Construire (AC) si face parte din documentatia DAU. Lipsa avizului ISU la obtinerea AC se sanctioneaza conform Legii 307/2006 Art. 44, amenzi intre 2.000-20.000 lei si oprirea lucrarilor.',14,cy);
   sign();
   pdf.save('Studiu_Trafic_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
-  ss('✅ Studiu de Trafic + Analiza Acces ISU generat!');
+  ss('OK Studiu de Trafic + Analiza Acces ISU generat!');
 }
 
 // ── SCENARIU DE SIGURANTA LA FOC (SSF) ────────────────────────────────────
@@ -2795,7 +2795,7 @@ async function generateSSF(){
   ].forEach(r=>cy=tblRow(r,cy,false,[100,82]));
   sign();
   pdf.save('SSF_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
-  ss('✅ Scenariu de Siguranta la Foc (SSF) generat — 12 pagini!');
+  ss('OK Scenariu de Siguranta la Foc (SSF) generat — 12 pagini!');
 }
 
 // ── STUDIU ISTORIC / PATRIMONIU ────────────────────────────────────────────
@@ -3195,7 +3195,7 @@ async function generateEnvironmentalImpact(){
 
   sign();
   pdf.save('Studiu_EIM_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
-  ss('✅ Studiu de Impact asupra Mediului generat! (10 pagini)');
+  ss('OK Studiu de Impact asupra Mediului generat! (10 pagini)');
 }
 
 async function generateIstoricStudy(){
@@ -3290,7 +3290,7 @@ async function generateIstoricStudy(){
 
   cy=sec(`1. DATE LIVE CIMEC — ${cimecOK?'INTEROGARE REUȘITĂ':'FALLBACK DATE LOCALE'}`,cy);cy+=2;
   if(!cimecOK){
-    cy=body('⚠️ '+cimecData.error+'. Datele afișate provin din baza locală UrbanX (LMI 2015). Pentru date actualizate consultați: map.cimec.ro și culture.ro.',14,cy);cy+=3;
+    cy=body('ATN️ '+cimecData.error+'. Datele afișate provin din baza locală UrbanX (LMI 2015). Pentru date actualizate consultați: map.cimec.ro și culture.ro.',14,cy);cy+=3;
   }
 
   // Monumente CIMEC live
@@ -3346,7 +3346,7 @@ async function generateIstoricStudy(){
         {type:'Feature',geometry:{type:'Point',coordinates:Array.isArray(coords[0])?coords[0]:coords},properties:{}},{units:'meters'});
       cy=tblRow([S2(p.cod||'—').slice(0,12),S2(p.denumire||'Sit arheologic').slice(0,38),S2(p.epoca||'—').slice(0,18),Math.round(dist)+'m'],cy,false,[25,80,40,30]);
     });cy+=3;
-    cy=body('⚠️ ATENȚIE SITURI ARHEOLOGICE: Prezența siturilor arheologice în raza de 1km impune RAPORT DE DIAGNOSTIC ARHEOLOGIC înainte de orice lucrare de terasament, conform Legii 422/2001 art. 49-53.',14,cy);cy+=3;
+    cy=body('ATN️ ATENȚIE SITURI ARHEOLOGICE: Prezența siturilor arheologice în raza de 1km impune RAPORT DE DIAGNOSTIC ARHEOLOGIC înainte de orice lucrare de terasament, conform Legii 422/2001 art. 49-53.',14,cy);cy+=3;
   }
   cy=sec('4. MONUMENTE ISTORICE IDENTIFICATE ÎN CONTEXT',cy);cy+=2;
   cy=body(cimecOK&&cimecMonumente.length>0?
@@ -3364,7 +3364,7 @@ async function generateIstoricStudy(){
           S2(z.cod||z.zona||'—').slice(0,14),
           S2(z.tip||'Zonă protejată').slice(0,22),
           Math.round(z.dist)+'m',
-          z.inZona?'ÎN ZONĂ ⚠':'în afara razei',
+          z.inZona?'ÎN ZONĂ ATN':'în afara razei',
           S2(implicatii)
         ],cy,false,[32,40,22,30,58]);
         if(z.inZona){pdf.setFillColor(180,50,20);pdf.rect(14,cy-8,W-28,8,'F');pdf.setTextColor(255,255,255);}
@@ -3505,7 +3505,7 @@ async function generateIstoricStudy(){
   ['Legea nr. 422/2001 privind protejarea monumentelor istorice, republicata 2006.','Ordinul MCID nr. 2828/2015 privind aprobarea Normelor metodologice de clasare si inventariere a monumentelor istorice.','HG nr. 593/2011 — Norme metodologice privind elaborarea si aprobarea RLU aferent PUZ ZCP.','Legea nr. 5/2000 privind PATN — Sectiunea III: Zone protejate.','Conventia de la Granada (1985) privind protectia patrimoniului arhitectural al Europei, ratificata prin Legea 157/1997.','Conventia de la Malta (1992) privind protectia patrimoniului arheologic, ratificata prin Legea 150/1997.','OG 43/2000 privind protectia patrimoniului arheologic, aprobata cu modificari prin Legea 378/2001.','PUG '+getUATLabel()+' — Zone construite protejate, ZCP si Regulamentul Local de Urbanism.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=2;});
   sign();
   pdf.save('Studiu_Patrimoniu_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
-  ss('✅ Studiu Istoric & Patrimoniu generat!');
+  ss('OK Studiu Istoric & Patrimoniu generat!');
 }
 
 
@@ -3674,7 +3674,7 @@ async function generateSolarStudy(){
      ['Alt. sol. iarnă',solarData.iarna.alt12+'° (min. 15°)'],
      ['Conformitate OMS 119',isConform?'DA — CONFORM':'NU — VERIFICARE']],
     isConform,
-    isConform?'✅ CONFORM OMS 119/2014 — Însorire minimă asigurată':'⚠️ VERIFICARE NECESARĂ — Alt. solară sub 15° la solstițiu iarnă'
+    isConform?'OK CONFORM OMS 119/2014 — Însorire minimă asigurată':'ATN️ VERIFICARE NECESARĂ — Alt. solară sub 15° la solstițiu iarnă'
   );
 
   // ════════════════════════════════════════════════════════════
@@ -3764,7 +3764,7 @@ async function generateSolarStudy(){
   pdf.setFillColor(...statCol);pdf.rect(14,cy,W-28,14,'F');
   pdf.setFillColor(...GOLD);pdf.rect(14,cy,3,14,'F');
   pdf.setTextColor(255,255,255);pdf.setFontSize(10);pdf.setFont('helvetica','bold');
-  pdf.text(isConform?'✓ CONFORM OMS 119/2014 — Altitudine solară ≥15° la solstițiu de iarnă':'✗ NECONFORM — Altitudine solară '+solarData.iarna.maxAlt.toFixed(1)+'° < 15° cerut de OMS 119/2014',W/2,cy+9,{align:'center'});
+  pdf.text(isConform?'OK CONFORM OMS 119/2014 — Altitudine solară ≥15° la solstițiu de iarnă':'NU NECONFORM — Altitudine solară '+solarData.iarna.maxAlt.toFixed(1)+'° < 15° cerut de OMS 119/2014',W/2,cy+9,{align:'center'});
   cy+=18;
 
   cy=sec('4. VERIFICARE CONFORMITATE OMS 119/2014',cy);
@@ -3898,8 +3898,8 @@ async function generateSolarStudy(){
   cy+=4;
   cy=sec('10.1. CONFORMITATE OMS 119/2014 — REZUMAT FINAL',cy);cy+=2;
   cy=tblRow(['Cerinta OMS 119/2014','Valoare calculata','Status'],cy,true,[80,60,42]);
-  [['Alt. solara min. 15° la 21 Dec, ora 12:00',solarData.iarna.alt12+'°',parseFloat(solarData.iarna.alt12)>=15?'✓ CONFORM':'⚠ NECONFORM'],
-   ['Min. 1h30min insorire directa pe zi (21 Dec)',oreMinIarna+'h disponibile alt>15°',oreMinIarna>=2?'✓ CONFORM':'⚠ Verificare studiu detaliat'],
+  [['Alt. solara min. 15° la 21 Dec, ora 12:00',solarData.iarna.alt12+'°',parseFloat(solarData.iarna.alt12)>=15?'OK CONFORM':'ATN NECONFORM'],
+   ['Min. 1h30min insorire directa pe zi (21 Dec)',oreMinIarna+'h disponibile alt>15°',oreMinIarna>=2?'OK CONFORM':'ATN Verificare studiu detaliat'],
    ['Camere de locuit orientate spre S, SE, E, SV','Conf. proiect','Verificare la PT'],
    ['Dist. min. intre cladiri (umbra 1:1)','H/tan(15°)='+(aedisH/Math.tan(15*Math.PI/180)).toFixed(0)+'m','Aplicare la proiect'],
   ].forEach(r=>cy=tblRow(r,cy,false,[80,60,42]));
@@ -3910,7 +3910,7 @@ async function generateSolarStudy(){
   sign();
 
   pdf.save('Studiu_Insorire_'+nrcad+'_'+year+'.pdf');
-  ss('✅ Studiu de Însorire generat! (8 pagini)');
+  ss('OK Studiu de Însorire generat! (8 pagini)');
 }
 
 // ── Wrapper global pentru studii — prinde erori și le afișează clar ────────
@@ -3932,7 +3932,7 @@ async function generateSolarStudy(){
         await orig.apply(this, arguments);
       }catch(err){
         console.error('['+name+'] eroare:', err);
-        ss('⚠️ Eroare la '+name+': '+err.message+'. Verificați consola pentru detalii.');
+        ss('ATN️ Eroare la '+name+': '+err.message+'. Verificați consola pentru detalii.');
       }
     };
   });
@@ -4011,7 +4011,7 @@ async function generateStudiuFezabilitate(paramOverrides){
     caps.img3D,
     [['Funcțiune propusă',fnLabel],['Tip studiu','SF / DALI · HG 907/2016'],['Faza','Pre-proiectare orientativă']],
     true,
-    '✓ STUDIU ORIENTATIV — PREFEZABILITATE URBANISTICĂ DIGITALĂ'
+    'OK STUDIU ORIENTATIV — PREFEZABILITATE URBANISTICĂ DIGITALĂ'
   );
 
   // ── PAG 2: DATE DE IDENTIFICARE + INDICATORI URBANISTICI ─────────────────
@@ -4296,7 +4296,7 @@ async function generateStudiuFezabilitate(paramOverrides){
    ['Cale acces ISU (lățime min.)','min. 3.5m (1 vehicul) / 5.5m (2 veh.)','P118-2/2013 art. 6.3','Verificare plan situație'],
    ['Distanța max. față - acces ISU','max. 80m față de intrarea principală','P118-2/2013 art. 6.5','Conf. proiect accese'],
    ['Hidrant exterior obligatoriu','H>'+Math.min(8,aedisH).toFixed(0)+'m sau SD>'+Math.min(600,Math.round(sdTotal)).toLocaleString()+'mp','P118-2/2013 art. 8','Verificare proiect ISU'],
-   ['Scară pompieri (H>28m)','NU — H='+aedisH.toFixed(1)+'m'+(aedisH>28?' ❌ OBLIGATORIE':''),'P118-2/2013 art. 7',aedisH>28?'OBLIGATORIU':'Nu se impune'],
+   ['Scară pompieri (H>28m)','NU — H='+aedisH.toFixed(1)+'m'+(aedisH>28?' ERR OBLIGATORIE':''),'P118-2/2013 art. 7',aedisH>28?'OBLIGATORIU':'Nu se impune'],
   ].forEach(r=>cy=tblRow(r,cy,false,[70,42,50,20]));
   cy+=2;
   cy=body(isISUObligF?'ATENȚIE: Avizul ISU este OBLIGATORIU pentru această investiție (H='+aedisH.toFixed(1)+'m, SD='+sdTotal+'mp). Costul obținerii avizului ISU și al conformării la cerințele P118: estimat 3.000-8.000 EUR (incluzând proiectant specialitate PSI + echipamente de detecție-alarmare-stingere). Avizul ISU se obține ÎNAINTE de Autorizația de Construire.':'Avizul ISU poate fi necesar în funcție de destinație și detaliile tehnice stabilite în PAC. Verificare obligatorie la faza de Certificat de Urbanism.',14,cy);
@@ -4311,7 +4311,7 @@ async function generateStudiuFezabilitate(paramOverrides){
   const altDec12=solarAltF(lat,11,12);
   const isConformSolar=altDec12>=15;
   cy=tblRow(['Parametru solar','Valoare calculată','Prag OMS 119/2014','Status'],cy,true,[75,38,38,31]);
-  [['Altitudine solară 21 Dec, ora 12:00',altDec12.toFixed(1)+'°','min. 15°',isConformSolar?'✓ CONFORM':'⚠ NECONFORM'],
+  [['Altitudine solară 21 Dec, ora 12:00',altDec12.toFixed(1)+'°','min. 15°',isConformSolar?'OK CONFORM':'ATN NECONFORM'],
    ['Umbră maximă proiectată (H='+aedisH.toFixed(1)+'m)',(aedisH/Math.tan(altDec12*Math.PI/180)>500?'>500':( aedisH/Math.tan(altDec12*Math.PI/180)).toFixed(0))+'m spre N','Conf. retragere RLU','Verificare proiect'],
    ['Retragere N minimă recomandată',(aedisH/Math.tan(15*Math.PI/180)).toFixed(0)+'m (formula H/tan15°)','H/tan(15°)','Verificare față de rs='+params?.rs+'m'],
    ['Studiu detaliat OAR obligatoriu',sdTotal>500||niv>4?'DA (>4 niv. sau SD>500mp)':'Recomandat','Ord. 119/2014 art. 3','La faza PAC'],
@@ -4364,14 +4364,14 @@ async function generateStudiuFezabilitate(paramOverrides){
   cy=sec('15. OPTIMIZĂRI RECOMANDATE PENTRU MAXIMIZAREA RENTABILITĂȚII',cy);cy+=2;
   cy=body('Pe baza sintezei tuturor studiilor tehnice de specialitate, se formulează următoarele recomandări de optimizare pentru investiția propusă pe amplasamentul '+nrcad+' (UTR '+utr+'). Implementarea acestor optimizări poate reduce costurile totale, crește randamentul și reduce riscurile de autorizare.',14,cy);cy+=4;
   cy=tblRow(['Optimizare recomandată','Beneficiu estimat','Cost implementare','Prioritate'],cy,true,[78,45,42,17]);
-  [['Orientare corp principal E-V (ax lung est-vest)','Reducere consum energetic 15-20% + conformitate OMS 119','0 EUR (proiect)','⭐⭐⭐'],
-   ['Parcare subterană P-1 (dacă ST<'+Math.round(pkMinF*30*1.5)+'mp)','+'+pkMinF+'loc suprafața liberă pentru spații comerciale/verzi',Math.round(pkMinF*5000).toLocaleString()+' EUR extra','⭐⭐⭐'],
-   ['Parter comercial activ (vitrine >40% fatadă stradală)','Chirie parter comercial 2-3x față de rezidențial','0 EUR (proiect)','⭐⭐⭐'],
-   ['Acoperis verde/FV (60% din SC='+Math.round(scMax*0.6)+'mp)','~'+Math.round(Math.round(scMax*0.6)/6.5*1100)+' kWh/an + reducere cost răcire','~'+Math.round(Math.round(scMax*0.6)*100).toLocaleString()+' EUR','⭐⭐'],
-   ['Sistem BMS (Building Management System)','Reducere costuri operaționale 20-30%','8.000-25.000 EUR','⭐⭐'],
-   ['Pre-certificare verde (BREEAM Very Good / LEED Silver)','Chirie +10-15% față de clădiri necertificate','10.000-30.000 EUR','⭐⭐'],
-   ['Stații EV ('+Math.max(2,Math.ceil(pkMinF*0.1))+' buc) + rastel biciclete','Atracție chiriași premium + conformitate Reg. UE 2023',''+Math.max(2,Math.ceil(pkMinF*0.1))*1500+' EUR','⭐⭐'],
-   ['Fatada ventilată cu termoizolație 15cm (fatade expuse N/NE)','Reducere consum termic 25-35%','30-60 EUR/mp extra vs. tencuială','⭐⭐'],
+  [['Orientare corp principal E-V (ax lung est-vest)','Reducere consum energetic 15-20% + conformitate OMS 119','0 EUR (proiect)','***'],
+   ['Parcare subterană P-1 (dacă ST<'+Math.round(pkMinF*30*1.5)+'mp)','+'+pkMinF+'loc suprafața liberă pentru spații comerciale/verzi',Math.round(pkMinF*5000).toLocaleString()+' EUR extra','***'],
+   ['Parter comercial activ (vitrine >40% fatadă stradală)','Chirie parter comercial 2-3x față de rezidențial','0 EUR (proiect)','***'],
+   ['Acoperis verde/FV (60% din SC='+Math.round(scMax*0.6)+'mp)','~'+Math.round(Math.round(scMax*0.6)/6.5*1100)+' kWh/an + reducere cost răcire','~'+Math.round(Math.round(scMax*0.6)*100).toLocaleString()+' EUR','**'],
+   ['Sistem BMS (Building Management System)','Reducere costuri operaționale 20-30%','8.000-25.000 EUR','**'],
+   ['Pre-certificare verde (BREEAM Very Good / LEED Silver)','Chirie +10-15% față de clădiri necertificate','10.000-30.000 EUR','**'],
+   ['Stații EV ('+Math.max(2,Math.ceil(pkMinF*0.1))+' buc) + rastel biciclete','Atracție chiriași premium + conformitate Reg. UE 2023',''+Math.max(2,Math.ceil(pkMinF*0.1))*1500+' EUR','**'],
+   ['Fatada ventilată cu termoizolație 15cm (fatade expuse N/NE)','Reducere consum termic 25-35%','30-60 EUR/mp extra vs. tencuială','**'],
   ].forEach(r=>cy=tblRow(r,cy,false,[78,45,42,17]));
   cy+=4;
   cy=sec('15.1. BUGET TOTAL RECONSIDERAT — INCLUSIV STUDII ȘI MĂSURI SPECIALE',cy);cy+=2;
@@ -4391,7 +4391,7 @@ async function generateStudiuFezabilitate(paramOverrides){
   ['HG nr. 907/2016 privind etapele de elaborare și conținutul-cadru al documentațiilor tehnico-economice.','Legea nr. 500/2002 privind finanțele publice — Capitolul privind investițiile publice.','Legea nr. 98/2016 privind achizițiile publice — art. 22 (studii de fezabilitate).','OUG nr. 114/2011 privind atribuirea anumitor contracte de achiziții publice în domeniile apărare și securitate.','Legea nr. 50/1991 republicată — autorizarea executării lucrărilor de construcții.','Legea nr. 350/2001 privind amenajarea teritoriului și urbanismul, republicată.','NP 074/2014 — Normativ privind principiile, exigențele și metodele cercetării geotehnice.','P100-1/2013 — Cod de proiectare seismică. Prevederi pentru clădiri (zona '+getSeismConfig().zona+').','Legea nr. 10/1995 republicată — Calitatea în construcții.','PUG '+uat+' în vigoare — UTR '+utr+' — Regulamentul Local de Urbanism.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=2;});
   sign();
   pdf.save('SF_DALI_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
-  ss('✅ Studiu Fezabilitate / DALI generat!');
+  ss('OK Studiu Fezabilitate / DALI generat!');
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -4488,7 +4488,7 @@ async function generateStudiuAmplasament(){
     caps.img3D,
     [['Funcțiune dominantă UTR',fnLabel],['Document','Studiu de Amplasament'],['Rol','Fundament comun studii specialitate']],
     true,
-    '✓ STUDIU DE AMPLASAMENT — DATE PRIMARE · DOCUMENT FUNDAMENT'
+    'OK STUDIU DE AMPLASAMENT — DATE PRIMARE · DOCUMENT FUNDAMENT'
   );
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -4758,16 +4758,16 @@ async function generateStudiuAmplasament(){
   cy=sec('9. RESTRICȚII CUMULATE IDENTIFICATE PENTRU AMPLASAMENT',cy);cy+=2;
   cy=body('Pe baza tuturor datelor analizate în prezentul studiu de amplasament (cadastru, PUG, vecinătăți, monumente, riscuri naturale, climatice, infrastructură), se identifică următoarele restricții cumulate care trebuie respectate în elaborarea oricărui studiu sau proiect de specialitate pentru amplasamentul '+nrcad+' (UTR '+utr+').',14,cy);cy+=4;
   cy=tblRow(['Categorie restricție','Conținut restricție','Baza legală','Severitate'],cy,true,[45,90,38,9]);
-  [['Urbanistic PUG','POT max '+params?.pot+'%, CUT max '+params?.cut+', H max '+(params?.h||'N/S')+'m, SV min '+params?.sv+'%, parcaje min '+params?.pk+'/unit.','RLU UTR '+utr,'🔴'],
-   ['Retrageri min.','Rf='+params?.rf+'m, Rl='+params?.rl+'m, Rs='+params?.rs+'m față de limitele de proprietate','RLU UTR '+utr,'🔴'],
-   ['Seismic','Structură antiseismică ag='+seism.ag+'g, Tc='+seism.Tc+'s, zona '+seism.zona,'P100-1/2013','🔴'],
-   ['Însorire/Umbre','Alt. sol. 21 Dec 12:00 = '+altDec12.toFixed(1)+'° ('+(isConformSolar?'≥15° CONFORM':'<15° NECONFORM')+'). Dist. min. N: '+(aedisH/Math.tan(15*Math.PI/180)).toFixed(0)+'m','OMS 119/2014','🔴'],
-   ['Patrimoniu/LMI',inZCP?'PARCELĂ ÎN ZCP — aviz DJCPN obligatoriu':inZonaProt?'Monument în 200m — consultare DJCPN':'Fără restricție patrimoniu identificată','Legea 422/2001',inZCP?'🔴':inZonaProt?'🟡':'🟢'],
-   ['ISU / Apărare incendiu',aedisH>8||sdTotal>600?'Aviz ISU OBLIGATORIU (H>8m sau SD>600mp)':'Verificare la PAC','P118+Legea 307',aedisH>8?'🔴':'🟡'],
-   ['Aeronautic AACR',distAerop<15?'Aviz ROMATSA OBLIGATORIU (dist. '+distAerop+'km la LRIA)':'Dist. '+distAerop+'km — aviz de verificat','HG 930/2016',distAerop<15?'🔴':'🟡'],
-   ['Vânt structural','Presiune vânt qp(H)='+qpH9.toFixed(3)+' kN/mp — input ing. rezistență','CR 1-1-4/2012','🟡'],
-   ['Zgomot','Zona acustică '+zgomot.zona_acustica+'. Tâmplărie min. Rw≥30dB fatade expuse.','SR 10009:2017','🟡'],
-   ['Hidrologic/NFA','NFA est. '+hidro.nfa+'. Hidroizolație/epuismente posibile.','NP 074/2014','🟡'],
+  [['Urbanistic PUG','POT max '+params?.pot+'%, CUT max '+params?.cut+', H max '+(params?.h||'N/S')+'m, SV min '+params?.sv+'%, parcaje min '+params?.pk+'/unit.','RLU UTR '+utr,'OBLIG'],
+   ['Retrageri min.','Rf='+params?.rf+'m, Rl='+params?.rl+'m, Rs='+params?.rs+'m față de limitele de proprietate','RLU UTR '+utr,'OBLIG'],
+   ['Seismic','Structură antiseismică ag='+seism.ag+'g, Tc='+seism.Tc+'s, zona '+seism.zona,'P100-1/2013','OBLIG'],
+   ['Însorire/Umbre','Alt. sol. 21 Dec 12:00 = '+altDec12.toFixed(1)+'° ('+(isConformSolar?'≥15° CONFORM':'<15° NECONFORM')+'). Dist. min. N: '+(aedisH/Math.tan(15*Math.PI/180)).toFixed(0)+'m','OMS 119/2014','OBLIG'],
+   ['Patrimoniu/LMI',inZCP?'PARCELĂ ÎN ZCP — aviz DJCPN obligatoriu':inZonaProt?'Monument în 200m — consultare DJCPN':'Fără restricție patrimoniu identificată','Legea 422/2001',inZCP?'OBLIG':inZonaProt?'REC.':'OK'],
+   ['ISU / Apărare incendiu',aedisH>8||sdTotal>600?'Aviz ISU OBLIGATORIU (H>8m sau SD>600mp)':'Verificare la PAC','P118+Legea 307',aedisH>8?'OBLIG':'REC.'],
+   ['Aeronautic AACR',distAerop<15?'Aviz ROMATSA OBLIGATORIU (dist. '+distAerop+'km la LRIA)':'Dist. '+distAerop+'km — aviz de verificat','HG 930/2016',distAerop<15?'OBLIG':'REC.'],
+   ['Vânt structural','Presiune vânt qp(H)='+qpH9.toFixed(3)+' kN/mp — input ing. rezistență','CR 1-1-4/2012','REC.'],
+   ['Zgomot','Zona acustică '+zgomot.zona_acustica+'. Tâmplărie min. Rw≥30dB fatade expuse.','SR 10009:2017','REC.'],
+   ['Hidrologic/NFA','NFA est. '+hidro.nfa+'. Hidroizolație/epuismente posibile.','NP 074/2014','REC.'],
   ].forEach(r=>cy=tblRow(r,cy,false,[45,90,38,9]));
   cy+=3;
   cy=sec('9.1. CHECKLIST STUDII OBLIGATORII ȘI RECOMANDATE',cy);cy+=2;
@@ -4831,5 +4831,5 @@ async function generateStudiuAmplasament(){
   ['Legea nr. 350/2001 privind amenajarea teritoriului și urbanismul, republicată.','Legea nr. 50/1991 republicată — autorizarea executării lucrărilor de construcții.','HG nr. 525/1996 — Regulamentul General de Urbanism, cu modificările ulterioare.','Legea nr. 422/2001 privind protejarea monumentelor istorice, republicată.','P100-1/2013 — Cod de proiectare seismică. Prevederi pentru clădiri.','CR 1-1-4/2012 — Cod de proiectare. Acțiunea vântului.','OMS nr. 119/2014 + Ord. 994/2018 — Norme igienă și însorire.','NP 074/2014 — Normativ privind cercetarea geotehnică.','HG 930/2016 — Avizare construcții în zone aeronautice.','PUG '+uat+' în vigoare — UTR '+utr+' — RLU.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
   sign();
   pdf.save('Studiu_Amplasament_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
-  ss('✅ Studiu de Amplasament generat!');
+  ss('OK Studiu de Amplasament generat!');
 }
