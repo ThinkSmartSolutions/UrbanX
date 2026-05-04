@@ -719,7 +719,12 @@ map.on('load',()=>{
     }catch(e){}
   }, 500);
 });
-map.on('error',(e)=>{console.error('Mapbox error:',e);ss('⚠️ Eroare hartă: '+e.error?.message);});
+map.on('error',(e)=>{
+  const msg = e.error?.message||'';
+  if(msg.includes('does not exist in the map') || msg.includes('No such layer')) return;
+  console.error('Mapbox error:',e);
+  ss('⚠️ Eroare hartă: '+msg);
+});
 // Fallback: dacă load nu s-a apelat în 10s, încercăm oricum
 setTimeout(()=>{
   if(!S.pug && !S._dataLoading){
