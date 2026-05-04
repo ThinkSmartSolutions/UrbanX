@@ -1406,39 +1406,37 @@ const CIMEC_LAYERS = {
 };
 
 async function _cimecQueryWFS(lon, lat, radiusM){
-  // WFS GetFeature în raza amplasamentului
   const bbox = [
-    lon - radiusM/111320,
-    lat - radiusM/111320,
-    lon + radiusM/111320,
-    lat + radiusM/111320
+    lon - radiusM/111320, lat - radiusM/111320,
+    lon + radiusM/111320, lat + radiusM/111320
   ].join(',');
 
   const results = { monumente:[], zone:[], situri:[], error:null };
 
-  // Interogăm layerele principale
   const queries = [
     { layer:'LMI_Puncte', key:'monumente' },
     { layer:'LMI_Zone',   key:'zone' },
     { layer:'Situri_Arh', key:'situri' },
   ];
 
+  // Timeout scurt (4s) — CORS va eșua rapid, nu blocăm generarea PDF
   for(const q of queries){
     try{
       const url = `${CIMEC_WMS}?SERVICE=WFS&VERSION=1.1.0&REQUEST=GetFeature`+
         `&TYPENAME=${q.layer}&BBOX=${bbox},EPSG:4326&SRSNAME=EPSG:4326`+
         `&OUTPUTFORMAT=application/json&maxFeatures=50`;
-      const resp = await fetch(url, {signal:AbortSignal.timeout(8000)});
+      const resp = await fetch(url, {signal:AbortSignal.timeout(4000), mode:'cors'});
       if(resp.ok){
         const data = await resp.json();
         results[q.key] = data.features||[];
       }
-    }catch(e){ /* silent fallback */ }
+    }catch(e){
+      // CORS blocat sau timeout — așteptat, continuăm cu date locale
+    }
   }
 
-  // Fallback: WMS GetFeatureInfo
-  if(!results.monumente.length && !results.zone.length){
-    results.error = 'CIMEC WFS indisponibil — se folosesc date locale';
+  if(!results.monumente.length && !results.zone.length && !results.situri.length){
+    results.error = 'CIMEC WFS indisponibil (CORS) — se folosesc date locale LMI';
   }
 
   return results;
@@ -1582,7 +1580,7 @@ async function generateEnvironmentalImpact(){
 
   cy=sec('3. EVALUAREA IMPACTULUI ASUPRA AERULUI',cy);
   cy=subsec('3.1 Starea actuală — calitatea aerului',cy);
-  cy=body('Calitatea aerului în '+uat+' este monitorizată prin rețeaua națională de monitoring gestionată de '+eim.aer.apm+'. Poluanții principali identificați în zona de influență sunt: '+eim.aer.poluanti_principali.join(', ')+'. Calitatea generală: '+eim.aer.calitate_generala+'. Valorile de referință respectă prevederile Legii nr. 104/2011 și Directivei 2008/50/CE.',14,cy);cy+=3;
+  cy=body('Calitatea aerului în '+uat+' este monitorizată prin rețeaua națională de monitoring gestionată de '+(eim.aer.apm||'APM Județean')+'. Poluanții principali identificați în zona de influență sunt: '+(eim.aer.poluanti_principali||['NO2','PM10']).join(', ')+'. Calitatea generală: '+(eim.aer.calitate_generala||'Moderată')+'. Valorile de referință respectă prevederile Legii nr. 104/2011 și Directivei 2008/50/CE.',14,cy);cy+=3;
   cy=tblRow(['Poluant','Valoare estimată','Limita legală (an)','Limita legală (zi)','Status'],cy,true,[35,32,35,35,45]);
   [['NO2 (dioxid azot)',(eim.aer.NO2_medie_anuala||'—')+' μg/m³','40 μg/m³','200 μg/m³ (h)','sub limită'],
    ['PM10 (pulberi grosiere)',(eim.aer.PM10_medie_anuala||'—')+' μg/m³','40 μg/m³','50 μg/m³','sub limită'],
@@ -1619,7 +1617,7 @@ async function generateEnvironmentalImpact(){
   cy+=3;
 
   cy=sec('5. EVALUAREA IMPACTULUI ASUPRA SOLULUI',cy);
-  cy=body('Tipul predominant de sol în zona amplasamentului: '+eim.sol.tip_sol_predominant+'. Permeabilitate: '+eim.sol.permeabilitate+'. Risc eroziune: '+eim.sol.eroziune+'. Impermeabilizarea terenului prin construcție afectează funcțiile pedologice și capacitatea de infiltrare a precipitațiilor.',14,cy);cy+=3;
+  cy=body('Tipul predominant de sol în zona amplasamentului: '+(eim.sol.tip_sol_predominant||'Verificare necesară')+'. Permeabilitate: '+(eim.sol.permeabilitate||'Medie')+'. Risc eroziune: '+(eim.sol.eroziune||'Redus — evaluare necesară')+'. Impermeabilizarea terenului prin construcție afectează funcțiile pedologice și capacitatea de infiltrare a precipitațiilor.',14,cy);cy+=3;
   const imp_procent=parseFloat(params.pot)||40;
   const perm_procent=100-imp_procent;
   cy=tblRow(['Categorie suprafață','Suprafață (mp)','% din teren','Impact sol','Măsuri compensare'],cy,true,[40,28,20,28,66]);
@@ -1785,7 +1783,7 @@ async function generateEnvironmentalImpact(){
     'Impactul asupra calității aerului este TEMPORAR și REVERSIBIL în faza de construcție. În faza de operare impactul este NESEMNIFICATIV cu condiția respectării normelor de eficiență energetică și a asigurării accesului la transport public.',
     'Impactul asupra resurselor de apă este CONTROLABIL prin racordarea obligatorie la rețeaua de apă-canal '+(eim.apa.operator||'operator local')+' și prin implementarea sistemelor de separare ape pluviale/uzate.',
     'Impermeabilizarea solului pe suprafața de '+(scMax).toFixed(0)+' mp ('+params.pot+'% POT) este parțial compensată de spațiile verzi obligatorii de min. '+svMin.toFixed(0)+' mp ('+params.sv+'% din teren), conform PUG '+uat+' UTR '+utr+'.',
-    'Nu s-au identificat arii naturale protejate în imediata vecinătate a amplasamentului '+(eim.natura2000.length>0?'— EXCEPȚIE: Site Natura 2000 '+eim.natura2000[0]+' necesită verificarea necesității Evaluării Adecvate (OUG 57/2007)':'— Procedura de Evaluare Adecvată nu este necesară')+'.',
+    'Nu s-au identificat arii naturale protejate în imediata vecinătate a amplasamentului '+((eim.natura2000||[]).length>0?'— EXCEPȚIE: Site Natura 2000 '+(eim.natura2000||[])[0]+' necesită verificarea necesității Evaluării Adecvate (OUG 57/2007)':'— Procedura de Evaluare Adecvată nu este necesară')+'.',
     'Impactul acustic depășește temporar limitele SR 10009:2017 în faza de construcție (75-85 dB față de 60 dB limită); se impun măsuri obligatorii: program de lucru 07-19, ecrane fonice, notificare vecini cu min. 5 zile înainte.',
     'Impactul socio-economic al proiectului este POZITIV: '+Math.round(parseFloat(area)/50)+' locuri de muncă temporar în construcție, funcțiune utilă '+fnLabel+' în context urban, creștere valoare proprietăți adiacente.',
     'Documentul prezent are caracter PRELIMINAR și ORIENTATIV. EIM complet va fi elaborat de expert acreditat RM (responsabil de mediu) și va include capitolele suplimentare prevăzute de Ord. 863/2002 (hărți, modele dispersie, consultare public etc.).',
@@ -1819,16 +1817,25 @@ async function generateIstoricStudy(){
   // ── Date LMI din UAT_REGISTRY (per UAT activ) ─────────────────────────
   const uatLmi = S_UAT.lmi || {};
   const ZONE_PROTEJATE_LOCAL = uatLmi.zone_protejate || [];
-  const distZone=ZONE_PROTEJATE_LOCAL.map(z=>{
-    const d=turf.distance({type:'Feature',geometry:{type:'Point',coordinates:[lon,lat]},properties:{}},{type:'Feature',geometry:{type:'Point',coordinates:z.centru},properties:{}},{units:'meters'});
-    return {...z,dist:d,inZona:d<z.raza};
+  const distZone = ZONE_PROTEJATE_LOCAL.map(z=>{
+    try{
+      const d=turf.distance(
+        {type:'Feature',geometry:{type:'Point',coordinates:[lon,lat]},properties:{}},
+        {type:'Feature',geometry:{type:'Point',coordinates:z.centru||[lon,lat]},properties:{}},
+        {units:'meters'}
+      );
+      return {...z, dist:d, inZona:d<(z.raza||500)};
+    }catch(e){ return {...z, dist:99999, inZona:false}; }
   });
 
   // Combinăm date CIMEC live + date locale
   const inZonaProtejataCimec = cimecZone.length>0||cimecMonumente.length>0||cimecSituri.length>0;
   const inZonaProtejataLocal = distZone.some(z=>z.inZona);
   const inZonaProtejata = inZonaProtejataCimec || inZonaProtejataLocal;
-  const zonaAproape=distZone.reduce((a,b)=>a.dist<b.dist?a:b);
+  // Guard: distZone poate fi gol dacă UAT-ul nu are zone_protejate definite
+  const zonaAproape = distZone.length > 0
+    ? distZone.reduce((a,b)=>a.dist<b.dist?a:b)
+    : {cod:'N/A', tip:'Nicio zonă locală', dist:0, inZona:false, desc:'Date locale indisponibile pentru acest UAT'};
   const half=(W-28)/2-2;
 
   // PAG 1: Cover
@@ -1843,7 +1850,7 @@ async function generateIstoricStudy(){
   pdf.setFillColor(20,35,70);pdf.rect(20,108,W-40,80,'F');pdf.setFillColor(...GOLD);pdf.rect(20,108,3,80,'F');
   [['Nr. cadastral:',nrcad],['UTR:',utr],['Coordonate:',lat.toFixed(5)+'N / '+lon.toFixed(5)+'E'],
    ['In zona protejata LMI:',inZonaProtejata?'DA — Restricții suplimentare!':'NU (verificare suplimentara rec.)'],
-   ['Cea mai apropiata zona prot.:',zonaAproape.zona],['Distanta:',Math.round(zonaAproape.dist)+' m'],
+   ['Cea mai apropiata zona prot.:',zonaAproape.cod||zonaAproape.zona||'N/A'],['Distanta:',Math.round(zonaAproape.dist)+' m'],
    ['Monument CIMEC în 1km:',cimecMonumente.length>0?cimecMonumente.length+' identificate':'0 (date live CIMEC)'],
    ['Surs date patrimoniu:',cimecOK?'CIMEC WMS live + date locale':'Date locale LMI 2015'],
   ].forEach(([l,v],i)=>{
@@ -1903,7 +1910,18 @@ async function generateIstoricStudy(){
   // Zone locale
   cy=sec('2. ZONE PROTEJATE — DATE LOCALE LMI IAȘI',cy);cy+=2;
   cy=tblRow(['Cod LMI','Tip','Dist.(m)','Status','Descriere'],cy,true,[30,30,18,20,80]);
-  distZone.forEach(z=>cy=tblRow([z.zona.split('-').pop(),z.tip.split(' ')[0],Math.round(z.dist)+'m',z.inZona?'ÎN ZONA':'în afară',z.desc.slice(0,32)],cy,false,[30,30,18,20,80]));
+  distZone.forEach(z=>{
+    const codVal  = (z.cod||z.zona||'—');
+    const tipVal  = (z.tip||'—');
+    const descVal = (z.desc||'—');
+    cy=tblRow([
+      codVal.split('-').pop().slice(0,12),
+      tipVal.split(' ')[0].slice(0,10),
+      Math.round(z.dist)+'m',
+      z.inZona?'ÎN ZONA':'în afară',
+      descVal.slice(0,32)
+    ], cy, false, [30,30,18,20,80]);
+  });
 
   // PAG 3: Context 3D + situri arheologice
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONTEXT URBAN 3D — SITURI ARHEOLOGICE SI RESTRICTII',3);ftr();
@@ -2055,6 +2073,10 @@ function toggleRapoarteMenu(){
   }, 50);
 }
 
+// generateSolarStudy — versiunea completă (8 pagini, OMS 119/2014)
+// NOTĂ: această funcție este definită și în 11-viewer3d.js (versiune veche, 4 pagini).
+// 10-studies.js se încarcă ÎNAINTE de 11-viewer3d.js, deci 11-viewer3d.js o suprascrie.
+// FIX: funcția din 11-viewer3d.js a fost redenumită _generateSolarStudyLegacy().
 async function generateSolarStudy(){
   const ap=S.parcels[S.activeParcel??0];
   if(!ap?.geo?.geometry){ss('Selectați o parcelă pentru studiu.');return;}
@@ -2304,6 +2326,31 @@ async function generateSolarStudy(){
   pdf.save('Studiu_Insorire_'+nrcad+'_'+year+'.pdf');
   ss('✅ Studiu de Însorire generat! (8 pagini)');
 }
+
+// ── Wrapper global pentru studii — prinde erori și le afișează clar ────────
+// Învelim funcțiile de studiu cu error handling pentru a nu mai cădea silențios
+(function _wrapStudyFunctions(){
+  const toWrap = [
+    'generateSolarStudy','generateIstoricStudy','generateShadowStudy',
+    'generateNoiseStudy','generateWindStudy','generateGreenStudy',
+    'generateMobilityStudy','generateDensityStudy','generateMemoriu',
+    'generateEnvironmentalImpact','generateAviatie','generateGeotehnic',
+    'generateTrafficStudy'
+  ];
+  toWrap.forEach(name=>{
+    const orig = window[name];
+    if(typeof orig !== 'function') return;
+    window[name] = async function(){
+      try{
+        await orig.apply(this, arguments);
+      }catch(err){
+        console.error('['+name+'] eroare:', err);
+        ss('⚠️ Eroare la '+name+': '+err.message+'. Verificați consola pentru detalii.');
+      }
+    };
+  });
+  // Eliminăm și global unhandledrejection care duplica mesajele
+})();
 
 
 

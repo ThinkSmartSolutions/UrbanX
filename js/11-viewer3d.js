@@ -90,7 +90,10 @@ function toggleRapoarteMenu(){
   }, 50);
 }
 
-async function generateSolarStudy(){
+// Versiunea veche a generateSolarStudy — păstrată pentru referință
+// Funcția activă este definită în 10-studies.js (versiune completă 8 pagini)
+// Această versiune NU mai suprascrie cea din 10-studies.js
+async function _generateSolarStudyLegacy(){
   const ap=S.parcels[S.activeParcel??0];
   if(!ap?.geo?.geometry){ss('Selectați o parcelă pentru studiu.');return;}
   ss('Se generează Studiu de Însorire — se capturează imagini...');
@@ -1122,10 +1125,223 @@ function _v3dRefreshDistances(){ _v3dToggleDistances(); }
 
 // ── Generare vizuală străzi în jurul parcelei ─────────────────────────────────
 // ═══ LOTIZARE 3D ══════════════════════════════════════════════════════════
-// Randează în viewer: loturi, drum, circulații, spații verzi, parcaje
-// Citește direct din sursele Mapbox populate de 08-lotizare.js
+// Randează în viewer: loturi, drum, circulații, spații verzi estimate
+// Citește din sursele Mapbox populate de 08-lotizare.js
 
 function _v3dAddLotizareGeometry(THREE, scene, toLoc){
+
+  // ── Verde% estimat per tip lot ─────────────────────────────────────────
+  const SV_PCT = {individuala:.30, insiruita:.12, duplex:.22, bloc:.20};
+  // Parcare: lățime strip (m) per tip
+  const PK_W   = {individuala:2.5, insiruita:0,   duplex:2.5, bloc:5.0};
+
+  // ── Materiale ──────────────────────────────────────────────────────────
+  function _matAsfalt(){
+    const cv=document.createElement('canvas'); cv.width=128; cv.height=256;
+    const ctx=cv.getContext('2d');
+    ctx.fillStyle='#3a4a5a'; ctx.fillRect(0,0,128,256);
+    for(let i=0;i<600;i++){ctx.fillStyle=`rgba(0,0,0,${Math.random()*.10})`;ctx.fillRect(Math.random()*128,Math.random()*256,1.5,1.5);}
+    // Linie mediană galbenă punctată
+    ctx.strokeStyle='#c8a020'; ctx.lineWidth=2; ctx.setLineDash([18,12]);
+    ctx.beginPath(); ctx.moveTo(64,0); ctx.lineTo(64,256); ctx.stroke();
+    // Borduri albe
+    ctx.strokeStyle='rgba(255,255,255,.2)'; ctx.lineWidth=2; ctx.setLineDash([]);
+    ctx.beginPath(); ctx.moveTo(5,0); ctx.lineTo(5,256); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(123,0); ctx.lineTo(123,256); ctx.stroke();
+    const t=new THREE.CanvasTexture(cv);
+    t.wrapS=t.wrapT=THREE.RepeatWrapping; t.repeat.set(1,3);
+    return new THREE.MeshStandardMaterial({map:t,roughness:.88,metalness:.04});
+  }
+  function _matVerde(){
+    const cv=document.createElement('canvas'); cv.width=64; cv.height=64;
+    const ctx=cv.getContext('2d');
+    ctx.fillStyle='#1c4d2e'; ctx.fillRect(0,0,64,64);
+    for(let i=0;i<280;i++){const g=50+Math.random()*55;ctx.fillStyle=`rgba(10,${g|0},20,.32)`;ctx.fillRect(Math.random()*64,Math.random()*64,2,3);}
+    ctx.strokeStyle='rgba(60,180,70,.25)'; ctx.lineWidth=1;
+    for(let i=0;i<10;i++){const x=Math.random()*64,y=Math.random()*64;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+Math.random()*4-2,y-6);ctx.stroke();}
+    const t=new THREE.CanvasTexture(cv);
+    t.wrapS=t.wrapT=THREE.RepeatWrapping; t.repeat.set(3,3);
+    return new THREE.MeshStandardMaterial({map:t,roughness:.96,metalness:0});
+  }
+  function _matParcare(){
+    const cv=document.createElement('canvas'); cv.width=128; cv.height=128;
+    const ctx=cv.getContext('2d');
+    ctx.fillStyle='#252d3a'; ctx.fillRect(0,0,128,128);
+    for(let i=0;i<180;i++){ctx.fillStyle=`rgba(255,255,255,${Math.random()*.04})`;ctx.fillRect(Math.random()*128,Math.random()*128,1.5,1.5);}
+    ctx.strokeStyle='rgba(226,232,240,.65)'; ctx.lineWidth=1.5; ctx.setLineDash([]);
+    [0,32,64,96,128].forEach(x=>{ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,128);ctx.stroke();});
+    ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(128,0);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(0,128);ctx.lineTo(128,128);ctx.stroke();
+    ctx.fillStyle='rgba(148,163,184,.5)';ctx.font='bold 20px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('P',64,64);
+    const t=new THREE.CanvasTexture(cv);
+    t.wrapS=t.wrapT=THREE.RepeatWrapping; t.repeat.set(2,2);
+    return new THREE.MeshStandardMaterial({map:t,roughness:.83,metalness:.05});
+  }
+  // Suprafață poligon plat
+  function _flatPoly(ring, y, mat){
+    try{
+      const pts=ring.slice(0,-1).map(toLoc);
+      if(pts.length<3) return null;
+      const sh=new THREE.Shape(); sh.moveTo(pts[0][0],pts[0][1]);
+      pts.slice(1).forEach(([x,z])=>sh.lineTo(x,z)); sh.closePath();
+      const m=new THREE.Mesh(new THREE.ShapeGeometry(sh),mat);
+      m.rotation.x=-Math.PI/2; m.position.y=y; m.receiveShadow=true;
+      scene.add(m); return m;
+    }catch(e){ return null; }
+  }
+  // Contur lot
+  function _outline(ring, y, color, opacity){
+    try{
+      const pts=ring.slice(0,-1).map(toLoc);
+      const verts=new Float32Array(pts.flatMap(([x,z])=>[x,y,z]));
+      const lg=new THREE.BufferGeometry(); lg.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));
+      scene.add(new THREE.LineLoop(lg,new THREE.LineBasicMaterial({color:color||'#7c3aed',opacity:opacity||.55,transparent:true})));
+    }catch(e){}
+  }
+  // Generează ring interior (verde/parcare) prin scalare spre centru
+  function _innerRing(ring, scaleFactor){
+    try{
+      const pts=ring.slice(0,-1).map(p=>({type:'Feature',geometry:{type:'Point',coordinates:p},properties:{}}));
+      const cx=ring.reduce((s,p)=>s+p[0],0)/ring.length;
+      const cy=ring.reduce((s,p)=>s+p[1],0)/ring.length;
+      const innerRing=ring.map(([lng,lat])=>[cx+(lng-cx)*scaleFactor, cy+(lat-cy)*scaleFactor]);
+      innerRing.push(innerRing[0]);
+      return innerRing;
+    }catch(e){ return null; }
+  }
+
+  // ── 1. Loturi din lotizare-src ─────────────────────────────────────────
+  const matVerde=_matVerde(), matParcare=_matParcare();
+  try{
+    const feats=(map.getSource('lotizare-src')?._data?.features)||[];
+    feats.forEach(f=>{
+      if(!f.geometry) return;
+      const tip=(f.properties?.tip||'individuala');
+      const color=f.properties?.color||'#a78bfa';
+      const borderColor=f.properties?.borderColor||color;
+      const ring=f.geometry.type==='Polygon'
+        ?f.geometry.coordinates[0]
+        :f.geometry.coordinates[0]?.[0];
+      if(!ring||ring.length<4) return;
+
+      // a) Suprafața lotului — semitransparentă, culoarea tipului
+      const matLot=new THREE.MeshStandardMaterial({
+        color,roughness:.9,metalness:0,transparent:true,opacity:.2,side:THREE.DoubleSide
+      });
+      _flatPoly(ring, 0.04, matLot);
+      _outline(ring, 0.06, borderColor, .5);
+
+      // b) Spațiu verde estimat — strip interior (sv% din suprafața lotului)
+      const svPct=SV_PCT[tip]||.20;
+      if(svPct>0.05){
+        // Scalăm ring-ul spre centru: suprafața pătrată crește cu scaleFactor²
+        // verde_pct = 1 - scaleFactor² => scaleFactor = sqrt(1-sv%)
+        const scaleV=Math.sqrt(1-svPct);
+        const verdeRing=_innerRing(ring, 1.0);
+        const lotIntRing=_innerRing(ring, scaleV);
+        if(verdeRing&&lotIntRing){
+          // Verde = ring extern - ring intern (fascia de jur-împrejur)
+          // Simplu: desenăm un poligon verde de grosimea diferenței
+          // Abordare: flat poly interior verde + flat poly lot peste el
+          _flatPoly(ring, 0.05, matVerde);
+          const matLotOver=new THREE.MeshStandardMaterial({
+            color,roughness:.9,metalness:0,transparent:true,opacity:.35,side:THREE.DoubleSide
+          });
+          const innerPts=lotIntRing.slice(0,-1).map(toLoc);
+          if(innerPts.length>=3){
+            const sh2=new THREE.Shape(); sh2.moveTo(innerPts[0][0],innerPts[0][1]);
+            innerPts.slice(1).forEach(([x,z])=>sh2.lineTo(x,z)); sh2.closePath();
+            const m2=new THREE.Mesh(new THREE.ShapeGeometry(sh2),matLotOver);
+            m2.rotation.x=-Math.PI/2; m2.position.y=0.055; m2.receiveShadow=true;
+            scene.add(m2);
+          }
+          _outline(ring, 0.07, '#16a34a', .3); // bordura verde
+        }
+      }
+
+      // c) Zonă parcare (doar individuala/duplex/bloc — fâșie față lot)
+      const pkW=PK_W[tip]||0;
+      if(pkW>0.5){
+        const scaleP=Math.max(.3, 1-(pkW/Math.sqrt(Math.max(1,turf?.area?.(f)||400)/Math.PI)*2));
+        // Parcare = fâșie în interior, culoare asfalt gri
+        const parkRing=_innerRing(ring, scaleP);
+        if(parkRing){
+          const outerPts=ring.slice(0,-1).map(toLoc);
+          const innerP=parkRing.slice(0,-1).map(toLoc);
+          if(outerPts.length>=3&&innerP.length>=3){
+            // Desenăm un ring subțire în față ca simbol parcare
+            const shP=new THREE.Shape(); shP.moveTo(outerPts[0][0],outerPts[0][1]);
+            outerPts.slice(1,3).forEach(([x,z])=>shP.lineTo(x,z));
+            innerP.slice(0,3).reverse().forEach(([x,z])=>shP.lineTo(x,z));
+            shP.closePath();
+            const mP=new THREE.Mesh(new THREE.ShapeGeometry(shP),matParcare);
+            mP.rotation.x=-Math.PI/2; mP.position.y=0.06; mP.receiveShadow=true;
+            scene.add(mP);
+          }
+        }
+      }
+    });
+  }catch(e){ console.warn('v3d lot feats:',e.message); }
+
+  // ── 2. Drum principal din lotizare-drum-src ────────────────────────────
+  try{
+    const drumFeats=(map.getSource('lotizare-drum-src')?._data?.features)||[];
+    if(drumFeats.length){
+      const matD=_matAsfalt();
+      drumFeats.forEach(f=>{
+        if(!f.geometry) return;
+        const rings=f.geometry.type==='Polygon'
+          ?f.geometry.coordinates
+          :(f.geometry.coordinates[0]||[]);
+        const ring=Array.isArray(rings[0][0])?rings[0]:rings;
+        if(!ring||ring.length<3) return;
+        _flatPoly(ring, 0.09, matD);
+        _outline(ring, 0.11, '#94a3b8', .5);
+        // Trotuar — bordura interioară subtilă
+        const innerT=_innerRing(ring, 0.92);
+        if(innerT){
+          const ipts=innerT.slice(0,-1).map(toLoc);
+          const verts2=new Float32Array(ipts.flatMap(([x,z])=>[x,0.10,z]));
+          const lg2=new THREE.BufferGeometry();
+          lg2.setAttribute('position',new THREE.Float32BufferAttribute(verts2,3));
+          scene.add(new THREE.LineLoop(lg2,new THREE.LineBasicMaterial({color:'#e2e8f0',opacity:.25,transparent:true})));
+        }
+      });
+    }
+  }catch(e){ console.warn('v3d drum:',e.message); }
+
+  // ── 3. Circulații custom (lot-drum-edit-src) — linii → benzi 3D ────────
+  try{
+    const editFeats=(map.getSource('lot-drum-edit-src')?._data?.features)||[];
+    editFeats.forEach(f=>{
+      if(!f.geometry) return;
+      const tipD=f.properties?.tip||'secundar';
+      const color=f.properties?.color||'#64748b';
+      // lătime reală = lineW - 2 (am adăugat +2 la stocare)
+      const lineWM=Math.max(2,(f.properties?.lineW||6)-2);
+      const mat=new THREE.MeshLambertMaterial({color,transparent:true,opacity:.75});
+      const coordsList=f.geometry.type==='LineString'
+        ?[f.geometry.coordinates]
+        :f.geometry.coordinates;
+      coordsList.forEach(coords=>{
+        const pts2d=coords.map(([lng,lat])=>toLoc([lng,lat]));
+        if(pts2d.length<2) return;
+        const hw=lineWM/2;
+        for(let i=0;i<pts2d.length-1;i++){
+          const[x0,z0]=pts2d[i],[x1,z1]=pts2d[i+1];
+          const dx=x1-x0,dz=z1-z0,len=Math.sqrt(dx*dx+dz*dz);
+          if(len<0.1) continue;
+          const nx=dz/len,nz=-dx/len;
+          const corners=[[x0+nx*hw,z0+nz*hw],[x1+nx*hw,z1+nz*hw],[x1-nx*hw,z1-nz*hw],[x0-nx*hw,z0-nz*hw]];
+          const mesh=_v3dPrism(THREE,corners,0.07,0.14,mat);
+          if(mesh){mesh.receiveShadow=true;scene.add(mesh);}
+        }
+      });
+    });
+  }catch(e){ console.warn('v3d circ:',e.message); }
+}
+
+function _v3dAddStreets(THREE, scene, ring0, toLoc){
 
   // ── Helpers materiale ─────────────────────────────────────────────────
   function _matDrum(){
