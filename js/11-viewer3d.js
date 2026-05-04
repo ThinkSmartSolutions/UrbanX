@@ -643,7 +643,7 @@ function _v3dBuild(ap){
 
   // ── Zone colorate: parcelă, edificabil, retrageri, SV, parcaje ──────────
   // IMPORTANT: _v3dAddZones trebuie apelat DUPĂ definirea lui toLoc
-  _v3dAddZones(THREE, scene, toLoc, ap, params);
+  _v3dAddZones(THREE, scene, toLoc, ap);
   // Legendă
   setTimeout(_v3dAddLegend, 300);
 
@@ -1117,7 +1117,7 @@ function _v3dAddDistanceLines(THREE, scene, toLoc){
 }
 
 // ── Zone colorate în viewer 3D (retrageri, edificabil, SV, parcaje) ─────────
-function _v3dAddZones(THREE, scene, toLoc, ap, params){
+function _v3dAddZones(THREE, scene, toLoc, ap){
   try{
     // Helper: creează un mesh plan colorat dintr-un polygon geografic
     function makeZoneMesh(ringCoords, color, opacity, yPos){
