@@ -876,7 +876,7 @@ function _v3dCaptureSilent(ap){
       const r=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,preserveDrawingBuffer:true});
       r.setSize(W2,H2); r.setPixelRatio(1);
       r.shadowMap.enabled=true; r.shadowMap.type=THREE.PCFSoftShadowMap;
-      r.toneMapping=THREE.ACESFilmicToneMapping; r.toneMappingExposure=1.1;
+      r.toneMapping=THREE.ReinhardToneMapping; r.toneMappingExposure=1.0; // Reinhard: fara dithering pe culori flat (lotizare galben)
 
       const scene=new THREE.Scene();
       scene.background=new THREE.Color('#c8d8e8');

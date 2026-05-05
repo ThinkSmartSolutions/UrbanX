@@ -1031,7 +1031,8 @@ function _lotHtmlFinanciar(){
 
 // ─── TAB: Export ─────────────────────────────────────────────────────────
 function _lotHtmlExport(){
-  const hasBilant=!!_LOT._bilant;
+  // hasBilant: bilant calculat SAU loturi generate (fallback)
+  const hasBilant=!!_LOT._bilant || (_LOT._loturi?.length>0);
   return `
   <div style="font-size:10px;color:#d4af37;font-weight:700;margin-bottom:10px">📄 Export documente</div>
   ${!hasBilant?`<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:8px;padding:8px 10px;font-size:10px;color:#f87171;margin-bottom:10px">⚠️ Generați planul de lotizare mai întâi</div>`:''}
@@ -1601,10 +1602,15 @@ function _genLotizareGeom(fpFeat, loturiPerTip, drumFract){
 
 // ─── Export PDF ───────────────────────────────────────────────────────────
 async function _lotExportPDF(){
-  if(!_LOT._bilant){ss('Generati planul de lotizare mai intai.');return;}
+  if(!_LOT._bilant){
+    ss('⚠️ Generati mai intai planul (butonul violet Generează Plan Lotizare).');
+    _lotTab('p'); // duca la parametri
+    return;
+  }
   const ap=S.parcels[S.activeParcel??0];
-  if(!ap?.geo?.geometry){ss('Selectati o parcela.');return;}
-  ss('Se genereaza PDF Plan de Lotizare...');
+  if(!ap?.geo?.geometry){ss('⚠️ Selectati o parcela de pe harta.');return;}
+  ss('⏳ Se genereaza PDF Plan de Lotizare (poate dura 15-30 sec)...');
+  try{
 
   // ── Initializare motor PDF comun ────────────────────────────────────────
   const d=_initStudyPdf('Plan de Lotizare si Parcelarea Terenului',
@@ -1863,7 +1869,11 @@ async function _lotExportPDF(){
 
   sign();
   pdf.save('Plan_Lotizare_'+S2(nrcad).replace(/[^a-zA-Z0-9]/g,'_')+'_'+new Date().getFullYear()+'.pdf');
-  ss('PDF Plan de Lotizare generat! (8 pagini)');
+  ss('✅ PDF Plan de Lotizare generat! (8 pagini)');
+  }catch(e){
+    console.error('_lotExportPDF error:',e);
+    ss('❌ Eroare la generare PDF: '+e.message+' — verificati consola (F12)');
+  }
 }
 
 
