@@ -1468,45 +1468,30 @@ canvas#c2d{width:100%;height:100%;display:block}
     if(typeof _lotTab==='function') _lotTab('p');
   };
 
-  // Fix Safari iOS: onclick inline nu functioneaza pe butoane generate dinamic
-  // Adauga touch event delegation pe document pentru aedis-fn-btn
-  // Fix universal: event delegation - un singur listener pentru TOATE butoanele generate dinamic
-  // Functioneaza pe iOS Safari, Android Chrome, desktop - fara MutationObserver, fara eval complex
+  // Event delegation - fix butoane generate dinamic pe toate browserele
   (function(){
     function _runOC(oc) {
-      // Incearca apel direct window.fnName(args) - cel mai rapid si sigur
-      var m = oc.match(/^([\w$_]+)\((.*)\)$/s);
-      if(m && typeof window[m[1]] === 'function') {
-        try {
-          var args = m[2].trim() ? Function('return [' + m[2] + ']')() : [];
-          window[m[1]].apply(window, args);
-          return;
-        } catch(e) {}
-      }
-      // Fallback: executa cu acces la scope global
-      try { Function(oc)(); } catch(e) {
-        try { (0,eval)(oc); } catch(e2) {}
-      }
+      try { (0,eval)(oc); } catch(e) { console.warn('onclick:', e.message, oc.slice(0,50)); }
     }
-    // Click delegation - capture phase, fara preventDefault
     document.addEventListener('click', function(e) {
       var el = e.target && e.target.closest ? e.target.closest('[onclick]') : null;
-      if(el && el.tagName !== 'A') { var oc = el.getAttribute('onclick'); if(oc) _runOC(oc); }
+      if(el && el.tagName !== 'A') { var oc2 = el.getAttribute('onclick'); if(oc2) _runOC(oc2); }
     }, false);
-    // iOS Safari touchend - previne double-fire
     var _ty = 0;
-    document.addEventListener('touchstart', function(e) { _ty = e.touches[0] ? e.touches[0].clientY : 0; }, {passive:true});
+    document.addEventListener('touchstart', function(e) {
+      _ty = e.touches && e.touches[0] ? e.touches[0].clientY : 0;
+    }, {passive:true});
     document.addEventListener('touchend', function(e) {
-      if(Math.abs((e.changedTouches[0] ? e.changedTouches[0].clientY : 0) - _ty) > 12) return;
+      if(Math.abs((e.changedTouches && e.changedTouches[0] ? e.changedTouches[0].clientY : 0) - _ty) > 12) return;
       var el = e.target && e.target.closest ? e.target.closest('[onclick]') : null;
       if(!el || el.tagName === 'A') return;
-      var oc = el.getAttribute('onclick');
-      if(!oc) return;
+      var oc3 = el.getAttribute('onclick');
+      if(!oc3) return;
       e.preventDefault();
-      _runOC(oc);
+      _runOC(oc3);
     }, {passive:false});
     window._runOC = _runOC;
-  })();;
+  })();
 </script>
 
 <script>
