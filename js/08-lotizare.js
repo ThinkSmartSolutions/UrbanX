@@ -1580,9 +1580,9 @@ function runLotizare(){
     // ── Multi-parcelă: union al tuturor parcelelor selectate ─────────────
     let pFeat;
     const nrParcele = (S.parcels||[]).filter(p=>p?.geo?.geometry).length;
+    _LOT._sceneCenter = null; // reset - folosim parcela activa ca centru implicit
     if(nrParcele > 1){
       ss('🏘 Se unifică '+nrParcele+' parcele pentru lotizare...');
-      // Pornim cu prima parcela si facem union cu restul
       let unified = {type:'Feature',geometry:S.parcels[0].geo.geometry,properties:{}};
       for(let pi=1;pi<S.parcels.length;pi++){
         const p=S.parcels[pi];
@@ -1593,6 +1593,11 @@ function runLotizare(){
         }catch(e){}
       }
       pFeat=unified;
+      // Salveaza centrul bbox-ului uniunii pentru viewer 3D
+      try{
+        const bb=turf.bbox(pFeat);
+        _LOT._sceneCenter=[(bb[0]+bb[2])/2,(bb[1]+bb[3])/2];
+      }catch(e){}
     } else {
       pFeat={type:'Feature',geometry:ap.geo.geometry,properties:{}};
     }
