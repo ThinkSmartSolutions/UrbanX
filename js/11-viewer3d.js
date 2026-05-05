@@ -860,13 +860,20 @@ function _v3dBuild(ap){
     scene.add(new THREE.LineLoop(lg,new THREE.LineBasicMaterial({color:'#00e5b4',opacity:0.7,transparent:true})));
   }catch(e){}
 
-  // Marcaj parcelă pe sol (suprafață luminoasă sub clădire)
+  // Marcaj parcelă pe sol
+  // Daca e lotizare activa: suprafata minima (loturile proprii arata limitele)
+  // Daca e AEDIS single: suprafata normala (arata zona de interventie)
   try{
+    const _hasLotizare=(S.vol._lastFeats||[]).some(f=>f.properties?.isLotizare);
     const pts=ring0.map(toLoc);
     const shape=new THREE.Shape(); shape.moveTo(pts[0][0],pts[0][1]);
     pts.slice(1,-1).forEach(([x,z])=>shape.lineTo(x,z)); shape.closePath();
     const geo=new THREE.ShapeGeometry(shape);
-    const mat=new THREE.MeshStandardMaterial({color:'#1a2535',roughness:0.97,metalness:0,transparent:true,opacity:0.85,side:THREE.DoubleSide});
+    // Lotizare: suprafata foarte transparenta (0.06) - nu acoperi loturile
+    // AEDIS: suprafata mai vizibila (0.82) - arata parcela
+    const surfOpacity = _hasLotizare ? 0.06 : 0.82;
+    const surfColor = _hasLotizare ? '#243050' : '#1a2535';
+    const mat=new THREE.MeshStandardMaterial({color:surfColor,roughness:0.97,metalness:0,transparent:true,opacity:surfOpacity,side:THREE.DoubleSide});
     const m2=new THREE.Mesh(geo,mat); m2.rotation.x=-Math.PI/2; m2.position.y=0.03; scene.add(m2);
 
     // Curtea interioară: marcaj verde deschis pe sol dacă există
@@ -1772,12 +1779,18 @@ function _v3dAddLotizareGeometry(THREE, scene, toLoc){
         :f.geometry.coordinates[0]?.[0];
       if(!ring||ring.length<4) return;
 
-      // a) Suprafața lotului — semitransparentă, culoarea tipului
-      const matLot=new THREE.MeshStandardMaterial({
-        color,roughness:.9,metalness:0,transparent:true,opacity:.2,side:THREE.DoubleSide
-      });
-      _flatPoly(ring, 0.04, matLot);
-      _outline(ring, 0.06, borderColor, .5);
+      // a) Suprafața lotului — semitransparentă
+      // Loturi partiale (la marginea parcelei) = doar outline, fara suprafata colorata
+      // (geometria triunghiulara creeaza suprafete mari vizual deranjante)
+      const isPartialSurf = f.properties?.partial === true;
+      if(!isPartialSurf){
+        const matLot=new THREE.MeshStandardMaterial({
+          color,roughness:.9,metalness:0,transparent:true,opacity:.08,side:THREE.DoubleSide
+        });
+        _flatPoly(ring, 0.04, matLot);
+      }
+      // Outline pentru toate loturile (inclusiv partiale) - arata limita lot
+      _outline(ring, 0.06, isPartialSurf?'rgba(255,255,255,0.3)':borderColor, isPartialSurf?0.2:.45);
 
       // b) Spațiu verde — pătrat CENTRAT mic, calculat din centroid pur
       // Nu folosim _innerRing (poate ieși din lot la forme neregulate)
@@ -2040,7 +2053,10 @@ function _v3dAddStreets(THREE, scene, ring0, toLoc){
         _lotOutline(ring,0.10,'#cbd5e1');
       } else {
         // Lot clădire — suprafață colorată semitransparentă
-        _flatPoly(ring,0.04,_matLot(color));
+        // Loturi partiale = doar outline, fara suprafata (evita triunghiuri mari)
+        if(!f.properties?.partial){
+          _flatPoly(ring,0.04,_matLot(color));
+        }
         _lotOutline(ring,0.05,borderColor);
       }
     });
