@@ -291,7 +291,7 @@ window._lotToggleLegend = function _lotToggleLegend(){
     </div>
     ${tipuriActive.map(([k,t])=>`
       <div style="display:flex;align-items:center;gap:7px;margin-bottom:5px">
-        <div style="width:14px;height:14px;border-radius:3px;background:${t.color};border:1px solid ${t.borderColor||t.color};flex-shrink:0"></div>
+        <div style="width:14px;height:14px;border-radius:3px;background:${(tipuriFromLoturi[k]?.color)||t.color};border:1px solid ${(tipuriFromLoturi[k]?.borderColor)||t.borderColor||t.color};flex-shrink:0"></div>
         <div>
           <span style="color:#e2e8f0;font-size:10px;font-weight:600">${t.icon} ${t.label}</span>
           ${t.categorie==='rezidential'?`<span style="color:#475569;font-size:8.5px"> · ${_LOT.tipMix[k]||0}%</span>`:
@@ -1002,6 +1002,14 @@ function _lotStartManualPlace(tipKey){
     return;
   }
 
+  // Curata orice placement anterior activ (alt tip care nu a terminat)
+  if(_LOT._placingTip && _LOT._placingTip !== tipKey){
+    _lotStopManualPlace(true); // anuleaza cel anterior
+  }
+  // Curata si handler-ul de click ramas eventual din sesiuni anterioare
+  if(map._lotPlaceHandler){ map.off('click', map._lotPlaceHandler); map._lotPlaceHandler=null; }
+  document.getElementById('lot-place-banner')?.remove();
+
   _LOT._placingTip = tipKey;
   const t = _LOT.tipuri[tipKey];
   const existingPos = (_LOT.manualPos[tipKey]||[]).length;
@@ -1083,11 +1091,13 @@ function _lotStartManualPlace(tipKey){
 }
 
 function _lotStopManualPlace(cancel){
-  if(!_LOT._placingTip) return;
-  if(cancel) _LOT.manualPos[_LOT._placingTip] = [];
-  _LOT._placingTip = null;
-  map.getCanvas().style.cursor = '';
-  if(map._lotPlaceHandler){ map.off('click', map._lotPlaceHandler); map._lotPlaceHandler=null; }
+  // Curata indiferent daca _placingTip e setat sau nu
+  if(_LOT._placingTip){
+    if(cancel) _LOT.manualPos[_LOT._placingTip] = [];
+    _LOT._placingTip = null;
+  }
+  try{ map.getCanvas().style.cursor = ''; }catch(e){}
+  if(map._lotPlaceHandler){ try{ map.off('click', map._lotPlaceHandler); }catch(e){} map._lotPlaceHandler=null; }
   if(window._lotPlaceEscHandler){ window.removeEventListener('keydown', window._lotPlaceEscHandler); window._lotPlaceEscHandler=null; }
   document.getElementById('lot-place-banner')?.remove();
 }
