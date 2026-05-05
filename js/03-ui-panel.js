@@ -839,7 +839,8 @@ function _htmlScenarii3(){
   const tabBtns = ['pug','max','optim'].map(k=>{
     const on = tab===k;
     return '<button onclick="S.vol3.activeTab=\''+k+'\';renderTab(\'proiect\')" '
-      +'style="flex:1;padding:9px 2px;border-radius:9px;border:2px solid '+(on?C[k]:'rgba(255,255,255,.08)')+';'
+      +'style="touch-action:manipulation;-webkit-tap-highlight-color:transparent;'
+      +'flex:1;padding:9px 2px;border-radius:9px;border:2px solid '+(on?C[k]:'rgba(255,255,255,.08)')+';'
       +'background:'+(on?C[k]+'18':'rgba(11,18,32,.6)')+';'
       +'color:'+(on?C[k]:'#475569')+';cursor:pointer;font-size:10px;font-weight:800;'
       +'display:flex;flex-direction:column;align-items:center;gap:3px;transition:all .15s">'
@@ -851,13 +852,13 @@ function _htmlScenarii3(){
 
   // ── Butoane generare ──────────────────────────────────────────────────
   const btnSingle = '<button onclick="generateSingleScenariu(\''+tab+'\')" '
-    +'style="flex:1;padding:10px 8px;border-radius:9px;border:1px solid '+C[tab]+';'
+    +'style="touch-action:manipulation;-webkit-tap-highlight-color:transparent;flex:1;padding:10px 8px;border-radius:9px;border:1px solid '+C[tab]+';'
     +'background:'+C[tab]+'18;color:'+C[tab]+';cursor:pointer;font-size:11px;font-weight:800">'
     +'⚡ '+IC[tab]+' '+LB[tab]
     +'</button>';
 
   const btnAll = '<button onclick="generateAllScenarii()" '
-    +'style="flex:1;padding:10px 8px;border-radius:9px;'
+    +'style="touch-action:manipulation;-webkit-tap-highlight-color:transparent;flex:1;padding:10px 8px;border-radius:9px;'
     +'background:linear-gradient(135deg,rgba(37,99,235,.35),rgba(217,119,6,.25),rgba(5,150,105,.35));'
     +'border:1px solid rgba(255,255,255,.18);color:#e2e8f0;cursor:pointer;font-size:11px;font-weight:800">'
     +'⚡ Toate 3 simultan'
@@ -912,12 +913,12 @@ function _htmlScenarii3(){
     +['pug','max','optim'].map(k=>{
       const on = act===k;
       return '<button onclick="_setActiveScenario3(\''+k+'\')" '
-        +'style="padding:7px 2px;border-radius:7px;border:1px solid '+(on?C[k]:'rgba(255,255,255,.08)')+';'
+        +'style="touch-action:manipulation;-webkit-tap-highlight-color:transparent;padding:7px 2px;border-radius:7px;border:1px solid '+(on?C[k]:'rgba(255,255,255,.08)')+';'
         +'background:'+(on?C[k]+'20':'transparent')+';color:'+(on?C[k]:'#475569')+';'
         +'cursor:pointer;font-size:10px;font-weight:700">'+IC[k]+' '+k.toUpperCase()+'</button>';
     }).join('')
     +'<button onclick="_setActiveScenario3(\'all\')" '
-    +'style="padding:7px 2px;border-radius:7px;border:1px solid '+(act==='all'?'#d4af37':'rgba(255,255,255,.08)')+';'
+    +'style="touch-action:manipulation;-webkit-tap-highlight-color:transparent;padding:7px 2px;border-radius:7px;border:1px solid '+(act==='all'?'#d4af37':'rgba(255,255,255,.08)')+';'
     +'background:'+(act==='all'?'rgba(212,175,55,.12)':'transparent')+';'
     +'color:'+(act==='all'?'#d4af37':'#475569')+';cursor:pointer;font-size:10px;font-weight:700">◉ Toate</button>'
     +'</div>'

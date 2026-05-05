@@ -339,8 +339,10 @@ function setScenariu(s){
 
   if(s === 'liber'){
     // Salvăm backup ctx
+    // Salvăm backup ctx — _safeFc elimina circular refs inainte de JSON.stringify
     if(!S._ctxBackup && S.ctx?.features?.length){
-      S._ctxBackup = JSON.parse(JSON.stringify(S.ctx));
+      try{ S._ctxBackup = JSON.parse(JSON.stringify(_safeFc ? _safeFc(S.ctx) : S.ctx)); }
+      catch(e){ S._ctxBackup = {type:'FeatureCollection', features: (S.ctx.features||[]).map(f=>({type:'Feature',geometry:f.geometry,properties:{...(f.properties||{})}}))}; }
     }
     // Ascundem ctx-3d
     _setCtxVisibility();
@@ -4413,7 +4415,7 @@ function aedisGetContent(){
     <div class="aedis-section">Funcțiunea principală</div>
     <div class="aedis-fn-grid">
       ${Object.entries(AEDIS_FN).map(([k,v])=>`
-        <button onclick="AEDIS.fn='${k}';aedisRender()" class="aedis-fn-btn${AEDIS.fn===k?' active':''}">
+        <button onclick="AEDIS.fn='${k}';AEDIS._fnOverride=true;aedisRender()" class="aedis-fn-btn${AEDIS.fn===k?' active':''}">
           <span class="aedis-fn-dot" style="background:${v.color}"></span>
           ${v.label}
         </button>`).join('')}
@@ -4428,7 +4430,7 @@ function aedisGetContent(){
     ${AEDIS.parterDiferit?`
     <div class="aedis-fn-grid" style="margin-top:8px">
       ${['comercial','birouri','institutie'].map(k=>`
-        <button onclick="AEDIS.fnParter='${k}';aedisRender()" class="aedis-fn-btn${AEDIS.fnParter===k?' active':''}">
+        <button onclick="AEDIS.fnParter='${k}';AEDIS._fnOverride=true;aedisRender()" class="aedis-fn-btn${AEDIS.fnParter===k?' active':''}">
           <span class="aedis-fn-dot" style="background:${AEDIS_FN[k].color}"></span>
           ${AEDIS_FN[k].label}
         </button>`).join('')}
@@ -4446,7 +4448,7 @@ function aedisGetContent(){
       ${Object.entries(AEDIS_STIL).map(([k,v])=>{
         const swatches = v.floorColors.slice(0,5).map(c=>`<span style="display:inline-block;width:8px;height:8px;background:${c};border-radius:1px;margin:0 1px"></span>`).join('');
         return `
-        <button onclick="AEDIS.stil='${k}';aedisRender()" class="aedis-stil-btn${AEDIS.stil===k?' active':''}">
+        <button onclick="AEDIS.stil='${k}';AEDIS._stilOverride=true;aedisRender()" class="aedis-stil-btn${AEDIS.stil===k?' active':''}">
           ${v.label}<br>
           <div style="margin:3px 0">${swatches}</div>
           <small style="opacity:0.7">${v.desc}</small>
@@ -4473,7 +4475,7 @@ function aedisGetContent(){
         {id:'extindere_v',ico:'🏗',label:'Ext. Vertical',desc:'Deasupra existentelor'},
         {id:'inglobare',ico:'🏙',label:'Inglobare',desc:'Înglobează existentele'},
       ].map(s=>`
-        <button onclick="AEDIS.scenariu='${s.id}';aedisRender();if((S.vol.genDone||window.AEDIS3D?.active)&&typeof aedisGenerateAll==='function')setTimeout(()=>aedisGenerateAll(),0)" class="aedis-scen-btn${AEDIS.scenariu===s.id?' active':''}">
+        <button onclick="AEDIS.scenariu='${s.id}';AEDIS._scenariuOverride=true;aedisRender();if((S.vol.genDone||window.AEDIS3D?.active)&&typeof aedisGenerateAll==='function')setTimeout(()=>aedisGenerateAll(),0)" class="aedis-scen-btn${AEDIS.scenariu===s.id?' active':''}">
           ${s.ico} ${s.label}<br><small>${s.desc}</small>
         </button>`).join('')}
     </div>
@@ -4500,7 +4502,7 @@ function aedisGetContent(){
         {id:'T',ico:'⊤',label:'Corp T',desc:'Formă T'},
         {id:'curte',ico:'⬜',label:'Curte int.',desc:'Curte interioară'},
       ].map(f=>`
-        <button onclick="AEDIS.forma='${f.id}';aedisRender();if((S.vol.genDone||window.AEDIS3D?.active)&&typeof aedisGenerateAll==='function')setTimeout(()=>aedisGenerateAll(),0)"
+        <button onclick="AEDIS.forma='${f.id}';AEDIS._formaOverride=true;aedisRender();if((S.vol.genDone||window.AEDIS3D?.active)&&typeof aedisGenerateAll==='function')setTimeout(()=>aedisGenerateAll(),0)"
           title="${f.desc}"
           style="padding:8px 4px;border-radius:9px;border:2px solid ${AEDIS.forma===f.id?'#d4af37':'rgba(255,255,255,.15)'};background:${AEDIS.forma===f.id?'rgba(212,175,55,.15)':'rgba(11,18,32,.8)'};color:${AEDIS.forma===f.id?'#d4af37':'#94a3b8'};cursor:pointer;font-size:18px;text-align:center;line-height:1.2;transition:all .15s">
           <div style="font-size:18px">${f.ico}</div>
@@ -4522,7 +4524,7 @@ function aedisGetContent(){
         <div class="aedis-lbl">Nr. niveluri</div>
         <div style="display:flex;gap:4px;margin-top:4px">
           ${[1,2,3,4,5,6,7,8,10,12].map(n=>`
-            <button onclick="AEDIS.corpuri[0].niv=${n};aedisRender();if((S.vol.genDone||window.AEDIS3D?.active)&&typeof aedisGenerateAll==='function')setTimeout(()=>aedisGenerateAll(),0)" 
+            <button onclick="AEDIS.corpuri[0].niv=${n};AEDIS._nivOverride=true;aedisRender();if((S.vol.genDone||window.AEDIS3D?.active)&&typeof aedisGenerateAll==='function')setTimeout(()=>aedisGenerateAll(),0)" 
               style="padding:5px 7px;border-radius:6px;border:1px solid ${niv===n?'#d4af37':'rgba(255,255,255,.2)'};background:${niv===n?'rgba(212,175,55,.2)':'transparent'};color:${niv===n?'#d4af37':'#94a3b8'};cursor:pointer;font-size:11px;font-weight:700">${n}</button>
           `).join('')}
         </div>
@@ -4531,7 +4533,7 @@ function aedisGetContent(){
     <div class="aedis-row" style="margin-top:10px">
       <span class="aedis-lbl">H/nivel (m)</span>
       <input type="range" min="2.6" max="5.5" step="0.1" value="${hNiv}"
-        oninput="AEDIS.corpuri[0].hNiv=+this.value;aedisRender()"
+        oninput="AEDIS.corpuri[0].hNiv=+this.value;AEDIS._hNivOverride=true;aedisRender()"
         style="flex:1;accent-color:#d4af37">
       <span class="aedis-val">${hNiv.toFixed(1)}m</span>
     </div>
@@ -4571,7 +4573,7 @@ function aedisGetContent(){
         {id:'mansarda',ico:'🏡',label:'Mansardă',desc:'Etaj înscris în șarpantă'},
         {id:'combinat',ico:'🏢',label:'Combinat',desc:'Terasă + corp tehnic'},
       ].map(a=>`
-        <button onclick="AEDIS.tipAcoperis='${a.id}';aedisRender()" class="aedis-acop-btn${AEDIS.tipAcoperis===a.id?' active':''}">
+        <button onclick="AEDIS.tipAcoperis='${a.id}';AEDIS._acoperisOverride=true;aedisRender()" class="aedis-acop-btn${AEDIS.tipAcoperis===a.id?' active':''}">
           <span style="font-size:20px">${a.ico}</span>
           <strong>${a.label}</strong>
           <small>${a.desc}</small>
