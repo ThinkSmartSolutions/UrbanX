@@ -213,7 +213,10 @@ function _showLotizarePanel(){
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
         <div>
           <span style="color:#a78bfa;font-weight:800;font-size:13px">🏘 Lotizare</span>
-          <span style="color:#64748b;font-weight:400;font-size:11px"> · ${ap?ap.nrcad+' · '+Math.round(ap.area||0)+'mp':'selectați parcela'}</span>
+          ${(S.parcels||[]).filter(p=>p?.geo?.geometry).length>1
+            ? `<span style="color:#f59e0b;font-weight:700;font-size:10px;margin-left:4px;background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.3);border-radius:5px;padding:2px 6px">⊞ ${S.parcels.filter(p=>p?.geo?.geometry).length} parcele</span>`
+            : `<span style="color:#64748b;font-weight:400;font-size:11px"> · ${ap?ap.nrcad+' · '+Math.round(ap.area||0)+'mp':'selectați parcela'}</span>`
+          }
           ${ap?.utr?`<span style="color:#d4af37;font-size:9px;margin-left:4px">UTR ${ap.utr}</span>`:''}
         </div>
         <button onclick="toggleLotizare()" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#f87171;border-radius:8px;padding:${mob?'8px 18px':'5px 12px'};font-size:${mob?'16px':'12px'};font-weight:700;cursor:pointer;flex-shrink:0;min-width:${mob?'44px':'auto'}">✕ Închide</button>
@@ -628,6 +631,7 @@ function _lotBuild3D(loturi, drumuri){
     if(!lot.geometry) return;
 
     // Parametri per tip (cu override)
+    const def = _LOT.tipuri[tipKey] || _LOT.tipuri.individuala; // definitie originala (fara override)
     const ov = _LOT.tipOverride[tipKey] || {};
     const niv     = Math.max(1, t.niv || 2);
     const hNiv    = Math.max(2.4, ov.hNiv || t.hNiv || 3.0);
@@ -1230,6 +1234,11 @@ function _lotHtmlParametri(){
   return `
   ${!ap?`<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:8px 10px;font-size:10px;color:#f87171;margin-bottom:10px">⚠️ Selectați mai întâi o parcelă de pe hartă</div>`:''}
 
+  ${(S.parcels||[]).filter(p=>p?.geo?.geometry).length>1?`
+  <div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:8px;padding:7px 10px;margin-bottom:10px;font-size:10px;color:#f59e0b">
+    <b>⊞ ${S.parcels.filter(p=>p?.geo?.geometry).length} parcele selectate</b> — lotizarea se va genera pe <b>suprafața unificată</b> a tuturor parcelelor.<br>
+    <span style="color:#64748b">Suprafață totală: ~${Math.round(S.parcels.filter(p=>p?.geo?.geometry).reduce((s,p)=>s+(p.area||0),0))} mp</span>
+  </div>`:''}
   <div style="font-size:10px;color:#fbbf24;font-weight:700;margin-bottom:6px">📐 Suprafață lot (mp/lot)</div>
   <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:7px">
     ${[300,400,500,600,800,1000].map(v=>`<button onclick="_LOT.lotAria=${v};_lotTab('p')" style="background:${_LOT.lotAria===v?'rgba(251,191,36,.25)':'rgba(255,255,255,.06)'};border:1px solid ${_LOT.lotAria===v?'#fbbf24':'rgba(255,255,255,.1)'};color:${_LOT.lotAria===v?'#fbbf24':'#94a3b8'};border-radius:7px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer">${v}mp</button>`).join('')}
@@ -1542,7 +1551,25 @@ function runLotizare(){
   ss('🏘 Se generează planul de lotizare...');
 
   try{
-    const pFeat={type:'Feature',geometry:ap.geo.geometry,properties:{}};
+    // ── Multi-parcelă: union al tuturor parcelelor selectate ─────────────
+    let pFeat;
+    const nrParcele = (S.parcels||[]).filter(p=>p?.geo?.geometry).length;
+    if(nrParcele > 1){
+      ss('🏘 Se unifică '+nrParcele+' parcele pentru lotizare...');
+      // Pornim cu prima parcela si facem union cu restul
+      let unified = {type:'Feature',geometry:S.parcels[0].geo.geometry,properties:{}};
+      for(let pi=1;pi<S.parcels.length;pi++){
+        const p=S.parcels[pi];
+        if(!p?.geo?.geometry) continue;
+        try{
+          const u=turf.union(unified,{type:'Feature',geometry:p.geo.geometry,properties:{}});
+          if(u?.geometry) unified=u;
+        }catch(e){}
+      }
+      pFeat=unified;
+    } else {
+      pFeat={type:'Feature',geometry:ap.geo.geometry,properties:{}};
+    }
     const pArea=turf.area(pFeat);
     const params=ap.params||getDefaultParams(ap.utr||'');
 
