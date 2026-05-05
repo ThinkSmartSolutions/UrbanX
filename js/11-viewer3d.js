@@ -566,6 +566,21 @@ function _v3dBuild(ap){
 
   // ── Asigurăm context 3D înainte de build ─────────────────────────────────
   // Dacă S.ctx e gol (Overpass a eșuat) → extragem din Mapbox rendered tiles
+  // Asigura-te ca contextul e populat — fallback la Mapbox daca Overpass a esuat
+  if((!S.ctx?.features?.length || S.ctx.features.length < 2) && typeof _ctxFromMapbox === 'function'){
+    try{
+      const ring0tmp = ap.geo.geometry.type==='Polygon'
+        ? ap.geo.geometry.coordinates[0]
+        : ap.geo.geometry.coordinates[0][0];
+      const cxTmp=ring0tmp.reduce((s,c)=>s+c[0],0)/ring0tmp.length;
+      const cyTmp=ring0tmp.reduce((s,c)=>s+c[1],0)/ring0tmp.length;
+      const radius=Math.max(300, Number(S.vol?.ctxR||400));
+      const extracted=_ctxFromMapbox([cxTmp,cyTmp], radius);
+      if(extracted?.length >= 1){
+        S.ctx={type:'FeatureCollection', features:extracted};
+      }
+    }catch(e){}
+  }
   const _ctxCount = S.ctx?.features?.length || 0;
   if(_ctxCount < 3 && typeof _ctxFromMapbox === 'function'){
     try{
@@ -924,7 +939,13 @@ function _v3dBuild(ap){
   canvas.addEventListener('wheel',_markDirty,{passive:true});
   canvas.addEventListener('touchstart',_markDirty,{passive:true});
 
-  _v3dStatus(`✅ ${V3D.aedis.length} volume AEDIS · ${V3D.ctx.length} clădiri context · Drag=rotire Scroll=zoom`);
+  // Forteaza vizibilitatea contextului dupa fiecare rebuild
+  setTimeout(()=>{
+    const ctxSel = document.getElementById('v3d-ctx');
+    if(ctxSel && ctxSel.value !== 'hide') _v3dCtxViz(ctxSel.value||'show');
+  }, 50);
+
+  _v3dStatus(`✅ ${V3D.aedis.length} vol. AEDIS · ${V3D.ctx.length} clăd. ctx · Drag=rotire Scroll=zoom`);
 }
 
 
@@ -1755,17 +1776,18 @@ function _v3dAddLotizareGeometry(THREE, scene, toLoc){
       // Nu se desenează pentru loturi parțiale (la marginea parcelei)
       const svPct = SPECIAL_TIPS.has(tip) ? 0 : (SV_PCT[tip]||0);
       const isPartial = f.properties?.partial === true;
-      if(svPct > 0.05 && !isPartial){
+      // Verde: doar pe loturi complete (>80% din aria target) cu centroid verificat
+      const lotAreaM2 = f.properties?.area||400;
+      const lotAriaTarget = (typeof _LOT!=='undefined' && _LOT.lotAria)||400;
+      const isSmall = lotAreaM2 < lotAriaTarget * 0.80;
+      if(svPct > 0.05 && !isPartial && !isSmall){
         try{
-          // Centroid lot în coordonate locale 3D
           const ringPts=ring.slice(0,-1).map(toLoc);
           const cx3=ringPts.reduce((s,p)=>s+p[0],0)/ringPts.length;
           const cz3=ringPts.reduce((s,p)=>s+p[1],0)/ringPts.length;
-          // Dimensiune mica: sqrt(area*svPct)*0.4 dar maxim 4m
-          const lotAreaM2=f.properties?.area||400;
-          const svSide=Math.min(4.0, Math.sqrt(lotAreaM2*svPct)*0.4);
+          // Dimensiune mai mica: max 3m (era 4m) - mai departe de margini
+          const svSide=Math.min(3.0, Math.sqrt(lotAreaM2*svPct)*0.35);
           if(svSide > 0.5){
-            // Pătrat mic centrat — garantat în interiorul lotului
             const shV=new THREE.Shape();
             shV.moveTo(cx3-svSide,cz3-svSide);
             shV.lineTo(cx3+svSide,cz3-svSide);
