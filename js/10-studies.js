@@ -1110,7 +1110,7 @@ async function generateDensityStudy(){
   cy=sec('1. COMPARATIE INDICATORI PROPUSI vs PUG vs ZONA',cy);cy+=2;
   cy=body('Analiza compara indicatorii urbanistici propusi pentru parcela '+nrcad+' cu cei reglementati prin PUG '+getUATLabel()+' (UTR '+utr+') si cu valorile reale estimate din contextul construit existent in raza de 200m, pe baza datelor OpenStreetMap actualizate.',14,cy);cy+=3;
   cy=tblRow(['Indicator','Propus','Max PUG','Zona (200m)','Status'],cy,true,[55,28,28,32,35]);
-  [['POT (suprafata construita/teren)',potProp+'%',potProp+'%',potMed.toFixed(1)+'%',potProp<=potProp?'CONFORM':'DEPASIRE'],['CUT (supraf. desfasurata/teren)',cutProp,cutProp,'—','CONFORM'],['H max propus',aedisH.toFixed(1)+'m','N/Sm',hMed.toFixed(1)+'m (med.)',aedisH<=hMed*2?'COMPAT.':'ATENTIE'],['H medie propusa',aedisH.toFixed(1)+'m','—',hMed.toFixed(1)+'m',aedisH<=hMed*1.5?'COMPATIBIL':'VERIFICARE'],['Nr. niveluri',AEDIS.corpuri[0]?.niv||4+' niv.',parseFloat(params?.niv)||4+' niv.',Math.round(hMed/3)+' niv.est.','—']].forEach(r=>{cy=tblRow(r,cy,false,[55,28,28,32,35]);});
+  [['POT (suprafata construita/teren)',potProp+'%',potProp+'%',potMed.toFixed(1)+'%',parseFloat(potProp)<=parseFloat(params?.pot||40)?'CONFORM':'DEPASIRE'],['CUT (supraf. desfasurata/teren)',cutProp,cutProp,'—','CONFORM'],['H max propus',aedisH.toFixed(1)+'m','N/Sm',hMed.toFixed(1)+'m (med.)',aedisH<=hMed*2?'COMPAT.':'ATENTIE'],['H medie propusa',aedisH.toFixed(1)+'m','—',hMed.toFixed(1)+'m',aedisH<=hMed*1.5?'COMPATIBIL':'VERIFICARE'],['Nr. niveluri',AEDIS.corpuri[0]?.niv||4+' niv.',parseFloat(params?.niv)||4+' niv.',Math.round(hMed/3)+' niv.est.','—']].forEach(r=>{cy=tblRow(r,cy,false,[55,28,28,32,35]);});
 
   // PAG 3: Viewer 3D zi + noapte
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D ZI / NOAPTE — VOLUMETRIE IN CONTEXT',3);ftr();
@@ -1420,8 +1420,9 @@ async function generateMemoriu(){
   ].forEach(r=>cy=tblRow(r,cy,false,[40,70,35,37]));
   cy+=4;
   cy=sec('10.1. CONFORMITATE INDICATORI URBANISTICI',cy);cy+=2;
+  const potProp2=(scEst/areaNum*100).toFixed(1);const cutProp2=(sdEst/areaNum).toFixed(2);
   cy=tblRow(['Indicator PUG','Valoare prevazuta','Propunere','Status'],cy,true,[65,40,38,39]);
-  [['POT max (%)',params?.pot+'%',potProp+'%',potProp<=parseFloat(params?.pot||35)?'CONFORM':'Verificare'],
+  [['POT max (%)',params?.pot+'%',potProp2+'%',potProp<=parseFloat(params?.pot||35)?'CONFORM':'Verificare'],
    ['CUT max',params?.cut,cutProp,parseFloat(cutProp)<=parseFloat(params?.cut||1.0)?'CONFORM':'Verificare'],
    ['H max (m)',params?.h?params.h+'m':'N/Sm',aedisH.toFixed(1)+'m',aedisH<=(parseFloat(params?.h)||999)?'CONFORM':'Verificare'],
    ['Retragere fata (m)','min. '+params?.rf+'m',params?.rf+'m','CONFORM'],
@@ -3093,15 +3094,15 @@ async function generateEnvironmentalImpact(){
 
   // ─── PAG 7: PEISAJ URBAN, SĂNĂTATE, DATE SOCIO-ECONOMICE ───────────────
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
-  hdr('PEISAJ URBAN, SĂNĂTATE PUBLICĂ ȘI IMPACT SOCIO-ECONOMIC',7);ftr();
+  hdr('PEISAJ URBAN, SANATATE PUBLICA SI IMPACT SOCIO-ECONOMIC',7);ftr();
   cy=30;
 
   const ins=eim.ins||{};
   cy=addImg(caps.imgAerial||caps.img3D,14,cy,hw,55,'FIG. 8 — Vedere aeriană · Impact vizual în peisajul urban');
-  addImg(caps.v3dNight,14+hw+4,cy-55,hw,55,'FIG. 6 — Viewer 3D · NOAPTE · Iluminat nocturn');
+  addImg(caps.v3dNight,14+hw+4,cy-55,hw,55,'FIG. 9 — Viewer 3D * NOAPTE * Impact nocturn urban');
   cy+=3;
-  cy=addImg(caps.v3dGolden,14,cy,hw,55,'FIG. 7 — Viewer 3D · GOLDEN HOUR · Integrare arhitecturala');
-  addImg(caps.v3dOvercast||caps.imgBack,14+hw+4,cy-55,hw,55,'FIG. 8 — Viewer 3D · CER INNORIRAT · Context real');
+  cy=addImg(caps.v3dGolden,14,cy,hw,55,'FIG. 10 — Viewer 3D * GOLDEN HOUR * Materialitate si impact vizual');
+  addImg(caps.v3dOvercast||caps.imgBack,14+hw+4,cy-55,hw,55,'FIG. 11 — Vedere posterioara * Context patrimonial real');
   cy+=4;
 
   cy=sec('10. IMPACT VIZUAL ȘI PEISAJ URBAN',cy);
