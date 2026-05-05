@@ -4099,9 +4099,9 @@ async function generateStudiuFezabilitate(paramOverrides){
   const sc1=Math.round(scMax*0.7), sda1=Math.round(sdTotal*0.7);
   const sc2=scMax, sda2=sdTotal;
   const sc3=Math.round(scMax*0.9), sda3=Math.round(sdTotal*1.1);
-  [['S1 — Conservator',sc1+' mp',sda1+' mp',Math.round(aedisH*0.75)+'m',Math.round(sda1*700/1000).toLocaleString('en-US')+' EUR',((sda1*0.85*50*12)/((sda1*700*1.25+costTeren)/1000)).toFixed(1)+'%'],
-   ['S2 — Recomandat ★',sc2+' mp',sda2+' mp',aedisH.toFixed(0)+'m',Math.round(sda2*700/1000).toLocaleString('en-US')+' EUR',((sda2*0.85*50*12)/((sda2*700*1.25+costTeren)/1000)).toFixed(1)+'%'],
-   ['S3 — Maxim RLU',sc3+' mp',sda3+' mp',params?.h||aedisH.toFixed(0)+'m',Math.round(sda3*700/1000).toLocaleString('en-US')+' EUR',((sda3*0.85*50*12)/((sda3*700*1.25+costTeren)/1000)).toFixed(1)+'%'],
+  [['S1 — Conservator',sc1+' mp',sda1+' mp',Math.round(aedisH*0.75)+'m',Math.round(sda1*_pretConstr).toLocaleString('en-US')+' EUR',((sda1*_rataOcup*_chirieRef*12)/((sda1*_pretConstr+costTeren)*1.25)*100).toFixed(1)+'%'],
+   ['S2 — Recomandat ★',sc2+' mp',sda2+' mp',aedisH.toFixed(0)+'m',Math.round(sda2*_pretConstr).toLocaleString('en-US')+' EUR',((sda2*_rataOcup*_chirieRef*12)/((sda2*_pretConstr+costTeren)*1.25)*100).toFixed(1)+'%'],
+   ['S3 — Maxim RLU',sc3+' mp',sda3+' mp',params?.h||aedisH.toFixed(0)+'m',Math.round(sda3*_pretConstr).toLocaleString('en-US')+' EUR',((sda3*_rataOcup*_chirieRef*12)/((sda3*_pretConstr+costTeren)*1.25)*100).toFixed(1)+'%'],
   ].forEach((r,i)=>{
     if(i===1){
       // S2 RECOMANDAT: linie verde stânga (3mm) + text "★" în culoare verde
