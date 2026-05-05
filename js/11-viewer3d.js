@@ -1747,23 +1747,33 @@ function _v3dAddLotizareGeometry(THREE, scene, toLoc){
       _flatPoly(ring, 0.04, matLot);
       _outline(ring, 0.06, borderColor, .5);
 
-      // b) Spațiu verde — mic pătrat CENTRAL, strict interior, niciodată pe drumuri
-      // Loturile parțiale (margine parcela) NU primesc verde vizual
+      // b) Spațiu verde — pătrat CENTRAT mic, calculat din centroid pur
+      // Nu folosim _innerRing (poate ieși din lot la forme neregulate)
+      // Nu se desenează pentru loturi parțiale (la marginea parcelei)
       const svPct = SPECIAL_TIPS.has(tip) ? 0 : (SV_PCT[tip]||0);
       const isPartial = f.properties?.partial === true;
       if(svPct > 0.05 && !isPartial){
-        // Verde = 35% din lot (pătrat mic în centru) — departe de orice margine
-        const scaleV = 0.35;
-        const verdePts = _innerRing(ring, scaleV)?.slice(0,-1).map(toLoc);
-        if(verdePts && verdePts.length >= 3){
-          const shV = new THREE.Shape();
-          shV.moveTo(verdePts[0][0], verdePts[0][1]);
-          verdePts.slice(1).forEach(([x,z])=>shV.lineTo(x,z));
-          shV.closePath();
-          const mVerde = new THREE.Mesh(new THREE.ShapeGeometry(shV), matVerde);
-          mVerde.rotation.x=-Math.PI/2; mVerde.position.y=0.04; mVerde.receiveShadow=true;
-          scene.add(mVerde);
-        }
+        try{
+          // Centroid lot în coordonate locale 3D
+          const ringPts=ring.slice(0,-1).map(toLoc);
+          const cx3=ringPts.reduce((s,p)=>s+p[0],0)/ringPts.length;
+          const cz3=ringPts.reduce((s,p)=>s+p[1],0)/ringPts.length;
+          // Dimensiune mica: sqrt(area*svPct)*0.4 dar maxim 4m
+          const lotAreaM2=f.properties?.area||400;
+          const svSide=Math.min(4.0, Math.sqrt(lotAreaM2*svPct)*0.4);
+          if(svSide > 0.5){
+            // Pătrat mic centrat — garantat în interiorul lotului
+            const shV=new THREE.Shape();
+            shV.moveTo(cx3-svSide,cz3-svSide);
+            shV.lineTo(cx3+svSide,cz3-svSide);
+            shV.lineTo(cx3+svSide,cz3+svSide);
+            shV.lineTo(cx3-svSide,cz3+svSide);
+            shV.closePath();
+            const mVerde=new THREE.Mesh(new THREE.ShapeGeometry(shV),matVerde);
+            mVerde.rotation.x=-Math.PI/2; mVerde.position.y=0.04; mVerde.receiveShadow=true;
+            scene.add(mVerde);
+          }
+        }catch(e){}
       }
 
       // c) Zonă parcare (doar individuala/duplex/bloc — nu tipuri speciale)
