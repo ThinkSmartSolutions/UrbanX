@@ -1657,8 +1657,11 @@ function runLotizare(){
 
     // Nr loturi speciale fixe
     const nrSpeciale=_specialTipKeys.reduce((s,k)=>s+(parseInt(tipCount[k])||0),0);
-    // Loturi rezidentiale = total disponibil minus speciale (minim 1)
-    const nrRezid=Math.max(1, nrLoturiTotal - nrSpeciale);
+    // Loturi rezidentiale: calculam din teren util REAL (nu din bbox)
+    // fpArea e suprafata reala a parcelei dupa buffer retrageri
+    const terenUtilRezid=fpArea*(1-drumAreaFract);
+    const nrRezidCalc=Math.max(1,Math.floor(terenUtilRezid/_LOT.lotAria)-nrSpeciale);
+    const nrRezid=Math.max(1, Math.min(nrRezidCalc, nrLoturiTotal - nrSpeciale));
 
     // Distribuie rezidentiale proportional
     const tipuriActiv=Object.entries(_LOT.tipMix).filter(([k,v])=>v>0 && !_specialTipKeys.includes(k));
@@ -2148,30 +2151,55 @@ function _genLotizareGeom(fpFeat, loturiPerTip, drumFract){
   const nrLoturiFinale=Math.min(asignari.length, pozitiiValide.length);
   if(nrLoturiFinale===0) return {loturi,drumuri};
 
-  // Tipuri speciale → pozitii de margine, rezidentiale → interior
+  // Rezidentiale → INTERIOR first (logica urbana: cladirile umplu centrul)
+  // Speciale (foisor/biserica etc.) → margini/colturi
   const specialTips=['gazebo','garaj','bbq','bucvara','bortodoxa','bcatolica'];
   const maxR=pozitiiValide.length>0?Math.max(...pozitiiValide.map(x=>x.r)):0;
   const maxC=pozitiiValide.length>0?Math.max(...pozitiiValide.map(x=>x.c)):0;
   const pozMargine=pozitiiValide.filter(p=>p.r===0||p.r===maxR||p.c===0||p.c===maxC);
   const pozInterior=pozitiiValide.filter(p=>!(p.r===0||p.r===maxR||p.c===0||p.c===maxC));
-  const pozOrdonate=[...pozMargine,...pozInterior];
+  // Rezidentiale: interior INTAI, apoi margini
+  const pozPtRezid=[...pozInterior,...pozMargine];
+  // Speciale: margini (colturi preferabil)
+  const pozPtSpeciale=[...pozMargine,...pozInterior];
 
-  // Tipuri speciale primele (pe margine), rezidentiale dupa (in interior)
+  // Construieste lista finala de asignari
   const asignSpeciale=asignari.filter(t=>specialTips.includes(t));
   const asignRezid=asignari.filter(t=>!specialTips.includes(t));
-  const asignariFinal=[...asignSpeciale,...asignRezid].slice(0, nrLoturiFinale);
 
-  asignariFinal.forEach((tip, i)=>{
-    const poz=pozOrdonate[i];
+  // Daca mai sunt pozitii valide dupa loturile cerute, umple cu tipul dominant
+  // (parcela plina = mai profesionist vizual)
+  const tipDominant=tipuriActive.filter(t=>!specialTips.includes(t))
+    .reduce((a,b)=>(loturiPerTip[a]||0)>=(loturiPerTip[b]||0)?a:b,tipuriActive[0]||'individuala');
+  const asignRezidFull=[...asignRezid];
+  // Completeaza pana la nr pozitii interior disponibile
+  while(asignRezidFull.length < pozPtRezid.length) asignRezidFull.push(tipDominant);
+
+  // Plaseaza rezidentialele pe pozitii interior→margini
+  asignRezidFull.forEach((tip, i)=>{
+    const poz=pozPtRezid[i];
     if(!poz) return;
     const t=_lotGetTip(tip)||_LOT.tipuri.individuala;
-    loturi.push({
-      type:'Feature',
-      geometry:poz.geom,
+    loturi.push({type:'Feature',geometry:poz.geom,
       properties:{tip,color:t.color,borderColor:t.borderColor,area:poz.area,
         partial:poz.area < _LOT.lotAria*0.85}
     });
   });
+
+  // Plaseaza specialele pe margini (daca pozitia nu e deja ocupata)
+  const ocupate=new Set(loturi.map(l=>JSON.stringify(l.geometry?.coordinates?.[0]?.[0])));
+  let siIdx=0;
+  for(let pi=0;pi<pozPtSpeciale.length && siIdx<asignSpeciale.length;pi++){
+    const poz=pozPtSpeciale[pi];
+    const key=JSON.stringify(poz.geom?.coordinates?.[0]?.[0]);
+    if(ocupate.has(key)) continue; // deja ocupata de rezidential
+    const tip=asignSpeciale[siIdx++];
+    const t=_lotGetTip(tip)||_LOT.tipuri.individuala;
+    loturi.push({type:'Feature',geometry:poz.geom,
+      properties:{tip,color:t.color,borderColor:t.borderColor,area:poz.area}
+    });
+    ocupate.add(key);
+  }
 
   return {loturi, drumuri};
 }
