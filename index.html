@@ -1369,6 +1369,42 @@ canvas#c2d{width:100%;height:100%;display:block}
   // Expunem global ca 08-lotizare.js să îl poată apela explicit după open/close
   window._lotLayoutSync = _applyLotOpen;
 
+  // Helper functions pentru butoanele AEDIS generate dinamic (fix iOS Safari eval)
+  window._aedisSetNiv = function(n) {
+    if(window.AEDIS?.corpuri?.[0]) { AEDIS.corpuri[0].niv = n; }
+    if(typeof aedisRender === 'function') aedisRender();
+  };
+  window._aedisSetScenariu = function(id) {
+    if(window.AEDIS) {
+      if(AEDIS._demolishActive && id !== 'demolare' && typeof _aedisRestoreCad3D === 'function') _aedisRestoreCad3D();
+      AEDIS.scenariu = id;
+    }
+    if(typeof aedisRender === 'function') aedisRender();
+  };
+  window._aedisSetForma = function(f) {
+    if(window.AEDIS) AEDIS.forma = f;
+    if(typeof aedisRender === 'function') aedisRender();
+    if((window.S?.vol?.genDone || window.AEDIS3D?.active) && typeof aedisGenerateAll === 'function') aedisGenerateAll();
+  };
+  window._aedisSetHNiv = function(v) {
+    if(window.AEDIS?.corpuri?.[0]) AEDIS.corpuri[0].hNiv = +v;
+    if(typeof aedisRender === 'function') aedisRender();
+  };
+  window._aedisSetFn = function(k) {
+    if(window.AEDIS) AEDIS.fn = k;
+    if(typeof aedisRender === 'function') aedisRender();
+    if(typeof _v3dIsOpen === 'function' && _v3dIsOpen() && typeof _v3dRebuildFast === 'function') _v3dRebuildFast();
+  };
+  window._aedisSetStil = function(k) {
+    if(window.AEDIS) AEDIS.stil = k;
+    if(typeof aedisRender === 'function') aedisRender();
+    if(typeof _v3dIsOpen === 'function' && _v3dIsOpen() && typeof _v3dRebuildFast === 'function') _v3dRebuildFast();
+  };
+  window._aedisSetAcoperis = function(id) {
+    if(window.AEDIS) AEDIS.tipAcoperis = id;
+    if(typeof aedisRender === 'function') aedisRender();
+  };
+
   // Fix Safari iOS: onclick inline nu functioneaza pe butoane generate dinamic
   // Adauga touch event delegation pe document pentru aedis-fn-btn
   // Safari iOS fix: butoane generate dinamic cu innerHTML nu primesc click events
@@ -1395,26 +1431,33 @@ canvas#c2d{width:100%;height:100%;display:block}
     _attachAll();
 
     // MutationObserver: detecteaza butoane noi adaugate la DOM
-    // Selector larg: acopera AEDIS + Lotizare + orice panel cu butoane onclick
-    const BTN_SEL = '.aedis-fn-btn, .aedis-dim-btn, #lot-modal button, #lot-content button';
-
-    const _attachAll2 = () => {
-      document.querySelectorAll(BTN_SEL).forEach(_attachTouch);
-    };
-    _attachAll2();
-
-    const _obs = new MutationObserver(mutations => {
-      mutations.forEach(m => {
-        m.addedNodes.forEach(node => {
-          if(!node.querySelectorAll) return;
-          node.querySelectorAll(BTN_SEL).forEach(_attachTouch);
-          // Daca nodul insusi e un buton cu onclick
-          if(node.tagName === 'BUTTON' && node.getAttribute('onclick')) _attachTouch(node);
-        });
+    // Selector universal: prinde ORICE element cu onclick din toata aplicatia
+    const _attachAll3 = () => {
+      // Butoane cu clase specifice + orice buton/div cu onclick din paneluri dinamice
+      document.querySelectorAll(
+        'button[onclick], .aedis-fn-btn, .aedis-dim-btn, [data-touch-fn], ' +
+        '#lot-modal button, #lot-content button, #aedis-modal button, ' +
+        '.ptab, .ltab, [onclick]'
+      ).forEach(el => {
+        if(el.tagName === 'SCRIPT' || el.tagName === 'A') return;
+        _attachTouch(el);
       });
+    };
+    _attachAll3();
+
+    // MutationObserver: ataseaza touch pe ORICE element nou cu onclick
+    const _obs = new MutationObserver(mutations => {
+      let needsReattach = false;
+      mutations.forEach(m => {
+        if(m.addedNodes.length) needsReattach = true;
+      });
+      if(needsReattach) {
+        clearTimeout(window._reattachTimer);
+        window._reattachTimer = setTimeout(_attachAll3, 80);
+      }
     });
     _obs.observe(document.body, {childList:true, subtree:true});
-    window._reattachTouchBtns = _attachAll2;
+    window._reattachTouchBtns = _attachAll3;
   })();
 })();
 </script>

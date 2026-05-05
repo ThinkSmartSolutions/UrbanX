@@ -1065,7 +1065,7 @@ function _v3dBuild(ap){
   obs.observe(canvas); V3D._obs=obs;
 
   // Render loop cu smooth camera damping (miscare cinematica fluida)
-  const DAMP=0.11; // inertie camera: 0=instant, 1=blocat
+  const DAMP=0.25; // inertie camera: valoare mai responsiva (era 0.11 = prea lent)
   let _thT=V3D.th, _phT=V3D.ph, _radT=V3D.rad; // targets
   window._v3dSetCamTarget=(th,ph,rad)=>{ _thT=th; _phT=ph; _radT=rad; };
   const render=()=>{
@@ -3463,10 +3463,9 @@ function _v3dUpdateCam(){
 }
 
 function _v3dResetCam(){
-  // Orientare initiala: NE, unghi mediu
-  // theta=PI = camera la Sud privind Nord (orientare ca harta: Nord in sus)
-  // phi=PI/3 = unghi mai sus pentru a vedea mai mult teren
+  // Reset: sincronizeaza SI targets pentru damping loop
   V3D.th=Math.PI; V3D.ph=Math.PI/3.2;
+  if(typeof _thT!=='undefined'){ _thT=V3D.th; } if(window._v3dSetCamTarget) window._v3dSetCamTarget(V3D.th,V3D.ph,V3D.rad);
   const maxH=Math.max(...(S.vol._lastFeats||[]).map(f=>f.properties?.top||0),8);
   const ap=S.parcels[S.activeParcel??0];
   // Centrul scenei: parcela activa (sau centrul lotizarii multi-parcel)
@@ -3485,7 +3484,7 @@ function _v3dResetCam(){
   const pts=ring.map?.(toLoc)||[];
   const parcelSz=Math.max(...pts.map(([x,z])=>Math.sqrt(x*x+z*z)),10);
   // Raza mai mică: 1.8x parcela (era 2.5x) — clădirile ocupă mai mult din ecran
-  V3D.rad=Math.max(parcelSz*1.8,maxH*2.0,25);
+  const newRad3=Math.max(parcelSz*1.8,maxH*2.0,25); V3D.rad=newRad3; if(typeof _radT!=='undefined') _radT=newRad3;
   if(!V3D.tx) V3D.tx = new THREE.Vector3(0, maxH*0.35, 0);
   else V3D.tx.set(0, maxH*0.35, 0);
   if(V3D.tx) V3D.tx.set(0,maxH*0.35,0);
@@ -3501,17 +3500,17 @@ function _v3dControls(canvas,cam){
     else{// Scrie in targets pentru smooth damping
         _thT=(_thT!==undefined?_thT:V3D.th)-dx;
         _phT=Math.max(0.04,Math.min(Math.PI*0.88,(_phT!==undefined?_phT:V3D.ph)+dy));
-        V3D.th=_thT; V3D.ph=_phT;
+        // NU mai scriem direct în V3D.th/ph → damping loop face tranziția
 }
-    _v3dUpdateCam();};
+    V3D._dirty=Math.max(V3D._dirty||0,3); _v3dUpdateCam();};
   window.addEventListener('mousemove',mm); window.addEventListener('mouseup',mu);
   window.addEventListener('keydown',e=>{if(e.key==='Escape')drag=false;});
   canvas.addEventListener('contextmenu',e=>{e.preventDefault();drag=false;});
   canvas.addEventListener('wheel',e=>{
     e.preventDefault();
-    // Zoom mai fluid: factor variabil (mai rapid de departe, mai precis de aproape)
     const factor = e.deltaY > 0 ? 1.06 : 0.945;
-    V3D.rad = Math.max(3, Math.min(400, V3D.rad * factor));
+    const newRad = Math.max(3, Math.min(400, (_radT||V3D.rad) * factor));
+    V3D.rad = newRad; _radT = newRad; // sync ambele → damping nu mai revine
     _v3dUpdateCam();
   },{passive:false});
   let ltd=0,ltx=0,lty=0;
@@ -3519,8 +3518,7 @@ function _v3dControls(canvas,cam){
   canvas.addEventListener('touchmove',e=>{e.preventDefault();if(e.touches.length===1&&drag){const dx=(e.touches[0].clientX-lx)*0.006,dy=(e.touches[0].clientY-ly)*0.006;// Scrie in targets pentru smooth damping
         _thT=(_thT!==undefined?_thT:V3D.th)-dx;
         _phT=Math.max(0.04,Math.min(Math.PI*0.88,(_phT!==undefined?_phT:V3D.ph)+dy));
-        V3D.th=_thT; V3D.ph=_phT;
-lx=e.touches[0].clientX;ly=e.touches[0].clientY;_v3dUpdateCam();}if(e.touches.length===2){const dx=e.touches[0].clientX-e.touches[1].clientX,dy=e.touches[0].clientY-e.touches[1].clientY;const d=Math.sqrt(dx*dx+dy*dy);V3D.rad=Math.max(3,Math.min(400,V3D.rad*(ltd/Math.max(1,d))));ltd=d;_v3dUpdateCam();}},{passive:false});
+        lx=e.touches[0].clientX;ly=e.touches[0].clientY; V3D._dirty=3; _v3dUpdateCam();}if(e.touches.length===2){const dx=e.touches[0].clientX-e.touches[1].clientX,dy=e.touches[0].clientY-e.touches[1].clientY;const d=Math.sqrt(dx*dx+dy*dy);const nr2=Math.max(3,Math.min(400,(_radT||V3D.rad)*(ltd/Math.max(1,d))));V3D.rad=nr2;_radT=nr2;ltd=d;V3D._dirty=3;_v3dUpdateCam();}},{passive:false});
   canvas.addEventListener('touchend',()=>{drag=false;});
   // 3-touch: reset camera la pozitia initiala
   canvas.addEventListener('touchstart',e=>{

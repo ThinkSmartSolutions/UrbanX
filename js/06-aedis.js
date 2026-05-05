@@ -231,28 +231,64 @@ function _applyMVPerBuildingHeights(feats, perBld, globalNiv, globalHNiv){
     };
 
     // Reconstruiește features cu heights corecte per clădire
-    const maxOrigTop = Math.max(...feats.map(f=>f.properties?.top||0));
-    const result = feats.map(f=>{
-      const bIdx = getBldIdx(f);
+    // FIX: nu mai scalăm → generăm floor-uri noi pentru fiecare clădire
+    const origNiv = globalNiv || 4;
+    const origHNiv = globalHNiv || 3.0;
+    const result = [];
+
+    clusters.forEach((cl, bIdx) => {
       const bCfg = perBld[bIdx] || {};
-      const origNiv = globalNiv || 4;
-      const origHNiv = globalHNiv || 3.0;
       const newNiv = bCfg.niv ?? origNiv;
       const newHNiv = bCfg.hNiv ?? origHNiv;
-      if(newNiv === origNiv && newHNiv === origHNiv) return f; // neschimbat
-      const scaleFactor = (newNiv * newHNiv) / (origNiv * origHNiv);
+      const origHTot = origNiv * origHNiv;
+      const newHTot  = newNiv * newHNiv;
 
-      // Scalăm bazele și topurile vertical
-      const newBase = (f.properties.base||0) * scaleFactor;
-      const newTop  = (f.properties.top||0) * scaleFactor;
+      // Features aparținând acestei clădiri
+      const bFeats = feats.filter(f => getBldIdx(f) === bIdx);
+      if(!bFeats.length) return;
 
-      // Omitem features care depășesc noul H maxim
-      if(newBase > newNiv * newHNiv + 2) return null;
+      // Dacă niv/hNiv nu s-au schimbat, păstrăm ca atare
+      if(newNiv === origNiv && newHNiv === origHNiv){
+        result.push(...bFeats); return;
+      }
 
-      return {...f, properties:{...f.properties, base:parseFloat(newBase.toFixed(3)), top:parseFloat(newTop.toFixed(3))}};
-    }).filter(Boolean);
+      // Reconstruim floor-urile: scalăm baza/top proporțional CU NOU H total
+      // Și generăm floor-uri suplimentare dacă newNiv > origNiv
+      const floorFeats = bFeats.filter(f => (f.properties?.floor??-1) >= 0);
+      const nonFloorFeats = bFeats.filter(f => (f.properties?.floor??-1) < 0);
 
-    return result;
+      // Scalăm feature-urile non-etaj (acoperiș, parapet etc.) la noul H
+      const scale = origHTot > 0 ? newHTot / origHTot : 1;
+      nonFloorFeats.forEach(f => {
+        const nb = parseFloat(((f.properties.base||0)*scale).toFixed(3));
+        const nt = parseFloat(((f.properties.top||0)*scale).toFixed(3));
+        if(nb <= newHTot + 2) result.push({...f, properties:{...f.properties, base:nb, top:nt}});
+      });
+
+      // Generăm floor-urile noi (câte newNiv bucăți)
+      const baseFloor = floorFeats.find(f=>f.properties?.floor===0) || floorFeats[0];
+      if(!baseFloor) { result.push(...bFeats); return; }
+
+      let curH = 0;
+      for(let i = 0; i < newNiv; i++){
+        const fH = i === 0 ? newHNiv : newHNiv; // parter = newHNiv
+        const topH = curH + fH;
+        // Clonăm geometria și proprietățile de la etajul corespunzător dacă există
+        const srcFloor = floorFeats.find(f=>f.properties?.floor===i) || baseFloor;
+        result.push({
+          ...srcFloor,
+          properties:{
+            ...srcFloor.properties,
+            floor: i,
+            base: parseFloat(curH.toFixed(3)),
+            top: parseFloat(topH.toFixed(3)),
+          }
+        });
+        curH = topH;
+      }
+    });
+
+    return result.length ? result : feats; // fallback
   }catch(e){
     console.warn('_applyMVPerBuildingHeights error:', e);
     return feats;
@@ -3869,51 +3905,11 @@ function _aedisToggleDimLabels(){
   // Dacă showDim e acum false → golim sursa de etichete
   // Dacă showDim e acum true → recalculăm etichetele
   try{
-    // ── Creare defensivă sursă + layer dacă nu au fost adăugate de addLayers() ──
-    if(!map.getSource('aedis-dim-src')){
-      map.addSource('aedis-dim-src',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
-    }
-    if(!map.getLayer('aedis-dim-layer')){
-      map.addLayer({
-        id:'aedis-dim-layer', type:'symbol', source:'aedis-dim-src',
-        layout:{
-          'text-field':['get','label'],
-          'text-size':12, 'text-font':['DIN Offc Pro Bold','Arial Unicode MS Bold'],
-          'text-anchor':'center', 'text-justify':'center',
-          'text-allow-overlap':true, 'text-ignore-placement':true,
-          'symbol-placement':'point'
-        },
-        paint:{
-          'text-color':'#ffffff','text-halo-color':'#0a1628','text-halo-width':1.5,
-          'text-opacity':0.95
-        }
-      });
-    }
-    if(!map.getSource('ctx-labels-src')){
-      map.addSource('ctx-labels-src',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
-    }
-    if(!map.getLayer('ctx-labels-layer')){
-      map.addLayer({
-        id:'ctx-labels-layer', type:'symbol', source:'ctx-labels-src',
-        layout:{
-          'text-field':['get','label'],
-          'text-size':10, 'text-font':['DIN Offc Pro Medium','Arial Unicode MS Regular'],
-          'text-anchor':'top', 'text-offset':[0,0.5],
-          'text-allow-overlap':false, 'text-ignore-placement':false
-        },
-        paint:{
-          'text-color':'#94a3b8','text-halo-color':'#070d1a','text-halo-width':1.2
-        }
-      });
-    }
-
     const dimSrc = map.getSource('aedis-dim-src');
     if(!dimSrc) return;
     if(!AEDIS.showDim){
       // Ascundem: golim sursa
       dimSrc.setData({type:'FeatureCollection',features:[]});
-      // Golim si etichetele contextuale
-      try{ map.getSource('ctx-labels-src')?.setData({type:'FeatureCollection',features:[]}); }catch(e2){}
     } else {
       // Afișăm: recalculăm din ultimul footprint
       const ap = S.parcels[S.activeParcel??0];
@@ -3952,12 +3948,6 @@ function aedisUpdateDimLabels(fp, niv, hP, hE, hTot){
       labels.push({type:'Feature',geometry:{type:'Point',coordinates:mid},
         properties:{label:`P:${hP.toFixed(1)}m`,type:'parter'}});
     }
-
-    // Punem etichetele AEDIS (H, niv) si in sursa dedicata aedis-dim-src
-    try{
-      const dimSrc = map.getSource('aedis-dim-src');
-      if(dimSrc) dimSrc.setData({type:'FeatureCollection',features:labels});
-    }catch(e2){}
 
     setSource('ctx-labels-src',{type:'FeatureCollection',features:[
       ...(S.ctx?._labels||[]),
@@ -4423,7 +4413,7 @@ function aedisGetContent(){
     <div class="aedis-section">Funcțiunea principală</div>
     <div class="aedis-fn-grid">
       ${Object.entries(AEDIS_FN).map(([k,v])=>`
-        <button onclick="AEDIS.fn='${k}';aedisRender();if(_v3dIsOpen())_v3dRebuildFast()" class="aedis-fn-btn${AEDIS.fn===k?' active':''}">
+        <button onclick="_aedisSetFn('${k}')" class="aedis-fn-btn${AEDIS.fn===k?' active':''}">
           <span class="aedis-fn-dot" style="background:${v.color}"></span>
           ${v.label}
         </button>`).join('')}
@@ -4456,7 +4446,7 @@ function aedisGetContent(){
       ${Object.entries(AEDIS_STIL).map(([k,v])=>{
         const swatches = v.floorColors.slice(0,5).map(c=>`<span style="display:inline-block;width:8px;height:8px;background:${c};border-radius:1px;margin:0 1px"></span>`).join('');
         return `
-        <button onclick="AEDIS.stil='${k}';aedisRender();if(_v3dIsOpen())_v3dRebuildFast()" class="aedis-stil-btn${AEDIS.stil===k?' active':''}">
+        <button onclick="_aedisSetStil('${k}')" class="aedis-stil-btn${AEDIS.stil===k?' active':''}">
           ${v.label}<br>
           <div style="margin:3px 0">${swatches}</div>
           <small style="opacity:0.7">${v.desc}</small>
@@ -4483,7 +4473,7 @@ function aedisGetContent(){
         {id:'extindere_v',ico:'🏗',label:'Ext. Vertical',desc:'Deasupra existentelor'},
         {id:'inglobare',ico:'🏙',label:'Inglobare',desc:'Înglobează existentele'},
       ].map(s=>`
-        <button onclick="(()=>{if(AEDIS._demolishActive&&'${s.id}'!=='demolare')_aedisRestoreCad3D();AEDIS.scenariu='${s.id}';aedisRender()})()" class="aedis-scen-btn${AEDIS.scenariu===s.id?' active':''}">
+        <button onclick="_aedisSetScenariu('${s.id}')" class="aedis-scen-btn${AEDIS.scenariu===s.id?' active':''}">
           ${s.ico} ${s.label}<br><small>${s.desc}</small>
         </button>`).join('')}
     </div>
@@ -4510,7 +4500,7 @@ function aedisGetContent(){
         {id:'T',ico:'⊤',label:'Corp T',desc:'Formă T'},
         {id:'curte',ico:'⬜',label:'Curte int.',desc:'Curte interioară'},
       ].map(f=>`
-        <button onclick="AEDIS.forma='${f.id}';aedisRender();if(S.vol.genDone||AEDIS3D.active)aedisGenerateAll()"
+        <button onclick="_aedisSetForma('${f.id}')"
           title="${f.desc}"
           style="padding:8px 4px;border-radius:9px;border:2px solid ${AEDIS.forma===f.id?'#d4af37':'rgba(255,255,255,.15)'};background:${AEDIS.forma===f.id?'rgba(212,175,55,.15)':'rgba(11,18,32,.8)'};color:${AEDIS.forma===f.id?'#d4af37':'#94a3b8'};cursor:pointer;font-size:18px;text-align:center;line-height:1.2;transition:all .15s">
           <div style="font-size:18px">${f.ico}</div>
@@ -4521,7 +4511,7 @@ function aedisGetContent(){
     <div class="aedis-row" style="margin-bottom:10px">
       <span class="aedis-lbl">Grosime brațe</span>
       <input type="range" min="20" max="50" step="5" value="${Math.round((AEDIS.formaRatio||0.35)*100)}"
-        oninput="AEDIS.formaRatio=+this.value/100;document.getElementById('aedis-ratio-val').textContent=this.value+'%';if(S.vol.genDone||AEDIS3D.active)aedisGenerateAll()"
+        oninput="AEDIS.formaRatio=+this.value/100;document.getElementById('aedis-ratio-val').textContent=this.value+'%';_aedisSetForma(AEDIS.forma)"
         style="flex:1;accent-color:#d4af37">
       <span class="aedis-val" id="aedis-ratio-val">${Math.round((AEDIS.formaRatio||0.35)*100)}%</span>
     </div>`:''}
@@ -4532,7 +4522,7 @@ function aedisGetContent(){
         <div class="aedis-lbl">Nr. niveluri</div>
         <div style="display:flex;gap:4px;margin-top:4px">
           ${[1,2,3,4,5,6,7,8,10,12].map(n=>`
-            <button onclick="AEDIS.corpuri[0].niv=${n};aedisRender()" 
+            <button onclick="_aedisSetNiv(${n})" 
               style="padding:5px 7px;border-radius:6px;border:1px solid ${niv===n?'#d4af37':'rgba(255,255,255,.2)'};background:${niv===n?'rgba(212,175,55,.2)':'transparent'};color:${niv===n?'#d4af37':'#94a3b8'};cursor:pointer;font-size:11px;font-weight:700">${n}</button>
           `).join('')}
         </div>
@@ -4541,7 +4531,7 @@ function aedisGetContent(){
     <div class="aedis-row" style="margin-top:10px">
       <span class="aedis-lbl">H/nivel (m)</span>
       <input type="range" min="2.6" max="5.5" step="0.1" value="${hNiv}"
-        oninput="AEDIS.corpuri[0].hNiv=+this.value;aedisRender()"
+        oninput="_aedisSetHNiv(this.value)"
         style="flex:1;accent-color:#d4af37">
       <span class="aedis-val">${hNiv.toFixed(1)}m</span>
     </div>
@@ -4581,7 +4571,7 @@ function aedisGetContent(){
         {id:'mansarda',ico:'🏡',label:'Mansardă',desc:'Etaj înscris în șarpantă'},
         {id:'combinat',ico:'🏢',label:'Combinat',desc:'Terasă + corp tehnic'},
       ].map(a=>`
-        <button onclick="AEDIS.tipAcoperis='${a.id}';aedisRender()" class="aedis-acop-btn${AEDIS.tipAcoperis===a.id?' active':''}">
+        <button onclick="_aedisSetAcoperis('${a.id}')" class="aedis-acop-btn${AEDIS.tipAcoperis===a.id?' active':''}">
           <span style="font-size:20px">${a.ico}</span>
           <strong>${a.label}</strong>
           <small>${a.desc}</small>
