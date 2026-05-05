@@ -713,7 +713,7 @@ function _v3dBuild(ap){
     // 1. Iarba/teren natural — fundal larg
     const cvGrass=document.createElement('canvas'); cvGrass.width=512; cvGrass.height=512;
     const gGrass=cvGrass.getContext('2d');
-    gGrass.fillStyle='#3d5a28'; gGrass.fillRect(0,0,512,512);
+    gGrass.fillStyle='#2a4018'; gGrass.fillRect(0,0,512,512);
     // Variatie de culoare naturala
     for(let i=0;i<8000;i++){
       const x=Math.random()*512, y=Math.random()*512;
@@ -730,7 +730,7 @@ function _v3dBuild(ap){
     // 2. Asfalt urban — zona principala (200x200 in jurul parcelei)
     const cvAsf=document.createElement('canvas'); cvAsf.width=512; cvAsf.height=512;
     const gA=cvAsf.getContext('2d');
-    gA.fillStyle='#2a2a2e'; gA.fillRect(0,0,512,512);
+    gA.fillStyle='#1e1e22'; gA.fillRect(0,0,512,512);
     // Granule asfalt
     for(let i=0;i<3000;i++){
       const x=Math.random()*512, y=Math.random()*512;
@@ -836,10 +836,14 @@ function _v3dBuild(ap){
         hotel:{roughness:0.50,metalness:0.25},
       }[fn]||{roughness:0.78,metalness:0.06};
 
+      // Material context realist cu tone calde naturale
+      const baseC=new THREE.Color(col);
+      // Adauga o tenta calda subtila (lumina difuza urbana)
+      if(!isNight2) baseC.lerp(new THREE.Color('#e8d8c8'),0.08);
       const mat=new THREE.MeshStandardMaterial({
-        color:col, ...pbrCtx,
-        emissive:isNight2?new THREE.Color(0.02,0.04,0.10):new THREE.Color(0,0,0),
-        emissiveIntensity:isNight2?0.5:0
+        color:baseC, ...pbrCtx,
+        emissive:isNight2?new THREE.Color(0.03,0.05,0.12):new THREE.Color(0,0,0),
+        emissiveIntensity:isNight2?0.6:0
       });
       const mesh=_v3dPrism(THREE,pts,0,h,mat);
       if(mesh){
@@ -3477,15 +3481,16 @@ function _v3dResetCam(){
   if(_LOT?._sceneCenter){
     cx2=_LOT._sceneCenter[0]; cy2=_LOT._sceneCenter[1];
   } else {
-    const ring=ap?.geo?.geometry?.type==='Polygon'?ap.geo.geometry.coordinates[0]:ap?.geo?.geometry?.coordinates?.[0]?.[0]||[];
-    cx2=ring.reduce?.((s,c)=>s+c[0],0)/(ring.length||1)||0;
-    cy2=ring.reduce?.((s,c)=>s+c[1],0)/(ring.length||1)||0;
+    const ring2=ap?.geo?.geometry?.type==='Polygon'?ap.geo.geometry.coordinates[0]:ap?.geo?.geometry?.coordinates?.[0]?.[0]||[];
+    cx2=ring2.reduce?.((s,c)=>s+c[0],0)/(ring2.length||1)||0;
+    cy2=ring2.reduce?.((s,c)=>s+c[1],0)/(ring2.length||1)||0;
+    V3D._resetRing=ring2; // salvat pt calcul parcelSz
   }
   const mLat=111320;
   const mLng=111320*Math.cos(cy2*Math.PI/180);
   const toLoc=([lng,lat])=>[(lng-cx2)*mLng,-(lat-cy2)*mLat];
-  const toWorld=([lng,lat])=>[(lng-cx2)*mLng,(lat-cy2)*mLat];
-  const pts=ring.map?.(toLoc)||[];
+  const _rring=V3D._resetRing||[];
+  const pts=_rring.map?.(toLoc)||[];
   const parcelSz=Math.max(...pts.map(([x,z])=>Math.sqrt(x*x+z*z)),10);
   // Raza mai mică: 1.8x parcela (era 2.5x) — clădirile ocupă mai mult din ecran
   const newRad3=Math.max(parcelSz*1.8,maxH*2.0,25); V3D.rad=newRad3; if(typeof _radT!=='undefined') _radT=newRad3;
