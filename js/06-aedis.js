@@ -3869,11 +3869,51 @@ function _aedisToggleDimLabels(){
   // Dacă showDim e acum false → golim sursa de etichete
   // Dacă showDim e acum true → recalculăm etichetele
   try{
+    // ── Creare defensivă sursă + layer dacă nu au fost adăugate de addLayers() ──
+    if(!map.getSource('aedis-dim-src')){
+      map.addSource('aedis-dim-src',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
+    }
+    if(!map.getLayer('aedis-dim-layer')){
+      map.addLayer({
+        id:'aedis-dim-layer', type:'symbol', source:'aedis-dim-src',
+        layout:{
+          'text-field':['get','label'],
+          'text-size':12, 'text-font':['DIN Offc Pro Bold','Arial Unicode MS Bold'],
+          'text-anchor':'center', 'text-justify':'center',
+          'text-allow-overlap':true, 'text-ignore-placement':true,
+          'symbol-placement':'point'
+        },
+        paint:{
+          'text-color':'#ffffff','text-halo-color':'#0a1628','text-halo-width':1.5,
+          'text-opacity':0.95
+        }
+      });
+    }
+    if(!map.getSource('ctx-labels-src')){
+      map.addSource('ctx-labels-src',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
+    }
+    if(!map.getLayer('ctx-labels-layer')){
+      map.addLayer({
+        id:'ctx-labels-layer', type:'symbol', source:'ctx-labels-src',
+        layout:{
+          'text-field':['get','label'],
+          'text-size':10, 'text-font':['DIN Offc Pro Medium','Arial Unicode MS Regular'],
+          'text-anchor':'top', 'text-offset':[0,0.5],
+          'text-allow-overlap':false, 'text-ignore-placement':false
+        },
+        paint:{
+          'text-color':'#94a3b8','text-halo-color':'#070d1a','text-halo-width':1.2
+        }
+      });
+    }
+
     const dimSrc = map.getSource('aedis-dim-src');
     if(!dimSrc) return;
     if(!AEDIS.showDim){
       // Ascundem: golim sursa
       dimSrc.setData({type:'FeatureCollection',features:[]});
+      // Golim si etichetele contextuale
+      try{ map.getSource('ctx-labels-src')?.setData({type:'FeatureCollection',features:[]}); }catch(e2){}
     } else {
       // Afișăm: recalculăm din ultimul footprint
       const ap = S.parcels[S.activeParcel??0];
@@ -3912,6 +3952,12 @@ function aedisUpdateDimLabels(fp, niv, hP, hE, hTot){
       labels.push({type:'Feature',geometry:{type:'Point',coordinates:mid},
         properties:{label:`P:${hP.toFixed(1)}m`,type:'parter'}});
     }
+
+    // Punem etichetele AEDIS (H, niv) si in sursa dedicata aedis-dim-src
+    try{
+      const dimSrc = map.getSource('aedis-dim-src');
+      if(dimSrc) dimSrc.setData({type:'FeatureCollection',features:labels});
+    }catch(e2){}
 
     setSource('ctx-labels-src',{type:'FeatureCollection',features:[
       ...(S.ctx?._labels||[]),
