@@ -642,7 +642,7 @@ function _v3dBuild(ap){
   const W=canvas.offsetWidth, H=canvas.offsetHeight;
 
   // Renderer
-  const r = new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:'high-performance'});
+  const r = new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:'high-performance',logarithmicDepthBuffer:true});
   r.setSize(W,H);
   r.setPixelRatio(Math.min(devicePixelRatio,1.5));
   r.shadowMap.enabled=true;
@@ -662,12 +662,13 @@ function _v3dBuild(ap){
     skyCanvas.width=2; skyCanvas.height=512;
     const skyCtx=skyCanvas.getContext('2d');
     const grad=skyCtx.createLinearGradient(0,0,0,512);
-    // Zi: gradient natural cer
-    grad.addColorStop(0,'#1a6db5');   // cer profund sus
-    grad.addColorStop(0.4,'#5ba3d4'); // cer mediu
-    grad.addColorStop(0.75,'#a8cfea'); // orizont superior
-    grad.addColorStop(0.9,'#ddeef7'); // orizont aproape
-    grad.addColorStop(1,'#e8f4fa');   // orizont jos
+    // Zi: gradient natural cer — mai albastru profund sus, orizont cald
+    grad.addColorStop(0,'#0f5a98');   // cer profund sus
+    grad.addColorStop(0.35,'#4090c0'); // cer mediu
+    grad.addColorStop(0.65,'#82bcd8'); // orizont superior
+    grad.addColorStop(0.85,'#c4dff0'); // orizont aproape
+    grad.addColorStop(0.95,'#ddf0f8'); // orizont
+    grad.addColorStop(1,'#eaf5fb');   // orizont jos
     skyCtx.fillStyle=grad;
     skyCtx.fillRect(0,0,2,512);
     const skyTex=new THREE.CanvasTexture(skyCanvas);
@@ -2913,8 +2914,12 @@ function _v3dMatRoof(THREE, stil, cache){
 function _v3dAddEdges(THREE, mesh, scene, color='#ffffff', opacity=0.3){
   try{
     const edges = new THREE.EdgesGeometry(mesh.geometry, 15);
-    const line = new THREE.LineSegments(edges,
-      new THREE.LineBasicMaterial({color, transparent:true, opacity}));
+    const mat = new THREE.LineBasicMaterial({color, transparent:true, opacity});
+    // polygonOffset elimina Z-fighting intre conturul de muchii si suprafata mesh-ului
+    mat.polygonOffset = true;
+    mat.polygonOffsetFactor = -1;
+    mat.polygonOffsetUnits = -1;
+    const line = new THREE.LineSegments(edges, mat);
     line.position.copy(mesh.position);
     line.rotation.copy(mesh.rotation);
     scene.add(line);
@@ -3050,6 +3055,13 @@ function _v3dAddWindows(THREE, pts2d, base, top, scene, stilKey, opts){
   });
 
   const mkMesh=(geo,mat,x,y,z,ry=0)=>{
+    // polygonOffset pe TOATE elementele de fațadă (ferestre, rame, spandrel)
+    // elimina Z-fighting cu suprafata peretelui de dedesubt
+    if(mat && !mat.polygonOffset){
+      mat.polygonOffset=true;
+      mat.polygonOffsetFactor=-2;
+      mat.polygonOffsetUnits=-2;
+    }
     const m=new THREE.Mesh(geo,mat); m.castShadow=true; m.receiveShadow=true;
     m.position.set(x,y,z); if(ry) m.rotation.y=ry; scene.add(m); return m;
   };
@@ -3226,12 +3238,12 @@ function _v3dApplyLight(preset,THREE,scene,r){
   const P={
     day:{
       sky:'#b8d4f0',fog:'#c0d8f2',
-      amb:{c:'#c8e0ff',i:1.2},
-      gnd:{c:'#887040',i:0.7},
-      sun:{c:'#fff4d0',i:6.0,p:[120,160,90]},   // soare mai puternic + mai sus
-      fill:{c:'#6090d0',i:1.2,p:[-90,50,-70]},
-      rim:{c:'#ffd080',i:1.4,p:[-10,25,-120]},    // rim light cald
-      exp:1.9,night:false,fog:false
+      amb:{c:'#e8eedc',i:0.85},                  // ambiant cald-natural, nu albastru rece
+      gnd:{c:'#b09060',i:0.55},                   // reflexie sol mai calda
+      sun:{c:'#fff5d8',i:4.8,p:[120,160,90]},    // soare la ora 10-11: cald, nu alb rece
+      fill:{c:'#5888cc',i:0.70,p:[-90,50,-70]},  // fill albastru-cer mai subtil
+      rim:{c:'#ffe8a8',i:2.2,p:[-10,25,-120]},   // rim cald puternic = contur clădirii
+      exp:1.75,night:false,fog:false
     },
     golden:{
       sky:'#e8903a',fog:'#d07820',
@@ -3244,12 +3256,12 @@ function _v3dApplyLight(preset,THREE,scene,r){
     },
     overcast:{
       sky:'#8898a8',fog:'#9aabba',
-      amb:{c:'#b0bcc8',i:2.0},    // ambient mai puternic (cer difuz)
-      gnd:{c:'#586068',i:0.5},
-      sun:{c:'#b8c8d8',i:0.8,p:[30,150,30]}, // "soare" complet difuz
-      fill:{c:'#88a0b0',i:1.4,p:[-50,70,-50]},
-      rim:{c:'#c0ccD4',i:0.6,p:[0,50,-100]},
-      exp:1.25,night:false,fog:true
+      amb:{c:'#ccd6de',i:1.45},                   // difuz uniform — nu wash-out (era 2.0)
+      gnd:{c:'#5a6870',i:0.40},                   // sol rece, reflectie joasa
+      sun:{c:'#c8d8e4',i:1.4,p:[30,150,30]},     // "soare" difuz din înalt, mai prezent
+      fill:{c:'#98b0bc',i:0.80,p:[-50,70,-50]},  // fill simetric, cerul noros iluminează egal
+      rim:{c:'#d0dce6',i:0.50,p:[0,50,-100]},    // rim subtil pentru contur fațade
+      exp:1.12,night:false,fog:true
     },
     night:{
       sky:'#02040c',fog:'#03060f',
@@ -3268,9 +3280,9 @@ function _v3dApplyLight(preset,THREE,scene,r){
     const skyCtx=scene._skyCtx, skyCanvas=scene._skyCanvas;
     const grad2=skyCtx.createLinearGradient(0,0,0,512);
     const skies={
-      day:[['#1565a8',0],['#4a90c4',0.35],['#90bfdc',0.7],['#cce4f4',0.88],['#e0eff8',1]],
+      day:[['#1060a0',0],['#3d88c0',0.3],['#78b4d8',0.62],['#b8d8ec',0.82],['#ddeef8',0.94],['#edf5fb',1]],
       golden:[['#1a1640',0],['#a03000',0.3],['#e86010',0.55],['#f09030',0.75],['#f8c060',1]],
-      overcast:[['#556070',0],['#7a8a94',0.4],['#a0b0b8',0.75],['#c0d0d8',1]],
+      overcast:[['#4e6070',0],['#728590',0.25],['#96a8b2',0.55],['#bccad0',0.78],['#d8e4e8',0.92],['#eaeff2',1]],
       night:[['#000005',0],['#010414',0.3],['#020820',0.65],['#050e28',1]],
     };
     const stops=skies[preset]||skies.day;
@@ -3299,6 +3311,8 @@ function _v3dApplyLight(preset,THREE,scene,r){
   sun.shadow.normalBias=0.04;
   scene.add(sun);
   const fill=new THREE.DirectionalLight(p.fill.c,p.fill.i); fill.position.set(...p.fill.p); scene.add(fill);
+  // Rim light — contur lateral spectaculos (era definit dar NICIODATĂ adăugat în scenă)
+  if(p.rim){ const rim=new THREE.DirectionalLight(p.rim.c,p.rim.i); rim.position.set(...p.rim.p); scene.add(rim); }
   if(r) r.toneMappingExposure=p.exp;
   window._v3dNight = !!p.night;  // Setăm flag pentru materiale
 
