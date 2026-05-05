@@ -1342,6 +1342,17 @@ function _v3dAddZones(THREE, scene, toLoc, ap){
     // Parcela: nu mai desenăm conturul în viewer — încurcă vizualizarea
     // Forma parcelei e vizibilă din retrageri + edificabil
 
+    // ── 1b. Drumuri din lotizare-drum-src — asfalt DEASUPRA spatiilor verzi ──
+  try{
+    const drumFeats=(map.getSource('lotizare-drum-src')?._data?.features)||[];
+    drumFeats.forEach(df=>{
+      if(!df.geometry) return;
+      const dring=df.geometry.type==='Polygon'?df.geometry.coordinates[0]:df.geometry.coordinates[0]?.[0];
+      if(!dring||dring.length<4) return;
+      _flatPoly(dring, 0.08, _matAsfalt()); // asfalt la y=0.08 acoperă verdeata
+    });
+  }catch(e){}
+
     // ── 2. EDIFICABIL — contur violet fără fill ───────────────────────────
     try{
       const edFeats = map.getSource('edificabil-src')?._data?.features||[];
@@ -1659,31 +1670,21 @@ function _v3dAddLotizareGeometry(THREE, scene, toLoc){
       _flatPoly(ring, 0.04, matLot);
       _outline(ring, 0.06, borderColor, .5);
 
-      // b) Spațiu verde estimat — NUMAI pentru tipuri rezidentiale
+      // b) Spațiu verde — NUMAI interior lot (nu pe margini/drumuri)
+      // Folosim scalare 0.85 spre centru = verde strict INTERIOR, nu pe borduri
       const svPct = SPECIAL_TIPS.has(tip) ? 0 : (SV_PCT[tip]||0);
-      if(svPct>0.05){
-        // Scalăm ring-ul spre centru: suprafața pătrată crește cu scaleFactor²
-        // verde_pct = 1 - scaleFactor² => scaleFactor = sqrt(1-sv%)
-        const scaleV=Math.sqrt(1-svPct);
-        const verdeRing=_innerRing(ring, 1.0);
-        const lotIntRing=_innerRing(ring, scaleV);
-        if(verdeRing&&lotIntRing){
-          // Verde = ring extern - ring intern (fascia de jur-împrejur)
-          // Simplu: desenăm un poligon verde de grosimea diferenței
-          // Abordare: flat poly interior verde + flat poly lot peste el
-          _flatPoly(ring, 0.05, matVerde);
-          const matLotOver=new THREE.MeshStandardMaterial({
-            color,roughness:.9,metalness:0,transparent:true,opacity:.35,side:THREE.DoubleSide
-          });
-          const innerPts=lotIntRing.slice(0,-1).map(toLoc);
-          if(innerPts.length>=3){
-            const sh2=new THREE.Shape(); sh2.moveTo(innerPts[0][0],innerPts[0][1]);
-            innerPts.slice(1).forEach(([x,z])=>sh2.lineTo(x,z)); sh2.closePath();
-            const m2=new THREE.Mesh(new THREE.ShapeGeometry(sh2),matLotOver);
-            m2.rotation.x=-Math.PI/2; m2.position.y=0.055; m2.receiveShadow=true;
-            scene.add(m2);
-          }
-          _outline(ring, 0.07, '#16a34a', .3); // bordura verde
+      if(svPct > 0.05){
+        // Verde = inner ring la 85% din lot (nu toata suprafata)
+        const scaleV = Math.sqrt(1-svPct) * 0.9; // mai strâns = nu iese pe drumuri
+        const verdePts = _innerRing(ring, scaleV)?.slice(0,-1).map(toLoc);
+        if(verdePts && verdePts.length >= 3){
+          const shV = new THREE.Shape();
+          shV.moveTo(verdePts[0][0], verdePts[0][1]);
+          verdePts.slice(1).forEach(([x,z])=>shV.lineTo(x,z));
+          shV.closePath();
+          const mVerde = new THREE.Mesh(new THREE.ShapeGeometry(shV), matVerde);
+          mVerde.rotation.x=-Math.PI/2; mVerde.position.y=0.04; mVerde.receiveShadow=true;
+          scene.add(mVerde);
         }
       }
 

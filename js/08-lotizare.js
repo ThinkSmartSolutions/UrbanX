@@ -248,7 +248,7 @@ function _showLotizarePanel(){
 
 
 // ─── Legenda culori lotizare ──────────────────────────────────────────────
-function _lotToggleLegend(){
+window._lotToggleLegend = function _lotToggleLegend(){
   const existing = document.getElementById('lot-legend');
   if(existing){ existing.remove(); return; }
 
@@ -961,7 +961,7 @@ function _lotBuild3D(loturi, drumuri){
 }
 
 // ─── Render 3D specializat per tip dotare / cult ─────────────────────────
-function _lotRenderSpecial(THREE, scene, geom, tipKey, toLoc){
+window._lotRenderSpecial = function _lotRenderSpecial(THREE, scene, geom, tipKey, toLoc){
   if(!THREE||!scene||!geom||!toLoc) return;
   try{
     const ring = geom.type==='Polygon' ? geom.coordinates[0] : geom.coordinates[0][0];
@@ -1096,7 +1096,7 @@ function _lotRenderSpecial(THREE, scene, geom, tipKey, toLoc){
       ch2.position.set(cx+bs*0.3,11.4,cz-bs*0.38); scene.add(ch2);
     }
   }catch(e){ console.warn('_lotRenderSpecial',tipKey,e.message); }
-}
+};
 
 function _lotHtmlTipuri(){
   const _mob = window.innerWidth < 841;
