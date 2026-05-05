@@ -2200,6 +2200,7 @@ function _v3dAddUrbanLife(THREE, scene, ring0, toLoc, isNight){
       roughness:0.1,metalness:0.2,emissive:new THREE.Color(isNight?0.9:0.1,isNight?0.8:0.08,isNight?0.1:0),
       emissiveIntensity:isNight?3.0:0.2});
     for(let i=0;i<3;i++){ // 3 felinare (era 5) — mai puține PointLight-uri noaptea
+      const [fx,fz]=safePt(lw*0.5+2.5,lw*0.5+9);
       const fGrp=new THREE.Group();
       // Stâlp
       const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.07,4.5,8),poleMatL);

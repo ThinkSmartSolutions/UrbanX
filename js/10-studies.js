@@ -4852,7 +4852,7 @@ async function generateStudiuFezabilitate(paramOverrides){
   const irrPct=(irrMid*100).toFixed(1);
   const rbc=Math.round(cfs.slice(1).reduce((s,v,t)=>s+v/Math.pow(1.05,t+1),0)/costTotal*100)/100;
   cy=subsec('17.1. VALOAREA ACTUALIZATA NETA (VAN/NPV) LA DIFERITE RATE DE ACTUALIZARE',cy);
-  cy=tblRow(['Rata actualizare','VAN calculat (EUR)','Interpretare','Decizie'],cy,true,[35,52,75,20]);\
+  cy=tblRow(['Rata actualizare','VAN calculat (EUR)','Interpretare','Decizie'],cy,true,[35,52,75,20]);
   [[' 5% (CE, proiecte EU)',''+npv5.toLocaleString('en-US')+' EUR',npv5>0?'VAN POZITIV — proiect fezabil economic':'VAN NEGATIV — necesita subventie',npv5>0?'OK':'ATN'],
    [' 8% (privat, risc mediu)',''+npv8.toLocaleString('en-US')+' EUR',npv8>0?'VAN POZITIV — randament superior cost capital':'VAN NEGATIV la această rată',npv8>0?'OK':'ATN'],
    ['10% (privat, risc ridicat)',''+npv10.toLocaleString('en-US')+' EUR',npv10>0?'Proiect robust la rată ridicată':'Sub pragul de rentabilitate la 10%',npv10>0?'OK':'Risc'],
@@ -4866,14 +4866,14 @@ async function generateStudiuFezabilitate(paramOverrides){
   kv('Payback',Math.ceil(costTotal/venitAn)+' ani',14+(kpiW+3)*3,cy,kpiW,GOLD);
   cy+=25;
   cy=subsec('17.2. ANALIZA DE SENZITIVITATE — IMPACT VARIATIE CHIRII ±20%',cy);
-  cy=tblRow(['Scenariu chirie','Chirie ref. (EUR/mp/lun)','VAN la 5%','RIR','Concluzie'],cy,true,[40,42,48,22,30]);\
+  cy=tblRow(['Scenariu chirie','Chirie ref. (EUR/mp/lun)','VAN la 5%','RIR','Concluzie'],cy,true,[40,42,48,22,30]);
   [['Pesimist (-20%)',(_chirieRef*0.8).toFixed(0)+' EUR/mp/lun',''+calcNPV(0.05,[-costTotal,...Array.from({length:20},(_,t)=>{const v=Math.round(sdTotal*_rataOcup*_chirieRef*0.8*12*Math.pow(1.03,t));return v-Math.round(v*0.25);})]).toLocaleString('en-US')+' EUR',(irrMid*0.7*100).toFixed(1)+'%','Viabil cu rezerva'],
    ['Realist (baza)',_chirieRef+' EUR/mp/lun',''+npv5.toLocaleString('en-US')+' EUR',irrPct+'%','Recomandat'],
-   ['Optimist (+20%)',(_chirieRef*1.2).toFixed(0)+' EUR/mp/lun',''+calcNPV(0.05,[-costTotal,...Array.from({length:20},(_,t)=>{const v=Math.round(sdTotal*_rataOcup*_chirieRef*1.2*12*Math.pow(1.03,t));return v-Math.round(v*0.25);});]).toLocaleString('en-US')+' EUR',(irrMid*1.25*100).toFixed(1)+'%','Performanță ridicată'],
+   ['Optimist (+20%)',(_chirieRef*1.2).toFixed(0)+' EUR/mp/lun',''+calcNPV(0.05,[-costTotal,...Array.from({length:20},(_,t)=>{const v=Math.round(sdTotal*_rataOcup*_chirieRef*1.2*12*Math.pow(1.03,t));return v-Math.round(v*0.25);})]).toLocaleString('en-US')+' EUR',(irrMid*1.25*100).toFixed(1)+'%','Performanță ridicată'],
   ].forEach(r=>cy=tblRow(r,cy,false,[40,42,48,22,30]));
   cy+=4;
   cy=subsec('17.3. INDICATORI KPI DE MONITORIZARE POST-INVESTITIE',cy);
-  cy=tblRow(['KPI','Valoare țintă','Frecvență măsurare','Responsabil'],cy,true,[55,45,45,37]);\
+  cy=tblRow(['KPI','Valoare țintă','Frecvență măsurare','Responsabil'],cy,true,[55,45,45,37]);
   [['Rata de ocupare (Occupancy Rate)','Min. '+Math.round(_rataOcup*100)+'% anual (baza: '+Math.round(_rataOcup*100)+'%)','Lunar / trimestrial','Administrator imobil'],
    ['Chirie medie realizată (EUR/mp/lun)','Min. '+_chirieRef+' EUR/mp/lun (preț 2024-2025)','Lunar','Administrator'],
    ['Venit anual brut (EUR)','Min. '+Math.round(venitAn*0.9).toLocaleString('en-US')+' EUR (90% din estimat)','Trimestrial / anual','Investitor + contabil'],
@@ -4889,7 +4889,7 @@ async function generateStudiuFezabilitate(paramOverrides){
   cy=33;
   cy=sec('18. CHECKLIST COMPLET DOCUMENTE PENTRU SF APROBAT — HG 907/2016',cy);cy+=2;
   cy=body('Lista de mai jos sintetizează TOATE documentele obligatorii pentru aprobarea Studiului de Fezabilitate conform HG 907/2016 și Legii 98/2016 (achiziții publice). Fiecare document trebuie obținut în ordinea indicată. Bifarea completă conduce la dosarul aprobabil de autoritatea contractantă și finanțator.',14,cy);cy+=3;
-  cy=tblRow(['Nr.','Document obligatoriu','Emitent / Elaborator','Status / Obs.'],cy,true,[8,100,52,22]);\
+  cy=tblRow(['Nr.','Document obligatoriu','Emitent / Elaborator','Status / Obs.'],cy,true,[8,100,52,22]);
   [['1','Certificat de Urbanism (CU) — valabilitate 12-24 luni','Primăria '+uat,'PRIMUL PAS'],
    ['2','Extras CF actualizat — nr. cadastral '+nrcad,'OCPI '+judet,'La achiziție teren'],
    ['3','Plan de situație vizat de OCPI — sc. 1:500 sau 1:1000','Topograf autorizat ANCPI','Conf. CU'],
@@ -4908,7 +4908,7 @@ async function generateStudiuFezabilitate(paramOverrides){
   ].forEach(r=>cy=tblRow(r,cy,false,[8,100,52,22]));
   cy+=4;
   cy=sec('18.1. CONFORMITATE CU DOCUMENTE STRATEGICE LOCALE SI EUROPENE',cy);cy+=2;
-  cy=tblRow(['Document strategic','Prevedere relevantă','Conformitate amplasament'],cy,true,[70,80,32]);\
+  cy=tblRow(['Document strategic','Prevedere relevantă','Conformitate amplasament'],cy,true,[70,80,32]);
   [['PUG '+uat+' în vigoare (HCL local)','UTR '+utr+' — funcțiuni admise: '+fnLabel,'CONFORM — verificat'],
    ['PMUD '+uat+' — Plan Mobilitate Urbana Durabila','Reducere trafic auto, parcare subterană, EV','Conformitate parțială — EV recomandat'],
    ['PAED '+uat+' — Plan Acțiune Energie Durabilă','Reducere CO₂ 40% până 2030 — clădiri NZEB','Certificare energetică obligatorie'],
