@@ -586,9 +586,9 @@ function _v3dBuild(ap){
   const W=canvas.offsetWidth, H=canvas.offsetHeight;
 
   // Renderer
-  const r = new THREE.WebGLRenderer({canvas,antialias:true,alpha:false});
-  r.setSize(W,H); r.setPixelRatio(Math.min(devicePixelRatio,2));
-  r.shadowMap.enabled=true; r.shadowMap.type=THREE.PCFSoftShadowMap;
+  const r = new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:'high-performance'});
+  r.setSize(W,H); r.setPixelRatio(Math.min(devicePixelRatio,1.5)); // 1.5 max — Retina ok, fără suprasarcină GPU
+  r.shadowMap.enabled=true; r.shadowMap.type=THREE.PCFShadowMap; // PCFSoft→PCF: ~30% mai rapid, vizual aproape identic
   r.toneMapping=THREE.ACESFilmicToneMapping; r.toneMappingExposure=1.65;
   V3D.r=r;
 
@@ -842,9 +842,19 @@ function _v3dBuild(ap){
   });
   obs.observe(canvas); V3D._obs=obs;
 
-  // Render loop
-  const render=()=>{ V3D.af=requestAnimationFrame(render); if(V3D.r&&V3D.scene&&V3D.cam) V3D.r.render(V3D.scene,V3D.cam); };
-  render();
+  // Render loop cu dirty flag — evită 60fps continuu când camera e statică
+  // _dirtyFrames: număr de frame-uri care mai trebuie randate după ultima interacțiune
+  V3D._dirty = 4;
+  const render=()=>{
+    V3D.af=requestAnimationFrame(render);
+    if(!V3D.r||!V3D.scene||!V3D.cam) return;
+    if(V3D._dirty > 0){ V3D.r.render(V3D.scene,V3D.cam); V3D._dirty--; }
+  };
+  // Marchează dirty la orice interacțiune cu canvas (orbit, zoom, drag)
+  const _markDirty=()=>{ V3D._dirty=4; };
+  canvas.addEventListener('pointerdown',_markDirty,{passive:true});
+  canvas.addEventListener('wheel',_markDirty,{passive:true});
+  canvas.addEventListener('touchstart',_markDirty,{passive:true});
 
   _v3dStatus(`✅ ${V3D.aedis.length} volume AEDIS · ${V3D.ctx.length} clădiri context · Drag=rotire Scroll=zoom`);
 }
@@ -2189,8 +2199,7 @@ function _v3dAddUrbanLife(THREE, scene, ring0, toLoc, isNight){
     const bulbMat=new THREE.MeshStandardMaterial({color:new THREE.Color(isNight?'#ffee80':'#e0d8c0'),
       roughness:0.1,metalness:0.2,emissive:new THREE.Color(isNight?0.9:0.1,isNight?0.8:0.08,isNight?0.1:0),
       emissiveIntensity:isNight?3.0:0.2});
-    for(let i=0;i<5;i++){
-      const [fx,fz]=safePt(lw*0.5+2.5,lw*0.5+9);
+    for(let i=0;i<3;i++){ // 3 felinare (era 5) — mai puține PointLight-uri noaptea
       const fGrp=new THREE.Group();
       // Stâlp
       const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.07,4.5,8),poleMatL);
@@ -2238,13 +2247,13 @@ function _v3dAddUrbanLife(THREE, scene, ring0, toLoc, isNight){
       scene.add(treeGrp);
     }
 
-    // ── Lumini interioare clădire noaptea ─────────────────────────────────
+    // ── Lumini interioare clădire noaptea — max 4 (era max 8) ─────────────
     if(isNight){
       const bxC=(minX+maxX)/2, bzC=(minZ+maxZ)/2;
-      const nFlN=Math.min(8,Math.round((maxX-minX)/3));
+      const nFlN=Math.min(4,Math.round((maxX-minX)/3));
       for(let fl=0;fl<nFlN;fl++){
         const hy=(fl+0.5)*3.0;
-        const wl=new THREE.PointLight('#ffe4a0',0.35,9,1.5);
+        const wl=new THREE.PointLight('#ffe4a0',0.55,14,1.4); // intensitate mai mare compensează numărul mai mic
         wl.position.set(bxC+(Math.random()-0.5)*4,hy,bzC+(Math.random()-0.5)*4);
         scene.add(wl);
       }
@@ -2685,8 +2694,8 @@ function _v3dAddWindows(THREE, pts2d, base, top, scene, stilKey){
             gMat = rnd<0.55 ? glassWarmMat : (rnd<0.80 ? glassMat : glassDarkMat);
           }
           mkMesh(new THREE.BoxGeometry(gW,gH,0.025),gMat,gx,gy,gz,ang);
-          // Punct de lumina interior noaptea (1 din 3 geamuri)
-          if(isNight2 && rnd<0.4){
+          // Punct de lumina interior noaptea (1 din 7 geamuri — era 1 din 3)
+          if(isNight2 && rnd<0.15){
             const pl=new THREE.PointLight(rnd<0.2?'#ffe8a0':'#fff0d0',0.25,5);
             pl.position.set(gx-nx*0.5,gy,gz-nz*0.5); scene.add(pl);
           }
@@ -2759,8 +2768,8 @@ function _v3dAddWindows(THREE, pts2d, base, top, scene, stilKey){
             x0+ux*(u+C.wW/2+panW2/2+0.09)+nx*C.reveal*0.5,wCy,
             z0+uz*(u+C.wW/2+panW2/2+0.09)+nz*C.reveal*0.5,ang);
         }
-        // Lumina interioara noaptea
-        if(isNight2 && rnd2<0.4){
+        // Lumina interioara noaptea (1 din 7 ferestre — era 1 din 3)
+        if(isNight2 && rnd2<0.15){
           const pl=new THREE.PointLight('#ffe8b0',0.20,4);
           pl.position.set(wx-nx*0.4,wCy,wz-nz*0.4); scene.add(pl);
         }
@@ -2843,8 +2852,11 @@ function _v3dApplyLight(preset,THREE,scene,r){
   }
   const amb=new THREE.AmbientLight(p.amb.c,p.amb.i); scene.add(amb);
   const sun=new THREE.DirectionalLight(p.sun.c,p.sun.i);
-  sun.position.set(...p.sun.p); sun.castShadow=true;
-  sun.shadow.mapSize.width=sun.shadow.mapSize.height=2048;
+  sun.position.set(...p.sun.p);
+  // Noapte: soarele nu e vizibil — dezactivăm shadow map complet (luna nu aruncă umbre)
+  // Zi/golden: umbra la 1024 în loc de 2048 — vizual identic de la distanță
+  sun.castShadow = !p.night;
+  sun.shadow.mapSize.width=sun.shadow.mapSize.height = p.night ? 512 : 1024;
   sun.shadow.camera.near=0.5; sun.shadow.camera.far=500;
   [-120,120,-120,120].forEach((v,i)=>{ if(i<2) sun.shadow.camera['left right'.split(' ')[i]]=v; else sun.shadow.camera['top bottom'.split(' ')[i-2]]=v; });
   sun.shadow.bias=-0.001; scene.add(sun);
@@ -2856,31 +2868,31 @@ function _v3dApplyLight(preset,THREE,scene,r){
   // IMPORTANT: folosim 'scene' (param), nu V3D.scene — funcționează și în capture silent
   const _nightScene = scene; // scene poate fi scena capture sau V3D.scene
   if(p.night && _nightScene){
-    // ── Lumini de stradă — sodium portocaliu (stâlpi pe perimetru) ──────
+    // ── Lumini de stradă — 6 în loc de 12: aceeași atmosferă, jumătate din cost GPU ──
     const streetPos=[
       [-40,9,-2],[40,9,-2],[0,9,-42],[0,9,42],
-      [-40,9,-42],[40,9,42],[-40,9,42],[40,9,-42],
-      [-20,8,20],[-20,8,-20],[20,8,20],[20,8,-20]
+      [-28,8,28],[28,8,-28]
     ];
     streetPos.forEach(([x,y,z])=>{
-      const pl=new THREE.PointLight('#ff9020',1.8,55,1.8);
+      const pl=new THREE.PointLight('#ff9020',2.2,65,1.6); // intensitate ușor mai mare compensează numărul mai mic
       pl.position.set(x,y,z);
       _nightScene.add(pl);
     });
 
-    // ── Lumini calde ferestre AEDIS — distribuite pe înălțimea clădirii ─
+    // ── Lumini ferestre AEDIS — 2 per etaj (din 5), pas 6.4m (din 3.2m) ─
+    // Vizual: același efect de „ferestre aprinse", GPU cost ~75% mai mic
     const maxH=Math.max(...(S.vol._lastFeats||[]).map(f=>f.properties?.top||0),8);
-    for(let yy=3; yy<maxH; yy+=3.2){
-      [[-2,yy,2],[2,yy,-2],[0,yy,0],[-3,yy,-3],[3,yy,3]].forEach(([x,y,z])=>{
-        const il=new THREE.PointLight('#ffcc60', 0.7+Math.random()*0.5, 22, 1.5);
+    for(let yy=3; yy<maxH; yy+=6.4){
+      [[-2.5,yy,2.5],[2.5,yy,-2.5]].forEach(([x,y,z])=>{
+        const il=new THREE.PointLight('#ffcc60', 1.1+Math.random()*0.6, 28, 1.4);
         il.position.set(x,y,z);
         _nightScene.add(il);
       });
     }
 
-    // ── Lumini vitrine parter — alb-cald mai intens ───────────────────
-    [[-5,1.5,5],[5,1.5,-5],[-5,1.5,-5],[5,1.5,5],[0,1.5,7],[0,1.5,-7]].forEach(([x,y,z])=>{
-      const vl=new THREE.PointLight('#fff0c0',2.5,20,1.8);
+    // ── Lumini vitrine parter — 3 în loc de 6 (alternate) ───────────────
+    [[-5,1.5,5],[5,1.5,-5],[0,1.5,7]].forEach(([x,y,z])=>{
+      const vl=new THREE.PointLight('#fff0c0',3.0,24,1.6);
       vl.position.set(x,y,z);
       _nightScene.add(vl);
     });
@@ -2932,6 +2944,7 @@ function _v3dApplyLight(preset,THREE,scene,r){
 function _v3dLight(preset){
   if(!V3D.scene||!window.THREE) return;
   _v3dApplyLight(preset,window.THREE,V3D.scene,V3D.r);
+  if(V3D._dirty!==undefined) V3D._dirty=6; // mai multe frame-uri pentru tranziția de materiale
   // Rebuildem materialele cu texturi de noapte/zi
   if(V3D.texCache){ Object.values(V3D.texCache).forEach(t=>t.dispose()); V3D.texCache={}; }
   // Actualizăm emissive pe meshurile AEDIS
@@ -2949,6 +2962,7 @@ function _v3dCtxViz(mode){
 
 // ── Orbit controls ─────────────────────────────────────────────────────────
 function _v3dUpdateCam(){
+  if(V3D._dirty!==undefined) V3D._dirty=3; // marchează render necesar
   if(!V3D.cam||!V3D.tx) return;
   const x=V3D.rad*Math.sin(V3D.ph)*Math.sin(V3D.th);
   const y=V3D.rad*Math.cos(V3D.ph);
