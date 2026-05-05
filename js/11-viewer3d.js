@@ -3005,12 +3005,15 @@ function _v3dAddWindows(THREE, pts2d, base, top, scene, stilKey, opts){
 
   const glassMat = new THREE.MeshStandardMaterial({
     color: new THREE.Color(isNight2 ? '#ffe890' : C.glassCol),
-    roughness: isNight2 ? 0.55 : (isCurtainWall ? 0.03 : 0.06),
-    metalness: isNight2 ? 0.05 : (isCurtainWall ? 0.55 : C.glassRef),
-    emissive: new THREE.Color(isNight2 ? 0.85 : 0.06, isNight2 ? 0.68 : 0.12, isNight2 ? 0.06 : 0.28),
-    emissiveIntensity: isNight2 ? 5.5 : (isCurtainWall ? 0.75 : 0.25),
+    roughness: isNight2 ? 0.55 : (isCurtainWall ? 0.02 : 0.06),
+    metalness: isNight2 ? 0.05 : (isCurtainWall ? 0.60 : C.glassRef),
+    emissive: new THREE.Color(isNight2 ? 0.85 : (isCurtainWall?0.04:0.06),
+                              isNight2 ? 0.68 : (isCurtainWall?0.10:0.12),
+                              isNight2 ? 0.06 : (isCurtainWall?0.32:0.28)),
+    emissiveIntensity: isNight2 ? 5.5 : (isCurtainWall ? 1.1 : 0.25),
     transparent: true,
-    opacity: isNight2 ? 0.98 : (isCurtainWall ? 0.78 : 0.88),
+    opacity: isNight2 ? 0.98 : (isCurtainWall ? 0.82 : 0.88),
+    depthWrite: false,
     side: THREE.FrontSide
   });
   // Geam stins noaptea (unele apartamente)
@@ -3018,14 +3021,14 @@ function _v3dAddWindows(THREE, pts2d, base, top, scene, stilKey, opts){
     color: new THREE.Color(isNight2 ? '#0a1428' : C.glassCol),
     roughness: 0.08, metalness: C.glassRef,
     emissive: new THREE.Color(0,0,0), emissiveIntensity: 0,
-    transparent: true, opacity: 0.85
+    transparent: true, opacity: 0.85, depthWrite: false
   });
   // Geam galben cald (bucătărie/living aprins)
   const glassWarmMat = new THREE.MeshStandardMaterial({
     color: new THREE.Color(isNight2 ? '#ffcc44' : C.glassCol),
     roughness: 0.6, metalness: 0.05,
     emissive: new THREE.Color(0.5, 0.32, 0.02), emissiveIntensity: isNight2 ? 3.2 : 0.1,
-    transparent: true, opacity: 0.95
+    transparent: true, opacity: 0.95, depthWrite: false
   });
   const frameMat = new THREE.MeshStandardMaterial({
     color: new THREE.Color(C.frame||'#a8b8c8'),
@@ -3084,64 +3087,97 @@ function _v3dAddWindows(THREE, pts2d, base, top, scene, stilKey, opts){
     const midX=(x0+x1)/2, midZ=(z0+z1)/2;
 
     // ════════════════════════════════════════════════════════════════════════
-    // MOD PERETE CORTINĂ — geam full-height cu mullioni verticali și orizontali
+    // MOD PERETE CORTINĂ — design profesionist cu spandrel, mullioni aluminiu,
+    // panouri de geam per bay, cortinaProcent pentru raport sticlă/opac
     // ════════════════════════════════════════════════════════════════════════
     if(isCurtainWall){
-      const mullW=0.08, mullD=0.12;
-      const transomH=0.10, transomD=0.08;
-      const nPanels=Math.max(2, Math.floor(len/1.5));
+      const cortinaPct = Math.max(0.35, Math.min(0.90, (AEDIS.cortinaProcent||60)/100));
+      const spandrelH  = realFH * (1 - cortinaPct);  // înălțime panou opac per etaj
+      const glassH     = realFH * cortinaPct;          // înălțime panou de geam per etaj
+      const mullW=0.05, mullD=0.09;
+      const transomH=0.07, transomD=0.08;
+      const nPanels=Math.max(2, Math.floor(len/1.45));
       const panW=len/nPanels;
-      const mullMat=new THREE.MeshStandardMaterial({color:'#6080a0',roughness:0.18,metalness:0.88});
-      const transMat=new THREE.MeshStandardMaterial({color:'#5070a0',roughness:0.20,metalness:0.85,
-        emissive:isNight2?new THREE.Color(0.02,0.04,0.12):new THREE.Color(0,0,0),emissiveIntensity:isNight2?0.6:0});
+      const bgReveal=C.reveal+0.01;
 
-      // Geam de fundal full-height (un singur panel pe toată fațada)
-      const bgGeo=new THREE.BoxGeometry(len-0.06, h-0.06, 0.03);
+      // ── Aluminiu structură — carcasă mullion/transom ──────────────────────
+      const mullMat=new THREE.MeshStandardMaterial({
+        color:new THREE.Color('#c4cfd8'), roughness:0.06, metalness:0.97
+      });
+
+      // ── Spandrel panel — bandă opacă la nivelul planșeului ───────────────
+      const spandrelMat=new THREE.MeshStandardMaterial({
+        color:new THREE.Color(isNight2?'#080e1e':'#0c1a30'),
+        roughness:0.22, metalness:0.72,
+        emissive:new THREE.Color(0,0,isNight2?0.06:0.01),
+        emissiveIntensity:isNight2?0.8:0.3,
+        depthWrite:false
+      });
+
+      // ── Geam de fundal — strat reflectiv deep blue ───────────────────────
+      // depthWrite:false esential cu logarithmicDepthBuffer pentru transparente
+      const bgGeo=new THREE.BoxGeometry(len-0.04, h-0.04, 0.06);
       const bgMat=new THREE.MeshStandardMaterial({
-        color:new THREE.Color(isNight2?'#1a2840':'#2a5890'),
-        roughness:0.04,metalness:0.75,
-        emissive:new THREE.Color(isNight2?0.06:0.04,isNight2?0.12:0.08,isNight2?0.30:0.20),
-        emissiveIntensity:isNight2?1.4:0.8,transparent:true,opacity:0.88});
-      mkMesh(bgGeo,bgMat,midX+nx*C.reveal,base+h/2,midZ+nz*C.reveal,ang);
+        color:new THREE.Color(isNight2?'#0b1628':'#0a2040'),
+        roughness:0.03, metalness:0.10,
+        emissive:new THREE.Color(
+          isNight2?0.04:0.02,
+          isNight2?0.10:0.06,
+          isNight2?0.38:0.25
+        ),
+        emissiveIntensity:isNight2?2.2:1.2,
+        transparent:true, opacity:isNight2?0.94:0.88,
+        depthWrite:false, side:THREE.FrontSide
+      });
+      mkMesh(bgGeo,bgMat,midX+nx*bgReveal,base+h/2,midZ+nz*bgReveal,ang);
 
-      // Mullioni verticali
-      for(let p=0;p<=nPanels;p++){
-        const u=p*panW;
-        const mx2=x0+ux*u+nx*(C.reveal+mullD/2);
-        const mz2=z0+uz*u+nz*(C.reveal+mullD/2);
-        mkMesh(new THREE.BoxGeometry(mullW,h+0.1,mullD),mullMat,mx2,base+h/2,mz2,ang);
+      // ── Spandrel panels per etaj (bandă opacă + panel reflectiv argintiu) ─
+      if(spandrelH > 0.12){
+        for(let fl=0;fl<nFloors;fl++){
+          const sy=base+fl*realFH+spandrelH*0.5;
+          const spGeo=new THREE.BoxGeometry(len-0.04, spandrelH-0.02, 0.08);
+          mkMesh(spGeo,spandrelMat,midX+nx*(bgReveal+0.02),sy,midZ+nz*(bgReveal+0.02),ang);
+        }
       }
-      // Traverse orizontale (transom) la fiecare etaj
-      for(let fl=0;fl<=nFloors;fl++){
-        const ty=base+fl*realFH;
-        const tx2=midX+nx*(C.reveal+transomD/2);
-        const tz2=midZ+nz*(C.reveal+transomD/2);
-        mkMesh(new THREE.BoxGeometry(len+0.06,transomH,transomD+0.04),transMat,tx2,ty,tz2,ang);
-      }
-      // Panouri de geam individuale cu variatie noapte
+
+      // ── Panouri de geam individuale per bay per etaj ──────────────────────
       for(let p=0;p<nPanels;p++){
         for(let fl=0;fl<nFloors;fl++){
           const u=(p+0.5)*panW;
-          const gx=x0+ux*u+nx*C.reveal;
-          const gz=z0+uz*u+nz*C.reveal;
-          const gy=base+fl*realFH+realFH*0.5;
-          const gW=panW-mullW-0.04, gH=realFH-transomH-0.04;
-          // Variatie noaptea: unele geamuri aprinse (galben), altele stinse
+          const gx=x0+ux*u+nx*(bgReveal+0.02);
+          const gz=z0+uz*u+nz*(bgReveal+0.02);
+          const gy=base+fl*realFH+spandrelH+glassH*0.5;
+          const gW=panW-mullW-0.04;
+          const gHh=Math.max(0.2, glassH-transomH-0.03);
           const seed=(si*100+p*13+fl*7);
           const rnd=_rng(seed);
           let gMat=glassMat;
-          if(isNight2){
-            gMat = rnd<0.55 ? glassWarmMat : (rnd<0.80 ? glassMat : glassDarkMat);
-          }
-          mkMesh(new THREE.BoxGeometry(gW,gH,0.025),gMat,gx,gy,gz,ang);
-          // Punct de lumina interior noaptea (1 din 7 geamuri — era 1 din 3)
-          if(isNight2 && rnd<0.15){
+          if(isNight2) gMat=rnd<0.55?glassWarmMat:(rnd<0.80?glassMat:glassDarkMat);
+          mkMesh(new THREE.BoxGeometry(gW,gHh,0.05),gMat,gx,gy,gz,ang);
+          if(isNight2&&rnd<0.15){
             const pl=new THREE.PointLight(rnd<0.2?'#ffe8a0':'#fff0d0',0.25,5);
             pl.position.set(gx-nx*0.5,gy,gz-nz*0.5); scene.add(pl);
           }
         }
       }
-      continue; // skip window module pentru curtain wall
+
+      // ── Mullioni verticali aluminiu — full height ─────────────────────────
+      for(let p=0;p<=nPanels;p++){
+        const u=p*panW;
+        const mx2=x0+ux*u+nx*(bgReveal+0.025);
+        const mz2=z0+uz*u+nz*(bgReveal+0.025);
+        mkMesh(new THREE.BoxGeometry(mullW,h+0.10,mullD),mullMat,mx2,base+h/2,mz2,ang);
+      }
+
+      // ── Traverse orizontale — la fiecare jonct. etaj (deasupra spandrel) ──
+      for(let fl=0;fl<=nFloors;fl++){
+        const ty=base+fl*realFH+(fl<nFloors?spandrelH:0);
+        const tx2=midX+nx*(bgReveal+0.025);
+        const tz2=midZ+nz*(bgReveal+0.025);
+        mkMesh(new THREE.BoxGeometry(len+0.04,transomH,transomD+0.04),mullMat,tx2,ty,tz2,ang);
+      }
+
+      continue; // skip window module clasic
     }
 
     // ════════════════════════════════════════════════════════════════════════

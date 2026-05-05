@@ -4796,14 +4796,14 @@ function aedisGetContent(){
 
       <!-- PERETE CORTINA -->
       <label class="aedis-toggle" style="margin-bottom:8px">
-        <input type="checkbox" ${AEDIS.peretelCortina?'checked':''} onchange="AEDIS.peretelCortina=this.checked;aedisRender();if(S.vol.genDone||AEDIS3D.active)aedisGenerateAll()">
+        <input type="checkbox" ${AEDIS.peretelCortina?'checked':''} onchange="AEDIS.peretelCortina=this.checked;aedisRender();if(typeof _v3dIsOpen==='function'&&_v3dIsOpen()&&typeof _v3dRebuildFast==='function')_v3dRebuildFast();if(S.vol.genDone||AEDIS3D.active)aedisGenerateAll()">
         <span class="aedis-toggle-label" style="font-weight:700;color:#e2e8f0">🪟 Perete cortină (curtain wall)</span>
       </label>
       ${AEDIS.peretelCortina?`
       <div class="aedis-row" style="margin-bottom:4px">
         <span class="aedis-lbl">Acoperire fațadă</span>
         <input type="range" min="30" max="100" step="5" value="${AEDIS.cortinaProcent||60}"
-          oninput="AEDIS.cortinaProcent=+this.value;document.getElementById('cortina-pct').textContent=this.value+'%';if(S.vol.genDone||AEDIS3D.active)aedisGenerateAll()"
+          oninput="AEDIS.cortinaProcent=+this.value;document.getElementById('cortina-pct').textContent=this.value+'%';if(typeof _v3dIsOpen==='function'&&_v3dIsOpen()&&typeof _v3dRebuildFast==='function')_v3dRebuildFast();if(S.vol.genDone||AEDIS3D.active)aedisGenerateAll()"
           style="flex:1;accent-color:#38bdf8">
         <span class="aedis-val" id="cortina-pct">${AEDIS.cortinaProcent||60}%</span>
       </div>
