@@ -1388,11 +1388,11 @@ function _lotHtmlTipuri(){
           </div>
         </div>
         <div style="display:flex;gap:4px;align-items:center">
-          <button onclick="_LOT.tipActiv=_LOT.tipActiv||{};_LOT.tipActiv['${key}']=!(_LOT.tipActiv['${key}']!==false);if(!_LOT.tipActiv['${key}']){_LOT.tipMix['${key}']=0;}else{_LOT.tipMix['${key}']=_LOT.tipMix['${key}']||10;}_lotTab('t')"
+          <button onclick="_lotSetTipActiv('${key}');if(!_LOT.tipActiv['${key}']){_LOT.tipMix['${key}']=0;}else{_LOT.tipMix['${key}']=_LOT.tipMix['${key}']||10;}_lotTab('t')"
             style="padding:${_mob?'8px 14px':'4px 10px'};border-radius:7px;font-size:${_mob?'12':'10'}px;font-weight:700;cursor:pointer;border:1px solid ${isActiv?t.color:'rgba(255,255,255,.15)'};background:${isActiv?t.color+'33':'rgba(11,18,32,.8)'};color:${isActiv?t.color:'#475569'};min-height:${_mob?'36':'auto'}px">
             ${isActiv?'✓ Activ':'+ Activează'}
           </button>
-          ${hasOverride?`<button onclick="delete _LOT.tipOverride['${key}'];_lotTab('t')" style="font-size:9px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);color:#f87171;border-radius:5px;padding:2px 7px;cursor:pointer">↩</button>`:''}
+          ${hasOverride?`<button onclick="_lotDelTipOverride('${key}')" style="font-size:9px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);color:#f87171;border-radius:5px;padding:2px 7px;cursor:pointer">↩</button>`:''}
         </div>
       </div>
       ${isActiv ? `
@@ -1554,7 +1554,7 @@ function _lotHtmlParametri(){
   })()}
   <div style="font-size:10px;color:#fbbf24;font-weight:700;margin-bottom:6px">📐 Suprafață lot (mp/lot)</div>
   <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:7px">
-    ${[300,400,500,600,800,1000].map(v=>`<button onclick="_LOT.lotAria=${v};_lotTab('p')" style="background:${_LOT.lotAria===v?'rgba(251,191,36,.25)':'rgba(255,255,255,.06)'};border:1px solid ${_LOT.lotAria===v?'#fbbf24':'rgba(255,255,255,.1)'};color:${_LOT.lotAria===v?'#fbbf24':'#94a3b8'};border-radius:7px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer">${v}mp</button>`).join('')}
+    ${[300,400,500,600,800,1000].map(v=>`<button onclick="_lotSetAria(${v})" style="background:${_LOT.lotAria===v?'rgba(251,191,36,.25)':'rgba(255,255,255,.06)'};border:1px solid ${_LOT.lotAria===v?'#fbbf24':'rgba(255,255,255,.1)'};color:${_LOT.lotAria===v?'#fbbf24':'#94a3b8'};border-radius:7px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer">${v}mp</button>`).join('')}
   </div>
   <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
     <span style="font-size:10px;color:#64748b;min-width:68px">Personalizat:</span>
@@ -1567,7 +1567,7 @@ function _lotHtmlParametri(){
   <div style="font-size:10px;color:#38bdf8;font-weight:700;margin-bottom:6px">🛣 Circulații interioare</div>
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:8px">
     ${[['latime','📏 Lățime fixă','Drum = lățimea setată'],['procent','📊 Procentaj','Drum = X% din teren'],['ambele','🔀 Ambele (min)','Cel mai restrictiv']].map(([v,l,d])=>`
-      <button onclick="_LOT.drumMod='${v}';_lotTab('p')" style="background:${_LOT.drumMod===v?'rgba(56,189,248,.2)':'rgba(255,255,255,.04)'};border:1px solid ${_LOT.drumMod===v?'#38bdf8':'rgba(255,255,255,.08)'};border-radius:8px;padding:7px 4px;cursor:pointer;text-align:center">
+      <button onclick="_lotSetDrumMod('${v}')" style="background:${_LOT.drumMod===v?'rgba(56,189,248,.2)':'rgba(255,255,255,.04)'};border:1px solid ${_LOT.drumMod===v?'#38bdf8':'rgba(255,255,255,.08)'};border-radius:8px;padding:7px 4px;cursor:pointer;text-align:center">
         <div style="color:${_LOT.drumMod===v?'#38bdf8':'#e2e8f0'};font-size:10px;font-weight:700">${l}</div>
         <div style="color:#475569;font-size:8px;margin-top:2px">${d}</div>
       </button>`).join('')}
@@ -1582,7 +1582,7 @@ function _lotHtmlParametri(){
     <span style="color:#38bdf8;font-size:12px;font-weight:700;min-width:35px">${_LOT.drumLat}m</span>
   </div>
   <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px">
-    ${[4,5,6,7,8,10].map(v=>`<button onclick="_LOT.drumLat=${v};_lotTab('p')" style="background:${_LOT.drumLat===v?'rgba(56,189,248,.2)':'rgba(255,255,255,.05)'};border:1px solid ${_LOT.drumLat===v?'#38bdf8':'rgba(255,255,255,.08)'};color:${_LOT.drumLat===v?'#38bdf8':'#64748b'};border-radius:6px;padding:4px 9px;font-size:10px;font-weight:700;cursor:pointer">${v}m</button>`).join('')}
+    ${[4,5,6,7,8,10].map(v=>`<button onclick="_lotSetDrumLat(${v})" style="background:${_LOT.drumLat===v?'rgba(56,189,248,.2)':'rgba(255,255,255,.05)'};border:1px solid ${_LOT.drumLat===v?'#38bdf8':'rgba(255,255,255,.08)'};color:${_LOT.drumLat===v?'#38bdf8':'#64748b'};border-radius:6px;padding:4px 9px;font-size:10px;font-weight:700;cursor:pointer">${v}m</button>`).join('')}
   </div>`:''}
 
   ${_LOT.drumMod!=='latime'?`
@@ -1601,7 +1601,7 @@ function _lotHtmlParametri(){
   <div style="font-size:10px;color:#34d399;font-weight:700;margin-bottom:6px">🧭 Strategie generare loturi</div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:14px">
     ${[['grid','📏 Grilă regulată','Loturi egale în rânduri'],['strip','➡ Fâșii paralele','Loturi alungite, front la drum'],['adaptiv','🔄 Adaptiv','Urmărește forma parcelei'],['radial','◉ Periferic','Loturi pe conturul parcelei']].map(([v,l,d])=>`
-      <button onclick="_LOT.strategie='${v}';_lotTab('p')" style="background:${_LOT.strategie===v?'rgba(52,211,153,.15)':'rgba(255,255,255,.04)'};border:1px solid ${_LOT.strategie===v?'#34d399':'rgba(255,255,255,.08)'};border-radius:8px;padding:8px;cursor:pointer;text-align:left">
+      <button onclick="_lotSetStrategie('${v}')" style="background:${_LOT.strategie===v?'rgba(52,211,153,.15)':'rgba(255,255,255,.04)'};border:1px solid ${_LOT.strategie===v?'#34d399':'rgba(255,255,255,.08)'};border-radius:8px;padding:8px;cursor:pointer;text-align:left">
         <div style="color:${_LOT.strategie===v?'#34d399':'#e2e8f0'};font-size:10px;font-weight:700">${l}</div>
         <div style="color:#475569;font-size:8.5px;margin-top:2px">${d}</div>
       </button>`).join('')}
@@ -1611,14 +1611,7 @@ function _lotHtmlParametri(){
   <div style="background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.2);border-radius:10px;padding:10px 12px;margin-bottom:8px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
       <div style="font-size:10px;color:#fbbf24;font-weight:700">📐 Retrageri edificabil față de limita proprietății</div>
-      <button onclick="
-        const ap=S.parcels[S.activeParcel??0];
-        const p=ap?.params||{};
-        _LOT.retFront=parseFloat(p.rf||0);
-        _LOT.retSpate=parseFloat(p.rs||0);
-        _LOT.retLateral=parseFloat(p.rl||0);
-        _lotTab('p')
-      " style="font-size:9px;background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.3);color:#fbbf24;border-radius:5px;padding:3px 8px;cursor:pointer">
+      <button onclick="_lotFromPUG()" style="font-size:9px;background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.3);color:#fbbf24;border-radius:5px;padding:3px 8px;cursor:pointer">
         ↙ Din PUG
       </button>
     </div>
@@ -1639,15 +1632,15 @@ function _lotHtmlParametri(){
         </div>`).join('')}
     </div>
     <div style="margin-top:8px;display:flex;gap:5px">
-      <button onclick="_LOT.retFront=0;_LOT.retSpate=0;_LOT.retLateral=0;_lotTab('p')"
+      <button onclick="_lotSetRet(0,0,0)"
         style="flex:1;font-size:9px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#f87171;border-radius:6px;padding:4px;cursor:pointer">
         0m (maxim teren)
       </button>
-      <button onclick="_LOT.retFront=3;_LOT.retSpate=3;_LOT.retLateral=3;_lotTab('p')"
+      <button onclick="_lotSetRet(3,3,3)"
         style="flex:1;font-size:9px;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.2);color:#fbbf24;border-radius:6px;padding:4px;cursor:pointer">
         3m (standard)
       </button>
-      <button onclick="_LOT.retFront=5;_LOT.retSpate=5;_LOT.retLateral=3;_lotTab('p')"
+      <button onclick="_lotSetRet(5,5,3)"
         style="flex:1;font-size:9px;background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.2);color:#818cf8;border-radius:6px;padding:4px;cursor:pointer">
         5/5/3m (PUG typ.)
       </button>
@@ -1710,10 +1703,10 @@ function _lotHtmlMix(){
         <div style="color:#475569;font-size:8px">${t.desc} · lot ${t.lotDefault}mp</div>
       </div>
       <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
-        <button onclick="_LOT.tipCount=_LOT.tipCount||{};_LOT.tipCount['${k}']=Math.max(0,(parseInt((_LOT.tipCount||{})['${k}'])||0)-1);_lotTab('m')"
+        <button onclick="_lotSetTipCount('${k}',-1)"
           style="width:28px;height:28px;border-radius:7px;font-size:16px;font-weight:700;cursor:pointer;border:1px solid rgba(255,255,255,.15);background:rgba(11,18,32,.9);color:#94a3b8;line-height:1">−</button>
         <span style="color:${cnt>0?t.color:'#475569'};font-size:16px;font-weight:800;min-width:22px;text-align:center">${cnt}</span>
-        <button onclick="_LOT.tipCount=_LOT.tipCount||{};_LOT.tipCount['${k}']=Math.min(10,(parseInt((_LOT.tipCount||{})['${k}'])||0)+1);_lotTab('m')"
+        <button onclick="_lotSetTipCount('${k}',+1)"
           style="width:28px;height:28px;border-radius:7px;font-size:16px;font-weight:700;cursor:pointer;border:1px solid ${t.color};background:${t.color}22;color:${t.color};line-height:1">+</button>
       </div>
       ${cnt>0?`
@@ -1739,7 +1732,7 @@ function _lotHtmlMix(){
       ['Duplex dominant',{individuala:20,insiruita:20,duplex:60,bloc:0}],
       ['Mixt cu bloc',{individuala:25,insiruita:25,duplex:25,bloc:25}],
     ].map(([l,mix])=>`
-      <button onclick="Object.assign(_LOT.tipMix,${JSON.stringify(mix)});_lotTab('m')"
+      <button onclick=\"_lotSetMix(${JSON.stringify(mix)})\"
         style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:8px;text-align:left;cursor:pointer;transition:border-color .15s"
         onmouseover="this.style.borderColor='rgba(167,139,250,.4)'" onmouseout="this.style.borderColor='rgba(255,255,255,.08)'">
         <div style="color:#e2e8f0;font-size:10px;font-weight:700">${l}</div>

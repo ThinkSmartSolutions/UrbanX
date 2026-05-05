@@ -4428,7 +4428,7 @@ function aedisGetContent(){
     ${AEDIS.parterDiferit?`
     <div class="aedis-fn-grid" style="margin-top:8px">
       ${['comercial','birouri','institutie'].map(k=>`
-        <button onclick="AEDIS.fnParter='${k}';aedisRender()" class="aedis-fn-btn${AEDIS.fnParter===k?' active':''}">
+        <button onclick="_aedisSetFnParter('${k}')" class="aedis-fn-btn${AEDIS.fnParter===k?' active':''}">
           <span class="aedis-fn-dot" style="background:${AEDIS_FN[k].color}"></span>
           ${AEDIS_FN[k].label}
         </button>`).join('')}
@@ -4755,7 +4755,7 @@ function aedisGetContent(){
       <div class="aedis-row" style="margin-bottom:6px">
         <span class="aedis-lbl">Adâncime (m)</span>
         <input type="range" min="0.8" max="2.5" step="0.1" value="${AEDIS.balconAdancime||1.5}"
-          oninput="AEDIS.balconAdancime=+this.value;document.getElementById('balc-adanc').textContent=this.value+'m';if(S.vol.genDone||AEDIS3D.active)aedisGenerateAll()"
+          oninput="window._aedisSetBalconAdanc&&_aedisSetBalconAdanc(+this.value);document.getElementById('balc-adanc').textContent=this.value+'m'"
           style="flex:1;accent-color:#3b82f6">
         <span class="aedis-val" id="balc-adanc">${(AEDIS.balconAdancime||1.5).toFixed(1)}m</span>
       </div>
@@ -4765,11 +4765,11 @@ function aedisGetContent(){
       </div>
       <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:8px">
         ${['N','E','S','V'].map(l=>`
-          <button onclick="(()=>{const a=AEDIS.balconLaturi;const i=a.indexOf('${l}');if(i>=0)a.splice(i,1);else a.push('${l}');aedisRender();if(S.vol.genDone||AEDIS3D.active)aedisGenerateAll()})()"
+          <button onclick="_aedisToggleBalcon('${l}')"
             style="padding:7px 2px;border-radius:7px;border:1px solid ${(AEDIS.balconLaturi||[]).includes('${l}')?'#3b82f6':'rgba(255,255,255,.12)'};background:${(AEDIS.balconLaturi||[]).includes('${l}')?'rgba(59,130,246,.25)':'rgba(11,18,32,.6)'};color:${(AEDIS.balconLaturi||[]).includes('${l}')?'#93c5fd':'#475569'};cursor:pointer;font-size:11px;font-weight:800;transition:all .15s">
             ${l}
           </button>`).join('')}
-        <button onclick="(()=>{const all=['N','E','S','V'];const cur=AEDIS.balconLaturi||[];AEDIS.balconLaturi=cur.length===4?[]:all;aedisRender();if(S.vol.genDone||AEDIS3D.active)aedisGenerateAll()})()"
+        <button onclick="_aedisToggleAllBalcon()"
           style="padding:7px 2px;border-radius:7px;border:1px solid ${(AEDIS.balconLaturi||[]).length===4?'#22c55e':'rgba(255,255,255,.12)'};background:${(AEDIS.balconLaturi||[]).length===4?'rgba(34,197,94,.2)':'rgba(11,18,32,.6)'};color:${(AEDIS.balconLaturi||[]).length===4?'#86efac':'#475569'};cursor:pointer;font-size:9px;font-weight:800">
           Toate
         </button>
@@ -4855,7 +4855,7 @@ function aedisGetContent(){
       title="LOISIR — Amenajare spații publice">🌿<span style="font-size:8px">Loisir</span></button>
     <button onclick="aedisAIRender()" class="aedis-dim-btn" style="background:rgba(212,175,55,.15);border-color:rgba(212,175,55,.4);color:#d4af37;font-size:10px" title="AI Render fotorealist (necesită API key Fal.ai)">🎨 AI</button>
     <button onclick="generateSolarStudy()" class="aedis-dim-btn" style="background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.4);color:#fbbf24;font-size:9px;display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 8px" title="Studiu Însorire PDF">☀<span style="font-size:8px">Însorire</span></button>
-    <button onclick="AEDIS.showDim=!AEDIS.showDim;aedisRender();_aedisToggleDimLabels()" 
+    <button onclick="_aedisToggleDim()" 
       class="aedis-dim-btn${AEDIS.showDim?' active':''}" title="Etichete dimensionale (toggle)">📏</button>
     <button onclick="aedisClose()" class="aedis-close-btn">✕</button>
   </div>`;
