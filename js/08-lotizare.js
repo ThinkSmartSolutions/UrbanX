@@ -16,6 +16,9 @@ const _LOT = {
   tipMix: { individuala:40, insiruita:30, duplex:20, bloc:10 }, // % din loturi rezidentiale (sum=100)
   // Tipuri speciale: numar FIX de loturi (nu procent) — se adauga deasupra rezidentialelor
   tipCount: { gazebo:0, garaj:0, bbq:0, bucvara:0, bortodoxa:0, bcatolica:0 },
+  // Pozitii manuale per tip special: { bortodoxa: [[lng,lat]], bbq: [[lng,lat],[lng2,lat2]], ... }
+  manualPos: {},
+  _placingTip: null, // tipul pentru care asteptam click pe harta
   // tipActiv: care tipuri sunt vizibile in Mix si generate
   tipActiv: { individuala:true, insiruita:true, duplex:true, bloc:true, gazebo:true, garaj:true, bbq:true, bucvara:true, bortodoxa:true, bcatolica:true },
 
@@ -200,7 +203,7 @@ function _showLotizarePanel(){
   const div = document.createElement('div');
   div.id='lotizare-panel';
   // Pe mobil: drawer de jos cu inaltime 48vh — lasa harta vizibila deasupra
-  div.style.cssText=`position:fixed;${mob?'bottom:72px;left:0;right:0;border-radius:16px 16px 0 0':'top:56px;right:'+rightPos+'px;width:'+panelW+'px;border-radius:16px'};z-index:8600;background:rgba(7,12,24,.97);border:1px solid rgba(167,139,250,.35);${mob?'border-bottom:none':''}padding:0;box-shadow:0 12px 48px rgba(0,0,0,.75);backdrop-filter:blur(16px);font-family:system-ui,sans-serif;max-height:${mob?'50':'88'}vh;overflow:hidden;display:flex;flex-direction:column`;
+  div.style.cssText=`position:fixed;${mob?'bottom:72px;left:0;right:0;border-radius:16px 16px 0 0':'top:56px;right:'+rightPos+'px;width:'+panelW+'px;border-radius:16px'};z-index:8600;background:rgba(7,12,24,.97);border:1px solid rgba(167,139,250,.35);${mob?'border-bottom:none':''}padding:0;box-shadow:0 12px 48px rgba(0,0,0,.75);backdrop-filter:blur(16px);font-family:system-ui,sans-serif;max-height:${mob?'62':'88'}vh;overflow:hidden;display:flex;flex-direction:column`;
 
   div.innerHTML=`
     <div style="padding:12px 16px 0;flex-shrink:0">
@@ -219,8 +222,26 @@ function _showLotizarePanel(){
       </div>
       ${!ap?'<div style="color:#f87171;font-size:10px;padding:4px 0 6px">⚠️ Selectați mai întâi o parcelă pe hartă!</div>':''}
       <div style="display:flex;gap:2px;background:rgba(255,255,255,.04);border-radius:8px;padding:3px" id="lot-tabs">
+        ${mob ? `
+        <!-- MOBIL: 2 randuri de tab-uri cu icoane + text lizibil -->
+        <div style="display:flex;gap:3px;width:100%">
+          ${[['p','⚙','Param'],['t','🏢','Tipuri'],['d','🏚','Demol.'],['c','🛣','Circ.']].map(([id,ico,lbl],i)=>`
+            <button onclick="_lotTab('${id}')" id="ltab-${id}" style="flex:1;border:none;background:rgba(255,255,255,.05);color:#64748b;border-radius:8px;padding:7px 2px 5px;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:2px;min-height:44px">
+              <span style="font-size:16px">${ico}</span>
+              <span style="font-size:9px;font-weight:700">${lbl}</span>
+            </button>`).join('')}
+        </div>
+        <div style="display:flex;gap:3px;width:100%;margin-top:3px">
+          ${[['m','🏡','Mix'],['r','📊','Rezult.'],['f','💰','Financ.'],['x','📄','Export']].map(([id,ico,lbl],i)=>`
+            <button onclick="_lotTab('${id}')" id="ltab-${id}" style="flex:1;border:none;background:rgba(255,255,255,.05);color:#64748b;border-radius:8px;padding:7px 2px 5px;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:2px;min-height:44px">
+              <span style="font-size:16px">${ico}</span>
+              <span style="font-size:9px;font-weight:700">${lbl}</span>
+            </button>`).join('')}
+        </div>
+        ` : `
         ${[['p','⚙ Param'],['t','🏢 Tipuri'],['d','🏚 Demolare'],['c','🛣 Circulații'],['m','🏡 Mix'],['r','📊 Rezultat'],['f','💰 Financiar'],['x','📄 Export']].map(([id,l],i)=>`
-          <button onclick="_lotTab('${id}')" id="ltab-${id}" style="flex:1;border:none;background:${i===0?'rgba(167,139,250,.2)':'none'};color:${i===0?'#a78bfa':'#64748b'};border-radius:6px;padding:5px 1px;font-size:${mob?6:7}px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .15s">${l}</button>`).join('')}
+          <button onclick="_lotTab('${id}')" id="ltab-${id}" style="flex:1;border:none;background:none;color:#64748b;border-radius:6px;padding:5px 1px;font-size:7px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .15s">${l}</button>`).join('')}
+        `}
       </div>
     </div>
     <div id="lot-content" style="overflow-y:auto;padding:12px 16px;flex:1">${_lotHtmlParametri()}</div>
@@ -299,8 +320,15 @@ function _lotTab(tab){
   ['p','t','d','c','m','r','f','x'].forEach(t=>{
     const b=document.getElementById('ltab-'+t);
     if(!b) return;
-    b.style.background = t===tab?'rgba(167,139,250,.2)':'none';
-    b.style.color = t===tab?'#a78bfa':'#64748b';
+    const isMob=window.innerWidth<841;
+    if(isMob){
+      b.style.background = t===tab?'rgba(167,139,250,.3)':'rgba(255,255,255,.05)';
+      b.style.color = t===tab?'#a78bfa':'#64748b';
+      b.style.borderBottom = t===tab?'2px solid #a78bfa':'2px solid transparent';
+    } else {
+      b.style.background = t===tab?'rgba(167,139,250,.2)':'none';
+      b.style.color = t===tab?'#a78bfa':'#64748b';
+    }
   });
   const c=document.getElementById('lot-content');
   if(!c) return;
@@ -961,6 +989,119 @@ function _lotBuild3D(loturi, drumuri){
 }
 
 // ─── Render 3D specializat per tip dotare / cult ─────────────────────────
+
+// ─── Plasare manuală tipuri speciale ──────────────────────────────────────
+function _lotStartManualPlace(tipKey){
+  const cnt = parseInt((_LOT.tipCount||{})[tipKey])||0;
+  if(cnt === 0){
+    ss('⚠️ Setați mai întâi numărul de loturi (+ buton) pentru '+(_LOT.tipuri[tipKey]?.label||tipKey));
+    return;
+  }
+
+  _LOT._placingTip = tipKey;
+  const t = _LOT.tipuri[tipKey];
+  const existingPos = (_LOT.manualPos[tipKey]||[]).length;
+  const needed = cnt;
+
+  ss(`📍 ${t?.icon||''} ${t?.label||tipKey}: click pe HARTĂ unde vrei să plasezi lotul (${existingPos+1}/${needed})`);
+  map.getCanvas().style.cursor = 'crosshair';
+
+  // Overlay banner vizibil
+  const banner = document.createElement('div');
+  banner.id = 'lot-place-banner';
+  banner.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:9000;background:rgba(167,139,250,.95);color:#fff;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:700;pointer-events:none;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.5)';
+  banner.innerHTML = `${t?.icon||'📍'} Click pe hartă — ${t?.label||tipKey} (${existingPos+1}/${needed}) &nbsp;<span style="font-size:11px;opacity:.8">ESC = anulează</span>`;
+  document.body.appendChild(banner);
+
+  // Sterge pozitiile anterioare si incepe fresh
+  _LOT.manualPos[tipKey] = [];
+
+  // Handler click harta
+  const handler = (e) => {
+    if(_LOT._placingTip !== tipKey) return;
+    const lngLat = e.lngLat;
+
+    // Verifica daca e in interiorul parcelei
+    const ap = S.parcels[S.activeParcel??0];
+    let inParcel = true;
+    if(ap?.geo?.geometry){
+      try{
+        const pt = {type:'Feature',geometry:{type:'Point',coordinates:[lngLat.lng,lngLat.lat]},properties:{}};
+        const parcelFeat = {type:'Feature',geometry:ap.geo.geometry,properties:{}};
+        inParcel = turf.booleanPointInPolygon(pt, parcelFeat);
+      }catch(e){}
+    }
+
+    if(!inParcel){
+      ss('⚠️ Punctul este în afara parcelei! Click în interiorul parcelei.');
+      return;
+    }
+
+    if(!_LOT.manualPos[tipKey]) _LOT.manualPos[tipKey]=[];
+    _LOT.manualPos[tipKey].push([lngLat.lng, lngLat.lat]);
+
+    const placed = _LOT.manualPos[tipKey].length;
+    const needed2 = parseInt((_LOT.tipCount||{})[tipKey])||1;
+
+    // Marker vizual pe harta
+    const markerId = 'lot-manual-'+tipKey+'-'+placed;
+    if(map.getLayer(markerId)) map.removeLayer(markerId);
+    if(map.getSource(markerId)) map.removeSource(markerId);
+    map.addSource(markerId, {type:'geojson', data:{type:'Feature',geometry:{type:'Point',coordinates:[lngLat.lng,lngLat.lat]},properties:{}}});
+    map.addLayer({id:markerId, type:'circle', source:markerId,
+      paint:{'circle-radius':8,'circle-color':_LOT.tipuri[tipKey]?.color||'#d4af37','circle-stroke-width':2,'circle-stroke-color':'#fff'}});
+
+    if(placed >= needed2){
+      // Toate plasate
+      _lotStopManualPlace(false);
+      ss(`✅ ${t?.icon||''} ${t?.label||tipKey}: ${placed} pozitii setate manual. Generați planul pentru a aplica.`);
+      // Refresh tab mix ca sa arate "✓ Manual"
+      const c = document.getElementById('lot-content');
+      if(c && document.getElementById('ltab-m')?.classList.contains('active-tab')) _lotTab('m');
+    } else {
+      ss(`📍 ${t?.icon||''} ${t?.label||tipKey}: mai plasați ${needed2-placed} lot(uri). Click pe hartă.`);
+      document.getElementById('lot-place-banner').innerHTML = `${t?.icon||'📍'} Click pe hartă — ${t?.label||tipKey} (${placed+1}/${needed2}) &nbsp;<span style="font-size:11px;opacity:.8">ESC = anulează</span>`;
+    }
+  };
+
+  map._lotPlaceHandler = handler;
+  map.on('click', handler);
+
+  // ESC pentru anulare
+  const escHandler = (e) => {
+    if(e.key === 'Escape' && _LOT._placingTip === tipKey){
+      _lotStopManualPlace(true);
+      ss('Plasare anulată');
+    }
+  };
+  window._lotPlaceEscHandler = escHandler;
+  window.addEventListener('keydown', escHandler);
+}
+
+function _lotStopManualPlace(cancel){
+  if(!_LOT._placingTip) return;
+  if(cancel) _LOT.manualPos[_LOT._placingTip] = [];
+  _LOT._placingTip = null;
+  map.getCanvas().style.cursor = '';
+  if(map._lotPlaceHandler){ map.off('click', map._lotPlaceHandler); map._lotPlaceHandler=null; }
+  if(window._lotPlaceEscHandler){ window.removeEventListener('keydown', window._lotPlaceEscHandler); window._lotPlaceEscHandler=null; }
+  document.getElementById('lot-place-banner')?.remove();
+}
+
+function _lotClearManualPos(tipKey){
+  if(!tipKey){ _LOT.manualPos={}; }
+  else {
+    delete _LOT.manualPos[tipKey];
+    // Sterge markerii vizuali
+    for(let i=1;i<=10;i++){
+      const id='lot-manual-'+tipKey+'-'+i;
+      try{ if(map.getLayer(id)) map.removeLayer(id); if(map.getSource(id)) map.removeSource(id); }catch(e){}
+    }
+  }
+  ss('📍 Pozițiile manuale au fost șterse');
+  _lotTab('m');
+}
+
 window._lotRenderSpecial = function _lotRenderSpecial(THREE, scene, geom, tipKey, toLoc){
   if(!THREE||!scene||!geom||!toLoc) return;
   try{
@@ -1060,9 +1201,26 @@ window._lotRenderSpecial = function _lotRenderSpecial(THREE, scene, geom, tipKey
       cos.position.set(cx+bw*0.3,hh+0.8,cz-bd*0.3); scene.add(cos);
     }
     else if(tipKey==='bortodoxa'){
-      const zidMat=new THREE.MeshStandardMaterial({color:'#f5f0e8',roughness:0.8,metalness:0});
-      const acMat=new THREE.MeshStandardMaterial({color:'#8B6914',roughness:0.6,metalness:0.3,emissive:new THREE.Color(0.05,0.04,0),emissiveIntensity:0.4});
-      const bs=Math.min(Math.max(sz*0.65,6),14); // minim 6m, max 14m
+      const isNight=window._v3dNight||false;
+      // Materiale: noaptea zidurile prind lumina calda, cupolele stralucesc auriu
+      const zidMat=new THREE.MeshStandardMaterial({
+        color: isNight?'#c8b89a':'#f5f0e8', roughness:0.8, metalness:0,
+        emissive: isNight?new THREE.Color(0.12,0.08,0.02):new THREE.Color(0,0,0),
+        emissiveIntensity: isNight?1.0:0
+      });
+      const acMat=new THREE.MeshStandardMaterial({
+        color:'#8B6914', roughness:0.4, metalness:0.5,
+        emissive: new THREE.Color(0.3,0.18,0.01),
+        emissiveIntensity: isNight?3.5:0.4  // cupola straluceste auriu noaptea
+      });
+      const cruceMat=new THREE.MeshStandardMaterial({
+        color:'#d4af37', roughness:0.1, metalness:1.0,
+        emissive: new THREE.Color(0.8,0.6,0.0),
+        emissiveIntensity: isNight?5.0:0.3   // crucea straluceste puternic noaptea
+      });
+      const bs=Math.min(Math.max(sz*0.65,6),14);
+
+      // Corp + bolta + turla
       const corp=new THREE.Mesh(new THREE.BoxGeometry(bs*0.6,5,bs),zidMat);
       corp.position.set(cx,2.5,cz); scene.add(corp);
       const bolta=new THREE.Mesh(new THREE.SphereGeometry(bs*0.32,8,6,0,Math.PI*2,0,Math.PI/2),acMat);
@@ -1071,16 +1229,66 @@ window._lotRenderSpecial = function _lotRenderSpecial(THREE, scene, geom, tipKey
       turla.position.set(cx,7.5,cz-bs*0.15); scene.add(turla);
       const turlaAc=new THREE.Mesh(new THREE.ConeGeometry(0.85,2.0,8),acMat);
       turlaAc.position.set(cx,10.2,cz-bs*0.15); scene.add(turlaAc);
-      const cruceMat=new THREE.MeshStandardMaterial({color:'#d4af37',roughness:0.2,metalness:0.9});
       const cv=new THREE.Mesh(new THREE.BoxGeometry(0.08,1.0,0.08),cruceMat);
       cv.position.set(cx,11.7,cz-bs*0.15); scene.add(cv);
       const ch=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.08,0.08),cruceMat);
       ch.position.set(cx,11.5,cz-bs*0.15); scene.add(ch);
+
+      if(isNight){
+        // ── Lumini noapte ──────────────────────────────────────────────
+        // 1. Halo auriu cupola — lumina calda portocalie sus
+        const haloLight=new THREE.PointLight('#ffc060',4.5,bs*2.5,1.8);
+        haloLight.position.set(cx,9,cz-bs*0.15); scene.add(haloLight);
+
+        // 2. Lumina difuza corp — ilumineaza peretii de jos
+        const corpLight=new THREE.PointLight('#ffe8a0',2.5,bs*1.8,2.0);
+        corpLight.position.set(cx,1.5,cz); scene.add(corpLight);
+
+        // 3. Spot cruce — fascicul alb-auriu de jos in sus pe cruce
+        const spotCruce=new THREE.SpotLight('#fffbe0',6,18,Math.PI/10,0.3,2);
+        spotCruce.position.set(cx,0.5,cz-bs*0.15-3);
+        spotCruce.target.position.set(cx,12,cz-bs*0.15);
+        scene.add(spotCruce); scene.add(spotCruce.target);
+
+        // 4. Ferestre nave — lumina calda galbena din interior
+        [[-bs*0.25,0],[bs*0.25,0],[0,-bs*0.4],[0,bs*0.4]].forEach(([ox,oz])=>{
+          const winLight=new THREE.PointLight('#ffdd80',1.8,bs*0.7,2.5);
+          winLight.position.set(cx+ox,2.5,cz+oz); scene.add(winLight);
+          // Mesh vitraliu emissive
+          const vitMat=new THREE.MeshStandardMaterial({
+            color:'#ffcc44',emissive:new THREE.Color(1.0,0.7,0.1),
+            emissiveIntensity:3,transparent:true,opacity:0.85,side:THREE.DoubleSide
+          });
+          const vit=new THREE.Mesh(new THREE.PlaneGeometry(0.9,1.4),vitMat);
+          vit.position.set(cx+ox,2.5,cz+oz); scene.add(vit);
+        });
+
+        // 5. Halo albastru-alb la baza — tip reper urban (spot exterior)
+        const groundSpot=new THREE.PointLight('#c0d8ff',1.5,bs*1.2,2.2);
+        groundSpot.position.set(cx,0.3,cz); scene.add(groundSpot);
+      }
     }
     else if(tipKey==='bcatolica'){
-      const zidMat=new THREE.MeshStandardMaterial({color:'#e8e0d0',roughness:0.75,metalness:0});
-      const acMat=new THREE.MeshStandardMaterial({color:'#607080',roughness:0.5,metalness:0.2});
-      const bs=Math.min(Math.max(sz*0.65,6),12); // minim 6m, max 12m
+      const isNight=window._v3dNight||false;
+      // Materiale: stil gotic — piatra alba iluminata cu spoturi reci
+      const zidMat=new THREE.MeshStandardMaterial({
+        color: isNight?'#d8d0c0':'#e8e0d0', roughness:0.75, metalness:0,
+        emissive: isNight?new THREE.Color(0.06,0.07,0.10):new THREE.Color(0,0,0),
+        emissiveIntensity: isNight?1.2:0
+      });
+      const acMat=new THREE.MeshStandardMaterial({
+        color:'#607080', roughness:0.45, metalness:0.25,
+        emissive: isNight?new THREE.Color(0.05,0.07,0.12):new THREE.Color(0,0,0),
+        emissiveIntensity: isNight?1.5:0
+      });
+      const cruceMat=new THREE.MeshStandardMaterial({
+        color:'#d4af37', roughness:0.1, metalness:1.0,
+        emissive: new THREE.Color(0.9,0.7,0.0),
+        emissiveIntensity: isNight?5.5:0.2  // crucea mai puternica decat la ortodoxa
+      });
+      const bs=Math.min(Math.max(sz*0.65,6),12);
+
+      // Geometrie
       const nava=new THREE.Mesh(new THREE.BoxGeometry(bs*0.55,5.5,bs),zidMat);
       nava.position.set(cx,2.75,cz); scene.add(nava);
       const aRoof=new THREE.Mesh(new THREE.CylinderGeometry(0.01,bs*0.32,1.8,3,1),acMat);
@@ -1089,11 +1297,46 @@ window._lotRenderSpecial = function _lotRenderSpecial(THREE, scene, geom, tipKey
       turn.position.set(cx+bs*0.3,4.5,cz-bs*0.38); scene.add(turn);
       const turnAc=new THREE.Mesh(new THREE.ConeGeometry(bs*0.13,2.5,4),acMat);
       turnAc.rotation.y=Math.PI/4; turnAc.position.set(cx+bs*0.3,10.25,cz-bs*0.38); scene.add(turnAc);
-      const cruceMat=new THREE.MeshStandardMaterial({color:'#d4af37',roughness:0.2,metalness:0.9});
       const cv2=new THREE.Mesh(new THREE.BoxGeometry(0.07,0.9,0.07),cruceMat);
       cv2.position.set(cx+bs*0.3,11.7,cz-bs*0.38); scene.add(cv2);
       const ch2=new THREE.Mesh(new THREE.BoxGeometry(0.45,0.07,0.07),cruceMat);
       ch2.position.set(cx+bs*0.3,11.4,cz-bs*0.38); scene.add(ch2);
+
+      if(isNight){
+        // ── Lumini noapte stil catolic ─────────────────────────────────
+        // 1. Spoturi reci pe turn + cruce (lumina alba-albastruie, gotic)
+        const spotTurn=new THREE.SpotLight('#e0eeff',5,20,Math.PI/8,0.25,1.8);
+        spotTurn.position.set(cx+bs*0.3-4,0.5,cz-bs*0.38-3);
+        spotTurn.target.position.set(cx+bs*0.3,12,cz-bs*0.38);
+        scene.add(spotTurn); scene.add(spotTurn.target);
+
+        // 2. Spot lateral nava (gotic: lumina dramatica pe fatada)
+        const spotNava=new THREE.SpotLight('#ddeeff',3,15,Math.PI/6,0.35,2);
+        spotNava.position.set(cx-bs*0.5,0.5,cz);
+        spotNava.target.position.set(cx,4,cz);
+        scene.add(spotNava); scene.add(spotNava.target);
+
+        // 3. Halo rece pe turn (albastru-alb: reper urban nocturn)
+        const turnLight=new THREE.PointLight('#a0c0ff',3.5,bs*1.8,1.8);
+        turnLight.position.set(cx+bs*0.3,8,cz-bs*0.38); scene.add(turnLight);
+
+        // 4. Vitralii nave — lumina calda galbena-portocalie din interior
+        [[-bs*0.2,-bs*0.35],[bs*0.15,-bs*0.1],[0,bs*0.3]].forEach(([ox,oz],wi)=>{
+          const wcol=['#ff9922','#ffcc44','#ff8844'][wi];
+          const winLight=new THREE.PointLight(wcol,2.0,bs*0.65,2.5);
+          winLight.position.set(cx+ox,2.5,cz+oz); scene.add(winLight);
+          const vitMat=new THREE.MeshStandardMaterial({
+            color:wcol, emissive:new THREE.Color(...wcol.match(/.{2}/g).map(h=>parseInt(h,16)/255/2)),
+            emissiveIntensity:4, transparent:true, opacity:0.9, side:THREE.DoubleSide
+          });
+          const vit=new THREE.Mesh(new THREE.PlaneGeometry(0.7,2.0),vitMat);
+          vit.position.set(cx+ox,2.5,cz+oz); scene.add(vit);
+        });
+
+        // 5. Lumina de sol albastra — halo urban la baza
+        const groundL=new THREE.PointLight('#8090c0',2.0,bs*1.0,2.5);
+        groundL.position.set(cx,0.5,cz); scene.add(groundL);
+      }
     }
   }catch(e){ console.warn('_lotRenderSpecial',tipKey,e.message); }
 };
@@ -1451,6 +1694,17 @@ function _lotHtmlMix(){
         <button onclick="_LOT.tipCount=_LOT.tipCount||{};_LOT.tipCount['${k}']=Math.min(10,(parseInt((_LOT.tipCount||{})['${k}'])||0)+1);_lotTab('m')"
           style="width:28px;height:28px;border-radius:7px;font-size:16px;font-weight:700;cursor:pointer;border:1px solid ${t.color};background:${t.color}22;color:${t.color};line-height:1">+</button>
       </div>
+      ${cnt>0?`
+      <div style="display:flex;align-items:center;gap:5px;margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,.06)">
+        ${(_LOT.manualPos||{})[k]?.length>0
+          ? `<span style="font-size:9px;color:#4ade80;flex:1">✓ ${(_LOT.manualPos[k]||[]).length}/${cnt} pozitii manuale</span>
+             <button onclick="_lotClearManualPos('${k}')" style="font-size:9px;padding:3px 7px;border-radius:5px;cursor:pointer;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);color:#f87171">✕ Reset</button>`
+          : `<span style="font-size:9px;color:#64748b;flex:1">Automat (margine)</span>`}
+        <button onclick="_lotStartManualPlace('${k}')"
+          style="padding:4px 10px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid ${t.color};background:${t.color}22;color:${t.color}">
+          📍 Plasare manuală
+        </button>
+      </div>`:''}
     </div>`;}).join('')}
 
   <div style="font-size:10px;color:#64748b;font-weight:700;margin:10px 0 6px">⚡ Preset-uri rapide</div>
@@ -2234,13 +2488,51 @@ function _genLotizareGeom(fpFeat, loturiPerTip, drumFract){
         partial:poz.area<_LOT.lotAria*0.85}});
   });
 
-  // Plaseaza speciale in pozitiile rezervate
+  // Plaseaza speciale: manual (daca exista pozitie setata) sau in pozitii rezervate
+  const manualPosTip = {}; // grupeaza pozitii manuale per tip
+  const manPos = _LOT.manualPos||{};
+  asignSpeciale.forEach(tip=>{
+    if(!manualPosTip[tip]) manualPosTip[tip]=0;
+    manualPosTip[tip]++;
+  });
+
+  let rezervIdx=0;
+  const tipUsed={}; // cate din fiecare tip special au fost plasate
   asignSpeciale.forEach((tip,i)=>{
-    const poz=pozRezerv[i]||(pozitiiValide[pozitiiValide.length-1-i]);
-    if(!poz) return;
-    const t=_lotGetTip(tip)||_LOT.tipuri.individuala;
-    loturi.push({type:'Feature',geometry:poz.geom,
-      properties:{tip,color:t.color,borderColor:t.borderColor,area:poz.area}});
+    if(!tipUsed[tip]) tipUsed[tip]=0;
+    const manPosArr = manPos[tip]||[];
+    const posIdx = tipUsed[tip];
+    tipUsed[tip]++;
+
+    if(manPosArr[posIdx]){
+      // Plasare manuala: genereaza lot centrat pe pozitia aleasa
+      const [lng,lat] = manPosArr[posIdx];
+      const cy3=(bbox2[1]+bbox2[3])/2;
+      const mLng3=111320*Math.cos(cy3*Math.PI/180), mLat3=111320;
+      const half = Math.sqrt(_LOT.lotAria)/2;
+      const dLng = half/mLng3, dLat = half/mLat3;
+      const manualPoly = {type:'Feature',geometry:{type:'Polygon',coordinates:[[
+        [lng-dLng,lat-dLat],[lng+dLng,lat-dLat],
+        [lng+dLng,lat+dLat],[lng-dLng,lat+dLat],[lng-dLng,lat-dLat]
+      ]]},properties:{}};
+      // Intersecteaza cu parcela
+      let lotGeom = manualPoly.geometry;
+      try{
+        const inter=turf.intersect(fpFeat, manualPoly);
+        if(inter?.geometry && turf.area(inter)>10) lotGeom=inter.geometry;
+      }catch(e){}
+      const t=_lotGetTip(tip)||_LOT.tipuri.individuala;
+      loturi.push({type:'Feature',geometry:lotGeom,
+        properties:{tip,color:t.color,borderColor:t.borderColor,area:Math.round(turf.area({type:'Feature',geometry:lotGeom,properties:{}})),manual:true}});
+    } else {
+      // Plasare automata pe pozitia rezervata
+      const poz=pozRezerv[rezervIdx]||(pozitiiValide[pozitiiValide.length-1-rezervIdx]);
+      rezervIdx++;
+      if(!poz) return;
+      const t=_lotGetTip(tip)||_LOT.tipuri.individuala;
+      loturi.push({type:'Feature',geometry:poz.geom,
+        properties:{tip,color:t.color,borderColor:t.borderColor,area:poz.area}});
+    }
   });
 
   return {loturi, drumuri};
