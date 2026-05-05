@@ -8,6 +8,10 @@ const _LOT = {
   drumProcent: 20,
   drumMod: 'ambele',
   strategie: 'grid',
+  // Retrageri perimetrale față de limita proprietății (pentru edificabilul lotizării)
+  retFront: 0,    // față stradă (m) — 0 = loturi până la limita proprietății
+  retSpate: 0,    // spate (m)
+  retLateral: 0,  // lateral stg+dreapta (m)
 
   tipMix: { individuala:40, insiruita:30, duplex:20, bloc:10, gazebo:0, garaj:0, bbq:0, bucvara:0, bortodoxa:0, bcatolica:0 },
   // tipActiv: care tipuri sunt vizibile in Mix si generate
@@ -140,6 +144,15 @@ function toggleLotizare(){
   _lotizareActive = !_lotizareActive;
   document.getElementById('btnLotizare')?.classList.toggle('on', _lotizareActive);
   if(_lotizareActive){
+    // Preia automat retragerile din PUG la prima deschidere (daca sunt 0 si PUG are valori)
+    if(_LOT.retFront===0 && _LOT.retSpate===0 && _LOT.retLateral===0){
+      try{
+        const ap=S.parcels[S.activeParcel??0];
+        const p=ap?.params||{};
+        const rf=parseFloat(p.rf||0), rs=parseFloat(p.rs||0), rl=parseFloat(p.rl||0);
+        if(rf>0||rs>0||rl>0){ _LOT.retFront=rf; _LOT.retSpate=rs; _LOT.retLateral=rl; }
+      }catch(e){}
+    }
     // Ascundem layerele care ar zgomota harta în modul lotizare
     ['dist-src','aedis-dim-src'].forEach(src=>{
       try{ setSource(src,{type:'FeatureCollection',features:[]}); }catch(e){}
@@ -1264,12 +1277,59 @@ function _lotHtmlParametri(){
   </div>
 
   <div style="font-size:10px;color:#34d399;font-weight:700;margin-bottom:6px">🧭 Strategie generare loturi</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:14px">
     ${[['grid','📏 Grilă regulată','Loturi egale în rânduri'],['strip','➡ Fâșii paralele','Loturi alungite, front la drum'],['adaptiv','🔄 Adaptiv','Urmărește forma parcelei'],['radial','◉ Periferic','Loturi pe conturul parcelei']].map(([v,l,d])=>`
       <button onclick="_LOT.strategie='${v}';_lotTab('p')" style="background:${_LOT.strategie===v?'rgba(52,211,153,.15)':'rgba(255,255,255,.04)'};border:1px solid ${_LOT.strategie===v?'#34d399':'rgba(255,255,255,.08)'};border-radius:8px;padding:8px;cursor:pointer;text-align:left">
         <div style="color:${_LOT.strategie===v?'#34d399':'#e2e8f0'};font-size:10px;font-weight:700">${l}</div>
         <div style="color:#475569;font-size:8.5px;margin-top:2px">${d}</div>
       </button>`).join('')}
+  </div>
+
+  <!-- ─── Retrageri edificabil lotizare ──────────────────────────────── -->
+  <div style="background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.2);border-radius:10px;padding:10px 12px;margin-bottom:8px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div style="font-size:10px;color:#fbbf24;font-weight:700">📐 Retrageri edificabil față de limita proprietății</div>
+      <button onclick="
+        const ap=S.parcels[S.activeParcel??0];
+        const p=ap?.params||{};
+        _LOT.retFront=parseFloat(p.rf||0);
+        _LOT.retSpate=parseFloat(p.rs||0);
+        _LOT.retLateral=parseFloat(p.rl||0);
+        _lotTab('p')
+      " style="font-size:9px;background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.3);color:#fbbf24;border-radius:5px;padding:3px 8px;cursor:pointer">
+        ↙ Din PUG
+      </button>
+    </div>
+    <div style="font-size:8.5px;color:#475569;margin-bottom:8px">
+      ⚠️ Aceste retrageri controlează <b style="color:#fbbf24">marginea edificabilului</b> — zona din care se generează loturile față de limita proprietății.<br>
+      Tab-ul <b style="color:#94a3b8">Analiză</b> → retrageri AEDIS (un singur imobil). <b>Nu se aplică automat la lotizare.</b>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+      ${[['retFront','↑ Față (stradă)','#fbbf24'],['retSpate','↓ Spate','#94a3b8'],['retLateral','↔ Lateral','#60a5fa']].map(([field,label,col])=>`
+        <div>
+          <div style="font-size:8px;color:#64748b;margin-bottom:3px">${label}</div>
+          <div style="display:flex;align-items:center;gap:3px">
+            <input type="number" min="0" max="20" step="0.5" value="${_LOT[field]||0}"
+              style="width:100%;background:#04090f;border:1px solid rgba(255,255,255,.15);color:${col};border-radius:5px;padding:5px 6px;font-size:13px;font-weight:700"
+              oninput="_LOT['${field}']=+this.value">
+            <span style="color:${col};font-size:10px;font-weight:700">m</span>
+          </div>
+        </div>`).join('')}
+    </div>
+    <div style="margin-top:8px;display:flex;gap:5px">
+      <button onclick="_LOT.retFront=0;_LOT.retSpate=0;_LOT.retLateral=0;_lotTab('p')"
+        style="flex:1;font-size:9px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#f87171;border-radius:6px;padding:4px;cursor:pointer">
+        0m (maxim teren)
+      </button>
+      <button onclick="_LOT.retFront=3;_LOT.retSpate=3;_LOT.retLateral=3;_lotTab('p')"
+        style="flex:1;font-size:9px;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.2);color:#fbbf24;border-radius:6px;padding:4px;cursor:pointer">
+        3m (standard)
+      </button>
+      <button onclick="_LOT.retFront=5;_LOT.retSpate=5;_LOT.retLateral=3;_lotTab('p')"
+        style="flex:1;font-size:9px;background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.2);color:#818cf8;border-radius:6px;padding:4px;cursor:pointer">
+        5/5/3m (PUG typ.)
+      </button>
+    </div>
   </div>`;
 }
 
@@ -1486,13 +1546,22 @@ function runLotizare(){
     const pArea=turf.area(pFeat);
     const params=ap.params||getDefaultParams(ap.utr||'');
 
-    // Lotizare foloseste PARCELA INTREAGA cu un buffer minim de 0.5m
-    // (buildFP e pentru un singur imobil AEDIS — retrage prea mult pt lotizare)
-    // Fiecare lot isi aplica propriile retrageri in _lotBuild3D
+    // Edificabil lotizare = parcela cu retrageri perimetrale configurate de utilizator
+    // _LOT.retFront/retSpate/retLateral (tab Param) — NU din Analiza tab (acelea sunt AEDIS)
+    const retF = Math.max(0, _LOT.retFront || 0);
+    const retS = Math.max(0, _LOT.retSpate || 0);
+    const retL = Math.max(0, _LOT.retLateral || 0);
+    const retMed = (retF + retS + retL*2) / 4; // retragere medie pentru buffer uniform
+    const retBuf = Math.max(0.5, retMed); // minim 0.5m pentru stabilitate geometrica
     let fp = pFeat;
     try{
-      const buf = turf.buffer(pFeat, -0.5, {units:'meters'});
-      if(buf?.geometry && turf.area(buf) > pArea*0.5) fp = buf;
+      const buf = turf.buffer(pFeat, -retBuf, {units:'meters'});
+      if(buf?.geometry && turf.area(buf) > pArea*0.3) fp = buf;
+      else if(retBuf > 1){
+        // Daca retragerea e prea mare pentru parcela mica, incercam 0.5m
+        const buf2 = turf.buffer(pFeat, -0.5, {units:'meters'});
+        if(buf2?.geometry && turf.area(buf2) > pArea*0.5) fp = buf2;
+      }
     }catch(e){}
     const fpArea = turf.area(fp);
 
@@ -1903,34 +1972,28 @@ function _genLotizareGeom(fpFeat, loturiPerTip, drumFract){
   const lotH=Math.sqrt(_LOT.lotAria)/mLat;
   const drumLatDeg=_LOT.drumLat/mLat;
 
-  // ── 1. Construim poligoane drumuri ──────────────────────────────────────
-  // A) Drumuri custom desenate manual
+  // ── 1. Drumuri ──────────────────────────────────────────────────────────
   _LOT._drumCustom.forEach(d=>{
-    const coords = d.coords;
-    if(coords.length < 2) return;
-    const latDeg = d.latime / mLat;
-    // Buffer liniar → poligon drum
+    if(d.coords.length < 2) return;
     try{
-      const line = {type:'Feature',geometry:{type:'LineString',coordinates:coords},properties:{}};
-      const buf = turf.buffer(line, d.latime/2, {units:'meters'});
+      const line={type:'Feature',geometry:{type:'LineString',coordinates:d.coords},properties:{}};
+      const buf=turf.buffer(line, d.latime/2, {units:'meters'});
       if(!buf?.geometry) return;
-      const inter = turf.intersect(fpFeat, buf);
+      const inter=turf.intersect(fpFeat, buf);
       if(inter?.geometry) drumuri.push({...inter,properties:{tip:d.tip,id:d.id}});
     }catch(e){}
   });
 
-  // B) Dacă nu există drumuri custom, generăm automat
   if(_LOT._drumCustom.length === 0){
-    // Drum principal orizontal la 1/3
-    const drumY = bbox2[1]+hDeg*0.33;
+    // Drum principal la 40% din inaltime (nu 33% — mai centrat)
+    const drumY = bbox2[1]+hDeg*0.40;
     const dp={type:'Feature',geometry:{type:'Polygon',coordinates:[[
       [bbox2[0],drumY],[bbox2[2],drumY],
       [bbox2[2],drumY+drumLatDeg],[bbox2[0],drumY+drumLatDeg],[bbox2[0],drumY]
     ]]},properties:{tip:'drum_principal'}};
     try{const di=turf.intersect(fpFeat,dp);if(di?.geometry)drumuri.push({...di,properties:{tip:'drum_principal'}});}catch(e){}
 
-    // Drumuri secundare
-    const cols=Math.max(1,Math.floor(wDeg/lotW));
+    // Drumuri secundare la fiecare 3 randuri
     const rows=Math.max(1,Math.floor(hDeg/lotH));
     for(let r=3;r<rows;r+=3){
       const y0=bbox2[1]+r*lotH;
@@ -1943,80 +2006,86 @@ function _genLotizareGeom(fpFeat, loturiPerTip, drumFract){
     }
   }
 
-  // ── 2. Calculăm zona rămasă pentru loturi (parcela minus drumuri) ──────
-  let terenDisponibil = fpFeat;
+  // ── 2. Teren disponibil = parcela minus drumuri ──────────────────────────
+  let terenDisponibil=fpFeat;
   drumuri.forEach(d=>{
-    try{
-      const diff = turf.difference(terenDisponibil, d);
-      if(diff?.geometry) terenDisponibil = diff;
-    }catch(e){}
+    try{ const diff=turf.difference(terenDisponibil,d); if(diff?.geometry) terenDisponibil=diff; }catch(e){}
   });
 
-  // ── 3. Grid adaptiv care UMPLE COMPLET terenul disponibil ──────────────
-  const cols2=Math.max(1,Math.floor(wDeg/lotW));
-  const rows2=Math.max(1,Math.floor(hDeg/lotH));
+  // ── 3. SCANARE COMPLETA grid → colecteaza TOATE pozitiile valide ─────────
+  // Fix principal: nu mai oprim bucla la lista.length — mai intai gasim toate
+  // pozitiile valide, apoi distribuim tipurile proportional
+  const cols2=Math.max(1,Math.round(wDeg/lotW)+1); // +1 pentru margini
+  const rows2=Math.max(1,Math.round(hDeg/lotH)+1);
+  const lotAriaMin=_LOT.lotAria*0.20; // minim 20% suprafata lot pentru a fi valid
 
-  const lista=[];
-  ['individuala','insiruita','duplex','bloc'].forEach(tip=>{
-    for(let i=0;i<(loturiPerTip[tip]||0);i++) lista.push(tip);
-  });
-  if(!lista.length) return {loturi,drumuri};
-
-  let idx=0;
-
-  for(let r=0;r<rows2&&idx<lista.length;r++){
+  const pozitiiValide=[];
+  for(let r=0;r<rows2;r++){
     const y0=bbox2[1]+r*lotH;
     const y1=y0+lotH;
-
-    for(let c=0;c<cols2&&idx<lista.length;c++){
+    for(let c=0;c<cols2;c++){
       const x0=bbox2[0]+c*lotW;
       const x1=x0+lotW;
-      const tip=lista[idx];
-      const t=_lotGetTip(tip)||_LOT.tipuri.individuala;
-
       const lotPoly={type:'Feature',geometry:{type:'Polygon',coordinates:[[
         [x0,y0],[x1,y0],[x1,y1],[x0,y1],[x0,y0]
-      ]]},properties:{tip,color:t.color,borderColor:t.borderColor}};
-
+      ]]},properties:{}};
       try{
-        // Intersectăm cu TERENUL DISPONIBIL (după scăderea drumurilor)
-        const inter=turf.intersect(terenDisponibil, lotPoly);
+        const inter=turf.intersect(terenDisponibil,lotPoly);
         if(!inter?.geometry) continue;
-
-        const interArea = turf.area(inter);
-        const lotAriaMin = _LOT.lotAria * 0.15; // minim 15% pentru a fi valid
-
-        if(interArea < lotAriaMin) continue; // lot prea mic — sărim
-
-        // MODULABIL: dacă lotul e parțial (margine), îl extindem să umple golul
-        const lotAreaTarget = _LOT.lotAria;
-
-        if(interArea >= lotAreaTarget * 0.85){
-          // Lot complet sau aproape complet → OK
-          loturi.push({...inter, properties:{...lotPoly.properties, area:Math.round(interArea)}});
-          idx++;
-        } else if(interArea >= lotAriaMin){
-          // Lot de margine parțial → îl comasăm cu vecinul sau îl lăsăm ca lot redus
-          // Verificăm dacă e lotul de final al listei sau e izolat
-          const isLastInRow = c === cols2-1 || x1 >= bbox2[2]-lotW*0.3;
-          const isEdgeLot = c===0 || r===0 || r===rows2-1;
-
-          if(isEdgeLot || isLastInRow){
-            // Lot de margine → acceptăm chiar și parțial, îi ajustăm tipul dacă e prea mic
-            const tipAdj = interArea < 200 ? 'insiruita' : tip;
-            const tAdj = _LOT.tipuri[tipAdj]||t;
-            loturi.push({...inter, properties:{
-              ...lotPoly.properties,
-              tip:tipAdj, color:tAdj.color, borderColor:tAdj.borderColor,
-              area:Math.round(interArea), partial:true
-            }});
-            idx++;
-          }
-          // Altfel: lot interior prea mic → golul va fi consumat de lotul următor extins
-        }
+        const interArea=turf.area(inter);
+        if(interArea < lotAriaMin) continue;
+        pozitiiValide.push({geom:inter.geometry, area:Math.round(interArea), r, c});
       }catch(e){}
     }
   }
+
+  if(!pozitiiValide.length) return {loturi,drumuri};
+
+  // ── 4. Distribuie tipurile pe pozitiile valide (proportional cu mix) ────
+  // Toate tipurile active (inclusiv cele speciale)
+  const tipuriActive=Object.keys(loturiPerTip).filter(k=>loturiPerTip[k]>0);
+  const totalCerut=Object.values(loturiPerTip).reduce((s,v)=>s+v,0);
+  const nrPoz=pozitiiValide.length;
+
+  // Asignam tipuri proportional — daca avem mai multe pozitii decat cerut,
+  // completam cu tipul dominant
+  const tipDominant=tipuriActive.reduce((a,b)=>(loturiPerTip[a]||0)>=(loturiPerTip[b]||0)?a:b,'individuala');
+  const asignari=[];
+  tipuriActive.forEach(tip=>{
+    const n=loturiPerTip[tip]||0;
+    for(let i=0;i<n;i++) asignari.push(tip);
+  });
+  // Completeaza pana la nrPoz cu tipul dominant (umple toata parcela)
+  while(asignari.length<nrPoz) asignari.push(tipDominant);
+
+  // Distribuie uniform (nu blocat in colturi) — amesteca tipurile
+  // Tipuri speciale (suprafata mica) → pozitii de la margine/colt
+  const specialTips=['gazebo','garaj','bbq','bucvara','bortodoxa','bcatolica'];
+  const pozMargine=pozitiiValide.filter(p=>{
+    const maxR=Math.max(...pozitiiValide.map(x=>x.r));
+    const maxC=Math.max(...pozitiiValide.map(x=>x.c));
+    return p.r===0||p.r===maxR||p.c===0||p.c===maxC;
+  });
+  const pozInterior=pozitiiValide.filter(p=>!pozMargine.includes(p));
+
+  // Sorteaza asignarile: tipuri speciale primele, rezidentiale dupa
+  const asignSpeciale=asignari.filter(t=>specialTips.includes(t));
+  const asignRezid=asignari.filter(t=>!specialTips.includes(t));
+  const asignariFinal=[...asignSpeciale,...asignRezid];
+
+  // Pune tipurile speciale pe pozitii de margine, rezidentiale pe interior
+  const pozOrdonate=[...pozMargine,...pozInterior];
+
+  pozOrdonate.forEach((poz, i)=>{
+    const tip=asignariFinal[i]||tipDominant;
+    const t=_lotGetTip(tip)||_LOT.tipuri[tipDominant]||_LOT.tipuri.individuala;
+    loturi.push({
+      type:'Feature',
+      geometry:poz.geom,
+      properties:{tip,color:t.color,borderColor:t.borderColor,area:poz.area,
+        partial:poz.area < _LOT.lotAria*0.85}
+    });
+  });
 
   return {loturi, drumuri};
 }
