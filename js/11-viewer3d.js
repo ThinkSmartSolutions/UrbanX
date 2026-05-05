@@ -3129,16 +3129,74 @@ function _v3dLight(preset){
   const isNowNight = window._v3dNight || false;
 
   const needsRebuild = (wasNight !== isNowNight);
-  if(needsRebuild){
-    // Rebuild complet pentru lumini speciale (biserici, noapte)
-    const savedTh=V3D.th, savedPh=V3D.ph, savedRad=V3D.rad;
-    V3D._camInit=true; // pastreaza unghiuri
-    // Ia ap din contextul curent
-    const apForBuild = (typeof S!=='undefined') ? S.parcels?.[S.activeParcel??0] : undefined;
-    setTimeout(()=>{
-      _v3dBuild(apForBuild);
-      setTimeout(()=>{ V3D.th=savedTh; V3D.ph=savedPh; V3D.rad=savedRad; _v3dUpdateCam(); }, 60);
-    }, 80);
+  if(needsRebuild && V3D.scene){
+    // Refresh SCENE ONLY — nu recrea HTML-ul overlay (ar inchide viewer-ul)
+    // 1. Sterge luminile speciale si meshuri emissive anterioare
+    const toRemove=[];
+    V3D.scene.traverse(obj=>{
+      if(obj.userData?.nightLight || obj.userData?.specialMesh) toRemove.push(obj);
+    });
+    toRemove.forEach(obj=>{ V3D.scene.remove(obj); if(obj.geometry) obj.geometry.dispose(); });
+
+    // 2. Re-aplica lumini ambientale cu noul preset
+    // (deja facut de _v3dApplyLight mai sus)
+
+    // 3. Rebuildeaza DOAR meshurile AEDIS/lotizare (nu HTML)
+    // Sterge aedis vechi, lasa contextul intact
+    V3D.aedis.forEach(m=>{ V3D.scene.remove(m); if(m.geometry) m.geometry.dispose(); });
+    V3D.aedis=[];
+
+    // Re-randeaza volumele AEDIS/lotizare cu noile materiale
+    const THREE=window.THREE;
+    const apRb=(typeof S!=='undefined')?S.parcels?.[S.activeParcel??0]:undefined;
+    if(apRb?.geo?.geometry && S.vol._lastFeats?.length){
+      try{
+        const ring0rb=apRb.geo.geometry.type==='Polygon'
+          ?apRb.geo.geometry.coordinates[0]
+          :apRb.geo.geometry.coordinates[0][0];
+        const cxRb=ring0rb.reduce((s,c)=>s+c[0],0)/ring0rb.length;
+        const cy2Rb=ring0rb.reduce((s,c)=>s+c[1],0)/ring0rb.length;
+        const mLngRb=111320*Math.cos(cy2Rb*Math.PI/180);
+        const mLatRb=111320;
+        const toLocRb=([lng,lat])=>[(lng-cxRb)*mLngRb,-(lat-cy2Rb)*mLatRb];
+
+        // Re-adauga volume
+        S.vol._lastFeats.forEach(f=>{
+          if(!f.geometry||f.properties?.isExistent) return;
+          const base=f.properties?.base||0, top=f.properties?.top||3;
+          const color=f.properties?.color||'#8898b0';
+          try{
+            const fring=f.geometry.type==='Polygon'?f.geometry.coordinates[0]:f.geometry.coordinates[0][0];
+            const pts=fring.slice(0,-1).map(toLocRb);
+            if(pts.length<3) return;
+            const isNightNow=window._v3dNight;
+            const mat=new THREE.MeshStandardMaterial({
+              color, roughness:0.7, metalness:0.1,
+              emissive: isNightNow?new THREE.Color(0.03,0.05,0.10):new THREE.Color(0,0,0),
+              emissiveIntensity: isNightNow?0.6:0
+            });
+            const m=_v3dPrism(THREE,pts,base,top,mat);
+            if(m){ m.castShadow=true; m.receiveShadow=true; V3D.scene.add(m); V3D.aedis.push(m); }
+          }catch(e){}
+        });
+
+        // Re-adauga speciale (cu lumini noapte)
+        const _specialTipsNight=['gazebo','garaj','bbq','bucvara','bortodoxa','bcatolica'];
+        const _renderedNight=new Set();
+        S.vol._lastFeats.forEach(f=>{
+          if(!f.properties?.isLotizare) return;
+          const tip=f.properties?.lotTip;
+          if(!_specialTipsNight.includes(tip)) return;
+          if(f.properties?.floor!==0) return;
+          const uid=tip+'_'+f.properties?.parcelIdx;
+          if(_renderedNight.has(uid)) return;
+          _renderedNight.add(uid);
+          if(typeof _lotRenderSpecial==='function')
+            _lotRenderSpecial(THREE,V3D.scene,f.geometry,tip,toLocRb);
+        });
+      }catch(e){ console.warn('night rebuild:',e.message); }
+    }
+    V3D._dirty=5;
     return;
   }
 

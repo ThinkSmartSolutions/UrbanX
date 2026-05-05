@@ -847,7 +847,9 @@ function _lotBuild3D(loturi, drumuri){
     const tipKey = lot.properties?.tip || 'individuala';
     const def = _LOT.tipuri[tipKey]||_LOT.tipuri.individuala;
     const ov = _LOT.tipOverride[tipKey]||{};
-    const tipAcoperis = ov.tipAcoperis ?? def.tipAcoperis ?? 'terasa_plata';
+    // Lot partial (margine parcela) = acoperis plat - geometria trapezoidala/triunghiulara
+    // genereaza proiectii vizuale in afara parcelei cu acoperisuri in panta
+    const tipAcoperis = (lot.properties?.partial===true) ? 'terasa_plata' : (ov.tipAcoperis ?? def.tipAcoperis ?? 'terasa_plata');
     if(!lot.geometry || tipAcoperis==='terasa_plata' || tipAcoperis==='terasa_circulabila') return;
     const t = {...def,...ov};
     const niv=Math.max(1,t.niv||2);
@@ -894,7 +896,9 @@ function _lotBuild3D(loturi, drumuri){
     const tipKey = lot.properties?.tip || 'individuala';
     const def = _LOT.tipuri[tipKey]||_LOT.tipuri.individuala;
     const ov = _LOT.tipOverride[tipKey]||{};
-    const tipAcoperis = ov.tipAcoperis ?? def.tipAcoperis ?? 'terasa_plata';
+    // Lot partial (margine parcela) = acoperis plat - geometria trapezoidala/triunghiulara
+    // genereaza proiectii vizuale in afara parcelei cu acoperisuri in panta
+    const tipAcoperis = (lot.properties?.partial===true) ? 'terasa_plata' : (ov.tipAcoperis ?? def.tipAcoperis ?? 'terasa_plata');
     if(!lot.geometry || tipAcoperis==='terasa_plata' || tipAcoperis==='terasa_circulabila') return;
     const t = {...def,...ov};
     const niv=Math.max(1,t.niv||2);
