@@ -644,6 +644,10 @@ function _lotBuild3D(loturi, drumuri){
     };
     const colors = tipColors[tipKey] || tipColors.individuala;
 
+    // Tipurile speciale (dotari/cult) genereaza doar o platforma de sol
+    // Geometria 3D detaliata e adaugata de _lotRenderSpecial in viewer
+    const _isSpecialTip = ['gazebo','garaj','bbq','bucvara','bortodoxa','bcatolica'].includes(tipKey);
+
     // Setări arhitecturale per tip (din override sau default)
     const tipStil      = ov.stil          ?? def.stil          ?? 'modern';
     const tipAcoperis  = ov.tipAcoperis   ?? def.tipAcoperis   ?? 'terasa_plata';
@@ -655,6 +659,19 @@ function _lotBuild3D(loturi, drumuri){
     const tipBalcAdanc = ov.balconAdancime?? def.balconAdancime?? 1.2;
     const tipCortina   = ov.pereteleCortina ?? def.pereteleCortina ?? false;
     const tipParterC   = ov.parterComercial ?? def.parterComercial ?? false;
+
+    // Tipuri speciale: doar platforma colorata de sol, geometria 3D = _lotRenderSpecial
+    if(_isSpecialTip){
+      feats3D.push({
+        type:'Feature', geometry: fpGeom,
+        properties:{
+          base:0, top:0.25, color: def.color,
+          floor:0, parcelIdx:lotIdx, lotTip:tipKey,
+          isLotizare:true, stil:tipStil
+        }
+      });
+      return; // skip generarea etajelor normale (forEach)
+    }
 
     // Generare etaje
     for(let i = 0; i < niv; i++){
@@ -893,59 +910,94 @@ function _lotRenderSpecial(THREE, scene, geom, tipKey, toLoc){
     if(tipKey==='gazebo'){
       const stMat=new THREE.MeshStandardMaterial({color:'#8B6914',roughness:0.8,metalness:0.1});
       const rfMat=new THREE.MeshStandardMaterial({color:'#c8520a',roughness:0.7,metalness:0.05});
-      const s=Math.min(sz,4);
+      const s=Math.min(Math.max(sz*0.6,3),8); // scala adaptiva, minim 3m
+      const postH=3.2;
       [[-s/2,-s/2],[s/2,-s/2],[s/2,s/2],[-s/2,s/2]].forEach(([ox,oz])=>{
-        const st=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.09,2.8,6),stMat);
-        st.position.set(cx+ox,1.4,cz+oz); scene.add(st);
+        const st=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.15,postH,8),stMat);
+        st.position.set(cx+ox,postH/2,cz+oz); scene.add(st);
       });
-      const rf=new THREE.Mesh(new THREE.ConeGeometry(s*0.75,1.5,4),rfMat);
-      rf.rotation.y=Math.PI/4; rf.position.set(cx,3.25,cz); scene.add(rf);
+      // Grinzi orizontale pe perimetru
+      [[-s/2,0,0.12,s],[0,-s/2,s,0.12]].forEach(([ox,oz,bw,bd])=>{
+        const g=new THREE.Mesh(new THREE.BoxGeometry(bw,0.15,bd),stMat);
+        g.position.set(cx+ox,postH,cz+oz); scene.add(g);
+        const g2=new THREE.Mesh(new THREE.BoxGeometry(bw,0.15,bd),stMat);
+        g2.position.set(cx-ox,postH,cz-oz); scene.add(g2);
+      });
+      const rf=new THREE.Mesh(new THREE.ConeGeometry(s*0.78,1.8,4),rfMat);
+      rf.rotation.y=Math.PI/4; rf.position.set(cx,postH+1.0,cz); scene.add(rf);
     }
     else if(tipKey==='garaj'){
       const wallMat=new THREE.MeshStandardMaterial({color:'#94a3b8',roughness:0.6,metalness:0.3});
-      const roofMat=new THREE.MeshStandardMaterial({color:'#64748b',roughness:0.5,metalness:0.5});
-      const gw=Math.min(w*0.85,6), gd=Math.min(d*0.85,5.5);
-      const body=new THREE.Mesh(new THREE.BoxGeometry(gw,2.4,gd),wallMat);
-      body.position.set(cx,1.2,cz); scene.add(body);
-      const roof=new THREE.Mesh(new THREE.BoxGeometry(gw+0.2,0.18,gd+0.2),roofMat);
-      roof.position.set(cx,2.49,cz); scene.add(roof);
-      const usaMat=new THREE.MeshStandardMaterial({color:'#1e3a5f',roughness:0.4,metalness:0.6});
-      const usa=new THREE.Mesh(new THREE.BoxGeometry(Math.min(gw*0.7,2.4),2.0,0.08),usaMat);
-      usa.position.set(cx,1.0,cz-gd/2-0.04); scene.add(usa);
+      const roofMat=new THREE.MeshStandardMaterial({color:'#475569',roughness:0.5,metalness:0.5,emissive:new THREE.Color(0.02,0.02,0.04),emissiveIntensity:0.3});
+      const gw=Math.min(Math.max(w*0.75,4),8), gd=Math.min(Math.max(d*0.75,4),7);
+      const gH=2.8;
+      const body=new THREE.Mesh(new THREE.BoxGeometry(gw,gH,gd),wallMat);
+      body.position.set(cx,gH/2,cz); scene.add(body);
+      const roof=new THREE.Mesh(new THREE.BoxGeometry(gw+0.3,0.2,gd+0.3),roofMat);
+      roof.position.set(cx,gH+0.1,cz); scene.add(roof);
+      const usaMat=new THREE.MeshStandardMaterial({color:'#1e3a5f',roughness:0.4,metalness:0.7});
+      const usaW=Math.min(gw*0.65,3.2);
+      const usa=new THREE.Mesh(new THREE.BoxGeometry(usaW,gH*0.85,0.1),usaMat);
+      usa.position.set(cx,gH*0.425,cz-gd/2-0.05); scene.add(usa);
+      // Linii usa
+      const lineMat=new THREE.MeshStandardMaterial({color:'#90a0b0',roughness:0.3,metalness:0.8});
+      for(let li=0;li<4;li++){
+        const lm=new THREE.Mesh(new THREE.BoxGeometry(usaW,0.06,0.05),lineMat);
+        lm.position.set(cx,0.5+li*0.55,cz-gd/2-0.06); scene.add(lm);
+      }
     }
     else if(tipKey==='bbq'){
       const piatra=new THREE.MeshStandardMaterial({color:'#6b5a4a',roughness:0.95,metalness:0});
-      const vatra=new THREE.Mesh(new THREE.CylinderGeometry(0.7,0.8,0.5,12),piatra);
-      vatra.position.set(cx,0.25,cz); scene.add(vatra);
-      const focMat=new THREE.MeshStandardMaterial({color:'#ff6600',emissive:new THREE.Color(0.8,0.3,0),emissiveIntensity:2,roughness:1});
-      const foc=new THREE.Mesh(new THREE.ConeGeometry(0.3,0.6,8),focMat);
-      foc.position.set(cx,0.8,cz); scene.add(foc);
+      const r_vatra=Math.min(sz*0.18,2.5);
+      const vatra=new THREE.Mesh(new THREE.CylinderGeometry(r_vatra,r_vatra*1.1,0.6,12),piatra);
+      vatra.position.set(cx,0.3,cz); scene.add(vatra);
+      // Parapet/zid vatra
+      const parapetMat=new THREE.MeshStandardMaterial({color:'#8b7355',roughness:0.9,metalness:0});
+      const parapet=new THREE.Mesh(new THREE.CylinderGeometry(r_vatra+0.3,r_vatra+0.35,0.4,12,1,true),parapetMat);
+      parapet.position.set(cx,0.8,cz); scene.add(parapet);
+      // Foc emissive vizibil
+      const focMat=new THREE.MeshStandardMaterial({color:'#ff6600',emissive:new THREE.Color(1.0,0.4,0),emissiveIntensity:4,roughness:1,transparent:true,opacity:0.9});
+      const foc=new THREE.Mesh(new THREE.ConeGeometry(r_vatra*0.5,r_vatra*0.8,8),focMat);
+      foc.position.set(cx,1.2,cz); scene.add(foc);
+      if(window._v3dNight){
+        const focLight=new THREE.PointLight('#ff6600',2.5,sz*2,1.5);
+        focLight.position.set(cx,2,cz); scene.add(focLight);
+      }
+      // Masa cu umbrela
       const masaMat=new THREE.MeshStandardMaterial({color:'#8B6914',roughness:0.8,metalness:0});
-      const masa=new THREE.Mesh(new THREE.CylinderGeometry(0.8,0.8,0.06,12),masaMat);
-      masa.position.set(cx-sz*0.4,0.75,cz-sz*0.4); scene.add(masa);
-      const picior=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.06,0.75,6),masaMat);
-      picior.position.set(cx-sz*0.4,0.37,cz-sz*0.4); scene.add(picior);
+      const offset=sz*0.35;
+      const masa=new THREE.Mesh(new THREE.CylinderGeometry(1.0,1.0,0.07,12),masaMat);
+      masa.position.set(cx+offset,0.78,cz+offset); scene.add(masa);
+      const picior=new THREE.Mesh(new THREE.CylinderGeometry(0.08,0.08,0.78,6),masaMat);
+      picior.position.set(cx+offset,0.39,cz+offset); scene.add(picior);
+      // Scaune (4)
+      [1,-1].forEach(sx2=>[1,-1].forEach(sz2=>{
+        const sc=new THREE.Mesh(new THREE.BoxGeometry(0.45,0.08,0.45),masaMat);
+        sc.position.set(cx+offset+sx2*0.65,0.48,cz+offset+sz2*0.65); scene.add(sc);
+      }));
     }
     else if(tipKey==='bucvara'){
       const perMat=new THREE.MeshStandardMaterial({color:'#f0d0a0',roughness:0.85,metalness:0});
       const rfMat=new THREE.MeshStandardMaterial({color:'#c84a20',roughness:0.7,metalness:0});
-      const bw=Math.min(w*0.85,5), bd=Math.min(d*0.85,4);
-      [[-bw/2,bd/2,0.12,2.4,bd],[bw/2,bd/2,0.12,2.4,bd],[0,-bd/2,bw,2.4,0.12]].forEach(([ox,,oz,ww,hh,dd])=>{
-        const p=new THREE.Mesh(new THREE.BoxGeometry(ww||0.12,hh,dd||0.12),perMat);
+      const bw=Math.min(Math.max(w*0.7,3),6), bd=Math.min(Math.max(d*0.7,3),5);
+      const hh=2.6;
+      // 3 pereti: stanga, dreapta, spate (fata deschisa)
+      [{ox:-bw/2,oz:0,ww:0.15,dd:bd},{ox:bw/2,oz:0,ww:0.15,dd:bd},{ox:0,oz:-bd/2,ww:bw,dd:0.15}].forEach(({ox,oz,ww,dd})=>{
+        const p=new THREE.Mesh(new THREE.BoxGeometry(ww,hh,dd),perMat);
         p.position.set(cx+ox,hh/2,cz+oz); scene.add(p);
       });
-      [[-bw/2,bd/2],[bw/2,bd/2],[0,-bd/2]].forEach(([ox,oz],i)=>{
-        const dims=i<2?[0.12,2.4,bd]:[bw,2.4,0.12];
-        const p=new THREE.Mesh(new THREE.BoxGeometry(...dims),perMat);
-        p.position.set(cx+ox,dims[1]/2,cz+oz); scene.add(p);
-      });
-      const rf=new THREE.Mesh(new THREE.BoxGeometry(bw+0.3,0.15,bd+0.3),rfMat);
-      rf.position.set(cx,2.47,cz); scene.add(rf);
+      // Acoperis
+      const rf=new THREE.Mesh(new THREE.BoxGeometry(bw+0.4,0.18,bd+0.4),rfMat);
+      rf.position.set(cx,hh+0.09,cz); scene.add(rf);
+      // Cos de fum
+      const cosMat=new THREE.MeshStandardMaterial({color:'#8B6914',roughness:0.9,metalness:0});
+      const cos=new THREE.Mesh(new THREE.CylinderGeometry(0.15,0.2,1.2,8),cosMat);
+      cos.position.set(cx+bw*0.3,hh+0.8,cz-bd*0.3); scene.add(cos);
     }
     else if(tipKey==='bortodoxa'){
       const zidMat=new THREE.MeshStandardMaterial({color:'#f5f0e8',roughness:0.8,metalness:0});
-      const acMat=new THREE.MeshStandardMaterial({color:'#8B6914',roughness:0.6,metalness:0.3});
-      const bs=Math.min(sz*0.7,8);
+      const acMat=new THREE.MeshStandardMaterial({color:'#8B6914',roughness:0.6,metalness:0.3,emissive:new THREE.Color(0.05,0.04,0),emissiveIntensity:0.4});
+      const bs=Math.min(Math.max(sz*0.65,6),14); // minim 6m, max 14m
       const corp=new THREE.Mesh(new THREE.BoxGeometry(bs*0.6,5,bs),zidMat);
       corp.position.set(cx,2.5,cz); scene.add(corp);
       const bolta=new THREE.Mesh(new THREE.SphereGeometry(bs*0.32,8,6,0,Math.PI*2,0,Math.PI/2),acMat);
@@ -963,7 +1015,7 @@ function _lotRenderSpecial(THREE, scene, geom, tipKey, toLoc){
     else if(tipKey==='bcatolica'){
       const zidMat=new THREE.MeshStandardMaterial({color:'#e8e0d0',roughness:0.75,metalness:0});
       const acMat=new THREE.MeshStandardMaterial({color:'#607080',roughness:0.5,metalness:0.2});
-      const bs=Math.min(sz*0.7,8);
+      const bs=Math.min(Math.max(sz*0.65,6),12); // minim 6m, max 12m
       const nava=new THREE.Mesh(new THREE.BoxGeometry(bs*0.55,5.5,bs),zidMat);
       nava.position.set(cx,2.75,cz); scene.add(nava);
       const aRoof=new THREE.Mesh(new THREE.CylinderGeometry(0.01,bs*0.32,1.8,3,1),acMat);

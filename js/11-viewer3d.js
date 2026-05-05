@@ -782,6 +782,26 @@ function _v3dBuild(ap){
     }catch(e){ console.warn('AEDIS mesh:',e.message); }
   });
 
+  // ── Render special lotizare (gazebo, bbq, biserici etc.) ────────────────
+  // Apelat INDIFERENT daca viewer era deschis la generare sau nu
+  try{
+    const _specialTips=['gazebo','garaj','bbq','bucvara','bortodoxa','bcatolica'];
+    const _hasSpecial=(S.vol._lastFeats||[]).some(f=>f.properties?.isLotizare&&_specialTips.includes(f.properties?.lotTip));
+    if(_hasSpecial && typeof _lotRenderSpecial==='function'){
+      const _rendered=new Set();
+      (S.vol._lastFeats||[]).forEach(f=>{
+        if(!f.properties?.isLotizare) return;
+        const tip=f.properties?.lotTip;
+        if(!_specialTips.includes(tip)) return;
+        if(f.properties?.floor!==0) return; // doar parterul ca referinta de pozitie
+        const uid=tip+'_'+f.properties?.parcelIdx;
+        if(_rendered.has(uid)) return;
+        _rendered.add(uid);
+        _lotRenderSpecial(THREE,scene,f.geometry,tip,toLoc);
+      });
+    }
+  }catch(e){ console.warn('lotRenderSpecial hook:',e.message); }
+
   // Parcelă contur
   try{
     const pts=ring0.map(toLoc);
