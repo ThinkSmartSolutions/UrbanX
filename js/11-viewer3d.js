@@ -842,14 +842,10 @@ function _v3dBuild(ap){
   });
   obs.observe(canvas); V3D._obs=obs;
 
-  // Render loop cu dirty flag — evită 60fps continuu când camera e statică
-  // _dirtyFrames: număr de frame-uri care mai trebuie randate după ultima interacțiune
-  V3D._dirty = 4;
-  const render=()=>{
-    V3D.af=requestAnimationFrame(render);
-    if(!V3D.r||!V3D.scene||!V3D.cam) return;
-    if(V3D._dirty > 0){ V3D.r.render(V3D.scene,V3D.cam); V3D._dirty--; }
-  };
+  // Render loop — always-render (dirty flag cauza black screen la build async)
+  // Performanța e asigurată de reducerea PointLights (-66%) și pixelRatio 1.5
+  const render=()=>{ V3D.af=requestAnimationFrame(render); if(V3D.r&&V3D.scene&&V3D.cam) V3D.r.render(V3D.scene,V3D.cam); };
+  render(); // pornește loop-ul RAF
   // Marchează dirty la orice interacțiune cu canvas (orbit, zoom, drag)
   const _markDirty=()=>{ V3D._dirty=4; };
   canvas.addEventListener('pointerdown',_markDirty,{passive:true});
@@ -2945,7 +2941,6 @@ function _v3dApplyLight(preset,THREE,scene,r){
 function _v3dLight(preset){
   if(!V3D.scene||!window.THREE) return;
   _v3dApplyLight(preset,window.THREE,V3D.scene,V3D.r);
-  if(V3D._dirty!==undefined) V3D._dirty=6; // mai multe frame-uri pentru tranziția de materiale
   // Rebuildem materialele cu texturi de noapte/zi
   if(V3D.texCache){ Object.values(V3D.texCache).forEach(t=>t.dispose()); V3D.texCache={}; }
   // Actualizăm emissive pe meshurile AEDIS
@@ -2963,7 +2958,6 @@ function _v3dCtxViz(mode){
 
 // ── Orbit controls ─────────────────────────────────────────────────────────
 function _v3dUpdateCam(){
-  if(V3D._dirty!==undefined) V3D._dirty=3; // marchează render necesar
   if(!V3D.cam||!V3D.tx) return;
   const x=V3D.rad*Math.sin(V3D.ph)*Math.sin(V3D.th);
   const y=V3D.rad*Math.cos(V3D.ph);
