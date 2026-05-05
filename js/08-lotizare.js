@@ -1242,22 +1242,22 @@ window._lotRenderSpecial = function _lotRenderSpecial(THREE, scene, geom, tipKey
         // ── Lumini noapte ──────────────────────────────────────────────
         // 1. Halo auriu cupola — lumina calda portocalie sus
         const haloLight=new THREE.PointLight('#ffc060',4.5,bs*2.5,1.8);
-        haloLight.position.set(cx,9,cz-bs*0.15); scene.add(haloLight);
+        haloLight.position.set(cx,9,cz-bs*0.15); haloLight.userData={nightLight:true}; scene.add(haloLight);
 
         // 2. Lumina difuza corp — ilumineaza peretii de jos
         const corpLight=new THREE.PointLight('#ffe8a0',2.5,bs*1.8,2.0);
-        corpLight.position.set(cx,1.5,cz); scene.add(corpLight);
+        corpLight.position.set(cx,1.5,cz); corpLight.userData={nightLight:true}; scene.add(corpLight);
 
         // 3. Spot cruce — fascicul alb-auriu de jos in sus pe cruce
         const spotCruce=new THREE.SpotLight('#fffbe0',6,18,Math.PI/10,0.3,2);
         spotCruce.position.set(cx,0.5,cz-bs*0.15-3);
         spotCruce.target.position.set(cx,12,cz-bs*0.15);
-        scene.add(spotCruce); scene.add(spotCruce.target);
+        spotCruce.userData={nightLight:true}; spotCruce.target.userData={nightLight:true}; scene.add(spotCruce); scene.add(spotCruce.target);
 
         // 4. Ferestre nave — lumina calda galbena din interior
         [[-bs*0.25,0],[bs*0.25,0],[0,-bs*0.4],[0,bs*0.4]].forEach(([ox,oz])=>{
           const winLight=new THREE.PointLight('#ffdd80',1.8,bs*0.7,2.5);
-          winLight.position.set(cx+ox,2.5,cz+oz); scene.add(winLight);
+          winLight.position.set(cx+ox,2.5,cz+oz); winLight.userData={nightLight:true}; scene.add(winLight);
           // Mesh vitraliu emissive
           const vitMat=new THREE.MeshStandardMaterial({
             color:'#ffcc44',emissive:new THREE.Color(1.0,0.7,0.1),
@@ -1269,7 +1269,7 @@ window._lotRenderSpecial = function _lotRenderSpecial(THREE, scene, geom, tipKey
 
         // 5. Halo albastru-alb la baza — tip reper urban (spot exterior)
         const groundSpot=new THREE.PointLight('#c0d8ff',1.5,bs*1.2,2.2);
-        groundSpot.position.set(cx,0.3,cz); scene.add(groundSpot);
+        groundSpot.position.set(cx,0.3,cz); groundSpot.userData={nightLight:true}; scene.add(groundSpot);
       }
     }
     else if(tipKey==='bcatolica'){
@@ -1312,23 +1312,23 @@ window._lotRenderSpecial = function _lotRenderSpecial(THREE, scene, geom, tipKey
         const spotTurn=new THREE.SpotLight('#e0eeff',5,20,Math.PI/8,0.25,1.8);
         spotTurn.position.set(cx+bs*0.3-4,0.5,cz-bs*0.38-3);
         spotTurn.target.position.set(cx+bs*0.3,12,cz-bs*0.38);
-        scene.add(spotTurn); scene.add(spotTurn.target);
+        spotTurn.userData={nightLight:true}; spotTurn.target.userData={nightLight:true}; scene.add(spotTurn); scene.add(spotTurn.target);
 
         // 2. Spot lateral nava (gotic: lumina dramatica pe fatada)
         const spotNava=new THREE.SpotLight('#ddeeff',3,15,Math.PI/6,0.35,2);
         spotNava.position.set(cx-bs*0.5,0.5,cz);
         spotNava.target.position.set(cx,4,cz);
-        scene.add(spotNava); scene.add(spotNava.target);
+        spotNava.userData={nightLight:true}; spotNava.target.userData={nightLight:true}; scene.add(spotNava); scene.add(spotNava.target);
 
         // 3. Halo rece pe turn (albastru-alb: reper urban nocturn)
         const turnLight=new THREE.PointLight('#a0c0ff',3.5,bs*1.8,1.8);
-        turnLight.position.set(cx+bs*0.3,8,cz-bs*0.38); scene.add(turnLight);
+        turnLight.position.set(cx+bs*0.3,8,cz-bs*0.38); turnLight.userData={nightLight:true}; scene.add(turnLight);
 
         // 4. Vitralii nave — lumina calda galbena-portocalie din interior
         [[-bs*0.2,-bs*0.35],[bs*0.15,-bs*0.1],[0,bs*0.3]].forEach(([ox,oz],wi)=>{
           const wcol=['#ff9922','#ffcc44','#ff8844'][wi];
           const winLight=new THREE.PointLight(wcol,2.0,bs*0.65,2.5);
-          winLight.position.set(cx+ox,2.5,cz+oz); scene.add(winLight);
+          winLight.position.set(cx+ox,2.5,cz+oz); winLight.userData={nightLight:true}; scene.add(winLight);
           const vitMat=new THREE.MeshStandardMaterial({
             color:wcol, emissive:new THREE.Color(...wcol.match(/.{2}/g).map(h=>parseInt(h,16)/255/2)),
             emissiveIntensity:4, transparent:true, opacity:0.9, side:THREE.DoubleSide
@@ -1339,7 +1339,7 @@ window._lotRenderSpecial = function _lotRenderSpecial(THREE, scene, geom, tipKey
 
         // 5. Lumina de sol albastra — halo urban la baza
         const groundL=new THREE.PointLight('#8090c0',2.0,bs*1.0,2.5);
-        groundL.position.set(cx,0.5,cz); scene.add(groundL);
+        groundL.position.set(cx,0.5,cz); groundL.userData={nightLight:true}; scene.add(groundL);
       }
     }
   }catch(e){ console.warn('_lotRenderSpecial',tipKey,e.message); }

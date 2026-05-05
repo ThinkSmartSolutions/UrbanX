@@ -695,6 +695,7 @@ function _v3dBuild(ap){
   const mLng=111320*Math.cos(cy2*Math.PI/180), mLat=111320;
   const toLoc=([lng,lat])=>[(lng-cx)*mLng,-(lat-cy2)*mLat]; // negat: rotateX(-PI/2) inverseaza → corect Nord=top
   const toWorld=([lng,lat])=>[(lng-cx)*mLng,(lat-cy2)*mLat]; // pt position.set direct
+  window._V3D_toLoc=toLoc; // salvat pt refresh noapte (fara re-calcul centroid)
 
   // ── Zone colorate: parcelă, edificabil, retrageri, SV, parcaje ──────────
   // IMPORTANT: _v3dAddZones trebuie apelat DUPĂ definirea lui toLoc
@@ -3146,72 +3147,58 @@ function _v3dLight(preset){
 
   const needsRebuild = (wasNight !== isNowNight);
   if(needsRebuild && V3D.scene){
-    // Refresh SCENE ONLY — nu recrea HTML-ul overlay (ar inchide viewer-ul)
-    // 1. Sterge luminile speciale si meshuri emissive anterioare
+    const THREE=window.THREE;
+    const isNightNow=window._v3dNight;
+
+    // ── UPDATE IN-PLACE (fara re-alocare = fara decalaj pozitii) ──────────
+    // 1. Update emissive pe toate meshurile existente (aedis + context)
+    V3D.scene.traverse(m=>{
+      if(!m.isMesh || !m.material) return;
+      if(m.userData?.nightLight) return; // sari luminile speciale
+      try{
+        const mat=m.material;
+        if(!mat.emissive) return;
+        // Cladiri context
+        if(V3D.ctx.includes(m)){
+          mat.emissive.set(isNightNow?0.02*255<<16:0, isNightNow?0.04*255<<8:0, isNightNow?0.1*255:0);
+          mat.emissive.setRGB(isNightNow?0.02:0, isNightNow?0.04:0, isNightNow?0.1:0);
+          mat.emissiveIntensity=isNightNow?0.5:0;
+          mat.needsUpdate=true;
+        }
+        // Cladiri AEDIS/lotizare
+        if(V3D.aedis.includes(m)){
+          mat.emissive.setRGB(isNightNow?0.03:0, isNightNow?0.05:0, isNightNow?0.08:0);
+          mat.emissiveIntensity=isNightNow?0.5:0;
+          mat.needsUpdate=true;
+        }
+      }catch(e){}
+    });
+
+    // 2. Sterge DOAR luminile speciale vechi (PointLight/SpotLight pentru biserici)
     const toRemove=[];
     V3D.scene.traverse(obj=>{
-      if(obj.userData?.nightLight || obj.userData?.specialMesh) toRemove.push(obj);
+      if(obj.userData?.nightLight) toRemove.push(obj);
     });
-    toRemove.forEach(obj=>{ V3D.scene.remove(obj); if(obj.geometry) obj.geometry.dispose(); });
+    toRemove.forEach(obj=>V3D.scene.remove(obj));
 
-    // 2. Re-aplica lumini ambientale cu noul preset
-    // (deja facut de _v3dApplyLight mai sus)
-
-    // 3. Rebuildeaza DOAR meshurile AEDIS/lotizare (nu HTML)
-    // Sterge aedis vechi, lasa contextul intact
-    V3D.aedis.forEach(m=>{ V3D.scene.remove(m); if(m.geometry) m.geometry.dispose(); });
-    V3D.aedis=[];
-
-    // Re-randeaza volumele AEDIS/lotizare cu noile materiale
-    const THREE=window.THREE;
-    const apRb=(typeof S!=='undefined')?S.parcels?.[S.activeParcel??0]:undefined;
-    if(apRb?.geo?.geometry && S.vol._lastFeats?.length){
-      try{
-        const ring0rb=apRb.geo.geometry.type==='Polygon'
-          ?apRb.geo.geometry.coordinates[0]
-          :apRb.geo.geometry.coordinates[0][0];
-        const cxRb=ring0rb.reduce((s,c)=>s+c[0],0)/ring0rb.length;
-        const cy2Rb=ring0rb.reduce((s,c)=>s+c[1],0)/ring0rb.length;
-        const mLngRb=111320*Math.cos(cy2Rb*Math.PI/180);
-        const mLatRb=111320;
-        const toLocRb=([lng,lat])=>[(lng-cxRb)*mLngRb,-(lat-cy2Rb)*mLatRb];
-
-        // Re-adauga volume
-        S.vol._lastFeats.forEach(f=>{
-          if(!f.geometry||f.properties?.isExistent) return;
-          const base=f.properties?.base||0, top=f.properties?.top||3;
-          const color=f.properties?.color||'#8898b0';
-          try{
-            const fring=f.geometry.type==='Polygon'?f.geometry.coordinates[0]:f.geometry.coordinates[0][0];
-            const pts=fring.slice(0,-1).map(toLocRb);
-            if(pts.length<3) return;
-            const isNightNow=window._v3dNight;
-            const mat=new THREE.MeshStandardMaterial({
-              color, roughness:0.7, metalness:0.1,
-              emissive: isNightNow?new THREE.Color(0.03,0.05,0.10):new THREE.Color(0,0,0),
-              emissiveIntensity: isNightNow?0.6:0
-            });
-            const m=_v3dPrism(THREE,pts,base,top,mat);
-            if(m){ m.castShadow=true; m.receiveShadow=true; V3D.scene.add(m); V3D.aedis.push(m); }
-          }catch(e){}
-        });
-
-        // Re-adauga speciale (cu lumini noapte)
-        const _specialTipsNight=['gazebo','garaj','bbq','bucvara','bortodoxa','bcatolica'];
-        const _renderedNight=new Set();
-        S.vol._lastFeats.forEach(f=>{
-          if(!f.properties?.isLotizare) return;
-          const tip=f.properties?.lotTip;
-          if(!_specialTipsNight.includes(tip)) return;
-          if(f.properties?.floor!==0) return;
-          const uid=tip+'_'+f.properties?.parcelIdx;
-          if(_renderedNight.has(uid)) return;
-          _renderedNight.add(uid);
-          if(typeof _lotRenderSpecial==='function')
-            _lotRenderSpecial(THREE,V3D.scene,f.geometry,tip,toLocRb);
-        });
-      }catch(e){ console.warn('night rebuild:',e.message); }
+    // 3. Daca e noapte, re-adauga luminile speciale (cu toLoc din scena curenta)
+    // Folosim _V3D_toLoc salvat la build original - fara recalcul
+    if(isNightNow && typeof _lotRenderSpecial==='function' && window._V3D_toLoc){
+      const _specialTipsN=['gazebo','garaj','bbq','bucvara','bortodoxa','bcatolica'];
+      const _renderedN=new Set();
+      (S.vol._lastFeats||[]).forEach(f=>{
+        if(!f.properties?.isLotizare) return;
+        const tip=f.properties?.lotTip;
+        if(!_specialTipsN.includes(tip)) return;
+        if(f.properties?.floor!==0) return;
+        const uid=tip+'_'+(f.properties?.parcelIdx??'x');
+        if(_renderedN.has(uid)) return;
+        _renderedN.add(uid);
+        try{ _lotRenderSpecial(THREE,V3D.scene,f.geometry,tip,window._V3D_toLoc); }catch(e){}
+      });
     }
+
+    if(V3D.texCache){ Object.values(V3D.texCache).forEach(t=>{try{t.dispose();}catch(e){}}); V3D.texCache={}; }
     V3D._dirty=5;
     return;
   }
