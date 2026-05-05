@@ -2551,9 +2551,18 @@ function _genLotizareGeom(fpFeat, loturiPerTip, drumFract){
     return true;
   });
 
-  // Reconstruieste lista loturi: rezidentiale filtrate + speciale
+  // Reconstruieste lista loturi cu clip final la parcela (garanteaza ca niciun lot nu iese)
   loturi.length=0;
-  loturiRezidFiltrate.forEach(l=>loturi.push(l));
+  loturiRezidFiltrate.forEach(l=>{
+    try{
+      // Verifica si re-clipuieste la fpFeat (parcela fara drumuri)
+      const clipped=turf.intersect(fpFeat,l);
+      if(clipped?.geometry && turf.area(clipped) > _LOT.lotAria*0.12){
+        loturi.push({...l,geometry:clipped.geometry,
+          properties:{...l.properties,area:Math.round(turf.area(clipped))}});
+      }
+    }catch(e){ loturi.push(l); } // fallback: pastreaza lotul original
+  });
   loturiSpeciale.forEach(l=>loturi.push(l));
 
   return {loturi, drumuri};

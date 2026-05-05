@@ -558,6 +558,14 @@ function _v3dStatus(msg){ const el=document.getElementById('v3d-status'); if(el)
 
 // ── Build scene ────────────────────────────────────────────────────────────
 function _v3dBuild(ap){
+  // Fallback daca ap nu e transmis (ex: rebuild din _v3dLight)
+  if(!ap || !ap?.geo?.geometry){
+    ap = (typeof S !== 'undefined') ? S.parcels?.[S.activeParcel??0] : undefined;
+  }
+  if(!ap?.geo?.geometry){
+    _v3dStatus('❌ Parcela lipsă — redeschide viewer din hartă'); return;
+  }
+
   const THREE = window.THREE;
   const canvas = document.getElementById('v3d-canvas');
   if(!canvas||!THREE){ _v3dStatus('❌ Three.js indisponibil'); return; }
@@ -3123,13 +3131,13 @@ function _v3dLight(preset){
   const needsRebuild = (wasNight !== isNowNight);
   if(needsRebuild){
     // Rebuild complet pentru lumini speciale (biserici, noapte)
-    // Pastreaza theta/phi (orientare camera) dar reseteaza _camInit pt pozitie
     const savedTh=V3D.th, savedPh=V3D.ph, savedRad=V3D.rad;
     V3D._camInit=true; // pastreaza unghiuri
+    // Ia ap din contextul curent
+    const apForBuild = (typeof S!=='undefined') ? S.parcels?.[S.activeParcel??0] : undefined;
     setTimeout(()=>{
-      _v3dBuild();
-      // Restaureaza camera
-      setTimeout(()=>{ V3D.th=savedTh; V3D.ph=savedPh; V3D.rad=savedRad; _v3dUpdateCam(); }, 50);
+      _v3dBuild(apForBuild);
+      setTimeout(()=>{ V3D.th=savedTh; V3D.ph=savedPh; V3D.rad=savedRad; _v3dUpdateCam(); }, 60);
     }, 80);
     return;
   }
