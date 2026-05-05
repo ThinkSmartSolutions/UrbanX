@@ -9,7 +9,9 @@ const _LOT = {
   drumMod: 'ambele',
   strategie: 'grid',
 
-  tipMix: { individuala:40, insiruita:30, duplex:20, bloc:10 },
+  tipMix: { individuala:40, insiruita:30, duplex:20, bloc:10, gazebo:0, garaj:0, bbq:0, bucvara:0, bortodoxa:0, bcatolica:0 },
+  // tipActiv: care tipuri sunt vizibile in Mix si generate
+  tipActiv: { individuala:true, insiruita:true, duplex:true, bloc:true, gazebo:false, garaj:false, bbq:false, bucvara:false, bortodoxa:false, bcatolica:false },
 
   tipuri: {
     individuala: {
@@ -18,7 +20,7 @@ const _LOT = {
       sc:35, hMax:8, niv:2, retF:5, retS:4, retL:3,
       color:'#4ade80', borderColor:'#16a34a',
       pretConstr:900, pretVanzare:1400, suprafUtila:130,
-      desc:'Lot propriu, grădină, garaj'
+      desc:'Lot propriu, grădină, garaj', categorie:'rezidential'
     },
     insiruita: {
       label:'Casă înșiruită', icon:'🏘',
@@ -26,7 +28,7 @@ const _LOT = {
       sc:60, hMax:9, niv:2, retF:4, retS:3, retL:0,
       color:'#60a5fa', borderColor:'#2563eb',
       pretConstr:800, pretVanzare:1250, suprafUtila:110,
-      desc:'Calcan lateral, front mic, eficient'
+      desc:'Calcan lateral, front mic, eficient', categorie:'rezidential'
     },
     duplex: {
       label:'Duplex (2 familii)', icon:'🏠',
@@ -34,7 +36,7 @@ const _LOT = {
       sc:50, hMax:8, niv:2, retF:4, retS:3, retL:0,
       color:'#fbbf24', borderColor:'#d97706',
       pretConstr:820, pretVanzare:1300, suprafUtila:120,
-      desc:'2 unități pe lot comun'
+      desc:'2 unități pe lot comun', categorie:'rezidential'
     },
     bloc: {
       label:'Bloc mic (4-8 ap)', icon:'🏢',
@@ -42,8 +44,63 @@ const _LOT = {
       sc:40, hMax:15, niv:4, retF:6, retS:5, retL:4,
       color:'#a78bfa', borderColor:'#7c3aed',
       pretConstr:750, pretVanzare:1350, suprafUtila:65,
-      desc:'Regim S+P+3E, max 8 ap'
-    }
+      desc:'Regim S+P+3E, max 8 ap', categorie:'rezidential'
+    },
+    // ── Dotări / amenajări ──────────────────────────────────────────────
+    gazebo: {
+      label:'Foisor / Pergolă', icon:'⛺',
+      lotMin:60, lotMax:300, lotDefault:80,
+      sc:50, hMax:4, niv:1, retF:2, retS:2, retL:2,
+      color:'#86efac', borderColor:'#22c55e',
+      pretConstr:350, pretVanzare:500, suprafUtila:30,
+      desc:'Structură ușoară, lemn sau metal', categorie:'dotare',
+      render3d:'gazebo'
+    },
+    garaj: {
+      label:'Garaj acoperit', icon:'🚗',
+      lotMin:20, lotMax:80, lotDefault:35,
+      sc:80, hMax:3, niv:1, retF:1, retS:1, retL:1,
+      color:'#94a3b8', borderColor:'#64748b',
+      pretConstr:400, pretVanzare:600, suprafUtila:30,
+      desc:'1-2 autoturisme, acoperiș metalic/tigla', categorie:'dotare',
+      render3d:'garaj'
+    },
+    bbq: {
+      label:'Zonă BBQ + Grătar', icon:'🔥',
+      lotMin:30, lotMax:150, lotDefault:50,
+      sc:30, hMax:2.5, niv:1, retF:2, retS:2, retL:2,
+      color:'#fb923c', borderColor:'#ea580c',
+      pretConstr:200, pretVanzare:300, suprafUtila:20,
+      desc:'Foișor + vatră + zona relaxare', categorie:'dotare',
+      render3d:'bbq'
+    },
+    bucvara: {
+      label:'Bucătărie de Vară', icon:'🍳',
+      lotMin:25, lotMax:80, lotDefault:40,
+      sc:70, hMax:3, niv:1, retF:2, retS:1, retL:1,
+      color:'#fde68a', borderColor:'#f59e0b',
+      pretConstr:500, pretVanzare:700, suprafUtila:25,
+      desc:'Spațiu semi-deschis, instalații gaz/apă', categorie:'dotare',
+      render3d:'bucvara'
+    },
+    bortodoxa: {
+      label:'Biserică Ortodoxă', icon:'⛪',
+      lotMin:500, lotMax:5000, lotDefault:1200,
+      sc:20, hMax:25, niv:3, retF:10, retS:8, retL:8,
+      color:'#fcd34d', borderColor:'#d97706',
+      pretConstr:2500, pretVanzare:0, suprafUtila:300,
+      desc:'Naos + pronaos + turlă, curte',  categorie:'cult',
+      render3d:'bortodoxa'
+    },
+    bcatolica: {
+      label:'Biserică Catolică', icon:'⛪',
+      lotMin:400, lotMax:4000, lotDefault:900,
+      sc:25, hMax:20, niv:3, retF:8, retS:6, retL:6,
+      color:'#e0f2fe', borderColor:'#0284c7',
+      pretConstr:2200, pretVanzare:0, suprafUtila:250,
+      desc:'Navă centrală + turn clopotniță', categorie:'cult',
+      render3d:'bcatolica'
+    },
   },
 
   // ── Clădiri existente marcate pentru demolare ─────────────────────────
@@ -658,6 +715,28 @@ function _lotBuild3D(loturi, drumuri){
 
   // Trimite în vol-src — viewer-ul 3D redă automat
   setSource('vol-src', {type:'FeatureCollection', features:feats3D});
+
+  // Render 3D special pentru tipurile dotare/cult (dacă viewer 3D e deschis)
+  const _specialTipuri = ['gazebo','garaj','bbq','bucvara','bortodoxa','bcatolica'];
+  if(window.THREE && window.V3D?.scene && window.V3D?.r) {
+    const ring0 = loturi[0]?.geometry ? (()=>{
+      try{
+        const ap=S.parcels[S.activeParcel??0];
+        const r0=ap.geo.geometry.type==='Polygon'?ap.geo.geometry.coordinates[0]:ap.geo.geometry.coordinates[0][0];
+        const c0=r0.reduce((s,c)=>s+c[0],0)/r0.length, c1=r0.reduce((s,c)=>s+c[1],0)/r0.length;
+        const mLng=111320*Math.cos(c1*Math.PI/180), mLat=111320;
+        return ([lng,lat])=>[(lng-c0)*mLng,(lat-c1)*mLat];
+      }catch(e){return null;}
+    })() : null;
+    if(ring0){
+      loturi.forEach(lot=>{
+        const tip = lot.properties?.tip;
+        if(!_specialTipuri.includes(tip)) return;
+        _lotRenderSpecial(window.THREE, window.V3D.scene, lot.geometry, tip, ring0);
+      });
+      window.V3D.r.render(window.V3D.scene, window.V3D.cam);
+    }
+  }
   S.vol.genDone = true;
   S.vol._lastFeats = feats3D;
 
@@ -667,23 +746,133 @@ function _lotBuild3D(loturi, drumuri){
   }
 }
 
+// ─── Render 3D specializat per tip dotare / cult ─────────────────────────
+function _lotRenderSpecial(THREE, scene, geom, tipKey, toLoc){
+  if(!THREE||!scene||!geom||!toLoc) return;
+  try{
+    const ring = geom.type==='Polygon' ? geom.coordinates[0] : geom.coordinates[0][0];
+    const pts2d = ring.slice(0,-1).map(([lng,lat])=>toLoc([lng,lat]));
+    const cx = pts2d.reduce((s,p)=>s+p[0],0)/pts2d.length;
+    const cz = pts2d.reduce((s,p)=>s+p[1],0)/pts2d.length;
+    const xs=pts2d.map(p=>p[0]), zs=pts2d.map(p=>p[1]);
+    const w=Math.max(...xs)-Math.min(...xs), d=Math.max(...zs)-Math.min(...zs);
+    const sz=Math.min(w,d)*0.8;
+
+    if(tipKey==='gazebo'){
+      const stMat=new THREE.MeshStandardMaterial({color:'#8B6914',roughness:0.8,metalness:0.1});
+      const rfMat=new THREE.MeshStandardMaterial({color:'#c8520a',roughness:0.7,metalness:0.05});
+      const s=Math.min(sz,4);
+      [[-s/2,-s/2],[s/2,-s/2],[s/2,s/2],[-s/2,s/2]].forEach(([ox,oz])=>{
+        const st=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.09,2.8,6),stMat);
+        st.position.set(cx+ox,1.4,cz+oz); scene.add(st);
+      });
+      const rf=new THREE.Mesh(new THREE.ConeGeometry(s*0.75,1.5,4),rfMat);
+      rf.rotation.y=Math.PI/4; rf.position.set(cx,3.25,cz); scene.add(rf);
+    }
+    else if(tipKey==='garaj'){
+      const wallMat=new THREE.MeshStandardMaterial({color:'#94a3b8',roughness:0.6,metalness:0.3});
+      const roofMat=new THREE.MeshStandardMaterial({color:'#64748b',roughness:0.5,metalness:0.5});
+      const gw=Math.min(w*0.85,6), gd=Math.min(d*0.85,5.5);
+      const body=new THREE.Mesh(new THREE.BoxGeometry(gw,2.4,gd),wallMat);
+      body.position.set(cx,1.2,cz); scene.add(body);
+      const roof=new THREE.Mesh(new THREE.BoxGeometry(gw+0.2,0.18,gd+0.2),roofMat);
+      roof.position.set(cx,2.49,cz); scene.add(roof);
+      const usaMat=new THREE.MeshStandardMaterial({color:'#1e3a5f',roughness:0.4,metalness:0.6});
+      const usa=new THREE.Mesh(new THREE.BoxGeometry(Math.min(gw*0.7,2.4),2.0,0.08),usaMat);
+      usa.position.set(cx,1.0,cz-gd/2-0.04); scene.add(usa);
+    }
+    else if(tipKey==='bbq'){
+      const piatra=new THREE.MeshStandardMaterial({color:'#6b5a4a',roughness:0.95,metalness:0});
+      const vatra=new THREE.Mesh(new THREE.CylinderGeometry(0.7,0.8,0.5,12),piatra);
+      vatra.position.set(cx,0.25,cz); scene.add(vatra);
+      const focMat=new THREE.MeshStandardMaterial({color:'#ff6600',emissive:new THREE.Color(0.8,0.3,0),emissiveIntensity:2,roughness:1});
+      const foc=new THREE.Mesh(new THREE.ConeGeometry(0.3,0.6,8),focMat);
+      foc.position.set(cx,0.8,cz); scene.add(foc);
+      const masaMat=new THREE.MeshStandardMaterial({color:'#8B6914',roughness:0.8,metalness:0});
+      const masa=new THREE.Mesh(new THREE.CylinderGeometry(0.8,0.8,0.06,12),masaMat);
+      masa.position.set(cx-sz*0.4,0.75,cz-sz*0.4); scene.add(masa);
+      const picior=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.06,0.75,6),masaMat);
+      picior.position.set(cx-sz*0.4,0.37,cz-sz*0.4); scene.add(picior);
+    }
+    else if(tipKey==='bucvara'){
+      const perMat=new THREE.MeshStandardMaterial({color:'#f0d0a0',roughness:0.85,metalness:0});
+      const rfMat=new THREE.MeshStandardMaterial({color:'#c84a20',roughness:0.7,metalness:0});
+      const bw=Math.min(w*0.85,5), bd=Math.min(d*0.85,4);
+      [[-bw/2,bd/2,0.12,2.4,bd],[bw/2,bd/2,0.12,2.4,bd],[0,-bd/2,bw,2.4,0.12]].forEach(([ox,,oz,ww,hh,dd])=>{
+        const p=new THREE.Mesh(new THREE.BoxGeometry(ww||0.12,hh,dd||0.12),perMat);
+        p.position.set(cx+ox,hh/2,cz+oz); scene.add(p);
+      });
+      [[-bw/2,bd/2],[bw/2,bd/2],[0,-bd/2]].forEach(([ox,oz],i)=>{
+        const dims=i<2?[0.12,2.4,bd]:[bw,2.4,0.12];
+        const p=new THREE.Mesh(new THREE.BoxGeometry(...dims),perMat);
+        p.position.set(cx+ox,dims[1]/2,cz+oz); scene.add(p);
+      });
+      const rf=new THREE.Mesh(new THREE.BoxGeometry(bw+0.3,0.15,bd+0.3),rfMat);
+      rf.position.set(cx,2.47,cz); scene.add(rf);
+    }
+    else if(tipKey==='bortodoxa'){
+      const zidMat=new THREE.MeshStandardMaterial({color:'#f5f0e8',roughness:0.8,metalness:0});
+      const acMat=new THREE.MeshStandardMaterial({color:'#8B6914',roughness:0.6,metalness:0.3});
+      const bs=Math.min(sz*0.7,8);
+      const corp=new THREE.Mesh(new THREE.BoxGeometry(bs*0.6,5,bs),zidMat);
+      corp.position.set(cx,2.5,cz); scene.add(corp);
+      const bolta=new THREE.Mesh(new THREE.SphereGeometry(bs*0.32,8,6,0,Math.PI*2,0,Math.PI/2),acMat);
+      bolta.position.set(cx,5.2,cz); scene.add(bolta);
+      const turla=new THREE.Mesh(new THREE.CylinderGeometry(0.8,1.0,3.5,8),zidMat);
+      turla.position.set(cx,7.5,cz-bs*0.15); scene.add(turla);
+      const turlaAc=new THREE.Mesh(new THREE.ConeGeometry(0.85,2.0,8),acMat);
+      turlaAc.position.set(cx,10.2,cz-bs*0.15); scene.add(turlaAc);
+      const cruceMat=new THREE.MeshStandardMaterial({color:'#d4af37',roughness:0.2,metalness:0.9});
+      const cv=new THREE.Mesh(new THREE.BoxGeometry(0.08,1.0,0.08),cruceMat);
+      cv.position.set(cx,11.7,cz-bs*0.15); scene.add(cv);
+      const ch=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.08,0.08),cruceMat);
+      ch.position.set(cx,11.5,cz-bs*0.15); scene.add(ch);
+    }
+    else if(tipKey==='bcatolica'){
+      const zidMat=new THREE.MeshStandardMaterial({color:'#e8e0d0',roughness:0.75,metalness:0});
+      const acMat=new THREE.MeshStandardMaterial({color:'#607080',roughness:0.5,metalness:0.2});
+      const bs=Math.min(sz*0.7,8);
+      const nava=new THREE.Mesh(new THREE.BoxGeometry(bs*0.55,5.5,bs),zidMat);
+      nava.position.set(cx,2.75,cz); scene.add(nava);
+      const aRoof=new THREE.Mesh(new THREE.CylinderGeometry(0.01,bs*0.32,1.8,3,1),acMat);
+      aRoof.rotation.y=Math.PI/2; aRoof.position.set(cx,6.3,cz); scene.add(aRoof);
+      const turn=new THREE.Mesh(new THREE.BoxGeometry(bs*0.2,9,bs*0.2),zidMat);
+      turn.position.set(cx+bs*0.3,4.5,cz-bs*0.38); scene.add(turn);
+      const turnAc=new THREE.Mesh(new THREE.ConeGeometry(bs*0.13,2.5,4),acMat);
+      turnAc.rotation.y=Math.PI/4; turnAc.position.set(cx+bs*0.3,10.25,cz-bs*0.38); scene.add(turnAc);
+      const cruceMat=new THREE.MeshStandardMaterial({color:'#d4af37',roughness:0.2,metalness:0.9});
+      const cv2=new THREE.Mesh(new THREE.BoxGeometry(0.07,0.9,0.07),cruceMat);
+      cv2.position.set(cx+bs*0.3,11.7,cz-bs*0.38); scene.add(cv2);
+      const ch2=new THREE.Mesh(new THREE.BoxGeometry(0.45,0.07,0.07),cruceMat);
+      ch2.position.set(cx+bs*0.3,11.4,cz-bs*0.38); scene.add(ch2);
+    }
+  }catch(e){ console.warn('_lotRenderSpecial',tipKey,e.message); }
+}
+
 function _lotHtmlTipuri(){
-  return Object.entries(_LOT.tipuri).map(([key, def])=>{
-    const ov = _LOT.tipOverride[key]||{};
-    const t  = {...def, ...ov}; // parametri efectivi
-    const hasOverride = Object.keys(ov).length > 0;
+  // Grupare pe categorii
+  const catLabels = {rezidential:'🏠 Rezidențial', dotare:'🌿 Dotări / Amenajări', cult:'⛪ Cult / Spații Publice'};
+  const grupe = {};
+  Object.entries(_LOT.tipuri).forEach(([key,def])=>{
+    const cat = def.categorie||'rezidential';
+    if(!grupe[cat]) grupe[cat]=[];
+    grupe[cat].push([key,def]);
+  });
 
-    // Calcul H total din niv + hNiv
-    const hNiv = ov.hNiv || def.hNiv || 3.0;
-    const hTotal = (t.niv * hNiv).toFixed(1);
-    const hParter = ov.hParter || def.hParter || 3.0;
-    const hRetras = ov.hasRetras !== undefined ? ov.hasRetras : false;
-
-    return `
-    <div style="background:rgba(255,255,255,.04);border:1px solid ${hasOverride?t.color+'66':'rgba(255,255,255,.07)'};border-radius:12px;padding:12px;margin-bottom:10px;border-left:3px solid ${t.color}">
-
-      <!-- Header tip -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+  let html = '';
+  Object.entries(grupe).forEach(([cat, items])=>{
+    html += `<div style="font-size:9px;color:#64748b;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin:8px 0 6px;padding:4px 8px;background:rgba(255,255,255,.04);border-radius:6px">${catLabels[cat]||cat}</div>`;
+    items.forEach(([key, def])=>{
+      const isActiv = _LOT.tipActiv?.[key] !== false;
+      const ov = _LOT.tipOverride[key]||{};
+      const t  = {...def, ...ov};
+      const hasOverride = Object.keys(ov).length > 0;
+      const hNiv = ov.hNiv || def.hNiv || 3.0;
+      const hParter = ov.hParter || def.hParter || 3.0;
+      const hRetras = ov.hasRetras !== undefined ? ov.hasRetras : false;
+      html += `
+    <div style="background:rgba(255,255,255,${isActiv?'.04':'.01'});border:1px solid ${isActiv?(hasOverride?t.color+'66':'rgba(255,255,255,.07)'):'rgba(255,255,255,.03)'};border-radius:12px;padding:12px;margin-bottom:8px;border-left:3px solid ${isActiv?t.color:'#334155'};opacity:${isActiv?1:0.45}">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:${isActiv?'10':'0'}px">
         <div style="display:flex;align-items:center;gap:8px">
           <span style="font-size:18px">${def.icon}</span>
           <div>
@@ -691,110 +880,68 @@ function _lotHtmlTipuri(){
             <div style="color:#475569;font-size:9px">${def.desc}</div>
           </div>
         </div>
-        ${hasOverride?`<button onclick="delete _LOT.tipOverride['${key}'];_lotTab('t')" style="font-size:9px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);color:#f87171;border-radius:5px;padding:2px 7px;cursor:pointer">↩ Reset</button>`:'<span style="font-size:8px;color:#334155">PUG implicit</span>'}
+        <div style="display:flex;gap:4px;align-items:center">
+          <button onclick="_LOT.tipActiv=_LOT.tipActiv||{};_LOT.tipActiv['${key}']=!(_LOT.tipActiv['${key}']!==false);if(!_LOT.tipActiv['${key}']){_LOT.tipMix['${key}']=0;}else{_LOT.tipMix['${key}']=_LOT.tipMix['${key}']||10;}_lotTab('t')"
+            style="padding:4px 10px;border-radius:7px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid ${isActiv?t.color:'rgba(255,255,255,.15)'};background:${isActiv?t.color+'33':'rgba(11,18,32,.8)'};color:${isActiv?t.color:'#475569'}">
+            ${isActiv?'✓ Activ':'+ Activează'}
+          </button>
+          ${hasOverride?`<button onclick="delete _LOT.tipOverride['${key}'];_lotTab('t')" style="font-size:9px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);color:#f87171;border-radius:5px;padding:2px 7px;cursor:pointer">↩</button>`:''}
+        </div>
       </div>
-
-      <!-- Regim înălțime -->
+      ${isActiv ? `
       <div style="background:rgba(0,0,0,.25);border-radius:8px;padding:8px 10px;margin-bottom:8px">
         <div style="font-size:9px;color:#d4af37;font-weight:700;text-transform:uppercase;margin-bottom:6px">Regim de înălțime</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px">
-
-          <!-- Nr. niveluri -->
           <div>
             <div style="font-size:9px;color:#64748b;margin-bottom:3px">Nr. niveluri (fără parter)</div>
             <div style="display:flex;gap:3px;flex-wrap:wrap">
-              ${[0,1,2,3,4,5,6,7].map(n=>`
-                <button onclick="_lotSetTipParam('${key}','niv',${n+1});_lotTab('t')"
-                  style="padding:4px 7px;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;
-                  border:1px solid ${t.niv===(n+1)?t.color:'rgba(255,255,255,.12)'};
-                  background:${t.niv===(n+1)?t.color+'33':'rgba(11,18,32,.8)'};
-                  color:${t.niv===(n+1)?t.color:'#64748b'}">
-                  ${n===0?'P':('P+'+n+'E')}
-                </button>`).join('')}
+              ${[0,1,2,3,4,5,6,7].map(n=>`<button onclick="_lotSetTipParam('${key}','niv',${n+1});_lotTab('t')" style="padding:4px 7px;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid ${t.niv===(n+1)?t.color:'rgba(255,255,255,.12)'};background:${t.niv===(n+1)?t.color+'33':'rgba(11,18,32,.8)'};color:${t.niv===(n+1)?t.color:'#64748b'}">${n===0?'P':('P+'+n+'E')}</button>`).join('')}
             </div>
           </div>
-
-          <!-- Etaj retras -->
           <div>
-            <div style="font-size:9px;color:#64748b;margin-bottom:3px">Etaj retras/mansardă</div>
+            <div style="font-size:9px;color:#64748b;margin-bottom:3px">Etaj retras</div>
             <div style="display:flex;gap:4px">
-              <button onclick="_lotSetTipParam('${key}','hasRetras',false);_lotTab('t')"
-                style="flex:1;padding:5px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;
-                border:1px solid ${!hRetras?t.color:'rgba(255,255,255,.12)'};
-                background:${!hRetras?t.color+'22':'rgba(11,18,32,.8)'};
-                color:${!hRetras?t.color:'#64748b'}">Fără</button>
-              <button onclick="_lotSetTipParam('${key}','hasRetras',true);_lotTab('t')"
-                style="flex:1;padding:5px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;
-                border:1px solid ${hRetras?t.color:'rgba(255,255,255,.12)'};
-                background:${hRetras?t.color+'22':'rgba(11,18,32,.8)'};
-                color:${hRetras?t.color:'#64748b'}">+1 Retras</button>
+              <button onclick="_lotSetTipParam('${key}','hasRetras',false);_lotTab('t')" style="flex:1;padding:5px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid ${!hRetras?t.color:'rgba(255,255,255,.12)'};background:${!hRetras?t.color+'22':'rgba(11,18,32,.8)'};color:${!hRetras?t.color:'#64748b'}">Fără</button>
+              <button onclick="_lotSetTipParam('${key}','hasRetras',true);_lotTab('t')" style="flex:1;padding:5px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid ${hRetras?t.color:'rgba(255,255,255,.12)'};background:${hRetras?t.color+'22':'rgba(11,18,32,.8)'};color:${hRetras?t.color:'#64748b'}">+Retras</button>
             </div>
           </div>
         </div>
-
-        <!-- Înălțimi etaje -->
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
           <div>
             <div style="font-size:9px;color:#64748b;margin-bottom:3px">H parter (m)</div>
-            <input type="number" min="2.5" max="6" step="0.1" value="${hParter}"
-              style="width:100%;background:#04090f;border:1px solid rgba(255,255,255,.15);color:#e2e8f0;border-radius:5px;padding:5px 8px;font-size:12px"
-              oninput="_lotSetTipParam('${key}','hParter',+this.value)">
+            <input type="number" min="2" max="8" step="0.1" value="${hParter}" style="width:100%;background:#04090f;border:1px solid rgba(255,255,255,.15);color:#e2e8f0;border-radius:5px;padding:5px 8px;font-size:12px" oninput="_lotSetTipParam('${key}','hParter',+this.value)">
           </div>
           <div>
-            <div style="font-size:9px;color:#64748b;margin-bottom:3px">H etaj curent (m)</div>
-            <input type="number" min="2.5" max="5" step="0.1" value="${hNiv}"
-              style="width:100%;background:#04090f;border:1px solid rgba(255,255,255,.15);color:#e2e8f0;border-radius:5px;padding:5px 8px;font-size:12px"
-              oninput="_lotSetTipParam('${key}','hNiv',+this.value);_lotTab('t')">
+            <div style="font-size:9px;color:#64748b;margin-bottom:3px">H etaj (m)</div>
+            <input type="number" min="2" max="5" step="0.1" value="${hNiv}" style="width:100%;background:#04090f;border:1px solid rgba(255,255,255,.15);color:#e2e8f0;border-radius:5px;padding:5px 8px;font-size:12px" oninput="_lotSetTipParam('${key}','hNiv',+this.value);_lotTab('t')">
           </div>
         </div>
-
-        <!-- H total calculat -->
         <div style="margin-top:6px;background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.2);border-radius:6px;padding:5px 8px;display:flex;justify-content:space-between">
-          <span style="font-size:9px;color:#64748b">H total estimat:</span>
-          <span style="color:#d4af37;font-size:11px;font-weight:800">
-            ${(parseFloat(hParter) + Math.max(0,t.niv-1)*parseFloat(hNiv) + (hRetras?2.5:0)).toFixed(1)}m
-            ${hRetras?' (+etaj retras)':''}
-          </span>
+          <span style="font-size:9px;color:#64748b">H total:</span>
+          <span style="color:#d4af37;font-size:11px;font-weight:800">${(parseFloat(hParter)+Math.max(0,t.niv-1)*parseFloat(hNiv)+(hRetras?2.5:0)).toFixed(1)}m${hRetras?' (+retras)':''}</span>
         </div>
       </div>
-
-      <!-- Suprafețe și retrageri -->
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px">
         <div>
           <div style="font-size:9px;color:#64748b;margin-bottom:3px">POT lot (%)</div>
-          <input type="number" min="10" max="100" step="5" value="${t.sc}"
-            style="width:100%;background:#04090f;border:1px solid rgba(255,255,255,.15);color:#e2e8f0;border-radius:5px;padding:4px 7px;font-size:12px"
-            oninput="_lotSetTipParam('${key}','sc',+this.value)">
+          <input type="number" min="10" max="100" step="5" value="${t.sc}" style="width:100%;background:#04090f;border:1px solid rgba(255,255,255,.15);color:#e2e8f0;border-radius:5px;padding:4px 7px;font-size:12px" oninput="_lotSetTipParam('${key}','sc',+this.value)">
         </div>
         <div>
           <div style="font-size:9px;color:#64748b;margin-bottom:3px">Ret. față (m)</div>
-          <input type="number" min="0" max="20" step="0.5" value="${t.retF}"
-            style="width:100%;background:#04090f;border:1px solid rgba(255,255,255,.15);color:#e2e8f0;border-radius:5px;padding:4px 7px;font-size:12px"
-            oninput="_lotSetTipParam('${key}','retF',+this.value)">
+          <input type="number" min="0" max="20" step="0.5" value="${t.retF}" style="width:100%;background:#04090f;border:1px solid rgba(255,255,255,.15);color:#e2e8f0;border-radius:5px;padding:4px 7px;font-size:12px" oninput="_lotSetTipParam('${key}','retF',+this.value)">
         </div>
         <div>
-          <div style="font-size:9px;color:#64748b;margin-bottom:3px">Sup. utilă/ap (mp)</div>
-          <input type="number" min="30" max="300" step="5" value="${t.suprafUtila}"
-            style="width:100%;background:#04090f;border:1px solid rgba(255,255,255,.15);color:#e2e8f0;border-radius:5px;padding:4px 7px;font-size:12px"
-            oninput="_lotSetTipParam('${key}','suprafUtila',+this.value)">
+          <div style="font-size:9px;color:#64748b;margin-bottom:3px">Lot default (mp)</div>
+          <input type="number" min="20" max="5000" step="10" value="${t.lotDefault||def.lotDefault}" style="width:100%;background:#04090f;border:1px solid rgba(255,255,255,.15);color:#e2e8f0;border-radius:5px;padding:4px 7px;font-size:12px" oninput="_lotSetTipParam('${key}','lotDefault',+this.value)">
         </div>
-      </div>
-
-      <!-- Rezumat regim -->
-      <div style="margin-top:8px;padding:6px 8px;background:rgba(255,255,255,.03);border-radius:6px;font-size:9px;color:#64748b">
-        Regim: <b style="color:#94a3b8">${t.niv===1?'Parter':'P+'+(t.niv-1)+'E'}${hRetras?'+Retras':''}</b>
-        · H≈<b style="color:#d4af37">${(parseFloat(hParter) + Math.max(0,t.niv-1)*parseFloat(hNiv) + (hRetras?2.5:0)).toFixed(1)}m</b>
-        · POT <b style="color:#94a3b8">${t.sc}%</b>
-        · <b style="color:#94a3b8">${t.suprafUtila}mp/ap</b>
-        · Retragere față <b style="color:#94a3b8">${t.retF}m</b>
-      </div>
+      </div>` : ''}
     </div>`;
-  }).join('') +
-  `<button onclick="Object.keys(_LOT.tipuri).forEach(k=>_LOT.tipOverride[k]={});_lotTab('t')"
-    style="width:100%;padding:8px;background:rgba(100,116,139,.1);border:1px solid rgba(100,116,139,.2);color:#64748b;border-radius:8px;font-size:10px;cursor:pointer;margin-top:4px">
-    ↩ Reset toți parametrii la valorile implicite
-  </button>`;
+    });
+  });
+  html += `<button onclick="Object.keys(_LOT.tipuri).forEach(k=>{_LOT.tipOverride[k]={};_LOT.tipActiv[k]=(['individuala','insiruita','duplex','bloc'].includes(k));if(!_LOT.tipActiv[k])_LOT.tipMix[k]=0;});_lotTab('t')" style="width:100%;padding:8px;background:rgba(100,116,139,.1);border:1px solid rgba(100,116,139,.2);color:#64748b;border-radius:8px;font-size:10px;cursor:pointer;margin-top:4px">↩ Reset toți parametrii</button>`;
+  return html;
 }
+
 
 function _lotHtmlParametri(){
   const ap=S.parcels[S.activeParcel??0];
@@ -867,7 +1014,7 @@ function _lotHtmlMix(){
   </div>
   ${total!==100?`<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:8px;padding:7px 10px;font-size:10px;color:#f87171;margin-bottom:8px">Totalul trebuie să fie 100% (acum ${total}%)</div>`:''}
 
-  ${Object.entries(_LOT.tipuri).map(([k,t])=>`
+  ${Object.entries(_LOT.tipuri).filter(([k])=>_LOT.tipActiv?.[k]!==false).map(([k,t])=>`
     <div style="background:rgba(255,255,255,.04);border-radius:11px;padding:11px;border:1px solid rgba(255,255,255,.06);margin-bottom:6px;border-left:3px solid ${_LOT.tipMix[k]>0?t.color:'rgba(255,255,255,.1)'}">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
         <label style="display:flex;align-items:center;gap:7px;cursor:pointer">
@@ -1070,11 +1217,15 @@ function runLotizare(){
     const pArea=turf.area(pFeat);
     const params=ap.params||getDefaultParams(ap.utr||'');
 
-    // Edificabil (cu retrageri față de stradă)
-    // Dacă există clădiri marcate pentru demolare → le excludem din calcul
-    // (tratate ca teren liber, nu mai influențează edificabilul)
-    const fp=buildFP(ap.geo.geometry,params)||pFeat;
-    const fpArea=turf.area(fp);
+    // Lotizare foloseste PARCELA INTREAGA cu un buffer minim de 0.5m
+    // (buildFP e pentru un singur imobil AEDIS — retrage prea mult pt lotizare)
+    // Fiecare lot isi aplica propriile retrageri in _lotBuild3D
+    let fp = pFeat;
+    try{
+      const buf = turf.buffer(pFeat, -0.5, {units:'meters'});
+      if(buf?.geometry && turf.area(buf) > pArea*0.5) fp = buf;
+    }catch(e){}
+    const fpArea = turf.area(fp);
 
     // Suprafață drum
     let drumAreaFract;
@@ -1106,7 +1257,8 @@ function runLotizare(){
     // Distribuire loturi per tip
     const loturiPerTip={};
     let ramas=nrLoturiTotal;
-    const tipuriActiv=Object.entries(_LOT.tipMix).filter(([,v])=>v>0);
+    // Filtreaza tipurile care sunt active SI au mix > 0
+    const tipuriActiv=Object.entries(_LOT.tipMix).filter(([k,v])=>v>0 && _LOT.tipActiv?.[k]!==false);
     tipuriActiv.forEach(([k,pct],i)=>{
       if(i===tipuriActiv.length-1) loturiPerTip[k]=ramas;
       else{const n=Math.max(0,Math.round(nrLoturiTotal*pct/totalMix));loturiPerTip[k]=n;ramas-=n;}
