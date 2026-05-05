@@ -3113,10 +3113,29 @@ function _v3dApplyLight(preset,THREE,scene,r){
 
 function _v3dLight(preset){
   if(!V3D.scene||!window.THREE) return;
+
+  // Verifica daca schimbam intre zi/noapte — necesita rebuild complet
+  // (lumini dinamice pt biserici, emissive speciale nu pot fi updatate incremental)
+  const wasNight = window._v3dNight || false;
   _v3dApplyLight(preset,window.THREE,V3D.scene,V3D.r);
-  // Rebuildem materialele cu texturi de noapte/zi
+  const isNowNight = window._v3dNight || false;
+
+  const needsRebuild = (wasNight !== isNowNight);
+  if(needsRebuild){
+    // Rebuild complet pentru lumini speciale (biserici, noapte)
+    // Pastreaza theta/phi (orientare camera) dar reseteaza _camInit pt pozitie
+    const savedTh=V3D.th, savedPh=V3D.ph, savedRad=V3D.rad;
+    V3D._camInit=true; // pastreaza unghiuri
+    setTimeout(()=>{
+      _v3dBuild();
+      // Restaureaza camera
+      setTimeout(()=>{ V3D.th=savedTh; V3D.ph=savedPh; V3D.rad=savedRad; _v3dUpdateCam(); }, 50);
+    }, 80);
+    return;
+  }
+
+  // Schimbare simpla (golden/overcast) — update incremental
   if(V3D.texCache){ Object.values(V3D.texCache).forEach(t=>t.dispose()); V3D.texCache={}; }
-  // Actualizăm emissive pe meshurile AEDIS
   V3D.aedis.forEach(m=>{
     if(m.material?.map){ m.material.emissive=new THREE.Color(window._v3dNight?0.04:0,window._v3dNight?0.06:0,window._v3dNight?0.1:0); m.material.emissiveIntensity=window._v3dNight?0.5:0; m.material.needsUpdate=true; }
   });

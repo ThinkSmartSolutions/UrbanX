@@ -2489,23 +2489,22 @@ function _genLotizareGeom(fpFeat, loturiPerTip, drumFract){
   });
 
   // Plaseaza speciale: manual (daca exista pozitie setata) sau in pozitii rezervate
-  const manualPosTip = {}; // grupeaza pozitii manuale per tip
   const manPos = _LOT.manualPos||{};
-  asignSpeciale.forEach(tip=>{
-    if(!manualPosTip[tip]) manualPosTip[tip]=0;
-    manualPosTip[tip]++;
-  });
-
+  const loturiSpeciale = []; // loturi speciale generate - pt a elimina suprapunerile
+  const tipUsed={};
   let rezervIdx=0;
-  const tipUsed={}; // cate din fiecare tip special au fost plasate
+
   asignSpeciale.forEach((tip,i)=>{
     if(!tipUsed[tip]) tipUsed[tip]=0;
     const manPosArr = manPos[tip]||[];
     const posIdx = tipUsed[tip];
     tipUsed[tip]++;
 
+    let lotGeom = null;
+    let manual = false;
+
     if(manPosArr[posIdx]){
-      // Plasare manuala: genereaza lot centrat pe pozitia aleasa
+      // Plasare manuala: lot centrat pe pozitia aleasa
       const [lng,lat] = manPosArr[posIdx];
       const cy3=(bbox2[1]+bbox2[3])/2;
       const mLng3=111320*Math.cos(cy3*Math.PI/180), mLat3=111320;
@@ -2515,25 +2514,47 @@ function _genLotizareGeom(fpFeat, loturiPerTip, drumFract){
         [lng-dLng,lat-dLat],[lng+dLng,lat-dLat],
         [lng+dLng,lat+dLat],[lng-dLng,lat+dLat],[lng-dLng,lat-dLat]
       ]]},properties:{}};
-      // Intersecteaza cu parcela
-      let lotGeom = manualPoly.geometry;
       try{
         const inter=turf.intersect(fpFeat, manualPoly);
         if(inter?.geometry && turf.area(inter)>10) lotGeom=inter.geometry;
-      }catch(e){}
-      const t=_lotGetTip(tip)||_LOT.tipuri.individuala;
-      loturi.push({type:'Feature',geometry:lotGeom,
-        properties:{tip,color:t.color,borderColor:t.borderColor,area:Math.round(turf.area({type:'Feature',geometry:lotGeom,properties:{}})),manual:true}});
+        else lotGeom=manualPoly.geometry;
+      }catch(e){ lotGeom=manualPoly.geometry; }
+      manual=true;
     } else {
-      // Plasare automata pe pozitia rezervata
       const poz=pozRezerv[rezervIdx]||(pozitiiValide[pozitiiValide.length-1-rezervIdx]);
       rezervIdx++;
-      if(!poz) return;
+      if(poz) lotGeom=poz.geom;
+    }
+
+    if(lotGeom){
       const t=_lotGetTip(tip)||_LOT.tipuri.individuala;
-      loturi.push({type:'Feature',geometry:poz.geom,
-        properties:{tip,color:t.color,borderColor:t.borderColor,area:poz.area}});
+      const lotFeat={type:'Feature',geometry:lotGeom,
+        properties:{tip,color:t.color,borderColor:t.borderColor,
+          area:Math.round(turf.area({type:'Feature',geometry:lotGeom,properties:{}})),
+          manual}};
+      loturiSpeciale.push(lotFeat);
     }
   });
+
+  // ELIMINA loturi rezidentiale care se suprapun cu pozitiile manuale ale specialelor
+  // (altfel casa individuala + biserica ocupa acelasi spatiu)
+  const loturiRezidFiltrate = loturi.filter(lr=>{
+    for(const ls of loturiSpeciale){
+      if(!ls.properties?.manual) continue; // doar pentru plasare manuala
+      try{
+        const overlap=turf.intersect(lr,ls);
+        if(overlap && turf.area(overlap) > turf.area(lr)*0.35){
+          return false; // lotul rezidential e acoperit >35% de special → elimina
+        }
+      }catch(e){}
+    }
+    return true;
+  });
+
+  // Reconstruieste lista loturi: rezidentiale filtrate + speciale
+  loturi.length=0;
+  loturiRezidFiltrate.forEach(l=>loturi.push(l));
+  loturiSpeciale.forEach(l=>loturi.push(l));
 
   return {loturi, drumuri};
 }
