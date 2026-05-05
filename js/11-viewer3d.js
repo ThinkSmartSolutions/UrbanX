@@ -670,7 +670,8 @@ function _v3dBuild(ap){
     cy2 = ring0.reduce((s,c)=>s+c[1],0)/ring0.length;
   }
   const mLng=111320*Math.cos(cy2*Math.PI/180), mLat=111320;
-  const toLoc=([lng,lat])=>[(lng-cx)*mLng,(lat-cy2)*mLat];
+  const toLoc=([lng,lat])=>[(lng-cx)*mLng,-(lat-cy2)*mLat]; // negat: rotateX(-PI/2) inverseaza → corect Nord=top
+  const toWorld=([lng,lat])=>[(lng-cx)*mLng,(lat-cy2)*mLat]; // pt position.set direct
 
   // ── Zone colorate: parcelă, edificabil, retrageri, SV, parcaje ──────────
   // IMPORTANT: _v3dAddZones trebuie apelat DUPĂ definirea lui toLoc
@@ -831,7 +832,7 @@ function _v3dBuild(ap){
   // Parcelă contur
   try{
     const pts=ring0.map(toLoc);
-    const verts=new Float32Array(pts.flatMap(([x,z])=>[x,0.2,z]));
+    const verts=new Float32Array(pts.flatMap(([x,z])=>[x,0.2,-z])); // toWorld: negate Z back
     const lg=new THREE.BufferGeometry(); lg.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));
     scene.add(new THREE.LineLoop(lg,new THREE.LineBasicMaterial({color:'#00e5b4',opacity:0.7,transparent:true})));
   }catch(e){}
@@ -870,7 +871,7 @@ function _v3dBuild(ap){
   _v3dAddStreets(THREE, scene, ring0, toLoc);
   // Adăugăm viață urbană (oameni, mașini, câini, biciclete etc.)
   const _isNightMode = window._v3dNight || document.getElementById('v3d-light')?.value === 'night';
-  _v3dAddUrbanLife(THREE, scene, ring0, toLoc, _isNightMode);
+  _v3dAddUrbanLife(THREE, scene, ring0, toWorld, _isNightMode); // toWorld: pozitii directe
   // Distanțele sunt afișate în harta Mapbox, NU în viewer 3D (simplitate vizuală)
 
   // Camera poziție
@@ -968,7 +969,8 @@ function _v3dCaptureSilent(ap){
       const cx=ring0.reduce((s,c)=>s+c[0],0)/ring0.length;
       const cy2=ring0.reduce((s,c)=>s+c[1],0)/ring0.length;
       const mLng=111320*Math.cos(cy2*Math.PI/180), mLat=111320;
-      const toLoc=([lng,lat])=>[(lng-cx)*mLng,(lat-cy2)*mLat];
+      const toLoc=([lng,lat])=>[(lng-cx)*mLng,-(lat-cy2)*mLat]; // negat: rotateX(-PI/2) inverseaza → corect Nord=top
+  const toWorld=([lng,lat])=>[(lng-cx)*mLng,(lat-cy2)*mLat]; // pt position.set direct
 
       // Fallback context din Mapbox dacă Overpass a eșuat
       if(!(S.ctx?.features?.length >= 3) && typeof _ctxFromMapbox === 'function'){
@@ -1021,7 +1023,7 @@ function _v3dCaptureSilent(ap){
       // Contur parcelă
       try{
         const pts=ring0.map(toLoc);
-        const verts=new Float32Array(pts.flatMap(([x,z])=>[x,0.2,z]));
+        const verts=new Float32Array(pts.flatMap(([x,z])=>[x,0.2,-z])); // toWorld: negate Z back
         const lg=new THREE.BufferGeometry(); lg.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));
         scene.add(new THREE.LineLoop(lg,new THREE.LineBasicMaterial({color:'#00e5b4',opacity:0.7,transparent:true})));
       }catch(e){}
@@ -1126,7 +1128,7 @@ function _v3dAddDistanceLines(THREE, scene, toLoc){
         const yLine = 0.5;
 
         // ── Linie principală — mai groasă, dashed-look via segmente ──────
-        const positions = new Float32Array(pts3D.flatMap(([x,z])=>[x, yLine, z]));
+        const positions = new Float32Array(pts3D.flatMap(([x,z])=>[x, yLine, -z])); // toWorld: negate z
         const geo = new THREE.BufferGeometry();
         geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
         const mat = new THREE.LineBasicMaterial({
@@ -1150,7 +1152,7 @@ function _v3dAddDistanceLines(THREE, scene, toLoc){
             depthTest: false, depthWrite: false
           });
           const sp = new THREE.Mesh(sg, sm);
-          sp.position.set(x, yLine, z);
+          sp.position.set(x, yLine, -z); // toWorld
           sp.renderOrder = 1000;
           sp.onBeforeRender = (r2)=>{ r2.clearDepth(); };
           scene.add(sp);
@@ -1220,7 +1222,7 @@ function _v3dAddDistanceLines(THREE, scene, toLoc){
         const sp2 = new THREE.Sprite(spMat);
         // Scale MARE — labelele se văd clar
         sp2.scale.set(9.0, 2.6, 1);
-        sp2.position.set(mx, yLine + 2.0, mz);
+        sp2.position.set(mx, yLine + 2.0, -mz); // toWorld
         sp2.renderOrder = 1001;
         scene.add(sp2);
         count++;
@@ -1562,7 +1564,8 @@ function _v3dToggleDistances(){
     const cx=ring0.reduce((s,c)=>s+c[0],0)/ring0.length;
     const cy2=ring0.reduce((s,c)=>s+c[1],0)/ring0.length;
     const mLng=111320*Math.cos(cy2*Math.PI/180),mLat=111320;
-    const toLoc=([lng,lat])=>[(lng-cx)*mLng,(lat-cy2)*mLat];
+    const toLoc=([lng,lat])=>[(lng-cx)*mLng,-(lat-cy2)*mLat]; // negat: rotateX(-PI/2) inverseaza → corect Nord=top
+  const toWorld=([lng,lat])=>[(lng-cx)*mLng,(lat-cy2)*mLat]; // pt position.set direct
 
     _v3dAddDistanceLines(window.THREE, V3D.scene, toLoc);
     V3D.r.render(V3D.scene, V3D.cam);
@@ -2498,7 +2501,7 @@ function _v3dAddRoofDetails(THREE, pts2d, base, top, scene, stilKey){
   const techMat = new THREE.MeshStandardMaterial({color:'#606870',roughness:0.55,metalness:0.35});
 
   const cx=pts2d.reduce((s,[x])=>s+x,0)/pts2d.length;
-  const cz=pts2d.reduce((s,[,z])=>s+z,0)/pts2d.length;
+  const cz=-pts2d.reduce((s,[,z])=>s+z,0)/pts2d.length; // negate: toLoc negat, position.set nevoie de world Z pozitiv pt Nord
 
   for(let i=0;i<pts2d.length;i++){
     const [x0,z0]=pts2d[i],[x1,z1]=pts2d[(i+1)%pts2d.length];
@@ -3132,7 +3135,8 @@ function _v3dResetCam(){
   }
   const mLat=111320;
   const mLng=111320*Math.cos(cy2*Math.PI/180);
-  const toLoc=([lng,lat])=>[(lng-cx2)*mLng,(lat-cy2)*mLat];
+  const toLoc=([lng,lat])=>[(lng-cx2)*mLng,-(lat-cy2)*mLat];
+  const toWorld=([lng,lat])=>[(lng-cx2)*mLng,(lat-cy2)*mLat];
   const pts=ring.map?.(toLoc)||[];
   const parcelSz=Math.max(...pts.map(([x,z])=>Math.sqrt(x*x+z*z)),10);
   // Raza mai mică: 1.8x parcela (era 2.5x) — clădirile ocupă mai mult din ecran
