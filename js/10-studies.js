@@ -4451,10 +4451,24 @@ async function generateStudiuAmplasament(){
     try{map.setLayoutProperty(lid,'visibility',v);}catch(e){}
   });
 
-  // ── Date de bază ──────────────────────────────────────────────────────────
+  // ── Date de bază — cu fallback pentru params undefined ──────────────────────
   const areaNum=parseFloat(area)||300;
-  const scMax=Math.round(areaNum*parseFloat(params?.pot||35)/100);
-  const sdTotal=Math.round(areaNum*parseFloat(params?.cut||1.0));
+  // Fallback sigur: dacă params din UTR nu are valorile setate, folosim REGULI direct
+  const _r = (typeof REGULI !== 'undefined' && utr && REGULI[utr]) ? REGULI[utr] : {};
+  const _pot  = parseFloat(params?.pot  ?? _r.pot  ?? 35);
+  const _cut  = parseFloat(params?.cut  ?? _r.cut  ?? 1.0);
+  const _h    = parseFloat(params?.h    ?? _r.h    ?? 0) || null;
+  const _niv  = parseFloat(params?.niv  ?? _r.niv  ?? 0) || null;
+  const _sv   = parseFloat(params?.sv   ?? _r.sv   ?? 20);
+  const _pk   = parseFloat(params?.pk   ?? _r.pk   ?? 1);
+  const _rf   = parseFloat(params?.rf   ?? _r.rf   ?? 5);
+  const _rl   = parseFloat(params?.rl   ?? _r.rl   ?? 3);
+  const _rs   = parseFloat(params?.rs   ?? _r.rs   ?? 5);
+  // Inlocuim params cu versiunea augmentata
+  const paramsS = {...(params||{}), pot:_pot, cut:_cut, sv:_sv, pk:_pk, rf:_rf, rl:_rl, rs:_rs,
+    h:_h||params?.h, niv:_niv||params?.niv };
+  const scMax=Math.round(areaNum*_pot/100);
+  const sdTotal=Math.round(areaNum*_cut);
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13.2;
   const niv=Math.max(1,Math.ceil(aedisH/3));
   const fnLabel=params?.fn_label||'Locuire / Mixt';
@@ -4537,7 +4551,7 @@ async function generateStudiuAmplasament(){
   // ═══════════════════════════════════════════════════════════════════════════
   // PAG 2: VIEWER 3D — TOATE 4 VARIANTE DE ILUMINARE (ZI/NOAPTE/GOLDEN/ÎNTUNECAT)
   // ═══════════════════════════════════════════════════════════════════════════
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D URBAN3D — ZI / NOAPTE / GOLDEN HOUR / iNTUNECAT',3);ftr();
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D URBAN3D — ZI / NOAPTE / GOLDEN HOUR / iNTUNECAT',2);ftr();
   let cy=28;
   const half2=(W-32)/2;
   pdf.setFontSize(8);pdf.setTextColor(...GRAY2);pdf.setFont('helvetica','italic');
@@ -4619,15 +4633,15 @@ async function generateStudiuAmplasament(){
   cy=sec('2. PARAMETRI URBANISTICI COMPLET — UTR '+utr+' — PUG '+uat.toUpperCase(),cy);cy+=2;
   cy=body('Regulamentul Local de Urbanism al '+uat+' (aprobat prin HCL, în vigoare) stabilește pentru zona UTR '+utr+' următorii indicatori și reglementări urbanistice. Acești parametri constituie baza legală pentru toate studiile și proiectele de specialitate elaborate pentru amplasamentul '+nrcad+'.',14,cy);cy+=4;
   cy=tblRow(['Indicator PUG','Valoare RLU','Calcul pentru teren','Semnificație și restricții'],cy,true,[35,25,38,84]);
-  [['POT max (%)',params?.pot+'%',scMax+' mp SC la sol','Suprafața maximă construită la sol. Nu se depășește.'],
-   ['CUT max',String(params?.cut),sdTotal+' mp SDA total','Suprafața desfășurată totală (toate nivelele). Nu se depășește.'],
-   ['H max (m)',params?.h?params.h+'m':'N/S','Conf. RLU','Înălțimea maximă absolută admisă (coamă/atic).'],
-   ['Nr. niv. max',params?.niv?params.niv:'N/S','~P+'+(niv-1),'Regimul de înălțime admis prin RLU.'],
-   ['SV min (%)',params?.sv+'%',Math.round(areaNum*parseFloat(params?.sv||20)/100)+' mp','Spații verzi amenajate. Obligatoriu, verificat prin AC.'],
-   ['Parcaje min.',params?.pk+' loc/unitate',Math.max(2,Math.ceil(sdTotal/120))+' locuri est.','Conform NP 051/2012 + RLU UTR.'],
-   ['Retragere față (Rf)',params?.rf+' m','Față de limita stradală','Min. față de aliniamentul stradal.'],
-   ['Retragere laterală (Rl)',params?.rl+' m','Față de limita laterală','Min. față de proprietate vecină stânga/dreapta.'],
-   ['Retragere spate (Rs)',params?.rs+' m','Față de limita posterioară','Min. față de proprietate vecină spate.'],
+  [['POT max (%)',_pot+'%',scMax+' mp SC la sol','Suprafața maximă construită la sol. Nu se depășește.'],
+   ['CUT max',String(_cut),sdTotal+' mp SDA total','Suprafața desfășurată totală (toate nivelele). Nu se depășește.'],
+   ['H max (m)',_h?_h+'m':'N/S','Conf. RLU','Înălțimea maximă absolută admisă (coamă/atic).'],
+   ['Nr. niv. max',_niv?_niv:'N/S','~P+'+(niv-1),'Regimul de înălțime admis prin RLU.'],
+   ['SV min (%)',_sv+'%',Math.round(areaNum*_sv/100)+' mp','Spații verzi amenajate. Obligatoriu, verificat prin AC.'],
+   ['Parcaje min.',_pk+' loc/unitate',Math.max(2,Math.ceil(sdTotal/120))+' locuri est.','Conform NP 051/2012 + RLU UTR.'],
+   ['Retragere față (Rf)',_rf+' m','Față de limita stradală','Min. față de aliniamentul stradal.'],
+   ['Retragere laterală (Rl)',_rl+' m','Față de limita laterală','Min. față de proprietate vecină stânga/dreapta.'],
+   ['Retragere spate (Rs)',_rs+' m','Față de limita posterioară','Min. față de proprietate vecină spate.'],
    ['Funcțiuni admise','Conf. PUG UTR '+utr,fnLabel,'Verificare directă PUG pentru lista completă.'],
    ['Funcțiuni interzise','Conf. PUG UTR '+utr,'Verificare PUG','Activități industriale poluante, depozite>500mp etc.'],
   ].forEach(r=>cy=tblRow(r,cy,false,[35,25,38,84]));
@@ -4847,8 +4861,8 @@ async function generateStudiuAmplasament(){
   cy=sec('9. RESTRICȚII CUMULATE IDENTIFICATE PENTRU AMPLASAMENT',cy);cy+=2;
   cy=body('Pe baza tuturor datelor analizate în prezentul studiu de amplasament (cadastru, PUG, vecinătăți, monumente, riscuri naturale, climatice, infrastructură), se identifică următoarele restricții cumulate care trebuie respectate în elaborarea oricărui studiu sau proiect de specialitate pentru amplasamentul '+nrcad+' (UTR '+utr+').',14,cy);cy+=4;
   cy=tblRow(['Categorie restricție','Conținut restricție','Baza legală','Severitate'],cy,true,[45,90,38,9]);
-  [['Urbanistic PUG','POT max '+params?.pot+'%, CUT max '+params?.cut+', H max '+(params?.h||'N/S')+'m, SV min '+params?.sv+'%, parcaje min '+params?.pk+'/unit.','RLU UTR '+utr,'OBLIG'],
-   ['Retrageri min.','Rf='+params?.rf+'m, Rl='+params?.rl+'m, Rs='+params?.rs+'m față de limitele de proprietate','RLU UTR '+utr,'OBLIG'],
+  [['Urbanistic PUG','POT max '+_pot+'%, CUT max '+_cut+', H max '+(params?.h||'N/S')+'m, SV min '+params?.sv+'%, parcaje min '+params?.pk+'/unit.','RLU UTR '+utr,'OBLIG'],
+   ['Retrageri min.','Rf='+_rf+'m, Rl='+_rl+'m, Rs='+_rs+'m față de limitele de proprietate','RLU UTR '+utr,'OBLIG'],
    ['Seismic','Structură antiseismică ag='+seism.ag+'g, Tc='+seism.Tc+'s, zona '+seism.zona,'P100-1/2013','OBLIG'],
    ['Însorire/Umbre','Alt. sol. 21 Dec 12:00 = '+altDec12.toFixed(1)+'° ('+(isConformSolar?'≥15° CONFORM':'<15° NECONFORM')+'). Dist. min. N: '+(aedisH/Math.tan(15*Math.PI/180)).toFixed(0)+'m','OMS 119/2014','OBLIG'],
    ['Patrimoniu/LMI',inZCP?'PARCELĂ ÎN ZCP — aviz DJCPN obligatoriu':inZonaProt?'Monument în 200m — consultare DJCPN':'Fără restricție patrimoniu identificată','Legea 422/2001',inZCP?'OBLIG':inZonaProt?'REC.':'OK'],
@@ -4906,7 +4920,7 @@ async function generateStudiuAmplasament(){
   cy=body('Prezentul Studiu de Amplasament și Analiză Teritorială pentru parcela cu nr. cadastral '+nrcad+' (suprafața '+area+' mp, UTR '+utr+', '+uat+', jud. '+judet+') constituie documentul fundament pentru elaborarea tuturor studiilor tehnice de specialitate ulterioare. A fost realizat prin platforma digitală UrbanX pe baza datelor cadastrale, a Registrului PUG, a datelor S_UAT și a bazei de date LMI locale. Are caracter STRICT ORIENTATIV.',14,cy);cy+=4;
   const catGeoF=aedisH>28?'3 — Complexă':aedisH>10?'2 — Curentă':'1 — Simplă';
   cy=tblRow(['Aspect verificat','Concluzie','Documentație impusă'],cy,true,[60,60,62]);
-  [['Indicatori PUG (POT/CUT/H/SV/Pk)','Conf. RLU UTR '+utr,'Proiect DTAC + memoriu'],
+  [['Indicatori PUG (POT/CUT/H/SV/Pk)','POT '+_pot+'% / CUT '+_cut+' / H '+(   _h?_h+'m':'N/S')+' / SV '+_sv+'%','Proiect DTAC + memoriu'],
    ['Însorire OMS 119/2014',isConformSolar?'Alt. sol. '+altDec12.toFixed(1)+'° ≥ 15° CONFORM':'Alt. sol. '+altDec12.toFixed(1)+'° < 15° — studiu OAR','Studiu însorire la PAC'],
    ['Patrimoniu LMI',inZCP?'ÎN ZCP — aviz DJCPN':inZonaProt?'Monument în 200m':'Fără restricție','Aviz DJCPN dacă în zonă prot.'],
    ['Risc seismic',seism.zona+' ag='+seism.ag+'g','P100-1/2013 — ing. rezistență'],
