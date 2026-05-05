@@ -58,39 +58,46 @@ document.addEventListener('click',function(e){
   },50);
 });
 
+// toggleRapoarteMenu — implementarea completa si fixata este in 06-aedis.js
+// Aceasta definitie suprascrie global-ul, deci redirectionam catre versiunea fixa
 function toggleRapoarteMenu(){
+  // Deleaga catre versiunea cu fix din 06-aedis.js (injectata via safeOn pe btnPDF)
+  // Folosim _rapoarteCloseHandler care e definit acolo
   const m = document.getElementById('rapoarte-menu');
   const btn = document.getElementById('btnPDF');
   if(!m) return;
-  const isOpen = m.style.display !== 'none';
-  if(isOpen){
-    m.style.display = 'none';
-    return;
+
+  if(typeof _rapoarteCloseHandler !== 'undefined' && _rapoarteCloseHandler){
+    document.removeEventListener('click', _rapoarteCloseHandler);
+    _rapoarteCloseHandler = null;
   }
-  // Poziționăm dropdown-ul fix față de buton
-  if(btn){
-    const r = btn.getBoundingClientRect();
-    m.style.top  = (r.bottom + 6) + 'px';
-    m.style.left = Math.max(8, r.right - m.offsetWidth || r.right - 224) + 'px';
-    // Ajustăm după render ca să nu iasă din ecran
-    m.style.display = 'block';
-    requestAnimationFrame(()=>{
-      const mr = m.getBoundingClientRect();
-      if(mr.right > window.innerWidth - 8) m.style.left = (window.innerWidth - mr.width - 8) + 'px';
-      if(mr.left < 8) m.style.left = '8px';
-    });
-  } else {
-    m.style.display = 'block';
-  }
-  // Închidem la click în afară
-  setTimeout(()=>{
-    document.addEventListener('click', function close(e){
+
+  const isOpen = m.style.display === 'block';
+  if(isOpen){ m.style.display = 'none'; return; }
+
+  m.style.visibility = 'hidden';
+  m.style.display = 'block';
+  requestAnimationFrame(()=>{
+    const r = btn ? btn.getBoundingClientRect() : {bottom:48, right:window.innerWidth-20, top:42};
+    const mw = m.offsetWidth || 270;
+    const mh = m.offsetHeight || 400;
+    let left = r.right - mw;
+    let top  = r.bottom + 6;
+    if(left + mw > window.innerWidth - 8) left = window.innerWidth - mw - 8;
+    if(left < 8) left = 8;
+    if(top + mh > window.innerHeight - 12) top = Math.max(8, r.top - mh - 4);
+    m.style.left = left + 'px';
+    m.style.top  = top  + 'px';
+    m.style.visibility = '';
+    window._rapoarteCloseHandler = function(e){
       if(!m.contains(e.target) && e.target.id !== 'btnPDF'){
         m.style.display = 'none';
-        document.removeEventListener('click', close);
+        document.removeEventListener('click', window._rapoarteCloseHandler);
+        window._rapoarteCloseHandler = null;
       }
-    });
-  }, 50);
+    };
+    setTimeout(()=> document.addEventListener('click', window._rapoarteCloseHandler), 50);
+  });
 }
 
 // Versiunea veche a generateSolarStudy — păstrată pentru referință

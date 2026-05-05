@@ -4856,8 +4856,7 @@ function aedisGetContent(){
       style="background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.4);color:#4ade80;font-size:9px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 8px"
       title="LOISIR — Amenajare spații publice">🌿<span style="font-size:8px">Loisir</span></button>
     <button onclick="aedisAIRender()" class="aedis-dim-btn" style="background:rgba(212,175,55,.15);border-color:rgba(212,175,55,.4);color:#d4af37;font-size:10px" title="AI Render fotorealist (necesită API key Fal.ai)">🎨 AI</button>
-    <button onclick="generateSolarStudy()" class="aedis-dim-btn" style="background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.4);color:#fbbf24;font-size:9px;display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 8px" title="Studiu Însorire PDF">☀<span style="font-size:8px">Însorire</span></button>
-    <button onclick="AEDIS.showDim=!AEDIS.showDim;aedisRender()" 
+    <button onclick="AEDIS.showDim=!AEDIS.showDim;aedisRender();if(typeof _aedisToggleDimLabels==='function')_aedisToggleDimLabels()" 
       class="aedis-dim-btn${AEDIS.showDim?' active':''}" title="Etichete dimensionale (toggle)">📏</button>
     <button onclick="aedisClose()" class="aedis-close-btn">✕</button>
   </div>`;
@@ -5579,33 +5578,51 @@ function aedisResetAndRender(){
 
 
 // ── toggleRapoarteMenu — definit aici pentru a fi disponibil la init ──────
+let _rapoarteCloseHandler = null; // referinta unica — previne acumularea de listeners
+
 function toggleRapoarteMenu(){
   const m = document.getElementById('rapoarte-menu');
   const btn = document.getElementById('btnPDF');
   if(!m) return;
-  const isOpen = m.style.display !== 'none';
-  if(isOpen){ m.style.display='none'; return; }
-  if(btn){
-    const r = btn.getBoundingClientRect();
-    m.style.top  = (r.bottom + 6) + 'px';
-    m.style.left = Math.max(8, r.right - m.offsetWidth || r.right - 224) + 'px';
-    m.style.display = 'block';
-    requestAnimationFrame(()=>{
-      const mr = m.getBoundingClientRect();
-      if(mr.right > window.innerWidth - 8) m.style.left = (window.innerWidth - mr.width - 8) + 'px';
-      if(mr.left < 8) m.style.left = '8px';
-    });
-  } else {
-    m.style.display = 'block';
+
+  // Sterge listener-ul anterior INTOTDEAUNA (previne acumularea)
+  if(_rapoarteCloseHandler){
+    document.removeEventListener('click', _rapoarteCloseHandler);
+    _rapoarteCloseHandler = null;
   }
-  setTimeout(()=>{
-    document.addEventListener('click', function close(e){
+
+  const isOpen = m.style.display === 'block';
+  if(isOpen){ m.style.display = 'none'; return; }
+
+  // Pozitionare corecta: display:block INTAI, apoi calculeaza offsetWidth real
+  m.style.visibility = 'hidden';
+  m.style.display = 'block';
+
+  requestAnimationFrame(()=>{
+    const r = btn ? btn.getBoundingClientRect() : {bottom:48, right:window.innerWidth - 20, top:42};
+    const mw = m.offsetWidth || 270;
+    const mh = m.offsetHeight || 400;
+    // Aliniat la dreapta butonului, sub el
+    let left = r.right - mw;
+    let top  = r.bottom + 6;
+    // Clamp la viewport
+    if(left + mw > window.innerWidth - 8) left = window.innerWidth - mw - 8;
+    if(left < 8) left = 8;
+    if(top + mh > window.innerHeight - 12) top = Math.max(8, r.top - mh - 4);
+    m.style.left = left + 'px';
+    m.style.top  = top  + 'px';
+    m.style.visibility = '';
+
+    // Adauga listener de inchidere (o singura data, cu referinta stocata)
+    _rapoarteCloseHandler = function(e){
       if(!m.contains(e.target) && e.target.id !== 'btnPDF'){
-        m.style.display='none';
-        document.removeEventListener('click', close);
+        m.style.display = 'none';
+        document.removeEventListener('click', _rapoarteCloseHandler);
+        _rapoarteCloseHandler = null;
       }
-    });
-  }, 10);
+    };
+    setTimeout(()=> document.addEventListener('click', _rapoarteCloseHandler), 50);
+  });
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
