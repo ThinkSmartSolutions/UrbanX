@@ -429,6 +429,7 @@ function aedisOpen3DViewer(){
       <button onclick="V3D.rad=Math.max(V3D.rad*0.65,8);_v3dUpdateCam()" title="Zoom in" style="background:rgba(59,130,246,.1);color:#60a5fa;border:1px solid rgba(59,130,246,.2);border-radius:7px;padding:3px 9px;font-size:13px;cursor:pointer;flex-shrink:0">＋</button>
       <button onclick="V3D.rad=Math.min(V3D.rad*1.4,300);_v3dUpdateCam()" title="Zoom out" style="background:rgba(59,130,246,.1);color:#60a5fa;border:1px solid rgba(59,130,246,.2);border-radius:7px;padding:3px 9px;font-size:13px;cursor:pointer;flex-shrink:0">－</button>
       <button id="v3d-dist-btn" onclick="_v3dToggleDistances()" title="Toggle distanțe vecini" style="background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.3);border-radius:7px;padding:3px 9px;font-size:11px;cursor:pointer;flex-shrink:0">📏</button>
+      <button id="v3d-legend-btn" onclick="_v3dToggleLotLegend()" title="Legendă tipuri lotizare" style="background:rgba(167,139,250,.1);color:#a78bfa;border:1px solid rgba(167,139,250,.3);border-radius:7px;padding:3px 9px;font-size:11px;cursor:pointer;flex-shrink:0;display:none">🎨</button>
       <div style="flex:1"></div>
       <button onclick="document.getElementById('aedis-3d-viewer-overlay').remove();_v3dCleanup()" style="background:rgba(20,30,60,.9);color:#a78bfa;border:1px solid rgba(139,92,246,.4);border-radius:8px;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0">✕ Închide</button>
     </div>
@@ -792,6 +793,13 @@ function _v3dBuild(ap){
       }
     }catch(e){ console.warn('AEDIS mesh:',e.message); }
   });
+
+  // ── Afiseaza butonul de legenda lotizare daca exista date ────────────────
+  try{
+    const _hasLot=(S.vol._lastFeats||[]).some(f=>f.properties?.isLotizare);
+    const _legendBtn=document.getElementById('v3d-legend-btn');
+    if(_legendBtn) _legendBtn.style.display=_hasLot?'':'none';
+  }catch(e){}
 
   // ── Render special lotizare (gazebo, bbq, biserici etc.) ────────────────
   // Apelat INDIFERENT daca viewer era deschis la generare sau nu
@@ -1557,6 +1565,59 @@ function _v3dToggleDistances(){
 }
 
 // Alias pentru compatibilitate
+// ─── Legendă lotizare în viewer ──────────────────────────────────────────────
+function _v3dToggleLotLegend(){
+  const overlay = document.getElementById('v3d-lot-legend');
+  if(overlay){ overlay.remove(); return; }
+
+  // Construieste legenda din datele lotizare curente
+  const hasLotizare = (S.vol._lastFeats||[]).some(f=>f.properties?.isLotizare);
+  if(!hasLotizare){ return; }
+
+  const tipuriVizibile = {};
+  (S.vol._lastFeats||[]).forEach(f=>{
+    if(!f.properties?.isLotizare) return;
+    const tip = f.properties?.lotTip || f.properties?.tip;
+    if(!tip || tipuriVizibile[tip]) return;
+    const tDef = (typeof _LOT !== 'undefined') ? _LOT.tipuri?.[tip] : null;
+    if(tDef) tipuriVizibile[tip] = tDef;
+  });
+
+  const container = document.getElementById('aedis-3d-viewer-overlay');
+  const div = document.createElement('div');
+  div.id = 'v3d-lot-legend';
+  div.style.cssText = 'position:absolute;bottom:50px;right:12px;z-index:10;background:rgba(7,12,26,.92);border:1px solid rgba(167,139,250,.3);border-radius:12px;padding:10px 13px;min-width:175px;max-width:210px;backdrop-filter:blur(10px);font-family:system-ui,sans-serif;pointer-events:all';
+
+  const tipEntries = Object.entries(tipuriVizibile);
+  div.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <span style="color:#a78bfa;font-size:10px;font-weight:800">🎨 Tipuri loturi</span>
+      <button onclick="document.getElementById('v3d-lot-legend')?.remove()" style="background:none;border:none;color:#64748b;cursor:pointer;font-size:13px;padding:0;line-height:1">✕</button>
+    </div>
+    ${tipEntries.map(([k,t])=>`
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
+        <div style="width:13px;height:13px;border-radius:3px;flex-shrink:0;background:${t.color};border:1px solid ${t.borderColor||t.color}88"></div>
+        <span style="color:#e2e8f0;font-size:10px;font-weight:600">${t.icon||''} ${t.label}</span>
+      </div>`).join('')}
+    <div style="margin-top:7px;border-top:1px solid rgba(255,255,255,.07);padding-top:7px;display:flex;flex-direction:column;gap:4px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:13px;height:5px;border-radius:2px;background:#6b5a40;flex-shrink:0"></div>
+        <span style="color:#94a3b8;font-size:9px">Drum / Circulații</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:13px;height:5px;border-radius:2px;background:#4a7a40;flex-shrink:0"></div>
+        <span style="color:#94a3b8;font-size:9px">Spații verzi lot</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:13px;height:5px;border-radius:2px;background:#c8d0d8;flex-shrink:0"></div>
+        <span style="color:#94a3b8;font-size:9px">Terasă / Acoperiș plat</span>
+      </div>
+    </div>
+  `;
+  (container||document.body).appendChild(div);
+}
+
+
 function _v3dRefreshDistances(){ _v3dToggleDistances(); }
 
 
