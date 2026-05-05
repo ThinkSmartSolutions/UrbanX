@@ -794,11 +794,18 @@ function _v3dBuild(ap){
     }catch(e){ console.warn('AEDIS mesh:',e.message); }
   });
 
-  // ── Afiseaza butonul de legenda lotizare daca exista date ────────────────
+  // ── Afiseaza butonul de legenda lotizare + auto-show la prima deschidere ──
   try{
     const _hasLot=(S.vol._lastFeats||[]).some(f=>f.properties?.isLotizare);
     const _legendBtn=document.getElementById('v3d-legend-btn');
-    if(_legendBtn) _legendBtn.style.display=_hasLot?'':'none';
+    if(_legendBtn){
+      _legendBtn.style.display=_hasLot?'inline-flex':'none';
+      // Auto-show legenda la prima deschidere cu lotizare
+      if(_hasLot && !V3D._legendShown){
+        V3D._legendShown=true;
+        setTimeout(()=>{ if(typeof _v3dToggleLotLegend==='function') _v3dToggleLotLegend(); }, 800);
+      }
+    }
   }catch(e){}
 
   // ── Render special lotizare (gazebo, bbq, biserici etc.) ────────────────
@@ -1353,13 +1360,22 @@ function _v3dAddZones(THREE, scene, toLoc, ap){
     // ── 1b. Drumuri din lotizare-drum-src — asfalt DEASUPRA spatiilor verzi ──
   try{
     const drumFeats=(map.getSource('lotizare-drum-src')?._data?.features)||[];
+    const matDrum=new THREE.MeshStandardMaterial({color:'#4a4a50',roughness:0.92,metalness:0.08});
     drumFeats.forEach(df=>{
       if(!df.geometry) return;
-      const dring=df.geometry.type==='Polygon'?df.geometry.coordinates[0]:df.geometry.coordinates[0]?.[0];
-      if(!dring||dring.length<4) return;
-      _flatPoly(dring, 0.08, _matAsfalt()); // asfalt la y=0.08 acoperă verdeata
+      const rings=df.geometry.type==='Polygon'?df.geometry.coordinates:[df.geometry.coordinates[0]];
+      rings.forEach(ring=>{
+        if(!ring||ring.length<4) return;
+        const dpts=ring.slice(0,-1).map(toLoc);
+        if(dpts.length<3) return;
+        const dsh=new THREE.Shape(); dsh.moveTo(dpts[0][0],dpts[0][1]);
+        dpts.slice(1).forEach(([x,z])=>dsh.lineTo(x,z)); dsh.closePath();
+        const dm=new THREE.Mesh(new THREE.ShapeGeometry(dsh),matDrum);
+        dm.rotation.x=-Math.PI/2; dm.position.y=0.12; dm.receiveShadow=true;
+        scene.add(dm);
+      });
     });
-  }catch(e){}
+  }catch(e){ console.warn('drum surface:',e.message); }
 
     // ── 2. EDIFICABIL — contur violet fără fill ───────────────────────────
     try{
@@ -1566,7 +1582,7 @@ function _v3dToggleDistances(){
 
 // Alias pentru compatibilitate
 // ─── Legendă lotizare în viewer ──────────────────────────────────────────────
-function _v3dToggleLotLegend(){
+window._v3dToggleLotLegend = function _v3dToggleLotLegend(){
   const overlay = document.getElementById('v3d-lot-legend');
   if(overlay){ overlay.remove(); return; }
 
@@ -1615,7 +1631,7 @@ function _v3dToggleLotLegend(){
     </div>
   `;
   (container||document.body).appendChild(div);
-}
+};
 
 
 function _v3dRefreshDistances(){ _v3dToggleDistances(); }
