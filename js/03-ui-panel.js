@@ -384,12 +384,23 @@ function renderAll(){
 function renderTab(tab){
   try{
     const html=getContent(tab);
+
+    // Desktop panel — tc-{tab}
     const el=document.getElementById('tc-'+tab);
-    if(el) el.innerHTML=html;
-    // Pe mobil actualizam si mob-body daca tab-ul activ e cel curent
+    if(el){
+      const savedScroll = el.scrollTop;
+      el.innerHTML=html;
+      if(savedScroll > 0) el.scrollTop=savedScroll;
+    }
+
+    // Mobile sheet — mob-body (daca tab activ e cel curent)
     if(window.innerWidth<=840 && tab===S.tab){
       const mb=document.getElementById('mob-body');
-      if(mb) mb.innerHTML=html;
+      if(mb){
+        const savedMbScroll = mb.scrollTop;
+        mb.innerHTML=html;
+        if(savedMbScroll > 0) mb.scrollTop=savedMbScroll;
+      }
     }
   }catch(e){
     console.error('renderTab error:', e);

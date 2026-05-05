@@ -4427,7 +4427,7 @@ function aedisGetContent(){
     <div class="aedis-section">Funcțiunea principală</div>
     <div class="aedis-fn-grid">
       ${Object.entries(AEDIS_FN).map(([k,v])=>`
-        <button onclick="AEDIS.fn='${k}';AEDIS._fnOverride=true;aedisRender()" class="aedis-fn-btn${AEDIS.fn===k?' active':''}">
+        <button onclick="AEDIS.fn='${k}';AEDIS._fnOverride=true;aedisRender();if(typeof _v3dIsOpen==='function'&&_v3dIsOpen()&&typeof _v3dRebuildFast==='function')_v3dRebuildFast();if((S.vol.genDone||window.AEDIS3D?.active)&&typeof aedisGenerateAll==='function')setTimeout(()=>aedisGenerateAll(),0)" class="aedis-fn-btn${AEDIS.fn===k?' active':''}">
           <span class="aedis-fn-dot" style="background:${v.color}"></span>
           ${v.label}
         </button>`).join('')}
@@ -4460,7 +4460,7 @@ function aedisGetContent(){
       ${Object.entries(AEDIS_STIL).map(([k,v])=>{
         const swatches = v.floorColors.slice(0,5).map(c=>`<span style="display:inline-block;width:8px;height:8px;background:${c};border-radius:1px;margin:0 1px"></span>`).join('');
         return `
-        <button onclick="AEDIS.stil='${k}';AEDIS._stilOverride=true;aedisRender()" class="aedis-stil-btn${AEDIS.stil===k?' active':''}">
+        <button onclick="AEDIS.stil='${k}';AEDIS._stilOverride=true;aedisRender();if(typeof _v3dIsOpen==='function'&&_v3dIsOpen()&&typeof _v3dRebuildFast==='function')_v3dRebuildFast();if((S.vol.genDone||window.AEDIS3D?.active)&&typeof aedisGenerateAll==='function')setTimeout(()=>aedisGenerateAll(),0)" class="aedis-stil-btn${AEDIS.stil===k?' active':''}">
           ${v.label}<br>
           <div style="margin:3px 0">${swatches}</div>
           <small style="opacity:0.7">${v.desc}</small>
@@ -4487,7 +4487,7 @@ function aedisGetContent(){
         {id:'extindere_v',ico:'🏗',label:'Ext. Vertical',desc:'Deasupra existentelor'},
         {id:'inglobare',ico:'🏙',label:'Inglobare',desc:'Înglobează existentele'},
       ].map(s=>`
-        <button onclick="AEDIS.scenariu='${s.id}';AEDIS._scenariuOverride=true;aedisRender();if((S.vol.genDone||window.AEDIS3D?.active)&&typeof aedisGenerateAll==='function')setTimeout(()=>aedisGenerateAll(),0)" class="aedis-scen-btn${AEDIS.scenariu===s.id?' active':''}">
+        <button onclick="AEDIS.scenariu='${s.id}';AEDIS._scenariuOverride=true;if(typeof setScenariu==='function')setScenariu(AEDIS.scenariu==='demolare'?'liber':AEDIS.scenariu);aedisRender();if((S.vol.genDone||window.AEDIS3D?.active)&&typeof aedisGenerateAll==='function')setTimeout(()=>aedisGenerateAll(),0)" class="aedis-scen-btn${AEDIS.scenariu===s.id?' active':''}">
           ${s.ico} ${s.label}<br><small>${s.desc}</small>
         </button>`).join('')}
     </div>
