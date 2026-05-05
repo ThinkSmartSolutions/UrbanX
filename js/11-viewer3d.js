@@ -651,12 +651,33 @@ function _v3dBuild(ap){
   grid.material.opacity=0.35; grid.material.transparent=true;
   grid.position.y=0.01; scene.add(grid);
 
-  // Coordonate locale
+  // Coordonate locale — centrat pe uniunea tuturor parcelelor selectate
+  // (fix orientare: cu multiple parcele, centrul scenei = centrul uniunii, nu parcela[0])
   const ring0 = ap.geo.geometry.type==='Polygon'
     ? ap.geo.geometry.coordinates[0]
     : ap.geo.geometry.coordinates[0][0];
-  const cx=ring0.reduce((s,c)=>s+c[0],0)/ring0.length;
-  const cy2=ring0.reduce((s,c)=>s+c[1],0)/ring0.length;
+
+  // Centrul scenei: media centrurilor tuturor parcelelor (pentru multi-parcel lotizare)
+  let cx, cy2;
+  const allParcels = (S.parcels||[]).filter(p=>p?.geo?.geometry);
+  if(allParcels.length > 1){
+    // Centrul bbox al tuturor parcelelor
+    let minLng=Infinity,maxLng=-Infinity,minLat=Infinity,maxLat=-Infinity;
+    allParcels.forEach(p=>{
+      const r = p.geo.geometry.type==='Polygon'
+        ? p.geo.geometry.coordinates[0]
+        : p.geo.geometry.coordinates[0][0];
+      r.forEach(([lng,lat])=>{
+        minLng=Math.min(minLng,lng); maxLng=Math.max(maxLng,lng);
+        minLat=Math.min(minLat,lat); maxLat=Math.max(maxLat,lat);
+      });
+    });
+    cx = (minLng+maxLng)/2;
+    cy2 = (minLat+maxLat)/2;
+  } else {
+    cx = ring0.reduce((s,c)=>s+c[0],0)/ring0.length;
+    cy2 = ring0.reduce((s,c)=>s+c[1],0)/ring0.length;
+  }
   const mLng=111320*Math.cos(cy2*Math.PI/180), mLat=111320;
   const toLoc=([lng,lat])=>[(lng-cx)*mLng,(lat-cy2)*mLat];
 
@@ -847,14 +868,28 @@ function _v3dBuild(ap){
   _v3dAddUrbanLife(THREE, scene, ring0, toLoc, _isNightMode);
   // Distanțele sunt afișate în harta Mapbox, NU în viewer 3D (simplitate vizuală)
 
-  // Camera poziție inițială
+  // Camera poziție
   const maxH=Math.max(...(S.vol._lastFeats||[]).map(f=>f.properties?.top||0),8);
-  const parcelSz=Math.max(...ring0.map(([lng,lat])=>{const[x,z]=toLoc([lng,lat]);return Math.sqrt(x*x+z*z);}),10);
-  V3D.rad=Math.max(parcelSz*2.5,maxH*2.2,35);
+  const allPts=[...ring0];
+  // Include punctele din toate parcelele pentru a calcula raza corecta
+  (S.parcels||[]).forEach(p=>{
+    const r=p?.geo?.geometry?.type==='Polygon'?p.geo.geometry.coordinates[0]:p?.geo?.geometry?.coordinates?.[0]?.[0];
+    if(r) allPts.push(...r);
+  });
+  const parcelSz=Math.max(...allPts.map(([lng,lat])=>{const[x,z]=toLoc([lng,lat]);return Math.sqrt(x*x+z*z);}),10);
+  const radTarget=Math.max(parcelSz*2.2,maxH*2.0,35);
+
+  // La primul build: seteaza rad direct
+  // La rebuild (viewer era deja deschis): pastreaza th/ph, schimba rad smooth
+  const isFirstBuild = !V3D.th;
+  if(isFirstBuild || V3D.rad < 1){
+    V3D.rad = radTarget;
+  } else {
+    // Pastreaza orientarea (th/ph) dar ajusteaza distanta pentru noul continut
+    V3D.rad = V3D.rad * 0.3 + radTarget * 0.7; // blend smooth
+  }
   if(!V3D.tx) V3D.tx = new THREE.Vector3(0, maxH*0.4, 0);
   else V3D.tx.set(0, maxH*0.4, 0);
-  if(!V3D.tx) V3D.tx=new THREE.Vector3(0,maxH*0.4,0);
-  else V3D.tx.set(0,maxH*0.4,0);
   _v3dUpdateCam();
 
   // Controls
@@ -2996,12 +3031,26 @@ function _v3dUpdateCam(){
 }
 
 function _v3dResetCam(){
+  // Orientare initiala: NE, unghi mediu
   V3D.th=Math.PI/4; V3D.ph=Math.PI/2.4;
   const maxH=Math.max(...(S.vol._lastFeats||[]).map(f=>f.properties?.top||0),8);
   const ap=S.parcels[S.activeParcel??0];
-  const ring=ap?.geo?.geometry?.type==='Polygon'?ap.geo.geometry.coordinates[0]:ap?.geo?.geometry?.coordinates?.[0]?.[0]||[];
-  const cy2=ring.reduce?.((s,c)=>s+c[1],0)/(ring.length||1)||0;
-  const mLat=111320; const cx2=ring.reduce?.((s,c)=>s+c[0],0)/(ring.length||1)||0;
+  // Centrul scenei: toate parcelele (multi-parcel aware)
+  let cx2,cy2;
+  const allP=(S.parcels||[]).filter(p=>p?.geo?.geometry);
+  if(allP.length>1){
+    let mn=Infinity,mx=-Infinity,ml=Infinity,mxl=-Infinity;
+    allP.forEach(p=>{
+      const r=p.geo.geometry.type==='Polygon'?p.geo.geometry.coordinates[0]:p.geo.geometry.coordinates[0][0];
+      r.forEach(([lng,lat])=>{mn=Math.min(mn,lng);mx=Math.max(mx,lng);ml=Math.min(ml,lat);mxl=Math.max(mxl,lat);});
+    });
+    cx2=(mn+mx)/2; cy2=(ml+mxl)/2;
+  } else {
+    const ring=ap?.geo?.geometry?.type==='Polygon'?ap.geo.geometry.coordinates[0]:ap?.geo?.geometry?.coordinates?.[0]?.[0]||[];
+    cy2=ring.reduce?.((s,c)=>s+c[1],0)/(ring.length||1)||0;
+    cx2=ring.reduce?.((s,c)=>s+c[0],0)/(ring.length||1)||0;
+  }
+  const mLat=111320;
   const mLng=111320*Math.cos(cy2*Math.PI/180);
   const toLoc=([lng,lat])=>[(lng-cx2)*mLng,(lat-cy2)*mLat];
   const pts=ring.map?.(toLoc)||[];
