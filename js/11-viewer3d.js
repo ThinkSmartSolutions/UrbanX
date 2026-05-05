@@ -18,24 +18,20 @@ function _toggleVizMenu(e){
   if(m.style.display==='block'){
     m.style.display='none';
   } else {
-    const btn=(e&&e.currentTarget)||document.querySelector('#viz-group button');
-    m.style.visibility='hidden';
+    // Capturăm btn SINCRON înainte de orice async
+    const btn=(e&&e.currentTarget instanceof Element ? e.currentTarget : null)
+              || document.querySelector('#viz-group button');
+    if(btn && typeof btn.getBoundingClientRect === 'function'){
+      const r=btn.getBoundingClientRect();
+      const mw=190; // latime estimata
+      let left=r.left;
+      let top=r.bottom+2;
+      if(left+mw>window.innerWidth-8) left=window.innerWidth-mw-8;
+      if(left<8) left=8;
+      m.style.left=left+'px';
+      m.style.top=top+'px';
+    }
     m.style.display='block';
-    requestAnimationFrame(()=>{
-      if(btn){
-        const r=btn.getBoundingClientRect();
-        const mw=m.offsetWidth||190;
-        const mh=m.offsetHeight||200;
-        let left=r.left;
-        let top=r.bottom+2;
-        if(left+mw>window.innerWidth-8) left=window.innerWidth-mw-8;
-        if(left<8) left=8;
-        if(top+mh>window.innerHeight-8) top=Math.max(8,r.top-mh-2);
-        m.style.left=left+'px';
-        m.style.top=top+'px';
-      }
-      m.style.visibility='';
-    });
   }
 }
 function _toggleToolsMenu(e){
@@ -47,24 +43,19 @@ function _toggleToolsMenu(e){
   if(m.style.display==='block'){
     m.style.display='none';
   } else {
-    const btn=(e&&e.currentTarget)||document.querySelector('#tools-group button');
-    m.style.visibility='hidden';
+    const btn=(e&&e.currentTarget instanceof Element ? e.currentTarget : null)
+              || document.querySelector('#tools-group button');
+    if(btn && typeof btn.getBoundingClientRect === 'function'){
+      const r=btn.getBoundingClientRect();
+      const mw=210;
+      let left=r.left;
+      let top=r.bottom+2;
+      if(left+mw>window.innerWidth-8) left=window.innerWidth-mw-8;
+      if(left<8) left=8;
+      m.style.left=left+'px';
+      m.style.top=top+'px';
+    }
     m.style.display='block';
-    requestAnimationFrame(()=>{
-      if(btn){
-        const r=btn.getBoundingClientRect();
-        const mw=m.offsetWidth||210;
-        const mh=m.offsetHeight||150;
-        let left=r.left;
-        let top=r.bottom+2;
-        if(left+mw>window.innerWidth-8) left=window.innerWidth-mw-8;
-        if(left<8) left=8;
-        if(top+mh>window.innerHeight-8) top=Math.max(8,r.top-mh-2);
-        m.style.left=left+'px';
-        m.style.top=top+'px';
-      }
-      m.style.visibility='';
-    });
   }
 }
 // Închide la click în afara meniurilor — cu delay pentru a nu anula deschiderea
