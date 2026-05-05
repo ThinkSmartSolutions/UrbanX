@@ -4366,7 +4366,19 @@ function aedisRender(){
   }
   const body=document.getElementById('aedis-body');
   if(!body) return;
-  try{ body.innerHTML=aedisGetContent(); }
+
+  // Salvăm scroll position — innerHTML reset șterge scrollTop-ul din aedis-content
+  const scrollEl = body.querySelector('.aedis-content');
+  const savedScroll = scrollEl ? scrollEl.scrollTop : 0;
+
+  try{
+    body.innerHTML=aedisGetContent();
+    // Restaurăm scroll după re-render (utilizatorul rămâne în aceeași poziție)
+    if(savedScroll > 0){
+      const newScrollEl = body.querySelector('.aedis-content');
+      if(newScrollEl) newScrollEl.scrollTop = savedScroll;
+    }
+  }
   catch(e){ body.innerHTML=`<div style="color:#f87171;padding:16px">Eroare: ${e.message}</div>`; }
 }
 
@@ -4767,12 +4779,12 @@ function aedisGetContent(){
       </div>
       <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:8px">
         ${['N','E','S','V'].map(l=>`
-          <button onclick="AEDIS.balconLaturi=AEDIS.balconLaturi||[];var _i=AEDIS.balconLaturi.indexOf('${l}');_i>=0?AEDIS.balconLaturi.splice(_i,1):AEDIS.balconLaturi.push('${l}');aedisRender();if((S.vol.genDone||window.AEDIS3D?.active)&&typeof aedisGenerateAll==='function')setTimeout(()=>aedisGenerateAll(),0)"
-            style="padding:7px 2px;border-radius:7px;border:1px solid ${(AEDIS.balconLaturi||[]).includes('${l}')?'#3b82f6':'rgba(255,255,255,.12)'};background:${(AEDIS.balconLaturi||[]).includes('${l}')?'rgba(59,130,246,.25)':'rgba(11,18,32,.6)'};color:${(AEDIS.balconLaturi||[]).includes('${l}')?'#93c5fd':'#475569'};cursor:pointer;font-size:11px;font-weight:800;transition:all .15s">
+          <button onclick="_aedisToggleBalcon('${l}');if((S.vol.genDone||window.AEDIS3D?.active)&&typeof aedisGenerateAll==='function')setTimeout(()=>aedisGenerateAll(),0)"
+            style="touch-action:manipulation;-webkit-tap-highlight-color:transparent;padding:7px 2px;border-radius:7px;border:1px solid ${(AEDIS.balconLaturi||[]).includes('${l}')?'#3b82f6':'rgba(255,255,255,.12)'};background:${(AEDIS.balconLaturi||[]).includes('${l}')?'rgba(59,130,246,.25)':'rgba(11,18,32,.6)'};color:${(AEDIS.balconLaturi||[]).includes('${l}')?'#93c5fd':'#475569'};cursor:pointer;font-size:11px;font-weight:800;transition:all .15s">
             ${l}
           </button>`).join('')}
-        <button onclick="AEDIS.balconLaturi=AEDIS.balconLaturi&&AEDIS.balconLaturi.length===4?[]:['N','E','S','V'];aedisRender();if((S.vol.genDone||window.AEDIS3D?.active)&&typeof aedisGenerateAll==='function')setTimeout(()=>aedisGenerateAll(),0)"
-          style="padding:7px 2px;border-radius:7px;border:1px solid ${(AEDIS.balconLaturi||[]).length===4?'#22c55e':'rgba(255,255,255,.12)'};background:${(AEDIS.balconLaturi||[]).length===4?'rgba(34,197,94,.2)':'rgba(11,18,32,.6)'};color:${(AEDIS.balconLaturi||[]).length===4?'#86efac':'#475569'};cursor:pointer;font-size:9px;font-weight:800">
+        <button onclick="_aedisToggleAllBalcon();if((S.vol.genDone||window.AEDIS3D?.active)&&typeof aedisGenerateAll==='function')setTimeout(()=>aedisGenerateAll(),0)"
+          style="touch-action:manipulation;-webkit-tap-highlight-color:transparent;padding:7px 2px;border-radius:7px;border:1px solid ${(AEDIS.balconLaturi||[]).length===4?'#22c55e':'rgba(255,255,255,.12)'};background:${(AEDIS.balconLaturi||[]).length===4?'rgba(34,197,94,.2)':'rgba(11,18,32,.6)'};color:${(AEDIS.balconLaturi||[]).length===4?'#86efac':'#475569'};cursor:pointer;font-size:9px;font-weight:800">
           Toate
         </button>
       </div>
