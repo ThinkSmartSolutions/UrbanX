@@ -535,6 +535,7 @@ function aedisOpen3DViewer(){
 // ── State ──────────────────────────────────────────────────────────────────
 
 function _v3dCleanup(){
+  V3D._camInit = false; // resetare la inchidere — la redeschidere va repositiona camera corect
   if(V3D.af) cancelAnimationFrame(V3D.af);
   if(V3D.r){ V3D.r.dispose(); V3D.r=null; }
   Object.values(V3D.texCache).forEach(t=>{ try{t.dispose();}catch(e){} });
@@ -870,14 +871,17 @@ function _v3dBuild(ap){
 
   // La primul build: seteaza rad direct
   // La rebuild (viewer era deja deschis): pastreaza th/ph, schimba rad smooth
-  const isFirstBuild = !V3D.th || V3D.th === 0;
-  if(isFirstBuild || V3D.rad < 1){
+  // Prima deschidere = flag V3D._camInit nu e setat inca
+  // Rebuild = viewer era deja deschis, pastreaza orientarea utilizatorului
+  if(!V3D._camInit){
+    // Prima deschidere: camera la SUD privind NORD (orientare ca harta)
+    V3D.th = Math.PI;
+    V3D.ph = Math.PI / 3.2;
     V3D.rad = radTarget;
-    // Prima deschidere: orientare default Nord-in-sus (camera la Sud privind Nord)
-    if(isFirstBuild){ V3D.th = Math.PI; V3D.ph = Math.PI/3.2; }
+    V3D._camInit = true;
   } else {
-    // Pastreaza orientarea (th/ph) dar ajusteaza distanta pentru noul continut
-    V3D.rad = V3D.rad * 0.3 + radTarget * 0.7; // blend smooth
+    // Rebuild: pastreaza th/ph, ajusteaza doar distanta
+    V3D.rad = V3D.rad * 0.3 + radTarget * 0.7;
   }
   if(!V3D.tx) V3D.tx = new THREE.Vector3(0, maxH*0.4, 0);
   else V3D.tx.set(0, maxH*0.4, 0);

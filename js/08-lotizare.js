@@ -235,11 +235,63 @@ function _showLotizarePanel(){
         <button onclick="_lotOpenUrban3D()" title="Deschide viewer Urban3D fotorealist" style="background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.25);color:#38bdf8;border-radius:8px;padding:8px 10px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">
           ⚡ Urban3D
         </button>
+        <button onclick="_lotToggleLegend()" title="Legendă culori" style="background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.25);color:#a78bfa;border-radius:8px;padding:8px 8px;font-size:13px;cursor:pointer;flex-shrink:0">
+          🎨
+        </button>
       </div>
       <button onclick="runLotizare()" style="width:100%;background:linear-gradient(135deg,#6d28d9,#4c1d95);border:1px solid #7c3aed;color:#fff;border-radius:10px;padding:12px;font-size:13px;font-weight:800;cursor:pointer;letter-spacing:.03em" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
         🏘 Generează Plan Lotizare
       </button>
     </div>`;
+  document.body.appendChild(div);
+}
+
+
+// ─── Legenda culori lotizare ──────────────────────────────────────────────
+function _lotToggleLegend(){
+  const existing = document.getElementById('lot-legend');
+  if(existing){ existing.remove(); return; }
+
+  const mob = window.innerWidth < 841;
+  const div = document.createElement('div');
+  div.id = 'lot-legend';
+  div.style.cssText = `position:fixed;${mob?'bottom:calc(50vh+68px);left:8px':'bottom:24px;left:12px'};z-index:8500;background:rgba(7,12,24,.94);border:1px solid rgba(167,139,250,.3);border-radius:12px;padding:10px 12px;font-family:system-ui,sans-serif;min-width:180px;max-width:220px;backdrop-filter:blur(12px);box-shadow:0 4px 24px rgba(0,0,0,.6)`;
+
+  const tipuriActive = Object.entries(_LOT.tipuri).filter(([k])=>{
+    if(['gazebo','garaj','bbq','bucvara','bortodoxa','bcatolica'].includes(k))
+      return (parseInt((_LOT.tipCount||{})[k])||0) > 0;
+    return (_LOT.tipMix[k]||0) > 0;
+  });
+
+  div.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <span style="color:#a78bfa;font-size:10px;font-weight:800">🎨 Legendă lotizare</span>
+      <button onclick="document.getElementById('lot-legend')?.remove()" style="background:none;border:none;color:#64748b;cursor:pointer;font-size:14px;line-height:1;padding:0">✕</button>
+    </div>
+    ${tipuriActive.map(([k,t])=>`
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:5px">
+        <div style="width:14px;height:14px;border-radius:3px;background:${t.color};border:1px solid ${t.borderColor||t.color};flex-shrink:0"></div>
+        <div>
+          <span style="color:#e2e8f0;font-size:10px;font-weight:600">${t.icon} ${t.label}</span>
+          ${t.categorie==='rezidential'?`<span style="color:#475569;font-size:8.5px"> · ${_LOT.tipMix[k]||0}%</span>`:
+            `<span style="color:#475569;font-size:8.5px"> · ${parseInt((_LOT.tipCount||{})[k])||0} lot</span>`}
+        </div>
+      </div>`).join('')}
+    <div style="margin-top:8px;border-top:1px solid rgba(255,255,255,.07);padding-top:7px">
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">
+        <div style="width:14px;height:5px;border-radius:2px;background:#94a3b8;flex-shrink:0"></div>
+        <span style="color:#94a3b8;font-size:9.5px">Drum / Circulații</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">
+        <div style="width:14px;height:5px;border-radius:2px;background:#16a34a;flex-shrink:0"></div>
+        <span style="color:#94a3b8;font-size:9.5px">Spații verzi estimate</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:7px">
+        <div style="width:14px;height:5px;border-radius:2px;background:#38bdf8;opacity:.5;flex-shrink:0"></div>
+        <span style="color:#94a3b8;font-size:9.5px">Parcare estimată</span>
+      </div>
+    </div>
+  `;
   document.body.appendChild(div);
 }
 
@@ -1750,6 +1802,7 @@ function runLotizare(){
     _lotBuild3D(loturi, drumuri);
 
     try{const bb=turf.bbox(pFeat);map.fitBounds([[bb[0],bb[1]],[bb[2],bb[3]]],{padding:60,duration:700});}catch(e){}
+    setTimeout(()=>{ if(!document.getElementById('lot-legend')) _lotToggleLegend(); }, 600);
     ss(`🏘 ${loturi.length} loturi · ${totalUnitati} unități · ROI ${roi}%`);
     _showLotizarePanel();setTimeout(()=>{
       _lotTab('r');
