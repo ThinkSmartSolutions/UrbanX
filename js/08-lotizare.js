@@ -2568,17 +2568,26 @@ function _genLotizareGeom(fpFeat, loturiPerTip, drumFract){
     return true;
   });
 
-  // Reconstruieste lista loturi cu clip final la parcela (garanteaza ca niciun lot nu iese)
+  // Reconstruieste lista loturi cu clip final + micro-inset pt separare vizuala de drum
   loturi.length=0;
   loturiRezidFiltrate.forEach(l=>{
     try{
-      // Verifica si re-clipuieste la fpFeat (parcela fara drumuri)
+      // 1. Clip la fpFeat (garanteaza ca nu iese din parcela)
       const clipped=turf.intersect(fpFeat,l);
-      if(clipped?.geometry && turf.area(clipped) > _LOT.lotAria*0.12){
-        loturi.push({...l,geometry:clipped.geometry,
-          properties:{...l.properties,area:Math.round(turf.area(clipped))}});
-      }
-    }catch(e){ loturi.push(l); } // fallback: pastreaza lotul original
+      if(!clipped?.geometry || turf.area(clipped) < _LOT.lotAria*0.12) return;
+      
+      // 2. Micro-inset de 0.25m → marginile nu mai coincid cu drumul (elimina z-fighting)
+      let finalGeom = clipped.geometry;
+      try{
+        const inset = turf.buffer({type:'Feature',geometry:clipped.geometry,properties:{}},
+          -0.00000225, {units:'degrees'}); // ~0.25m in grade
+        if(inset?.geometry && turf.area(inset) > _LOT.lotAria*0.08)
+          finalGeom = inset.geometry;
+      }catch(e){} // daca buffer esueaza, pastreaza clipuitul
+      
+      loturi.push({...l, geometry:finalGeom,
+        properties:{...l.properties, area:Math.round(turf.area({type:'Feature',geometry:finalGeom,properties:{}}))}});
+    }catch(e){ loturi.push(l); }
   });
   loturiSpeciale.forEach(l=>loturi.push(l));
 

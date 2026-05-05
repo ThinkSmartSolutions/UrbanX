@@ -1399,7 +1399,10 @@ function _v3dAddZones(THREE, scene, toLoc, ap){
     // ── 1b. Drumuri din lotizare-drum-src — asfalt DEASUPRA spatiilor verzi ──
   try{
     const drumFeats=(map.getSource('lotizare-drum-src')?._data?.features)||[];
-    const matDrum=new THREE.MeshStandardMaterial({color:'#4a4a50',roughness:0.92,metalness:0.08});
+    const matDrum=new THREE.MeshStandardMaterial({
+      color:'#3a3a40', roughness:0.95, metalness:0.05,
+      // Drum complet opac - acopera sigur orice margine de lot dedesubt
+    });
     drumFeats.forEach(df=>{
       if(!df.geometry) return;
       const rings=df.geometry.type==='Polygon'?df.geometry.coordinates:[df.geometry.coordinates[0]];
@@ -1410,7 +1413,9 @@ function _v3dAddZones(THREE, scene, toLoc, ap){
         const dsh=new THREE.Shape(); dsh.moveTo(dpts[0][0],dpts[0][1]);
         dpts.slice(1).forEach(([x,z])=>dsh.lineTo(x,z)); dsh.closePath();
         const dm=new THREE.Mesh(new THREE.ShapeGeometry(dsh),matDrum);
-        dm.rotation.x=-Math.PI/2; dm.position.y=0.12; dm.receiveShadow=true;
+        dm.rotation.x=-Math.PI/2;
+        dm.position.y=0.15; // mai sus decat outlines loturi (0.06) → acopera sigur
+        dm.receiveShadow=true;
         scene.add(dm);
       });
     });
