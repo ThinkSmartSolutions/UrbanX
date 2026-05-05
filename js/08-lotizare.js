@@ -108,6 +108,15 @@ function toggleLotizare(){
     }
     document.getElementById('lotizare-panel')?.remove();
     _floatPanelClose('lotizare-panel');
+    // Resetează harta după închidere (fix black screen pe mobil)
+    setTimeout(()=>{
+      try{
+        const mapEl = document.getElementById('map');
+        if(mapEl) mapEl.style.bottom = '';
+        if(window.map){ window.map.resize(); window.map.triggerRepaint(); }
+        if(window._lotLayoutSync) window._lotLayoutSync();
+      }catch(e){}
+    }, 80);
   }
 }
 
@@ -123,7 +132,7 @@ function _showLotizarePanel(){
   const div = document.createElement('div');
   div.id='lotizare-panel';
   // Pe mobil: drawer de jos cu inaltime 48vh — lasa harta vizibila deasupra
-  div.style.cssText=`position:fixed;${mob?'bottom:56px;left:0;right:0;border-radius:16px 16px 0 0':'top:56px;right:'+rightPos+'px;width:'+panelW+'px;border-radius:16px'};z-index:8600;background:rgba(7,12,24,.97);border:1px solid rgba(167,139,250,.35);${mob?'border-bottom:none':''}padding:0;box-shadow:0 12px 48px rgba(0,0,0,.75);backdrop-filter:blur(16px);font-family:system-ui,sans-serif;max-height:${mob?'50':'88'}vh;overflow:hidden;display:flex;flex-direction:column`;
+  div.style.cssText=`position:fixed;${mob?'bottom:72px;left:0;right:0;border-radius:16px 16px 0 0':'top:56px;right:'+rightPos+'px;width:'+panelW+'px;border-radius:16px'};z-index:8600;background:rgba(7,12,24,.97);border:1px solid rgba(167,139,250,.35);${mob?'border-bottom:none':''}padding:0;box-shadow:0 12px 48px rgba(0,0,0,.75);backdrop-filter:blur(16px);font-family:system-ui,sans-serif;max-height:${mob?'50':'88'}vh;overflow:hidden;display:flex;flex-direction:column`;
 
   div.innerHTML=`
     <div style="padding:12px 16px 0;flex-shrink:0">

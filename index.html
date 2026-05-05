@@ -716,9 +716,9 @@ canvas#c2d{width:100%;height:100%;display:block}
     margin:10px auto 6px;
     flex-shrink:0;
   }
-  /* Harta NU se acoperă — lotizare ocupă jos 55vh */
+  /* Harta NU se acoperă — lotizare ocupă jos 50vh+60px (sync cu JS _applyLotOpen) */
   body.lot-open #map{
-    bottom:calc(55vh + 72px)!important;
+    bottom:calc(50vh + 60px)!important;
     transition:bottom .25s ease!important;
   }
 }
@@ -1314,16 +1314,27 @@ canvas#c2d{width:100%;height:100%;display:block}
   
   function _applyLotOpen(){
     const m = _getLotModal();
-    if(!m) return;
-    const cs = window.getComputedStyle(m);
-    const visible = cs.display !== 'none' && cs.visibility !== 'hidden' && cs.opacity !== '0';
+    const mapEl = document.getElementById('map');
+    const visible = m ? (()=>{
+      const cs = window.getComputedStyle(m);
+      return cs.display !== 'none' && cs.visibility !== 'hidden' && cs.opacity !== '0';
+    })() : false;
+
     document.body.classList.toggle('lot-open', visible);
-    if(window.innerWidth >= 841 && window.map){
+
+    if(window.innerWidth >= 841){
+      // Desktop: deplasam harta la dreapta
       const w = Math.min(460, Math.round(window.innerWidth * 0.38));
-      const mapEl = document.getElementById('map');
       if(mapEl) mapEl.style.right = visible ? w+'px' : '';
-      if(visible) setTimeout(()=>{ try{window.map.resize();}catch(e){} }, 300);
+    } else {
+      // Mobil: ridicam harta de jos ca panelul sa nu o acopere
+      if(mapEl) mapEl.style.bottom = visible ? 'calc(50vh + 60px)' : '';
     }
+
+    // map.resize() la ORICE schimbare (deschidere SI inchidere, mobil SI desktop)
+    setTimeout(()=>{
+      try{ if(window.map){ window.map.resize(); window.map.triggerRepaint(); } }catch(e){}
+    }, visible ? 300 : 50);
   }
   
   // Observer pe body — prinde apariția/dispariția modalului și schimbări de style
