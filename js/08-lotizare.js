@@ -163,23 +163,15 @@ function toggleLotizare(){
   }
   if(_lotizareActive) _showLotizarePanel();
   else {
-    // IMPORTANT: NU ștergem sursele la închidere — propunerea lotizare rămâne vizibilă
-    // Sursele se curăță DOAR la Reset explicit sau la selectare parcelă nouă
-    // ['lotizare-src','lotizare-drum-src','lotizare-label-src'].forEach(s=>
-    //   setSource(s,{type:'FeatureCollection',features:[]}));
-    // setSource('lot-demo-src',{type:'FeatureCollection',features:[]});
     if(_LOT.demoMode) _lotDemoModeToggle();
-    // Restaurează front/setback layers
+    // Restaurează layerele de front/setback (ascunse când lotizarea era activă)
     ['front-parcel-line','front-setback-line','front-label','front-arrow'].forEach(lid=>{
       try{map.setLayoutProperty(lid,'visibility','visible');}catch(e){}
     });
-    updateMap();
-    // Curăță viewer-ul 3D DOAR dacă era generat de lotizare și nu există o propunere salvată
-    if(S.vol._lastFeats?.[0]?.properties?.isLotizare && !S.vol._lotizareSaved){
-      clearSource('vol-src');
-      S.vol.genDone = false;
-      S.vol._lastFeats = null;
-    }
+    // NU apelăm updateMap() — ar putea reseta sursele lotizare
+    // NU ștergem vol-src — 3D viewer rămâne cu lotizarea
+    // NU ștergem lotizare-src/drum/label — propunerea rămâne vizibilă pe hartă
+    // Curățarea se face NUMAI la Reset explicit sau parcelă nouă
     document.getElementById('lotizare-panel')?.remove();
     _floatPanelClose('lotizare-panel');
     // Resetează harta după închidere (fix black screen pe mobil)
@@ -219,7 +211,9 @@ function _showLotizarePanel(){
           }
           ${ap?.utr?`<span style="color:#d4af37;font-size:9px;margin-left:4px">UTR ${ap.utr}</span>`:''}
         </div>
-        <button onclick="toggleLotizare()" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#f87171;border-radius:8px;padding:${mob?'8px 18px':'5px 12px'};font-size:${mob?'16px':'12px'};font-weight:700;cursor:pointer;flex-shrink:0;min-width:${mob?'44px':'auto'}">✕ Închide</button>
+        <button onclick="toggleLotizare()" 
+  title="Închide panelul — lotizarea rămâne vizibilă pe hartă"
+  style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#f87171;border-radius:8px;padding:${mob?'8px 18px':'5px 12px'};font-size:${mob?'16px':'12px'};font-weight:700;cursor:pointer;flex-shrink:0;min-width:${mob?'44px':'auto'}">✕ Închide</button>
       </div>
       ${!ap?'<div style="color:#f87171;font-size:10px;padding:4px 0 6px">⚠️ Selectați mai întâi o parcelă pe hartă!</div>':''}
       <div style="display:flex;gap:2px;background:rgba(255,255,255,.04);border-radius:8px;padding:3px" id="lot-tabs">
@@ -1677,19 +1671,23 @@ function runLotizare(){
     // ── Afișare hartă 2D ──────────────────────────────────────────────────
     setSource('lotizare-src',{type:'FeatureCollection',features:loturi});
     setSource('lotizare-drum-src',{type:'FeatureCollection',features:drumuri});
-    const labels=loturi.map((l,li)=>{
-      const tip=l.properties.tip||'individuala';
-      const t=_LOT.tipuri[tip]||_LOT.tipuri.individuala;
-      const tv=_lotGetTip(tip);
-      const a=Math.round(turf.area(l));
-      const reg=tv.niv===1?'P':('P+'+(tv.niv-1)+'E');
-      // Label concis: nr. lot + suprafata + regim
-      return {type:'Feature',geometry:turf.centerOfMass(l).geometry,
-        properties:{
-          label:'L'+(li+1)+'\n'+a+'mp\n'+reg,
-          color:t.color
-        }};
-    });
+    // Labels: doar pentru loturi suficient de mari si cu pas de filtrare
+    // La proiecte mari (>30 loturi) reducem densitatea etichetelor
+    const labelStep = loturi.length > 40 ? 3 : loturi.length > 20 ? 2 : 1;
+    const labels=loturi
+      .filter((l,li)=> li % labelStep === 0) // filtrare pas
+      .map((l,li)=>{
+        const tip=l.properties.tip||'individuala';
+        const t=_LOT.tipuri[tip]||_LOT.tipuri.individuala;
+        const tv=_lotGetTip(tip);
+        const a=Math.round(turf.area(l));
+        const reg=tv.niv===1?'P':('P+'+(tv.niv-1)+'E');
+        return {type:'Feature',geometry:turf.centerOfMass(l).geometry,
+          properties:{
+            label:'L'+(li*labelStep+1)+'\n'+a+'mp\n'+reg,
+            color:t.color
+          }};
+      });
     setSource('lotizare-label-src',{type:'FeatureCollection',features:labels});
 
     // ── Generare volume 3D → vol-src ──────────────────────────────────────
@@ -1697,7 +1695,21 @@ function runLotizare(){
 
     try{const bb=turf.bbox(pFeat);map.fitBounds([[bb[0],bb[1]],[bb[2],bb[3]]],{padding:60,duration:700});}catch(e){}
     ss(`🏘 ${loturi.length} loturi · ${totalUnitati} unități · ROI ${roi}%`);
-    _showLotizarePanel();setTimeout(()=>_lotTab('r'),80);
+    _showLotizarePanel();setTimeout(()=>{
+      _lotTab('r');
+      // Adauga hint vizibil in rezultat despre cum se vede harta
+      const hint = document.getElementById('lot-close-hint');
+      if(!hint){
+        const c = document.getElementById('lot-content');
+        if(c){
+          const d = document.createElement('div');
+          d.id = 'lot-close-hint';
+          d.style.cssText = 'background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.2);border-radius:8px;padding:8px 10px;font-size:10px;color:#818cf8;margin-top:10px;text-align:center';
+          d.innerHTML = '💡 <b>✕ Închide</b> panelul pentru a vedea harta cu lotizarea · Propunerea rămâne vizibilă';
+          c.appendChild(d);
+        }
+      }
+    }, 80);
 
   }catch(e){console.error('Lotizare:',e);ss('⚠️ Eroare: '+e.message);}
 }
