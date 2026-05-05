@@ -850,6 +850,7 @@ function _lotRenderSpecial(THREE, scene, geom, tipKey, toLoc){
 }
 
 function _lotHtmlTipuri(){
+  const _mob = window.innerWidth < 841;
   // Grupare pe categorii
   const catLabels = {rezidential:'🏠 Rezidențial', dotare:'🌿 Dotări / Amenajări', cult:'⛪ Cult / Spații Publice'};
   const grupe = {};
@@ -874,15 +875,15 @@ function _lotHtmlTipuri(){
     <div style="background:rgba(255,255,255,${isActiv?'.04':'.01'});border:1px solid ${isActiv?(hasOverride?t.color+'66':'rgba(255,255,255,.07)'):'rgba(255,255,255,.03)'};border-radius:12px;padding:12px;margin-bottom:8px;border-left:3px solid ${isActiv?t.color:'#334155'};opacity:${isActiv?1:0.45}">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:${isActiv?'10':'0'}px">
         <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:18px">${def.icon}</span>
+          <span style="font-size:${_mob?'22':'18'}px">${def.icon}</span>
           <div>
-            <div style="color:#e2e8f0;font-size:12px;font-weight:800">${def.label}</div>
-            <div style="color:#475569;font-size:9px">${def.desc}</div>
+            <div style="color:#e2e8f0;font-size:${_mob?'14':'12'}px;font-weight:800">${def.label}</div>
+            <div style="color:#475569;font-size:${_mob?'10':'9'}px">${def.desc}</div>
           </div>
         </div>
         <div style="display:flex;gap:4px;align-items:center">
           <button onclick="_LOT.tipActiv=_LOT.tipActiv||{};_LOT.tipActiv['${key}']=!(_LOT.tipActiv['${key}']!==false);if(!_LOT.tipActiv['${key}']){_LOT.tipMix['${key}']=0;}else{_LOT.tipMix['${key}']=_LOT.tipMix['${key}']||10;}_lotTab('t')"
-            style="padding:4px 10px;border-radius:7px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid ${isActiv?t.color:'rgba(255,255,255,.15)'};background:${isActiv?t.color+'33':'rgba(11,18,32,.8)'};color:${isActiv?t.color:'#475569'}">
+            style="padding:${_mob?'8px 14px':'4px 10px'};border-radius:7px;font-size:${_mob?'12':'10'}px;font-weight:700;cursor:pointer;border:1px solid ${isActiv?t.color:'rgba(255,255,255,.15)'};background:${isActiv?t.color+'33':'rgba(11,18,32,.8)'};color:${isActiv?t.color:'#475569'};min-height:${_mob?'36':'auto'}px">
             ${isActiv?'✓ Activ':'+ Activează'}
           </button>
           ${hasOverride?`<button onclick="delete _LOT.tipOverride['${key}'];_lotTab('t')" style="font-size:9px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);color:#f87171;border-radius:5px;padding:2px 7px;cursor:pointer">↩</button>`:''}
@@ -895,21 +896,21 @@ function _lotHtmlTipuri(){
           <div>
             <div style="font-size:9px;color:#64748b;margin-bottom:3px">Nr. niveluri (fără parter)</div>
             <div style="display:flex;gap:3px;flex-wrap:wrap">
-              ${[0,1,2,3,4,5,6,7].map(n=>`<button onclick="_lotSetTipParam('${key}','niv',${n+1});_lotTab('t')" style="padding:4px 7px;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid ${t.niv===(n+1)?t.color:'rgba(255,255,255,.12)'};background:${t.niv===(n+1)?t.color+'33':'rgba(11,18,32,.8)'};color:${t.niv===(n+1)?t.color:'#64748b'}">${n===0?'P':('P+'+n+'E')}</button>`).join('')}
+              ${[0,1,2,3,4,5,6,7].map(n=>`<button onclick="_lotSetTipParam('${key}','niv',${n+1});_lotTab('t')" style="padding:${_mob?'8px 10px':'4px 7px'};border-radius:5px;font-size:${_mob?'13':'11'}px;font-weight:700;cursor:pointer;border:1px solid ${t.niv===(n+1)?t.color:'rgba(255,255,255,.12)'};background:${t.niv===(n+1)?t.color+'33':'rgba(11,18,32,.8)'};color:${t.niv===(n+1)?t.color:'#64748b'};min-height:${_mob?'36px':'auto'}">${n===0?'P':('P+'+n+'E')}</button>`).join('')}
             </div>
           </div>
           <div>
             <div style="font-size:9px;color:#64748b;margin-bottom:3px">Etaj retras</div>
             <div style="display:flex;gap:4px">
-              <button onclick="_lotSetTipParam('${key}','hasRetras',false);_lotTab('t')" style="flex:1;padding:5px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid ${!hRetras?t.color:'rgba(255,255,255,.12)'};background:${!hRetras?t.color+'22':'rgba(11,18,32,.8)'};color:${!hRetras?t.color:'#64748b'}">Fără</button>
-              <button onclick="_lotSetTipParam('${key}','hasRetras',true);_lotTab('t')" style="flex:1;padding:5px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid ${hRetras?t.color:'rgba(255,255,255,.12)'};background:${hRetras?t.color+'22':'rgba(11,18,32,.8)'};color:${hRetras?t.color:'#64748b'}">+Retras</button>
+              <button onclick="_lotSetTipParam('${key}','hasRetras',false);_lotTab('t')" style="flex:1;padding:${_mob?'9px 5px':'5px'};border-radius:6px;font-size:${_mob?'13':'10'}px;font-weight:700;cursor:pointer;border:1px solid ${!hRetras?t.color:'rgba(255,255,255,.12)'};background:${!hRetras?t.color+'22':'rgba(11,18,32,.8)'};color:${!hRetras?t.color:'#64748b'}">Fără</button>
+              <button onclick="_lotSetTipParam('${key}','hasRetras',true);_lotTab('t')" style="flex:1;padding:${_mob?'9px 5px':'5px'};border-radius:6px;font-size:${_mob?'13':'10'}px;font-weight:700;cursor:pointer;border:1px solid ${hRetras?t.color:'rgba(255,255,255,.12)'};background:${hRetras?t.color+'22':'rgba(11,18,32,.8)'};color:${hRetras?t.color:'#64748b'}">+Retras</button>
             </div>
           </div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
           <div>
             <div style="font-size:9px;color:#64748b;margin-bottom:3px">H parter (m)</div>
-            <input type="number" min="2" max="8" step="0.1" value="${hParter}" style="width:100%;background:#04090f;border:1px solid rgba(255,255,255,.15);color:#e2e8f0;border-radius:5px;padding:5px 8px;font-size:12px" oninput="_lotSetTipParam('${key}','hParter',+this.value)">
+            <input type="number" min="2" max="8" step="0.1" value="${hParter}" style="width:100%;background:#04090f;border:1px solid rgba(255,255,255,.15);color:#e2e8f0;border-radius:5px;padding:${_mob?'9px':'5px'} 8px;font-size:${_mob?'16px':'12px'}" oninput="_lotSetTipParam('${key}','hParter',+this.value)">
           </div>
           <div>
             <div style="font-size:9px;color:#64748b;margin-bottom:3px">H etaj (m)</div>
@@ -921,18 +922,18 @@ function _lotHtmlTipuri(){
           <span style="color:#d4af37;font-size:11px;font-weight:800">${(parseFloat(hParter)+Math.max(0,t.niv-1)*parseFloat(hNiv)+(hRetras?2.5:0)).toFixed(1)}m${hRetras?' (+retras)':''}</span>
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px">
+      <div style="display:grid;grid-template-columns:${_mob?'1fr 1fr':'1fr 1fr 1fr'};gap:5px">
         <div>
           <div style="font-size:9px;color:#64748b;margin-bottom:3px">POT lot (%)</div>
-          <input type="number" min="10" max="100" step="5" value="${t.sc}" style="width:100%;background:#04090f;border:1px solid rgba(255,255,255,.15);color:#e2e8f0;border-radius:5px;padding:4px 7px;font-size:12px" oninput="_lotSetTipParam('${key}','sc',+this.value)">
+          <input type="number" min="10" max="100" step="5" value="${t.sc}" style="width:100%;background:#04090f;border:1px solid rgba(255,255,255,.15);color:#e2e8f0;border-radius:5px;padding:${_mob?'8px':'4px'} 7px;font-size:${_mob?'14':'12'}px" oninput="_lotSetTipParam('${key}','sc',+this.value)">
         </div>
         <div>
           <div style="font-size:9px;color:#64748b;margin-bottom:3px">Ret. față (m)</div>
-          <input type="number" min="0" max="20" step="0.5" value="${t.retF}" style="width:100%;background:#04090f;border:1px solid rgba(255,255,255,.15);color:#e2e8f0;border-radius:5px;padding:4px 7px;font-size:12px" oninput="_lotSetTipParam('${key}','retF',+this.value)">
+          <input type="number" min="0" max="20" step="0.5" value="${t.retF}" style="width:100%;background:#04090f;border:1px solid rgba(255,255,255,.15);color:#e2e8f0;border-radius:5px;padding:${_mob?'8px':'4px'} 7px;font-size:${_mob?'14':'12'}px" oninput="_lotSetTipParam('${key}','retF',+this.value)">
         </div>
         <div>
           <div style="font-size:9px;color:#64748b;margin-bottom:3px">Lot default (mp)</div>
-          <input type="number" min="20" max="5000" step="10" value="${t.lotDefault||def.lotDefault}" style="width:100%;background:#04090f;border:1px solid rgba(255,255,255,.15);color:#e2e8f0;border-radius:5px;padding:4px 7px;font-size:12px" oninput="_lotSetTipParam('${key}','lotDefault',+this.value)">
+          <input type="number" min="20" max="5000" step="10" value="${t.lotDefault||def.lotDefault}" style="width:100%;background:#04090f;border:1px solid rgba(255,255,255,.15);color:#e2e8f0;border-radius:5px;padding:${_mob?'8px':'4px'} 7px;font-size:${_mob?'14':'12'}px" oninput="_lotSetTipParam('${key}','lotDefault',+this.value)">
         </div>
       </div>` : ''}
     </div>`;
