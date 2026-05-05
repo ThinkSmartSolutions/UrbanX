@@ -2068,44 +2068,38 @@ function _genLotizareGeom(fpFeat, loturiPerTip, drumFract){
 
   if(!pozitiiValide.length) return {loturi,drumuri};
 
-  // ── 4. Distribuie tipurile pe pozitiile valide (proportional cu mix) ────
-  // Toate tipurile active (inclusiv cele speciale)
+  // ── 4. Distribuie tipurile EXACT pe numarul cerut de loturi ─────────────
+  // Nu generam mai mult decat cere mixul utilizatorului
   const tipuriActive=Object.keys(loturiPerTip).filter(k=>loturiPerTip[k]>0);
   const totalCerut=Object.values(loturiPerTip).reduce((s,v)=>s+v,0);
-  const nrPoz=pozitiiValide.length;
 
-  // Asignam tipuri proportional — daca avem mai multe pozitii decat cerut,
-  // completam cu tipul dominant
-  const tipDominant=tipuriActive.reduce((a,b)=>(loturiPerTip[a]||0)>=(loturiPerTip[b]||0)?a:b,'individuala');
+  // Construim lista de tipuri de asignat (fix, cat cere mixul)
   const asignari=[];
   tipuriActive.forEach(tip=>{
     const n=loturiPerTip[tip]||0;
     for(let i=0;i<n;i++) asignari.push(tip);
   });
-  // Completeaza pana la nrPoz cu tipul dominant (umple toata parcela)
-  while(asignari.length<nrPoz) asignari.push(tipDominant);
+  // Daca avem mai putine pozitii valide decat cerut → folosim cat avem
+  const nrLoturiFinale=Math.min(asignari.length, pozitiiValide.length);
+  if(nrLoturiFinale===0) return {loturi,drumuri};
 
-  // Distribuie uniform (nu blocat in colturi) — amesteca tipurile
-  // Tipuri speciale (suprafata mica) → pozitii de la margine/colt
+  // Tipuri speciale → pozitii de margine, rezidentiale → interior
   const specialTips=['gazebo','garaj','bbq','bucvara','bortodoxa','bcatolica'];
-  const pozMargine=pozitiiValide.filter(p=>{
-    const maxR=Math.max(...pozitiiValide.map(x=>x.r));
-    const maxC=Math.max(...pozitiiValide.map(x=>x.c));
-    return p.r===0||p.r===maxR||p.c===0||p.c===maxC;
-  });
-  const pozInterior=pozitiiValide.filter(p=>!pozMargine.includes(p));
-
-  // Sorteaza asignarile: tipuri speciale primele, rezidentiale dupa
-  const asignSpeciale=asignari.filter(t=>specialTips.includes(t));
-  const asignRezid=asignari.filter(t=>!specialTips.includes(t));
-  const asignariFinal=[...asignSpeciale,...asignRezid];
-
-  // Pune tipurile speciale pe pozitii de margine, rezidentiale pe interior
+  const maxR=pozitiiValide.length>0?Math.max(...pozitiiValide.map(x=>x.r)):0;
+  const maxC=pozitiiValide.length>0?Math.max(...pozitiiValide.map(x=>x.c)):0;
+  const pozMargine=pozitiiValide.filter(p=>p.r===0||p.r===maxR||p.c===0||p.c===maxC);
+  const pozInterior=pozitiiValide.filter(p=>!(p.r===0||p.r===maxR||p.c===0||p.c===maxC));
   const pozOrdonate=[...pozMargine,...pozInterior];
 
-  pozOrdonate.forEach((poz, i)=>{
-    const tip=asignariFinal[i]||tipDominant;
-    const t=_lotGetTip(tip)||_LOT.tipuri[tipDominant]||_LOT.tipuri.individuala;
+  // Tipuri speciale primele (pe margine), rezidentiale dupa (in interior)
+  const asignSpeciale=asignari.filter(t=>specialTips.includes(t));
+  const asignRezid=asignari.filter(t=>!specialTips.includes(t));
+  const asignariFinal=[...asignSpeciale,...asignRezid].slice(0, nrLoturiFinale);
+
+  asignariFinal.forEach((tip, i)=>{
+    const poz=pozOrdonate[i];
+    if(!poz) return;
+    const t=_lotGetTip(tip)||_LOT.tipuri.individuala;
     loturi.push({
       type:'Feature',
       geometry:poz.geom,

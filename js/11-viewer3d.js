@@ -1526,8 +1526,10 @@ function _v3dRefreshDistances(){ _v3dToggleDistances(); }
 
 function _v3dAddLotizareGeometry(THREE, scene, toLoc){
 
-  // ── Verde% estimat per tip lot ─────────────────────────────────────────
+  // ── Verde% estimat per tip lot (NUMAI tipuri rezidentiale — nu speciale) ─
   const SV_PCT = {individuala:.30, insiruita:.12, duplex:.22, bloc:.20};
+  // Tipuri speciale: fara verde (au geometrie proprie din _lotRenderSpecial)
+  const SPECIAL_TIPS = new Set(['gazebo','garaj','bbq','bucvara','bortodoxa','bcatolica']);
   // Parcare: lățime strip (m) per tip
   const PK_W   = {individuala:2.5, insiruita:0,   duplex:2.5, bloc:5.0};
 
@@ -1627,8 +1629,8 @@ function _v3dAddLotizareGeometry(THREE, scene, toLoc){
       _flatPoly(ring, 0.04, matLot);
       _outline(ring, 0.06, borderColor, .5);
 
-      // b) Spațiu verde estimat — strip interior (sv% din suprafața lotului)
-      const svPct=SV_PCT[tip]||.20;
+      // b) Spațiu verde estimat — NUMAI pentru tipuri rezidentiale
+      const svPct = SPECIAL_TIPS.has(tip) ? 0 : (SV_PCT[tip]||0);
       if(svPct>0.05){
         // Scalăm ring-ul spre centru: suprafața pătrată crește cu scaleFactor²
         // verde_pct = 1 - scaleFactor² => scaleFactor = sqrt(1-sv%)
@@ -1655,8 +1657,8 @@ function _v3dAddLotizareGeometry(THREE, scene, toLoc){
         }
       }
 
-      // c) Zonă parcare (doar individuala/duplex/bloc — fâșie față lot)
-      const pkW=PK_W[tip]||0;
+      // c) Zonă parcare (doar individuala/duplex/bloc — nu tipuri speciale)
+      const pkW = SPECIAL_TIPS.has(tip) ? 0 : (PK_W[tip]||0);
       if(pkW>0.5){
         const scaleP=Math.max(.3, 1-(pkW/Math.sqrt(Math.max(1,turf?.area?.(f)||400)/Math.PI)*2));
         // Parcare = fâșie în interior, culoare asfalt gri
