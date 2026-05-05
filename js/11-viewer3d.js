@@ -714,7 +714,9 @@ function _v3dBuild(ap){
       industrial:     {etaj:'#c09870',parter:'#1e1008'},
       adaptat_context:{etaj:'#c8e0b8',parter:'#1c3014'},
     };
-    const cv=COLS_V[stilKey]||COLS_V.modern;
+    // Lotizare: fiecare tip poate avea stil propriu (f.properties.stil)
+    const fStilKey = f.properties?.stil || stilKey;
+    const cv=COLS_V[fStilKey]||COLS_V[stilKey]||COLS_V.modern;
     const col = floor===0 ? cv.parter : (f.properties?.color||cv.etaj);
     const h=top-base; if(h<=0.01) return;
     try{
@@ -743,13 +745,13 @@ function _v3dBuild(ap){
       if(isRoofSlab){
         mat = new THREE.MeshLambertMaterial({color:'#c8d0d8'});
       } else if(isPenthouse2){
-        mat = _v3dMatPenthouse(THREE,stilKey,V3D.texCache);
+        mat = _v3dMatPenthouse(THREE,fStilKey,V3D.texCache);
       } else if(isMansarda || isSarpanta){
         const roofCols={modern:'#2a3a50',clasic:'#7c3512',minimalist:'#c8d0d8',inovator:'#2a1a60',industrial:'#3a2818',adaptat_context:'#4a6030',contemporary:'#1a4020',deconstructivist:'#2a0a40'};
-        mat = new THREE.MeshStandardMaterial({color:new THREE.Color(roofCols[stilKey]||'#5a4030'),roughness:0.80,metalness:0.05});
-      } else if(floor===0){ mat=_v3dMatParter(THREE,stilKey,V3D.texCache); }
-      else if(isTop){ mat=_v3dMatPenthouse(THREE,stilKey,V3D.texCache); }
-      else{ mat=_v3dMatFloor(THREE,col,floor,stilKey,V3D.texCache); }
+        mat = new THREE.MeshStandardMaterial({color:new THREE.Color(roofCols[fStilKey]||'#5a4030'),roughness:0.80,metalness:0.05});
+      } else if(floor===0){ mat=_v3dMatParter(THREE,fStilKey,V3D.texCache); }
+      else if(isTop){ mat=_v3dMatPenthouse(THREE,fStilKey,V3D.texCache); }
+      else{ mat=_v3dMatFloor(THREE,col,floor,fStilKey,V3D.texCache); }
       if(!mat){ return; }
       // Pasăm hole-ul (curtea) la _v3dPrism pentru geometrie inelară
       const mesh=_v3dPrism(THREE,pts,base,top,mat,holePts);
@@ -763,14 +765,18 @@ function _v3dBuild(ap){
         }
         // Ferestre pe fațada exterioară
         if(floor >= 0 && h > 1.5){
-          _v3dAddWindows(THREE, pts, base, top, scene, stilKey);
-          // Ferestre și pe fațada interioară a curții
+          // Lotizare: perete cortina si stil din proprietatile featurului
+          const _wOpts = {
+            forceCurtain: !!f.properties?.pereteleCortina,
+            parterComercial: !!f.properties?.parterComercial,
+          };
+          _v3dAddWindows(THREE, pts, base, top, scene, fStilKey, _wOpts);
           if(holePts && holePts.length >= 3){
-            _v3dAddWindows(THREE, holePts, base, top, scene, stilKey);
+            _v3dAddWindows(THREE, holePts, base, top, scene, fStilKey, _wOpts);
           }
         }
         if(isRoofSlab && h >= 0.3){
-          _v3dAddRoofDetails(THREE, pts, base, top, scene, stilKey);
+          _v3dAddRoofDetails(THREE, pts, base, top, scene, fStilKey);
         }
       }
     }catch(e){ console.warn('AEDIS mesh:',e.message); }
@@ -2499,7 +2505,8 @@ function _v3dAddEdges(THREE, mesh, scene, color='#ffffff', opacity=0.3){
 }
 
 // Ferestre stilizate direct pe prismă — corelate cu STIL + FUNCȚIUNE + PERETE CORTINĂ
-function _v3dAddWindows(THREE, pts2d, base, top, scene, stilKey){
+function _v3dAddWindows(THREE, pts2d, base, top, scene, stilKey, opts){
+  opts = opts||{};
   const h = top - base;
   if(h < 1 || pts2d.length < 3) return;
   const isNight2 = window._v3dNight||false;
@@ -2508,7 +2515,7 @@ function _v3dAddWindows(THREE, pts2d, base, top, scene, stilKey){
   // Stilul CLASIC/MINIMALIST/INDUSTRIAL nu au niciodată curtain wall automat
   const stilAllowsCurtain = ['modern','inovator'].includes(stilKey);
   const fnWantsCurtain = ['birouri','comercial'].includes(fn); // doar birouri și comercial
-  const hasCurtainWall = AEDIS.peretelCortina ||
+  const hasCurtainWall = opts.forceCurtain || AEDIS.peretelCortina ||
     (stilAllowsCurtain && fnWantsCurtain) ||
     (fn === 'rezidential_colectiv' && stilKey === 'inovator' && AEDIS.cortinaProcent >= 80);
 

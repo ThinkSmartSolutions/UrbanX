@@ -20,7 +20,8 @@ const _LOT = {
       sc:35, hMax:8, niv:2, retF:5, retS:4, retL:3,
       color:'#4ade80', borderColor:'#16a34a',
       pretConstr:900, pretVanzare:1400, suprafUtila:130,
-      desc:'Lot propriu, grădină, garaj', categorie:'rezidential'
+      desc:'Lot propriu, grădină, garaj', categorie:'rezidential',
+      stil:'clasic', tipAcoperis:'sarpanta', penthouseActiv:false, balcoane:false, pereteleCortina:false, parterComercial:false
     },
     insiruita: {
       label:'Casă înșiruită', icon:'🏘',
@@ -28,7 +29,8 @@ const _LOT = {
       sc:60, hMax:9, niv:2, retF:4, retS:3, retL:0,
       color:'#60a5fa', borderColor:'#2563eb',
       pretConstr:800, pretVanzare:1250, suprafUtila:110,
-      desc:'Calcan lateral, front mic, eficient', categorie:'rezidential'
+      desc:'Calcan lateral, front mic, eficient', categorie:'rezidential',
+      stil:'modern', tipAcoperis:'terasa_plata', penthouseActiv:false, balcoane:true, balconAdancime:1.2, pereteleCortina:false, parterComercial:false
     },
     duplex: {
       label:'Duplex (2 familii)', icon:'🏠',
@@ -36,7 +38,8 @@ const _LOT = {
       sc:50, hMax:8, niv:2, retF:4, retS:3, retL:0,
       color:'#fbbf24', borderColor:'#d97706',
       pretConstr:820, pretVanzare:1300, suprafUtila:120,
-      desc:'2 unități pe lot comun', categorie:'rezidential'
+      desc:'2 unități pe lot comun', categorie:'rezidential',
+      stil:'modern', tipAcoperis:'sarpanta', penthouseActiv:false, balcoane:true, balconAdancime:1.0, pereteleCortina:false, parterComercial:false
     },
     bloc: {
       label:'Bloc mic (4-8 ap)', icon:'🏢',
@@ -44,7 +47,8 @@ const _LOT = {
       sc:40, hMax:15, niv:4, retF:6, retS:5, retL:4,
       color:'#a78bfa', borderColor:'#7c3aed',
       pretConstr:750, pretVanzare:1350, suprafUtila:65,
-      desc:'Regim S+P+3E, max 8 ap', categorie:'rezidential'
+      desc:'Regim S+P+3E, max 8 ap', categorie:'rezidential',
+      stil:'minimalist', tipAcoperis:'terasa_plata', penthouseActiv:true, penthouseRetragere:2.5, penthouseH:3.2, penthouseSuprafataFactor:0.5, balcoane:true, balconAdancime:1.5, pereteleCortina:true, parterComercial:true
     },
     // ── Dotări / amenajări ──────────────────────────────────────────────
     gazebo: {
@@ -640,6 +644,18 @@ function _lotBuild3D(loturi, drumuri){
     };
     const colors = tipColors[tipKey] || tipColors.individuala;
 
+    // Setări arhitecturale per tip (din override sau default)
+    const tipStil      = ov.stil          ?? def.stil          ?? 'modern';
+    const tipAcoperis  = ov.tipAcoperis   ?? def.tipAcoperis   ?? 'terasa_plata';
+    const tipPenthouse = ov.penthouseActiv?? def.penthouseActiv?? false;
+    const tipPRet      = ov.penthouseRetragere ?? def.penthouseRetragere ?? 2.5;
+    const tipPH        = ov.penthouseH    ?? def.penthouseH    ?? 3.2;
+    const tipPF        = ov.penthouseSuprafataFactor ?? def.penthouseSuprafataFactor ?? 0.5;
+    const tipBalcoane  = ov.balcoane      ?? def.balcoane      ?? false;
+    const tipBalcAdanc = ov.balconAdancime?? def.balconAdancime?? 1.2;
+    const tipCortina   = ov.pereteleCortina ?? def.pereteleCortina ?? false;
+    const tipParterC   = ov.parterComercial ?? def.parterComercial ?? false;
+
     // Generare etaje
     for(let i = 0; i < niv; i++){
       let base, top, color, geom = fpGeom;
@@ -675,6 +691,9 @@ function _lotBuild3D(loturi, drumuri){
           parcelIdx: lotIdx,
           lotTip: tipKey,
           isLotizare: true,
+          stil: tipStil,
+          pereteleCortina: tipCortina && i>0,
+          parterComercial: tipParterC && i===0,
           isRetras: hasRetras && isLast,
           isComercial: i===0 && hasComercial,
           scenariu: 'liber'
@@ -711,6 +730,119 @@ function _lotBuild3D(loturi, drumuri){
       properties:{base:0, top:0.15, color:'#475569',
         floor:-10, parcelIdx:-1, lotTip:'drum', isLotizare:true, scenariu:'liber'}
     });
+  });
+
+    // ── Acoperis per lot (sarpanta, mansarda, combinat) ─────────────────────
+  loturi.forEach((lot, lotIdx)=>{
+    const tipKey = lot.properties?.tip || 'individuala';
+    const def = _LOT.tipuri[tipKey]||_LOT.tipuri.individuala;
+    const ov = _LOT.tipOverride[tipKey]||{};
+    const tipAcoperis = ov.tipAcoperis ?? def.tipAcoperis ?? 'terasa_plata';
+    if(!lot.geometry || tipAcoperis==='terasa_plata' || tipAcoperis==='terasa_circulabila') return;
+    const t = {...def,...ov};
+    const niv=Math.max(1,t.niv||2);
+    const hP=Math.max(2.4,t.hParter||3.0);
+    const hE=Math.max(2.4,t.hNiv||3.0);
+    const topH=hP+(niv-1)*hE;
+    const tipStil=ov.stil??def.stil??'modern';
+    try{
+      const lotFeat={type:'Feature',geometry:lot.geometry,properties:{}};
+      if(tipAcoperis==='sarpanta'){
+        const shrunk=turf.buffer(lotFeat,-0.3/111320,{units:'degrees'});
+        const rGeom=shrunk?.geometry||lot.geometry;
+        feats3D.push({type:'Feature',geometry:rGeom,properties:{
+          base:topH, top:topH+2.0, color:'#8B4513', floor:-5, roofType:'sarpanta',
+          parcelIdx:lotIdx, lotTip:tipKey, isLotizare:true, stil:tipStil
+        }});
+      } else if(tipAcoperis==='mansarda'){
+        const ret=turf.buffer(lotFeat,-1.5/111320,{units:'degrees'});
+        const mGeom=ret?.geometry&&turf.area(ret)>10?ret.geometry:lot.geometry;
+        feats3D.push({type:'Feature',geometry:mGeom,properties:{
+          base:topH, top:topH+2.8, color:'#f0d8a0', floor:niv, roofType:'mansarda',
+          parcelIdx:lotIdx, lotTip:tipKey, isLotizare:true, stil:tipStil, isLast:true
+        }});
+        feats3D.push({type:'Feature',geometry:mGeom,properties:{
+          base:topH+2.8, top:topH+4.3, color:'#8B4513', floor:-12, roofType:'sarpanta_mica',
+          parcelIdx:lotIdx, lotTip:tipKey, isLotizare:true, stil:tipStil
+        }});
+      } else if(tipAcoperis==='combinat'){
+        feats3D.push({type:'Feature',geometry:lot.geometry,properties:{
+          base:topH, top:topH+0.3, color:'#c8d0d8', floor:-1, roofType:'terasa_plata',
+          parcelIdx:lotIdx, lotTip:tipKey, isLotizare:true, stil:tipStil
+        }});
+        const scaled=turf.transformScale(lotFeat,0.4,{origin:turf.centerOfMass(lotFeat)});
+        feats3D.push({type:'Feature',geometry:scaled.geometry,properties:{
+          base:topH+0.3, top:topH+3.5, color:'#475569', floor:-2, roofType:'combinat',
+          parcelIdx:lotIdx, lotTip:tipKey, isLotizare:true, stil:tipStil
+        }});
+      }
+    }catch(e){}
+  });
+
+  // ── Acoperiș per lot (sarpanta, mansarda, combinat) ─────────────────────
+  loturi.forEach((lot, lotIdx)=>{
+    const tipKey = lot.properties?.tip || 'individuala';
+    const def = _LOT.tipuri[tipKey]||_LOT.tipuri.individuala;
+    const ov = _LOT.tipOverride[tipKey]||{};
+    const tipAcoperis = ov.tipAcoperis ?? def.tipAcoperis ?? 'terasa_plata';
+    if(!lot.geometry || tipAcoperis==='terasa_plata' || tipAcoperis==='terasa_circulabila') return;
+    const t = {...def,...ov};
+    const niv=Math.max(1,t.niv||2);
+    const hP=Math.max(2.4,t.hParter||3.0);
+    const hE=Math.max(2.4,t.hNiv||3.0);
+    const topH=hP+(niv-1)*hE;
+    const tipStil=ov.stil??def.stil??'modern';
+    try{
+      const lotFeat={type:'Feature',geometry:lot.geometry,properties:{}};
+      if(tipAcoperis==='sarpanta'){
+        const shrunk=turf.buffer(lotFeat,-0.3/111320,{units:'degrees'});
+        const rGeom=shrunk?.geometry||lot.geometry;
+        feats3D.push({type:'Feature',geometry:rGeom,properties:{base:topH,top:topH+2.0,color:'#8B4513',floor:-5,roofType:'sarpanta',parcelIdx:lotIdx,lotTip:tipKey,isLotizare:true,stil:tipStil}});
+      } else if(tipAcoperis==='mansarda'){
+        const ret=turf.buffer(lotFeat,-1.5/111320,{units:'degrees'});
+        const mGeom=ret?.geometry&&turf.area(ret)>10?ret.geometry:lot.geometry;
+        feats3D.push({type:'Feature',geometry:mGeom,properties:{base:topH,top:topH+2.8,color:'#f0d8a0',floor:niv,roofType:'mansarda',parcelIdx:lotIdx,lotTip:tipKey,isLotizare:true,stil:tipStil,isLast:true}});
+        feats3D.push({type:'Feature',geometry:mGeom,properties:{base:topH+2.8,top:topH+4.3,color:'#8B4513',floor:-12,roofType:'sarpanta_mica',parcelIdx:lotIdx,lotTip:tipKey,isLotizare:true,stil:tipStil}});
+      } else if(tipAcoperis==='combinat'){
+        feats3D.push({type:'Feature',geometry:lot.geometry,properties:{base:topH,top:topH+0.3,color:'#c8d0d8',floor:-1,roofType:'terasa_plata',parcelIdx:lotIdx,lotTip:tipKey,isLotizare:true,stil:tipStil}});
+        const scaled=turf.transformScale(lotFeat,0.4,{origin:turf.centerOfMass(lotFeat)});
+        feats3D.push({type:'Feature',geometry:scaled.geometry,properties:{base:topH+0.3,top:topH+3.5,color:'#475569',floor:-2,roofType:'combinat',parcelIdx:lotIdx,lotTip:tipKey,isLotizare:true,stil:tipStil}});
+      }
+    }catch(e){}
+  });
+
+  // ── Penthouse per lot (dacă activat) ──────────────────────────────
+  loturi.forEach((lot, lotIdx)=>{
+    const tipKey = lot.properties?.tip || 'individuala';
+    const def = _LOT.tipuri[tipKey]||_LOT.tipuri.individuala;
+    const ov = _LOT.tipOverride[tipKey]||{};
+    const t = {...def,...ov};
+    if(!(ov.penthouseActiv ?? def.penthouseActiv)) return;
+    if(!lot.geometry) return;
+
+    const niv=Math.max(1,t.niv||2);
+    const hP=Math.max(2.4,t.hParter||3.0);
+    const hE=Math.max(2.4,t.hNiv||3.0);
+    const topH=hP+(niv-1)*hE;
+    const pRet=(ov.penthouseRetragere??def.penthouseRetragere??2.5);
+    const pH=(ov.penthouseH??def.penthouseH??3.2);
+    const pF=(ov.penthouseSuprafataFactor??def.penthouseSuprafataFactor??0.5);
+    const tipStil=ov.stil??def.stil??'modern';
+
+    try{
+      const lotFeat={type:'Feature',geometry:lot.geometry,properties:{}};
+      const scaled=turf.transformScale(lotFeat,Math.sqrt(pF),{origin:turf.centerOfMass(lotFeat)});
+      const buf=turf.buffer(scaled,-pRet/111320,{units:'degrees'});
+      const pGeom=buf?.geometry&&turf.area(buf)>4?buf.geometry:scaled.geometry;
+      feats3D.push({type:'Feature',geometry:pGeom,properties:{
+        base:topH,top:topH+pH,color:'#0f172a',floor:-20,roofType:'penthouse',
+        parcelIdx:lotIdx,lotTip:tipKey,isLotizare:true,stil:tipStil
+      }});
+      feats3D.push({type:'Feature',geometry:pGeom,properties:{
+        base:topH+pH,top:topH+pH+0.3,color:'#475569',floor:-21,roofType:'penthouse_terasa',
+        parcelIdx:lotIdx,lotTip:tipKey,isLotizare:true
+      }});
+    }catch(e){}
   });
 
   // Trimite în vol-src — viewer-ul 3D redă automat
@@ -935,7 +1067,91 @@ function _lotHtmlTipuri(){
           <div style="font-size:9px;color:#64748b;margin-bottom:3px">Lot default (mp)</div>
           <input type="number" min="20" max="5000" step="10" value="${t.lotDefault||def.lotDefault}" style="width:100%;background:#04090f;border:1px solid rgba(255,255,255,.15);color:#e2e8f0;border-radius:5px;padding:${_mob?'8px':'4px'} 7px;font-size:${_mob?'14':'12'}px" oninput="_lotSetTipParam('${key}','lotDefault',+this.value)">
         </div>
-      </div>` : ''}
+      </div>
+
+      <!-- ── Stil arhitectural ── -->
+      <div style="margin-top:8px">
+        <div style="font-size:9px;color:#d4af37;font-weight:700;text-transform:uppercase;margin-bottom:6px">🎨 Stil arhitectural</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px">
+          ${(window.AEDIS_STIL?Object.entries(window.AEDIS_STIL):[['modern',{label:'Modern'}],['clasic',{label:'Clasic'}],['minimalist',{label:'Minimalist'}],['industrial',{label:'Industrial'}],['inovator',{label:'Inovator'}],['adaptat_context',{label:'Context'}]]).map(([sk,sv])=>`
+            <button onclick="_lotSetTipParam('${key}','stil','${sk}');_lotTab('t')"
+              style="padding:${_mob?'7px 10px':'4px 8px'};border-radius:6px;font-size:${_mob?'11':'9'}px;font-weight:700;cursor:pointer;
+              border:1px solid ${(t.stil||def.stil||'modern')===sk?t.color:'rgba(255,255,255,.1)'};
+              background:${(t.stil||def.stil||'modern')===sk?t.color+'33':'rgba(11,18,32,.8)'};
+              color:${(t.stil||def.stil||'modern')===sk?t.color:'#64748b'}">${sv.label}</button>`).join('')}
+        </div>
+      </div>
+
+      <!-- ── Tip acoperiș ── -->
+      <div style="margin-top:8px">
+        <div style="font-size:9px;color:#d4af37;font-weight:700;text-transform:uppercase;margin-bottom:6px">🏠 Tip acoperiș</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px">
+          ${[['terasa_plata','▬','Terasă plată'],['terasa_circulabila','🏖','Terasă circul.'],['sarpanta','🏠','Șarpantă'],['mansarda','🏡','Mansardă'],['combinat','🏢','Combinat']].map(([id,ico,lbl])=>`
+            <button onclick="_lotSetTipParam('${key}','tipAcoperis','${id}');_lotTab('t')"
+              style="padding:${_mob?'7px 10px':'4px 8px'};border-radius:6px;font-size:${_mob?'11':'9'}px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px;
+              border:1px solid ${(t.tipAcoperis||def.tipAcoperis||'terasa_plata')===id?t.color:'rgba(255,255,255,.1)'};
+              background:${(t.tipAcoperis||def.tipAcoperis||'terasa_plata')===id?t.color+'33':'rgba(11,18,32,.8)'};
+              color:${(t.tipAcoperis||def.tipAcoperis||'terasa_plata')===id?t.color:'#64748b'}">
+              <span>${ico}</span><span style="font-size:${_mob?'10':'8'}px">${lbl}</span>
+            </button>`).join('')}
+        </div>
+      </div>
+
+      <!-- ── Penthouse ── -->
+      <div style="margin-top:8px;background:rgba(0,0,0,.2);border-radius:8px;padding:8px 10px">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="font-size:9px;color:#d4af37;font-weight:700;text-transform:uppercase">🏙 Penthouse</div>
+          <button onclick="_lotSetTipParam('${key}','penthouseActiv',!${!!(t.penthouseActiv||def.penthouseActiv)});_lotTab('t')"
+            style="padding:${_mob?'7px 12px':'3px 10px'};border-radius:6px;font-size:${_mob?'12':'10'}px;font-weight:700;cursor:pointer;
+            border:1px solid ${(t.penthouseActiv||def.penthouseActiv)?t.color:'rgba(255,255,255,.15)'};
+            background:${(t.penthouseActiv||def.penthouseActiv)?t.color+'33':'rgba(11,18,32,.8)'};
+            color:${(t.penthouseActiv||def.penthouseActiv)?t.color:'#475569'}">
+            ${(t.penthouseActiv||def.penthouseActiv)?'✓ Activ':'+ Adaugă'}
+          </button>
+        </div>
+        ${(t.penthouseActiv||def.penthouseActiv)?`
+        <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <div>
+            <div style="font-size:9px;color:#64748b;margin-bottom:3px">Retragere (m)</div>
+            <input type="range" min="1" max="8" step="0.5" value="${t.penthouseRetragere||def.penthouseRetragere||2.5}"
+              style="width:100%;accent-color:${t.color}"
+              oninput="_lotSetTipParam('${key}','penthouseRetragere',+this.value);this.nextElementSibling.textContent=this.value+'m'">
+            <span style="font-size:10px;color:#d4af37;font-weight:700">${t.penthouseRetragere||def.penthouseRetragere||2.5}m</span>
+          </div>
+          <div>
+            <div style="font-size:9px;color:#64748b;margin-bottom:3px">Înălțime (m)</div>
+            <input type="range" min="2.4" max="5" step="0.2" value="${t.penthouseH||def.penthouseH||3.2}"
+              style="width:100%;accent-color:${t.color}"
+              oninput="_lotSetTipParam('${key}','penthouseH',+this.value);this.nextElementSibling.textContent=this.value+'m'">
+            <span style="font-size:10px;color:#d4af37;font-weight:700">${t.penthouseH||def.penthouseH||3.2}m</span>
+          </div>
+          <div style="grid-column:span 2">
+            <div style="font-size:9px;color:#64748b;margin-bottom:3px">Suprafață penthouse (%)</div>
+            <input type="range" min="25" max="85" step="5" value="${Math.round((t.penthouseSuprafataFactor||def.penthouseSuprafataFactor||0.5)*100)}"
+              style="width:100%;accent-color:${t.color}"
+              oninput="_lotSetTipParam('${key}','penthouseSuprafataFactor',+this.value/100);this.nextElementSibling.textContent=this.value+'%'">
+            <span style="font-size:10px;color:#d4af37;font-weight:700">${Math.round((t.penthouseSuprafataFactor||def.penthouseSuprafataFactor||0.5)*100)}%</span>
+          </div>
+        </div>`:''}
+      </div>
+
+      <!-- ── Extra ── -->
+      <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:5px">
+        ${[['balcoane','🪟 Balcoane',true],['pereteleCortina','🪞 Perete cortină',true],[(['bloc','insiruita'].includes(key)?'parterComercial':null),'🏪 Parter comercial',['bloc','insiruita'].includes(key)]].filter(([f])=>f).map(([field,label])=>`
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:${_mob?'8px 12px':'5px 10px'};flex:1;min-width:110px">
+          <input type="checkbox" ${(t[field]||def[field])?'checked':''} onchange="_lotSetTipParam('${key}','${field}',this.checked);_lotTab('t')" style="accent-color:${t.color};width:${_mob?'18':'14'}px;height:${_mob?'18':'14'}px">
+          <span style="font-size:${_mob?'12':'10'}px;color:#94a3b8;font-weight:600">${label}</span>
+        </label>`).join('')}
+        ${(t.balcoane||def.balcoane)?`
+        <div style="width:100%;display:flex;align-items:center;gap:8px;padding:3px 2px">
+          <span style="font-size:9px;color:#64748b;white-space:nowrap">Adâncime balcon:</span>
+          <input type="range" min="0.6" max="2.5" step="0.1" value="${t.balconAdancime||def.balconAdancime||1.2}"
+            style="flex:1;accent-color:${t.color}"
+            oninput="_lotSetTipParam('${key}','balconAdancime',+this.value);this.nextElementSibling.textContent=this.value+'m'">
+          <span style="font-size:10px;color:#d4af37;font-weight:700;min-width:32px">${t.balconAdancime||def.balconAdancime||1.2}m</span>
+        </div>`:''}
+      </div>
+      ` : ''}
     </div>`;
     });
   });
