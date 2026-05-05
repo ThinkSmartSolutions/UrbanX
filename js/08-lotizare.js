@@ -1529,11 +1529,19 @@ function _lotHtmlParametri(){
   return `
   ${!ap?`<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:8px 10px;font-size:10px;color:#f87171;margin-bottom:10px">⚠️ Selectați mai întâi o parcelă de pe hartă</div>`:''}
 
-  ${(S.parcels||[]).filter(p=>p?.geo?.geometry).length>1?`
-  <div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:8px;padding:7px 10px;margin-bottom:10px;font-size:10px;color:#f59e0b">
-    <b>⊞ ${S.parcels.filter(p=>p?.geo?.geometry).length} parcele selectate</b> — lotizarea se va genera pe <b>suprafața unificată</b> a tuturor parcelelor.<br>
-    <span style="color:#64748b">Suprafață totală: ~${Math.round(S.parcels.filter(p=>p?.geo?.geometry).reduce((s,p)=>s+(p.area||0),0))} mp</span>
-  </div>`:''}
+  ${(()=>{
+    const pp=(S.parcels||[]).filter(p=>p?.geo?.geometry);
+    if(pp.length>1) return `
+  <div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:9px;padding:8px 11px;margin-bottom:10px;font-size:10px;color:#f59e0b">
+    <div style="font-weight:700;margin-bottom:3px">⊞ ${pp.length} parcele selectate pentru lotizare</div>
+    <div style="color:#94a3b8;font-size:9px">Suprafață totală: ~${Math.round(pp.reduce((s,p)=>s+(p.area||0),0))} mp · Lotizarea se generează pe suprafața unificată</div>
+    <div style="margin-top:5px;display:flex;gap:4px;flex-wrap:wrap">${pp.map((p,i)=>`<span style="background:rgba(245,158,11,.15);border-radius:4px;padding:2px 6px;font-size:9px">${p.nrcad||'Parcelă '+(i+1)} · ${Math.round(p.area||0)}mp</span>`).join('')}</div>
+  </div>`;
+    return `
+  <div style="background:rgba(56,189,248,.05);border:1px solid rgba(56,189,248,.15);border-radius:9px;padding:7px 10px;margin-bottom:10px;font-size:9.5px;color:#64748b">
+    📌 Parcelă unică. Activați <b>Multi</b> și selectați mai multe parcele pe hartă pentru a le lotiza împreună.
+  </div>`;
+  })()}
   <div style="font-size:10px;color:#fbbf24;font-weight:700;margin-bottom:6px">📐 Suprafață lot (mp/lot)</div>
   <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:7px">
     ${[300,400,500,600,800,1000].map(v=>`<button onclick="_LOT.lotAria=${v};_lotTab('p')" style="background:${_LOT.lotAria===v?'rgba(251,191,36,.25)':'rgba(255,255,255,.06)'};border:1px solid ${_LOT.lotAria===v?'#fbbf24':'rgba(255,255,255,.1)'};color:${_LOT.lotAria===v?'#fbbf24':'#94a3b8'};border-radius:7px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer">${v}mp</button>`).join('')}
@@ -1887,23 +1895,28 @@ function runLotizare(){
   ss('🏘 Se generează planul de lotizare...');
 
   try{
-    // ── Multi-parcelă: union al tuturor parcelelor selectate ─────────────
+    // ── Multi-parcelă: union al tuturor parcelelor cu geometrie valida ──
     let pFeat;
-    const nrParcele = (S.parcels||[]).filter(p=>p?.geo?.geometry).length;
-    _LOT._sceneCenter = null; // reset - folosim parcela activa ca centru implicit
+    // Filtreaza TOATE parcelele valide din S.parcels (multiselect populeaza acest array)
+    const parceleFiltrate = (S.parcels||[]).filter(p=>p?.geo?.geometry);
+    const nrParcele = parceleFiltrate.length;
+    _LOT._sceneCenter = null;
+    
     if(nrParcele > 1){
       ss('🏘 Se unifică '+nrParcele+' parcele pentru lotizare...');
-      let unified = {type:'Feature',geometry:S.parcels[0].geo.geometry,properties:{}};
-      for(let pi=1;pi<S.parcels.length;pi++){
-        const p=S.parcels[pi];
-        if(!p?.geo?.geometry) continue;
+      // Incepe cu parcela ACTIVA (nu neaparat prima din array)
+      const apIdx = S.activeParcel??0;
+      const startParcel = parceleFiltrate.find((_,i)=>i===apIdx) || parceleFiltrate[0];
+      let unified = {type:'Feature',geometry:startParcel.geo.geometry,properties:{}};
+      
+      for(const p of parceleFiltrate){
+        if(p === startParcel) continue; // deja adaugata
         try{
           const u=turf.union(unified,{type:'Feature',geometry:p.geo.geometry,properties:{}});
           if(u?.geometry) unified=u;
-        }catch(e){}
+        }catch(e){ console.warn('union parcel fail:',e.message); }
       }
       pFeat=unified;
-      // Salveaza centrul bbox-ului uniunii pentru viewer 3D
       try{
         const bb=turf.bbox(pFeat);
         _LOT._sceneCenter=[(bb[0]+bb[2])/2,(bb[1]+bb[3])/2];

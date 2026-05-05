@@ -515,6 +515,16 @@ canvas#c2d{width:100%;height:100%;display:block}
 
   #btn-admin,#btn-logout{display:none!important}
   #mob-nav{position:fixed!important;bottom:0!important;left:0!important;right:0!important;height:72px!important;z-index:300!important;background:#08152a!important;border-top:1px solid rgba(255,255,255,.1)!important;display:flex!important;align-items:stretch!important;padding-bottom:env(safe-area-inset-bottom,0)!important}
+  /* Pe mobil: Multi din top toolbar ascuns (e in bottom nav) */
+  #btnMulti{ display:none!important; }
+  /* Buton Lotizare activ */
+  #mob-nav-lot.lot-active { color:#a78bfa!important; }
+  #mob-nav-lot.lot-active .mnav-icon { filter:drop-shadow(0 0 4px rgba(167,139,250,.8)); }
+  #mob-nav-lot.lot-active::after {
+    content:''; position:absolute; top:6px; right:6px;
+    width:6px; height:6px; border-radius:50%;
+    background:#a78bfa; animation:pulse-dot 2s infinite;
+  }
   .mnav-btn{flex:1!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:4px!important;background:none!important;border:none!important;color:#64748b!important;cursor:pointer!important;transition:all .15s!important;padding:8px 4px!important;-webkit-tap-highlight-color:transparent!important;touch-action:manipulation!important;min-height:44px!important}
   .mnav-btn.active{color:#d4af37!important}
   .mnav-btn.active .mnav-icon{transform:scale(1.15)}
@@ -751,6 +761,8 @@ canvas#c2d{width:100%;height:100%;display:block}
 .adm-guide-step{display:flex;gap:10px;margin-bottom:7px;align-items:flex-start}
 .adm-guide-num{background:rgba(255,255,255,.06);color:#64748b;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;margin-top:1px}
 .adm-guide-txt{color:#94a3b8;font-size:11px;line-height:1.6}
+
+@keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.4)} }
 </style>
 </head>
 <body>
@@ -1140,9 +1152,10 @@ canvas#c2d{width:100%;height:100%;display:block}
     <span class="mnav-icon">🏗</span>
     <span class="mnav-label">Urban3D</span>
   </button>
-  <button class="mnav-btn" data-mt="multi" onclick="mobNavClick('multi',this)">
-    <span class="mnav-icon">🔲</span>
-    <span class="mnav-label">Multi</span>
+  <button class="mnav-btn" id="mob-nav-lot" data-mt="lotizare" 
+    onclick="if(typeof toggleLotizare==='function') toggleLotizare();">
+    <span class="mnav-icon">🏘</span>
+    <span class="mnav-label">Lotizare</span>
   </button>
   <button class="mnav-btn" data-mt="rapoarte" onclick="mobNavClick('rapoarte',this)">
     <span class="mnav-icon">📋</span>
@@ -1315,6 +1328,12 @@ canvas#c2d{width:100%;height:100%;display:block}
   function _applyLotOpen(){
     const m = _getLotModal();
     const mapEl = document.getElementById('map');
+    // Sincronizeaza butonul Lotizare din bottom nav
+    const lotBtn = document.getElementById('mob-nav-lot');
+    if(lotBtn){
+      const isOpen = !!m;
+      lotBtn.classList.toggle('lot-active', isOpen);
+    }
     const visible = m ? (()=>{
       const cs = window.getComputedStyle(m);
       return cs.display !== 'none' && cs.visibility !== 'hidden' && cs.opacity !== '0';
@@ -1343,6 +1362,81 @@ canvas#c2d{width:100%;height:100%;display:block}
   
   // Expunem global ca 08-lotizare.js să îl poată apela explicit după open/close
   window._lotLayoutSync = _applyLotOpen;
+})();
+</script>
+
+<script>
+// ── Control iluminare mobil (ora/umbrele) în harta 3D ─────────────────────
+(function(){
+  // FAB discret pentru schimbarea orei pe mobil
+  function _createLightFab(){
+    if(document.getElementById('mob-light-fab')) return;
+    const fab=document.createElement('div');
+    fab.id='mob-light-fab';
+    fab.style.cssText='position:fixed;bottom:80px;right:12px;z-index:400;display:none;flex-direction:column;gap:6px;align-items:flex-end';
+    fab.innerHTML=`
+      <div id="mob-light-panel" style="display:none;background:rgba(7,12,24,.95);border:1px solid rgba(167,139,250,.3);border-radius:14px;padding:10px 12px;margin-bottom:4px;min-width:160px">
+        <div style="font-size:10px;color:#a78bfa;font-weight:700;margin-bottom:8px">🌤 Iluminare hartă 3D</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          ${[['☀️','Zi (12:00)',0.6],['🌅','Golden hour',0.25],['☁️','Înnor.',0.8],['🌙','Noapte',1.0]].map(([ico,lbl,anchor])=>`
+          <button onclick="_mob3DLight(${anchor})" style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:8px 10px;cursor:pointer;text-align:left;width:100%">
+            <span style="font-size:16px">${ico}</span>
+            <span style="color:#e2e8f0;font-size:11px;font-weight:600">${lbl}</span>
+          </button>`).join('')}
+          <div style="margin-top:4px">
+            <div style="font-size:9px;color:#64748b;margin-bottom:4px">Poziție manuală</div>
+            <input type="range" min="0" max="1" step="0.05" value="0.6"
+              oninput="_mob3DLight(+this.value)"
+              style="width:100%;accent-color:#a78bfa">
+          </div>
+        </div>
+      </div>
+      <button id="mob-light-btn" onclick="document.getElementById('mob-light-panel').style.display=document.getElementById('mob-light-panel').style.display==='none'?'block':'none'"
+        style="width:44px;height:44px;border-radius:50%;background:rgba(7,12,24,.95);border:1px solid rgba(167,139,250,.4);color:#a78bfa;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.5)">
+        🌤
+      </button>
+    `;
+    document.body.appendChild(fab);
+  }
+
+  window._mob3DLight = function(anchor){
+    try{
+      if(!window.map) return;
+      // Seteaza pozitia soarelui in Mapbox GL
+      map.setLight({
+        anchor:'map',
+        color:'white',
+        intensity: anchor > 0.9 ? 0.05 : (anchor > 0.7 ? 0.3 : (anchor < 0.3 ? 0.85 : 0.7)),
+        position:[1.15, anchor*360, 90*(1-Math.abs(anchor-0.5)*2)]
+      });
+      // Feedback
+      const icons=['🌙','☁️','🌅','☀️'];
+      const icon=anchor<0.3?'☀️':anchor<0.5?'🌅':anchor<0.8?'☁️':'🌙';
+      document.getElementById('mob-light-btn').textContent=icon;
+    }catch(e){ console.warn('light:',e.message); }
+  };
+
+  // Afiseaza FAB-ul cand pitch > 20 pe mobil
+  function _checkShowLightFab(){
+    if(window.innerWidth >= 841) return;
+    _createLightFab();
+    const fab=document.getElementById('mob-light-fab');
+    if(!fab) return;
+    const pitch=window.map?.getPitch()||0;
+    fab.style.display=pitch>15?'flex':'none';
+  }
+
+  // Observer pe schimbarile de pitch
+  document.addEventListener('DOMContentLoaded',()=>{
+    setTimeout(()=>{
+      if(window.map){
+        map.on('pitch',_checkShowLightFab);
+        map.on('pitchend',_checkShowLightFab);
+        setInterval(_checkShowLightFab, 2000);
+      }
+    }, 2000);
+  });
+  window._checkShowLightFab=_checkShowLightFab;
 })();
 </script>
 
