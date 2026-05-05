@@ -353,6 +353,12 @@ canvas#c2d{width:100%;height:100%;display:block}
   background:rgba(11,18,32,.8);color:#94a3b8;cursor:pointer;
   font-size:11px;text-align:left;display:flex;align-items:center;gap:6px;
   transition:all .15s;
+  /* iOS Safari fix: touch target minim + elimina delay 300ms */
+  min-height:44px;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:rgba(212,175,55,.2);
+  -webkit-user-select:none;
+  user-select:none;
 }
 .aedis-fn-btn.active{border-color:#d4af37;background:rgba(212,175,55,.12);color:#d4af37;}
 .aedis-fn-btn:hover:not(.active){background:rgba(255,255,255,.06);color:#e2e8f0;}
@@ -1362,6 +1368,19 @@ canvas#c2d{width:100%;height:100%;display:block}
   
   // Expunem global ca 08-lotizare.js să îl poată apela explicit după open/close
   window._lotLayoutSync = _applyLotOpen;
+
+  // Fix Safari iOS: onclick inline nu functioneaza pe butoane generate dinamic
+  // Adauga touch event delegation pe document pentru aedis-fn-btn
+  document.addEventListener('touchend', function(e){
+    const btn = e.target.closest('.aedis-fn-btn');
+    if(!btn) return;
+    e.preventDefault();
+    // Extrage onclick si executa
+    const oc = btn.getAttribute('onclick');
+    if(oc){
+      try{ new Function(oc)(); }catch(err){ console.warn('fn-btn touch:', err); }
+    }
+  }, {passive:false});
 })();
 </script>
 
