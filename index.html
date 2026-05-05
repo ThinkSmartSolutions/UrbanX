@@ -1468,6 +1468,46 @@ canvas#c2d{width:100%;height:100%;display:block}
     if(typeof _lotTab==='function') _lotTab('p');
   };
 
+  // Sanitizer global pentru FeatureCollection - elimina circular refs inainte de Mapbox setData
+  window._safeFc = function(fc) {
+    if(!fc) return {type:'FeatureCollection',features:[]};
+    try {
+      return JSON.parse(JSON.stringify(fc));
+    } catch(e) {
+      // Fallback manual: pastreaza doar proprietati primitive
+      return {
+        type: 'FeatureCollection',
+        features: (fc.features||[]).map(function(f) {
+          var cleanProps = {};
+          var props = f.properties || {};
+          for(var k in props) {
+            var v = props[k];
+            if(v === null || typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') {
+              cleanProps[k] = v;
+            }
+          }
+          return { type:'Feature', geometry: f.geometry, properties: cleanProps };
+        })
+      };
+    }
+  };
+
+  // Patch global setSource: sanitizeaza automat inainte de Mapbox
+  // Ruleaza dupa ce toate JS-urile s-au incarcat
+  window.addEventListener('load', function() {
+    if(typeof setSource === 'function' && !setSource._patched) {
+      var _orig = setSource;
+      setSource = function(id, fc) {
+        // Sanitizeaza doar FeatureCollections, nu alte date
+        if(fc && fc.type === 'FeatureCollection' && fc.features) {
+          fc = window._safeFc(fc);
+        }
+        return _orig(id, fc);
+      };
+      setSource._patched = true;
+    }
+  });
+
   // Event delegation - fix butoane generate dinamic pe toate browserele
   (function(){
     function _runOC(oc) {
