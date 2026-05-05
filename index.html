@@ -1422,7 +1422,9 @@ canvas#c2d{width:100%;height:100%;display:block}
     _createLightFab();
     const fab=document.getElementById('mob-light-fab');
     if(!fab) return;
-    const pitch=window.map?.getPitch()||0;
+    // Fix Safari iOS: optional chaining nu functioneaza pe metode
+    let pitch=0;
+    try{ if(window.map && typeof window.map.getPitch==='function') pitch=window.map.getPitch(); }catch(e){}
     fab.style.display=pitch>15?'flex':'none';
   }
 
