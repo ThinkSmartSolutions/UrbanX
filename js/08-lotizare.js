@@ -122,7 +122,8 @@ function _showLotizarePanel(){
 
   const div = document.createElement('div');
   div.id='lotizare-panel';
-  div.style.cssText=`position:fixed;${mob?'bottom:72px;left:4px;right:4px':'top:56px;right:'+rightPos+'px;width:'+panelW+'px'};z-index:8600;background:rgba(7,12,24,.97);border:1px solid rgba(167,139,250,.35);border-radius:16px;padding:0;box-shadow:0 12px 48px rgba(0,0,0,.75);backdrop-filter:blur(16px);font-family:system-ui,sans-serif;max-height:${mob?'82':'88'}vh;overflow:hidden;display:flex;flex-direction:column`;
+  // Pe mobil: drawer de jos cu inaltime 48vh — lasa harta vizibila deasupra
+  div.style.cssText=`position:fixed;${mob?'bottom:56px;left:0;right:0;border-radius:16px 16px 0 0':'top:56px;right:'+rightPos+'px;width:'+panelW+'px;border-radius:16px'};z-index:8600;background:rgba(7,12,24,.97);border:1px solid rgba(167,139,250,.35);${mob?'border-bottom:none':''}padding:0;box-shadow:0 12px 48px rgba(0,0,0,.75);backdrop-filter:blur(16px);font-family:system-ui,sans-serif;max-height:${mob?'50':'88'}vh;overflow:hidden;display:flex;flex-direction:column`;
 
   div.innerHTML=`
     <div style="padding:12px 16px 0;flex-shrink:0">
@@ -132,7 +133,7 @@ function _showLotizarePanel(){
           <span style="color:#64748b;font-weight:400;font-size:11px"> · ${ap?ap.nrcad+' · '+Math.round(ap.area||0)+'mp':'selectați parcela'}</span>
           ${ap?.utr?`<span style="color:#d4af37;font-size:9px;margin-left:4px">UTR ${ap.utr}</span>`:''}
         </div>
-        <button onclick="toggleLotizare()" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#f87171;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0">✕</button>
+        <button onclick="toggleLotizare()" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#f87171;border-radius:8px;padding:${mob?'8px 18px':'5px 12px'};font-size:${mob?'16px':'12px'};font-weight:700;cursor:pointer;flex-shrink:0;min-width:${mob?'44px':'auto'}">✕ Închide</button>
       </div>
       ${!ap?'<div style="color:#f87171;font-size:10px;padding:4px 0 6px">⚠️ Selectați mai întâi o parcelă pe hartă!</div>':''}
       <div style="display:flex;gap:2px;background:rgba(255,255,255,.04);border-radius:8px;padding:3px" id="lot-tabs">
