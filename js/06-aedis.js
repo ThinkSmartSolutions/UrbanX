@@ -337,46 +337,48 @@ function updateMVDist(v){
 function setScenariu(s){
   S.vol.scenariuConstructie = s;
 
-  if(s === 'liber'){
-    // Salvăm backup ctx
-    // Salvăm backup ctx — _safeFc elimina circular refs inainte de JSON.stringify
-    if(!S._ctxBackup && S.ctx?.features?.length){
-      try{ S._ctxBackup = JSON.parse(JSON.stringify(_safeFc ? _safeFc(S.ctx) : S.ctx)); }
-      catch(e){ S._ctxBackup = {type:'FeatureCollection', features: (S.ctx.features||[]).map(f=>({type:'Feature',geometry:f.geometry,properties:{...(f.properties||{})}}))}; }
-    }
-    // Ascundem ctx-3d
-    _setCtxVisibility();
-    // Ascundem clădirile native DOAR pe parcelă (Clip Layer)
-    const ap = S.parcels[S.activeParcel??0];
-    _demolishHideNative(ap?.geo?.geometry || null);
-
-  } else {
-    // Restaurăm backup ctx
-    if(S._ctxBackup?.features?.length){
-      S.ctx = S._ctxBackup; S._ctxBackup = null;
-      try{ setSource('ctx-src', S.ctx); }catch(e){}
-    }
-    // Restaurăm layerele native ascunse
-    _demolishRestoreNative();
-    // Restaurăm stilul original dacă a fost schimbat
-    if(S._styleBeforeDemo){
-      const prevStyle = S._styleBeforeDemo; S._styleBeforeDemo = null;
-      const selBase = document.getElementById('selBase');
-      if(selBase) selBase.value = prevStyle;
-      map.setStyle(STYLES[prevStyle] || STYLES.custom);
-      map.once('style.load', ()=>{
-        setTimeout(()=>{ _restoreAfterStyleLoad(prevStyle); _setCtxVisibility(); }, 400);
-      });
-    } else {
+  try{
+    if(s === 'liber'){
+      // Salvăm backup ctx — _safeFc elimina circular refs inainte de JSON.stringify
+      if(!S._ctxBackup && S.ctx?.features?.length){
+        try{ S._ctxBackup = JSON.parse(JSON.stringify(_safeFc ? _safeFc(S.ctx) : S.ctx)); }
+        catch(e){ S._ctxBackup = {type:'FeatureCollection', features: (S.ctx.features||[]).map(f=>({type:'Feature',geometry:f.geometry,properties:{...(f.properties||{})}}))}; }
+      }
       _setCtxVisibility();
-    }
-  }
+      const ap = S.parcels[S.activeParcel??0];
+      _demolishHideNative(ap?.geo?.geometry || null);
 
-  if(S.vol.genDone){
-    const f = buildVolume();
-    setSource('vol-src',{type:'FeatureCollection',features:f});
+    } else {
+      if(S._ctxBackup?.features?.length){
+        S.ctx = S._ctxBackup; S._ctxBackup = null;
+        try{ setSource('ctx-src', S.ctx); }catch(e){}
+      }
+      _demolishRestoreNative();
+      if(S._styleBeforeDemo){
+        const prevStyle = S._styleBeforeDemo; S._styleBeforeDemo = null;
+        const selBase = document.getElementById('selBase');
+        if(selBase) selBase.value = prevStyle;
+        map.setStyle(STYLES[prevStyle] || STYLES.custom);
+        map.once('style.load', ()=>{
+          setTimeout(()=>{ _restoreAfterStyleLoad(prevStyle); _setCtxVisibility(); }, 400);
+        });
+      } else {
+        _setCtxVisibility();
+      }
+    }
+
+    if(S.vol.genDone){
+      try{
+        const f = buildVolume();
+        setSource('vol-src',{type:'FeatureCollection',features:f});
+      }catch(e){ console.warn('[setScenariu] buildVolume:', e.message); }
+    }
+  }catch(e){
+    console.warn('[setScenariu]', e.message);
+  }finally{
+    // renderTab se apelează ÎNTOTDEAUNA — indiferent de erori anterioare
+    renderTab('proiect');
   }
-  renderTab('proiect');
 }
 
 // Ascunde clădirile native DOAR pe parcelă folosind Clip Layer (Mapbox GL JS v3+)

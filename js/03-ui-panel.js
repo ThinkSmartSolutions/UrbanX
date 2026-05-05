@@ -296,9 +296,15 @@ function mobNavClick(tab, btn){
   btn.classList.add('active');
   S.tab = tab;
 
-  // Actualizăm conținut și deschidem
+  // Actualizăm conținut și deschidem — try/catch: sheet-ul se deschide chiar dacă getContent aruncă
   const mb = document.getElementById('mob-body');
-  if(mb) mb.innerHTML = getContent(tab);
+  if(mb){
+    try{ mb.innerHTML = getContent(tab); }
+    catch(e){
+      console.error('[mobNavClick] getContent('+tab+'):', e.message);
+      mb.innerHTML = '<div class="card"><div style="color:#f87171;padding:12px">Eroare la încărcare tab.<br><small>'+e.message+'</small></div></div>';
+    }
+  }
   if(sh){
     sh.classList.add('open');
     setTimeout(draw2D, 80);
