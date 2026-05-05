@@ -13,9 +13,11 @@ const _LOT = {
   retSpate: 0,    // spate (m)
   retLateral: 0,  // lateral stg+dreapta (m)
 
-  tipMix: { individuala:40, insiruita:30, duplex:20, bloc:10, gazebo:0, garaj:0, bbq:0, bucvara:0, bortodoxa:0, bcatolica:0 },
+  tipMix: { individuala:40, insiruita:30, duplex:20, bloc:10 }, // % din loturi rezidentiale (sum=100)
+  // Tipuri speciale: numar FIX de loturi (nu procent) — se adauga deasupra rezidentialelor
+  tipCount: { gazebo:0, garaj:0, bbq:0, bucvara:0, bortodoxa:0, bcatolica:0 },
   // tipActiv: care tipuri sunt vizibile in Mix si generate
-  tipActiv: { individuala:true, insiruita:true, duplex:true, bloc:true, gazebo:false, garaj:false, bbq:false, bucvara:false, bortodoxa:false, bcatolica:false },
+  tipActiv: { individuala:true, insiruita:true, duplex:true, bloc:true, gazebo:true, garaj:true, bbq:true, bucvara:true, bortodoxa:true, bcatolica:true },
 
   tipuri: {
     individuala: {
@@ -1338,28 +1340,33 @@ function _lotHtmlParametri(){
 
 // ─── TAB: Mix tipuri ──────────────────────────────────────────────────────
 function _lotHtmlMix(){
-  const total=Object.values(_LOT.tipMix).reduce((s,v)=>s+v,0);
+  // Doar rezidentiale in calcul sum=100
+  const _specK=['gazebo','garaj','bbq','bucvara','bortodoxa','bcatolica'];
+  const total=Object.entries(_LOT.tipMix).filter(([k])=>!_specK.includes(k)).reduce((s,[,v])=>s+v,0);
+  const totalSpeciale=Object.values(_LOT.tipCount||{}).reduce((s,v)=>s+(parseInt(v)||0),0);
   return `
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-    <span style="font-size:10px;color:#d4af37;font-weight:700">🏡 Mix tipuri locuințe</span>
+    <span style="font-size:10px;color:#d4af37;font-weight:700">🏡 Mix rezidențial</span>
     <span style="font-size:12px;font-weight:800;color:${total===100?'#4ade80':'#f87171'}">${total}% ${total===100?'✓':'≠100'}</span>
   </div>
-  ${total!==100?`<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:8px;padding:7px 10px;font-size:10px;color:#f87171;margin-bottom:8px">Totalul trebuie să fie 100% (acum ${total}%)</div>`:''}
+  ${total!==100?`<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:8px;padding:7px 10px;font-size:10px;color:#f87171;margin-bottom:8px">Totalul rezidențial trebuie să fie 100% (acum ${total}%)</div>`:''}
+  ${totalSpeciale>0?`<div style="background:rgba(212,175,55,.07);border:1px solid rgba(212,175,55,.2);border-radius:7px;padding:5px 9px;font-size:9px;color:#d4af37;margin-bottom:8px">+ ${totalSpeciale} loturi speciale adăugate automat deasupra mixului rezidențial</div>`:''}
 
-  ${Object.entries(_LOT.tipuri).filter(([k])=>_LOT.tipActiv?.[k]!==false).map(([k,t])=>`
-    <div style="background:rgba(255,255,255,.04);border-radius:11px;padding:11px;border:1px solid rgba(255,255,255,.06);margin-bottom:6px;border-left:3px solid ${_LOT.tipMix[k]>0?t.color:'rgba(255,255,255,.1)'}">
+  <!-- Rezidentiale: procente (sum 100%) -->
+  ${Object.entries(_LOT.tipuri).filter(([k])=>!['gazebo','garaj','bbq','bucvara','bortodoxa','bcatolica'].includes(k)).map(([k,t])=>`
+    <div style="background:rgba(255,255,255,.04);border-radius:11px;padding:11px;border:1px solid rgba(255,255,255,.06);margin-bottom:6px;border-left:3px solid ${(_LOT.tipMix[k]||0)>0?t.color:'rgba(255,255,255,.1)'}">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
         <label style="display:flex;align-items:center;gap:7px;cursor:pointer">
-          <input type="checkbox" ${_LOT.tipMix[k]>0?'checked':''} onchange="if(!this.checked){_LOT.tipMix['${k}']=0;_lotTab('m')}else{_LOT.tipMix['${k}']=25;_lotTab('m')}" style="accent-color:${t.color};width:16px;height:16px">
+          <input type="checkbox" ${(_LOT.tipMix[k]||0)>0?'checked':''} onchange="if(!this.checked){_LOT.tipMix['${k}']=0;_lotTab('m')}else{_LOT.tipMix['${k}']=25;_lotTab('m')}" style="accent-color:${t.color};width:16px;height:16px">
           <span style="font-size:13px">${t.icon}</span>
           <div>
             <div style="color:#e2e8f0;font-size:11px;font-weight:700">${t.label}</div>
             <div style="color:#475569;font-size:8.5px">${t.desc}</div>
           </div>
         </label>
-        <span style="color:${t.color};font-size:16px;font-weight:800;min-width:38px;text-align:right" id="mix-v-${k}">${_LOT.tipMix[k]}%</span>
+        <span style="color:${t.color};font-size:16px;font-weight:800;min-width:38px;text-align:right" id="mix-v-${k}">${_LOT.tipMix[k]||0}%</span>
       </div>
-      <input type="range" min="0" max="100" step="5" value="${_LOT.tipMix[k]}"
+      <input type="range" min="0" max="100" step="5" value="${_LOT.tipMix[k]||0}"
         oninput="_LOT.tipMix['${k}']=+this.value;document.getElementById('mix-v-${k}').textContent=this.value+'%'"
         style="width:100%;accent-color:${t.color};margin-bottom:7px">
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:3px">
@@ -1370,6 +1377,29 @@ function _lotHtmlMix(){
           </div>`).join('')}
       </div>
     </div>`).join('')}
+
+  <!-- Dotari/Cult: numar FIX de loturi (nu procent) -->
+  <div style="margin-top:12px;margin-bottom:6px">
+    <div style="font-size:10px;color:#d4af37;font-weight:700;margin-bottom:4px">🌿 Dotări / Amenajări / Cult — Nr. fix loturi</div>
+    <div style="font-size:9px;color:#475569;margin-bottom:8px">Aceste tipuri se adaugă deasupra mixului rezidențial. 0 = nu se generează.</div>
+  </div>
+  ${Object.entries(_LOT.tipuri).filter(([k])=>['gazebo','garaj','bbq','bucvara','bortodoxa','bcatolica'].includes(k)).map(([k,t])=>{
+    const cnt=parseInt((_LOT.tipCount||{})[k])||0;
+    return `
+    <div style="background:rgba(255,255,255,${cnt>0?'.05':'.02'});border-radius:10px;padding:9px 11px;margin-bottom:5px;border:1px solid ${cnt>0?t.color+'55':'rgba(255,255,255,.06)'};display:flex;align-items:center;gap:8px">
+      <span style="font-size:16px">${t.icon}</span>
+      <div style="flex:1;min-width:0">
+        <div style="color:#e2e8f0;font-size:11px;font-weight:700">${t.label}</div>
+        <div style="color:#475569;font-size:8px">${t.desc} · lot ${t.lotDefault}mp</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+        <button onclick="_LOT.tipCount=_LOT.tipCount||{};_LOT.tipCount['${k}']=Math.max(0,(parseInt((_LOT.tipCount||{})['${k}'])||0)-1);_lotTab('m')"
+          style="width:28px;height:28px;border-radius:7px;font-size:16px;font-weight:700;cursor:pointer;border:1px solid rgba(255,255,255,.15);background:rgba(11,18,32,.9);color:#94a3b8;line-height:1">−</button>
+        <span style="color:${cnt>0?t.color:'#475569'};font-size:16px;font-weight:800;min-width:22px;text-align:center">${cnt}</span>
+        <button onclick="_LOT.tipCount=_LOT.tipCount||{};_LOT.tipCount['${k}']=Math.min(10,(parseInt((_LOT.tipCount||{})['${k}'])||0)+1);_lotTab('m')"
+          style="width:28px;height:28px;border-radius:7px;font-size:16px;font-weight:700;cursor:pointer;border:1px solid ${t.color};background:${t.color}22;color:${t.color};line-height:1">+</button>
+      </div>
+    </div>`;}).join('')}
 
   <div style="font-size:10px;color:#64748b;font-weight:700;margin:10px 0 6px">⚡ Preset-uri rapide</div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
@@ -1539,8 +1569,10 @@ function runLotizare(){
   const ap=S.parcels[S.activeParcel??0];
   if(!ap?.geo?.geometry){ss('⚠️ Selectați o parcelă de pe hartă.');return;}
 
-  const totalMix=Object.values(_LOT.tipMix).reduce((s,v)=>s+v,0);
-  if(totalMix===0){ss('⚠️ Selectați cel puțin un tip de locuință.');return;}
+  const _specKeys2=['gazebo','garaj','bbq','bucvara','bortodoxa','bcatolica'];
+  const totalMix=Object.entries(_LOT.tipMix).filter(([k])=>!_specKeys2.includes(k)).reduce((s,[,v])=>s+v,0);
+  const totalSpeciale=Object.values(_LOT.tipCount||{}).reduce((s,v)=>s+(parseInt(v)||0),0);
+  if(totalMix===0 && totalSpeciale===0){ss('⚠️ Selectați cel puțin un tip de locuință sau dotare.');return;}
 
   ss('🏘 Se generează planul de lotizare...');
 
@@ -1615,14 +1647,30 @@ function runLotizare(){
 
     // Distribuire loturi per tip
     const loturiPerTip={};
-    let ramas=nrLoturiTotal;
-    // Filtreaza tipurile care sunt active SI au mix > 0
-    const tipuriActiv=Object.entries(_LOT.tipMix).filter(([k,v])=>v>0 && _LOT.tipActiv?.[k]!==false);
-    tipuriActiv.forEach(([k,pct],i)=>{
-      if(i===tipuriActiv.length-1) loturiPerTip[k]=ramas;
-      else{const n=Math.max(0,Math.round(nrLoturiTotal*pct/totalMix));loturiPerTip[k]=n;ramas-=n;}
-    });
+    const _specialTipKeys=['gazebo','garaj','bbq','bucvara','bortodoxa','bcatolica'];
+    const tipCount=_LOT.tipCount||{};
+
+    // Nr loturi speciale fixe
+    const nrSpeciale=_specialTipKeys.reduce((s,k)=>s+(parseInt(tipCount[k])||0),0);
+    // Loturi rezidentiale = total disponibil minus speciale (minim 1)
+    const nrRezid=Math.max(1, nrLoturiTotal - nrSpeciale);
+
+    // Distribuie rezidentiale proportional
+    const tipuriActiv=Object.entries(_LOT.tipMix).filter(([k,v])=>v>0 && !_specialTipKeys.includes(k));
+    let ramas=nrRezid;
+    if(totalMix>0){
+      tipuriActiv.forEach(([k,pct],i)=>{
+        if(i===tipuriActiv.length-1) loturiPerTip[k]=Math.max(0,ramas);
+        else{const n=Math.max(0,Math.round(nrRezid*pct/totalMix));loturiPerTip[k]=n;ramas-=n;}
+      });
+    }
     Object.keys(_LOT.tipuri).forEach(k=>{if(!loturiPerTip[k])loturiPerTip[k]=0;});
+
+    // Adauga speciale cu nr fix
+    _specialTipKeys.forEach(k=>{
+      const n=parseInt(tipCount[k])||0;
+      if(n>0) loturiPerTip[k]=n;
+    });
 
     // Generare geometrii
     const {loturi,drumuri}=_genLotizareGeom(fp,loturiPerTip,drumAreaFract);
