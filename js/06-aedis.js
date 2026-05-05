@@ -4413,7 +4413,7 @@ function aedisGetContent(){
     <div class="aedis-section">Funcțiunea principală</div>
     <div class="aedis-fn-grid">
       ${Object.entries(AEDIS_FN).map(([k,v])=>`
-        <button onclick="_aedisSetFn('${k}')" class="aedis-fn-btn${AEDIS.fn===k?' active':''}">
+        <button onclick="AEDIS.fn='${k}';aedisRender()" class="aedis-fn-btn${AEDIS.fn===k?' active':''}">
           <span class="aedis-fn-dot" style="background:${v.color}"></span>
           ${v.label}
         </button>`).join('')}
@@ -4428,7 +4428,7 @@ function aedisGetContent(){
     ${AEDIS.parterDiferit?`
     <div class="aedis-fn-grid" style="margin-top:8px">
       ${['comercial','birouri','institutie'].map(k=>`
-        <button onclick="_aedisSetFnParter('${k}')" class="aedis-fn-btn${AEDIS.fnParter===k?' active':''}">
+        <button onclick="AEDIS.fnParter='${k}';aedisRender()" class="aedis-fn-btn${AEDIS.fnParter===k?' active':''}">
           <span class="aedis-fn-dot" style="background:${AEDIS_FN[k].color}"></span>
           ${AEDIS_FN[k].label}
         </button>`).join('')}
@@ -4446,7 +4446,7 @@ function aedisGetContent(){
       ${Object.entries(AEDIS_STIL).map(([k,v])=>{
         const swatches = v.floorColors.slice(0,5).map(c=>`<span style="display:inline-block;width:8px;height:8px;background:${c};border-radius:1px;margin:0 1px"></span>`).join('');
         return `
-        <button onclick="_aedisSetStil('${k}')" class="aedis-stil-btn${AEDIS.stil===k?' active':''}">
+        <button onclick="AEDIS.stil='${k}';aedisRender()" class="aedis-stil-btn${AEDIS.stil===k?' active':''}">
           ${v.label}<br>
           <div style="margin:3px 0">${swatches}</div>
           <small style="opacity:0.7">${v.desc}</small>
@@ -4473,7 +4473,7 @@ function aedisGetContent(){
         {id:'extindere_v',ico:'🏗',label:'Ext. Vertical',desc:'Deasupra existentelor'},
         {id:'inglobare',ico:'🏙',label:'Inglobare',desc:'Înglobează existentele'},
       ].map(s=>`
-        <button onclick="_aedisSetScenariu('${s.id}')" class="aedis-scen-btn${AEDIS.scenariu===s.id?' active':''}">
+        <button onclick="AEDIS.scenariu='${s.id}';aedisRender()" class="aedis-scen-btn${AEDIS.scenariu===s.id?' active':''}">
           ${s.ico} ${s.label}<br><small>${s.desc}</small>
         </button>`).join('')}
     </div>
@@ -4500,7 +4500,7 @@ function aedisGetContent(){
         {id:'T',ico:'⊤',label:'Corp T',desc:'Formă T'},
         {id:'curte',ico:'⬜',label:'Curte int.',desc:'Curte interioară'},
       ].map(f=>`
-        <button onclick="_aedisSetForma('${f.id}')"
+        <button onclick="AEDIS.forma='${f.id}';aedisRender()"
           title="${f.desc}"
           style="padding:8px 4px;border-radius:9px;border:2px solid ${AEDIS.forma===f.id?'#d4af37':'rgba(255,255,255,.15)'};background:${AEDIS.forma===f.id?'rgba(212,175,55,.15)':'rgba(11,18,32,.8)'};color:${AEDIS.forma===f.id?'#d4af37':'#94a3b8'};cursor:pointer;font-size:18px;text-align:center;line-height:1.2;transition:all .15s">
           <div style="font-size:18px">${f.ico}</div>
@@ -4522,7 +4522,7 @@ function aedisGetContent(){
         <div class="aedis-lbl">Nr. niveluri</div>
         <div style="display:flex;gap:4px;margin-top:4px">
           ${[1,2,3,4,5,6,7,8,10,12].map(n=>`
-            <button onclick="_aedisSetNiv(${n})" 
+            <button onclick="AEDIS.corpuri[0].niv=${n};aedisRender()" 
               style="padding:5px 7px;border-radius:6px;border:1px solid ${niv===n?'#d4af37':'rgba(255,255,255,.2)'};background:${niv===n?'rgba(212,175,55,.2)':'transparent'};color:${niv===n?'#d4af37':'#94a3b8'};cursor:pointer;font-size:11px;font-weight:700">${n}</button>
           `).join('')}
         </div>
@@ -4571,7 +4571,7 @@ function aedisGetContent(){
         {id:'mansarda',ico:'🏡',label:'Mansardă',desc:'Etaj înscris în șarpantă'},
         {id:'combinat',ico:'🏢',label:'Combinat',desc:'Terasă + corp tehnic'},
       ].map(a=>`
-        <button onclick="_aedisSetAcoperis('${a.id}')" class="aedis-acop-btn${AEDIS.tipAcoperis===a.id?' active':''}">
+        <button onclick="AEDIS.tipAcoperis='${a.id}';aedisRender()" class="aedis-acop-btn${AEDIS.tipAcoperis===a.id?' active':''}">
           <span style="font-size:20px">${a.ico}</span>
           <strong>${a.label}</strong>
           <small>${a.desc}</small>
@@ -4765,11 +4765,11 @@ function aedisGetContent(){
       </div>
       <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:8px">
         ${['N','E','S','V'].map(l=>`
-          <button onclick="_aedisToggleBalcon('${l}')"
+          <button onclick="AEDIS.balconLaturi=AEDIS.balconLaturi||[];var _i=AEDIS.balconLaturi.indexOf('${l}');_i>=0?AEDIS.balconLaturi.splice(_i,1):AEDIS.balconLaturi.push('${l}');aedisRender()"
             style="padding:7px 2px;border-radius:7px;border:1px solid ${(AEDIS.balconLaturi||[]).includes('${l}')?'#3b82f6':'rgba(255,255,255,.12)'};background:${(AEDIS.balconLaturi||[]).includes('${l}')?'rgba(59,130,246,.25)':'rgba(11,18,32,.6)'};color:${(AEDIS.balconLaturi||[]).includes('${l}')?'#93c5fd':'#475569'};cursor:pointer;font-size:11px;font-weight:800;transition:all .15s">
             ${l}
           </button>`).join('')}
-        <button onclick="_aedisToggleAllBalcon()"
+        <button onclick="AEDIS.balconLaturi=AEDIS.balconLaturi&&AEDIS.balconLaturi.length===4?[]:['N','E','S','V'];aedisRender()"
           style="padding:7px 2px;border-radius:7px;border:1px solid ${(AEDIS.balconLaturi||[]).length===4?'#22c55e':'rgba(255,255,255,.12)'};background:${(AEDIS.balconLaturi||[]).length===4?'rgba(34,197,94,.2)':'rgba(11,18,32,.6)'};color:${(AEDIS.balconLaturi||[]).length===4?'#86efac':'#475569'};cursor:pointer;font-size:9px;font-weight:800">
           Toate
         </button>
@@ -4855,7 +4855,7 @@ function aedisGetContent(){
       title="LOISIR — Amenajare spații publice">🌿<span style="font-size:8px">Loisir</span></button>
     <button onclick="aedisAIRender()" class="aedis-dim-btn" style="background:rgba(212,175,55,.15);border-color:rgba(212,175,55,.4);color:#d4af37;font-size:10px" title="AI Render fotorealist (necesită API key Fal.ai)">🎨 AI</button>
     <button onclick="generateSolarStudy()" class="aedis-dim-btn" style="background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.4);color:#fbbf24;font-size:9px;display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 8px" title="Studiu Însorire PDF">☀<span style="font-size:8px">Însorire</span></button>
-    <button onclick="_aedisToggleDim()" 
+    <button onclick="AEDIS.showDim=!AEDIS.showDim;aedisRender()" 
       class="aedis-dim-btn${AEDIS.showDim?' active':''}" title="Etichete dimensionale (toggle)">📏</button>
     <button onclick="aedisClose()" class="aedis-close-btn">✕</button>
   </div>`;

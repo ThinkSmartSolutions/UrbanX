@@ -1470,59 +1470,43 @@ canvas#c2d{width:100%;height:100%;display:block}
 
   // Fix Safari iOS: onclick inline nu functioneaza pe butoane generate dinamic
   // Adauga touch event delegation pe document pentru aedis-fn-btn
-  // Safari iOS fix: butoane generate dinamic cu innerHTML nu primesc click events
-  // Solutie: MutationObserver ataseaza touchend DIRECT pe fiecare buton nou aparut
+  // Fix universal: event delegation - un singur listener pentru TOATE butoanele generate dinamic
+  // Functioneaza pe iOS Safari, Android Chrome, desktop - fara MutationObserver, fara eval complex
   (function(){
-    let _touchStartY = 0;
-    const _attachTouch = (btn) => {
-      if(btn._touchAttached) return;
-      btn._touchAttached = true;
-      btn.addEventListener('touchstart', e => { _touchStartY = e.touches[0].clientY; }, {passive:true});
-      btn.addEventListener('touchend', e => {
-        // Nu executa daca a fost un scroll (>8px miscare)
-        if(Math.abs(e.changedTouches[0].clientY - _touchStartY) > 8) return;
-        e.preventDefault();
-        const oc = btn.getAttribute('onclick');
-        if(oc) try { window.eval(oc); } catch(err) { console.warn('touch-btn:', err.message); }
-      }, {passive:false});
-    };
-
-    // Ataseaza la butoane deja existente
-    const _attachAll = () => {
-      document.querySelectorAll('.aedis-fn-btn, .aedis-dim-btn').forEach(_attachTouch);
-    };
-    _attachAll();
-
-    // MutationObserver: detecteaza butoane noi adaugate la DOM
-    // Selector universal: prinde ORICE element cu onclick din toata aplicatia
-    const _attachAll3 = () => {
-      // Butoane cu clase specifice + orice buton/div cu onclick din paneluri dinamice
-      document.querySelectorAll(
-        'button[onclick], .aedis-fn-btn, .aedis-dim-btn, [data-touch-fn], ' +
-        '#lot-modal button, #lot-content button, #aedis-modal button, ' +
-        '.ptab, .ltab, [onclick]'
-      ).forEach(el => {
-        if(el.tagName === 'SCRIPT' || el.tagName === 'A') return;
-        _attachTouch(el);
-      });
-    };
-    _attachAll3();
-
-    // MutationObserver: ataseaza touch pe ORICE element nou cu onclick
-    const _obs = new MutationObserver(mutations => {
-      let needsReattach = false;
-      mutations.forEach(m => {
-        if(m.addedNodes.length) needsReattach = true;
-      });
-      if(needsReattach) {
-        clearTimeout(window._reattachTimer);
-        window._reattachTimer = setTimeout(_attachAll3, 80);
+    function _runOC(oc) {
+      // Incearca apel direct window.fnName(args) - cel mai rapid si sigur
+      var m = oc.match(/^([\w$_]+)\((.*)\)$/s);
+      if(m && typeof window[m[1]] === 'function') {
+        try {
+          var args = m[2].trim() ? Function('return [' + m[2] + ']')() : [];
+          window[m[1]].apply(window, args);
+          return;
+        } catch(e) {}
       }
-    });
-    _obs.observe(document.body, {childList:true, subtree:true});
-    window._reattachTouchBtns = _attachAll3;
-  })();
-})();
+      // Fallback: executa cu acces la scope global
+      try { Function(oc)(); } catch(e) {
+        try { (0,eval)(oc); } catch(e2) {}
+      }
+    }
+    // Click delegation - capture phase, fara preventDefault
+    document.addEventListener('click', function(e) {
+      var el = e.target && e.target.closest ? e.target.closest('[onclick]') : null;
+      if(el && el.tagName !== 'A') { var oc = el.getAttribute('onclick'); if(oc) _runOC(oc); }
+    }, false);
+    // iOS Safari touchend - previne double-fire
+    var _ty = 0;
+    document.addEventListener('touchstart', function(e) { _ty = e.touches[0] ? e.touches[0].clientY : 0; }, {passive:true});
+    document.addEventListener('touchend', function(e) {
+      if(Math.abs((e.changedTouches[0] ? e.changedTouches[0].clientY : 0) - _ty) > 12) return;
+      var el = e.target && e.target.closest ? e.target.closest('[onclick]') : null;
+      if(!el || el.tagName === 'A') return;
+      var oc = el.getAttribute('onclick');
+      if(!oc) return;
+      e.preventDefault();
+      _runOC(oc);
+    }, {passive:false});
+    window._runOC = _runOC;
+  })();;
 </script>
 
 <script>
