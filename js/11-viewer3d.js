@@ -1747,12 +1747,13 @@ function _v3dAddLotizareGeometry(THREE, scene, toLoc){
       _flatPoly(ring, 0.04, matLot);
       _outline(ring, 0.06, borderColor, .5);
 
-      // b) Spațiu verde — NUMAI interior lot (nu pe margini/drumuri)
-      // Folosim scalare 0.85 spre centru = verde strict INTERIOR, nu pe borduri
+      // b) Spațiu verde — mic pătrat CENTRAL, strict interior, niciodată pe drumuri
+      // Loturile parțiale (margine parcela) NU primesc verde vizual
       const svPct = SPECIAL_TIPS.has(tip) ? 0 : (SV_PCT[tip]||0);
-      if(svPct > 0.05){
-        // Verde = inner ring la 85% din lot (nu toata suprafata)
-        const scaleV = Math.sqrt(1-svPct) * 0.9; // mai strâns = nu iese pe drumuri
+      const isPartial = f.properties?.partial === true;
+      if(svPct > 0.05 && !isPartial){
+        // Verde = 35% din lot (pătrat mic în centru) — departe de orice margine
+        const scaleV = 0.35;
         const verdePts = _innerRing(ring, scaleV)?.slice(0,-1).map(toLoc);
         if(verdePts && verdePts.length >= 3){
           const shV = new THREE.Shape();
