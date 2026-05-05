@@ -1,5 +1,8 @@
 // UrbanX — Menus + viewer Urban3D + materiale
 
+// Variabile globale camera damping — accesibile din _v3dBuild si _v3dControls
+var _thT=0, _phT=0, _radT=50;
+
 function _closeAllMenus(){
   const v=document.getElementById('viz-menu');
   const t=document.getElementById('tools-menu');
@@ -1065,8 +1068,9 @@ function _v3dBuild(ap){
   obs.observe(canvas); V3D._obs=obs;
 
   // Render loop cu smooth camera damping (miscare cinematica fluida)
-  const DAMP=0.25; // inertie camera: valoare mai responsiva (era 0.11 = prea lent)
-  let _thT=V3D.th, _phT=V3D.ph, _radT=V3D.rad; // targets
+  const DAMP=0.25;
+  // Targets pentru damping - initializate si accesibile din _v3dControls
+  _thT=V3D.th; _phT=V3D.ph; _radT=V3D.rad;
   window._v3dSetCamTarget=(th,ph,rad)=>{ _thT=th; _phT=ph; _radT=rad; };
   const render=()=>{
     V3D.af=requestAnimationFrame(render);

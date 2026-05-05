@@ -4511,7 +4511,7 @@ function aedisGetContent(){
     <div class="aedis-row" style="margin-bottom:10px">
       <span class="aedis-lbl">Grosime brațe</span>
       <input type="range" min="20" max="50" step="5" value="${Math.round((AEDIS.formaRatio||0.35)*100)}"
-        oninput="AEDIS.formaRatio=+this.value/100;document.getElementById('aedis-ratio-val').textContent=this.value+'%';_aedisSetForma(AEDIS.forma)"
+        oninput="AEDIS.formaRatio=+this.value/100;document.getElementById('aedis-ratio-val').textContent=this.value+'%';if(S.vol.genDone||AEDIS3D.active)aedisGenerateAll()"
         style="flex:1;accent-color:#d4af37">
       <span class="aedis-val" id="aedis-ratio-val">${Math.round((AEDIS.formaRatio||0.35)*100)}%</span>
     </div>`:''}
@@ -4531,7 +4531,7 @@ function aedisGetContent(){
     <div class="aedis-row" style="margin-top:10px">
       <span class="aedis-lbl">H/nivel (m)</span>
       <input type="range" min="2.6" max="5.5" step="0.1" value="${hNiv}"
-        oninput="_aedisSetHNiv(this.value)"
+        oninput="AEDIS.corpuri[0].hNiv=+this.value;aedisRender()"
         style="flex:1;accent-color:#d4af37">
       <span class="aedis-val">${hNiv.toFixed(1)}m</span>
     </div>
@@ -4755,7 +4755,7 @@ function aedisGetContent(){
       <div class="aedis-row" style="margin-bottom:6px">
         <span class="aedis-lbl">Adâncime (m)</span>
         <input type="range" min="0.8" max="2.5" step="0.1" value="${AEDIS.balconAdancime||1.5}"
-          oninput="window._aedisSetBalconAdanc&&_aedisSetBalconAdanc(+this.value);document.getElementById('balc-adanc').textContent=this.value+'m'"
+          oninput="AEDIS.balconAdancime=+this.value;document.getElementById('balc-adanc').textContent=this.value+'m';if(S.vol.genDone||AEDIS3D.active)aedisGenerateAll()"
           style="flex:1;accent-color:#3b82f6">
         <span class="aedis-val" id="balc-adanc">${(AEDIS.balconAdancime||1.5).toFixed(1)}m</span>
       </div>
