@@ -4099,9 +4099,9 @@ async function generateStudiuFezabilitate(paramOverrides){
   const sc1=Math.round(scMax*0.7), sda1=Math.round(sdTotal*0.7);
   const sc2=scMax, sda2=sdTotal;
   const sc3=Math.round(scMax*0.9), sda3=Math.round(sdTotal*1.1);
-  [['S1 — Conservator',sc1+' mp',sda1+' mp',Math.round(aedisH*0.75)+'m',Math.round(sda1*700/1000)+' kEUR',((sda1*0.85*50*12)/((sda1*700*1.25+costTeren)/1000)).toFixed(1)+'%'],
-   ['S2 — Recomandat ★',sc2+' mp',sda2+' mp',aedisH.toFixed(0)+'m',Math.round(sda2*700/1000)+' kEUR',((sda2*0.85*50*12)/((sda2*700*1.25+costTeren)/1000)).toFixed(1)+'%'],
-   ['S3 — Maxim RLU',sc3+' mp',sda3+' mp',params?.h||aedisH.toFixed(0)+'m',Math.round(sda3*700/1000)+' kEUR',((sda3*0.85*50*12)/((sda3*700*1.25+costTeren)/1000)).toFixed(1)+'%'],
+  [['S1 — Conservator',sc1+' mp',sda1+' mp',Math.round(aedisH*0.75)+'m',Math.round(sda1*700/1000).toLocaleString('en-US')+' EUR',((sda1*0.85*50*12)/((sda1*700*1.25+costTeren)/1000)).toFixed(1)+'%'],
+   ['S2 — Recomandat ★',sc2+' mp',sda2+' mp',aedisH.toFixed(0)+'m',Math.round(sda2*700/1000).toLocaleString('en-US')+' EUR',((sda2*0.85*50*12)/((sda2*700*1.25+costTeren)/1000)).toFixed(1)+'%'],
+   ['S3 — Maxim RLU',sc3+' mp',sda3+' mp',params?.h||aedisH.toFixed(0)+'m',Math.round(sda3*700/1000).toLocaleString('en-US')+' EUR',((sda3*0.85*50*12)/((sda3*700*1.25+costTeren)/1000)).toFixed(1)+'%'],
   ].forEach((r,i)=>{
     if(i===1){
       // S2 RECOMANDAT: linie verde stânga (3mm) + text "★" în culoare verde
@@ -4164,8 +4164,8 @@ async function generateStudiuFezabilitate(paramOverrides){
   cy+=4;
   cy=sec('6.1. SURSE DE FINANTARE IDENTIFICATE',cy);cy+=2;
   cy=tblRow(['Sursă de finanțare','Tip','% din total','Valoare est. (EUR)','Condiții principale'],cy,true,[55,25,18,42,42]);
-  [['Fonduri proprii investitor','Propriu',Math.round(costTotal*0.3/1000)+'0 kEUR'+'/100 kEUR',''+Math.round(costTotal*0.3).toLocaleString(),'Minim 20-30% capital propriu'],
-   ['Credit bancar (ipotecar)','Bancar',Math.round(costTotal*0.5/1000)+'0 kEUR',''+Math.round(costTotal*0.5).toLocaleString(),'Dobândă 6-9% (2024), termen 15-25 ani'],
+  [['Fonduri proprii investitor','Propriu',Math.round(costTotal*0.3).toLocaleString('en-US')+' EUR',''+Math.round(costTotal*0.3).toLocaleString('en-US'),'Minim 20-30% capital propriu'],
+   ['Credit bancar (ipotecar)','Bancar',Math.round(costTotal*0.5).toLocaleString('en-US')+' EUR',''+Math.round(costTotal*0.5).toLocaleString('en-US'),'Dobândă 6-9% (2024), termen 15-25 ani'],
    ['Fonduri europene (POR 2021-2027)','UE','-','-','Conf. axa prioritară — eligibilitate specifică'],
    ['Leasing imobiliar','Financiar','-','-','Alternativă credit clasic — termen 10-20 ani'],
    ['Parteneriat public-privat (PPP)','Mixt','-','-','Dacă investiție de interes public'],
@@ -4372,7 +4372,7 @@ async function generateStudiuFezabilitate(paramOverrides){
   const seismCfgF=getSeismConfig();
   cy=tblRow(['Parametru geotehnic','Valoare estimativă','Normă','Cost orientativ'],cy,true,[65,42,38,37]);
   [['Categoria geotehnică (NP 074/2014)',catGeoF,'NP 074/2014','—'],
-   ['Studiu geotehnic (foraje min.)',catGeoF.includes('3')?'5 foraje + 3 CPT':catGeoF.includes('2')?'3 foraje (h=8m)':'1-2 foraje (h=5m)','NP 074/2014',''+costGeoF.toLocaleString()+'-'+(costGeoF*1.8).toFixed(0)+' EUR'],
+   ['Studiu geotehnic (foraje min.)',catGeoF.includes('3')?'5 foraje + 3 CPT':catGeoF.includes('2')?'3 foraje (h=8m)':'1-2 foraje (h=5m)','NP 074/2014',''+costGeoF.toLocaleString()+'-'+(costGeoF*1.8).toLocaleString('en-US')+' EUR'],
    ['Fundații recomandate (estimativ)','Izolate/continue BA la 1.5-2.0m','NP 074 + SR EN 1997','Inclus cost construcție'],
    ['Zona seismică (P100-1/2013)',seismCfgF.zona+' (ag='+seismCfgF.ag+'g, Tc='+seismCfgF.Tc+'s)','P100-1/2013','Impact cost structură +5-15%'],
    ['Epuismente / hidroizolație','Posibil (NFA 1.5-8m în Iași)','NP 074/2014','+15.000-40.000 EUR'],
@@ -4633,8 +4633,8 @@ async function generateStudiuAmplasament(){
   cy=sec('2. PARAMETRI URBANISTICI COMPLET — UTR '+utr+' — PUG '+uat.toUpperCase(),cy);cy+=2;
   cy=body('Regulamentul Local de Urbanism al '+uat+' (aprobat prin HCL, în vigoare) stabilește pentru zona UTR '+utr+' următorii indicatori și reglementări urbanistice. Acești parametri constituie baza legală pentru toate studiile și proiectele de specialitate elaborate pentru amplasamentul '+nrcad+'.',14,cy);cy+=4;
   cy=tblRow(['Indicator PUG','Valoare RLU','Calcul pentru teren','Semnificație și restricții'],cy,true,[35,25,38,84]);
-  [['POT max (%)',_pot+'%',scMax+' mp SC la sol','Suprafața maximă construită la sol. Nu se depășește.'],
-   ['CUT max',String(_cut),sdTotal+' mp SDA total','Suprafața desfășurată totală (toate nivelele). Nu se depășește.'],
+  [['POT max (%)',_pot+'%',scMax.toLocaleString('en-US')+' mp SC la sol','Suprafața maximă construită la sol. Nu se depășește.'],
+   ['CUT max',String(_cut),sdTotal.toLocaleString('en-US')+' mp SDA total','Suprafața desfășurată totală (toate nivelele). Nu se depășește.'],
    ['H max (m)',_h?_h+'m':'N/S','Conf. RLU','Înălțimea maximă absolută admisă (coamă/atic).'],
    ['Nr. niv. max',_niv?_niv:'N/S','~P+'+(niv-1),'Regimul de înălțime admis prin RLU.'],
    ['SV min (%)',_sv+'%',Math.round(areaNum*_sv/100)+' mp','Spații verzi amenajate. Obligatoriu, verificat prin AC.'],

@@ -16,6 +16,17 @@ function _initStudyPdf(studyName, studySubtitle, totalPages){
   const WHITE=[255,255,255];
 
   const S2=t=>_pdfSafe(t);
+  // Formatare numere cu separator de mii (virgula) + sufix optional
+  // n(2489) => '2,489'  |  n(1742300,'EUR') => '1,742,300 EUR'  |  n(41.4,'%') => '41.4%'
+  const n=(val,suffix,decimals)=>{
+    if(val===null||val===undefined||val===''||isNaN(+val)) return S2(String(val??'-'));
+    const num=+val;
+    const d=decimals!==undefined?decimals:(Number.isInteger(num)?0:2);
+    const formatted=num.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+    return suffix?formatted+' '+suffix:formatted;
+  };
+  // nK: afiseaza valori mari in format '1,742 EUR' (fara zecimale, cu separator mii)
+  const nK=(val,suffix)=>n(val,suffix,0);
   const dateStr=new Date().toLocaleDateString('ro-RO',{day:'2-digit',month:'long',year:'numeric'});
   const ap=S.parcels[S.activeParcel??0];
   const nrcad=ap?.nrcad||'\u2014';
