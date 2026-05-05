@@ -1371,31 +1371,51 @@ canvas#c2d{width:100%;height:100%;display:block}
 
   // Fix Safari iOS: onclick inline nu functioneaza pe butoane generate dinamic
   // Adauga touch event delegation pe document pentru aedis-fn-btn
-  // Touch delegation pentru butoane generate dinamic (Safari iOS fix)
-  // Acopera: fn-btn (functiuni AEDIS), aedis-dim-btn, ptab (tabs panel)
-  document.addEventListener('touchend', function(e){
-    const btn = e.target.closest('.aedis-fn-btn, .aedis-dim-btn, .ptab, [data-touch-fn]');
-    if(!btn) return;
-    // Verifica daca e un scroll si nu un tap (nu face nimic daca a miscat)
-    e.preventDefault();
-    const oc = btn.getAttribute('onclick');
-    if(oc){
-      try{
-        // eval are acces la toate variabilele globale (window scope)
-        // in contrast cu new Function() care e izolat
-        const fn = new Function('AEDIS','S','_v3dRebuildFast','aedisRender','renderAll',
-          `"use strict"; ${oc}`,
-        );
-        fn(
-          window.AEDIS, window.S,
-          window._v3dRebuildFast, window.aedisRender, window.renderAll
-        );
-      }catch(err){
-        // Fallback: eval direct
-        try{ window.eval(oc); }catch(e2){ console.warn('fn-btn touch fallback:', e2.message); }
-      }
-    }
-  }, {passive:false});
+  // Safari iOS fix: butoane generate dinamic cu innerHTML nu primesc click events
+  // Solutie: MutationObserver ataseaza touchend DIRECT pe fiecare buton nou aparut
+  (function(){
+    let _touchStartY = 0;
+    const _attachTouch = (btn) => {
+      if(btn._touchAttached) return;
+      btn._touchAttached = true;
+      btn.addEventListener('touchstart', e => { _touchStartY = e.touches[0].clientY; }, {passive:true});
+      btn.addEventListener('touchend', e => {
+        // Nu executa daca a fost un scroll (>8px miscare)
+        if(Math.abs(e.changedTouches[0].clientY - _touchStartY) > 8) return;
+        e.preventDefault();
+        const oc = btn.getAttribute('onclick');
+        if(oc) try { window.eval(oc); } catch(err) { console.warn('touch-btn:', err.message); }
+      }, {passive:false});
+    };
+
+    // Ataseaza la butoane deja existente
+    const _attachAll = () => {
+      document.querySelectorAll('.aedis-fn-btn, .aedis-dim-btn').forEach(_attachTouch);
+    };
+    _attachAll();
+
+    // MutationObserver: detecteaza butoane noi adaugate la DOM
+    // Selector larg: acopera AEDIS + Lotizare + orice panel cu butoane onclick
+    const BTN_SEL = '.aedis-fn-btn, .aedis-dim-btn, #lot-modal button, #lot-content button';
+
+    const _attachAll2 = () => {
+      document.querySelectorAll(BTN_SEL).forEach(_attachTouch);
+    };
+    _attachAll2();
+
+    const _obs = new MutationObserver(mutations => {
+      mutations.forEach(m => {
+        m.addedNodes.forEach(node => {
+          if(!node.querySelectorAll) return;
+          node.querySelectorAll(BTN_SEL).forEach(_attachTouch);
+          // Daca nodul insusi e un buton cu onclick
+          if(node.tagName === 'BUTTON' && node.getAttribute('onclick')) _attachTouch(node);
+        });
+      });
+    });
+    _obs.observe(document.body, {childList:true, subtree:true});
+    window._reattachTouchBtns = _attachAll2;
+  })();
 })();
 </script>
 

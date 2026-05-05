@@ -446,6 +446,17 @@ function aedisOpen3DViewer(){
           style="background:rgba(59,130,246,.12);color:#60a5fa;border:1px solid rgba(59,130,246,.25);border-radius:8px;padding:5px 13px;font-size:16px;cursor:pointer;flex-shrink:0;min-height:36px;touch-action:manipulation">－</button>
         <button id="v3d-dist-btn" onclick="_v3dToggleDistances()" title="Distanțe vecini"
           style="background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.3);border-radius:8px;padding:5px 11px;font-size:14px;cursor:pointer;flex-shrink:0;min-height:36px;touch-action:manipulation">📏</button>
+        <!-- View presets rapide -->
+        <div style="display:flex;gap:3px;flex-shrink:0;border-left:1px solid rgba(255,255,255,.1);padding-left:5px;margin-left:2px">
+          <button onclick="V3D.th=Math.PI;V3D.ph=Math.PI/3.2;_v3dUpdateCam()" title="Vedere perspectivă (Sud→Nord)"
+            style="background:rgba(255,255,255,.06);color:#94a3b8;border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:4px 8px;font-size:10px;cursor:pointer;flex-shrink:0;min-height:36px;touch-action:manipulation">P</button>
+          <button onclick="V3D.th=Math.PI;V3D.ph=1.48;_v3dUpdateCam()" title="Vedere față (orizontal)"
+            style="background:rgba(255,255,255,.06);color:#94a3b8;border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:4px 8px;font-size:10px;cursor:pointer;flex-shrink:0;min-height:36px;touch-action:manipulation">F</button>
+          <button onclick="V3D.th=Math.PI/2;V3D.ph=1.48;_v3dUpdateCam()" title="Vedere laterală"
+            style="background:rgba(255,255,255,.06);color:#94a3b8;border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:4px 8px;font-size:10px;cursor:pointer;flex-shrink:0;min-height:36px;touch-action:manipulation">L</button>
+          <button onclick="V3D.th=Math.PI;V3D.ph=0.08;_v3dUpdateCam()" title="Vedere de sus (top-down)"
+            style="background:rgba(255,255,255,.06);color:#94a3b8;border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:4px 8px;font-size:10px;cursor:pointer;flex-shrink:0;min-height:36px;touch-action:manipulation">T</button>
+        </div>
         <button id="v3d-legend-btn" onclick="_v3dToggleLotLegend()" title="Legendă lotizare"
           style="background:rgba(167,139,250,.1);color:#a78bfa;border:1px solid rgba(167,139,250,.3);border-radius:8px;padding:5px 11px;font-size:14px;cursor:pointer;flex-shrink:0;min-height:36px;touch-action:manipulation;display:none">🎨</button>
       </div>
@@ -3489,22 +3500,32 @@ function _v3dControls(canvas,cam){
     if(shft||e.buttons===4){const r2=new THREE.Vector3();r2.crossVectors(cam.getWorldDirection(new THREE.Vector3()),cam.up).normalize();V3D.tx.addScaledVector(r2,-dx*V3D.rad*0.4);V3D.tx.y+=dy*V3D.rad*0.4;}
     else{// Scrie in targets pentru smooth damping
         _thT=(_thT!==undefined?_thT:V3D.th)-dx;
-        _phT=Math.max(0.08,Math.min(Math.PI/2.05,(_phT!==undefined?_phT:V3D.ph)+dy));
-        V3D.th=_thT; V3D.ph=_phT; // si direct pt feedback imediat
+        _phT=Math.max(0.04,Math.min(Math.PI*0.88,(_phT!==undefined?_phT:V3D.ph)+dy));
+        V3D.th=_thT; V3D.ph=_phT;
 }
     _v3dUpdateCam();};
   window.addEventListener('mousemove',mm); window.addEventListener('mouseup',mu);
   window.addEventListener('keydown',e=>{if(e.key==='Escape')drag=false;});
   canvas.addEventListener('contextmenu',e=>{e.preventDefault();drag=false;});
-  canvas.addEventListener('wheel',e=>{e.preventDefault();V3D.rad=Math.max(5,Math.min(300,V3D.rad*(e.deltaY>0?1.08:0.93)));_v3dUpdateCam();},{passive:false});
+  canvas.addEventListener('wheel',e=>{
+    e.preventDefault();
+    // Zoom mai fluid: factor variabil (mai rapid de departe, mai precis de aproape)
+    const factor = e.deltaY > 0 ? 1.06 : 0.945;
+    V3D.rad = Math.max(3, Math.min(400, V3D.rad * factor));
+    _v3dUpdateCam();
+  },{passive:false});
   let ltd=0,ltx=0,lty=0;
   canvas.addEventListener('touchstart',e=>{if(e.touches.length===1){drag=true;lx=e.touches[0].clientX;ly=e.touches[0].clientY;}if(e.touches.length===2){const dx=e.touches[0].clientX-e.touches[1].clientX,dy=e.touches[0].clientY-e.touches[1].clientY;ltd=Math.sqrt(dx*dx+dy*dy);}},{passive:true});
   canvas.addEventListener('touchmove',e=>{e.preventDefault();if(e.touches.length===1&&drag){const dx=(e.touches[0].clientX-lx)*0.006,dy=(e.touches[0].clientY-ly)*0.006;// Scrie in targets pentru smooth damping
         _thT=(_thT!==undefined?_thT:V3D.th)-dx;
-        _phT=Math.max(0.08,Math.min(Math.PI/2.05,(_phT!==undefined?_phT:V3D.ph)+dy));
-        V3D.th=_thT; V3D.ph=_phT; // si direct pt feedback imediat
-lx=e.touches[0].clientX;ly=e.touches[0].clientY;_v3dUpdateCam();}if(e.touches.length===2){const dx=e.touches[0].clientX-e.touches[1].clientX,dy=e.touches[0].clientY-e.touches[1].clientY;const d=Math.sqrt(dx*dx+dy*dy);V3D.rad=Math.max(5,Math.min(300,V3D.rad*(ltd/Math.max(1,d))));ltd=d;_v3dUpdateCam();}},{passive:false});
+        _phT=Math.max(0.04,Math.min(Math.PI*0.88,(_phT!==undefined?_phT:V3D.ph)+dy));
+        V3D.th=_thT; V3D.ph=_phT;
+lx=e.touches[0].clientX;ly=e.touches[0].clientY;_v3dUpdateCam();}if(e.touches.length===2){const dx=e.touches[0].clientX-e.touches[1].clientX,dy=e.touches[0].clientY-e.touches[1].clientY;const d=Math.sqrt(dx*dx+dy*dy);V3D.rad=Math.max(3,Math.min(400,V3D.rad*(ltd/Math.max(1,d))));ltd=d;_v3dUpdateCam();}},{passive:false});
   canvas.addEventListener('touchend',()=>{drag=false;});
+  // 3-touch: reset camera la pozitia initiala
+  canvas.addEventListener('touchstart',e=>{
+    if(e.touches.length===3){ e.preventDefault(); _v3dResetCam(); }
+  },{passive:false});
   V3D._cleanup=()=>{ window.removeEventListener('mousemove',mm); window.removeEventListener('mouseup',mu); };
 }
 
