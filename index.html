@@ -1371,14 +1371,29 @@ canvas#c2d{width:100%;height:100%;display:block}
 
   // Fix Safari iOS: onclick inline nu functioneaza pe butoane generate dinamic
   // Adauga touch event delegation pe document pentru aedis-fn-btn
+  // Touch delegation pentru butoane generate dinamic (Safari iOS fix)
+  // Acopera: fn-btn (functiuni AEDIS), aedis-dim-btn, ptab (tabs panel)
   document.addEventListener('touchend', function(e){
-    const btn = e.target.closest('.aedis-fn-btn');
+    const btn = e.target.closest('.aedis-fn-btn, .aedis-dim-btn, .ptab, [data-touch-fn]');
     if(!btn) return;
+    // Verifica daca e un scroll si nu un tap (nu face nimic daca a miscat)
     e.preventDefault();
-    // Extrage onclick si executa
     const oc = btn.getAttribute('onclick');
     if(oc){
-      try{ new Function(oc)(); }catch(err){ console.warn('fn-btn touch:', err); }
+      try{
+        // eval are acces la toate variabilele globale (window scope)
+        // in contrast cu new Function() care e izolat
+        const fn = new Function('AEDIS','S','_v3dRebuildFast','aedisRender','renderAll',
+          `"use strict"; ${oc}`,
+        );
+        fn(
+          window.AEDIS, window.S,
+          window._v3dRebuildFast, window.aedisRender, window.renderAll
+        );
+      }catch(err){
+        // Fallback: eval direct
+        try{ window.eval(oc); }catch(e2){ console.warn('fn-btn touch fallback:', e2.message); }
+      }
     }
   }, {passive:false});
 })();

@@ -368,7 +368,10 @@ function aedisOpen3DViewer(){
   if(ov) ov.remove();
   ov = document.createElement('div');
   ov.id = 'aedis-3d-viewer-overlay';
-  ov.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;background:#0a0e1a;display:flex;flex-direction:column;overflow:hidden;isolation:isolate';
+  // Pe mobil: viewer fullscreen deasupra bottom nav
+  const _isMobV = window.innerWidth < 841;
+  ov.style.cssText = `position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;background:#0a0e1a;display:flex;flex-direction:column;overflow:hidden;isolation:isolate;padding-bottom:${_isMobV?'env(safe-area-inset-bottom,0px)':'0'}`;
+
   document.body.appendChild(ov);
 
   const niv = AEDIS.corpuri[0]?.niv||4;
@@ -408,30 +411,44 @@ function aedisOpen3DViewer(){
   })();
 
   ov.innerHTML = `
-    <!-- TOPBAR VIEWER -->
-    <div style="background:#07101e;border-bottom:1px solid rgba(139,92,246,.25);padding:7px 10px;display:flex;align-items:center;gap:6px;flex-shrink:0;flex-wrap:wrap;position:relative;z-index:2">
-      <div style="font-size:12px;font-weight:800;color:#a78bfa;flex-shrink:0;display:flex;align-items:center;gap:5px">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" style="width:16px;height:16px"><defs><linearGradient id="vlbg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1e2c42"/><stop offset="1" stop-color="#070d16"/></linearGradient><linearGradient id="vlg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe08a"/><stop offset="0.5" stop-color="#d69e36"/><stop offset="1" stop-color="#9b641d"/></linearGradient></defs><rect width="1024" height="1024" rx="210" fill="url(#vlbg)"/><path d="M180 280h260l135 232-135 232H180l150-232z" fill="#f6f8fc"/><path d="M610 282h235L710 485H540z" fill="url(#vlg)"/><path d="M540 539h170l135 203H610z" fill="url(#vlg)"/></svg>
-        Urban3D
+    <!-- TOPBAR VIEWER — responsive mobil/desktop -->
+    <div id="v3d-topbar" style="background:#07101e;border-bottom:1px solid rgba(139,92,246,.25);padding:6px 8px;display:flex;flex-direction:column;gap:5px;flex-shrink:0;position:relative;z-index:2">
+      <!-- Rand 1: titlu + close -->
+      <div style="display:flex;align-items:center;gap:6px">
+        <div style="font-size:11px;font-weight:800;color:#a78bfa;flex-shrink:0;display:flex;align-items:center;gap:4px">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" style="width:14px;height:14px"><defs><linearGradient id="vlbg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1e2c42"/><stop offset="1" stop-color="#070d16"/></linearGradient><linearGradient id="vlg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe08a"/><stop offset="0.5" stop-color="#d69e36"/><stop offset="1" stop-color="#9b641d"/></linearGradient></defs><rect width="1024" height="1024" rx="210" fill="url(#vlbg)"/><path d="M180 280h260l135 232-135 232H180l150-232z" fill="#f6f8fc"/><path d="M610 282h235L710 485H540z" fill="url(#vlg)"/><path d="M540 539h170l135 203H610z" fill="url(#vlg)"/></svg>
+          Urban3D
+        </div>
+        <div style="flex:1"></div>
+        <button onclick="document.getElementById('aedis-3d-viewer-overlay').remove();_v3dCleanup()"
+          style="background:rgba(139,92,246,.2);color:#a78bfa;border:1px solid rgba(139,92,246,.4);border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;touch-action:manipulation;min-height:36px">✕ Închide</button>
       </div>
-      <select id="v3d-light" onchange="_v3dLight(this.value)" style="background:#0f172a;color:#e2e8f0;border:1px solid rgba(255,255,255,.12);border-radius:7px;padding:3px 7px;font-size:10px;flex-shrink:0">
-        <option value="day">☀ Zi</option>
-        <option value="golden">🌅 Golden</option>
-        <option value="overcast">☁ Înnor.</option>
-        <option value="night">🌙 Noapte</option>
-      </select>
-      <select id="v3d-ctx" onchange="_v3dCtxViz(this.value)" style="background:#0f172a;color:#e2e8f0;border:1px solid rgba(255,255,255,.12);border-radius:7px;padding:3px 7px;font-size:10px;flex-shrink:0">
-        <option value="show">Context</option>
-        <option value="wire">Wireframe</option>
-        <option value="hide">Ascunde</option>
-      </select>
-      <button onclick="_v3dResetCam()" title="Reset cameră" style="background:rgba(255,255,255,.05);color:#94a3b8;border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:3px 9px;font-size:11px;cursor:pointer;flex-shrink:0">⌂</button>
-      <button onclick="V3D.rad=Math.max(V3D.rad*0.65,8);_v3dUpdateCam()" title="Zoom in" style="background:rgba(59,130,246,.1);color:#60a5fa;border:1px solid rgba(59,130,246,.2);border-radius:7px;padding:3px 9px;font-size:13px;cursor:pointer;flex-shrink:0">＋</button>
-      <button onclick="V3D.rad=Math.min(V3D.rad*1.4,300);_v3dUpdateCam()" title="Zoom out" style="background:rgba(59,130,246,.1);color:#60a5fa;border:1px solid rgba(59,130,246,.2);border-radius:7px;padding:3px 9px;font-size:13px;cursor:pointer;flex-shrink:0">－</button>
-      <button id="v3d-dist-btn" onclick="_v3dToggleDistances()" title="Toggle distanțe vecini" style="background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.3);border-radius:7px;padding:3px 9px;font-size:11px;cursor:pointer;flex-shrink:0">📏</button>
-      <button id="v3d-legend-btn" onclick="_v3dToggleLotLegend()" title="Legendă tipuri lotizare" style="background:rgba(167,139,250,.1);color:#a78bfa;border:1px solid rgba(167,139,250,.3);border-radius:7px;padding:3px 9px;font-size:11px;cursor:pointer;flex-shrink:0;display:none">🎨</button>
-      <div style="flex:1"></div>
-      <button onclick="document.getElementById('aedis-3d-viewer-overlay').remove();_v3dCleanup()" style="background:rgba(20,30,60,.9);color:#a78bfa;border:1px solid rgba(139,92,246,.4);border-radius:8px;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0">✕ Închide</button>
+      <!-- Rand 2: controale — scroll orizontal pe mobil -->
+      <div style="display:flex;align-items:center;gap:5px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px">
+        <select id="v3d-light" onchange="_v3dLight(this.value)"
+          style="background:#0f172a;color:#e2e8f0;border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:5px 8px;font-size:11px;flex-shrink:0;min-height:36px;touch-action:manipulation">
+          <option value="day">☀ Zi</option>
+          <option value="golden">🌅 Golden</option>
+          <option value="overcast">☁ Înnor.</option>
+          <option value="night">🌙 Noapte</option>
+        </select>
+        <select id="v3d-ctx" onchange="_v3dCtxViz(this.value)"
+          style="background:#0f172a;color:#e2e8f0;border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:5px 8px;font-size:11px;flex-shrink:0;min-height:36px;touch-action:manipulation">
+          <option value="show">🏙 Context</option>
+          <option value="wire">〓 Wireframe</option>
+          <option value="hide">✕ Ascunde</option>
+        </select>
+        <button onclick="_v3dResetCam()" title="Reset cameră"
+          style="background:rgba(255,255,255,.06);color:#94a3b8;border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:5px 11px;font-size:16px;cursor:pointer;flex-shrink:0;min-height:36px;touch-action:manipulation">⌂</button>
+        <button onclick="V3D.rad=Math.max(V3D.rad*0.65,8);_v3dUpdateCam()" title="Zoom in"
+          style="background:rgba(59,130,246,.12);color:#60a5fa;border:1px solid rgba(59,130,246,.25);border-radius:8px;padding:5px 13px;font-size:16px;cursor:pointer;flex-shrink:0;min-height:36px;touch-action:manipulation">＋</button>
+        <button onclick="V3D.rad=Math.min(V3D.rad*1.4,300);_v3dUpdateCam()" title="Zoom out"
+          style="background:rgba(59,130,246,.12);color:#60a5fa;border:1px solid rgba(59,130,246,.25);border-radius:8px;padding:5px 13px;font-size:16px;cursor:pointer;flex-shrink:0;min-height:36px;touch-action:manipulation">－</button>
+        <button id="v3d-dist-btn" onclick="_v3dToggleDistances()" title="Distanțe vecini"
+          style="background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.3);border-radius:8px;padding:5px 11px;font-size:14px;cursor:pointer;flex-shrink:0;min-height:36px;touch-action:manipulation">📏</button>
+        <button id="v3d-legend-btn" onclick="_v3dToggleLotLegend()" title="Legendă lotizare"
+          style="background:rgba(167,139,250,.1);color:#a78bfa;border:1px solid rgba(167,139,250,.3);border-radius:8px;padding:5px 11px;font-size:14px;cursor:pointer;flex-shrink:0;min-height:36px;touch-action:manipulation;display:none">🎨</button>
+      </div>
     </div>
 
     <!-- CANVAS -->
