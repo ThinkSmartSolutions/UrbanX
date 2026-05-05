@@ -612,19 +612,45 @@ function _v3dBuild(ap){
 
   // Renderer
   const r = new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:'high-performance'});
-  r.setSize(W,H); r.setPixelRatio(Math.min(devicePixelRatio,1.5)); // 1.5 max — Retina ok, fără suprasarcină GPU
-  r.shadowMap.enabled=true; r.shadowMap.type=THREE.PCFShadowMap; // PCFSoft→PCF: ~30% mai rapid, vizual aproape identic
-  r.toneMapping=THREE.ACESFilmicToneMapping; r.toneMappingExposure=1.65;
+  r.setSize(W,H);
+  r.setPixelRatio(Math.min(devicePixelRatio,1.5));
+  r.shadowMap.enabled=true;
+  r.shadowMap.type=THREE.PCFSoftShadowMap; // PCFSoft: umbre cu margini mai moi = mai realist
+  r.toneMapping=THREE.ACESFilmicToneMapping;
+  r.toneMappingExposure=1.9; // mai mult contrast
+  r.outputEncoding=THREE.sRGBEncoding||THREE.LinearEncoding; // culori mai precise
   V3D.r=r;
 
   // Scene
   const scene=new THREE.Scene();
-  scene.background=new THREE.Color('#c8dff5');
-  scene.fog=new THREE.FogExp2('#c8dff5',0.0008);
+  scene.fog=new THREE.FogExp2('#c8dff5',0.0005);
+
+  // Sky gradient procesuală — mult mai realista decat culoare plata
+  (()=>{
+    const skyCanvas=document.createElement('canvas');
+    skyCanvas.width=2; skyCanvas.height=512;
+    const skyCtx=skyCanvas.getContext('2d');
+    const grad=skyCtx.createLinearGradient(0,0,0,512);
+    // Zi: gradient natural cer
+    grad.addColorStop(0,'#1a6db5');   // cer profund sus
+    grad.addColorStop(0.4,'#5ba3d4'); // cer mediu
+    grad.addColorStop(0.75,'#a8cfea'); // orizont superior
+    grad.addColorStop(0.9,'#ddeef7'); // orizont aproape
+    grad.addColorStop(1,'#e8f4fa');   // orizont jos
+    skyCtx.fillStyle=grad;
+    skyCtx.fillRect(0,0,2,512);
+    const skyTex=new THREE.CanvasTexture(skyCanvas);
+    skyTex.mapping=THREE.UVMapping;
+    scene.background=skyTex;
+    scene._skyCanvas=skyCanvas;
+    scene._skyCtx=skyCtx;
+    scene._skyTex=skyTex;
+  })();
   V3D.scene=scene;
 
   // Camera
-  const cam=new THREE.PerspectiveCamera(45,W/H,0.5,800);
+  // FOV 40° = perspectiva arhitecturala (mai putin deformare decat 60°)
+  const cam=new THREE.PerspectiveCamera(40,W/H,0.3,1200);
   V3D.cam=cam;
 
   // Watermark UrbanX în viewer (overlay HTML deasupra canvas)
@@ -651,29 +677,73 @@ function _v3dBuild(ap){
   // Lighting — zi
   _v3dApplyLight('day',THREE,scene,r);
 
-  // Ground procesuală pavaj
+  // Ground realist cu 3 straturi: iarba (departe), asfalt urban (aproape), pavaj trotuar
   (()=>{
-    const cv2=document.createElement('canvas'); cv2.width=256; cv2.height=256;
-    const gctx=cv2.getContext('2d');
-    gctx.fillStyle='#6a8a9a'; gctx.fillRect(0,0,256,256);
-    gctx.strokeStyle='#556e7e'; gctx.lineWidth=1;
-    [32,64,96,128,160,192,224].forEach(v=>{
-      gctx.beginPath();gctx.moveTo(v,0);gctx.lineTo(v,256);gctx.stroke();
-      gctx.beginPath();gctx.moveTo(0,v);gctx.lineTo(256,v);gctx.stroke();
-    });
-    for(let n=0;n<400;n++){
-      gctx.fillStyle=`rgba(255,255,255,${Math.random()*0.03})`;
-      gctx.fillRect(Math.random()*256,Math.random()*256,1.5,1.5);
+    // 1. Iarba/teren natural — fundal larg
+    const cvGrass=document.createElement('canvas'); cvGrass.width=512; cvGrass.height=512;
+    const gGrass=cvGrass.getContext('2d');
+    gGrass.fillStyle='#3d5a28'; gGrass.fillRect(0,0,512,512);
+    // Variatie de culoare naturala
+    for(let i=0;i<8000;i++){
+      const x=Math.random()*512, y=Math.random()*512;
+      const v=Math.random();
+      gGrass.fillStyle=v>0.5?`rgba(80,110,45,${v*0.25})`:`rgba(20,40,10,${v*0.2})`;
+      gGrass.fillRect(x,y,2+Math.random()*3,2);
     }
-    const gTex=new THREE.CanvasTexture(cv2);
-    gTex.wrapS=gTex.wrapT=THREE.RepeatWrapping; gTex.repeat.set(20,20);
-    const gMat=new THREE.MeshStandardMaterial({map:gTex,roughness:0.90,metalness:0.02,envMapIntensity:0.2});
-    const g=new THREE.Mesh(new THREE.PlaneGeometry(600,600),gMat);
-    g.rotation.x=-Math.PI/2; g.position.y=-0.05; g.receiveShadow=true; scene.add(g);
+    const tGrass=new THREE.CanvasTexture(cvGrass);
+    tGrass.wrapS=tGrass.wrapT=THREE.RepeatWrapping; tGrass.repeat.set(40,40);
+    const mGrass=new THREE.MeshStandardMaterial({map:tGrass,roughness:0.95,metalness:0});
+    const gBase=new THREE.Mesh(new THREE.PlaneGeometry(800,800),mGrass);
+    gBase.rotation.x=-Math.PI/2; gBase.position.y=-0.08; gBase.receiveShadow=true; scene.add(gBase);
+
+    // 2. Asfalt urban — zona principala (200x200 in jurul parcelei)
+    const cvAsf=document.createElement('canvas'); cvAsf.width=512; cvAsf.height=512;
+    const gA=cvAsf.getContext('2d');
+    gA.fillStyle='#2a2a2e'; gA.fillRect(0,0,512,512);
+    // Granule asfalt
+    for(let i=0;i<3000;i++){
+      const x=Math.random()*512, y=Math.random()*512;
+      const c=Math.floor(35+Math.random()*25);
+      gA.fillStyle=`rgb(${c},${c},${c+4})`;
+      gA.fillRect(x,y,1+Math.random()*2,1+Math.random()*2);
+    }
+    // Linii parcari subtile
+    gA.strokeStyle='rgba(255,255,255,0.08)'; gA.lineWidth=1;
+    for(let i=32;i<512;i+=64){
+      gA.beginPath(); gA.moveTo(i,0); gA.lineTo(i,512); gA.stroke();
+    }
+    const tAsf=new THREE.CanvasTexture(cvAsf);
+    tAsf.wrapS=tAsf.wrapT=THREE.RepeatWrapping; tAsf.repeat.set(14,14);
+    const mAsf=new THREE.MeshStandardMaterial({map:tAsf,roughness:0.92,metalness:0.04});
+    const gUrb=new THREE.Mesh(new THREE.PlaneGeometry(220,220),mAsf);
+    gUrb.rotation.x=-Math.PI/2; gUrb.position.y=-0.04; gUrb.receiveShadow=true; scene.add(gUrb);
+
+    // 3. Pavaj trotuar — textura dale beton
+    const cvPav=document.createElement('canvas'); cvPav.width=256; cvPav.height=256;
+    const gP=cvPav.getContext('2d');
+    gP.fillStyle='#b8bfbf'; gP.fillRect(0,0,256,256);
+    // Dale 32x16
+    for(let row=0;row<16;row++) for(let col=0;col<8;col++){
+      const off=(row%2)*16;
+      const x=col*32+off, y=row*16;
+      const v=0.88+Math.random()*0.18;
+      gP.fillStyle=`hsl(200,4%,${Math.floor(v*100)}%)`;
+      gP.fillRect(x+1,y+1,30,14);
+      // Rosturi
+      gP.fillStyle='#8a9090';
+      gP.fillRect(x,y,32,1); gP.fillRect(x,y,1,16);
+    }
+    const tPav=new THREE.CanvasTexture(cvPav);
+    tPav.wrapS=tPav.wrapT=THREE.RepeatWrapping; tPav.repeat.set(8,8);
+    const mPav=new THREE.MeshStandardMaterial({map:tPav,roughness:0.85,metalness:0.01});
+    // Trotuar inel in jurul parcelei (donut shape aprox cu 2 mesh-uri)
+    const gTrot=new THREE.Mesh(new THREE.PlaneGeometry(180,180),mPav);
+    gTrot.rotation.x=-Math.PI/2; gTrot.position.y=-0.02; gTrot.receiveShadow=true; scene.add(gTrot);
   })();
-  // Grid subtil
-  const grid=new THREE.GridHelper(400,100,'#4a6a80','#3a5060');
-  grid.material.opacity=0.35; grid.material.transparent=true;
+
+  // Grid subtil de orientare
+  const grid=new THREE.GridHelper(300,60,'#3a4a56','#2a3840');
+  grid.material.opacity=0.18; grid.material.transparent=true;
   grid.position.y=0.01; scene.add(grid);
 
   // Coordonate locale — centrat pe parcela activa (sau pe centrul lotizarii daca multi-parcel explicit)
@@ -724,11 +794,35 @@ function _v3dBuild(ap){
       const fring=f.geometry.type==='Polygon'?f.geometry.coordinates[0]:f.geometry.coordinates[0][0];
       const pts=fring.slice(0,-1).map(toLoc);
       if(pts.length<3) return;
-      const mat=new THREE.MeshStandardMaterial({color:col,roughness:0.75,metalness:0.05,
+      // PBR variat pe functiune pentru context realist
+      const pbrCtx={
+        residential:{roughness:0.82,metalness:0.03},
+        apartments:{roughness:0.72,metalness:0.08},
+        commercial:{roughness:0.35,metalness:0.45},
+        office:{roughness:0.22,metalness:0.60},
+        retail:{roughness:0.40,metalness:0.30},
+        industrial:{roughness:0.90,metalness:0.12},
+        hotel:{roughness:0.50,metalness:0.25},
+      }[fn]||{roughness:0.78,metalness:0.06};
+
+      const mat=new THREE.MeshStandardMaterial({
+        color:col, ...pbrCtx,
         emissive:isNight2?new THREE.Color(0.02,0.04,0.10):new THREE.Color(0,0,0),
-        emissiveIntensity:isNight2?0.5:0});
+        emissiveIntensity:isNight2?0.5:0
+      });
       const mesh=_v3dPrism(THREE,pts,0,h,mat);
-      if(mesh){ mesh.castShadow=true; mesh.receiveShadow=true; scene.add(mesh); V3D.ctx.push(mesh); }
+      if(mesh){
+        mesh.castShadow=true; mesh.receiveShadow=true; scene.add(mesh); V3D.ctx.push(mesh);
+
+        // Parapet mic pe acoperis (da volum si realim)
+        try{
+          const roofCols={residential:'#283840',commercial:'#1a2030',office:'#151e2e',default:'#202830'};
+          const rc=roofCols[fn]||roofCols.default;
+          const rMat=new THREE.MeshStandardMaterial({color:rc,roughness:0.88,metalness:0.08});
+          const rMesh=_v3dPrism(THREE,pts,h,h+Math.min(0.8,h*0.05),rMat);
+          if(rMesh){ scene.add(rMesh); V3D.ctx.push(rMesh); }
+        }catch(e){}
+      }
     }catch(e){}
   });
 
@@ -861,21 +955,18 @@ function _v3dBuild(ap){
     scene.add(new THREE.LineLoop(lg,new THREE.LineBasicMaterial({color:'#00e5b4',opacity:0.7,transparent:true})));
   }catch(e){}
 
-  // Marcaj parcelă pe sol
-  // Daca e lotizare activa: suprafata minima (loturile proprii arata limitele)
-  // Daca e AEDIS single: suprafata normala (arata zona de interventie)
+  // Marcaj parcelă pe sol — NUMAI pentru AEDIS (nu lotizare)
+  // La lotizare: loturile proprii arata limitele, parcela de baza nu e necesara
   try{
     const _hasLotizare=(S.vol._lastFeats||[]).some(f=>f.properties?.isLotizare);
-    const pts=ring0.map(toLoc);
-    const shape=new THREE.Shape(); shape.moveTo(pts[0][0],pts[0][1]);
-    pts.slice(1,-1).forEach(([x,z])=>shape.lineTo(x,z)); shape.closePath();
-    const geo=new THREE.ShapeGeometry(shape);
-    // Lotizare: suprafata foarte transparenta (0.06) - nu acoperi loturile
-    // AEDIS: suprafata mai vizibila (0.82) - arata parcela
-    const surfOpacity = _hasLotizare ? 0.06 : 0.82;
-    const surfColor = _hasLotizare ? '#243050' : '#1a2535';
-    const mat=new THREE.MeshStandardMaterial({color:surfColor,roughness:0.97,metalness:0,transparent:true,opacity:surfOpacity,side:THREE.DoubleSide});
-    const m2=new THREE.Mesh(geo,mat); m2.rotation.x=-Math.PI/2; m2.position.y=0.03; scene.add(m2);
+    if(!_hasLotizare){
+      const pts=ring0.map(toLoc);
+      const shape=new THREE.Shape(); shape.moveTo(pts[0][0],pts[0][1]);
+      pts.slice(1,-1).forEach(([x,z])=>shape.lineTo(x,z)); shape.closePath();
+      const geo=new THREE.ShapeGeometry(shape);
+      const mat=new THREE.MeshStandardMaterial({color:'#1a2535',roughness:0.97,metalness:0,transparent:true,opacity:0.82,side:THREE.DoubleSide});
+      const m2=new THREE.Mesh(geo,mat); m2.rotation.x=-Math.PI/2; m2.position.y=0.03; scene.add(m2);
+    }
 
     // Curtea interioară: marcaj verde deschis pe sol dacă există
     if(AEDIS.forma==='curte'){
@@ -945,10 +1036,24 @@ function _v3dBuild(ap){
   });
   obs.observe(canvas); V3D._obs=obs;
 
-  // Render loop — always-render (dirty flag cauza black screen la build async)
-  // Performanța e asigurată de reducerea PointLights (-66%) și pixelRatio 1.5
-  const render=()=>{ V3D.af=requestAnimationFrame(render); if(V3D.r&&V3D.scene&&V3D.cam) V3D.r.render(V3D.scene,V3D.cam); };
-  render(); // pornește loop-ul RAF
+  // Render loop cu smooth camera damping (miscare cinematica fluida)
+  const DAMP=0.11; // inertie camera: 0=instant, 1=blocat
+  let _thT=V3D.th, _phT=V3D.ph, _radT=V3D.rad; // targets
+  window._v3dSetCamTarget=(th,ph,rad)=>{ _thT=th; _phT=ph; _radT=rad; };
+  const render=()=>{
+    V3D.af=requestAnimationFrame(render);
+    if(!V3D.r||!V3D.scene||!V3D.cam) return;
+    // Smooth damp spre target
+    const dth=Math.abs(_thT-V3D.th), dph=Math.abs(_phT-V3D.ph), dr=Math.abs(_radT-V3D.rad);
+    if(dth>0.0003||dph>0.0003||dr>0.02){
+      V3D.th+=(_thT-V3D.th)*DAMP;
+      V3D.ph+=(_phT-V3D.ph)*DAMP;
+      V3D.rad+=(_radT-V3D.rad)*DAMP;
+      _v3dUpdateCam();
+    }
+    V3D.r.render(V3D.scene,V3D.cam);
+  };
+  render();
   // Marchează dirty la orice interacțiune cu canvas (orbit, zoom, drag)
   const _markDirty=()=>{ V3D._dirty=4; };
   canvas.addEventListener('pointerdown',_markDirty,{passive:true});
@@ -1640,8 +1745,18 @@ window._v3dToggleLotLegend = function _v3dToggleLotLegend(){
     if(!f.properties?.isLotizare) return;
     const tip = f.properties?.lotTip || f.properties?.tip;
     if(!tip || tipuriVizibile[tip]) return;
+    // Culoarea exacta din feature (cum apare pe harta/3D) nu din definitie
+    const colorFromFeat = f.properties?.color;
+    const borderFromFeat = f.properties?.borderColor;
     const tDef = (typeof _LOT !== 'undefined') ? _LOT.tipuri?.[tip] : null;
-    if(tDef) tipuriVizibile[tip] = tDef;
+    if(tDef){
+      // Merge definitia cu culoarea actuala din feature
+      tipuriVizibile[tip] = {
+        ...tDef,
+        color: colorFromFeat || tDef.color,
+        borderColor: borderFromFeat || tDef.borderColor
+      };
+    }
   });
 
   const container = document.getElementById('aedis-3d-viewer-overlay');
@@ -2302,147 +2417,149 @@ function _v3dAddUrbanLife(THREE, scene, ring0, toLoc, isNight){
       addSprite(bici,bix,0,biz,1.2,1.4);
     }
 
-    // ── Mașini 3D reale (BoxGeometry) cu faruri ─────────────────────────────
+    // ── Mașini 3D îmbunătățite (sedan + SUV + camioneta) ──────────────────
     const carPalette=[
-      {body:'#cc2222',glass:'#60a0c0',wheel:'#222',trim:'#aaa'},
-      {body:'#1a3aaa',glass:'#80b0d0',wheel:'#333',trim:'#c0c8d8'},
-      {body:'#1a7a3a',glass:'#70b090',wheel:'#222',trim:'#b0c0b0'},
-      {body:'#888898',glass:'#90b0c8',wheel:'#222',trim:'#c8c8d0'},
-      {body:'#111118',glass:'#4878a0',wheel:'#181818',trim:'#606070'},
-      {body:'#b07010',glass:'#a0c0a0',wheel:'#222',trim:'#d0a840'},
+      {body:'#cc2a1a',glass:'#4a8aaa',wheel:'#1a1a1a',trim:'#c0c0c0'},
+      {body:'#1a3aaa',glass:'#7090b8',wheel:'#1a1a1a',trim:'#aaaaaa'},
+      {body:'#2a2a2a',glass:'#3060a0',wheel:'#1a1a1a',trim:'#888888'},
+      {body:'#e8e0d0',glass:'#5080a0',wheel:'#222222',trim:'#dddddd'},
+      {body:'#1a6040',glass:'#406880',wheel:'#1a1a1a',trim:'#909090'},
+      {body:'#8a4a20',glass:'#4a7090',wheel:'#222222',trim:'#b0a090'},
+      {body:'#383838',glass:'#2a5070',wheel:'#111111',trim:'#707070'},
     ];
-    for(let i=0;i<4;i++){
-      const [cax,caz]=safePt(lw*0.5+6,lw*0.5+22);
-      const cp=carPalette[i%carPalette.length];
-      const carAngle=Math.random()*Math.PI*2;
+    const carTypes=['sedan','suv','compact'];
+    const carCount=Math.min(7,3+Math.floor(Math.random()*4));
+    for(let ci=0;ci<carCount;ci++){
+      const [cx3,cz3]=safePt(lw*0.5+5, lw*0.5+24);
+      const cp=carPalette[ci%carPalette.length];
+      const ct=carTypes[ci%3];
       const carGrp=new THREE.Group();
+      const bMat=new THREE.MeshStandardMaterial({color:cp.body,roughness:0.28,metalness:0.72});
+      const gMat=new THREE.MeshStandardMaterial({color:cp.glass,roughness:0.08,metalness:0.85,transparent:true,opacity:0.75});
+      const wMat=new THREE.MeshStandardMaterial({color:cp.wheel,roughness:0.82,metalness:0.15});
+      const tMat=new THREE.MeshStandardMaterial({color:cp.trim,roughness:0.55,metalness:0.60});
 
-      // Caroserie principală (sedan shape: 2 box-uri)
-      const bodyMat=new THREE.MeshStandardMaterial({color:new THREE.Color(cp.body),roughness:0.25,metalness:0.75});
-      const cabinMat=new THREE.MeshStandardMaterial({color:new THREE.Color(cp.body),roughness:0.28,metalness:0.70});
-      const glassMat2=new THREE.MeshStandardMaterial({color:new THREE.Color(cp.glass),roughness:0.05,metalness:0.8,transparent:true,opacity:0.7,
-        emissive:isNight?new THREE.Color(0.1,0.15,0.25):new THREE.Color(0,0,0.02),emissiveIntensity:isNight?0.8:0.1});
-      const wheelMat=new THREE.MeshStandardMaterial({color:new THREE.Color(cp.wheel),roughness:0.85,metalness:0.1});
-      const hubMat=new THREE.MeshStandardMaterial({color:new THREE.Color(cp.trim),roughness:0.2,metalness:0.9});
-      const headlightMat=new THREE.MeshStandardMaterial({color:new THREE.Color('#fffde0'),roughness:0.05,metalness:0.3,
-        emissive:isNight?new THREE.Color(0.9,0.85,0.5):new THREE.Color(0.05,0.05,0.02),emissiveIntensity:isNight?4.0:0.2});
-      const taillightMat=new THREE.MeshStandardMaterial({color:new THREE.Color('#ff2020'),roughness:0.1,metalness:0.2,
-        emissive:isNight?new THREE.Color(0.8,0.02,0.02):new THREE.Color(0.1,0,0),emissiveIntensity:isNight?3.5:0.1});
+      // Dimensiuni per tip
+      const dims={sedan:{L:4.2,W:1.8,H:1.45,rH:0.85},suv:{L:4.5,W:1.95,H:1.75,rH:0.95},compact:{L:3.7,W:1.7,H:1.35,rH:0.80}};
+      const d=dims[ct];
 
-      // Corp jos (caroserie)
-      const body=new THREE.Mesh(new THREE.BoxGeometry(3.8,0.7,1.8),bodyMat);
-      body.position.set(0,0.55,0); carGrp.add(body);
-      // Habitaclu (mai îngust și mai înalt)
-      const cabin=new THREE.Mesh(new THREE.BoxGeometry(2.2,0.65,1.65),cabinMat);
-      cabin.position.set(-0.2,1.12,0); carGrp.add(cabin);
-      // Geamuri habitaclu
-      const winF=new THREE.Mesh(new THREE.BoxGeometry(1.0,0.50,0.03),glassMat2);
-      winF.position.set(0.58,1.10,0.84); carGrp.add(winF);
-      const winR=new THREE.Mesh(new THREE.BoxGeometry(0.85,0.45,0.03),glassMat2);
-      winR.position.set(-0.55,1.10,0.84); carGrp.add(winR);
-      const winB=new THREE.Mesh(new THREE.BoxGeometry(0.03,0.48,1.58),glassMat2);
-      winB.position.set(-1.30,1.10,0); carGrp.add(winB);
-      // Faruri față
-      const hlL=new THREE.Mesh(new THREE.BoxGeometry(0.03,0.20,0.30),headlightMat);
-      hlL.position.set(1.92,0.65,0.55); carGrp.add(hlL);
-      const hlR=new THREE.Mesh(new THREE.BoxGeometry(0.03,0.20,0.30),headlightMat);
-      hlR.position.set(1.92,0.65,-0.55); carGrp.add(hlR);
-      // Stopuri spate
-      const tlL=new THREE.Mesh(new THREE.BoxGeometry(0.03,0.18,0.28),taillightMat);
-      tlL.position.set(-1.92,0.68,0.55); carGrp.add(tlL);
-      const tlR=new THREE.Mesh(new THREE.BoxGeometry(0.03,0.18,0.28),taillightMat);
-      tlR.position.set(-1.92,0.68,-0.55); carGrp.add(tlR);
-      // Roți (4)
-      [[1.1,0.30,1.0],[-1.1,0.30,1.0],[1.1,0.30,-1.0],[-1.1,0.30,-1.0]].forEach(([wx2,wy,wz2])=>{
-        const tyre=new THREE.Mesh(new THREE.CylinderGeometry(0.30,0.30,0.22,14),wheelMat);
-        tyre.rotation.z=Math.PI/2; tyre.position.set(wx2,wy,wz2); carGrp.add(tyre);
-        const hub=new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.16,0.24,8),hubMat);
-        hub.rotation.z=Math.PI/2; hub.position.set(wx2,wy,wz2); carGrp.add(hub);
+      // Corp principal (bottom)
+      const body=new THREE.Mesh(new THREE.BoxGeometry(d.L,d.H*0.5,d.W),bMat);
+      body.position.y=d.H*0.35; carGrp.add(body);
+
+      // Cabina (top) — trapeziodala simulata cu BoxGeometry mai mica
+      const cab=new THREE.Mesh(new THREE.BoxGeometry(d.L*0.62,d.H*0.45,d.W*0.94),bMat);
+      cab.position.set(-d.L*0.03,d.H*0.78,0); carGrp.add(cab);
+
+      // Geamuri
+      const windF=new THREE.Mesh(new THREE.BoxGeometry(0.05,d.H*0.35,d.W*0.85),gMat);
+      windF.position.set(d.L*0.28,d.H*0.76,0); windF.rotation.y=0; carGrp.add(windF);
+      const windB=new THREE.Mesh(new THREE.BoxGeometry(0.05,d.H*0.32,d.W*0.85),gMat);
+      windB.position.set(-d.L*0.31,d.H*0.74,0); carGrp.add(windB);
+
+      // Geamuri laterale
+      const windSL=new THREE.Mesh(new THREE.BoxGeometry(d.L*0.58,d.H*0.32,0.04),gMat);
+      windSL.position.set(-d.L*0.04,d.H*0.76, d.W*0.47); carGrp.add(windSL);
+      const windSR=windSL.clone(); windSR.position.z=-d.W*0.47; carGrp.add(windSR);
+
+      // Roti (4)
+      [[d.L*0.35,0,d.W*0.5+0.05],[-d.L*0.35,0,d.W*0.5+0.05],
+       [d.L*0.35,0,-d.W*0.5-0.05],[-d.L*0.35,0,-d.W*0.5-0.05]].forEach(([wx,wy,wz])=>{
+        const wheel=new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.3,0.22,10),wMat);
+        wheel.rotation.z=Math.PI/2; wheel.position.set(wx,0.3,wz);
+        carGrp.add(wheel);
+        // Janta simpla
+        const rim=new THREE.Mesh(new THREE.CylinderGeometry(0.18,0.18,0.24,8),tMat);
+        rim.rotation.z=Math.PI/2; rim.position.set(wx,0.3,wz);
+        carGrp.add(rim);
       });
-      // Umbra sub mașina
-      const shadow=new THREE.Mesh(new THREE.PlaneGeometry(4.2,2.2),
-        new THREE.MeshStandardMaterial({color:'#000000',transparent:true,opacity:0.25,roughness:1}));
-      shadow.rotation.x=-Math.PI/2; shadow.position.set(0,0.01,0); carGrp.add(shadow);
 
-      carGrp.position.set(cax,0,caz);
-      carGrp.rotation.y=carAngle;
-      carGrp.castShadow=true; carGrp.receiveShadow=true;
+      // Far fata + spate (emissive noaptea)
+      const lightCol=isNight?'#fff8e0':'#e8e0c8';
+      const rearCol=isNight?'#ff3020':'#c83820';
+      const fLMat=new THREE.MeshStandardMaterial({color:lightCol,emissive:isNight?new THREE.Color(1,0.95,0.7):new THREE.Color(0,0,0),emissiveIntensity:isNight?4:0});
+      const rLMat=new THREE.MeshStandardMaterial({color:rearCol,emissive:isNight?new THREE.Color(1,0.1,0.05):new THREE.Color(0,0,0),emissiveIntensity:isNight?3:0});
+      [[d.L*0.51,d.H*0.3,d.W*0.35,fLMat],[d.L*0.51,d.H*0.3,-d.W*0.35,fLMat],
+       [-d.L*0.51,d.H*0.3,d.W*0.35,rLMat],[-d.L*0.51,d.H*0.3,-d.W*0.35,rLMat]].forEach(([lx,ly,lz,lm])=>{
+        const light=new THREE.Mesh(new THREE.BoxGeometry(0.08,0.12,0.22),lm);
+        light.position.set(lx,ly,lz); carGrp.add(light);
+      });
+
+      // Positionare + rotire aleatorie
+      carGrp.position.set(cx3,0,-cz3);
+      carGrp.rotation.y=Math.random()*Math.PI*2;
+      carGrp.traverse(m=>{if(m.isMesh){m.castShadow=true;m.receiveShadow=true;}});
       scene.add(carGrp);
-
-      // Faruri + stopuri ca PointLight noaptea
-      if(isNight){
-        const fDir=new THREE.Vector3(Math.cos(carAngle),0,Math.sin(carAngle));
-        const fl2=new THREE.PointLight('#fffce0',1.8,14,2);
-        fl2.position.set(cax+fDir.x*2.0,0.65,caz+fDir.z*2.0); scene.add(fl2);
-        const rl2=new THREE.PointLight('#ff1010',0.8,7,2);
-        rl2.position.set(cax-fDir.x*2.0,0.65,caz-fDir.z*2.0); scene.add(rl2);
-      }
     }
-
-    // Bănci — pe trotuar, în afara parcelei
-    const banca=mkTex((ctx,w,h)=>{
-      ctx.clearRect(0,0,w,h);
-      ctx.fillStyle='#8b5e3c';ctx.fillRect(w*.1,h*.4,w*.8,h*.12);ctx.fillRect(w*.1,h*.55,w*.8,h*.08);
-      ctx.fillStyle='#555';ctx.fillRect(w*.12,h*.63,w*.1,h*.3);ctx.fillRect(w*.78,h*.63,w*.1,h*.3);
-      ctx.fillRect(w*.12,h*.35,w*.08,h*.2);ctx.fillRect(w*.8,h*.35,w*.08,h*.2);
-    },48,32);
-    for(let i=0;i<2;i++){
-      const [bnx,bnz]=safePt(lw*0.5+4, lw*0.5+10);
-      addSprite(banca,bnx,0,bnz,1.0,0.5);
-    }
-
-    // ── Felinare 3D ────────────────────────────────────────────────────────
-    const poleMatL=new THREE.MeshStandardMaterial({color:'#556070',roughness:0.6,metalness:0.5});
-    const armMatL=new THREE.MeshStandardMaterial({color:'#445060',roughness:0.6,metalness:0.5});
-    const bulbMat=new THREE.MeshStandardMaterial({color:new THREE.Color(isNight?'#ffee80':'#e0d8c0'),
-      roughness:0.1,metalness:0.2,emissive:new THREE.Color(isNight?0.9:0.1,isNight?0.8:0.08,isNight?0.1:0),
-      emissiveIntensity:isNight?3.0:0.2});
-    for(let i=0;i<3;i++){ // 3 felinare (era 5) — mai puține PointLight-uri noaptea
-      const [fx,fz]=safePt(lw*0.5+2.5,lw*0.5+9);
+    // ── Felinare 3D realiste (stalp + brat + glob) ────────────────────────
+    const felPos=[...Array(8)].map(()=>safePt(lw*0.5+4, lw*0.5+20));
+    felPos.forEach(([fx,fz])=>{
       const fGrp=new THREE.Group();
-      // Stâlp
-      const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.07,4.5,8),poleMatL);
-      pole.position.set(0,2.25,0); fGrp.add(pole);
-      // Braț curbat
-      const arm=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,0.9,6),armMatL);
-      arm.rotation.z=Math.PI/2*0.3; arm.position.set(0.35,4.4,0); fGrp.add(arm);
-      // Corp felinar
-      const lamp=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.14,0.28,8),
-        new THREE.MeshStandardMaterial({color:'#383830',roughness:0.5,metalness:0.6}));
-      lamp.position.set(0.62,4.28,0); fGrp.add(lamp);
-      // Bec
-      const bulb=new THREE.Mesh(new THREE.SphereGeometry(0.09,8,8),bulbMat);
-      bulb.position.set(0.62,4.14,0); fGrp.add(bulb);
-
-      fGrp.position.set(fx,0,fz);
-      fGrp.rotation.y=Math.random()*Math.PI*2;
-      scene.add(fGrp);
-      if(isNight){
-        const pl=new THREE.PointLight('#ffdd66',1.4,18,1.5);
-        pl.position.set(fx+0.62*Math.cos(fGrp.rotation.y),4.3,fz+0.62*Math.sin(fGrp.rotation.y));
-        scene.add(pl);
-      }
-    }
-
-    // ── Arbori simple ─────────────────────────────────────────────────────
-    const trunkMat=new THREE.MeshStandardMaterial({color:'#5a3a1a',roughness:0.9,metalness:0});
-    const foliagePalette=['#2d6b2a','#3a7a30','#255020','#4a8540','#1e5018'];
-    for(let i=0;i<5;i++){
-      const [tx,tz]=safePt(lw*0.5+3,lw*0.5+12);
-      const treeH=3.5+Math.random()*2.5;
-      const treeGrp=new THREE.Group();
-      // Trunchi
-      const trunk=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.18,treeH*0.4,7),trunkMat);
-      trunk.position.set(0,treeH*0.2,0); treeGrp.add(trunk);
-      // Coroana (3 sfere suprapuse)
-      const fCol=foliagePalette[i%foliagePalette.length];
-      const fMat=new THREE.MeshStandardMaterial({color:new THREE.Color(fCol),roughness:0.95,metalness:0});
-      [[0,treeH*0.75,0,1.0],[0.15,treeH*0.6,-0.1,0.8],[-0.1,treeH*0.55,0.15,0.75]].forEach(([ox,oy,oz,r])=>{
-        const sp=new THREE.Mesh(new THREE.SphereGeometry(r,7,7),fMat);
-        sp.position.set(ox,oy,oz); treeGrp.add(sp);
+      const stMat=new THREE.MeshStandardMaterial({color:'#303840',roughness:0.82,metalness:0.35});
+      const glMat=new THREE.MeshStandardMaterial({
+        color:'#fffae8',
+        emissive:isNight?new THREE.Color(1,0.92,0.6):new THREE.Color(0,0,0),
+        emissiveIntensity:isNight?5:0,
+        roughness:0.3,metalness:0.2
       });
+
+      // Stalp vertical
+      const stalp=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.10,7.5,8),stMat);
+      stalp.position.y=3.75; fGrp.add(stalp);
+
+      // Brat orizontal
+      const brat=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,1.8,6),stMat);
+      brat.rotation.z=Math.PI/2; brat.position.set(0.9,7.2,0); fGrp.add(brat);
+
+      // Glob luminos
+      const glob=new THREE.Mesh(new THREE.SphereGeometry(0.28,8,7),glMat);
+      glob.position.set(1.8,7.0,0); fGrp.add(glob);
+
+      // Capac
+      const cap=new THREE.Mesh(new THREE.CylinderGeometry(0.35,0.28,0.18,8),stMat);
+      cap.position.set(1.8,7.32,0); fGrp.add(cap);
+
+      // Lumina PointLight noaptea
+      if(isNight){
+        const pl=new THREE.PointLight('#ffaa30',2.5,25,1.8);
+        pl.position.set(1.8,6.8,0);
+        fGrp.add(pl);
+      }
+
+      fGrp.position.set(fx,0,-fz);
+      fGrp.traverse(m=>{if(m.isMesh)m.castShadow=true;});
+      scene.add(fGrp);
+    });
+    // ── Arbori realisti low-poly (trunchi + coroana multi-sfera) ───────────
+    const foliagePalette=['#2d6b2a','#3a7a30','#255020','#4a8540','#1e5018','#3d7228','#285c18'];
+    const treeCount2=6+Math.floor(Math.random()*5);
+    for(let i=0;i<treeCount2;i++){
+      const [tx,tz]=safePt(lw*0.5+3, lw*0.5+18);
+      const treeH=4+Math.random()*4;
+      const treeGrp=new THREE.Group();
+      const trR=0.10+Math.random()*0.08;
+
+      // Trunchi realist cu variatie de grosime
+      const trMat=new THREE.MeshStandardMaterial({color:'#3d2510',roughness:0.97,metalness:0});
+      const tr=new THREE.Mesh(new THREE.CylinderGeometry(trR*0.7,trR,treeH*0.38,8),trMat);
+      tr.position.set(0,treeH*0.19,0); tr.castShadow=true; treeGrp.add(tr);
+
+      // Coroana: sfera principala + 2-3 secundare (mai organic)
+      const fCol=foliagePalette[i%foliagePalette.length];
+      const fCol2=foliagePalette[(i+2)%foliagePalette.length];
+      const cr=1.2+Math.random()*0.9;
+      const addSphere=(ox,oy,oz,r,col)=>{
+        const sm=new THREE.MeshStandardMaterial({color:col,roughness:0.88,metalness:0});
+        const sp=new THREE.Mesh(new THREE.SphereGeometry(r,8,7),sm);
+        sp.position.set(ox,oy,oz); sp.castShadow=true; sp.receiveShadow=true;
+        treeGrp.add(sp);
+      };
+      addSphere(0, treeH*0.68, 0, cr, fCol);
+      addSphere(cr*0.45, treeH*0.58, -cr*0.2, cr*0.65, fCol2);
+      addSphere(-cr*0.35, treeH*0.62, cr*0.35, cr*0.6, fCol);
+      if(treeH>6) addSphere(0, treeH*0.82, 0, cr*0.5, fCol2);
+
       treeGrp.position.set(tx,0,tz);
-      treeGrp.castShadow=true;
       scene.add(treeGrp);
     }
 
@@ -2583,6 +2700,54 @@ function _v3dAddRoofDetails(THREE, pts2d, base, top, scene, stilKey){
   }catch(e){}
 }
 
+
+// ── Textură procedurală pentru fațade ──────────────────────────────────────
+// Genereaza o textura canvas cu ferestre realistice pe fatada
+function _v3dFacadeTex(THREE, opts={}){
+  const {w=256,h=256,winW=32,winH=44,winCols=4,winRows=4,bgCol='#c8b89a',winCol='#6090c0',glowCol='#8ab0e0',frameCol='#888'} = opts;
+  const cv=document.createElement('canvas'); cv.width=w; cv.height=h;
+  const ctx=cv.getContext('2d');
+  // Fond fatada (tencuiala/beton)
+  ctx.fillStyle=bgCol; ctx.fillRect(0,0,w,h);
+  // Variatie textura fina
+  for(let i=0;i<600;i++){
+    const v=Math.random()*0.08-0.04;
+    ctx.fillStyle=`rgba(${v>0?255:0},${v>0?255:0},${v>0?255:0},${Math.abs(v)})`;
+    ctx.fillRect(Math.random()*w,Math.random()*h,2,2);
+  }
+  // Ferestre
+  const padX=(w-winCols*(winW+8))/2+4;
+  const padY=(h-winRows*(winH+12))/2+6;
+  for(let row=0;row<winRows;row++) for(let col=0;col<winCols;col++){
+    const wx=padX+col*(winW+8), wy=padY+row*(winH+12);
+    // Rama fereastra
+    ctx.fillStyle=frameCol; ctx.fillRect(wx-2,wy-2,winW+4,winH+4);
+    // Geam (cu variatie culoare - unele aprinse)
+    const isLit=Math.random()>0.4;
+    const gc=isLit?glowCol:winCol;
+    ctx.fillStyle=gc; ctx.fillRect(wx,wy,winW,winH);
+    // Reflexie geam (diagonala)
+    const grd=ctx.createLinearGradient(wx,wy,wx+winW*0.5,wy+winH*0.5);
+    grd.addColorStop(0,'rgba(255,255,255,0.15)');
+    grd.addColorStop(0.4,'rgba(255,255,255,0.05)');
+    grd.addColorStop(1,'rgba(255,255,255,0)');
+    ctx.fillStyle=grd; ctx.fillRect(wx,wy,winW,winH);
+    // Toc/glaf
+    ctx.fillStyle='rgba(0,0,0,0.08)'; ctx.fillRect(wx-2,wy+winH+2,winW+4,2);
+  }
+  const tex=new THREE.CanvasTexture(cv);
+  tex.wrapS=THREE.ClampToEdgeWrapping;
+  tex.wrapT=THREE.ClampToEdgeWrapping;
+  return tex;
+}
+
+// Cache global pentru texturi fatade (evita re-generare)
+const _v3dFacadeCache={};
+function _v3dGetFacadeTex(THREE,key,opts){
+  if(!_v3dFacadeCache[key]) _v3dFacadeCache[key]=_v3dFacadeTex(THREE,opts);
+  return _v3dFacadeCache[key];
+}
+
 // ── Materiale corp îmbunătățite (MeshStandardMaterial cu PBR) ──────────────
 
 function _v3dMat(THREE, color, opts={}){
@@ -2635,6 +2800,9 @@ function _v3dMatFloor(THREE, colHex, floorIdx, stil, cache){
     try{ baseColor = stilDef.etajColor(null, floorIdx, niv); }catch(e){}
   }
 
+  // Textura procedurala fatada pentru stiluri clasice/rezidentiale
+  const usesFacadeTex = ['clasic','adaptat_context','minimalist','industrial'].includes(stil);
+
   // PBR distinct per stil — asta face diferența vizuală mare
   const pbr = {
     modern:          {roughness: isCW?0.06:0.22, metalness: isCW?0.72:0.18},
@@ -2648,11 +2816,28 @@ function _v3dMatFloor(THREE, colHex, floorIdx, stil, cache){
   }[stil] || {roughness:0.50, metalness:0.12};
 
   const mat=_v3dMat(THREE, baseColor, pbr);
+
+  // Textura fatada pentru stiluri clasice (ferestre + variatie tencuiala)
+  if(usesFacadeTex){
+    try{
+      const facadeColors={
+        clasic:{bgCol:'#c8b090',winCol:'#5878a0',glowCol:'#7898c0',frameCol:'#806050'},
+        adaptat_context:{bgCol:'#b8a888',winCol:'#4a7090',glowCol:'#6a90b0',frameCol:'#707060'},
+        minimalist:{bgCol:'#d8d4cc',winCol:'#4060a8',glowCol:'#6080c0',frameCol:'#a0a0a0'},
+        industrial:{bgCol:'#707878',winCol:'#304850',glowCol:'#507080',frameCol:'#505858'},
+      };
+      const fc=facadeColors[stil]||facadeColors.clasic;
+      const ftKey=`facade_${stil}_${floorIdx%2}`;
+      mat.map=_v3dGetFacadeTex(THREE,ftKey,{...fc,winRows:2,winCols:4});
+      mat.roughness=Math.min(mat.roughness,0.75);
+    }catch(e){}
+  }
+
   if(isNight){
     const nc = stilDef.windowColor || '#7dd3fc';
     const c = new THREE.Color(nc);
     mat.emissive = c;
-    mat.emissiveIntensity = 2.8; // mai puternic pentru ferestre vizibile
+    mat.emissiveIntensity = 2.8;
   }
   return cache[k]=mat;
 }
@@ -3004,31 +3189,31 @@ function _v3dApplyLight(preset,THREE,scene,r){
   scene.children.filter(c=>c.isLight).forEach(l=>scene.remove(l));
   const P={
     day:{
-      sky:'#c8dff5',fog:'#c8dff5',
-      amb:{c:'#d0e8ff',i:1.4},
-      gnd:{c:'#a09060',i:0.6},
-      sun:{c:'#fff8e0',i:5.5,p:[100,140,80]},
-      fill:{c:'#80b8f0',i:1.4,p:[-80,60,-60]},
-      rim:{c:'#ffe8a0',i:1.0,p:[-20,30,-100]},
-      exp:1.8,night:false,fog:false
+      sky:'#b8d4f0',fog:'#c0d8f2',
+      amb:{c:'#c8e0ff',i:1.2},
+      gnd:{c:'#887040',i:0.7},
+      sun:{c:'#fff4d0',i:6.0,p:[120,160,90]},   // soare mai puternic + mai sus
+      fill:{c:'#6090d0',i:1.2,p:[-90,50,-70]},
+      rim:{c:'#ffd080',i:1.4,p:[-10,25,-120]},    // rim light cald
+      exp:1.9,night:false,fog:false
     },
     golden:{
-      sky:'#f0b060',fog:'#e09040',
-      amb:{c:'#ffa040',i:0.9},
-      gnd:{c:'#603010',i:0.4},
-      sun:{c:'#ff6010',i:4.5,p:[140,18,60]},
-      fill:{c:'#a05020',i:0.8,p:[-60,40,-80]},
-      rim:{c:'#ffcc80',i:1.2,p:[0,20,-120]},
-      exp:1.6,night:false,fog:false
+      sky:'#e8903a',fog:'#d07820',
+      amb:{c:'#ff8020',i:0.75},
+      gnd:{c:'#7a3808',i:0.5},
+      sun:{c:'#ff4800',i:5.0,p:[160,12,70]},    // soare aproape de orizont
+      fill:{c:'#c06030',i:0.7,p:[-70,35,-90]},
+      rim:{c:'#ffe080',i:1.8,p:[10,15,-130]},    // rim puternic golden
+      exp:1.5,night:false,fog:false
     },
     overcast:{
-      sky:'#a8b8c8',fog:'#b0c0cc',
-      amb:{c:'#c0ccd8',i:1.8},
-      gnd:{c:'#707880',i:0.4},
-      sun:{c:'#c0d0e0',i:1.2,p:[40,120,40]},
-      fill:{c:'#90a8b8',i:1.0,p:[-40,60,-40]},
-      rim:{c:'#c8d4dc',i:0.5,p:[0,40,-80]},
-      exp:1.3,night:false,fog:true
+      sky:'#8898a8',fog:'#9aabba',
+      amb:{c:'#b0bcc8',i:2.0},    // ambient mai puternic (cer difuz)
+      gnd:{c:'#586068',i:0.5},
+      sun:{c:'#b8c8d8',i:0.8,p:[30,150,30]}, // "soare" complet difuz
+      fill:{c:'#88a0b0',i:1.4,p:[-50,70,-50]},
+      rim:{c:'#c0ccD4',i:0.6,p:[0,50,-100]},
+      exp:1.25,night:false,fog:true
     },
     night:{
       sky:'#02040c',fog:'#03060f',
@@ -3042,7 +3227,21 @@ function _v3dApplyLight(preset,THREE,scene,r){
   };
   const p=P[preset]||P.day;
   window._v3dNight=p.night;
-  if(scene.background) scene.background.set(p.sky);
+  // Update sky gradient per preset
+  if(scene._skyCanvas && scene._skyCtx && scene._skyTex){
+    const skyCtx=scene._skyCtx, skyCanvas=scene._skyCanvas;
+    const grad2=skyCtx.createLinearGradient(0,0,0,512);
+    const skies={
+      day:[['#1565a8',0],['#4a90c4',0.35],['#90bfdc',0.7],['#cce4f4',0.88],['#e0eff8',1]],
+      golden:[['#1a1640',0],['#a03000',0.3],['#e86010',0.55],['#f09030',0.75],['#f8c060',1]],
+      overcast:[['#556070',0],['#7a8a94',0.4],['#a0b0b8',0.75],['#c0d0d8',1]],
+      night:[['#000005',0],['#010414',0.3],['#020820',0.65],['#050e28',1]],
+    };
+    const stops=skies[preset]||skies.day;
+    stops.forEach(([c,s])=>grad2.addColorStop(s,c));
+    skyCtx.fillStyle=grad2; skyCtx.fillRect(0,0,2,512);
+    scene._skyTex.needsUpdate=true;
+  } else if(scene.background && scene.background.isColor) scene.background.set(p.sky);
   // Fog: dezactivat la zi/golden, activ la overcast/noapte cu densitate mică
   if(p.fog){
     if(!scene.fog) scene.fog=new THREE.FogExp2(p.sky,0.0006);
@@ -3057,9 +3256,12 @@ function _v3dApplyLight(preset,THREE,scene,r){
   // Zi/golden: umbra la 1024 în loc de 2048 — vizual identic de la distanță
   sun.castShadow = !p.night;
   sun.shadow.mapSize.width=sun.shadow.mapSize.height = p.night ? 512 : 1024;
-  sun.shadow.camera.near=0.5; sun.shadow.camera.far=500;
-  [-120,120,-120,120].forEach((v,i)=>{ if(i<2) sun.shadow.camera['left right'.split(' ')[i]]=v; else sun.shadow.camera['top bottom'.split(' ')[i-2]]=v; });
-  sun.shadow.bias=-0.001; scene.add(sun);
+  sun.shadow.camera.near=0.5; sun.shadow.camera.far=600;
+  sun.shadow.camera.left=-160; sun.shadow.camera.right=160;
+  sun.shadow.camera.top=160; sun.shadow.camera.bottom=-160;
+  sun.shadow.bias=-0.0008; // mai mic = umbre mai nete
+  sun.shadow.normalBias=0.04;
+  scene.add(sun);
   const fill=new THREE.DirectionalLight(p.fill.c,p.fill.i); fill.position.set(...p.fill.p); scene.add(fill);
   if(r) r.toneMappingExposure=p.exp;
   window._v3dNight = !!p.night;  // Setăm flag pentru materiale
@@ -3268,7 +3470,11 @@ function _v3dControls(canvas,cam){
   canvas.addEventListener('mousedown',e=>{drag=true;shft=e.shiftKey;lx=e.clientX;ly=e.clientY;canvas.style.cursor='grabbing';e.preventDefault();});
   const mm=e=>{if(!drag)return;const dx=(e.clientX-lx)*0.004,dy=(e.clientY-ly)*0.004;lx=e.clientX;ly=e.clientY;
     if(shft||e.buttons===4){const r2=new THREE.Vector3();r2.crossVectors(cam.getWorldDirection(new THREE.Vector3()),cam.up).normalize();V3D.tx.addScaledVector(r2,-dx*V3D.rad*0.4);V3D.tx.y+=dy*V3D.rad*0.4;}
-    else{V3D.th-=dx;V3D.ph=Math.max(0.08,Math.min(Math.PI/2.05,V3D.ph+dy));}
+    else{// Scrie in targets pentru smooth damping
+        _thT=(_thT!==undefined?_thT:V3D.th)-dx;
+        _phT=Math.max(0.08,Math.min(Math.PI/2.05,(_phT!==undefined?_phT:V3D.ph)+dy));
+        V3D.th=_thT; V3D.ph=_phT; // si direct pt feedback imediat
+}
     _v3dUpdateCam();};
   window.addEventListener('mousemove',mm); window.addEventListener('mouseup',mu);
   window.addEventListener('keydown',e=>{if(e.key==='Escape')drag=false;});
@@ -3276,7 +3482,11 @@ function _v3dControls(canvas,cam){
   canvas.addEventListener('wheel',e=>{e.preventDefault();V3D.rad=Math.max(5,Math.min(300,V3D.rad*(e.deltaY>0?1.08:0.93)));_v3dUpdateCam();},{passive:false});
   let ltd=0,ltx=0,lty=0;
   canvas.addEventListener('touchstart',e=>{if(e.touches.length===1){drag=true;lx=e.touches[0].clientX;ly=e.touches[0].clientY;}if(e.touches.length===2){const dx=e.touches[0].clientX-e.touches[1].clientX,dy=e.touches[0].clientY-e.touches[1].clientY;ltd=Math.sqrt(dx*dx+dy*dy);}},{passive:true});
-  canvas.addEventListener('touchmove',e=>{e.preventDefault();if(e.touches.length===1&&drag){const dx=(e.touches[0].clientX-lx)*0.006,dy=(e.touches[0].clientY-ly)*0.006;V3D.th-=dx;V3D.ph=Math.max(0.08,Math.min(Math.PI/2.05,V3D.ph+dy));lx=e.touches[0].clientX;ly=e.touches[0].clientY;_v3dUpdateCam();}if(e.touches.length===2){const dx=e.touches[0].clientX-e.touches[1].clientX,dy=e.touches[0].clientY-e.touches[1].clientY;const d=Math.sqrt(dx*dx+dy*dy);V3D.rad=Math.max(5,Math.min(300,V3D.rad*(ltd/Math.max(1,d))));ltd=d;_v3dUpdateCam();}},{passive:false});
+  canvas.addEventListener('touchmove',e=>{e.preventDefault();if(e.touches.length===1&&drag){const dx=(e.touches[0].clientX-lx)*0.006,dy=(e.touches[0].clientY-ly)*0.006;// Scrie in targets pentru smooth damping
+        _thT=(_thT!==undefined?_thT:V3D.th)-dx;
+        _phT=Math.max(0.08,Math.min(Math.PI/2.05,(_phT!==undefined?_phT:V3D.ph)+dy));
+        V3D.th=_thT; V3D.ph=_phT; // si direct pt feedback imediat
+lx=e.touches[0].clientX;ly=e.touches[0].clientY;_v3dUpdateCam();}if(e.touches.length===2){const dx=e.touches[0].clientX-e.touches[1].clientX,dy=e.touches[0].clientY-e.touches[1].clientY;const d=Math.sqrt(dx*dx+dy*dy);V3D.rad=Math.max(5,Math.min(300,V3D.rad*(ltd/Math.max(1,d))));ltd=d;_v3dUpdateCam();}},{passive:false});
   canvas.addEventListener('touchend',()=>{drag=false;});
   V3D._cleanup=()=>{ window.removeEventListener('mousemove',mm); window.removeEventListener('mouseup',mu); };
 }
