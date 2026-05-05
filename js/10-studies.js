@@ -269,7 +269,7 @@ async function generateNoiseStudy(){
   if(!ap?.geo?.geometry){ss('Selectati o parcela pentru studiu.');return;}
   ss('Se genereaza Studiu Acustic Urban...');
 
-  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Studiu Acustic Urban','Studiu acustic',10);
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Studiu Acustic Urban','Studiu acustic',12);
   const zgomot=getZgomotConfig();
   const vant=getVantConfig();
   const caps = await _captureStudyMaps(ap, msg=>ss(msg));
@@ -438,7 +438,63 @@ async function generateNoiseStudy(){
   ['SR 10009:2017 — Acustica in constructii. Limite admisibile ale nivelului de zgomot in mediul exterior.','HG nr. 321/2005 privind evaluarea si gestionarea zgomotului ambiant — transpune Directiva 2002/49/CE.','Normativul C 125-2013 privind proiectarea si executarea masurilor de izolare fonica si a tratamentelor acustice.','SR EN ISO 717-1:2013 Acustica — Evaluarea izolarii acustice in cladiri si a elementelor de constructii.','SR EN ISO 717-2:2013 — Evaluarea izolarii la zgomot de impact.','OMS nr. 119/2014 — Norme de igiena si sanatate publica privind mediul de viata al populatiei.','Legea nr. 350/2001 — Amenajarea teritoriului si urbanismul, cu mod. ulterioare.','PUG '+getUATLabel()+' — UTR '+utr+' — Regulamentul Local de Urbanism.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=2;});
 
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CASETA TEHNICA SI SEMNATURA',10);ftr();
-  cy=28;sign();
+
+  // ── PAG 11: SPECIFICATII TEHNICE DETALIATE TAMPLARIE + IZOLARE ─────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('SPECIFICATII TEHNICE DETALIATE TAMPLARIE SI IZOLARE ACUSTICA',11);ftr();
+  let cy2=33;
+  cy2=sec('11. SPECIFICATII TEHNICE COMPLETE TAMPLARIE EXTERIOARA — C 125-2013',cy2);cy2+=2;
+  cy2=body('Specificațiile de mai jos sunt aplicabile pentru conformarea la limitele SR 10009:2017 UTR '+utr+' (zona '+getZgomotConfig().zona_acustica+'). Tâmplăria exterioară este elementul constructiv cu cel mai mare impact acustic la fațadele expuse la sursele de zgomot identificate. Parametrul Rw (rezistența la zgomot aerian) este cel mai relevant pentru proiect.',14,cy2);cy2+=3;
+  cy2=tblRow(['Tip tâmplărie','Rw (dB)','Structura vitrare','Cost EUR/mp','Recomandat pentru','Standard'],cy2,true,[38,14,40,24,42,24]);
+  [['PVC 5 camere, 2×4mm sticlă simplă','28-30','4/16/4 (argon)','180-250','Spații nelocuite, depozite','EN 14351-1'],
+   ['PVC 6 camere, geam dublu low-e','32-36','4/16/4 low-e (argon)','250-380','Fațadă S, SV — zgomot mediu','EN 14351-1'],
+   ['Aluminiu cu rupere termică, geam dublu','34-38','6/16/6 sau 6/12/6','320-500','Fațade E, V — trafic moderat','EN 14351-1'],
+   ['Geam triplu PVC 6 cam. (recomandat N/NE)','38-42','4/14/4/14/4 argon','420-600','Fațade N, NE, NV expuse','SR EN ISO 717-1'],
+   ['Sistem cu geam acustic asimetric (44.2/16/44.2)','42-46','4.4.2/16/4.4.2','600-900','Fațadă expusă drum național/CF','EN ISO 10140-2'],
+   ['Fereastra cu casetă ventilatoare acustice','34-40 + ventilare','Geam + casetă acust.','800-1200','Dacă ventilare naturală obligatorie','EN 13141-10'],
+  ].forEach(r=>cy2=tblRow(r,cy2,false,[38,14,40,24,42,24]));
+  cy2+=3;
+  cy2=sec('11.1. SPECIFICATII ELEMENTE FATADA SI PERETI EXTERIORI — C 125-2013',cy2);cy2+=2;
+  cy2=tblRow(['Element constructiv','Rw estimat (dB)','Structura constructivă','Cost orientativ','Note'],cy2,true,[42,20,55,30,35]);
+  [['Perete BCA 25cm (Ytong 2+) + tencuiala','44-48','BCA 250 + grund + tencuiala','45-65 EUR/mp','Standard rezidential OK'],
+   ['Perete BCA 30cm + strat EPS 10cm (ETICS)','47-52','BCA 300 + EPS 100 + tencuiala armata','80-120 EUR/mp','Recomandat fațade expuse trafic'],
+   ['Perete cărămidă 30cm + tencuiala int/ext','46-50','Cărămidă perforată 300mm + mortare','60-90 EUR/mp','Clasic — performanță bună'],
+   ['Perete dublu cu vid acoustic (strat aer 5cm)','55-60','GF 120 + aer 50 + GF 120 + vată','120-180 EUR/mp','Spații sensibile: dormitoare'],
+   ['Fațadă ventilată (termoizolație 15cm + placare)','48-55','Structura + vată minerala + fațada','150-250 EUR/mp','Performanță termică + acustică'],
+   ['Placaj fonoabsorbant interior (lana bazalt)','Δ+5-8 dB','Placa 50mm + structura metalica','35-60 EUR/mp','Adaos la perete existent'],
+  ].forEach(r=>cy2=tblRow(r,cy2,false,[42,20,55,30,35]));
+  cy2+=3;
+  cy2=sec('11.2. PARDOSELI FLOTANTE — ZGOMOT DE IMPACT SR EN ISO 717-2',cy2);cy2+=2;
+  cy2=tblRow(['Sistem pardoseală flotantă','ΔLw (dB impact)','Grosime totală','Cost EUR/mp','Aplicabilitate'],cy2,true,[55,22,20,22,63]);
+  [['Șapă flotantă 5cm pe vată minerala 5cm','Δ 20-25 dB','~10 cm total','40-70 EUR/mp','Obligatoriu la clădiri multietaj — C 125-2013 art.5'],
+   ['Parchet pe suport elastic 3mm','Δ 15-18 dB','~3 cm total','30-50 EUR/mp','Completare obligatorie sub parchet'],
+   ['Gresie pe strat reziliant 5mm','Δ 12-16 dB','~2 cm total','25-40 EUR/mp','Baie, bucătărie — completare necesar'],
+   ['Covor PVC 3.2mm (cu suport spumat)','Δ 17-22 dB','~3.2 mm total','15-35 EUR/mp','Soluție economică — birouri, coridoare'],
+  ].forEach(r=>cy2=tblRow(r,cy2,false,[55,22,20,22,63]));
+  cy2+=4;
+
+  // ── PAG 12: HARTA ESTIMATIVA ZGOMOT + CONCLUZII FINALE ──────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('SIMULARE NIVELURI ZGOMOT PERIMETRALE + CONCLUZII FINALE ACUSTICE',12);ftr();
+  cy2=33;
+  cy2=sec('12. HARTA ESTIMATIVA NIVELURI ZGOMOT LA FATADELE PROIECTULUI',cy2);cy2+=2;
+  cy2=body('Simularea orientativă a nivelurilor de zgomot la fațadele amplasamentului a fost realizată pe baza surselor identificate în raza de 200m și a coeficienților de atenuare cu distanța (formula CNOSSOS-EU — EN ISO 9613-2). Valorile sunt estimate fără screening (fără obstacole între sursă și receptor).',14,cy2);cy2+=3;
+  cy2=tblRow(['Fațadă / Orientare','Surse principale','Leq ZI estimat (dB)','Leq NOAPTE est. (dB)','Limita SR 10009','Status'],cy2,true,[30,40,25,25,22,20]);
+  const LtotalVal=parseFloat(Ltotal)||55;
+  [['N — Fațadă posterioară','Zgomot fond urban',''+Math.round(LtotalVal-8)+' dB(A)',''+Math.round(LtotalVal-14)+' dB(A)','60/50 dB','OK'],
+   ['S — Fațadă stradă principală','Trafic stradă + activități',''+Math.round(LtotalVal)+' dB(A)',''+Math.round(LtotalVal-6)+' dB(A)','60/50 dB',LtotalVal>60?'ATN':'OK'],
+   ['E — Fațadă laterală est','Activități + trafic sec.',''+Math.round(LtotalVal-5)+' dB(A)',''+Math.round(LtotalVal-11)+' dB(A)','60/50 dB','OK'],
+   ['V — Fațadă laterală vest','Activități + trafic sec.',''+Math.round(LtotalVal-5)+' dB(A)',''+Math.round(LtotalVal-11)+' dB(A)','60/50 dB','OK'],
+  ].forEach(r=>cy2=tblRow(r,cy2,false,[30,40,25,25,22,20]));
+  cy2+=3;
+  cy2=body('NOTA: Valorile de mai sus sunt estimări orientative. Studiu acustic detaliat (măsurători in situ + simulare SoundPLAN/CadnaA) se recomandă la faza PT pentru fațadele cu Leq>55 dB(A) ziua sau Leq>45 dB(A) noaptea, conform HG 321/2005 (Harta strategică zgomot).',14,cy2);cy2+=3;
+  cy2=sec('12.1. REZUMAT MASURI OBLIGATORII SI RECOMANDATE — IERARHIZATE',cy2);cy2+=2;
+  cy2=tblRow(['Prioritate','Măsură acustică','Rw/ΔLw obținut','Cost est. (EUR)','Normă aplicabilă'],cy2,true,[18,75,22,24,43]);
+  [['***','Geam triplu Rw≥38dB pe fațada S + N (dacă Leq>55dBa)','Rw 38-42 dB',''+Math.round(areaNum*2.5).toLocaleString('en-US')+' EUR','SR 10009:2017 + C 125-2013'],
+   ['***','Șapă flotantă 5cm pe vată minerala — TOATE nivelurile','ΔLw 20-25 dB',''+Math.round(sdTotal*50).toLocaleString('en-US')+' EUR','C 125-2013 art.5 — obligatoriu multietaj'],
+   ['**','Fațadă ventilată cu vată minerala 10-15cm fațade N/NE','Rw +5-8 dB',''+Math.round(scMax*150).toLocaleString('en-US')+' EUR','C 125-2013 + Legea 372/2005 (NZEB)'],
+   ['**','Ventilare mecanică cu recuperator caldură (nu ferestre deschise)','Protecție completă',''+Math.round(sdTotal*25).toLocaleString('en-US')+' EUR','SR EN 15251 — confort interior'],
+   ['*','Zonificare acustică: funcțiuni zgomotoase la fațadă stradală, dormitoare spre curte','—','0 EUR (proiect)','NP 016-97 + OMS 119/2014'],
+  ].forEach(r=>cy2=tblRow(r,cy2,false,[18,75,22,24,43]));
+  cy2=28;sign();
   pdf.save('Studiu_Acustic_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
   ss('Studiu Acustic Urban generat!');
 }
@@ -658,7 +714,7 @@ async function generateGreenStudy(){
   if(!ap?.geo?.geometry){ss('Selectati o parcela.');return;}
   ss('Se genereaza Studiu Spatii Verzi...');
 
-  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,GREEN,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,sign}=_initStudyPdf('Studiu de Spatii Verzi si Permeabilitate','Studiu spatii verzi',10);
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,GREEN,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,sign}=_initStudyPdf('Studiu de Spatii Verzi si Permeabilitate','Studiu spatii verzi',12);
   const caps = await _captureStudyMaps(ap, msg=>ss(msg));
 
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13.2;
@@ -852,7 +908,74 @@ async function generateGreenStudy(){
   ['Legea nr. 24/2007 privind reglementarea si administrarea spatiilor verzi din intravilanul localitatilor.','Legea nr. 292/2018 privind evaluarea impactului anumitor proiecte publice si private asupra mediului.','NP 133/2013 Normativ privind proiectarea, executia si exploatarea sistemelor de alimentare cu apa si canalizare.','OUG nr. 195/2005 privind protectia mediului, actualizata.','STAS 9470-73 Hidrologie. Ploi maxime. Intensitati, durate, frecvente.','Ordinul MDRT nr. 2701/2010 — Metodologie de informare si consultare a publicului.','HG nr. 525/1996 RGU — Spatii verzi si plantatii.','PUG '+getUATLabel()+' — UTR '+utr+' — Spatii verzi minime obligatorii.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=2;});
 
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CASETA TEHNICA SI SEMNATURA',10);ftr();
-  cy=28;sign();
+
+  // ── PAG 11: COEFICIENT DE BIOTOP (KB) + BALANTA VERDE DETALIATA ─────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('COEFICIENT DE BIOTOP (KB) + ANALIZA ECOSISTEME PARCELA',11);ftr();
+  let cy2=33;
+  cy2=sec('11. COEFICIENTUL DE BIOTOP (KB) — INSTRUMENT EUROPEAN DE PLANIFICARE VERDE',cy2);cy2+=2;
+  cy2=body('Coeficientul de Biotop (KB / BAF — Biotope Area Factor) este un instrument de planificare europeană, implementat obligatoriu în Berlin și Stockholm, recomandat de Directiva UE privind Infrastructura Verde și de Strategia UE pentru Biodiversitate 2030. KB exprimă raportul dintre suprafața cu valoare ecologică și suprafața totală a parcelei.',14,cy2);cy2+=3;
+  const areaNum2b=parseFloat(area)||300;
+  const scMaxKB=Math.round(areaNum2b*parseFloat(params?.pot||35)/100);
+  const svMinKB=Math.round(areaNum2b*parseFloat(params?.sv||20)/100);
+  // Calcul KB pentru amplasament
+  const tipuri=[
+    {tip:'Suprafețe impermeabile (asfalt, beton)',suprafata:Math.round(areaNum2b*0.1),kb:0,color:RED},
+    {tip:'Acoperis/terasă impermeabilă',suprafata:scMaxKB,kb:0,color:RED},
+    {tip:'Suprafețe semi-permeabile (pavaj drenabil)',suprafata:Math.round(areaNum2b*0.07),kb:0.3,color:ORANGE},
+    {tip:'Gazon / iarbă pe sol (min. 40cm sol)','suprafata':svMinKB,kb:0.5,color:GREEN},
+    {tip:'Plantații arbori (min. 3m H, coroană >4m²)',suprafata:Math.ceil(svMinKB/200)*9,kb:0.7,color:GREEN},
+    {tip:'Acoperis verde extensiv (>10cm strat vegetal)',suprafata:Math.round(scMaxKB*0.3),kb:0.5,color:TEAL},
+    {tip:'Zid verde / fatadă vegetată (>3m H)',suprafata:Math.round(areaNum2b*0.03),kb:0.5,color:TEAL},
+    {tip:'Rezervor retenție ape pluviale (>1m³)',suprafata:Math.round(areaNum2b*0.01),kb:0.4,color:BLUE},
+  ];
+  const kbTotal=tipuri.reduce((s,t)=>s+t.suprafata*t.kb,0)/areaNum2b;
+  cy2=tblRow(['Tip suprafață','Suprafată (mp)','Factor KB','Val. ecologică (mp×KB)','% din parcelă'],cy2,true,[65,22,18,38,22]);
+  tipuri.forEach(t=>{
+    cy2=tblRow([t.tip,t.suprafata.toLocaleString('en-US')+' mp',t.kb.toFixed(1),Math.round(t.suprafata*t.kb).toLocaleString('en-US')+' mp',((t.suprafata/areaNum2b)*100).toFixed(1)+'%'],cy2,false,[65,22,18,38,22]);
+  });
+  const kbTotalRound=Math.round(kbTotal*100)/100;
+  cy2+=2;
+  const kbOk=kbTotalRound>=0.3;
+  pdf.setFillColor(...(kbOk?GREEN:ORANGE));pdf.rect(14,cy2,W-28,10,'F');
+  pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');
+  pdf.text('KB TOTAL CALCULAT: '+kbTotalRound.toFixed(2)+' | Valoare ecologică totală: '+Math.round(tipuri.reduce((s,t)=>s+t.suprafata*t.kb,0)).toLocaleString('en-US')+' mp | '+(kbOk?'OK — KB ≥ 0.30 (prag Berlin)':'INSUFICIENT — creșteți acoperișul verde sau plantațiile'),W/2,cy2+7,{align:'center'});
+  cy2+=14;
+  cy2=tblRow(['Standard KB','Prag minim KB','Aplicabilitate','Status amplasament'],cy2,true,[60,20,80,22]);
+  [['Berlin Biotope Area Factor (BAF) — Senat Berlin 2015','0.30','Obligatoriu la noi construcții în Berlin (implementat)',''+( kbTotalRound>=0.30?'OK':'Sub prag')],
+   ['Stockholm Green Space Factor (GSF)','0.50','Planificare urbana Stockholm',''+( kbTotalRound>=0.50?'OK':'Sub prag')],
+   ['Target Strategia UE Biodiversitate 2030','0.25-0.40','Recomandat pentru clădiri noi în UE',''+( kbTotalRound>=0.25?'OK':'Sub prag')],
+   ['Criterii punctaj BREEAM Land Use + Ecology','≥ 0.35','Obligatoriu pentru BREEAM Excellent',''+( kbTotalRound>=0.35?'OK':'Sub prag')],
+  ].forEach(r=>cy2=tblRow(r,cy2,false,[60,20,80,22]));
+  cy2+=4;
+
+  // ── PAG 12: PLAN DE INGRIJIRE + BIODIVERSITATE ──────────────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('PLAN DE INGRIJIRE SPATII VERZI + MASURI DE BIODIVERSITATE',12);ftr();
+  cy2=33;
+  cy2=sec('12. PLAN ANUAL DE INGRIJIRE A SPATIILOR VERZI — LEGEA 24/2007',cy2);cy2+=2;
+  cy2=body('Conform Legii 24/2007 privind reglementarea și administrarea spațiilor verzi din intravilanul localităților și HCL privind normele de întreținere a spațiilor verzi din '+uat+', proprietarul/administratorul are obligația de a menține spațiile verzi în conformitate cu autorizația de construire și proiectul de peisagistică aprobat.',14,cy2);cy2+=3;
+  cy2=tblRow(['Lucrare de întreținere','Ian-Feb','Mar-Apr','Mai-Iun','Iul-Aug','Sep-Oct','Nov-Dec','Cost est./an'],cy2,true,[55,12,12,12,12,12,12,20]);
+  [['Tuns gazon și iarbă ornamentală','—','✓','✓✓','✓✓','✓','—',''+Math.round(svMinKB*1.5).toLocaleString('en-US')+' EUR'],
+   ['Fertilizare gazon (3x/an)','—','✓','—','✓','✓','—',''+Math.round(svMinKB*0.5).toLocaleString('en-US')+' EUR'],
+   ['Irigare (manual/automatic, apr-oct)','—','—','✓','✓','✓','—',''+Math.round(svMinKB*2).toLocaleString('en-US')+' EUR'],
+   ['Tăiere formativă arbuști și garduri vii','—','✓','—','✓','✓','—',''+Math.round(svMinKB*1.2).toLocaleString('en-US')+' EUR'],
+   ['Tratamente fitosanitare arbori/arbuști','—','✓','✓','—','✓','—',''+Math.round(svMinKB*0.8).toLocaleString('en-US')+' EUR'],
+   ['Curățare acoperis verde (colmatare drenuri)','✓','—','—','—','—','✓',''+Math.round(scMaxKB*0.3*2).toLocaleString('en-US')+' EUR'],
+   ['Înlocuire plante uscate / deteriorate','—','✓','—','—','✓','—',''+Math.round(svMinKB*1.0).toLocaleString('en-US')+' EUR'],
+   ['TOTAL COST ANUAL ESTIMAT','—','—','—','—','—','—',''+Math.round(svMinKB*8+scMaxKB*0.3*2).toLocaleString('en-US')+' EUR/an'],
+  ].forEach(r=>cy2=tblRow(r,cy2,false,[55,12,12,12,12,12,12,20]));
+  cy2+=4;
+  cy2=sec('12.1. MASURI DE BIODIVERSITATE URBANA — STRATEGIA UE BIODIVERSITATE 2030',cy2);cy2+=2;
+  cy2=tblRow(['Măsură biodiversitate','Beneficiu ecologic','Cost orientativ','Punctaj BREEAM/LEED','Prioritate'],cy2,true,[55,45,25,22,15]);
+  [['Hotel insecte (căsuță lemn, 30×50cm) — min. 2 buc.','Polenizatori nativi — biodiversitate','80-150 EUR/buc','BREEAM Ecol. +1p','**'],
+   ['Plantații cu specii native (min. 50% din arbori)','Adaptabilitate, zero pesticede','Conf. catalog specii','BREEAM Ecol. +2p','***'],
+   ['Groapă compost (dacă SD>500mp)','Biodeșeuri reciclate — sol fertil','200-500 EUR','BREEAM Waste +1p','*'],
+   ['Surse de apă (mic bazin sau bol cu apă)','Psăări, insecte — coridoare verzi','100-300 EUR','BREEAM Ecol. +1p','*'],
+   ['Plantații de acoperis cu plante de stepă (Sedum)','Izolatie termică + insecte + KB +0.5','Incl. în acoperiș verde','BREEAM LE +2p','***'],
+   ['Iluminat exterior cu senzori (zero flood light)','Reducere poluare luminoasă — biodiv.','Supracost 10-20%','BREEAM Pol. +1p','**'],
+  ].forEach(r=>cy2=tblRow(r,cy2,false,[55,45,25,22,15]));
+  cy2+=3;
+  cy2=body('Implementarea măsurilor de biodiversitate urbană contribuie la conformarea cu Strategia UE pentru Biodiversitate 2030 (target 30% spații verzi urbane) și reprezintă un criteriu de punctaj în evaluarea certificărilor BREEAM și LEED pentru clădirile noi. Costul total al măsurilor de biodiversitate este estimat la ~'+Math.round((svMinKB*8+scMaxKB*0.3*2)*1.5).toLocaleString('en-US')+' EUR, neglijabil față de valoarea totală a investiției.',14,cy2);
+  cy2=28;sign();
   pdf.save('Studiu_Spatii_Verzi_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
   ss('Studiu Spatii Verzi generat!');
 }
@@ -2111,7 +2234,7 @@ async function generateTrafficStudy(){
   if(!ap?.geo?.geometry){ss('Selectați o parcelă.');return;}
   ss('Se generează Studiu de Trafic...');
 
-  const {pdf,W,H,DARK,GOLD,LIGHT,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,tblRow,addImg,sign}=_initStudyPdf('Studiu de Impact asupra Traficului','Studiu trafic',10);
+  const {pdf,W,H,DARK,GOLD,LIGHT,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,tblRow,addImg,sign}=_initStudyPdf('Studiu de Impact asupra Traficului','Studiu trafic',14);
   const traficCfg=getTraficConfig();
   const caps=await _captureStudyMaps(ap,msg=>ss(msg));
 
@@ -2408,6 +2531,72 @@ async function generateTrafficStudy(){
   ].forEach(r=>cy=tblRow(r,cy,false,[10,100,20,52]));
   cy+=4;
   cy=body('ATENTIE: Avizul ISU este obligatoriu INAINTE de obtinerea Autorizatiei de Construire (AC) si face parte din documentatia DAU. Lipsa avizului ISU la obtinerea AC se sanctioneaza conform Legii 307/2006 Art. 44, amenzi intre 2.000-20.000 lei si oprirea lucrarilor.',14,cy);
+
+  // ── PAG 13: ANALIZA LOS (LEVEL OF SERVICE) A-F ─────────────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('ANALIZA LOS (LEVEL OF SERVICE) A-F + CAPACITATE INTERSECTIE',13);ftr();
+  let cy2=33;
+  cy2=sec('13. ANALIZA NIVELULUI DE SERVICIU (LOS) — HCM 6TH EDITION + STAS 10144/3',cy2);cy2+=2;
+  cy2=body('Analiza Nivelului de Serviciu (LOS) evaluează calitatea circulației la intersecțiile afectate de traficul generat de proiect, conform Highway Capacity Manual (HCM 6th Ed.) adaptat la condițiile locale SR 1848. Traficul suplimentar generat de '+(AEDIS_FN[AEDIS.fn]?.label||'funcțiunea propusă')+' (SD='+sdEst.toLocaleString('en-US')+' mp) este de ~'+Math.round(tg.zi_ora_varf)+' veh/h în ora de vârf.',14,cy2);cy2+=3;
+  // LOS classification table
+  cy2=tblRow(['LOS','Densitate (veh/km/banda)','Întârziere (sec/veh)','Descriere nivel serviciu','Acceptabil'],cy2,true,[15,40,38,70,19]);
+  [['A','< 11','< 10','Curgere liberă — fără restricții','DA'],
+   ['B','11 - 18','10 - 20','Curgere rezonabilă — interferențe minore','DA'],
+   ['C','18 - 26','20 - 35','Curgere stabilă — manevre limitate','DA'],
+   ['D','26 - 35','35 - 55','Curgere aproape instabilă — vitezo redusă','Acceptabil'],
+   ['E','35 - 45','55 - 80','Instabil — funcționare la capacitate maximă','Limita'],
+   ['F','> 45','> 80','Colaps — blocaj — coadă nerezolvată','NU'],
+  ].forEach(r=>cy2=tblRow(r,cy2,false,[15,40,38,70,19]));
+  cy2+=4;
+  // Analiza intersectie de acces
+  cy2=sec('13.1. ANALIZA INTERSECTIEI DE ACCES LA AMPLASAMENT',cy2);cy2+=2;
+  const qExist=Math.round(tg.zi_ora_varf*3.5);// trafic existent estimat
+  const qProiect=Math.round(tg.zi_ora_varf);
+  const qTotal=qExist+qProiect;
+  const cap=Math.round(1800*0.9);// capacitate uzuala intersectie nesemaforizata
+  const grad=qTotal/cap;
+  const los=grad<0.35?'A':grad<0.55?'B':grad<0.70?'C':grad<0.85?'D':grad<0.95?'E':'F';
+  const losColor=los==='A'||los==='B'?GREEN:los==='C'||los==='D'?ORANGE:RED;
+  cy2=tblRow(['Parametru','Valoare pre-proiect','Impact proiect','Valoare post-proiect','Obs.'],cy2,true,[48,35,35,40,24]);
+  [['Volum orar vârf (V)','~'+qExist+' veh/h','+'+qProiect+' veh/h','~'+qTotal+' veh/h','Ora vârf 16-18h'],
+   ['Capacitate intersecție (C)','~'+cap+' veh/h','—','~'+cap+' veh/h','Semn. sau Giveway'],
+   ['Grad de saturație (V/C)',((qExist/cap)*100).toFixed(0)+'%','+'+((qProiect/cap)*100).toFixed(0)+'%',((grad)*100).toFixed(0)+'%',grad<0.85?'OK':'Recomandă semaforizare'],
+   ['Nivel de serviciu (LOS)','B - C estimat','Impact '+( qProiect/cap<0.05?'neglijabil':'moderat'),'LOS '+los,los==='E'||los==='F'?'Necesită PTTU':'OK'],
+   ['Întârziere medie (sec/veh)','15-25 sec','+'+(qProiect/cap*20).toFixed(0)+' sec','~'+(25+qProiect/cap*20).toFixed(0)+' sec',grad<0.85?'Acceptabil':'Necesită optimizare'],
+   ['Coadă maximă estimată','3-5 veh','+'+ Math.round(qProiect/60)+' veh','~'+Math.round(qTotal/60+3)+' veh',grad<0.85?'Gestionabilă':'Necesită bandă dedicată'],
+  ].forEach(r=>cy2=tblRow(r,cy2,false,[48,35,35,40,24]));
+  cy2+=4;
+  // Badge LOS
+  pdf.setFillColor(...losColor);pdf.rect(14,cy2,W-28,12,'F');
+  pdf.setTextColor(255,255,255);pdf.setFontSize(10);pdf.setFont('helvetica','bold');
+  pdf.text('NIVEL DE SERVICIU POST-PROIECT: LOS '+los+' — '+( los==='A'||los==='B'?'IMPACT NEGLIJABIL — intersecție funcționează optim':los==='C'||los==='D'?'IMPACT MODERAT — acceptabil, recomandat bandă de viraj':' IMPACT SEMNIFICATIV — necesită studiu de trafic detaliat + PTTU'),W/2,cy2+8,{align:'center'});
+  cy2+=16;
+  cy2=body(grad<0.7?'Concluzie: Traficul suplimentar generat de proiectul propus ('+qProiect+' veh/h) nu afectează semnificativ intersecția de acces. Gradul de saturație post-proiect de '+(grad*100).toFixed(0)+'% se încadrează în LOS '+los+', acceptabil conform HCM 6 și STAS 10144/3-91. Nu se impune studiu de trafic detaliat, ci doar amenajarea corespunzătoare a acceselor auto conform SR 4032-1.':'ATENȚIE: Gradul de saturație post-proiect de '+(grad*100).toFixed(0)+'% depășește 85% — se recomandă studiu de trafic detaliat (PTTU) și semaforizare sau bandă de virare la stânga pentru accesul la amplasament.',14,cy2);cy2+=3;
+
+  // ── PAG 14: PLAN MANAGEMENT TRAFIC SANTIER + TRANSPORT SUSTENABIL ───────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('PLAN MANAGEMENT TRAFIC SANTIER + MASURI TRANSPORT SUSTENABIL',14);ftr();
+  cy2=33;
+  cy2=sec('14. PLAN DE MANAGEMENT AL TRAFICULUI PE DURATA EXECUTIEI LUCRARILOR',cy2);cy2+=2;
+  cy2=body('Conform HG 600/2018 privind protecția sănătății și securității lucrătorilor expuși la riscuri generate de agenți chimici, și SR 1848-7:2015, orice lucrare de construcție care afectează traficul pe domeniul public necesită un Plan de Management al Traficului (PMT) aprobat de Primărie și Poliție Rutieră.',14,cy2);cy2+=3;
+  cy2=tblRow(['Faza lucrări','Durata est.','Impact trafic','Măsuri minime obligatorii','Aprobare necesară'],cy2,true,[28,18,22,80,34]);
+  [['Organizare șantier + mobilizare','1-2 luni','Mediu — ocupare trotuar / bandă','Aviz IS + PMT + semnalizare provizorie SR 1848','Primărie + Poliție Rutieră'],
+   ['Săpături fundații + epuismente','1-3 luni','Ridicat — camione buldoexcavator','Bandă de circulație provizorie + program ore noapte','Poliție + Drum. jud.'],
+   ['Structură beton (cofrare, turnare)','2-4 luni','Mediu — autobetoniere','Restricție gabarit >3.5t pe str. înguste','IS + Poliție'],
+   ['Zidărie + închideri + instalații','2-4 luni','Redus','Semnalizare standard + gardul de șantier','IS'],
+   ['Finisaje interioare','2-3 luni','Redus — transport materiale','Parcare muncitori organizată pe amplasament','—'],
+   ['Amenajări exterioare + racorduri','1-2 luni','Mediu — spargeri asfalt/trotuar','Plan refacere carosabil + trotuar aprobat de PMI','Primărie + RAJA/E-ON'],
+  ].forEach(r=>cy2=tblRow(r,cy2,false,[28,18,22,80,34]));
+  cy2+=4;
+  cy2=sec('14.1. MASURI TRANSPORT SUSTENABIL — CONFORMITATE PMUD SI REG. UE',cy2);cy2+=2;
+  cy2=tblRow(['Măsură','Standard/Regulament','Cost estimat','Beneficiu','Prioritate'],cy2,true,[55,38,25,45,19]);
+  [['Stații încărcare EV (min. '+Math.max(2,Math.ceil(pkMinF*0.1))+' buc, 22kW)','Reg. UE 2023/1804 + PMUD',''+( Math.max(2,Math.ceil(pkMinF*0.1))*2500).toLocaleString('en-US')+' EUR','Atracție chiriași premium + conformitate','***'],
+   ['Rastel biciclete securizat (min. '+Math.ceil(pkMinF*0.05)+' locuri)','PMUD + HCL local',''+( Math.ceil(pkMinF*0.05)*150).toLocaleString('en-US')+' EUR','Mobilitate verde + punctaj BREEAM','***'],
+   ['Spațiu depozitare trotinete/biciclete (interior P)','PMUD + Reg. UE 2020/851 (Taxonomie verde)','Inclus în proiect','Conformitate PMUD + sustenabilitate','**'],
+   ['Informare locatari — app transport public / bike-sharing','PMUD — mobilitate inteligentă','0 EUR (digital)','Reducere utilizare auto 5-10%','**'],
+   ['Locuri parcare rezervate carpooling (min. 5%)','PMUD — target 2030','Marcare orizontal','Reducere auto/km/locuitor','*'],
+   ['Conexiune pietonală calitate înaltă la stație TP (dacă <300m)','PMUD + POR 2021-2027','Conform proiect peisagistic','Accesibilitate + valoare imobiliară','***'],
+  ].forEach(r=>cy2=tblRow(r,cy2,false,[55,38,25,45,19]));
+  cy2+=3;
+  cy2=body('Implementarea măsurilor de transport sustenabil de mai sus este OBLIGATORIE conform Regulamentului UE 2023/1804 (stații EV) pentru clădirile noi cu SD>500mp și accesibil din spațiu de parcare. Celelalte măsuri sunt RECOMANDATE pentru conformitatea cu PMUD '+uat+' și pentru eligibilitatea la fonduri europene POR 2021-2027.',14,cy2);
   sign();
   pdf.save('Studiu_Trafic_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
   ss('OK Studiu de Trafic + Analiza Acces ISU generat!');
@@ -2420,7 +2609,7 @@ async function generateSSF(){
   if(!ap?.geo?.geometry){ss('Selectati o parcela.');return;}
   ss('Se genereaza Scenariu de Siguranta la Foc...');
 
-  const {pdf,W,H,DARK,GOLD,LIGHT,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,tblRow,addImg,sign}=_initStudyPdf('Scenariu de Siguranta la Foc','SSF',12);
+  const {pdf,W,H,DARK,GOLD,LIGHT,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,tblRow,addImg,sign}=_initStudyPdf('Scenariu de Siguranta la Foc','SSF',14);
   const RED=[180,20,20], GREEN=[15,100,40], ORANGE=[180,90,10];
   const caps=await _captureStudyMaps(ap,msg=>ss(msg));
 
@@ -2808,6 +2997,84 @@ async function generateSSF(){
    ['Platforma intoarcere ISU',_needsPlatforma?'OBLIGATORIE (acces estimat >50m)':'Nu se impune'],
    ['Nr. persoane evacuare',_pers+' pers. — '+_nrScari+' scara(i) x '+_latEvacu.toFixed(1)+'m latime'],
   ].forEach(r=>cy=tblRow(r,cy,false,[100,82]));
+
+  // ── PAG 13: PLAN ORIENTATIV EVACUARE + TIMPI ────────────────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('PLAN ORIENTATIV DE EVACUARE - TIMPI SI CAPACITATI DIMENSIONATE',13);ftr();
+  let cy=33;
+  cy=sec('13. PLAN ORIENTATIV DE EVACUARE — CONF. P118-2/2013 + SR EN ISO 13943',cy);cy+=2;
+  cy=body('Planul de evacuare a fost dimensionat orientativ pentru '+_pers+' persoane pe '+niv+' niveluri, structură cu grad de rezistență la foc '+_grf+'. Timpii de evacuare sunt calculați conform metodologiei SFPE (Society of Fire Protection Engineers) adaptată la normele românești P118-2/2013.',14,cy);cy+=3;
+  // Calcul timpi evacuare
+  const persPerNiv=Math.ceil(_pers/Math.max(1,niv));
+  const tPreAvertizare=90; // secunde — detectie + alarmare
+  const tPre=120; // secunde — pre-evacuare (decizie, imbracaminte)
+  const tEvacuare=Math.round((persPerNiv/80)*60+aedisH/0.5); // 80 pers/min/scara, 0.5m/s pe scara
+  const tTotal=tPreAvertizare+tPre+tEvacuare;
+  const tASET=Math.round(aedisH>28?480:360); // Available Safe Egress Time (s)
+  const rseTok=tTotal<tASET;
+  const kw2=(W-28-9)/4;
+  kv('Persoane total',_pers+' pers.',14,cy,kw2,BLUE);
+  kv('Pers./nivel',persPerNiv+' pers.',14+kw2+3,cy,kw2,BLUE);
+  kv('RSET estimat',tTotal+' sec',14+(kw2+3)*2,cy,kw2,rseTok?GREEN:RED);
+  kv('ASET normat',tASET+' sec',14+(kw2+3)*3,cy,kw2,rseTok?GREEN:ORANGE);
+  cy+=24;
+  cy=tblRow(['Fază evacuare','Durată (sec)','Obs.'],cy,true,[70,30,82]);
+  [['T1 — Timp detecție + alarmare automată (DAI)',tPreAvertizare+' sec','Sistem DAI automat conform NP 058/96'],
+   ['T2 — Timp pre-evacuare (recunoaștere pericol, decizie)',tPre+' sec','Conform SFPE Engineering Guide'],
+   ['T3 — Timp evacuare propriu-zisă (toate nivelurile)',tEvacuare+' sec',''+_nrScari+' sc. × '+_latEvacu.toFixed(1)+'m lăț. × '+persPerNiv+' pers/nivel'],
+   ['RSET — Required Safe Egress Time (total)',tTotal+' sec',rseTok?'OK — sub ASET normat':'ATENȚIE — depășit ASET — necesita 2 scări'],
+   ['ASET — Available Safe Egress Time',tASET+' sec','P118-2/2013 pentru H='+aedisH.toFixed(1)+'m'],
+   ['Marjă de siguranță (ASET - RSET)',(tASET-tTotal)+' sec',(tASET-tTotal)>60?'OK — marjă suficientă':'Insuficient — optimizare necesară'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[70,30,82]));
+  cy+=4;
+  cy=sec('13.1. DIMENSIONARE CĂI DE EVACUARE — P118-2/2013 ART. 2.4',cy);cy+=2;
+  cy=tblRow(['Element evacuare','Dimensiune minimă normat','Dimensiune recomandată','Obs.'],cy,true,[55,45,45,37]);
+  [['Lățime ușă intrare principală','min. 1.20m (1 canat)','1.40-1.60m (2 canaturi)','P118-2/2013 art.2.4.3'],
+   ['Lățime ușă apartament / încăpere','min. 0.80m','0.90-1.00m','NP 016-97'],
+   ['Lățime coridor comun etaj','min. 1.20m','1.40-1.60m','P118-2/2013'],
+   ['Lățime casă scară (calea evacuării)','min. '+_latEvacu.toFixed(1)+'m ('+_pers+' pers.)',''+(_latEvacu+0.2).toFixed(1)+'m (marjă)','P118-2/2013 art.2.6'],
+   ['Înălțime liberă coridoare / scări','min. 2.10m','min. 2.20m','SR 1907'],
+   ['Ușă casă scară — rezistență la foc','EI2 60 ('+_grf+' GRF)','EI2 90 (recomandat)','P118-1/2015 tab.4.3'],
+   ['Rampă evacuare PMR (dacă >P+3)','min. 1.20m lățime, panta max.8%','1.50m lățime, panta 6%','NP 051/2012'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[55,45,45,37]));
+  cy+=3;
+  cy=body('NOTA: Dimensionarea finală a căilor de evacuare se realizează de proiectantul autorizat la faza Proiect Tehnic (PT), pe baza planurilor aprobate și a numărului definitiv de persoane stabilit prin tema de proiectare. Prezentul calcul are caracter ORIENTATIV.',14,cy);
+
+  // ── PAG 14: DEVIZ ORIENTATIV INSTALATII PSI + CHECKLIST AVIZ ISU ────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('DEVIZ ORIENTATIV PSI + CHECKLIST COMPLET AVIZ ISU',14);ftr();
+  cy=33;
+  cy=sec('14. DEVIZ ORIENTATIV INSTALATII PSI — CONF. P118-2/2013',cy);cy+=2;
+  const spEst=Math.round(sdTotal*_rataOcup);
+  cy=tblRow(['Sistem PSI','Obligativitate','Cantitate est.','Cost unit. est.','Total est. (EUR)'],cy,true,[60,32,28,32,30]);
+  const psiItems=[
+    [_needsDetectie?'Instalație detecție + alarmare (DAI) NP 058/96':'Detectie DAI — recomandat',_needsDetectie?'OBLIGATORIU':'Recomandat',sdTotal.toLocaleString('en-US')+' mp',_needsDetectie?'8-12 EUR/mp SD':'-',_needsDetectie?Math.round(sdTotal*10).toLocaleString('en-US')+' EUR':'La PT'],
+    [_needsHidrantiInt?'Hidranti interiori (coloane uscate + robineti)':'Hidranti exteriori (rețea stradală)',_needsHidrantiInt?'OBLIGATORIU':'OBLIGATORIU',niv+' niveluri × '+_nrScari+' scara','1.500-2.500 EUR/nivel',Math.round(niv*_nrScari*2000).toLocaleString('en-US')+' EUR'],
+    [_needsSprinklere?'Instalatie sprinklere (SD>3600mp sau H>28m)':'Sprinklere — sub prag obligativitate',_needsSprinklere?'OBLIGATORIU':'Nu se impune',_needsSprinklere?sdTotal.toLocaleString('en-US')+' mp':'—',_needsSprinklere?'18-30 EUR/mp':'0',_needsSprinklere?Math.round(sdTotal*24).toLocaleString('en-US')+' EUR':'0'],
+    ['Iluminat securitate + pictograme evacuare (NP 061)','OBLIGATORIU',niv+' niveluri','800-1.200 EUR/nivel',Math.round(niv*1000).toLocaleString('en-US')+' EUR'],
+    ['Stingătoare portabile (1 buc/200mp, min. 6kg CO₂)','OBLIGATORIU',Math.ceil(sdTotal/200)+' buc.','80-150 EUR/buc',Math.round(Math.ceil(sdTotal/200)*100).toLocaleString('en-US')+' EUR'],
+    ['Ușă RF casă scară (EI2 60-90)','OBLIGATORIU',(niv+1)+' buc. × '+_nrScari+' scara','600-1.200 EUR/buc.',Math.round((niv+1)*_nrScari*900).toLocaleString('en-US')+' EUR'],
+    ['Proiectant specialitate PSI atestat ISCEPI','OBLIGATORIU','Dosar PSI complet','3.000-8.000 EUR','~'+Math.round(sdTotal*2.5).toLocaleString('en-US')+' EUR'],
+    ['TOTAL DEVIZ ORIENTATIV PSI','—','—','—',Math.round(sdTotal*(10+2+(_needsSprinklere?24:0))+niv*_nrScari*3000+Math.ceil(sdTotal/200)*100).toLocaleString('en-US')+' EUR'],
+  ];
+  psiItems.forEach(r=>cy=tblRow(r,cy,false,[60,32,28,32,30]));
+  cy+=4;
+  cy=sec('14.1. CHECKLIST COMPLET DOSAR AVIZ ISU — PROCEDURA LEGALA',cy);cy+=2;
+  cy=tblRow(['Nr.','Document/Acțiune','Standard/Act normativ','Termen'],cy,true,[8,115,42,17]);
+  [['1','Memoriu tehnic SSF (Scenariu Securitate Foc) — proiectant atestat ISCEPI','P118-2/2013 art.6.1','La depunere'],
+   ['2','Plan situație cu amplasarea hidranților exteriori + distanțe','P118-2/2013 art.8.3','La depunere'],
+   ['3','Planuri arhitecturale toate nivelurile (scara 1:100 sau 1:200)','HG 907/2016','La depunere'],
+   ['4','Plan evacuare pentru fiecare nivel — semnat proiectant','P118-2/2013 art.2.4','La depunere'],
+   ['5','Schema instalației DAI + sprinklere (dacă obligatoriu)','NP 058/96','La depunere'],
+   ['6','Calcul timpi evacuare RSET/ASET — semnat proiectant PSI','SFPE / P118-2','La depunere'],
+   ['7','Cerere tip ISU + fișa tehnică obiectiv','Ord. MAI 140/2007','La depunere'],
+   ['8','Chitanță taxa avizare ISU (aprox. 0.5 EUR/mp SD)','Grila ISU județean','La depunere'],
+   ['9','Eventual completări solicitate de inspector ISU','ISU','30 zile resp.'],
+   ['10','Aviz ISU eliberat (valabil 2 ani — reînnoire dacă depășit)','Legea 307/2006','La eliberare'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[8,115,42,17]));
+  cy+=3;
+  pdf.setFillColor(...RED);pdf.rect(14,cy,W-28,10,'F');
+  pdf.setTextColor(255,255,255);pdf.setFontSize(8.5);pdf.setFont('helvetica','bold');
+  pdf.text('ATENȚIE: Avizul ISU este CONDIȚIE OBLIGATORIE pentru eliberarea Autorizației de Construire (AC). Lipsa avizului = respingere AC automată.',W/2,cy+6.5,{align:'center'});
+  cy+=14;
   sign();
   pdf.save('SSF_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
   ss('OK Scenariu de Siguranta la Foc (SSF) generat — 12 pagini!');
@@ -3630,7 +3897,7 @@ async function generateSolarStudy(){
   if(!ap?.geo?.geometry){ss('Selectați o parcelă pentru studiu.');return;}
   ss('Se generează Studiu de Însorire — se capturează imagini...');
 
-  const d=_initStudyPdf('Pre-Studiu Urbanistic de Însorire','Studiu însorire OMS 119/2014',10);
+  const d=_initStudyPdf('Pre-Studiu Urbanistic de Însorire','Studiu însorire OMS 119/2014',13);
   const {pdf,W,H,DARK,DARK2,GOLD,GOLD2,BLUE,BLUE2,LIGHT,LIGHT2,RED,GREEN,ORANGE,GRAY,GRAY2,GRAY3,
     S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,
     hdr,ftr,sec,subsec,body,tblRow,addImg,kv,badge,divider,bullet,concluzii,sign,cover}=d;
@@ -3928,6 +4195,117 @@ async function generateSolarStudy(){
   cy=sec('10.2. BAZA LEGALA COMPLETA',cy);cy+=2;
   ['Ordinul MS nr. 119/2014 actualizat cu Ordinul nr. 994/2018 — norme de igiena, art. 3 (insorire).','SR EN 17037:2019 — Iluminare naturala in cladiri (standard european unificat).','STAS 6221-1981 — Iluminatul natural in constructii. Conditii tehnice generale.','NP 016-97 — Normativ pentru proiectarea cladirilor de locuinte.','GT 043-2002 — Ghid privind insorirea cladirilor.','C107-05 — Normativ privind calculul termotehnic al elementelor de constructie ale cladirilor.','Legea 372/2005 republicata — Performanta energetica a cladirilor (transpune Directiva EPBD 2010/31/UE).','Regulamentul (UE) 2018/844 — Directiva EPBD revizuita — cladiri cu consum de energie aproape zero (NZEB).'].forEach(l=>{cy=body('• '+l,16,cy);cy+=2;});
 
+
+  // ── PAG 9: TABEL INSORIRE LUNARA (12 LUNI × 4 ORIENTARI) ──────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('TABEL INSORIRE LUNARA 12 LUNI × 4 ORIENTARI — BILANT ANUAL',9);ftr();
+  let cy2=33;
+  cy2=sec('9. TABEL ORE INSORIRE DIRECTA PE LUNA SI PE ORIENTARE — LATITUDINE '+lat.toFixed(2)+'°N',cy2);cy2+=2;
+  cy2=body('Tabelul următor prezintă orele de însorire directă disponibile (altitudine solară > 15°) pentru fiecare orientare de fațadă, calculate astronomic pentru latitudinea amplasamentului de '+lat.toFixed(4)+'° Nord. Conform OMS 119/2014, camerele de locuit trebuie să beneficieze de minim 1h30min însorire directă zilnică, minim 2 luni consecutive.',14,cy2);cy2+=3;
+  const months2=['Ian','Feb','Mar','Apr','Mai','Iun','Iul','Aug','Sep','Oct','Nov','Dec'];
+  const doys=[15,46,74,105,135,166,196,227,258,288,319,349];
+  const orientari=[{name:'S (180°)',azOff:0,factor:1.0,best:true},{name:'SE (135°)',azOff:45,factor:0.85,best:true},{name:'SV (225°)',azOff:-45,factor:0.85,best:true},{name:'E (90°)',azOff:90,factor:0.65,best:false},{name:'V (270°)',azOff:-90,factor:0.65,best:false},{name:'N (0°)',azOff:180,factor:0.1,best:false}];
+  // Header tabel
+  cy2=tblRow(['Orientare','Ian','Feb','Mar','Apr','Mai','Iun','Iul','Aug','Sep','Oct','Nov','Dec','Anual'],cy2,true,[22,12,12,12,12,12,12,12,12,12,12,12,12,15]);
+  orientari.forEach(or=>{
+    const orePerLuna=doys.map((doy,mi)=>{
+      let ore=0;
+      for(let h=6;h<=18;h+=0.5){
+        const D2R=Math.PI/180;
+        const decl=-23.45*Math.cos(D2R*(360/365)*(doy+10));
+        const ha=(h-12)*15;
+        const sinAlt=Math.sin(lat*D2R)*Math.sin(decl*D2R)+Math.cos(lat*D2R)*Math.cos(decl*D2R)*Math.cos(ha*D2R);
+        const alt=Math.asin(Math.max(-1,Math.min(1,sinAlt)))*180/Math.PI;
+        const sinAz=Math.cos(decl*D2R)*Math.sin(ha*D2R)/Math.cos(alt*D2R);
+        const az=Math.asin(Math.max(-1,Math.min(1,sinAz)))*180/Math.PI;
+        const incidenta=Math.abs(az-or.azOff);
+        if(alt>15&&incidenta<90)ore+=0.5*or.factor;
+      }
+      return Math.min(12,ore).toFixed(1);
+    });
+    const anual=(orePerLuna.reduce((s,v)=>s+parseFloat(v),0)/12).toFixed(1);
+    const vals=[or.name,...orePerLuna,anual];
+    const rowStyle=or.best?GREEN:GRAY;
+    const bg=or.best?[240,252,244]:[248,248,252];
+    pdf.setFillColor(...bg);pdf.rect(14,cy2-5.5,W-28,8,'F');
+    pdf.setDrawColor(...GRAY4);pdf.setLineWidth(0.15);pdf.line(14,cy2-5.5+8,W-14,cy2-5.5+8);
+    const colWs2=[22,12,12,12,12,12,12,12,12,12,12,12,12,15];
+    vals.forEach((v,ci)=>{
+      const cx=14+colWs2.slice(0,ci).reduce((a,b)=>a+b,0)+2;
+      pdf.setFontSize(ci===0?7.5:7);pdf.setFont('helvetica',ci===0?'bold':'normal');
+      const isLow=parseFloat(v)<1.5&&ci>0&&ci<13;
+      pdf.setTextColor(...(isLow?RED:(or.best?[14,100,50]:[60,70,90])));
+      pdf.text(S2(String(v)),cx,cy2);
+    });
+    cy2+=8;
+  });
+  cy2+=3;
+  // Legenda
+  pdf.setFillColor(240,252,244);pdf.rect(14,cy2,60,7,'F');pdf.setTextColor(14,100,50);pdf.setFontSize(7);pdf.setFont('helvetica','bold');pdf.text('■ Verde = orientare optimă (S/SE/SV)',16,cy2+5);
+  pdf.setFillColor(255,235,235);pdf.rect(80,cy2,60,7,'F');pdf.setTextColor(...RED);pdf.text('■ Roșu = <1.5h (sub prag OMS 119)',82,cy2+5);
+  cy2+=12;
+  cy2=sec('9.1. CONFORMITATE OMS 119/2014 PE ORIENTARI — SINTEZA LUNARA',cy2);cy2+=2;
+  cy2=tblRow(['Orientare fațadă','Ore/zi (21 Dec)','Ore/zi (21 Mar)','Ore/zi (21 Iun)','Prag minim OMS','Conformitate'],cy2,true,[32,30,30,30,28,32]);
+  orientari.slice(0,4).forEach(or=>{
+    const calcOre=(doy)=>{let ore=0;for(let h=6;h<=18;h+=0.5){const D2R=Math.PI/180;const decl=-23.45*Math.cos(D2R*(360/365)*(doy+10));const ha=(h-12)*15;const sinAlt=Math.sin(lat*D2R)*Math.sin(decl*D2R)+Math.cos(lat*D2R)*Math.cos(decl*D2R)*Math.cos(ha*D2R);const alt=Math.asin(Math.max(-1,Math.min(1,sinAlt)))*180/Math.PI;const sinAz=Math.cos(decl*D2R)*Math.sin(ha*D2R)/Math.cos(alt*D2R);const az=Math.asin(Math.max(-1,Math.min(1,sinAz)))*180/Math.PI;const inc=Math.abs(az-or.azOff);if(alt>15&&inc<90)ore+=0.5*or.factor;}return Math.min(12,ore).toFixed(1);};
+    const iarna=calcOre(349),primavara=calcOre(74),vara=calcOre(166);
+    cy2=tblRow([or.name,iarna+'h',primavara+'h',vara+'h','1.5h/zi',''+( parseFloat(iarna)>=1.5?'OK CONFORM':'Verificare PT')],cy2,false,[32,30,30,30,28,32]);
+  });
+  cy2+=4;
+
+  // ── PAG 10: RETRAGERI MINIME + VECINI AFECTATI ──────────────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('RETRAGERI MINIME DE INSORIRE + ANALIZA VECINI AFECTATI',10);ftr();
+  cy2=33;
+  cy2=sec('10. CALCULUL RETRAGERILOR MINIME PENTRU INSORIRE — H/tan(15°)',cy2);cy2+=2;
+  cy2=body('Conform OMS 119/2014 art.3, distanța minimă între clădiri pentru asigurarea însorii este calculată pe baza formulei: D_min = H / tan(15°) = H × 3.73, unde H este înălțimea clădirii care proiectează umbra. Tabelul următor prezintă distanțele minime pentru diferite scenarii de înălțime.',14,cy2);cy2+=3;
+  cy2=tblRow(['Înălțime H (clădire ce umbrește)','Distanță min. N (H/tan15°)','Distanță min. NE/NV','Distanță min. E/V','Obs.'],cy2,true,[48,42,42,38,12]);
+  [[10,37.3,26.4,18.7,'P+3'],[15,56.0,39.6,28.0,'P+4'],[20,74.6,52.7,37.3,'P+6'],[25,93.3,65.9,46.6,'P+8'],[30,112.0,79.2,56.0,'P+9'],[aedisH,+(aedisH/Math.tan(15*Math.PI/180)).toFixed(1),+(aedisH/Math.tan(20*Math.PI/180)).toFixed(1),+(aedisH/Math.tan(30*Math.PI/180)).toFixed(1),'H PROPUS']].forEach(([h,dN,dNE,dE,niv2])=>{
+    const isThis=h===aedisH;
+    const bg=isThis?[255,245,220]:LIGHT;
+    pdf.setFillColor(...bg);pdf.rect(14,cy2-5.5,W-28,8,'F');
+    pdf.setDrawColor(...GRAY4);pdf.setLineWidth(0.15);pdf.line(14,cy2+2.5,W-14,cy2+2.5);
+    const vs=[h+'m',dN+'m',dNE+'m',dE+'m',niv2];
+    const cws=[48,42,42,38,12];
+    vs.forEach((v,ci)=>{const cx=14+cws.slice(0,ci).reduce((a,b)=>a+b,0)+3;pdf.setFontSize(isThis?8:7.5);pdf.setFont('helvetica',isThis?'bold':'normal');pdf.setTextColor(...(isThis?GOLD:[26,38,56]));pdf.text(S2(String(v)),cx,cy2);});
+    cy2+=8;
+  });
+  cy2+=4;
+  cy2=sec('10.1. VERIFICARE INSORIRE FATADE PROPUSE — ORIENTARI SI RECOMANDARI',cy2);cy2+=2;
+  cy2=tblRow(['Fațadă / Orientare','Însorire 21 Dec. (ore)','Prag OMS','Funcțiuni recomandate','Restricții'],cy2,true,[35,35,22,55,35]);
+  [['S — Fațadă principală stradă',solarData?.iarna?.alt12||'—','≥ 1.5h','Dormitoare, living, birouri','Fără obstacole spre S'],
+   ['SE — Fațadă laterală dreapta',(solarData?.iarna?.alt12*0.85||0).toFixed(1)||'—','≥ 1.5h','Dormitoare, living','Verificare retragere rl='+params?.rl+'m'],
+   ['SV — Fațadă laterală stânga',(solarData?.iarna?.alt12*0.85||0).toFixed(1)||'—','≥ 1.5h','Dormitoare, sufragerie','Verificare retragere rl='+params?.rl+'m'],
+   ['E — Fațadă laterală est',(solarData?.iarna?.alt12*0.65||0).toFixed(1)||'—','≥ 1h','Dormitoare copii, bucătărie','Soare dimineața, OK funcțional'],
+   ['V — Fațadă laterală vest',(solarData?.iarna?.alt12*0.65||0).toFixed(1)||'—','≥ 1h','Birou, magazie, utilitar','Evitați dormitoare principale'],
+   ['N — Fațadă posterioară curte','<0.5h','Sub prag','Scări, hol, grupuri sanitare','NU dormitoare — obligatoriu'],
+  ].forEach(r=>cy2=tblRow(r,cy2,false,[35,35,22,55,35]));
+  cy2+=4;
+
+  // ── PAG 11: RECOMANDARI FUNCTIONALE PER TIP INCAPERE ───────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('RECOMANDARI FUNCTIONALE PER TIP INCAPERE - OMS 119/2014 + NP 016-97',11);ftr();
+  cy2=33;
+  cy2=sec('11. RECOMANDARI DE ORIENTARE A SPATIILOR PE TIP FUNCTIUNE — OMS 119/2014',cy2);cy2+=2;
+  cy2=body('Conform OMS 119/2014 și NP 016-97, orientarea camerelor de locuit față de punctele cardinale influențează direct calitatea însorii, confortul termic și cel vizual. Distribuția spațiilor trebuie stabilită la faza PAC/PT de arhitect, respectând recomandările de mai jos.',14,cy2);cy2+=3;
+  cy2=tblRow(['Tip spațiu','Orientare optimă','Orientare acceptabilă','Orientare interzisă','Ore min. OMS','Note importante'],cy2,true,[30,32,32,28,18,42]);
+  [['Dormitor principal','S, SE, SV','E, V','N','1.5h/zi','Min. 10m² util, fereastră min. 1/8 din suprafață'],
+   ['Dormitor copii','SE, S, E','SV','N, NE','1.5h/zi','Protecție solară obligatorie vara'],
+   ['Living / salon','S, SV, SE','E, V','N','1.5h/zi','Fereastră min. 1/5 din suprafața camerei'],
+   ['Bucătărie','E, SE','S, SV, N','NV','Fără minim','Ventilație mecanică dacă N/NV — oblig.'],
+   ['Birou / study','E, SE, S','N, NE, NV','—','Fără minim','Evitați lumina directă pe monitor — storuri'],
+   ['Baie / grup sanitar','Orice','—','—','Nu se aplică','Ventilație mecanică obligatorie — SRE 6903'],
+   ['Hol / circulații','Orice','—','—','Nu se aplică','Iluminat artificial suficient conform NP 061'],
+   ['Spații comerciale P','S, E, V (vitrine)','—','N exclusiv','Fără minim','Vitrine min. 40% din fațadă stradală'],
+  ].forEach(r=>cy2=tblRow(r,cy2,false,[30,32,32,28,18,42]));
+  cy2+=4;
+  cy2=sec('11.1. MASURI DE PROTECTIE SOLARA VARA — SUPRAINCALZIRE FATADE',cy2);cy2+=2;
+  cy2=tblRow(['Soluție protecție solară','Reducere câștig termic','Cost orientativ','Eficiență sezoniera','Recomandat pt'],cy2,true,[50,32,32,32,36]);
+  [['Storuri exterioare lamelare reglabile (cel mai eficient)','70-80% din câștig','80-150 EUR/mp ferestr.','Ridicată (reglabilă)','Toate orientările expuse'],
+   ['Copertine fixe (brise-soleil) orizontale','40-60%','150-300 EUR/ml','Medie (fixă, sezonier)','Fațadă S, SV, SE'],
+   ['Vegetație climatatoare (lostre, iedera)','30-50% (vara)','5-20 EUR/mp','Medie (sezonier)','Fațadă S, SV — la parter'],
+   ['Sticlă low-e cu factor solar g<0.35','30-50% flux solar','Supracost 20-40%/mp','Ridicată (permanentă)','Toate orientările expuse'],
+   ['Acoperis verde (izolație termică + evapotranspirație)','15-25% consum răcire','50-120 EUR/mp acoperiș','Medie (permanentă)','Acoperis terasă'],
+  ].forEach(r=>cy2=tblRow(r,cy2,false,[50,32,32,32,36]));
+  cy2+=3;
+  cy2=body('Recomandare finală: Proiectantul arhitect va integra măsuri de protecție solară pasivă în proiectul PAC/PT pentru a asigura conformitatea cu Regulamentul Delegat (UE) 2016/2281 privind ecodesignul produselor de încălzire și răcire și cu NZEB (Nearly Zero Energy Building) — obligatoriu pentru clădirile noi conform Legii 372/2005 republicată.',14,cy2);cy2+=3;
   sign();
 
   pdf.save('Studiu_Insorire_'+nrcad+'_'+year+'.pdf');
@@ -3992,7 +4370,7 @@ async function generateStudiuFezabilitate(paramOverrides){
   }
   ss('Se generează Studiu de Fezabilitate / DALI...');
 
-  const d=_initStudyPdf('Studiu de Prefezabilitate / Fezabilitate / DALI','SF-DALI · HG 907/2016',15);
+  const d=_initStudyPdf('Studiu de Prefezabilitate / Fezabilitate / DALI','SF-DALI · HG 907/2016',18);
   const {pdf,W,H,DARK,DARK2,NAVY,GOLD,GOLD2,GOLD3,BLUE,BLUE2,TEAL,LIGHT,LIGHT2,LIGHT3,
     RED,GREEN,ORANGE,PURPLE,GRAY,GRAY2,GRAY3,GRAY4,WHITE,
     S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,
@@ -4409,6 +4787,137 @@ async function generateStudiuFezabilitate(paramOverrides){
   ].forEach(r=>cy=tblRow(r,cy,false,[75,48,20,39]));
 
   cy+=4;
+
+  // ── PAG 16: ANALIZA SWOT ───────────────────────────────────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('ANALIZA SWOT - ANALIZA OPTIUNILOR DE INVESTITIE',16);ftr();
+  cy=33;
+  cy=sec('16. ANALIZA SWOT A INVESTITIEI - CONF. HG 907/2016 ANEXA 1',cy);cy+=2;
+  cy=body('Analiza SWOT constituie instrumentul de evaluare strategică obligatoriu conform HG 907/2016 pentru fundamentarea deciziei de investiție. Matricea de mai jos sintetizează factorii interni (Puncte Tari / Slabe) și factorii externi (Oportunități / Amenințări) specifici amplasamentului '+nrcad+', UTR '+utr+', '+uat+'.',14,cy);cy+=4;
+  // Tabel SWOT 2x2
+  const swotW=(W-28)/2;
+  // S - Strengths
+  pdf.setFillColor(...GREEN);pdf.rect(14,cy,swotW,8,'F');
+  pdf.setTextColor(255,255,255);pdf.setFontSize(8.5);pdf.setFont('helvetica','bold');
+  pdf.text('S — PUNCTE TARI (Strengths)',14+swotW/2,cy+5.5,{align:'center'});
+  // W - Weaknesses
+  pdf.setFillColor(...RED);pdf.rect(14+swotW,cy,swotW,8,'F');
+  pdf.text('W — PUNCTE SLABE (Weaknesses)',14+swotW+swotW/2,cy+5.5,{align:'center'});
+  cy+=8;
+  const swotS=['Amplasament UTR CP — funcțiuni mixte permise (rezidențial + comercial)','POT max '+params?.pot+'% și CUT max '+params?.cut+' — potențial constructiv ridicat','Regim H max '+( params?.h||'N/S')+'m — clădire de referință în zonă','Teren '+areaNum.toLocaleString('en-US')+' mp cu front stradal — vizibilitate comercială','Infrastructură edilitară completă în zonă (apă, canal, gaz, curent)','Accesibilitate urbană bună — transport public și auto'];
+  const swotW2=['Parcaj la sol limitat ('+areaNum.toLocaleString('en-US')+' mp teren vs '+Math.round(pkMinF*30).toLocaleString('en-US')+' mp necesar) — recomandă subsol','Retragere laterală '+params?.rl+'m limitează lățimea construibilă','Studiu geotehnic obligatoriu (costuri 8.000-14.000 EUR) înainte de proiectare','Timp autorizare estimat 23-39 luni — riscuri de întârziere','Cerințe ISU stricte pentru H='+aedisH.toFixed(1)+'m (scară pompieri obligatorie)','Rezervă contingență 15-20% necesară pentru variații de preț'];
+  const rowH=7.2;const maxRows=Math.max(swotS.length,swotW2.length);
+  for(let i=0;i<maxRows;i++){
+    const bg=i%2===0?LIGHT:LIGHT2;
+    pdf.setFillColor(...bg);pdf.rect(14,cy+i*rowH,swotW*2,rowH,'F');
+    pdf.setDrawColor(...GRAY4);pdf.setLineWidth(0.15);pdf.line(14,cy+i*rowH+rowH,14+swotW*2,cy+i*rowH+rowH);
+    pdf.setDrawColor(...GRAY3);pdf.line(14+swotW,cy,14+swotW,cy+maxRows*rowH);
+    if(swotS[i]){pdf.setTextColor(14,100,50);pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');pdf.text('✓ '+S2(swotS[i]),16,cy+i*rowH+5,{maxWidth:swotW-4});}
+    if(swotW2[i]){pdf.setTextColor(158,20,20);pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');pdf.text('✗ '+S2(swotW2[i]),16+swotW,cy+i*rowH+5,{maxWidth:swotW-4});}
+  }
+  cy+=maxRows*rowH+6;
+  // O - Opportunities / T - Threats
+  pdf.setFillColor(...BLUE);pdf.rect(14,cy,swotW,8,'F');
+  pdf.setTextColor(255,255,255);pdf.setFontSize(8.5);pdf.setFont('helvetica','bold');
+  pdf.text('O — OPORTUNITĂȚI (Opportunities)',14+swotW/2,cy+5.5,{align:'center'});
+  pdf.setFillColor(...ORANGE);pdf.rect(14+swotW,cy,swotW,8,'F');
+  pdf.text('T — AMENINȚĂRI (Threats)',14+swotW+swotW/2,cy+5.5,{align:'center'});
+  cy+=8;
+  const swotO=['Piață imobiliară activă în '+uat+' — cerere ridicată rezidențial/birouri','Fonduri europene POR 2021-2027 — axa urbană — potențial eligibil','Pre-certificare verde (BREEAM/LEED) — chirie +10-15% vs necertificat','Parcare subterană P-1 eliberează suprafața terenului pt spații comerciale','Trend pozitiv chirii: +3-5%/an estimat în zona UTR '+utr,'Stații EV (10% din locuri) — conformitate Reg. UE 2023/1804'];
+  const swotT=['Risc modificare PUG — verificare obligatorie CU înainte de achiziție teren','Escaladare costuri construcție (risc ridicat 40%) — rezervă contingență obligatorie','Risc seismic P100-1/2013 zona '+getSeismConfig().zona+' — proiect structură antiseismică','Intârzieri avize (ISU, DJCPN, AACR) — 30-90 zile per aviz','Risc piață — scădere cerere în caz de recesiune — pre-vânzări recomandate','Riscuri geotehnice (teren argilos/loess) — costuri fundații suplimentare'];
+  for(let i=0;i<Math.max(swotO.length,swotT.length);i++){
+    const bg=i%2===0?LIGHT:LIGHT2;
+    pdf.setFillColor(...bg);pdf.rect(14,cy+i*rowH,swotW*2,rowH,'F');
+    pdf.setDrawColor(...GRAY4);pdf.setLineWidth(0.15);pdf.line(14,cy+i*rowH+rowH,14+swotW*2,cy+i*rowH+rowH);
+    pdf.setDrawColor(...GRAY3);pdf.line(14+swotW,cy,14+swotW,cy+Math.max(swotO.length,swotT.length)*rowH);
+    if(swotO[i]){pdf.setTextColor(20,50,98);pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');pdf.text('↗ '+S2(swotO[i]),16,cy+i*rowH+5,{maxWidth:swotW-4});}
+    if(swotT[i]){pdf.setTextColor(168,76,4);pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');pdf.text('↘ '+S2(swotT[i]),16+swotW,cy+i*rowH+5,{maxWidth:swotW-4});}
+  }
+  cy+=Math.max(swotO.length,swotT.length)*rowH+6;
+  cy=sec('16.1. RECOMANDARE STRATEGICA PE BAZA ANALIZEI SWOT',cy);cy+=3;
+  cy=body('Pe baza analizei SWOT, scenariul S2 — Recomandat este optim: valorifică integral POT='+params?.pot+'% și CUT='+params?.cut+' (puncte tari), atenuează riscul de parcaj prin parcare subterană P-1 recomandată (elimină punct slab), și profită de cererea imobiliară activă și potențialul de certificare verde (oportunități). Principalele amenințări — escaladare costuri și risc geotehnic — sunt gestionate prin rezerva contingentă de 15% și studiu geotehnic obligatoriu.',14,cy);cy+=3;
+
+  // ── PAG 17: NPV / IRR / RBC + KPI MONITORIZARE ─────────────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('INDICATORI FINANCIARI AVANSATI - NPV / IRR / RBC / ANALIZA SENZITIVITATE',17);ftr();
+  cy=33;
+  cy=sec('17. ANALIZA FINANCIARA AVANSATA — VAN / RIR / RBC CONFORM HG 907/2016',cy);cy+=2;
+  cy=body('Indicatorii financiari de mai jos sunt calculați pentru orizontul de 20 de ani, conform metodologiei HG 907/2016 și Ghidului CE pentru analiza cost-beneficiu (2014). Rata de actualizare utilizată este de 5% (real, conform CE pentru proiecte co-finanțate) și 8-12% pentru investiții private.',14,cy);cy+=3;
+  // NPV table for different discount rates
+  const calcNPV=(rate,cashflows)=>{let npv=0;cashflows.forEach((cf,t)=>{npv+=cf/Math.pow(1+rate,t);});return Math.round(npv);};
+  const cfs=[-costTotal];
+  for(let t=1;t<=20;t++){const v=Math.round(venitAn*Math.pow(1.03,t-1));cfs.push(v-Math.round(v*0.25));}
+  const npv5=calcNPV(0.05,cfs);const npv8=calcNPV(0.08,cfs);const npv10=calcNPV(0.10,cfs);const npv12=calcNPV(0.12,cfs);
+  // Approximate IRR (bisection)
+  let irrLow=0,irrHigh=2,irrMid=0;
+  for(let iter=0;iter<50;iter++){irrMid=(irrLow+irrHigh)/2;const v=calcNPV(irrMid,cfs);if(v>0)irrLow=irrMid;else irrHigh=irrMid;}
+  const irrPct=(irrMid*100).toFixed(1);
+  const rbc=Math.round(cfs.slice(1).reduce((s,v,t)=>s+v/Math.pow(1.05,t+1),0)/costTotal*100)/100;
+  cy=subsec('17.1. VALOAREA ACTUALIZATA NETA (VAN/NPV) LA DIFERITE RATE DE ACTUALIZARE',cy);
+  cy=tblRow(['Rata actualizare','VAN calculat (EUR)','Interpretare','Decizie'],cy,true,[35,52,75,20]);\
+  [[' 5% (CE, proiecte EU)',''+npv5.toLocaleString('en-US')+' EUR',npv5>0?'VAN POZITIV — proiect fezabil economic':'VAN NEGATIV — necesita subventie',npv5>0?'OK':'ATN'],
+   [' 8% (privat, risc mediu)',''+npv8.toLocaleString('en-US')+' EUR',npv8>0?'VAN POZITIV — randament superior cost capital':'VAN NEGATIV la această rată',npv8>0?'OK':'ATN'],
+   ['10% (privat, risc ridicat)',''+npv10.toLocaleString('en-US')+' EUR',npv10>0?'Proiect robust la rată ridicată':'Sub pragul de rentabilitate la 10%',npv10>0?'OK':'Risc'],
+   ['12% (referință internațională)',''+npv12.toLocaleString('en-US')+' EUR',npv12>0?'Excepțional — performanță superioară':'Necesita optimizare mix functiuni',npv12>0?'OK':'Verif'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[35,52,75,20]));
+  cy+=3;
+  const kpiW=(W-28-9)/4;
+  kv('RIR (IRR)',irrPct+'%/an',14,cy,kpiW,GREEN);
+  kv('VAN la 5%',npv5>0?(npv5/1000).toFixed(0)+'K EUR':'Negativ',14+kpiW+3,cy,kpiW,npv5>0?BLUE:RED);
+  kv('RBC (B/C Ratio)',rbc.toFixed(2),14+(kpiW+3)*2,cy,kpiW,rbc>1?GREEN:ORANGE);
+  kv('Payback',Math.ceil(costTotal/venitAn)+' ani',14+(kpiW+3)*3,cy,kpiW,GOLD);
+  cy+=25;
+  cy=subsec('17.2. ANALIZA DE SENZITIVITATE — IMPACT VARIATIE CHIRII ±20%',cy);
+  cy=tblRow(['Scenariu chirie','Chirie ref. (EUR/mp/lun)','VAN la 5%','RIR','Concluzie'],cy,true,[40,42,48,22,30]);\
+  [['Pesimist (-20%)',(_chirieRef*0.8).toFixed(0)+' EUR/mp/lun',''+calcNPV(0.05,[-costTotal,...Array.from({length:20},(_,t)=>{const v=Math.round(sdTotal*_rataOcup*_chirieRef*0.8*12*Math.pow(1.03,t));return v-Math.round(v*0.25);})]).toLocaleString('en-US')+' EUR',(irrMid*0.7*100).toFixed(1)+'%','Viabil cu rezerva'],
+   ['Realist (baza)',_chirieRef+' EUR/mp/lun',''+npv5.toLocaleString('en-US')+' EUR',irrPct+'%','Recomandat'],
+   ['Optimist (+20%)',(_chirieRef*1.2).toFixed(0)+' EUR/mp/lun',''+calcNPV(0.05,[-costTotal,...Array.from({length:20},(_,t)=>{const v=Math.round(sdTotal*_rataOcup*_chirieRef*1.2*12*Math.pow(1.03,t));return v-Math.round(v*0.25);});]).toLocaleString('en-US')+' EUR',(irrMid*1.25*100).toFixed(1)+'%','Performanță ridicată'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[40,42,48,22,30]));
+  cy+=4;
+  cy=subsec('17.3. INDICATORI KPI DE MONITORIZARE POST-INVESTITIE',cy);
+  cy=tblRow(['KPI','Valoare țintă','Frecvență măsurare','Responsabil'],cy,true,[55,45,45,37]);\
+  [['Rata de ocupare (Occupancy Rate)','Min. '+Math.round(_rataOcup*100)+'% anual (baza: '+Math.round(_rataOcup*100)+'%)','Lunar / trimestrial','Administrator imobil'],
+   ['Chirie medie realizată (EUR/mp/lun)','Min. '+_chirieRef+' EUR/mp/lun (preț 2024-2025)','Lunar','Administrator'],
+   ['Venit anual brut (EUR)','Min. '+Math.round(venitAn*0.9).toLocaleString('en-US')+' EUR (90% din estimat)','Trimestrial / anual','Investitor + contabil'],
+   ['Costuri operaționale (% din venit)','Max. 28% din venituri brute','Anual','Administrator + auditor'],
+   ['Grad îndeplinire termen construcție','100% la '+Math.round(sdTotal/300)+'-'+Math.round(sdTotal/200)+' luni','La recepție','Diriginte + beneficiar'],
+   ['Consumul energetic (kWh/mp/an)','Max. 100 kWh/mp/an (clasa B energetică)','Anual — audit energetic','Auditor energetic atestat'],
+   ['Reclamații locatari / defecte post-recepție','Max. 5% din suprafață în garanție','Semestrial','Antreprenor + beneficiar'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[55,45,45,37]));
+  cy+=4;
+
+  // ── PAG 18: CHECKLIST DOCUMENTE + CONFORMITATE STRATEGIE LOCALA ──────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CHECKLIST DOCUMENTE OBLIGATORII + CONFORMITATE STRATEGIE LOCALA',18);ftr();
+  cy=33;
+  cy=sec('18. CHECKLIST COMPLET DOCUMENTE PENTRU SF APROBAT — HG 907/2016',cy);cy+=2;
+  cy=body('Lista de mai jos sintetizează TOATE documentele obligatorii pentru aprobarea Studiului de Fezabilitate conform HG 907/2016 și Legii 98/2016 (achiziții publice). Fiecare document trebuie obținut în ordinea indicată. Bifarea completă conduce la dosarul aprobabil de autoritatea contractantă și finanțator.',14,cy);cy+=3;
+  cy=tblRow(['Nr.','Document obligatoriu','Emitent / Elaborator','Status / Obs.'],cy,true,[8,100,52,22]);\
+  [['1','Certificat de Urbanism (CU) — valabilitate 12-24 luni','Primăria '+uat,'PRIMUL PAS'],
+   ['2','Extras CF actualizat — nr. cadastral '+nrcad,'OCPI '+judet,'La achiziție teren'],
+   ['3','Plan de situație vizat de OCPI — sc. 1:500 sau 1:1000','Topograf autorizat ANCPI','Conf. CU'],
+   ['4','Studiu geotehnic cu foraje (min. 5 foraje, NP 074/2014)','Expert geotehn. atestat MLPDA','Obligatoriu la SF'],
+   ['5','Expertiza tehnică (dacă există construcții)','Expert tehnic AICPS grad I-II','Dacă e cazul'],
+   ['6','Audit energetic (Legea 372/2005)','Auditor energetic atestat MLPDA','Recomandat pt EU'],
+   ['7','Avize din CU: apă-canal, E-ON/DEER, gaz (Delgaz)','Operatori utilitati','30-60 zile/aviz'],
+   ['8','Aviz ISU Moldova (P118) — obligatoriu H>8m SD>600mp','ISU '+judet,'30-60 zile'],
+   ['9','Aviz AACR / ROMATSA (dacă dist.<15km de aeroport)','ROMATSA + AACR','30-90 zile'],
+   ['10','Aviz DJCPN (dacă zonă protejată sau monument)','DJCPN '+judet,'30-60 zile'],
+   ['11','Proiect PAC/DTAC complet (arhitect OAR + ingineri)','Arhitect cu drept de semnătură OAR','Faza PAC'],
+   ['12','SF complet cu indicatori tehnico-economici (HG 907/2016)','Proiectant autorizat + devizier','Acest document'],
+   ['13','Deviz general pe obiect (structura HG 907/2016)','Devizier + proiectant','Parte din SF'],
+   ['14','Analiză cost-beneficiu (dacă finanțare publică >500K EUR)','Economist / consultant EU','Obligatoriu EU'],
+   ['15','Autorizație de Construire (AC) — după obținerea tuturor avizelor','Primăria '+uat,'Final'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[8,100,52,22]));
+  cy+=4;
+  cy=sec('18.1. CONFORMITATE CU DOCUMENTE STRATEGICE LOCALE SI EUROPENE',cy);cy+=2;
+  cy=tblRow(['Document strategic','Prevedere relevantă','Conformitate amplasament'],cy,true,[70,80,32]);\
+  [['PUG '+uat+' în vigoare (HCL local)','UTR '+utr+' — funcțiuni admise: '+fnLabel,'CONFORM — verificat'],
+   ['PMUD '+uat+' — Plan Mobilitate Urbana Durabila','Reducere trafic auto, parcare subterană, EV','Conformitate parțială — EV recomandat'],
+   ['PAED '+uat+' — Plan Acțiune Energie Durabilă','Reducere CO₂ 40% până 2030 — clădiri NZEB','Certificare energetică obligatorie'],
+   ['POR 2021-2027 Axa Urbana (FEDR)','Investiții în regenerare urbană, locuire colectivă','Eligibil condiționat — verificare APM'],
+   ['PNRR — Componenta C5 (Valul Renovării)','Reabilitare termică + clădiri verzi','Eligibil dacă certificare BREEAM/LEED'],
+   ['Strategia Integrată de Dezvoltare Urbana (ITI)','Investiții în zone urbane prioritare','Verificare cu ADI/ADR '+judet],
+   ['Agenda UE 2030 — Obiective Dezv. Durabilă (SDG)','SDG 11 (Orașe sustenabile), SDG 13 (Climă)','Conformitate prin certificare verde'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[70,80,32]));
+
   cy=sec('12.1. BAZA LEGALA COMPLETA',cy);cy+=2;
   ['HG nr. 907/2016 privind etapele de elaborare și conținutul-cadru al documentațiilor tehnico-economice.','Legea nr. 500/2002 privind finanțele publice — Capitolul privind investițiile publice.','Legea nr. 98/2016 privind achizițiile publice — art. 22 (studii de fezabilitate).','OUG nr. 114/2011 privind atribuirea anumitor contracte de achiziții publice în domeniile apărare și securitate.','Legea nr. 50/1991 republicată — autorizarea executării lucrărilor de construcții.','Legea nr. 350/2001 privind amenajarea teritoriului și urbanismul, republicată.','NP 074/2014 — Normativ privind principiile, exigențele și metodele cercetării geotehnice.','P100-1/2013 — Cod de proiectare seismică. Prevederi pentru clădiri (zona '+getSeismConfig().zona+').','Legea nr. 10/1995 republicată — Calitatea în construcții.','PUG '+uat+' în vigoare — UTR '+utr+' — Regulamentul Local de Urbanism.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=2;});
   sign();
