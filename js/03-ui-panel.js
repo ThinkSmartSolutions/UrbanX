@@ -465,6 +465,7 @@ function htmlMobRapoarte(){
     ${btn('generateEnvironmentalImpact()','134,239,172','🌿','Studiu Impact Mediu (EIM)','Impact asupra mediului, APM','eim')}
     ${btn('generateStudiuAmplasament()','129,140,248','🗺','Studiu de Amplasament & Teritoriu','Document fundament, 13 domenii','amplasament')}
     ${btn('generateSSF()','248,113,113','🔥','Studiu Siguranță la Foc (ISU)','Aviz ISU Moldova, P118','isu')}
+    ${btn('generateRelevee()','212,175,55','📐','Relevee Instant','Planuri funcționale din cadastru','relevee')}
   </div>
   <div style="font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin:10px 0 6px">Studii tehnico-economice</div>
   <div class="card" style="display:flex;flex-direction:column;gap:6px">

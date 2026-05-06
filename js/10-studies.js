@@ -25,96 +25,6 @@ function _stripEmoji(str){
     .replace(/\uFE0F/gu,'').replace(/\s{2,}/g,' ').trim();
 }
 
-// ── Justify text in jsPDF (text aliniat stanga-dreapta) ──────────────────────
-// Folosit de _initStudyPdf_J si _addConcluziePage pentru paragrafe body
-function _pdfJustifyText(pdf, txt, x, cy, maxW, fz, lh, tc){
-  if(!txt) return (typeof cy==='number'&&isFinite(cy))?cy:28;
-  // NaN guards pentru coordonate
-  if(typeof cy!=='number'||!isFinite(cy)) cy=28;
-  if(typeof x!=='number'||!isFinite(x)) x=14;
-  if(typeof maxW!=='number'||maxW<=0) maxW=170;
-  try{
-    pdf.setFont('helvetica','normal');
-    pdf.setFontSize(fz||8.5);
-    if(tc) pdf.setTextColor(tc[0],tc[1],tc[2]);
-    const lines = pdf.splitTextToSize(String(txt), maxW);
-    const lineH = lh||5.0;
-    lines.forEach((line, li)=>{
-      if(!line) return;
-      const lineY = cy + li * lineH;
-      if(!isFinite(lineY)) return;
-      const words = line.split(' ').filter(w=>w.length>0);
-      const isLast = (li===lines.length-1);
-      if(isLast || words.length<=1){
-        pdf.text(line, x, lineY);
-      } else {
-        try{
-          const textW = words.reduce((s,w)=>{
-            const ww=pdf.getTextWidth(w)||0;
-            return s+(isFinite(ww)?ww:0);
-          }, 0);
-          const rawGap=(maxW-textW)/(words.length-1);
-          const gap=isFinite(rawGap)&&rawGap>=0?rawGap:1.5;
-          // Cap gap la 8mm ca sa nu arate ciudat
-          const safeGap=Math.min(gap,8);
-          let cx2=x;
-          words.forEach(w=>{
-            if(isFinite(cx2)) pdf.text(w,cx2,lineY);
-            const ww=pdf.getTextWidth(w)||0;
-            cx2+=(isFinite(ww)?ww:0)+safeGap;
-          });
-        }catch(je){
-          // Fallback simplu daca justify esueaza
-          pdf.text(line,x,lineY);
-        }
-      }
-    });
-    return cy + lines.length * lineH;
-  }catch(e){
-    // Fallback total: text simplu fara justify
-    try{ pdf.text(String(txt),x,cy); }catch(_){}
-    return cy+5;
-  }
-}
-
-// ── Wrapper _captureStudyMaps — pass-through, filtrul demolare se aplica separat ──
-async function _captureStudyMaps_J(ap, cb){
-  return await _captureStudyMaps(ap, cb);
-}
-
-// ── Wrapper _initStudyPdf care injecteaza body() cu justify si S2 safe ───────
-// Inlocuieste toate apelurile _initStudyPdf() din studii pentru text justify uniform
-function _initStudyPdf_J(...args){
-  const d = _initStudyPdf(...args);
-  const {pdf, W, S2} = d;
-  const _origBody = d.body;
-  const _origAddImg = d.addImg;
-
-  // Guard addImg: daca imaginea lipseste, returneaza cy valid (nu undefined)
-  d.addImg = function(imgData, x, cy, w, h, caption){
-    const safeCy = (typeof cy==='number'&&isFinite(cy)) ? cy : 28;
-    try{
-      const result = _origAddImg ? _origAddImg(imgData, x, safeCy, w, h, caption) : safeCy;
-      // Daca result e undefined/NaN (imagine lipsa), avanseaza cy cu spatiul rezervat
-      if(typeof result==='number'&&isFinite(result)) return result;
-      return safeCy + (h||0) + (caption?8:2);
-    }catch(e){
-      return safeCy + (h||0) + (caption?8:2);
-    }
-  };
-
-  // Guard body: justify + NaN safe
-  d.body = function(txt, x, cy){
-    if(typeof cy!=='number'||!isFinite(cy)) return _origBody?_origBody(txt,x,28):28;
-    const safe = S2 ? S2(txt) : String(txt||'');
-    const maxW = (W||210) - (x||14) - 12;
-    if(maxW<=0) return _origBody?_origBody(txt,x,cy):cy+5;
-    return _pdfJustifyText(pdf, safe, x, cy, maxW, 8.5, 5.0, [50,65,85]);
-  };
-
-  return d;
-}
-
 // UrbanX — Studii si rapoarte urbanistice
 
 async function generateShadowStudy(){
@@ -122,8 +32,8 @@ async function generateShadowStudy(){
   if(!ap?.geo?.geometry){ss('Selectati o parcela pentru studiu.');return;}
   ss('Se genereaza Studiu de Umbre & Obstructie...');
 
-  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf_J('Studiu de Umbre si Obstructie Vizuala','Studiu umbre',10);
-  const caps = await _captureStudyMaps_J(ap, msg=>ss(msg));
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Studiu de Umbre si Obstructie Vizuala','Studiu umbre',10);
+  const caps = await _captureStudyMaps(ap, msg=>ss(msg));
 
   function solarAlt(lat,month,hour){const D2R=Math.PI/180;const decl=(-23.45*Math.cos(D2R*(360/365)*(month*30+10)))*D2R;const ha=(hour-12)*15*D2R;return Math.max(0,Math.asin(Math.sin(lat*D2R)*Math.sin(decl)+Math.cos(lat*D2R)*Math.cos(decl)*Math.cos(ha))*180/Math.PI);}
   function shadowLen(h,alt){return alt>0.5?h/Math.tan(alt*Math.PI/180):999;}
@@ -161,7 +71,7 @@ async function generateShadowStudy(){
   rows.forEach(([l,v],i)=>{pdf.setTextColor(150,170,200);pdf.setFontSize(8);pdf.setFont('helvetica','normal');pdf.text(S2(l),26,124+i*11);pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text(S2(v),96,124+i*11);});
   pdf.setFillColor(isConform?20:180,isConform?120:30,isConform?60:30);pdf.rect(20,210,W-40,20,'F');
   pdf.setTextColor(255,255,255);pdf.setFontSize(11);pdf.setFont('helvetica','bold');
-  pdf.text(isConform?'CONFORM — Umbra acceptabila, insorire asigurata':'CONSTRUIRE PERMISA — Studiu insorire detaliat necesar in faza PT (OMS 119/2014)',W/2,220,{align:'center'});
+  pdf.text(isConform?'CONFORM — Umbra acceptabila, insorire asigurata':'ATENTIE — Verificare suplimentara necesara',W/2,220,{align:'center'});
   pdf.setFontSize(7.5);pdf.text('Prag OMS 119/2014: altitudine solara min. 15° la solstitiu iarna · Valoare calculata: '+solarAlt(lat,11,12).toFixed(1)+'°',W/2,228,{align:'center'});
   pdf.setTextColor(100,120,150);pdf.setFontSize(7);pdf.setFont('helvetica','normal');
   pdf.text('Generat: '+S2(dateStr)+' · Document orientativ · UrbanX TSS·FG',W/2,H-12,{align:'center'});
@@ -343,7 +253,6 @@ async function generateShadowStudy(){
   cy=body('Cladirea propusa cu inaltimea H='+aedisH.toFixed(1)+'m proiecteaza umbra maxima (solstitiu de iarna, ora 12:00) de '+( shadDec>500?'>500m':shadDec.toFixed(0)+'m')+' spre nord. Vecinii situati in aceasta directie pot fi afectati. Conform NP 016-97 si ghidului GT 043-2002, distanta minima recomandata dintre cladiri pentru asigurarea insolarii minime legale este functie de inaltimea cladirii umbritoare si de latitudine.',14,cy);cy+=4;
   cy=tblRow(['Inaltime cladire','Umbra la 12:00 (21 Dec)','Distanta minima recomandata','Comentariu'],cy,true,[40,50,60,32]);
   [5,8,10,12,14,16,18,20,25,28].forEach(h=>{
-    const sh=shadowLen(h,solarAlt(lat,11,12));
     const dmin=(h/Math.tan(15*Math.PI/180)).toFixed(0);
     const isCrt=Math.abs(h-aedisH)<1;
     cy=tblRow([h+'m',sh>500?'>500m':sh.toFixed(0)+'m',dmin+'m',isCrt?'← Cladire propusa':'—'],cy,false,[40,50,60,32]);
@@ -379,9 +288,9 @@ async function generateShadowStudy(){
   // ── Concluzii finale ─────────────────────────────────────────────────────
   const _aedisHShadow=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||aedisH||13;
   try{ _addConcluziePage(pdf,W,H,S2,hdr,ftr,sec,body,tblRow,nrcad,utr,uat,params,_aedisHShadow,AEDIS.fn||'rezidential_colectiv',10,'Studiu Umbre',[
-    {criteriu:'Umbra max. generata',valoare:'Cf. simulare (calculat per pagini 4-7)',status:'OK',obs:'Distanta min. D=H x tan(21.5) fata de ferestre vecine — integrata in proiect cf. RLU',remediere:'Retragerea fata de nord min. RLU — confirmata in faza PT prin studiu insorire arhitect OAR'},
-    {criteriu:'Ore insorire vecini',valoare:'Cf. simulare',status:'OK',obs:'Min. 1.5h/zi la solstitiu iarna (OMS 119/2014) — asigurat prin respectarea retragerilor RLU',remediere:'Studiu insorire detaliat elaborat de arhitect OAR obligatoriu in faza PT — constructia este permisa'},
-    {criteriu:'Conformitate OMS 119',valoare:'Orientativ',status:'OK',obs:'Studiu insorire detaliat (arhitect OAR) se depune la faza PT — nu blocheaza autorizarea'},
+    {criteriu:'Umbra max. generată',valoare:'Cf. simulare (calculat per pagini 4-7)',status:'ATENTIE',obs:'Verificați distanța min. D=H×tan(21.5°) față de ferestre vecine (OMS 119/2014)',remediere:'Reduceți H propus sau modificați amplasarea — distanță față de granițe min. H×0.4m'},
+    {criteriu:'Ore însorire vecini',valoare:'Cf. simulare',status:'ATENTIE',obs:'Verificați min. 1.5h/zi la solstițiu iarnă (OMS 119/2014)',remediere:'Asigurați distanța min. D=H×tan(21.5°) față de construcțiile vecine'},
+    {criteriu:'Conformitate OMS 119',valoare:'Orientativ',status:'OK',obs:'Studiu geotehnic și însorire detaliat obligatoriu în faza PT'},
   ]); }catch(_ce){console.warn('[concluzii]',_ce.message);}
   pdf.save('Studiu_Umbre_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
   ss('Studiu de Umbre generat!');
@@ -395,10 +304,10 @@ async function generateNoiseStudy(){
   if(!ap?.geo?.geometry){ss('Selectati o parcela pentru studiu.');return;}
   ss('Se genereaza Studiu Acustic Urban...');
 
-  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf_J('Studiu Acustic Urban','Studiu acustic',12);
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Studiu Acustic Urban','Studiu acustic',12);
   const zgomot=getZgomotConfig();
   const vant=getVantConfig();
-  const caps = await _captureStudyMaps_J(ap, msg=>ss(msg));
+  const caps = await _captureStudyMaps(ap, msg=>ss(msg));
 
   const FN_NOISE={'commercial':65,'industrial':75,'retail':62,'office':55,'school':52,'hospital':45,'residential':42,'yes':48,'Necunoscut':50};
   const vecini=S.ctx?.features||[];
@@ -426,7 +335,7 @@ async function generateNoiseStudy(){
   [['Nr. cadastral:',nrcad],['Zona UTR:',utr],['Suprafata teren:',area+' mp'],['Functiune propusa:',AEDIS_FN[AEDIS.fn]?.label||'—'],['Surse zgomot identificate:',surse.length+' in raza 200m'],['Nivel echivalent estimat Leq:',Ltotal.toFixed(1)+' dB(A)'],['Limita zi SR 10009:',limit_zi+' dB(A)'],['Limita noapte SR 10009:',limit_n+' dB(A)']].forEach(([l,v],i)=>{pdf.setTextColor(150,170,200);pdf.setFontSize(8);pdf.setFont('helvetica','normal');pdf.text(S2(l),26,112+i*9.5);pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text(S2(v),96,112+i*9.5);});
   pdf.setFillColor(isOk?20:180,isOk?120:30,isOk?60:30);pdf.rect(20,192,W-40,20,'F');
   pdf.setTextColor(255,255,255);pdf.setFontSize(11);pdf.setFont('helvetica','bold');
-  pdf.text(isOk?'CONFORM — Nivel zgomot acceptabil SR 10009/2017':'CONSTRUIRE PERMISA — Masuri de izolare fonica prevazute in proiectul tehnic',W/2,202,{align:'center'});
+  pdf.text(isOk?'CONFORM — Nivel zgomot acceptabil SR 10009/2017':'DEPASIRE — Masuri de izolare fonica necesare',W/2,202,{align:'center'});
   pdf.setFontSize(8);pdf.text('Nivel estimat: '+Ltotal.toFixed(1)+' dB(A) | Limita zi: '+limit_zi+' dB(A) | Limita noapte: '+limit_n+' dB(A)',W/2,210,{align:'center'});
   pdf.setTextColor(100,120,150);pdf.setFontSize(7);pdf.text('Generat: '+S2(dateStr)+' · Document orientativ · Confirmare prin masuratori acustice in situ',W/2,H-12,{align:'center'});
   ftr();
@@ -442,7 +351,7 @@ async function generateNoiseStudy(){
   if(!surse.length)cy=body('Nu s-au detectat surse de zgomot semnificative in raza de 200m.',14,cy);
   cy+=3;cy=sec('2. NIVEL TOTAL ESTIMAT PRIN COMPUNERE ENERGETICA',cy);cy+=2;
   cy=tblRow(['Indicator','Valoare','Status'],cy,true,[80,52,46]);
-  [['Nivel echivalent estimat Leq',Ltotal.toFixed(1)+' dB(A)',confZi?'CONFORM':'MASURI TEHNICE'],['Limita zi (06:00-22:00)',limit_zi+' dB(A)',Ltotal<=limit_zi?'OK':'MASURI TEHNICE'],['Limita noapte (22:00-06:00)',limit_n+' dB(A)',Ltotal<=limit_n?'OK':'MASURI TEHNICE'],['Atenuare necesara',Math.max(0,Ltotal-limit_zi).toFixed(1)+' dB(A)',Ltotal>limit_zi?'PREVAZUTA IN PT':'—']].forEach(r=>{cy=tblRow(r,cy,false,[80,52,46]);});
+  [['Nivel echivalent estimat Leq',Ltotal.toFixed(1)+' dB(A)',confZi?'CONFORM':'DEPASIRE'],['Limita zi (06:00-22:00)',limit_zi+' dB(A)',Ltotal<=limit_zi?'OK':'DEPASIT'],['Limita noapte (22:00-06:00)',limit_n+' dB(A)',Ltotal<=limit_n?'OK':'DEPASIT'],['Atenuare necesara',Math.max(0,Ltotal-limit_zi).toFixed(1)+' dB(A)',Ltotal>limit_zi?'NECESARA':'—']].forEach(r=>{cy=tblRow(r,cy,false,[80,52,46]);});
 
   // PAG 3: Viewer 3D zi + noapte + masuri
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D ZI / NOAPTE - MASURI DE ATENUARE',3);ftr();
@@ -476,7 +385,7 @@ async function generateNoiseStudy(){
   addImg(caps.imgDist,14+half+4,cy-52,half,52,'FIG. 7 — Plan distante contur-la-contur · Aliniamente');
   cy+=4;
   cy=sec('5. SINTEZA ANALIZEI ACUSTICE',cy);cy+=2;
-  cy=body('Nivelul de zgomot echivalent estimat pentru amplasamentul '+nrcad+' (UTR '+utr+', suprafata '+area+' mp) este de '+Ltotal.toFixed(1)+' dB(A), calculat prin compunerea energetica a celor '+surse.length+' surse identificate in raza de 200m. '+(isOk?'Valoarea se incadreaza in limitele admise de SR 10009/2017 pentru zona acustica corespunzatoare, atat pe perioada de zi ('+Ltotal.toFixed(1)+' dB(A) ≤ '+limit_zi+' dB(A)) cat si pe perioada de noapte ('+Ltotal.toFixed(1)+' dB(A) '+(confNoap?'≤':'>')+' '+limit_n+' dB(A)). Proiectul poate continua cu masuri standard de izolare fonica.':'Masurile constructive de izolare fonica (tamplarie geam tripan Rw>45dB, fatada ventilata cu strat fonoabsorbant) sunt prevazute in proiectul tehnic si sunt masuri standard curente pentru cladiri rezidentiale. Aceste masuri nu constituie impediment pentru autorizare, ci cerinte tehnice integrate in proiect.'),14,cy);cy+=5;
+  cy=body('Nivelul de zgomot echivalent estimat pentru amplasamentul '+nrcad+' (UTR '+utr+', suprafata '+area+' mp) este de '+Ltotal.toFixed(1)+' dB(A), calculat prin compunerea energetica a celor '+surse.length+' surse identificate in raza de 200m. '+(isOk?'Valoarea se incadreaza in limitele admise de SR 10009/2017 pentru zona acustica corespunzatoare, atat pe perioada de zi ('+Ltotal.toFixed(1)+' dB(A) ≤ '+limit_zi+' dB(A)) cat si pe perioada de noapte ('+Ltotal.toFixed(1)+' dB(A) '+(confNoap?'≤':'>')+' '+limit_n+' dB(A)). Proiectul poate continua cu masuri standard de izolare fonica.':'Valoarea depaseste limita admisa. Se recomanda masuri constructive suplimentare de izolare fonica, in special pentru fatadele expuse surselor principale. Elaborarea unui studiu acustic detaliat de catre specialist acreditato este recomandata.'),14,cy);cy+=5;
   cy=sec('6. BAZA LEGALA',cy);cy+=2;
   ['SR 10009:2017 — Acustica in constructii. Limite admisibile ale nivelului de zgomot in mediul exterior cladirilor.','HG nr. 321/2005 privind evaluarea si gestionarea zgomotului ambiant — transpune Directiva 2002/49/CE.','Directiva 2002/49/CE privind evaluarea si gestionarea zgomotului ambiental in mediul urban.','Normativul C 125-2013 privind proiectarea si executarea masurilor de izolare fonica in cladiri.','OMS nr. 119/2014 — Norme de igiena si sanatate publica privind mediul de viata al populatiei.','PUG '+getUATLabel()+' in vigoare — UTR '+utr+' — Regulamentul Local de Urbanism.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
 
@@ -555,8 +464,8 @@ async function generateNoiseStudy(){
   cy=sec('10. CONCLUZII FINALE - STUDIU ACUSTIC URBAN',cy);cy+=2;
   cy=body('Studiul acustic urban pentru amplasamentul '+nrcad+' (UTR '+utr+', suprafata '+area+' mp) a identificat '+surse.length+' surse de zgomot in raza de 200m. Nivelul de zgomot echivalent estimat este Leq='+Ltotal.toFixed(1)+' dB(A). '+(Ltotal<=limit_zi?'Valoarea SE INCADREAZA in limitele SR 10009:2017 pentru zona acustica '+getZgomotConfig().zona_acustica+' (limita zi: '+limit_zi+' dB(A)). Constructia poate continua cu masuri standard de izolare.':'Valoarea DEPASESTE limita admisa pentru zona acustica '+getZgomotConfig().zona_acustica+' (limita zi: '+limit_zi+' dB(A)). Sunt necesare masuri suplimentare de izolare acustica si un studiu acustic detaliat.'),14,cy);cy+=4;
   cy=tblRow(['Indicator','Valoare calculata','Limita normativa','Status'],cy,true,[75,38,38,31]);
-  [['Nivel zgomot echivalent Leq zi',Ltotal.toFixed(1)+' dB(A)',limit_zi+' dB(A)',Ltotal<=limit_zi?'CONFORM':'MASURI TEHNICE'],
-   ['Nivel zgomot echivalent Leq noapte',Ltotal.toFixed(1)+' dB(A)',limit_n+' dB(A)',Ltotal<=limit_n?'CONFORM':'MASURI TEHNICE'],
+  [['Nivel zgomot echivalent Leq zi',Ltotal.toFixed(1)+' dB(A)',limit_zi+' dB(A)',Ltotal<=limit_zi?'CONFORM':'DEPASIRE'],
+   ['Nivel zgomot echivalent Leq noapte',Ltotal.toFixed(1)+' dB(A)',limit_n+' dB(A)',Ltotal<=limit_n?'CONFORM':'DEPASIRE'],
    ['Numar surse identificate in 200m',surse.length+' surse','—','Informativ'],
    ['Zona acustica UTR '+utr,getZgomotConfig().zona_acustica,'Conf. SR 10009','Informativ'],
    ['Distanta pana la sursa principala',surse.length?surse[0].dist+'m':'—','—','Informativ'],
@@ -624,9 +533,9 @@ async function generateNoiseStudy(){
   ].forEach(r=>cy2=tblRow(r,cy2,false,[18,75,22,24,43]));
   cy2=28;sign();
   try{ _addConcluziePage(pdf,W,H,S2,hdr,ftr,sec,body,tblRow,nrcad,utr,uat,params,AEDIS.corpuri[0]?.niv*3||12,AEDIS.fn||'rezidential_colectiv',12,'Studiu Acustic',[
-    {criteriu:'Nivel zgomot calculat Lz',valoare:Ltotal.toFixed(1)+' dB',status:confZi?'OK':'MASURI',obs:confZi?'Conform SR 10009:2017':'Masuri fonice prevazute in proiectul tehnic — tamplarie geam tripan Rw>45dB + fatada ventilata cu strat fonoabsorbant',remediere:'Prevede tamplarie cu geam tripan Rw>45dB pe fatadele expuse, ecrane fonice sau fatada ventilata cu strat fonoabsorbant — constructia este permisa cu aceste masuri standard'},
-    {criteriu:'Nivel noapte Ln',valoare:Ltotal.toFixed(1)+' dB',status:confNoap?'OK':'MASURI',obs:confNoap?'Sub limita nocturna':'Masuri tehnice prevazute in PT — ferestre cu geam tripan Rw>48dB pe fatadele expuse',remediere:'Ferestre cu geam tripan Rw>48dB pe fatadele expuse — masura standard constructii rezidentiale'},
-    {criteriu:'Zone sensibile in 200m',valoare:(zgomot.surse_principale?.length||0)+' surse',status:'ATENTIE',obs:'Harta strategica de zgomot consultabila la Primarie — confirma zona acustica II',remediere:'Consultati Harta strategica de zgomot la Primaria '+S2(uat)+' pentru confirmarea zonei acustice; masurile tehnice prevazute acopera toate scenariile'},
+    {criteriu:'Nivel zgomot calculat Lz',valoare:Ltotal.toFixed(1)+' dB',status:confZi?'OK':'MASURI',obs:confZi?'Conform SR 10009:2017':'Depasire limita zi '+limit_zi+'dB — masuri fonice obligatorii in proiectul tehnic',remediere:'Prevede tamplarie cu geam tripan Rw>45dB pe fatadele expuse, ecrane fonice sau fatada ventilata cu strat fonoabsorbant — constructia este permisa cu aceste masuri standard'},
+    {criteriu:'Nivel noapte Ln',valoare:Ltotal.toFixed(1)+' dB',status:confNoap?'OK':'ATENTIE',obs:confNoap?'Sub limita nocturnă':'Posibilă depășire '+limit_n+'dB',remediere:'Ferestre cu geam tripan Rw>48dB pe fațadele expuse'},
+    {criteriu:'Zone sensibile în 200m',valoare:zgomot.surse_principale?.length||0+' surse',status:'ATENTIE',obs:'Verificare obligatorie SR 10009:2017 + HG 321/2005',remediere:'Harta strategică de zgomot consultabilă la Primărie'},
   ]); }catch(_ce){console.warn('[concluzii]',_ce.message);}
   pdf.save('Studiu_Acustic_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
   ss('Studiu Acustic Urban generat!');
@@ -640,10 +549,10 @@ async function generateWindStudy(){
   if(!ap?.geo?.geometry){ss('Selectati o parcela.');return;}
   ss('Se genereaza Studiu Vant & Confort Pietonal...');
 
-  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf_J('Studiu de Vant si Confort Pietonal','Studiu vant',10);
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Studiu de Vant si Confort Pietonal','Studiu vant',10);
   const vantCfg=getVantConfig();
   const zgomotCfg=getZgomotConfig();
-  const caps = await _captureStudyMaps_J(ap, msg=>ss(msg));
+  const caps = await _captureStudyMaps(ap, msg=>ss(msg));
 
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13.2;
   const vecini=S.ctx?.features||[];
@@ -835,10 +744,10 @@ async function generateWindStudy(){
 
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CASETA TEHNICA SI SEMNATURA',10);ftr();
   cy=28;sign();
-  try{ _addConcluziePage(pdf,W,H,S2,hdr,ftr,sec,body,tblRow,nrcad,utr,uat,params,aedisH,AEDIS.fn||'rezidential_colectiv',10,'Studiu Vant',[
-    {criteriu:'Zona vant de referinta',valoare:'Zona '+vantCfg.zona+', V0='+vantCfg.v_ref+'m/s',status:'OK',obs:'CR 1-1-4/2012 — necesara verificare in PT de catre inginer rezistenta',remediere:'Presiunea de calcul qp(H) determinata si folosita de proiectantul de structuri in faza PT/DTAC'},
-    {criteriu:'Raport H/Hmed zona',valoare:(aedisH/Math.max(1,hMed)).toFixed(2),status:'OK',obs:(aedisH/Math.max(1,hMed))>3?'Cladire inalta — masuri de protectie la vant prevazute in proiect':'Inaltime compatibila cu zona',remediere:'Masuri de protectie la vant (paravane, jardiniere, perdele vegetale) prevazute in proiectul de arhitectura si peisagistica'},
-    {criteriu:'Confort pietonal Lawson',valoare:'Verificare in faza PT',status:'OK',obs:'Simulare CFD recomandata in faza PT pentru cladiri H>28m; masuri de protectie prevazute',remediere:'Studiu CFD se elaboreaza in faza PT/DTAC daca H>28m; constructia este permisa cu masurile de protectie standard prevazute in proiect'},
+  try{ _addConcluziePage(pdf,W,H,S2,hdr,ftr,sec,body,tblRow,nrcad,utr,uat,params,aedisH,AEDIS.fn||'rezidential_colectiv',10,'Studiu Vânt',[
+    {criteriu:'Zonă vânt de referință',valoare:'Zona '+vantCfg.zona+', V0='+vantCfg.v_ref+'m/s',status:'OK',obs:'CR 1-1-4/2012 — necesară verificare în PT'},
+    {criteriu:'Raport H/Hmed zonă',valoare:(aedisH/Math.max(1,hMed)).toFixed(2),status:(aedisH/Math.max(1,hMed))>3?'ATENTIE':'OK',obs:(aedisH/Math.max(1,hMed))>3?'Clădire înaltă creează efect de tunel':'Înălțime compatibilă cu zona',remediere:'Reduceți H sau prevedeți studiu CFD dacă H/Hmed>3'},
+    {criteriu:'Confort pietonal Lawson',valoare:'Verificare necesară',status:'ATENTIE',obs:'Simulare CFD obligatorie pentru spații publice deschise H>28m'},
   ]); }catch(_ce){console.warn('[concluzii]',_ce.message);}
   pdf.save('Studiu_Vant_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
   ss('Studiu Vant & Confort Pietonal generat!');
@@ -852,8 +761,8 @@ async function generateGreenStudy(){
   if(!ap?.geo?.geometry){ss('Selectati o parcela.');return;}
   ss('Se genereaza Studiu Spatii Verzi...');
 
-  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf_J('Studiu de Spatii Verzi si Permeabilitate','Studiu spatii verzi',12);
-  const caps = await _captureStudyMaps_J(ap, msg=>ss(msg));
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Studiu de Spatii Verzi si Permeabilitate','Studiu spatii verzi',12);
+  const caps = await _captureStudyMaps(ap, msg=>ss(msg));
 
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13.2;
   const areaNum=parseFloat(area)||0;
@@ -898,7 +807,7 @@ async function generateGreenStudy(){
   cy=body('Conform Legii nr. 24/2007 privind reglementarea si administrarea spatiilor verzi din intravilanul localitatilor si PUG '+getUATLabel()+' (UTR '+utr+'), suprafata minima de spatii verzi este de '+params?.sv+'% din suprafata terenului, reprezentand '+svMin+' mp. Legea impune suplimentar un minim de 20% spatii verzi pentru orice constructie noua in intravilanul municipiului.',14,cy);cy+=4;
   cy=tblRow(['Indicator','Minim legal','Propus','Status'],cy,true,[70,42,42,24]);
   const svProp=Math.round(areaNum*0.22);
-  [['Spatii verzi totale (mp)',svObl.toLocaleString('en-US')+' mp',svProp.toLocaleString('en-US')+' mp',svProp>=svObl?'OK':'INSUFICIENT'],['Procentaj spatii verzi (%)',Math.max(params?.sv||20,20)+'%',((svProp/areaNum)*100).toFixed(1)+'%',svProp>=svObl?'CONFORM':'MARIRE SV NECESARA'],['SV permeabil la apa (min 60% din SV)',(svObl*0.6).toFixed(0)+' mp',(svProp*0.65).toFixed(0)+' mp','CONFORM'],['Arbori plantati (min 1/200mp SV)',Math.ceil(svObl/200)+' buc',Math.ceil(svProp/200)+' buc','CONFORM']].forEach(r=>{cy=tblRow(r,cy,false,[70,42,42,24]);});
+  [['Spatii verzi totale (mp)',svObl.toLocaleString('en-US')+' mp',svProp.toLocaleString('en-US')+' mp',svProp>=svObl?'OK':'DEFICIT'],['Procentaj spatii verzi (%)',Math.max(params?.sv||20,20)+'%',((svProp/areaNum)*100).toFixed(1)+'%',svProp>=svObl?'CONFORM':'NECONFORM'],['SV permeabil la apa (min 60% din SV)',(svObl*0.6).toFixed(0)+' mp',(svProp*0.65).toFixed(0)+' mp','CONFORM'],['Arbori plantati (min 1/200mp SV)',Math.ceil(svObl/200)+' buc',Math.ceil(svProp/200)+' buc','CONFORM']].forEach(r=>{cy=tblRow(r,cy,false,[70,42,42,24]);});
 
   // PAG 3: Viewer 3D zi + noapte
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D ZI / NOAPTE - VIZUALIZARE AMENAJARE VERDE',3);ftr();
@@ -1037,7 +946,7 @@ async function generateGreenStudy(){
   cy=body('Studiul de spatii verzi si permeabilitate pentru amplasamentul '+nrcad+' (UTR '+utr+', suprafata '+area+' mp) a analizat conformitatea cu normele minime de spatii verzi (SV minim='+params?.sv+'% = '+svMin2+' mp). Propunerea tehnica asigura minim '+svProp2+' mp spatii verzi ('+(svProp2/areaNum2*100).toFixed(1)+'% din suprafata terenului), '+(svProp2>=svMin2?'CONFORM cu prevederile RLU pentru UTR '+utr+'.':'NECONFORM — necesita suplimentarea suprafetei verzi.')+'.',14,cy);cy+=4;
   cy=tblRow(['Indicator','Valoare calculata','Cerinta normativa','Status'],cy,true,[70,42,42,28]);
   [['Suprafata teren (ST)',areaNum2.toLocaleString('en-US')+' mp','—','Informativ'],
-   ['Spatii verzi propuse',svProp2+' mp ('+Math.round(svProp2/areaNum2*100)+'%)','min. '+params?.sv+'% = '+svMin2.toLocaleString('en-US')+' mp',svProp2>=svMin2?'CONFORM':'MARIRE SV NECESARA'],
+   ['Spatii verzi propuse',svProp2+' mp ('+Math.round(svProp2/areaNum2*100)+'%)','min. '+params?.sv+'% = '+svMin2.toLocaleString('en-US')+' mp',svProp2>=svMin2?'CONFORM':'NECONFORM'],
    ['Suprafata construita (SC)',scMax2+' mp ('+params?.pot+'% POT)','max. '+params?.pot+'%','CONFORM'],
    ['Permeabilitate estimata',Math.round(svProp2/areaNum2*100)+'% pervios','min. '+Math.round(svMin2*0.6/areaNum2*100)+'% pervios','Verificare'],
    ['Arbori minim recomandati',Math.ceil(svProp2/200)+' buc','1 arbore/200mp SV','Recomandat'],
@@ -1077,7 +986,7 @@ async function generateGreenStudy(){
   const kbOk=kbTotalRound>=0.3;
   pdf.setFillColor(...(kbOk?GREEN:ORANGE));pdf.rect(14,cy2,W-28,10,'F');
   pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');
-  pdf.text('KB TOTAL CALCULAT: '+kbTotalRound.toFixed(2)+' | Valoare ecologica totala: '+Math.round(tipuri.reduce((s,t)=>s+t.suprafata*t.kb,0)).toLocaleString('en-US')+' mp | '+(kbOk?'OK — KB >= 0.30 (prag Berlin)':'INSUFICIENT — cresteti acoperisul verde sau plantatiile'),W/2,cy2+7,{align:'center'});
+  pdf.text('KB TOTAL CALCULAT: '+kbTotalRound.toFixed(2)+' | Valoare ecologică totală: '+Math.round(tipuri.reduce((s,t)=>s+t.suprafata*t.kb,0)).toLocaleString('en-US')+' mp | '+(kbOk?'OK — KB ≥ 0.30 (prag Berlin)':'INSUFICIENT — creșteți acoperișul verde sau plantațiile'),W/2,cy2+7,{align:'center'});
   cy2+=14;
   cy2=tblRow(['Standard KB','Prag minim KB','Aplicabilitate','Status amplasament'],cy2,true,[60,20,80,22]);
   [['Berlin Biotope Area Factor (BAF) — Senat Berlin 2015','0.30','Obligatoriu la noi construcții în Berlin (implementat)',''+( kbTotalRound>=0.30?'OK':'Sub prag')],
@@ -1127,8 +1036,8 @@ async function generateMobilityStudy(){
   if(!ap?.geo?.geometry){ss('Selectati o parcela.');return;}
   ss('Se genereaza Studiu Mobilitate & Parcaje...');
 
-  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf_J('Studiu de Mobilitate si Parcaje','Studiu mobilitate',10);
-  const caps = await _captureStudyMaps_J(ap, msg=>ss(msg));
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Studiu de Mobilitate si Parcaje','Studiu mobilitate',10);
+  const caps = await _captureStudyMaps(ap, msg=>ss(msg));
 
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13.2;
   const niv=AEDIS.corpuri[0]?.niv||4;
@@ -1324,8 +1233,8 @@ async function generateDensityStudy(){
   if(!ap?.geo?.geometry){ss('Selectati o parcela.');return;}
   ss('Se genereaza Studiu Densitate Urbana...');
 
-  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf_J('Studiu de Densitate si Presiune Urbana','Studiu densitate',10);
-  const caps = await _captureStudyMaps_J(ap, msg=>ss(msg));
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Studiu de Densitate si Presiune Urbana','Studiu densitate',10);
+  const caps = await _captureStudyMaps(ap, msg=>ss(msg));
 
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13.2;
   const vecini=S.ctx?.features||[];
@@ -1523,8 +1432,8 @@ async function generateMemoriu(){
   if(!ap?.geo?.geometry){ss('Selectati o parcela.');return;}
   ss('Se genereaza Memoriu Tehnic Preliminar...');
 
-  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf_J('Memoriu Tehnic Urbanistic Preliminar','Memoriu tehnic',10);
-  const caps = await _captureStudyMaps_J(ap, msg=>ss(msg));
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Memoriu Tehnic Urbanistic Preliminar','Memoriu tehnic',10);
+  const caps = await _captureStudyMaps(ap, msg=>ss(msg));
 
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13.2;
   const niv=AEDIS.corpuri[0]?.niv||4;
@@ -1732,8 +1641,8 @@ async function generateAACR(){
   if(!ap?.geo?.geometry){ss('Selectați o parcelă pentru studiu AACR.');return;}
   ss('Se generează Studiu AACR...');
 
-  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf_J('Studiu de Evaluare Aeronautica (AACR)','Studiu AACR',10);
-  const caps = await _captureStudyMaps_J(ap, msg=>ss(msg));
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Studiu de Evaluare Aeronautica (AACR)','Studiu AACR',10);
+  const caps = await _captureStudyMaps(ap, msg=>ss(msg));
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13;
   const niv=AEDIS.corpuri[0]?.niv||4;
   const fn=AEDIS.fn||'rezidential_colectiv';
@@ -1801,7 +1710,7 @@ async function generateAACR(){
   });
   pdf.setFillColor(isConform?20:180,isConform?120:30,isConform?60:30);pdf.rect(20,198,W-40,18,'F');
   pdf.setTextColor(255,255,255);pdf.setFontSize(11);pdf.setFont('helvetica','bold');
-  pdf.text(isConform?'CONFORM — H propus sub limita AACR':'AVIZ AACR OBLIGATORIU — Procedura standard de avizare; ajustare H poate fi necesara',W/2,207,{align:'center'});
+  pdf.text(isConform?'CONFORM — H propus sub limita AACR':'DEPĂȘIRE — Aviz AACR obligatoriu / Reducere H necesară',W/2,207,{align:'center'});
   if(caps.imgLocation){try{pdf.addImage(caps.imgLocation,'JPEG',14,H-72,W-28,58,undefined,'FAST');pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.4);pdf.rect(14,H-72,W-28,58,'S');pdf.setTextColor(...GOLD);pdf.setFontSize(6);pdf.text('AMPLASAMENT · '+S2(nrcad)+' · '+S2(utr),W/2,H-75,{align:'center'});}catch(e){}}
   ftr();
 
@@ -1956,8 +1865,8 @@ async function generateExistingBldStudy(){
   if(!ap?.geo?.geometry){ss('Selectați o parcelă.');return;}
   ss('Se generează Studiu Construcții Existente...');
 
-  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf_J('Studiu Constructii Existente pe Amplasament','Constructii existente',10);
-  const caps=await _captureStudyMaps_J(ap,msg=>ss(msg));
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Studiu Constructii Existente pe Amplasament','Constructii existente',10);
+  const caps=await _captureStudyMaps(ap,msg=>ss(msg));
 
   const parcelFeat={type:'Feature',geometry:ap.geo.geometry,properties:{}};
   const pArea=turf.area(parcelFeat);
@@ -2158,10 +2067,10 @@ async function generateGeotehnicalStudy(){
   if(!ap?.geo?.geometry){ss('Selectați o parcelă.');return;}
   ss('Se generează Pre-Studiu Geotehnic...');
 
-  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf_J('Pre-Studiu Geotehnic Preliminar','Pre-studiu geotehnic',10);
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Pre-Studiu Geotehnic Preliminar','Pre-studiu geotehnic',10);
   const seismCfg=getSeismConfig();
   const hidroCfg=getHidroConfig();
-  const caps=await _captureStudyMaps_J(ap,msg=>ss(msg));
+  const caps=await _captureStudyMaps(ap,msg=>ss(msg));
 
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13;
   const pArea=parseFloat(area)||0;
@@ -2379,9 +2288,9 @@ async function generateTrafficStudy(){
   if(!ap?.geo?.geometry){ss('Selectați o parcelă.');return;}
   ss('Se generează Studiu de Trafic...');
 
-  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf_J('Studiu de Impact asupra Traficului','Studiu trafic',14);
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Studiu de Impact asupra Traficului','Studiu trafic',14);
   const traficCfg=getTraficConfig();
-  const caps=await _captureStudyMaps_J(ap,msg=>ss(msg));
+  const caps=await _captureStudyMaps(ap,msg=>ss(msg));
 
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13;
   const niv=AEDIS.corpuri[0]?.niv||4;
@@ -2716,7 +2625,7 @@ async function generateTrafficStudy(){
   // Badge LOS
   pdf.setFillColor(...losColor);pdf.rect(14,cy2,W-28,12,'F');
   pdf.setTextColor(255,255,255);pdf.setFontSize(10);pdf.setFont('helvetica','bold');
-  pdf.text('NIVEL DE SERVICIU POST-PROIECT: LOS '+los+' — '+( los==='A'||los==='B'?'IMPACT NEGLIJABIL — intersectie functioneaza optim':los==='C'||los==='D'?'IMPACT MODERAT — acceptabil, recomandat banda de viraj':' IMPACT SEMNIFICATIV — necesita studiu de trafic detaliat + PTTU'),W/2,cy2+8,{align:'center'});
+  pdf.text('NIVEL DE SERVICIU POST-PROIECT: LOS '+los+' — '+( los==='A'||los==='B'?'IMPACT NEGLIJABIL — intersecție funcționează optim':los==='C'||los==='D'?'IMPACT MODERAT — acceptabil, recomandat bandă de viraj':' IMPACT SEMNIFICATIV — necesită studiu de trafic detaliat + PTTU'),W/2,cy2+8,{align:'center'});
   cy2+=16;
   cy2=body(grad<0.7?'Concluzie: Traficul suplimentar generat de proiectul propus ('+qProiect+' veh/h) nu afectează semnificativ intersecția de acces. Gradul de saturație post-proiect de '+(grad*100).toFixed(0)+'% se încadrează în LOS '+los+', acceptabil conform HCM 6 și STAS 10144/3-91. Nu se impune studiu de trafic detaliat, ci doar amenajarea corespunzătoare a acceselor auto conform SR 4032-1.':'ATENȚIE: Gradul de saturație post-proiect de '+(grad*100).toFixed(0)+'% depășește 85% — se recomandă studiu de trafic detaliat (PTTU) și semaforizare sau bandă de virare la stânga pentru accesul la amplasament.',14,cy2);cy2+=3;
 
@@ -2754,19 +2663,19 @@ async function generateTrafficStudy(){
 // Conf. P118-2/2013, P118-1/1999, Legea 307/2006, OMAI 163/2007, SR EN 1838
 async function generateSSF(){
   // Color safety fallback — ensure colors are arrays even if globals unavailable
-  const _DARK=typeof window.DARK!=='undefined'&&Array.isArray(window.DARK)?window.DARK:[8,21,42];
-  const _GOLD=typeof window.GOLD!=='undefined'&&Array.isArray(window.GOLD)?window.GOLD:[212,175,55];
-  const _BLUE=typeof window.BLUE!=='undefined'&&Array.isArray(window.BLUE)?window.BLUE:[59,130,246];
-  const _LIGHT=typeof window.LIGHT!=='undefined'&&Array.isArray(window.LIGHT)?window.LIGHT:[245,247,252];
-  const _RED=typeof window.RED!=='undefined'&&Array.isArray(window.RED)?window.RED:[220,38,38];
-  const _GREEN=typeof window.GREEN!=='undefined'&&Array.isArray(window.GREEN)?window.GREEN:[16,130,60];
+  const _DARK=typeof DARK!=='undefined'&&Array.isArray(DARK)?DARK:[8,21,42];
+  const _GOLD=typeof GOLD!=='undefined'&&Array.isArray(GOLD)?GOLD:[212,175,55];
+  const _BLUE=typeof BLUE!=='undefined'&&Array.isArray(BLUE)?BLUE:[59,130,246];
+  const _LIGHT=typeof LIGHT!=='undefined'&&Array.isArray(LIGHT)?LIGHT:[245,247,252];
+  const _RED=typeof RED!=='undefined'&&Array.isArray(RED)?RED:[220,38,38];
+  const _GREEN=typeof GREEN!=='undefined'&&Array.isArray(GREEN)?GREEN:[16,130,60];
   const ap=S.parcels[S.activeParcel??0];
   if(!ap?.geo?.geometry){ss('Selectati o parcela.');return;}
   ss('Se genereaza Scenariu de Siguranta la Foc...');
 
-  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf_J('Scenariu de Siguranta la Foc','SSF',14);
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Scenariu de Siguranta la Foc','SSF',14);
   // RED, GREEN, ORANGE sunt disponibile din destructurarea _initStudyPdf de mai sus
-  const caps=await _captureStudyMaps_J(ap,msg=>ss(msg));
+  const caps=await _captureStudyMaps(ap,msg=>ss(msg));
 
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13;
   const niv=AEDIS.corpuri[0]?.niv||4;
@@ -2790,32 +2699,59 @@ async function generateSSF(){
   const _sarcinaTermica = {'comercial':900,'retail':1000,'industrial':1500,'depozit':1200,
     'birouri':500,'hotel':700,'school':400,'public':350,
     'rezidential_colectiv':600,'locuinta_individuala':700,'default':500}[fn]||500;
-  // Numar persoane estimate
-  const _pers = {'comercial':Math.round(sdEst/4),'retail':Math.round(sdEst/4),
+  // ── Date din Relevee Instant (15-relevee.js) — mai precise ────────────────
+  let _rvBldSSF = null; let _rvFloorSSF = null;
+  let _rvAptCount = 0; let _rvCoresCount = 1; let _rvIsuOk = true; let _rvIsuIssues = [];
+  let _rvCorrMax = 0;
+  try {
+    if(typeof _rvCompBuilding === 'function' && typeof _rvFloor === 'function'){
+      const _rvPssf = {
+        nrCad: nrcad, utr, fn,
+        W: Math.sqrt(pArea * 1.2), D: Math.sqrt(pArea / 1.2),
+        area: pArea,
+        rf: parseFloat(params?.rf||0), rl: parseFloat(params?.rl||3), rs: parseFloat(params?.rs||6),
+        pot: parseFloat(params?.pot||35)/100, cut: parseFloat(params?.cut||1.5),
+        niv: niv, hn: 3.0, frontDir: S.vol?.frontDir||'N',
+      };
+      _rvBldSSF  = _rvCompBuilding(_rvPssf);
+      _rvFloorSSF = _rvFloor(_rvBldSSF, 1); // etaj curent tipic
+      _rvCoresCount = _rvBldSSF.cores.length || 1;
+      _rvAptCount   = niv * _rvCoresCount * 2;
+      _rvIsuOk      = _rvFloorSSF.isu?.ok !== false;
+      _rvIsuIssues  = _rvFloorSSF.isu?.issues || [];
+      _rvCorrMax    = _rvIsuIssues.length ? Math.max(..._rvIsuIssues.map(i=>parseFloat(i.d)||0)) : 0;
+    }
+  } catch(e){ console.warn('[SSF] Relevee data unavailable:', e.message); }
+
+  // Numar persoane — din relevee dacă disponibil, altfel estimat
+  const _persEstimat = {'comercial':Math.round(sdEst/4),'retail':Math.round(sdEst/4),
     'birouri':Math.round(sdEst/12),'hotel':Math.round(sdEst/25),
     'school':Math.round(sdEst/3),'public':Math.round(sdEst/3),
     'rezidential_colectiv':Math.round(sdEst/70*3),'locuinta_individuala':Math.round(sdEst/100*4),
     'default':Math.round(sdEst/20)}[fn]||Math.round(sdEst/20);
+  const _pers = _rvAptCount > 0
+    ? Math.round(_rvAptCount * ({'birouri':1.2,'hotel':1.5,'comercial':8}[fn]||2.8))
+    : _persEstimat;
+  const _persSource = _rvAptCount > 0 ? 'Din relevee ('+_rvAptCount+' unități × 2.8 pers/unitate)' : 'Estimat din SDA/70mp';
+
   // Cerinte instalatii PSI
   const _needsHidrantiInt  = niv>3 || sdEst>600 || ['comercial','retail','birouri','hotel'].includes(fn);
-  const _needsHidrantiExt  = true; // mereu necesari
+  const _needsHidrantiExt  = true;
   const _needsSprinklere   = aedisH>28 || sdEst>3600 || _sarcinaTermica>1200 || ['industrial','depozit'].includes(fn);
   const _needsDetectie     = niv>2 || sdEst>300 || ['hotel','school','public','comercial'].includes(fn);
   const _needsBobineFurtun = _needsHidrantiInt;
-  // Cai evacuare
-  const _latEvacu = _pers>200?2.0:_pers>100?1.5:1.2; // m latime scara evacuare
-  const _nrScari  = _pers>400?3:_pers>200?2:1;
-  const _lungMaxCor = ['comercial','birouri'].includes(fn)?25:35; // m lungime maxima coridor fara usa compartimentare
+  // Căi evacuare — din relevee dacă disponibil
+  const _latEvacu = _pers>200?2.0:_pers>100?1.5:1.2;
+  const _nrScari  = _rvCoresCount > 1 ? _rvCoresCount : (_pers>400?3:_pers>200?2:1);
+  const _nrScariSource = _rvCoresCount > 1 ? 'Din relevee (nuclee scări detectate)' : 'Estimat din nr. persoane';
+  const _lungMaxCor = ['comercial','birouri'].includes(fn)?25:35;
+  const _lungCorActual = _rvCorrMax > 0 ? _rvCorrMax : _lungMaxCor * 0.7; // din relevee sau 70% din max
+  const _corOk = _lungCorActual <= _lungMaxCor;
   // Acces ISU
   const _accesLungSSF = pArea>5000?65:pArea>2000?45:pArea>800?28:18;
   const _avizISU_SSF  = aedisH>28||niv>5||sdEst>600||_accesLungSSF>50||['comercial','industrial','depozit'].includes(fn);
-  // Rata de ocupare PSI — mp spatiu tehnic PSI / mp SD (functie de destinatie)
-  const _rataOcup = {'comercial':0.08,'retail':0.08,'industrial':0.06,'depozit':0.05,
-    'birouri':0.06,'hotel':0.07,'school':0.05,'public':0.06,
-    'rezidential_colectiv':0.04,'locuinta_individuala':0.03,'default':0.05}[fn]||0.05;
 
-  // ── PAG 1: COVER — tot PDF-ul e in try-catch pentru a preveni crash total ──
-  try{
+  // ── PAG 1: COVER ─────────────────────────────────────────────────────────
   pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');pdf.setFillColor(10,20,45);pdf.rect(0,3,W,H-6,'F');
   pdf.setFillColor(180,20,20);pdf.rect(0,0,W,3,'F');pdf.rect(0,H-3,W,3,'F');
   pdf.setTextColor(220,60,60);pdf.setFontSize(9);pdf.setFont('helvetica','bold');
@@ -3019,7 +2955,7 @@ async function generateSSF(){
     cy+=3;
     pdf.setFillColor(140,15,15);pdf.rect(14,cy,W-28,12,'F');pdf.setFillColor(200,50,50);pdf.rect(14,cy,4,12,'F');
     pdf.setTextColor(255,255,255);pdf.setFontSize(8);pdf.setFont('helvetica','bold');
-    pdf.text('OBLIGATORIU: PLATFORMA INTOARCERE ISU 18x18m la capatul caii de acces — P118-2/2013 Art. 6.9',W/2,cy+8,{align:'center'});
+    pdf.text('OBLIGATORIU: PLATFORMA INTOARCERE ISU 18×18m la capatul caii de acces — P118-2/2013 Art. 6.9',W/2,cy+8,{align:'center'});
     pdf.setTextColor(0,0,0);cy+=16;
   }
 
@@ -3235,17 +3171,127 @@ async function generateSSF(){
   cy+=3;
   pdf.setFillColor(...RED);pdf.rect(14,cy,W-28,10,'F');
   pdf.setTextColor(255,255,255);pdf.setFontSize(8.5);pdf.setFont('helvetica','bold');
-  pdf.text(S2('ATENTIE: Avizul ISU este CONDITIE OBLIGATORIE pentru eliberarea Autorizatiei de Construire (AC). Lipsa avizului = respingere AC automata.'),W/2,cy+6.5,{align:'center'});
+  pdf.text('ATENȚIE: Avizul ISU este CONDIȚIE OBLIGATORIE pentru eliberarea Autorizației de Construire (AC). Lipsa avizului = respingere AC automată.',W/2,cy+6.5,{align:'center'});
   cy+=14;
   sign();
-  try{ pdf.save('SSF_'+nrcad+'_'+new Date().getFullYear()+'.pdf'); }catch(e){ try{pdf.save('SSF_partial.pdf');}catch(_){} }
-  ss('OK Scenariu de Siguranta la Foc (SSF) generat!');
-  }catch(_ssf_e){
-    console.error('[SSF jsPDF error]', _ssf_e.message, _ssf_e.stack);
-    ss('SSF: eroare la generare — verificati consola (F12). Mesaj: '+_ssf_e.message);
-    try{ pdf.save('SSF_partial_'+nrcad+'.pdf'); }catch(_){
-      try{ pdf.save('SSF_partial.pdf'); }catch(__){}}
+  // ════════════════════════════════════════════════════════════════════════
+  // PAG RELEVEE — Schemă funcțională etaj curent + verificare evacuare ISU
+  // (pagina se adaugă DOAR dacă releveele sunt disponibile)
+  // ════════════════════════════════════════════════════════════════════════
+  if(_rvBldSSF && _rvFloorSSF){
+    try{
+      pdf.addPage();
+      pdf.setFillColor(245,245,248);pdf.rect(0,0,W,H,'F');
+      hdr('SCHEMA FUNCTIONALA ETAJ CURENT — RELEVEE INSTANT + VERIFICARE ISU P118',13);ftr();
+      let cy13=30;
+
+      // Intro
+      cy13=sec('13. SCHEMĂ FUNCȚIONALĂ GENERATĂ AUTOMAT — VERIFICARE CĂI EVACUARE',cy13);
+      cy13=body('Planul funcțional de mai jos a fost generat automat de motorul UrbanX Relevee Instant pe baza parametrilor urbanistici ai parcelei '+nrcad+'. Distribuția spațiilor, amplasarea nucleelor de scări și distanțele de evacuare au fost calculate conform P118-2/2013 Art.6 și OMAI 163/2007 Art.19.',14,cy13);cy13+=4;
+
+      // Tabel date relevee
+      cy13=tblRow(['Indicator','Valoare din relevee','Bază calcul','Status P118'],cy13,true,[55,55,45,27]);
+      const _ri = [
+        ['Nr. nuclee scări + lift detectate', _rvCoresCount+' nuclee', _nrScariSource, _rvCoresCount>=(_pers>200?2:1)?'OK':'Verificare'],
+        ['Nr. apartamente estimate', _rvAptCount+' unități', 'Relevee × '+niv+' niv.', 'Informativ'],
+        ['Nr. persoane din relevee', _pers+' pers.', _persSource, 'Conf. P118'],
+        ['Distanță max. coridor la scări', _lungCorActual.toFixed(0)+'m', _rvIsuIssues.length?'Calculat din relevee':'Estimat 70% din max', _corOk?'OK (≤'+_lungMaxCor+'m)':'⚠ Depășire'],
+        ['Nr. scări necesare P118', _nrScari+' scări', _nrScariSource, 'Conf. P118'],
+        ['Lățime minimă scări', _latEvacu.toFixed(1)+'m', 'P118-2/2013 Art.7.3', 'De respectat'],
+        ['Aviz ISU necesar', _avizISU_SSF?'DA — OBLIGATORIU':'NU — Verificare CU', 'Legea 307/2006', _avizISU_SSF?'Oblig.':'OK'],
+      ];
+      _ri.forEach(r=>{ cy13=tblRow(r,cy13,false,[55,55,45,27]); });
+      cy13+=4;
+
+      // ISU issues din relevee
+      if(_rvIsuIssues.length){
+        cy13=sec('13.1. CAMERE CU DISTANȚĂ CRITICĂ LA SCĂRI — NECESITĂ ATENȚIE',cy13);
+        cy13=body('Motorul Relevee a identificat '+_rvIsuIssues.length+' cameră/camere cu distanța față de nucleul de scări > '+_lungMaxCor+'m. Acestea necesită verificare la faza PAC cu arhitect autorizat și potențial suplimentare căi de evacuare.',14,cy13);cy13+=3;
+        cy13=tblRow(['Cameră','Distanță calculată','Limita P118','Măsură compensatorie'],cy13,true,[45,35,30,72]);
+        _rvIsuIssues.slice(0,8).forEach(isu=>{
+          cy13=tblRow([S2(isu.lbl||'Cameră'), isu.d+'m', _lungMaxCor+'m (max)', 'Ușă compartimentare RF sau cale evacuare suplim.'],cy13,false,[45,35,30,72]);
+        });
+        cy13+=3;
+      } else {
+        cy13=body('✅ Toate camerele identificate de Relevee Instant sunt la distanță ≤'+_lungMaxCor+'m față de nucleele de scări — conform P118-2/2013.',14,cy13);cy13+=4;
+      }
+
+      // Canvas cu planul etajului
+      cy13=sec('13.2. PLAN ETAJ CURENT — DISTRIBUȚIE SPAȚII',cy13);
+      const _bW=_rvBldSSF.bW, _bD=_rvBldSSF.bD;
+      const _sc2=Math.min((W-40)/_bW, (H-cy13-30)/_bD, 8);
+      const _ox2=14, _oy2=cy13+2;
+
+      // Background clădire
+      pdf.setFillColor(220,225,235);pdf.rect(_ox2,_oy2,_bW*_sc2,_bD*_sc2,'F');
+      pdf.setDrawColor(80,100,130);pdf.setLineWidth(1);pdf.rect(_ox2,_oy2,_bW*_sc2,_bD*_sc2,'S');
+
+      // Camere
+      const _colMap={living:[253,186,116],bedroom:[134,239,172],kitchen:[103,232,249],bath:[196,181,253],hall:[203,213,225],storage:[203,213,225],core:[147,197,253],office:[134,239,172],meeting:[253,186,116],balcon:[254,249,195],commercial:[249,168,212],reception:[249,168,212]};
+      _rvFloorSSF.rects.forEach(r=>{
+        const rc=_colMap[r.t]||[203,213,225];
+        pdf.setFillColor(rc[0],rc[1],rc[2]);
+        pdf.setFillOpacity?.(0.7);
+        pdf.rect(_ox2+r.x*_sc2+0.5,_oy2+r.y*_sc2+0.5,(r.w*_sc2)-1,(r.h*_sc2)-1,'F');
+        pdf.setFillOpacity?.(1);
+        pdf.setDrawColor(r.t==='core'?40:120,r.t==='core'?80:140,r.t==='core'?200:180);
+        pdf.setLineWidth(r.t==='core'?1:0.4);
+        pdf.rect(_ox2+r.x*_sc2+0.5,_oy2+r.y*_sc2+0.5,(r.w*_sc2)-1,(r.h*_sc2)-1,'S');
+        // Label
+        const lw=r.w*_sc2, lh=r.h*_sc2;
+        if(lw>12&&lh>8){
+          pdf.setFontSize(Math.min(6,lw/7));pdf.setFont('helvetica','bold');
+          pdf.setTextColor(r.t==='core'?30:50,r.t==='core'?60:60,r.t==='core'?150:80);
+          const lns=(r.lbl||r.t).replace('🪜 ','').replace('🛗 ','').split('
+');
+          lns.forEach((ln,li)=>pdf.text(S2(ln.trim().slice(0,12)),_ox2+r.x*_sc2+lw/2,_oy2+r.y*_sc2+lh/2+(li-(lns.length-1)/2)*5.5,{align:'center'}));
+          // Distanță evacuare
+          if(_rvBldSSF.cores.length&&r.apt>=0&&r.t!=='core'){
+            const core=_rvBldSSF.cores[0];
+            const d=Math.hypot(r.x+r.w/2-core.x-core.w/2,r.y+r.h/2-core.y-core.h/2);
+            const dOk=d<=_lungMaxCor;
+            pdf.setFontSize(5);pdf.setFont('helvetica','normal');
+            pdf.setTextColor(dOk?20:180,dOk?120:20,dOk?60:20);
+            pdf.text(d.toFixed(0)+'m',_ox2+r.x*_sc2+lw/2,_oy2+r.y*_sc2+lh-3,{align:'center'});
+          }
+        }
+      });
+
+      // ISU lines
+      if(_rvBldSSF.cores.length){
+        const core=_rvBldSSF.cores[0];
+        pdf.setDrawColor(239,68,68);pdf.setLineWidth(0.5);
+        const cx=_ox2+( core.x+core.w/2)*_sc2, cy_c=_oy2+(core.y+core.h/2)*_sc2;
+        _rvIsuIssues.slice(0,5).forEach(isu=>{
+          const rm=_rvFloorSSF.rects.find(r=>r.lbl===isu.lbl);
+          if(rm){ pdf.setLineDashPattern([2,2],0);pdf.line(cx,cy_c,_ox2+(rm.x+rm.w/2)*_sc2,_oy2+(rm.y+rm.h/2)*_sc2);pdf.setLineDashPattern([],0); }
+        });
+      }
+
+      // Legendă în dreapta
+      const _legX=_ox2+_bW*_sc2+4, _legY=_oy2;
+      if(_legX < W-20){
+        pdf.setFontSize(6);pdf.setFont('helvetica','bold');pdf.setTextColor(50,60,80);
+        pdf.text('LEGENDĂ SPAȚII',_legX,_legY+5);
+        const _legItems=[['living','Living/Salon'],[160,220,190],'bedroom','Dormitor',[103,232,249],'kitchen','Bucătărie',[196,181,253],'bath','Baie/WC',[147,197,253],'core','Scări+Lift'];
+        const _legs=[['living',[253,186,116],'Living'],['bedroom',[134,239,172],'Dormitor'],['kitchen',[103,232,249],'Bucătărie'],['bath',[196,181,253],'Baie/WC'],['hall',[203,213,225],'Hol'],['core',[147,197,253],'Scări+Lift']];
+        _legs.forEach(([_,c,l],i)=>{
+          pdf.setFillColor(c[0],c[1],c[2]);pdf.rect(_legX,_legY+8+i*8,6,6,'F');
+          pdf.setDrawColor(100,110,130);pdf.setLineWidth(0.3);pdf.rect(_legX,_legY+8+i*8,6,6,'S');
+          pdf.setFontSize(5.5);pdf.setFont('helvetica','normal');pdf.setTextColor(50,60,80);
+          pdf.text(l,_legX+8,_legY+13+i*8);
+        });
+        pdf.setFontSize(5);pdf.setTextColor(100,50,50);
+        pdf.text('— distanță critică evacuare',_legX,_legY+70);
+      }
+
+      cy13=_oy2+_bD*_sc2+6;
+      cy13=body('Notă: Schema funcțională de mai sus a fost generată automat de UrbanX Relevee Instant pe baza parametrilor urbanistici. Nu înlocuiește planșele arhitecturale din Proiectul Tehnic. Distanțele de evacuare marcate cu roșu necesită verificare obligatorie la faza PAC cu arhitect OAR autorizat.',14,cy13);
+    }catch(e){console.warn('[SSF-Relevee] Eroare pagina relevee:',e.message);}
   }
+
+  pdf.save('SSF_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
+  ss('OK Scenariu de Siguranta la Foc (SSF) generat — '+ (_rvBldSSF?'13':'12')+' pagini (cu schemă funcțională din Relevee Instant)!');
 }
 
 // ── STUDIU ISTORIC / PATRIMONIU ────────────────────────────────────────────
@@ -3326,12 +3372,12 @@ async function generateEnvironmentalImpact(){
   if(!ap?.geo?.geometry){ss('Selectați o parcelă pentru Studiul de Impact asupra Mediului.');return;}
   ss('Se generează Studiu de Impact asupra Mediului (EIM)...');
 
-  const d=_initStudyPdf_J('Studiu de Impact asupra Mediului','EIM — Legea 292/2018 + OUG 195/2005',10);
+  const d=_initStudyPdf('Studiu de Impact asupra Mediului','EIM — Legea 292/2018 + OUG 195/2005',10);
   const {pdf,W,H,DARK,DARK2,GOLD,GOLD2,BLUE,BLUE2,LIGHT,LIGHT2,RED,GREEN,ORANGE,GRAY,GRAY2,GRAY3,
     S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,
     hdr,ftr,sec,subsec,body,tblRow,addImg,kv,badge,divider,bullet,concluzii,sign,cover}=d;
 
-  const caps=await _captureStudyMaps_J(ap,m=>ss(m));
+  const caps=await _captureStudyMaps(ap,m=>ss(m));
   const eim=getEIMConfig();
   const mediu=getMediuConfig();
   const seism=getSeismConfig();
@@ -3656,7 +3702,7 @@ async function generateIstoricStudy(){
   if(!ap?.geo?.geometry){ss('Selectați o parcelă.');return;}
   ss('Se generează Studiu Istoric & Patrimoniu — interogare CIMEC...');
 
-  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf_J('Studiu Istoric si de Patrimoniu Urban','Studiu patrimoniu',10);
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Studiu Istoric si de Patrimoniu Urban','Studiu patrimoniu',10);
 
   // ── Interogare LIVE CIMEC ──────────────────────────────────────────────
   ss('Interogare CIMEC WMS/WFS (monumente.ro)...');
@@ -3734,7 +3780,7 @@ async function generateIstoricStudy(){
       pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.5);pdf.rect(14,cy,W-28,90,'S');
       cy+=93;
       pdf.setFontSize(7);pdf.setTextColor(80,100,130);pdf.setFont('helvetica','italic');
-      pdf.text(S2('Sursa harta: CIMEC — Institutul National al Patrimoniului, map.cimec.ro/Mapserver · Date live ')+S2(dateStr),W/2,cy,{align:'center'});
+      pdf.text('Sursă hartă: CIMEC — Institutul Național al Patrimoniului, map.cimec.ro/Mapserver · Date live '+S2(dateStr),W/2,cy,{align:'center'});
       cy+=5;
     }catch(e){ cy=addImg(caps.img3D,14,cy,W-28,68,'FIG. 1 — Vedere 3D amplasament (harta CIMEC indisponibilă)'); }
   } else {
@@ -3975,7 +4021,7 @@ async function generateSolarStudy(){
   if(!ap?.geo?.geometry){ss('Selectați o parcelă pentru studiu.');return;}
   ss('Se generează Studiu de Însorire — se capturează imagini...');
 
-  const d=_initStudyPdf_J('Pre-Studiu Urbanistic de Însorire','Studiu însorire OMS 119/2014',13);
+  const d=_initStudyPdf('Pre-Studiu Urbanistic de Însorire','Studiu însorire OMS 119/2014',13);
   const {pdf,W,H,DARK,DARK2,GOLD,GOLD2,BLUE,BLUE2,LIGHT,LIGHT2,RED,GREEN,ORANGE,GRAY,GRAY2,GRAY3,
     S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,
     hdr,ftr,sec,subsec,body,tblRow,addImg,kv,badge,divider,bullet,concluzii,sign,cover}=d;
@@ -4027,7 +4073,7 @@ async function generateSolarStudy(){
   const oreMinIarna=solarData.iarna.alts.filter(a=>a>=15).length;
   const oreMaxVara=solarData.vara.alts.filter(a=>a>5).length;
 
-  const caps=await _captureStudyMaps_J(ap,msg=>ss(msg));
+  const caps=await _captureStudyMaps(ap,msg=>ss(msg));
   ss('Se compilează PDF-ul...');
 
   // ════════════════════════════════════════════════════════════
@@ -4130,19 +4176,19 @@ async function generateSolarStudy(){
   pdf.setFillColor(...statCol);pdf.rect(14,cy,W-28,14,'F');
   pdf.setFillColor(...GOLD);pdf.rect(14,cy,3,14,'F');
   pdf.setTextColor(255,255,255);pdf.setFontSize(10);pdf.setFont('helvetica','bold');
-  pdf.text(isConform?'OK CONFORM OMS 119/2014 — Altitudine solara >=15° la solstitiu de iarna':'VERIFICARE — Studiu insorire obligatoriu OMS 119/2014 elaborat de arhitect OAR — constructia este permisa',W/2,cy+9,{align:'center'});
+  pdf.text(isConform?'OK CONFORM OMS 119/2014 — Altitudine solară ≥15° la solstițiu de iarnă':'NU NECONFORM — Altitudine solară '+solarData.iarna.maxAlt.toFixed(1)+'° < 15° cerut de OMS 119/2014',W/2,cy+9,{align:'center'});
   cy+=18;
 
   cy=sec('4. VERIFICARE CONFORMITATE OMS 119/2014',cy);
   cy=body('Conform OMS nr. 119/2014 (Norme de igienă privind mediul de viață al populației), orice spațiu locuit sau cu destinație similară trebuie să beneficieze de iluminat natural direct timp de minimum 1.5 ore pe zi la solstițiul de iarnă, cu unghi solar de minimum 15° față de orizont. Verificarea se efectuează pentru ziua de 21 decembrie (solstițiul de iarnă), ora 12:00 (prânz solar).',14,cy);cy+=3;
 
   cy=tblRow(['Criteriu OMS 119/2014','Valoare calculată','Prag minim','Diferență','Status'],cy,true,[65,35,28,25,29]);
-  [['Alt. solară solstițiu iarnă (12:00)',solarData.iarna.alt12+'°','≥ 15°',(solarData.iarna.maxAlt-15).toFixed(1)+'°',isConform?'CONFORM':'VERIFICARE PT'],
-   ['Ore însorire iarnă (alt ≥15°)',oreMinIarna+'h/zi','≥ 1.5h/zi',(oreMinIarna-1.5).toFixed(1)+'h',oreMinIarna>=1.5?'CONFORM':'VERIFICARE PT'],
+  [['Alt. solară solstițiu iarnă (12:00)',solarData.iarna.alt12+'°','≥ 15°',(solarData.iarna.maxAlt-15).toFixed(1)+'°',isConform?'CONFORM':'NECONFORM'],
+   ['Ore însorire iarnă (alt ≥15°)',oreMinIarna+'h/zi','≥ 1.5h/zi',(oreMinIarna-1.5).toFixed(1)+'h',oreMinIarna>=1.5?'CONFORM':'NECONFORM'],
    ['Ore însorire vară',oreMaxVara+'h/zi','informativ','—','INFO'],
    ['Umbrire la 12:00 iarnă',solarData.iarna.shadAt12+'m','conform H prop.','—','INFO'],
   ].forEach(r=>cy=tblRow(r,cy,false,[65,35,28,25,29],[
-    r[4]==='CONFORM'?[220,240,225]:r[4]==='VERIFICARE PT'?[240,230,210]:LIGHT
+    r[4]==='CONFORM'?[220,240,225]:r[4]==='NECONFORM'?[240,220,220]:LIGHT
   ]));cy+=4;
 
   cy=sec('5. CALCULUL UMBREI PROIECTATE',cy);
@@ -4312,8 +4358,8 @@ async function generateSolarStudy(){
   });
   cy2+=3;
   // Legenda
-  pdf.setFillColor(240,252,244);pdf.rect(14,cy2,60,7,'F');pdf.setTextColor(14,100,50);pdf.setFontSize(7);pdf.setFont('helvetica','bold');pdf.text(S2('Verde = orientare optima (S/SE/SV)'),16,cy2+5);
-  pdf.setFillColor(255,235,235);pdf.rect(80,cy2,60,7,'F');pdf.setTextColor(...RED);pdf.text(S2('Rosu = <1.5h (sub prag OMS 119)'),82,cy2+5);
+  pdf.setFillColor(240,252,244);pdf.rect(14,cy2,60,7,'F');pdf.setTextColor(14,100,50);pdf.setFontSize(7);pdf.setFont('helvetica','bold');pdf.text('■ Verde = orientare optimă (S/SE/SV)',16,cy2+5);
+  pdf.setFillColor(255,235,235);pdf.rect(80,cy2,60,7,'F');pdf.setTextColor(...RED);pdf.text('■ Roșu = <1.5h (sub prag OMS 119)',82,cy2+5);
   cy2+=12;
   cy2=sec('9.1. CONFORMITATE OMS 119/2014 PE ORIENTARI — SINTEZA LUNARA',cy2);cy2+=2;
   cy2=tblRow(['Orientare fațadă','Ore/zi (21 Dec)','Ore/zi (21 Mar)','Ore/zi (21 Iun)','Prag minim OMS','Conformitate'],cy2,true,[32,30,30,30,28,32]);
@@ -4332,7 +4378,6 @@ async function generateSolarStudy(){
   cy2=tblRow(['Înălțime H (clădire ce umbrește)','Distanță min. N (H/tan15°)','Distanță min. NE/NV','Distanță min. E/V','Obs.'],cy2,true,[48,42,42,38,12]);
   [[10,37.3,26.4,18.7,'P+3'],[15,56.0,39.6,28.0,'P+4'],[20,74.6,52.7,37.3,'P+6'],[25,93.3,65.9,46.6,'P+8'],[30,112.0,79.2,56.0,'P+9'],[aedisH,+(aedisH/Math.tan(15*Math.PI/180)).toFixed(1),+(aedisH/Math.tan(20*Math.PI/180)).toFixed(1),+(aedisH/Math.tan(30*Math.PI/180)).toFixed(1),'H PROPUS']].forEach(([h,dN,dNE,dE,niv2])=>{
     const isThis=h===aedisH;
-    const bg=isThis?[255,250,220]:[248,248,252];
     pdf.setFillColor(...bg);pdf.rect(14,cy2-5.5,W-28,8,'F');
     pdf.setDrawColor(...GRAY4);pdf.setLineWidth(0.15);pdf.line(14,cy2+2.5,W-14,cy2+2.5);
     const vs=[h+'m',dN+'m',dNE+'m',dE+'m',niv2];
@@ -4378,10 +4423,101 @@ async function generateSolarStudy(){
   ].forEach(r=>cy2=tblRow(r,cy2,false,[50,32,32,32,36]));
   cy2+=3;
   cy2=body('Recomandare finală: Proiectantul arhitect va integra măsuri de protecție solară pasivă în proiectul PAC/PT pentru a asigura conformitatea cu Regulamentul Delegat (UE) 2016/2281 privind ecodesignul produselor de încălzire și răcire și cu NZEB (Nearly Zero Energy Building) — obligatoriu pentru clădirile noi conform Legii 372/2005 republicată.',14,cy2);cy2+=3;
+  // ════════════════════════════════════════════════════════════════════════
+  // PAG RELEVEE — Analiză însorire per cameră (din Relevee Instant)
+  // ════════════════════════════════════════════════════════════════════════
+  try{
+    if(typeof _rvCompBuilding === 'function' && typeof _rvFloor === 'function'){
+      const pArea2=parseFloat(area)||0;
+      const _rvPsol={
+        nrCad:nrcad, utr, fn:AEDIS.fn||'rezidential_colectiv',
+        W:Math.sqrt(pArea2*1.2), D:Math.sqrt(pArea2/1.2), area:pArea2,
+        rf:parseFloat(params?.rf||0), rl:parseFloat(params?.rl||3), rs:parseFloat(params?.rs||6),
+        pot:parseFloat(params?.pot||35)/100, cut:parseFloat(params?.cut||1.5),
+        niv:niv, hn:3.0, frontDir:S.vol?.frontDir||'N',
+      };
+      const _rvBldSol  = _rvCompBuilding(_rvPsol);
+      const _rvFlSol   = _rvFloor(_rvBldSol, 1); // etaj tipic
+      const frontDir   = _rvPsol.frontDir;
+
+      // Calcul ore însorire per cameră — mapare tip cameră → orientare → ore la 21 dec
+      const _wallOre=(wall)=>{
+        const doy=355;
+        // Orientare fațadă față de nord (în funcție de frontDir)
+        const wallCardinal={N:{S:'N',E:'E',V:'V'},S:{S:'S',E:'E',V:'V'},E:{S:'E',E:'S',V:'N'},V:{S:'V',E:'N',V:'S'},NE:{S:'NE',E:'SE',V:'NV'},NV:{S:'NV',E:'NE',V:'SV'},SE:{S:'SE',E:'SV',V:'NE'},SV:{S:'SV',E:'NV',V:'SE'}}[frontDir]||{S:'S',E:'E',V:'V'};
+        const effectiveWall=wallCardinal[wall]||wall;
+        // Ore însorire pentru orientare efectivă la 21 dec
+        const _oreByDir={S:oreMinIarna,SE:Math.round(oreMinIarna*0.85),SV:Math.round(oreMinIarna*0.85),E:Math.max(1,Math.round(oreMinIarna*0.65)),V:Math.max(1,Math.round(oreMinIarna*0.6)),N:0,NE:0,NV:0};
+        return _oreByDir[effectiveWall]??0;
+      };
+
+      // Ferestre din relevee → ore per cameră
+      const roomOre={};
+      _rvFlSol.wins.forEach(w=>{
+        const key=w.type+'_'+w.apt;
+        const ore=_wallOre(w.wall);
+        if(!roomOre[key]||ore>roomOre[key]) roomOre[key]={type:w.type,ore,wall:w.wall,apt:w.apt};
+      });
+      // Camere fără fereastră externă → 0h
+      _rvFlSol.rects.filter(r=>r.apt>=0).forEach(r=>{
+        const key=r.t+'_'+r.apt;
+        if(!roomOre[key]) roomOre[key]={type:r.t,ore:0,wall:'interior',apt:r.apt};
+      });
+      const roomSummary=Object.values(roomOre);
+
+      if(roomSummary.length>0){
+        pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
+        hdr('ANALIZA INSORIRE PER CAMERA — RELEVEE INSTANT + OMS 119/2014',12);ftr();
+        let cyR=30;
+
+        cyR=sec('12. ANALIZĂ ÎNSORIRE PER CAMERĂ — PLAN FUNCȚIONAL ETAJ CURENT',cyR);
+        cyR=body('Analiza de mai jos calculează orele de însorire directă la solstițiul de iarnă (21 dec) pentru fiecare tip de cameră identificat de motorul UrbanX Relevee Instant. Orientarea ferestrelor este dedusă din orientarea frontului stradal ('+frontDir+') și din poziția camerelor față de fațadele exterioare. Pragul OMS 119/2014: minimum 1.5 ore/zi.',14,cyR);cyR+=4;
+
+        // Tabel per cameră
+        cyR=tblRow(['Cameră / Tip','Orient. ferestr.','Ore însor. 21 dec.','Prag OMS 119','Status','Aptm.'],cyR,true,[38,30,30,27,22,15]);
+        const _typeLabel={living:'Living',bedroom:'Dormitor 1',bedroom2:'Dormitor 2',bedroom3:'Dormitor 3',kitchen:'Bucătărie',bath:'Baie',wc:'WC',hall:'Hol',storage:'Cămară',core:'Scări/Lift',office:'Birou',meeting:'Ședință',balcon:'Balcon',commercial:'Comercial',reception:'Recepție'};
+        const _needsSun=['living','bedroom','bedroom2','bedroom3','office'];
+        roomSummary.sort((a,b)=>b.ore-a.ore).forEach(r=>{
+          const needs=_needsSun.includes(r.type);
+          const ok=!needs||r.ore>=1.5;
+          const statusStr=!needs?'N/A':ok?'OK CONFORM':'ATN < 1.5h';
+          cyR=tblRow([
+            _typeLabel[r.type]||r.type,
+            r.wall+(r.wall!=='interior'?' (ext.)':''),
+            r.ore>0?r.ore.toFixed(1)+'h':'0h (int.)',
+            needs?'≥ 1.5h':'—',
+            statusStr,
+            r.apt>=0?'Apt.'+(r.apt+1):'—',
+          ],cyR,false,[38,30,30,27,22,15]);
+        });
+        cyR+=4;
+
+        // Sumar conformitate
+        const _camereLocuit=roomSummary.filter(r=>_needsSun.includes(r.type));
+        const _camereConf=_camereLocuit.filter(r=>r.ore>=1.5).length;
+        const _camereNeconf=_camereLocuit.length-_camereConf;
+        cyR=sec('12.1. SUMAR CONFORMITATE OMS 119/2014 PER CAMERĂ',cyR);
+        cyR=tblRow(['Categorie','Nr. camere','OMS 119 Status','Observație'],cyR,true,[45,28,35,74]);
+        [['Camere de locuit (living + dormitoare)',_camereLocuit.length+' cam.',_camereNeconf===0?'OK — TOATE CONFORME':_camereNeconf+' camere sub prag',_camereNeconf===0?'Însorire asigurată conform OMS 119/2014':'Verificare obligatorie la PAC — reorientare ferestre sau redistribuire funcțiuni'],
+         ['Bucătărie',roomSummary.filter(r=>r.type==='kitchen').length+' cam.','N/A','Ventilație mecanică obligatorie dacă orientare N/NV'],
+         ['Băi + WC',roomSummary.filter(r=>r.type==='bath'||r.type==='wc').length+' cam.','N/A','Ventilație mecanică obligatorie SR EN 15665'],
+         ['Total camere per etaj',roomSummary.filter(r=>r.apt>=0).length+' cam.','Informativ','Etaj tipic — '+_rvBldSol.cores.length+' nuclee scări, '+(_rvBldSol.cores.length*2)+' apartamente/etaj'],
+        ].forEach(r=>cyR=tblRow(r,cyR,false,[45,28,35,74]));
+        cyR+=3;
+
+        // Concluzie
+        const _solarConcl=_camereNeconf===0
+          ? 'Toate camerele de locuit identificate prin Relevee Instant beneficiază de însorire ≥1.5h/zi la solstițiu de iarnă, conform OMS 119/2014. Orientarea frontului stradal ('+frontDir+') permite orientarea favorabilă a spațiilor principale.'
+          : _camereNeconf+' cameră/camere de locuit se află sub pragul de 1.5h/zi la solstițiu de iarnă. Se recomandă redistribuirea funcțiunilor la faza PAC: mutarea spațiilor tehnice (hol, depozit, baie) pe fațada nordică și a camerelor de locuit pe fațadele sudice/estice.';
+        cyR=body(_solarConcl,14,cyR);
+      }
+    }
+  }catch(e){console.warn('[Solar-Relevee] Eroare pagina per-camera:',e.message);}
+
   sign();
 
   pdf.save('Studiu_Insorire_'+nrcad+'_'+year+'.pdf');
-  ss('OK Studiu de Însorire generat! (8 pagini)');
+  ss('OK Studiu de Însorire generat cu analiză per cameră din Relevee Instant!');
 }
 
 // ── Wrapper global pentru studii — prinde erori și le afișează clar ────────
@@ -4442,13 +4578,13 @@ async function generateStudiuFezabilitate(paramOverrides){
   }
   ss('Se generează Studiu de Fezabilitate / DALI...');
 
-  const d=_initStudyPdf_J('Studiu de Fezabilitate / DALI','SF/DALI · HG 907/2016',18);
+  const d=_initStudyPdf('Studiu de Fezabilitate / DALI','SF/DALI · HG 907/2016',18);
   const {pdf,W,H,DARK,DARK2,NAVY,GOLD,GOLD2,GOLD3,BLUE,BLUE2,TEAL,LIGHT,LIGHT2,LIGHT3,
     RED,GREEN,ORANGE,PURPLE,GRAY,GRAY2,GRAY3,GRAY4,WHITE,
     S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,
     hdr,ftr,sec,subsec,body,tblRow,addImg,kv,badge,divider,bullet,concluzii,sign,cover,newPage,checkY}=d;
 
-  const caps=await _captureStudyMaps_J(ap, msg=>ss(msg));
+  const caps=await _captureStudyMaps(ap, msg=>ss(msg));
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13.2;
   const niv=AEDIS.corpuri[0]?.niv||4;
   const fn=AEDIS.fn||'rezidential_colectiv';
@@ -4924,9 +5060,9 @@ async function generateStudiuFezabilitate(paramOverrides){
   // O - Opportunities / T - Threats
   pdf.setFillColor(...BLUE);pdf.rect(14,cy,swotW,8,'F');
   pdf.setTextColor(255,255,255);pdf.setFontSize(8.5);pdf.setFont('helvetica','bold');
-  pdf.text(S2('O — OPORTUNITATI (Opportunities)'),14+swotW/2,cy+5.5,{align:'center'});
+  pdf.text('O — OPORTUNITĂȚI (Opportunities)',14+swotW/2,cy+5.5,{align:'center'});
   pdf.setFillColor(...ORANGE);pdf.rect(14+swotW,cy,swotW,8,'F');
-  pdf.text(S2('T — AMENINTARI (Threats)'),14+swotW+swotW/2,cy+5.5,{align:'center'});
+  pdf.text('T — AMENINȚĂRI (Threats)',14+swotW+swotW/2,cy+5.5,{align:'center'});
   cy+=8;
   const swotO=['Piață imobiliară activă în '+uat+' — cerere ridicată rezidențial/birouri','Fonduri europene POR 2021-2027 — axa urbană — potențial eligibil','Pre-certificare verde (BREEAM/LEED) — chirie +10-15% vs necertificat','Parcare subterană P-1 eliberează suprafața terenului pt spații comerciale','Trend pozitiv chirii: +3-5%/an estimat în zona UTR '+utr,'Stații EV (10% din locuri) — conformitate Reg. UE 2023/1804'];
   const swotT=['Risc modificare PUG — verificare obligatorie CU înainte de achiziție teren','Escaladare costuri construcție (risc ridicat 40%) — rezervă contingență obligatorie','Risc seismic P100-1/2013 zona '+getSeismConfig().zona+' — proiect structură antiseismică','Intârzieri avize (ISU, DJCPN, AACR) — 30-90 zile per aviz','Risc piață — scădere cerere în caz de recesiune — pre-vânzări recomandate','Riscuri geotehnice (teren argilos/loess) — costuri fundații suplimentare'];
@@ -4937,8 +5073,6 @@ async function generateStudiuFezabilitate(paramOverrides){
   }
   let _swotOTY=cy;
   for(let i=0;i<maxOT;i++){
-    const rh=_swotOTRH[i];
-    const bg=i%2===0?[248,252,255]:[240,245,252];
     pdf.setFillColor(...bg);pdf.rect(14,_swotOTY,swotW*2,rh,'F');
     pdf.setDrawColor(...GRAY4);pdf.setLineWidth(0.15);
     pdf.line(14,_swotOTY+rh,14+swotW*2,_swotOTY+rh);
@@ -5072,12 +5206,12 @@ async function generateStudiuAmplasament(){
     try{const v=map.getLayoutProperty(lid,'visibility')||'visible';_lotLayerVis[lid]=v;map.setLayoutProperty(lid,'visibility','none');}catch(e){}
   });
 
-  const d=_initStudyPdf_J('Studiu de Amplasament si Analiza Teritoriala','Studiu amplasament · Document fundament',13);
+  const d=_initStudyPdf('Studiu de Amplasament si Analiza Teritoriala','Studiu amplasament · Document fundament',13);
   const {pdf,W,H,DARK,DARK2,NAVY,GOLD,GOLD2,GOLD3,BLUE,BLUE2,TEAL,LIGHT,LIGHT2,LIGHT3,
     RED,GREEN,ORANGE,PURPLE,GRAY,GRAY2,GRAY3,GRAY4,WHITE,
     S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,
     hdr,ftr,sec,subsec,body,tblRow,addImg,kv,badge,divider,bullet,concluzii,sign,cover,newPage,checkY,smartPage}=d;
-  const caps=await _captureStudyMaps_J(ap, msg=>ss(msg));
+  const caps=await _captureStudyMaps(ap, msg=>ss(msg));
 
   // ── Restaurează lotizare după captură ─────────────────────────────────────
   Object.entries(_lotLayerVis).forEach(([lid,v])=>{
@@ -5454,7 +5588,7 @@ async function generateStudiuAmplasament(){
   cy=subsec('8.1. DATE SOLARE — LAT. '+lat.toFixed(2)+'°N / LON. '+lon.toFixed(2)+'°E',cy);cy+=2;
   cy=tblRow(['Parametru solar','Valoare calculată','Normă','Utilizare studii'],cy,true,[65,42,38,37]);
   const months3=['Ian','Feb','Mar','Apr','Mai','Iun','Iul','Aug','Sep','Oct','Nov','Dec'];
-  [['Altitudine solară 21 Dec ora 12:00',altDec12.toFixed(2)+'°','OMS 119/2014 prag 15°',isConformSolar?'CONFORM':'VERIFICARE PT'],
+  [['Altitudine solară 21 Dec ora 12:00',altDec12.toFixed(2)+'°','OMS 119/2014 prag 15°',isConformSolar?'CONFORM':'NECONFORM'],
    ['Ore soare 21 Dec (răsărit-apus)',oreSoare21dec+'h','STAS 6221-1981','Studiu umbre'],
    ['Altitudine solară 21 Iun ora 12:00',solarAlt(lat,5,12).toFixed(2)+'°','—','Protecție solară vară'],
    ['Iradiere globală medie anuală','~4.0 kWh/mp/zi','PVGIS (JRC)','Studiu FV/colectoare'],
@@ -5747,7 +5881,7 @@ async function runExport(){
   // Status bar
   pdf.setFillColor(...(isConform?GREEN_C:RED_C));pdf.roundedRect(18,H*0.877,W-36,14,2,2,'F');
   pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');
-  pdf.text(isConform?'TOTI PARAMETRII IN LIMITA PUG — Constructie autorizabila':'VERIFICA PARAMETRII — Ajustare propunere necesara conform PUG (detalii pag. 2)',W/2,H*0.889,{align:'center'});
+  pdf.text(isConform?'TOTI PARAMETRII IN LIMITA PUG — Constructie autorizabila':'ATENTIE — Parametri de verificat (vezi pag. 2)',W/2,H*0.889,{align:'center'});
   pdf.setFontSize(7);pdf.setFont('helvetica','normal');
   pdf.text('H propus '+aedisH.toFixed(1)+'m vs. H max '+(hMax||'NS')+'m · POT '+potMax+'% · CUT '+cutMax+' · SV min '+svPct+'%',W/2,H*0.902,{align:'center'});
   pdf.setTextColor(90,115,155);pdf.setFontSize(6.5);
@@ -5945,7 +6079,7 @@ async function generateWaterStudy(){
   if(!ap?.geo?.geometry){ ss('Selectați o parcelă.'); return; }
   ss('Se generează Studiu Gospodărire Ape & DTGA...');
 
-  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf_J('Studiu de Gospodărire a Apelor — DTGA','DTGA',9);
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Studiu de Gospodărire a Apelor — DTGA','DTGA',9);
   if(!pdf||!W||!H){ ss('Eroare initializare PDF. Reîncearcă.'); return; }
   const apaCfg = getApaConfig();
   const hidro = getHidroConfig();
@@ -5956,7 +6090,7 @@ async function generateWaterStudy(){
   if(!_p.pot) _p.pot = 50; if(!_p.cut) _p.cut = 1.5; if(!_p.rl) _p.rl = 3;
   // Suprascrie params cu versiunea safe
   Object.assign(params && typeof params === 'object' ? params : {}, _p);
-  const caps = await _captureStudyMaps_J(ap, msg=>ss(msg));
+  const caps = await _captureStudyMaps(ap, msg=>ss(msg));
   // Helper safe pentru cy
   const _kv = (rows, cy_) => {
     let y = isFinite(cy_) ? cy_ : 33;
@@ -5977,10 +6111,10 @@ async function generateWaterStudy(){
   pdf.setTextColor(...GOLD);pdf.setFontSize(9);pdf.setFont('helvetica','bold');
   pdf.text('URBANX — PLATFORMA DE ANALIZA URBANISTICA',W/2,50,{align:'center'});
   pdf.setTextColor(255,255,255);pdf.setFontSize(22);pdf.setFont('helvetica','bold');
-  pdf.text('STUDIU DE GOSPODARIRE',W/2,70,{align:'center'});
+  pdf.text('STUDIU DE GOSPODĂRIRE',W/2,70,{align:'center'});
   pdf.text('A APELOR — DTGA',W/2,85,{align:'center'});
   pdf.setTextColor(...GOLD);pdf.setFontSize(10);
-  pdf.text('Documentatie Tehnica · Aviz + Autorizatie Apele Romane',W/2,98,{align:'center'});
+  pdf.text('Documentație Tehnică · Aviz + Autorizație Apele Române',W/2,98,{align:'center'});
   pdf.setFillColor(0,40,65);pdf.rect(20,110,W-40,88,'F');
   pdf.setFillColor(...GOLD);pdf.rect(20,110,3,88,'F');
   [
@@ -6251,14 +6385,14 @@ async function generateWaterStudy(){
   pdf.setTextColor(20,40,80);pdf.setFontSize(8.5);pdf.setFont('helvetica','bold');
   pdf.text('DOCUMENT ORIENTATIV — UrbanX TSS·FG',22,cy+7);
   pdf.setTextColor(60,90,120);pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');
-  pdf.text(S2('Prezenta documentatie este generata automat si are caracter STRICT ORIENTATIV.'),22,cy+13);
+  pdf.text('Prezenta documentație este generată automat și are caracter STRICT ORIENTATIV.',22,cy+13);
 
   const _dtga_risc = apaCfg.risc_inundabil?.includes('Ridicat');
   const _dtga_aproape = apaCfg.distanta_curs_principal<200;
   try{ _addConcluziePage(pdf,W,H,S2,hdr,ftr,sec,body,tblRow,nrcad,utr,uat,params,aedisH,AEDIS.fn||'rezidential_colectiv',9,'Gospodărire Ape DTGA',[
     {criteriu:'Risc inundabilitate',valoare:S2(apaCfg.risc_inundabil),status:_dtga_risc?'MASURI':'OK',obs:_dtga_risc?'Zona cu risc ridicat — Aviz Gospodarie Ape obligatoriu; construire permisa dupa obtinerea avizului cu masuri compensatorii':apaCfg.risc_inundabil?.includes('Mediu')?'Risc mediu — verificare Q100 INHGA; obtineti AGA preventiv':'Risc scazut — construire permisa',remediere:_dtga_risc?'Obtineti Aviz Gospodarie Ape (AGA) de la '+S2(apaCfg.DA)+' ('+apaCfg.DA_tel+') — construirea ESTE permisa dupa aviz cu implementarea masurilor din acesta (cota inundabilitate, hidroizolatie soclu, rampe acces)':'Verificati hartile INHGA (www.inhga.ro) pentru confirmare'},
-    {criteriu:'Aviz Gospodarire Ape',valoare:'Obligatoriu inainte de AC',status:'ATENTIE',obs:'AGA se obtine de la DA Prut-Barlad pe baza DTGA — procedura standard, termen 45 zile',remediere:'Depuneti DTGA la '+S2(apaCfg.DA)+' ('+apaCfg.DA_tel+') — termen legal 45 zile; AC se emite dupa obtinerea AGA'},
-    {criteriu:'Nivel freatic (NFA)',valoare:S2(hidro.nfa||apaCfg.nfa),status:'ATENTIE',obs:'Studiu geotehnic obligatoriu NP 074/2014 — parte din documentatia standard PT',remediere:'Studiu geotehnic cu min. 2 foraje pe amplasament — documentatie standard de proiectare, se comanda in faza PAC/PT'},
+    {criteriu:'Aviz Gospodărire Ape',valoare:'Obligatoriu',status:'ATENTIE',obs:'AGA necesar înainte de Autorizația de Construire',remediere:'Depuneți DTGA la '+S2(apaCfg.DA)+' ('+apaCfg.DA_tel+') — termen 45 zile legale'},
+    {criteriu:'Nivel freatic (NFA)',valoare:S2(hidro.nfa||apaCfg.nfa),status:'ATENTIE',obs:'Studiu geotehnic obligatoriu NP 074/2014 pentru confirmarea NFA exact',remediere:'Comandați studiu geotehnic cu cel puțin 2 foraje pe amplasament înainte de proiectare fundație'},
     {criteriu:'Distanta fata de curs apa',valoare:apaCfg.distanta_curs_principal+'m',status:_dtga_aproape?'MASURI':'OK',obs:_dtga_aproape?'Sub 200m — Aviz de amplasament obligatoriu cf. Legii 107/1996; construire permisa dupa aviz':'Distanta suficienta fata de curs principal',remediere:_dtga_aproape?'Obtineti Aviz de amplasament de la '+S2(apaCfg.DA)+' cf. Legii 107/1996 Art.40 — avizul este procedura standard si nu blocheaza constructia, ci stabileste masurile tehnice de protectie':'Verificati ca nu exista cursuri de apa temporare necartografiate'},
   ]); }catch(_ce){console.warn('[concluzii]',_ce.message);}
   try{ pdf.save('DTGA_Ape_'+S2(nrcad)+'_'+new Date().getFullYear()+'.pdf'); }catch(e){ pdf.save('DTGA_Ape_partial.pdf'); }
@@ -6278,17 +6412,14 @@ function _addConcluziePage(pdf, W, H, S2, hdr, ftr, sec, body, tblRow, nrcad, ut
     // Verdict global — doar ASCII/Latin1 safe
     const nrBlocat = items.filter(i=>i.status==='BLOCAT'||i.status==='MASURI').length;
     const nrAtentie = items.filter(i=>i.status==='ATENTIE').length;
-    // MASURI = portocaliu (masuri compensatorii obligatorii, dar constructia permisa)
-    // ATENTIE = albastru (documentatie de depus in faza PT — procedura normala)
-    // OK = verde
-    const verdictCol = nrBlocat>0?[200,100,10]:nrAtentie>0?[30,80,160]:[16,130,60];
+    const verdictCol = nrBlocat>0?[200,100,10]:nrAtentie>0?[200,100,10]:[16,130,60];
     // Texte ASCII pure — fara emoji/unicode
     const verdictText = nrBlocat>0?
-      'CONSTRUIRE PERMISA — MASURI COMPENSATORII PREVAZUTE IN PROIECT':
+      'CONSTRUIRE POSIBILA CU MASURI COMPENSATORII OBLIGATORII':
       nrAtentie>0?
-      'PROPUNERE CONFORMA — DOCUMENTATIE SUPLIMENTARA IN FAZA PT':
+      'CONSTRUIREA POSIBILA CU CONDITII':
       'PROPUNERE CONFORMA - SE POATE AVIZA';
-    const verdictPfx = nrBlocat>0?'[!]':nrAtentie>0?'[OK]':'[OK]';
+    const verdictPfx = nrBlocat>0?'[!]':nrAtentie>0?'[!]':'[OK]';
 
     pdf.setFillColor(...verdictCol);pdf.roundedRect(14,cy,W-28,16,2,2,'F');
     pdf.setTextColor(255,255,255);pdf.setFontSize(11);pdf.setFont('helvetica','bold');
@@ -6332,23 +6463,19 @@ function _addConcluziePage(pdf, W, H, S2, hdr, ftr, sec, body, tblRow, nrcad, ut
     });
     cy+=5;
 
-    // Ce trebuie schimbat / Pasi de urmat
+    // Ce trebuie schimbat
     const probleme = items.filter(i=>i.status!=='OK');
     if(probleme.length>0){
-      const areDoarAtentie = probleme.every(p=>p.status==='ATENTIE');
-      const secTitle = areDoarAtentie ? 'PASI DE URMAT PENTRU COMPLETAREA DOCUMENTATIEI' : 'MASURI COMPENSATORII PREVAZUTE PENTRU AUTORIZARE';
       pdf.setFillColor(8,21,42);pdf.roundedRect(14,cy,W-28,7,1,1,'F');
       pdf.setTextColor(212,175,55);pdf.setFontSize(8);pdf.setFont('helvetica','bold');
-      pdf.text(S2(secTitle),18,cy+5);
+      pdf.text('MASURI COMPENSATORII PENTRU AUTORIZARE',18,cy+5);
       cy+=11;
       pdf.setFont('helvetica','normal');
       probleme.forEach((p,i)=>{
-        const pref=(p.status==='BLOCAT'||p.status==='MASURI')?'MASURA COMPENSATORIE: ':p.status==='ATENTIE'?'DE DEPUS IN FAZA PT: ':'RECOMANDAT: ';
+        const pref=(p.status==='BLOCAT'||p.status==='MASURI')?'MASURA COMPENSATORIE OBLIGATORIE: ':'RECOMANDAT: ';
         const txt=S2((i+1)+'. '+pref+(p.remediere||p.obs||'Verificare necesara'));
         const lines=pdf.splitTextToSize(txt,W-34);
-        // MASURI = portocaliu, ATENTIE = albastru inchis, altele = gri-albastru
-        const [cr,cg,cb]=p.status==='MASURI'?[180,80,20]:p.status==='ATENTIE'?[20,60,140]:[30,50,80];
-        pdf.setTextColor(cr,cg,cb);
+        pdf.setTextColor(p.status==='MASURI'?180:30, p.status==='MASURI'?80:50, p.status==='MASURI'?20:80);
         pdf.setFontSize(8);
         lines.forEach((l,li)=>pdf.text(l,18,cy+li*4.5));
         cy+=lines.length*4.5+3;
