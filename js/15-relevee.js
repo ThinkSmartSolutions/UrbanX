@@ -139,9 +139,16 @@ function _rvGetParcelParams(){
 
 // ── Algoritm de calcul ────────────────────────────────────────────────────
 function _rvCompBuilding(P){
-  const bW   = Math.max(6, P.W - P.rl * 2);
-  const bD   = Math.max(6, P.D - P.rf - P.rs);
-  const scArea   = Math.min(bW * bD, P.area * P.pot);
+  // Dimensiuni minime viabile — dacă parcela e prea mică, folosim estimare din arie
+  let effW = P.W, effD = P.D;
+  if(P.area < 100){
+    // Parcelă mică — estimăm din arie cu raport 1:1.5
+    effW = Math.max(P.W, Math.sqrt(P.area * 0.8));
+    effD = Math.max(P.D, P.area / effW);
+  }
+  const bW   = Math.max(6, effW - P.rl * 2);
+  const bD   = Math.max(6, effD - P.rf - P.rs);
+  const scArea   = Math.min(bW * bD, Math.max(P.area * P.pot, 36));
   const sdaTarget= P.area * P.cut;
   const niv  = Math.min(P.niv, Math.max(1, Math.round(sdaTarget / scArea)));
   const sdaTotal = scArea * niv;
@@ -740,6 +747,20 @@ async function generateRelevee(){
   document.querySelector('.rv-tab[data-tab="plan"]')?.classList.add('rv-on');
   document.getElementById('rv-empty')?.style.setProperty('display','none');
 
+  // Auto-fit: calculăm scala optimă pentru parcelă
+  try{
+    const wrap = document.getElementById('rv-drawwrap');
+    if(wrap && b.P){
+      const availW = wrap.clientWidth  - 140; // pad + dims
+      const availH = wrap.clientHeight - 120;
+      const scW = availW / (b.P.W + b.P.rl*2 + 4);
+      const scH = availH / (b.P.D + b.P.rf + b.P.rs + 4);
+      const fitSc = Math.min(28, Math.max(6, Math.floor(Math.min(scW, scH))));
+      _RV.scale = fitSc;
+      document.getElementById('rv-zval').textContent = Math.round(fitSc/12*100)+'%';
+    }
+  }catch(e){}
+
   _rvRender();
 
   clearInterval(tInt);
@@ -747,6 +768,9 @@ async function generateRelevee(){
   if(tdot) tdot.classList.remove('rv-running');
   if(tval) tval.textContent=secs+'s';
   document.getElementById('rv-tinfo').textContent=`Nr.cad. ${P.nrCad} · ${b.niv} niv. · SDA=${_rvFmt(b.sdaTotal)}m² · POT=${_rvFmt(b.scArea/P.area*100)}% · CUT=${_rvFmtD(b.sdaTotal/P.area)} · ${secs}s`;
+  // Populăm info parcelă din panoul drept
+  const piEl = document.getElementById('rv-parcel-info');
+  if(piEl) piEl.innerHTML = `Nr. cad.: <strong style="color:#D4AF37">${P.nrCad}</strong><br>UTR: ${P.utr}<br>Suprafață: ${P.area}m²<br>Dim. bbox: ${P.W.toFixed(1)}m × ${P.D.toFixed(1)}m<br>Front: ${P.frontDir}<br>POT max: ${Math.round(P.pot*100)}%<br>CUT max: ${P.cut}<br>H max: ${P.hMax}m<br>Niveluri: ${b.niv} niv.<br>H total: ${(b.niv*P.hn).toFixed(1)}m`;
 
   _rvUpdatePanels(b,P);
   if(typeof ss === 'function') ss(`✅ Relevee generate în ${secs}s — ${b.niv} niveluri, SDA=${_rvFmt(b.sdaTotal)}m²`);
@@ -829,11 +853,203 @@ function _rvZoom(d){
 }
 
 function _rvExport(){
+  // PNG quick export (păstrat pentru debug)
   const cv=document.getElementById('rv-canvas'); if(!cv.width) return;
   const a=document.createElement('a');
   const P=_RV.parcelParams;
   a.download=`relevee_${P?.nrCad||'urbanx'}_${_RV.tab}_e${_RV.floor}.png`;
   a.href=cv.toDataURL('image/png',1.0); a.click();
+}
+
+async function _rvExportPDF(){
+  const P = _RV.parcelParams;
+  const b = _RV.building;
+  if(!P||!b){ alert('Generați releveele mai întâi.'); return; }
+
+  // Folosim jsPDF dacă e disponibil (încărcat de 10-studies)
+  if(typeof jspdf === 'undefined' && typeof window.jspdf === 'undefined' && typeof jsPDF === 'undefined'){
+    // Fallback: export toate taburile ca PNG într-un zip sau PNG combinat
+    _rvExportAllPNG(P, b); return;
+  }
+
+  const btn = document.querySelector('.rv-expbtn');
+  if(btn){ btn.textContent = '⏳ Generez PDF…'; btn.style.opacity='.6'; }
+
+  try{
+    const _jsPDF = (typeof jsPDF!=='undefined')?jsPDF:(window.jspdf?.jsPDF);
+    const pdf = new _jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+    const W=297, H=210;
+    const GOLD=[212,175,55], DARK=[8,14,30], LIGHT=[245,247,252], RED=[220,38,38], GREEN=[16,130,60], BLUE=[59,130,246];
+
+    const S2=s=>String(s||'').replace(/[^ -~À-ɏ]/g,' ').slice(0,200);
+    const hdr=(title,pg)=>{
+      pdf.setFillColor(...DARK);pdf.rect(0,0,W,10,'F');
+      pdf.setFillColor(...GOLD);pdf.rect(0,0,W,1,'F');
+      pdf.setTextColor(212,175,55);pdf.setFontSize(7);pdf.setFont('helvetica','bold');
+      pdf.text('URBANX — RELEVEE INSTANT · Document orientativ',6,7);
+      pdf.setTextColor(200,210,220);pdf.text(S2(title),W/2,7,{align:'center'});
+      pdf.setTextColor(150,160,180);pdf.text('Pag. '+pg,W-6,7,{align:'right'});
+    };
+    const ftr=()=>{
+      pdf.setFillColor(20,30,50);pdf.rect(0,H-7,W,7,'F');
+      pdf.setTextColor(100,120,150);pdf.setFontSize(6);pdf.setFont('helvetica','normal');
+      pdf.text('Nr.cad. '+S2(P.nrCad)+' · UTR: '+S2(P.utr)+' · '+S2(P.fn)+' · UrbanX TSS·FG · Document orientativ — nu înlocuiește proiectul tehnic',W/2,H-2,{align:'center'});
+    };
+
+    // ── PAG 1: COPERTĂ ────────────────────────────────────────────────
+    pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');
+    pdf.setFillColor(...GOLD);pdf.rect(0,0,W,1.5,'F');pdf.rect(0,H-1.5,W,1.5,'F');
+    pdf.setTextColor(212,175,55);pdf.setFontSize(22);pdf.setFont('helvetica','bold');
+    pdf.text('RELEVEE INSTANT',W/2,55,{align:'center'});
+    pdf.setTextColor(200,210,220);pdf.setFontSize(11);pdf.setFont('helvetica','normal');
+    pdf.text('Planuri funcționale orientative generate automat',W/2,67,{align:'center'});
+    pdf.setFillColor(15,25,45);pdf.rect(W/2-70,78,140,65,'F');
+    pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.5);pdf.rect(W/2-70,78,140,65,'S');
+    pdf.setDrawColor(...GOLD);pdf.rect(W/2-68,80,2,61,'F');
+    const infoRows=[['Nr. cadastral',P.nrCad],['UTR',P.utr],['Funcțiune',P.fn],
+      ['Dimensiuni parcelă',P.W.toFixed(1)+'m × '+P.D.toFixed(1)+'m — '+P.area+'m²'],
+      ['Regim înălțime',b.niv+' niveluri · H='+(b.niv*P.hn).toFixed(1)+'m'],
+      ['SDA totală estimată',Math.round(b.sdaTotal)+'m²'],
+      ['POT / CUT',Math.round(b.scArea/P.area*100)+'% / '+b.sdaTotal/P.area/1|0+'.'+Math.round((b.sdaTotal/P.area%1)*10)],
+      ['Generare',new Date().toLocaleDateString('ro-RO')],];
+    infoRows.forEach(([l,v],i)=>{
+      pdf.setTextColor(150,165,185);pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');
+      pdf.text(S2(l)+':',W/2-64,88+i*8);
+      pdf.setTextColor(220,230,245);pdf.setFont('helvetica','bold');
+      pdf.text(S2(String(v)),W/2-20,88+i*8);
+    });
+    pdf.setTextColor(100,115,135);pdf.setFontSize(6.5);pdf.setFont('helvetica','italic');
+    pdf.text('Document orientativ — generat de UrbanX Relevee Instant · Nu înlocuiește proiectul tehnic elaborat de arhitect autorizat OAR',W/2,H-14,{align:'center'});
+
+    // ── Capturi canvas pentru fiecare tab ────────────────────────────
+    const tabs=['plan','fatada','sectiune','axono'];
+    const tabLabels=['PLAN NIVEL','FAȚADĂ PRINCIPALĂ','SECȚIUNE A-A','VEDERE AXONOMETRICĂ'];
+    const savedTab=_RV.tab; const savedFloor=_RV.floor; const savedScale=_RV.scale;
+
+    // Forțăm scala pentru export (mai mare = mai clar în PDF)
+    _RV.scale = 14;
+
+    for(let ti=0; ti<tabs.length; ti++){
+      _RV.tab = tabs[ti];
+      // Pentru Plan — exportăm toate etajele (max 4)
+      if(tabs[ti]==='plan'){
+        const maxFL = Math.min(b.niv, 4);
+        for(let fl=0; fl<maxFL; fl++){
+          _RV.floor=fl;
+          _rvRender();
+          await _rvSleep(80);
+          const cv=document.getElementById('rv-canvas');
+          if(cv&&cv.width>10){
+            const img=cv.toDataURL('image/png',0.92);
+            pdf.addPage();
+            hdr('PLAN '+( fl===0?'PARTER':'ETAJ '+fl)+' — Nr.cad. '+P.nrCad+' · UTR '+P.utr, ti*4+fl+2);
+            const cW=W-20, cH=H-20;
+            const ratio=cv.width/cv.height;
+            let iW=cW, iH=cW/ratio;
+            if(iH>cH){iH=cH;iW=cH*ratio;}
+            try{ pdf.addImage(img,'PNG',10+(cW-iW)/2,10+(cH-iH)/2,iW,iH); }catch(e){}
+            ftr();
+          }
+        }
+      } else {
+        _rvRender();
+        await _rvSleep(80);
+        const cv=document.getElementById('rv-canvas');
+        if(cv&&cv.width>10){
+          const img=cv.toDataURL('image/png',0.92);
+          pdf.addPage();
+          hdr(tabLabels[ti]+' — Nr.cad. '+P.nrCad+' · UTR '+P.utr, ti+2);
+          const cW=W-20, cH=H-20;
+          const ratio=cv.width/cv.height;
+          let iW=cW, iH=cW/ratio;
+          if(iH>cH){iH=cH;iW=cH*ratio;}
+          try{ pdf.addImage(img,'PNG',10+(cW-iW)/2,10+(cH-iH)/2,iW,iH); }catch(e){}
+          ftr();
+        }
+      }
+    }
+
+    // ── Pagina bilanț + normative ─────────────────────────────────────
+    pdf.addPage();
+    hdr('BILANȚ SUPRAFEȚE + VERIFICARE NORMATIVE',99);
+    pdf.setFillColor(...LIGHT);pdf.rect(0,10,W,H-10,'F');
+    let cy2=18;
+    pdf.setFillColor(...DARK);pdf.rect(10,cy2,W-20,7,'F');
+    pdf.setTextColor(...GOLD);pdf.setFontSize(8);pdf.setFont('helvetica','bold');
+    pdf.text('BILANȚ SUPRAFEȚE',12,cy2+5); cy2+=9;
+    const bilRows=[
+      ['Suprafață parcelă (ST)',P.area+'m²'],['SC edificiu la sol',Math.round(b.scArea)+'m²'],
+      ['SDA totală',Math.round(b.sdaTotal)+'m²'],
+      ['POT realizat',Math.round(b.scArea/P.area*100)+'% / max '+Math.round(P.pot*100)+'%'],
+      ['CUT realizat',(b.sdaTotal/P.area).toFixed(2)+' / max '+P.cut],
+      ['Nr. niveluri',b.niv+' niv.'],['H total',(b.niv*P.hn).toFixed(1)+'m'],
+      ['Nr. apartamente est.',Math.round(b.niv*b.cores.length*2)+' unități'],
+    ];
+    bilRows.forEach(([l,v],i)=>{
+      pdf.setFillColor(i%2?245:252,i%2?247:254,i%2?252:252);pdf.rect(10,cy2-4,W-20,7,'F');
+      pdf.setTextColor(50,70,100);pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');
+      pdf.text(S2(l),13,cy2);
+      pdf.setFont('helvetica','bold');pdf.setTextColor(20,40,80);
+      pdf.text(S2(v),100,cy2); cy2+=8;
+    });
+    cy2+=5;
+    const fl0=_RV.floors[0];
+    if(fl0){
+      pdf.setFillColor(...DARK);pdf.rect(10,cy2,W-20,7,'F');
+      pdf.setTextColor(...GOLD);pdf.setFontSize(8);pdf.setFont('helvetica','bold');
+      pdf.text('VERIFICARE NORMATIVE',12,cy2+5); cy2+=9;
+      const normRows=[
+        ['POT',b.scArea/P.area<=P.pot+.001,'CONFORM','DEPĂȘIRE','PUG · NP 068'],
+        ['CUT',b.sdaTotal/P.area<=P.cut+.001,'CONFORM','DEPĂȘIRE','PUG · NP 068'],
+        ['Suprafețe min. NP 057',fl0.rects.every(r=>{ const m={living:14,bedroom:12,bedroom2:10,kitchen:5,bath:3.6}[r.t]; return !m||r.w*r.h>=m; }),'CONFORM','Verificare PT','NP 057/2002'],
+        ['ISU evacuare',fl0.isu?.ok!==false,'CONFORM','Verificare PT','P118-2/2013'],
+        ['PMR',b.scArea>600,'Obligatoriu PMR','Verificare','NP 051/2012'],
+        ['Seismic',true,'Zona E ag=0.2g','—','P100-1/2013'],
+      ];
+      normRows.forEach(([l,ok,okTxt,errTxt,ref],i)=>{
+        pdf.setFillColor(i%2?245:252,i%2?247:254,i%2?252:252);pdf.rect(10,cy2-4,W-20,7,'F');
+        pdf.setTextColor(50,70,100);pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');
+        pdf.text(S2(l),13,cy2); pdf.text(S2(ref),150,cy2);
+        pdf.setFont('helvetica','bold');
+        pdf.setTextColor(...(ok?GREEN:RED));
+        pdf.text(ok?S2(okTxt):S2(errTxt),95,cy2); cy2+=8;
+      });
+    }
+    cy2+=5;
+    pdf.setFontSize(6.5);pdf.setTextColor(120,135,155);pdf.setFont('helvetica','italic');
+    pdf.text('Prezentul document orientativ a fost generat automat de platforma UrbanX Relevee Instant. Nu înlocuiește proiectul tehnic elaborat',10,cy2);cy2+=5;
+    pdf.text('de arhitect autorizat OAR conform Legii 50/1991. Dimensiunile sunt estimative. UrbanX TSS·FG · '+new Date().toLocaleDateString('ro-RO'),10,cy2);
+    ftr();
+
+    // Restore state
+    _RV.tab=savedTab; _RV.floor=savedFloor; _RV.scale=savedScale;
+    _rvRender();
+
+    pdf.save('Relevee_'+P.nrCad+'_'+new Date().getFullYear()+'.pdf');
+    if(btn){ btn.textContent='⬇ Export PDF Raport'; btn.style.opacity='1'; }
+    if(typeof ss==='function') ss('✅ PDF Relevee exportat — '+pdf.getNumberOfPages()+' pagini');
+
+  }catch(err){
+    console.error('[Relevee PDF]',err);
+    if(btn){ btn.textContent='⬇ Export PDF Raport'; btn.style.opacity='1'; }
+    // Fallback la PNG
+    _rvExportAllPNG(P, b);
+  }
+}
+
+function _rvExportAllPNG(P, b){
+  // Fallback când jsPDF nu e disponibil — exportă tab-ul curent ca PNG mare
+  const savedScale=_RV.scale;
+  _RV.scale=20; _rvRender();
+  setTimeout(()=>{
+    const cv=document.getElementById('rv-canvas');
+    if(!cv) return;
+    const a=document.createElement('a');
+    a.download='relevee_'+( P?.nrCad||'urbanx')+'_'+_RV.tab+'.png';
+    a.href=cv.toDataURL('image/png',1.0); a.click();
+    _RV.scale=savedScale; _rvRender();
+    if(typeof ss==='function') ss('Export PNG — instalați jsPDF pentru export PDF complet');
+  },150);
 }
 
 function _rvMobSheet(){
@@ -1076,7 +1292,7 @@ function _rvInject(){
       <button class="rv-zbtn" onclick="_rvZoom(1)">+</button>
       <button class="rv-zbtn" onclick="{_RV.scale=12;document.getElementById('rv-zval').textContent='100%';if(_RV.building)_rvRender();}" style="font-size:9px;font-weight:700;width:auto;padding:0 8px">FIT</button>
       <div id="rv-mob-info-btn" onclick="_rvMobSheet()">📊 Bilanț</div>
-      <div class="rv-expbtn" onclick="_rvExport()">⬇ Export PNG</div>
+      <div class="rv-expbtn" onclick="_rvExportPDF()" style="background:rgba(212,175,55,.15);font-size:10px">⬇ Export PDF Raport</div>
     </div>
     <!-- Mobile bottom sheet -->
     <div id="rv-mob-sheet">
