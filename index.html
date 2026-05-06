@@ -1301,20 +1301,22 @@ canvas#c2d{width:100%;height:100%;display:block}
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <!-- UrbanX JS Modules — ordinea de incarcare e importanta -->
-<script src="js/00-globals.js?v=2026050521"></script>
-<script src="js/02-map-core.js?v=2026050521"></script>
-<script src="js/03-ui-panel.js?v=2026050521"></script>
-<script src="js/04-search.js?v=2026050521"></script>
-<script src="js/05-cad-utils.js?v=2026050521"></script>
-<script src="js/06-aedis.js?v=2026050521"></script>
-<script src="js/07-pdf-utils.js?v=2026050521"></script>
-<script src="js/08-lotizare.js?v=2026050521"></script>
-<script src="js/09-pdf-engine.js?v=2026050521"></script>
-<script src="js/10-studies.js?v=2026050521"></script>
-<script src="js/11-viewer3d.js?v=2026050521"></script>
-<script src="js/12-admin.js?v=2026050521"></script>
-<script src="js/13-info-drawer.js?v=2026050521"></script>
-<script src="js/14-docx-export.js?v=2026050521"></script>
+<script src="js/00-globals.js?v=2026050601"></script>
+<script src="js/02-map-core.js?v=2026050601"></script>
+<script src="js/03-ui-panel.js?v=2026050601"></script>
+<script src="js/04-search.js?v=2026050601"></script>
+<script src="js/05-cad-utils.js?v=2026050601"></script>
+<script src="js/06-aedis.js?v=2026050601"></script>
+<script src="js/07-pdf-utils.js?v=2026050601"></script>
+<script src="js/08-lotizare.js?v=2026050601"></script>
+<script src="js/09-pdf-engine.js?v=2026050601"></script>
+<script src="js/10-studies.js?v=2026050601"></script>
+<script src="js/11-viewer3d.js?v=2026050601"></script>
+<script src="js/12-admin.js?v=2026050601"></script>
+<script src="js/13-info-drawer.js?v=2026050601"></script>
+<script src="js/14-docx-export.js?v=2026050601"></script>
+<script src="js/fixes-audit.js?v=2026050601"></script>
+<script src="js/map-resize-fix.js?v=2026050601"></script>
 
 <script>
 // ── Lotizare layout: decalează harta când panoul e vizibil ─────────────────
@@ -1508,15 +1510,16 @@ canvas#c2d{width:100%;height:100%;display:block}
     }
   });
 
-  // Event delegation - fix butoane generate dinamic pe toate browserele
+  // Event delegation - DOAR touchend pentru mobil (iOS Safari)
+  // Desktop: native onclick functioneaza direct, fara delegare (previne dubla executie)
   (function(){
     function _runOC(oc) {
       try { (0,eval)(oc); } catch(e) { console.warn('onclick:', e.message, oc.slice(0,50)); }
     }
-    document.addEventListener('click', function(e) {
-      var el = e.target && e.target.closest ? e.target.closest('[onclick]') : null;
-      if(el && el.tagName !== 'A') { var oc2 = el.getAttribute('onclick'); if(oc2) _runOC(oc2); }
-    }, false);
+    // Desktop: NU mai interceptam click — native onclick e suficient
+    // Delegarea click cauza dubla executie (nativ + eval) pe fiecare buton
+
+    // Mobile: touchend cu scroll-guard (>12px scroll = nu e tap)
     var _ty = 0;
     document.addEventListener('touchstart', function(e) {
       _ty = e.touches && e.touches[0] ? e.touches[0].clientY : 0;

@@ -18,18 +18,12 @@ function _toggleVizMenu(e){
   if(m.style.display==='block'){
     m.style.display='none';
   } else {
-    // Capturăm btn SINCRON înainte de orice async
-    const btn=(e&&e.currentTarget instanceof Element ? e.currentTarget : null)
-              || document.querySelector('#viz-group button');
-    if(btn && typeof btn.getBoundingClientRect === 'function'){
+    // Poziționare sub butonul apăsat
+    const btn=(e&&e.currentTarget)||document.querySelector('#viz-group button');
+    if(btn){
       const r=btn.getBoundingClientRect();
-      const mw=190; // latime estimata
-      let left=r.left;
-      let top=r.bottom+2;
-      if(left+mw>window.innerWidth-8) left=window.innerWidth-mw-8;
-      if(left<8) left=8;
-      m.style.left=left+'px';
-      m.style.top=top+'px';
+      m.style.left=r.left+'px';
+      m.style.top=(r.bottom+2)+'px';
     }
     m.style.display='block';
   }
@@ -43,17 +37,11 @@ function _toggleToolsMenu(e){
   if(m.style.display==='block'){
     m.style.display='none';
   } else {
-    const btn=(e&&e.currentTarget instanceof Element ? e.currentTarget : null)
-              || document.querySelector('#tools-group button');
-    if(btn && typeof btn.getBoundingClientRect === 'function'){
+    const btn=(e&&e.currentTarget)||document.querySelector('#tools-group button');
+    if(btn){
       const r=btn.getBoundingClientRect();
-      const mw=210;
-      let left=r.left;
-      let top=r.bottom+2;
-      if(left+mw>window.innerWidth-8) left=window.innerWidth-mw-8;
-      if(left<8) left=8;
-      m.style.left=left+'px';
-      m.style.top=top+'px';
+      m.style.left=r.left+'px';
+      m.style.top=(r.bottom+2)+'px';
     }
     m.style.display='block';
   }
@@ -70,47 +58,9 @@ document.addEventListener('click',function(e){
   },50);
 });
 
-// toggleRapoarteMenu — implementarea completa si fixata este in 06-aedis.js
-// Aceasta definitie suprascrie global-ul, deci redirectionam catre versiunea fixa
-function toggleRapoarteMenu(){
-  // Deleaga catre versiunea cu fix din 06-aedis.js (injectata via safeOn pe btnPDF)
-  // Folosim _rapoarteCloseHandler care e definit acolo
-  const m = document.getElementById('rapoarte-menu');
-  const btn = document.getElementById('btnPDF');
-  if(!m) return;
-
-  if(typeof _rapoarteCloseHandler !== 'undefined' && _rapoarteCloseHandler){
-    document.removeEventListener('click', _rapoarteCloseHandler);
-    _rapoarteCloseHandler = null;
-  }
-
-  const isOpen = m.style.display === 'block';
-  if(isOpen){ m.style.display = 'none'; return; }
-
-  m.style.visibility = 'hidden';
-  m.style.display = 'block';
-  requestAnimationFrame(()=>{
-    const r = btn ? btn.getBoundingClientRect() : {bottom:48, right:window.innerWidth-20, top:42};
-    const mw = m.offsetWidth || 270;
-    const mh = m.offsetHeight || 400;
-    let left = r.right - mw;
-    let top  = r.bottom + 6;
-    if(left + mw > window.innerWidth - 8) left = window.innerWidth - mw - 8;
-    if(left < 8) left = 8;
-    if(top + mh > window.innerHeight - 12) top = Math.max(8, r.top - mh - 4);
-    m.style.left = left + 'px';
-    m.style.top  = top  + 'px';
-    m.style.visibility = '';
-    window._rapoarteCloseHandler = function(e){
-      if(!m.contains(e.target) && e.target.id !== 'btnPDF'){
-        m.style.display = 'none';
-        document.removeEventListener('click', window._rapoarteCloseHandler);
-        window._rapoarteCloseHandler = null;
-      }
-    };
-    setTimeout(()=> document.addEventListener('click', window._rapoarteCloseHandler), 50);
-  });
-}
+// toggleRapoarteMenu — implementarea fixată este în 06-aedis.js (încărcat înainte)
+// Această definiție NU mai suprascrie versiunea bună din 06-aedis.js
+// function toggleRapoarteMenu(){ ... } — ELIMINAT din 11-viewer3d.js
 
 // Versiunea veche a generateSolarStudy — păstrată pentru referință
 // Funcția activă este definită în 10-studies.js (versiune completă 8 pagini)
@@ -661,7 +611,7 @@ function _v3dBuild(ap){
   const W=canvas.offsetWidth, H=canvas.offsetHeight;
 
   // Renderer
-  const r = new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:'high-performance',logarithmicDepthBuffer:true});
+  const r = new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:'high-performance'});
   r.setSize(W,H);
   r.setPixelRatio(Math.min(devicePixelRatio,1.5));
   r.shadowMap.enabled=true;
@@ -681,13 +631,12 @@ function _v3dBuild(ap){
     skyCanvas.width=2; skyCanvas.height=512;
     const skyCtx=skyCanvas.getContext('2d');
     const grad=skyCtx.createLinearGradient(0,0,0,512);
-    // Zi: gradient natural cer — mai albastru profund sus, orizont cald
-    grad.addColorStop(0,'#0f5a98');   // cer profund sus
-    grad.addColorStop(0.35,'#4090c0'); // cer mediu
-    grad.addColorStop(0.65,'#82bcd8'); // orizont superior
-    grad.addColorStop(0.85,'#c4dff0'); // orizont aproape
-    grad.addColorStop(0.95,'#ddf0f8'); // orizont
-    grad.addColorStop(1,'#eaf5fb');   // orizont jos
+    // Zi: gradient natural cer
+    grad.addColorStop(0,'#1a6db5');   // cer profund sus
+    grad.addColorStop(0.4,'#5ba3d4'); // cer mediu
+    grad.addColorStop(0.75,'#a8cfea'); // orizont superior
+    grad.addColorStop(0.9,'#ddeef7'); // orizont aproape
+    grad.addColorStop(1,'#e8f4fa');   // orizont jos
     skyCtx.fillStyle=grad;
     skyCtx.fillRect(0,0,2,512);
     const skyTex=new THREE.CanvasTexture(skyCanvas);
@@ -2933,12 +2882,8 @@ function _v3dMatRoof(THREE, stil, cache){
 function _v3dAddEdges(THREE, mesh, scene, color='#ffffff', opacity=0.3){
   try{
     const edges = new THREE.EdgesGeometry(mesh.geometry, 15);
-    const mat = new THREE.LineBasicMaterial({color, transparent:true, opacity});
-    // polygonOffset elimina Z-fighting intre conturul de muchii si suprafata mesh-ului
-    mat.polygonOffset = true;
-    mat.polygonOffsetFactor = -1;
-    mat.polygonOffsetUnits = -1;
-    const line = new THREE.LineSegments(edges, mat);
+    const line = new THREE.LineSegments(edges,
+      new THREE.LineBasicMaterial({color, transparent:true, opacity}));
     line.position.copy(mesh.position);
     line.rotation.copy(mesh.rotation);
     scene.add(line);
@@ -3017,15 +2962,12 @@ function _v3dAddWindows(THREE, pts2d, base, top, scene, stilKey, opts){
 
   const glassMat = new THREE.MeshStandardMaterial({
     color: new THREE.Color(isNight2 ? '#ffe890' : C.glassCol),
-    roughness: isNight2 ? 0.55 : (isCurtainWall ? 0.02 : 0.06),
-    metalness: isNight2 ? 0.05 : (isCurtainWall ? 0.60 : C.glassRef),
-    emissive: new THREE.Color(isNight2 ? 0.85 : (isCurtainWall?0.04:0.06),
-                              isNight2 ? 0.68 : (isCurtainWall?0.10:0.12),
-                              isNight2 ? 0.06 : (isCurtainWall?0.32:0.28)),
-    emissiveIntensity: isNight2 ? 5.5 : (isCurtainWall ? 1.1 : 0.25),
+    roughness: isNight2 ? 0.55 : (isCurtainWall ? 0.03 : 0.06),
+    metalness: isNight2 ? 0.05 : (isCurtainWall ? 0.55 : C.glassRef),
+    emissive: new THREE.Color(isNight2 ? 0.85 : 0.06, isNight2 ? 0.68 : 0.12, isNight2 ? 0.06 : 0.28),
+    emissiveIntensity: isNight2 ? 5.5 : (isCurtainWall ? 0.75 : 0.25),
     transparent: true,
-    opacity: isNight2 ? 0.98 : (isCurtainWall ? 0.82 : 0.88),
-    depthWrite: false,
+    opacity: isNight2 ? 0.98 : (isCurtainWall ? 0.78 : 0.88),
     side: THREE.FrontSide
   });
   // Geam stins noaptea (unele apartamente)
@@ -3033,14 +2975,14 @@ function _v3dAddWindows(THREE, pts2d, base, top, scene, stilKey, opts){
     color: new THREE.Color(isNight2 ? '#0a1428' : C.glassCol),
     roughness: 0.08, metalness: C.glassRef,
     emissive: new THREE.Color(0,0,0), emissiveIntensity: 0,
-    transparent: true, opacity: 0.85, depthWrite: false
+    transparent: true, opacity: 0.85
   });
   // Geam galben cald (bucătărie/living aprins)
   const glassWarmMat = new THREE.MeshStandardMaterial({
     color: new THREE.Color(isNight2 ? '#ffcc44' : C.glassCol),
     roughness: 0.6, metalness: 0.05,
     emissive: new THREE.Color(0.5, 0.32, 0.02), emissiveIntensity: isNight2 ? 3.2 : 0.1,
-    transparent: true, opacity: 0.95, depthWrite: false
+    transparent: true, opacity: 0.95
   });
   const frameMat = new THREE.MeshStandardMaterial({
     color: new THREE.Color(C.frame||'#a8b8c8'),
@@ -3077,13 +3019,6 @@ function _v3dAddWindows(THREE, pts2d, base, top, scene, stilKey, opts){
   });
 
   const mkMesh=(geo,mat,x,y,z,ry=0)=>{
-    // polygonOffset pe TOATE elementele de fațadă (ferestre, rame, spandrel)
-    // elimina Z-fighting cu suprafata peretelui de dedesubt
-    if(mat && !mat.polygonOffset){
-      mat.polygonOffset=true;
-      mat.polygonOffsetFactor=-2;
-      mat.polygonOffsetUnits=-2;
-    }
     const m=new THREE.Mesh(geo,mat); m.castShadow=true; m.receiveShadow=true;
     m.position.set(x,y,z); if(ry) m.rotation.y=ry; scene.add(m); return m;
   };
@@ -3099,97 +3034,64 @@ function _v3dAddWindows(THREE, pts2d, base, top, scene, stilKey, opts){
     const midX=(x0+x1)/2, midZ=(z0+z1)/2;
 
     // ════════════════════════════════════════════════════════════════════════
-    // MOD PERETE CORTINĂ — design profesionist cu spandrel, mullioni aluminiu,
-    // panouri de geam per bay, cortinaProcent pentru raport sticlă/opac
+    // MOD PERETE CORTINĂ — geam full-height cu mullioni verticali și orizontali
     // ════════════════════════════════════════════════════════════════════════
     if(isCurtainWall){
-      const cortinaPct = Math.max(0.35, Math.min(0.90, (AEDIS.cortinaProcent||60)/100));
-      const spandrelH  = realFH * (1 - cortinaPct);  // înălțime panou opac per etaj
-      const glassH     = realFH * cortinaPct;          // înălțime panou de geam per etaj
-      const mullW=0.05, mullD=0.09;
-      const transomH=0.07, transomD=0.08;
-      const nPanels=Math.max(2, Math.floor(len/1.45));
+      const mullW=0.08, mullD=0.12;
+      const transomH=0.10, transomD=0.08;
+      const nPanels=Math.max(2, Math.floor(len/1.5));
       const panW=len/nPanels;
-      const bgReveal=C.reveal+0.01;
+      const mullMat=new THREE.MeshStandardMaterial({color:'#6080a0',roughness:0.18,metalness:0.88});
+      const transMat=new THREE.MeshStandardMaterial({color:'#5070a0',roughness:0.20,metalness:0.85,
+        emissive:isNight2?new THREE.Color(0.02,0.04,0.12):new THREE.Color(0,0,0),emissiveIntensity:isNight2?0.6:0});
 
-      // ── Aluminiu structură — carcasă mullion/transom ──────────────────────
-      const mullMat=new THREE.MeshStandardMaterial({
-        color:new THREE.Color('#c4cfd8'), roughness:0.06, metalness:0.97
-      });
-
-      // ── Spandrel panel — bandă opacă la nivelul planșeului ───────────────
-      const spandrelMat=new THREE.MeshStandardMaterial({
-        color:new THREE.Color(isNight2?'#080e1e':'#0c1a30'),
-        roughness:0.22, metalness:0.72,
-        emissive:new THREE.Color(0,0,isNight2?0.06:0.01),
-        emissiveIntensity:isNight2?0.8:0.3,
-        depthWrite:false
-      });
-
-      // ── Geam de fundal — strat reflectiv deep blue ───────────────────────
-      // depthWrite:false esential cu logarithmicDepthBuffer pentru transparente
-      const bgGeo=new THREE.BoxGeometry(len-0.04, h-0.04, 0.06);
+      // Geam de fundal full-height (un singur panel pe toată fațada)
+      const bgGeo=new THREE.BoxGeometry(len-0.06, h-0.06, 0.03);
       const bgMat=new THREE.MeshStandardMaterial({
-        color:new THREE.Color(isNight2?'#0b1628':'#0a2040'),
-        roughness:0.03, metalness:0.10,
-        emissive:new THREE.Color(
-          isNight2?0.04:0.02,
-          isNight2?0.10:0.06,
-          isNight2?0.38:0.25
-        ),
-        emissiveIntensity:isNight2?2.2:1.2,
-        transparent:true, opacity:isNight2?0.94:0.88,
-        depthWrite:false, side:THREE.FrontSide
-      });
-      mkMesh(bgGeo,bgMat,midX+nx*bgReveal,base+h/2,midZ+nz*bgReveal,ang);
+        color:new THREE.Color(isNight2?'#1a2840':'#2a5890'),
+        roughness:0.04,metalness:0.75,
+        emissive:new THREE.Color(isNight2?0.06:0.04,isNight2?0.12:0.08,isNight2?0.30:0.20),
+        emissiveIntensity:isNight2?1.4:0.8,transparent:true,opacity:0.88});
+      mkMesh(bgGeo,bgMat,midX+nx*C.reveal,base+h/2,midZ+nz*C.reveal,ang);
 
-      // ── Spandrel panels per etaj (bandă opacă + panel reflectiv argintiu) ─
-      if(spandrelH > 0.12){
-        for(let fl=0;fl<nFloors;fl++){
-          const sy=base+fl*realFH+spandrelH*0.5;
-          const spGeo=new THREE.BoxGeometry(len-0.04, spandrelH-0.02, 0.08);
-          mkMesh(spGeo,spandrelMat,midX+nx*(bgReveal+0.02),sy,midZ+nz*(bgReveal+0.02),ang);
-        }
+      // Mullioni verticali
+      for(let p=0;p<=nPanels;p++){
+        const u=p*panW;
+        const mx2=x0+ux*u+nx*(C.reveal+mullD/2);
+        const mz2=z0+uz*u+nz*(C.reveal+mullD/2);
+        mkMesh(new THREE.BoxGeometry(mullW,h+0.1,mullD),mullMat,mx2,base+h/2,mz2,ang);
       }
-
-      // ── Panouri de geam individuale per bay per etaj ──────────────────────
+      // Traverse orizontale (transom) la fiecare etaj
+      for(let fl=0;fl<=nFloors;fl++){
+        const ty=base+fl*realFH;
+        const tx2=midX+nx*(C.reveal+transomD/2);
+        const tz2=midZ+nz*(C.reveal+transomD/2);
+        mkMesh(new THREE.BoxGeometry(len+0.06,transomH,transomD+0.04),transMat,tx2,ty,tz2,ang);
+      }
+      // Panouri de geam individuale cu variatie noapte
       for(let p=0;p<nPanels;p++){
         for(let fl=0;fl<nFloors;fl++){
           const u=(p+0.5)*panW;
-          const gx=x0+ux*u+nx*(bgReveal+0.02);
-          const gz=z0+uz*u+nz*(bgReveal+0.02);
-          const gy=base+fl*realFH+spandrelH+glassH*0.5;
-          const gW=panW-mullW-0.04;
-          const gHh=Math.max(0.2, glassH-transomH-0.03);
+          const gx=x0+ux*u+nx*C.reveal;
+          const gz=z0+uz*u+nz*C.reveal;
+          const gy=base+fl*realFH+realFH*0.5;
+          const gW=panW-mullW-0.04, gH=realFH-transomH-0.04;
+          // Variatie noaptea: unele geamuri aprinse (galben), altele stinse
           const seed=(si*100+p*13+fl*7);
           const rnd=_rng(seed);
           let gMat=glassMat;
-          if(isNight2) gMat=rnd<0.55?glassWarmMat:(rnd<0.80?glassMat:glassDarkMat);
-          mkMesh(new THREE.BoxGeometry(gW,gHh,0.05),gMat,gx,gy,gz,ang);
-          if(isNight2&&rnd<0.15){
+          if(isNight2){
+            gMat = rnd<0.55 ? glassWarmMat : (rnd<0.80 ? glassMat : glassDarkMat);
+          }
+          mkMesh(new THREE.BoxGeometry(gW,gH,0.025),gMat,gx,gy,gz,ang);
+          // Punct de lumina interior noaptea (1 din 7 geamuri — era 1 din 3)
+          if(isNight2 && rnd<0.15){
             const pl=new THREE.PointLight(rnd<0.2?'#ffe8a0':'#fff0d0',0.25,5);
             pl.position.set(gx-nx*0.5,gy,gz-nz*0.5); scene.add(pl);
           }
         }
       }
-
-      // ── Mullioni verticali aluminiu — full height ─────────────────────────
-      for(let p=0;p<=nPanels;p++){
-        const u=p*panW;
-        const mx2=x0+ux*u+nx*(bgReveal+0.025);
-        const mz2=z0+uz*u+nz*(bgReveal+0.025);
-        mkMesh(new THREE.BoxGeometry(mullW,h+0.10,mullD),mullMat,mx2,base+h/2,mz2,ang);
-      }
-
-      // ── Traverse orizontale — la fiecare jonct. etaj (deasupra spandrel) ──
-      for(let fl=0;fl<=nFloors;fl++){
-        const ty=base+fl*realFH+(fl<nFloors?spandrelH:0);
-        const tx2=midX+nx*(bgReveal+0.025);
-        const tz2=midZ+nz*(bgReveal+0.025);
-        mkMesh(new THREE.BoxGeometry(len+0.04,transomH,transomD+0.04),mullMat,tx2,ty,tz2,ang);
-      }
-
-      continue; // skip window module clasic
+      continue; // skip window module pentru curtain wall
     }
 
     // ════════════════════════════════════════════════════════════════════════
@@ -3293,12 +3195,12 @@ function _v3dApplyLight(preset,THREE,scene,r){
   const P={
     day:{
       sky:'#b8d4f0',fog:'#c0d8f2',
-      amb:{c:'#e8eedc',i:0.85},                  // ambiant cald-natural, nu albastru rece
-      gnd:{c:'#b09060',i:0.55},                   // reflexie sol mai calda
-      sun:{c:'#fff5d8',i:4.8,p:[120,160,90]},    // soare la ora 10-11: cald, nu alb rece
-      fill:{c:'#5888cc',i:0.70,p:[-90,50,-70]},  // fill albastru-cer mai subtil
-      rim:{c:'#ffe8a8',i:2.2,p:[-10,25,-120]},   // rim cald puternic = contur clădirii
-      exp:1.75,night:false,fog:false
+      amb:{c:'#c8e0ff',i:1.2},
+      gnd:{c:'#887040',i:0.7},
+      sun:{c:'#fff4d0',i:6.0,p:[120,160,90]},   // soare mai puternic + mai sus
+      fill:{c:'#6090d0',i:1.2,p:[-90,50,-70]},
+      rim:{c:'#ffd080',i:1.4,p:[-10,25,-120]},    // rim light cald
+      exp:1.9,night:false,fog:false
     },
     golden:{
       sky:'#e8903a',fog:'#d07820',
@@ -3311,12 +3213,12 @@ function _v3dApplyLight(preset,THREE,scene,r){
     },
     overcast:{
       sky:'#8898a8',fog:'#9aabba',
-      amb:{c:'#ccd6de',i:1.45},                   // difuz uniform — nu wash-out (era 2.0)
-      gnd:{c:'#5a6870',i:0.40},                   // sol rece, reflectie joasa
-      sun:{c:'#c8d8e4',i:1.4,p:[30,150,30]},     // "soare" difuz din înalt, mai prezent
-      fill:{c:'#98b0bc',i:0.80,p:[-50,70,-50]},  // fill simetric, cerul noros iluminează egal
-      rim:{c:'#d0dce6',i:0.50,p:[0,50,-100]},    // rim subtil pentru contur fațade
-      exp:1.12,night:false,fog:true
+      amb:{c:'#b0bcc8',i:2.0},    // ambient mai puternic (cer difuz)
+      gnd:{c:'#586068',i:0.5},
+      sun:{c:'#b8c8d8',i:0.8,p:[30,150,30]}, // "soare" complet difuz
+      fill:{c:'#88a0b0',i:1.4,p:[-50,70,-50]},
+      rim:{c:'#c0ccD4',i:0.6,p:[0,50,-100]},
+      exp:1.25,night:false,fog:true
     },
     night:{
       sky:'#02040c',fog:'#03060f',
@@ -3335,9 +3237,9 @@ function _v3dApplyLight(preset,THREE,scene,r){
     const skyCtx=scene._skyCtx, skyCanvas=scene._skyCanvas;
     const grad2=skyCtx.createLinearGradient(0,0,0,512);
     const skies={
-      day:[['#1060a0',0],['#3d88c0',0.3],['#78b4d8',0.62],['#b8d8ec',0.82],['#ddeef8',0.94],['#edf5fb',1]],
+      day:[['#1565a8',0],['#4a90c4',0.35],['#90bfdc',0.7],['#cce4f4',0.88],['#e0eff8',1]],
       golden:[['#1a1640',0],['#a03000',0.3],['#e86010',0.55],['#f09030',0.75],['#f8c060',1]],
-      overcast:[['#4e6070',0],['#728590',0.25],['#96a8b2',0.55],['#bccad0',0.78],['#d8e4e8',0.92],['#eaeff2',1]],
+      overcast:[['#556070',0],['#7a8a94',0.4],['#a0b0b8',0.75],['#c0d0d8',1]],
       night:[['#000005',0],['#010414',0.3],['#020820',0.65],['#050e28',1]],
     };
     const stops=skies[preset]||skies.day;
@@ -3366,8 +3268,6 @@ function _v3dApplyLight(preset,THREE,scene,r){
   sun.shadow.normalBias=0.04;
   scene.add(sun);
   const fill=new THREE.DirectionalLight(p.fill.c,p.fill.i); fill.position.set(...p.fill.p); scene.add(fill);
-  // Rim light — contur lateral spectaculos (era definit dar NICIODATĂ adăugat în scenă)
-  if(p.rim){ const rim=new THREE.DirectionalLight(p.rim.c,p.rim.i); rim.position.set(...p.rim.p); scene.add(rim); }
   if(r) r.toneMappingExposure=p.exp;
   window._v3dNight = !!p.night;  // Setăm flag pentru materiale
 
