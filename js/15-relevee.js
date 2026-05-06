@@ -1544,7 +1544,8 @@ async function _rvExportPDF(){
 
     // ── CALCULE ────────────────────────────────────────────────────────
     const maxFL=Math.min(b.niv,4);
-    totalPages=1+1+maxFL+1+1+1+1+1; // cover+situatie+planuri+fatada+sectiune+axono+memoriu+bilant
+    // +3 pagini noi: Date Clădire, Inventar Goluri+Suprafețe, Celelalte 3 Fațade
+    totalPages=1+1+1+maxFL+1+1+1+1+1+1+1; // cover+situatie+dateClirii+planuri+inv+fatada+3fatade+sectiune+axono+memoriu+bilant
     const fnLabel=(P.fn||'rezidential_colectiv').replace(/_/g,' ');
     const potOk=b.scArea/P.area<=P.pot+.001;
     const cutOk=b.sdaTotal/P.area<=P.cut+.001;
@@ -1569,8 +1570,9 @@ async function _rvExportPDF(){
     pdf.setTextColor(...C.gold);pdf.setFont('helvetica','bold');pdf.setFontSize(22);pdf.text('URBANX',14,18);
     pdf.setTextColor(170,185,205);pdf.setFont('helvetica','normal');pdf.setFontSize(8);pdf.text('PLATFORMĂ NAȚIONALĂ DE ANALIZĂ URBANISTICĂ',14,25);
     // Title
-    pdf.setTextColor(245,248,255);pdf.setFont('helvetica','bold');pdf.setFontSize(26);pdf.text('RELEVEE INSTANT',14,H*0.46);
-    pdf.setTextColor(...C.gold);pdf.setFont('helvetica','normal');pdf.setFontSize(10);pdf.text('Prezentare arhitecturală orientativă + verificare normative',14,H*0.46+10);
+    pdf.setTextColor(245,248,255);pdf.setFont('helvetica','bold');pdf.setFontSize(26);pdf.text('RELEVEU ARHITECTURAL',14,H*0.46);
+    pdf.setTextColor(245,248,255);pdf.setFont('helvetica','normal');pdf.setFontSize(11);pdf.text('Orientativ — Pre-proiectare · Verificare normative',14,H*0.46+10);
+    pdf.setTextColor(...C.gold);pdf.setFont('helvetica','normal');pdf.setFontSize(8.5);pdf.text('Conf. Legii 50/1991 · NP 057/2002 · OMS 119/2014 · P118/2013 · C107/2022',14,H*0.46+18);
     pdf.setFillColor(45,70,120);pdf.rect(14,H*0.46+13,120,0.6,'F');
     // Info grid bottom
     const infoItems=[
@@ -1613,6 +1615,133 @@ async function _rvExportPDF(){
     ftr();
 
     // ══════════════════════════════════════════════════════════════════
+    // PAG 3: DATE CLĂDIRE + METODĂ RELEVEU + DATE TEHNICE
+    // ══════════════════════════════════════════════════════════════════
+    newPage();
+    hdr('DATE CLĂDIRE · PARAMETRI URBANISTICI · METODĂ RELEVEU — Nr.cad. '+P.nrCad,pgN);
+    pdf.setFillColor(255,255,255);pdf.rect(0,9,W,H-16,'F');
+    let cy_dc=12;
+    const colW3=Math.floor((W-22)/3);
+
+    // ── Col 1: Date generale ──────────────────────────────────────────
+    pdf.setFillColor(...C.dark2);pdf.rect(10,cy_dc,colW3,6,'F');pdf.setFillColor(...C.gold);pdf.rect(10,cy_dc,1.5,6,'F');
+    pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(6.5);pdf.text('DATE GENERALE CLĂDIRE',10+colW3/2,cy_dc+4.2,{align:'center'});
+    let r1y=cy_dc+8;
+    const dat1=[
+      ['Nr. cadastral ANCPI:',P.nrCad,''],
+      ['UAT / Localitate:','Municipiul Iași, jud. Iași',''],
+      ['UTR / Zonă PUG:',P.utr,'conf. PUG Iași în vigoare'],
+      ['Funcțiunea propusă:',S2(fnLabel),'conf. AEDIS / PUG'],
+      ['Front stradal principal:',P.frontDir+' ('+({N:'Nord',S:'Sud',E:'Est',V:'Vest',NE:'Nord-Est',NV:'Nord-Vest',SE:'Sud-Est',SV:'Sud-Vest'}[P.frontDir]||P.frontDir)+')','OMS 119/2014'],
+      ['Suprafața teren (ST):',P.area+' m²','conf. CF/ANCPI'],
+      ['Dim. bbox parcelă:',P.W.toFixed(1)+' m × '+P.D.toFixed(1)+' m','estimat din GIS'],
+      ['Retragere front (Rf):',P.rf+' m','conf. RLU UTR '+P.utr],
+      ['Retragere lateral (Rl):',P.rl+' m','conf. RLU'],
+      ['Retragere spate (Rs):',P.rs+' m','conf. RLU'],
+    ];
+    dat1.forEach(([lab,val,obs],i)=>{
+      pdf.setFillColor(i%2?248:255,i%2?250:252,252);pdf.rect(10,r1y-2.5,colW3,6,'F');
+      pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.1);pdf.line(10,r1y+3.5,10+colW3,r1y+3.5);
+      pdf.setTextColor(70,90,115);pdf.setFont('helvetica','normal');pdf.setFontSize(5);pdf.text(S2(lab),12,r1y+1);
+      pdf.setTextColor(15,35,75);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);pdf.text(S2(String(val)),12,r1y+5);
+      if(obs){pdf.setTextColor(120,140,160);pdf.setFont('helvetica','italic');pdf.setFontSize(4.2);pdf.text(S2(obs),12,r1y+8);}
+      r1y+=obs?11:7;
+    });
+
+    // ── Col 2: Indicatori urbanistici ─────────────────────────────────
+    const cx2=10+colW3+2;
+    pdf.setFillColor(...C.dark2);pdf.rect(cx2,cy_dc,colW3,6,'F');pdf.setFillColor(...C.gold);pdf.rect(cx2,cy_dc,1.5,6,'F');
+    pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(6.5);pdf.text('INDICATORI URBANISTICI',cx2+colW3/2,cy_dc+4.2,{align:'center'});
+    let r2y=cy_dc+8;
+    const dat2=[
+      ['POT maxim admis (PUG):',RN(P.pot*100)+'%','PUG · NP 068'],
+      ['POT realizat:',RN(b.scArea/P.area*100)+'%',potOk?'CONFORM ✓':'DEPĂȘIRE ✗'],
+      ['CUT maxim admis (PUG):',String(P.cut),'PUG · NP 068'],
+      ['CUT realizat:',(b.sdaTotal/P.area).toFixed(2),cutOk?'CONFORM ✓':'DEPĂȘIRE ✗'],
+      ['H maxim admis:',P.hMax+' m','conf. RLU'],
+      ['H total propus:',(b.niv*P.hn).toFixed(1)+' m','P+'+( b.niv-1)+'E'],
+      ['Niveluri:',b.niv+' niv. (P+'+( b.niv-1)+'E)','H/nivel = '+P.hn.toFixed(1)+'m'],
+      ['Suprafată construită (SC):',RN(b.scArea)+' m²','la sol'],
+      ['SDA totală:',RN(b.sdaTotal)+' m²','Σ planșee'],
+      ['SDA per nivel:',RN(b.sdaPerFloor)+' m²','medie/etaj'],
+      ['Nuclee scări+lift:',b.cores.length,'conf. P118-2/2013'],
+      ['Unități locative est.:',RN(b.niv*b.cores.length*4),'orientativ'],
+    ];
+    dat2.forEach(([lab,val,note],i)=>{
+      const isOk=String(note).includes('✓'),isErr=String(note).includes('✗');
+      pdf.setFillColor(i%2?248:255,i%2?250:252,252);pdf.rect(cx2,r2y-2.5,colW3,6,'F');
+      pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.1);pdf.line(cx2,r2y+3.5,cx2+colW3,r2y+3.5);
+      pdf.setTextColor(70,90,115);pdf.setFont('helvetica','normal');pdf.setFontSize(5);pdf.text(S2(lab),cx2+2,r2y+1);
+      const vc=isOk?C.green:isErr?C.red:[15,35,75];
+      pdf.setTextColor(...vc);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);pdf.text(S2(val),cx2+2,r2y+5);
+      pdf.setTextColor(isOk?[34,197,94][0]:isErr?C.red[0]:120,isOk?150:isErr?60:140,isOk?94:isErr?38:160);
+      pdf.setFont('helvetica','italic');pdf.setFontSize(4.2);pdf.text(S2(note),cx2+colW3-2,r2y+5,{align:'right'});
+      r2y+=9;
+    });
+
+    // ── Col 3: Metodă Releveu + Scop ─────────────────────────────────
+    const cx3=cx2+colW3+2;
+    const rw3=W-cx3-8;
+    pdf.setFillColor(...C.dark2);pdf.rect(cx3,cy_dc,rw3,6,'F');pdf.setFillColor(...C.gold);pdf.rect(cx3,cy_dc,1.5,6,'F');
+    pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(6.5);pdf.text('METODĂ RELEVEU · SCOP',cx3+rw3/2,cy_dc+4.2,{align:'center'});
+    let r3y=cy_dc+10;
+
+    // Scop Releveu
+    pdf.setFillColor(235,242,252);pdf.roundedRect(cx3,r3y,rw3,22,1.5,1.5,'F');
+    pdf.setFillColor(...C.blue);pdf.rect(cx3,r3y,2,22,'F');
+    pdf.setTextColor(...C.blue);pdf.setFont('helvetica','bold');pdf.setFontSize(6);pdf.text('SCOP DOCUMENT',cx3+5,r3y+5);
+    pdf.setTextColor(20,45,90);pdf.setFont('helvetica','normal');pdf.setFontSize(5.5);
+    const scopTxt='Prezentul releveu orientativ a fost generat automat de platforma UrbanX în scop de PRE-PROIECTARE — pentru evaluarea fezabilității urbanistice a parcelei nr. '+P.nrCad+' și estimarea funcționalității propuse. NU înlocuiește releveul elaborat de arhitect autorizat OAR la fazele DTAC / PT / PAC conf. Legii 50/1991.';
+    const sl=pdf.splitTextToSize(S2(scopTxt),rw3-7);
+    sl.slice(0,4).forEach((l,li)=>pdf.text(l,cx3+5,r3y+10+li*3));
+    r3y+=26;
+
+    // Metodă ridicare
+    pdf.setFillColor(235,252,242);pdf.roundedRect(cx3,r3y,rw3,52,1.5,1.5,'F');
+    pdf.setFillColor(...C.green);pdf.rect(cx3,r3y,2,52,'F');
+    pdf.setTextColor(0,120,60);pdf.setFont('helvetica','bold');pdf.setFontSize(6);pdf.text('METODĂ DE RIDICARE (selectați la faza PT)',cx3+5,r3y+5);
+    const metode=[
+      ['☐ Manual (ruletă + teodolit optic)','Precizie ±2-5cm, cost redus, timp ridicat'],
+      ['☐ Stație totală robotizată','Precizie ±1-3cm, rapidă, export DXF/CAD'],
+      ['☐ Scanare 3D cu laser (LiDAR)','Precizie ±2-5mm, nor de puncte, BIM-ready'],
+      ['☐ Fotogrammetrie aeriană (UAV)','Precizie ±1-5cm, acoperire completă exterior'],
+      ['☐ Fotogrammetrie terestră','Precizie ±5-10mm, fațade și interior'],
+    ];
+    metode.forEach(([m,d],mi)=>{
+      pdf.setTextColor(0,80,40);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);pdf.text(m,cx3+5,r3y+13+mi*8);
+      pdf.setTextColor(40,100,70);pdf.setFont('helvetica','italic');pdf.setFontSize(4.8);pdf.text(d,cx3+5,r3y+17+mi*8);
+    });
+    r3y+=56;
+
+    // Nivel detaliu
+    pdf.setFillColor(252,248,232);pdf.roundedRect(cx3,r3y,rw3,32,1.5,1.5,'F');
+    pdf.setFillColor(...C.gold);pdf.rect(cx3,r3y,2,32,'F');
+    pdf.setTextColor(120,80,0);pdf.setFont('helvetica','bold');pdf.setFontSize(6);pdf.text('NIVEL DE DETALIU',cx3+5,r3y+5);
+    const nivDet=[
+      ['☐ Sumar','Plan general + dimensiuni principale, fără cote interioare'],
+      ['☐ Mediu','Cote complete, grosimi pereți, tipuri goluri (uzual PT)'],
+      ['☐ Execuție','Toate cotele, materiale, detalii constructive, finisaje'],
+    ];
+    nivDet.forEach(([n,d],ni)=>{
+      pdf.setTextColor(100,65,0);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);pdf.text(n,cx3+5,r3y+13+ni*8);
+      pdf.setTextColor(100,80,20);pdf.setFont('helvetica','italic');pdf.setFontSize(4.8);pdf.text(d,cx3+5,r3y+17+ni*8);
+    });
+    r3y+=36;
+
+    // Normative aplicate
+    pdf.setFillColor(248,248,252);pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.3);pdf.rect(cx3,r3y,rw3,H-r3y-18,'FD');
+    pdf.setFillColor(...C.dark2);pdf.rect(cx3,r3y,rw3,5.5,'F');
+    pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);pdf.text('NORMATIVE OBLIGATORII LA PT',cx3+2,r3y+3.8);
+    const norme2=[['NP 057/2002','Suprafețe minime locuințe'],['OMS 119/2014','Însorire min. 1.5h/zi'],['P118-2/2013','Evacuare ISU, căi acces'],['NP 051/2012','PMR, lift obligatoriu P+4+'],['C107/1-5:2022','Coeficienți termici U'],['P100-1/2013','Proiectare seismică'],['Legea 10/1995','Calitatea construcțiilor'],['SR EN 1992-1','BA — proiectare structurală']];
+    norme2.forEach(([cod,desc],ni)=>{
+      const ny=r3y+8+ni*7;if(ny>H-20)return;
+      pdf.setFillColor(ni%2?250:255,ni%2?251:253,255);pdf.rect(cx3,ny-2,rw3,7,'F');
+      pdf.setTextColor(...C.blue);pdf.setFont('helvetica','bold');pdf.setFontSize(5);pdf.text(cod,cx3+2,ny+2);
+      pdf.setTextColor(40,60,100);pdf.setFont('helvetica','normal');pdf.setFontSize(5);pdf.text(S2(desc),cx3+26,ny+2);
+    });
+    ftr();
+
+    // ══════════════════════════════════════════════════════════════════
     // PAG 3..N+2 — PLANURI DE NIVEL CU EXPLICAȚII
     // ══════════════════════════════════════════════════════════════════
     for(let fl=0;fl<maxFL;fl++){
@@ -1634,11 +1763,16 @@ async function _rvExportPDF(){
       drawPlan(flObj,P,b,ox,oy,sc);
       drawNorth(planAreaW-10,22,P.frontDir,6);
       drawScale(14,H-13,sc);
-      // Sectiune indicator
+      // Secțiune A-A (longitudinală, orizontală)
       pdf.setTextColor(...C.red);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
       pdf.text('A',ox-2.5,oy+b.bD*sc/2);pdf.text('A',ox+b.bW*sc+2,oy+b.bD*sc/2);
       pdf.setDrawColor(...C.red);pdf.setLineWidth(0.35);pdf.setLineDashPattern([1,0.8],0);
       pdf.line(ox,oy+b.bD*sc/2,ox+b.bW*sc,oy+b.bD*sc/2);pdf.setLineDashPattern([],0);
+      // Secțiune B-B (transversală, verticală)
+      pdf.setTextColor(37,99,235);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
+      pdf.text('B',ox+b.bW*sc/2,oy-2.5);pdf.text('B',ox+b.bW*sc/2,oy+b.bD*sc+3.5);
+      pdf.setDrawColor(37,99,235);pdf.setLineWidth(0.35);pdf.setLineDashPattern([1,0.8],0);
+      pdf.line(ox+b.bW*sc/2,oy,ox+b.bW*sc/2,oy+b.bD*sc);pdf.setLineDashPattern([],0);
 
       // ── RIGHT PANEL — ghid complet pentru non-arhitect ─────────────────
       const rx=10+planAreaW,ry=10,rw=W-rx-8,rh=planAreaH;
@@ -1746,7 +1880,139 @@ async function _rvExportPDF(){
     }
 
     // ══════════════════════════════════════════════════════════════════
-    // PAG FAȚADĂ PRINCIPALĂ + MATERIALE + 3D
+    // PAG: TABEL SUPRAFEȚE + INVENTAR GOLURI (USI/FERESTRE)
+    // ══════════════════════════════════════════════════════════════════
+    {
+    const fl0data=_RV.floors[0]||{rects:[],wins:[],doors:[]};
+    newPage();
+    hdr('TABEL SUPRAFEȚE · INVENTAR GOLURI (UȘI & FERESTRE) — Nr.cad. '+P.nrCad,pgN);
+    pdf.setFillColor(255,255,255);pdf.rect(0,9,W,H-16,'F');
+    const halfW=(W-22)/2;
+    let tY=12;
+
+    // ── Tabel suprafețe ────────────────────────────────────────────────
+    pdf.setFillColor(...C.dark2);pdf.rect(10,tY,halfW-2,6,'F');
+    pdf.setFillColor(...C.gold);pdf.rect(10,tY,1.5,6,'F');
+    pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(7);
+    pdf.text('TABEL SUPRAFEȚE — PARTER',10+(halfW-2)/2,tY+4.2,{align:'center'});
+    tY+=7;
+
+    const sfW=[30,22,22,22,22,halfW-2-30-22-22-22-22];
+    tY=tblHdr(['Spațiu / Cameră','Tip','L (m)','l (m)','Sup. (m²)','Normă min.'],sfW,tY);
+    // Per-room data
+    const aptGroups={};
+    fl0data.rects.filter(r=>r.apt>=0&&!r.bal).forEach(r=>{
+      const aId=r.apt;
+      if(!aptGroups[aId]) aptGroups[aId]=[];
+      aptGroups[aId].push(r);
+    });
+    const typeLabels={living:'Living/Salon',bedroom:'Dormitor 1',bedroom2:'Dormitor 2',bedroom3:'Dormitor 3',kitchen:'Bucătărie',bath:'Baie',wc:'WC',hall:'Hol/Coridor',storage:'Depozitare',core:'Casa scărilor',balcon:'Balcon',office:'Birou',meeting:'Sală ședințe',commercial:'Spațiu comercial',reception:'Recepție'};
+    const normMin={living:'14m²',bedroom:'12m²',bedroom2:'10m²',kitchen:'5m²',bath:'3.6m²',wc:'1.2m²',hall:'2m²',core:'—',balcon:'—',storage:'—'};
+    let rowI=0,totalSF=0;
+    // Show rooms from apartments (up to 20 rows)
+    const allRooms=fl0data.rects.filter(r=>!r.bal&&r.w>0.3&&r.h>0.3).slice(0,25);
+    allRooms.forEach((r)=>{
+      if(tY>H-40)return;
+      const area=r.w*r.h,areaOk=area>=(parseFloat(normMin[r.t])||0);
+      const nm=normMin[r.t]||'—';
+      tY=tblRow([S2(typeLabels[r.t]||r.t),S2(r.t),RN(r.w,2),RN(r.h,2),RN(area,2)+(areaOk?'':' ⚠'),nm],sfW,tY,rowI%2===0);
+      totalSF+=area; rowI++;
+    });
+    // Balcoane
+    fl0data.rects.filter(r=>r.bal&&r.w>0.3&&r.h>0.3).slice(0,5).forEach(r=>{
+      if(tY>H-40)return;
+      tY=tblRow(['Balcon','balcon',RN(r.w,2),RN(r.h,2),RN(r.w*r.h,2),'—'],sfW,tY,rowI%2===0); rowI++;
+    });
+    // Totaluri
+    pdf.setFillColor(...C.dark2);pdf.rect(10,tY,halfW-2,6,'F');
+    pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(6);
+    pdf.text('TOTAL SUPRAFȚĂ UTILĂ (nivel 0):',12,tY+4);
+    pdf.text(RN(totalSF,1)+' m²',10+halfW-4,tY+4,{align:'right'});
+    tY+=8;
+
+    // Bilanț suprafete
+    const bilRws=[
+      ['SC edificiu (la sol):',RN(b.scArea)+' m²'],
+      ['SDA totală (toate nivelurile):',RN(b.sdaTotal)+' m²'],
+      ['SDA / nivel (medie):',RN(b.sdaPerFloor)+' m²'],
+      ['Spații verzi necesare ('+RN((1-P.pot)*100*0.1,0)+'% min):',RN(P.area*(1-P.pot)*0.1)+' m²'],
+      ['H liberă / nivel estimată:','≈ '+(P.hn-0.3).toFixed(2)+' m (structură ~30cm)'],
+      ['Volum construit estimat:',RN(b.sdaTotal*(P.hn-0.3))+' m³'],
+    ];
+    bilRws.forEach(([lab,val],i)=>{
+      if(tY>H-25)return;
+      pdf.setFillColor(i%2?248:255,i%2?250:252,252);pdf.rect(10,tY,halfW-2,5.5,'F');
+      pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.1);pdf.line(10,tY+5.5,10+halfW-2,tY+5.5);
+      pdf.setTextColor(60,80,105);pdf.setFont('helvetica','normal');pdf.setFontSize(5.5);pdf.text(S2(lab),12,tY+4);
+      pdf.setTextColor(15,35,75);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);pdf.text(S2(val),10+halfW-4,tY+4,{align:'right'});
+      tY+=5.5;
+    });
+
+    // ── Inventar goluri ────────────────────────────────────────────────
+    const gx=10+halfW+2, gY=12;
+    let gCol=gY;
+    pdf.setFillColor(...C.dark2);pdf.rect(gx,gCol,halfW,6,'F');
+    pdf.setFillColor(...C.gold);pdf.rect(gx,gCol,1.5,6,'F');
+    pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(7);
+    pdf.text('INVENTAR GOLURI — UȘI & FERESTRE',gx+halfW/2,gCol+4.2,{align:'center'});
+    gCol+=7;
+
+    // Ferestre
+    pdf.setFillColor(235,248,255);pdf.rect(gx,gCol,halfW,5.5,'F');
+    pdf.setFillColor(30,150,200);pdf.rect(gx,gCol,1.5,5.5,'F');
+    pdf.setTextColor(30,100,170);pdf.setFont('helvetica','bold');pdf.setFontSize(6);
+    pdf.text('FERESTRE (estimat din geometrie)',gx+4,gCol+4);gCol+=7;
+    const ferW=[15,22,18,18,22,halfW-15-22-18-18-22];
+    gCol=tblHdr(['Fațadă','Tip cameră','L est.(m)','H est.(m)','Sup.(m²)','Specificație jPDF'],ferW,gCol);
+    const winTypes={'living':'Fereastra mare',bedroom:'Fereastra dormitor',bedroom2:'Fereastra dormitor',kitchen:'Fereastra bucatarie',hall:'Fereastra hol',bath:'Oblon/Geam mat'};
+    const winSpec={'living':'PVC 5cam., 2×0.7m, Uw≤1.0W/m²K',bedroom:'PVC 5cam., 1×0.7m',bedroom2:'PVC 5cam., 1×0.7m',kitchen:'PVC 5cam., 0.6×0.6m',bath:'Geam opac FR'};
+    fl0data.wins.slice(0,15).forEach((w,wi)=>{
+      if(gCol>H-40)return;
+      const wW=w.w||1.2,wH_=1.2,wArea=wW*wH_;
+      gCol=tblRow([w.wall,S2(winTypes[w.type]||w.type||'—'),RN(wW,2),RN(wH_,2),RN(wArea,2),S2(winSpec[w.type]||'PVC/AL triplu low-E')],ferW,gCol,wi%2===0);
+    });
+    gCol+=4;
+
+    // Usi
+    pdf.setFillColor(255,245,230);pdf.rect(gx,gCol,halfW,5.5,'F');
+    pdf.setFillColor(200,100,20);pdf.rect(gx,gCol,1.5,5.5,'F');
+    pdf.setTextColor(150,70,10);pdf.setFont('helvetica','bold');pdf.setFontSize(6);
+    pdf.text('UȘI — ACCES & COMPARTIMENTARE',gx+4,gCol+4);gCol+=7;
+    const usiW=[22,18,22,22,halfW-22-18-22-22];
+    gCol=tblHdr(['Tip ușă','Lăț. liberă (m)','H est. (m)','Direcție','Specificație'],usiW,gCol);
+    fl0data.doors.slice(0,8).forEach((d,di)=>{
+      if(gCol>H-25)return;
+      const tip=d.type==='main'?'Ușă intrare principală':'Ușă apartament';
+      const spec=d.type==='main'?'AL antiefractie RC2, 1.8m, PMR':'Lemn stratif. EI30, 0.9m, yală';
+      gCol=tblRow([tip,RN(d.w,2),'2.10',S2(d.swing||'—'),spec],usiW,gCol,di%2===0);
+    });
+    gCol+=4;
+
+    // Notă grosimi pereți
+    if(gCol<H-35){
+      pdf.setFillColor(245,248,255);pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.3);pdf.rect(gx,gCol,halfW,H-gCol-18,'FD');
+      pdf.setFillColor(...C.dark2);pdf.rect(gx,gCol,halfW,5.5,'F');
+      pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(6);pdf.text('GROSIMI PEREȚI ESTIMATIVE',gx+4,gCol+4);gCol+=7;
+      const pereti=[
+        ['Perete exterior (BA+BCA+EPS)','~40-45 cm','U=0.27 W/m²K, antiseismic P100'],
+        ['Perete structural interior (BA)','~20-25 cm','C25/30, armătură S500'],
+        ['Perete despărțitor (cărămidă/GKF)','~10-15 cm','Rw≥52dB (SR EN ISO 717-1)'],
+        ['Planșeu inter-etaj (BA+izolație)','~20-22 cm','U≤0.30 W/m²K, Lw≤58dB'],
+        ['Planșeu terasă (XPS20+hidroiz.)','~30-35 cm','U=0.18 W/m²K'],
+        ['Pardoseală parter (XPS10+sapa)','~15-20 cm','U=0.28 W/m²K'],
+      ];
+      pereti.forEach(([n,gros,spec],pi)=>{
+        if(gCol>H-22)return;
+        pdf.setFillColor(pi%2?248:255,252,255);pdf.rect(gx,gCol-2,halfW,8.5,'F');
+        pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.1);pdf.line(gx,gCol+6.5,gx+halfW,gCol+6.5);
+        pdf.setTextColor(20,40,90);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);pdf.text(S2(n),gx+2,gCol+2);
+        pdf.setTextColor(0,80,180);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);pdf.text(S2(gros),gx+halfW-30,gCol+2);
+        pdf.setTextColor(80,100,130);pdf.setFont('helvetica','italic');pdf.setFontSize(4.5);pdf.text(S2(spec),gx+2,gCol+6);
+        gCol+=9;
+      });
+    }
+    ftr();
+    }
     // ══════════════════════════════════════════════════════════════════
     newPage();
     hdr('FAȚADĂ PRINCIPALĂ · MATERIALE PROPUSE · PERFORMANȚĂ ENERGETICĂ — Nr.cad. '+P.nrCad,pgN);
@@ -2133,7 +2399,9 @@ async function _rvExportPDF(){
     pdf.text('Nu înlocuiește documentațiile tehnice avizate conf. Legii 50/1991 și Legii 350/2001 · Proiectul tehnic se elaborează de arhitect autorizat OAR',W/2,H-7,{align:'center'});
     ftr();
 
-    pdf.save('Relevee_'+P.nrCad+'_'+new Date().getFullYear()+'.pdf');
+    const dateForFile=new Date().toISOString().slice(0,10).replace(/-/g,'');
+    const pdfFileName=`Releveu_Arhitectural_Nr.${S2(P.nrCad)}_UTR-${S2(P.utr)}_${S2(fnLabel.replace(/\s+/g,'_').slice(0,20))}_${dateForFile}.pdf`;
+    pdf.save(pdfFileName);
     if(btn){btn.textContent='⬇ Export PDF Raport';btn.style.opacity='1';}
     if(typeof ss==='function') ss('✅ Prezentare Relevee exportată — '+totalPages+' pagini cu imagini 3D și memoriu justificativ!');
 
