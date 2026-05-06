@@ -5814,6 +5814,7 @@ async function generateWaterStudy(){
   ss('Se generează Studiu Gospodărire Ape & DTGA...');
 
   const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Studiu de Gospodărire a Apelor — DTGA','DTGA',9);
+  if(!pdf||!W||!H){ ss('Eroare initializare PDF. Reîncearcă.'); return; }
   const apaCfg = getApaConfig();
   const hidro = getHidroConfig();
   const aedisH = S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||0;
@@ -5907,8 +5908,8 @@ async function generateWaterStudy(){
   cy=sec('4. EVALUAREA RISCULUI DE INUNDABILITATE',cy);cy+=2;
   cy=body('Evaluarea riscului de inundabilitate se realizează în conformitate cu Directiva Europeană 2007/60/CE (transpusă prin HG 846/2010) și Planul de Management al Riscului la Inundații (PMRI) pentru bazinul hidrografic '+S2(apaCfg.bazin)+'. Hărțile de hazard și risc la inundații sunt disponibile pe platforma INHGA (www.inhga.ro).',14,cy);cy+=4;
 
-  const riscColor = apaCfg.risc_inundabil?.includes('Ridicat')?[...RED]:apaCfg.risc_inundabil?.includes('Mediu')?[...ORANGE]:[...GREEN];
-  pdf.setFillColor(...riscColor);pdf.roundedRect(14,cy,W-28,14,2,2,'F');
+  const riscColor = apaCfg.risc_inundabil?.includes('Ridicat')?[180,20,20]:apaCfg.risc_inundabil?.includes('Mediu')?[200,100,10]:[16,130,60];
+  if(isFinite(cy)){pdf.setFillColor(...riscColor);pdf.roundedRect(14,cy,W-28,14,2,2,'F');}
   pdf.setTextColor(255,255,255);pdf.setFontSize(11);pdf.setFont('helvetica','bold');
   pdf.text('RISC INUNDABILITATE: '+S2(apaCfg.risc_inundabil).toUpperCase(),W/2,cy+9,{align:'center'});
   cy+=18;
