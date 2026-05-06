@@ -291,6 +291,7 @@ async function generateShadowStudy(){
   cy=body('Cladirea propusa cu inaltimea H='+aedisH.toFixed(1)+'m proiecteaza umbra maxima (solstitiu de iarna, ora 12:00) de '+( shadDec>500?'>500m':shadDec.toFixed(0)+'m')+' spre nord. Vecinii situati in aceasta directie pot fi afectati. Conform NP 016-97 si ghidului GT 043-2002, distanta minima recomandata dintre cladiri pentru asigurarea insolarii minime legale este functie de inaltimea cladirii umbritoare si de latitudine.',14,cy);cy+=4;
   cy=tblRow(['Inaltime cladire','Umbra la 12:00 (21 Dec)','Distanta minima recomandata','Comentariu'],cy,true,[40,50,60,32]);
   [5,8,10,12,14,16,18,20,25,28].forEach(h=>{
+    const sh=shadowLen(h,solarAlt(lat,11,12));
     const dmin=(h/Math.tan(15*Math.PI/180)).toFixed(0);
     const isCrt=Math.abs(h-aedisH)<1;
     cy=tblRow([h+'m',sh>500?'>500m':sh.toFixed(0)+'m',dmin+'m',isCrt?'← Cladire propusa':'—'],cy,false,[40,50,60,32]);
