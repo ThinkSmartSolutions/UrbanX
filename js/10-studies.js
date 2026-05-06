@@ -14,6 +14,17 @@
   _colorDefs.forEach(([name,val])=>{ if(typeof window[name]==='undefined') window[name]=val; });
 })();
 
+
+// ── Helper: elimina emoji din texte pentru PDF ───────────────────────
+function _stripEmoji(str){
+  if(!str) return str;
+  return String(str)
+    .replace(/[\u{1F000}-\u{1FFFF}]/gu,'')
+    .replace(/[\u{2600}-\u{27FF}]/gu,'')
+    .replace(/[\u{1F300}-\u{1FAFF}]/gu,'')
+    .replace(/\uFE0F/gu,'').replace(/\s{2,}/g,' ').trim();
+}
+
 // UrbanX — Studii si rapoarte urbanistice
 
 async function generateShadowStudy(){
@@ -1010,7 +1021,7 @@ async function generateMobilityStudy(){
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13.2;
   const niv=AEDIS.corpuri[0]?.niv||4;
   const fn=AEDIS.fn||'rezidential_colectiv';
-  const fnLabel=AEDIS_FN[fn]?.label||fn;
+  const fnLabel=_stripEmoji(AEDIS_FN[fn]?.label||fn);
   const areaNum=parseFloat(area)||0;
   const pkMin=parseFloat(params?.pk)||1;
   const sdEst=Math.round(areaNum*(parseFloat(params?.cut)||2.0));
@@ -1405,7 +1416,7 @@ async function generateMemoriu(){
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13.2;
   const niv=AEDIS.corpuri[0]?.niv||4;
   const fn=AEDIS.fn||'rezidential_colectiv';
-  const fnLabel=AEDIS_FN[fn]?.label||fn;
+  const fnLabel=_stripEmoji(AEDIS_FN[fn]?.label||fn);
   const stil=AEDIS.stil||'modern';
   const stilLabel=AEDIS_STIL[stil]?.label||stil;
   const areaNum=parseFloat(area)||0;
@@ -2257,7 +2268,7 @@ async function generateTrafficStudy(){
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13;
   const niv=AEDIS.corpuri[0]?.niv||4;
   const fn=AEDIS.fn||'rezidential_colectiv';
-  const fnLabel=AEDIS_FN[fn]?.label||fn;
+  const fnLabel=_stripEmoji(AEDIS_FN[fn]?.label||fn);
   const pArea=parseFloat(area)||0;
   const sdEst=Math.round(pArea*(parseFloat(params?.cut)||2.0));
   // Estimare trafic generat (conf. ITE Trip Generation, adaptat RO)
@@ -2635,7 +2646,7 @@ async function generateSSF(){
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13;
   const niv=AEDIS.corpuri[0]?.niv||4;
   const fn=AEDIS.fn||'rezidential_colectiv';
-  const fnLabel=AEDIS_FN[fn]?.label||fn;
+  const fnLabel=_stripEmoji(AEDIS_FN[fn]?.label||fn);
   const pArea=parseFloat(area)||0;
   const scEst=Math.round(pArea*(parseFloat(params?.pot||35)/100));
   const sdEst=Math.round(pArea*(parseFloat(params?.cut||1.5)));
@@ -4825,17 +4836,45 @@ async function generateStudiuFezabilitate(paramOverrides){
   cy+=8;
   const swotS=['Amplasament UTR CP — funcțiuni mixte permise (rezidențial + comercial)','POT max '+params?.pot+'% și CUT max '+params?.cut+' — potențial constructiv ridicat','Regim H max '+( params?.h||'N/S')+'m — clădire de referință în zonă','Teren '+areaNum.toLocaleString('en-US')+' mp cu front stradal — vizibilitate comercială','Infrastructură edilitară completă în zonă (apă, canal, gaz, curent)','Accesibilitate urbană bună — transport public și auto'];
   const swotW2=['Parcaj la sol limitat ('+areaNum.toLocaleString('en-US')+' mp teren vs '+Math.round(pkMinF*30).toLocaleString('en-US')+' mp necesar) — recomandă subsol','Retragere laterală '+params?.rl+'m limitează lățimea construibilă','Studiu geotehnic obligatoriu (costuri 8.000-14.000 EUR) înainte de proiectare','Timp autorizare estimat 23-39 luni — riscuri de întârziere','Cerințe ISU stricte pentru H='+aedisH.toFixed(1)+'m (scară pompieri obligatorie)','Rezervă contingență 15-20% necesară pentru variații de preț'];
-  const swotRowH=16; // suficient pentru 2 linii text la 7.5pt (2*3.2 + padding)
+  // jsPDF v2.5.1 bug: {maxWidth} trimite wrapped lines la x=0
+  // Fix: splitTextToSize + draw fiecare linie explicit cu x,y calculate manual
+  const _swotLH=3.2; // line height mm la fontSize 7.5pt
+  const _swotPad=3.0;
+  const _swotCellH=(txt,maxW)=>{
+    if(!txt) return _swotLH+_swotPad*2;
+    return Math.max(1,pdf.splitTextToSize(S2(txt),maxW).length)*_swotLH+_swotPad*2;
+  };
   const maxRows=Math.max(swotS.length,swotW2.length);
+  // Pre-calculeaza inaltimile reale per rand
+  const _swotRH=[];
   for(let i=0;i<maxRows;i++){
-    const bg=i%2===0?LIGHT:LIGHT2;
-    pdf.setFillColor(...bg);pdf.rect(14,cy+i*swotRowH,swotW*2,swotRowH,'F');
-    pdf.setDrawColor(...GRAY4);pdf.setLineWidth(0.15);pdf.line(14,cy+i*swotRowH+swotRowH,14+swotW*2,cy+i*swotRowH+swotRowH);
-    pdf.setDrawColor(...GRAY3);pdf.setLineWidth(0.3);pdf.line(14+swotW,cy,14+swotW,cy+maxRows*swotRowH);
-    if(swotS[i]){pdf.setTextColor(14,100,50);pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');pdf.text(S2('+ '+swotS[i]),16,cy+i*swotRowH+5,{maxWidth:swotW-5});}
-    if(swotW2[i]){pdf.setTextColor(158,20,20);pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');pdf.text(S2('- '+swotW2[i]),16+swotW,cy+i*swotRowH+5,{maxWidth:swotW-5});}
+    _swotRH.push(Math.max(_swotCellH(swotS[i],swotW-6),_swotCellH(swotW2[i],swotW-6),8));
   }
-  cy+=maxRows*swotRowH+6;
+  // Deseneaza rand cu rand
+  let _swotY=cy;
+  for(let i=0;i<maxRows;i++){
+    const rh=_swotRH[i];
+    const bg=i%2===0?LIGHT:LIGHT2;
+    pdf.setFillColor(...bg);pdf.rect(14,_swotY,swotW*2,rh,'F');
+    pdf.setDrawColor(...GRAY4);pdf.setLineWidth(0.15);
+    pdf.line(14,_swotY+rh,14+swotW*2,_swotY+rh);
+    pdf.setDrawColor(...GRAY3);pdf.setLineWidth(0.3);
+    pdf.line(14+swotW,_swotY,14+swotW,_swotY+rh);
+    // Stanga (S)
+    if(swotS[i]){
+      pdf.setTextColor(14,100,50);pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');
+      const linesS=pdf.splitTextToSize(S2('+ '+swotS[i]),swotW-6);
+      linesS.forEach((l,li)=>pdf.text(l,16,_swotY+_swotPad+_swotLH+li*_swotLH));
+    }
+    // Dreapta (W)
+    if(swotW2[i]){
+      pdf.setTextColor(158,20,20);pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');
+      const linesW=pdf.splitTextToSize(S2('- '+swotW2[i]),swotW-6);
+      linesW.forEach((l,li)=>pdf.text(l,16+swotW,_swotY+_swotPad+_swotLH+li*_swotLH));
+    }
+    _swotY+=rh;
+  }
+  cy=_swotY+6;
   // O - Opportunities / T - Threats
   pdf.setFillColor(...BLUE);pdf.rect(14,cy,swotW,8,'F');
   pdf.setTextColor(255,255,255);pdf.setFontSize(8.5);pdf.setFont('helvetica','bold');
@@ -4846,15 +4885,32 @@ async function generateStudiuFezabilitate(paramOverrides){
   const swotO=['Piață imobiliară activă în '+uat+' — cerere ridicată rezidențial/birouri','Fonduri europene POR 2021-2027 — axa urbană — potențial eligibil','Pre-certificare verde (BREEAM/LEED) — chirie +10-15% vs necertificat','Parcare subterană P-1 eliberează suprafața terenului pt spații comerciale','Trend pozitiv chirii: +3-5%/an estimat în zona UTR '+utr,'Stații EV (10% din locuri) — conformitate Reg. UE 2023/1804'];
   const swotT=['Risc modificare PUG — verificare obligatorie CU înainte de achiziție teren','Escaladare costuri construcție (risc ridicat 40%) — rezervă contingență obligatorie','Risc seismic P100-1/2013 zona '+getSeismConfig().zona+' — proiect structură antiseismică','Intârzieri avize (ISU, DJCPN, AACR) — 30-90 zile per aviz','Risc piață — scădere cerere în caz de recesiune — pre-vânzări recomandate','Riscuri geotehnice (teren argilos/loess) — costuri fundații suplimentare'];
   const maxOT=Math.max(swotO.length,swotT.length);
+  const _swotOTRH=[];
   for(let i=0;i<maxOT;i++){
-    const bg=i%2===0?LIGHT:LIGHT2;
-    pdf.setFillColor(...bg);pdf.rect(14,cy+i*swotRowH,swotW*2,swotRowH,'F');
-    pdf.setDrawColor(...GRAY4);pdf.setLineWidth(0.15);pdf.line(14,cy+i*swotRowH+swotRowH,14+swotW*2,cy+i*swotRowH+swotRowH);
-    pdf.setDrawColor(...GRAY3);pdf.setLineWidth(0.3);pdf.line(14+swotW,cy,14+swotW,cy+maxOT*swotRowH);
-    if(swotO[i]){pdf.setTextColor(20,50,98);pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');pdf.text(S2('+ '+swotO[i]),16,cy+i*swotRowH+5,{maxWidth:swotW-5});}
-    if(swotT[i]){pdf.setTextColor(168,76,4);pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');pdf.text(S2('! '+swotT[i]),16+swotW,cy+i*swotRowH+5,{maxWidth:swotW-5});}
+    _swotOTRH.push(Math.max(_swotCellH(swotO[i],swotW-6),_swotCellH(swotT[i],swotW-6),8));
   }
-  cy+=maxOT*swotRowH+6;
+  let _swotOTY=cy;
+  for(let i=0;i<maxOT;i++){
+    const rh=_swotOTRH[i];
+    const bg=i%2===0?LIGHT:LIGHT2;
+    pdf.setFillColor(...bg);pdf.rect(14,_swotOTY,swotW*2,rh,'F');
+    pdf.setDrawColor(...GRAY4);pdf.setLineWidth(0.15);
+    pdf.line(14,_swotOTY+rh,14+swotW*2,_swotOTY+rh);
+    pdf.setDrawColor(...GRAY3);pdf.setLineWidth(0.3);
+    pdf.line(14+swotW,_swotOTY,14+swotW,_swotOTY+rh);
+    if(swotO[i]){
+      pdf.setTextColor(20,50,98);pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');
+      const linesO=pdf.splitTextToSize(S2('+ '+swotO[i]),swotW-6);
+      linesO.forEach((l,li)=>pdf.text(l,16,_swotOTY+_swotPad+_swotLH+li*_swotLH));
+    }
+    if(swotT[i]){
+      pdf.setTextColor(168,76,4);pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');
+      const linesT=pdf.splitTextToSize(S2('! '+swotT[i]),swotW-6);
+      linesT.forEach((l,li)=>pdf.text(l,16+swotW,_swotOTY+_swotPad+_swotLH+li*_swotLH));
+    }
+    _swotOTY+=rh;
+  }
+  cy=_swotOTY+6;
   cy=sec('16.1. RECOMANDARE STRATEGICA PE BAZA ANALIZEI SWOT',cy);cy+=3;
   cy=body('Pe baza analizei SWOT, scenariul S2 — Recomandat este optim: valorifică integral POT='+params?.pot+'% și CUT='+params?.cut+' (puncte tari), atenuează riscul de parcaj prin parcare subterană P-1 recomandată (elimină punct slab), și profită de cererea imobiliară activă și potențialul de certificare verde (oportunități). Principalele amenințări — escaladare costuri și risc geotehnic — sunt gestionate prin rezerva contingentă de 15% și studiu geotehnic obligatoriu.',14,cy);cy+=3;
 

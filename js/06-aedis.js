@@ -4050,10 +4050,14 @@ function aedisUpdateDimLabels(fp, niv, hP, hE, hTot){
         properties:{label:`P:${hP.toFixed(1)}m`,type:'parter'}});
     }
 
-    setSource('ctx-labels-src',{type:'FeatureCollection',features:[
-      ...(S.ctx?._labels||[]),
-      ...labels
-    ]});
+    // Actualizăm sursa corectă: aedis-dim-src (nu ctx-labels-src)
+    const dimSrc = map.getSource('aedis-dim-src');
+    if(dimSrc){
+      dimSrc.setData({type:'FeatureCollection',features:labels});
+    } else {
+      // Fallback: setSource generic
+      setSource('aedis-dim-src',{type:'FeatureCollection',features:labels});
+    }
   }catch(e){}
 }
 
