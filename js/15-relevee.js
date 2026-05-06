@@ -473,31 +473,100 @@ function _rvRenderPlan(fl,b){
     }
   });
 
-  // Ziduri exterioare
-  ctx.strokeStyle='#CBD5E1';ctx.lineWidth=3;ctx.strokeRect(ox,oy,bW*SC,bD*SC);
+  // ── PEREȚI: borduri groase + hașuri structurale ──────────────────────────
+  const wallPx = Math.max(2, SC * 0.17); // ~17cm perete non-structural
+  const extWallPx = Math.max(3, SC * 0.25); // ~25cm perete exterior/structural
 
-  // Ferestre
-  fl.wins.forEach(w=>{
-    ctx.fillStyle='rgba(56,189,248,.2)';
-    if(w.wall==='N') ctx.fillRect(ox+w.x*SC,oy-4,w.w*SC,6);
-    else if(w.wall==='S') ctx.fillRect(ox+w.x*SC,oy+bD*SC-2,w.w*SC,6);
-    else if(w.wall==='V') ctx.fillRect(ox-4,oy+w.y*SC,6,w.h*SC);
-    else if(w.wall==='E') ctx.fillRect(ox+bW*SC-2,oy+w.y*SC,6,w.h*SC);
-    ctx.strokeStyle='#38BDF8';ctx.lineWidth=2;
-    if(w.wall==='N') ctx.strokeRect(ox+w.x*SC,oy-4,w.w*SC,6);
-    else if(w.wall==='S') ctx.strokeRect(ox+w.x*SC,oy+bD*SC-2,w.w*SC,6);
-    else if(w.wall==='V') ctx.strokeRect(ox-4,oy+w.y*SC,6,w.h*SC);
-    else if(w.wall==='E') ctx.strokeRect(ox+bW*SC-2,oy+w.y*SC,6,w.h*SC);
+  // Hașuri diagonale pentru elemente structurale (cores, pereți BA)
+  function _hatch(x,y,w,h,col,sp){
+    ctx.save();
+    ctx.beginPath(); ctx.rect(x,y,w,h); ctx.clip();
+    ctx.strokeStyle=col||'rgba(20,40,90,0.28)'; ctx.lineWidth=0.7;
+    for(let i=-(Math.max(w,h));i<w+Math.max(w,h);i+=sp||Math.max(4,SC*0.35)){
+      ctx.beginPath(); ctx.moveTo(x+i,y); ctx.lineTo(x+i+h,y+h); ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  // Pasul 1: peretele exterior clădirii (cel mai gros)
+  ctx.save();
+  ctx.strokeStyle='rgba(5,12,40,0.96)';
+  ctx.lineWidth=extWallPx;
+  ctx.strokeRect(ox+extWallPx*.5,oy+extWallPx*.5,bW*SC-extWallPx,bD*SC-extWallPx);
+  // Hașura peretelui exterior
+  _hatch(ox,oy,extWallPx*1.5,bD*SC,'rgba(15,30,70,0.22)',Math.max(3,SC*0.25));           // V
+  _hatch(ox+bW*SC-extWallPx*1.5,oy,extWallPx*1.5,bD*SC,'rgba(15,30,70,0.22)',Math.max(3,SC*0.25)); // E
+  _hatch(ox,oy,bW*SC,extWallPx*1.5,'rgba(15,30,70,0.22)',Math.max(3,SC*0.25));            // N
+  _hatch(ox,oy+bD*SC-extWallPx*1.5,bW*SC,extWallPx*1.5,'rgba(15,30,70,0.22)',Math.max(3,SC*0.25)); // S
+  ctx.restore();
+
+  // Pasul 2: borduri camere (pereți interiori)
+  [...fl.rects].sort((a,m_)=>(a.zIdx||0)-(m_.zIdx||0)).forEach(r=>{
+    if(r.bal) return;
+    const rx=ox+r.x*SC, ry=oy+r.y*SC, rw=r.w*SC, rh=r.h*SC;
+    const wp = r.t==='core' ? wallPx*1.3 : wallPx;
+    ctx.strokeStyle = r.t==='core' ? 'rgba(5,15,45,0.95)' : 'rgba(12,25,60,0.75)';
+    ctx.lineWidth = wp;
+    ctx.setLineDash([]);
+    ctx.strokeRect(rx+wp*.5,ry+wp*.5,rw-wp,rh-wp);
+    // Hașura structurală (cores — beton armat)
+    if(r.t==='core'){
+      _hatch(rx+wp,ry+wp,rw-wp*2,rh-wp*2,'rgba(20,50,120,0.30)',Math.max(3,SC*0.3));
+    }
   });
 
-  // Intrare principale
-  fl.doors.filter(d=>d.type==='main').forEach(d=>{
-    const dx=ox+d.x*SC,dy=oy+bD*SC;
-    ctx.clearRect(dx-1,dy-3,d.w*SC+2,7);
-    ctx.strokeStyle='#F59E0B';ctx.lineWidth=2.5;
-    ctx.beginPath();ctx.moveTo(dx,dy);ctx.lineTo(dx+d.w*SC,dy);ctx.stroke();
-    ctx.strokeStyle='rgba(245,158,11,.35)';ctx.lineWidth=1;
-    ctx.beginPath();ctx.arc(dx+d.w*SC,dy,d.w*SC,Math.PI,Math.PI*1.5);ctx.stroke();
+  // Pasul 3: ferestre — goluri albe în perete + linie dublă
+  fl.wins.forEach(w=>{
+    ctx.fillStyle='rgba(56,189,248,.18)';
+    ctx.strokeStyle='#38BDF8'; ctx.lineWidth=2;
+    const wSC = (w.w||w.h||0)*SC;
+    let gx,gy,gw,gh;
+    if(w.wall==='N'){gx=ox+w.x*SC;gy=oy-extWallPx;gw=wSC;gh=extWallPx*2;}
+    else if(w.wall==='S'){gx=ox+w.x*SC;gy=oy+bD*SC-extWallPx;gw=wSC;gh=extWallPx*2;}
+    else if(w.wall==='V'){gx=ox-extWallPx;gy=oy+w.y*SC;gw=extWallPx*2;gh=wSC;}
+    else{gx=ox+bW*SC-extWallPx;gy=oy+w.y*SC;gw=extWallPx*2;gh=wSC;}
+    // Gol alb în perete
+    ctx.fillStyle='rgba(8,15,35,.98)'; ctx.fillRect(gx,gy,gw,gh);
+    // Linie fereastră (3 linii: toc + sticlă)
+    ctx.fillStyle='rgba(56,189,248,.15)'; ctx.fillRect(gx,gy,gw,gh);
+    ctx.strokeStyle='#38BDF8'; ctx.lineWidth=1.8;
+    ctx.strokeRect(gx+1,gy+1,gw-2,gh-2);
+    // Linia centrală (cercevelele ferestrei)
+    ctx.strokeStyle='rgba(56,189,248,.5)'; ctx.lineWidth=0.8;
+    if(w.wall==='N'||w.wall==='S'){
+      ctx.beginPath(); ctx.moveTo(gx+gw/2,gy); ctx.lineTo(gx+gw/2,gy+gh); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(gx,gy+gh/2); ctx.lineTo(gx+gw,gy+gh/2); ctx.stroke();
+    } else {
+      ctx.beginPath(); ctx.moveTo(gx,gy+gh/2); ctx.lineTo(gx+gw,gy+gh/2); ctx.stroke();
+    }
+  });
+
+  // Pasul 4: uși — arc + foaie ușă
+  fl.doors.forEach(d=>{
+    const dx=ox+d.x*SC, dw=d.w*SC;
+    const isMain=d.type==='main';
+    const dy_d = d.y!==undefined ? oy+d.y*SC : oy+bD*SC;
+    // Golul în perete (alb)
+    if(d.swing==='out'||isMain){
+      ctx.fillStyle='rgba(8,15,35,.98)'; ctx.fillRect(dx-1,dy_d-extWallPx,dw+2,extWallPx*2);
+    }
+    // Foaia ușii (linie subțire)
+    ctx.strokeStyle=isMain?'#F59E0B':'rgba(203,213,225,.7)';
+    ctx.lineWidth=isMain?2.5:1.5;
+    ctx.beginPath();
+    if(isMain||d.swing==='out'){
+      ctx.moveTo(dx,dy_d); ctx.lineTo(dx+dw,dy_d); ctx.stroke();
+      // Arc deschidere
+      ctx.strokeStyle=isMain?'rgba(245,158,11,.5)':'rgba(203,213,225,.3)';
+      ctx.lineWidth=1;
+      ctx.beginPath(); ctx.arc(dx,dy_d,dw,-Math.PI/2,0); ctx.stroke();
+    } else if(d.swing==='right'){
+      ctx.moveTo(dx,dy_d-wallPx); ctx.lineTo(dx+dw,dy_d-wallPx); ctx.stroke();
+      ctx.beginPath(); ctx.arc(dx,dy_d-wallPx,dw,0,Math.PI/2); ctx.stroke();
+    } else {
+      ctx.moveTo(dx,dy_d-wallPx); ctx.lineTo(dx+dw,dy_d-wallPx); ctx.stroke();
+      ctx.beginPath(); ctx.arc(dx+dw,dy_d-wallPx,dw,Math.PI/2,Math.PI); ctx.stroke();
+    }
   });
 
   // Cote
@@ -517,60 +586,163 @@ function _rvRenderPlan(fl,b){
 }
 
 function _rvRenderFacade(b){
-  const {P,bW,niv}=b; const Ht=niv*P.hn; const SC=_RV.scale*.85;
-  const pad=50; const W=bW*SC+pad*2+80; const H=Ht*SC+pad*2+50;
-  const {cv,ctx}=_rvInitCanvas(W,H+40);
-  ctx.fillStyle='#060C1A';ctx.fillRect(0,0,cv.width,H+40);
-  const ox=pad+40,oy=pad; const fW=bW*SC,fH=Ht*SC;
-  ctx.fillStyle='rgba(17,27,48,.95)';ctx.fillRect(ox,oy,fW,fH);
-  ctx.strokeStyle='#CBD5E1';ctx.lineWidth=2.5;ctx.strokeRect(ox,oy,fW,fH);
-  for(let i=1;i<niv;i++){
-    const ly=oy+fH-i*P.hn*SC;
-    ctx.fillStyle='rgba(203,213,225,.07)';ctx.fillRect(ox,ly-2,fW,2);
-    ctx.fillStyle='#475569';ctx.font='8px IBM Plex Mono';
-    ctx.fillText(i===0?'P':`E${i}`,ox-30,ly+4);
-  }
-  ctx.fillStyle='#475569';ctx.font='8px IBM Plex Mono';ctx.fillText('P',ox-14,oy+fH-4);
-  const wCols=Math.max(3,Math.floor(bW/3.2)); const wW=Math.min(bW/wCols*.55,1.8)*SC;
-  const wH=P.hn*.45*SC; const colSp=fW/wCols; const coreC=Math.floor(wCols/2);
-  for(let row=0;row<niv;row++){
-    const y0=oy+fH-(row+1)*P.hn*SC+(P.hn*SC-wH)*.3;
-    for(let col=0;col<wCols;col++){
-      if(col===coreC){ctx.fillStyle='rgba(37,99,235,.2)';ctx.fillRect(ox+col*colSp+(colSp-wW*.5)/2,y0,wW*.5,wH);ctx.strokeStyle='#3B82F6';ctx.lineWidth=1;ctx.strokeRect(ox+col*colSp+(colSp-wW*.5)/2,y0,wW*.5,wH);continue;}
-      const wx=ox+col*colSp+(colSp-wW)/2;
-      const sf=(['S','SE','SV'].includes(P.frontDir))?.35:.15;
-      ctx.fillStyle=`rgba(56,189,248,${sf})`;ctx.fillRect(wx,y0,wW,wH);
-      ctx.strokeStyle='#38BDF8';ctx.lineWidth=1.5;ctx.strokeRect(wx,y0,wW,wH);
-      ctx.strokeStyle='rgba(56,189,248,.3)';ctx.lineWidth=.5;
-      ctx.beginPath();ctx.moveTo(wx+wW/2,y0);ctx.lineTo(wx+wW/2,y0+wH);ctx.stroke();
-      ctx.beginPath();ctx.moveTo(wx,y0+wH/2);ctx.lineTo(wx+wW,y0+wH/2);ctx.stroke();
+  const {P,bW,bD,niv,cores}=b; const Ht=niv*P.hn; const SC=_RV.scale*.85;
+  const pad=40;
+  // Toate 4 fațade în layout vertical: N(principal), S(posterior), E(lateral), V(lateral)
+  const facadeW_NS=bW*SC, facadeW_EV=bD*SC, facadeH=Ht*SC;
+  const sectionH=facadeH+80; // h per facade + labels
+  const W=Math.max(facadeW_NS,facadeW_EV)+pad*2+120;
+  const H=sectionH*4+pad;
+  const {cv,ctx}=_rvInitCanvas(W,H);
+  ctx.fillStyle='#060C1A';ctx.fillRect(0,0,W,H);
+
+  // ── Helper: desenare o fațadă ──────────────────────────────────────────────
+  function drawOneFacade(label,fW,ox_,oy_,isMain,matZones){
+    // Header label
+    ctx.fillStyle='rgba(212,175,55,.15)';ctx.fillRect(pad-5,oy_-22,fW+10,20);
+    ctx.strokeStyle='rgba(212,175,55,.3)';ctx.lineWidth=1;ctx.strokeRect(pad-5,oy_-22,fW+10,20);
+    ctx.fillStyle='#D4AF37';ctx.font='bold 10px Space Grotesk';ctx.textAlign='left';
+    ctx.fillText('FAȚADĂ '+label+(isMain?' ◀ PRINCIPALĂ (FRONT STRADAL)':''),pad,oy_-7);
+    ctx.textAlign='left';
+
+    // Building fill
+    ctx.fillStyle='rgba(17,27,50,.95)'; ctx.fillRect(ox_,oy_,fW,facadeH);
+    ctx.strokeStyle='#CBD5E1'; ctx.lineWidth=2.5; ctx.strokeRect(ox_,oy_,fW,facadeH);
+
+    // Sol
+    ctx.fillStyle='rgba(60,80,100,.3)'; ctx.fillRect(ox_-10,oy_+facadeH,fW+20,8);
+    ctx.strokeStyle='rgba(100,120,150,.5)'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(ox_-20,oy_+facadeH); ctx.lineTo(ox_+fW+40,oy_+facadeH); ctx.stroke();
+    ctx.fillStyle='#475569'; ctx.font='8px IBM Plex Mono';
+    ctx.fillText('COTA ±0.00 (CTN)',ox_,oy_+facadeH+20);
+
+    // Planșee (linii orizontale inter-etaj)
+    for(let i=1;i<niv;i++){
+      const ly=oy_+facadeH-i*P.hn*SC;
+      ctx.fillStyle='rgba(203,213,225,.10)'; ctx.fillRect(ox_,ly-3,fW,3);
+      ctx.strokeStyle='rgba(203,213,225,.2)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(ox_,ly); ctx.lineTo(ox_+fW,ly); ctx.stroke();
+      ctx.fillStyle='#64748b'; ctx.font='7px IBM Plex Mono';
+      ctx.fillText(i===0?'P':`E${i}`,ox_-28,ly+4);
+      ctx.fillStyle='rgba(212,175,55,.5)'; ctx.font='7px IBM Plex Mono';
+      ctx.fillText('+'+(i*P.hn).toFixed(2)+'m',ox_-28,ly+12);
+    }
+    ctx.fillStyle='#64748b'; ctx.font='7px IBM Plex Mono';
+    ctx.fillText('P',ox_-14,oy_+facadeH-4);
+    ctx.fillStyle='rgba(212,175,55,.5)'; ctx.font='7px IBM Plex Mono';
+    ctx.fillText('+0.00',ox_-28,oy_+facadeH-4+8);
+
+    // Ferestre
+    const wCols=Math.max(3,Math.floor(fW/(SC*3.2)));
+    const wW=Math.min(fW/wCols*.58,1.9*SC);
+    const wH=P.hn*.44*SC; const colSp_=fW/wCols; const coreCol_=Math.floor(wCols/2);
+    for(let row=0;row<niv;row++){
+      const wy=oy_+facadeH-(row+1)*P.hn*SC+(P.hn*SC-wH)*.28;
+      for(let col=0;col<wCols;col++){
+        if(col===coreCol_){
+          // Nucleu scărilor (fara geam, culoare diferita)
+          ctx.fillStyle='rgba(37,99,235,.18)'; ctx.fillRect(ox_+col*colSp_+(colSp_-wW*.45)/2,wy,wW*.45,wH);
+          ctx.strokeStyle='rgba(59,130,246,.5)'; ctx.lineWidth=1; ctx.strokeRect(ox_+col*colSp_+(colSp_-wW*.45)/2,wy,wW*.45,wH);
+          continue;
+        }
+        const wx_=ox_+col*colSp_+(colSp_-wW)/2;
+        // Solicitare solara: fațadele S/SE/SV au geamuri mai luminoase
+        const solarBoost=(['S','SE','SV'].includes(P.frontDir)&&isMain)||(['N','NE','NV'].includes(P.frontDir)&&!isMain);
+        ctx.fillStyle=`rgba(56,189,248,${solarBoost?.40:.18})`; ctx.fillRect(wx_,wy,wW,wH);
+        ctx.strokeStyle='#38BDF8'; ctx.lineWidth=1.5; ctx.strokeRect(wx_,wy,wW,wH);
+        // Cercevele
+        ctx.strokeStyle='rgba(56,189,248,.4)'; ctx.lineWidth=.6;
+        ctx.beginPath();ctx.moveTo(wx_+wW/2,wy);ctx.lineTo(wx_+wW/2,wy+wH);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(wx_,wy+wH/2);ctx.lineTo(wx_+wW,wy+wH/2);ctx.stroke();
+      }
+    }
+
+    // Balcoane (benzi orizontale)
+    for(let row=1;row<niv;row++){
+      const bz=oy_+facadeH-row*P.hn*SC-4;
+      ctx.fillStyle='rgba(212,175,55,.08)'; ctx.fillRect(ox_+8,bz,fW-16,5);
+      ctx.strokeStyle='rgba(212,175,55,.35)'; ctx.lineWidth=1; ctx.strokeRect(ox_+8,bz,fW-16,5);
+    }
+
+    // Uța principală (doar fațada principală, parter)
+    if(isMain){
+      const doorW=2.4*SC,doorH=3.0*SC;
+      const dX=ox_+fW/2-doorW/2,dY=oy_+facadeH-doorH;
+      ctx.fillStyle='rgba(245,158,11,.15)'; ctx.fillRect(dX,dY,doorW,doorH);
+      ctx.strokeStyle='#F59E0B'; ctx.lineWidth=2; ctx.strokeRect(dX,dY,doorW,doorH);
+      ctx.strokeStyle='rgba(245,158,11,.5)'; ctx.lineWidth=.8;
+      ctx.beginPath();ctx.moveTo(dX+doorW/2,dY);ctx.lineTo(dX+doorW/2,dY+doorH);ctx.stroke();
+      ctx.fillStyle='rgba(245,158,11,.6)'; ctx.font='bold 7px IBM Plex Mono'; ctx.textAlign='center';
+      ctx.fillText('INTRARE',dX+doorW/2,dY+doorH+9); ctx.textAlign='left';
+    }
+
+    // Zone materiale (annotate pe dreapta)
+    const matLbls=matZones||[
+      {y:0,h:1,'mat':'Tencuiala decorativa siliconata','col':'#F97316','cod':'RAL 9001 / 7035'},
+      {y:1,h:niv-1,'mat':'Tencuiala siliconata + EPS 15cm','col':'#D4AF37','cod':'U=0.27 W/m²K'},
+      {y:0,h:niv,'mat':'Tamplarie PVC 5cam. + geam triplu low-E','col':'#38BDF8','cod':'Uw≤1.0 W/m²K'},
+    ];
+    // Sidebar materiale
+    const sbX=ox_+fW+10;
+    ctx.fillStyle='rgba(8,16,32,.9)'; ctx.fillRect(sbX,oy_,100,facadeH);
+    ctx.strokeStyle='rgba(212,175,55,.2)'; ctx.lineWidth=.5; ctx.strokeRect(sbX,oy_,100,facadeH);
+    ctx.fillStyle='rgba(212,175,55,.15)'; ctx.fillRect(sbX,oy_,100,14);
+    ctx.fillStyle='#D4AF37'; ctx.font='bold 7px IBM Plex Mono'; ctx.textAlign='center';
+    ctx.fillText('MATERIALE',sbX+50,oy_+10); ctx.textAlign='left';
+
+    const matItems=[
+      ['Perete exterior','BA20+BCA15+EPS15cm','#CBD5E1'],
+      ['Finisaj fațadă','Tencuiala siliconica','#F97316'],
+      ['Ferestre','PVC/AL triplu low-E','#38BDF8'],
+      ['Balcoane','Parapet sticla/beton','#D4AF37'],
+      ['Acoperiș','Terasa inversa XPS20','#22C55E'],
+      ['Ușă intrare','Aluminiu RF + sticlă','#F59E0B'],
+    ];
+    matItems.forEach(([name,spec,col],mi)=>{
+      const my=oy_+18+mi*18;
+      if(my>oy_+facadeH-10)return;
+      ctx.fillStyle=col+'33'; ctx.fillRect(sbX+2,my,96,16);
+      ctx.strokeStyle=col+'88'; ctx.lineWidth=.5; ctx.strokeRect(sbX+2,my,96,16);
+      ctx.fillStyle=col; ctx.fillRect(sbX+2,my,3,16);
+      ctx.fillStyle='rgba(220,232,250,.9)'; ctx.font='bold 6px IBM Plex Mono';
+      ctx.fillText(name,sbX+7,my+6);
+      ctx.fillStyle='rgba(148,163,184,.8)'; ctx.font='5.5px IBM Plex Mono';
+      ctx.fillText(spec,sbX+7,my+13);
+    });
+
+    // Dimensiuni H
+    if(_RV.showDim){
+      ctx.strokeStyle='rgba(212,175,55,.5)'; ctx.lineWidth=.8; ctx.setLineDash([3,3]);
+      ctx.beginPath();ctx.moveTo(ox_-18,oy_);ctx.lineTo(ox_-18,oy_+facadeH);ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.save();ctx.translate(ox_-36,oy_+facadeH/2);ctx.rotate(-Math.PI/2);
+      ctx.fillStyle='rgba(212,175,55,.8)';ctx.font='bold 9px IBM Plex Mono';ctx.textAlign='center';
+      ctx.fillText('H = '+Ht.toFixed(1)+'m',0,0);ctx.restore();
+      // L
+      ctx.strokeStyle='rgba(212,175,55,.5)'; ctx.lineWidth=.8; ctx.setLineDash([3,3]);
+      ctx.beginPath();ctx.moveTo(ox_,oy_+facadeH+30);ctx.lineTo(ox_+fW,oy_+facadeH+30);ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle='rgba(212,175,55,.8)';ctx.font='bold 9px IBM Plex Mono';ctx.textAlign='center';
+      ctx.fillText(fW===facadeW_NS?bW.toFixed(1)+'m':bD.toFixed(1)+'m',ox_+fW/2,oy_+facadeH+44);
+      ctx.textAlign='left';
     }
   }
-  for(let row=0;row<niv;row++){
-    const bz=oy+fH-(row+1)*P.hn*SC+P.hn*SC*.78;
-    ctx.fillStyle='rgba(212,175,55,.07)';ctx.fillRect(ox+10,bz,fW-20,4);
-    ctx.strokeStyle='rgba(212,175,55,.3)';ctx.lineWidth=1;ctx.strokeRect(ox+10,bz,fW-20,4);
-  }
-  const eW=2.2*SC,eH=2.8*SC,eX=ox+fW/2-eW/2,eY=oy+fH-eH;
-  ctx.fillStyle='rgba(245,158,11,.12)';ctx.fillRect(eX,eY,eW,eH);
-  ctx.strokeStyle='#F59E0B';ctx.lineWidth=2;ctx.strokeRect(eX,eY,eW,eH);
-  ctx.strokeStyle='rgba(203,213,225,.5)';ctx.lineWidth=2;
-  ctx.beginPath();ctx.moveTo(ox-20,oy+fH);ctx.lineTo(ox+fW+60,oy+fH);ctx.stroke();
-  ctx.fillStyle='#475569';ctx.font='9px IBM Plex Mono';ctx.fillText('COTA ±0.00 (CTN)',ox,oy+fH+14);
-  if(_RV.showDim){
-    ctx.strokeStyle='rgba(212,175,55,.4)';ctx.lineWidth=.8;ctx.setLineDash([3,3]);
-    ctx.beginPath();ctx.moveTo(ox,oy+fH+30);ctx.lineTo(ox+fW,oy+fH+30);ctx.stroke();
-    ctx.setLineDash([]);ctx.fillStyle='rgba(212,175,55,.7)';ctx.font='bold 9px IBM Plex Mono';ctx.textAlign='center';
-    ctx.fillText(bW.toFixed(1)+'m',ox+fW/2,oy+fH+44);
-    ctx.strokeStyle='rgba(212,175,55,.4)';ctx.lineWidth=.8;ctx.setLineDash([3,3]);
-    ctx.beginPath();ctx.moveTo(ox+fW+18,oy);ctx.lineTo(ox+fW+18,oy+fH);ctx.stroke();
-    ctx.setLineDash([]);ctx.save();ctx.translate(ox+fW+36,oy+fH/2);
-    ctx.fillText(Ht.toFixed(1)+'m',0,0);ctx.restore();
-    ctx.textAlign='left';
-  }
-  _rvDrawNorth(ctx,W-38,44,P.frontDir);
-  _rvDrawScale(ctx,pad,H+28,_RV.scale*.85);
-  _rvDrawCartus(ctx,W,H+40,P,null,'FAȚADĂ PRINCIPALĂ');
+
+  // ── Renderăm toate 4 fațade ────────────────────────────────────────────────
+  const dirs=[
+    {lbl:P.frontDir+' (PRINCIPALĂ)',fW:facadeW_NS,isMain:true},
+    {lbl:{N:'S',S:'N',E:'V',V:'E',NE:'SV',NV:'SE',SE:'NV',SV:'NE'}[P.frontDir]||'S'+' (POSTERIOARĂ)',fW:facadeW_NS,isMain:false},
+    {lbl:'E (LATERALĂ DREAPTĂ)',fW:facadeW_EV,isMain:false},
+    {lbl:'V (LATERALĂ STÂNGĂ)',fW:facadeW_EV,isMain:false},
+  ];
+  dirs.forEach(({lbl,fW,isMain},idx)=>{
+    const oy_=pad+25+idx*sectionH;
+    const ox_=pad+30;
+    drawOneFacade(lbl,fW,ox_,oy_,isMain);
+  });
+
+  _rvDrawNorth(ctx,W-38,50,P.frontDir);
+  _rvDrawCartus(ctx,W,H,P,null,'TOATE FAȚADELE — N · S · E · V');
 }
 
 function _rvRenderSection(b){
@@ -623,46 +795,147 @@ function _rvRenderSection(b){
 function _rvRenderAxono(b){
   const {P,bW,bD,niv,cores}=b; const s=_RV.scale*.5;
   const iso=(x,y,z)=>({px:(x-y)*Math.cos(Math.PI/6)*s, py:(x+y)*Math.sin(Math.PI/6)*s-z*s*.55});
-  const {cv,ctx}=_rvInitCanvas(720,520);
-  ctx.fillStyle='#060C1A';ctx.fillRect(0,0,720,520);
+  const {cv,ctx}=_rvInitCanvas(780,560);
+  ctx.fillStyle='#060C1A';ctx.fillRect(0,0,780,560);
+  // Grid background
   ctx.strokeStyle='rgba(255,255,255,.015)';ctx.lineWidth=.5;
-  for(let x=0;x<720;x+=20){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,520);ctx.stroke();}
-  for(let y=0;y<520;y+=20){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(720,y);ctx.stroke();}
-  const CX=310,CY=400;
+  for(let x=0;x<780;x+=20){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,560);ctx.stroke();}
+  for(let y=0;y<560;y+=20){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(780,y);ctx.stroke();}
+  const CX=280,CY=390;
   const pt=(x,y,z)=>{const r=iso(x,y,z);return[CX+r.px,CY+r.py];};
-  const face=(pts,fill,stk,lw=1)=>{ctx.beginPath();pts.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();ctx.fillStyle=fill;ctx.fill();ctx.strokeStyle=stk;ctx.lineWidth=lw;ctx.stroke();};
-  const sF=Math.min(4,niv);
+  const face=(pts,fill,stk,lw=1)=>{
+    ctx.beginPath();pts.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));
+    ctx.closePath();ctx.fillStyle=fill;ctx.fill();ctx.strokeStyle=stk;ctx.lineWidth=lw;ctx.stroke();
+  };
+
+  // ── Umbra (shadow) ────────────────────────────────────────────────────────
+  const shadowOff=8;
+  ctx.save(); ctx.globalAlpha=0.25;
+  const shadow_pts=[pt(0,0,0),pt(bW,0,0),pt(bW,bD,0),pt(0,bD,0)];
+  ctx.beginPath();
+  shadow_pts.forEach(([x,y],i)=>i?ctx.lineTo(x+shadowOff,y+shadowOff):ctx.moveTo(x+shadowOff,y+shadowOff));
+  ctx.closePath(); ctx.fillStyle='rgba(0,0,0,.6)'; ctx.fill();
+  ctx.globalAlpha=1; ctx.restore();
+
+  // ── Planșee (floors) ─────────────────────────────────────────────────────
+  const sF=Math.min(5,niv);
   for(let fl=0;fl<=sF;fl++){
     const z=fl*P.hn;
-    face([pt(0,0,z),pt(bW,0,z),pt(bW,bD,z),pt(0,bD,z)],`rgba(16,29,53,${.5+fl*.04})`,`rgba(203,213,225,${.06+fl*.02})`, .4);
+    const alpha=0.5+fl*.04;
+    face([pt(0,0,z),pt(bW,0,z),pt(bW,bD,z),pt(0,bD,z)],
+      `rgba(16,29,53,${alpha})`,`rgba(203,213,225,${.08+fl*.02})`, .4);
+    // Etichetă nivel pe marginea dreaptă
+    if(fl>0 && fl<=sF){
+      const[ex,ey]=pt(bW,0,z);
+      ctx.fillStyle='rgba(212,175,55,.7)'; ctx.font='bold 8px IBM Plex Mono';
+      ctx.fillText(fl===niv?'ATIC':(fl===1?'P':'E'+(fl-1)),ex+6,ey+3);
+      ctx.fillStyle='rgba(148,163,184,.5)'; ctx.font='7px IBM Plex Mono';
+      ctx.fillText('+'+(z).toFixed(1)+'m',ex+6,ey+12);
+    }
   }
   if(niv>sF){
     const z=niv*P.hn;
-    face([pt(0,0,z),pt(bW,0,z),pt(bW,bD,z),pt(0,bD,z)],'rgba(212,175,55,.1)','rgba(212,175,55,.5)',1.5);
+    face([pt(0,0,z),pt(bW,0,z),pt(bW,bD,z),pt(0,bD,z)],'rgba(212,175,55,.1)','rgba(212,175,55,.6)',1.5);
     ctx.strokeStyle='rgba(203,213,225,.1)';ctx.lineWidth=.5;ctx.setLineDash([4,4]);
-    [[0,0],[bW,0],[bW,bD],[0,bD]].forEach(([x,y])=>{const[ax,ay]=pt(x,y,sF*P.hn);const[bx_,by_]=pt(x,y,niv*P.hn);ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(bx_,by_);ctx.stroke();});
+    [[0,0],[bW,0],[bW,bD],[0,bD]].forEach(([x,y])=>{
+      const[ax,ay]=pt(x,y,sF*P.hn);const[bx_,by_]=pt(x,y,niv*P.hn);
+      ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(bx_,by_);ctx.stroke();
+    });
     ctx.setLineDash([]);
   }
+
+  // ── Fațade vizibile ───────────────────────────────────────────────────────
   const z1=sF*P.hn;
-  face([pt(0,bD,0),pt(bW,bD,0),pt(bW,bD,z1),pt(0,bD,z1)],'rgba(37,99,235,.1)','#3B82F6',1.5);
-  face([pt(bW,0,0),pt(bW,bD,0),pt(bW,bD,z1),pt(bW,0,z1)],'rgba(34,197,94,.07)','#22C55E',1);
-  const wCols=Math.max(2,Math.floor(bW/3.5));const wW_=bW/wCols*.55;const wH_=P.hn*.42;const cC=Math.floor(wCols/2);
+  // Fațada S (principală vizibilă)
+  face([pt(0,bD,0),pt(bW,bD,0),pt(bW,bD,z1),pt(0,bD,z1)],'rgba(37,99,235,.12)','#3B82F6',1.5);
+  // Fațada E (laterală)
+  face([pt(bW,0,0),pt(bW,bD,0),pt(bW,bD,z1),pt(bW,0,z1)],'rgba(34,197,94,.08)','rgba(100,150,120,.5)',1);
+
+  // ── Ferestre pe fațada S ──────────────────────────────────────────────────
+  const wCols=Math.max(2,Math.floor(bW/3.5));const wW_=bW/wCols*.55;const wH_=P.hn*.42;
+  const cC=Math.floor(wCols/2);
   for(let row=0;row<Math.min(niv,sF);row++){
     for(let col=0;col<wCols;col++){
       if(col===cC||col===cC-1) continue;
       const wx=col*bW/wCols+(bW/wCols-wW_)/2,wz=row*P.hn+P.hn*.25;
-      const sf=(['S','SE','SV'].includes(P.frontDir))?.3:.12;
-      face([pt(wx,bD,wz),pt(wx+wW_,bD,wz),pt(wx+wW_,bD,wz+wH_),pt(wx,bD,wz+wH_)],`rgba(56,189,248,${sf})`,'#38BDF8',1.2);
+      const sf=(['S','SE','SV'].includes(P.frontDir))?.35:.14;
+      face([pt(wx,bD,wz),pt(wx+wW_,bD,wz),pt(wx+wW_,bD,wz+wH_),pt(wx,bD,wz+wH_)],
+        `rgba(56,189,248,${sf})`,'#38BDF8',1.2);
+      // Cercevele
+      ctx.strokeStyle='rgba(56,189,248,.25)'; ctx.lineWidth=.5;
+      const[w1x,w1y]=pt(wx+wW_/2,bD,wz),wBot=pt(wx+wW_/2,bD,wz+wH_);
+      ctx.beginPath();ctx.moveTo(w1x,w1y);ctx.lineTo(wBot[0],wBot[1]);ctx.stroke();
     }
   }
-  for(let row=0;row<Math.min(niv,sF);row++){
+  // ── Balcoane ──────────────────────────────────────────────────────────────
+  for(let row=1;row<Math.min(niv,sF);row++){
     const bz=row*P.hn+P.hn*.78;
-    face([pt(.5,bD,bz),pt(bW-.5,bD,bz),pt(bW-.5,bD+.4,bz),pt(.5,bD+.4,bz)],'rgba(212,175,55,.08)','rgba(212,175,55,.3)',.8);
+    face([pt(.5,bD,bz),pt(bW-.5,bD,bz),pt(bW-.5,bD+.4,bz),pt(.5,bD+.4,bz)],
+      'rgba(212,175,55,.08)','rgba(212,175,55,.35)',.8);
   }
-  ctx.fillStyle='rgba(212,175,55,.8)';ctx.font='bold 11px Space Grotesk';
-  ctx.fillText(`VEDERE AXONOMETRICĂ · ${niv} NIV. · H=${(niv*P.hn).toFixed(1)}m · SDA=${_rvFmt(b.sdaTotal)}m²`,18,504);
-  _rvDrawCartus(ctx,720,520,P,null,'AXONOMETRIE');
-  _rvDrawNorth(ctx,680,40,P.frontDir);
+
+  // ── H indicator ──────────────────────────────────────────────────────────
+  const[hTopX,hTopY]=pt(bW+1,0,niv*P.hn),hBotPt=pt(bW+1,0,0);
+  ctx.strokeStyle='rgba(212,175,55,.5)';ctx.lineWidth=1;ctx.setLineDash([3,3]);
+  ctx.beginPath();ctx.moveTo(hTopX,hTopY);ctx.lineTo(hBotPt[0],hBotPt[1]);ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle='rgba(212,175,55,.85)'; ctx.font='bold 9px IBM Plex Mono';
+  ctx.fillText('H='+(niv*P.hn).toFixed(1)+'m',(hTopX+hBotPt[0])/2+6,(hTopY+hBotPt[1])/2);
+
+  // ── Explicație: CE ESTE ACEASTĂ VEDERE ────────────────────────────────────
+  // Panou informativ în dreapta
+  ctx.fillStyle='rgba(8,16,38,.92)'; ctx.fillRect(460,20,300,360);
+  ctx.strokeStyle='rgba(212,175,55,.25)'; ctx.lineWidth=1; ctx.strokeRect(460,20,300,360);
+  ctx.fillStyle='rgba(212,175,55,.15)'; ctx.fillRect(460,20,300,28);
+  ctx.fillStyle='#D4AF37'; ctx.font='bold 10px Space Grotesk'; ctx.textAlign='center';
+  ctx.fillText('CE ESTE VEDEREA AXONOMETRICĂ?',610,38); ctx.textAlign='left';
+
+  const explLines=[
+    ['📐 CE ESTE:','O proiecție izometrică tehnică (30°) a'],
+    ['','volumului clădirii. Arată forma 3D exactă,'],
+    ['','propor­ții­le și regimul de înălțime.'],
+    ['',''],
+    ['📏 CE ARATĂ:','• Planșee = benzile orizontale (niveluri)'],
+    ['','• Ferestre = dreptunghiuri albastre pe fațadă'],
+    ['','• Balcoane = benzi aurii per nivel'],
+    ['','• H indicator = înălțimea totală'],
+    ['','• Niveluri: '+niv+' niv. · H='+( niv*P.hn).toFixed(1)+'m'],
+    ['',''],
+    ['⚠️ CE NU ESTE:','NU este o randare foto-realistă.'],
+    ['','NU are materiale/culori finale (acelea'],
+    ['','se stabilesc la faza PAC de arhitect).'],
+    ['','NU este o perspectivă (care ar distorsiona'],
+    ['','propor­ți­ile și nu ar fi precisă tehnic).'],
+    ['',''],
+    ['✅ DE CE E UTIL:','• Înțelegi volumul fără a fi arhitect'],
+    ['','• Verifici că H și retragerile sunt corecte'],
+    ['','• Identifici numărul de niveluri'],
+    ['','• Compari cu contextul urban din PDF'],
+    ['',''],
+    ['🏗️ RANDARE 3D:','Disponibilă în Viewer 3D Urban3D →'],
+    ['','folosește butonul 🔭 din panoul AEDIS'],
+    ['','pentru imagini foto-realiste cu materiale.'],
+  ];
+  let ey=58;
+  explLines.forEach(([label,text])=>{
+    if(ey>360) return;
+    if(label){
+      ctx.fillStyle='#D4AF37'; ctx.font='bold 7px Space Grotesk';
+      ctx.fillText(label,468,ey);
+      ctx.fillStyle='rgba(203,213,225,.85)'; ctx.font='7px IBM Plex Mono';
+      ctx.fillText(text,468+58,ey);
+    } else {
+      ctx.fillStyle='rgba(148,163,184,.7)'; ctx.font='7px IBM Plex Mono';
+      ctx.fillText(text,468+58,ey);
+    }
+    ey+=11;
+  });
+
+  // Footer
+  ctx.fillStyle='rgba(212,175,55,.7)'; ctx.font='bold 10px Space Grotesk';
+  ctx.fillText(`VEDERE AXONOMETRICĂ · ${niv} NIV. · H=${(niv*P.hn).toFixed(1)}m · SDA=${_rvFmt(b.sdaTotal)}m²  ·  Nr.cad. ${P.nrCad}`,16,546);
+  _rvDrawCartus(ctx,780,560,P,null,'AXONOMETRIE 3D — SCHEMĂ ORIENTATIVĂ');
+  _rvDrawNorth(ctx,430,42,P.frontDir);
 }
 
 function _rvDrawDims(ctx,ox,oy,pw,ph,bW,bD,P,SC){
