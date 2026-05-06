@@ -955,13 +955,17 @@ function _authSuccess(user) {
 }
 
 // Logout
-function _authLogout() {
-  if(_supabase) _supabase.auth.signOut();
+function _authLogout(userTriggered=false) {
+  // signOut() apelat DOAR când utilizatorul dă click pe butonul de deconectare
+  // NU când e logout automat (token expirat) — evită loop de logout
+  if(userTriggered && _supabase) _supabase.auth.signOut();
   _authUser = null;
   const ov = document.getElementById('auth-overlay');
   if(ov) { ov.style.display='flex'; ov.style.opacity='1'; }
-  document.getElementById('auth-email').value = '';
-  document.getElementById('auth-pass').value  = '';
+  const em = document.getElementById('auth-email');
+  const pw = document.getElementById('auth-pass');
+  if(em) em.value = '';
+  if(pw) pw.value  = '';
   _authTab('login');
 }
 
@@ -976,21 +980,42 @@ function _authLogout() {
   }
 
   try {
+    // ── Listener auth state — atașat MEREU (nu doar la prima încărcare) ────
+    // Fix: SIGNED_OUT se poate declanșa la expirarea token-ului sau erori rețea
+    // → încearcă refresh sesiune înainte de a afișa login overlay
+    _supabase.auth.onAuthStateChange(async (event, session) => {
+      if(event === 'SIGNED_IN' && session?.user) {
+        _authSuccess(session.user);
+      } else if(event === 'TOKEN_REFRESHED' && session?.user) {
+        // Token reînnoit silențios — rămânem logați
+        _authUser = session.user;
+        console.log('✅ Token reînnoit automat:', session.user.email||session.user.id);
+      } else if(event === 'SIGNED_OUT') {
+        // NU delogăm imediat — verificăm dacă sesiunea e cu adevărat invalidă
+        // (evităm false-logout la freeze rețea sau erori temporare Supabase)
+        try {
+          await new Promise(r => setTimeout(r, 600)); // mică așteptare
+          const { data: { session: currentSess } } = await _supabase.auth.getSession();
+          if(currentSess?.user) {
+            // Sesiunea e validă — a fost o eroare tranzitorie, nu delogăm
+            _authUser = currentSess.user;
+            console.log('ℹ️ SIGNED_OUT tranzitor, sesiune validă — rămân logat');
+            return;
+          }
+        } catch(e2) {
+          console.warn('Auth refresh check failed:', e2.message);
+        }
+        // Sesiunea chiar a expirat sau utilizatorul s-a delogat explicit
+        _authLogout();
+      }
+    });
+
     // Verificăm dacă există o sesiune activă (după refresh pagină)
     const { data: { session } } = await _supabase.auth.getSession();
     if(session?.user) {
       _authSuccess(session.user);
       return;
     }
-
-    // Ascultăm schimbările de auth state (după OAuth redirect)
-    _supabase.auth.onAuthStateChange((event, session) => {
-      if(event === 'SIGNED_IN' && session?.user) {
-        _authSuccess(session.user);
-      } else if(event === 'SIGNED_OUT') {
-        _authLogout();
-      }
-    });
   } catch(e) {
     console.warn('Auth check failed:', e.message);
   }

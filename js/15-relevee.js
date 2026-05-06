@@ -386,6 +386,14 @@ function _rvRender(){
   if(!_RV.building) return;
   const fl = _RV.floors[_RV.floor] || _RV.floors[0];
   const b  = _RV.building;
+  // ── Curăță handler-ul de hover când NU suntem pe Plan ─────────────────────
+  // Bug: hover-ul de plan (tooltip camere) rămâne activ pe canvas la switch tab
+  if(_RV.tab !== 'plan'){
+    const cv_=document.getElementById('rv-canvas');
+    if(cv_){ cv_.onmousemove=null; cv_.onmouseleave=null; }
+    const tip=document.getElementById('rv-tip');
+    if(tip) tip.style.display='none';
+  }
   if     (_RV.tab==='plan')     _rvRenderPlan(fl,b);
   else if(_RV.tab==='fatada')   _rvRenderFacade(b);
   else if(_RV.tab==='sectiune') _rvRenderSection(b);
@@ -2358,7 +2366,8 @@ function _rvInject(){
       <button class="rv-zbtn" onclick="_rvZoom(1)">+</button>
       <button class="rv-zbtn" onclick="{_RV.scale=12;document.getElementById('rv-zval').textContent='100%';if(_RV.building)_rvRender();}" style="font-size:9px;font-weight:700;width:auto;padding:0 8px">FIT</button>
       <div id="rv-mob-info-btn" onclick="_rvMobSheet()">📊 Bilanț</div>
-      <div class="rv-expbtn" onclick="_rvExportPDF()" style="background:rgba(212,175,55,.15);font-size:10px">⬇ Export PDF Raport</div>
+      <div class="rv-expbtn" onclick="_rvExportPDF()" title="Exportă PDF complet — plan, fațade, secțiuni, memoriu, bilanț normative" style="background:linear-gradient(135deg,rgba(212,175,55,.25),rgba(212,175,55,.15));border:1px solid rgba(212,175,55,.5);font-size:11px;padding:6px 14px;font-weight:800;letter-spacing:.03em">📄 Export PDF Raport</div>
+      <div class="rv-expbtn" onclick="_rvExport()" title="Export PNG rapid — captură tab curent" style="font-size:10px;padding:5px 10px;margin-left:4px">🖼 PNG</div>
     </div>
     <!-- Mobile bottom sheet -->
     <div id="rv-mob-sheet">
