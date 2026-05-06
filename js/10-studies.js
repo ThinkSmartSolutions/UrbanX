@@ -2702,12 +2702,12 @@ async function generateTrafficStudy(){
 // Conf. P118-2/2013, P118-1/1999, Legea 307/2006, OMAI 163/2007, SR EN 1838
 async function generateSSF(){
   // Color safety fallback — ensure colors are arrays even if globals unavailable
-  const _DARK=typeof DARK!=='undefined'&&Array.isArray(DARK)?DARK:[8,21,42];
-  const _GOLD=typeof GOLD!=='undefined'&&Array.isArray(GOLD)?GOLD:[212,175,55];
-  const _BLUE=typeof BLUE!=='undefined'&&Array.isArray(BLUE)?BLUE:[59,130,246];
-  const _LIGHT=typeof LIGHT!=='undefined'&&Array.isArray(LIGHT)?LIGHT:[245,247,252];
-  const _RED=typeof RED!=='undefined'&&Array.isArray(RED)?RED:[220,38,38];
-  const _GREEN=typeof GREEN!=='undefined'&&Array.isArray(GREEN)?GREEN:[16,130,60];
+  const _DARK=typeof window.DARK!=='undefined'&&Array.isArray(window.DARK)?window.DARK:[8,21,42];
+  const _GOLD=typeof window.GOLD!=='undefined'&&Array.isArray(window.GOLD)?window.GOLD:[212,175,55];
+  const _BLUE=typeof window.BLUE!=='undefined'&&Array.isArray(window.BLUE)?window.BLUE:[59,130,246];
+  const _LIGHT=typeof window.LIGHT!=='undefined'&&Array.isArray(window.LIGHT)?window.LIGHT:[245,247,252];
+  const _RED=typeof window.RED!=='undefined'&&Array.isArray(window.RED)?window.RED:[220,38,38];
+  const _GREEN=typeof window.GREEN!=='undefined'&&Array.isArray(window.GREEN)?window.GREEN:[16,130,60];
   const ap=S.parcels[S.activeParcel??0];
   if(!ap?.geo?.geometry){ss('Selectati o parcela.');return;}
   ss('Se genereaza Scenariu de Siguranta la Foc...');
