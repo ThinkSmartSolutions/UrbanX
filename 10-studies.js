@@ -233,14 +233,17 @@ async function generateShadowStudy(){
   cy=tblRow(['Luna','Rasarit','Apus','Durata totala','Ore la alt>15°','Status'],cy,true,[25,28,28,35,35,31]);
   const months2=['Ianuarie','Februarie','Martie','Aprilie','Mai','Iunie','Iulie','August','Septembrie','Octombrie','Noiembrie','Decembrie'];
   months2.forEach((m,mi)=>{
-    const cosH=-Math.tan(lat*D2R)*Math.tan(decl*D2R);
-    const sunrise=cosH>1?null:(cosH<-1?0:12-Math.acos(cosH)/D2R/15);
-    const sunset=cosH>1?null:(cosH<-1?24:12+Math.acos(cosH)/D2R/15);
+    const D2R_m=Math.PI/180;
+    const decl_m=(-23.45*Math.cos(D2R_m*(360/365)*(mi*30+10)))*D2R_m;
+    const cosH=-Math.tan(lat*D2R_m)*Math.tan(decl_m);
+    const sunrise=cosH>1?null:(cosH<-1?0:12-Math.acos(Math.min(1,Math.max(-1,cosH)))/D2R_m/15);
+    const sunset=cosH>1?null:(cosH<-1?24:12+Math.acos(Math.min(1,Math.max(-1,cosH)))/D2R_m/15);
     const totalH=sunrise&&sunset?((sunset-sunrise).toFixed(1)+'h'):'—';
     const oreConf=[6,7,8,9,10,11,12,13,14,15,16,17,18].filter(h=>solarAlt(lat,mi,h)>=15).length;
     const rsStr=sunrise?Math.floor(sunrise)+':'+(Math.round((sunrise%1)*60)).toString().padStart(2,'0'):'—';
     const apusStr=sunset?Math.floor(sunset)+':'+(Math.round((sunset%1)*60)).toString().padStart(2,'0'):'—';
-    cy=tblRow([m,rsStr,apusStr,totalH,oreConf+'h',status],cy,false,[25,28,28,35,35,31]);
+    const statusM=solarAlt(lat,mi,12)>=15?'CONFORM':'Sub prag';
+    cy=tblRow([m,rsStr,apusStr,totalH,oreConf+'h',statusM],cy,false,[25,28,28,35,35,31]);
   });
 
   // PAG 9: Impact vecini + distante recomandate
@@ -1591,8 +1594,9 @@ async function generateMemoriu(){
   cy=sec('10.1. CONFORMITATE INDICATORI URBANISTICI',cy);cy+=2;
   const potProp2=(scEst/areaNum*100).toFixed(1);const cutProp2=(sdEst/areaNum).toFixed(2);
   cy=tblRow(['Indicator PUG','Valoare prevazuta','Propunere','Status'],cy,true,[65,40,38,39]);
-  [['POT max (%)',params?.pot+'%',potProp2+'%',potProp<=parseFloat(params?.pot||35)?'CONFORM':'Verificare'],
-   ['CUT max',params?.cut,cutProp,parseFloat(cutProp)<=parseFloat(params?.cut||1.0)?'CONFORM':'Verificare'],
+  const potPropM=parseFloat(params?.pot)||35;const cutPropM=parseFloat(params?.cut)||2.0;
+  [['POT max (%)',params?.pot+'%',potProp2+'%',parseFloat(potProp2)<=potPropM?'CONFORM':'Verificare'],
+   ['CUT max',params?.cut,cutProp2,parseFloat(cutProp2)<=cutPropM?'CONFORM':'Verificare'],
    ['H max (m)',params?.h?params.h+'m':'N/Sm',aedisH.toFixed(1)+'m',aedisH<=(parseFloat(params?.h)||999)?'CONFORM':'Verificare'],
    ['Retragere fata (m)','min. '+params?.rf+'m',params?.rf+'m','CONFORM'],
    ['Spatii verzi min (%)',params?.sv+'%',params?.sv+'%','Verificare proiect'],
@@ -2658,6 +2662,13 @@ async function generateTrafficStudy(){
 // ── SCENARIU DE SIGURANTA LA FOC (SSF) ────────────────────────────────────
 // Conf. P118-2/2013, P118-1/1999, Legea 307/2006, OMAI 163/2007, SR EN 1838
 async function generateSSF(){
+  // Color safety fallback — ensure colors are arrays even if globals unavailable
+  const _DARK=typeof DARK!=='undefined'&&Array.isArray(DARK)?DARK:[8,21,42];
+  const _GOLD=typeof GOLD!=='undefined'&&Array.isArray(GOLD)?GOLD:[212,175,55];
+  const _BLUE=typeof BLUE!=='undefined'&&Array.isArray(BLUE)?BLUE:[59,130,246];
+  const _LIGHT=typeof LIGHT!=='undefined'&&Array.isArray(LIGHT)?LIGHT:[245,247,252];
+  const _RED=typeof RED!=='undefined'&&Array.isArray(RED)?RED:[220,38,38];
+  const _GREEN=typeof GREEN!=='undefined'&&Array.isArray(GREEN)?GREEN:[16,130,60];
   const ap=S.parcels[S.activeParcel??0];
   if(!ap?.geo?.geometry){ss('Selectati o parcela.');return;}
   ss('Se genereaza Scenariu de Siguranta la Foc...');
@@ -3617,7 +3628,7 @@ async function generateIstoricStudy(){
   let cy=28;
   if(cimecImg){
     try{
-      pdf.addImage(cimecImg,'PNG',14,cy,W-28,90,undefined,'FAST');
+      if(cimecImg&&cimecImg.length>100) pdf.addImage(cimecImg,'PNG',14,cy,W-28,90,undefined,'FAST');
       pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.5);pdf.rect(14,cy,W-28,90,'S');
       cy+=93;
       pdf.setFontSize(7);pdf.setTextColor(80,100,130);pdf.setFont('helvetica','italic');
@@ -3981,7 +3992,8 @@ async function generateSolarStudy(){
   cy=tblRow(['Sezon / Zi cheie','Alt. la 12:00','Alt. max.','Răsărit','Apus','Ore soare','Umbră (H='+aedisH.toFixed(1)+'m)'],cy,true,[42,22,20,18,18,22,40]);
   Object.values(solarData).forEach(sd=>{
     const ss3=sd.ss2?((Math.floor(sd.ss2)+':'+(Math.round((sd.ss2%1)*60)).toString().padStart(2,'0'))):'—';
-    cy=tblRow([sd.label,sd.alt12+'°',sd.maxAlt.toFixed(1)+'°',sr,ss3,(sd.oreSoare||'—')+'h',sd.shadAt12+'m'],cy,false,[42,22,20,18,18,22,40]);
+    const srStr=sd.sr?(Math.floor(sd.sr)+':'+(Math.round((sd.sr%1)*60)).toString().padStart(2,'0')):'—';
+    cy=tblRow([sd.label,sd.alt12+'°',sd.maxAlt.toFixed(1)+'°',srStr,ss3,(sd.oreSoare||'—')+'h',sd.shadAt12+'m'],cy,false,[42,22,20,18,18,22,40]);
   });
   cy+=4;
 
@@ -4185,7 +4197,7 @@ async function generateSolarStudy(){
     const rowStyle=or.best?GREEN:GRAY;
     const bg=or.best?[240,252,244]:[248,248,252];
     pdf.setFillColor(...bg);pdf.rect(14,cy2-5.5,W-28,8,'F');
-    pdf.setDrawColor(...GRAY4);pdf.setLineWidth(0.15);pdf.line(14,cy2-5.5+8,W-14,cy2-5.5+8);
+    pdf.setDrawColor(...GRAY4_sw);pdf.setLineWidth(0.15);pdf.line(14,cy2-5.5+8,W-14,cy2-5.5+8);
     const colWs2=[22,12,12,12,12,12,12,12,12,12,12,12,12,15];
     vals.forEach((v,ci)=>{
       const cx=14+colWs2.slice(0,ci).reduce((a,b)=>a+b,0)+2;
@@ -4752,7 +4764,9 @@ async function generateStudiuFezabilitate(paramOverrides){
   cy=33;
   cy=sec('16. ANALIZA SWOT A INVESTITIEI - CONF. HG 907/2016 ANEXA 1',cy);cy+=2;
   cy=body('Analiza SWOT constituie instrumentul de evaluare strategică obligatoriu conform HG 907/2016 pentru fundamentarea deciziei de investiție. Matricea de mai jos sintetizează factorii interni (Puncte Tari / Slabe) și factorii externi (Oportunități / Amenințări) specifici amplasamentului '+nrcad+', UTR '+utr+', '+uat+'.',14,cy);cy+=4;
-  // Tabel SWOT 2x2
+  // Tabel SWOT 2x2 — color safety
+  const GRAY4_sw=typeof GRAY4!=='undefined'&&Array.isArray(GRAY4)?GRAY4:[200,210,218];
+  const GRAY3_sw=typeof GRAY3!=='undefined'&&Array.isArray(GRAY3)?GRAY3:[130,145,160];
   const swotW=(W-28)/2;
   const swotLineH=3.8;const swotPad=3.0; // pastrat pentru OT section
   // S - Strengths
@@ -4783,10 +4797,11 @@ async function generateStudiuFezabilitate(paramOverrides){
   let _swotY=cy;
   for(let i=0;i<maxRows;i++){
     const rh=_swotRH[i];
+    const bg=i%2===0?[248,252,255]:[240,245,252];
     pdf.setFillColor(...bg);pdf.rect(14,_swotY,swotW*2,rh,'F');
     pdf.setDrawColor(...GRAY4);pdf.setLineWidth(0.15);
     pdf.line(14,_swotY+rh,14+swotW*2,_swotY+rh);
-    pdf.setDrawColor(...GRAY3);pdf.setLineWidth(0.3);
+    pdf.setDrawColor(...GRAY3_sw);pdf.setLineWidth(0.3);
     pdf.line(14+swotW,_swotY,14+swotW,_swotY+rh);
     // Stanga (S)
     if(swotS[i]){
@@ -5030,11 +5045,11 @@ async function generateStudiuAmplasament(){
   }
   const altDec12=solarAlt(lat,11,12);
   const isConformSolar=altDec12>=15;
-  const D2R=Math.PI/180;
-  const decl12=(-23.45*Math.cos(D2R*(360/365)*(335+10)))*D2R;
-  const cosH12=-Math.tan(lat*D2R)*Math.tan(decl12);
-  const sunrise12=cosH12>1?null:(12-Math.acos(Math.min(1,Math.max(-1,cosH12)))/D2R/15);
-  const sunset12=cosH12>1?null:(12+Math.acos(Math.min(1,Math.max(-1,cosH12)))/D2R/15);
+  const D2R_amp=Math.PI/180;
+  const decl12=(-23.45*Math.cos(D2R_amp*(360/365)*(335+10)))*D2R_amp;
+  const cosH12=-Math.tan(lat*D2R_amp)*Math.tan(decl12);
+  const sunrise12=cosH12>1?null:(12-Math.acos(Math.min(1,Math.max(-1,cosH12)))/D2R_amp/15);
+  const sunset12=cosH12>1?null:(12+Math.acos(Math.min(1,Math.max(-1,cosH12)))/D2R_amp/15);
   const oreSoare21dec=sunrise12&&sunset12?(sunset12-sunrise12).toFixed(1):'—';
 
   // ── Studii necesare (logic automată) ──────────────────────────────────────
@@ -5733,7 +5748,7 @@ async function runExport(){
   // Plan 2D
   if(img2D&&img2D.length>500){
     try{
-      pdf.addImage(img2D,'JPEG',14,cy,W-28,52,undefined,'FAST');
+      if(img2D&&img2D.length>100) pdf.addImage(img2D,'JPEG',14,cy,W-28,52,undefined,'FAST');
       pdf.setDrawColor(200,208,225);pdf.setLineWidth(0.3);pdf.rect(14,cy,W-28,52,'S');
       pdf.setTextColor(90,105,130);pdf.setFontSize(6.5);pdf.setFont('helvetica','italic');
       pdf.text('FIG. 5 — Plan 2D ortogonal · Parcela + context urban · Sursa: UrbanX/Mapbox',14,cy+55);
