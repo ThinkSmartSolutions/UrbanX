@@ -77,6 +77,51 @@ function _pdfJustifyText(pdf, txt, x, cy, maxW, fz, lh, tc){
   }
 }
 
+// ── Wrapper _captureStudyMaps — ascunde cladirea demolata din capturi studii ──
+// In scenariul 'liber' (demolare + constructie noua), cladirea existenta pe
+// parcela apare in ctx-3d si in basemap, denaturand studiile.
+// Solutie: filtru Mapbox pe ctx-3d + fill-extrusion masca peste parcela.
+async function _captureStudyMaps_J(ap, cb){
+  const isDemo = (S.vol.scenariuConstructie==='liber') || AEDIS._demolishActive;
+  let _filterApplied = false;
+  if(isDemo && ap?.geo?.geometry){
+    try{
+      // 1. Filtru pe ctx-3d: ascunde cladirile al caror centroid e IN parcela
+      map.setFilter('ctx-3d',[
+        '!',['within',{type:'Feature',geometry:ap.geo.geometry,properties:{}}]
+      ]);
+      _filterApplied = true;
+      // 2. Fill-extrusion masca: acopera basemap buildings de pe parcela
+      if(!map.getSource('_demo_cap_src')){
+        map.addSource('_demo_cap_src',{type:'geojson',data:{
+          type:'Feature',geometry:ap.geo.geometry,properties:{}
+        }});
+      }
+      if(!map.getLayer('_demo_cap_fill')){
+        map.addLayer({
+          id:'_demo_cap_fill',type:'fill-extrusion',source:'_demo_cap_src',
+          paint:{
+            'fill-extrusion-color':'#c8b898',
+            'fill-extrusion-height':0.4,
+            'fill-extrusion-base':0,
+            'fill-extrusion-opacity':1
+          }
+        },'vol-3d');
+      }
+      await new Promise(r=>setTimeout(r,250));
+    }catch(e){ console.warn('[captureJ demolare filter]',e.message); }
+  }
+  try{
+    return await _captureStudyMaps_J(ap, cb);
+  }finally{
+    if(_filterApplied){ try{ map.setFilter('ctx-3d',null); }catch(e){} }
+    try{
+      if(map.getLayer('_demo_cap_fill')) map.removeLayer('_demo_cap_fill');
+      if(map.getSource('_demo_cap_src')) map.removeSource('_demo_cap_src');
+    }catch(e){}
+  }
+}
+
 // ── Wrapper _initStudyPdf care injecteaza body() cu justify si S2 safe ───────
 // Inlocuieste toate apelurile _initStudyPdf() din studii pentru text justify uniform
 function _initStudyPdf_J(...args){
@@ -118,7 +163,7 @@ async function generateShadowStudy(){
   ss('Se genereaza Studiu de Umbre & Obstructie...');
 
   const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf_J('Studiu de Umbre si Obstructie Vizuala','Studiu umbre',10);
-  const caps = await _captureStudyMaps(ap, msg=>ss(msg));
+  const caps = await _captureStudyMaps_J(ap, msg=>ss(msg));
 
   function solarAlt(lat,month,hour){const D2R=Math.PI/180;const decl=(-23.45*Math.cos(D2R*(360/365)*(month*30+10)))*D2R;const ha=(hour-12)*15*D2R;return Math.max(0,Math.asin(Math.sin(lat*D2R)*Math.sin(decl)+Math.cos(lat*D2R)*Math.cos(decl)*Math.cos(ha))*180/Math.PI);}
   function shadowLen(h,alt){return alt>0.5?h/Math.tan(alt*Math.PI/180):999;}
@@ -393,7 +438,7 @@ async function generateNoiseStudy(){
   const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf_J('Studiu Acustic Urban','Studiu acustic',12);
   const zgomot=getZgomotConfig();
   const vant=getVantConfig();
-  const caps = await _captureStudyMaps(ap, msg=>ss(msg));
+  const caps = await _captureStudyMaps_J(ap, msg=>ss(msg));
 
   const FN_NOISE={'commercial':65,'industrial':75,'retail':62,'office':55,'school':52,'hospital':45,'residential':42,'yes':48,'Necunoscut':50};
   const vecini=S.ctx?.features||[];
@@ -638,7 +683,7 @@ async function generateWindStudy(){
   const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf_J('Studiu de Vant si Confort Pietonal','Studiu vant',10);
   const vantCfg=getVantConfig();
   const zgomotCfg=getZgomotConfig();
-  const caps = await _captureStudyMaps(ap, msg=>ss(msg));
+  const caps = await _captureStudyMaps_J(ap, msg=>ss(msg));
 
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13.2;
   const vecini=S.ctx?.features||[];
@@ -848,7 +893,7 @@ async function generateGreenStudy(){
   ss('Se genereaza Studiu Spatii Verzi...');
 
   const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf_J('Studiu de Spatii Verzi si Permeabilitate','Studiu spatii verzi',12);
-  const caps = await _captureStudyMaps(ap, msg=>ss(msg));
+  const caps = await _captureStudyMaps_J(ap, msg=>ss(msg));
 
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13.2;
   const areaNum=parseFloat(area)||0;
@@ -1123,7 +1168,7 @@ async function generateMobilityStudy(){
   ss('Se genereaza Studiu Mobilitate & Parcaje...');
 
   const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf_J('Studiu de Mobilitate si Parcaje','Studiu mobilitate',10);
-  const caps = await _captureStudyMaps(ap, msg=>ss(msg));
+  const caps = await _captureStudyMaps_J(ap, msg=>ss(msg));
 
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13.2;
   const niv=AEDIS.corpuri[0]?.niv||4;
@@ -1320,7 +1365,7 @@ async function generateDensityStudy(){
   ss('Se genereaza Studiu Densitate Urbana...');
 
   const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf_J('Studiu de Densitate si Presiune Urbana','Studiu densitate',10);
-  const caps = await _captureStudyMaps(ap, msg=>ss(msg));
+  const caps = await _captureStudyMaps_J(ap, msg=>ss(msg));
 
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13.2;
   const vecini=S.ctx?.features||[];
@@ -1519,7 +1564,7 @@ async function generateMemoriu(){
   ss('Se genereaza Memoriu Tehnic Preliminar...');
 
   const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf_J('Memoriu Tehnic Urbanistic Preliminar','Memoriu tehnic',10);
-  const caps = await _captureStudyMaps(ap, msg=>ss(msg));
+  const caps = await _captureStudyMaps_J(ap, msg=>ss(msg));
 
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13.2;
   const niv=AEDIS.corpuri[0]?.niv||4;
@@ -1728,7 +1773,7 @@ async function generateAACR(){
   ss('Se generează Studiu AACR...');
 
   const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf_J('Studiu de Evaluare Aeronautica (AACR)','Studiu AACR',10);
-  const caps = await _captureStudyMaps(ap, msg=>ss(msg));
+  const caps = await _captureStudyMaps_J(ap, msg=>ss(msg));
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13;
   const niv=AEDIS.corpuri[0]?.niv||4;
   const fn=AEDIS.fn||'rezidential_colectiv';
@@ -1952,7 +1997,7 @@ async function generateExistingBldStudy(){
   ss('Se generează Studiu Construcții Existente...');
 
   const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf_J('Studiu Constructii Existente pe Amplasament','Constructii existente',10);
-  const caps=await _captureStudyMaps(ap,msg=>ss(msg));
+  const caps=await _captureStudyMaps_J(ap,msg=>ss(msg));
 
   const parcelFeat={type:'Feature',geometry:ap.geo.geometry,properties:{}};
   const pArea=turf.area(parcelFeat);
@@ -2156,7 +2201,7 @@ async function generateGeotehnicalStudy(){
   const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf_J('Pre-Studiu Geotehnic Preliminar','Pre-studiu geotehnic',10);
   const seismCfg=getSeismConfig();
   const hidroCfg=getHidroConfig();
-  const caps=await _captureStudyMaps(ap,msg=>ss(msg));
+  const caps=await _captureStudyMaps_J(ap,msg=>ss(msg));
 
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13;
   const pArea=parseFloat(area)||0;
@@ -2376,7 +2421,7 @@ async function generateTrafficStudy(){
 
   const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf_J('Studiu de Impact asupra Traficului','Studiu trafic',14);
   const traficCfg=getTraficConfig();
-  const caps=await _captureStudyMaps(ap,msg=>ss(msg));
+  const caps=await _captureStudyMaps_J(ap,msg=>ss(msg));
 
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13;
   const niv=AEDIS.corpuri[0]?.niv||4;
@@ -2761,7 +2806,7 @@ async function generateSSF(){
 
   const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf_J('Scenariu de Siguranta la Foc','SSF',14);
   // RED, GREEN, ORANGE sunt disponibile din destructurarea _initStudyPdf de mai sus
-  const caps=await _captureStudyMaps(ap,msg=>ss(msg));
+  const caps=await _captureStudyMaps_J(ap,msg=>ss(msg));
 
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13;
   const niv=AEDIS.corpuri[0]?.niv||4;
@@ -3319,7 +3364,7 @@ async function generateEnvironmentalImpact(){
     S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,
     hdr,ftr,sec,subsec,body,tblRow,addImg,kv,badge,divider,bullet,concluzii,sign,cover}=d;
 
-  const caps=await _captureStudyMaps(ap,m=>ss(m));
+  const caps=await _captureStudyMaps_J(ap,m=>ss(m));
   const eim=getEIMConfig();
   const mediu=getMediuConfig();
   const seism=getSeismConfig();
@@ -4015,7 +4060,7 @@ async function generateSolarStudy(){
   const oreMinIarna=solarData.iarna.alts.filter(a=>a>=15).length;
   const oreMaxVara=solarData.vara.alts.filter(a=>a>5).length;
 
-  const caps=await _captureStudyMaps(ap,msg=>ss(msg));
+  const caps=await _captureStudyMaps_J(ap,msg=>ss(msg));
   ss('Se compilează PDF-ul...');
 
   // ════════════════════════════════════════════════════════════
@@ -4436,7 +4481,7 @@ async function generateStudiuFezabilitate(paramOverrides){
     S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,
     hdr,ftr,sec,subsec,body,tblRow,addImg,kv,badge,divider,bullet,concluzii,sign,cover,newPage,checkY}=d;
 
-  const caps=await _captureStudyMaps(ap, msg=>ss(msg));
+  const caps=await _captureStudyMaps_J(ap, msg=>ss(msg));
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13.2;
   const niv=AEDIS.corpuri[0]?.niv||4;
   const fn=AEDIS.fn||'rezidential_colectiv';
@@ -5065,7 +5110,7 @@ async function generateStudiuAmplasament(){
     RED,GREEN,ORANGE,PURPLE,GRAY,GRAY2,GRAY3,GRAY4,WHITE,
     S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,
     hdr,ftr,sec,subsec,body,tblRow,addImg,kv,badge,divider,bullet,concluzii,sign,cover,newPage,checkY,smartPage}=d;
-  const caps=await _captureStudyMaps(ap, msg=>ss(msg));
+  const caps=await _captureStudyMaps_J(ap, msg=>ss(msg));
 
   // ── Restaurează lotizare după captură ─────────────────────────────────────
   Object.entries(_lotLayerVis).forEach(([lid,v])=>{
@@ -5944,7 +5989,7 @@ async function generateWaterStudy(){
   if(!_p.pot) _p.pot = 50; if(!_p.cut) _p.cut = 1.5; if(!_p.rl) _p.rl = 3;
   // Suprascrie params cu versiunea safe
   Object.assign(params && typeof params === 'object' ? params : {}, _p);
-  const caps = await _captureStudyMaps(ap, msg=>ss(msg));
+  const caps = await _captureStudyMaps_J(ap, msg=>ss(msg));
   // Helper safe pentru cy
   const _kv = (rows, cy_) => {
     let y = isFinite(cy_) ? cy_ : 33;
