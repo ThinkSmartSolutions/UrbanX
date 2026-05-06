@@ -1612,6 +1612,12 @@ function showUATSelector(){
         <div style="font-size:8.5px;color:#64748b">PUG georeferențiat + cadastru index + reguli PUG</div>
         <div style="font-size:8.5px;color:#60a5fa;margin-top:3px">Format: data/&#123;uat-id&#125;/ · github.com/tss-fg/urbanx-data</div>
       </div>
+    </div>
+    <div style="padding:10px 12px;border-top:1px solid rgba(255,255,255,.07);flex-shrink:0">
+      <button onclick="document.getElementById('uat-selector').remove();var b=document.getElementById('uat-selector-backdrop');if(b)b.remove()"
+        style="touch-action:manipulation;-webkit-tap-highlight-color:transparent;width:100%;padding:12px;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#f87171;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;min-height:48px">
+        ✕ Închide
+      </button>
     </div>`;
   document.body.appendChild(div);
 
@@ -4497,7 +4503,7 @@ function aedisGetContent(){
         <button onclick="AEDIS.stil='${k}';AEDIS._stilOverride=true;aedisRender();if(typeof _v3dIsOpen==='function'&&_v3dIsOpen()&&typeof _v3dRebuildFast==='function')_v3dRebuildFast();if((S.vol.genDone||window.AEDIS3D?.active)&&typeof aedisGenerateAll==='function')setTimeout(()=>aedisGenerateAll(),0)" class="aedis-stil-btn${AEDIS.stil===k?' active':''}">
           ${v.label}<br>
           <div style="margin:3px 0">${swatches}</div>
-          <small style="opacity:0.7">${v.desc}</small>
+          <small style="opacity:0.85;font-size:10px;color:#94a3b8;line-height:1.4;display:block;margin-top:2px">${v.desc}</small>
         </button>`;
       }).join('')}
     </div>

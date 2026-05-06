@@ -4795,14 +4795,7 @@ async function generateStudiuFezabilitate(paramOverrides){
   cy=body('Analiza SWOT constituie instrumentul de evaluare strategică obligatoriu conform HG 907/2016 pentru fundamentarea deciziei de investiție. Matricea de mai jos sintetizează factorii interni (Puncte Tari / Slabe) și factorii externi (Oportunități / Amenințări) specifici amplasamentului '+nrcad+', UTR '+utr+', '+uat+'.',14,cy);cy+=4;
   // Tabel SWOT 2x2
   const swotW=(W-28)/2;
-  // Calculeaza inaltimea reala a unui rand in functie de continut (evita overlap)
-  const swotLineH=3.8; // px per linie de text la fontSize 7.5
-  const swotPad=3.0;   // padding vertical per rand
-  const calcRowH=(textS,textW2)=>{
-    const linesS=textS?pdf.splitTextToSize('✓ '+S2(textS),swotW-6).length:0;
-    const linesW=textW2?pdf.splitTextToSize('✗ '+S2(textW2),swotW-6).length:0;
-    return Math.max(linesS,linesW,1)*swotLineH+swotPad*2;
-  };
+  const swotLineH=3.8;const swotPad=3.0; // pastrat pentru OT section
   // S - Strengths
   pdf.setFillColor(...GREEN);pdf.rect(14,cy,swotW,8,'F');
   pdf.setTextColor(255,255,255);pdf.setFontSize(8.5);pdf.setFont('helvetica','bold');
@@ -4813,32 +4806,17 @@ async function generateStudiuFezabilitate(paramOverrides){
   cy+=8;
   const swotS=['Amplasament UTR CP — funcțiuni mixte permise (rezidențial + comercial)','POT max '+params?.pot+'% și CUT max '+params?.cut+' — potențial constructiv ridicat','Regim H max '+( params?.h||'N/S')+'m — clădire de referință în zonă','Teren '+areaNum.toLocaleString('en-US')+' mp cu front stradal — vizibilitate comercială','Infrastructură edilitară completă în zonă (apă, canal, gaz, curent)','Accesibilitate urbană bună — transport public și auto'];
   const swotW2=['Parcaj la sol limitat ('+areaNum.toLocaleString('en-US')+' mp teren vs '+Math.round(pkMinF*30).toLocaleString('en-US')+' mp necesar) — recomandă subsol','Retragere laterală '+params?.rl+'m limitează lățimea construibilă','Studiu geotehnic obligatoriu (costuri 8.000-14.000 EUR) înainte de proiectare','Timp autorizare estimat 23-39 luni — riscuri de întârziere','Cerințe ISU stricte pentru H='+aedisH.toFixed(1)+'m (scară pompieri obligatorie)','Rezervă contingență 15-20% necesară pentru variații de preț'];
+  const swotRowH=16; // suficient pentru 2 linii text la 7.5pt (2*3.2 + padding)
   const maxRows=Math.max(swotS.length,swotW2.length);
-  // Calculeaza inaltimile dinamice pentru fiecare rand
-  const rowHeights=[];
-  for(let i=0;i<maxRows;i++) rowHeights.push(calcRowH(swotS[i],swotW2[i]));
-  const totalH=rowHeights.reduce((a,b)=>a+b,0);
-  // Deseneaza rândurile S/W cu înălțime dinamică
-  let ry=cy;
   for(let i=0;i<maxRows;i++){
-    const rh=rowHeights[i];
     const bg=i%2===0?LIGHT:LIGHT2;
-    pdf.setFillColor(...bg);pdf.rect(14,ry,swotW*2,rh,'F');
-    pdf.setDrawColor(...GRAY4);pdf.setLineWidth(0.15);pdf.line(14,ry+rh,14+swotW*2,ry+rh);
-    pdf.setDrawColor(...GRAY3);pdf.line(14+swotW,ry,14+swotW,ry+rh);
-    if(swotS[i]){
-      pdf.setTextColor(14,100,50);pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');
-      const lines=pdf.splitTextToSize('✓ '+S2(swotS[i]),swotW-6);
-      pdf.text(lines,16,ry+swotPad+swotLineH-0.5);
-    }
-    if(swotW2[i]){
-      pdf.setTextColor(158,20,20);pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');
-      const lines=pdf.splitTextToSize('✗ '+S2(swotW2[i]),swotW-6);
-      pdf.text(lines,16+swotW,ry+swotPad+swotLineH-0.5);
-    }
-    ry+=rh;
+    pdf.setFillColor(...bg);pdf.rect(14,cy+i*swotRowH,swotW*2,swotRowH,'F');
+    pdf.setDrawColor(...GRAY4);pdf.setLineWidth(0.15);pdf.line(14,cy+i*swotRowH+swotRowH,14+swotW*2,cy+i*swotRowH+swotRowH);
+    pdf.setDrawColor(...GRAY3);pdf.setLineWidth(0.3);pdf.line(14+swotW,cy,14+swotW,cy+maxRows*swotRowH);
+    if(swotS[i]){pdf.setTextColor(14,100,50);pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');pdf.text(S2('+ '+swotS[i]),16,cy+i*swotRowH+5,{maxWidth:swotW-5});}
+    if(swotW2[i]){pdf.setTextColor(158,20,20);pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');pdf.text(S2('- '+swotW2[i]),16+swotW,cy+i*swotRowH+5,{maxWidth:swotW-5});}
   }
-  cy+=totalH+6;
+  cy+=maxRows*swotRowH+6;
   // O - Opportunities / T - Threats
   pdf.setFillColor(...BLUE);pdf.rect(14,cy,swotW,8,'F');
   pdf.setTextColor(255,255,255);pdf.setFontSize(8.5);pdf.setFont('helvetica','bold');
@@ -4849,29 +4827,15 @@ async function generateStudiuFezabilitate(paramOverrides){
   const swotO=['Piață imobiliară activă în '+uat+' — cerere ridicată rezidențial/birouri','Fonduri europene POR 2021-2027 — axa urbană — potențial eligibil','Pre-certificare verde (BREEAM/LEED) — chirie +10-15% vs necertificat','Parcare subterană P-1 eliberează suprafața terenului pt spații comerciale','Trend pozitiv chirii: +3-5%/an estimat în zona UTR '+utr,'Stații EV (10% din locuri) — conformitate Reg. UE 2023/1804'];
   const swotT=['Risc modificare PUG — verificare obligatorie CU înainte de achiziție teren','Escaladare costuri construcție (risc ridicat 40%) — rezervă contingență obligatorie','Risc seismic P100-1/2013 zona '+getSeismConfig().zona+' — proiect structură antiseismică','Intârzieri avize (ISU, DJCPN, AACR) — 30-90 zile per aviz','Risc piață — scădere cerere în caz de recesiune — pre-vânzări recomandate','Riscuri geotehnice (teren argilos/loess) — costuri fundații suplimentare'];
   const maxOT=Math.max(swotO.length,swotT.length);
-  const rowHeightsOT=[];
-  for(let i=0;i<maxOT;i++) rowHeightsOT.push(calcRowH(swotO[i],swotT[i]));
-  const totalHOT=rowHeightsOT.reduce((a,b)=>a+b,0);
-  let ry2=cy;
   for(let i=0;i<maxOT;i++){
-    const rh=rowHeightsOT[i];
     const bg=i%2===0?LIGHT:LIGHT2;
-    pdf.setFillColor(...bg);pdf.rect(14,ry2,swotW*2,rh,'F');
-    pdf.setDrawColor(...GRAY4);pdf.setLineWidth(0.15);pdf.line(14,ry2+rh,14+swotW*2,ry2+rh);
-    pdf.setDrawColor(...GRAY3);pdf.line(14+swotW,ry2,14+swotW,ry2+rh);
-    if(swotO[i]){
-      pdf.setTextColor(20,50,98);pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');
-      const lines=pdf.splitTextToSize('↗ '+S2(swotO[i]),swotW-6);
-      pdf.text(lines,16,ry2+swotPad+swotLineH-0.5);
-    }
-    if(swotT[i]){
-      pdf.setTextColor(168,76,4);pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');
-      const lines=pdf.splitTextToSize('↘ '+S2(swotT[i]),swotW-6);
-      pdf.text(lines,16+swotW,ry2+swotPad+swotLineH-0.5);
-    }
-    ry2+=rh;
+    pdf.setFillColor(...bg);pdf.rect(14,cy+i*swotRowH,swotW*2,swotRowH,'F');
+    pdf.setDrawColor(...GRAY4);pdf.setLineWidth(0.15);pdf.line(14,cy+i*swotRowH+swotRowH,14+swotW*2,cy+i*swotRowH+swotRowH);
+    pdf.setDrawColor(...GRAY3);pdf.setLineWidth(0.3);pdf.line(14+swotW,cy,14+swotW,cy+maxOT*swotRowH);
+    if(swotO[i]){pdf.setTextColor(20,50,98);pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');pdf.text(S2('+ '+swotO[i]),16,cy+i*swotRowH+5,{maxWidth:swotW-5});}
+    if(swotT[i]){pdf.setTextColor(168,76,4);pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');pdf.text(S2('! '+swotT[i]),16+swotW,cy+i*swotRowH+5,{maxWidth:swotW-5});}
   }
-  cy+=totalHOT+6;
+  cy+=maxOT*swotRowH+6;
   cy=sec('16.1. RECOMANDARE STRATEGICA PE BAZA ANALIZEI SWOT',cy);cy+=3;
   cy=body('Pe baza analizei SWOT, scenariul S2 — Recomandat este optim: valorifică integral POT='+params?.pot+'% și CUT='+params?.cut+' (puncte tari), atenuează riscul de parcaj prin parcare subterană P-1 recomandată (elimină punct slab), și profită de cererea imobiliară activă și potențialul de certificare verde (oportunități). Principalele amenințări — escaladare costuri și risc geotehnic — sunt gestionate prin rezerva contingentă de 15% și studiu geotehnic obligatoriu.',14,cy);cy+=3;
 
