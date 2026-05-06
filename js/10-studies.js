@@ -1085,7 +1085,7 @@ async function generateMobilityStudy(){
   cy=sec('2. NECESARUL DE PARCAJE - CALCUL NP 051/2012',cy);cy+=2;
   cy=tblRow(['Functiune','Norma parcaje','Unitati','Nr. locuri min.'],cy,true,[55,45,40,38]);
   const pkRows=fn.includes('rezidential')||fn.includes('individual')?[['Apartamente/unitati rezidentiale','1 loc/unitate loc.','~'+locuinteEst+' ap.',pkObl+' loc.'],['Vizitatori (suplimentar)','1 loc/10 ap.','~'+locuinteEst+' ap.',Math.ceil(locuinteEst/10)+' loc.'],['Accesibilitate (PMR min 2%)','Min 1 loc/50 loc.','1 loc/50',Math.max(1,Math.ceil(pkObl/50))+' loc.']]:[fn.includes('birou')||fn.includes('office')?[['Spatii birouri/office','1 loc/40 mp SD',sdEst.toLocaleString('en-US')+' mp',Math.ceil(sdEst/40)+' loc.'],['Vizitatori birouri','1 loc/100 mp SD',sdEst.toLocaleString('en-US')+' mp',Math.ceil(sdEst/100)+' loc.'],['Biciclete (10% din total)','1 bicicleta/10 masini','—',Math.ceil(Math.ceil(sdEst/40)/10)+' loc.']]:[['Comercial/mixt (estimat)','1 loc/40 mp SD',sdEst.toLocaleString('en-US')+' mp',Math.ceil(sdEst/40)+' loc.'],['Personal angajat','1 loc/5 angajati','~'+Math.ceil(sdEst/20)+'ang.',Math.ceil(sdEst/100)+' loc.'],['Biciclete','1 loc/20 vizitatori','—',Math.ceil(sdEst/200)+' loc.']]];
-  pkRows.flat().forEach(r=>{cy=tblRow(r,cy,false,[55,45,40,38]);});
+  pkRows.forEach(r=>{cy=tblRow(Array.isArray(r)?r:[r],cy,false,[55,45,40,38]);});
 
   // PAG 3: Viewer 3D zi + noapte + tipuri parcaje
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D ZI / NOAPTE - TIPURI DE PARCAJE',3);ftr();
