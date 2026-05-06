@@ -5869,11 +5869,11 @@ async function generateWaterStudy(){
     ['UTR / Zonă PUG',utr], ['Suprafață teren',area+' mp'],
     ['Suprafață construită propusă',params?.pot?Math.round(areaNum*params.pot/100)+' mp (POT '+params.pot+'%)':'Cf. PUG'],
     ['H propus',aedisH>0?aedisH.toFixed(1)+'m':'Cf. proiect'],
-    ['Coordonate',lat.toFixed(6)+'° N, '+lon.toFixed(6)+'° E'],
+    ['Coordonate',(+lat||0).toFixed(6)+'° N, '+(+lon||0).toFixed(6)+'° E'],
     ['Operator apă/canal',S2(apaCfg.operator_apa)],
     ['Sursă apă potabilă',S2(apaCfg.sursa_apa)],
     ['Rețea canalizare',apaCfg.retea_canalizare?'DA — racord existent':'NU — soluție individuală necesară'],
-  ],cy);cy+=4;
+  ],cy);cy=isFinite(cy)?cy+4:37;
 
   cy=sec('2. CONTEXT HIDROGRAFIC',cy);cy+=2;
   cy=body('Amplasamentul este situat în bazinul hidrografic '+S2(apaCfg.bazin)+', sub-bazin '+S2(apaCfg.sub_bazin)+'. Autoritatea competentă pentru avizarea și autorizarea lucrărilor cu impact asupra resurselor de apă este '+S2(apaCfg.DA)+', cu sediul în '+S2(apaCfg.DA_oras)+'.',14,cy);cy+=4;
@@ -5883,7 +5883,7 @@ async function generateWaterStudy(){
     ['Cursuri de apă principale',(apaCfg.cursuri||[]).join(' · ')],
     ['Distanță curs principal',apaCfg.distanta_curs_principal+'m'],
     ['Arie naturală protejată',apaCfg.arie_naturala||'Niciuna în perimetrul de 3km'],
-  ],cy);cy+=4;
+  ],cy);cy=(isFinite(cy)?cy:33)+4;
 
   cy=sec('3. DIRECȚIA APELOR COMPETENTĂ',cy);cy+=2;
   cy=kv([
@@ -5893,7 +5893,7 @@ async function generateWaterStudy(){
     ['E-mail',apaCfg.DA_email],
     ['Website',apaCfg.DA_web],
     ['Normativ de bază',S2(apaCfg.norm_principala)],
-  ],cy);
+  ],cy);cy=isFinite(cy)?cy:33;
 
   // ── PAGINA 3: ANALIZA RISCULUI DE INUNDABILITATE ─────────────────────────
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('ANALIZA RISCULUI DE INUNDABILITATE',3);ftr();
@@ -5917,7 +5917,7 @@ async function generateWaterStudy(){
     ['Portanță estimată',S2(hidro.portanta||apaCfg.portanta)],
     ['Clasă geotehnică',S2(hidro.clasa_geotehnica||'2')],
     ['Studiu geotehnic obligatoriu','DA — NP 074/2014 (orice clădire)'],
-  ],cy);cy+=4;
+  ],cy);cy=(isFinite(cy)?cy:33)+4;
 
   cy=sec('5. OBLIGAȚII ZONE DE PROTECȚIE',cy);cy+=2;
   const zonaRisc = apaCfg.risc_inundabil?.includes('Ridicat');
@@ -5947,7 +5947,7 @@ async function generateWaterStudy(){
     ['Clasă geotehnică',S2(hidro.clasa_geotehnica||'2 — risc moderat')],
     ['Agresivitate față de beton','Verificare laborator necesară (carbonați, sulfați, pH)'],
     ['Studiu hidrogeologic','Recomandat pentru subsoluri și lucrări speciale de fundare'],
-  ],cy);cy+=4;
+  ],cy);cy=(isFinite(cy)?cy:33)+4;
 
   cy=sec('7. IMPACT CONSTRUCȚIE ASUPRA RESURSELOR DE APĂ',cy);cy+=2;
   cy=tblRow(['Categorie impact','Sursă','Măsuri obligatorii','Fază'],cy,true,[50,40,72,26]);
@@ -6007,7 +6007,7 @@ async function generateWaterStudy(){
       ['Scop',S2(s.scop)],['Conținut',S2(s.continut)],
       ['Bază legală',S2(s.baza)],['Cine elaborează',S2(s.cine)],
       ['Termen orientativ',s.termen],['Cost orientativ',s.cost],
-    ],cy);cy+=3;
+    ],cy);cy=(isFinite(cy)?cy:33)+3;
   });
 
   // ── PAGINA 7: PROCEDURA AVIZARE ──────────────────────────────────────────
@@ -6055,7 +6055,7 @@ async function generateWaterStudy(){
     ['Separator hidrocarburi','Obligatoriu pentru suprafețe cu trafic auto'],
     ['Racord colector public','Confirmare capacitate acceptare de la '+S2(apaCfg.operator_apa)],
     ['Alternativă infiltrare','Posibilă dacă portanță sol >100 kPa și NFA >1.5m'],
-  ],cy);cy+=4;
+  ],cy);cy=(isFinite(cy)?cy:33)+4;
 
   cy=sec('12.2 Ape uzate menajere',cy);cy+=2;
   const locatari = params?.cut?Math.round(areaNum*params.cut/40):50;
@@ -6066,7 +6066,7 @@ async function generateWaterStudy(){
     ['Rețea canalizare publică',apaCfg.retea_canalizare?'DISPONIBILĂ — confirmare raportat DA':'INDISPONIBILĂ — fosă etanșă/stație epurare individuală'],
     ['Racord la colector','Solicitare aviz tehnic '+S2(apaCfg.operator_apa)],
     ['Deversare direct curs apă','INTERZISĂ fără stație de epurare autorizată'],
-  ],cy);
+  ],cy);cy=isFinite(cy)?cy:33;
 
   // ── PAGINA 9: CONCLUZII + CHECKLIST ─────────────────────────────────────
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONCLUZII SI CHECKLIST DOCUMENTE NECESARE',9);ftr();
