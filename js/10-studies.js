@@ -77,49 +77,9 @@ function _pdfJustifyText(pdf, txt, x, cy, maxW, fz, lh, tc){
   }
 }
 
-// ── Wrapper _captureStudyMaps — ascunde cladirea demolata din capturi studii ──
-// In scenariul 'liber' (demolare + constructie noua), cladirea existenta pe
-// parcela apare in ctx-3d si in basemap, denaturand studiile.
-// Solutie: filtru Mapbox pe ctx-3d + fill-extrusion masca peste parcela.
+// ── Wrapper _captureStudyMaps — pass-through, filtrul demolare se aplica separat ──
 async function _captureStudyMaps_J(ap, cb){
-  const isDemo = (S.vol.scenariuConstructie==='liber') || AEDIS._demolishActive;
-  let _filterApplied = false;
-  if(isDemo && ap?.geo?.geometry){
-    try{
-      // 1. Filtru pe ctx-3d: ascunde cladirile al caror centroid e IN parcela
-      map.setFilter('ctx-3d',[
-        '!',['within',{type:'Feature',geometry:ap.geo.geometry,properties:{}}]
-      ]);
-      _filterApplied = true;
-      // 2. Fill-extrusion masca: acopera basemap buildings de pe parcela
-      if(!map.getSource('_demo_cap_src')){
-        map.addSource('_demo_cap_src',{type:'geojson',data:{
-          type:'Feature',geometry:ap.geo.geometry,properties:{}
-        }});
-      }
-      if(!map.getLayer('_demo_cap_fill')){
-        map.addLayer({
-          id:'_demo_cap_fill',type:'fill-extrusion',source:'_demo_cap_src',
-          paint:{
-            'fill-extrusion-color':'#c8b898',
-            'fill-extrusion-height':0.4,
-            'fill-extrusion-base':0,
-            'fill-extrusion-opacity':1
-          }
-        },'vol-3d');
-      }
-      await new Promise(r=>setTimeout(r,250));
-    }catch(e){ console.warn('[captureJ demolare filter]',e.message); }
-  }
-  try{
-    return await _captureStudyMaps_J(ap, cb);
-  }finally{
-    if(_filterApplied){ try{ map.setFilter('ctx-3d',null); }catch(e){} }
-    try{
-      if(map.getLayer('_demo_cap_fill')) map.removeLayer('_demo_cap_fill');
-      if(map.getSource('_demo_cap_src')) map.removeSource('_demo_cap_src');
-    }catch(e){}
-  }
+  return await _captureStudyMaps(ap, cb);
 }
 
 // ── Wrapper _initStudyPdf care injecteaza body() cu justify si S2 safe ───────
@@ -2854,7 +2814,8 @@ async function generateSSF(){
     'birouri':0.06,'hotel':0.07,'school':0.05,'public':0.06,
     'rezidential_colectiv':0.04,'locuinta_individuala':0.03,'default':0.05}[fn]||0.05;
 
-  // ── PAG 1: COVER ─────────────────────────────────────────────────────────
+  // ── PAG 1: COVER — tot PDF-ul e in try-catch pentru a preveni crash total ──
+  try{
   pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');pdf.setFillColor(10,20,45);pdf.rect(0,3,W,H-6,'F');
   pdf.setFillColor(180,20,20);pdf.rect(0,0,W,3,'F');pdf.rect(0,H-3,W,3,'F');
   pdf.setTextColor(220,60,60);pdf.setFontSize(9);pdf.setFont('helvetica','bold');
@@ -3277,8 +3238,14 @@ async function generateSSF(){
   pdf.text(S2('ATENTIE: Avizul ISU este CONDITIE OBLIGATORIE pentru eliberarea Autorizatiei de Construire (AC). Lipsa avizului = respingere AC automata.'),W/2,cy+6.5,{align:'center'});
   cy+=14;
   sign();
-  pdf.save('SSF_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
-  ss('OK Scenariu de Siguranta la Foc (SSF) generat — 12 pagini!');
+  try{ pdf.save('SSF_'+nrcad+'_'+new Date().getFullYear()+'.pdf'); }catch(e){ try{pdf.save('SSF_partial.pdf');}catch(_){} }
+  ss('OK Scenariu de Siguranta la Foc (SSF) generat!');
+  }catch(_ssf_e){
+    console.error('[SSF jsPDF error]', _ssf_e.message, _ssf_e.stack);
+    ss('SSF: eroare la generare — verificati consola (F12). Mesaj: '+_ssf_e.message);
+    try{ pdf.save('SSF_partial_'+nrcad+'.pdf'); }catch(_){
+      try{ pdf.save('SSF_partial.pdf'); }catch(__){}}
+  }
 }
 
 // ── STUDIU ISTORIC / PATRIMONIU ────────────────────────────────────────────
