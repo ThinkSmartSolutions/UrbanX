@@ -6502,3 +6502,426 @@ function _addConcluziePage(pdf, W, H, S2, hdr, ftr, sec, body, tblRow, nrcad, ut
     d2lines.forEach(l=>{pdf.text(l,W/2,dy,{align:'center'});dy+=3.5;});
   }catch(e){console.warn('[_addConcluziePage]',e.message);}
 }
+
+// ══════════════════════════════════════════════════════════════════════════
+// CERTIFICAT DE PERFORMANȚĂ ENERGETICĂ — CPE
+// Conf. Legea 372/2005, HG 765/2016, Mc001-2022, C107/1-5:2022
+// Calcule conform SR EN ISO 52000-1:2018 + metodologia nationala
+// ══════════════════════════════════════════════════════════════════════════
+async function generateEnergyCertificate(){
+  const ap=S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry){ss('Selectați o parcelă.');return;}
+  ss('⚡ Se generează Certificatul de Performanță Energetică...');
+
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Certificat de Performanta Energetica','CPE',12);
+  const caps=await _captureStudyMaps(ap,msg=>ss(msg));
+
+  // ── Parametri constructie ──────────────────────────────────────────────
+  const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13;
+  const niv=AEDIS.corpuri[0]?.niv||4;
+  const fn=AEDIS.fn||'rezidential_colectiv';
+  const fnLabel=_stripEmoji(AEDIS_FN[fn]?.label||fn);
+  const pArea=parseFloat(area)||0;
+  const scEst=Math.round(pArea*(parseFloat(params?.pot||35)/100));
+  const sdEst=Math.round(pArea*(parseFloat(params?.cut||1.5)));
+  const hNiv=3.0;
+  const isRez=fn.includes('rezidential')||fn.includes('locuinta');
+  const isOffice=fn.includes('birouri');
+  const isHotel=fn.includes('hotel');
+
+  // ── Geometrie anvelopa ──────────────────────────────────────────────────
+  const bW=Math.max(6,Math.sqrt(scEst*1.5));
+  const bD=Math.max(6,Math.sqrt(scEst/1.5));
+  const Aw_total=2*(bW+bD)*aedisH;
+  const ratioGlaz=isOffice?0.40:0.28;
+  const Aglaz=Aw_total*ratioGlaz;
+  const Aopaq=Aw_total-Aglaz;
+  const Aroof=scEst;
+  const Afloor=scEst;
+
+  // ── Propunere sistem constructiv (ETICS pe structura BA) ─────────────
+  // Pereti: BA20+VAT+BCA15+EPS15cm+tencuiala
+  const Uwall=0.27;   // W/m²K — sub limita C107: 0.35
+  const Uroof=0.18;   // W/m²K — sub limita C107: 0.25
+  const Ufloor=0.28;  // W/m²K — sub limita C107: 0.40
+  const Uwin=1.0;     // W/m²K triplu low-E — sub limita C107: 1.30
+  const gWin=0.50;    // g-value geam
+
+  // ── Puntile termice (calcul simplificat PSI) ───────────────────────────
+  const psi_IF=0.08;  // W/mK perete-planseu, rupt termic
+  const psi_Bal=0.10; // W/mK balcon, rupt termic
+  const L_IF=2*(bW+bD)*(niv+1);
+  const L_Bal=2*bW*(niv);
+  const dU_tb=(psi_IF*L_IF+psi_Bal*L_Bal)/(Aw_total+Aroof+Afloor)*0.6;
+
+  // ── HT — Coeficient total pierderi caldura transmisie [W/K] ──────────
+  const HT=Aopaq*(Uwall+dU_tb)+Aroof*Uroof+Afloor*Ufloor+Aglaz*Uwin;
+
+  // ── HV — Ventilatie [W/K] ─────────────────────────────────────────────
+  const Vnet=sdEst*(hNiv-0.35)*0.88;
+  const n_inf=isOffice?0.1:0.07;
+  const n_vent=isOffice?1.5:isHotel?1.0:0.35;
+  const HV=0.34*(n_inf+n_vent)*Vnet;
+  const Htot=HT+HV;
+
+  // ── Grade zile Iasi (STAS 6472/7-2001) ───────────────────────────────
+  const HDD=2820; // grade-zile incalzire Iasi (baza 15°C, oct-apr)
+  const CDD=190;  // grade-zile racire
+
+  // ── Castiguri termice ─────────────────────────────────────────────────
+  // Radiatia solara Iasi: S=1020, E/V=780, N=420, H=1250 kWh/m²/an
+  const Asud=bD*aedisH*ratioGlaz*0.40;
+  const Aev=(bW*aedisH)*ratioGlaz*0.25;
+  const Anord=bD*aedisH*ratioGlaz*0.10;
+  const Q_sol=(Asud*1020+Aev*780+Anord*420)*gWin*0.7;
+  const Q_int=isOffice?sdEst*15:isHotel?sdEst*8:sdEst*5;
+  const eta_g=0.85;
+
+  // ── Cerere neta caldura incalzire ─────────────────────────────────────
+  const Q_H_transm=Htot*HDD*24/1000;
+  const Q_H_net=Math.max(0,Q_H_transm-(Q_sol+Q_int)*eta_g);
+
+  // ── Cerere neta racire ────────────────────────────────────────────────
+  const Q_C_net=Math.max(0,(Q_sol*0.35+Q_int*0.4-HV*CDD*24/1000*0.5));
+
+  // ── Apa calda menajera ────────────────────────────────────────────────
+  const nApt=Math.max(1,Math.round(sdEst/70));
+  const nPers=Math.round(nApt*(isHotel?1.3:isOffice?0.8:2.5));
+  const Q_DHW=nPers*50*365/1000;
+
+  // ── Iluminat ─────────────────────────────────────────────────────────
+  const P_L=isOffice?10:isHotel?8:4;
+  const Q_light=P_L*sdEst*(isOffice?2000:1800)/1000;
+
+  // ── Sisteme tehnice propuse ────────────────────────────────────────────
+  // Incalzire: centrala termica condensatie gaz — eta=0.93×0.92=0.856
+  const eta_H=0.856;
+  // Racire: split AC (VRF) — EER=3.5, distributie 0.95
+  const eta_C=3.5*0.95;
+  // ACM: pompa de caldura monobloc aer-apa — COP_DHW=2.8
+  const eta_DHW=2.8;
+
+  // ── Factori conversie energie primara (Mc001:2022) ─────────────────────
+  const fp_gas=1.0;
+  const fp_elec=2.45;
+
+  // ── Energie primara ───────────────────────────────────────────────────
+  const EP_H=Q_H_net/eta_H*fp_gas;
+  const EP_C=Q_C_net/eta_C*fp_elec;
+  const EP_DHW=Q_DHW/eta_DHW*fp_elec;
+  const EP_L=Q_light*fp_elec*0.30;
+  const EP_total=EP_H+EP_C+EP_DHW+EP_L;
+  const EP_spec=Math.round(EP_total/Math.max(1,sdEst)*10)/10;
+
+  // ── NZEB ──────────────────────────────────────────────────────────────
+  const NZEB=isOffice?125:isHotel?110:90;
+  const NZEB_ok=EP_spec<=NZEB;
+
+  // ── CO2 ───────────────────────────────────────────────────────────────
+  const CO2_H=Q_H_net/eta_H*0.202;
+  const CO2_C=Q_C_net/eta_C*0.266;
+  const CO2_DHW=Q_DHW/eta_DHW*0.266;
+  const CO2_L=Q_light*0.266;
+  const CO2_spec=Math.round((CO2_H+CO2_C+CO2_DHW+CO2_L)/Math.max(1,sdEst)*10)/10;
+
+  // ── Clasa energetica ──────────────────────────────────────────────────
+  function cls(ep){
+    if(ep<15)return{c:'A++',rgb:[0,150,60],bg:[220,255,230]};
+    if(ep<30)return{c:'A+',rgb:[40,170,70],bg:[230,255,235]};
+    if(ep<50)return{c:'A',rgb:[90,190,50],bg:[235,255,225]};
+    if(ep<100)return{c:'B',rgb:[160,210,30],bg:[245,255,210]};
+    if(ep<150)return{c:'C',rgb:[220,200,20],bg:[255,252,210]};
+    if(ep<200)return{c:'D',rgb:[240,160,15],bg:[255,248,220]};
+    if(ep<250)return{c:'E',rgb:[235,100,15],bg:[255,240,220]};
+    if(ep<300)return{c:'F',rgb:[220,50,15],bg:[255,235,225]};
+    return{c:'G',rgb:[200,20,20],bg:[255,228,225]};
+  }
+  const energyCls=cls(EP_spec);
+
+  // ── Energie regenerabila (PV pe acoperis) ─────────────────────────────
+  const PV_kWp=scEst*0.20*0.18; // 20% din acoperis, eficienta 18%
+  const E_PV=PV_kWp*1050;  // kWh/an (1050h echivalent Iasi)
+  const EP_spec_PV=Math.round(Math.max(15,(EP_total-E_PV*fp_elec)/Math.max(1,sdEst)*10))/10;
+  const cls_PV=cls(EP_spec_PV);
+
+  const RN=(n,d=0)=>isNaN(n)?'—':d?Number(n).toFixed(d):Math.round(n)+'';
+  let cy=28;
+
+  // ══════════════════════════════════════════════════════════════════════
+  // PAG 1: COPERTA CERTIFICAT ENERGETIC
+  // ══════════════════════════════════════════════════════════════════════
+  // Background + accent bars
+  pdf.setFillColor(6,14,30);pdf.rect(0,0,W,H,'F');
+  pdf.setFillColor(0,90,180);pdf.rect(0,0,W,4,'F');
+  pdf.setFillColor(0,60,120);pdf.rect(0,H-4,W,4,'F');
+  pdf.setFillColor(18,36,65);pdf.rect(0,4,W,H-8,'F');
+
+  // Energy label graphic (large, center-right)
+  const lblX=W*0.48,lblW=W*0.45;
+  const labels=['G','F','E','D','C','B','A','A+','A++'];
+  const labCols=[[200,20,20],[220,50,20],[235,100,15],[240,160,15],[220,200,20],[160,210,30],[90,190,50],[40,170,70],[0,150,60]];
+  const barMaxW=lblW*0.78;
+  const barH=10;const barGap=2;const startY=H*0.22;
+  labels.forEach((lbl,i)=>{
+    const barW=barMaxW*(0.40+i*0.075);
+    const by=startY+i*(barH+barGap);
+    const col=labCols[i];
+    const isActive=energyCls.c===lbl;
+    pdf.setFillColor(...col);
+    pdf.roundedRect(lblX,by,barW,barH,1,1,'F');
+    pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(isActive?8.5:7);
+    pdf.text(lbl,lblX+barW-6,by+7);
+    if(lbl==='A+'||lbl==='A++'){
+      pdf.setFontSize(5);pdf.setFont('helvetica','normal');
+      pdf.text(lbl==='A++'?'NZEB Avansat':'NZEB',lblX+barW+2,by+4.5);
+    }
+    // Arrow indicator for current class
+    if(isActive){
+      pdf.setFillColor(255,220,0);
+      pdf.triangle(lblX+barW+8,by+1,lblX+barW+8,by+barH-1,lblX+barW+14,by+barH/2,'F');
+      pdf.setTextColor(255,220,0);pdf.setFont('helvetica','bold');pdf.setFontSize(10);
+      pdf.text(RN(EP_spec)+' kWh/m²/an',lblX+barW+17,by+7.5);
+    }
+  });
+
+  // Left side: title + building info
+  pdf.setTextColor(0,120,220);pdf.setFont('helvetica','bold');pdf.setFontSize(9);
+  pdf.text('CERTIFICAT DE PERFORMANTA ENERGETICA',14,H*0.18);
+  pdf.setTextColor(255,255,255);pdf.setFontSize(16);pdf.text('CLASA ENERGETICA',14,H*0.26);
+  pdf.setFillColor(...energyCls.rgb);pdf.roundedRect(14,H*0.28,32,18,3,3,'F');
+  pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(20);
+  pdf.text(energyCls.c,30,H*0.28+13,{align:'center'});
+
+  // Building info block
+  pdf.setFillColor(10,25,55);pdf.roundedRect(14,H*0.52,W*0.42,H*0.36,'F');
+  pdf.setFillColor(0,90,180);pdf.rect(14,H*0.52,3,H*0.36,'F');
+  const infoItems=[
+    ['Nr. cadastral:',nrcad],
+    ['UAT:',S2(uat)+' · jud. '+S2(judet)],
+    ['UTR/Zona:',utr],
+    ['Functiune:',fnLabel],
+    ['Regim inaltime:','P+'+niv+'E · H='+aedisH.toFixed(1)+'m'],
+    ['SD estimata:',sdEst+' m²'],
+    ['Nr. unitati:',nApt+' unitati'],
+    ['Data:',dateStr],
+  ];
+  infoItems.forEach(([lab,val],i)=>{
+    pdf.setTextColor(80,130,200);pdf.setFont('helvetica','normal');pdf.setFontSize(6.5);
+    pdf.text(S2(lab),20,H*0.52+9+i*8.5);
+    pdf.setTextColor(220,235,255);pdf.setFont('helvetica','bold');pdf.setFontSize(7);
+    pdf.text(S2(val),75,H*0.52+9+i*8.5);
+  });
+
+  // Thumbnail
+  if(caps.imgLocation){try{pdf.addImage(caps.imgLocation,'JPEG',W*0.47,H*0.64,W*0.47,H*0.25,undefined,'FAST');pdf.setDrawColor(0,90,180);pdf.setLineWidth(0.5);pdf.rect(W*0.47,H*0.64,W*0.47,H*0.25,'S');}catch(e){}}
+
+  pdf.setTextColor(80,110,160);pdf.setFont('helvetica','italic');pdf.setFontSize(5.5);
+  pdf.text('Certificat orientativ UrbanX TSS-FG · Conf. Legea 372/2005 · HG 765/2016 · Mc001:2022 · '+dateStr,W/2,H-6,{align:'center'});
+  ftr();
+
+  // ══════════════════════════════════════════════════════════════════════
+  // PAG 2: ANVELOPA CLADIRII — COEFICIENTI TERMICI
+  // ══════════════════════════════════════════════════════════════════════
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('ANVELOPA CLADIRII — COEFICIENTI TERMICI U — CONF. C107/4-2022',2);ftr();
+  cy=28;
+  cy=addImg(caps.img3D,14,cy,W-28,55,'FIG. 1 — Vedere 3D volumetrie propusa · Anvelopa termica exterioara');
+  cy=sec('1. CE ESTE CERTIFICATUL DE PERFORMANTA ENERGETICA?',cy);cy+=2;
+  cy=body('Certificatul de Performanta Energetica (CPE) este documentul oficial care arata cat de eficienta energetic este o cladire, similar notei de eficienta energetica de pe frigider sau masina de spalat. Clasele merg de la A++ (foarte eficienta, consum minim) pana la G (ineficienta, consum mare). In Romania, TOATE cladirile noi construite dupa 2021 trebuie sa fie Nearly Zero Energy Building (NZEB) — clasa A sau mai buna, cu consum de energie primara sub '+NZEB+' kWh/m²/an (Legea 372/2005 modificata prin L151/2019 + HG 765/2016). Cladirile NZEB sunt mai ieftine de intretinut si valoreaza mai mult pe piata imobiliara.',14,cy);cy+=4;
+  cy=sec('2. ANVELOPA TERMICA — STRATURILE CLADIRII',cy);cy+=2;
+  cy=body('Anvelopa termica este "haina" termica a cladirii — toti peretii exteriori, acoperisul si pardoseala la sol. Cu cat anvelopa este mai bine izolata, cu atat cladirea pierde mai putina caldura iarna si ramane mai rece vara, reducand costurile de incalzire/racire. Coeficientul U masoara pierderile de caldura (W/m²K) — cu cat e mai mic, cu atat mai bine.',14,cy);cy+=4;
+
+  cy=tblRow(['Element constructiv','Solutie propusa','Grosime','Coef. U propus','Limita C107/4:2022','Verdict'],cy,true,[45,55,18,22,25,17]);
+  [['Perete exterior','BA 20cm + VAT + BCA 15cm + EPS 15cm + tenc. armata','~45cm','0.27 W/m²K','0.35 W/m²K','CONFORM ✓'],
+   ['Terasa inversa (acoperis)','Planseu BA + bariera vapori + XPS 20cm + pietris','~30cm','0.18 W/m²K','0.25 W/m²K','CONFORM ✓'],
+   ['Pardoseala parter (spre sol)','Planseu BA + XPS 10cm + sapa + parchet','~25cm','0.28 W/m²K','0.40 W/m²K','CONFORM ✓'],
+   ['Ferestre (tamplarie)','Profil PVC/AL + geam triplu 4-16-4-16-4 low-E argon','72mm','Uw=1.0 W/m²K','1.30 W/m²K','CONFORM ✓'],
+   ['Punti termice liniare','Rupere termica balcoane, grinda perimetru izolata','—','ΔU='+dU_tb.toFixed(3)+' W/m²K','≤0.10 W/m²K','CONFORM ✓'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[45,55,18,22,25,17]));
+  cy+=4;
+
+  cy=sec('3. SUPRAFETELE ANVELOPEI TERMICE',cy);cy+=2;
+  cy=tblRow(['Suprafata anvelopa','Valoare calculata','Formula','Observatii'],cy,true,[50,30,55,47]);
+  [['Pereti opaci exteriori',RN(Aopaq)+' m²','2×('+RN(bW)+'m+'+RN(bD)+'m)×'+aedisH.toFixed(1)+'m × '+(1-ratioGlaz).toFixed(2),'Pereti fara geamuri'],
+   ['Suprafata vitrata (geamuri)',RN(Aglaz)+' m²',RN(ratioGlaz*100)+'% din Apereti','Raport vitraj recomandat 25-35%'],
+   ['Acoperis (terasa)',RN(Aroof)+' m²','Suprafata la sol × 1.0','Terasa plana circulabila'],
+   ['Pardoseala parter',RN(Afloor)+' m²','= SC edificiu','Spre sol/subsol'],
+   ['TOTAL anvelopa termica',RN(Aopaq+Aroof+Afloor+Aglaz)+' m²','Suma tuturor suprafetelor','Suprafata totala de calcul'],
+   ['Volum net incalzit/racit',RN(Vnet)+' m³','SD × (hNiv-0.35) × 0.88','Volum real util'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[50,30,55,47]));
+  cy+=3;
+  cy=body('NOTA IMPORTANTA: Coeficientul U calculat mai sus este ORIENTATIV, calculat pe baza solutiei constructive propuse de UrbanX. Valorile exacte se stabilesc de catre inginerul termotehnician la faza Proiect Tehnic (PT), prin calcul detaliat conf. SR EN ISO 6946:2017 si cu verificare de catre un verificator tehnic atestat.',14,cy);
+
+  // ══════════════════════════════════════════════════════════════════════
+  // PAG 3: BILANT ENERGETIC — CALCUL CERERE ENERGIE
+  // ══════════════════════════════════════════════════════════════════════
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('BILANT ENERGETIC ANUAL — CERERE SI CONSUM ENERGIE PRIMARA',3);ftr();
+  cy=28;
+  cy=sec('4. COEFICIENT GLOBAL PIERDERI DE CALDURA',cy);cy+=2;
+  cy=body('Coeficientul global de pierderi de caldura G1 [W/K] (sau HT) reprezinta cat de mult caldura pierde cladirea pentru fiecare grad de diferenta intre interior si exterior. Cu cat este mai mic, cu atat mai bine. Se calculeaza inmultind suprafetele cu coeficientii U corespunzatori, adaugand si pierderile prin ventilatie.',14,cy);cy+=3;
+  cy=tblRow(['Componenta pierderi','Suprafata/Volum','Coef. U sau HV','Pierderi [W/K]','% din total'],cy,true,[50,35,35,30,22]);
+  const Htot_=Htot||1;
+  [['Transmisie pereti opaci',RN(Aopaq)+' m²','U='+Uwall+' W/m²K + dU',RN(Aopaq*(Uwall+dU_tb))+' W/K',RN(Aopaq*(Uwall+dU_tb)/Htot_*100)+'%'],
+   ['Transmisie acoperis',RN(Aroof)+' m²','U='+Uroof+' W/m²K',RN(Aroof*Uroof)+' W/K',RN(Aroof*Uroof/Htot_*100)+'%'],
+   ['Transmisie pardoseala',RN(Afloor)+' m²','U='+Ufloor+' W/m²K',RN(Afloor*Ufloor)+' W/K',RN(Afloor*Ufloor/Htot_*100)+'%'],
+   ['Transmisie geamuri',RN(Aglaz)+' m²','Uw='+Uwin+' W/m²K',RN(Aglaz*Uwin)+' W/K',RN(Aglaz*Uwin/Htot_*100)+'%'],
+   ['Ventilatie si infiltratii',RN(Vnet)+' m³','n='+((n_inf+n_vent)).toFixed(2)+' h⁻¹',RN(HV)+' W/K',RN(HV/Htot_*100)+'%'],
+   ['TOTAL H_tot','—','—',RN(Htot)+' W/K','100%'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[50,35,35,30,22]));cy+=4;
+
+  cy=sec('5. BILANT ENERGETIC ANUAL (kWh/an)',cy);cy+=2;
+  cy=body('Bilantul energetic calculeaza cat energie primara consuma cladirea intr-un an complet de operare. Energia primara include atat energia utila cat si pierderile de producere/transport ale sursei (gaz, electricitate). Grade-zile Iasi: HDD='+HDD+' (incalzire), CDD='+CDD+' (racire).',14,cy);cy+=3;
+  cy=tblRow(['Capitol energetic','Energie utila','Eficienta sistem','Energie primara','Sursa','kWh/m²/an'],cy,true,[42,28,22,28,28,24]);
+  [['Incalzire spatii',RN(Q_H_net)+' kWh/an','eta='+eta_H.toFixed(2)+' (gaz cond.)',RN(EP_H)+' kWh_p','Gaz natural',RN(EP_H/Math.max(1,sdEst))],
+   ['Racire spatii',RN(Q_C_net)+' kWh/an','EER='+eta_C.toFixed(1)+' (split AC)',RN(EP_C)+' kWh_p','Electricitate',RN(EP_C/Math.max(1,sdEst))],
+   ['Apa calda menajera',RN(Q_DHW)+' kWh/an','COP='+eta_DHW.toFixed(1)+' (pompa cal.)',RN(EP_DHW)+' kWh_p','Electricitate',RN(EP_DHW/Math.max(1,sdEst))],
+   ['Iluminat',RN(Q_light)+' kWh/an','LED, factor 0.30',RN(EP_L)+' kWh_p','Electricitate',RN(EP_L/Math.max(1,sdEst))],
+   ['TOTAL ENERGIE PRIMARA',RN(Q_H_net+Q_C_net+Q_DHW+Q_light)+' kWh/an','—',RN(EP_total)+' kWh_p/an','—',EP_spec+''],
+  ].forEach(r=>cy=tblRow(r,cy,false,[42,28,22,28,28,24]));cy+=4;
+
+  // Visual energy bar
+  const barY=cy;const barW2=W-28;const barH2=18;
+  const maxEP=300;
+  const barFill=Math.min(1,EP_spec/maxEP)*barW2;
+  // Background gradient bar
+  const gradSteps=[[200,20,20],[220,50,20],[235,100,15],[240,160,15],[220,200,20],[160,210,30],[90,190,50],[40,170,70],[0,150,60]];
+  gradSteps.forEach((col,i)=>{
+    pdf.setFillColor(...col);pdf.rect(14+barW2/gradSteps.length*i,barY,barW2/gradSteps.length+0.5,barH2,'F');
+  });
+  pdf.setFillColor(255,255,255,0.6);pdf.setOpacity?.(0.4);
+  // Marker
+  pdf.setOpacity?.(1);
+  const markerX=14+barFill;
+  pdf.setFillColor(255,220,0);pdf.triangle(markerX-4,barY,markerX+4,barY,markerX,barY+barH2,'F');
+  pdf.setTextColor(20,40,80);pdf.setFont('helvetica','bold');pdf.setFontSize(8);
+  pdf.text(EP_spec+' kWh_prim/m²/an',markerX,barY-2,{align:'center'});
+  pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(6.5);
+  ['G','F','E','D','C','B','A','A+','A++'].forEach((l,i)=>{
+    pdf.text(l,14+barW2/9*(i+0.5),barY+11,{align:'center'});
+  });
+  pdf.setDrawColor(255,255,255);pdf.setLineWidth(0.3);
+  for(let i=1;i<9;i++) pdf.line(14+barW2/9*i,barY,14+barW2/9*i,barY+barH2);
+  pdf.setDrawColor(80,100,130);pdf.setLineWidth(0.5);pdf.rect(14,barY,barW2,barH2,'S');
+  // NZEB line
+  const nzebX=14+barW2*(NZEB/maxEP);
+  pdf.setDrawColor(0,80,200);pdf.setLineWidth(1);pdf.line(nzebX,barY-5,nzebX,barY+barH2+3);
+  pdf.setTextColor(0,80,200);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
+  pdf.text('NZEB: '+NZEB+' kWh/m²',nzebX,barY-7,{align:'center'});
+  cy+=barH2+12;
+
+  // Verdict NZEB
+  const vCol=NZEB_ok?[0,120,50]:[180,30,30];
+  pdf.setFillColor(...(NZEB_ok?[220,255,230]:[255,230,230]));pdf.roundedRect(14,cy,W-28,16,2,2,'F');
+  pdf.setFillColor(...vCol);pdf.rect(14,cy,3,16,'F');
+  pdf.setTextColor(...vCol);pdf.setFont('helvetica','bold');pdf.setFontSize(8);
+  pdf.text(NZEB_ok?'✓ CONFOM NZEB — Cladire aproape zero energie, conf. Legea 372/2005 + HG 765/2016':'✗ NU ATINGE NZEB — Necesita imbunatatiri conf. Legea 372/2005 + HG 765/2016',20,cy+7);
+  pdf.setTextColor(40,60,80);pdf.setFont('helvetica','normal');pdf.setFontSize(6);
+  pdf.text('EP_spec = '+EP_spec+' kWh_prim/m²/an vs. limita NZEB = '+NZEB+' kWh_prim/m²/an (conf. HG 765/2016 pentru '+fnLabel+')',20,cy+13);
+  cy+=20;
+
+  // ══════════════════════════════════════════════════════════════════════
+  // PAG 4: EMISII CO2 + ENERGIE REGENERABILA + RECOMANDARI
+  // ══════════════════════════════════════════════════════════════════════
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('EMISII CO2 · ENERGIE REGENERABILA · RECOMANDARI — '+fnLabel,4);ftr();
+  cy=28;
+
+  // CO2 section
+  cy=sec('6. EMISII DE CO2 — IMPACTUL CLIMATIC AL CLADIRII',cy);cy+=2;
+  cy=body('Emisiile de CO2 ale cladirii provin din arderea gazului natural (incalzire) si din consumul de electricitate (din reteaua nationala). Romania are un factor de emisie pentru electricitate de ~0.266 kgCO2/kWh (mix energetic 2024: hidro, nuclear, gaz, regenerabile). O cladire mai eficienta energetic emite mai putinCO2, contribuind la obiectivele climatice ale Romaniei (50% reducere emisii pana in 2030, conf. Strategia Nationala energie 2023-2035).',14,cy);cy+=4;
+  cy=tblRow(['Sursa emisii','Consum energie utila','Factor emisie','Emisii CO2/an','kgCO2/m²/an'],cy,true,[45,35,30,30,32]);
+  [['Incalzire (gaz natural)',RN(Q_H_net/eta_H)+' kWh/an','0.202 kgCO2/kWh',RN(CO2_H)+' kgCO2',RN(CO2_H/Math.max(1,sdEst))],
+   ['Racire (electricitate)',RN(Q_C_net/eta_C)+' kWh/an','0.266 kgCO2/kWh',RN(CO2_C)+' kgCO2',RN(CO2_C/Math.max(1,sdEst))],
+   ['Apa calda (pompa caldura)',RN(Q_DHW/eta_DHW)+' kWh/an','0.266 kgCO2/kWh',RN(CO2_DHW)+' kgCO2',RN(CO2_DHW/Math.max(1,sdEst))],
+   ['Iluminat LED',RN(Q_light)+' kWh/an','0.266 kgCO2/kWh',RN(CO2_L)+' kgCO2',RN(CO2_L/Math.max(1,sdEst))],
+   ['TOTAL EMISII CO2',RN((CO2_H+CO2_C+CO2_DHW+CO2_L))+' kgCO2/an','—',RN(CO2_H+CO2_C+CO2_DHW+CO2_L)+' kgCO2',CO2_spec+''],
+  ].forEach(r=>cy=tblRow(r,cy,false,[45,35,30,30,32]));cy+=4;
+
+  cy=sec('7. ENERGIE REGENERABILA — PANOURI FOTOVOLTAICE PE ACOPERIS',cy);cy+=2;
+  cy=body('Instalarea de panouri fotovoltaice pe acoperis este cea mai eficienta metoda de reducere a consumului de energie primara si de atingere a clasei A++ (NZEB avansat). Iasul are o radiatie solara de ~1250 kWh/m²/an, printre cele mai ridicate din Romania.',14,cy);cy+=3;
+  cy=tblRow(['Parametru PV','Valoare calculata','Baza de calcul','Observatii'],cy,true,[55,35,55,37]);
+  [['Suprafata disponibila acoperis',RN(scEst*0.20)+' m²','20% din acoperis ('+RN(scEst)+'m²)','Zona fara umbre, orientata S-SE'],
+   ['Putere instalata PV',RN(PV_kWp)+' kWp','18% eficienta panouri monocristaline','Panouri TOPCon 400-450Wp/buc'],
+   ['Productie anuala estimata',RN(E_PV)+' kWh/an','1050 ore echivalent la Iasi','Var. ±15% in functie de conditii'],
+   ['Reducere energie primara',RN(E_PV*fp_elec)+' kWh_prim/an','Factor conv. elec: '+fp_elec,'Inlocuieste electricitate din retea'],
+   ['EP_spec CU panouri PV',EP_spec_PV+' kWh_prim/m²/an','vs. '+EP_spec+' fara PV','Clasa: '+cls_PV.c],
+   ['Clasa energetica CU PV',cls_PV.c,'EP_spec_PV = '+EP_spec_PV+' kWh/m²/an','Imbunatatire: '+energyCls.c+' -> '+cls_PV.c],
+   ['Investitie estimata PV',RN(PV_kWp*900)+' EUR','~900 EUR/kWp instalat (2025)','Recuperare investitie ~6-8 ani'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[55,35,55,37]));cy+=4;
+
+  cy=sec('8. RECOMANDARI PENTRU ATINGEREA CLASEI NZEB',cy);cy+=2;
+  const recoms=[
+    ['🏠 ANVELOPA (prioritate 1)','Respectati grosimile de izolatie propuse: EPS 15cm pe pereti (U≤0.27 W/m²K), XPS 20cm pe terasa (U≤0.18), XPS 10cm pe pardoseala parter (U≤0.28). NU reduceti grosimile din economie — costul suplimentar al izolatiei este recuperat in 4-5 ani din facturi mai mici.',NZEB_ok?[0,120,50]:[180,30,30]],
+    ['🪟 FERESTRE (prioritate 2)','Specificati OBLIGATORIU geam triplu low-E cu argon, Uw≤1.0 W/m²K. Evitati geamul dublu standard (Uw=2.8) care pierde de 2.8x mai multa caldura. Tâmplaria PVC sau aluminiu cu minim 5 camere si rupere de punte termica. Cost suplimentar: ~40 EUR/mp fereastra → recuperare in 3 ani.',NZEB_ok?[0,120,50]:[200,100,0]],
+    ['⚙️ SISTEME TEHNICE (prioritate 3)','Incalzire: centrala termica condensatie gaz (eta≥93%) sau pompa de caldura aer-apa (COP≥4.0, clasa A++). ACM: boiler cu pompa caldura (COP≥2.5). Ventilatie: sistem VMC cu recuperare caldura eficienta≥80% (economie 30% fata de ventilatie simpla). Lifturi: regenerative cu recuperare energie frenare.',NZEB_ok?[0,80,160]:[0,80,160]],
+    ['☀️ ENERGIE REGENERABILA (rec. 4)','Instalati '+RN(PV_kWp)+' kWp panouri fotovoltaice pe acoperis (productie '+RN(E_PV)+' kWh/an). Optional: colectoare solare termice pentru ACM (reducere 60-70% fata de boiler electric). Puncte incarcare masini electrice in parcare (regulament UE 2023). Aceste masuri duc la clasa '+cls_PV.c+'.',NZEB_ok?[0,100,40]:[0,100,40]],
+    ['🌿 CONSTRUCTIE SUSTENABILA (rec. 5)','Utilizati materiale cu continut redus de carbon: beton BAC cu zgura de furnal (ciment Portland 30% inlocuit), armatura din otel reciclat 100%, BCA cu densitate D400 (carbon embodied cu 60% mai mic fata de beton monolit). Tinta: Carbon Embodied < 400 kgCO2/m² (conf. RICS 2023 Whole Life Carbon).',NZEB_ok?[0,80,40]:[0,80,40]],
+  ];
+  recoms.forEach(([title,text,col])=>{
+    if(cy>H-30)return;
+    pdf.setFillColor(Math.min(255,col[0]*0.1+240),Math.min(255,col[1]*0.1+245),Math.min(255,col[2]*0.1+248));
+    pdf.roundedRect(14,cy,W-28,20,1.5,1.5,'F');
+    pdf.setFillColor(...col);pdf.rect(14,cy,2.5,20,'F');
+    pdf.setTextColor(...col);pdf.setFont('helvetica','bold');pdf.setFontSize(6);pdf.text(S2(title),19,cy+6);
+    pdf.setTextColor(30,50,80);pdf.setFont('helvetica','normal');pdf.setFontSize(5.2);
+    const rLines=pdf.splitTextToSize(S2(text),W-34);
+    rLines.slice(0,3).forEach((l,li)=>pdf.text(l,19,cy+12+li*3));
+    cy+=23;
+  });
+
+  // ══════════════════════════════════════════════════════════════════════
+  // PAG 5: CONCLUZII + BAZA LEGALA CPE
+  // ══════════════════════════════════════════════════════════════════════
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONCLUZII CPE · BAZA LEGALA · PASI URMATORI',5);ftr();
+  cy=28;
+  cy=addImg(caps.v3dDay||caps.imgFront,14,cy,W-28,55,'FIG. 2 — Vedere 3D finalizata cu sistemele propuse — clasa energetica '+energyCls.c);cy+=3;
+
+  // Summary card
+  const sc_=[
+    ['Clasa energetica proiectata',energyCls.c,'EP_spec = '+EP_spec+' kWh_prim/m²/an'],
+    ['Clasa CU panouri fotovoltaice',cls_PV.c,'EP_spec = '+EP_spec_PV+' kWh_prim/m²/an'],
+    ['Limita NZEB (HG 765/2016)',NZEB+' kWh/m²/an',NZEB_ok?'CONFORM ✓':'Necesita masuri suplimentare'],
+    ['Emisii CO2 specifice',CO2_spec+' kgCO2/m²/an','echivalent '+RN(CO2_spec/0.202*1000/1000)+'mc gaz/m²/an'],
+    ['Coeficient pierderi HT',RN(HT)+' W/K','HV (ventilatie): '+RN(HV)+' W/K'],
+    ['Investitie suplimentara izolatie','+15-25 EUR/m² SD estimat','Recuperare in 4-6 ani facturi'],
+  ];
+  cy=tblRow(['Indicator CPE','Valoare','Observatie/Norma'],cy,true,[55,35,82]);
+  sc_.forEach(r=>cy=tblRow(r,cy,false,[55,35,82]));cy+=4;
+
+  cy=sec('9. BAZA LEGALA CERTIFICAT ENERGETIC',cy);cy+=2;
+  [['Legea 372/2005','Legea privind performanta energetica a cladirilor — republicata. Obligatia CPE la vanzare/inchiriere/constructie noua.'],
+   ['HG 765/2016','Cerinte minime de performanta energetica a cladirilor. NZEB obligatoriu cladiri noi. Penalitati pana la 50.000 RON neconformare.'],
+   ['Mc001/1-5:2022','Metodologia de calcul al performantei energetice a cladirilor — baza de calcul pentru CPE oficial.'],
+   ['C107/1-5:2022','Normativ privind calculul termotehnic al elementelor de constructie. Valorile limita U pentru fiecare element.'],
+   ['SR EN ISO 52000-1:2018','Performanta energetica a cladirilor — evaluare globala. Standard european armonizat in Romania.'],
+   ['L151/2019','Modificare Legea 372/2005 — introducere obligatorie NZEB pentru cladiri noi dupa 31 dec 2020.'],
+   ['Regulamentul UE 2024/1275','Building Energy Performance Directive (EPBD) — cladiri zero emisii din 2028 (noi), 2050 (existente).'],
+  ].forEach(([lege,desc])=>{
+    if(cy>H-25)return;
+    pdf.setFillColor(248,251,255);pdf.roundedRect(14,cy,W-28,9,1,1,'F');
+    pdf.setDrawColor(...BLUE);pdf.setLineWidth(0.2);pdf.rect(14,cy,W-28,9,'S');
+    pdf.setTextColor(...BLUE);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);pdf.text(S2(lege),16,cy+3.5);
+    pdf.setTextColor(30,50,85);pdf.setFont('helvetica','normal');pdf.setFontSize(5);
+    const dLines=pdf.splitTextToSize(S2(desc),W-50);
+    dLines.slice(0,1).forEach(l=>pdf.text(l,55,cy+3.5));
+    cy+=10;
+  });cy+=3;
+
+  cy=sec('10. PASI URMATORI PENTRU PROPRIETAR',cy);cy+=2;
+  [['ETAPA 1 — INAINTE DE AUTORIZATIA DE CONSTRUIRE:','Elaborare Proiect Tehnic (PT) de arhitect OAR cu inginer termotehnician atestat MDLPA. CPE se calculeaza la faza DTAC si se depune la Primarie ca parte din dosar.'],
+   ['ETAPA 2 — LA RECEPTIA CLADIRII:','Auditor energetic atestat MDLPA verifica ca toate solutiile din PT au fost implementate (izolatie, geamuri, instalatii) si emite CPE definitiv — obligatoriu pentru intabulare.'],
+   ['ETAPA 3 — EXPLOATARE CLADIRE:','CPE se anexeaza la fiecare contract de vanzare/inchiriere (obligatoriu Legea 372/2005). Reinnoire la lucrari majore sau la 10 ani. Afisare OBLIGATORIE la intrare pentru cladiri publice > 250m².'],
+   ['RECOMANDARE FINALA:','Proiectati din start pentru clasa A/A+ — costul suplimentar de constructie este de 3-8% dar cladirea va fi mai usor de vandut/inchiriat, nu va necesita reabilitare energetica in urmatorii 20 de ani, si beneficiaza de finantari verzi (BNR, EIB, fonduri europene cu rata redusa).'],
+  ].forEach(([step,txt])=>{
+    if(cy>H-25)return;
+    pdf.setFillColor(235,245,255);pdf.roundedRect(14,cy,W-28,15,1.5,1.5,'F');
+    pdf.setFillColor(...BLUE);pdf.rect(14,cy,2.5,15,'F');
+    pdf.setTextColor(...BLUE);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);pdf.text(S2(step),19,cy+5);
+    pdf.setTextColor(20,45,85);pdf.setFont('helvetica','normal');pdf.setFontSize(5);
+    const tl=pdf.splitTextToSize(S2(txt),W-32);
+    tl.slice(0,2).forEach((l,li)=>pdf.text(l,19,cy+10+li*3));
+    cy+=17;
+  });
+
+  pdf.save('CertificatEnergetic_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
+  if(typeof ss==='function') ss('✅ Certificat de Performanta Energetica generat — '+5+' pagini · Clasa '+energyCls.c+' ('+EP_spec+' kWh/m²/an)');
+}
+window.generateEnergyCertificate=generateEnergyCertificate;

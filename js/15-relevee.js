@@ -100,6 +100,14 @@ function _rvGetParcelParams(){
   const reg      = (typeof REGULI !== 'undefined' && REGULI[utr]) || {};
   const params   = ap.params || {};
 
+  // ── Scenariul Demolare: ignorăm construcțiile existente ─────────────
+  // Când utilizatorul a selectat scenariu "Demolare" în AEDIS,
+  // releveele și studiile trebuie să reflecte terenul LIBER, nu construcțiile
+  // demolate. Context OSM și S.vol._lastFeats nu mai sunt relevante.
+  const isDemolare = (typeof AEDIS !== 'undefined') &&
+    (AEDIS.scenariu === 'demolare' || AEDIS._demolishActive);
+  const existentH  = isDemolare ? 0 : null; // ignoram constructia existenta
+
   // Estimăm dimensiunile parcelei din bbox
   const bbox  = turf.bbox(ap.geo);
   const bboxW = turf.distance({type:'Feature',geometry:{type:'Point',coordinates:[bbox[0],bbox[1]]}},
@@ -111,7 +119,9 @@ function _rvGetParcelParams(){
   const frontDir = S.vol?.frontDir || ap.frontDir || 'N';
 
   // Înălțimea din AEDIS dacă e generat, altfel din params sau din regulament
-  const aedisH   = S.vol?._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0) || null;
+  // În scenariul Demolare, ignorăm înălțimea construcției existente
+  const aedisH   = isDemolare ? null :
+    (S.vol?._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0) || null);
   const hMax     = params.h || reg.h || 28;
   const hn       = 3.0;
   const niv      = aedisH ? Math.round(aedisH/hn) : (params.niv || reg.niv || Math.floor(hMax/hn));
@@ -1259,104 +1269,192 @@ async function _rvExportPDF(){
       pdf.setDrawColor(...C.red);pdf.setLineWidth(0.35);pdf.setLineDashPattern([1,0.8],0);
       pdf.line(ox,oy+b.bD*sc/2,ox+b.bW*sc,oy+b.bD*sc/2);pdf.setLineDashPattern([],0);
 
-      // RIGHT PANEL — explicații
+      // ── RIGHT PANEL — ghid complet pentru non-arhitect ─────────────────
       const rx=10+planAreaW,ry=10,rw=W-rx-8,rh=planAreaH;
       pdf.setFillColor(255,255,255);pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.3);pdf.rect(rx,ry,rw,rh,'FD');
       let panY=ry+2;
-      pdf.setFillColor(...C.dark2);pdf.rect(rx,panY,rw,6,'F');
-      pdf.setFillColor(...C.gold);pdf.rect(rx,panY,1.5,6,'F');
-      pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(6.5);
-      pdf.text('GHID CITIRE PLAN',rx+rw/2,panY+4.2,{align:'center'});panY+=8;
 
-      // Explicatii generale
+      // Header panel
+      pdf.setFillColor(...C.dark2);pdf.rect(rx,panY,rw,7,'F');
+      pdf.setFillColor(...C.gold);pdf.rect(rx,panY,2,7,'F');
+      pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(7);
+      pdf.text(fl===0?'CUM SE CITEȘTE PLANUL PARTERULUI':'CUM SE CITEȘTE PLANUL ETAJULUI '+fl,rx+rw/2,panY+5,{align:'center'});
+      panY+=10;
+
+      // Introducere contextualizata
+      const floorTitle=fl===0?'PARTER — NIVELUL 0 (COTA ±0.00)':'ETAJ '+fl+' — COTA +'+(fl*P.hn).toFixed(2)+'m';
+      pdf.setFillColor(235,242,252);pdf.roundedRect(rx+1,panY,rw-2,5,1,1,'F');
+      pdf.setTextColor(...C.blue);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
+      pdf.text(floorTitle,rx+3,panY+3.5);panY+=7;
+
       const genExp=fl===0
-        ?'Planul parterului reprezintă nivelul de la sol (cota ±0.00). La parter se regăsesc: holul de intrare cu căsuțe poștale, accesul la scara și lift, și apartamentele de la nivelul inferior.'
-        :'Planul etajului '+fl+' (cota +'+(fl*P.hn).toFixed(2)+'m) prezintă distribuția tipică a apartamentelor. Fiecare etaj are aceeași suprafață desfășurată de '+RN(b.sdaPerFloor)+'m².';
-      panY=bodyTxt(genExp,rx+2,panY,rw-4,5.5,[40,55,80]);panY+=3;
+        ?'Acesta este planul parterului — primul nivel al clădirii, la nivelul solului. Pe acest plan veți găsi: intrarea principală în clădire cu holul de acces, căsuțe poștale, nucleele de scări cu lift (accesul vertical la toate etajele), și apartamentele de la parter. Toți peretii sunt la scara 1:100 — 1cm pe plan = 1m în realitate.'
+        :'Acesta este planul etajului '+fl+' — un nivel tipic de locuire la înălțimea de '+(fl*P.hn).toFixed(2)+'m față de sol. Toate etajele de la 1 la '+(b.niv-1)+' au același plan funcțional (tip). Fiecare etaj cuprinde '+RN(b.cores.length*2)+' apartamente cu o suprafață totală de '+RN(b.sdaPerFloor)+'m².';
+      panY=bodyTxt(genExp,rx+2,panY,rw-4,5.2,[30,50,80]);panY+=4;
 
-      // Legenda spații cu explicații
-      pdf.setFillColor(245,248,252);pdf.rect(rx,panY,rw,5,'F');
-      pdf.setTextColor(...C.dark2);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
-      pdf.text('SPAȚII ȘI ROLUL LOR',rx+2,panY+3.5);panY+=7;
+      // Sectiune: CE VEDETI
+      pdf.setFillColor(245,248,252);pdf.rect(rx,panY,rw,5.5,'F');
+      pdf.setFillColor(...C.gold);pdf.rect(rx,panY,2,5.5,'F');
+      pdf.setTextColor(30,50,85);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
+      pdf.text('CE REPREZINTĂ FIECARE CULOARE PE PLAN?',rx+4,panY+3.8);panY+=7.5;
+
+      // Room explanations - full detail
       const roomExpl=[
-        [C.core,C.blue,'SCĂRI + LIFT','Casa scărilor și liftul — nucleul vertical al clădirii. Asigură accesul la toate nivelurile, inclusiv pentru persoane cu mobilitate redusă (PMR). Conf. NP 051/2012.'],
-        [C.hall,C.gray,'HOL INTRARE','Spațiu tampon între exterior și apartamente. La parter: căsuțe poștale, interfon video, spațiu biciclete. Conf. NP 016-97.'],
-        [C.living,C.orange,'LIVING / SALON','Camera principală de zi. Min. 14m² conf. NP 057/2002. Orientat spre Sud/Est pentru însorire maximă (OMS 119/2014). Ferestre mari pentru lumină naturală.'],
-        [C.bedroom,C.green,'DORMITOR','Cameră de odihnă. Min. 12m² (dormitor 1) / 10m² (dormitor 2) conf. NP 057/2002. Nu se orientează spre Nord — însorire obligatorie min. 1.5h/zi (OMS 119).'],
-        [C.kitchen,C.cyan,'BUCĂTĂRIE','Spațiu funcțional. Min. 5m² conf. NP 057/2002. Ventilație mecanică obligatorie conf. SR EN 15665. Canalizare și gaz natural racordate.'],
-        [C.bath,C.purple,'BAIE / WC','Grupuri sanitare. Min. 3.6m² baie / 1.2m² WC conf. NP 057/2002. Ventilație mecanică obligatorie. Hidroizolație planșeu conform SR EN 1504.'],
-        [C.balcon,C.gold,'BALCON','Spațiu exterior acoperit, extinde suprafața utilă. Min. 1.2m adâncime conf. NP 016-97. Parapet min. 1.0m înălțime conf. STAS 6131/1-1982.'],
+        [C.core,C.blue,'CASĂ SCĂRI + LIFT (albastru)','Inima verticală a clădirii. Scara permite accesul pe jos între etaje; liftul este OBLIGATORIU conf. NP 051/2012 pentru clădiri P+4 și mai mult și asigură accesul persoanelor cu mobilitate redusă (PMR). Cabina liftului min. 1.1×1.4m, ușă min. 0.8m (Legea 448/2006). Casa scărilor este compartimentată antifoc (uși EI 30) pentru evacuare în siguranță.','14m²','Nucleu'],
+        [C.hall,C.gray,'HOL / CORIDOR (gri)','Spațiu de tranziție și circulație. La PARTER: conține căsuțele poștale, interfon video color, eventual spații biciclete. La ETAJE: coridorul care leagă liftul/scara de ușile apartamentelor. Lățime min. 1.2m conf. P118 evacuare. Fără lumină naturală directă — reglementat de ventilație mecanică.','min. 3m²','Circulație'],
+        [C.living,C.orange,'LIVING / SALON (portocaliu)','Camera principală de zi și socializare — cea mai mare cameră din apartament. Orientată obligatoriu spre Sud, Est sau Vest pentru însorire min. 1.5h/zi la solstițiu de iarnă (OMS 119/2014). Min. 14m² conf. NP 057/2002 — suficient pentru canapea, masă dining, TV. Fereastra: min. 1/8 din suprafața camerei = min. 1.75m². Ventilație naturală directă obligatorie.','min. 14m²','Zi'],
+        [C.bedroom,C.green,'DORMITOR (verde)','Camera de odihnă — pat dublu sau pat single + dulap + birou. Suprafața minimă: 12m² dormitor principal, 10m² dormitor secundar (NP 057/2002). IMPORTANT: Dormitoarele NU se orientează spre Nord — însorirea minimă 1.5h/zi este OBLIGATORIE (OMS 119/2014). Fereastra asigură ventilarea nocturnă (aerisire obligatorie). Izolație fonică față de vecini min. Rw=52dB (SR EN ISO 717-1).','min. 10m²','Noapte'],
+        [C.kitchen,C.cyan,'BUCĂTĂRIE (turcoaz)','Spațiu de preparare alimente. Min. 5m² conf. NP 057/2002 — suficient pentru friteuza, cuptor, frigider, spălător, masă mică. OBLIGATORIU: ventilație mecanică cu extractor (hota) direct spre exterior conf. SR EN 15665. Racorduri: apă rece+caldă, canalizare, gaz natural sau electric (centrală termică). Faianta pe pereți (min. 1.5m înălțime), pardoseală ceramică.','min. 5m²','Zi'],
+        [C.bath,C.purple,'BAIE / WC (violet)','Grupul sanitar — baie cu cadă/cabină duș, lavoar, WC. Min. 3.6m² baie, 1.2m² WC separat (NP 057/2002). OBLIGATORIU ventilație mecanică spre exterior (nu în plafon!) conf. I5/2010. Hidroizolație planșeu și pereți min. 2m înălțime conf. SR EN 1504. Faianta 100% pereți. Pardoseală ceramică anti-alunecare (R9 min).','min. 3.6m²','Igienă'],
+        [C.balcon,C.gold,'BALCON / TERASĂ (auriu, linie punctată)','Extensie exterioară a apartamentului — spațiu semi-exterior acoperit. IMPORTANT: balconul NU este inclus în suprafața utilă dar se adaugă la suprafața construită. Adâncime min. 1.2m conf. NP 016-97. Parapet min. 1.0m înălțime conf. STAS 6131/1-1982. Sticlă securizată sau beton parapet. Planseul balconului: PUNTE TERMICĂ — necesită ruptură termică obligatorie conf. C107-05.','min. 4.5m²','Semi-ext.'],
       ];
-      roomExpl.forEach(([fill,stk,name,expl])=>{
-        if(panY>ry+rh-15)return;
-        pdf.setFillColor(...fill);pdf.setDrawColor(...stk);pdf.setLineWidth(0.4);pdf.rect(rx+1,panY-2,5,5,'FD');
-        pdf.setTextColor(...stk);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);pdf.text(name,rx+8,panY+1.5);
-        pdf.setTextColor(60,75,95);pdf.setFont('helvetica','normal');pdf.setFontSize(4.8);
-        const lines=pdf.splitTextToSize(S2(expl),rw-9);
-        lines.slice(0,2).forEach((l,li)=>pdf.text(l,rx+8,panY+5+li*2.9));
-        panY+=13;
+      roomExpl.forEach(([fill,stk,name,expl,minArea,tip])=>{
+        if(panY>ry+rh-32)return;
+        // Color bar + name
+        pdf.setFillColor(...fill);pdf.setDrawColor(...stk);pdf.setLineWidth(0.5);pdf.rect(rx+1,panY,6,12,'FD');
+        pdf.setFillColor(...stk);pdf.rect(rx+1,panY+9.5,6,2.5,'F'); // bottom accent
+        // Name
+        pdf.setTextColor(...stk);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);pdf.text(S2(name),rx+9,panY+4);
+        // Min area badge
+        pdf.setFillColor(...stk);pdf.roundedRect(rw+rx-18,panY,17,5.5,1,1,'F');
+        pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(4.5);pdf.text(minArea,rw+rx-9.5,panY+3.5,{align:'center'});
+        // Description
+        pdf.setTextColor(45,60,80);pdf.setFont('helvetica','normal');pdf.setFontSize(4.8);
+        const expLines=pdf.splitTextToSize(S2(expl),rw-9);
+        expLines.slice(0,3).forEach((l,li)=>pdf.text(l,rx+9,panY+8+li*2.9));
+        panY+=15;
       });
+      panY+=2;
 
-      // Note ferestre și uși
-      if(panY<ry+rh-25){
-        panY+=2;
-        pdf.setFillColor(235,245,255);pdf.roundedRect(rx+1,panY,rw-2,22,1,1,'F');
-        pdf.setFillColor(...C.blue);pdf.rect(rx+1,panY,1.5,22,'F');
+      // Sectiune: FERESTRE SI USA
+      if(panY<ry+rh-40){
+        pdf.setFillColor(232,245,255);pdf.roundedRect(rx+1,panY,rw-2,28,1.5,1.5,'F');
+        pdf.setFillColor(...C.blue);pdf.rect(rx+1,panY,2,28,'F');
         pdf.setTextColor(...C.blue);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
-        pdf.text('FERESTRE — CE SUNT ȘI DE CE?',rx+4,panY+4);
-        pdf.setTextColor(30,55,90);pdf.setFont('helvetica','normal');pdf.setFontSize(5);
-        const fExp='Ferestrele (marcate cu albastru pe pereții exteriori) asigură: lumină naturală (min. 1/8 din suprafața camerei conf. NP 016-97), ventilație naturală, și câștig solar pasiv iarna. Recomandare: geam dublu/triplu low-E (Uw≤1.1 W/m²K) conf. C107-05, cu tâmplărie PVC sau aluminiu cu rupere de punte termică. Pe fațada '+P.frontDir+' (fațadă '+(solarDir?'favorabilă':'secundară')+') sunt amplasate camerele '+(solarDir?'de locuit principale':'tehnice și circulații')+'.';
+        pdf.text('FERESTRELE — DE CE SUNT ACOLO ȘI CE FAC?',rx+5,panY+5);
+        pdf.setTextColor(20,45,80);pdf.setFont('helvetica','normal');pdf.setFontSize(5);
+        const fExp='Ferestrele sunt marcate cu dreptunghiuri albastre pe pereții exteriori ai clădirii. Ele au 3 roluri esențiale, toate reglementate legal: (1) LUMINA NATURALA: suprafața vitrata min. 1/8 din suprafata camerei conf. NP 016-97. O camera de 14m² are nevoie de min. 1.75m² geam — o fereastra de 1.2m x 1.5m depaseste aceasta cerinta. (2) AERISIREA: ventilatie naturala directa obligatorie pentru camerele de locuit — se deschid min. 1/20 din suprafata camerei conf. I5/2010. (3) CASTIG SOLAR PASIV iarna: ferestrele de pe fatadele S/SE/SV permit intrarea caldurii solare, reducand cu 15-25% consumul de incalzire. Specificatie recomandata: tamplarie PVC sau aluminiu cu rupere de punte termica, geam triplu low-E cu argon, Uw≤1.0 W/m²K conf. C107-2005. Cost estimat: 300-450 EUR/mp fereastra.';
         const fLines=pdf.splitTextToSize(S2(fExp),rw-6);
-        fLines.slice(0,4).forEach((l,li)=>pdf.text(l,rx+4,panY+9+li*3));
-        panY+=24;
+        fLines.slice(0,7).forEach((l,li)=>pdf.text(l,rx+5,panY+11+li*2.9));
+        panY+=31;
       }
-      if(panY<ry+rh-15){
-        pdf.setFillColor(255,248,230);pdf.roundedRect(rx+1,panY,rw-2,14,1,1,'F');
-        pdf.setFillColor(...C.orange);pdf.rect(rx+1,panY,1.5,14,'F');
+
+      if(panY<ry+rh-22 && fl===0){
+        pdf.setFillColor(255,245,225);pdf.roundedRect(rx+1,panY,rw-2,20,1.5,1.5,'F');
+        pdf.setFillColor(...C.orange);pdf.rect(rx+1,panY,2,20,'F');
         pdf.setTextColor(...C.orange);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
-        pdf.text('UȘĂ PRINCIPALĂ (marcaj portocaliu)',rx+4,panY+4);
-        pdf.setTextColor(80,50,10);pdf.setFont('helvetica','normal');pdf.setFontSize(5);
-        const dExp='Ușa de intrare principală (lățime min. 1.8m conf. NP 051/2012 — PMR) are acces din strada principală. Sistemul de acces include interfon video, cititor card/cod sau cheie mecanică. Arcul de deschidere indică direcția de rotire.';
+        pdf.text('USA PRINCIPALA DE INTRARE — ACCES SI SECURITATE',rx+5,panY+4.5);
+        pdf.setTextColor(70,40,10);pdf.setFont('helvetica','normal');pdf.setFontSize(5);
+        const dExp='Marcata cu arc portocaliu pe planul parterului. Latime OBLIGATORIE min. 1.2m simpla / recomandat 1.8m dubla conf. NP 051/2012 (acces persoane cu scaun rulant si carucior). Sistemul de acces include: interfon video color cu deblocare la distanta, yala electromagnetica sau electronic, posibil cititor de card/telecomanda. Usa: antiefractie clasa RC2 (SR EN 1627), cu garnitura termica si fonica. Pragul: max 2cm sau rampa (PMR). Iluminat automat cu senzor de miscare obligatoriu (min. 100 lux la intrare conf. NP 061).';
         const dLines=pdf.splitTextToSize(S2(dExp),rw-6);
-        dLines.slice(0,3).forEach((l,li)=>pdf.text(l,rx+4,panY+9+li*3));
+        dLines.slice(0,5).forEach((l,li)=>pdf.text(l,rx+5,panY+10+li*2.9));
+        panY+=23;
+      }
+
+      // Performanta termica
+      if(panY<ry+rh-18){
+        pdf.setFillColor(232,252,240);pdf.roundedRect(rx+1,panY,rw-2,16,1.5,1.5,'F');
+        pdf.setFillColor(...C.green);pdf.rect(rx+1,panY,2,16,'F');
+        pdf.setTextColor(0,100,50);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
+        pdf.text('EFICIENTA ENERGETICA A ACESTUI NIVEL',rx+5,panY+4.5);
+        pdf.setTextColor(10,60,30);pdf.setFont('helvetica','normal');pdf.setFontSize(5);
+        const eExp='Consumul energetic al nivelului '+fl+' este minimizat prin: termoizolatie pereti exteriori 15cm EPS (U=0.27 W/m²K, sub limita admisa de 0.35 W/m²K conf. C107/4-2022), geamuri triplu low-E (Uw≤1.0 vs. limita 1.30 W/m²K), ventilatie cu recuperare caldura 80% eficienta, pod termic la balcoane (ruptura termica). Clasa energetica estimata B-A dupa finalizare. Obligatia proprietarului: respectarea normei NZEB conf. Legea 372/2005 modificata — cladirile noi dupa 2021 sunt Nearly Zero Energy Building.';
+        const eLines=pdf.splitTextToSize(S2(eExp),rw-6);
+        eLines.slice(0,4).forEach((l,li)=>pdf.text(l,rx+5,panY+10+li*2.9));
+        panY+=19;
       }
 
       // Cartus
-      pdf.setFillColor(248,249,252);pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.25);
-      pdf.rect(rx,H-15,rw,8,'FD');
-      pdf.setTextColor(...C.dark2);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
-      pdf.text('Nr.cad. '+S2(P.nrCad)+' · '+S2(P.utr)+' · '+( fl===0?'PARTER':'ETAJ '+fl),rx+rw/2,H-10.5,{align:'center'});
-      pdf.setTextColor(100,115,135);pdf.setFont('helvetica','normal');pdf.setFontSize(4.8);
-      pdf.text('Cota planșeu: +'+(fl*P.hn).toFixed(2)+'m · SC='+RN(b.scArea)+'m² · Sc.1:100',rx+rw/2,H-7,{align:'center'});
+      pdf.setFillColor(15,28,55);pdf.rect(rx,H-17,rw,9,'F');
+      pdf.setFillColor(...C.gold);pdf.rect(rx,H-17,rw,1.2,'F');
+      pdf.setTextColor(...C.gold);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
+      pdf.text('Nr.cad. '+S2(P.nrCad)+' · UTR '+S2(P.utr)+' · '+(fl===0?'PLAN PARTER':'PLAN ETAJ '+fl)+' · Sc.1:100',rx+rw/2,H-12,{align:'center'});
+      pdf.setTextColor(120,140,170);pdf.setFont('helvetica','normal');pdf.setFontSize(4.8);
+      pdf.text('Cota ±'+(fl===0?'0.00':'+')+(fl*P.hn).toFixed(2)+'m · SC='+RN(b.scArea)+'m² · SDA nivel='+RN(b.sdaPerFloor)+'m² · Document orientativ UrbanX',rx+rw/2,H-8,{align:'center'});
       ftr();
     }
 
     // ══════════════════════════════════════════════════════════════════
-    // PAG FAȚADĂ + IMAGINI VIEWER
+    // PAG FAȚADĂ PRINCIPALĂ + MATERIALE + 3D
     // ══════════════════════════════════════════════════════════════════
     newPage();
-    hdr('FAȚADĂ PRINCIPALĂ + IMAGINI 3D VIEWER — Nr.cad. '+P.nrCad,pgN);
+    hdr('FAȚADĂ PRINCIPALĂ · MATERIALE PROPUSE · PERFORMANȚĂ ENERGETICĂ — Nr.cad. '+P.nrCad,pgN);
     pdf.setFillColor(...C.gray3);pdf.rect(0,9,W,H-16,'F');
-    const fSc=Math.min((W*0.55-25)/(b.bW+4),(H-45)/((b.niv*P.hn)+12));
+    const fSc=Math.min((W*0.42-20)/(b.bW+4),(H-45)/((b.niv*P.hn)+12));
     const fW=b.bW*fSc,fH=b.niv*P.hn*fSc;
-    const fOx=14+(W*0.55-25-fW)/2,fOy=12+(H-40-fH)/2;
+    const fOx=14+(W*0.42-20-fW)/2,fOy=12+(H-40-fH)/2;
     pdf.setFillColor(255,255,255);pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.3);
-    pdf.rect(10,10,W*0.55-12,H-28,'FD');
+    pdf.rect(10,10,W*0.42-8,H-28,'FD');
     drawFacade(b,P,fOx,fOy,fW,fH,fSc);
-    drawNorth(W*0.55-12,22,P.frontDir,6);
+    drawNorth(W*0.42-8,22,P.frontDir,6);
     drawScale(14,H-15,fSc);
-    // right: 3D images + explicatii
-    const vrx=W*0.55,vry=10,vrw=W-vrx-8;
-    const vh=(H-30)/2;
+
+    // Eticheta fatada
+    pdf.setTextColor(...C.dark2);pdf.setFont('helvetica','bold');pdf.setFontSize(6);
+    pdf.text('FATADA PRINCIPALA ('+P.frontDir+')',14,H-17);
+    pdf.setTextColor(100,115,135);pdf.setFont('helvetica','normal');pdf.setFontSize(5);
+    pdf.text('H total = '+(b.niv*P.hn).toFixed(1)+'m · L = '+RN(b.bW)+'m · '+b.niv+' niveluri',14,H-13.5);
+
+    // Right panel: 3D image (top half) + material specs (bottom half)
+    const vrx=W*0.42,vry=10,vrw=W-vrx-8;
+    const vh=(H-30)*0.42;
     pdf.setFillColor(230,234,244);pdf.rect(vrx,vry,vrw,vh,'F');
-    if(caps.v3dDay) addCap(caps.v3dDay,vrx,vry,vrw,vh,'FIG. 4 — Viewer 3D · ZI · Aspect exterior · Fațadă principală și context imediat');
-    else if(caps.img3D) addCap(caps.img3D,vrx,vry,vrw,vh,'FIG. 4 — Vedere 3D · Context urban real');
-    pdf.setFillColor(230,234,244);pdf.rect(vrx,vry+vh+2,vrw,vh,'F');
-    if(caps.v3dGolden) addCap(caps.v3dGolden,vrx,vry+vh+2,vrw,vh,'FIG. 5 — Viewer 3D · GOLDEN HOUR · Materialitate fațadă și umbre serale');
-    else if(caps.v3dNight) addCap(caps.v3dNight,vrx,vry+vh+2,vrw,vh,'FIG. 5 — Viewer 3D · NOAPTE · Impact vizual nocturn și iluminat arhitectural');
-    // Explicatie fatada
-    pdf.setFillColor(255,255,255);pdf.rect(10,H-13,W-20,6,'F');
-    noteBox('Fațada principală spre '+P.frontDir+' prezintă: ferestre cu tâmplărie termoizolantă (Uw≤1.1W/m²K, geam low-E), balcoane pe toate nivelurile (parapet min. 1.0m), finisaje rezistente la intemperii (tencuială decorativă sau placaj ventilat). Culoarea fațadei va fi stabilită la faza PAC de arhitectul proiectant conform RLU UTR '+P.utr+' și Ghidului de culoare al Municipiului Iași.',14,H-13,W-20,6);
+    if(caps.v3dDay) addCap(caps.v3dDay,vrx,vry,vrw,vh,'FIG. 4 — Viewer 3D · ZI · Aspect exterior finalizat cu materialele propuse');
+    else if(caps.img3D) addCap(caps.img3D,vrx,vry,vrw,vh,'FIG. 4 — Vedere 3D · Context urban și aspect exterior');
+
+    // Material specs panel
+    const matY=vry+vh+3;
+    const matH=H-matY-18;
+    pdf.setFillColor(255,255,255);pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.3);pdf.rect(vrx,matY,vrw,matH,'FD');
+
+    pdf.setFillColor(...C.dark2);pdf.rect(vrx,matY,vrw,6,'F');
+    pdf.setFillColor(...C.gold);pdf.rect(vrx,matY,2,6,'F');
+    pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(6);
+    pdf.text('MATERIALE PROPUSE & PERFORMANȚĂ TERMICĂ',vrx+vrw/2,matY+4.2,{align:'center'});
+    let mY=matY+8;
+
+    // Material layers table
+    const matLayers=[
+      ['PERETE EXTERIOR (de la exterior la interior):',null,null,null],
+      ['Tencuială decorativă siliconică','3mm','rezist. UV, lavabilă','—'],
+      ['Polistiren expandat EPS 150','15cm','termoizolație','U=0.27 W/m²K'],
+      ['Adeziv+plasă fibra de sticla (ETICS)','8mm','armare','—'],
+      ['Zidărie BCA clasa D400 ','20cm','structura','—'],
+      ['Tencuiala interior+glet','2cm','finisaj','—'],
+      ['TOTAL perete exterior','~40cm','conf. C107/4-2022','U≤0.35 ✓'],
+      ['GEAMURI (tâmplărie termoizolantă):',null,null,null],
+      ['Profil PVC sau AL cu rupere pt. termică','~70mm','structura','—'],
+      ['Geam triplu low-E cu argon 4-16-4-16-4','44mm','termoizolare','Ug=0.6 W/m²K'],
+      ['Sistem total fereastra','—','SR EN 14351','Uw≤1.0 W/m²K ✓'],
+      ['TERASA INVERSA (planseul ultimului nivel):',null,null,null],
+      ['Strat pietris/nisip protectie','5cm','protectie','—'],
+      ['Polistiren extrudat XPS 300','20cm','termoizolare','—'],
+      ['Bariera vapori + hidroizolatie polimer','2×4mm','etanseitate','—'],
+      ['Planseu BA','20cm','structura','U=0.18 W/m²K ✓'],
+    ];
+
+    const cw1=vrw*0.38,cw2=vrw*0.12,cw3=vrw*0.25,cw4=vrw*0.25;
+    matLayers.forEach(([elem,dim,rol,perf],i)=>{
+      if(mY>matY+matH-4)return;
+      if(dim===null){ // header row
+        pdf.setFillColor(15,28,55);pdf.rect(vrx,mY-2,vrw,5.5,'F');
+        pdf.setTextColor(...C.gold);pdf.setFont('helvetica','bold');pdf.setFontSize(4.8);
+        pdf.text(S2(elem),vrx+2,mY+2);
+        mY+=6;
+        return;
+      }
+      pdf.setFillColor(i%2===0?248:255,i%2===0?250:252,i%2===0?255:255);
+      pdf.rect(vrx,mY-2,vrw,5,'F');
+      pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.1);pdf.line(vrx,mY+3,vrx+vrw,mY+3);
+      pdf.setTextColor(30,50,80);pdf.setFont('helvetica','normal');pdf.setFontSize(4.5);
+      pdf.text(S2(elem),vrx+1.5,mY+1.5);
+      pdf.setFont('helvetica','bold');pdf.text(S2(dim),vrx+cw1+1.5,mY+1.5);
+      pdf.setFont('helvetica','normal');pdf.setTextColor(60,80,100);pdf.text(S2(rol),vrx+cw1+cw2+1.5,mY+1.5);
+      const perfOk=String(perf).includes('✓');
+      if(perfOk){pdf.setTextColor(0,120,60);pdf.setFont('helvetica','bold');}else{pdf.setTextColor(60,80,100);}
+      pdf.text(S2(perf),vrx+cw1+cw2+cw3+1.5,mY+1.5);
+      mY+=5;
+    });
     ftr();
 
     // ══════════════════════════════════════════════════════════════════
@@ -1397,42 +1495,153 @@ async function _rvExportPDF(){
     ftr();
 
     // ══════════════════════════════════════════════════════════════════
-    // PAG AXONOMETRIE 3D
+    // PAG VEDERE AXONOMETRICĂ ADNOTATĂ + MIX APARTAMENTE
     // ══════════════════════════════════════════════════════════════════
     newPage();
-    hdr('VEDERE AXONOMETRICĂ 3D + IMAGINI VIEWER — Nr.cad. '+P.nrCad,pgN);
+    hdr('VEDERE AXONOMETRICĂ 3D · MIX APARTAMENTE · SUPRAFEȚE PROPUSE — Nr.cad. '+P.nrCad,pgN);
     pdf.setFillColor(...C.gray3);pdf.rect(0,9,W,H-16,'F');
-    // Main axono (large)
+
+    // Axonometric (left 45%)
     pdf.setFillColor(240,243,250);pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.3);
-    pdf.rect(10,10,W*0.45,H-28,'FD');
-    const axSc=Math.min((W*0.43)/(b.bW+b.bD+6),(H-60)/((b.niv*P.hn)+b.bD/2+8))*0.82;
-    drawAxono(b,P,W*0.225,H*0.52,axSc);
-    drawNorth(W*0.45,22,P.frontDir,6);
+    pdf.rect(10,10,W*0.44,H-28,'FD');
+    const axSc=Math.min((W*0.42)/(b.bW+b.bD+6),(H-60)/((b.niv*P.hn)+b.bD/2+8))*0.82;
+    drawAxono(b,P,W*0.225,H*0.50,axSc);
+    drawNorth(W*0.44,22,P.frontDir,6);
     drawScale(14,H-15,axSc);
-    // Indicators overlay on axono
-    pdf.setTextColor(...C.dark2);pdf.setFont('helvetica','bold');pdf.setFontSize(8);
-    pdf.text('H = '+(b.niv*P.hn).toFixed(1)+'m',W*0.38,H*0.22);
-    pdf.setTextColor(80,100,130);pdf.setFont('helvetica','normal');pdf.setFontSize(6);
-    pdf.text(b.niv+' niv.',W*0.38,H*0.22+6);
-    // Right column: 2 viewer images + cards
-    const arx=W*0.47,arw=W-arx-8;
-    const ah1=(H-30)*0.45,ah2=(H-30)*0.45;
-    pdf.setFillColor(230,234,244);pdf.rect(arx,10,arw,ah1,'F');
-    if(caps.v3dGolden) addCap(caps.v3dGolden,arx,10,arw,ah1,'FIG. 8 — Viewer 3D · GOLDEN HOUR · Materialitate și umbre serale');
-    else if(caps.img3D) addCap(caps.img3D,arx,10,arw,ah1,'FIG. 8 — Vedere 3D · Context urban');
-    pdf.setFillColor(230,234,244);pdf.rect(arx,12+ah1,arw,ah2,'F');
-    if(caps.imgFront||caps.imgLocation) addCap(caps.imgFront||caps.imgLocation,arx,12+ah1,arw,ah2,'FIG. 9 — Vedere frontală · Front stradal și acces principal');
-    else if(caps.v3dNightAlt) addCap(caps.v3dNightAlt,arx,12+ah1,arw,ah2,'FIG. 9 — Viewer 3D · Vedere laterală');
-    // Cards bottom right
-    const cry=12+ah1+ah2+4;
-    const cards=[['SDA',''+RN(b.sdaTotal)+'m²'],['REGIM H',b.niv+' niv.'],['POT',RN(b.scArea/P.area*100)+'%'],['APT.',RN(b.niv*b.cores.length*2)]];
-    const cw=(arw-2)/cards.length;
-    cards.forEach(([t,v],i)=>{
-      const cx=arx+i*cw;
-      pdf.setFillColor(20,38,68);pdf.roundedRect(cx,cry,cw-1.5,H-cry-22,1,1,'F');
-      pdf.setFillColor(...C.gold);pdf.roundedRect(cx,cry,cw-1.5,6,1,1,'F');pdf.rect(cx,cry+3,cw-1.5,3,'F');
-      pdf.setTextColor(15,25,48);pdf.setFont('helvetica','bold');pdf.setFontSize(5);pdf.text(t,(cx+cw/2-0.75),cry+5,{align:'center'});
-      pdf.setTextColor(220,232,250);pdf.setFont('helvetica','bold');pdf.setFontSize(9);pdf.text(S2(v),(cx+cw/2-0.75),(cry+H-cry-22)/2+cry+2,{align:'center'});
+
+    // Etichete niveluri pe axonometrie
+    const c30ax=Math.cos(Math.PI/6)*axSc*0.82;
+    const s30ax=Math.sin(Math.PI/6)*axSc*0.82;
+    const axCX=W*0.225,axCY=H*0.50;
+    for(let fl_=0;fl_<=Math.min(b.niv,5);fl_++){
+      const z=fl_*P.hn;
+      const pRight={px:axCX+(b.bW)*c30ax, py:axCY+(b.bW)*s30ax-z*axSc*0.82*0.55};
+      const label=fl_===0?'PARTER':'E'+fl_;
+      const cota=fl_===0?'±0.00':'+'+((fl_*P.hn).toFixed(2));
+      pdf.setFillColor(20,40,80);pdf.roundedRect(pRight.px+2,pRight.py-2.5,18,5,1,1,'F');
+      pdf.setTextColor(...C.gold);pdf.setFont('helvetica','bold');pdf.setFontSize(4.5);pdf.text(label+' '+cota+'m',pRight.px+3,pRight.py+1.5);
+    }
+
+    // H total label
+    const {px:hPx,py:hPy}={px:axCX+(b.bW)*c30ax+22,py:axCY+(b.bW)*s30ax-b.niv*P.hn*axSc*0.82*0.55/2};
+    pdf.setTextColor(...C.dark2);pdf.setFont('helvetica','bold');pdf.setFontSize(9);
+    pdf.text('H='+(b.niv*P.hn).toFixed(1)+'m',Math.min(hPx,W*0.42),H*0.22);
+    pdf.setFont('helvetica','normal');pdf.setFontSize(6);pdf.setTextColor(80,100,130);
+    pdf.text(b.niv+' niveluri · '+b.cores.length+' nuclee',Math.min(hPx,W*0.42),H*0.22+7);
+
+    // Explicatie axonometrie - ce e aceasta vedere
+    pdf.setFillColor(255,255,255);pdf.rect(10,H-17,W*0.44-2,9,'F');
+    pdf.setTextColor(30,50,85);pdf.setFont('helvetica','bold');pdf.setFontSize(5);
+    pdf.text('CE ESTE VEDEREA AXONOMETRICĂ?',12,H-14);
+    pdf.setFont('helvetica','normal');pdf.setFontSize(4.8);pdf.setTextColor(50,65,85);
+    const axExp='Aceasta este o vedere tridimensionala a cladirii - puteti vedea simultan toate cele '+b.niv+' niveluri, volumul total, si proportiile fata de teren. Nu este o fotografie - este un desen tehnic la scara care arata forma exacta a cladirii propuse.';
+    const axLines=pdf.splitTextToSize(S2(axExp),W*0.42-4);
+    axLines.slice(0,2).forEach((l,li)=>pdf.text(l,12,H-10+li*3));
+
+    // Right panel - apartment mix table
+    const arx=W*0.45+6,arw=W-arx-8;
+    pdf.setFillColor(255,255,255);pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.3);pdf.rect(arx,10,arw,H-28,'FD');
+
+    let arY=12;
+    pdf.setFillColor(...C.dark2);pdf.rect(arx,arY,arw,7,'F');
+    pdf.setFillColor(...C.gold);pdf.rect(arx,arY,2,7,'F');
+    pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(6.5);
+    pdf.text('MIX APARTAMENTE — PROPUNERE',arx+arw/2,arY+5,{align:'center'});arY+=10;
+
+    // Rezumat rapid
+    const nApt=b.niv*b.cores.length*2;
+    const fnStr=String(P.fn||'rezidential_colectiv').toLowerCase();
+    const isRez=!fnStr.includes('birouri')&&!fnStr.includes('hotel');
+    const summary=[
+      ['SUPRAFATA PARCELA:',P.area+'m²'],
+      ['SUPRAFATA CONSTRUITA (SC):',RN(b.scArea)+'m² (POT='+RN(b.scArea/P.area*100)+'%)'],
+      ['SUPRAFATA DESFASURATA (SDA):',RN(b.sdaTotal)+'m²'],
+      ['NUMAR NIVELURI:',b.niv+' niveluri (P+'+(b.niv-1)+'E)'],
+      ['INALTIME TOTALA:',( b.niv*P.hn).toFixed(1)+'m'],
+      [isRez?'UNITATI LOCATIVE ESTIMATE:':'UNITATI PROPUSE:',nApt+' unitati'],
+      ['SUPRAFATA UTILA / UNITATE:',RN(b.sdaPerFloor/(b.cores.length*2)*0.75)+'m² medie estimata'],
+      ['NUCLEE SCARI+LIFT:',b.cores.length+' nuclee'],
+    ];
+    summary.forEach(([lab,val],i)=>{
+      pdf.setFillColor(i%2?248:255,i%2?250:252,252);pdf.rect(arx,arY-2,arw,5.5,'F');
+      pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.1);pdf.line(arx,arY+3.5,arx+arw,arY+3.5);
+      pdf.setTextColor(60,80,105);pdf.setFont('helvetica','normal');pdf.setFontSize(5);pdf.text(S2(lab),arx+2,arY+1.5);
+      pdf.setTextColor(20,45,80);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);pdf.text(S2(val),arx+arw-2,arY+1.8,{align:'right'});
+      arY+=5.5;
+    });
+    arY+=4;
+
+    // Tipuri apartamente
+    pdf.setFillColor(245,248,252);pdf.rect(arx,arY,arw,5.5,'F');
+    pdf.setFillColor(...C.gold);pdf.rect(arx,arY,2,5.5,'F');
+    pdf.setTextColor(30,50,85);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
+    pdf.text('TIPURI UNITATI PROPUSE PER ETAJ',arx+3,arY+3.8);arY+=8;
+
+    const aptTypes=isRez?[
+      ['Garsoniera (studio)','38m²','1+1 cam','1 balcon','1-2 pers','ideal tineri/chirie'],
+      ['Apartament 2 camere','65m²','Living+1 dorm','1 balcon','2-3 pers','cel mai cerut Iasi'],
+      ['Apartament 3 camere','88m²','Living+2 dorm','1 balcon','3-4 pers','familii cu copii'],
+      ['Apartament 4 camere','115m²','Living+3 dorm','2 balcoane','4-5 pers','familii mari/premium'],
+    ]:[
+      ['Camera standard','25-35m²','1 pat dublu','baie','1-2 pers','conf. min. hotel 3*'],
+      ['Camera dubla superioara','35-45m²','1 pat dublu','baie+dressing','2 pers','conf. hotel 4*'],
+      ['Camera twin','30-40m²','2 paturi single','baie','2 pers','calatorii afaceri'],
+      ['Apartament','55-75m²','Living+dormitor','2 bai','2-4 pers','sejur lung/VIP'],
+    ];
+    const acw=[arw*0.18,arw*0.12,arw*0.18,arw*0.12,arw*0.1,arw*0.30];
+    pdf.setFillColor(...C.dark2);pdf.rect(arx,arY,arw,5,'F');
+    ['Tip','Supraf.','Camere','Balcon','Pers.','Piata tinta'].forEach((h,i)=>{
+      const x=arx+acw.slice(0,i).reduce((a,b_)=>a+b_,0);
+      pdf.setTextColor(...C.gold);pdf.setFont('helvetica','bold');pdf.setFontSize(4.5);
+      pdf.text(h,x+1,arY+3.5);
+    });arY+=5;
+
+    aptTypes.forEach((row,ri)=>{
+      if(arY>H-40)return;
+      pdf.setFillColor(ri%2?248:255,ri%2?250:252,252);pdf.rect(arx,arY-1,arw,6,'F');
+      pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.1);pdf.line(arx,arY+5,arx+arw,arY+5);
+      row.forEach((cell,ci)=>{
+        const x=arx+acw.slice(0,ci).reduce((a,b_)=>a+b_,0);
+        pdf.setTextColor(ci===0?25:50,ci===0?45:65,ci===0?85:90);
+        pdf.setFont('helvetica',ci===0?'bold':'normal');pdf.setFontSize(5);
+        pdf.text(S2(cell),x+1,arY+3.5);
+      });
+      arY+=6;
+    });
+    arY+=5;
+
+    // ISU requirements summary
+    if(arY<H-50){
+      pdf.setFillColor(255,238,235);pdf.roundedRect(arx+1,arY,arw-2,35,1.5,1.5,'F');
+      pdf.setFillColor(200,30,30);pdf.rect(arx+1,arY,2,35,'F');
+      pdf.setTextColor(180,20,20);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
+      pdf.text('CERINTE OBLIGATORII ISU — CONF. P118-2/2013',arx+5,arY+5);
+      pdf.setTextColor(80,15,15);pdf.setFont('helvetica','normal');pdf.setFontSize(4.8);
+      const isuReqs=[
+        '• Scari protejate cu usi EI 30 pe fiecare nivel — evacuare in caz de incendiu (max. '+RN(b.cores.length)+' scara)',
+        '• Hidranti interiori obligatorii: niv.'+b.niv+'>3 — debit 2.5 l/s, presiune min. 2.5 bar la ajutaj',
+        '• Hidranti exteriori: la max. 150m de intrare — verificare retea RAJA/CET',
+        '• Sistem detectie+alarmare (DAI) obligatoriu: detectori fum fiecare camera, centrala, sirene',
+        '• Iluminat de securitate pe cai evacuare: min. 1 lux, autonomie 1h (baterie/UPS)',
+        '• Aviz ISU OBLIGATORIU inainte de Autorizatia de Construire — Legea 307/2006',
+      ];
+      isuReqs.forEach((r,ri)=>{
+        if(arY+10+ri*4.5>H-20)return;
+        pdf.text(S2(r),arx+5,arY+11+ri*4.5);
+      });
+      arY+=38;
+    }
+
+    // 3 KPI cards bottom
+    const kpiData=[['SDA TOTALA',RN(b.sdaTotal)+'m²'],['NR. APARTAMENTE',RN(nApt)+' apt.'],['H REGIM',b.niv+' niv.']];
+    const kcw=(arw)/kpiData.length;
+    const kcy=H-28;
+    kpiData.forEach(([t,v],ki)=>{
+      const kx=arx+ki*kcw;
+      pdf.setFillColor(12,25,50);pdf.roundedRect(kx+0.5,kcy,kcw-2,12,1.5,1.5,'F');
+      pdf.setFillColor(...C.gold);pdf.roundedRect(kx+0.5,kcy,kcw-2,4,1.5,1.5,'F');pdf.rect(kx+0.5,kcy+2,kcw-2,2,'F');
+      pdf.setTextColor(10,20,40);pdf.setFont('helvetica','bold');pdf.setFontSize(4.5);pdf.text(t,kx+kcw/2-0.75,kcy+3,{align:'center'});
+      pdf.setTextColor(220,235,255);pdf.setFont('helvetica','bold');pdf.setFontSize(8);pdf.text(S2(v),kx+kcw/2-0.75,kcy+9.5,{align:'center'});
     });
     ftr();
 
