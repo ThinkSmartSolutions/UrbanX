@@ -311,3 +311,82 @@ window.getFinanciarConfig = function(){
     nota: 'Prețuri ORIENTATIVE ±30%. Piața imobiliară variază semnificativ pe microzone și perioadă.',
   };
 };
+
+// ══════════════════════════════════════════════════════════════════════════
+// PATCH: PDF Safety — interceptează _initStudyPdf și wrappe tblRow/kv safe
+// Oprește crash-urile jsPDF.rect cu Invalid arguments
+// ══════════════════════════════════════════════════════════════════════════
+(function _patchPdfSafety(){
+  // Așteptăm până _initStudyPdf e disponibil
+  function patchWhenReady(){
+    if(typeof window._initStudyPdf !== 'function'){
+      setTimeout(patchWhenReady, 500);
+      return;
+    }
+    const _orig = window._initStudyPdf;
+    window._initStudyPdf = function(...args){
+      const result = _orig.apply(this, args);
+      if(!result) return result;
+
+      // Wrap tblRow safe
+      const _origTbl = result.tblRow;
+      if(typeof _origTbl === 'function'){
+        result.tblRow = function(cells, cy, isHeader, widths, ...rest){
+          // Guard: cells trebuie sa fie array
+          if(!Array.isArray(cells)){
+            console.warn('[UrbanX safety] tblRow primit non-array cells:', typeof cells, cells);
+            cells = cells ? [String(cells)] : ['—'];
+          }
+          // Guard: cy trebuie sa fie numar finit
+          const safeCy = (typeof cy === 'number' && isFinite(cy) && cy > 0) ? cy : 33;
+          // Guard: widths trebuie sa fie array de numere pozitive
+          if(Array.isArray(widths)){
+            widths = widths.map(w => (typeof w === 'number' && w > 0) ? w : 20);
+          }
+          try{
+            return _origTbl.call(this, cells, safeCy, isHeader, widths, ...rest);
+          }catch(e){
+            console.warn('[UrbanX safety] tblRow error:', e.message);
+            return safeCy + 7;
+          }
+        };
+      }
+
+      // Wrap kv safe
+      const _origKv = result.kv;
+      if(typeof _origKv === 'function'){
+        result.kv = function(rows, cy){
+          const safeCy = (typeof cy === 'number' && isFinite(cy) && cy > 0) ? cy : 33;
+          if(!Array.isArray(rows)) return safeCy + 7;
+          try{
+            const r = _origKv.call(this, rows, safeCy);
+            return (typeof r === 'number' && isFinite(r)) ? r : safeCy + rows.length * 7;
+          }catch(e){
+            console.warn('[UrbanX safety] kv error:', e.message);
+            return safeCy + rows.length * 7;
+          }
+        };
+      }
+
+      // Wrap sec/body/hdr/ftr safe
+      ['sec','body','hdr','ftr'].forEach(fn => {
+        const _origFn = result[fn];
+        if(typeof _origFn === 'function'){
+          result[fn] = function(...fnArgs){
+            try{ return _origFn.apply(this, fnArgs); }
+            catch(e){ console.warn('[UrbanX safety] '+fn+' error:', e.message); return fnArgs[1]||33; }
+          };
+        }
+      });
+
+      return result;
+    };
+    console.log('[UrbanX fixes-audit] PDF safety patch aplicat ✅');
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', ()=>setTimeout(patchWhenReady, 800));
+  } else {
+    setTimeout(patchWhenReady, 800);
+  }
+})();
