@@ -28,26 +28,53 @@ function _stripEmoji(str){
 // ── Justify text in jsPDF (text aliniat stanga-dreapta) ──────────────────────
 // Folosit de _initStudyPdf_J si _addConcluziePage pentru paragrafe body
 function _pdfJustifyText(pdf, txt, x, cy, maxW, fz, lh, tc){
-  if(!txt) return cy;
-  pdf.setFont('helvetica','normal');
-  pdf.setFontSize(fz||8.5);
-  if(tc) pdf.setTextColor(tc[0],tc[1],tc[2]);
-  const lines = pdf.splitTextToSize(String(txt), maxW);
-  const lineH = lh||5.0;
-  lines.forEach((line, li)=>{
-    const lineY = cy + li * lineH;
-    const words = line.split(' ').filter(w=>w.length>0);
-    const isLast = (li===lines.length-1);
-    if(isLast || words.length<=1){
-      pdf.text(line, x, lineY);
-    } else {
-      const textW = words.reduce((s,w)=>s+pdf.getTextWidth(w), 0);
-      const gap = Math.max(0, (maxW - textW) / (words.length-1));
-      let cx2 = x;
-      words.forEach(w=>{ pdf.text(w, cx2, lineY); cx2 += pdf.getTextWidth(w)+gap; });
-    }
-  });
-  return cy + lines.length * lineH;
+  if(!txt) return (typeof cy==='number'&&isFinite(cy))?cy:28;
+  // NaN guards pentru coordonate
+  if(typeof cy!=='number'||!isFinite(cy)) cy=28;
+  if(typeof x!=='number'||!isFinite(x)) x=14;
+  if(typeof maxW!=='number'||maxW<=0) maxW=170;
+  try{
+    pdf.setFont('helvetica','normal');
+    pdf.setFontSize(fz||8.5);
+    if(tc) pdf.setTextColor(tc[0],tc[1],tc[2]);
+    const lines = pdf.splitTextToSize(String(txt), maxW);
+    const lineH = lh||5.0;
+    lines.forEach((line, li)=>{
+      if(!line) return;
+      const lineY = cy + li * lineH;
+      if(!isFinite(lineY)) return;
+      const words = line.split(' ').filter(w=>w.length>0);
+      const isLast = (li===lines.length-1);
+      if(isLast || words.length<=1){
+        pdf.text(line, x, lineY);
+      } else {
+        try{
+          const textW = words.reduce((s,w)=>{
+            const ww=pdf.getTextWidth(w)||0;
+            return s+(isFinite(ww)?ww:0);
+          }, 0);
+          const rawGap=(maxW-textW)/(words.length-1);
+          const gap=isFinite(rawGap)&&rawGap>=0?rawGap:1.5;
+          // Cap gap la 8mm ca sa nu arate ciudat
+          const safeGap=Math.min(gap,8);
+          let cx2=x;
+          words.forEach(w=>{
+            if(isFinite(cx2)) pdf.text(w,cx2,lineY);
+            const ww=pdf.getTextWidth(w)||0;
+            cx2+=(isFinite(ww)?ww:0)+safeGap;
+          });
+        }catch(je){
+          // Fallback simplu daca justify esueaza
+          pdf.text(line,x,lineY);
+        }
+      }
+    });
+    return cy + lines.length * lineH;
+  }catch(e){
+    // Fallback total: text simplu fara justify
+    try{ pdf.text(String(txt),x,cy); }catch(_){}
+    return cy+5;
+  }
 }
 
 // ── Wrapper _initStudyPdf care injecteaza body() cu justify si S2 safe ───────
@@ -55,9 +82,13 @@ function _pdfJustifyText(pdf, txt, x, cy, maxW, fz, lh, tc){
 function _initStudyPdf_J(...args){
   const d = _initStudyPdf(...args);
   const {pdf, W, S2} = d;
+  const _origBody = d.body;
   d.body = function(txt, x, cy){
+    // Guard: daca cy e invalid, folosim _origBody ca fallback
+    if(typeof cy!=='number'||!isFinite(cy)) return _origBody?_origBody(txt,x,28):28;
     const safe = S2 ? S2(txt) : String(txt||'');
-    const maxW = (W||210) - x - 12;
+    const maxW = (W||210) - (x||14) - 12;
+    if(maxW<=0) return _origBody?_origBody(txt,x,cy):cy+5;
     return _pdfJustifyText(pdf, safe, x, cy, maxW, 8.5, 5.0, [50,65,85]);
   };
   return d;
