@@ -155,7 +155,9 @@ function _rvCompBuilding(P){
     effW = Math.max(P.W, Math.sqrt(P.area * 0.8));
     effD = Math.max(P.D, P.area / effW);
   }
-  const bW   = Math.max(6, effW - P.rl * 2);
+  const bW   = _fnRez
+    ? Math.min(80, Math.max(6, effW - P.rl * 2))  // rezidențial max 80m (rest = parcare/curte)
+    : Math.max(6, effW - P.rl * 2);               // birouri/hotel: fără cap
 
   // ── Adâncimea clădirii: rezidențial → coridor dublu încărcat (max 26m) ───
   // Un bloc de apartamente realist are max 25-26m adâncime:
@@ -172,8 +174,7 @@ function _rvCompBuilding(P){
   const sdaTotal = scArea * niv;
 
   // Nuclee scări+lift — 1 nucleu la fiecare 18m (P118-2/2013: max 30m coridoc evacuare)
-  // Exemplu: 23m → 1 nucleu; 36m → 2; 54m → 3
-  const nStairs = Math.max(1, Math.min(6, Math.floor(bW / 18.0)));
+  const nStairs = Math.max(1, Math.min(_fnRez?4:8, Math.floor(bW / 18.0)));
   const stairW  = 3.6;
   const stairD  = Math.min(6.6, bD * 0.5);
   const colSp   = bW / nStairs;
@@ -1730,7 +1731,7 @@ async function _rvExportPDF(){
       // ── 12. Stradă + front stradal ────────────────────────────────────
       pdf.setFillColor(215,220,235);pdf.rect(ox-P_.rl*sc,oy+bD*sc+P_.rs*sc,P_.W*sc,4,'F');
       pdf.setTextColor(55,75,115);pdf.setFont('helvetica','bold');pdf.setFontSize(5);
-      pdf.text('▲  FRONT STRADAL  ·  '+P_.frontDir+' · Nr.cad. '+S2(P_.nrCad),ox-P_.rl*sc+P_.W*sc/2,oy+bD*sc+P_.rs*sc+3,{align:'center'});
+      pdf.text('^ FRONT STRADAL  ^  '+P_.frontDir+' · Nr.cad. '+S2(P_.nrCad),ox+bW*sc/2,oy+bD*sc+P_.rs*sc+3,{align:'center'});
     };
     const drawNorth=(x,y,dir,sz)=>{
       const s=sz||7,rot={N:0,S:Math.PI,E:Math.PI/2,V:-Math.PI/2,NE:Math.PI/4,NV:-Math.PI/4,SE:Math.PI*3/4,SV:-Math.PI*3/4}[dir]||0;
@@ -2063,24 +2064,42 @@ async function _rvExportPDF(){
     });
     ftr();
 
-    // ══════════════════════════════════════════════════════════════════
-    // PAG 3..N+2 — PLANURI DE NIVEL CU EXPLICAȚII
-    // ══════════════════════════════════════════════════════════════════
-    for(let fl=0;fl<maxFL;fl++){
+    // PAG 3..N+2 — PLANURI DE NIVEL (PARTER + 1 TIP + notă etaje identice)
+    // ══════════════════════════════════════════════════════════════════════════
+    // Etajele 1..N-1 sunt identice pentru rezidential → afisam parter + un etaj tip
+    const _floorsToDraw=[];
+    _floorsToDraw.push(0); // parter mereu
+    if(maxFL>1) _floorsToDraw.push(1); // etaj tip (1)
+    if(maxFL>2 && _RV.floors[maxFL-1]?.floorIdx !== _RV.floors[1]?.floorIdx) _floorsToDraw.push(maxFL-1); // ultimul dacă diferit
+    const _identicalNote=maxFL>2 ? `Plan tip repetat la etajele 1–${maxFL-1} (total ${maxFL-1} etaje identice)` : '';
+
+    for(let fli=0;fli<_floorsToDraw.length;fli++){
+      const fl=_floorsToDraw[fli];
       newPage();
       const flObj=_RV.floors[fl];
-      const flLabel=fl===0?'PLAN PARTER (cota ±0.00)':'PLAN ETAJ '+fl+' (cota +'+(fl*P.hn).toFixed(2)+'m)';
-      hdr(flLabel+' — Nr.cad. '+P.nrCad+' · UTR '+P.utr,pgN);
+      const isTip=fl===1&&maxFL>2;
+      const flLabel=fl===0?'PLAN PARTER (cota +0.00)'
+        :isTip?`PLAN ETAJ TIP 1–${maxFL-1} (cota +${(fl*P.hn).toFixed(2)}m … +${((maxFL-1)*P.hn).toFixed(2)}m)`
+        :`PLAN ETAJ ${fl} (cota +${(fl*P.hn).toFixed(2)}m)`;
+      hdr(flLabel+' Nr.cad. '+P.nrCad+' UTR '+P.utr,pgN);
       pdf.setFillColor(...C.gray3);pdf.rect(0,9,W,H-16,'F');
+      if(isTip&&_identicalNote){
+        pdf.setFillColor(255,250,235);pdf.setDrawColor(180,130,20);pdf.setLineWidth(0.3);
+        pdf.rect(10,10,W-20,7,'FD');
+        pdf.setTextColor(120,80,10);pdf.setFont('helvetica','bold');pdf.setFontSize(6);
+        pdf.text('NOTA: '+_identicalNote+' — plan functional identic, cote identice.',W/2,14.5,{align:'center'});
+      }
 
       // Plan area (left 2/3)
-      const planAreaW=W*0.62,planAreaH=H-28;
+      const planAreaW=W*0.62,planAreaH=H-(isTip&&_identicalNote?36:28);
+      const planOy=isTip&&_identicalNote?17:10;
       pdf.setFillColor(255,255,255);pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.3);
-      pdf.rect(10,10,planAreaW-5,planAreaH,'FD');
+      pdf.rect(10,planOy,planAreaW-5,planAreaH,'FD');
 
-      const sc=Math.min((planAreaW-25)/(P.W+2),(planAreaH-20)/(P.D+8));
-      const ox=10+((planAreaW-25)-b.bW*sc)/2+P.rl*sc+2;
-      const oy=10+((planAreaH-20)-b.bD*sc)/2+P.rf*sc+4;
+      // Scara bazată pe CLĂDIRE (nu parcelă) — la mari parcele, parcela e mult mai mare decât clădirea
+      const sc=Math.min((planAreaW-35)/(b.bW+4),(planAreaH-30)/(b.bD+8));
+      const ox=10+((planAreaW-35)-b.bW*sc)/2+18;
+      const oy=planOy+((planAreaH-30)-b.bD*sc)/2+8;
 
       drawPlan(flObj,P,b,ox,oy,sc);
       drawNorth(planAreaW-10,22,P.frontDir,6);
@@ -2195,11 +2214,11 @@ async function _rvExportPDF(){
       pdf.setFillColor(15,28,55);pdf.rect(rx,H-17,rw,9,'F');
       pdf.setFillColor(...C.gold);pdf.rect(rx,H-17,rw,1.2,'F');
       pdf.setTextColor(...C.gold);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
-      pdf.text('Nr.cad. '+S2(P.nrCad)+' · UTR '+S2(P.utr)+' · '+(fl===0?'PLAN PARTER':'PLAN ETAJ '+fl)+' · Sc.1:100',rx+rw/2,H-12,{align:'center'});
+      pdf.text('Nr.cad. '+S2(P.nrCad)+' · UTR '+S2(P.utr)+' · '+(fl===0?'PLAN PARTER':(isTip?'PLAN ETAJ TIP':'PLAN ETAJ '+fl))+' · Sc.1:100',rx+rw/2,H-12,{align:'center'});
       pdf.setTextColor(120,140,170);pdf.setFont('helvetica','normal');pdf.setFontSize(4.8);
-      pdf.text('Cota ±'+(fl===0?'0.00':'+')+(fl*P.hn).toFixed(2)+'m · SC='+RN(b.scArea)+'m² · SDA nivel='+RN(b.sdaPerFloor)+'m² · Document orientativ UrbanX',rx+rw/2,H-8,{align:'center'});
+      pdf.text('Cota +'+(fl*P.hn).toFixed(2)+'m · SC='+RN(b.scArea)+'m² · SDA nivel='+RN(b.sdaPerFloor)+'m² · Document orientativ UrbanX',rx+rw/2,H-8,{align:'center'});
       ftr();
-    }
+    } // end _floorsToDraw loop
 
     // ══════════════════════════════════════════════════════════════════
     // PAG: TABEL SUPRAFEȚE + INVENTAR GOLURI (USI/FERESTRE)
