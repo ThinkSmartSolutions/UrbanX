@@ -171,8 +171,9 @@ function _rvCompBuilding(P){
   const niv  = Math.min(P.niv, Math.max(1, Math.round(sdaTarget / scArea)));
   const sdaTotal = scArea * niv;
 
-  // Nuclee scări+lift — poziționate central între cele 2 rânduri de apartamente
-  const nStairs = Math.max(1, Math.min(6, Math.floor(bW / 8.0)));
+  // Nuclee scări+lift — 1 nucleu la fiecare 18m (P118-2/2013: max 30m coridoc evacuare)
+  // Exemplu: 23m → 1 nucleu; 36m → 2; 54m → 3
+  const nStairs = Math.max(1, Math.min(6, Math.floor(bW / 18.0)));
   const stairW  = 3.6;
   const stairD  = Math.min(6.6, bD * 0.5);
   const colSp   = bW / nStairs;
@@ -1251,18 +1252,21 @@ async function _rvExportPDF(){
   const _jsPDF=(typeof jsPDF!=='undefined')?jsPDF:(window.jspdf?.jsPDF);
   if(!_jsPDF){_rvExportAllPNG(P,b);return;}
 
-  const btn=document.querySelector('.rv-expbtn');
-  if(btn){btn.textContent='⏳ Generez prezentare…';btn.style.opacity='.6';}
-  if(typeof ss==='function') ss('⏳ Se generează Prezentarea Relevee — se capturează imagini 3D…');
+  const btn=document.querySelector('.rv-expbtn')||document.querySelector('button[onclick*="ExportPDF"]');
+  if(btn){btn.textContent='⏳ Generez PDF…';btn.style.opacity='.6';btn.style.background='rgba(212,175,55,.25)';}
+  if(typeof ss==='function') ss('⏳ Generez Releveu PDF — Pasul 1/4: capturi hărți…');
 
-  // ── Capturi din viewer 3D ────────────────────────────────────────
+  // ── Capturi din viewer 3D (cu timeout 8s — nu blocăm dacă e lent) ────
   let caps={};
   try{
     const ap=S.parcels[S.activeParcel??0];
     if(ap?.geo?.geometry && typeof _captureStudyMaps==='function'){
-      caps=await _captureStudyMaps(ap, msg=>{ if(typeof ss==='function') ss(msg); });
+      const capturePromise=_captureStudyMaps(ap, msg=>{ if(typeof ss==='function') ss(msg); });
+      const timeoutPromise=new Promise(res=>setTimeout(()=>res({}),8000)); // max 8s
+      caps=await Promise.race([capturePromise,timeoutPromise])||{};
     }
-  }catch(e){console.warn('[Relevee PDF] capture failed:',e.message);}
+  }catch(e){console.warn('[Releveu PDF] capture failed:',e.message);}
+  if(typeof ss==='function') ss('⏳ Generez PDF — Pasul 2/4: planuri de nivel…');
 
   try{
     const pdf=new _jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
@@ -1432,9 +1436,8 @@ async function _rvExportPDF(){
           pdf.setDrawColor(...stk);pdf.setLineWidth(lw);
           pdf.rect(rx,ry,rw,rh,'FD');
         }
-        // Hașuri oblice pentru pereți structurali (cores)
+        // Hașuri oblice pentru pereți structurali (cores) — fără save/restore (jsPDF.save() = download!)
         if(r.t==='core'){
-          pdf.save();
           pdf.setDrawColor(50,80,160);pdf.setLineWidth(0.25);
           const sp=Math.max(1.5,colSz);
           for(let hi=-(rh);hi<rw+rh;hi+=sp){
@@ -1442,7 +1445,6 @@ async function _rvExportPDF(){
             const x2=Math.min(rx+rw,rx+hi+rh),y2=x2==rx+rw?ry+(rx+rw-(rx+hi)):ry+rh;
             if(x1<rx+rw&&x2>rx)pdf.line(x1,y1,x2,y2);
           }
-          pdf.restore();
         }
       });
 
@@ -1497,12 +1499,12 @@ async function _rvExportPDF(){
         // Linia foii
         if(isMain){
           pdf.line(dx,oy+bD*sc,dx+dw,oy+bD*sc);
-          pdf.setDrawColor(234,100,20);pdf.setLineWidth(0.35);
-          pdf.ellipse(dx,oy+bD*sc,dw,dw,undefined); // aproximare arc
-          // Arc propriu-zis (quarter circle)
-          for(let a=0;a<=Math.PI/2;a+=0.15){pdf.setLineWidth(0.3);
+          // Arc deschidere ușă (quarter circle)
+          pdf.setDrawColor(200,80,10);pdf.setLineWidth(0.35);
+          let prevAx=dx,prevAy=oy+bD*sc;
+          for(let a=0.15;a<=Math.PI/2+0.01;a+=0.15){
             const ax=dx+dw*Math.sin(a),ay=oy+bD*sc-dw*(1-Math.cos(a));
-            if(a>0){const prev_a=a-0.15;const pax=dx+dw*Math.sin(prev_a),pay=oy+bD*sc-dw*(1-Math.cos(prev_a));pdf.line(pax,pay,ax,ay);}
+            pdf.line(prevAx,prevAy,ax,ay);prevAx=ax;prevAy=ay;
           }
         } else {
           const sw=d.swing||'right';
@@ -1619,18 +1621,16 @@ async function _rvExportPDF(){
         pdf.setDrawColor(20,40,90);pdf.setLineWidth(0.3);
         pdf.line(dimLineX,prevGy,dimLineX,gy);
         pdf.line(dimLineX-2,prevGy,dimLineX+2,prevGy);pdf.line(dimLineX-2,gy,dimLineX+2,gy);
-        pdf.save();pdf.translate(dimLineX-4.5,(prevGy+gy)/2);pdf.rotate(90);
         pdf.setTextColor(15,35,90);pdf.setFont('helvetica','normal');pdf.setFontSize(4);
-        pdf.text(gSpY.toFixed(2)+' m',0,0,{align:'center'});pdf.restore();
+        pdf.text(gSpY.toFixed(2)+' m',dimLineX-4.5,(prevGy+gy)/2,{align:'center',angle:90});
         prevGy=gy;
       }
       // Total Y
       pdf.setDrawColor(20,40,90);pdf.setLineWidth(0.5);
       pdf.line(dimLineX-8,oy,dimLineX-8,oy+bD*sc);
       pdf.line(dimLineX-10,oy,dimLineX-6,oy);pdf.line(dimLineX-10,oy+bD*sc,dimLineX-6,oy+bD*sc);
-      pdf.save();pdf.translate(dimLineX-15,oy+bD*sc/2);pdf.rotate(90);
       pdf.setTextColor(15,35,90);pdf.setFont('helvetica','bold');pdf.setFontSize(5);
-      pdf.text(bD.toFixed(2)+' m',0,0,{align:'center'});pdf.restore();
+      pdf.text(bD.toFixed(2)+' m',dimLineX-15,oy+bD*sc/2,{align:'center',angle:90});
 
       // ── 12. Stradă + front stradal ────────────────────────────────────
       pdf.setFillColor(215,220,235);pdf.rect(ox-P_.rl*sc,oy+bD*sc+P_.rs*sc,P_.W*sc,4,'F');
