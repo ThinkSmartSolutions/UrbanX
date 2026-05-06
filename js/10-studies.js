@@ -2757,6 +2757,10 @@ async function generateSSF(){
   // Acces ISU
   const _accesLungSSF = pArea>5000?65:pArea>2000?45:pArea>800?28:18;
   const _avizISU_SSF  = aedisH>28||niv>5||sdEst>600||_accesLungSSF>50||['comercial','industrial','depozit'].includes(fn);
+  // Rata de ocupare PSI — mp spatiu tehnic PSI / mp SD (functie de destinatie)
+  const _rataOcup = {'comercial':0.08,'retail':0.08,'industrial':0.06,'depozit':0.05,
+    'birouri':0.06,'hotel':0.07,'school':0.05,'public':0.06,
+    'rezidential_colectiv':0.04,'locuinta_individuala':0.03,'default':0.05}[fn]||0.05;
 
   // ── PAG 1: COVER ─────────────────────────────────────────────────────────
   pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');pdf.setFillColor(10,20,45);pdf.rect(0,3,W,H-6,'F');
