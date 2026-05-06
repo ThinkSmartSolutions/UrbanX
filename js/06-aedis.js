@@ -4882,7 +4882,7 @@ function aedisGetContent(){
       style="background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.4);color:#4ade80;font-size:9px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 8px"
       title="LOISIR — Amenajare spații publice">🌿<span style="font-size:8px">Loisir</span></button>
     <button onclick="aedisAIRender()" class="aedis-dim-btn" style="background:rgba(212,175,55,.15);border-color:rgba(212,175,55,.4);color:#d4af37;font-size:10px" title="AI Render fotorealist (necesită API key Fal.ai)">🎨 AI</button>
-    <button onclick="AEDIS.showDim=!AEDIS.showDim;aedisRender();if(typeof _aedisToggleDimLabels==='function')_aedisToggleDimLabels()" 
+    <button onclick="AEDIS.showDim=!AEDIS.showDim;aedisRender();if(typeof _aedisToggleDimLabels==='function')_aedisToggleDimLabels();if(S.vol.genDone&&typeof updateDistanceLines==='function')updateDistanceLines()" 
       class="aedis-dim-btn${AEDIS.showDim?' active':''}" title="Etichete dimensionale (toggle)">📏</button>
     <button onclick="aedisClose()" class="aedis-close-btn">✕</button>
   </div>`;

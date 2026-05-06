@@ -1531,7 +1531,8 @@ canvas#c2d{width:100%;height:100%;display:block}
       var oc3 = el.getAttribute('onclick');
       if(!oc3) return;
       e.preventDefault();
-      _runOC(oc3);
+      // el.click() in loc de eval(oc) — executa onclick cu this=element (fix "this=window" bug)
+      el.click();
     }, {passive:false});
     window._runOC = _runOC;
   })();
