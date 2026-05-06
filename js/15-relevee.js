@@ -290,34 +290,38 @@ function _rvFloor(b, floorIdx){
     });
 
     // ── Coridor orizontal (bandă între apartamente Nord și nuclee) ─────────
-    // ── Coridoare la nivelul nucleelor (ISU P118-2/2013) ─────────────────────
-    // Spațiul lateral față de nucleu = CORIDOR COMUN DE ETAJ (obligatoriu etichetat)
-    // ISU: min 1.40m lățime liberă, max 30m lungime până la casa scărilor
+    // ── Zone la nivelul nucleelor (ISU P118-2/2013) ───────────────────────────
+    // Lângă fiecare nucleu: coridor etaj ÎNGUST (1.5-2m) + vestibul/holul etajului
+    // ISU: coridor evacure min 1.20m lățime liberă; max 30m lungime
+    const corrW = Math.max(1.5, Math.min(2.2, cores[0].h * 0.22)); // ~22% din înălțimea nucleului = coridor îngust
+    const vestibulH = cores[0].h - corrW; // restul = hol de etaj / spații comune
+
     cores.forEach((core,ci)=>{
-      // Coridor etaj (bandă orizontală la nivelul nucleului, stânga+dreapta)
-      if(hasDoubleCorridor){
-        // Stânga nucleului
-        const corrLW=core.x;
-        if(corrLW>0.5)
-          rects.push({t:'hall',x:0,y:core.y,w:corrLW,h:core.h,lbl:'Coridor etaj',apt:-3,zIdx:-1,normMin:0});
-        // Dreapta nucleului (pentru ultimul core → până la bW)
-        if(ci===cores.length-1){
-          const corrRW=bW-(core.x+core.w);
-          if(corrRW>0.5)
-            rects.push({t:'hall',x:core.x+core.w,y:core.y,w:corrRW,h:core.h,lbl:'Coridor etaj',apt:-3,zIdx:-1,normMin:0});
-        }
+      // Coridor îngust (primul rând de la core.y)
+      if(core.x > 0.3)
+        rects.push({t:'hall',x:0,y:core.y,w:core.x,h:corrW,
+          lbl:'Coridor etaj',apt:-3,zIdx:-1,normMin:0});
+      const rX=core.x+core.w, rW=bW-(core.x+core.w);
+      if(rW > 0.3)
+        rects.push({t:'hall',x:rX,y:core.y,w:rW,h:corrW,
+          lbl:'Coridor etaj',apt:-3,zIdx:-1,normMin:0});
+
+      // Vestibul / Holul etajului (restul spațiului la nivelul nucleului)
+      if(vestibulH > 0.8){
+        if(core.x > 0.3)
+          rects.push({t:'storage',x:0,y:core.y+corrW,w:core.x,h:vestibulH,
+            lbl:'Hol etaj / Spații comune',apt:-3,zIdx:-1,normMin:0});
+        if(rW > 0.3)
+          rects.push({t:'storage',x:rX,y:core.y+corrW,w:rW,h:vestibulH,
+            lbl:'Hol etaj / Spații comune',apt:-3,zIdx:-1,normMin:0});
         // Între nuclee consecutive
-        if(ci<cores.length-1){
-          const nextCore=cores[ci+1];
-          const midW=nextCore.x-(core.x+core.w);
-          if(midW>0.5)
-            rects.push({t:'hall',x:core.x+core.w,y:core.y,w:midW,h:core.h,lbl:'Coridor comun',apt:-3,zIdx:-1,normMin:0});
+        if(ci < cores.length-1){
+          const nx=cores[ci+1]; const mW=nx.x-(core.x+core.w);
+          if(mW>0.3){
+            rects.push({t:'hall',x:core.x+core.w,y:core.y,w:mW,h:corrW,lbl:'Coridor comun',apt:-3,zIdx:-1,normMin:0});
+            if(vestibulH>0.8) rects.push({t:'storage',x:core.x+core.w,y:core.y+corrW,w:mW,h:vestibulH,lbl:'Hol etaj',apt:-3,zIdx:-1,normMin:0});
+          }
         }
-      } else {
-        // Single corridor (stânga+dreapta nucleului)
-        if(core.x>0.5) rects.push({t:'hall',x:0,y:core.y,w:core.x,h:core.h,lbl:'Hol nivel',apt:-3,zIdx:-1,normMin:0});
-        const rW=bW-(core.x+core.w);
-        if(rW>0.5) rects.push({t:'hall',x:core.x+core.w,y:core.y,w:rW,h:core.h,lbl:'Hol nivel',apt:-3,zIdx:-1,normMin:0});
       }
     });
 
@@ -1109,6 +1113,39 @@ function _rvSetupHover(cv,fl,ox,oy){
         }
       }
     },{passive:true});
+  }
+
+  // ── Pan / drag (mână trage planșa stânga-dreapta-sus-jos) ──────────────
+  const wrap=document.querySelector('.rv-drawwrap');
+  if(wrap&&!wrap._rvPanBound){
+    wrap._rvPanBound=true;
+    let isPan=false,panSX=0,panSY=0,panSL=0,panST=0;
+    wrap.style.cursor='default';
+    wrap.addEventListener('mousedown',(e)=>{
+      if(e.button!==0||e.target!==cv)return;
+      isPan=true;wrap.style.cursor='grabbing';
+      panSX=e.clientX;panSY=e.clientY;panSL=wrap.scrollLeft;panST=wrap.scrollTop;
+    });
+    window.addEventListener('mousemove',(e)=>{
+      if(!isPan)return;
+      wrap.scrollLeft=panSL-(e.clientX-panSX);
+      wrap.scrollTop=panST-(e.clientY-panSY);
+    });
+    window.addEventListener('mouseup',()=>{if(isPan){isPan=false;wrap.style.cursor='default';}});
+    // Touch drag (1 deget)
+    let tSX=0,tSY=0,tSL=0,tST=0;
+    wrap.addEventListener('touchstart',(e)=>{
+      if(e.touches.length===1){tSX=e.touches[0].clientX;tSY=e.touches[0].clientY;tSL=wrap.scrollLeft;tST=wrap.scrollTop;}
+    },{passive:true});
+    wrap.addEventListener('touchmove',(e)=>{
+      if(e.touches.length===1){
+        wrap.scrollLeft=tSL-(e.touches[0].clientX-tSX);
+        wrap.scrollTop=tST-(e.touches[0].clientY-tSY);
+      }
+    },{passive:true});
+    // Cursor grab când ești pe canvas
+    cv.addEventListener('mouseenter',()=>{if(!isPan)wrap.style.cursor='grab';});
+    cv.addEventListener('mouseleave',()=>{if(!isPan)wrap.style.cursor='default';});
   }
 }
 
