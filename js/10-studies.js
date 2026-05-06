@@ -281,6 +281,13 @@ async function generateShadowStudy(){
   cy=body('NOTA: Prezentul studiu este ORIENTATIV si nu inlocuieste studiul de insorire elaborat de arhitect autorizat OAR, obligatoriu prin Ordin MS 119/2014 art. 3 alin. 2 pentru cladirile de locuinte cu mai mult de 2 apartamente sau cladirile de ingrijire a sanatatii.',14,cy);
 
   sign();
+  // ── Concluzii finale ─────────────────────────────────────────────────────
+  const _aedisHShadow=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||aedisH||13;
+  _addConcluziePage(pdf,W,H,S2,hdr,ftr,sec,body,tblRow,nrcad,utr,uat,params,_aedisHShadow,AEDIS.fn||'rezidential_colectiv',10,'Studiu Umbre',[
+    {criteriu:'Umbra max. generată',valoare:shadowMax?shadowMax.toFixed(0)+'m':'—',status:shadowMax&&shadowMax>15?'ATENTIE':'OK',obs:'Umbra lungă poate afecta proprietățile vecine — verificare',remediere:'Reduceți H propus sau modificați amplasarea pe parcelă'},
+    {criteriu:'Ore însorire vecini',valoare:'Cf. simulare',status:'ATENTIE',obs:'Verificați min. 1.5h/zi la solstițiu iarnă (OMS 119/2014)',remediere:'Asigurați distanța min. D=H×tan(21.5°) față de construcțiile vecine'},
+    {criteriu:'Conformitate OMS 119',valoare:'Orientativ',status:'OK',obs:'Studiu geotehnic și însorire detaliat obligatoriu în faza PT'},
+  ]);
   pdf.save('Studiu_Umbre_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
   ss('Studiu de Umbre generat!');
 }
@@ -521,6 +528,11 @@ async function generateNoiseStudy(){
    ['*','Zonificare acustică: funcțiuni zgomotoase la fațadă stradală, dormitoare spre curte','—','0 EUR (proiect)','NP 016-97 + OMS 119/2014'],
   ].forEach(r=>cy2=tblRow(r,cy2,false,[18,75,22,24,43]));
   cy2=28;sign();
+  _addConcluziePage(pdf,W,H,S2,hdr,ftr,sec,body,tblRow,nrcad,utr,uat,params,AEDIS.corpuri[0]?.niv*3||12,AEDIS.fn||'rezidential_colectiv',12,'Studiu Acustic',[
+    {criteriu:'Nivel zgomot calculat Lz',valoare:Ltotal.toFixed(1)+' dB',status:confZi?'OK':'BLOCAT',obs:confZi?'Conform SR 10009:2017':'Depășire limită zi '+limit_zi+'dB',remediere:'Prevede ecrane fonice, fațade cu Rw>45dB sau modifică implantarea'},
+    {criteriu:'Nivel noapte Ln',valoare:Ltotal.toFixed(1)+' dB',status:confNoap?'OK':'ATENTIE',obs:confNoap?'Sub limita nocturnă':'Posibilă depășire '+limit_n+'dB',remediere:'Ferestre cu geam tripan Rw>48dB pe fațadele expuse'},
+    {criteriu:'Zone sensibile în 200m',valoare:zgomot.surse_principale?.length||0+' surse',status:'ATENTIE',obs:'Verificare obligatorie SR 10009:2017 + HG 321/2005',remediere:'Harta strategică de zgomot consultabilă la Primărie'},
+  ]);
   pdf.save('Studiu_Acustic_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
   ss('Studiu Acustic Urban generat!');
 }
@@ -728,6 +740,11 @@ async function generateWindStudy(){
 
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CASETA TEHNICA SI SEMNATURA',10);ftr();
   cy=28;sign();
+  _addConcluziePage(pdf,W,H,S2,hdr,ftr,sec,body,tblRow,nrcad,utr,uat,params,aedisH,AEDIS.fn||'rezidential_colectiv',10,'Studiu Vânt',[
+    {criteriu:'Zonă vânt de referință',valoare:'Zona '+vantCfg.zona+', V0='+vantCfg.v_ref+'m/s',status:'OK',obs:'CR 1-1-4/2012 — necesară verificare în PT'},
+    {criteriu:'Raport H/Hmed zonă',valoare:(aedisH/Math.max(1,hMed)).toFixed(2),status:(aedisH/Math.max(1,hMed))>3?'ATENTIE':'OK',obs:(aedisH/Math.max(1,hMed))>3?'Clădire înaltă creează efect de tunel':'Înălțime compatibilă cu zona',remediere:'Reduceți H sau prevedeți studiu CFD dacă H/Hmed>3'},
+    {criteriu:'Confort pietonal Lawson',valoare:'Verificare necesară',status:'ATENTIE',obs:'Simulare CFD obligatorie pentru spații publice deschise H>28m'},
+  ]);
   pdf.save('Studiu_Vant_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
   ss('Studiu Vant & Confort Pietonal generat!');
 }
@@ -1621,6 +1638,10 @@ async function generateAACR(){
 
   const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Studiu de Evaluare Aeronautica (AACR)','Studiu AACR',10);
   const caps = await _captureStudyMaps(ap, msg=>ss(msg));
+  const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13;
+  const niv=AEDIS.corpuri[0]?.niv||4;
+  const fn=AEDIS.fn||'rezidential_colectiv';
+  const areaNum=parseFloat(area)||0;
 
   // Calcul distanță față de praguri pistă
   const parcelPt = {type:'Feature',geometry:{type:'Point',coordinates:[lon,lat]},properties:{}};
@@ -5873,9 +5894,13 @@ async function generateWaterStudy(){
   const apaCfg = getApaConfig();
   const hidro = getHidroConfig();
   const aedisH = S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||0;
-  const areaNum = ap.area || 0;
+  const areaNum = Math.max(1, ap.area || parseFloat(area) || 100);
+  // Params cu fallback — evita NaN la parcele fara UTR
+  if(!params.pot) params.pot = 50;
+  if(!params.cut) params.cut = 1.5;
+  if(!params.rl) params.rl = 3;
   const caps = await _captureStudyMaps(ap, msg=>ss(msg));
-  // TEAL disponibil din destructurarea _initStudyPdf
+  const _safeCy = (v) => (isFinite(v) && v > 0) ? v : 33;
 
   // ── PAGINA 1: COPERTĂ ────────────────────────────────────────────────────
   pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');
@@ -6161,6 +6186,80 @@ async function generateWaterStudy(){
   pdf.setTextColor(60,90,120);pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');
   pdf.text('Prezenta documentație este generată automat și are caracter STRICT ORIENTATIV.',22,cy+13);
 
+  const _dtga_risc = apaCfg.risc_inundabil?.includes('Ridicat');
+  const _dtga_aproape = apaCfg.distanta_curs_principal<200;
+  _addConcluziePage(pdf,W,H,S2,hdr,ftr,sec,body,tblRow,nrcad,utr,uat,params,aedisH,AEDIS.fn||'rezidential_colectiv',9,'Gospodărire Ape DTGA',[
+    {criteriu:'Risc inundabilitate',valoare:S2(apaCfg.risc_inundabil),status:_dtga_risc?'BLOCAT':'OK',obs:_dtga_risc?'Zonă cu risc ridicat — restricții construire':apaCfg.risc_inundabil?.includes('Mediu')?'Risc mediu — verificare Q100 INHGA obligatorie':'Risc scăzut — construire permisă',remediere:_dtga_risc?'Verificați hărțile INHGA și obțineți aviz special '+S2(apaCfg.DA)+' înainte de orice investiție pe teren':'Verificați hărțile INHGA (www.inhga.ro) pentru confirmare'},
+    {criteriu:'Aviz Gospodărire Ape',valoare:'Obligatoriu',status:'ATENTIE',obs:'AGA necesar înainte de Autorizația de Construire',remediere:'Depuneți DTGA la '+S2(apaCfg.DA)+' ('+apaCfg.DA_tel+') — termen 45 zile legale'},
+    {criteriu:'Nivel freatic (NFA)',valoare:S2(hidro.nfa||apaCfg.nfa),status:'ATENTIE',obs:'Studiu geotehnic obligatoriu NP 074/2014 pentru confirmarea NFA exact',remediere:'Comandați studiu geotehnic cu cel puțin 2 foraje pe amplasament înainte de proiectare fundație'},
+    {criteriu:'Distanță față de curs apă',valoare:apaCfg.distanta_curs_principal+'m',status:_dtga_aproape?'BLOCAT':'OK',obs:_dtga_aproape?'Sub 200m — aviz amplasament obligatoriu':'Distanță suficientă față de curs principal',remediere:_dtga_aproape?'Aviz amplasament curs de apă obligatoriu de la '+S2(apaCfg.DA)+' cf. Legii 107/1996 Art.40':'Verificați că nu sunt cursuri de apă temporare necartografiate'},
+  ]);
   pdf.save('DTGA_Ape_'+S2(nrcad)+'_'+new Date().getFullYear()+'.pdf');
   ss('✅ Studiu Gospodărire Ape DTGA generat (9 pagini) — '+S2(apaCfg.DA));
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// HELPER: Pagina de concluzii standardizată — adăugată la TOATE studiile
+// ═══════════════════════════════════════════════════════════════════════════
+function _addConcluziePage(pdf, W, H, S2, hdr, ftr, sec, body, tblRow, nrcad, utr, uat, params, aedisH, fn, pageNr, studyType, items){
+  // items = array de {criteriu, valoare, status:'OK'|'ATENTIE'|'BLOCAT', obs}
+  try{
+    pdf.addPage();
+    pdf.setFillColor(245,247,252);pdf.rect(0,0,W,H,'F');
+    hdr('CONCLUZII SI RECOMANDARI — VERDICT FINAL',pageNr);ftr();
+    let cy=33;
+
+    // Verdict global
+    const nrBlocat = items.filter(i=>i.status==='BLOCAT').length;
+    const nrAtentie = items.filter(i=>i.status==='ATENTIE').length;
+    const verdictCol = nrBlocat>0?[180,20,20]:nrAtentie>0?[200,100,10]:[16,130,60];
+    const verdictText = nrBlocat>0?'CONSTRUIREA NU ESTE RECOMANDATĂ — NECESARE MODIFICĂRI':nrAtentie>0?'CONSTRUIREA POSIBILĂ CU CONDIȚII':'PROPUNERE CONFORMĂ — SE POATE AVIZA';
+    const verdictIco = nrBlocat>0?'✗':nrAtentie>0?'△':'✓';
+
+    pdf.setFillColor(...verdictCol);pdf.roundedRect(14,cy,W-28,16,2,2,'F');
+    pdf.setTextColor(255,255,255);pdf.setFontSize(11);pdf.setFont('helvetica','bold');
+    pdf.text(verdictIco+' '+verdictText,W/2,cy+10.5,{align:'center'});
+    cy+=20;
+
+    cy=sec('DATE PROPUNERE ANALIZATĂ',cy);cy+=2;
+    pdf.setFontSize(8);pdf.setFont('helvetica','normal');pdf.setTextColor(60,80,120);
+    [['Nr. Cadastral',nrcad],['UTR / Zonă PUG',utr],['UAT',uat],
+     ['Funcțiune propusă',S2(_stripEmoji(fn))],['Regim înălțime propus',(aedisH>0?aedisH.toFixed(1):params?.h||'—')+'m'],
+     ['POT propus',params?.pot?params.pot+'%':'Cf. PUG'],['CUT propus',params?.cut||'Cf. PUG'],
+    ].forEach(([k,v])=>{
+      pdf.setTextColor(120,140,160);pdf.text(S2(k)+':',16,cy);
+      pdf.setTextColor(30,50,80);pdf.text(S2(String(v||'—')),80,cy);
+      cy+=5;
+    });
+    cy+=3;
+
+    cy=sec('VERIFICĂRI '+S2(studyType.toUpperCase()),cy);cy+=2;
+    cy=tblRow(['Criteriu','Valoare','Status','Recomandare'],cy,true,[60,40,22,66]);
+    items.forEach(item=>{
+      const col = item.status==='OK'?[16,130,60]:item.status==='ATENTIE'?[200,100,10]:[180,20,20];
+      cy=tblRow([S2(item.criteriu||'—'),S2(String(item.valoare||'—')),item.status,S2(item.obs||'—')],cy,false,[60,40,22,66],false,false);
+      // Color the status cell
+    });
+    cy+=4;
+
+    // Ce trebuie schimbat
+    const probleme = items.filter(i=>i.status!=='OK');
+    if(probleme.length>0){
+      cy=sec('CE TREBUIE SCHIMBAT PENTRU AVIZARE',cy);cy+=2;
+      probleme.forEach((p,i)=>{
+        const pref=p.status==='BLOCAT'?'OBLIGATORIU: ':'RECOMANDAT: ';
+        const lines=pdf.splitTextToSize((i+1)+'. '+pref+S2(p.remediere||p.obs||'Verificare necesară'),W-32);
+        lines.forEach((l,li)=>pdf.text(l,16,cy+li*4.2));
+        cy+=lines.length*4.2+2;
+        if(cy>H-40){pdf.addPage();pdf.setFillColor(245,247,252);pdf.rect(0,0,W,H,'F');hdr('CONCLUZII — CONTINUARE',pageNr);ftr();cy=33;}
+      });
+      cy+=3;
+    }
+
+    // Disclaimer
+    pdf.setFillColor(240,244,250);pdf.roundedRect(14,cy,W-28,16,2,2,'F');
+    pdf.setTextColor(80,100,140);pdf.setFontSize(7.5);pdf.setFont('helvetica','italic');
+    pdf.text('Document orientativ generat automat · UrbanX TSS·FG · Nu înlocuiește avizele oficiale · Verificare obligatorie cu specialiști autorizați',W/2,cy+6,{align:'center'});
+    pdf.text('Baza de date: PUG '+S2(uat)+' în vigoare · Normative naționale actualizate 2024-2025 · Surse: ANM, INHGA, ANCPI, ANAR',W/2,cy+12,{align:'center'});
+  }catch(e){console.warn('[_addConcluziePage]',e.message);}
 }
