@@ -290,6 +290,37 @@ function _rvFloor(b, floorIdx){
     });
 
     // ── Coridor orizontal (bandă între apartamente Nord și nuclee) ─────────
+    // ── Coridoare la nivelul nucleelor (ISU P118-2/2013) ─────────────────────
+    // Spațiul lateral față de nucleu = CORIDOR COMUN DE ETAJ (obligatoriu etichetat)
+    // ISU: min 1.40m lățime liberă, max 30m lungime până la casa scărilor
+    cores.forEach((core,ci)=>{
+      // Coridor etaj (bandă orizontală la nivelul nucleului, stânga+dreapta)
+      if(hasDoubleCorridor){
+        // Stânga nucleului
+        const corrLW=core.x;
+        if(corrLW>0.5)
+          rects.push({t:'hall',x:0,y:core.y,w:corrLW,h:core.h,lbl:'Coridor etaj',apt:-3,zIdx:-1,normMin:0});
+        // Dreapta nucleului (pentru ultimul core → până la bW)
+        if(ci===cores.length-1){
+          const corrRW=bW-(core.x+core.w);
+          if(corrRW>0.5)
+            rects.push({t:'hall',x:core.x+core.w,y:core.y,w:corrRW,h:core.h,lbl:'Coridor etaj',apt:-3,zIdx:-1,normMin:0});
+        }
+        // Între nuclee consecutive
+        if(ci<cores.length-1){
+          const nextCore=cores[ci+1];
+          const midW=nextCore.x-(core.x+core.w);
+          if(midW>0.5)
+            rects.push({t:'hall',x:core.x+core.w,y:core.y,w:midW,h:core.h,lbl:'Coridor comun',apt:-3,zIdx:-1,normMin:0});
+        }
+      } else {
+        // Single corridor (stânga+dreapta nucleului)
+        if(core.x>0.5) rects.push({t:'hall',x:0,y:core.y,w:core.x,h:core.h,lbl:'Hol nivel',apt:-3,zIdx:-1,normMin:0});
+        const rW=bW-(core.x+core.w);
+        if(rW>0.5) rects.push({t:'hall',x:core.x+core.w,y:core.y,w:rW,h:core.h,lbl:'Hol nivel',apt:-3,zIdx:-1,normMin:0});
+      }
+    });
+
     if(hasDoubleCorridor && northMaxD>0.5){
       const corrH=Math.max(1.0, Math.min(2.0, cores[0].y-northMaxD*0.88));
       const corrY=northMaxD-corrH;
@@ -1052,6 +1083,33 @@ function _rvSetupHover(cv,fl,ox,oy){
     } else if(tip){ tip.style.display='none'; }
   };
   cv.onmouseleave=()=>{const t=document.getElementById('rv-tip');if(t)t.style.display='none';};
+
+  // ── Scroll to zoom (mouse wheel + trackpad) ─────────────────────────────
+  if(!cv._rvScrollBound){
+    cv._rvScrollBound=true;
+    cv.addEventListener('wheel',(e)=>{
+      e.preventDefault();e.stopPropagation();
+      const delta=e.deltaY<0?1:-1;
+      _RV.scale=Math.max(4,Math.min(48,_RV.scale+delta*2));
+      document.getElementById('rv-zval').textContent=Math.round(_RV.scale/12*100)+'%';
+      if(_RV.building)_rvRender();
+    },{passive:false});
+    // Pinch-to-zoom (touch)
+    let lastDist=0;
+    cv.addEventListener('touchstart',(e)=>{if(e.touches.length===2)lastDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);},{passive:true});
+    cv.addEventListener('touchmove',(e)=>{
+      if(e.touches.length===2){
+        const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+        const delta=d-lastDist;
+        if(Math.abs(delta)>2){
+          _RV.scale=Math.max(4,Math.min(48,_RV.scale+(delta>0?1:-1)*1.5));
+          document.getElementById('rv-zval').textContent=Math.round(_RV.scale/12*100)+'%';
+          if(_RV.building)_rvRender();
+          lastDist=d;
+        }
+      }
+    },{passive:true});
+  }
 }
 
 // ══════════════════════════════════════════════════════════════════════════
