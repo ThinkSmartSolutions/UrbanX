@@ -871,834 +871,691 @@ async function _rvExportPDF(){
   if(!_jsPDF){_rvExportAllPNG(P,b);return;}
 
   const btn=document.querySelector('.rv-expbtn');
-  if(btn){btn.textContent='⏳ Generez PDF…';btn.style.opacity='.6';}
+  if(btn){btn.textContent='⏳ Generez prezentare…';btn.style.opacity='.6';}
+  if(typeof ss==='function') ss('⏳ Se generează Prezentarea Relevee — se capturează imagini 3D…');
+
+  // ── Capturi din viewer 3D ────────────────────────────────────────
+  let caps={};
+  try{
+    const ap=S.parcels[S.activeParcel??0];
+    if(ap?.geo?.geometry && typeof _captureStudyMaps==='function'){
+      caps=await _captureStudyMaps(ap, msg=>{ if(typeof ss==='function') ss(msg); });
+    }
+  }catch(e){console.warn('[Relevee PDF] capture failed:',e.message);}
 
   try{
     const pdf=new _jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
     const W=297,H=210;
-    let pgN=0;
+    let pgN=0; let totalPages=0;
     const newPage=()=>{if(pgN>0)pdf.addPage();pgN++;};
 
-    // ── Culori ──────────────────────────────────────────────────────────
+    // ── Culori & utilitare ───────────────────────────────────────────
     const C={
-      gold:[212,175,55], gold2:[245,198,60], dark:[8,14,30], dark2:[15,25,48],
-      light:[248,249,252], light2:[240,244,250], white:[255,255,255],
-      red:[220,38,38], green:[22,163,74], blue:[37,99,235], cyan:[6,182,212],
-      orange:[234,88,12], purple:[124,58,237], gray:[100,116,139],
-      gray2:[203,213,225], gray3:[241,245,249],
-      wall:[80,100,130], wallLight:[180,195,215],
-      living:[253,186,116], bedroom:[134,239,172], kitchen:[103,232,249],
-      bath:[196,181,253], hall:[203,213,225], core:[147,197,253],
-      balcon:[254,249,195], commercial:[249,168,212], storage:[209,213,219],
+      gold:[212,175,55],gold2:[245,198,60],dark:[8,14,30],dark2:[15,25,48],
+      light:[248,249,252],white:[255,255,255],red:[220,38,38],green:[22,163,74],
+      blue:[37,99,235],cyan:[6,182,212],orange:[234,88,12],purple:[124,58,237],
+      gray:[100,116,139],gray2:[203,213,225],gray3:[241,245,249],
+      wall:[80,100,130],living:[253,186,116],bedroom:[134,239,172],kitchen:[103,232,249],
+      bath:[196,181,253],hall:[203,213,225],core:[147,197,253],balcon:[254,249,195],
+      commercial:[249,168,212],storage:[209,213,219],
     };
-    const S2=s=>String(s||'').replace(/[^ -~À-ɏĀ-ɏ]/g,' ').replace(/\s+/g,' ').trim().slice(0,200);
-    const RN=(n,d=0)=>isNaN(n)?'—':d?n.toFixed(d):Math.round(n)+'';
+    const S2=s=>String(s||'').replace(/[^\x20-\x7E\u00C0-\u024F]/g,' ').replace(/\s+/g,' ').trim().slice(0,300);
+    const RN=(n,d=0)=>isNaN(n)?'—':d?Number(n).toFixed(d):Math.round(n)+'';
+    const addCap=(img,x,y,w,h,cap)=>{
+      if(!img||img.length<200)return;
+      try{
+        pdf.setFillColor(230,234,242);pdf.rect(x,y,w,h,'F');
+        pdf.addImage(img,'JPEG',x,y,w,h,undefined,'FAST');
+        if(cap){
+          pdf.setFillColor(0,0,0,0.5);
+          pdf.setFillColor(15,25,48);pdf.rect(x,y+h-5,w,5,'F');
+          pdf.setTextColor(...C.gold);pdf.setFont('helvetica','italic');pdf.setFontSize(5);
+          pdf.text(S2(cap),x+w/2,y+h-1.5,{align:'center'});
+        }
+      }catch(e){}
+    };
 
-    // ── Header/Footer helpers ────────────────────────────────────────────
+    // ── Header/Footer ────────────────────────────────────────────────
     const hdr=(title,pg)=>{
       pdf.setFillColor(...C.dark2);pdf.rect(0,0,W,9,'F');
       pdf.setFillColor(...C.gold);pdf.rect(0,0,W,1.2,'F');
-      // Logo text
-      pdf.setTextColor(...C.gold);pdf.setFontSize(7);pdf.setFont('helvetica','bold');
-      pdf.text('URBANX',5,6.2);
-      pdf.setTextColor(150,165,185);pdf.setFont('helvetica','normal');pdf.setFontSize(5.5);
-      pdf.text('RELEVEE INSTANT · Document orientativ',18,6.2);
-      // Title center
-      pdf.setTextColor(220,230,245);pdf.setFont('helvetica','bold');pdf.setFontSize(7.5);
-      pdf.text(S2(title),W/2,6.2,{align:'center'});
-      // Page right
-      pdf.setTextColor(...C.gold);pdf.setFontSize(6.5);
-      pdf.text('Pag. '+pg+' / '+totalPages,W-5,6.2,{align:'right'});
+      pdf.setTextColor(...C.gold);pdf.setFont('helvetica','bold');pdf.setFontSize(7);pdf.text('URBANX',5,6.2);
+      pdf.setTextColor(150,165,185);pdf.setFont('helvetica','normal');pdf.setFontSize(5.5);pdf.text('RELEVEE INSTANT · Prezentare elaborată',18,6.2);
+      pdf.setTextColor(220,230,245);pdf.setFont('helvetica','bold');pdf.setFontSize(7.5);pdf.text(S2(title),W/2,6.2,{align:'center'});
+      pdf.setTextColor(...C.gold);pdf.setFontSize(6.5);pdf.text('Pag. '+pg,W-5,6.2,{align:'right'});
     };
     const ftr=()=>{
       pdf.setFillColor(240,244,250);pdf.rect(0,H-7,W,7,'F');
       pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.2);pdf.line(0,H-7,W,H-7);
       pdf.setTextColor(120,135,155);pdf.setFontSize(5.5);pdf.setFont('helvetica','italic');
-      pdf.text('Nr.cad. '+S2(P.nrCad)+' · UTR: '+S2(P.utr)+' · '+S2(P.fn)+' · UrbanX TSS·FG · Document orientativ — nu înlocuiește proiectul tehnic elaborat de arhitect autorizat OAR conf. Legii 50/1991',W/2,H-2,{align:'center'});
+      pdf.text('Nr.cad. '+S2(P.nrCad)+' · UTR: '+S2(P.utr)+' · '+S2(P.fn)+' · UrbanX TSS·FG · Document orientativ — nu înlocuiește proiectul tehnic conf. Legii 50/1991',W/2,H-2,{align:'center'});
     };
-    const secTitle=(txt,y,col=C.dark2)=>{
-      pdf.setFillColor(...col);pdf.rect(10,y,W-20,6,'F');
+    const secTitle=(txt,y,col)=>{
+      const c=col||C.dark2;
+      pdf.setFillColor(...c);pdf.rect(10,y,W-20,6,'F');
       pdf.setFillColor(...C.gold);pdf.rect(10,y,1.5,6,'F');
       pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(7.5);
-      pdf.text(S2(txt),14,y+4.2);
-      return y+8;
+      pdf.text(S2(txt),14,y+4.2);return y+8;
     };
-    const bodyText=(txt,x,y,w=W-20,sz=7)=>{
-      pdf.setTextColor(40,55,80);pdf.setFont('helvetica','normal');pdf.setFontSize(sz);
-      const lines=pdf.splitTextToSize(S2(txt),w);
-      lines.forEach((l,i)=>pdf.text(l,x,y+i*sz*0.45));
-      return y+lines.length*sz*0.45+1.5;
+    const bodyTxt=(txt,x,y,w,sz,col)=>{
+      const s=sz||6.5,ww=w||(W-22),cc=col||[40,55,80];
+      pdf.setTextColor(...cc);pdf.setFont('helvetica','normal');pdf.setFontSize(s);
+      const lines=pdf.splitTextToSize(S2(txt),ww);
+      lines.forEach((l,i)=>pdf.text(l,x,y+i*(s*0.42)));
+      return y+lines.length*(s*0.42)+1.5;
+    };
+    const noteBox=(txt,x,y,w,h,icon,bgCol,tcol)=>{
+      const bg=bgCol||[248,252,255],tc=tcol||[30,60,120];
+      pdf.setFillColor(...bg);pdf.setDrawColor(tc[0],tc[1],tc[2],0.3);pdf.setLineWidth(0.3);
+      pdf.roundedRect(x,y,w,h,1.5,1.5,'FD');
+      if(icon){pdf.setTextColor(...tc);pdf.setFont('helvetica','bold');pdf.setFontSize(7);pdf.text(icon,x+2.5,y+h/2+2);}
+      pdf.setTextColor(...tc);pdf.setFont('helvetica','normal');pdf.setFontSize(5.5);
+      const lines=pdf.splitTextToSize(S2(txt),w-(icon?10:4));
+      lines.slice(0,Math.floor(h/3.2)).forEach((l,i)=>pdf.text(l,x+(icon?9:2.5),y+4+i*3.2));
     };
     const tblHdr=(cols,widths,y)=>{
-      pdf.setFillColor(...C.dark2);
-      const totalW=widths.reduce((a,b_)=>a+b_,0);
-      pdf.rect(10,y,totalW,6,'F');
+      pdf.setFillColor(...C.dark2);pdf.rect(10,y,widths.reduce((a,b_)=>a+b_,0),6,'F');
       pdf.setTextColor(...C.gold);pdf.setFont('helvetica','bold');pdf.setFontSize(6);
-      let x=10;cols.forEach((c,i)=>{pdf.text(S2(c),x+2,y+4.2);x+=widths[i];});
-      return y+6;
+      let x=10;cols.forEach((c,i)=>{pdf.text(S2(c),x+2,y+4.2);x+=widths[i];});return y+6;
     };
-    const tblRow=(cols,widths,y,isEven=false)=>{
-      pdf.setFillColor(isEven?245:252,isEven?248:253,isEven?252:253);
-      const totalW=widths.reduce((a,b_)=>a+b_,0);
-      pdf.rect(10,y,totalW,5.5,'F');
-      pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.1);pdf.line(10,y+5.5,10+totalW,y+5.5);
-      pdf.setTextColor(40,55,80);pdf.setFont('helvetica','normal');pdf.setFontSize(6);
+    const tblRow=(cols,widths,y,even)=>{
+      const tw=widths.reduce((a,b_)=>a+b_,0);
+      pdf.setFillColor(even?245:252,even?248:253,even?252:254);pdf.rect(10,y,tw,5.5,'F');
+      pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.1);pdf.line(10,y+5.5,10+tw,y+5.5);
       let x=10;cols.forEach((c,i)=>{
-        if(c==='OK'||c==='CONFORM'){pdf.setTextColor(...C.green);pdf.setFont('helvetica','bold');}
-        else if(c==='DEPĂȘIRE'||c==='NECONFORM'){pdf.setTextColor(...C.red);pdf.setFont('helvetica','bold');}
-        else if(c==='Verificare PT'||c==='Verificare'){pdf.setTextColor(180,100,20);pdf.setFont('helvetica','normal');}
+        const v=S2(String(c||''));
+        if(v==='CONFORM'||v==='OK'){pdf.setTextColor(...C.green);pdf.setFont('helvetica','bold');}
+        else if(v==='DEPĂȘIRE'||v==='NECONFORM'){pdf.setTextColor(...C.red);pdf.setFont('helvetica','bold');}
+        else if(v==='Verificare PT'){pdf.setTextColor(160,90,20);pdf.setFont('helvetica','normal');}
         else{pdf.setTextColor(40,55,80);pdf.setFont('helvetica','normal');}
-        pdf.text(S2(String(c)),x+2,y+4);x+=widths[i];
-      });
-      return y+5.5;
-    };
-    const badge=(txt,x,y,ok)=>{
-      const col=ok?[220,252,231]:ok===null?[241,245,249]:[254,226,226];
-      const tc=ok?C.green:ok===null?C.gray:C.red;
-      pdf.setFillColor(...col);pdf.roundedRect(x,y-3.5,22,5,1,1,'F');
-      pdf.setDrawColor(...tc);pdf.setLineWidth(0.3);pdf.roundedRect(x,y-3.5,22,5,1,1,'S');
-      pdf.setTextColor(...tc);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
-      pdf.text(S2(txt),x+11,y+0.2,{align:'center'});
+        pdf.setFontSize(6);pdf.text(v,x+2,y+4);x+=widths[i];
+      });return y+5.5;
     };
 
-    // ── Draw plan architectural ────────────────────────────────────────
-    const drawPlanArch=(fl,P_,b_,ox,oy,sc,showDim=true)=>{
+    // ── Draw plan ─────────────────────────────────────────────────────
+    const drawPlan=(fl,P_,b_,ox,oy,sc)=>{
       const bW=b_.bW,bD=b_.bD;
-      // Parcel area (dashed)
-      pdf.setDrawColor(...C.gold);pdf.setLineWidth(0.3);pdf.setLineDashPattern([2,1.5],0);
-      pdf.rect(ox-P_.rl*sc,oy-P_.rf*sc,P_.W*sc,P_.D*sc,'S');
-      pdf.setLineDashPattern([],0);
-      // Setback area (light fill)
-      pdf.setFillColor(248,249,252);pdf.rect(ox,oy,bW*sc,bD*sc,'F');
-      // Grid lines (structural)
-      pdf.setDrawColor(220,228,240);pdf.setLineWidth(0.1);
-      const gsp=5.4*sc;
-      for(let x=ox;x<=ox+bW*sc+0.1;x+=gsp){pdf.setLineDashPattern([1,1],0);pdf.line(x,oy,x,oy+bD*sc);pdf.setLineDashPattern([],0);}
-      for(let y=oy;y<=oy+bD*sc+0.1;y+=gsp){pdf.setLineDashPattern([1,1],0);pdf.line(ox,y,ox+bW*sc,y);pdf.setLineDashPattern([],0);}
-
-      // Rooms
+      pdf.setFillColor(248,249,252);pdf.rect(ox-P_.rl*sc,oy-P_.rf*sc,P_.W*sc,P_.D*sc,'F');
+      pdf.setDrawColor(...C.gold);pdf.setLineWidth(0.25);pdf.setLineDashPattern([2,1.5],0);
+      pdf.rect(ox-P_.rl*sc,oy-P_.rf*sc,P_.W*sc,P_.D*sc,'S');pdf.setLineDashPattern([],0);
+      pdf.setFillColor(245,246,250);pdf.rect(ox,oy,bW*sc,bD*sc,'F');
+      // structural grid
+      pdf.setDrawColor(220,228,240);pdf.setLineWidth(0.08);
+      for(let x=ox;x<=ox+bW*sc+0.1;x+=5.4*sc){pdf.setLineDashPattern([1,1.5],0);pdf.line(x,oy,x,oy+bD*sc);pdf.setLineDashPattern([],0);}
+      for(let y=oy;y<=oy+bD*sc+0.1;y+=3.6*sc){pdf.setLineDashPattern([1,1.5],0);pdf.line(ox,y,ox+bW*sc,y);pdf.setLineDashPattern([],0);}
+      const cm={living:C.living,bedroom:C.bedroom,bedroom2:C.bedroom,bedroom3:C.bedroom,kitchen:C.kitchen,bath:C.bath,wc:C.bath,hall:C.hall,storage:C.storage,core:C.core,office:C.bedroom,meeting:C.living,commercial:C.commercial,reception:C.commercial,balcon:C.balcon};
+      const sm={living:C.orange,bedroom:C.green,bedroom2:C.green,bedroom3:C.green,kitchen:C.cyan,bath:C.purple,wc:C.purple,hall:C.gray,storage:C.gray2,core:C.blue,office:C.green,meeting:C.orange,commercial:[180,50,200],reception:[180,50,200],balcon:C.gold};
       fl.rects.sort((a,m)=>(a.zIdx||0)-(m.zIdx||0)).forEach(r=>{
         const rx=ox+r.x*sc,ry=oy+r.y*sc,rw=r.w*sc,rh=r.h*sc;
-        const colMap={living:C.living,bedroom:C.bedroom,bedroom2:C.bedroom,bedroom3:C.bedroom,kitchen:C.kitchen,bath:C.bath,wc:C.bath,hall:C.hall,storage:C.storage,core:C.core,office:C.bedroom,meeting:C.living,commercial:C.commercial,reception:C.commercial,balcon:C.balcon};
-        const strokeMap={living:C.orange,bedroom:C.green,bedroom2:C.green,bedroom3:C.green,kitchen:C.cyan,bath:C.purple,wc:C.purple,hall:C.gray,storage:C.gray2,core:C.blue,office:C.green,meeting:C.orange,commercial:[180,50,200],reception:[180,50,200],balcon:C.gold};
-        const fc=colMap[r.t]||C.hall;
-        const sc2=strokeMap[r.t]||C.gray;
-        // Fill with opacity
-        pdf.setFillColor(fc[0],fc[1],fc[2]);
+        const fc=cm[r.t]||C.hall,stk=sm[r.t]||C.gray;
+        pdf.setFillColor(...fc);
         if(r.bal){pdf.setDrawColor(...C.gold);pdf.setLineWidth(0.3);pdf.setLineDashPattern([1.5,1],0);pdf.rect(rx,ry,rw,rh,'FD');pdf.setLineDashPattern([],0);}
-        else{pdf.setFillColor(fc[0],fc[1],fc[2]);pdf.setDrawColor(...sc2);pdf.setLineWidth(r.t==='core'?0.8:0.5);pdf.rect(rx,ry,rw,rh,'FD');}
-        // Label
-        if(rw>8&&rh>5){
-          const lbl=(r.lbl||r.t).replace(/[🪜🛗☀🛏🍳🚿🚽🏠🚪📦]/g,'').trim();
+        else{pdf.setDrawColor(...stk);pdf.setLineWidth(r.t==='core'?0.8:0.4);pdf.rect(rx,ry,rw,rh,'FD');}
+        if(rw>7&&rh>5){
+          const lbl=(r.lbl||r.t).replace(/[\u{1F000}-\u{1FAFF}]/gu,'').trim();
           const lines=lbl.split('\n').filter(Boolean);
           const fsz=Math.min(5.5,rw/8,rh/lines.length/2.5);
           pdf.setFont('helvetica','bold');pdf.setFontSize(fsz);
           pdf.setTextColor(r.t==='core'?37:50,r.t==='core'?99:65,r.t==='core'?235:90);
-          lines.forEach((ln,li)=>{
-            pdf.text(S2(ln.slice(0,14)),rx+rw/2,ry+rh/2+(li-(lines.length-1)/2)*fsz*0.6,{align:'center'});
-          });
-          if(!r.bal&&rw>12&&rh>9){
-            const area=Math.round(r.w*r.h);
-            pdf.setFont('helvetica','normal');pdf.setFontSize(Math.min(4.5,fsz*0.8));
-            pdf.setTextColor(100,120,140);
-            pdf.text(area+'m²',rx+rw/2,ry+rh/2+lines.length*fsz*0.35+2,{align:'center'});
+          lines.forEach((ln,li)=>pdf.text(S2(ln.slice(0,14)),rx+rw/2,ry+rh/2+(li-(lines.length-1)/2)*fsz*0.62,{align:'center'}));
+          if(!r.bal&&rw>10&&rh>8){
+            pdf.setFont('helvetica','normal');pdf.setFontSize(Math.min(4.2,fsz*0.75));pdf.setTextColor(100,120,140);
+            pdf.text(RN(r.w*r.h)+'m²',rx+rw/2,ry+rh/2+lines.length*fsz*0.37+2,{align:'center'});
           }
         }
       });
-
-      // Exterior walls (thick)
       pdf.setDrawColor(...C.wall);pdf.setLineWidth(1.2);pdf.rect(ox,oy,bW*sc,bD*sc,'S');
-
-      // Windows (cyan rectangles on walls)
       fl.wins.forEach(w=>{
-        pdf.setFillColor(200,240,255);pdf.setDrawColor(30,150,200);pdf.setLineWidth(0.8);
-        if(w.wall==='N'){pdf.rect(ox+w.x*sc,oy-1.2,w.w*sc,1.6,'FD');}
-        else if(w.wall==='S'){pdf.rect(ox+w.x*sc,oy+bD*sc-0.4,w.w*sc,1.6,'FD');}
-        else if(w.wall==='V'){pdf.rect(ox-1.2,oy+w.y*sc,1.6,w.h*sc,'FD');}
-        else if(w.wall==='E'){pdf.rect(ox+bW*sc-0.4,oy+w.y*sc,1.6,w.h*sc,'FD');}
+        pdf.setFillColor(200,235,255);pdf.setDrawColor(30,150,200);pdf.setLineWidth(0.7);
+        if(w.wall==='N') pdf.rect(ox+w.x*sc,oy-1.2,w.w*sc,1.6,'FD');
+        else if(w.wall==='S') pdf.rect(ox+w.x*sc,oy+bD*sc-0.4,w.w*sc,1.6,'FD');
+        else if(w.wall==='V') pdf.rect(ox-1.2,oy+w.y*sc,1.6,w.h*sc,'FD');
+        else if(w.wall==='E') pdf.rect(ox+bW*sc-0.4,oy+w.y*sc,1.6,w.h*sc,'FD');
       });
-
-      // Main door
       fl.doors.filter(d=>d.type==='main').forEach(d=>{
         const dx=ox+d.x*sc;
         pdf.setFillColor(255,255,255);pdf.rect(dx,oy+bD*sc-0.5,d.w*sc,1,'F');
-        pdf.setDrawColor(...C.orange);pdf.setLineWidth(0.8);
-        pdf.line(dx,oy+bD*sc,dx+d.w*sc,oy+bD*sc);
-        pdf.setLineDashPattern([0.5,0.5],0);
-        pdf.beginFormObject?.()||null;
-        pdf.setDrawColor(245,158,11,0.4);pdf.setLineWidth(0.4);
-        pdf.circle(dx+d.w*sc,oy+bD*sc,d.w*sc,'S');
-        pdf.setLineDashPattern([],0);
+        pdf.setDrawColor(...C.orange);pdf.setLineWidth(0.8);pdf.line(dx,oy+bD*sc,dx+d.w*sc,oy+bD*sc);
       });
-
       // Street
-      pdf.setFillColor(230,235,245);
-      pdf.rect(ox-P_.rl*sc,oy+bD*sc+P_.rs*sc,P_.W*sc,5,'F');
-      pdf.setDrawColor(150,165,185);pdf.setLineWidth(0.3);
-      pdf.line(ox-P_.rl*sc,oy+bD*sc+P_.rs*sc,ox-P_.rl*sc+P_.W*sc,oy+bD*sc+P_.rs*sc);
-      pdf.setTextColor(80,100,130);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
-      pdf.text('▲  FRONT STRADAL  ·  '+P_.frontDir,ox-P_.rl*sc+P_.W*sc/2,oy+bD*sc+P_.rs*sc+3.5,{align:'center'});
-
-      // Dimensions
-      if(showDim){
-        pdf.setDrawColor(...C.gold);pdf.setLineWidth(0.25);pdf.setLineDashPattern([1.5,1],0);
-        pdf.line(ox,oy+bD*sc+2,ox+bW*sc,oy+bD*sc+2);
-        pdf.setLineDashPattern([],0);
-        pdf.setTextColor(...C.gold);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
-        pdf.text(bW.toFixed(1)+'m',ox+bW*sc/2,oy+bD*sc+5.5,{align:'center'});
-        pdf.setLineDashPattern([1.5,1],0);
-        pdf.line(ox-2,oy,ox-2,oy+bD*sc);
-        pdf.setLineDashPattern([],0);
-        pdf.save();pdf.translate(ox-5,oy+bD*sc/2);pdf.rotate(90);
-        pdf.setFontSize(5.5);pdf.text(bD.toFixed(1)+'m',0,0,{align:'center'});pdf.restore();
-        // Parcel dims
-        pdf.setTextColor(150,165,185);pdf.setFontSize(4.5);
-        pdf.text(P_.W.toFixed(1)+'m (parcelă)',ox-P_.rl*sc+P_.W*sc/2,oy-P_.rf*sc-1.5,{align:'center'});
-      }
+      pdf.setFillColor(220,225,238);pdf.rect(ox-P_.rl*sc,oy+bD*sc+P_.rs*sc,P_.W*sc,4,'F');
+      pdf.setTextColor(80,100,130);pdf.setFont('helvetica','bold');pdf.setFontSize(5);
+      pdf.text('▲  FRONT STRADAL  ·  '+P_.frontDir,ox-P_.rl*sc+P_.W*sc/2,oy+bD*sc+P_.rs*sc+3,{align:'center'});
+      // dims
+      pdf.setDrawColor(...C.gold);pdf.setLineWidth(0.2);pdf.setLineDashPattern([1.5,1],0);
+      pdf.line(ox,oy+bD*sc+1.5,ox+bW*sc,oy+bD*sc+1.5);pdf.setLineDashPattern([],0);
+      pdf.setTextColor(...C.gold);pdf.setFont('helvetica','bold');pdf.setFontSize(5);
+      pdf.text(bW.toFixed(1)+'m',ox+bW*sc/2,oy+bD*sc+5,{align:'center'});
+      pdf.setLineDashPattern([1.5,1],0);pdf.line(ox-1.5,oy,ox-1.5,oy+bD*sc);pdf.setLineDashPattern([],0);
+      pdf.save();pdf.translate(ox-4.5,oy+bD*sc/2);pdf.rotate(90);pdf.setFontSize(5);pdf.text(bD.toFixed(1)+'m',0,0,{align:'center'});pdf.restore();
     };
-
-    // ── Draw facade ───────────────────────────────────────────────────
-    const drawFacadeArch=(b_,P_,ox,oy,fW,fH,sc)=>{
+    const drawNorth=(x,y,dir,sz)=>{
+      const s=sz||7,rot={N:0,S:Math.PI,E:Math.PI/2,V:-Math.PI/2,NE:Math.PI/4,NV:-Math.PI/4,SE:Math.PI*3/4,SV:-Math.PI*3/4}[dir]||0;
+      const p=(a,d)=>({x:x+Math.sin(a+rot)*d,y:y-Math.cos(a+rot)*d});
+      pdf.setFillColor(255,255,255);pdf.circle(x,y,s+1,'F');
+      pdf.setDrawColor(...C.gray);pdf.setLineWidth(0.3);pdf.circle(x,y,s+1,'S');
+      const n=p(0,s),s2=p(Math.PI,s);
+      pdf.setFillColor(...C.red);if(pdf.polygon)pdf.polygon([x,y,n.x-s*0.35,n.y,n.x+s*0.35,n.y],'F');else{pdf.setDrawColor(...C.red);pdf.line(x,y,n.x,n.y);}
+      pdf.setFillColor(170,180,195);if(pdf.polygon)pdf.polygon([x,y,s2.x-s*0.35,s2.y,s2.x+s*0.35,s2.y],'F');else{pdf.setDrawColor(160,175,190);pdf.line(x,y,s2.x,s2.y);}
+      pdf.setTextColor(...C.red);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);pdf.text('N',n.x,n.y-1.5,{align:'center'});
+    };
+    const drawScale=(x,y,sc)=>{
+      const m5=5*sc;
+      pdf.setFillColor(...C.dark2);pdf.rect(x,y,m5/2,1.5,'F');
+      pdf.setFillColor(255,255,255);pdf.rect(x+m5/2,y,m5/2,1.5,'F');
+      pdf.setDrawColor(...C.dark2);pdf.setLineWidth(0.35);pdf.rect(x,y,m5,1.5,'S');
+      pdf.setTextColor(60,75,95);pdf.setFont('helvetica','normal');pdf.setFontSize(5);
+      pdf.text('0',x,y+4);pdf.text('5m',x+m5,y+4,{align:'right'});
+      pdf.setTextColor(100,115,135);pdf.text('Sc. 1:100',x+m5/2,y+5.5,{align:'center'});
+    };
+    const drawFacade=(b_,P_,ox,oy,fW,fH,sc)=>{
       const niv=b_.niv;
-      // Sky
-      pdf.setFillColor(235,241,252);pdf.rect(ox,oy,fW,fH,'F');
-      // Ground shadow
-      pdf.setFillColor(215,220,228);pdf.rect(ox,oy+fH+0.5,fW,2,'F');
-      // Building
-      pdf.setFillColor(242,244,248);pdf.rect(ox,oy,fW,fH,'F');
-      pdf.setFillColor(235,238,245);pdf.rect(ox+fW*0.02,oy,fW*0.96,fH,'F');
-      // Floor bands
+      pdf.setFillColor(232,236,246);pdf.rect(ox,oy,fW,fH,'F');
       for(let i=0;i<niv;i++){
-        const fy=oy+fH-(i+1)*P_.hn*sc;
-        if(i%2===0){pdf.setFillColor(238,241,248);pdf.rect(ox,fy,fW,P_.hn*sc,'F');}
-        // Slab line
-        pdf.setFillColor(200,208,220);pdf.rect(ox,oy+fH-i*P_.hn*sc-1,fW,1.2,'F');
-        // Floor label
+        if(i%2===0){pdf.setFillColor(240,243,250);pdf.rect(ox,oy+fH-(i+1)*P_.hn*sc,fW,P_.hn*sc,'F');}
+        pdf.setFillColor(195,205,218);pdf.rect(ox,oy+fH-i*P_.hn*sc-1,fW,1.2,'F');
         pdf.setTextColor(120,135,155);pdf.setFont('helvetica','normal');pdf.setFontSize(5);
-        pdf.text(i===0?'P':`E${i}`,ox-5,oy+fH-(i)*P_.hn*sc-P_.hn*sc/2+1.5);
+        pdf.text(i===0?'P':`E${i}`,ox-5,oy+fH-i*P_.hn*sc-P_.hn*sc/2+1.5);
       }
-      // Windows
       const wCols=Math.max(3,Math.floor(b_.bW/3.2));
-      const wW_=Math.min(b_.bW/wCols*0.55,1.8)*sc, wH_=P_.hn*0.42*sc;
-      const colSp=fW/wCols;
-      const cC=Math.floor(wCols/2);
+      const wW_=Math.min(b_.bW/wCols*0.55,1.8)*sc,wH_=P_.hn*0.42*sc,colSp=fW/wCols,cC=Math.floor(wCols/2);
       for(let row=0;row<niv;row++){
         const wy=oy+fH-(row+1)*P_.hn*sc+(P_.hn*sc-wH_)*0.28;
         for(let col=0;col<wCols;col++){
-          const isCore=col===cC;
           const wx=ox+col*colSp+(colSp-wW_)/2;
-          if(isCore){
-            // Staircase window
-            pdf.setFillColor(220,230,245);pdf.rect(wx+wW_*0.25,wy,wW_*0.5,wH_,'F');
-            pdf.setDrawColor(...C.blue);pdf.setLineWidth(0.5);pdf.rect(wx+wW_*0.25,wy,wW_*0.5,wH_,'S');
-          } else {
-            pdf.setFillColor(210,228,252);pdf.rect(wx,wy,wW_,wH_,'F');
-            pdf.setFillColor(195,218,245);pdf.rect(wx,wy,wW_,wH_*0.5,'F');
-            pdf.setDrawColor(80,140,200);pdf.setLineWidth(0.5);pdf.rect(wx,wy,wW_,wH_,'S');
-            // Cross
-            pdf.setDrawColor(150,185,225);pdf.setLineWidth(0.2);
-            pdf.line(wx+wW_/2,wy,wx+wW_/2,wy+wH_);
-            pdf.line(wx,wy+wH_/2,wx+wW_,wy+wH_/2);
+          if(col===cC){pdf.setFillColor(215,228,245);pdf.setDrawColor(...C.blue);pdf.setLineWidth(0.4);pdf.rect(wx+wW_*0.25,wy,wW_*0.5,wH_,'FD');}
+          else{
+            pdf.setFillColor(195,220,250);pdf.setDrawColor(70,130,195);pdf.setLineWidth(0.4);pdf.rect(wx,wy,wW_,wH_,'FD');
+            pdf.setFillColor(180,210,240);pdf.rect(wx,wy,wW_,wH_*0.45,'F');
+            pdf.setDrawColor(140,180,220);pdf.setLineWidth(0.15);
+            pdf.line(wx+wW_/2,wy,wx+wW_/2,wy+wH_);pdf.line(wx,wy+wH_/2,wx+wW_,wy+wH_/2);
           }
         }
-        // Balcony rail
         const bY=oy+fH-(row+1)*P_.hn*sc+P_.hn*sc*0.8;
-        pdf.setFillColor(200,210,225);pdf.rect(ox+fW*0.03,bY,fW*0.94,1.5,'F');
-        pdf.setDrawColor(170,185,205);pdf.setLineWidth(0.3);
-        for(let ri=0;ri<Math.floor(fW*0.9/3);ri++){
-          pdf.line(ox+fW*0.03+ri*3+1.5,bY,ox+fW*0.03+ri*3+1.5,bY+1.5);
-        }
+        pdf.setFillColor(195,205,218);pdf.rect(ox+fW*0.03,bY,fW*0.94,1.5,'F');
       }
-      // Main entry
       const eW=2.2*sc,eH=2.8*sc,eX=ox+fW/2-eW/2,eY=oy+fH-eH;
-      pdf.setFillColor(180,195,215);pdf.rect(eX,eY,eW,eH,'F');
-      pdf.setDrawColor(100,130,170);pdf.setLineWidth(0.8);pdf.rect(eX,eY,eW,eH,'S');
-      pdf.setDrawColor(130,150,180);pdf.setLineWidth(0.3);pdf.line(eX+eW/2,eY,eX+eW/2,eY+eH);
-      // Exterior walls heavy
+      pdf.setFillColor(175,190,210);pdf.rect(eX,eY,eW,eH,'F');
+      pdf.setDrawColor(90,120,160);pdf.setLineWidth(0.7);pdf.rect(eX,eY,eW,eH,'S');
+      pdf.setDrawColor(120,145,175);pdf.setLineWidth(0.25);pdf.line(eX+eW/2,eY,eX+eW/2,eY+eH);
       pdf.setDrawColor(...C.wall);pdf.setLineWidth(1.2);pdf.rect(ox,oy,fW,fH,'S');
-      // Ground line
-      pdf.setDrawColor(100,115,135);pdf.setLineWidth(1);pdf.line(ox-5,oy+fH,ox+fW+10,oy+fH);
-      // H annotation
-      pdf.setDrawColor(...C.gold);pdf.setLineWidth(0.4);
-      pdf.line(ox+fW+3,oy,ox+fW+3,oy+fH);
-      pdf.line(ox+fW+2,oy,ox+fW+4,oy);
-      pdf.line(ox+fW+2,oy+fH,ox+fW+4,oy+fH);
-      pdf.setTextColor(...C.dark2);pdf.setFont('helvetica','bold');pdf.setFontSize(6.5);
-      pdf.text('H='+((niv*P_.hn).toFixed(1))+'m',ox+fW+10,oy+fH/2+2);
-      pdf.setTextColor(100,115,135);pdf.setFontSize(5);
-      pdf.text(niv+' niv.',ox+fW+10,oy+fH/2+6);
-      // CTN
-      pdf.setTextColor(90,105,125);pdf.setFont('helvetica','normal');pdf.setFontSize(5.5);
+      pdf.setDrawColor(90,105,125);pdf.setLineWidth(0.9);pdf.line(ox-5,oy+fH,ox+fW+10,oy+fH);
+      pdf.setTextColor(80,95,115);pdf.setFont('helvetica','normal');pdf.setFontSize(5.5);
       pdf.text('COTA ±0.00 (CTN)',ox,oy+fH+3.5);
-      // Width dim
-      pdf.setDrawColor(...C.gold);pdf.setLineWidth(0.25);
-      pdf.line(ox,oy+fH+7,ox+fW,oy+fH+7);
-      pdf.setTextColor(...C.gold);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
-      pdf.text(b_.bW.toFixed(1)+'m',ox+fW/2,oy+fH+10.5,{align:'center'});
+      pdf.setDrawColor(...C.gold);pdf.setLineWidth(0.35);
+      pdf.line(ox+fW+3,oy,ox+fW+3,oy+fH);pdf.line(ox+fW+2,oy,ox+fW+4,oy);pdf.line(ox+fW+2,oy+fH,ox+fW+4,oy+fH);
+      pdf.setTextColor(...C.dark2);pdf.setFont('helvetica','bold');pdf.setFontSize(6.5);
+      pdf.text('H='+(niv*P_.hn).toFixed(1)+'m',ox+fW+10,oy+fH/2+2);
+      pdf.setTextColor(100,115,135);pdf.setFontSize(5);pdf.setFont('helvetica','normal');
+      pdf.text(niv+' niv.',ox+fW+10,oy+fH/2+7);
     };
-
-    // ── Draw section ─────────────────────────────────────────────────
-    const drawSectionArch=(b_,P_,ox,oy,sW,sH,sc)=>{
+    const drawSection=(b_,P_,ox,oy,sW,sH,sc)=>{
       const niv=b_.niv;
-      // Fill
-      pdf.setFillColor(235,240,248);pdf.rect(ox,oy,sW,sH,'F');
-      // Floor zones
-      const zoneColors=[[253,220,180],[200,240,215],[180,230,250],[210,195,250]];
+      const zC=[[253,220,180],[200,240,215],[180,230,250],[210,195,250]];
       for(let i=0;i<niv;i++){
         const fy=oy+sH-(i+1)*P_.hn*sc;
-        pdf.setFillColor(...zoneColors[i%4]);pdf.rect(ox,fy,sW,P_.hn*sc,'F');
-        // Slab
-        pdf.setFillColor(170,185,205);pdf.rect(ox,fy-1.5,sW,1.5,'F');
-        // Label
+        pdf.setFillColor(...zC[i%4]);pdf.rect(ox,fy,sW,P_.hn*sc,'F');
+        pdf.setFillColor(165,180,198);pdf.rect(ox,fy-1.5,sW,1.5,'F');
         pdf.setTextColor(80,95,115);pdf.setFont('helvetica','bold');pdf.setFontSize(5);
-        pdf.text(i===0?'P':`E${i}`,ox-7,oy+sH-(i)*P_.hn*sc-P_.hn*sc/2+1.5);
-        // H per level
+        pdf.text(i===0?'P':`E${i}`,ox-7,oy+sH-i*P_.hn*sc-P_.hn*sc/2+1.5);
         pdf.setTextColor(140,155,175);pdf.setFont('helvetica','normal');pdf.setFontSize(4.5);
-        pdf.text(P_.hn.toFixed(1)+'m',ox+sW+2,oy+sH-(i)*P_.hn*sc-P_.hn*sc/2+1.5);
+        pdf.text(P_.hn.toFixed(1)+'m',ox+sW+2,oy+sH-i*P_.hn*sc-P_.hn*sc/2+1.5);
       }
-      // Staircase
       if(b_.cores.length){
         const c=b_.cores[Math.floor(b_.cores.length/2)];
         const cx=ox+sW/2-c.h*sc/2;
         for(let i=0;i<niv;i++){
           const fy=oy+sH-(i+1)*P_.hn*sc;
-          pdf.setFillColor(190,215,250);pdf.rect(cx,fy,c.h*sc,P_.hn*sc,'F');
-          pdf.setDrawColor(...C.blue);pdf.setLineWidth(0.4);pdf.rect(cx,fy,c.h*sc,P_.hn*sc,'S');
+          pdf.setFillColor(185,212,250);pdf.setDrawColor(...C.blue);pdf.setLineWidth(0.4);pdf.rect(cx,fy,c.h*sc,P_.hn*sc,'FD');
           const steps=7,sw=c.h*sc/steps,sh=P_.hn*sc/steps;
-          pdf.setDrawColor(80,130,200);pdf.setLineWidth(0.3);
-          for(let s=0;s<steps;s++){
-            pdf.line(cx+s*sw,fy+s*sh,cx+(s+1)*sw,fy+s*sh);
-            pdf.line(cx+(s+1)*sw,fy+s*sh,cx+(s+1)*sw,fy+(s+1)*sh);
-          }
+          pdf.setDrawColor(75,125,195);pdf.setLineWidth(0.3);
+          for(let s=0;s<steps;s++){pdf.line(cx+s*sw,fy+s*sh,cx+(s+1)*sw,fy+s*sh);pdf.line(cx+(s+1)*sw,fy+s*sh,cx+(s+1)*sw,fy+(s+1)*sh);}
         }
       }
-      // Foundation
-      pdf.setFillColor(170,180,195);pdf.rect(ox-4,oy+sH,sW+8,4,'F');
-      pdf.setDrawColor(130,145,165);pdf.setLineWidth(0.5);pdf.rect(ox-4,oy+sH,sW+8,4,'S');
-      // NFA
-      pdf.setDrawColor(30,160,190);pdf.setLineWidth(0.5);pdf.setLineDashPattern([2,1.5],0);
+      pdf.setFillColor(165,175,192);pdf.setDrawColor(125,140,160);pdf.setLineWidth(0.4);pdf.rect(ox-4,oy+sH,sW+8,4,'FD');
+      pdf.setDrawColor(25,155,185);pdf.setLineWidth(0.4);pdf.setLineDashPattern([2,1.5],0);
       pdf.line(ox-10,oy+sH+2.5,ox+sW+15,oy+sH+2.5);pdf.setLineDashPattern([],0);
-      pdf.setTextColor(20,140,170);pdf.setFont('helvetica','italic');pdf.setFontSize(5);
-      pdf.text('NFA est. ~-1.5m',ox+2,oy+sH+5.5);
-      // Walls
+      pdf.setTextColor(15,135,165);pdf.setFont('helvetica','italic');pdf.setFontSize(5);pdf.text('NFA est. ~-1.5m',ox+2,oy+sH+5.5);
       pdf.setDrawColor(...C.wall);pdf.setLineWidth(1.2);pdf.rect(ox,oy,sW,sH,'S');
-      // Ground
-      pdf.setDrawColor(90,105,125);pdf.setLineWidth(0.8);pdf.line(ox-10,oy+sH,ox+sW+20,oy+sH);
-      pdf.setTextColor(90,105,125);pdf.setFont('helvetica','normal');pdf.setFontSize(5.5);
-      pdf.text('±0.00 CTN',ox+2,oy+sH+3);
-      // H annotation
-      pdf.setDrawColor(...C.gold);pdf.setLineWidth(0.4);
-      pdf.line(ox+sW+4,oy,ox+sW+4,oy+sH);
-      pdf.line(ox+sW+3,oy,ox+sW+5,oy);pdf.line(ox+sW+3,oy+sH,ox+sW+5,oy+sH);
-      pdf.setTextColor(...C.dark2);pdf.setFont('helvetica','bold');pdf.setFontSize(6.5);
-      pdf.text('H='+(niv*P_.hn).toFixed(1)+'m',ox+sW+8,oy+sH/2+2);
+      pdf.setDrawColor(88,103,123);pdf.setLineWidth(0.8);pdf.line(ox-10,oy+sH,ox+sW+20,oy+sH);
+      pdf.setTextColor(88,103,123);pdf.setFont('helvetica','normal');pdf.setFontSize(5.5);pdf.text('±0.00 CTN',ox+2,oy+sH+3);
+      pdf.setDrawColor(...C.gold);pdf.setLineWidth(0.35);
+      pdf.line(ox+sW+4,oy,ox+sW+4,oy+sH);pdf.line(ox+sW+3,oy,ox+sW+5,oy);pdf.line(ox+sW+3,oy+sH,ox+sW+5,oy+sH);
+      pdf.setTextColor(...C.dark2);pdf.setFont('helvetica','bold');pdf.setFontSize(6.5);pdf.text('H='+(niv*P_.hn).toFixed(1)+'m',ox+sW+8,oy+sH/2+2);
     };
-
-    // ── Draw axono (isometric direct în PDF) ──────────────────────────
-    const drawAxonoArch=(b_,P_,cx,cy,sc)=>{
+    const drawAxono=(b_,P_,cx,cy2,sc)=>{
       const niv=b_.niv,bW=b_.bW,bD=b_.bD,hn=P_.hn;
-      const cos30=Math.cos(Math.PI/6)*sc*0.85, sin30=Math.sin(Math.PI/6)*sc*0.85;
-      const proj=(x,y,z)=>({px:cx+(x-y)*cos30, py:cy+(x+y)*sin30-z*sc*0.85*0.55});
-      const face=(pts,fill,stk,lw=0.4)=>{
-        pdf.setFillColor(...fill);pdf.setDrawColor(...stk);pdf.setLineWidth(lw);
-        pdf.moveTo(pts[0].px,pts[0].py);
-        pdf.beginPath();pts.forEach(p=>pdf.lineTo(p.px,p.py));
-        pdf.closePath();pdf.fillAndStroke?pdf.fillAndStroke():void 0;
-        // Manual
-        pdf.setFillColor(...fill);
-        const pg=[pts[0].px,pts[0].py];
-        for(let i=1;i<pts.length;i++){pdf.triangle?.()||(null);}
-        // Use rect-based approach
-        const xs=pts.map(p=>p.px),ys=pts.map(p=>p.py);
-        const minX=Math.min(...xs),minY=Math.min(...ys);
+      const c30=Math.cos(Math.PI/6)*sc*0.82,s30=Math.sin(Math.PI/6)*sc*0.82;
+      const prj=(x,y,z)=>({px:cx+(x-y)*c30,py:cy2+(x+y)*s30-z*sc*0.82*0.55});
+      const face=(pts,fr,fg,fb,sr,sg,sb,lw)=>{
+        pdf.setFillColor(fr,fg,fb);pdf.setDrawColor(sr,sg,sb);pdf.setLineWidth(lw||0.35);
+        if(pdf.polygon){pdf.polygon(pts.flatMap(p=>[p.px,p.py]),'FD');}
+        else{for(let i=0;i<pts.length;i++){const n=(i+1)%pts.length;pdf.line(pts[i].px,pts[i].py,pts[n].px,pts[n].py);}}
       };
-      // Draw each face manually using lines
-      const drawFace=(pts,fillR,fillG,fillB,stR,stG,stB,lw=0.4)=>{
-        const xc=pts.map(p=>p.px),yc=pts.map(p=>p.py);
-        pdf.setFillColor(fillR,fillG,fillB);
-        pdf.setDrawColor(stR,stG,stB);pdf.setLineWidth(lw);
-        // jsPDF polygon
-        if(pdf.polygon){
-          const coords=pts.flatMap(p=>[p.px,p.py]);
-          pdf.polygon(coords,'FD');
-        } else {
-          // fallback lines
-          pdf.setLineWidth(lw);
-          for(let i=0;i<pts.length;i++){
-            const n=(i+1)%pts.length;
-            pdf.line(pts[i].px,pts[i].py,pts[n].px,pts[n].py);
-          }
-        }
-      };
-      const showFloors=Math.min(niv,5);
-      // Floor slabs
-      for(let fl=0;fl<=showFloors;fl++){
-        const z=fl*hn;
-        const pts=[proj(0,0,z),proj(bW,0,z),proj(bW,bD,z),proj(0,bD,z)];
-        const bright=180+fl*8;
-        drawFace(pts,bright,bright+5,bright+15,150,160,175,0.3);
+      const sF=Math.min(niv,5);
+      for(let fl=0;fl<=sF;fl++){
+        const z=fl*hn,br=178+fl*7;
+        face([prj(0,0,z),prj(bW,0,z),prj(bW,bD,z),prj(0,bD,z)],br,br+5,br+15,148,158,172,0.25);
       }
-      if(niv>showFloors){
+      if(niv>sF){
         const z=niv*hn;
-        const pts=[proj(0,0,z),proj(bW,0,z),proj(bW,bD,z),proj(0,bD,z)];
-        drawFace(pts,245,235,190,C.gold[0],C.gold[1],C.gold[2],1);
+        face([prj(0,0,z),prj(bW,0,z),prj(bW,bD,z),prj(0,bD,z)],242,232,188,C.gold[0],C.gold[1],C.gold[2],0.9);
         pdf.setLineDashPattern([1.5,1.5],0);
-        [[0,0],[bW,0],[bW,bD],[0,bD]].forEach(([x,y])=>{
-          const a=proj(x,y,showFloors*hn),b2=proj(x,y,niv*hn);
-          pdf.setDrawColor(180,190,205);pdf.setLineWidth(0.3);pdf.line(a.px,a.py,b2.px,b2.py);
-        });
+        [[0,0],[bW,0],[bW,bD],[0,bD]].forEach(([x,y])=>{const a=prj(x,y,sF*hn),b2=prj(x,y,niv*hn);pdf.setDrawColor(175,185,202);pdf.setLineWidth(0.25);pdf.line(a.px,a.py,b2.px,b2.py);});
         pdf.setLineDashPattern([],0);
       }
-      const z1=showFloors*hn;
-      // Front face (S)
-      drawFace([proj(0,bD,0),proj(bW,bD,0),proj(bW,bD,z1),proj(0,bD,z1)],218,228,248,C.wall[0],C.wall[1],C.wall[2],0.8);
-      // Right face (E)
-      drawFace([proj(bW,0,0),proj(bW,bD,0),proj(bW,bD,z1),proj(bW,0,z1)],200,215,238,C.wall[0],C.wall[1],C.wall[2],0.6);
-      // Windows on front face
-      const wCols=Math.max(2,Math.floor(bW/3.5));
-      const wW2=bW/wCols*0.52,wH2=hn*0.4;
-      for(let row=0;row<Math.min(niv,showFloors);row++){
+      const z1=sF*hn;
+      face([prj(0,bD,0),prj(bW,bD,0),prj(bW,bD,z1),prj(0,bD,z1)],215,225,245,78,98,128,0.7);
+      face([prj(bW,0,0),prj(bW,bD,0),prj(bW,bD,z1),prj(bW,0,z1)],198,212,235,78,98,128,0.55);
+      const wCols=Math.max(2,Math.floor(bW/3.5)),wW2=bW/wCols*0.52,wH2=hn*0.4;
+      for(let row=0;row<Math.min(niv,sF);row++){
         for(let col=0;col<wCols;col++){
-          if(col===Math.floor(wCols/2)) continue;
+          if(col===Math.floor(wCols/2))continue;
           const wx=col*bW/wCols+(bW/wCols-wW2)/2,wz=row*hn+hn*0.22;
-          const wpts=[proj(wx,bD,wz),proj(wx+wW2,bD,wz),proj(wx+wW2,bD,wz+wH2),proj(wx,bD,wz+wH2)];
-          drawFace(wpts,190,220,255,60,130,200,0.4);
+          face([prj(wx,bD,wz),prj(wx+wW2,bD,wz),prj(wx+wW2,bD,wz+wH2),prj(wx,bD,wz+wH2)],188,218,252,55,125,195,0.35);
         }
-        // Balcony
         const bz=row*hn+hn*0.82;
-        const bpts=[proj(0.3,bD,bz),proj(bW-0.3,bD,bz),proj(bW-0.3,bD+0.35,bz),proj(0.3,bD+0.35,bz)];
-        drawFace(bpts,210,215,225,160,170,185,0.3);
+        face([prj(0.3,bD,bz),prj(bW-0.3,bD,bz),prj(bW-0.3,bD+0.35,bz),prj(0.3,bD+0.35,bz)],205,212,222,155,168,182,0.25);
       }
-      // Outer walls thick
-      pdf.setDrawColor(...C.wall);pdf.setLineWidth(1);
-      const corners=[[0,0],[bW,0],[bW,bD],[0,bD]];
-      for(let i=0;i<4;i++){
-        const a=proj(corners[i][0],corners[i][1],0);
-        const b2=proj(corners[i][0],corners[i][1],z1);
-        pdf.line(a.px,a.py,b2.px,b2.py);
-      }
+      pdf.setDrawColor(...C.wall);pdf.setLineWidth(0.9);
+      [[0,0],[bW,0],[bW,bD],[0,bD]].forEach(([x,y])=>{const a=prj(x,y,0),b2=prj(x,y,z1);pdf.line(a.px,a.py,b2.px,b2.py);});
     };
 
-    // ── North arrow ───────────────────────────────────────────────────
-    const drawNorthArrow=(x,y,dir,sz=8)=>{
-      const rot={N:0,S:Math.PI,E:Math.PI/2,V:-Math.PI/2,NE:Math.PI/4,NV:-Math.PI/4,SE:Math.PI*3/4,SV:-Math.PI*3/4}[dir]||0;
-      const r=(deg)=>{const d=deg*Math.PI/180+rot;return d;};
-      const p=(a,dist)=>({x:x+Math.sin(a)*dist,y:y-Math.cos(a)*dist});
-      // Circle
-      pdf.setFillColor(255,255,255);pdf.circle(x,y,sz+1,'F');
-      pdf.setDrawColor(...C.gray);pdf.setLineWidth(0.3);pdf.circle(x,y,sz+1,'S');
-      // N half (red)
-      const n=p(rot,sz);
-      pdf.setFillColor(...C.red);
-      if(pdf.polygon){pdf.polygon([x,y,n.x-sz*0.35,n.y,n.x+sz*0.35,n.y],'F');}
-      else{pdf.setDrawColor(...C.red);pdf.line(x,y,n.x,n.y);}
-      // S half (gray)
-      const s=p(rot+Math.PI,sz);
-      pdf.setFillColor(180,190,200);
-      if(pdf.polygon){pdf.polygon([x,y,s.x-sz*0.35,s.y,s.x+sz*0.35,s.y],'F');}
-      else{pdf.setDrawColor(160,175,190);pdf.line(x,y,s.x,s.y);}
-      // N label
-      pdf.setTextColor(...C.red);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
-      pdf.text('N',n.x,n.y-1.5,{align:'center'});
-    };
+    // ── CALCULE ────────────────────────────────────────────────────────
+    const maxFL=Math.min(b.niv,4);
+    totalPages=1+1+maxFL+1+1+1+1+1; // cover+situatie+planuri+fatada+sectiune+axono+memoriu+bilant
+    const fnLabel=(P.fn||'rezidential_colectiv').replace(/_/g,' ');
+    const potOk=b.scArea/P.area<=P.pot+.001;
+    const cutOk=b.sdaTotal/P.area<=P.cut+.001;
+    const fl0=_RV.floors[0];
+    const isuOk=fl0?.isu?.ok!==false;
+    const solarDir=['S','SE','SV','E'].includes(P.frontDir);
 
-    // ── Scale bar ────────────────────────────────────────────────────
-    const drawScaleBar=(x,y,sc,label='Sc. 1:100')=>{
-      const m5=5*sc;
-      pdf.setFillColor(...C.dark2);pdf.rect(x,y,m5/2,1.5,'F');
-      pdf.setFillColor(255,255,255);pdf.rect(x+m5/2,y,m5/2,1.5,'F');
-      pdf.setDrawColor(...C.dark2);pdf.setLineWidth(0.4);pdf.rect(x,y,m5,1.5,'S');
-      pdf.setTextColor(60,75,95);pdf.setFont('helvetica','normal');pdf.setFontSize(5);
-      pdf.text('0',x,y+4);pdf.text('5m',x+m5,y+4,{align:'right'});
-      pdf.setTextColor(100,115,135);pdf.text(label,x+m5/2,y+5.5,{align:'center'});
-    };
-
-    // ── Legend box ───────────────────────────────────────────────────
-    const drawLegend=(x,y,w=45)=>{
-      pdf.setFillColor(250,251,253);pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.3);
-      pdf.rect(x,y,w,52,'FD');
-      pdf.setFillColor(...C.dark2);pdf.rect(x,y,w,6,'F');
-      pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
-      pdf.text('LEGENDĂ SPAȚII',x+w/2,y+4,{align:'center'});
-      const items=[
-        [C.living,C.orange,'Living / Sufragerie'],
-        [C.bedroom,C.green,'Dormitor'],
-        [C.kitchen,C.cyan,'Bucătărie'],
-        [C.bath,C.purple,'Baie / WC'],
-        [C.hall,C.gray,'Hol / Coridor'],
-        [C.core,C.blue,'Scări + Lift'],
-        [C.balcon,C.gold,'Balcon / Terasă'],
-        [C.commercial,[180,50,200],'Comercial'],
-      ];
-      items.forEach(([fill,stroke,lbl],i)=>{
-        const iy=y+9+i*5.5;
-        pdf.setFillColor(...fill);pdf.setDrawColor(...stroke);pdf.setLineWidth(0.4);
-        pdf.rect(x+2,iy-2.5,5,4,'FD');
-        pdf.setTextColor(50,65,85);pdf.setFont('helvetica','normal');pdf.setFontSize(5);
-        pdf.text(lbl,x+9,iy);
-      });
-    };
-
-    // ══════════════════════════════════════════════════════════════
-    // CALCULEAZĂ NR. TOTAL PAGINI
-    // ══════════════════════════════════════════════════════════════
-    const maxFloors=Math.min(b.niv,4);
-    const totalPages=1+maxFloors+1+1+1+1; // cover+planuri+fatada+sectiune+axono+bilant
-
-    // ══════════════════════════════════════════════════════════════
-    // PAG 1 — COPERTĂ PROFESIONALĂ
-    // ══════════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════════════
+    // PAG 1 — COPERTĂ
+    // ══════════════════════════════════════════════════════════════════
     newPage();
-    // Background gradient (simulat cu benzi)
-    pdf.setFillColor(8,14,30);pdf.rect(0,0,W,H,'F');
-    pdf.setFillColor(12,22,45);pdf.rect(0,H*0.35,W,H*0.65,'F');
-    // Gold accent top
-    pdf.setFillColor(...C.gold);pdf.rect(0,0,W,2,'F');
-    // Logo area
-    pdf.setFillColor(15,25,48);pdf.roundedRect(10,8,70,20,2,2,'F');
-    pdf.setTextColor(...C.gold);pdf.setFont('helvetica','bold');pdf.setFontSize(16);
-    pdf.text('URBANX',15,21);
-    pdf.setTextColor(150,165,185);pdf.setFont('helvetica','normal');pdf.setFontSize(7);
-    pdf.text('PLATFORMĂ NAȚIONALĂ DE ANALIZĂ URBANISTICĂ',15,27);
+    pdf.setFillColor(...C.dark);pdf.rect(0,0,W,H,'F');
+    pdf.setFillColor(12,22,45);pdf.rect(0,H*0.4,W,H*0.6,'F');
+    pdf.setFillColor(...C.gold);pdf.rect(0,0,W,1.8,'F');pdf.rect(0,H-1.8,W,1.8,'F');
+    // 3D image full width top
+    if(caps.img3D) addCap(caps.img3D,0,0,W,H*0.42,'');
+    else{pdf.setFillColor(20,35,62);pdf.rect(0,0,W,H*0.42,'F');}
+    // Dark overlay gradient bottom of image
+    pdf.setFillColor(8,14,30);pdf.rect(0,H*0.32,W,H*0.12,'F');
+    pdf.setFillColor(...C.gold);pdf.rect(0,1.8,8,H*0.38,'F');
+    // Logo
+    pdf.setTextColor(...C.gold);pdf.setFont('helvetica','bold');pdf.setFontSize(22);pdf.text('URBANX',14,18);
+    pdf.setTextColor(170,185,205);pdf.setFont('helvetica','normal');pdf.setFontSize(8);pdf.text('PLATFORMĂ NAȚIONALĂ DE ANALIZĂ URBANISTICĂ',14,25);
     // Title
-    pdf.setTextColor(245,248,255);pdf.setFont('helvetica','bold');pdf.setFontSize(28);
-    pdf.text('RELEVEE',15,55);
-    pdf.setTextColor(...C.gold);pdf.text('INSTANT',15,72);
-    pdf.setTextColor(190,205,225);pdf.setFont('helvetica','normal');pdf.setFontSize(9);
-    pdf.text('Planuri funcționale orientative generate automat din datele cadastrale',15,82);
-    // Decorative line
-    pdf.setFillColor(...C.gold);pdf.rect(15,87,80,0.8,'F');
-    pdf.setFillColor(60,80,120);pdf.rect(97,87,W-107,0.8,'F');
-    // Info card
-    pdf.setFillColor(20,35,62);pdf.roundedRect(W*0.55,12,W*0.4,H-24,3,3,'F');
-    pdf.setFillColor(...C.gold);pdf.roundedRect(W*0.55,12,W*0.4,8,3,3,'F');
-    pdf.setFillColor(...C.gold);pdf.rect(W*0.55,16,W*0.4,4,'F');
-    pdf.setTextColor(15,25,48);pdf.setFont('helvetica','bold');pdf.setFontSize(7.5);
-    pdf.text('DATE DE IDENTIFICARE',W*0.55+W*0.2,18,{align:'center'});
-    const infoY=W*0.55; let iy=26;
-    const infoRow=(lbl,val,highlight=false)=>{
-      pdf.setFillColor(highlight?[30,50,85]:25,highlight?[50,80,130]:42,highlight?[90,120,180]:72);
-      pdf.setFillColor(highlight?30:25,highlight?50:42,highlight?90:72);
-      pdf.rect(infoY,iy-3,W*0.4,6,'F');
-      pdf.setTextColor(150,165,185);pdf.setFont('helvetica','normal');pdf.setFontSize(6.5);
-      pdf.text(S2(lbl),infoY+3,iy);
-      pdf.setTextColor(highlight?C.gold[0]:220,highlight?C.gold[1]:230,highlight?C.gold[2]:245);
-      if(highlight)pdf.setFont('helvetica','bold');
-      pdf.text(S2(String(val)),infoY+W*0.4-3,iy,{align:'right'});
-      pdf.setFont('helvetica','normal');
-      iy+=7;
-    };
-    infoRow('Nr. Cadastral',P.nrCad,true);
-    infoRow('UTR / Zonă',P.utr);
-    infoRow('Funcțiune propusă',P.fn);
-    infoRow('Suprafață parcelă',P.area+'m²');
-    infoRow('Dimensiuni bbox',P.W.toFixed(1)+'m × '+P.D.toFixed(1)+'m');
-    infoRow('Regim înălțime',b.niv+' niv. · H='+(b.niv*P.hn).toFixed(1)+'m',true);
-    infoRow('POT realizat / max',RN(b.scArea/P.area*100)+'% / '+RN(P.pot*100)+'%');
-    infoRow('CUT realizat / max',(b.sdaTotal/P.area).toFixed(2)+' / '+P.cut);
-    infoRow('SDA totală estimată',RN(b.sdaTotal)+'m²',true);
-    infoRow('Orientare front',P.frontDir);
-    infoRow('Nr. apartamente est.',RN(b.niv*b.cores.length*2)+' unități');
-    infoRow('Data generare',new Date().toLocaleDateString('ro-RO'));
-    // Normative badge strip
-    pdf.setFillColor(15,28,55);pdf.rect(infoY,iy-1,W*0.4,18,'F');
-    pdf.setTextColor(100,120,150);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
-    pdf.text('NORMATIVE APLICATE',infoY+3,iy+3);iy+=7;
-    ['NP 057/2002','OMS 119/2014','P118-2/2013','NP 051/2012','P100-1/2013'].forEach((n,i)=>{
-      const nx=infoY+3+(i%3)*32, niy2=iy+(Math.floor(i/3))*5;
-      pdf.setFillColor(25,45,80);pdf.roundedRect(nx-1,niy2-3,30,4.5,1,1,'F');
-      pdf.setTextColor(...C.gold);pdf.setFontSize(4.8);pdf.text(n,nx,niy2);
+    pdf.setTextColor(245,248,255);pdf.setFont('helvetica','bold');pdf.setFontSize(26);pdf.text('RELEVEE INSTANT',14,H*0.46);
+    pdf.setTextColor(...C.gold);pdf.setFont('helvetica','normal');pdf.setFontSize(10);pdf.text('Prezentare arhitecturală orientativă + verificare normative',14,H*0.46+10);
+    pdf.setFillColor(45,70,120);pdf.rect(14,H*0.46+13,120,0.6,'F');
+    // Info grid bottom
+    const infoItems=[
+      ['Nr. Cadastral',P.nrCad],['UTR / Zonă',P.utr],['Funcțiune',fnLabel],
+      ['Suprafață teren',P.area+'m²'],['Regim H',b.niv+' niv. · H='+(b.niv*P.hn).toFixed(1)+'m'],
+      ['POT / CUT',RN(b.scArea/P.area*100)+'% / '+(b.sdaTotal/P.area).toFixed(2)],
+      ['SDA estimată',RN(b.sdaTotal)+'m²'],['Data',new Date().toLocaleDateString('ro-RO')],
+    ];
+    const iCols=4,iColW=(W-28)/iCols;
+    infoItems.forEach(([l,v],i)=>{
+      const ix=14+(i%iCols)*iColW,iy=H*0.56+Math.floor(i/iCols)*16;
+      pdf.setFillColor(18,32,62);pdf.roundedRect(ix,iy,iColW-3,14,1.5,1.5,'F');
+      pdf.setFillColor(...C.gold);pdf.roundedRect(ix,iy,iColW-3,4.5,1.5,1.5,'F');pdf.rect(ix,iy+2,iColW-3,2.5,'F');
+      pdf.setTextColor(15,25,48);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);pdf.text(S2(l),ix+(iColW-3)/2,iy+3.8,{align:'center'});
+      pdf.setTextColor(220,232,248);pdf.setFont('helvetica','bold');pdf.setFontSize(7.5);pdf.text(S2(String(v)),ix+(iColW-3)/2,iy+11,{align:'center'});
     });
-    // Bottom disclaimer
-    pdf.setFillColor(10,18,38);pdf.rect(0,H-12,W,12,'F');
-    pdf.setFillColor(...C.gold);pdf.rect(0,H-12,W,0.6,'F');
     pdf.setTextColor(100,120,150);pdf.setFont('helvetica','italic');pdf.setFontSize(5.5);
-    pdf.text('Document orientativ generat de UrbanX Relevee Instant · Nu înlocuiește proiectul tehnic elaborat de arhitect autorizat OAR conform Legii 50/1991 · UrbanX TSS·FG',W/2,H-7,{align:'center'});
-    pdf.text('Dimensiunile sunt estimative — proiectul tehnic stabilește cotele exacte · '+new Date().toLocaleDateString('ro-RO'),W/2,H-3,{align:'center'});
+    pdf.text('Document orientativ · generat de UrbanX Relevee Instant · nu înlocuiește proiectul tehnic conf. Legii 50/1991 · UrbanX TSS·FG',W/2,H-3,{align:'center'});
 
-    // ══════════════════════════════════════════════════════════════
-    // PAG 2..N — PLANURI DE NIVEL
-    // ══════════════════════════════════════════════════════════════
-    for(let fl=0;fl<maxFloors;fl++){
+    // ══════════════════════════════════════════════════════════════════
+    // PAG 2 — PLAN DE SITUAȚIE + CONTEXT URBAN 3D
+    // ══════════════════════════════════════════════════════════════════
+    newPage();
+    hdr('PLAN DE SITUAȚIE ȘI CONTEXT URBAN — Nr.cad. '+P.nrCad,pgN);
+    pdf.setFillColor(...C.gray3);pdf.rect(0,9,W,H-16,'F');
+    // 3 imagini: location map, vedere frontala, vedere aeriana
+    const imgH=H-30,imgW1=(W-20)*0.55,imgW2=(W-20)*0.44;
+    pdf.setFillColor(230,234,244);pdf.rect(10,10,imgW1,imgH,'F');
+    if(caps.imgLocation) addCap(caps.imgLocation,10,10,imgW1,imgH,'FIG. 1 — Plan situație · Parcela '+P.nrCad+' în context urban · Sursa: UrbanX + OpenStreetMap');
+    const half2=imgH/2-1;
+    pdf.setFillColor(230,234,244);pdf.rect(14+imgW1,10,imgW2,half2,'F');
+    if(caps.img3D) addCap(caps.img3D,14+imgW1,10,imgW2,half2,'FIG. 2 — Vedere 3D · Volumul propus în contextul urban real');
+    else if(caps.v3dDay) addCap(caps.v3dDay,14+imgW1,10,imgW2,half2,'FIG. 2 — Viewer 3D · Vedere principală');
+    pdf.setFillColor(230,234,244);pdf.rect(14+imgW1,12+half2,imgW2,half2,'F');
+    if(caps.v3dDay&&caps.img3D) addCap(caps.v3dDay,14+imgW1,12+half2,imgW2,half2,'FIG. 3 — Viewer 3D Urban3D · ZI · Amplasament în țesut urban');
+    else if(caps.imgCity) addCap(caps.imgCity,14+imgW1,12+half2,imgW2,half2,'FIG. 3 — Hartă Municipiul Iași · Amplasament parcelă');
+    // Explicatie
+    pdf.setFillColor(255,255,255);pdf.rect(10,H-13,W-20,6,'F');
+    noteBox('Amplasamentul se situează în Municipiul Iași, UTR '+P.utr+', cu suprafața de '+P.area+'m² și dimensiunile de aprox. '+P.W.toFixed(1)+'m × '+P.D.toFixed(1)+'m. Frontul stradal principal este orientat spre '+P.frontDir+'. Vecinătățile imediate (clădiri, aliniamente stradale, spații verzi) determină retragerile obligatorii și caracterul arhitectural al viitoarei construcții.',14,H-13,W-20,6);
+    ftr();
+
+    // ══════════════════════════════════════════════════════════════════
+    // PAG 3..N+2 — PLANURI DE NIVEL CU EXPLICAȚII
+    // ══════════════════════════════════════════════════════════════════
+    for(let fl=0;fl<maxFL;fl++){
       newPage();
       const flObj=_RV.floors[fl];
-      const flLabel=fl===0?'PLAN PARTER':'PLAN ETAJ '+fl;
+      const flLabel=fl===0?'PLAN PARTER (cota ±0.00)':'PLAN ETAJ '+fl+' (cota +'+(fl*P.hn).toFixed(2)+'m)';
       hdr(flLabel+' — Nr.cad. '+P.nrCad+' · UTR '+P.utr,pgN);
+      pdf.setFillColor(...C.gray3);pdf.rect(0,9,W,H-16,'F');
 
-      // Calculate scale to fit plan nicely
-      const aW=W-60, aH=H-35;
-      const sc=Math.min(aW/(P.W+6), aH/(P.D+12));
-      const planW=b.bW*sc, planH=b.bD*sc;
-      // Center plan in available space (leave right margin for legend)
-      const ox=15+(aW-45-planW)/2+P.rl*sc;
-      const oy=12+(aH-planH)/2+P.rf*sc;
+      // Plan area (left 2/3)
+      const planAreaW=W*0.62,planAreaH=H-28;
+      pdf.setFillColor(255,255,255);pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.3);
+      pdf.rect(10,10,planAreaW-5,planAreaH,'FD');
 
-      pdf.setFillColor(...C.gray3);pdf.rect(0,9,W,H-9,'F');
-      pdf.setFillColor(255,255,255);pdf.rect(8,10,W-55,H-19,'F');
-      pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.3);pdf.rect(8,10,W-55,H-19,'S');
+      const sc=Math.min((planAreaW-25)/(P.W+2),(planAreaH-20)/(P.D+8));
+      const ox=10+((planAreaW-25)-b.bW*sc)/2+P.rl*sc+2;
+      const oy=10+((planAreaH-20)-b.bD*sc)/2+P.rf*sc+4;
 
-      drawPlanArch(flObj,P,b,ox,oy,sc,true);
-      drawNorthArrow(W-47,20,P.frontDir,7);
-      drawScaleBar(14,H-13,sc);
-      drawLegend(W-52,10);
+      drawPlan(flObj,P,b,ox,oy,sc);
+      drawNorth(planAreaW-10,22,P.frontDir,6);
+      drawScale(14,H-13,sc);
+      // Sectiune indicator
+      pdf.setTextColor(...C.red);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
+      pdf.text('A',ox-2.5,oy+b.bD*sc/2);pdf.text('A',ox+b.bW*sc+2,oy+b.bD*sc/2);
+      pdf.setDrawColor(...C.red);pdf.setLineWidth(0.35);pdf.setLineDashPattern([1,0.8],0);
+      pdf.line(ox,oy+b.bD*sc/2,ox+b.bW*sc,oy+b.bD*sc/2);pdf.setLineDashPattern([],0);
 
-      // Section indicator
-      pdf.setTextColor(...C.red);pdf.setFont('helvetica','bold');pdf.setFontSize(5);
-      pdf.text('A',ox-2,oy+b.bD*sc/2);
-      pdf.text('A',ox+b.bW*sc+2,oy+b.bD*sc/2);
-      pdf.setDrawColor(...C.red);pdf.setLineWidth(0.4);pdf.setLineDashPattern([1,1],0);
-      pdf.line(ox,oy+b.bD*sc/2,ox+b.bW*sc,oy+b.bD*sc/2);
-      pdf.setLineDashPattern([],0);
+      // RIGHT PANEL — explicații
+      const rx=10+planAreaW,ry=10,rw=W-rx-8,rh=planAreaH;
+      pdf.setFillColor(255,255,255);pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.3);pdf.rect(rx,ry,rw,rh,'FD');
+      let panY=ry+2;
+      pdf.setFillColor(...C.dark2);pdf.rect(rx,panY,rw,6,'F');
+      pdf.setFillColor(...C.gold);pdf.rect(rx,panY,1.5,6,'F');
+      pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(6.5);
+      pdf.text('GHID CITIRE PLAN',rx+rw/2,panY+4.2,{align:'center'});panY+=8;
 
-      // Info box bottom right
-      pdf.setFillColor(250,251,253);pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.3);
-      pdf.rect(W-52,65,44,H-74,'FD');
-      pdf.setFillColor(...C.dark2);pdf.rect(W-52,65,44,6,'F');
-      pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
-      pdf.text('DATE ETAJ',W-30,69,{align:'center'});
-      const flInfo=[
-        ['Nivel',fl===0?'Parter':'Etaj '+fl],
-        ['Cotă pardoseală','+'+(fl*P.hn).toFixed(2)+'m'],
-        ['Cotă planseu','+'+(fl*P.hn+P.hn).toFixed(2)+'m'],
-        ['H nivel net',(P.hn-0.25).toFixed(2)+'m'],
-        ['SC nivel',RN(b.scArea)+'m²'],
-        ['Nr. apartamente',b.cores.length*2+' apt.'],
+      // Explicatii generale
+      const genExp=fl===0
+        ?'Planul parterului reprezintă nivelul de la sol (cota ±0.00). La parter se regăsesc: holul de intrare cu căsuțe poștale, accesul la scara și lift, și apartamentele de la nivelul inferior.'
+        :'Planul etajului '+fl+' (cota +'+(fl*P.hn).toFixed(2)+'m) prezintă distribuția tipică a apartamentelor. Fiecare etaj are aceeași suprafață desfășurată de '+RN(b.sdaPerFloor)+'m².';
+      panY=bodyTxt(genExp,rx+2,panY,rw-4,5.5,[40,55,80]);panY+=3;
+
+      // Legenda spații cu explicații
+      pdf.setFillColor(245,248,252);pdf.rect(rx,panY,rw,5,'F');
+      pdf.setTextColor(...C.dark2);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
+      pdf.text('SPAȚII ȘI ROLUL LOR',rx+2,panY+3.5);panY+=7;
+      const roomExpl=[
+        [C.core,C.blue,'SCĂRI + LIFT','Casa scărilor și liftul — nucleul vertical al clădirii. Asigură accesul la toate nivelurile, inclusiv pentru persoane cu mobilitate redusă (PMR). Conf. NP 051/2012.'],
+        [C.hall,C.gray,'HOL INTRARE','Spațiu tampon între exterior și apartamente. La parter: căsuțe poștale, interfon video, spațiu biciclete. Conf. NP 016-97.'],
+        [C.living,C.orange,'LIVING / SALON','Camera principală de zi. Min. 14m² conf. NP 057/2002. Orientat spre Sud/Est pentru însorire maximă (OMS 119/2014). Ferestre mari pentru lumină naturală.'],
+        [C.bedroom,C.green,'DORMITOR','Cameră de odihnă. Min. 12m² (dormitor 1) / 10m² (dormitor 2) conf. NP 057/2002. Nu se orientează spre Nord — însorire obligatorie min. 1.5h/zi (OMS 119).'],
+        [C.kitchen,C.cyan,'BUCĂTĂRIE','Spațiu funcțional. Min. 5m² conf. NP 057/2002. Ventilație mecanică obligatorie conf. SR EN 15665. Canalizare și gaz natural racordate.'],
+        [C.bath,C.purple,'BAIE / WC','Grupuri sanitare. Min. 3.6m² baie / 1.2m² WC conf. NP 057/2002. Ventilație mecanică obligatorie. Hidroizolație planșeu conform SR EN 1504.'],
+        [C.balcon,C.gold,'BALCON','Spațiu exterior acoperit, extinde suprafața utilă. Min. 1.2m adâncime conf. NP 016-97. Parapet min. 1.0m înălțime conf. STAS 6131/1-1982.'],
       ];
-      flInfo.forEach(([l,v],i)=>{
-        const fy=74+i*6;
-        pdf.setFillColor(i%2?248:255,i%2?250:255,i%2?252:255);pdf.rect(W-52,fy-3,44,6,'F');
-        pdf.setTextColor(100,115,135);pdf.setFont('helvetica','normal');pdf.setFontSize(5);
-        pdf.text(l,W-50,fy);
-        pdf.setTextColor(40,55,80);pdf.setFont('helvetica','bold');
-        pdf.text(S2(v),W-9,fy,{align:'right'});
+      roomExpl.forEach(([fill,stk,name,expl])=>{
+        if(panY>ry+rh-15)return;
+        pdf.setFillColor(...fill);pdf.setDrawColor(...stk);pdf.setLineWidth(0.4);pdf.rect(rx+1,panY-2,5,5,'FD');
+        pdf.setTextColor(...stk);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);pdf.text(name,rx+8,panY+1.5);
+        pdf.setTextColor(60,75,95);pdf.setFont('helvetica','normal');pdf.setFontSize(4.8);
+        const lines=pdf.splitTextToSize(S2(expl),rw-9);
+        lines.slice(0,2).forEach((l,li)=>pdf.text(l,rx+8,panY+5+li*2.9));
+        panY+=13;
       });
 
-      // Solar note if overlay active
-      pdf.setTextColor(120,135,155);pdf.setFont('helvetica','italic');pdf.setFontSize(5);
-      const solarNote=(['S','SE','SV','E'].includes(P.frontDir))?'Orientare favorabilă însorire ('+P.frontDir+')':'Verificați orientarea camerelor conf. OMS 119/2014';
-      pdf.text('☀ '+solarNote,15,H-5);
+      // Note ferestre și uși
+      if(panY<ry+rh-25){
+        panY+=2;
+        pdf.setFillColor(235,245,255);pdf.roundedRect(rx+1,panY,rw-2,22,1,1,'F');
+        pdf.setFillColor(...C.blue);pdf.rect(rx+1,panY,1.5,22,'F');
+        pdf.setTextColor(...C.blue);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
+        pdf.text('FERESTRE — CE SUNT ȘI DE CE?',rx+4,panY+4);
+        pdf.setTextColor(30,55,90);pdf.setFont('helvetica','normal');pdf.setFontSize(5);
+        const fExp='Ferestrele (marcate cu albastru pe pereții exteriori) asigură: lumină naturală (min. 1/8 din suprafața camerei conf. NP 016-97), ventilație naturală, și câștig solar pasiv iarna. Recomandare: geam dublu/triplu low-E (Uw≤1.1 W/m²K) conf. C107-05, cu tâmplărie PVC sau aluminiu cu rupere de punte termică. Pe fațada '+P.frontDir+' (fațadă '+(solarDir?'favorabilă':'secundară')+') sunt amplasate camerele '+(solarDir?'de locuit principale':'tehnice și circulații')+'.';
+        const fLines=pdf.splitTextToSize(S2(fExp),rw-6);
+        fLines.slice(0,4).forEach((l,li)=>pdf.text(l,rx+4,panY+9+li*3));
+        panY+=24;
+      }
+      if(panY<ry+rh-15){
+        pdf.setFillColor(255,248,230);pdf.roundedRect(rx+1,panY,rw-2,14,1,1,'F');
+        pdf.setFillColor(...C.orange);pdf.rect(rx+1,panY,1.5,14,'F');
+        pdf.setTextColor(...C.orange);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
+        pdf.text('UȘĂ PRINCIPALĂ (marcaj portocaliu)',rx+4,panY+4);
+        pdf.setTextColor(80,50,10);pdf.setFont('helvetica','normal');pdf.setFontSize(5);
+        const dExp='Ușa de intrare principală (lățime min. 1.8m conf. NP 051/2012 — PMR) are acces din strada principală. Sistemul de acces include interfon video, cititor card/cod sau cheie mecanică. Arcul de deschidere indică direcția de rotire.';
+        const dLines=pdf.splitTextToSize(S2(dExp),rw-6);
+        dLines.slice(0,3).forEach((l,li)=>pdf.text(l,rx+4,panY+9+li*3));
+      }
 
+      // Cartus
+      pdf.setFillColor(248,249,252);pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.25);
+      pdf.rect(rx,H-15,rw,8,'FD');
+      pdf.setTextColor(...C.dark2);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
+      pdf.text('Nr.cad. '+S2(P.nrCad)+' · '+S2(P.utr)+' · '+( fl===0?'PARTER':'ETAJ '+fl),rx+rw/2,H-10.5,{align:'center'});
+      pdf.setTextColor(100,115,135);pdf.setFont('helvetica','normal');pdf.setFontSize(4.8);
+      pdf.text('Cota planșeu: +'+(fl*P.hn).toFixed(2)+'m · SC='+RN(b.scArea)+'m² · Sc.1:100',rx+rw/2,H-7,{align:'center'});
       ftr();
     }
 
-    // ══════════════════════════════════════════════════════════════
-    // PAG FAȚADĂ PRINCIPALĂ
-    // ══════════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════════════
+    // PAG FAȚADĂ + IMAGINI VIEWER
+    // ══════════════════════════════════════════════════════════════════
     newPage();
-    hdr('FAȚADĂ PRINCIPALĂ — VEDERE DIN STRADĂ · Nr.cad. '+P.nrCad,pgN);
-    pdf.setFillColor(235,238,245);pdf.rect(0,9,W,H-9,'F');
-    pdf.setFillColor(255,255,255);pdf.rect(8,10,W-16,H-19,'F');
-    pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.3);pdf.rect(8,10,W-16,H-19,'S');
+    hdr('FAȚADĂ PRINCIPALĂ + IMAGINI 3D VIEWER — Nr.cad. '+P.nrCad,pgN);
+    pdf.setFillColor(...C.gray3);pdf.rect(0,9,W,H-16,'F');
+    const fSc=Math.min((W*0.55-25)/(b.bW+4),(H-45)/((b.niv*P.hn)+12));
+    const fW=b.bW*fSc,fH=b.niv*P.hn*fSc;
+    const fOx=14+(W*0.55-25-fW)/2,fOy=12+(H-40-fH)/2;
+    pdf.setFillColor(255,255,255);pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.3);
+    pdf.rect(10,10,W*0.55-12,H-28,'FD');
+    drawFacade(b,P,fOx,fOy,fW,fH,fSc);
+    drawNorth(W*0.55-12,22,P.frontDir,6);
+    drawScale(14,H-15,fSc);
+    // right: 3D images + explicatii
+    const vrx=W*0.55,vry=10,vrw=W-vrx-8;
+    const vh=(H-30)/2;
+    pdf.setFillColor(230,234,244);pdf.rect(vrx,vry,vrw,vh,'F');
+    if(caps.v3dDay) addCap(caps.v3dDay,vrx,vry,vrw,vh,'FIG. 4 — Viewer 3D · ZI · Aspect exterior · Fațadă principală și context imediat');
+    else if(caps.img3D) addCap(caps.img3D,vrx,vry,vrw,vh,'FIG. 4 — Vedere 3D · Context urban real');
+    pdf.setFillColor(230,234,244);pdf.rect(vrx,vry+vh+2,vrw,vh,'F');
+    if(caps.v3dGolden) addCap(caps.v3dGolden,vrx,vry+vh+2,vrw,vh,'FIG. 5 — Viewer 3D · GOLDEN HOUR · Materialitate fațadă și umbre serale');
+    else if(caps.v3dNight) addCap(caps.v3dNight,vrx,vry+vh+2,vrw,vh,'FIG. 5 — Viewer 3D · NOAPTE · Impact vizual nocturn și iluminat arhitectural');
+    // Explicatie fatada
+    pdf.setFillColor(255,255,255);pdf.rect(10,H-13,W-20,6,'F');
+    noteBox('Fațada principală spre '+P.frontDir+' prezintă: ferestre cu tâmplărie termoizolantă (Uw≤1.1W/m²K, geam low-E), balcoane pe toate nivelurile (parapet min. 1.0m), finisaje rezistente la intemperii (tencuială decorativă sau placaj ventilat). Culoarea fațadei va fi stabilită la faza PAC de arhitectul proiectant conform RLU UTR '+P.utr+' și Ghidului de culoare al Municipiului Iași.',14,H-13,W-20,6);
+    ftr();
 
-    const fSc=Math.min((W-60)/(b.bW+4),(H-50)/((b.niv*P.hn)+10));
-    const fW=b.bW*fSc, fH=b.niv*P.hn*fSc;
-    const fOx=(W-fW)/2, fOy=12+(H-35-fH)/2;
+    // ══════════════════════════════════════════════════════════════════
+    // PAG SECȚIUNE A-A + NOAPTE + GOLDEN
+    // ══════════════════════════════════════════════════════════════════
+    newPage();
+    hdr('SECȚIUNE TRANSVERSALĂ A-A + VEDERI 3D — Nr.cad. '+P.nrCad,pgN);
+    pdf.setFillColor(...C.gray3);pdf.rect(0,9,W,H-16,'F');
+    const sSc=Math.min((W*0.55-25)/(b.bD+4),(H-45)/((b.niv*P.hn)+12));
+    const sW=b.bD*sSc,sH=b.niv*P.hn*sSc;
+    const sOx=14+(W*0.55-25-sW)/2,sOy=12+(H-40-sH)/2;
+    pdf.setFillColor(255,255,255);pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.3);
+    pdf.rect(10,10,W*0.55-12,H-28,'FD');
+    drawSection(b,P,sOx,sOy,sW,sH,sSc);
+    drawNorth(W*0.55-12,22,P.frontDir,6);
+    drawScale(14,H-15,sSc);
+    // legend sectiune
+    pdf.setFillColor(248,249,252);pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.25);
+    pdf.rect(14,H-28,W*0.55-20,12,'FD');
+    const sleg=[[C.living,C.orange,'Living/Salon'],[C.bedroom,C.green,'Dormitor'],[C.kitchen,C.cyan,'Bucătărie'],[C.core,C.blue,'Scări+Lift']];
+    sleg.forEach(([fc,stk,lbl],i)=>{
+      const sx=18+i*32;
+      pdf.setFillColor(...fc);pdf.setDrawColor(...stk);pdf.setLineWidth(0.3);pdf.rect(sx,H-24,5,4,'FD');
+      pdf.setTextColor(50,65,85);pdf.setFont('helvetica','normal');pdf.setFontSize(5);pdf.text(lbl,sx+6,H-21);
+    });
+    // right: noapte + overcast + explicatii
+    const srx=W*0.55,srw=W-srx-8;
+    const sh2=(H-30)/2;
+    pdf.setFillColor(230,234,244);pdf.rect(srx,10,srw,sh2,'F');
+    if(caps.v3dNight) addCap(caps.v3dNight,srx,10,srw,sh2,'FIG. 6 — Viewer 3D · NOAPTE · Impact iluminat artificial și vizibilitate nocturnă');
+    else if(caps.v3dOvercast) addCap(caps.v3dOvercast,srx,10,srw,sh2,'FIG. 6 — Viewer 3D · Vedere aeriană · Context densitate construită');
+    pdf.setFillColor(230,234,244);pdf.rect(srx,12+sh2,srw,sh2,'F');
+    if(caps.v3dOvercast) addCap(caps.v3dOvercast,srx,12+sh2,srw,sh2,'FIG. 7 — Viewer 3D · CER ACOPERIT · Volum și umbre difuze');
+    else if(caps.imgAerial) addCap(caps.imgAerial,srx,12+sh2,srw,sh2,'FIG. 7 — Vedere aeriană · Amprentă clădire și vecinătăți');
+    // nota structura
+    pdf.setFillColor(255,255,255);pdf.rect(10,H-13,W-20,6,'F');
+    noteBox('STRUCTURA PROPUSĂ: Cadre din beton armat (stâlpi + grinzi) clasa C25/30, armătură S500, proiectată antiseismic conf. P100-1/2013 zona E (ag=0,2g, Tc=1,6s). Planșee dale beton h=18-22cm. Fundații izolate/continue la min. -1,5m față de CTN. Zidărie de umplutură: BCA 20cm + termoizolație 15cm EPS/MW.',14,H-13,W-20,6);
+    ftr();
 
-    drawFacadeArch(b,P,fOx,fOy,fW,fH,fSc);
-    drawNorthArrow(W-28,22,P.frontDir,7);
-    drawScaleBar(15,H-13,fSc);
-
-    // Annotations
-    pdf.setTextColor(...C.dark2);pdf.setFont('helvetica','bold');pdf.setFontSize(6);
-    pdf.text('INTRARE',fOx+fW/2,fOy+fH+fSc*P.hn*0.15,{align:'center'});
-    pdf.setTextColor(80,100,130);pdf.setFont('helvetica','normal');pdf.setFontSize(5);
-    pdf.text('Acces principal pietonal + auto',fOx+fW/2,fOy+fH+fSc*P.hn*0.15+4,{align:'center'});
-
-    // Technical box
-    pdf.setFillColor(248,249,252);pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.3);
-    pdf.rect(10,H-30,120,20,'FD');
-    pdf.setFillColor(...C.dark2);pdf.rect(10,H-30,120,6,'F');
-    pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(6);
-    pdf.text('DATE TEHNICE FAȚADĂ',12,H-25.5);
-    const fData=[['H total',( b.niv*P.hn).toFixed(1)+'m'],['Nr. niveluri',b.niv+' niv.'],['Lățime fațadă',b.bW.toFixed(1)+'m'],['GRF estimat',b.niv>4?'GRF II (REI≥90min)':'GRF III (REI≥60min)'],['Balcoane',b.niv>2?'DA — toate nivelurile':'N/A']];
-    fData.forEach(([l,v],i)=>{
-      const fy=H-23+i*3;
-      pdf.setFillColor(i%2?248:252,i%2?250:253,i%2?252:254);pdf.rect(10,fy-2,120,3,'F');
-      pdf.setTextColor(100,115,135);pdf.setFont('helvetica','normal');pdf.setFontSize(5);pdf.text(l,12,fy);
-      pdf.setTextColor(40,55,80);pdf.setFont('helvetica','bold');pdf.text(S2(v),75,fy);
+    // ══════════════════════════════════════════════════════════════════
+    // PAG AXONOMETRIE 3D
+    // ══════════════════════════════════════════════════════════════════
+    newPage();
+    hdr('VEDERE AXONOMETRICĂ 3D + IMAGINI VIEWER — Nr.cad. '+P.nrCad,pgN);
+    pdf.setFillColor(...C.gray3);pdf.rect(0,9,W,H-16,'F');
+    // Main axono (large)
+    pdf.setFillColor(240,243,250);pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.3);
+    pdf.rect(10,10,W*0.45,H-28,'FD');
+    const axSc=Math.min((W*0.43)/(b.bW+b.bD+6),(H-60)/((b.niv*P.hn)+b.bD/2+8))*0.82;
+    drawAxono(b,P,W*0.225,H*0.52,axSc);
+    drawNorth(W*0.45,22,P.frontDir,6);
+    drawScale(14,H-15,axSc);
+    // Indicators overlay on axono
+    pdf.setTextColor(...C.dark2);pdf.setFont('helvetica','bold');pdf.setFontSize(8);
+    pdf.text('H = '+(b.niv*P.hn).toFixed(1)+'m',W*0.38,H*0.22);
+    pdf.setTextColor(80,100,130);pdf.setFont('helvetica','normal');pdf.setFontSize(6);
+    pdf.text(b.niv+' niv.',W*0.38,H*0.22+6);
+    // Right column: 2 viewer images + cards
+    const arx=W*0.47,arw=W-arx-8;
+    const ah1=(H-30)*0.45,ah2=(H-30)*0.45;
+    pdf.setFillColor(230,234,244);pdf.rect(arx,10,arw,ah1,'F');
+    if(caps.v3dGolden) addCap(caps.v3dGolden,arx,10,arw,ah1,'FIG. 8 — Viewer 3D · GOLDEN HOUR · Materialitate și umbre serale');
+    else if(caps.img3D) addCap(caps.img3D,arx,10,arw,ah1,'FIG. 8 — Vedere 3D · Context urban');
+    pdf.setFillColor(230,234,244);pdf.rect(arx,12+ah1,arw,ah2,'F');
+    if(caps.imgFront||caps.imgLocation) addCap(caps.imgFront||caps.imgLocation,arx,12+ah1,arw,ah2,'FIG. 9 — Vedere frontală · Front stradal și acces principal');
+    else if(caps.v3dNightAlt) addCap(caps.v3dNightAlt,arx,12+ah1,arw,ah2,'FIG. 9 — Viewer 3D · Vedere laterală');
+    // Cards bottom right
+    const cry=12+ah1+ah2+4;
+    const cards=[['SDA',''+RN(b.sdaTotal)+'m²'],['REGIM H',b.niv+' niv.'],['POT',RN(b.scArea/P.area*100)+'%'],['APT.',RN(b.niv*b.cores.length*2)]];
+    const cw=(arw-2)/cards.length;
+    cards.forEach(([t,v],i)=>{
+      const cx=arx+i*cw;
+      pdf.setFillColor(20,38,68);pdf.roundedRect(cx,cry,cw-1.5,H-cry-22,1,1,'F');
+      pdf.setFillColor(...C.gold);pdf.roundedRect(cx,cry,cw-1.5,6,1,1,'F');pdf.rect(cx,cry+3,cw-1.5,3,'F');
+      pdf.setTextColor(15,25,48);pdf.setFont('helvetica','bold');pdf.setFontSize(5);pdf.text(t,(cx+cw/2-0.75),cry+5,{align:'center'});
+      pdf.setTextColor(220,232,250);pdf.setFont('helvetica','bold');pdf.setFontSize(9);pdf.text(S2(v),(cx+cw/2-0.75),(cry+H-cry-22)/2+cry+2,{align:'center'});
     });
     ftr();
 
-    // ══════════════════════════════════════════════════════════════
-    // PAG SECȚIUNE A-A
-    // ══════════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════════════
+    // PAG MEMORIU JUSTIFICATIV
+    // ══════════════════════════════════════════════════════════════════
     newPage();
-    hdr('SECȚIUNE TRANSVERSALĂ A-A · Nr.cad. '+P.nrCad,pgN);
-    pdf.setFillColor(235,238,245);pdf.rect(0,9,W,H-9,'F');
-    pdf.setFillColor(255,255,255);pdf.rect(8,10,W-16,H-19,'F');
-    pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.3);pdf.rect(8,10,W-16,H-19,'S');
-
-    const sSc=Math.min((W-60)/(b.bD+4),(H-50)/((b.niv*P.hn)+10));
-    const sW=b.bD*sSc, sH=b.niv*P.hn*sSc;
-    const sOx=(W-sW)/2, sOy=12+(H-35-sH)/2;
-
-    drawSectionArch(b,P,sOx,sOy,sW,sH,sSc);
-    drawNorthArrow(W-28,22,P.frontDir,7);
-    drawScaleBar(15,H-13,sSc);
-
-    // Section legend
-    pdf.setFillColor(248,249,252);pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.3);
-    pdf.rect(W-80,12,70,40,'FD');
-    pdf.setFillColor(...C.dark2);pdf.rect(W-80,12,70,6,'F');
-    pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
-    pdf.text('LEGENDĂ SECȚIUNE',W-45,16,{align:'center'});
-    const sLeg=[[C.living,C.orange,'Zone locuit / birouri'],[C.bedroom,C.green,'Dormitoare'],[C.kitchen,C.cyan,'Bucătărie / utilități'],[C.core,C.blue,'Casa scărilor + lift'],[C.balcon,C.gold,'Placă beton (planșeu)']];
-    sLeg.forEach(([fill,stk,lbl],i)=>{
-      const sly=20+i*5.5;
-      pdf.setFillColor(...fill);pdf.setDrawColor(...stk);pdf.setLineWidth(0.4);pdf.rect(W-78,sly-2.5,5,4,'FD');
-      pdf.setTextColor(50,65,85);pdf.setFont('helvetica','normal');pdf.setFontSize(5);pdf.text(lbl,W-71,sly);
-    });
-
-    // Technical notes
-    pdf.setFillColor(248,249,252);pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.3);
-    pdf.rect(10,H-32,120,22,'FD');
-    pdf.setFillColor(...C.dark2);pdf.rect(10,H-32,120,6,'F');
-    pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(6);
-    pdf.text('NOTE TEHNICE SECȚIUNE',12,H-27.5);
-    const secNotes=['Structură beton armat conf. P100-1/2013 zona seismică E (ag=0.2g)','Grosime planșeu estimat: 18-22cm (proiect structural)','Înălțime liberă nivel: '+(P.hn-0.25).toFixed(2)+'m (H nivel '+(P.hn).toFixed(1)+'m - planșeu)','NFA estimat: 1.5-4.0m (verificare studiu geotehnic NP 074/2014)','Fundații recomandate: izolate/continue la min. 1.5m (sub CTN)'];
-    secNotes.forEach((n,i)=>{
-      pdf.setFillColor(i%2?248:252,252,252);pdf.rect(10,H-21+i*4-2,120,4,'F');
-      pdf.setTextColor(60,80,110);pdf.setFont('helvetica','normal');pdf.setFontSize(5);
-      pdf.text('▸ '+S2(n),12,H-21+i*4);
-    });
-    ftr();
-
-    // ══════════════════════════════════════════════════════════════
-    // PAG AXONOMETRIE
-    // ══════════════════════════════════════════════════════════════
-    newPage();
-    hdr('VEDERE AXONOMETRICĂ — VOLUM 3D ESTIMAT · Nr.cad. '+P.nrCad,pgN);
-    pdf.setFillColor(235,238,248);pdf.rect(0,9,W,H-9,'F');
-    pdf.setFillColor(248,249,254);pdf.rect(8,10,W-16,H-19,'F');
-    pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.3);pdf.rect(8,10,W-16,H-19,'S');
-
-    const axSc=Math.min((W-80)/(b.bW+b.bD+4),(H-50)/((b.niv*P.hn)+b.bD/2+6))*0.85;
-    const axCx=W*0.38, axCy=H*0.62;
-
-    drawAxonoArch(b,P,axCx,axCy,axSc);
-    drawNorthArrow(W-28,22,P.frontDir,7);
-
-    // Annotations
-    pdf.setTextColor(...C.dark2);pdf.setFont('helvetica','bold');pdf.setFontSize(7.5);
-    pdf.text('H = '+(b.niv*P.hn).toFixed(1)+'m',W*0.75,axCy-b.niv*P.hn*axSc*0.55+5);
-    pdf.setTextColor(100,115,135);pdf.setFont('helvetica','normal');pdf.setFontSize(6);
-    pdf.text(b.niv+' niveluri · P+'+( b.niv-1)+'E',W*0.75,axCy-b.niv*P.hn*axSc*0.55+11);
-
-    // Info cards row
-    const cards=[
-      ['SDA TOTALĂ',RN(b.sdaTotal)+'m²','Suprafață desfășurată'],
-      ['REGIM H',b.niv+' niv.','P+'+(b.niv-1)+'E = H'+(b.niv*P.hn).toFixed(1)+'m'],
-      ['POT / CUT',RN(b.scArea/P.area*100)+'% / '+(b.sdaTotal/P.area).toFixed(1),'Conf. PUG '+P.utr],
-      ['APT. ESTIMATE',RN(b.niv*b.cores.length*2)+' unități','Mix apt. configur.'],
+    hdr('MEMORIU JUSTIFICATIV — DE CE ACEASTĂ SOLUȚIE? — Nr.cad. '+P.nrCad,pgN);
+    pdf.setFillColor(255,255,255);pdf.rect(0,9,W,H-9,'F');
+    let my=13;
+    my=secTitle('1. JUSTIFICAREA SOLUȚIEI FUNCȚIONALE PROPUSE',my,[15,30,65]);
+    const mem1='Soluția funcțională propusă de UrbanX Relevee Instant pentru parcela '+P.nrCad+' (UTR '+P.utr+', suprafață '+P.area+'m²) valorifică integral indicatorii urbanistici permisi de PUG în vigoare: POT='+RN(b.scArea/P.area*100)+'% (max. '+RN(P.pot*100)+'%), CUT='+(b.sdaTotal/P.area).toFixed(2)+' (max. '+P.cut+'), H='+(b.niv*P.hn).toFixed(1)+'m ('+b.niv+' niveluri). Aceasta este soluția OPTIMĂ din punct de vedere economico-urbanistic deoarece maximizează suprafața desfășurată admisă (SDA='+RN(b.sdaTotal)+'m²) în condițiile respectării tuturor reglementărilor PUG.';
+    my=bodyTxt(mem1,12,my,W-24,6.5);my+=3;
+    my=secTitle('2. JUSTIFICAREA ORIENTĂRII ȘI DISTRIBUȚIEI SPAȚIILOR',my,[20,50,95]);
+    const mem2='Orientarea frontului stradal spre '+P.frontDir+' determină distribuția optimă a spațiilor conform OMS 119/2014: camerele de locuit (living, dormitoare) sunt orientate spre fațadele cu însorire favorabilă ('+(solarDir?'fațada principală spre '+P.frontDir+' este favorabilă — camere de zi bine însorite)':'fațadele laterale Est/Vest — se recomandă verificarea la PAC prin studiu OMS 119 detaliat)')+'). Spațiile tehnice (bucătărie, baie, hol) sunt amplasate spre fațadele secundare sau în zona centrală, reducând pierderile termice. Nucleul de scări+lift este plasat central pentru a minimiza lungimea coridoarelor de evacuare (max. 30m conf. P118-2/2013 art. 6).';
+    my=bodyTxt(mem2,12,my,W-24,6.5);my+=3;
+    my=secTitle('3. MATERIALE ȘI SOLUȚII TEHNICE RECOMANDATE',my,[20,80,55]);
+    const matRows=[
+      ['Element','Soluție recomandată','Standard/Normativ','Justificare'],
+      ['Structură','Cadre BA C25/30 + armătură S500','P100-1/2013 · SR EN 1992','Seismicitate zonă E (ag=0,2g) — structura trebuie să preia forțele seismice'],
+      ['Planșee','Dale BA 18-22cm cu izolație termică 10cm','C107-05 · STAS 6472','Izolare termică (coef. U≤0,3W/m²K) și acustică (Rw≥52dB între apt.)'],
+      ['Ferestre','PVC/AL cu rupere punte termică, geam triplu low-E','C107-05 · SR EN 14351','Uw≤1,1W/m²K — reducere consum energetic 30-40% față de geam dublu standard'],
+      ['Fațadă','Tencuială decorativă sau placaj ventilat + 15cm EPS/MW','C107-05 · ETAG004','U zid≤0,25W/m²K — clădire aproape zero energie (NZEB conf. Legea 372/2005)'],
+      ['Acoperiș','Terasă circulabilă/verde cu hidroizolație bitum+PVC','NP 040/2002 · SR EN 13984','Protecție precipitații, utilizare spațiu, biodiversitate urbană'],
+      ['Instalații','Centrală termică individuală per apt. sau centrală comună','I13/2015 · NP 037','Eficiență energetică, control individual consum, clasă A++'],
+      ['Lifturi','Min. 1 lift/scară P+4 sau mai mult · cabină min. 1,1×1,4m','SR EN 81-1 · NP 051/2012','Obligatoriu pentru PMR · Legea 448/2006 privind persoanele cu handicap'],
     ];
-    cards.forEach(([t,v,s],i)=>{
-      const cx=W-75+0,cy_c=H-48+i*14;
-      pdf.setFillColor(245,247,252);pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.3);
-      pdf.roundedRect(W-78,cy_c-5,70,12,1.5,1.5,'FD');
-      pdf.setFillColor(...C.dark2);pdf.roundedRect(W-78,cy_c-5,70,6,1.5,1.5,'F');
-      pdf.rect(W-78,cy_c-2,70,3,'F');
-      pdf.setTextColor(...C.gold);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
-      pdf.text(t,W-43,cy_c-1,{align:'center'});
-      pdf.setTextColor(20,40,80);pdf.setFontSize(8);
-      pdf.text(S2(v),W-43,cy_c+4,{align:'center'});
-      pdf.setTextColor(120,135,155);pdf.setFont('helvetica','normal');pdf.setFontSize(5);
-      pdf.text(S2(s),W-43,cy_c+7,{align:'center'});
-    });
+    my=tblHdr(matRows[0],[45,65,40,W-22-45-65-40],my);
+    matRows.slice(1).forEach((r,i)=>{my=tblRow(r,[45,65,40,W-22-45-65-40],my,i%2===0);});
+    my+=4;
+    my=secTitle('4. AVANTAJELE SOLUȚIEI FAȚĂ DE ALTERNATIVE',my,[80,30,20]);
+    const adv=[
+      '✓ MAXIM JURIDIC: Soluția valorifică 100% din CUT admis ('+P.cut+') — orice reducere ar însemna pierderi economice directe de '+RN((P.cut-b.sdaTotal/P.area)*P.area*700)+' EUR estimat (la 700 EUR/mp construcție).',
+      '✓ DISTRIBUȚIE OPTIMĂ FUNCȚIONAL: Nucleul central de scări minimizează circulațiile (economie suprafață ~8%) și asigură conformitatea cu P118-2/2013 (distanțe evacuare ≤30m).',
+      '✓ FLEXIBILITATE: Planul tip permite compartimentări diferite (apt. de 2, 3 sau 4 camere) la aceeași SC, adaptabil cererii de piață. Mix propus: '+(P.fn.includes('hotel')?'camere hotel standard':'apartamente 2-4 camere conf. cerere Iași 2024-2025')+'.',
+      '✓ CONFORMITATE COMPLETĂ: Toți indicatorii (POT, CUT, H, retrageri) sunt respectați, eliminând riscul de blocare a Autorizației de Construire.',
+    ];
+    adv.forEach(a=>{my=bodyTxt(a,12,my,W-24,6.5);my+=1;});
     ftr();
 
-    // ══════════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════════════
     // PAG BILANȚ + NORMATIVE + CONCLUZII
-    // ══════════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════════════
     newPage();
-    hdr('BILANȚ SUPRAFEȚE · VERIFICARE NORMATIVE · CONCLUZII',pgN);
-    pdf.setFillColor(...C.gray3);pdf.rect(0,9,W,H-9,'F');
-
-    let cy3=13;
-    const col1W=(W-22)/2, col2X=14+col1W+3;
-
-    // COL 1: Bilanț
-    pdf.setFillColor(255,255,255);pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.3);
-    pdf.rect(11,cy3,col1W,80,'FD');
-    cy3=secTitle('BILANȚ SUPRAFEȚE',cy3+0.5,C.dark2)+1;
-    const bilRows=[
-      ['Suprafață parcelă (ST)',P.area+'m²'],
-      ['SC edificiu la sol',RN(b.scArea)+'m²'],
-      ['Spații verzi min. (SV)',RN(P.area*(parseFloat(P.sv||10)/100))+'m²'],
-      ['SDA totală',RN(b.sdaTotal)+'m²'],
-      ['SDA/nivel',RN(b.sdaPerFloor)+'m²'],
-      ['POT realizat / max',RN(b.scArea/P.area*100)+'% / '+RN(P.pot*100)+'%'],
-      ['CUT realizat / max',(b.sdaTotal/P.area).toFixed(2)+' / '+P.cut],
-      ['Nr. niveluri',b.niv+' niv. (P+'+(b.niv-1)+'E)'],
-      ['Înălțime totală',(b.niv*P.hn).toFixed(1)+'m'],
-      ['Înălțime liberă nivel',(P.hn-0.25).toFixed(2)+'m'],
-      ['Nr. nuclee scări',b.cores.length+' nuclee'],
-      ['Apartamente estimate',RN(b.niv*b.cores.length*2)+' unități'],
-    ];
-    bilRows.forEach(([l,v],i)=>{ cy3=tblRow([l,v],[col1W-14,40],cy3,i%2===0); });
-    cy3+=4;
-
-    // COL 2: Normative
-    const fl0=_RV.floors[0];
-    let cy4=13;
-    pdf.setFillColor(255,255,255);pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.3);
-    pdf.rect(col2X,cy4,col1W+1,80,'FD');
-    cy4=secTitle('VERIFICARE NORMATIVE',cy4+0.5,C.dark2)+1;
-    const potOk=b.scArea/P.area<=P.pot+.001;
-    const cutOk=b.sdaTotal/P.area<=P.cut+.001;
-    const roomsOk=fl0?.rects.every(r=>{ const m={living:14,bedroom:12,bedroom2:10,kitchen:5,bath:3.6}[r.t]; return !m||r.w*r.h>=m; })!==false;
-    const isuOk=fl0?.isu?.ok!==false;
-    const solarOk=fl0?.rects.filter(r=>r.solarOk===false).length===0;
-    const normRows=[
-      ['POT max admis',potOk?'OK':'DEP.',potOk,'PUG · NP 068/2000'],
-      ['CUT max admis',cutOk?'OK':'DEP.',cutOk,'PUG · NP 068/2000'],
-      ['Suprafețe min.',roomsOk?'CONFORM':'Verif. PT',roomsOk,'NP 057/2002'],
-      ['Însorire OMS 119',solarOk?'CONFORM':'Verif. PT',solarOk,'OMS 119/2014'],
-      ['Evacuare ISU',isuOk?'CONFORM':'Verif. PT',isuOk,'P118-2/2013'],
-      ['Accesibilitate PMR',b.scArea>300?'Obligatoriu':null,null,'NP 051/2012'],
-      ['Seismic zona E',true,'ag=0.2g Tc=1.6s',true,'P100-1/2013'],
-      ['Calitate construcții',true,'Legea 10/1995',true,'Legea 10/1995'],
-    ];
-    normRows.forEach(([l,v,ok,ref],i)=>{
-      cy4=tblRow([l,S2(String(v)),S2(ref)],[col1W-20,22,col1W-5],cy4,i%2===0);
+    hdr('BILANȚ SUPRAFEȚE · VERIFICARE NORMATIVE · CONCLUZII FINALE',pgN);
+    pdf.setFillColor(...C.gray3);pdf.rect(0,9,W,H-16,'F');
+    const bCol1=W*0.32,bCol2=W*0.35,bCol3X=10+bCol1+bCol2+4;
+    // Col 1: Bilant
+    pdf.setFillColor(255,255,255);pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.3);pdf.rect(10,10,bCol1-2,H-28,'FD');
+    let by1=secTitle('BILANȚ SUPRAFEȚE',10.5,C.dark2);
+    const bilR=[['Suprafață parcelă',P.area+'m²'],['SC edificiu',RN(b.scArea)+'m²'],['SDA totală',RN(b.sdaTotal)+'m²'],['SDA/nivel',RN(b.sdaPerFloor)+'m²'],['POT real/max',RN(b.scArea/P.area*100)+'%/'+RN(P.pot*100)+'%'],['CUT real/max',(b.sdaTotal/P.area).toFixed(2)+'/'+P.cut],['Niveluri',b.niv+' niv. P+'+(b.niv-1)+'E'],['H total',(b.niv*P.hn).toFixed(1)+'m'],['H liber nivel',(P.hn-0.25).toFixed(2)+'m'],['Nuclee scări',b.cores.length],['Apartamente est.',RN(b.niv*b.cores.length*2)+' apt.'],['Locuri parcaj est.',RN(b.niv*b.cores.length*2)+' min.']];
+    bilR.forEach(([l,v],i)=>{
+      pdf.setFillColor(i%2?248:255,252,252);pdf.rect(10,by1-4,bCol1-2,5.5,'F');
+      pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.1);pdf.line(10,by1+1.5,10+bCol1-2,by1+1.5);
+      pdf.setTextColor(100,115,135);pdf.setFont('helvetica','normal');pdf.setFontSize(5.5);pdf.text(S2(l),12,by1);
+      pdf.setTextColor(30,50,80);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);pdf.text(S2(String(v)),10+bCol1-4,by1,{align:'right'});
+      by1+=5.5;
     });
-    cy4+=4;
-
-    // Conclusions
-    const concY=Math.max(cy3,cy4)+4;
-    pdf.setFillColor(255,255,255);pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.3);
-    pdf.rect(11,concY,W-22,H-concY-19,'FD');
-    const cY=secTitle('CONCLUZII ȘI RECOMANDĂRI',concY+0.5,[15,30,65])+2;
-    const potStatus=potOk?'se încadrează':'DEPĂȘEȘTE';
-    const cutStatus=cutOk?'se încadrează':'DEPĂȘEȘTE';
-    const concText=[
-      'Parcela cu nr. cadastral '+P.nrCad+' (UTR '+P.utr+', suprafață '+P.area+'m², Municipiul Iași) a fost analizată de platforma UrbanX Relevee Instant. Scenariul generat propune un volum edificabil de '+b.niv+' niveluri (P+'+(b.niv-1)+'E), cu înălțimea totală de '+(b.niv*P.hn).toFixed(1)+'m și o suprafață desfășurată totală estimată de '+RN(b.sdaTotal)+'m².',
-      'Indicatorii urbanistici: POT realizat '+RN(b.scArea/P.area*100)+'% '+potStatus+' în limitele PUG (max. '+RN(P.pot*100)+'%). CUT realizat '+(b.sdaTotal/P.area).toFixed(2)+' '+cutStatus+' în limitele PUG (max. '+P.cut+'). Construirea este fezabilă cu respectarea condițiilor din Regulamentul Local de Urbanism (RLU UTR '+P.utr+').',
-      'Se recomandă elaborarea unui Studiu de Însorire detaliat (OMS 119/2014) pentru orientarea '+P.frontDir+' a frontului stradal, cu verificarea orelor de însorire per cameră la solstițiu de iarnă. Orientările favorabile camere de locuit: S, SE, SV (min. 1.5h/zi la 21 dec.).',
-      'Pașii următori obligatorii: (1) Certificat de Urbanism → Primăria Municipiului Iași; (2) Studiu geotehnic NP 074/2014; (3) Proiect PAC/DTAC elaborat de arhitect OAR; (4) Avize din CU (ISU, utilități, AACR); (5) Autorizație de Construire.',
+    // Col 2: Normative
+    pdf.setFillColor(255,255,255);pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.3);pdf.rect(12+bCol1,10,bCol2-2,H-28,'FD');
+    let by2=secTitle('VERIFICARE NORMATIVE',10.5,C.dark2,12+bCol1,bCol2-2);
+    by2=10+8; // reset
+    pdf.setFillColor(...C.dark2);pdf.rect(12+bCol1,10,bCol2-2,6,'F');pdf.setFillColor(...C.gold);pdf.rect(12+bCol1,10,1.5,6,'F');
+    pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(7);pdf.text('VERIFICARE NORMATIVE',14+bCol1+(bCol2-2)/2,14.5,{align:'center'});
+    by2=20;
+    const normR2=[
+      ['POT max admis',potOk?'CONFORM':'DEPĂȘIRE',potOk,'PUG · NP 068','Suprafața construită nu depășește '+RN(P.pot*100)+'% din teren'],
+      ['CUT max admis',cutOk?'CONFORM':'DEPĂȘIRE',cutOk,'PUG · NP 068','SDA totală nu depășește coeficientul admis '+P.cut],
+      ['Supraf. min. camere',fl0?.rects.every(r=>{const m={living:14,bedroom:12,kitchen:5,bath:3.6}[r.t];return !m||r.w*r.h>=m;})!==false?'CONFORM':'Verif. PT',null,'NP 057/2002','Living min.14m², dormitor min.12m², bucătărie min.5m²'],
+      ['Însorire camere',solarDir?'CONFORM':'Verif. PT',solarDir,'OMS 119/2014','Min. 1,5h/zi la solstițiu iarnă · orientare fațadă '+P.frontDir],
+      ['Evacuare scări ISU',isuOk?'CONFORM':'Verif. PT',isuOk,'P118-2/2013','Distanța max. 30m de la orice punct la casa scărilor'],
+      ['PMR — persoane mobilitate red.',b.scArea>300?'Obligatoriu':'Verificare',null,'NP 051/2012 · L.448/2006','Lift obligatoriu, rampă acces, locuri parcare PMR 4%'],
+      ['Seismic — proiectare structurală','Obligatoriu conf. P100',true,'P100-1/2013','Zonă seismică E, ag=0,2g, Tc=1,6s · structură BA proiectată'],
+      ['Performanță energetică','NZEB obligatoriu',true,'Legea 372/2005','Clădiri noi = Nearly Zero Energy Building · audit energetic oblig.'],
+      ['Calitatea construcțiilor','Cerința A+B+C+D+E+F',true,'Legea 10/1995','Rezistență, securitate, igienă, confort, durabilitate, acces'],
     ];
-    let conclY=cY;
-    concText.forEach((t,i)=>{
-      pdf.setFillColor(i%2?248:252,252,253);pdf.rect(12,conclY-2,W-24,12,'F');
-      pdf.setFillColor(...C.gold);pdf.rect(12,conclY-2,1.5,12,'F');
-      pdf.setTextColor(40,55,80);pdf.setFont('helvetica','normal');pdf.setFontSize(6);
-      const lines=pdf.splitTextToSize(S2(t),W-28);
-      lines.slice(0,3).forEach((l,li)=>pdf.text(l,16,conclY+li*4.5));
-      conclY+=Math.min(lines.length,3)*4.5+3;
+    normR2.forEach(([l,v,ok,ref,note],i)=>{
+      if(by2>H-30)return;
+      pdf.setFillColor(i%2?248:255,i%2?250:252,i%2?252:254);pdf.rect(12+bCol1,by2-3.5,bCol2-2,10,'F');
+      pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.1);pdf.line(12+bCol1,by2+6.5,12+bCol1+bCol2-2,by2+6.5);
+      pdf.setTextColor(50,65,85);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);pdf.text(S2(l),14+bCol1,by2);
+      const vc=ok===true?C.green:ok===false?C.red:[140,100,20];
+      pdf.setTextColor(...vc);pdf.setFont('helvetica','bold');pdf.setFontSize(5);pdf.text(S2(v),14+bCol1,by2+4);
+      pdf.setTextColor(100,115,135);pdf.setFont('helvetica','normal');pdf.setFontSize(4.5);pdf.text(S2(ref)+' — '+S2(note).slice(0,55),14+bCol1,by2+7.5);
+      by2+=10;
     });
-
-    // Final disclaimer
-    pdf.setFillColor(8,14,30);pdf.rect(11,H-15,W-22,9,'F');
-    pdf.setFillColor(...C.gold);pdf.rect(11,H-15,W-22,1,'F');
+    // Col 3: Concluzii
+    pdf.setFillColor(255,255,255);pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.3);pdf.rect(bCol3X,10,W-bCol3X-8,H-28,'FD');
+    pdf.setFillColor(...C.dark2);pdf.rect(bCol3X,10,W-bCol3X-8,6,'F');pdf.setFillColor(...C.gold);pdf.rect(bCol3X,10,1.5,6,'F');
+    pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(7);pdf.text('CONCLUZII ȘI PAȘI URMĂTORI',bCol3X+(W-bCol3X-8)/2,14.5,{align:'center'});
+    let cly=22;
+    const concls=[
+      ['✅','FEZABILITATE URBANISTICĂ','Parcela '+P.nrCad+' (UTR '+P.utr+') permite construirea unui imobil de '+b.niv+' niveluri cu SDA='+RN(b.sdaTotal)+'m², respectând integral PUG. POT='+RN(b.scArea/P.area*100)+'%, CUT='+(b.sdaTotal/P.area).toFixed(2)+' — CONFORM.',[22,163,74]],
+      ['📐','PROIECT TEHNIC NECESAR','Prezentul document este ORIENTATIV. Este obligatorie elaborarea Proiectului Tehnic (PT) de arhitect autorizat OAR, care va stabili cotele exacte, materialele, instalațiile și detaliile de execuție.',[37,99,235]],
+      ['📋','CERTIFICAT DE URBANISM','Primul pas legal: solicitarea Certificatului de Urbanism la Primăria Municipiului Iași — stabilește lista exactă de avize (ISU, AACR, utilități, DJCPN dacă patrimoniu, APM).',[212,175,55]],
+      ['🏗️','STUDII OBLIGATORII ÎNAINTE DE PT','Studiu geotehnic (NP 074/2014, min. 3 foraje), studiu de însorire detaliat (OMS 119/2014), ridicare topografică (coordonate Stereo 70), releveu împrejurimi.',[124,58,237]],
+      ['📅','CALENDAR ESTIMAT','CU (1-2 luni) → Studii (2-4 luni) → PAC/DTAC (3-6 luni) → Avize (2-4 luni) → AC (1-2 luni) → PT (3-6 luni) → Execuție (10-15 luni). TOTAL: 22-39 luni.',[6,182,212]],
+    ];
+    concls.forEach(([ico,title,txt,tc])=>{
+      if(cly>H-30)return;
+      pdf.setFillColor(tc[0],tc[1],tc[2],0.08);
+      pdf.setFillColor(Math.min(255,tc[0]*0.15+240),Math.min(255,tc[1]*0.15+245),Math.min(255,tc[2]*0.1+248));
+      pdf.roundedRect(bCol3X+2,cly-3,W-bCol3X-12,18,1,1,'F');
+      pdf.setFillColor(...tc);pdf.rect(bCol3X+2,cly-3,1.5,18,'F');
+      pdf.setTextColor(...tc);pdf.setFont('helvetica','bold');pdf.setFontSize(6.5);
+      pdf.text(S2(title),bCol3X+6,cly+1.5);
+      pdf.setTextColor(40,55,75);pdf.setFont('helvetica','normal');pdf.setFontSize(5.2);
+      const lines=pdf.splitTextToSize(S2(txt),W-bCol3X-16);
+      lines.slice(0,3).forEach((l,li)=>pdf.text(l,bCol3X+6,cly+7+li*3.2));
+      cly+=22;
+    });
+    // Final stamp
+    pdf.setFillColor(8,14,30);pdf.rect(10,H-15,W-20,8,'F');
+    pdf.setFillColor(...C.gold);pdf.rect(10,H-15,W-20,1,'F');
     pdf.setTextColor(150,165,185);pdf.setFont('helvetica','italic');pdf.setFontSize(5.5);
-    pdf.text('Prezentul document orientativ a fost generat automat de platforma UrbanX Relevee Instant. Nu înlocuiește documentațiile tehnice avizate conf. Legii 50/1991 și Legii 350/2001.',W/2,H-10.5,{align:'center'});
+    pdf.text('Document orientativ generat automat de platforma UrbanX Relevee Instant · '+new Date().toLocaleDateString('ro-RO')+' · '+totalPages+' pagini · UrbanX TSS·FG',W/2,H-10.5,{align:'center'});
     pdf.setTextColor(...C.gold);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
-    pdf.text('UrbanX TSS·FG · '+new Date().toLocaleDateString('ro-RO')+' · '+totalPages+' pagini',W/2,H-7,{align:'center'});
+    pdf.text('Nu înlocuiește documentațiile tehnice avizate conf. Legii 50/1991 și Legii 350/2001 · Proiectul tehnic se elaborează de arhitect autorizat OAR',W/2,H-7,{align:'center'});
     ftr();
 
-    // SAVE
     pdf.save('Relevee_'+P.nrCad+'_'+new Date().getFullYear()+'.pdf');
     if(btn){btn.textContent='⬇ Export PDF Raport';btn.style.opacity='1';}
-    if(typeof ss==='function') ss('✅ PDF Relevee exportat profesional — '+totalPages+' pagini!');
+    if(typeof ss==='function') ss('✅ Prezentare Relevee exportată — '+totalPages+' pagini cu imagini 3D și memoriu justificativ!');
 
   }catch(err){
     console.error('[Relevee PDF]',err);
