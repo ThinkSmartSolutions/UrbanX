@@ -2626,7 +2626,7 @@ async function generateSSF(){
   ss('Se genereaza Scenariu de Siguranta la Foc...');
 
   const {pdf,W,H,DARK,DARK2,GOLD,GOLD2,BLUE,BLUE2,LIGHT,LIGHT2,RED,GREEN,ORANGE,PURPLE,GRAY2,GRAY3,GRAY4,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Scenariu de Siguranta la Foc','SSF',14);
-  const RED=[180,20,20], GREEN=[15,100,40], ORANGE=[180,90,10];
+  // RED, GREEN, ORANGE sunt disponibile din destructurarea _initStudyPdf de mai sus
   const caps=await _captureStudyMaps(ap,msg=>ss(msg));
 
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13;
@@ -5846,7 +5846,7 @@ async function generateWaterStudy(){
   const aedisH = S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||0;
   const areaNum = ap.area || 0;
   const caps = await _captureStudyMaps(ap, msg=>ss(msg));
-  const TEAL = [0,128,120];
+  // TEAL disponibil din destructurarea _initStudyPdf
 
   // ── PAGINA 1: COPERTĂ ────────────────────────────────────────────────────
   pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');
