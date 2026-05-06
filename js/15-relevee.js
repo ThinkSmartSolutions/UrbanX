@@ -1380,7 +1380,20 @@ async function _rvExportPDF(){
       bath:[196,181,253],hall:[203,213,225],core:[147,197,253],balcon:[254,249,195],
       commercial:[249,168,212],storage:[209,213,219],
     };
-    const S2=s=>String(s||'').replace(/[^\x20-\x7E\u00C0-\u024F]/g,' ').replace(/\s+/g,' ').trim().slice(0,300);
+    // S2: sanitizare text pentru jsPDF (WinAnsi/Helvetica)
+    // ș/Ș (U+0219/U+0218) → ş/Ş (cedilla, IN WinAnsi — vizual identic pt. română)
+    // ț/Ț (U+021B/U+021A) → ţ/Ţ (cedilla, IN WinAnsi — vizual identic pt. română)
+    // ă/Ă (U+0103/U+0102) → a/A (breve nu există în WinAnsi — fallback la bază)
+    // â/î rămân (U+00E2, U+00EE sunt IN WinAnsi)
+    const S2=s=>{
+      const r=String(s||'');
+      return r
+        .replace(/\u0219/g,'\u015F').replace(/\u0218/g,'\u015E')  // ș→ş  Ș→Ş
+        .replace(/\u021B/g,'\u0163').replace(/\u021A/g,'\u0162')  // ț→ţ  Ț→Ţ
+        .replace(/\u0103/g,'a').replace(/\u0102/g,'A')             // ă→a  Ă→A
+        .replace(/[^\x20-\x7E\u00C0-\u024F]/g,' ')
+        .replace(/\s+/g,' ').trim().slice(0,300);
+    };
     const RN=(n,d=0)=>isNaN(n)?'—':d?Number(n).toFixed(d):Math.round(n)+'';
     const addCap=(img,x,y,w,h,cap)=>{
       if(!img||img.length<200)return;
@@ -1401,7 +1414,7 @@ async function _rvExportPDF(){
       pdf.setFillColor(...C.dark2);pdf.rect(0,0,W,9,'F');
       pdf.setFillColor(...C.gold);pdf.rect(0,0,W,1.2,'F');
       pdf.setTextColor(...C.gold);pdf.setFont('helvetica','bold');pdf.setFontSize(7);pdf.text('URBANX',5,6.2);
-      pdf.setTextColor(150,165,185);pdf.setFont('helvetica','normal');pdf.setFontSize(5.5);pdf.text('RELEVEE INSTANT · Prezentare elaborată',18,6.2);
+      pdf.setTextColor(150,165,185);pdf.setFont('helvetica','normal');pdf.setFontSize(5.5);pdf.text('RELEVEE INSTANT · Prezentare elaborata',18,6.2);
       pdf.setTextColor(220,230,245);pdf.setFont('helvetica','bold');pdf.setFontSize(7.5);pdf.text(S2(title),W/2,6.2,{align:'center'});
       pdf.setTextColor(...C.gold);pdf.setFontSize(6.5);pdf.text('Pag. '+pg,W-5,6.2,{align:'right'});
     };
@@ -1868,7 +1881,8 @@ async function _rvExportPDF(){
     // ── CALCULE ────────────────────────────────────────────────────────
     const maxFL=Math.min(b.niv,4);
     // +3 pagini noi: Date Clădire, Inventar Goluri+Suprafețe, Celelalte 3 Fațade
-    totalPages=1+1+1+maxFL+1+1+1+1+1+1+1; // cover+situatie+dateClirii+planuri+inv+fatada+3fatade+sectiune+axono+memoriu+bilant
+    // totalPages: estimat; pgN la final = nr. real de pagini generate
+    totalPages=1+1+1+Math.min(maxFL,3)+1+1+1+1+1+1+1; // ~estimat; pgN va afisa valoarea reala
     const fnLabel=(P.fn||'rezidential_colectiv').replace(/_/g,' ');
     const potOk=b.scArea/P.area<=P.pot+.001;
     const cutOk=b.sdaTotal/P.area<=P.cut+.001;
@@ -2784,7 +2798,7 @@ async function _rvExportPDF(){
     pdf.setFillColor(8,14,30);pdf.rect(10,H-15,W-20,8,'F');
     pdf.setFillColor(...C.gold);pdf.rect(10,H-15,W-20,1,'F');
     pdf.setTextColor(150,165,185);pdf.setFont('helvetica','italic');pdf.setFontSize(5.5);
-    pdf.text('Document orientativ generat automat de platforma UrbanX Relevee Instant · '+new Date().toLocaleDateString('ro-RO')+' · '+totalPages+' pagini · UrbanX TSS·FG',W/2,H-10.5,{align:'center'});
+    pdf.text('Document orientativ generat automat de platforma UrbanX Relevee Instant · '+new Date().toLocaleDateString('ro-RO')+' · '+pgN+' pagini · UrbanX TSS·FG',W/2,H-10.5,{align:'center'});
     pdf.setTextColor(...C.gold);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
     pdf.text('Nu înlocuiește documentațiile tehnice avizate conf. Legii 50/1991 și Legii 350/2001 · Proiectul tehnic se elaborează de arhitect autorizat OAR',W/2,H-7,{align:'center'});
     ftr();
@@ -2793,7 +2807,7 @@ async function _rvExportPDF(){
     const pdfFileName=`Releveu_Arhitectural_Nr.${S2(P.nrCad)}_UTR-${S2(P.utr)}_${S2(fnLabel.replace(/\s+/g,'_').slice(0,20))}_${dateForFile}.pdf`;
     pdf.save(pdfFileName);
     if(btn){btn.textContent='⬇ Export PDF Raport';btn.style.opacity='1';}
-    if(typeof ss==='function') ss('✅ Prezentare Relevee exportată — '+totalPages+' pagini cu imagini 3D și memoriu justificativ!');
+    if(typeof ss==='function') ss('✅ Prezentare Relevee exportată — '+pgN+' pagini cu imagini 3D si memoriu justificativ!');
 
   }catch(err){
     console.error('[Relevee PDF]',err);
