@@ -4269,6 +4269,7 @@ async function generateSolarStudy(){
   cy2=tblRow(['Înălțime H (clădire ce umbrește)','Distanță min. N (H/tan15°)','Distanță min. NE/NV','Distanță min. E/V','Obs.'],cy2,true,[48,42,42,38,12]);
   [[10,37.3,26.4,18.7,'P+3'],[15,56.0,39.6,28.0,'P+4'],[20,74.6,52.7,37.3,'P+6'],[25,93.3,65.9,46.6,'P+8'],[30,112.0,79.2,56.0,'P+9'],[aedisH,+(aedisH/Math.tan(15*Math.PI/180)).toFixed(1),+(aedisH/Math.tan(20*Math.PI/180)).toFixed(1),+(aedisH/Math.tan(30*Math.PI/180)).toFixed(1),'H PROPUS']].forEach(([h,dN,dNE,dE,niv2])=>{
     const isThis=h===aedisH;
+    const bg=isThis?[255,250,220]:[248,248,252];
     pdf.setFillColor(...bg);pdf.rect(14,cy2-5.5,W-28,8,'F');
     pdf.setDrawColor(...GRAY4);pdf.setLineWidth(0.15);pdf.line(14,cy2+2.5,W-14,cy2+2.5);
     const vs=[h+'m',dN+'m',dNE+'m',dE+'m',niv2];
@@ -4873,6 +4874,8 @@ async function generateStudiuFezabilitate(paramOverrides){
   }
   let _swotOTY=cy;
   for(let i=0;i<maxOT;i++){
+    const rh=_swotOTRH[i];
+    const bg=i%2===0?[248,252,255]:[240,245,252];
     pdf.setFillColor(...bg);pdf.rect(14,_swotOTY,swotW*2,rh,'F');
     pdf.setDrawColor(...GRAY4);pdf.setLineWidth(0.15);
     pdf.line(14,_swotOTY+rh,14+swotW*2,_swotOTY+rh);
