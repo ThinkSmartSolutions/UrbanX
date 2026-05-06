@@ -217,11 +217,12 @@ async function generateShadowStudy(){
   cy=sec('8.1. CALCUL ALTITUDINE SOLARA DETALIATA - SOLSTITIU IARNA (21 DECEMBRIE)',cy);cy+=2;
   cy=tblRow(['Ora','Azimut solar','Alt. solara','Umbra (m)','Regim OMS','Insorire directa'],cy,true,[20,30,28,28,35,41]);
   [6,7,8,9,10,11,12,13,14,15,16,17,18].forEach(h=>{
-    const sh=shadowLen(aedisH,alt);
     const D2R=Math.PI/180;
     const decl=-23.45*Math.cos(D2R*(360/365)*(355+10));
     const ha=(h-12)*15;
     const sinA=Math.sin(lat*D2R)*Math.sin(decl*D2R)+Math.cos(lat*D2R)*Math.cos(decl*D2R)*Math.cos(ha*D2R);
+    const alt=Math.asin(Math.max(-1,Math.min(1,sinA)))*180/Math.PI;
+    const sh=shadowLen(aedisH,alt);
     const cosA=-(Math.cos(lat*D2R)*Math.sin(decl*D2R)-Math.sin(lat*D2R)*Math.cos(decl*D2R)*Math.cos(ha*D2R))/Math.sqrt(1-sinA*sinA);
     const az=h>=12?(Math.acos(Math.max(-1,Math.min(1,cosA)))*180/Math.PI):(360-Math.acos(Math.max(-1,Math.min(1,cosA)))*180/Math.PI);
     const regime=alt<1?'Sub orizont':alt<15?'ATN Sub prag':'OK Conform';
@@ -523,7 +524,7 @@ async function generateNoiseStudy(){
   cy2=tblRow(['Prioritate','Măsură acustică','Rw/ΔLw obținut','Cost est. (EUR)','Normă aplicabilă'],cy2,true,[18,75,22,24,43]);
   [['***','Geam triplu Rw≥38dB pe fațada S + N (dacă Leq>55dBa)','Rw 38-42 dB',''+Math.round(areaNum*2.5).toLocaleString('en-US')+' EUR','SR 10009:2017 + C 125-2013'],
    ['***','Șapă flotantă 5cm pe vată minerala — TOATE nivelurile','ΔLw 20-25 dB',''+Math.round(sdTotal*50).toLocaleString('en-US')+' EUR','C 125-2013 art.5 — obligatoriu multietaj'],
-   ['**','Fațadă ventilată cu vată minerala 10-15cm fațade N/NE','Rw +5-8 dB',''+Math.round(scMax*150).toLocaleString('en-US')+' EUR','C 125-2013 + Legea 372/2005 (NZEB)'],
+   ['**','Fațadă ventilată cu vată minerala 10-15cm fațade N/NE','Rw +5-8 dB',''+Math.round((areaNum*(parseFloat(params?.pot)||35)/100)*150).toLocaleString('en-US')+' EUR','C 125-2013 + Legea 372/2005 (NZEB)'],
    ['**','Ventilare mecanică cu recuperator caldură (nu ferestre deschise)','Protecție completă',''+Math.round(sdTotal*25).toLocaleString('en-US')+' EUR','SR EN 15251 — confort interior'],
    ['*','Zonificare acustică: funcțiuni zgomotoase la fațadă stradală, dormitoare spre curte','—','0 EUR (proiect)','NP 016-97 + OMS 119/2014'],
   ].forEach(r=>cy2=tblRow(r,cy2,false,[18,75,22,24,43]));
@@ -3878,9 +3879,11 @@ async function generateSolarStudy(){
   };
   const shadowLen=(h,alt)=>alt>0.5?(h/Math.tan(alt*Math.PI/180)).toFixed(1):'—';
   const sunrise=(latD,doy)=>{
-    const cosH=-Math.tan(latD*D2R)*Math.tan(decl*D2R);
+    const D2R_s=Math.PI/180;
+    const decl_s=-23.45*Math.cos(D2R_s*(360/365)*(doy+10));
+    const cosH=-Math.tan(latD*D2R_s)*Math.tan(decl_s*D2R_s);
     if(cosH>1) return null;if(cosH<-1) return 0;
-    return 12-Math.acos(cosH)/D2R/15;
+    return 12-Math.acos(cosH)/D2R_s/15;
   };
 
   // Zilele cheie
@@ -6117,7 +6120,7 @@ async function generateWaterStudy(){
     {criteriu:'Nivel freatic (NFA)',valoare:S2(hidro.nfa||apaCfg.nfa),status:'ATENTIE',obs:'Studiu geotehnic obligatoriu NP 074/2014 pentru confirmarea NFA exact',remediere:'Comandați studiu geotehnic cu cel puțin 2 foraje pe amplasament înainte de proiectare fundație'},
     {criteriu:'Distanță față de curs apă',valoare:apaCfg.distanta_curs_principal+'m',status:_dtga_aproape?'BLOCAT':'OK',obs:_dtga_aproape?'Sub 200m — aviz amplasament obligatoriu':'Distanță suficientă față de curs principal',remediere:_dtga_aproape?'Aviz amplasament curs de apă obligatoriu de la '+S2(apaCfg.DA)+' cf. Legii 107/1996 Art.40':'Verificați că nu sunt cursuri de apă temporare necartografiate'},
   ]); }catch(_ce){console.warn('[concluzii]',_ce.message);}
-  pdf.save('DTGA_Ape_'+S2(nrcad)+'_'+new Date().getFullYear()+'.pdf');
+  try{ pdf.save('DTGA_Ape_'+S2(nrcad)+'_'+new Date().getFullYear()+'.pdf'); }catch(e){ pdf.save('DTGA_Ape_partial.pdf'); }
   ss('✅ Studiu Gospodărire Ape DTGA generat (9 pagini) — '+S2(apaCfg.DA));
 }
 
