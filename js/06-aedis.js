@@ -1447,52 +1447,6 @@ function getZgomotConfig(){ return S_UAT.zgomot||{zona_acustica:'II',Lzsn_limita
 function getVantConfig(){ return S_UAT.vant||{zona:'III',v_ref:30,presiune_vant:0.55,directie_dominanta:'NV',norm:'CR 1-1-4/2012',factor_teren:'II'}; }
 function getTraficConfig(){ return S_UAT.trafic||{viteza_proiectare:50,TMA_ref:8000,norm_parcaje:'NP 051/2012 rev.'}; }
 function getMediuConfig(){ return S_UAT.mediu||{sv_minim_procent:20,norm:'Legea 24/2007'}; }
-
-// ── Config Apele Române — per UAT ─────────────────────────────────────────
-const _APA_ROMANA_CFG = {
-  'municipiul-iasi':     {DA:'DA Prut-Bârlad',DA_oras:'Iași',DA_adresa:'Bd. Carol I nr. 1, Iași 700505',DA_tel:'0232/213.135',DA_email:'office@daprut.rowater.ro',DA_web:'http://www.rowater.ro/daprut',bazin:'Prut-Bârlad',sub_bazin:'Bazinul Bahlui',cursuri:['Râul Bahlui (5.2km N)','Râul Jijia (14km NE)','Pârâul Nicolina (2.8km SV)'],risc_inundabil:'Mediu (lunca Bahlui) / Scăzut (platouri)',zona_inundabila:'Q100: mal stâng Bahlui',distanta_curs_principal:1200,arie_naturala:'ROSCI0105 Lunca Prutului (35km)'},
-  'municipiul-botosani': {DA:'DA Prut-Bârlad',DA_oras:'Iași',DA_adresa:'Bd. Carol I nr. 1, Iași 700505',DA_tel:'0232/213.135',DA_email:'office@daprut.rowater.ro',DA_web:'http://www.rowater.ro/daprut',bazin:'Prut-Bârlad',sub_bazin:'Bazinul Jijia',cursuri:['Râul Jijia (1.5km E)','Pârâul Dresleuca (3km V)'],risc_inundabil:'Mediu (lunca Jijia)',zona_inundabila:'Q100: lunca Jijia est',distanta_curs_principal:1500,arie_naturala:'ROSPA0067 Lacurile de acumulare Stânca-Costești (25km)'},
-  'municipiul-suceava':  {DA:'DA Siret',DA_oras:'Bacău',DA_adresa:'Str. Cuza Vodă nr. 1, Bacău 600274',DA_tel:'0234/511.510',DA_email:'office@dasiret.rowater.ro',DA_web:'http://www.rowater.ro/dasiret',bazin:'Siret',sub_bazin:'Bazinul Suceava',cursuri:['Râul Suceava (0.8km N)','Râul Sucevița (8km V)'],risc_inundabil:'Mediu (lunca Suceava)',zona_inundabila:'Q100: malul drept Suceava',distanta_curs_principal:800,arie_naturala:'ROSCI0229 Râul Suceava între Rădăuți și Mihoveni (5km)'},
-  'municipiul-falticeni': {DA:'DA Siret',DA_oras:'Bacău',DA_adresa:'Str. Cuza Vodă nr. 1, Bacău 600274',DA_tel:'0234/511.510',DA_email:'office@dasiret.rowater.ro',DA_web:'http://www.rowater.ro/dasiret',bazin:'Siret',sub_bazin:'Bazinul Moldova',cursuri:['Râul Moldova (2.5km E)'],risc_inundabil:'Scăzut-Mediu',zona_inundabila:'Q100: lunca Moldova',distanta_curs_principal:2500,arie_naturala:null},
-  'municipiul-radauti':   {DA:'DA Siret',DA_oras:'Bacău',DA_adresa:'Str. Cuza Vodă nr. 1, Bacău 600274',DA_tel:'0234/511.510',DA_email:'office@dasiret.rowater.ro',DA_web:'http://www.rowater.ro/dasiret',bazin:'Siret',sub_bazin:'Bazinul Suceava',cursuri:['Râul Suceava (1.2km S)'],risc_inundabil:'Mediu',zona_inundabila:'Q100: malul drept Suceava',distanta_curs_principal:1200,arie_naturala:'ROSCI0229 Râul Suceava'},
-  'municipiul-piatra-neamt':{DA:'DA Siret',DA_oras:'Bacău',DA_adresa:'Str. Cuza Vodă nr. 1, Bacău 600274',DA_tel:'0234/511.510',DA_email:'office@dasiret.rowater.ro',DA_web:'http://www.rowater.ro/dasiret',bazin:'Siret',sub_bazin:'Bazinul Bistrița',cursuri:['Râul Bistrița (0.5km S)','Lacul de acumulare Bâtca Doamnei (1km N)'],risc_inundabil:'Ridicat (malul Bistriței)',zona_inundabila:'Q100: lunca Bistrița — reglementat PLRM Siret',distanta_curs_principal:500,arie_naturala:'ROSCI0038 Cheile Bicazului — Hășmaș (30km)'},
-  'municipiul-roman':     {DA:'DA Siret',DA_oras:'Bacău',DA_adresa:'Str. Cuza Vodă nr. 1, Bacău 600274',DA_tel:'0234/511.510',DA_email:'office@dasiret.rowater.ro',DA_web:'http://www.rowater.ro/dasiret',bazin:'Siret',sub_bazin:'Confluența Moldova-Siret',cursuri:['Râul Siret (2km E)','Râul Moldova (0.6km V)'],risc_inundabil:'Mediu-Ridicat (zone de confluență)',zona_inundabila:'Q100: lunca Siret și Moldova',distanta_curs_principal:600,arie_naturala:null},
-  'oras-targu-neamt':     {DA:'DA Siret',DA_oras:'Bacău',DA_adresa:'Str. Cuza Vodă nr. 1, Bacău 600274',DA_tel:'0234/511.510',DA_email:'office@dasiret.rowater.ro',DA_web:'http://www.rowater.ro/dasiret',bazin:'Siret',sub_bazin:'Bazinul Ozana',cursuri:['Pârâul Ozana (0.8km)'],risc_inundabil:'Scăzut',zona_inundabila:'Q100: lunca Ozana',distanta_curs_principal:800,arie_naturala:null},
-  'municipiul-bacau':     {DA:'DA Siret',DA_oras:'Bacău',DA_adresa:'Str. Cuza Vodă nr. 1, Bacău 600274',DA_tel:'0234/511.510',DA_email:'office@dasiret.rowater.ro',DA_web:'http://www.rowater.ro/dasiret',bazin:'Siret',sub_bazin:'Bazinul Bistrița',cursuri:['Râul Bistrița (1.5km NE)','Râul Siret (5km E)'],risc_inundabil:'Mediu',zona_inundabila:'Q100: lunca Bistrița și Siret',distanta_curs_principal:1500,arie_naturala:null},
-  'municipiul-onesti':    {DA:'DA Siret',DA_oras:'Bacău',DA_adresa:'Str. Cuza Vodă nr. 1, Bacău 600274',DA_tel:'0234/511.510',DA_email:'office@dasiret.rowater.ro',DA_web:'http://www.rowater.ro/dasiret',bazin:'Siret',sub_bazin:'Bazinul Trotuș',cursuri:['Râul Trotuș (0.5km S)'],risc_inundabil:'Mediu-Ridicat',zona_inundabila:'Q100: lunca Trotuș',distanta_curs_principal:500,arie_naturala:null},
-  'municipiul-moinesti':  {DA:'DA Siret',DA_oras:'Bacău',DA_adresa:'Str. Cuza Vodă nr. 1, Bacău 600274',DA_tel:'0234/511.510',DA_email:'office@dasiret.rowater.ro',DA_web:'http://www.rowater.ro/dasiret',bazin:'Siret',sub_bazin:'Bazinul Trotuș',cursuri:['Pârâul Tazlău (1.2km)'],risc_inundabil:'Scăzut',zona_inundabila:'Q100: lunca Tazlău',distanta_curs_principal:1200,arie_naturala:null},
-  'municipiul-vaslui':    {DA:'DA Prut-Bârlad',DA_oras:'Iași',DA_adresa:'Bd. Carol I nr. 1, Iași 700505',DA_tel:'0232/213.135',DA_email:'office@daprut.rowater.ro',DA_web:'http://www.rowater.ro/daprut',bazin:'Prut-Bârlad',sub_bazin:'Bazinul Bârlad',cursuri:['Pârâul Vaslui (0.3km E)','Râul Bârlad (3km S)'],risc_inundabil:'Mediu (lunca Vaslui)',zona_inundabila:'Q100: lunca pârâului Vaslui',distanta_curs_principal:300,arie_naturala:null},
-  'municipiul-barlad':    {DA:'DA Prut-Bârlad',DA_oras:'Iași',DA_adresa:'Bd. Carol I nr. 1, Iași 700505',DA_tel:'0232/213.135',DA_email:'office@daprut.rowater.ro',DA_web:'http://www.rowater.ro/daprut',bazin:'Prut-Bârlad',sub_bazin:'Bazinul Bârlad',cursuri:['Râul Bârlad (0.4km E)'],risc_inundabil:'Mediu-Ridicat',zona_inundabila:'Q100: lunca Bârlad',distanta_curs_principal:400,arie_naturala:null},
-  'municipiul-husi':      {DA:'DA Prut-Bârlad',DA_oras:'Iași',DA_adresa:'Bd. Carol I nr. 1, Iași 700505',DA_tel:'0232/213.135',DA_email:'office@daprut.rowater.ro',DA_web:'http://www.rowater.ro/daprut',bazin:'Prut-Bârlad',sub_bazin:'Bazinul Prut',cursuri:['Râul Prut (8km E)','Pârâul Lohan (1km V)'],risc_inundabil:'Scăzut',zona_inundabila:'Q100: lunca Prut (departe)',distanta_curs_principal:1000,arie_naturala:'ROSPA0070 Lunca Mijlocie a Prutului (8km)'},
-  'municipiul-galati':    {DA:'DA Prut-Bârlad',DA_oras:'Iași',DA_adresa:'Bd. Carol I nr. 1, Iași 700505',DA_tel:'0232/213.135',DA_email:'office@daprut.rowater.ro',DA_web:'http://www.rowater.ro/daprut',bazin:'Dunăre',sub_bazin:'Confluența Siret-Prut-Dunăre',cursuri:['Fluviul Dunărea (1.5km S)','Râul Siret (15km NV)','Râul Prut (8km NE)'],risc_inundabil:'Ridicat (port Dunăre)',zona_inundabila:'Q100: zona portului și faleza',distanta_curs_principal:1500,arie_naturala:'ROSCI0103 Lunca Joasă a Prutului (8km)'},
-  'municipiul-tecuci':    {DA:'DA Prut-Bârlad',DA_oras:'Iași',DA_adresa:'Bd. Carol I nr. 1, Iași 700505',DA_tel:'0232/213.135',DA_email:'office@daprut.rowater.ro',DA_web:'http://www.rowater.ro/daprut',bazin:'Prut-Bârlad',sub_bazin:'Bazinul Bârlad',cursuri:['Râul Bârlad (0.5km V)'],risc_inundabil:'Mediu',zona_inundabila:'Q100: lunca Bârlad',distanta_curs_principal:500,arie_naturala:null},
-  'municipiul-focsani':   {DA:'DA Siret',DA_oras:'Bacău',DA_adresa:'Str. Cuza Vodă nr. 1, Bacău 600274',DA_tel:'0234/511.510',DA_email:'office@dasiret.rowater.ro',DA_web:'http://www.rowater.ro/dasiret',bazin:'Siret',sub_bazin:'Bazinul Milcov',cursuri:['Râul Milcov (1km E)','Râul Putna (8km NV)'],risc_inundabil:'Mediu',zona_inundabila:'Q100: lunca Milcov',distanta_curs_principal:1000,arie_naturala:null},
-  'municipiul-cluj-napoca':{DA:'DA Someș-Tisa',DA_oras:'Cluj-Napoca',DA_adresa:'Str. Vânătorului nr. 17, Cluj-Napoca 400213',DA_tel:'0264/433.082',DA_email:'office@dasomestisa.rowater.ro',DA_web:'http://www.rowater.ro/dasomes',bazin:'Someș-Tisa',sub_bazin:'Bazinul Someșul Mic',cursuri:['Râul Someșul Mic (0.4km S)'],risc_inundabil:'Mediu (lunca Someșul Mic)',zona_inundabila:'Q100: lunca Someșul Mic',distanta_curs_principal:400,arie_naturala:'ROSCI0227 Râul Crișul Negru (80km)'},
-  'municipiul-brasov':    {DA:'DA Olt',DA_oras:'Râmnicu Vâlcea',DA_adresa:'Str. Recea nr. 2, Rm. Vâlcea 240272',DA_tel:'0250/737.890',DA_email:'office@daolt.rowater.ro',DA_web:'http://www.rowater.ro/daolt',bazin:'Olt',sub_bazin:'Bazinul Bârsa',cursuri:['Râul Bârsa (2km SE)','Pârâul Graft (1km N)'],risc_inundabil:'Scăzut-Mediu',zona_inundabila:'Q100: lunca Bârsa',distanta_curs_principal:2000,arie_naturala:'ROSCI0122 Munții Bucegi (20km)'},
-  'municipiul-timisoara':  {DA:'DA Banat',DA_oras:'Timișoara',DA_adresa:'Str. Gheorghe Lazăr nr. 2A, Timișoara 300081',DA_tel:'0256/491.595',DA_email:'office@dabanat.rowater.ro',DA_web:'http://www.rowater.ro/dabanat',bazin:'Banat',sub_bazin:'Bazinul Bega',cursuri:['Canalul Bega (1.8km NV)'],risc_inundabil:'Scăzut (canal regularizat)',zona_inundabila:'Q100: zona Fabric-Fabric',distanta_curs_principal:1800,arie_naturala:'ROSCI0226 Râul Bega între Topolovăț și Timișoara (5km)'},
-  'municipiul-craiova':    {DA:'DA Jiu',DA_oras:'Craiova',DA_adresa:'Str. Brestei nr. 2, Craiova 200432',DA_tel:'0251/420.130',DA_email:'office@dajiu.rowater.ro',DA_web:'http://www.rowater.ro/dajiu',bazin:'Jiu',sub_bazin:'Bazinul Jiu inferior',cursuri:['Râul Jiu (3.5km V)'],risc_inundabil:'Mediu',zona_inundabila:'Q100: lunca Jiu vest',distanta_curs_principal:3500,arie_naturala:null},
-  'municipiul-constanta':  {DA:'DA Dobrogea-Litoral',DA_oras:'Constanța',DA_adresa:'Str. Mircea cel Bătrân nr. 127, Constanța 900527',DA_tel:'0241/545.520',DA_email:'office@dadl.rowater.ro',DA_web:'http://www.rowater.ro/dadl',bazin:'Dobrogea-Litoral',sub_bazin:'Litoral Marea Neagră',cursuri:['Marea Neagră (3km E)','Lacul Tăbăcărie (1km NV)'],risc_inundabil:'Scăzut (platou dobrogean)',zona_inundabila:'Q100: zona joasă port',distanta_curs_principal:1000,arie_naturala:'ROSCI0269 Zona Marină Vama Veche-2 Mai (45km)'},
-  'municipiul-bucuresti':  {DA:'ABA Argeș-Vedea + DA Argeș-Vedea',DA_oras:'Pitești',DA_adresa:'Str. Eroilor nr. 1, Pitești 110192',DA_tel:'0248/213.000',DA_email:'office@daarges.rowater.ro',DA_web:'http://www.rowater.ro/daarges',bazin:'Argeș-Vedea',sub_bazin:'Bazinul Dâmbovița + Colentina',cursuri:['Râul Dâmbovița (canalizat)','Lacurile Colentina (șir)'],risc_inundabil:'Scăzut (lucrări de regularizare extinse)',zona_inundabila:'Q100: sectoare neconstrolate',distanta_curs_principal:500,arie_naturala:'ROSPA0043 Ilfov-București (perimetrul Bălteni)'},
-};
-function getApaConfig(){
-  const uatId = S_UAT?.id || 'municipiul-iasi';
-  const base = _APA_ROMANA_CFG[uatId] || _APA_ROMANA_CFG['municipiul-iasi'];
-  const hidro = S_UAT?.hidro || {};
-  const medApa = S_UAT?.mediu?.apa || {};
-  return {
-    ...base,
-    nfa: hidro.nfa || '2-4m',
-    tip_sol: hidro.tip_sol || 'Verificare necesară',
-    portanta: hidro.portanta || '150-200 kPa',
-    risc_inundabil_hidro: hidro.risc_inundabil || 'Verificare necesară',
-    adancime_fundare: hidro.adancime_fundare || 'min. 0.9m',
-    operator_apa: medApa.operator || 'Operator regional',
-    sursa_apa: medApa.sursa_apa_potabila || 'Verificare locală',
-    retea_canalizare: medApa.retea_canalizare !== false,
-    receptori: medApa.receptori_naturali || [],
-    norm_principala: 'Legea 107/1996 + HG 930/2010 + Ord. 662/2006',
-  };
-}
 function getEIMConfig(){
   const m=S_UAT.mediu||{};
   return {
@@ -1620,7 +1574,7 @@ function showUATSelector(){
 
   const uatRows = (ids)=>ids.map(id=>{
     const u=UAT_REGISTRY[id]; if(!u) return '';
-    return `<div onclick="switchUAT('${id}');document.getElementById('uat-selector').remove()"
+    return `<div onclick="switchUAT('${id}');document.getElementById('uat-selector').remove();var b=document.getElementById('uat-selector-backdrop');if(b)b.remove()"
       style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:8px;cursor:pointer;border:1px solid ${id===S_UAT.id?'rgba(212,175,55,.4)':'rgba(255,255,255,.05)'};background:${id===S_UAT.id?'rgba(212,175,55,.07)':'transparent'};margin-bottom:2px;transition:background .15s"
       onmouseover="this.style.background='rgba(255,255,255,.04)'" onmouseout="this.style.background='${id===S_UAT.id?'rgba(212,175,55,.07)':'transparent'}'">
       <div>
@@ -1649,7 +1603,7 @@ function showUATSelector(){
         <span style="color:#d4af37;font-weight:800;font-size:13px">📍 Selectează UAT</span>
         <span style="color:#475569;font-size:9px;margin-left:6px">${Object.keys(UAT_REGISTRY).length} UAT-uri</span>
       </div>
-      <button onclick="document.getElementById('uat-selector').remove()" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#f87171;border-radius:7px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer">✕</button>
+      <button onclick="document.getElementById('uat-selector').remove();var b=document.getElementById('uat-selector-backdrop');if(b)b.remove()" style="touch-action:manipulation;-webkit-tap-highlight-color:transparent;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#f87171;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;min-width:44px;min-height:44px">✕</button>
     </div>
     <div style="overflow-y:auto;padding:10px 12px;flex:1">
       ${regionSections}
@@ -1658,8 +1612,34 @@ function showUATSelector(){
         <div style="font-size:8.5px;color:#64748b">PUG georeferențiat + cadastru index + reguli PUG</div>
         <div style="font-size:8.5px;color:#60a5fa;margin-top:3px">Format: data/&#123;uat-id&#125;/ · github.com/tss-fg/urbanx-data</div>
       </div>
+    </div>
+    <div style="padding:10px 12px;border-top:1px solid rgba(255,255,255,.07);flex-shrink:0">
+      <button onclick="document.getElementById('uat-selector').remove();var b=document.getElementById('uat-selector-backdrop');if(b)b.remove()"
+        style="touch-action:manipulation;-webkit-tap-highlight-color:transparent;width:100%;padding:12px;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#f87171;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;min-height:48px">
+        ✕ Închide
+      </button>
     </div>`;
   document.body.appendChild(div);
+
+  // Backdrop transparent — tap în afara selectorului îl închide
+  const backdrop = document.createElement('div');
+  backdrop.id = 'uat-selector-backdrop';
+  backdrop.style.cssText = 'position:fixed;inset:0;z-index:9199;background:transparent';
+  backdrop.onclick = () => {
+    div.remove();
+    backdrop.remove();
+  };
+  document.body.insertBefore(backdrop, div);
+
+  // Outside-click pe desktop (redundant cu backdrop dar sigur)
+  setTimeout(()=>{
+    document.addEventListener('click', function _uatClose(e){
+      if(!div.contains(e.target)){
+        div.remove(); backdrop.remove();
+        document.removeEventListener('click', _uatClose);
+      }
+    });
+  }, 100);
 }
 
 // ── LMI cultura.ro + CIMEC ───────────────────────────────────────────────
@@ -4220,6 +4200,32 @@ function _v3dUpdateLegend(){
 function aedisOpen(){
   AEDIS.open=true;
 
+  // ── Inițializare sursă etichete dimensionale (dacă nu există) ────────────
+  try{
+    if(!map.getSource('aedis-dim-src')){
+      map.addSource('aedis-dim-src',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
+    }
+    if(!map.getLayer('aedis-dim-layer')){
+      map.addLayer({
+        id:'aedis-dim-layer', type:'symbol', source:'aedis-dim-src',
+        layout:{
+          'text-field':['get','label'],
+          'text-size':11,
+          'text-font':['DIN Pro Bold','Arial Unicode MS Bold'],
+          'text-anchor':'center',
+          'text-justify':'center',
+          'text-allow-overlap':true,
+          'text-ignore-placement':true,
+        },
+        paint:{
+          'text-color':'#00ff88',
+          'text-halo-color':'rgba(0,0,0,0.85)',
+          'text-halo-width':1.8,
+        }
+      });
+    }
+  }catch(e){ console.warn('[aedisOpen] dim-layer:', e.message); }
+
   // ── Sincronizăm setările din Volum 3D → Urban3D ───────────────────────
   // Niveluri și H etaj
   const ap = S.parcels[S.activeParcel??0];
@@ -4523,7 +4529,7 @@ function aedisGetContent(){
         <button onclick="AEDIS.stil='${k}';AEDIS._stilOverride=true;aedisRender();if(typeof _v3dIsOpen==='function'&&_v3dIsOpen()&&typeof _v3dRebuildFast==='function')_v3dRebuildFast();if((S.vol.genDone||window.AEDIS3D?.active)&&typeof aedisGenerateAll==='function')setTimeout(()=>aedisGenerateAll(),0)" class="aedis-stil-btn${AEDIS.stil===k?' active':''}">
           ${v.label}<br>
           <div style="margin:3px 0">${swatches}</div>
-          <small style="opacity:0.7">${v.desc}</small>
+          <small style="opacity:0.85;font-size:10px;color:#94a3b8;line-height:1.4;display:block;margin-top:2px">${v.desc}</small>
         </button>`;
       }).join('')}
     </div>
@@ -4928,7 +4934,7 @@ function aedisGetContent(){
       style="background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.4);color:#4ade80;font-size:9px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 8px"
       title="LOISIR — Amenajare spații publice">🌿<span style="font-size:8px">Loisir</span></button>
     <button onclick="aedisAIRender()" class="aedis-dim-btn" style="background:rgba(212,175,55,.15);border-color:rgba(212,175,55,.4);color:#d4af37;font-size:10px" title="AI Render fotorealist (necesită API key Fal.ai)">🎨 AI</button>
-    <button onclick="AEDIS.showDim=!AEDIS.showDim;aedisRender();if(typeof _aedisToggleDimLabels==='function')_aedisToggleDimLabels()" 
+    <button onclick="AEDIS.showDim=!AEDIS.showDim;aedisRender();if(typeof _aedisToggleDimLabels==='function')_aedisToggleDimLabels();if(S.vol.genDone&&typeof updateDistanceLines==='function')updateDistanceLines()" 
       class="aedis-dim-btn${AEDIS.showDim?' active':''}" title="Etichete dimensionale (toggle)">📏</button>
     <button onclick="aedisClose()" class="aedis-close-btn">✕</button>
   </div>`;
