@@ -2335,6 +2335,12 @@ function _rvInject(){
   <div class="rv-sep"></div>
   <div class="rv-timer"><div class="rv-tdot" id="rv-tdot"></div><span id="rv-tval">00.0s</span></div>
   <div class="rv-tinfo" id="rv-tinfo">Se generează releveele…</div>
+  <button onclick="_rvExportPDF()" title="Exportă raportul complet PDF — toate planșele, memoriu, normative"
+    style="margin-left:8px;height:32px;padding:0 14px;border-radius:7px;border:1.5px solid rgba(212,175,55,.6);background:linear-gradient(135deg,rgba(212,175,55,.22),rgba(212,175,55,.12));color:#F5C518;cursor:pointer;font-size:11px;font-weight:800;font-family:'Space Grotesk',sans-serif;display:flex;align-items:center;gap:6px;letter-spacing:.03em;flex-shrink:0;transition:all .15s;"
+    onmouseover="this.style.background='linear-gradient(135deg,rgba(212,175,55,.38),rgba(212,175,55,.25))'"
+    onmouseout="this.style.background='linear-gradient(135deg,rgba(212,175,55,.22),rgba(212,175,55,.12))'">
+    📄 Export PDF
+  </button>
   <button class="rv-close-btn" onclick="closeRelevee()" title="Închide">✕</button>
 </div>
 <div class="rv-body">
