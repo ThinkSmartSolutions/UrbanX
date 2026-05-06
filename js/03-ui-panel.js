@@ -450,6 +450,7 @@ function htmlMobRapoarte(){
     ${btn('generateShadowStudy()','251,146,60','🌑','Studiu Umbre & Obstrucție','Umbre proiectate, distanțe critice','umbre')}
     ${btn('generateNoiseStudy()','167,139,250','🔇','Studiu Acustic Urban','Zgomot, SR 10009/2017','acustic')}
     ${btn('generateWindStudy()','56,189,248','🌬','Studiu Vânt & Confort Pietonal','Criteriu Lawson, zone calm','vant')}
+    ${btn('generateWaterStudy()','34,211,238','💧','Studiu Gospodărire Ape — DTGA','Aviz Apele Române, inundabilitate','apa')}
     ${btn('generateGreenStudy()','74,222,128','🌿','Studiu Spații Verzi','SV necesar, plantare, permeabilitate','verde')}
     ${btn('generateMobilityStudy()','244,114,182','🚗','Studiu Mobilitate & Parcaje','Parcaje, accese, NP 051','mobilitate')}
     ${btn('generateDensityStudy()','148,163,184','📊','Studiu Densitate Urbană','CUT zonal, POT vecini','densitate')}
