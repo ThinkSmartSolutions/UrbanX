@@ -296,13 +296,13 @@ function mobNavClick(tab, btn){
   btn.classList.add('active');
   S.tab = tab;
 
-  // Actualizăm conținut și deschidem — try/catch: sheet-ul se deschide chiar dacă getContent aruncă
+  // Actualizăm conținut — try/catch: sheet-ul se deschide chiar dacă getContent aruncă
   const mb = document.getElementById('mob-body');
   if(mb){
     try{ mb.innerHTML = getContent(tab); }
     catch(e){
       console.error('[mobNavClick] getContent('+tab+'):', e.message);
-      mb.innerHTML = '<div class="card"><div style="color:#f87171;padding:12px">Eroare la încărcare tab.<br><small>'+e.message+'</small></div></div>';
+      mb.innerHTML = '<div class="card"><div style="color:#f87171;padding:12px">Eroare încărcare tab: '+e.message+'</div></div>';
     }
   }
   if(sh){
@@ -366,23 +366,19 @@ function ensureFAB(){
 }
 
 function renderAll(){
-  // Debug: log tab activ
-  // console.log('renderAll tab:', S.tab);
-  // Actualizăm tab-ul activ
+  // renderTab actualizează tc-{tab} și mob-body (cu scroll preservation)
   renderTab(S.tab);
   // Actualizăm tabs
   document.querySelectorAll('.ptab').forEach(b=>b.classList.toggle('active',b.dataset.t===S.tab));
   document.querySelectorAll('.tc').forEach(c=>c.classList.toggle('active',c.id===`tc-${S.tab}`));
   document.querySelectorAll('.mtab').forEach(b=>b.classList.toggle('active',b.dataset.mt===S.tab));
-  // Mobile sync
+  // Mobile: renderTab a actualizat deja mob-body — NU mai facem innerHTML direct (ar reseta scroll-ul)
+  // Desktop: dacă mob-sheet e deschis, actualizăm și acolo
   const mb=_g('mob-body');
-  if(mb){
-    if(window.innerWidth<=840){
-      mb.innerHTML=getContent(S.tab);
-      // Overlay-ul de căutare (addr/cad) e separat de mob-body → nu e afectat
-    } else if(_g('mob-sheet')?.classList.contains('open')){
-      mb.innerHTML=getContent(S.tab);
-    }
+  if(mb && window.innerWidth>840 && _g('mob-sheet')?.classList.contains('open')){
+    const savedScroll = mb.scrollTop;
+    mb.innerHTML=getContent(S.tab);
+    if(savedScroll > 0) mb.scrollTop=savedScroll;
   }
   setTimeout(draw2D,60);
 }
@@ -391,7 +387,7 @@ function renderTab(tab){
   try{
     const html=getContent(tab);
 
-    // Desktop panel — tc-{tab}
+    // Desktop: tc-{tab} — cu scroll preservation
     const el=document.getElementById('tc-'+tab);
     if(el){
       const savedScroll = el.scrollTop;
@@ -399,7 +395,7 @@ function renderTab(tab){
       if(savedScroll > 0) el.scrollTop=savedScroll;
     }
 
-    // Mobile sheet — mob-body (daca tab activ e cel curent)
+    // Mobile: mob-body — cu scroll preservation
     if(window.innerWidth<=840 && tab===S.tab){
       const mb=document.getElementById('mob-body');
       if(mb){
@@ -409,7 +405,7 @@ function renderTab(tab){
       }
     }
   }catch(e){
-    console.error('renderTab error:', e);
+    console.error('renderTab('+tab+') error:', e);
     const el=document.getElementById('tc-'+tab);
     if(el) el.innerHTML='<div class="card"><div style="color:#f87171">Eroare: '+e.message+'</div></div>';
   }
@@ -856,8 +852,7 @@ function _htmlScenarii3(){
   const tabBtns = ['pug','max','optim'].map(k=>{
     const on = tab===k;
     return '<button onclick="S.vol3.activeTab=\''+k+'\';renderTab(\'proiect\')" '
-      +'style="touch-action:manipulation;-webkit-tap-highlight-color:transparent;'
-      +'flex:1;padding:9px 2px;border-radius:9px;border:2px solid '+(on?C[k]:'rgba(255,255,255,.08)')+';'
+      +'style="flex:1;padding:9px 2px;border-radius:9px;border:2px solid '+(on?C[k]:'rgba(255,255,255,.08)')+';'
       +'background:'+(on?C[k]+'18':'rgba(11,18,32,.6)')+';'
       +'color:'+(on?C[k]:'#475569')+';cursor:pointer;font-size:10px;font-weight:800;'
       +'display:flex;flex-direction:column;align-items:center;gap:3px;transition:all .15s">'
@@ -869,13 +864,13 @@ function _htmlScenarii3(){
 
   // ── Butoane generare ──────────────────────────────────────────────────
   const btnSingle = '<button onclick="generateSingleScenariu(\''+tab+'\')" '
-    +'style="touch-action:manipulation;-webkit-tap-highlight-color:transparent;flex:1;padding:10px 8px;border-radius:9px;border:1px solid '+C[tab]+';'
+    +'style="flex:1;padding:10px 8px;border-radius:9px;border:1px solid '+C[tab]+';'
     +'background:'+C[tab]+'18;color:'+C[tab]+';cursor:pointer;font-size:11px;font-weight:800">'
     +'⚡ '+IC[tab]+' '+LB[tab]
     +'</button>';
 
   const btnAll = '<button onclick="generateAllScenarii()" '
-    +'style="touch-action:manipulation;-webkit-tap-highlight-color:transparent;flex:1;padding:10px 8px;border-radius:9px;'
+    +'style="flex:1;padding:10px 8px;border-radius:9px;'
     +'background:linear-gradient(135deg,rgba(37,99,235,.35),rgba(217,119,6,.25),rgba(5,150,105,.35));'
     +'border:1px solid rgba(255,255,255,.18);color:#e2e8f0;cursor:pointer;font-size:11px;font-weight:800">'
     +'⚡ Toate 3 simultan'
@@ -930,12 +925,12 @@ function _htmlScenarii3(){
     +['pug','max','optim'].map(k=>{
       const on = act===k;
       return '<button onclick="_setActiveScenario3(\''+k+'\')" '
-        +'style="touch-action:manipulation;-webkit-tap-highlight-color:transparent;padding:7px 2px;border-radius:7px;border:1px solid '+(on?C[k]:'rgba(255,255,255,.08)')+';'
+        +'style="padding:7px 2px;border-radius:7px;border:1px solid '+(on?C[k]:'rgba(255,255,255,.08)')+';'
         +'background:'+(on?C[k]+'20':'transparent')+';color:'+(on?C[k]:'#475569')+';'
         +'cursor:pointer;font-size:10px;font-weight:700">'+IC[k]+' '+k.toUpperCase()+'</button>';
     }).join('')
     +'<button onclick="_setActiveScenario3(\'all\')" '
-    +'style="touch-action:manipulation;-webkit-tap-highlight-color:transparent;padding:7px 2px;border-radius:7px;border:1px solid '+(act==='all'?'#d4af37':'rgba(255,255,255,.08)')+';'
+    +'style="padding:7px 2px;border-radius:7px;border:1px solid '+(act==='all'?'#d4af37':'rgba(255,255,255,.08)')+';'
     +'background:'+(act==='all'?'rgba(212,175,55,.12)':'transparent')+';'
     +'color:'+(act==='all'?'#d4af37':'#475569')+';cursor:pointer;font-size:10px;font-weight:700">◉ Toate</button>'
     +'</div>'
