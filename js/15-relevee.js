@@ -1353,62 +1353,289 @@ async function _rvExportPDF(){
       });return y+5.5;
     };
 
-    // ── Draw plan ─────────────────────────────────────────────────────
+    // ── Draw plan — NIVEL CAD ──────────────────────────────────────────
     const drawPlan=(fl,P_,b_,ox,oy,sc)=>{
       const bW=b_.bW,bD=b_.bD;
+
+      // ── 1. Fundal parcelă + clădire ────────────────────────────────────
       pdf.setFillColor(248,249,252);pdf.rect(ox-P_.rl*sc,oy-P_.rf*sc,P_.W*sc,P_.D*sc,'F');
       pdf.setDrawColor(...C.gold);pdf.setLineWidth(0.25);pdf.setLineDashPattern([2,1.5],0);
       pdf.rect(ox-P_.rl*sc,oy-P_.rf*sc,P_.W*sc,P_.D*sc,'S');pdf.setLineDashPattern([],0);
-      pdf.setFillColor(245,246,250);pdf.rect(ox,oy,bW*sc,bD*sc,'F');
-      // structural grid
-      pdf.setDrawColor(220,228,240);pdf.setLineWidth(0.08);
-      for(let x=ox;x<=ox+bW*sc+0.1;x+=5.4*sc){pdf.setLineDashPattern([1,1.5],0);pdf.line(x,oy,x,oy+bD*sc);pdf.setLineDashPattern([],0);}
-      for(let y=oy;y<=oy+bD*sc+0.1;y+=3.6*sc){pdf.setLineDashPattern([1,1.5],0);pdf.line(ox,y,ox+bW*sc,y);pdf.setLineDashPattern([],0);}
-      const cm={living:C.living,bedroom:C.bedroom,bedroom2:C.bedroom,bedroom3:C.bedroom,kitchen:C.kitchen,bath:C.bath,wc:C.bath,hall:C.hall,storage:C.storage,core:C.core,office:C.bedroom,meeting:C.living,commercial:C.commercial,reception:C.commercial,balcon:C.balcon};
-      const sm={living:C.orange,bedroom:C.green,bedroom2:C.green,bedroom3:C.green,kitchen:C.cyan,bath:C.purple,wc:C.purple,hall:C.gray,storage:C.gray2,core:C.blue,office:C.green,meeting:C.orange,commercial:[180,50,200],reception:[180,50,200],balcon:C.gold};
-      fl.rects.sort((a,m)=>(a.zIdx||0)-(m.zIdx||0)).forEach(r=>{
+      pdf.setFillColor(252,252,254);pdf.rect(ox,oy,bW*sc,bD*sc,'F');
+
+      // ── 2. Grilă structurală cu bule alfanumerice ──────────────────────
+      // Calcul spatii grila bazat pe dimensiunile clădirii
+      const nGX=Math.max(3,Math.round(bW/4.5)),nGY=Math.max(2,Math.round(bD/3.8));
+      const gSpX=bW/nGX,gSpY=bD/nGY;
+      const bubR=2.8; // raza bula mm
+
+      // Linii grilă (punctate fine)
+      pdf.setDrawColor(190,200,220);pdf.setLineWidth(0.12);pdf.setLineDashPattern([1.5,1.5],0);
+      for(let gi=0;gi<=nGX;gi++){const gx=ox+gi*gSpX*sc;pdf.line(gx,oy-bubR*3,gx,oy+bD*sc+bubR*3);}
+      for(let gi=0;gi<=nGY;gi++){const gy=oy+gi*gSpY*sc;pdf.line(ox-bubR*3,gy,ox+bW*sc+bubR*3,gy);}
+      pdf.setLineDashPattern([],0);
+
+      // Bule numerice (sus + jos)
+      for(let gi=0;gi<=nGX;gi++){
+        const gx=ox+gi*gSpX*sc;
+        [oy-bubR*2.2,oy+bD*sc+bubR*2.2].forEach(gy2=>{
+          pdf.setFillColor(255,255,255);pdf.setDrawColor(30,50,100);pdf.setLineWidth(0.35);
+          pdf.circle(gx,gy2,bubR,'FD');
+          pdf.setTextColor(15,35,90);pdf.setFont('helvetica','bold');pdf.setFontSize(4);
+          pdf.text(String(gi+1),gx,gy2+1.3,{align:'center'});
+        });
+      }
+      // Bule literere (stânga + dreapta)
+      for(let gi=0;gi<=nGY;gi++){
+        const gy=oy+gi*gSpY*sc;
+        const ltr=String.fromCharCode(65+gi); // A,B,C...
+        [ox-bubR*2.2,ox+bW*sc+bubR*2.2].forEach(gx2=>{
+          pdf.setFillColor(255,255,255);pdf.setDrawColor(30,50,100);pdf.setLineWidth(0.35);
+          pdf.circle(gx2,gy,bubR,'FD');
+          pdf.setTextColor(15,35,90);pdf.setFont('helvetica','bold');pdf.setFontSize(4);
+          pdf.text(ltr,gx2,gy+1.3,{align:'center'});
+        });
+      }
+
+      // ── 3. Simboluri stâlpi la intersecții ────────────────────────────
+      const colSz=Math.max(1.2,0.4*sc); // 40cm coloane
+      for(let gi=0;gi<=nGX;gi++){
+        for(let gj=0;gj<=nGY;gj++){
+          const cx=ox+gi*gSpX*sc,cy=oy+gj*gSpY*sc;
+          if(cx<=ox+bW*sc+0.5&&cy<=oy+bD*sc+0.5){
+            pdf.setFillColor(20,40,85);
+            pdf.rect(cx-colSz/2,cy-colSz/2,colSz,colSz,'F');
+          }
+        }
+      }
+
+      // ── 4. Camere — umplutură colorată ────────────────────────────────
+      const cm={living:[255,240,210],bedroom:[220,248,225],bedroom2:[215,245,220],bedroom3:[210,242,218],
+        kitchen:[208,246,252],bath:[235,225,255],wc:[235,225,255],hall:[238,240,245],
+        storage:[228,230,235],core:[215,228,252],office:[218,242,220],meeting:[252,240,210],
+        commercial:[252,215,235],reception:[252,215,235],balcon:[252,250,215]};
+      const sm={living:[220,130,30],bedroom:[50,180,90],bedroom2:[50,180,90],bedroom3:[50,180,90],
+        kitchen:[20,160,190],bath:[130,80,200],wc:[130,80,200],hall:[100,115,140],
+        storage:[140,150,170],core:[40,100,210],office:[50,180,90],meeting:[220,130,30],
+        commercial:[180,30,140],reception:[180,30,140],balcon:[180,150,20]};
+
+      fl.rects.sort((a,m_)=>(a.zIdx||0)-(m_.zIdx||0)).forEach(r=>{
         const rx=ox+r.x*sc,ry=oy+r.y*sc,rw=r.w*sc,rh=r.h*sc;
-        const fc=cm[r.t]||C.hall,stk=sm[r.t]||C.gray;
+        if(rw<0.5||rh<0.5)return;
+        const fc=cm[r.t]||[238,240,245],stk=sm[r.t]||[100,115,140];
         pdf.setFillColor(...fc);
-        if(r.bal){pdf.setDrawColor(...C.gold);pdf.setLineWidth(0.3);pdf.setLineDashPattern([1.5,1],0);pdf.rect(rx,ry,rw,rh,'FD');pdf.setLineDashPattern([],0);}
-        else{pdf.setDrawColor(...stk);pdf.setLineWidth(r.t==='core'?0.8:0.4);pdf.rect(rx,ry,rw,rh,'FD');}
-        if(rw>7&&rh>5){
-          const lbl=(r.lbl||r.t).replace(/[\u{1F000}-\u{1FAFF}]/gu,'').trim();
-          const lines=lbl.split('\n').filter(Boolean);
-          const fsz=Math.min(5.5,rw/8,rh/lines.length/2.5);
-          pdf.setFont('helvetica','bold');pdf.setFontSize(fsz);
-          pdf.setTextColor(r.t==='core'?37:50,r.t==='core'?99:65,r.t==='core'?235:90);
-          lines.forEach((ln,li)=>pdf.text(S2(ln.slice(0,14)),rx+rw/2,ry+rh/2+(li-(lines.length-1)/2)*fsz*0.62,{align:'center'}));
-          if(!r.bal&&rw>10&&rh>8){
-            pdf.setFont('helvetica','normal');pdf.setFontSize(Math.min(4.2,fsz*0.75));pdf.setTextColor(100,120,140);
-            pdf.text(RN(r.w*r.h)+'m²',rx+rw/2,ry+rh/2+lines.length*fsz*0.37+2,{align:'center'});
+        if(r.bal){
+          pdf.setDrawColor(...C.gold);pdf.setLineWidth(0.4);pdf.setLineDashPattern([2,1],0);
+          pdf.rect(rx,ry,rw,rh,'FD');pdf.setLineDashPattern([],0);
+        } else {
+          const lw=r.t==='core'?1.0:r.apt<0?0.6:0.45;
+          pdf.setDrawColor(...stk);pdf.setLineWidth(lw);
+          pdf.rect(rx,ry,rw,rh,'FD');
+        }
+        // Hașuri oblice pentru pereți structurali (cores)
+        if(r.t==='core'){
+          pdf.save();
+          pdf.setDrawColor(50,80,160);pdf.setLineWidth(0.25);
+          const sp=Math.max(1.5,colSz);
+          for(let hi=-(rh);hi<rw+rh;hi+=sp){
+            const x1=Math.max(rx,rx+hi),y1=rx+hi<rx?ry+(rx-rx-hi):ry;
+            const x2=Math.min(rx+rw,rx+hi+rh),y2=x2==rx+rw?ry+(rx+rw-(rx+hi)):ry+rh;
+            if(x1<rx+rw&&x2>rx)pdf.line(x1,y1,x2,y2);
+          }
+          pdf.restore();
+        }
+      });
+
+      // ── 5. Perete exterior gros (simulat prin borduri multiple) ────────
+      const ewT=Math.max(1.5,0.25*sc); // 25cm perete exterior
+      pdf.setDrawColor(20,35,75);pdf.setLineWidth(ewT);
+      pdf.rect(ox+ewT/2,oy+ewT/2,bW*sc-ewT,bD*sc-ewT,'S');
+      // Linie interior perete (toc)
+      pdf.setDrawColor(80,100,130);pdf.setLineWidth(0.25);
+      pdf.rect(ox+ewT,oy+ewT,bW*sc-ewT*2,bD*sc-ewT*2,'S');
+
+      // ── 6. Ferestre — simbol dublu (toc + sticlă) ─────────────────────
+      fl.wins.forEach(w=>{
+        const wSC=(w.w||w.h||1.2)*sc;
+        const gapPx=ewT*0.85;
+        // Golul din perete (alb)
+        pdf.setFillColor(252,253,255);pdf.setDrawColor(255,255,255);pdf.setLineWidth(0.1);
+        if(w.wall==='N'){pdf.rect(ox+w.x*sc,oy-ewT,wSC,ewT,'F');}
+        else if(w.wall==='S'){pdf.rect(ox+w.x*sc,oy+bD*sc,wSC,ewT,'F');}
+        else if(w.wall==='V'){pdf.rect(ox-ewT,oy+w.y*sc,ewT,wSC,'F');}
+        else{pdf.rect(ox+bW*sc,oy+w.y*sc,ewT,wSC,'F');}
+        // Toc exterior + sticlă (3 linii: toc1, sticlă, toc2)
+        pdf.setDrawColor(30,130,190);pdf.setLineWidth(0.45);
+        if(w.wall==='N'||w.wall==='S'){
+          const fy=w.wall==='N'?oy-ewT:oy+bD*sc;
+          pdf.line(ox+w.x*sc,fy,ox+w.x*sc+wSC,fy); // toc exterior
+          pdf.line(ox+w.x*sc,fy+ewT,ox+w.x*sc+wSC,fy+ewT); // toc interior
+          pdf.setDrawColor(120,180,220);pdf.setLineWidth(0.8);
+          pdf.line(ox+w.x*sc,fy+ewT*0.5,ox+w.x*sc+wSC,fy+ewT*0.5); // sticlă
+        } else {
+          const fx=w.wall==='V'?ox-ewT:ox+bW*sc;
+          pdf.line(fx,oy+w.y*sc,fx,oy+w.y*sc+wSC);
+          pdf.line(fx+ewT,oy+w.y*sc,fx+ewT,oy+w.y*sc+wSC);
+          pdf.setDrawColor(120,180,220);pdf.setLineWidth(0.8);
+          pdf.line(fx+ewT*0.5,oy+w.y*sc,fx+ewT*0.5,oy+w.y*sc+wSC);
+        }
+      });
+
+      // ── 7. Uși — arc de deschidere ────────────────────────────────────
+      fl.doors.forEach(d=>{
+        const dx=ox+d.x*sc,dy_d=d.y!=null?oy+d.y*sc:oy+bD*sc;
+        const dw=d.w*sc;
+        const isMain=d.type==='main';
+        // Gol în perete
+        pdf.setFillColor(252,253,255);
+        if(isMain||d.y==null)pdf.rect(dx,oy+bD*sc-ewT,dw,ewT,'F');
+        else pdf.rect(dx-ewT/2,dy_d-ewT/2,dw+ewT,ewT,'F');
+        // Foaia ușii
+        const doorCol=isMain?C.orange:[40,60,100];
+        pdf.setDrawColor(...doorCol);
+        pdf.setLineWidth(isMain?0.7:0.45);
+        // Linia foii
+        if(isMain){
+          pdf.line(dx,oy+bD*sc,dx+dw,oy+bD*sc);
+          pdf.setDrawColor(234,100,20);pdf.setLineWidth(0.35);
+          pdf.ellipse(dx,oy+bD*sc,dw,dw,undefined); // aproximare arc
+          // Arc propriu-zis (quarter circle)
+          for(let a=0;a<=Math.PI/2;a+=0.15){pdf.setLineWidth(0.3);
+            const ax=dx+dw*Math.sin(a),ay=oy+bD*sc-dw*(1-Math.cos(a));
+            if(a>0){const prev_a=a-0.15;const pax=dx+dw*Math.sin(prev_a),pay=oy+bD*sc-dw*(1-Math.cos(prev_a));pdf.line(pax,pay,ax,ay);}
+          }
+        } else {
+          const sw=d.swing||'right';
+          if(sw==='right'){
+            pdf.line(dx,dy_d,dx+dw,dy_d);
+            for(let a=0;a<=Math.PI/2;a+=0.2){if(a>0){
+              const ax=dx+dw*Math.sin(a),ay=dy_d-dw*(1-Math.cos(a));
+              const pa=a-0.2,pax=dx+dw*Math.sin(pa),pay=dy_d-dw*(1-Math.cos(pa));
+              pdf.line(pax,pay,ax,ay);
+            }}
           }
         }
       });
-      pdf.setDrawColor(...C.wall);pdf.setLineWidth(1.2);pdf.rect(ox,oy,bW*sc,bD*sc,'S');
-      fl.wins.forEach(w=>{
-        pdf.setFillColor(200,235,255);pdf.setDrawColor(30,150,200);pdf.setLineWidth(0.7);
-        if(w.wall==='N') pdf.rect(ox+w.x*sc,oy-1.2,w.w*sc,1.6,'FD');
-        else if(w.wall==='S') pdf.rect(ox+w.x*sc,oy+bD*sc-0.4,w.w*sc,1.6,'FD');
-        else if(w.wall==='V') pdf.rect(ox-1.2,oy+w.y*sc,1.6,w.h*sc,'FD');
-        else if(w.wall==='E') pdf.rect(ox+bW*sc-0.4,oy+w.y*sc,1.6,w.h*sc,'FD');
+
+      // ── 8. Marcaje nivel (▽ cota) ──────────────────────────────────────
+      const cota=fl.floorIdx===0?'±0.00':'+'+(fl.floorIdx*P_.hn).toFixed(2);
+      fl.rects.filter(r=>r.apt>=0&&!r.bal&&r.w*r.h>6).slice(0,8).forEach(r=>{
+        const rx=ox+r.x*sc+r.w*sc/2,ry2=oy+r.y*sc+r.h*sc*0.78;
+        // Triunghi cotat
+        const ts=1.6;
+        pdf.setDrawColor(20,40,90);pdf.setLineWidth(0.4);
+        pdf.line(rx-ts,ry2,rx+ts,ry2);pdf.line(rx-ts,ry2,rx,ry2+ts*1.4);pdf.line(rx+ts,ry2,rx,ry2+ts*1.4);
+        pdf.setTextColor(15,35,90);pdf.setFont('helvetica','normal');pdf.setFontSize(3.8);
+        pdf.text(cota,rx,ry2+ts*1.4+2.5,{align:'center'});
       });
-      fl.doors.filter(d=>d.type==='main').forEach(d=>{
-        const dx=ox+d.x*sc;
-        pdf.setFillColor(255,255,255);pdf.rect(dx,oy+bD*sc-0.5,d.w*sc,1,'F');
-        pdf.setDrawColor(...C.orange);pdf.setLineWidth(0.8);pdf.line(dx,oy+bD*sc,dx+d.w*sc,oy+bD*sc);
+
+      // ── 9. Simboluri LIFT și SCĂRI ────────────────────────────────────
+      fl.rects.filter(r=>r.t==='core').forEach(core=>{
+        const rx=ox+core.x*sc,ry=oy+core.y*sc,rw=core.w*sc,rh=core.h*sc;
+        // Nucleu = zona scări + lift
+        const liftW=Math.min(rw*0.42,3.5*sc),liftH=Math.min(rh*0.58,4*sc);
+        const lx=rx+rw*0.52,ly=ry+rh*0.18;
+        // Simbolul liftului (pătrat cu X)
+        pdf.setFillColor(225,235,252);pdf.setDrawColor(40,80,160);pdf.setLineWidth(0.5);
+        pdf.rect(lx,ly,liftW,liftH,'FD');
+        pdf.setDrawColor(80,120,200);pdf.setLineWidth(0.3);
+        pdf.line(lx,ly,lx+liftW,ly+liftH);pdf.line(lx+liftW,ly,lx,ly+liftH);
+        pdf.setTextColor(15,60,160);pdf.setFont('helvetica','bold');pdf.setFontSize(3.5);
+        pdf.text('LIFT',lx+liftW/2,ly+liftH+3.5,{align:'center'});
+        // Simbolul scărilor (linii orizontale paralele cu săgeată)
+        const stX=rx+rw*0.04,stY=ry+rh*0.08,stW=rw*0.44,stH=rh*0.78;
+        const nSteps=Math.max(5,Math.floor(stH/2.5));
+        pdf.setFillColor(238,242,252);pdf.setDrawColor(40,70,140);pdf.setLineWidth(0.4);
+        pdf.rect(stX,stY,stW,stH,'FD');
+        pdf.setDrawColor(60,90,160);pdf.setLineWidth(0.2);
+        for(let si=1;si<nSteps;si++)pdf.line(stX,stY+si*(stH/nSteps),stX+stW,stY+si*(stH/nSteps));
+        // Săgeată direcție
+        const arY=stY+stH*0.5;
+        pdf.setDrawColor(30,60,140);pdf.setLineWidth(0.5);
+        pdf.line(stX+stW*0.25,arY,stX+stW*0.75,arY);
+        pdf.line(stX+stW*0.55,arY-1.5,stX+stW*0.75,arY);
+        pdf.line(stX+stW*0.55,arY+1.5,stX+stW*0.75,arY);
       });
-      // Street
-      pdf.setFillColor(220,225,238);pdf.rect(ox-P_.rl*sc,oy+bD*sc+P_.rs*sc,P_.W*sc,4,'F');
-      pdf.setTextColor(80,100,130);pdf.setFont('helvetica','bold');pdf.setFontSize(5);
-      pdf.text('▲  FRONT STRADAL  ·  '+P_.frontDir,ox-P_.rl*sc+P_.W*sc/2,oy+bD*sc+P_.rs*sc+3,{align:'center'});
-      // dims
-      pdf.setDrawColor(...C.gold);pdf.setLineWidth(0.2);pdf.setLineDashPattern([1.5,1],0);
-      pdf.line(ox,oy+bD*sc+1.5,ox+bW*sc,oy+bD*sc+1.5);pdf.setLineDashPattern([],0);
-      pdf.setTextColor(...C.gold);pdf.setFont('helvetica','bold');pdf.setFontSize(5);
-      pdf.text(bW.toFixed(1)+'m',ox+bW*sc/2,oy+bD*sc+5,{align:'center'});
-      pdf.setLineDashPattern([1.5,1],0);pdf.line(ox-1.5,oy,ox-1.5,oy+bD*sc);pdf.setLineDashPattern([],0);
-      pdf.save();pdf.translate(ox-4.5,oy+bD*sc/2);pdf.rotate(90);pdf.setFontSize(5);pdf.text(bD.toFixed(1)+'m',0,0,{align:'center'});pdf.restore();
+
+      // ── 10. Etichete profesionale camere ──────────────────────────────
+      const typeNm={living:'LIVING / SALON',bedroom:'DORMITOR 1',bedroom2:'DORMITOR 2',bedroom3:'DORMITOR 3',
+        kitchen:'BUCĂTĂRIE',bath:'BAIE',wc:'WC',hall:'HOL / CORIDOR',storage:'DEPOZITARE',
+        core:'CASA SCĂRILOR / LIFT',office:'SPAȚIU BIROURI',meeting:'SALĂ ȘEDINȚE',
+        commercial:'SPAȚIU COMERCIAL',reception:'RECEPȚIE',balcon:'BALCON / LOGGIE'};
+      fl.rects.forEach(r=>{
+        if(r.bal)return;
+        const rx=ox+r.x*sc,ry=oy+r.y*sc,rw=r.w*sc,rh=r.h*sc;
+        if(rw<7||rh<5)return;
+        const area=(r.w*r.h);
+        const nm=S2(typeNm[r.t]||String(r.lbl||r.t).toUpperCase()).replace(/[\u{1F000}-\u{1FAFF}]/gu,'').trim();
+        if(r.t==='core')return; // scările au simboluri proprii
+        // Funcțiunea (bold, albastru închis)
+        const fsz=Math.min(4.8,rw/10,rh/5);
+        pdf.setTextColor(15,40,90);pdf.setFont('helvetica','bold');pdf.setFontSize(fsz);
+        const lines=nm.split(' ');
+        // Max 2 rânduri
+        const l1=lines.slice(0,Math.ceil(lines.length/2)).join(' ');
+        const l2=lines.slice(Math.ceil(lines.length/2)).join(' ');
+        if(l2){
+          pdf.text(S2(l1),rx+rw/2,ry+rh/2-fsz*0.4,{align:'center'});
+          pdf.text(S2(l2),rx+rw/2,ry+rh/2+fsz*0.6,{align:'center'});
+        } else {
+          pdf.text(S2(l1),rx+rw/2,ry+rh/2+fsz*0.3,{align:'center'});
+        }
+        // Aria (normal, mic, gri)
+        if(rw>12&&rh>8){
+          pdf.setTextColor(70,90,120);pdf.setFont('helvetica','normal');pdf.setFontSize(Math.min(4,fsz*0.82));
+          pdf.text(area.toFixed(2)+' m²',rx+rw/2,ry+rh/2+(l2?fsz*1.6:fsz*1.0)+2,{align:'center'});
+        }
+      });
+
+      // ── 11. Cote în lanț (X) — dimensiuni per travee ──────────────────
+      const dimLineY=oy+bD*sc+8;
+      const dimLineX=ox-10;
+      pdf.setDrawColor(20,40,90);pdf.setLineWidth(0.3);
+
+      // Cote X (per travee)
+      let prevGx=ox;
+      for(let gi=1;gi<=nGX;gi++){
+        const gx=ox+gi*gSpX*sc;
+        pdf.line(prevGx,dimLineY,gx,dimLineY);
+        pdf.line(prevGx,dimLineY-2,prevGx,dimLineY+2);
+        pdf.line(gx,dimLineY-2,gx,dimLineY+2);
+        pdf.setTextColor(15,35,90);pdf.setFont('helvetica','normal');pdf.setFontSize(4);
+        pdf.text(gSpX.toFixed(2)+' m',(prevGx+gx)/2,dimLineY+4.5,{align:'center'});
+        prevGx=gx;
+      }
+      // Total X
+      pdf.setDrawColor(20,40,90);pdf.setLineWidth(0.5);
+      pdf.line(ox,dimLineY+7,ox+bW*sc,dimLineY+7);
+      pdf.line(ox,dimLineY+5,ox,dimLineY+9);pdf.line(ox+bW*sc,dimLineY+5,ox+bW*sc,dimLineY+9);
+      pdf.setTextColor(15,35,90);pdf.setFont('helvetica','bold');pdf.setFontSize(5);
+      pdf.text(bW.toFixed(2)+' m',ox+bW*sc/2,dimLineY+12,{align:'center'});
+
+      // Cote Y (per travee)
+      let prevGy=oy;
+      for(let gi=1;gi<=nGY;gi++){
+        const gy=oy+gi*gSpY*sc;
+        pdf.setDrawColor(20,40,90);pdf.setLineWidth(0.3);
+        pdf.line(dimLineX,prevGy,dimLineX,gy);
+        pdf.line(dimLineX-2,prevGy,dimLineX+2,prevGy);pdf.line(dimLineX-2,gy,dimLineX+2,gy);
+        pdf.save();pdf.translate(dimLineX-4.5,(prevGy+gy)/2);pdf.rotate(90);
+        pdf.setTextColor(15,35,90);pdf.setFont('helvetica','normal');pdf.setFontSize(4);
+        pdf.text(gSpY.toFixed(2)+' m',0,0,{align:'center'});pdf.restore();
+        prevGy=gy;
+      }
+      // Total Y
+      pdf.setDrawColor(20,40,90);pdf.setLineWidth(0.5);
+      pdf.line(dimLineX-8,oy,dimLineX-8,oy+bD*sc);
+      pdf.line(dimLineX-10,oy,dimLineX-6,oy);pdf.line(dimLineX-10,oy+bD*sc,dimLineX-6,oy+bD*sc);
+      pdf.save();pdf.translate(dimLineX-15,oy+bD*sc/2);pdf.rotate(90);
+      pdf.setTextColor(15,35,90);pdf.setFont('helvetica','bold');pdf.setFontSize(5);
+      pdf.text(bD.toFixed(2)+' m',0,0,{align:'center'});pdf.restore();
+
+      // ── 12. Stradă + front stradal ────────────────────────────────────
+      pdf.setFillColor(215,220,235);pdf.rect(ox-P_.rl*sc,oy+bD*sc+P_.rs*sc,P_.W*sc,4,'F');
+      pdf.setTextColor(55,75,115);pdf.setFont('helvetica','bold');pdf.setFontSize(5);
+      pdf.text('▲  FRONT STRADAL  ·  '+P_.frontDir+' · Nr.cad. '+S2(P_.nrCad),ox-P_.rl*sc+P_.W*sc/2,oy+bD*sc+P_.rs*sc+3,{align:'center'});
     };
     const drawNorth=(x,y,dir,sz)=>{
       const s=sz||7,rot={N:0,S:Math.PI,E:Math.PI/2,V:-Math.PI/2,NE:Math.PI/4,NV:-Math.PI/4,SE:Math.PI*3/4,SV:-Math.PI*3/4}[dir]||0;
@@ -1946,6 +2173,55 @@ async function _rvExportPDF(){
       pdf.setTextColor(60,80,105);pdf.setFont('helvetica','normal');pdf.setFontSize(5.5);pdf.text(S2(lab),12,tY+4);
       pdf.setTextColor(15,35,75);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);pdf.text(S2(val),10+halfW-4,tY+4,{align:'right'});
       tY+=5.5;
+    });
+
+    // ── BOMA / IPMS / GIF / ANCPI Standards Table ────────────────────
+    tY+=3;
+    pdf.setFillColor(...C.dark2);pdf.rect(10,tY,halfW-2,6,'F');
+    pdf.setFillColor(...C.gold);pdf.rect(10,tY,1.5,6,'F');
+    pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(6.5);
+    pdf.text('SUPRAFEȚE CONFORM STANDARDE INTERNAȚIONALE',10+(halfW-2)/2,tY+4.2,{align:'center'});
+    tY+=8;
+
+    // Calcule suprafete
+    const floorRects=fl0data.rects.filter(r=>!r.bal&&r.w>0.3&&r.h>0.3);
+    const coreArea=floorRects.filter(r=>r.t==='core'||r.apt===-1).reduce((s,r)=>s+r.w*r.h,0);
+    const corrArea=floorRects.filter(r=>r.apt<0&&r.t==='hall').reduce((s,r)=>s+r.w*r.h,0);
+    const usableRooms=floorRects.filter(r=>r.apt>=0&&!['core','hall'].includes(r.t));
+    const NIA=usableRooms.reduce((s,r)=>s+r.w*r.h,0);
+    const commonArea=coreArea+corrArea;
+    const GIA=b.scArea; // Gross Internal Area = SC (nivel)
+    const GFA=P.W*P.D; // Gross Floor Area (parcel footprint)
+    const numUnits=Math.max(1,Math.round(b.niv*b.cores.length*4));
+    const RentableIPMS=NIA+(commonArea/Math.max(1,numUnits)); // IPMS 2 per unit
+    const RentableBOMA=NIA*(1+commonArea/Math.max(1,GIA-commonArea)); // BOMA method
+    const LossFactor=(commonArea/GIA*100);
+    const RICS_NIA=NIA*0.97; // RICS: exclude pillars/thresholds
+    const DIN277_NGF=NIA+commonArea*0.7; // Netto-Grundfläche
+    const ANCPI_SU=NIA*0.95; // Suprafata utila cadastrala (fara gros pereti interiori)
+    const ANCPI_SC=GIA;
+
+    const stdRows=[
+      ['Standard','Denumire suprafață','Valoare','Descriere / Utilizare'],
+    ];
+    const boma_rows=[
+      ['BOMA 2017','Usable Area (UA)',RN(NIA,1)+' m²','Aria utilizabilă per chiriaș — fără zone comune'],
+      ['BOMA 2017','Rentable Area (RA)',RN(RentableBOMA,1)+' m²','UA + cotă proporțională zone comune (corridors, lifturi)'],
+      ['BOMA 2017','Loss Factor',RN(LossFactor,1)+'%','Procent pierdut prin zone comune — uzual 12-20%'],
+      ['IPMS 2 (GIA)','Gross Internal Area',RN(GIA,1)+' m²','Suprafata bruta interna — de la fata interioara a peretilor exteriori'],
+      ['IPMS 3 (NIA)','Net Internal Area',RN(NIA,1)+' m²','Suprafata neta utilizabila — fara pereti, circulatii comune, core'],
+      ['RICS CoMP','Net Internal Area',RN(RICS_NIA,1)+' m²','IPMS 3 minus praguri, stâlpi, nise sub 0.25m²'],
+      ['DIN 277 (DE)','Netto-Grundfläche',RN(DIN277_NGF,1)+' m²','NGF: suprafata neta totala (NF1+NF2+VF1+VF2)'],
+      ['ANCPI (RO)','Suprafață utilă (SU)',RN(ANCPI_SU,1)+' m²','Suprafata incaperilor principale — fara pereti, hol comun, bai/wc sub 1.2m'],
+      ['ANCPI (RO)','Suprafață construită (SC)',RN(ANCPI_SC,1)+' m²','Amprenta la sol (contur exterior) — cf. L7/1996 si ANCPI norme 2023'],
+      ['ANCPI (RO)','Suprafață desfașurată (SDA)',RN(b.sdaTotal,1)+' m²','Suma SC per toate nivelurile — folosita la autorizare L50/1991'],
+    ];
+
+    const bW_=[25,35,22,halfW-2-25-35-22];
+    tY=tblHdr(['Standard','Tip suprafață','Valoare','Utilizare / Obs.'],bW_,tY);
+    boma_rows.forEach(([std,tip,val,desc],ri)=>{
+      if(tY>H-18)return;
+      tY=tblRow([std,tip,val,desc],bW_,tY,ri%2===0);
     });
 
     // ── Inventar goluri ────────────────────────────────────────────────
