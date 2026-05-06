@@ -2662,13 +2662,13 @@ async function generateTrafficStudy(){
 // ── SCENARIU DE SIGURANTA LA FOC (SSF) ────────────────────────────────────
 // Conf. P118-2/2013, P118-1/1999, Legea 307/2006, OMAI 163/2007, SR EN 1838
 async function generateSSF(){
-  // Color safety fallback — ensure colors are arrays even if globals unavailable
-  const _DARK=typeof DARK!=='undefined'&&Array.isArray(DARK)?DARK:[8,21,42];
-  const _GOLD=typeof GOLD!=='undefined'&&Array.isArray(GOLD)?GOLD:[212,175,55];
-  const _BLUE=typeof BLUE!=='undefined'&&Array.isArray(BLUE)?BLUE:[59,130,246];
-  const _LIGHT=typeof LIGHT!=='undefined'&&Array.isArray(LIGHT)?LIGHT:[245,247,252];
-  const _RED=typeof RED!=='undefined'&&Array.isArray(RED)?RED:[220,38,38];
-  const _GREEN=typeof GREEN!=='undefined'&&Array.isArray(GREEN)?GREEN:[16,130,60];
+  // Color safety fallback — window. prefix evită temporal dead zone cu const-urile locale
+  const _DARK=Array.isArray(window.DARK)?window.DARK:[8,21,42];
+  const _GOLD=Array.isArray(window.GOLD)?window.GOLD:[212,175,55];
+  const _BLUE=Array.isArray(window.BLUE)?window.BLUE:[59,130,246];
+  const _LIGHT=Array.isArray(window.LIGHT)?window.LIGHT:[245,247,252];
+  const _RED=Array.isArray(window.RED)?window.RED:[220,38,38];
+  const _GREEN=Array.isArray(window.GREEN)?window.GREEN:[16,130,60];
   const ap=S.parcels[S.activeParcel??0];
   if(!ap?.geo?.geometry){ss('Selectati o parcela.');return;}
   ss('Se genereaza Scenariu de Siguranta la Foc...');
@@ -5072,10 +5072,12 @@ async function generateStudiuFezabilitate(paramOverrides){
   }
   let _swotOTY=cy;
   for(let i=0;i<maxOT;i++){
-    pdf.setFillColor(...bg);pdf.rect(14,_swotOTY,swotW*2,rh,'F');
-    pdf.setDrawColor(...GRAY4);pdf.setLineWidth(0.15);
+    const bgOT=i%2===0?[248,252,255]:[240,245,252];
+    const rh=_swotOTRH[i]||8;
+    pdf.setFillColor(...bgOT);pdf.rect(14,_swotOTY,swotW*2,rh,'F');
+    pdf.setDrawColor(...(GRAY4_sw||[200,210,218]));pdf.setLineWidth(0.15);
     pdf.line(14,_swotOTY+rh,14+swotW*2,_swotOTY+rh);
-    pdf.setDrawColor(...GRAY3);pdf.setLineWidth(0.3);
+    pdf.setDrawColor(...(GRAY3_sw||[130,145,160]));pdf.setLineWidth(0.3);
     pdf.line(14+swotW,_swotOTY,14+swotW,_swotOTY+rh);
     if(swotO[i]){
       pdf.setTextColor(20,50,98);pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');
