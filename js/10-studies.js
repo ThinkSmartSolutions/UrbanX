@@ -2750,6 +2750,10 @@ async function generateSSF(){
   // Acces ISU
   const _accesLungSSF = pArea>5000?65:pArea>2000?45:pArea>800?28:18;
   const _avizISU_SSF  = aedisH>28||niv>5||sdEst>600||_accesLungSSF>50||['comercial','industrial','depozit'].includes(fn);
+  // Variabile acces ISU necesare în SSF (definite separat față de generateMobilityStudy)
+  const _latime_min_ISU = aedisH > 12 ? 5.0 : 3.5;
+  const _needsPlatforma = _accesLungSSF > 50;
+  const _nrAccese = aedisH > 28 || scEst > 1000 ? 2 : 1;
 
   // ── PAG 1: COVER ─────────────────────────────────────────────────────────
   pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');pdf.setFillColor(10,20,45);pdf.rect(0,3,W,H-6,'F');
@@ -2873,7 +2877,7 @@ async function generateSSF(){
   cy=sec('6. INSTALATIA DE DETECTIE, ALARMARE SI AVERTIZARE LA INCENDIU',cy);cy+=2;
   cy=body('Instalatia de detectie si alarmare la incendiu (DAI) se proiecteaza conform P118-2/2013 Art. 9, SR EN 54 (parti 1-29) si OMAI 163/2007. Sistemul DAI trebuie sa asigure detectia automata a incendiului, alarmarea ocupantilor si transmiterea automata a semnalului la dispeceratul ISU sau la un serviciu privat de paza si interventie.',14,cy);cy+=4;
   const _daiOblig = _needsDetectie;
-  pdf.setFillColor(_daiOblig?[180,20,20]:[15,80,30][0],_daiOblig?20:80,_daiOblig?20:30);
+  pdf.setFillColor(...(_daiOblig?[180,20,20]:[15,80,30]));
   pdf.rect(14,cy,W-28,14,'F');
   pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');
   pdf.text('INSTALATIE DAI — '+(_daiOblig?'OBLIGATORIE (functiune, niv. sau suprafata depaseste pragul)':'RECOMANDATA (sub prag obligativitate, dar recomandata)'),W/2,cy+9,{align:'center'});
