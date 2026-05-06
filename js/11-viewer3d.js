@@ -434,6 +434,16 @@ function aedisOpen3DViewer(){
       </div>
     </div>
 
+    <!-- RAND 3: SLIDER ORA SOARELUI — vizibil doar la preset zi/golden -->
+    <div id="v3d-sun-row" style="background:#070e1c;border-bottom:1px solid rgba(212,175,55,.18);padding:5px 12px 6px;display:flex;align-items:center;gap:9px;flex-shrink:0">
+      <span style="font-size:10px;color:#d4af37;font-weight:700;flex-shrink:0;white-space:nowrap;letter-spacing:.03em">☀ Ora soarelui</span>
+      <input type="range" id="v3d-sun-slider" min="6" max="20" step="0.5" value="12"
+        oninput="_v3dSetSunHour(parseFloat(this.value))"
+        style="flex:1;height:4px;accent-color:#d4af37;cursor:pointer;min-width:80px;touch-action:manipulation">
+      <span id="v3d-sun-label" style="font-size:12px;font-weight:800;color:#fff4d0;min-width:38px;text-align:right;flex-shrink:0;letter-spacing:.02em">12:00</span>
+      <span id="v3d-sun-alt" style="font-size:9px;color:#94a3b8;min-width:36px;flex-shrink:0;text-align:right"></span>
+    </div>
+
     <!-- CANVAS -->
     <canvas id="v3d-canvas" style="flex:1;display:block;cursor:grab;touch-action:none;min-height:0"></canvas>
 
@@ -571,6 +581,15 @@ function _v3dBuild(ap){
   if(!canvas||!THREE){ _v3dStatus('❌ Three.js indisponibil'); return; }
   if(typeof V3D === 'undefined'){ console.error('V3D not initialized'); return; }
   window._v3dNight = document.getElementById('v3d-light')?.value === 'night' || false;
+  // Init slider: arata/ascunde in functie de preset curent
+  const _initPreset = document.getElementById('v3d-light')?.value||'day';
+  const _sunRowEl = document.getElementById('v3d-sun-row');
+  if(_sunRowEl) _sunRowEl.style.display = (_initPreset==='night'||_initPreset==='overcast')?'none':'flex';
+  // Reset slider la 12:00 la fiecare deschidere
+  const _sliderEl = document.getElementById('v3d-sun-slider');
+  if(_sliderEl){ _sliderEl.value='12'; }
+  const _lblEl = document.getElementById('v3d-sun-label');
+  if(_lblEl) _lblEl.textContent='12:00';
 
   // ── Asigurăm context 3D înainte de build ─────────────────────────────────
   // Dacă S.ctx e gol (Overpass a eșuat) → extragem din Mapbox rendered tiles
@@ -3350,6 +3369,14 @@ function _v3dApplyLight(preset,THREE,scene,r){
 
 function _v3dLight(preset){
   if(!V3D.scene||!window.THREE) return;
+  // Arata/ascunde slider-ul solar
+  const sunRow = document.getElementById('v3d-sun-row');
+  if(sunRow) sunRow.style.display = (preset==='night'||preset==='overcast') ? 'none' : 'flex';
+  if(preset!=='night'&&preset!=='overcast'){
+    // Re-aplica ora curenta a slider-ului
+    const sl = document.getElementById('v3d-sun-slider');
+    if(sl) _v3dSetSunHour(parseFloat(sl.value), preset);
+  }
 
   // Verifica daca schimbam intre zi/noapte — necesita rebuild complet
   // (lumini dinamice pt biserici, emissive speciale nu pot fi updatate incremental)
@@ -3507,3 +3534,114 @@ function _v3dControls(canvas,cam){
 
 
 // ── Refresh slider cu captură din viewer 3D ──────────────────────────────────
+
+// ── _v3dSetSunHour — poziționează soarele în scena 3D după ora zilei ─────────
+// Calcul solar real pentru lat ~47°N (Iași). Actualizează DirectionalLight
+// fără rebuild — smooth, în timp real.
+function _v3dSetSunHour(h, _preset){
+  // Actualizare label și altitudine
+  const hInt = Math.floor(h);
+  const hMin = Math.round((h - hInt) * 60);
+  const label = document.getElementById('v3d-sun-label');
+  const altEl = document.getElementById('v3d-sun-alt');
+  if(label) label.textContent = hInt+':'+(hMin<10?'0':'')+hMin;
+
+  if(!V3D.scene || !window.THREE) return;
+  if(window._v3dNight) return; // noapte — nu modifica soarele
+
+  // Latitudinea parcelei active — functioneaza pentru orice UAT din Romania
+  // Fallback 1: centrul parcelei active
+  // Fallback 2: centrul hartii curente (S.map)
+  // Fallback 3: centrul geografic Romania (45.9N)
+  const ap = S.parcels[S.activeParcel??0];
+  let lat = 45.9; // centrul geografic Romania — fallback final
+  try{
+    const c = turf.centerOfMass(ap.geo).geometry.coordinates;
+    lat = c[1]; // latitudine din parcela activa
+  } catch(e){
+    try{
+      // Fallback la centrul hartii Mapbox
+      const mc = (typeof map !== 'undefined') ? map.getCenter() : null;
+      if(mc && mc.lat) lat = mc.lat;
+    } catch(e2){}
+  }
+
+  // Calcul altitudine solara — ecuinoctiu (declinatie 0) — afisare neutra
+  const D2R = Math.PI / 180;
+  const decl = 0; // ~echinox, bun pentru afisare generica
+  const ha = (h - 12) * 15 * D2R;
+  const latR = lat * D2R;
+  const sinAlt = Math.sin(latR)*Math.sin(decl) + Math.cos(latR)*Math.cos(decl)*Math.cos(ha);
+  const altRad = Math.asin(Math.max(-0.15, Math.min(1, sinAlt)));
+  const altDeg = altRad * 180 / Math.PI;
+
+  if(altEl) altEl.textContent = altDeg > 0 ? altDeg.toFixed(0)+'°' : 'Sub orizont';
+
+  if(altDeg <= 0){
+    // Sub orizont: reducem lumina la aproape 0
+    V3D.scene.traverse(obj=>{
+      if(obj.isDirectionalLight && obj.castShadow){
+        obj.intensity = 0.1;
+      }
+    });
+    V3D._dirty = Math.max(V3D._dirty||0, 2);
+    return;
+  }
+
+  // Azimut solar
+  const sinAz = -Math.cos(decl)*Math.sin(ha)/Math.cos(altRad);
+  const cosAz = (Math.sin(decl)-Math.sin(latR)*Math.sin(altRad))/(Math.cos(latR)*Math.cos(altRad));
+  let az = Math.atan2(sinAz, cosAz); // radiani, N=0, E=+PI/2
+  if(h > 12) az = Math.abs(az); else az = -Math.abs(az); // fix AM/PM
+
+  // Conversie la coordonate Three.js (Y=sus, X=est, Z=nord)
+  const R = 200;
+  const sunX = -Math.sin(az) * Math.cos(altRad) * R; // est=+X (negat pt orientare scena)
+  const sunY = Math.sin(altRad) * R;
+  const sunZ = -Math.cos(az) * Math.cos(altRad) * R; // nord=+Z (negat)
+
+  // Culoare si intensitate functie de altitudine
+  let sunColor, sunIntensity, ambIntensity;
+  if(altDeg < 5){
+    sunColor='#ff5010'; sunIntensity=1.5; ambIntensity=0.4;
+  } else if(altDeg < 15){
+    sunColor='#ff9030'; sunIntensity=3.0; ambIntensity=0.7;
+  } else if(altDeg < 30){
+    sunColor='#ffc060'; sunIntensity=4.5; ambIntensity=1.0;
+  } else {
+    sunColor='#fff4d0'; sunIntensity=6.0; ambIntensity=1.2;
+  }
+
+  // Update sky gradient bazat pe ora
+  if(V3D.scene._skyCanvas && V3D.scene._skyCtx && V3D.scene._skyTex){
+    const skyCtx = V3D.scene._skyCtx;
+    const grad = skyCtx.createLinearGradient(0,0,0,512);
+    if(altDeg < 8){ // rasarit/apus
+      grad.addColorStop(0,'#1a1640'); grad.addColorStop(0.3,'#a03000');
+      grad.addColorStop(0.6,'#e86010'); grad.addColorStop(1,'#f8c060');
+    } else if(altDeg < 25){ // dimineata/seara
+      grad.addColorStop(0,'#1a3060'); grad.addColorStop(0.4,'#3a7090');
+      grad.addColorStop(0.75,'#90c0d8'); grad.addColorStop(1,'#d8eef8');
+    } else { // zi plina
+      grad.addColorStop(0,'#1565a8'); grad.addColorStop(0.35,'#4a90c4');
+      grad.addColorStop(0.7,'#90bfdc'); grad.addColorStop(1,'#e0eff8');
+    }
+    skyCtx.fillStyle=grad; skyCtx.fillRect(0,0,2,512);
+    V3D.scene._skyTex.needsUpdate=true;
+  }
+
+  // Aplica pozitie si culoare pe DirectionalLight (soarele)
+  V3D.scene.traverse(obj=>{
+    if(obj.isDirectionalLight && obj.castShadow){
+      obj.position.set(sunX, sunY, sunZ);
+      obj.color.set(sunColor);
+      obj.intensity = sunIntensity;
+    }
+    // Actualizeaza si ambient
+    if(obj.isAmbientLight){
+      obj.intensity = ambIntensity;
+    }
+  });
+
+  V3D._dirty = Math.max(V3D._dirty||0, 3);
+}
