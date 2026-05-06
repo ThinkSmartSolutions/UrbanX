@@ -6122,64 +6122,97 @@ async function generateWaterStudy(){
 // HELPER: Pagina de concluzii standardizată — adăugată la TOATE studiile
 // ═══════════════════════════════════════════════════════════════════════════
 function _addConcluziePage(pdf, W, H, S2, hdr, ftr, sec, body, tblRow, nrcad, utr, uat, params, aedisH, fn, pageNr, studyType, items){
-  // items = array de {criteriu, valoare, status:'OK'|'ATENTIE'|'BLOCAT', obs}
   try{
     pdf.addPage();
     pdf.setFillColor(245,247,252);pdf.rect(0,0,W,H,'F');
-    hdr('CONCLUZII SI RECOMANDARI — VERDICT FINAL',pageNr);ftr();
+    hdr(S2('CONCLUZII SI RECOMANDARI - VERDICT FINAL'),pageNr);ftr();
     let cy=33;
 
-    // Verdict global
+    // Verdict global — doar ASCII/Latin1 safe
     const nrBlocat = items.filter(i=>i.status==='BLOCAT').length;
     const nrAtentie = items.filter(i=>i.status==='ATENTIE').length;
     const verdictCol = nrBlocat>0?[180,20,20]:nrAtentie>0?[200,100,10]:[16,130,60];
-    const verdictText = nrBlocat>0?'CONSTRUIREA NU ESTE RECOMANDATĂ — NECESARE MODIFICĂRI':nrAtentie>0?'CONSTRUIREA POSIBILĂ CU CONDIȚII':'PROPUNERE CONFORMĂ — SE POATE AVIZA';
-    const verdictIco = nrBlocat>0?'✗':nrAtentie>0?'△':'✓';
+    // Texte ASCII pure — fara emoji/unicode
+    const verdictText = nrBlocat>0?
+      'CONSTRUIREA NU ESTE RECOMANDATA - NECESARE MODIFICARI':
+      nrAtentie>0?
+      'CONSTRUIREA POSIBILA CU CONDITII':
+      'PROPUNERE CONFORMA - SE POATE AVIZA';
+    const verdictPfx = nrBlocat>0?'[X]':nrAtentie>0?'[!]':'[OK]';
 
     pdf.setFillColor(...verdictCol);pdf.roundedRect(14,cy,W-28,16,2,2,'F');
     pdf.setTextColor(255,255,255);pdf.setFontSize(11);pdf.setFont('helvetica','bold');
-    pdf.text(verdictIco+' '+verdictText,W/2,cy+10.5,{align:'center'});
-    cy+=20;
+    pdf.text(verdictPfx+' '+verdictText,W/2,cy+10.5,{align:'center'});
+    cy+=22;
 
-    cy=sec('DATE PROPUNERE ANALIZATĂ',cy);cy+=2;
-    pdf.setFontSize(8);pdf.setFont('helvetica','normal');pdf.setTextColor(60,80,120);
-    [['Nr. Cadastral',nrcad],['UTR / Zonă PUG',utr],['UAT',uat],
-     ['Funcțiune propusă',S2(_stripEmoji(fn))],['Regim înălțime propus',(aedisH>0?aedisH.toFixed(1):params?.h||'—')+'m'],
-     ['POT propus',params?.pot?params.pot+'%':'Cf. PUG'],['CUT propus',params?.cut||'Cf. PUG'],
+    // Date propunere
+    pdf.setFillColor(8,21,42);pdf.roundedRect(14,cy,W-28,7,1,1,'F');
+    pdf.setTextColor(212,175,55);pdf.setFontSize(8);pdf.setFont('helvetica','bold');
+    pdf.text('DATE PROPUNERE ANALIZATA',18,cy+5);
+    cy+=9;
+
+    pdf.setFontSize(8);pdf.setFont('helvetica','normal');
+    [['Nr. Cadastral',nrcad],['UTR / Zona PUG',utr],['UAT',S2(uat)],
+     ['Functiune propusa',S2(_stripEmoji(fn))],
+     ['Regim inaltime propus',(aedisH>0?(+aedisH).toFixed(1):params?.h||'—')+'m'],
+     ['POT propus',params?.pot?params.pot+'%':'Cf. PUG'],
+     ['CUT propus',params?.cut||'Cf. PUG'],
     ].forEach(([k,v])=>{
       pdf.setTextColor(120,140,160);pdf.text(S2(k)+':',16,cy);
-      pdf.setTextColor(30,50,80);pdf.text(S2(String(v||'—')),80,cy);
+      pdf.setTextColor(30,50,80);pdf.text(S2(String(v||'—')),75,cy);
       cy+=5;
     });
-    cy+=3;
-
-    cy=sec('VERIFICĂRI '+S2(studyType.toUpperCase()),cy);cy+=2;
-    cy=tblRow(['Criteriu','Valoare','Status','Recomandare'],cy,true,[60,40,22,66]);
-    items.forEach(item=>{
-      const col = item.status==='OK'?[16,130,60]:item.status==='ATENTIE'?[200,100,10]:[180,20,20];
-      cy=tblRow([S2(item.criteriu||'—'),S2(String(item.valoare||'—')),item.status,S2(item.obs||'—')],cy,false,[60,40,22,66],false,false);
-      // Color the status cell
-    });
     cy+=4;
+
+    // Tabel verificari
+    pdf.setFillColor(8,21,42);pdf.roundedRect(14,cy,W-28,7,1,1,'F');
+    pdf.setTextColor(212,175,55);pdf.setFontSize(8);pdf.setFont('helvetica','bold');
+    pdf.text('VERIFICARI '+S2(studyType.toUpperCase()),18,cy+5);
+    cy+=9;
+
+    // Coloane: [65, 38, 20, 59] = 182mm (A4 - 28mm margini)
+    cy=tblRow([S2('Criteriu'),S2('Valoare'),S2('Status'),S2('Recomandare')],cy,true,[65,38,20,59]);
+    items.forEach(item=>{
+      cy=tblRow([
+        S2(item.criteriu||'—'),
+        S2(String(item.valoare||'—')),
+        S2(item.status||'—'),
+        S2(item.obs||'—')
+      ],cy,false,[65,38,20,59]);
+    });
+    cy+=5;
 
     // Ce trebuie schimbat
     const probleme = items.filter(i=>i.status!=='OK');
     if(probleme.length>0){
-      cy=sec('CE TREBUIE SCHIMBAT PENTRU AVIZARE',cy);cy+=2;
+      pdf.setFillColor(8,21,42);pdf.roundedRect(14,cy,W-28,7,1,1,'F');
+      pdf.setTextColor(212,175,55);pdf.setFontSize(8);pdf.setFont('helvetica','bold');
+      pdf.text('CE TREBUIE SCHIMBAT PENTRU AVIZARE',18,cy+5);
+      cy+=11;
+      pdf.setFont('helvetica','normal');
       probleme.forEach((p,i)=>{
         const pref=p.status==='BLOCAT'?'OBLIGATORIU: ':'RECOMANDAT: ';
-        const lines=pdf.splitTextToSize((i+1)+'. '+pref+S2(p.remediere||p.obs||'Verificare necesară'),W-32);
-        lines.forEach((l,li)=>pdf.text(l,16,cy+li*4.2));
-        cy+=lines.length*4.2+2;
-        if(cy>H-40){pdf.addPage();pdf.setFillColor(245,247,252);pdf.rect(0,0,W,H,'F');hdr('CONCLUZII — CONTINUARE',pageNr);ftr();cy=33;}
+        const txt=S2((i+1)+'. '+pref+(p.remediere||p.obs||'Verificare necesara'));
+        const lines=pdf.splitTextToSize(txt,W-34);
+        pdf.setTextColor(p.status==='BLOCAT'?180:30, p.status==='BLOCAT'?20:50, p.status==='BLOCAT'?20:80);
+        pdf.setFontSize(8);
+        lines.forEach((l,li)=>pdf.text(l,18,cy+li*4.5));
+        cy+=lines.length*4.5+3;
+        if(cy>H-35){pdf.addPage();pdf.setFillColor(245,247,252);pdf.rect(0,0,W,H,'F');hdr(S2('CONCLUZII - CONTINUARE'),pageNr);ftr();cy=33;}
       });
-      cy+=3;
+      cy+=2;
     }
 
-    // Disclaimer
-    pdf.setFillColor(240,244,250);pdf.roundedRect(14,cy,W-28,16,2,2,'F');
-    pdf.setTextColor(80,100,140);pdf.setFontSize(7.5);pdf.setFont('helvetica','italic');
-    pdf.text('Document orientativ generat automat · UrbanX TSS·FG · Nu înlocuiește avizele oficiale · Verificare obligatorie cu specialiști autorizați',W/2,cy+6,{align:'center'});
-    pdf.text('Baza de date: PUG '+S2(uat)+' în vigoare · Normative naționale actualizate 2024-2025 · Surse: ANM, INHGA, ANCPI, ANAR',W/2,cy+12,{align:'center'});
+    // Disclaimer — cu splitTextToSize ca sa nu se taie
+    if(cy>H-25){pdf.addPage();pdf.setFillColor(245,247,252);pdf.rect(0,0,W,H,'F');ftr();cy=H-30;}
+    pdf.setFillColor(240,244,250);pdf.roundedRect(14,cy,W-28,18,2,2,'F');
+    pdf.setTextColor(80,100,140);pdf.setFontSize(7);pdf.setFont('helvetica','italic');
+    const disc1=S2('Document orientativ generat automat - UrbanX TSS-FG - Nu inlocuieste avizele oficiale - Verificare obligatorie cu specialisti autorizati');
+    const disc2=S2('Baza de date: PUG '+String(uat||'')+' in vigoare - Normative nationale actualizate 2024-2025 - Surse: ANM, INHGA, ANCPI, ANAR');
+    const d1lines=pdf.splitTextToSize(disc1,W-36);
+    const d2lines=pdf.splitTextToSize(disc2,W-36);
+    let dy=cy+5;
+    d1lines.forEach(l=>{pdf.text(l,W/2,dy,{align:'center'});dy+=3.5;});
+    d2lines.forEach(l=>{pdf.text(l,W/2,dy,{align:'center'});dy+=3.5;});
   }catch(e){console.warn('[_addConcluziePage]',e.message);}
 }
