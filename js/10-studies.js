@@ -4308,6 +4308,7 @@ async function generateSolarStudy(){
 // ════════════════════════════════════════════════════════════════════════════
 
 async function generateStudiuFezabilitate(paramOverrides){
+  const ap=S.parcels[S.activeParcel??0];
   if(!ap?.geo?.geometry){ss('Selectați o parcelă pentru studiu.');return;}
   // Dacă nu avem overrides (chemat direct din buton), deschidem modalul de parametri
   if(!paramOverrides){
