@@ -6693,7 +6693,7 @@ async function generateEnergyCertificate(){
   pdf.text(energyCls.c,30,H*0.28+13,{align:'center'});
 
   // Building info block
-  pdf.setFillColor(10,25,55);pdf.roundedRect(14,H*0.52,W*0.42,H*0.36,'F');
+  pdf.setFillColor(10,25,55);pdf.roundedRect(14,H*0.52,W*0.42,H*0.36,2,2,'F');
   pdf.setFillColor(0,90,180);pdf.rect(14,H*0.52,3,H*0.36,'F');
   const infoItems=[
     ['Nr. cadastral:',nrcad],
