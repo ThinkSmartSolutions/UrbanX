@@ -52,6 +52,8 @@ async function generateShadowStudy(){
   const shadDec=shadowLen(aedisH,solarAlt(lat,11,12));
   const months=['Ian','Feb','Mar','Apr','Mai','Iun','Iul','Aug','Sep','Oct','Nov','Dec'];
   const half=(W-28)/2-2;
+  const areaNum=parseFloat(area)||0;
+  const sdTotal=Math.round(areaNum*(parseFloat(params?.cut)||1.0));
 
   // PAG 1: Cover
   pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');pdf.setFillColor(20,35,70);pdf.rect(0,3,W,H-6,'F');
@@ -215,7 +217,6 @@ async function generateShadowStudy(){
   cy=sec('8.1. CALCUL ALTITUDINE SOLARA DETALIATA - SOLSTITIU IARNA (21 DECEMBRIE)',cy);cy+=2;
   cy=tblRow(['Ora','Azimut solar','Alt. solara','Umbra (m)','Regim OMS','Insorire directa'],cy,true,[20,30,28,28,35,41]);
   [6,7,8,9,10,11,12,13,14,15,16,17,18].forEach(h=>{
-    const alt=solarAlt(lat,11,h);
     const sh=shadowLen(aedisH,alt);
     const D2R=Math.PI/180;
     const decl=-23.45*Math.cos(D2R*(360/365)*(355+10));
@@ -231,14 +232,11 @@ async function generateShadowStudy(){
   cy=tblRow(['Luna','Rasarit','Apus','Durata totala','Ore la alt>15°','Status'],cy,true,[25,28,28,35,35,31]);
   const months2=['Ianuarie','Februarie','Martie','Aprilie','Mai','Iunie','Iulie','August','Septembrie','Octombrie','Noiembrie','Decembrie'];
   months2.forEach((m,mi)=>{
-    const D2R=Math.PI/180;
-    const decl=-23.45*Math.cos(D2R*(360/365)*(mi*30+10));
     const cosH=-Math.tan(lat*D2R)*Math.tan(decl*D2R);
     const sunrise=cosH>1?null:(cosH<-1?0:12-Math.acos(cosH)/D2R/15);
     const sunset=cosH>1?null:(cosH<-1?24:12+Math.acos(cosH)/D2R/15);
     const totalH=sunrise&&sunset?((sunset-sunrise).toFixed(1)+'h'):'—';
     const oreConf=[6,7,8,9,10,11,12,13,14,15,16,17,18].filter(h=>solarAlt(lat,mi,h)>=15).length;
-    const status=oreConf>=4?'OK Bun':oreConf>=2?'ATN Limita':'NU Insuficient';
     const rsStr=sunrise?Math.floor(sunrise)+':'+(Math.round((sunrise%1)*60)).toString().padStart(2,'0'):'—';
     const apusStr=sunset?Math.floor(sunset)+':'+(Math.round((sunset%1)*60)).toString().padStart(2,'0'):'—';
     cy=tblRow([m,rsStr,apusStr,totalH,oreConf+'h',status],cy,false,[25,28,28,35,35,31]);
@@ -251,7 +249,6 @@ async function generateShadowStudy(){
   cy=body('Cladirea propusa cu inaltimea H='+aedisH.toFixed(1)+'m proiecteaza umbra maxima (solstitiu de iarna, ora 12:00) de '+( shadDec>500?'>500m':shadDec.toFixed(0)+'m')+' spre nord. Vecinii situati in aceasta directie pot fi afectati. Conform NP 016-97 si ghidului GT 043-2002, distanta minima recomandata dintre cladiri pentru asigurarea insolarii minime legale este functie de inaltimea cladirii umbritoare si de latitudine.',14,cy);cy+=4;
   cy=tblRow(['Inaltime cladire','Umbra la 12:00 (21 Dec)','Distanta minima recomandata','Comentariu'],cy,true,[40,50,60,32]);
   [5,8,10,12,14,16,18,20,25,28].forEach(h=>{
-    const sh=shadowLen(h,solarAlt(lat,11,12));
     const dmin=(h/Math.tan(15*Math.PI/180)).toFixed(0);
     const isCrt=Math.abs(h-aedisH)<1;
     cy=tblRow([h+'m',sh>500?'>500m':sh.toFixed(0)+'m',dmin+'m',isCrt?'← Cladire propusa':'—'],cy,false,[40,50,60,32]);
@@ -310,6 +307,8 @@ async function generateNoiseStudy(){
   const confZi=Ltotal<=limit_zi,confNoap=Ltotal<=limit_n;
   const isOk=confZi&&confNoap;
   const half=(W-28)/2-2;
+  const areaNum=parseFloat(area)||0;
+  const sdTotal=Math.round(areaNum*(parseFloat(params?.cut)||1.0));
 
   // PAG 1: Cover
   pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');pdf.setFillColor(20,35,70);pdf.rect(0,3,W,H-6,'F');
@@ -751,6 +750,7 @@ async function generateGreenStudy(){
   const scMax=Math.round(areaNum*potMax/100);
   const svObl=Math.max(svMin,Math.round(areaNum*0.20));
   const half=(W-28)/2-2;
+  const sdTotal=Math.round(areaNum*(parseFloat(params?.cut)||1.0));
 
   // PAG 1: Cover
   pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');pdf.setFillColor(20,35,70);pdf.rect(0,3,W,H-6,'F');
@@ -1028,6 +1028,7 @@ async function generateMobilityStudy(){
   const locuinteEst=Math.round(sdEst/70);
   const pkObl=Math.max(1,Math.round(locuinteEst*pkMin));
   const half=(W-28)/2-2;
+  const sdTotal=Math.round(areaNum*(parseFloat(params?.cut)||1.0));
 
   // PAG 1: Cover
   pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');pdf.setFillColor(20,35,70);pdf.rect(0,3,W,H-6,'F');
@@ -1127,7 +1128,6 @@ async function generateMobilityStudy(){
   cy=body('Necesarul de locuri de parcare pentru amplasamentul '+nrcad+' (UTR '+utr+', suprafata '+area+' mp) se calculeaza conform NP 051/2012 rev. (Normativ privind adaptarea cladirilor civile si spatiului urban la necesitatile persoanelor cu handicap) si prevederilor PUG '+getUATLabel()+' pentru UTR '+utr+'. Norma de parcaje prevede '+params?.pk+' loc/unitate locativa. Calculele de mai jos acopera toate functiunile principale posibile conform PUG.',14,cy);cy+=4;
   cy=tblRow(['Functiune propusa','Unitate de calcul','Norma (NP 051)','Cantitate','Total locuri'],cy,true,[55,38,30,30,29]);
   const scTotal=Math.round(parseFloat(area)*parseFloat(params?.pot||35)/100);
-  const sdTotal=Math.round(parseFloat(area)*parseFloat(params?.cut||1.0));
   [['Locuinte individuale','per unitate','2 loc/unitate',Math.ceil(sdTotal/120)+' unitati',Math.ceil(sdTotal/120)*2+' locuri'],
    ['Locuinte colective','per apartament','1 loc/apart',Math.ceil(sdTotal/60)+' apartamente',Math.ceil(sdTotal/60)+' locuri'],
    ['Birouri','per 100mp AU','2 loc/100mp',sdTotal+' mp AU',Math.ceil(sdTotal/100)*2+' locuri'],
@@ -1226,6 +1226,7 @@ async function generateDensityStudy(){
   const fnVecini={};vecini.forEach(f=>{const fn=f.properties?.fn||'yes';fnVecini[fn]=(fnVecini[fn]||0)+1;});
   const fnSorted=Object.entries(fnVecini).sort((a,b)=>b[1]-a[1]).slice(0,8);
   const half=(W-28)/2-2;
+  const sdTotal=Math.round(areaNum*(parseFloat(params?.cut)||1.0));
 
   // PAG 1: Cover
   pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');pdf.setFillColor(20,35,70);pdf.rect(0,3,W,H-6,'F');
@@ -2650,6 +2651,8 @@ async function generateSSF(){
   const pArea=parseFloat(area)||0;
   const scEst=Math.round(pArea*(parseFloat(params?.pot||35)/100));
   const sdEst=Math.round(pArea*(parseFloat(params?.cut||1.5)));
+  const sdTotal=sdEst; // alias pentru sectiunile de deviz PSI
+  const areaNum=pArea;
 
   // ── Calcule de baza SSF ─────────────────────────────────────────────────
   // Gradul de rezistenta la foc (GRF) — P118-1/1999 Tabelul 1
@@ -3161,15 +3164,12 @@ async function _cimecQueryWFS(lon, lat, radiusM){
 async function _cimecGetMapImage(lon, lat, radiusM, widthPx=800, heightPx=600){
   // WMS GetMap — fără CORS issues (imagine raster)
   const margin = radiusM*1.8/111320;
-  const bbox = `${lon-margin},${lat-margin},${lon+margin},${lat+margin}`;
-  const url = `${CIMEC_WMS}?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap`+
     `&LAYERS=LMI_Puncte,LMI_Zone,Situri_Arh`+
     `&BBOX=${bbox}&CRS=EPSG:4326`+
     `&WIDTH=${widthPx}&HEIGHT=${heightPx}`+
     `&FORMAT=image/png&TRANSPARENT=true&STYLES=`;
   try{
     // Încearcă direct (poate funcționa pe unele browsere)
-    const resp = await fetch(url, {signal:AbortSignal.timeout(12000), mode:'cors'});
     if(resp.ok && resp.headers.get('content-type')?.includes('image')){
       const blob = await resp.blob();
       return await new Promise(res=>{
@@ -3837,7 +3837,6 @@ function _closeAllMenus(){
 function _toggleVizMenu(e){
   if(e){ e.stopPropagation(); e.preventDefault(); }
   const m=document.getElementById('viz-menu');
-  const t=document.getElementById('tools-menu');
   if(!m) return;
   if(t) t.style.display='none';
   if(m.style.display==='block'){
@@ -3855,16 +3854,12 @@ function _toggleVizMenu(e){
 }
 function _toggleToolsMenu(e){
   if(e){ e.stopPropagation(); e.preventDefault(); }
-  const m=document.getElementById('tools-menu');
-  const v=document.getElementById('viz-menu');
   if(!m) return;
   if(v) v.style.display='none';
   if(m.style.display==='block'){
     m.style.display='none';
   } else {
-    const btn=(e&&e.currentTarget)||document.querySelector('#tools-group button');
     if(btn){
-      const r=btn.getBoundingClientRect();
       m.style.left=r.left+'px';
       m.style.top=(r.bottom+2)+'px';
     }
@@ -3875,17 +3870,13 @@ function _toggleToolsMenu(e){
 document.addEventListener('click',function(e){
   setTimeout(function(){
     if(!e.target.closest('#viz-group')&&!e.target.closest('#viz-menu')){
-      const m=document.getElementById('viz-menu');if(m)m.style.display='none';
     }
     if(!e.target.closest('#tools-group')&&!e.target.closest('#tools-menu')){
-      const m=document.getElementById('tools-menu');if(m)m.style.display='none';
     }
   },50);
 });
 
 function toggleRapoarteMenu(){
-  const m = document.getElementById('rapoarte-menu');
-  const btn = document.getElementById('btnPDF');
   if(!m) return;
   const isOpen = m.style.display !== 'none';
   if(isOpen){
@@ -3894,7 +3885,6 @@ function toggleRapoarteMenu(){
   }
   // Poziționăm dropdown-ul fix față de buton
   if(btn){
-    const r = btn.getBoundingClientRect();
     m.style.top  = (r.bottom + 6) + 'px';
     m.style.left = Math.max(8, r.right - m.offsetWidth || r.right - 224) + 'px';
     // Ajustăm după render ca să nu iasă din ecran
@@ -3947,8 +3937,6 @@ async function generateSolarStudy(){
   };
   const shadowLen=(h,alt)=>alt>0.5?(h/Math.tan(alt*Math.PI/180)).toFixed(1):'—';
   const sunrise=(latD,doy)=>{
-    const D2R=Math.PI/180;
-    const decl=-23.45*Math.cos(D2R*(360/365)*(doy+10));
     const cosH=-Math.tan(latD*D2R)*Math.tan(decl*D2R);
     if(cosH>1) return null;if(cosH<-1) return 0;
     return 12-Math.acos(cosH)/D2R/15;
@@ -4045,7 +4033,6 @@ async function generateSolarStudy(){
 
   cy=tblRow(['Sezon / Zi cheie','Alt. la 12:00','Alt. max.','Răsărit','Apus','Ore soare','Umbră (H='+aedisH.toFixed(1)+'m)'],cy,true,[42,22,20,18,18,22,40]);
   Object.values(solarData).forEach(sd=>{
-    const sr=sd.sr?((Math.floor(sd.sr)+':'+(Math.round((sd.sr%1)*60)).toString().padStart(2,'0'))):'—';
     const ss3=sd.ss2?((Math.floor(sd.ss2)+':'+(Math.round((sd.ss2%1)*60)).toString().padStart(2,'0'))):'—';
     cy=tblRow([sd.label,sd.alt12+'°',sd.maxAlt.toFixed(1)+'°',sr,ss3,(sd.oreSoare||'—')+'h',sd.shadAt12+'m'],cy,false,[42,22,20,18,18,22,40]);
   });
@@ -4240,11 +4227,6 @@ async function generateSolarStudy(){
     const orePerLuna=doys.map((doy,mi)=>{
       let ore=0;
       for(let h=6;h<=18;h+=0.5){
-        const D2R=Math.PI/180;
-        const decl=-23.45*Math.cos(D2R*(360/365)*(doy+10));
-        const ha=(h-12)*15;
-        const sinAlt=Math.sin(lat*D2R)*Math.sin(decl*D2R)+Math.cos(lat*D2R)*Math.cos(decl*D2R)*Math.cos(ha*D2R);
-        const alt=Math.asin(Math.max(-1,Math.min(1,sinAlt)))*180/Math.PI;
         const sinAz=Math.cos(decl*D2R)*Math.sin(ha*D2R)/Math.cos(alt*D2R);
         const az=Math.asin(Math.max(-1,Math.min(1,sinAz)))*180/Math.PI;
         const incidenta=Math.abs(az-or.azOff);
@@ -4253,7 +4235,6 @@ async function generateSolarStudy(){
       return Math.min(12,ore).toFixed(1);
     });
     const anual=(orePerLuna.reduce((s,v)=>s+parseFloat(v),0)/12).toFixed(1);
-    const vals=[or.name,...orePerLuna,anual];
     const rowStyle=or.best?GREEN:GRAY;
     const bg=or.best?[240,252,244]:[248,248,252];
     pdf.setFillColor(...bg);pdf.rect(14,cy2-5.5,W-28,8,'F');
@@ -4290,7 +4271,6 @@ async function generateSolarStudy(){
   cy2=tblRow(['Înălțime H (clădire ce umbrește)','Distanță min. N (H/tan15°)','Distanță min. NE/NV','Distanță min. E/V','Obs.'],cy2,true,[48,42,42,38,12]);
   [[10,37.3,26.4,18.7,'P+3'],[15,56.0,39.6,28.0,'P+4'],[20,74.6,52.7,37.3,'P+6'],[25,93.3,65.9,46.6,'P+8'],[30,112.0,79.2,56.0,'P+9'],[aedisH,+(aedisH/Math.tan(15*Math.PI/180)).toFixed(1),+(aedisH/Math.tan(20*Math.PI/180)).toFixed(1),+(aedisH/Math.tan(30*Math.PI/180)).toFixed(1),'H PROPUS']].forEach(([h,dN,dNE,dE,niv2])=>{
     const isThis=h===aedisH;
-    const bg=isThis?[255,245,220]:LIGHT;
     pdf.setFillColor(...bg);pdf.rect(14,cy2-5.5,W-28,8,'F');
     pdf.setDrawColor(...GRAY4);pdf.setLineWidth(0.15);pdf.line(14,cy2+2.5,W-14,cy2+2.5);
     const vs=[h+'m',dN+'m',dNE+'m',dE+'m',niv2];
@@ -4384,7 +4364,6 @@ async function generateSolarStudy(){
 // ════════════════════════════════════════════════════════════════════════════
 
 async function generateStudiuFezabilitate(paramOverrides){
-  const ap=S.parcels[S.activeParcel??0];
   if(!ap?.geo?.geometry){ss('Selectați o parcelă pentru studiu.');return;}
   // Dacă nu avem overrides (chemat direct din buton), deschidem modalul de parametri
   if(!paramOverrides){
@@ -4400,19 +4379,15 @@ async function generateStudiuFezabilitate(paramOverrides){
   }
   ss('Se generează Studiu de Fezabilitate / DALI...');
 
-  const d=_initStudyPdf('Studiu de Prefezabilitate / Fezabilitate / DALI','SF-DALI · HG 907/2016',18);
   const {pdf,W,H,DARK,DARK2,NAVY,GOLD,GOLD2,GOLD3,BLUE,BLUE2,TEAL,LIGHT,LIGHT2,LIGHT3,
     RED,GREEN,ORANGE,PURPLE,GRAY,GRAY2,GRAY3,GRAY4,WHITE,
     S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,
     hdr,ftr,sec,subsec,body,tblRow,addImg,kv,badge,divider,bullet,concluzii,sign,cover,newPage,checkY}=d;
-  const caps=await _captureStudyMaps(ap, msg=>ss(msg));
 
   // Date de baza
   const areaNum=parseFloat(area)||300;
   const scMax=Math.round(areaNum*parseFloat(params?.pot||35)/100);
   const sdTotal=Math.round(areaNum*parseFloat(params?.cut||1.0));
-  const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13.2;
-  const niv=Math.max(1,Math.ceil(aedisH/3));
   const svMin=Math.round(areaNum*parseFloat(params?.sv||20)/100);
   const pkMin=Math.max(2,Math.ceil(sdTotal/120)*parseInt(params?.pk||1));
   const latN=lat.toFixed(4),lonE=lon.toFixed(4);
@@ -4432,7 +4407,6 @@ async function generateStudiuFezabilitate(paramOverrides){
   const rentabilitate=((venitAn/costTotal)*100).toFixed(1); // % randament brut anual
 
   // Functiune
-  const fnLabel=(params?.fn_label||'Locuire colectivă / Mixt');
 
   // ── PAG 1: COVER ──────────────────────────────────────────────────────────
   cover(
@@ -4854,7 +4828,6 @@ async function generateStudiuFezabilitate(paramOverrides){
   let _swotY=cy;
   for(let i=0;i<maxRows;i++){
     const rh=_swotRH[i];
-    const bg=i%2===0?LIGHT:LIGHT2;
     pdf.setFillColor(...bg);pdf.rect(14,_swotY,swotW*2,rh,'F');
     pdf.setDrawColor(...GRAY4);pdf.setLineWidth(0.15);
     pdf.line(14,_swotY+rh,14+swotW*2,_swotY+rh);
@@ -4891,8 +4864,6 @@ async function generateStudiuFezabilitate(paramOverrides){
   }
   let _swotOTY=cy;
   for(let i=0;i<maxOT;i++){
-    const rh=_swotOTRH[i];
-    const bg=i%2===0?LIGHT:LIGHT2;
     pdf.setFillColor(...bg);pdf.rect(14,_swotOTY,swotW*2,rh,'F');
     pdf.setDrawColor(...GRAY4);pdf.setLineWidth(0.15);
     pdf.line(14,_swotOTY+rh,14+swotW*2,_swotOTY+rh);
@@ -5104,7 +5075,6 @@ async function generateStudiuAmplasament(){
   }
   const altDec12=solarAlt(lat,11,12);
   const isConformSolar=altDec12>=15;
-  const D2R=Math.PI/180;
   const decl12=(-23.45*Math.cos(D2R*(360/365)*(335+10)))*D2R;
   const cosH12=-Math.tan(lat*D2R)*Math.tan(decl12);
   const sunrise12=cosH12>1?null:(12-Math.acos(Math.min(1,Math.max(-1,cosH12)))/D2R/15);
