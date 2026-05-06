@@ -155,16 +155,15 @@ function _rvCompBuilding(P){
     effW = Math.max(P.W, Math.sqrt(P.area * 0.8));
     effD = Math.max(P.D, P.area / effW);
   }
+  // ── Funcțiunea clădirii — determină capurile dimensionale ────────────────
+  const _fnRez = !String(P.fn||'').toLowerCase().includes('birouri') &&
+                 !String(P.fn||'').toLowerCase().includes('hotel');
+
   const bW   = _fnRez
     ? Math.min(80, Math.max(6, effW - P.rl * 2))  // rezidențial max 80m (rest = parcare/curte)
     : Math.max(6, effW - P.rl * 2);               // birouri/hotel: fără cap
 
   // ── Adâncimea clădirii: rezidențial → coridor dublu încărcat (max 26m) ───
-  // Un bloc de apartamente realist are max 25-26m adâncime:
-  //   rândul NORD 9-10m + nuclee 6.6m + rândul SUD 9-10m = ~25m
-  // Restul parcelei (sub 26m) devine curte/parcare/spații verzi.
-  const _fnRez = !String(P.fn||'').toLowerCase().includes('birouri') &&
-                 !String(P.fn||'').toLowerCase().includes('hotel');
   const bD_raw = Math.max(6, effD - P.rf - P.rs);
   const bD   = _fnRez ? Math.min(26, bD_raw) : bD_raw;
 
