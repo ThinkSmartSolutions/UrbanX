@@ -120,6 +120,18 @@ function toggleMultiVol(){
   renderTab('proiect'); 
 }
 
+// ── Helper funcții balcoane — apelate din onclick-urile butoanelor N/E/S/V ──
+function _aedisToggleBalcon(latura){
+  if(!AEDIS.balconLaturi) AEDIS.balconLaturi = [];
+  const i = AEDIS.balconLaturi.indexOf(latura);
+  if(i >= 0){ AEDIS.balconLaturi.splice(i, 1); }
+  else { AEDIS.balconLaturi.push(latura); }
+  aedisRender();
+}
+function _aedisToggleAllBalcon(){
+  AEDIS.balconLaturi = (AEDIS.balconLaturi||[]).length === 4 ? [] : ['N','E','S','V'];
+  aedisRender();
+}
 
 function htmlPerBldgUI(){
   const mv = S.vol.multiVolCount||2;
