@@ -83,14 +83,30 @@ function _initStudyPdf_J(...args){
   const d = _initStudyPdf(...args);
   const {pdf, W, S2} = d;
   const _origBody = d.body;
+  const _origAddImg = d.addImg;
+
+  // Guard addImg: daca imaginea lipseste, returneaza cy valid (nu undefined)
+  d.addImg = function(imgData, x, cy, w, h, caption){
+    const safeCy = (typeof cy==='number'&&isFinite(cy)) ? cy : 28;
+    try{
+      const result = _origAddImg ? _origAddImg(imgData, x, safeCy, w, h, caption) : safeCy;
+      // Daca result e undefined/NaN (imagine lipsa), avanseaza cy cu spatiul rezervat
+      if(typeof result==='number'&&isFinite(result)) return result;
+      return safeCy + (h||0) + (caption?8:2);
+    }catch(e){
+      return safeCy + (h||0) + (caption?8:2);
+    }
+  };
+
+  // Guard body: justify + NaN safe
   d.body = function(txt, x, cy){
-    // Guard: daca cy e invalid, folosim _origBody ca fallback
     if(typeof cy!=='number'||!isFinite(cy)) return _origBody?_origBody(txt,x,28):28;
     const safe = S2 ? S2(txt) : String(txt||'');
     const maxW = (W||210) - (x||14) - 12;
     if(maxW<=0) return _origBody?_origBody(txt,x,cy):cy+5;
     return _pdfJustifyText(pdf, safe, x, cy, maxW, 8.5, 5.0, [50,65,85]);
   };
+
   return d;
 }
 
