@@ -3184,14 +3184,16 @@ async function _cimecQueryWFS(lon, lat, radiusM){
 }
 
 async function _cimecGetMapImage(lon, lat, radiusM, widthPx=800, heightPx=600){
-  // WMS GetMap — fără CORS issues (imagine raster)
+  // WMS GetMap — CORS poate bloca, returnăm null ca fallback
   const margin = radiusM*1.8/111320;
+  const bbox = [lon-margin, lat-margin, lon+margin, lat+margin].join(',');
+  const url = `${CIMEC_WMS}?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap`+
     `&LAYERS=LMI_Puncte,LMI_Zone,Situri_Arh`+
     `&BBOX=${bbox}&CRS=EPSG:4326`+
     `&WIDTH=${widthPx}&HEIGHT=${heightPx}`+
     `&FORMAT=image/png&TRANSPARENT=true&STYLES=`;
   try{
-    // Încearcă direct (poate funcționa pe unele browsere)
+    const resp = await fetch(url, {signal:AbortSignal.timeout(5000), mode:'cors'});
     if(resp.ok && resp.headers.get('content-type')?.includes('image')){
       const blob = await resp.blob();
       return await new Promise(res=>{
@@ -3200,8 +3202,9 @@ async function _cimecGetMapImage(lon, lat, radiusM, widthPx=800, heightPx=600){
         reader.readAsDataURL(blob);
       });
     }
-  }catch(e){}
-  // Fallback: folosim img element (bypass CORS pentru afișare)
+  }catch(e){
+    // CORS blocat sau timeout — fallback la null, continua generarea PDF
+  }
   return null;
 }
 
@@ -4324,10 +4327,17 @@ async function generateStudiuFezabilitate(paramOverrides){
   }
   ss('Se generează Studiu de Fezabilitate / DALI...');
 
+  const d=_initStudyPdf('Studiu de Fezabilitate / DALI','SF/DALI · HG 907/2016',18);
   const {pdf,W,H,DARK,DARK2,NAVY,GOLD,GOLD2,GOLD3,BLUE,BLUE2,TEAL,LIGHT,LIGHT2,LIGHT3,
     RED,GREEN,ORANGE,PURPLE,GRAY,GRAY2,GRAY3,GRAY4,WHITE,
     S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,
     hdr,ftr,sec,subsec,body,tblRow,addImg,kv,badge,divider,bullet,concluzii,sign,cover,newPage,checkY}=d;
+
+  const caps=await _captureStudyMaps(ap, msg=>ss(msg));
+  const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13.2;
+  const niv=AEDIS.corpuri[0]?.niv||4;
+  const fn=AEDIS.fn||'rezidential_colectiv';
+  const fnLabel=_stripEmoji(AEDIS_FN[fn]?.label||fn);
 
   // Date de baza
   const areaNum=parseFloat(area)||300;
@@ -5827,7 +5837,15 @@ async function generateWaterStudy(){
   Object.assign(params && typeof params === 'object' ? params : {}, _p);
   const caps = await _captureStudyMaps(ap, msg=>ss(msg));
   // Helper safe pentru cy
-  const _kv = (rows, cy_) => { try{ return kv(rows, isFinite(cy_)?cy_:33)||cy_; }catch(e){ return isFinite(cy_)?cy_+rows.length*7:33; } };
+  const _kv = (rows, cy_) => {
+    let y = isFinite(cy_) ? cy_ : 33;
+    try {
+      rows.forEach(([label, value]) => {
+        y = tblRow([String(label||''), String(value||'—')], y, false, [60, W-28-60]);
+      });
+    } catch(e) { y = isFinite(cy_) ? cy_ + rows.length*7 : 33; }
+    return y;
+  };
   const _sc = (v) => (isFinite(v) && v > 0) ? v : 33;
 
   // ── PAGINA 1: COPERTĂ ────────────────────────────────────────────────────
