@@ -195,6 +195,79 @@ function _rvMix(P){
   return 'rezCol'; // default rezidențial colectiv
 }
 
+// ── _rvFillApt: umple COMPLET un dreptunghi W×D cu camere de apartament ────────
+// Nicio bucată goală — fiecare m² are o funcțiune clară.
+// isFlipped=false → balcon sus (față stradă), hol jos (lângă nucleu) — rândul NORD
+// isFlipped=true  → hol sus (lângă nucleu), balcon jos (curte/grădină) — rândul SUD
+function _rvFillApt(x0, y0, W, D, aptIdx, isFlipped){
+  const rms=[];
+  if(W<1.5||D<3.0) return rms;
+  const push=(t,x,y,w,h,lbl,bal=false)=>{
+    if(w<0.3||h<0.3) return;
+    rms.push({t,lbl,bal,apt:aptIdx,x:x0+x,y:y0+y,w,h,normMin:_RV_NP057[t]||0});
+  };
+  // ── Zone proporționale (suma = D exact) ─────────────────────────────────
+  const r_bal =Math.max(0.9, Math.min(1.4,  D*0.11));  // balcon
+  const r_hol =Math.max(1.0, Math.min(2.0,  D*0.12));  // hol intrare
+  const r_serv=Math.max(2.0, Math.min(3.5,  D*0.26));  // servicii (baie+wc+bucătărie)
+  const r_noapt=Math.max(2.4, Math.min(4.5, D*0.29));  // dormitoare
+  const r_zi  =Math.max(2.5, D-r_bal-r_hol-r_serv-r_noapt); // living — restul
+  const sum=r_bal+r_hol+r_serv+r_noapt+r_zi;
+  const f=D/sum; // factor corecție
+  const bH=r_bal*f, hH=r_hol*f, sH=r_serv*f, nH=r_noapt*f, lH=r_zi*f;
+
+  // ── Dimensiuni lățimi funcționale ──────────────────────────────────────
+  const kW=Math.max(1.8, Math.min(W*0.38, 3.5));   // bucătărie (lătime)
+  const livW=W-kW;                                   // living (restul lățimii)
+  const bathW=Math.max(1.1, Math.min(W*0.44, 2.2)); // baie
+  const wcW=Math.max(0.7, Math.min(W*0.22, 1.3));   // wc
+  const holSW=Math.max(0, W-bathW-wcW);              // hol servicii (restul)
+  const d1W=Math.round(W*0.55*10)/10;                // dormitor principal
+  const d2W=W-d1W;                                   // dormitor 2
+
+  const drawNoapte=(y_)=>{
+    if(W>=5.5){
+      push('bedroom',  0,   y_, d1W, nH, 'Dorm. 1');
+      push('bedroom2', d1W, y_, d2W, nH*0.7, 'Dorm. 2');
+      if(nH*0.3>0.5) push('storage', d1W, y_+nH*0.7, d2W, nH*0.3, 'Dep.');
+    } else if(W>=3.5){
+      push('bedroom', 0, y_, W, nH, 'Dormitor');
+    } else {
+      push('bedroom', 0, y_, W, nH, 'Dorm.');
+    }
+  };
+  const drawServ=(y_)=>{
+    push('bath',  0,             y_, bathW,  sH,        'Baie');
+    push('wc',    bathW,         y_, wcW,    sH*0.65,   'WC');
+    if(holSW>0.3) push('hall',   bathW+wcW,  y_, holSW, sH, 'Hol');
+    if(sH*0.35>0.4) push('storage', bathW,  y_+sH*0.65, wcW, sH*0.35, 'Dep.');
+  };
+  const drawZiSi=(y_)=>{
+    push('living',  0,    y_, livW, lH,        'Living');
+    push('kitchen', livW, y_, kW,   lH*0.65,   'Bucătărie');
+    if(lH*0.35>0.5) push('storage', livW, y_+lH*0.65, kW, lH*0.35, 'Dep.');
+  };
+
+  if(!isFlipped){
+    // NORD: balcon sus → zi → noapte → servicii → hol
+    let y=0;
+    push('balcon',0,y,W,bH,'Balcon',true); y+=bH;
+    drawZiSi(y); y+=lH;
+    drawNoapte(y); y+=nH;
+    drawServ(y);   y+=sH;
+    push('hall',0,y,W,hH,'Hol apartament');
+  } else {
+    // SUD: hol sus → servicii → noapte → zi → balcon
+    let y=0;
+    push('hall',0,y,W,hH,'Hol apartament'); y+=hH;
+    drawServ(y);   y+=sH;
+    drawNoapte(y); y+=nH;
+    drawZiSi(y);   y+=lH;
+    push('balcon',0,y,W,bH,'Balcon',true);
+  }
+  return rms;
+}
+
 function _rvFloor(b, floorIdx){
   const {bW, bD, cores, P} = b;
   const isGround = floorIdx === 0;
@@ -203,95 +276,53 @@ function _rvFloor(b, floorIdx){
 
   // ── Apartamente rezidențiale ─────────────────────────────────────────────
   if(fnKey === 'rezCol'){
-    const aptTypes = ['apt2c','apt2c','apt3c','studio','apt3c','apt2c','apt4c','apt2c'];
-    const colSp    = bW / (cores.length + 1);
+    // ── Limite spațiu disponibil ──────────────────────────────────────────
+    const northMaxD  = cores.length > 0 ? cores[0].y : bD*0.4;
+    const southStart = cores.length > 0 ? cores[0].y+cores[0].h : bD*0.6;
+    const southAvailD= bD-southStart;
+    const hasDoubleCorridor = southAvailD >= 4.0;
 
-    // ── Coridor dublu încărcat ────────────────────────────────────────────
-    // northMaxD = adâncimea disponibilă pentru rândul NORD (0 → core.y)
-    // southStart = unde începe rândul SUD (core.y + core.h → bD)
-    const northMaxD  = cores.length > 0 ? cores[0].y        : bD * 0.4;
-    const southStart = cores.length > 0 ? cores[0].y + cores[0].h : bD * 0.6;
-    const southAvailD= bD - southStart;
-    const hasDoubleCorridor = southAvailD >= 5; // min 5m pentru rândul sud
-
-    cores.forEach((core, ci) => {
-      // ── Nucleu scări + lift ─────────────────────────────────────────
+    // ── Nuclee scări+lift ─────────────────────────────────────────────────
+    cores.forEach(core=>{
       rects.push({t:'core', x:core.x, y:core.y, w:core.w, h:core.h,
-        lbl: b.niv>3 ? '🪜 Sc.\n🛗 Lift' : '🪜 Scări', apt:-1});
-
-      // ── Apartament NORD stânga ──────────────────────────────────────
-      const tplKeyL = aptTypes[(ci*2) % aptTypes.length];
-      const tplL    = _RV_APT[tplKeyL] || _RV_APT.apt2c;
-      const aWL     = core.x - ci*colSp;
-      const scL     = Math.min(1, Math.min(aWL / tplL.w, northMaxD / tplL.d)) * 0.92;
-      tplL.rooms.forEach(r => rects.push({
-        t:r.t, lbl:r.lbl, bal:r.bal||false, apt:ci*2,
-        x: ci*colSp + r.x*scL,
-        y: r.y*scL,                           // NORD: y creşte spre interior
-        w: r.w*scL, h: r.h*scL,
-        normMin: _RV_NP057[r.t]||0,
-      }));
-
-      // ── Apartament SUD stânga (oglindit față de axa EV) ────────────
-      if(hasDoubleCorridor){
-        const tplKeySL = aptTypes[(ci*2 + 4) % aptTypes.length];
-        const tplSL    = _RV_APT[tplKeySL] || _RV_APT.apt2c;
-        const scSL     = Math.min(1, Math.min(aWL / tplSL.w, southAvailD / tplSL.d)) * 0.92;
-        tplSL.rooms.forEach(r => rects.push({
-          t:r.t, lbl:r.lbl, bal:r.bal||false, apt:ci*2 + cores.length*4,
-          x: ci*colSp + r.x*scSL,
-          y: bD - (r.y + r.h)*scSL,           // SUD: oglindit — y scade de la bD
-          w: r.w*scSL, h: r.h*scSL,
-          normMin: _RV_NP057[r.t]||0,
-        }));
-      }
-
-      // ── Apartamente DREAPTA (ultimul core) ─────────────────────────
-      if(ci === cores.length-1){
-        const x0   = core.x + core.w;
-        const aWR  = bW - x0;
-
-        // Nord dreapta
-        const tplKeyR = aptTypes[(ci*2+1) % aptTypes.length];
-        const tplR = _RV_APT[tplKeyR] || _RV_APT.apt2c;
-        const scR  = Math.min(1, Math.min(aWR / tplR.w, northMaxD / tplR.d)) * 0.92;
-        tplR.rooms.forEach(r => rects.push({
-          t:r.t, lbl:r.lbl, bal:r.bal||false, apt:ci*2+1,
-          x: x0 + (aWR-r.w*scR)/2 + (r.x*scR - (tplR.w*scR-r.w*scR)/2),
-          y: r.y*scR,
-          w: r.w*scR, h: r.h*scR,
-          normMin: _RV_NP057[r.t]||0,
-        }));
-
-        // Sud dreapta
-        if(hasDoubleCorridor){
-          const tplKeySR = aptTypes[(ci*2+5) % aptTypes.length];
-          const tplSR = _RV_APT[tplKeySR] || _RV_APT.apt2c;
-          const scSR  = Math.min(1, Math.min(aWR / tplSR.w, southAvailD / tplSR.d)) * 0.92;
-          tplSR.rooms.forEach(r => rects.push({
-            t:r.t, lbl:r.lbl, bal:r.bal||false, apt:ci*2+1+cores.length*4,
-            x: x0 + (aWR-r.w*scSR)/2 + (r.x*scSR - (tplSR.w*scSR-r.w*scSR)/2),
-            y: bD - (r.y + r.h)*scSR,
-            w: r.w*scSR, h: r.h*scSR,
-            normMin: _RV_NP057[r.t]||0,
-          }));
-        }
-      }
+        lbl:b.niv>3?'🪜 Sc.\n🛗 Lift':'🪜 Scări', apt:-1});
     });
 
-    // ── Coridor principal (bandă orizontală între rândul Nord și nuclee) ──
-    if(hasDoubleCorridor && northMaxD > 0){
-      const northAptEnd = Math.max(...rects.filter(r=>r.apt>=0 && r.apt<cores.length*4)
-                                          .map(r=>r.y+r.h).filter(v=>!isNaN(v)), northMaxD*0.85);
-      const corrY = northAptEnd + 0.15;
-      const corrH = Math.max(1.2, cores[0].y - corrY);
-      if(corrH > 0.5){
-        rects.push({t:'hall', x:0, y:corrY, w:bW, h:corrH,
-          lbl:'Coridor etaj', apt:-3, zIdx:-1, normMin:0});
-      }
+    // ── Coridor orizontal (bandă între apartamente Nord și nuclee) ─────────
+    if(hasDoubleCorridor && northMaxD>0.5){
+      const corrH=Math.max(1.0, Math.min(2.0, cores[0].y-northMaxD*0.88));
+      const corrY=northMaxD-corrH;
+      if(corrH>0.4 && corrY>0)
+        rects.push({t:'hall',x:0,y:corrY,w:bW,h:corrH,lbl:'Coridor etaj',apt:-3,zIdx:-1,normMin:0});
     }
 
-    // ── Hol intrare parter ────────────────────────────────────────────
+    // ── Generăm un dreptunghi de apartament pentru fiecare coloană ────────
+    // Coloana = spațiul dintre 2 nuclee consecutive (sau margine-nucleu)
+    const colBounds=[];
+    if(cores.length===1){
+      colBounds.push({xL:0, xR:cores[0].x});                       // stânga
+      colBounds.push({xL:cores[0].x+cores[0].w, xR:bW});           // dreapta
+    } else {
+      colBounds.push({xL:0, xR:cores[0].x});
+      for(let i=0;i<cores.length-1;i++)
+        colBounds.push({xL:cores[i].x+cores[i].w, xR:cores[i+1].x});
+      colBounds.push({xL:cores[cores.length-1].x+cores[cores.length-1].w, xR:bW});
+    }
+
+    colBounds.forEach(({xL,xR},ci)=>{
+      const W=xR-xL;
+      if(W<1.5) return; // prea îngust
+      // Rândul NORD — umplu complet [xL..xR] × [0..northMaxD]
+      if(northMaxD>=3.5)
+        _rvFillApt(xL, 0, W, northMaxD, ci*2, false)
+          .forEach(r=>rects.push(r));
+      // Rândul SUD — umplu complet [xL..xR] × [southStart..bD]
+      if(hasDoubleCorridor && southAvailD>=3.5)
+        _rvFillApt(xL, southStart, W, southAvailD, ci*2+1, true)
+          .forEach(r=>rects.push(r));
+    });
+
+    // ── Hol intrare parter ────────────────────────────────────────────────
     if(isGround)
       rects.push({t:'hall', x:0, y:bD-2.4, w:bW, h:2.4,
         lbl:'Hol intrare + Căsuțe poștale', apt:-2, zIdx:-1, normMin:0});
