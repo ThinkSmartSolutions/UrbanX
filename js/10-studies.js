@@ -2271,6 +2271,9 @@ async function generateTrafficStudy(){
   };
   const tg=TRAFIC_GEN[fn]||TRAFIC_GEN.default;
   const pkObl=Math.max(1,Math.round(unitatiEst*(parseFloat(params?.pk)||1)));
+  const pkMinF=pkObl; // alias pentru compatibilitate cu sectiunile de parcaj
+  const areaNum=pArea;
+  const sdTotal=sdEst;
   const half=(W-28)/2-2;
 
   // PAG 1: Cover

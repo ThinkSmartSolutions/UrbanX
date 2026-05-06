@@ -4001,19 +4001,32 @@ function _aedisToggleDimLabels(){
     } else {
       // Afișăm: recalculăm din ultimul footprint
       const ap = S.parcels[S.activeParcel??0];
-      if(!ap?.geo?.geometry || !S.vol.genDone) return;
+      if(!ap?.geo?.geometry) return;
       const params = ap.params || getDefaultParams(ap.utr||'');
       const fnDef = AEDIS_FN[AEDIS.fn] || AEDIS_FN.rezidential_colectiv;
       const totalNiv = AEDIS.corpuri[0]?.niv || pN(params.niv) || 4;
       const hParter = AEDIS.parterDiferit ? (fnDef.hParter||4.5) : (AEDIS.corpuri[0]?.hNiv||3.0);
       const hEtaj = AEDIS.corpuri[0]?.hNiv || fnDef.hEtaj || 3.0;
-      // Reconstruim footprint din lastFeats
-      const parterFeat = (S.vol._lastFeats||[]).find(f=>f.properties?.floor===0&&!f.properties?.isExistent);
-      if(parterFeat){
-        const fp = {type:'Feature',geometry:parterFeat.geometry,properties:{}};
-        const hTot = hParter+(totalNiv-1)*hEtaj;
-        aedisUpdateDimLabels(fp, totalNiv, hParter, hEtaj, hTot);
+      const hTot = hParter+(totalNiv-1)*hEtaj;
+
+      // Prioritate: lastFeats (dacă volum generat) → footprint calculat → geometria parcelei
+      let fp = null;
+      if(S.vol._lastFeats?.length){
+        const parterFeat = S.vol._lastFeats.find(f=>f.properties?.floor===0&&!f.properties?.isExistent);
+        if(parterFeat) fp = {type:'Feature',geometry:parterFeat.geometry,properties:{}};
       }
+      if(!fp && ap.geo?.geometry){
+        // Fallback: folosim footprint calculat din parametri
+        try{
+          const fpBuilt = buildFP(ap.geo.geometry, params);
+          if(fpBuilt?.geometry) fp = fpBuilt;
+        }catch(e){}
+      }
+      if(!fp && ap.geo?.geometry){
+        // Fallback final: geometria parcelei direct
+        fp = {type:'Feature', geometry:ap.geo.geometry, properties:{}};
+      }
+      if(fp) aedisUpdateDimLabels(fp, totalNiv, hParter, hEtaj, hTot);
     }
   }catch(e){ console.warn('_aedisToggleDimLabels:', e.message); }
 }

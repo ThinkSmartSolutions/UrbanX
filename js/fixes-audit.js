@@ -264,7 +264,74 @@
     }
     // Pentru orice alt id, apelăm funcția originală
     if(typeof _origInfoDrawer === 'function') _origInfoDrawer.call(this, id);
+    return;
   };
+
+  // ── Info drawer: Studiu Gospodărire Ape DTGA ─────────────────────────────
+  const _origInfoDrawer2 = window.infoDrawerOpen;
+  window.infoDrawerOpen = function(id){
+    if(id === 'apa'){
+      const drawer = document.getElementById('info-drawer');
+      const backdrop = document.getElementById('info-drawer-backdrop');
+      const ico = document.getElementById('info-drawer-ico');
+      const title = document.getElementById('info-drawer-title');
+      const badge = document.getElementById('info-drawer-badge-wrap');
+      const body = document.getElementById('info-drawer-body');
+      if(!drawer) return;
+      if(ico) ico.textContent = '💧';
+      if(title) title.textContent = 'Studiu Gospodărire Ape — DTGA';
+      if(badge) badge.innerHTML = `
+        <span style="background:rgba(34,211,238,.15);border:1px solid rgba(34,211,238,.4);color:#22d3ee;border-radius:5px;padding:2px 8px;font-size:9px;font-weight:700">LEGEA 107/1996</span>
+        <span style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:#22c55e;border-radius:5px;padding:2px 8px;font-size:9px;margin-left:4px">9 PAGINI</span>
+        <span style="background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.3);color:#a78bfa;border-radius:5px;padding:2px 8px;font-size:9px;margin-left:4px">ORIENTATIV</span>`;
+      if(body) body.innerHTML = `
+        <p style="color:#94a3b8;font-size:12px;line-height:1.7;margin-bottom:12px">
+          <b style="color:#e2e8f0">Documentația Tehnică de Gospodărire a Apelor (DTGA)</b> este obligatorie
+          conform <b style="color:#22d3ee">Legii Apelor 107/1996</b> și <b style="color:#22d3ee">HG 930/2010</b>
+          pentru obținerea Avizului de Gospodărire a Apelor înainte de emiterea Autorizației de Construire.
+        </p>
+        <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px;margin-bottom:10px">
+          <div style="font-size:10px;color:#64748b;font-weight:700;text-transform:uppercase;margin-bottom:6px">Conținut (9 pagini)</div>
+          ${[
+            ['💧','Date identificare + context hidrografic (bazin, sub-bazin, DA)'],
+            ['🌊','Analiza riscului de inundabilitate (Q100, INHGA, PMRI)'],
+            ['🪨','Ape subterane (NFA, tip sol, portanță, adâncime fundare)'],
+            ['📋','Conținut DTGA — 10 documente obligatorii cf. Ord. 662/2006'],
+            ['🔬','5 tipuri de studii (hidrologic, hidrogeologic, inundabilitate)'],
+            ['⚖️','Procedura avizare Apele Române — 8 etape + taxe'],
+            ['🔧','Cerințe tehnice ape pluviale + ape uzate (calcule per parcelă)'],
+            ['☑️','Checklist 10 documente necesare + contact DA competentă'],
+            ['📞','Date complete DA (adresă, telefon, email, web) per UAT'],
+          ].map(([i,t])=>`<div style="display:flex;gap:7px;align-items:flex-start;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04)"><span>${i}</span><span style="color:#cbd5e1;font-size:11px">${t}</span></div>`).join('')}
+        </div>
+        <div style="background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:8px;padding:10px;margin-bottom:10px">
+          <div style="font-size:10px;color:#22d3ee;font-weight:700;margin-bottom:6px">ACTE NORMATIVE PRINCIPALE</div>
+          ${[
+            'Legea Apelor 107/1996 (republicată) — cadrul general gospodărire ape',
+            'HG 930/2010 — Normele metodologice avize gospodărire ape',
+            'Ord. 662/2006 — Procedura DTGA + Aviz/Autorizație Apele Române',
+            'Dir. 2007/60/CE (HG 846/2010) — Managementul riscului la inundații',
+            'Dir. 2000/60/CE — Directiva Cadru Apă (DCA), transpusă prin L. 107/1996',
+            'NTPA 001/2002 — Condiții de calitate ape uzate evacuate',
+          ].map(t=>`<div style="color:#94a3b8;font-size:10px;padding:2px 0;border-bottom:1px solid rgba(255,255,255,.04)">• ${t}</div>`).join('')}
+        </div>
+        <div style="background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:8px;padding:10px">
+          <div style="font-size:10px;color:#22d3ee;font-weight:700;margin-bottom:4px">CÂND ESTE OBLIGATORIU</div>
+          <div style="color:#94a3b8;font-size:11px;line-height:1.6">
+            Avizul de Gospodărire a Apelor (AGA) este obligatoriu pentru <b style="color:#e2e8f0">orice construcție</b>
+            ce afectează resursele de apă, inclusiv lucrări de fundare, racorduri la rețele, amenajări de teren.
+            Se obține <b style="color:#22d3ee">înainte de Autorizația de Construire</b>.
+          </div>
+        </div>
+        <div style="margin-top:10px;background:rgba(0,0,0,.2);border-radius:8px;padding:8px;font-size:10px;color:#94a3b8">
+          <b style="color:#f59e0b">NOTĂ:</b> Document STRICT ORIENTATIV. Nu înlocuiește DTGA elaborată de consultant autorizat.
+          Valorile orientative au precizie ±30%.
+        </div>`;
+      if(backdrop){ backdrop.style.display='block'; }
+      if(drawer){ drawer.classList.add('open'); drawer.style.display='flex'; }
+      return;
+    }
+    if(typeof _origInfoDrawer2 === 'function') _origInfoDrawer2.call(this, id);
   console.log('[UrbanX fixes-audit] infoDrawerOpen fezabilitate patched ✅');
 })();
 
