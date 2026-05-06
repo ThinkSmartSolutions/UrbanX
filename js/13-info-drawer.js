@@ -583,6 +583,28 @@ const RAPORT_INFO = {
     ],
     nu: ['Obligatoriu prin lege NUMAI pentru proiecte cu finanțare publică (HG 907/2016)', 'Pentru investiții private este recomandat, nu impus prin lege', 'Valorile financiare sunt orientative ±25-30% — devizul definitiv necesită proiect tehnic'],
   },
+
+  apa: {
+    ico: '💧', label: 'Studiu Gospodărire Ape — DTGA',
+    badge: 'obligatoriu', badgeLabel: 'Aviz Apele Române',
+    color: '34,211,238',
+    fn: 'generateWaterStudy()',
+    ce: 'Documentează contextul hidrografic al amplasamentului (bazin, sub-bazin, cursuri de apă, Direcția Apelor competentă), evaluează riscul de inundabilitate conform hărților INHGA/PMRI, caracterizează apele subterane (NFA, tip sol, portanță) și prezintă toate documentele și studiile necesare pentru obținerea Avizului de Gospodărire a Apelor (AGA) de la Apele Române.',
+    dece: 'Avizul de Gospodărire a Apelor (AGA) este OBLIGATORIU conform Legii 107/1996 Art. 48 pentru orice construcție care afectează resursele de apă — inclusiv fundații, racorduri la rețele, amenajări de teren. AGA se obține ÎNAINTE de Autorizația de Construire și este condiție pentru emiterea acesteia de către Primărie.',
+    legal: 'Legea Apelor 107/1996 (republicată) · HG 930/2010 (norme metodologice) · Ord. 662/2006 (procedura DTGA) · Dir. 2007/60/CE (HG 846/2010 — risc inundații) · Dir. 2000/60/CE (Directiva Cadru Apă) · NTPA 001/2002 (calitate ape uzate)',
+    output: [
+      { ico: '🗺', txt: 'Context hidrografic: bazin, sub-bazin, cursuri de apă, Direcția Apelor competentă' },
+      { ico: '🌊', txt: 'Evaluarea riscului de inundabilitate (Q100, hărți INHGA, PMRI)' },
+      { ico: '🪨', txt: 'Ape subterane: NFA estimat, tip sol, portanță, adâncime fundare' },
+      { ico: '📋', txt: 'Conținut DTGA — 10 documente obligatorii cf. Ord. 662/2006' },
+      { ico: '🔬', txt: '5 tipuri de studii detaliate (hidrologic, hidrogeologic, inundabilitate, amplasament)' },
+      { ico: '⚖️', txt: 'Procedura avizare: 8 etape + termene + taxe orientative' },
+      { ico: '🔧', txt: 'Cerințe tehnice ape pluviale + uzate (calcule specifice parcelei)' },
+      { ico: '☑️', txt: 'Checklist 10 documente + date complete Direcția Apelor (adresă, tel, email, web)' },
+      { ico: '📞', txt: 'Configurație per UAT: 24 municipii — DA, bazin, cursuri, risc inundabilitate' },
+    ],
+    nu: ['Nu înlocuiește DTGA elaborată de consultant autorizat ANAR/INHGA', 'Valorile NFA și portanță sunt estimative — studiu geotehnic obligatoriu pe amplasament', 'Hărțile de risc la inundații se verifică obligatoriu pe platforma INHGA (www.inhga.ro)'],
+  },
 };
 
 function infoDrawerOpen(key) {
