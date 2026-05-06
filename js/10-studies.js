@@ -5030,6 +5030,7 @@ async function generateStudiuAmplasament(){
   }
   const altDec12=solarAlt(lat,11,12);
   const isConformSolar=altDec12>=15;
+  const D2R=Math.PI/180;
   const decl12=(-23.45*Math.cos(D2R*(360/365)*(335+10)))*D2R;
   const cosH12=-Math.tan(lat*D2R)*Math.tan(decl12);
   const sunrise12=cosH12>1?null:(12-Math.acos(Math.min(1,Math.max(-1,cosH12)))/D2R/15);
