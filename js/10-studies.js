@@ -5815,12 +5815,15 @@ async function generateWaterStudy(){
   const hidro = getHidroConfig();
   const aedisH = S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||0;
   const areaNum = Math.max(1, ap.area || parseFloat(area) || 100);
-  // Params cu fallback — evita NaN la parcele fara UTR
-  if(!params.pot) params.pot = 50;
-  if(!params.cut) params.cut = 1.5;
-  if(!params.rl) params.rl = 3;
+  // Params null guard + fallback — evita crash pe parcele fara UTR
+  const _p = (typeof params === 'object' && params !== null) ? params : {};
+  if(!_p.pot) _p.pot = 50; if(!_p.cut) _p.cut = 1.5; if(!_p.rl) _p.rl = 3;
+  // Suprascrie params cu versiunea safe
+  Object.assign(params && typeof params === 'object' ? params : {}, _p);
   const caps = await _captureStudyMaps(ap, msg=>ss(msg));
-  const _safeCy = (v) => (isFinite(v) && v > 0) ? v : 33;
+  // Helper safe pentru cy
+  const _kv = (rows, cy) => { try{ return _kv(rows, isFinite(cy)?cy:33); }catch(e){ return isFinite(cy)?cy+rows.length*7:33; } };
+  const _sc = (v) => (isFinite(v) && v > 0) ? v : 33;
 
   // ── PAGINA 1: COPERTĂ ────────────────────────────────────────────────────
   pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');
@@ -5864,7 +5867,7 @@ async function generateWaterStudy(){
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('DATE DE IDENTIFICARE SI CONTEXT HIDROLOGIC',2);ftr();
   let cy=33;
   cy=sec('1. DATE DE IDENTIFICARE AMPLASAMENT',cy);cy+=2;
-  cy=kv([
+  cy=_kv([
     ['Nr. Cadastral',nrcad], ['UAT',S2(uat)], ['Județ',S2(judet)],
     ['UTR / Zonă PUG',utr], ['Suprafață teren',area+' mp'],
     ['Suprafață construită propusă',params?.pot?Math.round(areaNum*params.pot/100)+' mp (POT '+params.pot+'%)':'Cf. PUG'],
@@ -5877,7 +5880,7 @@ async function generateWaterStudy(){
 
   cy=sec('2. CONTEXT HIDROGRAFIC',cy);cy+=2;
   cy=body('Amplasamentul este situat în bazinul hidrografic '+S2(apaCfg.bazin)+', sub-bazin '+S2(apaCfg.sub_bazin)+'. Autoritatea competentă pentru avizarea și autorizarea lucrărilor cu impact asupra resurselor de apă este '+S2(apaCfg.DA)+', cu sediul în '+S2(apaCfg.DA_oras)+'.',14,cy);cy+=4;
-  cy=kv([
+  cy=_kv([
     ['Bazin hidrografic',S2(apaCfg.bazin)],
     ['Sub-bazin',S2(apaCfg.sub_bazin)],
     ['Cursuri de apă principale',(apaCfg.cursuri||[]).join(' · ')],
@@ -5886,7 +5889,7 @@ async function generateWaterStudy(){
   ],cy);cy=(isFinite(cy)?cy:33)+4;
 
   cy=sec('3. DIRECȚIA APELOR COMPETENTĂ',cy);cy+=2;
-  cy=kv([
+  cy=_kv([
     ['Denumire',S2(apaCfg.DA)],
     ['Adresă',S2(apaCfg.DA_adresa)],
     ['Telefon',apaCfg.DA_tel],
@@ -5907,7 +5910,7 @@ async function generateWaterStudy(){
   pdf.text('RISC INUNDABILITATE: '+S2(apaCfg.risc_inundabil).toUpperCase(),W/2,cy+9,{align:'center'});
   cy+=18;
 
-  cy=kv([
+  cy=_kv([
     ['Risc inundabilitate',S2(apaCfg.risc_inundabil)],
     ['Zonă inundabilă Q100',S2(apaCfg.zona_inundabila)],
     ['Distanță față de curs principal',apaCfg.distanta_curs_principal+'m'],
@@ -5939,7 +5942,7 @@ async function generateWaterStudy(){
   cy=33;
   cy=sec('6. CARACTERIZAREA APELOR SUBTERANE',cy);cy+=2;
   cy=body('Evaluarea nivelului freatic are importanță directă pentru proiectarea fundațiilor, a subsolurilor și a sistemelor de drenaj. Datele de mai jos sunt orientative, bazate pe caracterizarea geologică a zonei '+S2(uat)+'. Verificarea exactă necesită studiu geotehnic pe amplasament conform NP 074/2014.',14,cy);cy+=4;
-  cy=kv([
+  cy=_kv([
     ['Nivel Freatic Maxim (NFA estimat)',S2(hidro.nfa||apaCfg.nfa)],
     ['Tip sol dominant',S2(hidro.tip_sol||apaCfg.tip_sol)],
     ['Portanță de calcul estimată',S2(hidro.portanta||apaCfg.portanta)],
@@ -6003,7 +6006,7 @@ async function generateWaterStudy(){
     pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');
     pdf.text((si+1)+'. '+S2(s.titlu),16,cy+5);
     cy+=8;
-    cy=kv([
+    cy=_kv([
       ['Scop',S2(s.scop)],['Conținut',S2(s.continut)],
       ['Bază legală',S2(s.baza)],['Cine elaborează',S2(s.cine)],
       ['Termen orientativ',s.termen],['Cost orientativ',s.cost],
@@ -6047,7 +6050,7 @@ async function generateWaterStudy(){
   const potPct = params?.pot||50;
   const scSol = Math.round(areaNum*potPct/100);
   const imperm = Math.round(areaNum*0.85);
-  cy=kv([
+  cy=_kv([
     ['Suprafață impermeabilizată estimată',imperm+' mp (SC+platforme+acces)'],
     ['Coeficient scurgere mediu (ψ)','0.75-0.85 (zone urbane dense)'],
     ['Precipitație de calcul (i15min)','150-170 l/s/ha (intensitate specifică Iași)'],
@@ -6059,7 +6062,7 @@ async function generateWaterStudy(){
 
   cy=sec('12.2 Ape uzate menajere',cy);cy+=2;
   const locatari = params?.cut?Math.round(areaNum*params.cut/40):50;
-  cy=kv([
+  cy=_kv([
     ['Utilizatori estimați',locatari+' persoane (estimat din regim H și funcțiune)'],
     ['Consum specific','150-250 l/pers/zi (rezidențial) / 5-30 l/mp/zi (comercial)'],
     ['Debit uzat mediu estimat',Math.round(locatari*200/86400*1000)+' l/s'],
