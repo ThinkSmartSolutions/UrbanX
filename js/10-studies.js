@@ -3242,8 +3242,7 @@ async function generateSSF(){
         if(lw>12&&lh>8){
           pdf.setFontSize(Math.min(6,lw/7));pdf.setFont('helvetica','bold');
           pdf.setTextColor(r.t==='core'?30:50,r.t==='core'?60:60,r.t==='core'?150:80);
-          const lns=(r.lbl||r.t).replace('🪜 ','').replace('🛗 ','').split('
-');
+          const lns=(r.lbl||r.t).replace('🪜 ','').replace('🛗 ','').split('\n');
           lns.forEach((ln,li)=>pdf.text(S2(ln.trim().slice(0,12)),_ox2+r.x*_sc2+lw/2,_oy2+r.y*_sc2+lh/2+(li-(lns.length-1)/2)*5.5,{align:'center'}));
           // Distanță evacuare
           if(_rvBldSSF.cores.length&&r.apt>=0&&r.t!=='core'){
