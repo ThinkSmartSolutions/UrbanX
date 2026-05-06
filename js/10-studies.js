@@ -2730,7 +2730,7 @@ async function generateSSF(){
 
   // ── PAG 2: DATE GENERALE + CLASIFICARI ───────────────────────────────────
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('DATE GENERALE CONSTRUCTIE - CLASIFICARI SIGURANTA FOC',2);ftr();
-  cy=28;
+  let cy=28;
   cy=addImg(caps.img3D,14,cy,W-28,65,'FIG. 1 — Volumetrie 3D propusa · Context urban · Date constructie');
   cy=sec('1. DATE GENERALE AMPLASAMENT SI CONSTRUCTIE PROPUSA',cy);cy+=2;
   cy=tblRow(['Parametru','Valoare','Obs.'],cy,true,[70,60,52]);
@@ -3054,7 +3054,7 @@ async function generateSSF(){
 
   // ── PAG 13: PLAN ORIENTATIV EVACUARE + TIMPI ────────────────────────────────
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('PLAN ORIENTATIV DE EVACUARE - TIMPI SI CAPACITATI DIMENSIONATE',13);ftr();
-  let cy=33;
+  cy=33;
   cy=sec('13. PLAN ORIENTATIV DE EVACUARE — CONF. P118-2/2013 + SR EN ISO 13943',cy);cy+=2;
   cy=body('Planul de evacuare a fost dimensionat orientativ pentru '+_pers+' persoane pe '+niv+' niveluri, structură cu grad de rezistență la foc '+_grf+'. Timpii de evacuare sunt calculați conform metodologiei SFPE (Society of Fire Protection Engineers) adaptată la normele românești P118-2/2013.',14,cy);cy+=3;
   // Calcul timpi evacuare
@@ -5901,8 +5901,8 @@ async function generateWaterStudy(){
   cy=sec('4. EVALUAREA RISCULUI DE INUNDABILITATE',cy);cy+=2;
   cy=body('Evaluarea riscului de inundabilitate se realizează în conformitate cu Directiva Europeană 2007/60/CE (transpusă prin HG 846/2010) și Planul de Management al Riscului la Inundații (PMRI) pentru bazinul hidrografic '+S2(apaCfg.bazin)+'. Hărțile de hazard și risc la inundații sunt disponibile pe platforma INHGA (www.inhga.ro).',14,cy);cy+=4;
 
-  const riscColor = apaCfg.risc_inundabil?.includes('Ridicat')?[...RED]:apaCfg.risc_inundabil?.includes('Mediu')?[...ORANGE]:[...GREEN];
-  pdf.setFillColor(...riscColor);pdf.roundedRect(14,cy,W-28,14,2,2,'F');
+  const riscColor = apaCfg.risc_inundabil?.includes('Ridicat')?[180,20,20]:apaCfg.risc_inundabil?.includes('Mediu')?[200,100,10]:[16,130,60];
+  if(isFinite(cy)){pdf.setFillColor(...riscColor);pdf.roundedRect(14,cy,W-28,14,2,2,'F');}
   pdf.setTextColor(255,255,255);pdf.setFontSize(11);pdf.setFont('helvetica','bold');
   pdf.text('RISC INUNDABILITATE: '+S2(apaCfg.risc_inundabil).toUpperCase(),W/2,cy+9,{align:'center'});
   cy+=18;
