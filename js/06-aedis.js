@@ -1574,7 +1574,7 @@ function showUATSelector(){
 
   const uatRows = (ids)=>ids.map(id=>{
     const u=UAT_REGISTRY[id]; if(!u) return '';
-    return `<div onclick="switchUAT('${id}');document.getElementById('uat-selector').remove()"
+    return `<div onclick="switchUAT('${id}');document.getElementById('uat-selector').remove();var b=document.getElementById('uat-selector-backdrop');if(b)b.remove()"
       style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:8px;cursor:pointer;border:1px solid ${id===S_UAT.id?'rgba(212,175,55,.4)':'rgba(255,255,255,.05)'};background:${id===S_UAT.id?'rgba(212,175,55,.07)':'transparent'};margin-bottom:2px;transition:background .15s"
       onmouseover="this.style.background='rgba(255,255,255,.04)'" onmouseout="this.style.background='${id===S_UAT.id?'rgba(212,175,55,.07)':'transparent'}'">
       <div>
@@ -1603,7 +1603,7 @@ function showUATSelector(){
         <span style="color:#d4af37;font-weight:800;font-size:13px">📍 Selectează UAT</span>
         <span style="color:#475569;font-size:9px;margin-left:6px">${Object.keys(UAT_REGISTRY).length} UAT-uri</span>
       </div>
-      <button onclick="document.getElementById('uat-selector').remove()" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#f87171;border-radius:7px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer">✕</button>
+      <button onclick="document.getElementById('uat-selector').remove();var b=document.getElementById('uat-selector-backdrop');if(b)b.remove()" style="touch-action:manipulation;-webkit-tap-highlight-color:transparent;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#f87171;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;min-width:44px;min-height:44px">✕</button>
     </div>
     <div style="overflow-y:auto;padding:10px 12px;flex:1">
       ${regionSections}
@@ -1614,6 +1614,26 @@ function showUATSelector(){
       </div>
     </div>`;
   document.body.appendChild(div);
+
+  // Backdrop transparent — tap în afara selectorului îl închide
+  const backdrop = document.createElement('div');
+  backdrop.id = 'uat-selector-backdrop';
+  backdrop.style.cssText = 'position:fixed;inset:0;z-index:9199;background:transparent';
+  backdrop.onclick = () => {
+    div.remove();
+    backdrop.remove();
+  };
+  document.body.insertBefore(backdrop, div);
+
+  // Outside-click pe desktop (redundant cu backdrop dar sigur)
+  setTimeout(()=>{
+    document.addEventListener('click', function _uatClose(e){
+      if(!div.contains(e.target)){
+        div.remove(); backdrop.remove();
+        document.removeEventListener('click', _uatClose);
+      }
+    });
+  }, 100);
 }
 
 // ── LMI cultura.ro + CIMEC ───────────────────────────────────────────────
