@@ -5814,3 +5814,308 @@ async function runExport(){
   pdf.save('Raport_Urbanistic_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
   ss('Raport Urbanistic generat (4 pagini) — Bilant PUG + Avize + Pasi urmatori');
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// STUDIU GOSPODĂRIRE APE — DTGA (Documentație Tehnică Gospodărire Ape)
+// Legea 107/1996 + HG 930/2010 + Ord. MADR 662/2006
+// ═══════════════════════════════════════════════════════════════════════════
+async function generateWaterStudy(){
+  const ap = S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry){ ss('Selectați o parcelă.'); return; }
+  ss('Se generează Studiu Gospodărire Ape & DTGA...');
+
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,LIGHT2,RED,GREEN,ORANGE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,sign}=_initStudyPdf('Studiu de Gospodărire a Apelor — DTGA','DTGA',9);
+  const apaCfg = getApaConfig();
+  const hidro = getHidroConfig();
+  const aedisH = S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||0;
+  const areaNum = ap.area || 0;
+  const caps = await _captureStudyMaps(ap, msg=>ss(msg));
+  const TEAL = [0,128,120];
+
+  // ── PAGINA 1: COPERTĂ ────────────────────────────────────────────────────
+  pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');
+  pdf.setFillColor(0,60,90);pdf.rect(0,3,W,H-6,'F');
+  pdf.setFillColor(...GOLD);pdf.rect(0,0,W,3,'F');pdf.rect(0,H-3,W,3,'F');
+  try{_pdfDrawLogo(pdf,W/2-10,18,20);}catch(e){}
+  pdf.setTextColor(...GOLD);pdf.setFontSize(9);pdf.setFont('helvetica','bold');
+  pdf.text('URBANX — PLATFORMA DE ANALIZA URBANISTICA',W/2,50,{align:'center'});
+  pdf.setTextColor(255,255,255);pdf.setFontSize(22);pdf.setFont('helvetica','bold');
+  pdf.text('STUDIU DE GOSPODĂRIRE',W/2,70,{align:'center'});
+  pdf.text('A APELOR — DTGA',W/2,85,{align:'center'});
+  pdf.setTextColor(...GOLD);pdf.setFontSize(10);
+  pdf.text('Documentație Tehnică · Aviz + Autorizație Apele Române',W/2,98,{align:'center'});
+  pdf.setFillColor(0,40,65);pdf.rect(20,110,W-40,88,'F');
+  pdf.setFillColor(...GOLD);pdf.rect(20,110,3,88,'F');
+  [
+    ['Nr. cadastral:',nrcad],['UAT / Județ:',S2(uat+' / '+judet)],
+    ['Suprafață teren:',area+' mp'],
+    ['Bazin hidrografic:',S2(apaCfg.bazin)],
+    ['Sub-bazin:',S2(apaCfg.sub_bazin)],
+    ['Direcția Apelor:',S2(apaCfg.DA)],
+    ['NFA estimat:',S2(apaCfg.nfa)],
+    ['Risc inundabilitate:',S2(apaCfg.risc_inundabil)],
+    ['Operator apă/canal:',S2(apaCfg.operator_apa)],
+  ].forEach(([l,v],i)=>{
+    pdf.setTextColor(120,170,200);pdf.setFontSize(8);pdf.setFont('helvetica','normal');pdf.text(S2(l),26,122+i*9.5);
+    pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text(S2(v),100,122+i*9.5);
+  });
+  pdf.setTextColor(80,110,140);pdf.setFontSize(7);
+  pdf.text('Generat: '+S2(dateStr)+' · Document orientativ · Legea 107/1996 + HG 930/2010 · UrbanX TSS·FG',W/2,H-12,{align:'center'});
+  if(caps.imgLocation&&caps.imgLocation.length>500){
+    try{
+      pdf.addImage(caps.imgLocation,'JPEG',14,H-68,W-28,54,undefined,'FAST');
+      pdf.setFillColor(0,20,40);pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.5);pdf.rect(14,H-68,W-28,54,'S');
+      pdf.setTextColor(...GOLD);pdf.setFontSize(6);pdf.setFont('helvetica','bold');
+      pdf.text('AMPLASAMENT · '+S2(nrcad)+' · '+S2(uat),W/2,H-71,{align:'center'});
+    }catch(e){}
+  }
+
+  // ── PAGINA 2: DATE IDENTIFICARE + CONTEXT HIDROLOGIC ────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('DATE DE IDENTIFICARE SI CONTEXT HIDROLOGIC',2);ftr();
+  let cy=33;
+  cy=sec('1. DATE DE IDENTIFICARE AMPLASAMENT',cy);cy+=2;
+  cy=kv([
+    ['Nr. Cadastral',nrcad], ['UAT',S2(uat)], ['Județ',S2(judet)],
+    ['UTR / Zonă PUG',utr], ['Suprafață teren',area+' mp'],
+    ['Suprafață construită propusă',params?.pot?Math.round(areaNum*params.pot/100)+' mp (POT '+params.pot+'%)':'Cf. PUG'],
+    ['H propus',aedisH>0?aedisH.toFixed(1)+'m':'Cf. proiect'],
+    ['Coordonate',lat.toFixed(6)+'° N, '+lon.toFixed(6)+'° E'],
+    ['Operator apă/canal',S2(apaCfg.operator_apa)],
+    ['Sursă apă potabilă',S2(apaCfg.sursa_apa)],
+    ['Rețea canalizare',apaCfg.retea_canalizare?'DA — racord existent':'NU — soluție individuală necesară'],
+  ],cy);cy+=4;
+
+  cy=sec('2. CONTEXT HIDROGRAFIC',cy);cy+=2;
+  cy=body('Amplasamentul este situat în bazinul hidrografic '+S2(apaCfg.bazin)+', sub-bazin '+S2(apaCfg.sub_bazin)+'. Autoritatea competentă pentru avizarea și autorizarea lucrărilor cu impact asupra resurselor de apă este '+S2(apaCfg.DA)+', cu sediul în '+S2(apaCfg.DA_oras)+'.',14,cy);cy+=4;
+  cy=kv([
+    ['Bazin hidrografic',S2(apaCfg.bazin)],
+    ['Sub-bazin',S2(apaCfg.sub_bazin)],
+    ['Cursuri de apă principale',(apaCfg.cursuri||[]).join(' · ')],
+    ['Distanță curs principal',apaCfg.distanta_curs_principal+'m'],
+    ['Arie naturală protejată',apaCfg.arie_naturala||'Niciuna în perimetrul de 3km'],
+  ],cy);cy+=4;
+
+  cy=sec('3. DIRECȚIA APELOR COMPETENTĂ',cy);cy+=2;
+  cy=kv([
+    ['Denumire',S2(apaCfg.DA)],
+    ['Adresă',S2(apaCfg.DA_adresa)],
+    ['Telefon',apaCfg.DA_tel],
+    ['E-mail',apaCfg.DA_email],
+    ['Website',apaCfg.DA_web],
+    ['Normativ de bază',S2(apaCfg.norm_principala)],
+  ],cy);
+
+  // ── PAGINA 3: ANALIZA RISCULUI DE INUNDABILITATE ─────────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('ANALIZA RISCULUI DE INUNDABILITATE',3);ftr();
+  cy=33;
+  cy=sec('4. EVALUAREA RISCULUI DE INUNDABILITATE',cy);cy+=2;
+  cy=body('Evaluarea riscului de inundabilitate se realizează în conformitate cu Directiva Europeană 2007/60/CE (transpusă prin HG 846/2010) și Planul de Management al Riscului la Inundații (PMRI) pentru bazinul hidrografic '+S2(apaCfg.bazin)+'. Hărțile de hazard și risc la inundații sunt disponibile pe platforma INHGA (www.inhga.ro).',14,cy);cy+=4;
+
+  const riscColor = apaCfg.risc_inundabil?.includes('Ridicat')?[...RED]:apaCfg.risc_inundabil?.includes('Mediu')?[...ORANGE]:[...GREEN];
+  pdf.setFillColor(...riscColor);pdf.roundedRect(14,cy,W-28,14,2,2,'F');
+  pdf.setTextColor(255,255,255);pdf.setFontSize(11);pdf.setFont('helvetica','bold');
+  pdf.text('RISC INUNDABILITATE: '+S2(apaCfg.risc_inundabil).toUpperCase(),W/2,cy+9,{align:'center'});
+  cy+=18;
+
+  cy=kv([
+    ['Risc inundabilitate',S2(apaCfg.risc_inundabil)],
+    ['Zonă inundabilă Q100',S2(apaCfg.zona_inundabila)],
+    ['Distanță față de curs principal',apaCfg.distanta_curs_principal+'m'],
+    ['Nivel ape subterane (NFA)',S2(hidro.nfa||apaCfg.nfa)],
+    ['Adâncime minimă fundare',S2(hidro.adancime_fundare||'min. 0.9m')],
+    ['Tip sol dominant',S2(hidro.tip_sol||apaCfg.tip_sol)],
+    ['Portanță estimată',S2(hidro.portanta||apaCfg.portanta)],
+    ['Clasă geotehnică',S2(hidro.clasa_geotehnica||'2')],
+    ['Studiu geotehnic obligatoriu','DA — NP 074/2014 (orice clădire)'],
+  ],cy);cy+=4;
+
+  cy=sec('5. OBLIGAȚII ZONE DE PROTECȚIE',cy);cy+=2;
+  const zonaRisc = apaCfg.risc_inundabil?.includes('Ridicat');
+  cy=body(zonaRisc?
+    'ATENȚIE: Amplasamentul se află în zonă cu risc ridicat la inundații. Construcția necesită aviz special din partea '+S2(apaCfg.DA)+' și respectarea Planului de Restricții (PR) din PMRI. Se recomandă verificarea hărților INHGA înainte de elaborarea SF/PT.':
+    'Amplasamentul nu se află în zonă cu risc ridicat la inundații conform hărților INHGA. Se recomandă totuși verificarea situației exacte față de cursurile de apă cele mai apropiate ('+S2((apaCfg.cursuri||[]).join(', '))+') și respectarea zonelor de protecție de 5m/10m/20m/50m conform Legii 107/1996.',14,cy);cy+=4;
+
+  cy=tblRow(['Curs de apă','Zona protecție','Activități interzise','Act normativ'],cy,true,[52,32,68,36]);
+  [
+    ['Râuri interioare nenavigabile H<2m','5m',   'Orice construcție permanentă','L.107/1996 Art.40'],
+    ['Râuri interioare nenavigabile H>2m','10m',  'Construcții + depozitare','L.107/1996 Art.40'],
+    ['Fluvii, râuri principale',          '50m',  'Construcții + exploatare','HG 930/2010 Art.14'],
+    ['Lacuri naturale și de acumulare',   '100m', 'Orice amenajare permanentă','L.107/1996 Art.42'],
+    ['Ape subterane (foraj/captare)',      '50m',  'Activități poluante','Ord. 662/2006'],
+  ].forEach(r=>{cy=tblRow(r,cy,false,[52,32,68,36]);});
+
+  // ── PAGINA 4: APE SUBTERANE + IMPACT CONSTRUCȚIE ────────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('APE SUBTERANE SI IMPACT CONSTRUCTIE',4);ftr();
+  cy=33;
+  cy=sec('6. CARACTERIZAREA APELOR SUBTERANE',cy);cy+=2;
+  cy=body('Evaluarea nivelului freatic are importanță directă pentru proiectarea fundațiilor, a subsolurilor și a sistemelor de drenaj. Datele de mai jos sunt orientative, bazate pe caracterizarea geologică a zonei '+S2(uat)+'. Verificarea exactă necesită studiu geotehnic pe amplasament conform NP 074/2014.',14,cy);cy+=4;
+  cy=kv([
+    ['Nivel Freatic Maxim (NFA estimat)',S2(hidro.nfa||apaCfg.nfa)],
+    ['Tip sol dominant',S2(hidro.tip_sol||apaCfg.tip_sol)],
+    ['Portanță de calcul estimată',S2(hidro.portanta||apaCfg.portanta)],
+    ['Adâncime minimă fundare',S2(hidro.adancime_fundare||'min. 0.9m (îngheț)')],
+    ['Clasă geotehnică',S2(hidro.clasa_geotehnica||'2 — risc moderat')],
+    ['Agresivitate față de beton','Verificare laborator necesară (carbonați, sulfați, pH)'],
+    ['Studiu hidrogeologic','Recomandat pentru subsoluri și lucrări speciale de fundare'],
+  ],cy);cy+=4;
+
+  cy=sec('7. IMPACT CONSTRUCȚIE ASUPRA RESURSELOR DE APĂ',cy);cy+=2;
+  cy=tblRow(['Categorie impact','Sursă','Măsuri obligatorii','Fază'],cy,true,[50,40,72,26]);
+  [
+    ['Ape pluviale contaminate','Parcare, platforme','Separator hidrocarburi + decantor','PT+AC'],
+    ['Ape uzate menajere','Utilizatori clădire','Racord rețea publică sau fosă etanșă','PT+AC'],
+    ['Ape de construcție','Turnare beton, spălare','Decantare înainte de evacuare','PE'],
+    ['Deseuri de construcție','Decopertare, demolare','Gestionare conform Legii 211/2011','PE'],
+    ['Impermeabilizare teren','Fundații, platforme','Sistem drenaj + infiltrare conform PUG','PT'],
+    ['Excavații subterane','Subsol/parcare','Epuisment autorizat AR dacă NFA<2m','PT+AC'],
+  ].forEach(r=>{cy=tblRow(r,cy,false,[50,40,72,26]);});cy+=4;
+  cy=body('Notă: PE = faza de execuție, PT = proiect tehnic, AC = autorizație de construire. Epuismentul apelor subterane cu debite >0.1 l/s necesită autorizație de gospodărire a apelor separată.',14,cy);
+
+  // ── PAGINA 5: DOCUMENTE DTGA ─────────────────────────────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('DOCUMENTATIA TEHNICA GOSPODĂRIRE APE — DTGA',5);ftr();
+  cy=33;
+  cy=sec('8. DTGA — DOCUMENTAȚIE TEHNICĂ GOSPODĂRIRE APE',cy);cy+=2;
+  cy=body('Documentația Tehnică de Gospodărire a Apelor (DTGA) este obligatorie conform Legii Apelor 107/1996 și HG 930/2010 pentru obținerea Avizului de Gospodărire a Apelor (AGA) — solicitat înainte de emiterea Autorizației de Construire — și ulterior a Autorizației de Gospodărire a Apelor pentru funcționare.',14,cy);cy+=4;
+
+  cy=sec('8.1 Conținut minim DTGA (cf. Ord. 662/2006)',cy);cy+=2;
+  cy=tblRow(['Nr.','Document / Studiu','Elaborator','Obligatoriu'],cy,true,[12,100,52,24]);
+  [
+    ['1','Memoriu tehnic general cu descrierea investiției','Proiectant autorizat','DA'],
+    ['2','Plan de situație 1:500 cu cursurile de apă din zonă','Topograf autorizat','DA'],
+    ['3','Plan de amplasament în bazinul hidrografic 1:25000','Proiectant / GIS','DA'],
+    ['4','Studiu hidrologic (debite, viituri Q1%, Q10%, Q100%)','Hidrolog autorizat','DA*'],
+    ['5','Studiu hidrogeologic (NFA, acvifere, vulnerabilitate)','Hidrogeolog aut.','DA*'],
+    ['6','Studiu de inundabilitate (hărți hazard Q100)','Hidrolog autorizat','Condiț.'],
+    ['7','Schema instalațiilor sanitare (ape uzate, pluviale)','Proiectant IS','DA'],
+    ['8','Calculul consumului de apă și al debitelor evacuate','Proiectant IS','DA'],
+    ['9','Soluție separare/tratare ape pluviale contaminate','Proiectant IS','DA'],
+    ['10','Aviz structură de gospodărire ape județul '+judet,'Autoavizat AR','DA'],
+  ].forEach(r=>{cy=tblRow(r,cy,false,[12,100,52,24]);});cy+=2;
+  cy=body('* DA* = obligatoriu pentru construcții >500mp, subsoluri, sau amplasamente la <50m față de cursuri de apă. Condiț. = condiționat de riscul de inundabilitate.',14,cy);
+
+  // ── PAGINA 6: TIPURI DE STUDII NECESARE ─────────────────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('TIPURI DE STUDII SI DOCUMENTATII APELE ROMÂNE',6);ftr();
+  cy=33;
+  cy=sec('9. TIPURILE DE STUDII ȘI DOCUMENTAȚII NECESARE',cy);cy+=2;
+  cy=body('Principalele tipuri de studii și documentații necesare pentru obținerea avizelor/autorizațiilor Apele Române sunt detaliate mai jos, cu baza legală și specificul fiecăruia.',14,cy);cy+=4;
+
+  const studiiApa=[
+    {titlu:'Documentație Tehnică Gospodărire Ape (DTGA)',scop:'Obținere Aviz de Gospodărire a Apelor (AGA) — obligatorie înainte de AC',continut:'Memoriu tehnic + planuri + studii hidrologice/hidrogeologice + scheme instalații',baza:'Legea 107/1996 Art.48 + HG 930/2010 + Ord. 662/2006',cine:'Proiectant atestat ANRE/ANAR',termen:'30-60 zile',cost:'3.000-12.000 EUR'},
+    {titlu:'Studiu Hidrologic',scop:'Evaluarea debitelor de viitură (Q1%, Q10%, Q100%) și a riscului de inundare',continut:'Analiza statistică pluviometrică + calcul debite max. + modelare hidrologică bazin',baza:'STAS 4068/1-82 + Ord. ANRE nr. 53/2014 + Dir. 2007/60/CE',cine:'Hidrolog autorizat / Institut acreditat',termen:'30-45 zile',cost:'2.500-8.000 EUR'},
+    {titlu:'Studiu Hidrogeologic',scop:'Caracterizarea acviferelor, a NFA și a vulnerabilității la poluare',continut:'Foraje de investigare + pompări de probă + modelare flux subteran',baza:'SR EN ISO 21413:2009 + NP 125/2010',cine:'Hidrogeolog autorizat',termen:'30-60 zile (foraje)',cost:'4.000-15.000 EUR'},
+    {titlu:'Studiu de Inundabilitate',scop:'Delimitarea precisă a zonelor inundabile și proiectarea sistemelor de apărare',continut:'Model 1D/2D HEC-RAS + hărți hazard Q100 + măsuri constructive',baza:'Dir. 2007/60/CE + HG 846/2010 + PMRI bazin '+S2(apaCfg.bazin),cine:'Hidrolog autorizat / INHGA',termen:'45-90 zile',cost:'5.000-20.000 EUR'},
+    {titlu:'Documentație Aviz Amplasament Apele Române',scop:'Aviz pentru construcții în apropierea cursurilor de apă sau a zonelor de protecție',continut:'Plan situație + memoriu + descrierea impactului + măsuri',baza:'Legea 107/1996 Art.40-44 + Ord. 662/2006 Art.5',cine:'Proiectant autorizat',termen:'15-30 zile',cost:'800-2.500 EUR'},
+  ];
+
+  studiiApa.forEach((s,si)=>{
+    if(cy>H-60){pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('TIPURI DE STUDII SI DOCUMENTATII APELE ROMÂNE',6);ftr();cy=33;}
+    pdf.setFillColor(0,60,90);pdf.roundedRect(14,cy,W-28,7,1,1,'F');
+    pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');
+    pdf.text((si+1)+'. '+S2(s.titlu),16,cy+5);
+    cy+=8;
+    cy=kv([
+      ['Scop',S2(s.scop)],['Conținut',S2(s.continut)],
+      ['Bază legală',S2(s.baza)],['Cine elaborează',S2(s.cine)],
+      ['Termen orientativ',s.termen],['Cost orientativ',s.cost],
+    ],cy);cy+=3;
+  });
+
+  // ── PAGINA 7: PROCEDURA AVIZARE ──────────────────────────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('PROCEDURA DE AVIZARE APELE ROMÂNE',7);ftr();
+  cy=33;
+  cy=sec('10. PROCEDURA DE OBȚINERE A AVIZULUI DE GOSPODĂRIRE A APELOR',cy);cy+=2;
+  cy=body('Avizul de Gospodărire a Apelor (AGA) se obține de la '+S2(apaCfg.DA)+' și este obligatoriu conform Legii 107/1996 Art. 48 înainte de emiterea Autorizației de Construire pentru lucrări care afectează resursele de apă.',14,cy);cy+=4;
+
+  cy=tblRow(['Etapă','Acțiune','Termen','Observații'],cy,true,[10,100,30,48]);
+  [
+    ['1','Cerere de emitere AGA (formulare tip DA)','5 zile','Se depune la '+S2(apaCfg.DA)],
+    ['2','Verificare completitudine documentație','5-10 zile','Se solicită completări dacă e cazul'],
+    ['3','Analiză DTGA de experți hidrologi','15-30 zile','Timp standard cf. HG 930/2010'],
+    ['4','Inspecție teren (dacă necesară)','5-10 zile','La solicitarea DA'],
+    ['5','Emitere AGA sau respingere motivată','45 zile max','Termen legal cf. Legea 107/1996'],
+    ['6','Contestație (dacă AGA e respins)','30 zile','La DA emitent sau instanță'],
+    ['7','Autorizație de Construire (AC)','30 zile','Se obține ulterior AGA'],
+    ['8','Autorizație Gospodărire Ape funcționare','La dare în folosință','Obligatorie la finalizare'],
+  ].forEach(r=>{cy=tblRow(r,cy,false,[10,100,30,48]);});cy+=4;
+
+  cy=sec('11. TAXE ȘI TARIFE (ORIENTATIV)',cy);cy+=2;
+  cy=tblRow(['Document','Tarif orientativ','Bază'],cy,true,[80,50,58]);
+  [
+    ['Aviz de Gospodărire Ape (AGA)','0 — 500 EUR','HG 930/2010 Anexa 3'],
+    ['Autorizație Gospodărire Ape funcționare','0 — 300 EUR','HG 930/2010 Anexa 3'],
+    ['Aviz amplasament curs de apă','0 — 200 EUR','HG 930/2010'],
+    ['Autorizație pentru lucrări provizorii','0 — 150 EUR','Ord. 662/2006'],
+  ].forEach(r=>{cy=tblRow(r,cy,false,[80,50,58]);});
+
+  // ── PAGINA 8: CERINȚE TEHNICE ────────────────────────────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CERINTE TEHNICE — APE PLUVIALE SI UZATE',8);ftr();
+  cy=33;
+  cy=sec('12. CERINȚE TEHNICE PRIVIND GESTIUNEA APELOR',cy);cy+=2;
+  cy=body('Proiectarea sistemelor de ape pluviale și uzate trebuie să respecte Normativul NP 133/2013 (rețele de canalizare), SR EN 752 (sisteme de canalizare exterioară) și NTPA 001/2002 (calitate ape uzate evacuate). Parametrii de proiectare sunt stabiliți în funcție de datele hidrologice locale.',14,cy);cy+=4;
+
+  cy=sec('12.1 Sistem ape pluviale',cy);cy+=2;
+  const potPct = params?.pot||50;
+  const scSol = Math.round(areaNum*potPct/100);
+  const imperm = Math.round(areaNum*0.85);
+  cy=kv([
+    ['Suprafață impermeabilizată estimată',imperm+' mp (SC+platforme+acces)'],
+    ['Coeficient scurgere mediu (ψ)','0.75-0.85 (zone urbane dense)'],
+    ['Precipitație de calcul (i15min)','150-170 l/s/ha (intensitate specifică Iași)'],
+    ['Debit pluvial estimat Q','~'+Math.round(imperm*0.80*0.0028).toFixed(2)+' m³/s — verificare calcul hidraulic'],
+    ['Separator hidrocarburi','Obligatoriu pentru suprafețe cu trafic auto'],
+    ['Racord colector public','Confirmare capacitate acceptare de la '+S2(apaCfg.operator_apa)],
+    ['Alternativă infiltrare','Posibilă dacă portanță sol >100 kPa și NFA >1.5m'],
+  ],cy);cy+=4;
+
+  cy=sec('12.2 Ape uzate menajere',cy);cy+=2;
+  const locatari = params?.cut?Math.round(areaNum*params.cut/40):50;
+  cy=kv([
+    ['Utilizatori estimați',locatari+' persoane (estimat din regim H și funcțiune)'],
+    ['Consum specific','150-250 l/pers/zi (rezidențial) / 5-30 l/mp/zi (comercial)'],
+    ['Debit uzat mediu estimat',Math.round(locatari*200/86400*1000)+' l/s'],
+    ['Rețea canalizare publică',apaCfg.retea_canalizare?'DISPONIBILĂ — confirmare raportat DA':'INDISPONIBILĂ — fosă etanșă/stație epurare individuală'],
+    ['Racord la colector','Solicitare aviz tehnic '+S2(apaCfg.operator_apa)],
+    ['Deversare direct curs apă','INTERZISĂ fără stație de epurare autorizată'],
+  ],cy);
+
+  // ── PAGINA 9: CONCLUZII + CHECKLIST ─────────────────────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONCLUZII SI CHECKLIST DOCUMENTE NECESARE',9);ftr();
+  cy=33;
+  cy=sec('13. CONCLUZII ȘI RECOMANDĂRI',cy);cy+=2;
+  cy=body('Pe baza analizei contextului hidrografic al amplasamentului '+S2(nrcad)+', UTR '+S2(utr)+', '+S2(uat)+', riscul de inundabilitate este evaluat ca '+S2(apaCfg.risc_inundabil)+'. Distanța față de cel mai apropiat curs de apă principal este de ~'+apaCfg.distanta_curs_principal+'m, ceea ce '+( apaCfg.distanta_curs_principal<200?'IMPUNE aviz obligatoriu de amplasament din partea '+S2(apaCfg.DA):apaCfg.distanta_curs_principal<500?'poate impune aviz de amplasament — verificare exactă necesară':'nu impune aviz de amplasament, dar DTGA rămâne obligatorie')+'. Nivelul freatic estimat este la '+S2(hidro.nfa||apaCfg.nfa)+', ceea ce '+(hidro.nfa&&hidro.nfa.includes('1.')?'necesită măsuri speciale de hidroizolare și epuisment în faza de execuție':'permite fundare directă cu precauții standard')+'.',14,cy);cy+=4;
+
+  cy=sec('14. CHECKLIST DOCUMENTE PENTRU AVIZARE APELE ROMÂNE',cy);cy+=2;
+  const items=[
+    ['DTGA — Documentație Tehnică Gospodărire Ape','Obligatorie cf. Legea 107/1996'],
+    ['Studiu hidrologic (Q1%, Q100%)','Obligatoriu pentru clădiri >500mp sau aproape de cursuri'],
+    ['Studiu hidrogeologic (NFA, acvifere)','Obligatoriu dacă subsol sau NFA<3m'],
+    ['Studiu de inundabilitate','Dacă amplasamentul e în zonă de risc Q100'],
+    ['Schema instalații sanitare (ape uzate+pluviale)','Obligatorie la DTGA'],
+    ['Aviz amplasament curs de apă','Dacă distanța <50m față de curs'],
+    ['Confirmare capacitate racord apă/canal','Solicitare la '+S2(apaCfg.operator_apa)],
+    ['Autorizație epuisment (dacă NFA<2m)','La subsoluri și excavații adânci'],
+    ['Aviz Gospodărire Ape (AGA)','Se obține de la '+S2(apaCfg.DA)+' înainte de AC'],
+    ['Autorizație funcționare (post-construcție)','La recepția finală'],
+  ];
+  cy=tblRow(['Nr.','Document','Observație'],cy,true,[10,90,88]);
+  items.forEach(([doc,obs],i)=>{cy=tblRow([(i+1)+'',doc,obs],cy,false,[10,90,88]);});
+  cy+=4;
+
+  pdf.setFillColor(0,50,80);pdf.roundedRect(14,cy,W-28,22,2,2,'F');
+  pdf.setFillColor(...GOLD);pdf.rect(14,cy,2.5,22,'F');
+  pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');
+  pdf.text('CONTACT '+S2(apaCfg.DA.toUpperCase()),22,cy+7);
+  pdf.setTextColor(180,210,240);pdf.setFontSize(8);pdf.setFont('helvetica','normal');
+  pdf.text(S2(apaCfg.DA_adresa)+' · Tel: '+apaCfg.DA_tel+' · E-mail: '+apaCfg.DA_email,22,cy+14);
+  pdf.text('Web: '+apaCfg.DA_web,22,cy+20);
+  cy+=28;
+
+  pdf.setFillColor(240,248,252);pdf.roundedRect(14,cy,W-28,18,2,2,'F');
+  pdf.setTextColor(20,40,80);pdf.setFontSize(8.5);pdf.setFont('helvetica','bold');
+  pdf.text('DOCUMENT ORIENTATIV — UrbanX TSS·FG',22,cy+7);
+  pdf.setTextColor(60,90,120);pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');
+  pdf.text('Prezenta documentație este generată automat și are caracter STRICT ORIENTATIV.',22,cy+13);
+
+  pdf.save('DTGA_Ape_'+S2(nrcad)+'_'+new Date().getFullYear()+'.pdf');
+  ss('✅ Studiu Gospodărire Ape DTGA generat (9 pagini) — '+S2(apaCfg.DA));
+}
