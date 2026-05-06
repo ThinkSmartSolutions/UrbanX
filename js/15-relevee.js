@@ -1414,14 +1414,14 @@ async function _rvExportPDF(){
       }
 
       // ── 4. Camere — umplutură colorată ────────────────────────────────
-      const cm={living:[255,240,210],bedroom:[220,248,225],bedroom2:[215,245,220],bedroom3:[210,242,218],
-        kitchen:[208,246,252],bath:[235,225,255],wc:[235,225,255],hall:[238,240,245],
-        storage:[228,230,235],core:[215,228,252],office:[218,242,220],meeting:[252,240,210],
-        commercial:[252,215,235],reception:[252,215,235],balcon:[252,250,215]};
-      const sm={living:[220,130,30],bedroom:[50,180,90],bedroom2:[50,180,90],bedroom3:[50,180,90],
-        kitchen:[20,160,190],bath:[130,80,200],wc:[130,80,200],hall:[100,115,140],
-        storage:[140,150,170],core:[40,100,210],office:[50,180,90],meeting:[220,130,30],
-        commercial:[180,30,140],reception:[180,30,140],balcon:[180,150,20]};
+      const cm={living:C.living,bedroom:C.bedroom,bedroom2:C.bedroom,bedroom3:C.bedroom,
+        kitchen:C.kitchen,bath:C.bath,wc:C.bath,hall:C.hall,storage:C.storage,
+        core:C.core,office:C.bedroom,meeting:C.living,commercial:C.commercial,
+        reception:C.commercial,balcon:C.balcon};
+      const sm={living:C.orange,bedroom:C.green,bedroom2:C.green,bedroom3:C.green,
+        kitchen:C.cyan,bath:C.purple,wc:C.purple,hall:C.gray,storage:C.gray2,
+        core:C.blue,office:C.green,meeting:C.orange,commercial:[180,30,140],
+        reception:[180,30,140],balcon:C.gold};
 
       fl.rects.sort((a,m_)=>(a.zIdx||0)-(m_.zIdx||0)).forEach(r=>{
         const rx=ox+r.x*sc,ry=oy+r.y*sc,rw=r.w*sc,rh=r.h*sc;
