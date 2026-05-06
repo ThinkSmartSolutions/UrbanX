@@ -2730,7 +2730,7 @@ async function generateSSF(){
 
   // ── PAG 2: DATE GENERALE + CLASIFICARI ───────────────────────────────────
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('DATE GENERALE CONSTRUCTIE - CLASIFICARI SIGURANTA FOC',2);ftr();
-  cy=28;
+  let cy=28;
   cy=addImg(caps.img3D,14,cy,W-28,65,'FIG. 1 — Volumetrie 3D propusa · Context urban · Date constructie');
   cy=sec('1. DATE GENERALE AMPLASAMENT SI CONSTRUCTIE PROPUSA',cy);cy+=2;
   cy=tblRow(['Parametru','Valoare','Obs.'],cy,true,[70,60,52]);
@@ -3054,7 +3054,7 @@ async function generateSSF(){
 
   // ── PAG 13: PLAN ORIENTATIV EVACUARE + TIMPI ────────────────────────────────
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('PLAN ORIENTATIV DE EVACUARE - TIMPI SI CAPACITATI DIMENSIONATE',13);ftr();
-  let cy=33;
+  cy=33;
   cy=sec('13. PLAN ORIENTATIV DE EVACUARE — CONF. P118-2/2013 + SR EN ISO 13943',cy);cy+=2;
   cy=body('Planul de evacuare a fost dimensionat orientativ pentru '+_pers+' persoane pe '+niv+' niveluri, structură cu grad de rezistență la foc '+_grf+'. Timpii de evacuare sunt calculați conform metodologiei SFPE (Society of Fire Protection Engineers) adaptată la normele românești P118-2/2013.',14,cy);cy+=3;
   // Calcul timpi evacuare
@@ -5822,7 +5822,7 @@ async function generateWaterStudy(){
   Object.assign(params && typeof params === 'object' ? params : {}, _p);
   const caps = await _captureStudyMaps(ap, msg=>ss(msg));
   // Helper safe pentru cy
-  const _kv = (rows, cy) => { try{ return _kv(rows, isFinite(cy)?cy:33); }catch(e){ return isFinite(cy)?cy+rows.length*7:33; } };
+  const _kv = (rows, cy_) => { try{ return kv(rows, isFinite(cy_)?cy_:33)||cy_; }catch(e){ return isFinite(cy_)?cy_+rows.length*7:33; } };
   const _sc = (v) => (isFinite(v) && v > 0) ? v : 33;
 
   // ── PAGINA 1: COPERTĂ ────────────────────────────────────────────────────
