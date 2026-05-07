@@ -747,7 +747,9 @@ const UAT_REGISTRY = {
     },
   },
 
-  // ── BOTOȘANI ────────────────────────────────────────────────────────────
+  // ── BOTOȘANI — JUDEȚ COMPLET ────────────────────────────────────────────
+  // Status: 'partial' → se actualizează la 'complet' după import DXF/SHP
+  // Fișiere necesare: data/botosani/cadastru_index.json + pug.geojson + reguli.json
   'municipiul-botosani': {
     label:'Municipiul Botoșani', short:'Botoșani',
     judet:'Botoșani', judetCode:'BT', siruta:'29980',
@@ -755,37 +757,278 @@ const UAT_REGISTRY = {
     pugFile:'./data/botosani/pug.geojson',
     cadastruIndex:'./data/botosani/cadastru_index.json',
     reguliFile:'./data/botosani/reguli.json',
-    status:'empty',
+    status:'partial', // → 'complet' după import DXF/SHP și populare cadastru_index.json
     primar:'Primăria Municipiului Botoșani',
-    daU:'Serviciul Urbanism și Amenajarea Teritoriului',
+    adresaPrimarie:'Piața Revoluției nr. 1, Botoșani 710236',
+    telefon:'0231 515 712', web:'https://www.primariabotosani.ro',
+    daU:'Serviciul Urbanism, Amenajarea Teritoriului și Autorizații',
+    djcpn:'DJCPN Botoșani', djcpnEmail:'djcpn.botosani@cultura.ro',
+    cjPut:'Consiliul Județean Botoșani',
+    apm:'APM Botoșani', apmWeb:'http://apmbt.anpm.ro',
+    // Aeroport — cel mai apropiat: Iași (LRIA, ~110km) sau Suceava (LRSV, ~90km)
+    aeroport:{
+      icao:'LRSV', nume:'Aeroportul Internațional „Ștefan cel Mare" Suceava',
+      distanta_km:88, directie:'V',
+      nota:'Nu există aeroport în județul Botoșani. Cel mai apropiat: Suceava 88km.',
+      contactAACR:'aacr@aacr.ro',
+    },
+    // Seismicitate — P100-1/2013
+    seism:{
+      zona:'E', ag:0.20, Tc:1.6, MSK:'VII',
+      norm:'P100-1/2013',
+      descriere:'Zona seismică E — intensitate moderată. ag=0.20g, Tc=1.6s (Câmpia Moldovei).',
+      recomandare:'Fundație directă pe loess consolidat. Verificare obligatorie pentru clădiri >P+3E.',
+    },
+    // Hidrologie și geotehnică
+    hidro:{
+      nfa:'2.0-5.0m',
+      tip_sol:'Loess, argilă prăfoasă, nisipuri fine (Câmpia Moldovei de Nord)',
+      portanta:'140-190 kPa (loess consolidat)',
+      risc_inundabil:'Scăzut general / Mediu în lunca Jijiei și Sitnaului',
+      adancime_fundare:'min. 0.9m (adâncime de îngheț 0.90m conf. STAS 6054)',
+      clasa_geotehnica:'2 (risc moderat)',
+      studiu_obligatoriu:'Da — NP 074/2014 pentru orice clădire',
+      rauri_principale:['Jijia','Sitnau','Dresleuca','Miletin'],
+      risc_inundare_jijia:'Zonă de risc ridicat — Plan Management Bazin Hidrografic Prut-Bârlad',
+    },
+    // LMI și Patrimoniu (DJCPN Botoșani)
+    lmi:{
+      cimecRadius:1000,
+      zone_protejate:[
+        {cod:'BT-II-s-B-02001', tip:'Zonă construită protejată', centru:[26.6635,47.7465], raza:600,
+          desc:'Centrul Istoric Botoșani — Zona pieței centrale și str. Calea Națională', aviz:'DJCPN Botoșani + MCID'},
+        {cod:'BT-II-s-B-02002', tip:'Ansamblu urban', centru:[26.6712,47.7482], raza:400,
+          desc:'Strada Cuza Vodă — ansamblul de arhitectură sec. XIX', aviz:'DJCPN Botoșani'},
+      ],
+      monumente_reprezentative:[
+        {cod:'BT-II-m-A-02001', denumire:'Sinagoga Mare Botoșani', categorie:'A', adresa:'Str. Marchian 17'},
+        {cod:'BT-II-m-A-02002', denumire:'Biserica Popăuți (1496)', categorie:'A', adresa:'Str. Popăuți 2'},
+        {cod:'BT-II-m-A-02003', denumire:'Turnul Colței (sec. XVII)', categorie:'A', adresa:'Str. Calea Națională'},
+        {cod:'BT-II-m-B-02004', denumire:'Palatul Administrativ', categorie:'B', adresa:'Piața Revoluției 1'},
+        {cod:'BT-II-m-B-02005', denumire:'Casa natală Eminescu (Ipotești)', categorie:'A', adresa:'Ipotești (com. Mihai Eminescu)'},
+        {cod:'BT-II-m-B-02006', denumire:'Liceul Național A.T. Laurian (1859)', categorie:'B', adresa:'Str. Cuza Vodă'},
+      ],
+      reglementare:'Legea 422/2001 · Ordinul MCID 2828/2015 · PUG Botoșani — zone protejate',
+    },
+    // Zgomot urban — studiu acustic
+    zgomot:{
+      zona_acustica:'II — Rezidențial/Mixt urban',
+      Lzsn_limita:60, Lnoapte_limita:50,
+      surse_principale:[
+        'Trafic rutier DN29 (Botoșani—Iași)',
+        'Trafic rutier DN29A (Botoșani—Dorohoi)',
+        'Nod feroviar CFR Botoșani',
+        'Activități comerciale zona centrală',
+      ],
+      distanta_cale_ferata:400,
+      norm:'SR 10009:2017 + HG 321/2005',
+    },
+    // Vânt — CR 1-1-4/2012
+    vant:{
+      zona:'III',
+      v_ref:30, presiune_vant:0.55,
+      directie_dominanta:'NV-NNV (predominant) / NE (iarnă)',
+      altitudine_teren:143, // m față de NMN, centrul Botoșanilor
+      norm:'CR 1-1-4/2012 · SR EN 1991-1-4:2006',
+      factor_teren:'II — câmpie deschisă (Câmpia Moldovei)',
+    },
+    // Trafic
+    trafic:{
+      viteza_proiectare:50,
+      TMA_ref:8500,
+      norm_parcaje:'NP 051/2012 rev.',
+      drumuri_nationale:['DN29 (Botoșani—Iași)','DN29A (Botoșani—Dorohoi)','DN29B'],
+      acces_transport_public:true,
+      linii_autobuz:['1','2','3','4','5','6','7','8'],
+      statii_cale_ferata:['Botoșani', 'Catamarești'],
+    },
+    // Mediu
+    mediu:{
+      sv_minim_procent:20,
+      parcuri_principale:['Parcul Mihai Eminescu','Parcul Cornișa Dresleucei','Grădina Publică'],
+      parc_cel_mai_apropiat:'Parcul Mihai Eminescu (centru)',
+      arie_protejata_apropiere:'Rezervația de la Stânca-Costești',
+      km_arie_protejata:45,
+      natura2000_proximitate:[
+        'ROSCI0084 Iazurile Miletinului și Başeului — 12km',
+        'ROSPA0046 Iazurile de pe Bașeu și Ibăneasa — 18km',
+        'ROSCI0062 Dealurile Agapia și Văratec — 75km',
+      ],
+      aer:{
+        apm:'APM Botoșani', apmWeb:'http://apmbt.anpm.ro',
+        statii_monitoring:['Botoșani-Urban (BT-1)'],
+        poluanti_principali:['NO2 (trafic)','PM10 (trafic + agricultură)'],
+        calitate_generala:'Bună — urbanizare moderată, presiune trafic în creștere',
+        norm:'Legea 104/2011 + Dir. 2008/50/CE',
+      },
+      apa:{
+        operator:'Nova Apaserv SA Botoșani',
+        sursa_apa_potabila:'Lacul Stânca-Costești (Prut) + subteran',
+        retea_canalizare:true, grad_conectare:78,
+        receptori_naturali:['Râul Jijia','Râul Sitnau'],
+        norm:'Legea 107/1996 + Dir. 2000/60/CE',
+      },
+      sol:{
+        tip_sol_predominant:'Cernoziom cambic, loess, argilă prăfoasă',
+        permeabilitate:'Scăzută-Medie',
+        eroziune:'Risc moderat pe versanți; scăzut în câmpie',
+        norm:'OUG 195/2005',
+      },
+      ins:{
+        populatie:106847, // Recensământ 2021
+        densitate_pop:1450,
+        suprafata_intravilam:3890, // ha
+        rata_somaj:4.1,
+        venit_mediu_lunar:3600, // RON net estimat
+        sursa:'INS — Recensământ 2021 + Fișă localitate 2023',
+        ins_web:'https://statistici.insse.ro',
+      },
+      norm:'Legea 292/2018 (EIM) + OUG 195/2005 + Legea 24/2007 (SV)',
+    },
+    // Prețuri piață (estimative, €/mp, 2024-2025)
+    market:{
+      teren_central:120, teren_rezidential:60, teren_periferic:25, teren_extravilan:8,
+      constructie_rezidential:800, constructie_comercial:950, constructie_industrial:600,
+      vanzare_apartament:900, vanzare_casa:700, chiria_birouri:8,
+      sursa:'Olx, Storia, Imobiliare.ro — medii estimative 2025',
+    },
+  },
+
+  // ── DOROHOI (Municipiu) ──────────────────────────────────────────────────
+  'municipiul-dorohoi': {
+    label:'Municipiul Dorohoi', short:'Dorohoi',
+    judet:'Botoșani', judetCode:'BT', siruta:'30027',
+    center:[26.3980,47.9572], zoom:13,
+    pugFile:'./data/dorohoi/pug.geojson',
+    cadastruIndex:'./data/dorohoi/cadastru_index.json',
+    reguliFile:'./data/botosani/reguli.json', // folosește reguli județ până la PUG specific
+    status:'partial',
+    primar:'Primăria Municipiului Dorohoi',
+    adresaPrimarie:'Str. Revoluției nr. 1, Dorohoi 715200',
+    telefon:'0231 611 490', web:'https://www.primaria-dorohoi.ro',
+    daU:'Compartiment Urbanism și Amenajarea Teritoriului',
     djcpn:'DJCPN Botoșani', djcpnEmail:'djcpn.botosani@cultura.ro',
     aeroport:null,
     seism:{zona:'E',ag:0.20,Tc:1.6,MSK:'VII',norm:'P100-1/2013',
-      descriere:'Zona seismică E — intensitate moderată.',
-      recomandare:'Fundație directă pe loess. Verificare pentru clădiri >P+2.'},
-    hidro:{nfa:'2.0-5.0m',tip_sol:'Loess, argilă prăfoasă (Câmpia Moldovei)',portanta:'140-190 kPa',
-      risc_inundabil:'Scăzut',adancime_fundare:'min. 0.9m',clasa_geotehnica:'2',studiu_obligatoriu:'Da'},
-    lmi:{cimecRadius:1000,
-      zone_protejate:[
-        {cod:'BT-II-s-B-01234',tip:'Zonă construită protejată',centru:[26.6697,47.7479],raza:500,
-          desc:'Centrul istoric Botoșani',aviz:'DJCPN Botoșani'},
-      ],
+      descriere:'Zona seismică E — similar Botoșani.',
+      recomandare:'Fundație directă pe loess. Verificare pentru >P+3E.'},
+    hidro:{nfa:'2.5-5.0m',tip_sol:'Loess, argilă (câmpie)',portanta:'130-180 kPa',
+      risc_inundabil:'Scăzut / Mediu luncă Jijia-Sitna',
+      adancime_fundare:'min. 0.9m',clasa_geotehnica:'2',studiu_obligatoriu:'Da'},
+    lmi:{cimecRadius:800,
+      zone_protejate:[{cod:'BT-II-s-B-03001',tip:'Centru urban protejat',centru:[26.3980,47.9572],raza:400,
+        desc:'Centrul istoric Dorohoi',aviz:'DJCPN Botoșani'}],
       monumente_reprezentative:[
-        {cod:'BT-II-m-A-01001',denumire:'Sinagoga Mare Botoșani',categorie:'A',adresa:'Str. Marchian 17'},
-        {cod:'BT-II-m-B-01002',denumire:'Biserica Popăuți',categorie:'A',adresa:'Str. Popăuți 2'},
+        {cod:'BT-II-m-A-03001',denumire:'Biserica Sf. Gheorghe Dorohoi (1495)',categorie:'A',adresa:'Str. Victoriei'},
+        {cod:'BT-II-m-B-03002',denumire:'Casa Memorială George Enescu',categorie:'B',adresa:'Str. Enescu'},
       ],
-      reglementare:'Legea 422/2001 · Ordinul MCID 2828/2015'},
+      reglementare:'Legea 422/2001'},
     zgomot:{zona_acustica:'II',Lzsn_limita:60,Lnoapte_limita:50,
-      surse_principale:['Trafic rutier DN29','Activități comerciale centru'],
-      norm:'SR 10009:2017'},
-    vant:{zona:'III',v_ref:30,presiune_vant:0.55,directie_dominanta:'NV',
-      norm:'CR 1-1-4/2012',factor_teren:'II'},
-    trafic:{viteza_proiectare:50,TMA_ref:8000,norm_parcaje:'NP 051/2012 rev.',
-      acces_transport_public:true},
+      surse_principale:['Trafic DN29A','Nod feroviar Dorohoi'],norm:'SR 10009:2017'},
+    vant:{zona:'III',v_ref:30,presiune_vant:0.55,directie_dominanta:'NV',norm:'CR 1-1-4/2012',factor_teren:'II'},
+    trafic:{viteza_proiectare:50,TMA_ref:4500,norm_parcaje:'NP 051/2012 rev.',
+      drumuri_nationale:['DN29A'],acces_transport_public:true},
+    mediu:{sv_minim_procent:20,parcuri_principale:['Parcul Central Dorohoi'],
+      apa:{operator:'Nova Apaserv SA',sursa_apa_potabila:'Subteran + Siret',retea_canalizare:true},
+      ins:{populatie:26800,sursa:'INS 2021'},norm:'Legea 24/2007'},
+    market:{teren_central:60,teren_rezidential:30,teren_extravilan:5,
+      constructie_rezidential:750,vanzare_apartament:750,sursa:'Estimativ 2025'},
+  },
+
+  // ── ORAȘE JUDEȚUL BOTOȘANI ───────────────────────────────────────────────
+  'oras-darabani': {
+    label:'Orașul Darabani', short:'Darabani',
+    judet:'Botoșani', judetCode:'BT', siruta:'31868',
+    center:[26.5773,48.1829], zoom:13,
+    cadastruIndex:'./data/darabani/cadastru_index.json',
+    reguliFile:'./data/botosani/reguli.json',
+    status:'partial', primar:'Primăria Orașului Darabani',
+    daU:'Compartiment Urbanism', djcpn:'DJCPN Botoșani',
+    aeroport:null,
+    seism:{zona:'E',ag:0.20,Tc:1.6,norm:'P100-1/2013'},
+    hidro:{nfa:'2.0-5.0m',tip_sol:'Loess',portanta:'130-170 kPa',studiu_obligatoriu:'Da'},
+    lmi:{cimecRadius:600,zone_protejate:[],monumente_reprezentative:[],reglementare:'Legea 422/2001'},
+    zgomot:{zona_acustica:'II',Lzsn_limita:60,Lnoapte_limita:50,surse_principale:['Trafic local'],norm:'SR 10009:2017'},
+    vant:{zona:'III',v_ref:30,presiune_vant:0.55,directie_dominanta:'NV',norm:'CR 1-1-4/2012',factor_teren:'I'},
+    trafic:{viteza_proiectare:50,TMA_ref:2000,norm_parcaje:'NP 051/2012 rev.'},
     mediu:{sv_minim_procent:20,norm:'Legea 24/2007'},
+    market:{teren_central:30,teren_rezidential:15,constructie_rezidential:700,vanzare_apartament:600},
+  },
+  'oras-saveni': {
+    label:'Orașul Săveni', short:'Săveni',
+    judet:'Botoșani', judetCode:'BT', siruta:'37015',
+    center:[26.8599,47.9564], zoom:13,
+    cadastruIndex:'./data/saveni/cadastru_index.json',
+    reguliFile:'./data/botosani/reguli.json',
+    status:'partial', primar:'Primăria Orașului Săveni',
+    daU:'Compartiment Urbanism', djcpn:'DJCPN Botoșani',
+    aeroport:null,
+    seism:{zona:'E',ag:0.20,Tc:1.6,norm:'P100-1/2013'},
+    hidro:{nfa:'2.5-5.0m',tip_sol:'Loess, cernoziom',portanta:'140-180 kPa',studiu_obligatoriu:'Da'},
+    lmi:{cimecRadius:600,zone_protejate:[],monumente_reprezentative:[],reglementare:'Legea 422/2001'},
+    zgomot:{zona_acustica:'II',Lzsn_limita:60,Lnoapte_limita:50,surse_principale:['Trafic local'],norm:'SR 10009:2017'},
+    vant:{zona:'III',v_ref:30,presiune_vant:0.55,directie_dominanta:'NV',norm:'CR 1-1-4/2012',factor_teren:'I'},
+    trafic:{viteza_proiectare:50,TMA_ref:1800,norm_parcaje:'NP 051/2012 rev.'},
+    mediu:{sv_minim_procent:20,norm:'Legea 24/2007'},
+    market:{teren_central:25,teren_rezidential:12,constructie_rezidential:700,vanzare_apartament:580},
+  },
+  'oras-flamanzi': {
+    label:'Orașul Flămânzi', short:'Flămânzi',
+    judet:'Botoșani', judetCode:'BT', siruta:'33274',
+    center:[26.8929,47.5558], zoom:13,
+    cadastruIndex:'./data/flamanzi/cadastru_index.json',
+    reguliFile:'./data/botosani/reguli.json',
+    status:'partial', primar:'Primăria Orașului Flămânzi',
+    daU:'Compartiment Urbanism', djcpn:'DJCPN Botoșani',
+    aeroport:null,
+    seism:{zona:'E',ag:0.20,Tc:1.6,norm:'P100-1/2013'},
+    hidro:{nfa:'3.0-6.0m',tip_sol:'Loess, argilă',portanta:'130-160 kPa',studiu_obligatoriu:'Da'},
+    lmi:{cimecRadius:500,zone_protejate:[],monumente_reprezentative:[],reglementare:'Legea 422/2001'},
+    zgomot:{zona_acustica:'II',Lzsn_limita:60,Lnoapte_limita:50,surse_principale:['Trafic local','CFR'],norm:'SR 10009:2017'},
+    vant:{zona:'III',v_ref:30,presiune_vant:0.55,directie_dominanta:'NV',norm:'CR 1-1-4/2012',factor_teren:'I'},
+    trafic:{viteza_proiectare:50,TMA_ref:1500,norm_parcaje:'NP 051/2012 rev.'},
+    mediu:{sv_minim_procent:20,norm:'Legea 24/2007'},
+    market:{teren_central:20,teren_rezidential:10,constructie_rezidential:680,vanzare_apartament:550},
+  },
+  'oras-bucecea': {
+    label:'Orașul Bucecea', short:'Bucecea',
+    judet:'Botoșani', judetCode:'BT', siruta:'30143',
+    center:[26.4640,47.7757], zoom:13,
+    cadastruIndex:'./data/bucecea/cadastru_index.json',
+    reguliFile:'./data/botosani/reguli.json',
+    status:'partial', primar:'Primăria Orașului Bucecea',
+    daU:'Compartiment Urbanism', djcpn:'DJCPN Botoșani',
+    aeroport:null,
+    seism:{zona:'E',ag:0.20,Tc:1.6,norm:'P100-1/2013'},
+    hidro:{nfa:'2.0-4.0m',tip_sol:'Loess',portanta:'140-180 kPa',studiu_obligatoriu:'Da'},
+    lmi:{cimecRadius:500,zone_protejate:[],monumente_reprezentative:[],reglementare:'Legea 422/2001'},
+    zgomot:{zona_acustica:'II',Lzsn_limita:60,Lnoapte_limita:50,surse_principale:['Trafic DN29C'],norm:'SR 10009:2017'},
+    vant:{zona:'III',v_ref:30,presiune_vant:0.55,directie_dominanta:'NV',norm:'CR 1-1-4/2012',factor_teren:'I'},
+    trafic:{viteza_proiectare:50,TMA_ref:1200,norm_parcaje:'NP 051/2012 rev.'},
+    mediu:{sv_minim_procent:20,norm:'Legea 24/2007'},
+    market:{teren_central:25,teren_rezidential:12,constructie_rezidential:700,vanzare_apartament:560},
+  },
+  'oras-stefanesti': {
+    label:'Orașul Ștefănești', short:'Ștefănești',
+    judet:'Botoșani', judetCode:'BT', siruta:'37695',
+    center:[27.2063,47.7314], zoom:13,
+    cadastruIndex:'./data/stefanesti/cadastru_index.json',
+    reguliFile:'./data/botosani/reguli.json',
+    status:'partial', primar:'Primăria Orașului Ștefănești',
+    daU:'Compartiment Urbanism', djcpn:'DJCPN Botoșani',
+    aeroport:null,
+    seism:{zona:'E',ag:0.20,Tc:1.6,norm:'P100-1/2013'},
+    hidro:{nfa:'2.0-4.5m',tip_sol:'Loess, cernoziom',portanta:'150-190 kPa',studiu_obligatoriu:'Da'},
+    lmi:{cimecRadius:500,zone_protejate:[],monumente_reprezentative:[{cod:'BT-II-m-B-05001',denumire:'Mânăstirea Vorona (1775)',categorie:'B',adresa:'com. Vorona'}],reglementare:'Legea 422/2001'},
+    zgomot:{zona_acustica:'II',Lzsn_limita:60,Lnoapte_limita:50,surse_principale:['Trafic local'],norm:'SR 10009:2017'},
+    vant:{zona:'III',v_ref:30,presiune_vant:0.55,directie_dominanta:'NV',norm:'CR 1-1-4/2012',factor_teren:'I'},
+    trafic:{viteza_proiectare:50,TMA_ref:1000,norm_parcaje:'NP 051/2012 rev.'},
+    mediu:{sv_minim_procent:20,natura2000_proximitate:['ROSCI0084 Iazurile Miletinului — 8km'],norm:'Legea 24/2007'},
+    market:{teren_central:20,teren_rezidential:10,constructie_rezidential:680,vanzare_apartament:540},
   },
 
   // ── SUCEAVA ─────────────────────────────────────────────────────────────
+
   'municipiul-suceava': {
     label:'Municipiul Suceava', short:'Suceava',
     judet:'Suceava', judetCode:'SV', siruta:'285386',
@@ -4471,10 +4714,6 @@ function aedisClose(){
   const btn = document.getElementById('aedis-mob-x');
   if(btn) btn.style.display='none';
 }
-// Închide AEDIS panel cu Escape
-document.addEventListener('keydown', e => {
-  if(e.key === 'Escape' && AEDIS.open) aedisClose();
-});
 function aedisTab(t){
   AEDIS.tab=t;
   aedisRender();
@@ -5003,6 +5242,7 @@ function aedisGetContent(){
     <button onclick="aedisAIRender()" class="aedis-dim-btn" style="background:rgba(212,175,55,.15);border-color:rgba(212,175,55,.4);color:#d4af37;font-size:10px" title="AI Render fotorealist (necesită API key Fal.ai)">🎨 AI</button>
     <button onclick="AEDIS.showDim=!AEDIS.showDim;aedisRender();if(typeof _aedisToggleDimLabels==='function')_aedisToggleDimLabels();if(S.vol.genDone&&typeof updateDistanceLines==='function')updateDistanceLines()" 
       class="aedis-dim-btn${AEDIS.showDim?' active':''}" title="Etichete dimensionale (toggle)">📏</button>
+    <button onclick="aedisClose()" class="aedis-close-btn">✕</button>
   </div>`;
 }
 

@@ -1,0 +1,8 @@
+{
+  "_format": {
+    "_doc": "Generat de convert_cadastru_bt.py — UrbanX TSS·FG",
+    "_structura": "nrcad → { bbox:[minLng,minLat,maxLng,maxLat], centroid:[lng,lat], area:mp, utr:string, siruta:string, uat:string }",
+    "_exemplu": "134279 → { bbox:[26.659,47.741,26.661,47.743], centroid:[26.660,47.742], area:3566, utr:'CM', siruta:'29980', uat:'municipiul-botosani' }",
+    "_status": "EMPTY — se populează după import DXF/SHP cu convert_cadastru_bt.py"
+  }
+}
