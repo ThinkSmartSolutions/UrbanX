@@ -1115,16 +1115,22 @@ function _rvRenderFacade(b){
   }
 
   // ── Renderăm toate 4 fațade ────────────────────────────────────────────────
+  const facadeDirMap={N:0,NE:45,E:90,SE:135,S:180,SV:225,V:270,NV:315};
   const dirs=[
-    {lbl:P.frontDir+' (PRINCIPALĂ)',fW:facadeW_NS,isMain:true},
-    {lbl:{N:'S',S:'N',E:'V',V:'E',NE:'SV',NV:'SE',SE:'NV',SV:'NE'}[P.frontDir]||'S'+' (POSTERIOARĂ)',fW:facadeW_NS,isMain:false},
-    {lbl:'E (LATERALĂ DREAPTĂ)',fW:facadeW_EV,isMain:false},
-    {lbl:'V (LATERALĂ STÂNGĂ)',fW:facadeW_EV,isMain:false},
+    {lbl:P.frontDir+' (PRINCIPALĂ)',fW:facadeW_NS,isMain:true,  dir:P.frontDir},
+    {lbl:{N:'S',S:'N',E:'V',V:'E',NE:'SV',NV:'SE',SE:'NV',SV:'NE'}[P.frontDir]||'S'+' (POSTERIOARĂ)',fW:facadeW_NS,isMain:false,dir:{N:'S',S:'N',E:'V',V:'E',NE:'SV',NV:'SE',SE:'NV',SV:'NE'}[P.frontDir]||'S'},
+    {lbl:'E (LATERALĂ DREAPTĂ)',fW:facadeW_EV,isMain:false,dir:'E'},
+    {lbl:'V (LATERALĂ STÂNGĂ)',fW:facadeW_EV,isMain:false,dir:'V'},
   ];
-  dirs.forEach(({lbl,fW,isMain},idx)=>{
+  dirs.forEach(({lbl,fW,isMain,dir},idx)=>{
     const oy_=pad+25+idx*sectionH;
     const ox_=pad+30;
     drawOneFacade(lbl,fW,ox_,oy_,isMain);
+    // Solar overlay pe fiecare fațadă
+    if(_RV.showSolar){
+      const fP={...P,frontDir:dir};
+      _rvDrawSolarFatada(ctx,fP,bW,bD,niv,ox_,oy_,fW,facadeH);
+    }
   });
 
   _rvDrawNorth(ctx,W-38,50,P.frontDir);
@@ -1576,8 +1582,6 @@ function _rvSetupHover(cv,fl,ox,oy){
 function _rvDrawSolarAnim(ctx, fl, b, ox, oy, SC){
   const hour=_RV.solarHour||10, month=_RV.solarMonth||12;
   const lat=47.16, DOY=[0,31,59,90,120,151,181,212,243,273,304,334][month-1]+15;
-  const decl=-23.45*Math.cos(2*Math.PI*(DOY+10)/365*Math.PI/180*180/Math.PI);
-  // — fix: correct formula
   const declRad=(-23.45*Math.cos((360/365*(DOY+10))*Math.PI/180))*Math.PI/180;
   const latRad=lat*Math.PI/180;
   const hAngleRad=(hour-12)*15*Math.PI/180;
@@ -1586,7 +1590,6 @@ function _rvDrawSolarAnim(ctx, fl, b, ox, oy, SC){
   const cosAz=(Math.sin(declRad)-Math.sin(latRad)*sinElev)/(Math.cos(latRad)*Math.cos(Math.asin(sinElev)||0.001));
   const azDeg=(hour<12?-1:1)*Math.acos(Math.max(-1,Math.min(1,cosAz)))*180/Math.PI+180;
 
-  // Cer negru dacă soarele sub orizont
   if(elevDeg<=0){
     ctx.fillStyle='rgba(5,10,30,.55)';
     ctx.fillRect(ox,oy,b.bW*SC,b.bD*SC);
@@ -1595,48 +1598,113 @@ function _rvDrawSolarAnim(ctx, fl, b, ox, oy, SC){
     ctx.textAlign='left'; return;
   }
 
-  const intensitate=Math.min(1,elevDeg/45); // 0-1 în funcție de înălțime soare
+  const intensitate=Math.min(1,elevDeg/45);
+  const frontAz={N:0,NE:45,E:90,SE:135,S:180,SV:225,V:270,NV:315}[b.P?.frontDir||'N']||0;
 
-  // Front direction → azimut numeric
-  const frontAz={N:0,NE:45,E:90,SE:135,S:180,SV:225,V:270,NV:315}[b.P.frontDir]||0;
+  // ── FIX BUG: split la mijlocul real al clădirii, nu la rație fixă ────────
+  // Nord rooms (y < bD/2) → fac spre frontDir
+  // Sud rooms (y ≥ bD/2) → fac spre opusul frontDir
+  const bMid = b.bD / 2;
 
   fl.rects.forEach(r=>{
-    if(!['living','bedroom','bedroom2','bedroom3','kitchen'].includes(r.t)) return;
+    if(!['living','bedroom','bedroom2','bedroom3','kitchen','hall','storage'].includes(r.t)) return;
     const rx=ox+r.x*SC, ry=oy+r.y*SC, rw=r.w*SC, rh=r.h*SC;
-
-    // Detectăm fațada camerei (N/S/E/V) în funcție de poziție în clădire
-    const relY=r.y/b.bD; // 0=nord, 1=sud
-    const facingAz=relY<0.35 ? frontAz : (relY>0.65 ? (frontAz+180)%360 : (frontAz+90)%360);
+    // Camerele de servicii (interior) nu au ferestre directe → semiumbră
+    const hasWindow = ['living','bedroom','bedroom2','bedroom3'].includes(r.t);
+    if(!hasWindow){
+      ctx.fillStyle='rgba(10,20,50,.15)'; ctx.fillRect(rx,ry,rw,rh); return;
+    }
+    // Fațada camerei: nord vs sud bazat pe poziția în clădire
+    const isNorth = (r.y + r.h/2) < bMid;
+    const facingAz = isNorth ? frontAz : (frontAz+180)%360;
     const angleDiff=Math.abs(((azDeg-facingAz+540)%360)-180);
     const sunlit=angleDiff<90 && elevDeg>2;
 
     if(sunlit){
-      const alpha=0.12+intensitate*0.35;
-      ctx.fillStyle=`rgba(255,220,60,${alpha})`;
+      const alpha=0.10+intensitate*0.38;
+      ctx.fillStyle=`rgba(255,215,50,${alpha})`;
       ctx.fillRect(rx,ry,rw,rh);
-      // Iconiță soare dacă cameră destul de mare
-      if(rw>20&&rh>14){
-        ctx.font=`${Math.min(14,rw*0.4)}px sans-serif`;
-        ctx.textAlign='center';
-        ctx.fillText('☀',rx+rw/2,ry+rh/2+4);
-        ctx.textAlign='left';
+      if(rw>22&&rh>15){
+        ctx.font=`${Math.min(13,rw*0.35)}px sans-serif`;ctx.textAlign='center';
+        ctx.fillStyle=`rgba(255,200,30,${0.6+intensitate*0.4})`;
+        ctx.fillText('☀',rx+rw/2,ry+rh/2+4); ctx.textAlign='left';
       }
     } else {
-      ctx.fillStyle='rgba(10,20,60,.35)';
-      ctx.fillRect(rx,ry,rw,rh);
+      ctx.fillStyle='rgba(10,20,60,.32)'; ctx.fillRect(rx,ry,rw,rh);
     }
   });
 
-  // Indicator soare (poziție în colț)
+  // ── Info box ──────────────────────────────────────────────────────────────
   const sx=ox+b.bW*SC+10, sy=oy+10;
-  ctx.fillStyle='rgba(8,15,35,.9)';ctx.fillRect(sx-5,sy-5,90,38);
-  ctx.strokeStyle='rgba(212,175,55,.3)';ctx.lineWidth=0.5;ctx.strokeRect(sx-5,sy-5,90,38);
+  ctx.fillStyle='rgba(8,15,35,.9)';ctx.fillRect(sx-5,sy-5,100,46);
+  ctx.strokeStyle='rgba(212,175,55,.3)';ctx.lineWidth=0.5;ctx.strokeRect(sx-5,sy-5,100,46);
   ctx.fillStyle='#D4AF37';ctx.font='bold 9px IBM Plex Mono';
-  ctx.fillText(`☀ ${String(hour).padStart(2,'0')}:00`,sx,sy+8);
+  ctx.fillText(`☀ ${String(Math.floor(hour)).padStart(2,'0')}:00`,sx,sy+8);
   ctx.fillStyle='rgba(212,175,55,.7)';ctx.font='8px IBM Plex Mono';
   ctx.fillText(`Elev: ${elevDeg.toFixed(1)}°  Az: ${azDeg.toFixed(0)}°`,sx,sy+20);
   const lunile=['Ian','Feb','Mar','Apr','Mai','Iun','Iul','Aug','Sep','Oct','Nov','Dec'];
-  ctx.fillText(lunile[month-1]||''+'  (OMS 119: 1.5h/zi)',sx,sy+30);
+  ctx.fillText((lunile[month-1]||'')+' · OMS 119: 1.5h/zi',sx,sy+32);
+}
+
+// ── Solar pe Fațadă — suprapune soare + umbre pe desenul fațadei ──────────
+function _rvDrawSolarFatada(ctx, P, bW, bD, niv, ox, oy, W, H){
+  if(!_RV.showSolar) return;
+  const hour=_RV.solarHour||10, month=_RV.solarMonth||12;
+  const lat=47.16, DOY=[0,31,59,90,120,151,181,212,243,273,304,334][month-1]+15;
+  const declRad=(-23.45*Math.cos((360/365*(DOY+10))*Math.PI/180))*Math.PI/180;
+  const latRad=lat*Math.PI/180;
+  const hAngleRad=(hour-12)*15*Math.PI/180;
+  const sinElev=Math.sin(latRad)*Math.sin(declRad)+Math.cos(latRad)*Math.cos(declRad)*Math.cos(hAngleRad);
+  const elevDeg=Math.asin(Math.max(-1,Math.min(1,sinElev)))*180/Math.PI;
+  const cosAz=(Math.sin(declRad)-Math.sin(latRad)*sinElev)/(Math.cos(latRad)*Math.cos(Math.asin(sinElev)||0.001));
+  const azDeg=(hour<12?-1:1)*Math.acos(Math.max(-1,Math.min(1,cosAz)))*180/Math.PI+180;
+
+  const frontAz={N:0,NE:45,E:90,SE:135,S:180,SV:225,V:270,NV:315}[P.frontDir||'N']||0;
+  const angleDiff=Math.abs(((azDeg-frontAz+540)%360)-180);
+  const sunHitsFront=angleDiff<90 && elevDeg>2;
+
+  // Calculăm poziția soarelui pe "cer" deasupra fațadei
+  // azOffset: cât de mult în stânga/dreapta față de centrul fațadei
+  const azOffset=Math.sin((azDeg-frontAz)*Math.PI/180); // -1..+1
+  const sunX=ox+W/2 + azOffset*(W*0.45);
+  const sunY=oy-20-elevDeg*1.2; // sus = unghi mare
+  const sunR=14+elevDeg*0.15;
+
+  // Cerul — gradient simplu zi/noapte
+  if(elevDeg>0){
+    const nightAlpha=Math.max(0,1-elevDeg/30)*0.5;
+    ctx.fillStyle=`rgba(5,15,40,${nightAlpha})`;
+    ctx.fillRect(ox,oy-50,W,50);
+    // Soare
+    ctx.save();
+    ctx.beginPath(); ctx.arc(sunX,sunY,sunR,0,Math.PI*2);
+    ctx.fillStyle=elevDeg>20?'rgba(255,220,60,.85)':'rgba(255,160,30,.75)';
+    ctx.fill();
+    // Raze
+    if(sunHitsFront){
+      for(let a=0;a<8;a++){
+        const ra=a*Math.PI/4;
+        ctx.beginPath();
+        ctx.moveTo(sunX+Math.cos(ra)*(sunR+3),sunY+Math.sin(ra)*(sunR+3));
+        ctx.lineTo(sunX+Math.cos(ra)*(sunR+10),sunY+Math.sin(ra)*(sunR+10));
+        ctx.strokeStyle='rgba(255,220,60,.5)';ctx.lineWidth=1.5;ctx.stroke();
+      }
+    }
+    ctx.restore();
+  }
+
+  // Umbră pe fațadă dacă soarele nu bate direct
+  if(!sunHitsFront && elevDeg>0){
+    ctx.fillStyle='rgba(10,20,60,.20)';
+    ctx.fillRect(ox,oy,W,H);
+    ctx.fillStyle='rgba(147,197,253,.6)';ctx.font='bold 8px IBM Plex Mono';ctx.textAlign='center';
+    ctx.fillText(`Fațadă ${P.frontDir} — umbră la ${String(Math.floor(hour)).padStart(2,'0')}:00`,ox+W/2,oy+H/2);
+    ctx.textAlign='left';
+  }
+
+  // Label oră + elevație
+  ctx.fillStyle='rgba(212,175,55,.9)';ctx.font='bold 9px IBM Plex Mono';
+  ctx.fillText(`☀ ${String(Math.floor(hour)).padStart(2,'0')}:00  Elev ${elevDeg.toFixed(0)}°  Az ${azDeg.toFixed(0)}°`,ox+6,oy-6);
 }
 
 // ══════════════════════════════════════════════════════════════════════════
