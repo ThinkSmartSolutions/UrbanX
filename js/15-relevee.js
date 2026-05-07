@@ -1949,10 +1949,14 @@ function _rvDNARadar(b, P, fl){
     (isuOk?.15:0.07)+(roomsOk?.15:0.07)+
     (parcSup>=parcNec?.1:.05)+.1
   *100);
+  const fnDNA = FN_CONFIG[_RV.fn] || FN_CONFIG.rez;
+  const omsApplies = fnDNA.omsInsorire !== false;
+  const isuDistDNA = fnDNA.isuDist || 30;
   const axes=[
-    {name:'POT',val:potOk?.85:(.35),color:potOk?'#22C55E':'#EF4444'},
-    {name:'CUT',val:cutOk?.8:(.35),color:cutOk?'#22C55E':'#EF4444'},
-    {name:'OMS',val:(totalSolarRooms-solarIssues)/totalSolarRooms*.9+.05,color:solarIssues===0?'#22C55E':'#F59E0B'},
+    {name:'POT',val:potOk?.85:.35,color:potOk?'#22C55E':'#EF4444'},
+    {name:'CUT',val:cutOk?.80:.35,color:cutOk?'#22C55E':'#EF4444'},
+    {name:'OMS',val:omsApplies?(totalSolarRooms-solarIssues)/totalSolarRooms*.9+.05:.75,
+     color:!omsApplies?'#475569':solarIssues===0?'#22C55E':'#F59E0B'},
     {name:'ISU',val:isuOk?.9:.55,color:isuOk?'#22C55E':'#F59E0B'},
     {name:'NP057',val:roomsOk?.9:.65,color:roomsOk?'#22C55E':'#F59E0B'},
     {name:'Parcaje',val:Math.min(1,parcSup/Math.max(1,parcNec))*.85+.05,color:parcSup>=parcNec?'#22C55E':'#EF4444'},
@@ -1984,10 +1988,10 @@ function _rvDNARadar(b, P, fl){
     const details=[
       {name:'POT',ok:potOk,msg:potOk?`✓ ${Math.round(b.scArea/P.area*100)}% / max ${Math.round(P.pot*100)}%`:`✗ ${Math.round(b.scArea/P.area*100)}% depășește ${Math.round(P.pot*100)}%`},
       {name:'CUT',ok:cutOk,msg:cutOk?`✓ ${(b.sdaTotal/P.area).toFixed(2)} / max ${P.cut}`:`✗ ${(b.sdaTotal/P.area).toFixed(2)} depășește ${P.cut}`},
-      {name:'OMS',ok:solarIssues===0,msg:solarIssues===0?`✓ Toate camerele ≥1.5h`:(`✗ ${solarIssues} camere sub minim`)},
-      {name:'ISU',ok:isuOk,msg:isuOk?'✓ Căi evacuare OK':'✗ Verificare distanțe'},
+      {name:'OMS',ok:!omsApplies||solarIssues===0,msg:!omsApplies?'— N/A · funcțiunea nu necesită însorire':solarIssues===0?`✓ Toate camerele ≥${fnDNA.omsMin}h/zi`:`✗ ${solarIssues} camere sub min ${fnDNA.omsMin}h`},
+      {name:'ISU',ok:isuOk,msg:isuOk?`✓ Căi evac. OK · max ${isuDistDNA}m · ${fnDNA.isuNorm}`:`✗ Verificare · max ${isuDistDNA}m · ${fnDNA.isuNorm}`},
       {name:'NP057',ok:roomsOk,msg:roomsOk?'✓ Suprafețe conforme':'✗ Camere sub minim'},
-      {name:'Parcaje',ok:parcSup>=parcNec,msg:parcSup>=parcNec?`✓ ${parcSup}/${parcNec} locuri`:`✗ ${parcSup}/${parcNec} locuri`},
+      {name:'Parcaje',ok:parcSup>=parcNec,msg:parcSup>=parcNec?`✓ ${parcSup}/${parcNec} locuri · ${fnDNA.pk_norm}`:`✗ ${parcSup}/${parcNec} · ${fnDNA.pk_norm}`},
     ];
     el.innerHTML=details.map(d=>`<div><span style="color:${d.ok?'#22C55E':'#EF4444'};font-weight:700">${d.name}:</span> ${d.msg}</div>`).join('');
   },50);
@@ -2444,23 +2448,32 @@ function _rvUpdatePanels(b,P){
     ['Parcaje necesare',parcNec_+' loc.'+(deficit_>0?' ⚠ deficit '+deficit_:' ✓')],
   ].map(([l,v])=>`<div class="rv-stat"><span class="rv-sl">${l}</span><span class="rv-sv">${v}</span></div>`).join('');
 
-  // Normative
+  // Normative — adaptate per funcțiune
   const fl=_RV.floors[0];
   const potOk=b.scArea/P.area<=P.pot+.001;
   const cutOk=b.sdaTotal/P.area<=P.cut+.001;
   const roomsOk=fl.rects.every(r=>{ const m=_RV_NP057[r.t]; return !m||r.w*r.h>=m; });
   const solarIssues=fl.rects.filter(r=>r.solarOk===false).length;
   const isuOk=fl.isu?.ok!==false;
+  const fnN = FN_CONFIG[_RV.fn] || FN_CONFIG.rez;
   const norms=document.getElementById('rv-norm');
   if(norms) norms.innerHTML=[
     ['POT',potOk?'ok':'err',potOk?'CONFORM':'DEPĂȘIRE','PUG · NP 068'],
     ['CUT',cutOk?'ok':'err',cutOk?'CONFORM':'DEPĂȘIRE','PUG · NP 068'],
     ['Suprafețe min.',roomsOk?'ok':'warn',roomsOk?'CONFORM':'Verificare','NP 057/2002'],
-    ['Însorire OMS 119',solarIssues===0?'ok':'warn',solarIssues===0?'CONFORM':solarIssues+' cam.','OMS 119/2014'],
-    ['Evacuare ISU',isuOk?'ok':'warn',isuOk?'CONFORM':'Verificare','P118-2/2013'],
+    ['Însorire OMS 119',!fnN.omsInsorire?'ok':solarIssues===0?'ok':'warn',
+      !fnN.omsInsorire?'N/A — funcțiune':solarIssues===0?'CONFORM':solarIssues+' cam.','OMS 119/2014'],
+    ['Evacuare ISU',isuOk?'ok':'warn',isuOk?`CONFORM (max ${fnN.isuDist}m)`:'Verificare',fnN.isuNorm],
+    ['Parcaje',fnN.pk_unit==='per_apt'?'warn':'ok',fnN.pk_norm,`1 loc / ${fnN.pk_unit==='per_apt'?'apt':fnN.pk_unit==='per_50m2'?'50m²':'2 cam.'}`],
     ['PMR',b.scArea>600?'ok':'warn','Obligatoriu','NP 051/2012'],
     ['Seismic',P.niv>0?'ok':'warn','Zona E ag=0.2g','P100-1/2013'],
   ].map(([l,cls,v,ref])=>`<div class="rv-norm-item"><div><div class="rv-nl">${l}</div><div class="rv-nref">${ref}</div></div><div class="rv-badge rv-badge-${cls}">${v}</div></div>`).join('');
+
+  // ── NORMATIVE APLICATE (secțiunea de jos) ─────────────────────────────────
+  const normApEl=document.getElementById('rv-norms-applied');
+  if(normApEl) normApEl.innerHTML=(fnN.norms||[]).map(n=>
+    `<div style="font-size:9px;color:#64748B;padding:2px 0;border-bottom:1px solid rgba(255,255,255,.03)">${n}</div>`
+  ).join('');
 
   // ── RAPOARTE AFECTATE DE ACEST RELEVEU ─────────────────────────────
   const rapoartePanel=document.getElementById('rv-rapoarte-aff');
@@ -4719,6 +4732,10 @@ function _rvInject(){
     <div class="rv-rsec">
       <div class="rv-sec-t">Verificare normative</div>
       <div id="rv-norm"><div style="font-size:10px;color:#4A6080;text-align:center;padding:8px">—</div></div>
+      <div style="margin-top:8px;padding-top:6px;border-top:1px solid rgba(255,255,255,.04)">
+        <div class="rv-sec-t" style="margin-bottom:4px">Normative aplicate</div>
+        <div id="rv-norms-applied" style="font-size:9px;color:#4A6080;line-height:1.8">—</div>
+      </div>
       <div id="rv-rapoarte-aff" style="padding-bottom:6px"></div>
     </div>
 
