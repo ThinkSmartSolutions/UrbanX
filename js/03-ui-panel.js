@@ -447,6 +447,8 @@ function htmlMobRapoarte(){
   <div style="font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Studii tehnice</div>
   <div class="card" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">
     ${btn('generateSolarStudy()','251,191,36','☀','Studiu de Însorire','Ore soare, bilanț solar, OMS 119','insorire')}
+    ${btn('generateCPE()','52,211,153','⚡','Certificat Performanță Energetică','Clasa A-G · EP kWh/m²an · NZEB','cpe')}
+    ${btn('generateCPE()','52,211,153','⚡','Certificat Performanță Energetică','Clasa A-G, EP kWh/m²an, NZEB, C107','cpe')}
     ${btn('generateShadowStudy()','251,146,60','🌑','Studiu Umbre & Obstrucție','Umbre proiectate, distanțe critice','umbre')}
     ${btn('generateNoiseStudy()','167,139,250','🔇','Studiu Acustic Urban','Zgomot, SR 10009/2017','acustic')}
     ${btn('generateWindStudy()','56,189,248','🌬','Studiu Vânt & Confort Pietonal','Criteriu Lawson, zone calm','vant')}
@@ -524,6 +526,7 @@ function mobSearchOverlayUpdate(contentHtml){
 const SHORTCUT_CATALOG = [
   {id:'raport_pdf',      ico:'📄', label:'Raport Urbanistic',   fn:"showPdfModal?showPdfModal():runExport()"},
   {id:'studiu_insorire', ico:'☀',  label:'Studiu Însorire',     fn:"generateSolarStudy()"},
+  {id:'studiu_cpe',      ico:'⚡', label:'Certificat Energetic', fn:"generateCPE()"},
   {id:'aedis_open',      ico:'⚡', label:'Urban3D',              fn:"aedisOpen()"},
   {id:'genVol',          ico:'🏗', label:'Generează Volum 3D',  fn:"genVol()"},
   {id:'parcele_zona',    ico:'📦', label:'Parcele din Zonă',     fn:"doLoadLocalParcels()"},
