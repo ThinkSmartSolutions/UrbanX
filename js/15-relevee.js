@@ -465,6 +465,7 @@ function _rvRender(){
   else if(_RV.tab==='fatada')   _rvRenderFacade(b);
   else if(_RV.tab==='sectiune') _rvRenderSection(b);
   else if(_RV.tab==='axono')    _rvRenderAxono(b);
+  else if(_RV.tab==='scenarii') _rvRenderScenarii(b);
 }
 
 function _rvRenderPlan(fl,b){
@@ -481,8 +482,7 @@ function _rvRenderPlan(fl,b){
   for(let y=0;y<H;y+=SC){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
 
   const ox=pad+P.rl*SC; const oy=pad+P.rf*SC;
-
-  // Parcelă
+  _RV.planOx=ox; _RV.planOy=oy; _RV.planSc=SC; // click detection coords
   ctx.strokeStyle='rgba(212,175,55,.35)';ctx.lineWidth=1;ctx.setLineDash([SC*.5,SC*.5]);
   ctx.strokeRect(pad,pad,P.W*SC,P.D*SC); ctx.setLineDash([]);
   ctx.fillStyle='rgba(212,175,55,.4)';ctx.font='9px IBM Plex Mono';
@@ -656,6 +656,17 @@ function _rvRenderPlan(fl,b){
   ctx.fillStyle='rgba(212,175,55,.05)';ctx.font=`bold ${SC*6}px Space Grotesk`;ctx.textAlign='center';
   ctx.fillText(fl.floorIdx===0?'PARTER':`ETAJ ${fl.floorIdx}`,ox+bW*SC/2,oy+bD*SC/2);
   ctx.textAlign='left';
+
+  // ── OVERLAY SOLAR (animație însorire OMS 119) ──────────────────────────
+  if(_RV.showSolar && _RV.solarAnim){
+    _rvDrawSolarAnim(ctx,fl,b,ox,oy,SC);
+  }
+
+  // ── OVERLAY ISU — cercuri evacuare 30m ────────────────────────────────
+  if(_RV.showISU){
+    _rvDrawISUCircles(ctx,b,ox,oy,SC);
+  }
+
   // Hover
   _rvSetupHover(cv,fl,ox,oy);
 }
@@ -1147,6 +1158,563 @@ function _rvSetupHover(cv,fl,ox,oy){
     cv.addEventListener('mouseenter',()=>{if(!isPan)wrap.style.cursor='grab';});
     cv.addEventListener('mouseleave',()=>{if(!isPan)wrap.style.cursor='default';});
   }
+
+  // ── Click pe cameră → Room Inspector ──────────────────────────────────
+  cv.onclick=(e)=>{
+    if(_RV.tab!=='plan') return;
+    const r=cv.getBoundingClientRect();
+    const mx=e.clientX-r.left, my=e.clientY-r.top;
+    const mxM=(mx-ox)/_RV.scale, myM=(my-oy)/_RV.scale;
+    const hit=fl.rects.find(r_=>mxM>=r_.x&&mxM<=r_.x+r_.w&&myM>=r_.y&&myM<=r_.y+r_.h);
+    if(hit){
+      _rvShowInspector(hit, e.clientX, e.clientY);
+    } else {
+      const ri=document.getElementById('rv-inspector');
+      if(ri) ri.style.display='none';
+    }
+  };
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// OVERLAY: SOLAR ÎNSORIRE (OMS 119/2014)
+// Calculează poziția soarelui pentru Iași (lat=47.16°) la ora/luna selectată
+// ══════════════════════════════════════════════════════════════════════════
+function _rvDrawSolarAnim(ctx, fl, b, ox, oy, SC){
+  const hour=_RV.solarHour||10, month=_RV.solarMonth||12;
+  const lat=47.16, DOY=[0,31,59,90,120,151,181,212,243,273,304,334][month-1]+15;
+  const decl=-23.45*Math.cos(2*Math.PI*(DOY+10)/365*Math.PI/180*180/Math.PI);
+  // — fix: correct formula
+  const declRad=(-23.45*Math.cos((360/365*(DOY+10))*Math.PI/180))*Math.PI/180;
+  const latRad=lat*Math.PI/180;
+  const hAngleRad=(hour-12)*15*Math.PI/180;
+  const sinElev=Math.sin(latRad)*Math.sin(declRad)+Math.cos(latRad)*Math.cos(declRad)*Math.cos(hAngleRad);
+  const elevDeg=Math.asin(Math.max(-1,Math.min(1,sinElev)))*180/Math.PI;
+  const cosAz=(Math.sin(declRad)-Math.sin(latRad)*sinElev)/(Math.cos(latRad)*Math.cos(Math.asin(sinElev)||0.001));
+  const azDeg=(hour<12?-1:1)*Math.acos(Math.max(-1,Math.min(1,cosAz)))*180/Math.PI+180;
+
+  // Cer negru dacă soarele sub orizont
+  if(elevDeg<=0){
+    ctx.fillStyle='rgba(5,10,30,.55)';
+    ctx.fillRect(ox,oy,b.bW*SC,b.bD*SC);
+    ctx.fillStyle='rgba(147,197,253,.7)';ctx.font='bold 11px IBM Plex Mono';ctx.textAlign='center';
+    ctx.fillText('🌙 NOAPTE  —  soare sub orizont',ox+b.bW*SC/2,oy+b.bD*SC/2);
+    ctx.textAlign='left'; return;
+  }
+
+  const intensitate=Math.min(1,elevDeg/45); // 0-1 în funcție de înălțime soare
+
+  // Front direction → azimut numeric
+  const frontAz={N:0,NE:45,E:90,SE:135,S:180,SV:225,V:270,NV:315}[b.P.frontDir]||0;
+
+  fl.rects.forEach(r=>{
+    if(!['living','bedroom','bedroom2','bedroom3','kitchen'].includes(r.t)) return;
+    const rx=ox+r.x*SC, ry=oy+r.y*SC, rw=r.w*SC, rh=r.h*SC;
+
+    // Detectăm fațada camerei (N/S/E/V) în funcție de poziție în clădire
+    const relY=r.y/b.bD; // 0=nord, 1=sud
+    const facingAz=relY<0.35 ? frontAz : (relY>0.65 ? (frontAz+180)%360 : (frontAz+90)%360);
+    const angleDiff=Math.abs(((azDeg-facingAz+540)%360)-180);
+    const sunlit=angleDiff<90 && elevDeg>2;
+
+    if(sunlit){
+      const alpha=0.12+intensitate*0.35;
+      ctx.fillStyle=`rgba(255,220,60,${alpha})`;
+      ctx.fillRect(rx,ry,rw,rh);
+      // Iconiță soare dacă cameră destul de mare
+      if(rw>20&&rh>14){
+        ctx.font=`${Math.min(14,rw*0.4)}px sans-serif`;
+        ctx.textAlign='center';
+        ctx.fillText('☀',rx+rw/2,ry+rh/2+4);
+        ctx.textAlign='left';
+      }
+    } else {
+      ctx.fillStyle='rgba(10,20,60,.35)';
+      ctx.fillRect(rx,ry,rw,rh);
+    }
+  });
+
+  // Indicator soare (poziție în colț)
+  const sx=ox+b.bW*SC+10, sy=oy+10;
+  ctx.fillStyle='rgba(8,15,35,.9)';ctx.fillRect(sx-5,sy-5,90,38);
+  ctx.strokeStyle='rgba(212,175,55,.3)';ctx.lineWidth=0.5;ctx.strokeRect(sx-5,sy-5,90,38);
+  ctx.fillStyle='#D4AF37';ctx.font='bold 9px IBM Plex Mono';
+  ctx.fillText(`☀ ${String(hour).padStart(2,'0')}:00`,sx,sy+8);
+  ctx.fillStyle='rgba(212,175,55,.7)';ctx.font='8px IBM Plex Mono';
+  ctx.fillText(`Elev: ${elevDeg.toFixed(1)}°  Az: ${azDeg.toFixed(0)}°`,sx,sy+20);
+  const lunile=['Ian','Feb','Mar','Apr','Mai','Iun','Iul','Aug','Sep','Oct','Nov','Dec'];
+  ctx.fillText(lunile[month-1]||''+'  (OMS 119: 1.5h/zi)',sx,sy+30);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// OVERLAY: ISU — CERCURI EVACUARE 30m (P118-2/2013)
+// ══════════════════════════════════════════════════════════════════════════
+function _rvDrawISUCircles(ctx, b, ox, oy, SC){
+  const rPx=30*SC; // 30m în pixeli
+  ctx.save();
+  b.cores.forEach(core=>{
+    const cx=ox+(core.x+core.w/2)*SC;
+    const cy=oy+(core.y+core.h/2)*SC;
+    // Zona verde (safe)
+    ctx.beginPath(); ctx.arc(cx,cy,rPx,0,Math.PI*2);
+    ctx.fillStyle='rgba(34,197,94,.07)';ctx.fill();
+    ctx.strokeStyle='rgba(34,197,94,.55)';ctx.lineWidth=1.2;
+    ctx.setLineDash([6,4]);ctx.stroke();ctx.setLineDash([]);
+    // Label
+    ctx.fillStyle='rgba(34,197,94,.8)';ctx.font='bold 8px IBM Plex Mono';ctx.textAlign='center';
+    ctx.fillText('30m',cx,cy-rPx+10);
+    ctx.textAlign='left';
+  });
+
+  // Colorăm camerele în funcție de distanță la cel mai apropiat nucleu
+  const fl=_RV.floors[_RV.floor]||_RV.floors[0];
+  fl.rects.filter(r=>r.apt>=0).forEach(r=>{
+    const rx=ox+r.x*SC, ry=oy+r.y*SC, rw=r.w*SC, rh=r.h*SC;
+    const cx_r=ox+(r.x+r.w/2)*SC, cy_r=oy+(r.y+r.h/2)*SC;
+    const minDist=Math.min(...b.cores.map(c=>{
+      const ccx=ox+(c.x+c.w/2)*SC, ccy=oy+(c.y+c.h/2)*SC;
+      return Math.hypot(cx_r-ccx,cy_r-ccy);
+    }));
+    if(minDist>rPx){
+      ctx.fillStyle='rgba(239,68,68,.25)';
+      ctx.fillRect(rx,ry,rw,rh);
+      ctx.strokeStyle='rgba(239,68,68,.5)';ctx.lineWidth=1;ctx.strokeRect(rx,ry,rw,rh);
+      if(rw>16&&rh>12){
+        ctx.fillStyle='rgba(239,68,68,.9)';ctx.font='7px IBM Plex Mono';ctx.textAlign='center';
+        ctx.fillText('⚠ >'+(minDist/SC).toFixed(0)+'m',rx+rw/2,ry+rh/2+3);ctx.textAlign='left';
+      }
+    }
+  });
+  ctx.restore();
+
+  // Legendă ISU
+  const fl_=_RV.floors[_RV.floor]||_RV.floors[0];
+  const overLimit=fl_.rects.filter(r=>r.apt>=0).filter(r=>{
+    const cx_r=ox+(r.x+r.w/2)*SC, cy_r=oy+(r.y+r.h/2)*SC;
+    return Math.min(...b.cores.map(c=>{
+      const ccx=ox+(c.x+c.w/2)*SC,ccy=oy+(c.y+c.h/2)*SC;
+      return Math.hypot(cx_r-ccx,cy_r-ccy);
+    }))>rPx;
+  }).length;
+  const lgx=ox, lgy=oy+b.bD*SC+8;
+  ctx.fillStyle='rgba(8,15,35,.88)';ctx.fillRect(lgx,lgy,220,22);
+  ctx.strokeStyle=overLimit?'rgba(239,68,68,.4)':'rgba(34,197,94,.4)';
+  ctx.lineWidth=0.5;ctx.strokeRect(lgx,lgy,220,22);
+  ctx.fillStyle=overLimit?'#EF4444':'#22C55E';
+  ctx.font='bold 8px IBM Plex Mono';ctx.textAlign='left';
+  ctx.fillText(overLimit?`⚠ ${overLimit} zone >30m de scară (P118-2/2013)`:'✓ Toate zonele în 30m — CONFORM ISU',lgx+6,lgy+14);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// ROOM INSPECTOR — click pe cameră → panou cu date + editare
+// ══════════════════════════════════════════════════════════════════════════
+function _rvShowInspector(room, clientX, clientY){
+  let ri=document.getElementById('rv-inspector');
+  if(!ri){
+    ri=document.createElement('div');
+    ri.id='rv-inspector';
+    document.body.appendChild(ri);
+  }
+  const typeNames={living:'Living / Salon',bedroom:'Dormitor 1',bedroom2:'Dormitor 2',bedroom3:'Dormitor 3',
+    kitchen:'Bucătărie',bath:'Baie / WC',wc:'WC',hall:'Hol / Coridor',storage:'Depozitare',
+    core:'Casă Scări + Lift',balcon:'Balcon / Terasă'};
+  const typeColors={living:'#EA580C',bedroom:'#16A34A',bedroom2:'#16A34A',bedroom3:'#15803D',
+    kitchen:'#0891B2',bath:'#7C3AED',wc:'#6D28D9',hall:'#475569',core:'#2563EB',balcon:'#B45309'};
+  const normMin={living:14,bedroom:12,bedroom2:10,bedroom3:10,kitchen:5,bath:3.6,wc:1.2,hall:3};
+  const area=room.w*room.h;
+  const minA=normMin[room.t]||0;
+  const ok=minA===0||area>=minA;
+  const color=typeColors[room.t]||'#64748B';
+  const name=typeNames[room.t]||room.t;
+
+  ri.style.cssText=`position:fixed;z-index:9999;top:${Math.min(clientY-40,window.innerHeight-320)}px;left:${Math.min(clientX+12,window.innerWidth-230)}px;
+    width:220px;background:rgba(6,12,26,.97);border:1px solid rgba(212,175,55,.25);border-radius:10px;
+    padding:12px;font-family:'IBM Plex Mono',monospace;box-shadow:0 8px 32px rgba(0,0,0,.6);display:block;`;
+
+  ri.innerHTML=`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      <div style="width:10px;height:10px;border-radius:2px;background:${color};flex-shrink:0"></div>
+      <span style="font-size:11px;font-weight:700;color:#DDE6F5;flex:1">${name}</span>
+      <button onclick="document.getElementById('rv-inspector').style.display='none'"
+        style="background:transparent;border:none;color:#4A6080;cursor:pointer;font-size:14px;line-height:1">✕</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:10px">
+      <div style="background:rgba(255,255,255,.04);border-radius:5px;padding:6px">
+        <div style="font-size:8px;color:#4A6080;margin-bottom:2px">SUPRAFAȚĂ</div>
+        <div style="font-size:16px;font-weight:800;color:${ok?'#22C55E':'#EF4444'}">${area.toFixed(1)}<span style="font-size:9px;font-weight:400">m²</span></div>
+      </div>
+      <div style="background:rgba(255,255,255,.04);border-radius:5px;padding:6px">
+        <div style="font-size:8px;color:#4A6080;margin-bottom:2px">NORMATIV</div>
+        <div style="font-size:14px;font-weight:700;color:${ok?'#22C55E':'#EF4444'}">${minA?minA+'m²':'-'}</div>
+        <div style="font-size:8px;color:${ok?'#22C55E':'#EF4444'}">${minA?(ok?'✓ CONFORM':'✗ SUB MIN'):'-'}</div>
+      </div>
+    </div>
+    <div style="font-size:9px;color:#4A6080;margin-bottom:4px">DIMENSIUNI</div>
+    <div style="display:flex;gap:6px;margin-bottom:8px;align-items:center">
+      <div style="flex:1">
+        <div style="font-size:8px;color:#4A6080;margin-bottom:2px">L (m)</div>
+        <input id="ri-w" type="number" value="${room.w.toFixed(2)}" step="0.1" min="1" max="20"
+          oninput="document.getElementById('ri-area-live').textContent=(parseFloat(this.value||0)*parseFloat(document.getElementById('ri-h').value||0)).toFixed(1)"
+          style="width:100%;padding:4px 6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:4px;color:#DDE6F5;font-size:10px;font-family:inherit">
+      </div>
+      <div style="color:#4A6080;margin-top:12px">×</div>
+      <div style="flex:1">
+        <div style="font-size:8px;color:#4A6080;margin-bottom:2px">A (m)</div>
+        <input id="ri-h" type="number" value="${room.h.toFixed(2)}" step="0.1" min="1" max="30"
+          oninput="document.getElementById('ri-area-live').textContent=(parseFloat(document.getElementById('ri-w').value||0)*parseFloat(this.value||0)).toFixed(1)"
+          style="width:100%;padding:4px 6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:4px;color:#DDE6F5;font-size:10px;font-family:inherit">
+      </div>
+      <div style="flex:1">
+        <div style="font-size:8px;color:#4A6080;margin-bottom:2px">= m²</div>
+        <div id="ri-area-live" style="font-size:13px;font-weight:700;color:${color};padding:4px 0">${area.toFixed(1)}</div>
+      </div>
+    </div>
+    ${room.solarH!=null?`<div style="background:rgba(255,255,255,.03);border-radius:5px;padding:6px;margin-bottom:8px;font-size:8px">
+      <span style="color:#F59E0B">☀ Însorire OMS 119:</span> <strong style="color:${room.solarOk?'#22C55E':'#EF4444'}">${room.solarH}h/zi</strong>
+      (min 1.5h) ${room.solarOk?'<span style="color:#22C55E">✓</span>':'<span style="color:#EF4444">✗ insuficient</span>'}
+    </div>`:''}
+    ${room.apt>=0?`<div style="font-size:8px;color:#4A6080;margin-bottom:6px">Apartament #${room.apt+1}</div>`:''}
+    <button onclick="
+      const fl=_RV.floors[_RV.floor]||_RV.floors[0];
+      const r=fl.rects.find(r_=>r_.x===${room.x}&&r_.y===${room.y});
+      if(r){r.w=parseFloat(document.getElementById('ri-w').value)||r.w;r.h=parseFloat(document.getElementById('ri-h').value)||r.h;}
+      if(_RV.building)_rvRender();
+      document.getElementById('rv-inspector').style.display='none';"
+      style="width:100%;padding:6px;background:rgba(212,175,55,.15);border:1px solid rgba(212,175,55,.3);
+        border-radius:5px;color:#D4AF37;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit">
+      ✓ Aplică modificările
+    </button>`;
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// DNA URBAN — Radar SVG dinamic (generare string SVG)
+// ══════════════════════════════════════════════════════════════════════════
+function _rvDNARadar(b, P, fl){
+  if(!b||!P||!fl) return '<svg width="140" height="140" viewBox="0 0 140 140"></svg>';
+  const cx=70,cy=68,r=50;
+  const potOk=b.scArea/P.area<=P.pot+.001;
+  const cutOk=b.sdaTotal/P.area<=P.cut+.001;
+  const solarIssues=(fl.rects||[]).filter(r_=>r_.solarOk===false).length;
+  const totalSolarRooms=Math.max(1,(fl.rects||[]).filter(r_=>r_.solarOk!=null).length);
+  const roomsOk=(fl.rects||[]).every(r_=>{const m=(_RV_NP057||{})[r_.t];return !m||r_.w*r_.h>=m;});
+  const isuOk=(fl.isu||{}).ok!==false;
+  const nrApt=Math.max(1,Math.round(b.sdaTotal/70));
+  const parcNec=Math.ceil(nrApt*1.2);
+  const parcSup=Math.floor(Math.max(0,P.area-b.bW*b.bD-200)/28);
+  const score=Math.round(
+    (potOk?.15:0)+(cutOk?.15:0)+
+    ((totalSolarRooms-solarIssues)/totalSolarRooms*.2)+
+    (isuOk?.15:0.07)+(roomsOk?.15:0.07)+
+    (parcSup>=parcNec?.1:.05)+.1
+  *100);
+  const axes=[
+    {name:'POT',val:potOk?.85:(.35),color:potOk?'#22C55E':'#EF4444'},
+    {name:'CUT',val:cutOk?.8:(.35),color:cutOk?'#22C55E':'#EF4444'},
+    {name:'OMS',val:(totalSolarRooms-solarIssues)/totalSolarRooms*.9+.05,color:solarIssues===0?'#22C55E':'#F59E0B'},
+    {name:'ISU',val:isuOk?.9:.55,color:isuOk?'#22C55E':'#F59E0B'},
+    {name:'NP057',val:roomsOk?.9:.65,color:roomsOk?'#22C55E':'#F59E0B'},
+    {name:'Parcaje',val:Math.min(1,parcSup/Math.max(1,parcNec))*.85+.05,color:parcSup>=parcNec?'#22C55E':'#EF4444'},
+  ];
+  const pts=axes.map((ax,i)=>{
+    const angle=i*Math.PI*2/axes.length-Math.PI/2;
+    return [cx+ax.val*r*Math.cos(angle),cy+ax.val*r*Math.sin(angle)];
+  });
+  const rings=[1,.67,.33];
+  const ringsStr=rings.map(v=>
+    '<polygon points="'+axes.map((_,i)=>{const a=i*Math.PI*2/axes.length-Math.PI/2;return (cx+v*r*Math.cos(a)).toFixed(1)+','+(cy+v*r*Math.sin(a)).toFixed(1);}).join(' ')+'" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="0.5"/>'
+  ).join('');
+  const axesStr=axes.map((_,i)=>{
+    const a=i*Math.PI*2/axes.length-Math.PI/2;
+    return `<line x1="${cx}" y1="${cy}" x2="${(cx+r*Math.cos(a)).toFixed(1)}" y2="${(cy+r*Math.sin(a)).toFixed(1)}" stroke="rgba(255,255,255,.07)" stroke-width="0.5"/>`;
+  }).join('');
+  const polyStr=`<polygon points="${pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')}" fill="rgba(212,175,55,.12)" stroke="#D4AF37" stroke-width="1.5" stroke-linejoin="round"/>`;
+  const labelsStr=axes.map((ax,i)=>{
+    const a=i*Math.PI*2/axes.length-Math.PI/2;
+    const lx=(cx+(r+14)*Math.cos(a)).toFixed(1),ly=(cy+(r+14)*Math.sin(a)+2).toFixed(1);
+    return `<text x="${lx}" y="${ly}" fill="${ax.color}" font-size="7.5" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-weight="700">${ax.name}</text>`;
+  }).join('');
+  const dotsStr=pts.map((p,i)=>`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="2.5" fill="${axes[i].color}"/>`).join('');
+  const scoreColor=score>=80?'#22C55E':score>=60?'#F59E0B':'#EF4444';
+  return `<svg width="140" height="140" viewBox="0 0 140 140">
+    ${ringsStr}${axesStr}${polyStr}${dotsStr}${labelsStr}
+    <text x="${cx}" y="${cy+4}" fill="${scoreColor}" font-size="14" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-weight="800">${score}</text>
+    <text x="${cx}" y="${cy+14}" fill="rgba(200,215,240,.4)" font-size="6.5" text-anchor="middle" font-family="IBM Plex Mono,monospace">/100</text>
+  </svg>`;
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// AVIZE TIMELINE — Calendar autorizare dinamic
+// ══════════════════════════════════════════════════════════════════════════
+function _rvBuildAvizeTimeline(b, P){
+  const niv=b.niv||1;
+  const sc=Math.round(b.scArea)||0;
+  const needsISUSpecial=niv>=5||sc>2500;
+  const needsDJCPN=P.utr?.toLowerCase().includes('pi')||false; // zone protejate
+  const needsLift=niv>=5;
+  const steps=[
+    {
+      status:'done', icon:'✅',
+      label:'Analiză UrbanX finalizată',
+      time:'Azi',
+      docs:`Releveu instant · SSF · Însorire · Parcaje<br>
+            <span style="color:#22C55E">SC=${sc}m² · SDA=${Math.round(b.sdaTotal)}m² · P+${niv-1}E · ${Math.round(b.sdaTotal/70)} apt.</span>`,
+    },
+    {
+      status:'current', icon:'🔄',
+      label:'Certificat de Urbanism',
+      time:'1–2 luni',
+      docs:`Cerere tip PMB/CL + opis documente<br>
+            Plan parcelă vizat ANCPI · Schiță arhitecturală<br>
+            Taxa CU: 0.5–1% val. estimată<br>
+            <b>Emite lista exactă de avize necesare</b>`,
+    },
+    {
+      status:'future', icon:'🔬',
+      label:'Studii obligatorii',
+      time:'2–4 luni',
+      docs:`📍 Studiu geotehnic — min ${b.cores?Math.max(3,b.cores.length):3} foraje × ${Math.max(8,niv*1.2+2).toFixed(0)}m<br>
+            📐 Ridicare topografică (Stereo 70)<br>
+            ☀ Studiu însorire detaliat (OMS 119)<br>
+            🚗 Studiu trafic (dacă >100 apt.)`,
+    },
+    {
+      status:'future', icon:'📋',
+      label:'PAC / DTAC (arhitect OAR)',
+      time:'3–6 luni',
+      docs:`Proiect Arhitectură + Structură + Instalații<br>
+            Memoriu tehnic + Deviz general<br>
+            ${needsLift?'<span style="color:#F59E0B">⚠ Lift obligatoriu — P+4+ (NP 051)</span>':''}
+            Piesele scrise + piesele desenate A1`,
+    },
+    {
+      status:'future', icon:'🏛',
+      label:'Avize speciale',
+      time:'2–4 luni',
+      docs:`🚒 ISU ${needsISUSpecial?'<span style="color:#F59E0B">(special — >P+4)</span>':''}<br>
+            ✈ AACR (dacă lângă aeroport)<br>
+            💧 Utilități: apă, canal, gaz, curent<br>
+            🌿 APM — acord de mediu<br>
+            ${needsDJCPN?'🏛 DJCPN — zonă protejată':''}`,
+    },
+    {
+      status:'future', icon:'📜',
+      label:'Autorizație de Construire',
+      time:'1–2 luni',
+      docs:`Dosar complet la Primărie<br>
+            Taxa AC: 0.5% val. lucrare (min. 50 lei)<br>
+            Valabilitate AC: 12 luni + 12 prelungire<br>
+            <b>OBLIGATORIU înainte de primul târnăcop!</b>`,
+    },
+    {
+      status:'future', icon:'🏗',
+      label:'Execuție + Recepție',
+      time:'10–18 luni',
+      docs:`Constructor autorizat + RTE obligatoriu<br>
+            Carte tehnică a construcției<br>
+            Recepție la terminare + Recepție finală<br>
+            Intabulare CF după recepție`,
+    },
+  ];
+
+  const totalMin=1+2+3+2+1+10, totalMax=2+4+6+4+2+18;
+  const dotColors={done:'#22C55E',current:'#D4AF37',future:'rgba(100,120,150,.5)'};
+  const borderColors={done:'#22C55E',current:'#D4AF37',future:'rgba(60,80,110,.5)'};
+
+  return `<div style="padding:4px 6px">
+    <div style="font-size:8px;color:#4A6080;margin-bottom:8px;line-height:1.4">
+      Calendar estimat de la analiză la <b style="color:#DDE6F5">recepție finală: ${totalMin}–${totalMax} luni</b>
+    </div>
+    <div style="position:relative;padding-left:16px">
+      <div style="position:absolute;left:6px;top:8px;bottom:8px;width:1px;background:rgba(60,80,110,.4)"></div>
+      ${steps.map((s,i)=>`
+        <div style="position:relative;margin-bottom:10px;cursor:pointer"
+          onclick="const d=this.querySelector('.tl-docs');d.style.display=d.style.display==='none'?'block':'none'">
+          <div style="position:absolute;left:-13px;top:1px;width:11px;height:11px;border-radius:50%;
+            background:${s.status==='done'?dotColors.done:s.status==='current'?dotColors.current:'#0D1A35'};
+            border:2px solid ${borderColors[s.status]||borderColors.future};
+            ${s.status==='current'?'box-shadow:0 0 6px rgba(212,175,55,.4)':''}"></div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <span style="font-size:9px;font-weight:${s.status==='future'?'400':'700'};
+              color:${s.status==='done'?'#22C55E':s.status==='current'?'#D4AF37':'#64748B'}">${s.icon} ${s.label}</span>
+            <span style="font-size:8px;color:${s.status==='done'?'#22C55E':s.status==='current'?'#F59E0B':'#3A5070'};
+              flex-shrink:0;margin-left:4px;font-weight:600">${s.time}</span>
+          </div>
+          <div class="tl-docs" style="display:none;font-size:8px;color:#4A6080;margin-top:3px;line-height:1.5;
+            padding:5px 6px;background:rgba(255,255,255,.02);border-radius:4px;border-left:2px solid ${borderColors[s.status]}">${s.docs}</div>
+        </div>
+      `).join('')}
+    </div>
+    <div style="margin-top:4px;padding:6px;background:rgba(212,175,55,.06);border-radius:4px;border:1px solid rgba(212,175,55,.12)">
+      <div style="font-size:8px;color:#4A6080">TOTAL ESTIMAT de la CU la recepție</div>
+      <div style="font-size:13px;font-weight:800;color:#D4AF37">${totalMin}–${totalMax} luni</div>
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// SCENARII A/B — Comparare două configurații
+// ══════════════════════════════════════════════════════════════════════════
+function _rvRenderScenarii(b){
+  const P=b.P||_RV.parcelParams; if(!P) return;
+  const {cv,ctx}=_rvInitCanvas(900,600);
+  ctx.fillStyle='#060C1A';ctx.fillRect(0,0,900,600);
+
+  // Titlu
+  ctx.fillStyle='rgba(212,175,55,.08)';ctx.fillRect(0,0,900,34);
+  ctx.fillStyle='#D4AF37';ctx.font='bold 13px Space Grotesk';ctx.textAlign='center';
+  ctx.fillText('COMPARAȚIE SCENARII A / B — Nr.cad. '+P.nrCad,450,22);
+
+  const nivB=_RV.scenNivB||b.niv;
+  const fnB=_RV.scenFnB||P.fn||'locuinta_colectiva';
+
+  // Construim clădirea B cu parametri diferiți
+  const PB=Object.assign({},P,{fn:fnB});
+  let bB; try{ bB=_rvCompBuilding(PB,{niv:nivB}); }catch(e){ bB=b; }
+
+  const SC=Math.min(6,140/(Math.max(b.bW,bB.bW)));
+  const padX=30,padY=44,midX=450;
+
+  // ── Planul A (stânga) ──────────────────────────────────────────────────
+  const oxA=padX+(midX-padX-b.bW*SC)/2, oyA=padY+(240-b.bD*SC)/2;
+  ctx.fillStyle='rgba(13,26,53,.8)';ctx.fillRect(padX,padY,midX-padX-10,280);
+  ctx.strokeStyle='rgba(37,99,235,.3)';ctx.lineWidth=1;ctx.strokeRect(padX,padY,midX-padX-10,280);
+  ctx.fillStyle='rgba(37,99,235,.7)';ctx.font='bold 11px Space Grotesk';ctx.textAlign='center';
+  ctx.fillText('SCENARIU A  —  CURENT',midX/2,padY+15);
+  _rvDrawPlanMini(ctx,b,oxA,oyA,SC);
+
+  // ── Planul B (dreapta) ─────────────────────────────────────────────────
+  const oxB=midX+10+(midX-padX-bB.bW*SC)/2, oyB=padY+(240-bB.bD*SC)/2;
+  ctx.fillStyle='rgba(13,26,53,.8)';ctx.fillRect(midX+10,padY,midX-padX-10,280);
+  ctx.strokeStyle='rgba(212,175,55,.3)';ctx.lineWidth=1;ctx.strokeRect(midX+10,padY,midX-padX-10,280);
+  ctx.fillStyle='rgba(212,175,55,.7)';ctx.font='bold 11px Space Grotesk';ctx.textAlign='center';
+  ctx.fillText('SCENARIU B  —  PROPUS',midX+10+(midX-padX)/2,padY+15);
+  _rvDrawPlanMini(ctx,bB,oxB,oyB,SC);
+
+  // ── Tabel comparativ (jos) ─────────────────────────────────────────────
+  const tY=padY+290, cols=[['Indicator',140],['Scenariu A',120],['Scenariu B',120],['Δ Diferență',120],['Winner',80]];
+  const tX=padX, tW=900-padX*2;
+
+  ctx.fillStyle='rgba(8,15,35,.95)';ctx.fillRect(tX,tY,tW,22);
+  ctx.fillStyle='rgba(212,175,55,.15)';ctx.fillRect(tX,tY,tW,22);
+  ctx.fillStyle='#D4AF37';ctx.font='bold 9px IBM Plex Mono';
+  let tx=tX+4;
+  cols.forEach(([h,w])=>{ ctx.textAlign='left';ctx.fillText(h,tx,tY+14);tx+=w; });
+
+  const potA=b.scArea/P.area, potB=bB.scArea/P.area;
+  const cutA=b.sdaTotal/P.area, cutB=bB.sdaTotal/P.area;
+  const nrAptA=Math.round(b.sdaTotal/70), nrAptB=Math.round(bB.sdaTotal/70);
+  const hA=b.niv*P.hn, hB=bB.niv*P.hn;
+  const sdaA=Math.round(b.sdaTotal), sdaB=Math.round(bB.sdaTotal);
+  const costA=sdaA*650, costB=sdaB*650;
+  const revA=nrAptA*280*1200, revB=nrAptB*280*1200;
+
+  const rows=[
+    ['Niveluri (P+nE)',`P+${b.niv-1}E`,`P+${bB.niv-1}E`,`${bB.niv>b.niv?'+':''}${bB.niv-b.niv} etaje`,bB.niv>=b.niv?'B':'A'],
+    ['H total (m)',hA.toFixed(1)+'m',hB.toFixed(1)+'m',(hB>hA?'+':'')+( hB-hA).toFixed(1)+'m',hB<=24?'B':'A'],
+    ['SC la sol (m²)',sdaA/b.niv+'m²',sdaB/bB.niv+'m²','—','—'],
+    ['SDA totală (m²)',sdaA+'m²',sdaB+'m²',(sdaB>sdaA?'+':'')+(sdaB-sdaA)+'m²',sdaB>sdaA?'B':'A'],
+    ['POT realizat',(potA*100).toFixed(1)+'%',(potB*100).toFixed(1)+'%','—',potA<=P.pot&&potB<=P.pot?'—':potA<=P.pot?'A':'B'],
+    ['CUT realizat',cutA.toFixed(2),cutB.toFixed(2),(cutB>cutA?'+':'')+(cutB-cutA).toFixed(2),cutB<=P.cut?'B':'A'],
+    ['Nr. apartamente est.',nrAptA+' apt.',nrAptB+' apt.',(nrAptB>nrAptA?'+':'')+(nrAptB-nrAptA)+' apt.',nrAptB>nrAptA?'B':'A'],
+    ['Cost construcție est.',(costA/1e6).toFixed(1)+'M€',(costB/1e6).toFixed(1)+'M€',(costB>costA?'+':'')+(( costB-costA)/1e6).toFixed(1)+'M€',costA<costB?'A':'B'],
+    ['Venituri estimate',(revA/1e6).toFixed(1)+'M€',(revB/1e6).toFixed(1)+'M€',(revB>revA?'+':'')+(( revB-revA)/1e6).toFixed(1)+'M€',revB>revA?'B':'A'],
+    ['H admis PUG',P.hmax||'24m',P.hmax||'24m',hB<=(P.hmax||24)?'✓':'⚠ DEPĂȘIRE',hB<=(P.hmax||24)?'B':'⚠'],
+  ];
+
+  rows.forEach((row,ri)=>{
+    const ry=tY+22+ri*22;
+    ctx.fillStyle=ri%2?'rgba(255,255,255,.03)':'rgba(255,255,255,.015)';
+    ctx.fillRect(tX,ry,tW,22);
+    ctx.fillStyle='rgba(255,255,255,.04)';
+    // Winner highlight
+    if(row[4]==='B') ctx.fillStyle='rgba(212,175,55,.07)';
+    if(row[4]==='A') ctx.fillStyle='rgba(37,99,235,.07)';
+    ctx.fillRect(tX,ry,tW,22);
+
+    tx=tX+4;
+    row.forEach((cell,ci)=>{
+      const colW=cols[ci][1];
+      const isWinner=ci===4;
+      ctx.fillStyle=isWinner?(cell==='B'?'#D4AF37':cell==='A'?'#60A5FA':cell.includes('⚠')?'#EF4444':'#4A6080'):
+        (ci===3?(cell.startsWith('+')?'#22C55E':cell.startsWith('-')?'#EF4444':'#64748B'):'#DDE6F5');
+      ctx.font=(isWinner?'bold ':'')+'8.5px IBM Plex Mono';
+      ctx.textAlign='left';
+      ctx.fillText(String(cell).slice(0,18),tx,ry+14);
+      tx+=colW;
+    });
+  });
+
+  // Controale Scenariu B
+  _rvUpdateScenarioControls(b, P);
+}
+
+// ── Desen mini plan pentru comparare ───────────────────────────────────
+function _rvDrawPlanMini(ctx, b, ox, oy, SC){
+  if(!b) return;
+  const bW=b.bW*SC, bD=b.bD*SC;
+  // Fundal clădire
+  ctx.fillStyle='rgba(17,30,60,.9)';ctx.fillRect(ox,oy,bW,bD);
+  ctx.strokeStyle='rgba(200,215,240,.7)';ctx.lineWidth=1.2;ctx.strokeRect(ox,oy,bW,bD);
+
+  // Nuclee cores
+  (b.cores||[]).forEach(c=>{
+    ctx.fillStyle='rgba(37,99,235,.25)';ctx.fillRect(ox+c.x*SC,oy+c.y*SC,c.w*SC,c.h*SC);
+    ctx.strokeStyle='rgba(37,99,235,.6)';ctx.lineWidth=0.6;ctx.strokeRect(ox+c.x*SC,oy+c.y*SC,c.w*SC,c.h*SC);
+  });
+
+  // Camere din parter
+  const fl=(b.floors||[])[0]||{rects:[]};
+  const typeCol={living:'rgba(251,146,60,.35)',bedroom:'rgba(74,222,128,.3)',bedroom2:'rgba(74,222,128,.25)',
+    kitchen:'rgba(34,211,238,.25)',bath:'rgba(167,139,250,.25)',hall:'rgba(100,116,139,.2)',core:'rgba(96,165,250,.2)',balcon:'rgba(212,175,55,.1)'};
+  fl.rects.forEach(r=>{
+    const fill=typeCol[r.t]||'rgba(255,255,255,.05)';
+    ctx.fillStyle=fill;ctx.fillRect(ox+r.x*SC,oy+r.y*SC,r.w*SC,r.h*SC);
+  });
+
+  // Info text
+  ctx.fillStyle='rgba(200,215,240,.55)';ctx.font='bold 8px IBM Plex Mono';ctx.textAlign='center';
+  ctx.fillText(b.niv+'niv · '+b.bW.toFixed(0)+'×'+b.bD.toFixed(0)+'m',ox+bW/2,oy+bD+12);
+}
+
+// ── Actualizează HTML cu controlul Scenariu B ──────────────────────────
+function _rvUpdateScenarioControls(b, P){
+  const wrap=document.getElementById('rv-drawwrap');
+  if(!wrap) return;
+  let ctrl=document.getElementById('rv-scen-ctrl');
+  if(!ctrl){
+    ctrl=document.createElement('div');
+    ctrl.id='rv-scen-ctrl';
+    ctrl.style.cssText='position:absolute;top:44px;right:8px;width:200px;background:rgba(8,15,35,.96);border:1px solid rgba(212,175,55,.25);border-radius:8px;padding:10px;font-family:"IBM Plex Mono",monospace;z-index:100';
+    wrap.style.position='relative';
+    wrap.appendChild(ctrl);
+  }
+  const nivB=_RV.scenNivB||b.niv;
+  ctrl.innerHTML=`
+    <div style="font-size:10px;font-weight:700;color:#D4AF37;margin-bottom:8px;border-bottom:1px solid rgba(212,175,55,.15);padding-bottom:5px">⚙ Parametri Scenariu B</div>
+    <div style="font-size:8px;color:#4A6080;margin-bottom:3px">Număr niveluri</div>
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+      <button onclick="_rvScenNiv(-1)" style="width:22px;height:22px;border-radius:4px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#DDE6F5;cursor:pointer;font-size:13px">−</button>
+      <div style="flex:1;text-align:center;font-size:14px;font-weight:700;color:#DDE6F5" id="rv-scen-niv-val">P+${nivB-1}E</div>
+      <button onclick="_rvScenNiv(1)" style="width:22px;height:22px;border-radius:4px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#DDE6F5;cursor:pointer;font-size:13px">+</button>
+    </div>
+    <div style="font-size:8px;color:#4A6080;margin-bottom:3px">Funcțiune</div>
+    <select onchange="_RV.scenFnB=this.value;if(_RV.building)_rvRender();"
+      style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#DDE6F5;font-size:8px;padding:4px;border-radius:4px;font-family:inherit;margin-bottom:8px">
+      <option value="locuinta_colectiva" ${(!_RV.scenFnB||_RV.scenFnB==='locuinta_colectiva')?'selected':''}>Locuință colectivă</option>
+      <option value="birouri" ${_RV.scenFnB==='birouri'?'selected':''}>Birouri</option>
+      <option value="mixta" ${_RV.scenFnB==='mixta'?'selected':''}>Mixtă (loc.+birouri)</option>
+      <option value="hotel" ${_RV.scenFnB==='hotel'?'selected':''}>Hotel</option>
+    </select>
+    <div style="font-size:7px;color:#2A3F60;margin-top:4px;line-height:1.4">H max admis: ${P.hmax||24}m · CUT max: ${P.cut}</div>
+    ${nivB*P.hn>(P.hmax||24)?'<div style="font-size:8px;color:#EF4444;margin-top:4px">⚠ H='+(nivB*P.hn).toFixed(1)+'m depășește '+( P.hmax||24)+'m admis!</div>':''}
+  `;
+}
+
+function _rvScenNiv(delta){
+  const P=_RV.parcelParams; if(!P) return;
+  _RV.scenNivB=Math.max(2,Math.min(15,(_RV.scenNivB||_RV.building?.niv||6)+delta));
+  const el=document.getElementById('rv-scen-niv-val');
+  if(el) el.textContent='P+'+(_RV.scenNivB-1)+'E';
+  if(_RV.building) _rvRender();
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -1240,6 +1808,11 @@ async function generateRelevee(){
 
   _rvRender();
 
+  // ── Actualizăm DataBus — toate rapoartele sunt notificate ─────────────
+  try{ window._RV_DataBus?.update(b, P); }catch(e){}
+  // ── ROI quick calc ────────────────────────────────────────────────────
+  try{ _rvCalcROI(); }catch(e){}
+
   clearInterval(tInt);
   const secs=((performance.now()-t0)/1000).toFixed(1);
   if(tdot) tdot.classList.remove('rv-running');
@@ -1265,8 +1838,21 @@ function _rvBuildFloorBar(niv){
 }
 
 function _rvUpdatePanels(b,P){
+  // ── Avize Timeline ────────────────────────────────────────────────────
+  const avizeContent=document.getElementById('rv-avize-content');
+  if(avizeContent) avizeContent.innerHTML=_rvBuildAvizeTimeline(b,P);
+
+  // ── DNA Urban Radar ───────────────────────────────────────────────────
+  const fl0=_RV.floors[0]||{rects:[],isu:{}};
+  const dnaDiv=document.getElementById('rv-dna');
+  if(dnaDiv) dnaDiv.innerHTML=_rvDNARadar(b,P,fl0);
+
   // Bilanț
   const bilant=document.getElementById('rv-bilant');
+  const nrAptEst_=Math.max(1,Math.round(b.sdaTotal/70));
+  const parcNec_=Math.ceil(nrAptEst_*1.2);
+  const parcSup_=Math.floor(Math.max(0,P.area-b.bW*b.bD-200)/28);
+  const deficit_=Math.max(0,parcNec_-parcSup_);
   if(bilant) bilant.innerHTML=[
     ['Suprafață parcelă',_rvFmt(P.area)+'m²'],
     ['SC edificiu',_rvFmt(b.scArea)+'m²'],
@@ -1274,7 +1860,8 @@ function _rvUpdatePanels(b,P){
     ['POT realizat',_rvFmt(b.scArea/P.area*100)+'% / max '+Math.round(P.pot*100)+'%'],
     ['CUT realizat',_rvFmtD(b.sdaTotal/P.area)+' / max '+P.cut],
     ['Niveluri',b.niv+' niv. · H='+(b.niv*P.hn).toFixed(1)+'m'],
-    ['Apartamente est.',_rvFmt(b.niv*b.cores.length*4)+' unități'],
+    ['Apartamente est.',_rvFmt(nrAptEst_)+' unități'],
+    ['Parcaje necesare',parcNec_+' loc.'+(deficit_>0?' ⚠ deficit '+deficit_:' ✓')],
   ].map(([l,v])=>`<div class="rv-stat"><span class="rv-sl">${l}</span><span class="rv-sv">${v}</span></div>`).join('');
 
   // Normative
@@ -1294,6 +1881,29 @@ function _rvUpdatePanels(b,P){
     ['PMR',b.scArea>600?'ok':'warn','Obligatoriu','NP 051/2012'],
     ['Seismic',P.niv>0?'ok':'warn','Zona E ag=0.2g','P100-1/2013'],
   ].map(([l,cls,v,ref])=>`<div class="rv-norm-item"><div><div class="rv-nl">${l}</div><div class="rv-nref">${ref}</div></div><div class="rv-badge rv-badge-${cls}">${v}</div></div>`).join('');
+
+  // ── RAPOARTE AFECTATE DE ACEST RELEVEU ─────────────────────────────
+  const rapoartePanel=document.getElementById('rv-rapoarte-aff');
+  if(rapoartePanel){
+    const db=window._RV_DataBus?.get();
+    const sum=window._RV_DataBus?.getSummary();
+    const rowsAff=[
+      {label:'📐 Studiu Însorire',detail:db?`front ${P.frontDir} · H=${(b.niv*P.hn).toFixed(0)}m · ${solarIssues>0?solarIssues+' cam. sub OMS':'✓ OMS 119'}`:'-',ok:solarIssues===0,study:'insorire'},
+      {label:'⚡ Cert. Performanță En.',detail:db?`U_perete=${db.uWall} · U_geam=${db.uWin} W/m²K`:'-',ok:true,study:'cpe'},
+      {label:'📋 SSF Fezabilitate',detail:db?`SC=${Math.round(b.scArea)}m² · SDA=${Math.round(b.sdaTotal)}m²`:'-',ok:potOk&&cutOk,study:'ssf'},
+      {label:'🚗 Studiu Trafic',detail:db?`${parcNec_} loc. · ${db.tripuriOra||'-'} veh/oră vârf`:'-',ok:parcSup_>=parcNec_,study:'trafic'},
+      {label:'🔊 Studiu Acustică',detail:db?`Rw≥${db.rwNecesar||52}dB · dist.str.=${P.rs}m`:'-',ok:true,study:'acustica'},
+      {label:'⛏ Studiu Geotehnic',detail:db?`${db.nrForaje||3} foraje × ${(db.adancForaj||10).toFixed(0)}m`:'-',ok:true,study:'geotech'},
+    ];
+    rapoartePanel.innerHTML=`<div style="font-size:9px;font-weight:700;color:var(--rv-gold);padding:6px 10px 2px;border-top:1px solid rgba(212,175,55,.15);letter-spacing:.05em">RAPOARTE AFECTATE</div>`+
+    rowsAff.map(r=>`<div class="rv-raff-row" title="${r.detail}" onclick="if(typeof _generateReport==='function')_generateReport('${r.study}')">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:9px;font-weight:600;color:${r.ok?'rgba(200,215,240,.9)':'rgba(250,180,180,.9)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.label}</div>
+        <div style="font-size:7.5px;color:rgba(100,120,150,.8);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.detail}</div>
+      </div>
+      <div style="font-size:8px;color:${r.ok?'rgba(52,211,153,.9)':'rgba(248,113,113,.9)'};flex-shrink:0;margin-left:4px">${r.ok?'✓':'⚠'}</div>
+    </div>`).join('');
+  }
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -1314,13 +1924,73 @@ function _rvTabClick(btn){
   document.querySelectorAll('.rv-tab').forEach(t=>t.classList.remove('rv-on'));
   btn.classList.add('rv-on');
   _RV.tab=btn.dataset.tab;
+  // Ascundem controalele scenariu când nu suntem pe tab-ul scenarii
+  const sc=document.getElementById('rv-scen-ctrl');
+  if(sc) sc.style.display=btn.dataset.tab==='scenarii'?'block':'none';
   if(_RV.building) _rvRender();
 }
 
 function _rvToggle(el,key){
   el.classList.toggle('rv-tog-on');
   _RV['show'+key[0].toUpperCase()+key.slice(1)]=el.classList.contains('rv-tog-on');
+  // Afișăm/ascundem controalele solar când se activează
+  if(key==='solar'){
+    const sc=document.getElementById('rv-solar-ctrls');
+    if(sc) sc.style.display=el.classList.contains('rv-tog-on')?'block':'none';
+    if(el.classList.contains('rv-tog-on')){
+      _RV.solarAnim=true;
+      _RV.solarHour=_RV.solarHour||10;
+      _RV.solarMonth=_RV.solarMonth||12;
+    }
+  }
   if(_RV.building) _rvRender();
+}
+
+// ── ROI Calculator ────────────────────────────────────────────────────────
+function _rvCalcROI(){
+  const b=_RV.building; if(!b) return;
+  const P=_RV.parcelParams; if(!P) return;
+  const cost=parseInt(document.getElementById('rv-roi-cost')?.value||650);
+  const sell=parseInt(document.getElementById('rv-roi-sell')?.value||1200);
+  const nrApt=Math.max(1,Math.round(b.sdaTotal/70));
+  const suMedie=b.sdaTotal/nrApt*0.82;
+  const totalCost=b.sdaTotal*cost;
+  const totalRev=nrApt*suMedie*sell;
+  const profit=totalRev-totalCost;
+  const roi=(profit/totalCost*100).toFixed(0);
+  const profEl=document.getElementById('rv-roi-profit');
+  const subEl=document.getElementById('rv-roi-sub');
+  if(profEl){
+    profEl.style.color=profit>0?'#22C55E':'#EF4444';
+    profEl.textContent=(profit>0?'+':'')+_rvFmt(profit/1000000,1)+'M€ profit brut';
+  }
+  if(subEl) subEl.textContent=`Cost: ${_rvFmt(totalCost/1000000,1)}M€ · Venituri: ${_rvFmt(totalRev/1000000,1)}M€ · ROI ~${roi}%`;
+}
+
+// (no duplicate _rvFmt — see line 86)
+
+// ── Solar Play — animează soarele 5:00→21:00 automat ─────────────────────
+let _rvSolarTimer=null;
+function _rvSolarPlay(){
+  if(_rvSolarTimer){
+    clearInterval(_rvSolarTimer);
+    _rvSolarTimer=null;
+    const btn=document.getElementById('rv-solar-play');
+    if(btn) btn.textContent='▶ Animație 24h';
+    return;
+  }
+  _RV.solarHour=5;
+  const slider=document.getElementById('rv-solar-hour');
+  const hval=document.getElementById('rv-solar-hval');
+  const btn=document.getElementById('rv-solar-play');
+  if(btn) btn.textContent='⏹ Stop animație';
+  _rvSolarTimer=setInterval(()=>{
+    _RV.solarHour=(_RV.solarHour||5)+0.25;
+    if(_RV.solarHour>21){ clearInterval(_rvSolarTimer);_rvSolarTimer=null;if(btn)btn.textContent='▶ Animație 24h';return; }
+    if(slider) slider.value=Math.round(_RV.solarHour);
+    if(hval) hval.textContent=String(Math.floor(_RV.solarHour)).padStart(2,'0')+':'+(_RV.solarHour%1>=0.5?'30':'00');
+    if(_RV.building) _rvRender();
+  },80);
 }
 
 function _rvZoom(d){
@@ -2128,108 +2798,177 @@ async function _rvExportPDF(){
       pdf.setDrawColor(37,99,235);pdf.setLineWidth(0.35);pdf.setLineDashPattern([1,0.8],0);
       pdf.line(ox+b.bW*sc/2,oy,ox+b.bW*sc/2,oy+b.bD*sc);pdf.setLineDashPattern([],0);
 
-      // ── RIGHT PANEL — ghid complet pentru non-arhitect ─────────────────
-      const rx=10+planAreaW,ry=10,rw=W-rx-8,rh=planAreaH;
-      pdf.setFillColor(255,255,255);pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.3);pdf.rect(rx,ry,rw,rh,'FD');
-      let panY=ry+2;
+      // ── RIGHT PANEL — date tehnice complete ────────────────────────────────
+      const rx=10+planAreaW,ry=planOy,rw=W-rx-8,rh=planAreaH;
+      pdf.setFillColor(248,250,254);pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.3);pdf.rect(rx,ry,rw,rh,'FD');
+      let panY=ry+1;
 
-      // Header panel
-      pdf.setFillColor(...C.dark2);pdf.rect(rx,panY,rw,7,'F');
-      pdf.setFillColor(...C.gold);pdf.rect(rx,panY,2,7,'F');
-      pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(7);
-      pdf.text(fl===0?'CUM SE CITEȘTE PLANUL PARTERULUI':'CUM SE CITEȘTE PLANUL ETAJULUI '+fl,rx+rw/2,panY+5,{align:'center'});
-      panY+=10;
+      // ── Header planșă ───────────────────────────────────────────────────
+      pdf.setFillColor(...C.dark2);pdf.rect(rx,panY,rw,8,'F');
+      pdf.setFillColor(...C.gold);pdf.rect(rx,panY,2,8,'F');
+      pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(6.5);
+      const scaleLabel=sc>=6?'1:50':sc>=3?'1:100':'1:200';
+      pdf.text(fl===0?'PLAN PARTER (cota +0.00)':'PLAN ETAJ '+(isTip?'TIP ':'')+fl+' (+'+( fl*P.hn).toFixed(2)+'m)',rx+rw/2,panY+5.5,{align:'center'});
+      panY+=9;
+      pdf.setFillColor(235,242,252);pdf.rect(rx,panY,rw,5.5,'F');
+      pdf.setTextColor(40,60,100);pdf.setFont('helvetica','normal');pdf.setFontSize(4.8);
+      pdf.text('Nr.cad. '+S2(P.nrCad)+' · UTR '+S2(P.utr)+' · Sc. '+scaleLabel+' · '+new Date().toLocaleDateString('ro-RO'),rx+2,panY+4);
+      panY+=7;
 
-      // Introducere contextualizata
-      const floorTitle=fl===0?'PARTER — NIVELUL 0 (COTA ±0.00)':'ETAJ '+fl+' — COTA +'+(fl*P.hn).toFixed(2)+'m';
-      pdf.setFillColor(235,242,252);pdf.roundedRect(rx+1,panY,rw-2,5,1,1,'F');
-      pdf.setTextColor(...C.blue);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
-      pdf.text(floorTitle,rx+3,panY+3.5);panY+=7;
-
-      const genExp=fl===0
-        ?'Acesta este planul parterului — primul nivel al clădirii, la nivelul solului. Pe acest plan veți găsi: intrarea principală în clădire cu holul de acces, căsuțe poștale, nucleele de scări cu lift (accesul vertical la toate etajele), și apartamentele de la parter. Toți peretii sunt la scara 1:100 — 1cm pe plan = 1m în realitate.'
-        :'Acesta este planul etajului '+fl+' — un nivel tipic de locuire la înălțimea de '+(fl*P.hn).toFixed(2)+'m față de sol. Toate etajele de la 1 la '+(b.niv-1)+' au același plan funcțional (tip). Fiecare etaj cuprinde '+RN(b.cores.length*4)+' apartamente cu o suprafață totală de '+RN(b.sdaPerFloor)+'m².';
-      panY=bodyTxt(genExp,rx+2,panY,rw-4,5.2,[30,50,80]);panY+=4;
-
-      // Sectiune: CE VEDETI
-      pdf.setFillColor(245,248,252);pdf.rect(rx,panY,rw,5.5,'F');
-      pdf.setFillColor(...C.gold);pdf.rect(rx,panY,2,5.5,'F');
-      pdf.setTextColor(30,50,85);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
-      pdf.text('CE REPREZINTĂ FIECARE CULOARE PE PLAN?',rx+4,panY+3.8);panY+=7.5;
-
-      // Room explanations - full detail
-      const roomExpl=[
-        [C.core,C.blue,'CASĂ SCĂRI + LIFT (albastru)','Inima verticală a clădirii. Scara permite accesul pe jos între etaje; liftul este OBLIGATORIU conf. NP 051/2012 pentru clădiri P+4 și mai mult și asigură accesul persoanelor cu mobilitate redusă (PMR). Cabina liftului min. 1.1×1.4m, ușă min. 0.8m (Legea 448/2006). Casa scărilor este compartimentată antifoc (uși EI 30) pentru evacuare în siguranță.','14m²','Nucleu'],
-        [C.hall,C.gray,'HOL / CORIDOR (gri)','Spațiu de tranziție și circulație. La PARTER: conține căsuțele poștale, interfon video color, eventual spații biciclete. La ETAJE: coridorul care leagă liftul/scara de ușile apartamentelor. Lățime min. 1.2m conf. P118 evacuare. Fără lumină naturală directă — reglementat de ventilație mecanică.','min. 3m²','Circulație'],
-        [C.living,C.orange,'LIVING / SALON (portocaliu)','Camera principală de zi și socializare — cea mai mare cameră din apartament. Orientată obligatoriu spre Sud, Est sau Vest pentru însorire min. 1.5h/zi la solstițiu de iarnă (OMS 119/2014). Min. 14m² conf. NP 057/2002 — suficient pentru canapea, masă dining, TV. Fereastra: min. 1/8 din suprafața camerei = min. 1.75m². Ventilație naturală directă obligatorie.','min. 14m²','Zi'],
-        [C.bedroom,C.green,'DORMITOR (verde)','Camera de odihnă — pat dublu sau pat single + dulap + birou. Suprafața minimă: 12m² dormitor principal, 10m² dormitor secundar (NP 057/2002). IMPORTANT: Dormitoarele NU se orientează spre Nord — însorirea minimă 1.5h/zi este OBLIGATORIE (OMS 119/2014). Fereastra asigură ventilarea nocturnă (aerisire obligatorie). Izolație fonică față de vecini min. Rw=52dB (SR EN ISO 717-1).','min. 10m²','Noapte'],
-        [C.kitchen,C.cyan,'BUCĂTĂRIE (turcoaz)','Spațiu de preparare alimente. Min. 5m² conf. NP 057/2002 — suficient pentru friteuza, cuptor, frigider, spălător, masă mică. OBLIGATORIU: ventilație mecanică cu extractor (hota) direct spre exterior conf. SR EN 15665. Racorduri: apă rece+caldă, canalizare, gaz natural sau electric (centrală termică). Faianta pe pereți (min. 1.5m înălțime), pardoseală ceramică.','min. 5m²','Zi'],
-        [C.bath,C.purple,'BAIE / WC (violet)','Grupul sanitar — baie cu cadă/cabină duș, lavoar, WC. Min. 3.6m² baie, 1.2m² WC separat (NP 057/2002). OBLIGATORIU ventilație mecanică spre exterior (nu în plafon!) conf. I5/2010. Hidroizolație planșeu și pereți min. 2m înălțime conf. SR EN 1504. Faianta 100% pereți. Pardoseală ceramică anti-alunecare (R9 min).','min. 3.6m²','Igienă'],
-        [C.balcon,C.gold,'BALCON / TERASĂ (auriu, linie punctată)','Extensie exterioară a apartamentului — spațiu semi-exterior acoperit. IMPORTANT: balconul NU este inclus în suprafața utilă dar se adaugă la suprafața construită. Adâncime min. 1.2m conf. NP 016-97. Parapet min. 1.0m înălțime conf. STAS 6131/1-1982. Sticlă securizată sau beton parapet. Planseul balconului: PUNTE TERMICĂ — necesită ruptură termică obligatorie conf. C107-05.','min. 4.5m²','Semi-ext.'],
-      ];
-      roomExpl.forEach(([fill,stk,name,expl,minArea,tip])=>{
-        if(panY>ry+rh-32)return;
-        // Color bar + name
-        pdf.setFillColor(...fill);pdf.setDrawColor(...stk);pdf.setLineWidth(0.5);pdf.rect(rx+1,panY,6,12,'FD');
-        pdf.setFillColor(...stk);pdf.rect(rx+1,panY+9.5,6,2.5,'F'); // bottom accent
-        // Name
-        pdf.setTextColor(...stk);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);pdf.text(S2(name),rx+9,panY+4);
-        // Min area badge
-        pdf.setFillColor(...stk);pdf.roundedRect(rw+rx-18,panY,17,5.5,1,1,'F');
-        pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(4.5);pdf.text(minArea,rw+rx-9.5,panY+3.5,{align:'center'});
-        // Description
-        pdf.setTextColor(45,60,80);pdf.setFont('helvetica','normal');pdf.setFontSize(4.8);
-        const expLines=pdf.splitTextToSize(S2(expl),rw-9);
-        expLines.slice(0,3).forEach((l,li)=>pdf.text(l,rx+9,panY+8+li*2.9));
-        panY+=15;
+      // ── Calcule suprafete din camere reale ────────────────────────────────
+      const rects_=flObj.rects||[];
+      // Grupăm camerele pe apartament
+      const aptMap_={};
+      rects_.filter(r=>r.apt>=0&&!r.bal&&r.w>0.3&&r.h>0.3).forEach(r=>{
+        if(!aptMap_[r.apt]) aptMap_[r.apt]={rooms:[],totalSU:0,hasBalcon:false};
+        aptMap_[r.apt].rooms.push(r);
+        aptMap_[r.apt].totalSU+=(r.w*r.h);
       });
-      panY+=2;
+      rects_.filter(r=>r.apt>=0&&r.bal).forEach(r=>{
+        if(!aptMap_[r.apt]) aptMap_[r.apt]={rooms:[],totalSU:0,hasBalcon:false};
+        aptMap_[r.apt].hasBalcon=true;
+      });
+      const nrApt_=Object.keys(aptMap_).length;
+      const suTotal_=Object.values(aptMap_).reduce((s,a)=>s+a.totalSU,0);
+      const commonSU_=rects_.filter(r=>r.apt<0&&!r.bal).reduce((s,r)=>s+r.w*r.h,0);
+      const coresSU_=rects_.filter(r=>r.t==='core').reduce((s,r)=>s+r.w*r.h,0);
+      const corridorSU_=rects_.filter(r=>r.apt<0&&r.t==='hall').reduce((s,r)=>s+r.w*r.h,0);
 
-      // Sectiune: FERESTRE SI USA
-      if(panY<ry+rh-40){
-        pdf.setFillColor(232,245,255);pdf.roundedRect(rx+1,panY,rw-2,28,1.5,1.5,'F');
-        pdf.setFillColor(...C.blue);pdf.rect(rx+1,panY,2,28,'F');
-        pdf.setTextColor(...C.blue);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
-        pdf.text('FERESTRELE — DE CE SUNT ACOLO ȘI CE FAC?',rx+5,panY+5);
-        pdf.setTextColor(20,45,80);pdf.setFont('helvetica','normal');pdf.setFontSize(5);
-        const fExp='Ferestrele sunt marcate cu dreptunghiuri albastre pe pereții exteriori ai clădirii. Ele au 3 roluri esențiale, toate reglementate legal: (1) LUMINA NATURALA: suprafața vitrata min. 1/8 din suprafata camerei conf. NP 016-97. O camera de 14m² are nevoie de min. 1.75m² geam — o fereastra de 1.2m x 1.5m depaseste aceasta cerinta. (2) AERISIREA: ventilatie naturala directa obligatorie pentru camerele de locuit — se deschid min. 1/20 din suprafata camerei conf. I5/2010. (3) CASTIG SOLAR PASIV iarna: ferestrele de pe fatadele S/SE/SV permit intrarea caldurii solare, reducand cu 15-25% consumul de incalzire. Specificatie recomandata: tamplarie PVC sau aluminiu cu rupere de punte termica, geam triplu low-E cu argon, Uw≤1.0 W/m²K conf. C107-2005. Cost estimat: 300-450 EUR/mp fereastra.';
-        const fLines=pdf.splitTextToSize(S2(fExp),rw-6);
-        fLines.slice(0,7).forEach((l,li)=>pdf.text(l,rx+5,panY+11+li*2.9));
-        panY+=31;
+      // ── TABEL SUPRAFETE (compact) ────────────────────────────────────────
+      pdf.setFillColor(...C.dark2);pdf.rect(rx,panY,rw,5.5,'F');
+      pdf.setFillColor(...C.gold);pdf.rect(rx,panY,2,5.5,'F');
+      pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
+      pdf.text('TABEL SUPRAFETE — NIVEL '+fl,rx+rw/2,panY+4,{align:'center'});
+      panY+=6.5;
+
+      // Header tabel
+      const tCols_=[rw*0.08,rw*0.32,rw*0.18,rw*0.18,rw*0.14,rw*0.10];
+      const tHdrs_=['Nr.','Camera','mp','Norm','Min.','✓'];
+      pdf.setFillColor(25,40,80);pdf.rect(rx,panY,rw,5,'F');
+      pdf.setTextColor(...C.gold);pdf.setFont('helvetica','bold');pdf.setFontSize(4.5);
+      let tx_=rx;
+      tHdrs_.forEach((h,i)=>{pdf.text(h,tx_+1,panY+3.5);tx_+=tCols_[i];});
+      panY+=5;
+
+      // Rânduri camere (max primele apartamente care încap)
+      const typeNm_={living:'Living',bedroom:'Dorm.1',bedroom2:'Dorm.2',bedroom3:'Dorm.3',
+        kitchen:'Bucatarie',bath:'Baie',wc:'WC',hall:'Hol',storage:'Dep.',core:'Scari'};
+      const normMin_={living:14,bedroom:12,bedroom2:10,bedroom3:10,kitchen:5,bath:3.6,wc:1.2,hall:3,storage:0};
+      let rowIdx_=0;
+      const showApts_=Math.min(nrApt_||1, Math.floor((rh-panY+ry-55)/5.5));
+
+      Object.entries(aptMap_).slice(0,showApts_).forEach(([aptId,apt])=>{
+        // Separator apartament
+        if(panY>ry+rh-50)return;
+        pdf.setFillColor(230,238,252);pdf.rect(rx,panY,rw,4.5,'F');
+        pdf.setFillColor(...C.blue);pdf.rect(rx,panY,2,4.5,'F');
+        pdf.setTextColor(...C.blue);pdf.setFont('helvetica','bold');pdf.setFontSize(4.5);
+        const aptSU_=RN(apt.totalSU,1);
+        pdf.text('Apartament '+(parseInt(aptId)+1)+' — SU='+aptSU_+'m²'+(apt.hasBalcon?' + balcon':''),rx+3,panY+3.2);
+        panY+=5;
+
+        // Camerele apartamentului
+        apt.rooms.forEach(r=>{
+          if(panY>ry+rh-50)return;
+          const area_=r.w*r.h,nm_=normMin_[r.t]||0;
+          const ok_=nm_===0||area_>=nm_;
+          rowIdx_++;
+          pdf.setFillColor(rowIdx_%2?250:255,rowIdx_%2?251:253,255);
+          pdf.rect(rx,panY,rw,4.8,'F');
+          pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.08);pdf.line(rx,panY+4.8,rx+rw,panY+4.8);
+          // Nr.
+          pdf.setTextColor(80,95,120);pdf.setFont('helvetica','normal');pdf.setFontSize(4.2);
+          pdf.text(String(rowIdx_),rx+1,panY+3.4);
+          // Tip
+          pdf.setTextColor(20,40,80);pdf.setFont('helvetica','bold');pdf.setFontSize(4.5);
+          pdf.text(S2(typeNm_[r.t]||r.t),rx+tCols_[0]+1,panY+3.4);
+          // Area
+          pdf.setFont('helvetica','normal');pdf.setFontSize(4.5);
+          pdf.setTextColor(20,40,80);
+          pdf.text(RN(area_,1),rx+tCols_[0]+tCols_[1]+1,panY+3.4);
+          // Norm min
+          pdf.setTextColor(80,95,120);
+          pdf.text(nm_?String(nm_)+'m':'-',rx+tCols_[0]+tCols_[1]+tCols_[2]+1,panY+3.4);
+          // Min label  
+          pdf.text(nm_?RN(nm_,0)+'m':'-',rx+tCols_[0]+tCols_[1]+tCols_[2]+tCols_[3]+1,panY+3.4);
+          // Status
+          pdf.setTextColor(ok_?22:200,ok_?163:38,ok_?74:38);pdf.setFont('helvetica','bold');pdf.setFontSize(5);
+          pdf.text(nm_===0?'—':ok_?'OK':'!',rx+tCols_[0]+tCols_[1]+tCols_[2]+tCols_[3]+tCols_[4]+1,panY+3.4);
+          panY+=4.8;
+        });
+      });
+
+      // ── BILANȚ ETAJ ───────────────────────────────────────────────────────
+      if(panY<ry+rh-52){
+        panY+=2;
+        pdf.setFillColor(...C.dark2);pdf.rect(rx,panY,rw,5.5,'F');
+        pdf.setFillColor(...C.gold);pdf.rect(rx,panY,2,5.5,'F');
+        pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
+        pdf.text('BILANT NIVEL '+fl,rx+rw/2,panY+4,{align:'center'});
+        panY+=6.5;
+        const bilRow_=(label,val,sub)=>{
+          if(panY>ry+rh-40)return;
+          pdf.setFillColor(248,250,255);pdf.rect(rx,panY,rw,6,'F');
+          pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.1);pdf.line(rx,panY+6,rx+rw,panY+6);
+          pdf.setTextColor(50,70,100);pdf.setFont('helvetica','normal');pdf.setFontSize(5);
+          pdf.text(S2(label),rx+2,panY+4.2);
+          pdf.setTextColor(15,35,75);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
+          pdf.text(S2(val),rx+rw-1,panY+4.2,{align:'right'});
+          if(sub){pdf.setTextColor(100,120,150);pdf.setFont('helvetica','italic');pdf.setFontSize(4);pdf.text(S2(sub),rx+rw-1,panY+7.5,{align:'right'});}
+          panY+=sub?8:6;
+        };
+        bilRow_('Supraf. construita nivel (SC):',RN(b.scArea)+' m²','la sol, contur exterior');
+        bilRow_('Supraf. utila apartamente (SU):',RN(suTotal_,0)+' m²','Σ camere private');
+        bilRow_('Zone comune (coridoare+nuclee):',RN(commonSU_,0)+' m²','hol+scari+lift');
+        bilRow_('Nr. apartamente pe etaj:',String(nrApt_||0),'estimate');
+        bilRow_('SU medie / apartament:',nrApt_>0?RN(suTotal_/nrApt_,1)+' m²':'—','orientativ');
+        const lossFact_=b.scArea>0?RN((1-suTotal_/b.scArea)*100,1):0;
+        bilRow_('Factor pierdere (comune/SC):',lossFact_+'%','<20% = eficient');
       }
 
-      if(panY<ry+rh-22 && fl===0){
-        pdf.setFillColor(255,245,225);pdf.roundedRect(rx+1,panY,rw-2,20,1.5,1.5,'F');
-        pdf.setFillColor(...C.orange);pdf.rect(rx+1,panY,2,20,'F');
-        pdf.setTextColor(...C.orange);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
-        pdf.text('USA PRINCIPALA DE INTRARE — ACCES SI SECURITATE',rx+5,panY+4.5);
-        pdf.setTextColor(70,40,10);pdf.setFont('helvetica','normal');pdf.setFontSize(5);
-        const dExp='Marcata cu arc portocaliu pe planul parterului. Latime OBLIGATORIE min. 1.2m simpla / recomandat 1.8m dubla conf. NP 051/2012 (acces persoane cu scaun rulant si carucior). Sistemul de acces include: interfon video color cu deblocare la distanta, yala electromagnetica sau electronic, posibil cititor de card/telecomanda. Usa: antiefractie clasa RC2 (SR EN 1627), cu garnitura termica si fonica. Pragul: max 2cm sau rampa (PMR). Iluminat automat cu senzor de miscare obligatoriu (min. 100 lux la intrare conf. NP 061).';
-        const dLines=pdf.splitTextToSize(S2(dExp),rw-6);
-        dLines.slice(0,5).forEach((l,li)=>pdf.text(l,rx+5,panY+10+li*2.9));
-        panY+=23;
+      // ── CALCUL PARCAJE (conf. NP 067/2002) ───────────────────────────────
+      if(panY<ry+rh-42){
+        panY+=2;
+        pdf.setFillColor(255,248,230);pdf.setDrawColor(180,130,20);pdf.setLineWidth(0.3);
+        pdf.rect(rx,panY,rw,5.5,'FD');
+        pdf.setFillColor(180,130,20);pdf.rect(rx,panY,2,5.5,'F');
+        pdf.setTextColor(100,70,0);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
+        pdf.text('PARCAJE — NP 067/2002',rx+rw/2,panY+4,{align:'center'});
+        panY+=7;
+        const totalAptEst_=Math.max(nrApt_,1)*b.niv;
+        const parcNec_=Math.ceil(totalAptEst_*1.2); // 1 rezident + 0.2 vizitatori
+        const parcPMR_=Math.max(2,Math.ceil(parcNec_*0.05)); // min 5% PMR
+        const suprafLibera_=Math.max(0,P.area-b.bW*b.bD);
+        const parcSuprafata_=Math.floor(suprafLibera_/28); // 28m²/loc
+        const deficit_=Math.max(0,parcNec_-parcSuprafata_);
+        const pRow_=(l,v,w)=>{
+          if(panY>ry+rh-28)return;
+          pdf.setFillColor(252,250,240);pdf.rect(rx,panY,rw,5,'F');
+          pdf.setDrawColor(200,180,120);pdf.setLineWidth(0.08);pdf.line(rx,panY+5,rx+rw,panY+5);
+          pdf.setTextColor(70,50,10);pdf.setFont('helvetica','normal');pdf.setFontSize(4.8);pdf.text(S2(l),rx+2,panY+3.5);
+          const vc=w?[200,30,30]:[30,80,20];
+          pdf.setTextColor(...vc);pdf.setFont('helvetica','bold');pdf.setFontSize(5);pdf.text(S2(v),rx+rw-1,panY+3.5,{align:'right'});
+          panY+=5;
+        };
+        pRow_('Total apartamente estimat ('+b.niv+' niv.):',String(totalAptEst_)+' apt.');
+        pRow_('Locuri necesare (1.2 loc/apt):',String(parcNec_)+' locuri');
+        pRow_('Din care PMR min. 5% (NP051):',String(parcPMR_)+' locuri PMR');
+        pRow_('Suprafata libera teren:',RN(suprafLibera_,0)+' m²');
+        pRow_('Locuri posibile la suprafata:',String(parcSuprafata_)+' locuri');
+        if(deficit_>0){
+          pRow_('DEFICIT — necesita subsol/demisol:',String(deficit_)+' locuri',true);
+        } else {
+          pRow_('SURPLUS (loc. la suprafata):','+'+String(parcSuprafata_-parcNec_)+' locuri');
+        }
       }
 
-      // Performanta termica
-      if(panY<ry+rh-18){
-        pdf.setFillColor(232,252,240);pdf.roundedRect(rx+1,panY,rw-2,16,1.5,1.5,'F');
-        pdf.setFillColor(...C.green);pdf.rect(rx+1,panY,2,16,'F');
-        pdf.setTextColor(0,100,50);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
-        pdf.text('EFICIENTA ENERGETICA A ACESTUI NIVEL',rx+5,panY+4.5);
-        pdf.setTextColor(10,60,30);pdf.setFont('helvetica','normal');pdf.setFontSize(5);
-        const eExp='Consumul energetic al nivelului '+fl+' este minimizat prin: termoizolatie pereti exteriori 15cm EPS (U=0.27 W/m²K, sub limita admisa de 0.35 W/m²K conf. C107/4-2022), geamuri triplu low-E (Uw≤1.0 vs. limita 1.30 W/m²K), ventilatie cu recuperare caldura 80% eficienta, pod termic la balcoane (ruptura termica). Clasa energetica estimata B-A dupa finalizare. Obligatia proprietarului: respectarea normei NZEB conf. Legea 372/2005 modificata — cladirile noi dupa 2021 sunt Nearly Zero Energy Building.';
-        const eLines=pdf.splitTextToSize(S2(eExp),rw-6);
-        eLines.slice(0,4).forEach((l,li)=>pdf.text(l,rx+5,panY+10+li*2.9));
-        panY+=19;
-      }
-
-      // Cartus
-      pdf.setFillColor(15,28,55);pdf.rect(rx,H-17,rw,9,'F');
-      pdf.setFillColor(...C.gold);pdf.rect(rx,H-17,rw,1.2,'F');
-      pdf.setTextColor(...C.gold);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
-      pdf.text('Nr.cad. '+S2(P.nrCad)+' · UTR '+S2(P.utr)+' · '+(fl===0?'PLAN PARTER':(isTip?'PLAN ETAJ TIP':'PLAN ETAJ '+fl))+' · Sc.1:100',rx+rw/2,H-12,{align:'center'});
-      pdf.setTextColor(120,140,170);pdf.setFont('helvetica','normal');pdf.setFontSize(4.8);
-      pdf.text('Cota +'+(fl*P.hn).toFixed(2)+'m · SC='+RN(b.scArea)+'m² · SDA nivel='+RN(b.sdaPerFloor)+'m² · Document orientativ UrbanX',rx+rw/2,H-8,{align:'center'});
+      // ── CARTUS planșă ────────────────────────────────────────────────────
+      pdf.setFillColor(15,28,55);pdf.rect(rx,ry+rh-10,rw,10,'F');
+      pdf.setFillColor(...C.gold);pdf.rect(rx,ry+rh-10,rw,1,'F');
+      pdf.setTextColor(...C.gold);pdf.setFont('helvetica','bold');pdf.setFontSize(5);
+      pdf.text(S2('Nr.cad. '+P.nrCad+' · UTR '+P.utr+' · '+(fl===0?'PLAN PARTER':(isTip?'PLAN TIP':'PLAN ETAJ '+fl))+' · Sc.'+scaleLabel),rx+rw/2,ry+rh-5,{align:'center'});
+      pdf.setTextColor(120,140,170);pdf.setFont('helvetica','normal');pdf.setFontSize(4.2);
+      pdf.text(S2('Cota +'+(fl*P.hn).toFixed(2)+'m · SC='+RN(b.scArea)+'m² · SU='+RN(suTotal_,0)+'m² · UrbanX TSS·FG'),rx+rw/2,ry+rh-2,{align:'center'});
       ftr();
     } // end _floorsToDraw loop
 
@@ -2498,7 +3237,146 @@ async function _rvExportPDF(){
     ftr();
 
     // ══════════════════════════════════════════════════════════════════
-    // PAG SECȚIUNE A-A + NOAPTE + GOLDEN
+    // PAG: FAȚADE S + E + V (celelalte 3 fațade)
+    // ══════════════════════════════════════════════════════════════════
+    const oppDir_={N:'S',S:'N',E:'V',V:'E',NE:'SV',NV:'SE',SE:'NV',SV:'NE'};
+    const sideDirs_=[oppDir_[P.frontDir]||'S','E','V'];
+    const sideWidths_=[b.bW,b.bD,b.bD]; // N/S folosesc bW, E/V folosesc bD
+    const sideLabels_=['POSTERIOARA','LATERALA DREAPTA','LATERALA STANGA'];
+    newPage();
+    hdr('FATADE S + E + V — Nr.cad. '+P.nrCad+' · UTR '+P.utr,pgN);
+    pdf.setFillColor(255,255,255);pdf.rect(0,9,W,H-16,'F');
+    const f3AreaW=(W-24)/3,f3AreaH=H-32;
+    [0,1,2].forEach(fi=>{
+      const fOx3=10+fi*(f3AreaW+2),fOy3=10;
+      const fBW=sideWidths_[fi],fBH=b.niv*P.hn;
+      const fSc3=Math.min((f3AreaW-16)/( fBW+2),(f3AreaH-30)/(fBH+8));
+      const fW3=fBW*fSc3,fH3=fBH*fSc3;
+      const fOxI=fOx3+(f3AreaW-16-fW3)/2+6,fOyI=fOy3+(f3AreaH-30-fH3)/2+8;
+      // Box
+      pdf.setFillColor(248,249,252);pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.3);
+      pdf.rect(fOx3,fOy3,f3AreaW-2,f3AreaH,'FD');
+      // Facade drawing
+      drawFacade(b,P,fOxI,fOyI,fW3,fH3,fSc3);
+      // Label
+      pdf.setFillColor(...C.dark2);pdf.rect(fOx3,fOy3+f3AreaH-14,f3AreaW-2,14,'F');
+      pdf.setFillColor(...C.gold);pdf.rect(fOx3,fOy3+f3AreaH-14,2,14,'F');
+      pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(6);
+      pdf.text('FATADA '+sideDirs_[fi]+' ('+sideLabels_[fi]+')',fOx3+f3AreaW/2-1,fOy3+f3AreaH-8,{align:'center'});
+      pdf.setTextColor(150,165,185);pdf.setFont('helvetica','normal');pdf.setFontSize(5);
+      pdf.text('H='+fBH.toFixed(1)+'m · L='+fBW.toFixed(1)+'m · '+b.niv+' niv. · Sc.1:100',fOx3+f3AreaW/2-1,fOy3+f3AreaH-3.5,{align:'center'});
+    });
+    // North arrow centered
+    drawNorth(W/2,H-8,P.frontDir,5);
+    ftr();
+
+    // ══════════════════════════════════════════════════════════════════
+    // PAG: CALCUL PARCAJE + PROPUNERE AMPLASAMENT
+    // ══════════════════════════════════════════════════════════════════
+    newPage();
+    hdr('CALCUL PARCAJE OBLIGATORII — NP 067/2002 + HCL IASI — Nr.cad. '+P.nrCad,pgN);
+    pdf.setFillColor(255,255,255);pdf.rect(0,9,W,H-16,'F');
+    let parY=12;
+    const totalAptParc_=Math.max(1,Math.round(b.sdaTotal/70));
+    const parcNecRez_=Math.ceil(totalAptParc_*1.2);
+    const parcPMR_2=Math.max(2,Math.ceil(parcNecRez_*0.05));
+    const suprafLibera2=Math.max(0,P.area-b.bW*b.bD-200); // -200mp= spatii verzi min
+    const parcSuprafata2=Math.floor(suprafLibera2/28);
+    const deficit2=Math.max(0,parcNecRez_-parcSuprafata2);
+    const nrNivSubsol=deficit2>0?Math.ceil(deficit2/Math.floor(b.bW*b.bD/28)):0;
+
+    // Header bicolor
+    pdf.setFillColor(255,248,230);pdf.rect(10,parY,W-20,8,'F');
+    pdf.setFillColor(180,130,20);pdf.rect(10,parY,3,8,'F');
+    pdf.setTextColor(80,55,5);pdf.setFont('helvetica','bold');pdf.setFontSize(8);
+    pdf.text('NECESARUL DE PARCAJE — CALCUL OBLIGATORIU',W/2,parY+5.5,{align:'center'});
+    parY+=11;
+
+    // 2 coloane
+    const pc1x=10,pc1w=(W-22)/2,pc2x=12+pc1w,pc2w=pc1w;
+    // Col 1: Baza legala + calcul
+    pdf.setFillColor(...C.dark2);pdf.rect(pc1x,parY,pc1w,6,'F');pdf.setFillColor(...C.gold);pdf.rect(pc1x,parY,2,6,'F');
+    pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(6.5);pdf.text('BAZA LEGALA + CALCUL',pc1x+pc1w/2,parY+4.3,{align:'center'});
+    parY+=7;
+    const legalRows_=[
+      ['NP 067/2002','Normativ parcaje cladiri civile si comerciale'],
+      ['HCL Iasi nr. 155/2007','Regulament local pentru municipiul Iasi'],
+      ['NP 051/2012','Locuri PMR min. 4-5% din total'],
+      ['Legea 448/2006','Acces persoane cu dizabilitati'],
+    ];
+    legalRows_.forEach(([cod,desc],li)=>{
+      pdf.setFillColor(li%2?248:255,li%2?250:252,252);pdf.rect(pc1x,parY,pc1w,6,'F');
+      pdf.setTextColor(...C.blue);pdf.setFont('helvetica','bold');pdf.setFontSize(5);pdf.text(cod,pc1x+2,parY+4);
+      pdf.setTextColor(40,60,90);pdf.setFont('helvetica','normal');pdf.setFontSize(5);pdf.text(S2(desc),pc1x+28,parY+4);
+      parY+=6;
+    });
+    parY+=4;
+    // Calcul numeric
+    pdf.setFillColor(235,242,255);pdf.rect(pc1x,parY,pc1w,6,'F');pdf.setFillColor(...C.blue);pdf.rect(pc1x,parY,2,6,'F');
+    pdf.setTextColor(...C.blue);pdf.setFont('helvetica','bold');pdf.setFontSize(6);pdf.text('CALCUL NUMERIC',pc1x+2,parY+4.3);parY+=7;
+    const calcRows_=[
+      ['Functiune cladire:',S2(fnLabel),'—'],
+      ['Numar apartamente estimate:',String(totalAptParc_)+' unitati','NP 057 / estimat'],
+      ['Norma rezidential:','1.0 loc/apt (rezidenti)','NP 067/2002'],
+      ['Norma vizitatori:','0.2 loc/apt','NP 067/2002'],
+      ['Total locuri necesare:',String(parcNecRez_)+' locuri','1.2 x '+totalAptParc_],
+      ['Din care PMR (min. 5%):',String(parcPMR_2)+' locuri PMR','marcat distinct, dim. 3.5x5m'],
+      ['Suprafata libera teren:',RN(suprafLibera2,0)+' m²','teren-SC-spatii verzi min'],
+      ['Locuri posibile la suprafata:',String(parcSuprafata2)+' locuri','la 28 m²/loc'],
+      ['DEFICIT necesita subsol/demisol:',deficit2>0?String(deficit2)+' locuri':'0 - SUFICIENT',deficit2>0?'OBLIGATORIU':'OK'],
+    ];
+    calcRows_.forEach(([lab,val,note],li)=>{
+      const isTotal=lab.includes('Total')||lab.includes('DEFICIT');
+      const isDeficit=lab.includes('DEFICIT');
+      pdf.setFillColor(isTotal?(isDeficit?255:240):li%2?248:255,isTotal?(isDeficit?230:248):li%2?250:252,isTotal?(isDeficit?230:245):255);
+      pdf.rect(pc1x,parY,pc1w,isTotal?7:6,'F');
+      if(isTotal){pdf.setFillColor(...(isDeficit&&deficit2>0?C.red:C.green));pdf.rect(pc1x,parY,2,7,'F');}
+      pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.1);pdf.line(pc1x,parY+(isTotal?7:6),pc1x+pc1w,parY+(isTotal?7:6));
+      const tc=isDeficit&&deficit2>0?C.red:isTotal?C.green:[40,60,90];
+      pdf.setTextColor(...tc);pdf.setFont('helvetica',isTotal?'bold':'normal');pdf.setFontSize(isTotal?5.5:5);
+      pdf.text(S2(lab),pc1x+2,parY+(isTotal?5:4));
+      pdf.setFont('helvetica','bold');pdf.text(S2(val),pc1x+pc1w-1,parY+(isTotal?5:4),{align:'right'});
+      pdf.setFont('helvetica','italic');pdf.setFontSize(4.2);pdf.setTextColor(80,100,130);
+      pdf.text(S2(note),pc1x+pc1w-1,parY+(isTotal?7:6)-1,{align:'right'});
+      parY+=isTotal?8:6;
+    });
+
+    // Col 2: Solutii + Propunere amplasament
+    let parY2=12+7+legalRows_.length*6+4+calcRows_.reduce((s,r)=>{const isT=r[0].includes('Total')||r[0].includes('DEFICIT');return s+(isT?8:6);},0)+4;
+    pdf.setFillColor(...C.dark2);pdf.rect(pc2x,12,pc2w,6,'F');pdf.setFillColor(...C.gold);pdf.rect(pc2x,12,2,6,'F');
+    pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(6.5);pdf.text('SOLUTII PROPUSE',pc2x+pc2w/2,16.3,{align:'center'});
+    let pY2=19;
+    const solRows_=[
+      ['Parcare la suprafata (recomandat):','Marcaj rutier + indicatoare · 28m²/loc · min. 2.5×5m · culoar 6m'],
+      ['Parcare subterana 1 nivel (daca deficit):','Sub amprenta cladirii · H min. 2.4m · rampa acces 15-18% panta max.'],
+      ['Parcare etajata/mecanizata (optiona):','Solutie pentru deficit mare · H=2.0m/nivel · sistem raft/lift auto'],
+      ['Locuri PMR obligatorii:','Amplasate langa intrare · marcaj galben+albastru · dim. 3.5×5.0m'],
+      ['Locuri biciclete (recomandat):','Min. 10% din nr. apartamente · suport metalic fixat'],
+      ['Statie incarcare EV (recomandat):','Min. 10% locuri pregatite pentru 22kW conf. Legea 259/2021'],
+    ];
+    solRows_.forEach(([tit,desc],si)=>{
+      if(pY2>H-30)return;
+      pdf.setFillColor(240,246,255);pdf.setDrawColor(180,200,230);pdf.setLineWidth(0.2);
+      pdf.rect(pc2x,pY2,pc2w,14,'FD');
+      pdf.setFillColor(...C.blue);pdf.rect(pc2x,pY2,2,14,'F');
+      pdf.setTextColor(15,40,90);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);pdf.text(S2(tit),pc2x+4,pY2+5);
+      pdf.setTextColor(40,65,110);pdf.setFont('helvetica','normal');pdf.setFontSize(4.8);
+      const dl=pdf.splitTextToSize(S2(desc),pc2w-6);
+      dl.slice(0,2).forEach((l,li)=>pdf.text(l,pc2x+4,pY2+9+li*3));
+      pY2+=16;
+    });
+
+    // Nota finala
+    if(pY2<H-25){
+      pdf.setFillColor(255,245,240);pdf.rect(pc2x,pY2,pc2w,22,'F');
+      pdf.setFillColor(...C.orange);pdf.rect(pc2x,pY2,2,22,'F');
+      pdf.setTextColor(150,60,10);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);pdf.text('NOTIFICARE IMPORTANTA',pc2x+4,pY2+5);
+      pdf.setTextColor(80,40,10);pdf.setFont('helvetica','normal');pdf.setFontSize(4.8);
+      const nota_='Necesarul de parcaje este stabilit definitiv prin Certificatul de Urbanism si Regulamentul Local de Urbanism. Prezentul calcul este orientativ bazat pe NP 067/2002 si normele locale. Autorizatia de Construire va specifica exact numarul si configuratia locurilor de parcare. Parcajele subterane necesita studiu geotehnic, calcul structura, ventilatie mecanica, stingere incendiu si autorizatie ISU separata.';
+      const nl=pdf.splitTextToSize(S2(nota_),pc2w-6);
+      nl.slice(0,5).forEach((l,li)=>pdf.text(l,pc2x+4,pY2+9+li*3));
+    }
+    ftr();
     // ══════════════════════════════════════════════════════════════════
     newPage();
     hdr('SECȚIUNE TRANSVERSALĂ A-A + VEDERI 3D — Nr.cad. '+P.nrCad,pgN);
@@ -2915,6 +3793,8 @@ function _rvInject(){
 .rv-sl{font-size:10px;color:#4A6080;font-family:'Space Grotesk',sans-serif;}
 .rv-sv{font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:#DDE6F5;}
 .rv-norm-item{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.03);}
+.rv-raff-row{display:flex;align-items:center;padding:4px 10px;border-bottom:1px solid rgba(255,255,255,.03);cursor:pointer;transition:background .12s;}
+.rv-raff-row:hover{background:rgba(212,175,55,.07);}
 .rv-nl{font-size:10px;color:#7A8FA8;font-family:'Space Grotesk',sans-serif;}
 .rv-nref{font-size:8px;color:#4A6080;font-family:'IBM Plex Mono',monospace;}
 .rv-badge{font-size:8px;padding:1px 7px;border-radius:99px;font-weight:700;font-family:'Space Grotesk',sans-serif;}
@@ -3017,23 +3897,119 @@ function _rvInject(){
 <div class="rv-body">
   <!-- LEFT -->
   <div class="rv-lpanel">
+    <!-- DNA Urban Radar -->
+    <div class="rv-rsec rv-dna-sec">
+      <div class="rv-sec-t">⬡ DNA Urban — Amprentă Normativă</div>
+      <div id="rv-dna" style="display:flex;justify-content:center;padding:4px 0">
+        <svg width="140" height="140" viewBox="0 0 140 140"><text x="70" y="75" fill="#2A3F60" font-size="9" text-anchor="middle" font-family="monospace">Se generează…</text></svg>
+      </div>
+    </div>
+
+    <!-- Overlays -->
     <div class="rv-rsec">
       <div class="rv-sec-t">Overlay analiză</div>
-      <div class="rv-tog-row"><span class="rv-tog-lbl">☀ Însorire OMS 119</span><div class="rv-tog" id="rv-tog-solar" onclick="_rvToggle(this,'solar')"></div></div>
-      <div class="rv-tog-row"><span class="rv-tog-lbl">🔥 Căi evacuare ISU</span><div class="rv-tog" id="rv-tog-isu" onclick="_rvToggle(this,'isu')"></div></div>
-      <div class="rv-tog-row"><span class="rv-tog-lbl">📐 Cote dimensionale</span><div class="rv-tog rv-tog-on" id="rv-tog-dim" onclick="_rvToggle(this,'dim')"></div></div>
-      <div class="rv-tog-row"><span class="rv-tog-lbl">🔲 Grilă structurală</span><div class="rv-tog" id="rv-tog-sgrid" onclick="_rvToggle(this,'sGrid')"></div></div>
+      <div class="rv-tog-row">
+        <span class="rv-tog-lbl">☀ Însorire OMS 119</span>
+        <div class="rv-tog" id="rv-tog-solar" onclick="_rvToggle(this,'solar')"></div>
+      </div>
+      <!-- Solar controls (hidden until toggle on) -->
+      <div id="rv-solar-ctrls" style="display:none;padding:4px 6px 2px;border-top:1px solid rgba(255,255,255,.04)">
+        <div style="font-size:8px;color:#4A6080;margin-bottom:3px">Oră solară (Iași lat=47.16°)</div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <input type="range" min="5" max="21" value="10" id="rv-solar-hour"
+            oninput="document.getElementById('rv-solar-hval').textContent=String(this.value).padStart(2,'0')+':00';_RV.solarHour=+this.value;_RV.solarAnim=true;if(_RV.building)_rvRender();"
+            style="flex:1;height:3px;accent-color:#D4AF37">
+          <span id="rv-solar-hval" style="font-size:9px;font-weight:700;color:#D4AF37;min-width:30px">10:00</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;margin-top:4px">
+          <span style="font-size:8px;color:#4A6080">Luna:</span>
+          <select id="rv-solar-month" onchange="_RV.solarMonth=+this.value;if(_RV.building)_rvRender();"
+            style="flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#DDE6F5;font-size:8px;padding:2px 4px;border-radius:3px">
+            <option value="12" selected>Dec — solstițiu iarnă (OMS)</option>
+            <option value="6">Iun — solstițiu vară</option>
+            <option value="3">Mar — echinocțiu</option>
+            <option value="9">Sep — echinocțiu</option>
+          </select>
+        </div>
+        <button onclick="_rvSolarPlay()" id="rv-solar-play"
+          style="width:100%;margin-top:4px;padding:3px;background:rgba(212,175,55,.1);border:1px solid rgba(212,175,55,.25);border-radius:3px;color:#D4AF37;font-size:8px;cursor:pointer;font-family:inherit">
+          ▶ Animație 24h
+        </button>
+      </div>
+
+      <div class="rv-tog-row">
+        <span class="rv-tog-lbl">🚨 Evacuare ISU P118</span>
+        <div class="rv-tog" id="rv-tog-isu" onclick="_rvToggle(this,'isu')"></div>
+      </div>
+      <div class="rv-tog-row">
+        <span class="rv-tog-lbl">📐 Cote dimensionale</span>
+        <div class="rv-tog rv-tog-on" id="rv-tog-dim" onclick="_rvToggle(this,'dim')"></div>
+      </div>
+      <div class="rv-tog-row">
+        <span class="rv-tog-lbl">🔲 Grilă structurală</span>
+        <div class="rv-tog" id="rv-tog-sgrid" onclick="_rvToggle(this,'sGrid')"></div>
+      </div>
     </div>
+
+    <!-- Bilanț -->
     <div class="rv-rsec">
       <div class="rv-sec-t">Bilanț suprafețe</div>
       <div id="rv-bilant"><div style="font-size:10px;color:#4A6080;text-align:center;padding:8px">—</div></div>
     </div>
+
+    <!-- Normative -->
     <div class="rv-rsec">
       <div class="rv-sec-t">Verificare normative</div>
       <div id="rv-norm"><div style="font-size:10px;color:#4A6080;text-align:center;padding:8px">—</div></div>
+      <div id="rv-rapoarte-aff" style="padding-bottom:6px"></div>
     </div>
+
+    <!-- ROI Quick Calculator -->
+    <div class="rv-rsec rv-roi-sec">
+      <div class="rv-sec-t" style="cursor:pointer;display:flex;justify-content:space-between"
+        onclick="const b=document.getElementById('rv-roi-body');b.style.display=b.style.display==='none'?'block':'none'">
+        💰 Rentabilitate Est.
+        <span style="color:#4A6080;font-size:8px" id="rv-roi-toggle">▼ expand</span>
+      </div>
+      <div id="rv-roi-body" style="display:none">
+        <div style="font-size:8px;color:#4A6080;padding:4px 0 2px">Preț construcție (€/m²)</div>
+        <input type="range" min="450" max="900" value="650" id="rv-roi-cost"
+          oninput="document.getElementById('rv-roi-cval').textContent=this.value;_rvCalcROI()"
+          style="width:100%;height:3px;accent-color:#D4AF37">
+        <div style="display:flex;justify-content:space-between;font-size:8px;color:#7A90B0">
+          <span>450</span><span id="rv-roi-cval" style="color:#D4AF37">650</span><span>900</span>
+        </div>
+        <div style="font-size:8px;color:#4A6080;padding:4px 0 2px">Preț vânzare (€/m²)</div>
+        <input type="range" min="800" max="2500" value="1200" id="rv-roi-sell"
+          oninput="document.getElementById('rv-roi-sval').textContent=this.value;_rvCalcROI()"
+          style="width:100%;height:3px;accent-color:#22C55E">
+        <div style="display:flex;justify-content:space-between;font-size:8px;color:#7A90B0">
+          <span>800</span><span id="rv-roi-sval" style="color:#22C55E">1200</span><span>2500</span>
+        </div>
+        <div id="rv-roi-result" style="margin-top:6px;padding:8px;background:rgba(255,255,255,.03);border-radius:5px">
+          <div style="font-size:8px;color:#4A6080;margin-bottom:3px">REZULTAT ESTIMATIV</div>
+          <div id="rv-roi-profit" style="font-size:14px;font-weight:800;color:#22C55E">—</div>
+          <div id="rv-roi-sub" style="font-size:7.5px;color:#4A6080;margin-top:2px">—</div>
+        </div>
+        <div style="font-size:7px;color:#2A3F60;margin-top:4px;line-height:1.4">* ORIENTATIV. Exclude teren, TVA, taxe, proiectare. Consultați evaluator ANEVAR.</div>
+      </div>
+    </div>
+
+    <!-- Avize Timeline -->
+    <div class="rv-rsec rv-avize-sec">
+      <div class="rv-sec-t" style="cursor:pointer;display:flex;justify-content:space-between"
+        onclick="const b=document.getElementById('rv-avize-body');b.style.display=b.style.display==='none'?'block':'none'">
+        📋 Calendar Autorizare
+        <span style="color:#4A6080;font-size:8px">▼</span>
+      </div>
+      <div id="rv-avize-body" style="display:none">
+        <div id="rv-avize-content"></div>
+      </div>
+    </div>
+
+    <!-- Legendă -->
     <div class="rv-rsec">
-      <div class="rv-sec-t">Legendă</div>
+      <div class="rv-sec-t">Legendă culori</div>
       <div class="rv-leg"><div class="rv-legsq" style="background:rgba(180,83,1,.14);border:1px solid #F97316"></div>Living / Sufragerie</div>
       <div class="rv-leg"><div class="rv-legsq" style="background:rgba(21,128,61,.13);border:1px solid #22C55E"></div>Dormitor</div>
       <div class="rv-leg"><div class="rv-legsq" style="background:rgba(14,116,144,.15);border:1px solid #06B6D4"></div>Bucătărie</div>
@@ -3041,9 +4017,6 @@ function _rvInject(){
       <div class="rv-leg"><div class="rv-legsq" style="background:rgba(71,85,105,.18);border:1px solid #64748B"></div>Hol / Coridor</div>
       <div class="rv-leg"><div class="rv-legsq" style="background:rgba(37,99,235,.16);border:1px solid #3B82F6"></div>Casa scărilor / Lift</div>
       <div class="rv-leg"><div class="rv-legsq" style="background:rgba(212,175,55,.08);border:1.5px dashed rgba(212,175,55,.45)"></div>Balcon / Terasă</div>
-    </div>
-    <div class="rv-rsec" style="font-size:9px;color:#4A6080;line-height:1.7;font-family:'IBM Plex Mono',monospace;">
-      NP 057/2002 — Suprafețe min.<br>OMS 119/2014 — Însorire<br>P118-2/2013 — ISU evacuare<br>NP 051/2012 — PMR<br>P100-1/2013 — Seismic
     </div>
   </div>
   <!-- CENTER -->
@@ -3053,6 +4026,7 @@ function _rvInject(){
       <div class="rv-tab" data-tab="fatada" onclick="_rvTabClick(this)">🏛 Fațadă</div>
       <div class="rv-tab" data-tab="sectiune" onclick="_rvTabClick(this)">✂ Secțiune</div>
       <div class="rv-tab" data-tab="axono" onclick="_rvTabClick(this)">📦 Axonometrie</div>
+      <div class="rv-tab" data-tab="scenarii" onclick="_rvTabClick(this)">⚖ Scenarii A/B</div>
     </div>
     <div class="rv-floorbar" id="rv-floorbar" style="display:none"></div>
     <div class="rv-drawwrap" id="rv-drawwrap">
