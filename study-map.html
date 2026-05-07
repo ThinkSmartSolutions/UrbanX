@@ -529,15 +529,15 @@ function setGoal(goalKey, btn){
       <p style="font-size:10px;color:var(--text2);line-height:1.6;margin-bottom:10px">${g.tip}</p>
       <div class="goal-section">
         <div class="goal-section-title">✅ Obligatorii</div>
-        <div class="goal-items">${g.required.map(k=>`<span class="goal-item req">${STUDIES[k]?.ico||''} ${STUDIES[k]?.label.split('\n')[0]||k}</span>`).join('')}</div>
+        <div class="goal-items">${g.required.map(k=>`<span class="goal-item req">${STUDIES[k]?.ico||''} ${STUDIES[k]?.label.split('\n').join(' ')||k}</span>`).join('')}</div>
       </div>
       ${g.optional.length?`<div class="goal-section" style="margin-top:6px">
         <div class="goal-section-title">⚡ Recomandate</div>
-        <div class="goal-items">${g.optional.map(k=>`<span class="goal-item opt">${STUDIES[k]?.ico||''} ${STUDIES[k]?.label.split('\n')[0]||k}</span>`).join('')}</div>
+        <div class="goal-items">${g.optional.map(k=>`<span class="goal-item opt">${STUDIES[k]?.ico||''} ${STUDIES[k]?.label.split('\n').join(' ')||k}</span>`).join('')}</div>
       </div>`:''}
       ${g.auto.length?`<div class="goal-section" style="margin-top:6px">
         <div class="goal-section-title">🔄 Generate automat</div>
-        <div class="goal-items">${g.auto.map(k=>`<span class="goal-item auto">${STUDIES[k]?.ico||''} ${STUDIES[k]?.label.split('\n')[0]||k}</span>`).join('')}</div>
+        <div class="goal-items">${g.auto.map(k=>`<span class="goal-item auto">${STUDIES[k]?.ico||''} ${STUDIES[k]?.label.split('\n').join(' ')||k}</span>`).join('')}</div>
       </div>`:''}
     </div>
     <p style="font-size:9px;color:var(--text3);line-height:1.6">Dă click pe orice studiu de pe hartă pentru a vedea detaliile și conexiunile sale.</p>`;
