@@ -1864,8 +1864,17 @@ function _rvShowInspector(room, clientX, clientY){
   if(window._rvEditHistory.length>20) window._rvEditHistory.shift();
 }
 
-// ══════════════════════════════════════════════════════════════════════════
-// FUNCȚIUNE CLĂDIRE — handler schimbare funcțiune
+// ── _rvRegenFloors — regenerează toate etajele cu fn+mix curent ──────────
+// Apelat de: _rvSetFn, _rvMixApply, orice schimbare care afectează planul
+function _rvRegenFloors(){
+  if(!_RV.building) return;
+  const b = _RV.building;
+  _RV.floors = [];
+  for(let i=0;i<b.niv;i++) _RV.floors.push(_rvFloor(b, i));
+  _RV.selectedRoom = null; // resetăm selecția după regen
+  _rvRender();
+  _rvUpdatePanels(b, _RV.parcelParams);
+}
 // Activ pentru toate UAT-urile, desktop + mobil, releveu + lotizare
 // ══════════════════════════════════════════════════════════════════════════
 function _rvSetFn(fnKey){
@@ -1886,7 +1895,7 @@ function _rvSetFn(fnKey){
   if(ms&&ms.value!==fnKey) ms.value=fnKey;
   const mn=document.getElementById('rv-mob-fn-norms');
   if(mn) mn.textContent=cfg.norms?.join(' · ')||'';
-  if(_RV.building){_rvRender();_rvUpdatePanels(_RV.building,_RV.parcelParams);}
+  if(_RV.building){ _rvRegenFloors(); }
   ss('🏗 '+cfg.label+' · ISU '+cfg.isuDist+'m · '+cfg.isuNorm+(cfg.omsInsorire?' · OMS 119 activ':' · OMS N/A'));
 }
 
@@ -1915,8 +1924,7 @@ function _rvMixApply(){
   keys.forEach(k=>{const v=parseInt(document.getElementById('rv-mix-'+k)?.value||0);mix[k]=v;total+=v;});
   if(total!==100){ss('⚠ Total trebuie să fie 100% (acum: '+total+'%)');return;}
   _RV.unitMix=mix;
-  _rvRender();
-  _rvUpdatePanels(_RV.building,_RV.parcelParams);
+  _rvRegenFloors();
   ss('✅ Mix: Gar.'+mix.studio+'% · 2C '+mix.apt2+'% · 3C '+mix.apt3+'% · 4C '+mix.apt4+'% · PH '+mix.ph+'%');
 }
 
