@@ -851,7 +851,34 @@ function _rvRenderPlan(fl,b){
     ctx.strokeRect(rx+wp*.5,ry+wp*.5,rw-wp,rh-wp);
     // Hașura structurală (cores — beton armat)
     if(r.t==='core'){
+      // Hașură structurală
       _hatch(rx+wp,ry+wp,rw-wp*2,rh-wp*2,'rgba(20,50,120,0.30)',Math.max(3,SC*0.3));
+      // Simbol scări — linii orizontale paralele cu săgeată
+      const stX=rx+wp+2, stY=ry+wp+2;
+      const stW=Math.max(8,(rw-wp*2)*0.55), stH=rh-wp*2-4;
+      if(stW>6&&stH>6){
+        const nSteps=Math.max(4,Math.floor(stH/Math.max(2,SC*0.22)));
+        ctx.strokeStyle='rgba(147,197,253,.5)'; ctx.lineWidth=0.6;
+        for(let si=1;si<=nSteps;si++){
+          const ly_=stY+si*(stH/nSteps);
+          ctx.beginPath(); ctx.moveTo(stX,ly_); ctx.lineTo(stX+stW,ly_); ctx.stroke();
+        }
+        // Săgeată direcție urcare
+        const arY=stY+stH*0.45;
+        ctx.strokeStyle='rgba(147,197,253,.8)'; ctx.lineWidth=1.2;
+        ctx.beginPath(); ctx.moveTo(stX+stW*0.2,arY); ctx.lineTo(stX+stW*0.75,arY); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(stX+stW*0.55,arY-3); ctx.lineTo(stX+stW*0.75,arY); ctx.lineTo(stX+stW*0.55,arY+3); ctx.stroke();
+      }
+      // Simbol lift (pătrat cu X) în dreapta
+      const lX=rx+wp+(rw-wp*2)*0.58, lY=ry+wp+3;
+      const lW=Math.max(6,(rw-wp*2)*0.38), lH=Math.min(lW*1.4,rh-wp*2-6);
+      if(lW>5&&lH>5){
+        ctx.fillStyle='rgba(37,99,235,.15)'; ctx.strokeStyle='rgba(96,165,250,.6)'; ctx.lineWidth=0.8;
+        ctx.fillRect(lX,lY,lW,lH); ctx.strokeRect(lX,lY,lW,lH);
+        ctx.strokeStyle='rgba(96,165,250,.4)'; ctx.lineWidth=0.5;
+        ctx.beginPath(); ctx.moveTo(lX,lY); ctx.lineTo(lX+lW,lY+lH); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(lX+lW,lY); ctx.lineTo(lX,lY+lH); ctx.stroke();
+      }
     }
   });
 
@@ -1485,13 +1512,16 @@ function _rvSetupHover(cv,fl,ox,oy){
     }
   };
 
+  // Salvăm ox,oy,SC în _RV pentru event handlers (care nu au acces la variabilele locale)
+  _RV.planOx = ox; _RV.planOy = oy; _RV.planSc = SC;
+
   // ── Drag resize handles ────────────────────────────────────────────────
-  // Detectăm dacă mousedown e pe un handle al camerei selectate
   const getHandle=(mx,my)=>{
     if(!_RV.selectedRoom) return null;
     const r=_RV.selectedRoom;
-    const rx=ox+r.x*SC, ry=oy+r.y*SC, rw=r.w*SC, rh=r.h*SC;
-    const hSz=12; // zona de hit mai mare decât desenul
+    const _ox=_RV.planOx, _oy=_RV.planOy, _SC=_RV.planSc;
+    const rx=_ox+r.x*_SC, ry=_oy+r.y*_SC, rw=r.w*_SC, rh=r.h*_SC;
+    const hSz=12;
     if(Math.abs(mx-(rx+rw))<hSz && Math.abs(my-(ry+rh/2))<hSz) return 'right';
     if(Math.abs(mx-(rx+rw/2))<hSz && Math.abs(my-(ry+rh))<hSz) return 'bottom';
     if(Math.abs(mx-(rx+rw))<hSz && Math.abs(my-(ry+rh))<hSz) return 'corner';
@@ -1520,8 +1550,9 @@ function _rvSetupHover(cv,fl,ox,oy){
       const r=cv.getBoundingClientRect();
       const mx=e.clientX-r.left, my=e.clientY-r.top;
       const {handle,mx0,my0,w0,h0}=_RV.resizing;
-      const dxM=(mx-mx0)/_RV.scale; // delta în metri
-      const dyM=(my-my0)/_RV.scale;
+      const _SC=_RV.planSc||_RV.scale;
+      const dxM=(mx-mx0)/_SC;
+      const dyM=(my-my0)/_SC;
       const minW=1.2, minH=1.2;
       if(handle==='right'||handle==='corner')
         _RV.selectedRoom.w=Math.max(minW, Math.round((w0+dxM)*10)/10);
@@ -4611,11 +4642,12 @@ function _rvInject(){
   <div class="rv-sep"></div>
   <div class="rv-timer"><div class="rv-tdot" id="rv-tdot"></div><span id="rv-tval">00.0s</span></div>
   <div class="rv-tinfo" id="rv-tinfo">Se generează releveele…</div>
-  <button onclick="_rvExportPDF()" title="Exportă raportul complet PDF — toate planșele, memoriu, normative"
+  <button onclick="_rvExportPDF()" title="Exportă raportul complet PDF — planuri, fațade, memoriu, normative, bilanț"
+    class="rv-expbtn"
     style="margin-left:8px;height:32px;padding:0 14px;border-radius:7px;border:1.5px solid rgba(212,175,55,.6);background:linear-gradient(135deg,rgba(212,175,55,.22),rgba(212,175,55,.12));color:#F5C518;cursor:pointer;font-size:11px;font-weight:800;font-family:'Space Grotesk',sans-serif;display:flex;align-items:center;gap:6px;letter-spacing:.03em;flex-shrink:0;transition:all .15s;"
     onmouseover="this.style.background='linear-gradient(135deg,rgba(212,175,55,.38),rgba(212,175,55,.25))'"
     onmouseout="this.style.background='linear-gradient(135deg,rgba(212,175,55,.22),rgba(212,175,55,.12))'">
-    📄 Export PDF
+    📄 Export PDF Raport
   </button>
   <button class="rv-close-btn" onclick="closeRelevee()" title="Închide">✕</button>
 </div>
@@ -4862,7 +4894,7 @@ function _rvInject(){
       <button class="rv-zbtn" onclick="_rvZoom(1)">+</button>
       <button class="rv-zbtn" onclick="{_RV.scale=12;document.getElementById('rv-zval').textContent='100%';if(_RV.building)_rvRender();}" style="font-size:9px;font-weight:700;width:auto;padding:0 8px">FIT</button>
       <div id="rv-mob-info-btn" onclick="_rvMobSheet()">📊 Analiză</div>
-      <div class="rv-expbtn" onclick="_rvExportPDF()" style="background:linear-gradient(135deg,rgba(212,175,55,.25),rgba(212,175,55,.15));border:1px solid rgba(212,175,55,.5);font-size:11px;padding:6px 14px;font-weight:800;letter-spacing:.03em">📄 PDF</div>
+      <div class="rv-expbtn-png" onclick="_rvExportPNG()" style="background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);font-size:11px;padding:6px 14px;font-weight:700;letter-spacing:.03em;cursor:pointer;border-radius:8px;color:#22C55E">🖼 PNG</div>
       <div class="rv-expbtn" onclick="_rvExport()" style="font-size:10px;padding:5px 10px;margin-left:4px">🖼 PNG</div>
     </div>
 
