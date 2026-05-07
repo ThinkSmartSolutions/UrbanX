@@ -1969,11 +1969,48 @@ function _rvDNARadar(b, P, fl){
   }).join('');
   const dotsStr=pts.map((p,i)=>`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="2.5" fill="${axes[i].color}"/>`).join('');
   const scoreColor=score>=80?'#22C55E':score>=60?'#F59E0B':'#EF4444';
+  // Actualizăm detaliul de scor în legendă
+  setTimeout(()=>{
+    const el=document.getElementById('rv-dna-score-detail');
+    if(!el) return;
+    const details=[
+      {name:'POT',ok:potOk,msg:potOk?`✓ ${Math.round(b.scArea/P.area*100)}% / max ${Math.round(P.pot*100)}%`:`✗ ${Math.round(b.scArea/P.area*100)}% depășește ${Math.round(P.pot*100)}%`},
+      {name:'CUT',ok:cutOk,msg:cutOk?`✓ ${(b.sdaTotal/P.area).toFixed(2)} / max ${P.cut}`:`✗ ${(b.sdaTotal/P.area).toFixed(2)} depășește ${P.cut}`},
+      {name:'OMS',ok:solarIssues===0,msg:solarIssues===0?`✓ Toate camerele ≥1.5h`:(`✗ ${solarIssues} camere sub minim`)},
+      {name:'ISU',ok:isuOk,msg:isuOk?'✓ Căi evacuare OK':'✗ Verificare distanțe'},
+      {name:'NP057',ok:roomsOk,msg:roomsOk?'✓ Suprafețe conforme':'✗ Camere sub minim'},
+      {name:'Parcaje',ok:parcSup>=parcNec,msg:parcSup>=parcNec?`✓ ${parcSup}/${parcNec} locuri`:`✗ ${parcSup}/${parcNec} locuri`},
+    ];
+    el.innerHTML=details.map(d=>`<div><span style="color:${d.ok?'#22C55E':'#EF4444'};font-weight:700">${d.name}:</span> ${d.msg}</div>`).join('');
+  },50);
   return `<svg width="140" height="140" viewBox="0 0 140 140">
     ${ringsStr}${axesStr}${polyStr}${dotsStr}${labelsStr}
     <text x="${cx}" y="${cy+4}" fill="${scoreColor}" font-size="14" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-weight="800">${score}</text>
     <text x="${cx}" y="${cy+14}" fill="rgba(200,215,240,.4)" font-size="6.5" text-anchor="middle" font-family="IBM Plex Mono,monospace">/100</text>
   </svg>`;
+}
+
+// ── Capturează SVG-ul radar ca PNG pentru PDF ─────────────────────────────
+function _rvCaptureDNARadarPNG(callback){
+  const svgEl=document.querySelector('#rv-dna svg');
+  if(!svgEl){callback(null);return;}
+  try{
+    const svgData=new XMLSerializer().serializeToString(svgEl);
+    const svgBlob=new Blob([svgData],{type:'image/svg+xml;charset=utf-8'});
+    const url=URL.createObjectURL(svgBlob);
+    const img=new Image();
+    img.onload=()=>{
+      const cnv=document.createElement('canvas');
+      cnv.width=280;cnv.height=280;
+      const c=cnv.getContext('2d');
+      c.fillStyle='#060C1A';c.fillRect(0,0,280,280);
+      c.drawImage(img,0,0,280,280);
+      callback(cnv.toDataURL('image/png'));
+      URL.revokeObjectURL(url);
+    };
+    img.onerror=()=>callback(null);
+    img.src=url;
+  }catch(e){callback(null);}
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -4206,18 +4243,36 @@ async function _rvExportPDF(){
       lines.slice(0,3).forEach((l,li)=>pdf.text(l,bCol3X+6,cly+7+li*3.2));
       cly+=22;
     });
-    // Final stamp
-    pdf.setFillColor(8,14,30);pdf.rect(10,H-15,W-20,8,'F');
-    pdf.setFillColor(...C.gold);pdf.rect(10,H-15,W-20,1,'F');
-    pdf.setTextColor(150,165,185);pdf.setFont('helvetica','italic');pdf.setFontSize(5.5);
-    pdf.text('Document orientativ generat automat de platforma UrbanX Relevee Instant · '+new Date().toLocaleDateString('ro-RO')+' · '+pgN+' pagini · UrbanX TSS·FG',W/2,H-10.5,{align:'center'});
-    pdf.setTextColor(...C.gold);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
-    pdf.text('Nu înlocuiește documentațiile tehnice avizate conf. Legii 50/1991 și Legii 350/2001 · Proiectul tehnic se elaborează de arhitect autorizat OAR',W/2,H-7,{align:'center'});
-    ftr();
-
-    const dateForFile=new Date().toISOString().slice(0,10).replace(/-/g,'');
-    const pdfFileName=`Releveu_Arhitectural_Nr.${S2(P.nrCad)}_UTR-${S2(P.utr)}_${S2(fnLabel.replace(/\s+/g,'_').slice(0,20))}_${dateForFile}.pdf`;
-    pdf.save(pdfFileName);
+    // Final stamp + DNA Radar în col 3 (dacă disponibil)
+    _rvCaptureDNARadarPNG(dnaImg=>{
+      try{
+        if(dnaImg){
+          // Adaugă imaginea radar în colț col 3
+          const rx=bCol3X+2, ry=cly+4;
+          if(ry<H-45){
+            pdf.setFillColor(6,12,26);pdf.rect(rx,ry,45,45,'F');
+            pdf.addImage(dnaImg,'PNG',rx,ry,45,45);
+            pdf.setTextColor(212,175,55);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
+            pdf.text('DNA URBAN — AMPRENTĂ NORMATIVĂ',rx+22.5,ry+49,{align:'center'});
+            // Legendă axe lângă radar
+            const axNames=[['POT','Ocupare teren',[34,197,94]],['CUT','Utilizare teren',[34,197,94]],['OMS','Însorire OMS 119',[252,211,77]],['ISU','Evacuare P118',[239,68,68]],['NP057','Supraf. min.',[96,165,250]],['Parcaje','NP 067/2002',[249,115,22]]];
+            let ly2=ry+2;
+            axNames.forEach(([ax,desc,col])=>{
+              pdf.setFillColor(...col);pdf.circle(rx+49,ly2+1.5,1.5,'F');
+              pdf.setTextColor(...col);pdf.setFont('helvetica','bold');pdf.setFontSize(4.5);pdf.text(ax,rx+52,ly2+2);
+              pdf.setTextColor(80,100,130);pdf.setFont('helvetica','normal');pdf.setFontSize(4);pdf.text(desc,rx+52,ly2+5.5);
+              ly2+=8;
+            });
+          }
+        }
+      }catch(e){}
+      pdf.setFillColor(8,14,30);pdf.rect(10,H-15,W-20,8,'F');
+      pdf.setFillColor(...C.gold);pdf.rect(10,H-15,W-20,1,'F');
+      pdf.setTextColor(150,165,185);pdf.setFont('helvetica','italic');pdf.setFontSize(5.5);
+      pdf.text('Document orientativ generat automat de platforma UrbanX Relevee Instant · '+new Date().toLocaleDateString('ro-RO')+' · '+pgN+' pagini · UrbanX TSS·FG',W/2,H-10.5,{align:'center'});
+      pdf.save('Releveu_'+S2(P.nrCad)+'_'+S2(P.utr)+'.pdf');
+    }); // end _rvCaptureDNARadarPNG callback
+    // Note: restul PDF-ului s-a salvat deja în callback
     if(btn){btn.textContent='⬇ Export PDF Raport';btn.style.opacity='1';}
     if(typeof ss==='function') ss('✅ Prezentare Relevee exportată — '+pgN+' pagini cu imagini 3D si memoriu justificativ!');
 
@@ -4572,6 +4627,31 @@ function _rvInject(){
       <div class="rv-sec-t">⬡ DNA Urban — Amprentă Normativă</div>
       <div id="rv-dna" style="display:flex;justify-content:center;padding:4px 0">
         <svg width="140" height="140" viewBox="0 0 140 140"><text x="70" y="75" fill="#2A3F60" font-size="9" text-anchor="middle" font-family="monospace">Se generează…</text></svg>
+      </div>
+      <!-- Legendă axe DNA radar -->
+      <div style="border-top:1px solid rgba(255,255,255,.05);padding-top:7px;margin-top:2px">
+        <div style="font-size:7.5px;color:#3A5070;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:5px">Ce măsoară fiecare axă</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px 8px">
+          ${[
+            ['POT','#22C55E','Ocupare teren (SC/Stotal vs max admis PUG)'],
+            ['CUT','#22C55E','Utilizare teren (SDA/Stotal vs max admis PUG)'],
+            ['OMS','#FCD34D','Însorire min. 1.5h/zi (OMS 119/2014)'],
+            ['ISU','#EF4444','Evacuare max 30m/40m (P118)'],
+            ['NP057','#60A5FA','Suprafețe min. camere (NP 057/2002)'],
+            ['Parcaje','#F97316','Locuri parcare (NP 067/2002)'],
+          ].map(([ax,col,desc])=>`
+          <div title="${desc}" style="display:flex;align-items:center;gap:4px;cursor:help">
+            <span style="width:6px;height:6px;border-radius:50%;background:${col};flex-shrink:0;display:inline-block"></span>
+            <span style="font-size:8px;font-weight:700;color:${col}">${ax}</span>
+          </div>`).join('')}
+        </div>
+        <div style="margin-top:5px;display:flex;gap:5px;align-items:center">
+          <div style="height:4px;flex:1;background:linear-gradient(90deg,#EF4444,#F59E0B,#22C55E);border-radius:2px"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:7px;color:#3A5070;margin-top:1px">
+          <span>0 — Neconform</span><span>50</span><span>100 — Optim</span>
+        </div>
+        <div id="rv-dna-score-detail" style="margin-top:5px;font-size:8px;color:#4A6080;line-height:1.6"></div>
       </div>
     </div>
 
