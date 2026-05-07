@@ -994,6 +994,9 @@ function _rvRenderPlan(fl,b){
     ctx.restore();
   }
 
+  // Salvăm ox,oy,SC în _RV ÎNAINTE de event handlers — SC e local în _rvRenderPlan
+  _RV.planOx = ox; _RV.planOy = oy; _RV.planSc = SC;
+
   // Hover
   _rvSetupHover(cv,fl,ox,oy);
 }
@@ -1511,9 +1514,6 @@ function _rvSetupHover(cv,fl,ox,oy){
       _rvRender();
     }
   };
-
-  // Salvăm ox,oy,SC în _RV pentru event handlers (care nu au acces la variabilele locale)
-  _RV.planOx = ox; _RV.planOy = oy; _RV.planSc = SC;
 
   // ── Drag resize handles ────────────────────────────────────────────────
   const getHandle=(mx,my)=>{
