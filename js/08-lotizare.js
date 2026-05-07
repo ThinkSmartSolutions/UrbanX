@@ -2949,6 +2949,22 @@ function _lotOpenReleveu(lotIdx) {
 
   // Dacă Releveu e deschis, îl notificăm; altfel îl deschidem
   if(typeof generateRelevee === 'function') {
+    // Setăm funcțiunea corectă în Releveu Instant pe baza tipului de clădire din lotizare
+    const rvFnMap = {
+      'individuala':'rez', 'insiruita':'rez', 'duplex':'rez', 'bloc':'rez',
+      'birouri':'birouri', 'office':'birouri',
+      'hotel':'hotel', 'pensiune':'hotel',
+      'comercial':'com', 'retail':'com',
+    };
+    if(window._RV) {
+      window._RV.fn = rvFnMap[tipKey] || 'rez';
+      window._RV.fnParter = null;
+      // Actualizăm selectorul din UI dacă Releveul e deschis
+      const sel = document.getElementById('rv-fn-select');
+      if(sel) sel.value = window._RV.fn;
+      const mSel = document.getElementById('rv-mob-fn-select');
+      if(mSel) mSel.value = window._RV.fn;
+    }
     // Stocăm temporar datele lotului pentru preluare de Releveu
     window._LOT_activeForReleveu = { parcel: virtParcel, lot, tipKey, lotIdx };
     generateRelevee();

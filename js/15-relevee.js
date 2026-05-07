@@ -80,13 +80,102 @@ const _RV = {
   showSolar: false, showISU: false, showDim: true, showSGrid: false,
   building: null, floors: [],
   parcelParams: null,
-  // ── Editare interactivă camere ─────────────────────────────────────────
-  selectedRoom: null,  // referință directă la obiectul rect din fl.rects
-  resizing: null,      // {handle:'right'|'bottom'|'corner', mx0,my0, w0,h0}
-  editDirty: false,    // marcaj că utilizatorul a editat manual
+  selectedRoom: null, resizing: null, editDirty: false,
+  unitMix: { studio:10, apt2:50, apt3:30, apt4:5, ph:5 },
+  fn: 'rez',       // funcțiunea principală
+  fnParter: null,  // null = same as fn; altfel: funcțiunea parterului P0
 };
 
-// ── Helpers ─────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+// FN_CONFIG — definiții complete per funcțiune
+// Activ pentru TOATE UAT-urile, desktop + mobil, releveu + lotizare
+// ═══════════════════════════════════════════════════════════════════════════
+const FN_CONFIG = {
+  rez:{
+    label:'Rezidențial', short:'Rez.', ico:'🏠', color:'#A78BFA',
+    isuDist:30, isuNorm:'P118-2/2013', scaraMin:1.0,
+    omsInsorire:true, omsMin:1.5,
+    pk_unit:'per_apt', pk_val:1, pk_norm:'NP 067/2002',
+    sv_min:20, ep_coef:1.0,
+    unitTypes:['studio','2cam','3cam','4cam','ph'],
+    unitLabels:['Garsonieră','2 camere','3 camere','4 camere','Penthouse'],
+    norms:['NP 057/2002','OMS 119/2014','P118-2/2013','NP 067/2002','NP 051/2012'],
+  },
+  birouri:{
+    label:'Birouri / Office', short:'Birouri', ico:'🏢', color:'#60A5FA',
+    isuDist:40, isuNorm:'P118-3/2015', scaraMin:1.2,
+    omsInsorire:false, omsMin:0,
+    pk_unit:'per_50m2', pk_val:1, pk_norm:'NP 067/2002',
+    sv_min:15, ep_coef:1.3, comp_antifoc:3000,
+    unitTypes:['openspace','celular','conf','receptie'],
+    unitLabels:['Open-space','Birouri celulare','Sală conferință','Recepție+Lobby'],
+    norms:['NP 067/2002','P118-3/2015','L 319/2006','SR EN 15251','NP 051/2012'],
+  },
+  hotel:{
+    label:'Hotel / Cazare', short:'Hotel', ico:'🏨', color:'#34D399',
+    isuDist:35, isuNorm:'P118-3/2015', scaraMin:1.2,
+    omsInsorire:true, omsMin:1.0,
+    pk_unit:'per_2cam', pk_val:0.5, pk_norm:'NP 067/2002',
+    sv_min:20, ep_coef:1.4, detectie_auto:true, cam_min_mp:16,
+    unitTypes:['standard','dubla','suite','apt_hotel'],
+    unitLabels:['Cameră standard','Cameră dublă','Suite','Apartament hotel'],
+    norms:['HG 237/2001','P118-3/2015','NP 051/2012','OMS 119/2014','STAS 6647'],
+  },
+  com:{
+    label:'Spații Comerciale', short:'Comercial', ico:'🏪', color:'#F59E0B',
+    isuDist:25, isuNorm:'P118-3/2015', scaraMin:1.4,
+    omsInsorire:false, omsMin:0,
+    pk_unit:'per_50m2', pk_val:1, pk_norm:'NP 067/2002',
+    sv_min:10, ep_coef:1.5, sprinklere:3600, iesiri_min:2,
+    unitTypes:['retail','alimentar','showroom','depozit'],
+    unitLabels:['Spațiu retail','Comerț alimentar','Showroom','Depozit'],
+    norms:['OG 99/2000','P118-3/2015','NP 067/2002','HG 622/2004','NP 051/2012'],
+  },
+  mixt_com_rez:{
+    label:'Comercial P0 + Rezidențial', short:'Com+Rez', ico:'🏬', color:'#F97316',
+    fnParter:'com', fnEtaje:'rez',
+    isuDist:30, isuNorm:'P118-2+P118-3', scaraMin:1.2,
+    omsInsorire:true, omsMin:1.5,
+    pk_unit:'combinat', pk_val:1, pk_norm:'NP 067/2002',
+    sv_min:15, ep_coef:1.2,
+    unitTypes:['retail','2cam','3cam'],
+    unitLabels:['Comercial P0','2 camere (E1+)','3 camere (E1+)'],
+    norms:['NP 057/2002','OMS 119/2014','P118-2/2013','P118-3/2015','NP 067/2002'],
+  },
+  mixt_bir_rez:{
+    label:'Birouri P0 + Rezidențial', short:'Bir+Rez', ico:'🏗', color:'#8B5CF6',
+    fnParter:'birouri', fnEtaje:'rez',
+    isuDist:30, isuNorm:'P118-2+P118-3', scaraMin:1.2,
+    omsInsorire:true, omsMin:1.5,
+    pk_unit:'combinat', pk_val:1, pk_norm:'NP 067/2002',
+    sv_min:15, ep_coef:1.25,
+    unitTypes:['openspace','2cam','3cam'],
+    unitLabels:['Birouri P0','2 camere (E1+)','3 camere (E1+)'],
+    norms:['NP 057/2002','OMS 119/2014','P118-2/2013','P118-3/2015','NP 067/2002'],
+  },
+  mixt_hotel_com:{
+    label:'Hotel + Comercial P0', short:'Hotel+Com', ico:'🏩', color:'#EC4899',
+    fnParter:'com', fnEtaje:'hotel',
+    isuDist:25, isuNorm:'P118-3/2015', scaraMin:1.2,
+    omsInsorire:true, omsMin:1.0, detectie_auto:true,
+    pk_unit:'combinat', pk_val:0.5, pk_norm:'NP 067/2002',
+    sv_min:15, ep_coef:1.45,
+    unitTypes:['retail','standard','dubla','suite'],
+    unitLabels:['Comercial P0','Standard (E1+)','Dublă (E1+)','Suite (E1+)'],
+    norms:['HG 237/2001','P118-3/2015','NP 067/2002','OMS 119/2014'],
+  },
+};
+
+// Returnează funcțiunea activă pentru etajul dat (0=parter poate fi diferit)
+function _rvGetFloorFn(floorIdx){
+  const cfg=FN_CONFIG[_RV.fn]||FN_CONFIG.rez;
+  if(floorIdx===0){
+    if(cfg.fnParter) return cfg.fnParter;
+    if(_RV.fnParter) return _RV.fnParter;
+  }
+  return cfg.fnEtaje||_RV.fn;
+}
+function _rvFloorFnCfg(floorIdx){ return FN_CONFIG[_rvGetFloorFn(floorIdx)]||FN_CONFIG.rez; }
 const _rvFmt  = n => isNaN(n) ? '—' : Math.round(n)+'';
 const _rvFmtD = n => isNaN(n) ? '—' : n.toFixed(2);
 const _rvPx   = v => v * _RV.scale;
@@ -204,7 +293,130 @@ function _rvMix(P){
 // Nicio bucată goală — fiecare m² are o funcțiune clară.
 // isFlipped=false → balcon sus (față stradă), hol jos (lângă nucleu) — rândul NORD
 // isFlipped=true  → hol sus (lângă nucleu), balcon jos (curte/grădină) — rândul SUD
-function _rvFillApt(x0, y0, W, D, aptIdx, isFlipped){
+// ═══════════════════════════════════════════════════════════════════════════
+// GENERATOARE CAMERE PE FUNCȚIUNE
+// ═══════════════════════════════════════════════════════════════════════════
+
+// ── Birouri ────────────────────────────────────────────────────────────────
+function _rvFillOffice(x0, y0, W, D, idx, type='openspace'){
+  const rms=[];
+  const push=(t,x,y,w,h,lbl)=>{if(w<0.3||h<0.3)return;rms.push({t,lbl,apt:idx,x:x0+x,y:y0+y,w,h,normMin:0});};
+  if(type==='openspace'){
+    push('living',0,0,W,D*0.75,'Open-space');
+    push('hall',0,D*0.75,W*0.35,D*0.25,'Recepție / Intrare');
+    push('kitchen',W*0.35,D*0.75,W*0.25,D*0.25,'Bucătărie/Pantry');
+    push('storage',W*0.60,D*0.75,W*0.40,D*0.25,'WC Comun');
+  } else if(type==='celular'){
+    // Birouri individuale 3×4m = 12m² fiecare de-a lungul ferestrei
+    const nBir=Math.max(1,Math.floor(W/3));
+    const bW=W/nBir;
+    for(let i=0;i<nBir;i++) push('bedroom',i*bW,0,bW-0.1,D*0.6,'Birou '+(i+1));
+    push('hall',0,D*0.6,W*0.5,D*0.4,'Coridor birou');
+    push('storage',W*0.5,D*0.6,W*0.5,D*0.4,'Arhivă / Depozit');
+  } else if(type==='conf'){
+    push('living',0,0,W,D*0.65,'Sală Conferință');
+    push('hall',0,D*0.65,W*0.4,D*0.35,'Hol');
+    push('storage',W*0.4,D*0.65,W*0.3,D*0.35,'Depozit AV');
+    push('bath',W*0.7,D*0.65,W*0.3,D*0.35,'WC');
+  } else { // receptie
+    push('living',0,0,W*0.6,D,'Lobby / Recepție');
+    push('bedroom',W*0.6,0,W*0.4,D*0.5,'Birou Manager');
+    push('storage',W*0.6,D*0.5,W*0.2,D*0.5,'Server Room');
+    push('bath',W*0.8,D*0.5,W*0.2,D*0.5,'WC');
+  }
+  return rms;
+}
+
+// ── Hotel ──────────────────────────────────────────────────────────────────
+function _rvFillHotel(x0, y0, W, D, idx, type='standard'){
+  const rms=[];
+  const push=(t,x,y,w,h,lbl)=>{if(w<0.3||h<0.3)return;rms.push({t,lbl,apt:idx,x:x0+x,y:y0+y,w,h,normMin:0});};
+  const camW=Math.min(W,4.0); // lățime cameră max 4m
+  const nCam=Math.max(1,Math.floor(W/camW));
+  const cW=W/nCam;
+  if(type==='standard'||type==='dubla'){
+    const camD=D*0.80;
+    for(let i=0;i<nCam;i++){
+      push('bedroom',i*cW,0,cW-0.1,camD*(type==='dubla'?0.75:0.70),'Camera '+(idx*10+i+1));
+      push('bath',i*cW,camD*(type==='dubla'?0.75:0.70),cW-0.1,camD*(type==='dubla'?0.25:0.30),'Baie');
+    }
+    push('hall',0,camD,W,D-camD,'Coridor Hotel');
+  } else if(type==='suite'){
+    push('living',0,0,W*0.55,D*0.65,'Living Suite');
+    push('bedroom',W*0.55,0,W*0.45,D*0.65,'Dormitor Suite');
+    push('bath',0,D*0.65,W*0.35,D*0.35,'Baie Suite');
+    push('storage',W*0.35,D*0.65,W*0.30,D*0.35,'Dressing');
+    push('balcon',W*0.65,D*0.65,W*0.35,D*0.35,'Terasă Suite',true);
+  } else { // apt_hotel
+    push('living',0,0,W*0.5,D*0.55,'Living');
+    push('bedroom',W*0.5,0,W*0.5,D*0.55,'Dormitor');
+    push('kitchen',0,D*0.55,W*0.35,D*0.45,'Bucătărie');
+    push('bath',W*0.35,D*0.55,W*0.3,D*0.45,'Baie');
+    push('hall',W*0.65,D*0.55,W*0.35,D*0.45,'Hol');
+  }
+  return rms;
+}
+
+// ── Comercial ──────────────────────────────────────────────────────────────
+function _rvFillCommercial(x0, y0, W, D, idx, type='retail'){
+  const rms=[];
+  const push=(t,x,y,w,h,lbl)=>{if(w<0.3||h<0.3)return;rms.push({t,lbl,apt:idx,x:x0+x,y:y0+y,w,h,normMin:0});};
+  if(type==='retail'||type==='showroom'){
+    push('living',0,0,W,D*0.65,type==='showroom'?'Showroom':'Spațiu Comercial');
+    push('storage',0,D*0.65,W*0.4,D*0.35,'Depozit Marfă');
+    push('hall',W*0.4,D*0.65,W*0.35,D*0.35,'Birouri / Admin');
+    push('bath',W*0.75,D*0.65,W*0.25,D*0.35,'WC Public');
+  } else if(type==='alimentar'){
+    push('living',0,0,W*0.70,D*0.70,'Raion Vânzare');
+    push('storage',W*0.70,0,W*0.30,D*0.70,'Depozit Frigorific');
+    push('hall',0,D*0.70,W*0.45,D*0.30,'Casă Marcat + Intrare');
+    push('kitchen',W*0.45,D*0.70,W*0.30,D*0.30,'Prep. Alim.');
+    push('bath',W*0.75,D*0.70,W*0.25,D*0.30,'WC Pers.');
+  } else { // depozit
+    push('storage',0,0,W,D*0.80,'Depozit / Logistică');
+    push('hall',0,D*0.80,W*0.5,D*0.20,'Birou Expeditor');
+    push('bath',W*0.5,D*0.80,W*0.5,D*0.20,'WC / Vestiare');
+  }
+  return rms;
+}
+
+// ── Dispatcher principal per funcțiune + tip ──────────────────────────────
+function _rvFillUnit(x0, y0, W, D, idx, isFlipped, floorFn, type){
+  switch(floorFn){
+    case 'birouri': return _rvFillOffice(x0,y0,W,D,idx,type||'openspace');
+    case 'hotel':   return _rvFillHotel(x0,y0,W,D,idx,type||'standard');
+    case 'com':     return _rvFillCommercial(x0,y0,W,D,idx,type||'retail');
+    default:        return _rvFillApt(x0,y0,W,D,idx,isFlipped,type||'auto');
+  }
+}
+
+// ── Construiește lista de tipuri de unități pentru un etaj ────────────────
+function _rvBuildUnitList(n, floorFn, mix, isLastFloor){
+  const cfg=FN_CONFIG[floorFn]||FN_CONFIG.rez;
+  if(floorFn==='rez'){
+    if(isLastFloor && mix.ph>0){
+      const nPH=Math.max(1,Math.round(n*mix.ph/100));
+      const list=[];
+      for(let i=0;i<nPH;i++) list.push('ph');
+      for(let i=nPH;i<n;i++) list.push('3cam');
+      return list;
+    }
+    const types=[{k:'studio',p:mix.studio||0},{k:'2cam',p:mix.apt2||0},{k:'3cam',p:mix.apt3||0},{k:'4cam',p:mix.apt4||0}];
+    const total=types.reduce((s,t)=>s+t.p,0)||100;
+    const list=[];
+    types.forEach(t=>{const c=Math.round(n*t.p/total);for(let i=0;i<c;i++)list.push(t.k);});
+    while(list.length<n)list.push('2cam');
+    return list.slice(0,n);
+  }
+  // Birouri / Hotel / Comercial: distribuie tipurile unifor din cfg.unitTypes
+  const ut=cfg.unitTypes||['openspace'];
+  const list=[];
+  for(let i=0;i<n;i++) list.push(ut[i%ut.length]);
+  return list;
+}
+function _rvBuildAptList(n,mix,isLastFloor){ return _rvBuildUnitList(n,'rez',mix,isLastFloor); }
+
+function _rvFillApt(x0, y0, W, D, aptIdx, isFlipped, type='auto'){
   const rms=[];
   if(W<1.5||D<3.0) return rms;
   const push=(t,x,y,w,h,lbl,bal=false)=>{
@@ -213,55 +425,94 @@ function _rvFillApt(x0, y0, W, D, aptIdx, isFlipped){
   };
 
   // ── Dacă apartamentul e LAT (bay > 8m) → împarțim în 2 ap. side-by-side ───
-  // Evităm camerele absurd de late (living de 12m lățime etc.)
   if(W >= 9.0){
     const half = W/2;
-    _rvFillApt(x0,      y0, half, D, aptIdx,   isFlipped).forEach(r=>rms.push(r));
-    _rvFillApt(x0+half, y0, half, D, aptIdx+100, isFlipped).forEach(r=>rms.push(r));
+    // Distribuim tipuri: primul jumătate primește type, al doilea - tipul următor
+    const type2 = type==='studio'?'2cam': type==='2cam'?'2cam': type==='3cam'?'2cam': type==='ph'?'3cam': type;
+    _rvFillApt(x0,      y0, half, D, aptIdx,     isFlipped, type).forEach(r=>rms.push(r));
+    _rvFillApt(x0+half, y0, half, D, aptIdx+100, isFlipped, type2).forEach(r=>rms.push(r));
     return rms;
   }
 
+  // ── Rezolvăm tipul automat din dimensiuni dacă nu e specificat ────────────
+  const effArea = W * D;
+  if(type==='auto'){
+    if(effArea < 30)      type='studio';
+    else if(effArea < 55) type='2cam';
+    else if(effArea < 80) type='3cam';
+    else                  type='4cam';
+  }
+
   // ── Zone proporționale (suma = D exact) ─────────────────────────────────
-  const r_bal  = Math.max(0.9,  Math.min(1.3,  D*0.11));   // balcon
-  const r_hol  = Math.max(0.9,  Math.min(1.6,  D*0.11));   // hol intrare (îngust!)
-  const r_serv = Math.max(2.0,  Math.min(3.2,  D*0.26));   // servicii
-  const r_noapt= Math.max(2.6,  Math.min(4.2,  D*0.30));   // dormitoare
-  const r_zi   = Math.max(2.8,  D-r_bal-r_hol-r_serv-r_noapt); // living
+  // Penthouse: balcon mai adânc, living mai înalt, fără hol mic
+  const isPH = type==='ph';
+  const r_bal  = isPH ? Math.max(2.0, D*0.18) : Math.max(0.9,  Math.min(1.3,  D*0.11));
+  const r_hol  = isPH ? 1.2                    : Math.max(0.9,  Math.min(1.6,  D*0.11));
+  const r_serv = Math.max(2.0, Math.min(3.2, D*0.26));
+  // Dormitoare — variază după tip
+  const nDorm  = type==='studio'?0: type==='2cam'?1: type==='3cam'?2: type==='4cam'?3: isPH?2:2;
+  const r_noapt= nDorm===0 ? 0 : Math.max(2.6, Math.min(4.2, D*0.30));
+  const r_zi   = Math.max(2.8, D - r_bal - r_hol - r_serv - r_noapt);
   const sum    = r_bal+r_hol+r_serv+r_noapt+r_zi;
   const f      = D/sum;
   const bH=r_bal*f, hH=r_hol*f, sH=r_serv*f, nH=r_noapt*f, lH=r_zi*f;
 
   // ── Lățimi funcționale ──────────────────────────────────────────────────
-  const kW    = Math.max(1.8, Math.min(W*0.38, 3.2));  // bucătărie (max 3.2m)
-  const livW  = W - kW;                                  // living
-  const bathW = Math.max(1.4, Math.min(2.0, W*0.30));   // baie
-  const wcW   = Math.max(0.8, Math.min(1.2, W*0.16));   // wc
-  // HOL SERVICII — fix principal: max 1.5m, restul devine dormitor/garderobă
+  const kW    = Math.max(1.8, Math.min(W*0.38, 3.2));
+  const livW  = W - kW;
+  const bathW = Math.max(1.4, Math.min(2.0, W*0.30));
+  const wcW   = Math.max(0.8, Math.min(1.2, W*0.16));
   const maxHolServW = Math.min(1.5, Math.max(0, W-bathW-wcW));
-  const extraServW  = Math.max(0, W-bathW-wcW-maxHolServW); // devine Dep/Garderobă
-  const d1W   = Math.round(W*0.55*10)/10;               // dormitor principal
-  const d2W   = W-d1W;                                   // dormitor 2
+  const extraServW  = Math.max(0, W-bathW-wcW-maxHolServW);
+  const d1W   = Math.round(W*0.55*10)/10;
+  const d2W   = W - d1W;
 
   const drawNoapte=(y_)=>{
-    if(W>=5.5){
-      push('bedroom',  0,   y_, d1W, nH, 'Dorm. 1');
-      push('bedroom2', d1W, y_, d2W, nH*0.72, 'Dorm. 2');
-      if(nH*0.28>0.5) push('storage', d1W, y_+nH*0.72, d2W, nH*0.28, 'Dep.');
-    } else {
+    if(nDorm === 0) return; // studio — niciun dormitor separat
+    if(nDorm === 1){
       push('bedroom', 0, y_, W, nH, 'Dormitor');
+    } else if(nDorm === 2){
+      push('bedroom',  0,   y_, d1W, nH,        'Dorm. 1');
+      push('bedroom2', d1W, y_, d2W, nH*0.72,   'Dorm. 2');
+      if(nH*0.28>0.5) push('storage', d1W, y_+nH*0.72, d2W, nH*0.28, 'Dep.');
+    } else { // 3 dormitoare (4cam + PH)
+      const d3W = Math.round(W*0.32*10)/10;
+      const d12 = W - d3W;
+      const dd1 = Math.round(d12*0.55*10)/10;
+      push('bedroom',  0,    y_, dd1,   nH,      'Dorm. 1');
+      push('bedroom2', dd1,  y_, d12-dd1, nH*0.72, 'Dorm. 2');
+      if(nH*0.28>0.5) push('storage', dd1, y_+nH*0.72, d12-dd1, nH*0.28, 'Dep.');
+      push('bedroom3', d12,  y_, d3W,   nH,      'Dorm. 3');
     }
   };
 
   const drawServ=(y_)=>{
+    if(type === 'studio'){
+      // Studio: bucătărie deschisă integrată în living, baie compactă
+      push('bath',  0,      y_, Math.min(W,2.2), sH, 'Baie');
+      if(W>2.5) push('storage', 2.2, y_, W-2.2, sH, 'Oficiu');
+      return;
+    }
     push('bath',  0,                      y_, bathW,       sH,        'Baie');
     push('wc',    bathW,                  y_, wcW,         sH*0.62,   'WC');
     if(maxHolServW>0.2) push('hall', bathW+wcW, y_, maxHolServW, sH, 'Hol');
-    // Spațiu rămas → Garderobă (nu "Hol" imens)
     if(extraServW>0.6)  push('storage', bathW+wcW+maxHolServW, y_, extraServW, sH, 'Garderobă');
     if(sH*0.38>0.4) push('storage', bathW, y_+sH*0.62, wcW, sH*0.38, 'Dep.');
   };
 
   const drawZiSi=(y_)=>{
+    if(type === 'studio'){
+      // Studio: o singură cameră combinată living+dormitor
+      push('living', 0, y_, W, lH+nH, 'Cameră + Living');
+      return;
+    }
+    if(isPH){
+      // Penthouse: living open-space cu bucătărie insulă
+      push('living',  0,    y_, W,  lH*0.70, 'Living Open-Space');
+      push('kitchen', 0,    y_+lH*0.70, W*0.45, lH*0.30, 'Bucătărie');
+      push('storage', W*0.45, y_+lH*0.70, W*0.55, lH*0.30, 'Dining');
+      return;
+    }
     push('living',  0,    y_, livW, lH,        'Living');
     push('kitchen', livW, y_, kW,   lH*0.65,   'Bucătărie');
     if(lH*0.35>0.5) push('storage', livW, y_+lH*0.65, kW, lH*0.35, 'Oficiu');
@@ -270,15 +521,15 @@ function _rvFillApt(x0, y0, W, D, aptIdx, isFlipped){
   // HOL APARTAMENT — îngust la intrare + zona rămasă devine Dormitor 3 dacă >2.5m
   const holAptW  = Math.min(W, 1.8);
   const holRestW = Math.max(0, W - holAptW);
-  // Dacă spațiul rămas e suficient pentru o cameră → Dormitor suplimentar, nu "Dep."
   const holRestLabel = holRestW >= 2.5 ? 'Dorm. 3' : holRestW >= 1.2 ? 'Dep.' : null;
+  const balLabel = isPH ? 'Terasă' : 'Balcon';
 
   if(!isFlipped){
     let y=0;
-    push('balcon',0,y,W,bH,'Balcon',true); y+=bH;
-    drawZiSi(y); y+=lH;
-    drawNoapte(y); y+=nH;
-    drawServ(y);   y+=sH;
+    push('balcon',0,y,W,bH,balLabel,true); y+=bH;
+    drawZiSi(y); y+= type==='studio' ? lH+nH : lH;
+    if(type!=='studio') { drawNoapte(y); y+=nH; }
+    drawServ(y); y+=sH;
     push('hall', 0, y, holAptW, hH, 'Hol');
     if(holRestW>0.4 && holRestLabel) push(holRestLabel==='Dorm. 3'?'bedroom3':'storage', holAptW, y, holRestW, hH, holRestLabel);
   } else {
@@ -286,10 +537,10 @@ function _rvFillApt(x0, y0, W, D, aptIdx, isFlipped){
     push('hall', 0, y, holAptW, hH, 'Hol');
     if(holRestW>0.4 && holRestLabel) push(holRestLabel==='Dorm. 3'?'bedroom3':'storage', holAptW, y, holRestW, hH, holRestLabel);
     y+=hH;
-    drawServ(y);   y+=sH;
-    drawNoapte(y); y+=nH;
-    drawZiSi(y);   y+=lH;
-    push('balcon',0,y,W,bH,'Balcon',true);
+    drawServ(y); y+=sH;
+    if(type!=='studio') { drawNoapte(y); y+=nH; }
+    drawZiSi(y); y+= type==='studio' ? lH+nH : lH;
+    push('balcon',0,y,W,bH,balLabel,true);
   }
   return rms;
 }
@@ -353,16 +604,22 @@ function _rvFloor(b, floorIdx){
       colBounds.push({xL:cores[cores.length-1].x+cores[cores.length-1].w, xR:bW});
     }
 
+    const floorFn     = _rvGetFloorFn(floorIdx);
+    const isLastFloor = (floorIdx === b.niv - 1);
+    const totalUnits  = colBounds.length * 2;
+    const unitTypes   = _rvBuildUnitList(totalUnits, floorFn, _RV.unitMix, isLastFloor);
+
     colBounds.forEach(({xL,xR},ci)=>{
       const W=xR-xL;
       if(W<1.5) return;
-      // Rândul NORD — umplu complet [xL..xR] × [0..northMaxD_]
+      const fallback = floorFn==='rez'?'2cam': floorFn==='birouri'?'openspace': floorFn==='hotel'?'standard':'retail';
+      const typeN = unitTypes[ci*2]   || fallback;
+      const typeS = unitTypes[ci*2+1] || fallback;
       if(northMaxD_>=3.5)
-        _rvFillApt(xL, 0, W, northMaxD_, ci*2, false)
+        _rvFillUnit(xL, 0,           W, northMaxD_,   ci*2,   false, floorFn, typeN)
           .forEach(r=>rects.push(r));
-      // Rândul SUD — umplu complet [xL..xR] × [southStart_..bD]
       if(southAvailD_>=3.5)
-        _rvFillApt(xL, southStart_, W, southAvailD_, ci*2+1, true)
+        _rvFillUnit(xL, southStart_, W, southAvailD_, ci*2+1, true,  floorFn, typeS)
           .forEach(r=>rects.push(r));
     });
 
@@ -1386,23 +1643,22 @@ function _rvDrawSolarAnim(ctx, fl, b, ox, oy, SC){
 // OVERLAY: ISU — CERCURI EVACUARE 30m (P118-2/2013)
 // ══════════════════════════════════════════════════════════════════════════
 function _rvDrawISUCircles(ctx, b, ox, oy, SC){
-  const rPx=30*SC; // 30m în pixeli
+  const fnCfg = _rvFloorFnCfg(_RV.floor);
+  const isuM  = fnCfg.isuDist || 30;  // distanță din FN_CONFIG per funcțiune
+  const rPx   = isuM * SC;
   ctx.save();
   b.cores.forEach(core=>{
     const cx=ox+(core.x+core.w/2)*SC;
     const cy=oy+(core.y+core.h/2)*SC;
-    // Zona verde (safe)
     ctx.beginPath(); ctx.arc(cx,cy,rPx,0,Math.PI*2);
     ctx.fillStyle='rgba(34,197,94,.07)';ctx.fill();
     ctx.strokeStyle='rgba(34,197,94,.55)';ctx.lineWidth=1.2;
     ctx.setLineDash([6,4]);ctx.stroke();ctx.setLineDash([]);
-    // Label
     ctx.fillStyle='rgba(34,197,94,.8)';ctx.font='bold 8px IBM Plex Mono';ctx.textAlign='center';
-    ctx.fillText('30m',cx,cy-rPx+10);
+    ctx.fillText(isuM+'m ('+fnCfg.isuNorm+')',cx,cy-rPx+10);
     ctx.textAlign='left';
   });
 
-  // Colorăm camerele în funcție de distanță la cel mai apropiat nucleu
   const fl=_RV.floors[_RV.floor]||_RV.floors[0];
   fl.rects.filter(r=>r.apt>=0).forEach(r=>{
     const rx=ox+r.x*SC, ry=oy+r.y*SC, rw=r.w*SC, rh=r.h*SC;
@@ -1423,7 +1679,6 @@ function _rvDrawISUCircles(ctx, b, ox, oy, SC){
   });
   ctx.restore();
 
-  // Legendă ISU
   const fl_=_RV.floors[_RV.floor]||_RV.floors[0];
   const overLimit=fl_.rects.filter(r=>r.apt>=0).filter(r=>{
     const cx_r=ox+(r.x+r.w/2)*SC, cy_r=oy+(r.y+r.h/2)*SC;
@@ -1539,6 +1794,62 @@ function _rvShowInspector(room, clientX, clientY){
   if(!window._rvEditHistory) window._rvEditHistory=[];
   window._rvEditHistory.push({w:room.w, h:room.h});
   if(window._rvEditHistory.length>20) window._rvEditHistory.shift();
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// FUNCȚIUNE CLĂDIRE — handler schimbare funcțiune
+// Activ pentru toate UAT-urile, desktop + mobil, releveu + lotizare
+// ══════════════════════════════════════════════════════════════════════════
+function _rvSetFn(fnKey){
+  const cfg=FN_CONFIG[fnKey]||FN_CONFIG.rez;
+  _RV.fn=fnKey; _RV.fnParter=null;
+  const n=document.getElementById('rv-fn-norms');
+  if(n) n.textContent=cfg.norms?.join(' · ')||'';
+  const t=document.getElementById('rv-mix-types');
+  if(t) t.innerHTML=(cfg.unitTypes||[]).map((k,i)=>
+    `<span style="font-size:8px;padding:1px 5px;border-radius:3px;background:rgba(255,255,255,.06);color:#7A90B0">${cfg.unitLabels?.[i]||k}</span>`
+  ).join('');
+  // OMS toggle — gri dacă nu se aplică funcțiunii
+  document.querySelectorAll('.rv-tog-row').forEach(r=>{
+    if(r.textContent.includes('OMS 119')) r.style.opacity=cfg.omsInsorire?'1':'0.4';
+  });
+  // Sync mobil
+  const ms=document.getElementById('rv-mob-fn-select');
+  if(ms&&ms.value!==fnKey) ms.value=fnKey;
+  const mn=document.getElementById('rv-mob-fn-norms');
+  if(mn) mn.textContent=cfg.norms?.join(' · ')||'';
+  if(_RV.building){_rvRender();_rvUpdatePanels(_RV.building,_RV.parcelParams);}
+  ss('🏗 '+cfg.label+' · ISU '+cfg.isuDist+'m · '+cfg.isuNorm+(cfg.omsInsorire?' · OMS 119 activ':' · OMS N/A'));
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// MIX APARTAMENTE — UI handlers
+// ══════════════════════════════════════════════════════════════════════════
+function _rvMixChange(){
+  const keys=['studio','apt2','apt3','apt4','ph'];
+  let total=0;
+  keys.forEach(k=>{
+    const v=parseInt(document.getElementById('rv-mix-'+k)?.value||0);
+    total+=v;
+    const vEl=document.getElementById('rv-mix-'+k+'-v');
+    if(vEl) vEl.textContent=v+'%';
+  });
+  const ok=total===100;
+  const tEl=document.getElementById('rv-mix-total');
+  const badge=document.getElementById('rv-mix-total-badge');
+  if(tEl){tEl.textContent=total+'%';tEl.style.color=ok?'#22C55E':'#EF4444';}
+  if(badge){badge.textContent=total+'%';badge.style.background=ok?'rgba(34,197,94,.15)':'rgba(239,68,68,.15)';badge.style.color=ok?'#22C55E':'#EF4444';}
+}
+
+function _rvMixApply(){
+  const keys=['studio','apt2','apt3','apt4','ph'];
+  let total=0; const mix={};
+  keys.forEach(k=>{const v=parseInt(document.getElementById('rv-mix-'+k)?.value||0);mix[k]=v;total+=v;});
+  if(total!==100){ss('⚠ Total trebuie să fie 100% (acum: '+total+'%)');return;}
+  _RV.unitMix=mix;
+  _rvRender();
+  _rvUpdatePanels(_RV.building,_RV.parcelParams);
+  ss('✅ Mix: Gar.'+mix.studio+'% · 2C '+mix.apt2+'% · 3C '+mix.apt3+'% · 4C '+mix.apt4+'% · PH '+mix.ph+'%');
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -4167,6 +4478,27 @@ function _rvInject(){
 <div class="rv-body">
   <!-- LEFT -->
   <div class="rv-lpanel">
+    <!-- FUNCȚIUNE CLĂDIRE — primul selector, cel mai important -->
+    <div class="rv-rsec" style="border:1px solid rgba(212,175,55,.2);background:rgba(212,175,55,.04);border-radius:8px;padding:8px">
+      <div class="rv-sec-t" style="color:#D4AF37;margin-bottom:8px">🏗 Funcțiune clădire</div>
+      <select id="rv-fn-select" onchange="_rvSetFn(this.value)"
+        style="width:100%;padding:6px 8px;background:rgba(255,255,255,.07);border:1px solid rgba(212,175,55,.3);
+        border-radius:6px;color:#DDE6F5;font-size:11px;font-family:'IBM Plex Mono',monospace;margin-bottom:6px">
+        <option value="rez"          >🏠 Rezidențial</option>
+        <option value="birouri"      >🏢 Birouri / Office</option>
+        <option value="hotel"        >🏨 Hotel / Cazare</option>
+        <option value="com"          >🏪 Spații Comerciale</option>
+        <option value="mixt_com_rez" >🏬 Comercial P0 + Rezidențial</option>
+        <option value="mixt_bir_rez" >🏗 Birouri P0 + Rezidențial</option>
+        <option value="mixt_hotel_com">🏩 Hotel + Comercial P0</option>
+      </select>
+      <div id="rv-fn-norms" style="font-size:8px;color:#4A6080;line-height:1.7">
+        NP 057 · OMS 119 · P118-2/2013 · NP 067/2002
+      </div>
+      <!-- Mix unități — se actualizează cu funcțiunea -->
+      <div id="rv-mix-types" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px"></div>
+    </div>
+
     <!-- DNA Urban Radar -->
     <div class="rv-rsec rv-dna-sec">
       <div class="rv-sec-t">⬡ DNA Urban — Amprentă Normativă</div>
@@ -4265,6 +4597,45 @@ function _rvInject(){
       </div>
     </div>
 
+    <!-- Mix Apartamente -->
+    <div class="rv-rsec">
+      <div class="rv-sec-t" style="cursor:pointer;display:flex;justify-content:space-between"
+        onclick="const b=document.getElementById('rv-mix-body');b.style.display=b.style.display==='none'?'block':'none'">
+        🏠 Mix Apartamente
+        <span id="rv-mix-total-badge" style="font-size:8px;padding:1px 5px;border-radius:3px;background:rgba(34,197,94,.15);color:#22C55E">100%</span>
+      </div>
+      <div id="rv-mix-body" style="display:block;padding-top:8px">
+        ${[
+          ['studio','🟣','Garsonieră','10','#A78BFA'],
+          ['apt2','🟢','2 camere','50','#22C55E'],
+          ['apt3','🔵','3 camere','30','#60A5FA'],
+          ['apt4','🟡','4 camere','5','#F59E0B'],
+          ['ph','🩷','Penthouse','5','#F472B6'],
+        ].map(([k,ico,lbl,def,col])=>`
+        <div style="margin-bottom:6px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
+            <span style="font-size:8.5px;color:#94a3b8">${ico} ${lbl}</span>
+            <span id="rv-mix-${k}-v" style="font-size:9px;font-weight:700;color:${col}">${def}%</span>
+          </div>
+          <input type="range" min="0" max="${k==='ph'?30:80}" step="5" value="${def}" id="rv-mix-${k}"
+            oninput="_rvMixChange()"
+            style="width:100%;height:3px;accent-color:${col}">
+        </div>`).join('')}
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:6px;border-top:1px solid rgba(255,255,255,.06)">
+          <span style="font-size:8px;color:#4A6080">Total</span>
+          <span id="rv-mix-total" style="font-size:10px;font-weight:800;color:#22C55E">100%</span>
+        </div>
+        <button onclick="_rvMixApply()"
+          style="width:100%;margin-top:8px;padding:7px;background:rgba(212,175,55,.12);border:1px solid rgba(212,175,55,.3);
+          border-radius:6px;color:#D4AF37;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit">
+          ↺ Regenerează cu acest mix
+        </button>
+        <div style="font-size:7px;color:#2A3F60;margin-top:4px;line-height:1.4">
+          Penthouse = ultimul etaj. Total trebuie să fie exact 100%.
+        </div>
+      </div>
+    </div>
+
     <!-- Avize Timeline -->
     <div class="rv-rsec rv-avize-sec">
       <div class="rv-sec-t" style="cursor:pointer;display:flex;justify-content:space-between"
@@ -4354,6 +4725,22 @@ function _rvInject(){
 
       <!-- Overlays tab -->
       <div class="rv-mob-panel" id="rv-mob-panel-overlays" style="display:none">
+        <!-- Funcțiune selector pe mobil — la fel ca desktop -->
+        <div class="rv-rst">🏗 FUNCȚIUNE CLĂDIRE</div>
+        <select id="rv-mob-fn-select" onchange="_rvSetFn(this.value)"
+          style="width:100%;padding:8px;background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.3);
+          border-radius:8px;color:#DDE6F5;font-size:12px;font-family:inherit;margin-bottom:6px">
+          <option value="rez"          >🏠 Rezidențial</option>
+          <option value="birouri"      >🏢 Birouri / Office</option>
+          <option value="hotel"        >🏨 Hotel / Cazare</option>
+          <option value="com"          >🏪 Spații Comerciale</option>
+          <option value="mixt_com_rez" >🏬 Comercial P0 + Rezidențial</option>
+          <option value="mixt_bir_rez" >🏗 Birouri P0 + Rezidențial</option>
+          <option value="mixt_hotel_com">🏩 Hotel + Comercial P0</option>
+        </select>
+        <div id="rv-mob-fn-norms" style="font-size:9px;color:#4A6080;margin-bottom:10px;line-height:1.6">
+          NP 057 · OMS 119 · P118-2/2013 · NP 067/2002
+        </div>
         <div class="rv-rst">OVERLAY ANALIZĂ</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px 0">
           <button class="rv-mob-ov-btn" id="rv-mob-ov-solar" onclick="_rvMobOverlay(this,'solar')">☀ Însorire OMS</button>
