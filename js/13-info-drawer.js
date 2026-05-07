@@ -622,6 +622,25 @@ const RAPORT_INFO = {
     ],
     nu: ['Nu înlocuiește DTGA elaborată de consultant autorizat ANAR/INHGA', 'Valorile NFA și portanță sunt estimative — studiu geotehnic obligatoriu pe amplasament', 'Hărțile de risc la inundații se verifică obligatoriu pe platforma INHGA (www.inhga.ro)'],
   },
+
+  cpe: {
+    ico: '⚡', label: 'Certificat de Performanță Energetică',
+    badge: 'obligatoriu', badgeLabel: 'Clădiri noi · NZEB 2021',
+    color: '52,211,153',
+    fn: 'generateCPE()',
+    ce: 'Calculează consumul anual de energie al clădirii propuse (EP_specific, kWh/m²an) și o încadrează într-o clasă energetică de la A+ la G, conform Ordinului 2641/2017 și metodologiei MC001-3/2022. Analizează parametrii termici ai anvelopei (U-values pereți, terasă, tâmplărie, planșeu), bilanțul energetic anual cu pierderi și câștiguri solare, și verifică conformitatea cu cerința NZEB obligatorie din 2021.',
+    dece: 'Legea 372/2005 republicată și Directiva europeană EPBD 2024/1275/UE (recast) impun că toate clădirile noi trebuie să atingă standardul Nearly Zero Energy Building (NZEB), adică cel puțin clasa energetică A (EP ≤ 100 kWh/m²an). Certificatul este obligatoriu la vânzare, închiriere și recepția oricărei clădiri noi. Băncile finanțatoare și cumpărătorii de apartamente îl solicită tot mai frecvent la faza de pre-vânzare.',
+    legal: 'Legea 372/2005 republicată · Ord. MDLPA 2641/2017 (metodologie CPE) · MC001-3/2022 (calcul necesar căldură) · C107/1-5:2022 (coeficienți termici) · Directiva EPBD 2024/1275/UE (recast) · Ord. 1071/2015 (auditori energetici atestați)',
+    output: [
+      { ico: '⚡', txt: 'Clasa energetică A+→G cu EP_specific (kWh/m²an) și vizualizare scală grafică' },
+      { ico: '🏗', txt: 'Indicatori termici anvelopă vs. limite C107/4-2022: U_perete, U_terasă, U_geam, U_planșeu' },
+      { ico: '📊', txt: 'Bilanț energetic anual: pierderi transmisie + ventilație − câștiguri solare − interne = necesar net' },
+      { ico: '✅', txt: 'Conformitate NZEB: DA (EP ≤ 100 kWh/m²an) / NU — cu indicarea deficitului' },
+      { ico: '💡', txt: '6 recomandări de îmbunătățire clasă cu impact EP estimat (termoizolație, geam triplu, VmC, FV)' },
+      { ico: '🌿', txt: 'Emisii CO₂ estimate (tone/an) conform factorilor IPCC 2021' },
+    ],
+    nu: ['Nu înlocuiește Certificatul Energetic oficial semnat de auditor energetic atestat ANRE/MDLPA', 'Valorile EP sunt orientative ±20% — calculul definitiv necesită proiect tehnic complet cu toate detaliile constructive', 'Nu acoperă instalațiile de climatizare, ventilație mecanică sau producere ACM — incluse în CPE oficial'],
+  },
 };
 
 function infoDrawerOpen(key) {
