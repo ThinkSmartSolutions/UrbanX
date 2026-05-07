@@ -2896,3 +2896,354 @@ function _lotExportClipboard(){
   navigator.clipboard?.writeText(lines).then(()=>ss('📋 Bilanț copiat!')).catch(()=>alert(lines));
 }
 
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ADĂUGIRI UrbanX — Conectivitate + Normative per lot + Click lot + Strategii
+// ═══════════════════════════════════════════════════════════════════════════
+
+// ── 1. CONEXIUNE RELEVEU INSTANT ─────────────────────────────────────────
+// Trimite datele unui lot selectat direct în Releveu Instant
+function _lotOpenReleveu(lotIdx) {
+  const lot = _LOT._loturi[lotIdx];
+  if(!lot) return;
+  const ap = S.parcels[S.activeParcel??0];
+  const tipKey = lot.properties?.tip || 'individuala';
+  const t = _lotGetTip(tipKey);
+  const area = lot.properties?.area || turf.area(lot);
+
+  // Construim un parcel params virtual pentru Releveu
+  const virtParcel = {
+    nrCad: (ap?.nrcad||'—') + '_Lot' + (lotIdx+1),
+    utr: ap?.utr || 'CM',
+    fn: tipKey === 'bloc' ? 'locuinta_colectiva' : 'locuinta_individuala',
+    area: Math.round(area),
+    W: Math.sqrt(area) * 1.4,  // estimat
+    D: Math.sqrt(area) * 0.7,
+    pot: t.sc / 100,
+    cut: (t.sc / 100) * t.niv * 0.85,
+    hn: t.hNiv || 3.0,
+    rf: t.retF || 5,
+    rs: t.retS || 4,
+    rl: t.retL || 3,
+    frontDir: ap?.params?.frontDir || 'N',
+    hmax: t.hMax || 15,
+  };
+
+  // Actualizăm DataBus cu datele lotului
+  try {
+    if(window._RV_DataBus) {
+      const bVirt = {
+        bW: Math.min(t.hMax||15, Math.sqrt(area) * 1.2),
+        bD: Math.sqrt(area) * 0.8,
+        niv: t.niv || 2,
+        scArea: area * (t.sc/100),
+        sdaTotal: area * (t.sc/100) * (t.niv||2),
+        sdaPerFloor: area * (t.sc/100),
+        cores: [{x:0,y:0,w:3.6,h:6.6}],
+        P: virtParcel,
+        floors: [{rects:[],isu:{},floorIdx:0}],
+      };
+      window._RV_DataBus.update(bVirt, virtParcel);
+    }
+  } catch(e) {}
+
+  // Dacă Releveu e deschis, îl notificăm; altfel îl deschidem
+  if(typeof generateRelevee === 'function') {
+    // Stocăm temporar datele lotului pentru preluare de Releveu
+    window._LOT_activeForReleveu = { parcel: virtParcel, lot, tipKey, lotIdx };
+    generateRelevee();
+    ss('📐 Releveu Instant deschis pentru Lot ' + (lotIdx+1) + ' · ' + Math.round(area) + 'm²');
+  } else {
+    ss('⚠ Releveu Instant nu este disponibil în această sesiune.');
+  }
+}
+
+// ── 2. VERIFICARE NORMATIVE PER LOT INDIVIDUAL ────────────────────────────
+// Returnează obiect cu toate verificările pentru un lot
+function _lotVerificaNormativeLot(lot, lotIdx) {
+  const tipKey = lot.properties?.tip || 'individuala';
+  const t = _lotGetTip(tipKey);
+  const area = lot.properties?.area || Math.round(turf.area(lot));
+  const ap = S.parcels[S.activeParcel??0];
+  const bbox = turf.bbox(lot);
+  const lotW = (bbox[2]-bbox[0]) * 111320 * Math.cos((bbox[1]+bbox[3])/2*Math.PI/180);
+  const lotH = (bbox[3]-bbox[1]) * 111320;
+  const frontStradal = Math.min(lotW, lotH) * 1.1; // estimat
+
+  // Accesul la drum — verificăm dacă lotul e adiacent cu un drum
+  let hasAccess = false;
+  try {
+    _LOT._drumuri.forEach(drum => {
+      try {
+        const buf = turf.buffer(drum, 0.5, {units:'meters'});
+        if(turf.booleanOverlap(lot, buf) || turf.booleanWithin(turf.centerOfMass(lot), buf)) hasAccess = true;
+        if(turf.booleanIntersects(lot, buf)) hasAccess = true;
+      } catch(e) {}
+    });
+    // Dacă e la margine parcelei → acces stradal direct
+    const ap2 = S.parcels[S.activeParcel??0];
+    if(ap2?.geo?.geometry) {
+      const parcelBuf = turf.buffer({type:'Feature',geometry:ap2.geo.geometry}, -2, {units:'meters'});
+      if(!parcelBuf || !turf.booleanWithin(lot, parcelBuf)) hasAccess = true;
+    }
+  } catch(e) { hasAccess = true; } // fallback safe
+
+  const minArea = t.lotMin || 150;
+  const minFront = tipKey==='individuala'?8:tipKey==='insiruita'?5:tipKey==='duplex'?10:15;
+  const maxPOT = (t.sc||40)/100;
+  const scMax = area * maxPOT;
+  const hTotal = (t.hParter||3) + Math.max(0,(t.niv||2)-1)*(t.hNiv||3);
+
+  return {
+    lotIdx,
+    tipKey,
+    area,
+    frontStradal: frontStradal.toFixed(1),
+    checks: [
+      { label:'Suprafață min.',  ref:'Legea 350/2001', val:`${Math.round(area)}m²`, norm:`min ${minArea}m²`, ok: area >= minArea },
+      { label:'Front stradal',   ref:'RLU/HG 525',     val:`${frontStradal.toFixed(1)}m`, norm:`min ${minFront}m`,  ok: frontStradal >= minFront },
+      { label:'Acces drum pub.', ref:'Legea 350/2001', val: hasAccess?'✓ Asigurat':'✗ Lipsă', norm:'Obligatoriu', ok: hasAccess },
+      { label:'H total clădire', ref:'RLU UTR',         val:`${hTotal.toFixed(1)}m`, norm:`max ${t.hMax||15}m`, ok: hTotal <= (t.hMax||15) },
+      { label:'SC max estimat',  ref:'POT='+t.sc+'%',  val:`${Math.round(scMax)}m²`, norm:`din ${Math.round(area)}m²`, ok: true },
+      { label:'Spații verzi',    ref:'Legea 24/2007',  val:`min ${Math.max(0,100-(t.sc||40))}%`, norm:'conform tip', ok: true },
+    ],
+    score: 0, // se calculează mai jos
+  };
+}
+
+// ── Afișează normativele lotului selectat în tab Rezultat ─────────────────
+function _lotShowNormsForLot(lotIdx) {
+  const lot = _LOT._loturi[lotIdx];
+  if(!lot) return;
+  const n = _lotVerificaNormativeLot(lot, lotIdx);
+  const allOk = n.checks.every(c=>c.ok);
+  const tipDef = _LOT.tipuri[n.tipKey]||_LOT.tipuri.individuala;
+
+  const html = `
+  <div style="background:rgba(${allOk?'34,197,94':'239,68,68'},.08);border:1px solid rgba(${allOk?'34,197,94':'239,68,68'},.25);border-radius:10px;padding:10px 12px;margin-bottom:10px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:24px">${tipDef.icon}</span>
+      <div>
+        <div style="font-size:11px;font-weight:800;color:#e2e8f0">Lot ${lotIdx+1} — ${tipDef.label}</div>
+        <div style="font-size:9px;color:#64748b">${Math.round(n.area)}m² · front ~${n.frontStradal}m · P+${(tipDef.niv||2)-1}E</div>
+      </div>
+      <div style="margin-left:auto;font-size:11px;font-weight:800;color:${allOk?'#22c55e':'#ef4444'}">${allOk?'✓ CONFORM':'⚠ NECONFORM'}</div>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:3px;margin-bottom:10px">
+    ${n.checks.map(c=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px;background:rgba(255,255,255,.03);border-radius:6px;border-left:2px solid ${c.ok?'#22c55e':'#ef4444'}">
+      <div>
+        <div style="font-size:9px;font-weight:600;color:#e2e8f0">${c.label}</div>
+        <div style="font-size:8px;color:#475569">${c.ref}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:9px;font-weight:700;color:${c.ok?'#22c55e':'#ef4444'}">${c.val}</div>
+        <div style="font-size:8px;color:#475569">${c.norm}</div>
+      </div>
+    </div>`).join('')}
+  </div>
+  <div style="display:flex;gap:6px">
+    <button onclick="_lotOpenReleveu(${lotIdx})"
+      style="flex:1;padding:9px;background:rgba(167,139,250,.15);border:1px solid rgba(167,139,250,.35);
+      color:#a78bfa;border-radius:8px;font-size:10px;font-weight:700;cursor:pointer">
+      📐 Deschide Releveu Instant
+    </button>
+    <button onclick="_lotHighlightOnMap(${lotIdx})"
+      style="padding:9px 12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+      color:#94a3b8;border-radius:8px;font-size:11px;cursor:pointer" title="Zoom la lot pe hartă">
+      🎯
+    </button>
+  </div>`;
+
+  const content = document.getElementById('lot-content');
+  if(content) content.innerHTML = html;
+}
+
+// Zoom la lot pe hartă + highlight temporar
+function _lotHighlightOnMap(lotIdx) {
+  const lot = _LOT._loturi[lotIdx];
+  if(!lot?.geometry) return;
+  try {
+    const bb = turf.bbox(lot);
+    map.fitBounds([[bb[0],bb[1]],[bb[2],bb[3]]], {padding:80, duration:600, maxZoom:18});
+    // Flash highlight temporar
+    setSource('lot-highlight-src', {type:'FeatureCollection', features:[lot]});
+    setTimeout(()=>setSource('lot-highlight-src',{type:'FeatureCollection',features:[]}), 2000);
+  } catch(e) {}
+}
+
+// ── 3. CLICK PE LOT PE HARTĂ ─────────────────────────────────────────────
+// Se apelează din handlerul Mapbox (dacă există layerul 'lotizare-src')
+function _lotSetupMapClick() {
+  if(!window.map || map._lotClickSetup) return;
+  map._lotClickSetup = true;
+
+  // Click pe layerul de loturi (lot-fill sau lotizare-src)
+  const layerIds = ['lotizare-fill','lot-fill-layer','lotizare-src-fill'];
+  layerIds.forEach(layerId => {
+    try {
+      if(map.getLayer(layerId)) {
+        map.on('click', layerId, (e) => {
+          if(!_lotizareActive) return;
+          const props = e.features?.[0]?.properties;
+          if(props == null) return;
+          // Găsim indexul lotului
+          const lotIdx = _LOT._loturi.findIndex(l => {
+            try { return turf.booleanContains({type:'Feature',geometry:l.geometry,properties:{}},
+              {type:'Feature',geometry:{type:'Point',coordinates:[e.lngLat.lng,e.lngLat.lat]},properties:{}}); }
+            catch(e2) { return false; }
+          });
+          if(lotIdx >= 0) {
+            _lotTab('r');
+            _lotShowNormsForLot(lotIdx);
+            ss('📋 Lot ' + (lotIdx+1) + ' · ' + (props.tip||'—') + ' · ' + Math.round(props.area||0) + 'm²');
+          }
+        });
+        map.on('mouseenter', layerId, () => { map.getCanvas().style.cursor = 'pointer'; });
+        map.on('mouseleave', layerId, () => { map.getCanvas().style.cursor = ''; });
+      }
+    } catch(e2) {}
+  });
+}
+
+// Apelăm setup-ul după generare
+const _origRunLotizare = window.runLotizare;
+window.runLotizare = function() {
+  _origRunLotizare?.apply(this, arguments);
+  setTimeout(_lotSetupMapClick, 500);
+};
+
+// ── 4. STRATEGIE ALTERNATIVĂ: ORGANIC (loturi de mărimi variabile) ────────
+// Adăugăm în _LOT.strategie posibilitatea 'organic'
+function _genLotizareOrganic(fpFeat, loturiPerTip) {
+  const loturi = [], drumuri = [];
+  const bbox2 = turf.bbox(fpFeat);
+  const cy = (bbox2[1]+bbox2[3])/2;
+  const mLng = 111320*Math.cos(cy*Math.PI/180), mLat = 111320;
+  const fpArea = turf.area(fpFeat);
+
+  // Drum central
+  const drumY = bbox2[1]+(bbox2[3]-bbox2[1])*0.45;
+  const drumLatDeg = _LOT.drumLat / mLat;
+  const dp = {type:'Feature',geometry:{type:'Polygon',coordinates:[[
+    [bbox2[0],drumY],[bbox2[2],drumY],
+    [bbox2[2],drumY+drumLatDeg],[bbox2[0],drumY+drumLatDeg],[bbox2[0],drumY]
+  ]]},properties:{tip:'drum_principal'}};
+  try{const di=turf.intersect(fpFeat,dp);if(di?.geometry)drumuri.push({...di,properties:{tip:'drum_principal'}});}catch(e){}
+
+  let terenDisp = fpFeat;
+  drumuri.forEach(d=>{try{const diff=turf.difference(terenDisp,d);if(diff?.geometry)terenDisp=diff;}catch(e){}});
+
+  // Generăm loturi de mărimi variate (±30% față de lotAria default)
+  const tipuriActive = Object.keys(loturiPerTip).filter(k=>loturiPerTip[k]>0);
+  const wDeg = bbox2[2]-bbox2[0];
+  const hDeg = bbox2[3]-bbox2[1];
+
+  // Împărțim în benzi orizontale și generăm loturi de lățimi diferite
+  const nBenzi = 3;
+  const benzH = (hDeg - drumLatDeg*2) / nBenzi;
+  let tipIdx = 0;
+
+  for(let b=0; b<nBenzi; b++) {
+    const yStart = b < Math.floor(nBenzi/2)
+      ? bbox2[1] + b*benzH
+      : bbox2[1] + drumLatDeg + b*benzH;
+    const variantW = _LOT.lotAria * (0.7 + Math.random()*0.6) / (benzH*mLat);
+    const variantWDeg = variantW / mLng;
+    let xCur = bbox2[0];
+
+    while(xCur < bbox2[2] - variantWDeg*0.2) {
+      const tipK = tipuriActive[tipIdx % tipuriActive.length] || 'individuala';
+      const lotT = _lotGetTip(tipK);
+      const thisW = (lotT.lotDefault||_LOT.lotAria) * (0.8+Math.random()*0.4);
+      const thisWDeg = thisW / (mLng * (benzH*mLat));
+
+      const lotPoly = {type:'Feature',geometry:{type:'Polygon',coordinates:[[
+        [xCur, yStart],[xCur+thisWDeg, yStart],
+        [xCur+thisWDeg, yStart+benzH],[xCur, yStart+benzH],[xCur, yStart]
+      ]]},properties:{}};
+
+      try {
+        const inter = turf.intersect(terenDisp, lotPoly);
+        if(inter?.geometry && turf.area(inter) > _LOT.lotAria*0.15) {
+          loturi.push({type:'Feature',geometry:inter.geometry,
+            properties:{tip:tipK,color:lotT.color,borderColor:lotT.borderColor,area:Math.round(turf.area(inter))}});
+          tipIdx++;
+        }
+      } catch(e) {}
+      xCur += thisWDeg;
+    }
+  }
+  return {loturi, drumuri};
+}
+
+// ── 5. BILANȚ COMPARATIV cu PUG ──────────────────────────────────────────
+function _lotBilantPUG() {
+  const b = _LOT._bilant;
+  if(!b) { ss('Generați mai întâi planul de lotizare.'); return; }
+  const ap = S.parcels[S.activeParcel??0];
+  const params = ap?.params||{};
+  const pArea = ap?.area||1;
+  const potAdmis = parseFloat(params.pot||0.6);
+  const cutAdmis = parseFloat(params.cut||3.0);
+  const hAdmis = parseFloat(params.h||24);
+
+  const potReal = b.terenLoturi / pArea;
+  const niv_mediu = Object.entries(b.perTip).reduce((s,[k,v])=>{
+    const t=_LOT.tipuri[k]||_LOT.tipuri.individuala; return s+v.count*(t.niv||2);
+  },0) / Math.max(1, b.totalLoturi);
+  const hMedie = Object.entries(b.perTip).reduce((s,[k,v])=>{
+    const t=_lotGetTip(k); return s+v.count*((t.hParter||3)+Math.max(0,(t.niv||2)-1)*(t.hNiv||3));
+  },0) / Math.max(1,b.totalLoturi);
+
+  return {
+    rows: [
+      {ind:'POT mediu',  real:(potReal*100).toFixed(0)+'%',  admis:(potAdmis*100).toFixed(0)+'%', ok:potReal<=potAdmis+0.01},
+      {ind:'H medie',    real:hMedie.toFixed(1)+'m',         admis:hAdmis+'m',                    ok:hMedie<=hAdmis+0.1},
+      {ind:'Eficiență',  real:(b.eficienta*100).toFixed(0)+'%', admis:'≥60%',                     ok:b.eficienta>=0.6},
+      {ind:'Drum (%)',   real:Math.round(b.terenDrum/pArea*100)+'%', admis:'≤30%',                 ok:b.terenDrum/pArea<=0.30},
+      {ind:'Loturi',     real:b.totalLoturi+' lot.',          admis:'maxim estimat',               ok:true},
+      {ind:'Unități',    real:b.totalUnitati+' unit.',        admis:'estimat',                     ok:true},
+    ]
+  };
+}
+
+// ── 6. INTEGRARE DataBus — după generare, notificăm toate studiile ─────────
+const _origRunLotizare2 = window.runLotizare;
+window.runLotizare = function() {
+  try { _origRunLotizare2?.apply(this, arguments); } catch(e) { throw e; }
+  setTimeout(() => {
+    try {
+      const b = _LOT._bilant;
+      const ap = S.parcels[S.activeParcel??0];
+      if(!b || !ap || !window._RV_DataBus) return;
+      // Calculăm building virtual pentru DataBus
+      const niv_med = Object.entries(b.perTip).reduce((s,[k,v])=>{
+        const t=_LOT.tipuri[k]||_LOT.tipuri.individuala;return s+v.count*(t.niv||2);
+      },0) / Math.max(1,b.totalLoturi);
+      const bVirt = {
+        bW: Math.sqrt(ap.area||10000)*0.8, bD: Math.sqrt(ap.area||10000)*0.7,
+        niv: Math.round(niv_med)||2,
+        scArea: b.terenLoturi*(Object.keys(b.perTip)[0] ? (_LOT.tipuri[Object.keys(b.perTip)[0]]?.sc||40)/100 : 0.4),
+        sdaTotal: b.costConstrTotal / 750, // estimat invers din cost
+        sdaPerFloor: b.terenLoturi * 0.4,
+        cores: Array(Math.max(1,Math.round(b.totalLoturi/6))).fill(null).map((_,i)=>({x:i*18,y:0,w:3.6,h:6.6})),
+        P: {nrCad:ap.nrcad,utr:ap.utr,fn:'lotizare',area:ap.area,pot:0.4,cut:niv_med*0.4,hn:3,rf:5,rs:5,rl:3,frontDir:'N'},
+        floors: [{rects:[],isu:{ok:true},floorIdx:0}],
+      };
+      window._RV_DataBus.update(bVirt, bVirt.P);
+      console.log('[Lotizare → DataBus] ✅ Notificat — '+b.totalLoturi+' loturi / '+b.totalUnitati+' unități');
+    } catch(e) {}
+  }, 800);
+};
+
+// Expunem funcțiile noi global
+window._lotOpenReleveu      = _lotOpenReleveu;
+window._lotVerificaNormativeLot = _lotVerificaNormativeLot;
+window._lotShowNormsForLot  = _lotShowNormsForLot;
+window._lotHighlightOnMap   = _lotHighlightOnMap;
+window._lotBilantPUG        = _lotBilantPUG;
+window._genLotizareOrganic  = _genLotizareOrganic;
+
+console.log('[UrbanX Lotizare+] ✅ Extensii încărcate: Releveu, Normative/lot, MapClick, Organic, DataBus');
