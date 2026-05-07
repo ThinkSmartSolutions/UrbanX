@@ -3708,17 +3708,94 @@ function _rvExportAllPNG(P,b){
 
 function _rvMobSheet(){
   const sh=document.getElementById('rv-mob-sheet'); if(!sh) return;
-  // Populate from main panels
-  const bil=document.getElementById('rv-bilant');
-  const norm=document.getElementById('rv-norm');
-  const mob_b=document.getElementById('rv-mob-bilant');
-  const mob_n=document.getElementById('rv-mob-norm');
-  if(mob_b&&bil) mob_b.innerHTML=bil.innerHTML;
-  if(mob_n&&norm) mob_n.innerHTML=norm.innerHTML;
+  _rvMobSync();
   sh.classList.add('rv-mob-open');
+  // Swipe down → close
+  let startY=0;
+  sh.ontouchstart=e=>{startY=e.touches[0].clientY;};
+  sh.ontouchmove=e=>{if(e.touches[0].clientY-startY>70)_rvMobSheetClose();};
 }
 function _rvMobSheetClose(){
   document.getElementById('rv-mob-sheet')?.classList.remove('rv-mob-open');
+}
+function _rvMobTab(btn,tab){
+  document.querySelectorAll('.rv-mob-tab').forEach(t=>t.classList.remove('rv-mob-tab-on'));
+  btn.classList.add('rv-mob-tab-on');
+  document.querySelectorAll('.rv-mob-panel').forEach(p=>p.style.display='none');
+  const panel=document.getElementById('rv-mob-panel-'+tab);
+  if(panel)panel.style.display='block';
+  if(tab==='roi')_rvMobCalcROI();
+}
+function _rvMobOverlay(btn,key){
+  btn.classList.toggle('rv-mob-ov-on');
+  const on=btn.classList.contains('rv-mob-ov-on');
+  _RV['show'+key[0].toUpperCase()+key.slice(1)]=on;
+  const dt=document.getElementById('rv-tog-'+key);
+  if(dt){if(on)dt.classList.add('rv-tog-on');else dt.classList.remove('rv-tog-on');}
+  if(key==='solar'){
+    const sc=document.getElementById('rv-mob-solar-ctrls');
+    if(sc)sc.style.display=on?'block':'none';
+    const sc2=document.getElementById('rv-solar-ctrls');
+    if(sc2)sc2.style.display=on?'block':'none';
+    if(on){_RV.solarAnim=true;_RV.solarHour=_RV.solarHour||10;_RV.solarMonth=12;}
+  }
+  if(_RV.building)_rvRender();
+}
+function _rvMobCalcROI(){
+  const b=_RV.building;if(!b)return;
+  const cost=parseInt(document.getElementById('rv-mob-roi-cost')?.value||650);
+  const sell=parseInt(document.getElementById('rv-mob-roi-sell')?.value||1200);
+  const nrApt=Math.max(1,Math.round(b.sdaTotal/70));
+  const totalCost=b.sdaTotal*cost, totalRev=nrApt*280*sell;
+  const profit=totalRev-totalCost;
+  const fmt=v=>v>=1e6?(v/1e6).toFixed(1)+'M€':(v/1e3).toFixed(0)+'k€';
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  set('rv-mob-roi-cost-total',fmt(totalCost));
+  set('rv-mob-roi-rev',fmt(totalRev));
+  set('rv-mob-roi-profit',(profit>0?'+':'')+fmt(profit));
+  set('rv-mob-roi-roi','ROI ~'+(profit/totalCost*100).toFixed(0)+'%  ·  '+nrApt+' apt.');
+  const el=document.getElementById('rv-mob-roi-profit');
+  if(el)el.style.color=profit>0?'#22C55E':'#EF4444';
+}
+function _rvMobSync(){
+  // Copiăm conținut din panoul desktop în cel mobil
+  const copy=(from,to)=>{const f=document.getElementById(from),t=document.getElementById(to);if(f&&t)t.innerHTML=f.innerHTML;};
+  copy('rv-bilant','rv-mob-bilant');
+  copy('rv-norm','rv-mob-norm');
+  copy('rv-rapoarte-aff','rv-mob-rapoarte');
+  copy('rv-dna','rv-mob-dna');
+  // Avize timeline
+  const avize=document.getElementById('rv-mob-avize');
+  if(avize&&_RV.building&&_RV.parcelParams)avize.innerHTML=_rvBuildAvizeTimeline(_RV.building,_RV.parcelParams);
+  // DNA metrics text
+  const mobMetrics=document.getElementById('rv-mob-dna-metrics');
+  if(mobMetrics&&_RV.building&&_RV.parcelParams){
+    const b=_RV.building,P=_RV.parcelParams;
+    const nrApt=Math.max(1,Math.round(b.sdaTotal/70));
+    const potOk=b.scArea/P.area<=P.pot+.001,cutOk=b.sdaTotal/P.area<=P.cut+.001;
+    mobMetrics.innerHTML=[
+      ['POT',Math.round(b.scArea/P.area*100)+'%/'+Math.round(P.pot*100)+'%',potOk?'#22C55E':'#EF4444'],
+      ['CUT',(b.sdaTotal/P.area).toFixed(2)+'/'+P.cut,cutOk?'#22C55E':'#EF4444'],
+      ['SDA',Math.round(b.sdaTotal)+'m²','#DDE6F5'],
+      ['Apt.',nrApt,'#DDE6F5'],
+      ['H',b.niv*P.hn+'m','#DDE6F5'],
+      ['Parcaje',Math.ceil(nrApt*1.2)+' loc.','#F59E0B'],
+    ].map(([l,v,c])=>`<div style="display:flex;justify-content:space-between;margin-bottom:2px"><span>${l}</span><span style="color:${c};font-weight:700">${v}</span></div>`).join('');
+  }
+  // Floor bar
+  const mobFloor=document.getElementById('rv-mob-floorbar');
+  if(mobFloor&&_RV.building){
+    const niv=_RV.building.niv,hn=_RV.parcelParams?.hn||3;
+    mobFloor.innerHTML=Array.from({length:niv},(_,i)=>
+      `<button onclick="_RV.floor=${i};if(_RV.building)_rvRender();_rvMobSync()"
+        style="padding:6px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.1);
+        background:${_RV.floor===i?'rgba(212,175,55,.15)':'rgba(255,255,255,.03)'};
+        color:${_RV.floor===i?'#D4AF37':'#7A90B0'};font-size:10px;font-weight:600;cursor:pointer;font-family:inherit">
+        ${i===0?'±0.00':'E'+i+'  +'+(i*hn)+'m'}
+      </button>`
+    ).join('');
+  }
+  _rvMobCalcROI();
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -3846,31 +3923,67 @@ function _rvInject(){
 }
 #rv-mob-info-btn {
   display: none;
-  padding: 4px 10px; border-radius: 5px;
-  border: 1px solid rgba(212,175,55,.25);
-  background: rgba(212,175,55,.07); color: #D4AF37;
-  font-size: 9px; font-weight: 700; cursor: pointer;
+  padding: 6px 12px; border-radius: 6px;
+  border: 1px solid rgba(212,175,55,.3);
+  background: rgba(212,175,55,.1); color: #D4AF37;
+  font-size: 10px; font-weight: 700; cursor: pointer;
   font-family: 'Space Grotesk', sans-serif;
-  align-items: center; gap: 4px;
+  align-items: center; gap: 5px;
 }
 
-/* Bottom info sheet pe mobil */
+/* Bottom sheet complet cu tabs */
 #rv-mob-sheet {
   display: none;
   position: absolute; bottom: 0; left: 0; right: 0;
-  background: rgba(11,20,38,.97); border-top: 1px solid rgba(212,175,55,.2);
-  border-radius: 12px 12px 0 0;
-  padding: 12px 14px 20px; z-index: 60;
-  max-height: 60vh; overflow-y: auto;
-  transform: translateY(100%); transition: transform .3s ease;
+  background: rgba(9,16,32,.98);
+  border-top: 1.5px solid rgba(212,175,55,.25);
+  border-radius: 16px 16px 0 0;
+  padding: 0 0 24px; z-index: 60;
+  max-height: 72vh; overflow: hidden;
+  transform: translateY(100%); transition: transform .32s cubic-bezier(.4,0,.2,1);
+  display: flex; flex-direction: column;
 }
 #rv-mob-sheet.rv-mob-open {
-  display: block;
   transform: translateY(0);
 }
 .rv-mob-sheet-handle {
-  width: 36px; height: 4px; background: rgba(212,175,55,.3);
-  border-radius: 99px; margin: 0 auto 12px;
+  width: 40px; height: 4px; background: rgba(212,175,55,.35);
+  border-radius: 99px; margin: 10px auto 0; cursor: pointer; flex-shrink:0;
+}
+.rv-mob-tabs {
+  display: flex; overflow-x: auto; -webkit-overflow-scrolling: touch;
+  border-bottom: 1px solid rgba(212,175,55,.1);
+  padding: 6px 12px 0; gap: 4px; flex-shrink: 0;
+  scrollbar-width: none;
+}
+.rv-mob-tabs::-webkit-scrollbar { display: none; }
+.rv-mob-tab {
+  padding: 6px 12px; border-radius: 8px 8px 0 0;
+  border: 1px solid rgba(255,255,255,.06); border-bottom: none;
+  background: transparent; color: #4A6080;
+  font-size: 10px; font-weight: 600; cursor: pointer;
+  white-space: nowrap; font-family: 'Space Grotesk', sans-serif;
+  transition: all .15s;
+}
+.rv-mob-tab.rv-mob-tab-on {
+  background: rgba(212,175,55,.12);
+  border-color: rgba(212,175,55,.25); color: #D4AF37;
+}
+.rv-mob-panel {
+  flex: 1; overflow-y: auto; padding: 12px 14px;
+  -webkit-overflow-scrolling: touch;
+}
+.rv-mob-ov-btn {
+  padding: 10px 8px; border-radius: 8px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.03); color: #7A90B0;
+  font-size: 11px; font-weight: 600; cursor: pointer;
+  font-family: 'Space Grotesk', sans-serif;
+  text-align: center; transition: all .12s;
+}
+.rv-mob-ov-btn.rv-mob-ov-on {
+  background: rgba(37,99,235,.15);
+  border-color: rgba(37,99,235,.4); color: #60A5FA;
 }
 `;
     document.head.appendChild(css);
@@ -4047,21 +4160,115 @@ function _rvInject(){
       <div class="rv-zval" id="rv-zval">100%</div>
       <button class="rv-zbtn" onclick="_rvZoom(1)">+</button>
       <button class="rv-zbtn" onclick="{_RV.scale=12;document.getElementById('rv-zval').textContent='100%';if(_RV.building)_rvRender();}" style="font-size:9px;font-weight:700;width:auto;padding:0 8px">FIT</button>
-      <div id="rv-mob-info-btn" onclick="_rvMobSheet()">📊 Bilanț</div>
-      <div class="rv-expbtn" onclick="_rvExportPDF()" title="Exportă PDF complet — plan, fațade, secțiuni, memoriu, bilanț normative" style="background:linear-gradient(135deg,rgba(212,175,55,.25),rgba(212,175,55,.15));border:1px solid rgba(212,175,55,.5);font-size:11px;padding:6px 14px;font-weight:800;letter-spacing:.03em">📄 Export PDF Raport</div>
-      <div class="rv-expbtn" onclick="_rvExport()" title="Export PNG rapid — captură tab curent" style="font-size:10px;padding:5px 10px;margin-left:4px">🖼 PNG</div>
+      <div id="rv-mob-info-btn" onclick="_rvMobSheet()">📊 Analiză</div>
+      <div class="rv-expbtn" onclick="_rvExportPDF()" style="background:linear-gradient(135deg,rgba(212,175,55,.25),rgba(212,175,55,.15));border:1px solid rgba(212,175,55,.5);font-size:11px;padding:6px 14px;font-weight:800;letter-spacing:.03em">📄 PDF</div>
+      <div class="rv-expbtn" onclick="_rvExport()" style="font-size:10px;padding:5px 10px;margin-left:4px">🖼 PNG</div>
     </div>
-    <!-- Mobile bottom sheet -->
+
+    <!-- ── MOBILE BOTTOM SHEET — design complet cu toate features ─── -->
     <div id="rv-mob-sheet">
-      <div class="rv-mob-sheet-handle"></div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <span style="font-size:11px;font-weight:700;color:#D4AF37;font-family:'Space Grotesk',sans-serif">📊 Bilanț + Normative</span>
-        <button onclick="_rvMobSheetClose()" style="background:none;border:none;color:#64748b;font-size:16px;cursor:pointer">✕</button>
+      <div class="rv-mob-sheet-handle" onclick="_rvMobSheetClose()"></div>
+
+      <!-- Tab bar mobil -->
+      <div class="rv-mob-tabs" id="rv-mob-tabs">
+        <button class="rv-mob-tab rv-mob-tab-on" onclick="_rvMobTab(this,'bilant')">📊 Bilanț</button>
+        <button class="rv-mob-tab" onclick="_rvMobTab(this,'dna')">⬡ DNA</button>
+        <button class="rv-mob-tab" onclick="_rvMobTab(this,'overlays')">🎛 Overlays</button>
+        <button class="rv-mob-tab" onclick="_rvMobTab(this,'roi')">💰 ROI</button>
+        <button class="rv-mob-tab" onclick="_rvMobTab(this,'avize')">📋 Avize</button>
       </div>
-      <div id="rv-mob-bilant"></div>
-      <div style="margin-top:10px"><div class="rv-rst">NORMATIVE</div><div id="rv-mob-norm"></div></div>
-    </div>
-  </div>
+
+      <!-- Bilanț tab -->
+      <div class="rv-mob-panel" id="rv-mob-panel-bilant">
+        <div class="rv-rst">BILANȚ SUPRAFEȚE</div>
+        <div id="rv-mob-bilant"></div>
+        <div style="margin-top:10px"><div class="rv-rst">VERIFICARE NORMATIVE</div><div id="rv-mob-norm"></div></div>
+        <div style="margin-top:10px"><div class="rv-rst">RAPOARTE AFECTATE</div><div id="rv-mob-rapoarte"></div></div>
+      </div>
+
+      <!-- DNA tab -->
+      <div class="rv-mob-panel" id="rv-mob-panel-dna" style="display:none">
+        <div class="rv-rst">⬡ DNA URBAN — AMPRENTĂ NORMATIVĂ</div>
+        <div style="display:flex;align-items:center;gap:12px;padding:8px 0">
+          <div id="rv-mob-dna"></div>
+          <div id="rv-mob-dna-metrics" style="flex:1;font-size:9px;color:#7A90B0;line-height:1.8"></div>
+        </div>
+      </div>
+
+      <!-- Overlays tab -->
+      <div class="rv-mob-panel" id="rv-mob-panel-overlays" style="display:none">
+        <div class="rv-rst">OVERLAY ANALIZĂ</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px 0">
+          <button class="rv-mob-ov-btn" id="rv-mob-ov-solar" onclick="_rvMobOverlay(this,'solar')">☀ Însorire OMS</button>
+          <button class="rv-mob-ov-btn" id="rv-mob-ov-isu" onclick="_rvMobOverlay(this,'isu')">🚨 ISU Evacuare</button>
+          <button class="rv-mob-ov-btn rv-mob-ov-on" id="rv-mob-ov-dim" onclick="_rvMobOverlay(this,'dim')">📐 Cote</button>
+          <button class="rv-mob-ov-btn" id="rv-mob-ov-sGrid" onclick="_rvMobOverlay(this,'sGrid')">🔲 Grilă</button>
+        </div>
+        <!-- Solar controls mobil -->
+        <div id="rv-mob-solar-ctrls" style="display:none;padding:8px;background:rgba(212,175,55,.06);border-radius:8px;border:1px solid rgba(212,175,55,.15)">
+          <div style="font-size:9px;color:#D4AF37;font-weight:700;margin-bottom:8px">☀ Simulare Solară — Iași lat=47.16°</div>
+          <div style="font-size:8px;color:#4A6080;margin-bottom:4px">Oră: <span id="rv-mob-solar-hval" style="color:#D4AF37;font-weight:700">10:00</span></div>
+          <input type="range" min="5" max="21" value="10" id="rv-mob-solar-hour" style="width:100%;height:4px;accent-color:#D4AF37;margin-bottom:8px"
+            oninput="const h=+this.value;_RV.solarHour=h;_RV.solarAnim=true;document.getElementById('rv-mob-solar-hval').textContent=String(Math.floor(h)).padStart(2,'0')+':00';if(_RV.building)_rvRender()">
+          <div style="font-size:8px;color:#4A6080;margin-bottom:4px">Lună:</div>
+          <select onchange="_RV.solarMonth=+this.value;if(_RV.building)_rvRender();"
+            style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#DDE6F5;font-size:10px;padding:6px;border-radius:6px;margin-bottom:8px">
+            <option value="12" selected>Decembrie — solstițiu iarnă (OMS 119)</option>
+            <option value="6">Iunie — solstițiu vară</option>
+            <option value="3">Martie — echinocțiu</option>
+          </select>
+          <button onclick="_rvSolarPlay()" id="rv-mob-solar-play"
+            style="width:100%;padding:8px;background:rgba(212,175,55,.12);border:1px solid rgba(212,175,55,.3);border-radius:6px;color:#D4AF37;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">
+            ▶ Animație 24h automată
+          </button>
+        </div>
+        <div class="rv-rst" style="margin-top:10px">ETAJ ACTIV</div>
+        <div id="rv-mob-floorbar" style="display:flex;gap:6px;flex-wrap:wrap;padding:6px 0"></div>
+      </div>
+
+      <!-- ROI tab -->
+      <div class="rv-mob-panel" id="rv-mob-panel-roi" style="display:none">
+        <div class="rv-rst">💰 RENTABILITATE ESTIMATIVĂ</div>
+        <div style="font-size:8px;color:#4A6080;padding:4px 0 8px">Ajustează parametrii pieței Iași:</div>
+        <div style="margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;font-size:9px;color:#7A90B0;margin-bottom:4px">
+            <span>Cost construcție (€/m²)</span><span id="rv-mob-roi-cval" style="color:#D4AF37;font-weight:700">650</span>
+          </div>
+          <input type="range" min="450" max="900" value="650" id="rv-mob-roi-cost" style="width:100%;height:4px;accent-color:#D4AF37"
+            oninput="document.getElementById('rv-mob-roi-cval').textContent=this.value;_rvMobCalcROI()">
+        </div>
+        <div style="margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;font-size:9px;color:#7A90B0;margin-bottom:4px">
+            <span>Preț vânzare (€/m²)</span><span id="rv-mob-roi-sval" style="color:#22C55E;font-weight:700">1200</span>
+          </div>
+          <input type="range" min="800" max="2500" value="1200" id="rv-mob-roi-sell" style="width:100%;height:4px;accent-color:#22C55E"
+            oninput="document.getElementById('rv-mob-roi-sval').textContent=this.value;_rvMobCalcROI()">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div style="background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.2);border-radius:8px;padding:10px">
+            <div style="font-size:8px;color:#7A90B0;margin-bottom:3px">Cost total</div>
+            <div id="rv-mob-roi-cost-total" style="font-size:16px;font-weight:800;color:#EF4444">—</div>
+          </div>
+          <div style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:8px;padding:10px">
+            <div style="font-size:8px;color:#7A90B0;margin-bottom:3px">Venituri</div>
+            <div id="rv-mob-roi-rev" style="font-size:16px;font-weight:800;color:#22C55E">—</div>
+          </div>
+          <div style="background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.2);border-radius:8px;padding:10px;grid-column:span 2">
+            <div style="font-size:8px;color:#7A90B0;margin-bottom:3px">Profit brut estimat</div>
+            <div id="rv-mob-roi-profit" style="font-size:22px;font-weight:800;color:#D4AF37">—</div>
+            <div id="rv-mob-roi-roi" style="font-size:10px;color:#7A90B0;margin-top:2px">—</div>
+          </div>
+        </div>
+        <div style="font-size:8px;color:#2A3F60;margin-top:8px;line-height:1.4">* Orientativ. Fără teren, TVA, proiectare, taxe.</div>
+      </div>
+
+      <!-- Avize tab -->
+      <div class="rv-mob-panel" id="rv-mob-panel-avize" style="display:none">
+        <div class="rv-rst">📋 CALENDAR AUTORIZARE</div>
+        <div id="rv-mob-avize"></div>
+      </div>
+
+    </div><!-- end mob-sheet -->
   <!-- RIGHT -->
   <div class="rv-rpanel">
     <div class="rv-rsec">
