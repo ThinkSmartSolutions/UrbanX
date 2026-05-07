@@ -6667,7 +6667,7 @@ async function generateCPE(){
       ['NECESAR NET ÎNCĂLZIRE', Math.round(qNet), EP_spec, 'Q_brut - câștiguri'],
     ].forEach((r,ri)=>{
       const isTotal = ri===2||ri===5;
-      if(isTotal){ pdf.setFillColor(ri===5?...GREEN:240,245,255); }
+      if(isTotal){ pdf.setFillColor(...(ri===5 ? GREEN : [240,245,255])); }
       cy=tblRow(r,cy,isTotal,[65,40,30,47]);
     });
     cy+=4;
