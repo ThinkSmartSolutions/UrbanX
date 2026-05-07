@@ -267,24 +267,24 @@ function _rvFillApt(x0, y0, W, D, aptIdx, isFlipped){
     if(lH*0.35>0.5) push('storage', livW, y_+lH*0.65, kW, lH*0.35, 'Oficiu');
   };
 
-  // HOL APARTAMENT — îngust, numai la intrare (max 1.8m lățime)
-  const holAptW = Math.min(W, 1.8);
-  const holRestW= Math.max(0, W - holAptW);
+  // HOL APARTAMENT — îngust la intrare + zona rămasă devine Dormitor 3 dacă >2.5m
+  const holAptW  = Math.min(W, 1.8);
+  const holRestW = Math.max(0, W - holAptW);
+  // Dacă spațiul rămas e suficient pentru o cameră → Dormitor suplimentar, nu "Dep."
+  const holRestLabel = holRestW >= 2.5 ? 'Dorm. 3' : holRestW >= 1.2 ? 'Dep.' : null;
 
   if(!isFlipped){
-    // NORD: balcon sus → zi → noapte → servicii → hol
     let y=0;
     push('balcon',0,y,W,bH,'Balcon',true); y+=bH;
     drawZiSi(y); y+=lH;
     drawNoapte(y); y+=nH;
     drawServ(y);   y+=sH;
     push('hall', 0, y, holAptW, hH, 'Hol');
-    if(holRestW>0.4) push('storage', holAptW, y, holRestW, hH, 'Dep.');
+    if(holRestW>0.4 && holRestLabel) push(holRestLabel==='Dorm. 3'?'bedroom3':'storage', holAptW, y, holRestW, hH, holRestLabel);
   } else {
-    // SUD: hol sus → servicii → noapte → zi → balcon
     let y=0;
     push('hall', 0, y, holAptW, hH, 'Hol');
-    if(holRestW>0.4) push('storage', holAptW, y, holRestW, hH, 'Dep.');
+    if(holRestW>0.4 && holRestLabel) push(holRestLabel==='Dorm. 3'?'bedroom3':'storage', holAptW, y, holRestW, hH, holRestLabel);
     y+=hH;
     drawServ(y);   y+=sH;
     drawNoapte(y); y+=nH;
@@ -336,9 +336,10 @@ function _rvFloor(b, floorIdx){
 
     // ── Generăm apartamente pentru fiecare coloană ────────────────────────
     // northMaxD = coreY (apartamente nord de la y=0 până la coridorul central)
-    // southStart = coreY + coreH (apartamente sud de la nucleu până la peretele S)
+    // southStart = coreY + corrH (apartamente sud pornesc IMEDIAT după coridor)
+    // Nucleele de scări (coreH=6.6m) se suprapun parțial, dar colBounds le exclude pe x
     const northMaxD_  = coreY;
-    const southStart_ = coreY + coreH;
+    const southStart_ = coreY + corrH;   // ← era coreY+coreH → lăsa 5m gol
     const southAvailD_= bD - southStart_;
 
     const colBounds=[];
