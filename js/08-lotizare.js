@@ -3261,5 +3261,12 @@ window._lotShowNormsForLot  = _lotShowNormsForLot;
 window._lotHighlightOnMap   = _lotHighlightOnMap;
 window._lotBilantPUG        = _lotBilantPUG;
 window._genLotizareOrganic  = _genLotizareOrganic;
+// Funcții demolare — necesare pentru onclick handlers din HTML generat (#28)
+window._lotDemoModeToggle   = _lotDemoModeToggle;
+window._lotDemoMarkAll      = _lotDemoMarkAll;
+window._lotDemoClearAll     = _lotDemoClearAll;
+window._lotDemoRefresh      = _lotDemoRefresh;
+window._lotSetDemolare      = _lotSetDemolare;
+window._lotDemoUpdatePanel  = _lotDemoUpdatePanel;
 
 console.log('[UrbanX Lotizare+] ✅ Extensii încărcate: Releveu, Normative/lot, MapClick, Organic, DataBus');

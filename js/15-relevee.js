@@ -2033,7 +2033,8 @@ function _rvDNARadar(b, P, fl){
       {name:'NP057',ok:roomsOk,msg:roomsOk?'✓ Suprafețe conforme':'✗ Camere sub minim'},
       {name:'Parcaje',ok:parcSup>=parcNec,msg:parcSup>=parcNec?`✓ ${parcSup}/${parcNec} locuri · ${fnDNA.pk_norm}`:`✗ ${parcSup}/${parcNec} · ${fnDNA.pk_norm}`},
     ];
-    el.innerHTML=details.map(d=>`<div><span style="color:${d.ok?'#22C55E':'#EF4444'};font-weight:700">${d.name}:</span> ${d.msg}</div>`).join('');
+    el.innerHTML=details.map(d=>`<div><span style="color:${d.ok?'#22C55E':'#EF4444'};font-weight:700">${d.name}:</span> ${d.msg}</div>`).join('') +
+      _rvDNAGetSolutii(b, P, potOk, cutOk, solarIssues, isuOk, roomsOk, parcSup, parcNec);
   },50);
   return `<svg width="140" height="140" viewBox="0 0 140 140">
     ${ringsStr}${axesStr}${polyStr}${dotsStr}${labelsStr}
@@ -2177,6 +2178,10 @@ function _rvBuildAvizeTimeline(b, P){
 // ══════════════════════════════════════════════════════════════════════════
 // SCENARII A/B — Comparare două configurații
 // ══════════════════════════════════════════════════════════════════════════
+// Ce vedeți: Scenariu A = configurația curentă (parametri setați)
+//            Scenariu B = configurația propusă (alt număr de niveluri)
+// Cum se interpretează: comparați SDA, SC, H, parcaje, cost estimat
+// Controlul "Niveluri B" din bara de sub taburi modifică Scenariu B în timp real
 function _rvRenderScenarii(b){
   const P=b.P||_RV.parcelParams; if(!P) return;
   const {cv,ctx}=_rvInitCanvas(900,600);
@@ -2535,8 +2540,134 @@ function _rvUpdatePanels(b,P){
         <div style="font-size:7.5px;color:rgba(100,120,150,.8);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.detail}</div>
       </div>
       <div style="font-size:8px;color:${r.ok?'rgba(52,211,153,.9)':'rgba(248,113,113,.9)'};flex-shrink:0;margin-left:4px">${r.ok?'✓':'⚠'}</div>
-    </div>`).join('');
+    </div>`).join('') +
+    // Buton auto-generare toate (#5 audit)
+    `<button onclick="_rvGenerateAllAffected()" style="width:calc(100% - 20px);margin:8px 10px 4px;padding:7px;
+      background:linear-gradient(135deg,rgba(212,175,55,.18),rgba(212,175,55,.08));
+      border:1px solid rgba(212,175,55,.4);border-radius:8px;
+      color:#D4AF37;font-size:9.5px;font-weight:700;cursor:pointer;letter-spacing:.03em;
+      display:flex;align-items:center;justify-content:center;gap:6px">
+      ⚡ Generează automat toate studiile afectate
+    </button>`;
   }
+}
+
+// ── Auto-generare studii afectate (#5 audit) ─────────────────────────────────
+async function _rvGenerateAllAffected(){
+  const queue = [
+    {fn:'generateSolarStudy',   label:'Studiu Însorire'},
+    {fn:'generateCPE',          label:'Certificat Performanță Energetică'},
+    {fn:'generateSSF',          label:'Studiu Siguranță Foc (ISU)'},
+    {fn:'generateTrafficStudy', label:'Studiu Impact Trafic'},
+    {fn:'generateNoiseStudy',   label:'Studiu Acustic'},
+    {fn:'generateGeotehnicalStudy', label:'Pre-Studiu Geotehnic'},
+  ];
+  ss('⚡ Se generează automat '+queue.length+' studii afectate...');
+  for(let i=0; i<queue.length; i++){
+    const {fn, label} = queue[i];
+    if(typeof window[fn] === 'function'){
+      ss(`⚡ [${i+1}/${queue.length}] ${label}...`);
+      try{ await window[fn](); }catch(e){ console.warn('Auto-gen '+fn+':', e.message); }
+      await new Promise(r=>setTimeout(r, 800)); // pauză între studii
+    }
+  }
+  ss('✅ Toate studiile afectate au fost generate — verificați folderul Downloads');
+}
+
+// ── DNA Soluții de conformitate (#6 audit) ────────────────────────────────────
+// Apelat din _rvDNARadar când există axe neconforme — returnează HTML cu soluții
+function _rvDNAGetSolutii(b, P, potOk, cutOk, solarIssues, isuOk, roomsOk, parcSup, parcNec){
+  const fnCfg = FN_CONFIG[_RV.fn] || FN_CONFIG.rez;
+  const solutii = [];
+
+  if(!potOk){
+    const depPct = Math.round(b.scArea/P.area*100) - Math.round(P.pot*100);
+    solutii.push({
+      axa:'POT', status:'neconform', col:'#EF4444',
+      titlu:'Depășire POT cu '+depPct+'%',
+      solutii:[
+        'Reducere amprentă edificiu prin repoziționare față de limitele parcelei',
+        'Soluție cu mai multe niveluri (crește CUT, reduce SC)',
+        'Etajare progresivă — etajele superioare retrase față de amprentă',
+        'Consultați PUG pentru derogări conf. art. 22 Legea 350/2001',
+      ]
+    });
+  }
+  if(!cutOk){
+    const depCut = ((b.sdaTotal/P.area) - P.cut).toFixed(2);
+    solutii.push({
+      axa:'CUT', status:'neconform', col:'#EF4444',
+      titlu:'Depășire CUT cu +'+depCut,
+      solutii:[
+        'Reducere număr niveluri (H max) sau suprafețe pe etaj',
+        'Eliminare subsol sau mansardă din SDA dacă nu e locuință',
+        'Verificare calcul SDA — unele funcțiuni se exclud (garaje, tehnic)',
+        'PUZ poate permite derogare pentru CUT motivat conf. RGU HG 525/1996',
+      ]
+    });
+  }
+  if(solarIssues > 0 && fnCfg.omsInsorire){
+    solutii.push({
+      axa:'OMS 119', status:'neconform', col:'#F59E0B',
+      titlu:solarIssues+' camere cu însorire insuficientă (<'+fnCfg.omsMin+'h/zi)',
+      solutii:[
+        'Reorientare clădire — fațada principală spre Sud sau Sud-Est',
+        'Mărire geamuri pe fațada sudică (min 1/8 din suprafața pardoselii)',
+        'Reconfigurare plan: camerele de dormit pe fațada insorită',
+        'Distanțe minime față de obstrucții: H/2 față de clădiri vecine',
+        'Studiu Însorire detaliat conf. OMS 119/2014 — obligatoriu la PA',
+      ]
+    });
+  }
+  if(!isuOk){
+    solutii.push({
+      axa:'ISU', status:'neconform', col:'#F59E0B',
+      titlu:'Căi de evacuare peste '+fnCfg.isuDist+'m ('+fnCfg.isuNorm+')',
+      solutii:[
+        'Adăugare nucleu de scări suplimentar — max '+fnCfg.isuDist+'m între nuclee',
+        'Lărgire coridor evacuare la min. '+fnCfg.scaraMin+'m liber',
+        'Compartiment antifoc suplimentar dacă SDA/nivel > 2500m²',
+        'Consultare aviz ISU Moldova înainte de PA conf. Legea 307/2006',
+      ]
+    });
+  }
+  if(!roomsOk){
+    solutii.push({
+      axa:'NP 057', status:'neconform', col:'#F59E0B',
+      titlu:'Camere sub suprafața minimă NP 057/2002',
+      solutii:[
+        'Living/sufragerie: min 18m² (2 pers.) sau 22m² (3+ pers.)',
+        'Dormitor 1: min 14m², Dormitor 2: min 12m²',
+        'Bucătărie: min 8m² + oficiu sau bucătărie-living min 18m²',
+        'Reorganizare plan — eliminare camere mici prin unificare',
+      ]
+    });
+  }
+  if(parcSup < parcNec){
+    solutii.push({
+      axa:'Parcaje', status:'neconform', col:'#EF4444',
+      titlu:'Deficit '+( parcNec-parcSup)+' locuri parcare (NP 067/2002)',
+      solutii:[
+        'Subsol parcare — '+(parcNec-parcSup)+' locuri suplimentare',
+        'Parcaj etajat dacă teren permite (min 2.8m înălțime/nivel)',
+        'Compensare prin parcaj public autorizat în max. 300m conf. HCL',
+        'Calcul exact conf. NP 067/2002 — poate fi mai mic decât estimat',
+      ]
+    });
+  }
+
+  if(!solutii.length) return '';
+
+  return `<div style="margin-top:8px;border-top:1px solid rgba(255,255,255,.07);padding-top:6px">
+    <div style="font-size:8px;font-weight:700;color:#D4AF37;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px">
+      💡 Soluții de conformitate
+    </div>
+    ${solutii.map(s=>`
+    <div style="margin-bottom:8px;padding:6px 8px;background:rgba(${s.col.slice(1).match(/.{2}/g).map(x=>parseInt(x,16)).join(',')},0.06);border-left:2px solid ${s.col};border-radius:0 6px 6px 0">
+      <div style="font-size:8px;font-weight:700;color:${s.col};margin-bottom:3px">${s.axa}: ${s.titlu}</div>
+      ${s.solutii.map(sol=>`<div style="font-size:7.5px;color:rgba(180,200,230,.75);margin-bottom:1px">▸ ${sol}</div>`).join('')}
+    </div>`).join('')}
+  </div>`;
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -4479,6 +4610,12 @@ function _rvMobSync(){
   copy('rv-norm','rv-mob-norm');
   copy('rv-rapoarte-aff','rv-mob-rapoarte');
   copy('rv-dna','rv-mob-dna');
+  // Sincronizăm și legenda detaliată pe mobil
+  setTimeout(()=>{
+    const src=document.getElementById('rv-dna-score-detail');
+    const dst=document.getElementById('rv-mob-dna-score-detail');
+    if(src&&dst) dst.innerHTML=src.innerHTML;
+  },150);
   // Avize timeline
   const avize=document.getElementById('rv-mob-avize');
   if(avize&&_RV.building&&_RV.parcelParams)avize.innerHTML=_rvBuildAvizeTimeline(_RV.building,_RV.parcelParams);
@@ -4999,10 +5136,30 @@ function _rvInject(){
       <!-- DNA tab -->
       <div class="rv-mob-panel" id="rv-mob-panel-dna" style="display:none">
         <div class="rv-rst">⬡ DNA URBAN — AMPRENTĂ NORMATIVĂ</div>
-        <div style="display:flex;align-items:center;gap:12px;padding:8px 0">
-          <div id="rv-mob-dna"></div>
-          <div id="rv-mob-dna-metrics" style="flex:1;font-size:9px;color:#7A90B0;line-height:1.8"></div>
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:8px 0">
+          <div id="rv-mob-dna" style="flex-shrink:0"></div>
+          <div style="flex:1;min-width:0">
+            <div id="rv-mob-dna-metrics" style="font-size:9px;color:#7A90B0;line-height:1.8"></div>
+            <!-- Legendă axe -->
+            <div style="margin-top:6px;display:grid;grid-template-columns:1fr 1fr;gap:2px 8px">
+              ${[['POT','#22C55E','Ocupare teren'],['CUT','#22C55E','Utilizare teren'],
+                 ['OMS','#FCD34D','Însorire OMS 119'],['ISU','#EF4444','Evacuare P118'],
+                 ['NP057','#60A5FA','Supraf. min.'],['Parcaje','#F97316','NP 067/2002']
+                ].map(([ax,col,desc])=>`
+              <div style="display:flex;align-items:center;gap:4px" title="${desc}">
+                <span style="width:6px;height:6px;border-radius:50%;background:${col};flex-shrink:0;display:inline-block"></span>
+                <span style="font-size:7.5px;font-weight:700;color:${col}">${ax}</span>
+                <span style="font-size:7px;color:#3A5070;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${desc}</span>
+              </div>`).join('')}
+            </div>
+            <!-- Bara gradient 0→100 -->
+            <div style="margin-top:6px;height:3px;background:linear-gradient(90deg,#EF4444,#F59E0B,#22C55E);border-radius:2px"></div>
+            <div style="display:flex;justify-content:space-between;font-size:7px;color:#3A5070;margin-top:1px">
+              <span>0 Neconform</span><span>100 Optim</span>
+            </div>
+          </div>
         </div>
+        <div id="rv-mob-dna-score-detail" style="font-size:8px;color:#4A6080;line-height:1.6;padding-top:6px;border-top:1px solid rgba(255,255,255,.06)"></div>
       </div>
 
       <!-- Overlays tab -->
