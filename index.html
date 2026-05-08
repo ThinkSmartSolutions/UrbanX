@@ -932,7 +932,20 @@ canvas#c2d{width:100%;height:100%;display:block}
   <button class="tb-btn" onclick="showUATSelector()" title="Schimbă UAT-ul activ" style="border-color:rgba(212,175,55,.4);color:#d4af37;display:flex;align-items:center;gap:4px">📍 <span id="uat-indicator">Iași</span></button>
 
   <div class="spacer"></div>
-  <button id="btnPanel" class="tb-btn" title="Arată/ascunde panou" style="background:rgba(212,175,55,.2);border-color:#d4af37;color:#d4af37;font-size:16px">☰</button>
+  <!-- Ascunde/afișează panel lateral — desktop (#12 audit) -->
+  <button id="btnPanel" class="tb-btn" title="Arată/ascunde panou" onclick="
+    const p=document.getElementById('panel');
+    if(p){
+      const hidden=p.style.display==='none';
+      p.style.display=hidden?'':'none';
+      this.style.opacity=hidden?'1':'0.5';
+      this.title=hidden?'Ascunde panoul':'Arată panoul';
+    }
+  " style="background:rgba(212,175,55,.2);border-color:#d4af37;color:#d4af37;font-size:16px">☰</button>
+  <!-- Ghid rapid utilizator nou (#12) -->
+  <button id="btnQuickStart" onclick="_toggleQuickStart()" title="Ghid rapid — cum obții un raport în 60 secunde" style="background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.35);color:#818cf8;border-radius:7px;padding:4px 10px;cursor:pointer;font-size:11px;font-weight:600;flex-shrink:0;display:none;align-items:center;gap:4px" id="btn-quickstart">
+    ❓ Ghid rapid
+  </button>
 
   <!-- Grup 2: Vizualizare dropdown -->
   <div id="viz-group">
@@ -959,11 +972,19 @@ canvas#c2d{width:100%;height:100%;display:block}
 </div>
 
 <!-- VIZ MENU — fixed, outside topbar -->
-<div id="viz-menu" style="display:none;position:fixed;top:48px;background:rgba(7,14,28,.97);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:6px;min-width:190px;z-index:9100;box-shadow:0 8px 32px rgba(0,0,0,.7);backdrop-filter:blur(12px)">
-  <div style="padding:4px 8px 5px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700">Perspectivă</div>
-  <button id="btn3D" onclick="set3D(60,-20);_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏙 Vedere 3D (60°)</button>
-  <button id="btn2D" onclick="set3D(0,0);_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">⬛ Vedere 2D (plan)</button>
-  <button id="btnSV" onclick="svOpen();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🚶 Street View</button>
+<div id="viz-menu" style="display:none;position:fixed;top:48px;background:rgba(7,14,28,.97);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:6px;min-width:200px;z-index:9100;box-shadow:0 8px 32px rgba(0,0,0,.7);backdrop-filter:blur(12px)">
+  <div style="padding:4px 8px 5px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700">Perspectivă hartă</div>
+  <button id="btn3D" onclick="set3D(60,-20);_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏙 Vedere 3D izometrică (60°)</button>
+  <button id="btn2D" onclick="set3D(0,0);_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">⬛ Vedere 2D — Plan</button>
+  <!-- Camera presets pentru viewer 3D (#11) -->
+  <div style="padding:5px 8px 2px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.06);margin-top:3px">Vederi preset (Viewer 3D)</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:3px">
+    <button id="P" onclick="window._setCameraPreset('P');_closeAllMenus()" style="background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.25);color:#a78bfa;border-radius:6px;padding:6px 4px;cursor:pointer;font-size:11px;font-weight:600" title="Perspectivă 3/4">🎯 Perspectivă</button>
+    <button id="F" onclick="window._setCameraPreset('F');_closeAllMenus()" style="background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.25);color:#60a5fa;border-radius:6px;padding:6px 4px;cursor:pointer;font-size:11px;font-weight:600" title="Față Nord">⬆ Față</button>
+    <button id="L" onclick="window._setCameraPreset('L');_closeAllMenus()" style="background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.25);color:#60a5fa;border-radius:6px;padding:6px 4px;cursor:pointer;font-size:11px;font-weight:600" title="Lateral Est">➡ Lateral</button>
+    <button id="T" onclick="window._setCameraPreset('T');_closeAllMenus()" style="background:rgba(148,163,184,.1);border:1px solid rgba(148,163,184,.25);color:#94a3b8;border-radius:6px;padding:6px 4px;cursor:pointer;font-size:11px;font-weight:600" title="Vedere de sus">⬛ Top (plan)</button>
+  </div>
+  <button id="btnSV" onclick="svOpen();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px;border-top:1px solid rgba(255,255,255,.06);margin-top:3px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🚶 Street View</button>
   <button id="btnLegend" onclick="toggleFnLegend(this);_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🎨 Legendă funcțiuni</button>
   <div style="padding:5px 8px 2px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.06);margin-top:3px">Stil hartă</div>
   <select class="tb-sel" id="selBase" style="display:block;width:calc(100% - 4px);margin:4px 2px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#e2e8f0;padding:6px 8px;font-size:12px;cursor:pointer">
@@ -1336,7 +1357,7 @@ canvas#c2d{width:100%;height:100%;display:block}
 <script src="js/07-pdf-utils.js?v=2026050601"></script>
 <script src="js/08-lotizare.js?v=2026050802"></script>
 <script src="js/09-pdf-engine.js?v=2026050601"></script>
-<script src="js/10-studies.js?v=2026050803"></script>
+<script src="js/10-studies.js?v=2026050804"></script>
 <script src="js/11-viewer3d.js?v=2026050601"></script>
 <script src="js/12-admin.js?v=2026050601"></script>
 <script src="js/13-info-drawer.js?v=2026050702"></script>
@@ -1604,19 +1625,78 @@ canvas#c2d{width:100%;height:100%;display:block}
   window._mob3DLight = function(anchor){
     try{
       if(!window.map) return;
-      // Seteaza pozitia soarelui in Mapbox GL
-      map.setLight({
-        anchor:'map',
-        color:'white',
-        intensity: anchor > 0.9 ? 0.05 : (anchor > 0.7 ? 0.3 : (anchor < 0.3 ? 0.85 : 0.7)),
-        position:[1.15, anchor*360, 90*(1-Math.abs(anchor-0.5)*2)]
-      });
-      // Feedback
-      const icons=['🌙','☁️','🌅','☀️'];
-      const icon=anchor<0.3?'☀️':anchor<0.5?'🌅':anchor<0.8?'☁️':'🌙';
-      document.getElementById('mob-light-btn').textContent=icon;
+      // Iluminare îmbunătățită (#11 audit) — Zi și Înnorat mai spectaculoase
+      let color, intensity, position;
+      if(anchor >= 0.9){        // 🌙 Noapte
+        color='#0a1628'; intensity=0.05;
+        position=[1.15, 180, 10];
+      } else if(anchor >= 0.7){ // ☁️ Înnorat — albastru difuz, umbra moale
+        color='#c8d8f0'; intensity=0.55;
+        position=[1.2, 200, 65];
+      } else if(anchor >= 0.4){ // 🌅 Golden hour — portocaliu cald
+        color='#ffb347'; intensity=0.92;
+        position=[1.15, 290, 18];
+      } else {                  // ☀️ Zi — lumina albă puternică, contraste clare
+        color='#ffffff'; intensity=1.0;
+        position=[1.15, 210, 55];
+      }
+      map.setLight({anchor:'map', color, intensity, position});
+      const icon = anchor>=0.9?'🌙':anchor>=0.7?'☁️':anchor>=0.4?'🌅':'☀️';
+      const lbl = document.getElementById('mob-light-btn');
+      if(lbl) lbl.textContent=icon;
     }catch(e){ console.warn('light:',e.message); }
   };
+
+  // ── Fix #11: P/F/L/T camera presets ──────────────────────────────────────
+  // Patch-uim funcțiile din 11-viewer3d.js care sacadează sau dau același view
+  window._setCameraPreset = function(preset){
+    if(!window.map || !window.set3D) return;
+    const cfg = {
+      P:  {pitch:55, bearing:-25, label:'Perspectivă'},   // izometrică 3/4
+      F:  {pitch:50, bearing:0,   label:'Față (Nord)'},    // față principală
+      FB: {pitch:50, bearing:180, label:'Față (Sud)'},     // față posterioară
+      L:  {pitch:50, bearing:90,  label:'Lateral (Est)'},  // lateral dreapta
+      LD: {pitch:50, bearing:270, label:'Lateral (Vest)'}, // lateral stânga
+      T:  {pitch:0,  bearing:0,   label:'Plan (Top)'},     // vedere de sus
+    };
+    const c = cfg[preset];
+    if(!c) return;
+    map.easeTo({pitch:c.pitch, bearing:c.bearing, duration:1000,
+      zoom: map.getZoom() < 16 ? 17 : map.getZoom()});
+    // Actualizăm slidere dacă există
+    const spitch=document.getElementById('slPitch'), sbear=document.getElementById('slBearing');
+    const vpitch=document.getElementById('pitchV'), vbear=document.getElementById('bearV');
+    if(spitch) spitch.value=c.pitch;
+    if(sbear)  sbear.value=(c.bearing+360)%360;
+    if(vpitch) vpitch.textContent=c.pitch+'°';
+    if(vbear)  vbear.textContent=((c.bearing+360)%360)+'°';
+    ss('📷 Vedere: '+c.label);
+  };
+
+  // Patch butoane P/F/L/T dacă sunt deja în DOM sau vor fi adăugate
+  function _patchCameraButtons(){
+    const map_p={
+      'P':'P', 'F':'F', 'L':'L', 'T':'T',
+      'btnCamP':'P','btnCamF':'F','btnCamL':'L','btnCamT':'T'
+    };
+    Object.entries(map_p).forEach(([id,preset])=>{
+      const btn=document.getElementById(id);
+      if(btn) btn.onclick=()=>window._setCameraPreset(preset);
+    });
+    // Căutăm și după text content (butoane cu literele P/F/L/T)
+    document.querySelectorAll('button').forEach(btn=>{
+      const t=btn.textContent?.trim();
+      if(['P','F','L','T'].includes(t) && !btn._camPatched){
+        btn._camPatched=true;
+        const preset=t;
+        btn.onclick=()=>window._setCameraPreset(preset);
+      }
+    });
+  }
+  // Rulăm patch acum și după 2s (când viewer3D e gata)
+  _patchCameraButtons();
+  setTimeout(_patchCameraButtons, 2000);
+  setTimeout(_patchCameraButtons, 5000);
 
   // Afiseaza FAB-ul cand pitch > 20 pe mobil
   function _checkShowLightFab(){
@@ -1806,6 +1886,93 @@ window.openStudyMap = openStudyMap;
   </div>
 </div>
 
+
+<!-- ═══ QUICK-START GUIDE (#12 audit) — Flow 60 secunde ═══════════════ -->
+<div id="quick-start-modal" style="display:none;position:fixed;inset:0;z-index:9500;background:rgba(4,8,18,.85);backdrop-filter:blur(8px);align-items:center;justify-content:center">
+  <div style="background:#0b1426;border:1px solid rgba(212,175,55,.3);border-radius:16px;padding:24px;max-width:480px;width:90%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.7)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div>
+        <div style="font-size:16px;font-weight:700;color:#d4af37">⚡ Raport în 60 secunde</div>
+        <div style="font-size:11px;color:#475569;margin-top:2px">Ghid rapid UrbanX — Urbanism digitalizat integrat</div>
+      </div>
+      <button onclick="_toggleQuickStart()" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#94a3b8;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:13px">✕</button>
+    </div>
+    <div style="display:flex;gap:12px;padding:10px;border-radius:10px;background:rgba(255,255,255,.03);border:0.5px solid rgba(255,255,255,.06);margin-bottom:8px">
+      <div style="width:28px;height:28px;border-radius:50%;background:rgba(212,175,55,.2);border:1px solid rgba(212,175,55,.4);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#d4af37;flex-shrink:0">1</div>
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:600;color:#e2e8f0;margin-bottom:2px">🗺 Selectează UAT-ul</div>
+        <div style="font-size:11px;color:#64748b;line-height:1.5">Apasă pe butonul <b>📍 Iași</b> din topbar și alege județul/municipiul/comuna din listă.</div>
+      </div>
+      <div style="font-size:10px;color:#475569;flex-shrink:0;margin-top:2px">~5s</div>
+    </div>
+    <div style="display:flex;gap:12px;padding:10px;border-radius:10px;background:rgba(255,255,255,.03);border:0.5px solid rgba(255,255,255,.06);margin-bottom:8px">
+      <div style="width:28px;height:28px;border-radius:50%;background:rgba(212,175,55,.2);border:1px solid rgba(212,175,55,.4);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#d4af37;flex-shrink:0">2</div>
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:600;color:#e2e8f0;margin-bottom:2px">🔍 Caută parcela</div>
+        <div style="font-size:11px;color:#64748b;line-height:1.5">În tab-ul <b>Căutare</b> introdu numărul cadastral sau adresa. Parcela apare evidențiată pe hartă.</div>
+      </div>
+      <div style="font-size:10px;color:#475569;flex-shrink:0;margin-top:2px">~10s</div>
+    </div>
+    <div style="display:flex;gap:12px;padding:10px;border-radius:10px;background:rgba(255,255,255,.03);border:0.5px solid rgba(255,255,255,.06);margin-bottom:8px">
+      <div style="width:28px;height:28px;border-radius:50%;background:rgba(212,175,55,.2);border:1px solid rgba(212,175,55,.4);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#d4af37;flex-shrink:0">3</div>
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:600;color:#e2e8f0;margin-bottom:2px">📐 Generează volumul</div>
+        <div style="font-size:11px;color:#64748b;line-height:1.5">Tab <b>Analiză</b> → ajustează niveluri, funcțiune, setbacks → apasă <b>Actualizează</b>.</div>
+      </div>
+      <div style="font-size:10px;color:#475569;flex-shrink:0;margin-top:2px">~15s</div>
+    </div>
+    <div style="display:flex;gap:12px;padding:10px;border-radius:10px;background:rgba(255,255,255,.03);border:0.5px solid rgba(255,255,255,.06);margin-bottom:8px">
+      <div style="width:28px;height:28px;border-radius:50%;background:rgba(212,175,55,.2);border:1px solid rgba(212,175,55,.4);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#d4af37;flex-shrink:0">4</div>
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:600;color:#e2e8f0;margin-bottom:2px">📋 Alege studiul</div>
+        <div style="font-size:11px;color:#64748b;line-height:1.5">Din topbar <b>📋 Rapoarte ▾</b> alege studiul dorit din cele 7 categorii.</div>
+      </div>
+      <div style="font-size:10px;color:#475569;flex-shrink:0;margin-top:2px">~5s</div>
+    </div>
+    <div style="display:flex;gap:12px;padding:10px;border-radius:10px;background:rgba(255,255,255,.03);border:0.5px solid rgba(255,255,255,.06);margin-bottom:8px">
+      <div style="width:28px;height:28px;border-radius:50%;background:rgba(212,175,55,.2);border:1px solid rgba(212,175,55,.4);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#d4af37;flex-shrink:0">5</div>
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:600;color:#e2e8f0;margin-bottom:2px">📄 Descarcă PDF</div>
+        <div style="font-size:11px;color:#64748b;line-height:1.5">Studiul se generează automat. PDF-ul se descarcă în folderul Downloads.</div>
+      </div>
+      <div style="font-size:10px;color:#475569;flex-shrink:0;margin-top:2px">~25s</div>
+    </div>
+
+    <div style="margin-top:12px;padding:10px;background:rgba(212,175,55,.08);border-radius:8px;border:1px solid rgba(212,175,55,.2)">
+      <div style="font-size:11px;color:#d4af37;font-weight:600;margin-bottom:4px">💡 Scurtături utile</div>
+      <div style="font-size:10.5px;color:#94a3b8;line-height:1.8">
+        <b>Escape</b> — Anulează selecția activă<br>
+        <b>Rapoarte → Hartă Conexiuni</b> — Vizualizează ce studii sunt legate<br>
+        <b>⬡ DNA Radar</b> — Scor normativ instant după generarea volumului<br>
+        <b>⚡ Auto-generare</b> — Generează toate studiile afectate dintr-o dată
+      </div>
+    </div>
+    <button onclick="_toggleQuickStart()" style="width:100%;margin-top:12px;padding:10px;background:linear-gradient(135deg,rgba(212,175,55,.2),rgba(212,175,55,.1));border:1px solid rgba(212,175,55,.4);border-radius:10px;color:#d4af37;font-size:13px;font-weight:700;cursor:pointer">
+      Am înțeles — Pornesc ✓
+    </button>
+  </div>
+</div>
+
+<script>
+function _toggleQuickStart(){
+  const m=document.getElementById('quick-start-modal');
+  if(!m) return;
+  const open=m.style.display==='flex';
+  m.style.display=open?'none':'flex';
+}
+// Arătăm butonul ghid rapid când utilizatorul e autentificat
+document.addEventListener('DOMContentLoaded',()=>{
+  setTimeout(()=>{
+    const btn=document.getElementById('btn-quickstart');
+    if(btn) btn.style.display='flex';
+    // Prima vizită → deschidem automat ghidul
+    if(!localStorage.getItem('ux_quickstart_seen')){
+      _toggleQuickStart();
+      localStorage.setItem('ux_quickstart_seen','1');
+    }
+  },3000);
+});
+</script>
 
 <!-- ═══ FIX #20 — CANCEL PARCEL / ADRESĂ FĂRĂ REFRESH ══════════════════ -->
 <div id="cancel-parcel-btn" style="display:none;position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:1200;background:rgba(239,68,68,.9);border:none;border-radius:999px;padding:10px 22px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,.5);letter-spacing:.02em;backdrop-filter:blur(8px)" onclick="window._cancelActiveParcel()">
