@@ -503,7 +503,6 @@ function htmlMobRapoarte(){
   </div>
   </div>`;
 }
-}
 
 
 // ═══ MOB SEARCH OVERLAY — rezultate căutare fix pe mobil ══════════════════
