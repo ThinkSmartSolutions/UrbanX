@@ -435,44 +435,74 @@ function htmlMobRapoarte(){
     </button>
     <button onclick="infoDrawerOpen('${infoKey}')" title="Detalii studiu" style="background:rgba(${color},.08);border:1px solid rgba(${color},.25);color:rgba(${color},.8);border-radius:10px;padding:0 12px;cursor:pointer;font-size:13px;flex-shrink:0;font-weight:700">ⓘ</button>
   </div>`;
+  const cat=(label,col)=>`<div style="font-size:9px;color:#${col||'475569'};text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin:8px 0 5px;display:flex;align-items:center;gap:6px"><span style="flex:1;height:1px;background:rgba(${col?col.replace(/(.{2})(.{2})(.{2})/,'$1,$2,$3'):'71,85,105'},.3)"></span>${label}<span style="flex:2;height:1px;background:rgba(${col?col.replace(/(.{2})(.{2})(.{2})/,'$1,$2,$3'):'71,85,105'},.3)"></span></div>`;
   return`
+  <div style="padding:4px 0 6px">
   <div class="section">📋 Rapoarte & Studii Urbane</div>
   ${warn}
-  <div style="font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Rapoarte principale</div>
-  <div class="card" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">
-    ${btn('runExport()','255,255,255','📄','Raport Urbanistic Complet','POT, CUT, H, funcțiuni, aliniamente','raport_complet')}
-    ${btn('_lotExportPDF()','192,132,252','🏘','Plan de Lotizare PDF','Export plan ansamblu rezidential','lotizare')}
-    ${btn('generateMemoriu()','212,175,55','🏗','Memoriu Tehnic Preliminar','Document tehnic complet avize','memoriu')}
+  <button onclick="openStudyMap()" style="width:100%;margin-bottom:10px;padding:11px 14px;
+    background:linear-gradient(135deg,rgba(212,175,55,.15),rgba(99,102,241,.1));
+    border:1px solid rgba(212,175,55,.35);border-radius:10px;cursor:pointer;
+    display:flex;align-items:center;gap:10px;text-align:left">
+    <span style="font-size:22px">🗺</span>
+    <div>
+      <div style="font-size:12px;font-weight:800;color:#d4af37">Hartă Rapoarte & Conexiuni</div>
+      <div style="font-size:10px;color:#64748b;margin-top:1px">Ce studii ai nevoie · ce date circulă · scopuri AC/PUZ/NZEB</div>
+    </div>
+    <span style="margin-left:auto;font-size:11px;color:#d4af37;font-weight:700">→</span>
+  </button>
+
+  ${cat('① Analize de Bază — Prima etapă','d4af37')}
+  <div class="card" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px">
+    ${btn('generateStudiuAmplasament()','129,140,248','🗺','Studiu de Amplasament & Teritoriu','Document fundament — alimentează toate studiile','amplasament')}
+    ${btn('runExport()','255,255,255','📄','Raport Urbanistic Complet','POT, CUT, H, funcțiuni, aliniamente, norme PUG','raport_complet')}
   </div>
-  <div style="font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Studii tehnice</div>
-  <div class="card" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">
-    ${btn('generateSolarStudy()','251,191,36','☀','Studiu de Însorire','Ore soare, bilanț solar, OMS 119','insorire')}
-    ${btn('generateCPE()','52,211,153','⚡','Certificat Performanță Energetică','Clasa A-G · EP kWh/m²an · NZEB','cpe')}
-    ${btn('generateCPE()','52,211,153','⚡','Certificat Performanță Energetică','Clasa A-G, EP kWh/m²an, NZEB, C107','cpe')}
+
+  ${cat('② Proiectare Preliminară','d4af37')}
+  <div class="card" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px">
+    ${btn('generateRelevee()','212,175,55','📐','Memoriu Tehnic Preliminar','Planuri funcționale, secțiuni, axonometrie, norme','relevee')}
+    ${btn('generateMemoriu()','212,175,55','🏗','Memoriu Tehnic Avize','Document tehnic complet pentru avize','memoriu')}
+    ${btn('_lotExportPDF()','192,132,252','🏘','Plan de Lotizare PDF','Planuri ansamblu rezidential, parcele, circulații','lotizare')}
+  </div>
+
+  ${cat('③ Studii Tehnice — Obligatorii AC/CU','94,234,212')}
+  <div class="card" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px">
+    ${btn('generateSolarStudy()','251,191,36','☀','Studiu Însorire','Ore soare, bilanț solar OMS 119/2014','insorire')}
     ${btn('generateShadowStudy()','251,146,60','🌑','Studiu Umbre & Obstrucție','Umbre proiectate, distanțe critice','umbre')}
-    ${btn('generateNoiseStudy()','167,139,250','🔇','Studiu Acustic Urban','Zgomot, SR 10009/2017','acustic')}
-    ${btn('generateWindStudy()','56,189,248','🌬','Studiu Vânt & Confort Pietonal','Criteriu Lawson, zone calm','vant')}
-    ${btn('generateWaterStudy()','34,211,238','💧','Studiu Gospodărire Ape — DTGA','Aviz Apele Române, inundabilitate','apa')}
-    ${btn('generateGreenStudy()','74,222,128','🌿','Studiu Spații Verzi','SV necesar, plantare, permeabilitate','verde')}
-    ${btn('generateMobilityStudy()','244,114,182','🚗','Studiu Mobilitate & Parcaje','Parcaje, accese, NP 051','mobilitate')}
-    ${btn('generateDensityStudy()','148,163,184','📊','Studiu Densitate Urbană','CUT zonal, POT vecini','densitate')}
-  </div>
-  <div style="font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Studii speciale & avize</div>
-  <div class="card" style="display:flex;flex-direction:column;gap:6px">
+    ${btn('generateSSF()','248,113,113','🔥','Studiu Siguranță la Foc (ISU)','Aviz ISU Moldova, P118-2/2013, evacuare','isu')}
+    ${btn('generateGeotehnicalStudy()','167,139,250','🪨','Pre-Studiu Geotehnic','Seismicitate, NFA, capacitate portantă','geotehnic')}
     ${btn('generateAACR()','96,165,250','✈','Studiu AACR — Aviz Aeroport','ICAO Anexa 14, H maxim admis','aacr')}
-    ${btn('generateExistingBldStudy()','251,113,133','🏚','Studiu Construcții Existente','Inventar, scenarii intervenție','existente')}
-    ${btn('generateGeotehnicalStudy()','167,139,250','🪨','Pre-Studiu Geotehnic','Seismicitate, NFA, fundare','geotehnic')}
-    ${btn('generateTrafficStudy()','52,211,153','🚦','Studiu Impact Trafic','Trafic generat, parcaje, ITE','trafic')}
-    ${btn('generateIstoricStudy()','245,158,11','🏛','Studiu Patrimoniu & Istoric','LMI, zone protejate, avize MCID','patrimoniu')}
-    ${btn('generateEnvironmentalImpact()','134,239,172','🌿','Studiu Impact Mediu (EIM)','Impact asupra mediului, APM','eim')}
-    ${btn('generateStudiuAmplasament()','129,140,248','🗺','Studiu de Amplasament & Teritoriu','Document fundament, 13 domenii','amplasament')}
-    ${btn('generateSSF()','248,113,113','🔥','Studiu Siguranță la Foc (ISU)','Aviz ISU Moldova, P118','isu')}
-    ${btn('generateRelevee()','212,175,55','📐','Relevee Instant','Planuri funcționale din cadastru','relevee')}
   </div>
-  <div style="font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin:10px 0 6px">Studii tehnico-economice</div>
+
+  ${cat('④ Studii Mediu & Infrastructură','74,222,128')}
+  <div class="card" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px">
+    ${btn('generateEnvironmentalImpact()','134,239,172','🌿','Studiu Impact Mediu (EIM)','Impact APM, Legea 292/2018','eim')}
+    ${btn('generateWaterStudy()','34,211,238','💧','Studiu Gospodărire Ape — DTGA','Aviz Apele Române, inundabilitate','apa')}
+    ${btn('generateGreenStudy()','74,222,128','🌳','Studiu Spații Verzi','SV necesar, plantare, permeabilitate','verde')}
+    ${btn('generateNoiseStudy()','167,139,250','🔇','Studiu Acustic Urban','Zgomot, SR 10009/2017, noapte','acustic')}
+    ${btn('generateWindStudy()','56,189,248','🌬','Studiu Vânt & Confort Pietonal','Criteriu Lawson, zone calm','vant')}
+  </div>
+
+  ${cat('⑤ Studii Mobilitate & Impact','244,114,182')}
+  <div class="card" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px">
+    ${btn('generateTrafficStudy()','52,211,153','🚦','Studiu Impact Trafic','Trafic generat, parcaje NP 067, ITE','trafic')}
+    ${btn('generateMobilityStudy()','244,114,182','🚗','Studiu Mobilitate & Parcaje','Accese, NP 051, PMR','mobilitate')}
+    ${btn('generateDensityStudy()','148,163,184','📊','Studiu Densitate Urbană','CUT zonal, POT vecini, profil stradal','densitate')}
+  </div>
+
+  ${cat('⑥ Studii Speciale & Patrimoniu','245,158,11')}
+  <div class="card" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px">
+    ${btn('generateIstoricStudy()','245,158,11','🏛','Studiu Patrimoniu & Istoric','LMI, zone protejate, avize MCID/DJCPN','patrimoniu')}
+    ${btn('generateExistingBldStudy()','251,113,133','🏚','Studiu Construcții Existente','Inventar, scenarii demolare/consolidare','existente')}
+  </div>
+
+  ${cat('⑦ Studii Tehnico-Economice','212,175,55')}
   <div class="card" style="display:flex;flex-direction:column;gap:6px">
     ${btn('generateStudiuFezabilitate()','212,175,55','📊','Studiu Fezabilitate / DALI','Viabilitate economică, HG 907/2016','fezabilitate')}
+    ${btn('generateCPE()','52,211,153','⚡','Certificat Performanță Energetică','Clasa A-G · EP kWh/m²an · NZEB · Legea 372/2005','cpe')}
+  </div>
   </div>`;
+}
 }
 
 
@@ -526,7 +556,6 @@ function mobSearchOverlayUpdate(contentHtml){
 const SHORTCUT_CATALOG = [
   {id:'raport_pdf',      ico:'📄', label:'Raport Urbanistic',   fn:"showPdfModal?showPdfModal():runExport()"},
   {id:'studiu_insorire', ico:'☀',  label:'Studiu Însorire',     fn:"generateSolarStudy()"},
-  {id:'studiu_cpe',      ico:'⚡', label:'Certificat Energetic', fn:"generateCPE()"},
   {id:'aedis_open',      ico:'⚡', label:'Urban3D',              fn:"aedisOpen()"},
   {id:'genVol',          ico:'🏗', label:'Generează Volum 3D',  fn:"genVol()"},
   {id:'parcele_zona',    ico:'📦', label:'Parcele din Zonă',     fn:"doLoadLocalParcels()"},

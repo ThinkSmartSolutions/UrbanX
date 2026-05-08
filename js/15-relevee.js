@@ -1470,6 +1470,15 @@ function _rvSetupHover(cv,fl,ox,oy){
     wrap.style.cursor='default';
     wrap.addEventListener('mousedown',(e)=>{
       if(e.button!==0||e.target!==cv)return;
+      // Nu activăm pan dacă suntem pe un handle de resize al camerei selectate
+      if(_RV.selectedRoom){
+        const r=cv.getBoundingClientRect();
+        const mx=e.clientX-r.left, my=e.clientY-r.top;
+        const h=getHandle?.(mx,my);
+        if(h) return; // lasă resize-ul să preia
+      }
+      // Nu activăm pan dacă suntem în modul de resize activ
+      if(_RV.resizing) return;
       isPan=true;wrap.style.cursor='grabbing';
       panSX=e.clientX;panSY=e.clientY;panSL=wrap.scrollLeft;panST=wrap.scrollTop;
     });
@@ -2535,13 +2544,33 @@ function _rvUpdatePanels(b,P){
 // ══════════════════════════════════════════════════════════════════════════
 function _rvOpen(){
   if(!document.getElementById('rv-modal')) _rvInject();
-  document.getElementById('rv-modal').classList.add('rv-modal-open');
+  const rvM=document.getElementById('rv-modal');
+  rvM.style.visibility='visible';
+  rvM.classList.add('rv-modal-open');
   _RV.open=true;
 }
 
 function closeRelevee(){
-  document.getElementById('rv-modal')?.classList.remove('rv-modal-open');
+  const modal=document.getElementById('rv-modal');
+  if(!modal) return;
+  modal.classList.remove('rv-modal-open');
   _RV.open=false;
+  _RV.selectedRoom=null;
+  _RV.resizing=null;
+  // Ascundem complet după tranziție ca să nu interfere cu butoanele din spatele modal-ului
+  clearTimeout(window._rvCloseTimer);
+  window._rvCloseTimer=setTimeout(()=>{
+    if(!_RV.open) modal.style.visibility='hidden';
+  }, 320);
+  // Oprim orice animație solară
+  clearInterval(window._rvSolarInterval);
+}
+
+function openRelevee_safe(){
+  const modal=document.getElementById('rv-modal');
+  if(!modal) return;
+  modal.style.visibility='visible';
+  _RV.open=true;
 }
 
 function _rvTabClick(btn){
@@ -2703,13 +2732,27 @@ async function _rvExportPDF(){
     };
 
     // ── Header/Footer ────────────────────────────────────────────────
+    const fnCfgDoc = FN_CONFIG[_RV.fn] || FN_CONFIG.rez;
+    const uatInfo = (typeof getUATById === 'function' && _AEDIS?.uatId) ? getUATById(_AEDIS.uatId) : null;
+    const uatLabel = uatInfo?.label || S2(P.uat||'Municipiul Iași');
+    const judetLabel = uatInfo?.judet || 'Județul Iași';
+
     const hdr=(title,pg)=>{
-      pdf.setFillColor(...C.dark2);pdf.rect(0,0,W,9,'F');
+      // Header identic cu Studiu Amplasament (captura 1)
+      pdf.setFillColor(...C.dark2);pdf.rect(0,0,W,12,'F');
       pdf.setFillColor(...C.gold);pdf.rect(0,0,W,1.2,'F');
-      pdf.setTextColor(...C.gold);pdf.setFont('helvetica','bold');pdf.setFontSize(7);pdf.text('URBANX',5,6.2);
-      pdf.setTextColor(150,165,185);pdf.setFont('helvetica','normal');pdf.setFontSize(5.5);pdf.text('RELEVEE INSTANT · Prezentare elaborata',18,6.2);
-      pdf.setTextColor(220,230,245);pdf.setFont('helvetica','bold');pdf.setFontSize(7.5);pdf.text(S2(title),W/2,6.2,{align:'center'});
-      pdf.setTextColor(...C.gold);pdf.setFontSize(6.5);pdf.text('Pag. '+pg,W-5,6.2,{align:'right'});
+      // Logo UrbanX stanga
+      pdf.setFillColor(...C.gold);pdf.roundedRect(3.5,2.5,7,7,1,1,'F');
+      pdf.setTextColor(...C.dark2);pdf.setFont('helvetica','bold');pdf.setFontSize(7);pdf.text('UX',7,7.5,{align:'center'});
+      // Titlu document
+      pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(8);pdf.text('MEMORIU TEHNIC PRELIMINAR DE ARHITECTURĂ',14,5.5);
+      // UAT + cadastral + UTR (linia 2 din header)
+      pdf.setTextColor(...C.gold);pdf.setFont('helvetica','normal');pdf.setFontSize(5.5);
+      pdf.text(uatLabel+' · '+judetLabel+' · Nr.cad. '+S2(P.nrCad)+' · UTR '+S2(P.utr)+' · '+fnCfgDoc.label,14,9.5);
+      // Titlu pagina centrat
+      pdf.setTextColor(200,215,240);pdf.setFont('helvetica','bold');pdf.setFontSize(7);pdf.text(S2(title),W/2,7,{align:'center'});
+      // Paginatie dreapta
+      pdf.setTextColor(...C.gold);pdf.setFontSize(6.5);pdf.text('Pag. '+pg,W-5,7,{align:'right'});
     };
     const ftr=()=>{
       pdf.setFillColor(240,244,250);pdf.rect(0,H-7,W,7,'F');
@@ -3200,7 +3243,7 @@ async function _rvExportPDF(){
     pdf.setTextColor(...C.gold);pdf.setFont('helvetica','bold');pdf.setFontSize(22);pdf.text('URBANX',14,18);
     pdf.setTextColor(170,185,205);pdf.setFont('helvetica','normal');pdf.setFontSize(8);pdf.text('PLATFORMĂ NAȚIONALĂ DE ANALIZĂ URBANISTICĂ',14,25);
     // Title
-    pdf.setTextColor(245,248,255);pdf.setFont('helvetica','bold');pdf.setFontSize(26);pdf.text('RELEVEU ARHITECTURAL',14,H*0.46);
+    pdf.setTextColor(245,248,255);pdf.setFont('helvetica','bold');pdf.setFontSize(22);pdf.text('MEMORIU TEHNIC PRELIMINAR',14,H*0.44);
     pdf.setTextColor(245,248,255);pdf.setFont('helvetica','normal');pdf.setFontSize(11);pdf.text('Orientativ — Pre-proiectare · Verificare normative',14,H*0.46+10);
     pdf.setTextColor(...C.gold);pdf.setFont('helvetica','normal');pdf.setFontSize(8.5);pdf.text('Conf. Legii 50/1991 · NP 057/2002 · OMS 119/2014 · P118/2013 · C107/2022',14,H*0.46+18);
     pdf.setFillColor(45,70,120);pdf.rect(14,H*0.46+13,120,0.6,'F');
@@ -3895,12 +3938,42 @@ async function _rvExportPDF(){
     ftr();
 
     // ══════════════════════════════════════════════════════════════════
-    // PAG: CALCUL PARCAJE + PROPUNERE AMPLASAMENT
+    // PAG: ACCESE RECOMANDATE + CALCUL PARCAJE — cerinta captura 2 din audit
     // ══════════════════════════════════════════════════════════════════
     newPage();
-    hdr('CALCUL PARCAJE OBLIGATORII — NP 067/2002 + HCL IASI — Nr.cad. '+P.nrCad,pgN);
+    hdr('ACCESE + CALCUL PARCAJE OBLIGATORII — NP 067/2002 — Nr.cad. '+P.nrCad,pgN);
     pdf.setFillColor(255,255,255);pdf.rect(0,9,W,H-16,'F');
-    let parY=12;
+    let parY=13;
+
+    // ── SECTIUNEA ACCESE (captura 2 — obligatoriu in toate rapoartele) ─
+    pdf.setFillColor(...C.dark2);pdf.rect(10,parY,W-20,7,'F');
+    pdf.setFillColor(...C.gold);pdf.rect(10,parY,3,7,'F');
+    pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(8);
+    pdf.text('3. ACCESE RECOMANDATE',W/2,parY+4.8,{align:'center'});
+    parY+=10;
+    const dirMap={N:'Nord',S:'Sud',E:'Est',V:'Vest',NE:'Nord-Est',NV:'Nord-Vest',SE:'Sud-Est',SV:'Sud-Vest'};
+    const streetDir = dirMap[P.frontDir]||P.frontDir;
+    const uatRoad = uatInfo?.trafic?.drumuri_nationale?.[0] || 'strada principală';
+    const accessRows=[
+      ['Acces auto principal','De pe '+streetDir+' (front stradal) · lățime min. 6.0m (2 sensuri) sau 3.5m (1 sens) · vizibilitate min. 30m pe ambele direcții · conf. DN 537/2003'],
+      ['Acces pietonal','Separat de accesul auto · lățime min. 1.5m · facilitați PMR (rampă, suprafață non-alunecoasă) · conf. NP 051/2012'],
+      ['Front stradal','Latura '+streetDir+' — '+P.W.toFixed(1)+'m · '+uatRoad+' · Aliniament stradal: '+P.rf+'m retragere față'],
+      ['Acces servicii','Pe latura laterală sau posterioară · lățime min. 3.5m (dacă există funcțiuni de servire)'],
+      ['Platformă parcare','Min. 4.50×2.50m/loc (perpendicular) sau 5.50m lungime + culoar 7.5m (90°) · conf. NP 067/2002'],
+      ['Semaforizare','Nu se impune la acest nivel de trafic (<100v/h) · se recomandă studiu de intersecție dacă >200v/h'],
+    ];
+    accessRows.forEach(([lbl,desc],ai)=>{
+      pdf.setFillColor(ai%2?248:255,ai%2?250:252,252);pdf.rect(10,parY,W-20,7.5,'F');
+      pdf.setFillColor(...C.gold);pdf.rect(10,parY,2,7.5,'F');
+      pdf.setTextColor(...C.dark2);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);pdf.text(lbl,13,parY+2.8);
+      pdf.setTextColor(40,60,90);pdf.setFont('helvetica','normal');pdf.setFontSize(5);
+      const lines=pdf.splitTextToSize(S2(desc),W-28);
+      lines.forEach((l,li)=>pdf.text(l,13,parY+5.8+li*3.2));
+      parY+=8;
+    });
+    parY+=5;
+
+    // ── CALCUL PARCAJE ────────────────────────────────────────────────
     const totalAptParc_=Math.max(1,Math.round(b.sdaTotal/70));
     const parcNecRez_=Math.ceil(totalAptParc_*1.2);
     const parcPMR_2=Math.max(2,Math.ceil(parcNecRez_*0.05));
@@ -4894,7 +4967,11 @@ function _rvInject(){
       <button class="rv-zbtn" onclick="_rvZoom(1)">+</button>
       <button class="rv-zbtn" onclick="{_RV.scale=12;document.getElementById('rv-zval').textContent='100%';if(_RV.building)_rvRender();}" style="font-size:9px;font-weight:700;width:auto;padding:0 8px">FIT</button>
       <div id="rv-mob-info-btn" onclick="_rvMobSheet()">📊 Analiză</div>
-      <div class="rv-expbtn-png" onclick="_rvExportPNG()" style="background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);font-size:11px;padding:6px 14px;font-weight:700;letter-spacing:.03em;cursor:pointer;border-radius:8px;color:#22C55E">🖼 PNG</div>
+      <div class="rv-expbtn-png" onclick="_rvExportPNG()"
+        style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);font-size:11px;padding:6px 14px;font-weight:700;letter-spacing:.03em;cursor:pointer;border-radius:8px;color:#22C55E;display:flex;align-items:center;gap:6px"
+        title="Exportă planșa curentă ca imagine PNG">
+        🖼 Export PNG
+      </div>
       <div class="rv-expbtn" onclick="_rvExport()" style="font-size:10px;padding:5px 10px;margin-left:4px">🖼 PNG</div>
     </div>
 
