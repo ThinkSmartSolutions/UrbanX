@@ -55,11 +55,14 @@ async function _captureStudyMapsSafe(ap, progressCb){
 (function(){
   const _colorDefs=[
     ['DARK',[8,21,42]],['DARK2',[15,35,70]],
-    ['GOLD',[212,175,55]],['GOLD2',[240,210,120]],
+    ['NAVY',[10,25,65]],
+    ['GOLD',[212,175,55]],['GOLD2',[240,210,120]],['GOLD3',[150,110,20]],
     ['BLUE',[59,130,246]],['BLUE2',[93,168,255]],
-    ['LIGHT',[245,247,252]],['LIGHT2',[235,239,248]],
+    ['LIGHT',[245,247,252]],['LIGHT2',[235,239,248]],['LIGHT3',[220,225,238]],
+    ['WHITE',[255,255,255]],
     ['RED',[220,38,38]],['GREEN',[16,130,60]],
     ['ORANGE',[234,120,20]],['PURPLE',[124,58,237]],
+    ['GRAY',[100,115,130]],
     ['GRAY2',[180,190,200]],['GRAY3',[130,145,160]],['GRAY4',[200,210,218]],
     ['TEAL',[0,128,120]],
   ];
@@ -77,7 +80,73 @@ function _stripEmoji(str){
     .replace(/\uFE0F/gu,'').replace(/\s{2,}/g,' ').trim();
 }
 
-// UrbanX — Studii si rapoarte urbanistice
+// ═══════════════════════════════════════════════════════════════════════════
+// AUDIT IMPLEMENTATION — DATA TRUST SYSTEM (recomandat in AUDIT_STUDII)
+// Clasificare surse date + confidence levels + study classification
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Niveluri de încredere per sursă de date (conform audit)
+const _DATA_TRUST = {
+  ANCPI:    { level: 95, label: 'ANCPI (oficial)', color: [16,130,60]  },
+  PUG_GIS:  { level: 90, label: 'PUG/GIS (oficial)', color: [59,130,246] },
+  OSM:      { level: 65, label: 'OSM (comunitar)', color: [234,120,20]  },
+  AI:       { level: 40, label: 'Estimare AI', color: [124,58,237]    },
+  CALCUL:   { level: 70, label: 'Calcul normativ', color: [0,128,120]  },
+};
+
+// Clasificare studii per tip (conform audit: Preview/Preliminary/Technical/Certified)
+const _STUDY_CLASS = {
+  ORIENTATIV:    { label: 'ESTIMARE ORIENTATIVĂ',    sublabel: 'AI · Prefezabilitate',   color: [234,120,20], bg: [255,235,200] },
+  PREFEZABILITATE:{ label: 'PREFEZABILITATE',         sublabel: 'Pre-proiectare · UrbanX', color: [59,130,246], bg: [220,235,255] },
+  TEHNIC:        { label: 'ANALIZĂ TEHNICĂ',          sublabel: 'Date PUG + normative',   color: [16,130,60],  bg: [220,245,225] },
+  LEGAL_NEEDED:  { label: 'NECESITĂ EXPERT OAR/AUO',  sublabel: 'Nu înlocuiește studiul oficial', color: [220,38,38],  bg: [255,220,220] },
+};
+
+// Funcție helper: adaugă un banner de trust/clasificare pe pagina curentă PDF
+function _pdfTrustBanner(pdf, W, H, studyClass, sources){
+  const cls = _STUDY_CLASS[studyClass] || _STUDY_CLASS.ORIENTATIV;
+  const y = H - 8;
+  // Fundal banner
+  pdf.setFillColor(...cls.bg);
+  pdf.rect(0, y-4, W, 10, 'F');
+  // Bordură stânga
+  pdf.setFillColor(...cls.color);
+  pdf.rect(0, y-4, 2, 10, 'F');
+  // Text clasificare
+  pdf.setTextColor(...cls.color);
+  pdf.setFontSize(5.5);
+  pdf.setFont('helvetica','bold');
+  pdf.text(cls.label+' · '+cls.sublabel, 5, y+1);
+  // Surse date
+  if(sources && sources.length){
+    const srcText = 'Surse: '+sources.map(s=>_DATA_TRUST[s]?.label||s).join(' · ');
+    pdf.setTextColor(100,115,130);
+    pdf.setFont('helvetica','normal');
+    pdf.text(srcText, W-6, y+1, {align:'right'});
+  }
+}
+
+// Funcție helper: adaugă bloc de disclaimer la finalul unui studiu
+function _pdfDisclaimerBlock(pdf, W, cy, studyClass, customText){
+  const cls = _STUDY_CLASS[studyClass] || _STUDY_CLASS.ORIENTATIV;
+  const h = customText ? 16 : 12;
+  pdf.setFillColor(...cls.bg);
+  pdf.rect(14, cy, W-28, h, 'F');
+  pdf.setFillColor(...cls.color);
+  pdf.rect(14, cy, 2, h, 'F');
+  pdf.setTextColor(...cls.color);
+  pdf.setFontSize(6);
+  pdf.setFont('helvetica','bold');
+  pdf.text(cls.label, 18, cy+5);
+  pdf.setTextColor(80,95,115);
+  pdf.setFont('helvetica','normal');
+  pdf.setFontSize(5.8);
+  const defaultText = 'Document generat automat de UrbanX — caracter STRICT ORIENTATIV. Nu înlocuiește avizele și studiile oficiale elaborate de experți autorizați.';
+  pdf.text(customText || defaultText, 18, cy+10, {maxWidth: W-36});
+  return cy + h + 4;
+}
+
+
 
 async function generateShadowStudy(){
   const ap=S.parcels[S.activeParcel??0];
@@ -127,6 +196,11 @@ async function generateShadowStudy(){
   pdf.setFontSize(7.5);pdf.text('Prag OMS 119/2014: altitudine solara min. 15° la solstitiu iarna · Valoare calculata: '+solarAlt(lat,11,12).toFixed(1)+'°',W/2,228,{align:'center'});
   pdf.setTextColor(100,120,150);pdf.setFontSize(7);pdf.setFont('helvetica','normal');
   pdf.text('Generat: '+S2(dateStr)+' · Document orientativ · UrbanX TSS·FG',W/2,H-12,{align:'center'});
+  // AUDIT: Clasificare studiu solar — calcul normativ + date OSM
+  pdf.setFillColor(220,235,255);pdf.rect(0,H-20,W,7,'F');
+  pdf.setFillColor(59,130,246);pdf.rect(0,H-20,2,7,'F');
+  pdf.setTextColor(30,60,130);pdf.setFontSize(5.5);pdf.setFont('helvetica','bold');
+  pdf.text('ANALIZĂ ORIENTATIVĂ (Calcul normativ 70% · OSM 65%) — Formula solarAlt() este o aproximare. Studiu legal de însorire OMS 119/2014 cu azimut real + DST + Equation of Time + ray tracing obligatoriu la faza PT.',5,H-15);
   if(caps.imgLocation&&caps.imgLocation.length>500){
     try{
       pdf.addImage(caps.imgLocation,'JPEG',14,H-72,W-28,58,undefined,'FAST');
@@ -390,6 +464,11 @@ async function generateNoiseStudy(){
   pdf.text(isOk?'CONFORM — Nivel zgomot acceptabil SR 10009/2017':'DEPASIRE — Masuri de izolare fonica necesare',W/2,202,{align:'center'});
   pdf.setFontSize(8);pdf.text('Nivel estimat: '+Ltotal.toFixed(1)+' dB(A) | Limita zi: '+limit_zi+' dB(A) | Limita noapte: '+limit_n+' dB(A)',W/2,210,{align:'center'});
   pdf.setTextColor(100,120,150);pdf.setFontSize(7);pdf.text('Generat: '+S2(dateStr)+' · Document orientativ · Confirmare prin masuratori acustice in situ',W/2,H-12,{align:'center'});
+  // AUDIT: Banner clasificare studiu — estimare AI, nu oficial
+  pdf.setFillColor(255,235,200);pdf.rect(0,H-22,W,8,'F');
+  pdf.setFillColor(234,120,20);pdf.rect(0,H-22,2,8,'F');
+  pdf.setTextColor(120,60,10);pdf.setFontSize(5.5);pdf.setFont('helvetica','bold');
+  pdf.text('⚠ ESTIMARE ORIENTATIVĂ AI (Confidence: OSM 65%) — Nivelurile de zgomot sunt DEDUSE din funcțiunile OSM, NU din măsurători. Un "commercial" poate avea 45–90 dB. Studiu acustic oficial (ISO 9613 / CNOSSOS-EU + măsurători in situ) obligatoriu la faza PT.',5,H-17);
   ftr();
 
   // PAG 2: Vedere 3D + surse zgomot
@@ -4631,10 +4710,30 @@ async function generateStudiuFezabilitate(paramOverrides){
   ss('Se generează Studiu de Fezabilitate / DALI...');
 
   const d=_initStudyPdf('Studiu de Fezabilitate / DALI','SF/DALI · HG 907/2016',18);
-  const {pdf,W,H,DARK,DARK2,NAVY,GOLD,GOLD2,GOLD3,BLUE,BLUE2,TEAL,LIGHT,LIGHT2,LIGHT3,
-    RED,GREEN,ORANGE,PURPLE,GRAY,GRAY2,GRAY3,GRAY4,WHITE,
-    S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,
+  const {pdf,W,H,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,
     hdr,ftr,sec,subsec,body,tblRow,addImg,kv,badge,divider,bullet,concluzii,sign,cover,newPage,checkY}=d;
+  // Fallback culori (unele nu sunt returnate de _initStudyPdf din engine)
+  const DARK  =d.DARK  ||window.DARK  ||[8,21,42];
+  const DARK2 =d.DARK2 ||window.DARK2 ||[15,35,70];
+  const NAVY  =d.NAVY  ||window.NAVY  ||[10,25,65];
+  const GOLD  =d.GOLD  ||window.GOLD  ||[212,175,55];
+  const GOLD2 =d.GOLD2 ||window.GOLD2 ||[240,210,120];
+  const GOLD3 =d.GOLD3 ||window.GOLD3 ||[150,110,20];
+  const BLUE  =d.BLUE  ||window.BLUE  ||[59,130,246];
+  const BLUE2 =d.BLUE2 ||window.BLUE2 ||[93,168,255];
+  const TEAL  =d.TEAL  ||window.TEAL  ||[0,128,120];
+  const LIGHT =d.LIGHT ||window.LIGHT ||[245,247,252];
+  const LIGHT2=d.LIGHT2||window.LIGHT2||[235,239,248];
+  const LIGHT3=d.LIGHT3||window.LIGHT3||[220,225,238];
+  const WHITE =d.WHITE ||window.WHITE ||[255,255,255];
+  const RED   =d.RED   ||window.RED   ||[220,38,38];
+  const GREEN =d.GREEN ||window.GREEN ||[16,130,60];
+  const ORANGE=d.ORANGE||window.ORANGE||[234,120,20];
+  const PURPLE=d.PURPLE||window.PURPLE||[124,58,237];
+  const GRAY  =d.GRAY  ||window.GRAY  ||[100,115,130];
+  const GRAY2 =d.GRAY2 ||window.GRAY2 ||[180,190,200];
+  const GRAY3 =d.GRAY3 ||window.GRAY3 ||[130,145,160];
+  const GRAY4 =d.GRAY4 ||window.GRAY4 ||[200,210,218];
 
   const caps=await _captureStudyMapsSafe(ap, msg=>ss(msg));
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13.2;
@@ -4659,12 +4758,25 @@ async function generateStudiuFezabilitate(paramOverrides){
   const _pretVanzare= parseFloat(_p.pretVanzare || _fc.pretVanzare || _pretConstr*1.4);
   const _rataOcup   = parseFloat(_p.rataOcupare || 85) / 100;
 
-  // ── LOGICĂ FUNCȚIUNI NON-COMERCIALE (#4 audit) ────────────────────────────
-  // Biserică, grădiniță, parc, spațiu public = CHELTUIALĂ, nu sursă de venit
-  const NON_COM_KW = ['bortodoxa','bcatolica','cult','religios','gradinita','scoala','parc','public'];
-  const isNonCom = NON_COM_KW.some(kw => (fn||'').toLowerCase().includes(kw));
-  // Suprafața non-comercială din lotizare (dacă avem mix)
-  const nonComArea = isNonCom ? sdTotal : (() => {
+  // ── LOGICĂ FUNCȚIUNI — VENITURI DIFERENȚIATE (#4 audit revizuit) ─────────
+  // REGULA CORECTĂ:
+  //   Cult/Religie = CHELTUIALĂ PURĂ (0 venituri) — nu se poate comercializa
+  //   Grădiniță/Școală = venituri PARȚIALE (taxe scolarizare privată / chirie spații / vânzare)
+  //     → se poate construi din fonduri private, NU neapărat fonduri publice
+  //   Parc public = taxe de vizitare / întreținere (20% din rata normală)
+  //   Restul (rezidențial, birouri, comercial, hotel) = venituri NORMALE
+
+  const TRUE_NON_COM_KW  = ['bortodoxa','bcatolica','cult','religios','vulte','vult']; // 0 venituri
+  const PARTIAL_COM_KW   = ['gradinita','scoala','educatie','invatamant','liceu','grupe']; // 60% din normă
+  const PUBLIC_FEE_KW    = ['parc','public','agrement','loisir']; // 20% din normă (taxe vizitare)
+
+  const isTrueNonCom  = TRUE_NON_COM_KW.some(kw => (fn||'').toLowerCase().includes(kw));
+  const isPartialCom  = !isTrueNonCom && PARTIAL_COM_KW.some(kw => (fn||'').toLowerCase().includes(kw));
+  const isPublicFee   = !isTrueNonCom && !isPartialCom && PUBLIC_FEE_KW.some(kw => (fn||'').toLowerCase().includes(kw));
+  const isNonCom      = isTrueNonCom; // backward compat flag
+
+  // Suprafața non-comercială din lotizare (dacă avem mix de tipuri)
+  const nonComArea = isTrueNonCom ? sdTotal : (() => {
     if(!window._LOT?.tipCount) return 0;
     const tc=_LOT.tipCount, tm=_LOT.tipMix||{};
     const nNon=(tc.bortodoxa||0)+(tc.bcatolica||0)+(tc.gazebo||0);
@@ -4673,14 +4785,37 @@ async function generateStudiuFezabilitate(paramOverrides){
   })();
   const comArea = sdTotal - nonComArea;
 
+  // ── COST = SDA (Suprafața Desfășurată Totală — ce se construiește) ────────
   const costConstr=Math.round(sdTotal*_pretConstr);
   const costTeren=Math.round(areaNum*_pretTeren);
   const costTotal=Math.round((costConstr+costTeren)*1.25);
-  // Venituri NUMAI din suprafața comercializabilă — funcțiunile non-comerciale = cost pur
-  const venitAn = isNonCom ? 0 : Math.round(comArea*_rataOcup*_chirieRef*12);
+
+  // ── VENIT = SU (Suprafața Utilă — ce se poate închiria/vinde) ─────────────
+  // SU ≈ 75–82% din SDA (depinde de funcțiune: rezidențial > birouri > hotel)
+  const _suRatioMap = {
+    rez:0.82, rezidential:0.82, apart:0.82, locuire:0.82,
+    birouri:0.78, office:0.78,
+    hotel:0.72, hostel:0.72,
+    com:0.84, comercial:0.84, retail:0.84,
+    mixt:0.80
+  };
+  const _suRatio = Object.entries(_suRatioMap).find(([k])=>(fn||'').toLowerCase().includes(k))?.[1] || 0.78;
+  const suTotal = Math.round(sdTotal * _suRatio); // Suprafața Utilă reală
+
+  // Multiplicator venit per tip funcțiune
+  const _venMult = isTrueNonCom ? 0 : isPartialCom ? 0.60 : isPublicFee ? 0.20 : 1.0;
+  const venitAn = Math.round(suTotal * _rataOcup * _chirieRef * 12 * _venMult);
   const rentabilitate = venitAn>0 ? ((venitAn/Math.max(1,costTotal))*100).toFixed(1) : '0.0';
-  const nonComNote = nonComArea>0
-    ? `Atenție: ${nonComArea}mp suprafață non-comercială (cult/public) = cheltuială de execuție ${Math.round(nonComArea*_pretConstr*1.25).toLocaleString()} EUR, fără venituri directe.`
+
+  // Notă context
+  const nonComNote = isTrueNonCom
+    ? `Atenție: funcțiunea "${(fn||'').slice(0,30)}" = cheltuială pură (cult/religios). Cost execuție estimat: ${Math.round(sdTotal*_pretConstr*1.25).toLocaleString()} EUR, venituri directe: 0 EUR.`
+    : isPartialCom
+    ? `Notă: "${(fn||'').slice(0,30)}" (educație) poate genera venituri din taxe de școlarizare/chirie spații (estimat 60% din rata pieței). Nu necesită fonduri publice dacă e privat.`
+    : isPublicFee
+    ? `Notă: "${(fn||'').slice(0,30)}" (spațiu public/parc) poate genera venituri din taxe de vizitare/întreținere (estimat 20% din rata pieței).`
+    : nonComArea>0
+    ? `Atenție: ${nonComArea}mp suprafață non-comercială (cult) = cheltuială de execuție ${Math.round(nonComArea*_pretConstr*1.25).toLocaleString()} EUR, fără venituri directe.`
     : '';
 
   // Functiune
@@ -4755,12 +4890,14 @@ async function generateStudiuFezabilitate(paramOverrides){
   cy+=3;
   cy=sec('4. DESCRIEREA INVESTITIEI - VARIANTE DE SCENARII',cy);cy+=2;
   cy=tblRow(['Scenariu','SC (mp)','SDA (mp)','H max (m)','Cost estimat','Rentabilitate'],cy,true,[30,22,24,22,44,40]);
-  const sc1=Math.round(scMax*0.7), sda1=Math.round(sdTotal*0.7);
-  const sc2=scMax, sda2=sdTotal;
-  const sc3=Math.round(scMax*0.9), sda3=Math.round(sdTotal*1.1);
-  [['S1 — Conservator',sc1+' mp',sda1+' mp',Math.round(aedisH*0.75)+'m',Math.round(sda1*_pretConstr).toLocaleString('en-US')+' EUR',((sda1*_rataOcup*_chirieRef*12)/((sda1*_pretConstr+costTeren)*1.25)*100).toFixed(1)+'%'],
-   ['S2 — Recomandat ★',sc2+' mp',sda2+' mp',aedisH.toFixed(0)+'m',Math.round(sda2*_pretConstr).toLocaleString('en-US')+' EUR',((sda2*_rataOcup*_chirieRef*12)/((sda2*_pretConstr+costTeren)*1.25)*100).toFixed(1)+'%'],
-   ['S3 — Maxim RLU',sc3+' mp',sda3+' mp',params?.h||aedisH.toFixed(0)+'m',Math.round(sda3*_pretConstr).toLocaleString('en-US')+' EUR',((sda3*_rataOcup*_chirieRef*12)/((sda3*_pretConstr+costTeren)*1.25)*100).toFixed(1)+'%'],
+  const sc1=Math.round(scMax*0.7), sda1=Math.round(sdTotal*0.7); const su1=Math.round(sda1*_suRatio);
+  const sc2=scMax, sda2=sdTotal; const su2=Math.round(sda2*_suRatio);
+  const sc3=Math.round(scMax*0.9), sda3=Math.round(sdTotal*1.1); const su3=Math.round(sda3*_suRatio);
+  // ROI: Cost pe SDA, Venit pe SU (corect economic)
+  const _roi = (sda,su) => isTrueNonCom ? 'N/A' : ((su*_rataOcup*_chirieRef*12*_venMult)/((sda*_pretConstr+costTeren)*1.25)*100).toFixed(1)+'%';
+  [['S1 — Conservator',sc1+' mp','SDA:'+sda1+' / SU:'+su1+' mp',Math.round(aedisH*0.75)+'m',Math.round(sda1*_pretConstr).toLocaleString('en-US')+' EUR',_roi(sda1,su1)],
+   ['S2 — Recomandat ★',sc2+' mp','SDA:'+sda2+' / SU:'+su2+' mp',aedisH.toFixed(0)+'m',Math.round(sda2*_pretConstr).toLocaleString('en-US')+' EUR',_roi(sda2,su2)],
+   ['S3 — Maxim RLU',sc3+' mp','SDA:'+sda3+' / SU:'+su3+' mp',params?.h||aedisH.toFixed(0)+'m',Math.round(sda3*_pretConstr).toLocaleString('en-US')+' EUR',_roi(sda3,su3)],
   ].forEach((r,i)=>{
     if(i===1){
       // S2 RECOMANDAT: linie verde stânga (3mm) + text "★" în culoare verde
@@ -4789,31 +4926,40 @@ async function generateStudiuFezabilitate(paramOverrides){
   cy=tblRow(['Indicator tehnico-economic','UM','Valoare estimativă','Baza de calcul'],cy,true,[80,18,42,42]);
   [['Suprafață teren (ST)',         'mp',areaNum+'','Extras CF'],
    ['Suprafață construită la sol (SC)','mp',scMax+'','POT='+params?.pot+'% x ST'],
-   ['Suprafață desfășurată totală (SDA)','mp',sdTotal.toLocaleString('en-US'),'CUT='+params?.cut+' x ST'],
+   ['Suprafață desfășurată totală (SDA)','mp',sdTotal.toLocaleString('en-US'),'CUT='+params?.cut+' x ST — baza cost execuție'],
+   ['Suprafață utilă estimată (SU)','mp',suTotal.toLocaleString('en-US'),(_suRatio*100).toFixed(0)+'% din SDA — baza calcul venituri'],
    ['Suprafață spații verzi (SV)','mp',svMin+'','SV='+params?.sv+'% x ST (min.)'],
    ['Nr. niveluri (regim înălțime)','niv.','P+'+(niv-1),'Conf. AEDIS / RLU'],
    ['Înălțime maximă (Hmax)','m',aedisH.toFixed(1),'Conf. AEDIS orientativ'],
    ['Nr. locuri parcare obligatorii','locuri',pkMin+'','NP 051/2012 + RLU'],
-   ['Valoare estimativă construcție','EUR',costConstr.toLocaleString(),(_fc.pretConstructie+' EUR/mp SDA')],
-   ['Valoare estimativă teren','EUR',costTeren.toLocaleString(),(_fc.pretTeren+' EUR/mp teren')],
+   ['Cost execuție construcție (pe SDA)','EUR',costConstr.toLocaleString(),_fc.pretConstructie+' EUR/mp SDA'],
+   ['Valoare estimativă teren','EUR',costTeren.toLocaleString(),_fc.pretTeren+' EUR/mp teren'],
    ['Diverse, neprevăzute, proiectare (25%)','EUR',Math.round((costConstr+costTeren)*0.25).toLocaleString(),'25% total construire+teren'],
-   ['VALOARE TOTALĂ INVESTIȚIE','EUR',costTotal.toLocaleString(),'Total estimativ'],
-   ['Valoare investiție / mp SDA','EUR/mp',Math.round(costTotal/sdTotal)+'','Indicele de cost /mp SDA'],
-   isNonCom
-     ? ['Funcțiune NON-COMERCIALĂ','—','Nu generează venituri','Cult / public / educație — cheltuială pură']
-     : ['Venit estimat anual (chirie)','EUR/an',venitAn.toLocaleString(),(_fc.chirieRef+' EUR/mp/lună × '+Math.round(_rataOcup*100)+'% ocupare')],
-   ['Randament brut (ROI brut anual)','%',isNonCom?'N/A — non-comercial':rentabilitate,isNonCom?'Funcțiune fără venituri directe':'Venit anual / Inv. totală'],
-   ['Perioadă estimată recuperare investiție','ani',isNonCom?'—':Math.ceil(costTotal/Math.max(1,venitAn))+'',isNonCom?'Nu se aplică':'Payback period simplu'],
+   ['VALOARE TOTALĂ INVESTIȚIE','EUR',costTotal.toLocaleString(),'Total estimativ — baza de referință'],
+   ['Valoare investiție / mp SDA','EUR/mp',Math.round(costTotal/sdTotal)+'','Indice cost construcție /mp SDA'],
+   isTrueNonCom
+     ? ['Funcțiune NON-COMERCIALĂ (cult)','—','Venituri: 0 EUR/an','Cult/religie — cheltuială pură, ROI nu se aplică']
+     : isPartialCom
+     ? ['Venit estimat anual — educație privată (pe SU)','EUR/an',venitAn.toLocaleString(),_fc.chirieRef+' EUR/mp/lună × 60% × SU '+suTotal+'mp']
+     : isPublicFee
+     ? ['Venituri taxe vizitare/întreținere (pe SU)','EUR/an',venitAn.toLocaleString(),'20% din chiria pieței × SU '+suTotal+'mp']
+     : ['Venit estimat anual — chirie/vânzare (pe SU)','EUR/an',venitAn.toLocaleString(),_fc.chirieRef+' EUR/mp/lună × '+Math.round(_rataOcup*100)+'% × SU '+suTotal+'mp'],
+   ['Randament brut (ROI brut anual)','%',isTrueNonCom?'N/A':rentabilitate,isTrueNonCom?'Cult — fără scop comercial':isPartialCom?'Educație privată (60%)':isPublicFee?'Parc public (20%)':'Venit anual / Inv. totală'],
+   ['Perioadă estimată recuperare investiție','ani',isTrueNonCom?'N/A':Math.ceil(costTotal/Math.max(1,venitAn))+'',isTrueNonCom?'Nu se aplică':'Payback period simplu'],
   ].forEach(r=>cy=tblRow(r,cy,false,[80,18,42,42]));
   cy+=4;
   if(nonComNote){
-    pdf.setFillColor(255,235,200);pdf.rect(14,cy,W-28,10,'F');
-    pdf.setFillColor(200,100,10);pdf.rect(14,cy,2,10,'F');
-    pdf.setTextColor(120,60,10);pdf.setFont('helvetica','bold');pdf.setFontSize(6.5);
-    pdf.text('⚠ '+S2(nonComNote),17,cy+6.5);
-    cy+=13;
+    const _noteColor = isTrueNonCom?[255,235,235]:isPartialCom?[230,245,230]:isPublicFee?[230,240,255]:[255,235,200];
+    const _bordColor = isTrueNonCom?[180,30,30]:isPartialCom?[20,120,60]:isPublicFee?[30,80,180]:[200,100,10];
+    const _textColor = isTrueNonCom?[120,20,20]:isPartialCom?[10,80,40]:isPublicFee?[20,60,130]:[120,60,10];
+    pdf.setFillColor(..._noteColor);pdf.rect(14,cy,W-28,12,'F');
+    pdf.setFillColor(..._bordColor);pdf.rect(14,cy,2,12,'F');
+    pdf.setTextColor(..._textColor);pdf.setFont('helvetica','bold');pdf.setFontSize(6.5);
+    const _icon = isTrueNonCom?'⚠':isPartialCom?'ℹ':isPublicFee?'ℹ':'⚠';
+    pdf.text(_icon+' '+S2(nonComNote),17,cy+7.5);
+    cy+=15;
   }
-  cy=body('NOTĂ: Valorile financiare sunt estimate la prețuri de piață 2024-2025 pentru zona '+uat+'. Devizul exact poate varia cu ±25-35% față de estimarea orientativă. Costul efectiv se stabilește prin ofertare detaliată pe baza Proiectului Tehnic aprobat.',14,cy);
+  cy=body('NOTĂ: Valorile financiare sunt estimate la prețuri de piață 2024-2025 pentru zona '+uat+'. Devizul exact poate varia cu ±25-35% față de estimarea orientativă. Costul efectiv se stabilește prin ofertare detaliată pe baza Proiectului Tehnic aprobat. SDA = Suprafața Desfășurată (baza costului); SU = Suprafața Utilă (~'+Math.round(_suRatio*100)+'% din SDA, baza veniturilor).',14,cy);
 
   // ── PAG 6: ANALIZA FINANCIARĂ + SURSE FINANȚARE ──────────────────────────
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('ANALIZA FINANCIARA - SURSE DE FINANTARE - ANALIZA COST-BENEFICIU',6);ftr();
@@ -4943,9 +5089,10 @@ async function generateStudiuFezabilitate(paramOverrides){
   cy=body('Prezentul Studiu de Prefezabilitate / Fezabilitate / DALI pentru amplasamentul cu nr. cadastral '+nrcad+' (UTR '+utr+', suprafața '+areaNum+' mp, '+uat+', jud. '+judet+') are caracter STRICT ORIENTATIV și a fost generat digital prin platforma UrbanX. Documentul sintetizează indicatorii tehnico-economici estimativi ai investiției propuse (SD total='+sdTotal+' mp, H='+aedisH.toFixed(1)+'m, valoare totală estimată ~'+costTotal.toLocaleString()+' EUR) și nu înlocuiește Studiul de Fezabilitate sau DALI elaborat de consultant autorizat conform HG 907/2016.',14,cy);cy+=3;
   cy=tblRow(['Indicator cheie','Valoare','Status'],cy,true,[80,52,50]);
   [['Valoare totală investiție estimativă','~'+costTotal.toLocaleString()+' EUR','Orientativ ±30%'],
-   ['Suprafață desfășurată (SDA)',sdTotal.toLocaleString('en-US')+' mp','Conf. CUT='+params?.cut],
-   ['Randament brut estimat (ROI)',rentabilitate+'%/an','La 50 EUR/mp/lună'],
-   ['Perioadă de recuperare investiție',Math.ceil(costTotal/venitAn)+' ani','Payback simplu'],
+   ['Suprafață desfășurată (SDA) — baza cost',sdTotal.toLocaleString('en-US')+' mp','Conf. CUT='+params?.cut],
+   ['Suprafață utilă (SU) — baza venituri',suTotal.toLocaleString('en-US')+' mp',Math.round(_suRatio*100)+'% din SDA'],
+   ['Randament brut estimat (ROI)',isTrueNonCom?'N/A':rentabilitate+'%/an',isTrueNonCom?'Cult — fără scop comercial':'Venit SU / Investiție totală'],
+   ['Perioadă de recuperare investiție',isTrueNonCom?'N/A':Math.ceil(costTotal/Math.max(1,venitAn))+' ani','Payback simplu'],
    ['Conformitate indicatori PUG','CONFORM (orientativ)','Verificare obligatorie CU'],
    ['Studiu geotehnic','OBLIGATORIU','Înainte de proiectare structurală'],
    ['Tip documentație obligatorie','SF (construcție nouă) / DALI (intervenție)','HG 907/2016'],
@@ -5203,7 +5350,7 @@ async function generateStudiuFezabilitate(paramOverrides){
   kv('RIR (IRR)',irrPct+'%/an',14,cy,kpiW,GREEN);
   kv('VAN la 5%',npv5>0?(npv5/1000).toFixed(0)+'K EUR':'Negativ',14+kpiW+3,cy,kpiW,npv5>0?BLUE:RED);
   kv('RBC (B/C Ratio)',rbc.toFixed(2),14+(kpiW+3)*2,cy,kpiW,rbc>1?GREEN:ORANGE);
-  kv('Payback',Math.ceil(costTotal/venitAn)+' ani',14+(kpiW+3)*3,cy,kpiW,GOLD);
+  kv('Payback',isTrueNonCom?'N/A':Math.ceil(costTotal/Math.max(1,venitAn))+' ani',14+(kpiW+3)*3,cy,kpiW,GOLD);
   cy+=25;
   cy=subsec('17.2. ANALIZA DE SENZITIVITATE — IMPACT VARIATIE CHIRII ±20%',cy);
   cy=tblRow(['Scenariu chirie','Chirie ref. (EUR/mp/lun)','VAN la 5%','RIR','Concluzie'],cy,true,[40,42,48,22,30]);
@@ -5302,10 +5449,30 @@ async function generateStudiuAmplasament(){
   });
 
   const d=_initStudyPdf('Studiu de Amplasament si Analiza Teritoriala','Studiu amplasament · Document fundament',13);
-  const {pdf,W,H,DARK,DARK2,NAVY,GOLD,GOLD2,GOLD3,BLUE,BLUE2,TEAL,LIGHT,LIGHT2,LIGHT3,
-    RED,GREEN,ORANGE,PURPLE,GRAY,GRAY2,GRAY3,GRAY4,WHITE,
-    S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,
+  const {pdf,W,H,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,
     hdr,ftr,sec,subsec,body,tblRow,addImg,kv,badge,divider,bullet,concluzii,sign,cover,newPage,checkY,smartPage}=d;
+  // Fallback culori (unele nu sunt returnate de _initStudyPdf)
+  const DARK  =d.DARK  ||window.DARK  ||[8,21,42];
+  const DARK2 =d.DARK2 ||window.DARK2 ||[15,35,70];
+  const NAVY  =d.NAVY  ||window.NAVY  ||[10,25,65];
+  const GOLD  =d.GOLD  ||window.GOLD  ||[212,175,55];
+  const GOLD2 =d.GOLD2 ||window.GOLD2 ||[240,210,120];
+  const GOLD3 =d.GOLD3 ||window.GOLD3 ||[150,110,20];
+  const BLUE  =d.BLUE  ||window.BLUE  ||[59,130,246];
+  const BLUE2 =d.BLUE2 ||window.BLUE2 ||[93,168,255];
+  const TEAL  =d.TEAL  ||window.TEAL  ||[0,128,120];
+  const LIGHT =d.LIGHT ||window.LIGHT ||[245,247,252];
+  const LIGHT2=d.LIGHT2||window.LIGHT2||[235,239,248];
+  const LIGHT3=d.LIGHT3||window.LIGHT3||[220,225,238];
+  const WHITE =d.WHITE ||window.WHITE ||[255,255,255];
+  const RED   =d.RED   ||window.RED   ||[220,38,38];
+  const GREEN =d.GREEN ||window.GREEN ||[16,130,60];
+  const ORANGE=d.ORANGE||window.ORANGE||[234,120,20];
+  const PURPLE=d.PURPLE||window.PURPLE||[124,58,237];
+  const GRAY  =d.GRAY  ||window.GRAY  ||[100,115,130];
+  const GRAY2 =d.GRAY2 ||window.GRAY2 ||[180,190,200];
+  const GRAY3 =d.GRAY3 ||window.GRAY3 ||[130,145,160];
+  const GRAY4 =d.GRAY4 ||window.GRAY4 ||[200,210,218];
   const caps=await _captureStudyMapsSafe(ap, msg=>ss(msg));
 
   // ── Restaurează lotizare după captură ─────────────────────────────────────
@@ -7006,7 +7173,7 @@ async function generateHealthImpactStudy(){
   [['Calitate apă potabilă','Conf. Legii 458/2002','Rețea distribuție','Monitorizare operator apă'],['Colectare deșeuri','Punct colectare ≤100m','Depozitare neconformă','HG 942/2017 · Legea 211/2011'],['Canalizare menajeră','100% conectare','Fosă septică neconformă','Legea 107/1996 + Directiva 91/271'],].forEach(r=>{cy=tblRow(r,cy,false,[60,35,50,47]);});
   cy+=4;
   cy=sec('E. RADON — ORD. MS 1020/2022',cy,ORANGE);
-  cy=body('Radonul (Rn-222) este un gaz radioactiv natural din sol, principala cauză de cancer pulmonar după fumat. Nivel referință național: 300 Bq/m³ (spații locuite) conf. Ord. MS 1020/2022. UAT '+(uat||'curent')+' se află în zona de risc radon: '+((lat>46.5&&lat<48)?'MODERAT (30-100 Bq/m³ estimat)':'SCĂZUT (<30 Bq/m³)').+' Măsuri: ventilare subsolului, etanșare plăci de fundație, membrană anti-radon dacă măsurare depășește 200 Bq/m³.',14,cy);
+  cy=body('Radonul (Rn-222) este un gaz radioactiv natural din sol, principala cauza de cancer pulmonar dupa fumat. Nivel referinta national: 300 Bq/m³ (spatii locuite) conf. Ord. MS 1020/2022. UAT '+(uat||'curent')+' se afla in zona de risc radon: '+((lat>46.5&&lat<48)?'MODERAT (30-100 Bq/m³ estimat)':'SCAZUT (<30 Bq/m³)')+'. Masuri: ventilare subsolului, etansare placi de fundatie, membrana anti-radon daca masurare depaseste 200 Bq/m³.',14,cy);
   cy+=6;
   cy=sec('F. CÂMPURI ELECTROMAGNETICE',cy,BLUE);
   cy=body('Distanțe de protecție față de infrastructura electrică (conf. ORE 26/2004): Linii 110kV: min. 15m, Linii 20kV: min. 10m, Posturi trafo: min. 5m. Se va verifica în harta rețelei ENGIE/E.ON. Stații 5G/4G: valori de referință ICNIRP — verificare obligatorie la urbanism.',14,cy);

@@ -877,11 +877,36 @@ function _htmlScenarii3(){
   const C   = {pug:'#3b82f6',max:'#f59e0b',optim:'#34d399'};
   const IC  = {pug:'🔵',max:'🟠',optim:'🟢'};
   const LB  = {pug:'PUG',max:'Maxim',optim:'Optim'};
-  const DESC= {
-    pug:  'Parametrii <b>exacti din PUG</b> pentru UTR-ul acestei parcele. Scenariul de referință legal.',
-    max:  '<b>Limita maximă</b> admisă: POT maxim, retrageri minime, calcan lateral. Scenariul cel mai agresiv.',
-    optim:'Numărul de niveluri cu <b>ROI estimat maxim</b>. Balanță construcție — piață — cost teren.'
+  const params = S.parcels[S.activeParcel??0]?.params || S.rule || {};
+  // ── Info box contextualizat per scenariu activ ──────────────────────────
+  const SCENARIO_INFO = {
+    pug: {
+      color: '#3b82f6',
+      title: '🔵 Scenariul PUG — cum funcționează',
+      desc: 'Folosește <b>parametrii exacți din RLU/PUG</b> pentru UTR-ul parcelei selectate.'
+        +'<br>POT='+params?.pot+'% · CUT='+params?.cut+' · H max='+(params?.h||'N/S')+'m'
+        +'<br>Retrageri: față '+params?.rf+'m · lateral '+params?.rl+'m · spate '+params?.rs+'m'
+        +'<br>Scenariul de <b>referință legal</b> — nicio depășire posibilă fără PUZ/PUD.'
+    },
+    max: {
+      color: '#f59e0b',
+      title: '🟠 Scenariul Maxim — cum funcționează',
+      desc: 'Utilizează <b>limita maximă admisă</b>: POT maxim, retrageri minime, calcan lateral.'
+        +'<br>POT='+params?.pot+'% (100% amprentă pe lotul util) · H max conform PUG'
+        +'<br>Retrageri minime: față '+params?.rf+'m · calcan lateral · spate minim'
+        +'<br>Scenariul cel mai agresiv — verificare obligatorie AACR + studiu umbre.'
+    },
+    optim: {
+      color: '#34d399',
+      title: '🟢 Algoritmul Optim — cum funcționează',
+      desc: 'Iterează niveluri 1→H_max PUG. Pentru fiecare N, calculează:'
+        +'<br><b>Cost</b> = SDA × Cost/m² (870€ P, 980€ P+3, 1250€ bloc înalt)'
+        +'<br><b>Venit</b> = SU (~80% din SDA) × Chirie (1520€/m², scade cu înălțimea)'
+        +'<br><b>ROI</b> = (Venit - Cost) / (Cost + Teren€) × 100%'
+        +'<br>Selectează N cu ROI maxim — balanță construcție vs piață vs teren.'
+    }
   };
+  const _sInfo = SCENARIO_INFO[tab] || SCENARIO_INFO.optim;
 
   // ── Butoane selecție tab ──────────────────────────────────────────────
   const tabBtns = ['pug','max','optim'].map(k=>{
@@ -975,18 +1000,13 @@ function _htmlScenarii3(){
   // ── Asamblare ─────────────────────────────────────────────────────────
   return '<div class="card" style="background:#06111f;border:1px solid rgba(59,130,246,.22);padding:12px;margin-bottom:10px">'
 
-    // Header
+    // Header cu info box dinamic per scenariu
     +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
     +'<div style="font-size:12px;font-weight:800;color:#d4af37;letter-spacing:.04em">⚡ SCENARII CONSTRUCTIVE</div>'
-    +'<div style="margin-top:4px;padding:8px 10px;background:rgba(52,211,153,.06);border-radius:8px;border-left:2px solid #34d399">'
-    +'<div style="font-size:10px;font-weight:700;color:#34d399;margin-bottom:4px">🟢 Algoritmul Optim — cum funcționează</div>'
-    +'<div style="font-size:9px;color:#64748b;line-height:1.6">'
-    +'Iterează niveluri 1→H_max PUG. Pentru fiecare N, calculează:<br>'
-    +'<b>Cost</b> = SU × Cost/m² (870€ P, 980€ P+3, 1250€ bloc înalt)<br>'
-    +'<b>Venit</b> = SU × Preț vânzare (1520€/m², scade cu înălțimea)<br>'
-    +'<b>ROI</b> = (Venit - Cost) / (Cost + Teren€) × 100%<br>'
-    +'Selectează N cu ROI maxim — balanță construcție vs piață vs teren.'
-    +'</div></div>'
+    +'<div style="margin-top:4px;padding:8px 10px;background:'+_sInfo.color+'0e;border-radius:8px;border-left:2px solid '+_sInfo.color+'">'
+    +'<div style="font-size:10px;font-weight:700;color:'+_sInfo.color+';margin-bottom:4px">'+_sInfo.title+'</div>'
+    +'<div style="font-size:9px;color:#64748b;line-height:1.6">'+_sInfo.desc+'</div>'
+    +'</div>'
     +(gen
       ? '<span style="font-size:9px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.25);color:#34d399;border-radius:999px;padding:2px 9px">✓ generate</span>'
       : '<span style="font-size:9px;color:#334155">selectați un scenariu și generați</span>'
@@ -1000,8 +1020,8 @@ function _htmlScenarii3(){
 
     // Descriere
     +'<div style="font-size:11px;color:#64748b;line-height:1.55;padding:8px 10px;background:#04090f;'
-    +'border-radius:7px;border-left:2px solid '+C[tab]+';margin-bottom:10px">'
-    +DESC[tab]
+    +'border-radius:7px;border-left:2px solid '+_sInfo.color+';margin-bottom:10px">'
+    +_sInfo.desc
     +'</div>'
 
     // Butoane

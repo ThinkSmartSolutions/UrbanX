@@ -1350,14 +1350,14 @@ canvas#c2d{width:100%;height:100%;display:block}
 <!-- UrbanX JS Modules — ordinea de incarcare e importanta -->
 <script src="js/00-globals.js?v=2026050601"></script>
 <script src="js/02-map-core.js?v=2026050804"></script>
-<script src="js/03-ui-panel.js?v=2026050901"></script>
+<script src="js/03-ui-panel.js?v=2026050902"></script>
 <script src="js/04-search.js?v=2026050601"></script>
 <script src="js/05-cad-utils.js?v=2026050601"></script>
 <script src="js/06-aedis.js?v=2026050802"></script>
 <script src="js/07-pdf-utils.js?v=2026050601"></script>
 <script src="js/08-lotizare.js?v=2026050900"></script>
 <script src="js/09-pdf-engine.js?v=2026050804"></script>
-<script src="js/10-studies.js?v=2026050901"></script>
+<script src="js/10-studies.js?v=2026050902"></script>
 <script src="js/11-viewer3d.js?v=2026050804"></script>
 <script src="js/12-admin.js?v=2026050601"></script>
 <script src="js/13-info-drawer.js?v=2026050702"></script>
@@ -1974,9 +1974,60 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 </script>
 
+<!-- ═══ PATCH: generateRelevee alias + Info Drawer fix ════════════════════ -->
+<script>
+// FIX: generateRelevee este definit în 15-relevee.js dar poate fi redenumit.
+// Adăugăm un alias de siguranță după încărcarea tuturor scripturilor.
+window.addEventListener('load', function(){
+  // Dacă 15-relevee.js nu a expus generateRelevee, afișăm eroare clară
+  if(typeof window.generateRelevee !== 'function'){
+    window.generateRelevee = function(){
+      ss('❌ 15-relevee.js: funcția generateRelevee nu este disponibilă — verificați că fișierul este actualizat (v=2026050901+)');
+      console.error('[UrbanX] generateRelevee not defined — 15-relevee.js may not be loaded or function was renamed');
+    };
+    console.warn('[UrbanX] generateRelevee fallback instalat — 15-relevee.js needs update');
+  }
+
+  // PATCH Info Drawer: dacă 13-info-drawer.js nu a actualizat titlul "Relevee Instant"
+  // patch-uim la deschidere pentru key='relevee'
+  const _origInfoOpen = window.infoDrawerOpen;
+  if(typeof _origInfoOpen === 'function'){
+    window.infoDrawerOpen = function(key){
+      _origInfoOpen.call(this, key);
+      if(key === 'relevee'){
+        // Patch titlu după randare
+        setTimeout(()=>{
+          const drawer = document.getElementById('info-drawer');
+          if(!drawer) return;
+          // Înlocuim "Relevee Instant" cu titlul corect în toate elementele din drawer
+          drawer.querySelectorAll('h1,h2,h3,.drawer-title,[class*="title"]').forEach(el=>{
+            if(el.textContent && el.textContent.includes('Relevee Instant')){
+              el.textContent = el.textContent.replace('Relevee Instant','Memoriu Tehnic Preliminar');
+            }
+          });
+          // Și în subtitlu dacă există badge-uri
+          drawer.querySelectorAll('[class*="badge"],[class*="tag"],[class*="pill"]').forEach(el=>{
+            if(el.textContent && el.textContent.includes('RELEVEU')){
+              el.textContent = el.textContent.replace('RELEVEU','PRE-PROIECTARE');
+            }
+          });
+        }, 80);
+      }
+    };
+  }
+});
+</script>
+
 <!-- ═══ FIX #20 — CANCEL PARCEL / ADRESĂ FĂRĂ REFRESH ══════════════════ -->
-<div id="cancel-parcel-btn" style="display:none;position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:1200;background:rgba(239,68,68,.9);border:none;border-radius:999px;padding:10px 22px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,.5);letter-spacing:.02em;backdrop-filter:blur(8px)" onclick="window._cancelActiveParcel()">
-  ✕ Anulează selecția
+<!-- Butonul de cancel este acum subtil și contextual, nu roșu agresiv -->
+<div id="cancel-parcel-btn" style="display:none;position:fixed;bottom:80px;right:18px;z-index:1200;
+  background:rgba(15,23,42,.88);border:1px solid rgba(212,175,55,.35);border-radius:10px;
+  padding:8px 14px 8px 11px;color:#d4af37;font-size:11.5px;font-weight:700;cursor:pointer;
+  box-shadow:0 4px 20px rgba(0,0,0,.45);letter-spacing:.01em;backdrop-filter:blur(10px);
+  display:flex;align-items:center;gap:7px;transition:opacity .2s" 
+  onclick="window._cancelActiveParcel()">
+  <span style="font-size:15px">✕</span>
+  <span>Anulează selecția</span>
 </div>
 <script>
 // Fix #20: Escape key + cancel button pentru selecție parcelă accidentală
@@ -2029,17 +2080,26 @@ document.addEventListener('keydown', e => {
   }
 });
 
-// Afișăm butonul cancel când o parcelă e selectată
-// Monitorizăm S.parcels cu un interval light (doar când nu e modal deschis)
+// Afișăm butonul cancel (subtil, dreapta-jos) DOAR când:
+// 1. O parcelă e selectată
+// 2. Nu e niciun modal/drawer deschis
+// 3. Panoul stânga este pe tabul hartă (nu pe un studiu complet)
+// 4. NU pe mobil când overlay-ul de căutare e deschis
 setInterval(()=>{
   const btn = document.getElementById('cancel-parcel-btn');
   if(!btn) return;
   const hasParcels = window.S?.parcels?.length > 0;
-  const anyModal = document.querySelector('.rv-modal-open, #study-map-modal[style*="flex"], [class*="modal"].show');
-  if(hasParcels && !anyModal){
-    btn.style.display = 'block';
-  } else {
-    btn.style.display = 'none';
+  // Detectăm mai agresiv modalele și panourile deschise
+  const anyModal = document.querySelector(
+    '.rv-modal-open, #study-map-modal[style*="flex"], [class*="modal"].show, ' +
+    '#mob-search-overlay.active, #info-drawer.show, #info-drawer[style*="block"]'
+  );
+  // Ascundem și dacă un studiu PDF se generează (statusBar activ)
+  const statusActive = (document.getElementById('status-bar')?.style.display||'') !== 'none'
+    && (document.getElementById('status-bar')?.textContent||'').includes('Se generează');
+  const shouldShow = hasParcels && !anyModal && !statusActive;
+  btn.style.display = shouldShow ? 'flex' : 'none';
+  btn.style.opacity = shouldShow ? '1' : '0';
   }
 }, 1000);
 </script>
