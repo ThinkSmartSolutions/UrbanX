@@ -1013,7 +1013,7 @@ canvas#c2d{width:100%;height:100%;display:block}
 
   <div style="padding:5px 8px 3px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.05);margin-top:3px">① Analize de Bază</div>
   <div style="display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:6px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
-    <button onclick="generateStudiuAmplasament();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#818cf8;padding:4px 8px;cursor:pointer;border-radius:5px;font-size:11.5px;">🗺 Studiu Amplasament & Teritoriu</button>
+    <button onclick="generateStudiuAmplasament();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#818cf8;padding:4px 8px;cursor:pointer;border-radius:5px;font-size:11.5px;" title="Studiu TERITORIAL: UTR, context urban, restricții, LMI, utilități. ≠ Memoriu Tehnic care e ARHITECTURAL.">🗺 Studiu de Amplasament & Context Teritorial</button>
     <button onclick="infoDrawerOpen('amplasament')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#818cf8'" onmouseout="this.style.color='#475569'">ⓘ</button>
   </div>
   <div style="display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:6px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
@@ -1988,31 +1988,72 @@ window.addEventListener('load', function(){
     console.warn('[UrbanX] generateRelevee fallback instalat — 15-relevee.js needs update');
   }
 
-  // PATCH Info Drawer: dacă 13-info-drawer.js nu a actualizat titlul "Relevee Instant"
-  // patch-uim la deschidere pentru key='relevee'
+  // PATCH Info Drawer: dacă 13-info-drawer.js nu a actualizat titlurile
   const _origInfoOpen = window.infoDrawerOpen;
   if(typeof _origInfoOpen === 'function'){
     window.infoDrawerOpen = function(key){
       _origInfoOpen.call(this, key);
-      if(key === 'relevee'){
-        // Patch titlu după randare
-        setTimeout(()=>{
-          const drawer = document.getElementById('info-drawer');
-          if(!drawer) return;
-          // Înlocuim "Relevee Instant" cu titlul corect în toate elementele din drawer
-          drawer.querySelectorAll('h1,h2,h3,.drawer-title,[class*="title"]').forEach(el=>{
-            if(el.textContent && el.textContent.includes('Relevee Instant')){
-              el.textContent = el.textContent.replace('Relevee Instant','Memoriu Tehnic Preliminar');
-            }
-          });
-          // Și în subtitlu dacă există badge-uri
-          drawer.querySelectorAll('[class*="badge"],[class*="tag"],[class*="pill"]').forEach(el=>{
-            if(el.textContent && el.textContent.includes('RELEVEU')){
-              el.textContent = el.textContent.replace('RELEVEU','PRE-PROIECTARE');
-            }
-          });
-        }, 80);
-      }
+      setTimeout(()=>{
+        const drawer = document.getElementById('info-drawer');
+        if(!drawer) return;
+
+        // Map key → titlu corect + descriere
+        const _DRAWER_PATCH = {
+          relevee: {
+            title: 'Memoriu Tehnic Preliminar',
+            badge: 'PRE-PROIECTARE · ARHITECTURAL',
+            desc: 'Generează instant planuri funcționale orientative pentru clădirea propusă: '
+              + 'plan nivel per etaj cu distribuția camerelor, fațadă principală cotată, '
+              + 'secțiune transversală, vedere axonometrică 3D și bilanț complet de suprafețe. '
+              + '<br><br><b>⚠ Diferit de Studiu de Amplasament:</b> acesta este un document '
+              + 'ARHITECTURAL (ce construiești), nu teritorial (unde construiești).'
+          },
+          amplasament: {
+            title: 'Studiu de Amplasament & Context Teritorial',
+            badge: 'ANALIZĂ TERITORIALĂ · DOCUMENT FUNDAMENT',
+            desc: 'Analizează amplasamentul din perspectivă TERITORIALĂ și URBANISTICĂ: '
+              + 'UTR și reglementări PUG, context construit 3D, monumente LMI în zonă, '
+              + 'utilități, accese, restricții legale, riscuri naturale și studii necesare. '
+              + '<br><br><b>⚠ Diferit de Memoriu Tehnic Preliminar:</b> acesta analizează '
+              + 'TERENUL și CONTEXTUL, nu propunerea arhitecturală.'
+          }
+        };
+
+        const patch = _DRAWER_PATCH[key];
+        if(!patch) return;
+
+        // Patch titlu
+        drawer.querySelectorAll('h1,h2,h3,.drawer-title,[class*="title"]').forEach(el=>{
+          const txt = el.textContent || '';
+          if(txt.includes('Relevee Instant') || (key==='relevee' && txt.includes('Relevee'))){
+            el.textContent = patch.title;
+          }
+          if(key==='amplasament' && txt.includes('Studiu Amplasament') && !txt.includes('Context')){
+            el.textContent = patch.title;
+          }
+        });
+
+        // Patch badge/tag
+        drawer.querySelectorAll('[class*="badge"],[class*="tag"],[class*="pill"]').forEach(el=>{
+          if(el.textContent && (el.textContent.includes('RELEVEU') || el.textContent.includes('PRE-PROIECTARE'))){
+            el.textContent = patch.badge;
+          }
+        });
+
+        // Injectează notă diferențiator dacă nu există
+        const existing = drawer.querySelector('[data-urbanx-patch]');
+        if(!existing && patch.desc){
+          const note = document.createElement('div');
+          note.setAttribute('data-urbanx-patch','1');
+          note.style.cssText = 'margin:12px 0 0;padding:10px 12px;background:rgba(212,175,55,.08);'
+            + 'border-left:3px solid rgba(212,175,55,.5);border-radius:0 8px 8px 0;'
+            + 'font-size:12px;color:#94a3b8;line-height:1.6';
+          note.innerHTML = patch.desc;
+          // Append la sfărșitul drawer content
+          const content = drawer.querySelector('.drawer-body,[class*="content"],[class*="body"]') || drawer;
+          content.appendChild(note);
+        }
+      }, 80);
     };
   }
 });

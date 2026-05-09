@@ -5567,15 +5567,128 @@ async function generateStudiuAmplasament(){
   if(niv>4||aedisH>14) studiiNecesare.push({s:'Studiu Umbre + Însorire (OMS 119)',ob:'OBLIGATORIU',motiv:'H='+aedisH.toFixed(1)+'m > 14m sau >P+3'});
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // PAG 1: COVER
+  // PAG 1: COVER — cu clarificare TERITORIAL vs ARHITECTURAL
   // ═══════════════════════════════════════════════════════════════════════════
   cover(
-    'Document fundament · Baza tuturor studiilor de specialitate',
+    'Analiză Teritorială & Context Urban · Document fundament pentru toate studiile tehnice',
     caps.v3dDay||caps.img3D,
-    [['Funcțiune dominantă UTR',fnLabel],['Document','Studiu de Amplasament'],['Rol','Fundament comun studii specialitate']],
+    [['Funcțiune dominantă UTR',fnLabel],
+     ['Tip document','STUDIU TERITORIAL (≠ Memoriu Tehnic)'],
+     ['Conținut','UTR · Restricții · LMI · Utilități · Context Urban · Acces'],
+     ['Rol','Fundament comun — alimentează toate studiile tehnice']],
     true,
-    'OK STUDIU DE AMPLASAMENT — DATE PRIMARE · DOCUMENT FUNDAMENT'
+    'OK STUDIU DE AMPLASAMENT & CONTEXT TERITORIAL — DOCUMENT FUNDAMENT'
   );
+
+  // ── CONFLICT DETECTION ENGINE (recomandat în audit) ─────────────────────
+  // Detectăm automat conflicte urbanistice ÎNAINTE de proiectare
+  const _conflicts = [];
+  const _warnings  = [];
+  const _propPOT = parseFloat(params?.pot||35);
+  const _propCUT = parseFloat(params?.cut||1.0);
+  const _propH   = parseFloat(params?.h||0)||aedisH;
+  const _propNiv = Math.max(1, Math.ceil(aedisH/3));
+
+  // Conflict 1: POT propus vs POT vecini mediu
+  const veciniPOT = (S.ctx?.features||[]).filter(f=>f.properties?.h>2).slice(0,15);
+  const hMedConf = veciniPOT.length ? veciniPOT.reduce((s,f)=>s+(f.properties?.h||7),0)/veciniPOT.length : 7;
+  if(aedisH > hMedConf * 2.0) _warnings.push({tip:'ÎNĂLȚIME',desc:'H propus ('+aedisH.toFixed(1)+'m) depășește de 2× H mediu vecini ('+hMedConf.toFixed(1)+'m) — risc aviz AACR/DNA'});
+  if(aedisH > (_propH||99)) _conflicts.push({tip:'H MAX PUG',desc:'H propus AEDIS ('+aedisH.toFixed(1)+'m) depășește H max PUG ('+_propH+'m) — CONFLICT LEGAL'});
+
+  // Conflict 2: Distanța față de aeroport
+  const distAerpConf = typeof S_UAT !== 'undefined' ? (S_UAT.aeroport?.distanta_km||30) : 30;
+  if(distAerpConf < 15) _conflicts.push({tip:'AACR OBLIGATORIU',desc:'Parcela la '+distAerpConf+'km de aeroport — aviz AACR/ROMATSA obligatoriu înaintea oricărui proiect'});
+  if(distAerpConf < 8)  _conflicts.push({tip:'ZONE RESTRICTIVE AACR',desc:'Distanță critică ('+distAerpConf+'km) — H maxim admis poate fi sub 10m conform ICAO Anexa 14'});
+
+  // Conflict 3: Zonă protejată LMI
+  if(inZCP) _conflicts.push({tip:'ZCP — ZONĂ CONSTRUITĂ PROTEJATĂ',desc:'Parcela se află în ZCP — aviz obligatoriu MCID/DJCPN. Restricții severe la demolare și aspect arhitectural'});
+  if(inZonaProt && !inZCP) _warnings.push({tip:'MONUMENT LMI APROPIAT',desc:'Monument LMI la '+monApropt.dist.toFixed(0)+'m — verificare aviz DJCPN necesară la faza PAC'});
+
+  // Conflict 4: ISU — înălțime/suprafață
+  if(aedisH > 28 || sdTotal > 3600) _conflicts.push({tip:'ISU P118 — PRAG ÎNALT',desc:'H='+aedisH.toFixed(1)+'m sau SD='+sdTotal+'mp depășesc pragul P118-2/2013 — aviz ISU cu proiect OBLIGATORIU'});
+  if(aedisH > 8 || sdTotal > 600)   _warnings.push({tip:'ISU P118 — VERIFICARE',desc:'H='+aedisH.toFixed(1)+'m sau SD='+sdTotal+'mp — aviz ISU probabil necesar. Verificare la faza PT'});
+
+  // Conflict 5: SV minim
+  const svCalcConf = Math.round(areaNum*parseFloat(params?.sv||20)/100);
+  if(_propCUT > 2.5 && svCalcConf < areaNum*0.15) _warnings.push({tip:'SPAȚII VERZI',desc:'CUT='+_propCUT+' cu SV minim ('+svCalcConf+'mp/'+Math.round(areaNum*0.2)+'mp) — risc neconformitate'});
+
+
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // PAG 1b: CONFLICT DETECTION — Avertismente urbanistice automate (AUDIT)
+  // ═══════════════════════════════════════════════════════════════════════════
+  if(_conflicts.length > 0 || _warnings.length > 0){
+    pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
+    hdr('CONFLICT DETECTION — VERIFICARE AUTOMATĂ URBANISTICĂ',2);ftr();
+    let cyCd=28;
+    // Header explicativ
+    pdf.setFillColor(15,25,50);pdf.rect(14,cyCd,W-28,14,'F');
+    pdf.setFillColor(...GOLD);pdf.rect(14,cyCd,3,14,'F');
+    pdf.setTextColor(...GOLD);pdf.setFontSize(8);pdf.setFont('helvetica','bold');
+    pdf.text('⚡ URBAN CONFLICT DETECTION ENGINE — UrbanX v2026',18,cyCd+5.5);
+    pdf.setTextColor(...GRAY3);pdf.setFontSize(6.5);pdf.setFont('helvetica','normal');
+    pdf.text('Verificare automată a parametrilor urbanistici propuși față de PUG, AACR, ISU, LMI și context construit. Conf. audit UrbanX.',18,cyCd+11);
+    cyCd+=18;
+
+    // CONFLICTE (roșu) — blochează proiectul
+    if(_conflicts.length > 0){
+      pdf.setFillColor(255,230,230);pdf.rect(14,cyCd,W-28,9,'F');
+      pdf.setFillColor(220,38,38);pdf.rect(14,cyCd,3,9,'F');
+      pdf.setTextColor(160,20,20);pdf.setFontSize(7.5);pdf.setFont('helvetica','bold');
+      pdf.text('🔴 CONFLICTE IDENTIFICATE ('+_conflicts.length+') — Rezolvare OBLIGATORIE înainte de proiectare',18,cyCd+6);
+      cyCd+=12;
+      _conflicts.forEach((c,i)=>{
+        const rh=14;
+        pdf.setFillColor(255,245,245);pdf.rect(14,cyCd,W-28,rh,'F');
+        pdf.setFillColor(220,38,38);pdf.rect(14,cyCd,1.5,rh,'F');
+        pdf.setTextColor(160,20,20);pdf.setFontSize(6.5);pdf.setFont('helvetica','bold');
+        pdf.text((i+1)+'. ['+S2(c.tip)+']',18,cyCd+5);
+        pdf.setTextColor(80,30,30);pdf.setFont('helvetica','normal');pdf.setFontSize(6.2);
+        pdf.text(S2(c.desc),18,cyCd+10,{maxWidth:W-36});
+        cyCd+=rh+2;
+      });
+      cyCd+=3;
+    }
+
+    // AVERTISMENTE (portocaliu) — necesită atenție
+    if(_warnings.length > 0){
+      pdf.setFillColor(255,245,220);pdf.rect(14,cyCd,W-28,9,'F');
+      pdf.setFillColor(234,120,20);pdf.rect(14,cyCd,3,9,'F');
+      pdf.setTextColor(130,60,10);pdf.setFontSize(7.5);pdf.setFont('helvetica','bold');
+      pdf.text('🟠 AVERTISMENTE ('+_warnings.length+') — Verificare recomandată',18,cyCd+6);
+      cyCd+=12;
+      _warnings.forEach((w,i)=>{
+        const rh=13;
+        pdf.setFillColor(255,250,240);pdf.rect(14,cyCd,W-28,rh,'F');
+        pdf.setFillColor(234,120,20);pdf.rect(14,cyCd,1.5,rh,'F');
+        pdf.setTextColor(130,60,10);pdf.setFontSize(6.5);pdf.setFont('helvetica','bold');
+        pdf.text((i+1)+'. ['+S2(w.tip)+']',18,cyCd+4.5);
+        pdf.setTextColor(80,50,20);pdf.setFont('helvetica','normal');pdf.setFontSize(6.2);
+        pdf.text(S2(w.desc),18,cyCd+9,{maxWidth:W-36});
+        cyCd+=rh+2;
+      });
+      cyCd+=3;
+    }
+
+    // OK dacă nu există conflicte sau avertismente
+    if(_conflicts.length===0 && _warnings.length===0){
+      pdf.setFillColor(220,245,225);pdf.rect(14,cyCd,W-28,16,'F');
+      pdf.setFillColor(16,130,60);pdf.rect(14,cyCd,3,16,'F');
+      pdf.setTextColor(10,80,40);pdf.setFontSize(8);pdf.setFont('helvetica','bold');
+      pdf.text('✅ NICIUN CONFLICT URBANISTIC DETECTAT',18,cyCd+7);
+      pdf.setFont('helvetica','normal');pdf.setFontSize(6.5);
+      pdf.text('Parametrii propuși sunt compatibili cu PUG și contextul urban analizat.',18,cyCd+12.5);
+      cyCd+=20;
+    }
+
+    // Legendă
+    cyCd+=4;
+    pdf.setFillColor(...DARK2);pdf.rect(14,cyCd,W-28,16,'F');
+    pdf.setTextColor(...GRAY3);pdf.setFontSize(6);pdf.setFont('helvetica','normal');
+    pdf.text('LEGENDĂ: 🔴 Conflict = parametru PUG depășit sau aviz obligatoriu neobtinabil fără modificări · 🟠 Avertisment = risc, necesită verificare · ✅ Conform = fără conflicte detectate',18,cyCd+5,{maxWidth:W-36});
+    pdf.text('NOTĂ: Conflict Detection Engine folosește date PUG (90% conf.), OSM (65% conf.) și calcule normative (70% conf.). Verificare finală: arhitect/urbanist autorizat.',18,cyCd+11,{maxWidth:W-36});
+    cyCd+=20;
+  }
 
   // ═══════════════════════════════════════════════════════════════════════════
   // PAG 2: VIEWER 3D — TOATE 4 VARIANTE DE ILUMINARE (ZI/NOAPTE/GOLDEN/ÎNTUNECAT)

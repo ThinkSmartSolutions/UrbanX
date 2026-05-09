@@ -454,15 +454,15 @@ function htmlMobRapoarte(){
 
   ${cat('① Analize de Bază — Prima etapă','d4af37')}
   <div class="card" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px">
-    ${btn('generateStudiuAmplasament()','129,140,248','🗺','Studiu de Amplasament & Teritoriu','Document fundament — alimentează toate studiile','amplasament')}
+    ${btn('generateStudiuAmplasament()','129,140,248','🗺','Studiu de Amplasament & Context Teritorial','Teritoriu · UTR · Restricții · LMI · Utilități · Acces','amplasament')}
     ${btn('runExport()','255,255,255','📄','Raport Urbanistic Complet','POT, CUT, H, funcțiuni, aliniamente, norme PUG','raport_complet')}
   </div>
 
   ${cat('② Proiectare Preliminară','d4af37')}
   <div class="card" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px">
-    ${btn('generateRelevee()','212,175,55','📐','Memoriu Tehnic Preliminar','Planuri funcționale, secțiuni, axonometrie, norme','relevee')}
-    ${btn('generateMemoriu()','212,175,55','🏗','Memoriu Tehnic Avize','Document tehnic complet pentru avize','memoriu')}
-    ${btn('_lotExportPDF()','192,132,252','🏘','Plan de Lotizare PDF','Planuri ansamblu rezidential, parcele, circulații','lotizare')}
+    ${btn('generateRelevee()','212,175,55','📐','Memoriu Tehnic Preliminar','Planuri funcționale · Secțiuni · Axonometrie · Bilanț suprafețe','relevee')}
+    ${btn('generateMemoriu()','212,175,55','🏗','Memoriu Tehnic pentru Avize','Document complet PT/DTAC · Avize AC · Specialist OAR','memoriu')}
+    ${btn('_lotExportPDF()','192,132,252','🏘','Plan de Lotizare PDF','Ansamblu rezidențial · Parcele · Circulații · Accese','lotizare')}
   </div>
 
   ${cat('③ Studii Tehnice — Obligatorii AC/CU','94,234,212')}
@@ -1096,6 +1096,21 @@ function htmlProiect(){
   const overCut = sD_max && sD_calc > sD_max;
 
   return [
+  // ── CONFLICT QUICK CHECK (audit) ─────────────────────────────────────────
+  (()=>{
+    const _cf=[];
+    const _h_max = parseFloat(p.h||0);
+    const _aH = S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||0;
+    const _dist = typeof S_UAT!=='undefined' ? (S_UAT.aeroport?.distanta_km||30) : 30;
+    if(_h_max>0 && _aH > _h_max+0.5) _cf.push('H propus '+_aH.toFixed(1)+'m > H max PUG '+_h_max+'m');
+    if(_dist < 15) _cf.push('Aeroport la '+_dist+'km — aviz AACR obligatoriu');
+    if(overCut) _cf.push('SDA depășește CUT max ('+sD_calc+' > '+(sD_max||'?')+' mp)');
+    if(_cf.length===0) return '';
+    return '<div style="background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.35);border-radius:10px;padding:9px 12px;margin-bottom:8px;font-size:11px">'
+      +'<div style="color:#ef4444;font-weight:700;margin-bottom:4px">⚡ '+_cf.length+' conflict'+(+_cf.length>1?'e':'')+' detectat'+(+_cf.length>1?'e':'')+' — Studiu Amplasament recomandat</div>'
+      +_cf.map(c=>'<div style="color:#fca5a5;padding:2px 0">• '+c+'</div>').join('')
+      +'</div>';
+  })(),
   // ── SCENARII CONSTRUCTIVE (nou) ──
   _htmlScenarii3(),
   // ── SEPARATOR ──
