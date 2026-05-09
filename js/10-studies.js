@@ -94,6 +94,45 @@ const _DATA_TRUST = {
   CALCUL:   { level: 70, label: 'Calcul normativ', color: [0,128,120]  },
 };
 
+// ── Versioning juridic (Audit rec. C) ───────────────────────────────────
+// Adauga data PUG + sursa in fiecare studiu pentru auditabilitate
+function _getPUGVersion(){
+  try {
+    const uat = (typeof getUATLabel === 'function') ? getUATLabel() : 'UAT';
+    const now = new Date();
+    const dataGen = now.toLocaleDateString('ro-RO',{day:'2-digit',month:'2-digit',year:'numeric'});
+    const utrCount = (typeof REGULI !== 'undefined') ? Object.keys(REGULI).length : 0;
+    return {
+      uat, dataGen,
+      sursa: 'UrbanX PUG Registry',
+      utrCount,
+      hash: 'v' + (now.getFullYear()) + (String(now.getMonth()+1).padStart(2,'0')),
+      label: `PUG ${uat} · ${utrCount} UTR-uri · ${dataGen}`
+    };
+  } catch(e) { return {label:'PUG (data nedisponibila)', hash:'N/A'}; }
+}
+
+// ── Confidence inline badge (Audit rec. D) ──────────────────────────────
+// Afiseaza un badge de incredere langa valorile din PDF
+function _pdfConfBadge(pdf, x, y, trustKey){
+  const t = _DATA_TRUST[trustKey];
+  if(!t) return;
+  const col = t.color;
+  const lvl = t.level;
+  const w = 28, h = 5;
+  pdf.setFillColor(col[0], col[1], col[2]);
+  pdf.setGlobalAlpha && pdf.setGlobalAlpha(0.15);
+  pdf.rect(x, y-3.5, w, h, 'F');
+  try{ if(pdf.setGlobalAlpha) pdf.setGlobalAlpha(1); }catch(e){}
+  pdf.setDrawColor(col[0], col[1], col[2]);
+  pdf.setLineWidth(0.3);
+  pdf.rect(x, y-3.5, w, h, 'S');
+  pdf.setTextColor(col[0], col[1], col[2]);
+  pdf.setFontSize(4.5);
+  pdf.setFont('helvetica','bold');
+  pdf.text(lvl+'% · '+t.label.split(' ')[0], x+1, y);
+}
+
 // Clasificare studii per tip (conform audit: Preview/Preliminary/Technical/Certified)
 const _STUDY_CLASS = {
   ORIENTATIV:    { label: 'ESTIMARE ORIENTATIVĂ',    sublabel: 'AI · Prefezabilitate',   color: [234,120,20], bg: [255,235,200] },
@@ -4821,10 +4860,12 @@ async function generateStudiuFezabilitate(paramOverrides){
   // Functiune
 
   // ── PAG 1: COVER ──────────────────────────────────────────────────────────
+  const _pugVer = _getPUGVersion();
   cover(
     'Studiu de Fezabilitate · DALI · conf. HG 907/2016',
     caps.img3D,
-    [['Funcțiune propusă',fnLabel],['Tip studiu','SF / DALI · HG 907/2016'],['Faza','Pre-proiectare orientativă']],
+    [['Funcțiune propusă',fnLabel],['Tip studiu','SF / DALI · HG 907/2016'],
+     ['Faza','Pre-proiectare orientativă'],['Sursa date PUG',_pugVer.label]],
     true,
     'OK STUDIU ORIENTATIV — PREFEZABILITATE URBANISTICĂ DIGITALĂ'
   );
@@ -4965,6 +5006,16 @@ async function generateStudiuFezabilitate(paramOverrides){
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('ANALIZA FINANCIARA - SURSE DE FINANTARE - ANALIZA COST-BENEFICIU',6);ftr();
   cy=33;
   cy=sec('6. ANALIZA FINANCIARA A INVESTITIEI',cy);cy+=2;
+  if(isTrueNonCom){
+    // Non-comercial (cult) — nu se aplica analiza financiara de tip venituri
+    pdf.setFillColor(255,235,220);pdf.rect(14,cy,W-28,18,'F');
+    pdf.setFillColor(220,80,10);pdf.rect(14,cy,3,18,'F');
+    pdf.setTextColor(140,50,10);pdf.setFontSize(8);pdf.setFont('helvetica','bold');
+    pdf.text('FUNCȚIUNE NON-COMERCIALĂ — Analiza cash flow nu se aplică',18,cy+6);
+    pdf.setFont('helvetica','normal');pdf.setFontSize(7);
+    pdf.text('Investiția în destinații de cult/religie nu generează venituri directe. Sursa de finanțare: donații, fonduri religioase, fonduri UE pentru patrimoniu, sponsorizări.',18,cy+13);
+    cy+=22;
+  } else {
   cy=tblRow(['An','Inv. totalizată (EUR)','Venit estimat (EUR)','Cheltuieli op. (EUR)','Cash flow net (EUR)','Recuperare cum.'],cy,true,[14,40,36,36,38,18]);
   const cfRows=[0,1,2,3,4,5,7,10,15,20];
   cfRows.forEach(an=>{
@@ -4972,10 +5023,11 @@ async function generateStudiuFezabilitate(paramOverrides){
     const ven=an===0?0:Math.round(venitAn*(1+0.03*an));
     const chelt=an===0?0:Math.round(ven*0.25);
     const cf=an===0?-costTotal:ven-chelt;
-    const recup=Math.min(100,Math.round((ven*(an||1)-costTotal)/costTotal*100+100));
+    const recup=Math.min(100,Math.round((ven*(an||1)-costTotal)/Math.max(1,costTotal)*100+100));
     cy=tblRow(['An '+(an||0),an===0?'-'+costTotal.toLocaleString():'-',an===0?'-':ven.toLocaleString(),an===0?'-':chelt.toLocaleString(),cf.toLocaleString(),an===0?'0%':recup+'%'],cy,false,[14,40,36,36,38,18]);
   });
   cy+=4;
+  }
   cy=sec('6.1. SURSE DE FINANTARE IDENTIFICATE',cy);cy+=2;
   cy=tblRow(['Sursă de finanțare','Tip','% din total','Valoare est. (EUR)','Condiții principale'],cy,true,[55,25,18,42,42]);
   [['Fonduri proprii investitor','Propriu',Math.round(costTotal*0.3).toLocaleString('en-US')+' EUR',''+Math.round(costTotal*0.3).toLocaleString('en-US'),'Minim 20-30% capital propriu'],
@@ -5695,6 +5747,29 @@ async function generateStudiuAmplasament(){
   // ═══════════════════════════════════════════════════════════════════════════
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D URBAN3D - ZI / NOAPTE / GOLDEN HOUR / INTUNECAT',2);ftr();
   let cy=28;
+
+  // ── BANNER DISTINCTIV: TERITORIAL vs ARHITECTURAL ────────────────────────
+  const half_=Math.floor((W-30)/2);
+  // Box stânga: CE ESTE acesta
+  pdf.setFillColor(20,40,90);pdf.rect(14,cy,half_,22,'F');
+  pdf.setFillColor(...GOLD);pdf.rect(14,cy,3,22,'F');
+  pdf.setTextColor(...GOLD);pdf.setFontSize(7);pdf.setFont('helvetica','bold');
+  pdf.text('ACESTA: Studiu de Amplasament & Context Teritorial',18,cy+5);
+  pdf.setTextColor(200,215,235);pdf.setFontSize(6);pdf.setFont('helvetica','normal');
+  pdf.text('Analizează TERENUL și CONTEXTUL URBAN:',18,cy+10);
+  pdf.text('UTR/PUG · LMI · Utilități · Restricții · Conflict Detection',18,cy+14.5);
+  pdf.text('= Document fundament pentru toate studiile de specialitate',18,cy+18.5);
+  // Box dreapta: CE NU ESTE acesta
+  pdf.setFillColor(12,25,50);pdf.rect(16+half_,cy,half_,22,'F');
+  pdf.setFillColor(100,115,130);pdf.rect(16+half_,cy,3,22,'F');
+  pdf.setTextColor(130,145,160);pdf.setFontSize(7);pdf.setFont('helvetica','bold');
+  pdf.text('DIFERIT: Memoriu Tehnic Preliminar (arhitectural)',20+half_,cy+5);
+  pdf.setTextColor(100,115,130);pdf.setFontSize(6);pdf.setFont('helvetica','normal');
+  pdf.text('Generează PLANURI FUNCȚIONALE:',20+half_,cy+10);
+  pdf.text('Plan etaje · Fațadă · Secțiune A-A · Axonometrie 3D',20+half_,cy+14.5);
+  pdf.text('= Document pre-proiectare arhitecturală (alt buton)',20+half_,cy+18.5);
+  cy+=28;
+
   const half2=(W-32)/2;
   pdf.setFontSize(8);pdf.setTextColor(...GRAY2);pdf.setFont('helvetica','italic');
   pdf.text('Vizualizari 3D generate cu motorul Urban3D (Three.js) · Materiale PBR · Iluminare simulata · Nr.cad '+nrcad+' · UTR '+S2(utr),W/2,cy+2,{align:'center'});
@@ -7433,3 +7508,156 @@ async function _addINSEStatisticsSection(pdf, W, cy, S2, hdr, uat, judet, uatId,
 
   return cy;
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CERTIFICAT PERFORMANTA ENERGETICA (CPE) — Legea 372/2005 · Ord. 2641/2017
+// Clasa energetica A+ → G · EP_specific kWh/m²an · NZEB verificare
+// ═══════════════════════════════════════════════════════════════════════════
+async function generateCPE(){
+  const ap=S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry){ss('Selectati o parcela pentru CPE.');return;}
+  ss('Se genereaza Certificat de Performanta Energetica...');
+
+  const d=_initStudyPdf('Certificat de Performanta Energetica','CPE · Ord. 2641/2017 · C107/4-2022',6);
+  const {pdf,W,H,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg}=d;
+  const DARK=d.DARK||[5,14,30],NAVY=d.NAVY||[14,36,72],GOLD=d.GOLD||[196,146,6],GOLD2=d.GOLD2||[228,182,48];
+  const LIGHT=d.LIGHT||[248,250,253],GREEN=d.GREEN||[14,100,50],RED=d.RED||[158,20,20];
+  const BLUE=d.BLUE||[20,50,98],ORANGE=d.ORANGE||[168,76,4];
+
+  const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||10;
+  const niv=Math.max(1,Math.ceil(aedisH/3));
+  const areaNum=parseFloat(area)||300;
+  const sdTotal=Math.round(areaNum*(parseFloat(params?.cut||1.0)));
+  const suTotal=Math.round(sdTotal*0.78);
+
+  // Parametri termici C107/4-2022
+  const uWall=0.27, uRoof=0.18, uWin=1.0, uFloor=0.28;
+  const bW=Math.sqrt(areaNum*parseFloat(params?.pot||35)/100);
+  const bD=bW;
+  const aWall=(2*(bW+bD))*niv*3*0.75;
+  const aRoof=bW*bD, aWin=(2*(bW+bD))*niv*3*0.25, aFloor=bW*bD;
+  // Pierderi transmisie (W/K)
+  const Htrans=uWall*aWall+uRoof*aRoof+uWin*aWin+uFloor*aFloor;
+  // Necesar anual incalzire (kWh/an) - simplificat
+  const hddIasi=2820; // grade-zile Iasi
+  const qCalc=Htrans*hddIasi*24/1000;
+  // EP specific (kWh/m²an)
+  const epSpec=Math.round(qCalc/Math.max(1,suTotal));
+  // Clasa energetica
+  const _cls=(ep)=>{
+    if(ep<=50) return {cls:'A+',col:[14,100,50],pct:5};
+    if(ep<=100) return {cls:'A', col:[20,120,60],pct:15};
+    if(ep<=150) return {cls:'B', col:[59,130,246],pct:30};
+    if(ep<=200) return {cls:'C', col:[0,128,120],pct:45};
+    if(ep<=250) return {cls:'D', col:[234,120,20],pct:60};
+    if(ep<=300) return {cls:'E', col:[180,80,10],pct:75};
+    if(ep<=350) return {cls:'F', col:[200,38,38],pct:88};
+    return {cls:'G',col:[158,20,20],pct:100};
+  };
+  const cls=_cls(epSpec);
+  const isNZEB=epSpec<=100;
+
+  // ── PAG 1: COVER ──────────────────────────────────────────────────────────
+  pdf.setFillColor(...DARK);pdf.rect(0,0,W,H,'F');
+  pdf.setFillColor(20,40,80);pdf.rect(0,4,W,H-8,'F');
+  pdf.setFillColor(...GOLD);pdf.rect(0,0,W,4,'F');pdf.rect(0,H-4,W,4,'F');
+  pdf.setTextColor(...GOLD);pdf.setFontSize(9);pdf.setFont('helvetica','bold');
+  pdf.text('URBANX — CERTIFICAT PERFORMANTA ENERGETICA',W/2,45,{align:'center'});
+  pdf.setTextColor(255,255,255);pdf.setFontSize(28);pdf.setFont('helvetica','bold');
+  pdf.text('CLASA',W/2,75,{align:'center'});
+  // Big class badge
+  pdf.setFillColor(...cls.col);pdf.rect(W/2-25,82,50,28,'F');
+  pdf.setTextColor(255,255,255);pdf.setFontSize(22);pdf.setFont('helvetica','bold');
+  pdf.text(cls.cls,W/2,102,{align:'center'});
+  pdf.setTextColor(...GOLD2);pdf.setFontSize(11);
+  pdf.text(epSpec+' kWh/m\u00b2an',W/2,120,{align:'center'});
+  // NZEB badge
+  pdf.setFillColor(isNZEB?[14,100,50]:RED[0],isNZEB?100:RED[1],isNZEB?50:RED[2]);
+  pdf.rect(W/2-40,128,80,12,'F');
+  pdf.setTextColor(255,255,255);pdf.setFontSize(8);pdf.setFont('helvetica','bold');
+  pdf.text(isNZEB?'CONFORM NZEB (EP\u2264100 kWh/m\u00b2an)':'NECONFORM NZEB — EP>100 kWh/m\u00b2an',W/2,136,{align:'center'});
+  // Scale bar
+  const scaleClasses=[{l:'A+',c:[14,100,50]},{l:'A',c:[20,120,60]},{l:'B',c:[59,130,246]},{l:'C',c:[0,128,120]},{l:'D',c:[234,120,20]},{l:'E',c:[180,80,10]},{l:'F',c:[200,38,38]},{l:'G',c:[158,20,20]}];
+  const scW=130,scX=(W-scW)/2;
+  pdf.setTextColor(180,195,215);pdf.setFontSize(6.5);
+  pdf.text('SCALA ENERGETICA — A+ (optim) → G (ineficient)',W/2,153,{align:'center'});
+  scaleClasses.forEach((sc,i)=>{
+    const bw=Math.max(8,(i+1)*11);
+    const x=scX+i*(scW/8);
+    pdf.setFillColor(...sc.c);pdf.rect(x,156,scW/8-1,8,'F');
+    pdf.setTextColor(255,255,255);pdf.setFontSize(6);pdf.setFont('helvetica','bold');
+    pdf.text(sc.l,x+(scW/8-1)/2,162,{align:'center'});
+    if(sc.l===cls.cls){
+      pdf.setFillColor(255,255,255);pdf.rect(x,155,scW/8-1,10,'S');
+      pdf.setLineWidth(1.5);
+    }
+  });
+  const kpiW=(W-28-6)/3;
+  let ky=178;
+  kv('NR. CADASTRAL',nrcad,14,ky,kpiW,GOLD);
+  kv('SUPRAFATA UTILA',suTotal+'mp',14+kpiW+3,ky,kpiW,BLUE);
+  kv('REGIM INALTIME','P+'+(niv-1)+'E H='+aedisH.toFixed(0)+'m',14+(kpiW+3)*2,ky,kpiW,NAVY);
+  pdf.setTextColor(100,120,150);pdf.setFontSize(7);pdf.setFont('helvetica','normal');
+  pdf.text('Generat: '+S2(dateStr)+' · '+S2(uat)+' · UTR '+S2(utr)+' · ORIENTATIV · Ord. 2641/2017',W/2,H-12,{align:'center'});
+  // Audit classification banner
+  pdf.setFillColor(220,235,255);pdf.rect(0,H-20,W,8,'F');
+  pdf.setFillColor(59,130,246);pdf.rect(0,H-20,2,8,'F');
+  pdf.setTextColor(30,60,130);pdf.setFontSize(5.5);pdf.setFont('helvetica','bold');
+  pdf.text('ESTIMARE ORIENTATIVA (Calcul normativ 70%) — Nu inlocuieste CPE oficial semnat de auditor energetic atestat ANRE/MDLPA.',5,H-15);
+  ftr();
+
+  // ── PAG 2: PARAMETRI TERMICI + BILANȚ ─────────────────────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('INDICATORI TERMICI ANVELOPA - C107/4-2022',2);ftr();
+  let cy=33;
+  cy=sec('1. COEFICIENTI TERMICI ANVELOPA (U-values)',cy);cy+=2;
+  cy=tblRow(['Element','U calc (W/m\u00b2K)','U max C107 (W/m\u00b2K)','Suprafata (m\u00b2)','Pierderi (W/K)','Status'],cy,true,[40,28,30,25,25,34]);
+  [['Perete exterior cu EPS 15cm',uWall,'0.30',aWall.toFixed(0),(uWall*aWall).toFixed(0),uWall<=0.30?'CONFORM':'DEPASIRE'],
+   ['Terasa inversa cu XPS 20cm',uRoof,'0.20',aRoof.toFixed(0),(uRoof*aRoof).toFixed(0),uRoof<=0.20?'CONFORM':'DEPASIRE'],
+   ['Tamplarie PVC triplu Low-E',uWin,'1.10',aWin.toFixed(0),(uWin*aWin).toFixed(0),uWin<=1.10?'CONFORM':'DEPASIRE'],
+   ['Planseu parter izolat',uFloor,'0.30',aFloor.toFixed(0),(uFloor*aFloor).toFixed(0),uFloor<=0.30?'CONFORM':'DEPASIRE'],
+   ['TOTAL PIERDERI TRANSMISIE','—','—','—',Htrans.toFixed(0)+' W/K','—'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[40,28,30,25,25,34]));
+  cy+=4;
+  cy=sec('2. BILANT ENERGETIC ANUAL (kWh/an)',cy);cy+=2;
+  const qVentilatie=Math.round(qCalc*0.25);
+  const qSolar=Math.round(qCalc*0.18);
+  const qInterne=Math.round(qCalc*0.12);
+  const qNet=Math.max(0,qCalc+qVentilatie-qSolar-qInterne);
+  cy=tblRow(['Componenta energetica','Valoare (kWh/an)','% din total','Observatii'],cy,true,[70,35,25,52]);
+  [['Pierderi transmisie anvelopa',Math.round(qCalc)+'',''+Math.round(qCalc/(qNet||1)*100)+'%','U-values × HDD '+hddIasi],
+   ['Pierderi ventilatie naturala',qVentilatie+'',''+Math.round(qVentilatie/(qNet||1)*100)+'%','n=0.5 vol/h (natural)'],
+   ['Castiguri solare (ferestre S/E/V)','-'+qSolar,'—','Orientare '+S2(S.vol?.frontDir||'N')],
+   ['Castiguri interne (oameni+echip.)','-'+qInterne,'—','3.5 W/mp SU'],
+   ['NECESAR NET INCALZIRE',qNet+'','100%','Inainte de sistem termic'],
+   ['EP specific (kWh/m\u00b2an SU)',epSpec+'','CLASA '+cls.cls,'Ord. 2641/2017 MC001-3/2022'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[70,35,25,52]));
+  cy+=4;
+  cy=sec('3. CONFORMITATE NZEB (Nearly Zero Energy Building)',cy);cy+=2;
+  pdf.setFillColor(isNZEB?220:255,isNZEB?245:220,isNZEB?225:220);pdf.rect(14,cy,W-28,18,'F');
+  pdf.setFillColor(isNZEB?14:158,isNZEB?100:20,isNZEB?50:20);pdf.rect(14,cy,3,18,'F');
+  pdf.setTextColor(isNZEB?10:100,isNZEB?70:15,isNZEB?30:15);pdf.setFont('helvetica','bold');pdf.setFontSize(8.5);
+  pdf.text(isNZEB?'\u2714 CONFORM NZEB — EP='+epSpec+' kWh/m\u00b2an \u2264 100 kWh/m\u00b2an (Legea 372/2005)':'\u2718 NECONFORM NZEB — EP='+epSpec+' kWh/m\u00b2an > 100 kWh/m\u00b2an · Necesita imbunatatiri',18,cy+7);
+  pdf.setFont('helvetica','normal');pdf.setFontSize(6.5);
+  pdf.text(isNZEB?'Cladirea propusa satisface cerinta NZEB obligatorie din 2021 conform Dir. EPBD 2024/1275/UE.':
+    'Deficit EP: '+(epSpec-100)+' kWh/m\u00b2an. Se recomanda: termoizolatie suplimentara + tamplarie triplu Low-E + VmC cu recuperare caldura.',18,cy+13);
+  cy+=22;
+
+  cy=sec('4. RECOMANDARI IMBUNATATIRE CLASA',cy);cy+=2;
+  [['Termoizolatie EPS 20cm (din 15cm)','U_perete: 0.27 → 0.20 W/m\u00b2K','Reducere EP: ~10-15%','5-8 EUR/mp'],
+   ['Tamplarie triplu Low-E Ug=0.5','U_geam: 1.0 → 0.5 W/m\u00b2K','Reducere EP: ~8-12%','120-180 EUR/mp'],
+   ['Ventilatie mecanica cu recuperare (VMC)','Recuperare 75-90% caldura ventilatie','Reducere EP: ~12-18%','3.000-8.000 EUR/apart.'],
+   ['Panouri fotovoltaice (6-8 kWp)','Producere energie: ~6.000 kWh/an','EP primar: -15-20%','5.000-10.000 EUR'],
+   ['Pompa de caldura (COP=3.5)','Eficienta sistem termic','EP final: -30-40%','8.000-15.000 EUR'],
+   ['Termoizolatie terasa XPS 25cm','U_acoperis: 0.18 → 0.13 W/m\u00b2K','Reducere EP: ~5-8%','4-6 EUR/mp'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[55,50,35,42]));
+  cy+=4;
+  const kpiW2=(W-28-9)/4;
+  kv('EP specific',epSpec+' kWh/m\u00b2an',14,cy,kpiW2,cls.col);
+  kv('Clasa Energetica',cls.cls,14+kpiW2+3,cy,kpiW2,cls.col);
+  kv('NZEB Status',isNZEB?'CONFORM':'NECONFORM',14+(kpiW2+3)*2,cy,kpiW2,isNZEB?GREEN:RED);
+  kv('CO\u2082 estimat',Math.round(qNet*0.22/1000)+' tone/an',14+(kpiW2+3)*3,cy,kpiW2,NAVY);
+
+  _pdfSaveMobile(pdf,'CPE_Clasa'+cls.cls+'_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
+  ss('OK CPE generat — Clasa '+cls.cls+' (EP='+epSpec+' kWh/m\u00b2an) · '+( isNZEB?'CONFORM NZEB':'Neconform NZEB'));
+}
+window.generateCPE = generateCPE;

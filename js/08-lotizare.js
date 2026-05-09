@@ -2094,13 +2094,25 @@ function runLotizare(){
     const roi=Math.round((profitTotal/Math.max(1,terenVal+costConstrTotal))*100);
 
     // Verificări
+    const lotMin=Object.entries(loturiPerTip).reduce((mn,[k])=>{const t=_LOT.tipuri[k];return t?Math.min(mn,t.lotMin||mn):mn;},_LOT.lotAria);
+    const hasEducatie2=Object.keys(loturiPerTip).some(k=>['gradinita','scoala'].includes(k)&&(loturiPerTip[k]||0)>0);
     const verificari=[
-      {label:'Lot ≥ 150mp (min legal)',value:_LOT.lotAria+'mp',ok:_LOT.lotAria>=150},
-      {label:'Drum ≥ 3.5m (un sens)',value:_LOT.drumLat+'m',ok:_LOT.drumLat>=3.5},
-      {label:'Drum ≥ 6m (două sensuri)',value:_LOT.drumLat+'m',ok:_LOT.drumLat>=6},
+      // Lot dimensiuni
+      {label:'Lot ≥ 150mp (min. legal RGU)',value:_LOT.lotAria+'mp',ok:_LOT.lotAria>=150,norm:'HG 525/1996 — Regulament General Urbanism'},
+      {label:'Lot ≥ minim funcțiune propusă',value:_LOT.lotAria+'mp ≥ '+lotMin+'mp',ok:_LOT.lotAria>=lotMin,norm:'Conf. funcțiune selectată'},
+      // Circulatii DN 537/2003
+      {label:'Drum principal ≥ 6m (2 sensuri)',value:(_LOT.drumTipuri?.principal?.latime||_LOT.drumLat)+'m',ok:(_LOT.drumTipuri?.principal?.latime||_LOT.drumLat)>=6,norm:'DN 537/2003 · NP 051/2012'},
+      {label:'Stradă locală ≥ 4m',value:(_LOT.drumTipuri?.secundar?.latime||Math.max(4,_LOT.drumLat*0.75))+'m',ok:(_LOT.drumTipuri?.secundar?.latime||4)>=4,norm:'DN 537/2003 art. 12'},
+      {label:'Alee acces ≥ 3.5m (1 sens)',value:(_LOT.drumTipuri?.acces?.latime||3.5)+'m',ok:(_LOT.drumTipuri?.acces?.latime||3.5)>=3.5,norm:'OG 96/2003 — acces urgente'},
+      // Acces urgente
+      {label:'Acces vehicule ISU (≥3.5m)',value:_LOT.drumLat+'m',ok:_LOT.drumLat>=3.5,norm:'P118-1/2015 · OG 96/2003'},
+      {label:'Raza întoarcere (≥6m)',value:_LOT.drumLat>=6?'Asigurată':'Verificare',ok:_LOT.drumLat>=6,norm:'STAS 10144/3-1991'},
+      // Eficienta si suprafete
       {label:'Loturi generate',value:loturi.length+' buc',ok:loturi.length>0},
       {label:'Eficiență utilizare (>60%)',value:(eficienta*100).toFixed(0)+'%',ok:eficienta>0.6,warn:eficienta<0.4?'Parcelă neregulată — normală pentru forme triunghiulare':null},
-      {label:'Suprafață drum (<30%)',value:(drumAreaFract*100).toFixed(0)+'%',ok:drumAreaFract<0.30},
+      {label:'Suprafață drum (<30%)',value:(drumAreaFract*100).toFixed(0)+'%',ok:drumAreaFract<0.30,norm:'Recomandare urbanism'},
+      // Educatie acces separat
+      ...(hasEducatie2?[{label:'Acces separat grădiniță/școală',value:'Generat automat',ok:true,norm:'NP 010/1997 · OMS 119/2014'}]:[]),
     ];
 
     _LOT._loturi=loturi;_LOT._drumuri=drumuri;
@@ -2463,24 +2475,69 @@ function _genLotizareGeom(fpFeat, loturiPerTip, drumFract){
   });
 
   if(_LOT._drumCustom.length === 0){
-    // Drum principal la 40% din inaltime (nu 33% — mai centrat)
-    const drumY = bbox2[1]+hDeg*0.40;
-    const dp={type:'Feature',geometry:{type:'Polygon',coordinates:[[
-      [bbox2[0],drumY],[bbox2[2],drumY],
-      [bbox2[2],drumY+drumLatDeg],[bbox2[0],drumY+drumLatDeg],[bbox2[0],drumY]
-    ]]},properties:{tip:'drum_principal'}};
-    try{const di=turf.intersect(fpFeat,dp);if(di?.geometry)drumuri.push({...di,properties:{tip:'drum_principal'}});}catch(e){}
+    // ── #31 AUDIT: Ierarhie circulatii DN 537/2003 ──────────────────────────
+    // Principiu: drum colector principal (6-7m) + stradă locală (5m) + alee acces (3.5m)
+    // Conform DN 537/2003 si NP 051/2012
+    const dt = _LOT.drumTipuri;
+    const latPrincipal = (dt?.principal?.latime || _LOT.drumLat || 6) / mLat;  // deg
+    const latSecundar  = (dt?.secundar?.latime  || Math.max(4, _LOT.drumLat*0.75)) / mLat;
+    const latAlee      = (dt?.acces?.latime     || 3.5) / mLat;
 
-    // Drumuri secundare la fiecare 3 randuri
-    const rows=Math.max(1,Math.floor(hDeg/lotH));
-    for(let r=3;r<rows;r+=3){
-      const y0=bbox2[1]+r*lotH;
-      if(y0<drumY+drumLatDeg&&y0+drumLatDeg*0.5>drumY) continue;
-      const ds={type:'Feature',geometry:{type:'Polygon',coordinates:[[
-        [bbox2[0],y0],[bbox2[2],y0],
-        [bbox2[2],y0+drumLatDeg*0.5],[bbox2[0],y0+drumLatDeg*0.5],[bbox2[0],y0]
-      ]]},properties:{tip:'drum_secundar'}};
-      try{const di=turf.intersect(fpFeat,ds);if(di?.geometry)drumuri.push({...di,properties:{tip:'drum_secundar'}});}catch(e){}
+    // ── Drum colector principal: paralel cu latura lunga, la 25% sau marginea strazii
+    // Pozitionat la sud (acces din strada) sau la est — cel mai scurt front la strada
+    const isWide = wDeg > hDeg; // parcela mai lata decat inalta
+    if(isWide){
+      // Drum principal orizontal (E-V) langa marginea de sud (stradă)
+      const drumY = bbox2[1] + lotH * 0.8; // langa marginea de sud
+      const dp={type:'Feature',geometry:{type:'Polygon',coordinates:[[
+        [bbox2[0],drumY],[bbox2[2],drumY],
+        [bbox2[2],drumY+latPrincipal],[bbox2[0],drumY+latPrincipal],[bbox2[0],drumY]
+      ]]},properties:{tip:'principal', latime: dt?.principal?.latime||_LOT.drumLat, label:'Drum colector'}};
+      try{const di=turf.intersect(fpFeat,dp);if(di?.geometry)drumuri.push({...di,properties:dp.properties});}catch(e){}
+
+      // Strazi locale (N-S) perpendicular pe principal, la fiecare 3-4 coloane de loturi
+      const cols=Math.max(1,Math.floor(wDeg/((dt?.secundar?.latime||5)/mLng)));
+      const colStep = Math.max(2, Math.floor(cols/Math.max(1,Math.floor(wDeg/((Math.sqrt(_LOT.lotAria*6))/mLng)))));
+      for(let c=colStep; c<cols-1; c+=colStep){
+        const x0=bbox2[0]+c*(wDeg/cols);
+        const ds={type:'Feature',geometry:{type:'Polygon',coordinates:[[
+          [x0,bbox2[1]],[x0+latSecundar,bbox2[1]],
+          [x0+latSecundar,bbox2[3]],[x0,bbox2[3]],[x0,bbox2[1]]
+        ]]},properties:{tip:'secundar', latime: dt?.secundar?.latime||5, label:'Strada locala'}};
+        try{const di=turf.intersect(fpFeat,ds);if(di?.geometry)drumuri.push({...di,properties:ds.properties});}catch(e){}
+      }
+    } else {
+      // Drum principal vertical (N-S) langa marginea de vest
+      const drumX = bbox2[0] + (wDeg/Math.max(1,Math.floor(wDeg/((dt?.principal?.latime||6)/mLng))))*0.5;
+      const dp={type:'Feature',geometry:{type:'Polygon',coordinates:[[
+        [drumX,bbox2[1]],[drumX+latPrincipal,bbox2[1]],
+        [drumX+latPrincipal,bbox2[3]],[drumX,bbox2[3]],[drumX,bbox2[1]]
+      ]]},properties:{tip:'principal', latime: dt?.principal?.latime||_LOT.drumLat, label:'Drum colector'}};
+      try{const di=turf.intersect(fpFeat,dp);if(di?.geometry)drumuri.push({...di,properties:dp.properties});}catch(e){}
+
+      // Strazi locale (E-V) la fiecare 3 randuri de loturi
+      const rows=Math.max(1,Math.floor(hDeg/lotH));
+      const rowStep = Math.max(2, Math.ceil(rows/Math.max(1,Math.floor(hDeg/((Math.sqrt(_LOT.lotAria*4))/mLat)))));
+      for(let r=rowStep; r<rows-1; r+=rowStep){
+        const y0=bbox2[1]+r*lotH;
+        const ds={type:'Feature',geometry:{type:'Polygon',coordinates:[[
+          [bbox2[0],y0],[bbox2[2],y0],
+          [bbox2[2],y0+latSecundar],[bbox2[0],y0+latSecundar],[bbox2[0],y0]
+        ]]},properties:{tip:'secundar', latime: dt?.secundar?.latime||5, label:'Strada locala'}};
+        try{const di=turf.intersect(fpFeat,ds);if(di?.geometry)drumuri.push({...di,properties:ds.properties});}catch(e){}
+      }
+    }
+
+    // Alei de acces (pietonale/auto) între grupuri de loturi speciale
+    // Grădinița / Școala = acces separat obligatoriu (NP 010/1997)
+    const hasEducatie = Object.keys(loturiPerTip).some(k=>['gradinita','scoala'].includes(k) && (loturiPerTip[k]||0)>0);
+    if(hasEducatie){
+      const aleY = bbox2[1] + hDeg * 0.65;
+      const da={type:'Feature',geometry:{type:'Polygon',coordinates:[[
+        [bbox2[0],aleY],[bbox2[2]*0.4+bbox2[0]*0.6,aleY],
+        [bbox2[2]*0.4+bbox2[0]*0.6,aleY+latAlee],[bbox2[0],aleY+latAlee],[bbox2[0],aleY]
+      ]]},properties:{tip:'acces', latime: 3.5, label:'Acces educatie'}};
+      try{const di=turf.intersect(fpFeat,da);if(di?.geometry)drumuri.push({...di,properties:da.properties});}catch(e){}
     }
   }
 

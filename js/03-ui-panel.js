@@ -1018,12 +1018,6 @@ function _htmlScenarii3(){
     +tabBtns
     +'</div>'
 
-    // Descriere
-    +'<div style="font-size:11px;color:#64748b;line-height:1.55;padding:8px 10px;background:#04090f;'
-    +'border-radius:7px;border-left:2px solid '+_sInfo.color+';margin-bottom:10px">'
-    +_sInfo.desc
-    +'</div>'
-
     // Butoane
     +'<div style="display:flex;gap:6px">'
     +btnSingle+btnAll

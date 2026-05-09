@@ -632,7 +632,7 @@ function _v3dBuild(ap){
   // Renderer
   const r = new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:'high-performance'});
   r.setSize(W,H);
-  r.setPixelRatio(Math.min(devicePixelRatio,1.5));
+  r.setPixelRatio(Math.min(devicePixelRatio,2)); // Audit: calitate renderer imbunatatita
   r.shadowMap.enabled=true;
   r.shadowMap.type=THREE.PCFSoftShadowMap; // PCFSoft: umbre cu margini mai moi = mai realist
   r.toneMapping=THREE.ACESFilmicToneMapping;
@@ -773,10 +773,10 @@ function _v3dBuild(ap){
   // Centrul scenei: din _LOT._sceneCenter (setat de runLotizare la multi-parcel)
   // sau din centrul parcelei active (single parcel sau AEDIS)
   let cx, cy2;
-  if(_LOT?._sceneCenter){
+  if(window._LOT?._sceneCenter){
     // Multi-parcel lotizare: centrul a fost calculat si salvat in runLotizare
-    cx = _LOT._sceneCenter[0];
-    cy2 = _LOT._sceneCenter[1];
+    cx = window._LOT._sceneCenter[0];
+    cy2 = window._LOT._sceneCenter[1];
   } else {
     cx = ring0.reduce((s,c)=>s+c[0],0)/ring0.length;
     cy2 = ring0.reduce((s,c)=>s+c[1],0)/ring0.length;
@@ -1112,7 +1112,7 @@ function _v3dCaptureSilent(ap){
 
     try{
       const r=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,preserveDrawingBuffer:true});
-      r.setSize(W2,H2); r.setPixelRatio(1);
+      r.setSize(W2,H2); r.setPixelRatio(Math.min(window.devicePixelRatio||1, 3)); // Audit: high-res PDF capture
       r.shadowMap.enabled=true; r.shadowMap.type=THREE.PCFSoftShadowMap;
       r.toneMapping=THREE.ReinhardToneMapping; r.toneMappingExposure=1.0; // Reinhard: fara dithering pe culori flat (lotizare galben)
 
@@ -1772,7 +1772,7 @@ window._v3dToggleLotLegend = function _v3dToggleLotLegend(){
     // Culoarea exacta din feature (cum apare pe harta/3D) nu din definitie
     const colorFromFeat = f.properties?.color;
     const borderFromFeat = f.properties?.borderColor;
-    const tDef = (typeof _LOT !== 'undefined') ? _LOT.tipuri?.[tip] : null;
+    const tDef = (typeof window._LOT !== "undefined") ? window._LOT.tipuri?.[tip] : null;
     if(tDef){
       // Merge definitia cu culoarea actuala din feature
       tipuriVizibile[tip] = {
@@ -1944,7 +1944,7 @@ function _v3dAddLotizareGeometry(THREE, scene, toLoc){
       const isPartial = f.properties?.partial === true;
       // Verde: doar pe loturi complete (>80% din aria target) cu centroid verificat
       const lotAreaM2 = f.properties?.area||400;
-      const lotAriaTarget = (typeof _LOT!=='undefined' && _LOT.lotAria)||400;
+      const lotAriaTarget = (typeof window._LOT!=="undefined" && window._LOT.lotAria)||400;
       const isSmall = lotAreaM2 < lotAriaTarget * 0.80;
       if(svPct > 0.05 && !isPartial && !isSmall){
         try{
@@ -3474,8 +3474,8 @@ function _v3dResetCam(){
   const ap=S.parcels[S.activeParcel??0];
   // Centrul scenei: parcela activa (sau centrul lotizarii multi-parcel)
   let cx2, cy2;
-  if(_LOT?._sceneCenter){
-    cx2=_LOT._sceneCenter[0]; cy2=_LOT._sceneCenter[1];
+  if(window._LOT?._sceneCenter){
+    cx2=window._LOT._sceneCenter[0]; cy2=window._LOT._sceneCenter[1];
   } else {
     const ring2=ap?.geo?.geometry?.type==='Polygon'?ap.geo.geometry.coordinates[0]:ap?.geo?.geometry?.coordinates?.[0]?.[0]||[];
     cx2=ring2.reduce?.((s,c)=>s+c[0],0)/(ring2.length||1)||0;
