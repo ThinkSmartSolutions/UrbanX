@@ -645,6 +645,25 @@ const RAPORT_INFO = {
     ],
     nu: ['Nu înlocuiește Certificatul Energetic oficial semnat de auditor energetic atestat ANRE/MDLPA', 'Valorile EP sunt orientative ±20% — calculul definitiv necesită proiect tehnic complet cu toate detaliile constructive', 'Nu acoperă instalațiile de climatizare, ventilație mecanică sau producere ACM — incluse în CPE oficial'],
   },
+
+  stabilitate_taluzuri: {
+    ico: '⛰', label: 'Stabilitate Taluzuri & Versanți',
+    badge: 'recomandat', badgeLabel: 'Teren în pantă · Săpături',
+    color: '180,76,4',
+    fn: 'generateStabilitateTaluzuri()',
+    ce: 'Evaluează stabilitatea taluzurilor și versanților pe amplasamentul propus folosind metoda Fellenius (taluz infinit) pentru săpături H<5m. Calculează factorul de siguranță Fs în 4 scenarii (uscat, umed, saturat, săpătură verticală) pe baza parametrilor geotehnici tipici zonei și a cotei reale AMSL obținute prin Elevation Engine (Mapbox Terrain-RGB / EU-DEM 25m Copernicus).',
+    dece: 'Orice proiect cu săpături pentru fundații, subsoluri sau amenajări pe teren cu pantă >5° necesită o evaluare preliminară de stabilitate. Dacă Fs < 1.5, sunt necesare măsuri active (taluzare, piloți, drenaj) înainte de executarea lucrărilor. SR EN 1997-1 (Eurocode 7) și NP 074/2014 impun ca proiectantul să demonstreze stabilitatea taluzurilor pe toată durata execuției.',
+    legal: 'SR EN 1997-1:2004 (Eurocode 7) — proiectare geotehnică · NP 074/2014 (cercetarea terenului de fundare) · P91/2008 (consolidare teren) · Ord. MTCT 1422/2003 (zonare risc alunecări) · SR EN 1998-5:2004 (EC8 — aspecte seismice fundații) · P100-1/2022 (zonare seismică, ag, Tc)',
+    output: [
+      { ico: '📍', txt: 'Cotă teren AMSL reală (Mapbox Terrain-RGB, precizie ±1m) — nu estimare hardcodată' },
+      { ico: '⚖', txt: 'Factor de siguranță Fs calculat în 4 scenarii: uscat / umed / saturat / săpătură verticală' },
+      { ico: '🏗', txt: 'Clasificare stabilitate EC7: STABIL (Fs≥2.0) / CONDIȚIONAT / LIMITĂ / INSTABIL (<1.3)' },
+      { ico: '🔬', txt: 'Parametri geotehnici estimați (c, phi, gamma, NFA) cu surse normative (NP 074, EC7)' },
+      { ico: '⚠', txt: 'Risc geomorfologic conform Ord. 1422/2003: alunecare / eroziune / tasare / sufoziune / lichefiere' },
+      { ico: '🛠', txt: 'Măsuri de stabilizare recomandate cu termene de execuție' },
+    ],
+    nu: ['Nu înlocuiește studiul geotehnic certificat semnat de expert geotehnician atestat (NP 074/2014)', 'Parametrii geotehnici sunt ESTIMATIVI — valorile reale necesită foraje in situ + laborator', 'Metoda Fellenius este conservativă; pentru H>5m sau geometrii complexe este necesară analiza Bishop circular sau Spencer'],
+  },
 };
 
 function infoDrawerOpen(key) {

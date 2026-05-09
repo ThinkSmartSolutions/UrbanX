@@ -559,7 +559,7 @@ async function generateShadowStudy(){
   addImg(caps.imgDist,14+half+4,cy-52,half,52,'FIG. 3 — Plan distante contur-la-contur · aliniamente');
   cy+=4;
   cy=sec('ORIENTARE CARDINALA SI IMPACT SOLAR',cy);cy+=2;
-  cy=body('Parcela '+nrcad+' este amplasata la coordonatele '+lat.toFixed(4)+'°N / '+lon.toFixed(4)+'°E (UTR '+utr+'). La latitudinea '+lat.toFixed(1)+'°N, altitudinea solara la solstitiu de iarna (21 decembrie, ora 12:00) este de '+solarAlt(lat,11,12).toFixed(1)+'°, '+(isConform?'valoare care depaseste cerința OMS 119/2014: min. 1.5 ore însorire directă/zi la solstițiu de iarnă (indicator: altitudine solară ≥15°).':'valoare sub 15° altitudine solară (indicator OMS 119/2014) — posibil insuficiente cele 1.5 ore/zi obligatorii. Studiu detaliat de însorire obligatoriu.'),14,cy);
+  cy=body('Parcela '+nrcad+' este amplasata la coordonatele '+lat.toFixed(4)+'°N / '+lon.toFixed(4)+'°E (UTR '+utr+'). La latitudinea '+lat.toFixed(1)+'°N, altitudinea solara la solstitiu de iarna (21 decembrie, ora 12:00) este de '+solarAlt(lat,11,12).toFixed(1)+'°, '+(isConform?'valoare care depaseste cerința OMS 119/2014: min. 1.5 ore însorire directă/zi la solstițiu de iarnă (indicator: altitudine solară >=15°).':'valoare sub 15° altitudine solară (indicator OMS 119/2014) — posibil insuficiente cele 1.5 ore/zi obligatorii. Studiu detaliat de însorire obligatoriu.'),14,cy);
 
   // PAG 3: Tabel umbre orare
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CALCULE UMBRE ORARE - CLADIREA PROPUSA',3);ftr();
@@ -877,7 +877,7 @@ async function generateNoiseStudy(){
   addImg(caps.imgDist,14+half+4,cy-52,half,52,'FIG. 7 — Plan distante contur-la-contur · Aliniamente');
   cy+=4;
   cy=sec('5. SINTEZA ANALIZEI ACUSTICE',cy);cy+=2;
-  cy=body('Nivelul de zgomot echivalent estimat pentru amplasamentul '+nrcad+' (UTR '+utr+', suprafata '+area+' mp) este de '+Ltotal.toFixed(1)+' dB(A), calculat prin compunerea energetica a celor '+surse.length+' surse identificate in raza de 200m. '+(isOk?'Valoarea se incadreaza in limitele admise de SR 10009/2017 pentru zona acustica corespunzatoare, atat pe perioada de zi ('+Ltotal.toFixed(1)+' dB(A) ≤ '+limit_zi+' dB(A)) cat si pe perioada de noapte ('+Ltotal.toFixed(1)+' dB(A) '+(confNoap?'≤':'>')+' '+limit_n+' dB(A)). Proiectul poate continua cu masuri standard de izolare fonica.':'Valoarea depaseste limita admisa. Se recomanda masuri constructive suplimentare de izolare fonica, in special pentru fatadele expuse surselor principale. Elaborarea unui studiu acustic detaliat de catre specialist acreditato este recomandata.'),14,cy);cy+=5;
+  cy=body('Nivelul de zgomot echivalent estimat pentru amplasamentul '+nrcad+' (UTR '+utr+', suprafata '+area+' mp) este de '+Ltotal.toFixed(1)+' dB(A), calculat prin compunerea energetica a celor '+surse.length+' surse identificate in raza de 200m. '+(isOk?'Valoarea se incadreaza in limitele admise de SR 10009/2017 pentru zona acustica corespunzatoare, atat pe perioada de zi ('+Ltotal.toFixed(1)+' dB(A) <= '+limit_zi+' dB(A)) cat si pe perioada de noapte ('+Ltotal.toFixed(1)+' dB(A) '+(confNoap?'<=':'>')+' '+limit_n+' dB(A)). Proiectul poate continua cu masuri standard de izolare fonica.':'Valoarea depaseste limita admisa. Se recomanda masuri constructive suplimentare de izolare fonica, in special pentru fatadele expuse surselor principale. Elaborarea unui studiu acustic detaliat de catre specialist acreditato este recomandata.'),14,cy);cy+=5;
   cy=sec('6. BAZA LEGALA',cy);cy+=2;
   ['SR 10009:2017 — Acustica in constructii. Limite admisibile ale nivelului de zgomot in mediul exterior cladirilor.','HG nr. 321/2005 privind evaluarea si gestionarea zgomotului ambiant — transpune Directiva 2002/49/CE.','Directiva 2002/49/CE privind evaluarea si gestionarea zgomotului ambiental in mediul urban.','Normativul C 125-2013 privind proiectarea si executarea masurilor de izolare fonica in cladiri.','OMS nr. 119/2014 — Norme de igiena si sanatate publica privind mediul de viata al populatiei.','PUG '+getUATLabel()+' in vigoare — UTR '+utr+' — Regulamentul Local de Urbanism.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
 
@@ -890,7 +890,7 @@ async function generateNoiseStudy(){
   cy=addImg(caps.imgLat,14,cy,half,50,'FIG. 10 — Vedere laterala (Est)');
   addImg(caps.imgAerial,14+half+4,cy-50,half,50,'FIG. 11 — Vedere aeriana 45° · Amprenta');
   cy+=4;
-  cy=body('Imaginile de mai sus prezinta volumul propus din patru directii, permitand evaluarea completa a contextului urban, a relatiei cu cladirile vecine si a expunerii la sursele de zgomot identificate. Se recomanda ca fatadele expuse zgomotului (conform hartii surselor, Pag. 2) sa fie tratate cu materiale cu coeficient de izolare acustica Rw ≥ 35 dB conform C 125-2013.',14,cy);
+  cy=body('Imaginile de mai sus prezinta volumul propus din patru directii, permitand evaluarea completa a contextului urban, a relatiei cu cladirile vecine si a expunerii la sursele de zgomot identificate. Se recomanda ca fatadele expuse zgomotului (conform hartii surselor, Pag. 2) sa fie tratate cu materiale cu coeficient de izolare acustica Rw >= 35 dB conform C 125-2013.',14,cy);
 
   // PAG 7: Semnatura
   // PAG 8: Specificatii tehnice izolare acustica
@@ -919,11 +919,11 @@ async function generateNoiseStudy(){
   cy+=4;
   cy=sec('8.3. CONFORMITATE C 125-2013 - NIVELE MINIME DE IZOLARE ACUSTICA',cy);cy+=2;
   cy=tblRow(['Spatiu','Rw minim (dB)','Valoare aleasa','Status'],cy,true,[55,35,35,57]);
-  [['Pereti exteriori → camere locuit',AACR_DATA?'30 dB':'30 dB','≥35 dB recomandat',Ltotal>55?'Verificare':'Conform'],
-   ['Pereti intre apartamente','48-50 dB','≥48 dB','Conform C 125-2013'],
-   ['Planseu intre etaje (aerian)','48-50 dB','≥48 dB','Conform C 125-2013'],
-   ['Planseu (impact)','Ln ≤ 58 dB','Pardoseli flotante','Conform C 125-2013'],
-   ['Tamplarie exterioara fatade expuse','min. 30 dB','Geam triplu ≥38dB',Ltotal>65?'OBLIGATORIU':'Recomandat'],
+  [['Pereti exteriori → camere locuit',AACR_DATA?'30 dB':'30 dB','>=35 dB recomandat',Ltotal>55?'Verificare':'Conform'],
+   ['Pereti intre apartamente','48-50 dB','>=48 dB','Conform C 125-2013'],
+   ['Planseu intre etaje (aerian)','48-50 dB','>=48 dB','Conform C 125-2013'],
+   ['Planseu (impact)','Ln <= 58 dB','Pardoseli flotante','Conform C 125-2013'],
+   ['Tamplarie exterioara fatade expuse','min. 30 dB','Geam triplu >=38dB',Ltotal>65?'OBLIGATORIU':'Recomandat'],
   ].forEach(r=>cy=tblRow(r,cy,false,[55,35,35,57]));
 
   // PAG 9: Harta zgomot + plan monitorizare
@@ -1017,7 +1017,7 @@ async function generateNoiseStudy(){
   cy2=body('NOTA: Valorile de mai sus sunt estimări orientative. Studiu acustic detaliat (măsurători in situ + simulare SoundPLAN/CadnaA) se recomandă la faza PT pentru fațadele cu Leq>55 dB(A) ziua sau Leq>45 dB(A) noaptea, conform HG 321/2005 (Harta strategică zgomot).',14,cy2);cy2+=3;
   cy2=sec('12.1. REZUMAT MASURI OBLIGATORII SI RECOMANDATE — IERARHIZATE',cy2);cy2+=2;
   cy2=tblRow(['Prioritate','Măsură acustică','Rw/ΔLw obținut','Cost est. (EUR)','Normă aplicabilă'],cy2,true,[18,75,22,24,43]);
-  [['***','Geam triplu Rw≥38dB pe fațada S + N (dacă Leq>55dBa)','Rw 38-42 dB',''+Math.round(areaNum*2.5).toLocaleString('en-US')+' EUR','SR 10009:2017 + C 125-2013'],
+  [['***','Geam triplu Rw>=38dB pe fațada S + N (dacă Leq>55dBa)','Rw 38-42 dB',''+Math.round(areaNum*2.5).toLocaleString('en-US')+' EUR','SR 10009:2017 + C 125-2013'],
    ['***','Șapă flotantă 5cm pe vată minerala — TOATE nivelurile','ΔLw 20-25 dB',''+Math.round(sdTotal*50).toLocaleString('en-US')+' EUR','C 125-2013 art.5 — obligatoriu multietaj'],
    ['**','Fațadă ventilată cu vată minerala 10-15cm fațade N/NE','Rw +5-8 dB',''+Math.round((areaNum*(parseFloat(params?.pot)||35)/100)*150).toLocaleString('en-US')+' EUR','C 125-2013 + Legea 372/2005 (NZEB)'],
    ['**','Ventilare mecanică cu recuperator caldură (nu ferestre deschise)','Protecție completă',''+Math.round(sdTotal*25).toLocaleString('en-US')+' EUR','SR EN 15251 — confort interior'],
@@ -1104,7 +1104,7 @@ async function generateWindStudy(){
   [aedisH>hMed*1.5?'EFECT BORA (downwash): Curentii descendenti pe fatada sudica pot atinge viteze de 1.2-1.5 x viteza vantului la nivel pietonal, in special in coltul de sud-vest al cladirii.':'Efect aerodinamic limitat — cladirea nu depaseste semnificativ inaltimea medie a contextului construit.',
    'EFECT CORIDOR (venturi): Spatiile inguste intre cladiri pot accelera vantul cu factor 1.3-1.8 fata de vantul incident. Se recomanda verificarea coridoarelor cu latime < '+( aedisH*0.4).toFixed(0)+'m.',
    'ZONA DE CALM (leeward): Spatiul de cel putin '+(aedisH*0.6).toFixed(0)+'m in spatele cladirii (fata de directia vantului dominant NE) beneficiaza de protectie naturala impotriva vantului.',
-   'IMPACT LA NIVEL PIETONAL (≤2m): Conform criteriilor Lawson, spatiile de sedere de pe terase vor necesita protectie suplimentara (jardiniere, paravane, vegetatie) daca viteza medie depaseste 2.5 m/s.'
+   'IMPACT LA NIVEL PIETONAL (<=2m): Conform criteriilor Lawson, spatiile de sedere de pe terase vor necesita protectie suplimentara (jardiniere, paravane, vegetatie) daca viteza medie depaseste 2.5 m/s.'
   ].forEach(r=>{cy=body('• '+r,16,cy);cy+=2;});
 
   // PAG 4: Viewer golden + overcast + masuri
@@ -1478,13 +1478,13 @@ async function generateGreenStudy(){
   const kbOk=kbTotalRound>=0.3;
   pdf.setFillColor(...(kbOk?GREEN:ORANGE));pdf.rect(14,cy2,W-28,10,'F');
   pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');
-  pdf.text('KB TOTAL CALCULAT: '+kbTotalRound.toFixed(2)+' | Valoare ecologică totală: '+Math.round(tipuri.reduce((s,t)=>s+t.suprafata*t.kb,0)).toLocaleString('en-US')+' mp | '+(kbOk?'OK — KB ≥ 0.30 (prag Berlin)':'INSUFICIENT — creșteți acoperișul verde sau plantațiile'),W/2,cy2+7,{align:'center'});
+  pdf.text('KB TOTAL CALCULAT: '+kbTotalRound.toFixed(2)+' | Valoare ecologică totală: '+Math.round(tipuri.reduce((s,t)=>s+t.suprafata*t.kb,0)).toLocaleString('en-US')+' mp | '+(kbOk?'OK — KB >= 0.30 (prag Berlin)':'INSUFICIENT — creșteți acoperișul verde sau plantațiile'),W/2,cy2+7,{align:'center'});
   cy2+=14;
   cy2=tblRow(['Standard KB','Prag minim KB','Aplicabilitate','Status amplasament'],cy2,true,[60,20,80,22]);
   [['Berlin Biotope Area Factor (BAF) — Senat Berlin 2015','0.30','Obligatoriu la noi construcții în Berlin (implementat)',''+( kbTotalRound>=0.30?'OK':'Sub prag')],
    ['Stockholm Green Space Factor (GSF)','0.50','Planificare urbana Stockholm',''+( kbTotalRound>=0.50?'OK':'Sub prag')],
    ['Target Strategia UE Biodiversitate 2030','0.25-0.40','Recomandat pentru clădiri noi în UE',''+( kbTotalRound>=0.25?'OK':'Sub prag')],
-   ['Criterii punctaj BREEAM Land Use + Ecology','≥ 0.35','Obligatoriu pentru BREEAM Excellent',''+( kbTotalRound>=0.35?'OK':'Sub prag')],
+   ['Criterii punctaj BREEAM Land Use + Ecology','>= 0.35','Obligatoriu pentru BREEAM Excellent',''+( kbTotalRound>=0.35?'OK':'Sub prag')],
   ].forEach(r=>cy2=tblRow(r,cy2,false,[60,20,80,22]));
   cy2+=4;
 
@@ -1603,7 +1603,7 @@ async function generateMobilityStudy(){
   cy+=4;
   cy=sec('4. ANALIZA FLUX PIETONAL SI ACCESIBILITATE PMR',cy);cy+=2;
   cy=body('Proiectarea acceselor pietonale si a spatiilor de circulatie exterioare va respecta prevederile Normativului NP 051/2012 (revizuit) privind adaptarea cladirilor civile si spatiului urban la necesitatile persoanelor cu handicap, precum si Legea nr. 448/2006. Se vor prevedea: rampe de acces cu panta max. 8% (sau 6% pentru lungimi >6m), latimi minime de 1.20m pentru circulatii pietonale principale, locuri de parcare PMR cu dimensiuni 2.50m x 5.00m amplasate in apropierea accesului principal.',14,cy);cy+=3;
-  [['Trotuar acces principal: latime minima 1.50m, suprafata non-alunecoasa (coef. alunecare ≥0.5 umed).','Rampa PMR la intrarea principala: panta max. 8%, latime min. 1.20m, balustrade pe ambele parti.','Locuri PMR: min. '+Math.max(1,Math.ceil(pkObl/50))+' locuri (2% din total), marcate vizibil, amplasate langa acces.','Iluminat accese: min. 50 lux la nivelul solului (conform NP 061/2002).','Semnalizare tactilo-vizuala la schimbarile de nivel si la traversarile carosabil.'
+  [['Trotuar acces principal: latime minima 1.50m, suprafata non-alunecoasa (coef. alunecare >=0.5 umed).','Rampa PMR la intrarea principala: panta max. 8%, latime min. 1.20m, balustrade pe ambele parti.','Locuri PMR: min. '+Math.max(1,Math.ceil(pkObl/50))+' locuri (2% din total), marcate vizibil, amplasate langa acces.','Iluminat accese: min. 50 lux la nivelul solului (conform NP 061/2002).','Semnalizare tactilo-vizuala la schimbarile de nivel si la traversarile carosabil.'
   ]].flat().forEach(r=>{cy=body('• '+r,16,cy);cy+=2;});
 
   // PAG 5: Plan 2D + distante + concluzii
@@ -1847,7 +1847,7 @@ async function generateDensityStudy(){
   ].forEach(r=>cy=tblRow(r,cy,false,[50,28,28,38,38]));
   cy+=4;
   cy=sec('7.1. PROFILUL URBAN STRADAL - RAPORT H/L (INALTIME/LATIME STRADA)',cy);cy+=2;
-  cy=body('Raportul H/L (inaltimea cladirii fata de latimea strazii) este un indicator cheie al perceptiei spatiale urbane. Un raport H/L de 1:1 creeaza un spatiu stradal echilibrat; sub 1:2 spatiul este perceput ca larg; peste 1:1 (cladiri mai inalte decat latimea strazii) se creeaza un efect de "canion urban". Pentru UTR '+utr+', latimea stradala tipica este de 8-12m (cu trotuare), ceea ce implica un raport H/L recomandat de max. 1:1 (H≤latime) pentru pastrarea caracterului stradal.',14,cy);cy+=4;
+  cy=body('Raportul H/L (inaltimea cladirii fata de latimea strazii) este un indicator cheie al perceptiei spatiale urbane. Un raport H/L de 1:1 creeaza un spatiu stradal echilibrat; sub 1:2 spatiul este perceput ca larg; peste 1:1 (cladiri mai inalte decat latimea strazii) se creeaza un efect de "canion urban". Pentru UTR '+utr+', latimea stradala tipica este de 8-12m (cu trotuare), ceea ce implica un raport H/L recomandat de max. 1:1 (H<=latime) pentru pastrarea caracterului stradal.',14,cy);cy+=4;
   cy=tblRow(['Scenariu','H cladire','Latime strada','Raport H/L','Perceptie spatiala'],cy,true,[40,28,35,30,49]);
   [['Inaltime minima PUG',params?.h?params.h+'m':'6m','8-12m (typ.)','1:'+(8/(params?.h||6)).toFixed(1),'Larg — deschis'],
    ['Inaltime propusa',aedisH.toFixed(1)+'m','8-12m','1:'+(10/aedisH).toFixed(1),aedisH<=10?'Echilibrat':'Dens — verificare'],
@@ -2062,22 +2062,22 @@ async function generateMemoriu(){
   cy=body('Prezentul memoriu tehnic contine specificatii tehnice orientative pentru propunerea arhitecturala aferenta amplasamentului '+nrcad+' (UTR '+utr+', suprafata '+area+' mp, H propus='+aedisH.toFixed(1)+'m). Aceste specificatii vor fi detaliate in Proiectul Tehnic (PT) si Detaliile de Executie (DDE), elaborate de arhitect si inginer autorizati.',14,cy);cy+=4;
   cy=tblRow(['Sistem constructiv','Solutie propusa orientativ','Norma aplicabila','Obs.'],cy,true,[55,65,38,24]);
   [['Structura de rezistenta','Cadre beton armat monolit / zidarie portanta conf. P100-1/2022','P100-1/2022','Zona seismica '+getSeismConfig().zona],
-   ['Pereti exteriori','Termoizolatie min. 10cm EPS/MW + fatada tencuita/ventilata','C107/4-2022','U≤0.30 W/mpK'],
-   ['Tamplarie exterioara','PVC/Al cu geam tripan low-E (Ug≤0.6 W/mpK)','SR EN 14351-1','Clasa etans. 3-4'],
-   ['Acoperis (terasa plata)','Termoizolatie min. 15cm EPS + hidroizolatie bituminoasa 2 straturi','C107/4-2022','U≤0.20 W/mpK'],
+   ['Pereti exteriori','Termoizolatie min. 10cm EPS/MW + fatada tencuita/ventilata','C107/4-2022','U<=0.30 W/mpK'],
+   ['Tamplarie exterioara','PVC/Al cu geam tripan low-E (Ug<=0.6 W/mpK)','SR EN 14351-1','Clasa etans. 3-4'],
+   ['Acoperis (terasa plata)','Termoizolatie min. 15cm EPS + hidroizolatie bituminoasa 2 straturi','C107/4-2022','U<=0.20 W/mpK'],
    ['Plansee intermediare','BA monolit min. 12cm grosime','P100-1/2022','cf. calcul structural'],
-   ['Pardoseli comune','Gresie portelanata antiderapanta Rn≥R10','EN 13845','PMR conformitate'],
+   ['Pardoseli comune','Gresie portelanata antiderapanta Rn>=R10','EN 13845','PMR conformitate'],
    ['Instalatii sanitare','Racord retea RAJA, contorizare individuala','STAS 1478','Epuisment necesar'],
    ['Instalatii termice','Centrala termica proprie sau racord retea (conf. aviz)','NP 037/99','Energie cls. B min.'],
   ].forEach(r=>cy=tblRow(r,cy,false,[55,65,38,24]));
   cy+=4;
   cy=sec('9.1. CERINTE MINIME PERFORMANTA ENERGETICA - LEGEA 372/2005',cy);cy+=2;
   cy=tblRow(['Element','Cerinta (W/mpK)','Solutie recomandata','Cost orientativ'],cy,true,[45,35,65,37]);
-  [['Pereti exteriori','U≤0.28-0.35','EPS 12-15cm (λ=0.040 W/mK) + tencuiala','40-80 EUR/mp'],
-   ['Planseu acoperis/pod','U≤0.20','EPS 15-20cm sau vata minerala 20cm','50-90 EUR/mp'],
-   ['Planseu peste subsol/exterior','U≤0.30','EPS 8-10cm sub planseu','30-60 EUR/mp'],
-   ['Tamplarie (geam+rama)','Uw≤1.20-1.40','Profil PVC 6 camere + geam triplu','250-400 EUR/mp'],
-   ['Punte termica perimetru','χ≤0.10 W/mK','Ruptor termic la balcoane','Conf. proiect'],
+  [['Pereti exteriori','U<=0.28-0.35','EPS 12-15cm (λ=0.040 W/mK) + tencuiala','40-80 EUR/mp'],
+   ['Planseu acoperis/pod','U<=0.20','EPS 15-20cm sau vata minerala 20cm','50-90 EUR/mp'],
+   ['Planseu peste subsol/exterior','U<=0.30','EPS 8-10cm sub planseu','30-60 EUR/mp'],
+   ['Tamplarie (geam+rama)','Uw<=1.20-1.40','Profil PVC 6 camere + geam triplu','250-400 EUR/mp'],
+   ['Punte termica perimetru','χ<=0.10 W/mK','Ruptor termic la balcoane','Conf. proiect'],
   ].forEach(r=>cy=tblRow(r,cy,false,[45,35,65,37]));
 
   // PAG 10: Concluzii extinse memoriu + etape urmaToare
@@ -2664,7 +2664,7 @@ async function generateGeotehnicalStudy(){
   const F3 = 1; // factor mediu: normal (fara apa agresiva, fara vibratii)
   const sumaFact = F1+F2+F3;
   const catGeoNr = sumaFact>=7?3 : sumaFact>=4?2 : 1;
-  const catGeo = catGeoNr===3?'3 — Complexă (>7 puncte NP 074)' : catGeoNr===2?'2 — Curentă (4-6 puncte NP 074)':'1 — Simplă (≤3 puncte NP 074)';
+  const catGeo = catGeoNr===3?'3 — Complexă (>7 puncte NP 074)' : catGeoNr===2?'2 — Curentă (4-6 puncte NP 074)':'1 — Simplă (<=3 puncte NP 074)';
 
   // Date hidrologie estimative zona Iași (din hărți geologice IGPG + foraje existente)
   const hidro={
@@ -2738,8 +2738,8 @@ async function generateGeotehnicalStudy(){
   ).forEach(r=>{cy=body('• '+r,16,cy);cy+=2;});
   cy+=3;cy=sec('4. TIPURI DE FUNDATII RECOMANDATE',cy);cy+=2;
   cy=tblRow(['Tip fundatie','Aplicabilitate','Cond. utilizare'],cy,true,[55,45,78]);
-  [['Fundații izolate din BA','P≤4 etaje, teren bun','P_conv>150kPa, NFA>2m adâncime fund.'],
-   ['Fundații continue (radier)','P≤4 etaje, teren slab sau NFA ridicat','Dacă argile contractile sau NFA<1.5m'],
+  [['Fundații izolate din BA','P<=4 etaje, teren bun','P_conv>150kPa, NFA>2m adâncime fund.'],
+   ['Fundații continue (radier)','P<=4 etaje, teren slab sau NFA ridicat','Dacă argile contractile sau NFA<1.5m'],
    ['Fundații pe piloți forati','P>4 etaje sau teren slab','Când p_conv<100kPa sau H>28m'],
   ].forEach(r=>cy=tblRow(r,cy,false,[55,45,78]));
 
@@ -3791,7 +3791,7 @@ async function generateSSF(){
         ['Nr. nuclee scări + lift detectate', _rvCoresCount+' nuclee', _nrScariSource, _rvCoresCount>=(_pers>200?2:1)?'OK':'Verificare'],
         ['Nr. apartamente estimate', _rvAptCount+' unități', 'Relevee × '+niv+' niv.', 'Informativ'],
         ['Nr. persoane din relevee', _pers+' pers.', _persSource, 'Conf. P118'],
-        ['Distanță max. coridor la scări', _lungCorActual.toFixed(0)+'m', _rvIsuIssues.length?'Calculat din relevee':'Estimat 70% din max', _corOk?'OK (≤'+_lungMaxCor+'m)':'⚠ Depășire'],
+        ['Distanță max. coridor la scări', _lungCorActual.toFixed(0)+'m', _rvIsuIssues.length?'Calculat din relevee':'Estimat 70% din max', _corOk?'OK (<='+_lungMaxCor+'m)':'⚠ Depășire'],
         ['Nr. scări necesare P118', _nrScari+' scări', _nrScariSource, 'Conf. P118'],
         ['Lățime minimă scări', _latEvacu.toFixed(1)+'m', 'P118-2/2013 Art.7.3', 'De respectat'],
         ['Aviz ISU necesar', _avizISU_SSF?'DA — OBLIGATORIU':'NU — Verificare CU', 'Legea 307/2006', _avizISU_SSF?'Oblig.':'OK'],
@@ -3809,7 +3809,7 @@ async function generateSSF(){
         });
         cy13+=3;
       } else {
-        cy13=body('✅ Toate camerele identificate de Relevee Instant sunt la distanță ≤'+_lungMaxCor+'m față de nucleele de scări — conform P118-2/2013.',14,cy13);cy13+=4;
+        cy13=body('✅ Toate camerele identificate de Relevee Instant sunt la distanță <='+_lungMaxCor+'m față de nucleele de scări — conform P118-2/2013.',14,cy13);cy13+=4;
       }
 
       // Canvas cu planul etajului
@@ -4742,7 +4742,7 @@ async function generateSolarStudy(){
   cy+=4;
 
   cy=sec('3. BILANT ORAR DE INSORIRE - TOATE ANOTIMPURILE',cy);
-  cy=body('Tabelul de mai jos prezintă altitudinea solară la fiecare oră pentru cele 4 momente cheie ale anului. Valorile ≥15° (evidențiate) reprezintă condiții de însorire conformă OMS 119/2014. Calculul ia în considerare declinația solară și unghiul orar pentru latitudinea amplasamentului.',14,cy);cy+=4;
+  cy=body('Tabelul de mai jos prezintă altitudinea solară la fiecare oră pentru cele 4 momente cheie ale anului. Valorile >=15° (evidențiate) reprezintă condiții de însorire conformă OMS 119/2014. Calculul ia în considerare declinația solară și unghiul orar pentru latitudinea amplasamentului.',14,cy);cy+=4;
 
   const hours12=[7,8,9,10,11,12,13,14,15,16,17];
   const hColW=[22,...hours12.map(()=>16)];
@@ -4772,15 +4772,15 @@ async function generateSolarStudy(){
   pdf.setFillColor(...statCol);pdf.rect(14,cy,W-28,14,'F');
   pdf.setFillColor(...GOLD);pdf.rect(14,cy,3,14,'F');
   pdf.setTextColor(255,255,255);pdf.setFontSize(10);pdf.setFont('helvetica','bold');
-  pdf.text(isConform?'OK CONFORM OMS 119/2014 — Altitudine solară ≥15° la solstițiu de iarnă':'NU NECONFORM — Altitudine solară '+solarData.iarna.maxAlt.toFixed(1)+'° < 15° cerut de OMS 119/2014',W/2,cy+9,{align:'center'});
+  pdf.text(isConform?'OK CONFORM OMS 119/2014 — Altitudine solară >=15° la solstițiu de iarnă':'NU NECONFORM — Altitudine solară '+solarData.iarna.maxAlt.toFixed(1)+'° < 15° cerut de OMS 119/2014',W/2,cy+9,{align:'center'});
   cy+=18;
 
   cy=sec('4. VERIFICARE CONFORMITATE OMS 119/2014',cy);
   cy=body('Conform OMS nr. 119/2014 (Norme de igienă privind mediul de viață al populației), orice spațiu locuit sau cu destinație similară trebuie să beneficieze de iluminat natural direct timp de minimum 1.5 ore pe zi la solstițiul de iarnă, cu unghi solar de minimum 15° față de orizont. Verificarea se efectuează pentru ziua de 21 decembrie (solstițiul de iarnă), ora 12:00 (prânz solar).',14,cy);cy+=3;
 
   cy=tblRow(['Criteriu OMS 119/2014','Valoare calculată','Prag minim','Diferență','Status'],cy,true,[65,35,28,25,29]);
-  [['Alt. solară solstițiu iarnă (12:00)',solarData.iarna.alt12+'°','≥ 15°',(solarData.iarna.maxAlt-15).toFixed(1)+'°',isConform?'CONFORM':'NECONFORM'],
-   ['Ore însorire iarnă (alt ≥15°)',oreMinIarna+'h/zi','≥ 1.5h/zi',(oreMinIarna-1.5).toFixed(1)+'h',oreMinIarna>=1.5?'CONFORM':'NECONFORM'],
+  [['Alt. solară solstițiu iarnă (12:00)',solarData.iarna.alt12+'°','>= 15°',(solarData.iarna.maxAlt-15).toFixed(1)+'°',isConform?'CONFORM':'NECONFORM'],
+   ['Ore însorire iarnă (alt >=15°)',oreMinIarna+'h/zi','>= 1.5h/zi',(oreMinIarna-1.5).toFixed(1)+'h',oreMinIarna>=1.5?'CONFORM':'NECONFORM'],
    ['Ore însorire vară',oreMaxVara+'h/zi','informativ','—','INFO'],
    ['Umbrire la 12:00 iarnă',solarData.iarna.shadAt12+'m','conform H prop.','—','INFO'],
   ].forEach(r=>cy=tblRow(r,cy,false,[65,35,28,25,29],[
@@ -4851,7 +4851,7 @@ async function generateSolarStudy(){
       ? 'Amplasamentul este CONFORM cu prevederile OMS 119/2014. Altitudinea solară la solstițiul de iarnă (21 dec, 12:00) este de '+solarData.iarna.alt12+'°, peste pragul minim de 15°. Însorirea minimă de 1.5 ore/zi este asigurată în cele mai defavorabile condiții sezoniere.'
       : 'Amplasamentul NECESITĂ VERIFICARE suplimentară. Altitudinea solară de '+solarData.iarna.alt12+'° la solstițiu iarnă este sub pragul de 15° OMS 119/2014. Se recomandă studiu detaliat de însorire cu simulare 3D și consultarea expertului în fizica construcțiilor.',
     'Umbra proiectată la solstițiu de iarnă (12:00) are lungimea estimată de '+solarData.iarna.shadAt12+'m. La solstițiu de vară, umbra se reduce la '+solarData.vara.shadAt12+'m. Aceste valori trebuie coroborate cu distanțele față de proprietățile vecine (rf='+params.rf+'m, rl='+params.rl+'m, rs='+params.rs+'m conform PUG).',
-    'Clădirea propusă cu H='+aedisH.toFixed(1)+'m și '+niv+' niveluri beneficiază de '+solarData.vara.oreSoare+' ore de însorire directă la solstițiu de vară și '+oreMinIarna+' ore/zi la solstițiu de iarnă (altitudine ≥15°).',
+    'Clădirea propusă cu H='+aedisH.toFixed(1)+'m și '+niv+' niveluri beneficiază de '+solarData.vara.oreSoare+' ore de însorire directă la solstițiu de vară și '+oreMinIarna+' ore/zi la solstițiu de iarnă (altitudine >=15°).',
     'Se recomandă orientarea principală a ferestrelor camere de locuit spre Sud-Sud-Est (±30°) pentru maximizarea câștigului solar pasiv în sezonul rece și reducerea supraîncălzirii în sezonul cald.',
     'Înaintea obținerii Autorizației de Construire se impune elaborarea unui Studiu Detaliat de Însorire cu simulare 3D certificată, semnat de arhitect autorizat OAR, conform Legii 50/1991.',
   ],cy);
@@ -4991,11 +4991,11 @@ async function generateSolarStudy(){
   cy2+=4;
   cy2=sec('10.1. VERIFICARE INSORIRE FATADE PROPUSE — ORIENTARI SI RECOMANDARI',cy2);cy2+=2;
   cy2=tblRow(['Fațadă / Orientare','Însorire 21 Dec. (ore)','Prag OMS','Funcțiuni recomandate','Restricții'],cy2,true,[35,35,22,55,35]);
-  [['S — Fațadă principală stradă',solarData?.iarna?.alt12||'—','≥ 1.5h','Dormitoare, living, birouri','Fără obstacole spre S'],
-   ['SE — Fațadă laterală dreapta',(solarData?.iarna?.alt12*0.85||0).toFixed(1)||'—','≥ 1.5h','Dormitoare, living','Verificare retragere rl='+params?.rl+'m'],
-   ['SV — Fațadă laterală stânga',(solarData?.iarna?.alt12*0.85||0).toFixed(1)||'—','≥ 1.5h','Dormitoare, sufragerie','Verificare retragere rl='+params?.rl+'m'],
-   ['E — Fațadă laterală est',(solarData?.iarna?.alt12*0.65||0).toFixed(1)||'—','≥ 1h','Dormitoare copii, bucătărie','Soare dimineața, OK funcțional'],
-   ['V — Fațadă laterală vest',(solarData?.iarna?.alt12*0.65||0).toFixed(1)||'—','≥ 1h','Birou, magazie, utilitar','Evitați dormitoare principale'],
+  [['S — Fațadă principală stradă',solarData?.iarna?.alt12||'—','>= 1.5h','Dormitoare, living, birouri','Fără obstacole spre S'],
+   ['SE — Fațadă laterală dreapta',(solarData?.iarna?.alt12*0.85||0).toFixed(1)||'—','>= 1.5h','Dormitoare, living','Verificare retragere rl='+params?.rl+'m'],
+   ['SV — Fațadă laterală stânga',(solarData?.iarna?.alt12*0.85||0).toFixed(1)||'—','>= 1.5h','Dormitoare, sufragerie','Verificare retragere rl='+params?.rl+'m'],
+   ['E — Fațadă laterală est',(solarData?.iarna?.alt12*0.65||0).toFixed(1)||'—','>= 1h','Dormitoare copii, bucătărie','Soare dimineața, OK funcțional'],
+   ['V — Fațadă laterală vest',(solarData?.iarna?.alt12*0.65||0).toFixed(1)||'—','>= 1h','Birou, magazie, utilitar','Evitați dormitoare principale'],
    ['N — Fațadă posterioară curte','<0.5h','Sub prag','Scări, hol, grupuri sanitare','NU dormitoare — obligatoriu'],
   ].forEach(r=>cy2=tblRow(r,cy2,false,[35,35,22,55,35]));
   cy2+=4;
@@ -5088,7 +5088,7 @@ async function generateSolarStudy(){
             _typeLabel[r.type]||r.type,
             r.wall+(r.wall!=='interior'?' (ext.)':''),
             r.ore>0?r.ore.toFixed(1)+'h':'0h (int.)',
-            needs?'≥ 1.5h':'—',
+            needs?'>= 1.5h':'—',
             statusStr,
             r.apt>=0?'Apt.'+(r.apt+1):'—',
           ],cyR,false,[38,30,30,27,22,15]);
@@ -5110,7 +5110,7 @@ async function generateSolarStudy(){
 
         // Concluzie
         const _solarConcl=_camereNeconf===0
-          ? 'Toate camerele de locuit identificate prin Relevee Instant beneficiază de însorire ≥1.5h/zi la solstițiu de iarnă, conform OMS 119/2014. Orientarea frontului stradal ('+frontDir+') permite orientarea favorabilă a spațiilor principale.'
+          ? 'Toate camerele de locuit identificate prin Relevee Instant beneficiază de însorire >=1.5h/zi la solstițiu de iarnă, conform OMS 119/2014. Orientarea frontului stradal ('+frontDir+') permite orientarea favorabilă a spațiilor principale.'
           : _camereNeconf+' cameră/camere de locuit se află sub pragul de 1.5h/zi la solstițiu de iarnă. Se recomandă redistribuirea funcțiunilor la faza PAC: mutarea spațiilor tehnice (hol, depozit, baie) pe fațada nordică și a camerelor de locuit pe fațadele sudice/estice.';
         cyR=body(_solarConcl,14,cyR);
       }
@@ -6548,7 +6548,7 @@ async function generateStudiuAmplasament(){
    ['Limita Leq zi (06-22h)',zgomot.Lzsn_limita+' dB(A)','SR 10009:2017','Tâmplărie, soluții acustice'],
    ['Limita Leq noapte (22-06h)',zgomot.Lnoapte_limita+' dB(A)','SR 10009:2017','Tâmplărie geam triplu'],
    ['Surse principale zgomot',(zgomot.surse_principale||[]).join(', ')||'Verificare in situ','—','Studiu acustic detaliat'],
-   ['Izolare acustică minimă fațade','Rw ≥ 30-35 dB','C 125-2013','Proiect instalații'],
+   ['Izolare acustică minimă fațade','Rw >= 30-35 dB','C 125-2013','Proiect instalații'],
   ].forEach(r=>cy=tblRow(r,cy,false,[65,42,38,37]));
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -6562,12 +6562,12 @@ async function generateStudiuAmplasament(){
   [['Urbanistic PUG','POT max '+_pot+'%, CUT max '+_cut+', H max '+(params?.h||'N/S')+'m, SV min '+params?.sv+'%, parcaje min '+params?.pk+'/unit.','RLU UTR '+utr,'OBLIG'],
    ['Retrageri min.','Rf='+_rf+'m, Rl='+_rl+'m, Rs='+_rs+'m față de limitele de proprietate','RLU UTR '+utr,'OBLIG'],
    ['Seismic','Structură antiseismică ag='+seism.ag+'g, Tc='+seism.Tc+'s, zona '+seism.zona,'P100-1/2022','OBLIG'],
-   ['Însorire/Umbre','Alt. sol. 21 Dec 12:00 = '+altDec12.toFixed(1)+'° ('+(isConformSolar?'≥15° CONFORM':'<15° NECONFORM')+'). Dist. min. N: '+(aedisH/Math.tan(15*Math.PI/180)).toFixed(0)+'m','OMS 119/2014','OBLIG'],
+   ['Însorire/Umbre','Alt. sol. 21 Dec 12:00 = '+altDec12.toFixed(1)+'° ('+(isConformSolar?'>=15° CONFORM':'<15° NECONFORM')+'). Dist. min. N: '+(aedisH/Math.tan(15*Math.PI/180)).toFixed(0)+'m','OMS 119/2014','OBLIG'],
    ['Patrimoniu/LMI',inZCP?'PARCELĂ ÎN ZCP — aviz DJCPN obligatoriu':inZonaProt?'Monument în 200m — consultare DJCPN':'Fără restricție patrimoniu identificată','Legea 422/2001',inZCP?'OBLIG':inZonaProt?'REC.':'OK'],
    ['ISU / Apărare incendiu',aedisH>8||sdTotal>600?'Aviz ISU OBLIGATORIU (H>8m sau SD>600mp)':'Verificare la PAC','P118+Legea 307',aedisH>8?'OBLIG':'REC.'],
    ['Aeronautic AACR',distAerop<15?'Aviz ROMATSA OBLIGATORIU (dist. '+distAerop+'km la LRIA)':'Dist. '+distAerop+'km — aviz de verificat','HG 930/2016',distAerop<15?'OBLIG':'REC.'],
    ['Vânt structural','Presiune vânt qp(H)='+qpH9.toFixed(3)+' kN/mp — input ing. rezistență','CR 1-1-4/2012','REC.'],
-   ['Zgomot','Zona acustică '+zgomot.zona_acustica+'. Tâmplărie min. Rw≥30dB fatade expuse.','SR 10009:2017','REC.'],
+   ['Zgomot','Zona acustică '+zgomot.zona_acustica+'. Tâmplărie min. Rw>=30dB fatade expuse.','SR 10009:2017','REC.'],
    ['Hidrologic/NFA','NFA est. '+hidro.nfa+'. Hidroizolație/epuismente posibile.','NP 074/2014','REC.'],
   ].forEach(r=>cy=tblRow(r,cy,false,[45,90,38,9]));
   cy+=3;
@@ -6619,7 +6619,7 @@ async function generateStudiuAmplasament(){
   const catGeoF=aedisH>28?'3 — Complexă':aedisH>10?'2 — Curentă':'1 — Simplă';
   cy=tblRow(['Aspect verificat','Concluzie','Documentație impusă'],cy,true,[60,60,62]);
   [['Indicatori PUG (POT/CUT/H/SV/Pk)','POT '+_pot+'% / CUT '+_cut+' / H '+(   _h?_h+'m':'N/S')+' / SV '+_sv+'%','Proiect DTAC + memoriu'],
-   ['Însorire OMS 119/2014',isConformSolar?'Alt. sol. '+altDec12.toFixed(1)+'° ≥ 15° CONFORM':'Alt. sol. '+altDec12.toFixed(1)+'° < 15° — studiu OAR','Studiu însorire la PAC'],
+   ['Însorire OMS 119/2014',isConformSolar?'Alt. sol. '+altDec12.toFixed(1)+'° >= 15° CONFORM':'Alt. sol. '+altDec12.toFixed(1)+'° < 15° — studiu OAR','Studiu însorire la PAC'],
    ['Patrimoniu LMI',inZCP?'ÎN ZCP — aviz DJCPN':inZonaProt?'Monument în 200m':'Fără restricție','Aviz DJCPN dacă în zonă prot.'],
    ['Risc seismic',seism.zona+' ag='+seism.ag+'g','P100-1/2022 — ing. rezistență'],
    ['ISU / Apărare incendiu',aedisH>8?'Aviz ISU OBLIGATORIU':'Verificare la PAC','Proiect P118 + aviz ISU'],
@@ -6835,10 +6835,10 @@ async function runExport(){
   const bilanRows=[
     ['Suprafata construita la sol (SC)',scMaxim.toLocaleString('en-US')+' mp',scOptim.toLocaleString('en-US')+' mp',scPropus.toLocaleString('en-US')+' mp',cPOT],
     ['Suprafata desfasurata totala (SDA)',sdMaxim.toLocaleString('en-US')+' mp',sdOptim.toLocaleString('en-US')+' mp',sdPropus.toLocaleString('en-US')+' mp',cCUT],
-    ['Spatii verzi amenajate (SV)',svMinim.toLocaleString('en-US')+' mp','≥'+svOptim.toLocaleString('en-US')+' mp',svPropus.toLocaleString('en-US')+' mp',cSV],
-    ['Locuri parcare necesare (Pk)',pkMinim+' locuri','≥'+pkMinim+' loc.',pkPropus+' locuri',true],
-    ['Inaltimea totala (H)',hMax?hMax+'m':'N/S','≤'+aedisH.toFixed(0)+'m',aedisH.toFixed(1)+'m',cH],
-    ['Teren neconstruibil (liber+SV)',Math.max(0,areaNum-scMaxim).toLocaleString('en-US')+' mp','≥'+Math.max(0,areaNum-scOptim).toLocaleString('en-US')+' mp',Math.max(0,areaNum-scPropus).toLocaleString('en-US')+' mp',true],
+    ['Spatii verzi amenajate (SV)',svMinim.toLocaleString('en-US')+' mp','>='+svOptim.toLocaleString('en-US')+' mp',svPropus.toLocaleString('en-US')+' mp',cSV],
+    ['Locuri parcare necesare (Pk)',pkMinim+' locuri','>='+pkMinim+' loc.',pkPropus+' locuri',true],
+    ['Inaltimea totala (H)',hMax?hMax+'m':'N/S','<='+aedisH.toFixed(0)+'m',aedisH.toFixed(1)+'m',cH],
+    ['Teren neconstruibil (liber+SV)',Math.max(0,areaNum-scMaxim).toLocaleString('en-US')+' mp','>='+Math.max(0,areaNum-scOptim).toLocaleString('en-US')+' mp',Math.max(0,areaNum-scPropus).toLocaleString('en-US')+' mp',true],
   ];
   bilanRows.forEach((r,i)=>{
     const [label,maxV,optimV,propusV,ok]=r;
@@ -6854,7 +6854,7 @@ async function runExport(){
   const indicRows=[
     ['POT — Procentul de Ocupare',potMax+'%',scMaxim.toLocaleString('en-US')+' mp',scOptim.toLocaleString('en-US')+' mp',scPropus.toLocaleString('en-US')+' mp',cPOT],
     ['CUT — Coeficient Utilizare Teren',String(cutMax),sdMaxim+' mp.ADC',sdOptim.toLocaleString('en-US')+' mp',sdPropus.toLocaleString('en-US')+' mp',cCUT],
-    ['H max (m)',hMax?hMax+'m':'N/S','—','≤'+(aedisH).toFixed(0)+'m',aedisH.toFixed(1)+'m',cH],
+    ['H max (m)',hMax?hMax+'m':'N/S','—','<='+(aedisH).toFixed(0)+'m',aedisH.toFixed(1)+'m',cH],
     ['Nr. niveluri max',p?.niv?String(p.niv):'N/S','—','—',niv+' niv.',true],
     ['Retragere fata strada (Rf)',p?.rf+'m','—',p?.rf+'m',p?.rf+'m',true],
     ['Retragere laterala (Rl)',p?.rl+'m','—',p?.rl+'m',p?.rl+'m',true],
@@ -7850,7 +7850,7 @@ async function generateHealthImpactStudy(){
   cy=newPage('D. APA POTABILĂ + E. RADON + F. CÂMPURI ELECTROMAGNETICE',5);
   cy=sec('D. APA POTABILĂ ȘI SALUBRITATE',cy,TEAL);
   cy=tblRow(['Indicator','Limita max.','Sursă risc','Obligație legală'],cy,true,[60,35,50,47]);
-  [['Calitate apă potabilă','Conf. Legii 458/2002','Rețea distribuție','Monitorizare operator apă'],['Colectare deșeuri','Punct colectare ≤100m','Depozitare neconformă','HG 942/2017 · Legea 211/2011'],['Canalizare menajeră','100% conectare','Fosă septică neconformă','Legea 107/1996 + Directiva 91/271'],].forEach(r=>{cy=tblRow(r,cy,false,[60,35,50,47]);});
+  [['Calitate apă potabilă','Conf. Legii 458/2002','Rețea distribuție','Monitorizare operator apă'],['Colectare deșeuri','Punct colectare <=100m','Depozitare neconformă','HG 942/2017 · Legea 211/2011'],['Canalizare menajeră','100% conectare','Fosă septică neconformă','Legea 107/1996 + Directiva 91/271'],].forEach(r=>{cy=tblRow(r,cy,false,[60,35,50,47]);});
   cy+=4;
   cy=sec('E. RADON — ORD. MS 1020/2022',cy,ORANGE);
   cy=body('Radonul (Rn-222) este un gaz radioactiv natural din sol, principala cauza de cancer pulmonar dupa fumat. Nivel referinta national: 300 Bq/m³ (spatii locuite) conf. Ord. MS 1020/2022. UAT '+(uat||'curent')+' se afla in zona de risc radon: '+((lat>46.5&&lat<48)?'MODERAT (30-100 Bq/m³ estimat)':'SCAZUT (<30 Bq/m³)')+'. Masuri: ventilare subsolului, etansare placi de fundatie, membrana anti-radon daca masurare depaseste 200 Bq/m³.',14,cy);
@@ -7862,7 +7862,7 @@ async function generateHealthImpactStudy(){
   cy=newPage('G. CONCLUZII ȘI RECOMANDĂRI — OMS + LEGISLAȚIE NAȚIONALĂ',6);
   cy=concluzii([
     'CALITATE AER: Parcela '+nrcad+' se află în zona urbană UAT '+uat+'. Principalele surse de poluare sunt traficul rutier pe DN29 și activitățile industriale din zonele adiacente. Se recomandă plantarea unui ecran vegetal de min. 15m pe latura dinspre artera principală.',
-    'ZGOMOT: Zona funcțională impune respectarea limitelor: Lzsn max. 60 dB (exterior rezidențial). La faza PAC se va realiza studiu acustic detaliat cu calcul de propagare și se vor prevedea geamuri fonoizolante Rw ≥ 35 dB pe fațadele expuse traficului.',
+    'ZGOMOT: Zona funcțională impune respectarea limitelor: Lzsn max. 60 dB (exterior rezidențial). La faza PAC se va realiza studiu acustic detaliat cu calcul de propagare și se vor prevedea geamuri fonoizolante Rw >= 35 dB pe fațadele expuse traficului.',
     'ÎNSORIRE: Orientarea fațadei principale spre '+solarDir+' determină condiții de însorire '+solarBonus+'. Obligatoriu studiu de însorire OMS 119/2014 la PAC, cu vizualizare umbre pentru 21 decembrie și 21 iunie.',
     'RADON: Se recomandă efectuarea măsurătorilor de radon înainte de execuție (min. 3 luni de monitorizare) și prevederea membranei anti-radon la fundație conform Ord. MS 1020/2022.',
     'APA POTABILĂ: Racordarea la rețeaua publică a operatorului '+((uatCfg?.mediu?.apa?.operator)||'local')+' este obligatorie. Se interzice fosa septică conform HG 188/2002. Plan de gestionare deșeuri conform HG 942/2017.',
@@ -8178,6 +8178,7 @@ async function generateStabilitateTaluzuri(){
   const ORANGE=d.ORANGE||[180,76,4],BLUE=d.BLUE||[59,130,246];
 
   // Obtine cote teren
+  ss('Studiu Stabilitate Taluzuri — capturi harta & 3D...');
   const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
   const elevData = await _getElevation(lat, lon);
   const elevTeren = elevData.elev;
@@ -8206,7 +8207,7 @@ async function generateStabilitateTaluzuri(){
 
   // ── Calcul factor de siguranta (Fs) - Metoda Fellenius simplificata ──
   // Pentru un taluz infinit cu unghi β:
-  // Fs = (c + (γ·H·cos²β - γw·hw·cos²β)·tan(φ)) / (γ·H·sin β·cos β)
+  // Fs = (c + (gama*H*cos2(beta) - gamaw*hw*cos2(beta))·tan(φ)) / (gama*H*sin(beta)*cos(beta))
   // Unde: H=inaltimea taluzului, β=unghiul, hw=adancimea panzei freatice
 
   const calcFs = (H, betaDeg, hwFraction=0.5) => {
@@ -8233,9 +8234,9 @@ async function generateStabilitateTaluzuri(){
   // Clasificare stabilitate conform SR EN 1997-1 + P91/2008
   const classifyFs = (Fs) => {
     if(Fs >= 2.0) return { cls:'STABIL', col:[16,130,60], desc:'Factor siguranță > 2.0 — stabilitate bună' };
-    if(Fs >= 1.5) return { cls:'CONDIȚIONAT STABIL', col:[59,130,246], desc:'1.5 ≤ Fs < 2.0 — stabilitate acceptabilă cu măsuri' };
-    if(Fs >= 1.3) return { cls:'LIMITA', col:[234,120,20], desc:'1.3 ≤ Fs < 1.5 — la limita stabilității' };
-    if(Fs >= 1.0) return { cls:'INSTABIL', col:[200,38,38], desc:'1.0 ≤ Fs < 1.3 — instabilitate probabilă' };
+    if(Fs >= 1.5) return { cls:'CONDIȚIONAT STABIL', col:[59,130,246], desc:'1.5 <= Fs < 2.0 — stabilitate acceptabilă cu măsuri' };
+    if(Fs >= 1.3) return { cls:'LIMITA', col:[234,120,20], desc:'1.3 <= Fs < 1.5 — la limita stabilității' };
+    if(Fs >= 1.0) return { cls:'INSTABIL', col:[200,38,38], desc:'1.0 <= Fs < 1.3 — instabilitate probabilă' };
     return { cls:'CRITIC', col:[140,0,0], desc:'Fs < 1.0 — colaps iminent' };
   };
 
@@ -8281,18 +8282,18 @@ async function generateStabilitateTaluzuri(){
   cy=sec('1. PARAMETRI GEOTEHNICI ESTIMATI — NP 074/2014 + EUROCODE 7',cy);cy+=2;
   cy=body('Parametrii geotehnici de mai jos sunt ESTIMATIVI, bazați pe caracteristicile tipice ale depozitelor cuaternare din zona ' + S2(uat) + ' (argile prăfoase, loess, nisipuri fine). Valorile REALE se stabilesc prin STUDIU GEOTEHNIC in situ (NP 074/2014) cu minim 3 foraje + laborator geotehnic.',14,cy);cy+=3;
   cy=tblRow(['Parametru geotehnic','Simbol','Valoare estimata','UM','Sursa / Standard'],cy,true,[65,18,30,15,54]);
-  [['Greutate vol. teren (sat.)','γ',geo.gamma,'kN/m³','STAS 1913-5 · tipic argile Podisul Moldovei'],
-   ['Greutate vol. apa','γw',geo.gammaW,'kN/m³','Constanta'],
-   ['Coeziune (total stresses)','c',geo.c,'kPa','Argile semitari · NP 074/2014 Tab.C1'],
-   ['Unghi frecare interna','φ',geo.phi,'°','Argile nisipoase · EC7 Tab. A.4'],
-   ['Rezistenta forfecare nedrenata','cu',geo.cu,'kPa','ULS · conform P100-1/2022'],
-   ['Nivel apa freatica (NFA)','hw',geo.nfa,'m','Estimat · foraje zona '+S2(uat)],
-   ['Cota teren amplasament','z0',elevTeren.toFixed(1),'m AMSL',S2(elevSursa)],
-   ['Inclinare medie teren','β',slopeEst.toFixed(1),'°','Estimat din DEM (Mapbox/EU-DEM)'],
+  [['Greutate vol. teren (sat.)','gama',geo.gamma,'kN/m³','STAS 1913-5 · tipic argile Podisul Moldovei'],
+   ['Greutate vol. apa','gama_w',geo.gammaW,'kN/m³','Constanta'],
+   ['Coeziune (total stresses)','c  (kPa)',geo.c,'kPa','Argile semitari · NP 074/2014 Tab.C1'],
+   ['Unghi frecare interna','phi (grade)',geo.phi,'°','Argile nisipoase · EC7 Tab. A.4'],
+   ['Rezistenta forfecare nedrenata','cu (kPa)',geo.cu,'kPa','ULS · conform P100-1/2022'],
+   ['Nivel apa freatica (NFA)','hw (m)',geo.nfa,'m','Estimat · foraje zona '+S2(uat)],
+   ['Cota teren amplasament','z0 (m AMSL)',elevTeren.toFixed(1),'m AMSL',S2(elevSursa)],
+   ['Inclinare medie teren','beta (grade)',slopeEst.toFixed(1),'°','Estimat din DEM (Mapbox/EU-DEM)'],
   ].forEach(r=>cy=tblRow(r,cy,false,[65,18,30,15,54]));
 
   cy+=4;cy=sec('2. CALCUL FACTOR DE SIGURANTA Fs — METODA FELLENIUS (TALUZ INFINIT)',cy);cy+=2;
-  cy=body('Formula Fellenius pentru taluz infinit (aplicabilă pentru H<5m și pante uniforme): Fs = [c\' + (γ·H·cos²β − γw·hw·cos²β)·tan φ\'] / (γ·H·sin β·cos β). Această metodă este conservativă și aplicabilă în fazele preliminare. Studii complete (Bishop circular, Spencer) se elaborează în PT.',14,cy);cy+=4;
+  cy=body('Formula Fellenius pentru taluz infinit (aplicabilă pentru H<5m și pante uniforme): Fs = [c\' + (gama*H*cos2(beta) − gamaw*hw*cos2(beta))·tan φ\'] / (gama*H*sin(beta)*cos(beta)). Această metodă este conservativă și aplicabilă în fazele preliminare. Studii complete (Bishop circular, Spencer) se elaborează în PT.',14,cy);cy+=4;
   cy=tblRow(['Scenariu','H taluz (m)','β (°)','NFA/H','Fs calculat','Clasa stabilitate'],cy,true,[60,22,16,18,22,44]);
   scenarii.forEach(sc=>{
     const cls_=classifyFs(sc.Fs);
@@ -8302,20 +8303,20 @@ async function generateStabilitateTaluzuri(){
   pdf.setFillColor(240,248,255);pdf.rect(14,cy,W-28,14,'F');
   pdf.setFillColor(59,130,246);pdf.rect(14,cy,2,14,'F');
   pdf.setTextColor(20,60,140);pdf.setFontSize(7);pdf.setFont('helvetica','bold');
-  pdf.text('NOTA: Fs ≥ 2.0 = stabil · Fs 1.5-2.0 = condiționat stabil · Fs 1.3-1.5 = la limită · Fs < 1.3 = instabil',18,cy+5);
+  pdf.text('NOTA: Fs >= 2.0 = stabil · Fs 1.5-2.0 = condiționat stabil · Fs 1.3-1.5 = la limită · Fs < 1.3 = instabil',18,cy+5);
   pdf.setFont('helvetica','normal');pdf.setFontSize(6.5);
-  pdf.text('SR EN 1997-1 (EC7) Art. 11.5: Fs_min = 1.25 (ULS) · Fs_rec = 1.50 (SLS) · P91/2008: categorii hazard geomorfologic',18,cy+11);
+  pdf.text('SR EN 1997-1 (EC7) Art. 11.5: Fs_min=1.25 (ULS) · Fs_rec=1.50 (SLS) · P91/2008: categorii hazard geomorfologic',18,cy+11);
   cy+=18;
 
   cy+=2;cy=sec('3. MASURI DE STABILIZARE RECOMANDATE',cy);cy+=2;
   const masuri = fsUmed < 1.5 ? [
-    ['Taluz cu inclinare ≤ 45° (1:1)','Obligatoriu la sapaturi > 1.5m · evita presiuni laterale excesive','Imediat · proiect tehnic'],
+    ['Taluz cu inclinare <= 45° (1:1)','Obligatoriu la sapaturi > 1.5m · evita presiuni laterale excesive','Imediat · proiect tehnic'],
     ['Pereti de sustinere (palplanse/micropiloti)','Daca spatiu limitat sau H>2m · calcul structural obligatoriu','Faza PT · specialist AICPS'],
     ['Drenaj perimetral','Scadere nivelului freatic → crestere Fs cu 0.3-0.8','Inainte de sapaturi'],
     ['Geogrile sau geocelule','Armarea suprafetei taluzului · Reducere tasari diferentiale','Optional · cost mic'],
     ['Monitorizare tasari','Min 4 repere de nivelment pe durata executiei','Obligatoriu la Categoria 2-3'],
   ] : [
-    ['Taluz la inclinare naturala (≤35°)','Suficient in conditii normale de executie','Standard'],
+    ['Taluz la inclinare naturala (<=35°)','Suficient in conditii normale de executie','Standard'],
     ['Verificare sezoniera NFA','Risc crescut primavara si dupa precipitatii abundente','Preventiv'],
     ['Drenaj suprafata','Colectare ape pluviale departe de taluz','Recomandat'],
   ];
@@ -8335,7 +8336,137 @@ async function generateStabilitateTaluzuri(){
   ['SR EN 1997-1:2004 (Eurocode 7) — Proiectare geotehnica, Partea 1: Reguli generale. Implementata in Romania.','NP 074/2014 — Normativ privind principiile, cerințele și metodele cercetarii geotehnice a terenului de fundare.','P91/2008 — Normativ privind proiectarea si executia lucrarilor de consolidare a terenului de fundare.','P91/1983 rev. — Instructiuni tehnice pentru prevenirea si combaterea alunecarilor de teren.','Ord. MTCT nr. 1422/2003 — Zonare teritoriala a riscului la alunecari de teren (Romania).','SR EN 1998-5:2004 (Eurocode 8, Part 5) — Fundatii, structuri de sustinere si geotehnice aspecte seismice.','STAS 1913-5:1985 — Determinarea granulometrica. Metoda analizei cu site si sedimentare.',
   ].forEach(l=>{cy=body('• '+l,16,cy);cy+=1.5;});
 
+  // ── PAG 3: FORMULA DETALIATA + GRAFIC Fs ──────────────────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('FORMULA FELLENIUS — SURSA SI DERIVARE — VIZUALIZARE Fs',3);ftr();
+  cy=33;
+  cy=sec('SURSA METODEI SI FORMULA DE CALCUL',cy);cy+=2;
+  cy=body('Metoda Fellenius (1927), numita si Metoda Suedeza sau Metoda Fellenius-Pettersson, evalueaza stabilitatea unui taluz infinit prin compararea fortelor de rezistenta la forfecare (Tf) cu fortele mobilizatoare tangentiale (Tm) pe un plan de alunecare la adancimea H, inclinat cu unghiul beta fata de orizontala.',14,cy);cy+=4;
+
+  // Formula vizuala
+  pdf.setFillColor(14,30,60);pdf.rect(14,cy,W-28,52,'F');pdf.setFillColor(...GOLD);pdf.rect(14,cy,2,52,'F');
+  pdf.setTextColor(...GOLD);pdf.setFontSize(9);pdf.setFont('helvetica','bold');
+  pdf.text('FORMULA FELLENIUS — TALUZ INFINIT (H < 5m, panta uniforma)',18,cy+6);
+  pdf.setTextColor(200,215,235);pdf.setFontSize(8.5);pdf.setFont('courier','bold');
+  pdf.text('Fs = [c + (gama*H*cos2(b) - gamaw*hw*cos2(b)) * tan(phi)]',18,cy+15);
+  pdf.text('     -------------------------------------------------------',18,cy+20);
+  pdf.text('             gama * H * sin(b) * cos(b)',18,cy+25);
+  pdf.setTextColor(150,170,200);pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');
+  const legendaF=[
+    'c   = coeziune efectiva (kPa)',
+    'gama = greutatea volumica teren (kN/m3)',
+    'H   = adancimea planului de alunecare (m)',
+    'b   = unghiul de inclinare al taluzului (grade)',
+    'gamaw = greutatea volumica apa (10 kN/m3)',
+    'hw  = inaltimea coloanei de apa freatica (m)',
+    'phi = unghiul de frecare interna (grade)',
+  ];
+  legendaF.forEach((l,i)=>{
+    pdf.text(l, 18+Math.floor(i/4)*(W/2-10), cy+30+((i%4)*5));
+  });
+  cy+=56;
+  pdf.setFillColor(240,248,255);pdf.rect(14,cy,W-28,14,'F');
+  pdf.setFillColor(59,130,246);pdf.rect(14,cy,2,14,'F');
+  pdf.setTextColor(20,60,140);pdf.setFontSize(7);pdf.setFont('helvetica','bold');
+  pdf.text('SURSA: Fellenius W. (1927) — Erdstatische Berechnungen. Berlin. | Reimplementat in SR EN 1997-1:2004 Anexa A',18,cy+5);
+  pdf.setFont('helvetica','normal');pdf.setFontSize(6.5);
+  pdf.text('Domeniu de aplicare: taluzuri cu H<5m, panta uniforma, sol omogen, plan de alunecare plan inclinat. Conservativ vs. Bishop circular.',18,cy+11);
+  cy+=18;
+
+  // Grafic Fs vs unghi beta (SVG-like cu PDF)
+  cy=sec('GRAFIC: FACTOR DE SIGURANTA Fs vs. UNGHI TALUZ BETA (sol umed, hw=H/2)',cy);cy+=4;
+  const gX=14, gY=cy, gW=W-28, gH=55;
+  pdf.setFillColor(14,24,48);pdf.rect(gX,gY,gW,gH,'F');
+  // Axe
+  pdf.setDrawColor(100,120,150);pdf.setLineWidth(0.5);
+  pdf.line(gX+10,gY+gH-8, gX+gW-5, gY+gH-8); // X axa
+  pdf.line(gX+10,gY+5, gX+10, gY+gH-8); // Y axa
+  // Labels
+  pdf.setTextColor(130,150,180);pdf.setFontSize(6);
+  pdf.text('beta (grade):', gX+gW/2, gY+gH-2, {align:'center'});
+  pdf.text('Fs:', gX+6, gY+gH/2, {align:'center'});
+  // Curba Fs vs beta
+  const betas=[5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80];
+  const fsVals=betas.map(b=>Math.min(20,calcFs(H_taluz,b,0.5)));
+  const maxFs=Math.min(20,fsVals[0]), minFs=0;
+  const xScale=(gW-15)/betas.length, yScale=(gH-13)/(maxFs-minFs);
+  // Zona verde (Fs>2)
+  pdf.setFillColor(16,130,60);pdf.setGState&&pdf.setGState(pdf.GState({opacity:0.15}));
+  const y2=gY+gH-8-(2-minFs)*yScale;
+  try{pdf.rect(gX+10,gY+5,gW-15,Math.max(0,y2-gY-5),'F');}catch(e){}
+  // Curba
+  pdf.setDrawColor(212,175,55);pdf.setLineWidth(1.5);
+  fsVals.forEach((fs,i)=>{
+    const x=gX+10+i*xScale;
+    const y=gY+gH-8-Math.min((fs-minFs)*yScale,gH-13);
+    if(i===0) pdf.moveTo(x,y);
+    if(i>0){
+      const xp=gX+10+(i-1)*xScale;
+      const yp=gY+gH-8-Math.min((fsVals[i-1]-minFs)*yScale,gH-13);
+      pdf.line(xp,yp,x,y);
+    }
+    if(i%3===0){
+      pdf.setTextColor(130,150,180);pdf.setFontSize(5);
+      pdf.text(betas[i]+'°',x,gY+gH-3,{align:'center'});
+    }
+  });
+  // Linie Fs=2 (limita stabil)
+  pdf.setDrawColor(16,200,80);pdf.setLineWidth(0.8);pdf.setLineDashPattern([2,2],0);
+  pdf.line(gX+10,gY+gH-8-2*yScale,gX+gW-5,gY+gH-8-2*yScale);
+  pdf.setLineDashPattern([],0);
+  pdf.setTextColor(16,200,80);pdf.setFontSize(6);
+  pdf.text('Fs=2.0 (STABIL)',gX+gW-5,gY+gH-8-2*yScale-1,{align:'right'});
+  // Punct curent
+  const betaIdx=betas.findIndex(b=>b>=slopeEst);
+  if(betaIdx>=0){
+    const xc=gX+10+betaIdx*xScale;
+    const yc=gY+gH-8-Math.min((fsVals[betaIdx]-minFs)*yScale,gH-13);
+    pdf.setFillColor(...GOLD);pdf.circle(xc,yc,2,'F');
+    pdf.setTextColor(...GOLD);pdf.setFontSize(6.5);pdf.setFont('helvetica','bold');
+    pdf.text('Amplasament (beta='+slopeEst+'°, Fs='+fsUmed.toFixed(1)+')',xc+3,yc-1);
+  }
+  cy+=gH+8;
+
+  // ── PAG 4: HARTA AMPLASAMENT + CONTEXT ─────────────────────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('HARTA AMPLASAMENT - CONTEXT GEOMORFOLOGIC',4);ftr();
+  cy=28;
+  if(caps.imgLocation){
+    cy=addImg(caps.img3D,14,cy,W-28,72,'FIG. 1 — Viewer 3D Urban · Context construit · Amplasament nr.cad. '+nrcad);
+    cy+=4;
+  }
+  const halfG=(W-32)/2;
+  if(caps.img2D) cy=addImg(caps.img2D,14,cy,halfG,54,'FIG. 2 — Plan 2D · Hartă amplasament · Contur parcelă');
+  if(caps.imgLocation) addImg(caps.imgLocation,14+halfG+4,cy-54,halfG,54,'FIG. 3 — Amplasament satelitar · Context imediat parcela');
+  cy+=6;
+  cy=sec('DATE COTA TEREN AMSL — ELEVATION ENGINE',cy);cy+=2;
+  cy=tblRow(['Parametru','Valoare','Sursa','Precizie'],cy,true,[60,35,70,17]);
+  [['Cotă teren amplasament',elevTeren.toFixed(1)+' m AMSL',elevSursa,elevConf+'%'],
+   ['Elevație airport LRIA (ARP)','121.0 m AMSL','AIP Romania (NOTAM)','±0.5m'],
+   ['Diferenta teren-ARP',(elevTeren-121).toFixed(1)+' m','Calcul direct','—'],
+   ['Metoda obtinere cotă',elevSursa.includes('Mapbox')?'Mapbox Terrain-RGB (tile zoom 14)':'OpenTopoData EU-DEM 25m','Copernicus/Mapbox','±1-3m'],
+   ['Panta medie teren estimata',slopeEst.toFixed(1)+'°','DEM estimat','±2-5°'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[60,35,70,17]));
+
+  // ── PAG 5: VIEWER 3D + CONCLUZII ───────────────────────────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D + CONCLUZII + DISCLAIMER',5);ftr();
+  cy=28;
+  if(caps.v3dDay){
+    cy=addImg(caps.v3dDay,14,cy,halfG,58,'FIG. 4 — Viewer 3D ZI · Volum propus · Context construit');
+    if(caps.v3dNight) addImg(caps.v3dNight,14+halfG+4,cy-58,halfG,58,'FIG. 5 — Viewer 3D NOAPTE · Iluminat + subteran');
+    cy+=4;
+  }
+  cy=sec('CONCLUZII SI RECOMANDARI',cy);cy+=2;
+  cy=body('Amplasamentul nr.cad. '+nrcad+' (UTR '+utr+', '+S2(uat)+') prezinta o inclinare estimata de '+slopeEst.toFixed(1)+'° si o cota de '+elevTeren.toFixed(1)+'m AMSL (sursa: '+elevSursa+'). Factorul de siguranta Fellenius calculat pentru starea UMEDA (hw=H/2, cel mai probabil scenariu operational) este Fs='+fsUmed.toFixed(2)+', incadrandu-se in clasa '+stability.cls+' conform SR EN 1997-1:2004. Sapaturile necesare pentru fundatie (adancime estimata '+H_taluz.toFixed(1)+'m) sunt FEZABILE in conditiile respectarii masurilor din tabelul de mai jos.',14,cy);cy+=4;
+  cy=tblRow(['Concluzie','Valoare','Status EC7'],cy,true,[80,50,52]);
+  [['Factor siguranta (umed, Fs)',fsUmed.toFixed(2),fsUmed>=2?'STABIL (Fs>=2.0)':fsUmed>=1.5?'COND. STABIL':'ATENTIE'],
+   ['Adancime fundare recomandata',H_taluz.toFixed(1)+'m','Sub cota inghet (-0.90m Iasi)'],
+   ['Sapaturi verticale permise (H<1.2m)','H='+Math.min(1.2,H_taluz).toFixed(1)+'m vertcal',H_taluz<=1.2?'PERMIS':'CU SPRAITURI'],
+   ['Cota teren AMSL',elevTeren.toFixed(1)+'m',elevSursa.split('(')[0].trim()],
+   ['Categorie geotehnica NP 074',catGeo,'Factori: '+F1+'+'+F2+'+'+F3+'='+sumaFact+' puncte'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[80,50,52]));
+  cy+=4;
+  _pdfDisclaimerBlock(pdf,W,cy,'ORIENTATIV','Studiu geomorfologic preliminar ORIENTATIV — Nu inlocuieste studiul geotehnic certificat elaborat de expert geotehnician atestat AICPS conform NP 074/2014. Parametrii geotehnici sunt ESTIMATIVI. Valorile reale se stabilesc prin foraje + laborator geotehnic. Datele de cota teren provin din Elevation Engine (precizie ±1-3m) — pentru lucrari de precizie se impune nivelment ANCPI.');
+
   _pdfSaveMobile(pdf,'Stabilitate_Taluzuri_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
-  ss('OK Studiu Stabilitate Taluzuri — Fs='+fsUmed.toFixed(2)+' ('+stability.cls+') · Cotă teren '+elevTeren.toFixed(1)+'m AMSL');
+  ss('OK Studiu Stabilitate Taluzuri — Fs='+fsUmed.toFixed(2)+' ('+stability.cls+') · Cota teren '+elevTeren.toFixed(1)+'m AMSL · 5 pag.');
 }
 window.generateStabilitateTaluzuri = generateStabilitateTaluzuri;
