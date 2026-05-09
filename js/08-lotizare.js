@@ -2839,13 +2839,26 @@ async function _lotExportPDF(){
    ['Circulatii pietonale','Conform profil ales','SR 13330:2014','CONFORM'],
   ].forEach(r=>{cy=tblRow(r,cy,false,[60,35,65,22]);});cy+=6;
 
-  cy=sec('5. VERIFICARE CONFORMITATE CU PUG '+uat.toUpperCase(),cy);
-  cy=body('Verificarile de mai jos sunt automate si orientative. Ele nu substituie avizul arhitectului sau al autoritatii competente (DAU / Primaria '+uat+'). Conformitatea finala se stabileste prin Certificat de Urbanism emis de autoritatea locala.',14,cy);cy+=3;
-  tblRow(['Criteriu verificat','Valoare','Status','Obs.'],cy,true,[80,30,22,50]);cy+=8;
+  cy=sec('5. VERIFICARE CONFORMITATE CU PUG '+uat.toUpperCase()+' + NORMATIVE TEHNICE',cy);
+  cy=body('Verificarile de mai jos sunt automate si orientative. Ele nu substituie avizul arhitectului sau al autoritatii competente (DAU / Primaria '+uat+'). Conformitatea finala se stabileste prin Certificat de Urbanism emis de autoritatea locala conform Legii 350/2001.',14,cy);cy+=3;
+  tblRow(['Criteriu verificat','Valoare','Normativ','Status'],cy,true,[75,30,55,22]);cy+=8;
   b.verificari.forEach(v=>{
     const statusColor=v.ok?[0,150,0]:[200,100,0];
-    cy=tblRow([S2(v.label),S2(v.value),v.ok?'CONFORM':(v.warn?'ATENTIE':'VERIF.'),S2(v.warn||'—')],cy,false,[80,30,22,50]);
+    const normRef = v.norm || '—';
+    const row=tblRow([S2(v.label),S2(v.value),S2(normRef),v.ok?'CONFORM':(v.warn?'ATENTIE':'VERIF.')],cy,false,[75,30,55,22]);
+    if(!v.ok){pdf.setFillColor(255,245,230);pdf.rect(14,cy-7,W-28,8,'F');}
+    cy=row;
   });
+  cy+=3;
+  // Sumar conformitate
+  const _conforme = b.verificari.filter(v=>v.ok).length;
+  const _neconf = b.verificari.filter(v=>!v.ok).length;
+  pdf.setFillColor(_neconf>0?255:240,_neconf>0?240:252,_neconf>0?230:240);
+  pdf.rect(14,cy,W-28,12,'F');
+  pdf.setFillColor(_neconf>0?180:20,_neconf>0?80:130,_neconf>0?10:60);pdf.rect(14,cy,2,12,'F');
+  pdf.setTextColor(_neconf>0?120:10,_neconf>0?50:80,_neconf>0?10:40);pdf.setFont('helvetica','bold');pdf.setFontSize(7);
+  pdf.text(_conforme+'/'+b.verificari.length+' criterii CONFORME · '+(_neconf>0?_neconf+' necesita verificare':'Toate criteriile sunt respectate'),18,cy+7.5);
+  cy+=15;
 
   // ─── PAG 5: ANALIZA FINANCIARA DETALIATA ────────────────────────────────
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');

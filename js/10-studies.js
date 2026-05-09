@@ -565,19 +565,33 @@ async function generateShadowStudy(){
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CALCULE UMBRE ORARE - CLADIREA PROPUSA',3);ftr();
   cy=28;cy=sec('1. ALTITUDINI SOLARE LA LATITUDINE '+lat.toFixed(2)+'N (ore/luna)',cy);cy+=2;
   const hours=[8,10,12,14,16];
-  cy=tblRow(['Luna',...hours.map(h=>h+':00h')],cy,true,[28,...hours.map(_=>28)]);
+  cy=tblRow(['Luna',...hours.map(h=>h+':00h'),'Ore insorire','OMS 119'],cy,true,[24,...hours.map(_=>22),28,20]);
   months.forEach((m,mi)=>{
     const vals=hours.map(h=>solarAlt(lat,mi,h));
-    cy=tblRow([m,...vals.map(v=>v<1?'—':v.toFixed(1)+'°')],cy,false,[28,...hours.map(_=>28)]);
-    vals.forEach((v,vi)=>{const x=14+28+vi*28;if(v>=30){pdf.setFillColor(20,120,60,0.6);pdf.rect(x,cy-8,28,8,'F');}else if(v>=15){pdf.setFillColor(180,130,20,0.6);pdf.rect(x,cy-8,28,8,'F');}else if(v>0){pdf.setFillColor(180,50,30,0.6);pdf.rect(x,cy-8,28,8,'F');}});
+    // Calcul ore insorire cu _calcOreInsorire (folosind azimut real + frontDir)
+    const oreObj = _calcOreInsorire(lat, mi, 15, frontDir); // ziua 15 a lunii
+    const oreStatus = oreObj.conforme ? 'OK' : mi===11||mi===0||mi===10 ? 'ATENTIE' : 'OK';
+    cy=tblRow([m,...vals.map(v=>v<1?'—':v.toFixed(1)+'°'),oreObj.label,oreStatus],cy,false,[24,...hours.map(_=>22),28,20]);
+    vals.forEach((v,vi)=>{const x=14+24+vi*22;if(v>=30){pdf.setFillColor(20,120,60);pdf.rect(x,cy-8,22,8,'F');}else if(v>=15){pdf.setFillColor(180,130,20);pdf.rect(x,cy-8,22,8,'F');}else if(v>0){pdf.setFillColor(180,50,30);pdf.rect(x,cy-8,22,8,'F');}});
+    // Coloreaza OMS status
+    if(oreStatus!=='OK'){pdf.setFillColor(200,60,20);pdf.rect(14+24+5*22+28,cy-8,20,8,'F');}
   });
-  cy+=4;
-  cy=sec('2. UMBRE PROIECTATE SOLSTITIU IARNA (21 Dec) · H='+aedisH.toFixed(1)+'m',cy);cy+=2;
-  cy=tblRow(['Ora','Alt. soare','Umbra (m)','Directie','Status'],cy,true,[22,32,32,40,52]);
+  cy+=2;
+  // Legenda culori
+  pdf.setFillColor(20,120,60);pdf.rect(14,cy,8,5,'F');pdf.setTextColor(60,80,100);pdf.setFontSize(6);pdf.text('Alt > 30° (optim)',24,cy+4);
+  pdf.setFillColor(180,130,20);pdf.rect(80,cy,8,5,'F');pdf.text('Alt 15-30° (acceptabil)',90,cy+4);
+  pdf.setFillColor(180,50,30);pdf.rect(165,cy,8,5,'F');pdf.text('Alt < 15° (sub indicator OMS 119)',175,cy+4);
+  cy+=10;
+  cy=sec('2. UMBRE PROIECTATE SOLSTITIU IARNA (21 Dec) · H='+aedisH.toFixed(1)+'m · Front '+frontDir,cy);cy+=2;
+  cy=tblRow(['Ora','Alt. soare','Azimut','Umbra (m)','Directia umbrei','Status'],cy,true,[18,28,24,28,44,40]);
   [8,9,10,11,12,13,14,15,16].forEach(h=>{
-    const alt=solarAlt(lat,11,h);const sh=shadowLen(aedisH,alt);
-    const status=alt<1?'Sub orizont':alt<15?'SUB PRAG LEGAL':'CONFORM (>15°)';
-    cy=tblRow([h+':00',alt<1?'—':alt.toFixed(1)+'°',sh>200?'>200m':sh.toFixed(0)+'m','Spre Nord',status],cy,false,[22,32,32,40,52]);
+    const pos = _solarPosition(lat, 11, 21, h); // 21 Dec cu azimut real
+    const sh=shadowLen(aedisH,pos.alt);
+    // Directia umbrei = opus azimutului solar
+    const azOpus = (pos.az + 180) % 360;
+    const dirLabel = azOpus < 22.5||azOpus>=337.5?'N': azOpus<67.5?'NE': azOpus<112.5?'E': azOpus<157.5?'SE': azOpus<202.5?'S': azOpus<247.5?'SV': azOpus<292.5?'V':'NV';
+    const status=pos.alt<1?'Sub orizont':pos.alt<15?'Sub indicator OMS':'CONFORM (alt>15°)';
+    cy=tblRow([h+':00',pos.alt<1?'—':pos.alt.toFixed(1)+'°',pos.alt<1?'—':pos.az.toFixed(0)+'°',sh>200?'>200m':sh.toFixed(0)+'m','Spre '+dirLabel+' ('+azOpus.toFixed(0)+'°)',status],cy,false,[18,28,24,28,44,40]);
   });
   cy+=3;pdf.setFontSize(7);pdf.setTextColor(...BLUE);
   cy=body('OMS 119/2014 Art. 3: spatiile de locuit beneficiaza de MINIMUM 1.5 ORE/ZI insorire directa la solstitiu de iarna (21 Dec). Altitudinea de 15° e indicator derivat (umbra = H cladire). Norma primara e durata (1.5h), nu unghiul.',14,cy);
@@ -5454,6 +5468,23 @@ async function generateStudiuFezabilitate(paramOverrides){
      : ['Venit estimat anual — chirie/vânzare (pe SU)','EUR/an',venitAn.toLocaleString(),_fc.chirieRef+' EUR/mp/lună × '+Math.round(_rataOcup*100)+'% × SU '+suTotal+'mp'],
    ['Randament brut (ROI brut anual)','%',isTrueNonCom?'N/A':rentabilitate,isTrueNonCom?'Cult — fără scop comercial':isPartialCom?'Educație privată (60%)':isPublicFee?'Parc public (20%)':'Venit anual / Inv. totală'],
    ['Perioadă estimată recuperare investiție','ani',isTrueNonCom?'N/A':Math.ceil(costTotal/Math.max(1,venitAn))+'',isTrueNonCom?'Nu se aplică':'Payback period simplu'],
+   ['Nr. niveluri (regim înălțime)','niv.','P+'+(niv-1),'Conf. AEDIS / RLU'],
+   ['Înălțime maximă (Hmax)','m',aedisH.toFixed(1),'Conf. AEDIS orientativ'],
+   ['Nr. locuri parcare obligatorii','locuri',pkMin+'','NP 051/2012 + RLU'],
+   ['Cost execuție construcție (pe SDA)','EUR',costConstr.toLocaleString(),_fc.pretConstructie+' EUR/mp SDA'],
+   ['Valoare estimativă teren','EUR',costTeren.toLocaleString(),_fc.pretTeren+' EUR/mp teren'],
+   ['Diverse, neprevăzute, proiectare (25%)','EUR',Math.round((costConstr+costTeren)*0.25).toLocaleString(),'25% total construire+teren'],
+   ['VALOARE TOTALĂ INVESTIȚIE','EUR',costTotal.toLocaleString(),'Total estimativ — baza de referință'],
+   ['Valoare investiție / mp SDA','EUR/mp',Math.round(costTotal/sdTotal)+'','Indice cost construcție /mp SDA'],
+   isTrueNonCom
+     ? ['Funcțiune NON-COMERCIALĂ (cult)','—','Venituri: 0 EUR/an','Cult/religie — cheltuială pură, ROI nu se aplică']
+     : isPartialCom
+     ? ['Venit estimat anual — educație privată (pe SU)','EUR/an',venitAn.toLocaleString(),_fc.chirieRef+' EUR/mp/lună × 60% × SU '+suTotal+'mp']
+     : isPublicFee
+     ? ['Venituri taxe vizitare/întreținere (pe SU)','EUR/an',venitAn.toLocaleString(),'20% din chiria pieței × SU '+suTotal+'mp']
+     : ['Venit estimat anual — chirie/vânzare (pe SU)','EUR/an',venitAn.toLocaleString(),_fc.chirieRef+' EUR/mp/lună × '+Math.round(_rataOcup*100)+'% × SU '+suTotal+'mp'],
+   ['Randament brut (ROI brut anual)','%',isTrueNonCom?'N/A':rentabilitate,isTrueNonCom?'Cult — fără scop comercial':isPartialCom?'Educație privată (60%)':isPublicFee?'Parc public (20%)':'Venit anual / Inv. totală'],
+   ['Perioadă estimată recuperare investiție','ani',isTrueNonCom?'N/A':Math.ceil(costTotal/Math.max(1,venitAn))+'',isTrueNonCom?'Nu se aplică':'Payback period simplu'],
   ].forEach(r=>cy=tblRow(r,cy,false,[80,18,42,42]));
   cy+=4;
   if(nonComNote){
@@ -5467,7 +5498,48 @@ async function generateStudiuFezabilitate(paramOverrides){
     pdf.text(_icon+' '+S2(nonComNote),17,cy+7.5);
     cy+=15;
   }
-  cy=body('NOTĂ: Valorile financiare sunt estimate la prețuri de piață 2024-2025 pentru zona '+uat+'. Devizul exact poate varia cu ±25-35% față de estimarea orientativă. Costul efectiv se stabilește prin ofertare detaliată pe baza Proiectului Tehnic aprobat. SDA = Suprafața Desfășurată (baza costului); SU = Suprafața Utilă (~'+Math.round(_suRatio*100)+'% din SDA, baza veniturilor).',14,cy);
+  cy=body('NOTA: Valorile financiare sunt estimate la preturi de piata 2024-2025 pentru zona '+uat+'. Devizul exact poate varia cu ±25-35% fata de estimarea orientativa. Costul efectiv se stabileste prin ofertare detaliata pe baza Proiectului Tehnic aprobat. SDA = Suprafata Desfasurata (baza costului); SU = Suprafata Utila (~'+Math.round(_suRatio*100)+'% din SDA, baza veniturilor).',14,cy);cy+=4;
+
+  // ── DEVIZ PE CATEGORII HG 907/2016 ──────────────────────────────────────
+  // Structura deviz conform HG 907/2016 Anexa nr. 6 (Devizul general al investitiei)
+  cy=sec('5.1. DEVIZ ESTIMATIV PER CATEGORII — HG 907/2016 Anexa 6',cy);cy+=2;
+  cy=body('Structura devizului general conform HG 907/2016 — Metodologia de elaborare a devizului general. Valorile sunt estimative (±25-35%), bazate pe indicii de cost medii nationali 2025 si specifici zonei '+S2(uat)+'. Devizul definitiv: devizist autorizat, pe baza PT aprobat.',14,cy);cy+=3;
+  const _C1 = Math.round(sdTotal * _pretConstr * 0.05);  // Obtinere teren (deja in proprietate, sau cost)
+  const _C2 = Math.round(sdTotal * _pretConstr * 0.04);  // Amenajare teren
+  const _C3 = Math.round(sdTotal * _pretConstr * 0.08);  // Amenajari pt protectia mediului
+  const _C4 = Math.round(sdTotal * _pretConstr * 0.67);  // Constructii si instalatii (corp principal)
+  const _C4sub = Math.round(sdTotal * _pretConstr * 0.15); // Instalatii electrice + sanitare + HVAC
+  const _C5 = Math.round(sdTotal * _pretConstr * 0.06);  // Organizare de santier
+  const _C6 = Math.round(sdTotal * _pretConstr * 0.03);  // Cheltuieli diverse si neprevazute (3%)
+  const _C7 = Math.round(sdTotal * _pretConstr * 0.07);  // Proiectare + consultanta + taxe
+  const _totalDeviz = _C1+_C2+_C3+_C4+_C4sub+_C5+_C6+_C7+costTeren;
+  cy=tblRow(['Capitol','Denumire (HG 907/2016)','EUR','%'],cy,true,[14,110,35,23]);
+  [
+    ['Cap. 1','Cheltuieli pentru obtinerea si amenajarea terenului',(_C1+_C2).toLocaleString(),Math.round((_C1+_C2)/_totalDeviz*100)+'%'],
+    ['  1.1','Obtinerea terenului (daca e cazul)',costTeren.toLocaleString(),Math.round(costTeren/_totalDeviz*100)+'%'],
+    ['  1.2','Amenajarea terenului (demolare, nivelare, imprejmuire)',_C2.toLocaleString(),Math.round(_C2/_totalDeviz*100)+'%'],
+    ['  1.3','Amenajari pentru protectia mediului',_C3.toLocaleString(),Math.round(_C3/_totalDeviz*100)+'%'],
+    ['Cap. 4','Cheltuieli pentru investitia de baza',(_C4+_C4sub).toLocaleString(),Math.round((_C4+_C4sub)/_totalDeviz*100)+'%'],
+    ['  4.1','Constructii si instalatii (corp principal, '+sdTotal+'mp SDA × '+_pretConstr+' EUR/mp)',_C4.toLocaleString(),Math.round(_C4/_totalDeviz*100)+'%'],
+    ['  4.2','Instalatii electrice + sanitare + HVAC + lift (est.)',_C4sub.toLocaleString(),Math.round(_C4sub/_totalDeviz*100)+'%'],
+    ['Cap. 5','Alte cheltuieli',(_C5+_C6+_C7).toLocaleString(),Math.round((_C5+_C6+_C7)/_totalDeviz*100)+'%'],
+    ['  5.1','Organizare de santier (6% din Cap. 4)',_C5.toLocaleString(),Math.round(_C5/_totalDeviz*100)+'%'],
+    ['  5.2','Consultanta, proiectare, taxe AC/CU, dirigentie (7%)',_C7.toLocaleString(),Math.round(_C7/_totalDeviz*100)+'%'],
+    ['  5.3','Cheltuieli diverse si neprevazute (3%)',_C6.toLocaleString(),Math.round(_C6/_totalDeviz*100)+'%'],
+    ['TOTAL DEVIZ GENERAL','Valoare totala investitie (exclusiv TVA)',_totalDeviz.toLocaleString(),'100%'],
+    ['+ TVA 19%','(aplicabil constructii noi)','',Math.round(_totalDeviz*0.19).toLocaleString()+' EUR'],
+    ['TOTAL CU TVA','',Math.round(_totalDeviz*1.19).toLocaleString()+' EUR',''],
+  ].forEach((r,i)=>{
+    const isBold = r[0].startsWith('Cap.')||r[0].startsWith('TOTAL');
+    cy=tblRow(r,cy,false,[14,110,35,23]);
+    if(isBold){pdf.setFont('helvetica','bold');pdf.setFontSize(6.5);}
+  });
+  cy+=2;
+  pdf.setFillColor(240,248,255);pdf.rect(14,cy,W-28,10,'F');
+  pdf.setFillColor(59,130,246);pdf.rect(14,cy,2,10,'F');
+  pdf.setTextColor(20,60,140);pdf.setFontSize(6);pdf.setFont('helvetica','normal');
+  pdf.text('Sursa: HG 907/2016 Anexa 6 (Metodologia de elaborare a devizului general) + preturi orientative piata 2025 zona '+S2(uat)+'. Valori ESTIMATIVE ±25-35%.',18,cy+6);
+  cy+=13;
 
   // ── PAG 6: ANALIZA FINANCIARĂ + SURSE FINANȚARE ──────────────────────────
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('ANALIZA FINANCIARA - SURSE DE FINANTARE - ANALIZA COST-BENEFICIU',6);ftr();
