@@ -751,6 +751,92 @@ function _pdfESGBlock(pdf, W, cy, esg) {
 }
 
 
+
+// ─────────────────────────────────────────────────────────────────────────────
+// #28 SECTION TYPES STANDARD
+// Audit pct. 28: "Fiecare sectiune trebuie sa aiba comportament standard"
+// Types: analysis_section, map_section, warning_section, conclusion_section, metric_section
+// ─────────────────────────────────────────────────────────────────────────────
+const _SECTION_RENDERERS = {
+  analysis: (pdf,W,cy,title,content,badge)=>{
+    pdf.setFillColor(14,28,60);pdf.rect(14,cy,W-28,7,'F');
+    pdf.setFillColor(59,130,246);pdf.rect(14,cy,2,7,'F');
+    pdf.setTextColor(180,210,255);pdf.setFontSize(7);pdf.setFont('helvetica','bold');
+    pdf.text(title.toUpperCase(),18,cy+5);
+    if(badge){pdf.setFillColor(59,130,246);pdf.rect(W-30,cy,16,7,'F');
+    pdf.setTextColor(255,255,255);pdf.setFontSize(5.5);pdf.text(badge,W-22,cy+4.8,{align:'center'});}
+    return cy+9;
+  },
+  warning: (pdf,W,cy,title,content)=>{
+    pdf.setFillColor(255,248,230);pdf.rect(14,cy,W-28,7,'F');
+    pdf.setFillColor(200,100,0);pdf.rect(14,cy,2,7,'F');
+    pdf.setTextColor(140,70,0);pdf.setFontSize(7);pdf.setFont('helvetica','bold');
+    pdf.text('⚠ '+title.toUpperCase(),18,cy+5);
+    return cy+9;
+  },
+  conclusion: (pdf,W,cy,title,content)=>{
+    pdf.setFillColor(230,250,238);pdf.rect(14,cy,W-28,7,'F');
+    pdf.setFillColor(16,130,60);pdf.rect(14,cy,2,7,'F');
+    pdf.setTextColor(10,80,40);pdf.setFontSize(7);pdf.setFont('helvetica','bold');
+    pdf.text('✓ '+title.toUpperCase(),18,cy+5);
+    return cy+9;
+  },
+  metric: (pdf,W,cy,metrics)=>{
+    // Mini KPI bar
+    const colW=(W-28)/metrics.length;
+    metrics.forEach((m,i)=>{
+      const mx=14+i*colW;
+      pdf.setFillColor(8,20,45);pdf.rect(mx,cy,colW-1,16,'F');
+      pdf.setTextColor(100,130,170);pdf.setFontSize(5.5);pdf.setFont('helvetica','normal');
+      pdf.text(m.label,mx+colW/2,cy+5,{align:'center'});
+      const vc=m.status==='ok'?[16,180,80]:m.status==='warn'?[200,140,0]:[200,50,50];
+      pdf.setTextColor(...vc);pdf.setFontSize(9);pdf.setFont('helvetica','bold');
+      pdf.text(String(m.value),mx+colW/2,cy+13,{align:'center'});
+    });
+    return cy+18;
+  },
+};
+
+// #29 REPORT NARRATIVE ENGINE
+// Audit pct. 29: "Raportul trebuie sa spuna o poveste logica"
+// Flux: unde este terenul -> ce reglementari -> ce probleme -> ce se poate -> ce riscuri -> ce recomandam
+function _generateNarrative(studyType, parcelData, analysisResults) {
+  const {nrCad,utr,area,lat,lon,uat,params} = parcelData;
+  const pot = parseFloat(params?.pot||35);
+  const cut = parseFloat(params?.cut||1.2);
+  const h = parseFloat(params?.h||12);
+
+  const templates = {
+    amplasament: [
+      `Amplasamentul identificat prin nr. cadastral ${nrCad}, situat in intravilanul ${uat}, ` +
+      `in zona UTR ${utr}, prezinta o suprafata de ${area} mp la coordonatele ${lat?.toFixed(4)}N/${lon?.toFixed(4)}E.`,
+      `Din punct de vedere al reglementarilor urbanistice aplicabile, ` +
+      `parcela se incadreaza in UTR ${utr} cu indicatori: POT max ${pot}%, CUT max ${cut}, H max ${h}m.`,
+      `Din analiza contextului urban rezulta compatibilitatea amplasamentului cu destinatia propusa, ` +
+      `sub rezerva respectarii indicatorilor urbanistici si a obtinerii avizelor necesare.`,
+      `Riscurile identificate in aceasta faza preliminara includ: verificarea conformitatii ` +
+      `cu normele de insorire (OMS 119/2014), accesul auto/pietonal si asigurarea parcajelor (NP 067/2002).`,
+      `Recomandam continuarea cu studii de specialitate detaliate (geotehnic, acustic, insorire) ` +
+      `inainte de solicitarea Certificatului de Urbanism.`,
+    ],
+    fezabilitate: [
+      `Studiul de prefezabilitate analizeaza viabilitatea economica a proiectului propus ` +
+      `pe amplasamentul ${nrCad} din ${uat}, UTR ${utr}, suprafata ${area} mp.`,
+      `Parametrii reglementari maximi admisi (POT ${pot}%, CUT ${cut}, H ${h}m) permit realizarea ` +
+      `unei constructii cu suprafata desfasurata estimata de cca. ${Math.round(area*cut)} mp.`,
+      `Analiza economica preliminara indica o investitie totala estimata si un randament brut ` +
+      `dependent de pretul de constructie si piata imobiliara locala.`,
+      `Principalii factori de risc economic identificati: durata autorizarii (6-18 luni), ` +
+      `variabilitatea preturilor la materiale si forta de munca, conditiile de finantare.`,
+      `Recomandam elaborarea unui studiu de fezabilitate complet (HG 907/2016) ` +
+      `pe baza unui proiect tehnic aprobat si oferte reale de la constructori.`,
+    ],
+  };
+
+  return templates[studyType] || templates.amplasament;
+}
+
+
 // Cache elevatie pentru a evita apeluri repetate (valid pe sesiune)
 const _ELEV_CACHE = {};
 
@@ -1181,7 +1267,18 @@ async function generateShadowStudy(){
 
   // PAG 2: Vedere 3D + analiza context
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONTEXT URBAN 3D - VEDERE PRINCIPALA',2);ftr();
-  let cy=28;
+  let cy=28
+  // #29 Narrative Engine — pagina de context
+  const _narrative = _generateNarrative('amplasament',{nrCad,utr,area,lat,lon,uat,params});
+  pdf.setFillColor(14,25,50);pdf.rect(14,cy,W-28,2,'F');cy+=4;
+  pdf.setTextColor(180,200,230);pdf.setFontSize(6.5);pdf.setFont('helvetica','italic');
+  _narrative.slice(0,2).forEach(para=>{
+    const lines=pdf.splitTextToSize(para,W-32);
+    lines.forEach(l=>{pdf.text(l,16,cy);cy+=5;});
+    cy+=2;
+  });
+  cy+=2;
+;
   cy=addImg(caps.img3D,14,cy,W-28,72,'FIG. 1 — Vedere 3D principala · Volumul propus in contextul urban real · pitch 62° bearing -20°');
   cy=sec('INCADRARE IN CONTEXT - ANALIZA VIZUALA',cy);cy+=2;
   cy=body('Imaginea de mai sus prezinta volumul propus (marcat in albastru) in contextul construit real al zonei, capturat din platforma UrbanX cu date OpenStreetMap actualizate. Se observa raportul volumetric fata de cladirile invecinate, orientarea fata de punctele cardinale si potentialele zone de obstructie solara.',14,cy);cy+=4;
@@ -6693,6 +6790,22 @@ async function generateStudiuFezabilitate(paramOverrides){
   const hcResult=_pdfHealthCheck('Studiu Fezabilitate DALI',params,nrcad,utr,[]);
   if(hcResult.issues.length>0){_pdfRenderHealthCheck(pdf,W,H,hcResult);}
   
+  
+  // ESG Rating in Fezabilitate (Audit G)
+  const aedisH_fez = S.vol?._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||12;
+  const fn_fez = AEDIS?.fn||'rezidential_colectiv';
+  const esgFez = _calcESGScore(ap,params,aedisH_fez,fn_fez);
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('ESG SUSTAINABILITY RATING + CONCLUZII');ftr();
+  let cyEsgF=33;
+  cyEsgF=_pdfESGBlock(pdf,W,cyEsgF,esgFez);
+  cyEsgF=_pdfAutoSummary(pdf,W,cyEsgF,[
+    {text:'ESG Rating: '+esgFez.rating+' ('+esgFez.total+'%) — '+( esgFez.total>70?'Eligibil finantari verzi':'Necesita optimizari'),ok:esgFez.total>70},
+    {text:'Environmental '+esgFez.E.score+'% — permeabilitate si spatii verzi',ok:esgFez.E.score>60},
+    {text:'Social '+esgFez.S.score+'% — accesibilitate si servicii',ok:esgFez.S.score>60},
+    {text:'Governance '+esgFez.G.score+'% — risc juridic si avizabilitate',ok:esgFez.G.score>60},
+  ],'CONCLUZII ESG FEZABILITATE');
+  _saveReportJSON('fezabilitate',{nrCad:nrcad,utr,area,lat,lon,uat,judet,params},[],['UrbanX'],{esg:esgFez.total});
+
   _pdfSaveMobile(pdf,'SF_DALI_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
   ss('OK Studiu Fezabilitate / DALI generat!');
 }

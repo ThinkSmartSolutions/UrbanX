@@ -326,33 +326,103 @@ function _initStudyPdf(studyName, studySubtitle, totalPages){
   };
 
   // Imagine cu border si caption elegant
-  const addImg=(img,x,y,w,h2,caption)=>{
+    // Figure counter - auto FIG.X references (Audit #17)
+  let _figCounter = 0;
+
+  const addImg=(img,x,y,w,h2,caption,opts)=>{
+    const opt=opts||{};
+    _figCounter++;
+    const figNum=opt.figNum||_figCounter;
+
     if(!img||img.length<500){
       pdf.setFillColor(...LIGHT3);pdf.rect(x,y,w,h2,'F');
       pdf.setDrawColor(...GRAY3);pdf.setLineWidth(0.3);pdf.rect(x,y,w,h2,'S');
       pdf.setTextColor(...GRAY2);pdf.setFontSize(8);pdf.setFont('helvetica','italic');
-      pdf.text('Captur\u0103 indisponibil\u0103',x+w/2,y+h2/2,{align:'center'});
-      if(caption){pdf.setFontSize(6);pdf.setTextColor(...GRAY);pdf.text(S2(caption),x+2,y+h2+3.5);return y+h2+8;}
+      pdf.text('Captură indisponibilă',x+w/2,y+h2/2,{align:'center'});
+      if(caption){
+        pdf.setFontSize(5.5);pdf.setTextColor(...GRAY);
+        pdf.text('FIG.'+figNum+' — '+S2(caption),x+2,y+h2+3.5);
+        return y+h2+8;
+      }
       return y+h2+4;
     }
     const fmt=img.startsWith('data:image/png')?'PNG':'JPEG';
     try{
       pdf.setFillColor(...DARK);pdf.rect(x-0.8,y-0.8,w+1.6,h2+1.6,'F');
       pdf.addImage(img,fmt,x,y,w,h2,undefined,'FAST');
-      if(caption){
-        pdf.setFillColor(...DARK);
-        try{pdf.setGState&&pdf.setGState(pdf.GState({opacity:0.80}));}catch(e2){}
-        pdf.rect(x,y+h2-7,w,7,'F');
-        try{pdf.setGState&&pdf.setGState(pdf.GState({opacity:1}));}catch(e2){}
-        pdf.setTextColor(...GOLD2);pdf.setFontSize(6);pdf.setFont('helvetica','italic');
-        pdf.text(S2(caption),x+2,y+h2-1.8);
+
+      // #6 Embedded Legend (colt stanga sus)
+      if(opt.legend&&opt.legend.length){
+        try{pdf.setGState&&pdf.setGState(pdf.GState({opacity:0.85}));}catch(e){}
+        const legH=5+opt.legend.length*5.5;
+        pdf.setFillColor(4,12,28);pdf.rect(x+3,y+3,38,legH,'F');
+        try{pdf.setGState&&pdf.setGState(pdf.GState({opacity:1}));}catch(e){}
+        opt.legend.forEach((leg,li)=>{
+          pdf.setFillColor(...(leg.col||[212,175,55]));
+          pdf.rect(x+5,y+5.5+li*5.5,4,3,'F');
+          pdf.setTextColor(220,230,245);pdf.setFontSize(5.5);pdf.setFont('helvetica','normal');
+          pdf.text(leg.label,x+11,y+7.5+li*5.5);
+        });
       }
+
+      // #13 North Arrow (colt dreapta sus)
+      if(opt.northArrow!==false){
+        const nx=x+w-10,ny=y+9;
+        try{pdf.setGState&&pdf.setGState(pdf.GState({opacity:0.82}));}catch(e){}
+        pdf.setFillColor(4,12,28);pdf.circle(nx,ny,5.5,'F');
+        try{pdf.setGState&&pdf.setGState(pdf.GState({opacity:1}));}catch(e){}
+        pdf.setFillColor(210,40,40);
+        pdf.triangle&&pdf.triangle(nx,ny-4.5,nx-2,ny+1,nx+2,ny+1,'F');
+        pdf.setFillColor(240,240,240);
+        pdf.triangle&&pdf.triangle(nx,ny+4.5,nx-2,ny-1,nx+2,ny-1,'F');
+        pdf.setTextColor(255,255,255);pdf.setFontSize(4.5);pdf.setFont('helvetica','bold');
+        pdf.text('N',nx,ny-5.5,{align:'center'});
+      }
+
+      // #12 Scale Bar (colt stanga jos)
+      if(opt.scaleM){
+        const bx=x+3,by=y+h2-9,bw=28;
+        pdf.setFillColor(255,255,255);pdf.rect(bx,by,bw,3,'F');
+        pdf.setFillColor(0,0,0);pdf.rect(bx,by,bw/2,3,'F');
+        pdf.setDrawColor(0);pdf.setLineWidth(0.3);pdf.rect(bx,by,bw,3,'S');
+        pdf.setTextColor(255,255,255);pdf.setFontSize(5);pdf.setFont('helvetica','bold');
+        pdf.text('0',bx,by+5.5);
+        pdf.text(opt.scaleLabel||opt.scaleM+'m',bx+bw,by+5.5,{align:'right'});
+      }
+
+      // #14 View Metadata 3D (colt dreapta jos)
+      if(opt.viewMeta){
+        try{pdf.setGState&&pdf.setGState(pdf.GState({opacity:0.75}));}catch(e){}
+        pdf.setFillColor(4,12,28);pdf.rect(x+w-62,y+h2-8,60,7,'F');
+        try{pdf.setGState&&pdf.setGState(pdf.GState({opacity:1}));}catch(e){}
+        pdf.setTextColor(120,160,210);pdf.setFontSize(5);pdf.setFont('helvetica','normal');
+        pdf.text(opt.viewMeta,x+w-60,y+h2-3.5);
+      }
+
+      // Caption cu FIG.X badge (Audit #17)
+      if(caption){
+        try{pdf.setGState&&pdf.setGState(pdf.GState({opacity:0.85}));}catch(e2){}
+        pdf.setFillColor(8,20,42);pdf.rect(x,y+h2-9,w,9,'F');
+        try{pdf.setGState&&pdf.setGState(pdf.GState({opacity:1}));}catch(e2){}
+        pdf.setFillColor(212,175,55);pdf.rect(x,y+h2-9,15,9,'F');
+        pdf.setTextColor(8,20,42);pdf.setFontSize(6);pdf.setFont('helvetica','bold');
+        pdf.text('FIG.'+figNum,x+7.5,y+h2-2.5,{align:'center'});
+        pdf.setTextColor(212,175,55);pdf.setFontSize(5.8);pdf.setFont('helvetica','italic');
+        pdf.text(S2(caption),x+17,y+h2-2.5,{maxWidth:w-20});
+      }
+
+      // #22 Evidence tag (sub imagine)
+      if(opt.evidenceSrc){
+        pdf.setTextColor(100,130,160);pdf.setFontSize(5);pdf.setFont('helvetica','italic');
+        pdf.text('Sursa: '+opt.evidenceSrc+' · '+new Date().toLocaleDateString('ro-RO'),x,y+h2+(caption?11:2));
+      }
+
     }catch(e){
       pdf.setFillColor(...LIGHT3);pdf.rect(x,y,w,h2,'F');
-      pdf.setTextColor(...GRAY2);pdf.setFontSize(7);pdf.text('Captur\u0103 indisponibil\u0103',x+w/2,y+h2/2,{align:'center'});
+      pdf.setTextColor(...GRAY2);pdf.setFontSize(7);pdf.text('Captură indisponibilă',x+w/2,y+h2/2,{align:'center'});
     }
-    return y+h2+4;
-  };
+    return y+h2+(caption?11:4);
+  };;
 
   const newPage=(title,pgNum)=>{
     pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
