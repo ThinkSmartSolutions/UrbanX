@@ -1349,20 +1349,20 @@ canvas#c2d{width:100%;height:100%;display:block}
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <!-- UrbanX JS Modules — ordinea de incarcare e importanta -->
 <script src="js/00-globals.js?v=2026050601"></script>
-<script src="js/02-map-core.js?v=2026050601"></script>
+<script src="js/02-map-core.js?v=2026050804"></script>
 <script src="js/03-ui-panel.js?v=2026050803"></script>
 <script src="js/04-search.js?v=2026050601"></script>
 <script src="js/05-cad-utils.js?v=2026050601"></script>
 <script src="js/06-aedis.js?v=2026050802"></script>
 <script src="js/07-pdf-utils.js?v=2026050601"></script>
 <script src="js/08-lotizare.js?v=2026050802"></script>
-<script src="js/09-pdf-engine.js?v=2026050601"></script>
+<script src="js/09-pdf-engine.js?v=2026050804"></script>
 <script src="js/10-studies.js?v=2026050804"></script>
-<script src="js/11-viewer3d.js?v=2026050601"></script>
+<script src="js/11-viewer3d.js?v=2026050804"></script>
 <script src="js/12-admin.js?v=2026050601"></script>
 <script src="js/13-info-drawer.js?v=2026050702"></script>
 <script src="js/14-docx-export.js?v=2026050601"></script>
-<script src="js/15-relevee.js?v=2026050803"></script>
+<script src="js/15-relevee.js?v=2026050805"></script>
 <script src="js/fixes-audit.js?v=2026050601"></script>
 <script src="js/map-resize-fix.js?v=2026050601"></script>
 
@@ -1982,27 +1982,35 @@ document.addEventListener('DOMContentLoaded',()=>{
 // Fix #20: Escape key + cancel button pentru selecție parcelă accidentală
 window._cancelActiveParcel = function(){
   // Încearcă clearare prin funcțiile existente
-  if(typeof doReset === 'function') doReset();
-  if(typeof doClearParcels === 'function') doClearParcels();
+  if(typeof doReset === 'function') try{ doReset(); }catch(e){}
   if(window.S){
-    if(typeof removeParcel === 'function'){
-      // Șterge toate parcelele din coadă inversă
-      const n = S.parcels?.length||0;
-      for(let i=n-1;i>=0;i--){ try{ removeParcel(i); }catch(e){} }
-    }
-    S.parcels = S.parcels?.slice(0,0)||[];
+    S.parcels = [];
     S.activeParcel = null;
+    S.utr = '';
+    S.rule = {};
+    S.ctx = null;
+    if(S.vol) { S.vol.genDone = false; }
+    // Curăță sursele de pe hartă
+    if(typeof clearSource === 'function'){
+      try{ clearSource('vol-src'); }catch(e){}
+      try{ clearSource('ctx-src'); }catch(e){}
+      try{ clearSource('sel-src'); }catch(e){}
+      try{ clearSource('fp-src'); }catch(e){}
+    }
+    // Actualizează highlight-ul de pe hartă
+    if(typeof updateMap === 'function') try{ updateMap(); }catch(e){}
+    // Curăță inputuri de căutare
+    ['inp-cad','inp-addr','mob-inp-cad','mob-inp-addr'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el) el.value='';
+    });
     window._lastCadVal='';
     window._lastAddrVal='';
-    // Curăță inputuri de căutare
-    const ic=document.getElementById('inp-cad');
-    const ia=document.getElementById('inp-addr');
-    if(ic) ic.value='';
-    if(ia) ia.value='';
+    window._lastCoordVal='';
   }
   document.getElementById('cancel-parcel-btn').style.display='none';
-  if(typeof renderAll === 'function') renderAll();
-  if(typeof ss === 'function') ss('✅ Selecție anulată');
+  if(typeof renderAll === 'function') try{ renderAll(); }catch(e){}
+  if(typeof ss === 'function') ss('✅ Selecție anulată — hartă liberă');
 };
 
 // Escape key anulează selecția

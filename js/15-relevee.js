@@ -1168,7 +1168,167 @@ function _rvRenderFacade(b){
 }
 
 function _rvRenderSection(b){
-  const {P,bW,bD,niv,cores}=b; const Ht=niv*P.hn; const SC=_RV.scale*.85;
+  const {P,bW,bD,niv,cores}=b;
+  const Ht=niv*P.hn;
+  const sectionType=_RV.sectionType||'AA'; // 'AA'=transversal sau 'BB'=longitudinal
+  const cutDim = sectionType==='AA' ? bD : bW; // dimensiunea de-a lungul secțiunii
+  const SC=_RV.scale*.85;
+  const pad=50;
+  const W=cutDim*SC+pad*2+100;
+  const H=Ht*SC+pad*2+60;
+  const {cv,ctx}=_rvInitCanvas(W+120,H+50);
+
+  ctx.fillStyle='#060C1A';ctx.fillRect(0,0,cv.width,H+50);
+
+  // ── Selector A-A / B-B ─────────────────────────────────────────────────────
+  const btnStyle=(active)=>`${active?'rgba(212,175,55,.3)':'rgba(255,255,255,.06)'};color:${active?'#D4AF37':'#64748b'};border:1px solid ${active?'rgba(212,175,55,.5)':'rgba(255,255,255,.1)'}`;
+  // Adăugăm butoane via DOM (nu canvas)
+  const tabDiv=document.getElementById('rv-section-tabs');
+  if(!tabDiv){
+    const div=document.createElement('div');
+    div.id='rv-section-tabs';
+    div.style.cssText='position:absolute;top:8px;left:50%;transform:translateX(-50%);display:flex;gap:4px;z-index:10;background:rgba(6,12,26,.9);padding:4px;border-radius:8px;border:1px solid rgba(255,255,255,.1)';
+    div.innerHTML=`
+      <button id="rv-sect-aa" onclick="_RV.sectionType='AA';_rvRender()" style="padding:4px 14px;border-radius:6px;cursor:pointer;font-size:10px;font-weight:700;font-family:'IBM Plex Mono',monospace;background:rgba(212,175,55,.3);color:#D4AF37;border:1px solid rgba(212,175,55,.5)">
+        ✂ Secțiune A-A
+      </button>
+      <button id="rv-sect-bb" onclick="_RV.sectionType='BB';_rvRender()" style="padding:4px 14px;border-radius:6px;cursor:pointer;font-size:10px;font-weight:700;font-family:'IBM Plex Mono',monospace;background:rgba(255,255,255,.06);color:#64748b;border:1px solid rgba(255,255,255,.1)">
+        ✂ Secțiune B-B
+      </button>`;
+    const wrap=cv.parentElement;
+    if(wrap){wrap.style.position='relative';wrap.appendChild(div);}
+  } else {
+    document.getElementById('rv-sect-aa').style.cssText=`padding:4px 14px;border-radius:6px;cursor:pointer;font-size:10px;font-weight:700;font-family:'IBM Plex Mono',monospace;background:${sectionType==='AA'?'rgba(212,175,55,.3)':'rgba(255,255,255,.06)'};color:${sectionType==='AA'?'#D4AF37':'#64748b'};border:1px solid ${sectionType==='AA'?'rgba(212,175,55,.5)':'rgba(255,255,255,.1)'}`;
+    document.getElementById('rv-sect-bb').style.cssText=`padding:4px 14px;border-radius:6px;cursor:pointer;font-size:10px;font-weight:700;font-family:'IBM Plex Mono',monospace;background:${sectionType==='BB'?'rgba(212,175,55,.3)':'rgba(255,255,255,.06)'};color:${sectionType==='BB'?'#D4AF37':'#64748b'};border:1px solid ${sectionType==='BB'?'rgba(212,175,55,.5)':'rgba(255,255,255,.1)'}`;
+  }
+
+  const ox=pad+50, oy=pad+30;
+  const sW=cutDim*SC, sH=Ht*SC;
+
+  // Titlu secțiune
+  ctx.fillStyle='rgba(212,175,55,.85)';ctx.font='bold 10px IBM Plex Mono';ctx.textAlign='center';
+  ctx.fillText(sectionType==='AA'
+    ? `SECȚIUNE A-A TRANSVERSALĂ (pe lățimea de ${bD.toFixed(1)}m)`
+    : `SECȚIUNE B-B LONGITUDINALĂ (pe lungimea de ${bW.toFixed(1)}m)`,
+    ox+sW/2, oy-12);
+  ctx.textAlign='left';
+
+  // Corp secțiune
+  ctx.fillStyle='rgba(17,27,48,.95)';ctx.fillRect(ox,oy,sW,sH);
+  ctx.strokeStyle='#CBD5E1';ctx.lineWidth=2;ctx.strokeRect(ox,oy,sW,sH);
+
+  // Culori etaje
+  const rC=['rgba(180,83,1,.14)','rgba(21,128,61,.13)','rgba(14,116,144,.15)','rgba(109,40,217,.13)'];
+  for(let i=0;i<niv;i++){
+    const y0=oy+sH-(i+1)*P.hn*SC;
+    ctx.fillStyle=rC[i%4];ctx.fillRect(ox+2,y0+2,sW-4,P.hn*SC-4);
+    // Planșeu
+    ctx.fillStyle='rgba(203,213,225,.25)';ctx.fillRect(ox,y0-2,sW,2);
+    // Etichetă nivel (stânga)
+    ctx.fillStyle='#94a3b8';ctx.font='bold 8px IBM Plex Mono';ctx.textAlign='right';
+    ctx.fillText(i===0?'P':`E${i}`,ox-6,y0+P.hn*SC/2+3);
+    // Înălțime etaj (dreapta)
+    ctx.fillStyle='rgba(212,175,55,.5)';ctx.font='7px IBM Plex Mono';ctx.textAlign='left';
+    ctx.fillText(P.hn.toFixed(1)+'m',ox+sW+6,y0+P.hn*SC/2+3);
+    ctx.textAlign='left';
+  }
+
+  // ── Casă scări ─────────────────────────────────────────────────────────────
+  if(cores.length){
+    // Selectăm nucleul central
+    const midCore=cores[Math.floor(cores.length/2)];
+    // Pentru secțiunea AA: tăiem perpendicular pe Y, deci afișăm X-ul nucleului
+    // Pentru BB: tăiem perpendicular pe X, deci afișăm Y-ul nucleului
+    const coreStart = sectionType==='AA'
+      ? (midCore.x/bW)*sW   // poziția X a casei scărilor pe secțiunea AA
+      : (midCore.y/bD)*sW;  // poziția Y a casei scărilor pe secțiunea BB
+    const coreDim = sectionType==='AA'
+      ? (midCore.w/bW)*sW   // lățimea pe secțiunea AA
+      : (midCore.h/bD)*sW;  // adâncimea pe secțiunea BB
+    const cx0=ox+coreStart;
+
+    for(let i=0;i<niv;i++){
+      const y0=oy+sH-(i+1)*P.hn*SC;
+      // Corp casă scări
+      ctx.fillStyle='rgba(37,99,235,.25)';ctx.fillRect(cx0,y0,coreDim,P.hn*SC);
+      ctx.strokeStyle='#3B82F6';ctx.lineWidth=0.8;ctx.strokeRect(cx0,y0,coreDim,P.hn*SC);
+      // Trepte scări — linii diagonale
+      const steps=6, sw=coreDim/steps, sh=P.hn*SC/steps;
+      ctx.strokeStyle='rgba(96,165,250,.6)';ctx.lineWidth=0.8;
+      for(let s=0;s<steps;s++){
+        ctx.beginPath();ctx.moveTo(cx0+s*sw,y0+(steps-s)*sh);ctx.lineTo(cx0+(s+1)*sw,y0+(steps-s)*sh);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(cx0+(s+1)*sw,y0+(steps-s)*sh);ctx.lineTo(cx0+(s+1)*sw,y0+(steps-s-1)*sh);ctx.stroke();
+      }
+      // Label casă scări la primul etaj
+      if(i===0){
+        ctx.fillStyle='rgba(96,165,250,.7)';ctx.font='bold 7px IBM Plex Mono';ctx.textAlign='center';
+        ctx.fillText('CASĂ',cx0+coreDim/2,y0+P.hn*SC*0.35);
+        ctx.fillText('SCĂRI',cx0+coreDim/2,y0+P.hn*SC*0.55);
+        ctx.textAlign='left';
+      }
+    }
+    // Lift — în dreapta casei scărilor
+    const liftW=Math.min(1.2*SC,coreDim*0.4);
+    const lx0=cx0+coreDim-liftW;
+    for(let i=0;i<niv;i++){
+      const y0=oy+sH-(i+1)*P.hn*SC;
+      ctx.fillStyle='rgba(59,130,246,.15)';ctx.fillRect(lx0,y0,liftW,P.hn*SC);
+      ctx.strokeStyle='rgba(96,165,250,.4)';ctx.lineWidth=0.5;ctx.strokeRect(lx0,y0,liftW,P.hn*SC);
+      // X simbol lift
+      ctx.strokeStyle='rgba(96,165,250,.3)';ctx.lineWidth=0.4;
+      ctx.beginPath();ctx.moveTo(lx0,y0);ctx.lineTo(lx0+liftW,y0+P.hn*SC);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(lx0+liftW,y0);ctx.lineTo(lx0,y0+P.hn*SC);ctx.stroke();
+    }
+  }
+
+  // ── Terenul și cota ±0.00 ─────────────────────────────────────────────────
+  ctx.fillStyle='rgba(107,114,128,.4)';ctx.fillRect(ox-10,oy+sH,sW+20,18);
+  ctx.strokeStyle='#6B7280';ctx.lineWidth=1;ctx.strokeRect(ox-10,oy+sH,sW+20,18);
+  // Hașură teren
+  ctx.strokeStyle='rgba(107,114,128,.3)';ctx.lineWidth=0.5;
+  for(let hx=ox-10;hx<ox+sW+20;hx+=8){
+    ctx.beginPath();ctx.moveTo(hx,oy+sH);ctx.lineTo(hx-8,oy+sH+18);ctx.stroke();
+  }
+
+  // Linie NFA
+  ctx.strokeStyle='rgba(6,182,212,.5)';ctx.lineWidth=1;ctx.setLineDash([5,4]);
+  const nfaY=oy+sH-Math.min(P.hn*.5,1.5)*SC;
+  ctx.beginPath();ctx.moveTo(ox-22,nfaY);ctx.lineTo(ox+sW+35,nfaY);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='rgba(6,182,212,.65)';ctx.font='7px IBM Plex Mono';
+  ctx.fillText('NFA ~-1.5m',ox+4,nfaY-2);
+
+  // Linie ±0.00
+  ctx.strokeStyle='rgba(203,213,225,.6)';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(ox-22,oy+sH);ctx.lineTo(ox+sW+35,oy+sH);ctx.stroke();
+  ctx.fillStyle='#94a3b8';ctx.font='bold 8px IBM Plex Mono';
+  ctx.fillText('±0.00 CTN',ox,oy+sH+12);
+
+  // ── Cote dimensionale ─────────────────────────────────────────────────────
+  if(_RV.showDim){
+    // Înălțime totală
+    ctx.strokeStyle='rgba(212,175,55,.4)';ctx.lineWidth=0.8;ctx.setLineDash([3,3]);
+    ctx.beginPath();ctx.moveTo(ox+sW+22,oy);ctx.lineTo(ox+sW+22,oy+sH);ctx.stroke();ctx.setLineDash([]);
+    ctx.strokeStyle='rgba(212,175,55,.4)';ctx.lineWidth=0.5;
+    ctx.beginPath();ctx.moveTo(ox+sW+16,oy);ctx.lineTo(ox+sW+28,oy);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(ox+sW+16,oy+sH);ctx.lineTo(ox+sW+28,oy+sH);ctx.stroke();
+    ctx.fillStyle='rgba(212,175,55,.85)';ctx.font='bold 8px IBM Plex Mono';ctx.textAlign='center';
+    ctx.save();ctx.translate(ox+sW+42,oy+sH/2);ctx.rotate(-Math.PI/2);
+    ctx.fillText('H='+Ht.toFixed(1)+'m',0,0);ctx.restore();
+    // Lățime secțiune
+    ctx.strokeStyle='rgba(212,175,55,.4)';ctx.lineWidth=0.5;
+    ctx.beginPath();ctx.moveTo(ox,oy-18);ctx.lineTo(ox+sW,oy-18);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(ox,oy-22);ctx.lineTo(ox,oy-12);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(ox+sW,oy-22);ctx.lineTo(ox+sW,oy-12);ctx.stroke();
+    ctx.fillStyle='rgba(212,175,55,.7)';ctx.font='7px IBM Plex Mono';
+    ctx.fillText(cutDim.toFixed(1)+'m',ox+sW/2-12,oy-6);
+    ctx.textAlign='left';
+  }
+
+  _rvDrawNorth(ctx,W+80,44,P.frontDir);
+  _rvDrawScale(ctx,pad,H+38,SC);
+  _rvDrawCartus(ctx,W+120,H+50,P,null,
+    sectionType==='AA'?'SECȚIUNE A-A TRANSVERSALĂ':'SECȚIUNE B-B LONGITUDINALĂ');
+}
   const pad=50; const W=bD*SC+pad*2+80; const H=Ht*SC+pad*2+50;
   const {cv,ctx}=_rvInitCanvas(W,H+40);
   ctx.fillStyle='#060C1A';ctx.fillRect(0,0,cv.width,H+40);
@@ -1215,7 +1375,168 @@ function _rvRenderSection(b){
 }
 
 function _rvRenderAxono(b){
-  const {P,bW,bD,niv,cores}=b; const s=_RV.scale*.5;
+  const {P,bW,bD,niv,cores}=b;
+  const EXPLODE_GAP = 8; // gap în metri între etaje pentru exploded view
+  const SHOW_FLOORS = Math.min(niv, 6);
+  const totalH = niv*P.hn + (SHOW_FLOORS-1)*EXPLODE_GAP;
+  const s = Math.min(7, 420/Math.max(bW,bD,totalH));
+
+  // Proiecție izometrică 30°
+  const ISO_ANG = Math.PI/6; // 30°
+  const isoX = (x,y,z) => (x - y) * Math.cos(ISO_ANG) * s;
+  const isoY = (x,y,z) => (x + y) * Math.sin(ISO_ANG) * s - z * s * 0.7;
+
+  const W=900, H=700;
+  const {cv,ctx}=_rvInitCanvas(W,H);
+  const CX=280, CY=560;
+  const pt=(x,y,z)=>[CX+isoX(x,y,z), CY+isoY(x,y,z)];
+
+  ctx.fillStyle='#060C1A';ctx.fillRect(0,0,W,H);
+
+  // Titlu
+  ctx.fillStyle='rgba(212,175,55,.9)';ctx.font='bold 12px IBM Plex Mono';ctx.textAlign='center';
+  ctx.fillText('AXONOMETRIE EXPLODATĂ — '+niv+' NIV. · H='+Math.round(niv*P.hn)+'m · '+bW.toFixed(1)+'×'+bD.toFixed(1)+'m',450,22);
+  ctx.fillStyle='rgba(148,163,184,.5)';ctx.font='8px IBM Plex Mono';
+  ctx.fillText('Vedere izometrică 30° · Etaje separate pentru vizualizare compartimentare · Nr.cad. '+P.nrCad,450,35);
+  ctx.textAlign='left';
+
+  const face=(pts,fill,stk,lw=1,alpha=1)=>{
+    ctx.save();ctx.globalAlpha=alpha;
+    ctx.beginPath();pts.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));
+    ctx.closePath();if(fill){ctx.fillStyle=fill;ctx.fill();}
+    ctx.strokeStyle=stk;ctx.lineWidth=lw;ctx.stroke();
+    ctx.restore();
+  };
+
+  // Floare plan pentru un etaj la înălțimea explodată
+  const drawFloor=(floorIdx, zBase)=>{
+    const fl = _RV.floors[floorIdx] || _RV.floors[0];
+    const zLabel = floorIdx === 0 ? 'P' : `E${floorIdx}`;
+    const zActual = floorIdx * P.hn;
+    const isLast = floorIdx === niv-1;
+
+    // Placa de planșeu
+    face([pt(0,0,zBase),pt(bW,0,zBase),pt(bW,bD,zBase),pt(0,bD,zBase)],
+      isLast?'rgba(212,175,55,.12)':'rgba(16,30,60,.75)',
+      isLast?'rgba(212,175,55,.8)':'rgba(96,130,180,.4)', isLast?1.5:0.6);
+
+    // Camerele din plan — simplificat în proiecție axonometrică
+    if(fl?.rects){
+      const typeColors={
+        living:'rgba(59,130,246,.25)',bedroom:'rgba(52,211,153,.25)',
+        bedroom2:'rgba(52,211,153,.2)',kitchen:'rgba(245,158,11,.25)',
+        bath:'rgba(167,139,250,.25)',hall:'rgba(100,116,139,.2)',
+        core:'rgba(37,99,235,.35)',balcon:'rgba(212,175,55,.15)',
+        storage:'rgba(75,85,99,.2)'
+      };
+      fl.rects.forEach(r=>{
+        const col=typeColors[r.t]||'rgba(50,70,100,.15)';
+        const border=r.t==='core'?'rgba(96,165,250,.6)':'rgba(100,120,160,.25)';
+        face([pt(r.x,r.y,zBase),pt(r.x+r.w,r.y,zBase),pt(r.x+r.w,r.y+r.h,zBase),pt(r.x,r.y+r.h,zBase)],col,border,0.4);
+      });
+    }
+
+    // Pereți laterali ai etajului (dacă nu e ultimul)
+    if(floorIdx < SHOW_FLOORS-1){
+      const zTop = zBase + P.hn;
+      // Fațada S
+      const sf = 0.08 + (floorIdx%2===0?0.04:0);
+      face([pt(0,bD,zBase),pt(bW,bD,zBase),pt(bW,bD,zTop),pt(0,bD,zTop)],
+        `rgba(37,99,235,${sf})`,'rgba(96,130,200,.5)',0.8);
+      // Fațada E
+      face([pt(bW,0,zBase),pt(bW,bD,zBase),pt(bW,bD,zTop),pt(bW,0,zTop)],
+        `rgba(34,197,94,.05)`,'rgba(80,130,100,.4)',0.6);
+
+      // Ferestre fațada S
+      const nWin=Math.max(2,Math.floor(bW/3.8));
+      const wW=bW/nWin*0.5, wH=P.hn*0.4;
+      for(let w=0;w<nWin;w++){
+        const wx=w*bW/nWin+(bW/nWin-wW)/2;
+        const wz=zBase+P.hn*0.25;
+        const skipCore=cores.some(c=>wx+wW>c.x&&wx<c.x+c.w);
+        if(!skipCore){
+          face([pt(wx,bD,wz),pt(wx+wW,bD,wz),pt(wx+wW,bD,wz+wH),pt(wx,bD,wz+wH)],
+            'rgba(56,189,248,.3)','rgba(56,189,248,.7)',0.8);
+        }
+      }
+
+      // Balcon
+      const bz=zBase+P.hn*0.75;
+      face([pt(0.5,bD,bz),pt(bW-0.5,bD,bz),pt(bW-0.5,bD+0.3,bz),pt(0.5,bD+0.3,bz)],
+        'rgba(212,175,55,.1)','rgba(212,175,55,.5)',0.7);
+    }
+
+    // Etichetă nivel
+    const[lx,ly]=pt(bW+0.5,0,zBase);
+    ctx.fillStyle='rgba(212,175,55,.9)';ctx.font='bold 9px IBM Plex Mono';ctx.textAlign='left';
+    ctx.fillText(zLabel, lx+4, ly+3);
+    ctx.fillStyle='rgba(148,163,184,.55)';ctx.font='7px IBM Plex Mono';
+    ctx.fillText('+'+zActual.toFixed(1)+'m',lx+4,ly+12);
+
+    // Linie punctată de conexiune cu etajul anterior
+    if(floorIdx > 0){
+      ctx.strokeStyle='rgba(100,120,160,.2)';ctx.lineWidth=0.5;ctx.setLineDash([3,5]);
+      [[0,0],[bW,0],[bW,bD],[0,bD]].forEach(([x,y])=>{
+        const[ax,ay]=pt(x,y,zBase);
+        const[bx_,by_]=pt(x,y,zBase-EXPLODE_GAP);
+        ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(bx_,by_);ctx.stroke();
+      });
+      ctx.setLineDash([]);
+    }
+  };
+
+  // Desenăm etajele de jos în sus (pentru occlusion corect)
+  for(let fl=SHOW_FLOORS-1;fl>=0;fl--){
+    const zBase = fl * (P.hn + EXPLODE_GAP);
+    drawFloor(fl, zBase);
+  }
+
+  // Dacă avem mai multe etaje decât SHOW_FLOORS, indicăm
+  if(niv > SHOW_FLOORS){
+    const[ex,ey]=pt(bW/2,bD,(SHOW_FLOORS-1)*(P.hn+EXPLODE_GAP)+P.hn+2);
+    ctx.fillStyle='rgba(212,175,55,.7)';ctx.font='bold 8px IBM Plex Mono';ctx.textAlign='center';
+    ctx.fillText(`... + ${niv-SHOW_FLOORS} etaje suplimentare (total ${niv} niv.)`,ex,ey);
+  }
+
+  // ── Legendă ───────────────────────────────────────────────────────────────
+  const lx=600, ly=55;
+  ctx.fillStyle='rgba(8,16,38,.9)';ctx.fillRect(lx-8,ly-12,280,220);
+  ctx.strokeStyle='rgba(212,175,55,.2)';ctx.lineWidth=0.5;ctx.strokeRect(lx-8,ly-12,280,220);
+  ctx.fillStyle='rgba(212,175,55,.8)';ctx.font='bold 9px IBM Plex Mono';ctx.textAlign='left';
+  ctx.fillText('LEGENDĂ CULORI CAMERE',lx,ly);
+  const legItems=[
+    ['rgba(59,130,246,.5)','Living / Sufragerie'],
+    ['rgba(52,211,153,.5)','Dormitor'],
+    ['rgba(245,158,11,.5)','Bucătărie'],
+    ['rgba(167,139,250,.5)','Baie / WC'],
+    ['rgba(37,99,235,.5)','Casă scări / Lift'],
+    ['rgba(212,175,55,.4)','Balcon / Terasă'],
+    ['rgba(100,116,139,.4)','Hol / Coridor'],
+    ['rgba(75,85,99,.4)','Depozit / Garderobă'],
+  ];
+  legItems.forEach(([col,lbl],i)=>{
+    ctx.fillStyle=col;ctx.fillRect(lx,ly+14+i*22,12,12);
+    ctx.strokeStyle='rgba(255,255,255,.2)';ctx.lineWidth=0.5;ctx.strokeRect(lx,ly+14+i*22,12,12);
+    ctx.fillStyle='rgba(200,215,240,.8)';ctx.font='8px IBM Plex Mono';
+    ctx.fillText(lbl,lx+16,ly+24+i*22);
+  });
+
+  // ── Dimensiuni ─────────────────────────────────────────────────────────────
+  const [dsx,dsy]=pt(0,bD+1,0), [dex,dey]=pt(bW,bD+1,0);
+  ctx.strokeStyle='rgba(148,163,184,.5)';ctx.lineWidth=0.7;
+  ctx.beginPath();ctx.moveTo(dsx,dsy);ctx.lineTo(dex,dey);ctx.stroke();
+  ctx.fillStyle='rgba(148,163,184,.8)';ctx.font='7px IBM Plex Mono';ctx.textAlign='center';
+  ctx.fillText(bW.toFixed(1)+'m',(dsx+dex)/2,(dsy+dey)/2+10);
+
+  const [dsx2,dsy2]=pt(bW+1,0,0), [dex2,dey2]=pt(bW+1,bD,0);
+  ctx.beginPath();ctx.moveTo(dsx2,dsy2);ctx.lineTo(dex2,dey2);ctx.stroke();
+  ctx.fillText(bD.toFixed(1)+'m',(dsx2+dex2)/2+15,(dsy2+dey2)/2);
+
+  // Buton zoom info
+  ctx.fillStyle='rgba(148,163,184,.4)';ctx.font='7px IBM Plex Mono';ctx.textAlign='center';
+  ctx.fillText('📦 Vedere izometrică explodată · '+SHOW_FLOORS+' din '+niv+' etaje afișate · Folosiți + / - pentru zoom',W/2,H-12);
+  ctx.textAlign='left';
+}
   const iso=(x,y,z)=>({px:(x-y)*Math.cos(Math.PI/6)*s, py:(x+y)*Math.sin(Math.PI/6)*s-z*s*.55});
   const {cv,ctx}=_rvInitCanvas(780,560);
   ctx.fillStyle='#060C1A';ctx.fillRect(0,0,780,560);
@@ -4661,6 +4982,10 @@ function _rvInject(){
 #rv-modal{position:fixed;inset:0;z-index:8000;background:rgba(4,8,18,.0);backdrop-filter:blur(0);display:flex;flex-direction:column;pointer-events:none;transition:all .25s;}
 #rv-modal.rv-modal-open{background:rgba(4,8,18,.96);backdrop-filter:blur(16px);pointer-events:all;}
 #rv-modal .rv-body{display:grid;grid-template-columns:260px 1fr 240px;height:100%;opacity:0;transition:opacity .25s .1s;}
+#rv-modal .rv-body.lpanel-hidden{grid-template-columns:0px 1fr 240px;}
+#rv-modal .rv-body.lpanel-hidden .rv-lpanel{display:none!important;}
+#rv-toggle-lpanel{position:absolute;left:250px;top:50%;transform:translateY(-50%);z-index:100;background:rgba(212,175,55,.15);border:1px solid rgba(212,175,55,.3);color:#D4AF37;border-radius:0 6px 6px 0;padding:6px 4px;cursor:pointer;font-size:10px;writing-mode:vertical-rl;text-orientation:mixed;letter-spacing:.05em;transition:left .2s}
+#rv-modal .rv-body.lpanel-hidden #rv-toggle-lpanel{left:0;}
 #rv-modal.rv-modal-open .rv-body{opacity:1;}
 .rv-topbar{display:flex;align-items:center;gap:10px;padding:0 14px;height:50px;background:rgba(6,12,26,.98);border-bottom:1px solid rgba(212,175,55,.15);flex-shrink:0;}
 .rv-logo-t{font-size:14px;font-weight:800;letter-spacing:.04em;font-family:'Space Grotesk',sans-serif;}
@@ -4861,9 +5186,10 @@ function _rvInject(){
   </button>
   <button class="rv-close-btn" onclick="closeRelevee()" title="Închide">✕</button>
 </div>
-<div class="rv-body">
+<div class="rv-body" id="rv-body-main">
   <!-- LEFT -->
-  <div class="rv-lpanel">
+  <div class="rv-lpanel" id="rv-lpanel-main">
+    <button id="rv-toggle-lpanel" title="Ascunde/afișează panoul" onclick="document.getElementById('rv-body-main').classList.toggle('lpanel-hidden');this.textContent=document.getElementById('rv-body-main').classList.contains('lpanel-hidden')?'▶ Panou':'◀ Panou'">◀ Panou</button>
     <!-- FUNCȚIUNE CLĂDIRE — primul selector, cel mai important -->
     <div class="rv-rsec" style="border:1px solid rgba(212,175,55,.2);background:rgba(212,175,55,.04);border-radius:8px;padding:8px">
       <div class="rv-sec-t" style="color:#D4AF37;margin-bottom:8px">🏗 Funcțiune clădire</div>
