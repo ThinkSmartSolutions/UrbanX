@@ -183,9 +183,39 @@ const _rvSleep= ms => new Promise(r=>setTimeout(r,ms));
 
 function _rvEsc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-// ── Extrage parametrii din parcela activă ───────────────────────────────────
+// ── Extrage parametrii din parcela activă (sau uniunea parcelelor în multiselect) ─
 function _rvGetParcelParams(){
-  const ap = S.parcels[S.activeParcel ?? 0];
+  // ── #18 MULTISELECT: dacă sunt mai multe parcele, unim geometriile ─────────
+  let ap;
+  if(S.multiMode && S.parcels.length > 1){
+    try{
+      // Unim toate parcelele selectate cu turf.union
+      let union = S.parcels[0]?.geo;
+      for(let i=1;i<S.parcels.length;i++){
+        if(S.parcels[i]?.geo) union = turf.union(union, S.parcels[i].geo);
+      }
+      const totalArea = S.parcels.reduce((s,p)=>s+(p.area||turf.area(p.geo)||0),0);
+      ap = {
+        geo: union,
+        area: totalArea,
+        utr: S.parcels[0]?.utr || 'CB7',
+        params: S.parcels[0]?.params || {},
+        nrCad: S.parcels.map(p=>p.nrCad||'?').join('+'),
+        _isMulti: true,
+        _count: S.parcels.length,
+      };
+      // Notify user
+      if(!window._rvMultiNotified){
+        window._rvMultiNotified=true;
+        ss('📐 Memoriu Tehnic pentru '+S.parcels.length+' parcele combinate · Suprafață totală: '+Math.round(totalArea)+'m²');
+      }
+    }catch(e){
+      ap = S.parcels[S.activeParcel ?? 0]; // fallback
+    }
+  } else {
+    window._rvMultiNotified=false;
+    ap = S.parcels[S.activeParcel ?? 0];
+  }
   if(!ap?.geo?.geometry) return null;
 
   const areaRaw  = ap.area || turf.area(ap.geo);
@@ -2767,7 +2797,8 @@ async function generateRelevee(){
   const secs=((performance.now()-t0)/1000).toFixed(1);
   if(tdot) tdot.classList.remove('rv-running');
   if(tval) tval.textContent=secs+'s';
-  document.getElementById('rv-tinfo').textContent=`Nr.cad. ${P.nrCad} · ${b.niv} niv. · SDA=${_rvFmt(b.sdaTotal)}m² · POT=${_rvFmt(b.scArea/P.area*100)}% · CUT=${_rvFmtD(b.sdaTotal/P.area)} · ${secs}s`;
+  const multiLabel = (S.multiMode&&S.parcels.length>1) ? ` · 📐 ${S.parcels.length} parcele combinate` : '';
+  document.getElementById('rv-tinfo').textContent=`Nr.cad. ${P.nrCad}${multiLabel} · ${b.niv} niv. · SDA=${_rvFmt(b.sdaTotal)}m² · POT=${_rvFmt(b.scArea/P.area*100)}% · CUT=${_rvFmtD(b.sdaTotal/P.area)} · ${secs}s`;
   // Populăm info parcelă din panoul drept
   const piEl = document.getElementById('rv-parcel-info');
   if(piEl) piEl.innerHTML = `Nr. cad.: <strong style="color:#D4AF37">${P.nrCad}</strong><br>UTR: ${P.utr}<br>Suprafață: ${P.area}m²<br>Dim. bbox: ${P.W.toFixed(1)}m × ${P.D.toFixed(1)}m<br>Front: ${P.frontDir}<br>POT max: ${Math.round(P.pot*100)}%<br>CUT max: ${P.cut}<br>H max: ${P.hMax}m<br>Niveluri: ${b.niv} niv.<br>H total: ${(b.niv*P.hn).toFixed(1)}m`;
@@ -4820,35 +4851,130 @@ async function _rvExportPDF(){
       lines.slice(0,3).forEach((l,li)=>pdf.text(l,bCol3X+6,cly+7+li*3.2));
       cly+=22;
     });
-    // Final stamp + DNA Radar în col 3 (dacă disponibil)
-    _rvCaptureDNARadarPNG(dnaImg=>{
+    // Final stamp + DNA Radar + PAGINA PANEL STÂNG (#25 audit)
+    _rvCaptureDNARadarPNG(async dnaImg=>{
       try{
+        // ── PAGINA SUPLIMENTARĂ: TOT CONȚINUTUL DIN PANOUL STÂNG (#25) ──────
+        pgN++;
+        pdf.addPage();
+        pdf.setFillColor(6,12,26);pdf.rect(0,0,W,H,'F');
+        hdr('SINTEZĂ ANALIZĂ · FUNCȚIUNE · DNA URBAN · LEGENDĂ · NORMATIVE APLICATE',pgN);
+        let sy=14;
+        const fnCfgPDF=window.FN_CONFIG?.[_RV.fn]||{label:'Rezidențial',norms:['NP 057/2002','OMS 119/2014','P118-2/2013'],isuDist:30,isuNorm:'P118-2/2013',omsInsorire:true};
+
+        // ── COL 1: Funcțiune + DNA radar ──────────────────────────────────────
+        const c1w=65, c1x=10;
+        // Funcțiune clădire
+        pdf.setFillColor(20,40,80);pdf.rect(c1x,sy,c1w,8,'F');pdf.setFillColor(...C.gold);pdf.rect(c1x,sy,1.5,8,'F');
+        pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(7);
+        pdf.text('FUNCȚIUNE CLĂDIRE',c1x+4,sy+5.5);sy+=10;
+        pdf.setFillColor(245,248,255);pdf.rect(c1x,sy,c1w,28,'F');
+        pdf.setTextColor(30,60,120);pdf.setFont('helvetica','bold');pdf.setFontSize(8);
+        pdf.text(S2(fnCfgPDF.label),c1x+3,sy+7);
+        pdf.setTextColor(100,120,150);pdf.setFont('helvetica','normal');pdf.setFontSize(5.5);
+        pdf.text('ISU: '+fnCfgPDF.isuDist+'m · '+S2(fnCfgPDF.isuNorm),c1x+3,sy+13);
+        pdf.text('OMS 119: '+(fnCfgPDF.omsInsorire?'ACTIV min '+fnCfgPDF.omsMin+'h/zi':'N/A — funcțiune'),c1x+3,sy+18);
+        pdf.text('Parcaje: '+S2(fnCfgPDF.pk_norm||'NP 067/2002'),c1x+3,sy+23);
+        sy+=30;
+        // DNA Radar
+        pdf.setFillColor(20,40,80);pdf.rect(c1x,sy,c1w,8,'F');pdf.setFillColor(...C.gold);pdf.rect(c1x,sy,1.5,8,'F');
+        pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(7);
+        pdf.text('DNA URBAN — SCOR NORMATIV',c1x+4,sy+5.5);sy+=10;
         if(dnaImg){
-          // Adaugă imaginea radar în colț col 3
-          const rx=bCol3X+2, ry=cly+4;
-          if(ry<H-45){
-            pdf.setFillColor(6,12,26);pdf.rect(rx,ry,45,45,'F');
-            pdf.addImage(dnaImg,'PNG',rx,ry,45,45);
-            pdf.setTextColor(212,175,55);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
-            pdf.text('DNA URBAN — AMPRENTĂ NORMATIVĂ',rx+22.5,ry+49,{align:'center'});
-            // Legendă axe lângă radar
-            const axNames=[['POT','Ocupare teren',[34,197,94]],['CUT','Utilizare teren',[34,197,94]],['OMS','Însorire OMS 119',[252,211,77]],['ISU','Evacuare P118',[239,68,68]],['NP057','Supraf. min.',[96,165,250]],['Parcaje','NP 067/2002',[249,115,22]]];
-            let ly2=ry+2;
-            axNames.forEach(([ax,desc,col])=>{
-              pdf.setFillColor(...col);pdf.circle(rx+49,ly2+1.5,1.5,'F');
-              pdf.setTextColor(...col);pdf.setFont('helvetica','bold');pdf.setFontSize(4.5);pdf.text(ax,rx+52,ly2+2);
-              pdf.setTextColor(80,100,130);pdf.setFont('helvetica','normal');pdf.setFontSize(4);pdf.text(desc,rx+52,ly2+5.5);
-              ly2+=8;
-            });
-          }
+          pdf.setFillColor(6,12,26);pdf.rect(c1x,sy,c1w,60,'F');
+          try{pdf.addImage(dnaImg,'PNG',c1x+2,sy+2,c1w-4,56);}catch(e){}
         }
-      }catch(e){}
+        sy+=62;
+        // Axe DNA
+        const axesPDF=[['POT','Ocupare teren',[34,197,94]],['CUT','Utilizare teren',[34,197,94]],['OMS','Însorire OMS',[252,211,77]],['ISU','Evacuare',[239,68,68]],['NP057','Supraf. min.',[96,165,250]],['Parcaje','NP 067',[249,115,22]]];
+        axesPDF.forEach(([ax,desc,col],i)=>{
+          pdf.setFillColor(...col);pdf.circle(c1x+4,sy+2,2,'F');
+          pdf.setTextColor(...col);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);pdf.text(ax,c1x+8,sy+3);
+          pdf.setTextColor(80,100,140);pdf.setFont('helvetica','normal');pdf.setFontSize(5);pdf.text(desc,c1x+22,sy+3);
+          sy+=7;
+        });
+
+        // ── COL 2: Legendă culori camere ──────────────────────────────────────
+        const c2x=82, c2w=60;
+        let c2y=14;
+        pdf.setFillColor(20,40,80);pdf.rect(c2x,c2y,c2w,8,'F');pdf.setFillColor(...C.gold);pdf.rect(c2x,c2y,1.5,8,'F');
+        pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(7);
+        pdf.text('LEGENDĂ CULORI CAMERE',c2x+4,c2y+5.5);c2y+=10;
+        const roomColors=[
+          [[59,130,246],'Living / Sufragerie','min. 14 m² (NP 057)'],
+          [[52,211,153],'Dormitor principal','min. 12 m² (NP 057)'],
+          [[52,211,153],'Dormitor 2/3','min. 10 m² (NP 057)'],
+          [[245,158,11],'Bucătărie','min. 5 m² (NP 057)'],
+          [[167,139,250],'Baie','min. 3.6 m² (NP 057)'],
+          [[100,116,139],'Hol / Coridor','min. 1.2m lățime'],
+          [[75,85,99],'Depozit / Garderobă','—'],
+          [[37,99,235],'Casă scări + Lift','Conf. ISU P118'],
+          [[212,175,55],'Balcon / Terasă','Balcon adânc min. 1.2m'],
+        ];
+        roomColors.forEach(([col,lbl,norm],i)=>{
+          pdf.setFillColor(...col);pdf.rect(c2x+2,c2y-3.5,9,7,'F');
+          pdf.setTextColor(30,50,80);pdf.setFont('helvetica','bold');pdf.setFontSize(6);pdf.text(S2(lbl),c2x+14,c2y);
+          pdf.setTextColor(100,120,150);pdf.setFont('helvetica','normal');pdf.setFontSize(4.5);pdf.text(S2(norm),c2x+14,c2y+4);
+          c2y+=10;
+        });
+        // Separator + Mix apartamente
+        c2y+=4;
+        pdf.setFillColor(20,40,80);pdf.rect(c2x,c2y,c2w,8,'F');pdf.setFillColor(...C.gold);pdf.rect(c2x,c2y,1.5,8,'F');
+        pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(7);
+        pdf.text('MIX APARTAMENTE SETAT',c2x+4,c2y+5.5);c2y+=10;
+        const mix=_RV.unitMix||{studio:10,apt2:50,apt3:30,apt4:5,ph:5};
+        [['Garsonieră',mix.studio+'%','~30-45 m²'],['2 camere',mix.apt2+'%','~55-70 m²'],
+         ['3 camere',mix.apt3+'%','~75-95 m²'],['4 camere',mix.apt4+'%','~95-120 m²'],
+         ['Penthouse',mix.ph+'%','~140-200 m²']].forEach(([t,p,s])=>{
+          pdf.setFillColor(245,248,255);pdf.rect(c2x,c2y-3.5,c2w,7,'F');
+          pdf.setTextColor(30,60,100);pdf.setFont('helvetica','bold');pdf.setFontSize(6);pdf.text(S2(t),c2x+3,c2y);
+          pdf.setTextColor(212,175,55);pdf.setFont('helvetica','bold');pdf.setFontSize(7);pdf.text(S2(p),c2x+35,c2y);
+          pdf.setTextColor(100,120,150);pdf.setFont('helvetica','normal');pdf.setFontSize(5);pdf.text(S2(s),c2x+50,c2y);
+          c2y+=7;
+        });
+
+        // ── COL 3: Normative aplicate + Rapoarte afectate ─────────────────────
+        const c3x=148, c3w=W-c3x-8;
+        let c3y=14;
+        pdf.setFillColor(20,40,80);pdf.rect(c3x,c3y,c3w,8,'F');pdf.setFillColor(...C.gold);pdf.rect(c3x,c3y,1.5,8,'F');
+        pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(7);
+        pdf.text('NORMATIVE APLICATE',c3x+4,c3y+5.5);c3y+=10;
+        (fnCfgPDF.norms||['NP 057/2002','OMS 119/2014','P118-2/2013','NP 067/2002','NP 051/2012']).forEach((n,i)=>{
+          pdf.setFillColor(i%2?248:255,i%2?250:252,252);pdf.rect(c3x,c3y-3,c3w,6,'F');
+          pdf.setFillColor(...C.gold);pdf.rect(c3x,c3y-3,1,6,'F');
+          pdf.setTextColor(30,60,100);pdf.setFont('helvetica','bold');pdf.setFontSize(6);pdf.text(S2(n),c3x+4,c3y+1);
+          c3y+=6;
+        });
+        c3y+=4;
+        // Rapoarte afectate
+        pdf.setFillColor(20,40,80);pdf.rect(c3x,c3y,c3w,8,'F');pdf.setFillColor(...C.gold);pdf.rect(c3x,c3y,1.5,8,'F');
+        pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(7);
+        pdf.text('STUDII RECOMANDATE',c3x+4,c3y+5.5);c3y+=10;
+        const studiiRec=[
+          ['Studiu Însorire','OMS 119/2014 — obligatoriu PT'],
+          ['Studiu ISU','P118-2/2013 — aviz obligatoriu'],
+          ['Pre-Studiu Geotehnic','NP 074/2014 — 3 foraje min.'],
+          ['Certificat Energetic','Legea 372/2005 — NZEB'],
+          ['Studiu Impact Trafic','Conf. volum edificiu'],
+          ['Studiu Amplasament','Document fundament'],
+          ['Pre-Studiu Bransamente','Apă, canal, electric, gaze'],
+        ];
+        studiiRec.forEach(([s,n],i)=>{
+          if(c3y>H-25)return;
+          pdf.setFillColor(i%2?248:255,i%2?250:252,252);pdf.rect(c3x,c3y-3,c3w,8,'F');
+          pdf.setFillColor(34,197,94);pdf.circle(c3x+3.5,c3y+1,1.5,'F');
+          pdf.setTextColor(30,60,100);pdf.setFont('helvetica','bold');pdf.setFontSize(6);pdf.text(S2(s),c3x+8,c3y+1);
+          pdf.setTextColor(100,120,150);pdf.setFont('helvetica','normal');pdf.setFontSize(4.5);pdf.text(S2(n),c3x+8,c3y+5);
+          c3y+=8;
+        });
+      }catch(e){ console.warn('[PDF panel page]',e.message); }
+
       pdf.setFillColor(8,14,30);pdf.rect(10,H-15,W-20,8,'F');
       pdf.setFillColor(...C.gold);pdf.rect(10,H-15,W-20,1,'F');
       pdf.setTextColor(150,165,185);pdf.setFont('helvetica','italic');pdf.setFontSize(5.5);
-      pdf.text('Document orientativ generat automat de platforma UrbanX Relevee Instant · '+new Date().toLocaleDateString('ro-RO')+' · '+pgN+' pagini · UrbanX TSS·FG',W/2,H-10.5,{align:'center'});
-      pdf.save('Releveu_'+S2(P.nrCad)+'_'+S2(P.utr)+'.pdf');
-    }); // end _rvCaptureDNARadarPNG callback
+      pdf.text('Document orientativ generat automat de platforma UrbanX · '+new Date().toLocaleDateString('ro-RO')+' · '+pgN+' pagini · UrbanX TSS·FG',W/2,H-10.5,{align:'center'});
+      pdf.save('Memoriu_Tehnic_'+S2(P.nrCad)+'_'+S2(P.utr)+'.pdf');
+    }); // end DNA radar callback
     // Note: restul PDF-ului s-a salvat deja în callback
     if(btn){btn.textContent='⬇ Export PDF Raport';btn.style.opacity='1';}
     if(typeof ss==='function') ss('✅ Prezentare Relevee exportată — '+pgN+' pagini cu imagini 3D si memoriu justificativ!');

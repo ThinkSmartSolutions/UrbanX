@@ -15,12 +15,12 @@ const _LOT = {
 
   tipMix: { individuala:40, insiruita:30, duplex:20, bloc:10 }, // % din loturi rezidentiale (sum=100)
   // Tipuri speciale: numar FIX de loturi (nu procent) — se adauga deasupra rezidentialelor
-  tipCount: { gazebo:0, garaj:0, bbq:0, bucvara:0, bortodoxa:0, bcatolica:0 },
+  tipCount: { gazebo:0, garaj:0, bbq:0, bucvara:0, bortodoxa:0, bcatolica:0, gradinita:0, scoala:0, magazin:0, parc:0, zona_sport:0 },
   // Pozitii manuale per tip special: { bortodoxa: [[lng,lat]], bbq: [[lng,lat],[lng2,lat2]], ... }
   manualPos: {},
   _placingTip: null, // tipul pentru care asteptam click pe harta
   // tipActiv: care tipuri sunt vizibile in Mix si generate
-  tipActiv: { individuala:true, insiruita:true, duplex:true, bloc:true, gazebo:true, garaj:true, bbq:true, bucvara:true, bortodoxa:true, bcatolica:true },
+  tipActiv: { individuala:true, insiruita:true, duplex:true, bloc:true, gazebo:true, garaj:true, bbq:true, bucvara:true, bortodoxa:true, bcatolica:true, gradinita:false, scoala:false, magazin:false, parc:false, zona_sport:false },
 
   tipuri: {
     individuala: {
@@ -96,6 +96,62 @@ const _LOT = {
       desc:'Spațiu semi-deschis, instalații gaz/apă', categorie:'dotare',
       render3d:'bucvara'
     },
+    gradinita: {
+      label:'Grădiniță / Creșă', icon:'🏫',
+      lotMin:800, lotMax:5000, lotDefault:1500,
+      sc:30, hMax:6, niv:1, retF:5, retS:5, retL:5,
+      color:'#67e8f9', borderColor:'#06b6d4',
+      pretConstr:1800, pretVanzare:0, suprafUtila:400,
+      desc:'Săli grupă + curte de joacă + parcare parents drop-off', categorie:'educatie',
+      render3d:'gradinita',
+      norme:['NP 010/1997','OMS 119/2014 — însorire obligatorie','HG 867/2016'],
+      parcaje:'1 loc/2 personal + 3 locuri drop-off',
+    },
+    scoala: {
+      label:'Școală / Liceu', icon:'🏛',
+      lotMin:3000, lotMax:20000, lotDefault:6000,
+      sc:25, hMax:12, niv:3, retF:8, retS:8, retL:8,
+      color:'#a5f3fc', borderColor:'#0891b2',
+      pretConstr:1600, pretVanzare:0, suprafUtila:2000,
+      desc:'Clase + sală sport + curte + cantină', categorie:'educatie',
+      render3d:'scoala',
+      norme:['NP 010/1997','OMS 119/2014','HG 867/2016'],
+      parcaje:'1 loc/10 elevi + personal',
+    },
+    magazin: {
+      label:'Magazin (Profi/MegaImage)', icon:'🏪',
+      lotMin:400, lotMax:3000, lotDefault:800,
+      sc:60, hMax:5, niv:1, retF:3, retS:3, retL:3,
+      color:'#fda4af', borderColor:'#e11d48',
+      pretConstr:900, pretVanzare:1200, suprafUtila:400,
+      desc:'Spațiu vânzare + depozit + birou + parcaj', categorie:'comercial',
+      render3d:'magazin',
+      norme:['OG 99/2000','P118-3/2015','NP 067/2002'],
+      parcaje:'1 loc / 25 mp suprafață vânzare (min 5 locuri)',
+    },
+    parc: {
+      label:'Parc Public / Loc Joacă', icon:'🌳',
+      lotMin:500, lotMax:50000, lotDefault:3000,
+      sc:5, hMax:4, niv:1, retF:0, retS:0, retL:0,
+      color:'#86efac', borderColor:'#16a34a',
+      pretConstr:150, pretVanzare:0, suprafUtila:0,
+      desc:'Alei pietonale + loc joacă + bănci + iluminat + vegetație', categorie:'spatiu_verde',
+      render3d:'parc',
+      norme:['Legea 24/2007 — spații verzi','SR 1848 — iluminat public','HG 769/2003'],
+      parcaje:'Biciclete min 10% din suprafață',
+      amenajari:['Alei pietonale pavate','Pistă biciclete','Teren de joacă','Bănci și coșuri gunoi','Fântâni arteziene','Amfiteatru în aer liber','Iluminat public LED','Toaletă publică'],
+    },
+    zona_sport: {
+      label:'Teren Sport / Fitness', icon:'⚽',
+      lotMin:400, lotMax:10000, lotDefault:1200,
+      sc:60, hMax:8, niv:1, retF:5, retS:5, retL:5,
+      color:'#bbf7d0', borderColor:'#15803d',
+      pretConstr:500, pretVanzare:0, suprafUtila:600,
+      desc:'Teren fotbal/tenis + fitness outdoor + tribune', categorie:'sport',
+      render3d:'zona_sport',
+      norme:['NP 079/2004','SR EN 15312','Legea 69/2000'],
+      parcaje:'1 loc / 10 utilizatori estimați',
+    },
     bortodoxa: {
       label:'Biserică Ortodoxă', icon:'⛪',
       lotMin:500, lotMax:5000, lotDefault:1200,
@@ -114,7 +170,6 @@ const _LOT = {
       desc:'Navă centrală + turn clopotniță', categorie:'cult',
       render3d:'bcatolica'
     },
-  },
 
   // ── Clădiri existente marcate pentru demolare ─────────────────────────
   demoIds: new Set(),     // Set de indecși din S.ctx.features marcate demo

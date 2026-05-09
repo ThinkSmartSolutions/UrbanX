@@ -477,6 +477,7 @@ function htmlMobRapoarte(){
   ${cat('④ Studii Mediu & Infrastructură','74,222,128')}
   <div class="card" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px">
     ${btn('generateEnvironmentalImpact()','134,239,172','🌿','Studiu Impact Mediu (EIM)','Impact APM, Legea 292/2018','eim')}
+    ${btn('generateHealthImpactStudy()','34,211,238','🏥','Studiu Impact Sănătate Populație','Aer · Zgomot · Radon · OMS 119','sanatate')}
     ${btn('generateWaterStudy()','34,211,238','💧','Studiu Gospodărire Ape — DTGA','Aviz Apele Române, inundabilitate','apa')}
     ${btn('generateGreenStudy()','74,222,128','🌳','Studiu Spații Verzi','SV necesar, plantare, permeabilitate','verde')}
     ${btn('generateNoiseStudy()','167,139,250','🔇','Studiu Acustic Urban','Zgomot, SR 10009/2017, noapte','acustic')}
@@ -977,6 +978,15 @@ function _htmlScenarii3(){
     // Header
     +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
     +'<div style="font-size:12px;font-weight:800;color:#d4af37;letter-spacing:.04em">⚡ SCENARII CONSTRUCTIVE</div>'
+    +'<div style="margin-top:4px;padding:8px 10px;background:rgba(52,211,153,.06);border-radius:8px;border-left:2px solid #34d399">'
+    +'<div style="font-size:10px;font-weight:700;color:#34d399;margin-bottom:4px">🟢 Algoritmul Optim — cum funcționează</div>'
+    +'<div style="font-size:9px;color:#64748b;line-height:1.6">'
+    +'Iterează niveluri 1→H_max PUG. Pentru fiecare N, calculează:<br>'
+    +'<b>Cost</b> = SU × Cost/m² (870€ P, 980€ P+3, 1250€ bloc înalt)<br>'
+    +'<b>Venit</b> = SU × Preț vânzare (1520€/m², scade cu înălțimea)<br>'
+    +'<b>ROI</b> = (Venit - Cost) / (Cost + Teren€) × 100%<br>'
+    +'Selectează N cu ROI maxim — balanță construcție vs piață vs teren.'
+    +'</div></div>'
     +(gen
       ? '<span style="font-size:9px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.25);color:#34d399;border-radius:999px;padding:2px 9px">✓ generate</span>'
       : '<span style="font-size:9px;color:#334155">selectați un scenariu și generați</span>'

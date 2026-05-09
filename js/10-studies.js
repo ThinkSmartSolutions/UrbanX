@@ -1656,6 +1656,7 @@ async function generateMemoriu(){
 
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CASETA TEHNICA SI SEMNATURA',10);ftr();
   cy=28;sign();
+  await _addHartaConexiuniPage(pdf,W,H,S2,hdr,ftr,'memoriu',nrcad);
   _pdfSaveMobile(pdf,'Memoriu_Tehnic_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
   ss('Memoriu Tehnic Preliminar generat!');
 }
@@ -4657,11 +4658,30 @@ async function generateStudiuFezabilitate(paramOverrides){
   const _chirieRef  = parseFloat(_p.chirieRef   || _fc.chirieRef);
   const _pretVanzare= parseFloat(_p.pretVanzare || _fc.pretVanzare || _pretConstr*1.4);
   const _rataOcup   = parseFloat(_p.rataOcupare || 85) / 100;
+
+  // ── LOGICĂ FUNCȚIUNI NON-COMERCIALE (#4 audit) ────────────────────────────
+  // Biserică, grădiniță, parc, spațiu public = CHELTUIALĂ, nu sursă de venit
+  const NON_COM_KW = ['bortodoxa','bcatolica','cult','religios','gradinita','scoala','parc','public'];
+  const isNonCom = NON_COM_KW.some(kw => (fn||'').toLowerCase().includes(kw));
+  // Suprafața non-comercială din lotizare (dacă avem mix)
+  const nonComArea = isNonCom ? sdTotal : (() => {
+    if(!window._LOT?.tipCount) return 0;
+    const tc=_LOT.tipCount, tm=_LOT.tipMix||{};
+    const nNon=(tc.bortodoxa||0)+(tc.bcatolica||0)+(tc.gazebo||0);
+    const nTot=Object.values(tc).reduce((s,v)=>s+(v||0),0)+Object.values(tm).reduce((s,v)=>s+(v||0),0);
+    return nTot>0 ? Math.round(sdTotal*nNon/nTot) : 0;
+  })();
+  const comArea = sdTotal - nonComArea;
+
   const costConstr=Math.round(sdTotal*_pretConstr);
   const costTeren=Math.round(areaNum*_pretTeren);
-  const costTotal=Math.round((costConstr+costTeren)*1.25); // +25% diverse+TVA+proiectare
-  const venitAn=Math.round(sdTotal*_rataOcup*_chirieRef*12);
-  const rentabilitate=((venitAn/costTotal)*100).toFixed(1); // % randament brut anual
+  const costTotal=Math.round((costConstr+costTeren)*1.25);
+  // Venituri NUMAI din suprafața comercializabilă — funcțiunile non-comerciale = cost pur
+  const venitAn = isNonCom ? 0 : Math.round(comArea*_rataOcup*_chirieRef*12);
+  const rentabilitate = venitAn>0 ? ((venitAn/Math.max(1,costTotal))*100).toFixed(1) : '0.0';
+  const nonComNote = nonComArea>0
+    ? `Atenție: ${nonComArea}mp suprafață non-comercială (cult/public) = cheltuială de execuție ${Math.round(nonComArea*_pretConstr*1.25).toLocaleString()} EUR, fără venituri directe.`
+    : '';
 
   // Functiune
 
@@ -4779,11 +4799,20 @@ async function generateStudiuFezabilitate(paramOverrides){
    ['Diverse, neprevăzute, proiectare (25%)','EUR',Math.round((costConstr+costTeren)*0.25).toLocaleString(),'25% total construire+teren'],
    ['VALOARE TOTALĂ INVESTIȚIE','EUR',costTotal.toLocaleString(),'Total estimativ'],
    ['Valoare investiție / mp SDA','EUR/mp',Math.round(costTotal/sdTotal)+'','Indicele de cost /mp SDA'],
-   ['Venit estimat anual (chirie)','EUR/an',venitAn.toLocaleString(),(_fc.chirieRef+' EUR/mp/lună × 85% ocupare')],
-   ['Randament brut (ROI brut anual)','%',rentabilitate,'Venit anual / Inv. totală'],
-   ['Perioadă estimată recuperare investiție','ani',Math.ceil(costTotal/venitAn)+'','Payback period simplu'],
+   isNonCom
+     ? ['Funcțiune NON-COMERCIALĂ','—','Nu generează venituri','Cult / public / educație — cheltuială pură']
+     : ['Venit estimat anual (chirie)','EUR/an',venitAn.toLocaleString(),(_fc.chirieRef+' EUR/mp/lună × '+Math.round(_rataOcup*100)+'% ocupare')],
+   ['Randament brut (ROI brut anual)','%',isNonCom?'N/A — non-comercial':rentabilitate,isNonCom?'Funcțiune fără venituri directe':'Venit anual / Inv. totală'],
+   ['Perioadă estimată recuperare investiție','ani',isNonCom?'—':Math.ceil(costTotal/Math.max(1,venitAn))+'',isNonCom?'Nu se aplică':'Payback period simplu'],
   ].forEach(r=>cy=tblRow(r,cy,false,[80,18,42,42]));
   cy+=4;
+  if(nonComNote){
+    pdf.setFillColor(255,235,200);pdf.rect(14,cy,W-28,10,'F');
+    pdf.setFillColor(200,100,10);pdf.rect(14,cy,2,10,'F');
+    pdf.setTextColor(120,60,10);pdf.setFont('helvetica','bold');pdf.setFontSize(6.5);
+    pdf.text('⚠ '+S2(nonComNote),17,cy+6.5);
+    cy+=13;
+  }
   cy=body('NOTĂ: Valorile financiare sunt estimate la prețuri de piață 2024-2025 pentru zona '+uat+'. Devizul exact poate varia cu ±25-35% față de estimarea orientativă. Costul efectiv se stabilește prin ofertare detaliată pe baza Proiectului Tehnic aprobat.',14,cy);
 
   // ── PAG 6: ANALIZA FINANCIARĂ + SURSE FINANȚARE ──────────────────────────
@@ -5232,6 +5261,19 @@ async function generateStudiuFezabilitate(paramOverrides){
   cy=sec('12.1. BAZA LEGALA COMPLETA',cy);cy+=2;
   ['HG nr. 907/2016 privind etapele de elaborare și conținutul-cadru al documentațiilor tehnico-economice.','Legea nr. 500/2002 privind finanțele publice — Capitolul privind investițiile publice.','Legea nr. 98/2016 privind achizițiile publice — art. 22 (studii de fezabilitate).','OUG nr. 114/2011 privind atribuirea anumitor contracte de achiziții publice în domeniile apărare și securitate.','Legea nr. 50/1991 republicată — autorizarea executării lucrărilor de construcții.','Legea nr. 350/2001 privind amenajarea teritoriului și urbanismul, republicată.','NP 074/2014 — Normativ privind principiile, exigențele și metodele cercetării geotehnice.','P100-1/2013 — Cod de proiectare seismică. Prevederi pentru clădiri (zona '+getSeismConfig().zona+').','Legea nr. 10/1995 republicată — Calitatea în construcții.','PUG '+uat+' în vigoare — UTR '+utr+' — Regulamentul Local de Urbanism.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=2;});
   sign();
+  // Capitol statistici INSE (#27) — înainte de salvare
+  let inseY = 14;
+  pdf.addPage();
+  hdr('STATISTICI DEMOGRAFICE & PIATĂ IMOBILIARĂ — INSE + DATE LOCALE',pgN+1);
+  pdf.setFillColor(255,255,255);pdf.rect(0,12,W,H-19,'F');
+  try{
+    inseY = await _addINSEStatisticsSection(
+      pdf, W, inseY, S2, hdr, uat, judet,
+      window.AEDIS?.uatId, areaNum, nrPers, sdTotal
+    );
+  }catch(e){ console.warn('INSE section:', e.message); }
+  ftr();
+  await _addHartaConexiuniPage(pdf,W,H,S2,hdr,ftr,'fezabilitate',nrcad);
   _pdfSaveMobile(pdf,'SF_DALI_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
   ss('OK Studiu Fezabilitate / DALI generat!');
 }
@@ -5753,6 +5795,8 @@ async function generateStudiuAmplasament(){
   cy=sec('11.1. BAZA LEGALA',cy);cy+=2;
   ['Legea nr. 350/2001 privind amenajarea teritoriului și urbanismul, republicată.','Legea nr. 50/1991 republicată — autorizarea executării lucrărilor de construcții.','HG nr. 525/1996 — Regulamentul General de Urbanism, cu modificările ulterioare.','Legea nr. 422/2001 privind protejarea monumentelor istorice, republicată.','P100-1/2013 — Cod de proiectare seismică. Prevederi pentru clădiri.','CR 1-1-4/2012 — Cod de proiectare. Acțiunea vântului.','OMS nr. 119/2014 + Ord. 994/2018 — Norme igienă și însorire.','NP 074/2014 — Normativ privind cercetarea geotehnică.','HG 930/2016 — Avizare construcții în zone aeronautice.','PUG '+uat+' în vigoare — UTR '+utr+' — RLU.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
   sign();
+  // Hartă conexiuni rapoarte (#26 audit) — înainte de semnături
+  await _addHartaConexiuniPage(pdf,W,H,S2,hdr,ftr,'amplasament',nrcad);
   _pdfSaveMobile(pdf,'Studiu_Amplasament_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
   ss('OK Studiu de Amplasament generat!');
 }
@@ -6803,4 +6847,309 @@ async function generatePrestudiuBransamente(){
   ftr();
   _pdfSaveMobile(pdf,'PreStudiu_Bransamente_'+S2(nrcad)+'_'+new Date().getFullYear()+'.pdf');
   ss('✅ Pre-studiu Bransamente generat — 4 pagini · Apă · Canal · Electric · Gaze · ISU · PV');
+}
+
+// ── Hartă Conexiuni Rapoarte în PDF (#26 audit) ──────────────────────────────
+// Capturează study-map.html ca screenshot și îl inserează înainte de semnături
+async function _addHartaConexiuniPage(pdf, W, H, S2, hdr, ftr, studyType, nrcad){
+  return new Promise(resolve => {
+    try {
+      // Creăm un iframe temporar invizibil cu study-map.html
+      const iframe = document.createElement('iframe');
+      iframe.src = './study-map.html?embed=1&highlight='+encodeURIComponent(studyType||'');
+      iframe.style.cssText = 'position:fixed;left:-9999px;top:0;width:1200px;height:700px;opacity:0;pointer-events:none';
+      document.body.appendChild(iframe);
+      
+      iframe.onload = () => {
+        setTimeout(() => {
+          try {
+            // Capturăm iframe cu html2canvas dacă disponibil
+            const win = iframe.contentWindow;
+            if(win && typeof html2canvas !== 'undefined') {
+              html2canvas(iframe.contentDocument.body, {
+                width:1200,height:700,scale:1,
+                backgroundColor:'#04080F',useCORS:true
+              }).then(canvas => {
+                const imgData = canvas.toDataURL('image/jpeg', 0.75);
+                pdf.addPage();
+                pdf.setFillColor(4,8,15);pdf.rect(0,0,W,H,'F');
+                hdr('HARTA CONEXIUNI RAPOARTE & STUDII — RELEVANTA PENTRU ACEST DOCUMENT', '—');
+                // Imagine centrată
+                const imgH = Math.round(W * 700/1200);
+                const imgY = Math.min(14, (H - imgH)/2);
+                pdf.addImage(imgData,'JPEG',8,imgY,W-16,imgH);
+                // Legendă minimă
+                const ly = imgY + imgH + 4;
+                if(ly < H-20){
+                  pdf.setTextColor(212,175,55);pdf.setFont('helvetica','bold');pdf.setFontSize(7);
+                  pdf.text('Harta prezintă conexiunile dintre toate studiile și rapoartele UrbanX și relevanța lor pentru dosarul de autorizare.',W/2,ly+4,{align:'center'});
+                  pdf.setTextColor(100,120,150);pdf.setFont('helvetica','normal');pdf.setFontSize(6);
+                  pdf.text('Studiul evidențiat: '+S2(studyType||'curent')+' · Nr.cad. '+S2(nrcad)+' · Generat UrbanX TSS·FG',W/2,ly+9,{align:'center'});
+                }
+                ftr();
+                document.body.removeChild(iframe);
+                resolve(true);
+              }).catch(() => { document.body.removeChild(iframe); resolve(false); });
+            } else {
+              // Fallback: pagină text fără imagine
+              document.body.removeChild(iframe);
+              pdf.addPage();
+              pdf.setFillColor(4,8,15);pdf.rect(0,0,W,H,'F');
+              hdr('HARTA CONEXIUNI RAPOARTE & STUDII', '—');
+              pdf.setTextColor(212,175,55);pdf.setFont('helvetica','bold');pdf.setFontSize(12);
+              pdf.text('Hartă Rapoarte & Conexiuni UrbanX',W/2,H/2-20,{align:'center'});
+              pdf.setTextColor(150,170,200);pdf.setFont('helvetica','normal');pdf.setFontSize(9);
+              pdf.text('Accesați Harta interactivă din meniu → Rapoarte → Hartă Rapoarte & Conexiuni',W/2,H/2,{align:'center'});
+              pdf.text('pentru a vizualiza toate dependențele și conexiunile studiilor.',W/2,H/2+10,{align:'center'});
+              pdf.text('Nr.cad. '+S2(nrcad)+' · UrbanX TSS·FG',W/2,H/2+25,{align:'center'});
+              ftr();
+              resolve(false);
+            }
+          } catch(e) { 
+            try{document.body.removeChild(iframe);}catch(e2){}
+            resolve(false); 
+          }
+        }, 1500);
+      };
+      iframe.onerror = () => { 
+        try{document.body.removeChild(iframe);}catch(e){}
+        resolve(false); 
+      };
+      // Timeout safety
+      setTimeout(() => { 
+        try{document.body.removeChild(iframe);}catch(e){}
+        resolve(false); 
+      }, 5000);
+    } catch(e) { resolve(false); }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// STUDIU IMPACT SĂNĂTATE POPULAȚIE — #2 AUDIT
+// OMS, Legea 104/2011, HG 1028/2014, SR EN 15251, Directiva 2002/49/CE
+// ═══════════════════════════════════════════════════════════════════════════
+async function generateHealthImpactStudy(){
+  const ap=S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry){ss('Selectați o parcelă.');return;}
+  ss('Se generează Studiu Impact Sănătate...');
+  const d=_initStudyPdf('Studiu de Impact asupra Sanatatii Populatiei','Studiu sănătate · OMS · Legea 104/2011',10);
+  const {pdf,W,H,DARK,DARK2,GOLD,BLUE,GREEN,RED,ORANGE,LIGHT,TEAL,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,newPage,concluzii,sign,cover,addImg}=d;
+  const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
+
+  const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||12;
+  const areaNum=parseFloat(area)||300;
+  const niv=Math.round(aedisH/3)||4;
+  const sda=Math.round(areaNum*(parseFloat(params?.cut)||1.2));
+  const nrApt=Math.round(sda/65);
+  const nrPers=Math.round(nrApt*2.5);
+  const uatCfg=typeof getUATById==='function'&&window.AEDIS?.uatId?getUATById(AEDIS.uatId):null;
+
+  // ── Cover ─────────────────────────────────────────────────────────────────
+  cover('Evaluarea impactului proiectului de construire\nasupra sănătății populației din zonă',caps.imgLocation||'',
+    [['Nr. persoane afectate estimat',nrPers+' pers.'],['Înălțime clădire',aedisH.toFixed(1)+'m'],['UAT / Județ',S2(uat)+' · '+S2(judet)]],
+    true,'STUDIU OBLIGATORIU LA FAZA PAC PENTRU CLĂDIRI > 600 m² SDA');
+
+  // ── PAG 2: CALITATE AER ───────────────────────────────────────────────────
+  let cy=newPage('A. CALITATEA AERULUI ȘI POLUAREA ATMOSFERICĂ — Legea 104/2011 + Dir. 2008/50/CE',2);
+  cy=sec('A1. SURSE DE POLUANȚI ATMOSFERICI ÎN PROXIMITATE',cy,BLUE);
+  cy=body('Evaluarea calității aerului se realizează față de valorile-limită stabilite prin Legea 104/2011 și Directiva 2008/50/CE. Principalii poluanți monitorizați sunt: NO₂, PM₁₀, PM₂.₅, O₃, SO₂, CO, benzen (C₆H₆) și metale grele.',14,cy);
+  cy+=4;
+  const aerRows=[['NO₂ (dioxid de azot)','40 μg/m³ anual','Trafic rutier — DN29','Risc cardiovascular, respirator'],['PM₁₀ (particule)','40 μg/m³ anual · 50 μg/m³ zilnic','Trafic + agricultură','Afecțiuni pulmonare cronice'],['PM₂.₅ (particule fine)','20 μg/m³ anual','Trafic + arderi','Risc cancer pulmonar'],['O₃ (ozon)','120 μg/m³/8h','Reacții fotochimice','Iritații respiratorii, efect astm'],['CO (monoxid carbon)','10 mg/m³/8h','Trafic nefluid, garaje','Intoxicație acută, risc cardiac']];
+  cy=tblRow(['Poluant','Val. limită (OMS/UE)','Sursă principală','Efect sănătate'],cy,true,[50,45,50,47]);
+  aerRows.forEach(r=>{cy=tblRow(r,cy,false,[50,45,50,47]);});
+  cy+=6;
+  cy=sec('A2. MĂSURI OBLIGATORII DE PROTECȚIE',cy,GREEN);
+  cy=body('Conf. Legii 104/2011 și HG 543/2004, proiectul trebuie să asigure:',14,cy);
+  cy+=4;
+  [['Distanță față de surse de poluare','Min. 50m față de artere cu trafic intens (>10.000 v/zi)','Conf. SR EN 15251 · Categoria IDA 2'],
+   ['Ventilație naturală','Toate spațiile locuite — min. 1 schimb aer/oră natural sau mecanic','NP 037/1999 · P122-1999'],
+   ['Filtrare aer (opțional)','Recomandat filtru HEPA dacă PM₁₀ > 40 μg/m³ măsurat','WHO Air Quality Guidelines 2021'],
+   ['Vegetație tampon','Plantare min. 20% SV cu arbori foioși cu rol fitodepurare','Legea 24/2007 art. 8'],
+  ].forEach(([t,d2,ref])=>{cy=tblRow([t,d2,ref],cy,false,[55,95,42]);});
+
+  // ── PAG 3: ZGOMOT ─────────────────────────────────────────────────────────
+  cy=newPage('B. ZGOMOT URBAN — DIR. 2002/49/CE + SR 10009:2017',3);
+  cy=sec('B1. EVALUARE IMPACT ZGOMOT',cy,ORANGE);
+  cy=body('Evaluarea zgomotului urban se face conform Directivei 2002/49/CE privind evaluarea și gestionarea zgomotului ambiental, transpusă prin HG 321/2005. Indicatorii principali sunt Lzsn (zi-seară-noapte) și Lnoapte.',14,cy);
+  cy+=4;
+  const zgomotRows=[
+    ['Rezidențial','60 dB','50 dB','50 dB','40 dB'],
+    ['Zonă mixtă','65 dB','55 dB','65 dB','55 dB'],
+    ['Spitale/școli','55 dB','45 dB','—','—'],
+    ['Zone industriale','70 dB','60 dB','—','—'],
+  ];
+  cy=tblRow(['Funcțiune','Lzsn max.','Lnoapte max.','Interior zi','Interior noapte'],cy,true,[50,35,35,35,37]);
+  zgomotRows.forEach(r=>{cy=tblRow(r,cy,false,[50,35,35,35,37]);});
+  cy+=4;
+  const surseZg=[['Trafic rutier DN29','55-72 dB','±30m de la ax','Geamuri fonoizolante min. Rw=35dB','SR EN ISO 16717'],['Trafic feroviar (dacă în zonă)','60-75 dB','±100m de la ax','Barieră fonoizolantă sau distanță','Directiva 2002/49/CE'],['Activități comerciale','50-65 dB','±20m','Orar restricționat 22:00-08:00','HG 321/2005'],['Antiere de construcție','70-90 dB','Temporar (zile lucr.)','Program 7:00-18:00 L-V','HG 1028/2014']];
+  cy=sec('B2. SURSE DE ZGOMOT ȘI MĂSURI',cy,BLUE);
+  cy=tblRow(['Sursă','Nivel estimat','Raza impact','Măsuri recomandate','Ref.'],cy,true,[40,30,25,65,32]);
+  surseZg.forEach(r=>{cy=tblRow(r,cy,false,[40,30,25,65,32]);});
+
+  // ── PAG 4: ÎNSORIRE + CONFORT TERMIC ─────────────────────────────────────
+  cy=newPage('C. ÎNSORIRE + CONFORT TERMIC — OMS 119/2014 + SR EN 15251',4);
+  cy=sec('C1. ÎNSORIRE ȘI LUMINĂ NATURALĂ',cy,GOLD);
+  const solarDir=P?.frontDir||'N';
+  const solarBonus=['S','SE','SV'].includes(solarDir)?'FAVORABILĂ':'VERIFICARE NECESARĂ';
+  cy=body(`Orientarea clădirii cu frontul stradal spre ${solarDir} determină o însorire ${solarBonus} pentru camerele principale. OMS 119/2014 stabilește că spatiile locuite trebuie să beneficieze de minim 1.5h/zi de însorire directă la solstițiu de iarnă (21 dec.). Clădirile vecine cu H=${aedisH.toFixed(1)}m pot genera umbre semnificative — studiu de umbre detaliat obligatoriu la PAC.`,14,cy);
+  cy+=6;
+  cy=tblRow(['Parametru','Valoare minimă','Valoare recomandată','Normativ'],cy,true,[60,45,55,32]);
+  [['Însorire camere locuite','1.5h/zi (iarnă)','3h/zi (iarnă)','OMS 119/2014'],['Factor de lumină naturală (FLN)','min. 1.5%','2.5% (camere)','SR EN 17037'],['Distanță față de obstrucții','H/2 față de clădiri vecine','H față de clădiri opuse','OMS 119/2014 · P22-1977'],['Umbre proprii pe vecini','Maxim 1.5h/zi afectate','0h adăugate','Legea 50/1991 + CJ'],].forEach(r=>{cy=tblRow(r,cy,false,[60,45,55,32]);});
+  cy+=4;
+  cy=sec('C2. CONFORT TERMIC URBAN (EFECT DE INSULĂ DE CĂLDURĂ)',cy,RED);
+  cy=body('Clădirile dense cresc temperatura urbană cu 1-4°C față de zonele verzi. Măsuri de atenuare: acoperișuri verzi (min. 30% acoperire), perdele de arbori pe fațada sudică, materiale cu albedo ridicat (culori deschise), ventilare naturală a curților interioare.',14,cy);
+
+  // ── PAG 5: APĂ + RADÓN + CÂMPURI EM ─────────────────────────────────────
+  cy=newPage('D. APA POTABILĂ + E. RADON + F. CÂMPURI ELECTROMAGNETICE',5);
+  cy=sec('D. APA POTABILĂ ȘI SALUBRITATE',cy,TEAL);
+  cy=tblRow(['Indicator','Limita max.','Sursă risc','Obligație legală'],cy,true,[60,35,50,47]);
+  [['Calitate apă potabilă','Conf. Legii 458/2002','Rețea distribuție','Monitorizare operator apă'],['Colectare deșeuri','Punct colectare ≤100m','Depozitare neconformă','HG 942/2017 · Legea 211/2011'],['Canalizare menajeră','100% conectare','Fosă septică neconformă','Legea 107/1996 + Directiva 91/271'],].forEach(r=>{cy=tblRow(r,cy,false,[60,35,50,47]);});
+  cy+=4;
+  cy=sec('E. RADON — ORD. MS 1020/2022',cy,ORANGE);
+  cy=body('Radonul (Rn-222) este un gaz radioactiv natural din sol, principala cauză de cancer pulmonar după fumat. Nivel referință național: 300 Bq/m³ (spații locuite) conf. Ord. MS 1020/2022. UAT '+(uat||'curent')+' se află în zona de risc radon: '+((lat>46.5&&lat<48)?'MODERAT (30-100 Bq/m³ estimat)':'SCĂZUT (<30 Bq/m³)').+' Măsuri: ventilare subsolului, etanșare plăci de fundație, membrană anti-radon dacă măsurare depășește 200 Bq/m³.',14,cy);
+  cy+=6;
+  cy=sec('F. CÂMPURI ELECTROMAGNETICE',cy,BLUE);
+  cy=body('Distanțe de protecție față de infrastructura electrică (conf. ORE 26/2004): Linii 110kV: min. 15m, Linii 20kV: min. 10m, Posturi trafo: min. 5m. Se va verifica în harta rețelei ENGIE/E.ON. Stații 5G/4G: valori de referință ICNIRP — verificare obligatorie la urbanism.',14,cy);
+
+  // ── PAG 6: CONCLUZII ──────────────────────────────────────────────────────
+  cy=newPage('G. CONCLUZII ȘI RECOMANDĂRI — OMS + LEGISLAȚIE NAȚIONALĂ',6);
+  cy=concluzii([
+    'CALITATE AER: Parcela '+nrcad+' se află în zona urbană UAT '+uat+'. Principalele surse de poluare sunt traficul rutier pe DN29 și activitățile industriale din zonele adiacente. Se recomandă plantarea unui ecran vegetal de min. 15m pe latura dinspre artera principală.',
+    'ZGOMOT: Zona funcțională impune respectarea limitelor: Lzsn max. 60 dB (exterior rezidențial). La faza PAC se va realiza studiu acustic detaliat cu calcul de propagare și se vor prevedea geamuri fonoizolante Rw ≥ 35 dB pe fațadele expuse traficului.',
+    'ÎNSORIRE: Orientarea fațadei principale spre '+solarDir+' determină condiții de însorire '+solarBonus+'. Obligatoriu studiu de însorire OMS 119/2014 la PAC, cu vizualizare umbre pentru 21 decembrie și 21 iunie.',
+    'RADON: Se recomandă efectuarea măsurătorilor de radon înainte de execuție (min. 3 luni de monitorizare) și prevederea membranei anti-radon la fundație conform Ord. MS 1020/2022.',
+    'APA POTABILĂ: Racordarea la rețeaua publică a operatorului '+((uatCfg?.mediu?.apa?.operator)||'local')+' este obligatorie. Se interzice fosa septică conform HG 188/2002. Plan de gestionare deșeuri conform HG 942/2017.',
+    'CÂMPURI EM: Se vor verifica distanțele față de infrastructura electrică în planul rețelei ENGIE/E.ON și se vor respecta distanțele minime de protecție stabilite prin ORE 26/2004.',
+    'AVIZ SĂNĂTATE PUBLICĂ: Documentația de avizare va include prezentul studiu de impact sănătate, alături de studiul acustic, studiul de însorire și memoriul de mediu. Avizul DSP '+judet+' este obligatoriu pentru clădiri cu SDA > 600 m².',
+  ]);
+  sign();
+  await _addHartaConexiuniPage(pdf,W,H,S2,hdr,ftr,'eim',nrcad);
+  _pdfSaveMobile(pdf,'Studiu_Sanatate_'+S2(nrcad)+'_'+new Date().getFullYear()+'.pdf');
+  ss('✅ Studiu Impact Sănătate generat — 6 pag. · Aer · Zgomot · Însorire · Radon · EM · Apă');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// STATISTICI INSE — #27 AUDIT
+// Date INS per UAT: populație, vârstă, ocupare, venituri
+// Sursă: https://statistici.insse.ro + date locale UAT_REGISTRY
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Cache local pentru date INSE (evită re-fetch)
+window._inseCache = window._inseCache || {};
+
+async function _fetchINSEStats(uatId, uat, judet){
+  const cacheKey = uatId || (uat+judet);
+  if(window._inseCache[cacheKey]) return window._inseCache[cacheKey];
+
+  // Date din UAT_REGISTRY (populate la import) — sursa primară
+  const uatCfg = (typeof getUATById==='function' && uatId) ? getUATById(uatId) : null;
+  const insData = uatCfg?.mediu?.ins || uatCfg?.ins || null;
+
+  if(insData){
+    const result = {
+      populatie: insData.populatie || 0,
+      densitate: insData.densitate_pop || 0,
+      suprafata_km2: Math.round((insData.suprafata_intravilam||0)/100),
+      rata_somaj: insData.rata_somaj || 0,
+      venit_mediu: insData.venit_mediu_lunar || 0,
+      sursa: insData.sursa || 'UAT Registry UrbanX',
+      an: 2023,
+      _fromRegistry: true,
+    };
+    window._inseCache[cacheKey] = result;
+    return result;
+  }
+
+  // Fallback: date estimative per tip UAT
+  const isMunicipiu = (uatCfg?.label||uat||'').toLowerCase().includes('municipiu');
+  const isOras = (uatCfg?.label||uat||'').toLowerCase().includes('oraș') || (uatCfg?.label||uat||'').toLowerCase().includes('oras');
+  const defaultStats = {
+    municipiu: {populatie:80000,densitate:1200,rata_somaj:4.5,venit_mediu:3800},
+    oras:      {populatie:20000,densitate:500, rata_somaj:6.0,venit_mediu:3200},
+    comuna:    {populatie:5000, densitate:80,  rata_somaj:8.0,venit_mediu:2600},
+  };
+  const tier = isMunicipiu?'municipiu':isOras?'oras':'comuna';
+  const est = defaultStats[tier];
+  const result = {
+    ...est,
+    suprafata_km2: tier==='municipiu'?35:tier==='oras'?10:50,
+    sursa:'Date estimative orientative — verificați statistici.insse.ro',
+    an: 2023,
+    _estimated: true,
+  };
+  window._inseCache[cacheKey] = result;
+  return result;
+}
+
+// Adaugă capitol statistici INSE într-un PDF existent
+async function _addINSEStatisticsSection(pdf, W, cy, S2, hdr, uat, judet, uatId, areaNum, nrPers, sda){
+  const stats = await _fetchINSEStats(uatId, uat, judet);
+  const estColor = stats._estimated ? [200,100,20] : [34,197,94];
+
+  cy+=4;
+  pdf.setFillColor(10,25,60);pdf.rect(14,cy,W-28,8,'F');
+  pdf.setFillColor(212,175,55);pdf.rect(14,cy,1.5,8,'F');
+  pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(8);
+  pdf.text('STATISTICI DEMOGRAFICE & ECONOMICE — '+S2(uat)+' · Sursa: INSE '+stats.an,W/2,cy+5.5,{align:'center'});
+  cy+=10;
+
+  if(stats._estimated){
+    pdf.setFillColor(255,235,200);pdf.rect(14,cy,W-28,7,'F');
+    pdf.setFillColor(...estColor);pdf.rect(14,cy,1.5,7,'F');
+    pdf.setTextColor(...estColor);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
+    pdf.text('⚠ Date estimative orientative — verificați statistici.insse.ro pentru date oficiale confirmate',17,cy+4.5);
+    cy+=9;
+  }
+
+  // Tabel statistici în 2 coloane
+  const statsRows=[
+    ['Populație totală UAT',stats.populatie?.toLocaleString()||'—','persoane','Recensământ 2021 + INS'],
+    ['Densitate populație',stats.densitate?.toLocaleString()||'—','loc/km²','INS 2023'],
+    ['Rată șomaj',stats.rata_somaj||'—','%','ANOFM 2023'],
+    ['Venit mediu net lunar',stats.venit_mediu?.toLocaleString()||'—','RON/lună','INS AMIGO 2023'],
+  ];
+  const halfW=(W-28)/2;
+  statsRows.forEach(([l,v,unit,ref],i)=>{
+    const col=i%2===0?14:14+halfW+2;
+    const row=Math.floor(i/2);
+    pdf.setFillColor(row%2?248:255,row%2?250:252,row%2?252:255);
+    pdf.rect(col,cy+row*10,halfW,10,'F');
+    pdf.setTextColor(60,80,110);pdf.setFont('helvetica','normal');pdf.setFontSize(6);
+    pdf.text(S2(l),col+3,cy+row*10+4);
+    pdf.setTextColor(30,50,90);pdf.setFont('helvetica','bold');pdf.setFontSize(8);
+    pdf.text(S2(String(v))+' '+unit,col+3,cy+row*10+8.5);
+    pdf.setTextColor(120,140,160);pdf.setFont('helvetica','normal');pdf.setFontSize(4.5);
+    pdf.text(S2(ref),col+halfW-2,cy+row*10+8.5,{align:'right'});
+  });
+  cy+=22;
+
+  // Analiză piață imobiliară
+  const market = (typeof getUATById==='function'&&uatId) ? getUATById(uatId)?.market : null;
+  if(market){
+    cy+=3;
+    pdf.setFillColor(10,25,60);pdf.rect(14,cy,W-28,7,'F');pdf.setFillColor(212,175,55);pdf.rect(14,cy,1.5,7,'F');
+    pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(7);
+    pdf.text('PIAȚA IMOBILIARĂ — '+S2(uat)+' · Estimativ 2024-2025',W/2,cy+4.8,{align:'center'});cy+=9;
+    const mkRows=[
+      ['Teren central',market.teren_central,'€/mp'],
+      ['Teren rezidențial',market.teren_rezidential,'€/mp'],
+      ['Construcție rezidențial',market.constructie_rezidential,'€/mp'],
+      ['Vânzare apartament',market.vanzare_apartament,'€/mp'],
+    ];
+    mkRows.forEach(([l,v,u],i)=>{
+      const col=i%2===0?14:14+(W-28)/2+2;
+      const row=Math.floor(i/2);
+      pdf.setFillColor(i%2===0?(row%2?248:255):(row%2?245:252),252,255);
+      pdf.rect(col,cy+row*9,(W-28)/2,9,'F');
+      pdf.setTextColor(60,80,110);pdf.setFont('helvetica','normal');pdf.setFontSize(6);pdf.text(S2(l),col+3,cy+row*9+4);
+      pdf.setTextColor(30,70,140);pdf.setFont('helvetica','bold');pdf.setFontSize(7.5);pdf.text((v||'—')+' '+u,col+3,cy+row*9+8);
+      cy=0; // reset for next row
+    });
+    cy+=22;
+    pdf.setTextColor(100,120,150);pdf.setFont('helvetica','italic');pdf.setFontSize(5.5);
+    pdf.text('Sursa: '+S2(market.sursa||'Estimativ orientativ'),17,cy);
+    cy+=6;
+  }
+
+  return cy;
 }
