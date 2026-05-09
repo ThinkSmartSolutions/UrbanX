@@ -1358,19 +1358,18 @@ function _rvRenderSection(b){
   _rvDrawScale(ctx,pad,H+38,SC);
   _rvDrawCartus(ctx,W+120,H+50,P,null,
     sectionType==='AA'?'SECȚIUNE A-A TRANSVERSALĂ':'SECȚIUNE B-B LONGITUDINALĂ');
-}
-  const pad=50; const W=bD*SC+pad*2+80; const H=Ht*SC+pad*2+50;
-  const {cv,ctx}=_rvInitCanvas(W,H+40);
-  ctx.fillStyle='#060C1A';ctx.fillRect(0,0,cv.width,H+40);
-  const ox=pad+40,oy=pad; const sW=bD*SC,sH=Ht*SC;
-  ctx.fillStyle='rgba(17,27,48,.95)';ctx.fillRect(ox,oy,sW,sH);
-  ctx.strokeStyle='#CBD5E1';ctx.lineWidth=2.5;ctx.strokeRect(ox,oy,sW,sH);
-  const rC=['rgba(180,83,1,.14)','rgba(21,128,61,.13)','rgba(14,116,144,.15)','rgba(109,40,217,.13)'];
+  const pad2=50; const W2=bD*SC+pad2*2+80; const H2=Ht*SC+pad2*2+50;
+  const {cv2,ctx2}=_rvInitCanvas(W2,H2+40);
+  ctx2.fillStyle='#060C1A';ctx2.fillRect(0,0,cv2.width,H2+40);
+  const ox2=pad2+40,oy2=pad2; const sW2=bD*SC,sH2=Ht*SC;
+  ctx2.fillStyle='rgba(17,27,48,.95)';ctx2.fillRect(ox2,oy2,sW2,sH2);
+  ctx2.strokeStyle='#CBD5E1';ctx2.lineWidth=2.5;ctx2.strokeRect(ox2,oy2,sW2,sH2);
+  const rC2=['rgba(180,83,1,.14)','rgba(21,128,61,.13)','rgba(14,116,144,.15)','rgba(109,40,217,.13)'];
   for(let i=0;i<niv;i++){
-    const y0=oy+sH-(i+1)*P.hn*SC;
-    ctx.fillStyle=rC[i%4];ctx.fillRect(ox+2,y0+2,sW-4,P.hn*SC-4);
-    ctx.fillStyle='rgba(203,213,225,.2)';ctx.fillRect(ox,y0-3,sW,3);
-    ctx.fillStyle='#475569';ctx.font='8px IBM Plex Mono';ctx.fillText(i===0?'P':`E${i}`,ox-30,y0+P.hn*SC/2+4);
+    const y0=oy2+sH2-(i+1)*P.hn*SC;
+    ctx2.fillStyle=rC2[i%4];ctx2.fillRect(ox2+2,y0+2,sW2-4,P.hn*SC-4);
+    ctx2.fillStyle='rgba(203,213,225,.2)';ctx2.fillRect(ox2,y0-3,sW2,3);
+    ctx2.fillStyle='#475569';ctx2.font='8px IBM Plex Mono';ctx2.fillText(i===0?'P':`E${i}`,ox2-30,y0+P.hn*SC/2+4);
   }
   if(cores.length){
     const c=cores[Math.floor(cores.length/2)];const cx=ox+sW/2-c.h*SC/2;
@@ -1386,7 +1385,7 @@ function _rvRenderSection(b){
   ctx.fillStyle='rgba(107,114,128,.35)';ctx.fillRect(ox-8,oy+sH,sW+16,16);
   ctx.strokeStyle='#6B7280';ctx.lineWidth=1;ctx.strokeRect(ox-8,oy+sH,sW+16,16);
   ctx.strokeStyle='rgba(6,182,212,.5)';ctx.lineWidth=1;ctx.setLineDash([5,4]);
-  const nfaY=oy+sH+Math.min(P.hn*.5,1.5)*SC;
+  const nfaY2=oy+sH+Math.min(P.hn*.5,1.5)*SC;
   ctx.beginPath();ctx.moveTo(ox-20,nfaY);ctx.lineTo(ox+sW+30,nfaY);ctx.stroke();ctx.setLineDash([]);
   ctx.fillStyle='rgba(6,182,212,.6)';ctx.font='8px IBM Plex Mono';ctx.fillText('NFA ~-1.5m',ox+4,nfaY+10);
   ctx.strokeStyle='rgba(203,213,225,.5)';ctx.lineWidth=2;
@@ -1402,6 +1401,7 @@ function _rvRenderSection(b){
   _rvDrawNorth(ctx,W-38,44,P.frontDir);
   _rvDrawScale(ctx,pad,H+28,_RV.scale*.85);
   _rvDrawCartus(ctx,W,H+40,P,null,'SECȚIUNE A-A');
+}
 
 function _rvRenderAxono(b){
   const {P,bW,bD,niv,cores}=b;

@@ -217,9 +217,7 @@ function _pdfConfBadge(pdf, x, y, trustKey){
   const lvl = t.level;
   const w = 28, h = 5;
   pdf.setFillColor(col[0], col[1], col[2]);
-  pdf.setGlobalAlpha && pdf.setGlobalAlpha(0.15);
   pdf.rect(x, y-3.5, w, h, 'F');
-  try{ if(pdf.setGlobalAlpha) pdf.setGlobalAlpha(1); }catch(e){}
   pdf.setDrawColor(col[0], col[1], col[2]);
   pdf.setLineWidth(0.3);
   pdf.rect(x, y-3.5, w, h, 'S');
@@ -1871,7 +1869,19 @@ async function generateMemoriu(){
   cy=body('Propunerea volumetrica generata cu AEDIS Urban3D prevede o constructie cu '+niv+' niveluri (H total = '+aedisH.toFixed(1)+'m), stil arhitectural '+stilLabel+', cu functiunea principala de '+fnLabel+'. Suprafata construita la sol estimata este de '+scEst.toLocaleString('en-US')+' mp (POT = '+params?.pot+'%), iar suprafata desfasurata totala estimata este de '+sdEst+' mp (CUT = '+params?.cut+').',14,cy);cy+=3;
   cy=body('Cladirea propusa se integreaza in contextul construit existent, cu inaltimea medie a zonei de '+hMed.toFixed(1)+'m. Raportul H/Hmedie = '+(aedisH/Math.max(1,hMed)).toFixed(2)+' indica o '+(aedisH>hMed*1.3?'insertie mai inalta decat contextul, necesitand atentie sporita la impactul vizual si structural':'insertie compatibila cu caracterul construit al zonei')+'. Finisajele si materialele vor fi determinate prin proiectul tehnic elaborat de arhitect autorizat OAR.',14,cy);cy+=3;
   cy=tblRow(['Element arhitectural','Descriere propusa'],cy,true,[70,108]);
-  [['Sistem structural','Beton armat monolit / zidarie structurala'],['Fatade',''+stilLabel+' — conf. AEDIS Urban3D'],['Acoperis',''+{terasa_plata:'Terasa plata circulabila',terasa_circulabila:'Terasa circulabila',sarpanta:'Sarpanta inclinata',mansarda:'Mansarda'}[AEDIS.tipAcoperis||'terasa_plata']||'Terasa plata'],['Tamplarie','PVC/Al cu geam tripan (termoizolant)'],['Finisaj exterior','Tencuiala decorativa / placaj fata'],['Subsol / Demisol',pkObl>5?'Parcare subterana '+pkObl+' locuri':'Optional, dupa necesitate']].forEach(r=>{cy=tblRow(r,cy,false,[70,108]);});
+  [['Sistem structural','Beton armat monolit / zidarie structurala'],
+   ['Fatade',''+stilLabel+' — conf. AEDIS Urban3D'],
+   ['Acoperis',''+{terasa_plata:'Terasa plata circulabila',terasa_circulabila:'Terasa circulabila',sarpanta:'Sarpanta inclinata',mansarda:'Mansarda'}[AEDIS.tipAcoperis||'terasa_plata']||'Terasa plata'],
+   ['Tamplarie','PVC/Al cu geam tripan Low-E (termoizolant)'],
+   ['Finisaj exterior','Tencuiala decorativa / placaj fata'],
+   ['Subsol P-1 (sub cota ±0.00)',pkObl>5
+     ? 'Parcare subterana ~'+pkObl+' locuri · Subsol NEGENERABIL in viewer 3D (e sub teren)'
+     : 'Optional, dupa necesitate'],
+   ['Rampa acces subsol',pkObl>5
+     ? 'Latime min. 3.50m (1 sens) / 6.0m (2 sensuri) · Panta max. 15% · Zona orizontala 3m la capat · H liber min. 2.10m (rampa) / 2.40m (parcare) — NP 064/2002'
+     : '—'],
+   ['Loc parcare subsol','4.50m × 2.50m (perpendicular) + culoar manevrare 7.50m · Stalp max. 5.5m distanta — NP 064/2002'],
+  ].forEach(r=>{cy=tblRow(r,cy,false,[70,108]);});
 
   // PAG 5: Vederi multiple + bilant
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VEDERI MULTIPLE 3D - BILANT SUPRAFETE',5);ftr();
@@ -4784,11 +4794,18 @@ async function generateSolarStudy(){
   orientari.forEach(or=>{
     const orePerLuna=doys.map((doy,mi)=>{
       let ore=0;
+      const D2R_=Math.PI/180;
       for(let h=6;h<=18;h+=0.5){
-        const sinAz=Math.cos(decl*D2R)*Math.sin(ha*D2R)/Math.cos(alt*D2R);
-        const az=Math.asin(Math.max(-1,Math.min(1,sinAz)))*180/Math.PI;
-        const incidenta=Math.abs(az-or.azOff);
-        if(alt>15&&incidenta<90)ore+=0.5*or.factor;
+        // Calcul declinatie + unghi orar (variabile locale per iteratie)
+        const decl_=-23.45*Math.cos(D2R_*(360/365)*(doy+10));
+        const ha_=(h-12)*15;
+        const sinAlt_=Math.sin(lat*D2R_)*Math.sin(decl_*D2R_)+Math.cos(lat*D2R_)*Math.cos(decl_*D2R_)*Math.cos(ha_*D2R_);
+        const alt_=Math.asin(Math.max(-1,Math.min(1,sinAlt_)))*180/Math.PI;
+        if(alt_ <= 1) continue; // sub orizont
+        const sinAz_=Math.cos(decl_*D2R_)*Math.sin(ha_*D2R_)/Math.max(0.001,Math.cos(alt_*D2R_));
+        const az_=Math.asin(Math.max(-1,Math.min(1,sinAz_)))*180/Math.PI;
+        const incidenta=Math.abs(az_-or.azOff);
+        if(alt_>1&&incidenta<90)ore+=0.5*or.factor;
       }
       return Math.min(12,ore).toFixed(1);
     });
