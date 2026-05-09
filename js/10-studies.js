@@ -215,6 +215,195 @@ function _pdfCursBNR(pdf, W, H, cursData) {
   );
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// AUDIT ENGINE — Funcții standard pentru toate studiile
+// Implementate conform cerintelor AUDIT_STUDII_SI_RAPOARTE.docx
+// ═══════════════════════════════════════════════════════════════════════════
+
+// #I — STUDY CLASSIFICATION: OFICIAL / AI ESTIMAT / SIMULARE ORIENTATIVA
+// Audit pct. I: "Trebuie separate: date oficiale / estimari AI / simulari"
+const _STUDY_CLASSES = {
+  OFICIAL:      { label:'DOCUMENT BAZAT PE DATE OFICIALE',   col:[16,100,40],   bg:[230,250,235], badge:'OFICIAL',    abbr:'OF' },
+  AI_ESTIMAT:   { label:'ESTIMARE ASISTATA AI + DATE PUBLICE', col:[160,80,0],   bg:[255,245,225], badge:'AI ESTIMAT', abbr:'AI' },
+  SIMULARE:     { label:'SIMULARE ORIENTATIVA PRELIMINARA',  col:[50,80,150],   bg:[230,240,255], badge:'SIMULARE',   abbr:'SIM'},
+  ORIENTATIV:   { label:'DOCUMENT ORIENTATIV',               col:[80,80,80],    bg:[245,245,245], badge:'ORIENTATIV', abbr:'OR' },
+};
+
+// Banner clasificare — apare pe prima pagina a fiecarui studiu
+function _pdfStudyClassBanner(pdf, W, cy, classKey, studyName) {
+  const cls = _STUDY_CLASSES[classKey] || _STUDY_CLASSES.ORIENTATIV;
+  pdf.setFillColor(...cls.bg);
+  pdf.rect(14, cy, W-28, 10, 'F');
+  pdf.setFillColor(...cls.col);
+  pdf.rect(14, cy, 3, 10, 'F');
+  pdf.setTextColor(...cls.col);
+  pdf.setFontSize(7); pdf.setFont('helvetica','bold');
+  pdf.text(cls.badge, 20, cy+6.5);
+  pdf.setFontSize(6.5); pdf.setFont('helvetica','normal');
+  pdf.setTextColor(60,80,100);
+  pdf.text(cls.label + ' — ' + studyName, 44, cy+6.5);
+  return cy+13;
+}
+
+// #10 — KEY METRICS STRIP: POT/CUT/H/UTR pe fiecare pagina ca dashboard
+// Audit pct. 10: "Pe fiecare pagina: POT: 35% | CUT: 1.2 | Hmax: 15m | UTR: L2a"
+function _pdfMetricsStrip(pdf, W, params, utr, extraMetrics) {
+  const H_page = pdf.internal.pageSize.getHeight();
+  const metrics = [
+    { k:'POT', v: params?.pot ? params.pot+'%' : '—' },
+    { k:'CUT', v: params?.cut || '—' },
+    { k:'H max', v: params?.h ? params.h+'m' : '—' },
+    { k:'UTR', v: utr || '—' },
+    ...(extraMetrics||[]),
+  ];
+  const stripW = W-28;
+  const colW = stripW / metrics.length;
+  const sy = H_page - 14;
+  pdf.setFillColor(8,20,45);
+  pdf.rect(14, sy, stripW, 9, 'F');
+  metrics.forEach((m,i) => {
+    const x = 14 + i*colW + colW/2;
+    pdf.setTextColor(100,130,170); pdf.setFontSize(5.5); pdf.setFont('helvetica','normal');
+    pdf.text(m.k, x, sy+3.5, {align:'center'});
+    pdf.setTextColor(212,175,55); pdf.setFontSize(7); pdf.setFont('helvetica','bold');
+    pdf.text(String(m.v), x, sy+8, {align:'center'});
+    if(i>0){ pdf.setDrawColor(30,50,80); pdf.setLineWidth(0.2); pdf.line(14+i*colW, sy+1, 14+i*colW, sy+8); }
+  });
+}
+
+// #8 — DATA FRESHNESS BLOCK
+// Audit pct. 6/8: "Ultima actualizare date: ANCPI: / PUG: / OSM: live"
+function _pdfDataFreshness(pdf, W, cy, sources) {
+  const defaults = [
+    { src:'ANCPI cadastru', date:'conform sursă locala' , conf:'95%' },
+    { src:'PUG/RLU in vigoare', date: new Date().toLocaleDateString('ro-RO'), conf:'90%' },
+    { src:'OSM context urban', date:'live (actualizat continuu)', conf:'65%' },
+    { src:'Calcule UrbanX', date:new Date().toLocaleDateString('ro-RO'), conf:'AI' },
+  ];
+  const rows = sources || defaults;
+  pdf.setFillColor(245,248,252); pdf.rect(14,cy,W-28,8+rows.length*7,'F');
+  pdf.setFillColor(59,130,246); pdf.rect(14,cy,2,8+rows.length*7,'F');
+  pdf.setTextColor(40,80,140); pdf.setFontSize(7); pdf.setFont('helvetica','bold');
+  pdf.text('DATE FRESHNESS — Surse si actualizare', 19, cy+5.5);
+  rows.forEach((r,i) => {
+    const ry = cy+10+i*7;
+    pdf.setTextColor(60,80,110); pdf.setFontSize(6.5); pdf.setFont('helvetica','normal');
+    pdf.text('• '+r.src+': ', 19, ry);
+    pdf.setFont('helvetica','bold'); pdf.setTextColor(20,80,150);
+    pdf.text(r.date, 19+pdf.getTextWidth('• '+r.src+': '), ry);
+    pdf.setFont('helvetica','normal'); pdf.setTextColor(100,130,160);
+    pdf.text(' [conf. '+r.conf+']', 19+pdf.getTextWidth('• '+r.src+': '+r.date), ry);
+  });
+  return cy+10+rows.length*7+4;
+}
+
+// #2 — LIMITARI ANALIZA: sectiune standard in fiecare studiu
+// Audit pct. 8: "LIMITARI: Nu au fost disponibile foraje geotehnice / Nu exista masuratori..."
+function _pdfLimitariAnaliza(pdf, W, cy, studyType, customLimitari) {
+  const defaultLimitari = {
+    acustic: [
+      'Zgomotul a fost ESTIMAT pe baza functiunilor OSM — nu reprezinta masuratori in situ',
+      'Nu includ: trafic real, flux auto, Lden, Ln, vibratii, reflexii multiple',
+      'Standard ISO 9613-2 aplicat in varianta simplificata (sursa punctiforma, teren plat)',
+      'Studiu acustic certificat (lab acreditat RENAR) obligatoriu inainte de autorizare',
+    ],
+    insorire: [
+      'Calcul solar bazat pe algoritm NOAA aproximat — nu include DST complet, terrain shading, DSM',
+      'Obstructiile reale (cladiri, arbori, teren) nu sunt modelate mesh-based',
+      'Studiu legal de insorire (ray tracing real) obligatoriu la faza PT conform OMS 119/2014',
+    ],
+    geotehnic: [
+      'Parametrii geotehnici sunt ESTIMATIVI — bazati pe date tipice zona, nu foraje reale',
+      'Nu exista date de laborator (granulometrie, limita Atterberg, incercari de forfecare)',
+      'Studiu geotehnic certificat (NP 074/2014) cu minim 3 foraje obligatoriu inainte de autorizare',
+    ],
+    default: [
+      'Datele cartografice provin din OSM (precizie variabila, 65-85%) si date oficiale ANCPI',
+      'Calculele sunt ESTIMATIVE si orientative — nu inlocuiesc studiile tehnice certificate',
+      'Valorile finale se stabilesc prin documentatii tehnice elaborate de experti atestati',
+      'Document valabil la data generarii — verificati actualizarile normative si PUG',
+    ],
+  };
+  const limitari = customLimitari || defaultLimitari[studyType] || defaultLimitari.default;
+  pdf.setFillColor(255,248,240); pdf.rect(14,cy,W-28,8+limitari.length*7,'F');
+  pdf.setFillColor(200,80,20); pdf.rect(14,cy,2,8+limitari.length*7,'F');
+  pdf.setTextColor(140,50,10); pdf.setFontSize(7); pdf.setFont('helvetica','bold');
+  pdf.text('LIMITARI ANALIZA — Cititi inainte de utilizare', 19, cy+5.5);
+  limitari.forEach((l,i) => {
+    const ry = cy+10+i*7;
+    pdf.setTextColor(100,50,10); pdf.setFontSize(6.5); pdf.setFont('helvetica','normal');
+    pdf.text('• '+l, 19, ry, {maxWidth: W-36});
+  });
+  return cy+10+limitari.length*7+4;
+}
+
+// #5 — NEXT ACTION: actiune necesara dupa fiecare problema
+// Audit pct. 5: "ACTIUNE NECESARA: Studiu geotehnic / Aviz ABA / Verificare ISU"
+function _pdfNextAction(pdf, W, cy, actions) {
+  if(!actions||!actions.length) return cy;
+  pdf.setFillColor(230,245,255); pdf.rect(14,cy,W-28,8+actions.length*7,'F');
+  pdf.setFillColor(59,130,246); pdf.rect(14,cy,2,8+actions.length*7,'F');
+  pdf.setTextColor(10,60,140); pdf.setFontSize(7); pdf.setFont('helvetica','bold');
+  pdf.text('ACTIUNE NECESARA — Pasi urmatori recomandati', 19, cy+5.5);
+  actions.forEach((a,i) => {
+    const ry = cy+10+i*7;
+    const prio = a.prio||'RECOMANDAT';
+    const prioCol = prio==='OBLIGATORIU'?[200,20,20]:prio==='URGENT'?[180,80,0]:[30,80,160];
+    pdf.setTextColor(...prioCol); pdf.setFontSize(6); pdf.setFont('helvetica','bold');
+    pdf.text('['+prio+']', 19, ry);
+    pdf.setTextColor(20,50,100); pdf.setFontSize(6.5); pdf.setFont('helvetica','normal');
+    pdf.text(' '+a.text, 19+pdf.getTextWidth('['+prio+'] '), ry, {maxWidth: W-42});
+  });
+  return cy+10+actions.length*7+4;
+}
+
+// #15 — AUTO SUMMARY ENGINE: 3 bullets automate per capitol
+// Audit pct. 15: "REZUMAT: POT conform / Acces auto posibil / Necesita verificare ISU"
+function _pdfAutoSummary(pdf, W, cy, bullets, title) {
+  if(!bullets||!bullets.length) return cy;
+  const t = title||'REZUMAT CAPITOL';
+  pdf.setFillColor(14,30,60); pdf.rect(14,cy,W-28,8+bullets.length*7,'F');
+  pdf.setFillColor(212,175,55); pdf.rect(14,cy,W-28,1,'F');
+  pdf.setTextColor(212,175,55); pdf.setFontSize(7); pdf.setFont('helvetica','bold');
+  pdf.text(t, 18, cy+6);
+  bullets.forEach((b,i) => {
+    const ry = cy+10+i*7;
+    const ok = b.ok!==false;
+    const col = ok?[16,160,60]:[200,50,30];
+    pdf.setTextColor(...col); pdf.setFontSize(8); pdf.setFont('helvetica','bold');
+    pdf.text(ok?'✓':'✗', 18, ry);
+    pdf.setTextColor(200,215,235); pdf.setFontSize(6.5); pdf.setFont('helvetica','normal');
+    pdf.text(' '+b.text, 24, ry, {maxWidth: W-36});
+  });
+  return cy+10+bullets.length*7+4;
+}
+
+// #11 — MAP PURPOSE LABEL
+// Audit pct. 11: "SCOP HARTA: Identificarea relatiei dintre..."
+function _pdfMapPurpose(pdf, W, cy, purpose, scale, viewport) {
+  pdf.setFillColor(8,20,45); pdf.rect(14,cy,W-28,9,'F');
+  pdf.setTextColor(100,140,200); pdf.setFontSize(6); pdf.setFont('helvetica','normal');
+  const scaleStr = scale ? ' · SCARA: '+scale : '';
+  const vpStr = viewport ? ' · '+viewport : '';
+  pdf.text('SCOP: '+purpose+scaleStr+vpStr, 17, cy+5.5);
+  return cy+11;
+}
+
+// #24 — PROFESSIONAL LANGUAGE FORMATTER
+// Audit pct. 24: "NU: SE POATE CONSTRUI / CI: Din analiza preliminara rezulta ca..."
+function _prfLang(rawText) {
+  // Inlocuieste limbajul absolut cu limbaj profesional
+  return String(rawText)
+    .replace(/SE POATE CONSTRUI/gi, 'Din analiza preliminara rezulta ca este posibila construirea')
+    .replace(/ESTE INTERZIS/gi, 'Analiza indica restrictii privind')
+    .replace(/NU SE POATE/gi, 'Nu rezulta posibilitatea')
+    .replace(/TREBUIE OBLIGATORIU/gi, 'Este recomandat ca')
+    .replace(/GARANTAT/gi, 'Estimat (orientativ)')
+    .replace(/DEFINITIV/gi, 'Preliminar');
+}
+
+
+
 // Cache elevatie pentru a evita apeluri repetate (valid pe sesiune)
 const _ELEV_CACHE = {};
 
@@ -641,6 +830,7 @@ async function generateShadowStudy(){
     }catch(e){}
   }
   ftr();
+  cy=_pdfStudyClassBanner(pdf,W,28,'SIMULARE','Studiu Umbre - Simulare orientativa');
 
   // PAG 2: Vedere 3D + analiza context
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONTEXT URBAN 3D - VEDERE PRINCIPALA',2);ftr();
@@ -974,6 +1164,7 @@ async function generateNoiseStudy(){
   pdf.setTextColor(120,60,10);pdf.setFontSize(5.5);pdf.setFont('helvetica','bold');
   pdf.text('⚠ ESTIMARE ORIENTATIVĂ AI (Confidence: OSM 65%) — Nivelurile de zgomot sunt DEDUSE din funcțiunile OSM, NU din măsurători. Un "commercial" poate avea 45–90 dB. Studiu acustic oficial (ISO 9613 / CNOSSOS-EU + măsurători in situ) obligatoriu la faza PT.',5,H-17);
   ftr();
+  cy=_pdfStudyClassBanner(pdf,W,28,'AI_ESTIMAT','Studiu Acustic Urban - Estimare AI pe OSM');
 
   // PAG 2: Vedere 3D + surse zgomot
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONTEXT URBAN 3D - SURSE ZGOMOT IDENTIFICATE',2);ftr();
@@ -2112,6 +2303,7 @@ async function generateMemoriu(){
   // PAG 2: Vedere 3D principala + date teren
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('PLANUL DE SITUATIE 3D - INCADRARE IN CONTEXT',2);ftr();
   let cy=28;
+  cy=_pdfStudyClassBanner(pdf,W,cy,'AI_ESTIMAT','Memoriu Tehnic Preliminar');
   cy=addImg(caps.img3D,14,cy,W-28,72,'FIG. 1 — Vedere 3D principala · Volumul propus in contextul urban real · pitch 62° bearing -20°');
   cy=sec('1. DATE DE IDENTIFICARE A TERENULUI',cy);cy+=2;
   cy=body('Terenul identificat cu nr. cadastral '+nrcad+' este amplasat in intravilanul Municipiului Iasi, in zona urbanistica '+utr+', la coordonatele GPS '+lat.toFixed(5)+'°N / '+lon.toFixed(5)+'°E. Suprafata masurata a terenului este de '+area+' mp, conform datelor cadastrale. Terenul este '+(areaNum>200?'de dimensiuni corespunzatoare interventiei propuse':'de dimensiuni reduse, ce necesita o analiza atenta a indicatorilor urbanistici')+', cu front stradal la strada adiacenta parcelei.',14,cy);cy+=3;
@@ -2843,6 +3035,7 @@ async function generateGeotehnicalStudy(){
   // PAG 2: Harta + zonare seismica
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONTEXT GEOTEHNIC - ZONARE SEISMICA SI TEREN',2);ftr();
   let cy=28;
+  cy=_pdfStudyClassBanner(pdf,W,cy,'AI_ESTIMAT','Pre-Studiu Geotehnic - Estimativi');
   cy=addImg(caps.img3D,14,cy,W-28,68,'\1'+S2(uat)+'\2');
   cy=sec('1. ZONARE SEISMICA - P100-1/2022 (in vigoare)',cy);cy+=2;
   cy=tblRow(['Parametru seismic','Valoare','Semnificatie'],cy,true,[60,45,73]);
@@ -3511,6 +3704,7 @@ async function generateSSF(){
   });
   if(caps.imgLocation){try{pdf.addImage(caps.imgLocation,'JPEG',14,H-72,W-28,58,undefined,'FAST');pdf.setDrawColor(180,20,20);pdf.setLineWidth(0.4);pdf.rect(14,H-72,W-28,58,'S');pdf.setTextColor(220,60,60);pdf.setFontSize(6);pdf.text('AMPLASAMENT · '+S2(nrcad),W/2,H-75,{align:'center'});}catch(e){}}
   ftr();
+  cy=_pdfStudyClassBanner(pdf,W,28,'AI_ESTIMAT','Studiu Siguranta Foc ISU - Analiza');
 
   // ── PAG 2: DATE GENERALE + CLASIFICARI ───────────────────────────────────
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('DATE GENERALE CONSTRUCTIE - CLASIFICARI SIGURANTA FOC',2);ftr();
@@ -4835,6 +5029,7 @@ async function generateSolarStudy(){
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
   hdr('VEDERE 3D PRINCIPALA - CONTEXT URBAN SI AMPLASAMENT',2);ftr();
   let cy=30;
+  cy=_pdfStudyClassBanner(pdf,W,cy,'SIMULARE','Studiu Insorire - Simulare orientativa');
 
   // Imagine 3D mare - full width
   cy=addImg(caps.img3D,14,cy,W-28,100,'FIG. 1 — Vedere 3D Urban · Amplasament parcelă '+nrcad+' · UTR '+utr+' · '+uat+' · Perspectivă 62° pitch');cy+=2;
@@ -5463,6 +5658,7 @@ async function generateStudiuFezabilitate(paramOverrides){
 
   // ── PAG 2: DATE DE IDENTIFICARE + INDICATORI URBANISTICI ─────────────────
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('DATE DE IDENTIFICARE SI INDICATORI URBANISTICI PUG',2);ftr();
+  cy=_pdfStudyClassBanner(pdf,W,28,'AI_ESTIMAT','Studiu Fezabilitate DALI - Orientativ');
   let cy=33;
   cy=sec('1. DATE DE IDENTIFICARE A INVESTITIEI',cy);cy+=2;
   // KPI-uri
@@ -6359,6 +6555,7 @@ async function generateStudiuAmplasament(){
   if(_conflicts.length > 0 || _warnings.length > 0){
     pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
     hdr('CONFLICT DETECTION — VERIFICARE AUTOMATĂ URBANISTICĂ',2);ftr();
+  cy=_pdfStudyClassBanner(pdf,W,28,'AI_ESTIMAT','Studiu Amplasament & Context Teritorial');
     let cyCd=28;
     // Header explicativ
     pdf.setFillColor(15,25,50);pdf.rect(14,cyCd,W-28,14,'F');
@@ -7284,6 +7481,7 @@ async function generateWaterStudy(){
   // ── PAGINA 2: DATE IDENTIFICARE + CONTEXT HIDROLOGIC ────────────────────
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('DATE DE IDENTIFICARE SI CONTEXT HIDROLOGIC',2);ftr();
   let cy=33;
+  cy=_pdfStudyClassBanner(pdf,W,cy,'AI_ESTIMAT','Studiu Gospodarire Ape - Analiza orientativa');
   cy=sec('1. DATE DE IDENTIFICARE AMPLASAMENT',cy);cy+=2;
   cy=_kv([
     ['Nr. Cadastral',nrcad], ['UAT',S2(uat)], ['Județ',S2(judet)],
@@ -7898,6 +8096,7 @@ async function generatePrestudiuBransamente(){
     pdf.text(S2(t),14,y+9.5+i*3.5);
   });
   ftr();
+  cy=_pdfStudyClassBanner(pdf,W,28,'AI_ESTIMAT','Pre-studiu Bransamente - Estimatii');
   _pdfSaveMobile(pdf,'PreStudiu_Bransamente_'+S2(nrcad)+'_'+new Date().getFullYear()+'.pdf');
   ss('✅ Pre-studiu Bransamente generat — 4 pagini · Apă · Canal · Electric · Gaze · ISU · PV');
 }
@@ -8309,6 +8508,7 @@ async function generateCPE(){
   pdf.setTextColor(30,60,130);pdf.setFontSize(5.5);pdf.setFont('helvetica','bold');
   pdf.text('ESTIMARE ORIENTATIVA (Calcul normativ 70%) — Nu inlocuieste CPE oficial semnat de auditor energetic atestat ANRE/MDLPA.',5,H-15);
   ftr();
+  cy=_pdfStudyClassBanner(pdf,W,28,'SIMULARE','CPE - Estimare energetica orientativa');
 
   // ── PAG 2: PARAMETRI TERMICI + BILANȚ ─────────────────────────────────────
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('INDICATORI TERMICI ANVELOPA - C107/4-2022',2);ftr();
@@ -8482,6 +8682,7 @@ async function generateStabilitateTaluzuri(){
   pdf.setTextColor(80,100,140);pdf.setFontSize(6);pdf.setFont('helvetica','italic');
   pdf.text('ESTIMARE ORIENTATIVA · Calcul normativ 60% · Date DEM '+(elevData.confidence)+'% · Studiu geotehnic certificat obligatoriu (NP 074/2014)',W/2,H-14,{align:'center'});
   ftr();
+  cy=_pdfStudyClassBanner(pdf,W,28,'AI_ESTIMAT','Stabilitate Taluzuri - Calcul orientativ');
 
   // ── PAG 2: PARAMETRI GEOTEHNICI + CALCUL FS ─────────────────────────────
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('PARAMETRI GEOTEHNICI SI CALCUL FACTOR SIGURANTA',2);ftr();
