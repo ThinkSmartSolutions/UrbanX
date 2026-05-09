@@ -122,6 +122,17 @@ function _stripEmoji(str){
 // Precizie: ±1-3m (Mapbox zoom 14) suficienta pentru AACR si geotehnica
 // ═══════════════════════════════════════════════════════════════════════════
 
+
+// ── Configuratie TVA Romania (Legea 227/2015 Cod Fiscal actualizat) ─────────
+// TVA standard Romania: 19% din 01.01.2017 (OUG 25/2017)
+// Cote reduse: 9% (alimente, medicamente), 5% (locuinte sociale, carti)
+// MODIFICA AICI daca cota se schimba:
+const _TVA_STANDARD = 0.19;  // 19% - constructii noi standard
+const _TVA_REDUS_9  = 0.09;  // 9% - locuinte sociale (suprafata < 120mp, pret < 600k lei)
+const _TVA_REDUS_5  = 0.05;  // 5% - locuinte achizitionate prin ANL
+// Nota: pentru locuinte noi < 600.000 lei cu suprafata < 120mp utili → TVA 9%
+// Sursa: Legea 227/2015 Cod Fiscal, Art. 291, actualizat OUG 16/2022
+
 // Cache elevatie pentru a evita apeluri repetate (valid pe sesiune)
 const _ELEV_CACHE = {};
 
@@ -650,28 +661,64 @@ async function generateShadowStudy(){
 
   // PAG 7: Baza legala + semnatura
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('BAZA LEGALA SI SEMNATURA',7);ftr();
-  cy=28;cy=sec('7. BAZA LEGALA SI NORMATIVA',cy);cy+=2;
-  ['Ordinul MS nr. 119/2014 actualizat cu Ordinul nr. 994/2018, art. 3: minim 1.5 ore insorire directa/zi la solstitiu iarna pentru spatiile de locuit principale.',
-   'STAS 6221-1981 Iluminatul natural in constructii — Conditii tehnice generale.',
-   'Legea nr. 350/2001 privind amenajarea teritoriului si urbanismul, republicata.',
-   'Regulamentul General de Urbanism aprobat prin HG nr. 525/1996, cu modificarile ulterioare.',
-   'PUG '+getUATLabel()+' in vigoare — UTR '+utr+' — Regulamentul Local de Urbanism.',
-   'Ghidul privind insorirea cladirilor GT 043-2002 — INCERC Bucuresti.'
-  ].forEach(l=>{cy=body('• '+l,16,cy);cy+=2;});
-  // Harta orasului inainte de concluzii
-  if(caps.imgCity&&caps.imgCity.length>500){
-    cy+=3;
-    pdf.setFillColor(...DARK);pdf.rect(14,cy-3,W-28,4,'F');
-    pdf.setFillColor(...GOLD);pdf.rect(14,cy-3,W-28,1,'F');
-    pdf.setTextColor(...GOLD);pdf.setFontSize(7);pdf.setFont('helvetica','bold');
-    pdf.text('INCADRARE IN CONTEXTUL URBAN — '+S2(uat).toUpperCase(),W/2,cy+4,{align:'center'});
-    cy+=8;
-    try{pdf.addImage(caps.imgCity,'JPEG',14,cy,W-28,52,undefined,'FAST');}catch(e){}
-    pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.4);pdf.rect(14,cy,W-28,52,'S');
-    pdf.setTextColor(80,90,110);pdf.setFontSize(6);pdf.setFont('helvetica','italic');
-    pdf.text('FIG. — Harta urbana · Zoom 12 · Incadrare amplasament in '+S2(uat)+' · Sursa: UrbanX',W/2,cy+55,{align:'center'});
-    cy+=60;
-  }
+  cy=28;cy=sec('7. BAZA LEGALA SI NORMATIVA COMPLETA',cy);cy+=2;
+  // Organizata pe categorii pentru claritate
+  cy=body('Documentul de fata a fost elaborat cu respectarea urmatoarelor acte normative in vigoare (selectie relevanta pentru proiect):',14,cy);cy+=3;
+  const _normGroups=[
+    {title:'URBANISM SI AUTORIZARE',items:[
+      'Legea nr. 350/2001 privind amenajarea teritoriului si urbanismul — republicata si actualizata.',
+      'Legea nr. 50/1991 republicata — autorizarea executarii lucrarilor de constructii.',
+      'HG nr. 525/1996 — Regulamentul General de Urbanism, cu modificarile ulterioare.',
+      'PUG '+getUATLabel()+' in vigoare — UTR '+utr+' — Regulamentul Local de Urbanism (RLU).',
+      'Legea nr. 10/1995 republicata — calitatea in constructii.',
+    ]},
+    {title:'INSORIRE SI IGIENA',items:[
+      'Ordinul MS nr. 119/2014 actualizat cu Ord. 994/2018 — norme igiena Art. 3: min. 1.5 ore/zi insorire directa la solstitiu iarna.',
+      'SR EN 17037:2019 — Iluminare naturala in cladiri (standard european).',
+      'STAS 6221-1981 — Iluminatul natural in constructii. Conditii tehnice generale.',
+      'GT 043-2002 — Ghid privind insorirea cladirilor (INCERC Bucuresti).',
+    ]},
+    {title:'LOCUINTE SI SPATII',items:[
+      'NP 016-97/NP 016/1-2003 — Normativ pentru proiectarea cladirilor de locuinte.',
+      'NP 057/2002 — Normativ privind proiectarea cladirilor de locuinte — suprafete minime camere.',
+      'NP 033/1999 — Normativ privind proiectarea si realizarea constructiilor de locuinte.',
+      'NP 068/2002 — Normativ privind proiectarea cladirilor civile din punct de vedere al cerintei de siguranta in exploatare.',
+    ]},
+    {title:'SECURITATE LA INCENDIU',items:[
+      'P118-1/2015 — Normativ privind siguranta la foc a constructiilor — Partea 1: Constructii civile.',
+      'P118-2/2013 — Instalatii de stingere a incendiilor.',
+      'P118-3/2015 — Instalatii de detectie, semnalizare si alarmare la incendiu.',
+      'Legea nr. 307/2006 privind apararea impotriva incendiilor.',
+    ]},
+    {title:'STRUCTURA SI GEOTEHNICA',items:[
+      'P100-1/2022 — Cod de proiectare seismica (in vigoare din 01.01.2023, inlocuieste P100-1/2013).',
+      'CR 6-2006 — Cod de proiectare pentru structuri din zidarie.',
+      'NP 074/2014 — Normativ privind cercetarea geotehnica a terenului de fundare.',
+      'SR EN 1997-1:2004 (Eurocode 7) — Proiectare geotehnica.',
+      'STAS 6054 — Adancimea de inghet (cota fundare sub cota de inghet).',
+    ]},
+    {title:'INSTALATII SI ENERGETICA',items:[
+      'C107/4-2022 — Normativ privind calculul termotehnic al elementelor de constructie.',
+      'Legea 372/2005 republicata — Performanta energetica a cladirilor (NZEB).',
+      'NTE 007/2016/00 — Normativ instalatii electrice aferente cladirilor.',
+      'SR EN 12831-1:2017 — Calculul sarcinii termice de proiectare.',
+      'Ord. ANRE Reg. 90/2019 — Prosumatori fotovoltaici.',
+    ]},
+    {title:'PARCAJE SI CIRCULATII',items:[
+      'NP 064/2002 — Normativ pentru proiectarea si realizarea parcajelor auto.',
+      'DN 537/2003 — Proiectarea drumurilor urbane.',
+      'NP 051/2012 rev. — Accesibilitate persoane cu handicap.',
+      'SR 4032-1:2001 — Lucrari de drumuri. Terminologie.',
+    ]},
+  ];
+  _normGroups.forEach(g=>{
+    cy+=2;
+    pdf.setFillColor(14,30,60);pdf.rect(14,cy,W-28,7,'F');pdf.setFillColor(...GOLD);pdf.rect(14,cy,2,7,'F');
+    pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(7);
+    pdf.text(g.title,18,cy+4.8);cy+=9;
+    g.items.forEach(l=>{cy=body('• '+l,18,cy);cy+=1.5;});
+    cy+=2;
+  });
   // Harta orasului inainte de concluzii
   if(caps.imgCity&&caps.imgCity.length>500){
     cy+=3;
@@ -5527,8 +5574,8 @@ async function generateStudiuFezabilitate(paramOverrides){
     ['  5.2','Consultanta, proiectare, taxe AC/CU, dirigentie (7%)',_C7.toLocaleString(),Math.round(_C7/_totalDeviz*100)+'%'],
     ['  5.3','Cheltuieli diverse si neprevazute (3%)',_C6.toLocaleString(),Math.round(_C6/_totalDeviz*100)+'%'],
     ['TOTAL DEVIZ GENERAL','Valoare totala investitie (exclusiv TVA)',_totalDeviz.toLocaleString(),'100%'],
-    ['+ TVA 19%','(aplicabil constructii noi)','',Math.round(_totalDeviz*0.19).toLocaleString()+' EUR'],
-    ['TOTAL CU TVA','',Math.round(_totalDeviz*1.19).toLocaleString()+' EUR',''],
+    ['+ TVA '+Math.round(_TVA_STANDARD*100)+'%','(standard constructii noi · Legea 227/2015 + OUG 25/2017)','',Math.round(_totalDeviz*_TVA_STANDARD).toLocaleString()+' EUR'],
+    ['TOTAL CU TVA','',Math.round(_totalDeviz*(1+_TVA_STANDARD)).toLocaleString()+' EUR',''],
   ].forEach((r,i)=>{
     const isBold = r[0].startsWith('Cap.')||r[0].startsWith('TOTAL');
     cy=tblRow(r,cy,false,[14,110,35,23]);

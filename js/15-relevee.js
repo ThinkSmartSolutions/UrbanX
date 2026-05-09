@@ -5148,10 +5148,7 @@ function _rvInject(){
 #rv-modal{position:fixed;inset:0;z-index:8000;background:rgba(4,8,18,.0);backdrop-filter:blur(0);display:flex;flex-direction:column;pointer-events:none;transition:all .25s;}
 #rv-modal.rv-modal-open{background:rgba(4,8,18,.96);backdrop-filter:blur(16px);pointer-events:all;}
 #rv-modal .rv-body{display:grid;grid-template-columns:260px 1fr 240px;height:100%;}
-#rv-modal .rv-body.lpanel-hidden{grid-template-columns:0px 1fr 240px;}
-#rv-modal .rv-body.lpanel-hidden .rv-lpanel{display:none!important;}
-#rv-toggle-lpanel{position:absolute;left:250px;top:50%;transform:translateY(-50%);z-index:100;background:rgba(212,175,55,.15);border:1px solid rgba(212,175,55,.3);color:#D4AF37;border-radius:0 6px 6px 0;padding:6px 4px;cursor:pointer;font-size:10px;writing-mode:vertical-rl;text-orientation:mixed;letter-spacing:.05em;transition:left .2s}
-#rv-modal .rv-body.lpanel-hidden #rv-toggle-lpanel{left:0;}
+/* lpanel-hidden CSS removed — rv-toggle-lpanel button eliminated */
 /* opacity gestionat pe rv-modal, nu pe body */
 .rv-topbar{display:flex;align-items:center;gap:10px;padding:0 14px;height:50px;background:rgba(6,12,26,.98);border-bottom:1px solid rgba(212,175,55,.15);flex-shrink:0;}
 .rv-logo-t{font-size:14px;font-weight:800;letter-spacing:.04em;font-family:'Space Grotesk',sans-serif;}
@@ -5355,13 +5352,23 @@ function _rvInject(){
   <button id="rv-btn-hide-analiza" title="Ascunde/afișează secțiunile de Analiză din panoul lateral"
     onclick="(function(btn){
       const secs=['rv-sec-dna','rv-sec-overlay','rv-sec-bilant'];
-      const anyVisible = secs.some(id=>document.getElementById(id)?.style.display!=='none');
-      secs.forEach(id=>{
-        const el=document.getElementById(id);
-        if(el) el.style.display=anyVisible?'none':'';
-      });
-      btn.textContent=anyVisible?'◉ Analiză':'○ Analiză';
-      btn.style.opacity=anyVisible?'0.5':'1';
+      // Folosim data-attribute pentru stare sigura
+      const hidden = btn.dataset.hidden === '1';
+      if(hidden){
+        // READUCE sectiunile
+        secs.forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='';});
+        btn.dataset.hidden='0';
+        btn.textContent='○ Analiză';
+        btn.style.opacity='1';
+        btn.title='Ascunde sectiunile de Analiza';
+      } else {
+        // ASCUNDE sectiunile
+        secs.forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
+        btn.dataset.hidden='1';
+        btn.textContent='◉ Analiză ascunsă';
+        btn.style.opacity='0.6';
+        btn.title='Click pentru a readuce sectiunile de Analiza';
+      }
     })(this)"
     style="flex-shrink:0;height:28px;padding:0 10px;border-radius:6px;border:1px solid rgba(56,189,248,.3);background:rgba(56,189,248,.08);color:#38bdf8;cursor:pointer;font-size:10px;font-weight:700;font-family:'Space Grotesk',sans-serif;letter-spacing:.03em;transition:all .15s;">
     ○ Analiză
@@ -5378,20 +5385,7 @@ function _rvInject(){
 <div class="rv-body" id="rv-body-main">
   <!-- LEFT -->
   <div class="rv-lpanel" id="rv-lpanel-main">
-    <button id="rv-toggle-lpanel" title="Ascunde/afișează panoul" onclick="(function(btn){
-  const body=document.getElementById('rv-body-main');
-  body.classList.toggle('lpanel-hidden');
-  const hidden=body.classList.contains('lpanel-hidden');
-  btn.textContent=hidden?'▶ Panou':'◀ Panou';
-  btn.style.left=hidden?'0':'250px';
-  // Resize canvas dupa toggle (previne ecranul negru)
-  setTimeout(()=>{
-    const cv=document.getElementById('rv-canvas');
-    if(cv && window._rvRender) _rvRender();
-    // Forteaza reflow
-    if(cv){const w=cv.offsetWidth,h=cv.offsetHeight;if(w>0&&h>0){cv.width=w;cv.height=h;if(window._rvRender)_rvRender();}}
-  },220);
-})(this)">◀ Panou</button>
+  <!-- rv-toggle-lpanel removed: caused unrecoverable black screen -->
     <!-- FUNCȚIUNE CLĂDIRE — primul selector, cel mai important -->
     <div class="rv-rsec" style="border:1px solid rgba(212,175,55,.2);background:rgba(212,175,55,.04);border-radius:8px;padding:8px">
       <div class="rv-sec-t" style="color:#D4AF37;margin-bottom:8px">🏗 Funcțiune clădire</div>
@@ -5656,18 +5650,30 @@ function _rvInject(){
       <button class="rv-zbtn" onclick="{_RV.scale=12;document.getElementById('rv-zval').textContent='100%';if(_RV.building)_rvRender();}" style="font-size:9px;font-weight:700;width:auto;padding:0 8px">FIT</button>
       <div id="rv-mob-info-btn" onclick="_rvMobSheet()">📊 Analiză</div>
       <!-- Buton ascunde/arata panoul cu Normative + Info parcelă -->
-      <button id="rv-btn-hide-rpanel" title="Ascunde/afișează panoul cu Normative și Info parcelă"
+      <button id="rv-btn-hide-rpanel"
+        title="Ascunde/afișează panoul Info — click din nou pentru readucere"
         onclick="(function(btn){
           const body=document.getElementById('rv-body-main');
-          const rp=document.querySelector('.rv-rpanel');
-          const hidden=body.classList.toggle('rpanel-hidden');
-          btn.textContent=hidden?'◉ Info':'○ Info';
-          btn.style.color=hidden?'#94a3b8':'#38bdf8';
-          btn.style.borderColor=hidden?'rgba(148,163,184,.2)':'rgba(56,189,248,.3)';
-          // Resize canvas
+          const isHidden = btn.dataset.hidden==='1';
+          if(isHidden){
+            body.classList.remove('rpanel-hidden');
+            btn.dataset.hidden='0';
+            btn.textContent='○ Info';
+            btn.style.color='#38bdf8';
+            btn.style.borderColor='rgba(56,189,248,.3)';
+            btn.style.background='rgba(56,189,248,.08)';
+          } else {
+            body.classList.add('rpanel-hidden');
+            btn.dataset.hidden='1';
+            btn.textContent='◉ Info ↩';
+            btn.style.color='#94a3b8';
+            btn.style.borderColor='rgba(148,163,184,.3)';
+            btn.style.background='rgba(148,163,184,.06)';
+          }
           setTimeout(()=>{if(window._rvRender&&_RV.building)_rvRender();},150);
         })(this)"
-        style="padding:4px 10px;border-radius:6px;border:1px solid rgba(56,189,248,.3);background:rgba(56,189,248,.06);color:#38bdf8;cursor:pointer;font-size:10px;font-weight:700;font-family:'Space Grotesk',sans-serif;white-space:nowrap;flex-shrink:0">
+        data-hidden="0"
+        style="flex-shrink:0;height:28px;padding:0 10px;border-radius:6px;border:1px solid rgba(56,189,248,.3);background:rgba(56,189,248,.08);color:#38bdf8;cursor:pointer;font-size:10px;font-weight:700;font-family:'Space Grotesk',sans-serif;letter-spacing:.03em;transition:all .15s">
         ○ Info
       </button>
       <div class="rv-expbtn-png" onclick="_rvExportPNG()"
