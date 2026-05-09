@@ -3325,3 +3325,7 @@ window._lotSetDemolare      = _lotSetDemolare;
 window._lotDemoUpdatePanel  = _lotDemoUpdatePanel;
 
 console.log('[UrbanX Lotizare+] ✅ Extensii încărcate: Releveu, Normative/lot, MapClick, Organic, DataBus');
+
+// FIX: expose _LOT on window so 11-viewer3d.js can access it
+// Without this, "ReferenceError: _LOT is not defined" occurs in viewer3d
+window._LOT = _LOT;

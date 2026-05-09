@@ -5,14 +5,6 @@
 // Expune: generateRelevee(), closeRelevee()
 // ═══════════════════════════════════════════════════════════════════════════
 
-// SAFETY: Definim un placeholder pe window IMEDIAT — dacă fișierul
-// se încarcă parțial (eroare de rețea), butonul arată eroare clară în loc de crash
-window.generateRelevee = window.generateRelevee || function(){
-  if(typeof ss==='function') ss('⏳ 15-relevee.js se inițializează — încearcă din nou în 2 secunde');
-  // Re-încearcă după ce scriptul se încarcă complet
-  setTimeout(()=>{ if(typeof window._generateReleveeReal==='function') window._generateReleveeReal(); },1500);
-};
-
 // ── Normative româneşti ─────────────────────────────────────────────────────
 const _RV_NP057 = { living:14, bedroom:12, bedroom2:10, bedroom3:8, kitchen:5, bath:3.6, wc:1.2, hall:3, storage:1.5 };
 const _RV_OMS119_H = 1.5; // ore min. însorire iarnă
@@ -5730,8 +5722,8 @@ function _rvInject(){
   document.body.appendChild(div);
 }
 
-// Expune global — SUPRASCRIE placeholder-ul de la linia 1 cu funcția reală
-window._generateReleveeReal = generateRelevee; // alias intern (folosit de placeholder dacă e necesar)
-window.generateRelevee = generateRelevee;       // expunere principală
+// Expune global
+window.generateRelevee = generateRelevee;
 window.closeRelevee    = closeRelevee;
-console.log('[UrbanX] ✅ 15-relevee.js loaded — generateRelevee() disponibil');
+
+console.log("[UrbanX] 15-relevee.js loaded OK -- generateRelevee available");
