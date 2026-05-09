@@ -2714,6 +2714,17 @@ const _RV_STEPS = [
   'Finalizez documentația orientativă…',
 ];
 
+
+// Colapseaza/expandeaza sectiunile din panoul lateral
+function _rvCollapseSection(titleEl){
+  titleEl.classList.toggle('collapsed');
+  // Ascunde/arata fratii (siblings) - toate elementele dupa rv-sec-t
+  let next = titleEl.nextElementSibling;
+  while(next){
+    next.style.display = titleEl.classList.contains('collapsed') ? 'none' : '';
+    next = next.nextElementSibling;
+  }
+}
 async function generateRelevee(){
   const ap = S.parcels[S.activeParcel ?? 0];
   if(!ap?.geo?.geometry){
@@ -5107,12 +5118,12 @@ function _rvInject(){
     css.textContent=`
 #rv-modal{position:fixed;inset:0;z-index:8000;background:rgba(4,8,18,.0);backdrop-filter:blur(0);display:flex;flex-direction:column;pointer-events:none;transition:all .25s;}
 #rv-modal.rv-modal-open{background:rgba(4,8,18,.96);backdrop-filter:blur(16px);pointer-events:all;}
-#rv-modal .rv-body{display:grid;grid-template-columns:260px 1fr 240px;height:100%;opacity:0;transition:opacity .25s .1s;}
+#rv-modal .rv-body{display:grid;grid-template-columns:260px 1fr 240px;height:100%;}
 #rv-modal .rv-body.lpanel-hidden{grid-template-columns:0px 1fr 240px;}
 #rv-modal .rv-body.lpanel-hidden .rv-lpanel{display:none!important;}
 #rv-toggle-lpanel{position:absolute;left:250px;top:50%;transform:translateY(-50%);z-index:100;background:rgba(212,175,55,.15);border:1px solid rgba(212,175,55,.3);color:#D4AF37;border-radius:0 6px 6px 0;padding:6px 4px;cursor:pointer;font-size:10px;writing-mode:vertical-rl;text-orientation:mixed;letter-spacing:.05em;transition:left .2s}
 #rv-modal .rv-body.lpanel-hidden #rv-toggle-lpanel{left:0;}
-#rv-modal.rv-modal-open .rv-body{opacity:1;}
+/* opacity gestionat pe rv-modal, nu pe body */
 .rv-topbar{display:flex;align-items:center;gap:10px;padding:0 14px;height:50px;background:rgba(6,12,26,.98);border-bottom:1px solid rgba(212,175,55,.15);flex-shrink:0;}
 .rv-logo-t{font-size:14px;font-weight:800;letter-spacing:.04em;font-family:'Space Grotesk',sans-serif;}
 .rv-sub{font-size:8px;color:#4A6080;text-transform:uppercase;letter-spacing:.1em;}
@@ -5128,6 +5139,12 @@ function _rvInject(){
 .rv-lpanel{background:#0B1426;border-right:1px solid rgba(212,175,55,.1);overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px;}
 .rv-lpanel::-webkit-scrollbar{width:3px;}.rv-lpanel::-webkit-scrollbar-thumb{background:rgba(212,175,55,.15);}
 .rv-sec-t{font-size:8px;text-transform:uppercase;letter-spacing:.12em;color:#4A6080;font-weight:700;margin-bottom:8px;font-family:'Space Grotesk',sans-serif;}
+.rv-sec-t.collapsible{cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none;padding:4px 0;}
+.rv-sec-t.collapsible:hover{color:#D4AF37;}
+.rv-sec-t.collapsible::after{content:'▴';font-size:8px;transition:transform .2s;}
+.rv-sec-t.collapsible.collapsed::after{content:'▾';}
+.rv-sec-t.collapsible.collapsed + *,.rv-sec-t.collapsible.collapsed ~ .rv-sec-body{display:none!important;}
+.rv-sec-body{transition:all .2s;}
 .rv-tog-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
 .rv-tog-lbl{font-size:10px;color:#7A8FA8;font-family:'Space Grotesk',sans-serif;}
 .rv-tog{width:32px;height:17px;border-radius:99px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);cursor:pointer;position:relative;transition:all .2s;flex-shrink:0;}
@@ -5303,9 +5320,24 @@ function _rvInject(){
   <div class="rv-sep"></div>
   <div class="rv-timer"><div class="rv-tdot" id="rv-tdot"></div><span id="rv-tval">00.0s</span></div>
   <div class="rv-tinfo" id="rv-tinfo">Se generează releveele…</div>
+  <!-- Buton Ascunde Analiză — ascunde/arata sectiunile DNA + Overlay + Bilant -->
+  <button id="rv-btn-hide-analiza" title="Ascunde/afișează secțiunile de Analiză din panoul lateral"
+    onclick="(function(btn){
+      const secs=['rv-sec-dna','rv-sec-overlay','rv-sec-bilant'];
+      const anyVisible = secs.some(id=>document.getElementById(id)?.style.display!=='none');
+      secs.forEach(id=>{
+        const el=document.getElementById(id);
+        if(el) el.style.display=anyVisible?'none':'';
+      });
+      btn.textContent=anyVisible?'◉ Analiză':'○ Analiză';
+      btn.style.opacity=anyVisible?'0.5':'1';
+    })(this)"
+    style="flex-shrink:0;height:28px;padding:0 10px;border-radius:6px;border:1px solid rgba(56,189,248,.3);background:rgba(56,189,248,.08);color:#38bdf8;cursor:pointer;font-size:10px;font-weight:700;font-family:'Space Grotesk',sans-serif;letter-spacing:.03em;transition:all .15s;">
+    ○ Analiză
+  </button>
   <button onclick="_rvExportPDF()" title="Exportă raportul complet PDF — planuri, fațade, memoriu, normative, bilanț"
     class="rv-expbtn"
-    style="margin-left:8px;height:32px;padding:0 14px;border-radius:7px;border:1.5px solid rgba(212,175,55,.6);background:linear-gradient(135deg,rgba(212,175,55,.22),rgba(212,175,55,.12));color:#F5C518;cursor:pointer;font-size:11px;font-weight:800;font-family:'Space Grotesk',sans-serif;display:flex;align-items:center;gap:6px;letter-spacing:.03em;flex-shrink:0;transition:all .15s;"
+    style="height:32px;padding:0 14px;border-radius:7px;border:1.5px solid rgba(212,175,55,.6);background:linear-gradient(135deg,rgba(212,175,55,.22),rgba(212,175,55,.12));color:#F5C518;cursor:pointer;font-size:11px;font-weight:800;font-family:'Space Grotesk',sans-serif;display:flex;align-items:center;gap:6px;letter-spacing:.03em;flex-shrink:0;transition:all .15s;"
     onmouseover="this.style.background='linear-gradient(135deg,rgba(212,175,55,.38),rgba(212,175,55,.25))'"
     onmouseout="this.style.background='linear-gradient(135deg,rgba(212,175,55,.22),rgba(212,175,55,.12))'">
     📄 Export PDF Raport
@@ -5315,7 +5347,20 @@ function _rvInject(){
 <div class="rv-body" id="rv-body-main">
   <!-- LEFT -->
   <div class="rv-lpanel" id="rv-lpanel-main">
-    <button id="rv-toggle-lpanel" title="Ascunde/afișează panoul" onclick="document.getElementById('rv-body-main').classList.toggle('lpanel-hidden');this.textContent=document.getElementById('rv-body-main').classList.contains('lpanel-hidden')?'▶ Panou':'◀ Panou'">◀ Panou</button>
+    <button id="rv-toggle-lpanel" title="Ascunde/afișează panoul" onclick="(function(btn){
+  const body=document.getElementById('rv-body-main');
+  body.classList.toggle('lpanel-hidden');
+  const hidden=body.classList.contains('lpanel-hidden');
+  btn.textContent=hidden?'▶ Panou':'◀ Panou';
+  btn.style.left=hidden?'0':'250px';
+  // Resize canvas dupa toggle (previne ecranul negru)
+  setTimeout(()=>{
+    const cv=document.getElementById('rv-canvas');
+    if(cv && window._rvRender) _rvRender();
+    // Forteaza reflow
+    if(cv){const w=cv.offsetWidth,h=cv.offsetHeight;if(w>0&&h>0){cv.width=w;cv.height=h;if(window._rvRender)_rvRender();}}
+  },220);
+})(this)">◀ Panou</button>
     <!-- FUNCȚIUNE CLĂDIRE — primul selector, cel mai important -->
     <div class="rv-rsec" style="border:1px solid rgba(212,175,55,.2);background:rgba(212,175,55,.04);border-radius:8px;padding:8px">
       <div class="rv-sec-t" style="color:#D4AF37;margin-bottom:8px">🏗 Funcțiune clădire</div>
@@ -5338,8 +5383,8 @@ function _rvInject(){
     </div>
 
     <!-- DNA Urban Radar -->
-    <div class="rv-rsec rv-dna-sec">
-      <div class="rv-sec-t">⬡ DNA Urban — Amprentă Normativă</div>
+    <div class="rv-rsec rv-dna-sec" id="rv-sec-dna">
+      <div class="rv-sec-t collapsible" onclick="_rvCollapseSection(this)" title="Ascunde/afișează">⬡ DNA Urban — Amprentă Normativă</div>
       <div id="rv-dna" style="display:flex;justify-content:center;padding:4px 0">
         <svg width="140" height="140" viewBox="0 0 140 140"><text x="70" y="75" fill="#2A3F60" font-size="9" text-anchor="middle" font-family="monospace">Se generează…</text></svg>
       </div>
@@ -5371,8 +5416,8 @@ function _rvInject(){
     </div>
 
     <!-- Overlays -->
-    <div class="rv-rsec">
-      <div class="rv-sec-t">Overlay analiză</div>
+    <div class="rv-rsec" id="rv-sec-overlay">
+      <div class="rv-sec-t collapsible" onclick="_rvCollapseSection(this)" title="Ascunde/afișează">Overlay analiză</div>
       <div class="rv-tog-row">
         <span class="rv-tog-lbl">☀ Însorire OMS 119</span>
         <div class="rv-tog" id="rv-tog-solar" onclick="_rvToggle(this,'solar')"></div>
@@ -5417,8 +5462,8 @@ function _rvInject(){
     </div>
 
     <!-- Bilanț -->
-    <div class="rv-rsec">
-      <div class="rv-sec-t">Bilanț suprafețe</div>
+    <div class="rv-rsec" id="rv-sec-bilant">
+      <div class="rv-sec-t collapsible" onclick="_rvCollapseSection(this)" title="Ascunde/afișează">Bilanț suprafețe</div>
       <div id="rv-bilant"><div style="font-size:10px;color:#4A6080;text-align:center;padding:8px">—</div></div>
     </div>
 
