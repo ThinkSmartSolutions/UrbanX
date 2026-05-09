@@ -170,6 +170,7 @@ const _LOT = {
       desc:'Navă centrală + turn clopotniță', categorie:'cult',
       render3d:'bcatolica'
     },
+  },  // closes tipuri{}
 
   // ── Clădiri existente marcate pentru demolare ─────────────────────────
   demoIds: new Set(),     // Set de indecși din S.ctx.features marcate demo
@@ -3326,6 +3327,5 @@ window._lotDemoUpdatePanel  = _lotDemoUpdatePanel;
 
 console.log('[UrbanX Lotizare+] ✅ Extensii încărcate: Releveu, Normative/lot, MapClick, Organic, DataBus');
 
-// FIX: expose _LOT on window so 11-viewer3d.js can access it
-// Without this, "ReferenceError: _LOT is not defined" occurs in viewer3d
+// FIX: expose _LOT on window for 11-viewer3d.js access
 window._LOT = _LOT;

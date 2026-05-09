@@ -1402,7 +1402,6 @@ function _rvRenderSection(b){
   _rvDrawNorth(ctx,W-38,44,P.frontDir);
   _rvDrawScale(ctx,pad,H+28,_RV.scale*.85);
   _rvDrawCartus(ctx,W,H+40,P,null,'SECȚIUNE A-A');
-}
 
 function _rvRenderAxono(b){
   const {P,bW,bD,niv,cores}=b;
@@ -1566,7 +1565,7 @@ function _rvRenderAxono(b){
   ctx.fillStyle='rgba(148,163,184,.4)';ctx.font='7px IBM Plex Mono';ctx.textAlign='center';
   ctx.fillText('📦 Vedere izometrică explodată · '+SHOW_FLOORS+' din '+niv+' etaje afișate · Folosiți + / - pentru zoom',W/2,H-12);
   ctx.textAlign='left';
-}
+  { // block scope for subsequent render
   const iso=(x,y,z)=>({px:(x-y)*Math.cos(Math.PI/6)*s, py:(x+y)*Math.sin(Math.PI/6)*s-z*s*.55});
   const {cv,ctx}=_rvInitCanvas(780,560);
   ctx.fillStyle='#060C1A';ctx.fillRect(0,0,780,560);
@@ -1711,6 +1710,7 @@ function _rvRenderAxono(b){
   _rvDrawNorth(ctx,430,42,P.frontDir);
 }
 
+  } // end block scope
 function _rvDrawDims(ctx,ox,oy,pw,ph,bW,bD,P,SC){
   ctx.strokeStyle='rgba(212,175,55,.4)';ctx.fillStyle='rgba(212,175,55,.75)';
   ctx.font='bold 9px IBM Plex Mono';ctx.lineWidth=.8;
