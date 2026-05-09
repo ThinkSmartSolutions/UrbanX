@@ -51,6 +51,40 @@ async function _captureStudyMapsSafe(ap, progressCb){
   return caps;
 }
 
+// ── Smart Map Cropping (Audit rec. III.1-4) ─────────────────────────────
+// Adapteaza viewport-ul hărții la forma parcelei înainte de captură
+// Parcele lungi-înguste → zoom diferit; aspect ratio corect
+function _smartFitParcel(ap){
+  if(!ap?.geo?.geometry || typeof map === 'undefined') return;
+  try{
+    const bbox = turf.bbox(ap.geo);
+    const [w0,s0,e0,n0] = bbox;
+    const wDeg = e0-w0, hDeg = n0-s0;
+    const aspect = wDeg / Math.max(hDeg, 0.00001);
+    // Padding adaptiv: mai mic pentru parcele mici, mai mare pentru context
+    const paddingPct = ap.area < 500 ? 0.5 : ap.area < 2000 ? 0.35 : 0.25;
+    const padLng = wDeg * paddingPct;
+    const padLat = hDeg * paddingPct;
+    // Aspect ratio correction: dacă parcela e foarte lungă/îngustă
+    // adăugăm padding suplimentar pe axa scurtă
+    const padExtra = aspect > 3 ? hDeg * 0.8 : aspect < 0.33 ? wDeg * 0.8 : 0;
+    const bounds = [
+      [w0 - padLng - (aspect > 3 ? 0 : padExtra),
+       s0 - padLat - (aspect < 0.33 ? padExtra : 0)],
+      [e0 + padLng + (aspect > 3 ? 0 : padExtra),
+       n0 + padLat + (aspect < 0.33 ? padExtra : 0)]
+    ];
+    map.fitBounds(bounds, {padding:10, duration:0, maxZoom:19});
+  }catch(e){}
+}
+
+// Captură cu smart cropping aplicat automat
+async function _captureStudyMapsSmartCrop(ap, progressCb){
+  _smartFitParcel(ap);
+  await new Promise(r=>setTimeout(r, 600)); // wait for map to settle
+  return await _captureStudyMapsSafe(ap, progressCb);
+}
+
 
 (function(){
   const _colorDefs=[
@@ -185,6 +219,59 @@ function _pdfDisclaimerBlock(pdf, W, cy, studyClass, customText){
   return cy + h + 4;
 }
 
+// ── Regulatory Rule Engine (Audit rec. B) ────────────────────────────────
+// Reguli urbanistice machine-readable: IF condition THEN conflict/warning
+// Extinde Conflict Detection cu reguli structurate per UTR și normativ
+const _URBAN_RULES = [
+  // POT/CUT conformitate
+  { id:'POT_MAX',  sev:'conflict', norm:'RLU UTR',
+    check:(p,r)=> parseFloat(p?.pot||0) > parseFloat(r?.pot||100),
+    msg:(p,r)=>`POT propus (${p?.pot}%) depășește max. PUG (${r?.pot}%) — necesită PUZ` },
+  { id:'CUT_MAX',  sev:'conflict', norm:'RLU UTR',
+    check:(p,r)=> parseFloat(p?.cut||0) > parseFloat(r?.cut||99),
+    msg:(p,r)=>`CUT propus (${p?.cut}) depășește max. PUG (${r?.cut}) — necesită PUZ` },
+  { id:'H_MAX',    sev:'conflict', norm:'RLU + AACR',
+    check:(p,r)=> parseFloat(p?.h||0)>0 && r?.h && parseFloat(p?.h) > parseFloat(r?.h),
+    msg:(p,r)=>`H propus (${p?.h}m) depășește H max PUG (${r?.h}m)` },
+  // Retrageri
+  { id:'RF_MIN',   sev:'warning',  norm:'RLU UTR',
+    check:(p,r)=> r?.rf && parseFloat(p?.rf||99) < parseFloat(r?.rf),
+    msg:(p,r)=>`Retragere față propusă (${p?.rf}m) sub minimul RLU (${r?.rf}m)` },
+  { id:'RL_MIN',   sev:'warning',  norm:'RLU UTR',
+    check:(p,r)=> r?.rl && parseFloat(p?.rl||99) < parseFloat(r?.rl),
+    msg:(p,r)=>`Retragere laterală propusă (${p?.rl}m) sub minimul RLU (${r?.rl}m)` },
+  // Spatii verzi
+  { id:'SV_MIN',   sev:'warning',  norm:'Legea 24/2007',
+    check:(p,r)=> r?.sv && parseFloat(p?.sv||99) < parseFloat(r?.sv),
+    msg:(p,r)=>`SV propus (${p?.sv}%) sub minimul RLU (${r?.sv}%)` },
+  // ISU
+  { id:'ISU_H',    sev:'conflict', norm:'P118-2/2013',
+    check:(p)=> { const h=parseFloat(p?.h||0); return h>8; },
+    msg:(p)=>`H=${p?.h}m > 8m — aviz ISU obligatoriu înainte de AC` },
+  { id:'ISU_SD',   sev:'warning',  norm:'P118-2/2013',
+    check:(p,r,area)=> { const sd=Math.round((area||0)*parseFloat(p?.cut||1)); return sd>600; },
+    msg:(p,r,area)=>`SD estimat ~${Math.round((area||0)*parseFloat(p?.cut||1))}mp > 600mp — aviz ISU probabil` },
+];
+
+// Aplică regulile și returnează conflicte + avertismente
+function _runUrbanRules(params, area){
+  const conflicts = [], warnings = [];
+  const utr = (typeof S !== 'undefined') ? (S.parcels?.[S.activeParcel??0]?.utr || '') : '';
+  const rules = (typeof REGULI !== 'undefined' && REGULI[utr]) ? REGULI[utr] : {};
+  _URBAN_RULES.forEach(rule => {
+    try {
+      if(rule.check(params, rules, area)){
+        const item = { id: rule.id, msg: rule.msg(params, rules, area), norm: rule.norm };
+        if(rule.sev === 'conflict') conflicts.push(item);
+        else warnings.push(item);
+      }
+    } catch(e) {}
+  });
+  return { conflicts, warnings };
+}
+
+
+
 
 
 async function generateShadowStudy(){
@@ -234,7 +321,7 @@ async function generateShadowStudy(){
   pdf.text(isConform?'CONFORM — Umbra acceptabila, insorire asigurata':'ATENTIE — Verificare suplimentara necesara',W/2,220,{align:'center'});
   pdf.setFontSize(7.5);pdf.text('Prag OMS 119/2014: altitudine solara min. 15° la solstitiu iarna · Valoare calculata: '+solarAlt(lat,11,12).toFixed(1)+'°',W/2,228,{align:'center'});
   pdf.setTextColor(100,120,150);pdf.setFontSize(7);pdf.setFont('helvetica','normal');
-  pdf.text('Generat: '+S2(dateStr)+' · Document orientativ · UrbanX TSS·FG',W/2,H-12,{align:'center'});
+  pdf.text('Generat: '+S2(dateStr)+' · '+_getPUGVersion().hash+' · Document orientativ · UrbanX TSS·FG',W/2,H-12,{align:'center'});
   // AUDIT: Clasificare studiu solar — calcul normativ + date OSM
   pdf.setFillColor(220,235,255);pdf.rect(0,H-20,W,7,'F');
   pdf.setFillColor(59,130,246);pdf.rect(0,H-20,2,7,'F');
@@ -745,7 +832,7 @@ async function generateWindStudy(){
   pdf.text('Analiza expunere vant · Zone de calm · Confort pietonal Lawson',W/2,100,{align:'center'});
   pdf.setFillColor(30,50,90);pdf.rect(20,112,W-40,80,'F');pdf.setFillColor(...GOLD);pdf.rect(20,112,3,80,'F');
   [['Nr. cadastral:',nrcad],['Zona UTR:',utr],['Suprafata teren:',area+' mp'],['H propus:',aedisH.toFixed(1)+'m'],['H medie zona:',hMed.toFixed(1)+'m'],['Raport H/Hmedio:',((aedisH/Math.max(1,hMed)).toFixed(2))],['Directie vant predominanta:','NE (iarna) / SV (vara)'],['Viteza vant de referinta:','V0=25m/s (zona II STAS 10101)']].forEach(([l,v],i)=>{pdf.setTextColor(150,170,200);pdf.setFontSize(8);pdf.setFont('helvetica','normal');pdf.text(S2(l),26,124+i*9.5);pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text(S2(v),96,124+i*9.5);});
-  pdf.setTextColor(100,120,150);pdf.setFontSize(7);pdf.text('Generat: '+S2(dateStr)+' · Document orientativ · UrbanX TSS·FG',W/2,H-12,{align:'center'});
+  pdf.setTextColor(100,120,150);pdf.setFontSize(7);pdf.text('Generat: '+S2(dateStr)+' · '+_getPUGVersion().hash+' · Document orientativ · UrbanX TSS·FG',W/2,H-12,{align:'center'});
   // Harta amplasament pe cover (Standard 3D) - banda jos
   if(caps.imgLocation&&caps.imgLocation.length>500){
     try{
@@ -956,7 +1043,7 @@ async function generateGreenStudy(){
   pdf.text('Bilantu spatii verzi · Plantare · Coeficient permeabilitate · Conf. Legii 24/2007',W/2,100,{align:'center'});
   pdf.setFillColor(30,50,90);pdf.rect(20,112,W-40,80,'F');pdf.setFillColor(...GOLD);pdf.rect(20,112,3,80,'F');
   [['Nr. cadastral:',nrcad],['Zona UTR:',utr],['Suprafata teren:',area+' mp'],['SV minim PUG ('+params?.sv+'%):',svMin.toLocaleString('en-US')+' mp'],['SV obligatoriu (min 20%):',svObl.toLocaleString('en-US')+' mp'],['Suprafata construita max (POT '+potMax+'%):',scMax.toLocaleString('en-US')+' mp'],['Suprafata libera estimata:',Math.max(0,areaNum-scMax).toLocaleString('en-US')+' mp'],['H propus:',aedisH.toFixed(1)+'m']].forEach(([l,v],i)=>{pdf.setTextColor(150,170,200);pdf.setFontSize(8);pdf.setFont('helvetica','normal');pdf.text(S2(l),26,124+i*9.5);pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text(S2(v),106,124+i*9.5);});
-  pdf.setTextColor(100,120,150);pdf.setFontSize(7);pdf.text('Generat: '+S2(dateStr)+' · Document orientativ · UrbanX TSS·FG',W/2,H-12,{align:'center'});
+  pdf.setTextColor(100,120,150);pdf.setFontSize(7);pdf.text('Generat: '+S2(dateStr)+' · '+_getPUGVersion().hash+' · Document orientativ · UrbanX TSS·FG',W/2,H-12,{align:'center'});
   // Harta amplasament pe cover (Standard 3D) - banda jos
   if(caps.imgLocation&&caps.imgLocation.length>500){
     try{
@@ -1234,7 +1321,7 @@ async function generateMobilityStudy(){
   pdf.text('Necesarul de parcaje · Accese · Flux pietonal si auto · Norma NP 051/2012',W/2,100,{align:'center'});
   pdf.setFillColor(30,50,90);pdf.rect(20,112,W-40,80,'F');pdf.setFillColor(...GOLD);pdf.rect(20,112,3,80,'F');
   [['Nr. cadastral:',nrcad],['Zona UTR:',utr],['Suprafata teren:',area+' mp'],['Functiune propusa:',fnLabel],['Nr. niveluri propus:',niv+' niv.'],['SD estimata:',sdEst.toLocaleString('en-US')+' mp'],['Locuinte estimate:',locuinteEst+' apartamente'],['Parcaje obligatorii (min):',pkObl+' locuri']].forEach(([l,v],i)=>{pdf.setTextColor(150,170,200);pdf.setFontSize(8);pdf.setFont('helvetica','normal');pdf.text(S2(l),26,124+i*9.5);pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text(S2(v),100,124+i*9.5);});
-  pdf.setTextColor(100,120,150);pdf.setFontSize(7);pdf.text('Generat: '+S2(dateStr)+' · Document orientativ · UrbanX TSS·FG',W/2,H-12,{align:'center'});
+  pdf.setTextColor(100,120,150);pdf.setFontSize(7);pdf.text('Generat: '+S2(dateStr)+' · '+_getPUGVersion().hash+' · Document orientativ · UrbanX TSS·FG',W/2,H-12,{align:'center'});
   // Harta amplasament pe cover (Standard 3D) - banda jos
   if(caps.imgLocation&&caps.imgLocation.length>500){
     try{
@@ -1432,7 +1519,7 @@ async function generateDensityStudy(){
   pdf.text('Comparatie indicatori propusi vs zona · Caracter predominant · Conformitate PUG',W/2,100,{align:'center'});
   pdf.setFillColor(30,50,90);pdf.rect(20,112,W-40,80,'F');pdf.setFillColor(...GOLD);pdf.rect(20,112,3,80,'F');
   [['Nr. cadastral:',nrcad],['Zona UTR:',utr],['Suprafata teren:',area+' mp'],['POT propus / PUG max:',potProp+'% / '+potProp+'%'],['CUT propus / PUG max:',cutProp+' / '+cutProp],['H propus / H max vecin:',aedisH.toFixed(1)+'m / '+(hMed*1.5).toFixed(1)+'m'],['H medie zona (200m raza):',hMed.toFixed(1)+'m'],['Nr. cladiri in context incarcat:',vecini.length+' buc.']].forEach(([l,v],i)=>{pdf.setTextColor(150,170,200);pdf.setFontSize(8);pdf.setFont('helvetica','normal');pdf.text(S2(l),26,124+i*9.5);pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text(S2(v),108,124+i*9.5);});
-  pdf.setTextColor(100,120,150);pdf.setFontSize(7);pdf.text('Generat: '+S2(dateStr)+' · Document orientativ · UrbanX TSS·FG',W/2,H-12,{align:'center'});
+  pdf.setTextColor(100,120,150);pdf.setFontSize(7);pdf.text('Generat: '+S2(dateStr)+' · '+_getPUGVersion().hash+' · Document orientativ · UrbanX TSS·FG',W/2,H-12,{align:'center'});
   // Harta amplasament pe cover (Standard 3D) - banda jos
   if(caps.imgLocation&&caps.imgLocation.length>500){
     try{
@@ -4886,6 +4973,12 @@ async function generateStudiuFezabilitate(paramOverrides){
   kv('SV MINIM',params?.sv+'%',14+(kw+3)*2,cy,kw,GREEN);
   kv('PARCAJE MIN',params?.pk+' loc/unit',14+(kw+3)*3,cy,kw,PURPLE);
   cy+=24;
+  // Confidence badge — indicatori PUG sunt sursa PUG_GIS (90% confidence)
+  try{_pdfConfBadge(pdf,W-46,cy-22,'PUG_GIS');}catch(e){}
+  // PUG versioning juridic
+  const _pugVF=_getPUGVersion();
+  pdf.setTextColor(100,120,150);pdf.setFontSize(5.5);pdf.setFont('helvetica','italic');
+  pdf.text('Sursa: '+S2(_pugVF.label||'PUG local'),14,cy-2);
   cy=sec('2. PARAMETRI TEHNICI ESTIMATIVI AI INVESTITIEI',cy);cy+=2;
   cy=tblRow(['Parametru','Valoare estimativă','Baza de calcul','Obs.'],cy,true,[70,38,55,19]);
   [['Suprafață construită la sol (SC)',scMax+' mp (POT='+params?.pot+'%)','RLU UTR '+utr,'Estimativ'],
@@ -5663,6 +5756,20 @@ async function generateStudiuAmplasament(){
   // Conflict 5: SV minim
   const svCalcConf = Math.round(areaNum*parseFloat(params?.sv||20)/100);
   if(_propCUT > 2.5 && svCalcConf < areaNum*0.15) _warnings.push({tip:'SPAȚII VERZI',desc:'CUT='+_propCUT+' cu SV minim ('+svCalcConf+'mp/'+Math.round(areaNum*0.2)+'mp) — risc neconformitate'});
+
+  // Conflict 6: Regulatory Rule Engine — aplica toate regulile structurate
+  try {
+    const _ruleResults = _runUrbanRules(params, areaNum);
+    _ruleResults.conflicts.forEach(c => _conflicts.push({tip:c.id, desc:c.msg+' ['+c.norm+']'}));
+    _ruleResults.warnings.forEach(w => _warnings.push({tip:w.id, desc:w.msg+' ['+w.norm+']'}));
+  } catch(e) {}
+
+  // Deduplica conflicte (acelasi tip poate aparea din ambele surse)
+  const _dedupC = [], _seenC = new Set();
+  _conflicts.forEach(c=>{ if(!_seenC.has(c.tip)){_seenC.add(c.tip);_dedupC.push(c);} });
+  _conflicts.length = 0; _dedupC.forEach(c=>_conflicts.push(c));
+
+
 
 
 
