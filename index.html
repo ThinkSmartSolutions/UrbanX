@@ -1350,19 +1350,19 @@ canvas#c2d{width:100%;height:100%;display:block}
 <!-- UrbanX JS Modules — ordinea de incarcare e importanta -->
 <script src="js/00-globals.js?v=2026050601"></script>
 <script src="js/02-map-core.js?v=2026050804"></script>
-<script src="js/03-ui-panel.js?v=2026050902"></script>
+<script src="js/03-ui-panel.js?v=2026050903"></script>
 <script src="js/04-search.js?v=2026050601"></script>
 <script src="js/05-cad-utils.js?v=2026050601"></script>
 <script src="js/06-aedis.js?v=2026050802"></script>
 <script src="js/07-pdf-utils.js?v=2026050601"></script>
-<script src="js/08-lotizare.js?v=2026050900"></script>
+<script src="js/08-lotizare.js?v=2026050901"></script>
 <script src="js/09-pdf-engine.js?v=2026050804"></script>
 <script src="js/10-studies.js?v=2026050902"></script>
-<script src="js/11-viewer3d.js?v=2026050804"></script>
+<script src="js/11-viewer3d.js?v=2026050902"></script>
 <script src="js/12-admin.js?v=2026050601"></script>
-<script src="js/13-info-drawer.js?v=2026050702"></script>
+<script src="js/13-info-drawer.js?v=2026050901"></script>
 <script src="js/14-docx-export.js?v=2026050601"></script>
-<script src="js/15-relevee.js?v=2026050901"></script>
+<script src="js/15-relevee.js?v=2026050902"></script>
 <script src="js/fixes-audit.js?v=2026050601"></script>
 <script src="js/map-resize-fix.js?v=2026050601"></script>
 
@@ -1976,16 +1976,34 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 <!-- ═══ PATCH: generateRelevee alias + Info Drawer fix ════════════════════ -->
 <script>
-// FIX: generateRelevee este definit în 15-relevee.js dar poate fi redenumit.
-// Adăugăm un alias de siguranță după încărcarea tuturor scripturilor.
+// SHIM: _lotizareActive poate fi undefined dacă 08-lotizare.js nu s-a inițializat corect
+// Prevenim "ReferenceError: _lotizareActive is not defined" în 02-map-core.js și 11-viewer3d.js
+if(typeof window._lotizareActive === 'undefined') window._lotizareActive = false;
+// SHIM: _LOT - poate fi undefined dacă 08-lotizare.js nu s-a inițializat
+if(typeof window._LOT === 'undefined') window._LOT = {
+  _loturi:[], _drumuri:[], tipuri:{}, tipMix:{}, tipCount:{}, tipOverride:{},
+  demoMode:false, retFront:0, retSpate:0, retLateral:0,
+  lotAria:400, drumLat:6, drumProcent:20
+};
+</script>
+<script>
+// FIX: generateRelevee — încearcă toate variantele posibile de nume din 15-relevee.js
 window.addEventListener('load', function(){
-  // Dacă 15-relevee.js nu a expus generateRelevee, afișăm eroare clară
   if(typeof window.generateRelevee !== 'function'){
-    window.generateRelevee = function(){
-      ss('❌ 15-relevee.js: funcția generateRelevee nu este disponibilă — verificați că fișierul este actualizat (v=2026050901+)');
-      console.error('[UrbanX] generateRelevee not defined — 15-relevee.js may not be loaded or function was renamed');
-    };
-    console.warn('[UrbanX] generateRelevee fallback instalat — 15-relevee.js needs update');
+    // Poate funcția a fost redenumită în 15-relevee.js
+    const _alts = ['_rvOpen','openRelevee','rvGenerate','generateMemoriuTehnic','_generateRelevee','generateMTP'];
+    const _found = _alts.find(n => typeof window[n] === 'function');
+    if(_found){
+      window.generateRelevee = window[_found];
+      console.log('[UrbanX] generateRelevee → alias la ' + _found);
+    } else {
+      window.generateRelevee = function(){
+        ss('❌ Memoriu Tehnic: 15-relevee.js nu s-a încărcat corect. Verificați Network tab → HTTP 200 pe fișier.');
+        console.error('[UrbanX] generateRelevee missing. Funcții _rv disponibile:', 
+          Object.keys(window).filter(k=>k.startsWith('_rv')||k.includes('elevee')||k.includes('emoriu')));
+      };
+      console.warn('[UrbanX] generateRelevee: fallback activ — 15-relevee.js nu a expus funcția');
+    }
   }
 
   // PATCH Info Drawer: dacă 13-info-drawer.js nu a actualizat titlurile

@@ -519,15 +519,16 @@ const RAPORT_INFO = {
 
   // ── STUDII TEHNICO-ECONOMICE ────────────────────────────────────────────
   amplasament: {
-    ico: '🗺', label: 'Studiu de Amplasament & Teritoriu',
-    badge: 'recomandat', badgeLabel: 'Document fundament · 13 pagini',
+    ico: '🗺', label: 'Studiu de Amplasament & Context Teritorial',
+    badge: 'recomandat', badgeLabel: 'Analiză teritorială · 13 pagini',
     color: '129,140,248',
     fn: 'generateStudiuAmplasament()',
-    ce: 'Analizează amplasamentul în 12 domenii tehnice integrate: indicatori PUG, situație juridică, infrastructură edilitară, patrimoniu LMI, servituți, mobilitate, seismicitate, însorire, vânt, zgomot, geotehnică, impact mediu și estimare financiară. Constituie documentul fundament pe baza căruia se elaborează toate studiile de specialitate ulterioare.',
-    dece: 'Studiul de Amplasament centralizează toate informațiile tehnice relevante despre un teren înainte de a angaja cheltuieli de proiectare. Determină automat lista studiilor obligatorii și avizelor necesare, economisind timp și evitând surprize în procesul de autorizare.',
+    ce: 'Analizează amplasamentul în 12 domenii tehnice <b>teritoriale și urbanistice</b>: indicatori PUG/UTR, situație juridică, infrastructură edilitară, patrimoniu LMI, servituți, mobilitate, seismicitate, însorire, vânt, zgomot, geotehnică, impact mediu și estimare financiară. Constituie documentul fundament pe baza căruia se elaborează toate studiile de specialitate ulterioare.<br><br><b>⚠ Diferit de Memoriu Tehnic Preliminar:</b> acesta analizează <b>TERENUL și CONTEXTUL URBAN</b> (unde construiești, ce restricții există, ce avize trebuie), nu planurile arhitecturale.',
+    dece: 'Studiul de Amplasament & Context Teritorial centralizează toate informațiile tehnice despre un teren înainte de cheltuieli de proiectare. Detectează automat conflicte urbanistice, determină lista studiilor obligatorii și avizelor necesare, economisind timp și evitând surprize în autorizare.<br><br>Nu confunda cu <b>Memoriu Tehnic Preliminar</b> care generează <b>planuri arhitecturale</b> (planuri etaje, secțiuni A-A, axonometrie, bilanț suprafețe).',
     legal: 'Legea 350/2001 (urbanism) · HG 525/1996 (RGU) · P100-1/2013 (seismic) · CR 1-1-4/2012 (vânt) · OMS 119/2014 (însorire) · NP 074/2014 (geotehnică) · HG 930/2016 (aeronautic) · Legea 422/2001 (patrimoniu)',
     output: [
       { ico: '📐', txt: 'Indicatori PUG complet: POT/CUT/H/SV/Pk/retrageri + bilanț suprafețe' },
+      { ico: '⚡', txt: 'Conflict Detection Engine: verificare automată H max, AACR, ISU, LMI, SV' },
       { ico: '⚖️', txt: 'Situație juridică cadastrală: CF, servituți, acces, sarcini' },
       { ico: '🔌', txt: 'Infrastructură tehnico-edilitară: rețele disponibile, consumuri, costuri branșare' },
       { ico: '🏛', txt: 'Patrimoniu LMI: zone protejate, monumente, distanțe, procedura aviz DJCPN' },
@@ -539,7 +540,7 @@ const RAPORT_INFO = {
       { ico: '✈️', txt: 'Aeronautic AACR/ROMATSA: distanță aeroport, H max admisă ICAO' },
       { ico: '🌿', txt: 'Impact mediu: aer, apă, sol, deșeuri, arii protejate, Natura 2000' },
       { ico: '📊', txt: 'Dashboard studii necesare: 12 domenii cu verdict OBLIGATORIU/RECOMANDAT/OK' },
-      { ico: '💶', txt: 'Estimare financiară primară: cost construcție, teren, ROI orientativ' },
+      { ico: '💶', txt: 'Estimare financiară primară: cost construcție SDA, venituri SU, ROI orientativ' },
     ],
     nu: ['Nu există excepții — recomandat pentru orice investiție imobiliară indiferent de dimensiune', 'Nu înlocuiește studiile tehnice de specialitate individuale obligatorii prin lege', 'Valorile sunt orientative — verificarea obligatorie la ANCPI, Primărie și operatori utilități'],
   },
@@ -564,12 +565,12 @@ const RAPORT_INFO = {
     nu: ['Clădiri cu H≤8m ȘI suprafață desfășurată ≤600mp fără funcțiuni cu pericol special', 'Construcții provizorii sau anexe gospodărești fără funcțiune publică', 'Nu înlocuiește avizul oficial ISU Moldova obligatoriu pentru dosarul AC'],
   },
   relevee: {
-    ico: '📐', label: 'Relevee Instant',
-    badge: 'recomandat', badgeLabel: 'Pre-proiectare · PDF instant',
+    ico: '📐', label: 'Memoriu Tehnic Preliminar',
+    badge: 'recomandat', badgeLabel: 'Pre-proiectare · Arhitectural',
     color: '212,175,55',
     fn: 'generateRelevee()',
-    ce: 'Generează instant planuri funcționale orientative pentru clădirea propusă pe parcela activă: plan nivel per etaj cu distribuția camerelor conform NP 057/2002, fațadă principală cotată, secțiune transversală, vedere axonometrică 3D și bilanț complet de suprafețe. Planurile respectă normativele de însorire (OMS 119/2014), evacuare ISU (P118-2/2013) și accesibilitate PMR.',
-    dece: 'Înainte de a angaja un arhitect, releveul instant UrbanX îți arată în câteva secunde cum ar putea arăta clădirea pe parcela ta: câte apartamente încap, cum sunt distribuite camerele, care sunt suprafețele estimate și dacă volumul respectă indicatorii PUG. Este documentul perfect pentru a porni o discuție cu arhitectul, cu banca sau cu investitorii.',
+    ce: 'Generează instant planuri funcționale orientative pentru clădirea propusă pe parcela activă: plan nivel per etaj cu distribuția camerelor conform NP 057/2002, fațadă principală cotată, secțiune transversală A-A, vedere axonometrică 3D și bilanț complet de suprafețe. <br><br><b>⚠ Diferit de Studiu de Amplasament:</b> acesta este un document <b>ARHITECTURAL</b> (cum arată clădirea pe interior — planuri, secțiuni, suprafețe), nu teritorial.',
+    dece: 'Înainte de a angaja un arhitect, Memoriul Tehnic Preliminar UrbanX îți arată în câteva secunde cum ar putea arăta clădirea pe parcela ta: câte apartamente încap, cum sunt distribuite camerele, care sunt suprafețele estimate și dacă volumul respectă indicatorii PUG. Este documentul perfect pentru a porni o discuție cu arhitectul, cu banca sau cu investitorii.<br><br>Nu confunda cu <b>Studiul de Amplasament & Context Teritorial</b> care analizează <b>terenul și contextul urban</b> (UTR, restricții, LMI, utilități), nu propunerea arhitecturală.',
     legal: 'NP 057/2002 (locuințe) · OMS 119/2014 (igienă și însorire) · P118-2/2013 (securitate incendiu) · NP 051/2012 (accesibilitate PMR) · P100-1/2013 (proiectare seismică) · NP 067/2002 (parcaje)',
     output: [
       { ico: '📐', txt: 'Plan Parter și Planuri Etaj pentru toate nivelurile — camere, baie, bucătărie, hol, balcon' },
