@@ -3123,6 +3123,24 @@ function _rvCalcROI(){
     profEl.textContent=(profit>0?'+':'')+_fmtEur(profit)+' profit brut';
   }
   if(subEl) subEl.textContent=`Cost execuție: ${_fmtEur(totalCost)} · Venituri vânzare: ${_fmtEur(totalRev)} · ROI ~${roi}%`;
+  // ── Sincronizare cu panoul DREPT (rv-rpanel) ─────────────────────────────
+  try{
+    const rpCost=document.getElementById('rv-rp-cost');
+    const rpSell=document.getElementById('rv-rp-sell');
+    const rpProfit=document.getElementById('rv-rp-profit');
+    const rpSub=document.getElementById('rv-rp-sub');
+    const rpCs=document.getElementById('rv-rp-cost-slider');
+    const rpSs=document.getElementById('rv-rp-sell-slider');
+    if(rpCost) rpCost.textContent=cost;
+    if(rpSell) rpSell.textContent=sell;
+    if(rpCs&&rpCs.value!==String(cost)) rpCs.value=cost;
+    if(rpSs&&rpSs.value!==String(sell)) rpSs.value=sell;
+    if(rpProfit){
+      rpProfit.style.color=profit>0?'#22C55E':'#EF4444';
+      rpProfit.textContent=(profit>0?'+':'')+_fmtEur(profit);
+    }
+    if(rpSub) rpSub.textContent=`Cost: ${_fmtEur(totalCost)} · Venituri: ${_fmtEur(totalRev)}\nROI: ~${roi}% · SDA: ${Math.round(b.sdaTotal)}mp`;
+  }catch(e){}
 }
 
 // (no duplicate _rvFmt — see line 86)
@@ -5802,16 +5820,133 @@ function _rvInject(){
     </div><!-- end mob-sheet -->
   <!-- RIGHT -->
   <div class="rv-rpanel">
+
+    <!-- ── Secțiunea 1: Normative aplicate (dinamice) ── -->
     <div class="rv-rsec">
-      <div class="rv-sec-t">Normative aplicate</div>
-      <div style="font-size:8.5px;color:#4A6080;line-height:1.8;font-family:'IBM Plex Mono',monospace;">
-        NP 057/2002<br>OMS 119/2014<br>P118-1/2013<br>P100-1/2013<br>NP 051/2012<br>Legea 10/1995<br>PUG Iași în vigoare
+      <div class="rv-sec-t collapsible" onclick="_rvCollapseSection(this)">Normative aplicate</div>
+      <div id="rv-norms-applied" style="font-size:8.5px;color:#4A6080;line-height:1.8;font-family:'IBM Plex Mono',monospace;">
+        NP 057/2002<br>OMS 119/2014<br>P118-1/2015<br>P100-1/2022<br>NP 051/2012<br>Legea 10/1995<br>PUG Iași în vigoare
       </div>
     </div>
+
+    <!-- ── Secțiunea 2: Info parcelă activă ── -->
     <div class="rv-rsec">
-      <div class="rv-sec-t">Info parcelă activă</div>
+      <div class="rv-sec-t collapsible" onclick="_rvCollapseSection(this)">Info parcelă activă</div>
       <div id="rv-parcel-info" style="font-size:9px;color:#4A6080;font-family:'IBM Plex Mono',monospace;line-height:1.8">—</div>
     </div>
+
+    <!-- ── Secțiunea 3: Rentabilitate în timp real (oglindă din lpanel) ── -->
+    <div class="rv-rsec" id="rv-rpanel-roi">
+      <div class="rv-sec-t collapsible" onclick="_rvCollapseSection(this)" style="color:#22C55E">💰 Rentabilitate estimativă</div>
+      <div id="rv-rpanel-roi-body" style="padding-top:6px">
+        <!-- ROI live sync din panoul stâng -->
+        <div style="display:flex;gap:8px;margin-bottom:6px">
+          <div style="flex:1;background:rgba(212,175,55,.06);border:1px solid rgba(212,175,55,.12);border-radius:5px;padding:6px;text-align:center">
+            <div style="font-size:7px;color:#6A8090;margin-bottom:2px">Preț construcție</div>
+            <div id="rv-rp-cost" style="font-size:14px;font-weight:800;color:#D4AF37">—</div>
+            <div style="font-size:7px;color:#4A6080">€/m² SDA</div>
+          </div>
+          <div style="flex:1;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.12);border-radius:5px;padding:6px;text-align:center">
+            <div style="font-size:7px;color:#6A8090;margin-bottom:2px">Preț vânzare</div>
+            <div id="rv-rp-sell" style="font-size:14px;font-weight:800;color:#22C55E">—</div>
+            <div style="font-size:7px;color:#4A6080">€/m² SU</div>
+          </div>
+        </div>
+        <!-- Rezultat mare -->
+        <div style="background:rgba(255,255,255,.03);border-radius:6px;padding:8px;text-align:center;margin-bottom:8px">
+          <div style="font-size:8px;color:#4A6080;margin-bottom:4px">PROFIT BRUT ESTIMAT</div>
+          <div id="rv-rp-profit" style="font-size:18px;font-weight:900;color:#22C55E">—</div>
+          <div id="rv-rp-sub" style="font-size:7.5px;color:#4A6080;margin-top:3px;line-height:1.5">—</div>
+        </div>
+        <!-- Mini sliders sincronizate -->
+        <div style="font-size:7.5px;color:#4A6080;margin-bottom:2px">Ajustează preț construcție:</div>
+        <input type="range" min="450" max="900" value="650" id="rv-rp-cost-slider"
+          oninput="const lv=document.getElementById('rv-roi-cost');if(lv){lv.value=this.value;lv.dispatchEvent(new Event('input'));}"
+          style="width:100%;height:3px;accent-color:#D4AF37;margin-bottom:6px">
+        <div style="font-size:7.5px;color:#4A6080;margin-bottom:2px">Ajustează preț vânzare:</div>
+        <input type="range" min="800" max="2500" value="1200" id="rv-rp-sell-slider"
+          oninput="const lv=document.getElementById('rv-roi-sell');if(lv){lv.value=this.value;lv.dispatchEvent(new Event('input'));}"
+          style="width:100%;height:3px;accent-color:#22C55E">
+        <div style="font-size:7px;color:#2A3F60;margin-top:6px;line-height:1.4">
+          * Exclude: teren, TVA 19%, taxe, proiectare ~12%. Modifici sliderele → actualizare instantanee.
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Secțiunea 4: Ghid formule ── -->
+    <div class="rv-rsec">
+      <div class="rv-sec-t collapsible" onclick="_rvCollapseSection(this)" style="color:#38bdf8">📐 Ghid formule</div>
+      <div style="padding-top:6px">
+
+        <!-- Formula ROI -->
+        <div style="background:rgba(56,189,248,.05);border:1px solid rgba(56,189,248,.1);border-radius:5px;padding:7px;margin-bottom:6px">
+          <div style="font-size:7.5px;font-weight:700;color:#38bdf8;margin-bottom:5px">💰 Rentabilitate</div>
+          <div style="font-size:7px;color:#4A6080;line-height:1.9;font-family:'IBM Plex Mono',monospace">
+            Cost = SDA × Preț construcție<br>
+            Venituri = SU × Preț vânzare<br>
+            <span style="color:#22C55E">Profit = Venituri − Cost</span><br>
+            <span style="color:#D4AF37">ROI = Profit / Cost × 100%</span>
+          </div>
+          <div style="font-size:6.5px;color:#2A3F60;margin-top:4px">SU ≈ 82% din SDA · Exlcude teren, TVA, taxe</div>
+        </div>
+
+        <!-- Formula OMS 119 -->
+        <div style="background:rgba(234,179,8,.05);border:1px solid rgba(234,179,8,.1);border-radius:5px;padding:7px;margin-bottom:6px">
+          <div style="font-size:7.5px;font-weight:700;color:#D4AF37;margin-bottom:5px">☀ Însorire — OMS 119/2014</div>
+          <div style="font-size:7px;color:#4A6080;line-height:1.9;font-family:'IBM Plex Mono',monospace">
+            Cerință: min <span style="color:#22C55E">1.5 ore/zi</span> insolație directă<br>
+            la solstițiu iarnă (21 Dec)<br>
+            Indicator: alt. solară ≥ 15° la 12:00<br>
+            Umbră = H / tan(altitudine_solara)
+          </div>
+          <div style="font-size:6.5px;color:#2A3F60;margin-top:4px">OMS 119/2014 Art.3 — cerința e durata, nu unghiul</div>
+        </div>
+
+        <!-- Formula ISU -->
+        <div style="background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.1);border-radius:5px;padding:7px;margin-bottom:6px">
+          <div style="font-size:7.5px;font-weight:700;color:#EF4444;margin-bottom:5px">🚨 Evacuare ISU — P118-1/2015</div>
+          <div style="font-size:7px;color:#4A6080;line-height:1.9;font-family:'IBM Plex Mono',monospace">
+            Aviz ISU dacă: H > <span style="color:#EF4444">28m</span> SAU SD > <span style="color:#EF4444">1500mp</span><br>
+            Max. cale evacuare: 30m (rez.) / 25m (com.)<br>
+            Lățime minimă: 1.0m (coridor) / 0.9m (ușă)<br>
+            Nr. persoane: SU / 2.5 mp/pers (com.)
+          </div>
+          <div style="font-size:6.5px;color:#2A3F60;margin-top:4px">P118-1/2015 Tabel 4.4 + Legea 307/2006</div>
+        </div>
+
+        <!-- Formula NP 057 camere -->
+        <div style="background:rgba(96,165,250,.05);border:1px solid rgba(96,165,250,.1);border-radius:5px;padding:7px;margin-bottom:6px">
+          <div style="font-size:7.5px;font-weight:700;color:#60A5FA;margin-bottom:5px">🏠 Suprafețe camere — NP 057/2002</div>
+          <div style="font-size:7px;color:#4A6080;line-height:1.9;font-family:'IBM Plex Mono',monospace">
+            Living: min <span style="color:#60A5FA">18mp</span> (2 pers.) / 22mp (3+)<br>
+            Dormitor 1: min <span style="color:#60A5FA">14mp</span><br>
+            Dormitor 2: min 12mp · Baie: min 4mp<br>
+            Bucătărie: min 8mp (cu loc masă) / 5mp
+          </div>
+          <div style="font-size:6.5px;color:#2A3F60;margin-top:4px">NP 057/2002 actualizat + Legea 18/1995</div>
+        </div>
+
+        <!-- Formula Parcaje -->
+        <div style="background:rgba(249,115,22,.05);border:1px solid rgba(249,115,22,.1);border-radius:5px;padding:7px">
+          <div style="font-size:7.5px;font-weight:700;color:#F97316;margin-bottom:5px">🚗 Parcaje — NP 067/2002</div>
+          <div style="font-size:7px;color:#4A6080;line-height:1.9;font-family:'IBM Plex Mono',monospace">
+            Rez. colectiv: 1 loc / <span style="color:#F97316">apt.</span> + 10% vizitatori<br>
+            Birouri: 1 loc / <span style="color:#F97316">50mp</span> SU<br>
+            Comercial: 1 loc / <span style="color:#F97316">25mp</span> SU<br>
+            Loc parcare: 2.5m × 5.0m (standard)
+          </div>
+          <div style="font-size:6.5px;color:#2A3F60;margin-top:4px">NP 067/2002 + RLU UTR local</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Secțiunea 5: Rapoarte afectate ── -->
+    <div class="rv-rsec">
+      <div class="rv-sec-t collapsible" onclick="_rvCollapseSection(this)">Rapoarte afectate</div>
+      <div id="rv-rapoarte-aff" style="font-size:8.5px;color:#4A6080;line-height:1.8">—</div>
+    </div>
+
   </div>
 </div>
 <div id="rv-tip"></div>`;
