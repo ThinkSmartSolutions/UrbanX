@@ -26,6 +26,12 @@ function _pdfSaveMobile(pdf, filename){
 // Bug: al 2-lea studiu generat pierde demolarea pentru că _captureStudyMaps
 // restaurează S.ctx din backup, ștergând masca de demolare aplicată de utilizator.
 async function _captureStudyMapsSafe(ap, progressCb){
+  // Calculeaza scara pentru capturi (folosita de addImg scale bar)
+  const _zoom = map?.getZoom ? Math.round(map.getZoom()) : 16;
+  const _lat = ap?.lat || ap?.geo?.properties?.lat || 47.16;
+  const _scaleInfo = _mapboxScale(_lat, _zoom);
+  window._lastCaptureScale = _scaleInfo; // disponibil in studii via window._lastCaptureScale
+
   // Salvăm starea de demolare ÎNAINTE de captură
   const demolishWasActive = !!(window.AEDIS?._demolishActive);
   const ctxBackupSaved    = S._ctxBackup ? JSON.parse(JSON.stringify(S._ctxBackup)) : null;
@@ -926,6 +932,42 @@ function _getElevEstimate(lat, lon) {
 
 // Functia principala: obtine elevatie cu fallback automat
 // Returneaza: { elev: Number, source: String, confidence: Number }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SCALE CALCULATOR — calculeaza scara reala a capturilor Mapbox
+// Formula: metersPerPixel = 40075016.686 * cos(lat*PI/180) / (256 * 2^zoom)
+// ─────────────────────────────────────────────────────────────────────────────
+function _mapboxScale(lat, zoom) {
+  const metersPerPx = 40075016.686 * Math.cos(lat * Math.PI / 180) / (256 * Math.pow(2, zoom));
+  // Captura PDF = ~280px latime (W-28 = ~182mm la 72dpi = ~513px, la 300dpi = ~2138px)
+  // Folosim 513px ca referinta (72dpi browser)
+  const captureWidthPx = 513;
+  const captureWidthM  = metersPerPx * captureWidthPx;
+  
+  // Scala normalizata (1:X)
+  const scale = Math.round(captureWidthM / 0.182 / 100) * 100; // 0.182m = 182mm latime PDF
+  
+  // Scale bar "nice" value (rotunjit la 50/100/200/500m)
+  const niceVals = [25,50,100,200,500,1000,2000,5000];
+  const barM = niceVals.find(v => v >= captureWidthM/6) || 1000;
+  
+  return {
+    metersPerPx: Math.round(metersPerPx*10)/10,
+    captureWidthM: Math.round(captureWidthM),
+    scale: scale,         // e.g. 2000 = scara 1:2000
+    barM: barM,           // lungimea bara scala in metri
+    barLabel: barM >= 1000 ? (barM/1000)+'km' : barM+'m',
+    scaleLabel: '1:' + scale.toLocaleString(),
+  };
+}
+
+// Zoom-uri tipice Mapbox si scara aproximativa la latitudinea Iasului (47.16°N):
+// zoom 12 = ~1:38000 (vedere oras), barM=500m
+// zoom 14 = ~1:9500  (cartier),     barM=100m
+// zoom 16 = ~1:2400  (stradal),     barM=50m
+// zoom 18 = ~1:600   (parcela),     barM=10m
+
+
 async function _getElevation(lat, lon) {
   const key = lat.toFixed(4) + '_' + lon.toFixed(4);
   if(_ELEV_CACHE[key]) return _ELEV_CACHE[key];
@@ -1807,6 +1849,13 @@ async function generateNoiseStudy(){
     {criteriu:'Nivel noapte Ln',valoare:Ltotal.toFixed(1)+' dB',status:confNoap?'OK':'ATENTIE',obs:confNoap?'Sub limita nocturnă':'Posibilă depășire '+limit_n+'dB',remediere:'Ferestre cu geam tripan Rw>48dB pe fațadele expuse'},
     {criteriu:'Zone sensibile în 200m',valoare:zgomot.surse_principale?.length||0+' surse',status:'ATENTIE',obs:'Verificare obligatorie SR 10009:2017 + HG 321/2005',remediere:'Harta strategică de zgomot consultabilă la Primărie'},
   ]); }catch(_ce){console.warn('[concluzii]',_ce.message);}
+  
+  // ESG Rating (Audit G)
+  try{const _esgX=_calcESGScore(ap,params,(S.vol?._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||12),(AEDIS?.fn||'rezidential_colectiv'));pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('ESG URBAN SUSTAINABILITY RATING');ftr();let _cy2=33;_cy2=_pdfESGBlock(pdf,W,_cy2,_esgX);}catch(_e){}
+
+  // Health Check (Audit #16)
+  try{const _hc=_pdfHealthCheck('Studiu Acustic Urban',params,nrcad,utr,[]);if(_hc.issues.length>0)_pdfRenderHealthCheck(pdf,W,H,_hc);}catch(_e){}
+
   _pdfSaveMobile(pdf,'Studiu_Acustic_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
   ss('Studiu Acustic Urban generat!');
 }
@@ -2019,6 +2068,10 @@ async function generateWindStudy(){
     {criteriu:'Raport H/Hmed zonă',valoare:(aedisH/Math.max(1,hMed)).toFixed(2),status:(aedisH/Math.max(1,hMed))>3?'ATENTIE':'OK',obs:(aedisH/Math.max(1,hMed))>3?'Clădire înaltă creează efect de tunel':'Înălțime compatibilă cu zona',remediere:'Reduceți H sau prevedeți studiu CFD dacă H/Hmed>3'},
     {criteriu:'Confort pietonal Lawson',valoare:'Verificare necesară',status:'ATENTIE',obs:'Simulare CFD obligatorie pentru spații publice deschise H>28m'},
   ]); }catch(_ce){console.warn('[concluzii]',_ce.message);}
+  
+  // Health Check (Audit #16)
+  try{const _hc=_pdfHealthCheck('Studiu Vant Confort Pietonal',params,nrcad,utr,[]);if(_hc.issues.length>0)_pdfRenderHealthCheck(pdf,W,H,_hc);}catch(_e){}
+
   _pdfSaveMobile(pdf,'Studiu_Vant_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
   ss('Studiu Vant & Confort Pietonal generat!');
 }
@@ -2491,6 +2544,10 @@ async function generateMobilityStudy(){
 
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CASETA TEHNICA SI SEMNATURA',10);ftr();
   cy=28;sign();
+  
+  // Health Check (Audit #16)
+  try{const _hc=_pdfHealthCheck('Studiu Mobilitate & Parcaje',params,nrcad,utr,[]);if(_hc.issues.length>0)_pdfRenderHealthCheck(pdf,W,H,_hc);}catch(_e){}
+
   _pdfSaveMobile(pdf,'Studiu_Mobilitate_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
   ss('Studiu Mobilitate & Parcaje generat!');
 }
@@ -2888,6 +2945,10 @@ async function generateMemoriu(){
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CASETA TEHNICA SI SEMNATURA',10);ftr();
   cy=28;sign();
   await _addHartaConexiuniPage(pdf,W,H,S2,hdr,ftr,'memoriu',nrcad);
+  
+  // Health Check (Audit #16)
+  try{const _hc=_pdfHealthCheck('Memoriu Tehnic Preliminar',params,nrcad,utr,[]);if(_hc.issues.length>0)_pdfRenderHealthCheck(pdf,W,H,_hc);}catch(_e){}
+
   _pdfSaveMobile(pdf,'Memoriu_Tehnic_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
   ss('Memoriu Tehnic Preliminar generat!');
 }
@@ -3195,6 +3256,10 @@ async function generateAACR(){
 
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CASETA TEHNICA SI SEMNATURA',10);ftr();
   cy=28;sign();
+  
+  // Health Check (Audit #16)
+  try{const _hc=_pdfHealthCheck('Studiu AACR Aviz Aeroport',params,nrcad,utr,[]);if(_hc.issues.length>0)_pdfRenderHealthCheck(pdf,W,H,_hc);}catch(_e){}
+
   _pdfSaveMobile(pdf,'Studiu_AACR_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
   ss('OK Studiu AACR generat!');
 }
@@ -3411,7 +3476,10 @@ async function generateGeotehnicalStudy(){
   const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Pre-Studiu Geotehnic Preliminar','Pre-studiu geotehnic',10);
   const seismCfg=getSeismConfig();
   const hidroCfg=getHidroConfig();
-  const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
+    // #18 Table of Contents
+  _pdfTableOfContents(pdf,W,H,[{"num": 1, "title": "Cover — Identificare amplasament si parametri geotehnici", "page": 1}, {"num": 2, "title": "Context 3D — amplasament si vecinatati", "page": 2}, {"num": 3, "title": "Parametri geotehnici estimati — NP 074/2014", "page": 3}, {"num": 4, "title": "Riscuri geotehnice — alunecari, tasari, seism", "page": 4}, {"num": 5, "title": "Recomandari fundare si investigatii necesare", "page": 5}, {"num": "ESG", "title": "ESG Urban Sustainability Rating", "page": "ult."}],'Pre-Studiu Geotehnic Preliminar — NP 074/2014');
+  
+const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
 
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13;
   const pArea=parseFloat(area)||0;
@@ -3655,6 +3723,13 @@ async function generateGeotehnicalStudy(){
   cy=sec('10.1. BAZA LEGALA GEOTEHNICA COMPLETA',cy);cy+=2;
   ['NP 074/2014 — Normativ privind principiile, exigentele si metodele cercetarii geotehnice.','SR EN 1997-1:2004 (Eurocod 7) — Proiectarea geotehnica. Reguli generale.','SR EN 1997-2:2007 — Eurocod 7. Investigarea si incercarea terenului.','P100-1/2022 — Cod de proiectare seismica. Prevederi pentru cladiri. Revizuire 2022.','P100-3/2019 — Cod de proiectare seismica. Evaluarea si proiectarea cladirilor existente.','STAS 1242/1-89 — Teren de fundare. Principii generale de cercetare.','STAS 3300/1-85 — Teren de fundare. Principii de calcul.','SR EN 1998-5:2004 (Eurocod 8) — Proiectare seismica. Fundatii, structuri de sustinere si aspecte geotehnice.','Legea 10/1995 republicata — Calitatea in constructii. Cerinta A: Rezistenta mecanica si stabilitate.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=2;});
   sign();
+  
+  // ESG Rating (Audit G)
+  try{const _esgX=_calcESGScore(ap,params,(S.vol?._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||12),(AEDIS?.fn||'rezidential_colectiv'));pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('ESG URBAN SUSTAINABILITY RATING');ftr();let _cy2=33;_cy2=_pdfESGBlock(pdf,W,_cy2,_esgX);}catch(_e){}
+
+  // Health Check (Audit #16)
+  try{const _hc=_pdfHealthCheck('Pre-Studiu Geotehnic',params,nrcad,utr,[]);if(_hc.issues.length>0)_pdfRenderHealthCheck(pdf,W,H,_hc);}catch(_e){}
+
   _pdfSaveMobile(pdf,'PreStudiu_Geotehnic_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
   ss('OK Pre-Studiu Geotehnic generat!');
 }
@@ -4032,6 +4107,10 @@ async function generateTrafficStudy(){
   cy2+=3;
   cy2=body('Implementarea măsurilor de transport sustenabil de mai sus este OBLIGATORIE conform Regulamentului UE 2023/1804 (stații EV) pentru clădirile noi cu SD>500mp și accesibil din spațiu de parcare. Celelalte măsuri sunt RECOMANDATE pentru conformitatea cu PMUD '+uat+' și pentru eligibilitatea la fonduri europene POR 2021-2027.',14,cy2);
   sign();
+  
+  // Health Check (Audit #16)
+  try{const _hc=_pdfHealthCheck('Studiu Impact Trafic',params,nrcad,utr,[]);if(_hc.issues.length>0)_pdfRenderHealthCheck(pdf,W,H,_hc);}catch(_e){}
+
   _pdfSaveMobile(pdf,'Studiu_Trafic_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
   ss('OK Studiu de Trafic + Analiza Acces ISU generat!');
 }
@@ -4052,7 +4131,10 @@ async function generateSSF(){
 
   const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Scenariu de Siguranta la Foc','SSF',14);
   // RED, GREEN, ORANGE sunt disponibile din destructurarea _initStudyPdf de mai sus
-  const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
+    // #18 Table of Contents
+  _pdfTableOfContents(pdf,W,H,[{"num": 1, "title": "Cover — Identificare cladire si clasificare ISU", "page": 1}, {"num": 2, "title": "Analiza riscuri incendiu — surse si propagare", "page": 2}, {"num": 3, "title": "Cai evacuare — distante si latimi P118-1/2015", "page": 3}, {"num": 4, "title": "Instalatii PSI — detectie, stingere, semnalizare", "page": 4}, {"num": 5, "title": "Masuri tehnice + avize ISU necesare", "page": 5}, {"num": "ESG", "title": "ESG Urban Sustainability Rating", "page": "ult."}],'Studiu Siguranta la Foc — P118-1/2015 + Legea 307/2006');
+  
+const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
 
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13;
   const niv=AEDIS.corpuri[0]?.niv||4;
@@ -4667,6 +4749,13 @@ async function generateSSF(){
     }catch(e){console.warn('[SSF-Relevee] Eroare pagina relevee:',e.message);}
   }
 
+  
+  // ESG Rating (Audit G)
+  try{const _esgX=_calcESGScore(ap,params,(S.vol?._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||12),(AEDIS?.fn||'rezidential_colectiv'));pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('ESG URBAN SUSTAINABILITY RATING');ftr();let _cy2=33;_cy2=_pdfESGBlock(pdf,W,_cy2,_esgX);}catch(_e){}
+
+  // Health Check (Audit #16)
+  try{const _hc=_pdfHealthCheck('SSF / Siguranta la Foc',params,nrcad,utr,[]);if(_hc.issues.length>0)_pdfRenderHealthCheck(pdf,W,H,_hc);}catch(_e){}
+
   _pdfSaveMobile(pdf,'SSF_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
   ss('OK Scenariu de Siguranta la Foc (SSF) generat — '+ (_rvBldSSF?'13':'12')+' pagini (cu schemă funcțională din Relevee Instant)!');
 }
@@ -5070,6 +5159,13 @@ async function generateEnvironmentalImpact(){
   ],cy);
 
   sign();
+  
+  // ESG Rating (Audit G)
+  try{const _esgX=_calcESGScore(ap,params,(S.vol?._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||12),(AEDIS?.fn||'rezidential_colectiv'));pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('ESG URBAN SUSTAINABILITY RATING');ftr();let _cy2=33;_cy2=_pdfESGBlock(pdf,W,_cy2,_esgX);}catch(_e){}
+
+  // Health Check (Audit #16)
+  try{const _hc=_pdfHealthCheck('Studiu Impact Mediu (EIM)',params,nrcad,utr,[]);if(_hc.issues.length>0)_pdfRenderHealthCheck(pdf,W,H,_hc);}catch(_e){}
+
   _pdfSaveMobile(pdf,'Studiu_EIM_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
   ss('OK Studiu de Impact asupra Mediului generat! (10 pagini)');
 }
@@ -5451,7 +5547,21 @@ async function generateSolarStudy(){
   const oreMinIarna=solarData.iarna.alts.filter(a=>a>=15).length;
   const oreMaxVara=solarData.vara.alts.filter(a=>a>5).length;
 
-  const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
+  
+  // #18 TOC Solar
+  _pdfTableOfContents(pdf,W,H,[
+    {num:1,title:'Cover — Parametri insorire si cotă teren AMSL',page:1},
+    {num:2,title:'Context urban 3D — umbre principale',page:2},
+    {num:3,title:'Calcule orare — altitudini solare si umbre per luna',page:3},
+    {num:4,title:'Analiza vecini — impact umbrire + Viewer 3D',page:4},
+    {num:5,title:'Diagrama solara anuala + Golden Hour',page:5},
+    {num:6,title:'Vederi multiple + concluzii',page:6},
+    {num:7,title:'Baza legala — OMS 119/2014 + GT 043-2002',page:7},
+    {num:8,title:'Conformitate detaliata OMS 119/2014',page:8},
+    {num:9,title:'Impact umbre proprietati vecine + distante',page:9},
+    {num:10,title:'Concluzii finale + baza legala completa',page:10},
+  ],'Studiu de Insorire si Umbre — OMS 119/2014');
+const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
   ss('Se compilează PDF-ul...');
 
   // ════════════════════════════════════════════════════════════
@@ -5902,6 +6012,10 @@ async function generateSolarStudy(){
 
   sign();
 
+  
+  // Health Check (Audit #16)
+  try{const _hc=_pdfHealthCheck('Studiu Insorire OMS 119',params,nrcad,utr,[]);if(_hc.issues.length>0)_pdfRenderHealthCheck(pdf,W,H,_hc);}catch(_e){}
+
   _pdfSaveMobile(pdf,'Studiu_Insorire_'+nrcad+'_'+year+'.pdf');
   ss('OK Studiu de Însorire generat cu analiză per cameră din Relevee Instant!');
 }
@@ -5950,6 +6064,18 @@ async function generateSolarStudy(){
 async function generateStudiuFezabilitate(paramOverrides){
   ss('Studiu Fezabilitate — se obține cursul BNR EUR/RON...');
   const _cursEUR = await _getBNRRate('EUR');
+  // #18 TOC Fezabilitate
+  _pdfTableOfContents(pdf,W,H,[
+    {num:1,title:'Cover — Identificare amplasament si parametri economici',page:1},
+    {num:2,title:'Context urban 3D — volumetrie propusa si vecini',page:2},
+    {num:3,title:'Analiza juridica — conformitate PUG/RLU',page:3},
+    {num:4,title:'Indicatori tehnico-economici (SDA, SU, SC, parcaje)',page:4},
+    {num:5,title:'Deviz estimativ HG 907/2016 (Cap.1+4+5 + TVA 21%)',page:5},
+    {num:6,title:'Scenarii S1/S2/S3 — ROI, payback, cash-flow',page:6},
+    {num:7,title:'Baza legala — HG 907/2016, Legea 50/1991',page:7},
+    {num:'ESG',title:'ESG Urban Sustainability Rating',page:'ult.'},
+  ],'Studiu de Fezabilitate / DALI — HG 907/2016');
+
   const ap=S.parcels[S.activeParcel??0];
   if(!ap?.geo?.geometry){ss('Selectați o parcelă pentru studiu.');return;}
   // Dacă nu avem overrides (chemat direct din buton), deschidem modalul de parametri
