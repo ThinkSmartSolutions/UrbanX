@@ -404,6 +404,353 @@ function _prfLang(rawText) {
 
 
 
+
+// ─────────────────────────────────────────────────────────────────────────────
+// #18 TABLE OF CONTENTS AUTOMAT
+// Audit pct. 18: "Table of Contents automat — CRITIC pentru rapoarte mari"
+// ─────────────────────────────────────────────────────────────────────────────
+function _pdfTableOfContents(pdf, W, H, chapters, title) {
+  // chapters = [{num, title, page, status}]
+  pdf.addPage();
+  pdf.setFillColor(8,20,42);
+  pdf.rect(0,0,W,H,'F');
+  pdf.setFillColor(212,175,55);
+  pdf.rect(0,0,W,4,'F');
+  pdf.rect(0,H-4,W,4,'F');
+  pdf.setTextColor(212,175,55);
+  pdf.setFontSize(8);
+  pdf.setFont('helvetica','bold');
+  pdf.text('CUPRINS — ' + (title||'').toUpperCase(), W/2, 20, {align:'center'});
+  pdf.setFillColor(14,30,60);
+  pdf.rect(14,28,W-28,H-48,'F');
+  let cy=38;
+  chapters.forEach((ch,i) => {
+    const isSection = !ch.page;
+    if(isSection) {
+      pdf.setTextColor(212,175,55);
+      pdf.setFontSize(7.5);
+      pdf.setFont('helvetica','bold');
+      pdf.text(ch.title.toUpperCase(), 20, cy);
+      cy+=8;
+    } else {
+      const col = ch.status==='warn'?[220,120,30]:ch.status==='err'?[200,40,40]:[160,185,210];
+      pdf.setTextColor(...col);
+      pdf.setFontSize(7);
+      pdf.setFont('helvetica','normal');
+      pdf.text(ch.num+'. '+ch.title, 22, cy);
+      pdf.setFont('helvetica','bold');
+      pdf.text('Pag. '+ch.page, W-24, cy, {align:'right'});
+      // Linie punctata
+      pdf.setDrawColor(30,50,80);
+      pdf.setLineWidth(0.2);
+      pdf.setLineDashPattern([1,2],0);
+      pdf.line(22+pdf.getTextWidth(ch.num+'. '+ch.title)+2, cy-1, W-30, cy-1);
+      pdf.setLineDashPattern([],0);
+      cy+=9;
+    }
+  });
+  pdf.setTextColor(80,100,130);
+  pdf.setFontSize(5.5);
+  pdf.setFont('helvetica','italic');
+  pdf.text('Document generat de UrbanX TSS·FG — ' + new Date().toLocaleString('ro-RO'), W/2, H-8, {align:'center'});
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// #16 DOCUMENT HEALTH CHECK — inainte de export
+// Audit pct. 16: "Engine care verifica inainte de export"
+// ─────────────────────────────────────────────────────────────────────────────
+function _pdfHealthCheck(studyName, params, nrCad, utr, sections) {
+  const checks = [];
+  const issues = [];
+
+  // Verifica date minime obligatorii
+  if(!nrCad||nrCad==='—') issues.push({sev:'err', msg:'Nr. cadastral lipsa — document incomplete'});
+  if(!utr||utr==='—')      issues.push({sev:'warn',msg:'UTR necunoscut — verifica PUG'});
+  if(!params?.pot)          issues.push({sev:'warn',msg:'POT nedifinit — parametri PUG incompleți'});
+
+  // Verifica consistenta parametri
+  if(params?.pot&&parseFloat(params.pot)>75) issues.push({sev:'warn',msg:'POT>75% — verifica daca e corect (RLU)'});
+  if(params?.cut&&parseFloat(params.cut)>6)  issues.push({sev:'warn',msg:'CUT>6 — valoare neobisnuita, verifica RLU'});
+
+  // Verifica pagini generate
+  if(sections&&sections.length<3) issues.push({sev:'warn',msg:'Studiu cu mai putin de 3 pagini — posibil incomplet'});
+
+  return {
+    studyName,
+    timestamp: new Date().toISOString(),
+    status: issues.filter(i=>i.sev==='err').length>0?'INVALID':issues.length>0?'AVERTISMENT':'OK',
+    issues,
+    nrCad,
+    utr,
+  };
+}
+
+// Afiseaza health check in PDF (ultima pagina)
+function _pdfRenderHealthCheck(pdf, W, H, healthResult) {
+  const ok = healthResult.status==='OK';
+  const warn = healthResult.status==='AVERTISMENT';
+  const bg = ok?[235,252,240]:warn?[255,250,230]:[255,235,235];
+  const col = ok?[16,100,40]:warn?[140,80,0]:[160,20,20];
+  
+  pdf.addPage();
+  pdf.setFillColor(...bg);
+  pdf.rect(0,0,W,H,'F');
+  pdf.setFillColor(...col);
+  pdf.rect(0,0,W,6,'F');
+  pdf.setTextColor(255,255,255);
+  pdf.setFontSize(8); pdf.setFont('helvetica','bold');
+  pdf.text('DOCUMENT HEALTH CHECK — ' + healthResult.status, W/2, 4, {align:'center'});
+  
+  let cy=18;
+  pdf.setTextColor(...col);
+  pdf.setFontSize(9); pdf.setFont('helvetica','bold');
+  pdf.text((ok?'✓ Document valid':'⚠ '+healthResult.issues.length+' probleme detectate'), 14, cy); cy+=10;
+  
+  pdf.setFontSize(7); pdf.setFont('helvetica','normal');
+  pdf.setTextColor(60,80,100);
+  pdf.text('Studiu: '+healthResult.studyName, 14, cy); cy+=6;
+  pdf.text('Nr. cadastral: '+healthResult.nrCad+' · UTR: '+healthResult.utr, 14, cy); cy+=6;
+  pdf.text('Generat: '+new Date().toLocaleString('ro-RO')+' · UrbanX TSS·FG', 14, cy); cy+=10;
+  
+  if(healthResult.issues.length>0) {
+    healthResult.issues.forEach(issue => {
+      const iCol = issue.sev==='err'?[180,20,20]:[160,90,0];
+      pdf.setFillColor(issue.sev==='err'?255:255, issue.sev==='err'?235:248, 230);
+      pdf.rect(14,cy-5,W-28,9,'F');
+      pdf.setFillColor(...iCol); pdf.rect(14,cy-5,2,9,'F');
+      pdf.setTextColor(...iCol); pdf.setFontSize(7); pdf.setFont('helvetica','bold');
+      pdf.text('['+issue.sev.toUpperCase()+'] ', 17, cy);
+      pdf.setFont('helvetica','normal');
+      pdf.text(issue.msg, 17+pdf.getTextWidth('['+issue.sev.toUpperCase()+'] '), cy);
+      cy+=12;
+    });
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// #20 REPORT JSON — salveaza structura alaturi de PDF
+// Audit pct. 20: "Salveaza si JSON: {study_type, parcel, conclusions, sources}"
+// ─────────────────────────────────────────────────────────────────────────────
+function _saveReportJSON(studyType, parcelData, conclusions, sources, scores) {
+  const report = {
+    report_id: studyType+'_'+parcelData.nrCad+'_'+Date.now(),
+    study_type: studyType,
+    generated_at: new Date().toISOString(),
+    urbanx_version: '2.5.0',
+    tva_rate: _TVA_STANDARD,
+    parcel: {
+      nrCad: parcelData.nrCad,
+      utr: parcelData.utr,
+      area: parcelData.area,
+      lat: parcelData.lat,
+      lon: parcelData.lon,
+      uat: parcelData.uat,
+      judet: parcelData.judet,
+    },
+    parameters: parcelData.params||{},
+    conclusions: conclusions||[],
+    sources: sources||[
+      {id:'ANCPI', confidence:0.95, type:'official'},
+      {id:'OSM',   confidence:0.65, type:'crowdsourced'},
+      {id:'AI',    confidence:0.40, type:'estimated'},
+    ],
+    scores: scores||{},
+    classification: 'AI_ESTIMAT',
+    disclaimer: 'Document orientativ. Nu inlocuieste studii tehnice certificate.',
+  };
+  try {
+    const blob = new Blob([JSON.stringify(report,null,2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href=url; a.download=report.report_id+'.json';
+    // Nu descarcam automat — oferim optional
+    window._lastReportJSON = report;
+    console.log('[UrbanX] Report JSON salvat in window._lastReportJSON');
+  }catch(e){}
+  return report;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// #12 SCALE BAR — bara grafica pe capturi harta
+// Audit pct. 12: "Fiecare captura: SCARA APROX 1:2000"
+// ─────────────────────────────────────────────────────────────────────────────
+function _pdfScaleBar(pdf, x, y, scaleM, label) {
+  // scaleM = latimea barei in metri, label = '100m' etc.
+  const barW = 30; // latime bara in pt PDF
+  const barH = 2.5;
+  // Bara grafica alternanta alb-negru
+  pdf.setFillColor(255,255,255);
+  pdf.rect(x,y,barW,barH,'F');
+  pdf.setFillColor(0,0,0);
+  pdf.rect(x,y,barW/2,barH,'F');
+  pdf.setDrawColor(0,0,0);
+  pdf.setLineWidth(0.3);
+  pdf.rect(x,y,barW,barH,'S');
+  // Linii de capete
+  pdf.line(x,y-1,x,y+barH+1);
+  pdf.line(x+barW,y-1,x+barW,y+barH+1);
+  // Label
+  pdf.setTextColor(0,0,0);
+  pdf.setFontSize(5);
+  pdf.setFont('helvetica','normal');
+  pdf.text('0',x-1,y+barH+3.5,{align:'center'});
+  pdf.text(label||scaleM+'m',x+barW,y+barH+3.5,{align:'center'});
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// #14 VIEW METADATA 3D
+// Audit pct. 14: "VIEW: Pitch 62° · Bearing -20° · FOV 40°"
+// ─────────────────────────────────────────────────────────────────────────────
+function _pdfViewMetadata(pdf, W, y, pitch, bearing, fovOrZoom, extra) {
+  pdf.setFillColor(4,12,28);
+  pdf.rect(14,y,W-28,7,'F');
+  pdf.setTextColor(100,140,200);
+  pdf.setFontSize(5.5);
+  pdf.setFont('helvetica','normal');
+  const meta = [
+    'PITCH: '+Math.round(pitch||62)+'°',
+    'BEARING: '+Math.round(bearing||0)+'°',
+    fovOrZoom?'ZOOM: '+fovOrZoom:'',
+    extra||'',
+  ].filter(Boolean).join('  ·  ');
+  pdf.text(meta, W/2, y+4.5, {align:'center'});
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// #22 EVIDENCE SNAPSHOTS — sursa date + timestamp
+// Audit pct. 22: "Daca spui zona inundabila — trebuie: snapshot GIS + layer source + timestamp"
+// ─────────────────────────────────────────────────────────────────────────────
+function _pdfEvidenceTag(pdf, x, y, sourceId, dataType, confidence) {
+  const confCol = confidence>80?[16,130,60]:confidence>50?[180,120,0]:[180,40,40];
+  pdf.setFillColor(4,12,28,0.8);
+  pdf.setFontSize(5);
+  pdf.setFont('helvetica','bold');
+  const tag = '['+sourceId+' · '+dataType+' · '+confidence+'%]';
+  const tw = pdf.getTextWidth(tag)+4;
+  pdf.setFillColor(4,12,28);
+  pdf.rect(x,y-4,tw,5,'F');
+  pdf.setTextColor(...confCol);
+  pdf.text(tag, x+2, y);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// G. ESG ENGINE — Environmental, Social, Governance scoring
+// Audit pct. G: "Environmental: runoff, permeability, carbon, heat island
+//                Social: accessibility, services, walkability
+//                Governance: permit complexity, legal risk, avizability"
+// ─────────────────────────────────────────────────────────────────────────────
+function _calcESGScore(ap, params, aedisH, fn) {
+  const area = parseFloat(ap?.area||300);
+  const pot = parseFloat(params?.pot||35)/100;
+  const sc = area * pot;
+  const permeability = (1 - pot) * 100; // % suprafata permeabila
+  const niv = AEDIS?.corpuri?.[0]?.niv||4;
+  
+  // E — Environmental
+  const E = {
+    runoff: permeability>40?90:permeability>25?65:40, // scurgere suprafata
+    permeability: Math.min(100, permeability*1.5),    // permeabilitate
+    carbon: niv<5?75:niv<8?55:35,                     // amprenta carbon (mai putine etaje = mai bine pe carbon per mp)
+    heatIsland: pot<0.4?80:pot<0.6?60:40,             // efect de insula de caldura
+    greenRatio: permeability>30?70:40,                 // spatii verzi
+    score: 0,
+  };
+  E.score = Math.round((E.runoff+E.permeability+E.carbon+E.heatIsland+E.greenRatio)/5);
+  
+  // S — Social
+  const isRez = fn&&(fn.includes('rez')||fn.includes('locuin'));
+  const isCom = fn&&(fn.includes('com')||fn.includes('birouri'));
+  const S_esg = {
+    accessibility: 70, // default (fara date mobilitate reala)
+    services: 65,      // proximitate servicii (OSM estimate)
+    walkability: 60,   // pedestrian access
+    density: niv>3?75:50, // densitate urbana (mai multi = mai social)
+    mixedUse: (isRez||isCom)?65:80, // functiune mixta
+    score: 0,
+  };
+  S_esg.score = Math.round((S_esg.accessibility+S_esg.services+S_esg.walkability+S_esg.density+S_esg.mixedUse)/5);
+  
+  // G — Governance
+  const hNeed = aedisH>28; // necesita aviz ISU
+  const potOk = pot <= (parseFloat(params?.pot||35)/100 + 0.02);
+  const G_esg = {
+    permitComplexity: hNeed?30:60,   // complexitate autorizare
+    legalRisk: potOk?80:40,          // risc juridic
+    avizability: hNeed?45:75,        // probabilitate avizare
+    transparency: 70,                // transparenta (UrbanX documenteaza)
+    compliance: 65,                  // conformitate normative estimate
+    score: 0,
+  };
+  G_esg.score = Math.round((G_esg.permitComplexity+G_esg.legalRisk+G_esg.avizability+G_esg.transparency+G_esg.compliance)/5);
+  
+  const totalESG = Math.round((E.score+S_esg.score+G_esg.score)/3);
+  const rating = totalESG>=75?'A':totalESG>=60?'B':totalESG>=45?'C':totalESG>=30?'D':'E';
+  
+  return { E, S:S_esg, G:G_esg, total:totalESG, rating };
+}
+
+// Render ESG Score in PDF
+function _pdfESGBlock(pdf, W, cy, esg) {
+  const ratingCol = {A:[16,130,60],B:[80,160,60],C:[200,150,20],D:[180,80,0],E:[180,20,20]}[esg.rating]||[100,100,100];
+  
+  // Header ESG
+  pdf.setFillColor(8,20,45); pdf.rect(14,cy,W-28,12,'F');
+  pdf.setFillColor(...ratingCol); pdf.rect(14,cy,3,12,'F');
+  pdf.setTextColor(212,175,55); pdf.setFontSize(8); pdf.setFont('helvetica','bold');
+  pdf.text('ESG SCORE — Urban Sustainability Rating', 19, cy+5);
+  pdf.setFillColor(...ratingCol);
+  pdf.rect(W-40,cy+1,18,10,'F');
+  pdf.setTextColor(255,255,255); pdf.setFontSize(10); pdf.setFont('helvetica','bold');
+  pdf.text(esg.rating+' ('+esg.total+')', W-31, cy+8.5, {align:'center'});
+  cy+=14;
+  
+  // 3 coloane E/S/G
+  const colW=(W-28)/3;
+  [
+    {k:'E', label:'Environmental', score:esg.E.score, items:[
+      {l:'Runoff & Permeabilitate',v:esg.E.permeability},
+      {l:'Amprenta carbon',v:esg.E.carbon},
+      {l:'Insula caldura',v:esg.E.heatIsland},
+    ], col:[30,140,60]},
+    {k:'S', label:'Social', score:esg.S.score, items:[
+      {l:'Accesibilitate',v:esg.S.accessibility},
+      {l:'Servicii proximitate',v:esg.S.services},
+      {l:'Densitate urbana',v:esg.S.density},
+    ], col:[59,130,246]},
+    {k:'G', label:'Governance', score:esg.G.score, items:[
+      {l:'Complexitate AC',v:esg.G.permitComplexity},
+      {l:'Risc juridic',v:esg.G.legalRisk},
+      {l:'Avizabilitate',v:esg.G.avizability},
+    ], col:[160,90,200]},
+  ].forEach((dim,di) => {
+    const cx = 14+di*colW;
+    pdf.setFillColor(14,30,60); pdf.rect(cx,cy,colW-2,52,'F');
+    pdf.setFillColor(...dim.col); pdf.rect(cx,cy,2,52,'F');
+    pdf.setTextColor(...dim.col); pdf.setFontSize(7.5); pdf.setFont('helvetica','bold');
+    pdf.text(dim.k+' — '+dim.label, cx+5, cy+6);
+    pdf.setFontSize(14); pdf.text(dim.score, cx+colW-15, cy+12);
+    dim.items.forEach((item,ii) => {
+      const iy=cy+18+ii*10;
+      pdf.setTextColor(140,165,200); pdf.setFontSize(6); pdf.setFont('helvetica','normal');
+      pdf.text(item.l+': ', cx+5, iy);
+      const scoreCol = item.v>=70?[60,180,90]:item.v>=50?[200,150,30]:[200,60,60];
+      pdf.setTextColor(...scoreCol); pdf.setFont('helvetica','bold');
+      pdf.text(item.v+'%', cx+colW-18, iy);
+      // Mini bara
+      pdf.setFillColor(20,40,70); pdf.rect(cx+5,iy+1.5,colW-28,2.5,'F');
+      pdf.setFillColor(...scoreCol); pdf.rect(cx+5,iy+1.5,(colW-28)*item.v/100,2.5,'F');
+    });
+  });
+  cy+=54;
+  
+  pdf.setFillColor(230,245,255); pdf.rect(14,cy,W-28,8,'F');
+  pdf.setFillColor(59,130,246); pdf.rect(14,cy,2,8,'F');
+  pdf.setTextColor(20,60,140); pdf.setFontSize(6.5); pdf.setFont('helvetica','italic');
+  pdf.text('ESG scoring orientativ — estimat pe baza parametrilor proiectului. Audit ESG complet: specialist certificat RICS/CFA ESG.',18,cy+5);
+  return cy+12;
+}
+
+
 // Cache elevatie pentru a evita apeluri repetate (valid pe sesiune)
 const _ELEV_CACHE = {};
 
@@ -6341,6 +6688,11 @@ async function generateStudiuFezabilitate(paramOverrides){
   }catch(e){ console.warn('INSE section:', e.message); }
   ftr();
   await _addHartaConexiuniPage(pdf,W,H,S2,hdr,ftr,'fezabilitate',nrcad);
+  
+  // Health Check (Audit #16)
+  const hcResult=_pdfHealthCheck('Studiu Fezabilitate DALI',params,nrcad,utr,[]);
+  if(hcResult.issues.length>0){_pdfRenderHealthCheck(pdf,W,H,hcResult);}
+  
   _pdfSaveMobile(pdf,'SF_DALI_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
   ss('OK Studiu Fezabilitate / DALI generat!');
 }
@@ -7036,6 +7388,17 @@ async function generateStudiuAmplasament(){
   sign();
   // Hartă conexiuni rapoarte (#26 audit) — înainte de semnături
   await _addHartaConexiuniPage(pdf,W,H,S2,hdr,ftr,'amplasament',nrcad);
+  
+  // ── ESG URBAN SUSTAINABILITY RATING (Audit G) ────────────────────────────
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('ESG URBAN SUSTAINABILITY RATING');ftr();
+  let cyESG=33;
+  cyESG=sec('ESG SCORING — ENVIRONMENTAL, SOCIAL, GOVERNANCE',cyESG);cyESG+=3;
+  cyESG=body('Analiza ESG evalueaza sustenabilitatea proiectului pe 3 dimensiuni. Scorurile sunt ESTIMATIVE pe baza parametrilor proiectului.',14,cyESG);cyESG+=4;
+  const esgScore=_calcESGScore(ap,params,aedisH,fn);
+  cyESG=_pdfESGBlock(pdf,W,cyESG,esgScore);
+  // Report JSON (Audit #20)
+  _saveReportJSON('amplasament',{nrCad:nrcad,utr,area,lat,lon,uat,judet,params},[{type:'ESG',rating:esgScore.rating}],['ANCPI','OSM'],{esg:esgScore.total});
+
   _pdfSaveMobile(pdf,'Studiu_Amplasament_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
   ss('OK Studiu de Amplasament generat!');
 }
