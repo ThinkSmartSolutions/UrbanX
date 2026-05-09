@@ -3107,11 +3107,22 @@ function _rvCalcROI(){
   const roi=(profit/totalCost*100).toFixed(0);
   const profEl=document.getElementById('rv-roi-profit');
   const subEl=document.getElementById('rv-roi-sub');
+  // Afisaj adaptiv: k€ pentru valori <500k, M€ pentru valori >=500k
+  const _fmtEur=(v)=>{
+    if(Math.abs(v)>=500000) return (v/1000000).toFixed(1)+'M€';
+    if(Math.abs(v)>=1000) return Math.round(v/1000)+'k€';
+    return Math.round(v)+'€';
+  };
+  // Afiseaza SDA si SU in interfata
+  const sdaInfo=document.getElementById('rv-roi-sda-val');
+  const suInfo=document.getElementById('rv-roi-su-val');
+  if(sdaInfo) sdaInfo.textContent=Math.round(b.sdaTotal);
+  if(suInfo) suInfo.textContent=Math.round(nrApt*suMedie);
   if(profEl){
     profEl.style.color=profit>0?'#22C55E':'#EF4444';
-    profEl.textContent=(profit>0?'+':'')+_rvFmt(profit/1000000,1)+'M€ profit brut';
+    profEl.textContent=(profit>0?'+':'')+_fmtEur(profit)+' profit brut';
   }
-  if(subEl) subEl.textContent=`Cost: ${_rvFmt(totalCost/1000000,1)}M€ · Venituri: ${_rvFmt(totalRev/1000000,1)}M€ · ROI ~${roi}%`;
+  if(subEl) subEl.textContent=`Cost execuție: ${_fmtEur(totalCost)} · Venituri vânzare: ${_fmtEur(totalRev)} · ROI ~${roi}%`;
 }
 
 // (no duplicate _rvFmt — see line 86)
@@ -5184,6 +5195,8 @@ function _rvInject(){
 .rv-expbtn:hover{background:rgba(212,175,55,.14);}
 .rv-rpanel{background:#0B1426;border-left:1px solid rgba(212,175,55,.1);overflow-y:auto;padding:12px;}
 .rv-rpanel::-webkit-scrollbar{width:3px;}.rv-rpanel::-webkit-scrollbar-thumb{background:rgba(212,175,55,.15);}
+#rv-modal .rv-body.rpanel-hidden{grid-template-columns:260px 1fr 0px;}
+#rv-modal .rv-body.rpanel-hidden .rv-rpanel{display:none!important;}
 .rv-rsec{margin-bottom:14px;}
 .rv-rst{font-size:8px;text-transform:uppercase;letter-spacing:.12em;color:#4A6080;font-weight:700;margin-bottom:8px;font-family:'Space Grotesk',sans-serif;}
 .rv-stat{display:flex;justify-content:space-between;align-items:baseline;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.03);}
@@ -5486,26 +5499,49 @@ function _rvInject(){
         <span style="color:#4A6080;font-size:8px" id="rv-roi-toggle">▼ expand</span>
       </div>
       <div id="rv-roi-body" style="display:none">
-        <div style="font-size:8px;color:#4A6080;padding:4px 0 2px">Preț construcție (€/m²)</div>
+        <!-- Explicatie cum functioneaza calculatorul -->
+        <div style="background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.12);border-radius:6px;padding:7px;margin-bottom:8px">
+          <div style="font-size:8px;font-weight:700;color:#38bdf8;margin-bottom:4px">💡 Cum funcționează</div>
+          <div style="font-size:7.5px;color:#4A6080;line-height:1.6">
+            Calculatorul estimează <b style="color:#7A90B0">profitabilitatea brută</b> a proiectului curent,
+            în timp real, pe măsură ce ajustezi:<br>
+            &nbsp;• <b style="color:#D4AF37">Preț construcție</b> = cost execuție per m² SDA (suprafața desfășurată total)<br>
+            &nbsp;• <b style="color:#22C55E">Preț vânzare</b> = prețul de vânzare per m² SU (suprafața utilă, ~82% din SDA)<br><br>
+            <b style="color:#94a3b8">Formula:</b><br>
+            Cost = SDA × Preț construcție<br>
+            Venituri = SU × Preț vânzare<br>
+            Profit brut = Venituri − Cost<br>
+            ROI = Profit / Cost × 100%<br><br>
+            <b style="color:#f59e0b">Atenție:</b> exclude teren, TVA (19%), taxe, proiectare (~10-15% din cost), cheltuieli de finanțare.
+          </div>
+        </div>
+        <div style="font-size:8px;color:#4A6080;padding:4px 0 2px">Preț construcție (€/m² SDA)</div>
         <input type="range" min="450" max="900" value="650" id="rv-roi-cost"
           oninput="document.getElementById('rv-roi-cval').textContent=this.value;_rvCalcROI()"
           style="width:100%;height:3px;accent-color:#D4AF37">
         <div style="display:flex;justify-content:space-between;font-size:8px;color:#7A90B0">
-          <span>450</span><span id="rv-roi-cval" style="color:#D4AF37">650</span><span>900</span>
+          <span>450 (simplu)</span><span id="rv-roi-cval" style="color:#D4AF37;font-weight:700">650</span><span>900 (premium)</span>
         </div>
-        <div style="font-size:8px;color:#4A6080;padding:4px 0 2px">Preț vânzare (€/m²)</div>
+        <div style="font-size:8px;color:#4A6080;padding:4px 0 2px">Preț vânzare (€/m² SU)</div>
         <input type="range" min="800" max="2500" value="1200" id="rv-roi-sell"
           oninput="document.getElementById('rv-roi-sval').textContent=this.value;_rvCalcROI()"
           style="width:100%;height:3px;accent-color:#22C55E">
         <div style="display:flex;justify-content:space-between;font-size:8px;color:#7A90B0">
-          <span>800</span><span id="rv-roi-sval" style="color:#22C55E">1200</span><span>2500</span>
+          <span>800 (rural)</span><span id="rv-roi-sval" style="color:#22C55E;font-weight:700">1200</span><span>2500 (premium Buc.)</span>
+        </div>
+        <!-- Afisaj SDA si SU din proiect -->
+        <div id="rv-roi-sda-info" style="font-size:7.5px;color:#38bdf8;padding:3px 0;display:flex;gap:8px">
+          <span>SDA proiect: <b id="rv-roi-sda-val">—</b> m²</span>
+          <span>SU estimat (~82%): <b id="rv-roi-su-val">—</b> m²</span>
         </div>
         <div id="rv-roi-result" style="margin-top:6px;padding:8px;background:rgba(255,255,255,.03);border-radius:5px">
           <div style="font-size:8px;color:#4A6080;margin-bottom:3px">REZULTAT ESTIMATIV</div>
           <div id="rv-roi-profit" style="font-size:14px;font-weight:800;color:#22C55E">—</div>
           <div id="rv-roi-sub" style="font-size:7.5px;color:#4A6080;margin-top:2px">—</div>
         </div>
-        <div style="font-size:7px;color:#2A3F60;margin-top:4px;line-height:1.4">* ORIENTATIV. Exclude teren, TVA, taxe, proiectare. Consultați evaluator ANEVAR.</div>
+        <div style="font-size:7px;color:#2A3F60;margin-top:4px;line-height:1.4">
+          * ORIENTATIV. Nu include: teren, TVA, taxe AC/CU (~5%), proiectare (~12%), comision vânzare (3%). Valori reale: consultant ANEVAR + devizier autorizat.
+        </div>
       </div>
     </div>
 
@@ -5601,6 +5637,21 @@ function _rvInject(){
       <button class="rv-zbtn" onclick="_rvZoom(1)">+</button>
       <button class="rv-zbtn" onclick="{_RV.scale=12;document.getElementById('rv-zval').textContent='100%';if(_RV.building)_rvRender();}" style="font-size:9px;font-weight:700;width:auto;padding:0 8px">FIT</button>
       <div id="rv-mob-info-btn" onclick="_rvMobSheet()">📊 Analiză</div>
+      <!-- Buton ascunde/arata panoul cu Normative + Info parcelă -->
+      <button id="rv-btn-hide-rpanel" title="Ascunde/afișează panoul cu Normative și Info parcelă"
+        onclick="(function(btn){
+          const body=document.getElementById('rv-body-main');
+          const rp=document.querySelector('.rv-rpanel');
+          const hidden=body.classList.toggle('rpanel-hidden');
+          btn.textContent=hidden?'◉ Info':'○ Info';
+          btn.style.color=hidden?'#94a3b8':'#38bdf8';
+          btn.style.borderColor=hidden?'rgba(148,163,184,.2)':'rgba(56,189,248,.3)';
+          // Resize canvas
+          setTimeout(()=>{if(window._rvRender&&_RV.building)_rvRender();},150);
+        })(this)"
+        style="padding:4px 10px;border-radius:6px;border:1px solid rgba(56,189,248,.3);background:rgba(56,189,248,.06);color:#38bdf8;cursor:pointer;font-size:10px;font-weight:700;font-family:'Space Grotesk',sans-serif;white-space:nowrap;flex-shrink:0">
+        ○ Info
+      </button>
       <div class="rv-expbtn-png" onclick="_rvExportPNG()"
         style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);font-size:11px;padding:6px 14px;font-weight:700;letter-spacing:.03em;cursor:pointer;border-radius:8px;color:#22C55E;display:flex;align-items:center;gap:6px"
         title="Exportă planșa curentă ca imagine PNG">
