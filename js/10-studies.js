@@ -123,15 +123,97 @@ function _stripEmoji(str){
 // ═══════════════════════════════════════════════════════════════════════════
 
 
-// ── Configuratie TVA Romania (Legea 227/2015 Cod Fiscal actualizat) ─────────
-// TVA standard Romania: 19% din 01.01.2017 (OUG 25/2017)
-// Cote reduse: 9% (alimente, medicamente), 5% (locuinte sociale, carti)
-// MODIFICA AICI daca cota se schimba:
-const _TVA_STANDARD = 0.19;  // 19% - constructii noi standard
-const _TVA_REDUS_9  = 0.09;  // 9% - locuinte sociale (suprafata < 120mp, pret < 600k lei)
-const _TVA_REDUS_5  = 0.05;  // 5% - locuinte achizitionate prin ANL
-// Nota: pentru locuinte noi < 600.000 lei cu suprafata < 120mp utili → TVA 9%
-// Sursa: Legea 227/2015 Cod Fiscal, Art. 291, actualizat OUG 16/2022
+// ════════════════════════════════════════════════════════════════════════════
+// CONFIGURATIE TVA ROMANIA + CURS BNR LIVE
+// ════════════════════════════════════════════════════════════════════════════
+// TVA Romania (Legea 227/2015 Cod Fiscal, modificata):
+//   Din 01.08.2025: standard 21%, redus unic 11%
+//   Inainte (01.01.2017-31.07.2025): standard 19%, redus 9% / 5%
+//   SURSA VERIFICARE: https://anaf.ro / https://codfiscal.net
+//
+// IMPORTANT: ANAF nu ofera API public pentru cote TVA.
+// Actualizarea este MANUALA — verifica anual sau la fiecare modificare legislativa.
+// ─────────────────────────────────────────────────────────────────────────────
+const _TVA_STANDARD = 0.21;  // 21% — standard constructii/servicii (din 01.08.2025)
+const _TVA_REDUS    = 0.11;  // 11% — cota redusa unica (din 01.08.2025): medicamente, alimente, carti
+const _TVA_REDUS_9  = 0.11;  // alias pentru compatibilitate (inlocuieste fosta 9%)
+const _TVA_REDUS_5  = 0.11;  // alias pentru compatibilitate (inlocuieste fosta 5%)
+const _TVA_DATA_VIGOARE = '01.08.2025';
+const _TVA_SURSA = 'Legea 227/2015 Cod Fiscal, modificata prin Legea bugetului 2025';
+
+// ── BNR Exchange Rate Engine ─────────────────────────────────────────────────
+// Banca Nationala a Romaniei — API public XML, gratuit, fara cheie
+// Endpoint: https://www.bnr.ro/nbrfxrates.xml
+// Actualizat zilnic de BNR la ora 13:00 (zile lucratoare)
+// Sursa juridica: Legea 312/2004 privind Statutul BNR, Art. 9
+// ─────────────────────────────────────────────────────────────────────────────
+
+const _BNR_CACHE = {};  // Cache sesiune pentru cursul BNR
+
+async function _getBNRRate(currency = 'EUR') {
+  const cacheKey = currency + '_' + new Date().toDateString();
+  if (_BNR_CACHE[cacheKey]) return _BNR_CACHE[cacheKey];
+
+  try {
+    // BNR XML API — permite CORS din browser
+    const url = 'https://www.bnr.ro/nbrfxrates.xml';
+    const resp = await fetch(url, { signal: AbortSignal.timeout(6000) });
+    const xml = await resp.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(xml, 'application/xml');
+    
+    // Extrage data publicarii
+    const pubDate = doc.querySelector('PublishingDate')?.textContent || new Date().toISOString().split('T')[0];
+    
+    // Cauta cursul valutei cerute
+    const rates = doc.querySelectorAll('Rate');
+    let rate = null;
+    rates.forEach(r => {
+      if (r.getAttribute('currency') === currency) {
+        const val = parseFloat(r.textContent);
+        const mult = parseInt(r.getAttribute('multiplier') || '1');
+        rate = val / mult;
+      }
+    });
+
+    if (rate && rate > 0) {
+      const result = {
+        rate: Math.round(rate * 100) / 100,
+        currency,
+        date: pubDate,
+        source: 'BNR — Banca Nationala a Romaniei (www.bnr.ro)',
+        label: `1 ${currency} = ${(Math.round(rate * 100) / 100).toFixed(4)} RON (BNR, ${pubDate})`
+      };
+      _BNR_CACHE[cacheKey] = result;
+      return result;
+    }
+  } catch(e) {
+    console.warn('[BNR] Fallback la curs estimat:', e.message);
+  }
+
+  // Fallback: curs estimat (actualizat manual periodic)
+  const fallbackRates = { EUR: 5.05, USD: 4.68, GBP: 5.85, CHF: 5.15 };
+  const fb = fallbackRates[currency] || 5.05;
+  return {
+    rate: fb,
+    currency,
+    date: 'estimat',
+    source: 'Estimare (BNR indisponibil)',
+    label: `1 ${currency} ≈ ${fb} RON (estimat — verificati BNR.ro)`
+  };
+}
+
+// Functie helper: formateaza suma cu curs BNR in footer-ul studiului
+function _pdfCursBNR(pdf, W, H, cursData) {
+  if (!cursData) return;
+  pdf.setTextColor(100, 130, 160);
+  pdf.setFontSize(5.5);
+  pdf.setFont('helvetica', 'italic');
+  pdf.text(
+    `Curs valutar: ${cursData.label} · TVA ${Math.round(_TVA_STANDARD * 100)}% (standard, din ${_TVA_DATA_VIGOARE}) · ${cursData.source}`,
+    W / 2, H - 5, { align: 'center' }
+  );
+}
 
 // Cache elevatie pentru a evita apeluri repetate (valid pe sesiune)
 const _ELEV_CACHE = {};
@@ -2685,6 +2767,7 @@ async function generateExistingBldStudy(){
 
 // ── STUDIU GEOTEHNIC PRELIMINAR ────────────────────────────────────────────
 async function generateGeotehnicalStudy(){
+  const _cursEUR = await _getBNRRate('EUR');
   const ap=S.parcels[S.activeParcel??0];
   if(!ap?.geo?.geometry){ss('Selectați o parcelă.');return;}
   ss('Se generează Pre-Studiu Geotehnic...');
@@ -5226,6 +5309,8 @@ async function generateSolarStudy(){
 // ════════════════════════════════════════════════════════════════════════════
 
 async function generateStudiuFezabilitate(paramOverrides){
+  ss('Studiu Fezabilitate — se obține cursul BNR EUR/RON...');
+  const _cursEUR = await _getBNRRate('EUR');
   const ap=S.parcels[S.activeParcel??0];
   if(!ap?.geo?.geometry){ss('Selectați o parcelă pentru studiu.');return;}
   // Dacă nu avem overrides (chemat direct din buton), deschidem modalul de parametri
@@ -5575,7 +5660,8 @@ async function generateStudiuFezabilitate(paramOverrides){
     ['  5.3','Cheltuieli diverse si neprevazute (3%)',_C6.toLocaleString(),Math.round(_C6/_totalDeviz*100)+'%'],
     ['TOTAL DEVIZ GENERAL','Valoare totala investitie (exclusiv TVA)',_totalDeviz.toLocaleString(),'100%'],
     ['+ TVA '+Math.round(_TVA_STANDARD*100)+'%','(standard constructii noi · Legea 227/2015 + OUG 25/2017)','',Math.round(_totalDeviz*_TVA_STANDARD).toLocaleString()+' EUR'],
-    ['TOTAL CU TVA','',Math.round(_totalDeviz*(1+_TVA_STANDARD)).toLocaleString()+' EUR',''],
+    ['TOTAL CU TVA','',Math.round(_totalDeviz*(1+_TVA_STANDARD)).toLocaleString()+' EUR','TVA '+Math.round(_TVA_STANDARD*100)+'% (standard, din '+_TVA_DATA_VIGOARE+')'],
+    ['Echivalent RON (curs BNR)','',Math.round(_totalDeviz*(1+_TVA_STANDARD)*(_cursEUR?.rate||5.05)).toLocaleString()+' RON','1 EUR = '+(_cursEUR?.rate||5.05).toFixed(4)+' RON ('+(_cursEUR?.date||'estimat')+')'],
   ].forEach((r,i)=>{
     const isBold = r[0].startsWith('Cap.')||r[0].startsWith('TOTAL');
     cy=tblRow(r,cy,false,[14,110,35,23]);
@@ -6067,6 +6153,7 @@ async function generateStudiuFezabilitate(paramOverrides){
 // STUDIU AMPLASAMENT — Document fundament pentru toate studiile de specialitate
 // ════════════════════════════════════════════════════════════════════════════
 async function generateStudiuAmplasament(){
+  const _cursEUR = await _getBNRRate('EUR');
   const ap=S.parcels[S.activeParcel??0];
   if(!ap?.geo?.geometry){ss('Selectați o parcelă pentru studiu.');return;}
   ss('Se generează Studiu de Amplasament...');
@@ -8286,6 +8373,7 @@ window.generateCPE = generateCPE;
 // Clasificare hazard: P91/2008 + Ord. 1422/2003 (risc geomorfologic)
 // ═══════════════════════════════════════════════════════════════════════════
 async function generateStabilitateTaluzuri(){
+  const _cursEUR = await _getBNRRate('EUR');
   const ap=S.parcels[S.activeParcel??0];
   if(!ap?.geo?.geometry){ss('Selectați o parcelă pentru studiu stabilitate.');return;}
   ss('Studiu Stabilitate Taluzuri — se obțin cote de nivel DEM...');
