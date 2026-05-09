@@ -192,10 +192,10 @@ const _LOT = {
 
   // Config drum per tip
   drumTipuri: {
-    principal: {label:'Drum principal',  latime:7, color:'#94a3b8', opacity:0.6},
-    secundar:  {label:'Drum secundar',   latime:5, color:'#64748b', opacity:0.5},
-    acces:     {label:'Alee acces',      latime:3.5,color:'#475569', opacity:0.4},
-    pietonal:  {label:'Cale pietonală',  latime:2, color:'#38bdf8', opacity:0.35},
+    principal: {label:'Drum colector principal',  latime:7, color:'#94a3b8', opacity:0.6, norm:'DN 537/2003 · min 6m + trotuare 1.5m', viteza:30},
+    secundar:  {label:'Stradă locală rezidențială', latime:5, color:'#64748b', opacity:0.5, norm:'DN 537/2003 · min 4m + trotuare 1m', viteza:20},
+    acces:     {label:'Alee acces + parcare',   latime:3.5,color:'#475569', opacity:0.4, norm:'min 3.5m (1 sens) / 6m (2 sensuri)', viteza:10},
+    pietonal:  {label:'Cale pietonală / pistă bicicletă', latime:2, color:'#38bdf8', opacity:0.35, norm:'min 1.5m pietonal + 1.5m biciclete', viteza:0},
   }
 };
 
