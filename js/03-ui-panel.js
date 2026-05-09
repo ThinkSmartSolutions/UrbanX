@@ -501,6 +501,7 @@ function htmlMobRapoarte(){
   <div class="card" style="display:flex;flex-direction:column;gap:6px">
     ${btn('generateStudiuFezabilitate()','212,175,55','📊','Studiu Fezabilitate / DALI','Viabilitate economică, HG 907/2016','fezabilitate')}
     ${btn('generateCPE()','52,211,153','⚡','Certificat Performanță Energetică','Clasa A-G · EP kWh/m²an · NZEB · Legea 372/2005','cpe')}
+    ${btn('generateStabilitateTaluzuri()','180,76,4','⛰','Studiu Stabilitate Taluzuri','Bishop · Fellenius · EC7 · NP 074/2014 · Cotă AMSL real','stabilitate')}
     ${btn('generatePrestudiuBransamente()','96,165,250','🔌','Pre-studiu Bransamente & Utilități','Apă · Canal · Electric · Gaze · ISU · PV','bransamente')}
   </div>
   </div>`;

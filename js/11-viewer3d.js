@@ -932,6 +932,58 @@ function _v3dBuild(ap){
         if(isRoofSlab && h >= 0.3){
           _v3dAddRoofDetails(THREE, pts, base, top, scene, fStilKey);
         }
+
+        // ── SUBSOL / PARCARE SUBTERANA — vizualizare 3D ───────────────────
+        // Daca AEDIS.subsol sau numarul de parcaje necesita subsol, afisam
+        // un volum semi-transparent sub cota ±0 (sub nivelul terenului)
+        if(floor === 0 && !f.properties?.isLotizare && !f.properties?.isExistent){
+          const pkMin = parseFloat(window.AEDIS?.pkMin||S.vol?.pkMin||0);
+          const pkNiv = parseFloat(window.AEDIS?.pkNivele||S.vol?.pkNivele||1);
+          const hasSubsol = pkMin > 0 && pkMin > ((parseFloat(window.S?.parcels?.[S.activeParcel??0]?.area)||300) * parseFloat(window.AEDIS?.pot||0.35) * 0.15);
+          const subsolH = hasSubsol ? Math.max(2.8, Math.ceil(pkMin/((pts.length||4)*0.9))*3.2) : 0;
+
+          if(subsolH > 0 && pts.length >= 3){
+            try{
+              // Material subsol: gri-albastru semi-transparent (beton aparent)
+              const matSub = new THREE.MeshStandardMaterial({
+                color: new THREE.Color(0.22, 0.28, 0.38),
+                roughness: 0.9, metalness: 0.02,
+                transparent: true, opacity: 0.55,
+                side: THREE.DoubleSide,
+              });
+              const meshSub = _v3dPrism(THREE, pts, -subsolH, 0, matSub);
+              if(meshSub){
+                scene.add(meshSub);
+                V3D.aedis.push(meshSub);
+                // Linie de contur la cota ±0 (interfata teren-subsol)
+                _v3dAddEdges(THREE, meshSub, scene, '#38bdf8', 0.3);
+
+                // Label "SUBSOL P-1" deasupra liniei de teren
+                // (simplu billboard cu canvas)
+                const lblCanv = document.createElement('canvas');
+                lblCanv.width=256; lblCanv.height=48;
+                const lblCtx = lblCanv.getContext('2d');
+                lblCtx.fillStyle='rgba(14,36,72,0.85)';
+                lblCtx.beginPath();lblCtx.roundRect(0,0,256,48,8);lblCtx.fill();
+                lblCtx.fillStyle='#38bdf8';lblCtx.font='bold 16px monospace';
+                lblCtx.textAlign='center';
+                lblCtx.fillText('SUBSOL P-1 · ' + Math.round(pkMin) + ' loc. parcare', 128, 20);
+                lblCtx.fillStyle='rgba(150,180,210,0.9)';lblCtx.font='11px monospace';
+                lblCtx.fillText('H=' + subsolH.toFixed(1) + 'm · ' + Math.round(pts.reduce((a,p)=>a,0)||30) + ' mp/nivel', 128, 38);
+                const lblTex = new THREE.CanvasTexture(lblCanv);
+                const lblMat = new THREE.MeshBasicMaterial({map:lblTex,transparent:true,depthWrite:false});
+                const lblMesh = new THREE.Mesh(new THREE.PlaneGeometry(8,1.5), lblMat);
+                // Centrul geometric al parcelei la cota -subsolH/2
+                const ctrX = pts.reduce((s,p)=>s+p[0],0)/pts.length;
+                const ctrZ = pts.reduce((s,p)=>s+p[1],0)/pts.length;
+                lblMesh.position.set(ctrX, -subsolH/2, ctrZ);
+                scene.add(lblMesh);
+
+                console.log(`[V3D] Subsol P-1 adăugat: H=${subsolH.toFixed(1)}m, ${pkMin} locuri parcare`);
+              }
+            }catch(e){ console.warn('[V3D] Subsol render error:', e.message); }
+          }
+        }
       }
     }catch(e){ console.warn('AEDIS mesh:',e.message); }
   });
