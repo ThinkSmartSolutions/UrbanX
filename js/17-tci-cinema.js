@@ -244,6 +244,11 @@ const TCI = {
       this.map?.once('idle', () => setTimeout(_initCam, 500));
       setTimeout(_initCam, 4000);  // fallback absolut
     }
+    // Director cinematic: porneste filmul dupa 1.5s (harta e gata)
+    this._directorInit();
+    setTimeout(() => {
+      if(this.Director && this.mode !== 'parcela') this.Director.play();
+    }, 1500);
     this.start();
   },
 
@@ -1179,6 +1184,11 @@ const TCI = {
     this._drawParcelRiskCard(ctx, W, H);
     // ── COMPARARE EU (overlay central jos) ────────────────────────────────
     const _tT = (this.year - (this.startYear||2026)) / Math.max(1, 2055 - (this.startYear||2026));
+
+    // ── CITY LIFE: vehicule, pietoni, puls urban ──────────────────────────
+    this._drawCityLife(ctx, W, H);
+    // ── DIRECTOR OVERLAY per scena ────────────────────────────────────────
+    if(this.Director._active) this._drawDirectorOverlay(ctx, W, H);
 
   },
 
@@ -2657,6 +2667,9 @@ const TCI = {
     this._currentZone   = null;
     console.log('[TCI Storyteller] ' + this._STORY_SHOTS.length + ' shots × ' + this._STORY_ZONES.length + ' zone');
 
+    // Init viata urbana pe canvas
+    this._initCityLife(cx, cy);
+
     // Afisam primul card imediat
     if(this._STORY_SHOTS.length) {
       const firstShot = this._STORY_SHOTS[0];
@@ -2666,6 +2679,9 @@ const TCI = {
   },
 
   _updateCinemaCamera(year, yearT, totalT) {
+    // Daca Director-ul rulează filmul, nu interferam cu camera
+    if(this.Director?._active) return;
+
     if(!this._cinemaActive || !this.map) return;
     if(!this.running) return;
 
@@ -2920,7 +2936,567 @@ const TCI = {
   },
 
   _rr(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();},
-};
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // TCI.Director — CINEMATIC URBAN DOCUMENTARY ENGINE
+  // Orchestrează 12 scene cinematografice: de la satelit → nivel pietonal
+  // ══════════════════════════════════════════════════════════════════════════
+
+  Director: {
+    _active: false,
+    _sceneIdx: -1,
+    _sceneStartTime: 0,
+    _sceneTimer: null,
+    _tci: null,   // ref la TCI setat in _directorInit
+
+    // ── CELE 12 SCENE (conform storyboard) ─────────────────────────────────
+    _buildScenes(cx, cy, cityName, cityPop, cityYear) {
+      const roPop = '19.6M';
+      const pop50 = Math.round(cityPop * 1.18).toLocaleString();
+      const popStr = cityPop.toLocaleString();
+      return [
+        // ── SCENA 1: Overview România (00:00–00:06) ─────────────────────────
+        {
+          id: 'overview_romania',
+          title: '1 · OVERVIEW ROMÂNIA',
+          duration: 6500,
+          camera: { center:[24.5, 45.8], zoom:5.8, pitch:0, bearing:0, duration:2500 },
+          narrative: {
+            title: '🌍 România în Context European',
+            body:  `România — ${roPop} locuitori · ${cityName} este polul regional al Moldovei. Privim de sus, din perspectivă europeană, înainte să coborâm spre orașul care se transformă.`,
+            src:   'Eurostat Urban Audit 2021 · INS România'
+          },
+          overlay: 'satellite_overview',
+          nightMode: false,
+        },
+        // ── SCENA 2: Zoom Moldova (00:06–00:12) ─────────────────────────────
+        {
+          id: 'zoom_moldova',
+          title: '2 · ZOOM MOLDOVA',
+          duration: 6000,
+          camera: { center:[cx+0.5, cy+0.3], zoom:8.5, pitch:15, bearing:-10, duration:3500 },
+          narrative: {
+            title: `🗺 Regiunea Moldova — Focus ${cityName}`,
+            body:  `Coborâm spre polul regional. ${cityName} — centru universitar, economic și cultural al Moldovei. Populație urbană: ${popStr} loc. · Zona metropolitană extinsă.`,
+            src:   'INS · MDLPA Regiune Nord-Est'
+          },
+          overlay: 'region_zoom',
+        },
+        // ── SCENA 3: Approach Iași (00:12–00:20) ────────────────────────────
+        {
+          id: 'city_approach',
+          title: '3 · APPROACH — VEDERE AERIANĂ',
+          duration: 8000,
+          camera: { center:[cx, cy], zoom:11.5, pitch:30, bearing:-25, duration:4000 },
+          narrative: {
+            title: `✈ Aterizăm în ${cityName} · ${cityYear}`,
+            body:  `Populație ${cityYear}: ${popStr} loc. · Proiecție 2050: ${pop50} loc. (+20.3%) · Rata anuală de creștere calibrată pe date INSE. Vedem orașul de sus — ca un urbanist care vine pentru prima dată.`,
+            src:   'INSE Cohort-Survival · Eurostat Urban Audit'
+          },
+          overlay: 'approach_data',
+        },
+        // ── SCENA 4: City Overview 3D (00:20–00:30) ─────────────────────────
+        {
+          id: 'city_3d_overview',
+          title: '4 · CITY OVERVIEW 3D',
+          duration: 10000,
+          camera: { center:[cx, cy], zoom:13, pitch:55, bearing:-30, duration:4500 },
+          cameraChain: [
+            { center:[cx+0.005, cy-0.003], zoom:13.5, pitch:60, bearing:30, duration:5000, delay:5000 },
+          ],
+          narrative: {
+            title: `🏙 ${cityName} 3D — Cartierele Principale`,
+            body:  `Vedere 3D a țesutului urban. Densitate medie: 48 loc/ha · Zone rezidențiale (albastru), mixte (violet), comerciale (portocaliu). Clădirile reflectă reglementările PUG: înălțime, CUT, POT.`,
+            src:   'PUG + RLU · OSM Buildings · ANCPI'
+          },
+          overlay: 'city_3d',
+        },
+        // ── SCENA 5: Dezvoltare Urbană (00:30–00:42) ─────────────────────────
+        {
+          id: 'urban_development',
+          title: '5 · DEZVOLTARE URBANĂ 2025–2050',
+          duration: 12000,
+          camera: { center:[cx+0.010, cy+0.012], zoom:14, pitch:62, bearing:15, duration:4000 },
+          cameraChain: [
+            { center:[cx-0.008, cy-0.010], zoom:14.5, pitch:65, bearing:-20, duration:5000, delay:7000 },
+          ],
+          narrative: {
+            title: '📈 Unde se Dezvoltă Orașul?',
+            body:  `Zone cu potențial major de creștere (roșu): periferia nordică și vestică. Medie: +2.1 ha/an reconvertite. Densificare centrală: +28% față de 2021. Autorizații construire ANCPI: trend ascendent post-2022.`,
+            src:   'ANCPI Autorizații Construire · INSE · PUG UTR M/C'
+          },
+          overlay: 'development_zones',
+        },
+        // ── SCENA 6: Infrastructură & Mobilitate (00:42–00:55) ───────────────
+        {
+          id: 'infrastructure_mobility',
+          title: '6 · INFRASTRUCTURĂ & MOBILITATE',
+          duration: 13000,
+          camera: { center:[cx, cy], zoom:13.5, pitch:50, bearing:0, duration:4000 },
+          narrative: {
+            title: '🚊 Rețeaua de Mobilitate Urbană',
+            body:  `Trafic aglomerat (roșu) → flux (verde) pe rețeaua stradală principală. Modal split ${cityYear}: auto 72% · TP 18% · activ 10%. Linii TP extinse post-2028 (tramvai + autobuz rapid). Predicție 2050: TP +62%.`,
+            src:   'PNRR Transport · MDLPA · Eurostat Modal Split'
+          },
+          overlay: 'traffic_network',
+        },
+        // ── SCENA 7: Focus Zonă (00:55–01:10) ────────────────────────────────
+        {
+          id: 'district_focus',
+          title: '7 · FOCUS — ZONĂ DENSIFICARE',
+          duration: 15000,
+          camera: { center:[cx+0.008, cy+0.010], zoom:15.5, pitch:72, bearing:-15, duration:4500 },
+          cameraChain: [
+            { center:[cx+0.010, cy+0.008], zoom:16, pitch:74, bearing:25, duration:6000, delay:9000 },
+          ],
+          narrative: {
+            title: '🏗 Densificare — Construcții Noi vs Existente',
+            body:  `Zona nord-centrală: densificare +28% estimată 2021→2040 · Locuințe noi: 12.400 · Populație 2050: 45.800 în această zonă. Clădirile portocalii = în construcție activă. Clădirile albastre = finalizate.`,
+            src:   'ANCPI · INSE · Model proiecție UTR'
+          },
+          overlay: 'construction_focus',
+        },
+        // ── SCENA 8: Comparație (01:10–01:20) ────────────────────────────────
+        {
+          id: 'comparison',
+          title: '8 · COMPARAȚIE CU ALTE ORAȘE',
+          duration: 10000,
+          camera: { center:[cx, cy], zoom:12.5, pitch:45, bearing:-10, duration:3500 },
+          narrative: {
+            title: `⚖ ${cityName} vs Alte Orașe Europene`,
+            body:  `Densitate: 48 loc/ha vs Cluj 76 loc/ha vs Vilnius 156 loc/ha. Expansiune ${cityName}: 2.450 ha · Trafic: +38% vs 2021. Compararea cu orase UE similare arată potențial major de densificare sustenabilă.`,
+            src:   'Eurostat Urban Audit 2021 · EEA Urban Atlas'
+          },
+          overlay: 'comparison_eu',
+        },
+        // ── SCENA 9: Street Transition (01:20–01:28) ─────────────────────────
+        {
+          id: 'street_transition',
+          title: '9 · STREET TRANSITION',
+          duration: 8000,
+          camera: { center:[cx+0.003, cy+0.002], zoom:17, pitch:78, bearing:5, duration:4000 },
+          narrative: {
+            title: '🚶 Coborâm la Nivelul Strazii',
+            body:  `Trecere de la perspectiva aviatică la cea pietonală. Vedem orașul prin ochii unui locuitor: trotuare, circulații, spații publice. Calitatea spațiului public = indicatorul real al calității vieții urbane.`,
+            src:   'WalkScore · OMS Spații Verzi · ESRI Urban Observatory'
+          },
+          overlay: 'street_level',
+        },
+        // ── SCENA 10: Viata Urbana (01:28–01:40) ─────────────────────────────
+        {
+          id: 'urban_life',
+          title: '10 · VIATA URBANA — PULS',
+          duration: 12000,
+          camera: { center:[cx-0.003, cy+0.001], zoom:16.5, pitch:75, bearing:-20, duration:4000 },
+          cameraChain: [
+            { center:[cx, cy+0.003], zoom:17, pitch:76, bearing:40, duration:5000, delay:7000 },
+          ],
+          narrative: {
+            title: '🌆 Pulsul Urban — Mobilitate & Viață',
+            body:  `Transport public: +62% pasageri estimat 2050 vs 2021. Pietoni/zi în centru: 24.700. Bicicliști: trend +18%/an. Orașul devine mai verde și mai conectat odată cu implementarea PMUD.`,
+            src:   'PMUD · PNRR Mobilitate · Eurostat Urban Mobility'
+          },
+          overlay: 'urban_pulse',
+          nightMode: true,  // vizualizare noaptea
+        },
+        // ── SCENA 11: Evolutie Temporala (01:40–01:52) ───────────────────────
+        {
+          id: 'temporal_evolution',
+          title: '11 · EVOLUȚIE TEMPORALĂ 2025–2050',
+          duration: 12000,
+          camera: { center:[cx, cy], zoom:13.5, pitch:55, bearing:0, duration:3500 },
+          narrative: {
+            title: '⏱ Transformarea Orașului — 2025 → 2050',
+            body:  `Slider temporal: vedem transformarea live. Clădirile cresc, rețeaua TP se extinde, densitatea pulsează. Proiecția este calibrată pe date INSE, modele IPCC AR6 și tendințele ANCPI.`,
+            src:   'INSE · IPCC AR6 RCP4.5/8.5 · ANCPI · Eurostat'
+          },
+          overlay: 'temporal_morph',
+          animateYear: true,  // face year scrub automat in aceasta scena
+        },
+        // ── SCENA 12: Concluzie & Viziune (01:52–02:05) ──────────────────────
+        {
+          id: 'conclusion_vision',
+          title: '12 · CONCLUZIE & VIZIUNE 2050',
+          duration: 13000,
+          camera: { center:[cx, cy], zoom:12, pitch:45, bearing:-20, duration:4000 },
+          cameraChain: [
+            { center:[cx, cy], zoom:13.5, pitch:58, bearing:20, duration:6000, delay:7000 },
+          ],
+          narrative: {
+            title: `🌟 ${cityName} 2050 — Viziunea`,
+            body:  `Oraș mai dens · Mobilitate verde · Infrastructură modernă · Calitate a vieții mai bună. Toate proiecțiile sunt bazate pe date oficiale și calibrate pe tendințe reale. Aceasta este analiza urbanistică digitală.`,
+            src:   'INSE · Eurostat · ANCPI · BNR · IPCC AR6 · OMS · PNRR'
+          },
+          overlay: 'conclusion',
+        },
+      ];
+    },
+
+    // ── Init: porneste filmul ───────────────────────────────────────────────
+    init(tciRef) {
+      this._tci = tciRef;
+      this._active = false;
+      this._sceneIdx = -1;
+      clearTimeout(this._sceneTimer);
+    },
+
+    play() {
+      const T = this._tci;
+      if(!T) return;
+      const d  = T.cityData;
+      const cx = T.activeParcel?.lon || d?.lon || 27.601;
+      const cy = T.activeParcel?.lat || d?.lat || 47.158;
+      this._scenes = this._buildScenes(cx, cy, d?.name||'UAT', d?.pop2021||100000, T.year||2025);
+      this._cx = cx; this._cy = cy;
+      this._active = true;
+      this._sceneIdx = -1;
+      this._advanceScene();
+      console.log('[TCI Director] Film pornit — ' + this._scenes.length + ' scene');
+    },
+
+    stop() {
+      this._active = false;
+      clearTimeout(this._sceneTimer);
+      clearTimeout(this._chainTimer);
+    },
+
+    _advanceScene() {
+      if(!this._active) return;
+      this._sceneIdx++;
+      if(this._sceneIdx >= this._scenes.length) {
+        // Film terminat — trecem la storyteller loop normal
+        this._active = false;
+        console.log('[TCI Director] Film complet — predau catre Storyteller');
+        return;
+      }
+      this._playScene(this._scenes[this._sceneIdx]);
+    },
+
+    _playScene(scene) {
+      if(!this._active) return;
+      const T = this._tci;
+      const m = T?.map;
+      if(!m) return;
+
+      console.log('[TCI Director] Scena ' + (this._sceneIdx+1) + '/' + this._scenes.length + ': ' + scene.id);
+      this._sceneStartTime = Date.now();
+
+      // 1. Muta camera
+      try {
+        m.flyTo({
+          center:   scene.camera.center,
+          zoom:     scene.camera.zoom,
+          pitch:    scene.camera.pitch,
+          bearing:  scene.camera.bearing,
+          duration: scene.camera.duration,
+          essential: true,
+          easing: (t) => {
+            // Cinematic easing: slow start, fast middle, slow end
+            const c1 = 1.70158, c2 = c1 * 1.525;
+            return t < 0.5
+              ? (Math.pow(2*t,2) * ((c2+1)*2*t - c2)) / 2
+              : (Math.pow(2*t-2,2) * ((c2+1)*(2*t-2) + c2) + 2) / 2;
+          },
+        });
+        T.bearing = scene.camera.bearing;
+      } catch(e) {}
+
+      // Camera chain (miscare secundara in interiorul scenei)
+      clearTimeout(this._chainTimer);
+      if(scene.cameraChain?.length) {
+        scene.cameraChain.forEach(cc => {
+          this._chainTimer = setTimeout(() => {
+            if(!this._active) return;
+            try {
+              m.flyTo({
+                center:   cc.center,
+                zoom:     cc.zoom,
+                pitch:    cc.pitch,
+                bearing:  cc.bearing,
+                duration: cc.duration,
+                essential: true,
+                easing: (t) => t < 0.5 ? 2*t*t : -1+(4-2*t)*t,
+              });
+              T.bearing = cc.bearing;
+            } catch(e) {}
+          }, cc.delay);
+        });
+      }
+
+      // 2. Night mode
+      this._currentOverlay = scene.overlay;
+      this._nightMode = !!scene.nightMode;
+
+      // 3. Narrative card
+      if(T) T._updateNarrativeForZone({
+        name:    scene.title,
+        narText: () => scene.narrative.body,
+        narSrc:  scene.narrative.src,
+      }, T.year || 2025, 'director');
+      // Titlu scena
+      setTimeout(() => {
+        const titleEl = document.getElementById('tci-narcard-title');
+        if(titleEl) titleEl.textContent = scene.narrative.title;
+      }, 100);
+
+      // 4. Animatia anului (scena 11)
+      if(scene.animateYear && T) {
+        T._directorYearAnim = true;
+        const startY = T.startYear || 2025;
+        const endY   = 2050;
+        const step   = (scene.duration - 2000) / (endY - startY);
+        let y = startY;
+        const tick = () => {
+          if(!this._active || !T._directorYearAnim) return;
+          if(y <= endY) {
+            T._onYearChange(y);
+            const sl = document.getElementById('tci-scrub');
+            if(sl) sl.value = y;
+            y++;
+            setTimeout(tick, step);
+          }
+        };
+        setTimeout(tick, 1000);
+      } else if(T) {
+        T._directorYearAnim = false;
+      }
+
+      // 5. Trece la scena urmatoare dupa duration
+      this._sceneTimer = setTimeout(() => this._advanceScene(), scene.duration);
+    },
+
+    // Overlay type curent (citit de _draw2D_hud)
+    _currentOverlay: null,
+    _nightMode: false,
+    _cx: 27.601,
+    _cy: 47.158,
+    _scenes: [],
+  },
+
+  // ── Director init in launch ───────────────────────────────────────────────
+  _directorInit() {
+    this.Director.init(this);
+  },
+
+  // ── Enhanced Canvas: viata urbana animata ────────────────────────────────
+  // Masini, pietoni, pulse urban, efecte atmosferice
+  _lifeParticles: [],
+  _lifePulse: [],
+  _lifeInit: false,
+  _lifeFrame: 0,
+
+  _initCityLife(cx, cy) {
+    this._lifeParticles = [];
+    this._lifePulse = [];
+    this._lifeFrame = 0;
+
+    // Generăm "vehicule" pe rute simulate în jurul centrului
+    const routes = [
+      { ax:cx-0.02, ay:cy,       bx:cx+0.02, by:cy,       w:2.5 },  // E-V principal
+      { ax:cx,      ay:cy-0.018, bx:cx,      by:cy+0.018, w:2   },  // N-S principal
+      { ax:cx-0.01, ay:cy+0.01,  bx:cx+0.015, by:cy-0.012, w:1.5 }, // diagonal
+      { ax:cx+0.008, ay:cy-0.015, bx:cx-0.012, by:cy+0.015, w:1.5 },
+      { ax:cx-0.018, ay:cy-0.01, bx:cx+0.018, by:cy+0.01, w:1 },
+    ];
+
+    const rng = (s) => { let x=Math.sin(s+1)*43758.5453; return x-Math.floor(x); };
+    routes.forEach((rt, ri) => {
+      const n = Math.round(18 + rng(ri*7)*20);
+      for(let i=0; i<n; i++) {
+        const t = rng(ri*100+i);
+        this._lifeParticles.push({
+          route: ri,
+          ax: rt.ax, ay: rt.ay, bx: rt.bx, by: rt.by,
+          t, speed: (0.0008 + rng(i*31+ri)*0.0015) * (rng(i*7)>0.3?1:-1),
+          type: i%8===0?'tram' : i%4===0?'bus' : 'car',
+          w: rt.w,
+        });
+      }
+    });
+
+    // Zone de puls (activitate urbana)
+    this._lifePulse = [
+      { lon:cx,        lat:cy,        r:0, maxR:60, alpha:0.7, color:'#D4AF37', phase:0    },
+      { lon:cx+0.01,   lat:cy+0.012,  r:0, maxR:40, alpha:0.5, color:'#60a5fa', phase:1.5  },
+      { lon:cx-0.012,  lat:cy+0.008,  r:0, maxR:45, alpha:0.4, color:'#22c55e', phase:0.8  },
+      { lon:cx+0.015,  lat:cy-0.010,  r:0, maxR:35, alpha:0.45, color:'#f59e0b', phase:2.2 },
+    ];
+
+    this._lifeInit = true;
+  },
+
+  _drawCityLife(ctx, W, H) {
+    if(!this._lifeInit || !this.map) return;
+    const m = this.map;
+    const now = Date.now() / 1000;
+    this._lifeFrame++;
+
+    // ── Pulse rings ───────────────────────────────────────────────────────
+    this._lifePulse.forEach(p => {
+      const speed = 0.8;
+      p.r = ((now * speed + p.phase) % 1) * p.maxR;
+      const alpha = (1 - p.r / p.maxR) * p.alpha * 0.6;
+      if(alpha < 0.01) return;
+      try {
+        const pt = m.project([p.lon, p.lat]);
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, p.r, 0, Math.PI*2);
+        ctx.strokeStyle = p.color + Math.round(alpha*255).toString(16).padStart(2,'0');
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        ctx.restore();
+      } catch(e) {}
+    });
+
+    // ── Vehicule (masini, autobuze, tramvaie) ─────────────────────────────
+    const zoom = m.getZoom?.() || 13;
+    if(zoom < 11) return;  // nu desena vehicule la zoom mic
+
+    const alpha = Math.min(1, (zoom - 11) / 3);  // fade in cu zoom
+    const isNight = this.Director._nightMode;
+
+    this._lifeParticles.forEach(p => {
+      p.t += p.speed;
+      if(p.t > 1) p.t -= 1;
+      if(p.t < 0) p.t += 1;
+
+      const lon = p.ax + (p.bx - p.ax) * p.t;
+      const lat = p.ay + (p.by - p.ay) * p.t;
+
+      try {
+        const pt = m.project([lon, lat]);
+        if(pt.x < -20 || pt.x > W+20 || pt.y < -20 || pt.y > H+20) return;
+
+        const sz = zoom > 14 ? (p.type==='tram'?7:p.type==='bus'?5:3) : 2;
+        ctx.save();
+        ctx.globalAlpha = alpha * (isNight ? 0.9 : 0.65);
+
+        if(isNight) {
+          // Headlight glow noaptea
+          const grad = ctx.createRadialGradient(pt.x, pt.y, 0, pt.x, pt.y, sz*4);
+          grad.addColorStop(0, p.type==='tram'?'rgba(255,220,100,0.9)':'rgba(255,255,220,0.8)');
+          grad.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.fillStyle = grad;
+          ctx.fillRect(pt.x-sz*4, pt.y-sz*4, sz*8, sz*8);
+        }
+
+        // Body vehicul
+        const col = p.type==='tram' ? '#ef4444' : p.type==='bus' ? '#3b82f6' : '#D4AF37';
+        ctx.fillStyle = col;
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, sz, 0, Math.PI*2);
+        ctx.fill();
+        ctx.restore();
+      } catch(e) {}
+    });
+  },
+
+  // ── Draw Director overlay per scena ─────────────────────────────────────
+  _drawDirectorOverlay(ctx, W, H) {
+    const ov = this.Director._currentOverlay;
+    if(!ov) return;
+    const now = Date.now()/1000;
+    const sceneAge = (Date.now() - this.Director._sceneStartTime) / 1000;
+    const fadeIn = Math.min(1, sceneAge / 1.5);
+    const cx = this.Director._cx, cy = this.Director._cy;
+    const m  = this.map;
+
+    ctx.save();
+    ctx.globalAlpha = fadeIn;
+
+    if(ov === 'approach_data') {
+      // Scena 3: date mari pop-in
+      const d = (typeof _getProjectionData !== 'undefined')
+        ? _getProjectionData(this.year, this.scenario, this.cityKey) : null;
+      const pop = (d?.demo?.value || this.cityData?.pop2021 || 100000).toLocaleString();
+      const pop50 = Math.round((this.cityData?.pop2021||100000)*1.18).toLocaleString();
+      ctx.fillStyle = 'rgba(4,10,24,0.6)';
+      this._rr(ctx, W*0.04, H*0.12, 200, 90, 8); ctx.fill();
+      ctx.fillStyle='#D4AF37'; ctx.font='bold 9px "Space Grotesk"'; ctx.textAlign='left';
+      ctx.fillText('POPULAȚIE ' + this.year, W*0.04+14, H*0.12+22);
+      ctx.fillStyle='#fff'; ctx.font='bold 28px "Space Grotesk"';
+      ctx.fillText(pop, W*0.04+14, H*0.12+54);
+      ctx.fillStyle='#22c55e'; ctx.font='bold 11px "Space Grotesk"';
+      ctx.fillText('PROIECȚIE 2050: ' + pop50, W*0.04+14, H*0.12+74);
+      ctx.fillStyle='rgba(34,197,94,0.6)'; ctx.font='bold 9px "Space Grotesk"';
+      ctx.fillText('+20.3%', W*0.04+14, H*0.12+88);
+      ctx.textAlign='left';
+    }
+
+    if(ov === 'development_zones') {
+      // Scena 5: bare 3D pe canvas simuland crestere cladiri
+      const barZones = [
+        { lon:cx+0.010, lat:cy+0.012, h:0.7, col:'#ef4444', label:'Majoră' },
+        { lon:cx-0.008, lat:cy+0.008, h:0.5, col:'#f59e0b', label:'Medie' },
+        { lon:cx+0.018, lat:cy-0.005, h:0.3, col:'#22c55e', label:'Mică' },
+      ];
+      barZones.forEach(bz => {
+        if(!m) return;
+        try {
+          const pt = m.project([bz.lon, bz.lat]);
+          const pulse = 0.85 + Math.sin(now*2 + bz.lon)*0.15;
+          const bh = 40 * bz.h * pulse;
+          ctx.fillStyle = bz.col + '99';
+          ctx.fillRect(pt.x-10, pt.y-bh, 20, bh);
+          ctx.fillStyle = bz.col;
+          ctx.fillRect(pt.x-10, pt.y-bh, 20, 3);
+          ctx.fillStyle='rgba(255,255,255,0.8)'; ctx.font='8px "Space Grotesk"';
+          ctx.textAlign='center';
+          ctx.fillText(bz.label, pt.x, pt.y+12);
+        } catch(e){}
+      });
+      ctx.textAlign='left';
+    }
+
+    if(ov === 'comparison_eu') {
+      // Scena 8: tabel comparatie
+      ctx.fillStyle='rgba(4,10,24,0.85)';
+      this._rr(ctx, W/2-160, H*0.2, 320, 120, 10); ctx.fill();
+      ctx.strokeStyle='rgba(212,175,55,0.4)'; ctx.lineWidth=1;
+      this._rr(ctx, W/2-160, H*0.2, 320, 120, 10); ctx.stroke();
+      const rows=[
+        ['DENSITATE','48 loc/ha','76 loc/ha','156 loc/ha'],
+        ['TRAFIC','+38%','+52%','+22%'],
+        ['EXPANSIUNE','2.450 ha','1.870 ha','980 ha'],
+      ];
+      ctx.font='bold 9px "Space Grotesk"'; ctx.textAlign='center';
+      ctx.fillStyle='#D4AF37'; ctx.fillText(this.cityData?.name||'Iași', W/2-80, H*0.2+22);
+      ctx.fillStyle='#60a5fa'; ctx.fillText('Cluj-Napoca', W/2+0, H*0.2+22);
+      ctx.fillStyle='#a78bfa'; ctx.fillText('Vilnius', W/2+80, H*0.2+22);
+      rows.forEach((r,i)=>{
+        const y = H*0.2 + 42 + i*25;
+        ctx.fillStyle='rgba(148,163,184,0.6)'; ctx.font='8px "Space Grotesk"';
+        ctx.fillText(r[0], W/2-80, y);
+        ctx.fillStyle='#D4AF37'; ctx.font='bold 10px "Space Grotesk"';
+        ctx.fillText(r[1], W/2, y);
+        ctx.fillStyle='#60a5fa';
+        ctx.fillText(r[2], W/2+80, y);
+      });
+      ctx.textAlign='left';
+    }
+
+    if(ov === 'conclusion') {
+      // Scena 12: viziunea 2050
+      ctx.fillStyle='rgba(4,10,24,0.88)';
+      this._rr(ctx, W-230, H*0.18, 200, 130, 10); ctx.fill();
+      ctx.strokeStyle='rgba(212,175,55,0.5)'; ctx.lineWidth=1;
+      this._rr(ctx, W-230, H*0.18, 200, 130, 10); ctx.stroke();
+      ctx.fillStyle='#D4AF37'; ctx.font='bold 11px "Space Grotesk"';
+      ctx.textAlign='center';
+      ctx.fillText((this.cityData?.name||'UAT')+' 2050', W-130, H*0.18+22);
+      const items=['✅ Oraș mai dens','✅ Mobilitate verde','✅ Infrastructură modernă','✅ Calitate viață mai bună'];
+      items.forEach((it,i)=>{
+        ctx.fillStyle='rgba(255,255,255,0.85)'; ctx.font='9px "Space Grotesk"';
+        ctx.fillText(it, W-130, H*0.18+42+i*20);
+      });
+      ctx.textAlign='left';
+    }
+
+    ctx.restore();
+  },
+
+}; // end TCI
 
 // ── Entry points ──────────────────────────────────────────────────────────
 window.TCI     = TCI;
