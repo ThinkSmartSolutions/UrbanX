@@ -753,24 +753,22 @@ const TCI = {
     // ── L3: Rețea stradală colorată per congestie (trafic real) ───────────
     if(!m.getLayer?.('tci-roads-flow')) {
       try {
-        m.addLayer({
-          id: 'tci-roads-flow',
-          type: 'line',
-          source: 'composite',
-          'source-layer': 'road',
-          filter: ['in', ['get', 'class'],
-            ['literal', ['primary','secondary','tertiary','street','motorway']]
-          ],
-          minzoom: 12,
-          paint: {
-            'line-color':   '#94a3b8',
-            'line-width':   ['interpolate', ['linear'], ['zoom'],
-              12, 1.5,
-              16, 3.5,
-            ],
-            'line-opacity': 0.55,
-          },
-        });
+        // Mapbox Standard nu are sursa 'composite' — folosim mapbox-streets-v8 deja adaugata
+        const roadSrc = m.getSource?.('tci-bld-src') ? 'tci-bld-src' : null;
+        if(roadSrc) {
+          m.addLayer({
+            id: 'tci-roads-flow',
+            type: 'line',
+            source: roadSrc,
+            'source-layer': 'road',
+            minzoom: 11,
+            paint: {
+              'line-color':   '#94a3b8',
+              'line-width':   ['interpolate',['linear'],['zoom'], 11,1, 16,3],
+              'line-opacity': 0.5,
+            },
+          });
+        }
       } catch(e) { console.warn('[TCI-L3] roads:', e.message); }
     }
 
@@ -4039,7 +4037,7 @@ const TCI = {
   // Masini 3D, autobuze, tramvaie, pietoni — instanced meshes pe Mapbox WebGL
   _initThreeJS(cx, cy) {
     const T=this;
-    if(T._threeReady) { T._updateThreePositions(); return; }
+    if(T._threeReady) { /* Three.js layer deja initializat */ return; }
 
     const load=(src)=>new Promise((res,rej)=>{
       if(document.querySelector(`script[src="${src}"]`)){res();return;}
@@ -4244,38 +4242,15 @@ const TCI = {
     async narrateScene(scene, cityData, year) {
       if(!this._enabled) return;
       window.speechSynthesis?.cancel();
-      this._speaking=false;
-
-      // 1. Genereaza naratie cu Claude API
-      let text = scene.narrative.body; // fallback
-      try {
-        const resp = await fetch('https://api.anthropic.com/v1/messages', {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({
-            model:'claude-sonnet-4-20250514',
-            max_tokens:120,
-            messages:[{
-              role:'user',
-              content:`Ești naratorul unui documentar urbanistic despre ${cityData?.name||'oraș'}, România.\nScena: "${scene.narrative.title}".\nDate: ${(cityData?.pop2021||0).toLocaleString()} loc., ${year}.\nScrie exact 2 propoziții de narație cinematografică în română.\nStil: documentar BBC despre orașe. Concis, impactant, fără cuvinte tehnice excesive.\nDoar narația, fără altceva.`
-            }]
-          })
-        });
-        if(resp.ok) {
-          const data=await resp.json();
-          const generated=data.content?.find(c=>c.type==='text')?.text?.trim();
-          if(generated&&generated.length>20) text=generated;
-        }
-      } catch(e) { /* fallback to scene.narrative.body */ }
-
-      // 2. Afiseaza subtitlu
+      this._speaking = false;
+      // Subtitlu + TTS cu textul scenei
+      // (API Claude direct nu merge din browser — CORS; necesita proxy)
+      const text = scene.narrative.body || scene.narrative.title || '';
       this._showSubtitle(text);
-
-      // 3. Vorbeste via Web Speech API
       this._speak(text);
     },
 
-    _showSubtitle(text) {
+        _showSubtitle(text) {
       if(!this._subtitleEl) this._buildSubtitleEl();
       const el=this._subtitleEl;
       if(!el) return;
@@ -4496,45 +4471,40 @@ const TCI = {
 
     // ── 2. Init: genera date + creeaza overlay ──────────────────────────
     async init(tci) {
-      this._tci = tci;
-      const ok = await this._load();
-      if(!ok || !window.deck?.MapboxOverlay) return;
-
-      const map  = tci.map;
-      const d    = tci.cityData;
+      const SELF = this;   // preserve context through callbacks and await
+      SELF._tci = tci;
+      const ok = await SELF._load();
+      if(!ok || !window.deck?.MapboxOverlay) {
+        console.warn('[DeckGL] MapboxOverlay indisponibil — skip');
+        return;
+      }
+      const map = tci.map;
+      const d   = tci.cityData;
       if(!map) return;
-
-      const cx = d?.lon  || 27.601;
-      const cy = d?.lat  || 47.158;
+      const cx = d?.lon   || 27.601;
+      const cy = d?.lat   || 47.158;
       const pop= d?.pop2021 || 360633;
-
-      // Genereaza toate datele odata
-      this._data = this._generateAllData(cx, cy, pop, d);
-
-      // Creeaza overlay — Deck.gl v9 + Mapbox GL JS v3
+      // Genereaza date
+      SELF._data = SELF._generateAllData(cx, cy, pop, d);
+      // Creeaza overlay — context explicit via SELF
       const addOverlay = () => {
-        if(this._ready) return;
+        if(SELF._ready) return;
         try {
-          this._overlay = new deck.MapboxOverlay({ interleaved:false, layers:[] });
-          map.addControl(this._overlay);
-          this._ready = true;
-          console.log('[DeckGL] ✅ Overlay activ');
-          this._startRenderLoop();
-        } catch(e) {
-          console.error('[DeckGL] Init error:', e.message);
-        }
+          SELF._overlay = new deck.MapboxOverlay({ interleaved:false, layers:[] });
+          map.addControl(SELF._overlay);
+          SELF._ready = true;
+          console.log('[DeckGL] ✅ Overlay activ pe hartă');
+          SELF._startRenderLoop();
+        } catch(e) { console.error('[DeckGL] Init error:', e.message); }
       };
-      if(map.isStyleLoaded?.() && map.loaded?.()) {
-        addOverlay();
-      } else {
+      if(map.isStyleLoaded?.() && map.loaded?.()) { addOverlay(); }
+      else {
         map.once('load', addOverlay);
         map.once('idle', addOverlay);
         setTimeout(addOverlay, 4000);
       }
     },
-    },
 
-    // ── 3. Generare date sintetice bazate pe coordonate reale ───────────
     _generateAllData(cx, cy, pop, cityData) {
       const rng = (seed) => {
         let x = Math.sin(seed + 1) * 43758.5453;
@@ -4846,6 +4816,7 @@ const TCI = {
       this._ready   = false;
     },
 
+  },
 }; // end TCI
 
 // ── Entry points ──────────────────────────────────────────────────────────
