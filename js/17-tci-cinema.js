@@ -919,15 +919,18 @@ const TCI = {
     this.startTime = performance.now() - this.pausedAt;
     const btn = document.getElementById('tci-play');
     if(btn) btn.textContent = '⏸ Pauza';
-    // Prima narativa: explica ce urmeaza sa vada
+    // Prima narativa: afisam cardul cu informatii initiale
     setTimeout(() => {
-      const txt = document.getElementById('tci-narrative-text');
-      const src = document.getElementById('tci-narrative-src');
-      const strip = document.getElementById('tci-narrative');
-      if(txt) txt.textContent = 'Culorile UTR pe hartă: Albastru=rezidențial · Violet=mixt · Portocaliu=comercial · Verde=spații verzi · Roșu=industrial. Clădirile cresc cu densificarea urbană 2026→2055.';
-      if(src) src.textContent = 'PUG+RLU per UAT';
-      if(strip) strip.style.opacity='1';
-    }, 1000);
+      const titleEl = document.getElementById('tci-narcard-title');
+      const bodyEl  = document.getElementById('tci-narcard-body');
+      const srcEl   = document.getElementById('tci-narcard-src');
+      const card    = document.getElementById('tci-narcard');
+      const name    = this.cityData?.name || 'UAT';
+      if(titleEl) titleEl.textContent = `🏙 ${name} — Proiecție ${this.startYear}–2055`;
+      if(bodyEl)  bodyEl.textContent  = `Culorile UTR: 🔵 Rezidențial · 🟣 Mixt/Central · 🟠 Comercial · 🟢 Spații verzi · 🔴 Industrial. Clădirile cresc cu densificarea urbană. Camera va zbura automat prin cele 4 zone ale orașului.`;
+      if(srcEl)   srcEl.textContent   = '📊 PUG · RLU · Date INSE · Eurostat · ANCPI';
+      if(card)    card.style.opacity  = '1';
+    }, 1200);
     this._loop();
   },
 
@@ -1001,45 +1004,54 @@ const TCI = {
 
   _updateNarrative(year, totalT, mode) {
     const now = Date.now();
-    if(now - this._narrativeTimer < 4500) return; // Schimba la 4.5s
+    if(now - this._narrativeTimer < 6000) return;
     this._narrativeTimer = now;
 
-    const d = (typeof _getProjectionData !== 'undefined')
-      ? _getProjectionData(year, this.scenario, this.cityKey) : null;
-    const pop = d?.demo?.value || 0;
-    const baseP = this.cityData?.pop2021 || 100000;
-    const rateP = this.cityData?.rata_reala_2011_2021 || 0;
-
-    // Selectam narativa relevanta bazata pe context
-    let narrativeKey;
-    if(year >= 2045 && d?.climate?.deltaT >= 2) {
-      narrativeKey = 'climate_heat';
-    } else if(year >= 2030 && totalT > 0.3) {
-      const keys = ['densification','traffic_modal','pib_conv','infra_tp','esg_verde'];
-      narrativeKey = keys[this._narrativeIndex++ % keys.length];
-    } else if(rateP < -0.5) {
-      narrativeKey = 'pop_decline';
-    } else if(rateP > 0.3) {
-      narrativeKey = 'pop_growth';
-    } else {
-      const keys = ['utr_colors','traffic_modal','risk_seismic','pop_growth'];
-      narrativeKey = keys[this._narrativeIndex++ % keys.length];
+    // Daca exista zona activa afisata de camera, actualizam doar datele numerice
+    if(this._currentZone) {
+      const pd = (typeof _getProjectionData !== 'undefined')
+        ? _getProjectionData(year, this.scenario, this.cityKey) : null;
+      const bodyEl = document.getElementById('tci-narcard-body');
+      const curShot = this._STORY_SHOTS?.[this._storyShotIdx % (this._STORY_SHOTS?.length||1)];
+      if(bodyEl && curShot?.type !== 'zbor') {
+        const newBody = this._currentZone.narText(year, pd);
+        if(newBody !== bodyEl.textContent) {
+          bodyEl.style.opacity = '0.6';
+          setTimeout(() => { bodyEl.textContent = newBody; bodyEl.style.opacity = '1'; }, 300);
+        }
+      }
+      return;
     }
 
+    // Fallback: fara zona activa, afisam narativa contextuala
+    const d = (typeof _getProjectionData !== 'undefined')
+      ? _getProjectionData(year, this.scenario, this.cityKey) : null;
+    const rateP = this.cityData?.rata_reala_2011_2021 || 0;
+
+    let narrativeKey;
+    if(year >= 2045 && d?.climate?.deltaT >= 2) narrativeKey = 'climate_heat';
+    else if(year >= 2030 && totalT > 0.3) {
+      narrativeKey = ['densification','traffic_modal','pib_conv','infra_tp','esg_verde'][this._narrativeIndex++ % 5];
+    } else if(rateP < -0.5) narrativeKey = 'pop_decline';
+    else if(rateP > 0.3)    narrativeKey = 'pop_growth';
+    else narrativeKey = ['utr_colors','traffic_modal','risk_seismic','pop_growth'][this._narrativeIndex++ % 4];
+
     const narr = this._NARRATIVES[narrativeKey];
-    const textEl = document.getElementById('tci-narrative-text');
-    const srcEl  = document.getElementById('tci-narrative-src');
-    const stripEl = document.getElementById('tci-narrative');
+    if(!narr) return;
 
-    if(!textEl || !narr) return;
+    const titleEl = document.getElementById('tci-narcard-title');
+    const bodyEl  = document.getElementById('tci-narcard-body');
+    const srcEl   = document.getElementById('tci-narcard-src');
+    const card    = document.getElementById('tci-narcard');
 
-    // Fade out → update → fade in
-    if(stripEl) stripEl.style.opacity = '0';
+    if(!bodyEl) return;
+    if(card) card.style.opacity = '0';
     setTimeout(() => {
-      textEl.textContent = narr.text;
-      if(srcEl) srcEl.textContent = narr.src;
-      if(stripEl) stripEl.style.opacity = '1';
-    }, 400);
+      if(titleEl) titleEl.textContent = `📍 ${this.cityData?.name||''} · ${year}`;
+      bodyEl.textContent = narr.text;
+      if(srcEl) srcEl.textContent = '📊 ' + narr.src;
+      if(card)  card.style.opacity = '1';
+    }, 350);
   },
 
   // ── Animatie harta per an ─────────────────────────────────────────────────
@@ -2543,132 +2555,210 @@ const TCI = {
   _initCinemaCamera(cx, cy) {
     const d    = this.cityData;
     const risk = (typeof _getRiskProfile !== 'undefined') ? _getRiskProfile(d||{}) : null;
-    const isRisk = risk?.riskScore > 50;
+    const cityName = d?.name || this.cityKey;
 
-    // Zone de interes: centru, zone dense, periferie, zone risc
-    const zones = {
-      centru:    { lon: cx,         lat: cy,          zoom: 15.5, pitch: 58, bearing: -15  },
-      nord:      { lon: cx+0.012,   lat: cy+0.015,    zoom: 14.8, pitch: 52, bearing: 20   },
-      sud:       { lon: cx-0.008,   lat: cy-0.012,    zoom: 15,   pitch: 55, bearing: -30  },
-      est:       { lon: cx+0.018,   lat: cy-0.005,    zoom: 14.5, pitch: 50, bearing: 45   },
-      vest:      { lon: cx-0.015,   lat: cy+0.008,    zoom: 14.8, pitch: 52, bearing: -45  },
-      // Street level — vizualizare pietonala
-      strada1:   { lon: cx+0.005,   lat: cy+0.003,    zoom: 17,   pitch: 72, bearing: 10   },
-      strada2:   { lon: cx-0.004,   lat: cy-0.006,    zoom: 17.5, pitch: 75, bearing: -20  },
-      // Drone high — vedere de ansamblu
-      drone_h:   { lon: cx,         lat: cy,           zoom: 13,   pitch: 45, bearing: 0    },
-      drone_rot: { lon: cx,         lat: cy,           zoom: 14,   pitch: 55, bearing: 90   },
-      // Periferie
-      peri_n:    { lon: cx+0.025,   lat: cy+0.028,    zoom: 13.5, pitch: 42, bearing: 15   },
-      peri_s:    { lon: cx-0.02,    lat: cy-0.025,    zoom: 13.5, pitch: 42, bearing: -15  },
-      // Zona risc (daca exista)
-      risc:      { lon: cx+0.01,    lat: cy+0.018,    zoom: 14.5, pitch: 48, bearing: 30   },
-    };
+    // ── STORYTELLER: 4 zone narative × 6 shot-uri = 24 shots/ciclu ────────
+    // Fiecare zonă are o poveste urbanistică proprie, sincronizată cu camera
 
-    // Secvente cinematice per tip moment
-    this._CAM_SEQUENCES = {
+    this._STORY_ZONES = [
+      {
+        id: 'centru',
+        name: 'Centrul Civic',
+        lon: cx,        lat: cy,
+        narTitle: (yr) => `🏛 Centrul Civic — ${cityName} · ${yr}`,
+        narText:  (yr, pd) => {
+          const pop = Math.round((pd?.demo?.value||d?.pop2021||100000));
+          const cut = (2.5 + (yr-2021)*0.015).toFixed(2);
+          return `Zona centrală concentrează densitatea maximă de funcțiuni mixte. CUT estimat: ${cut} · Populație proiectată: ${pop.toLocaleString()} loc. · Presiune demografică +${((yr-2021)*0.4).toFixed(1)}%/an față de periferie.`;
+        },
+        narSrc: 'PUG · ANCPI · Eurostat Urban Audit 2021',
+      },
+      {
+        id: 'rezidential_nord',
+        name: 'Rezidențial Nord',
+        lon: cx+0.012,  lat: cy+0.015,
+        narTitle: (yr) => `🏘 Rezidențial Nord — ${cityName} · ${yr}`,
+        narText:  (yr, pd) => {
+          const auth = Math.round((yr-2021)*115);
+          const dens = Math.round(1800 + (yr-2021)*28);
+          return `Densificare rezidențială progresivă: ~${auth} autorizații noi cumulate față de 2021. Densitate estimată: ${dens} loc/km². Clădiri noi: R+4 mediu, conform RLU-PUG.`;
+        },
+        narSrc: 'ANCPI Autorizații Construire · INSE Recensămînt',
+      },
+      {
+        id: 'periferie_vest',
+        name: 'Periferie Vest — Expansiune',
+        lon: cx-0.022,  lat: cy+0.010,
+        narTitle: (yr) => `🌱 Periferie Vest — Expansiune · ${yr}`,
+        narText:  (yr, pd) => {
+          const ha  = (2.1*(yr-2021)).toFixed(1);
+          const ms  = (typeof _getModalSplit !== 'undefined') ? _getModalSplit(yr) : {auto:72,tp:18};
+          return `Expansiune periferică: ~${ha} ha/an reconvertite din agricol/industrial. Transport auto dominant: ${ms.auto}% · TP: ${ms.tp}%. Necesitate infrastructură: drumuri de acces + linie TP după 2028.`;
+        },
+        narSrc: 'MDLPA Fond Imobiliar · Eurostat Land Use · PNRR Mobilitate',
+      },
+      {
+        id: 'industrial',
+        name: 'Zona Industrială — Reconversie',
+        lon: cx+0.022,  lat: cy-0.012,
+        narTitle: (yr) => `🏗 Zona Industrială — Reconversie · ${yr}`,
+        narText:  (yr, pd) => {
+          const ha  = (1.4*(yr-2021)).toFixed(1);
+          const esg = Math.round(51 + (yr-2021)*0.9);
+          return `Reconversie industrială → mix funcțional: ~${ha} ha reabilitate. ESG Urban Score: ${esg}/100. Oportunitate: logistică urbană + spații coworking + rezidențial accesibil. Risc brun: ANIF monitorizare sol.`;
+        },
+        narSrc: 'ANIF · ANCPI · Eurostat SDG 11 · BNR Imobiliar',
+      },
+    ];
 
-      // Fiecare 12s (un an): secventa scurta
-      year_normal: [
-        { ...zones.centru,  dur: 8000  },
-        { ...zones.nord,    dur: 10000 },
-        { ...zones.strada1, dur: 8000  },
-        { ...zones.drone_h, dur: 10000 },
-        { ...zones.sud,     dur: 8000  },
-        { ...zones.strada2, dur: 8000  },
-        { ...zones.est,     dur: 10000 },
-        { ...zones.drone_rot, dur: 10000 },
-        { ...zones.vest,    dur: 8000  },
-        { ...zones.peri_n,  dur: 10000 },
-      ],
+    // ── Construim lista completă de shots: Satelit→Coborare→Aterizare→Pieton→Explorare→Zbor
+    // Structura per screenshot-ul de proiect (20 shots/ciclu, 4 zone)
+    this._STORY_SHOTS = [];
+    const ap = this.activeParcel;
 
-      // La milestone: secventa dramatica
-      milestone: [
-        { ...zones.drone_h, dur: 3000, pitch: 30  },  // pull back dramatic
-        { ...zones.centru,  dur: 4000, pitch: 62  },  // zoom in centru
-        { ...zones.strada1, dur: 3000               },  // street level
-        { ...zones.drone_rot, dur: 4000             },  // rotire
-      ],
+    if(this.mode === 'parcela' && ap) {
+      // Mod parcelă: 4 shots centrate pe parcelă activă
+      this._STORY_SHOTS = [
+        { zoneId:'parcela', type:'satelit',   lon:ap.lon, lat:ap.lat, zoom:10,   pitch:0,  bearing:0,   dur:5000 },
+        { zoneId:'parcela', type:'coborare',  lon:ap.lon, lat:ap.lat, zoom:15,   pitch:52, bearing:-15, dur:5000 },
+        { zoneId:'parcela', type:'pieton',    lon:ap.lon, lat:ap.lat, zoom:17.5, pitch:72, bearing:0,   dur:13000},
+        { zoneId:'parcela', type:'explorare', lon:ap.lon, lat:ap.lat, zoom:17,   pitch:68, bearing:60,  dur:10000},
+        { zoneId:'parcela', type:'zbor',      lon:cx,     lat:cy,     zoom:12.5, pitch:30, bearing:0,   dur:5000 },
+      ];
+    } else {
+      this._STORY_ZONES.forEach(zone => {
+        this._STORY_SHOTS.push(
+          // Shot 1 — SATELIT: vedere de sus, orasul de ansamblu (7s)
+          { zoneId:zone.id, type:'satelit',   lon:zone.lon, lat:zone.lat, zoom:10,   pitch:0,  bearing:0,     dur:7000  },
+          // Shot 2 — COBORARE: clădirile apar, 3D (5s)
+          { zoneId:zone.id, type:'coborare',  lon:zone.lon, lat:zone.lat, zoom:14.5, pitch:52, bearing:-15,   dur:5000  },
+          // Shot 3 — ATERIZARE: strada se vede (4s)
+          { zoneId:zone.id, type:'aterizare', lon:zone.lon, lat:zone.lat, zoom:16.5, pitch:68, bearing:30,    dur:4000  },
+          // Shot 4 — PIETON: nivel ochi, modificările vizibile (13s)
+          { zoneId:zone.id, type:'pieton',    lon:zone.lon, lat:zone.lat, zoom:17.5, pitch:76, bearing:-10,   dur:13000 },
+          // Shot 5 — EXPLORARE: bearing rotit +60° (10s)
+          { zoneId:zone.id, type:'explorare', lon:zone.lon, lat:zone.lat, zoom:17,   pitch:68, bearing:zone.lon>cx?60:-60, dur:10000},
+          // Shot 6 — ZBOR: pull-back la zona nouă (5s)
+          { zoneId:zone.id, type:'zbor',      lon:cx,       lat:cy,       zoom:12.5, pitch:30, bearing:0,     dur:5000  }
+        );
+      });
+    }
 
-      // Scenariu S4 (climatic) — accent pe zone de risc
-      climatic: [
-        { ...zones.risc,    dur: 8000  },
-        { ...zones.centru,  dur: 10000 },
-        { ...zones.peri_s,  dur: 8000  },
-        { ...zones.drone_h, dur: 10000 },
-        { ...zones.strada1, dur: 8000  },
-      ],
+    // Compatibilitate cu _milestoneCamera care foloseste _CAM_SEQUENCES
+    this._CAM_SEQUENCES = { milestone: [
+      { lon:cx, lat:cy, zoom:12.5, pitch:25, bearing:0,   dur:3000 },
+      { lon:cx, lat:cy, zoom:15.5, pitch:62, bearing:-30, dur:4000 },
+    ]};
 
-      // Scenariu S1 (optimist) — accent pe periferie/extindere
-      optimist: [
-        { ...zones.centru,  dur: 8000  },
-        { ...zones.peri_n,  dur: 10000 },
-        { ...zones.peri_s,  dur: 10000 },
-        { ...zones.strada2, dur: 8000  },
-        { ...zones.drone_h, dur: 8000  },
-      ],
-
-      // Mod parcela — centrat pe parcela activa
-      parcela: [
-        { lon: this.activeParcel?.lon||cx, lat: this.activeParcel?.lat||cy,
-          zoom: 17.5, pitch: 68, bearing: -10, dur: 10000 },
-        { lon: this.activeParcel?.lon||cx, lat: this.activeParcel?.lat||cy,
-          zoom: 16,   pitch: 58, bearing: 30,  dur: 10000 },
-        { lon: this.activeParcel?.lon||cx, lat: this.activeParcel?.lat||cy,
-          zoom: 15.5, pitch: 50, bearing: -20, dur: 8000  },
-        { lon: cx, lat: cy, zoom: 14.5, pitch: 52, bearing: 0, dur: 8000 },
-      ],
-    };
-
-    this._cinemaTimer   = 0;
-    this._cinemaSeqIdx  = 0;
+    this._storyShotIdx  = 0;
+    this._cinemaSeqIdx  = 0;  // compatibilitate
     this._cinemaActive  = true;
     this._lastCinemaFly = 0;
-    console.log('[TCI Cinema] Sistem camera cinematica initializat');
+    this._currentZone   = null;
+    console.log('[TCI Storyteller] ' + this._STORY_SHOTS.length + ' shots × ' + this._STORY_ZONES.length + ' zone');
+
+    // Afisam primul card imediat
+    if(this._STORY_SHOTS.length) {
+      const firstShot = this._STORY_SHOTS[0];
+      const firstZone = this._STORY_ZONES?.find(z => z.id === firstShot.zoneId);
+      if(firstZone) setTimeout(() => this._updateNarrativeForZone(firstZone, this.year, firstShot.type), 1200);
+    }
   },
 
   _updateCinemaCamera(year, yearT, totalT) {
-    if(!this._cinemaActive || !this.map || !this._CAM_SEQUENCES) return;
+    if(!this._cinemaActive || !this.map) return;
     if(!this.running) return;
 
-    const now = Date.now();
+    const shots = this._STORY_SHOTS;
+    if(!shots?.length) return;
 
-    // Selectam secventa activa
-    let seqKey = 'year_normal';
-    if(this.mode === 'parcela') seqKey = 'parcela';
-    else if(this.scenario === 'S4') seqKey = 'climatic';
-    else if(this.scenario === 'S1') seqKey = 'optimist';
-
-    const seq = this._CAM_SEQUENCES[seqKey];
-    if(!seq?.length) return;
-
-    const curShot = seq[this._cinemaSeqIdx % seq.length];
-    const shotDur = curShot.dur || 10000;
+    const now     = Date.now();
+    const curShot = shots[this._storyShotIdx % shots.length];
+    const shotDur = curShot.dur || 8000;
 
     if(now - this._lastCinemaFly > shotDur) {
-      // Trecem la urmatorul shot
-      this._cinemaSeqIdx++;
-      const nextShot = seq[this._cinemaSeqIdx % seq.length];
+      this._storyShotIdx++;
+      this._cinemaSeqIdx = this._storyShotIdx; // sync compatibilitate
+      const s = shots[this._storyShotIdx % shots.length];
 
-      // La anumite momente adaugam dramatism suplimentar
       const isMilestone = this.MILES.includes(year) && yearT < 0.1;
 
-      const flyOpts = {
-        center:   [nextShot.lon, nextShot.lat],
-        zoom:     nextShot.zoom + (isMilestone ? 0.5 : 0),
-        pitch:    nextShot.pitch || 55,
-        bearing:  nextShot.bearing || 0,
-        duration: isMilestone ? 4000 : 6000,
-        essential: true,
-        easing: (t) => t < 0.5 ? 2*t*t : -1+(4-2*t)*t,  // ease in-out quad
-      };
+      // Durata flyTo adaptata la tipul shotului
+      const flyDur = {
+        satelit:   3500,
+        coborare:  4500,
+        aterizare: 3000,
+        pieton:    5000,
+        explorare: 6000,
+        zbor:      4500,
+        parcela:   5000,
+      }[s.type] || 5000;
 
       try {
-        this.map.flyTo(flyOpts);
+        this.map.flyTo({
+          center:    [s.lon, s.lat],
+          zoom:      s.zoom + (isMilestone ? 0.4 : 0),
+          pitch:     s.pitch,
+          bearing:   s.bearing,
+          duration:  isMilestone ? flyDur * 0.8 : flyDur,
+          essential: true,
+          easing: (t) => t < 0.5 ? 2*t*t : -1+(4-2*t)*t,
+        });
         this._lastCinemaFly = now;
-        this.bearing = nextShot.bearing || 0;
+        this.bearing = s.bearing;
+
+        // Actualizare card narativ sincronizat cu zona afisata
+        const zone = this._STORY_ZONES?.find(z => z.id === s.zoneId);
+        if(zone && zone.id !== this._currentZone?.id) {
+          this._currentZone = zone;
+          this._updateNarrativeForZone(zone, year, s.type);
+        }
       } catch(e) {}
     }
+  },
+
+  // ── Narrative sincronizat cu zona de camera ───────────────────────────────
+  _updateNarrativeForZone(zone, year, shotType) {
+    if(!zone) return;
+    const pd = (typeof _getProjectionData !== 'undefined')
+      ? _getProjectionData(year, this.scenario, this.cityKey) : null;
+
+    const shotLabels = {
+      satelit:   '🛰 Vedere satelit',
+      coborare:  '✈ Coborâre spre',
+      aterizare: '🛬 Aterizare în',
+      pieton:    '🚶 La nivelul strazii',
+      explorare: '🔄 Explorare 360°',
+      zbor:      '🌆 Context metropolitan',
+      parcela:   '📍 Parcelă activă',
+    };
+    const label = shotLabels[shotType] || '';
+
+    let title, body, src;
+    if(shotType === 'zbor') {
+      const ms = (typeof _getModalSplit !== 'undefined') ? _getModalSplit(year) : {auto:72,tp:18,bici_ped:10};
+      title = `${label} — ${this.cityData?.name || ''} · ${year}`;
+      body  = `Perspectivă metropolitană. Modal split ${year}: auto ${ms.auto}% · transport public ${ms.tp}% · activ ${ms.bici_ped}%. Densitate urbană în expansiune.`;
+      src   = 'MDLPA · Eurostat Urban Audit · PNRR';
+    } else {
+      title = `${label} — ${zone.name} · ${year}`;
+      body  = zone.narText(year, pd);
+      src   = zone.narSrc;
+    }
+
+    const titleEl = document.getElementById('tci-narcard-title');
+    const bodyEl  = document.getElementById('tci-narcard-body');
+    const srcEl   = document.getElementById('tci-narcard-src');
+    const card    = document.getElementById('tci-narcard');
+
+    if(!card) return;
+    card.style.opacity = '0';
+    setTimeout(() => {
+      if(titleEl) titleEl.textContent = title;
+      if(bodyEl)  bodyEl.textContent  = body;
+      if(srcEl)   srcEl.textContent   = '📊 ' + src;
+      card.style.opacity = '1';
+    }, 350);
   },
 
   // Secventa dramatica la milestone (camera pull-back + zoom in)
@@ -2951,3 +3041,13 @@ window.openTCI = (opts) => {
 };
 
 console.log('[TCI Cinema] window.map + canvas overlay — UAT ori parcelă, zoom cinematice');
+
+// ── Shim _CityCompare.searchCity2 (compatibilitate 00-globals.js) ──────────
+if(typeof window._CityCompare === 'undefined') window._CityCompare = {};
+if(typeof window._CityCompare.searchCity2 !== 'function') {
+  window._CityCompare.searchCity2 = function(q) { try { TCI._cmpSearch(q); } catch(e){} };
+}
+if(typeof window._CityCompare.searchCity !== 'function') {
+  window._CityCompare.searchCity = function(q) { try { TCI._cmpSearch(q); } catch(e){} };
+}
+
