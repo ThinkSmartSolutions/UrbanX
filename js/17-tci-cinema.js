@@ -220,6 +220,7 @@ const TCI = {
     this.bearing   = this.map.getBearing?.() || 0;
 
     this._buildOverlay();
+    this._hideParcelPopup();
     this._addMapLayers();
     this._cameraIntro();
     this.start();
@@ -282,6 +283,26 @@ const TCI = {
       <button id="tci-rtoggle" onclick="TCI._toggleRight()" style="position:absolute;right:0;top:50%;transform:translateY(-50%);z-index:11;background:rgba(4,10,24,0.85);border:1px solid rgba(255,255,255,0.1);border-right:none;border-radius:6px 0 0 6px;color:rgba(148,163,184,0.6);padding:8px 5px;font-size:10px;cursor:pointer;writing-mode:vertical-rl;pointer-events:all;transition:right .25s ease;">
         DATE LIVE ▸
       </button>
+
+      <!-- NARRATIVE STRIP -->
+      <div id="tci-narrative" style="
+        position:absolute;bottom:62px;left:185px;right:0;z-index:9;
+        background:rgba(4,10,24,0.82);backdrop-filter:blur(10px);
+        border-top:1px solid rgba(212,175,55,0.1);
+        padding:6px 16px;pointer-events:none;
+        display:flex;align-items:center;gap:10px;min-height:28px;
+        transition:opacity .5s ease;
+      ">
+        <div style="font-size:8px;font-weight:700;color:rgba(212,175,55,0.7);letter-spacing:.1em;flex-shrink:0;">
+          ◈ ANALIZĂ
+        </div>
+        <div id="tci-narrative-text" style="
+          font-size:9px;color:rgba(200,215,235,0.82);line-height:1.4;flex:1;
+        "></div>
+        <div id="tci-narrative-src" style="
+          font-size:7px;color:rgba(100,120,150,0.5);flex-shrink:0;font-style:italic;
+        "></div>
+      </div>
 
       <!-- BOTTOM BAR -->
       <div style="position:absolute;bottom:0;left:185px;right:0;pointer-events:all;background:rgba(4,10,24,0.9);backdrop-filter:blur(12px);border-top:1px solid rgba(212,175,55,0.15);padding:8px 14px;display:flex;align-items:center;gap:10px;z-index:10;">
@@ -380,6 +401,11 @@ const TCI = {
   // ── Layere minime pe harta existenta ─────────────────────────────────────
   _addMapLayers() {
     const m = this.map; if(!m) return;
+    // Asigura zoom/pan activ pe harta in timp ce TCI ruleaza
+    m.scrollZoom?.enable();
+    m.dragPan?.enable();
+    m.doubleClickZoom?.enable();
+    m.touchZoomRotate?.enable();
     const d = this.cityData;
     const cx = this.activeParcel?.lon || d?.lon || 27.601;
     const cy = this.activeParcel?.lat || d?.lat || 47.158;
@@ -510,6 +536,66 @@ const TCI = {
     this.raf = requestAnimationFrame(() => this._loop());
   },
 
+  // ── Narrative: explica ce se vede ────────────────────────────────────────
+  _NARRATIVES: {
+    pop_growth:    { text:'Heatmap-ul violet → portocaliu arată presiunea demografică. Intensitate mai mare = densitate populației mai ridicată în această zonă.', src:'INSE · Cohort-Survival' },
+    pop_decline:   { text:'Heatmap-ul albastru spre violet indică scădere demografică. Zonele mai deschise pierd население față de 2021.', src:'INSE · Model Eurostat' },
+    traffic_modal: { text:'Punctele gri = autoturisme. Albastre = transport public. Verzi = bicicliști/pietoni. Raportul se schimbă progresiv spre mobilitate sustenabilă.', src:'Eurostat Modal Split 2021→2055' },
+    utr_colors:    { text:'Culorile UTR-urilor: Albastru = rezidențial colectiv · Violet = mixt/central · Portocaliu = comercial · Verde = spații verzi · Roșu = industrial.', src:'PUG + RLU per UAT' },
+    climate_heat:  { text:'Temperatura crește cu +0.8°C la 2030 și +2.8°C la 2055 față de 1990 (IPCC AR6 RCP8.5). Zonele dense acumulează mai multă căldură urbană.', src:'IPCC AR6 · ANM ROCADA' },
+    risk_seismic:  { text:'Profilul seismic al acestui UAT (INFP P100-1/2013) influențează reglementările de construcție și limitele de înălțime în zonele de risc.', src:'INFP · Normativ P100-1/2013' },
+    densification: { text:'Densificarea urbană este vizibilă prin creșterea intensității heatmap-ului. Zona centrală crește mai rapid datorită indicatorilor CUT mai mari.', src:'ANCPI · Autorizații construcție' },
+    esg_verde:     { text:'ESG-ul urban crește prin adăugarea de spații verzi (min. 9 mp/loc OMS). Zonele verzi apar mai intens pe hartă odată cu implementarea strategiei climatice.', src:'OMS · Eurostat SDG · ANM' },
+    pib_conv:      { text:'Convergența economică față de media UE crește progresiv. PIB/cap estimat prin modelul Mankiw-Romer-Weil calibrat cu date BNR și Eurostat.', src:'BNR · Eurostat · MRW 1992' },
+    infra_tp:      { text:'Transportul public se extinde după 2028. Numărul de linii și stații crește odată cu densificarea urbană și obiectivele PNRR mobilitate sustenabilă.', src:'MDLPA · PNRR Transport · Eurostat' },
+  },
+
+  _narrativeTimer: 0,
+  _narrativeIndex: 0,
+
+  _updateNarrative(year, totalT, mode) {
+    const now = Date.now();
+    if(now - this._narrativeTimer < 4500) return; // Schimba la 4.5s
+    this._narrativeTimer = now;
+
+    const d = (typeof _getProjectionData !== 'undefined')
+      ? _getProjectionData(year, this.scenario, this.cityKey) : null;
+    const pop = d?.demo?.value || 0;
+    const baseP = this.cityData?.pop2021 || 100000;
+    const rateP = this.cityData?.rata_reala_2011_2021 || 0;
+
+    // Selectam narativa relevanta bazata pe context
+    let narrativeKey;
+    if(year >= 2045 && d?.climate?.deltaT >= 2) {
+      narrativeKey = 'climate_heat';
+    } else if(year >= 2030 && totalT > 0.3) {
+      const keys = ['densification','traffic_modal','pib_conv','infra_tp','esg_verde'];
+      narrativeKey = keys[this._narrativeIndex++ % keys.length];
+    } else if(rateP < -0.5) {
+      narrativeKey = 'pop_decline';
+    } else if(rateP > 0.3) {
+      narrativeKey = 'pop_growth';
+    } else {
+      const keys = ['utr_colors','traffic_modal','risk_seismic','pop_growth'];
+      narrativeKey = keys[this._narrativeIndex++ % keys.length];
+    }
+
+    const narr = this._NARRATIVES[narrativeKey];
+    const textEl = document.getElementById('tci-narrative-text');
+    const srcEl  = document.getElementById('tci-narrative-src');
+    const stripEl = document.getElementById('tci-narrative');
+
+    if(!textEl || !narr) return;
+
+    // Fade out → update → fade in
+    if(stripEl) stripEl.style.opacity = '0';
+    setTimeout(() => {
+      textEl.textContent = narr.text;
+      if(srcEl) srcEl.textContent = narr.src;
+      if(stripEl) stripEl.style.opacity = '1';
+    }, 400);
+  },
+
   // ── Animatie harta per an ─────────────────────────────────────────────────
   _animateMap(year, yearT, totalT) {
     const m  = this.map; if(!m) return;
@@ -572,6 +658,8 @@ const TCI = {
       this._updateKPIs(d, ms);
       this._updateRisk();
     }
+    // 6. Narrative strip
+    this._updateNarrative(year, totalT, this.mode);
   },
 
   // ── 2D Overlay: intro ────────────────────────────────────────────────────
@@ -826,6 +914,47 @@ const TCI = {
     return url;
   },
 
+  // ── Ascunde popup-ul parcelei active ───────────────────────────────────────
+  _hideParcelPopup() {
+    // Inchide orice popup Mapbox deschis
+    if(this.map) {
+      try { this.map._popups?.forEach(p => p.remove()); } catch(e) {}
+    }
+    // Ascunde panelul info din platforma (daca e deschis)
+    const infoPanel = document.getElementById('info-panel') ||
+                      document.getElementById('panel-info') ||
+                      document.getElementById('bilant-panel') ||
+                      document.querySelector('.bilant-modal') ||
+                      document.querySelector('[id*="bilant"]');
+    if(infoPanel && infoPanel.style.display !== 'none') {
+      infoPanel._tci_was_visible = true;
+      infoPanel.style.display = 'none';
+    }
+    // Ascunde orice popup Mapbox GL din DOM
+    document.querySelectorAll('.mapboxgl-popup').forEach(p => {
+      p._tci_was_visible = true;
+      p.style.display = 'none';
+    });
+  },
+
+  // ── Restaureaza popup-ul la inchiderea TCI ────────────────────────────────
+  _restoreParcelPopup() {
+    const infoPanel = document.getElementById('info-panel') ||
+                      document.getElementById('panel-info') ||
+                      document.getElementById('bilant-panel') ||
+                      document.querySelector('.bilant-modal');
+    if(infoPanel?._tci_was_visible) {
+      infoPanel.style.display = '';
+      infoPanel._tci_was_visible = false;
+    }
+    document.querySelectorAll('.mapboxgl-popup').forEach(p => {
+      if(p._tci_was_visible) {
+        p.style.display = '';
+        p._tci_was_visible = false;
+      }
+    });
+  },
+
   _detectCity() {
     const ap=window.S?.parcels?.[window.S?.activeParcel??0];
     if(!ap) return null;
@@ -860,6 +989,7 @@ const TCI = {
     if(mapEl){mapEl.style.cssText='';m?.resize?.();}
     document.getElementById('tci-ov')?.remove();
     document.getElementById('tci-sel')?.remove();
+    this._restoreParcelPopup();
   },
 
   _rr(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();},
