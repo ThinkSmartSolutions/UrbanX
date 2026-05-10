@@ -78,10 +78,36 @@ const _AnimationEngine = {
     if(btn) btn.textContent = '▶ Animeaza';
   },
 
+  // ── Gaseste instanta Mapbox GL corecta ─────────────────────────────────
+  _getMapboxInstance() {
+    // Incearca mai multe variante de acces
+    const candidates = [
+      window.map,
+      window.MAP,
+      window.mapbox,
+      window.map?.map,        // wrapper cu .map intern
+      window.map?._map,       // alt wrapper
+      window.mapboxMap,
+      document.querySelector('.mapboxgl-map')?._mapbox,
+    ];
+    for(const m of candidates) {
+      if(m && typeof m.getLayer === 'function' && typeof m.addLayer === 'function') {
+        return m;
+      }
+    }
+    return null;
+  },
+
   // ── Setup Mapbox pentru animatie ────────────────────────────────────────
   _setupMapbox(engine) {
+    // Incearca sa gaseasca instanta Mapbox corecta
+    this.state.map = this._getMapboxInstance();
     const m = this.state.map;
-    if(!m) return;
+    if(!m) {
+      console.warn('[TCI] Mapbox instance not found — canvas fallback');
+      this._startCanvasFallback(engine);
+      return;
+    }
 
     // Obtine locatia parcele active sau centrul orasului curent
     const city = _RO_CITIES_DB && engine.currentCityKey
@@ -713,10 +739,165 @@ const _AnimationEngine = {
     }
   },
 
-  // ── Fallback canvas daca Mapbox nu e disponibil ───────────────────────────
+  // ── Fallback canvas REAL animat ─────────────────────────────────────────
   _startCanvasFallback(engine) {
-    console.warn('[TCI] Mapbox indisponibil. Asigurati-va ca harta e initiata.');
-    ss && ss('⚠️ Deschideți TCI de pe harta principală pentru animația 3D completă.');
+    console.log('[TCI] Canvas 3D fallback activ');
+    const as = this.state;
+    as.running = true;
+    as.startTime = performance.now() - as.pausedAt;
+
+    // Initializeaza starea de cladiri si particule
+    if(!as.buildings?.length) this._initBuildingsCanvas();
+    if(!as.particles?.length)  this._initParticlesCanvas(80);
+
+    const btn = document.getElementById('tci-play-btn');
+    if(btn) btn.textContent = '⏸ Pauza';
+
+    this._loopCanvas(engine);
+  },
+
+  _initBuildingsCanvas() {
+    const as = this.state;
+    as.buildings = [];
+    for(let i=0;i<40;i++){
+      const s=i*1337;
+      as.buildings.push({
+        id:i, x:(s%900)/1000+0.05,
+        width:0.028+(s%25)/1000,
+        height:0.07+(s%18)/100,
+        niv:3+Math.floor(s%15),
+        yearAppear:i<15?2021:2021+Math.floor((s%340)/10),
+        phase:i<15?1.0:0.0,
+        constructed:i<15,
+        hue:s%25,
+      });
+    }
+  },
+
+  _initParticlesCanvas(n) {
+    const as = this.state;
+    as.particles = Array.from({length:n},(_,i)=>({
+      x:Math.random(), y:0.66+Math.random()*0.28,
+      speed:0.0004+Math.random()*0.0009,
+      dir:Math.random()<0.5?1:-1,
+      type:['car','car','car','bike','ped'][Math.floor(Math.random()*5)],
+      hue:Math.random()*40,
+    }));
+  },
+
+  _loopCanvas(engine) {
+    const as = this.state;
+    const A  = this.ANIM;
+    if(!as.running) return;
+
+    const elapsed = (performance.now() - as.startTime) * as.speed;
+
+    if(elapsed < A.introDuration) {
+      this._renderCanvasFrame(engine, 2021, 0, elapsed/A.introDuration, 'intro');
+    } else {
+      let t = elapsed - A.introDuration;
+      let found = false;
+
+      for(let yr = A.startYear; yr <= A.endYear; yr++) {
+        const isMilestone = A.milestones.includes(yr);
+        const dur = isMilestone ? A.yearDuration + A.milestonePause : A.yearDuration;
+
+        if(t < dur) {
+          if(yr !== engine.currentYear) engine.setYear(yr);
+          const yearT = isMilestone && t >= A.yearDuration
+            ? 1.0
+            : Math.min(1, t / A.yearDuration);
+          this._renderCanvasFrame(engine, yr, yearT, (yr-2021)/34,
+            isMilestone && t >= A.yearDuration ? 'milestone' : 'year');
+          if(isMilestone && t >= A.yearDuration) {
+            const mT = (t - A.yearDuration) / A.milestonePause;
+            const canvas = document.getElementById('tci-main-canvas');
+            if(canvas) {
+              const ctx = canvas.getContext('2d');
+              const d   = _getProjectionData(yr, engine.currentScenario||'S2', engine.currentCity||'iasi');
+              if(ctx && d) this._renderMilestoneCard(ctx, canvas.width, canvas.height, yr, d, mT, engine);
+            }
+          }
+          found = true;
+          break;
+        }
+        t -= dur;
+      }
+
+      if(!found) {
+        const ot = Math.min(1, t/A.outroDuration);
+        this._renderCanvasOutro(engine, ot);
+        if(ot >= 1) { this.reset(engine); return; }
+      }
+    }
+
+    as.animFrame = requestAnimationFrame(() => this._loopCanvas(engine));
+  },
+
+  _renderCanvasFrame(engine, year, yearT, totalT, phase) {
+    const canvas = document.getElementById('tci-main-canvas');
+    if(!canvas) return;
+
+    // Dimensioneaza corect
+    const W = canvas.offsetWidth || 600;
+    const H = canvas.offsetHeight || 400;
+    if(canvas.width !== W || canvas.height !== H) {
+      canvas.width  = W;
+      canvas.height = H;
+    }
+    const ctx = canvas.getContext('2d');
+    if(!ctx) return;
+
+    const d = _getProjectionData(year, engine.currentScenario||'S2', engine.currentCity||'iasi');
+    const season  = (yearT * 2 + totalT * 8) % 4;
+    const dayT    = (yearT * 6 + totalT * 3) % 1;
+    const sunH    = Math.max(0, Math.sin(dayT * Math.PI));
+    const groundY = H * 0.63;
+
+    // 8 layere canvas
+    this.renderSky(ctx, W, H, groundY, season, dayT, sunH, totalT, d);
+    this.renderBuildings(ctx, W, H, groundY, totalT, yearT, d, dayT);
+    this.renderVegetation(ctx, W, H, groundY, totalT, season, d);
+    this.renderHeatmap(ctx, W, H, groundY, totalT, yearT, d, engine.currentScenario||'S2');
+    this.renderTraffic(ctx, W, H, groundY, totalT, dayT, d);
+    this.renderInfrastructure(ctx, W, H, groundY, totalT, d);
+    this.renderGround(ctx, W, H, groundY, totalT, season);
+
+    // Data overlay dupa 55% din an
+    if(yearT > 0.55 && d) {
+      this._renderDataCardOnCanvas(ctx, W, H, year, d, (yearT-0.55)/0.45);
+    }
+
+    // HUD
+    this.renderYearHUD && this.renderYearHUD(ctx, W, H, year, totalT, yearT, d, engine.currentScenario||'S2');
+
+    // Update stats
+    engine._updateStats && engine._updateStats(d, year);
+  },
+
+  _renderCanvasOutro(engine, t) {
+    const canvas = document.getElementById('tci-main-canvas');
+    if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if(!ctx) return;
+    const W = canvas.width, H = canvas.height;
+    const d = _getProjectionData(2055, engine.currentScenario||'S2', engine.currentCity||'iasi');
+    this.renderSky(ctx,W,H,H*0.63,2,0.6,0.8,1,d);
+    this.renderBuildings(ctx,W,H,H*0.63,1,1,d,0.6);
+    this.renderGround(ctx,W,H,H*0.63,1,2);
+    const fo = t > 0.72 ? (t-0.72)/0.28 : 0;
+    ctx.fillStyle = 'rgba(2,6,15,'+fo+')';
+    ctx.fillRect(0,0,W,H);
+    const al = Math.min(1,t*2.8)*(t<0.65?1:Math.max(0,(0.7-t)/0.05));
+    if(al > 0.05) {
+      ctx.save(); ctx.globalAlpha = al; ctx.textAlign = 'center';
+      ctx.fillStyle = '#D4AF37'; ctx.font = 'bold 20px "Space Grotesk"';
+      const city = _RO_CITIES_DB?.[engine.currentCityKey]||{name:"Iasi"};
+      ctx.fillText(city.name+' 2055 — Proiectie completa', W/2, H*0.3);
+      ctx.fillStyle = 'rgba(148,163,184,0.8)'; ctx.font = '10px "Space Grotesk"';
+      ctx.fillText('INSE · Eurostat · ANCPI · BNR · IPCC AR6', W/2, H*0.38);
+      ctx.restore();
+    }
   },
 
   // ── Reset Mapbox la normal ─────────────────────────────────────────────────
