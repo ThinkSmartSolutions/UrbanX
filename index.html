@@ -788,8 +788,125 @@ canvas#c2d{width:100%;height:100%;display:block}
   };
 })();
 </script>
+
+  <!-- UrbanX Workspace Styles -->
+  <link rel="stylesheet" href="wx-styles.css?v=2026051010">
+<style>
+/* Override: integreaza navigatia noua cu structura existenta */
+#app { 
+  padding-top: 0 !important;
+}
+/* Ascunde elementele vechi de navigatie pe desktop cand wx e activ */
+@media (min-width: 1200px) {
+  #mob-nav, #mobile-bottom-nav, .bottom-nav { display: none !important; }
+}
+/* Panelul stang existent devine modulul activ */
+#left-panel-wrapper, #panel-container {
+  display: none;
+}
+/* Adaptare pentru noul layout */
+#map { 
+  position: absolute !important;
+  inset: 0 !important;
+}
+</style>
+<style>
+.tci-launch-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: 8px;
+  border: 1px solid rgba(212,175,55,0.35);
+  background: linear-gradient(135deg, rgba(212,175,55,0.08), rgba(139,92,246,0.08));
+  color: #D4AF37; font-size: 11px; font-weight: 700;
+  font-family: inherit; cursor: pointer; transition: all .2s;
+  animation: tciPulse 3s ease-in-out infinite;
+}
+.tci-launch-btn:hover {
+  background: rgba(212,175,55,0.18);
+  box-shadow: 0 0 20px rgba(212,175,55,0.25);
+  transform: translateY(-1px);
+}
+@keyframes tciPulse {
+  0%,100% { box-shadow: 0 0 0 rgba(212,175,55,0); }
+  50%      { box-shadow: 0 0 12px rgba(212,175,55,0.2); }
+}
+@media(max-width:900px) { .tci-launch-label { display:none; } }
+</style>
+<script>
+    // Service Worker registration
+    if('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(r => console.log('[SW] OK:', r.scope))
+          .catch(e => console.warn('[SW] Failed:', e.message));
+      });
+    }
+  </script>
 </head>
 <body>
+<!-- UrbanX Workspace Navigation v3.2 -->
+<div id="wx-topbar">
+  <div id="wx-logo">
+    <svg width="24" height="24" viewBox="0 0 100 100" style="flex-shrink:0">
+      <rect width="100" height="100" rx="18" fill="#101D35"/>
+      <path d="M18 28h26l13 22-13 22H18l15-22z" fill="#DDE6F5"/>
+      <path d="M59 28h23L71 49H53z" fill="#D4AF37"/>
+      <path d="M53 55h17l13 19H61z" fill="#D4AF37"/>
+    </svg>
+    <div>
+      <div id="wx-logo-text">UrbanX</div>
+      <div id="wx-logo-sub">Urban Intelligence OS</div>
+    </div>
+  </div>
+  
+  <!-- Desktop navigation -->
+  <nav id="wx-nav-desktop">
+    <!-- populat de WorkspaceManager -->
+  </nav>
+  
+  <!-- Package badge -->
+  <div id="wx-pkg-badge" onclick="_showPackageSelector()" style="cursor:pointer">
+    📐 Professional
+  </div>
+  
+  <!-- User button -->
+  <button class="tci-launch-btn" onclick="openTCI()" title="Proiectie Urbanistica Temporala">
+    🏙 <span class="tci-launch-label">Temporal City Intelligence</span>
+  </button>
+  <div id="wx-user-btn" title="Contul meu">👤</div>
+</div>
+
+<!-- Mobile bottom navigation -->
+<nav id="wx-nav-mobile" style="display:none">
+  <!-- populat de WorkspaceManager -->
+</nav>
+
+<!-- Mobile bottom sheet -->
+<div id="wx-mobile-sheet">
+  <div id="wx-sheet-handle"></div>
+  <div id="wx-sheet-content">
+    <!-- continut panel contextual pe mobile -->
+  </div>
+</div>
+
+<!-- Package selector modal -->
+<div id="wx-package-modal" onclick="if(event.target===this)this.style.display='none'">
+  <div style="max-width:900px;width:100%">
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="font-size:20px;font-weight:900;color:#fff">Alege pachetul tău</div>
+      <div style="font-size:12px;color:#4a6080;margin-top:4px">Fiecare pachet deblochează funcționalități diferite</div>
+    </div>
+    <div class="wx-pkg-grid" id="wx-pkg-grid">
+      <!-- populat de JS -->
+    </div>
+    <div style="text-align:center;margin-top:16px">
+      <button onclick="document.getElementById('wx-package-modal').style.display='none'"
+        style="background:transparent;border:1px solid rgba(255,255,255,0.15);color:#94a3b8;padding:8px 20px;border-radius:6px;cursor:pointer;font-size:11px">
+        Închide
+      </button>
+    </div>
+  </div>
+</div>
+
 
 <!-- ══ LOGIN OVERLAY ════════════════════════════════════════════════════ -->
 <div id="auth-overlay" style="
@@ -1122,6 +1239,7 @@ canvas#c2d{width:100%;height:100%;display:block}
   </div>
   <div style="display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:6px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
     <button onclick="generateCPE();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#34d399;padding:4px 8px;cursor:pointer;border-radius:5px;font-size:11.5px;">⚡ Certificat Performanță Energetică</button>
+    <button onclick="generateProiectieUrbanistica();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#818cf8;padding:4px 8px;cursor:pointer;border-radius:5px;font-size:11.5px;">🏙 Proiecție Urbanistică 10/20/30 ani</button>
     <button onclick="generateStabilitateTaluzuri();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#fb923c;padding:4px 8px;cursor:pointer;border-radius:5px;font-size:11.5px;">⛰ Stabilitate Taluzuri & Versanți</button>
     <button onclick="infoDrawerOpen('cpe')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#34d399'" onmouseout="this.style.color='#475569'">ⓘ</button>
   </div>
@@ -1369,17 +1487,17 @@ canvas#c2d{width:100%;height:100%;display:block}
 <!-- UrbanX JS Modules — ordinea de incarcare e importanta -->
 <script src="js/00-globals.js?v=2026050601"></script>
 <script src="js/02-map-core.js?v=2026050804"></script>
-<script src="js/03-ui-panel.js?v=2026050905"></script>
+<script src="js/03-ui-panel.js?v=2026051004"></script>
 <script src="js/04-search.js?v=2026050601"></script>
 <script src="js/05-cad-utils.js?v=2026050601"></script>
 <script src="js/06-aedis.js?v=2026050802"></script>
 <script src="js/07-pdf-utils.js?v=2026050601"></script>
 <script src="js/08-lotizare.js?v=2026050906"></script>
-<script src="js/09-pdf-engine.js?v=2026050918"></script>
-<script src="js/10-studies.js?v=2026050919"></script>
+<script src="js/09-pdf-engine.js?v=2026051006"></script>
+<script src="js/10-studies.js?v=2026051010"></script>
 <script src="js/11-viewer3d.js?v=2026050904"></script>
 <script src="js/12-admin.js?v=2026050601"></script>
-<script src="js/13-info-drawer.js?v=2026050902"></script>
+<script src="js/13-info-drawer.js?v=2026051004"></script>
 <script src="js/14-docx-export.js?v=2026050601"></script>
 <script src="js/15-relevee.js?v=2026050909"></script>
 <script src="js/fixes-audit.js?v=2026050601"></script>
@@ -2195,5 +2313,57 @@ setInterval(()=>{
 }, 1000);
 </script>
 
+
+  <!-- UrbanX Architecture v3.2 -->
+  <script src="js/00-packages.js?v=2026051010"></script>
+  <script src="js/16-projects.js?v=2026051010"></script>
+  <script src="js/17-projection-engine.js?v=2026051010"></script>
+  <script src="js/18-animation-engine.js?v=2026051010"></script>
+<script>
+// Initializare package selector modal
+function _initPackageModal() {
+  const grid = document.getElementById('wx-pkg-grid');
+  if(!grid || typeof _PACKAGES === 'undefined') return;
+  grid.innerHTML = Object.entries(_PACKAGES).map(([key, pkg]) => `
+    <div class="wx-pkg-card" onclick="_USER.setPackage('${key}');document.getElementById('wx-package-modal').style.display='none'"
+      style="border-color:${pkg.color}33;--pkg-color:${pkg.color}">
+      <div class="wx-pkg-icon">${pkg.icon}</div>
+      <div class="wx-pkg-name" style="color:${pkg.color}">${pkg.label}</div>
+      <div class="wx-pkg-sub">${pkg.sublabel}</div>
+      <div class="wx-pkg-price" style="color:${pkg.color};border-color:${pkg.color}">${pkg.price}</div>
+    </div>
+  `).join('');
+}
+window.addEventListener('load', () => setTimeout(_initPackageModal, 1000));
+
+// Mobile sheet: deschide cand se apasa pe modul
+function _openMobileSheet(moduleId) {
+  const sheet = document.getElementById('wx-mobile-sheet');
+  const content = document.getElementById('wx-sheet-content');
+  if(!sheet || !content) return;
+  content.innerHTML = typeof _PanelRenderer !== 'undefined' ? 
+    _PanelRenderer.getLeftPanel(moduleId) : '';
+  sheet.classList.add('open');
+}
+function _closeMobileSheet() {
+  document.getElementById('wx-mobile-sheet')?.classList.remove('open');
+}
+
+// Swipe down to close sheet
+let sheetStartY = 0;
+document.getElementById('wx-mobile-sheet')?.addEventListener('touchstart', e => { sheetStartY = e.touches[0].clientY; });
+document.getElementById('wx-mobile-sheet')?.addEventListener('touchend', e => {
+  if(e.changedTouches[0].clientY - sheetStartY > 80) _closeMobileSheet();
+});
+
+// Hook parcel click pentru a actualiza discover panel
+const _origParcelClick = window.onParcelSelect;
+window._onParcelSelectedHook = function(parcel) {
+  if(typeof _wxUpdateParcelInfo === 'function') _wxUpdateParcelInfo(parcel);
+};
+</script>
+  <script src="js/20-uats-database.js?v=2026051010"></script>
+  <script src="js/21-cloud-sync.js?v=2026051010"></script>
+  <script src="js/19-ux-polish.js?v=2026051010"></script>
 </body>
 </html>
