@@ -965,6 +965,43 @@ const TCI = {
     },
 
     // ── QUERY CONSTRÂNGERI — cimitire, spitale, parcuri via Mapbox ────
+    // ── CIMEC WFS — LMI național, toate monumentele din orice UAT ──────
+    // 3 tentative CORS: direct → corsproxy.io → allorigins.win
+    // Aceasta e singura sursă completă pentru TOATE monumentele istorice RO
+    async queryLMI(lon, lat, radiusM) {
+      if(typeof _cimecQueryWFS === 'function') {
+        try { return await _cimecQueryWFS(lon, lat, radiusM); } catch(e){}
+      }
+      const CIMEC = 'https://map.cimec.ro/Mapserver/wms';
+      const km = radiusM / 111320;
+      const bbox = [lon-km, lat-km, lon+km, lat+km].join(',');
+      const result = {monumente:[], zone:[], situri:[]};
+
+      for(const [layer, key] of [['LMI_Puncte','monumente'],['LMI_Zone','zone'],['Situri_Arh','situri']]) {
+        const wfsQ = `SERVICE=WFS&VERSION=1.1.0&REQUEST=GetFeature&TYPENAME=${layer}`+
+                     `&BBOX=${bbox},EPSG:4326&SRSNAME=EPSG:4326&OUTPUTFORMAT=application/json&maxFeatures=200`;
+        const direct = `${CIMEC}?${wfsQ}`;
+        const urls = [
+          direct,
+          `https://corsproxy.io/?${encodeURIComponent(direct)}`,
+          `https://api.allorigins.win/raw?url=${encodeURIComponent(direct)}`,
+        ];
+        for(const url of urls) {
+          try {
+            const resp = await fetch(url, {signal:AbortSignal.timeout(5000), mode:'cors'});
+            if(resp.ok) {
+              const txt = await resp.text();
+              if(txt.includes('FeatureCollection')) {
+                result[key] = JSON.parse(txt).features || [];
+                if(result[key].length) { console.log(`[CIMEC] ✅ ${key}:${result[key].length}`); break; }
+              }
+            }
+          } catch(e) {}
+        }
+      }
+      return result;
+    },
+
     async queryConstraints(lon, lat, radiusKm, token) {
       // Categorii de exclus sau de urmărit
       const searches = [
