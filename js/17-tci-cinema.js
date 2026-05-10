@@ -274,13 +274,17 @@ const TCI = {
         <div id="tci-left" style="padding:10px;display:flex;flex-direction:column;gap:8px;"></div>
       </div>
 
-      <!-- PANEL DREAPTA -->
-      <div style="position:absolute;right:0;top:48px;bottom:62px;width:185px;pointer-events:all;background:rgba(4,10,24,0.85);backdrop-filter:blur(12px);border-left:1px solid rgba(255,255,255,0.06);overflow-y:auto;z-index:10;">
-        <div id="tci-right" style="padding:10px;"></div>
+      <!-- PANEL DREAPTA: colapsibil, inchis by default -->
+      <div id="tci-rpanel" style="position:absolute;right:0;top:48px;bottom:62px;width:0;pointer-events:all;background:rgba(4,10,24,0.88);backdrop-filter:blur(12px);border-left:1px solid rgba(255,255,255,0.06);overflow:hidden;z-index:10;transition:width .25s ease;">
+        <div id="tci-right" style="padding:10px;width:185px;"></div>
       </div>
+      <!-- Buton toggle dreapta -->
+      <button id="tci-rtoggle" onclick="TCI._toggleRight()" style="position:absolute;right:0;top:50%;transform:translateY(-50%);z-index:11;background:rgba(4,10,24,0.85);border:1px solid rgba(255,255,255,0.1);border-right:none;border-radius:6px 0 0 6px;color:rgba(148,163,184,0.6);padding:8px 5px;font-size:10px;cursor:pointer;writing-mode:vertical-rl;pointer-events:all;transition:right .25s ease;">
+        DATE LIVE ▸
+      </button>
 
       <!-- BOTTOM BAR -->
-      <div style="position:absolute;bottom:0;left:185px;right:185px;pointer-events:all;background:rgba(4,10,24,0.9);backdrop-filter:blur(12px);border-top:1px solid rgba(212,175,55,0.15);padding:8px 14px;display:flex;align-items:center;gap:10px;z-index:10;">
+      <div style="position:absolute;bottom:0;left:185px;right:0;pointer-events:all;background:rgba(4,10,24,0.9);backdrop-filter:blur(12px);border-top:1px solid rgba(212,175,55,0.15);padding:8px 14px;display:flex;align-items:center;gap:10px;z-index:10;">
         <div id="tci-yr" style="font-size:24px;font-weight:900;color:#D4AF37;min-width:46px;">${this.startYear}</div>
         <div style="flex:1;position:relative;">
           <input type="range" id="tci-scrub" min="${this.startYear}" max="2055" value="${this.startYear}" step="1"
@@ -832,6 +836,18 @@ const TCI = {
   },
 
   // ── Close ─────────────────────────────────────────────────────────────────
+  _toggleRight() {
+    const panel = document.getElementById('tci-rpanel');
+    const btn   = document.getElementById('tci-rtoggle');
+    if(!panel) return;
+    const isOpen = panel.style.width === '185px';
+    panel.style.width = isOpen ? '0' : '185px';
+    if(btn) {
+      btn.textContent = isOpen ? 'DATE LIVE ▸' : '◂ DATE LIVE';
+      btn.style.right = isOpen ? '0' : '185px';
+    }
+  },
+
   close() {
     if(this.running) this.pause();
     const m=this.map;
