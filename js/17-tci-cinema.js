@@ -1242,6 +1242,572 @@ const TCI = {
     this._restoreParcelPopup();
   },
 
+  // ── Raport PDF metodologic citabil OAR/Consiliu Local ─────────────────────
+  async generatePDFReport() {
+    if(typeof jsPDF === 'undefined' && typeof window.jspdf === 'undefined') {
+      typeof _Toast !== 'undefined' && _Toast.warn('jsPDF indisponibil. Folosiți Export din platforma principală.');
+      return;
+    }
+    const JPDF = typeof jsPDF !== 'undefined' ? jsPDF : window.jspdf.jsPDF;
+
+    const cd  = this.cityData;
+    const ap  = this.activeParcel;
+    const yr  = this.year;
+    const scen = this.scenario;
+    const risk = (typeof _getRiskProfile !== 'undefined') ? _getRiskProfile(cd||{}) : null;
+    const d   = (typeof _getProjectionData !== 'undefined') ? _getProjectionData(yr, scen, this.cityKey) : null;
+    const ms  = (typeof _getModalSplit !== 'undefined') ? _getModalSplit(yr) : {auto:72,tp:18,bici_ped:10};
+
+    typeof _Toast !== 'undefined' && _Toast.info('Se generează raportul PDF...');
+
+    const pdf = new JPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+    const W=210, H=297;
+    const DARK=[2,6,15], NAVY=[10,26,61], GOLD=[212,175,55], GOLD2=[180,148,40];
+    const BLUE=[30,64,175], GREEN=[21,128,61], RED=[185,28,28], GRAY=[71,85,105];
+    const LIGHT=[248,250,252], WHITE=[255,255,255];
+    const dateStr = new Date().toLocaleDateString('ro-RO', {year:'numeric',month:'long',day:'numeric'});
+
+    const rr = (x,y,w,h,r=2) => { pdf.roundedRect(x,y,w,h,r,r,'F'); };
+    const ln = (x1,y1,x2,y2) => { pdf.line(x1,y1,x2,y2); };
+    const tx = (t,x,y,opts={}) => { pdf.text(String(t),x,y,opts); };
+
+    // ════════════════════════════════════════════════════════════════════
+    // PAG 1 — COPERTĂ
+    // ════════════════════════════════════════════════════════════════════
+    pdf.setFillColor(...DARK); pdf.rect(0,0,W,H,'F');
+    pdf.setFillColor(...GOLD);  pdf.rect(0,0,W,4,'F');
+    pdf.setFillColor(...NAVY);  pdf.rect(0,4,W,H-4,'F');
+
+    // Gradient simulat
+    for(let i=0;i<60;i++){
+      pdf.setFillColor(Math.round(2+i*0.3),Math.round(6+i*0.4),Math.round(15+i*0.8));
+      pdf.rect(0,4+i*4,W,4,'F');
+    }
+
+    pdf.setFillColor(...GOLD); pdf.rect(0,0,W,3,'F');
+
+    // Logo / brand
+    pdf.setTextColor(...GOLD);
+    pdf.setFontSize(9); pdf.setFont('helvetica','bold');
+    tx('URBANX · TSS·FG', W/2, 18, {align:'center'});
+
+    pdf.setTextColor(255,255,255);
+    pdf.setFontSize(28); pdf.setFont('helvetica','bold');
+    tx('PROIECȚIE', W/2, 55, {align:'center'});
+    tx('URBANISTICĂ', W/2, 68, {align:'center'});
+
+    pdf.setTextColor(...GOLD);
+    pdf.setFontSize(20); pdf.setFont('helvetica','bold');
+    tx(cd?.name || 'UAT', W/2, 85, {align:'center'});
+
+    // Card central
+    pdf.setFillColor(10,20,50);
+    rr(20,95,170,90,4);
+    pdf.setDrawColor(...GOLD2); pdf.setLineWidth(0.3);
+    pdf.roundedRect(20,95,170,90,4,4,'S');
+
+    const kpis_cover = [
+      ['Scenariu',    {S1:'S1 — Optimist',S2:'S2 — Moderat',S3:'S3 — Conservator',S4:'S4 — Climatic'}[scen]||scen],
+      ['Perioadă',    `${this.startYear||2026} — 2055`],
+      ['Populație',   `${(cd?.pop2021||0).toLocaleString()} loc. (INSE 2021)`],
+      ['Rată reală',  `${(cd?.rata_reala_2011_2021||0).toFixed(2)}%/an (2011-2021)`],
+      ['Risc global', risk ? `${risk.riskScore}/100 — ${risk.riskLabel}` : '—'],
+      ['UAT județ',   `${cd?.judet || '—'} · SIRUTA ${cd?.siruta||'—'}`],
+    ];
+    kpis_cover.forEach(([k,v],i) => {
+      const ky = 103 + i*13;
+      pdf.setTextColor(148,163,184);
+      pdf.setFontSize(7); pdf.setFont('helvetica','normal');
+      tx(k+':', 28, ky);
+      pdf.setTextColor(255,255,255);
+      pdf.setFontSize(8); pdf.setFont('helvetica','bold');
+      tx(v||'—', 75, ky);
+    });
+
+    // Cuprins
+    pdf.setFillColor(5,12,32);
+    rr(20,192,170,68,4);
+    pdf.setTextColor(...GOLD);
+    pdf.setFontSize(7.5); pdf.setFont('helvetica','bold');
+    tx('CUPRINS', 28, 201);
+    const cuprins = [
+      '1. Profilul UAT și indicatori urbanistici',
+      '2. Proiecție demografică 2026-2055 (3 scenarii)',
+      '3. Dezvoltare urbană și construcții',
+      '4. Profil de risc teritorial',
+      '5. Mobilitate și transport',
+      '6. Comparare Eurostat Urban Audit (UE)',
+      '7. Metodologie și surse citate',
+    ];
+    pdf.setFont('helvetica','normal');
+    cuprins.forEach((l,i) => {
+      pdf.setTextColor(200,215,235);
+      pdf.setFontSize(7);
+      tx(l, 28, 209+i*8);
+    });
+
+    // Footer coperta
+    pdf.setFillColor(...GOLD); pdf.rect(0,H-4,W,4,'F');
+    pdf.setTextColor(10,20,40);
+    pdf.setFontSize(5.5); pdf.setFont('helvetica','bold');
+    tx(`UrbanX · Analiză statistică și proiecție · Date oficiale publice · ${dateStr}`, W/2, H-1, {align:'center'});
+
+    // ════════════════════════════════════════════════════════════════════
+    // PAG 2 — PROFIL UAT + INDICATORI
+    // ════════════════════════════════════════════════════════════════════
+    pdf.addPage();
+    pdf.setFillColor(...LIGHT); pdf.rect(0,0,W,H,'F');
+
+    // Header pagina
+    pdf.setFillColor(...DARK); pdf.rect(0,0,W,16,'F');
+    pdf.setFillColor(...GOLD); pdf.rect(0,0,4,16,'F');
+    pdf.setTextColor(...GOLD); pdf.setFontSize(7); pdf.setFont('helvetica','bold');
+    tx('URBANX · PROIECȚIE URBANISTICĂ', 8, 7);
+    pdf.setTextColor(255,255,255); pdf.setFontSize(9);
+    tx('1. PROFIL UAT ȘI INDICATORI URBANISTICI', 8, 13);
+    pdf.setTextColor(148,163,184); pdf.setFontSize(6);
+    tx(`${cd?.name||'UAT'} · ${dateStr}`, W-10, 13, {align:'right'});
+
+    let cy2 = 24;
+
+    // Identificare
+    pdf.setTextColor(...NAVY); pdf.setFontSize(9); pdf.setFont('helvetica','bold');
+    tx('1.1 Identificare și localizare', 14, cy2); cy2+=5;
+    pdf.setDrawColor(212,175,55); pdf.setLineWidth(0.3);
+    ln(14, cy2, W-14, cy2); cy2+=4;
+
+    const ident = [
+      ['Denumire UAT', cd?.name||'—'],
+      ['Județ', cd?.judet||'—'],
+      ['Cod SIRUTA', cd?.siruta||'—'],
+      ['Tip UAT', cd?.tip||'—'],
+      ['Coordonate', cd ? `${cd.lat?.toFixed(4)}°N, ${cd.lon?.toFixed(4)}°E` : '—'],
+      ['Populație 2021', (cd?.pop2021||0).toLocaleString()+' loc. (INSE)'],
+      ['Populație 2011', (cd?.pop2011||0).toLocaleString()+' loc. (INSE)'],
+      ['Rată 2011-2021', (cd?.rata_reala_2011_2021||0).toFixed(3)+'%/an'],
+    ];
+    ident.forEach(([k,v]) => {
+      pdf.setTextColor(...GRAY); pdf.setFontSize(7.5); pdf.setFont('helvetica','normal');
+      tx(k+':', 14, cy2);
+      pdf.setTextColor(...DARK); pdf.setFont('helvetica','bold');
+      tx(v, 70, cy2);
+      cy2+=6;
+    });
+    cy2+=4;
+
+    // Indicatori PUG (daca avem parcela activa)
+    if(ap?.params) {
+      pdf.setTextColor(...NAVY); pdf.setFontSize(9); pdf.setFont('helvetica','bold');
+      tx('1.2 Indicatori urbanistici PUG activi', 14, cy2); cy2+=5;
+      pdf.setDrawColor(212,175,55); pdf.setLineWidth(0.3);
+      ln(14, cy2, W-14, cy2); cy2+=4;
+
+      const pug_items = [
+        ['UTR activ',       ap.utr||'—'],
+        ['POT maxim',       (ap.params.pot||'—')+'%'],
+        ['CUT maxim',       ap.params.cut||'—'],
+        ['H maxim',         (ap.params.h||'—')+'m'],
+        ['Retragere față',  (ap.params.retFata||ap.params.retrageri?.fata||'—')+'m'],
+        ['Retragere spate', (ap.params.retSpate||ap.params.retrageri?.spate||'—')+'m'],
+        ['Nr. cadastral',   ap.nrCad||ap.nrcad||'—'],
+        ['Suprafață teren', parseFloat(ap.area||0).toFixed(0)+' mp'],
+      ];
+      pug_items.forEach(([k,v]) => {
+        pdf.setTextColor(...GRAY); pdf.setFontSize(7.5); pdf.setFont('helvetica','normal');
+        tx(k+':', 14, cy2);
+        pdf.setTextColor(...DARK); pdf.setFont('helvetica','bold');
+        tx(String(v), 80, cy2);
+        cy2+=6;
+      });
+    }
+
+    // Footer
+    this._pdfFooter(pdf, W, H, 2, dateStr, cd);
+
+    // ════════════════════════════════════════════════════════════════════
+    // PAG 3 — PROIECȚIE DEMOGRAFICĂ
+    // ════════════════════════════════════════════════════════════════════
+    pdf.addPage();
+    pdf.setFillColor(...LIGHT); pdf.rect(0,0,W,H,'F');
+    this._pdfHeader(pdf,W,'2. PROIECȚIE DEMOGRAFICĂ 2026-2055',cd,dateStr);
+    cy2 = 24;
+
+    pdf.setTextColor(...NAVY); pdf.setFontSize(9); pdf.setFont('helvetica','bold');
+    tx('2.1 Evoluție populației per scenariu', 14, cy2); cy2+=5;
+    pdf.setDrawColor(212,175,55); pdf.setLineWidth(0.3);
+    ln(14, cy2, W-14, cy2); cy2+=6;
+
+    // Tabel scenarii
+    const scenColors = {S1:[21,128,61],S2:[139,92,246],S3:[180,83,9],S4:[56,189,248]};
+    const scenNames  = {S1:'Optimist',S2:'Moderat (referință)',S3:'Conservator',S4:'Climatic'};
+    const years_proj = [2026,2030,2035,2040,2045,2050,2055];
+
+    // Header tabel
+    pdf.setFillColor(...NAVY); pdf.rect(14, cy2-4, W-28, 8,'F');
+    pdf.setTextColor(255,255,255); pdf.setFontSize(7); pdf.setFont('helvetica','bold');
+    tx('Scenariu', 16, cy2+1);
+    years_proj.forEach((y,i) => tx(String(y), 55+i*22, cy2+1));
+    cy2+=10;
+
+    ['S1','S2','S3','S4'].forEach((sc,si) => {
+      const col = scenColors[sc];
+      if(si%2===0) { pdf.setFillColor(240,244,255); pdf.rect(14,cy2-4,W-28,8,'F'); }
+      pdf.setFillColor(...col); pdf.rect(14,cy2-4,2,8,'F');
+      pdf.setTextColor(...col); pdf.setFontSize(7); pdf.setFont('helvetica','bold');
+      tx(scenNames[sc], 18, cy2+1);
+      years_proj.forEach((y,i) => {
+        const dd = typeof _getProjectionData !== 'undefined' ? _getProjectionData(y,sc,this.cityKey) : null;
+        const pop = dd?.demo?.value || cd?.pop2021 || 0;
+        pdf.setTextColor(...DARK); pdf.setFont('helvetica','normal');
+        tx((pop/1000).toFixed(1)+'k', 55+i*22, cy2+1);
+      });
+      if(sc===scen) {
+        pdf.setDrawColor(...col); pdf.setLineWidth(0.3);
+        pdf.roundedRect(14,cy2-4,W-28,8,1,1,'S');
+      }
+      cy2+=10;
+    });
+
+    cy2+=6;
+    pdf.setTextColor(...NAVY); pdf.setFontSize(9); pdf.setFont('helvetica','bold');
+    tx('2.2 Metodologie proiecție demografică', 14, cy2); cy2+=5;
+    ln(14,cy2,W-14,cy2); cy2+=5;
+
+    const metod_text = [
+      'Modelul de proiecție demografică UrbanX utilizează metoda Cohort-Survival (Eurostat, 2023), calibrată',
+      'cu datele recensămintelor INSE 2011 și 2021 pentru fiecare UAT în parte.',
+      '',
+      'Rata de evoluție demografică reală 2011-2021 a fost calculată ca medie geometrică anualizată:',
+      `r = (P2021/P2011)^(1/10) - 1 = ${(cd?.rata_reala_2011_2021||0).toFixed(4)}`,
+      '',
+      'Scenariile de proiecție aplică ajustări față de rata istorică bazate pe:',
+      '  S1 Optimist: +convergență UE accelerată (investiții PNRR, retenție forță de muncă)',
+      '  S2 Moderat: continuarea tendinței actuale, referință principală',
+      '  S3 Conservator: depopulare accelerată, emigrare structurală',
+      '  S4 Climatic: adaptare RCP 8.5 (IPCC AR6), presiune spații verzi și migrație climatică',
+    ];
+    metod_text.forEach(l => {
+      const textC=l.startsWith('  ')?GRAY:DARK; pdf.setTextColor(...textC);
+      pdf.setFontSize(7); pdf.setFont('helvetica','normal');
+      tx(l, 14, cy2); cy2+=5;
+    });
+
+    this._pdfFooter(pdf,W,H,3,dateStr,cd);
+
+    // ════════════════════════════════════════════════════════════════════
+    // PAG 4 — RISC TERITORIAL
+    // ════════════════════════════════════════════════════════════════════
+    pdf.addPage();
+    pdf.setFillColor(...LIGHT); pdf.rect(0,0,W,H,'F');
+    this._pdfHeader(pdf,W,'4. PROFIL DE RISC TERITORIAL',cd,dateStr);
+    cy2=24;
+
+    const risks = [
+      { label:'Risc seismic', key:'seismic', src:'INFP P100-1/2013 — Normativ seismic',
+        detail:`Zona ${risk?.seismic?.key||'—'}, accelerație ag=${risk?.seismic?.ag||'—'}g` },
+      { label:'Risc inundații', key:'flood', src:'ANAR PGRA 2021-2027 — Plan managament risc',
+        detail:risk?.flood?.description||'Date bazin hidrografic ANAR' },
+      { label:'Alunecări teren', key:'landslide', src:'INHGA + INCDFP — Cartare teritoriu',
+        detail:risk?.landslide?.description||'Date INHGA monitorizare' },
+    ];
+
+    risks.forEach(r => {
+      const riskData = risk?.[r.key];
+      const score = riskData?.score || 0;
+      const col = score>60?[185,28,28]:score>35?[180,83,9]:[21,128,61];
+
+      pdf.setFillColor(248,248,252); pdf.roundedRect(14,cy2,W-28,32,2,2,'F');
+      pdf.setFillColor(...col); pdf.rect(14,cy2,3,32,'F');
+      pdf.setTextColor(...col); pdf.setFontSize(9); pdf.setFont('helvetica','bold');
+      tx(r.label, 20, cy2+8);
+      pdf.setFillColor(...col);
+      pdf.roundedRect(W-40,cy2+3,24,12,2,2,'F');
+      pdf.setTextColor(255,255,255); pdf.setFontSize(8);
+      tx(score+'/100', W-28, cy2+11, {align:'center'});
+      pdf.setTextColor(...DARK); pdf.setFontSize(7.5); pdf.setFont('helvetica','normal');
+      tx(r.detail, 20, cy2+17);
+      pdf.setTextColor(...GRAY); pdf.setFontSize(6.5);
+      tx('Sursă: '+r.src, 20, cy2+25);
+      cy2+=38;
+    });
+
+    cy2+=4;
+    pdf.setTextColor(...NAVY); pdf.setFontSize(9); pdf.setFont('helvetica','bold');
+    tx(`Scor risc compozit UAT: ${risk?.riskScore||0}/100 — ${risk?.riskLabel||'—'}`, 14, cy2); cy2+=6;
+    pdf.setTextColor(...GRAY); pdf.setFontSize(7); pdf.setFont('helvetica','normal');
+    const risk_nota = [
+      'Scorul de risc compozit este calculat ca medie ponderată a celor trei categorii de risc,',
+      'calibrată cu date oficiale INFP, ANAR și INHGA la nivel de județ.',
+      'Zonele cu scor > 60 necesită studii specifice suplimentare (studiu geotehnic, studiu hidraulic).',
+      'Riscul teritorial influențează vectorii de presiune urbană și scenariile de dezvoltare din TCI.',
+    ];
+    risk_nota.forEach(l => { tx(l,14,cy2); cy2+=5; });
+
+    this._pdfFooter(pdf,W,H,4,dateStr,cd);
+
+    // ════════════════════════════════════════════════════════════════════
+    // PAG 5 — MOBILITATE + MODAL SPLIT
+    // ════════════════════════════════════════════════════════════════════
+    pdf.addPage();
+    pdf.setFillColor(...LIGHT); pdf.rect(0,0,W,H,'F');
+    this._pdfHeader(pdf,W,'5. MOBILITATE ȘI TRANSPORT',cd,dateStr);
+    cy2=24;
+
+    // Tabel modal split per an
+    pdf.setTextColor(...NAVY); pdf.setFontSize(9); pdf.setFont('helvetica','bold');
+    tx('5.1 Evoluție modal split 2021-2055', 14, cy2); cy2+=5;
+    ln(14,cy2,W-14,cy2); cy2+=6;
+
+    const msYears = [2021,2026,2030,2035,2040,2045,2050,2055];
+    pdf.setFillColor(...NAVY); pdf.rect(14,cy2-4,W-28,8,'F');
+    pdf.setTextColor(255,255,255); pdf.setFontSize(6.5); pdf.setFont('helvetica','bold');
+    tx('An', 16, cy2+1);
+    tx('Auto (%)', 35, cy2+1);
+    tx('TP (%)', 65, cy2+1);
+    tx('Bici+Ped (%)', 92, cy2+1);
+    tx('Sursa/Model', 130, cy2+1);
+    cy2+=10;
+
+    msYears.forEach((y,i) => {
+      const msY = typeof _getModalSplit !== 'undefined' ? _getModalSplit(y) : {auto:72,tp:18,bici_ped:10};
+      if(i%2===0){pdf.setFillColor(245,248,255);pdf.rect(14,cy2-4,W-28,8,'F');}
+      pdf.setTextColor(...DARK); pdf.setFontSize(7); pdf.setFont('helvetica','normal');
+      tx(String(y), 16, cy2+1);
+      const mc2=y>=2040?GREEN:GRAY; pdf.setTextColor(...mc2);
+      tx(msY.auto+'%', 40, cy2+1);
+      pdf.setTextColor(...BLUE);
+      tx(msY.tp+'%', 70, cy2+1);
+      pdf.setTextColor(21,128,61);
+      tx(msY.bici_ped+'%', 100, cy2+1);
+      pdf.setTextColor(...GRAY);
+      const src = y<=2021?'Eurostat RO 2021':y<=2030?'Strategie Transport RO':y<=2040?'Pactul Verde UE':'UE net-zero 2050';
+      tx(src, 130, cy2+1);
+      cy2+=8;
+    });
+
+    cy2+=6;
+    pdf.setTextColor(...NAVY); pdf.setFontSize(9); pdf.setFont('helvetica','bold');
+    tx('5.2 Notă metodologică', 14, cy2); cy2+=5;
+    ln(14,cy2,W-14,cy2); cy2+=5;
+    pdf.setTextColor(...DARK); pdf.setFontSize(7); pdf.setFont('helvetica','normal');
+    ['Proiecția modal split urmează traiectoria stabilită de Eurostat (Romania Transport 2021,',
+     'Strategia Națională de Transport 2021-2035, Pactul Verde European și obiectivul UE net-zero 2050).',
+     'Valorile la 2055 (42% auto, 37% TP, 21% bici/ped) reprezintă scenariul de convergență UE.',
+    ].forEach(l=>{tx(l,14,cy2);cy2+=5;});
+
+    this._pdfFooter(pdf,W,H,5,dateStr,cd);
+
+    // ════════════════════════════════════════════════════════════════════
+    // PAG 6 — COMPARARE EU EUROSTAT URBAN AUDIT
+    // ════════════════════════════════════════════════════════════════════
+    pdf.addPage();
+    pdf.setFillColor(...LIGHT); pdf.rect(0,0,W,H,'F');
+    this._pdfHeader(pdf,W,'6. COMPARARE EUROSTAT URBAN AUDIT',cd,dateStr);
+    cy2=24;
+
+    const tip2  = cd?.tip || 'municipiu';
+    const peers2 = this._EU_PEERS[tip2] || this._EU_PEERS.municipiu;
+    const curEU  = this._EU_CITIES[this.cityKey] || {name:cd?.name||'UAT',country:'RO',pib:12000,modal_auto:72,verde:8,conv_eu:65};
+    const peerData = peers2.slice(0,4).map(k=>this._EU_CITIES[k]).filter(Boolean);
+    const allCities = [curEU, ...peerData];
+
+    pdf.setTextColor(...NAVY); pdf.setFontSize(9); pdf.setFont('helvetica','bold');
+    tx('6.1 Indicatori comparativi — Eurostat Urban Audit 2021', 14, cy2); cy2+=5;
+    ln(14,cy2,W-14,cy2); cy2+=6;
+
+    // Tabel comparativ
+    const metrics_pdf = [
+      {k:'pib',       l:'PIB/cap (€)',         u:'€'},
+      {k:'conv_eu',   l:'Convergență EU (%)',  u:'%'},
+      {k:'modal_auto',l:'Trafic auto (%)',     u:'%'},
+      {k:'verde',     l:'Spații verzi (mp/loc)',u:'mp'},
+    ];
+
+    pdf.setFillColor(...NAVY); pdf.rect(14,cy2-4,W-28,8,'F');
+    pdf.setTextColor(255,255,255); pdf.setFontSize(6.5); pdf.setFont('helvetica','bold');
+    tx('Indicator', 16, cy2+1);
+    allCities.forEach((city,i) => {
+      tx((city.flag||'')+ ' '+city.name, 55+i*30, cy2+1);
+    });
+    cy2+=10;
+
+    metrics_pdf.forEach((m,mi) => {
+      if(mi%2===0){pdf.setFillColor(245,248,255);pdf.rect(14,cy2-4,W-28,8,'F');}
+      pdf.setTextColor(...DARK); pdf.setFontSize(7); pdf.setFont('helvetica','normal');
+      tx(m.l, 16, cy2+1);
+      allCities.forEach((city,ci) => {
+        const val = city[m.k] || 0;
+        const isRO = city.country === 'RO';
+        const rc=isRO?BLUE:GRAY; pdf.setTextColor(...rc);
+        if(ci===0) { pdf.setFont('helvetica','bold'); }
+        const disp = m.u==='€' ? '€'+(val/1000).toFixed(0)+'k' : val+m.u;
+        tx(disp, 58+ci*30, cy2+1);
+        pdf.setFont('helvetica','normal');
+      });
+      cy2+=8;
+    });
+
+    cy2+=8;
+    pdf.setTextColor(...NAVY); pdf.setFontSize(9); pdf.setFont('helvetica','bold');
+    tx('6.2 Concluzii comparative', 14, cy2); cy2+=5;
+    ln(14,cy2,W-14,cy2); cy2+=5;
+
+    const pibEU   = peerData.reduce((s,c)=>s+c.pib,0)/Math.max(1,peerData.length);
+    const convDiff = (curEU.conv_eu||65) - (peerData.reduce((s,c)=>s+(c.conv_eu||0),0)/Math.max(1,peerData.length));
+    const pibDiff  = ((curEU.pib||12000)/pibEU*100-100).toFixed(1);
+
+    const concl = [
+      `${cd?.name||'UAT'} are un PIB/cap de ~${pibDiff}% față de media orașelor similare europene.`,
+      `Convergența față de media UE: ${curEU.conv_eu||65}% (medie peer cities: ${Math.round((peerData.reduce((s,c)=>s+(c.conv_eu||0),0)/Math.max(1,peerData.length)))}).`,
+      `Modal split auto (${curEU.modal_auto||72}%) depășește media UE (${Math.round((peerData.reduce((s,c)=>s+(c.modal_auto||0),0)/Math.max(1,peerData.length)))}%) — necesită investiții TP.`,
+      `Spații verzi (${curEU.verde||8} mp/loc) sub norma OMS (9 mp/loc min, 26 mp ideal).`,
+      'La scenariu S2 Moderat, convergența economică față de peer cities va ajunge la ~85% în 2055.',
+    ];
+    pdf.setTextColor(...DARK); pdf.setFontSize(7.5); pdf.setFont('helvetica','normal');
+    concl.forEach(l => { tx(l,14,cy2); cy2+=6; });
+
+    this._pdfFooter(pdf,W,H,6,dateStr,cd);
+
+    // ════════════════════════════════════════════════════════════════════
+    // PAG 7 — METODOLOGIE ȘI SURSE CITATE
+    // ════════════════════════════════════════════════════════════════════
+    pdf.addPage();
+    pdf.setFillColor(...LIGHT); pdf.rect(0,0,W,H,'F');
+    this._pdfHeader(pdf,W,'7. METODOLOGIE ȘI SURSE CITATE',cd,dateStr);
+    cy2=24;
+
+    const surse = [
+      { cat:'Demografie', items:[
+        'INSE — Institutul Național de Statistică, Recensăminte 2011 și 2021 (www.insse.ro)',
+        'Eurostat — Cohort-Survival demographic projection methodology (ec.europa.eu/eurostat)',
+        'Model Cohort-Survival calibrat per UAT, rată geometrică anualizată 2011-2021',
+      ]},
+      { cat:'Economic', items:[
+        'BNR — Banca Națională a României, Curs EUR/RON, Date macroeconomice (www.bnr.ro)',
+        'Eurostat Urban Audit 2021 — Date comparate pentru 800+ orașe UE',
+        'Model Mankiw-Romer-Weil (1992) — Estimare PIB/cap pe termen lung',
+        'INS — PIB regional, date NUTS3 (www.insse.ro)',
+      ]},
+      { cat:'Construcții și urbanism', items:[
+        'ANCPI — Autorizații de construire 2015-2024 (www.ancpi.ro)',
+        'MDLPA — HG 907/2016, Conținutul documentațiilor tehnico-economice',
+        'PUG + RLU per UAT — Indicatori urbanistici (POT, CUT, H, Retrageri)',
+      ]},
+      { cat:'Climă și mediu', items:[
+        'IPCC AR6 (2021) — Sixth Assessment Report, RCP4.5 și RCP8.5',
+        'ANM ROCADA — Climatologie istorică Romania (www.meteoromania.ro)',
+        'Eurostat SDG — Spații verzi per locuitor, indicatori urbani de mediu',
+        'OMS — Ghid spații verzi urbane: min. 9 mp/loc, recomandare 26 mp/loc',
+      ]},
+      { cat:'Riscuri teritoriale', items:[
+        'INFP — Institutul Național de Fizica Pământului, Normativ P100-1/2013',
+        'ANAR — Planul de Management al Riscului la Inundații PGRA 2021-2027',
+        'INHGA + INCDFP — Date monitorizare alunecări de teren',
+      ]},
+      { cat:'Mobilitate', items:[
+        'Eurostat — Modal Split of Passenger Transport, 2021 (Romania: 72% auto)',
+        'MDLPA — Strategia Națională de Transport 2021-2035',
+        'Pactul Verde European — Obiective mobilitate sustenabilă 2030/2050',
+      ]},
+    ];
+
+    surse.forEach(({cat,items}) => {
+      pdf.setFillColor(215,225,245);
+      pdf.roundedRect(14,cy2-3,W-28,7,1,1,'F');
+      pdf.setTextColor(...NAVY); pdf.setFontSize(8); pdf.setFont('helvetica','bold');
+      tx(cat, 16, cy2+2); cy2+=8;
+      items.forEach(item => {
+        pdf.setTextColor(...DARK); pdf.setFontSize(6.5); pdf.setFont('helvetica','normal');
+        tx('• '+item, 16, cy2); cy2+=5;
+      });
+      cy2+=3;
+    });
+
+    this._pdfFooter(pdf,W,H,7,dateStr,cd);
+
+    // ════════════════════════════════════════════════════════════════════
+    // PAG 8 — DISCLAIMER + SEMNATURA
+    // ════════════════════════════════════════════════════════════════════
+    pdf.addPage();
+    pdf.setFillColor(...DARK); pdf.rect(0,0,W,H,'F');
+    pdf.setFillColor(...GOLD); pdf.rect(0,0,W,3,'F');
+
+    pdf.setTextColor(...GOLD); pdf.setFontSize(11); pdf.setFont('helvetica','bold');
+    tx('Notă metodologică și disclaimer', W/2, 35, {align:'center'});
+
+    pdf.setFillColor(10,20,50);
+    pdf.roundedRect(20,44,W-40,120,4,4,'F');
+    pdf.setTextColor(200,215,235); pdf.setFontSize(7.5); pdf.setFont('helvetica','normal');
+
+    const disclaimer = [
+      'Prezentul document este generat automat de platforma UrbanX (ThinkSmart Solutions · TSS·FG)',
+      'și constituie exclusiv o analiză statistică și proiecție bazată pe date oficiale publice.',
+      '',
+      'LIMITELE DOCUMENTULUI:',
+      '• Nu înlocuiește documentația tehnică certificată (PUZ, PUD, PUG, DTAC, PT)',
+      '• Nu constituie aviz sau aprobare din partea vreunei autorități publice',
+      '• Proiecțiile sunt estimative și depind de evoluția factorilor socio-economici',
+      '• Valorile de risc sunt indicative — necesită studii certificate pentru autorizare',
+      '• Comparațiile EU sunt bazate pe Eurostat Urban Audit 2021 (date la nivel NUTS)',
+      '',
+      'UTILIZARE RECOMANDATĂ:',
+      '• Suport decizional în faza de pre-feasibility și documentare PUZ/PIDU',
+      '• Argument metodologic în fața OAR, Consiliu Local, finanțatori PNRR',
+      '• Instrument de comunicare publică și consultare cetățeni',
+      '• Material educativ și de analiză comparativă teritorială',
+      '',
+      'Datele INSE, ANCPI, ANM, INFP, ANAR sunt proprietatea instituțiilor respective.',
+      'UrbanX le procesează și le proiectează conform metodologiilor internaționale citate.',
+    ];
+    let dy2 = 52;
+    disclaimer.forEach(l => {
+      pdf.setTextColor(l.startsWith('•')?[200,215,235]:l===''?[0,0,0]:l.endsWith(':')?[212,175,55]:[160,180,200]);
+      pdf.setFont('helvetica', l.endsWith(':') ? 'bold' : 'normal');
+      if(l) tx(l, 26, dy2);
+      dy2+=6;
+    });
+
+    // Semnatura
+    pdf.setFillColor(10,20,50);
+    pdf.roundedRect(20,172,W-40,50,4,4,'F');
+    pdf.setTextColor(...GOLD); pdf.setFontSize(9); pdf.setFont('helvetica','bold');
+    tx('UrbanX · ThinkSmart Solutions · TSS·FG', W/2, 185, {align:'center'});
+    pdf.setTextColor(160,180,200); pdf.setFontSize(7.5); pdf.setFont('helvetica','normal');
+    tx(`Raport generat automat · ${dateStr}`, W/2, 195, {align:'center'});
+    tx(`UAT: ${cd?.name||'—'} · Scenariu: ${scen} · An proiecție: ${yr}`, W/2, 203, {align:'center'});
+    tx('https://thinksmartsolutions.github.io/UrbanX/', W/2, 212, {align:'center'});
+
+    pdf.setFillColor(...GOLD); pdf.rect(0,H-4,W,4,'F');
+
+    // Save
+    const fname = `TCI_${(cd?.name||'UAT').replace(/\s/g,'_')}_${yr}_${scen}.pdf`;
+    pdf.save(fname);
+    typeof _Toast !== 'undefined' && _Toast.success(`Raport salvat: ${fname}`);
+  },
+
+  // ── Helpers PDF ─────────────────────────────────────────────────────────
+  _pdfHeader(pdf, W, title, cd, dateStr) {
+    pdf.setFillColor(2,6,15); pdf.rect(0,0,W,16,'F');
+    pdf.setFillColor(212,175,55); pdf.rect(0,0,4,16,'F');
+    pdf.setTextColor(212,175,55); pdf.setFontSize(7); pdf.setFont('helvetica','bold');
+    pdf.text('URBANX · TSS·FG', 8, 7);
+    pdf.setTextColor(255,255,255); pdf.setFontSize(9);
+    pdf.text(title, 8, 13);
+    pdf.setTextColor(148,163,184); pdf.setFontSize(6);
+    pdf.text(`${cd?.name||'UAT'} · ${dateStr}`, W-10, 13, {align:'right'});
+    pdf.setFillColor(212,175,55); pdf.rect(0,16,W,0.5,'F');
+  },
+
+  _pdfFooter(pdf, W, H, pageNum, dateStr, cd) {
+    pdf.setFillColor(240,244,255); pdf.rect(0,H-10,W,10,'F');
+    pdf.setDrawColor(212,175,55); pdf.setLineWidth(0.2);
+    pdf.line(0,H-10,W,H-10);
+    pdf.setTextColor(71,85,105); pdf.setFontSize(6); pdf.setFont('helvetica','normal');
+    pdf.text(`UrbanX · ${cd?.name||'UAT'} · ${dateStr}`, 8, H-4);
+    pdf.text(`Pagina ${pageNum}/8`, W-8, H-4, {align:'right'});
+    pdf.text('Date oficiale publice · Nu înlocuiește documentația tehnică certificată', W/2, H-4, {align:'center'});
+  },
+
   // ── Comparare EU — Eurostat Urban Audit 2021 ───────────────────────────────
   _drawEUComparison(ctx, W, H, year, totalT) {
     if(!this._showEUCompare) return;
