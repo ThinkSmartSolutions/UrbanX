@@ -1,13 +1,11 @@
 # .github/workflows/spatial-pipeline.yml
-# Rulează automat în fiecare duminică la 02:00 UTC
-# Sau manual din GitHub Actions → "Run workflow"
 
 name: Romania Spatial Data Pipeline
 
 on:
   schedule:
-    - cron: '0 2 * * 0'   # Duminică 02:00 UTC
-  workflow_dispatch:        # și manual oricând
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
 
 jobs:
   ingest:
@@ -15,23 +13,61 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Python setup
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install requests geopandas shapely
+        run: pip install requests geopandas shapely supabase
 
-      - name: Run spatial pipeline
+      - name: Run pipeline
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: python romania_spatial_pipeline.py
 
-      - name: Upload export as artifact
+      # ── VERIFICARE 1: numără records în Supabase după insert ──────────
+      - name: Verify Supabase record count
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          python3 - << 'PYEOF'
+          import requests, os, sys
+          url = os.environ['SUPABASE_URL']
+          key = os.environ['SUPABASE_SERVICE_KEY']
+          r = requests.get(
+            f'{url}/rest/v1/lmi_romania?select=count',
+            headers={'apikey':key,'Authorization':f'Bearer {key}','Prefer':'count=exact'}
+          )
+          count = int(r.headers.get('Content-Range','0/0').split('/')[-1])
+          print(f'✅ Supabase lmi_romania: {count} records')
+          if count < 100:
+            print('❌ EROARE: prea puține records — pipeline a eșuat parțial')
+            sys.exit(1)
+          PYEOF
+
+      # ── VERIFICARE 2: salvează raport ca artifact ─────────────────────
+      - name: Upload pipeline report
         uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: lmi-romania-${{ github.run_number }}
-          path: lmi_romania_export.json
+          name: pipeline-report-${{ github.run_number }}
+          path: |
+            lmi_romania_export.json
+            pipeline_report.json
           retention-days: 30
+
+      # ── VERIFICARE 3: notificare email dacă eșuează ───────────────────
+      - name: Notify on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `❌ Spatial Pipeline Failed — Run #${context.runNumber}`,
+              body: `Pipeline-ul de date spațiale a eșuat.\n\n**Run:** ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}\n\nVerificați logurile și reluați manual din Actions → Run workflow.`,
+              labels: ['pipeline', 'bug']
+            });

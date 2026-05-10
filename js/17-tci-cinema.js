@@ -372,6 +372,12 @@ const TCI = {
             ].map(it=>`<div style="display:flex;align-items:center;gap:4px;margin-bottom:2px"><div style="width:8px;height:6px;background:${it.c};border-radius:1px;flex-shrink:0"></div><span style="font-size:7px;color:rgba(180,200,220,0.7)">${it.l}</span></div>`).join('')}
             <div style="font-size:6px;color:rgba(100,120,150,0.45);margin-top:3px">INS · Eurostat · ANCPI · Model TSS·FG</div>
           </div>
+          <!-- STATUS DATE SURSE -->
+          <div style='border-top:1px solid rgba(255,255,255,0.06);padding-top:5px;margin-top:2px'>
+            <div style='font-size:6.5px;font-weight:700;color:rgba(148,163,184,0.5);margin-bottom:3px'>STATUS SURSE DATE</div>
+            <div id='tci-data-status' style='font-size:7px;line-height:1.6;color:rgba(148,163,184,0.5)'>verificare...</div>
+          </div>
+          </div>
         </div>
       </div>
 
@@ -408,6 +414,7 @@ const TCI = {
     window.addEventListener('resize', () => this._resizeCv());
     this._updateHeader();
     this._updateKPIs();
+    setTimeout(() => this._checkDataStatus(), 2000);
     this._updateNarCard('', '', '');
   },
 
@@ -481,6 +488,54 @@ const TCI = {
 
     const msg = msgs[sceneId] || msgs['s4'];
     ex.textContent = msg;
+  },
+
+  // ── STATUS DATE — verificare vizuală că sursele sunt active ──────────
+  async _checkDataStatus() {
+    const el = document.getElementById('tci-data-status');
+    if(!el) return;
+
+    const checks = [];
+
+    // 1. Supabase LMI
+    try {
+      const url  = window.SUPABASE_URL;
+      const key  = window.SUPABASE_ANON_KEY;
+      if(url && key) {
+        const r = await fetch(`${url}/rest/v1/lmi_romania?select=count`,
+          {headers:{'apikey':key,'Authorization':`Bearer ${key}`,'Prefer':'count=exact'},
+           signal:AbortSignal.timeout(4000)});
+        const count = parseInt(r.headers.get('Content-Range')?.split('/')[1]||'0');
+        checks.push(count > 100
+          ? `<span style="color:#22c55e">✅ LMI Supabase: ${count.toLocaleString()} monumente</span>`
+          : `<span style="color:#f59e0b">⚠️ LMI Supabase: ${count} (puțin)</span>`);
+      } else {
+        checks.push(`<span style="color:#6b7280">⬜ LMI Supabase: neconfigurat</span>`);
+      }
+    } catch(e) {
+      checks.push(`<span style="color:#ef4444">❌ LMI Supabase: eroare</span>`);
+    }
+
+    // 2. Mapbox SearchBox
+    try {
+      const token = mapboxgl?.accessToken;
+      const r = await fetch(
+        `https://api.mapbox.com/search/searchbox/v1/category/cemetery?bbox=27,47,28,48&limit=1&access_token=${token}`,
+        {signal:AbortSignal.timeout(4000)});
+      checks.push(r.ok
+        ? `<span style="color:#22c55e">✅ Mapbox POI: activ</span>`
+        : `<span style="color:#ef4444">❌ Mapbox POI: ${r.status}</span>`);
+    } catch(e) {
+      checks.push(`<span style="color:#ef4444">❌ Mapbox POI: timeout</span>`);
+    }
+
+    // 3. Zone constrângeri încărcate
+    const bufsCount = this._constraints?.bufs?.length || 0;
+    checks.push(bufsCount > 0
+      ? `<span style="color:#22c55e">✅ Constrângeri: ${bufsCount} zone excluse</span>`
+      : `<span style="color:#6b7280">⬜ Constrângeri: în așteptare</span>`);
+
+    el.innerHTML = checks.join('<br>');
   },
 
   _updateKPIs() {

@@ -365,3 +365,32 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+# ── RAPORT FINAL — salvat ca JSON pentru GitHub Action artifact ──────────────
+def write_report(records, start_time):
+    import time
+    report = {
+        'timestamp':     datetime.utcnow().isoformat() + 'Z',
+        'duration_sec':  round(time.time() - start_time, 1),
+        'total_records': len(records),
+        'by_source': {
+            'CIMEC':    len([r for r in records if r.get('source')=='CIMEC']),
+            'OSM':      len([r for r in records if r.get('source')=='OSM']),
+            'Wikidata': len([r for r in records if r.get('source')=='Wikidata']),
+        },
+        'by_layer': {
+            'monumente': len([r for r in records if r.get('layer')=='monumente']),
+            'zone':      len([r for r in records if r.get('layer')=='zone']),
+            'situri':    len([r for r in records if r.get('layer')=='situri']),
+            'heritage':  len([r for r in records if r.get('layer')=='heritage']),
+        },
+        'status': 'SUCCESS' if len(records) > 100 else 'PARTIAL',
+    }
+    with open('pipeline_report.json', 'w') as f:
+        json.dump(report, f, indent=2)
+    print(f"\n{'='*40}")
+    print(f"STATUS: {report['status']}")
+    print(f"Records: {report['total_records']} în {report['duration_sec']}s")
+    print(f"CIMEC: {report['by_source']['CIMEC']} | OSM: {report['by_source']['OSM']} | Wikidata: {report['by_source']['Wikidata']}")
+    return report
