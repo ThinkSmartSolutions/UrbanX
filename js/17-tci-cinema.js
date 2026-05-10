@@ -291,13 +291,14 @@ const TCI = {
         <div id="tci-left" style="padding:10px;display:flex;flex-direction:column;gap:8px;"></div>
       </div>
 
-      <!-- PANEL DREAPTA: colapsibil, inchis by default -->
-      <div id="tci-rpanel" style="position:absolute;right:0;top:48px;bottom:62px;width:0;pointer-events:all;background:rgba(4,10,24,0.88);backdrop-filter:blur(12px);border-left:1px solid rgba(255,255,255,0.06);overflow:hidden;z-index:10;transition:width .25s ease;">
-        <div id="tci-right" style="padding:10px;width:185px;"></div>
+      <!-- PANEL DREAPTA: deschis by default, scrollabil -->
+      <div id="tci-rpanel" style="position:absolute;right:0;top:48px;bottom:62px;width:200px;pointer-events:all;background:rgba(4,10,24,0.92);backdrop-filter:blur(14px);border-left:1px solid rgba(255,255,255,0.07);overflow:hidden;z-index:10;transition:width .2s ease;">
+        <div id="tci-right" style="padding:8px;width:200px;height:100%;overflow-y:auto;box-sizing:border-box;"></div>
       </div>
       <!-- Buton toggle dreapta -->
-      <button id="tci-rtoggle" onclick="TCI._toggleRight()" style="position:absolute;right:0;top:50%;transform:translateY(-50%);z-index:11;background:rgba(4,10,24,0.85);border:1px solid rgba(255,255,255,0.1);border-right:none;border-radius:6px 0 0 6px;color:rgba(148,163,184,0.6);padding:8px 5px;font-size:10px;cursor:pointer;writing-mode:vertical-rl;pointer-events:all;transition:right .25s ease;">
-        DATE LIVE ▸
+      <button id="tci-rtoggle" onclick="TCI._toggleRight()" title="Arată/Ascunde panel"
+        style="position:absolute;right:200px;top:50%;transform:translateY(-50%);z-index:11;background:rgba(4,10,24,0.85);border:1px solid rgba(255,255,255,0.1);border-right:none;border-radius:6px 0 0 6px;color:rgba(148,163,184,0.6);padding:8px 4px;font-size:9px;cursor:pointer;writing-mode:vertical-rl;pointer-events:all;transition:right .2s ease;">
+        ◂ DATE
       </button>
 
       <!-- NARRATIVE STRIP -->
@@ -321,7 +322,7 @@ const TCI = {
       </div>
 
       <!-- BOTTOM BAR -->
-      <div style="position:absolute;bottom:0;left:185px;right:0;pointer-events:all;background:rgba(4,10,24,0.9);backdrop-filter:blur(12px);border-top:1px solid rgba(212,175,55,0.15);padding:8px 14px;display:flex;align-items:center;gap:10px;z-index:10;">
+      <div style="position:absolute;bottom:0;left:185px;right:200px;pointer-events:all;background:rgba(4,10,24,0.9);backdrop-filter:blur(12px);border-top:1px solid rgba(212,175,55,0.15);padding:8px 14px;display:flex;align-items:center;gap:10px;z-index:10;">
         <div id="tci-yr" style="font-size:24px;font-weight:900;color:#D4AF37;min-width:46px;">${this.startYear}</div>
         <div style="flex:1;position:relative;">
           <input type="range" id="tci-scrub" min="${this.startYear}" max="2055" value="${this.startYear}" step="1"
@@ -395,23 +396,201 @@ const TCI = {
   _buildRightPanel() {
     const el = document.getElementById('tci-right'); if(!el) return;
     el.innerHTML = `
-      <div style="font-size:8px;font-weight:700;color:#D4AF37;letter-spacing:.08em;margin-bottom:8px">DATE PROIECȚIE LIVE</div>
+      <div style="font-size:8px;font-weight:700;color:#D4AF37;letter-spacing:.08em;margin-bottom:6px">DATE LIVE</div>
       <div id="tci-kpis-r"></div>
-      <div id="tci-risk-r" style="margin-top:8px;"></div>
-      <div style="margin-top:10px;background:rgba(14,26,52,0.6);border-radius:7px;padding:8px;border:1px solid rgba(255,255,255,0.06);">
-        <div style="font-size:7.5px;font-weight:700;color:#D4AF37;margin-bottom:5px;">📋 DATE OFICIALE</div>
-        <div style="font-size:7px;color:rgba(148,163,184,0.75);line-height:1.8;">
-          Demografie: INSE 2021<br>
-          Model: Cohort-Survival (Eurostat)<br>
-          Construcții: ANCPI 2015-2024<br>
-          Clima: IPCC AR6 RCP4.5/8.5<br>
-          Riscuri: INFP · ANAR · INHGA<br>
-          Economic: BNR · Eurostat
+      <div id="tci-risk-r" style="margin-top:6px;"></div>
+
+      <!-- Grafic demografic mini -->
+      <div style="margin-top:8px;background:rgba(14,26,52,0.7);border-radius:7px;padding:8px;border:1px solid rgba(255,255,255,0.06);">
+        <div style="font-size:8px;font-weight:700;color:#D4AF37;margin-bottom:5px">📈 Proiecție demografică</div>
+        <canvas id="tci-chart-pop" width="165" height="70" style="width:100%;display:block;"></canvas>
+        <div style="font-size:6.5px;color:rgba(100,120,150,0.5);margin-top:3px">INSE · Cohort-Survival · 2021-2055</div>
+      </div>
+
+      <!-- EU Comparison -->
+      <div style="margin-top:8px;background:rgba(14,26,52,0.7);border-radius:7px;border:1px solid rgba(139,92,246,0.2);">
+        <div style="padding:7px 8px;display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:8px;font-weight:700;color:#a78bfa">⚖ Comparare EU</span>
+          <button onclick="TCI._showEUCompare=!TCI._showEUCompare;document.getElementById('tci-eu-body').style.display=TCI._showEUCompare?'block':'none';this.textContent=TCI._showEUCompare?'▲':'▼';"
+            style="background:none;border:none;color:rgba(148,163,184,0.6);cursor:pointer;font-size:10px;padding:0 4px;">▲</button>
         </div>
-        <div style="margin-top:6px;padding-top:5px;border-top:1px solid rgba(255,255,255,0.05);font-size:6.5px;color:rgba(212,175,55,0.6);font-style:italic;line-height:1.5;">
-          UrbanX — analiză statistică și proiecție bazată pe date oficiale publice. Nu înlocuiește documentația tehnică certificată.
+        <div id="tci-eu-body" style="padding:0 8px 8px;">
+          <div id="tci-eu-content"></div>
+          <div style="font-size:6px;color:rgba(100,120,150,0.4);margin-top:5px">Eurostat Urban Audit 2021 · proiectat per scenariu</div>
         </div>
+      </div>
+
+      <!-- Surse -->
+      <div style="margin-top:8px;padding:7px;background:rgba(14,26,52,0.5);border-radius:6px;font-size:6.5px;color:rgba(100,120,150,0.55);line-height:1.7;">
+        INSE · Eurostat · ANCPI · BNR<br>IPCC AR6 · ANM · INFP · ANAR<br>
+        <span style="color:rgba(212,175,55,0.5);font-style:italic">UrbanX · analiză statistică</span>
       </div>`;
+
+    // Dupa render, desenam graficul
+    setTimeout(() => this._drawDemoChart(), 200);
+  },
+
+  _drawDemoChart() {
+    const cv = document.getElementById('tci-chart-pop');
+    if(!cv) return;
+    const ctx = cv.getContext('2d');
+    const W = cv.width, H = cv.height;
+    ctx.clearRect(0,0,W,H);
+
+    // Fundal
+    ctx.fillStyle = 'rgba(4,10,24,0.01)';
+    ctx.fillRect(0,0,W,H);
+
+    const sY = this.startYear || 2026;
+    const years = [];
+    for(let y=sY;y<=2055;y+=3) years.push(y);
+
+    const scenColors = {S1:'#22c55e',S2:'#8b5cf6',S3:'#f59e0b',S4:'#38bdf8'};
+    const scens = ['S1','S2','S3','S4'];
+
+    // Asele
+    ctx.strokeStyle = 'rgba(148,163,184,0.2)';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.moveTo(20,5); ctx.lineTo(20,H-12); ctx.lineTo(W-5,H-12); ctx.stroke();
+
+    // Valori min/max pentru scala
+    let minP = Infinity, maxP = 0;
+    scens.forEach(sc => {
+      years.forEach(y => {
+        const d = typeof _getProjectionData !== 'undefined' ? _getProjectionData(y,sc,this.cityKey) : null;
+        const v = d?.demo?.value || this.cityData?.pop2021 || 0;
+        if(v < minP) minP=v; if(v > maxP) maxP=v;
+      });
+    });
+    const range = maxP - minP || 1;
+
+    // Linii per scenariu
+    scens.forEach((sc, si) => {
+      ctx.strokeStyle = scenColors[sc] + (sc === this.scenario ? 'ff' : '66');
+      ctx.lineWidth   = sc === this.scenario ? 2 : 1;
+      ctx.beginPath();
+      years.forEach((y, i) => {
+        const d = typeof _getProjectionData !== 'undefined' ? _getProjectionData(y,sc,this.cityKey) : null;
+        const v = d?.demo?.value || this.cityData?.pop2021 || 0;
+        const px = 22 + (i / (years.length-1)) * (W-28);
+        const py = H-14 - ((v-minP)/range) * (H-22);
+        i===0 ? ctx.moveTo(px,py) : ctx.lineTo(px,py);
+      });
+      ctx.stroke();
+
+      // Label scenariu
+      ctx.fillStyle = scenColors[sc] + (sc === this.scenario ? 'ff' : '88');
+      ctx.font = '6px sans-serif';
+      ctx.fillText(sc, W-18+si*0, 10+si*9);
+    });
+
+    // Marker an curent
+    const curT = (this.year - sY) / Math.max(1, 2055-sY);
+    const markerX = 22 + curT * (W-28);
+    ctx.strokeStyle = '#D4AF37';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([2,2]);
+    ctx.beginPath(); ctx.moveTo(markerX,5); ctx.lineTo(markerX,H-12); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Labels axe
+    ctx.fillStyle = 'rgba(148,163,184,0.45)';
+    ctx.font = '5px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(sY, 22, H-3);
+    ctx.fillText('2055', W-5, H-3);
+    ctx.fillText(this.year, markerX, H-3);
+
+    // Legenda scenarii (colț dreapta sus)
+    scens.forEach((sc,i) => {
+      const lx = W-36, ly = 6+i*9;
+      ctx.fillStyle = scenColors[sc];
+      ctx.fillRect(lx, ly, 12, 2);
+      ctx.fillStyle = 'rgba(148,163,184,0.6)';
+      ctx.textAlign = 'left';
+      ctx.fillText(sc, lx+14, ly+3);
+    });
+    ctx.textAlign = 'left';
+  },
+
+  _updateEUPanel(year, totalT) {
+    if(!this._showEUCompare) return;
+    const el = document.getElementById('tci-eu-content');
+    if(!el) return;
+
+    const cd  = this.cityData;
+    const tip = cd?.tip || 'municipiu';
+    const peer = this._EU_PEERS[tip] || this._EU_PEERS.municipiu;
+    const euKeys = peer.eu || ['miskolc','ruse'];
+    const roKeys = (peer.ro || ['iasi','brasov']).filter(k => k !== this.cityKey).slice(0,2);
+
+    const curEU = this._EU_CITIES[this._getEUCityKey(this.cityKey)] || {
+      name:cd?.name||'UAT', country:'RO', flag:'🇷🇴',
+      pop:cd?.pop2021||100000, pib:12000, modal_auto:72, verde:8, conv_eu:65,
+    };
+
+    // Construim lista: curent + 2 EU + 2 RO
+    const cities = [
+      { key:this.cityKey, data:curEU, isCurrent:true, isRO:true },
+      ...euKeys.map(k => ({ key:k, data:this._EU_CITIES[k], isCurrent:false, isRO:false })).filter(x=>x.data),
+      ...roKeys.map(k => {
+        const euK = this._getEUCityKey(k);
+        const euD = this._EU_CITIES[euK];
+        return { key:k, data:euD, isCurrent:false, isRO:true };
+      }).filter(x=>x.data),
+    ];
+
+    const metrics = [
+      { k:'pib',        l:'PIB/cap',   u:'€', fmt:(v)=>'€'+(v/1000).toFixed(0)+'k', good:true  },
+      { k:'conv_eu',    l:'Conv. EU',  u:'%', fmt:(v)=>v+'%',                        good:true  },
+      { k:'modal_auto', l:'Auto %',    u:'%', fmt:(v)=>v+'%',                        good:false },
+      { k:'verde',      l:'Verdeață',  u:'mp',fmt:(v)=>v+'mp',                       good:true  },
+    ];
+
+    // Proiectam per totalT
+    const proj = (city, key) => {
+      const isRO = city.isRO;
+      const f = isRO ? 1+totalT*0.55 : 1+totalT*0.35;
+      const base = city.data[key] || 0;
+      if(key==='pib')        return Math.round(base * f);
+      if(key==='conv_eu')    return Math.min(130, Math.round(base * (1+totalT*(isRO?0.35:0.08))));
+      if(key==='modal_auto') return Math.max(28, Math.round(base - totalT*(isRO?30:18)));
+      if(key==='verde')      return Math.round(base * (1+totalT*(isRO?0.6:0.3)));
+      return base;
+    };
+
+    const maxVals = {pib:50000, conv_eu:130, modal_auto:80, verde:40};
+
+    el.innerHTML = `
+      <!-- Header orase -->
+      <div style="display:grid;grid-template-columns:repeat(${cities.length},1fr);gap:2px;margin-bottom:6px;">
+        ${cities.map(city=>`
+          <div style="text-align:center;">
+            <div style="font-size:9px">${city.data.flag||''}</div>
+            <div style="font-size:7.5px;font-weight:${city.isCurrent?700:500};color:${city.isCurrent?'#D4AF37':city.isRO?'#60a5fa':'rgba(200,215,235,0.8)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${city.data.name}</div>
+            <div style="font-size:6px;color:rgba(100,120,150,0.5)">${city.data.country}</div>
+          </div>`).join('')}
+      </div>
+
+      ${metrics.map(m=>`
+        <div style="margin-bottom:6px;">
+          <div style="font-size:7px;color:rgba(148,163,184,0.6);margin-bottom:2px">${m.l} <span style="color:rgba(100,120,150,0.4)">${m.u}</span></div>
+          <div style="display:grid;grid-template-columns:repeat(${cities.length},1fr);gap:2px;">
+            ${cities.map(city => {
+              const v   = proj(city, m.k);
+              const pct = Math.min(1, v / maxVals[m.k]);
+              const good = m.good ? pct > 0.6 : pct < 0.5;
+              const col = city.isCurrent ? '#D4AF37'
+                        : good ? '#22c55e' : pct > 0.35 ? '#f59e0b' : '#ef4444';
+              return `<div style="text-align:center;">
+                <div style="background:rgba(255,255,255,0.05);border-radius:2px;height:4px;margin-bottom:2px;">
+                  <div style="width:${Math.round(pct*100)}%;height:100%;background:${col};border-radius:2px;"></div>
+                </div>
+                <div style="font-size:7px;font-weight:${city.isCurrent?700:400};color:${col}">${m.fmt(v)}</div>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>`).join('')}`;
   },
 
   // ── Layere minime pe harta existenta ─────────────────────────────────────
@@ -1287,10 +1466,10 @@ const TCI = {
     const btn   = document.getElementById('tci-rtoggle');
     if(!panel) return;
     const isOpen = panel.style.width === '185px';
-    panel.style.width = isOpen ? '0' : '185px';
+    panel.style.width = isOpen ? '0' : '200px';
     if(btn) {
       btn.textContent = isOpen ? 'DATE LIVE ▸' : '◂ DATE LIVE';
-      btn.style.right = isOpen ? '0' : '185px';
+      btn.style.right = isOpen ? '0' : '200px';
     }
   },
 
@@ -2140,13 +2319,13 @@ const TCI = {
     return Object.keys(this._EU_CITIES).find(k => this._EU_CITIES[k].country === 'RO') || 'iasi';
   },
 
-  // Orase recomandate per tip UAT romanesc
+  // 2 EU + 2-3 RO per tip UAT
   _EU_PEERS: {
-    capitala:           ['brno','wroclaw','vilnius','graz'],
-    municipiu_mare:     ['debrecen','plovdiv','miskolc','brno'],
-    municipiu_resedinta:['miskolc','ruse','ostrava','kaunas'],
-    municipiu:          ['miskolc','ruse','plovdiv','kaunas'],
-    oras:               ['ruse','miskolc','plovdiv','ostrava'],
+    capitala:           { eu:['brno','graz'],        ro:['cluj','timisoara','brasov'] },
+    municipiu_mare:     { eu:['debrecen','brno'],     ro:['timisoara','brasov','iasi'] },
+    municipiu_resedinta:{ eu:['miskolc','ruse'],      ro:['iasi','brasov','timisoara'] },
+    municipiu:          { eu:['ruse','miskolc'],      ro:['suceava','iasi','brasov']   },
+    oras:               { eu:['ruse','plovdiv'],      ro:['botosani','suceava']        },
   },
 
   // ── PARCEL RISK CARD — unic în lume ───────────────────────────────────────
