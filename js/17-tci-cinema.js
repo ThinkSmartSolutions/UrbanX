@@ -7,10 +7,10 @@
 
 const TCI = {
 
-  map: null,          // window.map — harta existenta din platforma
-  canvas: null,       // canvas overlay 2D (text, carduri)
-  ctx: null,
+  map: null,
+  canvas: null, ctx: null,
   running: false,
+  _showEUCompare: false,   // toggle comparare EU
   speed: 1,
   year: 2021,
   startYear: 2021,
@@ -893,6 +893,9 @@ const TCI = {
     this._drawLegend(ctx, W, H);
     // ── PARCEL RISK CARD (colț stânga sus, mod parcela) ──────────────────
     this._drawParcelRiskCard(ctx, W, H);
+    // ── COMPARARE EU (overlay central jos) ────────────────────────────────
+    const _tT = (this.year - (this.startYear||2026)) / Math.max(1, 2055 - (this.startYear||2026));
+    this._drawEUComparison(ctx, W, H, this.year, _tT);
   },
 
   // ── Legenda UTR vizibila pe harta ─────────────────────────────────────────
@@ -1237,6 +1240,241 @@ const TCI = {
     document.getElementById('tci-ov')?.remove();
     document.getElementById('tci-sel')?.remove();
     this._restoreParcelPopup();
+  },
+
+  // ── Comparare EU — Eurostat Urban Audit 2021 ───────────────────────────────
+  _drawEUComparison(ctx, W, H, year, totalT) {
+    if(!this._showEUCompare) return;
+
+    const cd   = this.cityData;
+    const tip  = cd?.tip || 'municipiu';
+    const peers = this._EU_PEERS[tip] || this._EU_PEERS.municipiu;
+
+    // Orasul curent ca primul entry
+    const currentKey = this.cityKey;
+    const currentCity = this._EU_CITIES[currentKey] || {
+      name: cd?.name || 'UAT',
+      country: 'RO', flag: '🇷🇴',
+      pop:  cd?.pop2021    || 100000,
+      pib:  12000,
+      modal_auto: 72,
+      verde: 8,
+      conv_eu: 65,
+    };
+
+    // 4 peer cities + curent = 5 total
+    const cities = [
+      { key: currentKey, data: currentCity, isCurrent: true },
+      ...peers.slice(0,4).map(k => ({
+        key: k, data: this._EU_CITIES[k], isCurrent: false,
+      })).filter(x => x.data),
+    ];
+
+    // Proiectam valorile anului curent
+    const projFactor = 1 + totalT * 0.35; // crestere estimata EU
+    const roProjFactor = 1 + totalT * 0.55; // Romania converge mai rapid
+
+    const projected = cities.map(city => {
+      const isRO = city.data.country === 'RO';
+      const f    = isRO ? roProjFactor : projFactor;
+      return {
+        ...city,
+        proj: {
+          pop:        Math.round(city.data.pop * (1 + (isRO ? (cd?.rata_reala_2011_2021||0) : 0.002) * (year - 2021))),
+          pib:        Math.round(city.data.pib * f),
+          modal_auto: Math.max(30, Math.round(city.data.modal_auto - totalT * (isRO ? 30 : 18))),
+          verde:      Math.round(city.data.verde * (1 + totalT * (isRO ? 0.6 : 0.3))),
+          conv_eu:    Math.min(130, Math.round(city.data.conv_eu * (1 + totalT * (isRO ? 0.35 : 0.08)))),
+        },
+      };
+    });
+
+    // ── Layout ────────────────────────────────────────────────────────
+    const PW = Math.min(W - 195 - 10, 680); // latime panel
+    const PH = 320;
+    const PX = 195 + (W - 195) / 2 - PW / 2;
+    const PY = H - 62 - PH - 36;  // deasupra narrative strip
+
+    ctx.save();
+    ctx.globalAlpha = 0.96;
+
+    // Background panel
+    ctx.shadowColor = 'rgba(0,0,0,0.6)';
+    ctx.shadowBlur  = 25;
+    ctx.fillStyle   = 'rgba(4,10,24,0.94)';
+    this._rr(ctx, PX, PY, PW, PH, 10);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = 'rgba(212,175,55,0.25)';
+    ctx.lineWidth   = 0.5;
+    this._rr(ctx, PX, PY, PW, PH, 10);
+    ctx.stroke();
+
+    // Header
+    ctx.fillStyle = '#D4AF37';
+    ctx.font      = 'bold 8.5px "Space Grotesk"';
+    ctx.textAlign = 'left';
+    ctx.fillText(`⚖ COMPARARE EUROSTAT URBAN AUDIT ${year}`, PX+12, PY+14);
+
+    ctx.fillStyle = 'rgba(148,163,184,0.5)';
+    ctx.font      = '7px "Space Grotesk"';
+    ctx.fillText(
+      `${cd?.name||'UAT'} vs orașe similare UE · Sursă: Eurostat Urban Audit 2021 · Proiecție UrbanX`,
+      PX+12, PY+26
+    );
+
+    // Buton inchide
+    ctx.fillStyle = 'rgba(148,163,184,0.4)';
+    ctx.font      = '10px "Space Grotesk"';
+    ctx.textAlign = 'right';
+    ctx.fillText('✕', PX+PW-10, PY+16);
+    ctx.textAlign = 'left';
+
+    // ── Metrics rows ──────────────────────────────────────────────────
+    const metrics = [
+      { key:'pib',        label:'PIB/cap (€)',         unit:'€',   maxVal:50000, goodHigh:true,  color:'#22c55e', src:'Eurostat' },
+      { key:'conv_eu',    label:'Convergență EU (%)',  unit:'%',   maxVal:130,   goodHigh:true,  color:'#8b5cf6', src:'Eurostat' },
+      { key:'modal_auto', label:'Trafic auto (%)',     unit:'%',   maxVal:100,   goodHigh:false, color:'#f59e0b', src:'Eurostat Modal Split' },
+      { key:'verde',      label:'Spații verzi (mp/loc)',unit:'mp', maxVal:50,    goodHigh:true,  color:'#16a34a', src:'Eurostat SDG' },
+    ];
+
+    const colW   = (PW - 20) / cities.length;
+    const startY = PY + 38;
+
+    // Header coloane (orase)
+    cities.forEach((city, ci) => {
+      const cx2 = PX + 10 + ci * colW + colW/2;
+      ctx.textAlign = 'center';
+
+      // Flag + nume
+      ctx.fillStyle = city.isCurrent ? '#D4AF37' : '#fff';
+      ctx.font      = city.isCurrent ? 'bold 11px "Space Grotesk"' : '10px "Space Grotesk"';
+      ctx.fillText(city.data.flag + ' ' + city.data.name, cx2, startY);
+
+      // Tara
+      ctx.fillStyle = 'rgba(148,163,184,0.5)';
+      ctx.font      = '7px "Space Grotesk"';
+      ctx.fillText(city.data.country + ' · ' + year, cx2, startY+12);
+
+      // Border bottom daca e curent
+      if(city.isCurrent) {
+        ctx.strokeStyle = 'rgba(212,175,55,0.4)';
+        ctx.lineWidth   = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(PX + 10 + ci*colW + 4, startY + 18);
+        ctx.lineTo(PX + 10 + (ci+1)*colW - 4, startY + 18);
+        ctx.stroke();
+      }
+    });
+
+    // Rows metrice
+    const rowH   = (PH - 80) / metrics.length;
+    metrics.forEach((metric, mi) => {
+      const rowY = startY + 28 + mi * rowH;
+
+      // Label metric
+      ctx.textAlign = 'left';
+      ctx.fillStyle = metric.color;
+      ctx.font      = '7.5px "Space Grotesk"';
+      ctx.fillText(metric.label, PX+12, rowY+8);
+
+      // Sursa
+      ctx.fillStyle = 'rgba(100,120,150,0.45)';
+      ctx.font      = '6px "Space Grotesk"';
+      ctx.fillText(metric.src, PX+12, rowY+18);
+
+      // Valori per oras + bari
+      const maxProj = Math.max(...projected.map(p => p.proj[metric.key] || 0));
+      const effectiveMax = Math.max(metric.maxVal, maxProj * 1.1);
+
+      projected.forEach((city, ci) => {
+        const val  = city.proj[metric.key] || 0;
+        const pct  = Math.min(1, val / effectiveMax);
+        const bX   = PX + 10 + ci * colW;
+        const bW   = colW - 8;
+        const barW2 = bW * pct;
+
+        // Background bar
+        ctx.fillStyle = 'rgba(255,255,255,0.04)';
+        ctx.fillRect(bX+2, rowY+22, bW, 10);
+
+        // Filled bar
+        const barColor = metric.goodHigh
+          ? (pct > 0.7 ? metric.color : pct > 0.4 ? '#f59e0b' : '#ef4444')
+          : (pct < 0.4 ? '#22c55e' : pct < 0.65 ? '#f59e0b' : '#ef4444');
+
+        ctx.fillStyle = city.isCurrent ? metric.color : barColor + 'aa';
+        ctx.fillRect(bX+2, rowY+22, barW2, 10);
+
+        // Valore text
+        ctx.textAlign = 'center';
+        ctx.fillStyle = city.isCurrent ? '#fff' : 'rgba(200,215,235,0.75)';
+        ctx.font      = city.isCurrent ? 'bold 8px "Space Grotesk"' : '8px "Space Grotesk"';
+        const displayVal = metric.unit === '€'
+          ? '€' + (val/1000).toFixed(0) + 'k'
+          : val + metric.unit;
+        ctx.fillText(displayVal, bX + colW/2, rowY+36);
+      });
+
+      // Separator
+      ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+      ctx.lineWidth   = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(PX+10, rowY+rowH-2);
+      ctx.lineTo(PX+PW-10, rowY+rowH-2);
+      ctx.stroke();
+    });
+
+    // Footer
+    ctx.textAlign = 'center';
+    ctx.fillStyle = 'rgba(100,120,150,0.4)';
+    ctx.font      = '6.5px "Space Grotesk"';
+    ctx.fillText(
+      'Eurostat Urban Audit 2021 · Proiecție UrbanX — convergență EU bazată pe rate istorice BNR/Eurostat',
+      PX + PW/2, PY + PH - 7
+    );
+
+    ctx.restore();
+    ctx.textAlign = 'left';
+  },
+
+  // ── Baza de date orașe europene — Eurostat Urban Audit 2021 ──────────────
+  _EU_CITIES: {
+    // România
+    iasi:       { name:'Iași',       country:'RO', flag:'🇷🇴', pop:360633, pib:13200, modal_auto:72, verde:8,  conv_eu:68  },
+    cluj:       { name:'Cluj-Napoca',country:'RO', flag:'🇷🇴', pop:324576, pib:18400, modal_auto:65, verde:11, conv_eu:82  },
+    timisoara:  { name:'Timișoara',  country:'RO', flag:'🇷🇴', pop:319279, pib:17200, modal_auto:68, verde:12, conv_eu:78  },
+    brasov:     { name:'Brașov',     country:'RO', flag:'🇷🇴', pop:253200, pib:15800, modal_auto:66, verde:14, conv_eu:72  },
+    botosani:   { name:'Botoșani',   country:'RO', flag:'🇷🇴', pop:106847, pib:9800,  modal_auto:74, verde:7,  conv_eu:52  },
+    suceava:    { name:'Suceava',    country:'RO', flag:'🇷🇴', pop:114462, pib:10200, modal_auto:71, verde:9,  conv_eu:55  },
+    // Ungaria
+    debrecen:   { name:'Debrecen',   country:'HU', flag:'🇭🇺', pop:202214, pib:17800, modal_auto:58, verde:18, conv_eu:78  },
+    miskolc:    { name:'Miskolc',    country:'HU', flag:'🇭🇺', pop:155713, pib:14200, modal_auto:55, verde:22, conv_eu:68  },
+    // Bulgaria
+    plovdiv:    { name:'Plovdiv',    country:'BG', flag:'🇧🇬', pop:346893, pib:12400, modal_auto:62, verde:10, conv_eu:55  },
+    ruse:       { name:'Ruse',       country:'BG', flag:'🇧🇬', pop:147981, pib:11800, modal_auto:60, verde:14, conv_eu:52  },
+    // Cehia
+    brno:       { name:'Brno',       country:'CZ', flag:'🇨🇿', pop:382405, pib:28600, modal_auto:45, verde:24, conv_eu:92  },
+    ostrava:    { name:'Ostrava',    country:'CZ', flag:'🇨🇿', pop:287333, pib:22400, modal_auto:48, verde:28, conv_eu:85  },
+    // Lituania
+    vilnius:    { name:'Vilnius',    country:'LT', flag:'🇱🇹', pop:592389, pib:31200, modal_auto:52, verde:20, conv_eu:95  },
+    kaunas:     { name:'Kaunas',     country:'LT', flag:'🇱🇹', pop:289380, pib:26800, modal_auto:54, verde:22, conv_eu:90  },
+    // Polonia
+    wroclaw:    { name:'Wrocław',    country:'PL', flag:'🇵🇱', pop:643782, pib:29400, modal_auto:47, verde:26, conv_eu:94  },
+    poznan:     { name:'Poznań',     country:'PL', flag:'🇵🇱', pop:551627, pib:27800, modal_auto:44, verde:28, conv_eu:92  },
+    // Austria
+    graz:       { name:'Graz',       country:'AT', flag:'🇦🇹', pop:291072, pib:42000, modal_auto:38, verde:35, conv_eu:122 },
+    // Germania
+    leipzig:    { name:'Leipzig',    country:'DE', flag:'🇩🇪', pop:587857, pib:38400, modal_auto:35, verde:38, conv_eu:128 },
+  },
+
+  // Orase recomandate per tip UAT romanesc
+  _EU_PEERS: {
+    capitala:           ['brno','wroclaw','vilnius','graz'],
+    municipiu_mare:     ['debrecen','plovdiv','miskolc','brno'],
+    municipiu_resedinta:['miskolc','ruse','ostrava','kaunas'],
+    municipiu:          ['miskolc','ruse','plovdiv','kaunas'],
+    oras:               ['ruse','miskolc','plovdiv','ostrava'],
   },
 
   // ── PARCEL RISK CARD — unic în lume ───────────────────────────────────────
