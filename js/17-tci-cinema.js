@@ -443,7 +443,7 @@ const TCI = {
     if(!c1||!c2) return;
     const el=document.getElementById('tci-cmp-out'); if(!el) return;
     const rows=[
-      ['Populație',           (d1.demo?.value||c1.pop2021||0).toLocaleString(),  (d2.demo?.value||c2.pop2021||0).toLocaleString()],
+      ['Populație',           ((d1?.demo)?.value||c1.pop2021||0).toLocaleString(),  ((d2?.demo)?.value||c2.pop2021||0).toLocaleString()],
       ['Rată anuală',         (c1.rata_reala_2011_2021||0).toFixed(2)+'%',        (c2.rata_reala_2011_2021||0).toFixed(2)+'%'],
       ['PIB/cap estimat',     '€'+((d1.housing?.pibCapProj||14200)/1000).toFixed(1)+'k', '€'+((d2.housing?.pibCapProj||14200)/1000).toFixed(1)+'k'],
       ['ESG Score',           (d1.esg?.total||51)+'/100',                         (d2.esg?.total||51)+'/100'],
@@ -614,6 +614,7 @@ const TCI = {
       const rate=(d.rata_reala_2011_2021||0).toFixed(2);
       const pib=Math.round((d.pop2021||100000)*0.04/1000);
       const isCapital=name==='Iași'||name==='Cluj-Napoca'||name==='Timișoara'||name==='Constanța';
+      const ms=(typeof _getModalSplit!=='undefined')?_getModalSplit(yr):{auto:72,tp:18,bici_ped:10};
 
       // Date REALE per oras
       const cityProfile = () => {
@@ -680,7 +681,7 @@ const TCI = {
          cam:fly([cx,cy],12.8,48,0,5500),
          chain:[fly([cx+0.006,cy-0.004],13.2,52,-18,6000,18000),fly([cx-0.004,cy+0.004],13.5,55,15,6000,38000),fly([cx,cy],14,58,-10,6000,58000),fly([cx,cy],13,50,0,5500,75000)],
          title:'🚊 Rețea Mobilitate — Trafic Live',
-         body:'TMZ rețea principală: estimat '+Math.round((d.pop2021||100000)*0.22)+' vehicule/zi. Tramvaie (roșu) · Autobuze (albastru) · Mașini (galben) animate în timp real. Modal split: auto '+ms?.auto+'% · TP '+(ms?.tp)+'%.',
+         body:'TMZ rețea principală: estimat '+Math.round((d.pop2021||100000)*0.22)+' vehicule/zi. Tramvaie (roșu) · Autobuze (albastru) · Mașini (galben) animate în timp real. Modal split: auto '+ms.auto+'% · TP '+(ms.tp)+'%.',
          src:'PMUD · PNRR Mobilitate · Eurostat Modal Split'},
 
         // S7 — Focus cartier
@@ -839,23 +840,29 @@ const TCI = {
 
   _updateBuildingHeight(yr) {
     const m=this.map; if(!m?.setPaintProperty) return;
-    const yF=Math.max(0,(yr-2025)/25);
+    const yF=Math.max(0,Math.min(1,(yr-2025)/25));
+
+    // Culori clare: albastru = existent, portocaliu = constructie, verde = finalizat nou
     try {
-      m.setPaintProperty('tci-bld-layer','fill-extrusion-height',[
-        'interpolate',['linear'],['get','height'],
-        0, 0,
-        5, 5+yF*2,
-        20, 20+yF*8,
-        50, 50+yF*20,
-        100, 100+yF*40,
-      ]);
       m.setPaintProperty('tci-bld-layer','fill-extrusion-color',[
         'interpolate',['linear'],['get','height'],
-        0,'#0d1f3c',
-        20,yF>0.3?'#f59e0b':'#16306e',
-        40,yF>0.5?'#22c55e':'#2455a0',
-        100,'#2e6ab8',
+        0,  '#0f172a',          // subsol/mic — aproape negru
+        8,  yF>0.1?'#1e3a5f':'#1e3a5f',   // existent mic — albastru închis
+        15, yF>0.2?'#f59e0b':'#1d4ed8',   // mediu: portocaliu (constructie) vs albastru (existent)
+        25, yF>0.4?'#22c55e':'#2563eb',   // înalt: verde (nou) vs albastru (existent)
+        50, yF>0.6?'#16a34a':'#1d4ed8',   // foarte înalt: verde intens nou
+        100,'#0ea5e9',                      // ultra înalt: cyan — clădiri de referință
       ]);
+      m.setPaintProperty('tci-bld-layer','fill-extrusion-height',[
+        'interpolate',['linear'],['get','height'],
+        0,  0,
+        5,  5,
+        15, 15+yF*6,     // clădiri medii cresc +6m până în 2050
+        30, 30+yF*12,    // blocuri +12m
+        60, 60+yF*25,    // turn-uri +25m
+        100,100+yF*45,   // zgârie-nori +45m
+      ]);
+      m.setPaintProperty('tci-bld-layer','fill-extrusion-opacity',0.82+yF*0.08);
     } catch(e){}
   },
 
@@ -864,74 +871,125 @@ const TCI = {
     const ctx=this.ctx; if(!ctx) return;
     const W=this.canvas.width, H=this.canvas.height;
     ctx.clearRect(0,0,W,H);
+    const globalYF=Math.max(0,Math.min(1,(yr-this.startYear)/(2055-this.startYear)));
 
-    // An mare pe fundal
+    // An mare semitransparent pe fundal
     ctx.save();
     ctx.fillStyle='rgba(212,175,55,0.05)';
     ctx.font=`bold ${Math.round(H*0.18)}px "Space Grotesk",sans-serif`;
     ctx.textAlign='left';
-    ctx.fillText(yr, 200, H*0.60);
+    ctx.fillText(yr, 200, H*0.62);
     ctx.restore();
 
     // Bara progres
-    const totalYrs=2055-this.startYear;
-    const prog=(yr-this.startYear)/totalYrs;
-    ctx.fillStyle='rgba(212,175,55,0.6)';
-    ctx.fillRect(190, H-62, (W-395)*prog, 2);
+    ctx.fillStyle='rgba(212,175,55,0.15)';
+    ctx.fillRect(190,H-63,(W-395),3);
+    ctx.fillStyle='rgba(212,175,55,0.7)';
+    ctx.fillRect(190,H-63,(W-395)*globalYF,3);
 
     // Watermark
-    ctx.save();
-    ctx.globalAlpha=0.35;
-    ctx.fillStyle='rgba(148,163,184,0.6)';
-    ctx.font='7px "Space Grotesk"';
-    ctx.textAlign='right';
-    ctx.fillText('INSE · Eurostat · ANCPI · BNR · IPCC AR6 · ANM · INFP · ANAR', W-10, H-70);
-    ctx.fillStyle='rgba(212,175,55,0.5)';
-    ctx.font='bold 7px "Space Grotesk"';
-    ctx.fillText('UrbanX TSS·FG · Proiecție urbanistică · Date oficiale publice', W-10, H-61);
-    ctx.restore();
-    ctx.textAlign='left';
+    ctx.save(); ctx.globalAlpha=0.3;
+    ctx.fillStyle='rgba(148,163,184,0.6)'; ctx.font='7px "Space Grotesk"'; ctx.textAlign='right';
+    ctx.fillText('INSE · Eurostat · ANCPI · BNR · IPCC AR6 · ANM · INFP · ANAR',W-10,H-70);
+    ctx.fillStyle='rgba(212,175,55,0.5)'; ctx.font='bold 7px "Space Grotesk"';
+    ctx.fillText('UrbanX TSS·FG · Proiecție urbanistică · Date oficiale publice',W-10,H-61);
+    ctx.restore(); ctx.textAlign='left';
 
-    // Milestone: an mare dramatic
-    if(this.MILES.includes(yr) && yF<0.15) {
-      const a=Math.min(1,yF/0.15)*0.9;
-      ctx.save();
-      ctx.globalAlpha=a;
-      ctx.fillStyle='#D4AF37';
-      ctx.font='bold 18px "Space Grotesk"';
+    // Milestone dramatic
+    if(this.MILES.includes(yr) && yF<0.12) {
+      const a=Math.min(1,yF/0.12)*0.9;
+      ctx.save(); ctx.globalAlpha=a;
       ctx.textAlign='center';
-      ctx.fillText('⭐ MILESTONE '+yr, W/2, H*0.25);
-      ctx.restore();
-      ctx.textAlign='left';
+      ctx.fillStyle='#D4AF37'; ctx.font='bold 20px "Space Grotesk"';
+      ctx.fillText('⭐ '+yr+' — MILESTONE', W/2, H*0.24);
+      const d=this._data(yr);
+      const pop=(d.demo?.value||0).toLocaleString();
+      ctx.fillStyle='rgba(255,255,255,0.7)'; ctx.font='11px "Space Grotesk"';
+      ctx.fillText('Populație: '+pop+' · PIB/cap: €'+((d.housing?.pibCapProj||14200)/1000).toFixed(0)+'k · ESG: '+(d.esg?.total||51)+'/100', W/2, H*0.30);
+      ctx.restore(); ctx.textAlign='left';
     }
 
-    // Legend UTR dreapta jos
-    this._drawLegend(ctx, W, H);
+    // Time Machine overlay — când scena s11 e activă
+    const sceneId=this._director?._scenes?.[this._director?._idx]?.id;
+    if(sceneId==='s11') this._drawTimeMachine(ctx, W, H, yr);
+
+    // Legendă clădiri — mereu vizibilă
+    this._drawLegend(ctx, W, H, yr);
   },
 
-  _drawLegend(ctx, W, H) {
-    const items=[
-      {c:'#1e40af',l:'Rezidențial (L)'},
-      {c:'#5b21b6',l:'Mixt/Central (M)'},
-      {c:'#b45309',l:'Comercial (C)'},
-      {c:'#16a34a',l:'Spații verzi (V)'},
-      {c:'#991b1b',l:'Industrial (I)'},
-      {c:'#f59e0b',l:'Construcție activă'},
-    ];
-    const LW=150, LH=items.length*13+16, LX=W-LW-10, LY=H-65-LH;
+  _drawTimeMachine(ctx, W, H, yr) {
+    const yF=Math.max(0,Math.min(1,(yr-2025)/25));
     ctx.save();
-    ctx.fillStyle='rgba(4,10,24,0.82)';
+
+    // Labels 2025 | 2050 cu opacitate variabilă
+    const a=Math.min(1,(Date.now()-this._tmStart||1)/1500);
+    ctx.globalAlpha=a;
+    ctx.font=`bold ${Math.round(H*0.12)}px "Space Grotesk"`;
+    ctx.textAlign='center';
+    ctx.fillStyle='rgba(148,163,184,0.15)'; ctx.fillText('2025',W*0.26,H*0.58);
+    ctx.fillStyle='rgba(212,175,55,'+(0.1+yF*0.15)+')'; ctx.fillText('2050',W*0.74,H*0.58);
+
+    // Sub-labels
+    ctx.font='bold 13px "Space Grotesk"';
+    ctx.fillStyle='rgba(148,163,184,0.45)'; ctx.fillText('ASTĂZI',W*0.26,H*0.65);
+    ctx.fillStyle='rgba(212,175,55,'+(0.3+yF*0.45)+')'; ctx.fillText('VIITORUL',W*0.74,H*0.65);
+
+    // Linie split verticală animată
+    const spX=W/2+Math.sin(Date.now()/6000)*15;
+    ctx.fillStyle='rgba(255,255,255,'+(0.3+yF*0.3)+')';
+    ctx.fillRect(spX-1,50,2,H-112);
+
+    // Play button
+    ctx.fillStyle='rgba(4,10,24,0.8)';
+    ctx.beginPath(); ctx.arc(spX,H/2-15,20,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle='rgba(212,175,55,0.7)'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.arc(spX,H/2-15,20,0,Math.PI*2); ctx.stroke();
+    ctx.fillStyle='rgba(212,175,55,0.9)';
+    ctx.beginPath(); ctx.moveTo(spX-8,H/2-24); ctx.lineTo(spX-8,H/2-6); ctx.lineTo(spX+12,H/2-15); ctx.closePath(); ctx.fill();
+
+    // An curent centrat
+    ctx.fillStyle='#D4AF37'; ctx.font='bold 16px "Space Grotesk"';
+    ctx.fillText(this.year||yr, spX, H/2+18);
+
+    // Progress bar transformare
+    const pW=200, pX=W/2-pW/2, pY=H*0.75;
+    ctx.fillStyle='rgba(255,255,255,0.1)'; ctx.fillRect(pX,pY,pW,4);
+    ctx.fillStyle='rgba(212,175,55,0.8)'; ctx.fillRect(pX,pY,pW*yF,4);
+    ctx.fillStyle='rgba(148,163,184,0.6)'; ctx.font='9px "Space Grotesk"';
+    ctx.fillText('Transformare: '+Math.round(yF*100)+'%', W/2, pY+16);
+
+    ctx.restore(); ctx.textAlign='left';
+  },
+
+  _drawLegend(ctx, W, H, yr) {
+    const yF=Math.max(0,Math.min(1,((yr||this.year)-2025)/25));
+    // Legenda explică CULORILE CLĂDIRILOR + ce înseamnă per an
+    const items=[
+      {c:'#1e3a5f', l:'Clădiri existente pre-2025'},
+      {c:'#f59e0b', l:'Construcție activă '+(2025+Math.round(yF*8))+'–'+(2025+Math.round(yF*15))},
+      {c:'#22c55e', l:'Finalizate · Clădiri noi'},
+      {c:'#0ea5e9', l:'Landmark / Înalt'},
+      {c:'#0f172a', l:'Construcție nouă mică'},
+    ];
+    const LW=185, LH=items.length*14+24, LX=W-LW-10, LY=H-70-LH;
+    ctx.save();
+    ctx.fillStyle='rgba(4,10,24,0.85)';
     this._rr(ctx,LX,LY,LW,LH,6); ctx.fill();
-    ctx.fillStyle='rgba(148,163,184,0.55)';
-    ctx.font='bold 7px "Space Grotesk"';
-    ctx.fillText('ZONARE UTR', LX+10, LY+13);
+    ctx.strokeStyle='rgba(255,255,255,0.07)'; ctx.lineWidth=1;
+    this._rr(ctx,LX,LY,LW,LH,6); ctx.stroke();
+    ctx.fillStyle='#D4AF37'; ctx.font='bold 7.5px "Space Grotesk"';
+    ctx.fillText('CLĂDIRI — '+(yr||this.year), LX+10, LY+14);
+    // Bara progres densificare
+    const bpW=LW-20;
+    ctx.fillStyle='rgba(255,255,255,0.08)'; ctx.fillRect(LX+10,LY+18,bpW,3);
+    ctx.fillStyle='rgba(212,175,55,0.7)';   ctx.fillRect(LX+10,LY+18,bpW*yF,3);
     items.forEach((it,i)=>{
-      const y=LY+16+i*13;
-      ctx.fillStyle=it.c;
-      ctx.fillRect(LX+10,y,10,9);
-      ctx.fillStyle='rgba(200,215,235,0.75)';
-      ctx.font='8px "Space Grotesk"';
-      ctx.fillText(it.l,LX+26,y+8);
+      const y=LY+26+i*14;
+      ctx.fillStyle=it.c; ctx.fillRect(LX+10,y,10,10);
+      ctx.strokeStyle='rgba(255,255,255,0.2)'; ctx.lineWidth=0.5;
+      ctx.strokeRect(LX+10,y,10,10);
+      ctx.fillStyle='rgba(200,215,235,0.78)'; ctx.font='8px "Space Grotesk"';
+      ctx.fillText(it.l,LX+25,y+8.5);
     });
     ctx.restore();
   },
