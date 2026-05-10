@@ -753,6 +753,75 @@ const TCI = {
     this.layersAdded = false;
   },
 
+  // ── Cautare al 2-lea oras pentru comparatie ─────────────────────────────
+  _searchCity2(query) {
+    if(!query || query.length < 2) return;
+    // Debounce
+    clearTimeout(this._searchTimer);
+    this._searchTimer = setTimeout(async () => {
+      const results = typeof _searchUAT !== 'undefined' ? _searchUAT(query, 8) : [];
+      const container = document.getElementById('tci-compare-results-v4');
+      if(!container) return;
+      if(!results.length) { container.innerHTML = ''; return; }
+      container.innerHTML = results.map(r => `
+        <div onclick="TCI._selectCity2('${r.key}','${r.name}')" style="
+          padding:6px 8px;cursor:pointer;border-radius:5px;font-size:10px;
+          color:rgba(200,215,235,0.9);border-bottom:1px solid rgba(255,255,255,0.05);"
+          onmouseover="this.style.background='rgba(255,255,255,0.06)'"
+          onmouseout="this.style.background='transparent'">
+          <span style="font-weight:600">${r.name}</span>
+          <span style="color:rgba(148,163,184,0.5);font-size:9px"> jud. ${r.judet}</span>
+        </div>
+      `).join('');
+      container.style.display = 'block';
+    }, 300);
+  },
+
+  _selectCity2(key, name) {
+    const container = document.getElementById('tci-compare-results-v4');
+    if(container) container.style.display = 'none';
+    const input = document.getElementById('tci-compare-input-v4');
+    if(input) input.value = name;
+    this._showCityComparison(key, name);
+  },
+
+  _showCityComparison(city2Key, city2Name) {
+    const el = document.getElementById('tci-compare-output-v4');
+    if(!el) return;
+    const year = this.year || 2025;
+    const scen = this.scenario || 'S2';
+    const d1 = typeof _getProjectionData !== 'undefined' ? _getProjectionData(year, scen, this.cityKey) : null;
+    const d2 = typeof _getProjectionData !== 'undefined' ? _getProjectionData(year, scen, city2Key) : null;
+    const c1 = typeof _RO_CITIES_DB !== 'undefined' ? _RO_CITIES_DB[this.cityKey] : null;
+    const c2 = typeof _RO_CITIES_DB !== 'undefined' ? _RO_CITIES_DB[city2Key] : null;
+    if(!d1 || !d2 || !c1 || !c2) { el.innerHTML = '<div style="font-size:9px;color:#ef4444">Date indisponibile</div>'; return; }
+
+    const rows = [
+      ['Populație '+year, (d1.demo?.value||0).toLocaleString(), (d2.demo?.value||0).toLocaleString()],
+      ['Rată 2011-2021', (c1.rata_reala_2011_2021||0).toFixed(2)+'%/an', (c2.rata_reala_2011_2021||0).toFixed(2)+'%/an'],
+      ['PIB/cap est.', '€'+((d1.housing?.pibCapProj||0)/1000).toFixed(0)+'k', '€'+((d2.housing?.pibCapProj||0)/1000).toFixed(0)+'k'],
+      ['ESG Rating', (d1.esg?.rating||'B')+' '+(d1.esg?.total||65), (d2.esg?.rating||'B')+' '+(d2.esg?.total||65)],
+      ['Convergență EU', (d1.euConvergence||74)+'%', (d2.euConvergence||74)+'%'],
+    ];
+
+    el.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:4px;text-align:center;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid rgba(255,255,255,0.08)">
+        <div style="font-size:10px;font-weight:700;color:#D4AF37">${c1.name}</div>
+        <div style="font-size:8px;color:rgba(148,163,184,0.4)">vs</div>
+        <div style="font-size:10px;font-weight:700;color:#38bdf8">${city2Name}</div>
+      </div>
+      ${rows.map(([l,v1,v2])=>`
+        <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:2px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.04);align-items:center">
+          <div style="font-size:9px;font-weight:700;color:#D4AF37;text-align:right">${v1}</div>
+          <div style="font-size:7px;color:rgba(100,120,150,0.6);text-align:center;padding:0 4px">${l}</div>
+          <div style="font-size:9px;font-weight:700;color:#38bdf8;text-align:left">${v2}</div>
+        </div>
+      `).join('')}
+      <div style="font-size:6.5px;color:rgba(100,120,150,0.4);margin-top:6px;text-align:center">INSE · Eurostat · model Cohort-Survival</div>
+    `;
+    el.style.display = 'block';
+  },
+
   // ── Helpers ───────────────────────────────────────────────────────────────
   _popGeoJSON(lat, lon, intensity) {
     const features=[];
