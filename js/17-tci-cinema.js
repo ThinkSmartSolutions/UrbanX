@@ -10,7 +10,7 @@ const TCI = {
   map: null,
   canvas: null, ctx: null,
   running: false,
-  _showEUCompare: false,   // toggle comparare EU
+  _showEUCompare: true,    // vizibil implicit
   speed: 1,
   year: 2021,
   startYear: 2021,
@@ -223,12 +223,20 @@ const TCI = {
     this._hideParcelPopup();
     this._addMapLayers();
     this._cameraIntro();
-    // Initializam sistemul cinematice dupa ce harta e gata
-    setTimeout(() => {
+    // Camera cinematica: initializam dupa ce harta e GARANTAT gata
+    const _initCam = () => {
       const cx = this.activeParcel?.lon || this.cityData?.lon || 27.601;
       const cy = this.activeParcel?.lat || this.cityData?.lat || 47.158;
       this._initCinemaCamera(cx, cy);
-    }, 1000);
+      // Primul shot: imediat dupa initializare
+      this._lastCinemaFly = 0;
+    };
+    if(this.map?.isStyleLoaded?.() && this.map?.loaded?.()) {
+      setTimeout(_initCam, 800);
+    } else {
+      this.map?.once('idle', () => setTimeout(_initCam, 500));
+      setTimeout(_initCam, 4000);  // fallback absolut
+    }
     this.start();
   },
 
@@ -2495,18 +2503,123 @@ const TCI = {
 
   _initParticlesOnRoads(cx, cy) {
     this._roadParticles = [];
-    const gs=0.004, gn=5, streets=[];
-    for(let i=-gn;i<=gn;i++){
-      streets.push({start:[cx-gn*gs,cy+i*gs],end:[cx+gn*gs,cy+i*gs]});
-      streets.push({start:[cx+i*gs,cy-gn*gs],end:[cx+i*gs,cy+gn*gs]});
+    this._roadSegments  = [];
+    const m = this.map; if(!m) return;
+
+    // Obtinem segmentele reale de strazi din Mapbox
+    const extractRoads = () => {
+      try {
+        const features = m.queryRenderedFeatures(
+          undefined,
+          { layers: ['road-primary','road-secondary','road-street',
+                     'road-tertiary','road-motorway-trunk',
+                     'road','roads','tci-roads-flow'] }
+        );
+
+        let segs = [];
+        features.forEach(f => {
+          const g = f.geometry;
+          if(g.type === 'LineString' && g.coordinates.length >= 2) {
+            for(let i=0;i<g.coordinates.length-1;i++){
+              segs.push({
+                start: g.coordinates[i],
+                end:   g.coordinates[i+1],
+              });
+            }
+          }
+        });
+
+        // Daca nu gasim strazi in stil, folosim strazi Mapbox Streets
+        if(segs.length < 10) {
+          const feat2 = m.queryRenderedFeatures(undefined,
+            { sourceLayer:'road' });
+          feat2.forEach(f => {
+            const g = f.geometry;
+            if(g.type === 'LineString') {
+              for(let i=0;i<g.coordinates.length-1;i++){
+                segs.push({ start:g.coordinates[i], end:g.coordinates[i+1] });
+              }
+            }
+          });
+        }
+
+        // Fallback: strazi realiste pentru orasul activ
+        if(segs.length < 10) {
+          segs = this._fallbackRoads(cx, cy);
+        }
+
+        this._roadSegments = segs;
+        this._buildParticles(segs);
+        console.log(`[TCI] ${segs.length} segmente strazi reale extrase`);
+      } catch(e) {
+        this._roadSegments = this._fallbackRoads(cx, cy);
+        this._buildParticles(this._roadSegments);
+      }
+    };
+
+    // Asteptam ca harta sa fie gata sa ofere features
+    if(m.isStyleLoaded?.() && m.loaded?.()) {
+      extractRoads();
+    } else {
+      m.once('idle', extractRoads);
+      setTimeout(extractRoads, 3000); // fallback
     }
+  },
+
+  _fallbackRoads(cx, cy) {
+    // Strazi realiste bazate pe pattern urban romanesc
+    // Bulevard principal E-V + N-S + strazi secundare
+    const segs = [];
+    const pop  = this.cityData?.pop2021 || 100000;
+    const r    = Math.min(0.025, 0.008 + pop/2000000);
+
+    // Bulevarde principale (4 axe)
+    const boulevards = [
+      { from:[-r,0],   to:[r,0],    // E-V
+        pts: [[-r,0],[-r*0.6,0.002],[-r*0.2,-0.001],[0,0],[r*0.2,0.001],[r*0.6,-0.001],[r,0]] },
+      { from:[0,-r],   to:[0,r],    // N-S
+        pts: [[0,-r],[0.001,-r*0.6],[-0.001,-r*0.2],[0,0],[0.001,r*0.2],[-0.001,r*0.6],[0,r]] },
+      { from:[-r*0.7,-r*0.7], to:[r*0.7,r*0.7],   // NV-SE
+        pts: [[-r*0.7,-r*0.7],[-r*0.3,-r*0.3],[0,0],[r*0.3,r*0.3],[r*0.7,r*0.7]] },
+      { from:[-r*0.7,r*0.7],  to:[r*0.7,-r*0.7],  // NE-SV
+        pts: [[-r*0.7,r*0.7],[-r*0.3,r*0.3],[0,0],[r*0.3,-r*0.3],[r*0.7,-r*0.7]] },
+    ];
+
+    boulevards.forEach(b => {
+      for(let i=0;i<b.pts.length-1;i++){
+        segs.push({
+          start: [cx+b.pts[i][0],   cy+b.pts[i][1]],
+          end:   [cx+b.pts[i+1][0], cy+b.pts[i+1][1]],
+        });
+      }
+    });
+
+    // Strazi secundare in grila (insa pe coordonate reale)
+    const step = r/4;
+    for(let i=-3;i<=3;i++){
+      for(let j=-3;j<=2;j++){
+        // Orizontale
+        segs.push({ start:[cx+j*step,     cy+i*step*0.7], end:[cx+(j+1)*step, cy+i*step*0.7] });
+        // Verticale
+        segs.push({ start:[cx+i*step*0.7, cy+j*step],     end:[cx+i*step*0.7, cy+(j+1)*step] });
+      }
+    }
+    return segs;
+  },
+
+  _buildParticles(segs) {
+    if(!segs.length) return;
+    this._roadParticles = [];
     const r=(s)=>{let x=Math.sin(s*7919)*9999;return x-Math.floor(x);};
-    for(let i=0;i<120;i++){
+    for(let i=0;i<150;i++){
+      const seg = segs[Math.floor(r(i*37) * segs.length)];
       this._roadParticles.push({
-        street:streets[i%streets.length], t:(i*0.073)%1,
-        speed:0.0003+r(i*31)*0.0004,
-        type:i<70?'car':i<100?'bus':'bike',
-        phase:r(i*17)*Math.PI*2,
+        seg,
+        t:     r(i*73) % 1,
+        dir:   r(i*53) > 0.5 ? 1 : -1,  // sens de mers
+        speed: 0.004 + r(i*31) * 0.006,  // viteza realista
+        type:  i<90?'car' : i<125?'bus' : 'bike',
+        phase: r(i*17)*Math.PI*2,
       });
     }
   },
