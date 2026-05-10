@@ -1511,10 +1511,10 @@ out geom qt;`;
           const seed = Math.abs(Math.sin(i * 127.1 + lon * 311.7));
           this._entities.push({
             lon, lat,
-            wM: 18 + seed * 25,  // 18-43m lățime
-            dM: 14 + seed * 20,  // 14-34m adâncime
-            hBase: Math.max(6, z.hMax * 0.2),
-            hMax:  z.hMax * (0.65 + seed * 0.35),
+            wM: 30 + seed * 40,  // 30-70m lățime (mărit pentru vizibilitate)
+            dM: 25 + seed * 35,  // 25-60m adâncime (mărit)
+            hBase: Math.max(15, z.hMax * 0.4),        // înălțime de bază mai mare
+            hMax:  z.hMax * 2.0 * (0.65 + seed * 0.35), // 2x înălțime maximă
             startYr: z.startYr,
             color:   new THREE.Color(z.color),
             zoneId:  z.id,
@@ -1525,6 +1525,26 @@ out geom qt;`;
       console.log('[3D] Entities:', this._entities.length, 'pentru', zones.length, 'zone');
       this._buildMesh();
       this.updateYear(year);
+
+      // AUTO-DIAGNOSTIC — apare în consolă fără să tastezi nimic
+      setTimeout(() => {
+        console.warn('=== TCI 3D DIAGNOSTIC ===');
+        console.warn('entities:', this._entities.length);
+        console.warn('mesh:', this._mesh ? 'CREAT' : 'NULL — _buildMesh nu a rulat');
+        console.warn('ready:', this._ready);
+        console.warn('mercOrigin:', this._mercOrigin ? JSON.stringify(this._mercOrigin) : 'NULL — setOrigin nu a fost apelat');
+        if(this._mesh) {
+          console.warn('mesh.visible:', this._mesh.visible);
+          const c = new THREE.Color();
+          this._mesh.getColorAt(0, c);
+          console.warn('color[0]:', '#' + c.getHexString());
+        }
+        if(this._entities.length > 0) {
+          const e0 = this._entities[0];
+          console.warn('entity[0]:', JSON.stringify({lon:e0.lon, lat:e0.lat, hMax:e0.hMax, startYr:e0.startYr}));
+        }
+        console.warn('=== END DIAGNOSTIC ===');
+      }, 3000);
     },
 
     _buildMesh() {
