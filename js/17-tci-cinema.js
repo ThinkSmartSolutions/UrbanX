@@ -55,6 +55,10 @@ const TCI = {
 
   // ── Selector vizual ───────────────────────────────────────────────────────
   _showSelector() {
+    if(window._TCI_URL_RESTORE && !window._TCI_URL_RESTORE.done) {
+      console.log('[TCI._showSelector] Blocat - URL restore pending');
+      return;
+    }
     let sel = document.getElementById('tci-sel');
     if(sel) { sel.style.display='flex'; return; }
 
@@ -189,7 +193,10 @@ const TCI = {
 
     this.map = window.map;
     if(!this.map || typeof this.map.flyTo !== 'function') {
-      alert('Harta nu este inițiată. Reîncărcați pagina și așteptați harta.'); return;
+      // Nu alert - retry silentios
+      console.warn('[TCI._launch] window.map nu e gata, retry in 1s');
+      setTimeout(() => this._launch(mode, opts), 1000);
+      return;
     }
 
     this.mode = mode;
