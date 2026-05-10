@@ -360,11 +360,11 @@ const TCI = {
       <div style="border-bottom:1px solid rgba(255,255,255,0.06);padding-bottom:8px;">
         <div style="font-size:8px;font-weight:700;color:#D4AF37;letter-spacing:.08em;margin-bottom:5px">COMPARARE ORAȘE</div>
         <div style="font-size:8px;color:rgba(148,163,184,0.55);margin-bottom:4px">${this.cityData?.name||'—'} vs:</div>
-        <input type="text" id="tci-cmp-inp" placeholder="Al 2-lea UAT..."
+        <input type="text" id="tci-cmp-inp" placeholder="Caută UAT (ex: Cluj, Botoșani...)"
           autocomplete="off" oninput="TCI._cmpSearch(this.value)"
           style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);color:#fff;padding:6px 8px;border-radius:6px;font-size:10px;font-family:inherit;box-sizing:border-box;">
-        <div id="tci-cmp-res" style="background:rgba(4,10,24,0.97);border:1px solid rgba(255,255,255,0.1);border-radius:6px;max-height:100px;overflow-y:auto;display:none;margin-top:3px;"></div>
-        <div id="tci-cmp-out" style="display:none;margin-top:6px;"></div>
+        <div id="tci-cmp-res" style="background:rgba(4,10,24,0.97);border:1px solid rgba(255,255,255,0.1);border-radius:6px;max-height:120px;overflow-y:auto;display:none;margin-top:3px;"></div>
+        <div id="tci-cmp-out" style="margin-top:6px;"></div>
       </div>
 
       <!-- Export -->
@@ -703,14 +703,59 @@ const TCI = {
     ctx.fillText(year, 200, H*0.52);
     // Bara progres
     ctx.fillStyle='rgba(212,175,55,0.75)';
-    ctx.fillRect(185, H-63, (W-370)*(totalT+yearT*(1/Math.max(1,2055-this.startYear))), 2);
+    ctx.fillRect(185, H-63, (W-185)*(totalT+yearT*(1/Math.max(1,2055-this.startYear))), 2);
     // Watermark
     ctx.save();ctx.globalAlpha=0.45;ctx.textAlign='right';
     ctx.fillStyle='rgba(148,163,184,0.6)';ctx.font='7px "Space Grotesk"';
-    ctx.fillText('INSE · Eurostat · ANCPI · BNR · IPCC AR6 · ANM · INFP · ANAR',W-190,H-70);
+    ctx.fillText('INSE · Eurostat · ANCPI · BNR · IPCC AR6 · ANM · INFP · ANAR',W-10,H-70);
     ctx.fillStyle='rgba(212,175,55,0.5)';ctx.font='bold 7px "Space Grotesk"';
-    ctx.fillText('UrbanX · Analiză statistică și proiecție · date oficiale publice',W-190,H-61);
+    ctx.fillText('UrbanX · Analiză statistică și proiecție · date oficiale publice',W-10,H-61);
     ctx.restore();ctx.textAlign='left';
+
+    // ── LEGENDA UTR pe canvas (colț dreapta jos, deasupra watermark) ────────
+    this._drawLegend(ctx, W, H);
+  },
+
+  // ── Legenda UTR vizibila pe harta ─────────────────────────────────────────
+  _drawLegend(ctx, W, H) {
+    const items = [
+      { c:'#1e40af', l:'Rezidențial colectiv (L)' },
+      { c:'#5b21b6', l:'Mixt / Central (M)' },
+      { c:'#b45309', l:'Comercial (C)' },
+      { c:'#065f46', l:'Instituțional (IS)' },
+      { c:'#16a34a', l:'Spații verzi (V)' },
+      { c:'#991b1b', l:'Industrial (I)' },
+      { c:'#f59e0b', l:'Construcție activă' },
+    ];
+    const LW = 148, LH = items.length * 14 + 18;
+    const LX = W - LW - 10;
+    const LY = H - 95 - LH;
+
+    ctx.save();
+    ctx.globalAlpha = 0.88;
+    ctx.fillStyle = 'rgba(4,10,24,0.85)';
+    this._rr(ctx, LX, LY, LW, LH, 6);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    ctx.lineWidth = 0.5;
+    this._rr(ctx, LX, LY, LW, LH, 6);
+    ctx.stroke();
+
+    ctx.fillStyle = 'rgba(212,175,55,0.85)';
+    ctx.font = 'bold 7.5px "Space Grotesk"';
+    ctx.textAlign = 'left';
+    ctx.fillText('FUNCȚIUNI URBANE — PUG+RLU', LX+8, LY+10);
+
+    items.forEach((item, i) => {
+      const y = LY + 18 + i * 14;
+      ctx.fillStyle = item.c;
+      ctx.fillRect(LX+8, y-5, 8, 8);
+      ctx.fillStyle = 'rgba(200,215,235,0.82)';
+      ctx.font = '7.5px "Space Grotesk"';
+      ctx.fillText(item.l, LX+20, y+2);
+    });
+    ctx.restore();
+    ctx.textAlign = 'left';
   },
 
   // ── 2D Overlay: Milestone card ────────────────────────────────────────────
@@ -910,7 +955,30 @@ const TCI = {
   _share() {
     const p=new URLSearchParams({c:this.cityKey,s:this.scenario,y:this.year,m:this.mode}).toString();
     const url=window.location.origin+window.location.pathname+'?tci='+btoa(p);
-    navigator.clipboard?.writeText(url).then(()=>typeof _Toast!=='undefined'&&_Toast.success('URL copiat!'));
+    // Afiseaza URL vizibil pe ecran (nu doar clipboard)
+    let box = document.getElementById('tci-share-box');
+    if(!box) {
+      box = document.createElement('div');
+      box.id = 'tci-share-box';
+      box.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:3100;background:rgba(4,10,24,0.97);border:1px solid rgba(212,175,55,0.5);border-radius:10px;padding:14px 20px;min-width:360px;font-family:"Space Grotesk",sans-serif;';
+      document.body.appendChild(box);
+    }
+    box.innerHTML = `
+      <div style="font-size:8px;color:#D4AF37;letter-spacing:.1em;margin-bottom:6px">🔗 SHARE URL — TCI ${this.cityData?.name||''} ${this.year}</div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <input readonly value="${url}"
+          style="flex:1;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);color:#fff;padding:7px 9px;border-radius:6px;font-size:9px;font-family:monospace;cursor:text;"
+          onclick="this.select()">
+        <button onclick="navigator.clipboard.writeText('${url}').then(()=>{this.textContent='✓ Copiat!';setTimeout(()=>this.textContent='📋 Copiază',2000)})"
+          style="padding:7px 12px;border-radius:6px;background:rgba(212,175,55,0.15);border:1px solid rgba(212,175,55,0.4);color:#D4AF37;font-size:10px;cursor:pointer;font-family:inherit;white-space:nowrap;">
+          📋 Copiază
+        </button>
+      </div>
+      <button onclick="document.getElementById('tci-share-box').style.display='none'"
+        style="position:absolute;top:8px;right:8px;background:none;border:none;color:rgba(148,163,184,0.5);font-size:12px;cursor:pointer;">✕</button>`;
+    box.style.display = 'block';
+    // Si in clipboard
+    navigator.clipboard?.writeText(url);
     return url;
   },
 
