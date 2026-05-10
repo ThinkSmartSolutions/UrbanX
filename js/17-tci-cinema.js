@@ -1442,6 +1442,11 @@ out geom qt;`;
     render(gl, matrix) {
       if(!this._ready || !this._mercOrigin) return;
 
+      // CRITIC: curăță depth buffer înainte de Three.js
+      // Mapbox Standard 3D buildings scriu în depth buffer → TCI boxes pierd depth test
+      // Fără asta, clădirile colorate sunt invizibile sub clădirile Mapbox existente
+      gl.clear(gl.DEPTH_BUFFER_BIT);
+
       // ── CHEIA: modelMatrix transformă din spațiu local (metri) la Mercator
       // Y negat pentru că Mapbox Mercator are Y crescând spre sud (jos)
       // Three.js are Y crescând în sus (nord) → negăm
