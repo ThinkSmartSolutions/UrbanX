@@ -941,155 +941,111 @@ const TCI = {
     },
 
     // ── Overpass API — cimitire, păduri, ape, căi ferate ─────────────
-    async queryOverpass(lon, lat, radiusM) {
-      const r = Math.min(radiusM, 12000); // max 12km radius
-      const q = `[out:json][timeout:12];(
-        way["landuse"="cemetery"](around:${r},${lat},${lon});
-        way["amenity"="grave_yard"](around:${r},${lat},${lon});
-        relation["landuse"="cemetery"](around:${r},${lat},${lon});
-        node["amenity"="grave_yard"](around:${r},${lat},${lon});
-        relation["landuse"="cemetery"](around:${r},${lat},${lon});
-        way["landuse"="forest"](around:${r},${lat},${lon});
-        relation["landuse"="forest"](around:${r},${lat},${lon});
-        way["natural"="wood"](around:${r},${lat},${lon});
-        way["natural"="water"](around:${r},${lat},${lon});
-        way["landuse"="reservoir"](around:${r},${lat},${lon});
-        way["waterway"~"^(river|canal)$"](around:${r},${lat},${lon});
-        way["railway"~"^(rail|narrow_gauge|light_rail)$"](around:${r},${lat},${lon});
-        way["aeroway"~"^(runway|taxiway)$"](around:${r},${lat},${lon});
-      );out geom qt;`;
-
+    // ── MAPBOX SEARCH API — POI complet, orice UAT România ──────────────
+    // Folosim tokenul Mapbox existent — nu e nevoie de API key separat
+    // Date mult mai complete decât Overpass pentru România
+    // Documentație: docs.mapbox.com/api/search/search-box/
+    async _mapboxCategorySearch(category, lon, lat, radiusKm, token) {
+      const margin = radiusKm / 111.32;
+      const bbox   = `${lon-margin},${lat-margin},${lon+margin},${lat+margin}`;
+      const url    = `https://api.mapbox.com/search/searchbox/v1/category/${category}`+
+                     `?bbox=${bbox}&limit=50&language=ro&access_token=${token}`;
       try {
-        const resp = await fetch('https://overpass-api.de/api/interpreter', {
-          method:'POST', body:'data='+encodeURIComponent(q),
-          signal:AbortSignal.timeout(12000),
-        });
-        if(!resp.ok) return null;
-        const data = await resp.json();
-        const result = {cimitire:[],paduri:[],ape:[],cale_ferata:[]};
-        (data.elements||[]).forEach(el=>{
-          const t = el.tags||{};
-          if(t.landuse==='cemetery')            result.cimitire.push(el);
-          else if(t.landuse==='forest'||t.natural==='wood') result.paduri.push(el);
-          else if(t.natural==='water'||t.landuse==='reservoir'||t.waterway) result.ape.push(el);
-          else if(t.railway||t.aeroway)          result.cale_ferata.push(el);
-        });
-        return result;
-      } catch(e) {
-        console.warn('[CONSTRAINT] Overpass timeout/error:', e.message);
-        return null;
-      }
-    },
-
-    // ── CIMEC WFS — LMI monumente ─────────────────────────────────────
-    async queryLMI(lon, lat, radiusM) {
-      if(typeof _cimecQueryWFS === 'function') return _cimecQueryWFS(lon, lat, radiusM);
-      const CIMEC = 'https://map.cimec.ro/Mapserver/wms';
-      const km = radiusM/111320;
-      const bbox = [lon-km,lat-km,lon+km,lat+km].join(',');
-      const result = {monumente:[],zone:[],situri:[]};
-      for(const [layer,key] of [['LMI_Puncte','monumente'],['LMI_Zone','zone'],['Situri_Arh','situri']]) {
-        try {
-          const url = `${CIMEC}?SERVICE=WFS&VERSION=1.1.0&REQUEST=GetFeature&TYPENAME=${layer}&BBOX=${bbox},EPSG:4326&SRSNAME=EPSG:4326&OUTPUTFORMAT=application/json&maxFeatures=200`;
-          const resp = await fetch(url,{signal:AbortSignal.timeout(4000),mode:'cors'});
-          if(resp.ok) result[key] = (await resp.json()).features||[];
-        } catch(e){}
-      }
-      return result;
-    },
-
-    // ── CENTROID helper ────────────────────────────────────────────────
-    // ── QUERY ZONE DE DEZVOLTARE — automat, orice UAT ───────────────────
-    // Overpass returnează:
-    //   - Șantiere active (building=construction, landuse=construction)
-    //   - Spitale/instituții majore (ancorele de dezvoltare)
-    //   - Complexe rezidențiale noi (tagged în OSM)
-    //   - Zone cu construcții recente
-    // FUNCȚIONEAZĂ PENTRU ORICE UAT DIN ROMÂNIA, AUTOMAT
-    async queryDevelopmentZones(lon, lat, radiusM) {
-      const r = Math.min(radiusM, 15000);
-      const q = `[out:json][timeout:15];
-(
-  way["building"="construction"](around:${r},${lat},${lon});
-  relation["building"="construction"](around:${r},${lat},${lon});
-  way["landuse"="construction"](around:${r},${lat},${lon});
-  way["amenity"="hospital"](around:${r},${lat},${lon});
-  node["amenity"="hospital"](around:${r},${lat},${lon});
-  way["amenity"="university"](around:${r},${lat},${lon});
-  way["landuse"="residential"]["name"](around:${r},${lat},${lon});
-  node["place"~"^(suburb|neighbourhood)$"]["name"](around:${r},${lat},${lon});
-  way["building"~"^(apartments|residential)"](around:${r},${lat},${lon});
-);
-out geom qt;`;
-
-      try {
-        const resp = await fetch('https://overpass-api.de/api/interpreter', {
-          method:'POST', body:'data='+encodeURIComponent(q),
-          signal:AbortSignal.timeout(15000),
-        });
+        const resp = await fetch(url, {signal:AbortSignal.timeout(6000)});
         if(!resp.ok) return [];
         const data = await resp.json();
-        const zones = [];
+        return (data.features||[]).map(f=>({
+          name: f.properties?.name || f.properties?.full_address || category,
+          lon:  f.geometry?.coordinates?.[0],
+          lat:  f.geometry?.coordinates?.[1],
+          category,
+          tags: f.properties || {},
+        })).filter(p=>p.lon&&p.lat);
+      } catch(e) { return []; }
+    },
 
-        (data.elements||[]).forEach(el => {
-          const t  = el.tags||{};
-          const c  = this._centroid(el.geometry);
+    // ── QUERY CONSTRÂNGERI — cimitire, spitale, parcuri via Mapbox ────
+    async queryConstraints(lon, lat, radiusKm, token) {
+      // Categorii de exclus sau de urmărit
+      const searches = [
+        {cat:'cemetery',   bufR:70,  type:'cimitir',  color:'#6b7280', exclude:true},
+        {cat:'park',       bufR:80,  type:'parc',     color:'#15803d', exclude:true},
+        {cat:'playground', bufR:30,  type:'loc_joaca',color:'#15803d', exclude:false},
+        {cat:'hospital',   bufR:0,   type:'spital',   color:'#06b6d4', exclude:false, isDev:true},
+        {cat:'university', bufR:0,   type:'univ',     color:'#8b5cf6', exclude:false, isDev:true},
+        {cat:'stadium',    bufR:80,  type:'stadion',  color:'#374151', exclude:true},
+      ];
+
+      const results = await Promise.all(
+        searches.map(s =>
+          this._mapboxCategorySearch(s.cat, lon, lat, radiusKm, token)
+               .then(pois => pois.map(p=>({...p,...s})))
+        )
+      );
+
+      const flat = results.flat();
+      const bufs = [];
+      const devZones = [];
+
+      flat.forEach(p => {
+        if(p.exclude && p.bufR > 0) {
+          bufs.push({lon:p.lon, lat:p.lat, r:p.bufR,
+                     reason:p.name, color:p.color, type:p.type});
+        }
+        if(p.isDev) {
+          devZones.push({lon:p.lon, lat:p.lat, name:p.name,
+                        type:p.type, color:p.color,
+                        hMax:p.type==='spital'?40:25,
+                        startYr:2026, priority:1});
+        }
+      });
+
+      console.log(`[CONSTRAINT] Mapbox Search: ${bufs.length} excluse + ${devZones.length} zone dev din ${flat.length} POI`);
+      return {bufs, devZones};
+    },
+
+    // ── QUERY ȘANTIERE ACTIVE — Overpass (Mapbox nu are categoria) ────
+    async queryConstructionSites(lon, lat, radiusM) {
+      const r = Math.min(radiusM, 12000);
+      const q = `[out:json][timeout:10];
+(
+  way["building"="construction"](around:${r},${lat},${lon});
+  way["landuse"="construction"](around:${r},${lat},${lon});
+  node["amenity"="grave_yard"](around:${r},${lat},${lon});
+  way["amenity"="grave_yard"](around:${r},${lat},${lon});
+  way["natural"="wood"](around:${r},${lat},${lon});
+  way["natural"="water"](around:${r},${lat},${lon});
+  way["waterway"~"^(river|canal)$"](around:${r},${lat},${lon});
+  way["railway"~"^(rail|light_rail)$"](around:${r},${lat},${lon});
+);
+out geom qt;`;
+      try {
+        const resp = await fetch('https://overpass-api.de/api/interpreter',
+          {method:'POST', body:'data='+encodeURIComponent(q),
+           signal:AbortSignal.timeout(10000)});
+        if(!resp.ok) return {santiere:[], extra_bufs:[]};
+        const data = await resp.json();
+        const santiere = [], extra_bufs = [];
+        (data.elements||[]).forEach(el=>{
+          const t=el.tags||{}, c=this._centroid(el.geometry);
           if(!c) return;
-          const [eLon, eLat] = c;
-          const name = t.name || t['name:ro'] || '';
-
-          // Tip și parametri per categorie
-          if(t.building==='construction' || t.landuse==='construction') {
-            zones.push({
-              lon:eLon, lat:eLat, name: name||'Șantier activ',
-              type:'constructie', color:'#f59e0b',
-              hMax: t.building_levels ? (+t.building_levels)*3 : 18,
-              startYr: 2025, priority: 1,
-            });
-          } else if(t.amenity==='hospital') {
-            zones.push({
-              lon:eLon, lat:eLat, name: name||'Spital',
-              type:'institutional', color:'#06b6d4',
-              hMax:35, startYr:2026, priority:2,
-            });
-          } else if(t.amenity==='university') {
-            zones.push({
-              lon:eLon, lat:eLat, name: name||'Universitate',
-              type:'institutional', color:'#8b5cf6',
-              hMax:25, startYr:2027, priority:2,
-            });
-          } else if(t.landuse==='residential' && name) {
-            zones.push({
-              lon:eLon, lat:eLat, name,
-              type:'rezidential', color:'#3b82f6',
-              hMax:20, startYr:2028, priority:3,
-            });
-          } else if(t.place && name) {
-            zones.push({
-              lon:eLon, lat:eLat, name,
-              type:'cartier', color:'#22c55e',
-              hMax:15, startYr:2029, priority:3,
-            });
+          if(t.building==='construction'||t.landuse==='construction') {
+            santiere.push({lon:c[0],lat:c[1],name:t.name||'Șantier activ',
+                           type:'constructie',color:'#f59e0b',hMax:20,startYr:2025,priority:1});
+          } else if(t.amenity==='grave_yard') {
+            extra_bufs.push({lon:c[0],lat:c[1],r:65,reason:t.name||'Cimitir',color:'#6b7280',type:'cimitir'});
+          } else if(t.natural==='wood') {
+            extra_bufs.push({lon:c[0],lat:c[1],r:50,reason:t.name||'Pădure',color:'#15803d',type:'padure'});
+          } else if(t.natural==='water'||t.waterway==='river') {
+            extra_bufs.push({lon:c[0],lat:c[1],r:50,reason:t.name||'Apă',color:'#0ea5e9',type:'apa'});
+          } else if(t.railway) {
+            extra_bufs.push({lon:c[0],lat:c[1],r:22,reason:'Cale ferată',color:'#78716c',type:'cf'});
           }
         });
-
-        // Deduplicate pe baza distanței (merge puncte la <200m)
-        const merged = [];
-        zones.forEach(z => {
-          const R=111319.9, cp=Math.cos(lat*Math.PI/180);
-          const tooClose = merged.some(m =>
-            Math.hypot((z.lon-m.lon)*R*cp, (z.lat-m.lat)*R) < 200
-          );
-          if(!tooClose) merged.push(z);
-        });
-
-        console.log(`[CONSTRAINT] ✅ Zone dezvoltare Overpass: ${merged.length} găsite (${zones.length} brut)`);
-        return merged;
-      } catch(e) {
-        console.log('[CONSTRAINT] queryDevelopmentZones timeout/err:', e.message);
-        return [];
-      }
+        return {santiere, extra_bufs};
+      } catch(e) { return {santiere:[], extra_bufs:[]}; }
     },
+
 
     _centroid(geom) {
       if(!geom) return null;
@@ -1117,59 +1073,58 @@ out geom qt;`;
     // ── BUILD — funcția principală ────────────────────────────────────
     async build(lon, lat, radiusKm=12) {
       console.log('[CONSTRAINT] Build pentru', lon.toFixed(4), lat.toFixed(4));
+      const token = mapboxgl?.accessToken || window.MAPBOX_TOKEN || '';
 
-      // Rulează TOATE query-urile în paralel
-      const [lmiData, osmData, devData] = await Promise.allSettled([
+      // Rulează toate query-urile în paralel
+      const [lmiRes, mapboxRes, overpassRes] = await Promise.allSettled([
         this.queryLMI(lon, lat, radiusKm*1000),
-        this.queryOverpass(lon, lat, radiusKm*1000),
-        this.queryDevelopmentZones(lon, lat, radiusKm*1000),
+        token ? this.queryConstraints(lon, lat, radiusKm, token) : Promise.resolve({bufs:[],devZones:[]}),
+        this.queryConstructionSites(lon, lat, radiusKm*1000),
       ]);
 
-      const lmi = lmiData.status==='fulfilled' ? lmiData.value : {monumente:[],zone:[],situri:[]};
-      const osm = osmData.status==='fulfilled' && osmData.value
-                  ? osmData.value : {cimitire:[],paduri:[],ape:[],cale_ferata:[]};
-      const dev = devData.status==='fulfilled' ? devData.value : [];
+      const lmi       = lmiRes.status==='fulfilled'      ? lmiRes.value      : {monumente:[],zone:[],situri:[]};
+      const mapboxData= mapboxRes.status==='fulfilled'   ? mapboxRes.value   : {bufs:[],devZones:[]};
+      const overpass  = overpassRes.status==='fulfilled' ? overpassRes.value : {santiere:[],extra_bufs:[]};
 
-      // Protecții critice hardcodate (mereu corecte) + Overpass
+      // Protecții hardcodate (mereu corecte)
       const hardProtected = this.getProtectedForCity(lon, lat);
-      const bufs = [...hardProtected];
 
-      // LMI buffers
-      [...(lmi.monumente||[]), ...(lmi.zone||[])].forEach(m=>{
-        const c = this._centroid(m.geometry); if(!c) return;
-        const cat = (m.properties?.CATEGORIE||'B').toUpperCase();
+      // Buffer-e combinate: hardcoded + Mapbox + Overpass extra
+      const bufs = [
+        ...hardProtected,
+        ...mapboxData.bufs,
+        ...overpass.extra_bufs,
+      ];
+
+      // LMI din CIMEC (când CORS permite)
+      [...(lmi.monumente||[]),...(lmi.zone||[])].forEach(m=>{
+        const c=this._centroid(m.geometry); if(!c) return;
+        const cat=(m.properties?.CATEGORIE||'B').toUpperCase();
         bufs.push({lon:c[0],lat:c[1],r:cat.startsWith('A')?100:50,
                    reason:'LMI '+(m.properties?.DENUMIRE||'Monument'),color:'#dc2626',type:'lmi'});
       });
-      (lmi.situri||[]).forEach(s=>{
-        const c = this._centroid(s.geometry); if(!c) return;
-        bufs.push({lon:c[0],lat:c[1],r:100,reason:'Sit arheologic',color:'#b91c1c',type:'lmi'});
-      });
 
-      // Cimitire, păduri, ape, CF buffers
-      osm.cimitire.forEach(el=>{
-        const c=this._centroid(el.geometry); if(!c) return;
-        bufs.push({lon:c[0],lat:c[1],r:60,reason:'Cimitir: '+(el.tags?.name||''),color:'#6b7280',type:'cimitir'});
-      });
-      osm.paduri.forEach(el=>{
-        const c=this._centroid(el.geometry); if(!c) return;
-        bufs.push({lon:c[0],lat:c[1],r:55,reason:'Pădure: '+(el.tags?.name||''),color:'#15803d',type:'padure'});
-      });
-      osm.ape.forEach(el=>{
-        const c=this._centroid(el.geometry); if(!c) return;
-        const r=el.tags?.waterway==='river'||el.tags?.natural==='water'?50:15;
-        bufs.push({lon:c[0],lat:c[1],r,reason:'Apă: '+(el.tags?.name||''),color:'#0ea5e9',type:'apa'});
-      });
-      osm.cale_ferata.forEach(el=>{
-        const c=this._centroid(el.geometry); if(!c) return;
-        bufs.push({lon:c[0],lat:c[1],r:22,reason:'Cale ferată',color:'#78716c',type:'cf'});
-      });
+      // Zone de dezvoltare: Mapbox spitale/univ + Overpass șantiere
+      const devZones = [
+        ...mapboxData.devZones,
+        ...overpass.santiere,
+      ];
 
       const aeronautic = this.checkAeronautic(lon, lat);
       const seismic    = this._seismicByCoord(lon, lat);
 
-      console.log(`[CONSTRAINT] ✅ ${bufs.length} excluse | ${dev.length} zone dezvoltare găsite OSM`);
-      return {bufs, aeronautic, seismic, lmi, osm, devZones:dev, loaded:true};
+      // Deduplicare buffere (elimină duplicatele la <150m)
+      const R=111319.9, cp=Math.cos(lat*Math.PI/180);
+      const dedupBufs = [];
+      bufs.forEach(b=>{
+        const dup = dedupBufs.some(d=>
+          Math.hypot((b.lon-d.lon)*R*cp,(b.lat-d.lat)*R)<150 && d.type===b.type
+        );
+        if(!dup) dedupBufs.push(b);
+      });
+
+      console.log(`[CONSTRAINT] ✅ ${dedupBufs.length} excluderi | ${devZones.length} zone dev | Mapbox:${mapboxData.bufs.length} Overpass:${overpass.extra_bufs.length} Hard:${hardProtected.length}`);
+      return {bufs:dedupBufs, aeronautic, seismic, lmi, devZones, loaded:true};
     },
   },
 
