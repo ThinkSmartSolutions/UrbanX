@@ -89,7 +89,7 @@ const _CloudSync = {
   async registerSW() {
     if(!('serviceWorker' in navigator)) return;
     try {
-      const reg = await navigator.serviceWorker.register('/sw.js');
+      const reg = await navigator.serviceWorker.register('./sw.js');
       console.log('[SW] Inregistrat:', reg.scope);
 
       // Asculta mesaje de la SW

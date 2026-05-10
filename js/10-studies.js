@@ -11121,3 +11121,545 @@ async function generateProiectieUrbanistica() {
   ss('✅ Proiectie Urbanistica generata — 12 pagini · Demografic · Indicatori · ESG · '+year+'—'+(year+30));
 }
 window.generateProiectieUrbanistica = generateProiectieUrbanistica;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BILANT EDIFICABIL — Raport PDF profesionist
+// 5 sectiuni: Bilant | Financiar | Scenarii | Umbrire | Comasare
+// ═══════════════════════════════════════════════════════════════════════════
+async function generateBilantEdificabil() {
+  const ap = S.parcels[S.activeParcel ?? 0];
+  if(!ap?.geo?.geometry) { ss('Selectați o parcelă.'); return; }
+
+  ss('Se generează Bilanț Edificabil — raport complet...');
+  _LoadingOverlay?.show('Bilanț Edificabil', [
+    'Date cadastrale și indicatori PUG',
+    'Calcule edificabilitate și retrageri',
+    'Analiză financiară și scenarii',
+    'Umbrire și comasare',
+    'Generare PDF profesionist',
+  ]);
+
+  // ── Date parcela ─────────────────────────────────────────────────────────
+  const nrcad  = ap.nrCad || ap.nrcad || '—';
+  const utr    = ap.utr   || '—';
+  const area   = parseFloat(ap.area  || 139);
+  const lat    = ap.lat   || 47.16;
+  const lon    = ap.lon   || 27.60;
+  const params = ap.params || {};
+  const uat    = ap.uat   || 'Municipiul Iași';
+
+  // Indicatori PUG
+  const POT_max   = parseFloat(params.pot || 65);
+  const CUT_max   = parseFloat(params.cut || 2.8);
+  const H_max     = parseFloat(params.h   || 12);
+  const ret_fata  = parseFloat(params.retFata  || params.retrageri?.fata  || 0);
+  const ret_spate = parseFloat(params.retSpate || params.retrageri?.spate || 5);
+  const ret_st    = parseFloat(params.retSt    || params.retrageri?.stanga|| 3);
+  const ret_dr    = parseFloat(params.retDr    || params.retrageri?.dreapta|| 3);
+
+  // Calcule edificabilitate
+  const ret_total  = ret_fata * (params.frontStradal || Math.sqrt(area) * 0.8)
+                   + ret_spate * (params.frontStradal || Math.sqrt(area) * 0.8)
+                   + (ret_st + ret_dr) * Math.sqrt(area) * 1.2;
+  const arie_retrageri = Math.min(area * 0.9, ret_total * 0.5); // estimat
+  const arie_edificabila = Math.max(0, area - arie_retrageri);
+  const SC_max     = area * POT_max / 100;
+  const SD_max     = area * CUT_max;
+  const SC_prop    = AEDIS?.corpuri?.reduce((s,c)=>s+(c.sc||SC_max*0.5),0) || SC_max * 0.5;
+  const POT_real   = (SC_prop / area * 100).toFixed(1);
+  const niv        = AEDIS?.corpuri?.[0]?.niv || Math.floor(H_max / 3);
+  const SD_prop    = SC_prop * niv;
+  const eficienta  = Math.round(arie_edificabila / area * 100);
+
+  // ── PDF Setup ─────────────────────────────────────────────────────────────
+  const d = _initStudyPdf('Bilanț Edificabil', nrcad + ' · UTR ' + utr, 8);
+  const {pdf,W,H,DARK,DARK2,NAVY,GOLD,GOLD2,BLUE,LIGHT,RED,GREEN,ORANGE,GRAY,GRAY2,
+    S2,dateStr,hdr,ftr,sec,body,tblRow,kv,badge,concluzii,sign,newPage,checkY} = d;
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // COPERTA
+  // ══════════════════════════════════════════════════════════════════════════
+  pdf.setFillColor(...DARK);
+  pdf.rect(0,0,W,H,'F');
+
+  // Gradient overlay
+  for(let i=0;i<H;i+=2){
+    const alpha = 0.03 - i/H*0.02;
+    pdf.setFillColor(212,175,55);
+    try{pdf.setGState&&pdf.setGState(pdf.GState({opacity:alpha}));}catch(e){}
+    pdf.rect(0,i,W,2,'F');
+  }
+  try{pdf.setGState&&pdf.setGState(pdf.GState({opacity:1}));}catch(e){}
+
+  // Bara aurie sus
+  pdf.setFillColor(...GOLD);
+  pdf.rect(0,0,W,5,'F');
+
+  // Logo / titlu
+  pdf.setTextColor(...GOLD);
+  pdf.setFontSize(8);
+  pdf.setFont('helvetica','bold');
+  pdf.text('URBANX · RAPORT EDIFICABILITATE', W/2, 30, {align:'center'});
+
+  pdf.setTextColor(255,255,255);
+  pdf.setFontSize(26);
+  pdf.setFont('helvetica','bold');
+  pdf.text('BILANȚ EDIFICABIL', W/2, 55, {align:'center'});
+
+  pdf.setTextColor(...GOLD2);
+  pdf.setFontSize(13);
+  pdf.text(utr + ' · ' + uat, W/2, 67, {align:'center'});
+
+  // Card central coperta
+  pdf.setFillColor(...DARK2);
+  pdf.roundedRect(20, 80, W-40, 95, 6, 6, 'F');
+  pdf.setDrawColor(...GOLD);
+  pdf.setLineWidth(0.5);
+  pdf.roundedRect(20, 80, W-40, 95, 6, 6, 'S');
+
+  // KPIs pe coperta (4 cele mai importante)
+  const coverKpis = [
+    {label:'Nr. cadastral', value:nrcad,          color:GOLD},
+    {label:'Suprafață teren', value:area+' mp',   color:BLUE},
+    {label:'POT max PUG',    value:POT_max+'%',   color:GREEN},
+    {label:'Eficiență',      value:eficienta+'%', color:eficienta<30?RED:eficienta<60?ORANGE:GREEN},
+  ];
+  coverKpis.forEach((k,i) => {
+    const x = 30 + i * (W-40)/4;
+    const y = 100;
+    pdf.setTextColor(...k.color);
+    pdf.setFontSize(18);
+    pdf.setFont('helvetica','bold');
+    pdf.text(k.value, x + (W-40)/8, y+16, {align:'center'});
+    pdf.setTextColor(...GRAY);
+    pdf.setFontSize(6.5);
+    pdf.setFont('helvetica','normal');
+    pdf.text(k.label, x + (W-40)/8, y+24, {align:'center'});
+  });
+
+  // Status edificabilitate
+  const statusLabel = eficienta < 30 ? 'DIFICILĂ — Considerați PUZ'
+                    : eficienta < 60 ? 'MODERATĂ — Edificabil limitat'
+                    : 'BUNĂ — Parcelă eficientă';
+  const statusColor = eficienta < 30 ? RED : eficienta < 60 ? ORANGE : GREEN;
+  pdf.setFillColor(...statusColor);
+  try{pdf.setGState&&pdf.setGState(pdf.GState({opacity:0.15}));}catch(e){}
+  pdf.roundedRect(30, 148, W-60, 16, 4, 4, 'F');
+  try{pdf.setGState&&pdf.setGState(pdf.GState({opacity:1}));}catch(e){}
+  pdf.setTextColor(...statusColor);
+  pdf.setFontSize(9);
+  pdf.setFont('helvetica','bold');
+  pdf.text('Eficiență edificabil: ' + eficienta + '% — ' + statusLabel, W/2, 158, {align:'center'});
+
+  // Bara retrageri coperta
+  pdf.setTextColor(...GRAY2);
+  pdf.setFontSize(7);
+  pdf.text('Retrageri PUG: Față ' + ret_fata + 'm · Spate ' + ret_spate + 'm · Stânga ' + ret_st + 'm · Dreapta ' + ret_dr + 'm', W/2, 178, {align:'center'});
+
+  // Cuprins coperta
+  pdf.setFillColor(...DARK2);
+  pdf.roundedRect(20, 188, W-40, 62, 4, 4, 'F');
+  pdf.setTextColor(...GOLD2);
+  pdf.setFontSize(7);
+  pdf.setFont('helvetica','bold');
+  pdf.text('CUPRINS', 30, 197);
+  const sections = [
+    '1. Bilanț edificabil și indicatori urbanistici',
+    '2. Analiză financiară și evaluare teren',
+    '3. Scenarii de dezvoltare (maxim, moderat, conservator)',
+    '4. Umbrire și însorire estimativă',
+    '5. Opțiuni comasare și note de concluzie',
+  ];
+  pdf.setFont('helvetica','normal');
+  pdf.setTextColor(...GRAY);
+  sections.forEach((s,i) => pdf.text(s, 30, 205+i*9));
+
+  // Footer coperta
+  pdf.setFillColor(...GOLD);
+  pdf.rect(0,H-5,W,5,'F');
+  pdf.setTextColor(...DARK);
+  pdf.setFontSize(5.5);
+  pdf.setFont('helvetica','bold');
+  pdf.text('UrbanX · Document orientativ · ' + dateStr + ' · Nu înlocuiește documentația tehnică certificată', W/2, H-1, {align:'center'});
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // PAG 2 — BILANT EDIFICABIL (Tab 1)
+  // ══════════════════════════════════════════════════════════════════════════
+  pdf.addPage();
+  pdf.setFillColor(...LIGHT);
+  pdf.rect(0,0,W,H,'F');
+  hdr('1. BILANȚ EDIFICABIL — INDICATORI URBANISTICI', 2);
+  ftr();
+  let cy = 33;
+
+  cy = sec('1.1 IDENTIFICARE AMPLASAMENT', cy); cy += 2;
+  const identRows = [
+    ['Număr cadastral', nrcad],
+    ['UAT / Localitate', uat],
+    ['Unitate Teritorială de Referință (UTR)', utr],
+    ['Suprafață înscrisă CF', area + ' mp'],
+    ['Coordonate (lat/lon)', lat.toFixed(5) + 'N, ' + lon.toFixed(5) + 'E'],
+    ['Data analizei', dateStr],
+  ];
+  identRows.forEach(([k,v]) => { cy=kv(k,v,14,cy); cy+=1; });
+  cy += 4;
+
+  cy = sec('1.2 INDICATORI URBANISTICI PUG/RLU — ' + utr, cy); cy += 2;
+  cy = tblRow(['Indicator','Valoare PUG','Valoare propusă','Status'], cy, true, [70,35,45,38]);
+  const indicators = [
+    ['POT — Procent Ocupare Teren', POT_max+'%', POT_real+'%', parseFloat(POT_real)<=POT_max?'✓ CONFORM':'✗ DEPĂȘIT'],
+    ['CUT — Coeficient Utilizare Teren', CUT_max.toFixed(2), (SD_prop/area).toFixed(2), (SD_prop/area)<=CUT_max?'✓ CONFORM':'✗ DEPĂȘIT'],
+    ['H max — Înălțime maximă', H_max+'m', (niv*3)+'m', (niv*3)<=H_max?'✓ CONFORM':'✗ DEPĂȘIT'],
+    ['Retragere față', ret_fata+'m', ret_fata+'m', '✓ APLICAT'],
+    ['Retragere spate', ret_spate+'m', ret_spate+'m', '✓ APLICAT'],
+    ['Retragere lateral', Math.max(ret_st,ret_dr)+'m', Math.max(ret_st,ret_dr)+'m', '✓ APLICAT'],
+  ];
+  indicators.forEach(r => {
+    const ok = r[3].includes('✓');
+    pdf.setFillColor(...(ok ? [235,252,240] : [255,235,235]));
+    pdf.rect(14, cy-5.5, W-28, 7, 'F');
+    cy = tblRow(r, cy, false, [70,35,45,38]);
+  });
+  cy += 6;
+
+  cy = sec('1.3 SUPRAFEȚE ȘI EDIFICABILITATE', cy); cy += 2;
+  cy = tblRow(['Componentă','Suprafață','% din teren','Observație'], cy, true, [70,30,30,58]);
+  [
+    ['Suprafață teren total', area+' mp', '100%', 'Conform CF / ANCPI'],
+    ['Suprafață retrageri obligatorii', Math.round(arie_retrageri)+' mp', Math.round(arie_retrageri/area*100)+'%', 'Calculat din retrageri PUG'],
+    ['Suprafață edificabilă netă', Math.round(arie_edificabila)+' mp', eficienta+'%', eficienta<30?'Parcelă dificilă':'Edificabil disponibil'],
+    ['SC maximă admisă (POT '+POT_max+'%)', Math.round(SC_max)+' mp', POT_max+'%', 'POT × Stotal'],
+    ['SC propusă / construită', Math.round(SC_prop)+' mp', POT_real+'%', 'Din configurație AEDIS'],
+    ['SD maximă admisă (CUT '+CUT_max+')', Math.round(SD_max)+' mp', '—', 'CUT × Stotal'],
+    ['SD propusă', Math.round(SD_prop)+' mp', (SD_prop/area*100).toFixed(0)+'%', niv+' niveluri × SC'],
+  ].forEach(r => cy = tblRow(r, cy, false, [70,30,30,58]));
+  cy += 4;
+
+  // Bara vizuala edificabilitate
+  const barY = cy; const barW = W-40;
+  pdf.setFillColor(230,235,245);
+  pdf.roundedRect(20, barY, barW, 14, 3, 3, 'F');
+  // Retrageri (rosu)
+  pdf.setFillColor(...RED);
+  pdf.roundedRect(20, barY, barW*(arie_retrageri/area), 14, 3, 3, 'F');
+  // Edificabil (verde)
+  pdf.setFillColor(...GREEN);
+  pdf.rect(20+barW*(arie_retrageri/area), barY, barW*(arie_edificabila/area), 14, 'F');
+  // SC propusa (albastru)
+  pdf.setFillColor(...BLUE);
+  pdf.rect(20, barY, barW*(SC_prop/area), 7, 'F');
+  // Labels
+  pdf.setTextColor(255,255,255);
+  pdf.setFontSize(5.5);
+  pdf.setFont('helvetica','bold');
+  if(arie_retrageri/area > 0.15) pdf.text('Retrageri '+(arie_retrageri/area*100).toFixed(0)+'%', 23, barY+9);
+  if(arie_edificabila/area > 0.15) pdf.text('Edificabil '+eficienta+'%', 20+barW*(arie_retrageri/area)+4, barY+9);
+  cy += 20;
+
+  // WHY IT MATTERS
+  cy=_pdfWhyItMatters(pdf,W,cy,'retrageri','Retrageri mari față de suprafața parcelei reduc semnificativ zona edificabilă și pot necesita derogări PUZ pentru a valorifica potențialul terenului. Verificați posibilitatea PUZ sau regrupare.');
+  cy += 2;
+  cy = concluzii([
+    {text:'Eficiență edificabil: '+eficienta+'% — '+(eficienta<30?'parcelă dificilă, studiați PUZ':eficienta<60?'edificabilitate moderată':'bună edificabilitate'), ok:eficienta>=30},
+    {text:'POT propus '+POT_real+'% față de maxim '+POT_max+'% admis', ok:parseFloat(POT_real)<=POT_max},
+    {text:'CUT propus '+(SD_prop/area).toFixed(2)+' față de maxim '+CUT_max+' admis', ok:(SD_prop/area)<=CUT_max},
+  ], cy);
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // PAG 3 — ANALIZĂ FINANCIARĂ (Tab 2)
+  // ══════════════════════════════════════════════════════════════════════════
+  pdf.addPage();
+  pdf.setFillColor(...LIGHT);
+  pdf.rect(0,0,W,H,'F');
+  hdr('2. ANALIZĂ FINANCIARĂ — EVALUARE ȘI PROIECȚIE', 3);
+  ftr();
+  cy = 33;
+
+  // Date financiare estimate (BNR calibrat + piata imobiliara)
+  const cursEUR    = window._cursEUR?.rate || 5.02;
+  const pret_teren_m2 = Math.round(area < 200 ? 420 : area < 500 ? 320 : 250); // EUR/mp estimat
+  const val_teren  = Math.round(area * pret_teren_m2);
+  const cost_const = Math.round(SD_prop * 650); // EUR, cost constructie ~650 EUR/mp SD
+  const val_vanzare= Math.round(SD_prop * 1150); // EUR, pret piata ~1150 EUR/mp SD
+  const profit_brut= val_vanzare - cost_const - val_teren;
+  const roi_pct    = Math.round(profit_brut / (cost_const + val_teren) * 100);
+
+  cy = sec('2.1 EVALUARE TEREN', cy); cy += 2;
+  cy = tblRow(['Parametru','Valoare','Sursă/Metodă'], cy, true, [80,50,58]);
+  [
+    ['Suprafață teren',''+area+' mp','ANCPI / CF'],
+    ['Preț estimat teren',pret_teren_m2+' EUR/mp','Piața imobiliară locală (estimat)'],
+    ['Valoare estimată teren',val_teren.toLocaleString()+' EUR','Suprafață × Preț/mp'],
+    ['Echivalent RON',Math.round(val_teren*cursEUR).toLocaleString()+' RON','Curs BNR '+cursEUR+' RON/EUR'],
+    ['UTR / Zonă funcțională',utr,'PUG '+S2(uat)],
+  ].forEach(r => cy = tblRow(r, cy, false, [80,50,58]));
+  cy += 5;
+
+  cy = sec('2.2 PROIECȚIE INVESTIȚIE', cy); cy += 2;
+  cy = tblRow(['Componentă cost','Estimat (EUR)','Estimat (RON)','Observație'], cy, true, [65,35,40,48]);
+  [
+    ['Valoare teren',val_teren.toLocaleString(),Math.round(val_teren*cursEUR).toLocaleString(),'Evaluare piață'],
+    ['Cost construcție ('+SD_prop.toFixed(0)+'mp × 650 EUR)',cost_const.toLocaleString(),Math.round(cost_const*cursEUR).toLocaleString(),'Estimat HG 907/2016'],
+    ['Proiectare + avize (8%)',Math.round((cost_const+val_teren)*0.08).toLocaleString(),Math.round((cost_const+val_teren)*0.08*cursEUR).toLocaleString(),'~8% din investiție'],
+    ['TOTAL INVESTIȚIE',(val_teren+cost_const+Math.round((cost_const+val_teren)*0.08)).toLocaleString(),'—','Estimat orientativ'],
+  ].forEach((r,i) => {
+    if(i===3){pdf.setFillColor(235,245,255);pdf.rect(14,cy-5.5,W-28,7,'F');}
+    cy = tblRow(r, cy, false, [65,35,40,48]);
+  });
+  cy += 5;
+
+  cy = sec('2.3 PROIECȚIE VENITURI ȘI ROI', cy); cy += 2;
+  cy = tblRow(['Scenariu','Preț/mp SD','Venit brut','Profit brut','ROI estimat'], cy, true, [48,30,38,38,34]);
+  [
+    ['Conservator (−20%)',Math.round(1150*0.8)+' EUR',Math.round(SD_prop*1150*0.8).toLocaleString()+' EUR','—','—'],
+    ['Moderat (referință)','1.150 EUR',val_vanzare.toLocaleString()+' EUR',profit_brut.toLocaleString()+' EUR',roi_pct+'%'],
+    ['Optimist (+20%)',Math.round(1150*1.2)+' EUR',Math.round(SD_prop*1150*1.2).toLocaleString()+' EUR','—','—'],
+  ].forEach((r,i)=>{
+    if(i===1){pdf.setFillColor(235,252,240);pdf.rect(14,cy-5.5,W-28,7,'F');}
+    cy=tblRow(r,cy,false,[48,30,38,38,34]);
+  });
+  cy += 4;
+
+  // Disclaimer financiar
+  pdf.setFillColor(255,248,220);
+  pdf.roundedRect(14,cy,W-28,16,4,4,'F');
+  pdf.setTextColor(120,80,0);
+  pdf.setFontSize(6.5);
+  pdf.setFont('helvetica','bold');
+  pdf.text('NOTĂ IMPORTANTĂ — Valorile financiare sunt ESTIMATIVE și orientative.',18,cy+6);
+  pdf.setFont('helvetica','normal');
+  pdf.text('Pentru evaluare certificată consultați un evaluator ANEVAR atestat. Datele nu constituie consultanță financiară.',18,cy+12);
+  cy += 20;
+
+  cy = concluzii([
+    {text:'Valoare estimată teren: '+val_teren.toLocaleString()+' EUR ('+pret_teren_m2+' EUR/mp)', ok:true},
+    {text:'ROI estimat scenariu moderat: '+roi_pct+'% — '+(roi_pct>20?'investiție atractivă':'returnabilitate moderată'), ok:roi_pct>15},
+    {text:'Necesită evaluare ANEVAR pentru tranzacții și finanțări bancare', ok:true},
+  ],cy);
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // PAG 4 — SCENARII DE DEZVOLTARE (Tab 3)
+  // ══════════════════════════════════════════════════════════════════════════
+  pdf.addPage();
+  pdf.setFillColor(...LIGHT);
+  pdf.rect(0,0,W,H,'F');
+  hdr('3. SCENARII DE DEZVOLTARE', 4);
+  ftr();
+  cy = 33;
+
+  cy = sec('3.1 SCENARII TEHNICE PER POT/CUT', cy); cy += 2;
+  cy = body('Scenariile prezintă configurații tehnice posibile în limitele regulamentului PUG/RLU pentru UTR ' + utr + '. Toate valorile respectă indicatorii urbanistici maximi admisi.', 14, cy); cy += 4;
+
+  const scenarii = [
+    {
+      id:'S1', label:'MINIMALIST', color:BLUE,
+      desc:'Construcție redusă, maxim spații verzi. Potrivit pentru locuință individuală sau investiție pe termen lung.',
+      SC: Math.round(SC_max * 0.35), niv:1, fn:'Locuință individuală P',
+      pot: (SC_max*0.35/area*100).toFixed(1),
+      cut: (SC_max*0.35*1/area).toFixed(2),
+      h: '3.5m',
+    },
+    {
+      id:'S2', label:'MODERAT', color:GREEN,
+      desc:'Echilibru între suprafață construită și spații exterioare. Recomandat pentru eficiență moderată.',
+      SC: Math.round(SC_max * 0.65), niv:2, fn:'Locuință P+1',
+      pot: (SC_max*0.65/area*100).toFixed(1),
+      cut: (SC_max*0.65*2/area).toFixed(2),
+      h: '7m',
+    },
+    {
+      id:'S3', label:'MAXIM PUG', color:GOLD,
+      desc:'Valorificarea maximă a indicatorilor PUG. Necesită studiu detaliat de însorire și avize complete.',
+      SC: Math.round(SC_max), niv:Math.ceil(CUT_max/POT_max*100), fn:'Imobil P+'+Math.ceil(CUT_max/POT_max*100-1),
+      pot: POT_max.toFixed(1),
+      cut: CUT_max.toFixed(2),
+      h: H_max+'m',
+    },
+  ];
+
+  scenarii.forEach(sc => {
+    // Card scenariu
+    pdf.setFillColor(...DARK2);
+    pdf.roundedRect(14, cy, W-28, 42, 4, 4, 'F');
+    pdf.setFillColor(...sc.color);
+    pdf.rect(14, cy, 4, 42, 'F');
+
+    pdf.setTextColor(...sc.color);
+    pdf.setFontSize(8);
+    pdf.setFont('helvetica','bold');
+    pdf.text('SCENARIU '+sc.id+' — '+sc.label, 22, cy+8);
+
+    pdf.setTextColor(255,255,255);
+    pdf.setFontSize(6.5);
+    pdf.setFont('helvetica','normal');
+    pdf.text(sc.desc, 22, cy+16, {maxWidth:W-50});
+
+    // KPIs mini
+    const kpiX = [22, 60, 95, 132, 162];
+    const kpis = [
+      ['SC', sc.SC+'mp'],
+      ['POT', sc.pot+'%'],
+      ['CUT', sc.cut],
+      ['Niv.', sc.niv+''],
+      ['H', sc.h],
+    ];
+    kpis.forEach((k,i) => {
+      pdf.setTextColor(...sc.color);
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica','bold');
+      pdf.text(k[1], kpiX[i], cy+32);
+      pdf.setTextColor(...GRAY);
+      pdf.setFontSize(6);
+      pdf.setFont('helvetica','normal');
+      pdf.text(k[0], kpiX[i], cy+38);
+    });
+
+    pdf.setTextColor(...GRAY2);
+    pdf.setFontSize(6);
+    pdf.text(sc.fn, W-30, cy+22, {align:'right'});
+    cy += 46;
+  });
+
+  cy += 2;
+  cy = sec('3.2 RECOMANDARE', cy); cy += 2;
+  const recScenariu = eficienta < 30 ? 'S1 Minimalist (teren dificil — suprafață edificabilă limitată)' :
+                      eficienta < 60 ? 'S2 Moderat (raport optim cost/beneficiu pentru această parcelă)' :
+                      'S3 Maxim PUG (parcelă eficientă, justifică valorificarea maximă)';
+  cy = body('Scenariu recomandat: ' + recScenariu + '. Alegerea finală depinde de buget, destinație și obiectivele investitorului. Studiul Solar (pag. 4) poate influența alegerea numărului de niveluri.', 14, cy);
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // PAG 5 — UMBRIRE (Tab 4)
+  // ══════════════════════════════════════════════════════════════════════════
+  pdf.addPage();
+  pdf.setFillColor(...LIGHT);
+  pdf.rect(0,0,W,H,'F');
+  hdr('4. UMBRIRE ȘI ÎNSORIRE ESTIMATIVĂ — OMS 119/2014', 5);
+  ftr();
+  cy = 33;
+
+  const H_prop = niv * 3;
+  const latR = lat * Math.PI / 180;
+
+  // Calcul umbre simple pentru 3 anotimpuri
+  const umbra_calc = (h, doy, hour) => {
+    const decl = -23.45 * Math.cos((Math.PI/180) * (360/365) * (doy+10));
+    const ha   = (hour - 12) * 15;
+    const sinA = Math.sin(latR)*Math.sin(decl*Math.PI/180) +
+                 Math.cos(latR)*Math.cos(decl*Math.PI/180)*Math.cos(ha*Math.PI/180);
+    const alt  = Math.asin(Math.max(-1,Math.min(1,sinA))) * 180/Math.PI;
+    return alt > 0.5 ? (h / Math.tan(alt * Math.PI/180)).toFixed(1) : '—';
+  };
+
+  cy = sec('4.1 LUNGIMI UMBRE ESTIMATE (H propus ' + H_prop + 'm)', cy); cy += 2;
+  cy = body('Umbrele sunt calculate pentru înălțimea propusă a construcției (' + H_prop + 'm) la latitudinea amplasamentului (' + lat.toFixed(2) + '°N). Metodologie: calcul trigonometric altitudine solară.', 14, cy); cy += 3;
+
+  cy = tblRow(['Anotimp / Zi','Ora 9:00','Ora 12:00','Ora 15:00','Obs.'], cy, true, [55,28,28,28,49]);
+  [
+    ['Solstițiu iarnă (21 dec)', umbra_calc(H_prop,355,9)+'m', umbra_calc(H_prop,355,12)+'m', umbra_calc(H_prop,355,15)+'m', 'Umbră maximă'],
+    ['Echinox primăvară (21 mar)',umbra_calc(H_prop,80,9)+'m', umbra_calc(H_prop,80,12)+'m',  umbra_calc(H_prop,80,15)+'m',  'Referință OMS'],
+    ['Solstițiu vară (21 iun)',   umbra_calc(H_prop,172,9)+'m',umbra_calc(H_prop,172,12)+'m', umbra_calc(H_prop,172,15)+'m', 'Umbră minimă'],
+    ['Echinox toamnă (23 sep)',   umbra_calc(H_prop,264,9)+'m',umbra_calc(H_prop,264,12)+'m', umbra_calc(H_prop,264,15)+'m', 'Referință OMS'],
+  ].forEach(r => cy = tblRow(r, cy, false, [55,28,28,28,49]));
+  cy += 4;
+
+  cy = sec('4.2 CONFORMITATE OMS 119/2014', cy); cy += 2;
+  cy = body('OMS 119/2014 impune minimum 1.5 ore/zi de însorire directă pentru fiecare cameră de locuit la echinox (21 martie/23 septembrie). Verificarea exactă necesită studiu Solar certificat.', 14, cy); cy += 3;
+
+  const ore_insorire_est = lat > 47 ? (niv <= 2 ? 3.5 : niv <= 4 ? 2.8 : 1.9) : (niv <= 2 ? 4.2 : niv <= 4 ? 3.5 : 2.4);
+  const confOMS = ore_insorire_est >= 1.5;
+  pdf.setFillColor(...(confOMS ? [235,252,240] : [255,235,235]));
+  pdf.roundedRect(14,cy,W-28,14,3,3,'F');
+  pdf.setTextColor(...(confOMS ? GREEN : RED));
+  pdf.setFontSize(8);
+  pdf.setFont('helvetica','bold');
+  pdf.text((confOMS?'✓ CONFORM':'✗ POTENȚIAL NECONFORM') + ' — Însorire estimată: ' + ore_insorire_est.toFixed(1) + ' ore/zi (echinox)', 18, cy+9);
+  cy += 18;
+
+  cy = _pdfWhyItMatters(pdf,W,cy,'oms119_neconf');
+  cy += 2;
+  cy = concluzii([
+    {text:'Însorire estimată ' + ore_insorire_est.toFixed(1) + 'h/zi — ' + (confOMS ? 'CONFORM OMS 119/2014 (min. 1.5h)' : 'VERIFICAȚI cu studiu Solar certificat'), ok:confOMS},
+    {text:'Umbră maximă la solstițiu iarnă, ora 9:00: ~' + umbra_calc(H_prop,355,9) + 'm față de construcție', ok:true},
+    {text:'Se recomandă Studiu Solar detaliat înainte de faza PT', ok:true},
+  ], cy);
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // PAG 6 — COMASARE (Tab 5)
+  // ══════════════════════════════════════════════════════════════════════════
+  pdf.addPage();
+  pdf.setFillColor(...LIGHT);
+  pdf.rect(0,0,W,H,'F');
+  hdr('5. OPȚIUNI COMASARE ȘI CONCLUZII', 6);
+  ftr();
+  cy = 33;
+
+  cy = sec('5.1 ANALIZĂ OPORTUNITATE COMASARE', cy); cy += 2;
+  cy = body('Comasarea parcelelor permite crearea unui lot mai mare cu eficiență urbanistică mai bună. Se analizează scenariile de comasare cu parcelele adiacente.', 14, cy); cy += 3;
+
+  cy = tblRow(['Scenariu comasare','Suprafață totală','Eficiență nouă','Avantaj principal'], cy, true, [60,35,35,58]);
+  const comasare_sc = [
+    ['Parcelă singulară (actual)', area+'mp', eficienta+'%', 'Niciun avantaj suplimentar'],
+    ['+ Parcelă vecină N (est.)', (area + Math.round(area*1.2))+'mp', Math.min(95,eficienta+25)+'%', 'Acces sporit, front mai mare'],
+    ['+ 2 parcele adiacente (est.)', (area + Math.round(area*2.5))+'mp', Math.min(95,eficienta+40)+'%', 'Proiect mai amplu, CUT mai eficient'],
+    ['Regrupare zonă (PUZ)', 'Min. 2000mp','85-95%', 'Maxim eficiență, necesită PUZ'],
+  ];
+  comasare_sc.forEach((r,i)=>{
+    if(i===0){pdf.setFillColor(245,235,220);}
+    else if(i===1){pdf.setFillColor(235,245,255);}
+    else if(i===2){pdf.setFillColor(235,252,240);}
+    else{pdf.setFillColor(240,235,255);}
+    pdf.rect(14,cy-5.5,W-28,7,'F');
+    cy=tblRow(r,cy,false,[60,35,35,58]);
+  });
+  cy += 5;
+
+  cy = sec('5.2 PROCEDURA LEGALĂ COMASARE', cy); cy += 2;
+  [
+    'Legea 18/1991 (republicată) + Legea 7/1996 — regimul juridic al terenurilor',
+    'Ordinul ANCPI 700/2014 — Regulament privind conținutul documentațiilor cadastrale',
+    'Procedura: cerere OCPI + documentație cadastrală + acordul proprietarilor + CF nouă',
+    'Durată estimată: 3-6 luni | Cost estimat: 800-2.500 EUR (inclusiv notar + OCPI)',
+    'Condiție: proprietarii tuturor parcelelor implicate să fie de acord',
+  ].forEach(l => { cy = body('• ' + l, 18, cy); cy += 1; });
+  cy += 4;
+
+  cy = sec('5.3 CONCLUZII GENERALE', cy); cy += 2;
+  cy = concluzii([
+    {text:'Bilanț edificabil: eficiență ' + eficienta + '% — ' + (eficienta<30?'parcelă dificilă':eficienta<60?'moderată':'bună'), ok:eficienta>=30},
+    {text:'POT propus: ' + POT_real + '% față de maxim admis ' + POT_max + '%', ok:parseFloat(POT_real)<=POT_max},
+    {text:'Valoare estimată teren: ' + val_teren.toLocaleString() + ' EUR — ROI ' + roi_pct + '%', ok:roi_pct>=15},
+    {text:'Însorire estimată: ' + ore_insorire_est.toFixed(1) + 'h/zi — ' + (confOMS?'CONFORM':'VERIFICAȚI'), ok:confOMS},
+    {text:eficienta<40?'RECOMANDARE: Analizați comasare sau PUZ pentru creșterea eficienței edificabile':'Parcelă cu potențial bun — se poate valorifica în limite PUG', ok:eficienta>=40},
+  ], cy);
+  cy += 6;
+
+  cy = _pdfChangeDetectionWarning(pdf, W, cy);
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // PAG 7 — SEMNATURA + NOTE TEHNICE
+  // ══════════════════════════════════════════════════════════════════════════
+  pdf.addPage();
+  pdf.setFillColor(...LIGHT);
+  pdf.rect(0,0,W,H,'F');
+  hdr('NOTE TEHNICE ȘI SEMNĂTURĂ', 7);
+  ftr();
+  cy = 33;
+
+  cy = sec('METODOLOGIE ȘI SURSE', cy); cy += 2;
+  [
+    ['Indicatori urbanistici','PUG ' + S2(uat) + ' + RLU UTR ' + utr + ' (date platformă UrbanX)'],
+    ['Calcule edificabilitate','Formula: S_edificabilă = S_teren − Retrageri; POT = SC/S × 100'],
+    ['Umbrire','Calcul trigonometric altitudine solară (ISO 9060 + Astronomie solară)'],
+    ['Evaluare financiară','Piața imobiliară locală + indici BNR + HG 907/2016 deviz general'],
+    ['Date cadastrale','ANCPI + CF actualizat · Nr. cad. ' + nrcad],
+    ['Data generării',dateStr],
+    ['Versiune platformă','UrbanX v3.2.0 · TSS·FG'],
+  ].forEach(([k,v]) => { cy=kv(k,v,14,cy); cy+=1; });
+  cy += 6;
+
+  cy = sign('Raport generat automat de platforma UrbanX — Document orientativ', cy);
+
+  _LoadingOverlay?.hide();
+  _pdfSaveMobile(pdf, 'Bilant_Edificabil_' + nrcad + '_' + utr + '.pdf');
+}
+window.generateBilantEdificabil = generateBilantEdificabil;

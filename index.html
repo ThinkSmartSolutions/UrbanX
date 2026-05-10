@@ -2396,5 +2396,24 @@ window._onParcelSelectedHook = function(parcel) {
   <script src="js/20-uats-database.js?v=2026051010"></script>
   <script src="js/21-cloud-sync.js?v=2026051010"></script>
   <script src="js/19-ux-polish.js?v=2026051010"></script>
+<script>
+// Hook pentru buton Export PDF in Bilant modal
+function addBilantExportBtn() {
+  const modal = document.querySelector(".bilant-modal, #bilant-modal, [class*=bilant]");
+  if(!modal) return;
+  if(modal.querySelector(".bilant-export-btn")) return;
+  const btn = document.createElement("button");
+  btn.className = "bilant-export-btn";
+  btn.textContent = "📄 Export PDF Raport";
+  btn.style.cssText = "background:rgba(212,175,55,0.15);border:1px solid rgba(212,175,55,0.4);color:#D4AF37;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:12px;width:100%;margin-top:8px";
+  btn.onclick = () => generateBilantEdificabil && generateBilantEdificabil();
+  modal.querySelector(".bilant-actions, .modal-footer, .btn-row") 
+    ? modal.querySelector(".bilant-actions, .modal-footer, .btn-row").appendChild(btn)
+    : modal.appendChild(btn);
+}
+// Observer pentru cand se deschide modalul
+new MutationObserver(() => addBilantExportBtn())
+  .observe(document.body, {childList:true, subtree:true});
+</script>
 </body>
 </html>
