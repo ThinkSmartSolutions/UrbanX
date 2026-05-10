@@ -256,6 +256,16 @@ const TCI = {
     ov.id = 'tci-ov';
     ov.style.cssText = 'position:fixed;inset:0;z-index:3000;pointer-events:none;font-family:"Space Grotesk","Inter",sans-serif;';
     ov.innerHTML = `
+      <style>
+        @media(max-width:600px){
+          #tci-lpanel{width:0!important;overflow:hidden!important;}
+          #tci-rpanel{width:0!important;overflow:hidden!important;}
+          #tci-rtoggle{display:none!important;}
+          #tci-ltoggle{display:none!important;}
+          #tci-narcard{left:8px!important;right:8px!important;transform:none!important;width:auto!important;max-width:none!important;bottom:68px!important;}
+          #tci-bottom-bar{left:0!important;right:0!important;}
+        }
+      </style>
       <canvas id="tci-canvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;background:transparent;"></canvas>
 
       <!-- TOPBAR -->
@@ -301,23 +311,32 @@ const TCI = {
         ◂ DATE
       </button>
 
-      <!-- NARRATIVE STRIP -->
-      <div id="tci-narrative" style="
-        position:absolute;bottom:62px;left:185px;right:0;z-index:9;
-        background:rgba(4,10,24,0.82);backdrop-filter:blur(10px);
-        border-top:1px solid rgba(212,175,55,0.1);
-        padding:6px 16px;pointer-events:none;
-        display:flex;align-items:center;gap:10px;min-height:28px;
-        transition:opacity .5s ease;
+      <!-- CARD NARATIUNE — sincronizat cu camera, mare, lizibil -->
+      <div id="tci-narcard" style="
+        position:absolute;
+        left:50%;transform:translateX(-50%);
+        bottom:78px;
+        max-width:520px;width:calc(100% - 420px);min-width:280px;
+        z-index:9;pointer-events:none;
+        background:rgba(4,10,24,0.92);
+        backdrop-filter:blur(16px);
+        border:1px solid rgba(212,175,55,0.3);
+        border-radius:10px;padding:12px 16px;
+        transition:opacity .4s ease;
       ">
-        <div style="font-size:8px;font-weight:700;color:rgba(212,175,55,0.7);letter-spacing:.1em;flex-shrink:0;">
-          ◈ ANALIZĂ
-        </div>
-        <div id="tci-narrative-text" style="
-          font-size:9px;color:rgba(200,215,235,0.82);line-height:1.4;flex:1;
+        <div id="tci-narcard-title" style="
+          font-size:13px;font-weight:700;color:#D4AF37;
+          margin-bottom:5px;line-height:1.3;
+          font-family:'Space Grotesk','Inter',sans-serif;
         "></div>
-        <div id="tci-narrative-src" style="
-          font-size:7px;color:rgba(100,120,150,0.5);flex-shrink:0;font-style:italic;
+        <div id="tci-narcard-body" style="
+          font-size:12px;color:rgba(200,215,235,0.88);
+          line-height:1.55;
+          font-family:'Space Grotesk','Inter',sans-serif;
+        "></div>
+        <div id="tci-narcard-src" style="
+          font-size:9px;color:rgba(148,163,184,0.5);
+          margin-top:5px;font-style:italic;
         "></div>
       </div>
 
