@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Expires" content="0"/>
+<title>UrbanX – Platformă de Analiză Urbanistică</title>
+<meta name="description" content="UrbanX — Platformă națională de analiză urbanistică avansată. Analiză cadastrală, PUG, indicatori urbanistici, studii de specialitate și vizualizare 3D pentru orice UAT din România.">
+<!-- UrbanX Favicon & PWA -->
+<link rel="icon" href="/UrbanX/favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="/UrbanX/favicon.svg">
+<link rel="icon" type="image/png" sizes="96x96" href="/UrbanX/favicon-96x96.png">
+<link rel="icon" type="image/png" sizes="48x48" href="/UrbanX/favicon-48x48.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/UrbanX/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/UrbanX/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/UrbanX/apple-touch-icon.png">
+<link rel="manifest" href="/UrbanX/site.webmanifest" crossorigin="use-credentials">
+<meta name="theme-color" content="#0b0f1a">
+<meta name="application-name" content="UrbanX">
+<meta name="apple-mobile-web-app-title" content="UrbanX">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="msapplication-TileColor" content="#0b0f1a">
+<meta name="msapplication-TileImage" content="/UrbanX/android-chrome-192x192.png">
+<script>
+// Inline manifest fallback — elimina eroarea 404 daca fisierul lipseste
+if(!window._manifestLoaded){
+  try{
+    const mLink=document.querySelector('link[rel="manifest"]');
+    if(mLink){
+      // Verificam daca manifestul e accesibil
+      fetch(mLink.href,{method:'HEAD'}).catch(()=>{
+        // Fallback: manifest inline ca blob
+        const m=JSON.stringify({name:'UrbanX AEDIS',short_name:'UrbanX',start_url:'/UrbanX/',display:'standalone',theme_color:'#0b0f1a',background_color:'#0b0f1a',icons:[{src:'/UrbanX/android-chrome-192x192.png',sizes:'192x192',type:'image/png'},{src:'/UrbanX/android-chrome-512x512.png',sizes:'512x512',type:'image/png'}]});
+        const blob=new Blob([m],{type:'application/json'});
+        mLink.href=URL.createObjectURL(blob);
+      });
+    }
+  }catch(e){}
+  window._manifestLoaded=true;
+}
+</script>
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.11.0/mapbox-gl.css" rel="stylesheet"/>
+<link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.5.0/mapbox-gl-draw.css" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'Segoe UI',Arial,sans-serif;background:#0b1220;color:#e2e8f0;overflow:hidden}
+#map{position:fixed;inset:0;z-index:0}
+
+/* TOPBAR */
+#topbar{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;gap:6px;padding:7px 10px;background:linear-gradient(180deg,rgba(8,37,74,.95),rgba(8,37,74,.7));backdrop-filter:blur(8px);flex-wrap:nowrap;overflow-x:auto;-ms-overflow-style:none;scrollbar-width:none}
+#topbar.viewer-open,#topbar.viewer-open *{display:none!important;visibility:hidden!important;pointer-events:none!important}
+#topbar.viewer-bg{background:#07101e!important;border-bottom:1px solid rgba(139,92,246,.25)!important}
+#topbar.viewer-bg .tb-btn,#topbar.viewer-bg .tb-sel,#topbar.viewer-bg .logo{color:#a78bfa!important;border-color:rgba(139,92,246,.3)!important;background:rgba(139,92,246,.08)!important}
+#topbar::-webkit-scrollbar{display:none}
+.logo{color:#d4af37;font-weight:800;font-size:14px;letter-spacing:2px;margin-right:4px;white-space:nowrap}
+.tb-btn,.tb-sel{border:1px solid rgba(255,255,255,.2);background:rgba(11,18,32,.8);color:#e2e8f0;border-radius:8px;padding:6px 11px;font-size:12px;cursor:pointer;white-space:nowrap;transition:all .15s;min-height:34px}
+.tb-btn:hover{background:rgba(59,130,246,.35);border-color:#3b82f6}
+.tb-btn.on{background:#3b82f6;border-color:#3b82f6;color:#fff}
+.tb-btn.multi-on{background:#d4af37;border-color:#d4af37;color:#0b1220;font-weight:700}
+.spacer{flex:1}
+
+/* STATUS */
+#status{position:fixed;bottom:36px;left:10px;z-index:90;background:rgba(11,18,32,.92);border:1px solid rgba(255,255,255,.15);border-radius:9px;padding:6px 12px;font-size:12px;max-width:min(520px,calc(100vw - 20px));backdrop-filter:blur(6px)}
+
+/* UTR DRAWER */
+#utr-drawer{position:fixed;top:48px;left:0;right:0;z-index:200;background:rgba(11,18,32,.98);border-bottom:2px solid rgba(212,175,55,.4);padding:12px 14px;max-height:58vh;overflow-y:auto;backdrop-filter:blur(12px);display:none}
+#utr-drawer.open{display:block}
+.utr-chip{display:inline-flex;align-items:center;padding:4px 9px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;margin:2px;border:2px solid;transition:all .15s}
+.utr-chip:hover{opacity:.8;transform:scale(1.05)}
+
+/* PANEL */
+#panel{position:fixed;top:0;right:0;bottom:0;z-index:80;width:420px;background:rgba(10,16,30,.97);border-left:1px solid rgba(255,255,255,.1);display:flex;flex-direction:column;backdrop-filter:blur(12px);transition:right .25s ease}
+#panel-tabs{display:flex;background:#08152a;border-bottom:1px solid rgba(255,255,255,.1);padding-top:48px;overflow-x:auto;flex-shrink:0;-ms-overflow-style:none;scrollbar-width:none}
+#panel-tabs::-webkit-scrollbar{display:none}
+.ptab{flex-shrink:0;padding:10px 14px;font-size:12px;font-weight:700;text-align:center;cursor:pointer;color:#64748b;border-bottom:2px solid transparent;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none;transition:all .15s;letter-spacing:.02em}
+.ptab.active{color:#d4af37;border-bottom-color:#d4af37;background:rgba(212,175,55,.05)}
+.ptab:hover:not(.active){color:#94a3b8;background:rgba(255,255,255,.04)}
+#panel-body{flex:1;overflow-y:auto;padding:12px}
+.tc{display:none}.tc.active{display:block}
+
+/* MOBILE SHEET */
+#mob-sheet{position:fixed;bottom:0;left:0;right:0;z-index:110;background:#0f172a;border-top:2px solid rgba(212,175,55,.4);border-radius:18px 18px 0 0;max-height:78vh;transform:translateY(100%);transition:transform .3s ease;display:flex;flex-direction:column}
+#mob-sheet.open{transform:translateY(0)}
+.msh-drag{width:36px;height:4px;border-radius:999px;background:#374151;margin:9px auto 5px}
+.msh-head{display:flex;justify-content:space-between;align-items:center;padding:8px 16px 12px;border-bottom:1px solid rgba(255,255,255,.1)}
+#mob-tabs{display:flex;overflow-x:auto;background:#08152a;border-bottom:1px solid rgba(255,255,255,.1);flex-shrink:0;-ms-overflow-style:none;scrollbar-width:none}
+#mob-tabs::-webkit-scrollbar{display:none}
+.mtab{flex-shrink:0;padding:11px 16px;font-size:14px;font-weight:700;color:#64748b;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none;min-height:46px}
+.mtab.active{color:#d4af37;border-bottom-color:#d4af37}
+#mob-body{flex:1;overflow-y:auto;padding:12px;-webkit-overflow-scrolling:touch}
+
+/* 3D CTRL (doar pitch/bearing) */
+#ctrl3d{display:none!important}
+#ctrl3d label{font-size:10px;color:#94a3b8;display:block;margin-bottom:2px}
+#ctrl3d input[type=range]{width:100%;accent-color:#3b82f6;margin-bottom:6px}
+.c3row{display:flex;justify-content:space-between}
+.c3val{font-size:10px;color:#d4af37}
+
+/* UI */
+.section{font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;margin:12px 0 6px}
+.section:first-child{margin-top:0}
+.card{background:#0f172a;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:11px;margin-bottom:9px}
+.inp{width:100%;padding:10px 12px;border-radius:9px;border:1px solid rgba(255,255,255,.15);background:#080f1c;color:#e2e8f0;font-size:15px;margin-bottom:7px;outline:none;font-family:inherit}
+.inp:focus{border-color:#3b82f6}
+.inp::placeholder{color:#475569}
+.sel{width:100%;padding:9px 12px;border-radius:9px;border:1px solid rgba(255,255,255,.15);background:#080f1c;color:#e2e8f0;font-size:14px;margin-bottom:7px;outline:none}
+.btn-p,.btn-s,.btn-g,.btn-w{display:inline-flex;align-items:center;justify-content:center;gap:5px;border:none;border-radius:9px;padding:9px 14px;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .15s}
+.btn-p{background:#3b82f6;color:#fff}.btn-p:hover{background:#2563eb}
+.btn-s{background:#374151;color:#e2e8f0}.btn-s:hover{background:#4b5563}
+.btn-g{background:rgba(212,175,55,.2);color:#d4af37;border:1px solid rgba(212,175,55,.4)}.btn-g:hover{background:rgba(212,175,55,.35)}
+.btn-w{background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3)}.btn-w:hover{background:rgba(239,68,68,.25)}
+.btn-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:8px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.met{background:#080f1c;border:1px solid rgba(255,255,255,.08);border-radius:9px;padding:10px}
+.ml{font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em}
+.mv{margin-top:4px;font-size:13px;font-weight:700;color:#e2e8f0}
+.mv.big{font-size:18px;color:#3b82f6}
+.mv.gold{font-size:14px;color:#d4af37}
+.mv.ok{color:#34d399}.mv.warn{color:#fbbf24}.mv.err{color:#f87171}
+.badge{display:inline-flex;align-items:center;border-radius:999px;padding:3px 9px;font-weight:700;font-size:11px;margin:2px}
+.b-b{background:rgba(59,130,246,.15);color:#60a5fa}
+.b-g{background:rgba(16,185,129,.15);color:#34d399}
+.b-y{background:rgba(212,175,55,.15);color:#d4af37}
+.b-r{background:rgba(239,68,68,.15);color:#f87171}
+.help{font-size:11px;color:#64748b;margin:-2px 0 7px;line-height:1.5}
+.res-box{border:1px solid rgba(255,255,255,.1);border-radius:9px;max-height:170px;overflow:auto;background:#080f1c;margin-bottom:7px}
+.ri{padding:8px 11px;border-bottom:1px solid rgba(255,255,255,.07);cursor:pointer;font-size:12px;color:#e2e8f0}
+.ri:last-child{border-bottom:none}.ri:hover{background:rgba(59,130,246,.15)}
+.re{padding:8px 11px;font-size:12px;color:#64748b}
+.spin{display:inline-block;width:10px;height:10px;border:2px solid rgba(255,255,255,.2);border-top-color:#3b82f6;border-radius:50%;animation:sp .6s linear infinite;vertical-align:middle;margin-right:4px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.vbox{min-height:160px;border:1px solid rgba(255,255,255,.1);border-radius:9px;background:#080f1c;display:flex;align-items:center;justify-content:center;overflow:hidden}
+canvas#c2d{width:100%;height:100%;display:block}
+.fl-leg{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.fl-dot{display:inline-flex;align-items:center;gap:3px;font-size:11px;color:#94a3b8}
+.fl-sq{width:11px;height:11px;border-radius:2px;display:inline-block}
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{background:#080f1c;padding:6px 7px;text-align:left;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,.08)}
+.tbl td{padding:6px 7px;border-bottom:1px solid rgba(255,255,255,.06);color:#e2e8f0}
+.tbl tr:last-child td{border-bottom:none}
+.warn-box{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:8px 10px;font-size:12px;color:#fbbf24;margin-bottom:8px}
+.ok-box{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:8px;padding:8px 10px;font-size:12px;color:#34d399;margin-bottom:8px}
+.err-box{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:8px 10px;font-size:12px;color:#f87171;margin-bottom:8px}
+.sc-item{background:#080f1c;border:1px solid rgba(255,255,255,.08);border-radius:9px;padding:8px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:7px}
+.ms-item{background:#080f1c;border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:9px;margin-bottom:7px}
+.ms-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+/* Legenda functiuni */
+#fn-legend{position:fixed;bottom:22px;left:10px;z-index:75;background:rgba(10,16,30,.92);
+  border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:8px 10px;
+  font-size:10px;backdrop-filter:blur(8px);max-width:160px;display:none}
+#fn-legend.visible{display:block}
+.fn-leg-row{display:flex;align-items:center;gap:5px;margin:2px 0;color:#e2e8f0;font-size:10px}
+.fn-leg-sq{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.fn-leg-title{font-size:11px;font-weight:700;color:#d4af37;margin-bottom:4px}
+/* MOB SEARCH OVERLAY — rezultate căutare fix pe mobil */
+#mob-search-overlay{
+  display:none;
+  position:fixed;
+  left:0;right:0;
+  z-index:10000;
+  background:#0f172a;
+  border-top:2px solid rgba(212,175,55,.5);
+  border-bottom:1px solid rgba(255,255,255,.08);
+  max-height:45vh;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  box-shadow:0 -4px 24px rgba(0,0,0,.6);
+}
+#mob-search-overlay.active{display:block;}
+#mob-search-overlay .mob-ov-header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 16px 6px;
+  font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em;
+}
+#mob-search-overlay .ri{
+  padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.06);
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+  active-color:rgba(59,130,246,.2);
+}
+#mob-search-overlay .ri:active{background:rgba(59,130,246,.15);}
+#mob-search-overlay .ri:last-child{border-bottom:none;}
+#mob-search-overlay .re{padding:14px 16px;font-size:13px;color:#64748b;}
+#copy{position:fixed;bottom:0;left:0;right:0;z-index:70;background:rgba(8,37,74,.8);color:rgba(212,175,55,.6);display:flex;justify-content:space-between;padding:4px 12px;font-size:10px}
+
+/* PDF MODAL */
+#pdf-modal{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+#pdf-modal.open{display:flex}
+#pdf-box{background:#0f172a;border:1px solid rgba(212,175,55,.4);border-radius:16px;width:min(580px,96vw);max-height:90vh;overflow-y:auto;padding:24px}
+.pdf-opt{background:#080f1c;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px;margin-bottom:9px;cursor:pointer;transition:all .15s}
+.pdf-opt:hover{border-color:#d4af37;background:rgba(212,175,55,.08)}
+.pdf-opt.sel{border-color:#3b82f6;background:rgba(59,130,246,.1)}
+.pdf-opt h4{font-size:14px;font-weight:700;color:#e2e8f0;margin-bottom:4px}
+.pdf-opt p{font-size:12px;color:#64748b;line-height:1.5}
+.mapboxgl-ctrl-top-left{top:52px!important}
+.mapboxgl-ctrl-top-right{top:52px!important}
+@media(max-width:768px){
+  .mapboxgl-ctrl-top-left{top:56px!important}
+  .mapboxgl-ctrl-top-right{top:56px!important}
+}
+
+
+/* ═══ Urban3D Modal ════════════════════════════════════════════════════════ */
+#aedis-modal {
+  position:fixed;top:0;right:-420px;width:420px;height:100vh;
+  z-index:500;background:#0a1628;
+  border-left:1px solid rgba(255,255,255,.1);
+  display:flex;flex-direction:column;
+  transition:right .3s cubic-bezier(.4,0,.2,1);
+  box-shadow:-4px 0 24px rgba(0,0,0,.5);
+}
+#aedis-modal.open { right:0; }
+
+/* ═══ Info Drawer Rapoarte ══════════════════════════════════════════════════ */
+#info-drawer-backdrop{
+  position:fixed;inset:0;z-index:8500;background:rgba(0,0,0,0);
+  pointer-events:none;transition:background .25s
+}
+#info-drawer-backdrop.open{background:rgba(0,0,0,.45);pointer-events:auto}
+#info-drawer{
+  position:fixed;top:0;right:-420px;width:420px;max-width:96vw;height:100vh;
+  z-index:8600;background:#07101e;border-left:1px solid rgba(212,175,55,.25);
+  display:flex;flex-direction:column;
+  transition:right .28s cubic-bezier(.4,0,.2,1);
+  box-shadow:-8px 0 40px rgba(0,0,0,.6)
+}
+#info-drawer.open{right:0}
+#info-drawer-head{
+  display:flex;align-items:center;gap:10px;padding:14px 16px;
+  border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0;
+  background:#07101e
+}
+#info-drawer-body{flex:1;overflow-y:auto;padding:18px 18px 32px}
+.idr-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:10px;font-weight:700;padding:3px 9px;border-radius:999px;
+  text-transform:uppercase;letter-spacing:.06em
+}
+.idr-badge.obligatoriu{background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3)}
+.idr-badge.recomandat{background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.25)}
+.idr-badge.optional{background:rgba(100,116,139,.15);color:#94a3b8;border:1px solid rgba(100,116,139,.25)}
+.idr-section{
+  font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+  color:#475569;margin:18px 0 7px
+}
+.idr-section:first-of-type{margin-top:0}
+.idr-text{font-size:13px;color:#cbd5e1;line-height:1.6}
+.idr-list{margin:0;padding:0 0 0 16px}
+.idr-list li{font-size:12px;color:#94a3b8;line-height:1.7}
+.idr-output-row{
+  display:flex;align-items:center;gap:8px;padding:8px 10px;
+  background:rgba(255,255,255,.03);border-radius:8px;margin-bottom:5px
+}
+.idr-output-ico{font-size:15px;flex-shrink:0}
+.idr-output-txt{font-size:12px;color:#94a3b8}
+.idr-nu-row{
+  display:flex;align-items:flex-start;gap:7px;padding:7px 10px;
+  background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);
+  border-radius:8px;margin-bottom:5px
+}
+.idr-nu-txt{font-size:12px;color:#f87171;line-height:1.5}
+#info-drawer-gen-btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;padding:13px;border-radius:11px;border:none;cursor:pointer;
+  font-size:14px;font-weight:700;font-family:inherit;
+  background:linear-gradient(135deg,#1e3a6e,#0d2040);
+  color:#d4af37;border:1px solid rgba(212,175,55,.4);
+  transition:all .15s;margin-top:20px
+}
+#info-drawer-gen-btn:hover{background:linear-gradient(135deg,#2a4a7f,#1a3150);border-color:#d4af37}
+@media(max-width:600px){
+  #info-drawer{width:100%;max-width:100%;right:-100%}
+}
+
+/* Topbar button Urban3D */
+#btnAEDIS {
+  background:linear-gradient(135deg,#1e3a5f,#0d2137)!important;
+  border:1px solid rgba(212,175,55,.5)!important;
+  color:#d4af37!important;
+  font-weight:700!important;
+  letter-spacing:.5px!important;
+  position:relative;
+  overflow:hidden;
+}
+#btnAEDIS::before {
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(212,175,55,.1),transparent);
+  pointer-events:none;
+}
+#btnAEDIS:hover { border-color:#d4af37!important; background:linear-gradient(135deg,#2a4a7f,#1a3150)!important; }
+
+/* Header */
+#aedis-header {
+  padding:14px 16px 10px;
+  background:linear-gradient(180deg,#0d1f3c,#0a1628);
+  border-bottom:1px solid rgba(212,175,55,.3);
+  flex-shrink:0;
+}
+.aedis-title {
+  font-size:15px;font-weight:800;color:#d4af37;
+  letter-spacing:1.5px;display:flex;align-items:center;gap:8px;
+}
+.aedis-subtitle { font-size:10px;color:#64748b;margin-top:2px;letter-spacing:.5px; }
+
+/* Parcel info */
+.aedis-parcel-info {
+  margin:10px 16px 0;padding:10px 12px;
+  background:#080f1c;border-radius:10px;
+  border:1px solid rgba(255,255,255,.08);
+}
+.aedis-pi-row { display:flex;flex-wrap:wrap;gap:5px;align-items:center; }
+.aedis-pi-badge {
+  padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700;
+  background:rgba(255,255,255,.08);color:#94a3b8;
+}
+.aedis-pi-badge.blue{background:rgba(59,130,246,.15);color:#60a5fa;}
+.aedis-pi-badge.green{background:rgba(34,197,94,.15);color:#4ade80;}
+.aedis-pi-badge.orange{background:rgba(245,158,11,.15);color:#f59e0b;}
+
+/* Tabs */
+.aedis-tabs {
+  display:flex;gap:2px;padding:8px 10px;
+  background:#080f1c;border-bottom:1px solid rgba(255,255,255,.06);
+  flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+.aedis-tabs::-webkit-scrollbar{display:none}
+.aedis-tab {
+  flex-shrink:0;padding:7px 11px;border-radius:8px;border:none;
+  background:transparent;color:#64748b;cursor:pointer;
+  font-size:11px;font-weight:600;transition:all .15s;white-space:nowrap;
+}
+.aedis-tab.active{background:rgba(212,175,55,.15);color:#d4af37;}
+.aedis-tab:hover:not(.active){background:rgba(255,255,255,.05);color:#94a3b8;}
+
+/* Content */
+.aedis-content { flex:1;overflow-y:auto;padding:12px 14px;-webkit-overflow-scrolling:touch; }
+.aedis-section {
+  font-size:10px;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;color:#d4af37;
+  margin:14px 0 8px;padding-bottom:4px;
+  border-bottom:1px solid rgba(212,175,55,.2);
+}
+.aedis-section:first-child{margin-top:0;}
+
+/* Funcțiuni grid */
+.aedis-fn-grid { display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px; }
+.aedis-fn-btn {
+  padding:8px 10px;border-radius:9px;border:1px solid rgba(255,255,255,.12);
+  background:rgba(11,18,32,.8);color:#94a3b8;cursor:pointer;
+  font-size:11px;text-align:left;display:flex;align-items:center;gap:6px;
+  transition:all .15s;
+}
+.aedis-fn-btn.active{border-color:#d4af37;background:rgba(212,175,55,.12);color:#d4af37;}
+.aedis-fn-btn:hover:not(.active){background:rgba(255,255,255,.06);color:#e2e8f0;}
+.aedis-fn-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.aedis-fn-desc{font-size:11px;color:#64748b;padding:6px 8px;background:#080f1c;border-radius:7px;line-height:1.5;}
+
+/* Stiluri grid */
+.aedis-stil-grid { display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px; }
+.aedis-stil-btn {
+  padding:8px 6px;border-radius:9px;border:1px solid rgba(255,255,255,.12);
+  background:rgba(11,18,32,.8);color:#94a3b8;cursor:pointer;
+  font-size:10px;text-align:center;line-height:1.4;transition:all .15s;
+}
+.aedis-stil-btn strong{display:block;margin-bottom:2px;font-size:11px;}
+.aedis-stil-btn small{color:#475569;font-size:9px;}
+.aedis-stil-btn.active{border-color:#d4af37;background:rgba(212,175,55,.12);color:#d4af37;}
+.aedis-stil-btn.active small{color:#92704a;}
+
+/* Scenariu grid */
+.aedis-scen-grid { display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:10px; }
+.aedis-scen-btn {
+  padding:10px 8px;border-radius:9px;border:1px solid rgba(255,255,255,.12);
+  background:rgba(11,18,32,.8);color:#94a3b8;cursor:pointer;
+  font-size:11px;text-align:center;line-height:1.4;transition:all .15s;
+}
+.aedis-scen-btn small{display:block;font-size:9px;color:#475569;margin-top:2px;}
+.aedis-scen-btn.active{border-color:#3b82f6;background:rgba(59,130,246,.15);color:#60a5fa;}
+
+/* Acoperiș grid */
+.aedis-acop-grid { display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px; }
+.aedis-acop-btn {
+  padding:10px 6px;border-radius:10px;border:1px solid rgba(255,255,255,.12);
+  background:rgba(11,18,32,.8);color:#94a3b8;cursor:pointer;
+  font-size:10px;text-align:center;line-height:1.4;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  transition:all .15s;
+}
+.aedis-acop-btn strong{font-size:11px;}
+.aedis-acop-btn small{color:#475569;font-size:9px;}
+.aedis-acop-btn.active{border-color:#34d399;background:rgba(34,211,153,.12);color:#34d399;}
+
+/* Metrici */
+.aedis-g2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px;}
+.aedis-g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
+.aedis-metric{padding:10px;background:#080f1c;border-radius:8px;border:1px solid rgba(255,255,255,.06);}
+.aedis-ml{font-size:10px;color:#64748b;margin-bottom:4px;}
+.aedis-mv{font-size:16px;font-weight:700;color:#e2e8f0;}
+.aedis-mv.warn{color:#f59e0b;}
+.aedis-mv.blue{color:#60a5fa;}
+.aedis-mv.green{color:#34d399;}
+
+/* Rows */
+.aedis-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.aedis-lbl{font-size:11px;color:#94a3b8;min-width:80px;}
+.aedis-val{font-size:12px;font-weight:700;color:#d4af37;min-width:38px;text-align:right;}
+
+/* Toggle */
+.aedis-toggle{display:flex;align-items:center;gap:8px;cursor:pointer;padding:6px 0;}
+.aedis-toggle input{width:16px;height:16px;accent-color:#d4af37;}
+.aedis-toggle-label{font-size:12px;color:#94a3b8;}
+
+/* Summary box */
+.aedis-summary-box{
+  display:flex;gap:10px;flex-wrap:wrap;
+  padding:10px;background:#080f1c;border-radius:8px;
+  margin-top:6px;font-size:12px;color:#64748b;
+}
+.aedis-summary-box b{font-size:13px;}
+
+/* Context compare */
+.aedis-context-compare{margin-bottom:8px;}
+.aedis-cc-row{display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:11px;color:#64748b;}
+.aedis-cc-row span:first-child{min-width:100px;}
+.aedis-cc-row span:last-child{min-width:40px;text-align:right;}
+.aedis-cc-bar-wrap{flex:1;height:6px;background:#1e293b;border-radius:3px;overflow:hidden;}
+.aedis-cc-bar{height:100%;border-radius:3px;transition:width .3s;}
+
+/* Fn legend */
+.aedis-fn-legend{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;}
+.aedis-fn-row{display:flex;align-items:center;gap:4px;font-size:11px;color:#94a3b8;}
+.aedis-fn-sq{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+
+/* Existent box */
+.aedis-existent-box{
+  padding:10px;background:#1a1a00;border:1px solid rgba(245,158,11,.25);
+  border-radius:8px;margin-bottom:8px;
+}
+
+/* Table */
+.aedis-tbl{width:100%;border-collapse:collapse;font-size:11px;}
+.aedis-tbl th{padding:7px 8px;background:#0d1f3c;color:#94a3b8;text-align:left;font-weight:600;}
+.aedis-tbl td{padding:7px 8px;border-bottom:1px solid rgba(255,255,255,.05);color:#e2e8f0;}
+.aedis-tbl tr:hover td{background:rgba(255,255,255,.02);}
+
+/* Alerts */
+.aedis-warn{padding:8px 10px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:7px;font-size:11px;color:#f87171;margin-top:6px;}
+.aedis-ok{padding:8px 10px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:7px;font-size:11px;color:#4ade80;margin-top:6px;}
+
+/* Actions */
+.aedis-actions {
+  display:flex;gap:6px;padding:12px 14px;
+  border-top:1px solid rgba(255,255,255,.08);
+  background:#080f1c;flex-shrink:0;
+}
+.aedis-build-btn {
+  flex:1;padding:13px;border-radius:12px;border:none;
+  background:linear-gradient(135deg,#1e3a5f,#0d2137);
+  color:#d4af37;font-size:13px;font-weight:800;cursor:pointer;
+  letter-spacing:.5px;border:1px solid rgba(212,175,55,.4);
+  transition:all .2s;
+}
+.aedis-build-btn:hover{background:linear-gradient(135deg,#2a4a7f,#1a3150);border-color:#d4af37;}
+.aedis-dim-btn,.aedis-close-btn {
+  padding:13px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.12);
+  background:rgba(11,18,32,.8);color:#64748b;cursor:pointer;font-size:12px;
+}
+.aedis-dim-btn.active{border-color:#60a5fa;color:#60a5fa;background:rgba(59,130,246,.1);}
+.aedis-close-btn:hover{color:#f87171;border-color:rgba(239,68,68,.3);}
+
+/* Mobile responsive */
+@media(max-width:840px){
+  #aedis-modal{
+    width:100%!important;right:auto!important;
+    bottom:-100vh;top:auto;height:85vh;
+    border-left:none!important;border-top:2px solid rgba(212,175,55,.4);
+    border-radius:20px 20px 0 0;
+    transition:bottom .3s cubic-bezier(.4,0,.2,1)!important;
+  }
+  #aedis-modal.open{bottom:0!important;right:auto!important;}
+  .aedis-tabs{justify-content:flex-start;}
+  .aedis-fn-grid,.aedis-scen-grid{grid-template-columns:1fr 1fr;}
+  .aedis-stil-grid,.aedis-acop-grid{grid-template-columns:1fr 1fr 1fr;}
+  .aedis-build-btn{font-size:15px!important;min-height:52px!important;}
+  .aedis-tab{font-size:12px!important;padding:9px 12px!important;}
+}
+
+/* ═══ MOBILE UX — REDESIGN PREMIUM ═══════════════════════════════════════ */
+@media(max-width:840px){
+  #panel{display:none!important}
+  #ctrl3d{display:none!important}
+  #btnPDF{display:none!important}
+  /* #btnPanel vizibil in topbar */
+  #mob-fab{display:none!important}
+
+  #topbar{flex-wrap:nowrap!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch;padding:6px 10px!important;gap:6px!important;height:52px!important;background:rgba(8,21,42,.98)!important;-ms-overflow-style:none;scrollbar-width:none;border-bottom:1px solid rgba(255,255,255,.08)!important}
+  #topbar::-webkit-scrollbar{display:none}
+  .logo{font-size:16px!important;letter-spacing:1.5px;font-weight:800}
+  .tb-btn{padding:7px 13px!important;font-size:13px!important;min-height:36px!important;flex-shrink:0!important;border-radius:10px!important}
+  #selBase{padding:7px 10px!important;font-size:13px!important;flex-shrink:0!important;min-height:36px!important}
+
+  #status{bottom:72px!important;left:8px!important;right:8px!important;top:auto!important;font-size:13px!important;font-weight:500!important;max-width:none!important;padding:8px 14px!important;border-radius:10px!important;z-index:85;line-height:1.4!important}
+
+  #mob-sheet{position:fixed!important;bottom:72px!important;left:0!important;right:0!important;z-index:200!important;background:#0a1628!important;border-top:2px solid rgba(212,175,55,.6)!important;border-radius:24px 24px 0 0!important;max-height:78vh!important;transform:translateY(100%)!important;transition:transform .3s cubic-bezier(.4,0,.2,1)!important;display:flex!important;flex-direction:column!important;overflow:hidden!important}
+  #mob-sheet.open{transform:translateY(0)!important}
+
+  #mob-drag{padding:14px 0 8px;display:flex;justify-content:center;cursor:grab;flex-shrink:0}
+  .msh-drag-bar{width:48px;height:5px;border-radius:999px;background:rgba(255,255,255,.3)}
+
+  #mob-body{flex:1;overflow-y:auto!important;padding:8px 16px 20px!important;-webkit-overflow-scrolling:touch}
+
+  #btn-admin,#btn-logout{display:none!important}
+  #mob-nav{position:fixed!important;bottom:0!important;left:0!important;right:0!important;height:72px!important;z-index:300!important;background:#08152a!important;border-top:1px solid rgba(255,255,255,.1)!important;display:flex!important;align-items:stretch!important;padding-bottom:env(safe-area-inset-bottom,0)!important}
+  .mnav-btn{flex:1!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:4px!important;background:none!important;border:none!important;color:#64748b!important;cursor:pointer!important;transition:all .15s!important;padding:8px 4px!important;-webkit-tap-highlight-color:transparent!important;touch-action:manipulation!important;min-height:44px!important}
+  .mnav-btn.active{color:#d4af37!important}
+  .mnav-btn.active .mnav-icon{transform:scale(1.15)}
+  .mnav-icon{font-size:24px!important;line-height:1!important;transition:transform .15s}
+  .mnav-label{font-size:11px!important;font-weight:600!important;letter-spacing:.03em!important}
+
+  #mob-body .section{font-size:16px!important;font-weight:700!important;margin:18px 0 10px!important;color:#d4af37!important;letter-spacing:.04em;text-transform:uppercase}
+  #mob-body .help{font-size:14px!important;line-height:1.65!important;color:#94a3b8!important;margin-bottom:10px!important}
+  #mob-body .card{padding:16px!important;margin-bottom:14px!important;border-radius:14px!important}
+  #mob-body .inp,#mob-body input[type=text],#mob-body input[type=number]{font-size:16px!important;padding:14px 16px!important;min-height:54px!important;border-radius:12px!important;margin-bottom:10px!important}
+  #mob-body select{font-size:16px!important;padding:14px 16px!important;min-height:54px!important;border-radius:12px!important}
+  #mob-body .btn-p,#mob-body .btn-s,#mob-body .btn-g,#mob-body .btn-w{font-size:16px!important;padding:16px 20px!important;min-height:56px!important;border-radius:14px!important;font-weight:700!important}
+  #mob-body .ml{font-size:13px!important;color:#94a3b8!important;margin-bottom:4px!important}
+  #mob-body .mv{font-size:20px!important;font-weight:700!important}
+  #mob-body .mv.big{font-size:26px!important;color:#3b82f6!important}
+  #mob-body .mv.gold{font-size:18px!important;color:#d4af37!important}
+  #mob-body .met{padding:14px!important;border-radius:12px!important}
+  #mob-body .g2{grid-template-columns:1fr 1fr!important;gap:10px!important}
+  #mob-body .g3{grid-template-columns:1fr 1fr!important;gap:8px!important}
+  #mob-body .badge{font-size:13px!important;padding:6px 14px!important}
+  #mob-body label{font-size:16px!important;line-height:1.5!important}
+  #mob-body input[type=checkbox],#mob-body input[type=radio]{width:22px!important;height:22px!important}
+  #mob-body input[type=range]{height:8px!important;accent-color:#3b82f6}
+  #mob-body .tbl{font-size:13px!important}
+  #mob-body .tbl td,#mob-body .tbl th{padding:10px 8px!important}
+  #mob-body .ok-box,#mob-body .warn-box,#mob-body .err-box{font-size:14px!important;padding:12px 14px!important;border-radius:10px!important;line-height:1.5!important}
+  .mapboxgl-popup{margin-bottom:80px!important}
+  .mob-only{display:block!important}
+  .desk-only{display:none!important}
+  input,select,textarea{font-size:16px!important}
+}
+
+@media(min-width:841px){
+  #mob-sheet{display:none!important}
+  #mob-fab{display:none!important}
+  .mob-only{display:none!important}
+  .desk-only{display:block}
+  .mob-only{display:block!important} /* sliderele apar și pe desktop */
+}
+@media(max-width:840px){
+  .mob-only{display:block}
+  .desk-only{display:none!important}
+  #ctrl3d{display:none!important}
+}
+
+.ux-popup .mapboxgl-popup-content,
+.mapboxgl-popup-content{
+  background:#0b1220!important;
+  color:#e2e8f0!important;
+  border:1px solid rgba(212,175,55,.4)!important;
+  border-radius:12px!important;
+  padding:12px 15px!important;
+  font-size:13px!important;
+  min-width:160px;
+  max-width:260px!important;
+  box-shadow:0 8px 32px rgba(0,0,0,.8)!important;
+}
+.mapboxgl-popup-tip{display:none}
+.mapboxgl-popup-close-button{color:#94a3b8!important;font-size:18px!important;right:4px!important;top:4px!important;padding:0 6px!important;background:none!important;line-height:1.2!important}
+.mapboxgl-popup-close-button:hover{color:#fff!important;background:rgba(255,255,255,.1)!important;border-radius:4px!important}
+/* ── LOISIR ── */
+.loisir-mode-grid,.loisir-cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
+.loisir-mode-btn,.loisir-cat-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(11,18,32,.85);color:#94a3b8;font-size:11px;cursor:pointer;text-align:left;transition:all .15s}
+.loisir-mode-btn.active,.loisir-cat-btn.active{color:#fff;border-color:var(--loisir-color,#d4af37);background:color-mix(in srgb,var(--loisir-color,#d4af37) 22%,transparent)}
+.loisir-dot{width:10px;height:10px;border-radius:50%;background:var(--loisir-color,#d4af37);flex-shrink:0}
+.loisir-switch{width:34px;height:18px;border-radius:99px;background:#334155;position:relative;flex-shrink:0}
+.loisir-switch:after{content:'';position:absolute;width:14px;height:14px;left:2px;top:2px;border-radius:50%;background:#94a3b8;transition:.15s}
+.loisir-cat-btn.active .loisir-switch{background:var(--loisir-color,#d4af37)}
+.loisir-cat-btn.active .loisir-switch:after{left:18px;background:#fff}
+.loisir-box{padding:9px 10px;border-radius:8px;font-size:11px;line-height:1.45;margin-bottom:10px}
+.loisir-box.ok{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.35);color:#4ade80}
+.loisir-box.warn{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35);color:#fbbf24}
+.loisir-box.err{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.35);color:#f87171}
+.loisir-mini-actions{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.loisir-mini-btn{padding:8px 10px;border-radius:9px;border:1px solid rgba(255,255,255,.12);background:#0f172a;color:#94a3b8;font-size:11px;cursor:pointer}
+.loisir-mini-btn:hover{border-color:#d4af37;color:#d4af37}.loisir-file{display:none}
+#loisir-ai-preview{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:900;width:min(920px,94vw);max-height:82vh;background:#08111f;border:1px solid rgba(212,175,55,.45);border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.75);display:none;overflow:hidden}
+#loisir-ai-preview.open{display:block}.loisir-ai-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;background:linear-gradient(180deg,#0d1f3c,#08111f);border-bottom:1px solid rgba(212,175,55,.25)}
+.loisir-ai-title{color:#d4af37;font-weight:800;font-size:14px;letter-spacing:.04em}.loisir-ai-body{padding:12px}.loisir-ai-img{width:100%;max-height:68vh;object-fit:contain;border-radius:12px;background:#020617}.loisir-ai-close{background:none;border:1px solid rgba(255,255,255,.18);color:#94a3b8;border-radius:8px;padding:5px 10px;cursor:pointer}.loisir-ai-close:hover{color:#fff;border-color:#d4af37}
+
+
+.cod-auriu{color:#fbbf24;font-family:monospace;background:rgba(251,191,36,.08);padding:1px 4px;border-radius:3px}
+.cod-verde{color:#4ade80;font-family:monospace;background:rgba(74,222,128,.08);padding:1px 4px;border-radius:3px}
+.step-txt{color:#94a3b8;font-size:11px;line-height:1.6}
+.adm-guide-header{font-size:13px;font-weight:800;color:#d4af37;margin-bottom:10px;padding:10px 14px;background:rgba(212,175,55,.06);border:1px solid rgba(212,175,55,.2);border-radius:10px}
+.adm-guide-sec{background:#080f1c;border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:14px;margin-bottom:8px}
+.adm-guide-sec-title{font-size:12px;font-weight:800;margin-bottom:10px}
+.adm-guide-step{display:flex;gap:10px;margin-bottom:7px;align-items:flex-start}
+.adm-guide-num{background:rgba(255,255,255,.06);color:#64748b;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;margin-top:1px}
+.adm-guide-txt{color:#94a3b8;font-size:11px;line-height:1.6}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN OVERLAY ════════════════════════════════════════════════════ -->
+<div id="auth-overlay" style="
+  position:fixed;inset:0;z-index:99999;
+  background:linear-gradient(135deg,#050c18 0%,#0b1628 50%,#0d1f3a 100%);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Segoe UI',system-ui,sans-serif;
+">
+  <!-- Grid bg -->
+  <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:48px 48px;pointer-events:none"></div>
+
+  <!-- Gold lines decor -->
+  <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,#d4af37,transparent)"></div>
+  <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#d4af37,transparent)"></div>
+
+  <div style="position:relative;z-index:1;width:100%;max-width:420px;padding:20px">
+
+    <!-- Card -->
+    <div id="auth-card" style="
+      background:rgba(15,25,41,.95);
+      border:1px solid rgba(212,175,55,.25);
+      border-radius:16px;padding:36px 32px;
+      box-shadow:0 32px 80px rgba(0,0,0,.6);
+      backdrop-filter:blur(12px);
+    ">
+      <!-- Logo -->
+      <div style="text-align:center;margin-bottom:28px">
+        <div style="
+          width:60px;height:60px;margin:0 auto 14px;
+          background:#172233;border:1.5px solid #d4af37;border-radius:14px;
+          display:flex;align-items:center;justify-content:center;
+          font-size:28px;font-weight:900;color:#fff;font-family:'Arial Black',sans-serif;
+          box-shadow:0 0 30px rgba(212,175,55,.2);
+        ">X</div>
+        <div style="font-size:22px;font-weight:800;color:#fff;letter-spacing:.04em">UrbanX</div>
+        <div style="font-size:11px;color:#d4af37;letter-spacing:.15em;text-transform:uppercase;margin-top:4px">Platformă Urbanistică</div>
+      </div>
+
+      <!-- Tabs: Login / Register -->
+      <div style="display:flex;background:#0b1628;border-radius:9px;padding:3px;margin-bottom:24px;gap:2px">
+        <button id="tab-login" onclick="_authTab('login')" style="
+          flex:1;padding:8px;border:none;border-radius:7px;cursor:pointer;
+          font-size:13px;font-weight:700;transition:all .2s;
+          background:#1e2d42;color:#fff;
+        ">Autentificare</button>
+        <button id="tab-register" onclick="_authTab('register')" style="
+          flex:1;padding:8px;border:none;border-radius:7px;cursor:pointer;
+          font-size:13px;font-weight:700;transition:all .2s;
+          background:transparent;color:#64748b;
+        ">Înregistrare</button>
+      </div>
+
+      <!-- Email input -->
+      <div style="margin-bottom:12px">
+        <label style="font-size:11px;color:#94a3b8;font-weight:600;letter-spacing:.05em;display:block;margin-bottom:5px">EMAIL</label>
+        <input id="auth-email" type="email" placeholder="email@exemplu.ro" style="
+          width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+          border-radius:8px;padding:11px 14px;color:#fff;font-size:13px;
+          font-family:inherit;outline:none;transition:border-color .2s;box-sizing:border-box;
+        " onfocus="this.style.borderColor='rgba(212,175,55,.5)'" onblur="this.style.borderColor='rgba(255,255,255,.1)'"
+           onkeydown="if(event.key==='Enter')_authSubmit()">
+      </div>
+
+      <!-- Password input -->
+      <div style="margin-bottom:6px">
+        <label style="font-size:11px;color:#94a3b8;font-weight:600;letter-spacing:.05em;display:block;margin-bottom:5px">PAROLĂ</label>
+        <div style="position:relative">
+          <input id="auth-pass" type="password" placeholder="Minim 8 caractere" style="
+            width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+            border-radius:8px;padding:11px 40px 11px 14px;color:#fff;font-size:13px;
+            font-family:inherit;outline:none;transition:border-color .2s;box-sizing:border-box;
+          " onfocus="this.style.borderColor='rgba(212,175,55,.5)'" onblur="this.style.borderColor='rgba(255,255,255,.1)'"
+             onkeydown="if(event.key==='Enter')_authSubmit()">
+          <span onclick="const i=document.getElementById('auth-pass');i.type=i.type==='password'?'text':'password'" style="
+            position:absolute;right:12px;top:50%;transform:translateY(-50%);
+            cursor:pointer;font-size:16px;color:#475569;user-select:none
+          ">👁</span>
+        </div>
+      </div>
+
+      <!-- Forgot password -->
+      <div id="auth-forgot-wrap" style="text-align:right;margin-bottom:20px">
+        <span onclick="_authForgot()" style="font-size:11px;color:#d4af37;cursor:pointer;text-decoration:none">
+          Ai uitat parola?
+        </span>
+      </div>
+
+      <!-- Error / Info message -->
+      <div id="auth-msg" style="
+        display:none;padding:9px 12px;border-radius:7px;
+        font-size:12px;margin-bottom:14px;font-weight:500;
+      "></div>
+
+      <!-- Submit button -->
+      <button id="auth-btn" onclick="_authSubmit()" style="
+        width:100%;padding:12px;background:#d4af37;border:none;border-radius:9px;
+        color:#0b0f1a;font-weight:800;font-size:14px;cursor:pointer;
+        font-family:inherit;transition:all .2s;letter-spacing:.02em;
+      " onmouseover="this.style.background='#f0cc6a';this.style.transform='translateY(-1px)'"
+         onmouseout="this.style.background='#d4af37';this.style.transform=''">
+        🔐 Autentificare
+      </button>
+
+      <!-- Divider -->
+      <div style="display:flex;align-items:center;gap:10px;margin:18px 0">
+        <div style="flex:1;height:1px;background:rgba(255,255,255,.08)"></div>
+        <span style="font-size:11px;color:#334155">sau</span>
+        <div style="flex:1;height:1px;background:rgba(255,255,255,.08)"></div>
+      </div>
+
+      <!-- Google OAuth -->
+      <button onclick="_authGoogle()" style="
+        width:100%;padding:10px;background:rgba(255,255,255,.05);
+        border:1px solid rgba(255,255,255,.1);border-radius:9px;
+        color:#e2e8f0;font-size:13px;font-weight:600;cursor:pointer;
+        font-family:inherit;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:10px;
+      " onmouseover="this.style.background='rgba(255,255,255,.1)'"
+         onmouseout="this.style.background='rgba(255,255,255,.05)'">
+        <svg width="18" height="18" viewBox="0 0 18 18">
+          <path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z"/>
+          <path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 0 1-7.18-2.54H1.83v2.07A8 8 0 0 0 8.98 17z"/>
+          <path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 0 1 0-3.04V5.41H1.83a8 8 0 0 0 0 7.18l2.67-2.07z"/>
+          <path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 0 0 1.83 5.4L4.5 7.49a4.77 4.77 0 0 1 4.48-3.3z"/>
+        </svg>
+        Continuă cu Google
+      </button>
+
+      <!-- Footer -->
+      <div style="text-align:center;margin-top:20px;font-size:10px;color:#1e293b;line-height:1.6">
+        UrbanX · TSS·FG · Acces restricționat<br>
+        <span style="color:#0f172a">Produs în curs de dezvoltare și cercetare</span>
+      </div>
+    </div>
+
+    <!-- Version tag -->
+    <div style="text-align:center;margin-top:14px;font-size:10px;color:#1e3a5f;letter-spacing:.08em">
+      UrbanX v1.0 · TRL 3 → SaaS
+    </div>
+  </div>
+</div>
+<!-- ══ END LOGIN OVERLAY ════════════════════════════════════════════════ -->
+
+<div id="map"></div>
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <span class="logo" style="display:flex;align-items:center;gap:6px;cursor:pointer" onclick="window.location.reload()" title="UrbanX">
+    <span style="width:24px;height:24px;flex-shrink:0"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024"><defs><linearGradient id="ubg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1e2c42"/><stop offset="1" stop-color="#070d16"/></linearGradient><linearGradient id="ugold2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe08a"/><stop offset="0.5" stop-color="#d69e36"/><stop offset="1" stop-color="#9b641d"/></linearGradient></defs><rect width="1024" height="1024" rx="210" fill="url(#ubg2)"/><path d="M180 280h260l135 232-135 232H180l150-232z" fill="#f6f8fc"/><path d="M610 282h235L710 485H540z" fill="url(#ugold2)"/><path d="M540 539h170l135 203H610z" fill="url(#ugold2)"/></svg></span>
+    <span>UrbanX</span>
+  </span>
+
+  <!-- Grup 1: Navigare & Căutare -->
+  <button class="tb-btn" id="btnUTR">🗺 UTR</button>
+  <button class="tb-btn" id="btnGPS">📍 GPS</button>
+  <button class="tb-btn" id="btnMulti" title="Multiselect parcele">🔲 Multi</button>
+
+  <!-- UAT activ -->
+  <button class="tb-btn" onclick="showUATSelector()" title="Schimbă UAT-ul activ" style="border-color:rgba(212,175,55,.4);color:#d4af37;display:flex;align-items:center;gap:4px">📍 <span id="uat-indicator">Iași</span></button>
+
+  <div class="spacer"></div>
+  <button id="btnPanel" class="tb-btn" title="Arată/ascunde panou" style="background:rgba(212,175,55,.2);border-color:#d4af37;color:#d4af37;font-size:16px">☰</button>
+
+  <!-- Grup 2: Vizualizare dropdown -->
+  <div id="viz-group">
+    <button class="tb-btn" onclick="_toggleVizMenu(event)" title="Vizualizare hartă" style="display:flex;align-items:center;gap:4px">
+      🏙 Vizualizare ▾
+    </button>
+  </div>
+
+  <!-- Grup 3: Instrumente dropdown -->
+  <div id="tools-group">
+    <button class="tb-btn" onclick="_toggleToolsMenu(event)" title="Instrumente analiză" style="display:flex;align-items:center;gap:4px">
+      🔧 Instrumente ▾
+    </button>
+  </div>
+
+  <!-- Rapoarte (rămâne vizibil — acțiunea principală) -->
+  <button class="tb-btn" id="btnPDF" onclick="toggleRapoarteMenu()" title="Rapoarte & Studii" style="display:flex;align-items:center;gap:4px;position:relative">📋 Rapoarte ▾</button>
+
+  <!-- Admin & Cont -->
+  <button onclick="_adminOpen()" id="btn-admin" title="Panou Admin" style="display:none;background:rgba(212,175,55,.15);border:1px solid rgba(212,175,55,.4);color:#d4af37;border-radius:7px;padding:4px 10px;cursor:pointer;font-size:11px;font-weight:700;flex-shrink:0;align-items:center;gap:4px" onmouseover="this.style.background='rgba(212,175,55,.3)'" onmouseout="this.style.background='rgba(212,175,55,.15)'">⚙️ Admin</button>
+  <button onclick="_authLogout()" title="Deconectare" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#f87171;border-radius:7px;padding:4px 10px;cursor:pointer;font-size:11px;font-weight:600;flex-shrink:0;display:flex;align-items:center;gap:4px" onmouseover="this.style.background='rgba(239,68,68,.2)'" onmouseout="this.style.background='rgba(239,68,68,.1)'" id="btn-logout">
+    🚪 <span id="auth-user-label">Ieșire</span>
+  </button>
+</div>
+
+<!-- VIZ MENU — fixed, outside topbar -->
+<div id="viz-menu" style="display:none;position:fixed;top:48px;background:rgba(7,14,28,.97);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:6px;min-width:190px;z-index:9100;box-shadow:0 8px 32px rgba(0,0,0,.7);backdrop-filter:blur(12px)">
+  <div style="padding:4px 8px 5px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700">Perspectivă</div>
+  <button id="btn3D" onclick="set3D(60,-20);_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏙 Vedere 3D (60°)</button>
+  <button id="btn2D" onclick="set3D(0,0);_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">⬛ Vedere 2D (plan)</button>
+  <button id="btnSV" onclick="svOpen();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🚶 Street View</button>
+  <button id="btnLegend" onclick="toggleFnLegend(this);_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🎨 Legendă funcțiuni</button>
+  <div style="padding:5px 8px 2px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.06);margin-top:3px">Stil hartă</div>
+  <select class="tb-sel" id="selBase" style="display:block;width:calc(100% - 4px);margin:4px 2px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#e2e8f0;padding:6px 8px;font-size:12px;cursor:pointer">
+    <option value="custom">🌆 Urban 3D</option>
+    <option value="standard">☀ Standard 3D ✦</option>
+    <option value="streets">🗺 Streets</option>
+    <option value="sat">🛰 Satelitar</option>
+  </select>
+</div>
+
+<!-- TOOLS MENU — fixed, outside topbar -->
+<div id="tools-menu" style="display:none;position:fixed;top:48px;background:rgba(7,14,28,.97);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:6px;min-width:210px;z-index:9100;box-shadow:0 8px 32px rgba(0,0,0,.7);backdrop-filter:blur(12px)">
+  <button id="btnLotizare" onclick="toggleLotizare();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#a78bfa;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏘 Lotizare teren</button>
+  <button id="btnCimec" onclick="showCimecWidget();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#fbbf24;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏛 LMI Monumente</button>
+  <button id="btnBilant" onclick="toggleBilant();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#4ade80;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">📐 Bilanț edificabil</button>
+</div>
+
+<!-- RAPOARTE DROPDOWN — direct pe body pentru a evita overflow clipping din topbar -->
+<div id="rapoarte-menu" style="display:none;position:fixed;background:#0f172a;border:1px solid rgba(212,175,55,.3);border-radius:10px;padding:8px;min-width:260px;z-index:9000;box-shadow:0 8px 32px rgba(0,0,0,.6)">
+  <div style="padding:4px 12px 6px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.08em;font-weight:700">Rapoarte principale</div>
+  <div style="display:flex;align-items:center;gap:2px;padding:2px 4px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'" style="border-radius:6px">
+    <button onclick="runExport();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#e2e8f0;padding:5px 8px;cursor:pointer;border-radius:6px;font-size:12px;font-weight:600">📄 Raport Urbanistic Complet</button>
+    <button onclick="infoDrawerOpen('raport_complet')" title="Află mai multe" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#64748b;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37';this.style.borderColor='rgba(212,175,55,.4)'" onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,.1)'">ⓘ</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:2px;padding:2px 4px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+    <button onclick="_lotExportPDF();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#c084fc;padding:5px 8px;cursor:pointer;border-radius:6px;font-size:12px">🏘 Plan de Lotizare PDF</button>
+    <button onclick="infoDrawerOpen('lotizare')" title="Află mai multe" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#64748b;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37';this.style.borderColor='rgba(212,175,55,.4)'" onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,.1)'">ⓘ</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:2px;padding:2px 4px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+    <button onclick="generateMemoriu();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#d4af37;padding:5px 8px;cursor:pointer;border-radius:6px;font-size:12px">🏗 Memoriu Tehnic Preliminar</button>
+    <button onclick="infoDrawerOpen('memoriu')" title="Află mai multe" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#64748b;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37';this.style.borderColor='rgba(212,175,55,.4)'" onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,.1)'">ⓘ</button>
+  </div>
+  <div style="padding:6px 12px 2px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.08em;font-weight:700;border-top:1px solid rgba(255,255,255,.06);margin-top:4px">Studii tehnice</div>
+  <div style="display:flex;align-items:center;gap:2px;padding:2px 4px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+    <button onclick="generateSolarStudy();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#fbbf24;padding:5px 8px;cursor:pointer;border-radius:6px;font-size:12px">☀ Studiu de Însorire</button>
+    <button onclick="infoDrawerOpen('insorire')" title="Află mai multe" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#64748b;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37';this.style.borderColor='rgba(212,175,55,.4)'" onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,.1)'">ⓘ</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:2px;padding:2px 4px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+    <button onclick="generateShadowStudy();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#fb923c;padding:5px 8px;cursor:pointer;border-radius:6px;font-size:12px">🌑 Studiu Umbre & Obstrucție</button>
+    <button onclick="infoDrawerOpen('umbre')" title="Află mai multe" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#64748b;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37';this.style.borderColor='rgba(212,175,55,.4)'" onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,.1)'">ⓘ</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:2px;padding:2px 4px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+    <button onclick="generateNoiseStudy();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#a78bfa;padding:5px 8px;cursor:pointer;border-radius:6px;font-size:12px">🔇 Studiu Acustic Urban</button>
+    <button onclick="infoDrawerOpen('acustic')" title="Află mai multe" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#64748b;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37';this.style.borderColor='rgba(212,175,55,.4)'" onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,.1)'">ⓘ</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:2px;padding:2px 4px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+    <button onclick="generateWindStudy();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#38bdf8;padding:5px 8px;cursor:pointer;border-radius:6px;font-size:12px">🌬 Studiu Vânt & Confort Pietonal</button>
+    <button onclick="infoDrawerOpen('vant')" title="Află mai multe" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#64748b;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37';this.style.borderColor='rgba(212,175,55,.4)'" onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,.1)'">ⓘ</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:2px;padding:2px 4px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+    <button onclick="generateGreenStudy();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#4ade80;padding:5px 8px;cursor:pointer;border-radius:6px;font-size:12px">🌿 Studiu Spații Verzi</button>
+    <button onclick="infoDrawerOpen('verde')" title="Află mai multe" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#64748b;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37';this.style.borderColor='rgba(212,175,55,.4)'" onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,.1)'">ⓘ</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:2px;padding:2px 4px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+    <button onclick="generateMobilityStudy();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#f472b6;padding:5px 8px;cursor:pointer;border-radius:6px;font-size:12px">🚗 Studiu Mobilitate & Parcaje</button>
+    <button onclick="infoDrawerOpen('mobilitate')" title="Află mai multe" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#64748b;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37';this.style.borderColor='rgba(212,175,55,.4)'" onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,.1)'">ⓘ</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:2px;padding:2px 4px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+    <button onclick="generateDensityStudy();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#94a3b8;padding:5px 8px;cursor:pointer;border-radius:6px;font-size:12px">📊 Studiu Densitate Urbană</button>
+    <button onclick="infoDrawerOpen('densitate')" title="Află mai multe" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#64748b;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37';this.style.borderColor='rgba(212,175,55,.4)'" onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,.1)'">ⓘ</button>
+  </div>
+  <div style="padding:6px 12px 2px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.08em;font-weight:700;border-top:1px solid rgba(255,255,255,.06);margin-top:4px">Studii speciale & avize</div>
+  <div style="display:flex;align-items:center;gap:2px;padding:2px 4px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+    <button onclick="generateAACR();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#60a5fa;padding:5px 8px;cursor:pointer;border-radius:6px;font-size:12px">✈ Studiu AACR (Aviz Aeroport)</button>
+    <button onclick="infoDrawerOpen('aacr')" title="Află mai multe" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#64748b;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37';this.style.borderColor='rgba(212,175,55,.4)'" onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,.1)'">ⓘ</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:2px;padding:2px 4px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+    <button onclick="generateExistingBldStudy();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#fb7185;padding:5px 8px;cursor:pointer;border-radius:6px;font-size:12px">🏚 Studiu Construcții Existente</button>
+    <button onclick="infoDrawerOpen('existente')" title="Află mai multe" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#64748b;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37';this.style.borderColor='rgba(212,175,55,.4)'" onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,.1)'">ⓘ</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:2px;padding:2px 4px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+    <button onclick="generateGeotehnicalStudy();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#a78bfa;padding:5px 8px;cursor:pointer;border-radius:6px;font-size:12px">🪨 Pre-Studiu Geotehnic</button>
+    <button onclick="infoDrawerOpen('geotehnic')" title="Află mai multe" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#64748b;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37';this.style.borderColor='rgba(212,175,55,.4)'" onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,.1)'">ⓘ</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:2px;padding:2px 4px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+    <button onclick="generateTrafficStudy();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#34d399;padding:5px 8px;cursor:pointer;border-radius:6px;font-size:12px">🚦 Studiu de Impact Trafic</button>
+    <button onclick="infoDrawerOpen('trafic')" title="Află mai multe" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#64748b;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37';this.style.borderColor='rgba(212,175,55,.4)'" onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,.1)'">ⓘ</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:2px;padding:2px 4px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+    <button onclick="generateIstoricStudy();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#f59e0b;padding:5px 8px;cursor:pointer;border-radius:6px;font-size:12px">🏛 Studiu Patrimoniu & Istoric</button>
+    <button onclick="infoDrawerOpen('patrimoniu')" title="Află mai multe" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#64748b;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37';this.style.borderColor='rgba(212,175,55,.4)'" onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,.1)'">ⓘ</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:2px;padding:2px 4px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+    <button onclick="generateEnvironmentalImpact();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#86efac;padding:5px 8px;cursor:pointer;border-radius:6px;font-size:12px">🌿 Studiu Impact Mediu (EIM)</button>
+    <button onclick="infoDrawerOpen('eim')" title="Află mai multe" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#64748b;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37';this.style.borderColor='rgba(212,175,55,.4)'" onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,.1)'">ⓘ</button>
+  </div>
+</div>
+
+<!-- ═══ INFO DRAWER RAPOARTE ══════════════════════════════════════════════ -->
+<div id="info-drawer-backdrop" onclick="infoDrawerClose()"></div>
+<div id="info-drawer">
+  <div id="info-drawer-head">
+    <span id="info-drawer-ico" style="font-size:22px;flex-shrink:0">📄</span>
+    <div style="flex:1;min-width:0">
+      <div id="info-drawer-title" style="font-size:14px;font-weight:700;color:#e2e8f0;line-height:1.2"></div>
+      <div id="info-drawer-badge-wrap" style="margin-top:5px"></div>
+    </div>
+    <button onclick="infoDrawerClose()" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#f87171;border-radius:7px;padding:5px 12px;cursor:pointer;font-size:12px;font-weight:600;flex-shrink:0">✕</button>
+  </div>
+  <div id="info-drawer-body">
+    <!-- conținut dinamic -->
+  </div>
+</div>
+
+<div id="status">⏳ Se încarcă…</div>
+
+<!-- UTR DRAWER -->
+<div id="utr-drawer">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px">
+    <b style="color:#d4af37">🗺 Zone UTR — PUG Iași · Click pe UTR pentru a-l evidenția și a vedea regulamentul</b>
+    <button id="btnCloseUTR" onclick="hideUTRDrawer()" title="Ascunde bara — UTR-urile rămân pe hartă (Esc)" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:#f87171;border-radius:7px;padding:5px 14px;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;letter-spacing:.05em">✕ Ascunde bara</button>
+  </div>
+  <div id="utr-chips"></div>
+  <div id="utr-leg" style="margin-top:6px;font-size:11px;color:#64748b"></div>
+</div>
+
+<!-- 3D CTRL -->
+<div id="ctrl3d">
+  <div class="c3row"><label>Pitch (înclinare)</label><span class="c3val" id="pitchV">0°</span></div>
+  <input type="range" id="slPitch" min="0" max="85" value="0">
+  <div class="c3row"><label>Bearing (rotire)</label><span class="c3val" id="bearV">0°</span></div>
+  <input type="range" id="slBearing" min="0" max="360" value="0">
+</div>
+
+<!-- PANEL DESKTOP -->
+<div id="panel">
+  <div id="panel-tabs">
+    <button class="ptab active" data-t="search">🔍 Căutare</button>
+    <button class="ptab" data-t="utr">🗺 UTR</button>
+    <button class="ptab" data-t="indicatori">📊 Indicatori</button>
+    <button class="ptab" data-t="proiect">🏗 Analiză</button>
+    <button class="ptab" data-t="multi">🔲 Multi</button>
+    <button class="ptab" data-t="scen">📅 Scen.</button>
+    <button class="ptab" data-t="rapoarte">📋 Rapoarte</button>
+  </div>
+  <div id="panel-body">
+    <div class="tc active" id="tc-search"></div>
+    <div class="tc" id="tc-utr"></div>
+    <div class="tc" id="tc-indicatori"></div>
+    <div class="tc" id="tc-proiect"></div>
+    <div class="tc" id="tc-multi"></div>
+    <div class="tc" id="tc-scen"></div>
+    <div class="tc" id="tc-rapoarte"></div>
+  </div>
+</div>
+
+<!-- MOBILE BOTTOM SHEET -->
+<div id="mob-sheet">
+  <!-- Drag handle -->
+  <div id="mob-drag" ontouchstart="mobDragStart(event)" ontouchmove="mobDragMove(event)" ontouchend="mobDragEnd(event)">
+    <div class="msh-drag-bar"></div>
+  </div>
+  <!-- Content -->
+  <div id="mob-body"></div>
+</div>
+
+<!-- MOBILE BOTTOM NAV BAR - mereu vizibil -->
+<nav id="mob-nav">
+  <button class="mnav-btn active" data-mt="search" onclick="mobNavClick('search',this)">
+    <span class="mnav-icon" style="display:flex;align-items:center;justify-content:center"><span style="width:20px;height:20px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" style="display:inline-block;vertical-align:middle">
+  <defs>
+    <linearGradient id="ubg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1e2c42"/><stop offset="1" stop-color="#070d16"/></linearGradient>
+    <linearGradient id="ugold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe08a"/><stop offset="0.5" stop-color="#d69e36"/><stop offset="1" stop-color="#9b641d"/></linearGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="210" fill="url(#ubg)"/>
+  <path d="M180 280h260l135 232-135 232H180l150-232z" fill="#f6f8fc"/>
+  <path d="M610 282h235L710 485H540z" fill="url(#ugold)"/>
+  <path d="M540 539h170l135 203H610z" fill="url(#ugold)"/>
+</svg></span></span>
+    <span class="mnav-label">Căutare</span>
+  </button>
+  <button class="mnav-btn" data-mt="utr" onclick="mobNavClick('utr',this)">
+    <span class="mnav-icon">🗺</span>
+    <span class="mnav-label">UTR</span>
+  </button>
+  <button class="mnav-btn" data-mt="proiect" onclick="mobNavClick('proiect',this)">
+    <span class="mnav-icon">🏗</span>
+    <span class="mnav-label">Urban3D</span>
+  </button>
+  <button class="mnav-btn" data-mt="multi" onclick="mobNavClick('multi',this)">
+    <span class="mnav-icon">🔲</span>
+    <span class="mnav-label">Multi</span>
+  </button>
+  <button class="mnav-btn" data-mt="rapoarte" onclick="mobNavClick('rapoarte',this)">
+    <span class="mnav-icon">📋</span>
+    <span class="mnav-label">Rapoarte</span>
+  </button>
+</nav>
+
+<!-- OVERLAY FIX rezultate căutare mobil -->
+<div id="mob-search-overlay">
+  <div class="mob-ov-header">
+    <span id="mob-ov-title">Rezultate</span>
+    <button onclick="mobSearchOverlayClose()" 
+      style="background:none;border:none;color:#64748b;font-size:18px;cursor:pointer;padding:0 4px;line-height:1">✕</button>
+  </div>
+  <div id="mob-ov-content"></div>
+</div>
+
+<!-- Buton flotant mobile failsafe -->
+<!-- FAB înlocuit cu mob-nav bar -->
+
+<!-- Disclaimer dev banner -->
+<div id="dev-disclaimer" style="position:fixed;bottom:26px;left:50%;transform:translateX(-50%);z-index:69;
+  background:rgba(10,15,30,0.80);border:1px solid rgba(212,175,55,0.30);border-radius:8px;
+  padding:3px 12px;font-size:9.5px;color:#64748b;pointer-events:none;white-space:nowrap;
+  backdrop-filter:blur(4px);letter-spacing:0.02em;max-width:90vw;text-align:center;overflow:hidden;text-overflow:ellipsis">
+  <span style="display:inline-flex;align-items:center;gap:5px;vertical-align:middle">
+    <span style="width:14px;height:14px;flex-shrink:0"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" style="display:inline-block;vertical-align:middle">
+  <defs>
+    <linearGradient id="ubg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1e2c42"/><stop offset="1" stop-color="#070d16"/></linearGradient>
+    <linearGradient id="ugold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe08a"/><stop offset="0.5" stop-color="#d69e36"/><stop offset="1" stop-color="#9b641d"/></linearGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="210" fill="url(#ubg)"/>
+  <path d="M180 280h260l135 232-135 232H180l150-232z" fill="#f6f8fc"/>
+  <path d="M610 282h235L710 485H540z" fill="url(#ugold)"/>
+  <path d="M540 539h170l135 203H610z" fill="url(#ugold)"/>
+</svg></span>
+    <strong style="color:#d4af37">UrbanX</strong>
+  </span>
+  — Produs în curs de dezvoltare și cercetare · Valori orientative ·
+  <span style="color:#475569">TSS·FG</span>
+</div>
+<div id="copy">
+  <span style="display:flex;align-items:center;gap:5px">
+    <span style="width:14px;height:14px;opacity:0.8"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" style="display:inline-block;vertical-align:middle">
+  <defs>
+    <linearGradient id="ubg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1e2c42"/><stop offset="1" stop-color="#070d16"/></linearGradient>
+    <linearGradient id="ugold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe08a"/><stop offset="0.5" stop-color="#d69e36"/><stop offset="1" stop-color="#9b641d"/></linearGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="210" fill="url(#ubg)"/>
+  <path d="M180 280h260l135 232-135 232H180l150-232z" fill="#f6f8fc"/>
+  <path d="M610 282h235L710 485H540z" fill="url(#ugold)"/>
+  <path d="M540 539h170l135 203H610z" fill="url(#ugold)"/>
+</svg></span>
+    <span>UrbanX · <span style="opacity:0.6;font-size:9px">TSS·FG</span></span>
+  </span>
+  <span>Mapbox GL · Cadastru · PUG Iași · OSM</span>
+</div>
+<div id="aedis-modal">
+  <div id="aedis-header">
+    <div class="aedis-title" style="display:flex;align-items:center;gap:8px">
+      <span style="width:28px;height:28px;flex-shrink:0"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024"><defs><linearGradient id="ubg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1e2c42"/><stop offset="1" stop-color="#070d16"/></linearGradient><linearGradient id="ugold2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe08a"/><stop offset="0.5" stop-color="#d69e36"/><stop offset="1" stop-color="#9b641d"/></linearGradient></defs><rect width="1024" height="1024" rx="210" fill="url(#ubg2)"/><path d="M180 280h260l135 232-135 232H180l150-232z" fill="#f6f8fc"/><path d="M610 282h235L710 485H540z" fill="url(#ugold2)"/><path d="M540 539h170l135 203H610z" fill="url(#ugold2)"/></svg></span>
+      <div>
+        <div style="font-size:15px;font-weight:800;letter-spacing:0.04em;color:#d4af37">UrbanX</div>
+        <div style="font-size:9px;font-weight:500;color:#475569;letter-spacing:0.06em;text-transform:uppercase">Generator Volumetric · TSS·FG</div>
+      </div>
+    </div>
+    <div class="aedis-subtitle" style="display:none">UrbanX</div>
+  </div>
+  <div id="aedis-body" style="flex:1;overflow:hidden;display:flex;flex-direction:column;">
+    <div style="padding:20px;color:#64748b;font-size:12px">Selectați o parcelă pe hartă și apăsați ⚡ Urban3D pentru a începe.</div>
+  </div>
+</div>
+
+<div id="fn-legend">
+  <div class="fn-leg-title">Funcțiuni clădiri</div>
+  <div class="fn-leg-row"><div class="fn-leg-sq" style="background:#7da87b"></div>Rezidențial colectiv</div>
+  <div class="fn-leg-row"><div class="fn-leg-sq" style="background:#a3b899"></div>Rezidențial</div>
+  <div class="fn-leg-row"><div class="fn-leg-sq" style="background:#e8a838"></div>Comercial</div>
+  <div class="fn-leg-row"><div class="fn-leg-sq" style="background:#f0823c"></div>Comerț/Retail</div>
+  <div class="fn-leg-row"><div class="fn-leg-sq" style="background:#5b8dd9"></div>Birouri</div>
+  <div class="fn-leg-row"><div class="fn-leg-sq" style="background:#c0453a"></div>Industrial</div>
+  <div class="fn-leg-row"><div class="fn-leg-sq" style="background:#9b59b6"></div>Educație</div>
+  <div class="fn-leg-row"><div class="fn-leg-sq" style="background:#e74c8b"></div>Sănătate</div>
+  <div class="fn-leg-row"><div class="fn-leg-sq" style="background:#d4af37"></div>Cult/Religie</div>
+  <div class="fn-leg-row"><div class="fn-leg-sq" style="background:#e67e22"></div>Hotelier</div>
+  <div class="fn-leg-row"><div class="fn-leg-sq" style="background:#8a9ab0"></div>Necunoscut</div>
+  <div style="margin-top:5px;font-size:9px;color:#64748b">Etichete: H(m) / funcțiune</div>
+</div>
+
+<!-- PDF MODAL -->
+<div id="pdf-modal">
+  <div id="pdf-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <h2 style="color:#d4af37;font-size:18px;font-weight:800">📄 Export Raport UrbanX</h2>
+      <button onclick="_g('pdf-modal').classList.remove('open')" style="background:none;border:1px solid rgba(255,255,255,.2);color:#94a3b8;border-radius:8px;padding:5px 12px;cursor:pointer;font-size:13px">✕</button>
+    </div>
+    <p style="font-size:12px;color:#64748b;margin-bottom:16px">Alege tipul de raport. Harta se captează din vederea curentă — poziționează-te înainte de export.</p>
+
+    <div class="pdf-opt sel" id="pdf-opt-full" onclick="selectPdfOpt('full')">
+      <h4>🏙 Raport complet — Teren + PUG + Volum + Indicatori</h4>
+      <p>Pag. 1: Hartă 3D cu volumul generat. Pag. 2: Regulament PUG complet (UTR, utilizări admise/interzise). Pag. 3: Toți indicatorii urbanistici (POT, CUT, H, aliniamente, SV) — PUG vs. proiect. Pag. 4: Parametrii proiectului și scenariul ales.</p>
+    </div>
+
+    <div class="pdf-opt" id="pdf-opt-vol3" onclick="selectPdfOpt('vol3')">
+      <h4>🏗 Raport 3 scenarii — Demolare / Extindere H / Extindere V</h4>
+      <p>Captează automat cele 3 scenarii de volumetrie (generează fiecare și face screenshot), plus tabel comparativ cu suprafețele, nivelurile și CUT realizat per scenariu. Recomandat pentru fezabilitate.</p>
+    </div>
+
+    <div class="pdf-opt" id="pdf-opt-multi" onclick="selectPdfOpt('multi')">
+      <h4>🔲 Raport multiparcelă — Toate parcelele selectate</h4>
+      <p>Tabel cu fiecare parcelă: nr. cadastral, suprafață, UTR, funcțiune, POT/CUT/H max, spații verzi, parcaje necesare. Plus hartă cu toate parcelele evidențiate. Util pentru comasări și PUZ-uri.</p>
+    </div>
+
+    <div class="pdf-opt" id="pdf-opt-scen" onclick="selectPdfOpt('scen')">
+      <h4>📅 Raport scenarii salvate — Comparație temporală</h4>
+      <p>Exportă scenariile salvate cu parametrii lor (UTR, funcțiune, niveluri, H, suprafețe) în tabel comparativ pe orizonturi de timp (5/10/15 ani).</p>
+    </div>
+
+    <div id="pdf-progress" style="display:none;margin-top:12px;padding:10px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);border-radius:8px;font-size:12px;color:#60a5fa">
+      <span class="spin"></span><span id="pdf-prog-msg">Se generează raportul…</span>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn-p" onclick="runExport()" style="flex:1;font-size:15px;font-weight:700">⬇ Generează PDF</button>
+        
+      <button class="btn-s" onclick="_g('pdf-modal').classList.remove('open')">Anulează</button>
+    </div>
+  </div>
+</div>
+
+<!-- Supabase Auth SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.11.0/mapbox-gl.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.5.0/mapbox-gl-draw.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<!-- UrbanX JS Modules — ordinea de incarcare e importanta -->
+<script src="js/00-globals.js"></script>
+<script src="js/02-map-core.js"></script>
+<script src="js/03-ui-panel.js"></script>
+<script src="js/04-search.js"></script>
+<script src="js/05-cad-utils.js"></script>
+<script src="js/06-aedis.js"></script>
+<script src="js/07-pdf-utils.js"></script>
+<script src="js/08-lotizare.js"></script>
+<script src="js/09-pdf-engine.js"></script>
+<script src="js/10-studies.js"></script>
+<script src="js/11-viewer3d.js"></script>
+<script src="js/12-admin.js"></script>
+<script src="js/13-info-drawer.js"></script>
+
+</script>
+
+<!-- ═══ STREET VIEW MODAL ══════════════════════════════════════════════════ -->
+<div id="sv-modal" style="display:none;position:fixed;inset:0;z-index:600;background:#000;flex-direction:column">
+
+  <!-- Header -->
+  <div style="background:rgba(8,21,42,.97);border-bottom:1px solid rgba(212,175,55,.3);
+              padding:10px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0">
+    <span style="font-size:16px">🚶</span>
+    <div>
+      <div style="font-size:13px;font-weight:700;color:#d4af37">Street View — Perspectiva pietonului</div>
+      <div id="sv-subtitle" style="font-size:10px;color:#64748b">Drag pentru a roti • Proiecția volumului 3D suprapusă</div>
+    </div>
+    <div style="flex:1"></div>
+    <div style="display:flex;gap:6px">
+      <button id="sv-toggle-vol" onclick="svToggleVolume()" 
+        style="padding:6px 11px;background:rgba(59,130,246,.2);border:1px solid #3b82f6;
+               color:#60a5fa;border-radius:7px;cursor:pointer;font-size:11px;font-weight:700">
+        🏗 Volum ON
+      </button>
+      <button onclick="svClose()" 
+        style="padding:6px 12px;background:rgba(239,68,68,.2);border:1px solid rgba(239,68,68,.4);
+               color:#f87171;border-radius:7px;cursor:pointer;font-size:12px;font-weight:700">✕</button>
+    </div>
+  </div>
+
+  <!-- Main: SV iframe + canvas overlay -->
+  <div style="flex:1;position:relative;overflow:hidden">
+    <iframe id="sv-iframe" src="" style="width:100%;height:100%;border:none;display:block"
+      allow="fullscreen" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    
+    <!-- Canvas pentru proiectia volumului -->
+    <canvas id="sv-canvas" style="position:absolute;inset:0;width:100%;height:100%;
+      pointer-events:none;opacity:0.85"></canvas>
+
+    <!-- Punct de vedere marker -->
+    <div id="sv-pov-marker" style="position:absolute;bottom:60px;left:50%;transform:translateX(-50%);
+      background:rgba(8,21,42,.9);border:1px solid rgba(212,175,55,.4);border-radius:8px;
+      padding:6px 12px;font-size:10px;color:#d4af37;pointer-events:none">
+      📍 <span id="sv-pov-label">Calculez poziția…</span>
+    </div>
+  </div>
+
+  <!-- Bottom: pozitii sugerate -->
+  <div id="sv-positions" style="background:rgba(8,21,42,.97);border-top:1px solid rgba(255,255,255,.08);
+    padding:8px 12px;display:flex;gap:8px;overflow-x:auto;flex-shrink:0;min-height:54px;
+    align-items:center">
+    <span style="font-size:10px;color:#475569;white-space:nowrap;flex-shrink:0">Vizualizare din:</span>
+  </div>
+</div>
+
+<script>
+</script>
+
+<!-- ── ADMIN PANEL ──────────────────────────────────────────────────────── -->
+<div id="admin-overlay" onclick="if(event.target===this)_adminClose()" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);align-items:center;justify-content:center">
+  <div style="background:#0f172a;border:1px solid rgba(212,175,55,.4);border-radius:16px;width:min(680px,96vw);max-height:88vh;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,.7)">
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,.1);flex-shrink:0">
+      <div>
+        <div style="font-size:16px;font-weight:800;color:#d4af37;letter-spacing:.04em">⚙️ Panou Administrare</div>
+        <div style="font-size:11px;color:#64748b;margin-top:3px">UrbanX · Acces restricționat · <span id="adm-logged-as" style="color:#94a3b8"></span></div>
+      </div>
+      <button onclick="_adminClose()" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#f87171;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:12px;font-weight:600">✕ Închide</button>
+    </div>
+
+    <!-- Body scrollabil -->
+    <div id="adm-body" style="flex:1;overflow-y:auto;padding:18px 22px;display:flex;flex-direction:column;gap:16px">
+
+      <!-- Stats -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+        <div style="background:#080f1c;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px;text-align:center">
+          <div style="font-size:24px;font-weight:800;color:#3b82f6" id="adm-total">—</div>
+          <div style="font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-top:3px">Total</div>
+        </div>
+        <div style="background:#080f1c;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px;text-align:center">
+          <div style="font-size:24px;font-weight:800;color:#34d399" id="adm-confirmed">—</div>
+          <div style="font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-top:3px">Confirmați</div>
+        </div>
+        <div style="background:#080f1c;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px;text-align:center">
+          <div style="font-size:24px;font-weight:800;color:#fbbf24" id="adm-pending">—</div>
+          <div style="font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-top:3px">Neconfirmați</div>
+        </div>
+        <div style="background:#080f1c;border:1px solid rgba(212,175,55,.15);border-radius:10px;padding:12px;text-align:center">
+          <div style="font-size:24px;font-weight:800;color:#d4af37" id="adm-admins">—</div>
+          <div style="font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-top:3px">Admini</div>
+        </div>
+      </div>
+
+      <!-- Tabel utilizatori -->
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em">Utilizatori înregistrați</div>
+          <button onclick="_adminLoadUsers()" id="adm-reload-btn" style="background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.3);color:#60a5fa;border-radius:7px;padding:5px 12px;font-size:11px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:5px">🔄 Reîncarcă</button>
+        </div>
+        <div id="adm-msg" style="font-size:12px;margin-bottom:8px"></div>
+        <div id="adm-users" style="border:1px solid rgba(255,255,255,.08);border-radius:10px;overflow:hidden;min-height:60px">
+          <div style="padding:24px;text-align:center;color:#64748b;font-size:12px">Se încarcă lista de utilizatori...</div>
+        </div>
+      </div>
+
+      <!-- Invită user nou -->
+      <div style="background:#080f1c;border:1px solid rgba(59,130,246,.2);border-radius:10px;padding:14px">
+        <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">✉️ Invită utilizator nou</div>
+        <div style="display:flex;gap:8px">
+          <input id="adm-invite-email" type="email" placeholder="email@exemplu.ro" style="flex:1;padding:9px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#0b1220;color:#e2e8f0;font-size:13px;outline:none" onkeydown="if(event.key==='Enter')_adminInvite()">
+          <button onclick="_adminInvite()" style="background:rgba(59,130,246,.2);border:1px solid rgba(59,130,246,.4);color:#60a5fa;border-radius:8px;padding:9px 16px;cursor:pointer;font-size:12px;font-weight:700;white-space:nowrap">Invită</button>
+        </div>
+        <div id="adm-invite-msg" style="font-size:11px;margin-top:7px"></div>
+      </div>
+
+      <!-- Setare rol -->
+      <div style="background:#080f1c;border:1px solid rgba(212,175,55,.15);border-radius:10px;padding:14px">
+        <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">👑 Schimbă rol utilizator</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input id="adm-role-email" type="email" placeholder="email@exemplu.ro" style="flex:1;min-width:180px;padding:9px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#0b1220;color:#e2e8f0;font-size:13px;outline:none">
+          <select id="adm-role-sel" style="padding:9px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#0b1220;color:#e2e8f0;font-size:13px;outline:none">
+            <option value="admin">👑 Admin</option>
+            <option value="user" selected>👤 User</option>
+          </select>
+          <button onclick="_adminSetRole()" style="background:rgba(212,175,55,.15);border:1px solid rgba(212,175,55,.4);color:#d4af37;border-radius:8px;padding:9px 16px;cursor:pointer;font-size:12px;font-weight:700;white-space:nowrap">Aplică</button>
+        </div>
+        <div id="adm-role-msg" style="font-size:11px;margin-top:7px"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+</body>
+</html>
