@@ -1547,8 +1547,8 @@ out geom qt;`;
       // Geometrie ușor mai subțire pentru clădiri (nu perfect cubice)
       const geom = new THREE.BoxGeometry(1, 1, 1);
       geom.translate(0, 0, 0.5); // pivotul la Z=0 (sol)
-      // MeshBasicMaterial: NU depinde de lumini → culoarea instanței apare GARANTAT
-      const mat = new THREE.MeshBasicMaterial({ vertexColors: true });
+      // depthTest:false → clădirile TCI apar ÎNTOTDEAUNA, indiferent de depth buffer Mapbox
+      const mat = new THREE.MeshBasicMaterial({ vertexColors: true, depthTest: false });
       this._mesh = new THREE.InstancedMesh(geom, mat, this._entities.length);
       this._mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
       // Inițializează instanceColor (gri neutru) ÎNAINTE de primul render → shader compile corect
