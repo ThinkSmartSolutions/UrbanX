@@ -16,7 +16,7 @@ const TCI = {
   bearing: 0,
   _selectedUATKey: null,
   MILES: [2030, 2035, 2040, 2045, 2050],
-  YEAR_DUR: 14000,
+  YEAR_DUR: 26000,
 
   // ── Date reale per UAT ───────────────────────────────────────────────────
   _city() {
@@ -595,7 +595,25 @@ const TCI = {
 
     init(tci) {
       this._tci=tci;
-      this._scenes=this._build();
+      try {
+        this._scenes=this._build();
+        console.log('[Director] ✅ '+this._scenes.length+' scene încărcate pentru '+T.cityData?.name);
+      } catch(e) {
+        console.error('[Director] Eroare build scenes:',e.message);
+        // Fallback minim — 2 scene garantate
+        const d=T.cityData||{}, cx=d.lon||27.601, cy=d.lat||47.158;
+        this._scenes=[
+          {id:'fb1',dur:60000,light:'dusk',
+           cam:{center:[cx,cy],zoom:4.5,pitch:0,bearing:0,duration:3500},
+           chain:[{center:[cx,cy],zoom:12,pitch:50,bearing:-20,duration:6000,delay:8000},{center:[cx,cy],zoom:15,pitch:68,bearing:10,duration:5000,delay:20000}],
+           title:'🏙 '+d.name,'body':d.name+' — proiecție urbanistică 2025-2055',src:'UrbanX TSS·FG'},
+          {id:'fb2',dur:60000,light:'dusk',
+           cam:{center:[cx,cy],zoom:13.5,pitch:55,bearing:-25,duration:5000},
+           chain:[{center:[cx,cy],zoom:16.5,pitch:76,bearing:20,duration:6000,delay:12000},{center:[cx,cy],zoom:12,pitch:40,bearing:0,duration:5000,delay:35000}],
+           title:'📊 Date Oficiale '+d.name,'body':'Proiecție calibrată: INSE · Eurostat · ANCPI · BNR · IPCC AR6',src:'UrbanX TSS·FG'},
+        ];
+        console.log('[Director] Fallback cu',this._scenes.length,'scene');
+      }
       this._idx=-1;
       clearTimeout(this._timer);
       setTimeout(()=>this._next(),1500);
@@ -637,7 +655,7 @@ const TCI = {
 
       return [
         // S1 — Vedere globală → România
-        {id:'s1',dur:75000,light:'day',
+        {id:'s1',dur:18000,light:'day',
          cam:fly([24.5,45.9],4.5,0,0,3500),
          chain:[fly([cx+0.3,cy+0.2],7.5,18,-12,6000,7000),fly([cx,cy],10,30,-10,6000,30000),fly([cx,cy],12,45,-20,5500,55000)],
          title:'🌍 '+name+' — Vedere Globală',
@@ -645,7 +663,7 @@ const TCI = {
          src:'INS · Eurostat · ANCPI'},
 
         // S2 — Zoom regional
-        {id:'s2',dur:75000,light:'day',
+        {id:'s2',dur:18000,light:'day',
          cam:fly([cx+0.2,cy+0.1],8.5,20,-10,5000),
          chain:[fly([cx,cy+0.03],10.5,32,-8,6000,20000),fly([cx,cy],11.5,40,-5,6000,45000),fly([cx,cy],12.5,48,-15,5500,62000)],
          title:'🗺 Regiune — '+name+' Pol Regional',
@@ -653,7 +671,7 @@ const TCI = {
          src:'INS Recensămînt 2021 · ADR Nord-Est · Eurostat NUTS'},
 
         // S3 — Aproach cu date reale
-        {id:'s3',dur:75000,light:'dusk',
+        {id:'s3',dur:22000,light:'dusk',
          cam:fly([cx,cy],11,25,-20,5000),
          chain:[fly([cx,cy],12,38,-12,6000,18000),fly([cx,cy],13,50,-8,6000,38000),fly([cx,cy],13.5,55,-5,5500,58000)],
          title:'✈ Aproach — '+name+' '+yr,
@@ -661,7 +679,7 @@ const TCI = {
          src:'INSE Cohort-Survival · ANCPI · BNR · Eurostat'},
 
         // S4 — City 3D
-        {id:'s4',dur:80000,light:'dusk',
+        {id:'s4',dur:70000,light:'dusk',
          cam:fly([cx,cy],13.2,52,-28,5500),
          chain:[fly([cx+0.004,cy],13.8,58,20,6000,15000),fly([cx-0.003,cy+0.003],14,60,-20,6000,35000),fly([cx,cy],13.5,55,10,6000,58000),fly([cx,cy],14,62,-5,5500,68000)],
          title:'🏙 '+name+' 3D — Structura Urbană',
@@ -677,7 +695,7 @@ const TCI = {
          src:'ANCPI Autorizații · PUG UTR · INS Construcții'},
 
         // S6 — Mobilitate
-        {id:'s6',dur:90000,light:'night',
+        {id:'s6',dur:85000,light:'night',
          cam:fly([cx,cy],12.8,48,0,5500),
          chain:[fly([cx+0.006,cy-0.004],13.2,52,-18,6000,18000),fly([cx-0.004,cy+0.004],13.5,55,15,6000,38000),fly([cx,cy],14,58,-10,6000,58000),fly([cx,cy],13,50,0,5500,75000)],
          title:'🚊 Rețea Mobilitate — Trafic Live',
@@ -685,7 +703,7 @@ const TCI = {
          src:'PMUD · PNRR Mobilitate · Eurostat Modal Split'},
 
         // S7 — Focus cartier
-        {id:'s7',dur:95000,light:'dusk',
+        {id:'s7',dur:90000,light:'dusk',
          cam:fly([cx+0.007,cy+0.010],14.8,65,-18,5500),
          chain:[fly([cx+0.009,cy+0.012],15.5,70,15,6000,18000),fly([cx+0.006,cy+0.013],16,73,-25,7000,38000),fly([cx+0.010,cy+0.010],16.5,75,20,7000,60000),fly([cx+0.008,cy+0.011],15.5,68,0,6000,78000)],
          title:'🏗 Focus Zone — Densificare',
@@ -693,7 +711,7 @@ const TCI = {
          src:'PUG · ANCPI · INS · Model UTR TSS·FG'},
 
         // S8 — Street level
-        {id:'s8',dur:90000,light:'dusk',
+        {id:'s8',dur:80000,light:'dusk',
          cam:fly([cx+0.002,cy+0.001],16.5,74,5,6000),
          chain:[fly([cx+0.003,cy+0.001],17,78,35,7000,18000),fly([cx+0.001,cy+0.003],17.3,79,-20,7000,38000),fly([cx+0.004,cy+0.002],17.5,76,50,7000,60000),fly([cx+0.002,cy+0.001],16.5,74,0,6000,78000)],
          title:'🚶 Nivel Pietonal — Viața Urbană',
@@ -701,7 +719,7 @@ const TCI = {
          src:'PMUD · ANM Calitate Aer · OMS WalkScore'},
 
         // S9 — Riscuri
-        {id:'s9',dur:75000,light:'night',
+        {id:'s9',dur:65000,light:'night',
          cam:fly([cx,cy],12.5,46,5,5500),
          chain:[fly([cx+0.006,cy-0.004],13,50,-18,6000,18000),fly([cx-0.008,cy+0.005],13.3,53,12,6000,38000),fly([cx,cy],13,48,0,5500,58000),fly([cx,cy],13.5,55,-10,5500,66000)],
          title:'⚠ Riscuri & Climă — Profil '+name,
@@ -709,7 +727,7 @@ const TCI = {
          src:'INFP P100-1/2013 · ANAR · IPCC AR6 RCP8.5 · ANM'},
 
         // S10 — Comparatie
-        {id:'s10',dur:80000,light:'dusk',
+        {id:'s10',dur:70000,light:'dusk',
          cam:fly([cx,cy],12.3,44,-10,5500),
          chain:[fly([cx+0.004,cy],12.8,48,18,6000,20000),fly([cx-0.004,cy+0.003],13.2,52,-15,6000,42000),fly([cx,cy],12.5,46,0,5500,62000),fly([cx,cy],13,52,10,5500,70000)],
          title:'⚖ '+name+' vs Orase Similare EU',
@@ -717,7 +735,7 @@ const TCI = {
          src:'Eurostat Urban Audit 2021 · INS · BNR · EIU'},
 
         // S11 — Time Machine
-        {id:'s11',dur:95000,light:'dusk',
+        {id:'s11',dur:90000,light:'dusk',
          cam:fly([cx,cy],13.2,52,0,5500),
          chain:[fly([cx,cy],13.8,56,60,7500,15000),fly([cx,cy],14.2,60,120,7500,35000),fly([cx,cy],14.5,62,180,7500,55000),fly([cx,cy],14.2,60,240,7500,73000)],
          title:'⏱ Time Machine — 2025 → 2050',
@@ -726,7 +744,7 @@ const TCI = {
          animYear:true},
 
         // S12 — Concluzie
-        {id:'s12',dur:60000,light:'dusk',
+        {id:'s12',dur:50000,light:'dusk',
          cam:fly([cx,cy],11.8,40,-20,5000),
          chain:[fly([cx,cy],12.5,48,25,6000,14000),fly([cx,cy],13.2,55,-15,6000,30000),fly([cx,cy],14,60,10,6000,46000)],
          title:'🌟 '+name+' 2050 — Viziunea',
@@ -913,8 +931,107 @@ const TCI = {
     const sceneId=this._director?._scenes?.[this._director?._idx]?.id;
     if(sceneId==='s11') this._drawTimeMachine(ctx, W, H, yr);
 
+    // Overlay date per nivel de zoom — vizibil la ORICE nivel
+    const zoom = this.map?.getZoom?.() || 12;
+    this._drawZoomOverlay(ctx, W, H, yr, zoom, sceneId);
+
     // Legendă clădiri — mereu vizibilă
     this._drawLegend(ctx, W, H, yr);
+  },
+
+  _drawZoomOverlay(ctx, W, H, yr, zoom, sceneId) {
+    const city = this._city();
+    const d    = this._data(yr);
+    const name = city.name || 'UAT';
+    const pop  = (d.demo?.value || city.pop2021 || 0).toLocaleString();
+    const yF   = Math.max(0,Math.min(1,(yr-2025)/25));
+
+    ctx.save();
+
+    // ── ZOOM 4-7: Europa/Moldova — card stânga cu date cheie ─────────────
+    if(zoom < 8) {
+      const cx2=20, cy2=H*0.28;
+      ctx.fillStyle='rgba(4,10,24,0.88)';
+      this._rr(ctx,cx2,cy2,210,130,8); ctx.fill();
+      ctx.strokeStyle='rgba(212,175,55,0.3)'; ctx.lineWidth=1;
+      this._rr(ctx,cx2,cy2,210,130,8); ctx.stroke();
+      ctx.textAlign='left';
+      ctx.fillStyle='#D4AF37'; ctx.font='bold 11px "Space Grotesk"';
+      ctx.fillText('📍 '+name, cx2+14, cy2+20);
+      ctx.fillStyle='rgba(148,163,184,0.55)'; ctx.font='7.5px "Space Grotesk"';
+      ctx.fillText(city.judet ? 'jud. '+city.judet+' · România' : 'România', cx2+14, cy2+34);
+      ctx.fillStyle='rgba(255,255,255,0.1)'; ctx.fillRect(cx2+14,cy2+38,180,1);
+      const rows=[
+        {l:'Populație '+yr, v:pop,              c:'#60a5fa'},
+        {l:'PIB/cap est.',  v:'€'+((d.housing?.pibCapProj||14200)/1000).toFixed(0)+'k', c:'#22c55e'},
+        {l:'Creștere/an',   v:(city.rata_reala_2011_2021||0).toFixed(2)+'%', c:'#D4AF37'},
+        {l:'ESG Score',     v:(d.esg?.total||51)+'/100',  c:'#a78bfa'},
+      ];
+      rows.forEach((r,i)=>{
+        const ry=cy2+44+i*20;
+        ctx.fillStyle='rgba(148,163,184,0.55)'; ctx.font='7.5px "Space Grotesk"';
+        ctx.fillText(r.l, cx2+14, ry+8);
+        ctx.fillStyle=r.c; ctx.font='bold 11px "Space Grotesk"';
+        ctx.fillText(r.v, cx2+120, ry+8);
+      });
+      // Marker pe harta — incarcat
+      ctx.textAlign='center';
+      ctx.fillStyle='rgba(239,68,68,0.9)'; ctx.font='16px "Space Grotesk"';
+      ctx.fillText('📍', W/2+10, H/2);
+    }
+
+    // ── ZOOM 8-11: Regional — statistici regionale ────────────────────────
+    if(zoom >= 8 && zoom < 12) {
+      const cx2=20, cy2=H*0.3;
+      ctx.fillStyle='rgba(4,10,24,0.85)';
+      this._rr(ctx,cx2,cy2,200,100,7); ctx.fill();
+      ctx.strokeStyle='rgba(96,165,250,0.25)'; ctx.lineWidth=1;
+      this._rr(ctx,cx2,cy2,200,100,7); ctx.stroke();
+      ctx.textAlign='left';
+      ctx.fillStyle='#60a5fa'; ctx.font='bold 10px "Space Grotesk"';
+      ctx.fillText(name+' — '+yr, cx2+12, cy2+18);
+      ctx.fillStyle='rgba(148,163,184,0.55)'; ctx.font='7.5px "Space Grotesk"';
+      ctx.fillText('Pol regional · zona metropolitana', cx2+12, cy2+30);
+      ctx.fillStyle='rgba(255,255,255,0.08)'; ctx.fillRect(cx2+12,cy2+34,174,1);
+      ctx.fillStyle='rgba(200,215,235,0.85)'; ctx.font='bold 22px "Space Grotesk"';
+      ctx.fillText(pop, cx2+12, cy2+62);
+      ctx.fillStyle='rgba(148,163,184,0.5)'; ctx.font='7px "Space Grotesk"';
+      ctx.fillText('locuitori · proiecție '+yr, cx2+12, cy2+74);
+      // Delta vs 2025
+      const pop0 = city.pop2021||100000;
+      const delta = Math.round(((d.demo?.value||pop0)-pop0)/pop0*100);
+      ctx.fillStyle=delta>0?'#22c55e':'#ef4444'; ctx.font='bold 10px "Space Grotesk"';
+      ctx.fillText((delta>0?'+':'')+delta+'% față de 2025', cx2+12, cy2+90);
+    }
+
+    // ── ZOOM 12-13: City overview — KPI-uri centru sus ────────────────────
+    if(zoom >= 12 && zoom < 14) {
+      const ms=(typeof _getModalSplit!=='undefined')?_getModalSplit(yr):{auto:72,tp:18};
+      const kpis=[
+        {l:'POPULAȚIE',v:pop,c:'#60a5fa'},
+        {l:'PIB/CAP',v:'€'+((d.housing?.pibCapProj||14200)/1000).toFixed(0)+'k',c:'#22c55e'},
+        {l:'ESG',v:(d.esg?.total||51)+'/100',c:'#a78bfa'},
+        {l:'MODAL AUTO',v:ms.auto+'%',c:'#f59e0b'},
+      ];
+      const kW=100, kGap=8, kH=44;
+      const totalW=kpis.length*(kW+kGap)-kGap;
+      const kX=W/2-totalW/2, kY=52;
+      kpis.forEach((k,i)=>{
+        const x=kX+i*(kW+kGap);
+        ctx.fillStyle='rgba(4,10,24,0.85)';
+        this._rr(ctx,x,kY,kW,kH,5); ctx.fill();
+        ctx.strokeStyle=k.c+'44'; ctx.lineWidth=1;
+        this._rr(ctx,x,kY,kW,kH,5); ctx.stroke();
+        ctx.textAlign='center';
+        ctx.fillStyle='rgba(148,163,184,0.55)'; ctx.font='6.5px "Space Grotesk"';
+        ctx.fillText(k.l, x+kW/2, kY+12);
+        ctx.fillStyle=k.c; ctx.font='bold 14px "Space Grotesk"';
+        ctx.fillText(k.v, x+kW/2, kY+32);
+      });
+      ctx.textAlign='left';
+    }
+
+    ctx.restore();
   },
 
   _drawTimeMachine(ctx, W, H, yr) {
