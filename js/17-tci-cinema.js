@@ -639,7 +639,41 @@ const TCI = {
     const cx = ap?.lon || d?.lon || 27.601;
     const cy = ap?.lat || d?.lat || 47.158;
 
-    // ── L2: Clădiri 3D — sursa Mapbox Streets v8 (funcționează cu orice stil) ─
+    // ── MAPBOX STANDARD STYLE — fotorealism, lighting, umbre reale ──────────
+    // Schimbam la Standard daca nu e deja activ
+    const currentStyle = m.getStyle?.()?.name || '';
+    if(!currentStyle.toLowerCase().includes('standard')) {
+      try {
+        m.setStyle('mapbox://styles/mapbox/standard');
+        // Dupa incarcarea stilului nou, re-adaugam layerele TCI
+        m.once('style.load', () => {
+          console.log('[TCI] Mapbox Standard loaded — re-adding layers');
+          this._setLightPreset('dusk');
+          this._addTCILayers(cx, cy);
+        });
+        return;  // layers se adauga la style.load
+      } catch(e) {
+        console.warn('[TCI] Standard style failed, continuam cu stilul existent:', e.message);
+      }
+    }
+
+    this._addTCILayers(cx, cy);
+  },
+
+  // Seteaza iluminatul Mapbox Standard per scena
+  _setLightPreset(preset) {
+    try {
+      const m = this.map;
+      if(!m) return;
+      m.setConfigProperty('basemap','lightPreset', preset);
+      console.log('[TCI] Light preset:', preset);
+    } catch(e) { /* stilul poate sa nu fie Standard */ }
+  },
+
+  _addTCILayers(cx, cy) {
+    const m = this.map; if(!m) return;
+
+    // ── Clădiri 3D — sursa Mapbox Streets v8 ────────────────────────────────
     if(!m.getSource?.('tci-bld-src')) {
       try {
         // Sursa separata de buildings — nu depinde de STYLES.custom
@@ -3821,9 +3855,35 @@ const TCI = {
         } catch(e) {}
       }
 
-      // 2. Night mode + overlay
+      // 2. Night mode + overlay + LIGHTING PRESET per scena
       this._currentOverlay = scene.overlay;
       this._nightMode      = !!scene.nightMode;
+
+      // Mapbox Standard lighting preset adaptat la scena
+      const lightPresets = {
+        intro_europe: 'day', zoom_region: 'day', city_approach: 'dusk',
+        city_3d_reveal: 'dusk', statistics_card: 'dusk', neighborhoods_map: 'dawn',
+        metro_orbit: 'day', demography_context: 'day',
+        act1_centru_approach: 'dusk', act1_centru_street: 'dusk',
+        act1_rezidential_nord: 'dawn', act1_nord_street: 'dawn',
+        act1_comercial: 'day', act1_industrial: 'day',
+        act1_green: 'day', act1_density: 'day', act1_risk_baseline: 'night',
+        act2_baseline_2025: 'dusk', act2_early_growth: 'day',
+        act2_milestone_2030: 'dusk', act2_acceleration: 'day',
+        act2_milestone_2035: 'dusk', act2_construction_wave: 'day',
+        act2_before_after: 'day', act2_milestone_2040: 'dusk',
+        act3_traffic_now: 'night', act3_congestion: 'night',
+        act3_tp_now: 'dusk', act3_tp_future: 'day',
+        act3_modal_split: 'day', act3_pedestrian: 'dusk',
+        act4_seismic: 'night', act4_flood: 'night', act4_climate: 'day',
+        act4_heat_island: 'day', act4_green_response: 'dawn',
+        act5_ro_eu: 'dusk', act5_vs_cluj: 'dusk', act5_vs_vilnius: 'dusk',
+        act5_vs_central: 'dusk', act5_summary: 'dusk',
+        act6_2045: 'dusk', act6_2050_full: 'dusk', act6_smart_kpis: 'night',
+        act6_sustainable: 'dawn', act6_final_orbit: 'night', act6_conclusion: 'dusk',
+      };
+      const lp = lightPresets[scene.id] || (scene.nightMode ? 'night' : 'dusk');
+      T._setLightPreset(lp);
 
       // 3. Narrative card (instant, fara delay)
       if(T) T._updateNarrativeForZone({
@@ -4012,22 +4072,33 @@ const TCI = {
     ctx.globalAlpha = fadeIn;
 
     if(ov === 'approach_data') {
-      // Scena 3: date mari pop-in
-      const d = (typeof _getProjectionData !== 'undefined')
-        ? _getProjectionData(this.year, this.scenario, this.cityKey) : null;
-      const pop = (d?.demo?.value || this.cityData?.pop2021 || 100000).toLocaleString();
-      const pop50 = Math.round((this.cityData?.pop2021||100000)*1.18).toLocaleString();
-      ctx.fillStyle = 'rgba(4,10,24,0.6)';
-      this._rr(ctx, W*0.04, H*0.12, 200, 90, 8); ctx.fill();
-      ctx.fillStyle='#D4AF37'; ctx.font='bold 9px "Space Grotesk"'; ctx.textAlign='left';
-      ctx.fillText('POPULAȚIE ' + this.year, W*0.04+14, H*0.12+22);
-      ctx.fillStyle='#fff'; ctx.font='bold 28px "Space Grotesk"';
-      ctx.fillText(pop, W*0.04+14, H*0.12+54);
-      ctx.fillStyle='#22c55e'; ctx.font='bold 11px "Space Grotesk"';
-      ctx.fillText('PROIECȚIE 2050: ' + pop50, W*0.04+14, H*0.12+74);
-      ctx.fillStyle='rgba(34,197,94,0.6)'; ctx.font='bold 9px "Space Grotesk"';
-      ctx.fillText('+20.3%', W*0.04+14, H*0.12+88);
-      ctx.textAlign='left';
+      // S3 — exact ca storyboard: card stânga-jos, numere mari
+      const pop = (this.cityData?.pop2021 || 360633).toLocaleString();
+      const pop50 = Math.round((this.cityData?.pop2021||360633)*1.203).toLocaleString();
+      const cardH = 130, cardW = 210;
+      const cx2 = 16, cy2 = H - 75 - cardH;
+      ctx.fillStyle = 'rgba(4,10,24,0.88)';
+      this._rr(ctx, cx2, cy2, cardW, cardH, 8); ctx.fill();
+      ctx.strokeStyle = 'rgba(212,175,55,0.25)'; ctx.lineWidth = 1;
+      this._rr(ctx, cx2, cy2, cardW, cardH, 8); ctx.stroke();
+      ctx.textAlign = 'left';
+      // Label
+      ctx.fillStyle = 'rgba(148,163,184,0.7)'; ctx.font = 'bold 8px "Space Grotesk"';
+      ctx.fillText('POPULAȚIE ' + this.year, cx2+12, cy2+18);
+      // Număr mare pop curentă
+      ctx.fillStyle = '#ffffff'; ctx.font = 'bold 36px "Space Grotesk"';
+      ctx.fillText(pop, cx2+12, cy2+60);
+      // Separator
+      ctx.fillStyle = 'rgba(212,175,55,0.3)'; ctx.fillRect(cx2+12, cy2+68, cardW-24, 1);
+      // Proiecție 2050
+      ctx.fillStyle = 'rgba(148,163,184,0.6)'; ctx.font = 'bold 8px "Space Grotesk"';
+      ctx.fillText('POPULAȚIE 2050', cx2+12, cy2+83);
+      ctx.fillStyle = '#22c55e'; ctx.font = 'bold 22px "Space Grotesk"';
+      ctx.fillText(pop50, cx2+12, cy2+108);
+      // Delta
+      ctx.fillStyle = '#22c55e'; ctx.font = 'bold 10px "Space Grotesk"';
+      ctx.fillText('+20,3%', cx2+12, cy2+126);
+      ctx.textAlign = 'left';
     }
 
     if(ov === 'development_zones') {
@@ -4471,7 +4542,129 @@ const TCI = {
       }
     }
 
+    // ── S4 — Neighborhoods labels pe hartă (Copou, Tătărași, Nicolina...) ──
+    if(ov === 'city_3d_reveal' || ov === 'neighborhoods_labels' || ov === 'city_3d') {
+      if(m) {
+        const zones=[
+          {lon:cx+0.009,lat:cy+0.013,label:'COPOU',       col:'#a78bfa'},
+          {lon:cx+0.005,lat:cy-0.008,label:'TĂTĂRAȘI',    col:'#60a5fa'},
+          {lon:cx-0.003,lat:cy+0.001,label:'CENTRU',      col:'#D4AF37'},
+          {lon:cx-0.005,lat:cy-0.012,label:'NICOLINA',    col:'#60a5fa'},
+          {lon:cx+0.018,lat:cy-0.006,label:'DACIA',       col:'#94a3b8'},
+          {lon:cx-0.014,lat:cy+0.007,label:'FRUMOASA',    col:'#22c55e'},
+          {lon:cx+0.011,lat:cy+0.004,label:'AL. CEL BUN', col:'#94a3b8'},
+        ];
+        ctx.save();
+        zones.forEach(z=>{
+          try {
+            const pt=m.project([z.lon,z.lat]);
+            if(pt.x<20||pt.x>W-20||pt.y<52||pt.y>H-60) return;
+            const tw=ctx.measureText(z.label).width;
+            ctx.fillStyle='rgba(4,10,24,0.78)';
+            this._rr(ctx,pt.x-tw/2-7,pt.y-10,tw+14,16,3); ctx.fill();
+            ctx.fillStyle=z.col; ctx.font='bold 8px "Space Grotesk"';
+            ctx.textAlign='center'; ctx.fillText(z.label,pt.x,pt.y+2);
+            ctx.fillStyle=z.col+'cc';
+            ctx.beginPath(); ctx.arc(pt.x,pt.y+12,2.5,0,Math.PI*2); ctx.fill();
+          } catch(e){}
+        });
+        ctx.restore(); ctx.textAlign='left';
+
+        // Legendă densitate dreapta-sus (ca storyboard S4)
+        const lgd=[{col:'#ef4444',l:'200+'},{col:'#f97316',l:'150'},{col:'#f59e0b',l:'100'},{col:'#22c55e',l:'50'},{col:'#1d4ed8',l:'0'}];
+        const lgX=W-92, lgY=58, lgH=lgd.length*16+26;
+        ctx.fillStyle='rgba(4,10,24,0.85)'; this._rr(ctx,lgX,lgY,80,lgH,6); ctx.fill();
+        ctx.fillStyle='rgba(148,163,184,0.7)'; ctx.font='bold 7px "Space Grotesk"'; ctx.textAlign='center';
+        ctx.fillText('DENSITATE', lgX+40, lgY+13);
+        ctx.fillStyle='rgba(100,120,150,0.5)'; ctx.font='6px "Space Grotesk"';
+        ctx.fillText('LOCUITORI / HA', lgX+40, lgY+22);
+        lgd.forEach((l,i)=>{
+          const ly=lgY+28+i*16;
+          ctx.fillStyle=l.col; ctx.fillRect(lgX+10,ly,12,10);
+          ctx.fillStyle='rgba(200,215,235,0.8)'; ctx.font='8px "Space Grotesk"'; ctx.textAlign='left';
+          ctx.fillText(l.l, lgX+28, ly+9);
+        });
+        ctx.textAlign='left';
+      }
+    }
+
+    // ── S7 — Focus zonă: numere mari exacte ca storyboard ───────────────────
+    if(ov === 'construction_focus' || ov === 'district_focus') {
+      const yr=this.year||2025;
+      const densif=Math.round(28+(yr-2021)*0.4);
+      const locNoi=Math.round(12400*Math.min(1,(yr-2021)/19));
+      const pop50z=45800;
+      const cW=178, cH=148, cX=W-cW-12, cY=62;
+      ctx.fillStyle='rgba(4,10,24,0.92)'; this._rr(ctx,cX,cY,cW,cH,8); ctx.fill();
+      ctx.strokeStyle='rgba(212,175,55,0.3)'; ctx.lineWidth=1; this._rr(ctx,cX,cY,cW,cH,8); ctx.stroke();
+      ctx.textAlign='center';
+      ctx.fillStyle='rgba(148,163,184,0.6)'; ctx.font='bold 8px "Space Grotesk"'; ctx.fillText('DENSIFICARE',cX+cW/2,cY+17);
+      ctx.fillStyle='#22c55e'; ctx.font='bold 30px "Space Grotesk"'; ctx.fillText('+'+densif+'%',cX+cW/2,cY+48);
+      ctx.fillStyle='rgba(255,255,255,0.08)'; ctx.fillRect(cX+10,cY+54,cW-20,1);
+      ctx.fillStyle='rgba(148,163,184,0.6)'; ctx.font='bold 8px "Space Grotesk"'; ctx.fillText('LOCUINȚE NOI',cX+cW/2,cY+70);
+      ctx.fillStyle='#D4AF37'; ctx.font='bold 26px "Space Grotesk"'; ctx.fillText(locNoi.toLocaleString(),cX+cW/2,cY+96);
+      ctx.fillStyle='rgba(255,255,255,0.08)'; ctx.fillRect(cX+10,cY+102,cW-20,1);
+      ctx.fillStyle='rgba(148,163,184,0.6)'; ctx.font='bold 8px "Space Grotesk"'; ctx.fillText('POPULAȚIE 2050',cX+cW/2,cY+118);
+      ctx.fillStyle='#60a5fa'; ctx.font='bold 20px "Space Grotesk"'; ctx.fillText(pop50z.toLocaleString(),cX+cW/2,cY+142);
+      ctx.textAlign='left';
+    }
+
+    // ── S6 — Traffic legend exactă ca storyboard ─────────────────────────────
+    if(ov === 'traffic_heatmap' || ov === 'traffic_network' || ov === 'congestion_nodes') {
+      const lgX=16, lgY=H-75-76;
+      ctx.fillStyle='rgba(4,10,24,0.88)'; this._rr(ctx,lgX,lgY,145,72,7); ctx.fill();
+      ctx.strokeStyle='rgba(255,255,255,0.07)'; ctx.lineWidth=1; this._rr(ctx,lgX,lgY,145,72,7); ctx.stroke();
+      ctx.fillStyle='rgba(148,163,184,0.7)'; ctx.font='bold 8px "Space Grotesk"';
+      ctx.fillText('TRAFIC',lgX+12,lgY+15);
+      [{col:'#ef4444',l:'AGLOMERAT'},{col:'#f59e0b',l:'MODERAT'},{col:'#22c55e',l:'FLUID'}].forEach((it,i)=>{
+        const ly=lgY+24+i*17;
+        ctx.strokeStyle=it.col; ctx.lineWidth=3;
+        ctx.beginPath(); ctx.moveTo(lgX+12,ly+5); ctx.lineTo(lgX+34,ly+5); ctx.stroke();
+        ctx.fillStyle='rgba(200,215,235,0.85)'; ctx.font='8px "Space Grotesk"';
+        ctx.fillText(it.l,lgX+40,ly+9);
+      });
+    }
+
+    // ── S10 — Urban life: TP +62% + Pietoni 24.700 ──────────────────────────
+    if(ov === 'urban_pulse' || ov === 'pedestrian_street') {
+      const cW=178, cX=W-cW-12, cY=62;
+      ctx.fillStyle='rgba(4,10,24,0.90)'; this._rr(ctx,cX,cY,cW,112,8); ctx.fill();
+      ctx.strokeStyle='rgba(34,197,94,0.3)'; ctx.lineWidth=1; this._rr(ctx,cX,cY,cW,112,8); ctx.stroke();
+      ctx.textAlign='center';
+      ctx.fillStyle='rgba(148,163,184,0.6)'; ctx.font='bold 8px "Space Grotesk"'; ctx.fillText('TRANSPORT PUBLIC',cX+cW/2,cY+17);
+      ctx.fillStyle='#22c55e'; ctx.font='bold 34px "Space Grotesk"'; ctx.fillText('+62%',cX+cW/2,cY+53);
+      ctx.fillStyle='rgba(255,255,255,0.08)'; ctx.fillRect(cX+10,cY+59,cW-20,1);
+      ctx.fillStyle='rgba(148,163,184,0.6)'; ctx.font='bold 8px "Space Grotesk"'; ctx.fillText('PIETONI / ZI',cX+cW/2,cY+74);
+      ctx.fillStyle='#60a5fa'; ctx.font='bold 22px "Space Grotesk"'; ctx.fillText('24.700',cX+cW/2,cY+100);
+      ctx.textAlign='left';
+    }
+
+    // ── S11 — 2025 | 2050 simultane cu linie split + play button ─────────────
+    if(ov === 'temporal_morph') {
+      ctx.save();
+      const a=Math.min(1,sceneAge/1.5);
+      ctx.globalAlpha=a;
+      // Texte mari
+      ctx.font=`bold ${Math.round(H*0.135)}px "Space Grotesk"`;
+      ctx.textAlign='center';
+      ctx.fillStyle='rgba(148,163,184,0.16)'; ctx.fillText('2025',W*0.27,H*0.60);
+      ctx.fillStyle='rgba(212,175,55,0.20)';  ctx.fillText('2050',W*0.73,H*0.60);
+      // Linie split animata
+      const spX=W/2+Math.sin(now*0.18)*12;
+      ctx.fillStyle='rgba(255,255,255,0.65)'; ctx.fillRect(spX-1,50,2,H-112);
+      // Play button
+      const bY=H/2-12;
+      ctx.fillStyle='rgba(4,10,24,0.8)';
+      ctx.beginPath(); ctx.arc(spX,bY,18,0,Math.PI*2); ctx.fill();
+      ctx.strokeStyle='rgba(212,175,55,0.7)'; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.arc(spX,bY,18,0,Math.PI*2); ctx.stroke();
+      ctx.fillStyle='rgba(212,175,55,0.9)';
+      ctx.beginPath(); ctx.moveTo(spX-7,bY-9); ctx.lineTo(spX-7,bY+9); ctx.lineTo(spX+10,bY); ctx.closePath(); ctx.fill();
+      ctx.restore(); ctx.textAlign='left';
+    }
+
     ctx.restore();
+
   },
 
 
@@ -4694,11 +4887,12 @@ const TCI = {
           arm.rotation.x=Math.PI/2; arm.rotation.z=angle;
         });
 
-        // Matrix Mapbox → Three.js
+        // Matrix Mapbox → Three.js (folosim T._3cam / T._3rend — scop corect)
+        if(!T._3cam || !T._3rend || !T._3scene) { map.triggerRepaint(); return; }
         const rotX=new THREE.Matrix4().makeRotationAxis(new THREE.Vector3(1,0,0),Math.PI/2);
-        camera.projectionMatrix=new THREE.Matrix4().fromArray(matrix).multiply(rotX);
-        renderer.resetState();
-        renderer.render(T._3scene,T._3cam);
+        T._3cam.projectionMatrix=new THREE.Matrix4().fromArray(matrix).multiply(rotX);
+        T._3rend.resetState();
+        T._3rend.render(T._3scene,T._3cam);
         map.triggerRepaint();
       },
     });
