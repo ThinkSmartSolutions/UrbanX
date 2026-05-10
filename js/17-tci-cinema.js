@@ -311,51 +311,55 @@ const TCI = {
         <button onclick="TCI.close()" style="background:none;border:none;color:rgba(148,163,184,0.45);cursor:pointer;font-size:14px;pointer-events:all;padding:2px 8px">✕</button>
       </div>
       <!-- PANEL STANG -->
-      <div id="tci-lpanel" style="position:absolute;left:0;top:42px;bottom:60px;width:182px;pointer-events:all;background:rgba(4,10,24,0.90);backdrop-filter:blur(12px);border-right:1px solid rgba(255,255,255,0.06);overflow-y:auto;z-index:10">
-        <div style="padding:10px">
-          <div style="font-size:7.5px;font-weight:700;color:#D4AF37;letter-spacing:.08em;margin-bottom:8px">DATE LIVE</div>
+      <!-- PANEL STÂNG UNIC — conține tot: date live + narativ + proiecție + legendă -->
+      <!-- Ambele hărți au aceeași lățime → sync perfect -->
+      <div id="tci-lpanel" style="position:absolute;left:0;top:42px;bottom:60px;width:280px;pointer-events:all;background:rgba(4,10,24,0.92);backdrop-filter:blur(12px);border-right:1px solid rgba(255,255,255,0.06);overflow-y:auto;z-index:10">
+        <div style="padding:10px;display:flex;flex-direction:column;gap:6px">
+
+          <!-- DATE LIVE -->
+          <div style="font-size:7px;font-weight:700;color:#D4AF37;letter-spacing:.08em">DATE LIVE</div>
           <div id="tci-kpis"></div>
-          <div style="border-top:1px solid rgba(255,255,255,0.06);margin:10px 0;padding-top:10px">
-            <div style="font-size:7.5px;font-weight:700;color:#D4AF37;letter-spacing:.08em;margin-bottom:6px">COMPARARE UAT</div>
+
+          <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:6px">
+            <div style="font-size:7px;font-weight:700;color:#D4AF37;letter-spacing:.08em;margin-bottom:5px">COMPARARE UAT</div>
             <input type="text" id="tci-cmp-inp" placeholder="Caută UAT..." autocomplete="off" oninput="TCI._cmpSearch(this.value)"
-              style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);color:#fff;padding:6px 8px;border-radius:6px;font-size:10px;font-family:inherit;box-sizing:border-box">
-            <div id="tci-cmp-res" style="background:rgba(4,10,24,0.97);border:1px solid rgba(255,255,255,0.1);border-radius:6px;max-height:100px;overflow-y:auto;display:none;margin-top:3px"></div>
-            <div id="tci-cmp-out" style="margin-top:6px"></div>
-          </div>
-          <div style="border-top:1px solid rgba(255,255,255,0.06);margin:10px 0;padding-top:10px">
-            <button onclick="TCI._snapshot()" style="display:block;width:100%;text-align:left;padding:6px 8px;margin-bottom:4px;border-radius:5px;border:1px solid rgba(255,255,255,0.07);background:rgba(14,26,52,0.5);color:rgba(200,215,235,0.8);font-size:10px;cursor:pointer;font-family:inherit;pointer-events:all">📷 Snapshot</button>
-            <button onclick="TCI._share()" style="display:block;width:100%;text-align:left;padding:6px 8px;border-radius:5px;border:1px solid rgba(255,255,255,0.07);background:rgba(14,26,52,0.5);color:rgba(200,215,235,0.8);font-size:10px;cursor:pointer;font-family:inherit;pointer-events:all">🔗 Share URL</button>
-          </div>
-        </div>
-      </div>
-      <!-- PANEL DREPT -->
-      <!-- PANEL DREPT — Narativ + KPI proiecție + Legendă -->
-      <div id="tci-rpanel" style="position:absolute;right:0;top:42px;bottom:60px;width:220px;pointer-events:all;background:rgba(4,10,24,0.92);backdrop-filter:blur(12px);border-left:1px solid rgba(255,255,255,0.06);overflow-y:auto;z-index:10">
-        <div style="padding:10px;display:flex;flex-direction:column;gap:8px">
-
-          <!-- Scena curenta / narativ -->
-          <div id="tci-narcard" style="background:rgba(14,26,52,0.8);border:1px solid rgba(212,175,55,0.3);border-radius:8px;padding:10px;transition:opacity .35s">
-            <div id="tci-nar-title" style="font-size:10.5px;font-weight:700;color:#D4AF37;margin-bottom:4px;line-height:1.3"></div>
-            <div id="tci-nar-body" style="font-size:9.5px;color:rgba(200,215,235,0.85);line-height:1.55"></div>
-            <div id="tci-nar-src" style="font-size:7.5px;color:rgba(148,163,184,0.4);margin-top:4px;font-style:italic"></div>
+              style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);color:#fff;padding:5px 7px;border-radius:5px;font-size:9.5px;font-family:inherit;box-sizing:border-box">
+            <div id="tci-cmp-res" style="background:rgba(4,10,24,0.97);border:1px solid rgba(255,255,255,0.1);border-radius:5px;max-height:80px;overflow-y:auto;display:none;margin-top:2px"></div>
+            <div id="tci-cmp-out" style="margin-top:4px"></div>
           </div>
 
-          <!-- Ce vedeti -->
-          <div id="tci-nar-what" style="background:rgba(8,18,40,0.8);border:1px solid rgba(96,165,250,0.2);border-radius:8px;padding:9px">
-            <div style="font-size:7.5px;font-weight:700;color:#60a5fa;margin-bottom:3px;letter-spacing:.05em">👁 CE VEDEȚI</div>
-            <div id="tci-nar-whattext" style="font-size:9px;color:rgba(180,200,225,0.82);line-height:1.55"></div>
+          <div style="display:flex;gap:4px">
+            <button onclick="TCI._snapshot()" style="flex:1;text-align:left;padding:5px 7px;border-radius:4px;border:1px solid rgba(255,255,255,0.07);background:rgba(14,26,52,0.5);color:rgba(200,215,235,0.75);font-size:9px;cursor:pointer;font-family:inherit">📷 Snapshot</button>
+            <button onclick="TCI._share()" style="flex:1;text-align:left;padding:5px 7px;border-radius:4px;border:1px solid rgba(255,255,255,0.07);background:rgba(14,26,52,0.5);color:rgba(200,215,235,0.75);font-size:9px;cursor:pointer;font-family:inherit">🔗 Share URL</button>
           </div>
 
-          <!-- Separator -->
-          <div style="border-top:1px solid rgba(255,255,255,0.06)"></div>
-          <div style="font-size:7.5px;font-weight:700;color:#D4AF37;letter-spacing:.08em">PROIECȚIE ${this.startYear}–2055</div>
-          <div id="tci-kpis-r"></div>
-          <canvas id="tci-chart" width="195" height="60" style="width:100%;display:block"></canvas>
-          <div id="tci-eu-panel"></div>
+          <!-- SEPARATOR -->
+          <div style="border-top:1px solid rgba(212,175,55,0.2);margin:2px 0"></div>
 
-          <!-- Legenda -->
-          <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:8px">
-            <div style="font-size:7px;font-weight:700;color:rgba(148,163,184,0.55);margin-bottom:5px;letter-spacing:.06em">LEGENDA PROIECȚIE</div>
+          <!-- SCENA CURENTĂ / NARATIV -->
+          <div id="tci-narcard" style="background:rgba(14,26,52,0.8);border:1px solid rgba(212,175,55,0.28);border-radius:7px;padding:9px;transition:opacity .35s">
+            <div id="tci-nar-title" style="font-size:10px;font-weight:700;color:#D4AF37;margin-bottom:3px;line-height:1.3"></div>
+            <div id="tci-nar-body" style="font-size:9px;color:rgba(200,215,235,0.85);line-height:1.55"></div>
+            <div id="tci-nar-src" style="font-size:7px;color:rgba(148,163,184,0.4);margin-top:3px;font-style:italic"></div>
+          </div>
+
+          <!-- CE VEDEȚI -->
+          <div id="tci-nar-what" style="background:rgba(8,18,40,0.8);border:1px solid rgba(96,165,250,0.18);border-radius:7px;padding:8px">
+            <div style="font-size:7px;font-weight:700;color:#60a5fa;margin-bottom:2px;letter-spacing:.05em">👁 CE VEDEȚI</div>
+            <div id="tci-nar-whattext" style="font-size:8.5px;color:rgba(180,200,225,0.82);line-height:1.5"></div>
+          </div>
+
+          <!-- PROIECȚIE KPIs -->
+          <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:5px">
+            <div style="font-size:7px;font-weight:700;color:#D4AF37;letter-spacing:.08em;margin-bottom:4px">PROIECȚIE ${this.startYear}–2055</div>
+            <div id="tci-kpis-r"></div>
+            <canvas id="tci-chart" width="255" height="55" style="width:100%;display:block;margin-top:5px"></canvas>
+            <div id="tci-eu-panel"></div>
+          </div>
+
+          <!-- LEGENDĂ -->
+          <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:6px">
+            <div style="font-size:7px;font-weight:700;color:rgba(148,163,184,0.55);margin-bottom:4px;letter-spacing:.06em">LEGENDA PROIECȚIE</div>
             ${[
               {c:'#374151',l:'Planificat'},
               {c:'#f59e0b',l:'Construcție activă'},
@@ -365,21 +369,21 @@ const TCI = {
               {c:'#2563eb',l:'Rezidențial colectiv'},
               {c:'#ea580c',l:'Reconversie industrială'},
               {c:'#16a34a',l:'Creștere rezidențială'},
-            ].map(it=>`<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px"><div style="width:9px;height:7px;background:${it.c};border-radius:2px;flex-shrink:0"></div><span style="font-size:7.5px;color:rgba(180,200,220,0.7)">${it.l}</span></div>`).join('')}
-            <div style="font-size:6.5px;color:rgba(100,120,150,0.45);margin-top:4px">INS · Eurostat · ANCPI · Model TSS·FG</div>
+            ].map(it=>`<div style="display:flex;align-items:center;gap:4px;margin-bottom:2px"><div style="width:8px;height:6px;background:${it.c};border-radius:1px;flex-shrink:0"></div><span style="font-size:7px;color:rgba(180,200,220,0.7)">${it.l}</span></div>`).join('')}
+            <div style="font-size:6px;color:rgba(100,120,150,0.45);margin-top:3px">INS · Eurostat · ANCPI · Model TSS·FG</div>
           </div>
         </div>
       </div>
 
-      <!-- BANNER SURSE -->
-      <div id="tci-src-banner" style="position:absolute;top:42px;left:182px;right:220px;z-index:9;pointer-events:none;background:rgba(4,10,24,0.75);border-bottom:1px solid rgba(255,255,255,0.05);padding:3px 14px;display:flex;align-items:center;gap:10px;flex-wrap:nowrap;overflow:hidden">
+      <!-- BANNER SURSE — de la panoul stâng la marginea dreaptă -->
+      <div id="tci-src-banner" style="position:absolute;top:42px;left:280px;right:0;z-index:9;pointer-events:none;background:rgba(4,10,24,0.75);border-bottom:1px solid rgba(255,255,255,0.05);padding:3px 14px;display:flex;align-items:center;gap:10px;flex-wrap:nowrap;overflow:hidden">
         <div style="font-size:6px;font-weight:700;color:rgba(212,175,55,0.6);letter-spacing:.12em;white-space:nowrap">SURSE OFICIALE:</div>
         ${['INSE','Eurostat','ANCPI','BNR','Meteo România','INFP','ANAR','IPCC AR6'].map(s=>`<span style="font-size:6px;color:rgba(148,163,184,0.45);white-space:nowrap">${s}</span>`).join('<span style="color:rgba(255,255,255,0.1)">·</span>')}
         <div style="flex:1;font-size:6px;color:rgba(100,120,150,0.35);text-align:right;white-space:nowrap">Valori orientative · Model predictiv TSS·FG ©</div>
       </div>
 
-      <!-- BOTTOM BAR -->
-      <div id="tci-bbar" style="position:absolute;bottom:0;left:182px;right:188px;pointer-events:all;background:rgba(4,10,24,0.92);backdrop-filter:blur(12px);border-top:1px solid rgba(212,175,55,0.15);padding:7px 14px;display:flex;align-items:center;gap:10px;z-index:10">
+      <!-- BOTTOM BAR — de la panoul stâng la marginea dreaptă -->
+      <div id="tci-bbar" style="position:absolute;bottom:0;left:280px;right:0;pointer-events:all;background:rgba(4,10,24,0.92);backdrop-filter:blur(12px);border-top:1px solid rgba(212,175,55,0.15);padding:7px 14px;display:flex;align-items:center;gap:10px;z-index:10">
         <div id="tci-yr" style="font-size:26px;font-weight:900;color:#D4AF37;min-width:50px"></div>
         <div style="flex:1;position:relative">
           <input type="range" id="tci-scrub" min="${this.startYear}" max="2055" value="${this.startYear}" step="1" oninput="TCI.scrubTo(+this.value)" style="width:100%;accent-color:#D4AF37;height:4px">
