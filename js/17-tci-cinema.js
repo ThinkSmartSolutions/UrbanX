@@ -401,14 +401,190 @@ const TCI = {
   // ── Layere minime pe harta existenta ─────────────────────────────────────
   _addMapLayers() {
     const m = this.map; if(!m) return;
-    // Asigura zoom/pan activ pe harta in timp ce TCI ruleaza
     m.scrollZoom?.enable();
     m.dragPan?.enable();
     m.doubleClickZoom?.enable();
     m.touchZoomRotate?.enable();
-    const d = this.cityData;
-    const cx = this.activeParcel?.lon || d?.lon || 27.601;
-    const cy = this.activeParcel?.lat || d?.lat || 47.158;
+
+    const d  = this.cityData;
+    const ap = this.activeParcel;
+    const cx = ap?.lon || d?.lon || 27.601;
+    const cy = ap?.lat || d?.lat || 47.158;
+
+    // ── L2: Clădiri 3D animate (cresc cu densificarea per UTR) ─────────────
+    if(!m.getLayer?.('tci-bld-anim')) {
+      try {
+        m.addLayer({
+          id: 'tci-bld-anim',
+          type: 'fill-extrusion',
+          source: 'composite',
+          'source-layer': 'building',
+          filter: ['==', 'extrude', 'true'],
+          minzoom: 13,
+          paint: {
+            'fill-extrusion-color': [
+              'interpolate', ['linear'], ['get', 'height'],
+              0,  '#0d1f3c',   // joase = albastru inchis
+              12, '#16306e',   // medii
+              25, '#1e4080',   // inalte
+              50, '#2455a0',   // foarte inalte
+              100,'#2e6ab8',   // turn
+            ],
+            'fill-extrusion-height': ['get', 'height'],
+            'fill-extrusion-base':   ['get', 'min_height'],
+            'fill-extrusion-opacity': 0.88,
+          },
+        });
+      } catch(e) { console.warn('[TCI-L2] buildings:', e.message); }
+    }
+
+    // ── L2: Zone constructie activa (portocaliu pulsant) ──────────────────
+    if(!m.getSource?.('tci-constr')) {
+      try {
+        m.addSource('tci-constr', {
+          type: 'geojson',
+          data: { type: 'FeatureCollection', features: [] }
+        });
+        m.addLayer({
+          id: 'tci-constr-layer',
+          type: 'fill-extrusion',
+          source: 'tci-constr',
+          paint: {
+            'fill-extrusion-color':   '#f59e0b',
+            'fill-extrusion-height':  ['get', 'h'],
+            'fill-extrusion-base':    0,
+            'fill-extrusion-opacity': 0.75,
+          },
+        });
+      } catch(e) {}
+    }
+
+    // ── L3: Rețea stradală colorată per congestie (trafic real) ───────────
+    if(!m.getLayer?.('tci-roads-flow')) {
+      try {
+        m.addLayer({
+          id: 'tci-roads-flow',
+          type: 'line',
+          source: 'composite',
+          'source-layer': 'road',
+          filter: ['in', ['get', 'class'],
+            ['literal', ['primary','secondary','tertiary','street','motorway']]
+          ],
+          minzoom: 12,
+          paint: {
+            'line-color':   '#94a3b8',
+            'line-width':   ['interpolate', ['linear'], ['zoom'],
+              12, 1.5,
+              16, 3.5,
+            ],
+            'line-opacity': 0.55,
+          },
+        });
+      } catch(e) { console.warn('[TCI-L3] roads:', e.message); }
+    }
+
+    // ── L3: Transport public — linii animate ───────────────────────────────
+    if(!m.getSource?.('tci-tp')) {
+      try {
+        m.addSource('tci-tp', {
+          type: 'geojson',
+          data: this._generateTPLines(cx, cy),
+        });
+        m.addLayer({
+          id: 'tci-tp-layer',
+          type: 'line',
+          source: 'tci-tp',
+          paint: {
+            'line-color':   ['get', 'color'],
+            'line-width':   3,
+            'line-opacity': 0,   // invizibil pana in 2028
+          },
+        });
+      } catch(e) {}
+    }
+
+    // ── L4: Vectori presiune urbana ─────────────────────────────────────────
+    if(!m.getSource?.('tci-pressure')) {
+      try {
+        m.addSource('tci-pressure', {
+          type: 'geojson',
+          data: this._generatePressureVectors(cx, cy),
+        });
+        m.addLayer({
+          id: 'tci-pressure-layer',
+          type: 'line',
+          source: 'tci-pressure',
+          paint: {
+            'line-color':   ['get', 'color'],
+            'line-width':   ['get', 'width'],
+            'line-opacity': 0,
+          },
+        });
+        // Capete sagetate pentru vectori
+        m.addLayer({
+          id: 'tci-pressure-points',
+          type: 'circle',
+          source: 'tci-pressure',
+          paint: {
+            'circle-radius':  ['get', 'r'],
+            'circle-color':   ['get', 'color'],
+            'circle-opacity': 0,
+          },
+        });
+      } catch(e) {}
+    }
+
+    // ── L4: Heatmap presiune demografica ───────────────────────────────────
+    if(!m.getSource?.('tci-pop')) {
+      try {
+        m.addSource('tci-pop', {
+          type: 'geojson',
+          data: this._generatePopHeat(cy, cx, 0.4),
+        });
+        m.addLayer({
+          id: 'tci-pop-layer',
+          type: 'heatmap',
+          source: 'tci-pop',
+          paint: {
+            'heatmap-weight':     ['get','w'],
+            'heatmap-radius':     35,
+            'heatmap-intensity':  0.4,
+            'heatmap-opacity':    0.28,
+            'heatmap-color': [
+              'interpolate', ['linear'], ['heatmap-density'],
+              0,   'rgba(0,0,255,0)',
+              0.3, 'rgba(50,50,255,0.3)',
+              0.6, 'rgba(139,92,246,0.5)',
+              0.85,'rgba(212,175,55,0.6)',
+              1,   'rgba(255,80,0,0.7)',
+            ],
+          },
+        });
+      } catch(e) {}
+    }
+
+    // ── L3: Particule trafic pe coordonate reale (nu random) ───────────────
+    if(!m.getSource?.('tci-tr')) {
+      try {
+        m.addSource('tci-tr', {
+          type: 'geojson',
+          data: { type: 'FeatureCollection', features: [] }
+        });
+        m.addLayer({
+          id: 'tci-tr-layer',
+          type: 'circle',
+          source: 'tci-tr',
+          paint: {
+            'circle-radius':  ['get','r'],
+            'circle-color':   ['get','c'],
+            'circle-opacity': 0.82,
+            'circle-blur':    0.2,
+          },
+        });
+      } catch(e) {}
+    }
+
+    this._initParticlesOnRoads(cx, cy);
 
     // Heatmap populatie (safe pe orice stil)
     if(!m.getSource?.('tci-pop')) {
