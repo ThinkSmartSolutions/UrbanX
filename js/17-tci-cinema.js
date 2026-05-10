@@ -741,56 +741,132 @@ const TCI = {
     return zones;
   },
 
+  // ══════════════════════════════════════════════════════════════════════
+  // SISTEM VIZUAL PROIECȚIE — coerență totală
+  // 6 CULORI. Un sistem. Aplicat pe clădiri reale.
+  // Stânga: realitate. Dreapta: același oraș + schimbările proiectate.
+  // ══════════════════════════════════════════════════════════════════════
+
+  // ── SISTEM DE CULORI — 6 tipuri, logică clară ────────────────────────
+  // Violet  = Centru civic (densificare maximă)
+  // Galben  = Construcție activă (orice zonă, 0-5 ani)
+  // Portocaliu = Coridor / aproape finalizat
+  // Albastru = Rezidențial colectiv
+  // Portocaliu roșcat = Reconversie industrială
+  // Verde   = Creștere periferică nouă
+  // Gri     = Stabil, fără schimbări
+  COLORS: {
+    centru:     '#7c3aed',  // violet — max density
+    coridor:    '#d97706',  // amber — boulevards
+    rezid:      '#2563eb',  // blue — collective housing
+    reconv:     '#ea580c',  // red-orange — industrial reconversion
+    nou:        '#16a34a',  // green — new growth
+    stabil:     '#374151',  // gray — no change
+    constructie:'#f59e0b',  // yellow — active construction
+    aproape:    '#f97316',  // orange — nearly complete
+  },
+
+  // ── ZONELE STATISTICE — mici, precise, fără elipse uriașe ───────────
+  _buildZones(cx, cy) {
+    const pop  = this.cityData?.pop2021 || 100000;
+    const sc   = Math.pow(pop / 360000, 0.4);
+    const C    = this.COLORS;
+
+    return [
+      // CENTRU CIVIC — inelul central, strict perimetrul civic
+      {id:'CV', color:C.centru,  hMax:52, startYr:2026,
+       ring:{cx:cx, cy:cy, rx:0.0028*sc, ry:0.0019*sc},
+       label:'Centru Civic', sub:'Densificare R+8→R+12'},
+
+      // CORIDOARE AXIALE — benzi înguste pe arterele principale
+      {id:'CEV', color:C.coridor, hMax:32, startYr:2027,
+       rect:{cx:cx, cy:cy-0.0005, w:0.018*sc, h:0.0014*sc},
+       label:'Coridor Est-Vest', sub:'Bulevard · R+4→R+8'},
+      {id:'CNS', color:C.coridor, hMax:28, startYr:2028,
+       rect:{cx:cx+0.001, cy:cy, w:0.0014*sc, h:0.016*sc},
+       label:'Coridor Nord-Sud', sub:'Ax principal · R+4→R+7'},
+
+      // ZONE REZIDENȚIALE COLECTIVE — inele moderate
+      {id:'RN', color:C.rezid, hMax:28, startYr:2029,
+       ring:{cx:cx+0.009*sc, cy:cy+0.011*sc, rx:0.0038*sc, ry:0.0026*sc},
+       label:'Rezidențial Nord', sub:'Densificare moderată R+4→R+6'},
+      {id:'RS', color:C.rezid, hMax:25, startYr:2030,
+       ring:{cx:cx+0.004*sc, cy:cy-0.009*sc, rx:0.0040*sc, ry:0.0028*sc},
+       label:'Rezidențial Sud', sub:'Reabilitare + supraetajare R+4→R+5'},
+
+      // RECONVERSIE INDUSTRIALĂ — dreptunghi la periferia est
+      {id:'RI', color:C.reconv, hMax:35, startYr:2031,
+       rect:{cx:cx+0.021*sc, cy:cy-0.009*sc, w:0.009*sc, h:0.006*sc},
+       label:'Reconversie Industrială', sub:'Industrial→Mixt R+5→R+8'},
+
+      // CREȘTERE PERIFERICĂ — zone mici la marginea construită
+      {id:'PN', color:C.nou, hMax:14, startYr:2033,
+       ring:{cx:cx-0.018*sc, cy:cy+0.004*sc, rx:0.0050*sc, ry:0.0036*sc},
+       label:'Creștere Vest', sub:'Rezidențial nou R+2→R+3'},
+      {id:'PE', color:C.nou, hMax:16, startYr:2032,
+       ring:{cx:cx+0.024*sc, cy:cy-0.006*sc, rx:0.0055*sc, ry:0.0038*sc},
+       label:'Creștere Est-Sud', sub:'Rezidențial nou R+2→R+3'},
+    ];
+  },
+
+  _polyFromDef(def) {
+    if(def.ring) {
+      const {cx,cy,rx,ry} = def.ring;
+      return this._poly(cx,cy,rx,ry,24);
+    }
+    if(def.rect) {
+      const {cx,cy,w,h} = def.rect;
+      return this._rect(cx,cy,w,h);
+    }
+    return null;
+  },
+
   _initProjectionLayers(cx, cy) {
     const m = this.map; if(!m) return;
     if(m.getSource?.('tci-proj')) return;
 
-    this._projZones = this._generateStatisticalProjection(cx, cy);
+    this._projZones = this._buildZones(cx, cy);
 
     try {
       m.addSource('tci-proj', {type:'geojson', data:{type:'FeatureCollection',features:[]}});
 
-      // Contur zonă — punctat, vizibil zoom 10+
-      m.addLayer({
-        id:'tci-proj-outline', type:'line', source:'tci-proj',
+      // 1. Umplere zonă — subtilă, transparentă
+      m.addLayer({id:'tci-proj-fill', type:'fill', source:'tci-proj',
+        paint:{
+          'fill-color':['get','dc'],
+          'fill-opacity':['interpolate',['linear'],['zoom'],9,0.08,14,0.12,17,0.06],
+        }
+      });
+
+      // 2. Contur zonă — MEREU vizibil, linie subțire
+      m.addLayer({id:'tci-proj-outline', type:'line', source:'tci-proj',
         paint:{
           'line-color':['get','color'],
-          'line-width':['interpolate',['linear'],['zoom'],10,1.5,15,2.5,17,3],
-          'line-opacity':0.90,
-          'line-dasharray':[6,3],
+          'line-width':['interpolate',['linear'],['zoom'],9,1.5,14,2,17,2.5],
+          'line-opacity':0.9,
+          'line-dasharray':['case',['get','active'],[1],[6,4]],
         }
       });
 
-      // Fill semitransparent — context
-      m.addLayer({
-        id:'tci-proj-fill', type:'fill', source:'tci-proj',
-        paint:{
-          'fill-color':['get','displayColor'],
-          'fill-opacity':['interpolate',['linear'],['zoom'],9,0.10,14,0.15,17,0.08],
-        }
-      });
-
-      // EXTRUZIUNI 3D — clădiri proiectate care cresc per an
-      // fill-extrusion-opacity NU e data-driven → fix: valoare fixă
-      m.addLayer({
-        id:'tci-proj-bld', type:'fill-extrusion', source:'tci-proj',
+      // 3. EXTRUZIUNI — clădirile proiectate cresc
+      // fill-extrusion-opacity FIXED (nu data-driven în Mapbox GL JS)
+      m.addLayer({id:'tci-proj-bld', type:'fill-extrusion', source:'tci-proj',
         minzoom:12,
         paint:{
-          'fill-extrusion-color':['get','displayColor'],
+          'fill-extrusion-color':['get','dc'],
           'fill-extrusion-height':['get','h'],
           'fill-extrusion-base':2,
-          'fill-extrusion-opacity':0.82,
+          'fill-extrusion-opacity':0.80,
         }
       });
 
-      // Etichete — un singur label per zonă
-      m.addLayer({
-        id:'tci-proj-labels', type:'symbol', source:'tci-proj',
+      // 4. Etichete — un singur label, vizibil zoom 11+
+      m.addLayer({id:'tci-proj-labels', type:'symbol', source:'tci-proj',
         minzoom:11,
         layout:{
-          'text-field':['concat',['get','label'],'\n',['get','desc']],
+          'text-field':['concat',['get','label'],' · ',['get','sub']],
           'text-font':['DIN Pro Medium','Arial Unicode MS Regular'],
-          'text-size':['interpolate',['linear'],['zoom'],11,8,14,10,16,12],
+          'text-size':['interpolate',['linear'],['zoom'],11,9,14,11,16,13],
           'symbol-placement':'point',
           'text-allow-overlap':false,
           'text-anchor':'center',
@@ -800,49 +876,47 @@ const TCI = {
           'text-color':['get','color'],
           'text-halo-color':'rgba(4,10,24,0.97)',
           'text-halo-width':3,
+          'text-opacity':['interpolate',['linear'],['zoom'],10,0,12,1],
         }
       });
 
-      console.log('[TCI] ✅ Layere proiecție statistică inițializate:', this._projZones.length, 'zone');
+      console.log('[TCI] ✅ Sistem vizual proiecție:', this._projZones.length, 'zone');
       this._updateProjectionLayers(this.year || 2025);
 
-    } catch(e) { console.warn('[TCI] Init projection layers:', e.message); }
+    } catch(e) { console.warn('[TCI] Proj init:', e.message); }
   },
 
   _updateProjectionLayers(yr) {
     const m = this.map; if(!m?.getSource?.('tci-proj')) return;
     if(!this._projZones) return;
+    const C = this.COLORS;
 
-    // Cod culori: GALBEN=constructie activă · PORTOCALIU=aproape gata · culoare zonă=finalizat
-    const statusColor = (zone, yr) => {
-      if(yr < zone.startYr)           return '#374151'; // planificat — gri
-      const age = yr - zone.startYr;
-      if(age < 5)                      return '#f59e0b'; // galben — constructie
-      if(age < 10)                     return '#f97316'; // portocaliu — aproape gata
-      return zone.color;                                  // culoarea zonei — finalizat
+    const getDisplayColor = (z, yr) => {
+      if(yr < z.startYr)             return C.stabil;      // planificat
+      const age = yr - z.startYr;
+      if(age < 5)                    return C.constructie;  // galben — activ
+      if(age < 10)                   return C.aproape;      // portocaliu — aproape
+      return z.color;                                        // culoarea zonei
     };
 
     const features = this._projZones.map(z => {
-      const started = yr >= z.startYr;
-      const yF      = started ? Math.min(1, (yr - z.startYr) / 18) : 0;
-      const h       = started ? z.hBase + (z.hMax - z.hBase) * yF : 0;
-      const dc      = statusColor(z, yr);
+      const coords = this._polyFromDef(z); if(!coords) return null;
+      const active = yr >= z.startYr;
+      const yF     = active ? Math.min(1, (yr - z.startYr) / 18) : 0;
+      const h      = active ? (z.hMax * 0.2 + z.hMax * 0.8 * yF) : 0;
+      const dc     = getDisplayColor(z, yr);
 
       return {
         type:'Feature',
-        geometry:{type:'Polygon', coordinates:[z.coords]},
+        geometry:{type:'Polygon', coordinates:[coords]},
         properties:{
-          id:z.id, label:z.label, desc:z.desc,
-          color: z.color,
-          displayColor: dc,
-          h: Math.round(h * 10) / 10,
+          id:z.id, label:z.label, sub:z.sub,
+          color:z.color, dc, h:Math.round(h), active:active?1:0,
         }
       };
-    });
+    }).filter(Boolean);
 
-    try {
-      m.getSource('tci-proj').setData({type:'FeatureCollection', features});
-    } catch(e) {}
+    try { m.getSource('tci-proj').setData({type:'FeatureCollection', features}); } catch(e){}
   },
 
   _buildTPRoutes(cx,cy) {
