@@ -1661,30 +1661,40 @@ out geom qt;`;
       } catch(e) { console.warn('[TCI] 2D layers:', e.message); }
     }
 
-    // 2. Fill-extrusion nativ Mapbox — clădiri 3D proiectate (înlocuiește Three.js)
+    // 2. Layer clădiri proiectate — fill simplu (compatibil toate stilurile Mapbox)
     if(!m.getSource?.('tci-buildings')) {
       try {
         m.addSource('tci-buildings', {type:'geojson', data:{type:'FeatureCollection',features:[]}});
+        // fill-extrusion pentru 3D
         m.addLayer({
-          id: 'tci-buildings-3d', type: 'fill-extrusion', source: 'tci-buildings',
-          slot: 'top',
-          minzoom: 12,
+          id: 'tci-buildings-3d',
+          type: 'fill-extrusion',
+          source: 'tci-buildings',
           paint: {
             'fill-extrusion-color':   ['get','color'],
             'fill-extrusion-height':  ['get','height'],
             'fill-extrusion-base':    0,
-            'fill-extrusion-opacity': 0.92,
-            'fill-extrusion-ambient-occlusion-intensity': 0,
+            'fill-extrusion-opacity': 0.9,
           }
         });
-        console.log('[TCI] ✅ Fill-extrusion buildings layer adăugat');
-        // TEST HARDCODAT — bloc roșu 100m la Spital Regional
+        // fill 2D ca fallback vizibil garantat
+        m.addLayer({
+          id: 'tci-buildings-fill',
+          type: 'fill',
+          source: 'tci-buildings',
+          paint: {
+            'fill-color':   ['get','color'],
+            'fill-opacity': 0.7,
+          }
+        });
+        console.log('[TCI] ✅ Buildings layers adăugate (fill + fill-extrusion)');
+        // TEST: poligon roșu mare hardcodat
         m.getSource('tci-buildings').setData({type:'FeatureCollection',features:[{
           type:'Feature',
           geometry:{type:'Polygon',coordinates:[[[27.584,47.185],[27.592,47.185],[27.592,47.192],[27.584,47.192],[27.584,47.185]]]},
           properties:{height:100, color:'#ff0000'}
         }]});
-      } catch(e) { console.warn('[TCI] buildings layer error:', e.message); }
+      } catch(e) { console.error('[TCI] EROARE layer:', e.message); }
     }
 
     // 3. Generează zone — ÎN PARALEL cu fetch-ul de constrângeri
