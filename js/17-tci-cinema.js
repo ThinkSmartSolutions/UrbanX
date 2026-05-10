@@ -511,34 +511,213 @@ const TCI = {
     const m=this.map; if(!m) return;
     const cx=this.cityData?.lon||27.601, cy=this.cityData?.lat||47.158;
 
-    // Cladiri 3D
-
-    // Vehicule animate — GeoJSON source, update fiecare frame
+    // Vehicule animate — GeoJSON source
     if(!m.getSource?.('tci-vehicles')) {
       try {
         m.addSource('tci-vehicles',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
-        // Masini — punct auriu
         m.addLayer({id:'tci-veh-car',type:'circle',source:'tci-vehicles',filter:['==',['get','t'],'car'],
           paint:{'circle-radius':['interpolate',['linear'],['zoom'],12,2,16,4,18,6],'circle-color':'#D4AF37','circle-blur':0.3,'circle-opacity':0.9}});
-        // Autobuze — albastru
         m.addLayer({id:'tci-veh-bus',type:'circle',source:'tci-vehicles',filter:['==',['get','t'],'bus'],
           paint:{'circle-radius':['interpolate',['linear'],['zoom'],12,3,16,6,18,9],'circle-color':'#3b82f6','circle-blur':0.2,'circle-opacity':0.9}});
-        // Tramvaie — rosu
         m.addLayer({id:'tci-veh-tram',type:'circle',source:'tci-vehicles',filter:['==',['get','t'],'tram'],
           paint:{'circle-radius':['interpolate',['linear'],['zoom'],12,3.5,16,7,18,10],'circle-color':'#ef4444','circle-blur':0.2,'circle-opacity':0.95}});
-        console.log('[TCI] ✅ Vehicle layers added');
-      } catch(e){ console.warn('[TCI] Vehicles:', e.message); }
+        console.log('[TCI] ✅ Vehicule adaugate');
+      } catch(e){ console.warn('[TCI] Vehicule:', e.message); }
     }
 
-    // Linii TP permanente
+    // Linii TP
     if(!m.getSource?.('tci-tp')) {
       try {
-        const routes = this._buildTPRoutes(cx,cy);
-        m.addSource('tci-tp',{type:'geojson',data:routes});
+        m.addSource('tci-tp',{type:'geojson',data:this._buildTPRoutes(cx,cy)});
         m.addLayer({id:'tci-tp-layer',type:'line',source:'tci-tp',
-          paint:{'line-color':['get','color'],'line-width':['interpolate',['linear'],['zoom'],10,2,15,4],'line-opacity':0.75}});
+          paint:{'line-color':['get','color'],'line-width':['interpolate',['linear'],['zoom'],10,2,15,4],'line-opacity':0.7}});
       } catch(e){}
     }
+
+    // ── LAYERE PROIECȚIE URBANISTICĂ — doar pe harta DREAPTĂ ─────────────
+    this._initProjectionLayers(cx, cy);
+  },
+
+  // ══════════════════════════════════════════════════════════════════════
+  // PROIECȚIE URBANISTICĂ — zone UTR, clădiri noi, expansiune intravilam
+  // ══════════════════════════════════════════════════════════════════════
+
+  _projZones: null,
+
+  _poly(cx, cy, rx, ry, n=20) {
+    const pts=[];
+    for(let i=0;i<=n;i++){const a=(i/n)*Math.PI*2;pts.push([cx+Math.cos(a)*rx,cy+Math.sin(a)*ry]);}
+    return pts;
+  },
+
+  _rect(cx, cy, w, h) {
+    return [[cx-w,cy-h],[cx+w,cy-h],[cx+w,cy+h],[cx-w,cy+h],[cx-w,cy-h]];
+  },
+
+  _generateProjectionZones(cx, cy) {
+    const pop = this.cityData?.pop2021 || 100000;
+    const sc  = Math.pow(pop/360000, 0.4); // scale: Iasi=1.0, sat mic=0.4
+    const name= this.cityData?.name||'UAT';
+
+    // Zone generate pe baza coordonatelor reale ale orasului
+    return [
+      // 1. CENTRU CIVIC — densificare maxima, R+8-R+12
+      { id:'centru', name:'Centru Civic',
+        type:'M', typeLabel:'Mixt · Densificare Majoră',
+        color:'#8b5cf6',
+        coords: this._poly(cx, cy, 0.009*sc, 0.006*sc),
+        hBase:18, hMax:52, hYear:2028,
+        cut:'CUT 3.0-3.5', poi:'R+8-R+12 · Funcțiuni mixte', area: Math.round(180*sc),
+        cam: {center:[cx,cy], zoom:15.0, pitch:62, bearing:-15} },
+
+      // 2. ZONA REZIDENTIALA NORD (Copou / echivalent)
+      { id:'nord', name:'Rezidențial Nord',
+        type:'L', typeLabel:'Rezidențial · Densificare Moderată',
+        color:'#3b82f6',
+        coords: this._poly(cx+0.010*sc, cy+0.013*sc, 0.008*sc, 0.006*sc),
+        hBase:12, hMax:28, hYear:2030,
+        cut:'CUT 1.0-1.5', poi:'R+4-R+6 · Rezidențial premium', area: Math.round(220*sc),
+        cam: {center:[cx+0.010*sc,cy+0.013*sc], zoom:15.2, pitch:64, bearing:20} },
+
+      // 3. RECONVERSIE INDUSTRIALA (CUG / zona est)
+      { id:'industrial', name:'Reconversie Industrială',
+        type:'RI', typeLabel:'Industrial → Mixt · Reconversie',
+        color:'#f97316',
+        coords: this._rect(cx+0.022*sc, cy-0.011*sc, 0.012*sc, 0.007*sc),
+        hBase:8, hMax:35, hYear:2032,
+        cut:'CUT 1.5-2.0', poi:'R+5-R+8 · Birouri+Rezidențial', area: Math.round(310*sc),
+        cam: {center:[cx+0.022*sc,cy-0.011*sc], zoom:15.0, pitch:60, bearing:-25} },
+
+      // 4. EXPANSIUNE VEST — intravilam nou
+      { id:'vest', name:'Expansiune Vest',
+        type:'EX', typeLabel:'Extindere Intravilam · Nou',
+        color:'#22c55e',
+        coords: this._poly(cx-0.020*sc, cy+0.006*sc, 0.010*sc, 0.007*sc),
+        hBase:4, hMax:14, hYear:2034,
+        cut:'CUT 0.4-0.6', poi:'R+2-R+3 · Rezidențial Nou', area: Math.round(280*sc),
+        cam: {center:[cx-0.020*sc,cy+0.006*sc], zoom:14.5, pitch:55, bearing:15} },
+
+      // 5. EXPANSIUNE EST/SUD (Dancu / echivalent)
+      { id:'dancu', name:'Expansiune Est-Sud',
+        type:'EX', typeLabel:'Extindere Intravilam · Nou',
+        color:'#16a34a',
+        coords: this._poly(cx+0.026*sc, cy-0.008*sc, 0.011*sc, 0.007*sc),
+        hBase:4, hMax:16, hYear:2033,
+        cut:'CUT 0.3-0.5', poi:'R+2-R+3 · Rezidențial+Logistică', area: Math.round(320*sc),
+        cam: {center:[cx+0.026*sc,cy-0.008*sc], zoom:14.2, pitch:52, bearing:-10} },
+
+      // 6. REABILITARE FOND EXISTENT (Tătărași / echivalent)
+      { id:'reab', name:'Reabilitare Fond Construit',
+        type:'LR', typeLabel:'Rezidențial · Reabilitare + Supraetajare',
+        color:'#60a5fa',
+        coords: this._poly(cx+0.005*sc, cy-0.010*sc, 0.009*sc, 0.006*sc),
+        hBase:14, hMax:22, hYear:2029,
+        cut:'CUT 0.9-1.2', poi:'R+4-R+5 · Renovare+Supraetajare', area: Math.round(195*sc),
+        cam: {center:[cx+0.005*sc,cy-0.010*sc], zoom:15.2, pitch:63, bearing:10} },
+    ];
+  },
+
+  _initProjectionLayers(cx, cy) {
+    const m = this.map; if(!m) return;
+    if(m.getSource?.('tci-proj')) return; // deja initializat
+
+    this._projZones = this._generateProjectionZones(cx, cy);
+
+    const mkFeatures = (yr) => this._projZones.map(z => {
+      const yF = Math.max(0, Math.min(1, (yr - z.hYear) / 15));
+      return {
+        type:'Feature',
+        geometry: {type:'Polygon', coordinates:[z.coords]},
+        properties: {
+          id: z.id, name: z.name, type: z.type,
+          typeLabel: z.typeLabel, color: z.color,
+          poi: z.poi, cut: z.cut,
+          h: z.hBase + (z.hMax - z.hBase) * yF,
+          opacity: Math.min(0.82, Math.max(0, (yr - z.hYear + 3) * 0.12)),
+        }
+      };
+    });
+
+    try {
+      m.addSource('tci-proj', {type:'geojson', data:{type:'FeatureCollection', features:mkFeatures(this.year||2025)}});
+
+      // ── Umplere zone — fill semitransparent pentru context
+      m.addLayer({
+        id:'tci-proj-fill', type:'fill', source:'tci-proj',
+        paint:{
+          'fill-color':['get','color'],
+          'fill-opacity':['*',['get','opacity'],0.18],
+        }
+      });
+
+      // ── Contur zone — mereu vizibil (linii punctate)
+      m.addLayer({
+        id:'tci-proj-outline', type:'line', source:'tci-proj',
+        paint:{
+          'line-color':['get','color'],
+          'line-width':2.5,
+          'line-opacity':0.85,
+          'line-dasharray':[4,3],
+        }
+      });
+
+      // ── Cladiri proiectate — extruziuni 3D care cresc per an
+      m.addLayer({
+        id:'tci-proj-bld', type:'fill-extrusion', source:'tci-proj',
+        minzoom:12,
+        paint:{
+          'fill-extrusion-color':['get','color'],
+          'fill-extrusion-height':['get','h'],
+          'fill-extrusion-base':0,
+          'fill-extrusion-opacity':['get','opacity'],
+        }
+      });
+
+      // ── Etichete zone — vizibile la zoom 12+
+      m.addLayer({
+        id:'tci-proj-labels', type:'symbol', source:'tci-proj',
+        minzoom:12,
+        layout:{
+          'text-field':['concat',['get','name'],'\n',['get','typeLabel']],
+          'text-font':['DIN Pro Medium','Arial Unicode MS Regular'],
+          'text-size':['interpolate',['linear'],['zoom'],12,9,15,12,17,14],
+          'text-anchor':'center',
+          'text-justify':'center',
+          'text-max-width':10,
+        },
+        paint:{
+          'text-color':['get','color'],
+          'text-halo-color':'rgba(4,10,24,0.92)',
+          'text-halo-width':2.5,
+          'text-opacity':['interpolate',['linear'],['zoom'],11,0,13,1],
+        }
+      });
+
+      console.log('[TCI] ✅ Layere proiecție urbanistică adaugate:', this._projZones.length, 'zone');
+      this._updateProjectionLayers(this.year||2025);
+
+    } catch(e) { console.warn('[TCI] Proiecție layers:', e.message); }
+  },
+
+  _updateProjectionLayers(yr) {
+    const m=this.map; if(!m?.getSource?.('tci-proj')) return;
+    if(!this._projZones) return;
+
+    const features = this._projZones.map(z => {
+      const yF   = Math.max(0, Math.min(1, (yr - z.hYear) / 15));
+      const h    = z.hBase + (z.hMax - z.hBase) * yF;
+      const opac = Math.min(0.82, Math.max(0, (yr - z.hYear + 3) * 0.12));
+      return {
+        type:'Feature',
+        geometry:{type:'Polygon', coordinates:[z.coords]},
+        properties:{id:z.id, name:z.name, type:z.type, typeLabel:z.typeLabel,
+          color:z.color, poi:z.poi, cut:z.cut, h, opacity:opac}
+      };
+    });
+
+    try {
+      m.getSource('tci-proj').setData({type:'FeatureCollection', features});
+    } catch(e){}
   },
 
   _buildTPRoutes(cx,cy) {
@@ -653,6 +832,7 @@ const TCI = {
       const pib=Math.round((d.pop2021||100000)*0.04/1000);
       const isCapital=name==='Iași'||name==='Cluj-Napoca'||name==='Timișoara'||name==='Constanța';
       const ms=(typeof _getModalSplit!=='undefined')?_getModalSplit(yr):{auto:72,tp:18,bici_ped:10};
+      const sc=Math.pow((d.pop2021||100000)/360000, 0.4); // scale pt zone UTR (1.0=Iasi)
 
       // Date REALE per oras
       const cityProfile = () => {
@@ -708,72 +888,76 @@ const TCI = {
          src:'INSE · ANCPI · BNR · Eurostat'},
 
         // S4 — City 3D orbit (70s) — zoom 14.5-15.5 pentru cladiri 3D vizibile
+        // S4 — City 3D overview (70s) — zbor deasupra intregului oras
         {id:'s4',dur:70000,light:'dusk',
-         cam:{center:[cx,cy],zoom:14.0,pitch:55,bearing:-30,duration:6000},
+         cam:{center:[cx,cy],zoom:13.5,pitch:50,bearing:-25,duration:5500},
          chain:[
-           {center:[cx+0.004,cy+0.002],zoom:14.8,pitch:60,bearing:15,duration:6000,delay:12000},
-           {center:[cx-0.003,cy+0.003],zoom:15.2,pitch:63,bearing:-25,duration:6000,delay:26000},
-           {center:[cx+0.002,cy-0.002],zoom:15.5,pitch:65,bearing:10,duration:6000,delay:42000},
-           {center:[cx,cy],zoom:14.5,pitch:58,bearing:0,duration:6000,delay:58000},
+           {center:[cx,cy],zoom:14.5,pitch:60,bearing:20,duration:6500,delay:12000},
+           {center:[cx+0.010*sc,cy+0.013*sc],zoom:15.0,pitch:63,bearing:-20,duration:6500,delay:26000},
+           {center:[cx+0.022*sc,cy-0.011*sc],zoom:14.8,pitch:60,bearing:15,duration:6500,delay:42000},
+           {center:[cx,cy],zoom:13.8,pitch:52,bearing:0,duration:6000,delay:58000},
          ],
-         title:'🏙 '+name+' 3D — Structura Urbană',
-         body:'Clădiri 3D reale — zoom în pentru detalii. UTR: Rezidențial · Mixt · Comercial · Industrial. CUT max: 2.5-3.5. Densitate medie: '+densHA+' loc/ha.',
-         src:'PUG '+name+' · OSM Buildings 3D · ANCPI'},
+         title:'🏙 '+name+' 3D — Zonare Urbanistică',
+         body:'Violet = Centru Civic (densificare max R+12) · Albastru = Rezidențial (R+4-6) · Portocaliu = Industrial→Mixt · Verde = Expansiune Intravilam. Zonele apar și cresc pe dreapta pe masura ce anii avansează.',
+         src:'PUG '+name+' · ANCPI · OSM Buildings 3D'},
 
-        // S5 — Dezvoltare (85s) — zoom 14-15, chains la 12, 28, 48, 68s
+        // S5 — Dezvoltare (85s) — zbor prin fiecare zona UTR
         {id:'s5',dur:85000,light:'dusk',
-         cam:{center:[cx+0.006,cy+0.008],zoom:14.2,pitch:60,bearing:15,duration:6000},
+         cam:{center:[cx,cy],zoom:14.0,pitch:58,bearing:0,duration:5500},
          chain:[
-           {center:[cx+0.010,cy+0.012],zoom:14.8,pitch:63,bearing:-15,duration:6000,delay:12000},
-           {center:[cx-0.008,cy+0.006],zoom:15.0,pitch:65,bearing:20,duration:6000,delay:28000},
-           {center:[cx+0.008,cy-0.006],zoom:14.5,pitch:62,bearing:0,duration:6000,delay:48000},
-           {center:[cx,cy],zoom:14.0,pitch:58,bearing:-10,duration:5500,delay:68000},
+           // Centru Civic
+           {center:[cx,cy],zoom:15.2,pitch:65,bearing:-15,duration:7000,delay:10000},
+           // Zona Rezidentiala Nord
+           {center:[cx+0.010*sc,cy+0.013*sc],zoom:15.0,pitch:63,bearing:20,duration:7000,delay:26000},
+           // Reconversie Industriala
+           {center:[cx+0.022*sc,cy-0.011*sc],zoom:14.8,pitch:60,bearing:-25,duration:7000,delay:44000},
+           // Expansiune Vest
+           {center:[cx-0.020*sc,cy+0.006*sc],zoom:14.5,pitch:56,bearing:10,duration:6500,delay:62000},
          ],
-         title:'📈 Dezvoltare Urbană 2025–2050',
-         body:'Autorizații/an: ~'+Math.round((d.pop2021||100000)/420)+'. Zone densificare majoră (roșu): centru+nord. Zone expansiune (galben): periferie. Clădirile cresc vizibil pe hartă.',
-         src:'ANCPI Autorizații · PUG UTR · INS Construcții',
+         title:'📈 Proiecție Clădiri Noi — 2025–2050',
+         body:'Camera zboară prin fiecare zonă UTR. Contururile colorate = zone proiectate. Clădirile extrudate cresc în înălțime pe harta dreaptă cu fiecare an. Stânga = 2025 real. Dreapta = proiecție.',
+         src:'PUG UTR · ANCPI Autorizații · INS · Eurostat',
          animYear:true,yearFrom:2025,yearTo:2050},
 
-        // S6 — Mobilitate (85s) — zoom 13-14.5, traffic vizibil
+        // S6 — Mobilitate (85s)
         {id:'s6',dur:85000,light:'night',
          cam:{center:[cx,cy],zoom:13.5,pitch:50,bearing:0,duration:5500},
          chain:[
-           {center:[cx+0.006,cy-0.004],zoom:14.0,pitch:54,bearing:-18,duration:6000,delay:14000},
-           {center:[cx-0.004,cy+0.004],zoom:14.2,pitch:56,bearing:18,duration:6000,delay:30000},
-           {center:[cx+0.005,cy+0.002],zoom:14.5,pitch:58,bearing:-8,duration:6000,delay:48000},
+           {center:[cx+0.006*sc,cy-0.004*sc],zoom:14.0,pitch:54,bearing:-18,duration:6000,delay:14000},
+           {center:[cx-0.004*sc,cy+0.004*sc],zoom:14.2,pitch:56,bearing:18,duration:6000,delay:30000},
+           {center:[cx+0.005*sc,cy+0.002*sc],zoom:14.5,pitch:58,bearing:-8,duration:6000,delay:48000},
            {center:[cx,cy],zoom:13.5,pitch:50,bearing:0,duration:5500,delay:68000},
          ],
-         title:'🚊 Rețea Mobilitate — Trafic Live',
-         body:'TMZ: ~'+Math.round((d.pop2021||100000)*0.22)+' veh/zi. Mașini (galben) · Autobuze (albastru) · Tramvaie (roșu) animate. Modal split: auto '+ms.auto+'% · TP '+ms.tp+'%.',
+         title:'🚊 Mobilitate & Trafic 2050',
+         body:'Mașini (galben) · Autobuze (albastru) · Tramvaie (roșu) animate pe rețeaua reală. Modal split 2025: auto '+ms.auto+'% · TP '+ms.tp+'%. Proiecție 2050: auto 52% · TP 36%.',
          src:'PMUD · PNRR Mobilitate · Eurostat'},
 
-        // S7 — Focus cartier (90s) — zoom 15-17, street level
+        // S7 — Focus ZONA DE RECONVERSIE INDUSTRIALA (90s)
         {id:'s7',dur:90000,light:'dusk',
-         cam:{center:[cx+0.007,cy+0.010],zoom:15.2,pitch:65,bearing:-18,duration:6000},
+         cam:{center:[cx+0.022*sc,cy-0.011*sc],zoom:14.5,pitch:60,bearing:-20,duration:6000},
          chain:[
-           {center:[cx+0.009,cy+0.012],zoom:15.8,pitch:70,bearing:15,duration:7000,delay:14000},
-           {center:[cx+0.006,cy+0.013],zoom:16.2,pitch:73,bearing:-25,duration:7000,delay:32000},
-           {center:[cx+0.010,cy+0.010],zoom:16.8,pitch:75,bearing:20,duration:7000,delay:52000},
-           {center:[cx+0.008,cy+0.011],zoom:15.5,pitch:68,bearing:0,duration:6000,delay:74000},
+           {center:[cx+0.022*sc,cy-0.011*sc],zoom:15.2,pitch:66,bearing:15,duration:7000,delay:14000},
+           {center:[cx+0.022*sc,cy-0.011*sc],zoom:15.8,pitch:70,bearing:-30,duration:7000,delay:32000},
+           {center:[cx+0.010*sc,cy+0.013*sc],zoom:15.5,pitch:68,bearing:20,duration:7000,delay:52000},
+           {center:[cx,cy],zoom:14.0,pitch:55,bearing:0,duration:6000,delay:74000},
          ],
-         title:'🏗 Focus Zone — Densificare',
-         body:'Zona nord-centrală: +28% estimat 2025-2040. Locuințe noi: ~'+Math.round((d.pop2021||100000)/30)+'. CUT 0.8-1.2. Valoare imobiliară: +'+Math.round(6+parseFloat(rate)*3)+'%/an.',
-         src:'PUG · ANCPI · INS · Model UTR'},
+         title:'🏗 Reconversie Industrială → Mixt Funcțional',
+         body:'Fosta zonă industrială: '+Math.round(310*sc)+'ha · Reconversie 2028-2042. CUT 1.5-2.0 · R+5-R+8. Birouri + Rezidențial + Retail. Investiție estimată: €'+Math.round(pib*380)+'M. Locuri muncă noi: ~'+Math.round((d.pop2021||100000)/28).toLocaleString()+'.',
+         src:'PUG UTR RI · ANCPI · Model TSS·FG'},
 
-        // S8 — Street level (80s) — zoom 16.5-17.5
+        // S8 — Street level IN ZONA DE RECONVERSIE (80s)
         {id:'s8',dur:80000,light:'dusk',
-         cam:{center:[cx+0.002,cy+0.001],zoom:16.5,pitch:74,bearing:5,duration:6000},
+         cam:{center:[cx+0.020*sc,cy-0.009*sc],zoom:16.5,pitch:74,bearing:5,duration:6000},
          chain:[
-           {center:[cx+0.003,cy+0.001],zoom:17.0,pitch:78,bearing:35,duration:7000,delay:13000},
-           {center:[cx+0.001,cy+0.003],zoom:17.3,pitch:79,bearing:-20,duration:7000,delay:30000},
-           {center:[cx+0.004,cy+0.002],zoom:17.5,pitch:76,bearing:48,duration:7000,delay:50000},
-           {center:[cx+0.002,cy+0.001],zoom:16.5,pitch:74,bearing:0,duration:6000,delay:66000},
+           {center:[cx+0.021*sc,cy-0.010*sc],zoom:17.0,pitch:78,bearing:35,duration:7000,delay:13000},
+           {center:[cx+0.019*sc,cy-0.011*sc],zoom:17.3,pitch:79,bearing:-20,duration:7000,delay:30000},
+           {center:[cx+0.000,cy+0.000],zoom:16.8,pitch:76,bearing:15,duration:7000,delay:50000},
+           {center:[cx+0.020*sc,cy-0.009*sc],zoom:16.5,pitch:74,bearing:0,duration:6000,delay:66000},
          ],
-         title:'🚶 Nivel Pietonal — Viața Urbană',
-         body:'Pietoni/zi centru: ~'+Math.round((d.pop2021||100000)*0.065).toLocaleString()+'. WalkScore: '+Math.round(55+densHA*0.15)+'/100. Calitate aer PM2.5: 18μg/m³. Tramvaiele și mașinile se văd la zoom 16+.',
-         src:'PMUD · ANM · OMS'},
+         title:'🚶 La Nivel de Stradă — Viitoarea Zonă',
+         body:'Perspectivă pietonală în zona de reconversie. Clădirile noi (extrudate colorate) pe dreapta vs realitatea actuală pe stânga. Zoom 17, pitch 78° — vedere ca pietoni prin noul cartier proiectat.',
+         src:'PMUD · ANM · OMS · Model Spațial TSS·FG'},
 
-        // S9 — Riscuri (65s)
         {id:'s9',dur:65000,light:'night',
          cam:{center:[cx,cy],zoom:13.0,pitch:46,bearing:5,duration:5500},
          chain:[
@@ -928,6 +1112,7 @@ const TCI = {
       this._lastKpiUpdate=yr;
       this._updateKPIs();
       this._updateBuildingHeight(yr);
+      this._updateProjectionLayers(yr);
     }
   },
 
