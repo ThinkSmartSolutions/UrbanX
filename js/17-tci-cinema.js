@@ -1688,12 +1688,6 @@ out geom qt;`;
           }
         });
         console.log('[TCI] ✅ Buildings layers adăugate (fill + fill-extrusion)');
-        // TEST: poligon roșu mare hardcodat
-        m.getSource('tci-buildings').setData({type:'FeatureCollection',features:[{
-          type:'Feature',
-          geometry:{type:'Polygon',coordinates:[[[27.584,47.185],[27.592,47.185],[27.592,47.192],[27.584,47.192],[27.584,47.185]]]},
-          properties:{height:100, color:'#ff0000'}
-        }]});
       } catch(e) { console.error('[TCI] EROARE layer:', e.message); }
     }
 
