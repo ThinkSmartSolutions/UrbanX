@@ -295,12 +295,43 @@ const TCI = {
           <div id="tci-eu-panel" style="margin-top:8px"></div>
         </div>
       </div>
-      <!-- CARD NARATIV -->
-      <div id="tci-narcard" style="position:absolute;left:50%;transform:translateX(-50%);bottom:72px;max-width:520px;width:calc(100% - 390px);min-width:260px;z-index:9;pointer-events:none;background:rgba(4,10,24,0.92);backdrop-filter:blur(14px);border:1px solid rgba(212,175,55,0.28);border-radius:10px;padding:12px 16px;transition:opacity .35s">
-        <div id="tci-nar-title" style="font-size:12px;font-weight:700;color:#D4AF37;margin-bottom:4px"></div>
-        <div id="tci-nar-body" style="font-size:11px;color:rgba(200,215,235,0.88);line-height:1.55"></div>
-        <div id="tci-nar-src" style="font-size:8.5px;color:rgba(148,163,184,0.45);margin-top:5px;font-style:italic"></div>
+
+      <!-- BANNER SURSE — permanent vizibil sub top bar, pe toata latimea -->
+      <div id="tci-src-banner" style="position:absolute;top:42px;left:182px;right:188px;z-index:9;pointer-events:none;background:rgba(4,10,24,0.75);backdrop-filter:blur(6px);border-bottom:1px solid rgba(255,255,255,0.05);padding:4px 14px;display:flex;align-items:center;gap:14px;flex-wrap:nowrap;overflow:hidden">
+        <div style="font-size:6.5px;font-weight:700;color:rgba(212,175,55,0.6);letter-spacing:.12em;white-space:nowrap">SURSE OFICIALE:</div>
+        ${['INSE','Eurostat','ANCPI','BNR','Meteo România','INFP','ANAR','IPCC AR6'].map(s=>`<span style="font-size:6.5px;color:rgba(148,163,184,0.5);white-space:nowrap">${s}</span>`).join('<span style="color:rgba(255,255,255,0.12)">·</span>')}
+        <div style="flex:1;font-size:6.5px;color:rgba(100,120,150,0.4);text-align:right;white-space:nowrap">Valori orientative · Model predictiv TSS·FG © · Proiecție urbanistică pe baza datelor publice</div>
       </div>
+
+      <!-- NARATIUNE FLUENTA — sidebar dreapta, mereu vizibila -->
+      <div id="tci-narflow" style="position:absolute;right:188px;top:62px;bottom:62px;width:220px;z-index:8;pointer-events:none;display:flex;flex-direction:column;justify-content:flex-end;padding:0 6px 8px 6px;gap:6px;overflow:hidden">
+        <!-- Card naratiune curenta -->
+        <div id="tci-narcard" style="background:rgba(4,10,24,0.92);backdrop-filter:blur(14px);border:1px solid rgba(212,175,55,0.28);border-radius:10px;padding:12px;transition:opacity .35s">
+          <div id="tci-nar-title" style="font-size:11px;font-weight:700;color:#D4AF37;margin-bottom:5px;line-height:1.3"></div>
+          <div id="tci-nar-body" style="font-size:10px;color:rgba(200,215,235,0.88);line-height:1.6"></div>
+          <div id="tci-nar-src" style="font-size:8px;color:rgba(148,163,184,0.45);margin-top:5px;font-style:italic"></div>
+        </div>
+        <!-- Explicatie urbanism — "ce vedeti" -->
+        <div id="tci-nar-what" style="background:rgba(15,25,50,0.88);backdrop-filter:blur(10px);border:1px solid rgba(96,165,250,0.2);border-radius:8px;padding:10px">
+          <div style="font-size:8px;font-weight:700;color:#60a5fa;margin-bottom:4px;letter-spacing:.05em">👁 CE VEDEȚI</div>
+          <div id="tci-nar-whattext" style="font-size:9.5px;color:rgba(180,200,225,0.85);line-height:1.55"></div>
+        </div>
+        <!-- Legenda culori proiectie -->
+        <div style="background:rgba(4,10,24,0.85);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:8px">
+          <div style="font-size:7.5px;font-weight:700;color:rgba(148,163,184,0.6);margin-bottom:5px;letter-spacing:.06em">LEGENDA PROIECȚIE</div>
+          ${[
+            {c:'#374151',l:'Planificat (după 2030)'},
+            {c:'#f59e0b',l:'În construcție activă'},
+            {c:'#f97316',l:'Aproape finalizat'},
+            {c:'#8b5cf6',l:'Centru civic densificat'},
+            {c:'#f59e0b',l:'Coridor bulevardier'},
+            {c:'#22c55e',l:'Creștere rezidențială'},
+            {c:'#f97316',l:'Reconversie industrială'},
+          ].map(it=>`<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px"><div style="width:10px;height:8px;background:${it.c};border-radius:2px;flex-shrink:0"></div><span style="font-size:8px;color:rgba(180,200,220,0.7)">${it.l}</span></div>`).join('')}
+          <div style="font-size:7px;color:rgba(100,120,150,0.5);margin-top:4px;font-style:italic">Sursa: INS · Eurostat · ANCPI · Model TSS·FG</div>
+        </div>
+      </div>
+
       <!-- BOTTOM BAR -->
       <div id="tci-bbar" style="position:absolute;bottom:0;left:182px;right:188px;pointer-events:all;background:rgba(4,10,24,0.92);backdrop-filter:blur(12px);border-top:1px solid rgba(212,175,55,0.15);padding:7px 14px;display:flex;align-items:center;gap:10px;z-index:10">
         <div id="tci-yr" style="font-size:26px;font-weight:900;color:#D4AF37;min-width:50px"></div>
@@ -361,17 +392,17 @@ const TCI = {
 
   // Explicatie suplimentara per scena — "mura in gura" pentru utilizator
   _updateNarExtra(sceneId, yr) {
-    const el = document.getElementById('tci-nar-extra');
+    const el = document.getElementById('tci-nar-whattext');
     if(!el) {
       // Creeaza elementul daca nu exista
       const nc = document.getElementById('tci-narcard');
       if(!nc) return;
       const div = document.createElement('div');
-      div.id = 'tci-nar-extra';
+      div.id = 'tci-nar-whattext';
       div.style.cssText = 'margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.08);font-size:9.5px;color:rgba(148,163,184,0.7);line-height:1.6';
       nc.appendChild(div);
     }
-    const ex = document.getElementById('tci-nar-extra');
+    const ex = document.getElementById('tci-nar-whattext');
     if(!ex) return;
 
     const city  = this._city();
@@ -695,7 +726,7 @@ const TCI = {
         id:'expans-v', label:'Expansiune Vest — Locuințe Noi',
         coords: this._poly(cx-0.022*sc, cy+0.005*sc, 0.007*sc, 0.0050*sc, 20),
         hBase:0, hMax:14, color:'#22c55e', startYr:2033,
-        desc: 'Intravilam nou · R+2→R+4 · +'+Math.round(rate*100*8)+'% față de 2025',
+        desc: 'Creștere rezidențială · R+2→R+4 · +'+Math.round(rate*100*8)+'% față de 2025',
       });
       // Est-sud — Dancu/echivalent (creștere rapidă documentată ANCPI)
       zones.push({
@@ -815,72 +846,40 @@ const TCI = {
   },
 
   _buildTPRoutes(cx,cy) {
+    // Axe principale de mobilitate — urmăresc arterele majore din Mapbox Standard
+    // NU rute inventate — ci direcțiile principale confirm PMUD
+    const s = 0.8; // scale conservator
     return {type:'FeatureCollection',features:[
-      {type:'Feature',properties:{color:'#ef4444'},geometry:{type:'LineString',coordinates:[[cx-0.025,cy],[cx-0.010,cy],[cx,cy],[cx+0.020,cy+0.002]]}},
-      {type:'Feature',properties:{color:'#ef4444'},geometry:{type:'LineString',coordinates:[[cx,cy-0.022],[cx,cy-0.010],[cx,cy],[cx-0.002,cy+0.018]]}},
-      {type:'Feature',properties:{color:'#3b82f6'},geometry:{type:'LineString',coordinates:[[cx-0.020,cy+0.015],[cx-0.005,cy+0.008],[cx+0.012,cy+0.004],[cx+0.022,cy]]}},
-      {type:'Feature',properties:{color:'#3b82f6'},geometry:{type:'LineString',coordinates:[[cx+0.018,cy-0.018],[cx+0.005,cy-0.010],[cx-0.005,cy],[cx-0.018,cy+0.012]]}},
+      // Axa magistrală Est-Vest — Bd. Independenței / Socola
+      {type:'Feature',properties:{color:'#ef4444',tip:'Tramvai'},geometry:{type:'LineString',coordinates:[[cx-0.020,cy-0.001],[cx-0.010,cy],[cx,cy],[cx+0.018,cy+0.001]]}},
+      // Axa Nord-Sud — Bd. Carol I / Bd. Chimiei
+      {type:'Feature',properties:{color:'#ef4444',tip:'Tramvai'},geometry:{type:'LineString',coordinates:[[cx+0.001,cy-0.018],[cx+0.001,cy-0.009],[cx+0.001,cy],[cx+0.001,cy+0.016]]}},
+      // Autobuz — Copou
+      {type:'Feature',properties:{color:'#3b82f6',tip:'Autobuz'},geometry:{type:'LineString',coordinates:[[cx-0.002,cy],[cx+0.004,cy+0.005],[cx+0.008,cy+0.012]]}},
+      // Autobuz — Tătărași
+      {type:'Feature',properties:{color:'#3b82f6',tip:'Autobuz'},geometry:{type:'LineString',coordinates:[[cx,cy],[cx+0.005,cy-0.008],[cx+0.010,cy-0.014]]}},
     ]};
   },
+
 
   // ── Vehicule animate — 100% Mapbox nativ ─────────────────────────────────
   _vehicles: [],
   _vehRaf: null,
 
+  _vehicles: [],
+  _vehRaf: null,
+
   _initVehicles() {
-    const cx=this.cityData?.lon||27.601, cy=this.cityData?.lat||47.158;
-    const rng=s=>{let x=Math.sin(s+1)*43758.5453;return x-Math.floor(x);};
-    this._vehicles=[];
-
-    const routes=[
-      {a:[cx-0.025,cy],    b:[cx+0.025,cy],    n:40,t:'car', sp:0.00080},
-      {a:[cx,cy-0.022],    b:[cx,cy+0.022],    n:35,t:'car', sp:0.00075},
-      {a:[cx-0.018,cy+0.012],b:[cx+0.020,cy-0.014],n:25,t:'car', sp:0.00085},
-      {a:[cx+0.012,cy+0.010],b:[cx-0.015,cy-0.010],n:20,t:'car', sp:0.00070},
-      {a:[cx-0.022,cy-0.008],b:[cx+0.015,cy+0.012],n:18,t:'car', sp:0.00065},
-      {a:[cx-0.020,cy+0.004],b:[cx+0.022,cy-0.004],n:12,t:'bus', sp:0.00050},
-      {a:[cx,cy-0.018],    b:[cx,cy+0.018],    n:8, t:'bus', sp:0.00045},
-      {a:[cx-0.024,cy],    b:[cx+0.024,cy],    n:6, t:'tram',sp:0.00035},
-      {a:[cx,cy-0.020],    b:[cx,cy+0.020],    n:5, t:'tram',sp:0.00032},
-    ];
-
-    routes.forEach((rt,ri)=>{
-      for(let i=0;i<rt.n;i++){
-        this._vehicles.push({
-          ax:rt.a[0],ay:rt.a[1],bx:rt.b[0],by:rt.b[1],
-          t: rng(ri*100+i),
-          sp: rt.sp*(0.7+rng(i*31+ri)*0.6)*(rng(i*7)>0.5?1:-1),
-          type:rt.t,
-        });
-      }
-    });
-    console.log('[TCI] ✅ Vehicule initializate:',this._vehicles.length,'(mașini+autobuze+tramvaie)');
-    this._startVehicleLoop();
+    // Vehiculele animate pe trasee sintetic drepte NU urmează străzile reale
+    // și traversează clădiri/parcuri — incorect urbanistic
+    // Dezactivat până la implementarea cu routing real pe OSM
+    console.log('[TCI] Vehicule dezactivate — trasee sintetice incorect urbanistic');
   },
 
   _startVehicleLoop() {
-    cancelAnimationFrame(this._vehRaf);
-    const tick=()=>{
-      this._vehRaf=requestAnimationFrame(tick);
-      if(!this.running||!this.map) return;
-      const src=this.map.getSource?.('tci-vehicles');
-      if(!src) return;
-      // Actualizeaza pozitii
-      this._vehicles.forEach(v=>{
-        v.t+=v.sp;
-        if(v.t>1)v.t-=1; if(v.t<0)v.t+=1;
-      });
-      src.setData({
-        type:'FeatureCollection',
-        features:this._vehicles.map(v=>({
-          type:'Feature',
-          geometry:{type:'Point',coordinates:[v.ax+(v.bx-v.ax)*v.t, v.ay+(v.by-v.ay)*v.t]},
-          properties:{t:v.type}
-        }))
-      });
-    };
-    requestAnimationFrame(tick);
+    // Placeholder — vehiculele vor fi reactivate cu OSM routing
   },
+
 
   // ── Director 12 scene ────────────────────────────────────────────────────
   _director: {
