@@ -1643,6 +1643,17 @@ out geom qt;`;
             'line-dasharray':[6,4],
           }
         });
+        // Fill-extrusion pe aceeași sursă tci-proj — garantat vizibil
+        m.addLayer({
+          id:'tci-proj-extrusion', type:'fill-extrusion', source:'tci-proj',
+          minzoom:11,
+          paint:{
+            'fill-extrusion-color':   ['get','dc'],
+            'fill-extrusion-height':  ['get','extHeight'],
+            'fill-extrusion-base':    0,
+            'fill-extrusion-opacity': 0.75,
+          }
+        });
         m.addLayer({id:'tci-proj-labels', type:'symbol', source:'tci-proj',
           minzoom:11,
           layout:{
@@ -1783,6 +1794,7 @@ out geom qt;`;
           properties:{
             label:z.label, sub:z.sub||'',
             color:z.color, dc:statusColor(z,yr),
+            extHeight: yr < z.startYr ? 2 : Math.min(z.hMax||40, 5 + (yr-z.startYr)*3),
           }
         };
       }).filter(Boolean);
