@@ -1424,6 +1424,9 @@ const _ProjectionEngine = {
 
           <!-- Canvas 3D principal -->
           <div class="tci-canvas-wrap" id="tci-canvas-wrap">
+            <!-- Container Mapbox 3D -->
+            <div id="tci-map-container" class="tci-mapbox-container"></div>
+            <!-- Canvas overlay pentru milestone cards si HUD -->
             <canvas id="tci-main-canvas" class="tci-main-canvas"></canvas>
 
             <!-- Overlay info pe canvas -->
@@ -1619,6 +1622,9 @@ const _ProjectionEngine = {
     if(!canvas) return;
     this.canvas = canvas;
     this.ctx    = canvas.getContext('2d');
+
+    // Initializare Mapbox in TCI container
+    this._initTCIMapbox();
 
     const wrap = document.getElementById('tci-canvas-wrap');
     const resize = () => {
@@ -2014,6 +2020,68 @@ const _ProjectionEngine = {
     this._drawSparkline('tci-sp-pib',   pibVals,   '#22c55e');
     this._drawSparkline('tci-sp-clim',  climVals,  '#ef4444');
     this._drawSparkline('tci-sp-esg',   esgVals,   '#38bdf8');
+  },
+
+
+  // Initializare Mapbox in containerul TCI ────────────────────────────────
+  _initTCIMapbox() {
+    const container = document.getElementById('tci-map-container');
+    if(!container || !window.mapboxgl || !window.MAPBOX_TOKEN) return;
+
+    // Daca harta principala exista, mutam view-ul sau facem mirror
+    if(window.map) {
+      // Sincronizam cu harta principala
+      const center = window.map.getCenter();
+      const zoom   = Math.min(16, window.map.getZoom() + 1);
+
+      try {
+        this.tciMap = new mapboxgl.Map({
+          container: container,
+          style:     'mapbox://styles/mapbox/dark-v11',
+          center:    [center.lng, center.lat],
+          zoom:      zoom,
+          pitch:     55,
+          bearing:   -15,
+          accessToken: MAPBOX_TOKEN || mapboxgl.accessToken,
+          antialias: true,
+        });
+
+        this.tciMap.on('load', () => {
+          console.log('[TCI] Mapbox 3D map initialized');
+          // Adauga 3D buildings
+          this.tciMap.addLayer({
+            id: '3d-buildings',
+            source: 'composite',
+            'source-layer': 'building',
+            filter: ['==', 'extrude', 'true'],
+            type: 'fill-extrusion',
+            minzoom: 13,
+            paint: {
+              'fill-extrusion-color': ['interpolate',['linear'],['get','height'],0,'#0a1628',50,'#102855',150,'#1a3880'],
+              'fill-extrusion-height': ['get', 'height'],
+              'fill-extrusion-base': ['get', 'min_height'],
+              'fill-extrusion-opacity': 0.85,
+            },
+          }, 'waterway-label');
+
+          // Inregistram harta TCI in AnimationEngine
+          if(typeof _AnimationEngine !== 'undefined') {
+            _AnimationEngine.state.map = this.tciMap;
+          }
+        });
+      } catch(e) {
+        // Fallback: folosim harta principala
+        if(typeof _AnimationEngine !== 'undefined') {
+          _AnimationEngine.state.map = window.map;
+        }
+        container.style.display = 'none';
+      }
+    } else {
+      // Folosim harta principala direct ca referinta
+      if(typeof _AnimationEngine !== 'undefined') {
+        _AnimationEngine.state.map = window.map;
+      }
+    }
   },
 
   // ── EU Comparative Chart ────────────────────────────────────────────────
