@@ -968,39 +968,51 @@ const TCI = {
     // ── CIMEC WFS — LMI național, toate monumentele din orice UAT ──────
     // 3 tentative CORS: direct → corsproxy.io → allorigins.win
     // Aceasta e singura sursă completă pentru TOATE monumentele istorice RO
+    // ── CIMEC WFS — toate monumentele istorice România ──────────────────
+    // Necesită Cloudflare Worker proxy (cimec-worker.js din repo)
+    // Setează URL-ul worker-ului în TCI.CIMEC_PROXY după deploy
+    // Instrucțiuni: see DEPLOY_CIMEC_PROXY.md în repo
     async queryLMI(lon, lat, radiusM) {
+      // Refolosește funcția din 10-studies.js dacă e disponibilă
       if(typeof _cimecQueryWFS === 'function') {
         try { return await _cimecQueryWFS(lon, lat, radiusM); } catch(e){}
       }
-      const CIMEC = 'https://map.cimec.ro/Mapserver/wms';
-      const km = radiusM / 111320;
-      const bbox = [lon-km, lat-km, lon+km, lat+km].join(',');
-      const result = {monumente:[], zone:[], situri:[]};
+
+      const CIMEC    = 'https://map.cimec.ro/Mapserver/wms';
+      const proxyUrl = window.TCI?.CIMEC_PROXY || '';  // ex: https://cimec-proxy.yourname.workers.dev
+      const km       = radiusM / 111320;
+      const bbox     = [lon-km, lat-km, lon+km, lat+km].join(',');
+      const result   = {monumente:[], zone:[], situri:[]};
 
       for(const [layer, key] of [['LMI_Puncte','monumente'],['LMI_Zone','zone'],['Situri_Arh','situri']]) {
-        const wfsQ = `SERVICE=WFS&VERSION=1.1.0&REQUEST=GetFeature&TYPENAME=${layer}`+
-                     `&BBOX=${bbox},EPSG:4326&SRSNAME=EPSG:4326&OUTPUTFORMAT=application/json&maxFeatures=200`;
-        const direct = `${CIMEC}?${wfsQ}`;
-        const urls = [
-          direct,
-          `https://corsproxy.io/?${encodeURIComponent(direct)}`,
-          `https://api.allorigins.win/raw?url=${encodeURIComponent(direct)}`,
-        ];
-        for(const url of urls) {
-          try {
-            const resp = await fetch(url, {signal:AbortSignal.timeout(5000), mode:'cors'});
-            if(resp.ok) {
-              const txt = await resp.text();
-              if(txt.includes('FeatureCollection')) {
-                result[key] = JSON.parse(txt).features || [];
-                if(result[key].length) { console.log(`[CIMEC] ✅ ${key}:${result[key].length}`); break; }
-              }
+        const wfsQ  = `${CIMEC}?SERVICE=WFS&VERSION=1.1.0&REQUEST=GetFeature`+
+                      `&TYPENAME=${layer}&BBOX=${bbox},EPSG:4326&SRSNAME=EPSG:4326`+
+                      `&OUTPUTFORMAT=application/json&maxFeatures=200`;
+
+        // Cu proxy: CORS rezolvat
+        // Fără proxy: CORS blocat (CIMEC nu permite browser direct)
+        const url = proxyUrl
+          ? `${proxyUrl}?url=${encodeURIComponent(wfsQ)}`
+          : wfsQ;
+
+        try {
+          const resp = await fetch(url, {signal:AbortSignal.timeout(6000), mode:'cors'});
+          if(resp.ok) {
+            const txt = await resp.text();
+            if(txt.includes('FeatureCollection')) {
+              result[key] = JSON.parse(txt).features || [];
+              if(result[key].length)
+                console.log(`[CIMEC] ✅ ${key}: ${result[key].length} monumente`);
             }
-          } catch(e) {}
+          }
+        } catch(e) {
+          if(!proxyUrl)
+            console.log('[CIMEC] CORS blocat — configurați TCI.CIMEC_PROXY cu URL-ul worker-ului');
         }
       }
       return result;
     },
+
 
     async queryConstraints(lon, lat, radiusKm, token) {
       // Categorii de exclus sau de urmărit
