@@ -972,46 +972,70 @@ const TCI = {
     // Necesită Cloudflare Worker proxy (cimec-worker.js din repo)
     // Setează URL-ul worker-ului în TCI.CIMEC_PROXY după deploy
     // Instrucțiuni: see DEPLOY_CIMEC_PROXY.md în repo
+    // ── LMI — Supabase (primar) → CIMEC fallback ────────────────────────
+    // Supabase: date pre-ingerate server-side, fără CORS, rapid
+    // CIMEC: fallback dacă Supabase nu e configurat
     async queryLMI(lon, lat, radiusM) {
-      // Refolosește funcția din 10-studies.js dacă e disponibilă
+      // Încearcă Supabase mai întâi (romania_spatial_pipeline.py populează)
+      const supabaseUrl = window.SUPABASE_URL || '';
+      const supabaseKey = window.SUPABASE_ANON_KEY || '';
+      if(supabaseUrl && supabaseKey) {
+        try {
+          const margin = radiusM / 111320;
+          const url = `${supabaseUrl}/rest/v1/lmi_romania`+
+            `?lon=gte.${lon-margin}&lon=lte.${lon+margin}`+
+            `&lat=gte.${lat-margin}&lat=lte.${lat+margin}`+
+            `&select=denumire,categorie,lon,lat,buffer_m,source`;
+          const resp = await fetch(url, {
+            headers:{'apikey':supabaseKey,'Authorization':`Bearer ${supabaseKey}`},
+            signal:AbortSignal.timeout(5000),
+          });
+          if(resp.ok) {
+            const rows = await resp.json();
+            if(rows?.length) {
+              console.log(`[LMI] ✅ Supabase: ${rows.length} monumente`);
+              // Convertește în format CIMEC-compatibil
+              return {
+                monumente: rows.filter(r=>r.source!=='OSM' || r.landuse!=='cemetery')
+                               .map(r=>({
+                  geometry:{type:'Point',coordinates:[r.lon,r.lat]},
+                  properties:{DENUMIRE:r.denumire,CATEGORIE:r.categorie,buffer_m:r.buffer_m}
+                })),
+                zone: [],
+                situri: [],
+              };
+            }
+          }
+        } catch(e) { console.log('[LMI] Supabase error:', e.message); }
+      }
+
+      // Fallback: CIMEC direct + proxy worker (dacă configurat)
       if(typeof _cimecQueryWFS === 'function') {
         try { return await _cimecQueryWFS(lon, lat, radiusM); } catch(e){}
       }
-
-      const CIMEC    = 'https://map.cimec.ro/Mapserver/wms';
-      const proxyUrl = window.TCI?.CIMEC_PROXY || '';  // ex: https://cimec-proxy.yourname.workers.dev
-      const km       = radiusM / 111320;
-      const bbox     = [lon-km, lat-km, lon+km, lat+km].join(',');
-      const result   = {monumente:[], zone:[], situri:[]};
-
-      for(const [layer, key] of [['LMI_Puncte','monumente'],['LMI_Zone','zone'],['Situri_Arh','situri']]) {
-        const wfsQ  = `${CIMEC}?SERVICE=WFS&VERSION=1.1.0&REQUEST=GetFeature`+
-                      `&TYPENAME=${layer}&BBOX=${bbox},EPSG:4326&SRSNAME=EPSG:4326`+
-                      `&OUTPUTFORMAT=application/json&maxFeatures=200`;
-
-        // Cu proxy: CORS rezolvat
-        // Fără proxy: CORS blocat (CIMEC nu permite browser direct)
-        const url = proxyUrl
-          ? `${proxyUrl}?url=${encodeURIComponent(wfsQ)}`
-          : wfsQ;
-
+      const proxyUrl = window.TCI?.CIMEC_PROXY || '';
+      if(!proxyUrl) {
+        console.log('[LMI] Fără Supabase/proxy — rulați romania_spatial_pipeline.py');
+        return {monumente:[],zone:[],situri:[]};
+      }
+      const CIMEC = 'https://map.cimec.ro/Mapserver/wms';
+      const km = radiusM/111320;
+      const bbox = [lon-km,lat-km,lon+km,lat+km].join(',');
+      const result = {monumente:[],zone:[],situri:[]};
+      for(const[layer,key] of [['LMI_Puncte','monumente'],['LMI_Zone','zone'],['Situri_Arh','situri']]) {
+        const wfsQ = `${CIMEC}?SERVICE=WFS&VERSION=1.1.0&REQUEST=GetFeature&TYPENAME=${layer}&BBOX=${bbox},EPSG:4326&SRSNAME=EPSG:4326&OUTPUTFORMAT=application/json&maxFeatures=200`;
         try {
-          const resp = await fetch(url, {signal:AbortSignal.timeout(6000), mode:'cors'});
+          const resp = await fetch(`${proxyUrl}?url=${encodeURIComponent(wfsQ)}`,
+                                   {signal:AbortSignal.timeout(5000),mode:'cors'});
           if(resp.ok) {
             const txt = await resp.text();
-            if(txt.includes('FeatureCollection')) {
-              result[key] = JSON.parse(txt).features || [];
-              if(result[key].length)
-                console.log(`[CIMEC] ✅ ${key}: ${result[key].length} monumente`);
-            }
+            if(txt.includes('FeatureCollection')) result[key] = JSON.parse(txt).features||[];
           }
-        } catch(e) {
-          if(!proxyUrl)
-            console.log('[CIMEC] CORS blocat — configurați TCI.CIMEC_PROXY cu URL-ul worker-ului');
-        }
+        } catch(e){}
       }
       return result;
     },
+
 
 
     async queryConstraints(lon, lat, radiusKm, token) {

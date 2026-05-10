@@ -1,0 +1,37 @@
+# .github/workflows/spatial-pipeline.yml
+# Rulează automat în fiecare duminică la 02:00 UTC
+# Sau manual din GitHub Actions → "Run workflow"
+
+name: Romania Spatial Data Pipeline
+
+on:
+  schedule:
+    - cron: '0 2 * * 0'   # Duminică 02:00 UTC
+  workflow_dispatch:        # și manual oricând
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Python setup
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests geopandas shapely
+
+      - name: Run spatial pipeline
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python romania_spatial_pipeline.py
+
+      - name: Upload export as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lmi-romania-${{ github.run_number }}
+          path: lmi_romania_export.json
+          retention-days: 30
