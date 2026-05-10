@@ -187,7 +187,7 @@ const TCI = {
             'fill-extrusion-color': ['get','color'],
             'fill-extrusion-height': ['get','h'],
             'fill-extrusion-base': 0,
-            'fill-extrusion-opacity': ['get','op'],
+            'fill-extrusion-opacity': 0.75,
           },
         });
       } catch(e) {}
@@ -283,7 +283,8 @@ const TCI = {
     if(this.running) return;
     this.running = true;
     this.startTime = performance.now() - this.pausedAt;
-    document.getElementById('tci-v4-play').textContent = '⏸ Pauza';
+    const playBtn = document.getElementById('tci-v4-play');
+    if(playBtn) playBtn.textContent = '⏸ Pauza';
     this._loop();
   },
 
@@ -291,7 +292,8 @@ const TCI = {
     this.running = false;
     this.pausedAt = performance.now() - this.startTime;
     cancelAnimationFrame(this.raf);
-    document.getElementById('tci-v4-play').textContent = '▶ Play';
+    const btn = document.getElementById('tci-v4-play');
+    if(btn) btn.textContent = '▶ Play';
   },
 
   toggle() { this.running ? this.pause() : this.start(); },
@@ -739,7 +741,10 @@ const TCI = {
   },
 
   close() {
-    this.pause();
+    // Guard: nu face nimic daca modalul nu e deschis
+    const modal = document.getElementById('tci-v4-modal');
+    if(modal && modal.style.display === 'none') return;
+    if(this.running) this.pause();
     const m = this.map;
     if(m) {
       ['tci-3d-buildings','tci-constructii-layer','tci-heatmap-layer','tci-traffic-layer','tci-risk-flood-layer'].forEach(id=>{try{if(m.getLayer(id))m.removeLayer(id);}catch(e){}});
@@ -748,8 +753,8 @@ const TCI = {
     }
     const mapEl = document.getElementById('map');
     if(mapEl) { mapEl.style.cssText=''; m?.resize?.(); }
-    const modal = document.getElementById('tci-v4-modal');
-    if(modal) modal.style.display = 'none';
+    const modalEl = document.getElementById('tci-v4-modal');
+    if(modalEl) modalEl.style.display = 'none';
     this.layersAdded = false;
   },
 
@@ -856,8 +861,8 @@ window.openTCI = (opts) => TCI.open(opts);
 if(typeof _ProjectionEngine !== 'undefined') {
   _ProjectionEngine.open            = () => TCI.open({cityKey: _ProjectionEngine.currentCity||'iasi'});
   _ProjectionEngine.startAnimation  = () => TCI.toggle();
-  _ProjectionEngine.stopAnimation   = () => TCI.pause();
-  _ProjectionEngine.close           = () => TCI.close();
+  _ProjectionEngine.stopAnimation   = () => { try { TCI.pause(); } catch(e) {} };
+  _ProjectionEngine.close           = () => { try { TCI.close(); } catch(e) {} };
 }
 
 console.log('[TCI v4.0] window.map confirmed — harta reala Iasi activa');
