@@ -944,6 +944,98 @@ const TCI = {
     },
 
     // ── CENTROID helper ────────────────────────────────────────────────
+    // ── QUERY ZONE DE DEZVOLTARE — automat, orice UAT ───────────────────
+    // Overpass returnează:
+    //   - Șantiere active (building=construction, landuse=construction)
+    //   - Spitale/instituții majore (ancorele de dezvoltare)
+    //   - Complexe rezidențiale noi (tagged în OSM)
+    //   - Zone cu construcții recente
+    // FUNCȚIONEAZĂ PENTRU ORICE UAT DIN ROMÂNIA, AUTOMAT
+    async queryDevelopmentZones(lon, lat, radiusM) {
+      const r = Math.min(radiusM, 15000);
+      const q = `[out:json][timeout:15];
+(
+  way["building"="construction"](around:${r},${lat},${lon});
+  relation["building"="construction"](around:${r},${lat},${lon});
+  way["landuse"="construction"](around:${r},${lat},${lon});
+  way["amenity"="hospital"](around:${r},${lat},${lon});
+  node["amenity"="hospital"](around:${r},${lat},${lon});
+  way["amenity"="university"](around:${r},${lat},${lon});
+  way["landuse"="residential"]["name"](around:${r},${lat},${lon});
+  node["place"~"^(suburb|neighbourhood)$"]["name"](around:${r},${lat},${lon});
+  way["building"~"^(apartments|residential)"](around:${r},${lat},${lon});
+);
+out geom qt;`;
+
+      try {
+        const resp = await fetch('https://overpass-api.de/api/interpreter', {
+          method:'POST', body:'data='+encodeURIComponent(q),
+          signal:AbortSignal.timeout(15000),
+        });
+        if(!resp.ok) return [];
+        const data = await resp.json();
+        const zones = [];
+
+        (data.elements||[]).forEach(el => {
+          const t  = el.tags||{};
+          const c  = this._centroid(el.geometry);
+          if(!c) return;
+          const [eLon, eLat] = c;
+          const name = t.name || t['name:ro'] || '';
+
+          // Tip și parametri per categorie
+          if(t.building==='construction' || t.landuse==='construction') {
+            zones.push({
+              lon:eLon, lat:eLat, name: name||'Șantier activ',
+              type:'constructie', color:'#f59e0b',
+              hMax: t.building_levels ? (+t.building_levels)*3 : 18,
+              startYr: 2025, priority: 1,
+            });
+          } else if(t.amenity==='hospital') {
+            zones.push({
+              lon:eLon, lat:eLat, name: name||'Spital',
+              type:'institutional', color:'#06b6d4',
+              hMax:35, startYr:2026, priority:2,
+            });
+          } else if(t.amenity==='university') {
+            zones.push({
+              lon:eLon, lat:eLat, name: name||'Universitate',
+              type:'institutional', color:'#8b5cf6',
+              hMax:25, startYr:2027, priority:2,
+            });
+          } else if(t.landuse==='residential' && name) {
+            zones.push({
+              lon:eLon, lat:eLat, name,
+              type:'rezidential', color:'#3b82f6',
+              hMax:20, startYr:2028, priority:3,
+            });
+          } else if(t.place && name) {
+            zones.push({
+              lon:eLon, lat:eLat, name,
+              type:'cartier', color:'#22c55e',
+              hMax:15, startYr:2029, priority:3,
+            });
+          }
+        });
+
+        // Deduplicate pe baza distanței (merge puncte la <200m)
+        const merged = [];
+        zones.forEach(z => {
+          const R=111319.9, cp=Math.cos(lat*Math.PI/180);
+          const tooClose = merged.some(m =>
+            Math.hypot((z.lon-m.lon)*R*cp, (z.lat-m.lat)*R) < 200
+          );
+          if(!tooClose) merged.push(z);
+        });
+
+        console.log(`[CONSTRAINT] ✅ Zone dezvoltare Overpass: ${merged.length} găsite (${zones.length} brut)`);
+        return merged;
+      } catch(e) {
+        console.log('[CONSTRAINT] queryDevelopmentZones timeout/err:', e.message);
+        return [];
+      }
+    },
+
     _centroid(geom) {
       if(!geom) return null;
       if(geom.type==='Point') return geom.coordinates;
@@ -969,73 +1061,58 @@ const TCI = {
 
     // ── BUILD — funcția principală ────────────────────────────────────
     async build(lon, lat, radiusKm=12) {
-      console.log('[CONSTRAINT] Build pentru', lon.toFixed(4), lat.toFixed(4), 'radius', radiusKm, 'km');
+      console.log('[CONSTRAINT] Build pentru', lon.toFixed(4), lat.toFixed(4));
 
-      const [lmiData, osmData] = await Promise.allSettled([
+      // Rulează TOATE query-urile în paralel
+      const [lmiData, osmData, devData] = await Promise.allSettled([
         this.queryLMI(lon, lat, radiusKm*1000),
         this.queryOverpass(lon, lat, radiusKm*1000),
+        this.queryDevelopmentZones(lon, lat, radiusKm*1000),
       ]);
 
-      const lmi   = lmiData.status==='fulfilled'   ? lmiData.value   : {monumente:[],zone:[],situri:[]};
-      const osm   = osmData.status==='fulfilled' && osmData.value
-                    ? osmData.value
-                    : {cimitire:[],paduri:[],ape:[],cale_ferata:[]};
+      const lmi = lmiData.status==='fulfilled' ? lmiData.value : {monumente:[],zone:[],situri:[]};
+      const osm = osmData.status==='fulfilled' && osmData.value
+                  ? osmData.value : {cimitire:[],paduri:[],ape:[],cale_ferata:[]};
+      const dev = devData.status==='fulfilled' ? devData.value : [];
 
-      // Construim lista de buffere de excludere
       const bufs = [];
 
-      // LMI — 100m buffer categoria A, 50m categoria B (Legea 422/2001)
+      // LMI buffers
       [...(lmi.monumente||[]), ...(lmi.zone||[])].forEach(m=>{
-        const c = this._centroid(m.geometry);
-        if(!c) return;
-        const cat = (m.properties?.CATEGORIE||m.properties?.CAT||'B').toUpperCase();
-        const r = cat.startsWith('A') ? 100 : 50;
-        bufs.push({lon:c[0],lat:c[1],r,reason:'LMI '+(m.properties?.DENUMIRE||'Monument'),color:'#dc2626',type:'lmi'});
+        const c = this._centroid(m.geometry); if(!c) return;
+        const cat = (m.properties?.CATEGORIE||'B').toUpperCase();
+        bufs.push({lon:c[0],lat:c[1],r:cat.startsWith('A')?100:50,
+                   reason:'LMI '+(m.properties?.DENUMIRE||'Monument'),color:'#dc2626',type:'lmi'});
       });
-      // Situri arheologice — 100m
       (lmi.situri||[]).forEach(s=>{
-        const c = this._centroid(s.geometry);
-        if(!c) return;
-        bufs.push({lon:c[0],lat:c[1],r:100,reason:'Sit arheologic '+(s.properties?.DENUMIRE||''),color:'#b91c1c',type:'lmi'});
+        const c = this._centroid(s.geometry); if(!c) return;
+        bufs.push({lon:c[0],lat:c[1],r:100,reason:'Sit arheologic',color:'#b91c1c',type:'lmi'});
       });
 
-      // Cimitire — 50m buffer (Ord. MS 119/2014)
+      // Cimitire, păduri, ape, CF buffers
       osm.cimitire.forEach(el=>{
-        const c = this._centroid(el.geometry);
-        if(!c) return;
-        const name = el.tags?.name||'Cimitir';
-        bufs.push({lon:c[0],lat:c[1],r:60,reason:'Cimitir: '+name,color:'#6b7280',type:'cimitir'});
+        const c=this._centroid(el.geometry); if(!c) return;
+        bufs.push({lon:c[0],lat:c[1],r:60,reason:'Cimitir: '+(el.tags?.name||''),color:'#6b7280',type:'cimitir'});
       });
-
-      // Păduri — 50m (Codul Silvic)
       osm.paduri.forEach(el=>{
-        const c = this._centroid(el.geometry);
-        if(!c) return;
-        bufs.push({lon:c[0],lat:c[1],r:55,reason:'Pădure: '+(el.tags?.name||'Zone forestieră'),color:'#15803d',type:'padure'});
+        const c=this._centroid(el.geometry); if(!c) return;
+        bufs.push({lon:c[0],lat:c[1],r:55,reason:'Pădure: '+(el.tags?.name||''),color:'#15803d',type:'padure'});
       });
-
-      // Ape — 15m albii minore, 50m râuri (Legea 107/1996)
       osm.ape.forEach(el=>{
-        const c = this._centroid(el.geometry);
-        if(!c) return;
-        const r = el.tags?.waterway==='river'||el.tags?.natural==='water' ? 50 : 15;
-        bufs.push({lon:c[0],lat:c[1],r,reason:'Zonă apă: '+(el.tags?.name||'Curs apă'),color:'#0ea5e9',type:'apa'});
+        const c=this._centroid(el.geometry); if(!c) return;
+        const r=el.tags?.waterway==='river'||el.tags?.natural==='water'?50:15;
+        bufs.push({lon:c[0],lat:c[1],r,reason:'Apă: '+(el.tags?.name||''),color:'#0ea5e9',type:'apa'});
       });
-
-      // Căi ferate — 20m (HG 401/2016)
       osm.cale_ferata.forEach(el=>{
-        const c = this._centroid(el.geometry);
-        if(!c) return;
+        const c=this._centroid(el.geometry); if(!c) return;
         bufs.push({lon:c[0],lat:c[1],r:22,reason:'Cale ferată',color:'#78716c',type:'cf'});
       });
 
       const aeronautic = this.checkAeronautic(lon, lat);
       const seismic    = this._seismicByCoord(lon, lat);
 
-      console.log(`[CONSTRAINT] ✅ ${bufs.length} buffere: LMI=${lmi.monumente?.length||0} cimitire=${osm.cimitire.length} paduri=${osm.paduri.length} ape=${osm.ape.length} CF=${osm.cale_ferata.length}`);
-      console.log(`[CONSTRAINT] Seismic: ${seismic.zone} (ag=${seismic.ag}g) | Aeronautic: ${aeronautic.restricted?aeronautic.airport+' '+aeronautic.dist+'m':'liber'}`);
-
-      return {bufs, aeronautic, seismic, lmi, osm, loaded:true};
+      console.log(`[CONSTRAINT] ✅ ${bufs.length} excluse | ${dev.length} zone dezvoltare găsite OSM`);
+      return {bufs, aeronautic, seismic, lmi, osm, devZones:dev, loaded:true};
     },
   },
 
@@ -1044,119 +1121,135 @@ const TCI = {
   // ── Generează zone de creștere — filtrate prin constrângeri ─────────
   // Include expansiune intravilam (extravilan construibil prin PUZ)
   // Specific Iași: Moara de Vânt, Bucium, Miroslava, Dancu
-  _buildZones(cx, cy, constraints) {
-    const pop = this.cityData?.pop2021 || 100000;
-    const sc  = Math.pow(pop / 360000, 0.4);  // Iași sc=1.0
-    const C   = this.COLORS;
-    const bufs = constraints?.bufs || [];
-    const R    = 111319.9;
-    const cp   = Math.cos(cy * Math.PI / 180);
+  // ── Baza de date zone reale per oras ───────────────────────────────────
+  // Sursă: Google Maps GPS + ANCPI autorizații + teren
+  // ── ZONE REALE GPS — coordonate absolute din Google Maps ───────────────
+  // Sursa: coordonate confirmate teren + ANCPI autorizații + cunoaștere locală
+  // FIECARE ORAS VA PRIMI PROPRIILE COORDONATE LA CONFIGURARE
+  _REAL_ZONES: {
+    'iasi': [
+      // ── ZONE ACTIVE 2025 — deja în construcție ──────────────────────
+      {id:'SR', lat:47.1877, lon:27.5874, rx:0.0060, ry:0.0042,
+       color:'#f59e0b', hMax:45, startYr:2025,
+       label:'Spital Regional + Pol Medical',
+       sub:'Hub medical + rezidențial R+4→R+10 · €580M'},
+      {id:'CR', lat:47.2011, lon:27.5349, rx:0.0050, ry:0.0035,
+       color:'#8b5cf6', hMax:32, startYr:2025,
+       label:'Complex Royal — Copou',
+       sub:'Rezidențial colectiv R+6→R+10 · activ'},
+      {id:'CG', lat:47.1987, lon:27.5374, rx:0.0035, ry:0.0025,
+       color:'#7c3aed', hMax:28, startYr:2026,
+       label:'Copou Garden Residence',
+       sub:'Rezidențial R+5→R+8 · Copou-Breazu'},
+      // ── ZONA DANCU / GREENPARK / HIMSON — expansiune est ────────────
+      // Complex Himson, Greenpark — zona cu creștere maximă
+      {id:'DK', lat:47.1420, lon:27.6530, rx:0.0080, ry:0.0055,
+       color:'#16a34a', hMax:20, startYr:2026,
+       label:'Dancu — Greenpark · Himson',
+       sub:'Rezidențial nou R+2→R+5 · extravilan PUZ'},
+      // ── CENTRU CIVIC — densificare intravilam ───────────────────────
+      {id:'CV', lat:47.1580, lon:27.6010, rx:0.0026, ry:0.0018,
+       color:'#7c3aed', hMax:52, startYr:2026,
+       label:'Centru Civic',
+       sub:'Densificare R+8→R+12 · zona CM'},
+      // ── CORIDOARE BULEVARDIERE ────────────────────────────────────────
+      {id:'CEV', lat:47.1572, lon:27.6005, rect:{w:0.018, h:0.0013},
+       color:'#d97706', hMax:28, startYr:2027,
+       label:'Coridor Est-Vest',
+       sub:'Bd. Independenței R+4→R+7'},
+      // ── RECONVERSIE NICOLINA / AUREL VLAICU ─────────────────────────
+      // Zona industrială Nicolina în conversie rapidă
+      {id:'RI', lat:47.1460, lon:27.6210, rx:0.0075, ry:0.0052,
+       color:'#ea580c', hMax:33, startYr:2030,
+       label:'Reconversie Nicolina',
+       sub:'Industrial→Mixt R+5→R+8'},
+      // ── REZIDENȚIAL SUD — Baza 3 / Calea Chișinăului ────────────────
+      {id:'RS', lat:47.1360, lon:27.5850, rx:0.0048, ry:0.0034,
+       color:'#2563eb', hMax:22, startYr:2031,
+       label:'Rezidențial Sud',
+       sub:'Reabilitare + supraetajare R+4→R+5'},
+    ],
+    // ── TEMPLATE PENTRU ALTE ORASE ─────────────────────────────────────
+    // Adaugă coordonate GPS preluate din Google Maps / ANCPI
+    // Format: {id, lat, lon, rx, ry, color, hMax, startYr, label, sub}
+    'botosani': [
+      {id:'CV', lat:47.7453, lon:26.6653, rx:0.0022, ry:0.0015,
+       color:'#7c3aed', hMax:35, startYr:2027,
+       label:'Centru Botoșani', sub:'Densificare moderată R+5→R+8'},
+      {id:'RN', lat:47.7560, lon:26.6700, rx:0.0040, ry:0.0028,
+       color:'#2563eb', hMax:18, startYr:2029,
+       label:'Rezidențial Nord', sub:'R+3→R+5'},
+    ],
+  },
 
-    // Helper: verifică dacă centrul unei zone e exclus
-    // ── PROTECȚII HARDCODATE IAȘI — zone cunoscute care NU se construiesc ──
-    // Sursa: LMI, ANCPI, PUG Iași, cunoaștere teren urbanistic
+  _buildZones(cx, cy, constraints) {
+    const bufs = (constraints?.bufs || []);
+    // Adaugă protecții cunoscute Iași
     const IASI_PROTECTED = [
-      // Cimitire protejate cu buffer 80m
-      {lon:27.5895, lat:47.1521, r:120, reason:'Cimitirul Eternitatea — LMI+protecție sanitară'},
+      {lon:27.5895, lat:47.1521, r:120, reason:'Cimitirul Eternitatea'},
       {lon:27.6050, lat:47.1910, r:80,  reason:'Cimitirul Sf. Apostoli Petru și Pavel'},
       {lon:27.6218, lat:47.1955, r:80,  reason:'Cimitirul Armenesc'},
-      // Păduri și spații verzi protejate
-      {lon:27.6350, lat:47.1950, r:300, reason:'Pădurea Ciric — spațiu verde protejat'},
-      {lon:27.5850, lat:47.1650, r:150, reason:'Lacul Ciric — zonă hidrografică'},
-      // Stadion (nu se construiesc blocuri pe el)
+      {lon:27.6350, lat:47.1950, r:300, reason:'Pădurea Ciric'},
+      {lon:27.5850, lat:47.1650, r:150, reason:'Lacul Ciric'},
       {lon:27.5640, lat:47.1680, r:80,  reason:'Stadionul TEPRO'},
     ];
-    // Adaugă la bufferele de constrângeri
-    const allBufs = [...(constraints?.bufs||[]), ...IASI_PROTECTED];
-
-    const ok = (lon, lat, extraR=0) => {
-      for(const b of bufs) {
+    const allBufs = [...bufs, ...IASI_PROTECTED];
+    const R   = 111319.9;
+    const cp  = Math.cos(cy * Math.PI / 180);
+    const ok  = (lon, lat, extraR=0) => {
+      for(const b of allBufs) {
         const d = Math.hypot((lon-b.lon)*R*cp, (lat-b.lat)*R);
-        if(d < b.r + extraR) return false; // exclus
+        if(d < b.r + extraR) return false;
       }
       return true;
     };
 
+    // ── Date reale per oras ────────────────────────────────────────────
+    const cityKey = (this.cityKey||'').toLowerCase();
+    const realZones = this._REAL_ZONES[cityKey] || this._REAL_ZONES['iasi']; // fallback Iași
+
+    // Dacă avem date reale → folosim GPS direct
+    if(realZones) {
+      const zones = [];
+      realZones.forEach(z => {
+        if(!ok(z.lon, z.lat)) {
+          console.log('[TCI] Zonă exclusă de constrângere:', z.label, z.lon, z.lat);
+          return;
+        }
+        // Construiesc definiția zonei în formatul cerut de _polyFromDef
+        const def = z.rect
+          ? {id:z.id,color:z.color,hMax:z.hMax,startYr:z.startYr,label:z.label,sub:z.sub,
+             rect:{cx:z.lon, cy:z.lat, w:z.rect.w, h:z.rect.h}}
+          : {id:z.id,color:z.color,hMax:z.hMax,startYr:z.startYr,label:z.label,sub:z.sub,
+             ring:{cx:z.lon, cy:z.lat, rx:z.rx, ry:z.ry}};
+        zones.push(def);
+      });
+      console.log('[TCI] ✅ Zone reale GPS:', zones.length, 'zone pentru', cityKey);
+      return zones;
+    }
+
+    // ── Fallback generic (orice alt UAT) — offset relativ față de centru ──
+    const pop = this.cityData?.pop2021 || 100000;
+    const sc  = Math.pow(pop / 360000, 0.4);
+    const C   = this.COLORS;
     const zones = [];
-
-    // ── 1. CENTRU CIVIC — densificare intravilam existent ────────────
-    // Nu se extinde — se densifică ce există
-    if(ok(cx, cy)) zones.push({
-      id:'CV', color:C.centru, hMax:52, startYr:2026,
-      ring:{cx, cy, rx:0.0026*sc, ry:0.0018*sc},
-      label:'Centru Civic', sub:'Densificare R+8→R+12',
-    });
-
-    // ── 2. MOARA DE VÂNT — Iași specific (Spitalul Regional) ─────────
-    // Coordonate reale: platoul NV al Iașului, 47.175° N, 27.540° E
-    // Sursa: ANCPI autorizații 2018-2025, Spital Regional în construcție
-    const mw_lon = cx - 0.041, mw_lat = cy + 0.017; // ~NV față de centru
-    if(ok(mw_lon, mw_lat)) zones.push({
-      id:'MV', color:C.coridor, hMax:35, startYr:2025,
-      ring:{cx:mw_lon, cy:mw_lat, rx:0.0060*sc, ry:0.0042*sc},
-      label:'Moara de Vânt — Spital Regional', sub:'Pol medical + rezidențial R+4→R+8',
-    });
-
-    // ── 3. CORIDOARE AXIALE — de-a lungul arterelor principale ───────
-    // Densificare în intravilam existent, nu extindere
-    const cev_lon = cx, cev_lat = cy - 0.0004;
-    if(ok(cev_lon, cev_lat)) zones.push({
-      id:'CEV', color:C.coridor, hMax:30, startYr:2027,
-      rect:{cx:cev_lon, cy:cev_lat, w:0.016*sc, h:0.0013*sc},
-      label:'Coridor Est-Vest', sub:'Bulevard R+4→R+7',
-    });
-    const cns_lon = cx + 0.001, cns_lat = cy;
-    if(ok(cns_lon, cns_lat)) zones.push({
-      id:'CNS', color:C.coridor, hMax:27, startYr:2028,
-      rect:{cx:cns_lon, cy:cns_lat, w:0.0013*sc, h:0.015*sc},
-      label:'Coridor Nord-Sud', sub:'Ax principal R+4→R+7',
-    });
-
-    // ── 4. ZONE REZIDENȚIALE COLECTIVE — densificare moderată ────────
-    const rn_lon = cx + 0.009*sc, rn_lat = cy + 0.011*sc;
-    if(ok(rn_lon, rn_lat)) zones.push({
-      id:'RN', color:C.rezid, hMax:26, startYr:2029,
-      ring:{cx:rn_lon, cy:rn_lat, rx:0.0035*sc, ry:0.0025*sc},
-      label:'Rezidențial Nord', sub:'Densificare R+4→R+6',
-    });
-    const rs_lon = cx + 0.004*sc, rs_lat = cy - 0.009*sc;
-    if(ok(rs_lon, rs_lat)) zones.push({
-      id:'RS', color:C.rezid, hMax:24, startYr:2030,
-      ring:{cx:rs_lon, cy:rs_lat, rx:0.0038*sc, ry:0.0027*sc},
-      label:'Rezidențial Sud', sub:'Reabilitare + supraetajare R+4→R+5',
-    });
-
-    // ── 5. RECONVERSIE INDUSTRIALĂ — zona est ────────────────────────
-    // ANCPI: autorizații conversie industrial→mixt în creștere accelerată
-    const ri_lon = cx + 0.021*sc, ri_lat = cy - 0.009*sc;
-    if(ok(ri_lon, ri_lat)) zones.push({
-      id:'RI', color:C.reconv, hMax:33, startYr:2031,
-      rect:{cx:ri_lon, cy:ri_lat, w:0.008*sc, h:0.0055*sc},
-      label:'Reconversie Industrială', sub:'Industrial→Mixt R+5→R+8',
-    });
-
-    // ── 6. EXPANSIUNE PUZ — extravilan construibil ───────────────────
-    // PUZ: extindere intravilam legală. Supus avizului CJ + MDLPA.
-    // Bucium / spre CUG — creștere documentată ANCPI
-    const pv_lon = cx - 0.020*sc, pv_lat = cy + 0.005*sc;
-    if(ok(pv_lon, pv_lat)) zones.push({
-      id:'PV', color:C.nou, hMax:14, startYr:2032,
-      ring:{cx:pv_lon, cy:pv_lat, rx:0.0048*sc, ry:0.0034*sc},
-      label:'Expansiune PUZ Vest', sub:'Rezidențial nou prin PUZ R+2→R+4',
-    });
-    // Dancu / Est-Sud — zona cu cea mai rapidă creștere Iași 2015-2025
-    const pe_lon = cx + 0.024*sc, pe_lat = cy - 0.006*sc;
-    if(ok(pe_lon, pe_lat)) zones.push({
-      id:'PE', color:C.nou, hMax:15, startYr:2030,
-      ring:{cx:pe_lon, cy:pe_lat, rx:0.0052*sc, ry:0.0037*sc},
-      label:'Expansiune Dancu Est', sub:'Rezidențial nou R+2→R+4',
-    });
-
-    const total = zones.length;
-    const excl  = 9 - total; // câte zone au fost excluse de constrângeri
-    console.log(`[TCI] Zone generate: ${total}/9 (${excl} excluse de constrângeri)`);
+    const addIf = (zone) => { if(ok(zone.ring?.cx||zone.rect?.cx, zone.ring?.cy||zone.rect?.cy)) zones.push(zone); };
+    addIf({id:'CV', color:C.centru, hMax:42,startYr:2026,
+           ring:{cx:cx,cy:cy,rx:0.0026*sc,ry:0.0018*sc},label:'Centru Civic',sub:'Densificare R+6→R+10'});
+    addIf({id:'RN', color:C.rezid, hMax:24,startYr:2028,
+           ring:{cx:cx+0.012*sc,cy:cy+0.014*sc,rx:0.0040*sc,ry:0.0028*sc},label:'Rezidențial Nord',sub:'R+4→R+6'});
+    addIf({id:'RS', color:C.rezid, hMax:22,startYr:2030,
+           ring:{cx:cx+0.005*sc,cy:cy-0.010*sc,rx:0.0042*sc,ry:0.0030*sc},label:'Rezidențial Sud',sub:'R+3→R+5'});
+    addIf({id:'RI', color:C.reconv,hMax:30,startYr:2031,
+           rect:{cx:cx+0.022*sc,cy:cy-0.010*sc,w:0.008*sc,h:0.006*sc},label:'Reconversie',sub:'Industrial→Mixt'});
+    addIf({id:'PE', color:C.nou,   hMax:14,startYr:2030,
+           ring:{cx:cx+0.025*sc,cy:cy-0.006*sc,rx:0.0055*sc,ry:0.0040*sc},label:'Expansiune Est',sub:'Rezidențial nou PUZ'});
+    addIf({id:'PV', color:C.nou,   hMax:12,startYr:2033,
+           ring:{cx:cx-0.020*sc,cy:cy+0.005*sc,rx:0.0048*sc,ry:0.0034*sc},label:'Expansiune Vest',sub:'Rezidențial nou PUZ'});
+    console.log('[TCI] Zone generice:', zones.length, 'pentru', cityKey);
     return zones;
   },
+
 
 
   _polyFromDef(def) {
@@ -1305,6 +1398,10 @@ const TCI = {
       const mat = new THREE.MeshBasicMaterial({ vertexColors: true });
       this._mesh = new THREE.InstancedMesh(geom, mat, this._entities.length);
       this._mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+      // Inițializează instanceColor (gri neutru) ÎNAINTE de primul render → shader compile corect
+      const _gc = new THREE.Color(0.3, 0.3, 0.3);
+      for(let _i = 0; _i < this._entities.length; _i++) this._mesh.setColorAt(_i, _gc);
+      if(this._mesh.instanceColor) this._mesh.instanceColor.needsUpdate = true;
       this._scene.add(this._mesh);
       this._addStreetLights();
     },
@@ -1449,6 +1546,29 @@ const TCI = {
     this._CONSTRAINT.build(cx, cy, 12).then(constraints => {
       this._constraints = constraints;
       this._projZones = this._buildZones(cx, cy, constraints);
+      // Merge zone găsite de Overpass (șantiere active, spitale etc.)
+      if(constraints.devZones?.length) {
+        const existing = new Set(this._projZones.map(z=>z.id));
+        constraints.devZones.forEach((dz,idx) => {
+          if(dz.priority > 2) return; // skip generic cartiere
+          const id = 'OSM_'+idx;
+          if(existing.has(id)) return;
+          // Verifică că nu e pe o zonă exclusă
+          const R=111319.9, cp=Math.cos(cy*Math.PI/180);
+          const excluded = constraints.bufs.some(b=>
+            Math.hypot((dz.lon-b.lon)*R*cp,(dz.lat-b.lat)*R)<b.r+50
+          );
+          if(excluded) return;
+          const rx = 0.0040, ry = 0.0028;
+          this._projZones.push({
+            id, color:dz.color, hMax:dz.hMax, startYr:dz.startYr,
+            label:dz.name, sub:dz.type==='constructie'?'Șantier activ OSM 2025':'Pol de dezvoltare',
+            ring:{cx:dz.lon, cy:dz.lat, rx, ry},
+          });
+          existing.add(id);
+        });
+        console.log('[TCI] ✅ Zone Overpass adăugate:', this._projZones.length, 'total');
+      }
       this._updateProjectionLayers(this.year || 2025);
       // Adaugă layer vizual pentru zonele excluse
       this._showConstraintOverlay(constraints, cx, cy);
@@ -1661,12 +1781,12 @@ const TCI = {
         // S4 — MOARA DE VÂNT / SPITAL REGIONAL (50s) · ZIUA → la stradă
         // Prima scenă cu nivel stradă — zona cu cel mai activ șantier
         {id:'s4',dur:50000,light:'day',
-         cam:{center:[cx-0.041*sc,cy+0.017*sc],zoom:14.0,pitch:55,bearing:-20,duration:5000},
+         cam:{center:[27.5874,47.1877],zoom:14.0,pitch:55,bearing:-20,duration:5000},
          chain:[
-           {center:[cx-0.041*sc,cy+0.017*sc],zoom:15.5,pitch:68,bearing:15,duration:6000,delay:10000},
-           {center:[cx-0.041*sc,cy+0.017*sc],zoom:16.5,pitch:74,bearing:-20,duration:6000,delay:22000,light:'day'},
-           {center:[cx-0.041*sc,cy+0.018*sc],zoom:17.0,pitch:78,bearing:10,duration:6000,delay:34000,light:'dusk'},
-           {center:[cx-0.038*sc,cy+0.016*sc],zoom:15.0,pitch:62,bearing:30,duration:5500,delay:44000,light:'dusk'},
+           {center:[27.5874,47.1877],zoom:15.5,pitch:68,bearing:15,duration:6000,delay:10000},
+           {center:[27.5874,47.1877],zoom:16.5,pitch:74,bearing:-20,duration:6000,delay:22000,light:'day'},
+           {center:[27.5874,47.1878],zoom:17.0,pitch:78,bearing:10,duration:6000,delay:34000,light:'dusk'},
+           {center:[27.5880,47.1875],zoom:15.0,pitch:62,bearing:30,duration:5500,delay:44000,light:'dusk'},
          ],
          title:'🏥 Moara de Vânt — Pol Medical + Smart City',
          body:'Spitalul Regional Iași (€580M, în construcție 2025). Platou NV: zona cu cea mai rapidă creștere din Moldova. ANCPI: +340 autorizații/an 2018-2025. Proiecție: hub medical + rezidențial R+4-R+10.',
