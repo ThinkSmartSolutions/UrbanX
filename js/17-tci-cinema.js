@@ -1435,7 +1435,12 @@ out geom qt;`;
       this._renderer = new THREE.WebGLRenderer({
         canvas: map.getCanvas(), context: gl, antialias: true });
       this._renderer.autoClear = false;
-      // MeshBasicMaterial nu necesită lumini
+
+      // Lumini în spațiul local (metri)
+      this._scene.add(new THREE.AmbientLight(0xffffff, 1.2));
+      const sun = new THREE.DirectionalLight(0xffd580, 1.0);
+      sun.position.set(300, 600, 800);
+      this._scene.add(sun);
 
       this._ready = true;
       console.log('[3D] ✅ CustomLayerInterface activ — coordinate system corect');
@@ -1643,17 +1648,6 @@ out geom qt;`;
             'line-dasharray':[6,4],
           }
         });
-        // Fill-extrusion pe aceeași sursă tci-proj — garantat vizibil
-        m.addLayer({
-          id:'tci-proj-extrusion', type:'fill-extrusion', source:'tci-proj',
-          minzoom:11,
-          paint:{
-            'fill-extrusion-color':   ['get','dc'],
-            'fill-extrusion-height':  ['get','extHeight'],
-            'fill-extrusion-base':    0,
-            'fill-extrusion-opacity': 0.75,
-          }
-        });
         m.addLayer({id:'tci-proj-labels', type:'symbol', source:'tci-proj',
           minzoom:11,
           layout:{
@@ -1672,34 +1666,12 @@ out geom qt;`;
       } catch(e) { console.warn('[TCI] 2D layers:', e.message); }
     }
 
-    // 2. Layer clădiri proiectate — fill simplu (compatibil toate stilurile Mapbox)
-    if(!m.getSource?.('tci-buildings')) {
+    // 2. CustomLayerInterface cu Three.js — clădirile 3D reale
+    if(!m.getLayer?.('tci-3d-engine')) {
       try {
-        m.addSource('tci-buildings', {type:'geojson', data:{type:'FeatureCollection',features:[]}});
-        // fill-extrusion pentru 3D
-        m.addLayer({
-          id: 'tci-buildings-3d',
-          type: 'fill-extrusion',
-          source: 'tci-buildings',
-          paint: {
-            'fill-extrusion-color':   ['get','color'],
-            'fill-extrusion-height':  ['get','height'],
-            'fill-extrusion-base':    0,
-            'fill-extrusion-opacity': 0.9,
-          }
-        });
-        // fill 2D ca fallback vizibil garantat
-        m.addLayer({
-          id: 'tci-buildings-fill',
-          type: 'fill',
-          source: 'tci-buildings',
-          paint: {
-            'fill-color':   ['get','color'],
-            'fill-opacity': 0.7,
-          }
-        });
-        console.log('[TCI] ✅ Buildings layers adăugate (fill + fill-extrusion)');
-      } catch(e) { console.error('[TCI] EROARE layer:', e.message); }
+        m.addLayer(this._3D);
+        console.log('[TCI] ✅ CustomLayer 3D adăugat');
+      } catch(e) { console.warn('[TCI] CustomLayer:', e.message); }
     }
 
     // 3. Generează zone — ÎN PARALEL cu fetch-ul de constrângeri
@@ -1747,8 +1719,6 @@ out geom qt;`;
     const buildScene = () => {
       this._3D.setOrigin(cx, cy);
       this._3D.buildSceneGraph(this._projZones, this.year || 2025);
-      // Populează fill-extrusion imediat după ce entitățile sunt create
-      setTimeout(() => this._updateProjectionLayers(this.year || 2025), 100);
     };
     if(m.isStyleLoaded?.()) buildScene();
     else { m.once('idle', buildScene); setTimeout(buildScene, 3000); }
@@ -1794,42 +1764,16 @@ out geom qt;`;
           properties:{
             label:z.label, sub:z.sub||'',
             color:z.color, dc:statusColor(z,yr),
-            extHeight: yr < z.startYr ? 2 : Math.min(z.hMax||40, 5 + (yr-z.startYr)*3),
           }
         };
       }).filter(Boolean);
       try { m.getSource('tci-proj').setData({type:'FeatureCollection', features}); } catch(e){}
     }
 
-    // Update fill-extrusion — zone întregi colorate (garantat vizibil)
-    if(m?.getSource?.('tci-buildings') && this._projZones?.length) {
-      const C = this.COLORS;
-      const features = this._projZones.map(z => {
-        const coords = this._polyFromDef(z);
-        if(!coords || coords.length < 3) return null;
-        // Înălțime crescătoare per an
-        let h = 2;
-        if(yr >= z.startYr) {
-          const yrs = yr - z.startYr;
-          h = Math.min(z.hMax || 40, 5 + yrs * 3);
-        }
-        // Culoare per stare temporală
-        let color;
-        if(yr < z.startYr)      color = C.stabil || '#374151';
-        else if((yr-z.startYr) < 5)  color = C.constructie || '#f59e0b';
-        else if((yr-z.startYr) < 10) color = C.aproape    || '#f97316';
-        else                         color = z.color || '#16a34a';
-        return {
-          type:'Feature',
-          geometry:{type:'Polygon', coordinates:[coords]},
-          properties:{ height:h, color, label:z.label }
-        };
-      }).filter(Boolean);
-      try { m.getSource('tci-buildings').setData({type:'FeatureCollection',features}); } catch(e){}
-    }
-
-    // Three.js updateYear — păstrat pentru compatibilitate
+    // Update 3D clădiri
     try { this._3D.updateYear(yr); } catch(e){}
+
+    // Update LOD
     try { this._3D.updateLOD(m?.getZoom?.() || 14); } catch(e){}
   },
 
@@ -2191,8 +2135,6 @@ out geom qt;`;
       this._drawHUD(2055,1);
     }
     this.raf=requestAnimationFrame(()=>this._loop());
-    this._3D?.updateLOD?.(this.map?.getZoom?.() ?? 14);
-    this._3D?._map?.triggerRepaint?.();
   },
 
   _onYearChange(yr) {
