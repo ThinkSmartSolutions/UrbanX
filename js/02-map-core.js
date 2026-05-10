@@ -5,6 +5,7 @@ const map=new mapboxgl.Map({
   center:[27.6014,47.1585],zoom:13,pitch:0,bearing:0,antialias:true,
   preserveDrawingBuffer:true
 });
+window.map = map;
 map.addControl(new mapboxgl.NavigationControl(),'top-left');
 // Safety: curăță stări rămase din sesiuni anterioare
 document.getElementById('topbar')?.classList.remove('viewer-open');
