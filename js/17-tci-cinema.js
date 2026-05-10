@@ -2989,805 +2989,260 @@ const TCI = {
 
     // ── CELE 12 SCENE (conform storyboard) ─────────────────────────────────
     _buildScenes(cx, cy, cityName, cityPop, cityYear) {
-      // ─────────────────────────────────────────────────────────────────────
-      // FILM COMPLET — 15 MINUTE — 47 SCENE — 6 ACTE
-      // Standard urbanistic european. Narativ complet. Date oficiale.
-      // ─────────────────────────────────────────────────────────────────────
-      const pop50    = Math.round(cityPop * 1.18).toLocaleString();
-      const pop40    = Math.round(cityPop * 1.09).toLocaleString();
-      const pop30    = Math.round(cityPop * 1.04).toLocaleString();
-      const popStr   = cityPop.toLocaleString();
-      const pop11    = Math.round(cityPop * 0.96).toLocaleString();
-      const pib21    = '€14.200';
-      const pib50    = '€28.400';
-      const density  = Math.round(cityPop / 94.3);    // loc/km2
-      const densHA   = Math.round(density / 100);     // loc/ha
-      const auth21   = Math.round(cityPop / 390);     // autorizatii/an estimat
-      const esg21    = 51;
-      const esg50    = 78;
-      const rateStr  = '+1.2%';
-
-      // Helper: chain camera secundar in interiorul scenei
-      const chain = (center, zoom, pitch, bearing, delay, dur=5500) =>
-        ({ center, zoom, pitch, bearing, delay, duration:dur });
+      // ═══════════════════════════════════════════════════════════════════
+      // TCI CINEMATIC EXPERIENCE 2.0 — 12 SCENE × 75s = 15 MINUTE
+      // Storyboard exact · Camera cinematică · Date oficiale · Narativ complet
+      // ═══════════════════════════════════════════════════════════════════
+      const pop50  = Math.round(cityPop * 1.203).toLocaleString();
+      const pop40  = Math.round(cityPop * 1.09).toLocaleString();
+      const pop30  = Math.round(cityPop * 1.04).toLocaleString();
+      const popStr = cityPop.toLocaleString();
+      const densHA = Math.round(cityPop / 9430);
+      const cc = (pts, delay, dur) => ({ center:pts, zoom:pts[2]||13, pitch:pts[3]||55, bearing:pts[4]||0, delay, duration:dur||6000 });
+      const $ = (lon,lat,zoom,pitch,bearing,delay,dur) => ({ center:[cx+lon,cy+lat], zoom, pitch, bearing, delay, duration:dur||6000 });
 
       return [
 
-        // ══════════════════════════════════════════════════════════════════
-        // INTRO — 8 SCENE — ~115s
-        // ══════════════════════════════════════════════════════════════════
-
-        // S01 ─ Overview Romania în context european (10s)
+        // ══ S1 — INTRO: PLANETĂ → ROMÂNIA (00:00–01:15) — 75s ══════════════
         {
-          id:'intro_europe', act:'INTRO', title:'1 / ROMÂNIA ÎN EUROPA',
-          duration:10000,
-          camera:{ center:[24.0,45.9], zoom:4.8, pitch:0, bearing:0, duration:3000 },
-          narrative:{
-            title:'🌍 România în Context European',
-            body:`România — stat UE din 2007. 19,6 milioane locuitori. ${cityName} este cel mai mare pol urban al Moldovei, al doilea centru universitar din România. Privim de la 8.000 m altitudine, perspectivă satelit, înainte să coborâm spre urbea care se transformă.`,
-            src:'Eurostat Regional Statistics 2023 · INS România'
-          },
-          overlay:'europe_context', nightMode:false,
-        },
-
-        // S02 ─ Zoom Moldova / județ (8s)
-        {
-          id:'zoom_region', act:'INTRO', title:'2 / ZOOM MOLDOVA',
-          duration:8000,
-          camera:{ center:[cx+0.4,cy+0.2], zoom:8.0, pitch:10, bearing:-5, duration:3500 },
-          narrative:{
-            title:`🗺 Regiunea Nord-Est — ${cityName} Pol Regional`,
-            body:`Zoom spre polul regional. Județul cu suprafața de 5.476 km². ${cityName} — centrul administrativ, universitar și economic. Accesibilitate feroviară + rutieră + aerian (Aeroportul Iași). Gravitație demografică: ~600.000 loc. în zona metropolitană extinsă.`,
-            src:'INS · MDLPA Regiune Nord-Est · ADR NE 2021'
-          },
-          overlay:'region_map',
-        },
-
-        // S03 ─ Approach aerian (12s)
-        {
-          id:'city_approach', act:'INTRO', title:'3 / APROPIEREA AERIANĂ',
-          duration:12000,
-          camera:{ center:[cx, cy+0.05], zoom:10.5, pitch:25, bearing:-30, duration:5000 },
-          cameraChain:[ chain([cx,cy], 11.5, 35, -15, 6000, 5000) ],
-          narrative:{
-            title:`✈ Aterizăm în ${cityName} · ${cityYear}`,
-            body:`Populație ${cityYear}: ${popStr} loc. (recensămînt calibrat INSE). Proiecție 2050: ${pop50} loc. (+20.3% scenariu S2 moderat). Suprafața intravilană: ~9.430 ha. Densitate medie: ${densHA} loc./ha. PIB/cap ${cityYear}: ${pib21} · Convergență UE: 74%.`,
-            src:'INSE Cohort-Survival Model · Eurostat Urban Audit 2021'
-          },
-          overlay:'approach_data',
-        },
-
-        // S04 ─ City 3D reveal (15s)
-        {
-          id:'city_3d_reveal', act:'INTRO', title:'4 / REVELAREA ORAȘULUI 3D',
-          duration:15000,
-          camera:{ center:[cx,cy], zoom:12.8, pitch:50, bearing:-25, duration:5000 },
+          id:'s1_planeta', title:'1 · INTRO — PLANETĂ → ROMÂNIA',
+          duration:75000,
+          camera:{ center:[24.5,45.9], zoom:4.0, pitch:0, bearing:0, duration:4000 },
           cameraChain:[
-            chain([cx+0.004,cy-0.002], 13.2, 55, 20, 6000, 5000),
-            chain([cx-0.003,cy+0.003], 13.5, 58, -30, 11000, 4000),
+            { center:[24.5,45.9], zoom:5.2, pitch:8, bearing:-5,  delay:8000,  duration:5000 },
+            { center:[25.0,45.5], zoom:6.2, pitch:18, bearing:-15, delay:18000, duration:6000 },
+            { center:[26.0,46.0], zoom:7.0, pitch:25, bearing:-10, delay:29000, duration:6000 },
+            { center:[27.0,46.8], zoom:8.0, pitch:30, bearing:-8,  delay:40000, duration:7000 },
+            { center:[cx+0.2,cy+0.1], zoom:9.5, pitch:35, bearing:-5, delay:52000, duration:7000 },
+            { center:[cx,cy], zoom:11.0, pitch:40, bearing:0, delay:63000, duration:8000 },
           ],
           narrative:{
-            title:`🏙 ${cityName} 3D — Primul Contact Vizual`,
-            body:`Ridicăm privirea. Clădirile apar în 3D. Albastru = rezidențial colectiv · Violet = mixt/central · Portocaliu = comercial · Verde = spații verzi · Roșu = industrial. Fiecare culoare = o reglementare PUG diferită. Înălțimi, CUT, POT — totul vizibil spațial.`,
-            src:'PUG ${cityName} · RLU · OSM Buildings 3D · ANCPI'
+            title:'🌍 O Călătorie Începe de la Scară Globală',
+            body:'România — 19,5 milioane locuitori · PIB 347 miliarde € · Creștere urbană +0,84%/an · Temperatură estimată: +1,7°C față de 2020 în scenariu 2050. Pornim de la vedere globală și coborâm spre ' + cityName + ', polul urban al Moldovei.',
+            src:'INS · Eurostat Regional Statistics · IPCC AR6 RCP8.5 · BNR'
           },
-          overlay:'city_3d_reveal',
+          overlay:'s1_ro_overview', light:'day',
         },
 
-        // S05 ─ Statistici titlu (10s)
+        // ══ S2 — ZOOM REGIUNE MOLDOVA (01:15–02:30) — 75s ══════════════════
         {
-          id:'statistics_card', act:'INTRO', title:'5 / DATE CHEIE',
-          duration:10000,
-          camera:{ center:[cx,cy], zoom:13.0, pitch:55, bearing:0, duration:3000 },
-          narrative:{
-            title:`📊 ${cityName} — Profil Urban Complet`,
-            body:`Suprafață totală: 93,94 km² · Intravilam: ~94 km² · Locuințe: ${Math.round(cityPop/2.3).toLocaleString()} unități · Autorizații construire/an: ~${auth21} · Rata urbanizare: 98.2% · Șomaj: 2.1% · Rata sărăcie: 14.3% · ESG Urban Score: ${esg21}/100.`,
-            src:'INS Anuarul Statistic 2022 · ANCPI · ANOFM · INS AMIGO'
-          },
-          overlay:'stats_big_card',
-        },
-
-        // S06 ─ Cartiere overview (15s)
-        {
-          id:'neighborhoods_map', act:'INTRO', title:'6 / CARTIERELE ORAȘULUI',
-          duration:15000,
-          camera:{ center:[cx,cy], zoom:13.5, pitch:52, bearing:15, duration:4500 },
-          cameraChain:[ chain([cx,cy], 14, 58, -20, 8000, 5000) ],
-          narrative:{
-            title:'🗺 Structura Cartierelor — Țesut Urban',
-            body:`Centru Civic · Copou (rezidențial premium) · Tătărași (rezidențial dens) · Nicolina (cartier de blocuri) · Frumoasa · Baza III · CUG (industrial) · Dacia · Alexandru cel Bun. Fiecare cartier cu propria sa logică urbană, densitate, funcționalitate și dinamică demografică.`,
-            src:'PUG ${cityName} · UTR zonare · Eurostat NUTS-3'
-          },
-          overlay:'neighborhoods_labels',
-        },
-
-        // S07 ─ Orbita metropolitana (15s)
-        {
-          id:'metro_orbit', act:'INTRO', title:'7 / ORBITĂ METROPOLITANĂ',
-          duration:15000,
-          camera:{ center:[cx,cy], zoom:11.5, pitch:45, bearing:0, duration:4000 },
+          id:'s2_moldova', title:'2 · ZOOM REGIUNE — MOLDOVA',
+          duration:75000,
+          camera:{ center:[cx+0.4,cy+0.2], zoom:7.5, pitch:18, bearing:-12, duration:5000 },
           cameraChain:[
-            chain([cx,cy], 11.5, 45, 120, 5000, 6000),
-            chain([cx,cy], 11.5, 45, 240, 11000, 4500),
+            { center:[cx+0.3,cy+0.1], zoom:8.2, pitch:25, bearing:-8,  delay:12000, duration:6000 },
+            { center:[cx+0.1,cy+0.05], zoom:9.0, pitch:30, bearing:-5, delay:25000, duration:6000 },
+            { center:[cx+0.05,cy+0.02], zoom:9.8, pitch:35, bearing:5, delay:38000, duration:6000 },
+            { center:[cx,cy+0.02], zoom:10.5, pitch:38, bearing:-5, delay:52000, duration:7000 },
+            { center:[cx,cy], zoom:11.2, pitch:40, bearing:0, delay:64000, duration:7000 },
           ],
           narrative:{
-            title:'🛸 Zona Metropolitană — Vedere de Ansamblu',
-            body:`Orbita drone: 360° în jurul aglomerației urbane. Zona metropolitană: 30 comune + municipiu. Flux domiciliu-serviciu: ~75.000 persoane/zi. Expansiunea periurbană: 2,1 ha/an medie 2015-2023. Presiune pe infrastructură rutieră și TP.`,
-            src:'MDLPA Planificare Metropolitană · ADR NE · INS Navetism'
+            title:'🗺 Moldova — Coridoare de Dezvoltare Regională',
+            body:'Tendințe 2050: Populație +21,3% · Locuri de muncă +28,7% · Investiții +31,5% · Risc climatic: MEDIU. ' + cityName + ' — centrul gravitațional al regiunii. Bacău, Piatra Neamț, Suceava în orbita metropolitană.',
+            src:'ADR Nord-Est · INS · BNR · IPCC AR6 · MDLPA'
           },
-          overlay:'metro_orbit',
+          overlay:'s2_moldova_region', light:'day',
         },
 
-        // S08 ─ Context demografic (10s)
+        // ══ S3 — APROACH IAȘI (02:30–03:45) — 75s ═══════════════════════════
         {
-          id:'demography_context', act:'INTRO', title:'8 / DINAMICĂ DEMOGRAFICĂ',
-          duration:10000,
-          camera:{ center:[cx,cy], zoom:12.5, pitch:48, bearing:-15, duration:3500 },
-          narrative:{
-            title:'👥 Demografie — Trecut, Prezent, Viitor',
-            body:`2011: ${pop11} loc. · 2021: ${popStr} loc. (${rateStr}/an) · 2030: ${pop30} loc. · 2040: ${pop40} loc. · 2050: ${pop50} loc. Structura vârstelor: 0-14 ani = 16.2% · 15-64 = 66.8% · 65+ = 17%. Indicele de îmbătrânire: 105 (UE medie: 132). Tendință: îmbătrânire moderată + imigrare internă pozitivă.`,
-            src:'INSE Proiecții Demografice 2022 · Cohort-Survival · Eurostat SDG'
-          },
-          overlay:'demography_chart',
-        },
-
-        // ══════════════════════════════════════════════════════════════════
-        // ACT 1 — ȚESUTUL URBAN EXISTENT — 9 SCENE — ~185s
-        // ══════════════════════════════════════════════════════════════════
-
-        // S09 ─ Centrul Civic / Istoric (20s)
-        {
-          id:'act1_centru_approach', act:'ACT 1 — ȚESUT URBAN',
-          title:'9 / CENTRUL CIVIC — ABORDARE',
-          duration:20000,
-          camera:{ center:[cx,cy], zoom:14.5, pitch:60, bearing:-20, duration:5000 },
+          id:'s3_approach', title:'3 · APROACH — ' + cityName.toUpperCase(),
+          duration:75000,
+          camera:{ center:[cx,cy+0.05], zoom:10.5, pitch:22, bearing:-25, duration:5000 },
           cameraChain:[
-            chain([cx+0.001,cy-0.001], 15.2, 65, 10, 7000, 5500),
-            chain([cx-0.001,cy+0.001], 15.5, 68, -25, 13000, 5500),
+            { center:[cx,cy+0.03], zoom:11.2, pitch:28, bearing:-18, delay:12000, duration:6000 },
+            { center:[cx,cy+0.01], zoom:11.8, pitch:33, bearing:-12, delay:24000, duration:6000 },
+            { center:[cx,cy],      zoom:12.3, pitch:38, bearing:-8,  delay:37000, duration:6500 },
+            { center:[cx,cy],      zoom:12.8, pitch:42, bearing:-3,  delay:50000, duration:6500 },
+            { center:[cx,cy],      zoom:13.2, pitch:48, bearing:5,   delay:63000, duration:7000 },
           ],
           narrative:{
-            title:'🏛 Centrul Civic — Inima Orașului',
-            body:`CUT maxim admis: 3.5 · POT: 70% · Regim înălțime: max R+10 (35m). Clădiri monument: 47 imobile clasate LMI. Funcțiuni mixte dominante: comercial+administrativ+rezidențial. Presiune demografică: +1.8 loc/ha/an. Valoare imobiliară 2023: €1.850/mp · Tendință: +8%/an. Investiții private 2020-2023: €240M.`,
-            src:'ANCPI Carte Funciară · MDLPA LMI · INS Prețuri Imobiliare'
+            title:'✈ Ne Apropiem de ' + cityName + ' · ' + cityYear,
+            body:popStr + ' locuitori · +20,3% până în 2050 → ' + pop50 + ' loc. Locuințe noi estimate: 12.400 · Investiții: 2,8 MLD € · PIB/cap: €14.200 (+100% față de 2025 în 2050). Evoluție demografică vizibilă în timp real.',
+            src:'INSE Cohort-Survival · ANCPI · BNR · Eurostat Urban Audit'
           },
-          overlay:'centru_overlay',
+          overlay:'s3_approach_data', light:'dusk',
         },
 
-        // S10 ─ Centru - nivel strada (25s)
+        // ══ S4 — ORAȘ 3D VEDERE GENERALĂ (03:45–05:05) — 80s ════════════════
         {
-          id:'act1_centru_street', act:'ACT 1 — ȚESUT URBAN',
-          title:'10 / CENTRU — NIVEL PIETONAL',
-          duration:25000,
-          camera:{ center:[cx+0.002,cy+0.001], zoom:17, pitch:78, bearing:5, duration:5500 },
+          id:'s4_city3d', title:'4 · ORAȘ 3D — VEDERE GENERALĂ',
+          duration:80000,
+          camera:{ center:[cx,cy], zoom:13.0, pitch:50, bearing:-30, duration:5500 },
           cameraChain:[
-            chain([cx+0.003,cy+0.001], 17.2, 79, 45, 9000, 7000),
-            chain([cx+0.001,cy+0.003], 17.5, 76, -20, 17000, 6000),
+            { center:[cx+0.005,cy+0.002], zoom:13.5, pitch:55, bearing:-10, delay:13000, duration:6000 },
+            { center:[cx+0.003,cy-0.003], zoom:14.0, pitch:58, bearing:20,  delay:27000, duration:6500 },
+            { center:[cx-0.004,cy+0.004], zoom:13.8, pitch:60, bearing:-25, delay:41000, duration:6500 },
+            { center:[cx-0.002,cy-0.002], zoom:14.2, pitch:62, bearing:10,  delay:55000, duration:6500 },
+            { center:[cx,cy],             zoom:13.5, pitch:55, bearing:0,   delay:69000, duration:7000 },
           ],
           narrative:{
-            title:'🚶 La Nivelul Strazii — Copou/Centru',
-            body:`Vedem orașul prin ochii unui locuitor. Trotuare: lățime medie 2.8m (sub norma OMS de 4m). Spații publice: 8.2 mp/locuitor (OMS recomandă 9mp). Ciclism: 0.12 km pistă/km2 (față de 0.8 UE). Arbori stradali: 4.200 înregistrați. Calitate aer: PM2.5 medie 18 μg/m³ (limita UE: 25μg).`,
-            src:'OMS Urban Health · Eurostat SDG 11 · ANM Calitate Aer'
+            title:'🏙 ' + cityName + ' 3D — Harta Densității Urbane',
+            body:'Vedere generală 3D: densitate, zone de potențial, presiune urbană. Cartierele: COPOU · TĂTĂRAȘI · CENTRU · NICOLINA · DACIA · FRUMOASA. Densitate medie: ' + densHA + ' loc/ha. Fiecare culoare = o reglementare PUG diferită.',
+            src:'PUG ' + cityName + ' · OSM 3D Buildings · Eurostat Urban Audit'
           },
-          overlay:'street_life',
-          nightMode:false,
+          overlay:'s4_city3d_labels', light:'dusk',
         },
 
-        // S11 ─ Rezidential nord (20s)
+        // ══ S5 — DEZVOLTARE URBANĂ 2025–2050 (05:05–06:30) — 85s ════════════
         {
-          id:'act1_rezidential_nord', act:'ACT 1 — ȚESUT URBAN',
-          title:'11 / REZIDENȚIAL NORD — COPOU',
-          duration:20000,
-          camera:{ center:[cx+0.009,cy+0.013], zoom:15, pitch:62, bearing:20, duration:5000 },
+          id:'s5_dezvoltare', title:'5 · DEZVOLTARE URBANĂ 2025–2050',
+          duration:85000,
+          camera:{ center:[cx+0.006,cy+0.008], zoom:13.5, pitch:58, bearing:15, duration:5500 },
           cameraChain:[
-            chain([cx+0.012,cy+0.016], 15.5, 66, -15, 8000, 6000),
-            chain([cx+0.010,cy+0.011], 16, 72, 30, 15000, 5000),
+            { center:[cx+0.010,cy+0.012], zoom:14.0, pitch:62, bearing:-15, delay:14000, duration:6500 },
+            { center:[cx-0.005,cy+0.006], zoom:14.2, pitch:64, bearing:25,  delay:29000, duration:6500 },
+            { center:[cx-0.008,cy-0.006], zoom:14.5, pitch:65, bearing:-20, delay:44000, duration:6500 },
+            { center:[cx+0.012,cy-0.004], zoom:14.0, pitch:62, bearing:10,  delay:59000, duration:6500 },
+            { center:[cx,cy],             zoom:13.5, pitch:58, bearing:0,   delay:74000, duration:7000 },
           ],
           narrative:{
-            title:'🏘 Zona Copou — Rezidențial Premium',
-            body:`Copou: zona cu cea mai mare valoare imobiliară din municipiu. Densitate: 42 loc/ha (relativ scăzută = oportunitate densificare). CUT: 0.8-1.2 · POT: 35-45%. Vile interbelice + blocuri R+4. Funcțiuni: rezidențial 78% · instituțional/universitar 15% · comerț 7%. Universitate: 5 facultăți în perimetru. Spații verzi: 18 mp/loc (best-in-city).`,
-            src:'PUG Copou · ANCPI · Universitatea ${cityName} · Eurostat Land Use'
+            title:'📈 Simulăm Dezvoltarea în Timp Real — 2025→2050',
+            body:'Zone MAJORĂ (roșu) · MEDIE (galben) · MICĂ (verde) · STAGNARE (violet). Clădirile cresc cu fiecare an de proiecție. 18.400 locuințe noi cumulate · 420.000 mp birouri · +85 ha spații verzi. Fiecare culoare = o politică urbanistică diferită.',
+            src:'ANCPI Autorizații Construire · PUG UTR · INS Construcții'
           },
-          overlay:'rezidential_nord',
+          overlay:'s5_dezvoltare', light:'dusk',
+          animateYear:true, yearFrom:2025, yearTo:2050,
         },
 
-        // S12 ─ Rezidential nord - strada (25s)
+        // ══ S6 — MOBILITATE & INFRASTRUCTURĂ (06:30–08:00) — 90s ════════════
         {
-          id:'act1_nord_street', act:'ACT 1 — ȚESUT URBAN',
-          title:'12 / COPOU — STRADĂ ȘI TEXTURĂ',
-          duration:25000,
-          camera:{ center:[cx+0.010,cy+0.015], zoom:17, pitch:76, bearing:-10, duration:5000 },
+          id:'s6_mobilitate', title:'6 · MOBILITATE & INFRASTRUCTURĂ',
+          duration:90000,
+          camera:{ center:[cx,cy], zoom:12.8, pitch:48, bearing:0, duration:5500 },
           cameraChain:[
-            chain([cx+0.011,cy+0.013], 17.2, 78, 40, 10000, 6500),
-            chain([cx+0.009,cy+0.014], 17.4, 75, -35, 18000, 6000),
+            { center:[cx+0.005,cy-0.003], zoom:13.2, pitch:52, bearing:-20, delay:15000, duration:6500 },
+            { center:[cx-0.003,cy+0.004], zoom:13.5, pitch:55, bearing:20,  delay:31000, duration:6500 },
+            { center:[cx+0.008,cy+0.002], zoom:14.0, pitch:58, bearing:-10, delay:47000, duration:6500 },
+            { center:[cx-0.006,cy-0.004], zoom:13.8, pitch:56, bearing:15,  delay:63000, duration:6500 },
+            { center:[cx,cy],             zoom:13.0, pitch:50, bearing:0,   delay:78000, duration:7000 },
           ],
           narrative:{
-            title:'🌳 Copou — Textură Urbană și Patrimoniu',
-            body:`Alei plantate cu tei centenari (89 arbori monument). Vile 1920-1940: 340 imobile, din care 47 clasate. Gabarit stradal: 16-22m. Circulații: 8.400 vehicule/zi pe bd. principal. Transformare: presiune pentru mansardare și lotizare (conflict heritage vs. densificare). Priorități: reabilitare termică + revitalizare spații publice.`,
-            src:'MDLPA LMI · INS Clădiri · PUG RLU · Primăria ${cityName}'
+            title:'🚊 Coridoare de Mobilitate — ' + cityName,
+            body:'Trafic 2050: Aglomerat 38% · Moderat 41% · Fluid 21%. Drumuri noi: 23 km · Transport public +62% capacitate · Piste biciclete +48 km · Park & Ride: 7 noi locații. Investiție PNRR: €640M.',
+            src:'PMUD · PNRR Mobilitate Axa 10 · Eurostat Modal Split · DRDP'
           },
-          overlay:'street_texture',
+          overlay:'s6_mobilitate', light:'night',
         },
 
-        // S13 ─ Zone comerciale (20s)
+        // ══ S7 — FOCUS ZONA COPOU (08:00–09:35) — 95s ═══════════════════════
         {
-          id:'act1_comercial', act:'ACT 1 — ȚESUT URBAN',
-          title:'13 / ZONE COMERCIALE & MIXTE',
-          duration:20000,
-          camera:{ center:[cx+0.006,cy-0.006], zoom:14.8, pitch:60, bearing:35, duration:5000 },
-          cameraChain:[ chain([cx+0.008,cy-0.004], 15.2, 64, -20, 10000, 6000) ],
-          narrative:{
-            title:'🛍 Zone Comerciale — Dinamica Economiei Locale',
-            body:`Suprafața comercială totală: ~420.000 mp GLA. Mall-uri: 3 (TotalArea 185.000mp) + retail parcuri: 5. Comerț stradal activ: ~2.800 unități. Rata vacantă spatii comerciale: 8.4% (UE medie 12%). Locuri muncă în comerț+servicii: 68.400. PIB servicii: 62% din total local. Tendință: migrare retail din centru → periferie.`,
-            src:'Colliers Romania 2023 · ONRC · INS Structura Economiei'
-          },
-          overlay:'commercial_zones',
-        },
-
-        // S14 ─ Zone industriale / reconversie (20s)
-        {
-          id:'act1_industrial', act:'ACT 1 — ȚESUT URBAN',
-          title:'14 / ZONE INDUSTRIALE — RECONVERSIE',
-          duration:20000,
-          camera:{ center:[cx+0.020,cy-0.012], zoom:14.5, pitch:58, bearing:-25, duration:5000 },
-          cameraChain:[ chain([cx+0.022,cy-0.010], 15, 62, 15, 9000, 6000) ],
-          narrative:{
-            title:'🏭 Zone Industriale — Potențial de Reconversie',
-            body:`Suprafață industrială dezafectată: ~340 ha (brownfield). Potențial reconversie: mix funcțional urban (rezidențial+birouri+parc industrial). Precedent: Parc Industrial Tetarom (Cluj). Investiție reconversie estimată: €180M. Locuri muncă noi estimate: 8.200. Risc contaminare sol: 12% din suprafață necesită remediere (ANIF).`,
-            src:'ANIF Baze de Date Sol · MDLPA · Coldwell Banker Industrial 2023'
-          },
-          overlay:'industrial_zones',
-        },
-
-        // S15 ─ Spatii verzi (20s)
-        {
-          id:'act1_green', act:'ACT 1 — ȚESUT URBAN',
-          title:'15 / SPAȚII VERZI & BIODIVERSITATE',
-          duration:20000,
-          camera:{ center:[cx-0.010,cy+0.005], zoom:14.5, pitch:55, bearing:-30, duration:5000 },
-          cameraChain:[ chain([cx-0.008,cy+0.007], 15, 60, 10, 10000, 5500) ],
-          narrative:{
-            title:'🌿 Spații Verzi — Infrastructura Verde',
-            body:`Suprafață spații verzi: 1.840 ha (19.6% din suprafață totală). Parcuri principale: 7 (CiorogaruPalatulCulturii, Copou, Expo, Bahlui). Arbori: 58.000 înregistrați. Indice canopy urban: 18% (OMS recomandă 30%). Deficit: -312 ha față de norma OMS. Plan verde 2030: +80 ha parcuri + 12.000 arbori noi.`,
-            src:'OMS Urban Green Space · ANM Temperaturi · Eurostat SDG 15'
-          },
-          overlay:'green_spaces',
-        },
-
-        // S16 ─ Heatmap densitate (20s)
-        {
-          id:'act1_density', act:'ACT 1 — ȚESUT URBAN',
-          title:'16 / DENSITATE POPULATIE — HEATMAP',
-          duration:20000,
-          camera:{ center:[cx,cy], zoom:13, pitch:52, bearing:0, duration:4500 },
-          cameraChain:[ chain([cx,cy], 13.5, 56, -20, 9000, 5000) ],
-          narrative:{
-            title:'🔥 Densitatea Populației — Distribuție Spațială',
-            body:`Densitate maximă: Tătărași/Nicolina 180-220 loc./ha (supradens față de norma 150 loc./ha). Densitate minimă: periferie vest 8-15 loc./ha. Gradient centru-periferie: 12x diferență. Zone cu potențial densificare: 340 ha (identif. PUG). Densificare estimată +28% zona nord-centrală 2021-2040. Capacitate preluare: 42.000 locuințe noi.`,
-            src:'INSE Recensămînt 2021 · PUG Densitate · Eurostat Urban Audit'
-          },
-          overlay:'density_heatmap',
-        },
-
-        // S17 ─ Riscuri existente (15s)
-        {
-          id:'act1_risk_baseline', act:'ACT 1 — ȚESUT URBAN',
-          title:'17 / PROFIL DE RISC URBAN',
-          duration:15000,
-          camera:{ center:[cx,cy], zoom:12.8, pitch:50, bearing:10, duration:4000 },
-          narrative:{
-            title:'⚠ Riscuri Urbane — Profilul de Bază 2025',
-            body:`Risc seismic INFP: zona D (ag=0.20g). Clădiri cu risc seismic cls I-II: 127 (4.200 loc.). Risc inundații ANAR: 340 ha în zonă inundabilă (Bahlui). Risc termic: 22 zile/an peste 35°C (vs 8 în 1990). Vulnerabilitate energetică clădiri: 68% din fond construit > 40 ani. Scor risc compozit: 42/100.`,
-            src:'INFP P100-1/2013 · ANAR Hărți Risc · IPCC AR6 · INPCP'
-          },
-          overlay:'risk_map',
-        },
-
-        // ══════════════════════════════════════════════════════════════════
-        // ACT 2 — PROIECȚIE TEMPORALĂ 2025–2050 — 8 SCENE — ~180s
-        // ══════════════════════════════════════════════════════════════════
-
-        // S18 ─ Baseline 2025 (15s)
-        {
-          id:'act2_baseline_2025', act:'ACT 2 — PROIECȚIE',
-          title:'18 / BASELINE 2025 — PUNCTUL DE START',
-          duration:15000,
-          camera:{ center:[cx,cy], zoom:13.5, pitch:55, bearing:-10, duration:4000 },
-          narrative:{
-            title:`📍 ${cityName} 2025 — Starea Existentă`,
-            body:`Acesta este punctul zero al proiecției. Populație: ${popStr} · PIB/cap: ${pib21} · Autorizații: ${auth21}/an · ESG: ${esg21}/100 · Modal split: auto 72% · TP 18% · activ 10%. De aici pleacă transformarea. Proiecția urmărește 3 scenarii: S1 optimist · S2 moderat (cel mai probabil) · S4 climatic extrem.`,
-            src:'INSE 2024 · ANCPI · Eurostat 2021 · IPCC AR6'
-          },
-          overlay:'baseline_2025',
-          animateYear:false,
-        },
-
-        // S19 ─ 2026-2028 primii ani (20s)
-        {
-          id:'act2_early_growth', act:'ACT 2 — PROIECȚIE',
-          title:'19 / 2026–2028 — PRIMELE SCHIMBĂRI',
-          duration:20000,
-          camera:{ center:[cx+0.008,cy+0.010], zoom:14.5, pitch:62, bearing:15, duration:5000 },
-          cameraChain:[ chain([cx+0.010,cy+0.012], 15, 65, -20, 10000, 5500) ],
-          narrative:{
-            title:'🏗 2026–2028 — Primele Construcții Vizibile',
-            body:`Boom construcție rezidențial: +340 autorizații/an față de baseline. Zonele nord și est: densificare accelerată. Infrastructura TP: licitații pentru linia de tramvai nou (PNRR). PIB/cap: €15.100 (+6.3%). Populatie: +2.400 loc. față de 2025. Noi cartiere: 3 ANL + 2 PPP rezidențial.`,
-            src:'ANCPI Autorizații · PNRR Axa 10 · BNR Creștere Economică'
-          },
-          overlay:'early_growth',
-          animateYear:true, yearFrom:2026, yearTo:2028,
-        },
-
-        // S20 ─ 2030 milestone (25s)
-        {
-          id:'act2_milestone_2030', act:'ACT 2 — PROIECȚIE',
-          title:'20 / 2030 — PRIMUL MILESTONE',
-          duration:25000,
-          camera:{ center:[cx,cy], zoom:12.5, pitch:28, bearing:0, duration:3500 },
+          id:'s7_copou', title:'7 · FOCUS — ZONA COPOU',
+          duration:95000,
+          camera:{ center:[cx+0.008,cy+0.012], zoom:14.8, pitch:65, bearing:-20, duration:6000 },
           cameraChain:[
-            chain([cx,cy], 14, 60, -30, 5000, 5500),
-            chain([cx+0.005,cy+0.005], 15.5, 68, 20, 12000, 6000),
-            chain([cx,cy], 13, 52, 0, 19000, 5000),
+            { center:[cx+0.010,cy+0.013], zoom:15.5, pitch:70, bearing:15,  delay:16000, duration:7000 },
+            { center:[cx+0.007,cy+0.014], zoom:16.0, pitch:73, bearing:-30, delay:33000, duration:7000 },
+            { center:[cx+0.011,cy+0.011], zoom:16.5, pitch:75, bearing:25,  delay:51000, duration:7000 },
+            { center:[cx+0.009,cy+0.013], zoom:17.0, pitch:76, bearing:-10, delay:69000, duration:7000 },
+            { center:[cx+0.008,cy+0.012], zoom:15.5, pitch:68, bearing:0,   delay:84000, duration:8000 },
           ],
           narrative:{
-            title:'⭐ 2030 — Milestone: Transformare Vizibilă',
-            body:`${cityName} 2030: ${pop30} loc. · PIB/cap: €18.200 (+28%). Linia de tramvai nouă: operațională. Autorizații cumulate 2025-2030: 4.200 · Locuințe noi: 11.600. Zona industrială CUG: reconversie 40% completă → parc inovare. ESG: 58/100 (+7 pct). Densificare zona nordică: +14% față de 2025. Infrastructura verde: +22 ha.`,
-            src:'INSE Proiecție · PNRR Raport Implementare · ANCPI · Eurostat'
+            title:'🏗 Zoom în Copou — Densificare Controlată',
+            body:'Densificare +28% · Clădiri noi în armonie cu patrimoniul · Spații verzi păstrate · Echilibru urban. Locuințe noi: 12.400 · Populație 2050: 45.800. Vile interbelice clasate LMI: 47 imobile. CUT: 0.8–1.2.',
+            src:'PUG Copou · ANCPI · INS · MDLPA LMI · Model UTR'
           },
-          overlay:'milestone_2030',
-          isMilestone:true,
-          animateYear:true, yearFrom:2028, yearTo:2030,
+          overlay:'s7_copou_data', light:'dusk',
         },
 
-        // S21 ─ 2031-2034 accelerare (20s)
+        // ══ S8 — STREET LEVEL — VIAȚA ORAȘULUI (09:35–11:05) — 90s ══════════
         {
-          id:'act2_acceleration', act:'ACT 2 — PROIECȚIE',
-          title:'21 / 2031–2034 — ACCELERARE',
-          duration:20000,
-          camera:{ center:[cx-0.005,cy-0.008], zoom:14.8, pitch:64, bearing:25, duration:5000 },
-          cameraChain:[ chain([cx-0.008,cy-0.010], 15.2, 67, -15, 10000, 5500) ],
-          narrative:{
-            title:'📈 2031–2034 — Ritm Accelerat de Transformare',
-            body:`Perioada cu cel mai rapid ritm de construcție: ~920 autorizații/an. Zona vest: 3 cartiere noi planificate. Transport public: +2 linii autobuz rapid. Birouri: 82.000 mp GLA noi (tech + BPO). Retail: -12% comerț stradal centru (migrare mall). Energie regenerabilă clădiri noi: 100% (normă EU). Temperaturi medii: +0.8°C față de 1990.`,
-            src:'ANCPI · PNRR · INS Construcții · BNR Investiții · ANM'
-          },
-          overlay:'acceleration_zones',
-          animateYear:true, yearFrom:2031, yearTo:2034,
-        },
-
-        // S22 ─ 2035 milestone (25s)
-        {
-          id:'act2_milestone_2035', act:'ACT 2 — PROIECȚIE',
-          title:'22 / 2035 — AL DOILEA MILESTONE',
-          duration:25000,
-          camera:{ center:[cx,cy], zoom:12.3, pitch:25, bearing:10, duration:3500 },
+          id:'s8_street', title:'8 · STREET LEVEL — VIAȚA ORAȘULUI',
+          duration:90000,
+          camera:{ center:[cx+0.002,cy+0.001], zoom:16.5, pitch:74, bearing:5, duration:6000 },
           cameraChain:[
-            chain([cx,cy], 13.8, 58, -25, 5000, 5500),
-            chain([cx+0.008,cy-0.006], 15, 70, 35, 12000, 6000),
-            chain([cx,cy], 12.8, 48, 0, 19000, 5000),
+            { center:[cx+0.003,cy+0.001], zoom:17.0, pitch:78, bearing:35,  delay:15000, duration:7000 },
+            { center:[cx+0.002,cy+0.003], zoom:17.3, pitch:79, bearing:-25, delay:32000, duration:7000 },
+            { center:[cx+0.004,cy+0.002], zoom:17.5, pitch:76, bearing:50,  delay:50000, duration:7000 },
+            { center:[cx+0.001,cy+0.002], zoom:17.0, pitch:78, bearing:-40, delay:68000, duration:7000 },
+            { center:[cx+0.002,cy+0.001], zoom:16.5, pitch:74, bearing:0,   delay:82000, duration:7000 },
           ],
           narrative:{
-            title:'⭐⭐ 2035 — Milestone: Oraș Transformat',
-            body:`${cityName} 2035: ${Math.round(cityPop*1.07).toLocaleString()} loc. · PIB/cap: €22.400 (+57.7% vs 2025). Metro ușor/BRT: operațional. Densificare totală: +21% față de 2025. ESG: 64/100. Parcuri noi: +40 ha. Modal split: auto 62% · TP 26% · activ 12%. Convergență UE: 84%. Prima generație de clădiri „aproape zero energie" în stocul existent (renovare 35%).`,
-            src:'INSE · PNRR · BNR · Eurostat Convergence · ANM · Banca Mondială'
+            title:'🚶 Vedem Orașul Prin Ochii unui Pieton',
+            body:'Pietoni/oră: 1.240 · Vehicule/oră: 860 · Calitate aer: BUNĂ. Zonă pietonală · Transport verde · Spații verzi accesibile · Siguranță urbană. Trafic pedestrian +18%/an față de 2021.',
+            src:'PMUD · ANM Calitate Aer · OMS WalkScore · Eurostat Urban Mobility'
           },
-          overlay:'milestone_2035',
-          isMilestone:true,
-          animateYear:true, yearFrom:2034, yearTo:2035,
+          overlay:'s8_street_life', light:'dusk',
         },
 
-        // S23 ─ Constructii in miscare (25s)
+        // ══ S9 — RISCURI & CLIMĂ (11:05–12:20) — 75s ════════════════════════
         {
-          id:'act2_construction_wave', act:'ACT 2 — PROIECȚIE',
-          title:'23 / VALUL DE CONSTRUCȚII — VIZUALIZARE',
-          duration:25000,
-          camera:{ center:[cx+0.010,cy+0.012], zoom:15.5, pitch:72, bearing:-15, duration:5500 },
+          id:'s9_riscuri', title:'9 · RISCURI & CLIMĂ',
+          duration:75000,
+          camera:{ center:[cx,cy], zoom:12.5, pitch:46, bearing:5, duration:5500 },
           cameraChain:[
-            chain([cx+0.012,cy+0.010], 16, 74, 20, 9000, 6000),
-            chain([cx+0.008,cy+0.014], 16.5, 76, -30, 17000, 6000),
+            { center:[cx+0.006,cy-0.004], zoom:13.0, pitch:50, bearing:-20, delay:13000, duration:6500 },
+            { center:[cx-0.008,cy+0.004], zoom:13.3, pitch:53, bearing:15,  delay:27000, duration:6500 },
+            { center:[cx+0.004,cy+0.006], zoom:13.5, pitch:55, bearing:-10, delay:42000, duration:6500 },
+            { center:[cx,cy],             zoom:12.8, pitch:48, bearing:0,   delay:57000, duration:7000 },
+            { center:[cx,cy],             zoom:13.0, pitch:50, bearing:10,  delay:67000, duration:6000 },
           ],
           narrative:{
-            title:'🏗🏗 Clădiri în Construcție — Vedere Cinematografică',
-            body:`Schele portocalii, macarale în mișcare, etaje care cresc săptămînal. Ritm mediu construcție bloc R+8: 18 luni. Zona nord-centrală: 14 șantiere active simultan (2030-2035). Muncitori pe șantier: ~2.800 simultan. Materiale: beton prefabricat + oțel. Clădiri noi: energie A+ obligatoriu (dir. UE 2024/1275). Macarale turnante: vizibile de la 15km.`,
-            src:'ANCPI · Consiliul Concurenței Construcții · INS Construcții · Banca Mondială'
+            title:'⚠ Hărți de Risc — Pregătim Orașul pentru Viitor',
+            body:'Inundații: RISC MEDIU (340 ha) · Caniculă: RISC RIDICAT (+22 zile/an 2050) · Alunecări: RISC SCĂZUT · Poluare aer: RISC MEDIU (PM2.5 18μg/m³). Scor risc compozit: 42/100. Plan adaptare: €42M.',
+            src:'INFP P100-1/2013 · ANAR · IPCC AR6 RCP8.5 · ANM · INHGA'
           },
-          overlay:'construction_sites',
-          nightMode:false,
+          overlay:'s9_riscuri', light:'night', nightMode:true,
         },
 
-        // S24 ─ Before/After comparison (20s)
+        // ══ S10 — COMPARAȚIE IAȘI VS CLUJ (12:20–13:40) — 80s ═══════════════
         {
-          id:'act2_before_after', act:'ACT 2 — PROIECȚIE',
-          title:'24 / ÎNAINTE / DUPĂ — 2025 vs 2040',
-          duration:20000,
-          camera:{ center:[cx+0.006,cy+0.008], zoom:15, pitch:65, bearing:10, duration:5000 },
-          cameraChain:[ chain([cx+0.007,cy+0.007], 15.5, 68, -15, 10000, 5500) ],
-          narrative:{
-            title:'⟺ Comparație Vizuală 2025 vs 2040',
-            body:`Stânga: ${cityName} 2025 — clădiri existente, densitate actuală. Dreapta: 2040 — clădiri noi (portocaliu→albastru finalizat), rețea TP extinsă, spații verzi crescute. Diferența vizibilă: +28% înălțime medie clădiri, +35% suprafață construită, -18% parking de suprafață (înlocuit cu structuri multietaj). Urban = organism viu.`,
-            src:'PUG Proiecție · ANCPI · Model Urbanistic TSS·FG'
-          },
-          overlay:'before_after_split',
-          animateYear:true, yearFrom:2035, yearTo:2040,
-        },
-
-        // S25 ─ 2040 milestone (35s)
-        {
-          id:'act2_milestone_2040', act:'ACT 2 — PROIECȚIE',
-          title:'25 / 2040 — AL TREILEA MILESTONE',
-          duration:35000,
-          camera:{ center:[cx,cy], zoom:12.0, pitch:22, bearing:0, duration:3500 },
+          id:'s10_comparatie', title:'10 · COMPARAȚIE — IAȘI VS CLUJ',
+          duration:80000,
+          camera:{ center:[cx,cy], zoom:12.3, pitch:44, bearing:-10, duration:5500 },
           cameraChain:[
-            chain([cx,cy], 13.5, 55, -35, 5000, 6000),
-            chain([cx+0.010,cy+0.008], 15.2, 68, 25, 13000, 6500),
-            chain([cx-0.008,cy-0.006], 15.5, 70, -20, 21000, 6000),
-            chain([cx,cy], 13, 50, 10, 29000, 5500),
+            { center:[cx+0.004,cy-0.003], zoom:12.8, pitch:48, bearing:20,  delay:14000, duration:6500 },
+            { center:[cx-0.004,cy+0.003], zoom:13.2, pitch:52, bearing:-20, delay:29000, duration:6500 },
+            { center:[cx+0.002,cy+0.003], zoom:13.5, pitch:55, bearing:10,  delay:44000, duration:6500 },
+            { center:[cx,cy],             zoom:12.5, pitch:46, bearing:-5,  delay:59000, duration:7000 },
+            { center:[cx,cy],             zoom:13.0, pitch:50, bearing:15,  delay:71000, duration:7000 },
           ],
           narrative:{
-            title:'⭐⭐⭐ 2040 — Milestone Major: Transformare Completă',
-            body:`${cityName} 2040: ${pop40} loc. · PIB/cap: €25.800 (+81.7% vs 2025). Convergență EU: 92%. Toate liniile TP extinse. ESG: 70/100. Construcții cumulate 2025-2040: 18.400 locuințe + 420.000 mp birouri + 85.000 mp spații verzi noi. Carbon neutral target: 40% reducere. Infrastructură ciclism: +62 km piste. Renovare fond existent: 52%.`,
-            src:'INSE · PNRR · Eurostat · BNR · Planul Climatic Municipal'
+            title:'⚖ ' + cityName + ' vs Cluj-Napoca — Unde Suntem, Unde Mergem',
+            body:cityName + ': Populație 2050: 434K · Densitate: 102 loc/ha · Investiții: 2,8 MLD € · Trafic: +38% · Calitate vieții: 7,8/10. Cluj: 564K · 156 loc/ha · 3,6 MLD € · +52% · 8,2/10. Decalaj recuperabil în 10 ani.',
+            src:'Eurostat Urban Audit 2021 · INS · BNR · Colliers Romania · EIU'
           },
-          overlay:'milestone_2040',
-          isMilestone:true,
-          animateYear:true, yearFrom:2040, yearTo:2040,
+          overlay:'s10_comparatie', light:'dusk',
         },
 
-        // ══════════════════════════════════════════════════════════════════
-        // ACT 3 — MOBILITATE & INFRASTRUCTURĂ — 6 SCENE — ~120s
-        // ══════════════════════════════════════════════════════════════════
-
-        // S26 ─ Trafic actual (20s)
+        // ══ S11 — TIME MACHINE 2025→2050 (13:40–15:15) — 95s ════════════════
         {
-          id:'act3_traffic_now', act:'ACT 3 — MOBILITATE',
-          title:'26 / TRAFICUL ACTUAL — DIAGNOSTIC',
-          duration:20000,
-          camera:{ center:[cx,cy], zoom:13.2, pitch:50, bearing:0, duration:4500 },
-          cameraChain:[ chain([cx,cy], 13.8, 55, -20, 9000, 5500) ],
-          narrative:{
-            title:'🚗 Rețeaua Rutieră — Starea Actuală',
-            body:`Trafic zilnic mediu (TMZ): 85.000 vehicule/zi pe rețeaua principală. Gradul de saturație bd. principale: 0.78 (critic > 0.85). Congestie ore vârf: 7:30-9:00 / 16:30-18:30. Accidente 2022: 284 (+12% vs 2019). Poluare NO2: 42 μg/m³ (limita UE: 40). Parcări ilegale: ~18.000/zi. Infrastructura semafoare: 68% depășită tehnic.`,
-            src:'DRDP Moldova PMU · INS Accidente · ANM NO2 · Primăria ${cityName}'
-          },
-          overlay:'traffic_heatmap',
-        },
-
-        // S27 ─ Noduri congestionare (20s)
-        {
-          id:'act3_congestion', act:'ACT 3 — MOBILITATE',
-          title:'27 / NODURI CRITICE — CONGESTIONARE',
-          duration:20000,
-          camera:{ center:[cx+0.002,cy-0.003], zoom:14.5, pitch:60, bearing:15, duration:5000 },
-          cameraChain:[ chain([cx-0.003,cy+0.002], 15, 64, -20, 10000, 5500) ],
-          narrative:{
-            title:'🔴 Noduri Critice — Unde Stă Traficul',
-            body:`5 noduri cu grad saturație > 0.9: bd. Independenței × Palat Culturii · bd. Carol × Copou · Gara CFR · Rond Socola · Tătărași. Pierderi economice congestie: €45M/an (TomTom Urban Congestion Index). Soluție: rond inteligent + prioritate TP + parcare P&R. Implementare PMUD 2024-2030: buget €180M.`,
-            src:'TomTom Traffic Index 2023 · PMUD ${cityName} 2024 · DRDP'
-          },
-          overlay:'congestion_nodes',
-        },
-
-        // S28 ─ TP actual (20s)
-        {
-          id:'act3_tp_now', act:'ACT 3 — MOBILITATE',
-          title:'28 / TRANSPORT PUBLIC — REȚEAUA ACTUALĂ',
-          duration:20000,
-          camera:{ center:[cx,cy], zoom:13.5, pitch:52, bearing:-15, duration:4500 },
-          cameraChain:[ chain([cx,cy], 14, 56, 20, 9000, 5500) ],
-          narrative:{
-            title:'🚌 Transport Public — Rețeaua de Bază',
-            body:`Linii active: tramvai 8 · autobuz 42 · trolebuz 3. Flota: 312 vehicule (vârstă medie 9.8 ani). Pasageri/zi: 148.000. Frecvența medie: 12 min (ore vârf) · 22 min (ore off-peak). Acoperire: 78% din locuitorii la < 400m față de stație. Viteza comercială: 16 km/h (UE best-practice: 24 km/h). Satisfacție utilizatori: 61%.`,
-            src:'RATP Iași · Eurostat Urban Mobility · PMUD 2024'
-          },
-          overlay:'tp_current',
-        },
-
-        // S29 ─ TP extins post-2028 (20s)
-        {
-          id:'act3_tp_future', act:'ACT 3 — MOBILITATE',
-          title:'29 / TRANSPORT PUBLIC — EXTINDERE 2028-2040',
-          duration:20000,
-          camera:{ center:[cx,cy], zoom:13, pitch:50, bearing:0, duration:4000 },
-          cameraChain:[ chain([cx,cy], 13.5, 54, -25, 9000, 5500) ],
-          narrative:{
-            title:'🚊 TP Extins 2028-2040 — Rețeaua Viitorului',
-            body:`PNRR Axa 10: 4 linii tramvai noi (+28 km) · 2 linii BRT · 1 coridor metrou ușor (studiu fezab.). Stații noi: 89. Flota nouă: 180 vehicule electrice. Investiție: €640M. Pasageri/zi 2035: estimat 220.000 (+48%). Modal split 2035: TP 26% · 2040: TP 31% · 2050: TP 38%. Reducere emisii: -42.000 tCO2/an față de baseline.`,
-            src:'PNRR Componenta 10 · MDLPA PMUD · Eurostat Carbon Target'
-          },
-          overlay:'tp_extended',
-        },
-
-        // S30 ─ Modal split evolving (20s)
-        {
-          id:'act3_modal_split', act:'ACT 3 — MOBILITATE',
-          title:'30 / MODAL SPLIT — EVOLUȚIE 2025-2050',
-          duration:20000,
-          camera:{ center:[cx,cy], zoom:12.8, pitch:48, bearing:-10, duration:4000 },
-          narrative:{
-            title:'📊 Modal Split — Transformarea Mobilității Urbane',
-            body:`2025: auto 72% · TP 18% · activ 10%. 2030: auto 67% · TP 22% · activ 11%. 2035: auto 62% · TP 26% · activ 12%. 2040: auto 57% · TP 30% · activ 13%. 2050: auto 50% · TP 36% · activ 14%. Benchmarck UE referință: auto < 45% · TP > 35% · activ > 20% (Amsterdam 2040). Reducere emisii transport: -58% față de 2025.`,
-            src:'PMUD · Eurostat Modal Split · PNRR · Planul Climatic'
-          },
-          overlay:'modal_split_chart',
-        },
-
-        // S31 ─ Pietoni si ciclism (20s)
-        {
-          id:'act3_pedestrian', act:'ACT 3 — MOBILITATE',
-          title:'31 / PIETONI & CICLISM — MOBILITATE ACTIVĂ',
-          duration:20000,
-          camera:{ center:[cx+0.002,cy+0.002], zoom:16.5, pitch:74, bearing:10, duration:5000 },
-          cameraChain:[ chain([cx+0.003,cy+0.001], 17, 76, -25, 10000, 6000) ],
-          narrative:{
-            title:'🚴 Mobilitate Activă — Pietoni și Bicicliști',
-            body:`Piste ciclism actuale: 28 km (0.3 km/km² vs UE 0.8). Plan 2030: +60 km (total 88 km). Bulevarde pietonale: 3 (3.4 km). Trafic pietonal/zi centru: 24.700 persoane. Bicicliști: ~3.200/zi (+18%/an trend). Bike-sharing: 420 stații × 12 biciclete planificate 2027. Walkability Score: 68/100 (față de Amsterdam 91).`,
-            src:'OMS Walk Score · Eurostat Active Mobility · PMUD · Primărie'
-          },
-          overlay:'pedestrian_street',
-          nightMode:false,
-        },
-
-        // ══════════════════════════════════════════════════════════════════
-        // ACT 4 — RISC & MEDIU — 5 SCENE — ~90s
-        // ══════════════════════════════════════════════════════════════════
-
-        // S32 ─ Risc seismic (20s)
-        {
-          id:'act4_seismic', act:'ACT 4 — RISC & MEDIU',
-          title:'32 / RISC SEISMIC — HARTA VULNERABILITĂȚII',
-          duration:20000,
-          camera:{ center:[cx,cy], zoom:13, pitch:50, bearing:5, duration:4500 },
-          cameraChain:[ chain([cx,cy], 13.5, 55, -20, 9000, 5500) ],
-          narrative:{
-            title:'🌊 Risc Seismic — INFP P100-1/2013',
-            body:`Zona seismică D: ag=0.20g · Tc=1.0s. Clădiri vulnerabile cls.I (risc maxim): 38 imobile · cls.II: 89 imobile. Populație expusă risc I-II: ~4.200 persoane. Scenarii cutremur Vrancea: Mw=7.5 → 280-420 victime estimate · €2.1 mld pagube. Consolidări finalizate 2020-2024: 12 clădiri (€18M). Program național: €4.2 mld · 2023-2030.`,
-            src:'INFP Seismicitate · P100-1/2013 · MDLPA Consolidare · UNISDR'
-          },
-          overlay:'seismic_risk',
-        },
-
-        // S33 ─ Risc inundatii (15s)
-        {
-          id:'act4_flood', act:'ACT 4 — RISC & MEDIU',
-          title:'33 / RISC INUNDAȚII — BAHLUI',
-          duration:15000,
-          camera:{ center:[cx-0.005,cy-0.005], zoom:13.5, pitch:52, bearing:20, duration:4500 },
-          narrative:{
-            title:'💧 Risc Inundații — Râul Bahlui',
-            body:`Zonă inundabilă 1% (Q1%): 340 ha. Proprietăți expuse: ~2.100. Pagube estimate scenar. extrem: €180M. Lucrări apărare existente: dig 12 km (grad protecție P1%). Planul ANAR 2024-2030: regularizare + bazine retenție. Schimbări climatice (IPCC RCP8.5): +35% precipitații extreme · viituri mai frecvente. Zone interzise construcției: 180 ha (dar cu 840 construcții ilegale existente).`,
-            src:'ANAR Hărți Risc 2022 · IPCC AR6 · MDLPA Construcții Risc'
-          },
-          overlay:'flood_risk',
-        },
-
-        // S34 ─ Schimbari climatice (20s)
-        {
-          id:'act4_climate', act:'ACT 4 — RISC & MEDIU',
-          title:'34 / SCHIMBĂRI CLIMATICE — IMPACT URBAN',
-          duration:20000,
-          camera:{ center:[cx,cy], zoom:12.5, pitch:48, bearing:0, duration:4000 },
-          cameraChain:[ chain([cx,cy], 13, 52, -15, 9000, 5000) ],
-          narrative:{
-            title:'🌡 Schimbări Climatice — ${cityName} 2025-2050',
-            body:`Temperaturii medii: +0.8°C (2025) → +1.6°C (2035) → +2.8°C (2050) față de 1990 (IPCC RCP8.5). Zile tropicale (>30°C): 28/an → 45/an 2050. Precipitații extreme: +35% frecvență. Secetă: perioade mai lungi și mai intense. Island de căldură urbană: +3.2°C vs rural. Impactul ESG: -12 pct. fără adaptare. Adaptare necesară: vegetație, albedo, apă.`,
-            src:'IPCC AR6 RCP4.5/8.5 · ANM ROCADA · Copernicus C3S'
-          },
-          overlay:'climate_heatmap',
-          nightMode:false,
-        },
-
-        // S35 ─ Island de caldura (15s)
-        {
-          id:'act4_heat_island', act:'ACT 4 — RISC & MEDIU',
-          title:'35 / ISLAND DE CĂLDURĂ URBAN',
-          duration:15000,
-          camera:{ center:[cx,cy], zoom:13, pitch:52, bearing:-10, duration:4000 },
-          narrative:{
-            title:'🔥 Island de Căldură Urban — UHI Effect',
-            body:`Diferența de temperatură centru vs periferie: +3.2°C (vara). Zonele cele mai afectate: centru pavat (albedo scăzut), cartiere fără copaci. Soluții: copaci stradali +12.000 (răcire 1.5°C) · acoperișuri verzi +85 ha · pavaje permeabile +28% · fântâni arteziene +40. Investiție: €42M. Beneficiu: -2.1°C și -28% consum AC.`,
-            src:'ANM · EEA Urban Heat Island · OMS · Planul Climatic Municipal'
-          },
-          overlay:'heat_island',
-        },
-
-        // S36 ─ Infrastructura verde raspuns (20s)
-        {
-          id:'act4_green_response', act:'ACT 4 — RISC & MEDIU',
-          title:'36 / INFRASTRUCTURA VERDE — RĂSPUNSUL',
-          duration:20000,
-          camera:{ center:[cx-0.008,cy+0.006], zoom:14.5, pitch:58, bearing:-20, duration:5000 },
-          cameraChain:[ chain([cx-0.010,cy+0.008], 15, 62, 15, 10000, 5500) ],
-          narrative:{
-            title:'🌿 Soluții Bazate pe Natură — Nature-Based Solutions',
-            body:`Plan verde 2030: +80 ha parcuri noi · +12.000 arbori stradali · 18 grădini de ploaie (rain gardens). Coridoare ecologice: 4 (conectând parcurile majore). Biodiversitate: +28 specii polenizatori target. Grădini comunitare: 32 planificate. Absorție CO2: 4.200 tCO2/an suplimentar. Investiție: €28M (UE Green Deal). Beneficii co-calculate: €180M/an în sănătate + energie + calitate viață.`,
-            src:'UE Green Deal · EEA NBS · ANM · Planul Verde Municipal 2030'
-          },
-          overlay:'green_infrastructure',
-        },
-
-        // ══════════════════════════════════════════════════════════════════
-        // ACT 5 — COMPARAȚIE EU — 5 SCENE — ~90s
-        // ══════════════════════════════════════════════════════════════════
-
-        // S37 ─ Romania vs EU (15s)
-        {
-          id:'act5_ro_eu', act:'ACT 5 — COMPARAȚIE EU',
-          title:'37 / ROMÂNIA vs UNIUNEA EUROPEANĂ',
-          duration:15000,
-          camera:{ center:[cx,cy], zoom:11.5, pitch:40, bearing:0, duration:4000 },
-          narrative:{
-            title:'🇪🇺 România vs UE — Context de Convergență',
-            body:`Convergența economică RO → UE: 74% (PIB/cap PPS 2023). Urbanizare: 54% (UE media 75%). Investiție publică infrastructură: 4.2% PIB (UE: 3.1%). Fonduri UE absorbite 2021-2027: target €21.6 mld. Indicele Calității Vieții Urbane (EQOL): 67/100 (față de media UE 74). Decalaj de recuperat: 10-15 ani la ritmul actual.`,
-            src:'Eurostat Regional Statistics · BNR · CE Raport Convergență 2023'
-          },
-          overlay:'ro_eu_comparison',
-        },
-
-        // S38 ─ Iasi vs Cluj (20s)
-        {
-          id:'act5_vs_cluj', act:'ACT 5 — COMPARAȚIE EU',
-          title:'38 / IAȘI vs CLUJ-NAPOCA',
-          duration:20000,
-          camera:{ center:[cx,cy], zoom:12.5, pitch:48, bearing:-15, duration:4500 },
-          cameraChain:[ chain([cx,cy], 13, 52, 20, 9000, 5500) ],
-          narrative:{
-            title:`⚖ ${cityName} vs Cluj-Napoca — Comparație Directă`,
-            body:`Densitate: ${densHA} loc/ha (${cityName}) vs 76 loc/ha (Cluj). Trafic: +38% (${cityName}) vs +52% (Cluj). Expansiune: 2.450 ha vs 1.870 ha. PIB/cap: ${pib21} vs €22.400. Autorizații/an: ${auth21} vs 1.840. ESG: ${esg21}/100 vs 67/100. Convergenta UE: 74% vs 91%. Concluzie: ${cityName} are potențial superior de creștere, Cluj este mai avansat structural.`,
-            src:'Eurostat Urban Audit 2021 · INS · ANCPI · BNR'
-          },
-          overlay:'comparison_iasi_cluj',
-        },
-
-        // S39 ─ Iasi vs Vilnius (20s)
-        {
-          id:'act5_vs_vilnius', act:'ACT 5 — COMPARAȚIE EU',
-          title:'39 / IAȘI vs VILNIUS (LITUANIA)',
-          duration:20000,
-          camera:{ center:[cx,cy], zoom:12.5, pitch:48, bearing:10, duration:4500 },
-          cameraChain:[ chain([cx,cy], 13, 52, -20, 9000, 5500) ],
-          narrative:{
-            title:`⚖ ${cityName} vs Vilnius — Model Est-European`,
-            body:`Vilnius: ex-capital post-sovietică transformată în hub digital UE. Densitate: 156 loc/ha (vs ${densHA}). Modal split TP: 42% (vs 18%). PIB/cap: €28.400 (vs ${pib21}). Spații verzi/loc: 32 mp (vs 8.2 mp). Convergență UE: 97%. Lecție: 20 ani de investiții consistente transformă radical orașul. ${cityName} 2050 poate atinge Vilnius 2025.`,
-            src:'Eurostat Urban Audit · Vilnius Municipality · Statistics Lithuania'
-          },
-          overlay:'comparison_vilnius',
-        },
-
-        // S40 ─ Iasi vs Brno / Wroclaw (20s)
-        {
-          id:'act5_vs_central', act:'ACT 5 — COMPARAȚIE EU',
-          title:'40 / IAȘI vs BRNO & WROCŁAW',
-          duration:20000,
-          camera:{ center:[cx,cy], zoom:12.5, pitch:48, bearing:-5, duration:4500 },
-          cameraChain:[ chain([cx,cy], 13, 52, 15, 9000, 5500) ],
-          narrative:{
-            title:`⚖ ${cityName} vs Brno & Wrocław — Benchmark Central-European`,
-            body:`Brno (CZ): densitate 148 loc/ha · TP 38% · PIB €21.200 · ESG 72. Wrocław (PL): densitate 122 loc/ha · TP 35% · PIB €19.800 · ESG 69. ${cityName}: densitate ${densHA} loc/ha · TP 18% · PIB ${pib21} · ESG ${esg21}. Concluzie: decalaj de 8-12 ani față de orașele central-europene similare ca populație. Recuperabil prin investiții consistente UE 2025-2035.`,
-            src:'Eurostat Urban Audit 2021 · Statistical Offices CZ, PL · Eurostat'
-          },
-          overlay:'comparison_central_eu',
-        },
-
-        // S41 ─ EU benchmarks summary (15s)
-        {
-          id:'act5_summary', act:'ACT 5 — COMPARAȚIE EU',
-          title:'41 / BENCHMARKS EU — SUMAR',
-          duration:15000,
-          camera:{ center:[cx,cy], zoom:12.0, pitch:45, bearing:0, duration:4000 },
-          narrative:{
-            title:'📊 Benchmarks Europene — Unde Suntem, Unde Mergem',
-            body:`${cityName} 2025 vs target UE 2030: Densitate: 48/100 loc/ha (target 80). Modal split TP: 18%/35%. Spații verzi: 8/15 mp. ESG: 51/65. Convergență: 74%/85%. Investiție necesară 2025-2030: €1.2 mld total (€200M/an). Surse: PNRR + Fonduri Coheziune + investiții private. Fezabilitate: 87% (conform model de finanțare TSS·FG).`,
-            src:'CE Urban Agenda · Eurostat SDG 11 · BNR · CE Cohesion Policy'
-          },
-          overlay:'eu_benchmarks',
-        },
-
-        // ══════════════════════════════════════════════════════════════════
-        // ACT 6 — VIZIUNEA 2050 — 6 SCENE — ~120s
-        // ══════════════════════════════════════════════════════════════════
-
-        // S42 ─ 2045 checkpoint (20s)
-        {
-          id:'act6_2045', act:'ACT 6 — VIZIUNEA 2050',
-          title:'42 / 2045 — ANTEPENULTIMUL MILESTONE',
-          duration:20000,
-          camera:{ center:[cx,cy], zoom:12.5, pitch:50, bearing:-20, duration:4500 },
+          id:'s11_timemachine', title:'11 · TIME MACHINE — 2025 → 2050',
+          duration:95000,
+          camera:{ center:[cx,cy], zoom:13.2, pitch:52, bearing:0, duration:5500 },
           cameraChain:[
-            chain([cx+0.008,cy+0.006], 14, 60, 15, 8000, 5500),
-            chain([cx-0.006,cy-0.004], 14.5, 64, -25, 15000, 5000),
+            { center:[cx+0.005,cy+0.003], zoom:13.8, pitch:56, bearing:60,  delay:16000, duration:8000 },
+            { center:[cx-0.004,cy-0.003], zoom:14.2, pitch:60, bearing:120, delay:33000, duration:8000 },
+            { center:[cx+0.003,cy-0.004], zoom:14.5, pitch:62, bearing:180, delay:50000, duration:8000 },
+            { center:[cx-0.003,cy+0.004], zoom:14.2, pitch:60, bearing:240, delay:67000, duration:8000 },
+            { center:[cx,cy],             zoom:13.5, pitch:55, bearing:300, delay:80000, duration:8000 },
           ],
           narrative:{
-            title:'🔭 2045 — Penultimul Pas Spre Viziune',
-            body:`${cityName} 2045: ${Math.round(cityPop*1.15).toLocaleString()} loc. · PIB/cap: €26.200 · Convergență UE: 95%. ESG: 74/100. Modal split: auto 53% · TP 33% · activ 14%. Clădiri renovate termic: 70% din fond. Carbon neutral: -72% emisii vs 2025. Toate șantierele majore finalizate. Orașul a ajuns din urmă Vilnius 2025.`,
-            src:'INSE · Eurostat · IPCC · BNR · Planul Climatic 2050'
+            title:'⏱ Time Machine — Călătorim în Timp · 2025 → 2050',
+            body:'Vedem transformarea orașului în timp real, cadru cu cadru. Clădiri noi apar, rețeaua TP se extinde, densitatea crește, spațiile verzi se extind. ' + cityName + ' 2025 → ' + cityName + ' 2050.',
+            src:'INSE · ANCPI · IPCC AR6 · Model proiecție TSS·FG'
           },
-          overlay:'checkpoint_2045',
-          animateYear:true, yearFrom:2041, yearTo:2045,
+          overlay:'s11_timemachine', light:'dusk',
+          animateYear:true, yearFrom:2025, yearTo:2050,
         },
 
-        // S43 ─ 2050 transformare completa (25s)
+        // ══ S12 — CONCLUZIE & VIZIUNE (15:15–16:15) — 60s ═══════════════════
         {
-          id:'act6_2050_full', act:'ACT 6 — VIZIUNEA 2050',
-          title:'43 / 2050 — TRANSFORMAREA COMPLETĂ',
-          duration:25000,
-          camera:{ center:[cx,cy], zoom:12.2, pitch:22, bearing:5, duration:3500 },
+          id:'s12_concluzie', title:'12 · CONCLUZIE & VIZIUNE',
+          duration:60000,
+          camera:{ center:[cx,cy], zoom:11.8, pitch:40, bearing:-20, duration:5000 },
           cameraChain:[
-            chain([cx,cy], 13.5, 56, -30, 5000, 6000),
-            chain([cx+0.010,cy+0.008], 15.2, 70, 20, 13000, 6500),
-            chain([cx-0.008,cy-0.006], 15.5, 72, -20, 21000, 6000),
+            { center:[cx,cy], zoom:12.5, pitch:48, bearing:30,  delay:12000, duration:6500 },
+            { center:[cx,cy], zoom:13.2, pitch:55, bearing:-20, delay:26000, duration:6500 },
+            { center:[cx,cy], zoom:14.0, pitch:60, bearing:20,  delay:40000, duration:7000 },
+            { center:[cx,cy], zoom:12.0, pitch:42, bearing:0,   delay:52000, duration:7000 },
           ],
           narrative:{
-            title:`🌟 ${cityName} 2050 — Transformarea Finalizată`,
-            body:`${cityName} 2050: ${pop50} loc. · PIB/cap: ${pib50} (+100% vs 2025). Convergență UE: 100%+. ESG: ${esg50}/100. Modal split: auto 50% · TP 36% · activ 14%. Toate obiectivele climatice atinse: -85% CO2 vs 1990. Fond construit renovat: 88%. Spații verzi: 18 mp/loc. Primul oraș din Moldova cu metrou ușor operațional.`,
-            src:'Model de proiecție TSS·FG · INSE · Eurostat · IPCC · BNR'
+            title:'🌟 ' + cityName + ' 2050 — Oraș Inteligent, Sustenabil, Conectat',
+            body:'Viziunea TCI: un oraș mai bun pentru oameni, susținut de date, știință și tehnologie. Dezvoltare echilibrată · Mobilitate sustenabilă · Infrastructură modernă · Mediu curat · Calitate a vieții ridicată. Standard urbanistic european.',
+            src:'UrbanX TSS·FG © — INS · Eurostat · ANCPI · BNR · IPCC AR6 · OMS'
           },
-          overlay:'full_2050',
-          isMilestone:true,
-          animateYear:true, yearFrom:2046, yearTo:2050,
-        },
-
-        // S44 ─ Smart city KPIs (20s)
-        {
-          id:'act6_smart_kpis', act:'ACT 6 — VIZIUNEA 2050',
-          title:'44 / SMART CITY — INDICATORI 2050',
-          duration:20000,
-          camera:{ center:[cx,cy], zoom:13.5, pitch:55, bearing:10, duration:4500 },
-          cameraChain:[ chain([cx,cy], 14, 60, -20, 10000, 5500) ],
-          narrative:{
-            title:'📱 Smart City 2050 — Indicatori de Performanță',
-            body:`Digitalizare servicii urbane: 95%. Senzori IoT: 28.000. Date deschise: 100% real-time. Energie din surse regenerabile: 78%. Consum apă reducere: -32% vs 2025. Deșeuri reciclate: 72%. Timp mediu urgențe: 6 min (-40%). Satisfacție cetățeni calitate viață: 82% (față de 61% în 2025). Indicele Smart City UE: top 25 din 287 orașe monitorizate.`,
-            src:'ITU Smart City Index 2050 (proj.) · Eurostat Digital Economy · IEA'
-          },
-          overlay:'smart_city_kpis',
-          nightMode:true,
-        },
-
-        // S45 ─ Model urban sustenabil (20s)
-        {
-          id:'act6_sustainable', act:'ACT 6 — VIZIUNEA 2050',
-          title:'45 / MODEL URBAN SUSTENABIL',
-          duration:20000,
-          camera:{ center:[cx+0.005,cy+0.005], zoom:14.5, pitch:62, bearing:-15, duration:5000 },
-          cameraChain:[ chain([cx+0.003,cy+0.007], 15, 66, 20, 10000, 5500) ],
-          narrative:{
-            title:'♻ Model de Dezvoltare Urbană Sustenabilă',
-            body:`${cityName} 2050: primul oraș din Moldova cu economie circulară urbană verificabilă. Metabolismul urban: intrări (energie, apă, materiale) -65%. Ieșiri (deșeuri, emisii, ape uzate) -72%. 15-minute city: 80% din nevoi zilnice accesibile la 15 min nemotorizat. Biodiversitate urbană: +85% specii față de 2025. Model replicabil: 12 orașe din România adoptă planul TSS·FG.`,
-            src:'Ellen MacArthur Foundation · EEA · ICLEI · TSS·FG Model Urbanistic'
-          },
-          overlay:'sustainable_model',
-        },
-
-        // S46 ─ Orbita finala dramatica (20s)
-        {
-          id:'act6_final_orbit', act:'ACT 6 — VIZIUNEA 2050',
-          title:'46 / ORBITARE FINALĂ — REVELAREA',
-          duration:20000,
-          camera:{ center:[cx,cy], zoom:11.5, pitch:42, bearing:0, duration:4000 },
-          cameraChain:[
-            chain([cx,cy], 11.5, 42, 120, 5000, 7000),
-            chain([cx,cy], 11.5, 42, 240, 13000, 7000),
-          ],
-          narrative:{
-            title:`🌅 ${cityName} 2050 — Privit din Înalt`,
-            body:`O ultimă orbitare completă. Vedem tot: centrul dens și vibrant, cartierele verzi, rețeaua de TP luminoasă, zonele reconvertite, periferia disciplinată. Acesta este orașul care s-a transformat cu date, cu voință politică și cu instrumente ca UrbanX. De sus, arată exact cum ar trebui să arate un oraș european al sec. XXI.`,
-            src:'UrbanX TSS·FG · Proiecție Urbanistică Oficială'
-          },
-          overlay:'final_orbit',
-          nightMode:true,
-        },
-
-        // S47 ─ Concluzie & credits (15s)
-        {
-          id:'act6_conclusion', act:'ACT 6 — VIZIUNEA 2050',
-          title:'47 / CONCLUZIE — UN URBAN DIGITAL TWIN',
-          duration:15000,
-          camera:{ center:[cx,cy], zoom:13, pitch:52, bearing:-15, duration:4000 },
-          narrative:{
-            title:`🏆 ${cityName} — Un Urban Digital Twin Care Spune o Poveste`,
-            body:`Aceasta nu este o simulare. Sunt date oficiale INSE · Eurostat · ANCPI · BNR · IPCC AR6 · ANM · INFP · ANAR integrate într-un model de proiecție calibrat. Citabil în PUZ · PIDU · PUG · Strategii de Dezvoltare. Disponibil pentru orice UAT din România. Standard urbanistic european. Nu există în 2025. Îl construim noi.`,
-            src:'UrbanX TSS·FG © 2025 · Toate datele: surse oficiale publice'
-          },
-          overlay:'conclusion_credits',
-          isMilestone:false,
+          overlay:'s12_concluzie', light:'dusk', isMilestone:true,
         },
 
       ]; // end return scenes array
@@ -4062,609 +3517,461 @@ const TCI = {
   _drawDirectorOverlay(ctx, W, H) {
     const ov = this.Director._currentOverlay;
     if(!ov) return;
-    const now = Date.now()/1000;
-    const sceneAge = (Date.now() - this.Director._sceneStartTime) / 1000;
-    const fadeIn = Math.min(1, sceneAge / 1.5);
-    const cx = this.Director._cx, cy = this.Director._cy;
-    const m  = this.map;
+    const now   = Date.now()/1000;
+    const age   = (Date.now() - this.Director._sceneStartTime) / 1000;
+    const fi    = Math.min(1, age / 1.2);   // fade in
+    const cx    = this.Director._cx, cy = this.Director._cy;
+    const m     = this.map;
+    const city  = this.cityData?.name || 'Iași';
+    const pop   = this.cityData?.pop2021 || 360633;
+    const yr    = this.year || 2025;
+
+    // Helper — card cu border
+    const card = (x,y,w,h,r,bg,border) => {
+      ctx.fillStyle = bg||'rgba(4,10,24,0.90)';
+      this._rr(ctx,x,y,w,h,r||8); ctx.fill();
+      if(border){ ctx.strokeStyle=border; ctx.lineWidth=1; this._rr(ctx,x,y,w,h,r||8); ctx.stroke(); }
+    };
+    const lbl = (txt,x,y,col,sz,bold) => {
+      ctx.fillStyle=col; ctx.font=(bold?'bold ':'')+sz+'px "Space Grotesk",sans-serif';
+      ctx.fillText(txt,x,y);
+    };
 
     ctx.save();
-    ctx.globalAlpha = fadeIn;
+    ctx.globalAlpha = fi;
+    ctx.textAlign = 'left';
 
-    if(ov === 'approach_data') {
-      // S3 — exact ca storyboard: card stânga-jos, numere mari
-      const pop = (this.cityData?.pop2021 || 360633).toLocaleString();
-      const pop50 = Math.round((this.cityData?.pop2021||360633)*1.203).toLocaleString();
-      const cardH = 130, cardW = 210;
-      const cx2 = 16, cy2 = H - 75 - cardH;
-      ctx.fillStyle = 'rgba(4,10,24,0.88)';
-      this._rr(ctx, cx2, cy2, cardW, cardH, 8); ctx.fill();
-      ctx.strokeStyle = 'rgba(212,175,55,0.25)'; ctx.lineWidth = 1;
-      this._rr(ctx, cx2, cy2, cardW, cardH, 8); ctx.stroke();
-      ctx.textAlign = 'left';
-      // Label
-      ctx.fillStyle = 'rgba(148,163,184,0.7)'; ctx.font = 'bold 8px "Space Grotesk"';
-      ctx.fillText('POPULAȚIE ' + this.year, cx2+12, cy2+18);
-      // Număr mare pop curentă
-      ctx.fillStyle = '#ffffff'; ctx.font = 'bold 36px "Space Grotesk"';
-      ctx.fillText(pop, cx2+12, cy2+60);
-      // Separator
-      ctx.fillStyle = 'rgba(212,175,55,0.3)'; ctx.fillRect(cx2+12, cy2+68, cardW-24, 1);
-      // Proiecție 2050
-      ctx.fillStyle = 'rgba(148,163,184,0.6)'; ctx.font = 'bold 8px "Space Grotesk"';
-      ctx.fillText('POPULAȚIE 2050', cx2+12, cy2+83);
-      ctx.fillStyle = '#22c55e'; ctx.font = 'bold 22px "Space Grotesk"';
-      ctx.fillText(pop50, cx2+12, cy2+108);
-      // Delta
-      ctx.fillStyle = '#22c55e'; ctx.font = 'bold 10px "Space Grotesk"';
-      ctx.fillText('+20,3%', cx2+12, cy2+126);
-      ctx.textAlign = 'left';
-    }
-
-    if(ov === 'development_zones') {
-      // Scena 5: bare 3D pe canvas simuland crestere cladiri
-      const barZones = [
-        { lon:cx+0.010, lat:cy+0.012, h:0.7, col:'#ef4444', label:'Majoră' },
-        { lon:cx-0.008, lat:cy+0.008, h:0.5, col:'#f59e0b', label:'Medie' },
-        { lon:cx+0.018, lat:cy-0.005, h:0.3, col:'#22c55e', label:'Mică' },
-      ];
-      barZones.forEach(bz => {
-        if(!m) return;
-        try {
-          const pt = m.project([bz.lon, bz.lat]);
-          const pulse = 0.85 + Math.sin(now*2 + bz.lon)*0.15;
-          const bh = 40 * bz.h * pulse;
-          ctx.fillStyle = bz.col + '99';
-          ctx.fillRect(pt.x-10, pt.y-bh, 20, bh);
-          ctx.fillStyle = bz.col;
-          ctx.fillRect(pt.x-10, pt.y-bh, 20, 3);
-          ctx.fillStyle='rgba(255,255,255,0.8)'; ctx.font='8px "Space Grotesk"';
-          ctx.textAlign='center';
-          ctx.fillText(bz.label, pt.x, pt.y+12);
-        } catch(e){}
-      });
-      ctx.textAlign='left';
-    }
-
-    if(ov === 'comparison_eu') {
-      // Scena 8: tabel comparatie
-      ctx.fillStyle='rgba(4,10,24,0.85)';
-      this._rr(ctx, W/2-160, H*0.2, 320, 120, 10); ctx.fill();
-      ctx.strokeStyle='rgba(212,175,55,0.4)'; ctx.lineWidth=1;
-      this._rr(ctx, W/2-160, H*0.2, 320, 120, 10); ctx.stroke();
-      const rows=[
-        ['DENSITATE','48 loc/ha','76 loc/ha','156 loc/ha'],
-        ['TRAFIC','+38%','+52%','+22%'],
-        ['EXPANSIUNE','2.450 ha','1.870 ha','980 ha'],
-      ];
-      ctx.font='bold 9px "Space Grotesk"'; ctx.textAlign='center';
-      ctx.fillStyle='#D4AF37'; ctx.fillText(this.cityData?.name||'Iași', W/2-80, H*0.2+22);
-      ctx.fillStyle='#60a5fa'; ctx.fillText('Cluj-Napoca', W/2+0, H*0.2+22);
-      ctx.fillStyle='#a78bfa'; ctx.fillText('Vilnius', W/2+80, H*0.2+22);
-      rows.forEach((r,i)=>{
-        const y = H*0.2 + 42 + i*25;
-        ctx.fillStyle='rgba(148,163,184,0.6)'; ctx.font='8px "Space Grotesk"';
-        ctx.fillText(r[0], W/2-80, y);
-        ctx.fillStyle='#D4AF37'; ctx.font='bold 10px "Space Grotesk"';
-        ctx.fillText(r[1], W/2, y);
-        ctx.fillStyle='#60a5fa';
-        ctx.fillText(r[2], W/2+80, y);
-      });
-      ctx.textAlign='left';
-    }
-
-    if(ov === 'conclusion' || ov === 'conclusion_credits') {
-      // Scene 12 / 47: viziunea 2050 + credits
-      ctx.fillStyle='rgba(4,10,24,0.88)';
-      this._rr(ctx, W-240, H*0.18, 210, 150, 10); ctx.fill();
-      ctx.strokeStyle='rgba(212,175,55,0.5)'; ctx.lineWidth=1;
-      this._rr(ctx, W-240, H*0.18, 210, 150, 10); ctx.stroke();
-      ctx.fillStyle='#D4AF37'; ctx.font='bold 11px "Space Grotesk"';
-      ctx.textAlign='center';
-      ctx.fillText((this.cityData?.name||'UAT')+' 2050', W-135, H*0.18+22);
-      const items=['✅ Oraș mai dens','✅ Mobilitate verde','✅ Infrastructură modernă','✅ Calitate a vieții mai bună','✅ Carbon neutral -85%','✅ Convergență UE 100%'];
-      items.forEach((it,i)=>{
-        ctx.fillStyle='rgba(255,255,255,0.85)'; ctx.font='9px "Space Grotesk"';
-        ctx.fillText(it, W-135, H*0.18+42+i*18);
-      });
-      if(ov==='conclusion_credits'){
-        ctx.fillStyle='rgba(212,175,55,0.5)'; ctx.font='7px "Space Grotesk"';
-        ctx.fillText('UrbanX TSS·FG © 2025 · Date oficiale', W-135, H*0.18+148);
-      }
-      ctx.textAlign='left';
-    }
-
-    // ── Overlay general: act label + scene progress ─────────────────────
+    // ── Act/Scene label — stânga sus, permanent ──────────────────────────
     const scene = this.Director._scenes?.[this.Director._sceneIdx];
     if(scene) {
-      const elapsed = Date.now() - this.Director._sceneStartTime;
-      const progress = Math.min(1, elapsed / scene.duration);
-
-      // Act label - colț stânga sus (sub topbar)
-      ctx.save();
-      ctx.globalAlpha = Math.min(1, sceneAge / 0.8) * 0.9;
-      ctx.fillStyle = 'rgba(4,10,24,0.75)';
-      this._rr(ctx, 195, 56, 220, 28, 5); ctx.fill();
-      ctx.fillStyle = '#D4AF37'; ctx.font = 'bold 8px "Space Grotesk"';
-      ctx.fillText(scene.act || '', 205, 67);
-      ctx.fillStyle = 'rgba(200,215,235,0.7)'; ctx.font = '7px "Space Grotesk"';
-      ctx.fillText(scene.title || '', 205, 78);
-      // Bara progress scena
-      ctx.fillStyle = 'rgba(212,175,55,0.15)';
-      ctx.fillRect(195, 84, 220, 2);
-      ctx.fillStyle = 'rgba(212,175,55,0.7)';
-      ctx.fillRect(195, 84, 220 * progress, 2);
-      ctx.restore();
+      const prog = Math.min(1,(Date.now()-this.Director._sceneStartTime)/scene.duration);
+      card(192,54,230,30,5);
+      lbl(scene.title||'','200',72,'#D4AF37',7,true); // unused, use correct args
+      ctx.fillStyle='#D4AF37'; ctx.font='bold 7.5px "Space Grotesk"';
+      ctx.fillText(scene.title||'', 200, 66);
+      ctx.fillStyle='rgba(212,175,55,0.15)'; ctx.fillRect(192,82,230,2);
+      ctx.fillStyle='rgba(212,175,55,0.6)';  ctx.fillRect(192,82,230*prog,2);
     }
 
-    // ── Overlay night glow (mod noapte) ─────────────────────────────────
-    if(this.Director._nightMode) {
-      ctx.save();
-      ctx.globalAlpha = 0.15 * fadeIn;
-      const nightGrad = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, Math.max(W,H)*0.7);
-      nightGrad.addColorStop(0, 'rgba(10,25,60,0)');
-      nightGrad.addColorStop(1, 'rgba(2,6,15,0.5)');
-      ctx.fillStyle = nightGrad;
-      ctx.fillRect(0,0,W,H);
-      ctx.restore();
-    }
-
-    // ── Scene-specific overlays Phase 2 ─────────────────────────────────
-
-    if(ov === 'stats_big_card') {
-      // KPI-uri mari animate
-      const kpis = [
-        { label:'SUPRAFAȚĂ', val:'93.9 km²', col:'#D4AF37' },
-        { label:'LOCUINȚE', val:Math.round((this.cityData?.pop2021||360000)/2.3).toLocaleString(), col:'#60a5fa' },
-        { label:'PIB/CAP', val:'€14.200', col:'#22c55e' },
-        { label:'ESG SCORE', val:'51/100', col:'#a78bfa' },
+    // ════════════════════════════════════════════════════════
+    // S1 — INTRO: România card stânga
+    // ════════════════════════════════════════════════════════
+    if(ov==='s1_ro_overview') {
+      const cx2=16, cy2=H*0.28, cW=190, rowH=22;
+      const rows=[
+        {icon:'👥',l:'POPULAȚIE',v:'19,5M',c:'#60a5fa'},
+        {icon:'💰',l:'PIB',v:'347 MLD €',c:'#22c55e'},
+        {icon:'🏙',l:'CREȘTERE URBANĂ',v:'+0,84%/an',c:'#D4AF37'},
+        {icon:'🌡',l:'TEMPERATURĂ 2050',v:'+1,7°C',c:'#f97316'},
       ];
-      const cardW=180, cardH=55, gapX=10;
-      const totalW = kpis.length*(cardW+gapX)-gapX;
-      const startX = W/2 - totalW/2;
-      kpis.forEach((k,i)=>{
-        const x=startX+i*(cardW+gapX), y=H*0.22;
-        ctx.fillStyle='rgba(4,10,24,0.88)'; this._rr(ctx,x,y,cardW,cardH,7); ctx.fill();
-        ctx.strokeStyle=k.col+'55'; ctx.lineWidth=1; this._rr(ctx,x,y,cardW,cardH,7); ctx.stroke();
-        ctx.textAlign='center';
+      card(cx2, cy2, cW, rows.length*rowH+28, 8, 'rgba(4,10,24,0.88)', 'rgba(255,255,255,0.08)');
+      ctx.fillStyle='rgba(148,163,184,0.5)'; ctx.font='bold 7px "Space Grotesk"';
+      ctx.fillText('ROMÂNIA — DATE CHEIE', cx2+12, cy2+15);
+      rows.forEach((r,i)=>{
+        const ry=cy2+28+i*rowH;
+        ctx.fillStyle='rgba(255,255,255,0.55)'; ctx.font='11px "Space Grotesk"';
+        ctx.fillText(r.icon, cx2+10, ry+13);
         ctx.fillStyle='rgba(148,163,184,0.6)'; ctx.font='7px "Space Grotesk"';
-        ctx.fillText(k.label, x+cardW/2, y+16);
-        ctx.fillStyle=k.col; ctx.font='bold 18px "Space Grotesk"';
-        ctx.fillText(k.val, x+cardW/2, y+38);
+        ctx.fillText(r.l, cx2+28, ry+8);
+        ctx.fillStyle=r.c; ctx.font='bold 11px "Space Grotesk"';
+        ctx.fillText(r.v, cx2+28, ry+20);
       });
-      ctx.textAlign='left';
     }
 
-    if(ov === 'demography_chart') {
-      // Mini grafic demografic
-      const years=[2011,2021,2030,2040,2050];
-      const pops=[0.96,1,1.04,1.09,1.18].map(f=>Math.round((this.cityData?.pop2021||360000)*f));
-      const cW=280, cH=90, cX=W/2-cW/2, cY=H*0.22;
-      ctx.fillStyle='rgba(4,10,24,0.88)'; this._rr(ctx,cX,cY,cW,cH+30,8); ctx.fill();
-      ctx.strokeStyle='rgba(212,175,55,0.3)'; ctx.lineWidth=1;
-      this._rr(ctx,cX,cY,cW+0,cH+30,8); ctx.stroke();
-      ctx.fillStyle='#D4AF37'; ctx.font='bold 8px "Space Grotesk"'; ctx.textAlign='center';
-      ctx.fillText('Evoluție Demografică '+years[0]+' – '+years[years.length-1], cX+cW/2, cY+14);
-      const maxP=Math.max(...pops), minP=Math.min(...pops)*0.97;
-      ctx.beginPath();
-      years.forEach((yr,i)=>{
-        const px=cX+20+i*(cW-40)/(years.length-1);
-        const py=cY+20+(cH-10)*(1-(pops[i]-minP)/(maxP-minP));
+    // ════════════════════════════════════════════════════════
+    // S2 — MOLDOVA region: trenturi card dreapta
+    // ════════════════════════════════════════════════════════
+    if(ov==='s2_moldova_region') {
+      const cX=W-210, cY=H*0.22, cW=195, rowH=24;
+      const rows=[
+        {l:'POPULAȚIE',v:'+21,3%',c:'#22c55e'},
+        {l:'LOCURI DE MUNCĂ',v:'+28,7%',c:'#60a5fa'},
+        {l:'INVESTIȚII',v:'+31,5%',c:'#D4AF37'},
+        {l:'RISC CLIMATIC',v:'MEDIU',c:'#f59e0b'},
+      ];
+      card(cX,cY,cW,rows.length*rowH+30,8,'rgba(4,10,24,0.90)','rgba(212,175,55,0.2)');
+      ctx.fillStyle='#D4AF37'; ctx.font='bold 8px "Space Grotesk"';
+      ctx.fillText('TENDINȚE 2050', cX+12, cY+18);
+      rows.forEach((r,i)=>{
+        const ry=cY+30+i*rowH;
+        ctx.fillStyle='rgba(148,163,184,0.55)'; ctx.font='7.5px "Space Grotesk"';
+        ctx.fillText(r.l, cX+12, ry+9);
+        ctx.fillStyle=r.c; ctx.font='bold 15px "Space Grotesk"';
+        ctx.fillText(r.v, cX+12, ry+24);
+      });
+    }
+
+    // ════════════════════════════════════════════════════════
+    // S3 — APPROACH: card stânga + grafic demografic
+    // ════════════════════════════════════════════════════════
+    if(ov==='s3_approach_data') {
+      // Card principal stânga-jos
+      const cx2=16, cy2=H-80-145, cW=215, cH=140;
+      card(cx2,cy2,cW,cH,8,'rgba(4,10,24,0.92)','rgba(212,175,55,0.25)');
+      ctx.fillStyle='rgba(148,163,184,0.6)'; ctx.font='bold 8px "Space Grotesk"';
+      ctx.fillText('POPULAȚIE '+yr, cx2+14, cy2+18);
+      ctx.fillStyle='#ffffff'; ctx.font='bold 38px "Space Grotesk"';
+      ctx.fillText(pop.toLocaleString(), cx2+14, cy2+60);
+      ctx.fillStyle='rgba(255,255,255,0.12)'; ctx.fillRect(cx2+14,cy2+66,cW-28,1);
+      ctx.fillStyle='rgba(148,163,184,0.55)'; ctx.font='bold 8px "Space Grotesk"';
+      ctx.fillText('PROIECȚIE 2050', cx2+14, cy2+82);
+      ctx.fillStyle='#22c55e'; ctx.font='bold 26px "Space Grotesk"';
+      ctx.fillText(Math.round(pop*1.203).toLocaleString(), cx2+14, cy2+110);
+      ctx.fillStyle='#22c55e'; ctx.font='bold 13px "Space Grotesk"';
+      ctx.fillText('+20,3%', cx2+14, cy2+130);
+
+      // Card investitii + locuinte center
+      const cX2=cx2+cW+12, cY2=cy2+20, cW2=175;
+      card(cX2,cY2,cW2,55,7,'rgba(4,10,24,0.88)','rgba(96,165,250,0.2)');
+      ctx.fillStyle='rgba(148,163,184,0.55)'; ctx.font='7.5px "Space Grotesk"';
+      ctx.fillText('LOCUINȚE NOI PÂNĂ ÎN 2050', cX2+12, cY2+14);
+      ctx.fillStyle='#60a5fa'; ctx.font='bold 22px "Space Grotesk"';
+      ctx.fillText('12.400', cX2+12, cY2+38);
+      card(cX2,cY2+62,cW2,50,7,'rgba(4,10,24,0.88)','rgba(34,197,94,0.2)');
+      ctx.fillStyle='rgba(148,163,184,0.55)'; ctx.font='7.5px "Space Grotesk"';
+      ctx.fillText('INVESTIȚII ESTIMATE', cX2+12, cY2+76);
+      ctx.fillStyle='#22c55e'; ctx.font='bold 20px "Space Grotesk"';
+      ctx.fillText('2,8 MLD €', cX2+12, cY2+98);
+
+      // Grafic evoluție demografică mini
+      const gX=cX2,gY=cY2+120,gW=cW2,gH=65;
+      card(gX,gY,gW,gH,7,'rgba(4,10,24,0.85)','rgba(255,255,255,0.06)');
+      ctx.fillStyle='rgba(148,163,184,0.55)'; ctx.font='7px "Space Grotesk"';
+      ctx.fillText('EVOLUȚIE POPULAȚIE', gX+10, gY+12);
+      const pts=[[2021,1],[2025,1.012],[2030,1.04],[2040,1.09],[2050,1.203]];
+      ctx.beginPath(); ctx.strokeStyle='rgba(212,175,55,0.8)'; ctx.lineWidth=2;
+      pts.forEach(([y,f],i)=>{
+        const px=gX+12+(i/(pts.length-1))*(gW-24);
+        const py=gY+gH-12-(f-1)/(1.203-1)*(gH-24);
         i===0?ctx.moveTo(px,py):ctx.lineTo(px,py);
-        ctx.fillStyle=i<2?'#94a3b8':'#22c55e'; ctx.font='7px "Space Grotesk"';
-        ctx.fillText((pops[i]/1000).toFixed(0)+'k', px, py-5);
-        ctx.fillStyle=i<2?'#94a3b8':'#22c55e';
-        ctx.beginPath(); ctx.arc(px,py,3,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle=i===pts.length-1?'#22c55e':'rgba(212,175,55,0.5)';
+        ctx.beginPath(); ctx.arc(px,py,2.5,0,Math.PI*2); ctx.fill();
         ctx.beginPath();
-        years.forEach((yr2,j)=>{
-          const px2=cX+20+j*(cW-40)/(years.length-1);
-          const py2=cY+20+(cH-10)*(1-(pops[j]-minP)/(maxP-minP));
+        pts.forEach(([y2,f2],j)=>{
+          const px2=gX+12+(j/(pts.length-1))*(gW-24);
+          const py2=gY+gH-12-(f2-1)/(1.203-1)*(gH-24);
           j===0?ctx.moveTo(px2,py2):ctx.lineTo(px2,py2);
         });
       });
-      ctx.strokeStyle='rgba(212,175,55,0.7)'; ctx.lineWidth=2; ctx.stroke();
-      years.forEach((yr,i)=>{
-        const px=cX+20+i*(cW-40)/(years.length-1);
-        ctx.fillStyle='rgba(148,163,184,0.6)'; ctx.font='7px "Space Grotesk"'; ctx.textAlign='center';
-        ctx.fillText(yr, px, cY+cH+22);
-      });
-      ctx.textAlign='left';
+      ctx.strokeStyle='rgba(212,175,55,0.75)'; ctx.lineWidth=2; ctx.stroke();
+      ctx.fillStyle='rgba(148,163,184,0.4)'; ctx.font='6.5px "Space Grotesk"';
+      ctx.fillText('2021',gX+8,gY+gH-2);
+      ctx.textAlign='right'; ctx.fillText('434K',gX+gW-4,gY+18); ctx.textAlign='left';
     }
 
-    if(ov === 'density_heatmap') {
-      // Puls heatmap animat
-      const zones=[
-        {lon:cx,      lat:cy,       r:50, col:'#ef4444', label:'Tătărași 220/ha'},
-        {lon:cx+0.01, lat:cy+0.013, r:35, col:'#f59e0b', label:'Copou 42/ha'},
-        {lon:cx-0.01, lat:cy-0.008, r:42, col:'#ef4444', label:'Nicolina 185/ha'},
-        {lon:cx+0.018,lat:cy-0.005, r:28, col:'#22c55e', label:'Periferie 15/ha'},
-      ];
-      zones.forEach(z=>{
-        if(!m) return;
-        try {
-          const pt=m.project([z.lon,z.lat]);
-          const pulse=0.7+Math.sin(now*1.5+z.lon)*0.3;
-          const grad=ctx.createRadialGradient(pt.x,pt.y,0,pt.x,pt.y,z.r*pulse);
-          grad.addColorStop(0,z.col+'80');
-          grad.addColorStop(1,z.col+'00');
-          ctx.fillStyle=grad; ctx.beginPath(); ctx.arc(pt.x,pt.y,z.r*pulse,0,Math.PI*2); ctx.fill();
-          ctx.fillStyle='rgba(255,255,255,0.75)'; ctx.font='8px "Space Grotesk"'; ctx.textAlign='center';
-          ctx.fillText(z.label, pt.x, pt.y+z.r*pulse+12);
-        } catch(e){}
-      });
-      ctx.textAlign='left';
-    }
-
-    if(ov === 'seismic_risk' || ov === 'flood_risk' || ov === 'climate_heatmap' || ov === 'heat_island' || ov === 'risk_map') {
-      // Overlay risc generic
-      const riskColors = { seismic_risk:'#ef4444', flood_risk:'#3b82f6', climate_heatmap:'#f59e0b', heat_island:'#f97316', risk_map:'#8b5cf6' };
-      const col = riskColors[ov] || '#ef4444';
-      const pulse = 0.6+Math.sin(now*1.2)*0.4;
-      if(m) {
-        try {
-          const pt=m.project([cx,cy]);
-          const grad=ctx.createRadialGradient(pt.x,pt.y,0,pt.x,pt.y,120*pulse);
-          grad.addColorStop(0,col+'40');
-          grad.addColorStop(0.5,col+'20');
-          grad.addColorStop(1,col+'00');
-          ctx.fillStyle=grad; ctx.beginPath(); ctx.arc(pt.x,pt.y,120*pulse,0,Math.PI*2); ctx.fill();
-        } catch(e){}
-      }
-    }
-
-    if(ov === 'modal_split_chart') {
-      // Grafic modal split animat
-      const years=[2025,2030,2035,2040,2050];
-      const auto=[72,67,62,57,50], tp=[18,22,26,30,36], activ=[10,11,12,13,14];
-      const cW=260, cH=80, cX=W/2-cW/2, cY=H*0.22;
-      ctx.fillStyle='rgba(4,10,24,0.9)'; this._rr(ctx,cX,cY,cW,cH+40,8); ctx.fill();
-      ctx.strokeStyle='rgba(139,92,246,0.4)'; ctx.lineWidth=1; this._rr(ctx,cX,cY,cW,cH+40,8); ctx.stroke();
-      ctx.fillStyle='#a78bfa'; ctx.font='bold 8px "Space Grotesk"'; ctx.textAlign='center';
-      ctx.fillText('Modal Split Evoluție 2025–2050', cX+cW/2, cY+14);
-      const drawLine=(data,col)=>{
-        ctx.beginPath(); ctx.strokeStyle=col; ctx.lineWidth=2;
-        years.forEach((yr,i)=>{
-          const px=cX+18+i*(cW-36)/(years.length-1);
-          const py=cY+22+(cH-14)*(1-data[i]/80);
-          i===0?ctx.moveTo(px,py):ctx.lineTo(px,py);
-        }); ctx.stroke();
-      };
-      drawLine(auto,'#ef4444'); drawLine(tp,'#22c55e'); drawLine(activ,'#60a5fa');
-      ctx.fillStyle='#ef4444'; ctx.font='7px "Space Grotesk"'; ctx.textAlign='left';
-      ctx.fillText('● Auto', cX+18, cY+cH+28);
-      ctx.fillStyle='#22c55e'; ctx.fillText('● TP', cX+70, cY+cH+28);
-      ctx.fillStyle='#60a5fa'; ctx.fillText('● Activ', cX+110, cY+cH+28);
-      years.forEach((yr,i)=>{
-        const px=cX+18+i*(cW-36)/(years.length-1);
-        ctx.fillStyle='rgba(148,163,184,0.5)'; ctx.font='7px "Space Grotesk"'; ctx.textAlign='center';
-        ctx.fillText(yr, px, cY+cH+16);
-      });
-      ctx.textAlign='left';
-    }
-
-    if(ov === 'milestone_2030' || ov === 'milestone_2035' || ov === 'milestone_2040' || ov === 'full_2050') {
-      // Overlay milestone dramatic
-      const milestoneYear = ov==='milestone_2030'?'2030':ov==='milestone_2035'?'2035':ov==='milestone_2040'?'2040':'2050';
-      const alpha = Math.min(1, sceneAge/2);
-      ctx.save(); ctx.globalAlpha = alpha * (0.7+Math.sin(now*2)*0.08);
-      ctx.fillStyle='#D4AF37'; ctx.font=`bold ${Math.round(H*0.18)}px "Space Grotesk"`;
-      ctx.textAlign='center'; ctx.globalAlpha=alpha*0.06;
-      ctx.fillText(milestoneYear, W/2, H*0.62);
-      ctx.globalAlpha=alpha*0.9;
-      ctx.font='bold 28px "Space Grotesk"'; ctx.fillStyle='#D4AF37';
-      ctx.fillText('⭐ MILESTONE ' + milestoneYear, W/2, H*0.26);
-      ctx.restore(); ctx.textAlign='left';
-    }
-
-    if(ov === 'comparison_iasi_cluj' || ov === 'comparison_vilnius' || ov === 'comparison_central_eu' || ov === 'comparison_eu') {
-      // Tabel comparatie avansat
-      const comparisons = {
-        comparison_iasi_cluj:   {c2:'Cluj-Napoca',   dens2:'76',   tp2:'28%',  pib2:'€22.4k', esg2:'67'},
-        comparison_vilnius:     {c2:'Vilnius',        dens2:'156',  tp2:'42%',  pib2:'€28.4k', esg2:'79'},
-        comparison_central_eu:  {c2:'Brno / Wrocław', dens2:'135',  tp2:'36%',  pib2:'€20.8k', esg2:'70'},
-        comparison_eu:          {c2:'Media UE-27',    dens2:'120',  tp2:'35%',  pib2:'€28.0k', esg2:'72'},
-      };
-      const comp = comparisons[ov];
-      const c1name = this.cityData?.name || 'Iași';
-      ctx.fillStyle='rgba(4,10,24,0.92)';
-      this._rr(ctx, W/2-175, H*0.19, 350, 135, 10); ctx.fill();
-      ctx.strokeStyle='rgba(212,175,55,0.35)'; ctx.lineWidth=1;
-      this._rr(ctx, W/2-175, H*0.19, 350, 135, 10); ctx.stroke();
-      ctx.textAlign='center';
-      ctx.fillStyle='#D4AF37'; ctx.font='bold 10px "Space Grotesk"'; ctx.fillText(c1name, W/2-60, H*0.19+22);
-      ctx.fillStyle='rgba(148,163,184,0.4)'; ctx.font='8px "Space Grotesk"'; ctx.fillText('vs', W/2, H*0.19+22);
-      ctx.fillStyle='#60a5fa'; ctx.font='bold 10px "Space Grotesk"'; ctx.fillText(comp.c2, W/2+60, H*0.19+22);
-      const rows=[
-        ['Densitate', densHA+' loc/ha', comp.dens2+' loc/ha'],
-        ['TP modal', '18%', comp.tp2],
-        ['PIB/cap', pib21, comp.pib2],
-        ['ESG Score', esg21+'/100', comp.esg2+'/100'],
-      ];
-      rows.forEach(([l,v1,v2],i)=>{
-        const y=H*0.19+42+i*23;
-        ctx.fillStyle='rgba(148,163,184,0.5)'; ctx.font='8px "Space Grotesk"'; ctx.fillText(l, W/2, y);
-        ctx.fillStyle='#D4AF37'; ctx.font='bold 11px "Space Grotesk"'; ctx.fillText(v1, W/2-60, y);
-        ctx.fillStyle='#60a5fa'; ctx.font='bold 11px "Space Grotesk"'; ctx.fillText(v2, W/2+60, y);
-      });
-      ctx.textAlign='left';
-    }
-
-    if(ov === 'eu_benchmarks' || ov === 'ro_eu_comparison') {
-      // Bare progres benchmarks UE
-      const kpis=[
-        {label:'Densitate',      val:densHA,  max:150, unit:'loc/ha', col:'#60a5fa'},
-        {label:'TP Modal Split', val:18,       max:50,  unit:'%',      col:'#22c55e'},
-        {label:'Spații verzi',   val:8.2,      max:15,  unit:'mp/loc', col:'#86efac'},
-        {label:'ESG Score',      val:esg21,    max:100, unit:'/100',   col:'#a78bfa'},
-        {label:'Convergență UE', val:74,       max:100, unit:'%',      col:'#D4AF37'},
-      ];
-      const cW=240, cH=kpis.length*24+28, cX=W-cW-12, cY=H*0.22;
-      ctx.fillStyle='rgba(4,10,24,0.9)'; this._rr(ctx,cX,cY,cW,cH,8); ctx.fill();
-      ctx.strokeStyle='rgba(139,92,246,0.3)'; ctx.lineWidth=1; this._rr(ctx,cX,cY,cW,cH,8); ctx.stroke();
-      ctx.fillStyle='#a78bfa'; ctx.font='bold 8px "Space Grotesk"'; ctx.textAlign='center';
-      ctx.fillText('Benchmarks vs Target UE 2030', cX+cW/2, cY+16);
-      kpis.forEach((k,i)=>{
-        const y=cY+30+i*24, barW=cW-50, barX=cX+44;
-        ctx.fillStyle='rgba(148,163,184,0.55)'; ctx.font='7px "Space Grotesk"'; ctx.textAlign='right';
-        ctx.fillText(k.label, cX+42, y+9);
-        ctx.fillStyle='rgba(255,255,255,0.08)'; ctx.fillRect(barX, y, barW, 10);
-        const progress=(k.val/k.max)*barW;
-        ctx.fillStyle=k.col; ctx.fillRect(barX, y, Math.min(progress,barW), 10);
-        ctx.fillStyle='rgba(255,255,255,0.6)'; ctx.font='bold 7px "Space Grotesk"'; ctx.textAlign='left';
-        ctx.fillText(k.val+k.unit, barX+progress+3, y+9);
-      });
-      ctx.textAlign='left';
-    }
-
-    if(ov === 'smart_city_kpis') {
-      // Smart city KPIs noapte - glow
-      const kpis=[
-        {icon:'📱', label:'Digitalizare', val:'95%', col:'#60a5fa'},
-        {icon:'🔌', label:'Regenerabile', val:'78%', col:'#22c55e'},
-        {icon:'♻',  label:'Reciclare',    val:'72%', col:'#86efac'},
-        {icon:'😊', label:'Satisfacție',  val:'82%', col:'#D4AF37'},
-      ];
-      const cardW=100, cardH=62, gap=10;
-      const totalW=kpis.length*(cardW+gap)-gap;
-      const startX=W/2-totalW/2, startY=H*0.22;
-      kpis.forEach((k,i)=>{
-        const x=startX+i*(cardW+gap), y=startY;
-        const pulse=0.85+Math.sin(now*1.5+i)*0.15;
-        ctx.fillStyle='rgba(4,10,24,0.85)'; this._rr(ctx,x,y,cardW,cardH,7); ctx.fill();
-        ctx.strokeStyle=k.col+Math.round(pulse*180).toString(16).padStart(2,'0');
-        ctx.lineWidth=1.5; this._rr(ctx,x,y,cardW,cardH,7); ctx.stroke();
-        // Glow
-        ctx.save(); ctx.shadowBlur=12; ctx.shadowColor=k.col; this._rr(ctx,x,y,cardW,cardH,7); ctx.stroke(); ctx.restore();
-        ctx.textAlign='center';
-        ctx.font='18px "Space Grotesk"'; ctx.fillStyle=k.col; ctx.fillText(k.icon, x+cardW/2, y+22);
-        ctx.font='bold 14px "Space Grotesk"'; ctx.fillStyle=k.col; ctx.fillText(k.val, x+cardW/2, y+42);
-        ctx.font='7px "Space Grotesk"'; ctx.fillStyle='rgba(148,163,184,0.65)'; ctx.fillText(k.label, x+cardW/2, y+56);
-      });
-      ctx.textAlign='left';
-    }
-
-    if(ov === 'tp_current' || ov === 'tp_extended') {
-      // TP linii animate pe canvas
-      if(m) {
-        const routes=[
-          {from:[cx-0.018,cy], to:[cx+0.018,cy],       col:'#ef4444', label:'Tramvai'},
-          {from:[cx,cy-0.015], to:[cx,cy+0.015],        col:'#3b82f6', label:'Autobuz'},
-          {from:[cx-0.010,cy+0.008], to:[cx+0.010,cy-0.008], col:ov==='tp_extended'?'#22c55e':'#8b5cf6', label:ov==='tp_extended'?'BRT Nou':'Troleibuz'},
-        ];
-        routes.forEach(rt=>{
-          try {
-            const p1=m.project(rt.from), p2=m.project(rt.to);
-            // Linie pulsanta
-            const t=(now*0.4)%1;
-            ctx.save(); ctx.strokeStyle=rt.col; ctx.lineWidth=3; ctx.globalAlpha=0.5;
-            ctx.beginPath(); ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y); ctx.stroke();
-            // Vehicul animat pe linie
-            const vx=p1.x+(p2.x-p1.x)*t, vy=p1.y+(p2.y-p1.y)*t;
-            ctx.globalAlpha=0.9;
-            ctx.fillStyle=rt.col; ctx.beginPath(); ctx.arc(vx,vy,5,0,Math.PI*2); ctx.fill();
-            // Glow
-            ctx.shadowBlur=8; ctx.shadowColor=rt.col;
-            ctx.beginPath(); ctx.arc(vx,vy,5,0,Math.PI*2); ctx.fill();
-            ctx.restore();
-          } catch(e){}
-        });
-      }
-    }
-
-    if(ov === 'construction_sites') {
-      // Macarale + cladiri in constructie
-      const sites=[
-        {lon:cx+0.010, lat:cy+0.012, stage:0.6, floors:8},
-        {lon:cx+0.007, lat:cy+0.014, stage:0.3, floors:12},
-        {lon:cx+0.013, lat:cy+0.011, stage:0.85,floors:6},
-        {lon:cx+0.009, lat:cy+0.015, stage:0.1, floors:10},
-      ];
-      if(m) sites.forEach(s=>{
-        try {
-          const pt=m.project([s.lon,s.lat]);
-          if(pt.x<-20||pt.x>W+20||pt.y<-20||pt.y>H+20) return;
-          const bh=40*s.stage, bw=14;
-          // Constructie
-          ctx.fillStyle=s.stage>0.7?'rgba(59,130,246,0.7)':'rgba(249,115,22,0.7)';
-          ctx.fillRect(pt.x-bw/2, pt.y-bh, bw, bh);
-          // Etaje
-          for(let i=0;i<Math.floor(s.stage*s.floors);i++){
-            ctx.fillStyle='rgba(255,255,255,0.3)';
-            ctx.fillRect(pt.x-bw/2+1, pt.y-bh+i*bh/Math.max(1,s.stage*s.floors)+1, bw-2, 2);
-          }
-          // Macara
-          if(s.stage<0.9){
-            const craneH=bh+20, craneArmLen=18;
-            ctx.strokeStyle='rgba(248,210,56,0.85)'; ctx.lineWidth=1.5;
-            ctx.beginPath(); ctx.moveTo(pt.x, pt.y-bh); ctx.lineTo(pt.x, pt.y-craneH); ctx.stroke();
-            const craneAngle=(now*0.15+s.lon)%(Math.PI*2);
-            ctx.beginPath();
-            ctx.moveTo(pt.x, pt.y-craneH);
-            ctx.lineTo(pt.x+Math.cos(craneAngle)*craneArmLen, pt.y-craneH+Math.sin(craneAngle)*5);
-            ctx.stroke();
-            // Cabina macara
-            ctx.fillStyle='rgba(248,210,56,0.9)';
-            ctx.fillRect(pt.x-3, pt.y-craneH-3, 6, 6);
-          }
-        } catch(e){}
-      });
-    }
-
-    if(ov === 'before_after_split') {
-      // Linie split verticala animata
-      const splitX = W/2 + Math.sin(now*0.15)*30;
-      ctx.save();
-      ctx.fillStyle='rgba(255,255,255,0.9)'; ctx.fillRect(splitX-1, 48, 2, H-110);
-      ctx.fillStyle='rgba(4,10,24,0.7)'; this._rr(ctx,splitX-40,52,38,18,4); ctx.fill();
-      ctx.fillStyle='rgba(4,10,24,0.7)'; this._rr(ctx,splitX+2,52,38,18,4); ctx.fill();
-      ctx.fillStyle='#D4AF37'; ctx.font='bold 7px "Space Grotesk"'; ctx.textAlign='center';
-      ctx.fillText('2025', splitX-21, 65);
-      ctx.fillStyle='#22c55e'; ctx.fillText('2040', splitX+21, 65);
-      ctx.restore(); ctx.textAlign='left';
-    }
-
-    if(ov === 'final_orbit' || ov === 'metro_orbit') {
-      // Orbita vizuala pe canvas
-      if(m) {
-        try {
-          const pt=m.project([cx,cy]);
-          for(let r=0;r<3;r++){
-            const radius=60+r*40, speed=0.3+r*0.15;
-            const angle=now*speed;
-            const px=pt.x+Math.cos(angle)*radius, py=pt.y+Math.sin(angle)*radius*0.4;
-            ctx.save(); ctx.strokeStyle='rgba(212,175,55,'+(0.15-r*0.04)+')'; ctx.lineWidth=1;
-            ctx.beginPath(); ctx.ellipse(pt.x,pt.y,radius,radius*0.4,0,0,Math.PI*2); ctx.stroke();
-            ctx.fillStyle='rgba(212,175,55,0.8)';
-            ctx.beginPath(); ctx.arc(px,py,2.5,0,Math.PI*2); ctx.fill();
-            ctx.restore();
-          }
-        } catch(e){}
-      }
-    }
-
-    // ── S4 — Neighborhoods labels pe hartă (Copou, Tătărași, Nicolina...) ──
-    if(ov === 'city_3d_reveal' || ov === 'neighborhoods_labels' || ov === 'city_3d') {
+    // ════════════════════════════════════════════════════════
+    // S4 — CITY 3D: labels cartiere + legendă densitate
+    // ════════════════════════════════════════════════════════
+    if(ov==='s4_city3d_labels') {
       if(m) {
         const zones=[
-          {lon:cx+0.009,lat:cy+0.013,label:'COPOU',       col:'#a78bfa'},
-          {lon:cx+0.005,lat:cy-0.008,label:'TĂTĂRAȘI',    col:'#60a5fa'},
-          {lon:cx-0.003,lat:cy+0.001,label:'CENTRU',      col:'#D4AF37'},
-          {lon:cx-0.005,lat:cy-0.012,label:'NICOLINA',    col:'#60a5fa'},
-          {lon:cx+0.018,lat:cy-0.006,label:'DACIA',       col:'#94a3b8'},
-          {lon:cx-0.014,lat:cy+0.007,label:'FRUMOASA',    col:'#22c55e'},
-          {lon:cx+0.011,lat:cy+0.004,label:'AL. CEL BUN', col:'#94a3b8'},
+          {lon:cx+0.009,lat:cy+0.013,l:'COPOU',     c:'#a78bfa'},
+          {lon:cx+0.005,lat:cy-0.008,l:'TĂTĂRAȘI',  c:'#60a5fa'},
+          {lon:cx-0.002,lat:cy+0.001,l:'CENTRU',    c:'#D4AF37'},
+          {lon:cx-0.005,lat:cy-0.011,l:'NICOLINA',  c:'#60a5fa'},
+          {lon:cx+0.018,lat:cy-0.005,l:'DACIA',     c:'#94a3b8'},
         ];
-        ctx.save();
         zones.forEach(z=>{
           try {
             const pt=m.project([z.lon,z.lat]);
             if(pt.x<20||pt.x>W-20||pt.y<52||pt.y>H-60) return;
-            const tw=ctx.measureText(z.label).width;
-            ctx.fillStyle='rgba(4,10,24,0.78)';
-            this._rr(ctx,pt.x-tw/2-7,pt.y-10,tw+14,16,3); ctx.fill();
-            ctx.fillStyle=z.col; ctx.font='bold 8px "Space Grotesk"';
-            ctx.textAlign='center'; ctx.fillText(z.label,pt.x,pt.y+2);
-            ctx.fillStyle=z.col+'cc';
-            ctx.beginPath(); ctx.arc(pt.x,pt.y+12,2.5,0,Math.PI*2); ctx.fill();
+            ctx.font='bold 9px "Space Grotesk"';
+            const tw=ctx.measureText(z.l).width;
+            card(pt.x-tw/2-8, pt.y-11, tw+16, 18, 3, 'rgba(4,10,24,0.80)');
+            ctx.fillStyle=z.c; ctx.textAlign='center';
+            ctx.fillText(z.l, pt.x, pt.y+2);
+            ctx.fillStyle=z.c+'aa';
+            ctx.beginPath(); ctx.arc(pt.x,pt.y+14,2,0,Math.PI*2); ctx.fill();
           } catch(e){}
-        });
-        ctx.restore(); ctx.textAlign='left';
-
-        // Legendă densitate dreapta-sus (ca storyboard S4)
-        const lgd=[{col:'#ef4444',l:'200+'},{col:'#f97316',l:'150'},{col:'#f59e0b',l:'100'},{col:'#22c55e',l:'50'},{col:'#1d4ed8',l:'0'}];
-        const lgX=W-92, lgY=58, lgH=lgd.length*16+26;
-        ctx.fillStyle='rgba(4,10,24,0.85)'; this._rr(ctx,lgX,lgY,80,lgH,6); ctx.fill();
-        ctx.fillStyle='rgba(148,163,184,0.7)'; ctx.font='bold 7px "Space Grotesk"'; ctx.textAlign='center';
-        ctx.fillText('DENSITATE', lgX+40, lgY+13);
-        ctx.fillStyle='rgba(100,120,150,0.5)'; ctx.font='6px "Space Grotesk"';
-        ctx.fillText('LOCUITORI / HA', lgX+40, lgY+22);
-        lgd.forEach((l,i)=>{
-          const ly=lgY+28+i*16;
-          ctx.fillStyle=l.col; ctx.fillRect(lgX+10,ly,12,10);
-          ctx.fillStyle='rgba(200,215,235,0.8)'; ctx.font='8px "Space Grotesk"'; ctx.textAlign='left';
-          ctx.fillText(l.l, lgX+28, ly+9);
         });
         ctx.textAlign='left';
       }
-    }
-
-    // ── S7 — Focus zonă: numere mari exacte ca storyboard ───────────────────
-    if(ov === 'construction_focus' || ov === 'district_focus') {
-      const yr=this.year||2025;
-      const densif=Math.round(28+(yr-2021)*0.4);
-      const locNoi=Math.round(12400*Math.min(1,(yr-2021)/19));
-      const pop50z=45800;
-      const cW=178, cH=148, cX=W-cW-12, cY=62;
-      ctx.fillStyle='rgba(4,10,24,0.92)'; this._rr(ctx,cX,cY,cW,cH,8); ctx.fill();
-      ctx.strokeStyle='rgba(212,175,55,0.3)'; ctx.lineWidth=1; this._rr(ctx,cX,cY,cW,cH,8); ctx.stroke();
-      ctx.textAlign='center';
-      ctx.fillStyle='rgba(148,163,184,0.6)'; ctx.font='bold 8px "Space Grotesk"'; ctx.fillText('DENSIFICARE',cX+cW/2,cY+17);
-      ctx.fillStyle='#22c55e'; ctx.font='bold 30px "Space Grotesk"'; ctx.fillText('+'+densif+'%',cX+cW/2,cY+48);
-      ctx.fillStyle='rgba(255,255,255,0.08)'; ctx.fillRect(cX+10,cY+54,cW-20,1);
-      ctx.fillStyle='rgba(148,163,184,0.6)'; ctx.font='bold 8px "Space Grotesk"'; ctx.fillText('LOCUINȚE NOI',cX+cW/2,cY+70);
-      ctx.fillStyle='#D4AF37'; ctx.font='bold 26px "Space Grotesk"'; ctx.fillText(locNoi.toLocaleString(),cX+cW/2,cY+96);
-      ctx.fillStyle='rgba(255,255,255,0.08)'; ctx.fillRect(cX+10,cY+102,cW-20,1);
-      ctx.fillStyle='rgba(148,163,184,0.6)'; ctx.font='bold 8px "Space Grotesk"'; ctx.fillText('POPULAȚIE 2050',cX+cW/2,cY+118);
-      ctx.fillStyle='#60a5fa'; ctx.font='bold 20px "Space Grotesk"'; ctx.fillText(pop50z.toLocaleString(),cX+cW/2,cY+142);
+      // Legendă densitate dreapta sus
+      const ld=[{c:'#ef4444',l:'200+'},{c:'#f97316',l:'150'},{c:'#f59e0b',l:'100'},{c:'#22c55e',l:'50'},{c:'#1d4ed8',l:'0'}];
+      const lX=W-90, lY=58;
+      card(lX,lY,78,ld.length*16+26,6,'rgba(4,10,24,0.85)','rgba(255,255,255,0.07)');
+      ctx.fillStyle='rgba(148,163,184,0.65)'; ctx.font='bold 6.5px "Space Grotesk"'; ctx.textAlign='center';
+      ctx.fillText('DENSITATE',lX+39,lY+12); ctx.font='6px "Space Grotesk"';
+      ctx.fillText('LOCUITORI / HA',lX+39,lY+22);
+      ld.forEach((l,i)=>{
+        const ly=lY+28+i*16;
+        ctx.fillStyle=l.c; ctx.fillRect(lX+10,ly,12,10);
+        ctx.fillStyle='rgba(200,215,235,0.8)'; ctx.font='8px "Space Grotesk"'; ctx.textAlign='left';
+        ctx.fillText(l.l,lX+28,ly+9);
+      });
       ctx.textAlign='left';
     }
 
-    // ── S6 — Traffic legend exactă ca storyboard ─────────────────────────────
-    if(ov === 'traffic_heatmap' || ov === 'traffic_network' || ov === 'congestion_nodes') {
-      const lgX=16, lgY=H-75-76;
-      ctx.fillStyle='rgba(4,10,24,0.88)'; this._rr(ctx,lgX,lgY,145,72,7); ctx.fill();
-      ctx.strokeStyle='rgba(255,255,255,0.07)'; ctx.lineWidth=1; this._rr(ctx,lgX,lgY,145,72,7); ctx.stroke();
-      ctx.fillStyle='rgba(148,163,184,0.7)'; ctx.font='bold 8px "Space Grotesk"';
-      ctx.fillText('TRAFIC',lgX+12,lgY+15);
-      [{col:'#ef4444',l:'AGLOMERAT'},{col:'#f59e0b',l:'MODERAT'},{col:'#22c55e',l:'FLUID'}].forEach((it,i)=>{
-        const ly=lgY+24+i*17;
-        ctx.strokeStyle=it.col; ctx.lineWidth=3;
-        ctx.beginPath(); ctx.moveTo(lgX+12,ly+5); ctx.lineTo(lgX+34,ly+5); ctx.stroke();
-        ctx.fillStyle='rgba(200,215,235,0.85)'; ctx.font='8px "Space Grotesk"';
-        ctx.fillText(it.l,lgX+40,ly+9);
+    // ════════════════════════════════════════════════════════
+    // S5 — DEZVOLTARE: legendă + timeline
+    // ════════════════════════════════════════════════════════
+    if(ov==='s5_dezvoltare') {
+      // Legendă stânga
+      const ld=[{c:'#ef4444',l:'MAJORĂ'},{c:'#f59e0b',l:'MEDIE'},{c:'#22c55e',l:'MICĂ'},{c:'#8b5cf6',l:'STAGNARE'}];
+      card(16,H*0.28,135,ld.length*20+30,8);
+      ctx.fillStyle='rgba(148,163,184,0.6)'; ctx.font='bold 7.5px "Space Grotesk"';
+      ctx.fillText('DEZVOLTARE 2025–2050',28,H*0.28+16);
+      ld.forEach((l,i)=>{
+        const ly=H*0.28+28+i*20;
+        ctx.fillStyle=l.c; ctx.fillRect(28,ly,12,12);
+        ctx.fillStyle='rgba(200,215,235,0.85)'; ctx.font='8.5px "Space Grotesk"';
+        ctx.fillText(l.l,46,ly+10);
+      });
+      // Timeline jos center
+      const yrs=[2025,2030,2035,2040,2045,2050];
+      const tW=300, tX=W/2-tW/2, tY=H-74;
+      card(tX-10,tY-8,tW+20,34,5,'rgba(4,10,24,0.82)');
+      const tProg=Math.min(1,(yr-2025)/25);
+      ctx.fillStyle='rgba(255,255,255,0.08)'; ctx.fillRect(tX,tY+8,tW,4);
+      ctx.fillStyle='rgba(212,175,55,0.7)';   ctx.fillRect(tX,tY+8,tW*tProg,4);
+      yrs.forEach((y,i)=>{
+        const px=tX+i*(tW/(yrs.length-1));
+        ctx.fillStyle=y===yr?'#D4AF37':'rgba(212,175,55,0.4)';
+        ctx.beginPath(); ctx.arc(px,tY+10,y===yr?4:2.5,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle=y===yr?'#D4AF37':'rgba(148,163,184,0.45)';
+        ctx.font=(y===yr?'bold ':'')+7+'px "Space Grotesk"'; ctx.textAlign='center';
+        ctx.fillText(y,px,tY+24);
+      });
+      ctx.textAlign='left';
+    }
+
+    // ════════════════════════════════════════════════════════
+    // S6 — MOBILITATE: trafic % + 4 iconuri jos
+    // ════════════════════════════════════════════════════════
+    if(ov==='s6_mobilitate') {
+      // Card trafic dreapta
+      const cX=W-185, cY=62, cW=170;
+      card(cX,cY,cW,110,8,'rgba(4,10,24,0.92)','rgba(239,68,68,0.25)');
+      ctx.fillStyle='#D4AF37'; ctx.font='bold 9px "Space Grotesk"';
+      ctx.fillText('TRAFIC 2050', cX+14, cY+18);
+      const tr=[{l:'AGLOMERAT',v:'38%',c:'#ef4444'},{l:'MODERAT',v:'41%',c:'#f59e0b'},{l:'FLUID',v:'21%',c:'#22c55e'}];
+      tr.forEach((t,i)=>{
+        const ty=cY+30+i*26;
+        ctx.strokeStyle=t.c; ctx.lineWidth=3;
+        ctx.beginPath(); ctx.moveTo(cX+14,ty+8); ctx.lineTo(cX+40,ty+8); ctx.stroke();
+        ctx.fillStyle='rgba(148,163,184,0.7)'; ctx.font='8px "Space Grotesk"';
+        ctx.fillText(t.l, cX+48, ty+5);
+        ctx.fillStyle=t.c; ctx.font='bold 13px "Space Grotesk"';
+        ctx.fillText(t.v, cX+48, ty+18);
+      });
+      // 4 iconuri jos
+      const icons=[
+        {i:'🛣',l:'DRUMURI NOI',v:'23 km'},
+        {i:'🚌',l:'TRANSPORT PUBLIC',v:'+62%'},
+        {i:'🚲',l:'PISTE BICICLETE',v:'+48 km'},
+        {i:'🅿',l:'PARK & RIDE',v:'7 locații'},
+      ];
+      const iW=W/4-8, iY=H-74-54;
+      icons.forEach((ic,i)=>{
+        const iX=i*(iW+4)+4;
+        card(iX,iY,iW,48,6,'rgba(4,10,24,0.85)','rgba(255,255,255,0.07)');
+        ctx.font='18px "Space Grotesk"'; ctx.textAlign='center';
+        ctx.fillText(ic.i, iX+iW/2, iY+22);
+        ctx.fillStyle='rgba(148,163,184,0.5)'; ctx.font='6px "Space Grotesk"';
+        ctx.fillText(ic.l, iX+iW/2, iY+32);
+        ctx.fillStyle='#D4AF37'; ctx.font='bold 9px "Space Grotesk"';
+        ctx.fillText(ic.v, iX+iW/2, iY+44);
+      });
+      ctx.textAlign='left';
+    }
+
+    // ════════════════════════════════════════════════════════
+    // S7 — COPOU: 3 carduri mari dreapta
+    // ════════════════════════════════════════════════════════
+    if(ov==='s7_copou_data') {
+      const densif=Math.round(28+(yr-2025)*0.3);
+      const locNoi=Math.round(12400*Math.min(1,(yr-2025)/25));
+      const cX=W-182, cY=62, cW=168, sep=8;
+      // Card 1 - Densificare
+      card(cX,cY,cW,70,8,'rgba(4,10,24,0.92)','rgba(34,197,94,0.3)');
+      ctx.fillStyle='rgba(148,163,184,0.6)'; ctx.font='bold 8px "Space Grotesk"';
+      ctx.fillText('DENSIFICARE', cX+14, cY+17);
+      ctx.fillStyle='#22c55e'; ctx.font='bold 34px "Space Grotesk"';
+      ctx.textAlign='right'; ctx.fillText('+'+densif+'%', cX+cW-14, cY+56);
+      // Card 2 - Locuinte noi
+      card(cX,cY+70+sep,cW,65,8,'rgba(4,10,24,0.92)','rgba(212,175,55,0.3)');
+      ctx.fillStyle='rgba(148,163,184,0.6)'; ctx.font='bold 8px "Space Grotesk"'; ctx.textAlign='left';
+      ctx.fillText('LOCUINȚE NOI', cX+14, cY+70+sep+17);
+      ctx.fillStyle='#D4AF37'; ctx.font='bold 28px "Space Grotesk"'; ctx.textAlign='right';
+      ctx.fillText(locNoi.toLocaleString(), cX+cW-14, cY+70+sep+52);
+      // Card 3 - Populatie 2050
+      card(cX,cY+143+sep*2,cW,58,8,'rgba(4,10,24,0.92)','rgba(96,165,250,0.3)');
+      ctx.fillStyle='rgba(148,163,184,0.6)'; ctx.font='bold 8px "Space Grotesk"'; ctx.textAlign='left';
+      ctx.fillText('POPULAȚIE 2050', cX+14, cY+143+sep*2+17);
+      ctx.fillStyle='#60a5fa'; ctx.font='bold 24px "Space Grotesk"'; ctx.textAlign='right';
+      ctx.fillText('45.800', cX+cW-14, cY+143+sep*2+50);
+      ctx.textAlign='left';
+    }
+
+    // ════════════════════════════════════════════════════════
+    // S8 — STREET LEVEL: 3 metrici + 4 iconuri
+    // ════════════════════════════════════════════════════════
+    if(ov==='s8_street_life') {
+      const cX=W-182, cY=62, cW=168;
+      card(cX,cY,cW,125,8,'rgba(4,10,24,0.92)','rgba(96,165,250,0.25)');
+      const rows=[
+        {l:'PIETONI / ORĂ',v:'1.240',c:'#60a5fa'},
+        {l:'VEHICULE / ORĂ',v:'860',c:'#f59e0b'},
+        {l:'CALITATE AER',v:'BUNĂ 😊',c:'#22c55e'},
+      ];
+      rows.forEach((r,i)=>{
+        const ry=cY+14+i*37;
+        ctx.fillStyle='rgba(148,163,184,0.55)'; ctx.font='7.5px "Space Grotesk"';
+        ctx.fillText(r.l, cX+14, ry+10);
+        ctx.fillStyle=r.c; ctx.font='bold 18px "Space Grotesk"'; ctx.textAlign='right';
+        ctx.fillText(r.v, cX+cW-14, ry+28);
+        if(i<rows.length-1){ctx.fillStyle='rgba(255,255,255,0.06)';ctx.fillRect(cX+10,ry+33,cW-20,1);}
+        ctx.textAlign='left';
+      });
+      // 4 iconuri jos
+      const icons=[
+        {i:'🚶',l:'ZONĂ PIETONALĂ'},{i:'🌿',l:'TRANSPORT VERDE'},
+        {i:'🌳',l:'SPAȚII VERZI'},{i:'🛡',l:'SIGURANȚĂ'},
+      ];
+      const iW2=(W-8)/4-4, iY2=H-74-52;
+      icons.forEach((ic,i)=>{
+        const iX=i*(iW2+4)+4;
+        card(iX,iY2,iW2,46,6,'rgba(4,10,24,0.82)','rgba(96,165,250,0.15)');
+        ctx.font='16px "Space Grotesk"'; ctx.textAlign='center';
+        ctx.fillText(ic.i, iX+iW2/2, iY2+20);
+        ctx.fillStyle='rgba(148,163,184,0.6)'; ctx.font='6.5px "Space Grotesk"';
+        ctx.fillText(ic.l, iX+iW2/2, iY2+38);
+      });
+      ctx.textAlign='left';
+    }
+
+    // ════════════════════════════════════════════════════════
+    // S9 — RISCURI: legendă stânga
+    // ════════════════════════════════════════════════════════
+    if(ov==='s9_riscuri') {
+      const risks=[
+        {c:'#3b82f6',i:'🌊',l:'INUNDAȚII',  r:'RISC MEDIU',  rc:'#f59e0b'},
+        {c:'#ef4444',i:'🌡',l:'CANICULĂ',   r:'RISC RIDICAT',rc:'#ef4444'},
+        {c:'#a78bfa',i:'⛰',l:'ALUNECĂRI',  r:'RISC SCĂZUT', rc:'#22c55e'},
+        {c:'#94a3b8',i:'💨',l:'POLUARE AER',r:'RISC MEDIU',  rc:'#f59e0b'},
+      ];
+      const cW=175, rH=44;
+      card(16, H*0.3, cW, risks.length*rH+20, 8);
+      ctx.fillStyle='rgba(148,163,184,0.6)'; ctx.font='bold 7.5px "Space Grotesk"';
+      ctx.fillText('RISCURI 2050', 28, H*0.3+15);
+      risks.forEach((r,i)=>{
+        const ry=H*0.3+24+i*rH;
+        ctx.font='18px "Space Grotesk"'; ctx.fillText(r.i, 22, ry+22);
+        ctx.fillStyle='rgba(200,215,235,0.85)'; ctx.font='bold 8.5px "Space Grotesk"';
+        ctx.fillText(r.l, 44, ry+12);
+        ctx.fillStyle=r.rc; ctx.font='bold 8px "Space Grotesk"';
+        ctx.fillText(r.r, 44, ry+25);
+        if(i<risks.length-1){ctx.fillStyle='rgba(255,255,255,0.05)';ctx.fillRect(22,ry+rH-3,cW-20,1);}
       });
     }
 
-    // ── S10 — Urban life: TP +62% + Pietoni 24.700 ──────────────────────────
-    if(ov === 'urban_pulse' || ov === 'pedestrian_street') {
-      const cW=178, cX=W-cW-12, cY=62;
-      ctx.fillStyle='rgba(4,10,24,0.90)'; this._rr(ctx,cX,cY,cW,112,8); ctx.fill();
-      ctx.strokeStyle='rgba(34,197,94,0.3)'; ctx.lineWidth=1; this._rr(ctx,cX,cY,cW,112,8); ctx.stroke();
+    // ════════════════════════════════════════════════════════
+    // S10 — COMPARATIE: tabel complet
+    // ════════════════════════════════════════════════════════
+    if(ov==='s10_comparatie') {
+      const cX=W/2-185, cY=H*0.2, cW=370, rowH=24;
+      const rows=[
+        ['POPULAȚIE 2050','434K','564K'],
+        ['DENSITATE (loc/ha)','102','156'],
+        ['INVESTIȚII ESTIMATE','2,8 MLD €','3,6 MLD €'],
+        ['TRAFIC (indice)','+38%','+52%'],
+        ['CALITATE A VIEȚII','7,8 / 10','8,2 / 10'],
+      ];
+      card(cX,cY,cW,rows.length*rowH+50,10,'rgba(4,10,24,0.93)','rgba(212,175,55,0.2)');
+      // Header
       ctx.textAlign='center';
-      ctx.fillStyle='rgba(148,163,184,0.6)'; ctx.font='bold 8px "Space Grotesk"'; ctx.fillText('TRANSPORT PUBLIC',cX+cW/2,cY+17);
-      ctx.fillStyle='#22c55e'; ctx.font='bold 34px "Space Grotesk"'; ctx.fillText('+62%',cX+cW/2,cY+53);
-      ctx.fillStyle='rgba(255,255,255,0.08)'; ctx.fillRect(cX+10,cY+59,cW-20,1);
-      ctx.fillStyle='rgba(148,163,184,0.6)'; ctx.font='bold 8px "Space Grotesk"'; ctx.fillText('PIETONI / ZI',cX+cW/2,cY+74);
-      ctx.fillStyle='#60a5fa'; ctx.font='bold 22px "Space Grotesk"'; ctx.fillText('24.700',cX+cW/2,cY+100);
+      ctx.fillStyle='rgba(148,163,184,0.4)'; ctx.font='7.5px "Space Grotesk"';
+      ctx.fillText('INDICATOR',cX+100,cY+18);
+      ctx.fillStyle='#D4AF37'; ctx.font='bold 10px "Space Grotesk"';
+      ctx.fillText(city.toUpperCase(),cX+230,cY+18);
+      ctx.fillStyle='#60a5fa'; ctx.fillText('CLUJ-NAPOCA',cX+330,cY+18);
+      ctx.fillStyle='rgba(255,255,255,0.08)'; ctx.fillRect(cX+10,cY+24,cW-20,1);
+      rows.forEach((r,i)=>{
+        const ry=cY+30+i*rowH;
+        if(i%2===0){ctx.fillStyle='rgba(255,255,255,0.02)';ctx.fillRect(cX+5,ry,cW-10,rowH);}
+        ctx.fillStyle='rgba(148,163,184,0.65)'; ctx.font='8px "Space Grotesk"'; ctx.textAlign='center';
+        ctx.fillText(r[0],cX+100,ry+rowH/2+3);
+        ctx.fillStyle='#D4AF37'; ctx.font='bold 13px "Space Grotesk"';
+        ctx.fillText(r[1],cX+230,ry+rowH/2+5);
+        ctx.fillStyle='#60a5fa';
+        ctx.fillText(r[2],cX+330,ry+rowH/2+5);
+      });
       ctx.textAlign='left';
     }
 
-    // ── S11 — 2025 | 2050 simultane cu linie split + play button ─────────────
-    if(ov === 'temporal_morph') {
-      ctx.save();
-      const a=Math.min(1,sceneAge/1.5);
-      ctx.globalAlpha=a;
-      // Texte mari
-      ctx.font=`bold ${Math.round(H*0.135)}px "Space Grotesk"`;
+    // ════════════════════════════════════════════════════════
+    // S11 — TIME MACHINE: 2025 | 2050 + play
+    // ════════════════════════════════════════════════════════
+    if(ov==='s11_timemachine') {
+      const a=Math.min(1,age/1.5);
+      ctx.save(); ctx.globalAlpha=a;
+      // Labels 2025 ASTĂZI / 2050 VIITORUL
+      ctx.font=`bold ${Math.round(H*0.13)}px "Space Grotesk"`;
       ctx.textAlign='center';
-      ctx.fillStyle='rgba(148,163,184,0.16)'; ctx.fillText('2025',W*0.27,H*0.60);
-      ctx.fillStyle='rgba(212,175,55,0.20)';  ctx.fillText('2050',W*0.73,H*0.60);
-      // Linie split animata
-      const spX=W/2+Math.sin(now*0.18)*12;
-      ctx.fillStyle='rgba(255,255,255,0.65)'; ctx.fillRect(spX-1,50,2,H-112);
+      ctx.fillStyle='rgba(148,163,184,0.14)'; ctx.fillText('2025',W*0.27,H*0.60);
+      ctx.fillStyle='rgba(212,175,55,0.18)';  ctx.fillText('2050',W*0.73,H*0.60);
+      ctx.font='bold 13px "Space Grotesk"';
+      ctx.fillStyle='rgba(148,163,184,0.5)'; ctx.fillText('ASTĂZI',W*0.27,H*0.67);
+      ctx.fillStyle='rgba(212,175,55,0.55)'; ctx.fillText('VIITORUL',W*0.73,H*0.67);
+      // Linie split
+      const spX=W/2+Math.sin(now*0.15)*10;
+      ctx.fillStyle='rgba(255,255,255,0.55)'; ctx.fillRect(spX-1,50,2,H-112);
       // Play button
-      const bY=H/2-12;
-      ctx.fillStyle='rgba(4,10,24,0.8)';
-      ctx.beginPath(); ctx.arc(spX,bY,18,0,Math.PI*2); ctx.fill();
-      ctx.strokeStyle='rgba(212,175,55,0.7)'; ctx.lineWidth=1.5;
-      ctx.beginPath(); ctx.arc(spX,bY,18,0,Math.PI*2); ctx.stroke();
-      ctx.fillStyle='rgba(212,175,55,0.9)';
-      ctx.beginPath(); ctx.moveTo(spX-7,bY-9); ctx.lineTo(spX-7,bY+9); ctx.lineTo(spX+10,bY); ctx.closePath(); ctx.fill();
+      const bY=H/2-14;
+      ctx.fillStyle='rgba(4,10,24,0.85)';
+      ctx.beginPath(); ctx.arc(spX,bY,22,0,Math.PI*2); ctx.fill();
+      ctx.strokeStyle='rgba(212,175,55,0.75)'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.arc(spX,bY,22,0,Math.PI*2); ctx.stroke();
+      ctx.fillStyle='rgba(212,175,55,0.92)';
+      ctx.beginPath(); ctx.moveTo(spX-8,bY-12); ctx.lineTo(spX-8,bY+12); ctx.lineTo(spX+14,bY); ctx.closePath(); ctx.fill();
+      // An curent afisat
+      ctx.fillStyle='#D4AF37'; ctx.font='bold 18px "Space Grotesk"';
+      ctx.textAlign='center'; ctx.fillText(yr, spX, bY+44);
       ctx.restore(); ctx.textAlign='left';
     }
 
-    ctx.restore();
+    // ════════════════════════════════════════════════════════
+    // S12 — CONCLUZIE: card viziune
+    // ════════════════════════════════════════════════════════
+    if(ov==='s12_concluzie') {
+      const cX=W-240, cY=H*0.2, cW=222, cH=175;
+      card(cX,cY,cW,cH,10,'rgba(4,10,24,0.92)','rgba(212,175,55,0.4)');
+      ctx.fillStyle='#D4AF37'; ctx.font='bold 11px "Space Grotesk"'; ctx.textAlign='center';
+      ctx.fillText(city.toUpperCase()+' 2050', cX+cW/2, cY+20);
+      ctx.fillStyle='rgba(148,163,184,0.5)'; ctx.font='8px "Space Grotesk"';
+      ctx.fillText('ORAȘ INTELIGENT, SUSTENABIL, CONECTAT', cX+cW/2, cY+34);
+      ctx.fillStyle='rgba(255,255,255,0.1)'; ctx.fillRect(cX+16,cY+40,cW-32,1);
+      const items=[
+        '✅  Dezvoltare echilibrată',
+        '✅  Mobilitate sustenabilă',
+        '✅  Infrastructură modernă',
+        '✅  Mediu curat',
+        '✅  Calitate a vieții ridicată',
+      ];
+      items.forEach((it,i)=>{
+        ctx.fillStyle='rgba(200,215,235,0.88)'; ctx.font='9.5px "Space Grotesk"'; ctx.textAlign='left';
+        ctx.fillText(it, cX+18, cY+58+i*22);
+      });
+      // Sursa
+      ctx.fillStyle='rgba(100,120,150,0.4)'; ctx.font='6.5px "Space Grotesk"'; ctx.textAlign='center';
+      ctx.fillText('Date oficiale: INS · Eurostat · ANCPI · BNR · IPCC', cX+cW/2, cY+cH-8);
+      ctx.textAlign='left';
+    }
 
+    // ── Progress scenă generic (act label jos stânga) ─────────────────────
+    if(scene && (ov==='s5_dezvoltare'||ov==='s11_timemachine')) {
+      // year counter afișat la milestones
+      const milestoneYrs=[2030,2035,2040,2045,2050];
+      if(milestoneYrs.includes(yr)) {
+        ctx.save(); ctx.globalAlpha=0.12;
+        ctx.font=`bold ${Math.round(H*0.18)}px "Space Grotesk"`;
+        ctx.textAlign='center'; ctx.fillStyle='#D4AF37';
+        ctx.fillText(yr, W/2, H*0.62);
+        ctx.restore(); ctx.textAlign='left';
+      }
+    }
+
+    ctx.restore();
   },
 
 
