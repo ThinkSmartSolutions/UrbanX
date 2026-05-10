@@ -287,49 +287,53 @@ const TCI = {
         </div>
       </div>
       <!-- PANEL DREPT -->
-      <div id="tci-rpanel" style="position:absolute;right:0;top:42px;bottom:60px;width:188px;pointer-events:all;background:rgba(4,10,24,0.90);backdrop-filter:blur(12px);border-left:1px solid rgba(255,255,255,0.06);overflow-y:auto;z-index:10">
-        <div style="padding:10px">
-          <div style="font-size:7.5px;font-weight:700;color:#D4AF37;letter-spacing:.08em;margin-bottom:8px">PROIECȚIE ${this.startYear}–2055</div>
+      <!-- PANEL DREPT — Narativ + KPI proiecție + Legendă -->
+      <div id="tci-rpanel" style="position:absolute;right:0;top:42px;bottom:60px;width:220px;pointer-events:all;background:rgba(4,10,24,0.92);backdrop-filter:blur(12px);border-left:1px solid rgba(255,255,255,0.06);overflow-y:auto;z-index:10">
+        <div style="padding:10px;display:flex;flex-direction:column;gap:8px">
+
+          <!-- Scena curenta / narativ -->
+          <div id="tci-narcard" style="background:rgba(14,26,52,0.8);border:1px solid rgba(212,175,55,0.3);border-radius:8px;padding:10px;transition:opacity .35s">
+            <div id="tci-nar-title" style="font-size:10.5px;font-weight:700;color:#D4AF37;margin-bottom:4px;line-height:1.3"></div>
+            <div id="tci-nar-body" style="font-size:9.5px;color:rgba(200,215,235,0.85);line-height:1.55"></div>
+            <div id="tci-nar-src" style="font-size:7.5px;color:rgba(148,163,184,0.4);margin-top:4px;font-style:italic"></div>
+          </div>
+
+          <!-- Ce vedeti -->
+          <div id="tci-nar-what" style="background:rgba(8,18,40,0.8);border:1px solid rgba(96,165,250,0.2);border-radius:8px;padding:9px">
+            <div style="font-size:7.5px;font-weight:700;color:#60a5fa;margin-bottom:3px;letter-spacing:.05em">👁 CE VEDEȚI</div>
+            <div id="tci-nar-whattext" style="font-size:9px;color:rgba(180,200,225,0.82);line-height:1.55"></div>
+          </div>
+
+          <!-- Separator -->
+          <div style="border-top:1px solid rgba(255,255,255,0.06)"></div>
+          <div style="font-size:7.5px;font-weight:700;color:#D4AF37;letter-spacing:.08em">PROIECȚIE ${this.startYear}–2055</div>
           <div id="tci-kpis-r"></div>
-          <canvas id="tci-chart" width="163" height="60" style="width:100%;display:block;margin-top:8px"></canvas>
-          <div id="tci-eu-panel" style="margin-top:8px"></div>
+          <canvas id="tci-chart" width="195" height="60" style="width:100%;display:block"></canvas>
+          <div id="tci-eu-panel"></div>
+
+          <!-- Legenda -->
+          <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:8px">
+            <div style="font-size:7px;font-weight:700;color:rgba(148,163,184,0.55);margin-bottom:5px;letter-spacing:.06em">LEGENDA PROIECȚIE</div>
+            ${[
+              {c:'#374151',l:'Planificat'},
+              {c:'#f59e0b',l:'Construcție activă'},
+              {c:'#f97316',l:'Aproape finalizat'},
+              {c:'#7c3aed',l:'Centru civic'},
+              {c:'#d97706',l:'Coridor bulevardier'},
+              {c:'#2563eb',l:'Rezidențial colectiv'},
+              {c:'#ea580c',l:'Reconversie industrială'},
+              {c:'#16a34a',l:'Creștere rezidențială'},
+            ].map(it=>`<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px"><div style="width:9px;height:7px;background:${it.c};border-radius:2px;flex-shrink:0"></div><span style="font-size:7.5px;color:rgba(180,200,220,0.7)">${it.l}</span></div>`).join('')}
+            <div style="font-size:6.5px;color:rgba(100,120,150,0.45);margin-top:4px">INS · Eurostat · ANCPI · Model TSS·FG</div>
+          </div>
         </div>
       </div>
 
-      <!-- BANNER SURSE — permanent vizibil sub top bar, pe toata latimea -->
-      <div id="tci-src-banner" style="position:absolute;top:42px;left:182px;right:188px;z-index:9;pointer-events:none;background:rgba(4,10,24,0.75);backdrop-filter:blur(6px);border-bottom:1px solid rgba(255,255,255,0.05);padding:4px 14px;display:flex;align-items:center;gap:14px;flex-wrap:nowrap;overflow:hidden">
-        <div style="font-size:6.5px;font-weight:700;color:rgba(212,175,55,0.6);letter-spacing:.12em;white-space:nowrap">SURSE OFICIALE:</div>
-        ${['INSE','Eurostat','ANCPI','BNR','Meteo România','INFP','ANAR','IPCC AR6'].map(s=>`<span style="font-size:6.5px;color:rgba(148,163,184,0.5);white-space:nowrap">${s}</span>`).join('<span style="color:rgba(255,255,255,0.12)">·</span>')}
-        <div style="flex:1;font-size:6.5px;color:rgba(100,120,150,0.4);text-align:right;white-space:nowrap">Valori orientative · Model predictiv TSS·FG © · Proiecție urbanistică pe baza datelor publice</div>
-      </div>
-
-      <!-- NARATIUNE FLUENTA — sidebar dreapta, mereu vizibila -->
-      <div id="tci-narflow" style="position:absolute;right:188px;top:62px;bottom:62px;width:220px;z-index:8;pointer-events:none;display:flex;flex-direction:column;justify-content:flex-end;padding:0 6px 8px 6px;gap:6px;overflow:hidden">
-        <!-- Card naratiune curenta -->
-        <div id="tci-narcard" style="background:rgba(4,10,24,0.92);backdrop-filter:blur(14px);border:1px solid rgba(212,175,55,0.28);border-radius:10px;padding:12px;transition:opacity .35s">
-          <div id="tci-nar-title" style="font-size:11px;font-weight:700;color:#D4AF37;margin-bottom:5px;line-height:1.3"></div>
-          <div id="tci-nar-body" style="font-size:10px;color:rgba(200,215,235,0.88);line-height:1.6"></div>
-          <div id="tci-nar-src" style="font-size:8px;color:rgba(148,163,184,0.45);margin-top:5px;font-style:italic"></div>
-        </div>
-        <!-- Explicatie urbanism — "ce vedeti" -->
-        <div id="tci-nar-what" style="background:rgba(15,25,50,0.88);backdrop-filter:blur(10px);border:1px solid rgba(96,165,250,0.2);border-radius:8px;padding:10px">
-          <div style="font-size:8px;font-weight:700;color:#60a5fa;margin-bottom:4px;letter-spacing:.05em">👁 CE VEDEȚI</div>
-          <div id="tci-nar-whattext" style="font-size:9.5px;color:rgba(180,200,225,0.85);line-height:1.55"></div>
-        </div>
-        <!-- Legenda culori proiectie -->
-        <div style="background:rgba(4,10,24,0.85);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:8px">
-          <div style="font-size:7.5px;font-weight:700;color:rgba(148,163,184,0.6);margin-bottom:5px;letter-spacing:.06em">LEGENDA PROIECȚIE</div>
-          ${[
-            {c:'#374151',l:'Planificat (după 2030)'},
-            {c:'#f59e0b',l:'În construcție activă'},
-            {c:'#f97316',l:'Aproape finalizat'},
-            {c:'#8b5cf6',l:'Centru civic densificat'},
-            {c:'#f59e0b',l:'Coridor bulevardier'},
-            {c:'#22c55e',l:'Creștere rezidențială'},
-            {c:'#f97316',l:'Reconversie industrială'},
-          ].map(it=>`<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px"><div style="width:10px;height:8px;background:${it.c};border-radius:2px;flex-shrink:0"></div><span style="font-size:8px;color:rgba(180,200,220,0.7)">${it.l}</span></div>`).join('')}
-          <div style="font-size:7px;color:rgba(100,120,150,0.5);margin-top:4px;font-style:italic">Sursa: INS · Eurostat · ANCPI · Model TSS·FG</div>
-        </div>
+      <!-- BANNER SURSE -->
+      <div id="tci-src-banner" style="position:absolute;top:42px;left:182px;right:220px;z-index:9;pointer-events:none;background:rgba(4,10,24,0.75);border-bottom:1px solid rgba(255,255,255,0.05);padding:3px 14px;display:flex;align-items:center;gap:10px;flex-wrap:nowrap;overflow:hidden">
+        <div style="font-size:6px;font-weight:700;color:rgba(212,175,55,0.6);letter-spacing:.12em;white-space:nowrap">SURSE OFICIALE:</div>
+        ${['INSE','Eurostat','ANCPI','BNR','Meteo România','INFP','ANAR','IPCC AR6'].map(s=>`<span style="font-size:6px;color:rgba(148,163,184,0.45);white-space:nowrap">${s}</span>`).join('<span style="color:rgba(255,255,255,0.1)">·</span>')}
+        <div style="flex:1;font-size:6px;color:rgba(100,120,150,0.35);text-align:right;white-space:nowrap">Valori orientative · Model predictiv TSS·FG ©</div>
       </div>
 
       <!-- BOTTOM BAR -->
@@ -828,217 +832,190 @@ const TCI = {
   // Temporal Scene Graph → fiecare clădire are stări în timp
   // ══════════════════════════════════════════════════════════════════════
 
-  _3D: {
-    _map:      null,
-    _scene:    null,
-    _camera:   null,
-    _renderer: null,
-    _meshes:   {},     // tip → InstancedMesh
-    _entities: [],     // Temporal Scene Graph
-    _ready:    false,
-    _year:     2025,
+  // ══════════════════════════════════════════════════════════════════════
+  // TCI 3D ENGINE — CustomLayerInterface corect
+  // MODEL MATRIX APPROACH: obiectele sunt in METRI față de centrul orașului
+  // Mapbox injectează camera matrix, modelMatrix face conversia la Mercator
+  // Y negat în modelMatrix → orientare corectă (north = +Y în Three.js)
+  // ══════════════════════════════════════════════════════════════════════
 
-    // ── CustomLayerInterface — Mapbox îl apelează automat ────────────────
-    id:            'tci-3d-engine',
-    type:          'custom',
-    renderingMode: '3d',
+  _3D: {
+    _map: null, _scene: null, _camera: null, _renderer: null,
+    _mesh: null, _entities: [], _ready: false,
+    _cx: 0, _cy: 0,          // centrul orașului (lon/lat)
+    _mercOrigin: [0,0,0],    // mercator x,y,z al centrului
+    _scale: 1,               // meterInMercatorCoordinateUnits la centru
+
+    id: 'tci-3d-engine', type: 'custom', renderingMode: '3d',
 
     onAdd(map, gl) {
       if(typeof THREE === 'undefined') { console.warn('[3D] Three.js lipsă'); return; }
       this._map = map;
-
       this._camera   = new THREE.Camera();
       this._scene    = new THREE.Scene();
       this._renderer = new THREE.WebGLRenderer({
-        canvas:    map.getCanvas(),
-        context:   gl,
-        antialias: true,
-      });
+        canvas: map.getCanvas(), context: gl, antialias: true });
       this._renderer.autoClear = false;
 
-      // Lumini
+      // Lumini în spațiul local (metri)
       this._scene.add(new THREE.AmbientLight(0xffffff, 0.55));
       const sun = new THREE.DirectionalLight(0xffd580, 1.0);
-      sun.position.set(0.5, 0.8, 1.0);
+      sun.position.set(500, 800, 1000);
       this._scene.add(sun);
 
       this._ready = true;
-      console.log('[3D] ✅ CustomLayerInterface activ');
+      console.log('[3D] ✅ CustomLayerInterface activ — coordinate system corect');
     },
 
-    // Mapbox apelează render() la fiecare frame
     render(gl, matrix) {
-      if(!this._ready || !this._scene || !this._camera) return;
+      if(!this._ready || !this._mercOrigin) return;
 
-      // ── MAGIC: injectează camera Mapbox direct în Three.js ────────────
-      // Elimină COMPLET drift-ul și desync-ul
-      this._camera.projectionMatrix = new THREE.Matrix4().fromArray(matrix);
+      // ── CHEIA: modelMatrix transformă din spațiu local (metri) la Mercator
+      // Y negat pentru că Mapbox Mercator are Y crescând spre sud (jos)
+      // Three.js are Y crescând în sus (nord) → negăm
+      const s = this._scale;
+      const [tx, ty, tz] = this._mercOrigin;
+      const modelMatrix = new THREE.Matrix4()
+        .makeTranslation(tx, ty, tz)
+        .scale(new THREE.Vector3(s, -s, s));  // -s pentru Y!
+
+      // Combină camera Mapbox cu transformarea locală
+      this._camera.projectionMatrix =
+        new THREE.Matrix4().fromArray(matrix).multiply(modelMatrix);
 
       this._renderer.resetState();
       this._renderer.render(this._scene, this._camera);
       this._map?.triggerRepaint();
     },
 
-    onRemove() {
-      try { this._renderer?.dispose(); } catch(e){}
-      this._ready = false;
+    onRemove() { try { this._renderer?.dispose(); } catch(e){} this._ready = false; },
+
+    // ── Setează originea orașului ─────────────────────────────────────
+    setOrigin(cx, cy) {
+      this._cx = cx; this._cy = cy;
+      const mc = mapboxgl.MercatorCoordinate.fromLngLat([cx, cy], 0);
+      this._mercOrigin = [mc.x, mc.y, mc.z];
+      this._scale = mc.meterInMercatorCoordinateUnits();
+      console.log('[3D] Origin setat:', cx, cy, '| scale:', this._scale.toExponential(3));
     },
 
-    // ── Construieste Temporal Scene Graph ────────────────────────────────
-    buildSceneGraph(cx, cy, zones, year) {
-      if(!this._ready || typeof THREE === 'undefined') return;
-      this._year    = year;
-      this._entities= [];
+    // ── Convertește lon/lat la METRI față de origine ──────────────────
+    _toLocal(lon, lat, altM = 0) {
+      const dx = (lon - this._cx) * 111319.9 * Math.cos(this._cy * Math.PI / 180);
+      const dy = (lat - this._cy) * 111319.9;
+      return [dx, dy, altM]; // în metri față de centrul orașului
+    },
 
-      // Curatare scene
-      this._scene.children.filter(c=>c.isInstancedMesh||c.isMesh).forEach(c=>this._scene.remove(c));
+    // ── Construiește scene graph din zone ────────────────────────────
+    buildSceneGraph(zones, year) {
+      if(!this._ready || typeof THREE === 'undefined') return;
+      // Curăță scene
+      while(this._scene.children.length > 2) this._scene.remove(this._scene.children[2]);
+      this._entities = [];
+      this._mesh = null;
 
       zones.forEach(z => {
-        if(!z.hMax || z.hMax === 0) return; // skip zone fara constructii
-
-        // Genereaza 8-20 entitati per zona
+        if(!z.hMax || z.hMax === 0) return;
         const coords = window.TCI?._polyFromDef?.(z);
-        if(!coords) return;
+        if(!coords || coords.length < 3) return;
 
-        const bbox = this._bbox(coords);
-        const density = Math.max(8, Math.min(20, Math.round(z.hMax / 2.5)));
+        const density = Math.max(6, Math.min(18, Math.round(z.hMax / 3)));
+        const bbox = this._bboxCoords(coords);
 
         for(let i = 0; i < density; i++) {
-          // Distributie aleatoriu in bbox, cu verificare ca e in poligon
           let lon, lat, tries = 0;
           do {
             lon = bbox.minX + Math.random() * (bbox.maxX - bbox.minX);
             lat = bbox.minY + Math.random() * (bbox.maxY - bbox.minY);
             tries++;
-          } while(!this._pip([lon,lat], coords) && tries < 20);
-          if(tries >= 20) continue;
+          } while(!this._pip([lon,lat], coords) && tries < 30);
+          if(tries >= 30) continue;
 
-          // Dimensiuni cladire — variata pentru naturalete
-          const seed  = Math.sin(i * 127.1 + lon * 311.7) * 0.5 + 0.5;
-          const wMeters = 20 + seed * 30;
-          const dMeters = 15 + seed * 25;
-
+          const seed = Math.abs(Math.sin(i * 127.1 + lon * 311.7));
           this._entities.push({
-            id:      z.id + '_' + i,
             lon, lat,
-            wM:      wMeters,
-            dM:      dMeters,
-            hBase:   z.hMax * 0.15,
-            hMax:    z.hMax * (0.7 + seed * 0.3),
+            wM: 18 + seed * 25,  // 18-43m lățime
+            dM: 14 + seed * 20,  // 14-34m adâncime
+            hBase: Math.max(6, z.hMax * 0.2),
+            hMax:  z.hMax * (0.65 + seed * 0.35),
             startYr: z.startYr,
             color:   new THREE.Color(z.color),
-            phase:   'planned',
+            zoneId:  z.id,
           });
         }
       });
 
-      console.log('[3D] Scene graph:', this._entities.length, 'entitati');
-      this._buildInstancedMesh(cx, cy);
+      console.log('[3D] Entities:', this._entities.length, 'pentru', zones.length, 'zone');
+      this._buildMesh();
       this.updateYear(year);
     },
 
-    // ── InstancedMesh — un draw call pentru toate cladirile ─────────────
-    _buildInstancedMesh(cx, cy) {
+    _buildMesh() {
       if(!this._entities.length) return;
-
-      // Geometrie cladire — cutie unitate 1×1×1
-      // O vom scala cu instanceMatrix
+      // Geometrie cutie cu originea la baza (nu centru)
       const geom = new THREE.BoxGeometry(1, 1, 1);
-      geom.translate(0, 0, 0.5); // origine la baza
-
-      // Material cu shader pentru animatia de inaltime
-      const mat = new THREE.MeshLambertMaterial({
-        transparent: true,
-        opacity: 0.85,
-      });
-
-      const mesh = new THREE.InstancedMesh(geom, mat, this._entities.length);
-      mesh.frustumCulled = true;
-      mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-
-      this._scene.add(mesh);
-      this._meshes.buildings = mesh;
-
-      // Stocheaza referinta la entitati pe mesh
-      mesh._entities = this._entities;
-      mesh._cx = cx;
-      mesh._cy = cy;
-
-      console.log('[3D] InstancedMesh:', this._entities.length, 'instante');
+      geom.translate(0, 0, 0.5); // pivotul la Z=0 (sol)
+      const mat = new THREE.MeshLambertMaterial({ vertexColors: true });
+      this._mesh = new THREE.InstancedMesh(geom, mat, this._entities.length);
+      this._mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+      this._scene.add(this._mesh);
     },
 
-    // ── Update Temporal State — apelat cand se schimba anul ─────────────
     updateYear(yr) {
-      if(!this._ready) return;
-      this._year = yr;
-      const mesh = this._meshes.buildings;
-      if(!mesh) return;
-
-      const cx = mesh._cx, cy = mesh._cy;
+      if(!this._ready || !this._mesh) return;
       const dummy = new THREE.Object3D();
       const color = new THREE.Color();
+      const C = window.TCI?.COLORS || {};
 
-      mesh._entities.forEach((e, idx) => {
-        // ── Calcul inaltime per an ─────────────────────────────────────
+      this._entities.forEach((e, idx) => {
+        // Înălțime per an
         let h = 0;
         if(yr >= e.startYr) {
-          const age = yr - e.startYr;
-          const yF  = Math.min(1, age / 18);
+          const yF = Math.min(1, (yr - e.startYr) / 18);
           h = e.hBase + (e.hMax - e.hBase) * yF;
         }
 
-        // ── Converteste coordonate → Mercator Mapbox ──────────────────
-        const mc = mapboxgl.MercatorCoordinate.fromLngLat([e.lon, e.lat], 0);
-        const sc = mc.meterInMercatorCoordinateUnits();
-
-        dummy.position.set(mc.x, mc.y, mc.z);
-        dummy.scale.set(e.wM * sc, e.dM * sc, h > 0 ? h * sc : 0.01);
+        // Poziție în METRI față de originea orașului
+        const [lx, ly] = this._toLocal(e.lon, e.lat);
+        dummy.position.set(lx, ly, 0);
+        // Scala în METRI — modelMatrix se ocupă de conversia la Mercator
+        dummy.scale.set(e.wM, e.dM, Math.max(0.5, h));
         dummy.updateMatrix();
-        mesh.setMatrixAt(idx, dummy.matrix);
+        this._mesh.setMatrixAt(idx, dummy.matrix);
 
-        // ── Culoare per stare ─────────────────────────────────────────
-        const C = window.TCI?.COLORS;
-        if(!C) { mesh.setColorAt(idx, e.color); }
-        else if(yr < e.startYr)         color.set(C.stabil);
-        else if((yr - e.startYr) < 5)  color.set(C.constructie);
-        else if((yr - e.startYr) < 10) color.set(C.aproape);
-        else                            color.copy(e.color);
-        mesh.setColorAt(idx, color);
+        // Culoare per stare temporală
+        if(!C.stabil || yr < e.startYr)              color.set(C.stabil || '#374151');
+        else if((yr - e.startYr) < 5)               color.set(C.constructie || '#f59e0b');
+        else if((yr - e.startYr) < 10)              color.set(C.aproape    || '#f97316');
+        else                                          color.copy(e.color);
+        this._mesh.setColorAt(idx, color);
       });
 
-      mesh.instanceMatrix.needsUpdate = true;
-      if(mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+      this._mesh.instanceMatrix.needsUpdate = true;
+      if(this._mesh.instanceColor) this._mesh.instanceColor.needsUpdate = true;
       this._map?.triggerRepaint();
     },
 
-    // ── LOD — ascunde mesh-ul la zoom mic, arata heatmap ────────────────
     updateLOD(zoom) {
-      const mesh = this._meshes.buildings;
-      if(mesh) mesh.visible = zoom >= 12.5;
+      if(this._mesh) this._mesh.visible = zoom >= 12.5;
     },
 
-    // ── Utilitare ────────────────────────────────────────────────────────
-    _bbox(coords) {
-      let minX=Infinity, minY=Infinity, maxX=-Infinity, maxY=-Infinity;
-      coords.forEach(([x,y])=>{
-        if(x<minX)minX=x; if(x>maxX)maxX=x;
-        if(y<minY)minY=y; if(y>maxY)maxY=y;
-      });
+    _bboxCoords(coords) {
+      let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+      coords.forEach(([x,y])=>{ if(x<minX)minX=x; if(x>maxX)maxX=x; if(y<minY)minY=y; if(y>maxY)maxY=y; });
       return {minX,minY,maxX,maxY};
     },
 
-    // Point in polygon (ray casting)
     _pip([px,py], poly) {
-      let inside = false;
+      let inside=false;
       for(let i=0,j=poly.length-1;i<poly.length;j=i++){
-        const [xi,yi]=poly[i],[xj,yj]=poly[j];
-        if((yi>py)!==(yj>py) && px<(xj-xi)*(py-yi)/(yj-yi)+xi) inside=!inside;
+        const[xi,yi]=poly[i],[xj,yj]=poly[j];
+        if((yi>py)!==(yj>py)&&px<(xj-xi)*(py-yi)/(yj-yi)+xi)inside=!inside;
       }
       return inside;
     },
   },
 
-  // ── Initializare 3D engine ───────────────────────────────────────────
   _initProjectionLayers(cx, cy) {
     const m = this.map; if(!m) return;
 
@@ -1089,7 +1066,8 @@ const TCI = {
 
     // 5. Construieste scene graph 3D (dupa ce stilul e complet incarcat)
     const buildScene = () => {
-      this._3D.buildSceneGraph(cx, cy, this._projZones, this.year || 2025);
+      this._3D.setOrigin(cx, cy);  // CRITIC: setează originea ÎNAINTE de buildSceneGraph
+      this._3D.buildSceneGraph(this._projZones, this.year || 2025);
     };
     if(m.isStyleLoaded?.()) buildScene();
     else { m.once('idle', buildScene); setTimeout(buildScene, 3000); }
