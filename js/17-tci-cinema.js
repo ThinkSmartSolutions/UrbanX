@@ -1442,11 +1442,6 @@ out geom qt;`;
     render(gl, matrix) {
       if(!this._ready || !this._mercOrigin) return;
 
-      // CRITIC: curăță depth buffer înainte de Three.js
-      // Mapbox Standard 3D buildings scriu în depth buffer → TCI boxes pierd depth test
-      // Fără asta, clădirile colorate sunt invizibile sub clădirile Mapbox existente
-      gl.clear(gl.DEPTH_BUFFER_BIT);
-
       // ── CHEIA: modelMatrix transformă din spațiu local (metri) la Mercator
       // Y negat pentru că Mapbox Mercator are Y crescând spre sud (jos)
       // Three.js are Y crescând în sus (nord) → negăm
@@ -1511,10 +1506,10 @@ out geom qt;`;
           const seed = Math.abs(Math.sin(i * 127.1 + lon * 311.7));
           this._entities.push({
             lon, lat,
-            wM: 30 + seed * 40,  // 30-70m lățime (mărit pentru vizibilitate)
-            dM: 25 + seed * 35,  // 25-60m adâncime (mărit)
-            hBase: Math.max(15, z.hMax * 0.4),        // înălțime de bază mai mare
-            hMax:  z.hMax * 2.0 * (0.65 + seed * 0.35), // 2x înălțime maximă
+            wM: 18 + seed * 25,
+            dM: 14 + seed * 20,
+            hBase: Math.max(6, z.hMax * 0.2),
+            hMax:  z.hMax * (0.65 + seed * 0.35),
             startYr: z.startYr,
             color:   new THREE.Color(z.color),
             zoneId:  z.id,
