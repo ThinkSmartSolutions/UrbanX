@@ -56,10 +56,10 @@ const TCI = {
 
     modal = document.createElement('div');
     modal.id = 'tci-v4-modal';
-    modal.style.cssText = 'position:fixed;inset:0;z-index:3000;display:flex;flex-direction:column;background:#000;font-family:"Space Grotesk","Inter",sans-serif;';
+    modal.style.cssText = 'position:fixed;inset:0;z-index:3000;display:flex;flex-direction:column;background:transparent;font-family:"Space Grotesk","Inter",sans-serif;';
 
     modal.innerHTML = `
-      <canvas id="tci-v4-canvas" style="position:absolute;inset:0;z-index:20;pointer-events:none;width:100%;height:100%;"></canvas>
+      <canvas id="tci-v4-canvas" style="position:absolute;inset:0;z-index:20;pointer-events:none;width:100%;height:100%;background:transparent;"></canvas>
 
       <!-- TOPBAR -->
       <div style="position:absolute;top:0;left:0;right:0;z-index:30;background:rgba(4,10,24,0.9);backdrop-filter:blur(12px);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 16px;display:flex;align-items:center;gap:12px;">
@@ -112,8 +112,98 @@ const TCI = {
       </div>
 
       <!-- LEGENDA (lateral stanga) -->
-      <div id="tci-v4-legend" style="position:absolute;left:12px;top:60px;bottom:60px;z-index:25;width:170px;background:rgba(4,10,24,0.85);backdrop-filter:blur(10px);border-radius:8px;border:1px solid rgba(255,255,255,0.08);padding:10px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;">
-        <div id="tci-v4-legend-content"></div>
+
+
+      <!-- PANEL STANG COMPLET -->
+      <div id="tci-left-panel" style="
+        position:absolute;left:0;top:48px;bottom:64px;
+        width:200px;z-index:25;
+        background:rgba(4,10,24,0.90);backdrop-filter:blur(14px);
+        border-right:1px solid rgba(212,175,55,0.12);
+        overflow-y:auto;display:flex;flex-direction:column;
+      ">
+        <!-- Scenarii -->
+        <div style="padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.06)">
+          <div style="font-size:8px;font-weight:700;color:#D4AF37;letter-spacing:.1em;margin-bottom:6px">SCENARIU PROIECȚIE</div>
+          ${[['S1','Optimist','PIB +5.5%/an, retenție forță muncă','#22c55e'],
+             ['S2','Moderat','Tendința curentă (referință)','#8b5cf6'],
+             ['S3','Conserv.','Depopulare accelerată, emigrare','#f59e0b'],
+             ['S4','Climatic','Adaptare RCP 8.5, presiune verde','#38bdf8']].map(([id,l,sub,c2])=>`
+            <div onclick="TCI.setScenario('${id}')" id="tci-lp-scen-${id}" style="
+              padding:7px 10px;border-radius:7px;cursor:pointer;margin-bottom:4px;
+              border:1px solid ${id==='S2'?c2+'44':'rgba(255,255,255,0.06)'};
+              background:${id==='S2'?c2+'18':'rgba(14,26,52,0.5)'};
+            ">
+              <div style="font-size:10px;font-weight:700;color:${id==='S2'?c2:'rgba(200,215,235,0.8)'}">${l}</div>
+              <div style="font-size:8px;color:rgba(148,163,184,0.55)">${sub}</div>
+            </div>
+          `).join('')}
+        </div>
+
+        <!-- Legendă funcțiuni -->
+        <div style="padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.06)">
+          <div style="font-size:8px;font-weight:700;color:#D4AF37;letter-spacing:.1em;margin-bottom:6px">LEGENDĂ</div>
+          <div id="tci-v4-legend-content"></div>
+        </div>
+
+        <!-- Comparare ani -->
+        <div style="padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.06)">
+          <div style="font-size:8px;font-weight:700;color:#D4AF37;letter-spacing:.1em;margin-bottom:6px">COMPARARE ANI</div>
+          <button onclick="TCI._toggleSplit()" style="
+            width:100%;padding:7px;border-radius:6px;cursor:pointer;font-family:inherit;
+            background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);
+            color:rgba(200,215,235,0.8);font-size:10px;font-weight:600;
+          ">⧉ Comparare split</button>
+          <div style="display:flex;gap:6px;margin-top:6px;align-items:center">
+            <span style="font-size:9px;color:rgba(148,163,184,0.5)">Acum</span>
+            <input type="range" id="tci-split-yr" min="2021" max="2055" value="2025" step="1"
+              style="flex:1;accent-color:#D4AF37;height:3px;"
+              oninput="document.getElementById('tci-split-yr-lbl').textContent=this.value">
+            <span id="tci-split-yr-lbl" style="font-size:9px;color:#D4AF37;min-width:28px">2025</span>
+          </div>
+        </div>
+
+        <!-- Comparare orase -->
+        <div style="padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.06)">
+          <div style="font-size:8px;font-weight:700;color:#D4AF37;letter-spacing:.1em;margin-bottom:6px">COMPARARE ORAȘE</div>
+          <div style="font-size:8px;color:rgba(148,163,184,0.6);margin-bottom:4px">${(typeof _RO_CITIES_DB!=='undefined'&&TCI.cityKey?(_RO_CITIES_DB[TCI.cityKey]?.name||'Iași'):'Iași')} vs:</div>
+          <input type="text" id="tci-compare-input-v4" placeholder="Al 2-lea oraș..."
+            autocomplete="off"
+            oninput="TCI._searchCity2(this.value)"
+            style="
+              width:100%;background:rgba(255,255,255,0.07);
+              border:1px solid rgba(255,255,255,0.12);
+              color:#fff;padding:6px 8px;border-radius:6px;
+              font-size:10px;font-family:inherit;box-sizing:border-box;
+            ">
+          <div id="tci-compare-results-v4" style="
+            background:rgba(4,10,24,0.97);border:1px solid rgba(255,255,255,0.1);
+            border-radius:6px;max-height:100px;overflow-y:auto;display:none;margin-top:3px;
+          "></div>
+          <div id="tci-compare-output-v4" style="margin-top:6px;display:none;"></div>
+        </div>
+
+        <!-- Export profesional -->
+        <div style="padding:10px 12px">
+          <div style="font-size:8px;font-weight:700;color:#D4AF37;letter-spacing:.1em;margin-bottom:6px">EXPORT PROFESIONAL</div>
+          ${[
+            ['🎬','Export Video (.webm)','TCI._startVideoExport()'],
+            ['📄','Raport PDF metodologic','generateBilantEdificabil&&generateBilantEdificabil()'],
+            ['📊','Date JSON (citabile)','_ProjectionEngine?.exportData&&_ProjectionEngine.exportData()'],
+            ['📷','Snapshot PNG','TCI._snapshot()'],
+            ['🔗','Share URL stare TCI','TCI._shareURL()'],
+          ].map(([icon,label,action])=>`
+            <button onclick="${action}" style="
+              display:block;width:100%;text-align:left;padding:6px 8px;
+              border-radius:5px;border:1px solid rgba(255,255,255,0.07);
+              background:rgba(14,26,52,0.5);color:rgba(200,215,235,0.8);
+              font-size:10px;cursor:pointer;font-family:inherit;margin-bottom:3px;
+            " onmouseover="this.style.background='rgba(255,255,255,0.06)'"
+               onmouseout="this.style.background='rgba(14,26,52,0.5)'">
+              ${icon} ${label}
+            </button>
+          `).join('')}
+        </div>
       </div>
 
       <!-- CARD MILESTONE -->
@@ -727,6 +817,7 @@ const TCI = {
       b.style.color         = active ? c : 'rgba(148,163,184,0.5)';
       b.style.borderColor   = active ? c+'66' : 'rgba(255,255,255,0.08)';
     });
+    this._updateScenarioButtons(s);
   },
 
   scrubTo(year) {
@@ -825,6 +916,58 @@ const TCI = {
       <div style="font-size:6.5px;color:rgba(100,120,150,0.4);margin-top:6px;text-align:center">INSE · Eurostat · model Cohort-Survival</div>
     `;
     el.style.display = 'block';
+  },
+
+  // ── Snapshot ────────────────────────────────────────────────────────────
+  _startVideoExport() {
+    if(typeof _VideoExporter === 'undefined') { typeof _Toast!=='undefined'&&_Toast.warn('Video Export indisponibil'); return; }
+    const canvas = document.getElementById('tci-v4-canvas');
+    if(_VideoExporter.isRecording) _VideoExporter.stopRecording();
+    else _VideoExporter.startRecording(canvas);
+  },
+
+  _snapshot() {
+    const canvas = document.getElementById('tci-v4-canvas');
+    if(!canvas) return;
+    const link = document.createElement('a');
+    link.download = 'TCI_' + (this.year||2025) + '_' + (this.cityKey||'iasi') + '.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    typeof _Toast !== 'undefined' && _Toast.success('Snapshot salvat!');
+  },
+
+  // ── Share URL ────────────────────────────────────────────────────────────
+  _shareURL() {
+    const params = new URLSearchParams({c:this.cityKey||'iasi', s:this.scenario||'S2', y:this.year||2025}).toString();
+    const url = window.location.origin + window.location.pathname + '?tci=' + btoa(params);
+    navigator.clipboard?.writeText(url).then(() => {
+      typeof _Toast !== 'undefined' && _Toast.success('URL copiat în clipboard!');
+    });
+    return url;
+  },
+
+  // ── Split comparare ──────────────────────────────────────────────────────
+  _toggleSplit() {
+    const yr = parseInt(document.getElementById('tci-split-yr')?.value || '2025');
+    const d1 = typeof _getProjectionData !== 'undefined' ? _getProjectionData(yr, this.scenario, this.cityKey) : null;
+    const d2 = typeof _getProjectionData !== 'undefined' ? _getProjectionData(this.year||2025, this.scenario, this.cityKey) : null;
+    if(!d1 || !d2) { typeof _Toast !== 'undefined' && _Toast.info('Date insuficiente pentru comparare'); return; }
+    const city = typeof _RO_CITIES_DB !== 'undefined' ? _RO_CITIES_DB[this.cityKey] : {name:'Iași'};
+    typeof _Toast !== 'undefined' && _Toast.info(`${city.name} ${yr} vs ${this.year||2025}: ${d1.demo?.value?.toLocaleString()} vs ${d2.demo?.value?.toLocaleString()} loc.`, 5000);
+  },
+
+  // ── Update scenarii buttons in left panel ────────────────────────────────
+  _updateScenarioButtons(s) {
+    const colors = {S1:'#22c55e',S2:'#8b5cf6',S3:'#f59e0b',S4:'#38bdf8'};
+    ['S1','S2','S3','S4'].forEach(id => {
+      const el = document.getElementById('tci-lp-scen-'+id);
+      if(!el) return;
+      const c2 = colors[id];
+      const active = id === s;
+      el.style.border = active ? '1px solid '+c2+'44' : '1px solid rgba(255,255,255,0.06)';
+      el.style.background = active ? c2+'18' : 'rgba(14,26,52,0.5)';
+      el.querySelector('div').style.color = active ? c2 : 'rgba(200,215,235,0.8)';
+    });
   },
 
   // ── Helpers ───────────────────────────────────────────────────────────────
