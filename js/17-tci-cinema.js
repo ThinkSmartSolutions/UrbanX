@@ -223,6 +223,12 @@ const TCI = {
     this._hideParcelPopup();
     this._addMapLayers();
     this._cameraIntro();
+    // Initializam sistemul cinematice dupa ce harta e gata
+    setTimeout(() => {
+      const cx = this.activeParcel?.lon || this.cityData?.lon || 27.601;
+      const cy = this.activeParcel?.lat || this.cityData?.lat || 47.158;
+      this._initCinemaCamera(cx, cy);
+    }, 1000);
     this.start();
   },
 
@@ -267,6 +273,8 @@ const TCI = {
             <button onclick="TCI.setScenario('${id}')" id="tci-scen-${id}"
               style="padding:4px 7px;border-radius:4px;border:1px solid ${id==='S2'?col+'55':'rgba(255,255,255,0.07)'};background:${id==='S2'?col+'18':'transparent'};color:${id==='S2'?col:'rgba(148,163,184,0.45)'};font-size:9px;font-weight:700;cursor:pointer;font-family:inherit;pointer-events:all;">${l}</button>`).join('')}
         </div>
+        <button id="tci-cinema-toggle" onclick="TCI._cinemaActive=!TCI._cinemaActive;this.textContent=TCI._cinemaActive?'🎬 Auto':'📍 Manual';this.style.color=TCI._cinemaActive?'#D4AF37':'rgba(148,163,184,0.6)';"
+          style="padding:5px 10px;border-radius:5px;border:1px solid rgba(212,175,55,0.25);background:rgba(212,175,55,0.08);color:#D4AF37;font-size:10px;cursor:pointer;font-family:inherit;pointer-events:all;">🎬 Auto</button>
         <button onclick="TCI.close()" style="padding:5px 12px;border-radius:5px;border:1px solid rgba(255,255,255,0.12);background:transparent;color:rgba(148,163,184,0.6);font-size:11px;cursor:pointer;font-family:inherit;pointer-events:all;">✕</button>
       </div>
 
@@ -448,12 +456,15 @@ const TCI = {
       } catch(e) { console.warn('[TCI-L2] buildings:', e.message); }
     }
 
-    // ── L2: Zone constructie activa (portocaliu pulsant) ──────────────────
+    // ── L2: Zone constructie activa — layer separat cu GeoJSON custom ────────
     if(!m.getSource?.('tci-constr')) {
       try {
+        // Generam zone de constructie in jurul centrului orasului
+        // (unde e presiunea maxima de densificare conform UTR M/C)
+        const constrFeatures = this._generateConstrZones(cx, cy);
         m.addSource('tci-constr', {
           type: 'geojson',
-          data: { type: 'FeatureCollection', features: [] }
+          data: { type: 'FeatureCollection', features: constrFeatures },
         });
         m.addLayer({
           id: 'tci-constr-layer',
@@ -463,7 +474,23 @@ const TCI = {
             'fill-extrusion-color':   '#f59e0b',
             'fill-extrusion-height':  ['get', 'h'],
             'fill-extrusion-base':    0,
-            'fill-extrusion-opacity': 0.75,
+            'fill-extrusion-opacity': 0,   // invizibil initial, creste cu anii
+          },
+        });
+        // Layer separat: cladiri FINALIZATE (albastru deschis)
+        m.addSource('tci-done', {
+          type: 'geojson',
+          data: { type: 'FeatureCollection', features: [] },
+        });
+        m.addLayer({
+          id: 'tci-done-layer',
+          type: 'fill-extrusion',
+          source: 'tci-done',
+          paint: {
+            'fill-extrusion-color':   '#3b82f6',
+            'fill-extrusion-height':  ['get', 'h'],
+            'fill-extrusion-base':    0,
+            'fill-extrusion-opacity': 0,
           },
         });
       } catch(e) {}
@@ -2290,6 +2317,198 @@ const TCI = {
 
     ctx.restore();
     ctx.textAlign = 'left';
+  },
+
+  // ── Sistem camera cinematica automata ─────────────────────────────────────
+  // Secvente de zbor care dramatizeaza proiectia urbana
+  _CAM_SEQUENCES: null,  // initializat in _launch cu coordonate reale
+
+  _cinemaTimer: 0,
+  _cinemaSeqIdx: 0,
+  _cinemaPhase: 'overview',
+
+  _initCinemaCamera(cx, cy) {
+    const d    = this.cityData;
+    const risk = (typeof _getRiskProfile !== 'undefined') ? _getRiskProfile(d||{}) : null;
+    const isRisk = risk?.riskScore > 50;
+
+    // Zone de interes: centru, zone dense, periferie, zone risc
+    const zones = {
+      centru:    { lon: cx,         lat: cy,          zoom: 15.5, pitch: 58, bearing: -15  },
+      nord:      { lon: cx+0.012,   lat: cy+0.015,    zoom: 14.8, pitch: 52, bearing: 20   },
+      sud:       { lon: cx-0.008,   lat: cy-0.012,    zoom: 15,   pitch: 55, bearing: -30  },
+      est:       { lon: cx+0.018,   lat: cy-0.005,    zoom: 14.5, pitch: 50, bearing: 45   },
+      vest:      { lon: cx-0.015,   lat: cy+0.008,    zoom: 14.8, pitch: 52, bearing: -45  },
+      // Street level — vizualizare pietonala
+      strada1:   { lon: cx+0.005,   lat: cy+0.003,    zoom: 17,   pitch: 72, bearing: 10   },
+      strada2:   { lon: cx-0.004,   lat: cy-0.006,    zoom: 17.5, pitch: 75, bearing: -20  },
+      // Drone high — vedere de ansamblu
+      drone_h:   { lon: cx,         lat: cy,           zoom: 13,   pitch: 45, bearing: 0    },
+      drone_rot: { lon: cx,         lat: cy,           zoom: 14,   pitch: 55, bearing: 90   },
+      // Periferie
+      peri_n:    { lon: cx+0.025,   lat: cy+0.028,    zoom: 13.5, pitch: 42, bearing: 15   },
+      peri_s:    { lon: cx-0.02,    lat: cy-0.025,    zoom: 13.5, pitch: 42, bearing: -15  },
+      // Zona risc (daca exista)
+      risc:      { lon: cx+0.01,    lat: cy+0.018,    zoom: 14.5, pitch: 48, bearing: 30   },
+    };
+
+    // Secvente cinematice per tip moment
+    this._CAM_SEQUENCES = {
+
+      // Fiecare 12s (un an): secventa scurta
+      year_normal: [
+        { ...zones.centru,  dur: 8000  },
+        { ...zones.nord,    dur: 10000 },
+        { ...zones.strada1, dur: 8000  },
+        { ...zones.drone_h, dur: 10000 },
+        { ...zones.sud,     dur: 8000  },
+        { ...zones.strada2, dur: 8000  },
+        { ...zones.est,     dur: 10000 },
+        { ...zones.drone_rot, dur: 10000 },
+        { ...zones.vest,    dur: 8000  },
+        { ...zones.peri_n,  dur: 10000 },
+      ],
+
+      // La milestone: secventa dramatica
+      milestone: [
+        { ...zones.drone_h, dur: 3000, pitch: 30  },  // pull back dramatic
+        { ...zones.centru,  dur: 4000, pitch: 62  },  // zoom in centru
+        { ...zones.strada1, dur: 3000               },  // street level
+        { ...zones.drone_rot, dur: 4000             },  // rotire
+      ],
+
+      // Scenariu S4 (climatic) — accent pe zone de risc
+      climatic: [
+        { ...zones.risc,    dur: 8000  },
+        { ...zones.centru,  dur: 10000 },
+        { ...zones.peri_s,  dur: 8000  },
+        { ...zones.drone_h, dur: 10000 },
+        { ...zones.strada1, dur: 8000  },
+      ],
+
+      // Scenariu S1 (optimist) — accent pe periferie/extindere
+      optimist: [
+        { ...zones.centru,  dur: 8000  },
+        { ...zones.peri_n,  dur: 10000 },
+        { ...zones.peri_s,  dur: 10000 },
+        { ...zones.strada2, dur: 8000  },
+        { ...zones.drone_h, dur: 8000  },
+      ],
+
+      // Mod parcela — centrat pe parcela activa
+      parcela: [
+        { lon: this.activeParcel?.lon||cx, lat: this.activeParcel?.lat||cy,
+          zoom: 17.5, pitch: 68, bearing: -10, dur: 10000 },
+        { lon: this.activeParcel?.lon||cx, lat: this.activeParcel?.lat||cy,
+          zoom: 16,   pitch: 58, bearing: 30,  dur: 10000 },
+        { lon: this.activeParcel?.lon||cx, lat: this.activeParcel?.lat||cy,
+          zoom: 15.5, pitch: 50, bearing: -20, dur: 8000  },
+        { lon: cx, lat: cy, zoom: 14.5, pitch: 52, bearing: 0, dur: 8000 },
+      ],
+    };
+
+    this._cinemaTimer   = 0;
+    this._cinemaSeqIdx  = 0;
+    this._cinemaActive  = true;
+    this._lastCinemaFly = 0;
+    console.log('[TCI Cinema] Sistem camera cinematica initializat');
+  },
+
+  _updateCinemaCamera(year, yearT, totalT) {
+    if(!this._cinemaActive || !this.map || !this._CAM_SEQUENCES) return;
+    if(!this.running) return;
+
+    const now = Date.now();
+
+    // Selectam secventa activa
+    let seqKey = 'year_normal';
+    if(this.mode === 'parcela') seqKey = 'parcela';
+    else if(this.scenario === 'S4') seqKey = 'climatic';
+    else if(this.scenario === 'S1') seqKey = 'optimist';
+
+    const seq = this._CAM_SEQUENCES[seqKey];
+    if(!seq?.length) return;
+
+    const curShot = seq[this._cinemaSeqIdx % seq.length];
+    const shotDur = curShot.dur || 10000;
+
+    if(now - this._lastCinemaFly > shotDur) {
+      // Trecem la urmatorul shot
+      this._cinemaSeqIdx++;
+      const nextShot = seq[this._cinemaSeqIdx % seq.length];
+
+      // La anumite momente adaugam dramatism suplimentar
+      const isMilestone = this.MILES.includes(year) && yearT < 0.1;
+
+      const flyOpts = {
+        center:   [nextShot.lon, nextShot.lat],
+        zoom:     nextShot.zoom + (isMilestone ? 0.5 : 0),
+        pitch:    nextShot.pitch || 55,
+        bearing:  nextShot.bearing || 0,
+        duration: isMilestone ? 4000 : 6000,
+        essential: true,
+        easing: (t) => t < 0.5 ? 2*t*t : -1+(4-2*t)*t,  // ease in-out quad
+      };
+
+      try {
+        this.map.flyTo(flyOpts);
+        this._lastCinemaFly = now;
+        this.bearing = nextShot.bearing || 0;
+      } catch(e) {}
+    }
+  },
+
+  // Secventa dramatica la milestone (camera pull-back + zoom in)
+  _milestoneCamera(year) {
+    if(!this.map || !this._CAM_SEQUENCES) return;
+    const seq  = this._CAM_SEQUENCES.milestone;
+    const d    = this.cityData;
+    const cx   = this.activeParcel?.lon || d?.lon || 27.601;
+    const cy   = this.activeParcel?.lat || d?.lat || 47.158;
+
+    // Pull back dramatic
+    this.map.flyTo({
+      center:   [cx, cy],
+      zoom:     12.5,
+      pitch:    25,
+      bearing:  0,
+      duration: 2500,
+      essential: true,
+    });
+    this.bearing = 0;
+
+    // Dupa 3s: zoom in dramatic pe centru
+    setTimeout(() => {
+      if(!this.running) return;
+      this.map.flyTo({
+        center:   [cx, cy],
+        zoom:     15.5,
+        pitch:    60,
+        bearing:  -30,
+        duration: 4000,
+        essential: true,
+      });
+      this.bearing = -30;
+      this._lastCinemaFly = Date.now();
+    }, 3000);
+  },
+
+  _initParticlesOnRoads(cx, cy) {
+    this._roadParticles = [];
+    const gs=0.004, gn=5, streets=[];
+    for(let i=-gn;i<=gn;i++){
+      streets.push({start:[cx-gn*gs,cy+i*gs],end:[cx+gn*gs,cy+i*gs]});
+      streets.push({start:[cx+i*gs,cy-gn*gs],end:[cx+i*gs,cy+gn*gs]});
+    }
+    const r=(s)=>{let x=Math.sin(s*7919)*9999;return x-Math.floor(x);};
+    for(let i=0;i<120;i++){
+      this._roadParticles.push({
+        street:streets[i%streets.length], t:(i*0.073)%1,
+        speed:0.0003+r(i*31)*0.0004,
+        type:i<70?'car':i<100?'bus':'bike',
+        phase:r(i*17)*Math.PI*2,
+      });
+    }
   },
 
   _rr(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();},
