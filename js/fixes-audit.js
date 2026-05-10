@@ -390,3 +390,4 @@ window.getFinanciarConfig = function(){
     setTimeout(patchWhenReady, 800);
   }
 })();
+if(typeof _lotizareActive === 'undefined') window._lotizareActive = false;
