@@ -2837,74 +2837,110 @@ if(typeof _ProjectionEngine!=='undefined'){
 }
 
 // Restore URL la load
-// ── URL Restore cu retry ─────────────────────────────────────────────────
+// ── URL Restore BULLETPROOF ──────────────────────────────────────────────
 (function() {
-  const p = new URLSearchParams(window.location.search);
+  const p    = new URLSearchParams(window.location.search);
   const tciP = p.get('tci');
   if(!tciP) return;
 
-  let params;
+  let params, ck, sc, yr, md;
   try {
     params = new URLSearchParams(atob(tciP));
+    ck  = params.get('c') || 'iasi';
+    sc  = params.get('s') || 'S2';
+    yr  = parseInt(params.get('y') || '2026');
+    md  = params.get('m') || 'uat';
   } catch(e) { return; }
 
-  let ck = params.get('c');
-  const sc  = params.get('s') || 'S2';
-  const yr  = parseInt(params.get('y') || '2026');
-  const md  = params.get('m') || 'uat';
+  // Flag global: blocam selectorul si orice alt TCI open
+  window._TCI_URL_RESTORE = { ck, sc, yr, md, done: false };
 
-  // Rezolva cityKey din SIRUTA (RO-IS-105309 → cauta in DB)
-  const resolveCityKey = (key) => {
+  // Rezolva SIRUTA → cityKey
+  const resolve = (key) => {
     if(typeof _RO_CITIES_DB === 'undefined') return key;
     if(_RO_CITIES_DB[key]) return key;
-    // Cauta dupa SIRUTA numeric
-    const sirutaM = key.match(/(\d{5,6})$/);
-    if(sirutaM) {
-      const found = Object.entries(_RO_CITIES_DB).find(([k,v]) =>
-        String(v.siruta) === sirutaM[1] || String(v.SIRUTA) === sirutaM[1]
+    const sm = key.match(/(\d{5,6})$/);
+    if(sm) {
+      const f = Object.entries(_RO_CITIES_DB).find(([k,v]) =>
+        String(v.siruta)===sm[1]||String(v.SIRUTA)===sm[1]||String(v.cod_siruta)===sm[1]
       );
-      if(found) return found[0];
+      if(f) return f[0];
     }
-    // Cauta dupa cod judet (RO-IS- → IS → Iași)
-    const judetM = key.match(/RO-([A-Z]{2})-/);
-    if(judetM) {
-      const jCode = judetM[1];
-      const found = Object.entries(_RO_CITIES_DB).find(([k,v]) =>
-        (v.judet||'').slice(0,2).toUpperCase() === jCode
+    const jm = key.match(/RO-([A-Z]{2})-/);
+    if(jm) {
+      const f = Object.entries(_RO_CITIES_DB).find(([k,v]) =>
+        (v.judet||'').slice(0,2).toUpperCase()===jm[1]
       );
-      if(found) return found[0];
+      if(f) return f[0];
     }
-    return key;
+    // Fallback: gasim orasul dupa orice cheie partiala
+    const lk = key.toLowerCase();
+    const f2 = Object.entries(_RO_CITIES_DB).find(([k,v]) =>
+      k.toLowerCase().includes(lk.slice(-5)) ||
+      (v.name||'').toLowerCase().includes(lk.replace(/-/g,' ').slice(-5))
+    );
+    return f2 ? f2[0] : key;
   };
 
-  // Retry: asteapta window.map sa fie gata (max 20 incercari × 500ms = 10s)
+  const doLaunch = () => {
+    if(window._TCI_URL_RESTORE.done) return;
+    window._TCI_URL_RESTORE.done = true;
+
+    const resolvedKey = resolve(ck);
+    console.log('[TCI URL] Lansez:', resolvedKey, sc, yr, md);
+
+    // Eliminam orice selector deschis
+    document.getElementById('tci-sel')?.remove();
+    document.getElementById('tci-mode-selector')?.remove();
+
+    try {
+      TCI._launch(md, { cityKey: resolvedKey, scenario: sc });
+      // Dupa ce harta e gata, mergem la anul din URL
+      const scrubWait = setInterval(() => {
+        if(TCI.year !== undefined && TCI.running !== undefined) {
+          clearInterval(scrubWait);
+          setTimeout(() => { try { TCI.scrubTo(yr); } catch(e){} }, 1500);
+        }
+      }, 300);
+    } catch(e) {
+      console.warn('[TCI URL] Launch error:', e);
+      window._TCI_URL_RESTORE.done = false; // permite retry
+    }
+  };
+
+  // Retry agresiv: la fiecare 400ms, max 30 incercari (12s)
   let tries = 0;
   const tryLaunch = () => {
+    if(window._TCI_URL_RESTORE.done) return;
     tries++;
-    const mapReady = window.map && typeof window.map.flyTo === 'function';
-    const dbReady  = typeof _RO_CITIES_DB !== 'undefined';
-
-    if(mapReady) {
-      ck = resolveCityKey(ck || 'iasi');
-      // Ascunde selectorul daca e afisat
-      document.getElementById('tci-sel')?.remove();
-      // Lansam direct fara selector
-      try {
-        TCI._launch(md, { cityKey: ck, scenario: sc });
-        setTimeout(() => { try { TCI.scrubTo(yr); } catch(e){} }, 2000);
-        console.log(`[TCI] URL restore: ${ck} · ${sc} · ${yr} · ${md}`);
-      } catch(e) {
-        console.warn('[TCI] URL restore launch error:', e);
-      }
-    } else if(tries < 20) {
-      setTimeout(tryLaunch, 500);
+    const mapOK = window.map && typeof window.map.flyTo === 'function'
+                  && (window.map.isStyleLoaded?.() || tries > 10);
+    if(mapOK) {
+      doLaunch();
+    } else if(tries < 30) {
+      setTimeout(tryLaunch, 400);
     } else {
-      console.warn('[TCI] URL restore: map not ready after 10s');
+      // Forteaza lansare chiar daca harta nu e 100% gata
+      console.warn('[TCI URL] Fortez lansarea dupa 12s');
+      doLaunch();
     }
   };
 
-  // Prima incercare dupa 1s
-  window.addEventListener('load', () => setTimeout(tryLaunch, 1000));
+  // Pornim imediat si la DOMContentLoaded si la load
+  setTimeout(tryLaunch, 800);
+  document.addEventListener('DOMContentLoaded', () => setTimeout(tryLaunch, 1200));
+  window.addEventListener('load', () => setTimeout(tryLaunch, 600));
 })();
+
+// Interceptam openTCI: daca avem URL restore pending, nu aratam selectorul
+const _origOpenTCI = window.openTCI;
+window.openTCI = (opts) => {
+  if(window._TCI_URL_RESTORE && !window._TCI_URL_RESTORE.done) {
+    console.log('[TCI] openTCI interceptat - URL restore pending');
+    return;
+  }
+  if(_origOpenTCI) _origOpenTCI(opts);
+  else TCI.open(opts||{});
+};
 
 console.log('[TCI Cinema] window.map + canvas overlay — UAT ori parcelă, zoom cinematice');
