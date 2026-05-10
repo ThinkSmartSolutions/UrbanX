@@ -9,8 +9,10 @@ const CACHE_API      = 'urbanx-api-v3.2';
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24h pentru API
 
 // Assets statice de cache la install
+// Calea relativa corecta per deployment
+const _SW_BASE = self.location.pathname.replace('/sw.js','');
 const STATIC_ASSETS = [
-  '/', '/index.html',
+  _SW_BASE + '/', _SW_BASE + '/index.html',
   '/wx-styles.css',
   '/js/00-packages.js',
   '/js/09-pdf-engine.js',
@@ -54,7 +56,7 @@ self.addEventListener('activate', event => {
           .filter(k => k !== CACHE_STATIC && k !== CACHE_API)
           .map(k => caches.delete(k))
       )
-    ).then(() => self.clients.claim())
+    ).then(() => self.clients.claim().then(() => console.log('[SW] UrbanX activ')))
   );
 });
 

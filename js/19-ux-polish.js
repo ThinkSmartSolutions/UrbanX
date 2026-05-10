@@ -767,14 +767,17 @@ const _LoadingOverlay = {
 };
 
 // ── PATCH: Override _pdfSaveMobile cu loading overlay ────────────────────
-const _origSaveMobile = window._pdfSaveMobile;
-if(_origSaveMobile) {
-  window._pdfSaveMobile = function(pdf, filename) {
-    _LoadingOverlay.hide();
-    _origSaveMobile(pdf, filename);
-    _Toast.success('PDF generat: ' + filename.split('/').pop(), 4000);
-  };
-}
+// Patch _pdfSaveMobile cu guard anti-redeclarare
+(function() {
+  const _savedMobile = window._pdfSaveMobile;
+  if(_savedMobile && typeof _savedMobile === "function") {
+    window._pdfSaveMobile = function(pdf, filename) {
+      _LoadingOverlay.hide();
+      _savedMobile(pdf, filename);
+      _Toast.success("PDF generat: " + (filename||"").split("/").pop(), 4000);
+    };
+  }
+})();
 
 // ── INITIALIZATION ────────────────────────────────────────────────────────
 window.addEventListener('load', () => {
