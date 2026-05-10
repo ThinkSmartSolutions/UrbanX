@@ -233,7 +233,12 @@ const TCI = {
       }
     } catch(e){}
 
-    // MeshBasicMaterial — culoarea e independentă de lumini, nu mai modificăm AmbientLight
+    // Ambientlight Three.js — mai scăzut noaptea, mai puternic ziua
+    const ambientByPreset = { night:0.35, dawn:0.65, dusk:0.80, day:1.20 };
+    try {
+      const ambient = this._3D?._scene?.children?.find?.(c=>c.isAmbientLight);
+      if(ambient) { ambient.intensity = ambientByPreset[preset] ?? 1.0; this._3D._map?.triggerRepaint?.(); }
+    } catch(e){}
   },
 
   _updateSplitLabels() {
@@ -1430,10 +1435,7 @@ out geom qt;`;
       this._renderer = new THREE.WebGLRenderer({
         canvas: map.getCanvas(), context: gl, antialias: true });
       this._renderer.autoClear = false;
-
-      // MeshBasicMaterial nu reacționează la lumini → nu adăugăm lumini
-      // (AmbientLight/DirectionalLight/PointLight în scenă cu BasicMaterial
-      //  forțează Three.js r128 să recompileze shadere → 500+ erori/frame)
+      // MeshBasicMaterial nu necesită lumini
 
       this._ready = true;
       console.log('[3D] ✅ CustomLayerInterface activ — coordinate system corect');
@@ -1457,7 +1459,7 @@ out geom qt;`;
 
       this._renderer.resetState();
       this._renderer.render(this._scene, this._camera);
-      // triggerRepaint mutat în _loop() — nu mai forțăm 60fps când TCI e pe Pauză
+      this._map?.triggerRepaint();
     },
 
     onRemove() { try { this._renderer?.dispose(); } catch(e){} this._ready = false; },
@@ -1506,8 +1508,8 @@ out geom qt;`;
           const seed = Math.abs(Math.sin(i * 127.1 + lon * 311.7));
           this._entities.push({
             lon, lat,
-            wM: 18 + seed * 25,
-            dM: 14 + seed * 20,
+            wM: 18 + seed * 25,  // 18-43m lățime
+            dM: 14 + seed * 20,  // 14-34m adâncime
             hBase: Math.max(6, z.hMax * 0.2),
             hMax:  z.hMax * (0.65 + seed * 0.35),
             startYr: z.startYr,
@@ -1520,26 +1522,6 @@ out geom qt;`;
       console.log('[3D] Entities:', this._entities.length, 'pentru', zones.length, 'zone');
       this._buildMesh();
       this.updateYear(year);
-
-      // AUTO-DIAGNOSTIC — apare în consolă fără să tastezi nimic
-      setTimeout(() => {
-        console.warn('=== TCI 3D DIAGNOSTIC ===');
-        console.warn('entities:', this._entities.length);
-        console.warn('mesh:', this._mesh ? 'CREAT' : 'NULL — _buildMesh nu a rulat');
-        console.warn('ready:', this._ready);
-        console.warn('mercOrigin:', this._mercOrigin ? JSON.stringify(this._mercOrigin) : 'NULL — setOrigin nu a fost apelat');
-        if(this._mesh) {
-          console.warn('mesh.visible:', this._mesh.visible);
-          const c = new THREE.Color();
-          this._mesh.getColorAt(0, c);
-          console.warn('color[0]:', '#' + c.getHexString());
-        }
-        if(this._entities.length > 0) {
-          const e0 = this._entities[0];
-          console.warn('entity[0]:', JSON.stringify({lon:e0.lon, lat:e0.lat, hMax:e0.hMax, startYr:e0.startYr}));
-        }
-        console.warn('=== END DIAGNOSTIC ===');
-      }, 3000);
     },
 
     _buildMesh() {
@@ -1547,8 +1529,8 @@ out geom qt;`;
       // Geometrie ușor mai subțire pentru clădiri (nu perfect cubice)
       const geom = new THREE.BoxGeometry(1, 1, 1);
       geom.translate(0, 0, 0.5); // pivotul la Z=0 (sol)
-      // depthTest:false → clădirile TCI apar ÎNTOTDEAUNA, indiferent de depth buffer Mapbox
-      const mat = new THREE.MeshBasicMaterial({ vertexColors: true, depthTest: false });
+      // MeshBasicMaterial: NU depinde de lumini → culoarea instanței apare GARANTAT
+      const mat = new THREE.MeshBasicMaterial({ vertexColors: true });
       this._mesh = new THREE.InstancedMesh(geom, mat, this._entities.length);
       this._mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
       // Inițializează instanceColor (gri neutru) ÎNAINTE de primul render → shader compile corect
@@ -1556,13 +1538,39 @@ out geom qt;`;
       for(let _i = 0; _i < this._entities.length; _i++) this._mesh.setColorAt(_i, _gc);
       if(this._mesh.instanceColor) this._mesh.instanceColor.needsUpdate = true;
       this._scene.add(this._mesh);
-      // Street lights eliminate — PointLight incompatibil cu MeshBasicMaterial în Three.js r128
+      this._addStreetLights();
     },
 
-    // _addStreetLights eliminat — PointLight incompatibil cu MeshBasicMaterial în Three.js r128
-    // (forțează recompilare shader la fiecare frame → 500+ erori/s)
-    _addStreetLights() { /* no-op */ },
-    setNightLights(on) { /* no-op */ },
+    // Lumini stradale — puncte calde la 8m înălțime pe arterele principale
+    _addStreetLights() {
+      const spacing = 60; // m între stâlpi
+      const height  = 8;
+      // Axa E-V: de la -1800m la +1800m față de centru, la Y=0
+      // Axa N-S: de la -1600m la +1600m, la X=0
+      const axes = [
+        {axis:'x', range:[-1800,1800], fixed:0,    spacing},
+        {axis:'y', range:[-1600,1600], fixed:30,   spacing},
+      ];
+      this._lights = [];
+      axes.forEach(ax => {
+        for(let v = ax.range[0]; v <= ax.range[1]; v += ax.spacing) {
+          const light = new THREE.PointLight(0xfff0d0, 0.0, 120);
+          if(ax.axis === 'x') light.position.set(v, ax.fixed, height);
+          else                light.position.set(ax.fixed, v, height);
+          this._scene.add(light);
+          this._lights.push(light);
+        }
+      });
+      console.log('[3D] Street lights:', this._lights.length);
+    },
+
+    // Aprinde/stinge luminile stradale
+    setNightLights(on) {
+      (this._lights||[]).forEach(l => {
+        l.intensity = on ? (0.3 + Math.random()*0.15) : 0;
+      });
+      this._map?.triggerRepaint?.();
+    },
 
     updateYear(yr) {
       if(!this._ready || !this._mesh) return;
@@ -1653,12 +1661,21 @@ out geom qt;`;
       } catch(e) { console.warn('[TCI] 2D layers:', e.message); }
     }
 
-    // 2. CustomLayerInterface cu Three.js — clădirile 3D reale
-    if(!m.getLayer?.('tci-3d-engine')) {
+    // 2. Fill-extrusion nativ Mapbox — clădiri 3D proiectate (înlocuiește Three.js)
+    if(!m.getSource?.('tci-buildings')) {
       try {
-        m.addLayer(this._3D);
-        console.log('[TCI] ✅ CustomLayer 3D adăugat');
-      } catch(e) { console.warn('[TCI] CustomLayer:', e.message); }
+        m.addSource('tci-buildings', {type:'geojson', data:{type:'FeatureCollection',features:[]}});
+        m.addLayer({
+          id: 'tci-buildings-3d', type: 'fill-extrusion', source: 'tci-buildings',
+          paint: {
+            'fill-extrusion-color':   ['get','color'],
+            'fill-extrusion-height':  ['get','height'],
+            'fill-extrusion-base':    0,
+            'fill-extrusion-opacity': 0.92,
+          }
+        });
+        console.log('[TCI] ✅ Fill-extrusion buildings layer adăugat');
+      } catch(e) { console.warn('[TCI] buildings layer error:', e.message); }
     }
 
     // 3. Generează zone — ÎN PARALEL cu fetch-ul de constrângeri
@@ -1757,10 +1774,38 @@ out geom qt;`;
       try { m.getSource('tci-proj').setData({type:'FeatureCollection', features}); } catch(e){}
     }
 
-    // Update 3D clădiri
-    try { this._3D.updateYear(yr); } catch(e){}
+    // Update fill-extrusion buildings (Mapbox nativ — garantat vizibil)
+    if(m?.getSource?.('tci-buildings') && this._3D?._entities?.length) {
+      const C = this.COLORS;
+      const features = this._3D._entities.map(e => {
+        let h = 1;
+        if(yr >= e.startYr) {
+          const yF = Math.min(1, (yr - e.startYr) / 18);
+          h = e.hBase + (e.hMax - e.hBase) * yF;
+        }
+        h = Math.max(1, h);
+        let color;
+        if(yr < e.startYr)             color = C.stabil || '#374151';
+        else if((yr-e.startYr) < 5)    color = C.constructie || '#f59e0b';
+        else if((yr-e.startYr) < 10)   color = C.aproape    || '#f97316';
+        else                            color = '#' + e.color.getHexString();
+        const dLat = (e.dM/2) / 111319.9;
+        const dLon = (e.wM/2) / (111319.9 * Math.cos(e.lat * Math.PI/180));
+        return {
+          type:'Feature',
+          geometry:{type:'Polygon', coordinates:[[
+            [e.lon-dLon, e.lat-dLat],[e.lon+dLon, e.lat-dLat],
+            [e.lon+dLon, e.lat+dLat],[e.lon-dLon, e.lat+dLat],
+            [e.lon-dLon, e.lat-dLat],
+          ]]},
+          properties:{ height:h, color }
+        };
+      });
+      try { m.getSource('tci-buildings').setData({type:'FeatureCollection',features}); } catch(e){}
+    }
 
-    // Update LOD
+    // Three.js updateYear — păstrat pentru compatibilitate
+    try { this._3D.updateYear(yr); } catch(e){}
     try { this._3D.updateLOD(m?.getZoom?.() || 14); } catch(e){}
   },
 
@@ -2122,10 +2167,8 @@ out geom qt;`;
       this._drawHUD(2055,1);
     }
     this.raf=requestAnimationFrame(()=>this._loop());
-    // triggerRepaint doar când animația rulează (nu când e Pauză)
-    this._3D?._map?.triggerRepaint?.();
-    // updateLOD la fiecare frame — mesh vizibil imediat când zoom >= 12.5
     this._3D?.updateLOD?.(this.map?.getZoom?.() ?? 14);
+    this._3D?._map?.triggerRepaint?.();
   },
 
   _onYearChange(yr) {
@@ -2395,8 +2438,6 @@ out geom qt;`;
     for(let y=sY;y<yr;y++) t+=this.MILES.includes(y)?this.YEAR_DUR*2.2:this.YEAR_DUR;
     this.pausedAt=t/this.speed;
     this._onYearChange(yr);
-    // Asigură vizibilitatea mesh-ului când e pe pauză
-    this._3D?.updateLOD?.(this.map?.getZoom?.() ?? 14);
   },
 
   setScenario(s) {
