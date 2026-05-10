@@ -133,35 +133,49 @@ const TCI = {
     this.bearing   = this.map.getBearing?.() || 0;
 
     this._buildUI();
-    this._initMapLayers();
-    this._initVehicles();
-    this._director.init(this);
 
     const cx = this.cityData?.lon || 27.601;
     const cy = this.cityData?.lat || 47.158;
 
-    // Pozitie initiala: overview oras
-    this.map.flyTo({ center:[cx,cy], zoom:11, pitch:40, bearing:-20, duration:2000, essential:true });
+    // Pozitie initiala imediata
+    this.map.jumpTo({ center:[cx,cy], zoom:4.5, pitch:0, bearing:0 });
 
-    // Mapbox Standard style + lighting
-    this._applyStyle();
+    // Tot restul: DUPA ce stilul e gata
+    const onStyleReady = () => {
+      this._setLight('dusk');
+      this._initMapLayers();
+      this._initVehicles();
+      setTimeout(() => {
+        this._director.init(this);
+        this.start();
+        console.log('[TCI v40] ✅ Lansat — hartă, vehicule, director');
+      }, 600);
+    };
 
-    setTimeout(() => this.start(), 500);
+    // Aplica Standard style
+    try {
+      const styleName = this.map.getStyle?.()?.name || '';
+      if(!styleName.toLowerCase().includes('standard')) {
+        this.map.setStyle('mapbox://styles/mapbox/standard');
+        this.map.once('style.load', onStyleReady);
+        setTimeout(onStyleReady, 6000); // fallback absolut
+      } else {
+        // Stil deja Standard — porneste direct
+        if(this.map.isStyleLoaded?.()) {
+          onStyleReady();
+        } else {
+          this.map.once('idle', onStyleReady);
+          setTimeout(onStyleReady, 3000);
+        }
+      }
+    } catch(e) {
+      console.warn('[TCI] Style error:', e.message);
+      onStyleReady(); // porneste oricum
+    }
   },
 
   _applyStyle() {
-    try {
-      const style = this.map.getStyle?.()?.name || '';
-      if(!style.toLowerCase().includes('standard')) {
-        this.map.setStyle('mapbox://styles/mapbox/standard');
-        this.map.once('style.load', () => {
-          this._setLight('dusk');
-          this._initMapLayers();
-        });
-      } else {
-        this._setLight('dusk');
-      }
-    } catch(e) {}
+    // Pastrat pentru compatibilitate — logica mutata in _launch
   },
 
   _setLight(preset) {
@@ -618,7 +632,7 @@ const TCI = {
         return profiles[name]||`Municipiu reședință de județ, jud. ${county}. Centru administrativ și economic regional.`;
       };
 
-      const fly=(c,z,p,b,d)=>({center:c,zoom:z,pitch:p,bearing:b,duration:d||5500});
+      const fly=(c,z,p,b,dur,dly)=>({center:c,zoom:z,pitch:p,bearing:b,duration:dur||5500,delay:dly||0});
 
       return [
         // S1 — Vedere globală → România
@@ -731,20 +745,25 @@ const TCI = {
       // Camera principala
       try { T.map.flyTo({...sc.cam,essential:true}); T.bearing=sc.cam.bearing; } catch(e){}
 
-      // Camera chain
-      clearTimeout(this._chainT);
-      (sc.chain||[]).forEach((c,i)=>{
+      // Camera chain — DELAY corect per pozitie
+      if(this._chainTimers) this._chainTimers.forEach(clearTimeout);
+      const ease=(t)=>t<0.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+      this._chainTimers=(sc.chain||[]).map(c=>
         setTimeout(()=>{
           if(!T.running) return;
-          try{ T.map.flyTo({...c,essential:true}); T.bearing=c.bearing; }catch(e){}
-        }, c.delay||0);
-      });
+          try{
+            T.map.flyTo({center:c.center,zoom:c.zoom,pitch:c.pitch,bearing:c.bearing,
+              duration:c.duration||6000,essential:true,easing:ease});
+            T.bearing=c.bearing;
+          }catch(e){}
+        }, c.delay||0)
+      );
 
       // Light preset
       T._setLight(sc.light||'dusk');
 
-      // Narativ — UN SINGUR text
-      T._updateNarCard(sc.title, sc.body, sc.src);
+      // Narativ — UN singur text, dupa camera porneste
+      setTimeout(()=>T._updateNarCard(sc.title, sc.body, sc.src), 800);
 
       // Year animation
       if(sc.animYear) {
@@ -756,9 +775,7 @@ const TCI = {
           if(y<=2050){ T._onYearChange(y++); setTimeout(tick,step); }
         };
         setTimeout(tick,1200);
-      } else {
-        T._dirYearAnim=false;
-      }
+      } else { T._dirYearAnim=false; }
 
       this._timer=setTimeout(()=>this._next(), sc.dur);
     },
