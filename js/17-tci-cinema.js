@@ -1457,7 +1457,7 @@ out geom qt;`;
 
       this._renderer.resetState();
       this._renderer.render(this._scene, this._camera);
-      this._map?.triggerRepaint();
+      // triggerRepaint mutat în _loop() — nu mai forțăm 60fps când TCI e pe Pauză
     },
 
     onRemove() { try { this._renderer?.dispose(); } catch(e){} this._ready = false; },
@@ -2102,6 +2102,8 @@ out geom qt;`;
       this._drawHUD(2055,1);
     }
     this.raf=requestAnimationFrame(()=>this._loop());
+    // triggerRepaint doar când animația rulează (nu când e Pauză)
+    this._3D?._map?.triggerRepaint?.();
   },
 
   _onYearChange(yr) {
