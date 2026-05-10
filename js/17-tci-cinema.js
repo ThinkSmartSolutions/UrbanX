@@ -354,9 +354,52 @@ const TCI = {
     setTimeout(() => {
       if(t) t.textContent = title;
       if(b) b.textContent = body;
-      if(s) s.textContent = src ? '📊 '+src : '';
+      if(s) s.textContent = src ? '📊 Surse oficiale: '+src : '';
       if(c) c.style.opacity = '1';
     }, 280);
+  },
+
+  // Explicatie suplimentara per scena — "mura in gura" pentru utilizator
+  _updateNarExtra(sceneId, yr) {
+    const el = document.getElementById('tci-nar-extra');
+    if(!el) {
+      // Creeaza elementul daca nu exista
+      const nc = document.getElementById('tci-narcard');
+      if(!nc) return;
+      const div = document.createElement('div');
+      div.id = 'tci-nar-extra';
+      div.style.cssText = 'margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.08);font-size:9.5px;color:rgba(148,163,184,0.7);line-height:1.6';
+      nc.appendChild(div);
+    }
+    const ex = document.getElementById('tci-nar-extra');
+    if(!ex) return;
+
+    const city  = this._city();
+    const d     = this._data(yr);
+    const name  = city.name || 'UAT';
+    const yF    = Math.max(0,Math.min(1,(yr-2025)/25));
+    const zones = this._projZones||[];
+    const startedZones = zones.filter(z=>yr>=z.hYear);
+    const constrZones  = zones.filter(z=>yr>=z.hYear&&(yr-z.hYear)<5);
+    const doneZones    = zones.filter(z=>(yr-z.hYear)>=10);
+
+    const msgs = {
+      's1': `👁 Ce vedeți: harta Europei cu ${name} marcat (punct roșu). Context: locul României și al ${name} în Europa. Stânga = realitatea 2025. Dreapta = aceeași hartă cu date predictive suprapuse.`,
+      's2': `👁 Ce vedeți: zona metropolitană ${name} de la înălțime. Liniile colorate = rețeaua de transport public. Punctele = vehicule în timp real. Datele demografice vin de la Recensămîntul INS 2021.`,
+      's3': `👁 Ce vedeți: apropierea de ${name}. Clădirile 3D apar la zoom 14+. Dreapta va începe să arate DIFERIT față de stânga pe măsură ce anii avansează și zonele de construcție devin active.`,
+      's4': `👁 Ce vedeți: ${name} în 3D. STÂNGA = cum arată azi. DREAPTA = proiecție. Contururile ${zones.length} zone delimitate sunt zonele din Planul Urbanistic General (PUG). ${startedZones.length>0?'Zonele portocalii/galbene = construcție activă în '+yr+'.':'Aşteptaţi — zonele vor apărea pe dreapta pe măsură ce anii avansează.'}`,
+      's5': `👁 Ce vedeți: clădirile GALBENE pe dreapta = construcție activă în ${yr}. Clădirile colorate (violet/albastru/portocaliu) = finalizate. Pe stânga = nicio construcție nouă (2025). ${constrZones.length} zone active acum. Înălțimile cresc vizibil de la an la an.`,
+      's6': `👁 Ce vedeți: rețeaua de transport public + traficul auto în mișcare. ROȘU = tramvai. ALBASTRU = autobuz. GALBEN = mașini private. Traseele albastre/roșii = linii TP existente. La zoom 14+ mișcarea e vizibilă.`,
+      's7': `👁 Ce vedeți: o zonă specifică din ${name} la zoom detaliat. Conturul portocaliu delimitat = zonă de reconversie industrială din PUG. Pe DREAPTA apar clădiri noi extrudate — acestea NU există azi, sunt proiecția bazată pe UTR-uri și CUT-uri aprobate.`,
+      's8': `👁 Ce vedeți: nivel pietonal — ca și cum ai fi pe stradă. Clădirile din jur sunt OSM 3D real. Pe DREAPTA, unele clădiri sunt mai înalte = proiecția densificării. Luminile se schimbă: zi → apus → noapte = diverse scenarii de utilizare urbană.`,
+      's9': `👁 Ce vedeți: harta de risc suprapusă pe ${name}. Albastru = risc inundații (ANAR). Roșu = risc seismic (INFP/P100). Galben = risc caniculă (IPCC AR6 RCP8.5). Date climatice calibrate pentru 2050 vs 2025.`,
+      's10': `👁 Ce vedeți: ${name} comparat cu orașe similare din România și UE. Toate datele = Eurostat Urban Audit 2021 + INS. Indicatorii arată unde se situează ${name} și câți ani de investiții consistente sunt necesari pentru convergența EU.`,
+      's11': `👁 Ce vedeți: transformarea completă 2025→2050 în timp real. STÂNGA = 2025 înghețat. DREAPTA = evoluție an cu an. Folosiți slider-ul de jos pentru a sări la orice an. Fiecare clădire nouă are o bază legală: UTR + CUT + autorizații ANCPI.`,
+      's12': `👁 Ce vedeți: ${name} 2050 — imaginea completă. ${doneZones.length} zone urbanistice finalizate. +${Math.round(yF*20)}% populație. +${Math.round(yF*100)}% PIB/cap față de 2025. Toate proiecțiile sunt calibrate pe date oficiale și pot fi citate în documente PUZ/PUG/PIDU.`,
+    };
+
+    const msg = msgs[sceneId] || msgs['s4'];
+    ex.textContent = msg;
   },
 
   _updateKPIs() {
@@ -619,105 +662,111 @@ const TCI = {
 
   _initProjectionLayers(cx, cy) {
     const m = this.map; if(!m) return;
-    if(m.getSource?.('tci-proj')) return; // deja initializat
+    if(m.getSource?.('tci-proj')) return;
 
     this._projZones = this._generateProjectionZones(cx, cy);
 
-    const mkFeatures = (yr) => this._projZones.map(z => {
-      const yF = Math.max(0, Math.min(1, (yr - z.hYear) / 15));
-      return {
-        type:'Feature',
-        geometry: {type:'Polygon', coordinates:[z.coords]},
-        properties: {
-          id: z.id, name: z.name, type: z.type,
-          typeLabel: z.typeLabel, color: z.color,
-          poi: z.poi, cut: z.cut,
-          h: z.hBase + (z.hMax - z.hBase) * yF,
-          opacity: Math.min(0.82, Math.max(0, (yr - z.hYear + 3) * 0.12)),
-        }
-      };
-    });
+    // Genereaza features cu h=0 initial (nu s-au inceput inca)
+    const emptyFeatures = this._projZones.map(z => ({
+      type:'Feature',
+      geometry:{type:'Polygon', coordinates:[z.coords]},
+      properties:{ id:z.id, name:z.name, type:z.type, typeLabel:z.typeLabel,
+        color:z.color, poi:z.poi, cut:z.cut, h:0, displayColor:z.color, area:z.area||100 }
+    }));
 
     try {
-      m.addSource('tci-proj', {type:'geojson', data:{type:'FeatureCollection', features:mkFeatures(this.year||2025)}});
+      m.addSource('tci-proj', {type:'geojson', data:{type:'FeatureCollection', features:emptyFeatures}});
 
-      // ── Umplere zone — fill semitransparent pentru context
-      m.addLayer({
-        id:'tci-proj-fill', type:'fill', source:'tci-proj',
-        paint:{
-          'fill-color':['get','color'],
-          'fill-opacity':['*',['get','opacity'],0.18],
-        }
-      });
-
-      // ── Contur zone — mereu vizibil (linii punctate)
+      // ── Contur zone — MEREU vizibil ca ghid, chiar si inainte de start
       m.addLayer({
         id:'tci-proj-outline', type:'line', source:'tci-proj',
         paint:{
           'line-color':['get','color'],
-          'line-width':2.5,
-          'line-opacity':0.85,
-          'line-dasharray':[4,3],
+          'line-width':['interpolate',['linear'],['zoom'],10,1.5,15,3],
+          'line-opacity':0.80,
+          'line-dasharray':[5,4],
         }
       });
 
-      // ── Cladiri proiectate — extruziuni 3D care cresc per an
+      // ── Umplere zona — vizibila mereu, opacity mica
+      m.addLayer({
+        id:'tci-proj-fill', type:'fill', source:'tci-proj',
+        paint:{
+          'fill-color':['get','displayColor'],
+          'fill-opacity':0.12,
+        }
+      });
+
+      // ── Cladiri proiectate — extruziuni 3D
+      // CRITIC: fill-extrusion-opacity NU e data-driven → folosim culoare + opacity fixa
       m.addLayer({
         id:'tci-proj-bld', type:'fill-extrusion', source:'tci-proj',
-        minzoom:12,
+        minzoom:11,
         paint:{
-          'fill-extrusion-color':['get','color'],
+          'fill-extrusion-color':['get','displayColor'],
           'fill-extrusion-height':['get','h'],
           'fill-extrusion-base':0,
-          'fill-extrusion-opacity':['get','opacity'],
+          'fill-extrusion-opacity':0.78,  // FIXED — nu data-driven!
+          'fill-extrusion-ambient-occlusion-intensity':0.5,
         }
       });
 
-      // ── Etichete zone — vizibile la zoom 12+
+      // ── Etichete zone
       m.addLayer({
         id:'tci-proj-labels', type:'symbol', source:'tci-proj',
-        minzoom:12,
+        minzoom:11,
         layout:{
           'text-field':['concat',['get','name'],'\n',['get','typeLabel']],
           'text-font':['DIN Pro Medium','Arial Unicode MS Regular'],
-          'text-size':['interpolate',['linear'],['zoom'],12,9,15,12,17,14],
-          'text-anchor':'center',
-          'text-justify':'center',
-          'text-max-width':10,
+          'text-size':['interpolate',['linear'],['zoom'],11,8,14,11,16,14],
+          'text-anchor':'center', 'text-max-width':10,
         },
         paint:{
           'text-color':['get','color'],
-          'text-halo-color':'rgba(4,10,24,0.92)',
-          'text-halo-width':2.5,
-          'text-opacity':['interpolate',['linear'],['zoom'],11,0,13,1],
+          'text-halo-color':'rgba(4,10,24,0.95)',
+          'text-halo-width':3,
+          'text-opacity':['interpolate',['linear'],['zoom'],10,0,12,1],
         }
       });
 
-      console.log('[TCI] ✅ Layere proiecție urbanistică adaugate:', this._projZones.length, 'zone');
-      this._updateProjectionLayers(this.year||2025);
+      console.log('[TCI] ✅ Zone UTR proiectate:', this._projZones.length);
 
-    } catch(e) { console.warn('[TCI] Proiecție layers:', e.message); }
+      // Update imediat
+      setTimeout(()=>this._updateProjectionLayers(this.year||2025), 500);
+
+    } catch(e) { console.warn('[TCI] Proiecție layers error:', e.message); }
   },
 
   _updateProjectionLayers(yr) {
     const m=this.map; if(!m?.getSource?.('tci-proj')) return;
     if(!this._projZones) return;
 
+    // ── Coduri de culori: galben=constructie, original=finalizat, gri=planificat
+    const getDisplayColor = (z, year) => {
+      if(year < z.hYear) return '#4b5563';           // Planificat — gri
+      const age = year - z.hYear;
+      if(age < 5)  return '#f59e0b';                  // Sub constructie — GALBEN
+      if(age < 10) return '#f97316';                  // Aproape finalizat — PORTOCALIU
+      return z.color;                                  // Finalizat — culoarea zonei
+    };
+
     const features = this._projZones.map(z => {
-      const yF   = Math.max(0, Math.min(1, (yr - z.hYear) / 15));
-      const h    = z.hBase + (z.hMax - z.hBase) * yF;
-      const opac = Math.min(0.82, Math.max(0, (yr - z.hYear + 3) * 0.12));
+      const yF          = Math.max(0, Math.min(1, (yr - z.hYear) / 18));
+      const h           = yr >= z.hYear
+        ? z.hBase + (z.hMax - z.hBase) * yF
+        : 0;  // h=0 → zona nu se vede ca extruziune (inca nu a inceput)
+      const displayColor= getDisplayColor(z, yr);
       return {
         type:'Feature',
         geometry:{type:'Polygon', coordinates:[z.coords]},
-        properties:{id:z.id, name:z.name, type:z.type, typeLabel:z.typeLabel,
-          color:z.color, poi:z.poi, cut:z.cut, h, opacity:opac}
+        properties:{ id:z.id, name:z.name, type:z.type, typeLabel:z.typeLabel,
+          color:z.color, displayColor, poi:z.poi, cut:z.cut, h, area:z.area||100 }
       };
     });
 
     try {
       m.getSource('tci-proj').setData({type:'FeatureCollection', features});
-    } catch(e){}
+    } catch(e) {}
   },
 
   _buildTPRoutes(cx,cy) {
@@ -949,10 +998,10 @@ const TCI = {
         {id:'s8',dur:80000,light:'dusk',
          cam:{center:[cx+0.020*sc,cy-0.009*sc],zoom:16.5,pitch:74,bearing:5,duration:6000},
          chain:[
-           {center:[cx+0.021*sc,cy-0.010*sc],zoom:17.0,pitch:78,bearing:35,duration:7000,delay:13000},
-           {center:[cx+0.019*sc,cy-0.011*sc],zoom:17.3,pitch:79,bearing:-20,duration:7000,delay:30000},
-           {center:[cx+0.000,cy+0.000],zoom:16.8,pitch:76,bearing:15,duration:7000,delay:50000},
-           {center:[cx+0.020*sc,cy-0.009*sc],zoom:16.5,pitch:74,bearing:0,duration:6000,delay:66000},
+           {center:[cx+0.021*sc,cy-0.010*sc],zoom:17.0,pitch:78,bearing:35,duration:7000,delay:13000,light:'dusk'},
+           {center:[cx+0.019*sc,cy-0.011*sc],zoom:17.3,pitch:79,bearing:-20,duration:7000,delay:30000,light:'night'},
+           {center:[cx+0.000,cy+0.000],zoom:16.8,pitch:76,bearing:15,duration:7000,delay:50000,light:'night'},
+           {center:[cx+0.020*sc,cy-0.009*sc],zoom:16.5,pitch:74,bearing:0,duration:6000,delay:66000,light:'dawn'},
          ],
          title:'🚶 La Nivel de Stradă — Viitoarea Zonă',
          body:'Perspectivă pietonală în zona de reconversie. Clădirile noi (extrudate colorate) pe dreapta vs realitatea actuală pe stânga. Zoom 17, pitch 78° — vedere ca pietoni prin noul cartier proiectat.',
@@ -1011,43 +1060,49 @@ const TCI = {
 
     _next() {
       this._idx++;
-      if(this._idx>=this._scenes.length){ this._idx=0; } // loop
-      const sc=this._scenes[this._idx];
-      if(!sc) return;
+      if(this._idx>=this._scenes.length){ this._idx=0; }
+      const sc=this._scenes[this._idx]; if(!sc) return;
       const T=this._tci;
-      console.log('[Director] Scena '+(this._idx+1)+'/'+this._scenes.length+': '+sc.id);
+      console.log(`[Director] Scena ${this._idx+1}/${this._scenes.length}: ${sc.id} (${sc.dur/1000}s)`);
 
-      // Camera principala
-      try { T.map.flyTo({...sc.cam,essential:true}); T.bearing=sc.cam.bearing; } catch(e){}
-
-      // Camera chain — DELAY corect per pozitie
-      if(this._chainTimers) this._chainTimers.forEach(clearTimeout);
-      const ease=(t)=>t<0.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
-      this._chainTimers=(sc.chain||[]).map(c=>
-        setTimeout(()=>{
-          if(!T.running) return;
-          try{
-            T.map.flyTo({center:c.center,zoom:c.zoom,pitch:c.pitch,bearing:c.bearing,
-              duration:c.duration||6000,essential:true,easing:ease});
-            T.bearing=c.bearing;
-          }catch(e){}
-        }, c.delay||0)
-      );
-
-      // Light preset
+      // SEASON / LIGHTING CYCLE
       T._setLight(sc.light||'dusk');
 
-      // Narativ — UN singur text, dupa camera porneste
-      setTimeout(()=>T._updateNarCard(sc.title, sc.body, sc.src), 800);
+      // Garantie zoom 3D la S4+
+      const ease=(t)=>t<0.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+      const is3D=['s4','s5','s6','s7','s8','s9','s10','s11','s12'].includes(sc.id);
+      if(is3D && (T.map?.getZoom?.()||4)<13.5){
+        try{const cx=T.cityData?.lon||27.601,cy=T.cityData?.lat||47.158;
+          T.map.jumpTo({center:[cx,cy],zoom:13.5,pitch:40,bearing:0});}catch(e){}
+      }
+      try{T.map.flyTo({...sc.cam,essential:true,easing:ease});T.bearing=sc.cam.bearing||0;}catch(e){}
+
+      // Camera chain cu delay + lighting change optional per camera
+      if(this._chainTimers) this._chainTimers.forEach(clearTimeout);
+      this._chainTimers=(sc.chain||[]).map(c=>setTimeout(()=>{
+        if(!T.running) return;
+        try{T.map.flyTo({center:c.center,zoom:c.zoom,pitch:c.pitch,bearing:c.bearing,
+          duration:c.duration||6000,essential:true,easing:ease});
+          T.bearing=c.bearing;
+          if(c.light) T._setLight(c.light);
+        }catch(e){}
+      }, c.delay||0));
+
+      // Narativ explicit
+      setTimeout(()=>{
+        T._updateNarCard(sc.title, sc.body, sc.src);
+        T._updateNarExtra(sc.id, T.year||T.startYear||2025);
+      }, 900);
 
       // Year animation
-      if(sc.animYear) {
+      if(sc.animYear){
         T._dirYearAnim=true;
-        let y=T.startYear;
-        const step=Math.max(250,(sc.dur-2000)/25);
+        let y=T.year||T.startYear||2025;
+        const target=sc.yearTo||2050;
+        const step=Math.max(300,(sc.dur-2000)/Math.max(1,target-y));
         const tick=()=>{
-          if(!this._tci.running||!T._dirYearAnim) return;
-          if(y<=2050){ T._onYearChange(y++); setTimeout(tick,step); }
+          if(!T.running||!T._dirYearAnim) return;
+          if(y<=target){T._onYearChange(y++);setTimeout(tick,step);}
         };
         setTimeout(tick,1200);
       } else { T._dirYearAnim=false; }
@@ -1055,8 +1110,13 @@ const TCI = {
       this._timer=setTimeout(()=>this._next(), sc.dur);
     },
 
-    stop(){ clearTimeout(this._timer); this._idx=-1; },
+    stop(){
+      clearTimeout(this._timer);
+      if(this._chainTimers) this._chainTimers.forEach(clearTimeout);
+      this._idx=-1;
+    },
   },
+
 
   // ── Loop principal ───────────────────────────────────────────────────────
   start() {
