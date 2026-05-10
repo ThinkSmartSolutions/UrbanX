@@ -835,12 +835,10 @@ canvas#c2d{width:100%;height:100%;display:block}
     // Service Worker registration
     if('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        // SW path relativ la locatia paginii (GitHub Pages: /UrbanX/)
-        const swPath = window.location.pathname.split('/').slice(0,-1).join('/') + '/sw.js';
-        navigator.serviceWorker.register(swPath, { scope: './' })
+        navigator.serviceWorker.register('./sw.js')
           .then(r => console.log('[SW] OK:', r.scope))
-          .catch(e => console.warn('[SW] Not available:', e.message));
-      });
+          .catch(e => console.warn('[SW] Skip:', e.message));
+        });
     }
   </script>
 </head>
