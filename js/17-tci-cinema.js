@@ -1607,7 +1607,8 @@ const TCI = {
 
     const tip2  = cd?.tip || 'municipiu';
     const peers2 = this._EU_PEERS[tip2] || this._EU_PEERS.municipiu;
-    const curEU  = this._EU_CITIES[this.cityKey] || {name:cd?.name||'UAT',country:'RO',pib:12000,modal_auto:72,verde:8,conv_eu:65};
+    const euKey2  = this._getEUCityKey(this.cityKey);
+    const curEU  = (euKey2 && this._EU_CITIES[euKey2]) || {name:cd?.name||'UAT',country:'RO',pib:12000,modal_auto:72,verde:8,conv_eu:65};
     const peerData = peers2.slice(0,4).map(k=>this._EU_CITIES[k]).filter(Boolean);
     const allCities = [curEU, ...peerData];
 
@@ -1817,7 +1818,7 @@ const TCI = {
     const peers = this._EU_PEERS[tip] || this._EU_PEERS.municipiu;
 
     // Orasul curent ca primul entry
-    const currentKey = this.cityKey;
+    const currentKey = this._getEUCityKey(this.cityKey) || this.cityKey;
     const currentCity = this._EU_CITIES[currentKey] || {
       name: cd?.name || 'UAT',
       country: 'RO', flag: '🇷🇴',
@@ -2034,6 +2035,44 @@ const TCI = {
     leipzig:    { name:'Leipzig',    country:'DE', flag:'🇩🇪', pop:587857, pib:38400, modal_auto:35, verde:38, conv_eu:128 },
   },
 
+  // Mapare SIRUTA/platform key → EU_CITIES key
+  _EU_KEY_MAP: {
+    // Iasi variante
+    'RO-IS-105309': 'iasi', 'iasi': 'iasi', 'IS': 'iasi',
+    // Cluj
+    'RO-CJ-54984':  'cluj', 'cluj': 'cluj', 'cluj-napoca': 'cluj',
+    // Timisoara
+    'RO-TM-155350': 'timisoara', 'timisoara': 'timisoara',
+    // Brasov
+    'RO-BV-26986':  'brasov', 'brasov': 'brasov',
+    // Botosani
+    'RO-BT-21959':  'botosani', 'botosani': 'botosani',
+    // Suceava
+    'RO-SV-146069': 'suceava', 'suceava': 'suceava',
+    // Alte mari orase
+    'RO-CT-61095':  'iasi',  // Constanta → peer iasi
+    'RO-GL-84442':  'iasi',  // Galati
+    'RO-PH-119217': 'iasi',  // Ploiesti
+  },
+
+  _getEUCityKey(cityKey) {
+    if(!cityKey) return null;
+    const lower = cityKey.toLowerCase();
+    // Direct match
+    if(this._EU_KEY_MAP[cityKey]) return this._EU_KEY_MAP[cityKey];
+    if(this._EU_KEY_MAP[lower]) return this._EU_KEY_MAP[lower];
+    // Cautare partiala in nume
+    const name = this.cityData?.name?.toLowerCase() || '';
+    if(name.includes('iasi') || name.includes('iași')) return 'iasi';
+    if(name.includes('cluj')) return 'cluj';
+    if(name.includes('timis')) return 'timisoara';
+    if(name.includes('brasov') || name.includes('brașov')) return 'brasov';
+    if(name.includes('botosani') || name.includes('botoșani')) return 'botosani';
+    if(name.includes('suceava')) return 'suceava';
+    // Fallback: primul oras RO din EU_CITIES
+    return Object.keys(this._EU_CITIES).find(k => this._EU_CITIES[k].country === 'RO') || 'iasi';
+  },
+
   // Orase recomandate per tip UAT romanesc
   _EU_PEERS: {
     capitala:           ['brno','wroclaw','vilnius','graz'],
@@ -2242,10 +2281,35 @@ window.addEventListener('load',()=>setTimeout(()=>{
   if(!tciP) return;
   try{
     const s=new URLSearchParams(atob(tciP));
-    const ck=s.get('c'),sc=s.get('s'),yr=parseInt(s.get('y')||'2026'),md=s.get('m')||'uat';
+    let ck=s.get('c'), sc=s.get('s'), yr=parseInt(s.get('y')||'2026'), md=s.get('m')||'uat';
+    // Verifica daca cityKey exista in DB, altfel cauta by SIRUTA sau name
+    if(ck && typeof _RO_CITIES_DB !== 'undefined') {
+      if(!_RO_CITIES_DB[ck]) {
+        // Cauta dupa SIRUTA in key (format RO-IS-105309 → siruta=105309)
+        const sirutaMatch = ck.match(/(\d{5,6})$/);
+        if(sirutaMatch) {
+          const siruta = sirutaMatch[1];
+          const found = Object.entries(_RO_CITIES_DB).find(([k,v])=>
+            String(v.siruta)===siruta || String(v.SIRUTA)===siruta
+          );
+          if(found) ck = found[0];
+        }
+        // Sau cauta by county code (IS=Iasi, CJ=Cluj etc)
+        if(!_RO_CITIES_DB[ck]) {
+          const judetMatch = ck.match(/RO-([A-Z]{2})-/);
+          if(judetMatch) {
+            const judet = judetMatch[1];
+            const found = Object.entries(_RO_CITIES_DB).find(([k,v])=>
+              v.judet_code===judet || (v.judet||'').slice(0,2).toUpperCase()===judet
+            );
+            if(found) ck = found[0];
+          }
+        }
+      }
+    }
     TCI._launch(md,{cityKey:ck||'iasi',scenario:sc||'S2'});
     setTimeout(()=>TCI.scrubTo(yr),1500);
-  }catch(e){}
+  }catch(e){console.warn('[TCI] URL restore error:',e);}
 },1200));
 
 console.log('[TCI Cinema] window.map + canvas overlay — UAT ori parcelă, zoom cinematice');
