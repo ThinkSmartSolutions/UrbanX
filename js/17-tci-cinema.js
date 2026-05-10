@@ -1160,7 +1160,7 @@ const TCI = {
     this._drawParcelRiskCard(ctx, W, H);
     // ── COMPARARE EU (overlay central jos) ────────────────────────────────
     const _tT = (this.year - (this.startYear||2026)) / Math.max(1, 2055 - (this.startYear||2026));
-    this._drawEUComparison(ctx, W, H, this.year, _tT);
+
   },
 
   // ── Legenda UTR vizibila pe harta ─────────────────────────────────────────
