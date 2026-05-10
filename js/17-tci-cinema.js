@@ -411,30 +411,40 @@ const TCI = {
     const cx = ap?.lon || d?.lon || 27.601;
     const cy = ap?.lat || d?.lat || 47.158;
 
-    // ── L2: Clădiri 3D animate (cresc cu densificarea per UTR) ─────────────
+    // ── L2: Clădiri 3D — sursa Mapbox Streets v8 (funcționează cu orice stil) ─
+    if(!m.getSource?.('tci-bld-src')) {
+      try {
+        // Sursa separata de buildings — nu depinde de STYLES.custom
+        m.addSource('tci-bld-src', {
+          type: 'vector',
+          url: 'mapbox://mapbox.mapbox-streets-v8',
+        });
+      } catch(e) { console.warn('[TCI-L2] bld-src:', e.message); }
+    }
     if(!m.getLayer?.('tci-bld-anim')) {
       try {
         m.addLayer({
           id: 'tci-bld-anim',
           type: 'fill-extrusion',
-          source: 'composite',
+          source: 'tci-bld-src',
           'source-layer': 'building',
-          filter: ['==', 'extrude', 'true'],
+          filter: ['==', ['get','extrude'], 'true'],
           minzoom: 13,
           paint: {
             'fill-extrusion-color': [
               'interpolate', ['linear'], ['get', 'height'],
-              0,  '#0d1f3c',   // joase = albastru inchis
-              12, '#16306e',   // medii
-              25, '#1e4080',   // inalte
-              50, '#2455a0',   // foarte inalte
-              100,'#2e6ab8',   // turn
+              0,  '#0d1f3c',
+              12, '#16306e',
+              25, '#1e4080',
+              50, '#2455a0',
+              100,'#2e6ab8',
             ],
-            'fill-extrusion-height': ['get', 'height'],
-            'fill-extrusion-base':   ['get', 'min_height'],
+            'fill-extrusion-height': ['get','height'],
+            'fill-extrusion-base':   ['get','min_height'],
             'fill-extrusion-opacity': 0.88,
           },
         });
+        console.log('[TCI-L2] ✅ 3D buildings layer adaugat (Mapbox Streets v8)');
       } catch(e) { console.warn('[TCI-L2] buildings:', e.message); }
     }
 
@@ -621,20 +631,19 @@ const TCI = {
       m.flyTo({ center:[cx,cy], zoom:16.5, pitch:62, bearing:-15, duration:100, essential:true });
       this.bearing = -15;
     } else {
-      // UAT: Porneste la nivel oras dar IMEDIAT trece in Drone 3D
-      // Prima miscare: panorama rapida de sus
-      m.flyTo({ center:[cx,cy], zoom:11, pitch:20, bearing:0, duration:100 });
-      // Dupa 800ms: zoom in cinematic cu pitch 55° (se vad cladirile 3D)
+      // UAT: Drone 3D direct — pitch 55° de la inceput
+      m.flyTo({ center:[cx,cy], zoom:14.5, pitch:55, bearing:-20, duration:100 });
+      // Dupa 200ms: confirmare pozitie exacta
       setTimeout(() => {
         m.flyTo({
           center:   [cx, cy],
           zoom:     14.5,
           pitch:    55,
           bearing:  -20,
-          duration: 5000,
+          duration: 3000,
           essential: true,
         });
-      }, 800);
+      }, 200);
       this.bearing = -20;
     }
   },
