@@ -617,19 +617,26 @@ const TCI = {
     const cy = ap?.lat || d?.lat || 47.158;
 
     if(this.mode === 'parcela') {
-      // Zoom in dramatic pe parcela
-      m.flyTo({ center:[cx,cy], zoom:13, pitch:0, bearing:0, duration:100 });
-      setTimeout(() => {
-        m.flyTo({ center:[cx,cy], zoom:16.5, pitch:62, bearing:-15, duration:4000, essential:true });
-      }, 200);
+      // Porn direct la nivelul parcelei — 3D street level
+      m.flyTo({ center:[cx,cy], zoom:16.5, pitch:62, bearing:-15, duration:100, essential:true });
+      this.bearing = -15;
     } else {
-      // Overview oras → drone
-      m.flyTo({ center:[cx,cy], zoom:10.5, pitch:0, bearing:0, duration:100 });
+      // UAT: Porneste la nivel oras dar IMEDIAT trece in Drone 3D
+      // Prima miscare: panorama rapida de sus
+      m.flyTo({ center:[cx,cy], zoom:11, pitch:20, bearing:0, duration:100 });
+      // Dupa 800ms: zoom in cinematic cu pitch 55° (se vad cladirile 3D)
       setTimeout(() => {
-        m.flyTo({ center:[cx,cy], zoom:13, pitch:50, bearing:-15, duration:5000, essential:true });
-      }, 200);
+        m.flyTo({
+          center:   [cx, cy],
+          zoom:     14.5,
+          pitch:    55,
+          bearing:  -20,
+          duration: 5000,
+          essential: true,
+        });
+      }, 800);
+      this.bearing = -20;
     }
-    this.bearing = -15;
   },
 
   // ── Camera presets manual ─────────────────────────────────────────────────
@@ -663,6 +670,15 @@ const TCI = {
     this.startTime = performance.now() - this.pausedAt;
     const btn = document.getElementById('tci-play');
     if(btn) btn.textContent = '⏸ Pauza';
+    // Prima narativa: explica ce urmeaza sa vada
+    setTimeout(() => {
+      const txt = document.getElementById('tci-narrative-text');
+      const src = document.getElementById('tci-narrative-src');
+      const strip = document.getElementById('tci-narrative');
+      if(txt) txt.textContent = 'Culorile UTR pe hartă: Albastru=rezidențial · Violet=mixt · Portocaliu=comercial · Verde=spații verzi · Roșu=industrial. Clădirile cresc cu densificarea urbană 2026→2055.';
+      if(src) src.textContent = 'PUG+RLU per UAT';
+      if(strip) strip.style.opacity='1';
+    }, 1000);
     this._loop();
   },
 
@@ -683,6 +699,10 @@ const TCI = {
 
     if(elapsed < this.INTRO_DUR) {
       this._draw2D_intro(elapsed / this.INTRO_DUR);
+      // La 70% din intro, activam Drone 3D automat
+      if(elapsed > this.INTRO_DUR * 0.7 && elapsed < this.INTRO_DUR * 0.72) {
+        this._camPreset(this.mode === 'parcela' ? 'detail' : 'drone');
+      }
     } else {
       let t = elapsed - this.INTRO_DUR;
       let found = false;
@@ -844,9 +864,12 @@ const TCI = {
     const ctx=this.ctx; if(!ctx) return;
     const W=this.canvas.width, H=this.canvas.height;
     ctx.clearRect(0,0,W,H);
-    const fi=Math.min(1,t*2.5);
-    ctx.fillStyle=`rgba(2,6,15,${1-fi})`;
-    ctx.fillRect(0,0,W,H);
+    // Fade-in rapid - doar primele 0.3s acopera harta
+    const fi=Math.min(1,t*4);
+    if(fi < 1) {
+      ctx.fillStyle=`rgba(2,6,15,${1-fi})`;
+      ctx.fillRect(0,0,W,H);
+    }
     if(t>0.18){
       const ta=Math.min(1,(t-0.18)/0.2)*(t<0.78?1:Math.max(0,(1-t)/0.22));
       const cn=this.cityData?.name||'UAT';
