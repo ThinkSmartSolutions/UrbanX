@@ -188,7 +188,26 @@ const TCI = {
       this.map.on('move', () => {
         if(this._syncLock || !this.mapLeft) return;
         this._syncLock = true;
-        try { this.mapLeft.jumpTo({ center:this.map.getCenter(), zoom:this.map.getZoom(), pitch:this.map.getPitch(), bearing:this.map.getBearing() }); } catch(e){}
+        try {
+          // Sync complet: center, zoom, pitch, bearing
+          // La pitch mare, folosim getFreeCameraOptions pentru precizie maximă
+          const pitch   = this.map.getPitch();
+          const bearing = this.map.getBearing();
+          const zoom    = this.map.getZoom();
+          const center  = this.map.getCenter();
+
+          if(pitch > 50) {
+            // La pitch mare — sync via FreeCameraOptions pentru aliniere perfectă
+            const opts = this.map.getFreeCameraOptions();
+            if(opts && this.mapLeft.setFreeCameraOptions) {
+              this.mapLeft.setFreeCameraOptions(opts);
+            } else {
+              this.mapLeft.jumpTo({ center, zoom, pitch, bearing });
+            }
+          } else {
+            this.mapLeft.jumpTo({ center, zoom, pitch, bearing });
+          }
+        } catch(e){}
         this._syncLock = false;
       });
     } catch(e) { console.warn('[TCI] mapLeft error:', e.message); }
@@ -197,6 +216,29 @@ const TCI = {
   _setLight(preset) {
     try { this.map.setConfigProperty('basemap','lightPreset',preset); } catch(e){}
     try { this.mapLeft?.setConfigProperty('basemap','lightPreset',preset); } catch(e){}
+
+    // Geamuri clădiri proiectate — se aprind noaptea/seara
+    const emissiveByPreset = { night:0.45, dawn:0.25, dusk:0.15, day:0.0 };
+    const intensity = emissiveByPreset[preset] ?? 0.0;
+    // Culoare geamuri: galben cald la noapte, portocaliu la seara
+    const emissiveColor = preset === 'night' ? 0xffd060 : preset === 'dawn' ? 0xff9040 : 0x000000;
+
+    try {
+      const mesh = this._3D?._mesh;
+      if(mesh?.material) {
+        mesh.material.emissive = new THREE.Color(emissiveColor);
+        mesh.material.emissiveIntensity = intensity;
+        mesh.material.needsUpdate = true;
+        this._3D._map?.triggerRepaint?.();
+      }
+    } catch(e){}
+
+    // Ambientlight Three.js — mai scăzut noaptea, mai puternic ziua
+    const ambientByPreset = { night:0.35, dawn:0.65, dusk:0.80, day:1.20 };
+    try {
+      const ambient = this._3D?._scene?.children?.find?.(c=>c.isAmbientLight);
+      if(ambient) { ambient.intensity = ambientByPreset[preset] ?? 1.0; this._3D._map?.triggerRepaint?.(); }
+    } catch(e){}
   },
 
   _updateSplitLabels() {
@@ -858,9 +900,9 @@ const TCI = {
       this._renderer.autoClear = false;
 
       // Lumini în spațiul local (metri)
-      this._scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+      this._scene.add(new THREE.AmbientLight(0xffffff, 1.2));
       const sun = new THREE.DirectionalLight(0xffd580, 1.0);
-      sun.position.set(500, 800, 1000);
+      sun.position.set(300, 600, 800);
       this._scene.add(sun);
 
       this._ready = true;
@@ -952,13 +994,51 @@ const TCI = {
 
     _buildMesh() {
       if(!this._entities.length) return;
-      // Geometrie cutie cu originea la baza (nu centru)
+      // Geometrie ușor mai subțire pentru clădiri (nu perfect cubice)
       const geom = new THREE.BoxGeometry(1, 1, 1);
       geom.translate(0, 0, 0.5); // pivotul la Z=0 (sol)
-      const mat = new THREE.MeshLambertMaterial({ vertexColors: true });
+      const mat = new THREE.MeshStandardMaterial({
+        vertexColors: true,
+        roughness:    0.75,
+        metalness:    0.05,
+        emissive:     new THREE.Color(0x000000),
+        emissiveIntensity: 0,
+      });
       this._mesh = new THREE.InstancedMesh(geom, mat, this._entities.length);
       this._mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
       this._scene.add(this._mesh);
+      this._addStreetLights();
+    },
+
+    // Lumini stradale — puncte calde la 8m înălțime pe arterele principale
+    _addStreetLights() {
+      const spacing = 60; // m între stâlpi
+      const height  = 8;
+      // Axa E-V: de la -1800m la +1800m față de centru, la Y=0
+      // Axa N-S: de la -1600m la +1600m, la X=0
+      const axes = [
+        {axis:'x', range:[-1800,1800], fixed:0,    spacing},
+        {axis:'y', range:[-1600,1600], fixed:30,   spacing},
+      ];
+      this._lights = [];
+      axes.forEach(ax => {
+        for(let v = ax.range[0]; v <= ax.range[1]; v += ax.spacing) {
+          const light = new THREE.PointLight(0xfff0d0, 0.0, 120);
+          if(ax.axis === 'x') light.position.set(v, ax.fixed, height);
+          else                light.position.set(ax.fixed, v, height);
+          this._scene.add(light);
+          this._lights.push(light);
+        }
+      });
+      console.log('[3D] Street lights:', this._lights.length);
+    },
+
+    // Aprinde/stinge luminile stradale
+    setNightLights(on) {
+      (this._lights||[]).forEach(l => {
+        l.intensity = on ? (0.3 + Math.random()*0.15) : 0;
+      });
+      this._map?.triggerRepaint?.();
     },
 
     updateYear(yr) {
@@ -1301,17 +1381,25 @@ const TCI = {
          src:'PUG UTR RI · ANCPI · Model TSS·FG'},
 
         // S8 — Street level IN ZONA DE RECONVERSIE (80s)
+        // S8 — Street level DRAMATIC: dusk → noapte → dawn (80s)
+        // Camera merge in zona de reconversie unde sunt cladiri proiectate
         {id:'s8',dur:80000,light:'dusk',
-         cam:{center:[cx+0.020*sc,cy-0.009*sc],zoom:16.5,pitch:74,bearing:5,duration:6000},
+         cam:{center:[cx+0.020*sc,cy-0.009*sc],zoom:15.5,pitch:68,bearing:-15,duration:5500},
          chain:[
-           {center:[cx+0.021*sc,cy-0.010*sc],zoom:17.0,pitch:78,bearing:35,duration:7000,delay:13000,light:'dusk'},
-           {center:[cx+0.019*sc,cy-0.011*sc],zoom:17.3,pitch:79,bearing:-20,duration:7000,delay:30000,light:'night'},
-           {center:[cx+0.000,cy+0.000],zoom:16.8,pitch:76,bearing:15,duration:7000,delay:50000,light:'night'},
-           {center:[cx+0.020*sc,cy-0.009*sc],zoom:16.5,pitch:74,bearing:0,duration:6000,delay:66000,light:'dawn'},
+           // Zoom in pe zona cu cladiri proiectate — apus dramatic
+           {center:[cx+0.020*sc,cy-0.009*sc],zoom:16.2,pitch:72,bearing:20,duration:6500,delay:10000,light:'dusk'},
+           // Nivel strada — vede cladirile proiectate (portocalii/violet) in dreapta
+           {center:[cx+0.021*sc,cy-0.010*sc],zoom:17.0,pitch:78,bearing:-25,duration:7000,delay:24000,light:'dusk'},
+           // Noaptea — geamuri se aprind, lumina dramatica
+           {center:[cx+0.019*sc,cy-0.008*sc],zoom:17.3,pitch:79,bearing:15,duration:7000,delay:40000,light:'night'},
+           // Dawn — lumina calda a diminetii
+           {center:[cx+0.022*sc,cy-0.011*sc],zoom:16.8,pitch:75,bearing:-10,duration:7000,delay:57000,light:'dawn'},
+           // Pull-back cinematic — reveal zona completa
+           {center:[cx+0.022*sc,cy-0.011*sc],zoom:14.8,pitch:60,bearing:30,duration:6000,delay:70000,light:'dawn'},
          ],
-         title:'🚶 La Nivel de Stradă — Viitoarea Zonă',
-         body:'Perspectivă pietonală în zona de reconversie. Clădirile noi (extrudate colorate) pe dreapta vs realitatea actuală pe stânga. Zoom 17, pitch 78° — vedere ca pietoni prin noul cartier proiectat.',
-         src:'PMUD · ANM · OMS · Model Spațial TSS·FG'},
+         title:'🌆 Nivel Pietonal — '+name+' Ziua de Mâine',
+         body:'Perspectivă pietonală în zona de reconversie industrială. DREAPTA = proiecție 2028-2042: R+5-R+8, mixt funcțional, spații publice noi. Ciclul luminos: apus → noapte (geamuri aprinse) → dimineața. Densitate proiectată: +'+Math.round(densHA*0.4)+' loc/ha.',
+         src:'PMUD · ANM · OMS · ANCPI · Model TSS·FG'},
 
         {id:'s9',dur:65000,light:'night',
          cam:{center:[cx,cy],zoom:13.0,pitch:46,bearing:5,duration:5500},
