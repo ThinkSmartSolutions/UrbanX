@@ -4388,12 +4388,22 @@ const TCI = {
     // Camera spline
     T._CC._tci=T;
 
-    // Three.js layer
+    // ── DECK.GL — sistem principal de vizualizare ─────────────────────────
+    T._DeckGL._tci=T;
+    const initDeck = () => T._DeckGL.init(T);
     if(T.map?.isStyleLoaded?.()&&T.map?.loaded?.()) {
-      setTimeout(()=>T._initThreeJS(cx,cy), 1200);
+      setTimeout(initDeck, 1000);
     } else {
-      T.map?.once('idle',()=>setTimeout(()=>T._initThreeJS(cx,cy),800));
-      setTimeout(()=>T._initThreeJS(cx,cy),5000);
+      T.map?.once('idle', ()=>setTimeout(initDeck,600));
+      setTimeout(initDeck, 5000);
+    }
+
+    // Three.js layer (fallback vizualizare 3D)
+    if(T.map?.isStyleLoaded?.()&&T.map?.loaded?.()) {
+      setTimeout(()=>T._initThreeJS(cx,cy), 2000);
+    } else {
+      T.map?.once('idle',()=>setTimeout(()=>T._initThreeJS(cx,cy),1500));
+      setTimeout(()=>T._initThreeJS(cx,cy),6000);
     }
 
     // AI Director
@@ -4403,7 +4413,7 @@ const TCI = {
     // Video Exporter
     T._VideoExporter._tci=T;
 
-    // Adauga butoane UI (Narator + Video) in bottom bar
+    // Adauga butoane UI
     T._addPhase3UI();
   },
 
@@ -4435,6 +4445,406 @@ const TCI = {
     bar.appendChild(aiBtn);
     bar.appendChild(recBtn);
   },
+
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // DECK.GL — GPU-ACCELERATED URBAN VISUALIZATION
+  // TripsLayer · HexagonLayer · ArcLayer · ColumnLayer · ScatterplotLayer
+  // ══════════════════════════════════════════════════════════════════════════
+
+  _DeckGL: {
+    _tci:     null,
+    _overlay: null,
+    _ready:   false,
+    _tick:    0,
+    _data:    null,   // pre-computed city data
+    _raf:     null,
+
+    // ── 1. Load Deck.gl CDN ─────────────────────────────────────────────
+    _load() {
+      return new Promise(resolve => {
+        // Deja incarcat?
+        if(window.deck?.MapboxOverlay) { resolve(true); return; }
+
+        const tryLoad = (url, onFail) => {
+          const s = document.createElement('script');
+          s.src = url;
+          s.onload = () => {
+            // Deck.gl v9: verifica ca MapboxOverlay e disponibil
+            if(window.deck?.MapboxOverlay) {
+              console.log('[DeckGL] ✅ Loaded:', url.split('/')[4]);
+              resolve(true);
+            } else {
+              console.warn('[DeckGL] Bundle incarcat dar MapboxOverlay lipseste');
+              onFail?.();
+            }
+          };
+          s.onerror = () => { console.warn('[DeckGL] Failed:', url); onFail?.(); };
+          document.head.appendChild(s);
+        };
+
+        // v9 — compatibil cu Mapbox GL JS v3
+        tryLoad(
+          'https://unpkg.com/deck.gl@9.0.14/dist.min.js',
+          () => tryLoad(
+            'https://cdn.jsdelivr.net/npm/deck.gl@9.0.14/dist.min.js',
+            () => { console.error('[DeckGL] Toate CDN-urile au esuat'); resolve(false); }
+          )
+        );
+      });
+    },
+
+    // ── 2. Init: genera date + creeaza overlay ──────────────────────────
+    async init(tci) {
+      this._tci = tci;
+      const ok = await this._load();
+      if(!ok || !window.deck?.MapboxOverlay) return;
+
+      const map  = tci.map;
+      const d    = tci.cityData;
+      if(!map) return;
+
+      const cx = d?.lon  || 27.601;
+      const cy = d?.lat  || 47.158;
+      const pop= d?.pop2021 || 360633;
+
+      // Genereaza toate datele odata
+      this._data = this._generateAllData(cx, cy, pop, d);
+
+      // Creeaza overlay — Deck.gl v9 + Mapbox GL JS v3
+      const addOverlay = () => {
+        if(this._ready) return;
+        try {
+          this._overlay = new deck.MapboxOverlay({ interleaved:false, layers:[] });
+          map.addControl(this._overlay);
+          this._ready = true;
+          console.log('[DeckGL] ✅ Overlay activ');
+          this._startRenderLoop();
+        } catch(e) {
+          console.error('[DeckGL] Init error:', e.message);
+        }
+      };
+      if(map.isStyleLoaded?.() && map.loaded?.()) {
+        addOverlay();
+      } else {
+        map.once('load', addOverlay);
+        map.once('idle', addOverlay);
+        setTimeout(addOverlay, 4000);
+      }
+    },
+    },
+
+    // ── 3. Generare date sintetice bazate pe coordonate reale ───────────
+    _generateAllData(cx, cy, pop, cityData) {
+      const rng = (seed) => {
+        let x = Math.sin(seed + 1) * 43758.5453;
+        return x - Math.floor(x);
+      };
+
+      // ── Puncte populatie pentru HexagonLayer
+      const popPoints = [];
+      for(let i = 0; i < 6000; i++) {
+        const angle = rng(i * 7.3) * Math.PI * 2;
+        const r = -Math.log(1 - rng(i * 13.7) * 0.99) * 0.013;
+        const jx = (rng(i * 17.1) - 0.5) * 0.003;
+        const jy = (rng(i * 19.3) - 0.5) * 0.002;
+        popPoints.push({
+          position: [cx + Math.cos(angle)*r + jx, cy + Math.sin(angle)*r*0.72 + jy],
+          weight:   0.5 + rng(i * 23.1) * 3.5,
+        });
+      }
+
+      // ── Trips animate (TripsLayer) — rute principale + secundare
+      const tripRoutes = [
+        { a:[cx-0.025,cy],        b:[cx+0.025,cy],        n:50, type:0, speed:220 },
+        { a:[cx,cy-0.022],        b:[cx,cy+0.022],        n:45, type:0, speed:200 },
+        { a:[cx-0.018,cy+0.012],  b:[cx+0.020,cy-0.014],  n:30, type:0, speed:240 },
+        { a:[cx+0.012,cy+0.010],  b:[cx-0.015,cy-0.010],  n:25, type:0, speed:210 },
+        { a:[cx-0.022,cy-0.008],  b:[cx+0.015,cy+0.012],  n:20, type:0, speed:195 },
+        { a:[cx-0.020,cy+0.004],  b:[cx+0.022,cy-0.004],  n:12, type:1, speed:160 },  // bus
+        { a:[cx-0.024,cy],        b:[cx+0.024,cy],        n:8,  type:2, speed:140 },   // tram
+        { a:[cx,cy-0.018],        b:[cx,cy+0.018],        n:6,  type:2, speed:150 },   // tram
+      ];
+      const trips = [];
+      tripRoutes.forEach((rt, ri) => {
+        for(let i = 0; i < rt.n; i++) {
+          const tOff = rng(ri*200+i) * 1000;
+          const dx = rt.b[0]-rt.a[0], dy = rt.b[1]-rt.a[1];
+          const steps = 24;
+          const path = [], ts = [];
+          for(let s = 0; s <= steps; s++) {
+            const t = s/steps;
+            const lat_jit = Math.sin(t*Math.PI*3)*0.0008*(rng(ri*50+i*3)-0.5);
+            path.push([rt.a[0]+dx*t, rt.a[1]+dy*t+lat_jit]);
+            ts.push(tOff + s * rt.speed);
+          }
+          trips.push({ vendor:rt.type, path, timestamps:ts });
+        }
+      });
+
+      // ── Coloane dezvoltare urbana (ColumnLayer)
+      const columns = [];
+      for(let i = 0; i < 120; i++) {
+        const angle = rng(i*7.7)*Math.PI*2;
+        const dist  = 0.002 + rng(i*11.3)*0.020;
+        const intens= rng(i*13.9);
+        const type  = intens>0.70?0 : intens>0.42?1 : intens>0.18?2 : 3;
+        const COLORS = [[239,68,68],[245,158,11],[34,197,94],[139,92,246]];
+        columns.push({
+          position: [cx+Math.cos(angle)*dist, cy+Math.sin(angle)*dist*0.75],
+          baseElevation: intens * 250,
+          color: COLORS[type],
+          type, intens,
+        });
+      }
+
+      // ── Arce fluxuri navetism
+      const arcOrigins = [
+        { pos:[cx-0.032,cy+0.025], w:850 },
+        { pos:[cx+0.028,cy+0.018], w:620 },
+        { pos:[cx+0.022,cy-0.025], w:540 },
+        { pos:[cx-0.015,cy-0.028], w:710 },
+        { pos:[cx-0.030,cy-0.012], w:580 },
+        { pos:[cx+0.035,cy+0.008], w:490 },
+        { pos:[cx-0.028,cy+0.000], w:440 },
+      ];
+      const arcs = arcOrigins.map((o,i) => ({
+        sourcePosition: o.pos,
+        targetPosition: [cx, cy],
+        sourceColor: [96,165,250, Math.round(100+o.w/8)],
+        targetColor: [212,175,55, 220],
+        width: 1 + o.w/600,
+      }));
+
+      // ── Risc puncte (ScatterplotLayer)
+      const riskPts = Array.from({length:300},(_,i)=>({
+        position: [cx+(rng(i*7)-0.5)*0.045, cy+(rng(i*13)-0.5)*0.035],
+        weight: rng(i*17),
+        type: Math.floor(rng(i*23)*4),
+      }));
+
+      // ── Orase Romania pentru overview
+      const roCities = [
+        {name:'Iași',      pos:[cx,cy],            pop,             isHome:true},
+        {name:'Cluj',      pos:[23.596,46.769],    pop:324576,      isHome:false},
+        {name:'Timișoara', pos:[21.226,45.760],    pop:319279,      isHome:false},
+        {name:'Constanța', pos:[28.652,44.176],    pop:303399,      isHome:false},
+        {name:'Craiova',   pos:[23.796,44.319],    pop:269506,      isHome:false},
+        {name:'Brașov',    pos:[25.611,45.657],    pop:253200,      isHome:false},
+        {name:'Galați',    pos:[28.046,45.436],    pop:231204,      isHome:false},
+        {name:'Ploiești',  pos:[26.019,44.943],    pop:208235,      isHome:false},
+        {name:'Oradea',    pos:[21.921,47.046],    pop:196367,      isHome:false},
+        {name:'Bacău',     pos:[26.912,46.567],    pop:144307,      isHome:false},
+        {name:'Suceava',   pos:[26.254,47.651],    pop:92121,       isHome:false},
+        {name:'Piatra N.', pos:[26.372,46.924],    pop:85055,       isHome:false},
+        {name:'Brăila',    pos:[27.969,45.269],    pop:168469,      isHome:false},
+        {name:'Arad',      pos:[21.312,46.186],    pop:159074,      isHome:false},
+        {name:'Sibiu',     pos:[24.150,45.800],    pop:147245,      isHome:false},
+      ];
+
+      // ── Rute TP pentru PathLayer
+      const tpRoutes = [
+        { path:[[cx-0.024,cy-0.002],[cx-0.010,cy],[cx+0.000,cy],[cx+0.020,cy+0.002]], color:[239,68,68,200], w:4 },
+        { path:[[cx+0.002,cy-0.022],[cx+0.001,cy-0.010],[cx,cy],[cx-0.001,cy+0.018]], color:[239,68,68,200], w:4 },
+        { path:[[cx-0.020,cy+0.015],[cx-0.005,cy+0.008],[cx+0.010,cy+0.005],[cx+0.022,cy+0.000]], color:[59,130,246,180], w:3 },
+        { path:[[cx+0.018,cy-0.018],[cx+0.005,cy-0.010],[cx-0.005,cy+0.000],[cx-0.018,cy+0.012]], color:[59,130,246,180], w:3 },
+      ];
+
+      console.log(`[DeckGL] Data generat: ${popPoints.length} pop pts, ${trips.length} trips, ${columns.length} cols, ${arcs.length} arcs`);
+      return { popPoints, trips, columns, arcs, riskPts, roCities, tpRoutes };
+    },
+
+    // ── 4. Compune layer-ele per scena si an ────────────────────────────
+    _getLayers(sceneId, year) {
+      if(!window.deck || !this._data) return [];
+      const D    = this._data;
+      const t    = this._tick;
+      const yF   = Math.max(0, Math.min(1, (year-2025)/25));
+      const zoom = this._tci?.map?.getZoom?.() || 13;
+      const layers= [];
+
+      // ── TRIPS (mașini animate) — vizibile de la zoom 10+ ──────────────
+      if(zoom >= 10 && window.deck.TripsLayer) {
+        const trailLen = zoom > 14 ? 220 : zoom > 12 ? 160 : 100;
+        const colors   = { 0:[212,175,55], 1:[59,130,246], 2:[239,68,68] };
+        layers.push(new deck.TripsLayer({
+          id: 'trips',
+          data: D.trips,
+          getPath:       d => d.path,
+          getTimestamps: d => d.timestamps,
+          getColor:      d => colors[d.vendor] || colors[0],
+          opacity:       0.85,
+          widthMinPixels: zoom > 14 ? 3 : 2,
+          trailLength:   trailLen,
+          currentTime:   t % 1200,
+          shadowEnabled: false,
+        }));
+      }
+
+      // ── TP ROUTES (linii permanente) ──────────────────────────────────
+      if(zoom >= 11) {
+        layers.push(new deck.PathLayer({
+          id: 'tp-routes',
+          data: D.tpRoutes,
+          getPath:  d => d.path,
+          getColor: d => d.color,
+          getWidth: d => d.w,
+          widthUnits: 'pixels',
+          rounded: true,
+          billboard: false,
+          opacity: 0.7,
+        }));
+      }
+
+      // ── HEXAGON (densitate populatie) — S4, S5, S11 ───────────────────
+      const hexScenes = ['s4_city3d_labels','s5_dezvoltare','s11_timemachine','s3_approach_data'];
+      if(hexScenes.some(s=>sceneId?.includes(s.split('_')[0]+'_'+s.split('_')[1])) || hexScenes.includes(sceneId)) {
+        layers.push(new deck.HexagonLayer({
+          id: 'pop-hex',
+          data: D.popPoints,
+          getPosition:    d => d.position,
+          getWeight:      d => d.weight,
+          radius:         180,
+          elevationScale: 80 + yF * 280,
+          extruded:       true,
+          pickable:       false,
+          colorRange: [
+            [29,78,216,200],[59,130,246,210],
+            [245,158,11,215],[239,68,68,220],
+            [220,38,38,225],[180,20,20,235],
+          ],
+          coverage: 0.85,
+          upperPercentile: 95,
+        }));
+      }
+
+      // ── COLUMNS (dezvoltare) — S5 ──────────────────────────────────────
+      if(sceneId==='s5_dezvoltare' || sceneId==='s11_timemachine') {
+        layers.push(new deck.ColumnLayer({
+          id: 'dev-cols',
+          data: D.columns,
+          getPosition:  d => d.position,
+          getElevation: d => d.baseElevation * yF * (1 + Math.sin(t*0.03 + d.intens*6)*0.08),
+          getFillColor: d => [...d.color, 190],
+          getLineColor: d => [...d.color, 255],
+          radius:       55,
+          extruded:     true,
+          diskResolution: 6,
+          stroked:      false,
+          elevationScale: 1.2,
+        }));
+      }
+
+      // ── ARCS (navetism / fluxuri) — S2, S3 ────────────────────────────
+      if(sceneId==='s2_moldova_region' || sceneId==='s3_approach_data' || sceneId==='s1_ro_overview') {
+        layers.push(new deck.ArcLayer({
+          id: 'commute-arcs',
+          data: D.arcs,
+          getSourcePosition: d => d.sourcePosition,
+          getTargetPosition: d => d.targetPosition,
+          getSourceColor:    d => d.sourceColor,
+          getTargetColor:    d => d.targetColor,
+          getWidth:          d => d.width,
+          widthMinPixels: 1.5,
+          greatCircle: false,
+          opacity: 0.75,
+        }));
+
+        // Orase Romania scatter
+        layers.push(new deck.ScatterplotLayer({
+          id: 'ro-cities',
+          data: D.roCities,
+          getPosition:  d => d.pos,
+          getRadius:    d => d.isHome ? 4500 : 1500 + d.pop/250,
+          getFillColor: d => d.isHome ? [212,175,55,230] : [96,165,250,180],
+          getLineColor: [255,255,255,120],
+          stroked: true,
+          lineWidthMinPixels: 1,
+          radiusUnits: 'meters',
+          opacity: 0.9,
+        }));
+      }
+
+      // ── RISK SCATTER — S9 ─────────────────────────────────────────────
+      if(sceneId==='s9_riscuri') {
+        const riskColors = [
+          [59,130,246,160],
+          [239,68,68,180],
+          [167,139,250,150],
+          [148,163,184,130],
+        ];
+        layers.push(new deck.ScatterplotLayer({
+          id: 'risk-pts',
+          data: D.riskPts,
+          getPosition:  d => d.position,
+          getRadius:    d => 120 + d.weight * 350,
+          getFillColor: d => riskColors[d.type] || riskColors[0],
+          radiusUnits: 'meters',
+          opacity: 0.5,
+        }));
+      }
+
+      // ── PEDESTRIANS scatter — S8 ───────────────────────────────────────
+      if(sceneId==='s8_street_life' && zoom >= 15) {
+        const cx = this._tci?.cityData?.lon || 27.601;
+        const cy = this._tci?.cityData?.lat || 47.158;
+        const pedData = this._data._pedCache || (()=>{
+          const arr = [];
+          const rng = s => { let x=Math.sin(s)*43758.5453; return x-Math.floor(x); };
+          for(let i=0;i<200;i++) arr.push({
+            position:[cx+(rng(i*7)-0.5)*0.012, cy+(rng(i*13)-0.5)*0.008],
+            phase: rng(i*17)*Math.PI*2,
+          });
+          this._data._pedCache = arr;
+          return arr;
+        })();
+        layers.push(new deck.ScatterplotLayer({
+          id: 'pedestrians',
+          data: pedData,
+          getPosition:  d => [
+            d.position[0] + Math.cos(t*0.008+d.phase)*0.00020,
+            d.position[1] + Math.sin(t*0.008+d.phase)*0.00015,
+          ],
+          getRadius:    12,
+          getFillColor: [96,165,250,200],
+          radiusUnits: 'meters',
+          opacity: 0.8,
+          updateTriggers: { getPosition: t },
+        }));
+      }
+
+      return layers;
+    },
+
+    // ── 5. Render loop — actualizeaza layerele la fiecare frame ──────────
+    _startRenderLoop() {
+      let lastScene = null;
+      let lastYear  = -1;
+
+      const frame = () => {
+        this._tick++;
+        this._raf = requestAnimationFrame(frame);
+        if(!this._ready || !this._overlay) return;
+
+        const T       = this._tci;
+        const sceneId = T?.Director?._scenes?.[T.Director?._sceneIdx]?.id || '';
+        const year    = T?.year || 2025;
+
+        // Actualizeaza layers la fiecare frame (trips au nevoie de currentTime)
+        try {
+          this._overlay.setProps({ layers: this._getLayers(sceneId, year) });
+        } catch(e) {}
+      };
+      requestAnimationFrame(frame);
+      console.log('[DeckGL] Render loop pornit');
+    },
+
+    destroy() {
+      cancelAnimationFrame(this._raf);
+      try { this._tci?.map?.removeControl?.(this._overlay); } catch(e) {}
+      this._overlay = null;
+      this._ready   = false;
+    },
 
 }; // end TCI
 
