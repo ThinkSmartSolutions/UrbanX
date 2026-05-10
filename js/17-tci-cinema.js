@@ -1678,6 +1678,12 @@ out geom qt;`;
           }
         });
         console.log('[TCI] ✅ Fill-extrusion buildings layer adăugat');
+        // TEST HARDCODAT — bloc roșu 100m la Spital Regional
+        m.getSource('tci-buildings').setData({type:'FeatureCollection',features:[{
+          type:'Feature',
+          geometry:{type:'Polygon',coordinates:[[[27.584,47.185],[27.592,47.185],[27.592,47.192],[27.584,47.192],[27.584,47.185]]]},
+          properties:{height:100, color:'#ff0000'}
+        }]});
       } catch(e) { console.warn('[TCI] buildings layer error:', e.message); }
     }
 
