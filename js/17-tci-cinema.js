@@ -696,6 +696,7 @@ const TCI = {
           this._animateMap(yr, yT, tT);
           if(isMile && t >= this.YEAR_DUR) {
             this._draw2D_milestone(yr, (t - this.YEAR_DUR) / this.MILESTONE_DUR);
+            this._drawParcelRiskCard(this.ctx, this.canvas?.width||800, this.canvas?.height||600);
           } else {
             this._draw2D_hud(yr, yT, tT);
           }
@@ -890,6 +891,8 @@ const TCI = {
 
     // ── LEGENDA UTR pe canvas (colț dreapta jos, deasupra watermark) ────────
     this._drawLegend(ctx, W, H);
+    // ── PARCEL RISK CARD (colț stânga sus, mod parcela) ──────────────────
+    this._drawParcelRiskCard(ctx, W, H);
   },
 
   // ── Legenda UTR vizibila pe harta ─────────────────────────────────────────
@@ -1234,6 +1237,184 @@ const TCI = {
     document.getElementById('tci-ov')?.remove();
     document.getElementById('tci-sel')?.remove();
     this._restoreParcelPopup();
+  },
+
+  // ── PARCEL RISK CARD — unic în lume ───────────────────────────────────────
+  // Afișat automat pe canvas când TCI e în modul parcela
+  // Date: INFP P100-1/2013 · ANAR PGRA 2021-2027 · INSE · ANCPI
+  _drawParcelRiskCard(ctx, W, H) {
+    const ap = this.activeParcel;
+    if(!ap || this.mode !== 'parcela') return;
+
+    const risk = (typeof _getRiskProfile !== 'undefined')
+      ? _getRiskProfile(this.cityData || {}) : null;
+    const cd = this.cityData;
+
+    // ── Date parcela ────────────────────────────────────────────────────
+    const nrCad   = ap.nrCad || ap.nrcad || '—';
+    const utr     = ap.utr   || '—';
+    const area    = parseFloat(ap.area  || 0).toFixed(0);
+    const pot     = ap.params?.pot || '—';
+    const h_max   = ap.params?.h   || '—';
+    const rata    = (cd?.rata_reala_2011_2021 || 0).toFixed(2);
+    const rataCol = (cd?.rata_reala_2011_2021 || 0) >= 0 ? '#22c55e' : '#ef4444';
+
+    // ── Scor risc compozit ───────────────────────────────────────────────
+    const riskScore = risk?.riskScore || 0;
+    const riskColor = riskScore > 60 ? '#ef4444'
+                    : riskScore > 35 ? '#f59e0b' : '#22c55e';
+    const riskLabel = riskScore > 60 ? 'RISC RIDICAT'
+                    : riskScore > 35 ? 'RISC MODERAT' : 'RISC SCAZUT';
+
+    // ── ROI estimat (din Bilanț Edificabil) ─────────────────────────────
+    const areaNum    = parseFloat(area) || 100;
+    const potNum     = parseFloat(pot)  || 50;
+    const SC_max     = areaNum * potNum / 100;
+    const niv        = Math.floor((parseFloat(h_max) || 9) / 3);
+    const SD_prop    = SC_max * niv;
+    const pret_teren = areaNum < 200 ? 420 : areaNum < 500 ? 320 : 250;
+    const val_teren  = areaNum * pret_teren;
+    const cost_constr= SD_prop * 650;
+    const val_vanzare= SD_prop * 1150;
+    const roi_pct    = val_teren + cost_constr > 0
+      ? Math.round((val_vanzare - cost_constr - val_teren) / (val_teren + cost_constr) * 100)
+      : 0;
+    const roiColor = roi_pct > 20 ? '#22c55e' : roi_pct > 8 ? '#f59e0b' : '#ef4444';
+
+    // ── Dimensions & position ───────────────────────────────────────────
+    const CW = 230, CH = 310;
+    const CX = 195, CY = 56;   // colț stânga sus, sub topbar
+
+    ctx.save();
+
+    // Shadow + background
+    ctx.shadowColor = 'rgba(0,0,0,0.5)';
+    ctx.shadowBlur  = 20;
+    ctx.fillStyle   = 'rgba(4,10,24,0.95)';
+    this._rr(ctx, CX, CY, CW, CH, 10);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Border + bara sus colorata per risc
+    ctx.strokeStyle = riskColor + '88';
+    ctx.lineWidth   = 1;
+    this._rr(ctx, CX, CY, CW, CH, 10);
+    ctx.stroke();
+    ctx.fillStyle = riskColor;
+    ctx.fillRect(CX, CY, CW, 3);
+
+    // ── Header ────────────────────────────────────────────────────────
+    ctx.textAlign = 'left';
+    ctx.fillStyle = 'rgba(212,175,55,0.9)';
+    ctx.font      = 'bold 8px "Space Grotesk"';
+    ctx.fillText('📍 PARCEL RISK CARD', CX+10, CY+14);
+
+    ctx.fillStyle = '#fff';
+    ctx.font      = 'bold 13px "Space Grotesk"';
+    ctx.fillText(`Nr. ${nrCad}  ·  UTR ${utr}`, CX+10, CY+30);
+
+    ctx.fillStyle = 'rgba(148,163,184,0.65)';
+    ctx.font      = '8px "Space Grotesk"';
+    ctx.fillText(`${area} mp  ·  ${cd?.name || ''}  ·  jud. ${cd?.judet || ''}`, CX+10, CY+44);
+
+    // ── Separator ─────────────────────────────────────────────────────
+    ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+    ctx.lineWidth   = 0.5;
+    ctx.beginPath(); ctx.moveTo(CX+10, CY+52); ctx.lineTo(CX+CW-10, CY+52); ctx.stroke();
+
+    // ── Risc seismic ──────────────────────────────────────────────────
+    const seismicKey   = risk?.seismic?.key   || '—';
+    const seismicColor = risk?.seismic?.score > 60 ? '#ef4444' : risk?.seismic?.score > 35 ? '#f59e0b' : '#22c55e';
+
+    ctx.fillStyle = 'rgba(148,163,184,0.55)';
+    ctx.font      = '7.5px "Space Grotesk"';
+    ctx.fillText('⚡ SEISMIC  —  INFP P100-1/2013', CX+10, CY+66);
+    ctx.fillStyle = seismicColor;
+    ctx.font      = 'bold 12px "Space Grotesk"';
+    ctx.fillText(seismicKey, CX+10, CY+81);
+    ctx.fillStyle = 'rgba(148,163,184,0.45)';
+    ctx.font      = '7px "Space Grotesk"';
+    ctx.fillText(`ag=${risk?.seismic?.ag||'—'}g  ·  ${risk?.seismic?.description||''}`, CX+10, CY+93);
+
+    // ── Risc inundatii ────────────────────────────────────────────────
+    const floodKey   = risk?.flood?.key   || '—';
+    const floodColor = risk?.flood?.score > 60 ? '#ef4444' : risk?.flood?.score > 35 ? '#f59e0b' : '#22c55e';
+
+    ctx.fillStyle = 'rgba(148,163,184,0.55)';
+    ctx.font      = '7.5px "Space Grotesk"';
+    ctx.fillText('💧 INUNDAȚII  —  ANAR PGRA 2021-2027', CX+10, CY+109);
+    ctx.fillStyle = floodColor;
+    ctx.font      = 'bold 12px "Space Grotesk"';
+    ctx.fillText(floodKey, CX+10, CY+124);
+    ctx.fillStyle = 'rgba(148,163,184,0.45)';
+    ctx.font      = '7px "Space Grotesk"';
+    ctx.fillText(risk?.flood?.description || 'Date ANAR bazin hidrografic', CX+10, CY+136);
+
+    // ── Demografie ────────────────────────────────────────────────────
+    ctx.fillStyle = 'rgba(148,163,184,0.55)';
+    ctx.font      = '7.5px "Space Grotesk"';
+    ctx.fillText('👥 DEMOGRAFIE  —  INSE 2011-2021', CX+10, CY+152);
+    ctx.fillStyle = rataCol;
+    ctx.font      = 'bold 12px "Space Grotesk"';
+    ctx.fillText(`${rata}% / an`, CX+10, CY+167);
+    ctx.fillStyle = 'rgba(148,163,184,0.45)';
+    ctx.font      = '7px "Space Grotesk"';
+    const pop21 = (cd?.pop2021||0).toLocaleString();
+    const pop11 = (cd?.pop2011||0).toLocaleString();
+    ctx.fillText(`${pop11} loc. (2011) → ${pop21} loc. (2021)`, CX+10, CY+179);
+
+    // ── Separator ─────────────────────────────────────────────────────
+    ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+    ctx.lineWidth   = 0.5;
+    ctx.beginPath(); ctx.moveTo(CX+10, CY+189); ctx.lineTo(CX+CW-10, CY+189); ctx.stroke();
+
+    // ── ROI estimat ───────────────────────────────────────────────────
+    ctx.fillStyle = 'rgba(148,163,184,0.55)';
+    ctx.font      = '7.5px "Space Grotesk"';
+    ctx.fillText('💶 ROI ESTIMAT  —  ANCPI · HG 907/2016', CX+10, CY+203);
+
+    // Bara ROI
+    const barW = CW - 20;
+    const roiFill = Math.min(barW, Math.max(0, roi_pct / 40 * barW));
+    ctx.fillStyle = 'rgba(255,255,255,0.06)';
+    ctx.fillRect(CX+10, CY+210, barW, 8);
+    ctx.fillStyle = roiColor;
+    ctx.fillRect(CX+10, CY+210, roiFill, 8);
+
+    ctx.fillStyle = roiColor;
+    ctx.font      = 'bold 12px "Space Grotesk"';
+    ctx.fillText(`${roi_pct}% ROI`, CX+10, CY+232);
+    ctx.fillStyle = 'rgba(148,163,184,0.45)';
+    ctx.font      = '7px "Space Grotesk"';
+    ctx.fillText(`Val. teren ~€${val_teren.toLocaleString()} · Const. ~€${Math.round(cost_constr).toLocaleString()}`, CX+10, CY+244);
+
+    // ── Scor risc total ───────────────────────────────────────────────
+    ctx.fillStyle = 'rgba(255,255,255,0.06)';
+    this._rr(ctx, CX+10, CY+254, CW-20, 28, 5);
+    ctx.fill();
+
+    ctx.fillStyle = riskColor;
+    ctx.font      = 'bold 9px "Space Grotesk"';
+    ctx.fillText(`${riskLabel}`, CX+18, CY+265);
+
+    // Scor numeric
+    ctx.textAlign = 'right';
+    ctx.fillStyle = riskColor;
+    ctx.font      = 'bold 16px "Space Grotesk"';
+    ctx.fillText(`${riskScore}/100`, CX+CW-14, CY+268);
+    ctx.textAlign = 'left';
+
+    ctx.fillStyle = 'rgba(100,120,150,0.45)';
+    ctx.font      = '6.5px "Space Grotesk"';
+    ctx.fillText('INFP · ANAR · INHGA · INSE', CX+18, CY+277);
+
+    // ── Disclaimer ────────────────────────────────────────────────────
+    ctx.fillStyle = 'rgba(80,100,130,0.45)';
+    ctx.font      = '6px "Space Grotesk"';
+    ctx.fillText('UrbanX · Analiză statistică · Date oficiale publice', CX+10, CY+CH-6);
+
+    ctx.restore();
+    ctx.textAlign = 'left';
   },
 
   _rr(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();},
