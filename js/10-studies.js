@@ -480,12 +480,12 @@ function _pdfTableOfContents(pdf, W, H, chapters, title) {
 // #16 DOCUMENT HEALTH CHECK — inainte de export
 // Audit pct. 16: "Engine care verifica inainte de export"
 // ─────────────────────────────────────────────────────────────────────────────
-function _pdfHealthCheck(studyName, params, nrCad, utr, sections) {
+function _pdfHealthCheck(studyName, params, nrcad, utr, sections) {
   const checks = [];
   const issues = [];
 
   // Verifica date minime obligatorii
-  if(!nrCad||nrCad==='—') issues.push({sev:'err', msg:'Nr. cadastral lipsa — document incomplete'});
+  if(!nrcad||nrcad==='—') issues.push({sev:'err', msg:'Nr. cadastral lipsa — document incomplete'});
   if(!utr||utr==='—')      issues.push({sev:'warn',msg:'UTR necunoscut — verifica PUG'});
   if(!params?.pot)          issues.push({sev:'warn',msg:'POT nedifinit — parametri PUG incompleți'});
 
@@ -501,7 +501,7 @@ function _pdfHealthCheck(studyName, params, nrCad, utr, sections) {
     timestamp: new Date().toISOString(),
     status: issues.filter(i=>i.sev==='err').length>0?'INVALID':issues.length>0?'AVERTISMENT':'OK',
     issues,
-    nrCad,
+    nrcad,
     utr,
   };
 }
@@ -530,7 +530,7 @@ function _pdfRenderHealthCheck(pdf, W, H, healthResult) {
   pdf.setFontSize(7); pdf.setFont('helvetica','normal');
   pdf.setTextColor(60,80,100);
   pdf.text('Studiu: '+healthResult.studyName, 14, cy); cy+=6;
-  pdf.text('Nr. cadastral: '+healthResult.nrCad+' · UTR: '+healthResult.utr, 14, cy); cy+=6;
+  pdf.text('Nr. cadastral: '+healthResult.nrcad+' · UTR: '+healthResult.utr, 14, cy); cy+=6;
   pdf.text('Generat: '+new Date().toLocaleString('ro-RO')+' · UrbanX TSS·FG', 14, cy); cy+=10;
   
   if(healthResult.issues.length>0) {
@@ -554,13 +554,13 @@ function _pdfRenderHealthCheck(pdf, W, H, healthResult) {
 // ─────────────────────────────────────────────────────────────────────────────
 function _saveReportJSON(studyType, parcelData, conclusions, sources, scores) {
   const report = {
-    report_id: studyType+'_'+parcelData.nrCad+'_'+Date.now(),
+    report_id: studyType+'_'+parcelData.nrcad+'_'+Date.now(),
     study_type: studyType,
     generated_at: new Date().toISOString(),
     urbanx_version: '2.5.0',
     tva_rate: _TVA_STANDARD,
     parcel: {
-      nrCad: parcelData.nrCad,
+      nrcad: parcelData.nrcad,
       utr: parcelData.utr,
       area: parcelData.area,
       lat: parcelData.lat,
@@ -822,14 +822,14 @@ const _SECTION_RENDERERS = {
 // Audit pct. 29: "Raportul trebuie sa spuna o poveste logica"
 // Flux: unde este terenul -> ce reglementari -> ce probleme -> ce se poate -> ce riscuri -> ce recomandam
 function _generateNarrative(studyType, parcelData, analysisResults) {
-  const {nrCad,utr,area,lat,lon,uat,params} = parcelData;
+  const {nrcad,utr,area,lat,lon,uat,params} = parcelData;
   const pot = parseFloat(params?.pot||35);
   const cut = parseFloat(params?.cut||1.2);
   const h = parseFloat(params?.h||12);
 
   const templates = {
     amplasament: [
-      `Amplasamentul identificat prin nr. cadastral ${nrCad}, situat in intravilanul ${uat}, ` +
+      `Amplasamentul identificat prin nr. cadastral ${nrcad}, situat in intravilanul ${uat}, ` +
       `in zona UTR ${utr}, prezinta o suprafata de ${area} mp la coordonatele ${lat?.toFixed(4)}N/${lon?.toFixed(4)}E.`,
       `Din punct de vedere al reglementarilor urbanistice aplicabile, ` +
       `parcela se incadreaza in UTR ${utr} cu indicatori: POT max ${pot}%, CUT max ${cut}, H max ${h}m.`,
@@ -842,7 +842,7 @@ function _generateNarrative(studyType, parcelData, analysisResults) {
     ],
     fezabilitate: [
       `Studiul de prefezabilitate analizeaza viabilitatea economica a proiectului propus ` +
-      `pe amplasamentul ${nrCad} din ${uat}, UTR ${utr}, suprafata ${area} mp.`,
+      `pe amplasamentul ${nrcad} din ${uat}, UTR ${utr}, suprafata ${area} mp.`,
       `Parametrii reglementari maximi admisi (POT ${pot}%, CUT ${cut}, H ${h}m) permit realizarea ` +
       `unei constructii cu suprafata desfasurata estimata de cca. ${Math.round(area*cut)} mp.`,
       `Analiza economica preliminara indica o investitie totala estimata si un randament brut ` +
@@ -2028,7 +2028,7 @@ const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONTEXT URBAN 3D - VEDERE PRINCIPALA',2);ftr();
   let cy=28
   // #29 Narrative Engine — pagina de context
-  const _narrative = _generateNarrative('amplasament',{nrCad,utr,area,lat,lon,uat,params});
+  const _narrative = _generateNarrative('amplasament',{nrcad,utr,area,lat,lon,uat,params});
   pdf.setFillColor(14,25,50);pdf.rect(14,cy,W-28,2,'F');cy+=4;
   pdf.setTextColor(180,200,230);pdf.setFontSize(6.5);pdf.setFont('helvetica','italic');
   _narrative.slice(0,2).forEach(para=>{
@@ -4875,6 +4875,9 @@ const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
 // ── SCENARIU DE SIGURANTA LA FOC (SSF) ────────────────────────────────────
 // Conf. P118-2/2013, P118-1/1999, Legea 307/2006, OMAI 163/2007, SR EN 1838
 async function generateSSF(){
+  const ap=window.S?.parcels?.[window.S?.activeParcel??0];
+  if(!ap?.geo?.geometry){ss('Selectați mai întâi o parcelă de pe hartă.');return;}
+  
   // Color safety fallback — window. prefix evită temporal dead zone cu const-urile locale
   const _DARK=Array.isArray(window.DARK)?window.DARK:[8,21,42];
   const _GOLD=Array.isArray(window.GOLD)?window.GOLD:[212,175,55];
@@ -4882,7 +4885,7 @@ async function generateSSF(){
   const _LIGHT=Array.isArray(window.LIGHT)?window.LIGHT:[245,247,252];
   const _RED=Array.isArray(window.RED)?window.RED:[220,38,38];
   const _GREEN=Array.isArray(window.GREEN)?window.GREEN:[16,130,60];
-  const ap=S.parcels[S.activeParcel??0];
+  
   if(!ap?.geo?.geometry){ss('Selectati o parcela.');return;}
   ss('Se genereaza Scenariu de Siguranta la Foc...');
 
@@ -4922,7 +4925,7 @@ const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
   try {
     if(typeof _rvCompBuilding === 'function' && typeof _rvFloor === 'function'){
       const _rvPssf = {
-        nrCad: nrcad, utr, fn,
+        nrcad: nrcad, utr, fn,
         W: Math.sqrt(pArea * 1.2), D: Math.sqrt(pArea / 1.2),
         area: pArea,
         rf: parseFloat(params?.rf||0), rl: parseFloat(params?.rl||3), rs: parseFloat(params?.rs||6),
@@ -6610,7 +6613,7 @@ const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
     const rowStyle=or.best?GREEN:GRAY;
     const bg=or.best?[240,252,244]:[248,248,252];
     pdf.setFillColor(...bg);pdf.rect(14,cy2-5.5,W-28,8,'F');
-    pdf.setDrawColor(...GRAY4_sw);pdf.setLineWidth(0.15);pdf.line(14,cy2-5.5+8,W-14,cy2-5.5+8);
+    pdf.setDrawColor(200,210,218);pdf.setLineWidth(0.15);pdf.line(14,cy2-5.5+8,W-14,cy2-5.5+8);
     const colWs2=[22,12,12,12,12,12,12,12,12,12,12,12,12,15];
     vals.forEach((v,ci)=>{
       const cx=14+colWs2.slice(0,ci).reduce((a,b)=>a+b,0)+2;
@@ -6695,7 +6698,7 @@ const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
     if(typeof _rvCompBuilding === 'function' && typeof _rvFloor === 'function'){
       const pArea2=parseFloat(area)||0;
       const _rvPsol={
-        nrCad:nrcad, utr, fn:AEDIS.fn||'rezidential_colectiv',
+        nrcad:nrcad, utr, fn:AEDIS.fn||'rezidential_colectiv',
         W:Math.sqrt(pArea2*1.2), D:Math.sqrt(pArea2/1.2), area:pArea2,
         rf:parseFloat(params?.rf||0), rl:parseFloat(params?.rl||3), rs:parseFloat(params?.rs||6),
         pot:parseFloat(params?.pot||35)/100, cut:parseFloat(params?.cut||1.5),
@@ -6834,16 +6837,7 @@ async function generateStudiuFezabilitate(paramOverrides){
   ss('Studiu Fezabilitate — se obține cursul BNR EUR/RON...');
   const _cursEUR = await _getBNRRate('EUR');
   // #18 TOC Fezabilitate
-  _pdfTableOfContents(pdf,W,H,[
-    {num:1,title:'Cover — Identificare amplasament si parametri economici',page:1},
-    {num:2,title:'Context urban 3D — volumetrie propusa si vecini',page:2},
-    {num:3,title:'Analiza juridica — conformitate PUG/RLU',page:3},
-    {num:4,title:'Indicatori tehnico-economici (SDA, SU, SC, parcaje)',page:4},
-    {num:5,title:'Deviz estimativ HG 907/2016 (Cap.1+4+5 + TVA 21%)',page:5},
-    {num:6,title:'Scenarii S1/S2/S3 — ROI, payback, cash-flow',page:6},
-    {num:7,title:'Baza legala — HG 907/2016, Legea 50/1991',page:7},
-    {num:'ESG',title:'ESG Urban Sustainability Rating',page:'ult.'},
-  ],'Studiu de Fezabilitate / DALI — HG 907/2016');
+
 
   const ap=S.parcels[S.activeParcel??0];
   if(!ap?.geo?.geometry){ss('Selectați o parcelă pentru studiu.');return;}
@@ -6876,6 +6870,16 @@ async function generateStudiuFezabilitate(paramOverrides){
   const d=_initStudyPdf('Studiu de Fezabilitate / DALI','SF/DALI · HG 907/2016',18);
   const {pdf,W,H,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,
     hdr,ftr,sec,subsec,body,tblRow,addImg,kv,badge,divider,bullet,concluzii,sign,cover,newPage,checkY}=d;
+    _pdfTableOfContents(pdf,W,H,[
+    {num:1,title:'Cover — Identificare amplasament si parametri economici',page:1},
+    {num:2,title:'Context urban 3D — volumetrie propusa si vecini',page:2},
+    {num:3,title:'Analiza juridica — conformitate PUG/RLU',page:3},
+    {num:4,title:'Indicatori tehnico-economici (SDA, SU, SC, parcaje)',page:4},
+    {num:5,title:'Deviz estimativ HG 907/2016 (Cap.1+4+5 + TVA 21%)',page:5},
+    {num:6,title:'Scenarii S1/S2/S3 — ROI, payback, cash-flow',page:6},
+    {num:7,title:'Baza legala — HG 907/2016, Legea 50/1991',page:7},
+    {num:'ESG',title:'ESG Urban Sustainability Rating',page:'ult.'},
+  ],'Studiu de Fezabilitate / DALI — HG 907/2016');
   // Fallback culori (unele nu sunt returnate de _initStudyPdf din engine)
   const DARK  =d.DARK  ||window.DARK  ||[8,21,42];
   const DARK2 =d.DARK2 ||window.DARK2 ||[15,35,70];
@@ -7699,7 +7703,7 @@ async function generateStudiuFezabilitate(paramOverrides){
     {text:'Social '+esgFez.S.score+'% — accesibilitate si servicii',ok:esgFez.S.score>60},
     {text:'Governance '+esgFez.G.score+'% — risc juridic si avizabilitate',ok:esgFez.G.score>60},
   ],'CONCLUZII ESG FEZABILITATE');
-  _saveReportJSON('fezabilitate',{nrCad:nrcad,utr,area,lat,lon,uat,judet,params},[],['UrbanX'],{esg:esgFez.total});
+  _saveReportJSON('fezabilitate',{nrcad:nrcad,utr,area,lat,lon,uat,judet,params},[],['UrbanX'],{esg:esgFez.total});
 
   
   // #7 Change Detection Warning
@@ -8440,7 +8444,7 @@ async function generateStudiuAmplasament(){
   const esgScore=_calcESGScore(ap,params,aedisH,fn);
   cyESG=_pdfESGBlock(pdf,W,cyESG,esgScore);
   // Report JSON (Audit #20)
-  _saveReportJSON('amplasament',{nrCad:nrcad,utr,area,lat,lon,uat,judet,params},[{type:'ESG',rating:esgScore.rating}],['ANCPI','OSM'],{esg:esgScore.total});
+  _saveReportJSON('amplasament',{nrcad:nrcad,utr,area,lat,lon,uat,judet,params},[{type:'ESG',rating:esgScore.rating}],['ANCPI','OSM'],{esg:esgScore.total});
 
   
   // Health Check (Audit #16)
@@ -11028,7 +11032,7 @@ async function generateProiectieUrbanistica() {
   cy=sec('12. CONCLUZII PRINCIPALE — PROIECTIE URBANISTICA '+year+'—'+(year+30), cy); cy+=2;
   
   // Narrative Engine
-  const narrative = _generateNarrative('amplasament',{nrCad,utr,area,lat,lon,uat,params});
+  const narrative = _generateNarrative('amplasament',{nrcad,utr,area,lat,lon,uat,params});
   cy=body(_prfLang(narrative[0]+' '+narrative[2]),14,cy); cy+=3;
   
   cy=_pdfAutoSummary(pdf,W,cy,[
@@ -11095,7 +11099,7 @@ async function generateProiectieUrbanistica() {
   cy+=14;
   
   _pdfCursBNR(pdf,W,H,cursEUR);
-  _saveReportJSON('proiectie_urbanistica',{nrCad,utr,area,lat,lon,uat,judet,params},
+  _saveReportJSON('proiectie_urbanistica',{nrcad,utr,area,lat,lon,uat,judet,params},
     [{type:'proiectie',populatie2055:proj.S2_mediu.an30,cerere_locuinte:totalLoc}],
     ['INSE','Eurostat','UrbanX'],{esg:esgNow.total}
   );

@@ -735,13 +735,21 @@ function _rvFloor(b, floorIdx){
 // ══════════════════════════════════════════════════════════════════════════
 // RENDERER
 // ══════════════════════════════════════════════════════════════════════════
-function _rvInitCanvas(W,H){
-  const cv = document.getElementById('rv-canvas');
+function _rvInitCanvas(W,H,canvasId){
+  const cv = document.getElementById(canvasId||'rv-canvas');
+  if(!cv) {
+    // Canvas nu exista in DOM - cream unul temporar
+    const tmp = document.createElement('canvas');
+    tmp.id = canvasId||'rv-canvas-tmp';
+    const wrap = document.getElementById('rv-canvas')?.parentElement || document.body;
+    wrap.appendChild(tmp);
+    return _rvInitCanvas(W,H,tmp.id);
+  }
   const dpr = window.devicePixelRatio || 1;
-  cv.width = W*dpr; cv.height = H*dpr;
+  cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr);
   cv.style.width = W+'px'; cv.style.height = H+'px';
   const ctx = cv.getContext('2d'); ctx.scale(dpr,dpr);
-  return {cv,ctx,W,H};
+  return {cv,ctx,cv2:cv,ctx2:ctx,W,H};
 }
 
 function _rvRender(){
@@ -1198,6 +1206,12 @@ function _rvRenderFacade(b){
 }
 
 function _rvRenderSection(b){
+  if(!b || !b.P) { 
+    const cv = document.getElementById("rv-canvas");
+    if(cv){const ctx=cv.getContext("2d");ctx.fillStyle="#060C1A";ctx.fillRect(0,0,cv.width,cv.height);}
+    return; 
+  }
+
   const {P,bW,bD,niv,cores}=b;
   const Ht=niv*P.hn;
   const sectionType=_RV.sectionType||'AA'; // 'AA'=transversal sau 'BB'=longitudinal
@@ -1359,7 +1373,7 @@ function _rvRenderSection(b){
   _rvDrawCartus(ctx,W+120,H+50,P,null,
     sectionType==='AA'?'SECȚIUNE A-A TRANSVERSALĂ':'SECȚIUNE B-B LONGITUDINALĂ');
   const pad2=50; const W2=bD*SC+pad2*2+80; const H2=Ht*SC+pad2*2+50;
-  const {cv2,ctx2}=_rvInitCanvas(W2,H2+40);
+  const _rv2=_rvInitCanvas(W2,H2+40,"rv-canvas"); const cv2=_rv2.cv; const ctx2=_rv2.ctx;
   ctx2.fillStyle='#060C1A';ctx2.fillRect(0,0,cv2.width,H2+40);
   const ox2=pad2+40,oy2=pad2; const sW2=bD*SC,sH2=Ht*SC;
   ctx2.fillStyle='rgba(17,27,48,.95)';ctx2.fillRect(ox2,oy2,sW2,sH2);
@@ -5160,6 +5174,11 @@ function _rvInject(){
 .rv-running{animation:rv-pulse 1s ease-in-out infinite;}
 @keyframes rv-pulse{0%,100%{opacity:1}50%{opacity:.3}}
 .rv-tinfo{margin-left:auto;font-size:10px;color:#4A6080;font-family:'IBM Plex Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px;}
+
+  /* Buton menu mobil - vizibil doar sub 840px */
+  #rv-mobile-menu-btn { display: none; }
+  @media (max-width: 840px) { #rv-mobile-menu-btn { display: flex !important; } }
+
 .rv-close-btn{margin-left:8px;width:28px;height:28px;border-radius:6px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#64748b;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;}
 .rv-close-btn:hover{border-color:rgba(239,68,68,.4);color:#EF4444;}
 .rv-lpanel{background:#0B1426;border-right:1px solid rgba(212,175,55,.1);overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px;}
@@ -5236,9 +5255,23 @@ function _rvInject(){
     grid-template-columns: 1fr !important;
     grid-template-rows: 1fr auto;
   }
-  /* Ascunde panourile laterale pe mobil — afișează doar canvas + bottom sheet */
-  #rv-modal .rv-lpanel { display: none !important; }
+  /* Pe mobil: panel stang = drawer toggle cu buton */
+  #rv-modal .rv-lpanel { 
+    position: fixed !important;
+    left: -260px;
+    top: 0; bottom: 0;
+    width: 260px !important;
+    z-index: 200;
+    transition: left .3s ease;
+    border-right: 1px solid rgba(212,175,55,0.2) !important;
+    box-shadow: 4px 0 20px rgba(0,0,0,0.5);
+  }
+  #rv-modal .rv-lpanel.rv-lpanel-open {
+    left: 0 !important;
+  }
   #rv-modal .rv-rpanel { display: none !important; }
+  /* Buton deschide panel pe mobil */
+  #rv-mobile-menu-btn { display: flex !important; }
   #rv-modal .rv-center { grid-column: 1; }
 
   /* Bottom sheet cu info esențial */
@@ -5380,7 +5413,12 @@ function _rvInject(){
     onmouseout="this.style.background='linear-gradient(135deg,rgba(212,175,55,.22),rgba(212,175,55,.12))'">
     📄 Export PDF Raport
   </button>
-  <button class="rv-close-btn" onclick="closeRelevee()" title="Închide">✕</button>
+  <button id="rv-mobile-menu-btn" 
+      onclick="document.querySelector('.rv-lpanel').classList.toggle('rv-lpanel-open')"
+      style="display:none;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);
+      color:#fff;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:14px;margin-right:6px">
+      ☰
+    </button><button class="rv-close-btn" onclick="closeRelevee()" title="Închide">✕</button>
 </div>
 <div class="rv-body" id="rv-body-main">
   <!-- LEFT -->
