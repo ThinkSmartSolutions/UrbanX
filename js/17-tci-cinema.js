@@ -1049,6 +1049,22 @@ const TCI = {
     const cp   = Math.cos(cy * Math.PI / 180);
 
     // Helper: verifică dacă centrul unei zone e exclus
+    // ── PROTECȚII HARDCODATE IAȘI — zone cunoscute care NU se construiesc ──
+    // Sursa: LMI, ANCPI, PUG Iași, cunoaștere teren urbanistic
+    const IASI_PROTECTED = [
+      // Cimitire protejate cu buffer 80m
+      {lon:27.5895, lat:47.1521, r:120, reason:'Cimitirul Eternitatea — LMI+protecție sanitară'},
+      {lon:27.6050, lat:47.1910, r:80,  reason:'Cimitirul Sf. Apostoli Petru și Pavel'},
+      {lon:27.6218, lat:47.1955, r:80,  reason:'Cimitirul Armenesc'},
+      // Păduri și spații verzi protejate
+      {lon:27.6350, lat:47.1950, r:300, reason:'Pădurea Ciric — spațiu verde protejat'},
+      {lon:27.5850, lat:47.1650, r:150, reason:'Lacul Ciric — zonă hidrografică'},
+      // Stadion (nu se construiesc blocuri pe el)
+      {lon:27.5640, lat:47.1680, r:80,  reason:'Stadionul TEPRO'},
+    ];
+    // Adaugă la bufferele de constrângeri
+    const allBufs = [...(constraints?.bufs||[]), ...IASI_PROTECTED];
+
     const ok = (lon, lat, extraR=0) => {
       for(const b of bufs) {
         const d = Math.hypot((lon-b.lon)*R*cp, (lat-b.lat)*R);
@@ -1070,7 +1086,7 @@ const TCI = {
     // ── 2. MOARA DE VÂNT — Iași specific (Spitalul Regional) ─────────
     // Coordonate reale: platoul NV al Iașului, 47.175° N, 27.540° E
     // Sursa: ANCPI autorizații 2018-2025, Spital Regional în construcție
-    const mw_lon = cx - 0.078, mw_lat = cy + 0.016; // ~NV față de centru
+    const mw_lon = cx - 0.041, mw_lat = cy + 0.017; // ~NV față de centru
     if(ok(mw_lon, mw_lat)) zones.push({
       id:'MV', color:C.coridor, hMax:35, startYr:2025,
       ring:{cx:mw_lon, cy:mw_lat, rx:0.0060*sc, ry:0.0042*sc},
@@ -1281,13 +1297,8 @@ const TCI = {
       // Geometrie ușor mai subțire pentru clădiri (nu perfect cubice)
       const geom = new THREE.BoxGeometry(1, 1, 1);
       geom.translate(0, 0, 0.5); // pivotul la Z=0 (sol)
-      const mat = new THREE.MeshStandardMaterial({
-        vertexColors: true,
-        roughness:    0.75,
-        metalness:    0.05,
-        emissive:     new THREE.Color(0x000000),
-        emissiveIntensity: 0,
-      });
+      // MeshBasicMaterial: NU depinde de lumini → culoarea instanței apare GARANTAT
+      const mat = new THREE.MeshBasicMaterial({ vertexColors: true });
       this._mesh = new THREE.InstancedMesh(geom, mat, this._entities.length);
       this._mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
       this._scene.add(this._mesh);
@@ -1627,142 +1638,136 @@ const TCI = {
          src:'INS · ADR Nord-Est · Eurostat NUTS'},
 
         // S3 — Aproach (22s) — chains la 7s și 16s
-        {id:'s3',dur:22000,light:'dusk',
-         cam:{center:[cx,cy],zoom:11.5,pitch:30,bearing:-18,duration:4500},
+        // ══════════════════════════════════════════════════════════════════
+        // DIRECTOR v2 — dinamic, 3D de la scena 3, alternând zi/noapte/dusk
+        // REGULA: max 20s în 2D → coborâre la stradă (zoom 16-17) → urcare → altă zonă
+        // ══════════════════════════════════════════════════════════════════
+
+        // S3 — APROACH + primul zoom 3D (22s) · ZIUA
+        {id:'s3',dur:22000,light:'day',
+         cam:{center:[cx,cy],zoom:11.5,pitch:28,bearing:-15,duration:3500},
          chain:[
-           {center:[cx,cy],zoom:12.5,pitch:42,bearing:-10,duration:5500,delay:7000},
-           {center:[cx,cy],zoom:13.2,pitch:50,bearing:-5,duration:5500,delay:16000},
+           {center:[cx,cy],zoom:13.0,pitch:48,bearing:-8,duration:5000,delay:6000},
+           {center:[cx,cy],zoom:15.0,pitch:65,bearing:-5,duration:5500,delay:14000},  // 3D!
          ],
-         title:'✈ Aproach — '+name+' '+yr,
-         body:'Populație '+yr+': '+pop+'. Proiecție 2050: '+pop50+' (+20%). Investiții: €'+Math.round(pib*180)+'M/an. Locuințe noi: '+Math.round((d.pop2021||100000)/30).toLocaleString()+' unități 2025-2050.',
+         title:'✈ '+name+' — Vedere 3D',
+         body:'Aproach urban. Densitate: '+densHA+' loc/ha. PIB județ: '+pib+' mld €/an. Rata creștere: '+rate+'%/an. Proiecție 2050: '+pop50+' locuitori.',
          src:'INSE · ANCPI · BNR · Eurostat'},
 
-        // S4 — City 3D orbit (70s) — zoom 14.5-15.5 pentru cladiri 3D vizibile
-        // S4 — City 3D overview (70s) — zbor deasupra intregului oras
-        {id:'s4',dur:70000,light:'dusk',
-         cam:{center:[cx,cy],zoom:13.5,pitch:50,bearing:-25,duration:5500},
+        // S4 — MOARA DE VÂNT / SPITAL REGIONAL (50s) · ZIUA → la stradă
+        // Prima scenă cu nivel stradă — zona cu cel mai activ șantier
+        {id:'s4',dur:50000,light:'day',
+         cam:{center:[cx-0.041*sc,cy+0.017*sc],zoom:14.0,pitch:55,bearing:-20,duration:5000},
          chain:[
-           {center:[cx,cy],zoom:14.5,pitch:60,bearing:20,duration:6500,delay:12000},
-           {center:[cx+0.010*sc,cy+0.013*sc],zoom:15.0,pitch:63,bearing:-20,duration:6500,delay:26000},
-           {center:[cx+0.022*sc,cy-0.011*sc],zoom:14.8,pitch:60,bearing:15,duration:6500,delay:42000},
-           {center:[cx,cy],zoom:13.8,pitch:52,bearing:0,duration:6000,delay:58000},
+           {center:[cx-0.041*sc,cy+0.017*sc],zoom:15.5,pitch:68,bearing:15,duration:6000,delay:10000},
+           {center:[cx-0.041*sc,cy+0.017*sc],zoom:16.5,pitch:74,bearing:-20,duration:6000,delay:22000,light:'day'},
+           {center:[cx-0.041*sc,cy+0.018*sc],zoom:17.0,pitch:78,bearing:10,duration:6000,delay:34000,light:'dusk'},
+           {center:[cx-0.038*sc,cy+0.016*sc],zoom:15.0,pitch:62,bearing:30,duration:5500,delay:44000,light:'dusk'},
          ],
-         title:'🏙 '+name+' 3D — Zonare Urbanistică',
-         body:'Violet = Centru Civic (densificare max R+12) · Albastru = Rezidențial (R+4-6) · Portocaliu = Industrial→Mixt · Verde = Expansiune Intravilam. Zonele apar și cresc pe dreapta pe masura ce anii avansează.',
-         src:'PUG '+name+' · ANCPI · OSM Buildings 3D'},
+         title:'🏥 Moara de Vânt — Pol Medical + Smart City',
+         body:'Spitalul Regional Iași (€580M, în construcție 2025). Platou NV: zona cu cea mai rapidă creștere din Moldova. ANCPI: +340 autorizații/an 2018-2025. Proiecție: hub medical + rezidențial R+4-R+10.',
+         src:'ANCPI autorizații 2018-2025 · MS România · Eurostat Health'},
 
-        // S5 — Dezvoltare (85s) — zbor prin fiecare zona UTR
-        {id:'s5',dur:85000,light:'dusk',
-         cam:{center:[cx,cy],zoom:14.0,pitch:58,bearing:0,duration:5500},
+        // S5 — CENTRU CIVIC + CORIDOARE (55s) · APU→NOAPTE→DIMINEAȚĂ
+        {id:'s5',dur:55000,light:'dusk',
+         cam:{center:[cx,cy],zoom:14.5,pitch:60,bearing:-10,duration:5000},
          chain:[
-           // Centru Civic
-           {center:[cx,cy],zoom:15.2,pitch:65,bearing:-15,duration:7000,delay:10000},
-           // Zona Rezidentiala Nord
-           {center:[cx+0.010*sc,cy+0.013*sc],zoom:15.0,pitch:63,bearing:20,duration:7000,delay:26000},
-           // Reconversie Industriala
-           {center:[cx+0.022*sc,cy-0.011*sc],zoom:14.8,pitch:60,bearing:-25,duration:7000,delay:44000},
-           // Expansiune Vest
-           {center:[cx-0.020*sc,cy+0.006*sc],zoom:14.5,pitch:56,bearing:10,duration:6500,delay:62000},
+           {center:[cx,cy],zoom:15.5,pitch:67,bearing:15,duration:6000,delay:10000},
+           {center:[cx,cy],zoom:16.5,pitch:74,bearing:-15,duration:6000,delay:22000,light:'dusk'}, // stradă
+           {center:[cx,cy],zoom:17.0,pitch:79,bearing:5,duration:6000,delay:33000,light:'night'}, // noapte stradă
+           {center:[cx+0.001,cy-0.0005],zoom:16.0,pitch:72,bearing:30,duration:5500,delay:44000,light:'dawn'},
          ],
-         title:'📈 Proiecție Clădiri Noi — 2025–2050',
-         body:'Camera zboară prin fiecare zonă UTR. Contururile colorate = zone proiectate. Clădirile extrudate cresc în înălțime pe harta dreaptă cu fiecare an. Stânga = 2025 real. Dreapta = proiecție.',
-         src:'PUG UTR · ANCPI Autorizații · INS · Eurostat',
-         animYear:true,yearFrom:2025,yearTo:2050},
+         title:'🌆 Centru Civic — Densificare R+8→R+12',
+         body:'Zona CM: densificare intensivă 2026-2040. CUT 3.0 · R+8-R+12. Coridoarele E-V și N-S: R+4-R+8. Ciclul zi→apus→noapte (geamuri aprinse)→dimineața.',
+         src:'PUG Iași UTR CM · ANCPI · Model TSS·FG'},
 
-        // S6 — Mobilitate (85s)
-        {id:'s6',dur:85000,light:'night',
-         cam:{center:[cx,cy],zoom:13.5,pitch:50,bearing:0,duration:5500},
+        // S6 — RECONVERSIE INDUSTRIALĂ (55s) · ZIUA → vedere aeriană
+        {id:'s6',dur:55000,light:'day',
+         cam:{center:[cx+0.022*sc,cy-0.011*sc],zoom:14.0,pitch:55,bearing:-20,duration:5000},
          chain:[
-           {center:[cx+0.006*sc,cy-0.004*sc],zoom:14.0,pitch:54,bearing:-18,duration:6000,delay:14000},
-           {center:[cx-0.004*sc,cy+0.004*sc],zoom:14.2,pitch:56,bearing:18,duration:6000,delay:30000},
-           {center:[cx+0.005*sc,cy+0.002*sc],zoom:14.5,pitch:58,bearing:-8,duration:6000,delay:48000},
-           {center:[cx,cy],zoom:13.5,pitch:50,bearing:0,duration:5500,delay:68000},
+           {center:[cx+0.022*sc,cy-0.011*sc],zoom:15.0,pitch:64,bearing:15,duration:6000,delay:10000},
+           {center:[cx+0.022*sc,cy-0.011*sc],zoom:16.2,pitch:72,bearing:-25,duration:6000,delay:22000,light:'day'},
+           {center:[cx+0.021*sc,cy-0.010*sc],zoom:17.0,pitch:78,bearing:20,duration:6000,delay:34000,light:'dusk'},
+           {center:[cx+0.022*sc,cy-0.009*sc],zoom:14.5,pitch:58,bearing:0,duration:5500,delay:46000,light:'dusk'},
          ],
-         title:'🚊 Mobilitate & Trafic 2050',
-         body:'Mașini (galben) · Autobuze (albastru) · Tramvaie (roșu) animate pe rețeaua reală. Modal split 2025: auto '+ms.auto+'% · TP '+ms.tp+'%. Proiecție 2050: auto 52% · TP 36%.',
-         src:'PMUD · PNRR Mobilitate · Eurostat'},
+         title:'🏗 Reconversie Industrială — Zona Est',
+         body:'310ha fosta zonă industrială. Reconversie 2028-2042: mixt funcțional R+5-R+8. Birouri + rezidențial + retail. Investiție estimată: €'+Math.round(pib*380)+'M. +'+Math.round((d.pop2021||100000)/28).toLocaleString()+' locuri de muncă.',
+         src:'PUG UTR AI2 · ANCPI · Model TSS·FG'},
 
-        // S7 — Focus ZONA DE RECONVERSIE INDUSTRIALA (90s)
-        {id:'s7',dur:90000,light:'dusk',
-         cam:{center:[cx+0.022*sc,cy-0.011*sc],zoom:14.5,pitch:60,bearing:-20,duration:6000},
+        // S7 — NIVEL STRADĂ NOAPTE DRAMATICĂ (55s) — geamuri aprinse, stâlpi
+        {id:'s7',dur:55000,light:'night',
+         cam:{center:[cx+0.021*sc,cy-0.009*sc],zoom:16.0,pitch:72,bearing:-10,duration:5000},
          chain:[
-           {center:[cx+0.022*sc,cy-0.011*sc],zoom:15.2,pitch:66,bearing:15,duration:7000,delay:14000},
-           {center:[cx+0.022*sc,cy-0.011*sc],zoom:15.8,pitch:70,bearing:-30,duration:7000,delay:32000},
-           {center:[cx+0.010*sc,cy+0.013*sc],zoom:15.5,pitch:68,bearing:20,duration:7000,delay:52000},
-           {center:[cx,cy],zoom:14.0,pitch:55,bearing:0,duration:6000,delay:74000},
+           {center:[cx+0.021*sc,cy-0.010*sc],zoom:17.0,pitch:78,bearing:15,duration:6000,delay:10000,light:'night'},
+           {center:[cx+0.020*sc,cy-0.011*sc],zoom:17.3,pitch:79,bearing:-20,duration:6000,delay:22000,light:'night'},
+           {center:[cx+0.019*sc,cy-0.009*sc],zoom:16.5,pitch:74,bearing:30,duration:5500,delay:34000,light:'dawn'},
+           {center:[cx+0.022*sc,cy-0.011*sc],zoom:15.0,pitch:62,bearing:10,duration:5500,delay:46000,light:'dawn'},
          ],
-         title:'🏗 Reconversie Industrială → Mixt Funcțional',
-         body:'Fosta zonă industrială: '+Math.round(310*sc)+'ha · Reconversie 2028-2042. CUT 1.5-2.0 · R+5-R+8. Birouri + Rezidențial + Retail. Investiție estimată: €'+Math.round(pib*380)+'M. Locuri muncă noi: ~'+Math.round((d.pop2021||100000)/28).toLocaleString()+'.',
-         src:'PUG UTR RI · ANCPI · Model TSS·FG'},
-
-        // S8 — Street level IN ZONA DE RECONVERSIE (80s)
-        // S8 — Street level DRAMATIC: dusk → noapte → dawn (80s)
-        // Camera merge in zona de reconversie unde sunt cladiri proiectate
-        {id:'s8',dur:80000,light:'dusk',
-         cam:{center:[cx+0.020*sc,cy-0.009*sc],zoom:15.5,pitch:68,bearing:-15,duration:5500},
-         chain:[
-           // Zoom in pe zona cu cladiri proiectate — apus dramatic
-           {center:[cx+0.020*sc,cy-0.009*sc],zoom:16.2,pitch:72,bearing:20,duration:6500,delay:10000,light:'dusk'},
-           // Nivel strada — vede cladirile proiectate (portocalii/violet) in dreapta
-           {center:[cx+0.021*sc,cy-0.010*sc],zoom:17.0,pitch:78,bearing:-25,duration:7000,delay:24000,light:'dusk'},
-           // Noaptea — geamuri se aprind, lumina dramatica
-           {center:[cx+0.019*sc,cy-0.008*sc],zoom:17.3,pitch:79,bearing:15,duration:7000,delay:40000,light:'night'},
-           // Dawn — lumina calda a diminetii
-           {center:[cx+0.022*sc,cy-0.011*sc],zoom:16.8,pitch:75,bearing:-10,duration:7000,delay:57000,light:'dawn'},
-           // Pull-back cinematic — reveal zona completa
-           {center:[cx+0.022*sc,cy-0.011*sc],zoom:14.8,pitch:60,bearing:30,duration:6000,delay:70000,light:'dawn'},
-         ],
-         title:'🌆 Nivel Pietonal — '+name+' Ziua de Mâine',
-         body:'Perspectivă pietonală în zona de reconversie industrială. DREAPTA = proiecție 2028-2042: R+5-R+8, mixt funcțional, spații publice noi. Ciclul luminos: apus → noapte (geamuri aprinse) → dimineața. Densitate proiectată: +'+Math.round(densHA*0.4)+' loc/ha.',
+         title:'🌃 Noaptea — '+name+' 2040',
+         body:'Nivel pietonal: geamuri aprinse (rezidențial densificat), iluminat stradal LED, activitate nocturnă. Comparație stânga (2025, industrial) vs dreapta (2040, mixt funcțional). Densitate proiectată: +'+Math.round(densHA*0.4)+' loc/ha.',
          src:'PMUD · ANM · OMS · ANCPI · Model TSS·FG'},
 
-        {id:'s9',dur:65000,light:'night',
-         cam:{center:[cx,cy],zoom:13.0,pitch:46,bearing:5,duration:5500},
+        // S8 — EXPANSIUNE DANCU + REZIDENȚIAL NOU (50s) · ZIUA
+        {id:'s8',dur:50000,light:'day',
+         cam:{center:[cx+0.024*sc,cy-0.006*sc],zoom:13.5,pitch:48,bearing:-15,duration:5000},
+         chain:[
+           {center:[cx+0.024*sc,cy-0.006*sc],zoom:14.8,pitch:62,bearing:20,duration:6000,delay:10000},
+           {center:[cx+0.024*sc,cy-0.006*sc],zoom:16.0,pitch:72,bearing:-10,duration:6000,delay:22000,light:'day'},
+           {center:[cx+0.023*sc,cy-0.007*sc],zoom:16.5,pitch:75,bearing:15,duration:6000,delay:33000,light:'dusk'},
+           {center:[cx+0.024*sc,cy-0.006*sc],zoom:13.5,pitch:46,bearing:5,duration:5000,delay:44000,light:'dusk'},
+         ],
+         title:'🏘 Expansiune Dancu — PUZ Rezidențial',
+         body:'Cea mai rapidă creștere Iași 2015-2025: +4.200 locuințe/an (ANCPI). Zone noi prin PUZ: R+2-R+4. Extindere intravilam legal pe extravilan agricol. Proiecție: +'+Math.round((d.pop2021||100000)*0.08).toLocaleString()+' locuitori până 2035.',
+         src:'ANCPI autorizații 2015-2025 · PUZ aprobate CJ Iași · INS'},
+
+        // S9 — RISCURI & CLIMĂ (50s) · NOAPTE
+        {id:'s9',dur:50000,light:'night',
+         cam:{center:[cx,cy],zoom:12.5,pitch:42,bearing:5,duration:5000},
          chain:[
            {center:[cx+0.006,cy-0.004],zoom:13.5,pitch:50,bearing:-18,duration:6000,delay:12000},
-           {center:[cx-0.008,cy+0.005],zoom:13.8,pitch:53,bearing:14,duration:6000,delay:28000},
-           {center:[cx,cy],zoom:13.0,pitch:48,bearing:0,duration:5500,delay:48000},
+           {center:[cx-0.008,cy+0.005],zoom:13.8,pitch:53,bearing:14,duration:6000,delay:26000},
+           {center:[cx,cy],zoom:12.5,pitch:42,bearing:0,duration:5000,delay:42000},
          ],
          title:'⚠ Riscuri & Climă — '+name,
-         body:'Risc seismic: zona D (ag=0.20g). Inundații: ~340ha. Caniculă 2050: +22 zile/an. Scor risc: '+Math.round(35+densHA*0.3)+'/100. Plan adaptare: €42M.',
-         src:'INFP · ANAR · IPCC AR6 · ANM'},
+         body:'Seismic: zona C (ag=0.20g, P100-1/2022). Inundații ANAR: ~340ha risc P1%. Caniculă 2050: +22 zile/an (IPCC AR6 RCP8.5). Alunecări: zone cu pantă >15°. Scor risc: '+Math.round(35+densHA*0.3)+'/100.',
+         src:'INFP P100-1/2022 · ANAR · IPCC AR6 · ANM · INHGA'},
 
-        // S10 — Comparatie (70s)
-        {id:'s10',dur:70000,light:'dusk',
-         cam:{center:[cx,cy],zoom:12.5,pitch:44,bearing:-10,duration:5500},
+        // S10 — COMPARAȚIE EU (55s) · APU
+        {id:'s10',dur:55000,light:'dusk',
+         cam:{center:[cx,cy],zoom:13.0,pitch:46,bearing:-10,duration:5000},
          chain:[
-           {center:[cx+0.004,cy-0.003],zoom:13.0,pitch:48,bearing:18,duration:6000,delay:14000},
-           {center:[cx-0.004,cy+0.003],zoom:13.5,pitch:52,bearing:-18,duration:6000,delay:32000},
-           {center:[cx,cy],zoom:12.8,pitch:46,bearing:5,duration:5500,delay:52000},
+           {center:[cx+0.004,cy-0.003],zoom:14.0,pitch:56,bearing:18,duration:6000,delay:12000},
+           {center:[cx-0.004,cy+0.003],zoom:14.5,pitch:60,bearing:-18,duration:6000,delay:28000},
+           {center:[cx,cy],zoom:13.0,pitch:46,bearing:5,duration:5000,delay:46000},
          ],
          title:'⚖ '+name+' vs Orase Similare EU',
-         body:name+': '+densHA+' loc/ha · TP 18% · ESG 51/100. Cluj: 76/ha · 28% · 67. Vilnius: 156/ha · 42% · 79. Decalaj recuperabil: 8-12 ani investiții.',
+         body:name+': '+densHA+' loc/ha · TP 18% · ESG 51/100. Cluj: 76/ha · 28% · 67. Vilnius: 156/ha · 42% · 79. Decalaj recuperabil prin investiții consistente: 8-12 ani.',
          src:'Eurostat Urban Audit 2021 · INS · BNR'},
 
-        // S11 — Time Machine (90s) — orbit 360 + year scrub
-        {id:'s11',dur:90000,light:'dusk',
-         cam:{center:[cx,cy],zoom:14.0,pitch:55,bearing:0,duration:5500},
+        // S11 — TIME MACHINE orbit 360° (70s) · ZIUA→APU→NOAPTE
+        {id:'s11',dur:70000,light:'day',
+         cam:{center:[cx,cy],zoom:14.0,pitch:55,bearing:0,duration:5000},
          chain:[
-           {center:[cx,cy],zoom:14.5,pitch:58,bearing:60,duration:8000,delay:15000},
-           {center:[cx,cy],zoom:14.8,pitch:60,bearing:120,duration:8000,delay:33000},
-           {center:[cx,cy],zoom:15.0,pitch:62,bearing:180,duration:8000,delay:52000},
-           {center:[cx,cy],zoom:14.5,pitch:58,bearing:240,duration:8000,delay:71000},
+           {center:[cx,cy],zoom:14.8,pitch:60,bearing:90,duration:8000,delay:12000,light:'day'},
+           {center:[cx,cy],zoom:15.0,pitch:62,bearing:180,duration:8000,delay:28000,light:'dusk'},
+           {center:[cx,cy],zoom:15.2,pitch:64,bearing:270,duration:8000,delay:46000,light:'night'},
+           {center:[cx,cy],zoom:14.5,pitch:58,bearing:360,duration:7000,delay:62000,light:'dawn'},
          ],
          title:'⏱ Time Machine — 2025 → 2050',
-         body:'Orbită 360°. Clădirile cresc, rețeaua TP se extinde. Scrub pe slider pentru orice an. Transformare: '+Math.round((yr-2025)/25*100)+'% completă.',
+         body:'Orbită 360° completă. Zi→apus→noapte→dimineață. Clădirile cresc progresiv. Scrub pe slider pentru orice an. Transformare totală: '+Math.round((yr-2025)/25*100)+'%.',
          src:'INSE · ANCPI · IPCC · Model TSS·FG',
          animYear:true,yearFrom:2025,yearTo:2050},
 
-        // S12 — Concluzie (50s)
-        {id:'s12',dur:50000,light:'dusk',
-         cam:{center:[cx,cy],zoom:12.2,pitch:42,bearing:-18,duration:5000},
+        // S12 — CONCLUZIE (40s) · DIMINEAȚA
+        {id:'s12',dur:40000,light:'dawn',
+         cam:{center:[cx,cy],zoom:12.5,pitch:44,bearing:-15,duration:4500},
          chain:[
-           {center:[cx,cy],zoom:13.0,pitch:50,bearing:22,duration:6000,delay:12000},
-           {center:[cx,cy],zoom:14.2,pitch:58,bearing:-12,duration:6000,delay:30000},
-           {center:[cx,cy],zoom:12.0,pitch:40,bearing:0,duration:5500,delay:44000},
+           {center:[cx,cy],zoom:14.0,pitch:58,bearing:20,duration:6000,delay:10000},
+           {center:[cx,cy],zoom:15.5,pitch:66,bearing:-10,duration:5500,delay:26000},
+           {center:[cx,cy],zoom:12.0,pitch:38,bearing:0,duration:5000,delay:35000},
          ],
          title:'🌟 '+name+' 2050 — Viziunea',
-         body:'Proiecție 2025-2050: +20% pop · +100% PIB/cap · ESG 78/100 · TP 36%. Date oficiale calibrate. Standard urbanistic european — disponibil oricărui UAT din România.',
+         body:'Proiecție 2025-2050: +20% pop · +100% PIB/cap · ESG 78/100 · TP 36%. Toate datele din surse oficiale calibrate. Instrument decizional pentru administrații și investitori.',
          src:'UrbanX TSS·FG © — INS · Eurostat · ANCPI · BNR · IPCC AR6'},
       ];
     },
