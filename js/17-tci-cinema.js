@@ -2526,41 +2526,74 @@ if(typeof _ProjectionEngine!=='undefined'){
 }
 
 // Restore URL la load
-window.addEventListener('load',()=>setTimeout(()=>{
-  const p=new URLSearchParams(window.location.search);
-  const tciP=p.get('tci');
+// ── URL Restore cu retry ─────────────────────────────────────────────────
+(function() {
+  const p = new URLSearchParams(window.location.search);
+  const tciP = p.get('tci');
   if(!tciP) return;
-  try{
-    const s=new URLSearchParams(atob(tciP));
-    let ck=s.get('c'), sc=s.get('s'), yr=parseInt(s.get('y')||'2026'), md=s.get('m')||'uat';
-    // Verifica daca cityKey exista in DB, altfel cauta by SIRUTA sau name
-    if(ck && typeof _RO_CITIES_DB !== 'undefined') {
-      if(!_RO_CITIES_DB[ck]) {
-        // Cauta dupa SIRUTA in key (format RO-IS-105309 → siruta=105309)
-        const sirutaMatch = ck.match(/(\d{5,6})$/);
-        if(sirutaMatch) {
-          const siruta = sirutaMatch[1];
-          const found = Object.entries(_RO_CITIES_DB).find(([k,v])=>
-            String(v.siruta)===siruta || String(v.SIRUTA)===siruta
-          );
-          if(found) ck = found[0];
-        }
-        // Sau cauta by county code (IS=Iasi, CJ=Cluj etc)
-        if(!_RO_CITIES_DB[ck]) {
-          const judetMatch = ck.match(/RO-([A-Z]{2})-/);
-          if(judetMatch) {
-            const judet = judetMatch[1];
-            const found = Object.entries(_RO_CITIES_DB).find(([k,v])=>
-              v.judet_code===judet || (v.judet||'').slice(0,2).toUpperCase()===judet
-            );
-            if(found) ck = found[0];
-          }
-        }
-      }
+
+  let params;
+  try {
+    params = new URLSearchParams(atob(tciP));
+  } catch(e) { return; }
+
+  let ck = params.get('c');
+  const sc  = params.get('s') || 'S2';
+  const yr  = parseInt(params.get('y') || '2026');
+  const md  = params.get('m') || 'uat';
+
+  // Rezolva cityKey din SIRUTA (RO-IS-105309 → cauta in DB)
+  const resolveCityKey = (key) => {
+    if(typeof _RO_CITIES_DB === 'undefined') return key;
+    if(_RO_CITIES_DB[key]) return key;
+    // Cauta dupa SIRUTA numeric
+    const sirutaM = key.match(/(\d{5,6})$/);
+    if(sirutaM) {
+      const found = Object.entries(_RO_CITIES_DB).find(([k,v]) =>
+        String(v.siruta) === sirutaM[1] || String(v.SIRUTA) === sirutaM[1]
+      );
+      if(found) return found[0];
     }
-    TCI._launch(md,{cityKey:ck||'iasi',scenario:sc||'S2'});
-    setTimeout(()=>TCI.scrubTo(yr),1500);
-  }catch(e){console.warn('[TCI] URL restore error:',e);}
-},1200));
+    // Cauta dupa cod judet (RO-IS- → IS → Iași)
+    const judetM = key.match(/RO-([A-Z]{2})-/);
+    if(judetM) {
+      const jCode = judetM[1];
+      const found = Object.entries(_RO_CITIES_DB).find(([k,v]) =>
+        (v.judet||'').slice(0,2).toUpperCase() === jCode
+      );
+      if(found) return found[0];
+    }
+    return key;
+  };
+
+  // Retry: asteapta window.map sa fie gata (max 20 incercari × 500ms = 10s)
+  let tries = 0;
+  const tryLaunch = () => {
+    tries++;
+    const mapReady = window.map && typeof window.map.flyTo === 'function';
+    const dbReady  = typeof _RO_CITIES_DB !== 'undefined';
+
+    if(mapReady) {
+      ck = resolveCityKey(ck || 'iasi');
+      // Ascunde selectorul daca e afisat
+      document.getElementById('tci-sel')?.remove();
+      // Lansam direct fara selector
+      try {
+        TCI._launch(md, { cityKey: ck, scenario: sc });
+        setTimeout(() => { try { TCI.scrubTo(yr); } catch(e){} }, 2000);
+        console.log(`[TCI] URL restore: ${ck} · ${sc} · ${yr} · ${md}`);
+      } catch(e) {
+        console.warn('[TCI] URL restore launch error:', e);
+      }
+    } else if(tries < 20) {
+      setTimeout(tryLaunch, 500);
+    } else {
+      console.warn('[TCI] URL restore: map not ready after 10s');
+    }
+  };
+
+  // Prima incercare dupa 1s
+  window.addEventListener('load', () => setTimeout(tryLaunch, 1000));
+})();
 
 console.log('[TCI Cinema] window.map + canvas overlay — UAT ori parcelă, zoom cinematice');
