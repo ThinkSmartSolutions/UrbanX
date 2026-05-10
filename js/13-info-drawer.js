@@ -627,6 +627,25 @@ const RAPORT_INFO = {
     nu: ['Nu înlocuiește DTGA elaborată de consultant autorizat ANAR/INHGA', 'Valorile NFA și portanță sunt estimative — studiu geotehnic obligatoriu pe amplasament', 'Hărțile de risc la inundații se verifică obligatoriu pe platforma INHGA (www.inhga.ro)'],
   },
 
+  proiectie_urb: {
+    ico: '🏙', label: 'Proiecție Urbanistică 10/20/30 Ani',
+    badge: 'strategic', badgeLabel: 'INSE · Scenarii S1/S2/S3',
+    color: '100,130,220',
+    fn: 'generateProiectieUrbanistica()',
+    ce: 'Analizează evoluția demografică și urbanistică a amplasamentului pe orizonturi de 10, 20 și 30 ani. Integrează date INSE (populatie, rata natalitate, migratie), prognoze Eurostat, scenarii S1/S2/S3 de dezvoltare și proiectează indicatorii urbanistici (POT/CUT/H) la revizuirile viitoare de PUG.',
+    dece: 'Legea 350/2001 Art. 46 impune revizuirea PUG la 10 ani. Investitorii și băncile finanțatoare solicită tot mai frecvent studii de fezabilitate pe termen lung care includ evoluția demografică. Studiul demonstrează adaptabilitatea proiectului la schimbările urbanistice viitoare.',
+    legal: 'Legea 350/2001 (amenajarea teritoriului) · HG 525/1996 (RGU) · PATN — Planul de Amenajare a Teritoriului Național · INSE — date statistice oficiale · Eurostat Romania Demographic Outlook · Strategia Nationala pentru Locuire 2021-2030',
+    output: [
+      { ico: '📊', txt: 'Proiecție demografică 3 scenarii (S1 optimist/S2 moderat/S3 conservator) cu grafice 2025-2055' },
+      { ico: '🏗', txt: 'Indicatori urbanistici proiectați: POT/CUT/H estimat la 2035/2045/2055' },
+      { ico: '🏠', txt: 'Cerere locuinte estimată: nr. apartamente și SDA necesare pe decade' },
+      { ico: '🌐', txt: 'ESG Rating proiectat: scor E/S/G acum vs 2035 cu potențial de îmbunătățire' },
+      { ico: '📍', txt: 'Hartă amplasament cu context strategic regional (FIG.1-4 cu north arrow)' },
+      { ico: '⚖', txt: 'Baza legală completă: Legea 350/2001, INSE 2025, Eurostat, OCDE Urban Reviews' },
+    ],
+    nu: ['Nu înlocuiește studiul de piață imobiliară profesionist (evaluator ANEVAR)', 'Proiecțiile demografice sunt estimative — nu includ șocuri exogene (pandemii, crize)', 'Indicatorii urbanistici proiectați nu reprezintă angajamente ale administrației locale'],
+  },
+
   cpe: {
     ico: '⚡', label: 'Certificat de Performanță Energetică',
     badge: 'obligatoriu', badgeLabel: 'Clădiri noi · NZEB 2021',

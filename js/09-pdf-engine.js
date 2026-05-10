@@ -1,10 +1,13 @@
 // UrbanX — Design system PDF - _initStudyPdf
 // Fix: auto-paginare pentru body, sec, tblRow, bullet, concluzii
 
-function _initStudyPdf(studyName, studySubtitle, totalPages){
+function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
+  const _orient = opts?.orientation || 'portrait';
+  const _format = opts?.format || 'a4';
   const {jsPDF}=window.jspdf;
-  const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-  const W=210,H=297;
+  const pdf=new jsPDF({orientation:_orient,unit:'mm',format:_format});
+  const W = _orient==='landscape'?(_format==='a3'?420:297):(_format==='a3'?297:210);
+  const H = _orient==='landscape'?(_format==='a3'?297:210):(_format==='a3'?420:297);
 
   // Paleta rafinata
   const DARK=[5,14,30],DARK2=[11,24,50],NAVY=[14,36,72];
@@ -326,32 +329,52 @@ function _initStudyPdf(studyName, studySubtitle, totalPages){
   };
 
   // Imagine cu border si caption elegant
-    // Figure counter - auto FIG.X references (Audit #17)
+  // Auto figure counter (Audit #17)
   let _figCounter = 0;
-
   const addImg=(img,x,y,w,h2,caption,opts)=>{
     const opt=opts||{};
     _figCounter++;
     const figNum=opt.figNum||_figCounter;
-
     if(!img||img.length<500){
       pdf.setFillColor(...LIGHT3);pdf.rect(x,y,w,h2,'F');
       pdf.setDrawColor(...GRAY3);pdf.setLineWidth(0.3);pdf.rect(x,y,w,h2,'S');
       pdf.setTextColor(...GRAY2);pdf.setFontSize(8);pdf.setFont('helvetica','italic');
-      pdf.text('Captură indisponibilă',x+w/2,y+h2/2,{align:'center'});
-      if(caption){
-        pdf.setFontSize(5.5);pdf.setTextColor(...GRAY);
-        pdf.text('FIG.'+figNum+' — '+S2(caption),x+2,y+h2+3.5);
-        return y+h2+8;
-      }
+      pdf.text('Captur\u0103 indisponibil\u0103',x+w/2,y+h2/2,{align:'center'});
+      if(caption){pdf.setFontSize(5.5);pdf.setTextColor(...GRAY);pdf.text('FIG.'+figNum+' \u2014 '+S2(caption),x+2,y+h2+3.5);return y+h2+8;}
       return y+h2+4;
     }
     const fmt=img.startsWith('data:image/png')?'PNG':'JPEG';
     try{
       pdf.setFillColor(...DARK);pdf.rect(x-0.8,y-0.8,w+1.6,h2+1.6,'F');
       pdf.addImage(img,fmt,x,y,w,h2,undefined,'FAST');
-
-      // #6 Embedded Legend (colt stanga sus)
+      if(opt.northArrow!==false){
+        const nx=x+w-10,ny=y+9;
+        try{pdf.setGState&&pdf.setGState(pdf.GState({opacity:0.82}));}catch(e){}
+        pdf.setFillColor(4,12,28);pdf.circle(nx,ny,5.5,'F');
+        try{pdf.setGState&&pdf.setGState(pdf.GState({opacity:1}));}catch(e){}
+        pdf.setFillColor(210,40,40);
+        if(pdf.triangle)pdf.triangle(nx,ny-4.5,nx-2,ny+1,nx+2,ny+1,'F');
+        pdf.setFillColor(240,240,240);
+        if(pdf.triangle)pdf.triangle(nx,ny+4.5,nx-2,ny-1,nx+2,ny-1,'F');
+        pdf.setTextColor(255,255,255);pdf.setFontSize(4.5);pdf.setFont('helvetica','bold');
+        pdf.text('N',nx,ny-5.5,{align:'center'});
+      }
+      if(opt.scaleM){
+        const bx=x+3,by=y+h2-9,bw=28;
+        pdf.setFillColor(255,255,255);pdf.rect(bx,by,bw,3,'F');
+        pdf.setFillColor(0,0,0);pdf.rect(bx,by,bw/2,3,'F');
+        pdf.setDrawColor(0);pdf.setLineWidth(0.3);pdf.rect(bx,by,bw,3,'S');
+        pdf.setTextColor(255,255,255);pdf.setFontSize(5);pdf.setFont('helvetica','bold');
+        pdf.text('0',bx,by+5.5);
+        pdf.text(opt.scaleLabel||opt.scaleM+'m',bx+bw,by+5.5,{align:'right'});
+      }
+      if(opt.viewMeta){
+        try{pdf.setGState&&pdf.setGState(pdf.GState({opacity:0.75}));}catch(e){}
+        pdf.setFillColor(4,12,28);pdf.rect(x+w-62,y+h2-8,60,7,'F');
+        try{pdf.setGState&&pdf.setGState(pdf.GState({opacity:1}));}catch(e){}
+        pdf.setTextColor(120,160,210);pdf.setFontSize(5);pdf.setFont('helvetica','normal');
+        pdf.text(opt.viewMeta,x+w-60,y+h2-3.5);
+      }
       if(opt.legend&&opt.legend.length){
         try{pdf.setGState&&pdf.setGState(pdf.GState({opacity:0.85}));}catch(e){}
         const legH=5+opt.legend.length*5.5;
@@ -364,42 +387,6 @@ function _initStudyPdf(studyName, studySubtitle, totalPages){
           pdf.text(leg.label,x+11,y+7.5+li*5.5);
         });
       }
-
-      // #13 North Arrow (colt dreapta sus)
-      if(opt.northArrow!==false){
-        const nx=x+w-10,ny=y+9;
-        try{pdf.setGState&&pdf.setGState(pdf.GState({opacity:0.82}));}catch(e){}
-        pdf.setFillColor(4,12,28);pdf.circle(nx,ny,5.5,'F');
-        try{pdf.setGState&&pdf.setGState(pdf.GState({opacity:1}));}catch(e){}
-        pdf.setFillColor(210,40,40);
-        pdf.triangle&&pdf.triangle(nx,ny-4.5,nx-2,ny+1,nx+2,ny+1,'F');
-        pdf.setFillColor(240,240,240);
-        pdf.triangle&&pdf.triangle(nx,ny+4.5,nx-2,ny-1,nx+2,ny-1,'F');
-        pdf.setTextColor(255,255,255);pdf.setFontSize(4.5);pdf.setFont('helvetica','bold');
-        pdf.text('N',nx,ny-5.5,{align:'center'});
-      }
-
-      // #12 Scale Bar (colt stanga jos)
-      if(opt.scaleM){
-        const bx=x+3,by=y+h2-9,bw=28;
-        pdf.setFillColor(255,255,255);pdf.rect(bx,by,bw,3,'F');
-        pdf.setFillColor(0,0,0);pdf.rect(bx,by,bw/2,3,'F');
-        pdf.setDrawColor(0);pdf.setLineWidth(0.3);pdf.rect(bx,by,bw,3,'S');
-        pdf.setTextColor(255,255,255);pdf.setFontSize(5);pdf.setFont('helvetica','bold');
-        pdf.text('0',bx,by+5.5);
-        pdf.text(opt.scaleLabel||opt.scaleM+'m',bx+bw,by+5.5,{align:'right'});
-      }
-
-      // #14 View Metadata 3D (colt dreapta jos)
-      if(opt.viewMeta){
-        try{pdf.setGState&&pdf.setGState(pdf.GState({opacity:0.75}));}catch(e){}
-        pdf.setFillColor(4,12,28);pdf.rect(x+w-62,y+h2-8,60,7,'F');
-        try{pdf.setGState&&pdf.setGState(pdf.GState({opacity:1}));}catch(e){}
-        pdf.setTextColor(120,160,210);pdf.setFontSize(5);pdf.setFont('helvetica','normal');
-        pdf.text(opt.viewMeta,x+w-60,y+h2-3.5);
-      }
-
-      // Caption cu FIG.X badge (Audit #17)
       if(caption){
         try{pdf.setGState&&pdf.setGState(pdf.GState({opacity:0.85}));}catch(e2){}
         pdf.setFillColor(8,20,42);pdf.rect(x,y+h2-9,w,9,'F');
@@ -410,19 +397,12 @@ function _initStudyPdf(studyName, studySubtitle, totalPages){
         pdf.setTextColor(212,175,55);pdf.setFontSize(5.8);pdf.setFont('helvetica','italic');
         pdf.text(S2(caption),x+17,y+h2-2.5,{maxWidth:w-20});
       }
-
-      // #22 Evidence tag (sub imagine)
-      if(opt.evidenceSrc){
-        pdf.setTextColor(100,130,160);pdf.setFontSize(5);pdf.setFont('helvetica','italic');
-        pdf.text('Sursa: '+opt.evidenceSrc+' · '+new Date().toLocaleDateString('ro-RO'),x,y+h2+(caption?11:2));
-      }
-
     }catch(e){
       pdf.setFillColor(...LIGHT3);pdf.rect(x,y,w,h2,'F');
-      pdf.setTextColor(...GRAY2);pdf.setFontSize(7);pdf.text('Captură indisponibilă',x+w/2,y+h2/2,{align:'center'});
+      pdf.setTextColor(...GRAY2);pdf.setFontSize(7);pdf.text('Captur\u0103 indisponibil\u0103',x+w/2,y+h2/2,{align:'center'});
     }
     return y+h2+(caption?11:4);
-  };;
+  };
 
   const newPage=(title,pgNum)=>{
     pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
@@ -448,3 +428,53 @@ function _initStudyPdf(studyName, studySubtitle, totalPages){
 
 
 
+
+
+// ── Landscape page helpers ─────────────────────────────────────────────────
+function _pdfAddLandscapePage(pdf){pdf.addPage('a4','landscape');return{W:297,H:210};}
+function _pdfAddPortraitPage(pdf){pdf.addPage('a4','portrait');return{W:210,H:297};}
+function _needsLandscape(cols){return cols.reduce((a,b)=>a+b,0)>175;}
+
+// ── Print Safe Colors (Audit #26) ─────────────────────────────────────────
+const _PRINT_PALETTE={
+  BLACK:[0,0,0],WHITE:[255,255,255],DARK_NAVY:[8,20,42],GOLD:[180,140,0],
+  GREEN_SAFE:[0,100,40],RED_SAFE:[160,0,0],BLUE_SAFE:[0,60,140],
+  AMBER_SAFE:[140,90,0],GRAY_TEXT:[60,70,80],GRAY_LIGHT:[230,235,240],
+};
+function _wcagContrast(r1,r2){
+  const l=rgb=>{const s=rgb.map(v=>{const c=v/255;return c<=0.03928?c/12.92:Math.pow((c+0.055)/1.055,2.4);});return 0.2126*s[0]+0.7152*s[1]+0.0722*s[2];};
+  const L1=l(r1),L2=l(r2);return(Math.max(L1,L2)+0.05)/(Math.min(L1,L2)+0.05);
+}
+
+// ── Safe Zones (Audit Sect.III #9) ────────────────────────────────────────
+const _safeZones=[];
+function _resetSafeZones(){_safeZones.length=0;}
+function _registerZone(x,y,w,h,lbl){_safeZones.push({x,y,w,h,lbl});}
+function _isSafeToPlace(x,y,w,h){return!_safeZones.some(z=>x<z.x+z.w&&x+w>z.x&&y<z.y+z.h&&y+h>z.y);}
+function _findSafeY(W,y,h){let s=y,it=0;while(!_isSafeToPlace(14,s,W-28,h)&&it<20){s+=5;it++;}return s;}
+
+// ── Iconography (Audit #27) ───────────────────────────────────────────────
+function _pdfIcon(pdf,x,y,type,size,col){
+  const s=size||5,c=col||[60,80,100];
+  const colors={ok:[0,110,50],warn:[140,90,0],err:[150,0,0],info:[0,70,150]};
+  const labels={ok:'+',warn:'!',err:'x',info:'i'};
+  pdf.setFillColor(...(colors[type]||c));
+  pdf.circle(x,y,s/2,'F');
+  pdf.setTextColor(255,255,255);pdf.setFontSize(s*1.2);pdf.setFont('helvetica','bold');
+  pdf.text(labels[type]||'?',x,y+s*0.4,{align:'center'});
+}
+
+// ── Dynamic Typography (Audit Sect.III #10) ───────────────────────────────
+function _pdfDynamicText(pdf,text,x,y,maxW,maxH,opts){
+  const minF=opts?.minSize||5.5,maxF=opts?.maxSize||8;
+  for(let fs=maxF;fs>=minF;fs-=0.5){
+    pdf.setFontSize(fs);
+    const lines=pdf.splitTextToSize(text,maxW);
+    if(lines.length*(fs*0.45)<=maxH){lines.forEach((l,i)=>pdf.text(l,x,y+i*(fs*0.45)));return y+lines.length*(fs*0.45);}
+  }
+  pdf.setFontSize(minF);
+  const maxL=Math.floor(maxH/(minF*0.45));
+  const lines=pdf.splitTextToSize(text,maxW).slice(0,maxL-1);
+  lines.push('...');lines.forEach((l,i)=>pdf.text(l,x,y+i*(minF*0.45)));
+  return y+maxL*(minF*0.45);
+}
