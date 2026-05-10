@@ -1789,33 +1789,30 @@ out geom qt;`;
       try { m.getSource('tci-proj').setData({type:'FeatureCollection', features}); } catch(e){}
     }
 
-    // Update fill-extrusion buildings (Mapbox nativ — garantat vizibil)
-    if(m?.getSource?.('tci-buildings') && this._3D?._entities?.length) {
+    // Update fill-extrusion — zone întregi colorate (garantat vizibil)
+    if(m?.getSource?.('tci-buildings') && this._projZones?.length) {
       const C = this.COLORS;
-      const features = this._3D._entities.map(e => {
-        let h = 1;
-        if(yr >= e.startYr) {
-          const yF = Math.min(1, (yr - e.startYr) / 18);
-          h = e.hBase + (e.hMax - e.hBase) * yF;
+      const features = this._projZones.map(z => {
+        const coords = this._polyFromDef(z);
+        if(!coords || coords.length < 3) return null;
+        // Înălțime crescătoare per an
+        let h = 2;
+        if(yr >= z.startYr) {
+          const yrs = yr - z.startYr;
+          h = Math.min(z.hMax || 40, 5 + yrs * 3);
         }
-        h = Math.max(1, h);
+        // Culoare per stare temporală
         let color;
-        if(yr < e.startYr)             color = C.stabil || '#374151';
-        else if((yr-e.startYr) < 5)    color = C.constructie || '#f59e0b';
-        else if((yr-e.startYr) < 10)   color = C.aproape    || '#f97316';
-        else                            color = '#' + e.color.getHexString();
-        const dLat = (e.dM/2) / 111319.9;
-        const dLon = (e.wM/2) / (111319.9 * Math.cos(e.lat * Math.PI/180));
+        if(yr < z.startYr)      color = C.stabil || '#374151';
+        else if((yr-z.startYr) < 5)  color = C.constructie || '#f59e0b';
+        else if((yr-z.startYr) < 10) color = C.aproape    || '#f97316';
+        else                         color = z.color || '#16a34a';
         return {
           type:'Feature',
-          geometry:{type:'Polygon', coordinates:[[
-            [e.lon-dLon, e.lat-dLat],[e.lon+dLon, e.lat-dLat],
-            [e.lon+dLon, e.lat+dLat],[e.lon-dLon, e.lat+dLat],
-            [e.lon-dLon, e.lat-dLat],
-          ]]},
-          properties:{ height:h, color }
+          geometry:{type:'Polygon', coordinates:[coords]},
+          properties:{ height:h, color, label:z.label }
         };
-      });
+      }).filter(Boolean);
       try { m.getSource('tci-buildings').setData({type:'FeatureCollection',features}); } catch(e){}
     }
 
