@@ -7,6 +7,7 @@
 const TCI = {
 
   map: null,
+  tciMap: null,
   canvas: null, ctx: null,
   running: false, speed: 1,
   year: 2021, scenario: 'S2',
@@ -223,26 +224,75 @@ const TCI = {
     this.canvas.height = window.innerHeight;
   },
 
-  // ── SETUP LAYERE MAPBOX PE HARTA REALA ──────────────────────────────────
+  // ── SETUP: creeaza harta TCI proprie cu dark-v11 (are 3D buildings) ────
   setupMapLayers() {
-    const m = this.map;
-    if(!m || this.layersAdded) return;
+    if(this.layersAdded) return;
 
-    // 1. Pune harta fullscreen
-    const mapEl = document.getElementById('map');
-    if(mapEl) {
-      mapEl.style.cssText = 'position:fixed!important;inset:0!important;z-index:2999!important;width:100vw!important;height:100vh!important;';
-      m.resize();
-    }
-
-    // 2. Camera initiala: panoramica deasupra Iasului
     const city = (typeof _RO_CITIES_DB !== 'undefined') ? _RO_CITIES_DB[this.cityKey] : null;
     const cx = city?.lon || 27.601, cy = city?.lat || 47.158;
 
-    m.flyTo({ center:[cx,cy], zoom:12.5, pitch:0, bearing:0, duration:2000, essential:true });
+    // Obtine Mapbox token din harta principala
+    const token = window.mapboxgl?.accessToken || 
+                  (window.map?.accessToken) ||
+                  window.MAPBOX_TOKEN || '';
 
-    // 3. 3D Buildings layer (pe harta reala OSM)
-    if(!m.getLayer?.('tci-3d-buildings')) {
+    if(!token) { console.warn('[TCI] Token Mapbox lipsa'); this._noMapFallback(); return; }
+
+    // Creeaza container pentru harta TCI
+    const host = document.getElementById('tci-map-host');
+    if(!host) return;
+    host.innerHTML = '';
+    host.style.cssText = 'position:absolute;inset:0;z-index:1;';
+
+    // Harta TCI dedicata cu dark-v11 (are composite sursa cu cladiri 3D)
+    try {
+      mapboxgl.accessToken = token;
+      this.tciMap = new mapboxgl.Map({
+        container: host,
+        style: 'mapbox://styles/mapbox/dark-v11',
+        center: [cx, cy],
+        zoom: 14,
+        pitch: 55,
+        bearing: -15,
+        antialias: true,
+        preserveDrawingBuffer: true,
+      });
+
+      this.tciMap.on('load', () => {
+        console.log('[TCI] Harta proprie incarcata - adaug layere 3D');
+        this._addAllLayers(cx, cy);
+        this.bearing = -15;
+      });
+
+      this.tciMap.on('error', (e) => {
+        console.warn('[TCI] Eroare harta:', e.error?.message);
+      });
+
+    } catch(e) {
+      console.warn('[TCI] Nu pot crea harta TCI:', e.message);
+      this._noMapFallback();
+      return;
+    }
+
+    // Inlocuim this.map cu harta TCI pentru animatie
+    // (harta principala ramane neatinsa)
+    this.map = this.tciMap;
+
+    this.layersAdded = true;
+    this.renderLegend(this.activeMode || '3d');
+    console.log('[TCI v4] Setup complet');
+  },
+
+  // ── Adauga toate layerele pe harta TCI ───────────────────────────────────
+  _addAllLayers(cx, cy) {
+    const m = this.tciMap;
+    if(!m) return;
+
+    // Camera initiala cinematica
+    m.flyTo({ center:[cx,cy], zoom:14, pitch:55, bearing:-15, duration:1500, essential:true });
+
+    // 3D Buildings layer
+    if(!m.getLayer('tci-3d-buildings')) {
       try {
         m.addLayer({
           id: 'tci-3d-buildings',
@@ -340,9 +390,15 @@ const TCI = {
       } catch(e) {}
     }
 
+    console.log('[TCI v4] Toate layerele 3D adaugate');
+  },
+
+  // ── Fallback daca nu avem token ───────────────────────────────────────────
+  _noMapFallback() {
+    const host = document.getElementById('tci-map-host');
+    if(host) host.innerHTML = '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;color:rgba(148,163,184,0.6);"><div style=\"font-size:48px;margin-bottom:12px\">🗺</div><div style=\"font-size:13px\">Token Mapbox indisponibil.<br>Deschideți TCI din interiorul hărții.</div></div>';
     this.layersAdded = true;
     this.renderLegend('3d');
-    console.log('[TCI v4] Layere Mapbox initializate pe harta reala');
   },
 
   // ── INITIALIZARE PARTICULE TRAFIC ────────────────────────────────────────
@@ -423,7 +479,7 @@ const TCI = {
 
   // ── ANIMATIE PER AN ───────────────────────────────────────────────────────
   _animateYear(year, yearT, totalT) {
-    const m = this.map; if(!m) return;
+    const m = this.tciMap || this.map; if(!m) return;
     const d = typeof _getProjectionData !== 'undefined'
       ? _getProjectionData(year, this.scenario, this.cityKey) : null;
     const ms = typeof _getModalSplit !== 'undefined'
@@ -525,7 +581,7 @@ const TCI = {
 
   // ── Trafic animat pe coordonate reale ────────────────────────────────────
   _updateTraffic(totalT, ms) {
-    const m = this.map;
+    const m = this.tciMap || this.map;
     if(!m?.getSource?.('tci-traffic')) return;
     const t = Date.now()/1000;
     const scale = 0.00007 * (0.4+totalT*0.9);
@@ -836,14 +892,12 @@ const TCI = {
     const modal = document.getElementById('tci-v4-modal');
     if(modal && modal.style.display === 'none') return;
     if(this.running) this.pause();
-    const m = this.map;
-    if(m) {
-      ['tci-3d-buildings','tci-constructii-layer','tci-heatmap-layer','tci-traffic-layer','tci-risk-flood-layer'].forEach(id=>{try{if(m.getLayer(id))m.removeLayer(id);}catch(e){}});
-      ['tci-constructii','tci-heatmap','tci-traffic','tci-risk-flood'].forEach(id=>{try{if(m.getSource(id))m.removeSource(id);}catch(e){}});
-      m.flyTo?.({zoom:13,pitch:0,bearing:0,duration:1500});
+    // Distruge harta TCI dedicata
+    if(this.tciMap) {
+      try { this.tciMap.remove(); } catch(e) {}
+      this.tciMap = null;
     }
-    const mapEl = document.getElementById('map');
-    if(mapEl) { mapEl.style.cssText=''; m?.resize?.(); }
+    this.map = window.map; // restauram referinta
     const modalEl = document.getElementById('tci-v4-modal');
     if(modalEl) modalEl.style.display = 'none';
     this.layersAdded = false;
