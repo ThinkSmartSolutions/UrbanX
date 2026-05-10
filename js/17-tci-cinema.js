@@ -1667,11 +1667,14 @@ out geom qt;`;
         m.addSource('tci-buildings', {type:'geojson', data:{type:'FeatureCollection',features:[]}});
         m.addLayer({
           id: 'tci-buildings-3d', type: 'fill-extrusion', source: 'tci-buildings',
+          slot: 'top',
+          minzoom: 12,
           paint: {
             'fill-extrusion-color':   ['get','color'],
             'fill-extrusion-height':  ['get','height'],
             'fill-extrusion-base':    0,
             'fill-extrusion-opacity': 0.92,
+            'fill-extrusion-ambient-occlusion-intensity': 0,
           }
         });
         console.log('[TCI] ✅ Fill-extrusion buildings layer adăugat');
@@ -1723,6 +1726,8 @@ out geom qt;`;
     const buildScene = () => {
       this._3D.setOrigin(cx, cy);
       this._3D.buildSceneGraph(this._projZones, this.year || 2025);
+      // Populează fill-extrusion imediat după ce entitățile sunt create
+      setTimeout(() => this._updateProjectionLayers(this.year || 2025), 100);
     };
     if(m.isStyleLoaded?.()) buildScene();
     else { m.once('idle', buildScene); setTimeout(buildScene, 3000); }
