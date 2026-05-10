@@ -233,12 +233,7 @@ const TCI = {
       }
     } catch(e){}
 
-    // Ambientlight Three.js — mai scăzut noaptea, mai puternic ziua
-    const ambientByPreset = { night:0.35, dawn:0.65, dusk:0.80, day:1.20 };
-    try {
-      const ambient = this._3D?._scene?.children?.find?.(c=>c.isAmbientLight);
-      if(ambient) { ambient.intensity = ambientByPreset[preset] ?? 1.0; this._3D._map?.triggerRepaint?.(); }
-    } catch(e){}
+    // MeshBasicMaterial — culoarea e independentă de lumini, nu mai modificăm AmbientLight
   },
 
   _updateSplitLabels() {
@@ -1436,11 +1431,9 @@ out geom qt;`;
         canvas: map.getCanvas(), context: gl, antialias: true });
       this._renderer.autoClear = false;
 
-      // Lumini în spațiul local (metri)
-      this._scene.add(new THREE.AmbientLight(0xffffff, 1.2));
-      const sun = new THREE.DirectionalLight(0xffd580, 1.0);
-      sun.position.set(300, 600, 800);
-      this._scene.add(sun);
+      // MeshBasicMaterial nu reacționează la lumini → nu adăugăm lumini
+      // (AmbientLight/DirectionalLight/PointLight în scenă cu BasicMaterial
+      //  forțează Three.js r128 să recompileze shadere → 500+ erori/frame)
 
       this._ready = true;
       console.log('[3D] ✅ CustomLayerInterface activ — coordinate system corect');
@@ -1543,39 +1536,13 @@ out geom qt;`;
       for(let _i = 0; _i < this._entities.length; _i++) this._mesh.setColorAt(_i, _gc);
       if(this._mesh.instanceColor) this._mesh.instanceColor.needsUpdate = true;
       this._scene.add(this._mesh);
-      this._addStreetLights();
+      // Street lights eliminate — PointLight incompatibil cu MeshBasicMaterial în Three.js r128
     },
 
-    // Lumini stradale — puncte calde la 8m înălțime pe arterele principale
-    _addStreetLights() {
-      const spacing = 60; // m între stâlpi
-      const height  = 8;
-      // Axa E-V: de la -1800m la +1800m față de centru, la Y=0
-      // Axa N-S: de la -1600m la +1600m, la X=0
-      const axes = [
-        {axis:'x', range:[-1800,1800], fixed:0,    spacing},
-        {axis:'y', range:[-1600,1600], fixed:30,   spacing},
-      ];
-      this._lights = [];
-      axes.forEach(ax => {
-        for(let v = ax.range[0]; v <= ax.range[1]; v += ax.spacing) {
-          const light = new THREE.PointLight(0xfff0d0, 0.0, 120);
-          if(ax.axis === 'x') light.position.set(v, ax.fixed, height);
-          else                light.position.set(ax.fixed, v, height);
-          this._scene.add(light);
-          this._lights.push(light);
-        }
-      });
-      console.log('[3D] Street lights:', this._lights.length);
-    },
-
-    // Aprinde/stinge luminile stradale
-    setNightLights(on) {
-      (this._lights||[]).forEach(l => {
-        l.intensity = on ? (0.3 + Math.random()*0.15) : 0;
-      });
-      this._map?.triggerRepaint?.();
-    },
+    // _addStreetLights eliminat — PointLight incompatibil cu MeshBasicMaterial în Three.js r128
+    // (forțează recompilare shader la fiecare frame → 500+ erori/s)
+    _addStreetLights() { /* no-op */ },
+    setNightLights(on) { /* no-op */ },
 
     updateYear(yr) {
       if(!this._ready || !this._mesh) return;
