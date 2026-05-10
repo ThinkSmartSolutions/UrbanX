@@ -2129,6 +2129,8 @@ out geom qt;`;
     this.raf=requestAnimationFrame(()=>this._loop());
     // triggerRepaint doar când animația rulează (nu când e Pauză)
     this._3D?._map?.triggerRepaint?.();
+    // updateLOD la fiecare frame — mesh vizibil imediat când zoom >= 12.5
+    this._3D?.updateLOD?.(this.map?.getZoom?.() ?? 14);
   },
 
   _onYearChange(yr) {
@@ -2398,6 +2400,8 @@ out geom qt;`;
     for(let y=sY;y<yr;y++) t+=this.MILES.includes(y)?this.YEAR_DUR*2.2:this.YEAR_DUR;
     this.pausedAt=t/this.speed;
     this._onYearChange(yr);
+    // Asigură vizibilitatea mesh-ului când e pe pauză
+    this._3D?.updateLOD?.(this.map?.getZoom?.() ?? 14);
   },
 
   setScenario(s) {
