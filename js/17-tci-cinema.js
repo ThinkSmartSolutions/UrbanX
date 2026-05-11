@@ -1430,39 +1430,20 @@ out geom qt;`;
     onAdd(map, gl) {
       if(typeof THREE === 'undefined') { console.warn('[3D] Three.js lipsă'); return; }
       this._map = map;
-      this._camera = new THREE.Camera();
-      this._scene  = new THREE.Scene();
+      this._camera   = new THREE.Camera();
+      this._scene    = new THREE.Scene();
+      this._renderer = new THREE.WebGLRenderer({
+        canvas: map.getCanvas(), context: gl, antialias: true });
+      this._renderer.autoClear = false;
 
-      // OVERLAY CANVAS SEPARAT — bypass WebGL shared context
-      // CustomLayerInterface păstrat DOAR pentru matrix-ul Mapbox
-      const mc = map.getCanvas();
-      const container = map.getContainer(); // div-ul principal Mapbox
-
-      const ov = document.createElement('canvas');
-      const dpr = window.devicePixelRatio || 1;
-      ov.width  = container.offsetWidth  * dpr;
-      ov.height = container.offsetHeight * dpr;
-      ov.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10;';
-      container.style.position = 'relative'; // asigură context de poziționare
-      container.appendChild(ov);
-      this._overlay = ov;
-
-      this._renderer = new THREE.WebGLRenderer({canvas: ov, antialias: true, alpha: true});
-      this._renderer.setPixelRatio(dpr);
-      this._renderer.setClearColor(0x000000, 0);
-      this._renderer.autoClear = true;
-
-      new ResizeObserver(() => {
-        const d = window.devicePixelRatio || 1;
-        ov.width  = container.offsetWidth  * d;
-        ov.height = container.offsetHeight * d;
-        this._renderer.setSize(container.offsetWidth, container.offsetHeight);
-      }).observe(container);
-
-      this._scene.add(new THREE.AmbientLight(0xffffff, 1.0));
+      // Lumini în spațiul local (metri)
+      this._scene.add(new THREE.AmbientLight(0xffffff, 1.2));
+      const sun = new THREE.DirectionalLight(0xffd580, 1.0);
+      sun.position.set(300, 600, 800);
+      this._scene.add(sun);
 
       this._ready = true;
-      console.log('[3D] ✅ CustomLayerInterface overlay activ');
+      console.log('[3D] ✅ CustomLayerInterface activ — coordinate system corect');
     },
 
     render(gl, matrix) {
@@ -1480,23 +1461,15 @@ out geom qt;`;
       // Combină camera Mapbox cu transformarea locală
       this._camera.projectionMatrix =
         new THREE.Matrix4().fromArray(matrix).multiply(modelMatrix);
-      // projectionMatrixInverse sincronizat
-      this._camera.projectionMatrixInverse
-        .copy(this._camera.projectionMatrix).invert();
+      this._camera.projectionMatrixInverse.copy(this._camera.projectionMatrix).invert();
 
-      // LOD
       if(this._mesh) this._mesh.visible = (this._map?.getZoom?.() ?? 0) >= 12.5;
-
-      // Render pe OVERLAY CANVAS (nu pe shared gl — bypass toate erorile WebGL)
+      this._renderer.resetState();
       this._renderer.render(this._scene, this._camera);
       this._map?.triggerRepaint();
     },
 
-    onRemove() {
-      try { this._renderer?.dispose(); } catch(e){}
-      try { this._overlay?.remove(); } catch(e){}
-      this._ready = false;
-    },
+    onRemove() { try { this._renderer?.dispose(); } catch(e){} this._ready = false; },
 
     // ── Setează originea orașului ─────────────────────────────────────
     setOrigin(cx, cy) {
@@ -1518,7 +1491,7 @@ out geom qt;`;
     buildSceneGraph(zones, year) {
       if(!this._ready || typeof THREE === 'undefined') return;
       // Curăță scene
-      while(this._scene.children.length > 1) this._scene.remove(this._scene.children[1]); // 1 AmbientLight
+      while(this._scene.children.length > 2) this._scene.remove(this._scene.children[2]);
       this._entities = [];
       this._mesh = null;
 
@@ -1564,8 +1537,7 @@ out geom qt;`;
       const geom = new THREE.BoxGeometry(1, 1, 1);
       geom.translate(0, 0, 0.5); // pivotul la Z=0 (sol)
       // MeshBasicMaterial: NU depinde de lumini → culoarea instanței apare GARANTAT
-      // depthTest:false — overlay canvas separat, nu există depth buffer Mapbox
-      const mat = new THREE.MeshBasicMaterial({ vertexColors: true, depthTest: false });
+      const mat = new THREE.MeshBasicMaterial({ vertexColors: true });
       this._mesh = new THREE.InstancedMesh(geom, mat, this._entities.length);
       this._mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
       // Inițializează instanceColor (gri neutru) ÎNAINTE de primul render → shader compile corect
@@ -1573,7 +1545,7 @@ out geom qt;`;
       for(let _i = 0; _i < this._entities.length; _i++) this._mesh.setColorAt(_i, _gc);
       if(this._mesh.instanceColor) this._mesh.instanceColor.needsUpdate = true;
       this._scene.add(this._mesh);
-      // _addStreetLights eliminat — PointLights incompatibili Three.js r128 + Mapbox v3
+      // PointLights eliminate — 500+ erori Three.js r128
     },
 
     // Lumini stradale — puncte calde la 8m înălțime pe arterele principale
