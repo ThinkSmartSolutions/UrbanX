@@ -1437,10 +1437,10 @@ out geom qt;`;
       this._renderer.autoClear = false;
 
       // Lumini în spațiul local (metri)
-      this._scene.add(new THREE.AmbientLight(0xffffff, 1.2));
-      const sun = new THREE.DirectionalLight(0xffd580, 1.0);
-      sun.position.set(300, 600, 800);
-      this._scene.add(sun);
+      // 1 AmbientLight e suficient pentru MeshBasicMaterial + shader compile corect
+      this._scene.add(new THREE.AmbientLight(0xffffff, 1.0));
+      // DirectionalLight eliminat — nu afectează MeshBasicMaterial
+      // PointLights eliminate — cauzau 500+ erori/frame în Three.js r128
 
       this._ready = true;
       console.log('[3D] ✅ CustomLayerInterface activ — coordinate system corect');
@@ -1461,6 +1461,12 @@ out geom qt;`;
       // Combină camera Mapbox cu transformarea locală
       this._camera.projectionMatrix =
         new THREE.Matrix4().fromArray(matrix).multiply(modelMatrix);
+      // CRITIC r128: projectionMatrixInverse trebuie sincronizat manual
+      this._camera.projectionMatrixInverse
+        .copy(this._camera.projectionMatrix).invert();
+
+      // LOD direct în render — garantat actualizat la fiecare frame
+      if(this._mesh) this._mesh.visible = (this._map?.getZoom?.() ?? 0) >= 12.5;
 
       this._renderer.resetState();
       this._renderer.render(this._scene, this._camera);
@@ -1489,7 +1495,7 @@ out geom qt;`;
     buildSceneGraph(zones, year) {
       if(!this._ready || typeof THREE === 'undefined') return;
       // Curăță scene
-      while(this._scene.children.length > 2) this._scene.remove(this._scene.children[2]);
+      while(this._scene.children.length > 1) this._scene.remove(this._scene.children[1]); // 1 AmbientLight
       this._entities = [];
       this._mesh = null;
 
@@ -1543,7 +1549,7 @@ out geom qt;`;
       for(let _i = 0; _i < this._entities.length; _i++) this._mesh.setColorAt(_i, _gc);
       if(this._mesh.instanceColor) this._mesh.instanceColor.needsUpdate = true;
       this._scene.add(this._mesh);
-      this._addStreetLights();
+      // _addStreetLights eliminat — PointLights incompatibili Three.js r128 + Mapbox v3
     },
 
     // Lumini stradale — puncte calde la 8m înălțime pe arterele principale
