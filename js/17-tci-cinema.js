@@ -436,12 +436,12 @@ const TCI = {
     const cx = spatial?.centroid?.[0] ?? this.cityData?.lon ?? 27.601;
     const cy = spatial?.centroid?.[1] ?? this.cityData?.lat ?? 47.158;
 
-    // Bbox UAT → zoom optim care arată întregul teritoriu
-    const bbox = spatial?.bbox;
-    const zoomForUAT = bbox
-      ? Math.min(13, Math.max(10,
-          Math.floor(8 - Math.log2(Math.max(bbox[2]-bbox[0], bbox[3]-bbox[1]) * 111))))
-      : 11;
+    // Zoom optim per tip UAT — bbox folosit doar pentru centrare
+    // Formula log2 anterioară era greșită (dădea zoom prea mic)
+    const zoomForUAT = this.d?.tip === 'comuna'      ? 13 :
+                       this.d?.tip === 'oras'         ? 12 :
+                       this.d?.tip?.includes('munic') ? 11 :
+                       this.d?.tip === 'C'            ? 10 : 11;
 
     if(spatial) {
       console.log(`[UAT Registry] ${this.d?.name}: centroid=[${cx.toFixed(4)},${cy.toFixed(4)}] verified=${spatial.geo_verified} bbox=${bbox?.map(v=>v.toFixed(3))}`);
@@ -657,11 +657,12 @@ const TCI = {
           <div style="font-size:7px;font-weight:700;color:#D4AF37;letter-spacing:.08em">DATE LIVE</div>
           <div id="tci-kpis"></div>
 
-          <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:6px">
-            <div style="font-size:7px;font-weight:700;color:#D4AF37;letter-spacing:.08em;margin-bottom:5px">COMPARARE UAT</div>
-            <input type="text" id="tci-cmp-inp" placeholder="Caută UAT..." autocomplete="off" oninput="TCI._cmpSearch(this.value)"
-              style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);color:#fff;padding:5px 7px;border-radius:5px;font-size:9.5px;font-family:inherit;box-sizing:border-box">
-            <div id="tci-cmp-res" style="background:rgba(4,10,24,0.97);border:1px solid rgba(255,255,255,0.1);border-radius:5px;max-height:80px;overflow-y:auto;display:none;margin-top:2px"></div>
+          <!-- BENCHMARK — vizibil, deasupra butoanelor -->
+          <div style="border:1px solid rgba(56,189,248,0.25);border-radius:8px;padding:8px;margin-top:6px;background:rgba(14,26,52,0.6)">
+            <div style="font-size:8px;font-weight:700;color:#38bdf8;letter-spacing:.06em;margin-bottom:6px">⚖ COMPARĂ CU ALT UAT</div>
+            <input type="text" id="tci-cmp-inp" placeholder="Tastează oraș, comună..." autocomplete="off" oninput="TCI._cmpSearch(this.value)"
+              style="width:100%;background:rgba(255,255,255,0.09);border:1px solid rgba(56,189,248,0.3);color:#fff;padding:7px 9px;border-radius:6px;font-size:11px;font-family:inherit;box-sizing:border-box">
+            <div id="tci-cmp-res" style="background:rgba(4,10,24,0.97);border:1px solid rgba(255,255,255,0.1);border-radius:5px;max-height:100px;overflow-y:auto;display:none;margin-top:3px"></div>
             <div id="tci-cmp-out" style="margin-top:4px"></div>
           </div>
 
@@ -1161,18 +1162,33 @@ const TCI = {
   _cmpSearch(q) {
     clearTimeout(this._cs);
     this._cs = setTimeout(()=>{
-      const res=(typeof _searchUAT!=='undefined')?_searchUAT(q,6):[];
+      // Asigurăm că comunele sunt în _UAT_DB (injectat de _selSearch)
+      if(!this._extrasInjected && typeof _UAT_DB !== 'undefined') {
+        try { Object.assign(_UAT_DB, this._EXTRA_UATS); this._extrasInjected=true; } catch(e){}
+      }
+      let res = (typeof _searchUAT!=='undefined') ? _searchUAT(q,8) : [];
+      // Fallback direct în comune
+      if(!res.length && q && q.length>=2) {
+        const qN = q.toLowerCase().replace(/[șş]/g,'s').replace(/[țţ]/g,'t').replace(/[ăâ]/g,'a').replace(/î/g,'i');
+        res = Object.entries(this._EXTRA_UATS||{})
+          .filter(([,c])=>{
+            const n=(c.name||'').toLowerCase().replace(/[șş]/g,'s').replace(/[țţ]/g,'t').replace(/[ăâ]/g,'a').replace(/î/g,'i');
+            return n.startsWith(qN)||n.includes(qN);
+          })
+          .map(([k,c])=>({key:k,name:c.name,judet:c.judet,pop2021:c.pop2021}))
+          .slice(0,8);
+      }
       const el=document.getElementById('tci-cmp-res'); if(!el) return;
       if(!res.length){el.style.display='none';return;}
       el.innerHTML=res.map(r=>`
         <div onclick="TCI._cmpSelect('${r.key}','${r.name}')"
-          style="padding:6px 10px;cursor:pointer;font-size:10px;color:rgba(200,215,235,0.9)"
+          style="padding:7px 10px;cursor:pointer;font-size:11px;color:rgba(200,215,235,0.9)"
           onmouseover="this.style.background='rgba(255,255,255,0.06)'"
           onmouseout="this.style.background='none'">
-          <b>${r.name}</b><span style="color:rgba(148,163,184,0.4);font-size:8px"> · ${r.judet} · ${(r.pop2021||0).toLocaleString()}</span>
+          <b>${r.name}</b><span style="color:rgba(148,163,184,0.4);font-size:9px"> · ${r.judet||'—'} · ${(r.pop2021||0).toLocaleString()}</span>
         </div>`).join('');
       el.style.display='block';
-    },250);
+    },200);
   },
 
   _cmpSelect(key, name) {
@@ -2794,6 +2810,11 @@ ROI = (Vsale - Ctotal) / Ctotal   <span class="v">→ ROI ${feas.roi}% (prag 12%
   way["natural"="water"](around:${r},${lat},${lon});
   way["waterway"~"^(river|canal)$"](around:${r},${lat},${lon});
   way["railway"~"^(rail|light_rail)$"](around:${r},${lat},${lon});
+  way["amenity"="university"](around:${r},${lat},${lon});
+  way["amenity"="college"](around:${r},${lat},${lon});
+  way["landuse"="education"](around:${r},${lat},${lon});
+  way["leisure"~"^(park|nature_reserve|stadium)$"](around:${r},${lat},${lon});
+  way["landuse"~"^(military|religious|recreation_ground)$"](around:${r},${lat},${lon});
 );
 out geom qt;`;
       try {
@@ -2809,18 +2830,32 @@ out geom qt;`;
           // ── FIX: apă + pădure cu geometrie completă (nu centroid unic) ──
           // Râul Bistrița are 10km → centroid = 1 punct → buffer insuficient
           // Sample la fiecare ~8 noduri → acoperire completă a cursului
-          const isWater   = t.natural==='water'||t.waterway==='river'||t.waterway==='stream';
-          const isWood    = t.natural==='wood'||t.landuse==='forest';
-          const isCimitir = t.amenity==='grave_yard'||t.landuse==='cemetery';
-          const isRail    = !!(t.railway);
+          const isWater    = t.natural==='water'||t.waterway==='river'||t.waterway==='stream';
+          const isWood     = t.natural==='wood'||t.landuse==='forest';
+          const isCimitir  = t.amenity==='grave_yard'||t.landuse==='cemetery';
+          const isRail     = !!(t.railway);
+          const isUniv     = t.amenity==='university'||t.amenity==='college'||t.landuse==='education';
+          const isParcStad = t.leisure==='park'||t.leisure==='nature_reserve'||t.leisure==='stadium';
+          const isMilRel   = t.landuse==='military'||t.landuse==='religious'||t.landuse==='recreation_ground';
 
-          if(isWater||isWood||isCimitir||isRail) {
+          if(isWater||isWood||isCimitir||isRail||isUniv||isParcStad||isMilRel) {
             const geom = el.geometry || [];
-            const step = isWater ? 5 : isWood ? 8 : 4; // noduri între sample-uri
-            const r_buf = isWater ? 80 : isWood ? 60 : isCimitir ? 65 : 25;
-            const reason = t.name || (isWater?'Apă':isWood?'Pădure':isCimitir?'Cimitir':'Cale ferată');
-            const color  = isWater?'#0ea5e9':isWood?'#15803d':isCimitir?'#6b7280':'#78716c';
-            const type   = isWater?'apa':isWood?'padure':isCimitir?'cimitir':'cf';
+            const step = isWater ? 5 : isWood ? 8 : 4;
+            const r_buf = isWater   ? 80
+                        : isWood    ? 60
+                        : isCimitir ? 65
+                        : isUniv    ? 80   // campus universitar — buffer mare
+                        : isParcStad? 50   // parc/stadion
+                        : isMilRel  ? 60   // militar/religios
+                        :             25;  // cale ferată
+            const reason = t.name || (
+              isWater?'Apă':isWood?'Pădure':isCimitir?'Cimitir':
+              isUniv?'Campus universitar':isParcStad?'Parc/Stadion':
+              isMilRel?'Zonă specială':'Cale ferată');
+            const color = isWater?'#0ea5e9':isWood?'#15803d':isCimitir?'#6b7280':
+                          isUniv?'#7c3aed':isParcStad?'#16a34a':'#78716c';
+            const type  = isWater?'apa':isWood?'padure':isCimitir?'cimitir':
+                          isUniv?'campus':isParcStad?'parc':'cf';
 
             if(geom.length === 0) {
               // Fallback la centroid dacă nu avem geometrie
