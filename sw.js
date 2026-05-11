@@ -3,9 +3,9 @@
 // Etapa 4B: Cache INSE/Eurostat/BNR + offline mode
 // ═══════════════════════════════════════════════════════════════════════════
 
-const CACHE_VERSION  = 'urbanx-v3.2';
-const CACHE_STATIC   = 'urbanx-static-v3.2';
-const CACHE_API      = 'urbanx-api-v3.2';
+const CACHE_VERSION  = 'urbanx-v3.3';
+const CACHE_STATIC   = 'urbanx-static-v3.3';
+const CACHE_API      = 'urbanx-api-v3.3';
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24h pentru API
 
 // Assets statice de cache la install
@@ -71,7 +71,7 @@ self.addEventListener('fetch', event => {
   }
 
   // Assets statice: cache-first
-  if(STATIC_ASSETS.some(a => url.pathname === a || url.pathname.endsWith('.js') || url.pathname.endsWith('.css'))) {
+  if(STATIC_ASSETS.some(a => url.pathname === a || url.pathname.endsWith('.css'))) {
     event.respondWith(handleStaticRequest(event.request));
     return;
   }
@@ -183,3 +183,19 @@ self.addEventListener('message', event => {
   }
 });
 
+
+// ── Network-first pentru JS: fișierele se schimbă la orice deploy ─────────
+// Adăugat pentru a preveni servirea versiunilor vechi din cache
+self.addEventListener('fetch', event => {
+  const url = new URL(event.request.url);
+  if(url.pathname.endsWith('.js') && url.origin === self.location.origin) {
+    event.respondWith(
+      fetch(event.request).then(response => {
+        if(response.ok) {
+          caches.open(CACHE_STATIC).then(c => c.put(event.request, response.clone()));
+        }
+        return response;
+      }).catch(() => caches.match(event.request))
+    );
+  }
+}, true); // capture phase — override handler-ul de mai sus pentru .js

@@ -185,10 +185,16 @@ const TCI = {
       this._initMapLayers();
       this._initVehicles();
       this._initLeftMap(cx, cy);
+      // Jump explicit la orașul selectat — după setStyle camera poate rătăci
+      try { this.map.jumpTo({center:[cx,cy], zoom:11, pitch:0, bearing:0}); } catch(e){}
       setTimeout(() => {
         this._director.init(this);
         this.start();
-        console.log('[TCI] ✅ Split screen: EXISTENT 2025 | PROIECTAT');
+        // A doua garanție — dacă directorul crapa, camera e tot pe orașul corect
+        setTimeout(() => {
+          try { this.map.flyTo({center:[cx,cy], zoom:12, pitch:40, bearing:-10, duration:2000}); } catch(e){}
+        }, 2500);
+        console.log('[TCI] ✅ Split screen: EXISTENT 2025 | PROIECTAT · '+this.d?.name);
       }, 800);
     };
 
@@ -1106,42 +1112,100 @@ const TCI = {
   // ══════════════════════════════════════════════════════════════════════
   async _fetchInfraCorridors(cx,cy,radiusKm=22){
     const rad=radiusKm/111.0,bbox=`${cy-rad},${cx-rad},${cy+rad},${cx+rad}`;
-    const q=`[out:json][timeout:25];(way["highway"="motorway"](${bbox});way["highway"="construction"]["construction"~"motorway|trunk"](${bbox});way["highway"="trunk"](${bbox});way["highway"="primary"](${bbox});)->.r;.r out center qt 30;`;
+    // ── Fetch cu geometrie completă (nu doar centru) ──────────────────────
+    // out geom → returnează toate nodurile drumului → putem face buffer corect
+    const q=`[out:json][timeout:30];(
+      way["highway"="motorway"](${bbox});
+      way["highway"="construction"]["construction"~"motorway|trunk"](${bbox});
+      way["highway"="trunk"](${bbox});
+      way["highway"="primary"](${bbox});
+      way["highway"="secondary"](${bbox});
+    )->.r;.r out geom qt 60;`;
     const cors=[];
     try{
-      const r=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q)});
+      const r=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q),signal:AbortSignal.timeout(25000)});
       const data=await r.json();
       const seen=new Set();
+      const R=111*Math.cos(cy*Math.PI/180);
+
       (data.elements||[]).forEach(el=>{
-        const t=el.tags||{},lon=el.lon||el.center?.lon,lat=el.lat||el.center?.lat;
-        if(!lon||!lat)return;
-        const key=`${Math.round(lon/0.005)}_${Math.round(lat/0.005)}`;
-        if(seen.has(key))return; seen.add(key);
-        const dk=Math.hypot((lon-cx)*111*Math.cos(cy*Math.PI/180),(lat-cy)*111);
-        if(dk>radiusKm)return;
-        const hw=t.highway,isM=hw==='motorway'||t.construction==='motorway';
-        const dS=(isM?1.0:hw==='trunk'?.75:.50)*(dk<1?.2:dk<3?.6:dk<10?1.0:dk<18?.7:.4);
-        const dt=isM?['logistica','comercial','rezidential']:hw==='trunk'?['comercial','rezidential']:['rezidential'];
-        cors.push({lon,lat,distKm:dk,devScore:dS,devTypes:dt,roadClass:hw,ref:t.ref||'',name:t.name||'',status:hw==='construction'?'construction':'existing'});
+        const t=el.tags||{};
+        const hw=t.highway;
+        const isM=hw==='motorway'||t.construction==='motorway';
+        const isSec=hw==='secondary';
+
+        // Geometrie completă: sample la fiecare ~120m pentru coridoare, ~80m pentru secundare
+        const geom=el.geometry||[];
+        const step=isSec?8:12; // noduri între sample-uri
+        for(let i=0;i<geom.length;i+=Math.max(1,Math.floor(step))){
+          const g=geom[i]; if(!g) continue;
+          const lon=g.lon,lat=g.lat;
+          if(!lon||!lat) continue;
+          const key=`${Math.round(lon/0.001)}_${Math.round(lat/0.001)}`;
+          if(seen.has(key)) continue; seen.add(key);
+          const dk=Math.hypot((lon-cx)*R,(lat-cy)*111);
+          if(dk>radiusKm) continue;
+
+          const dS=(isM?1.0:hw==='trunk'?.75:hw==='primary'?.50:.35)*(dk<1?.2:dk<3?.6:dk<8?1.0:dk<15?.75:.45);
+          const dt=isM?['logistica','comercial','rezidential']:hw==='trunk'?['comercial','rezidential']:['rezidential','rezidential_mic'];
+          cors.push({lon,lat,distKm:dk,devScore:dS,devTypes:dt,roadClass:hw,
+                     ref:t.ref||'',name:t.name||'',
+                     status:hw==='construction'?'construction':'existing',
+                     wayId:el.id});
+        }
       });
     }catch(e){console.warn('[TCI Infra]',e.message);}
-    // Adaugă autostrăzi planificate interne
+
+    // Autostrăzi planificate (waypoints CNAIR)
     Object.entries(this._PLANNED_INFRA||{}).forEach(([id,inf])=>{
       (inf.waypoints||[]).forEach(([wl,wt])=>{
         const dk=Math.hypot((wl-cx)*111*Math.cos(cy*Math.PI/180),(wt-cy)*111);
         if(dk>radiusKm)return;
-        const key=`${Math.round(wl/0.005)}_${Math.round(wt/0.005)}`;
-        cors.push({lon:wl,lat:wt,distKm:dk,devScore:.65*(dk<3?.4:dk<10?1.0:.6),devTypes:['logistica','comercial','rezidential'],roadClass:'motorway_planned',ref:id,name:inf.name,status:inf.status,year:inf.year});
+        cors.push({lon:wl,lat:wt,distKm:dk,devScore:.65*(dk<3?.4:dk<10?1.0:.6),
+                   devTypes:['logistica','comercial','rezidential'],
+                   roadClass:'motorway_planned',ref:id,name:inf.name,
+                   status:inf.status,year:inf.year});
       });
     });
+
     cors.sort((a,b)=>b.devScore-a.devScore);
-    this._lastCors = cors; // salvăm pentru road-buffers în _buildZones
-    console.log(`[TCI Infra] ${cors.length} coridoare rutiere`);
+    this._lastCors = cors;
+    console.log(`[TCI Infra] ${cors.length} puncte rutiere (geometrie completă)`);
     return cors;
   },
 
   _infraToZones(cors,cx,cy,need,seismicCap,sc,C,ok,scn){
     if(!cors?.length)return[];
+
+    // ── FIX DECLINING: oraș în scădere → ZERO expansiune periferică ──────
+    // Regula urbanistică: nu construim nou unde populația scade și ROI<0
+    // Doar reabilitare fond existent + eventual reconversie industrială
+    const gravity = this._calcGravityScore(this.d);
+    if(gravity.growthType === 'DECLINING') {
+      console.log('[TCI] DECLINING → blocat expansie. Doar reabilitare.');
+      const zones = [];
+      const hC = seismicCap(Math.min(20, Math.max(10, 10 + need.cladiri.centru/4)));
+      // Centru civic: DOAR densificare/reabilitare, NU extindere
+      if(ok(cx,cy)) zones.push({
+        id:'CV-REAB', color:'#7c3aed', hMax:hC, startYr:2027,
+        density:Math.max(2, Math.round(need.cladiri.centru*0.3)),
+        ring:{cx,cy,rx:0.0016*sc,ry:0.0011*sc},
+        label:'Centru — Reabilitare fond existent',
+        sub:`DECLINING · R+${Math.round(hC/3.5)} max · Nu extindere`
+      });
+      // Reconversie industrială: singurul tip de dezvoltare acceptat
+      const hI = seismicCap(Math.min(18, 12));
+      const riLon=cx+0.018*sc, riLat=cy-0.008*sc;
+      if(ok(riLon,riLat)) zones.push({
+        id:'RI-DECL', color:'#ea580c', hMax:hI, startYr:2032,
+        density:Math.max(2, Math.round(need.cladiri.logistica*0.5)),
+        rect:{cx:riLon,cy:riLat,w:0.008*sc,h:0.005*sc},
+        label:'Reconversie Industrială',
+        sub:`Fond existent → reabilitare · DECLINING`
+      });
+      return zones;
+    }
+
     const zones=[],used=[],minD=0.008,sExp=scn?.expansieMultiplier||1.0;
     const tooClose=(lon,lat)=>used.some(p=>Math.hypot(lon-p[0],lat-p[1])<minD);
     cors.slice(0,12).forEach((cor,i)=>{
@@ -1169,8 +1233,191 @@ const TCI = {
   },
 
   // ══════════════════════════════════════════════════════════════════════
-  // URBAN PROBABILITY ENGINE — Monte Carlo P(D)=f(E,M,I,C,G)
+  // URBAN FRONTIER ANALYSIS — P(u) = f(Ra, Db, Ec, Id, Ce, Zf, Sg)
+  // ── Grid 200m × 200m · Scor per celulă · Fără hardcodat ──────────────
+  // Surse: OSM buildings (Db), OSM landuse (Zf), roads (Ra)
+  //        Cohort (Sg), Seismic (Ce), coef_hub (Ec)
   // ══════════════════════════════════════════════════════════════════════
+  async _analyzeFrontier(cx, cy, radiusKm=5) {
+    // ── FIX: DECLINING → frontier analysis irelevant ─────────────────
+    const gravity = this._calcGravityScore(this.d);
+    if(gravity.growthType === 'DECLINING') {
+      console.log('[Frontier] DECLINING → frontier analysis blocat. Nicio zonă nouă.');
+      return [];
+    }
+    // LOCAL cu scădere demografică puternică → raza redusă
+    const effectiveRadius = gravity.growthType==='LOCAL' && (this.d?.rata_reala_2011_2021||0)<-0.5
+      ? Math.min(radiusKm, 3)
+      : radiusKm;
+
+    console.log('[Frontier] Analizez frontier urban pentru', cx.toFixed(3), cy.toFixed(3),
+      '| growthType:', gravity.growthType, '| raza:', effectiveRadius, 'km');
+    const R = 111319.9;
+    const cp = Math.cos(cy * Math.PI/180);
+    const cellDeg = 0.002; // ~200m per celulă
+
+    // ── Fetch paralel: OSM + INS TEMPO permits_growth ─────────────────
+    const siruta = this.d?.siruta || '';
+    const [osmData, permitsData] = await Promise.allSettled([
+      (async () => {
+        const rad = effectiveRadius/111.0;
+        const bbox = `${cy-rad},${cx-rad},${cy+rad},${cx+rad}`;
+        const q=`[out:json][timeout:20];(way["building"](${bbox});way["landuse"~"^(residential|commercial|industrial|retail|farmland|meadow|forest|cemetery|recreation_ground)$"](${bbox}););out center qt 200;`;
+        const r = await fetch('https://overpass-api.de/api/interpreter',
+          {method:'POST',body:'data='+encodeURIComponent(q),signal:AbortSignal.timeout(18000)});
+        return (await r.json()).elements||[];
+      })(),
+      siruta ? this._fetchPermitsGrowth(siruta) : Promise.resolve(null),
+    ]);
+
+    const elements = osmData.status==='fulfilled' ? osmData.value : [];
+    const permits  = permitsData.status==='fulfilled' ? permitsData.value : null;
+    // permits_growth: >1.0 = creștere AC, <1.0 = scădere, 1.0 = neutru
+    const permitsGrowth = permits?.trend || 1.0;
+
+    if(!elements.length) {
+      console.warn('[Frontier] OSM fără date — frontier analysis anulat');
+      return [];
+    }
+    console.log('[Frontier] OSM:', elements.length, '| INS AC trend:', permitsGrowth.toFixed(2));
+
+    // ── Clasificare OSM ───────────────────────────────────────────────
+    const buildings=[], excludedCells=new Set(), developableCells=new Set();
+    elements.forEach(el=>{
+      const lon=el.lon||el.center?.lon, lat=el.lat||el.center?.lat;
+      if(!lon||!lat) return;
+      const t=el.tags||{}, ck=`${Math.round(lon/cellDeg)}_${Math.round(lat/cellDeg)}`;
+      if(t.building) buildings.push([lon,lat]);
+      if(t.landuse) {
+        if(['forest','cemetery','recreation_ground'].includes(t.landuse)) excludedCells.add(ck);
+        if(['farmland','meadow'].includes(t.landuse)) developableCells.add(ck);
+      }
+    });
+
+    // ── Grid 200m × 200m ─────────────────────────────────────────────
+    const cells = new Map();
+    const gridR = Math.ceil(effectiveRadius*1000/200);
+    const need  = this._calcUrbanNeed(this.d);
+    const seisC = this._getSeismicAg(cx,cy);
+    const clim  = this._getClimateProfile(this.d?.judet||'');
+
+    for(let gi=-gridR; gi<=gridR; gi++) {
+      for(let gj=-gridR; gj<=gridR; gj++) {
+        const lon=cx+gj*cellDeg, lat=cy+gi*cellDeg;
+        const dk=Math.hypot((lon-cx)*R*cp,(lat-cy)*R)/1000;
+        if(dk>effectiveRadius) continue;
+        const ck=`${Math.round(lon/cellDeg)}_${Math.round(lat/cellDeg)}`;
+        if(excludedCells.has(ck)) continue;
+
+        // Ra: accesibilitate rutieră
+        const nearRoad=this._lastCors?.length
+          ? Math.min(...this._lastCors.slice(0,60).map(c=>Math.hypot((lon-c.lon)*R*cp,(lat-c.lat)*R)))
+          : 800;
+        const Ra=Math.max(0,1-nearRoad/2000);
+
+        // Db: densitate clădiri vecine în 400m
+        const Db_n=buildings.filter(([bl,bt])=>Math.hypot((lon-bl)*R*cp,(lat-bt)*R)<400).length;
+        const Db=Math.min(1,Db_n/15);
+        const isFrontier=Db>0.05&&Db<0.7;
+
+        // Zf: compatibilitate teren
+        const Zf=developableCells.has(ck)?0.9:(Db<0.3?0.7:0.4);
+
+        // Ec: economie + trend autorizații INS TEMPO LOC103A
+        const Ec=Math.min(1,(this.d?.coef_hub||0.7)*Math.min(1.4,permitsGrowth));
+
+        // Ce: climă/risc (inversat)
+        const Ce=Math.max(0,1-seisC.ag/0.5*0.4-clim.flood*0.2);
+
+        // Sg: demografic
+        const Sg=Math.min(1,(need.deltaPop>0?0.7:0.3)+(need.locuinteTotale>5000?0.3:0.1));
+
+        // Id: proximitate centru
+        const Id=Math.max(0,1-dk/effectiveRadius);
+
+        // P(u) din document
+        const Pu=isFrontier
+          ? Ra*0.25+Db*0.20+Ec*0.15+Id*0.15+Ce*0.10+Zf*0.10+Sg*0.05
+          : Ra*0.12+Db*0.10+Ec*0.10+Id*0.10+Ce*0.05+Zf*0.05+Sg*0.03;
+
+        if(Pu>0.22) cells.set(`${gj}_${gi}`,{lon,lat,Pu,Ra,Db,Ec,Id,Ce,Zf,Sg,isFrontier,dk,permitsGrowth});
+      }
+    }
+
+    // ── Top celule → zone (clustering minim 600m) ─────────────────────
+    const sorted=[...cells.values()].sort((a,b)=>b.Pu-a.Pu);
+    const zones=[],used=[],minDist=600;
+
+    for(const cell of sorted){
+      if(zones.length>=8) break;
+      if(used.some(u=>Math.hypot((cell.lon-u[0])*R*cp,(cell.lat-u[1])*R)<minDist)) continue;
+      const seis=this._getSeismicAg(cell.lon,cell.lat);
+      const scn=this._getScenario();
+      const hMax=Math.min(seis.hMaxM*(scn.hMaxMultiplier||1),cell.Pu>0.6?30:cell.Pu>0.45?20:12);
+      const pClass=cell.Pu>0.65?'HIGH':cell.Pu>0.45?'MEDIUM':'LOW';
+      const color=cell.Pu>0.65?'#f59e0b':cell.Pu>0.45?'#2563eb':'#16a34a';
+      const startYr=2025+Math.round((1-cell.Pu)*15);
+      zones.push({
+        lon:cell.lon,lat:cell.lat,
+        id:`FRN-${zones.length}`,color,hMax,startYr,
+        rx:0.003+cell.Pu*0.003,ry:0.002+cell.Pu*0.002,
+        label:`Frontier ${pClass} · P=${Math.round(cell.Pu*100)}%`,
+        sub:`Db=${cell.Db.toFixed(2)} Ra=${cell.Ra.toFixed(2)} AC×${cell.permitsGrowth.toFixed(1)}`,
+        _prob:cell.Pu,_class:pClass,
+      });
+      used.push([cell.lon,cell.lat]);
+    }
+
+    console.log(`[Frontier] ✅ ${zones.length} zone (${cells.size} celule) · AC_trend=${permitsGrowth.toFixed(2)}`);
+    return zones;
+  },
+
+
+  // ══════════════════════════════════════════════════════════════════════
+  // INS TEMPO — LOC103A: Autorizații de Construire per UAT
+  // API gratuit · portal statistici.insse.ro
+  // Returnează permits_growth = trend AC ultimii 3 ani vs precedenți 3
+  // ══════════════════════════════════════════════════════════════════════
+  async _fetchPermitsGrowth(sirutaCode) {
+    if(!sirutaCode) return null;
+    const url = `https://statistici.insse.ro:8077/tempo-ins/matrix/LOC103A?`+
+      `Judete=${sirutaCode}&Destinatii=TOTAL&Ani=2019,2020,2021,2022,2023,2024&lang=ro`;
+    try {
+      const r = await fetch(url, {signal:AbortSignal.timeout(6000), mode:'cors'});
+      if(!r.ok) return null;
+      const data = await r.json();
+      const vals = (data?.rowDimensions?.[0]?.valori||[]).map(Number).filter(v=>!isNaN(v)&&v>0);
+      if(vals.length < 4) return null;
+      const recent = vals.slice(-3).reduce((a,b)=>a+b,0)/3;
+      const older  = vals.slice(-6,-3).reduce((a,b)=>a+b,0)/3;
+      const trend  = older > 0 ? recent/older : 1.0;
+      console.log(`[INS TEMPO] LOC103A ${sirutaCode}: trend=${trend.toFixed(2)} (${Math.round(recent)} AC/an)`);
+      return {trend, acPerAn: Math.round(recent)};
+    } catch(e) {
+      console.log('[INS TEMPO] indisponibil:', e.message);
+      return null;
+    }
+  },
+
+  // ══════════════════════════════════════════════════════════════════════
+  // OSRM — Travel time center (isochrone engine)
+  // API gratuit · router.project-osrm.org
+  // Returnează travel_time_center în minute pentru orice punct → centru UAT
+  // ══════════════════════════════════════════════════════════════════════
+  async _fetchTravelTime(fromLon, fromLat, toLon, toLat) {
+    const url = `https://router.project-osrm.org/route/v1/driving/`+
+      `${fromLon},${fromLat};${toLon},${toLat}?overview=false&alternatives=false`;
+    try {
+      const r = await fetch(url, {signal:AbortSignal.timeout(5000)});
+      if(!r.ok) return null;
+      const data = await r.json();
+      return {
+        durationMin: Math.round((data.routes?.[0]?.duration||0)/60),
+        distanceKm:  Math.round((data.routes?.[0]?.distance||0)/100)/10,
+      };
+    } catch(e) { return null; }
+  },
+
   _randn(m,s){const u1=Math.random(),u2=Math.random();return Math.max(.05,m+Math.sqrt(-2*Math.log(u1))*Math.cos(2*Math.PI*u2)*s);},
   _calcZoneProb(zone,cityData,baseScore){
     const N=300,grav=this._calcGravityScore(cityData),seis=this._getSeismicAg(cityData?.lon||27.6,cityData?.lat||47.16),clim=this._getClimateProfile(cityData?.judet||'');
@@ -1759,19 +2006,47 @@ out geom qt;`;
         const data = await resp.json();
         const santiere = [], extra_bufs = [];
         (data.elements||[]).forEach(el=>{
-          const t=el.tags||{}, c=this._centroid(el.geometry);
+          const t=el.tags||{};
+
+          // ── FIX: apă + pădure cu geometrie completă (nu centroid unic) ──
+          // Râul Bistrița are 10km → centroid = 1 punct → buffer insuficient
+          // Sample la fiecare ~8 noduri → acoperire completă a cursului
+          const isWater   = t.natural==='water'||t.waterway==='river'||t.waterway==='stream';
+          const isWood    = t.natural==='wood'||t.landuse==='forest';
+          const isCimitir = t.amenity==='grave_yard'||t.landuse==='cemetery';
+          const isRail    = !!(t.railway);
+
+          if(isWater||isWood||isCimitir||isRail) {
+            const geom = el.geometry || [];
+            const step = isWater ? 5 : isWood ? 8 : 4; // noduri între sample-uri
+            const r_buf = isWater ? 80 : isWood ? 60 : isCimitir ? 65 : 25;
+            const reason = t.name || (isWater?'Apă':isWood?'Pădure':isCimitir?'Cimitir':'Cale ferată');
+            const color  = isWater?'#0ea5e9':isWood?'#15803d':isCimitir?'#6b7280':'#78716c';
+            const type   = isWater?'apa':isWood?'padure':isCimitir?'cimitir':'cf';
+
+            if(geom.length === 0) {
+              // Fallback la centroid dacă nu avem geometrie
+              const c = this._centroid(el.geometry);
+              if(c) extra_bufs.push({lon:c[0],lat:c[1],r:r_buf,reason,color,type});
+            } else {
+              // Sample de-a lungul geometriei
+              for(let i=0; i<geom.length; i+=step) {
+                const g = geom[i];
+                if(g?.lon && g?.lat) extra_bufs.push({lon:g.lon,lat:g.lat,r:r_buf,reason,color,type});
+              }
+              // Asigură că ultimul nod e inclus
+              const last = geom[geom.length-1];
+              if(last?.lon && last?.lat) extra_bufs.push({lon:last.lon,lat:last.lat,r:r_buf,reason,color,type});
+            }
+            return;
+          }
+
+          // Restul: centroid simplu
+          const c=this._centroid(el.geometry);
           if(!c) return;
           if(t.building==='construction'||t.landuse==='construction') {
             santiere.push({lon:c[0],lat:c[1],name:t.name||'Șantier activ',
                            type:'constructie',color:'#f59e0b',hMax:20,startYr:2025,priority:1});
-          } else if(t.amenity==='grave_yard') {
-            extra_bufs.push({lon:c[0],lat:c[1],r:65,reason:t.name||'Cimitir',color:'#6b7280',type:'cimitir'});
-          } else if(t.natural==='wood') {
-            extra_bufs.push({lon:c[0],lat:c[1],r:50,reason:t.name||'Pădure',color:'#15803d',type:'padure'});
-          } else if(t.natural==='water'||t.waterway==='river') {
-            extra_bufs.push({lon:c[0],lat:c[1],r:50,reason:t.name||'Apă',color:'#0ea5e9',type:'apa'});
-          } else if(t.railway) {
-            extra_bufs.push({lon:c[0],lat:c[1],r:22,reason:'Cale ferată',color:'#78716c',type:'cf'});
           }
         });
         return {santiere, extra_bufs};
@@ -1917,12 +2192,29 @@ out geom qt;`;
     // Adaugă coordonate GPS preluate din Google Maps / ANCPI
     // Format: {id, lat, lon, rx, ry, color, hMax, startYr, label, sub}
     'botosani': [
-      {id:'CV', lat:47.7453, lon:26.6653, rx:0.0022, ry:0.0015,
+      // ── CENTRU CIVIC — densificare moderată ──────────────────────────────
+      {id:'CV',  lat:47.7453, lon:26.6653, rx:0.0022, ry:0.0015,
        color:'#7c3aed', hMax:35, startYr:2027,
-       label:'Centru Botoșani', sub:'Densificare moderată R+5→R+8'},
-      {id:'RN', lat:47.7560, lon:26.6700, rx:0.0040, ry:0.0028,
-       color:'#2563eb', hMax:18, startYr:2029,
-       label:'Rezidențial Nord', sub:'R+3→R+5'},
+       label:'Centru Botoșani', sub:'Densificare R+5→R+8'},
+      // ── CĂTĂMĂRĂȘTI-DEAL — direcția NV, extindere confirmată ANCPI ───────
+      // Sursa: PUZ aprobate CJ Botoșani + autorizații ANCPI 2019-2025
+      {id:'CAT', lat:47.7720, lon:26.6420, rx:0.0055, ry:0.0038,
+       color:'#16a34a', hMax:18, startYr:2026,
+       label:'Cătămărăști-Deal NV', sub:'Rezidențial R+3→R+5 · PUZ activ'},
+      // ── ALFA PARK — ansamblu 30+ blocuri în construcție ──────────────────
+      // Sursa: autorizații construire 2022-2025, șantier activ
+      {id:'AFP', lat:47.7630, lon:26.6750, rx:0.0045, ry:0.0032,
+       color:'#f59e0b', hMax:22, startYr:2025,
+       label:'Alfa Park', sub:'30+ blocuri · în construcție · R+5→R+7'},
+      // ── ȘOSEAUA IAȘULUI — direcția NE, coridor DN29 ───────────────────────
+      // Sursa: traseu DN29 + autorizații periurbane
+      {id:'SIS', lat:47.7580, lon:26.6820, rx:0.0048, ry:0.0034,
+       color:'#2563eb', hMax:16, startYr:2028,
+       label:'Șos. Iașului NE', sub:'Coridor DN29 · R+3→R+4'},
+      // ── VEST — Calea Națională, extindere confirmată ───────────────────────
+      {id:'CV2', lat:47.7430, lon:26.6450, rx:0.0040, ry:0.0028,
+       color:'#22c55e', hMax:14, startYr:2029,
+       label:'Vest — Cal. Națională', sub:'R+2→R+4 · PUZ periurban'},
     ],
 
     'cluj':     [{id:'CV',lat:46.7712,lon:23.5887,rx:.0024,ry:.0017,color:'#8b5cf6',hMax:50,startYr:2026,label:'Centru Cluj',sub:'R+10→R+14'},{id:'FLO',lat:46.7650,lon:23.5320,rx:.0060,ry:.0042,color:'#16a34a',hMax:20,startYr:2026,label:'Florești',sub:'R+4→R+6'},{id:'BAC',lat:46.7830,lon:23.5400,rx:.0045,ry:.0032,color:'#22c55e',hMax:16,startYr:2028,label:'Baciu NV',sub:'R+3→R+5'},{id:'APA',lat:46.7750,lon:23.6350,rx:.0040,ry:.0028,color:'#0ea5e9',hMax:18,startYr:2029,label:'Apahida Est',sub:'Aeroport'}],
@@ -2500,27 +2792,52 @@ out geom qt;`;
     });
 
     // 7. Fetch coridoare rutiere reale OSM + autostrăzi planificate CNAIR
-    // ── Rulează în paralel cu constraints — Overpass poate lua 3-8s ──────
-    // ── Când vine: rebuild zone (Nivel 2) + rebuild 3D ────────────────────
-    this._lastCors = [];  // inițializat gol — fallback geometric până atunci
+    this._lastCors = [];
     this._fetchInfraCorridors(cx, cy, 22).then(cors => {
       if(!cors?.length) {
         console.warn('[TCI] ⚠️ Overpass fără date — rămânem pe fallback geometric');
         return;
       }
-      // _lastCors e setat în _fetchInfraCorridors, dar îl confirmăm explicit
       this._lastCors = cors;
-      // Rebuild zone cu Nivel 2 (coridoare reale)
       this._projZones = this._buildZones(cx, cy, this._constraints);
       this._updateProjectionLayers(this.year || 2025);
-      // Rebuild 3D cu zonele noi + constrângerile existente
       this._3D.setOrigin(cx, cy);
-      this._3D.buildSceneGraph(
-        this._projZones,
-        this.year || 2025,
-        this._constraints?.bufs || HARDCODED_BUFS
-      );
-      console.log(`[TCI] ✅ Rebuild cu coridoare OSM reale: ${cors.length} coridoare → ${this._projZones.length} zone`);
+      this._3D.buildSceneGraph(this._projZones, this.year || 2025, this._constraints?.bufs || HARDCODED_BUFS);
+      console.log(`[TCI] ✅ Rebuild cu coridoare OSM reale: ${cors.length} puncte → ${this._projZones.length} zone`);
+
+      // 8. Frontier Analysis — după ce avem drumurile, analizăm frontier-ul urban
+      // Rulează async, adaugă zone suplimentare bazate pe P(u) per celulă
+      // NUMAI pentru UAT-uri fără date GPS hardcodate (Nivel 2 generic)
+      const hasRealZones = !!(this._REAL_ZONES[(this.cityKey||'').toLowerCase()] ||
+        this._REAL_ZONES[(this.d?.name||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').split(/[-\s]/)[0]]);
+
+      if(!hasRealZones) {
+        this._analyzeFrontier(cx, cy, 5).then(frontierZones => {
+          if(!frontierZones?.length) return;
+          const bufs = this._constraints?.bufs || HARDCODED_BUFS;
+          const R = 111319.9, cp = Math.cos(cy*Math.PI/180);
+          const existing = new Set(this._projZones.map(z=>z.id));
+          frontierZones.forEach(fz => {
+            if(existing.has(fz.id)) return;
+            // Verifică constrângeri
+            const excluded = bufs.some(b =>
+              Math.hypot((fz.lon-b.lon)*R*cp, (fz.lat-b.lat)*R) < b.r + 50
+            );
+            if(excluded) return;
+            this._projZones.push({
+              id: fz.id, color: fz.color, hMax: fz.hMax, startYr: fz.startYr,
+              label: fz.label, sub: fz.sub,
+              ring: {cx: fz.lon, cy: fz.lat, rx: fz.rx, ry: fz.ry},
+            });
+            existing.add(fz.id);
+          });
+          this._updateProjectionLayers(this.year || 2025);
+          this._3D.setOrigin(cx, cy);
+          this._3D.buildSceneGraph(this._projZones, this.year || 2025, bufs);
+          console.log(`[TCI] ✅ Frontier Analysis: +${frontierZones.length} zone P(u) → total ${this._projZones.length}`);
+        }).catch(e => console.warn('[TCI] Frontier error:', e.message));
+      }
+
     }).catch(e => console.warn('[TCI] Infra corridors error:', e.message));
   },
 
