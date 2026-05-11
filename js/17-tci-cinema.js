@@ -754,7 +754,28 @@ const TCI = {
       {l:'Scenariu',              v: scn.label+' ×'+scn.rateMultiplier, c:'#94a3b8'},
     ];
 
-    el.innerHTML = rows.map(r=>`
+    // ── Lifecycle Score L + Development Pressure (extra KPIs) ────────────
+    const lifecycle = grav.lifecycle || this._calcLifecycleScore(city);
+    const L = lifecycle.score ?? 0;
+    const Lcolor = L > 0.3 ? '#22c55e' : L > -0.2 ? '#f59e0b' : '#f87171';
+    const Llabel = L > 0.45 ? 'GROWING' : L > 0.10 ? 'STABLE' : L > -0.30 ? 'STABLE' : L > -0.55 ? 'DECLINING' : 'SHRINKING';
+
+    // Development Pressure: Dp = f(Hd, Ig, Ca)
+    // Hd = cerere locuințe (locuinteTotale/pop), Ig = lifecycle.Eg, Ca = coef_hub
+    const Hd = Math.min(1, need.locuinteTotale / Math.max(1, city.pop2021) * 10);
+    const Ig = Math.max(0, (lifecycle.Eg + 1) / 2);
+    const Ca = Math.min(1, (city.coef_hub || 0.7));
+    const Dp = Math.round((Hd*0.40 + Ig*0.35 + Ca*0.25) * 100);
+    const Dpcolor = Dp > 60 ? '#f59e0b' : Dp > 35 ? '#60a5fa' : '#94a3b8';
+
+    const extraRows = [
+      {l:'Lifecycle Score L',    v:`${L>=0?'+':''}${L.toFixed(2)} ${Llabel}`,  c:Lcolor},
+      {l:'Dev. Pressure Dp',     v:`${Dp}/100`,                                  c:Dpcolor,
+       t:`Hd=${Hd.toFixed(2)}·Ig=${Ig.toFixed(2)}·Ca=${Ca.toFixed(2)} · Dp=f(Hd,Ig,Ca)`},
+    ];
+    const allRows = [...rows, ...extraRows];
+
+    el.innerHTML = allRows.map(r=>`
       <div style="display:flex;justify-content:space-between;align-items:baseline;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04)"
         ${r.t?`title="${r.t}"`:''}
       >
@@ -1038,15 +1059,26 @@ const TCI = {
     const L = Pg*0.35 + Eg*0.25 + Mn*0.25 + Ac*0.15;
     const score = Math.max(-1, Math.min(1, L));
 
-    // Clasificare pentru compatibilitate cu codul existent
-    const lifecycleType =
-      score >  0.45 ? 'GROWING'    :
-      score >  0.10 ? 'STABLE'     :
-      score > -0.30 ? 'STABLE'     :  // LOCAL stabil = nu declining
-      score > -0.55 ? 'DECLINING'  :
-                      'SHRINKING';
+    // ── Inertia urbană — L(t+1) = 0.7×L(t) + 0.3×L_nou ─────────────────
+    // Documentul audit final: "Orașele nu se schimbă instant."
+    // Prev L stocat în cityData._lifecyclePrev (actualizat la fiecare calcul)
+    const rawScore = score;
+    const prevL = cityData._lifecyclePrev ?? score; // prima rulare = fără inertie
+    const inertiaScore = 0.7 * prevL + 0.3 * rawScore;
+    // Stocăm pentru ciclul următor (modificare directă pe obiect — intenționat)
+    if(cityData) cityData._lifecyclePrev = inertiaScore;
 
-    return { score, lifecycleType, Pg, Eg, Mn, Ac };
+    const finalScore = Math.max(-1, Math.min(1, inertiaScore));
+
+    // Clasificare
+    const lifecycleType =
+      finalScore >  0.45 ? 'GROWING'   :
+      finalScore >  0.10 ? 'STABLE'    :
+      finalScore > -0.30 ? 'STABLE'    :
+      finalScore > -0.55 ? 'DECLINING' :
+                           'SHRINKING';
+
+    return { score: finalScore, rawScore, lifecycleType, Pg, Eg, Mn, Ac, inertia: prevL };
   },
 
   _calcGravityScore(cityData){
