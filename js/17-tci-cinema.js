@@ -799,12 +799,18 @@ const TCI = {
   // ══════════════════════════════════════════════════════════════════════
   _calcGravityScore(cityData){
     const pop=(cityData?.pop2021||100000),rate=(cityData?.rata_reala_2011_2021||0)/100;
-    const univ=(cityData?.universitati||0),judet=cityData?.judet||'';
+    // universitati din DB sau hardcodat pentru orașele cunoscute
+    const UNIV_CITIES={'IS':5,'CJ':4,'TM':4,'B':10,'BV':2,'SB':2,'CS':2,'BC':1,'SV':1,'GL':1,'CT':2,'MS':2,'HR':1,'NT':1};
+    const univ=(cityData?.universitati||UNIV_CITIES[cityData?.judet||'']||0),judet=cityData?.judet||'';
     const eP=Math.min(1,pop/400000),eC=Math.max(0,Math.min(1,(rate+0.02)/0.04));
     const eE=Math.min(1,univ/3),eK=['IS','CJ','TM','B','CT','BV'].includes(judet)?0.8:0.4;
     const eI=rate>0?0.7:rate>-0.01?0.4:0.2;
     const score=eP*.30+eC*.25+eE*.20+eK*.15+eI*.10;
-    const growthType=score>0.65?'METROPOLITAN':score>0.45?'REGIONAL':score>0.30?'LOCAL':'DECLINING';
+    // Praguri ajustate — România are puține orașe >300k
+    // Iași/Cluj/TM/B = METROPOLITAN chiar și cu score mediu
+    const isLargeCity = pop > 250000;
+    const growthType = (score>0.55||isLargeCity&&score>0.45)?'METROPOLITAN'
+                     : score>0.35?'REGIONAL':score>0.22?'LOCAL':'DECLINING';
     return{gravityScore:score,growthType,ePopulatie:eP,eCrestere:eC,eEducatie:eE,eConectivit:eK};
   },
 
@@ -1010,7 +1016,7 @@ const TCI = {
   // GENERATOR RAPORT PDF
   // ══════════════════════════════════════════════════════════════════════
   _generateReport(){
-    const d=this.cityData||{},scn=this._getScenario(),need=this._calcUrbanNeed(d);
+    const d=this.d||{},scn=this._getScenario(),need=this._calcUrbanNeed(d);
     const grav=this._calcGravityScore(d),seis=this._getSeismicAg(d.lon||27.6,d.lat||47.16);
     const clim=this._getClimateProfile(d.judet||''),zones=this._projZones||[];
     const upeRes=this._runUPE(d,zones),feas=this._calcFeasibility({},d,seis.ag);
@@ -1084,7 +1090,7 @@ td{padding:7px 10px;border-bottom:1px solid #f1f5f9}tr:nth-child(even) td{backgr
 <div class="formula"><span class="c">Cohort Survival (INS/Eurostat):</span>
 Px+5,t+5 = Px,t × Sx + Mx,t
   <span class="c">Sx = rata supraviețuire INS 2021 per cohortă și sex</span>
-  <span class="c">Mx,t = flux migrație per cohortă × ponderi vârstă × bonus universitar ×${(cityData?.universitati||0)>0?'1.3':'1.0'}</span>
+  <span class="c">Mx,t = flux migrație per cohortă × ponderi vârstă × bonus universitar ×${(d?.universitati||0)>0?'1.3':'1.0'}</span>
   <span class="v">→ ${(d.pop2021||0).toLocaleString('ro-RO')} → ${pop55} | rată INS: ${(d.rata_reala_2011_2021||0).toFixed(2)}%/an × scenariu ×${scn.rateMultiplier}</span>
 
 <span class="c">Household Formation Engine:</span>
@@ -1144,8 +1150,8 @@ ROI = (Vsale - Ctotal) / Ctotal   <span class="v">→ ROI ${feas.roi}% (prag 12%
     // Genereaza zonele de proiecție statistic — cercuri concentrice
   // + coridoare de mobilitate + zone de reconversie industrială
   _generateStatisticalProjection(cx, cy) {
-    const pop  = this.cityData?.pop2021 || 100000;
-    const rate = Math.abs(this.cityData?.rata_reala_2011_2021 || 0) / 100;
+    const pop  = this.d?.pop2021 || 100000;
+    const rate = Math.abs(this.d?.rata_reala_2011_2021 || 0) / 100;
     const sc   = Math.pow(pop / 360000, 0.35); // Iași=1.0, oraș mic=0.45
 
     // Scalăm razele în funcție de mărimea orașului
@@ -1765,8 +1771,8 @@ out geom qt;`;
     }
 
     // ── GENERATOR STATISTIC — Cohort+Gravity+Seismic+Scenariu ──────────
-    const need    = this._calcUrbanNeed(this.cityData);
-    const gravity = this._calcGravityScore(this.cityData);
+    const need    = this._calcUrbanNeed(this.d);
+    const gravity = this._calcGravityScore(this.d);
     const seismic = this._getSeismicAg(cx, cy);
     const scn     = this._getScenario?.() || {hMaxMultiplier:1.0,expansieMultiplier:1.0};
     const sc      = need.scale;
@@ -1944,14 +1950,25 @@ out geom qt;`;
         const density = Math.max(6, Math.min(18, Math.round(z.hMax / 3)));
         const bbox = this._bboxCoords(coords);
 
+        // Obținem bufferele de constrângeri pentru filtrare poziții
+        const _bufs = window.TCI?._constraints?.bufs || [];
+        const _R = 111319.9;
+        const _cp = Math.cos((coords[0]?.[1]||47) * Math.PI/180);
+        const _okPos = (lo, la) => {
+          // Nu construim pe drumuri, cimitire, monumente, ape
+          for(const b of _bufs) {
+            if(Math.hypot((lo-b.lon)*_R*_cp,(la-b.lat)*_R) < b.r) return false;
+          }
+          return true;
+        };
         for(let i = 0; i < density; i++) {
           let lon, lat, tries = 0;
           do {
             lon = bbox.minX + Math.random() * (bbox.maxX - bbox.minX);
             lat = bbox.minY + Math.random() * (bbox.maxY - bbox.minY);
             tries++;
-          } while(!this._pip([lon,lat], coords) && tries < 30);
-          if(tries >= 30) continue;
+          } while((!this._pip([lon,lat], coords) || !_okPos(lon,lat)) && tries < 40);
+          if(tries >= 40) continue;
 
           const seed = Math.abs(Math.sin(i * 127.1 + lon * 311.7));
           this._entities.push({
@@ -2244,11 +2261,11 @@ out geom qt;`;
       this._tci=tci;
       try {
         this._scenes=this._build();
-        console.log('[Director] ✅ '+this._scenes.length+' scene încărcate pentru '+T.cityData?.name);
+        console.log('[Director] ✅ '+this._scenes.length+' scene încărcate pentru '+T.d?.name);
       } catch(e) {
         console.error('[Director] Eroare build scenes:',e.message);
         // Fallback minim — 2 scene garantate
-        const d=T.cityData||{}, cx=d.lon||27.601, cy=d.lat||47.158;
+        const d=T.d||{}, cx=d.lon||27.601, cy=d.lat||47.158;
         this._scenes=[
           {id:'fb1',dur:60000,light:'dusk',
            cam:{center:[cx,cy],zoom:4.5,pitch:0,bearing:0,duration:3500},
@@ -2268,7 +2285,7 @@ out geom qt;`;
 
     _build() {
       const T=this._tci;
-      const d=T.cityData||{};
+      const d=T.d||{};
       const cx=d.lon||27.601, cy=d.lat||47.158;
       const name=d.name||'UAT';
       const pop=(d.pop2021||100000).toLocaleString();
@@ -2473,7 +2490,7 @@ out geom qt;`;
       const ease=(t)=>t<0.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
       const is3D=['s4','s5','s6','s7','s8','s9','s10','s11','s12'].includes(sc.id);
       if(is3D && (T.map?.getZoom?.()||4)<13.5){
-        try{const cx=T.cityData?.lon||27.601,cy=T.cityData?.lat||47.158;
+        try{const cx=T.d?.lon||27.601,cy=T.d?.lat||47.158;
           T.map.jumpTo({center:[cx,cy],zoom:13.5,pitch:40,bearing:0});}catch(e){}
       }
       try{T.map.flyTo({...sc.cam,essential:true,easing:ease});T.bearing=sc.cam.bearing||0;}catch(e){}
@@ -2834,7 +2851,7 @@ out geom qt;`;
     this.scenario=s;
     this._updateKPIs();
     // Rebuild zones cu noul scenariu
-    const cx=this.cityData?.lon||27.601, cy=this.cityData?.lat||47.158;
+    const cx=this.d?.lon||27.601, cy=this.d?.lat||47.158;
     this._projZones=this._buildZones(cx,cy,this._constraints||{bufs:[]});
     this._updateProjectionLayers(this.year||2025);
     // Rebuild 3D cu animație resetată
@@ -2856,7 +2873,7 @@ out geom qt;`;
       if(!cv) return;
       const a=document.createElement('a');
       a.href=cv.toDataURL('image/png');
-      a.download=`UrbanX-${this.cityData?.name||'UAT'}-${this.year}.png`;
+      a.download=`UrbanX-${this.d?.name||'UAT'}-${this.year}.png`;
       a.click();
     } catch(e){ console.warn('Snapshot:',e); }
   },
@@ -2869,7 +2886,7 @@ out geom qt;`;
     if(!box){ box=document.createElement('div'); box.id='tci-share-box';
       box.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:3100;background:rgba(4,10,24,0.97);border:1px solid rgba(212,175,55,0.5);border-radius:10px;padding:14px 20px;min-width:360px;font-family:"Space Grotesk",sans-serif;pointer-events:all';
       document.body.appendChild(box); }
-    box.innerHTML=`<div style="font-size:8px;color:#D4AF37;margin-bottom:6px">🔗 SHARE URL — ${this.cityData?.name||''} ${this.year}</div>
+    box.innerHTML=`<div style="font-size:8px;color:#D4AF37;margin-bottom:6px">🔗 SHARE URL — ${this.d?.name||''} ${this.year}</div>
       <div style="display:flex;gap:6px"><input readonly value="${url}" onclick="this.select()" style="flex:1;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);color:#fff;padding:7px 9px;border-radius:6px;font-size:9px;font-family:monospace">
       <button onclick="navigator.clipboard.writeText('${url}').then(()=>{this.textContent='✓ Copiat!';setTimeout(()=>this.textContent='📋 Copiază',2000)})" style="padding:7px 12px;border-radius:6px;background:rgba(212,175,55,0.15);border:1px solid rgba(212,175,55,0.4);color:#D4AF37;font-size:10px;cursor:pointer;font-family:inherit">📋 Copiază</button></div>
       <button onclick="this.parentElement.remove()" style="position:absolute;top:8px;right:8px;background:none;border:none;color:rgba(148,163,184,0.5);font-size:12px;cursor:pointer">✕</button>`;
@@ -2892,7 +2909,7 @@ out geom qt;`;
         const blob=new Blob(this._recChunks,{type:'video/webm'});
         const a=document.createElement('a');
         a.href=URL.createObjectURL(blob);
-        a.download=`UrbanX-${this.cityData?.name||'UAT'}-${this.year}.webm`;
+        a.download=`UrbanX-${this.d?.name||'UAT'}-${this.year}.webm`;
         a.click();
       };
       this._rec.stop(); this._recActive=false;
