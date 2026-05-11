@@ -444,7 +444,7 @@ const TCI = {
                        this.d?.tip === 'C'            ? 10 : 11;
 
     if(spatial) {
-      console.log(`[UAT Registry] ${this.d?.name}: centroid=[${cx.toFixed(4)},${cy.toFixed(4)}] verified=${spatial.geo_verified} bbox=${bbox?.map(v=>v.toFixed(3))}`);
+      console.log(`[UAT Registry] ${this.d?.name}: centroid=[${cx.toFixed(4)},${cy.toFixed(4)}] verified=${spatial.geo_verified}`);
     }
 
     this._buildUI(cx, cy);
