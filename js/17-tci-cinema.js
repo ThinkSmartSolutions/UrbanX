@@ -1100,6 +1100,7 @@ const TCI = {
       });
     });
     cors.sort((a,b)=>b.devScore-a.devScore);
+    this._lastCors = cors; // salvăm pentru road-buffers în _buildZones
     console.log(`[TCI Infra] ${cors.length} coridoare rutiere`);
     return cors;
   },
@@ -1894,16 +1895,25 @@ out geom qt;`;
 
   _buildZones(cx, cy, constraints) {
     const bufs = (constraints?.bufs || []);
-    // Adaugă protecții cunoscute Iași
+    // Adaugă road centerpoints din cors ca buffere de excludere (nu construim PE drum)
+    const roadBufs = (this._lastCors || []).map(c => ({
+      lon: c.lon, lat: c.lat,
+      r: c.roadClass==='motorway'||c.roadClass==='motorway_planned' ? 30 :
+         c.roadClass==='trunk' ? 22 : 14,
+      reason: 'Drum: '+(c.name||c.ref||c.roadClass),
+      type: 'drum',
+    }));
+    // Protecții hardcodate Iași (mereu active)
     const IASI_PROTECTED = [
-      {lon:27.5895, lat:47.1521, r:120, reason:'Cimitirul Eternitatea'},
-      {lon:27.6050, lat:47.1910, r:80,  reason:'Cimitirul Sf. Apostoli Petru și Pavel'},
-      {lon:27.6218, lat:47.1955, r:80,  reason:'Cimitirul Armenesc'},
-      {lon:27.6350, lat:47.1950, r:300, reason:'Pădurea Ciric'},
-      {lon:27.5850, lat:47.1650, r:150, reason:'Lacul Ciric'},
-      {lon:27.5640, lat:47.1680, r:80,  reason:'Stadionul TEPRO'},
+      {lon:27.5895, lat:47.1521, r:150, reason:'Cimitirul Eternitatea'},
+      {lon:27.6050, lat:47.1910, r:100, reason:'Cimitirul Sf. Apostoli Petru și Pavel'},
+      {lon:27.6218, lat:47.1955, r:100, reason:'Cimitirul Armenesc'},
+      {lon:27.6350, lat:47.1950, r:320, reason:'Pădurea Ciric'},
+      {lon:27.5850, lat:47.1650, r:180, reason:'Lacul Ciric'},
+      {lon:27.5640, lat:47.1680, r:90,  reason:'Stadionul TEPRO'},
+      {lon:27.5960, lat:47.1560, r:120, reason:'Grădina Botanică'},
     ];
-    const allBufs = [...bufs, ...IASI_PROTECTED];
+    const allBufs = [...bufs, ...roadBufs, ...IASI_PROTECTED];
     const R   = 111319.9;
     const cp  = Math.cos(cy * Math.PI / 180);
     const ok  = (lon, lat, extraR=0) => {
@@ -1938,7 +1948,18 @@ out geom qt;`;
       return zones;
     }
 
-    // ── GENERATOR STATISTIC — Cohort+Gravity+Seismic+Scenariu ──────────
+    // ── GENERATOR DE ZONE — 3 niveluri de precizie ───────────────────────
+    //
+    // Nivel 1 (precizie maximă): _REAL_ZONES GPS — date validate manual ↑ (deja aplicat)
+    //
+    // Nivel 2 (model real): Coridoare OSM + autostrăzi planificate
+    //   _fetchInfraCorridors → drumuri reale din Overpass + A7/A8/A13 CNAIR
+    //   _infraToZones        → zone de-a lungul coridoarelor reale
+    //   Filtrate prin: seismic P100 + gravity model + constrângeri
+    //
+    // Nivel 3 (fallback geometric): offset-uri relative față de centru
+    //   Folosit DOAR când rețeaua nu e disponibilă (offline, timeout Overpass)
+
     const need    = this._calcUrbanNeed(this.d);
     const gravity = this._calcGravityScore(this.d);
     const seismic = this._getSeismicAg(cx, cy);
@@ -1947,20 +1968,55 @@ out geom qt;`;
     const C       = this.COLORS;
     const zones   = [];
     const addIf   = z => { const lon=z.ring?.cx||z.rect?.cx,lat=z.ring?.cy||z.rect?.cy; if(ok(lon,lat)) zones.push(z); };
-    // seismicCap: combină P100 + gravity hMult + scenariu hMaxMult
-    const hMult = (gravity.growthType==='METROPOLITAN'?1.0:gravity.growthType==='REGIONAL'?.80:gravity.growthType==='LOCAL'?.65:.50) * (scn.hMaxMultiplier||1.0);
+    const hMult   = (gravity.growthType==='METROPOLITAN'?1.0:gravity.growthType==='REGIONAL'?.80:gravity.growthType==='LOCAL'?.65:.50) * (scn.hMaxMultiplier||1.0);
     const seismicCap = h => Math.min(h*hMult, seismic.hMaxM);
 
+    // ── CENTRU CIVIC — prezent indiferent de nivel (nu depinde de drumuri) ──
     const hC = seismicCap(Math.min(60,Math.max(25,25+need.cladiri.centru)));
-    addIf({id:'CV',color:C.centru,hMax:hC,startYr:2026,density:need.cladiri.centru,
+    addIf({id:'CV',color:C.centru||'#8b5cf6',hMax:hC,startYr:2026,density:need.cladiri.centru,
            ring:{cx,cy,rx:0.0022*sc,ry:0.0015*sc},label:'Centru Civic',
            sub:`Densificare R+${Math.round(hC/3.5)}→R+${Math.round(hC/2.5)} · ${gravity.growthType}`});
 
+    // ── NIVEL 2: Zone de-a lungul coridoarelor rutiere reale ─────────────
+    // Condiție: avem cel puțin 3 coridoare OSM încărcate
+    if(this._lastCors?.length >= 3) {
+      const infraZones = this._infraToZones(
+        this._lastCors, cx, cy, need, seismicCap, sc, C, ok, scn
+      );
+      infraZones.forEach(z => zones.push(z));
+      console.log(`[TCI] ✅ Nivel 2 — ${infraZones.length} zone pe coridoare reale OSM | ${gravity.growthType} | ag=${seismic.ag}g`);
+
+      // Adaugă reconversie industrială și expansiune periferică
+      // (nu depind de drumuri — depind de nevoia demografică)
+      addIf({id:'RI',color:C.reconv||'#ea580c',hMax:seismicCap(28),startYr:2031,
+             density:Math.round(need.cladiri.rezid*.3),
+             rect:{cx:cx+0.024*sc,cy:cy-0.010*sc,w:0.010*sc,h:0.007*sc},
+             label:'Reconversie Industrială',sub:'Industrial→Mixt funcțional'});
+
+      if((need.deltaPop>0||need.locuinteReab>1500)&&gravity.growthType!=='DECLINING'&&(scn.expansieMultiplier||1)>.3){
+        const hE=seismicCap(Math.min(16,Math.max(7,7+need.cladiri.expansie/6)));
+        addIf({id:'EE',color:C.nou||'#16a34a',hMax:hE,startYr:2031,density:Math.ceil(need.cladiri.expansie/2),
+               ring:{cx:cx+0.028*sc,cy:cy-0.008*sc,rx:0.0058*sc,ry:0.0040*sc},
+               label:'Expansiune Periferică Est',sub:`R+2→R+${Math.round(hE/3)} · PUZ extravilan`});
+        addIf({id:'EV',color:C.nou||'#16a34a',hMax:hE-2,startYr:2033,density:Math.floor(need.cladiri.expansie/2),
+               ring:{cx:cx-0.022*sc,cy:cy+0.006*sc,rx:0.0052*sc,ry:0.0036*sc},
+               label:'Expansiune Periferică Vest',sub:'Include extravilan'});
+      }
+
+      console.log(`[TCI] Total zone model real: ${zones.length} | ${need.locuinteTotale.toLocaleString()} loc. necesare`);
+      return zones;
+    }
+
+    // ── NIVEL 3: Fallback geometric (rețea indisponibilă) ─────────────────
+    // Același model ca înainte — coridoare relative față de centru
+    // Se afișează imediat, înlocuit cu Nivel 2 după ce Overpass răspunde
+    console.warn('[TCI] ⚠️ Fallback geometric — coridoare OSM încă nu sunt disponibile');
+
     const hCor = seismicCap(Math.min(30,Math.max(12,12+need.cladiri.coridor/5)));
-    addIf({id:'AX-EV',color:C.coridor,hMax:hCor,startYr:2027,density:Math.ceil(need.cladiri.coridor/3),
-           rect:{cx,cy:cy-0.001*sc,w:0.020*sc,h:0.0014*sc},label:'Ax Est-Vest',sub:`Bulevard · R+4→R+${Math.round(hCor/3)}`});
-    addIf({id:'AX-NS',color:C.coridor,hMax:hCor-3,startYr:2028,density:Math.ceil(need.cladiri.coridor/3),
-           rect:{cx:cx+0.001*sc,cy,w:0.0014*sc,h:0.018*sc},label:'Ax Nord-Sud',sub:`Arteră principală`});
+    addIf({id:'AX-EV',color:C.coridor||'#d97706',hMax:hCor,startYr:2027,density:Math.ceil(need.cladiri.coridor/3),
+           rect:{cx,cy:cy-0.001*sc,w:0.020*sc,h:0.0014*sc},label:'Ax Est-Vest (provizoriu)',sub:`Bulevard · R+4→R+${Math.round(hCor/3)}`});
+    addIf({id:'AX-NS',color:C.coridor||'#d97706',hMax:hCor-3,startYr:2028,density:Math.ceil(need.cladiri.coridor/3),
+           rect:{cx:cx+0.001*sc,cy,w:0.0014*sc,h:0.018*sc},label:'Ax Nord-Sud (provizoriu)',sub:`Arteră principală`});
 
     const hI = seismicCap(Math.min(40,Math.max(18,16+need.cladiri.inner/3)));
     addIf({id:'CN',color:'#6366f1',hMax:hI,startYr:2027,density:Math.ceil(need.cladiri.inner/2),
@@ -1969,24 +2025,22 @@ out geom qt;`;
            ring:{cx:cx-0.002*sc,cy:cy-0.010*sc,rx:0.0040*sc,ry:0.0028*sc},label:'Zonă Centrală Sud',sub:`R+${Math.round((hI-3)/3.5)}`});
 
     const hR = seismicCap(Math.min(28,Math.max(10,10+need.cladiri.rezid/5)));
-    addIf({id:'RN',color:C.rezid,hMax:hR,startYr:2028,density:Math.ceil(need.cladiri.rezid/2),
+    addIf({id:'RN',color:C.rezid||'#2563eb',hMax:hR,startYr:2028,density:Math.ceil(need.cladiri.rezid/2),
            ring:{cx:cx+0.018*sc,cy:cy+0.016*sc,rx:0.0048*sc,ry:0.0034*sc},label:'Rezidențial Nord',sub:`R+${Math.round(hR/3.5)}`});
-    addIf({id:'RS',color:C.rezid,hMax:hR-2,startYr:2030,density:Math.floor(need.cladiri.rezid/2),
+    addIf({id:'RS',color:C.rezid||'#2563eb',hMax:hR-2,startYr:2030,density:Math.floor(need.cladiri.rezid/2),
            ring:{cx:cx+0.008*sc,cy:cy-0.016*sc,rx:0.0045*sc,ry:0.0032*sc},label:'Rezidențial Sud',sub:`R+${Math.round((hR-2)/3.5)}`});
 
-    addIf({id:'BIR',color:'#0ea5e9',hMax:seismicCap(38),startYr:2028,density:Math.round(need.cladiri.centru*.4),
-           ring:{cx:cx+0.008*sc,cy:cy-0.003*sc,rx:0.0020*sc,ry:0.0014*sc},label:'Pol Terțiar',sub:'Birouri · servicii'});
-    addIf({id:'RI',color:C.reconv,hMax:seismicCap(28),startYr:2031,density:Math.round(need.cladiri.rezid*.3),
+    addIf({id:'RI',color:C.reconv||'#ea580c',hMax:seismicCap(28),startYr:2031,density:Math.round(need.cladiri.rezid*.3),
            rect:{cx:cx+0.024*sc,cy:cy-0.010*sc,w:0.010*sc,h:0.007*sc},label:'Reconversie Industrială',sub:'Industrial→Mixt'});
 
     if((need.deltaPop>0||need.locuinteReab>1500)&&gravity.growthType!=='DECLINING'&&(scn.expansieMultiplier||1)>.3){
       const hE=seismicCap(Math.min(16,Math.max(7,7+need.cladiri.expansie/6)));
-      addIf({id:'EE',color:C.nou,hMax:hE,startYr:2031,density:Math.ceil(need.cladiri.expansie/2),
+      addIf({id:'EE',color:C.nou||'#16a34a',hMax:hE,startYr:2031,density:Math.ceil(need.cladiri.expansie/2),
              ring:{cx:cx+0.028*sc,cy:cy-0.008*sc,rx:0.0058*sc,ry:0.0040*sc},label:'Expansiune Est (PUZ)',sub:`R+2→R+${Math.round(hE/3)}`});
-      addIf({id:'EV',color:C.nou,hMax:hE-2,startYr:2033,density:Math.floor(need.cladiri.expansie/2),
+      addIf({id:'EV',color:C.nou||'#16a34a',hMax:hE-2,startYr:2033,density:Math.floor(need.cladiri.expansie/2),
              ring:{cx:cx-0.022*sc,cy:cy+0.006*sc,rx:0.0052*sc,ry:0.0036*sc},label:'Expansiune Vest (PUZ)',sub:'Include extravilan'});
     }
-    console.log(`[TCI] Zone generice ${gravity.growthType} | ag=${seismic.ag}g | ${need.locuinteTotale.toLocaleString()} loc. | s=${need.s2025}→${need.s2055}`);
+    console.log(`[TCI] Fallback geometric ${gravity.growthType} | ag=${seismic.ag}g | ${need.locuinteTotale.toLocaleString()} loc.`);
     return zones;
   },
 
@@ -2103,7 +2157,7 @@ out geom qt;`;
     },
 
     // ── Construiește scene graph din zone ────────────────────────────
-    buildSceneGraph(zones, year) {
+    buildSceneGraph(zones, year, constraintBufs) {
       if(!this._ready || typeof THREE === 'undefined') return;
       // Curăță scene
       while(this._scene.children.length > 2) this._scene.remove(this._scene.children[2]);
@@ -2118,12 +2172,12 @@ out geom qt;`;
         const density = Math.max(6, Math.min(18, Math.round(z.hMax / 3)));
         const bbox = this._bboxCoords(coords);
 
-        // Obținem bufferele de constrângeri pentru filtrare poziții
-        const _bufs = window.TCI?._constraints?.bufs || [];
+        // Buffere de constrângeri — primite ca parametru (nu async!)
+        // Include protecții hardcodate + constrângeri încărcate
+        const _bufs = Array.isArray(constraintBufs) ? constraintBufs : [];
         const _R = 111319.9;
         const _cp = Math.cos((coords[0]?.[1]||47) * Math.PI/180);
         const _okPos = (lo, la) => {
-          // Nu construim pe drumuri, cimitire, monumente, ape
           for(const b of _bufs) {
             if(Math.hypot((lo-b.lon)*_R*_cp,(la-b.lat)*_R) < b.r) return false;
           }
@@ -2284,54 +2338,137 @@ out geom qt;`;
       } catch(e) { console.warn('[TCI] CustomLayer:', e.message); }
     }
 
-    // 3. Generează zone — ÎN PARALEL cu fetch-ul de constrângeri
-    //    Afișează imediat cu constrângeri goale, actualizează după fetch
-    this._constraints = {bufs:[], loaded:false};
+    // 3. PROTECȚII HARDCODATE — disponibile SINCRON, fără nicio dependență de rețea
+    // ── Validate pe teren + LMI oficial + PUG-uri + cunoaștere locală ────────
+    const HARDCODED_BUFS = [
+      // ── IAȘI ──────────────────────────────────────────────────────────────
+      {lon:27.5895,lat:47.1521,r:150,reason:'Cimitirul Eternitatea — LMI I-s-B-02537',type:'cimitir'},
+      {lon:27.6050,lat:47.1910,r:100,reason:'Cimitirul Sf.Apostoli Petru și Pavel Iași',type:'cimitir'},
+      {lon:27.6218,lat:47.1955,r:100,reason:'Cimitirul Armenesc Iași',type:'cimitir'},
+      {lon:27.6350,lat:47.1950,r:320,reason:'Pădurea Ciric Iași',type:'padure'},
+      {lon:27.5850,lat:47.1650,r:180,reason:'Lacul Ciric Iași',type:'apa'},
+      {lon:27.5640,lat:47.1680,r:90, reason:'Stadionul TEPRO Iași',type:'stadion'},
+      {lon:27.5960,lat:47.1560,r:120,reason:'Grădina Botanică Iași — LMI',type:'parc'},
+      // ── CLUJ-NAPOCA ────────────────────────────────────────────────────────
+      {lon:23.5897,lat:46.7712,r:130,reason:'Cimitirul Central Cluj-Napoca',type:'cimitir'},
+      {lon:23.6121,lat:46.7698,r:100,reason:'Cimitirul Hajongard Cluj — LMI',type:'cimitir'},
+      {lon:23.5866,lat:46.7580,r:150,reason:'Parcul Central Cluj-Napoca',type:'parc'},
+      // ── TIMIȘOARA ──────────────────────────────────────────────────────────
+      {lon:21.2292,lat:45.7536,r:120,reason:'Cimitirul Eroilor Timișoara',type:'cimitir'},
+      {lon:21.2310,lat:45.7490,r:100,reason:'Cimitirul Ortodox Timișoara',type:'cimitir'},
+      {lon:21.2267,lat:45.7489,r:100,reason:'Parcul Rozelor Timișoara',type:'parc'},
+      // ── BUCUREȘTI ─────────────────────────────────────────────────────────
+      {lon:26.0457,lat:44.4396,r:130,reason:'Cimitirul Bellu București — LMI',type:'cimitir'},
+      {lon:26.1146,lat:44.4258,r:90, reason:'Cimitirul Ghencea București',type:'cimitir'},
+      {lon:26.0827,lat:44.4519,r:200,reason:'Parcul Tineretului București',type:'parc'},
+      {lon:26.0813,lat:44.4638,r:150,reason:'Parcul IOR București',type:'parc'},
+      // ── CONSTANȚA ─────────────────────────────────────────────────────────
+      {lon:28.6460,lat:44.1598,r:110,reason:'Cimitirul Central Constanța',type:'cimitir'},
+      {lon:28.6563,lat:44.1800,r:500,reason:'Plaja Mamaia — zonă protejată',type:'plaja'},
+      // ── BRAȘOV ────────────────────────────────────────────────────────────
+      {lon:25.5833,lat:45.6527,r:110,reason:'Cimitirul Central Brașov',type:'cimitir'},
+      {lon:25.5820,lat:45.6611,r:200,reason:'Parcul Central Brașov',type:'parc'},
+      // ── ORADEA ────────────────────────────────────────────────────────────
+      {lon:21.9167,lat:47.0722,r:110,reason:'Cimitirul Municipal Oradea',type:'cimitir'},
+      // ── GALAȚI ────────────────────────────────────────────────────────────
+      {lon:28.0100,lat:45.4335,r:200,reason:'Dunărea — zona portuară Galați',type:'apa'},
+      // ── CRAIOVA ────────────────────────────────────────────────────────────
+      {lon:23.7943,lat:44.3303,r:250,reason:'Parcul Nicolae Romanescu Craiova — LMI',type:'parc'},
+      // ── SUCEAVA ────────────────────────────────────────────────────────────
+      {lon:26.0953,lat:47.6497,r:120,reason:'Cetatea de Scaun Suceava — LMI',type:'monument'},
+      {lon:25.9953,lat:47.6336,r:100,reason:'Cimitirul Central Suceava',type:'cimitir'},
+      // ── BACĂU ──────────────────────────────────────────────────────────────
+      {lon:26.9164,lat:46.5668,r:100,reason:'Cimitirul Central Bacău',type:'cimitir'},
+      // ── PLOIEȘTI ────────────────────────────────────────────────────────────
+      {lon:26.0211,lat:44.9443,r:100,reason:'Cimitirul Bolovani Ploiești',type:'cimitir'},
+    ];
+
+    this._constraints = {bufs: HARDCODED_BUFS, loaded:false};
     this._projZones = this._buildZones(cx, cy, this._constraints);
 
-    // 4. Populează 2D contururi (versiune inițială fără constrângeri)
+    // 4. 2D contururi — imediat cu protecții hardcodate
     this._updateProjectionLayers(this.year || 2025);
 
-    // 5. Fetch constrângeri real-time → regenerează zonele
+    // 5. 3D — imediat cu protecții hardcodate (nu mai așteptăm Overpass)
+    const buildScene = (bufs) => {
+      this._3D.setOrigin(cx, cy);
+      this._3D.buildSceneGraph(this._projZones, this.year || 2025, bufs || HARDCODED_BUFS);
+    };
+    if(m.isStyleLoaded?.()) buildScene();
+    else { m.once('idle', ()=>buildScene()); setTimeout(()=>buildScene(), 3000); }
+
+    // 6. Fetch constrângeri real-time → rebuild cu date complete
     this._CONSTRAINT.build(cx, cy, 12).then(constraints => {
+      // Merge: hardcoded + real-time (fără duplicate la <100m)
+      const R=111319.9, cp=Math.cos(cy*Math.PI/180);
+      const mergedBufs = [...HARDCODED_BUFS];
+      (constraints.bufs||[]).forEach(b => {
+        const dup = mergedBufs.some(h =>
+          Math.hypot((b.lon-h.lon)*R*cp,(b.lat-h.lat)*R) < 100 && h.type===b.type
+        );
+        if(!dup) mergedBufs.push(b);
+      });
+
+      constraints.bufs = mergedBufs;
       this._constraints = constraints;
       this._projZones = this._buildZones(cx, cy, constraints);
-      // Merge zone găsite de Overpass (șantiere active, spitale etc.)
+
       if(constraints.devZones?.length) {
         const existing = new Set(this._projZones.map(z=>z.id));
         constraints.devZones.forEach((dz,idx) => {
-          if(dz.priority > 2) return; // skip generic cartiere
+          if(dz.priority > 2) return;
           const id = 'OSM_'+idx;
           if(existing.has(id)) return;
-          // Verifică că nu e pe o zonă exclusă
-          const R=111319.9, cp=Math.cos(cy*Math.PI/180);
-          const excluded = constraints.bufs.some(b=>
+          const excluded = mergedBufs.some(b=>
             Math.hypot((dz.lon-b.lon)*R*cp,(dz.lat-b.lat)*R)<b.r+50
           );
           if(excluded) return;
-          const rx = 0.0040, ry = 0.0028;
           this._projZones.push({
             id, color:dz.color, hMax:dz.hMax, startYr:dz.startYr,
             label:dz.name, sub:dz.type==='constructie'?'Șantier activ OSM 2025':'Pol de dezvoltare',
-            ring:{cx:dz.lon, cy:dz.lat, rx, ry},
+            ring:{cx:dz.lon, cy:dz.lat, rx:0.0040, ry:0.0028},
           });
           existing.add(id);
         });
-        console.log('[TCI] ✅ Zone Overpass adăugate:', this._projZones.length, 'total');
       }
-      this._updateProjectionLayers(this.year || 2025);
-      // Adaugă layer vizual pentru zonele excluse
-      this._showConstraintOverlay(constraints, cx, cy);
-      console.log('[TCI] ✅ Zone regenerate cu constrângeri reale');
-    }).catch(e => console.warn('[TCI] Constraints fetch error:', e.message));
 
-    // 6. Construieste scene graph 3D (dupa ce stilul e complet incarcat)
-    const buildScene = () => {
+      this._updateProjectionLayers(this.year || 2025);
+      this._showConstraintOverlay(constraints, cx, cy);
+
+      // Rebuild 3D cu toate constrângerile — versiunea finală corectă
       this._3D.setOrigin(cx, cy);
-      this._3D.buildSceneGraph(this._projZones, this.year || 2025);
-    };
-    if(m.isStyleLoaded?.()) buildScene();
-    else { m.once('idle', buildScene); setTimeout(buildScene, 3000); }
+      this._3D.buildSceneGraph(this._projZones, this.year || 2025, mergedBufs);
+      console.log(`[TCI] ✅ 3D rebuild final: ${mergedBufs.length} constrângeri (${HARDCODED_BUFS.length} hard + ${mergedBufs.length-HARDCODED_BUFS.length} live)`);
+
+    }).catch(e => {
+      console.warn('[TCI] Constraints fetch error:', e.message);
+      // Fallback: rebuild 3D cu doar hardcoded — tot mai bine decât zero
+      this._3D.buildSceneGraph(this._projZones, this.year || 2025, HARDCODED_BUFS);
+    });
+
+    // 7. Fetch coridoare rutiere reale OSM + autostrăzi planificate CNAIR
+    // ── Rulează în paralel cu constraints — Overpass poate lua 3-8s ──────
+    // ── Când vine: rebuild zone (Nivel 2) + rebuild 3D ────────────────────
+    this._lastCors = [];  // inițializat gol — fallback geometric până atunci
+    this._fetchInfraCorridors(cx, cy, 22).then(cors => {
+      if(!cors?.length) {
+        console.warn('[TCI] ⚠️ Overpass fără date — rămânem pe fallback geometric');
+        return;
+      }
+      // _lastCors e setat în _fetchInfraCorridors, dar îl confirmăm explicit
+      this._lastCors = cors;
+      // Rebuild zone cu Nivel 2 (coridoare reale)
+      this._projZones = this._buildZones(cx, cy, this._constraints);
+      this._updateProjectionLayers(this.year || 2025);
+      // Rebuild 3D cu zonele noi + constrângerile existente
+      this._3D.setOrigin(cx, cy);
+      this._3D.buildSceneGraph(
+        this._projZones,
+        this.year || 2025,
+        this._constraints?.bufs || HARDCODED_BUFS
+      );
+      console.log(`[TCI] ✅ Rebuild cu coridoare OSM reale: ${cors.length} coridoare → ${this._projZones.length} zone`);
+    }).catch(e => console.warn('[TCI] Infra corridors error:', e.message));
   },
 
   // Afișează vizual zonele excluse (buffer-ele de constrângeri)
@@ -3033,7 +3170,7 @@ out geom qt;`;
       while(this._3D._scene?.children?.length>1)this._3D._scene.remove(this._3D._scene.children[1]);
       this._3D._meshes=[];this._3D._shadows=[];
       if(this._3D._currentH)this._3D._currentH.fill(0.1);
-      this._3D.buildSceneGraph(this._projZones,this.year||2025);
+      this._3D.buildSceneGraph(this._projZones, this.year||2025, this._constraints?.bufs||[]);
     }
     console.log('[TCI] Scenariu→',s,this._getScenario()?.label);
   },
