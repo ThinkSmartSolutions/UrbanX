@@ -487,6 +487,16 @@ const TCI = {
     this._updateKPIs();
     setTimeout(() => this._checkDataStatus(), 2000);
     this._updateNarCard('', '', '');
+    // Dev Pressure overlay init
+    setTimeout(()=>{
+      if(!document.getElementById('tci-dev-pressure')){
+        const dp=document.createElement('div');
+        dp.id='tci-dev-pressure';
+        dp.style.cssText='position:absolute;bottom:110px;right:20px;width:225px;background:rgba(4,10,24,0.9);backdrop-filter:blur(8px);border:1px solid rgba(212,175,55,0.3);border-radius:8px;padding:10px 12px;pointer-events:none;z-index:20;display:none';
+        (document.getElementById('tci-root')||document.body).appendChild(dp);
+      }
+      this._updateDevPressureOverlay(this.year||2025);
+    },2000);
   },
 
   _resizeCv() {
@@ -897,31 +907,174 @@ const TCI = {
 
   _cmpSelect(key, name) {
     document.getElementById('tci-cmp-res').style.display='none';
-    document.getElementById('tci-cmp-inp').value=name;
-    const c1=this.cityData, c2=(typeof _RO_CITIES_DB!=='undefined')?_RO_CITIES_DB[key]:null;
-    const d1=this._data(this.year), d2=(typeof _getProjectionData!=='undefined')?_getProjectionData(this.year,this.scenario,key):{};
-    if(!c1||!c2) return;
-    const el=document.getElementById('tci-cmp-out'); if(!el) return;
-    const rows=[
-      ['Populație',           ((d1?.demo)?.value||c1.pop2021||0).toLocaleString(),  ((d2?.demo)?.value||c2.pop2021||0).toLocaleString()],
-      ['Rată anuală',         (c1.rata_reala_2011_2021||0).toFixed(2)+'%',        (c2.rata_reala_2011_2021||0).toFixed(2)+'%'],
-      ['PIB/cap estimat',     '€'+((d1.housing?.pibCapProj||14200)/1000).toFixed(1)+'k', '€'+((d2.housing?.pibCapProj||14200)/1000).toFixed(1)+'k'],
-      ['ESG Score',           (d1.esg?.total||51)+'/100',                         (d2.esg?.total||51)+'/100'],
+    document.getElementById('tci-cmp-inp').value = name;
+
+    // ── Lookup date UAT2 — același 3-step ca în _launch ─────────────────
+    let d2 = null;
+    if(typeof _RO_CITIES_DB !== 'undefined') d2 = _RO_CITIES_DB[key];
+    if(!d2 && typeof _UAT_DB !== 'undefined')  d2 = _UAT_DB[key];
+    if(!d2 && typeof _UAT_DB !== 'undefined') {
+      const siruta = key.split('-').pop();
+      d2 = Object.values(_UAT_DB).find(c => c.siruta === siruta || c.siruta === String(+siruta));
+    }
+    if(!d2) {
+      document.getElementById('tci-cmp-out').innerHTML =
+        `<div style="font-size:9px;color:#f87171;padding:6px">UAT negăsit în baza de date.</div>`;
+      return;
+    }
+
+    const d1 = this.d || this.cityData || {};
+    const el = document.getElementById('tci-cmp-out');
+    if(!el) return;
+
+    // ── Calculăm toți indicatorii pentru ambele UAT-uri ─────────────────
+    const calc = (d) => {
+      const grav  = this._calcGravityScore(d);
+      const need  = this._calcUrbanNeed(d);
+      const seis  = this._getSeismicAg(d.lon||27.6, d.lat||47.16);
+      const clim  = this._getClimateProfile(d.judet||'');
+      const feas  = this._calcFeasibility({}, d, seis.ag);
+      const L     = grav.lifecycle?.score ?? 0;
+      const Ltype = grav.growthType;
+      const Lcolor = L > 0.3 ? '#4ade80' : L > -0.2 ? '#fbbf24' : '#f87171';
+      return { d, grav, need, seis, clim, feas, L, Ltype, Lcolor };
+    };
+
+    const A = calc(d1);
+    const B = calc(d2);
+
+    // ── Funcție de comparare vizuală ─────────────────────────────────────
+    // win=true dacă A e mai bun, false dacă B e mai bun, null = neutral
+    const cmp = (valA, valB, higherIsBetter=true) => {
+      if(valA == null || valB == null) return null;
+      const diff = higherIsBetter ? valA - valB : valB - valA;
+      if(Math.abs(diff) < 0.01 * Math.max(Math.abs(valA),Math.abs(valB),1)) return null;
+      return diff > 0 ? 'A' : 'B';
+    };
+
+    const fmt = (v, suffix='', decimals=0) =>
+      v == null ? '—' : (typeof v === 'number' ? v.toFixed(decimals) : v) + suffix;
+
+    // ── Rânduri benchmark ─────────────────────────────────────────────────
+    const rows = [
+      // [label, valA, valB, winner (A/B/null), unitate vizuală]
+      { l:'Lifecycle Score L',
+        vA: (A.L>=0?'+':'')+A.L.toFixed(2),
+        vB: (B.L>=0?'+':'')+B.L.toFixed(2),
+        cA: A.Lcolor, cB: B.Lcolor,
+        w: cmp(A.L, B.L), tip:'Scor continuu [-1,+1] · Formula: f(Pg,Eg,Mn,Ac)' },
+      { l:'Tip urban',
+        vA: A.Ltype, vB: B.Ltype,
+        cA:'#e2e8f0', cB:'#e2e8f0', w: null },
+      { l:'Populație 2021',
+        vA: (A.d.pop2021||0).toLocaleString('ro-RO'),
+        vB: (B.d.pop2021||0).toLocaleString('ro-RO'),
+        cA:'#e2e8f0', cB:'#e2e8f0',
+        w: cmp(A.d.pop2021, B.d.pop2021), tip:'INS Recensământ 2021' },
+      { l:'Prognoză 2055',
+        vA: (A.need.pop2055||0).toLocaleString('ro-RO'),
+        vB: (B.need.pop2055||0).toLocaleString('ro-RO'),
+        cA: A.need.pop2055 > A.d.pop2021 ? '#4ade80':'#f87171',
+        cB: B.need.pop2055 > B.d.pop2021 ? '#4ade80':'#f87171',
+        w: cmp(A.need.pop2055, B.need.pop2055), tip:'Cohort Survival INS · Scenariu '+this.scenario },
+      { l:'Rată demografică',
+        vA: fmt(A.d.rata_reala_2011_2021, '%/an', 2),
+        vB: fmt(B.d.rata_reala_2011_2021, '%/an', 2),
+        cA: (A.d.rata_reala_2011_2021||0)>=0?'#4ade80':'#f87171',
+        cB: (B.d.rata_reala_2011_2021||0)>=0?'#4ade80':'#f87171',
+        w: cmp(A.d.rata_reala_2011_2021, B.d.rata_reala_2011_2021), tip:'INS 2011-2021' },
+      { l:'Gravity Score',
+        vA: A.grav.gravityScore.toFixed(3),
+        vB: B.grav.gravityScore.toFixed(3),
+        cA:'#e2e8f0', cB:'#e2e8f0',
+        w: cmp(A.grav.gravityScore, B.grav.gravityScore), tip:'G = eP×0.30 + eC×0.25 + eE×0.20 + eK×0.15 + eI×0.10' },
+      { l:'Presiune economică',
+        vA: fmt(A.d.coef_hub, '', 2),
+        vB: fmt(B.d.coef_hub, '', 2),
+        cA:'#e2e8f0', cB:'#e2e8f0',
+        w: cmp(A.d.coef_hub, B.d.coef_hub), tip:'coef_hub: 1.0=mediu, >1.0=hub regional, <0.7=periferic' },
+      { l:'Locuințe necesare',
+        vA: (A.need.locuinteTotale||0).toLocaleString('ro-RO'),
+        vB: (B.need.locuinteTotale||0).toLocaleString('ro-RO'),
+        cA:'#e2e8f0', cB:'#e2e8f0',
+        w: null, tip:'HFE + Cohort · cerere totală 2025-2055' },
+      { l:'Investiție estimată',
+        vA: '≈'+Math.round((A.need.totalM2||0)*850/1e6)+'M€',
+        vB: '≈'+Math.round((B.need.totalM2||0)*850/1e6)+'M€',
+        cA:'#e2e8f0', cB:'#e2e8f0',
+        w: null, tip:'€850/m² medie națională ANCPI 2024' },
+      { l:'ROI estimat',
+        vA: fmt(A.feas.roi, '%'),
+        vB: fmt(B.feas.roi, '%'),
+        cA: (A.feas.roi||0)>=12?'#4ade80':'#f87171',
+        cB: (B.feas.roi||0)>=12?'#4ade80':'#f87171',
+        w: cmp(A.feas.roi, B.feas.roi), tip:'Prag viabilitate: 12%' },
+      { l:'Risc seismic',
+        vA: 'ag='+A.seis.ag+'g · max R+'+A.seis.hMaxStory,
+        vB: 'ag='+B.seis.ag+'g · max R+'+B.seis.hMaxStory,
+        cA: A.seis.ag>=0.35?'#f87171':'#fbbf24',
+        cB: B.seis.ag>=0.35?'#f87171':'#fbbf24',
+        w: cmp(A.seis.ag, B.seis.ag, false), tip:'P100-1/2013 · MDLPA' },
+      { l:'Risc climatic 2055',
+        vA: A.clim.label || (A.clim.uhi+'°C UHI'),
+        vB: B.clim.label || (B.clim.uhi+'°C UHI'),
+        cA:'#e2e8f0', cB:'#e2e8f0',
+        w: null, tip:'IPCC AR6 RCP4.5 · Copernicus' },
     ];
-    el.innerHTML=`
-      <div style="background:rgba(14,26,52,0.8);border-radius:8px;padding:9px;border:1px solid rgba(255,255,255,0.07)">
-        <div style="display:grid;grid-template-columns:1fr 10px 1fr;gap:4px;margin-bottom:7px;text-align:center">
-          <div style="font-size:9px;font-weight:800;color:#D4AF37">${c1.name}</div>
-          <div style="font-size:7px;color:rgba(148,163,184,0.3)">vs</div>
-          <div style="font-size:9px;font-weight:800;color:#38bdf8">${name}</div>
+
+    // ── Scor global benchmark ─────────────────────────────────────────────
+    let scoreA = 0, scoreB = 0;
+    rows.forEach(r => { if(r.w==='A') scoreA++; else if(r.w==='B') scoreB++; });
+
+    el.innerHTML = `
+      <div style="background:rgba(8,15,35,0.95);border:1px solid rgba(212,175,55,0.2);border-radius:10px;overflow:hidden;margin-top:5px">
+
+        <!-- Header -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;background:rgba(0,0,0,0.3);border-bottom:1px solid rgba(255,255,255,0.06)">
+          <div style="padding:8px 10px;border-right:1px solid rgba(255,255,255,0.06)">
+            <div style="font-size:9px;font-weight:800;color:#D4AF37">${A.d.name||'—'}</div>
+            <div style="font-size:7px;color:rgba(148,163,184,0.5)">jud. ${A.d.judet||'—'} · ${(A.d.pop2021||0).toLocaleString()}</div>
+          </div>
+          <div style="padding:8px 10px">
+            <div style="font-size:9px;font-weight:800;color:#38bdf8">${B.d.name||'—'}</div>
+            <div style="font-size:7px;color:rgba(148,163,184,0.5)">jud. ${B.d.judet||'—'} · ${(B.d.pop2021||0).toLocaleString()}</div>
+          </div>
         </div>
-        ${rows.map(([l,v1,v2])=>`
-          <div style="display:grid;grid-template-columns:1fr 80px 1fr;gap:2px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
-            <span style="font-size:9px;font-weight:700;color:#D4AF37;text-align:right;padding-right:4px">${v1}</span>
-            <span style="font-size:7px;color:rgba(100,120,150,0.5);text-align:center">${l}</span>
-            <span style="font-size:9px;font-weight:700;color:#38bdf8;padding-left:4px">${v2}</span>
-          </div>`).join('')}
-        <div style="font-size:6.5px;color:rgba(100,120,150,0.4);text-align:center;margin-top:5px">INSE · Eurostat · ${this.year}</div>
+
+        <!-- Rânduri indicatori -->
+        ${rows.map(r=>`
+          <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid rgba(255,255,255,0.04)"
+            title="${r.tip||''}">
+            <div style="padding:5px 10px;border-right:1px solid rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:space-between;gap:4px">
+              <span style="font-size:9px;font-weight:700;color:${r.cA}">${r.vA}</span>
+              ${r.w==='A'?'<span style="font-size:8px;color:#4ade80">◀</span>':''}
+            </div>
+            <div style="padding:5px 10px;display:flex;align-items:center;justify-content:space-between;gap:4px">
+              ${r.w==='B'?'<span style="font-size:8px;color:#38bdf8">▶</span>':''}
+              <span style="font-size:9px;font-weight:700;color:${r.cB}">${r.vB}</span>
+            </div>
+          </div>
+          <div style="background:rgba(255,255,255,0.02);padding:1px 10px 3px">
+            <span style="font-size:7px;color:rgba(100,120,150,0.55)">${r.l}</span>
+          </div>`
+        ).join('')}
+
+        <!-- Scor global -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;background:rgba(0,0,0,0.2)">
+          <div style="padding:8px 10px;border-right:1px solid rgba(255,255,255,0.06);text-align:center">
+            <span style="font-size:14px;font-weight:800;color:#D4AF37">${scoreA}</span>
+            <span style="font-size:7px;color:rgba(148,163,184,0.4)"> indicatori favorabili</span>
+          </div>
+          <div style="padding:8px 10px;text-align:center">
+            <span style="font-size:14px;font-weight:800;color:#38bdf8">${scoreB}</span>
+            <span style="font-size:7px;color:rgba(148,163,184,0.4)"> indicatori favorabili</span>
+          </div>
+        </div>
+        <div style="padding:4px 10px 6px;text-align:center">
+          <span style="font-size:6.5px;color:rgba(100,120,150,0.4)">
+            ◀ ▶ = indicator favorabil · Motoare: Lifecycle · Cohort · Gravity · Seismic · Climate · HFE · ROI
+          </span>
+        </div>
       </div>`;
     el.style.display='block';
   },
@@ -1494,6 +1647,69 @@ const TCI = {
       console.log(`[Slope] ✅ Slope aplicat. Celule rămase: ${cells.size}`);
     }
 
+    // ── Accessibility Engine — OSRM Table API ────────────────────────
+    // Documentul audit: "Orașele cresc după timp de acces, nu distanță geometrică"
+    // OSRM table endpoint: O singură cerere pentru top 30 celule
+    // Înlocuiește Id = 1 - dk/radius (euclidean) cu Id = f(travel_time_min)
+    //
+    // Miroslava e la 8km de Iași dar 12 min → Id ridicat
+    // Un sat la 6km pe drum montan → 35 min → Id scăzut
+    const topCellsForOSRM = [...cells.values()]
+      .sort((a,b)=>b.Pu-a.Pu)
+      .slice(0, 30); // max 30 → o singură cerere OSRM
+
+    if(topCellsForOSRM.length > 0) {
+      try {
+        // Format: src;dst1;dst2;... (centrul orașului = sursa)
+        const coords = [
+          `${cx},${cy}`,
+          ...topCellsForOSRM.map(c=>`${c.lon.toFixed(5)},${c.lat.toFixed(5)}`)
+        ].join(';');
+        const destinations = topCellsForOSRM.map((_,i)=>i+1).join(';');
+        const osrmUrl = `https://router.project-osrm.org/table/v1/driving/${coords}` +
+          `?sources=0&destinations=${destinations}&annotations=duration`;
+
+        const osrmResp = await fetch(osrmUrl, {signal: AbortSignal.timeout(6000)});
+        if(osrmResp.ok) {
+          const osrmData = await osrmResp.json();
+          const durations = osrmData.durations?.[0] || []; // timpi în secunde de la centru
+
+          topCellsForOSRM.forEach((cell, i) => {
+            const durSec = durations[i];
+            if(durSec == null || durSec < 0) return; // null = inaccesibil rutier
+
+            const durMin = durSec / 60;
+            cell.travelMin = Math.round(durMin);
+
+            // Id bazat pe timp real — înlocuiește distanța euclidiană
+            // < 10 min: excelent | 10-20: bun | 20-35: moderat | > 35: slab
+            const IdReal = durMin < 10  ? 1.00 :
+                           durMin < 20  ? 0.75 :
+                           durMin < 30  ? 0.50 :
+                           durMin < 45  ? 0.25 : 0.05;
+
+            // Recalculează P(u) cu Id real (înlocuiește Id euclidean)
+            const IdOld = cell.Id;
+            cell.Id = IdReal;
+            cell.Pu = cell.isFrontier
+              ? cell.Ra*0.25 + cell.Db*0.20 + cell.Ec*0.15 + IdReal*0.15 +
+                cell.Ce*0.10 + cell.Zf*0.10 + cell.Sg*0.05
+              : cell.Ra*0.12 + cell.Db*0.10 + cell.Ec*0.10 + IdReal*0.10 +
+                cell.Ce*0.05 + cell.Zf*0.05 + cell.Sg*0.03;
+
+            // Aplică din nou slope (dacă fusese aplicat)
+            if(cell.slopeSuit != null) cell.Pu *= cell.slopeSuit;
+          });
+          const validTimes = topCellsForOSRM.filter(c=>c.travelMin!=null);
+          console.log(`[OSRM] ✅ Travel time pentru ${validTimes.length} celule | ` +
+            `min=${Math.min(...validTimes.map(c=>c.travelMin))}min ` +
+            `max=${Math.max(...validTimes.map(c=>c.travelMin))}min`);
+        }
+      } catch(e) {
+        console.warn('[OSRM] Table API indisponibil:', e.message, '— folosim distanță euclidiană');
+      }
+    }
+
     // ── Top celule → zone (clustering minim 600m) ─────────────────────
     const sorted=[...cells.values()].sort((a,b)=>b.Pu-a.Pu);
     const zones=[],used=[],minDist=600;
@@ -1518,6 +1734,7 @@ const TCI = {
       const slopeLabel = cell.slopeDeg
         ? ` · ${Math.round(cell.slopeDeg)}° ${cell.slopeType||''}`
         : '';
+      const accessLabel = cell.travelMin != null ? ` · ${cell.travelMin}min` : '';
       const label = isVillaPremium
         ? `Premium Low-Density · P=${Math.round(cell.Pu*100)}%`
         : `Frontier ${pClass} · P=${Math.round(cell.Pu*100)}%`;
@@ -1528,7 +1745,14 @@ const TCI = {
         rx:isVillaPremium?0.002:0.003+cell.Pu*0.003,
         ry:isVillaPremium?0.0014:0.002+cell.Pu*0.002,
         label,
-        sub:`Db=${cell.Db.toFixed(2)} Ra=${cell.Ra.toFixed(2)}${slopeLabel}`,
+        sub:`Db=${cell.Db.toFixed(2)} Ra=${cell.Ra.toFixed(2)}${slopeLabel}${accessLabel}`,
+        // Provenance — vizibil în popup la click
+        _prob:cell.Pu, _class:pClass,
+        _Ra:cell.Ra, _Db:cell.Db, _Ec:cell.Ec,
+        _Ce:cell.Ce, _Zf:cell.Zf, _Sg:cell.Sg,
+        _permitsGrowth:cell.permitsGrowth,
+        _travelMin:cell.travelMin,
+        slopeDeg:cell.slopeDeg, slopeType:cell.slopeType,
         _prob:cell.Pu,_class:pClass,
       });
       used.push([cell.lon,cell.lat]);
@@ -2537,14 +2761,60 @@ out geom qt;`;
 
   _buildZones(cx, cy, constraints) {
     const bufs = (constraints?.bufs || []);
-    // Adaugă road centerpoints din cors ca buffere de excludere (nu construim PE drum)
-    const roadBufs = (this._lastCors || []).map(c => ({
-      lon: c.lon, lat: c.lat,
-      r: c.roadClass==='motorway'||c.roadClass==='motorway_planned' ? 30 :
-         c.roadClass==='trunk' ? 22 : 14,
-      reason: 'Drum: '+(c.name||c.ref||c.roadClass),
-      type: 'drum',
-    }));
+    // ── Road buffers context-aware — logică urbanistică corectă ─────────
+    // Legea drumurilor + L350/2001 + RLU:
+    //
+    // CONTEXT 1 — ZONĂ CONSTRUITĂ EXISTENTĂ (intravilan dens):
+    //   Clădirile SE ALINIAZĂ la stradă — buffer = doar ampriza fizică
+    //   (nu putem construi PE asfalt, dar putem fi la 0m de trotuar)
+    //   Referință: RLU "aliniament obligatoriu" în UTR centrale
+    //
+    // CONTEXT 2 — ZONĂ NOUĂ / PERIFERICĂ (extravilan sau intravilan nou):
+    //   Se aplică zona de protecție legală:
+    //   - Autostradă: 50m de la ax (HG 600/2014)
+    //   - DN: 22m de la marginea platformei (L198/2015)
+    //   - DJ: 20m de la marginea platformei
+    //   - Stradă nouă: 6-8m retragere față de limita proprietății
+    //
+    // Distincția o face densitatea de clădiri vecine (Db din OSM buildings).
+    // Db > 0.4 = zonă construită → buffer mic (aliniament)
+    // Db < 0.3 = zonă nouă → buffer protecție legală
+
+    const _roadBufR = (rc, isBuiltUp) => {
+      if(isBuiltUp) {
+        // Aliniament stradal — buffer = DOAR ampriza fizică a carosabilului
+        // Nu blocăm construcțiile aliniate la stradă
+        return rc==='motorway'||rc==='motorway_planned' ? 18 :  // 2×3.75m + acostament minim
+               rc==='trunk'                              ? 13 :  // 2×3.5m + bordură
+               rc==='primary'                            ?  9 :  // 2×3m + bordură
+               rc==='secondary'                          ?  7 :  // 2×3m
+                                                           5 ;  // stradă locală
+      } else {
+        // Zonă nouă periferică — zone de protecție legale
+        // Surse: L198/2015 (drumuri publice), HG 600/2014 (autostrăzi)
+        return rc==='motorway'||rc==='motorway_planned' ? 50 :  // 50m de la ax autostradă
+               rc==='trunk'                              ? 30 :  // DN major
+               rc==='primary'                            ? 22 :  // DN/DJ — 22m de la marginea platformei
+               rc==='secondary'                          ? 15 :  // DJ local
+                                                          10 ;  // stradă nouă
+      }
+    };
+
+    // Estimăm densitatea locală per coridor rutier
+    // (folosim _lastCors distKm ca proxy — mai departe de centru = mai puțin construit)
+    const roadBufs = (this._lastCors || []).map(c => {
+      // Zonă construită: aproape de centru (< 3km) SAU secondary/residential
+      const likelyBuiltUp = c.distKm < 3.5 ||
+                            c.roadClass === 'secondary' ||
+                            c.roadClass === 'residential';
+      return {
+        lon: c.lon, lat: c.lat,
+        r: _roadBufR(c.roadClass, likelyBuiltUp),
+        reason: 'Drum: '+(c.name||c.ref||c.roadClass),
+        type: 'drum',
+        builtUp: likelyBuiltUp,
+      };
+    });
     // Protecții hardcodate Iași (mereu active)
     const IASI_PROTECTED = [
       {lon:27.5895, lat:47.1521, r:150, reason:'Cimitirul Eternitatea'},
@@ -2953,14 +3223,43 @@ out geom qt;`;
       try {
         m.addSource('tci-proj', {type:'geojson', data:{type:'FeatureCollection',features:[]}});
 
+        // Fundal colorat subtil — zona vizibilă chiar și fără 3D
+        m.addLayer({id:'tci-proj-bg', type:'fill', source:'tci-proj',
+          paint:{
+            'fill-color':['get','color'],
+            'fill-opacity':['interpolate',['linear'],['zoom'],
+              9, 0.06,   // zoom mic: abia vizibil
+              13, 0.10,  // zoom mediu: ușor colorat
+              16, 0.05   // zoom mare: aproape transparent (clădirile 3D iau fața)
+            ],
+          }
+        });
+
+        // Contur principal — mai gros, mai vizibil
         m.addLayer({id:'tci-proj-outline', type:'line', source:'tci-proj',
           paint:{
             'line-color':['get','color'],
-            'line-width':['interpolate',['linear'],['zoom'],9,1,14,2.5],
-            'line-opacity':0.85,
-            'line-dasharray':[6,4],
+            'line-width':['interpolate',['linear'],['zoom'],
+              8,  1.5,
+              11, 2.5,
+              14, 4.0,
+              17, 5.0
+            ],
+            'line-opacity': 0.92,
+            'line-dasharray':[5,3],
           }
         });
+
+        // Contur interior alb — face conturul să "iasă" pe orice fundal
+        m.addLayer({id:'tci-proj-outline-inner', type:'line', source:'tci-proj',
+          minzoom: 12,
+          paint:{
+            'line-color': 'rgba(255,255,255,0.25)',
+            'line-width':['interpolate',['linear'],['zoom'],12,0.5,16,1.5],
+            'line-opacity': 0.6,
+          }
+        });
+
         m.addLayer({id:'tci-proj-labels', type:'symbol', source:'tci-proj',
           minzoom:11,
           layout:{
@@ -2976,8 +3275,90 @@ out geom qt;`;
             'text-halo-width':3,
           }
         });
+        // Fill clickabil — folosim bg-ul deja existent, nu un layer separat
+        // tci-proj-bg are fill vizibil → click funcționează natural
+
       } catch(e) { console.warn('[TCI] 2D layers:', e.message); }
     }
+
+    // ── Click handler PROVENANCE — înregistrat O SINGURĂ DATĂ ────────────
+    // CRITIC: trebuie să fie AFARĂ din if(!getSource) — altfel nu se re-înregistrează
+    if(!this._provenanceClickRegistered && m.getLayer?.('tci-proj-bg')) {
+      this._provenanceClickRegistered = true;
+      const TCI = this; // captăm referința corectă
+
+      m.on('click','tci-proj-bg', (e) => {
+        const f = e.features?.[0]; if(!f) return;
+        const p = f.properties || {};
+        const zonId = p.id || '?';
+        const zone = (TCI._projZones||[]).find(z=>z.id===zonId) || p;
+
+        const factors = [];
+        const Ra = zone._Ra ?? p._Ra;
+        const Db = zone._Db ?? p._Db;
+        const Ce = zone._Ce ?? p._Ce;
+        const Zf = zone._Zf ?? p._Zf;
+        const pg = zone._permitsGrowth ?? p._permitsGrowth;
+        const sl = zone.slopeDeg ?? p.slopeDeg;
+        const st = zone.slopeType ?? p.slopeType;
+
+        if(Ra != null) factors.push({sign:Ra>0.6?'+':Ra>0.3?'~':'-', label:`Accesibilitate rutieră: ${Math.round(Ra*100)}%`, src:'OSM road network'});
+        if(Db != null) factors.push({sign:Db>0.1&&Db<0.8?'+':Db>=0.8?'~':'-', label:`Densitate clădiri vecine: ${Math.round(Db*100)}%`, src:'OSM buildings'});
+        if(Ce != null) factors.push({sign:Ce>0.6?'+':Ce>0.3?'~':'-', label:`Risc climatic/seismic: ${Math.round((1-Ce)*100)}%`, src:'P100-1/2013 + IPCC'});
+        if(Zf != null) factors.push({sign:Zf>0.6?'+':'-', label:`Compatibilitate teren: ${Zf>0.7?'Agricol/construibil':'Restricționat'}`, src:'OSM landuse'});
+        if(pg != null) factors.push({sign:pg>1.1?'+':pg>0.9?'~':'-', label:`Tendință autorizații: ×${Number(pg).toFixed(2)}`, src:'INS TEMPO LOC103A'});
+        if(sl != null) factors.push({sign:sl<10?'+':sl<20?'~':'-', label:`Pantă teren: ${Number(sl).toFixed(1)}° (${st||'?'})`, src:'Mapbox Terrain RGB'});
+
+        // Accessibility — travel time real OSRM
+        const tm = zone._travelMin ?? p._travelMin;
+        if(tm != null) factors.push({
+          sign: tm<10?'+':tm<25?'~':'-',
+          label:`Timp acces centru: ${tm} minute (OSRM)`,
+          src:'OSRM Routing Engine'
+        });
+        if(zone.startYr||p.startYr) factors.push({sign:'~', label:`Start estimat: ${zone.startYr||p.startYr}`, src:'Model TSS·FG'});
+
+        const grav = TCI._calcGravityScore(TCI.d);
+        const L = grav.lifecycle?.score ?? 0;
+        factors.push({sign:grav.growthType==='DECLINING'?'-':grav.growthType==='METROPOLITAN'?'+':'~',
+          label:`Ciclu urban: ${grav.growthType} (L=${L>=0?'+':''}${L.toFixed(2)})`, src:'Lifecycle Engine'});
+
+        const factorHtml = factors.length
+          ? factors.map(f=>`
+            <div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.06)">
+              <span style="width:16px;flex-shrink:0;color:${f.sign==='+'?'#4ade80':f.sign==='-'?'#f87171':'#fbbf24'};font-size:12px">${f.sign==='+'?'↑':f.sign==='-'?'↓':'→'}</span>
+              <div><div style="font-size:10px;color:#e2e8f0">${f.label}</div>
+                   <div style="font-size:9px;color:#64748b">${f.src}</div></div>
+            </div>`).join('')
+          : '<div style="color:#64748b;font-size:9px;padding:4px 0">Date provenance indisponibile pentru această zonă</div>';
+
+        const pct = zone._prob ? Math.round(zone._prob*100) : (Number(p.prob)||50);
+        const pColor = pct>65?'#f59e0b':pct>45?'#3b82f6':'#22c55e';
+        const lbl = p.label || zone.label || zonId;
+        const sub = p.sub  || zone.sub  || '';
+
+        new mapboxgl.Popup({closeButton:true, maxWidth:'300px'})
+          .setLngLat(e.lngLat)
+          .setHTML(`<div style="background:#0f172a;color:#e2e8f0;border-radius:8px;padding:12px;font-family:system-ui,sans-serif;margin:-10px -10px -15px">
+            <div style="font-size:11px;font-weight:700;color:${p.color||'#f59e0b'};margin-bottom:2px">${lbl}</div>
+            <div style="font-size:8.5px;color:#94a3b8;margin-bottom:8px">${sub}</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:6px 8px;background:rgba(255,255,255,0.05);border-radius:5px">
+              <div style="font-size:20px;font-weight:800;color:${pColor}">${pct}%</div>
+              <div><div style="font-size:9px;font-weight:600;color:${pColor}">Probabilitate dezvoltare</div>
+                   <div style="font-size:8px;color:#64748b">Monte Carlo N=300 · TSS·FG</div></div>
+            </div>
+            <div style="font-size:8.5px;font-weight:600;color:#64748b;text-transform:uppercase;margin-bottom:4px">Factori identificați</div>
+            ${factorHtml}
+            <div style="margin-top:6px;font-size:7.5px;color:#475569">⚠ Nu substituie PUG/PUZ · UrbanX TSS·FG ${new Date().getFullYear()}</div>
+          </div>`)
+          .addTo(m);
+      });
+
+      m.on('mouseenter','tci-proj-bg',()=>{ m.getCanvas().style.cursor='pointer'; });
+      m.on('mouseleave','tci-proj-bg',()=>{ m.getCanvas().style.cursor=''; });
+      console.log('[TCI] ✅ Provenance click handler înregistrat');
+    }
+
 
     // 2. CustomLayerInterface cu Three.js — clădirile 3D reale
     if(!m.getLayer?.('tci-3d-engine')) {
@@ -3103,42 +3484,68 @@ out geom qt;`;
         return;
       }
       this._lastCors = cors;
+
+      // ── Road buffers context-aware pentru 3D ────────────────────────────
+      // Același principiu: zonă construită → aliniament (buffer mic)
+      //                    zonă nouă periferică → zonă protecție legală
+      const R3d=111319.9, cp3d=Math.cos(cy*Math.PI/180);
+      const roadBufsFor3D = cors.map(c => {
+        const likelyBuiltUp = c.distKm < 3.5 ||
+                              c.roadClass === 'secondary' ||
+                              c.roadClass === 'residential';
+        const r = likelyBuiltUp
+          ? (c.roadClass==='motorway'||c.roadClass==='motorway_planned' ? 18 :
+             c.roadClass==='trunk'    ? 13 :
+             c.roadClass==='primary'  ?  9 :
+             c.roadClass==='secondary'?  7 : 5)
+          : (c.roadClass==='motorway'||c.roadClass==='motorway_planned' ? 50 :
+             c.roadClass==='trunk'    ? 30 :
+             c.roadClass==='primary'  ? 22 :
+             c.roadClass==='secondary'? 15 : 10);
+        return {lon:c.lon, lat:c.lat, r, type:'drum', builtUp:likelyBuiltUp};
+      });
+      // Merge cu constrângerile existente (cimitire, păduri, apă, LMI)
+      const existingBufs = this._constraints?.bufs || HARDCODED_BUFS;
+      const fullBufs = [...existingBufs];
+      roadBufsFor3D.forEach(rb => {
+        // Deduplicare: nu adăugăm un buffer dacă există deja unul de același tip la <60m
+        const dup = fullBufs.some(b =>
+          b.type==='drum' && Math.hypot((rb.lon-b.lon)*R3d*cp3d,(rb.lat-b.lat)*R3d) < 60
+        );
+        if(!dup) fullBufs.push(rb);
+      });
+
       this._projZones = this._buildZones(cx, cy, this._constraints);
       this._updateProjectionLayers(this.year || 2025);
       this._3D.setOrigin(cx, cy);
-      this._3D.buildSceneGraph(this._projZones, this.year || 2025, this._constraints?.bufs || HARDCODED_BUFS);
-      console.log(`[TCI] ✅ Rebuild cu coridoare OSM reale: ${cors.length} puncte → ${this._projZones.length} zone`);
+      // Acum 3D primește road buffers → clădiri departe de bulevarde
+      this._3D.buildSceneGraph(this._projZones, this.year || 2025, fullBufs);
+      console.log(`[TCI] ✅ 3D cu ${roadBufsFor3D.length} road buffers (45/38/32/22/15m) → ${this._projZones.length} zone`);
 
-      // 8. Frontier Analysis — după ce avem drumurile, analizăm frontier-ul urban
-      // Rulează async, adaugă zone suplimentare bazate pe P(u) per celulă
-      // NUMAI pentru UAT-uri fără date GPS hardcodate (Nivel 2 generic)
       const hasRealZones = !!(this._REAL_ZONES[(this.cityKey||'').toLowerCase()] ||
         this._REAL_ZONES[(this.d?.name||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').split(/[-\s]/)[0]]);
 
       if(!hasRealZones) {
         this._analyzeFrontier(cx, cy, 5).then(frontierZones => {
           if(!frontierZones?.length) return;
-          const bufs = this._constraints?.bufs || HARDCODED_BUFS;
-          const R = 111319.9, cp = Math.cos(cy*Math.PI/180);
           const existing = new Set(this._projZones.map(z=>z.id));
           frontierZones.forEach(fz => {
             if(existing.has(fz.id)) return;
-            // Verifică constrângeri
-            const excluded = bufs.some(b =>
-              Math.hypot((fz.lon-b.lon)*R*cp, (fz.lat-b.lat)*R) < b.r + 50
+            const excluded = fullBufs.some(b =>
+              Math.hypot((fz.lon-b.lon)*R3d*cp3d, (fz.lat-b.lat)*R3d) < b.r + 50
             );
             if(excluded) return;
             this._projZones.push({
-              id: fz.id, color: fz.color, hMax: fz.hMax, startYr: fz.startYr,
-              label: fz.label, sub: fz.sub,
-              ring: {cx: fz.lon, cy: fz.lat, rx: fz.rx, ry: fz.ry},
+              id:fz.id, color:fz.color, hMax:fz.hMax, startYr:fz.startYr,
+              label:fz.label, sub:fz.sub,
+              ring:{cx:fz.lon, cy:fz.lat, rx:fz.rx, ry:fz.ry},
             });
             existing.add(fz.id);
           });
           this._updateProjectionLayers(this.year || 2025);
           this._3D.setOrigin(cx, cy);
-          this._3D.buildSceneGraph(this._projZones, this.year || 2025, bufs);
-          console.log(`[TCI] ✅ Frontier Analysis: +${frontierZones.length} zone P(u) → total ${this._projZones.length}`);
+          this._3D.buildSceneGraph(this._projZones, this.year || 2025, fullBufs);
+          console.log(`[TCI] ✅ Frontier: +${frontierZones.length} zone → total ${this._projZones.length}`);
         }).catch(e => console.warn('[TCI] Frontier error:', e.message));
       }
 
@@ -3181,8 +3588,13 @@ out geom qt;`;
           type:'Feature',
           geometry:{type:'Polygon', coordinates:[coords]},
           properties:{
-            label:z.label, sub:z.sub||'',
+            id:z.id, label:z.label, sub:z.sub||'',
             color:z.color, dc:statusColor(z,yr),
+            prob:z._prob?Math.round(z._prob*100):null,
+            // Provenance pentru popup
+            _Ra:z._Ra, _Db:z._Db, _Ce:z._Ce, _Zf:z._Zf,
+            _permitsGrowth:z._permitsGrowth,
+            slopeDeg:z.slopeDeg, slopeType:z.slopeType, _travelMin:z._travelMin,
           }
         };
       }).filter(Boolean);
@@ -3313,7 +3725,7 @@ out geom qt;`;
            {center:[cx,cy],zoom:13.0,pitch:52,bearing:-8,duration:4000,delay:5000},
            {center:[cx,cy],zoom:14.5,pitch:64,bearing:8,duration:5000,delay:13000},
          ],
-         title:'🏙 '+name+' — Proiecție '+startYear+'→2055',
+         title:'🏙 '+name+' — Proiecție 2025→2055',
          body:cityProfile()+' Populație '+pop.toLocaleString()+' loc. · '+
               (grav.growthType==='DECLINING'?'Declin demografic: reabilitare prioritară.':
                grav.growthType==='METROPOLITAN'?'Creștere accelerată: presiune imobiliară ridicată.':
@@ -3578,15 +3990,55 @@ out geom qt;`;
     const yd=document.getElementById('tci-yr'); if(yd) yd.textContent=yr;
     const yt=document.getElementById('tci-yr-top'); if(yt) yt.textContent='PROIECTAT · '+yr;
     const sl=document.getElementById('tci-scrub'); if(sl) sl.value=yr;
-    // Update label dreapta
     const lr=document.getElementById('tci-lbl-right');
     if(lr) lr.textContent='🔮 PROIECTAT · '+yr;
-    // Actualizeaza KPIs
     if(Math.abs(yr-(this._lastKpiUpdate||0))>=2){
       this._lastKpiUpdate=yr;
       this._updateKPIs();
       this._updateBuildingHeight(yr);
       this._updateProjectionLayers(yr);
+    }
+
+    // ── Development Pressure Visualization pentru 2025-2028 ──────────
+    // Documentul audit: "Nu clădiri. Arată presiuni, riscuri, probabilități."
+    this._updateDevPressureOverlay(yr);
+  },
+
+  _updateDevPressureOverlay(yr) {
+    const el = document.getElementById('tci-dev-pressure');
+    if(!el) return;
+
+    const grav = this._calcGravityScore(this.d);
+    const need = this._calcUrbanNeed(this.d);
+    const L = grav.lifecycle?.score || 0;
+
+    if(yr <= 2028) {
+      // Primii 3 ani: nu apar clădiri → arată presiunile active
+      const yDelta = yr - 2025;
+      const presRez = Math.round(need.locuinteTotale / 30 * (1 + yDelta * 0.04));
+      const presEco = Math.round((grav.lifecycle?.Ec || 0.5) * 100);
+      const migr2534 = (this.d?.rata_reala_2011_2021||0) > -0.5 ? '+' : '−';
+
+      const items = [
+        {icon:'🏘', label:'Presiune rezidențială', val:`+${presRez} unit/an`, color:'#f59e0b'},
+        {icon:'📈', label:`Lifecycle L=${L>=0?'+':''}${L.toFixed(2)}`, val:grav.growthType, color:L>0.1?'#4ade80':L>-0.3?'#fbbf24':'#f87171'},
+        {icon:'👥', label:'Migrație 25-34 ani', val:`${migr2534} tendință`, color:'#60a5fa'},
+        {icon:'🏗', label:'Autorizații estimate', val:`~${need.cladiri.centru+need.cladiri.inner}/an`, color:'#a78bfa'},
+      ];
+
+      el.style.display='block';
+      el.innerHTML = `
+        <div style="font-size:8px;font-weight:700;color:#D4AF37;text-transform:uppercase;margin-bottom:5px;letter-spacing:1px">
+          📊 Presiuni Urbane ${yr}
+        </div>
+        ${items.map(it=>`
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+            <span style="font-size:9px;color:rgba(180,200,225,0.7)">${it.icon} ${it.label}</span>
+            <span style="font-size:9px;font-weight:700;color:${it.color}">${it.val}</span>
+          </div>`).join('')}
+        <div style="font-size:7px;color:rgba(148,163,184,0.4);margin-top:4px">Clădirile apar din ${(this._projZones||[]).reduce((m,z)=>Math.min(m,z.startYr||2055),2055)}</div>`;
+    } else {
+      el.style.display='none';
     }
   },
 
