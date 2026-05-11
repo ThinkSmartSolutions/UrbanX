@@ -339,6 +339,10 @@ const TCI = {
             <button onclick="TCI._snapshot()" style="flex:1;text-align:left;padding:5px 7px;border-radius:4px;border:1px solid rgba(255,255,255,0.07);background:rgba(14,26,52,0.5);color:rgba(200,215,235,0.75);font-size:9px;cursor:pointer;font-family:inherit">📷 Snapshot</button>
             <button onclick="TCI._share()" style="flex:1;text-align:left;padding:5px 7px;border-radius:4px;border:1px solid rgba(255,255,255,0.07);background:rgba(14,26,52,0.5);color:rgba(200,215,235,0.75);font-size:9px;cursor:pointer;font-family:inherit">🔗 Share URL</button>
           </div>
+          <div style="display:flex;gap:4px;margin-top:4px">
+            <button onclick="TCI._generateReport()" style="flex:1;text-align:left;padding:6px 7px;border-radius:4px;border:1px solid rgba(212,175,55,0.4);background:rgba(212,175,55,0.12);color:#D4AF37;font-size:9px;cursor:pointer;font-family:inherit;font-weight:600">📄 Raport PDF</button>
+            <button onclick="TCI._saveScenario();alert('Scenariu salvat!')" style="flex:1;text-align:left;padding:6px 7px;border-radius:4px;border:1px solid rgba(99,102,241,0.4);background:rgba(99,102,241,0.12);color:#818cf8;font-size:9px;cursor:pointer;font-family:inherit;font-weight:600">💾 Salvează</button>
+          </div>
 
           <!-- SEPARATOR -->
           <div style="border-top:1px solid rgba(212,175,55,0.2);margin:2px 0"></div>
@@ -1760,25 +1764,55 @@ out geom qt;`;
       return zones;
     }
 
-    // ── Fallback generic (orice alt UAT) — offset relativ față de centru ──
-    const pop = this.cityData?.pop2021 || 100000;
-    const sc  = Math.pow(pop / 360000, 0.4);
-    const C   = this.COLORS;
-    const zones = [];
-    const addIf = (zone) => { if(ok(zone.ring?.cx||zone.rect?.cx, zone.ring?.cy||zone.rect?.cy)) zones.push(zone); };
-    addIf({id:'CV', color:C.centru, hMax:42,startYr:2026,
-           ring:{cx:cx,cy:cy,rx:0.0026*sc,ry:0.0018*sc},label:'Centru Civic',sub:'Densificare R+6→R+10'});
-    addIf({id:'RN', color:C.rezid, hMax:24,startYr:2028,
-           ring:{cx:cx+0.012*sc,cy:cy+0.014*sc,rx:0.0040*sc,ry:0.0028*sc},label:'Rezidențial Nord',sub:'R+4→R+6'});
-    addIf({id:'RS', color:C.rezid, hMax:22,startYr:2030,
-           ring:{cx:cx+0.005*sc,cy:cy-0.010*sc,rx:0.0042*sc,ry:0.0030*sc},label:'Rezidențial Sud',sub:'R+3→R+5'});
-    addIf({id:'RI', color:C.reconv,hMax:30,startYr:2031,
-           rect:{cx:cx+0.022*sc,cy:cy-0.010*sc,w:0.008*sc,h:0.006*sc},label:'Reconversie',sub:'Industrial→Mixt'});
-    addIf({id:'PE', color:C.nou,   hMax:14,startYr:2030,
-           ring:{cx:cx+0.025*sc,cy:cy-0.006*sc,rx:0.0055*sc,ry:0.0040*sc},label:'Expansiune Est',sub:'Rezidențial nou PUZ'});
-    addIf({id:'PV', color:C.nou,   hMax:12,startYr:2033,
-           ring:{cx:cx-0.020*sc,cy:cy+0.005*sc,rx:0.0048*sc,ry:0.0034*sc},label:'Expansiune Vest',sub:'Rezidențial nou PUZ'});
-    console.log('[TCI] Zone generice:', zones.length, 'pentru', cityKey);
+    // ── GENERATOR STATISTIC — Cohort+Gravity+Seismic+Scenariu ──────────
+    const need    = this._calcUrbanNeed(this.cityData);
+    const gravity = this._calcGravityScore(this.cityData);
+    const seismic = this._getSeismicAg(cx, cy);
+    const scn     = this._getScenario?.() || {hMaxMultiplier:1.0,expansieMultiplier:1.0};
+    const sc      = need.scale;
+    const C       = this.COLORS;
+    const zones   = [];
+    const addIf   = z => { const lon=z.ring?.cx||z.rect?.cx,lat=z.ring?.cy||z.rect?.cy; if(ok(lon,lat)) zones.push(z); };
+    // seismicCap: combină P100 + gravity hMult + scenariu hMaxMult
+    const hMult = (gravity.growthType==='METROPOLITAN'?1.0:gravity.growthType==='REGIONAL'?.80:gravity.growthType==='LOCAL'?.65:.50) * (scn.hMaxMultiplier||1.0);
+    const seismicCap = h => Math.min(h*hMult, seismic.hMaxM);
+
+    const hC = seismicCap(Math.min(60,Math.max(25,25+need.cladiri.centru)));
+    addIf({id:'CV',color:C.centru,hMax:hC,startYr:2026,density:need.cladiri.centru,
+           ring:{cx,cy,rx:0.0022*sc,ry:0.0015*sc},label:'Centru Civic',
+           sub:`Densificare R+${Math.round(hC/3.5)}→R+${Math.round(hC/2.5)} · ${gravity.growthType}`});
+
+    const hCor = seismicCap(Math.min(30,Math.max(12,12+need.cladiri.coridor/5)));
+    addIf({id:'AX-EV',color:C.coridor,hMax:hCor,startYr:2027,density:Math.ceil(need.cladiri.coridor/3),
+           rect:{cx,cy:cy-0.001*sc,w:0.020*sc,h:0.0014*sc},label:'Ax Est-Vest',sub:`Bulevard · R+4→R+${Math.round(hCor/3)}`});
+    addIf({id:'AX-NS',color:C.coridor,hMax:hCor-3,startYr:2028,density:Math.ceil(need.cladiri.coridor/3),
+           rect:{cx:cx+0.001*sc,cy,w:0.0014*sc,h:0.018*sc},label:'Ax Nord-Sud',sub:`Arteră principală`});
+
+    const hI = seismicCap(Math.min(40,Math.max(18,16+need.cladiri.inner/3)));
+    addIf({id:'CN',color:'#6366f1',hMax:hI,startYr:2027,density:Math.ceil(need.cladiri.inner/2),
+           ring:{cx:cx+0.010*sc,cy:cy+0.012*sc,rx:0.0038*sc,ry:0.0026*sc},label:'Zonă Centrală Nord',sub:`R+${Math.round(hI/3.5)}`});
+    addIf({id:'CS',color:'#6366f1',hMax:hI-3,startYr:2028,density:Math.floor(need.cladiri.inner/2),
+           ring:{cx:cx-0.002*sc,cy:cy-0.010*sc,rx:0.0040*sc,ry:0.0028*sc},label:'Zonă Centrală Sud',sub:`R+${Math.round((hI-3)/3.5)}`});
+
+    const hR = seismicCap(Math.min(28,Math.max(10,10+need.cladiri.rezid/5)));
+    addIf({id:'RN',color:C.rezid,hMax:hR,startYr:2028,density:Math.ceil(need.cladiri.rezid/2),
+           ring:{cx:cx+0.018*sc,cy:cy+0.016*sc,rx:0.0048*sc,ry:0.0034*sc},label:'Rezidențial Nord',sub:`R+${Math.round(hR/3.5)}`});
+    addIf({id:'RS',color:C.rezid,hMax:hR-2,startYr:2030,density:Math.floor(need.cladiri.rezid/2),
+           ring:{cx:cx+0.008*sc,cy:cy-0.016*sc,rx:0.0045*sc,ry:0.0032*sc},label:'Rezidențial Sud',sub:`R+${Math.round((hR-2)/3.5)}`});
+
+    addIf({id:'BIR',color:'#0ea5e9',hMax:seismicCap(38),startYr:2028,density:Math.round(need.cladiri.centru*.4),
+           ring:{cx:cx+0.008*sc,cy:cy-0.003*sc,rx:0.0020*sc,ry:0.0014*sc},label:'Pol Terțiar',sub:'Birouri · servicii'});
+    addIf({id:'RI',color:C.reconv,hMax:seismicCap(28),startYr:2031,density:Math.round(need.cladiri.rezid*.3),
+           rect:{cx:cx+0.024*sc,cy:cy-0.010*sc,w:0.010*sc,h:0.007*sc},label:'Reconversie Industrială',sub:'Industrial→Mixt'});
+
+    if((need.deltaPop>0||need.locuinteReab>1500)&&gravity.growthType!=='DECLINING'&&(scn.expansieMultiplier||1)>.3){
+      const hE=seismicCap(Math.min(16,Math.max(7,7+need.cladiri.expansie/6)));
+      addIf({id:'EE',color:C.nou,hMax:hE,startYr:2031,density:Math.ceil(need.cladiri.expansie/2),
+             ring:{cx:cx+0.028*sc,cy:cy-0.008*sc,rx:0.0058*sc,ry:0.0040*sc},label:'Expansiune Est (PUZ)',sub:`R+2→R+${Math.round(hE/3)}`});
+      addIf({id:'EV',color:C.nou,hMax:hE-2,startYr:2033,density:Math.floor(need.cladiri.expansie/2),
+             ring:{cx:cx-0.022*sc,cy:cy+0.006*sc,rx:0.0052*sc,ry:0.0036*sc},label:'Expansiune Vest (PUZ)',sub:'Include extravilan'});
+    }
+    console.log(`[TCI] Zone generice ${gravity.growthType} | ag=${seismic.ag}g | ${need.locuinteTotale.toLocaleString()} loc. | s=${need.s2025}→${need.s2055}`);
     return zones;
   },
 
@@ -2796,8 +2830,24 @@ out geom qt;`;
   },
 
   setScenario(s) {
+    if(!s||this.scenario===s)return;
     this.scenario=s;
     this._updateKPIs();
+    // Rebuild zones cu noul scenariu
+    const cx=this.cityData?.lon||27.601, cy=this.cityData?.lat||47.158;
+    this._projZones=this._buildZones(cx,cy,this._constraints||{bufs:[]});
+    this._updateProjectionLayers(this.year||2025);
+    // Rebuild 3D cu animație resetată
+    if(this._3D?._ready){
+      this._3D._entities=[];
+      (this._3D._meshes||[]).forEach(m=>{try{m.geometry?.dispose();m.material?.dispose();}catch(e){}});
+      (this._3D._shadows||[]).forEach(s=>{try{s.geometry?.dispose();s.material?.dispose();}catch(e){}});
+      while(this._3D._scene?.children?.length>1)this._3D._scene.remove(this._3D._scene.children[1]);
+      this._3D._meshes=[];this._3D._shadows=[];
+      if(this._3D._currentH)this._3D._currentH.fill(0.1);
+      this._3D.buildSceneGraph(this._projZones,this.year||2025);
+    }
+    console.log('[TCI] Scenariu→',s,this._getScenario()?.label);
   },
 
   _snapshot() {
