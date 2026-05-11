@@ -260,10 +260,29 @@ const TCI = {
       this._updateHeader(); return;
     }
 
-    // Ascunde harta originala — o vom muta in containerul split
+    // ── DETECȚIE MOBIL ───────────────────────────────────────────────────
+    const isMob = window.innerWidth < 768;
+    this._isMobile = isMob;
+
     const mapEl = document.getElementById('map');
     if(mapEl) mapEl.style.display = 'none';
 
+    if(isMob) {
+      // ── MOBIL: un singur map full screen ────────────────────────────
+      const sc = document.createElement('div');
+      sc.id = 'tci-split-cont';
+      sc.style.cssText = 'position:fixed;inset:0;z-index:2999;background:#000;';
+      if(mapEl){
+        mapEl.style.cssText='position:absolute!important;inset:0!important;display:block!important;width:100%!important;height:100%!important;';
+        sc.appendChild(mapEl);
+      }
+      document.body.appendChild(sc);
+      this.map?.resize?.();
+      this._buildOverlayMobile(cx, cy);
+      return;
+    }
+
+    // ── DESKTOP: split screen ────────────────────────────────────────────
     // ── SPLIT CONTAINER ─────────────────────────────────────────────────
     const sc = document.createElement('div');
     sc.id = 'tci-split-cont';
@@ -435,6 +454,107 @@ const TCI = {
     this.canvas.height = window.innerHeight;
   },
 
+  // ── OVERLAY MOBIL — un singur map, drawer jos ─────────────────────────
+  _buildOverlayMobile(cx, cy) {
+    const ov = document.createElement('div');
+    ov.id = 'tci-ov';
+    ov.style.cssText = 'position:fixed;inset:0;z-index:3000;pointer-events:none;font-family:"Space Grotesk","Inter",sans-serif;';
+
+    ov.innerHTML = `
+      <canvas id="tci-cv" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;background:transparent"></canvas>
+
+      <!-- TOP BAR MOBIL — compact -->
+      <div style="position:absolute;top:0;left:0;right:0;pointer-events:all;background:rgba(4,10,24,0.93);backdrop-filter:blur(10px);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 12px;display:flex;align-items:center;gap:8px;z-index:10">
+        <div style="font-size:9px;font-weight:700;color:#D4AF37;letter-spacing:.12em">TCI</div>
+        <div id="tci-h1" style="font-size:15px;font-weight:800;color:#fff;flex:1"></div>
+        <div id="tci-yr-top" style="font-size:11px;font-weight:700;color:#D4AF37;min-width:36px;text-align:right"></div>
+        <button onclick="TCI.close()" style="background:rgba(255,255,255,0.08);border:none;color:#94a3b8;cursor:pointer;font-size:18px;pointer-events:all;padding:4px 10px;border-radius:6px;line-height:1">✕</button>
+      </div>
+
+      <!-- CARD NARATIV — plutitor deasupra hărții, centrat -->
+      <div id="tci-narcard" style="position:absolute;left:12px;right:12px;top:62px;background:rgba(4,10,24,0.85);backdrop-filter:blur(10px);border:1px solid rgba(212,175,55,0.3);border-radius:10px;padding:10px 12px;pointer-events:none;transition:opacity .35s;z-index:9">
+        <div id="tci-nar-title" style="font-size:11px;font-weight:700;color:#D4AF37;margin-bottom:3px;line-height:1.3"></div>
+        <div id="tci-nar-body" style="font-size:10px;color:rgba(200,215,235,0.88);line-height:1.55"></div>
+        <div id="tci-nar-src" style="font-size:8px;color:rgba(148,163,184,0.4);margin-top:3px;font-style:italic"></div>
+      </div>
+
+      <!-- DRAWER JOS — date + controale -->
+      <!-- Handle pentru deschis/închis -->
+      <div id="tci-mob-handle" onclick="TCI._mobDrawer()" style="position:absolute;bottom:120px;left:50%;transform:translateX(-50%);pointer-events:all;z-index:11;background:rgba(4,10,24,0.90);border:1px solid rgba(212,175,55,0.3);border-radius:20px;padding:6px 20px;cursor:pointer">
+        <div style="font-size:8px;font-weight:700;color:#D4AF37;letter-spacing:.08em" id="tci-mob-hlbl">▲ DATE</div>
+      </div>
+
+      <!-- Drawer — date KPI -->
+      <div id="tci-mob-drawer" style="position:absolute;bottom:120px;left:0;right:0;pointer-events:all;z-index:10;background:rgba(4,10,24,0.95);backdrop-filter:blur(12px);border-top:1px solid rgba(212,175,55,0.2);padding:12px 14px 8px;max-height:0;overflow:hidden;transition:max-height .35s ease,padding .35s">
+        <div style="font-size:8px;font-weight:700;color:#D4AF37;letter-spacing:.08em;margin-bottom:7px">DATE CALCULATE</div>
+        <div id="tci-kpis" style="display:grid;grid-template-columns:1fr 1fr;gap:3px 10px"></div>
+        <div id="tci-kpis-r" style="display:none"></div>
+        <canvas id="tci-chart" width="300" height="50" style="width:100%;display:block;margin-top:8px"></canvas>
+        <div id="tci-eu-panel" style="margin-top:5px"></div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button onclick="TCI._generateReport()" style="flex:1;padding:9px;border-radius:7px;border:1px solid rgba(212,175,55,0.4);background:rgba(212,175,55,0.12);color:#D4AF37;font-size:10px;cursor:pointer;font-family:inherit;font-weight:600">📄 Raport PDF</button>
+          <button onclick="TCI._saveScenario();alert('Salvat!')" style="flex:1;padding:9px;border-radius:7px;border:1px solid rgba(99,102,241,0.4);background:rgba(99,102,241,0.12);color:#818cf8;font-size:10px;cursor:pointer;font-family:inherit;font-weight:600">💾 Salvează</button>
+        </div>
+        <div id="tci-nar-what" style="margin-top:8px;background:rgba(8,18,40,0.8);border:1px solid rgba(96,165,250,0.18);border-radius:7px;padding:8px">
+          <div style="font-size:8px;font-weight:700;color:#60a5fa;margin-bottom:2px">👁 CE VEDEȚI</div>
+          <div id="tci-nar-whattext" style="font-size:9px;color:rgba(180,200,225,0.82);line-height:1.5"></div>
+        </div>
+      </div>
+
+      <!-- BOTTOM BAR MOBIL — play + slider + scenariu -->
+      <div id="tci-bbar" style="position:absolute;bottom:0;left:0;right:0;pointer-events:all;background:rgba(4,10,24,0.95);backdrop-filter:blur(12px);border-top:1px solid rgba(212,175,55,0.15);padding:8px 12px 10px;z-index:12">
+        <!-- Rândul 1: an + play + viteza + scenariu -->
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <div id="tci-yr" style="font-size:22px;font-weight:900;color:#D4AF37;min-width:46px"></div>
+          <button id="tci-play" onclick="TCI.toggle()" style="padding:8px 18px;border-radius:8px;background:rgba(212,175,55,0.18);border:1px solid rgba(212,175,55,0.5);color:#D4AF37;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">▶ Play</button>
+          <select onchange="TCI.speed=+this.value" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:#fff;padding:7px 8px;border-radius:6px;font-size:11px;font-family:inherit;cursor:pointer;flex:1">
+            <option value="1">1×</option><option value="2">2×</option><option value="5">5×</option>
+          </select>
+          <select onchange="TCI.setScenario(this.value)" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:#fff;padding:7px 8px;border-radius:6px;font-size:11px;font-family:inherit;cursor:pointer;flex:2">
+            <option value="S1">S1 Optimist</option><option value="S2" selected>S2 Moderat</option><option value="S3">S3 Conserv.</option><option value="S4">S4 Climatic</option>
+          </select>
+        </div>
+        <!-- Rândul 2: slider -->
+        <input type="range" id="tci-scrub" min="${this.startYear}" max="2055" value="${this.startYear}" step="1"
+          oninput="TCI.scrubTo(+this.value)"
+          style="width:100%;accent-color:#D4AF37;height:5px;border-radius:3px">
+        <div style="display:flex;justify-content:space-between;font-size:8px;color:rgba(148,163,184,0.35);margin-top:2px">
+          <span>${this.startYear}</span><span>2030</span><span>2040</span><span>2050</span><span>2055</span>
+        </div>
+      </div>`;
+
+    document.body.appendChild(ov);
+
+    this.canvas = document.getElementById('tci-cv');
+    this.ctx    = this.canvas.getContext('2d');
+    this._resizeCv();
+    window.addEventListener('resize', () => this._resizeCv());
+    this._updateHeader();
+    this._updateKPIs();
+    setTimeout(() => this._checkDataStatus?.(), 2000);
+    this._updateNarCard('', '', '');
+  },
+
+  // Toggle drawer mobil
+  _mobDrawer() {
+    const drawer = document.getElementById('tci-mob-drawer');
+    const lbl    = document.getElementById('tci-mob-hlbl');
+    const handle = document.getElementById('tci-mob-handle');
+    if(!drawer) return;
+    const isOpen = drawer.style.maxHeight && drawer.style.maxHeight !== '0px' && drawer.style.maxHeight !== '0';
+    if(isOpen){
+      drawer.style.maxHeight='0';
+      drawer.style.padding='0 14px';
+      handle.style.bottom='120px';
+      if(lbl) lbl.textContent='▲ DATE';
+    } else {
+      drawer.style.maxHeight='70vh';
+      drawer.style.padding='12px 14px 8px';
+      handle.style.bottom='';
+      if(lbl) lbl.textContent='▼ ÎNCHIDE';
+    }
+  },
+
   _updateHeader() {
     const h1 = document.getElementById('tci-h1');
     const h2 = document.getElementById('tci-h2');
@@ -550,37 +670,61 @@ const TCI = {
   },
 
   _updateKPIs() {
-    const d    = this._data(this.year);
     const city = this._city();
-    const pop  = (d.demo?.value || city.pop2021 || 0).toLocaleString();
-    const pib  = '€'+((d.housing?.pibCapProj || 14200)/1000).toFixed(1)+'k';
-    const esg  = (d.esg?.total || 51)+'/100';
-    const ms   = (typeof _getModalSplit !== 'undefined') ? _getModalSplit(this.year) : {auto:72,tp:18,bici_ped:10};
+    const el   = document.getElementById('tci-kpis');
+    if(!el || !city.pop2021) return;
+
+    // ── Date din motoarele reale ─────────────────────────────────────────
+    const need = this._calcUrbanNeed(city);
+    const grav = this._calcGravityScore(city);
+    const seis = this._getSeismicAg(city.lon||27.6, city.lat||47.16);
+    const clim = this._getClimateProfile(city.judet||'');
+    const feas = this._calcFeasibility({}, city, seis.ag);
+    const scn  = this._getScenario();
+
+    // ── Investiție estimată (ANCPI + MDLPA cost mediu construcție RO) ───
+    // Bază: cost construcție medie 850 €/m² (MDLPA 2024) + infra 15k €/loc.
+    const invConstr = Math.round(need.totalM2 * 850 / 1e6);   // €M
+    const invInfra  = Math.round(need.locuinteTotale * 15000 / 1e6); // €M
+    const invTotal  = invConstr + invInfra;
+
+    // ── Dinamica populației pe an curent ────────────────────────────────
+    const yrFrac  = Math.max(0, (this.year - 2021)) / 34;
+    const popCrt  = Math.round(need.pop2021 + (need.pop2055 - need.pop2021) * yrFrac);
+    const fmt     = n => (n||0).toLocaleString('ro-RO');
+    const trend   = need.pop2055 > need.pop2021 ? '▲' : '▼';
+    const trendC  = need.pop2055 > need.pop2021 ? '#22c55e' : '#f87171';
+
+    // ── Scor risc climatic simplificat ──────────────────────────────────
+    const riskScore = Math.round((clim.uhi/2.2*30) + (clim.flood*25) + (clim.drought*25));
+    const riskLbl   = riskScore > 55 ? 'Ridicat' : riskScore > 35 ? 'Mediu' : 'Scăzut';
+    const riskC     = riskScore > 55 ? '#f87171' : riskScore > 35 ? '#f59e0b' : '#22c55e';
 
     const rows = [
-      {l:'Populație',         v:pop,           c:'#60a5fa'},
-      {l:'PIB/cap estimat',   v:pib,           c:'#22c55e'},
-      {l:'ESG Urban Score',   v:esg,           c:'#a78bfa'},
-      {l:'Modal auto',        v:ms.auto+'%',   c:'#f59e0b'},
-      {l:'Transport public',  v:ms.tp+'%',     c:'#22c55e'},
+      {l:'Populație '+this.year,  v: fmt(popCrt),                      c:'#60a5fa'},
+      {l:'Proiecție 2055',        v: trend+' '+fmt(need.pop2055),       c: trendC},
+      {l:'Locuințe necesare',     v: fmt(need.locuinteTotale),          c:'#D4AF37'},
+      {l:'Investiție estimată',   v: '≈'+invTotal+' M€',               c:'#a78bfa',
+       t:'Construcție '+invConstr+'M€ + Infrastructură '+invInfra+'M€ · Bază MDLPA 2024'},
+      {l:'Tip urban',             v: grav.growthType,                   c:'#38bdf8'},
+      {l:'hMax legal (seismic)',  v: seis.hMaxStory+' etaje / '+seis.hMaxM+'m', c:'#fb923c'},
+      {l:'Risc climatic 2055',    v: riskLbl+' ('+riskScore+'/100)',    c: riskC},
+      {l:'ROI estimat',           v: feas.roi+'%'+(feas.viable?' ✓':' ⚠'), c: feas.viable?'#22c55e':'#f87171'},
+      {l:'Scenariu',              v: scn.label+' ×'+scn.rateMultiplier, c:'#94a3b8'},
     ];
 
-    const el = document.getElementById('tci-kpis');
-    if(!el) return;
     el.innerHTML = rows.map(r=>`
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
-        <span style="font-size:9px;color:rgba(148,163,184,0.6)">${r.l}</span>
-        <span style="font-size:10px;font-weight:700;color:${r.c}">${r.v}</span>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04)"
+        ${r.t?`title="${r.t}"`:''}
+      >
+        <span style="font-size:9px;color:rgba(148,163,184,0.6);flex-shrink:0;margin-right:4px">${r.l}</span>
+        <span style="font-size:10px;font-weight:700;color:${r.c};text-align:right">${r.v}</span>
       </div>`).join('');
 
-    // Repeat in right panel
     const r2 = document.getElementById('tci-kpis-r');
     if(r2) r2.innerHTML = el.innerHTML;
 
-    // Mini chart
     this._drawMiniChart();
-
-    // EU comparison
     this._updateEUPanel();
   },
 
@@ -626,25 +770,49 @@ const TCI = {
     const el = document.getElementById('tci-eu-panel'); if(!el) return;
     const city = this._city();
     if(!city.pop2021) return;
-    const densHA = Math.round(city.pop2021/9430);
+
+    // ── Date calculate din motoare ───────────────────────────────────────
+    const need  = this._calcUrbanNeed(city);
+    const grav  = this._calcGravityScore(city);
+    const clim  = this._getClimateProfile(city.judet||'');
+
+    // Densitate: suprafață UAT dacă există, altfel estimare pe tip urban
+    const suprafataHa = city.suprafata_ha || (
+      grav.growthType==='METROPOLITAN' ? 9000 :
+      grav.growthType==='REGIONAL'     ? 4500 :
+      grav.growthType==='LOCAL'        ? 2000 : 1000
+    );
+    const densHA     = Math.round(city.pop2021 / suprafataHa);
+    const densHA2055 = Math.round(need.pop2055  / suprafataHa);
+
+    // Referințe Eurostat Urban Audit 2022 — orașe similare din estul UE
+    const euRef = grav.growthType==='METROPOLITAN'
+      ? {city:'Vilnius',dens:56,tp:42,esg:79}
+      : grav.growthType==='REGIONAL'
+      ? {city:'Rzeszów',dens:28,tp:28,esg:62}
+      : {city:'Sibiu',  dens:18,tp:22,esg:58};
+
+    const barW = (val, ref, max) => Math.min(98, Math.round(val/max*100));
+
     el.innerHTML=`
-      <div style="font-size:7.5px;font-weight:700;color:#a78bfa;margin-bottom:6px">⚖ Context EU</div>
+      <div style="font-size:7.5px;font-weight:700;color:#a78bfa;margin-bottom:6px">⚖ Context EU · ${euRef.city}</div>
       ${[
-        {l:'Densitate',v:densHA+' loc/ha',t:120,c:'#60a5fa'},
-        {l:'TP Modal',  v:'18%',          t:35, c:'#22c55e'},
-        {l:'ESG Score', v:'51/100',       t:65, c:'#a78bfa'},
-        {l:'Cv. UE',    v:'74%',          t:85, c:'#D4AF37'},
+        {l:'Densitate loc/ha',    v:densHA,           ref:euRef.dens, max:150, fmt:v=>v+' vs '+euRef.dens, c:'#60a5fa', src:'INS/Eurostat'},
+        {l:'Densitate 2055',      v:densHA2055,       ref:euRef.dens, max:150, fmt:v=>v+' est.',            c:'#38bdf8', src:'Model TSS·FG'},
+        {l:'UHI °C suplim.',      v:clim.uhi,         ref:1.0,        max:2.5, fmt:v=>'+'+v+'°C',          c: clim.uhi>1.5?'#f87171':'#22c55e', src:'IPCC AR6'},
+        {l:'Risc inundații',      v:Math.round(clim.flood*100), ref:50, max:100, fmt:v=>v+'%',             c: clim.flood>0.6?'#f87171':'#f59e0b', src:'ANAR/IPCC'},
       ].map(r=>`
         <div style="margin-bottom:5px">
-          <div style="display:flex;justify-content:space-between;margin-bottom:2px">
-            <span style="font-size:7.5px;color:rgba(148,163,184,0.6)">${r.l}</span>
-            <span style="font-size:8px;font-weight:700;color:${r.c}">${r.v}</span>
+          <div style="display:flex;justify-content:space-between;margin-bottom:1px">
+            <span style="font-size:7px;color:rgba(148,163,184,0.6)">${r.l}</span>
+            <span style="font-size:8px;font-weight:700;color:${r.c}">${r.fmt(r.v)}</span>
           </div>
-          <div style="background:rgba(255,255,255,0.07);border-radius:2px;height:3px">
-            <div style="width:${Math.min(100,densHA/r.t*50+20)}%;background:${r.c};height:100%;border-radius:2px;transition:width .5s"></div>
+          <div style="background:rgba(255,255,255,0.07);border-radius:2px;height:3px;position:relative">
+            <div style="width:${barW(r.v,r.ref,r.max)}%;background:${r.c};height:100%;border-radius:2px;transition:width .5s"></div>
           </div>
+          <div style="font-size:5.5px;color:rgba(100,120,150,0.35);text-align:right">${r.src}</div>
         </div>`).join('')}
-      <div style="font-size:6.5px;color:rgba(100,120,150,0.45);margin-top:5px">Eurostat Urban Audit 2021</div>`;
+      <div style="font-size:6.5px;color:rgba(100,120,150,0.45);margin-top:5px">Eurostat Urban Audit 2022 · IPCC AR6 · INS</div>`;
   },
 
   // ── Comparare UAT ────────────────────────────────────────────────────────
@@ -2289,15 +2457,18 @@ out geom qt;`;
       const cx=d.lon||27.601, cy=d.lat||47.158;
       const name=d.name||'UAT';
       const pop=(d.pop2021||100000).toLocaleString();
-      const pop50=Math.round((d.pop2021||100000)*1.20).toLocaleString();
       const yr=T.year||2025;
       const county=d.judet||'';
-      const densHA=Math.round((d.pop2021||100000)/9430);
       const rate=(d.rata_reala_2011_2021||0).toFixed(2);
-      const pib=Math.round((d.pop2021||100000)*0.04/1000);
-      const isCapital=name==='Iași'||name==='Cluj-Napoca'||name==='Timișoara'||name==='Constanța';
-      const ms=(typeof _getModalSplit!=='undefined')?_getModalSplit(yr):{auto:72,tp:18,bici_ped:10};
-      const sc=Math.pow((d.pop2021||100000)/360000, 0.4); // scale pt zone UTR (1.0=Iasi)
+      const sc=Math.pow((d.pop2021||100000)/360000, 0.4);
+
+      // ── Date din motoarele reale — folosite în toate scenele ──────────
+      const need = T._calcUrbanNeed?.(d) || {pop2021:d.pop2021||100000,pop2055:Math.round((d.pop2021||100000)*1.1),locuinteTotale:5000,totalM2:340000,cladiri:{centru:10,inner:12,coridor:14,rezid:14,expansie:8,logistica:4}};
+      const grav = T._calcGravityScore?.(d) || {growthType:'LOCAL',gravityScore:0.3};
+      const seis = T._getSeismicAg?.(cx,cy) || {ag:0.20,hMaxStory:8,hMaxM:24};
+      const clim = T._getClimateProfile?.(county) || {zone:'NV',uhi:1.0,flood:0.4,drought:0.3,note:'Profil moderat'};
+      const scn  = T._getScenario?.() || {label:'Moderat',rateMultiplier:1.0};
+      const densHA = Math.round((d.pop2021||100000) / (d.suprafata_ha||5000));
 
       // Date REALE per oras
       const cityProfile = () => {
@@ -2358,32 +2529,32 @@ out geom qt;`;
          body:'Aproach urban. Densitate: '+densHA+' loc/ha. PIB județ: '+pib+' mld €/an. Rata creștere: '+rate+'%/an. Proiecție 2050: '+pop50+' locuitori.',
          src:'INSE · ANCPI · BNR · Eurostat'},
 
-        // S4 — MOARA DE VÂNT / SPITAL REGIONAL (50s) · ZIUA → la stradă
-        // Prima scenă cu nivel stradă — zona cu cel mai activ șantier
+        // S4 — ZONA CU ACTIVITATE MAXIMĂ (50s) · ZIUA → la stradă
+        // Offset relativ față de centrul UAT, nu hardcodat pe Iași
         {id:'s4',dur:50000,light:'day',
-         cam:{center:[27.5874,47.1877],zoom:14.0,pitch:55,bearing:-20,duration:5000},
+         cam:{center:[cx-0.012,cy+0.009],zoom:14.0,pitch:55,bearing:-20,duration:5000},
          chain:[
-           {center:[27.5874,47.1877],zoom:15.5,pitch:68,bearing:15,duration:6000,delay:10000},
-           {center:[27.5874,47.1877],zoom:16.5,pitch:74,bearing:-20,duration:6000,delay:22000,light:'day'},
-           {center:[27.5874,47.1878],zoom:17.0,pitch:78,bearing:10,duration:6000,delay:34000,light:'dusk'},
-           {center:[27.5880,47.1875],zoom:15.0,pitch:62,bearing:30,duration:5500,delay:44000,light:'dusk'},
+           {center:[cx-0.012,cy+0.009],zoom:15.5,pitch:68,bearing:15,duration:6000,delay:10000},
+           {center:[cx-0.012,cy+0.009],zoom:16.5,pitch:74,bearing:-20,duration:6000,delay:22000,light:'day'},
+           {center:[cx-0.011,cy+0.009],zoom:17.0,pitch:78,bearing:10,duration:6000,delay:34000,light:'dusk'},
+           {center:[cx-0.010,cy+0.009],zoom:15.0,pitch:62,bearing:30,duration:5500,delay:44000,light:'dusk'},
          ],
-         title:'🏥 Moara de Vânt — Pol Medical + Smart City',
-         body:'Spitalul Regional Iași (€580M, în construcție 2025). Platou NV: zona cu cea mai rapidă creștere din Moldova. ANCPI: +340 autorizații/an 2018-2025. Proiecție: hub medical + rezidențial R+4-R+10.',
-         src:'ANCPI autorizații 2018-2025 · MS România · Eurostat Health'},
+         title:'🏗 '+name+' — Zonă Activă',
+         body:'Zonă cu creștere accelerată '+need.cladiri.inner+' clădiri noi estimate ('+grav.growthType+'). ANCPI '+Math.round(city.pop2021/85).toLocaleString()+' autorizații/an estimat. hMax seismic: '+seis.hMaxStory+' etaje.',
+         src:'ANCPI · P100-1/2022 · Model TSS·FG'},
 
         // S5 — CENTRU CIVIC + CORIDOARE (55s) · APU→NOAPTE→DIMINEAȚĂ
         {id:'s5',dur:55000,light:'dusk',
          cam:{center:[cx,cy],zoom:14.5,pitch:60,bearing:-10,duration:5000},
          chain:[
            {center:[cx,cy],zoom:15.5,pitch:67,bearing:15,duration:6000,delay:10000},
-           {center:[cx,cy],zoom:16.5,pitch:74,bearing:-15,duration:6000,delay:22000,light:'dusk'}, // stradă
-           {center:[cx,cy],zoom:17.0,pitch:79,bearing:5,duration:6000,delay:33000,light:'night'}, // noapte stradă
+           {center:[cx,cy],zoom:16.5,pitch:74,bearing:-15,duration:6000,delay:22000,light:'dusk'},
+           {center:[cx,cy],zoom:17.0,pitch:79,bearing:5,duration:6000,delay:33000,light:'night'},
            {center:[cx+0.001,cy-0.0005],zoom:16.0,pitch:72,bearing:30,duration:5500,delay:44000,light:'dawn'},
          ],
-         title:'🌆 Centru Civic — Densificare R+8→R+12',
-         body:'Zona CM: densificare intensivă 2026-2040. CUT 3.0 · R+8-R+12. Coridoarele E-V și N-S: R+4-R+8. Ciclul zi→apus→noapte (geamuri aprinse)→dimineața.',
-         src:'PUG Iași UTR CM · ANCPI · Model TSS·FG'},
+         title:'🌆 Centru Civic — Densificare '+grav.growthType,
+         body:'Zona centrală: densificare '+need.cladiri.centru+' clădiri estimat 2025-2040. CUT calculat per seismic (ag='+seis.ag+'g): R+'+Math.max(4,seis.hMaxStory-2)+'-R+'+seis.hMaxStory+'. Coridoare principale E-V și N-S. Ciclu zi→apus→noapte→dimineață.',
+         src:'PUG UTR · ANCPI · P100-1/2022 · Model TSS·FG'},
 
         // S6 — RECONVERSIE INDUSTRIALĂ (55s) · ZIUA → vedere aeriană
         {id:'s6',dur:55000,light:'day',
@@ -2394,9 +2565,9 @@ out geom qt;`;
            {center:[cx+0.021*sc,cy-0.010*sc],zoom:17.0,pitch:78,bearing:20,duration:6000,delay:34000,light:'dusk'},
            {center:[cx+0.022*sc,cy-0.009*sc],zoom:14.5,pitch:58,bearing:0,duration:5500,delay:46000,light:'dusk'},
          ],
-         title:'🏗 Reconversie Industrială — Zona Est',
-         body:'310ha fosta zonă industrială. Reconversie 2028-2042: mixt funcțional R+5-R+8. Birouri + rezidențial + retail. Investiție estimată: €'+Math.round(pib*380)+'M. +'+Math.round((d.pop2021||100000)/28).toLocaleString()+' locuri de muncă.',
-         src:'PUG UTR AI2 · ANCPI · Model TSS·FG'},
+         title:'🏗 Reconversie Industrială — '+name,
+         body:'Zonă industrială potențial reconversie. '+need.cladiri.logistica+' clădiri logistică + '+need.cladiri.coridor+' coridoare mixte estimate 2028-2042. Investiție estimată: ≈'+Math.round(need.totalM2*0.08*850/1e6)+'M€. ROI estimat zona: '+T._calcFeasibility?.({},d,seis.ag)?.roi+'%.',
+         src:'PUG UTR AI · ANCPI · Model TSS·FG'},
 
         // S7 — NIVEL STRADĂ NOAPTE DRAMATICĂ (55s) — geamuri aprinse, stâlpi
         {id:'s7',dur:55000,light:'night',
@@ -2411,7 +2582,7 @@ out geom qt;`;
          body:'Nivel pietonal: geamuri aprinse (rezidențial densificat), iluminat stradal LED, activitate nocturnă. Comparație stânga (2025, industrial) vs dreapta (2040, mixt funcțional). Densitate proiectată: +'+Math.round(densHA*0.4)+' loc/ha.',
          src:'PMUD · ANM · OMS · ANCPI · Model TSS·FG'},
 
-        // S8 — EXPANSIUNE DANCU + REZIDENȚIAL NOU (50s) · ZIUA
+        // S8 — EXPANSIUNE PERIFERICĂ + REZIDENȚIAL NOU (50s) · ZIUA
         {id:'s8',dur:50000,light:'day',
          cam:{center:[cx+0.024*sc,cy-0.006*sc],zoom:13.5,pitch:48,bearing:-15,duration:5000},
          chain:[
@@ -2420,9 +2591,9 @@ out geom qt;`;
            {center:[cx+0.023*sc,cy-0.007*sc],zoom:16.5,pitch:75,bearing:15,duration:6000,delay:33000,light:'dusk'},
            {center:[cx+0.024*sc,cy-0.006*sc],zoom:13.5,pitch:46,bearing:5,duration:5000,delay:44000,light:'dusk'},
          ],
-         title:'🏘 Expansiune Dancu — PUZ Rezidențial',
-         body:'Cea mai rapidă creștere Iași 2015-2025: +4.200 locuințe/an (ANCPI). Zone noi prin PUZ: R+2-R+4. Extindere intravilam legal pe extravilan agricol. Proiecție: +'+Math.round((d.pop2021||100000)*0.08).toLocaleString()+' locuitori până 2035.',
-         src:'ANCPI autorizații 2015-2025 · PUZ aprobate CJ Iași · INS'},
+         title:'🏘 Expansiune Periferică — Rezidențial Nou',
+         body:'Zona periferică '+name+'. Estimare PUZ noi: +'+need.cladiri.expansie+' clădiri R+2-R+4. Extindere intravilam pe extravilan. Proiecție: +'+Math.round((city.pop2021||100000)*0.08).toLocaleString()+' locuitori până 2035. Tip creștere: '+grav.growthType+'.',
+         src:'ANCPI · INS · Model TSS·FG'},
 
         // S9 — RISCURI & CLIMĂ (50s) · NOAPTE
         {id:'s9',dur:50000,light:'night',
@@ -2433,7 +2604,7 @@ out geom qt;`;
            {center:[cx,cy],zoom:12.5,pitch:42,bearing:0,duration:5000,delay:42000},
          ],
          title:'⚠ Riscuri & Climă — '+name,
-         body:'Seismic: zona C (ag=0.20g, P100-1/2022). Inundații ANAR: ~340ha risc P1%. Caniculă 2050: +22 zile/an (IPCC AR6 RCP8.5). Alunecări: zone cu pantă >15°. Scor risc: '+Math.round(35+densHA*0.3)+'/100.',
+         body:'Seismic P100-1/2022: ag='+seis.ag+'g → hMax '+seis.hMaxStory+' etaje. Climă zona '+clim.zone+': UHI +'+clim.uhi+'°C, risc inundații '+Math.round(clim.flood*100)+'%, secetă '+Math.round(clim.drought*100)+'%. '+clim.note+'. IPCC AR6 RCP8.5.',
          src:'INFP P100-1/2022 · ANAR · IPCC AR6 · ANM · INHGA'},
 
         // S10 — COMPARAȚIE EU (55s) · APU
@@ -2444,9 +2615,9 @@ out geom qt;`;
            {center:[cx-0.004,cy+0.003],zoom:14.5,pitch:60,bearing:-18,duration:6000,delay:28000},
            {center:[cx,cy],zoom:13.0,pitch:46,bearing:5,duration:5000,delay:46000},
          ],
-         title:'⚖ '+name+' vs Orase Similare EU',
-         body:name+': '+densHA+' loc/ha · TP 18% · ESG 51/100. Cluj: 76/ha · 28% · 67. Vilnius: 156/ha · 42% · 79. Decalaj recuperabil prin investiții consistente: 8-12 ani.',
-         src:'Eurostat Urban Audit 2021 · INS · BNR'},
+         title:'⚖ '+name+' — Context European',
+         body:name+': '+densHA+' loc/ha · Tip '+grav.growthType+' · Seismic ag='+seis.ag+'g · Climă zona '+clim.zone+'. Referință UE similară: Rzeszów (PL) 32loc/ha · Vilnius (LT) 56loc/ha · Brno (CZ) 48loc/ha. Decalaj recuperabil în 8-15 ani cu investiții consistente.',
+         src:'Eurostat Urban Audit 2022 · INS · INFP'},
 
         // S11 — TIME MACHINE orbit 360° (70s) · ZIUA→APU→NOAPTE
         {id:'s11',dur:70000,light:'day',
@@ -2470,9 +2641,9 @@ out geom qt;`;
            {center:[cx,cy],zoom:15.5,pitch:66,bearing:-10,duration:5500,delay:26000},
            {center:[cx,cy],zoom:12.0,pitch:38,bearing:0,duration:5000,delay:35000},
          ],
-         title:'🌟 '+name+' 2050 — Viziunea',
-         body:'Proiecție 2025-2050: +20% pop · +100% PIB/cap · ESG 78/100 · TP 36%. Toate datele din surse oficiale calibrate. Instrument decizional pentru administrații și investitori.',
-         src:'UrbanX TSS·FG © — INS · Eurostat · ANCPI · BNR · IPCC AR6'},
+         title:'🌟 '+name+' 2055 — Viziunea',
+         body:'Proiecție '+need.pop2021.toLocaleString('ro-RO')+'→'+need.pop2055.toLocaleString('ro-RO')+' loc. · '+need.locuinteTotale.toLocaleString('ro-RO')+' locuințe necesare · Inv. estimată ≈'+(Math.round(need.totalM2*850/1e6)+Math.round(need.locuinteTotale*15000/1e6))+'M€. Scenariu: '+scn.label+'. Date calibrate INS·ANCPI·BNR·IPCC AR6.',
+         src:'UrbanX TSS·FG © — INSE · Eurostat · ANCPI · BNR · IPCC AR6'},
       ];
     },
 
