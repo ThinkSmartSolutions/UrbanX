@@ -659,6 +659,7 @@ const TCI = {
           <!-- DATE LIVE -->
           <div style="font-size:7px;font-weight:700;color:#D4AF37;letter-spacing:.08em">DATE LIVE</div>
           <div id="tci-kpis"></div>
+          <div id="tci-housing-mix" style="margin-top:6px;padding:6px 0;border-top:1px solid rgba(255,255,255,0.06)"></div>
 
           <!-- BENCHMARK — vizibil, deasupra butoanelor -->
           <div style="border:1px solid rgba(56,189,248,0.25);border-radius:8px;padding:8px;margin-top:6px;background:rgba(14,26,52,0.6)">
@@ -1034,7 +1035,11 @@ const TCI = {
       {l:'Tip urban',             v: grav.growthType,                   c:'#38bdf8'},
       {l:'hMax legal (seismic)',  v: seis.hMaxStory+' etaje / '+seis.hMaxM+'m', c:'#fb923c'},
       {l:'Risc climatic 2055',    v: riskLbl+' ('+riskScore+'/100)',    c: riskC},
-      {l:'ROI estimat',           v: feas.roi+'%'+(feas.viable?' ✓':' ⚠'), c: feas.viable?'#22c55e':'#f87171'},
+      {l:'ROI estimat',           v: feas.roi+'%'+(feas.viable?' ✓':' ⚠'), c: feas.viable?'#22c55e':'#f87171',
+       t:`Brut ${feas.roiBrut}% × factor absorbție → ${feas.roi}% ajustat`},
+      {l:'Absorbție estimată',      v: (feas.absorbtieAn||0).toLocaleString('ro-RO')+' un./an',
+       c: (feas.absorbtieAn||0)>200?'#22c55e':(feas.absorbtieAn||0)>80?'#f59e0b':'#f87171',
+       t:`Accesibilitate credit: ${feas.pctGospodariAcces}% gospodării · Vacanță: ${feas.vacantaLocativa}% · Înlocuire: ${feas.cerereInlocuire} un./an`},
       {l:'Scenariu',              v: scn.label+' ×'+scn.rateMultiplier, c:'#94a3b8'},
     ];
 
@@ -1051,6 +1056,9 @@ const TCI = {
     const Ca = Math.min(1, (city.coef_hub || 0.7));
     const Dp = Math.round((Hd*0.40 + Ig*0.35 + Ca*0.25) * 100);
     const Dpcolor = Dp > 60 ? '#f59e0b' : Dp > 35 ? '#60a5fa' : '#94a3b8';
+
+    // Housing Mix — breakeven pe tipologii
+    const housingMix = this._calcHousingMix(need, city);
 
     const extraRows = [
       {l:'Lifecycle Score L',    v:`${L>=0?'+':''}${L.toFixed(2)} ${Llabel}`,  c:Lcolor},
@@ -1069,6 +1077,33 @@ const TCI = {
 
     const r2 = document.getElementById('tci-kpis-r');
     if(r2) r2.innerHTML = el.innerHTML;
+
+    // ── Housing Mix Panel ──────────────────────────────────────────────
+    const hmEl = document.getElementById('tci-housing-mix');
+    if(hmEl && housingMix) {
+      const { mix, totalInvestitie } = housingMix;
+      hmEl.innerHTML = `
+        <div style="font-size:7px;font-weight:700;color:#D4AF37;letter-spacing:.06em;margin-bottom:5px">
+          MIX CERERE LOCUINȚE 2025→2055
+        </div>
+        ${Object.entries(mix).filter(([,v])=>v.unitati>0).map(([k,v])=>`
+          <div style="margin-bottom:3px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:8px;color:rgba(200,215,235,0.8)">${v.label}</span>
+              <span style="font-size:8px;font-weight:700;color:#D4AF37">${v.unitati.toLocaleString('ro-RO')} un.</span>
+            </div>
+            <div style="display:flex;gap:6px;margin-top:1px">
+              <span style="font-size:7px;color:rgba(148,163,184,0.5)">${v.pct}% · ${v.m2}m² · ≈${v.investitie_m}M€</span>
+            </div>
+            <div style="height:2px;background:rgba(255,255,255,0.06);border-radius:1px;margin-top:2px">
+              <div style="width:${Math.min(100,v.pct*3)}%;height:100%;background:#D4AF37;border-radius:1px;opacity:0.6"></div>
+            </div>
+          </div>`).join('')}
+        <div style="border-top:1px solid rgba(255,255,255,0.08);margin-top:5px;padding-top:4px;display:flex;justify-content:space-between">
+          <span style="font-size:7px;color:rgba(148,163,184,0.5)">Total investiție estimată</span>
+          <span style="font-size:9px;font-weight:700;color:#a78bfa">≈${totalInvestitie.toLocaleString('ro-RO')} M€</span>
+        </div>`;
+    }
 
     this._drawMiniChart();
     this._updateEUPanel();
@@ -1210,10 +1245,11 @@ const TCI = {
       const seis  = this._getSeismicAg(d.lon||27.6, d.lat||47.16);
       const clim  = this._getClimateProfile(d.judet||'');
       const feas  = this._calcFeasibility({}, d, seis.ag);
+      const housing = this._calcHousingMix(need, d);
       const L     = grav.lifecycle?.score ?? 0;
       const Ltype = grav.growthType;
       const Lcolor = L > 0.3 ? '#4ade80' : L > -0.2 ? '#fbbf24' : '#f87171';
-      return { d, grav, need, seis, clim, feas, L, Ltype, Lcolor };
+      return { d, grav, need, seis, clim, feas, housing, L, Ltype, Lcolor };
     };
 
     const A = calc(d1);
@@ -1296,6 +1332,42 @@ const TCI = {
         vB: B.clim.label || (B.clim.uhi+'°C UHI'),
         cA:'#e2e8f0', cB:'#e2e8f0',
         w: null, tip:'IPCC AR6 RCP4.5 · Copernicus' },
+
+      // ── ECONOMIC ABSORPTION ────────────────────────────────────────
+      { l:'Absorbție piață/an',
+        vA: (A.feas.absorbtieAn||0).toLocaleString('ro-RO')+' un.',
+        vB: (B.feas.absorbtieAn||0).toLocaleString('ro-RO')+' un.',
+        cA: (A.feas.absorbtieAn||0)>200?'#4ade80':(A.feas.absorbtieAn||0)>80?'#fbbf24':'#f87171',
+        cB: (B.feas.absorbtieAn||0)>200?'#4ade80':(B.feas.absorbtieAn||0)>80?'#fbbf24':'#f87171',
+        w: cmp(A.feas.absorbtieAn, B.feas.absorbtieAn),
+        tip:'Gospodării noi + cerere înlocuire − stoc excedentar · BNR + putere cumpărare locală' },
+      { l:'Acces credit gospodării',
+        vA: (A.feas.pctGospodariAcces||0)+'%',
+        vB: (B.feas.pctGospodariAcces||0)+'%',
+        cA: (A.feas.pctGospodariAcces||0)>35?'#4ade80':'#fbbf24',
+        cB: (B.feas.pctGospodariAcces||0)>35?'#4ade80':'#fbbf24',
+        w: cmp(A.feas.pctGospodariAcces, B.feas.pctGospodariAcces),
+        tip:'% gospodării cu salariu ≥ rata credit. INS salariu mediu net per județ' },
+      { l:'Vacanță locativă',
+        vA: (A.feas.vacantaLocativa||0)+'%',
+        vB: (B.feas.vacantaLocativa||0)+'%',
+        cA: (A.feas.vacantaLocativa||0)<10?'#4ade80':'#f87171',
+        cB: (B.feas.vacantaLocativa||0)<10?'#4ade80':'#f87171',
+        w: cmp(A.feas.vacantaLocativa, B.feas.vacantaLocativa, false),
+        tip:'Fond locativ excedentar — concurează cu piața primară' },
+
+      // ── HOUSING MIX — top 2 tipologii ─────────────────────────────
+      { l:'Tipologie dominantă',
+        vA: (() => { const hm=A.housing?.mix; if(!hm) return '—'; const top=Object.entries(hm).sort((a,b)=>b[1].unitati-a[1].unitati)[0]; return top?`${top[1].label.split('/')[0].trim()} (${top[1].pct}%)`:'—'; })(),
+        vB: (() => { const hm=B.housing?.mix; if(!hm) return '—'; const top=Object.entries(hm).sort((a,b)=>b[1].unitati-a[1].unitati)[0]; return top?`${top[1].label.split('/')[0].trim()} (${top[1].pct}%)`:'—'; })(),
+        cA:'#e2e8f0', cB:'#e2e8f0',
+        w: null, tip:'Tipologia cu cea mai mare cerere din Housing Mix Engine' },
+      { l:'Senior housing',
+        vA: (() => { const hm=A.housing?.mix; return hm?.senior?`${hm.senior.unitati.toLocaleString('ro-RO')} un. (${hm.senior.pct}%)`:'—'; })(),
+        vB: (() => { const hm=B.housing?.mix; return hm?.senior?`${hm.senior.unitati.toLocaleString('ro-RO')} un. (${hm.senior.pct}%)`:'—'; })(),
+        cA:'#a78bfa', cB:'#a78bfa',
+        w: cmp(A.housing?.mix?.senior?.unitati, B.housing?.mix?.senior?.unitati),
+        tip:'Cerere Senior Housing 65+ ani · populație în îmbătrânire rapidă' },
     ];
 
     // ── Scor global benchmark ─────────────────────────────────────────────
@@ -1465,41 +1537,47 @@ const TCI = {
   _calcLifecycleScore(cityData) {
     if(!cityData) return 0;
     const rata = cityData.rata_reala_2011_2021 || 0;
+    const hub  = cityData.coef_hub || 0.78;
+    const univ = cityData.universitati || 0;
 
     // Pg: creștere demografică normalizată [-1, +1]
-    // Rata -3%/an → -1.0 | 0% → 0 | +3%/an → +1.0
     const Pg = Math.max(-1, Math.min(1, rata / 2.5));
 
-    // Eg: presiune economică din coef_hub calibrat pe media RO (0.78)
-    // 0.5 → -0.5 (declin) | 0.78 → 0 (mediu) | 1.25 → +1.0 (boom)
-    const hub = cityData.coef_hub || 0.78;
+    // Eg: presiune economică din coef_hub (media RO = 0.78)
     const Eg = Math.max(-1, Math.min(1, (hub - 0.78) * 2.2));
 
-    // Mn: balanță migrație (proxy: rata demografică cu pondere universitară)
-    const univBonus = (cityData.universitati || 0) > 2 ? 0.15 : 0;
-    const Mn = Math.max(-1, Math.min(1, Pg + univBonus));
+    // Mn: balanță migrație — SEMNAL INDEPENDENT de Pg
+    // Audit v125: Mn = Pg + bonus era duplicat. Fix:
+    // Mn = f(deviereRegionala, pullEconomic, pullUniversitar)
+    // Logică: un oraș crește față de media regiunii → atrage migrație netă
+    const RATA_MED_REGIUNE = {
+      'BI':0.5,'NV':0.1,'V':0.0,'C':-0.2,
+      'NE':-0.6,'SE':-0.9,'S':-1.1,'SV':-1.2
+    };
+    const regiune = cityData.regiune || 'NE';
+    const rataReg = RATA_MED_REGIUNE[regiune] ?? -0.5;
+    const deviereReg  = Math.max(-1, Math.min(1, (rata - rataReg) / 3.0));
+    const pullEcon    = Math.max(-0.5, Math.min(0.5, (hub - 0.78) * 1.2));
+    const pullUniv    = Math.min(0.4, univ * 0.10);
+    const Mn = Math.max(-1, Math.min(1,
+      deviereReg * 0.55 + pullEcon * 0.30 + pullUniv * 0.15
+    ));
 
-    // Ac: trend autorizații INS TEMPO (dacă disponibil)
-    // 0.5× → -0.5 | 1.0× → 0 | 2.0× → +0.5
+    // Ac: trend autorizații INS TEMPO
     const permTrend = cityData._permitsGrowth || 1.0;
     const Ac = Math.max(-1, Math.min(1, (permTrend - 1.0) * 1.5));
 
-    // L = combinație ponderată
+    // L = Pg×0.35 + Eg×0.25 + Mn×0.25 + Ac×0.15
     const L = Pg*0.35 + Eg*0.25 + Mn*0.25 + Ac*0.15;
     const score = Math.max(-1, Math.min(1, L));
 
-    // ── Inertia urbană — L(t+1) = 0.7×L(t) + 0.3×L_nou ─────────────────
-    // Documentul audit final: "Orașele nu se schimbă instant."
-    // Prev L stocat în cityData._lifecyclePrev (actualizat la fiecare calcul)
+    // Inertie: L(t+1) = 0.7×L(t) + 0.3×L_nou
     const rawScore = score;
-    const prevL = cityData._lifecyclePrev ?? score; // prima rulare = fără inertie
+    const prevL = cityData._lifecyclePrev ?? score;
     const inertiaScore = 0.7 * prevL + 0.3 * rawScore;
-    // Stocăm pentru ciclul următor (modificare directă pe obiect — intenționat)
     if(cityData) cityData._lifecyclePrev = inertiaScore;
-
     const finalScore = Math.max(-1, Math.min(1, inertiaScore));
 
-    // Clasificare
     const lifecycleType =
       finalScore >  0.45 ? 'GROWING'   :
       finalScore >  0.10 ? 'STABLE'    :
@@ -1507,7 +1585,8 @@ const TCI = {
       finalScore > -0.55 ? 'DECLINING' :
                            'SHRINKING';
 
-    return { score: finalScore, rawScore, lifecycleType, Pg, Eg, Mn, Ac, inertia: prevL };
+    return { score:finalScore, rawScore, lifecycleType, Pg, Eg, Mn, Ac,
+             inertia:prevL, deviereReg, pullEcon, pullUniv };
   },
 
   _calcGravityScore(cityData){
@@ -1515,15 +1594,25 @@ const TCI = {
     const UNIV_CITIES={'IS':5,'CJ':4,'TM':4,'B':10,'BV':2,'SB':2,'CS':2,'BC':1,'SV':1,'GL':1,'CT':2,'MS':2,'HR':1,'NT':1};
     const univ=(cityData?.universitati||UNIV_CITIES[cityData?.judet||'']||0),judet=cityData?.judet||'';
     const eP=Math.min(1,pop/400000),eC=Math.max(0,Math.min(1,(rate+0.02)/0.04));
-    const eE=Math.min(1,univ/3),eK=['IS','CJ','TM','B','CT','BV'].includes(judet)?0.8:0.4;
+    const eE=Math.min(1,univ/3);
+
+    // eK: conectivitate rutieră reală per județ — Audit: hardcodat 6 județe era greșit
+    // Sursă: CNAIR 2025 + Masterplan autostrăzi + A7(2027)/A8(2028)
+    const EK_MAP = {
+      'B':1.00,'IF':0.92,'TM':0.88,'CJ':0.88,'PH':0.82,'AR':0.82,'BH':0.82,
+      'BV':0.82,'CT':0.82,'SB':0.78,'DJ':0.78,'AB':0.72,'DB':0.72,'AG':0.70,
+      'IS':0.70,'MS':0.68,'HD':0.68,'MM':0.66,'SM':0.66,'GL':0.68,'BC':0.68,
+      'SJ':0.62,'NT':0.62,'SV':0.62,'CS':0.62,'BZ':0.62,'BR':0.62,
+      'BT':0.52,'VS':0.58,'GJ':0.58,'VL':0.58,'OT':0.56,'MH':0.56,
+      'HR':0.56,'BN':0.60,'CV':0.58,'IL':0.56,'VN':0.52,'TR':0.52,'TL':0.48,'CL':0.54,
+    };
+    const eK = EK_MAP[judet] || 0.52;
+
     const eI=rate>0?0.7:rate>-0.01?0.4:0.2;
     const score=eP*.30+eC*.25+eE*.20+eK*.15+eI*.10;
 
-    // ── Lifecycle Score integrat în growthType ────────────────────────
     const lifecycle = this._calcLifecycleScore(cityData);
     const isLargeCity = pop > 250000;
-
-    // growthType = combinație gravity + lifecycle
     const growthType =
       (score>0.55 || isLargeCity&&score>0.45) ? 'METROPOLITAN' :
       score>0.35 && lifecycle.score>-0.2      ? 'REGIONAL'     :
@@ -1532,17 +1621,10 @@ const TCI = {
       score>0.22                               ? 'LOCAL'        :
                                                  'DECLINING';
 
-    return {
-      gravityScore:score, growthType,
-      ePopulatie:eP, eCrestere:eC, eEducatie:eE, eConectivit:eK,
-      lifecycle, // score continuu disponibil pentru oricine îl cere
-    };
+    return { gravityScore:score, growthType,
+             ePopulatie:eP, eCrestere:eC, eEducatie:eE, eConectivit:eK, lifecycle };
   },
 
-  // ══════════════════════════════════════════════════════════════════════
-  // HOUSEHOLD FORMATION ENGINE — Ht = Pt/St dinamic
-  // Trend INS: 2.3(2021) → 1.9(2040) → 1.75(2055)
-  // ══════════════════════════════════════════════════════════════════════
   _householdSizeAt(year,gravityType){
     const base={METROPOLITAN:2.20,REGIONAL:2.35,LOCAL:2.50,DECLINING:2.60};
     const s0=base[gravityType]||2.30,yr=Math.max(2021,Math.min(2055,year));
@@ -1608,6 +1690,77 @@ const TCI = {
     'CV':{counties:['BV','HR','CV','MS','AB','SB','HD'],uhi:0.8,drought:.3,flood:.4,note:'Transilvania — climat moderat'},
     'SV':{counties:['OT','DJ','MH','GJ','VL','AG'],uhi:1.5,drought:.7,flood:.5,note:'Oltenia — secetă severă 2040-2055'},
   },
+  // ══════════════════════════════════════════════════════════════════════
+  // HOUSING DEMAND ENGINE — Mix tipologii locuințe 2025-2055
+  // Audit: anterior era un singur număr total. Acum: 7 tipologii distincte.
+  // Fiecare are cerere diferită per growthType + demografic + economic.
+  // ══════════════════════════════════════════════════════════════════════════
+  _calcHousingMix(need, cityData) {
+    const { locuinteTotale, pop2021 } = need;
+    const { growthType } = need.gravity;
+    const hub  = cityData?.coef_hub || 0.78;
+    const univ = cityData?.universitati || 0;
+
+    // Structura demografică din populația curentă
+    const pct65plus = 0.048 + 0.038 + 0.035; // 65-69 + 70-74 + 75+
+    const seniorPop = Math.round(pop2021 * pct65plus);
+
+    // ── Ponderi per tipologie ────────────────────────────────────────────
+    // Studio/Garsoniere: tineri 20-35 + single + studenți
+    const pctStudio = Math.min(0.30,
+      0.12 + (univ > 2 ? 0.07 : univ > 0 ? 0.04 : 0)
+           + (hub > 1.0 ? 0.04 : 0)
+           + (growthType==='METROPOLITAN'||growthType==='REGIONAL' ? 0.03 : 0)
+    );
+    // 2 camere: primul apartament, cupluri tinere, migrație economică
+    const pct2cam = 0.26 + (growthType==='METROPOLITAN' ? 0.02 : 0);
+    // 3 camere: familii consolidate, clasa medie
+    const pct3cam = growthType==='METROPOLITAN' ? 0.22 : 0.18;
+    // Senior Housing: 65+ în creștere rapidă (+40% până în 2055)
+    const pctSenior = Math.min(0.15, 0.04 + (seniorPop / pop2021) * 0.35);
+    // Premium: hub economic puternic, expați, management
+    const pctPremium = Math.max(0, Math.min(0.10, (hub - 0.90) * 0.35));
+    // Suburban/Case: expansie periurbană, familii cu copii
+    const pctSuburban = (growthType==='METROPOLITAN'||growthType==='REGIONAL') ? 0.11 : 0.07;
+    // Cămine studențești: per universitate (unități = locuri de cazare)
+    const pctStudent = univ > 0 ? Math.min(0.07, univ * 0.014) : 0;
+
+    // Normalizăm să sumeze 1.0
+    const rawPcts = { studio:pctStudio, t2cam:pct2cam, t3cam:pct3cam,
+                      senior:pctSenior, premium:pctPremium,
+                      suburban:pctSuburban, student:pctStudent };
+    const sumPct = Object.values(rawPcts).reduce((s,v)=>s+v, 0);
+    const pcts = Object.fromEntries(Object.entries(rawPcts).map(([k,v])=>[k, v/sumPct]));
+
+    // Suprafețe medii (m²) și prețuri medii (€/m² ANCPI 2024)
+    const META = {
+      studio:   { m2:38,  eur:1050, label:'Studio / Garsoniere',    segment:'tineri 20-35 ani · studenți · single' },
+      t2cam:    { m2:58,  eur:950,  label:'Apartamente 2 camere',   segment:'familii tinere · migrație economică' },
+      t3cam:    { m2:78,  eur:900,  label:'Apartamente 3 camere',   segment:'familii cu copii · clasă medie' },
+      senior:   { m2:48,  eur:850,  label:'Senior Housing',         segment:'65+ ani · cerere +40% până în 2055' },
+      premium:  { m2:125, eur:1800, label:'Rezidențial Premium',    segment:'venituri >3.000€/lună · expați' },
+      suburban: { m2:155, eur:700,  label:'Case Suburbane',         segment:'expansie periurbană · familii cu mașini' },
+      student:  { m2:18,  eur:600,  label:'Cămine Studențești',     segment:`${Math.round(univ*8000)} locuri necesare` },
+    };
+
+    const mix = {};
+    Object.entries(pcts).forEach(([k, pct]) => {
+      const m = META[k];
+      const unitati = Math.max(0, Math.round(locuinteTotale * pct));
+      const m2_total = unitati * m.m2;
+      mix[k] = {
+        ...m,
+        pct:       Math.round(pct * 100),
+        unitati,
+        m2_total,
+        investitie_m: Math.round(m2_total * m.eur / 1e6), // M€
+      };
+    });
+
+    const totalInvestitie = Object.values(mix).reduce((s,v)=>s+v.investitie_m, 0);
+    return { mix, totalInvestitie };
+  },
+
   _getClimateProfile(judet){
     for(const[z,d]of Object.entries(this._CLIMATE_ZONES))if(d.counties.includes(judet))return{zone:z,...d};
     return{zone:'NV',uhi:1.0,drought:.3,flood:.4,note:'Profil climatic moderat'};
@@ -2219,12 +2372,137 @@ const TCI = {
   // REAL ESTATE FEASIBILITY ENGINE
   // ROI = (Vsale - Ctotal) / Ctotal
   // ══════════════════════════════════════════════════════════════════════
-  _calcFeasibility(zone,cityData,seismicAg){
-    const g=this._calcGravityScore(cityData);
-    const pi=g.growthType==='METROPOLITAN'?1.0:g.growthType==='REGIONAL'?.65:g.growthType==='LOCAL'?.45:.30;
-    const pS=Math.round(1800*pi),pL=Math.round(200*pi),pB=Math.round(700+(seismicAg||.2)*500);
-    const cF=pB*.07*2.5,cT=pL+pB+cF,roi=(pS-cT)/cT;
-    return{priceSale:pS,priceLand:pL,priceBuild:pB,cTotal:Math.round(cT),roi:Math.round(roi*1000)/10,viable:roi>.12,label:roi>.12?`ROI ${Math.round(roi*100)}% ✓`:`ROI ${Math.round(roi*100)}% — risc`};
+  // ══════════════════════════════════════════════════════════════════════
+  // ECONOMIC ABSORPTION ENGINE — v2
+  // Audit: ROI anterior = (pS - cT) / cT. Prea simplu — ignora absorbția reală.
+  //
+  // Absorbție reală = f(putere_cumpărare, creditare, stoc_excedentar, vacanță)
+  //
+  // Date disponibile local (fără API extern):
+  //   - Salariu mediu net per județ (INS 2024, static)
+  //   - Rata BNR de referință (hardcodat la valoarea curentă)
+  //   - Stoc excedentar estimat din household size trend
+  //   - Vacanță locativă estimată din growthType
+  // ══════════════════════════════════════════════════════════════════════
+  _calcFeasibility(zone, cityData, seismicAg) {
+    const g = this._calcGravityScore(cityData);
+    const need = this._calcUrbanNeed(cityData);
+    const pop = cityData?.pop2021 || 100000;
+    const judet = cityData?.judet || 'IS';
+
+    // ── 1. PREȚURI DE VÂNZARE — per tip urban ─────────────────────────
+    // Sursă: ANCPI raport piață imobiliară 2024, calibrat per tier
+    const PRET_VANZARE = {
+      METROPOLITAN: 1800,  // €/m² — Iași, Cluj, TM, București periurban
+      REGIONAL:      950,  // €/m² — Oradea, Sibiu, Brașov mic, Bacău
+      LOCAL:         700,  // €/m² — orașe mici
+      DECLINING:     480,  // €/m² — cerere slabă
+      SHRINKING:     320,  // €/m² — piață aproape inexistentă
+    };
+    const pS = PRET_VANZARE[g.growthType] || 700;
+
+    // ── 2. COSTURI CONSTRUCȚIE — per caracteristici UAT ───────────────
+    const seismic = seismicAg || 0.20;
+    const factorSeismic = seismic >= 0.35 ? 1.28 : seismic >= 0.25 ? 1.14 : 1.00;
+    const pB = Math.round(850 * factorSeismic); // €/m² construcție + seismic
+    const pL = Math.round(150 * (g.gravityScore || 0.4) * 2.2); // teren variabil
+    const cF = Math.round(pB * 0.08);  // costuri financiare (credit constructor)
+    const cT = pL + pB + cF;
+
+    // ── 3. PUTEREA DE CUMPĂRARE — salariu mediu net per județ ─────────
+    // INS 2024 — salariu mediu net lunar (RON), convertit la EUR (1 EUR = 5.0 RON)
+    const SALARIU_NET_EUR = {
+      'B':1580,'IF':1420,'CJ':1380,'TM':1350,'BV':1280,'CT':1250,'SB':1220,
+      'IS':1080,'AR':1180,'BH':1200,'SV':980,'NT':920,'BC':980,'VS':860,
+      'BT':840,'GL':980,'BR':920,'DJ':1050,'OT':880,'GJ':960,'VL':900,
+      'PH':1100,'DB':1020,'AG':1050,'CS':950,'HD':1020,'MS':1050,'HR':980,
+      'MM':1020,'SM':1050,'SJ':960,'AB':1020,'CV':980,'BN':980,'BZ':980,
+      'IL':920,'CL':900,'GR':880,'TR':860,'TL':920,'VN':880,'MH':900,
+    };
+    const salariuEur = SALARIU_NET_EUR[judet] || 950;
+
+    // ── 4. ACCESIBILITATE CREDIT ──────────────────────────────────────
+    // Rata BNR referință (actualizată manual la necesitate)
+    const RATA_BNR = 5.75; // % anual (mai 2026)
+    const rataCreditIpotecar = RATA_BNR + 2.5; // spread bancă tipic
+    // Unitate medie 68m² — cât costă și câtă rată suportă
+    const pretUnitateEur = Math.round(pS * 68);
+    const avans20pct = Math.round(pretUnitateEur * 0.20);
+    const creditNecesar = pretUnitateEur - avans20pct;
+    // Rată lunară credit 30 ani
+    const rataLunara_pct = rataCreditIpotecar / 100 / 12;
+    const nrLuni = 30 * 12;
+    const rataCreditLunara = Math.round(
+      creditNecesar * rataLunara_pct * Math.pow(1 + rataLunara_pct, nrLuni)
+      / (Math.pow(1 + rataLunara_pct, nrLuni) - 1)
+    );
+    // Regula BNR: rata ≤ 40% din venit net
+    const venitMaxAdmis = Math.round(rataCreditLunara / 0.40);
+    // Gospodării cu venituri suficiente (proxy din salariu mediu)
+    // Presupunem distribuție log-normală: ~30% din gospodării au venit > pragul
+    const pctGospodariAcces = Math.max(0.05, Math.min(0.65,
+      salariuEur > venitMaxAdmis
+        ? 0.55  // salariu mediu depășește pragul → >50% au acces
+        : (salariuEur / venitMaxAdmis) * 0.45
+    ));
+
+    // ── 5. STOC EXCEDENTAR — locuințe goale în piață ─────────────────
+    // Estimat din rata demografică și household size trend
+    const rataDemogr = cityData?.rata_reala_2011_2021 || 0;
+    const vacantaLocativa = g.growthType === 'GROWING'    ? 0.04 :
+                            g.growthType === 'STABLE'     ? 0.08 :
+                            g.growthType === 'LOCAL'      ? 0.12 :
+                            g.growthType === 'DECLINING'  ? 0.18 :
+                                                            0.28; // SHRINKING
+    // Fond existent estimat (INS ratio ~0.43 locuinte/persoana)
+    const fondExistent = Math.round(pop * 0.43);
+    const stocExcedentar = Math.round(fondExistent * vacantaLocativa);
+
+    // ── 6. ABSORBȚIE ANUALĂ ───────────────────────────────────────────
+    // Gospodării noi anual (din cohort survival)
+    const gospodariiNoi = Math.round((need.locuinteTotale || 0) / 30); // pe 30 ani
+    // Absorbție = gospodării cu acces credit × rata accesibilitate
+    const absorbtieGospodarii = Math.round(gospodariiNoi * pctGospodariAcces);
+    // Penalizare stoc excedentar: concurență cu piața secundară
+    const penalizareStoc = Math.max(0, Math.round(stocExcedentar * 0.05)); // 5%/an se reabsorb
+    const absorbtieNeta = Math.max(0, absorbtieGospodarii - penalizareStoc);
+    // Cerere de înlocuire: fond vechi (>40 ani) → 1.2%/an necesită înlocuire
+    const cerereInlocuire = Math.round(fondExistent * 0.012);
+    const absorbtieAnualaTotal = absorbtieNeta + cerereInlocuire;
+
+    // ── 7. ROI AJUSTAT CU ABSORBȚIE ───────────────────────────────────
+    // ROI brut (preț vs cost)
+    const roiBrut = (pS - cT) / cT;
+    // Factor absorbție: piață cu absorbție mică → risc crescut → ROI ajustat în jos
+    const absorbtieRef = { METROPOLITAN:600, REGIONAL:250, LOCAL:120, DECLINING:60, SHRINKING:20 };
+    const absorbtieRefVal = absorbtieRef[g.growthType] || 120;
+    const factorAbsorbtie = Math.min(1.2, Math.max(0.5,
+      absorbtieAnualaTotal / absorbtieRefVal
+    ));
+    const roiAjustat = roiBrut * factorAbsorbtie;
+    const roi = Math.round(roiAjustat * 1000) / 10;
+    const viable = roiAjustat > 0.12;
+
+    return {
+      // Prețuri
+      priceSale: pS, priceLand: pL, priceBuild: pB, cTotal: cT,
+      // ROI
+      roi, roiBrut: Math.round(roiBrut * 1000) / 10,
+      viable,
+      // Absorbție
+      absorbtieAn:      absorbtieAnualaTotal,
+      absorbtieNeta,
+      cerereInlocuire,
+      stocExcedentar,
+      vacantaLocativa:  Math.round(vacantaLocativa * 100),
+      // Credit
+      salariuEur, rataCreditLunara, pctGospodariAcces: Math.round(pctGospodariAcces * 100),
+      venitMaxAdmis, pretUnitate: pretUnitateEur,
+      // Label
+      label: viable
+        ? `ROI ${roi}% ✓ · Absorbție ~${absorbtieAnualaTotal} un./an`
+        : `ROI ${roi}% ⚠ · Absorbție limitată ~${absorbtieAnualaTotal} un./an`,
+    };
   },
 
   // ══════════════════════════════════════════════════════════════════════
@@ -2242,165 +2520,332 @@ const TCI = {
   // GENERATOR RAPORT PDF
   // ══════════════════════════════════════════════════════════════════════
   _generateReport(){
-    const d=this.d||{},scn=this._getScenario(),need=this._calcUrbanNeed(d);
-    const grav=this._calcGravityScore(d),seis=this._getSeismicAg(d.lon||27.6,d.lat||47.16);
-    const clim=this._getClimateProfile(d.judet||''),zones=this._projZones||[];
-    const upeRes=this._runUPE(d,zones),feas=this._calcFeasibility({},d,seis.ag);
+    const d=this.d||{}, scn=this._getScenario(), need=this._calcUrbanNeed(d);
+    const grav=this._calcGravityScore(d), seis=this._getSeismicAg(d.lon||27.6,d.lat||47.16);
+    const clim=this._getClimateProfile(d.judet||''), zones=this._projZones||[];
+    const upeRes=this._runUPE(d,zones), feas=this._calcFeasibility({},d,seis.ag);
+    const housing=this._calcHousingMix(need,d);
+    const lc=grav.lifecycle||{score:0,Pg:0,Eg:0,Mn:0,Ac:0};
     const today=new Date().toLocaleDateString('ro-RO',{year:'numeric',month:'long',day:'numeric'});
-    const todayISO=new Date().toISOString().split('T')[0];
-    const pop21=(d.pop2021||0).toLocaleString('ro-RO'),pop55=(need.pop2055||0).toLocaleString('ro-RO');
-    const investEst=Math.round((need.totalM2||0)*1200/1000000);
-    const html=`<!DOCTYPE html><html lang="ro"><head><meta charset="UTF-8"><title>Raport TCI — ${d.name} — ${today}</title>
-<style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
-*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Inter',sans-serif;color:#1e293b;font-size:10.5pt;line-height:1.65}
-@media print{.no-print{display:none}.page-break{page-break-before:always}@page{margin:1.8cm;size:A4}}
-.hdr{background:linear-gradient(135deg,#0f172a,#1a2f5e);color:#fff;padding:28px 36px}
-h1{font-size:22pt;font-weight:800}.sub{font-size:11pt;color:rgba(255,255,255,.7);margin-top:4px}
-.warn{background:#fffbeb;border-left:4px solid #f59e0b;padding:10px 16px;font-size:8.5pt;color:#78350f}
-.content{padding:28px 36px}
-h2{font-size:13pt;font-weight:700;color:#0f172a;margin:24px 0 10px;padding-bottom:5px;border-bottom:2.5px solid #e2e8f0}
-.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}
-.kpi{background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;padding:12px 14px}
-.kv{font-size:17pt;font-weight:700;color:#0f172a;line-height:1.1}.kl{font-size:7.5pt;color:#64748b;text-transform:uppercase;margin-top:3px}.ks{font-size:7pt;color:#94a3b8;margin-top:4px;font-style:italic}
+    const iso=new Date().toISOString().split('T')[0];
+    const n=(v,dec=0)=>typeof v==='number'?v.toLocaleString('ro-RO',{minimumFractionDigits:dec,maximumFractionDigits:dec}):v||'—';
+    const pct=v=>`${v>=0?'+':''}${(v*100).toFixed(0)}%`;
+
+    // ── Recomandări specifice per growthType ─────────────────────────
+    const REC = {
+      METROPOLITAN: {
+        primar:   'Actualizare PUG urgent — presiune imobiliară depășește capacitatea actuală. Introduceți zone de densificare controlată pe axele de transport.',
+        investit: `ROI ${feas.roi}% susținut de cerere ridicată. Zone prioritare: coridoare transport + centru consolidat. Risc: supraaglomerare fără infrastructură.`,
+        oar:      'PUZ obligatoriu pentru zone periurbane. Reglementare înălțimi per P100 ag=' + seis.ag + 'g. Mixitate funcțională obligatorie în proiecte >500 unități.',
+        cnair:    'Coordonare urgentă noduri autostradă cu zone logistice identificate. Centuri ocolitoare — prioritate națională.',
+      },
+      REGIONAL: {
+        primar:   'Densificare moderată pe coridoarele principale. Evitați expansiunea necontrolată — costul infrastructurii depășește beneficiul fiscal pe termen scurt.',
+        investit: `ROI ${feas.roi}% — viabil cu absorbție corectă. Segment recomandat: 2 camere + suburban. Evitați premium fără studiu de piață local.`,
+        oar:      'Regulament local urbanistic care definește aliniamente și înălțimi. Protejați silueta istorică acolo unde există.',
+        cnair:    'Verificați conectarea cu A7/A8/A13 planificate — poate schimba radical coridoarele de dezvoltare.',
+      },
+      LOCAL: {
+        primar:   'Consolidare fond existent înainte de extindere. Reabilitarea clădirilor vechi are ROI mai bun decât construcțiile noi în zone cu cerere slabă.',
+        investit: `ROI ${feas.roi}% — marginal. Studiați segmentul senior housing și reconversie industrială. Evitați rezidențial nou fără cerere demonstrată.`,
+        oar:      'PUG simplificat cu focus pe zonele construite. Evitați reglementări care blochează reconversia.',
+        cnair:    'Conectivitate rutieră — factor critic pentru atragere investiții. Lobby pentru DJ modernizat.',
+      },
+      DECLINING: {
+        primar:   'Zero expansiune periferică. Concentrați resursele în centru: reabilitare, spații verzi, servicii de proximitate. Atrageți servicii medicale și sociale.',
+        investit: `ROI ${feas.roi}% — nesustenabil pentru rezidențial nou. Oportunitate: reconversie industrială, medical, senior housing subvenționat.`,
+        oar:      'Demolare clădiri abandonate și reconstrucție pe același amprentă — singura expansiune justificată. Prioritate verde urban.',
+        cnair:    'Investiție în transport public, nu în drumuri noi — reduce costul mobilității pentru populația rămasă.',
+      },
+      SHRINKING: {
+        primar:   'Plan de contracție controlată. Concentrați serviciile în nuclee viabile. Renunțați la infrastructura din zonele depopulate.',
+        investit: 'Nu recomandăm investiții rezidențiale noi. Potențial: agricultură intensivă, energie regenerabilă, turism rural.',
+        oar:      'Studiu de reconversie și demolare selectivă. Fond construit excedentar — costul întreținerii depășește valoarea.',
+        cnair:    'Menținere infrastructură minimă vitală. Redirecționare fonduri spre UAT-uri cu potențial.',
+      },
+    };
+    const rec = REC[grav.growthType] || REC['LOCAL'];
+
+    // ── Top zone cu motiv specific ───────────────────────────────────
+    const topZones = zones.slice(0,8).map(z => {
+      const u = upeRes[z.id||z.label] || {pct:50,classification:'MEDIUM',color:'#f59e0b'};
+      const motivParts = [];
+      if(z._Db!=null)  motivParts.push(`Densitate clădiri: ${(z._Db*100).toFixed(0)}%`);
+      if(z._Ra!=null)  motivParts.push(`Acces rutier: ${(z._Ra*100).toFixed(0)}%`);
+      if(z._travelMin!=null) motivParts.push(`${z._travelMin} min centru`);
+      if(z.slopeDeg!=null)   motivParts.push(`Pantă ${z.slopeDeg.toFixed(1)}°`);
+      return {...z, prob:u.pct, cls:u.classification, color:u.color,
+               motiv: motivParts.join(' · ') || 'Analiză geometrică'};
+    });
+
+    const css = `
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;color:#1e293b;font-size:10pt;line-height:1.6}
+@media print{.no-print{display:none}.pb{page-break-before:always}@page{margin:1.8cm;size:A4}}
+.hdr{background:linear-gradient(135deg,#0f172a,#1a3060);color:#fff;padding:28px 36px}
+h1{font-size:22pt;font-weight:800;margin-bottom:4px}
+.sub{font-size:10pt;color:rgba(255,255,255,.65)}
+.tag{display:inline-block;padding:4px 11px;border-radius:4px;font-size:8pt;font-weight:600;margin-top:8px;margin-right:6px}
+.warn{background:#fffbeb;border-left:4px solid #f59e0b;padding:10px 16px;font-size:8.5pt;color:#78350f;margin:0}
+.body{padding:28px 36px}
+h2{font-size:12pt;font-weight:800;color:#0f172a;margin:22px 0 10px;padding-bottom:5px;border-bottom:2px solid #e2e8f0}
+h3{font-size:10pt;font-weight:700;color:#334155;margin:14px 0 6px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:10px 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0}
+.kpi{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px}
 .kpi.b{border-color:#93c5fd;background:#eff6ff}.kpi.b .kv{color:#1d4ed8}
-.kpi.g{border-color:#86efac;background:#f0fdf4}.kpi.g .kv{color:#166534}
+.kpi.g{border-color:#86efac;background:#f0fdf4}.kpi.g .kv{color:#15803d}
 .kpi.r{border-color:#fca5a5;background:#fef2f2}.kpi.r .kv{color:#991b1b}
-table{width:100%;border-collapse:collapse;margin:10px 0;font-size:9pt}
-th{background:#0f172a;color:#fff;padding:8px 10px;text-align:left;font-size:8pt;font-weight:600}
-td{padding:7px 10px;border-bottom:1px solid #f1f5f9}tr:nth-child(even) td{background:#f8fafc}
-.formula{background:#0f172a;color:#e2e8f0;border-radius:8px;padding:14px 18px;font-family:monospace;font-size:9pt;margin:10px 0;line-height:1.9}
-.formula .c{color:#64748b}.formula .v{color:#86efac}
-.pred{border-left:3px solid;padding:10px 14px;margin:8px 0;border-radius:0 6px 6px 0}
-.pred.y{border-color:#f59e0b;background:#fffbeb}.pred.b{border-color:#3b82f6;background:#eff6ff}.pred.p{border-color:#8b5cf6;background:#f5f3ff}
-.zone-row{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid #f1f5f9}
-.zone-dot{width:11px;height:11px;border-radius:2px;flex-shrink:0;margin-top:3px}
-.src-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:10px 0}
+.kpi.y{border-color:#fcd34d;background:#fffbeb}.kpi.y .kv{color:#92400e}
+.kv{font-size:16pt;font-weight:800;line-height:1.1}
+.kl{font-size:7.5pt;color:#64748b;text-transform:uppercase;letter-spacing:.04em;margin-top:3px}
+.ks{font-size:7pt;color:#94a3b8;margin-top:3px;font-style:italic}
+.box{border:1px solid #e2e8f0;border-radius:8px;padding:14px;background:#f8fafc}
+.score-big{font-size:28pt;font-weight:900;line-height:1}
+table{width:100%;border-collapse:collapse;font-size:8.5pt;margin:8px 0}
+th{background:#0f172a;color:#fff;padding:7px 10px;text-align:left;font-size:7.5pt;font-weight:700}
+td{padding:6px 10px;border-bottom:1px solid #f1f5f9;vertical-align:top}
+tr:nth-child(even) td{background:#f8fafc}
+.bar{height:7px;border-radius:3px;display:inline-block}
+.rec-box{border-left:3px solid;border-radius:0 7px 7px 0;padding:10px 14px;margin:6px 0}
+.mono{background:#0f172a;color:#86efac;border-radius:7px;padding:12px 16px;font-family:monospace;font-size:8.5pt;line-height:1.9;margin:8px 0}
+.mono .c{color:#64748b}.mono .v{color:#D4AF37}
+.src-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
 .src{border:1px solid #e2e8f0;border-radius:6px;padding:9px 11px}
-.sn{font-weight:700;font-size:9pt}.sd{font-size:8pt;color:#64748b;margin-top:2px}.st{font-size:7.5pt;color:#94a3b8;margin-top:3px;font-style:italic}
-.footer{background:#f8fafc;border-top:2px solid #e2e8f0;padding:16px 36px;font-size:8pt;color:#94a3b8;display:flex;justify-content:space-between}
-.btn{position:fixed;top:16px;right:16px;z-index:999;background:#1d4ed8;color:#fff;border:none;border-radius:7px;padding:9px 18px;font-size:9.5pt;cursor:pointer;font-family:inherit}</style></head>
-<body><button class="btn no-print" onclick="window.print()">⬇ Descarcă PDF</button>
+.sn{font-weight:700;font-size:9pt}.sd{font-size:8pt;color:#64748b;margin-top:2px}.st{font-size:7pt;color:#94a3b8;margin-top:2px;font-style:italic}
+.footer{background:#f8fafc;border-top:2px solid #e2e8f0;padding:14px 36px;font-size:7.5pt;color:#94a3b8;display:flex;justify-content:space-between;align-items:center}
+.btn{position:fixed;top:16px;right:16px;z-index:999;background:#1d4ed8;color:#fff;border:none;border-radius:7px;padding:9px 18px;font-size:9.5pt;cursor:pointer;font-family:inherit;font-weight:700}
+`;
+
+    const lcColor = lc.score>0.1?'#15803d':lc.score>-0.3?'#92400e':'#991b1b';
+    const lcBg = lc.score>0.1?'#f0fdf4':lc.score>-0.3?'#fffbeb':'#fef2f2';
+
+    const html = `<!DOCTYPE html><html lang="ro"><head><meta charset="UTF-8">
+<title>Raport TCI — ${d.name} — ${iso}</title><style>${css}</style></head>
+<body>
+<button class="btn no-print" onclick="window.print()">⬇ Descarcă PDF</button>
+
 <div class="hdr">
-  <div style="font-size:9pt;color:rgba(255,255,255,.55);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px"><strong style="color:#D4AF37">UrbanX</strong> · TCI Cinema · Raport Predictiv Urban</div>
+  <div style="font-size:8pt;color:rgba(212,175,55,.8);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">
+    UrbanX · TCI Cinema · Raport Predictiv Urban
+  </div>
   <h1>${d.name||'Analiză UAT'}</h1>
-  <div class="sub">Proiecție Urbanistică 2025–2055 · jud. ${d.judet||'—'} · ${today}</div>
-  <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
-    <span style="background:rgba(212,175,55,.2);border:1px solid #D4AF37;color:#D4AF37;padding:4px 10px;border-radius:4px;font-size:8.5pt;font-weight:600">★ ${scn.label}</span>
-    <span style="background:${seis.ag>=.35?'rgba(239,68,68,.2)':'rgba(245,158,11,.2)'};border:1px solid ${seis.ag>=.35?'#ef4444':'#f59e0b'};color:${seis.ag>=.35?'#fca5a5':'#fcd34d'};padding:4px 10px;border-radius:4px;font-size:8.5pt">⚠ ag=${seis.ag}g · max R+${seis.hMaxStory}</span>
-    <span style="background:rgba(99,102,241,.2);border:1px solid #818cf8;color:#c7d2fe;padding:4px 10px;border-radius:4px;font-size:8.5pt">${grav.growthType} · Gravity ${grav.gravityScore.toFixed(2)}</span>
+  <div class="sub">Proiecție urbanistică 2025–2055 · jud. ${d.judet||'—'} · ${today}</div>
+  <div>
+    <span class="tag" style="background:rgba(212,175,55,.2);border:1px solid #D4AF37;color:#D4AF37">★ ${scn.label}</span>
+    <span class="tag" style="background:rgba(99,102,241,.2);border:1px solid #818cf8;color:#c7d2fe">${grav.growthType} · G=${grav.gravityScore.toFixed(2)}</span>
+    <span class="tag" style="background:${seis.ag>=.35?'rgba(239,68,68,.2)':'rgba(245,158,11,.2)'};border:1px solid ${seis.ag>=.35?'#ef4444':'#f59e0b'};color:${seis.ag>=.35?'#fca5a5':'#fcd34d'}">⚠ ag=${seis.ag}g · max R+${seis.hMaxStory}</span>
   </div>
 </div>
-<div class="warn">⚠ Proiecție statistică bazată pe date oficiale. Nu substituie PUG/PUZ. Data: ${today} · Surse accesate: ${todayISO}</div>
-<div class="content">
-<h2>1. Sinteză UAT</h2>
-<div class="kpis">
-  <div class="kpi b"><div class="kv">${pop21}</div><div class="kl">Populație 2021</div><div class="ks">INS · Recensământ 2021</div></div>
-  <div class="kpi ${need.pop2055>(d.pop2021||0)?'g':''}"><div class="kv">${pop55}</div><div class="kl">Estimat 2055</div><div class="ks">Cohort Survival INS · s=${need.s2025}→${need.s2055}</div></div>
-  <div class="kpi b"><div class="kv">${(need.locuinteTotale||0).toLocaleString('ro-RO')}</div><div class="kl">Locuințe necesare</div><div class="ks">HFE + Cohort · ANCPI</div></div>
-  <div class="kpi ${seis.ag>=.35?'r':''}"><div class="kv">ag=${seis.ag}g</div><div class="kl">Seismic · max R+${seis.hMaxStory}</div><div class="ks">P100-1/2013 MDLPA</div></div>
-  <div class="kpi g"><div class="kv">€${investEst}M</div><div class="kl">Investiție estimată</div><div class="ks">€1.200/m² · ANCPI 2024</div></div>
-  <div class="kpi"><div class="kv">${feas.roi}%</div><div class="kl">ROI estimat · ${feas.viable?'✓ Viabil':'⚠ Risc'}</div><div class="ks">Prag viabilitate: 12%</div></div>
-  <div class="kpi"><div class="kv">${need.s2025}→${need.s2055}</div><div class="kl">Household size 2025→2055</div><div class="ks">HFE · INS trend scădere</div></div>
-  <div class="kpi"><div class="kv">${clim.uhi}°C UHI</div><div class="kl">Insulă căldură 2055 · zona ${clim.zone}</div><div class="ks">Copernicus · IPCC AR6 RCP4.5</div></div>
+
+<div class="warn">⚠ Proiecție statistică bazată pe date oficiale INS/ANCPI/MDLPA. Nu substituie PUG sau aviz urbanistic. · ${today}</div>
+
+<div class="body">
+
+<!-- 1. SINTEZĂ -->
+<h2>1. Sinteză UAT — ${d.name}</h2>
+<div class="grid4">
+  <div class="kpi b"><div class="kv">${n(d.pop2021)}</div><div class="kl">Populație 2021</div><div class="ks">INS · Recensământ 2021</div></div>
+  <div class="kpi ${need.pop2055>(d.pop2021||0)?'g':'r'}"><div class="kv">${n(need.pop2055)}</div><div class="kl">Estimat 2055</div><div class="ks">Cohort Survival · scenariu ${this.scenario}</div></div>
+  <div class="kpi y"><div class="kv">${n(need.locuinteTotale)}</div><div class="kl">Locuințe necesare</div><div class="ks">HFE + Cohort 2025-2055</div></div>
+  <div class="kpi ${seis.ag>=.35?'r':''}"><div class="kv">ag=${seis.ag}g</div><div class="kl">Risc seismic · R+${seis.hMaxStory} max</div><div class="ks">P100-1/2013 MDLPA</div></div>
+  <div class="kpi b"><div class="kv">≈${n(Math.round(need.totalM2*1200/1e6))}M€</div><div class="kl">Investiție estimată</div><div class="ks">€1.200/m² ANCPI 2024</div></div>
+  <div class="kpi ${feas.viable?'g':'r'}"><div class="kv">${feas.roi}%</div><div class="kl">ROI ajustat · ${feas.viable?'✓ Viabil':'⚠ Risc'}</div><div class="ks">Brut ${feas.roiBrut}% × absorbție · seismic ×${seis.ag>=.35?'1.25':seis.ag>=.25?'1.12':'1.0'}</div></div>
+  <div class="kpi ${(feas.absorbtieAn||0)>200?'g':(feas.absorbtieAn||0)>80?'y':'r'}"><div class="kv">${n(feas.absorbtieAn||0)}</div><div class="kl">Absorbție un./an</div><div class="ks">Credit BNR ${RATA_BNR||5.75}% · ${feas.pctGospodariAcces}% gospodării cu acces</div></div>
+  <div class="kpi"><div class="kv">${need.s2025}→${need.s2055}</div><div class="kl">Persoane/gospodărie</div><div class="ks">HFE · INS trend</div></div>
+  <div class="kpi"><div class="kv">${clim.uhi}°C UHI</div><div class="kl">Insulă termică 2055</div><div class="ks">IPCC AR6 RCP4.5 · zona ${clim.zone}</div></div>
 </div>
 
-<h2>2. Diagnostic Urban — ${d.name||'UAT'}</h2>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0">
-<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px">
-  <div style="font-size:8pt;text-transform:uppercase;color:#94a3b8;margin-bottom:6px">Lifecycle Score L</div>
-  <div style="font-size:22pt;font-weight:800;color:${(grav.lifecycle?.score||0)>0.1?'#166534':(grav.lifecycle?.score||0)>-0.3?'#92400e':'#991b1b'}">${((grav.lifecycle?.score||0)>=0?'+':'')}${(grav.lifecycle?.score||0).toFixed(2)}</div>
-  <div style="font-size:9pt;margin-top:4px;color:#475569">
-    <strong>${grav.growthType}</strong> · 
-    ${grav.growthType==='DECLINING'?'Declin demografic activ. Prioritate: reabilitare fond existent, tipologii medicale/sociale.':
-      grav.growthType==='SHRINKING'?'Contracție severă. Zero expansiune. Verde urban și reconversie.':
-      grav.growthType==='METROPOLITAN'?'Creștere accelerată. Presiune imobiliară ridicată pe axe de transport.':
-      grav.growthType==='REGIONAL'?'Creștere moderată. Densificare centru + coridoare principale.':
-      'Echilibru fragil. Densificare selectivă + reabilitare.'}
+<!-- 2. DIAGNOSTIC LIFECYCLE -->
+<h2>2. Diagnostic Urban — Lifecycle Score</h2>
+<div class="grid2">
+  <div class="box" style="border-color:${lcColor};background:${lcBg}">
+    <div style="font-size:8pt;text-transform:uppercase;color:${lcColor};letter-spacing:.06em;margin-bottom:6px">Lifecycle Score L ∈ [-1, +1]</div>
+    <div class="score-big" style="color:${lcColor}">${lc.score>=0?'+':''}${lc.score.toFixed(2)}</div>
+    <div style="font-size:11pt;font-weight:700;color:${lcColor};margin-top:4px">${grav.growthType}</div>
+    <div style="font-size:8pt;color:#475569;margin-top:8px;line-height:1.6">
+      Pg (demografie) = <strong>${lc.Pg>=0?'+':''}${lc.Pg.toFixed(2)}</strong><br>
+      Eg (economie) = <strong>${lc.Eg>=0?'+':''}${lc.Eg.toFixed(2)}</strong><br>
+      Mn (migrație) = <strong>${lc.Mn>=0?'+':''}${lc.Mn.toFixed(2)}</strong><br>
+      Ac (autorizații) = <strong>${lc.Ac>=0?'+':''}${lc.Ac.toFixed(2)}</strong>
+    </div>
   </div>
-  <div style="font-size:8pt;color:#94a3b8;margin-top:8px">
-    Pg=${(grav.lifecycle?.Pg||0).toFixed(2)} · Eg=${(grav.lifecycle?.Eg||0).toFixed(2)} · 
-    Mn=${(grav.lifecycle?.Mn||0).toFixed(2)} · Ac=${(grav.lifecycle?.Ac||0).toFixed(2)}
+  <div class="box">
+    <div style="font-size:8pt;text-transform:uppercase;color:#64748b;letter-spacing:.06em;margin-bottom:8px">De ce crește / scade</div>
+    <div style="font-size:9pt;line-height:1.8;color:#334155">
+      ${(d.rata_reala_2011_2021||0)>=0?'▲':'▼'} <strong>Rată demografică ${(d.rata_reala_2011_2021||0).toFixed(2)}%/an</strong> (INS 2011-2021)<br>
+      ${(d.coef_hub||0.7)>0.9?'▲':'→'} <strong>Hub economic ${(d.coef_hub||0.7).toFixed(2)}</strong> (media RO: 0.78)<br>
+      ${(d.universitati||0)>1?'▲':'▼'} <strong>${(d.universitati||0)>0?`${d.universitati} universități`:'Fără universitate'}</strong> — ${(d.universitati||0)>1?'stabilizator demografic':'vulnerabilitate migrație tineri'}<br>
+      ${lc.deviereReg!=null?`${lc.deviereReg>0?'▲':'▼'} <strong>Deviere față de media regiunii</strong>: ${lc.deviereReg>0?'+':''}${(lc.deviereReg*100).toFixed(0)}%`:''}
+    </div>
+    <div style="margin-top:12px;font-size:8pt;color:#64748b;background:#f1f5f9;border-radius:6px;padding:8px">
+      <strong>Concluzie:</strong> ${
+        grav.growthType==='METROPOLITAN' ? 'Presiune imobiliară ridicată. Risc supraaglomerare fără infrastructură adecvată.' :
+        grav.growthType==='REGIONAL'     ? 'Creștere moderată sustenabilă. Densificare controlată pe coridoare.' :
+        grav.growthType==='DECLINING'    ? 'Declin activ. Prioritate: reabilitare fond existent, nu extindere.' :
+        grav.growthType==='SHRINKING'    ? 'Contracție severă. Plan de densificare a serviciilor în nuclee viabile.' :
+        'Echilibru fragil. Densificare selectivă + reabilitare prioritară.'}
+    </div>
   </div>
 </div>
-<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px">
-  <div style="font-size:8pt;text-transform:uppercase;color:#94a3b8;margin-bottom:6px">De ce crește/scade</div>
-  <div style="font-size:9pt;line-height:1.7;color:#334155">
-    ${(d.rata_reala_2011_2021||0)<-1?`▼ Rată demografică ${(d.rata_reala_2011_2021||0).toFixed(2)}%/an — declin semnificativ 2011-2021.`:`▲ Rată demografică ${(d.rata_reala_2011_2021||0).toFixed(2)}%/an — tendință ${(d.rata_reala_2011_2021||0)>0?'pozitivă':'stabilă'}.`}
-    <br>${(d.coef_hub||0.7)>0.9?`Pol economic regional (coef_hub=${(d.coef_hub||0.7).toFixed(2)}) — atracție forță de muncă.`:`Economie locală medie (coef_hub=${(d.coef_hub||0.7).toFixed(2)}).`}
-    <br>${(d.universitati||0)>1?`Centre universitare (${d.universitati}) — stabilizator demografic important.`:`Fără universitate — vulnerabilitate la migrație tineri.`}
-    <br>Seismic ag=${seis.ag}g → hMax legal R+${seis.hMaxStory} (max ${seis.hMaxM}m).
-  </div>
-</div>
-</div>
 
-<h2>3. Predicții 2025–2055</h2>
-<div class="pred y"><div style="font-size:10pt;font-weight:700;margin-bottom:4px">🏗 2025–2030</div>
-  <p style="margin:0">Orizont scurt: ${(need.locuinteNoi||0).toLocaleString('ro-RO')} locuințe noi din creștere demografică + ${(need.locuinteReab||0).toLocaleString('ro-RO')} reabilitări. Household size în scădere (${need.s2025}→${need.s2055}) generează cerere suplimentară. Zone active: ${zones.filter(z=>z.startYr<=2030).slice(0,3).map(z=>z.label||z.id).join(', ')||'—'}.</p></div>
-<div class="pred b"><div style="font-size:10pt;font-weight:700;margin-bottom:4px">🏙 2030–2040</div>
-  <p style="margin:0">Faza de maturizare. ${grav.growthType==='METROPOLITAN'?'Presiunea imobiliară crescută pe axele de transport. IT și servicii avansate domină cererea de locuințe premium.':grav.growthType==='DECLINING'?'Reabilitarea fondului construit devine prioritară. Construcțiile noi limitate la zone strategice.':'Densificare moderată de-a lungul coridoarelor de mobilitate.'} Impactul A7/A8 se materializează în zone logistice și rezidențiale periurbane.</p></div>
-<div class="pred p"><div style="font-size:10pt;font-weight:700;margin-bottom:4px">🌆 2040–2055</div>
-  <p style="margin:0">Orizont lung: populație estimată ${pop55}. Climat (zona ${clim.zone}, UHI +${clim.uhi}°C) impune standarde verzi obligatorii. ${seis.ag>=.35?`Restricție seismică ag=${seis.ag}g menține înălțimile reduse (max R+${seis.hMaxStory}).`:''} Household size ${need.s2055} → cerere structurală pentru locuințe mai mici și de calitate.</p></div>
-
-<h2>4. Modele Matematice</h2>
-<div class="formula"><span class="c">Cohort Survival (INS/Eurostat):</span>
-Px+5,t+5 = Px,t × Sx + Mx,t
-  <span class="c">Sx = rata supraviețuire INS 2021 per cohortă și sex</span>
-  <span class="c">Mx,t = flux migrație per cohortă × ponderi vârstă × bonus universitar ×${(d?.universitati||0)>0?'1.3':'1.0'}</span>
-  <span class="v">→ ${(d.pop2021||0).toLocaleString('ro-RO')} → ${pop55} | rată INS: ${(d.rata_reala_2011_2021||0).toFixed(2)}%/an × scenariu ×${scn.rateMultiplier}</span>
-
-<span class="c">Household Formation Engine:</span>
-Ht = Pt / St  — St = f(tip_urban, an)   <span class="v">→ ${need.s2025} (2025) → ${need.s2055} (2055)</span>
-
-<span class="c">Urban Gravity Model:</span>
-G = eP×0.30 + eC×0.25 + eE×0.20 + eK×0.15 + eI×0.10   <span class="v">→ ${grav.gravityScore.toFixed(3)} = ${grav.growthType}</span>
-
-<span class="c">Urban Probability Engine (Monte Carlo N=300):</span>
-P(D) = f(E, M, I, C, G)   <span class="v">→ probabilitate per zonă, nu valori fixe</span>
-
-<span class="c">Real Estate Feasibility:</span>
-ROI = (Vsale - Ctotal) / Ctotal   <span class="v">→ ROI ${feas.roi}% (prag 12%: ${feas.viable?'✓ VIABIL':'⚠ RISC'})</span></div>
-
-<h2>5. Zone de Dezvoltare — Probabilistic</h2>
-<p style="font-size:8.5pt;color:#64748b;margin-bottom:10px">P(D) = f(E,M,I,C,G) — Monte Carlo 300 simulări per zonă · Nu certitudini, ci probabilități.</p>
+<!-- 3. HOUSING MIX -->
+<h2>3. Cerere Locuințe 2025–2055 — Mix pe Tipologii</h2>
+<p style="font-size:8.5pt;color:#64748b;margin-bottom:10px">Distribuție calculată din structura demografică (Cohort INS), presiune economică (coef_hub=${(d.coef_hub||0.78).toFixed(2)}) și tip urban (${grav.growthType}).</p>
 <table>
-  <tr><th>Zonă</th><th>Probabilitate</th><th>Clasificare</th><th>hMax</th><th>Start</th></tr>
-  ${zones.slice(0,15).map(z=>{const u=upeRes[z.id||z.label]||{pct:50,classification:'MEDIUM',color:'#f59e0b'};return`<tr><td><strong>${z.label||z.id}</strong><div style="font-size:7.5pt;color:#64748b">${z.sub||''}</div></td><td><div style="display:flex;align-items:center;gap:6px"><div style="width:${u.pct}px;height:9px;background:${u.color};border-radius:2px;max-width:80px"></div><strong style="color:${u.color}">${u.pct}%</strong></div></td><td><span style="background:${u.color}22;color:${u.color};padding:2px 7px;border-radius:9px;font-size:7.5pt;font-weight:600">${u.classification}</span></td><td>${z.hMax||'—'}m</td><td>${z.startYr||'—'}</td></tr>`;}).join('')}
+  <tr><th>Tipologie</th><th>Segment Țintă</th><th>Unități</th><th>Pondere</th><th>Suprafață medie</th><th>Investiție est.</th></tr>
+  ${Object.entries(housing.mix).filter(([,v])=>v.unitati>0).map(([k,v])=>`
+  <tr>
+    <td><strong>${v.label}</strong></td>
+    <td style="color:#64748b;font-size:8pt">${v.segment}</td>
+    <td><strong>${n(v.unitati)}</strong></td>
+    <td>
+      <div style="display:flex;align-items:center;gap:6px">
+        <div class="bar" style="width:${Math.min(80,v.pct*2.5)}px;background:#D4AF37;opacity:.7"></div>
+        <span style="font-weight:700">${v.pct}%</span>
+      </div>
+    </td>
+    <td>${v.m2}m²</td>
+    <td><strong>≈${n(v.investitie_m)}M€</strong></td>
+  </tr>`).join('')}
+  <tr style="background:#0f172a;color:#fff">
+    <td colspan="2"><strong>TOTAL</strong></td>
+    <td><strong>${n(need.locuinteTotale)}</strong></td>
+    <td><strong>100%</strong></td>
+    <td>—</td>
+    <td><strong>≈${n(housing.totalInvestitie)}M€</strong></td>
+  </tr>
 </table>
 
-<h2 class="page-break">6. Scenarii Comparative</h2>
+<!-- 3b. ECONOMIC ABSORPTION -->
+<h2>4. Economic Absorption — Capacitatea Reală a Pieței</h2>
+<p style="font-size:8.5pt;color:#64748b;margin-bottom:10px">
+  Câte unități poate absorbi piața local pe an — calculat din putere de cumpărare, 
+  accesibilitate credit și stoc existent.
+</p>
+<div class="grid4">
+  <div class="kpi ${(feas.absorbtieAn||0)>200?'g':(feas.absorbtieAn||0)>80?'y':'r'}">
+    <div class="kv">${n(feas.absorbtieAn)}</div>
+    <div class="kl">Absorbție totală/an</div>
+    <div class="ks">gospodării noi + cerere înlocuire</div>
+  </div>
+  <div class="kpi b">
+    <div class="kv">${n(feas.cerereInlocuire)}</div>
+    <div class="kl">Cerere înlocuire/an</div>
+    <div class="ks">fond >40 ani · rata 1.2%/an</div>
+  </div>
+  <div class="kpi ${(feas.stocExcedentar||0)<1000?'g':'r'}">
+    <div class="kv">${n(feas.stocExcedentar)}</div>
+    <div class="kl">Stoc excedentar</div>
+    <div class="ks">vacanță ${feas.vacantaLocativa}% · concurență piață secundară</div>
+  </div>
+  <div class="kpi">
+    <div class="kv">${feas.pctGospodariAcces}%</div>
+    <div class="kl">Gospodării cu acces credit</div>
+    <div class="ks">salariu mediu ${n(feas.salariuEur)}€ · rată ${n(feas.rataCreditLunara)}€/lună</div>
+  </div>
+</div>
 <table>
-  <tr><th>Scenariu</th><th>Ipoteză</th><th>Rată ×</th><th>Locuințe est.</th><th>hMax ×</th></tr>
-  ${['S1','S2','S3','S4'].map(s=>{const sc=this._SCENARIOS[s];const loc=Math.round((need.locuinteTotale||0)*sc.rateMultiplier);return`<tr ${this.scenario===s?'style="background:#eff6ff;font-weight:600"':''}><td>${s} ${sc.label}</td><td>${s==='S1'?'PNRR complet, investiții masive':s==='S2'?'Referință INS':s==='S3'?'Prioritate calitate':' Crize climatice'}</td><td>×${sc.rateMultiplier}</td><td>${loc.toLocaleString('ro-RO')}</td><td>×${sc.hMaxMultiplier}</td></tr>`;}).join('')}
+  <tr><th>Factor</th><th>Valoare</th><th>Sursă</th><th>Impact</th></tr>
+  <tr><td>Preț unitate 68m²</td><td><strong>${n(feas.pretUnitate)}€</strong></td><td>ANCPI 2024 · ${grav.growthType}</td><td>Determină accesibilitatea</td></tr>
+  <tr><td>Rată credit lunară (30 ani)</td><td><strong>${n(feas.rataCreditLunara)}€/lună</strong></td><td>BNR + spread 2.5% = ${(5.75+2.5).toFixed(2)}%</td><td>Venit minim necesar: ${n(feas.venitMaxAdmis)}€/lună</td></tr>
+  <tr><td>Salariu mediu net jud. ${d.judet}</td><td><strong>${n(feas.salariuEur)}€/lună</strong></td><td>INS 2024</td><td>${feas.salariuEur>=feas.venitMaxAdmis?'✓ Accesibil pentru clasa medie':'⚠ Acces limitat — necesită 2 salarii'}</td></tr>
+  <tr><td>ROI brut (preț vs cost)</td><td><strong>${feas.roiBrut}%</strong></td><td>Calcul intern</td><td>Înainte de ajustarea pentru absorbție</td></tr>
+  <tr><td>ROI ajustat absorbție</td><td><strong style="color:${feas.viable?'#15803d':'#991b1b'}">${feas.roi}%</strong></td><td>Factor ${grav.growthType}: ${(feas.absorbtieAn/({METROPOLITAN:600,REGIONAL:250,LOCAL:120,DECLINING:60,SHRINKING:20}[grav.growthType]||120)).toFixed(2)}×</td><td>${feas.viable?'✓ Viabil — peste pragul de 12%':'⚠ Sub pragul de viabilitate'}</td></tr>
 </table>
 
-<h2>7. Surse Oficiale — Data accesului: ${todayISO}</h2>
+<!-- 5. ZONE PRIORITARE -->
+<h2>4. Zone de Dezvoltare — Prioritare și Motiv</h2>
+<p style="font-size:8.5pt;color:#64748b;margin-bottom:10px">P(D) = f(E,M,I,C,G) · Probabilitate per zonă, nu certitudini. Monte Carlo N=300.</p>
+<table>
+  <tr><th>Zonă</th><th>Probabilitate</th><th>Motiv identificat</th><th>hMax</th><th>Start</th></tr>
+  ${topZones.map(z=>`
+  <tr>
+    <td>
+      <div style="display:flex;align-items:center;gap:7px">
+        <div style="width:10px;height:10px;border-radius:2px;background:${z.color||'#f59e0b'};flex-shrink:0"></div>
+        <div><strong>${z.label||z.id}</strong><div style="font-size:7.5pt;color:#64748b">${z.sub||''}</div></div>
+      </div>
+    </td>
+    <td>
+      <div style="display:flex;align-items:center;gap:5px">
+        <div class="bar" style="width:${Math.min(60,z.prob*0.6)}px;background:${z.color||'#f59e0b'}"></div>
+        <strong style="color:${z.color||'#f59e0b'}">${z.prob}%</strong>
+        <span style="font-size:7pt;background:${z.color||'#f59e0b'}22;color:${z.color||'#f59e0b'};padding:1px 6px;border-radius:8px">${z.cls}</span>
+      </div>
+    </td>
+    <td style="font-size:8pt;color:#475569">${z.motiv}</td>
+    <td>${z.hMax||'—'}m</td>
+    <td>${z.startYr||'—'}</td>
+  </tr>`).join('')}
+</table>
+
+<!-- 5. RECOMANDĂRI ACȚIONABILE -->
+<h2>6. Recomandări — ${grav.growthType}</h2>
+<div class="rec-box" style="border-color:#1d4ed8;background:#eff6ff">
+  <div style="font-size:8pt;font-weight:700;color:#1d4ed8;text-transform:uppercase;margin-bottom:4px">🏛 Primărie / Consiliu Local</div>
+  <div style="font-size:9pt;color:#1e3a5f">${rec.primar}</div>
+</div>
+<div class="rec-box" style="border-color:#15803d;background:#f0fdf4">
+  <div style="font-size:8pt;font-weight:700;color:#15803d;text-transform:uppercase;margin-bottom:4px">💰 Investitori / Dezvoltatori</div>
+  <div style="font-size:9pt;color:#14532d">${rec.investit}</div>
+</div>
+<div class="rec-box" style="border-color:#7c3aed;background:#f5f3ff">
+  <div style="font-size:8pt;font-weight:700;color:#7c3aed;text-transform:uppercase;margin-bottom:4px">📐 OAR / Urbaniști</div>
+  <div style="font-size:9pt;color:#4c1d95">${rec.oar}</div>
+</div>
+<div class="rec-box" style="border-color:#92400e;background:#fffbeb">
+  <div style="font-size:8pt;font-weight:700;color:#92400e;text-transform:uppercase;margin-bottom:4px">🛣 CNAIR / Infrastructură</div>
+  <div style="font-size:9pt;color:#78350f">${rec.cnair}</div>
+</div>
+
+<!-- 6. MODELE MATEMATICE -->
+<h2 class="pb">7. Modele Matematice și Surse</h2>
+<div class="mono">
+<span class="c">// Lifecycle Score L ∈ [-1, +1]</span>
+L = Pg×0.35 + Eg×0.25 + Mn×0.25 + Ac×0.15  <span class="v">→ L=${lc.score>=0?'+':''}${lc.score.toFixed(2)} (${grav.growthType})</span>
+  Pg = rata_demografică / 2.5                <span class="v">→ ${lc.Pg>=0?'+':''}${lc.Pg.toFixed(2)}</span>
+  Eg = (coef_hub - 0.78) × 2.2              <span class="v">→ ${lc.Eg>=0?'+':''}${lc.Eg.toFixed(2)}</span>
+  Mn = deviereRegionala×0.55 + pullEcon×0.30 <span class="v">→ ${lc.Mn>=0?'+':''}${lc.Mn.toFixed(2)} [semnal independent]</span>
+  L(t+1) = 0.7×L(t) + 0.3×L_nou            <span class="c">// Inertie urbană</span>
+
+<span class="c">// Urban Gravity G ∈ [0, 1]</span>
+G = eP×0.30 + eC×0.25 + eE×0.20 + eK×0.15 + eI×0.10  <span class="v">→ G=${grav.gravityScore.toFixed(3)}</span>
+  eK = conectivitate per județ (CNAIR 2025)  <span class="v">→ ${grav.eConectivit.toFixed(2)} [corect per jud. ${d.judet}]</span>
+
+<span class="c">// Cohort Survival INS 2021</span>
+Px+5,t+5 = Px,t × Sx + Mx,t                <span class="v">→ ${n(d.pop2021)} → ${n(need.pop2055)} loc. (2055)</span>
+
+<span class="c">// Housing Formation</span>
+H(t) = P(t) / S(t)  S=${need.s2025}→${need.s2055} <span class="v">→ ${n(need.locuinteTotale)} unități necesare</span>
+
+<span class="c">// Feasibility Engine</span>
+ROI = (Vsale - Ctotal) / Ctotal             <span class="v">→ ${feas.roi}% (prag 12%: ${feas.viable?'✓ VIABIL':'⚠ RISC'})</span>
+</div>
+
+<h2>8. Surse de Date</h2>
 <div class="src-grid">
-  <div class="src"><div class="sn">INS — Institutul Național de Statistică</div><div class="sd">Recensământ 2021, rate supraviețuire cohorte, household size trend</div><div class="st">insse.ro · accesat ${todayISO}</div></div>
-  <div class="src"><div class="sn">ANCPI — Cadastru și Publicitate Imobiliară</div><div class="sd">Autorizații construire, suprafață medie 68m², rata înlocuire 1.2%/an</div><div class="st">geoportal.ancpi.ro · accesat ${todayISO}</div></div>
-  <div class="src"><div class="sn">MDLPA — Normativ P100-1/2013</div><div class="sd">Zonare seismică, accelerație ag, restricții înălțime clădiri</div><div class="st">mdlpa.ro · accesat ${todayISO}</div></div>
-  <div class="src"><div class="sn">OpenStreetMap + Overpass API</div><div class="sd">Rețea rutieră live: autostrăzi, DN, DJ. Constrângeri: plaje, mine, porturi</div><div class="st">overpass-api.de · accesat ${todayISO}</div></div>
-  <div class="src"><div class="sn">CNAIR — Autostrăzi planificate</div><div class="sd">A7 (2027), A8 (2028), A13 (2032), centuri ocolitoare</div><div class="st">cnair.ro · accesat ${todayISO}</div></div>
-  <div class="src"><div class="sn">Copernicus + IPCC AR6 + Eurostat</div><div class="sd">UHI, RCP4.5/8.5, risc secetă/inundații, Urban Audit comparații EU</div><div class="st">cds.climate.copernicus.eu · ec.europa.eu/eurostat · accesat ${todayISO}</div></div>
+  <div class="src"><div class="sn">INS SIRUTA dec.2025 + Recensământ 2021</div><div class="sd">3181 UAT-uri, rate demografice, cohort survival, household size</div><div class="st">insse.ro · accesat ${iso}</div></div>
+  <div class="src"><div class="sn">ANCPI — Geoportal Cadastral</div><div class="sd">Autorizații construire, suprafață medie 68m²/unitate</div><div class="st">geoportal.ancpi.ro · accesat ${iso}</div></div>
+  <div class="src"><div class="sn">P100-1/2013 — MDLPA</div><div class="sd">Zonare seismică, ag=${seis.ag}g, înălțime max R+${seis.hMaxStory}</div><div class="st">mdlpa.ro</div></div>
+  <div class="src"><div class="sn">OpenStreetMap + OSRM</div><div class="sd">Rețea rutieră live, timp acces, accesibilitate UAT</div><div class="st">overpass-api.de · router.project-osrm.org · accesat ${iso}</div></div>
+  <div class="src"><div class="sn">CNAIR — Masterplan Autostrăzi 2030</div><div class="sd">A7(2027), A8(2028), A13(2032), centuri ocolitoare</div><div class="st">cnair.ro</div></div>
+  <div class="src"><div class="sn">IPCC AR6 + Copernicus</div><div class="sd">UHI +${clim.uhi}°C 2055, risc secetă ${Math.round(clim.drought*100)}%, inundații ${Math.round(clim.flood*100)}%</div><div class="st">cds.climate.copernicus.eu · accesat ${iso}</div></div>
+</div>
 </div>
 
-<h2>8. Recomandări Instituționale</h2>
-<table>
-  <tr><th>Destinatar</th><th>Acțiune</th><th>Termen</th></tr>
-  <tr><td><strong>Primărie / CL</strong></td><td>Actualizare PUG cu zonele identificate. Rezervare coridor A7/A8/centuri</td><td>2025-2027</td></tr>
-  <tr><td><strong>CNAIR</strong></td><td>Coordonare noduri autostradă cu zonele logistice (devScore>0.7)</td><td>2025-2028</td></tr>
-  <tr><td><strong>OAR / Urbaniști</strong></td><td>PUZ zone periurbane. Regulament înălțimi conform P100 ag=${seis.ag}g</td><td>2026-2030</td></tr>
-  <tr><td><strong>Investitori</strong></td><td>Zone prioritare: ROI ${feas.roi}% · ${feas.viable?'Viabil în condițiile actuale':'Verificați finanțarea'}</td><td>Imediat</td></tr>
-  <tr><td><strong>MDLPA</strong></td><td>Integrare PATN Secțiunea IV · corelare A7/A8 · finanțare PNRR</td><td>2026-2028</td></tr>
-</table>
-</div>
 <div class="footer">
-  <div><strong>UrbanX TCI Cinema</strong> · Think Smart Solutions<br>Motor: Cohort Survival INS · HFE · Urban Gravity · Road Corridor · UPE Monte Carlo · Seismic P100</div>
-  <div style="text-align:right">Generat: ${today}<br>${this.scenario} · ${scn.label} · ID: TCI-${todayISO}-${(this.cityKey||'uat').toUpperCase()}</div>
-</div></body></html>`;
+  <div><strong>UrbanX TCI Cinema</strong> · Think Smart Solutions · Motor: Cohort INS · HFE · Gravity · P(u) · Lifecycle v2</div>
+  <div style="text-align:right">Generat: ${today} · ${this.scenario} · ${scn.label}<br>ID: TCI-${iso}-${(this.cityKey||'uat').toUpperCase()}</div>
+</div>
+</body></html>`;
+
     const w=window.open('','_blank');
     if(w){w.document.write(html);w.document.close();}
     return html;
   },
+
 
     // Genereaza zonele de proiecție statistic — cercuri concentrice
   // + coridoare de mobilitate + zone de reconversie industrială
