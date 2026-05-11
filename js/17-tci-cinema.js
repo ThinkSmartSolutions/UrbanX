@@ -1430,18 +1430,28 @@ out geom qt;`;
     onAdd(map, gl) {
       if(typeof THREE === 'undefined') { console.warn('[3D] Three.js lipsă'); return; }
       this._map = map;
-      this._camera   = new THREE.Camera();
-      this._scene    = new THREE.Scene();
-      this._renderer = new THREE.WebGLRenderer({
-        canvas: map.getCanvas(), context: gl, antialias: true });
-      this._renderer.autoClear = false;
+      this._camera = new THREE.Camera();
+      this._scene  = new THREE.Scene();
 
-      // Lumini în spațiul local (metri)
-      // 1 AmbientLight e suficient pentru MeshBasicMaterial + shader compile corect
+      // OVERLAY CANVAS SEPARAT — bypass WebGL shared context
+      // CustomLayerInterface păstrat DOAR pentru matrix-ul Mapbox
+      const mc = map.getCanvas();
+      const ov = document.createElement('canvas');
+      ov.width = mc.width; ov.height = mc.height;
+      ov.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2;';
+      mc.parentElement.appendChild(ov);
+      this._overlay = ov;
+
+      this._renderer = new THREE.WebGLRenderer({canvas: ov, antialias: true, alpha: true});
+      this._renderer.setClearColor(0x000000, 0);
+      this._renderer.autoClear = true;
+
+      new ResizeObserver(() => {
+        ov.width = mc.width; ov.height = mc.height;
+        this._renderer.setSize(mc.width, mc.height, false);
+      }).observe(mc);
+
       this._scene.add(new THREE.AmbientLight(0xffffff, 1.0));
-      // DirectionalLight eliminat — nu afectează MeshBasicMaterial
-      // PointLights eliminate — cauzau 500+ erori/frame în Three.js r128
-
       this._ready = true;
       console.log('[3D] ✅ CustomLayerInterface activ — coordinate system corect');
     },
@@ -1461,19 +1471,23 @@ out geom qt;`;
       // Combină camera Mapbox cu transformarea locală
       this._camera.projectionMatrix =
         new THREE.Matrix4().fromArray(matrix).multiply(modelMatrix);
-      // CRITIC r128: projectionMatrixInverse trebuie sincronizat manual
+      // projectionMatrixInverse sincronizat
       this._camera.projectionMatrixInverse
         .copy(this._camera.projectionMatrix).invert();
 
-      // LOD direct în render — garantat actualizat la fiecare frame
+      // LOD
       if(this._mesh) this._mesh.visible = (this._map?.getZoom?.() ?? 0) >= 12.5;
 
-      this._renderer.resetState();
+      // Render pe OVERLAY CANVAS (nu pe shared gl — bypass toate erorile WebGL)
       this._renderer.render(this._scene, this._camera);
       this._map?.triggerRepaint();
     },
 
-    onRemove() { try { this._renderer?.dispose(); } catch(e){} this._ready = false; },
+    onRemove() {
+      try { this._renderer?.dispose(); } catch(e){}
+      try { this._overlay?.remove(); } catch(e){}
+      this._ready = false;
+    },
 
     // ── Setează originea orașului ─────────────────────────────────────
     setOrigin(cx, cy) {
