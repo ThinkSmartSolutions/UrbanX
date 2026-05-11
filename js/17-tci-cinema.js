@@ -1430,18 +1430,24 @@ out geom qt;`;
     onAdd(map, gl) {
       if(typeof THREE === 'undefined') { console.warn('[3D] Three.js lipsă'); return; }
       this._map = map;
-      this._camera   = new THREE.Camera();
-      this._scene    = new THREE.Scene();
-      this._renderer = new THREE.WebGLRenderer({
-        canvas: map.getCanvas(), context: gl, antialias: true });
-      this._renderer.autoClear = false;
-
-      // Lumini în spațiul local (metri)
-      this._scene.add(new THREE.AmbientLight(0xffffff, 1.2));
-      const sun = new THREE.DirectionalLight(0xffd580, 1.0);
-      sun.position.set(300, 600, 800);
-      this._scene.add(sun);
-
+      this._camera = new THREE.Camera();
+      this._scene  = new THREE.Scene();
+      // Overlay canvas separat — bypass WebGL context sharing issues
+      const cont = map.getContainer();
+      const ov = document.createElement('canvas');
+      ov.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10;';
+      cont.style.position = 'relative';
+      cont.appendChild(ov);
+      this._overlay = ov;
+      this._renderer = new THREE.WebGLRenderer({canvas: ov, antialias: true, alpha: true});
+      this._renderer.setPixelRatio(window.devicePixelRatio);
+      this._renderer.setSize(cont.offsetWidth, cont.offsetHeight);
+      this._renderer.setClearColor(0x000000, 0);
+      this._renderer.autoClear = true;
+      new ResizeObserver(() => {
+        this._renderer.setSize(cont.offsetWidth, cont.offsetHeight);
+      }).observe(cont);
+      this._scene.add(new THREE.AmbientLight(0xffffff, 1.0));
       this._ready = true;
       console.log('[3D] ✅ CustomLayerInterface activ — coordinate system corect');
     },
@@ -1462,12 +1468,19 @@ out geom qt;`;
       this._camera.projectionMatrix =
         new THREE.Matrix4().fromArray(matrix).multiply(modelMatrix);
 
-      this._renderer.resetState();
+      // LOD per zoom
+      const z = this._map?.getZoom?.() ?? 0;
+      (this._meshes||[]).forEach(m => { if(m) m.visible = z >= 12.5; });
+      // Render pe overlay canvas (context separat)
       this._renderer.render(this._scene, this._camera);
       this._map?.triggerRepaint();
     },
 
-    onRemove() { try { this._renderer?.dispose(); } catch(e){} this._ready = false; },
+    onRemove() {
+      try { this._renderer?.dispose(); } catch(e){}
+      try { this._overlay?.remove(); } catch(e){}
+      this._meshes = []; this._ready = false;
+    },
 
     // ── Setează originea orașului ─────────────────────────────────────
     setOrigin(cx, cy) {
@@ -1531,20 +1544,22 @@ out geom qt;`;
 
     _buildMesh() {
       if(!this._entities.length) return;
-      // Geometrie ușor mai subțire pentru clădiri (nu perfect cubice)
+      // Curăță scene (păstrează doar AmbientLight)
+      while(this._scene.children.length > 1) this._scene.remove(this._scene.children[1]);
+      // Mesh-uri individuale (nu InstancedMesh) — compatibil garantat
       const geom = new THREE.BoxGeometry(1, 1, 1);
-      geom.translate(0, 0, 0.5); // pivotul la Z=0 (sol)
-      // MeshBasicMaterial: NU depinde de lumini → culoarea instanței apare GARANTAT
-      const mat = new THREE.MeshBasicMaterial({ vertexColors: true });
-      this._mesh = new THREE.InstancedMesh(geom, mat, this._entities.length);
-      this._mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-      // Inițializează instanceColor (gri neutru) ÎNAINTE de primul render → shader compile corect
-      const _gc = new THREE.Color(0.3, 0.3, 0.3);
-      for(let _i = 0; _i < this._entities.length; _i++) this._mesh.setColorAt(_i, _gc);
-      if(this._mesh.instanceColor) this._mesh.instanceColor.needsUpdate = true;
-      this._scene.add(this._mesh);
-      // PointLights eliminate — 500+ erori Three.js r128
+      geom.translate(0, 0, 0.5);
+      this._meshes = this._entities.map(e => {
+        const mat = new THREE.MeshBasicMaterial({color: e.color, depthTest: false});
+        const mesh = new THREE.Mesh(geom.clone(), mat);
+        this._scene.add(mesh);
+        return mesh;
+      });
+      this._mesh = {visible: true}; // dummy pentru updateLOD
+   
     },
+
+    // Lumini stradale  },
 
     // Lumini stradale — puncte calde la 8m înălțime pe arterele principale
     _addStreetLights() {
@@ -1578,42 +1593,40 @@ out geom qt;`;
     },
 
     updateYear(yr) {
-      if(!this._ready || !this._mesh) return;
-      const dummy = new THREE.Object3D();
-      const color = new THREE.Color();
+      if(!this._ready || !this._meshes?.length) return;
       const C = window.TCI?.COLORS || {};
+      const s = this._scale;
 
       this._entities.forEach((e, idx) => {
-        // Înălțime per an
-        let h = 0;
+        const mesh = this._meshes[idx];
+        if(!mesh) return;
+
+        let h = 0.5;
         if(yr >= e.startYr) {
           const yF = Math.min(1, (yr - e.startYr) / 18);
-          h = e.hBase + (e.hMax - e.hBase) * yF;
+          h = Math.max(0.5, e.hBase + (e.hMax - e.hBase) * yF);
         }
 
-        // Poziție în METRI față de originea orașului
         const [lx, ly] = this._toLocal(e.lon, e.lat);
-        dummy.position.set(lx, ly, 0);
-        // Scala în METRI — modelMatrix se ocupă de conversia la Mercator
-        dummy.scale.set(e.wM, e.dM, Math.max(0.5, h));
-        dummy.updateMatrix();
-        this._mesh.setMatrixAt(idx, dummy.matrix);
+        mesh.position.set(lx, ly, 0);
+        mesh.scale.set(e.wM, e.dM, h);
 
         // Culoare per stare temporală
-        if(!C.stabil || yr < e.startYr)              color.set(C.stabil || '#374151');
-        else if((yr - e.startYr) < 5)               color.set(C.constructie || '#f59e0b');
-        else if((yr - e.startYr) < 10)              color.set(C.aproape    || '#f97316');
-        else                                          color.copy(e.color);
-        this._mesh.setColorAt(idx, color);
+        let col;
+        if(!C.stabil || yr < e.startYr)       col = C.stabil      || '#374151';
+        else if((yr - e.startYr) < 5)          col = C.constructie || '#f59e0b';
+        else if((yr - e.startYr) < 10)         col = C.aproape     || '#f97316';
+        else                                    col = '#' + e.color.getHexString();
+        mesh.material.color.set(col);
+        mesh.visible = yr >= e.startYr - 1;
       });
 
-      this._mesh.instanceMatrix.needsUpdate = true;
-      if(this._mesh.instanceColor) this._mesh.instanceColor.needsUpdate = true;
       this._map?.triggerRepaint();
     },
 
     updateLOD(zoom) {
-      if(this._mesh) this._mesh.visible = zoom >= 12.5;
+      const v = zoom >= 12.5;
+      (this._meshes||[]).forEach(m => { if(m) m.visible = v; });
     },
 
     _bboxCoords(coords) {
