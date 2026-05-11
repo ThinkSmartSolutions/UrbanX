@@ -1461,8 +1461,15 @@ out geom qt;`;
 
       this._scene.add(new THREE.AmbientLight(0xffffff, 1.0));
 
+      // TEST: sferă galbenă 300m la centrul orașului
+      const _tGeo = new THREE.SphereGeometry(300, 16, 16);
+      const _tMat = new THREE.MeshBasicMaterial({color: 0xffff00, depthTest: false});
+      const _tMesh = new THREE.Mesh(_tGeo, _tMat);
+      _tMesh.position.set(0, 0, 150);
+      this._scene.add(_tMesh);
+
       this._ready = true;
-      console.log('[3D] ✅ CustomLayerInterface activ — coordinate system corect');
+      console.log('[3D] ✅ CustomLayerInterface activ — test sphere adăugat');
     },
 
     render(gl, matrix) {
