@@ -123,9 +123,25 @@ const TCI = {
     this.cityKey   = this._selectedUATKey || opts.cityKey
       || window.S?.activeUAT || window._ProjectionEngine?.currentCity || 'iasi';
     this._selectedUATKey = null;
-    this.cityData  = (typeof _RO_CITIES_DB !== 'undefined')
-      ? (_RO_CITIES_DB[this.cityKey] || Object.values(_RO_CITIES_DB)[0]) : null;
-    this.d = this.cityData;  // alias folosit în director, _buildZones, _calcUrbanNeed
+    // ── Lookup cityData — 3 strategii ────────────────────────────────────
+    // 1. Key direct în _RO_CITIES_DB (ex: 'RO-IS-01' din projection-engine)
+    // 2. Key direct în _UAT_DB (ex: 'RO-VN-78046' din uats-database)
+    // 3. Siruta în _RO_CITIES_DB (extrage din key 'RO-VN-78046' → '78046')
+    this.cityData = null;
+    if(typeof _RO_CITIES_DB !== 'undefined')
+      this.cityData = _RO_CITIES_DB[this.cityKey];
+    if(!this.cityData && typeof _UAT_DB !== 'undefined')
+      this.cityData = _UAT_DB[this.cityKey];
+    if(!this.cityData && typeof _RO_CITIES_DB !== 'undefined') {
+      const siruta = this.cityKey.split('-').pop();
+      this.cityData = Object.values(_RO_CITIES_DB).find(c => c.siruta === siruta || c.siruta === String(+siruta));
+    }
+    if(!this.cityData && typeof _RO_CITIES_DB !== 'undefined')
+      this.cityData = Object.values(_RO_CITIES_DB)[0];
+    this.d = this.cityData;
+
+    // ── Diagnostic — vizibil în consolă la orice lansare ─────────────────
+    console.log(`[TCI] Launch: key="${this.cityKey}" → name="${this.d?.name}" lon=${this.d?.lon} lat=${this.d?.lat}`);
 
     // ── Normalizare câmpuri _UAT_DB → format intern ───────────────────────
     // _UAT_DB folosește coef_hub în loc de universitati, judet_code în loc de judet
@@ -2603,22 +2619,26 @@ out geom qt;`;
       this._tci=tci;
       try {
         this._scenes=this._build();
-        console.log('[Director] ✅ '+this._scenes.length+' scene încărcate pentru '+T.d?.name);
+        console.log('[Director] ✅ '+this._scenes.length+' scene încărcate pentru '+this._tci?.d?.name);
       } catch(e) {
-        console.error('[Director] Eroare build scenes:',e.message);
-        // Fallback minim — 2 scene garantate
-        const d=T.d||{}, cx=d.lon||27.601, cy=d.lat||47.158;
+        console.error('[Director] Eroare build scenes:',e.message, e.stack?.split('\n')[1]||'');
+        // Fallback — folosim this._tci (T nu e în scope aici!)
+        const d=this._tci?.d||{};
+        const cx=d.lon||27.601, cy=d.lat||47.158;
+        const name=d.name||'UAT';
         this._scenes=[
           {id:'fb1',dur:60000,light:'dusk',
            cam:{center:[cx,cy],zoom:4.5,pitch:0,bearing:0,duration:3500},
-           chain:[{center:[cx,cy],zoom:12,pitch:50,bearing:-20,duration:6000,delay:8000},{center:[cx,cy],zoom:15,pitch:68,bearing:10,duration:5000,delay:20000}],
-           title:'🏙 '+d.name,'body':d.name+' — proiecție urbanistică 2025-2055',src:'UrbanX TSS·FG'},
+           chain:[{center:[cx,cy],zoom:12,pitch:50,bearing:-20,duration:6000,delay:8000},
+                  {center:[cx,cy],zoom:15,pitch:68,bearing:10,duration:5000,delay:20000}],
+           title:'🏙 '+name,body:name+' — proiecție urbanistică 2025-2055',src:'UrbanX TSS·FG'},
           {id:'fb2',dur:60000,light:'dusk',
            cam:{center:[cx,cy],zoom:13.5,pitch:55,bearing:-25,duration:5000},
-           chain:[{center:[cx,cy],zoom:16.5,pitch:76,bearing:20,duration:6000,delay:12000},{center:[cx,cy],zoom:12,pitch:40,bearing:0,duration:5000,delay:35000}],
-           title:'📊 Date Oficiale '+d.name,'body':'Proiecție calibrată: INSE · Eurostat · ANCPI · BNR · IPCC AR6',src:'UrbanX TSS·FG'},
+           chain:[{center:[cx,cy],zoom:16.5,pitch:76,bearing:20,duration:6000,delay:12000},
+                  {center:[cx,cy],zoom:12,pitch:40,bearing:0,duration:5000,delay:35000}],
+           title:'📊 Date Oficiale '+name,body:'Proiecție calibrată: INSE · Eurostat · ANCPI · BNR · IPCC AR6',src:'UrbanX TSS·FG'},
         ];
-        console.log('[Director] Fallback cu',this._scenes.length,'scene');
+        console.log('[Director] Fallback la',cx.toFixed(3),cy.toFixed(3),'pentru',name);
       }
       this._idx=-1;
       clearTimeout(this._timer);
@@ -2683,7 +2703,7 @@ out geom qt;`;
            {center:[cx,cy],zoom:11.0,pitch:35,bearing:-10,duration:5500,delay:13000},
          ],
          title:'🗺 Regiune — '+name+' Pol Regional',
-         body:'Zona metropolitana extinsă. Rată demografică: '+rate+'%/an. Densitate: '+densHA+' loc/km². PIB județ: '+pib+' mld €/an.',
+         body:'Zona metropolitana extinsă. Rată demografică: '+rate+'%/an. Densitate: '+densHA+' loc/km². PIB județ: '+Math.round((d.pop2021||100000)*(d.coef_hub||0.8)*0.05/1000)+' mld €/an.',
          src:'INS · ADR Nord-Est · Eurostat NUTS'},
 
         // S3 — Aproach (22s) — chains la 7s și 16s
@@ -2700,7 +2720,7 @@ out geom qt;`;
            {center:[cx,cy],zoom:15.0,pitch:65,bearing:-5,duration:5500,delay:14000},  // 3D!
          ],
          title:'✈ '+name+' — Vedere 3D',
-         body:'Aproach urban. Densitate: '+densHA+' loc/ha. PIB județ: '+pib+' mld €/an. Rata creștere: '+rate+'%/an. Proiecție 2050: '+pop50+' locuitori.',
+         body:'Aproach urban. Densitate: '+densHA+' loc/ha. PIB județ: '+Math.round((d.pop2021||100000)*(d.coef_hub||0.8)*0.05/1000)+' mld €/an. Rata creștere: '+rate+'%/an. Proiecție 2055: '+Math.round(need.pop2055).toLocaleString('ro-RO')+' locuitori.',
          src:'INSE · ANCPI · BNR · Eurostat'},
 
         // S4 — ZONA CU ACTIVITATE MAXIMĂ (50s) · ZIUA → la stradă
