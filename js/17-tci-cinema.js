@@ -1526,10 +1526,10 @@ out geom qt;`;
           const seed = Math.abs(Math.sin(i * 127.1 + lon * 311.7));
           this._entities.push({
             lon, lat,
-            wM: 18 + seed * 25,  // 18-43m lățime
-            dM: 14 + seed * 20,  // 14-34m adâncime
-            hBase: Math.max(6, z.hMax * 0.2),
-            hMax:  z.hMax * (0.65 + seed * 0.35),
+            wM: 25 + seed * 35,  // 25-60m lățime
+            dM: 20 + seed * 30,  // 20-50m adâncime
+            hBase: Math.max(10, z.hMax * 0.3),
+            hMax:  z.hMax * (0.7 + seed * 0.3),
             startYr: z.startYr,
             color:   new THREE.Color(z.color),
             zoneId:  z.id,
@@ -1608,8 +1608,8 @@ out geom qt;`;
         }
 
         const [lx, ly] = this._toLocal(e.lon, e.lat);
-        mesh.position.set(lx, ly, 0);
-        mesh.scale.set(e.wM, e.dM, h);
+        mesh.position.set(lx, ly, -2); // -2m sub suprafată = ancorat la sol
+        mesh.scale.set(e.wM, e.dM, h + 2); // compensare
 
         // Culoare per stare temporală
         let col;
@@ -1749,9 +1749,11 @@ out geom qt;`;
       });
       m.addSource('tci-constraints', {type:'geojson', data:{type:'FeatureCollection',features}});
       m.addLayer({id:'tci-const-fill', type:'fill', source:'tci-constraints',
-        paint:{'fill-color':['get','color'],'fill-opacity':0.18}});
+        maxzoom: 13,
+        paint:{'fill-color':['get','color'],'fill-opacity':0.12}});
       m.addLayer({id:'tci-const-outline', type:'line', source:'tci-constraints',
-        paint:{'line-color':['get','color'],'line-width':1.5,'line-dasharray':[4,3],'line-opacity':0.7}});
+        maxzoom: 14,
+        paint:{'line-color':['get','color'],'line-width':1,'line-dasharray':[4,3],'line-opacity':0.5}});
       console.log('[TCI] ✅ Overlay constrângeri:', features.length, 'zone excluse');
     } catch(e){}
   },
