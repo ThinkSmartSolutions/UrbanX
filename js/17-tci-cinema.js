@@ -125,6 +125,25 @@ const TCI = {
     this._selectedUATKey = null;
     this.cityData  = (typeof _RO_CITIES_DB !== 'undefined')
       ? (_RO_CITIES_DB[this.cityKey] || Object.values(_RO_CITIES_DB)[0]) : null;
+    this.d = this.cityData;  // alias folosit în director, _buildZones, _calcUrbanNeed
+
+    // ── Normalizare câmpuri _UAT_DB → format intern ───────────────────────
+    // _UAT_DB folosește coef_hub în loc de universitati, judet_code în loc de judet
+    if(this.d && !this.d.universitati && this.d.coef_hub) {
+      // Estimare universitati din coef_hub + tip urban
+      // coef_hub >= 1.0 = hub regional cu universitate
+      const jc = (this.d.judet_code||this.d.judet||'').toUpperCase();
+      this.d.universitati = this.d.coef_hub >= 1.10 ? 5
+        : this.d.coef_hub >= 1.0  ? 3
+        : this.d.coef_hub >= 0.85 ? 1
+        : 0;
+      // Orașe cunoscute cu universitate (din INS)
+      const UNIV = {'IS':5,'CJ':4,'TM':4,'B':8,'CT':2,'BV':2,'SV':1,'BC':1,'OT':1,'PH':1,'DJ':2,'GL':1,'BH':1,'SB':1,'AB':1};
+      if(UNIV[jc]) this.d.universitati = UNIV[jc];
+    }
+    if(this.d && !this.d.judet && this.d.judet_code) {
+      this.d.judet = this.d.judet_code; // fallback pentru câmpul judet
+    }
     if(_prevKey && _prevKey!==this.cityKey && this._3D?._meshes?.length){
       this._3D._entities=[];
       (this._3D._meshes||[]).forEach(m=>{try{m.geometry?.dispose();m.material?.dispose();}catch(e){}});
@@ -647,17 +666,17 @@ const TCI = {
       checks.push(`<span style="color:#ef4444">❌ LMI Supabase: eroare</span>`);
     }
 
-    // 2. Mapbox SearchBox
+    // 2. Mapbox Geocoding
     try {
       const token = mapboxgl?.accessToken;
       const r = await fetch(
-        `https://api.mapbox.com/search/searchbox/v1/category/cemetery?bbox=27,47,28,48&limit=1&access_token=${token}`,
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/cimitir.json?bbox=27,47,28,48&limit=1&access_token=${token}`,
         {signal:AbortSignal.timeout(4000)});
       checks.push(r.ok
-        ? `<span style="color:#22c55e">✅ Mapbox POI: activ</span>`
-        : `<span style="color:#ef4444">❌ Mapbox POI: ${r.status}</span>`);
+        ? `<span style="color:#22c55e">✅ Mapbox Geocoding: activ</span>`
+        : `<span style="color:#ef4444">❌ Mapbox Geocoding: ${r.status}</span>`);
     } catch(e) {
-      checks.push(`<span style="color:#ef4444">❌ Mapbox POI: timeout</span>`);
+      checks.push(`<span style="color:#ef4444">❌ Mapbox Geocoding: timeout</span>`);
     }
 
     // 3. Zone constrângeri încărcate
@@ -1559,20 +1578,31 @@ ROI = (Vsale - Ctotal) / Ctotal   <span class="v">→ ROI ${feas.roi}% (prag 12%
     // Date mult mai complete decât Overpass pentru România
     // Documentație: docs.mapbox.com/api/search/search-box/
     async _mapboxCategorySearch(category, lon, lat, radiusKm, token) {
+      // Mapbox SearchBox v1/category este deprecat → 400 Bad Request
+      // Folosim Geocoding API v5 cu query text — stabil și documentat
+      const catMap = {
+        'cemetery':   'cimitir cemetery graveyard',
+        'park':       'parc park',
+        'playground': 'loc de joacă playground',
+        'hospital':   'spital hospital',
+        'university': 'universitate university',
+        'stadium':    'stadion stadium arena',
+      };
+      const q = catMap[category] || category;
       const margin = radiusKm / 111.32;
       const bbox   = `${lon-margin},${lat-margin},${lon+margin},${lat+margin}`;
-      const url    = `https://api.mapbox.com/search/searchbox/v1/category/${category}`+
-                     `?bbox=${bbox}&limit=50&language=ro&access_token=${token}`;
+      const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json`+
+                  `?bbox=${bbox}&limit=10&language=ro&access_token=${token}`;
       try {
         const resp = await fetch(url, {signal:AbortSignal.timeout(6000)});
         if(!resp.ok) return [];
         const data = await resp.json();
         return (data.features||[]).map(f=>({
-          name: f.properties?.name || f.properties?.full_address || category,
-          lon:  f.geometry?.coordinates?.[0],
-          lat:  f.geometry?.coordinates?.[1],
+          name:     f.text || f.place_name || category,
+          lon:      f.center?.[0],
+          lat:      f.center?.[1],
           category,
-          tags: f.properties || {},
+          tags:     f.properties || {},
         })).filter(p=>p.lon&&p.lat);
       } catch(e) { return []; }
     },
@@ -1925,8 +1955,15 @@ out geom qt;`;
     };
 
     // ── Date reale per oras ────────────────────────────────────────────
+    // cityKey poate fi: 'iasi' (vechi), 'RO-IS-105309' (nou din _UAT_DB)
+    // _REAL_ZONES are chei simple: 'iasi', 'focsani', 'cluj' etc.
+    // Normalizăm: 'RO-VN-78046' → name='Focșani' → 'focsani'
     const cityKey = (this.cityKey||'').toLowerCase();
-    const realZones = this._REAL_ZONES[cityKey];
+    const nameNorm = (this.d?.name||'')
+      .toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')  // elimină diacritice
+      .split(/[-\s]/)[0];  // primul cuvânt: 'Cluj-Napoca'→'cluj', 'Focșani'→'focsani'
+    const realZones = this._REAL_ZONES[cityKey] || this._REAL_ZONES[nameNorm];
 
     // Dacă avem date reale → folosim GPS direct
     if(realZones) {
