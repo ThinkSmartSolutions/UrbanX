@@ -1461,15 +1461,8 @@ out geom qt;`;
 
       this._scene.add(new THREE.AmbientLight(0xffffff, 1.0));
 
-      // TEST: sferă galbenă 300m la centrul orașului
-      const _tGeo = new THREE.SphereGeometry(300, 16, 16);
-      const _tMat = new THREE.MeshBasicMaterial({color: 0xffff00, depthTest: false});
-      const _tMesh = new THREE.Mesh(_tGeo, _tMat);
-      _tMesh.position.set(0, 0, 150);
-      this._scene.add(_tMesh);
-
       this._ready = true;
-      console.log('[3D] ✅ CustomLayerInterface activ — test sphere adăugat');
+      console.log('[3D] ✅ CustomLayerInterface overlay activ');
     },
 
     render(gl, matrix) {
@@ -1571,7 +1564,8 @@ out geom qt;`;
       const geom = new THREE.BoxGeometry(1, 1, 1);
       geom.translate(0, 0, 0.5); // pivotul la Z=0 (sol)
       // MeshBasicMaterial: NU depinde de lumini → culoarea instanței apare GARANTAT
-      const mat = new THREE.MeshBasicMaterial({ vertexColors: true });
+      // depthTest:false — overlay canvas separat, nu există depth buffer Mapbox
+      const mat = new THREE.MeshBasicMaterial({ vertexColors: true, depthTest: false });
       this._mesh = new THREE.InstancedMesh(geom, mat, this._entities.length);
       this._mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
       // Inițializează instanceColor (gri neutru) ÎNAINTE de primul render → shader compile corect
