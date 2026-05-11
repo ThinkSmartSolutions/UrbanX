@@ -203,23 +203,26 @@ const TCI = {
     }
 
     this._ss = setTimeout(() => {
-      // Acum _searchUAT găsește și comune (sunt în _UAT_DB)
-      let res = (typeof _searchUAT !== 'undefined') ? _searchUAT(q, 10) : [];
+      // _searchSIRUTA = toate 3181 UAT-urile din INS SIRUTA dec.2025
+      // _searchUAT = doar municipii+orase din 20-uats-database.js
+      // Prioritate: _searchSIRUTA dacă e disponibil
+      let res = [];
+      if(typeof _searchSIRUTA !== 'undefined') {
+        res = _searchSIRUTA(q, 10);
+      } else if(typeof _searchUAT !== 'undefined') {
+        res = _searchUAT(q, 10);
+      }
 
-      // Fallback direct dacă _searchUAT nu e disponibil
+      // Fallback direct în comune _EXTRA_UATS dacă nimic găsit
       if(!res.length && q && q.length >= 2) {
-        const qN = q.toLowerCase()
-          .replace(/[șş]/g,'s').replace(/[țţ]/g,'t')
-          .replace(/[ăâ]/g,'a').replace(/î/g,'i');
-        res = Object.entries(this._EXTRA_UATS)
-          .filter(([,c]) => {
-            const n = (c.name||'').toLowerCase()
-              .replace(/[șş]/g,'s').replace(/[țţ]/g,'t')
-              .replace(/[ăâ]/g,'a').replace(/î/g,'i');
-            return n.startsWith(qN) || n.includes(qN);
+        const qN = q.toLowerCase().replace(/[șş]/g,'s').replace(/[țţ]/g,'t').replace(/[ăâ]/g,'a').replace(/î/g,'i');
+        res = Object.entries(this._EXTRA_UATS||{})
+          .filter(([,c])=>{
+            const n=(c.name||'').toLowerCase().replace(/[șş]/g,'s').replace(/[țţ]/g,'t').replace(/[ăâ]/g,'a').replace(/î/g,'i');
+            return n.startsWith(qN)||n.includes(qN);
           })
-          .map(([k,c]) => ({key:k, name:c.name, judet:c.judet, pop2021:c.pop2021, score:80}))
-          .slice(0, 8);
+          .map(([k,c])=>({key:k,name:c.name,judet:c.judet,pop2021:c.pop2021,tip:c.tip}))
+          .slice(0,8);
       }
 
       const el = document.getElementById('tci-sel-res');
@@ -663,7 +666,7 @@ const TCI = {
             <input type="text" id="tci-cmp-inp" placeholder="Tastează oraș, comună..." autocomplete="off" oninput="TCI._cmpSearch(this.value)"
               style="width:100%;background:rgba(255,255,255,0.09);border:1px solid rgba(56,189,248,0.3);color:#fff;padding:7px 9px;border-radius:6px;font-size:11px;font-family:inherit;box-sizing:border-box">
             <div id="tci-cmp-res" style="background:rgba(4,10,24,0.97);border:1px solid rgba(255,255,255,0.1);border-radius:5px;max-height:100px;overflow-y:auto;display:none;margin-top:3px"></div>
-            <div id="tci-cmp-out" style="margin-top:4px"></div>
+            <div id="tci-cmp-out" style="margin-top:4px;max-height:340px;overflow-y:auto"></div>
           </div>
 
           <div style="display:flex;gap:4px">
@@ -1162,22 +1165,9 @@ const TCI = {
   _cmpSearch(q) {
     clearTimeout(this._cs);
     this._cs = setTimeout(()=>{
-      // Asigurăm că comunele sunt în _UAT_DB (injectat de _selSearch)
-      if(!this._extrasInjected && typeof _UAT_DB !== 'undefined') {
-        try { Object.assign(_UAT_DB, this._EXTRA_UATS); this._extrasInjected=true; } catch(e){}
-      }
-      let res = (typeof _searchUAT!=='undefined') ? _searchUAT(q,8) : [];
-      // Fallback direct în comune
-      if(!res.length && q && q.length>=2) {
-        const qN = q.toLowerCase().replace(/[șş]/g,'s').replace(/[țţ]/g,'t').replace(/[ăâ]/g,'a').replace(/î/g,'i');
-        res = Object.entries(this._EXTRA_UATS||{})
-          .filter(([,c])=>{
-            const n=(c.name||'').toLowerCase().replace(/[șş]/g,'s').replace(/[țţ]/g,'t').replace(/[ăâ]/g,'a').replace(/î/g,'i');
-            return n.startsWith(qN)||n.includes(qN);
-          })
-          .map(([k,c])=>({key:k,name:c.name,judet:c.judet,pop2021:c.pop2021}))
-          .slice(0,8);
-      }
+      // _searchSIRUTA = toate 3181 UAT-urile din INS SIRUTA dec.2025
+      let res = typeof _searchSIRUTA!=='undefined' ? _searchSIRUTA(q,8) :
+                typeof _searchUAT!=='undefined'    ? _searchUAT(q,8) : [];
       const el=document.getElementById('tci-cmp-res'); if(!el) return;
       if(!res.length){el.style.display='none';return;}
       el.innerHTML=res.map(r=>`
