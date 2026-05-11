@@ -1461,18 +1461,6 @@ out geom qt;`;
 
       this._scene.add(new THREE.AmbientLight(0xffffff, 1.0));
 
-      // TEST VIZUAL: cerc roșu în colțul overlay ca să confirmăm poziționarea
-      const _ctx = ov.getContext('2d');
-      if(_ctx) {
-        _ctx.fillStyle = 'rgba(255,0,0,0.8)';
-        _ctx.beginPath();
-        _ctx.arc(60, 60, 50, 0, Math.PI*2);
-        _ctx.fill();
-        _ctx.fillStyle = 'white';
-        _ctx.font = '20px Arial';
-        _ctx.fillText('TCI 3D', 30, 65);
-      }
-
       this._ready = true;
       console.log('[3D] ✅ CustomLayerInterface activ — coordinate system corect');
     },
