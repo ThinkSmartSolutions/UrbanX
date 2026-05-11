@@ -2734,7 +2734,7 @@ out geom qt;`;
            {center:[cx-0.010,cy+0.009],zoom:15.0,pitch:62,bearing:30,duration:5500,delay:44000,light:'dusk'},
          ],
          title:'🏗 '+name+' — Zonă Activă',
-         body:'Zonă cu creștere accelerată '+need.cladiri.inner+' clădiri noi estimate ('+grav.growthType+'). ANCPI '+Math.round(city.pop2021/85).toLocaleString()+' autorizații/an estimat. hMax seismic: '+seis.hMaxStory+' etaje.',
+         body:'Zonă cu creștere accelerată '+need.cladiri.inner+' clădiri noi estimate ('+grav.growthType+'). ANCPI '+Math.round(d.pop2021/85).toLocaleString()+' autorizații/an estimat. hMax seismic: '+seis.hMaxStory+' etaje.',
          src:'ANCPI · P100-1/2022 · Model TSS·FG'},
 
         // S5 — CENTRU CIVIC + CORIDOARE (55s) · APU→NOAPTE→DIMINEAȚĂ
@@ -2786,7 +2786,7 @@ out geom qt;`;
            {center:[cx+0.024*sc,cy-0.006*sc],zoom:13.5,pitch:46,bearing:5,duration:5000,delay:44000,light:'dusk'},
          ],
          title:'🏘 Expansiune Periferică — Rezidențial Nou',
-         body:'Zona periferică '+name+'. Estimare PUZ noi: +'+need.cladiri.expansie+' clădiri R+2-R+4. Extindere intravilam pe extravilan. Proiecție: +'+Math.round((city.pop2021||100000)*0.08).toLocaleString()+' locuitori până 2035. Tip creștere: '+grav.growthType+'.',
+         body:'Zona periferică '+name+'. Estimare PUZ noi: +'+need.cladiri.expansie+' clădiri R+2-R+4. Extindere intravilam pe extravilan. Proiecție: +'+Math.round((d.pop2021||100000)*0.08).toLocaleString()+' locuitori până 2035. Tip creștere: '+grav.growthType+'.',
          src:'ANCPI · INS · Model TSS·FG'},
 
         // S9 — RISCURI & CLIMĂ (50s) · NOAPTE
