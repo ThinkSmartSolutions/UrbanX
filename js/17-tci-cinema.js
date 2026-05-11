@@ -92,22 +92,22 @@ const TCI = {
   // Sursă: INS Recensământ 2021 · coordonate GPS validate
   _EXTRA_UATS: {
     // ═══ IAȘI (IS) ════════════════════════════════════════════════════════
-    'RO-IS-95042':{siruta:'95042',name:'Miroslava',judet:'IS',judet_code:'IS',tip:'comuna',pop2021:17842,pop2011:11200,lat:47.121,lon:27.526,regiune:'NE',coef_hub:0.85,rata_reala_2011_2021:4.76},
-    'RO-IS-94889':{siruta:'94889',name:'Aroneanu',judet:'IS',judet_code:'IS',tip:'comuna',pop2021:5840,pop2011:4100,lat:47.175,lon:27.680,regiune:'NE',coef_hub:0.72,rata_reala_2011_2021:3.60},
-    'RO-IS-95024':{siruta:'95024',name:'Lețcani',judet:'IS',judet_code:'IS',tip:'comuna',pop2021:7200,pop2011:5600,lat:47.188,lon:27.513,regiune:'NE',coef_hub:0.75,rata_reala_2011_2021:2.54},
-    'RO-IS-95005':{siruta:'95005',name:'Ciurea',judet:'IS',judet_code:'IS',tip:'comuna',pop2021:12400,pop2011:9800,lat:47.089,lon:27.534,regiune:'NE',coef_hub:0.78,rata_reala_2011_2021:2.37},
-    'RO-IS-95087':{siruta:'95087',name:'Rediu',judet:'IS',judet_code:'IS',tip:'comuna',pop2021:6100,pop2011:4800,lat:47.195,lon:27.617,regiune:'NE',coef_hub:0.74,rata_reala_2011_2021:2.41},
-    'RO-IS-94951':{siruta:'94951',name:'Holboca',judet:'IS',judet_code:'IS',tip:'comuna',pop2021:11200,pop2011:8900,lat:47.142,lon:27.682,regiune:'NE',coef_hub:0.76,rata_reala_2011_2021:2.32},
+    'RO-IS-95042':{siruta:'95042',name:'Miroslava',judet:'IS',judet_code:'IS',tip:'comuna',pop2021:17842,pop2011:11200,lat:47.14597,lon:27.527077,regiune:'NE',coef_hub:0.85,rata_reala_2011_2021:4.76},
+    'RO-IS-94889':{siruta:'94889',name:'Aroneanu',judet:'IS',judet_code:'IS',tip:'comuna',pop2021:5840,pop2011:4100,lat:47.203683,lon:27.602671,regiune:'NE',coef_hub:0.72,rata_reala_2011_2021:3.60},
+    'RO-IS-95024':{siruta:'95024',name:'Lețcani',judet:'IS',judet_code:'IS',tip:'comuna',pop2021:7200,pop2011:5600,lat:47.155,lon:27.478,regiune:'NE',coef_hub:0.75,rata_reala_2011_2021:2.54},
+    'RO-IS-95005':{siruta:'95005',name:'Ciurea',judet:'IS',judet_code:'IS',tip:'comuna',pop2021:12400,pop2011:9800,lat:47.065,lon:27.512,regiune:'NE',coef_hub:0.78,rata_reala_2011_2021:2.37},
+    'RO-IS-95087':{siruta:'95087',name:'Rediu',judet:'IS',judet_code:'IS',tip:'comuna',pop2021:6100,pop2011:4800,lat:47.185,lon:27.635,regiune:'NE',coef_hub:0.74,rata_reala_2011_2021:2.41},
+    'RO-IS-94951':{siruta:'94951',name:'Holboca',judet:'IS',judet_code:'IS',tip:'comuna',pop2021:11200,pop2011:8900,lat:47.138,lon:27.69,regiune:'NE',coef_hub:0.76,rata_reala_2011_2021:2.32},
     'RO-IS-94977':{siruta:'94977',name:'Ipătele',judet:'IS',judet_code:'IS',tip:'comuna',pop2021:3200,pop2011:3100,lat:47.080,lon:27.642,regiune:'NE',coef_hub:0.62,rata_reala_2011_2021:-0.32},
-    'RO-IS-95069':{siruta:'95069',name:'Popricani',judet:'IS',judet_code:'IS',tip:'comuna',pop2021:6800,pop2011:6200,lat:47.268,lon:27.598,regiune:'NE',coef_hub:0.65,rata_reala_2011_2021:0.94},
-    'RO-IS-94870':{siruta:'94870',name:'Bârnova',judet:'IS',judet_code:'IS',tip:'comuna',pop2021:6400,pop2011:5800,lat:47.071,lon:27.577,regiune:'NE',coef_hub:0.71,rata_reala_2011_2021:1.00},
+    'RO-IS-95069':{siruta:'95069',name:'Popricani',judet:'IS',judet_code:'IS',tip:'comuna',pop2021:6800,pop2011:6200,lat:47.258,lon:27.61,regiune:'NE',coef_hub:0.65,rata_reala_2011_2021:0.94},
+    'RO-IS-94870':{siruta:'94870',name:'Bârnova',judet:'IS',judet_code:'IS',tip:'comuna',pop2021:6400,pop2011:5800,lat:47.048,lon:27.565,regiune:'NE',coef_hub:0.71,rata_reala_2011_2021:1.00},
     'RO-IS-94913':{siruta:'94913',name:'Comarna',judet:'IS',judet_code:'IS',tip:'comuna',pop2021:2800,pop2011:2900,lat:47.040,lon:27.660,regiune:'NE',coef_hub:0.60,rata_reala_2011_2021:-0.35},
     'RO-IS-94995':{siruta:'94995',name:'Horpaz',judet:'IS',judet_code:'IS',tip:'comuna',pop2021:2600,pop2011:2100,lat:47.135,lon:27.548,regiune:'NE',coef_hub:0.70,rata_reala_2011_2021:2.15},
     'RO-IS-95033':{siruta:'95033',name:'Lunca Cetățuii',judet:'IS',judet_code:'IS',tip:'comuna',pop2021:4200,pop2011:3600,lat:47.104,lon:27.585,regiune:'NE',coef_hub:0.68,rata_reala_2011_2021:1.56},
     'RO-IS-95114':{siruta:'95114',name:'Schitu Duca',judet:'IS',judet_code:'IS',tip:'comuna',pop2021:3400,pop2011:3200,lat:47.098,lon:27.714,regiune:'NE',coef_hub:0.61,rata_reala_2011_2021:0.61},
     'RO-IS-95132':{siruta:'95132',name:'Sinești',judet:'IS',judet_code:'IS',tip:'comuna',pop2021:4100,pop2011:4000,lat:47.348,lon:27.623,regiune:'NE',coef_hub:0.63,rata_reala_2011_2021:0.25},
-    'RO-IS-95213':{siruta:'95213',name:'Tomești',judet:'IS',judet_code:'IS',tip:'comuna',pop2021:9600,pop2011:7400,lat:47.133,lon:27.604,regiune:'NE',coef_hub:0.77,rata_reala_2011_2021:2.63},
-    'RO-IS-95294':{siruta:'95294',name:'Valea Lupului',judet:'IS',judet_code:'IS',tip:'comuna',pop2021:8900,pop2011:6200,lat:47.209,lon:27.541,regiune:'NE',coef_hub:0.79,rata_reala_2011_2021:3.68},
+    'RO-IS-95213':{siruta:'95213',name:'Tomești',judet:'IS',judet_code:'IS',tip:'comuna',pop2021:9600,pop2011:7400,lat:47.12,lon:27.58,regiune:'NE',coef_hub:0.77,rata_reala_2011_2021:2.63},
+    'RO-IS-95294':{siruta:'95294',name:'Valea Lupului',judet:'IS',judet_code:'IS',tip:'comuna',pop2021:8900,pop2011:6200,lat:47.178,lon:27.525,regiune:'NE',coef_hub:0.79,rata_reala_2011_2021:3.68},
     'RO-IS-95258':{siruta:'95258',name:'Tătăruși',judet:'IS',judet_code:'IS',tip:'comuna',pop2021:3100,pop2011:3000,lat:47.047,lon:27.574,regiune:'NE',coef_hub:0.63,rata_reala_2011_2021:0.33},
     'RO-IS-95249':{siruta:'95249',name:'Tudor Vladimirescu',judet:'IS',judet_code:'IS',tip:'comuna',pop2021:5800,pop2011:5400,lat:47.293,lon:27.664,regiune:'NE',coef_hub:0.64,rata_reala_2011_2021:0.72},
     'RO-IS-95276':{siruta:'95276',name:'Ungheni IS',judet:'IS',judet_code:'IS',tip:'comuna',pop2021:5900,pop2011:5600,lat:47.065,lon:27.296,regiune:'NE',coef_hub:0.65,rata_reala_2011_2021:0.52},
@@ -119,8 +119,8 @@ const TCI = {
     'RO-IS-94932':{siruta:'94932',name:'Dobrovăț',judet:'IS',judet_code:'IS',tip:'comuna',pop2021:4600,pop2011:4500,lat:47.026,lon:27.462,regiune:'NE',coef_hub:0.62,rata_reala_2011_2021:0.22},
     'RO-IS-95195':{siruta:'95195',name:'Tibănești',judet:'IS',judet_code:'IS',tip:'comuna',pop2021:4600,pop2011:4700,lat:47.256,lon:27.220,regiune:'NE',coef_hub:0.61,rata_reala_2011_2021:-0.21},
     // ═══ BOTOȘANI (BT) ═══════════════════════════════════════════════════
-    'RO-BT-18180':{siruta:'18180',name:'Cătămărăști',judet:'BT',judet_code:'BT',tip:'comuna',pop2021:8400,pop2011:6200,lat:47.783,lon:26.636,regiune:'NE',coef_hub:0.73,rata_reala_2011_2021:3.08},
-    'RO-BT-18384':{siruta:'18384',name:'Curtești',judet:'BT',judet_code:'BT',tip:'comuna',pop2021:6800,pop2011:5800,lat:47.691,lon:26.749,regiune:'NE',coef_hub:0.70,rata_reala_2011_2021:1.59},
+    'RO-BT-18180':{siruta:'18180',name:'Cătămărăști',judet:'BT',judet_code:'BT',tip:'comuna',pop2021:8400,pop2011:6200,lat:47.750243,lon:26.570911,regiune:'NE',coef_hub:0.73,rata_reala_2011_2021:3.08},
+    'RO-BT-18384':{siruta:'18384',name:'Curtești',judet:'BT',judet_code:'BT',tip:'comuna',pop2021:6800,pop2011:5800,lat:47.678,lon:26.735,regiune:'NE',coef_hub:0.70,rata_reala_2011_2021:1.59},
     'RO-BT-18357':{siruta:'18357',name:'Cristești BT',judet:'BT',judet_code:'BT',tip:'comuna',pop2021:4200,pop2011:4100,lat:47.618,lon:26.617,regiune:'NE',coef_hub:0.63,rata_reala_2011_2021:0.24},
     'RO-BT-19276':{siruta:'19276',name:'Ștefănești BT',judet:'BT',judet_code:'BT',tip:'comuna',pop2021:10200,pop2011:10400,lat:47.804,lon:27.196,regiune:'NE',coef_hub:0.66,rata_reala_2011_2021:-0.19},
     'RO-BT-19187':{siruta:'19187',name:'Săveni',judet:'BT',judet_code:'BT',tip:'comuna',pop2021:9800,pop2011:10200,lat:47.961,lon:26.860,regiune:'NE',coef_hub:0.65,rata_reala_2011_2021:-0.39},
@@ -132,7 +132,7 @@ const TCI = {
     'RO-BT-19079':{siruta:'19079',name:'Rădăuți-Prut',judet:'BT',judet_code:'BT',tip:'comuna',pop2021:5800,pop2011:6000,lat:48.238,lon:26.822,regiune:'NE',coef_hub:0.63,rata_reala_2011_2021:-0.33},
     'RO-BT-19321':{siruta:'19321',name:'Trușești',judet:'BT',judet_code:'BT',tip:'comuna',pop2021:5800,pop2011:6000,lat:47.784,lon:26.882,regiune:'NE',coef_hub:0.63,rata_reala_2011_2021:-0.33},
     'RO-BT-18857':{siruta:'18857',name:'Mihăileni BT',judet:'BT',judet_code:'BT',tip:'comuna',pop2021:4800,pop2011:4900,lat:47.869,lon:26.661,regiune:'NE',coef_hub:0.62,rata_reala_2011_2021:-0.21},
-    'RO-BT-18875':{siruta:'18875',name:'Mihai Eminescu BT',judet:'BT',judet_code:'BT',tip:'comuna',pop2021:5600,pop2011:5800,lat:47.732,lon:26.600,regiune:'NE',coef_hub:0.63,rata_reala_2011_2021:-0.35},
+    'RO-BT-18875':{siruta:'18875',name:'Mihai Eminescu BT',judet:'BT',judet_code:'BT',tip:'comuna',pop2021:5600,pop2011:5800,lat:47.766133,lon:26.55851,regiune:'NE',coef_hub:0.63,rata_reala_2011_2021:-0.35},
     'RO-BT-18964':{siruta:'18964',name:'Nicșeni',judet:'BT',judet_code:'BT',tip:'comuna',pop2021:4100,pop2011:4200,lat:47.838,lon:26.669,regiune:'NE',coef_hub:0.62,rata_reala_2011_2021:-0.24},
     'RO-BT-19535':{siruta:'19535',name:'Vlăsinești',judet:'BT',judet_code:'BT',tip:'comuna',pop2021:4800,pop2011:5000,lat:47.911,lon:26.806,regiune:'NE',coef_hub:0.62,rata_reala_2011_2021:-0.41},
     'RO-BT-18419':{siruta:'18419',name:'Dângeni',judet:'BT',judet_code:'BT',tip:'comuna',pop2021:3600,pop2011:3700,lat:47.802,lon:26.822,regiune:'NE',coef_hub:0.61,rata_reala_2011_2021:-0.27},
@@ -144,7 +144,7 @@ const TCI = {
     'RO-BT-18722':{siruta:'18722',name:'Leorda',judet:'BT',judet_code:'BT',tip:'comuna',pop2021:5400,pop2011:5600,lat:47.973,lon:26.838,regiune:'NE',coef_hub:0.63,rata_reala_2011_2021:-0.36},
     'RO-BT-18562':{siruta:'18562',name:'George Enescu BT',judet:'BT',judet_code:'BT',tip:'comuna',pop2021:4200,pop2011:4400,lat:47.961,lon:26.696,regiune:'NE',coef_hub:0.62,rata_reala_2011_2021:-0.46},
     'RO-BT-19562':{siruta:'19562',name:'Vorona',judet:'BT',judet_code:'BT',tip:'comuna',pop2021:5200,pop2011:5400,lat:47.596,lon:26.744,regiune:'NE',coef_hub:0.62,rata_reala_2011_2021:-0.37},
-    'RO-BT-18073':{siruta:'18073',name:'Băluşeni',judet:'BT',judet_code:'BT',tip:'comuna',pop2021:2900,pop2011:3000,lat:47.816,lon:26.622,regiune:'NE',coef_hub:0.61,rata_reala_2011_2021:-0.34},
+    'RO-BT-18073':{siruta:'18073',name:'Băluşeni',judet:'BT',judet_code:'BT',tip:'comuna',pop2021:2900,pop2011:3000,lat:47.669937,lon:26.795311,regiune:'NE',coef_hub:0.61,rata_reala_2011_2021:-0.34},
     'RO-BT-18019':{siruta:'18019',name:'Albești BT',judet:'BT',judet_code:'BT',tip:'comuna',pop2021:4200,pop2011:4300,lat:47.931,lon:26.768,regiune:'NE',coef_hub:0.61,rata_reala_2011_2021:-0.24},
     'RO-BT-18046':{siruta:'18046',name:'Avrămeni',judet:'BT',judet_code:'BT',tip:'comuna',pop2021:3800,pop2011:3900,lat:47.962,lon:26.578,regiune:'NE',coef_hub:0.60,rata_reala_2011_2021:-0.26},
     'RO-BT-18135':{siruta:'18135',name:'Brăteni',judet:'BT',judet_code:'BT',tip:'comuna',pop2021:1800,pop2011:1900,lat:47.842,lon:26.815,regiune:'NE',coef_hub:0.60,rata_reala_2011_2021:-0.53},
@@ -190,6 +190,7 @@ const TCI = {
     // Asta face _searchUAT să le găsească natural, fără cod special
     if(!this._extrasInjected) {
       this._extrasInjected = true;
+      this._applyGeoCache(); // Restaurează coordonate geocodate din sesiunile anterioare
       try {
         if(typeof _UAT_DB !== 'undefined') {
           Object.assign(_UAT_DB, this._EXTRA_UATS);
@@ -241,6 +242,89 @@ const TCI = {
     if(inp) inp.value = name;
     const res = document.getElementById('tci-sel-res');
     if(res) res.style.display = 'none';
+
+    // ── Geocodare automată la selecție ───────────────────────────────────
+    // Pentru ORICE UAT (comună, sat, oraș) — geocodăm imediat după selecție
+    // Astfel la lansare coordonatele sunt deja corecte
+    // Nu mai depindem de coordonate estimate/hardcodate
+    const token = mapboxgl?.accessToken || '';
+    if(!token) return;
+
+    // Căutăm UAT-ul în toate bazele de date disponibile
+    let uatData = null;
+    if(typeof _RO_CITIES_DB !== 'undefined') uatData = _RO_CITIES_DB[key];
+    if(!uatData && typeof _UAT_DB !== 'undefined') uatData = _UAT_DB[key];
+    if(!uatData) uatData = this._EXTRA_UATS?.[key];
+
+    const judet = uatData?.judet || uatData?.judet_code || '';
+    const query = encodeURIComponent(`${name}, ${judet}, Romania`);
+    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${query}.json`+
+      `?types=place,locality,neighborhood,poi&country=ro&limit=1&access_token=${token}`;
+
+    fetch(url, {signal: AbortSignal.timeout(5000)})
+      .then(r => r.json())
+      .then(data => {
+        const feat = data.features?.[0];
+        if(!feat?.center) return;
+        const [lon, lat] = feat.center;
+        // Verificăm că e în România (bounding box România)
+        if(lat < 43.5 || lat > 48.5 || lon < 20 || lon > 30) return;
+
+        console.log(`[TCI] Geocodat "${name}": ${lat.toFixed(5)}, ${lon.toFixed(5)}`);
+
+        // Actualizăm _UAT_REGISTRY (sursa principală)
+        if(window._UAT_REGISTRY?.[key]) {
+          window._UAT_REGISTRY[key].centroid = [lon, lat];
+          window._UAT_REGISTRY[key].geo_verified = true;
+        } else if(window._UAT_REGISTRY) {
+          // UAT nou — adăugăm în registry
+          window._UAT_REGISTRY[key] = {
+            centroid: [lon, lat], geo_verified: true,
+            name, siruta: key.split('-').pop()
+          };
+        }
+
+        // Actualizăm și în bazele de date vechi (compatibilitate)
+        if(typeof _UAT_DB !== 'undefined' && _UAT_DB[key]) {
+          _UAT_DB[key].lat = lat; _UAT_DB[key].lon = lon;
+        }
+        if(this._EXTRA_UATS?.[key]) {
+          this._EXTRA_UATS[key].lat = lat; this._EXTRA_UATS[key].lon = lon;
+        }
+        // Cache persistent IndexedDB-like via localStorage (nu sessionStorage)
+        try {
+          const cache = JSON.parse(localStorage.getItem('_tci_geocache')||'{}');
+          cache[key] = {lat, lon, name, ts: Date.now()};
+          localStorage.setItem('_tci_geocache', JSON.stringify(cache));
+        } catch(e) {}
+      })
+      .catch(() => {}); // Silențios — coordonatele existente rămân ca fallback
+  },
+
+  // Aplică cache-ul de geocodare la startup
+  _applyGeoCache() {
+    try {
+      // localStorage → persistent între sesiuni (nu sessionStorage)
+      const cache = JSON.parse(localStorage.getItem('_tci_geocache')||'{}');
+      let applied = 0;
+      Object.entries(cache).forEach(([key,{lat,lon}]) => {
+        // Scriem în _UAT_REGISTRY (sursa principală)
+        if(window._UAT_REGISTRY?.[key]) {
+          window._UAT_REGISTRY[key].centroid = [lon, lat];
+          window._UAT_REGISTRY[key].geo_verified = true;
+        }
+        // Compatibilitate cu DB-urile vechi
+        if(this._EXTRA_UATS?.[key]) {
+          this._EXTRA_UATS[key].lat = lat;
+          this._EXTRA_UATS[key].lon = lon;
+        }
+        if(typeof _UAT_DB !== 'undefined' && _UAT_DB[key]) {
+          _UAT_DB[key].lat = lat; _UAT_DB[key].lon = lon;
+        }
+        applied++;
+      });
+      if(applied) console.log(`[UAT Registry] Cache aplicat: ${applied} UAT-uri cu coordonate corectate`);
+    } catch(e) {}
   },
 
   // ── Launch ───────────────────────────────────────────────────────────────
@@ -311,11 +395,60 @@ const TCI = {
     this.pausedAt  = 0;
     this.bearing   = this.map.getBearing?.() || 0;
 
-    const cx = this.cityData?.lon || 27.601;
-    const cy = this.cityData?.lat || 47.158;
+    // ── Geocodare automată pentru comune din _EXTRA_UATS ─────────────────
+    // Coordonatele estimate din _EXTRA_UATS pot fi incorecte
+    // Folosim Mapbox Geocoding API pentru a obține coordonate precise
+    if(this.d?.tip === 'comuna' && this._EXTRA_UATS[this.cityKey]) {
+      const token = mapboxgl?.accessToken || '';
+      const numeComuna = this.d.name;
+      const judet = this.d.judet || this.d.judet_code || '';
+      if(token) {
+        fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(numeComuna+', '+judet+', Romania')}.json?types=place,locality,neighborhood&country=ro&limit=1&access_token=${token}`)
+          .then(r=>r.json())
+          .then(data=>{
+            const feat = data.features?.[0];
+            if(feat?.center) {
+              const [newLon, newLat] = feat.center;
+              console.log(`[TCI] Geocodat ${numeComuna}: ${newLat.toFixed(4)}, ${newLon.toFixed(4)} (era ${this.d.lat}, ${this.d.lon})`);
+              // Actualizăm coordonatele în obiectul de date
+              this.d.lon = newLon;
+              this.d.lat = newLat;
+              this.cityData.lon = newLon;
+              this.cityData.lat = newLat;
+              // Stocăm pentru sesiunile viitoare
+              if(this._EXTRA_UATS[this.cityKey]) {
+                this._EXTRA_UATS[this.cityKey].lon = newLon;
+                this._EXTRA_UATS[this.cityKey].lat = newLat;
+              }
+              // Salt la coordonatele corecte
+              try { this.map.flyTo({center:[newLon,newLat], zoom:12, pitch:45, bearing:-10, duration:2000}); } catch(e){}
+            }
+          })
+          .catch(e=>console.warn('[TCI] Geocodare comună:', e.message));
+      }
+    }
+
+    // ── UAT Spatial Registry — geometry-first ───────────────────────────
+    // Prioritate: 1. _UAT_REGISTRY (centroid verificat/bbox)
+    //             2. cityData.lon/lat (din DB existent)
+    //             3. Fallback Iași
+    const spatial = window._getUATSpatial?.(this.cityKey);
+    const cx = spatial?.centroid?.[0] ?? this.cityData?.lon ?? 27.601;
+    const cy = spatial?.centroid?.[1] ?? this.cityData?.lat ?? 47.158;
+
+    // Bbox UAT → zoom optim care arată întregul teritoriu
+    const bbox = spatial?.bbox;
+    const zoomForUAT = bbox
+      ? Math.min(13, Math.max(10,
+          Math.floor(8 - Math.log2(Math.max(bbox[2]-bbox[0], bbox[3]-bbox[1]) * 111))))
+      : 11;
+
+    if(spatial) {
+      console.log(`[UAT Registry] ${this.d?.name}: centroid=[${cx.toFixed(4)},${cy.toFixed(4)}] verified=${spatial.geo_verified} bbox=${bbox?.map(v=>v.toFixed(3))}`);
+    }
 
     this._buildUI(cx, cy);
-    this.map.jumpTo({ center:[cx,cy], zoom:11.0, pitch:35, bearing:-12 });
+    this.map.jumpTo({ center:[cx,cy], zoom:zoomForUAT, pitch:35, bearing:-12 });
 
     const onStyleReady = () => {
       this._setLight('dusk');
@@ -323,7 +456,7 @@ const TCI = {
       this._initVehicles();
       this._initLeftMap(cx, cy);
       // Jump explicit la orașul selectat — după setStyle camera poate rătăci
-      try { this.map.jumpTo({center:[cx,cy], zoom:11.0, pitch:35, bearing:-12}); } catch(e){}
+      try { this.map.jumpTo({center:[cx,cy], zoom:zoomForUAT, pitch:35, bearing:-12}); } catch(e){}
       setTimeout(() => {
         this._director.init(this);
         this.start();
