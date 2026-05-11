@@ -1436,22 +1436,43 @@ out geom qt;`;
       // OVERLAY CANVAS SEPARAT — bypass WebGL shared context
       // CustomLayerInterface păstrat DOAR pentru matrix-ul Mapbox
       const mc = map.getCanvas();
+      const container = map.getContainer(); // div-ul principal Mapbox
+
       const ov = document.createElement('canvas');
-      ov.width = mc.width; ov.height = mc.height;
-      ov.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2;background:rgba(255,0,0,0.15);';
-      mc.parentElement.appendChild(ov);
+      const dpr = window.devicePixelRatio || 1;
+      ov.width  = container.offsetWidth  * dpr;
+      ov.height = container.offsetHeight * dpr;
+      ov.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10;';
+      container.style.position = 'relative'; // asigură context de poziționare
+      container.appendChild(ov);
       this._overlay = ov;
 
       this._renderer = new THREE.WebGLRenderer({canvas: ov, antialias: true, alpha: true});
+      this._renderer.setPixelRatio(dpr);
       this._renderer.setClearColor(0x000000, 0);
       this._renderer.autoClear = true;
 
       new ResizeObserver(() => {
-        ov.width = mc.width; ov.height = mc.height;
-        this._renderer.setSize(mc.width, mc.height, false);
-      }).observe(mc);
+        const d = window.devicePixelRatio || 1;
+        ov.width  = container.offsetWidth  * d;
+        ov.height = container.offsetHeight * d;
+        this._renderer.setSize(container.offsetWidth, container.offsetHeight);
+      }).observe(container);
 
       this._scene.add(new THREE.AmbientLight(0xffffff, 1.0));
+
+      // TEST VIZUAL: cerc roșu în colțul overlay ca să confirmăm poziționarea
+      const _ctx = ov.getContext('2d');
+      if(_ctx) {
+        _ctx.fillStyle = 'rgba(255,0,0,0.8)';
+        _ctx.beginPath();
+        _ctx.arc(60, 60, 50, 0, Math.PI*2);
+        _ctx.fill();
+        _ctx.fillStyle = 'white';
+        _ctx.font = '20px Arial';
+        _ctx.fillText('TCI 3D', 30, 65);
+      }
+
       this._ready = true;
       console.log('[3D] ✅ CustomLayerInterface activ — coordinate system corect');
     },
