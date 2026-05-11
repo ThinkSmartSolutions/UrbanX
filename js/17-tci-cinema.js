@@ -1438,7 +1438,7 @@ out geom qt;`;
       const mc = map.getCanvas();
       const ov = document.createElement('canvas');
       ov.width = mc.width; ov.height = mc.height;
-      ov.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2;';
+      ov.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2;background:rgba(255,0,0,0.15);';
       mc.parentElement.appendChild(ov);
       this._overlay = ov;
 
