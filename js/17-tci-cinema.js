@@ -1699,6 +1699,19 @@ out geom qt;`;
        color:'#2563eb', hMax:18, startYr:2029,
        label:'Rezidențial Nord', sub:'R+3→R+5'},
     ],
+
+    'cluj':     [{id:'CV',lat:46.7712,lon:23.5887,rx:.0024,ry:.0017,color:'#8b5cf6',hMax:50,startYr:2026,label:'Centru Cluj',sub:'R+10→R+14'},{id:'FLO',lat:46.7650,lon:23.5320,rx:.0060,ry:.0042,color:'#16a34a',hMax:20,startYr:2026,label:'Florești',sub:'R+4→R+6'},{id:'BAC',lat:46.7830,lon:23.5400,rx:.0045,ry:.0032,color:'#22c55e',hMax:16,startYr:2028,label:'Baciu NV',sub:'R+3→R+5'},{id:'APA',lat:46.7750,lon:23.6350,rx:.0040,ry:.0028,color:'#0ea5e9',hMax:18,startYr:2029,label:'Apahida Est',sub:'Aeroport'}],
+    'timisoara':[{id:'CV',lat:45.7489,lon:21.2087,rx:.0024,ry:.0017,color:'#8b5cf6',hMax:45,startYr:2026,label:'Centru TM',sub:'Densificare'},{id:'GIR',lat:45.7050,lon:21.2200,rx:.0055,ry:.0038,color:'#16a34a',hMax:18,startYr:2027,label:'Giroc Sud',sub:'R+3→R+5'},{id:'DUM',lat:45.7780,lon:21.2350,rx:.0048,ry:.0034,color:'#22c55e',hMax:16,startYr:2028,label:'Dumbrăvița Nord',sub:'R+3→R+4'}],
+    'constanta': [{id:'CV',lat:44.1598,lon:28.6348,rx:.0022,ry:.0016,color:'#8b5cf6',hMax:24,startYr:2026,label:'Centru CT',sub:'ag=0.30g max R+8'},{id:'OVI',lat:44.2650,lon:28.5700,rx:.0055,ry:.0038,color:'#16a34a',hMax:16,startYr:2028,label:'Ovidiu Nord',sub:'Departe de port'}],
+    'brasov':    [{id:'CV',lat:45.6480,lon:25.6060,rx:.0022,ry:.0016,color:'#8b5cf6',hMax:40,startYr:2026,label:'Centru BV',sub:'R+8→R+12'},{id:'SCH',lat:45.6700,lon:25.6350,rx:.0050,ry:.0035,color:'#16a34a',hMax:20,startYr:2027,label:'Schei',sub:'R+4→R+6'}],
+    'galati':    [{id:'CV',lat:45.4353,lon:28.0080,rx:.0020,ry:.0014,color:'#8b5cf6',hMax:12,startYr:2026,label:'Centru GL',sub:'ag=0.40g MAX R+4'},{id:'MIC',lat:45.4580,lon:28.0350,rx:.0048,ry:.0034,color:'#f59e0b',hMax:12,startYr:2028,label:'Micro 19-21',sub:'Max R+4 seismic'}],
+    'focsani':   [{id:'CV',lat:45.6960,lon:27.1840,rx:.0018,ry:.0013,color:'#8b5cf6',hMax:12,startYr:2026,label:'Centru FV',sub:'ag=0.40g STRICT R+4'}],
+    'suceava':   [{id:'CV',lat:47.6520,lon:26.2556,rx:.0020,ry:.0014,color:'#8b5cf6',hMax:32,startYr:2026,label:'Centru SV',sub:'R+6→R+10'},{id:'SCH',lat:47.6650,lon:26.2200,rx:.0050,ry:.0035,color:'#16a34a',hMax:16,startYr:2028,label:'Șcheia Vest',sub:'R+3→R+5'}],
+    'bacau':     [{id:'CV',lat:46.5670,lon:26.9136,rx:.0020,ry:.0014,color:'#8b5cf6',hMax:24,startYr:2026,label:'Centru BC',sub:'ag=0.30g R+8'},{id:'SUD',lat:46.5420,lon:26.9200,rx:.0048,ry:.0034,color:'#16a34a',hMax:18,startYr:2028,label:'Sud BC',sub:'R+3→R+6'}],
+    'bucuresti': [{id:'CV',lat:44.4268,lon:26.1025,rx:.0020,ry:.0014,color:'#8b5cf6',hMax:18,startYr:2026,label:'Centru B',sub:'ag=0.35g R+6'},{id:'NOR',lat:44.4780,lon:26.0900,rx:.0060,ry:.0042,color:'#16a34a',hMax:18,startYr:2027,label:'Floreasca-Aviației',sub:'R+4→R+6 premium'},{id:'EST',lat:44.4200,lon:26.1800,rx:.0065,ry:.0045,color:'#0ea5e9',hMax:15,startYr:2027,label:'Voluntari-Pantelimon',sub:'R+3→R+5'},{id:'A2',lat:44.3800,lon:26.2500,rx:.0055,ry:.0038,color:'#78716c',hMax:9,startYr:2027,label:'Logistică A2',sub:'P+1→P+2'}],
+    'ploiesti':  [{id:'CV',lat:44.9365,lon:26.0227,rx:.0020,ry:.0014,color:'#8b5cf6',hMax:18,startYr:2026,label:'Centru PH',sub:'ag=0.35g R+6'},{id:'NOR',lat:44.9650,lon:26.0300,rx:.0050,ry:.0035,color:'#16a34a',hMax:15,startYr:2028,label:'Nord PH',sub:'R+3→R+5'}],
+    'craiova':   [{id:'CV',lat:44.3196,lon:23.7963,rx:.0020,ry:.0014,color:'#8b5cf6',hMax:24,startYr:2026,label:'Centru CJ',sub:'ag=0.30g R+8'},{id:'NOR',lat:44.3500,lon:23.8100,rx:.0050,ry:.0035,color:'#16a34a',hMax:18,startYr:2028,label:'Nord CJ — Ford',sub:'R+3→R+6'}],
+
   },
 
   _buildZones(cx, cy, constraints) {
