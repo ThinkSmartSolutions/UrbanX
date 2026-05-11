@@ -1323,6 +1323,36 @@ out geom qt;`;
   },
 
 
+
+  // ══════════════════════════════════════════════════════════════════════
+  // CONSTRÂNGERI SEISMICE — P100-1/2013 MDLPA (date publice)
+  // Restricție hMax per zonă seismică
+  // ══════════════════════════════════════════════════════════════════════
+  _SEISMIC_ZONES: [
+    // Z1: ag=0.40g — Vrancea epicentru + Câmpia Română est
+    { ag:0.40, hMaxStory:4,  bbox:[26.5,45.2,28.2,46.3], counties:['VN','BZ','GL','BR'] },
+    // Z2: ag=0.35g — București + câmpia sudică
+    { ag:0.35, hMaxStory:6,  bbox:[24.8,43.6,28.5,45.3], counties:['IF','IL','CL','PH','DB','GR','TR','TL','B'] },
+    // Z3: ag=0.30g — Moldova + Oltenia + Dobrogea
+    { ag:0.30, hMaxStory:8,  bbox:[22.5,43.6,28.5,47.8], counties:['IS','BC','NT','VS','AG','OT','MH','DJ','CT','VL','GJ','MS'] },
+    // Z4: ag=0.20g — Transilvania + Banat + nord-vest
+    { ag:0.20, hMaxStory:12, bbox:[20.2,45.2,26.5,48.3], counties:['SV','BT','MM','SJ','BH','AR','TM','CS','HD','AB','SB','BV','CV','HR','CJ'] },
+    // Z5: ag=0.10g — nord-vest extrem
+    { ag:0.10, hMaxStory:99, bbox:[22.0,47.0,24.5,48.3], counties:['SM','BN'] },
+  ],
+
+  // Returnează ag și hMax permis pentru un punct GPS
+  _getSeismicAg(lon, lat) {
+    // Caută zona seismică după bounding box
+    for(const z of this._SEISMIC_ZONES) {
+      const [minLon, minLat, maxLon, maxLat] = z.bbox;
+      if(lon >= minLon && lon <= maxLon && lat >= minLat && lat <= maxLat) {
+        return { ag: z.ag, hMaxStory: z.hMaxStory, hMaxM: z.hMaxStory * 3.0 };
+      }
+    }
+    return { ag: 0.15, hMaxStory: 10, hMaxM: 30 }; // default moderat
+  },
+
   // ══════════════════════════════════════════════════════════════════════
   // MOTOR PREDICTIV URBAN — bazat pe date INS + ANCPI + BNR
   // Funcționează pentru ORICE UAT din România
@@ -1408,7 +1438,7 @@ out geom qt;`;
 
     // ── Date reale per oras ────────────────────────────────────────────
     const cityKey = (this.cityKey||'').toLowerCase();
-    const realZones = this._REAL_ZONES[cityKey] || this._REAL_ZONES['iasi']; // fallback Iași
+    const realZones = this._REAL_ZONES[cityKey]; // NO fallback — alte UAT folosesc motorul statistic
 
     // Dacă avem date reale → folosim GPS direct
     if(realZones) {
@@ -1426,7 +1456,15 @@ out geom qt;`;
              ring:{cx:z.lon, cy:z.lat, rx:z.rx, ry:z.ry}};
         zones.push(def);
       });
-      console.log('[TCI] ✅ Zone reale GPS:', zones.length, 'zone pentru', cityKey);
+      // Verifică restricție seismică și pentru zonele reale GPS
+      const seismicReal = this._getSeismicAg(cx, cy);
+      zones.forEach(z => {
+        if(z.hMax > seismicReal.hMaxM) {
+          console.warn(`[TCI] Seismic: ${z.id} hMax=${z.hMax}m > ag=${seismicReal.ag}g limită=${seismicReal.hMaxM}m → capsat`);
+          z.hMax = seismicReal.hMaxM;
+        }
+      });
+      console.log('[TCI] ✅ Zone reale GPS:', zones.length, 'zone | seismic ag=' + seismicReal.ag + 'g');
       return zones;
     }
 
@@ -1437,25 +1475,33 @@ out geom qt;`;
     const zones = [];
     const addIf = z => { const lon=z.ring?.cx||z.rect?.cx, lat=z.ring?.cy||z.rect?.cy; if(ok(lon,lat)) zones.push(z); };
 
-    // Centru Civic — hMax din densitate proiectată
-    const hC = Math.min(65, Math.max(28, 28 + need.cladiri.centru));
+    // Verifică restricția seismică pentru acest UAT
+    const seismic = this._getSeismicAg(cx, cy);
+    const hSeismicMax = seismic.hMaxM; // hMax impus de P100-1/2013
+    console.log(`[TCI] Seismic ag=${seismic.ag}g → hMax=${hSeismicMax}m (R+${seismic.hMaxStory})`);
+
+    // Funcție helper: aplică restricția seismică la hMax
+    const seismicCap = (h) => Math.min(h, hSeismicMax);
+
+    // Centru Civic — hMax din densitate proiectată + restricție seismică
+    const hC = seismicCap(Math.min(65, Math.max(28, 28 + need.cladiri.centru)));
     addIf({id:'CV', color:C.centru, hMax:hC, startYr:2026, density:need.cladiri.centru,
            ring:{cx:cx,cy:cy,rx:0.0026*sc,ry:0.0018*sc}, label:'Centru Civic',
-           sub:`Densificare R+${Math.round(hC/3.5)}→R+${Math.round(hC/2.5)} · ${need.locuinteNoi} loc. noi`});
+           sub:`Densificare R+${Math.round(hC/3.5)}→R+${Math.round(hC/2.5)} · ag=${seismic.ag}g`});
 
-    const hI = Math.min(42, Math.max(18, 16 + need.cladiri.inner/2));
+    const hI = seismicCap(Math.min(42, Math.max(18, 16 + need.cladiri.inner/2)));
     addIf({id:'CN', color:'#6366f1', hMax:hI, startYr:2027, density:Math.ceil(need.cladiri.inner/2),
            ring:{cx:cx+0.010*sc,cy:cy+0.012*sc,rx:0.0038*sc,ry:0.0026*sc}, label:'Zonă Centrală Nord',sub:`R+${Math.round(hI/3.5)}→R+${Math.round(hI/2.8)}`});
     addIf({id:'CS', color:'#6366f1', hMax:hI-3, startYr:2028, density:Math.floor(need.cladiri.inner/2),
            ring:{cx:cx-0.002*sc,cy:cy-0.010*sc,rx:0.0040*sc,ry:0.0028*sc}, label:'Zonă Centrală Sud',sub:`R+${Math.round((hI-3)/3.5)}`});
 
-    const hCor = Math.min(32, Math.max(12, 10 + need.cladiri.coridor/4));
+    const hCor = seismicCap(Math.min(32, Math.max(12, 10 + need.cladiri.coridor/4)));
     addIf({id:'CEV', color:C.coridor, hMax:hCor, startYr:2027, density:Math.ceil(need.cladiri.coridor/2),
            rect:{cx:cx,cy:cy-0.001*sc,w:0.020*sc,h:0.0016*sc}, label:'Coridor Est-Vest',sub:`Bulevard · R+4→R+${Math.round(hCor/3)}`});
     addIf({id:'CNS', color:C.coridor, hMax:hCor-3, startYr:2028, density:Math.floor(need.cladiri.coridor/2),
            rect:{cx:cx+0.001*sc,cy:cy,w:0.0016*sc,h:0.018*sc}, label:'Coridor Nord-Sud',sub:`Ax principal`});
 
-    const hR = Math.min(28, Math.max(10, 8 + need.cladiri.rezid/5));
+    const hR = seismicCap(Math.min(28, Math.max(10, 8 + need.cladiri.rezid/5)));
     addIf({id:'RN', color:C.rezid, hMax:hR, startYr:2028, density:Math.ceil(need.cladiri.rezid/2),
            ring:{cx:cx+0.018*sc,cy:cy+0.016*sc,rx:0.0048*sc,ry:0.0034*sc}, label:'Rezidențial Colectiv Nord',sub:`R+${Math.round(hR/3.5)}`});
     addIf({id:'RS', color:C.rezid, hMax:hR-2, startYr:2030, density:Math.floor(need.cladiri.rezid/2),
@@ -1610,9 +1656,9 @@ out geom qt;`;
           const seed = Math.abs(Math.sin(i * 127.1 + lon * 311.7));
           this._entities.push({
             lon, lat,
-            wM: 18 + seed * 25,  // 18-43m lățime
-            dM: 14 + seed * 20,  // 14-34m adâncime
-            hBase: Math.max(6, z.hMax * 0.2),
+            wM: 20 + seed * 22,  // 20-42m lățime (bloc tipic România)
+            dM: 12 + seed * 16,  // 12-28m adâncime
+            hBase: Math.max(8, z.hMax * 0.25),
             hMax:  z.hMax * (0.65 + seed * 0.35),
             startYr: z.startYr,
             color:   new THREE.Color(z.color),
@@ -1767,7 +1813,17 @@ out geom qt;`;
     // 4. Populează 2D contururi (versiune inițială fără constrângeri)
     this._updateProjectionLayers(this.year || 2025);
 
-    // 5. Fetch constrângeri real-time → regenerează zonele
+    // 5. Fetch constrângeri OSM suplimentare (drumuri, plaje, mine, porturi)
+    this._fetchOSMConstraints(cx, cy).then(osmBufs => {
+      if(osmBufs.length > 0) {
+        this._constraints.bufs = [...(this._constraints.bufs||[]), ...osmBufs];
+        this._projZones = this._buildZones(cx, cy, this._constraints);
+        this._updateProjectionLayers(this.year || 2025);
+        console.log('[TCI] ✅ Constrângeri OSM aplicate:', osmBufs.length, 'zone');
+      }
+    }).catch(e => console.warn('[TCI] OSM constraints:', e.message));
+
+    // 6. Fetch constrângeri real-time → regenerează zonele
     this._CONSTRAINT.build(cx, cy, 12).then(constraints => {
       this._constraints = constraints;
       this._projZones = this._buildZones(cx, cy, constraints);
@@ -1826,6 +1882,76 @@ out geom qt;`;
         paint:{'line-color':['get','color'],'line-width':1.5,'line-dasharray':[4,3],'line-opacity':0.7}});
       console.log('[TCI] ✅ Overlay constrângeri:', features.length, 'zone excluse');
     } catch(e){}
+  },
+
+  // ══════════════════════════════════════════════════════════════════════
+  // FETCH OSM CONSTRÂNGERI SUPLIMENTARE
+  // Drumuri naționale, plaje, mine, porturi, industrie periculoasă
+  // ══════════════════════════════════════════════════════════════════════
+  async _fetchOSMConstraints(cx, cy, radius=0.15) {
+    const bbox = `${cy-radius},${cx-radius},${cy+radius},${cx+radius}`;
+    const queries = [
+      // Drumuri naționale/autostrăzi — buffer 30m
+      `way["highway"~"motorway|trunk|primary"](${bbox});`,
+      // Plaje și coastă
+      `way["natural"~"beach|coastline"](${bbox});`,
+      `node["natural"~"beach|coastline"](${bbox});`,
+      // Mine și cariere
+      `way["landuse"~"quarry|mine"](${bbox});`,
+      // Porturi
+      `way["harbour"](${bbox}); way["waterway"="dock"](${bbox});`,
+      // Industrie activă (buffer 150m de la rezidențial)
+      `way["landuse"="industrial"](${bbox});`,
+      // Zone inundabile OSM
+      `way["natural"="floodplain"](${bbox}); way["flood_prone"="yes"](${bbox});`,
+    ].join('
+');
+
+    const overpassQuery = `[out:json][timeout:30];
+(
+${queries}
+);
+out center qt;`;
+
+    try {
+      const r = await fetch('https://overpass-api.de/api/interpreter', {
+        method: 'POST',
+        body: 'data=' + encodeURIComponent(overpassQuery),
+      });
+      const data = await r.json();
+      const elements = data.elements || [];
+
+      const osmBufs = [];
+      elements.forEach(el => {
+        const t = el.tags || {};
+        const lon = el.lon || el.center?.lon;
+        const lat = el.lat || el.center?.lat;
+        if(!lon || !lat) return;
+
+        // Buffer per tip
+        if(t.highway === 'motorway' || t.highway === 'trunk') {
+          osmBufs.push({lon, lat, r:40, reason:'Autostradă/drum expres — buffer 40m', type:'road', color:'#64748b'});
+        } else if(t.highway === 'primary') {
+          osmBufs.push({lon, lat, r:25, reason:'Drum național — buffer 25m', type:'road', color:'#64748b'});
+        } else if(t.natural === 'beach' || t.natural === 'coastline') {
+          osmBufs.push({lon, lat, r:100, reason:'Plajă/coastă — zonă protejată', type:'beach', color:'#fbbf24'});
+        } else if(t.landuse === 'quarry' || t.landuse === 'mine') {
+          osmBufs.push({lon, lat, r:200, reason:'Carieră/mină — zonă exclusă', type:'quarry', color:'#78716c'});
+        } else if(t.harbour || t.waterway === 'dock') {
+          osmBufs.push({lon, lat, r:150, reason:'Port/doc — zonă exclusă', type:'port', color:'#0ea5e9'});
+        } else if(t.landuse === 'industrial') {
+          osmBufs.push({lon, lat, r:120, reason:'Industrie activă — buffer 120m', type:'industrial', color:'#f97316'});
+        } else if(t.natural === 'floodplain' || t.flood_prone === 'yes') {
+          osmBufs.push({lon, lat, r:80, reason:'Zonă inundabilă OSM', type:'flood', color:'#3b82f6'});
+        }
+      });
+
+      console.log(`[TCI] OSM constrângeri: ${osmBufs.length} zone din ${elements.length} elemente`);
+      return osmBufs;
+    } catch(e) {
+      console.warn('[TCI] OSM constraints fetch failed:', e.message);
+      return [];
+    }
   },
 
   _updateProjectionLayers(yr) {
