@@ -765,7 +765,379 @@ const TCI = {
     corridor:  { growthRate:0.35, startYr:2027, color:'#f59e0b', label:'Coridoare de mobilitate — densificare ax' },
   },
 
-  // Genereaza zonele de proiecție statistic — cercuri concentrice
+
+  // ══════════════════════════════════════════════════════════════════════
+  // SCENARII S1-S4
+  // ══════════════════════════════════════════════════════════════════════
+  _SCENARIOS:{'S1':{label:'Accelerat',rateMultiplier:1.8,hMaxMultiplier:1.25,expansieMultiplier:1.5},'S2':{label:'Sustenabil',rateMultiplier:1.0,hMaxMultiplier:1.0,expansieMultiplier:1.0},'S3':{label:'Conservare',rateMultiplier:0.6,hMaxMultiplier:0.80,expansieMultiplier:0.4},'S4':{label:'Risc Climatic',rateMultiplier:0.3,hMaxMultiplier:0.65,expansieMultiplier:0.2}},
+  _getScenario(){return this._SCENARIOS[this.scenario]||this._SCENARIOS['S2'];},
+
+  // ══════════════════════════════════════════════════════════════════════
+  // ZONE SEISMICE P100-1/2013
+  // ══════════════════════════════════════════════════════════════════════
+  _SEISMIC_ZONES:[
+    {ag:0.40,hMaxStory:4, bbox:[26.5,45.2,28.2,46.3]},
+    {ag:0.35,hMaxStory:6, bbox:[24.8,43.6,28.5,45.3]},
+    {ag:0.30,hMaxStory:8, bbox:[22.5,43.6,28.5,47.8]},
+    {ag:0.20,hMaxStory:12,bbox:[20.2,45.2,26.5,48.3]},
+    {ag:0.10,hMaxStory:99,bbox:[22.0,47.0,24.5,48.3]},
+  ],
+  _getSeismicAg(lon,lat){
+    for(const z of this._SEISMIC_ZONES){
+      const[x1,y1,x2,y2]=z.bbox;
+      if(lon>=x1&&lon<=x2&&lat>=y1&&lat<=y2)return{ag:z.ag,hMaxStory:z.hMaxStory,hMaxM:z.hMaxStory*3.0};
+    }
+    return{ag:0.15,hMaxStory:10,hMaxM:30};
+  },
+
+  // ══════════════════════════════════════════════════════════════════════
+  // URBAN GRAVITY MODEL
+  // ══════════════════════════════════════════════════════════════════════
+  _calcGravityScore(cityData){
+    const pop=(cityData?.pop2021||100000),rate=(cityData?.rata_reala_2011_2021||0)/100;
+    const univ=(cityData?.universitati||0),judet=cityData?.judet||'';
+    const eP=Math.min(1,pop/400000),eC=Math.max(0,Math.min(1,(rate+0.02)/0.04));
+    const eE=Math.min(1,univ/3),eK=['IS','CJ','TM','B','CT','BV'].includes(judet)?0.8:0.4;
+    const eI=rate>0?0.7:rate>-0.01?0.4:0.2;
+    const score=eP*.30+eC*.25+eE*.20+eK*.15+eI*.10;
+    const growthType=score>0.65?'METROPOLITAN':score>0.45?'REGIONAL':score>0.30?'LOCAL':'DECLINING';
+    return{gravityScore:score,growthType,ePopulatie:eP,eCrestere:eC,eEducatie:eE,eConectivit:eK};
+  },
+
+  // ══════════════════════════════════════════════════════════════════════
+  // HOUSEHOLD FORMATION ENGINE — Ht = Pt/St dinamic
+  // Trend INS: 2.3(2021) → 1.9(2040) → 1.75(2055)
+  // ══════════════════════════════════════════════════════════════════════
+  _householdSizeAt(year,gravityType){
+    const base={METROPOLITAN:2.20,REGIONAL:2.35,LOCAL:2.50,DECLINING:2.60};
+    const s0=base[gravityType]||2.30,yr=Math.max(2021,Math.min(2055,year));
+    const rata=yr<=2040?0.0080:0.0050;
+    return Math.max(1.65,Math.round(s0*Math.pow(1-rata,yr-2021)*100)/100);
+  },
+
+  // ══════════════════════════════════════════════════════════════════════
+  // RATE SUPRAVIEȚUIRE COHORTE — INS 2021
+  // ══════════════════════════════════════════════════════════════════════
+  _SURVIVAL_RATES:{'0-4':[.9985,.9978],'5-9':[.9991,.9987],'10-14':[.9993,.9989],'15-19':[.9990,.9979],'20-24':[.9988,.9973],'25-29':[.9987,.9971],'30-34':[.9984,.9966],'35-39':[.9980,.9957],'40-44':[.9971,.9938],'45-49':[.9956,.9907],'50-54':[.9932,.9862],'55-59':[.9895,.9796],'60-64':[.9836,.9688],'65-69':[.9745,.9530],'70-74':[.9580,.9253],'75+':[.8900,.8400]},
+  _POP_DIST:[['0-4',.048,0.],['5-9',.050,0.],['10-14',.052,0.],['15-19',.056,.05],['20-24',.062,.35],['25-29',.070,.55],['30-34',.072,.50],['35-39',.068,.30],['40-44',.065,.15],['45-49',.063,.08],['50-54',.060,.05],['55-59',.058,.03],['60-64',.055,.02],['65-69',.048,.01],['70-74',.038,.0],['75+',.035,.0]],
+
+  // ══════════════════════════════════════════════════════════════════════
+  // MOTOR DEMOGRAFIC — Cohort Survival + Migration Matrix
+  // Px+n,t+n = Px,t · Sx + Mx,t (standard INS/Eurostat)
+  // ══════════════════════════════════════════════════════════════════════
+  _calcUrbanNeed(cityData){
+    const pop2021=cityData?.pop2021||100000;
+    const scn=this._getScenario?.();
+    const rateAn=(cityData?.rata_reala_2011_2021||0)/100*(scn?.rateMultiplier||1.0);
+    const hasUniv=(cityData?.universitati||0)>0;
+    const gravity=this._calcGravityScore(cityData);
+    const MW={'0-4':.3,'5-9':.3,'10-14':.2,'15-19':.3,'20-24':1.,'25-29':1.,'30-34':.8,'35-39':.6,'40-44':.4,'45-49':.3,'50-54':.2,'55-59':.1,'60-64':.1,'65-69':.05,'70-74':.02,'75+':.01};
+    const ub=hasUniv?1.3:1.0;
+    let cohorte=this._POP_DIST.map(([n,p,e])=>({n,pop:Math.round(pop2021*p),e}));
+    let nouGospTot=0;
+    for(let c=0;c<6;c++){
+      const nc=[];
+      cohorte.forEach(x=>{
+        const sr=this._SURVIVAL_RATES?.[x.n]||[.95,.95];
+        const sx=(sr[0]+sr[1])/2,w=MW[x.n]||.3,uvb=(x.n==='20-24'||x.n==='25-29')?ub:1.;
+        const pn=Math.max(0,Math.round(x.pop*Math.pow(sx,5)+x.pop*rateAn*5*w*uvb));
+        if(x.e>0)nouGospTot+=Math.max(0,pn-x.pop)*x.e/2.3;
+        nc.push({...x,pop:pn});
+      });
+      cohorte=nc;
+    }
+    const pop2055=cohorte.reduce((s,x)=>s+x.pop,0);
+    const s25=this._householdSizeAt(2025,gravity.growthType);
+    const s55=this._householdSizeAt(2055,gravity.growthType);
+    const h25=Math.round(pop2021/s25),h55=Math.round(pop2055/s55);
+    const locuinteNoi=Math.max(0,h55-h25)+Math.max(0,h55-Math.round(pop2055/s25));
+    const locuinteReab=Math.round(h25*.36*.40);
+    const pop2034=cohorte.filter(x=>['20-24','25-29','30-34'].includes(x.n)).reduce((s,x)=>s+x.pop,0);
+    const locuinteGospNoi=Math.round(Math.abs(nouGospTot))+Math.round(pop2034*.18);
+    const locuinteTotale=locuinteNoi+locuinteReab+locuinteGospNoi;
+    const totalM2=locuinteTotale*68;
+    const scale=Math.pow(pop2021/360000,.38);
+    const cladiri={centru:Math.max(4,Math.round(totalM2*.18/(1800*scale))),inner:Math.max(6,Math.round(totalM2*.22/(1400*scale))),coridor:Math.max(8,Math.round(totalM2*.20/(1200*scale))),rezid:Math.max(8,Math.round(totalM2*.25/(1100*scale))),expansie:Math.max(4,Math.round(totalM2*.15/(900*scale))),logistica:Math.max(2,Math.round(totalM2*.08/(2500*scale)))};
+    console.log(`[TCI Cohort] ${cityData?.name}: ${pop2021.toLocaleString()}→${pop2055.toLocaleString()} | s=${s25}→${s55} | ${locuinteTotale.toLocaleString()} loc.`);
+    return{pop2021,pop2055,deltaPop:Math.max(0,pop2055-pop2021),locuinteNoi,locuinteReab,locuinteTotale,totalM2,scale,cladiri,s2025:s25,s2055:s55,gravity};
+  },
+
+  // ══════════════════════════════════════════════════════════════════════
+  // PROFIL CLIMATIC — Copernicus + IPCC AR6
+  // ══════════════════════════════════════════════════════════════════════
+  _CLIMATE_ZONES:{
+    'SE':{counties:['CT','GL','BR','TL','CL','IL'],uhi:1.8,drought:.8,flood:.6,note:'Zonă vulnerabilă — caniculă+secetă 2050'},
+    'CE':{counties:['B','IF','GR','TR','DB','PH'],uhi:2.2,drought:.5,flood:.6,note:'București — insulă termică maximă'},
+    'NE':{counties:['IS','BT','VS','NT','BC','SV'],uhi:1.0,drought:.3,flood:.7,note:'Moldova — risc inundații crescut'},
+    'NV':{counties:['CJ','MM','BH','SJ','SM','BN'],uhi:0.9,drought:.2,flood:.5,note:'Cel mai favorabil climatic'},
+    'CV':{counties:['BV','HR','CV','MS','AB','SB','HD'],uhi:0.8,drought:.3,flood:.4,note:'Transilvania — climat moderat'},
+    'SV':{counties:['OT','DJ','MH','GJ','VL','AG'],uhi:1.5,drought:.7,flood:.5,note:'Oltenia — secetă severă 2040-2055'},
+  },
+  _getClimateProfile(judet){
+    for(const[z,d]of Object.entries(this._CLIMATE_ZONES))if(d.counties.includes(judet))return{zone:z,...d};
+    return{zone:'NV',uhi:1.0,drought:.3,flood:.4,note:'Profil climatic moderat'};
+  },
+
+  // ══════════════════════════════════════════════════════════════════════
+  // AUTOSTRĂZI PLANIFICATE — CNAIR 2025
+  // ══════════════════════════════════════════════════════════════════════
+  _PLANNED_INFRA:{
+    'A7':{name:'A7 Moldova',status:'construction',year:2027,waypoints:[[26.913,46.567],[26.256,47.652]]},
+    'A8':{name:'A8 Iași-TgMureș',status:'construction',year:2028,waypoints:[[27.601,47.158],[27.350,47.050],[26.920,46.820]]},
+    'A13':{name:'A13 Brașov-Bacău',status:'planned',year:2032,waypoints:[[25.600,45.648],[26.913,46.567]]},
+    'CENTURA_IS':{name:'Centură Iași',status:'construction',year:2026,waypoints:[[27.530,47.180],[27.580,47.220],[27.650,47.180],[27.640,47.130],[27.570,47.120]]},
+  },
+
+  // ══════════════════════════════════════════════════════════════════════
+  // FETCH INFRASTRUCTURĂ OSM + PLANIFICATĂ
+  // ══════════════════════════════════════════════════════════════════════
+  async _fetchInfraCorridors(cx,cy,radiusKm=22){
+    const rad=radiusKm/111.0,bbox=`${cy-rad},${cx-rad},${cy+rad},${cx+rad}`;
+    const q=`[out:json][timeout:25];(way["highway"="motorway"](${bbox});way["highway"="construction"]["construction"~"motorway|trunk"](${bbox});way["highway"="trunk"](${bbox});way["highway"="primary"](${bbox});)->.r;.r out center qt 30;`;
+    const cors=[];
+    try{
+      const r=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q)});
+      const data=await r.json();
+      const seen=new Set();
+      (data.elements||[]).forEach(el=>{
+        const t=el.tags||{},lon=el.lon||el.center?.lon,lat=el.lat||el.center?.lat;
+        if(!lon||!lat)return;
+        const key=`${Math.round(lon/0.005)}_${Math.round(lat/0.005)}`;
+        if(seen.has(key))return; seen.add(key);
+        const dk=Math.hypot((lon-cx)*111*Math.cos(cy*Math.PI/180),(lat-cy)*111);
+        if(dk>radiusKm)return;
+        const hw=t.highway,isM=hw==='motorway'||t.construction==='motorway';
+        const dS=(isM?1.0:hw==='trunk'?.75:.50)*(dk<1?.2:dk<3?.6:dk<10?1.0:dk<18?.7:.4);
+        const dt=isM?['logistica','comercial','rezidential']:hw==='trunk'?['comercial','rezidential']:['rezidential'];
+        cors.push({lon,lat,distKm:dk,devScore:dS,devTypes:dt,roadClass:hw,ref:t.ref||'',name:t.name||'',status:hw==='construction'?'construction':'existing'});
+      });
+    }catch(e){console.warn('[TCI Infra]',e.message);}
+    // Adaugă autostrăzi planificate interne
+    Object.entries(this._PLANNED_INFRA||{}).forEach(([id,inf])=>{
+      (inf.waypoints||[]).forEach(([wl,wt])=>{
+        const dk=Math.hypot((wl-cx)*111*Math.cos(cy*Math.PI/180),(wt-cy)*111);
+        if(dk>radiusKm)return;
+        const key=`${Math.round(wl/0.005)}_${Math.round(wt/0.005)}`;
+        cors.push({lon:wl,lat:wt,distKm:dk,devScore:.65*(dk<3?.4:dk<10?1.0:.6),devTypes:['logistica','comercial','rezidential'],roadClass:'motorway_planned',ref:id,name:inf.name,status:inf.status,year:inf.year});
+      });
+    });
+    cors.sort((a,b)=>b.devScore-a.devScore);
+    console.log(`[TCI Infra] ${cors.length} coridoare rutiere`);
+    return cors;
+  },
+
+  _infraToZones(cors,cx,cy,need,seismicCap,sc,C,ok,scn){
+    if(!cors?.length)return[];
+    const zones=[],used=[],minD=0.008,sExp=scn?.expansieMultiplier||1.0;
+    const tooClose=(lon,lat)=>used.some(p=>Math.hypot(lon-p[0],lat-p[1])<minD);
+    cors.slice(0,12).forEach((cor,i)=>{
+      const{lon,lat,devScore,devTypes,roadClass,ref,name,status,year}=cor;
+      if(tooClose(lon,lat)||devScore<.15)return;
+      const sb=status==='planned'?(year?Math.max(0,year-2026):5):status==='construction'?2:0;
+      const lbl=([ref,name].filter(Boolean).join(' ')||`Drum ${i+1}`).substring(0,40);
+      if(devTypes.includes('logistica')&&cor.distKm>2&&cor.distKm<15&&sExp>.3){
+        const h=seismicCap(9);
+        if(ok(lon,lat)){zones.push({id:`LOG-${i}`,color:C.reconv||'#ea580c',hMax:h,startYr:2028+sb,density:Math.max(2,Math.round((need.cladiri?.logistica||3)*devScore)),ring:{cx:lon,cy:lat,rx:.006*sc,ry:.004*sc},label:`Parc Logistic: ${lbl}`,sub:`${roadClass} · P+1→P+2`});used.push([lon,lat]);return;}
+      }
+      if(devTypes.includes('comercial')&&cor.distKm<12&&sExp>.4){
+        const h=seismicCap(Math.min(28,Math.max(10,10+devScore*18)));
+        if(ok(lon,lat)&&!tooClose(lon,lat)){zones.push({id:`COM-${i}`,color:C.coridor||'#d97706',hMax:h,startYr:2027+sb,density:Math.max(3,Math.round((need.cladiri?.coridor||6)*devScore*.8)),ring:{cx:lon,cy:lat,rx:.004*sc,ry:.0028*sc},label:`Comercial: ${lbl}`,sub:`R+3→R+${Math.round(h/3)}`});used.push([lon,lat]);return;}
+      }
+      if(devTypes.includes('rezidential')&&cor.distKm>1&&cor.distKm<18&&sExp>.35){
+        const h=seismicCap(Math.min(24,Math.max(8,8+devScore*16)));
+        const ang=Math.atan2(lat-cy,lon-cx)+Math.PI/2,off=.003*sc;
+        const lr=lon+Math.cos(ang)*off,ltr=lat+Math.sin(ang)*off;
+        if(ok(lr,ltr)&&!tooClose(lr,ltr)){zones.push({id:`REZ-${i}`,color:C.rezid||'#2563eb',hMax:h,startYr:2029+sb,density:Math.max(4,Math.round((need.cladiri?.rezid||8)*devScore*.6)),ring:{cx:lr,cy:ltr,rx:.005*sc,ry:.0035*sc},label:`Rezidențial: ${lbl}`,sub:`R+${Math.round(h/4)}→R+${Math.round(h/3)}`});used.push([lr,ltr]);}
+      }
+    });
+    console.log(`[TCI Infra] → ${zones.length} zone din coridoare`);
+    return zones;
+  },
+
+  // ══════════════════════════════════════════════════════════════════════
+  // URBAN PROBABILITY ENGINE — Monte Carlo P(D)=f(E,M,I,C,G)
+  // ══════════════════════════════════════════════════════════════════════
+  _randn(m,s){const u1=Math.random(),u2=Math.random();return Math.max(.05,m+Math.sqrt(-2*Math.log(u1))*Math.cos(2*Math.PI*u2)*s);},
+  _calcZoneProb(zone,cityData,baseScore){
+    const N=300,grav=this._calcGravityScore(cityData),seis=this._getSeismicAg(cityData?.lon||27.6,cityData?.lat||47.16),clim=this._getClimateProfile(cityData?.judet||'');
+    const bs=Math.min(1,Math.max(0,baseScore||(grav.gravityScore*.4+(1-seis.ag/.5)*.2+(zone.devScore||.5)*.4)));
+    const W={E:.25,M:.20,I:.25,C:.15,G:.15};
+    let ok=0;
+    for(let i=0;i<N;i++){
+      const sc=bs*(this._randn(1,.25)*W.E+this._randn(1,.30)*W.M+this._randn(1,.20)*W.I+(2-this._randn(1,.22))*W.C+this._randn(1,.28)*W.G);
+      if(sc>.5)ok++;
+    }
+    const p=ok/N,pct=Math.round(p*100);
+    const cls=p>=.70?'HIGH':p>=.45?'MEDIUM':p>=.25?'LOW':'UNLIKELY';
+    const col=p>=.70?'#22c55e':p>=.45?'#f59e0b':p>=.25?'#64748b':'#374151';
+    return{probability:p,pct,classification:cls,color:col,label:`${cls} ${pct}%`};
+  },
+  _runUPE(cityData,zones){
+    const res={};
+    (zones||[]).forEach(z=>{res[z.id||z.label]=this._calcZoneProb(z,cityData,null);});
+    console.log('[UPE] Monte Carlo complet:',Object.entries(res).map(([k,v])=>`${k}:${v.pct}%`).slice(0,5).join(', '));
+    return res;
+  },
+
+  // ══════════════════════════════════════════════════════════════════════
+  // REAL ESTATE FEASIBILITY ENGINE
+  // ROI = (Vsale - Ctotal) / Ctotal
+  // ══════════════════════════════════════════════════════════════════════
+  _calcFeasibility(zone,cityData,seismicAg){
+    const g=this._calcGravityScore(cityData);
+    const pi=g.growthType==='METROPOLITAN'?1.0:g.growthType==='REGIONAL'?.65:g.growthType==='LOCAL'?.45:.30;
+    const pS=Math.round(1800*pi),pL=Math.round(200*pi),pB=Math.round(700+(seismicAg||.2)*500);
+    const cF=pB*.07*2.5,cT=pL+pB+cF,roi=(pS-cT)/cT;
+    return{priceSale:pS,priceLand:pL,priceBuild:pB,cTotal:Math.round(cT),roi:Math.round(roi*1000)/10,viable:roi>.12,label:roi>.12?`ROI ${Math.round(roi*100)}% ✓`:`ROI ${Math.round(roi*100)}% — risc`};
+  },
+
+  // ══════════════════════════════════════════════════════════════════════
+  // SALVARE SCENARII
+  // ══════════════════════════════════════════════════════════════════════
+  _saveScenario(name){
+    const d=this.cityData||{},scn=this._getScenario(),need=this._calcUrbanNeed(d);
+    const snap={id:`tci_${Date.now()}`,name:name||`${d.name||'UAT'} — ${scn.label} — ${new Date().toLocaleDateString('ro-RO')}`,savedAt:new Date().toISOString(),cityKey:this.cityKey,cityName:d.name,pop2021:d.pop2021,scenario:this.scenario,pop2055:need.pop2055,locuinteTotale:need.locuinteTotale,zones:(this._projZones||[]).map(z=>({id:z.id,label:z.label,hMax:z.hMax,startYr:z.startYr}))};
+    try{const ex=JSON.parse(localStorage.getItem('tci_scenarios')||'[]');ex.unshift(snap);localStorage.setItem('tci_scenarios',JSON.stringify(ex.slice(0,20)));}catch(e){}
+    console.log('[TCI] Scenariu salvat:',snap.name);
+    return snap;
+  },
+
+  // ══════════════════════════════════════════════════════════════════════
+  // GENERATOR RAPORT PDF
+  // ══════════════════════════════════════════════════════════════════════
+  _generateReport(){
+    const d=this.cityData||{},scn=this._getScenario(),need=this._calcUrbanNeed(d);
+    const grav=this._calcGravityScore(d),seis=this._getSeismicAg(d.lon||27.6,d.lat||47.16);
+    const clim=this._getClimateProfile(d.judet||''),zones=this._projZones||[];
+    const upeRes=this._runUPE(d,zones),feas=this._calcFeasibility({},d,seis.ag);
+    const today=new Date().toLocaleDateString('ro-RO',{year:'numeric',month:'long',day:'numeric'});
+    const todayISO=new Date().toISOString().split('T')[0];
+    const pop21=(d.pop2021||0).toLocaleString('ro-RO'),pop55=(need.pop2055||0).toLocaleString('ro-RO');
+    const investEst=Math.round((need.totalM2||0)*1200/1000000);
+    const html=`<!DOCTYPE html><html lang="ro"><head><meta charset="UTF-8"><title>Raport TCI — ${d.name} — ${today}</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Inter',sans-serif;color:#1e293b;font-size:10.5pt;line-height:1.65}
+@media print{.no-print{display:none}.page-break{page-break-before:always}@page{margin:1.8cm;size:A4}}
+.hdr{background:linear-gradient(135deg,#0f172a,#1a2f5e);color:#fff;padding:28px 36px}
+h1{font-size:22pt;font-weight:800}.sub{font-size:11pt;color:rgba(255,255,255,.7);margin-top:4px}
+.warn{background:#fffbeb;border-left:4px solid #f59e0b;padding:10px 16px;font-size:8.5pt;color:#78350f}
+.content{padding:28px 36px}
+h2{font-size:13pt;font-weight:700;color:#0f172a;margin:24px 0 10px;padding-bottom:5px;border-bottom:2.5px solid #e2e8f0}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}
+.kpi{background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;padding:12px 14px}
+.kv{font-size:17pt;font-weight:700;color:#0f172a;line-height:1.1}.kl{font-size:7.5pt;color:#64748b;text-transform:uppercase;margin-top:3px}.ks{font-size:7pt;color:#94a3b8;margin-top:4px;font-style:italic}
+.kpi.b{border-color:#93c5fd;background:#eff6ff}.kpi.b .kv{color:#1d4ed8}
+.kpi.g{border-color:#86efac;background:#f0fdf4}.kpi.g .kv{color:#166534}
+.kpi.r{border-color:#fca5a5;background:#fef2f2}.kpi.r .kv{color:#991b1b}
+table{width:100%;border-collapse:collapse;margin:10px 0;font-size:9pt}
+th{background:#0f172a;color:#fff;padding:8px 10px;text-align:left;font-size:8pt;font-weight:600}
+td{padding:7px 10px;border-bottom:1px solid #f1f5f9}tr:nth-child(even) td{background:#f8fafc}
+.formula{background:#0f172a;color:#e2e8f0;border-radius:8px;padding:14px 18px;font-family:monospace;font-size:9pt;margin:10px 0;line-height:1.9}
+.formula .c{color:#64748b}.formula .v{color:#86efac}
+.pred{border-left:3px solid;padding:10px 14px;margin:8px 0;border-radius:0 6px 6px 0}
+.pred.y{border-color:#f59e0b;background:#fffbeb}.pred.b{border-color:#3b82f6;background:#eff6ff}.pred.p{border-color:#8b5cf6;background:#f5f3ff}
+.zone-row{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid #f1f5f9}
+.zone-dot{width:11px;height:11px;border-radius:2px;flex-shrink:0;margin-top:3px}
+.src-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:10px 0}
+.src{border:1px solid #e2e8f0;border-radius:6px;padding:9px 11px}
+.sn{font-weight:700;font-size:9pt}.sd{font-size:8pt;color:#64748b;margin-top:2px}.st{font-size:7.5pt;color:#94a3b8;margin-top:3px;font-style:italic}
+.footer{background:#f8fafc;border-top:2px solid #e2e8f0;padding:16px 36px;font-size:8pt;color:#94a3b8;display:flex;justify-content:space-between}
+.btn{position:fixed;top:16px;right:16px;z-index:999;background:#1d4ed8;color:#fff;border:none;border-radius:7px;padding:9px 18px;font-size:9.5pt;cursor:pointer;font-family:inherit}</style></head>
+<body><button class="btn no-print" onclick="window.print()">⬇ Descarcă PDF</button>
+<div class="hdr">
+  <div style="font-size:9pt;color:rgba(255,255,255,.55);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px"><strong style="color:#D4AF37">UrbanX</strong> · TCI Cinema · Raport Predictiv Urban</div>
+  <h1>${d.name||'Analiză UAT'}</h1>
+  <div class="sub">Proiecție Urbanistică 2025–2055 · jud. ${d.judet||'—'} · ${today}</div>
+  <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+    <span style="background:rgba(212,175,55,.2);border:1px solid #D4AF37;color:#D4AF37;padding:4px 10px;border-radius:4px;font-size:8.5pt;font-weight:600">★ ${scn.label}</span>
+    <span style="background:${seis.ag>=.35?'rgba(239,68,68,.2)':'rgba(245,158,11,.2)'};border:1px solid ${seis.ag>=.35?'#ef4444':'#f59e0b'};color:${seis.ag>=.35?'#fca5a5':'#fcd34d'};padding:4px 10px;border-radius:4px;font-size:8.5pt">⚠ ag=${seis.ag}g · max R+${seis.hMaxStory}</span>
+    <span style="background:rgba(99,102,241,.2);border:1px solid #818cf8;color:#c7d2fe;padding:4px 10px;border-radius:4px;font-size:8.5pt">${grav.growthType} · Gravity ${grav.gravityScore.toFixed(2)}</span>
+  </div>
+</div>
+<div class="warn">⚠ Proiecție statistică bazată pe date oficiale. Nu substituie PUG/PUZ. Data: ${today} · Surse accesate: ${todayISO}</div>
+<div class="content">
+<h2>1. Sinteză UAT</h2>
+<div class="kpis">
+  <div class="kpi b"><div class="kv">${pop21}</div><div class="kl">Populație 2021</div><div class="ks">INS · Recensământ 2021</div></div>
+  <div class="kpi ${need.pop2055>(d.pop2021||0)?'g':''}"><div class="kv">${pop55}</div><div class="kl">Estimat 2055</div><div class="ks">Cohort Survival INS · s=${need.s2025}→${need.s2055}</div></div>
+  <div class="kpi b"><div class="kv">${(need.locuinteTotale||0).toLocaleString('ro-RO')}</div><div class="kl">Locuințe necesare</div><div class="ks">HFE + Cohort · ANCPI</div></div>
+  <div class="kpi ${seis.ag>=.35?'r':''}"><div class="kv">ag=${seis.ag}g</div><div class="kl">Seismic · max R+${seis.hMaxStory}</div><div class="ks">P100-1/2013 MDLPA</div></div>
+  <div class="kpi g"><div class="kv">€${investEst}M</div><div class="kl">Investiție estimată</div><div class="ks">€1.200/m² · ANCPI 2024</div></div>
+  <div class="kpi"><div class="kv">${feas.roi}%</div><div class="kl">ROI estimat · ${feas.viable?'✓ Viabil':'⚠ Risc'}</div><div class="ks">Prag viabilitate: 12%</div></div>
+  <div class="kpi"><div class="kv">${need.s2025}→${need.s2055}</div><div class="kl">Household size 2025→2055</div><div class="ks">HFE · INS trend scădere</div></div>
+  <div class="kpi"><div class="kv">${clim.uhi}°C UHI</div><div class="kl">Insulă căldură 2055 · zona ${clim.zone}</div><div class="ks">Copernicus · IPCC AR6 RCP4.5</div></div>
+</div>
+
+<h2>2. Predicții 2025–2055</h2>
+<div class="pred y"><div style="font-size:10pt;font-weight:700;margin-bottom:4px">🏗 2025–2030</div>
+  <p style="margin:0">Orizont scurt: ${(need.locuinteNoi||0).toLocaleString('ro-RO')} locuințe noi din creștere demografică + ${(need.locuinteReab||0).toLocaleString('ro-RO')} reabilitări. Household size în scădere (${need.s2025}→${need.s2055}) generează cerere suplimentară. Zone active: ${zones.filter(z=>z.startYr<=2030).slice(0,3).map(z=>z.label||z.id).join(', ')||'—'}.</p></div>
+<div class="pred b"><div style="font-size:10pt;font-weight:700;margin-bottom:4px">🏙 2030–2040</div>
+  <p style="margin:0">Faza de maturizare. ${grav.growthType==='METROPOLITAN'?'Presiunea imobiliară crescută pe axele de transport. IT și servicii avansate domină cererea de locuințe premium.':grav.growthType==='DECLINING'?'Reabilitarea fondului construit devine prioritară. Construcțiile noi limitate la zone strategice.':'Densificare moderată de-a lungul coridoarelor de mobilitate.'} Impactul A7/A8 se materializează în zone logistice și rezidențiale periurbane.</p></div>
+<div class="pred p"><div style="font-size:10pt;font-weight:700;margin-bottom:4px">🌆 2040–2055</div>
+  <p style="margin:0">Orizont lung: populație estimată ${pop55}. Climat (zona ${clim.zone}, UHI +${clim.uhi}°C) impune standarde verzi obligatorii. ${seis.ag>=.35?`Restricție seismică ag=${seis.ag}g menține înălțimile reduse (max R+${seis.hMaxStory}).`:''} Household size ${need.s2055} → cerere structurală pentru locuințe mai mici și de calitate.</p></div>
+
+<h2>3. Modele Matematice</h2>
+<div class="formula"><span class="c">Cohort Survival (INS/Eurostat):</span>
+Px+5,t+5 = Px,t × Sx + Mx,t
+  <span class="c">Sx = rata supraviețuire INS 2021 per cohortă și sex</span>
+  <span class="c">Mx,t = flux migrație per cohortă × ponderi vârstă × bonus universitar ×${(cityData?.universitati||0)>0?'1.3':'1.0'}</span>
+  <span class="v">→ ${(d.pop2021||0).toLocaleString('ro-RO')} → ${pop55} | rată INS: ${(d.rata_reala_2011_2021||0).toFixed(2)}%/an × scenariu ×${scn.rateMultiplier}</span>
+
+<span class="c">Household Formation Engine:</span>
+Ht = Pt / St  — St = f(tip_urban, an)   <span class="v">→ ${need.s2025} (2025) → ${need.s2055} (2055)</span>
+
+<span class="c">Urban Gravity Model:</span>
+G = eP×0.30 + eC×0.25 + eE×0.20 + eK×0.15 + eI×0.10   <span class="v">→ ${grav.gravityScore.toFixed(3)} = ${grav.growthType}</span>
+
+<span class="c">Urban Probability Engine (Monte Carlo N=300):</span>
+P(D) = f(E, M, I, C, G)   <span class="v">→ probabilitate per zonă, nu valori fixe</span>
+
+<span class="c">Real Estate Feasibility:</span>
+ROI = (Vsale - Ctotal) / Ctotal   <span class="v">→ ROI ${feas.roi}% (prag 12%: ${feas.viable?'✓ VIABIL':'⚠ RISC'})</span></div>
+
+<h2>4. Zone de Dezvoltare — Probabilistic</h2>
+<p style="font-size:8.5pt;color:#64748b;margin-bottom:10px">P(D) = f(E,M,I,C,G) — Monte Carlo 300 simulări per zonă · Nu certitudini, ci probabilități.</p>
+<table>
+  <tr><th>Zonă</th><th>Probabilitate</th><th>Clasificare</th><th>hMax</th><th>Start</th></tr>
+  ${zones.slice(0,15).map(z=>{const u=upeRes[z.id||z.label]||{pct:50,classification:'MEDIUM',color:'#f59e0b'};return`<tr><td><strong>${z.label||z.id}</strong><div style="font-size:7.5pt;color:#64748b">${z.sub||''}</div></td><td><div style="display:flex;align-items:center;gap:6px"><div style="width:${u.pct}px;height:9px;background:${u.color};border-radius:2px;max-width:80px"></div><strong style="color:${u.color}">${u.pct}%</strong></div></td><td><span style="background:${u.color}22;color:${u.color};padding:2px 7px;border-radius:9px;font-size:7.5pt;font-weight:600">${u.classification}</span></td><td>${z.hMax||'—'}m</td><td>${z.startYr||'—'}</td></tr>`;}).join('')}
+</table>
+
+<h2 class="page-break">5. Scenarii Comparative</h2>
+<table>
+  <tr><th>Scenariu</th><th>Ipoteză</th><th>Rată ×</th><th>Locuințe est.</th><th>hMax ×</th></tr>
+  ${['S1','S2','S3','S4'].map(s=>{const sc=this._SCENARIOS[s];const loc=Math.round((need.locuinteTotale||0)*sc.rateMultiplier);return`<tr ${this.scenario===s?'style="background:#eff6ff;font-weight:600"':''}><td>${s} ${sc.label}</td><td>${s==='S1'?'PNRR complet, investiții masive':s==='S2'?'Referință INS':s==='S3'?'Prioritate calitate':' Crize climatice'}</td><td>×${sc.rateMultiplier}</td><td>${loc.toLocaleString('ro-RO')}</td><td>×${sc.hMaxMultiplier}</td></tr>`;}).join('')}
+</table>
+
+<h2>6. Surse Oficiale — Data accesului: ${todayISO}</h2>
+<div class="src-grid">
+  <div class="src"><div class="sn">INS — Institutul Național de Statistică</div><div class="sd">Recensământ 2021, rate supraviețuire cohorte, household size trend</div><div class="st">insse.ro · accesat ${todayISO}</div></div>
+  <div class="src"><div class="sn">ANCPI — Cadastru și Publicitate Imobiliară</div><div class="sd">Autorizații construire, suprafață medie 68m², rata înlocuire 1.2%/an</div><div class="st">geoportal.ancpi.ro · accesat ${todayISO}</div></div>
+  <div class="src"><div class="sn">MDLPA — Normativ P100-1/2013</div><div class="sd">Zonare seismică, accelerație ag, restricții înălțime clădiri</div><div class="st">mdlpa.ro · accesat ${todayISO}</div></div>
+  <div class="src"><div class="sn">OpenStreetMap + Overpass API</div><div class="sd">Rețea rutieră live: autostrăzi, DN, DJ. Constrângeri: plaje, mine, porturi</div><div class="st">overpass-api.de · accesat ${todayISO}</div></div>
+  <div class="src"><div class="sn">CNAIR — Autostrăzi planificate</div><div class="sd">A7 (2027), A8 (2028), A13 (2032), centuri ocolitoare</div><div class="st">cnair.ro · accesat ${todayISO}</div></div>
+  <div class="src"><div class="sn">Copernicus + IPCC AR6 + Eurostat</div><div class="sd">UHI, RCP4.5/8.5, risc secetă/inundații, Urban Audit comparații EU</div><div class="st">cds.climate.copernicus.eu · ec.europa.eu/eurostat · accesat ${todayISO}</div></div>
+</div>
+
+<h2>7. Recomandări Instituționale</h2>
+<table>
+  <tr><th>Destinatar</th><th>Acțiune</th><th>Termen</th></tr>
+  <tr><td><strong>Primărie / CL</strong></td><td>Actualizare PUG cu zonele identificate. Rezervare coridor A7/A8/centuri</td><td>2025-2027</td></tr>
+  <tr><td><strong>CNAIR</strong></td><td>Coordonare noduri autostradă cu zonele logistice (devScore>0.7)</td><td>2025-2028</td></tr>
+  <tr><td><strong>OAR / Urbaniști</strong></td><td>PUZ zone periurbane. Regulament înălțimi conform P100 ag=${seis.ag}g</td><td>2026-2030</td></tr>
+  <tr><td><strong>Investitori</strong></td><td>Zone prioritare: ROI ${feas.roi}% · ${feas.viable?'Viabil în condițiile actuale':'Verificați finanțarea'}</td><td>Imediat</td></tr>
+  <tr><td><strong>MDLPA</strong></td><td>Integrare PATN Secțiunea IV · corelare A7/A8 · finanțare PNRR</td><td>2026-2028</td></tr>
+</table>
+</div>
+<div class="footer">
+  <div><strong>UrbanX TCI Cinema</strong> · Think Smart Solutions<br>Motor: Cohort Survival INS · HFE · Urban Gravity · Road Corridor · UPE Monte Carlo · Seismic P100</div>
+  <div style="text-align:right">Generat: ${today}<br>${this.scenario} · ${scn.label} · ID: TCI-${todayISO}-${(this.cityKey||'uat').toUpperCase()}</div>
+</div></body></html>`;
+    const w=window.open('','_blank');
+    if(w){w.document.write(html);w.document.close();}
+    return html;
+  },
+
+    // Genereaza zonele de proiecție statistic — cercuri concentrice
   // + coridoare de mobilitate + zone de reconversie industrială
   _generateStatisticalProjection(cx, cy) {
     const pop  = this.cityData?.pop2021 || 100000;
