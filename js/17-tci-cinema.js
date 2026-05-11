@@ -178,7 +178,7 @@ const TCI = {
     const cy = this.cityData?.lat || 47.158;
 
     this._buildUI(cx, cy);
-    this.map.jumpTo({ center:[cx,cy], zoom:4.5, pitch:0, bearing:0 });
+    this.map.jumpTo({ center:[cx,cy], zoom:11.0, pitch:35, bearing:-12 });
 
     const onStyleReady = () => {
       this._setLight('dusk');
@@ -186,7 +186,7 @@ const TCI = {
       this._initVehicles();
       this._initLeftMap(cx, cy);
       // Jump explicit la orașul selectat — după setStyle camera poate rătăci
-      try { this.map.jumpTo({center:[cx,cy], zoom:11, pitch:0, bearing:0}); } catch(e){}
+      try { this.map.jumpTo({center:[cx,cy], zoom:11.0, pitch:35, bearing:-12}); } catch(e){}
       setTimeout(() => {
         this._director.init(this);
         this.start();
@@ -222,7 +222,7 @@ const TCI = {
       this.mapLeft = new mapboxgl.Map({
         container: 'tci-map-left',
         style: 'mapbox://styles/mapbox/standard',
-        center: [cx, cy], zoom: 4.5, pitch: 0, bearing: 0,
+        center: [cx, cy], zoom: 11.0, pitch: 35, bearing: -12,
         accessToken: mapboxgl.accessToken,
         interactive: false,
         attributionControl: false,
@@ -1556,28 +1556,81 @@ const TCI = {
   //  15-25° → 0.25 (dificil — sau premium vilă dacă income high)
   //   >25°  → 0.00 (interzis)
   // ══════════════════════════════════════════════════════════════════════
+  // ══════════════════════════════════════════════════════════════════════
+  // SLOPE ENGINE — Terrain via Mapbox Terrain RGB tiles
+  // ── Fără CORS, fără API key separat — folosim token-ul Mapbox existent
+  // ── Mapbox Terrain-RGB: elevatia encodată în RGB per pixel
+  //    elevation = -10000 + (R*256*256 + G*256 + B) * 0.1
+  // ── Fallback: estimare din lat (România: câmpie 50-200m, deal 200-600m)
+  // ══════════════════════════════════════════════════════════════════════
   async _fetchElevationBatch(cells) {
-    // cells = [{lon, lat, key}, ...] — max 100
     if(!cells?.length) return new Map();
+    const elevMap = new Map();
 
-    const batch = cells.slice(0, 100);
-    const locations = batch.map(c => `${c.lat.toFixed(4)},${c.lon.toFixed(4)}`).join('|');
-    const url = `https://api.opentopodata.org/v1/srtm90m?locations=${locations}`;
+    // Obținem token Mapbox din harta existentă
+    const token = mapboxgl?.accessToken || window._mapboxToken || '';
 
-    try {
-      const r = await fetch(url, {signal: AbortSignal.timeout(8000)});
-      if(!r.ok) return new Map();
-      const data = await r.json();
-      const elevMap = new Map();
-      (data.results || []).forEach((res, i) => {
-        if(batch[i]) elevMap.set(batch[i].key, res.elevation || 0);
+    if(token) {
+      // Zoom 9 — rezoluție ~300m/pixel, suficient pentru grid 200m
+      const Z = 9;
+      const n2t = (lat,lon,z) => {
+        const n = Math.floor((1-Math.log(Math.tan(lat*Math.PI/180)+1/Math.cos(lat*Math.PI/180))/Math.PI)/2*Math.pow(2,z));
+        const t = Math.floor((lon+180)/360*Math.pow(2,z));
+        return [t,n];
+      };
+
+      // Grupăm celulele pe tile-uri pentru a minimiza request-urile
+      const tileGroups = new Map();
+      cells.forEach(cell => {
+        const [tx,ty] = n2t(cell.lat, cell.lon, Z);
+        const tk = `${tx}_${ty}`;
+        if(!tileGroups.has(tk)) tileGroups.set(tk,[]);
+        tileGroups.get(tk).push(cell);
       });
-      console.log(`[Slope] ✅ Elevație pentru ${elevMap.size} celule`);
-      return elevMap;
-    } catch(e) {
-      console.warn('[Slope] OpenTopoData indisponibil:', e.message);
-      return new Map();
+
+      // Fetch max 6 tile-uri (cele mai populate)
+      const sorted = [...tileGroups.entries()].sort((a,b)=>b[1].length-a[1].length).slice(0,6);
+
+      await Promise.allSettled(sorted.map(async ([tk, tcells]) => {
+        const [tx,ty] = tk.split('_').map(Number);
+        const url = `https://api.mapbox.com/v4/mapbox.terrain-rgb/${Z}/${tx}/${ty}.pngraw?access_token=${token}`;
+        try {
+          const resp = await fetch(url, {signal:AbortSignal.timeout(5000)});
+          if(!resp.ok) return;
+          const blob = await resp.blob();
+          const img = await createImageBitmap(blob);
+          const canvas = new OffscreenCanvas(256, 256);
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+
+          tcells.forEach(cell => {
+            // Coordonate pixel în tile
+            const tileSize = Math.pow(2,Z);
+            const px = Math.floor(((cell.lon+180)/360*tileSize - tx) * 256);
+            const py = Math.floor(((1-Math.log(Math.tan(cell.lat*Math.PI/180)+1/Math.cos(cell.lat*Math.PI/180))/Math.PI)/2*tileSize - ty) * 256);
+            if(px<0||px>255||py<0||py>255) return;
+            const [r,g,b] = ctx.getImageData(px,py,1,1).data;
+            const elev = -10000 + (r*256*256 + g*256 + b) * 0.1;
+            elevMap.set(cell.key, Math.round(elev));
+          });
+        } catch(e) { /* tile fetch failed, fallback below */ }
+      }));
     }
+
+    // Fallback pentru celule fără elevație: estimare din latitudine și longitudine
+    // România: câmpie sud/vest ~50-150m, deal central ~200-500m, munte ~600-2500m
+    cells.forEach(cell => {
+      if(elevMap.has(cell.key)) return;
+      // Estimare brută: munții Carpați sunt la lon 22-26.5, lat 44.5-47.5
+      const isMountain = (cell.lon > 22.5 && cell.lon < 26.5) &&
+                         (cell.lat > 44.5 && cell.lat < 47.5);
+      const elevEst = isMountain ? 400 : 150; // estimare conservatoare
+      elevMap.set(cell.key, elevEst);
+    });
+
+    const realCount = [...elevMap.values()].filter(v=>v!==150&&v!==400).length;
+    console.log(`[Slope] ✅ ${elevMap.size} celule | ${realCount} din Mapbox Terrain | ${elevMap.size-realCount} fallback`);
+    return elevMap;
   },
 
   // Calculează suitability din pantă (grade)
@@ -1751,7 +1804,36 @@ td{padding:7px 10px;border-bottom:1px solid #f1f5f9}tr:nth-child(even) td{backgr
   <div class="kpi"><div class="kv">${clim.uhi}°C UHI</div><div class="kl">Insulă căldură 2055 · zona ${clim.zone}</div><div class="ks">Copernicus · IPCC AR6 RCP4.5</div></div>
 </div>
 
-<h2>2. Predicții 2025–2055</h2>
+<h2>2. Diagnostic Urban — ${d.name||'UAT'}</h2>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0">
+<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px">
+  <div style="font-size:8pt;text-transform:uppercase;color:#94a3b8;margin-bottom:6px">Lifecycle Score L</div>
+  <div style="font-size:22pt;font-weight:800;color:${(grav.lifecycle?.score||0)>0.1?'#166534':(grav.lifecycle?.score||0)>-0.3?'#92400e':'#991b1b'}">${((grav.lifecycle?.score||0)>=0?'+':'')}${(grav.lifecycle?.score||0).toFixed(2)}</div>
+  <div style="font-size:9pt;margin-top:4px;color:#475569">
+    <strong>${grav.growthType}</strong> · 
+    ${grav.growthType==='DECLINING'?'Declin demografic activ. Prioritate: reabilitare fond existent, tipologii medicale/sociale.':
+      grav.growthType==='SHRINKING'?'Contracție severă. Zero expansiune. Verde urban și reconversie.':
+      grav.growthType==='METROPOLITAN'?'Creștere accelerată. Presiune imobiliară ridicată pe axe de transport.':
+      grav.growthType==='REGIONAL'?'Creștere moderată. Densificare centru + coridoare principale.':
+      'Echilibru fragil. Densificare selectivă + reabilitare.'}
+  </div>
+  <div style="font-size:8pt;color:#94a3b8;margin-top:8px">
+    Pg=${(grav.lifecycle?.Pg||0).toFixed(2)} · Eg=${(grav.lifecycle?.Eg||0).toFixed(2)} · 
+    Mn=${(grav.lifecycle?.Mn||0).toFixed(2)} · Ac=${(grav.lifecycle?.Ac||0).toFixed(2)}
+  </div>
+</div>
+<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px">
+  <div style="font-size:8pt;text-transform:uppercase;color:#94a3b8;margin-bottom:6px">De ce crește/scade</div>
+  <div style="font-size:9pt;line-height:1.7;color:#334155">
+    ${(d.rata_reala_2011_2021||0)<-1?`▼ Rată demografică ${(d.rata_reala_2011_2021||0).toFixed(2)}%/an — declin semnificativ 2011-2021.`:`▲ Rată demografică ${(d.rata_reala_2011_2021||0).toFixed(2)}%/an — tendință ${(d.rata_reala_2011_2021||0)>0?'pozitivă':'stabilă'}.`}
+    <br>${(d.coef_hub||0.7)>0.9?`Pol economic regional (coef_hub=${(d.coef_hub||0.7).toFixed(2)}) — atracție forță de muncă.`:`Economie locală medie (coef_hub=${(d.coef_hub||0.7).toFixed(2)}).`}
+    <br>${(d.universitati||0)>1?`Centre universitare (${d.universitati}) — stabilizator demografic important.`:`Fără universitate — vulnerabilitate la migrație tineri.`}
+    <br>Seismic ag=${seis.ag}g → hMax legal R+${seis.hMaxStory} (max ${seis.hMaxM}m).
+  </div>
+</div>
+</div>
+
+<h2>3. Predicții 2025–2055</h2>
 <div class="pred y"><div style="font-size:10pt;font-weight:700;margin-bottom:4px">🏗 2025–2030</div>
   <p style="margin:0">Orizont scurt: ${(need.locuinteNoi||0).toLocaleString('ro-RO')} locuințe noi din creștere demografică + ${(need.locuinteReab||0).toLocaleString('ro-RO')} reabilitări. Household size în scădere (${need.s2025}→${need.s2055}) generează cerere suplimentară. Zone active: ${zones.filter(z=>z.startYr<=2030).slice(0,3).map(z=>z.label||z.id).join(', ')||'—'}.</p></div>
 <div class="pred b"><div style="font-size:10pt;font-weight:700;margin-bottom:4px">🏙 2030–2040</div>
@@ -1759,7 +1841,7 @@ td{padding:7px 10px;border-bottom:1px solid #f1f5f9}tr:nth-child(even) td{backgr
 <div class="pred p"><div style="font-size:10pt;font-weight:700;margin-bottom:4px">🌆 2040–2055</div>
   <p style="margin:0">Orizont lung: populație estimată ${pop55}. Climat (zona ${clim.zone}, UHI +${clim.uhi}°C) impune standarde verzi obligatorii. ${seis.ag>=.35?`Restricție seismică ag=${seis.ag}g menține înălțimile reduse (max R+${seis.hMaxStory}).`:''} Household size ${need.s2055} → cerere structurală pentru locuințe mai mici și de calitate.</p></div>
 
-<h2>3. Modele Matematice</h2>
+<h2>4. Modele Matematice</h2>
 <div class="formula"><span class="c">Cohort Survival (INS/Eurostat):</span>
 Px+5,t+5 = Px,t × Sx + Mx,t
   <span class="c">Sx = rata supraviețuire INS 2021 per cohortă și sex</span>
@@ -1778,20 +1860,20 @@ P(D) = f(E, M, I, C, G)   <span class="v">→ probabilitate per zonă, nu valori
 <span class="c">Real Estate Feasibility:</span>
 ROI = (Vsale - Ctotal) / Ctotal   <span class="v">→ ROI ${feas.roi}% (prag 12%: ${feas.viable?'✓ VIABIL':'⚠ RISC'})</span></div>
 
-<h2>4. Zone de Dezvoltare — Probabilistic</h2>
+<h2>5. Zone de Dezvoltare — Probabilistic</h2>
 <p style="font-size:8.5pt;color:#64748b;margin-bottom:10px">P(D) = f(E,M,I,C,G) — Monte Carlo 300 simulări per zonă · Nu certitudini, ci probabilități.</p>
 <table>
   <tr><th>Zonă</th><th>Probabilitate</th><th>Clasificare</th><th>hMax</th><th>Start</th></tr>
   ${zones.slice(0,15).map(z=>{const u=upeRes[z.id||z.label]||{pct:50,classification:'MEDIUM',color:'#f59e0b'};return`<tr><td><strong>${z.label||z.id}</strong><div style="font-size:7.5pt;color:#64748b">${z.sub||''}</div></td><td><div style="display:flex;align-items:center;gap:6px"><div style="width:${u.pct}px;height:9px;background:${u.color};border-radius:2px;max-width:80px"></div><strong style="color:${u.color}">${u.pct}%</strong></div></td><td><span style="background:${u.color}22;color:${u.color};padding:2px 7px;border-radius:9px;font-size:7.5pt;font-weight:600">${u.classification}</span></td><td>${z.hMax||'—'}m</td><td>${z.startYr||'—'}</td></tr>`;}).join('')}
 </table>
 
-<h2 class="page-break">5. Scenarii Comparative</h2>
+<h2 class="page-break">6. Scenarii Comparative</h2>
 <table>
   <tr><th>Scenariu</th><th>Ipoteză</th><th>Rată ×</th><th>Locuințe est.</th><th>hMax ×</th></tr>
   ${['S1','S2','S3','S4'].map(s=>{const sc=this._SCENARIOS[s];const loc=Math.round((need.locuinteTotale||0)*sc.rateMultiplier);return`<tr ${this.scenario===s?'style="background:#eff6ff;font-weight:600"':''}><td>${s} ${sc.label}</td><td>${s==='S1'?'PNRR complet, investiții masive':s==='S2'?'Referință INS':s==='S3'?'Prioritate calitate':' Crize climatice'}</td><td>×${sc.rateMultiplier}</td><td>${loc.toLocaleString('ro-RO')}</td><td>×${sc.hMaxMultiplier}</td></tr>`;}).join('')}
 </table>
 
-<h2>6. Surse Oficiale — Data accesului: ${todayISO}</h2>
+<h2>7. Surse Oficiale — Data accesului: ${todayISO}</h2>
 <div class="src-grid">
   <div class="src"><div class="sn">INS — Institutul Național de Statistică</div><div class="sd">Recensământ 2021, rate supraviețuire cohorte, household size trend</div><div class="st">insse.ro · accesat ${todayISO}</div></div>
   <div class="src"><div class="sn">ANCPI — Cadastru și Publicitate Imobiliară</div><div class="sd">Autorizații construire, suprafață medie 68m², rata înlocuire 1.2%/an</div><div class="st">geoportal.ancpi.ro · accesat ${todayISO}</div></div>
@@ -1801,7 +1883,7 @@ ROI = (Vsale - Ctotal) / Ctotal   <span class="v">→ ROI ${feas.roi}% (prag 12%
   <div class="src"><div class="sn">Copernicus + IPCC AR6 + Eurostat</div><div class="sd">UHI, RCP4.5/8.5, risc secetă/inundații, Urban Audit comparații EU</div><div class="st">cds.climate.copernicus.eu · ec.europa.eu/eurostat · accesat ${todayISO}</div></div>
 </div>
 
-<h2>7. Recomandări Instituționale</h2>
+<h2>8. Recomandări Instituționale</h2>
 <table>
   <tr><th>Destinatar</th><th>Acțiune</th><th>Termen</th></tr>
   <tr><td><strong>Primărie / CL</strong></td><td>Actualizare PUG cu zonele identificate. Rezervare coridor A7/A8/centuri</td><td>2025-2027</td></tr>
@@ -3167,12 +3249,12 @@ out geom qt;`;
         const name=d.name||'UAT';
         this._scenes=[
           {id:'fb1',dur:60000,light:'dusk',
-           cam:{center:[cx,cy],zoom:4.5,pitch:0,bearing:0,duration:3500},
-           chain:[{center:[cx,cy],zoom:12,pitch:50,bearing:-20,duration:6000,delay:8000},
-                  {center:[cx,cy],zoom:15,pitch:68,bearing:10,duration:5000,delay:20000}],
+           cam:{center:[cx,cy],zoom:11.0,pitch:35,bearing:-12,duration:2800},
+           chain:[{center:[cx,cy],zoom:13.0,pitch:52,bearing:-8,duration:5000,delay:6000},
+                  {center:[cx,cy],zoom:15.0,pitch:68,bearing:10,duration:5000,delay:16000}],
            title:'🏙 '+name,body:name+' — proiecție urbanistică 2025-2055',src:'UrbanX TSS·FG'},
           {id:'fb2',dur:60000,light:'dusk',
-           cam:{center:[cx,cy],zoom:13.5,pitch:55,bearing:-25,duration:5000},
+           cam:{center:[cx,cy],zoom:13.5,pitch:55,bearing:-25,duration:3000},
            chain:[{center:[cx,cy],zoom:16.5,pitch:76,bearing:20,duration:6000,delay:12000},
                   {center:[cx,cy],zoom:12,pitch:40,bearing:0,duration:5000,delay:35000}],
            title:'📊 Date Oficiale '+name,body:'Proiecție calibrată: INSE · Eurostat · ANCPI · BNR · IPCC AR6',src:'UrbanX TSS·FG'},
@@ -3223,27 +3305,37 @@ out geom qt;`;
       const fly=(c,z,p,b,dur,dly)=>({center:c,zoom:z,pitch:p,bearing:b,duration:dur||5500,delay:dly||0});
 
       return [
-        // S1 — Europa → România (18s) — chains la 5s și 13s
-        {id:'s1',dur:18000,light:'day',
-         cam:{center:[24.5,45.9],zoom:4.5,pitch:0,bearing:0,duration:3000},
+        // S1 — DIRECT PE ORAȘ (nu mai facem tur turistic al României)
+        // ── Aterizare imediată + date live ────────────────────────────────
+        {id:'s1',dur:20000,light:'dusk',
+         cam:{center:[cx,cy],zoom:11.0,pitch:35,bearing:-12,duration:2800},
          chain:[
-           {center:[24.8,45.7],zoom:5.8,pitch:8,bearing:-5,duration:4500,delay:5000},
-           {center:[cx+0.2,cy+0.1],zoom:7.2,pitch:15,bearing:-10,duration:5000,delay:13000},
+           {center:[cx,cy],zoom:13.0,pitch:52,bearing:-8,duration:4000,delay:5000},
+           {center:[cx,cy],zoom:14.5,pitch:64,bearing:8,duration:5000,delay:13000},
          ],
-         title:'🌍 '+name+' — Vedere Globală',
-         body:'Romania · '+pop+' loc. · jud. '+county+'. '+cityProfile(),
-         src:'INS · Eurostat · ANCPI'},
+         title:'🏙 '+name+' — Proiecție '+startYear+'→2055',
+         body:cityProfile()+' Populație '+pop.toLocaleString()+' loc. · '+
+              (grav.growthType==='DECLINING'?'Declin demografic: reabilitare prioritară.':
+               grav.growthType==='METROPOLITAN'?'Creștere accelerată: presiune imobiliară ridicată.':
+               'Creștere moderată pe coridoare principale.')+
+              ' Lifecycle L='+grav.lifecycle?.score?.toFixed(2)+'. Risc seismic ag='+seis.ag+'g.',
+         src:'INS · ANCPI · P100-1/2022 · Model TSS·FG'},
 
-        // S2 — Moldova (18s) — chains la 5s și 13s
-        {id:'s2',dur:18000,light:'day',
-         cam:{center:[cx+0.25,cy+0.12],zoom:8.0,pitch:15,bearing:-8,duration:4000},
+        // S2 — DATE LIVE: KPI-uri + zone de risc + infrastructură (20s)
+        // ── Nu mai plimbăm camera pe Moldova ────────────────────────────
+        {id:'s2',dur:20000,light:'day',
+         cam:{center:[cx,cy],zoom:12.5,pitch:42,bearing:-20,duration:3000},
          chain:[
-           {center:[cx+0.05,cy+0.03],zoom:9.5,pitch:25,bearing:-5,duration:5000,delay:5000},
-           {center:[cx,cy],zoom:11.0,pitch:35,bearing:-10,duration:5500,delay:13000},
+           {center:[cx,cy],zoom:13.5,pitch:55,bearing:5,duration:5000,delay:6000},
+           {center:[cx,cy],zoom:14.0,pitch:60,bearing:-15,duration:5000,delay:14000},
          ],
-         title:'🗺 Regiune — '+name+' Pol Regional',
-         body:'Zona metropolitana extinsă. Rată demografică: '+rate+'%/an. Densitate: '+densHA+' loc/km². PIB județ: '+Math.round((d.pop2021||100000)*(d.coef_hub||0.8)*0.05/1000)+' mld €/an.',
-         src:'INS · ADR Nord-Est · Eurostat NUTS'},
+         title:'📊 Date Oficiale — '+name,
+         body:'Proiecție calibrată: '+need.pop2055.toLocaleString()+' loc. în 2055 ('+
+              (need.deltaPop>=0?'+':'')+Math.round(((need.pop2055-need.pop2021)/need.pop2021)*100)+'% față de 2021). '+
+              'Necesare '+need.locuinteTotale.toLocaleString()+' locuințe · Investiție estimată ≈'+
+              Math.round(need.totalM2*850/1e6+need.locuinteTotale*15000/1e6)+'M€. '+
+              'hMax seismic: R+'+seis.hMaxStory+'. Risc climatic: '+clim.label+'.',
+         src:'INSE · ANCPI · BNR · IPCC AR6 · Model TSS·FG'},
 
         // S3 — Aproach (22s) — chains la 7s și 16s
         // ══════════════════════════════════════════════════════════════════
