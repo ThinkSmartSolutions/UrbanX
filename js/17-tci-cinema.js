@@ -1461,9 +1461,7 @@ out geom qt;`;
       // Combină camera Mapbox cu transformarea locală
       this._camera.projectionMatrix =
         new THREE.Matrix4().fromArray(matrix).multiply(modelMatrix);
-      this._camera.projectionMatrixInverse.copy(this._camera.projectionMatrix).invert();
 
-      if(this._mesh) this._mesh.visible = (this._map?.getZoom?.() ?? 0) >= 12.5;
       this._renderer.resetState();
       this._renderer.render(this._scene, this._camera);
       this._map?.triggerRepaint();
