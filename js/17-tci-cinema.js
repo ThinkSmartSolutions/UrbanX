@@ -1006,21 +1006,76 @@ const TCI = {
   // ══════════════════════════════════════════════════════════════════════
   // URBAN GRAVITY MODEL
   // ══════════════════════════════════════════════════════════════════════
+  // ══════════════════════════════════════════════════════════════════════
+  // URBAN LIFECYCLE SCORE — L = f(Pg, Eg, Mn, Ac) ∈ [-1.0, +1.0]
+  // ── Scor continuu, nu etichete fixe ──────────────────────────────────
+  // Surse: INS rata demografică, coef_hub economic, INS AC trend
+  // -1.0 = shrinking sever | 0.0 = stabil | +1.0 = boomtown
+  // ══════════════════════════════════════════════════════════════════════
+  _calcLifecycleScore(cityData) {
+    if(!cityData) return 0;
+    const rata = cityData.rata_reala_2011_2021 || 0;
+
+    // Pg: creștere demografică normalizată [-1, +1]
+    // Rata -3%/an → -1.0 | 0% → 0 | +3%/an → +1.0
+    const Pg = Math.max(-1, Math.min(1, rata / 2.5));
+
+    // Eg: presiune economică din coef_hub calibrat pe media RO (0.78)
+    // 0.5 → -0.5 (declin) | 0.78 → 0 (mediu) | 1.25 → +1.0 (boom)
+    const hub = cityData.coef_hub || 0.78;
+    const Eg = Math.max(-1, Math.min(1, (hub - 0.78) * 2.2));
+
+    // Mn: balanță migrație (proxy: rata demografică cu pondere universitară)
+    const univBonus = (cityData.universitati || 0) > 2 ? 0.15 : 0;
+    const Mn = Math.max(-1, Math.min(1, Pg + univBonus));
+
+    // Ac: trend autorizații INS TEMPO (dacă disponibil)
+    // 0.5× → -0.5 | 1.0× → 0 | 2.0× → +0.5
+    const permTrend = cityData._permitsGrowth || 1.0;
+    const Ac = Math.max(-1, Math.min(1, (permTrend - 1.0) * 1.5));
+
+    // L = combinație ponderată
+    const L = Pg*0.35 + Eg*0.25 + Mn*0.25 + Ac*0.15;
+    const score = Math.max(-1, Math.min(1, L));
+
+    // Clasificare pentru compatibilitate cu codul existent
+    const lifecycleType =
+      score >  0.45 ? 'GROWING'    :
+      score >  0.10 ? 'STABLE'     :
+      score > -0.30 ? 'STABLE'     :  // LOCAL stabil = nu declining
+      score > -0.55 ? 'DECLINING'  :
+                      'SHRINKING';
+
+    return { score, lifecycleType, Pg, Eg, Mn, Ac };
+  },
+
   _calcGravityScore(cityData){
     const pop=(cityData?.pop2021||100000),rate=(cityData?.rata_reala_2011_2021||0)/100;
-    // universitati din DB sau hardcodat pentru orașele cunoscute
     const UNIV_CITIES={'IS':5,'CJ':4,'TM':4,'B':10,'BV':2,'SB':2,'CS':2,'BC':1,'SV':1,'GL':1,'CT':2,'MS':2,'HR':1,'NT':1};
     const univ=(cityData?.universitati||UNIV_CITIES[cityData?.judet||'']||0),judet=cityData?.judet||'';
     const eP=Math.min(1,pop/400000),eC=Math.max(0,Math.min(1,(rate+0.02)/0.04));
     const eE=Math.min(1,univ/3),eK=['IS','CJ','TM','B','CT','BV'].includes(judet)?0.8:0.4;
     const eI=rate>0?0.7:rate>-0.01?0.4:0.2;
     const score=eP*.30+eC*.25+eE*.20+eK*.15+eI*.10;
-    // Praguri ajustate — România are puține orașe >300k
-    // Iași/Cluj/TM/B = METROPOLITAN chiar și cu score mediu
+
+    // ── Lifecycle Score integrat în growthType ────────────────────────
+    const lifecycle = this._calcLifecycleScore(cityData);
     const isLargeCity = pop > 250000;
-    const growthType = (score>0.55||isLargeCity&&score>0.45)?'METROPOLITAN'
-                     : score>0.35?'REGIONAL':score>0.22?'LOCAL':'DECLINING';
-    return{gravityScore:score,growthType,ePopulatie:eP,eCrestere:eC,eEducatie:eE,eConectivit:eK};
+
+    // growthType = combinație gravity + lifecycle
+    const growthType =
+      (score>0.55 || isLargeCity&&score>0.45) ? 'METROPOLITAN' :
+      score>0.35 && lifecycle.score>-0.2      ? 'REGIONAL'     :
+      lifecycle.score < -0.55                  ? 'SHRINKING'    :
+      lifecycle.score < -0.30                  ? 'DECLINING'    :
+      score>0.22                               ? 'LOCAL'        :
+                                                 'DECLINING';
+
+    return {
+      gravityScore:score, growthType,
+      ePopulatie:eP, eCrestere:eC, eEducatie:eE, eConectivit:eK,
+      lifecycle, // score continuu disponibil pentru oricine îl cere
+    };
   },
 
   // ══════════════════════════════════════════════════════════════════════
@@ -1181,28 +1236,54 @@ const TCI = {
     // Regula urbanistică: nu construim nou unde populația scade și ROI<0
     // Doar reabilitare fond existent + eventual reconversie industrială
     const gravity = this._calcGravityScore(this.d);
-    if(gravity.growthType === 'DECLINING') {
-      console.log('[TCI] DECLINING → blocat expansie. Doar reabilitare.');
+    if(gravity.growthType === 'DECLINING' || gravity.growthType === 'SHRINKING') {
+      console.log('[TCI]', gravity.growthType, '→ tipologii speciale. L=', gravity.lifecycle?.score?.toFixed(2));
       const zones = [];
+      const L = gravity.lifecycle?.score || -0.4;
       const hC = seismicCap(Math.min(20, Math.max(10, 10 + need.cladiri.centru/4)));
-      // Centru civic: DOAR densificare/reabilitare, NU extindere
+
+      // ── Centru: reabilitare + densificare controlată ──────────────
       if(ok(cx,cy)) zones.push({
         id:'CV-REAB', color:'#7c3aed', hMax:hC, startYr:2027,
         density:Math.max(2, Math.round(need.cladiri.centru*0.3)),
         ring:{cx,cy,rx:0.0016*sc,ry:0.0011*sc},
-        label:'Centru — Reabilitare fond existent',
-        sub:`DECLINING · R+${Math.round(hC/3.5)} max · Nu extindere`
+        label:'Centru — Reabilitare',
+        sub:`L=${L.toFixed(2)} · R+${Math.round(hC/3.5)} max · Fond existent`
       });
-      // Reconversie industrială: singurul tip de dezvoltare acceptat
-      const hI = seismicCap(Math.min(18, 12));
+
+      // ── Medical/Senior Housing — cerere crescută prin îmbătrânire ──
+      // Documentul: "medical = logică îmbătrânire. Senior housing = demografie"
+      const medLon=cx+0.010*sc, medLat=cy+0.006*sc;
+      if(ok(medLon,medLat)) zones.push({
+        id:'MED-DECL', color:'#06b6d4', hMax:seismicCap(12), startYr:2028,
+        density:Math.max(2,3),
+        ring:{cx:medLon,cy:medLat,rx:0.0020*sc,ry:0.0014*sc},
+        label:'Medical · Senior Housing',
+        sub:`Demografie îmbătrânire · R+2→R+4`
+      });
+
+      // ── Reconversie industrială — singura expansiune permisă ────────
       const riLon=cx+0.018*sc, riLat=cy-0.008*sc;
       if(ok(riLon,riLat)) zones.push({
-        id:'RI-DECL', color:'#ea580c', hMax:hI, startYr:2032,
-        density:Math.max(2, Math.round(need.cladiri.logistica*0.5)),
+        id:'RI-DECL', color:'#ea580c', hMax:seismicCap(15), startYr:2031,
+        density:Math.max(2, Math.round(need.cladiri.logistica*0.4)),
         rect:{cx:riLon,cy:riLat,w:0.008*sc,h:0.005*sc},
         label:'Reconversie Industrială',
-        sub:`Fond existent → reabilitare · DECLINING`
+        sub:`Industrial→Mixed compact · eficiență`
       });
+
+      // ── SHRINKING: adaugă verde urban / demolări ──────────────────
+      if(gravity.growthType === 'SHRINKING') {
+        const verdeLon=cx-0.012*sc, verdeLat=cy+0.004*sc;
+        if(ok(verdeLon,verdeLat)) zones.push({
+          id:'VERDE-SHR', color:'#16a34a', hMax:0, startYr:2026,
+          density:1,
+          ring:{cx:verdeLon,cy:verdeLat,rx:0.0025*sc,ry:0.0018*sc},
+          label:'Verde Urban · Shrinking',
+          sub:`Demolări + renaturarizare · L=${L.toFixed(2)}`
+        });
+      }
+
       return zones;
     }
 
@@ -1344,6 +1425,43 @@ const TCI = {
       }
     }
 
+    // ── Slope Engine: batch elevation pentru top 100 celule ──────────
+    // Documentul: "Nu faceți fetch per celulă. Faceți batch."
+    const sortedForSlope = [...cells.values()].sort((a,b)=>b.Pu-a.Pu).slice(0,100);
+    const elevBatch = sortedForSlope.map(c=>({key:`${c.lon.toFixed(4)}_${c.lat.toFixed(4)}`,lon:c.lon,lat:c.lat}));
+    const elevMap = await this._fetchElevationBatch(elevBatch);
+
+    // Calculează panta și aplică suitability
+    const cellDegM = cellDeg * R; // ~222m per celulă
+    if(elevMap.size > 0) {
+      cells.forEach((cell, key) => {
+        const eKey = `${cell.lon.toFixed(4)}_${cell.lat.toFixed(4)}`;
+        const elev = elevMap.get(eKey);
+        if(elev === undefined) return;
+
+        // Calculează panta față de celula vecină la est (+cellDeg)
+        const neighborKey = `${(cell.lon+cellDeg).toFixed(4)}_${cell.lat.toFixed(4)}`;
+        const elevNeighbor = elevMap.get(neighborKey) || elev;
+        const slopeDeg = this._calcSlopeDeg(elev, elevNeighbor, cellDegM);
+        const suit = this._slopeToSuitability(slopeDeg, gravity.lifecycle?.score || 0);
+
+        cell.elevation = elev;
+        cell.slopeDeg  = slopeDeg;
+        cell.slopeSuit = suit.suit;
+        cell.slopeType = suit.type;
+        cell.allowType = suit.allow;
+
+        // Aplică slope suitability în P(u)
+        cell.Pu = cell.Pu * suit.suit;
+
+        // Dacă slope interzice construcțiile noi → elimină din candidați
+        if(suit.allow === 'none' || suit.allow === 'none_new') {
+          cells.delete(key);
+        }
+      });
+      console.log(`[Slope] ✅ Slope aplicat. Celule rămase: ${cells.size}`);
+    }
+
     // ── Top celule → zone (clustering minim 600m) ─────────────────────
     const sorted=[...cells.values()].sort((a,b)=>b.Pu-a.Pu);
     const zones=[],used=[],minDist=600;
@@ -1353,16 +1471,32 @@ const TCI = {
       if(used.some(u=>Math.hypot((cell.lon-u[0])*R*cp,(cell.lat-u[1])*R)<minDist)) continue;
       const seis=this._getSeismicAg(cell.lon,cell.lat);
       const scn=this._getScenario();
-      const hMax=Math.min(seis.hMaxM*(scn.hMaxMultiplier||1),cell.Pu>0.6?30:cell.Pu>0.45?20:12);
+
+      // Slope suitability influențează hMax și tipul de dezvoltare
+      const slopeSuit = cell.slopeSuit ?? 1.0;
+      const isVillaPremium = cell.allowType === 'villa_low_density';
+      const hBase = isVillaPremium ? 8 : (cell.Pu>0.6?30:cell.Pu>0.45?20:12);
+      const hMax = Math.min(seis.hMaxM*(scn.hMaxMultiplier||1), hBase * slopeSuit + 4);
+
       const pClass=cell.Pu>0.65?'HIGH':cell.Pu>0.45?'MEDIUM':'LOW';
-      const color=cell.Pu>0.65?'#f59e0b':cell.Pu>0.45?'#2563eb':'#16a34a';
+      const color = isVillaPremium ? '#a78bfa'  // violet = premium
+        : cell.Pu>0.65?'#f59e0b':cell.Pu>0.45?'#2563eb':'#16a34a';
       const startYr=2025+Math.round((1-cell.Pu)*15);
+
+      const slopeLabel = cell.slopeDeg
+        ? ` · ${Math.round(cell.slopeDeg)}° ${cell.slopeType||''}`
+        : '';
+      const label = isVillaPremium
+        ? `Premium Low-Density · P=${Math.round(cell.Pu*100)}%`
+        : `Frontier ${pClass} · P=${Math.round(cell.Pu*100)}%`;
+
       zones.push({
         lon:cell.lon,lat:cell.lat,
         id:`FRN-${zones.length}`,color,hMax,startYr,
-        rx:0.003+cell.Pu*0.003,ry:0.002+cell.Pu*0.002,
-        label:`Frontier ${pClass} · P=${Math.round(cell.Pu*100)}%`,
-        sub:`Db=${cell.Db.toFixed(2)} Ra=${cell.Ra.toFixed(2)} AC×${cell.permitsGrowth.toFixed(1)}`,
+        rx:isVillaPremium?0.002:0.003+cell.Pu*0.003,
+        ry:isVillaPremium?0.0014:0.002+cell.Pu*0.002,
+        label,
+        sub:`Db=${cell.Db.toFixed(2)} Ra=${cell.Ra.toFixed(2)}${slopeLabel}`,
         _prob:cell.Pu,_class:pClass,
       });
       used.push([cell.lon,cell.lat]);
@@ -1378,6 +1512,62 @@ const TCI = {
   // API gratuit · portal statistici.insse.ro
   // Returnează permits_growth = trend AC ultimii 3 ani vs precedenți 3
   // ══════════════════════════════════════════════════════════════════════
+  // ══════════════════════════════════════════════════════════════════════
+  // SLOPE ENGINE — Terrain Suitability via OpenTopoData SRTM 90m
+  // ── Batch sampling (nu per celulă!) — max 100 locații per request ────
+  // Sursa: api.opentopodata.org · SRTM 90m · gratuit fără autentificare
+  //
+  // Suitability per pantă (din document):
+  //   0-5°  → 1.00 (excelent)
+  //   5-10° → 0.85 (bun)
+  //  10-15° → 0.60 (limitat)
+  //  15-25° → 0.25 (dificil — sau premium vilă dacă income high)
+  //   >25°  → 0.00 (interzis)
+  // ══════════════════════════════════════════════════════════════════════
+  async _fetchElevationBatch(cells) {
+    // cells = [{lon, lat, key}, ...] — max 100
+    if(!cells?.length) return new Map();
+
+    const batch = cells.slice(0, 100);
+    const locations = batch.map(c => `${c.lat.toFixed(4)},${c.lon.toFixed(4)}`).join('|');
+    const url = `https://api.opentopodata.org/v1/srtm90m?locations=${locations}`;
+
+    try {
+      const r = await fetch(url, {signal: AbortSignal.timeout(8000)});
+      if(!r.ok) return new Map();
+      const data = await r.json();
+      const elevMap = new Map();
+      (data.results || []).forEach((res, i) => {
+        if(batch[i]) elevMap.set(batch[i].key, res.elevation || 0);
+      });
+      console.log(`[Slope] ✅ Elevație pentru ${elevMap.size} celule`);
+      return elevMap;
+    } catch(e) {
+      console.warn('[Slope] OpenTopoData indisponibil:', e.message);
+      return new Map();
+    }
+  },
+
+  // Calculează suitability din pantă (grade)
+  // Bonus premium: pantă 10-25° + lifecycle.score > 0 → vilă low density
+  _slopeToSuitability(slopeDeg, lifecycleScore=0) {
+    if(slopeDeg <= 5)  return {suit:1.00, type:'flat',    allow:'all'};
+    if(slopeDeg <= 10) return {suit:0.85, type:'gentle',  allow:'all'};
+    if(slopeDeg <= 15) return {suit:0.60, type:'moderate',allow:'residential_medium'};
+    if(slopeDeg <= 25) {
+      // Pantă medie + economie bună = potential premium (Copou, Brașov, faleză)
+      if(lifecycleScore > 0.2) return {suit:0.35, type:'steep_premium', allow:'villa_low_density'};
+      return {suit:0.20, type:'steep', allow:'none_new'};
+    }
+    return {suit:0.00, type:'cliff', allow:'none'};
+  },
+
+  // Calculează panta în grade între două celule adiacente
+  _calcSlopeDeg(elev1, elev2, distM) {
+    if(!distM || distM === 0) return 0;
+    return Math.abs(Math.atan2(Math.abs(elev1 - elev2), distM) * 180 / Math.PI);
+  },
+
   async _fetchPermitsGrowth(sirutaCode) {
     if(!sirutaCode) return null;
     const url = `https://statistici.insse.ro:8077/tempo-ins/matrix/LOC103A?`+
