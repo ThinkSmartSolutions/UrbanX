@@ -676,6 +676,11 @@ const TCI = {
           </div>
           <div style="display:flex;gap:4px;margin-top:4px">
             <button onclick="TCI._generateReport()" style="flex:1;text-align:left;padding:6px 7px;border-radius:4px;border:1px solid rgba(212,175,55,0.4);background:rgba(212,175,55,0.12);color:#D4AF37;font-size:9px;cursor:pointer;font-family:inherit;font-weight:600">📄 Raport PDF</button>
+            <button onclick="TCI._streetViewMode()" id="tci-sv-btn" title="Mod nivel stradă — zoom pe clădiri, construcție etaj cu etaj"
+              style="padding:6px 10px;border-radius:6px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:#22c55e;font-size:10px;cursor:pointer;font-family:inherit;font-weight:700">
+              🚶 Stradă
+            </button>
+            <button onclick="TCI._exportGeoJSON()" title="Export zone ca GeoJSON — compatibil QGIS, ArcGIS, uMap" style="flex:1;text-align:left;padding:6px 7px;border-radius:4px;border:1px solid rgba(56,189,248,0.4);background:rgba(56,189,248,0.08);color:#38bdf8;font-size:9px;cursor:pointer;font-family:inherit;font-weight:600">⬇ Export GIS</button>
             <button onclick="TCI._saveScenario();alert('Scenariu salvat!')" style="flex:1;text-align:left;padding:6px 7px;border-radius:4px;border:1px solid rgba(99,102,241,0.4);background:rgba(99,102,241,0.12);color:#818cf8;font-size:9px;cursor:pointer;font-family:inherit;font-weight:600">💾 Salvează</button>
           </div>
 
@@ -819,6 +824,7 @@ const TCI = {
         <div id="tci-eu-panel" style="margin-top:5px"></div>
         <div style="display:flex;gap:8px;margin-top:8px">
           <button onclick="TCI._generateReport()" style="flex:1;padding:9px;border-radius:7px;border:1px solid rgba(212,175,55,0.4);background:rgba(212,175,55,0.12);color:#D4AF37;font-size:10px;cursor:pointer;font-family:inherit;font-weight:600">📄 Raport PDF</button>
+          <button onclick="TCI._exportGeoJSON()" title="Export GeoJSON — QGIS/ArcGIS" style="flex:1;padding:9px;border-radius:7px;border:1px solid rgba(56,189,248,0.4);background:rgba(56,189,248,0.08);color:#38bdf8;font-size:10px;cursor:pointer;font-family:inherit;font-weight:600">⬇ Export GIS</button>
           <button onclick="TCI._saveScenario();alert('Salvat!')" style="flex:1;padding:9px;border-radius:7px;border:1px solid rgba(99,102,241,0.4);background:rgba(99,102,241,0.12);color:#818cf8;font-size:10px;cursor:pointer;font-family:inherit;font-weight:600">💾 Salvează</button>
         </div>
         <div id="tci-nar-what" style="margin-top:8px;background:rgba(8,18,40,0.8);border:1px solid rgba(96,165,250,0.18);border-radius:7px;padding:8px">
@@ -904,50 +910,561 @@ const TCI = {
     }, 280);
   },
 
-  // Explicatie suplimentara per scena — "mura in gura" pentru utilizator
+  // ── NARATIV TEMPORAL ACTIV ───────────────────────────────────────────
+  // La fiecare an din slider, o propoziție generată din date reale
+  // Utilizatorul înțelege CE SE ÎNTÂMPLĂ și DE CE în acel an
   _updateNarExtra(sceneId, yr) {
-    const el = document.getElementById('tci-nar-whattext');
+    let el = document.getElementById('tci-nar-whattext');
     if(!el) {
-      // Creeaza elementul daca nu exista
       const nc = document.getElementById('tci-narcard');
       if(!nc) return;
-      const div = document.createElement('div');
-      div.id = 'tci-nar-whattext';
-      div.style.cssText = 'margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.08);font-size:9.5px;color:rgba(148,163,184,0.7);line-height:1.6';
-      nc.appendChild(div);
+      el = document.createElement('div');
+      el.id = 'tci-nar-whattext';
+      el.style.cssText = 'margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.08);font-size:9.5px;color:rgba(148,163,184,0.7);line-height:1.6';
+      nc.appendChild(el);
     }
-    const ex = document.getElementById('tci-nar-whattext');
-    if(!ex) return;
 
     const city  = this._city();
-    const d     = this._data(yr);
+    const need  = this._calcUrbanNeed(city);
+    const grav  = this._calcGravityScore(city);
+    const lc    = grav.lifecycle || {};
     const name  = city.name || 'UAT';
-    const yF    = Math.max(0,Math.min(1,(yr-2025)/25));
-    const zones = this._projZones||[];
-    const startedZones = zones.filter(z=>yr>=z.hYear);
-    const constrZones  = zones.filter(z=>yr>=z.hYear&&(yr-z.hYear)<5);
-    const doneZones    = zones.filter(z=>(yr-z.hYear)>=10);
+    const zones = this._projZones || [];
+    const rata  = city.rata_reala_2011_2021 || 0;
 
-    const msgs = {
-      's1': `👁 Ce vedeți: harta Europei cu ${name} marcat (punct roșu). Context: locul României și al ${name} în Europa. Stânga = realitatea 2025. Dreapta = aceeași hartă cu date predictive suprapuse.`,
-      's2': `👁 Ce vedeți: zona metropolitană ${name} de la înălțime. Liniile colorate = rețeaua de transport public. Punctele = vehicule în timp real. Datele demografice vin de la Recensămîntul INS 2021.`,
-      's3': `👁 Ce vedeți: apropierea de ${name}. Clădirile 3D apar la zoom 14+. Dreapta va începe să arate DIFERIT față de stânga pe măsură ce anii avansează și zonele de construcție devin active.`,
-      's4': `👁 Ce vedeți: ${name} în 3D. STÂNGA = cum arată azi. DREAPTA = proiecție. Contururile ${zones.length} zone delimitate sunt zonele din Planul Urbanistic General (PUG). ${startedZones.length>0?'Zonele portocalii/galbene = construcție activă în '+yr+'.':'Aşteptaţi — zonele vor apărea pe dreapta pe măsură ce anii avansează.'}`,
-      's5': `👁 Ce vedeți: clădirile GALBENE pe dreapta = construcție activă în ${yr}. Clădirile colorate (violet/albastru/portocaliu) = finalizate. Pe stânga = nicio construcție nouă (2025). ${constrZones.length} zone active acum. Înălțimile cresc vizibil de la an la an.`,
-      's6': `👁 Ce vedeți: rețeaua de transport public + traficul auto în mișcare. ROȘU = tramvai. ALBASTRU = autobuz. GALBEN = mașini private. Traseele albastre/roșii = linii TP existente. La zoom 14+ mișcarea e vizibilă.`,
-      's7': `👁 Ce vedeți: o zonă specifică din ${name} la zoom detaliat. Conturul portocaliu delimitat = zonă de reconversie industrială din PUG. Pe DREAPTA apar clădiri noi extrudate — acestea NU există azi, sunt proiecția bazată pe UTR-uri și CUT-uri aprobate.`,
-      's8': `👁 Ce vedeți: nivel pietonal — ca și cum ai fi pe stradă. Clădirile din jur sunt OSM 3D real. Pe DREAPTA, unele clădiri sunt mai înalte = proiecția densificării. Luminile se schimbă: zi → apus → noapte = diverse scenarii de utilizare urbană.`,
-      's9': `👁 Ce vedeți: harta de risc suprapusă pe ${name}. Albastru = risc inundații (ANAR). Roșu = risc seismic (INFP/P100). Galben = risc caniculă (IPCC AR6 RCP8.5). Date climatice calibrate pentru 2050 vs 2025.`,
-      's10': `👁 Ce vedeți: ${name} comparat cu orașe similare din România și UE. Toate datele = Eurostat Urban Audit 2021 + INS. Indicatorii arată unde se situează ${name} și câți ani de investiții consistente sunt necesari pentru convergența EU.`,
-      's11': `👁 Ce vedeți: transformarea completă 2025→2050 în timp real. STÂNGA = 2025 înghețat. DREAPTA = evoluție an cu an. Folosiți slider-ul de jos pentru a sări la orice an. Fiecare clădire nouă are o bază legală: UTR + CUT + autorizații ANCPI.`,
-      's12': `👁 Ce vedeți: ${name} 2050 — imaginea completă. ${doneZones.length} zone urbanistice finalizate. +${Math.round(yF*20)}% populație. +${Math.round(yF*100)}% PIB/cap față de 2025. Toate proiecțiile sunt calibrate pe date oficiale și pot fi citate în documente PUZ/PUG/PIDU.`,
-    };
+    // ── Narativ bazat pe AN — date reale din motoare ──────────────────
+    const temporal = this._buildTemporalNarrative(city, need, grav, lc, zones, yr, name, rata);
+    const sceneCtx = this._buildSceneContext(sceneId, yr, name, zones);
 
-    const msg = msgs[sceneId] || msgs['s4'];
-    ex.textContent = msg;
+    el.innerHTML = `
+      <div style="margin-bottom:6px;opacity:0.5;font-size:8px">${sceneCtx}</div>
+      <div style="font-size:9.5px;line-height:1.7;color:rgba(210,225,240,0.85)">${temporal}</div>
+    `;
   },
 
-  // ── STATUS DATE — verificare vizuală că sursele sunt active ──────────
+  _buildTemporalNarrative(city, need, grav, lc, zones, yr, name, rata) {
+    const pop2021 = city.pop2021 || 100000;
+    const pop2055 = need.pop2055 || pop2021;
+    const yrFrac  = Math.max(0, Math.min(1, (yr - 2025) / 30));
+    const popEst  = Math.round(pop2021 + (pop2055 - pop2021) * yrFrac);
+    const deltaP  = popEst - pop2021;
+    const fmt     = n => Math.abs(n).toLocaleString('ro-RO');
+
+    const zonesActive    = zones.filter(z => yr >= (z.startYr||2026));
+    const zonesThisYear  = zones.filter(z => yr === (z.startYr||2026));
+    const zonesBuilding  = zones.filter(z => yr >= (z.startYr||2026) && yr < (z.startYr||2026)+6);
+    const zonesDone      = zones.filter(z => yr >= (z.startYr||2026) + 6);
+    const locuinteEst    = Math.round((need.locuinteTotale||0) * yrFrac);
+    const investEst      = Math.round((need.totalM2||0) * 850 * yrFrac / 1e6);
+
+    // ── Fragmente narative per tip eveniment ─────────────────────────
+    const fragments = [];
+
+    // 1. Context demografic
+    if(yr <= 2027) {
+      fragments.push(`<strong>${yr}</strong> — Populația estimată: <strong>${fmt(popEst)}</strong> loc. ${deltaP > 0 ? `(+${fmt(deltaP)} față de 2021)` : `(${fmt(deltaP)} față de 2021)`}.`);
+    } else {
+      const trend = deltaP > 0 ? `crește cu +${fmt(deltaP)} față de 2021` : `scade cu ${fmt(Math.abs(deltaP))} față de 2021`;
+      fragments.push(`<strong>${yr}</strong> — Populația ${trend} → <strong>${fmt(popEst)}</strong> loc.`);
+    }
+
+    // 2. Zone active
+    if(zonesThisYear.length > 0) {
+      const zNames = zonesThisYear.slice(0,2).map(z=>z.label||z.id).join(', ');
+      fragments.push(`🔶 <strong>Nou în ${yr}:</strong> ${zNames} intră în construcție.`);
+    }
+
+    if(zonesBuilding.length > 0 && zonesThisYear.length === 0) {
+      fragments.push(`🏗 <strong>${zonesBuilding.length} zone</strong> în construcție activă.`);
+    }
+
+    if(zonesDone.length > 0) {
+      fragments.push(`✅ <strong>${zonesDone.length} zone</strong> finalizate — ${Math.round(need.locuinteTotale * (zonesDone.length/Math.max(1,zones.length))).toLocaleString('ro-RO')} unități livrate.`);
+    }
+
+    // 3. Presiune imobiliară
+    if(locuinteEst > 0) {
+      fragments.push(`📊 Cerere cumulată 2025→${yr}: <strong>≈${fmt(locuinteEst)}</strong> locuințe · ≈${fmt(investEst)} M€.`);
+    }
+
+    // 4. Moment critic — milestones specifice
+    if(yr === 2030) {
+      fragments.push(`⚡ <strong>2030 — Moment critic:</strong> PNRR investiții urbanistice trebuiau finalizate. Verificați dacă infrastructura planificată e operațională.`);
+    }
+    if(yr === 2035 && rata > 1) {
+      const popExtra = Math.round(pop2021 * (Math.pow(1 + rata/100, 14) - 1));
+      fragments.push(`📈 <strong>2035 —</strong> La rata actuală (+${rata.toFixed(1)}%/an), ${name} adaugă <strong>+${fmt(popExtra)}</strong> loc. față de 2021. Infrastructura de utilități trebuie extinsă.`);
+    }
+    if(yr === 2040 && grav.growthType === 'METROPOLITAN') {
+      fragments.push(`🏙 <strong>2040 —</strong> Zona metropolitană atinge densitate critică. Risc supraaglomerare fără transport public extins.`);
+    }
+    if(yr === 2045 && (grav.growthType === 'DECLINING' || grav.growthType === 'WEAKENING')) {
+      fragments.push(`⚠️ <strong>2045 —</strong> Fondul construit excedentar devine vizibil. Prioritate: reabilitare și densificare selectivă, nu extindere.`);
+    }
+    if(yr === 2050) {
+      const converged = pop2055 > pop2021 ? 'creștere sustenabilă' : 'contracție controlată';
+      fragments.push(`🎯 <strong>2050 —</strong> Traiectoria confirmă ${converged}. ${zonesDone.length}/${zones.length} zone finalizate.`);
+    }
+
+    // 5. Sursa și metodologia — câte o linie discretă
+    if(yr === this.startYear) {
+      fragments.push(`<span style="opacity:0.45;font-size:8px">Model: INS Cohort Survival · Gravity · P(u) Frontier · OSRM · P100-1/2013</span>`);
+    }
+
+    return fragments.join('<br>');
+  },
+
+  _buildSceneContext(sceneId, yr, name, zones) {
+    const ctx = {
+      's1': `👁 Hartă Europa — localizare ${name}`,
+      's2': `👁 Vista aeriană — rețea transport + vehicule live`,
+      's3': `👁 Apropierea de ${name} — clădiri 3D activate la zoom 14+`,
+      's4': `👁 3D urban — STÂNGA: 2025 · DREAPTA: proiecție ${yr}`,
+      's5': `👁 Construcție activă ${yr} — galben=nou · colorat=finalizat`,
+      's6': `👁 Transport public + trafic — roșu=tramvai · albastru=autobuz`,
+      's7': `👁 Detaliu zonă — contur=UTR din PUG · clădiri=proiecție`,
+      's8': `👁 Nivel pietonal — clădiri OSM real + proiecție densificare`,
+      's9': `👁 Hartă risc — albastru=inundații · roșu=seismic · galben=caniculă`,
+      's10':`👁 Benchmark EU — ${name} vs orașe similare Eurostat`,
+      's11':`👁 Transformare 2025→2055 — slider = orice an`,
+      's12':`👁 ${name} ${yr} — imagine completă · ${zones.filter(z=>yr>=(z.startYr||2026)+6).length}/${zones.length} zone finalizate`,
+    };
+    return ctx[sceneId] || `👁 Scenă ${sceneId} — ${yr}`;
+  },
+
+
+  // ── EXPORT GEOJSON ──────────────────────────────────────────────────
+  // Zone proiectate → GeoJSON cu atribute complete
+  // Utilizabil direct în QGIS, ArcGIS, orice GIS profesional
+  _exportGeoJSON() {
+    const city   = this._city();
+    const zones  = this._projZones || [];
+    const need   = this._calcUrbanNeed(city);
+    const grav   = this._calcGravityScore(city);
+    const seis   = this._getSeismicAg(city.lon||27.6, city.lat||47.16);
+    const today  = new Date().toISOString().split('T')[0];
+
+    if(!zones.length) {
+      alert('Nu există zone proiectate de exportat. Lansați mai întâi o proiecție.');
+      return;
+    }
+
+    // Construim GeoJSON FeatureCollection
+    const features = zones.map((z, i) => {
+      // Reconstruim poligonul din ring (același algoritm ca _updateProjectionLayers)
+      const ring = z.ring || {};
+      const cx = ring.cx || (z.lon||0);
+      const cy = ring.cy || (z.lat||0);
+      const rx = ring.rx || 0.005;
+      const ry = ring.ry || 0.003;
+      const R = 111319.9;
+      const cp = Math.cos(cy * Math.PI / 180);
+
+      // Poligon eliptic cu 32 puncte
+      const coords = [];
+      for(let a = 0; a <= 360; a += 11.25) {
+        const rad = a * Math.PI / 180;
+        coords.push([
+          Math.round((cx + rx * Math.cos(rad)) * 100000) / 100000,
+          Math.round((cy + ry * Math.sin(rad)) * 100000) / 100000,
+        ]);
+      }
+      coords.push(coords[0]); // închide poligonul
+
+      return {
+        type: 'Feature',
+        geometry: { type: 'Polygon', coordinates: [coords] },
+        properties: {
+          // Identificatori oficiali
+          id:            z.id || `zone-${i+1}`,
+          siruta:        city.siruta || (this.cityKey||'').split('-').pop(),
+          uat_name:      city.name || '',
+          judet:         city.judet || '',
+          uat_key:       this.cityKey || '',
+
+          // Clasificare urbanistică
+          label:         z.label || '',
+          sub:           z.sub || '',
+          tipologie:     (z.label||'').split('—')[0]?.trim() || '',
+          growth_type:   grav.growthType,
+          lifecycle_l:   (grav.lifecycle?.score||0).toFixed(3),
+          lifecycle_type:grav.lifecycle?.lifecycleType || '',
+
+          // Date temporale
+          start_year:    z.startYr || 2026,
+          h_max_m:       z.hMax || 0,
+          scenario:      this.scenario || 'S2',
+
+          // Probabilitate dezvoltare P(u)
+          prob_pct:      z._prob ? Math.round(z._prob * 100) : null,
+          pu_class:      z._prob > 0.6 ? 'HIGH' : z._prob > 0.35 ? 'MEDIUM' : 'LOW',
+
+          // Factori P(u)
+          factor_ra:     z._Ra != null ? +z._Ra.toFixed(3) : null,
+          factor_db:     z._Db != null ? +z._Db.toFixed(3) : null,
+          travel_min:    z._travelMin || null,
+          slope_deg:     z.slopeDeg != null ? +z.slopeDeg.toFixed(1) : null,
+
+          // Riscuri
+          seismic_ag:    seis.ag,
+          seismic_hmax:  seis.hMaxStory,
+
+          // Metadata
+          model_version: 'TCI v131',
+          generated:     today,
+          disclaimer:    'Predictie statistica. Nu substituie aviz urbanistic sau PUG.',
+        },
+      };
+    });
+
+    const geojson = {
+      type: 'FeatureCollection',
+      name: `TCI_${city.name||'UAT'}_${today}`,
+      crs: { type: 'name', properties: { name: 'urn:ogc:def:crs:OGC:1.3:CRS84' } },
+      metadata: {
+        generator:    'UrbanX TCI Cinema v131',
+        uat:          city.name || '',
+        siruta:       city.siruta || '',
+        judet:        city.judet || '',
+        growth_type:  grav.growthType,
+        lifecycle_l:  (grav.lifecycle?.score||0).toFixed(3),
+        pop2021:      city.pop2021 || 0,
+        pop2055:      need.pop2055 || 0,
+        locuinte:     need.locuinteTotale || 0,
+        scenario:     this.scenario || 'S2',
+        generated:    today,
+        zones_count:  zones.length,
+        seismic_ag:   seis.ag,
+        disclaimer:   'Predictie statistica INS+OSM+OSRM. Nu substituie aviz urbanistic.',
+      },
+      features,
+    };
+
+    // Download
+    const blob = new Blob([JSON.stringify(geojson, null, 2)], { type: 'application/geo+json' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `TCI_${(city.name||'UAT').replace(/\s/g,'_')}_${today}.geojson`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    console.log(`[TCI] Export GeoJSON: ${features.length} zone, ${(blob.size/1024).toFixed(1)}KB`);
+  },
+
+
+  // ══════════════════════════════════════════════════════════════════════
+  // MOD NIVEL STRADĂ — experiența completă la nivel pietonal
+  // Zoom 18.8 · Pitch 78° · Construcție etaj-cu-etaj · Trafic live
+  // ══════════════════════════════════════════════════════════════════════
+
+  _streetViewMode() {
+    if(this._inStreetView) { this._exitStreetView(); return; }
+    const m = this.map; if(!m) return;
+    this._inStreetView = true;
+    const btn = document.getElementById('tci-sv-btn');
+    if(btn){btn.textContent='✕ Ieși stradă';btn.style.borderColor='rgba(248,113,113,0.5)';btn.style.color='#f87171';}
+
+    const zones  = this._projZones?.filter(z=>this.year>=(z.startYr||2026))||[];
+    const cx = this.d?.lon||27.601, cy = this.d?.lat||47.158;
+    let tLon=cx, tLat=cy;
+    if(zones.length>0){
+      const z=zones[0], ring=z.ring||{};
+      const zCx=ring.cx||cx, zCy=ring.cy||cy;
+      const bRad=(m.getBearing?.()|| 0)*Math.PI/180;
+      tLon=zCx-Math.sin(bRad)*0.0015; tLat=zCy+Math.cos(bRad)*0.0012;
+    }
+    this._enableMapbox3D();
+    m.flyTo({center:[tLon,tLat],zoom:18.8,pitch:78,bearing:m.getBearing?.()|| -20,duration:3500,
+      easing:t=>t<0.5?2*t*t:-1+(4-2*t)*t});
+    setTimeout(()=>{this._setLight('dusk');this._3D?.setNightLights?.(true);this._startDayNightCycle();this._spawnStreetPedestrians();},3500);
+    this._setupStreetViewControls();
+    this._showStreetViewOverlay();
+    console.log('[TCI] 🚶 Mod nivel stradă activat');
+  },
+
+  _exitStreetView() {
+    this._inStreetView=false;
+    const btn=document.getElementById('tci-sv-btn');
+    if(btn){btn.textContent='🚶 Stradă';btn.style.borderColor='rgba(34,197,94,0.3)';btn.style.color='#22c55e';}
+    this.map?.flyTo({zoom:12,pitch:45,bearing:-12,duration:2500});
+    this._stopDayNightCycle();
+    this._teardownStreetViewControls();
+    this._removeStreetPedestrians();
+    document.getElementById('tci-sv-overlay')?.remove();
+    const bld=this.map?.getLayer?.('tci-3d-bld-existing');
+    if(bld) try{this.map.removeLayer('tci-3d-bld-existing');}catch(e){}
+    setTimeout(()=>this._setLight('day'),2500);
+  },
+
+  _enableMapbox3D() {
+    const m=this.map; if(!m) return;
+    if(!m.getLayer?.('tci-3d-bld-existing')) {
+      try {
+        if(m.getSource?.('composite')) {
+          m.addLayer({
+            id:'tci-3d-bld-existing',type:'fill-extrusion',
+            source:'composite','source-layer':'building',
+            filter:['==','extrude','true'],
+            paint:{
+              'fill-extrusion-color':'#1a2744',
+              'fill-extrusion-height':['get','height'],
+              'fill-extrusion-base':['get','min_height'],
+              'fill-extrusion-opacity':0.85,
+            },
+          },'tci-3d-engine');
+        }
+      } catch(e){console.warn('[TCI] 3D OSM buildings:',e.message);}
+    }
+    try{m.setMaxZoom?.(22);m.setMaxPitch?.(85);}catch(e){}
+  },
+
+  _startDayNightCycle() {
+    if(this._dayNightInterval) return;
+    const presets=['dusk','night','night','dawn','day']; let idx=0;
+    this._setLight(presets[0]);
+    this._dayNightInterval=setInterval(()=>{
+      idx=(idx+1)%presets.length;
+      this._setLight(presets[idx]);
+      this._3D?.setNightLights?.(presets[idx]==='night');
+    },8000);
+  },
+
+  _stopDayNightCycle() {
+    if(this._dayNightInterval){clearInterval(this._dayNightInterval);this._dayNightInterval=null;}
+  },
+
+  _setupStreetViewControls() {
+    if(this._svKeysActive) return;
+    this._svKeysActive=true;
+    this._svKeyHandler=(e)=>{
+      if(!this._inStreetView) return;
+      const m=this.map, center=m.getCenter(), bearing=(m.getBearing?.()||0), speed=0.00008;
+      const br=bearing*Math.PI/180;
+      switch(e.key){
+        case 'ArrowLeft':  m.setBearing?.(bearing-8); break;
+        case 'ArrowRight': m.setBearing?.(bearing+8); break;
+        case 'ArrowUp': case 'w': case 'W':
+          m.setCenter([center.lng+Math.sin(br)*speed,center.lat+Math.cos(br)*speed]); break;
+        case 'ArrowDown': case 's': case 'S':
+          m.setCenter([center.lng-Math.sin(br)*speed,center.lat-Math.cos(br)*speed]); break;
+        case 'q': case 'Q': m.setPitch?.(Math.min(85,(m.getPitch?.()||78)+5)); break;
+        case 'e': case 'E': m.setPitch?.(Math.max(30,(m.getPitch?.()||78)-5)); break;
+        case 'Escape': this._exitStreetView(); break;
+        default: return;
+      }
+      e.preventDefault();
+    };
+    window.addEventListener('keydown',this._svKeyHandler);
+  },
+
+  _teardownStreetViewControls() {
+    if(this._svKeyHandler){window.removeEventListener('keydown',this._svKeyHandler);this._svKeyHandler=null;}
+    this._svKeysActive=false;
+  },
+
+  _showStreetViewOverlay() {
+    const ov=document.createElement('div'); ov.id='tci-sv-overlay';
+    ov.style.cssText='position:fixed;bottom:120px;right:20px;z-index:3000;background:rgba(4,10,24,0.92);border:1px solid rgba(34,197,94,0.3);border-radius:10px;padding:12px 14px;min-width:200px;font-family:"Space Grotesk",sans-serif;pointer-events:none';
+    ov.innerHTML=`<div style="font-size:8px;font-weight:700;color:#22c55e;letter-spacing:.08em;margin-bottom:8px">🚶 MOD NIVEL STRADĂ</div>
+      <div style="font-size:8px;color:rgba(148,163,184,0.7);line-height:2.2">
+        <kbd style="background:rgba(255,255,255,0.1);padding:1px 5px;border-radius:3px">←→</kbd> Rotire vedere<br>
+        <kbd style="background:rgba(255,255,255,0.1);padding:1px 5px;border-radius:3px">↑↓</kbd> / <kbd style="background:rgba(255,255,255,0.1);padding:1px 5px;border-radius:3px">W S</kbd> Mișcare<br>
+        <kbd style="background:rgba(255,255,255,0.1);padding:1px 5px;border-radius:3px">Q E</kbd> Unghi privire<br>
+        <kbd style="background:rgba(255,255,255,0.1);padding:1px 5px;border-radius:3px">ESC</kbd> Ieșire<br>
+        <span style="color:rgba(148,163,184,0.4);font-size:7px">Slider = construcție etaj cu etaj</span>
+      </div>`;
+    document.body.appendChild(ov);
+  },
+
+  _spawnStreetPedestrians() {
+    if(!this._3D?._scene || typeof THREE === 'undefined') return;
+    this._svPedestrians = [];
+    const cx = this.d?.lon || 27.601;
+    const cy = this.d?.lat || 47.158;
+    const R  = 111319.9;
+    const cp = Math.cos(cy * Math.PI / 180);
+    const sM = this._3D._scale || 1e-6;
+
+    // ── Paleta de culori haine — variată, realistă ──────────────────
+    const OUTFIT_COLORS = [
+      0x1e40af, 0x7c3aed, 0xdc2626, 0x15803d, 0x92400e,
+      0x0891b2, 0xb45309, 0x475569, 0x9333ea, 0xbe123c,
+      0x065f46, 0x1d4ed8, 0x7e22ce, 0x166534, 0xb91c1c,
+    ];
+    const SKIN_COLORS = [0xffd5b5, 0xf0c090, 0xd4956a, 0x8d5524, 0xc68642];
+
+    // ── Crează un biped din primitive ────────────────────────────────
+    const makeBiped = (outfitColor, skinColor, height) => {
+      const g = new THREE.Group();
+      const s = sM; // scara Mercator
+
+      // Cap
+      const headG = new THREE.SphereGeometry(0.12*s, 5, 4);
+      const headM = new THREE.MeshBasicMaterial({color:skinColor, depthTest:false, transparent:true, opacity:0.92});
+      const head  = new THREE.Mesh(headG, headM);
+      head.position.set(0, 0, 1.62 * height * s);
+      g.add(head);
+
+      // Torso
+      const torsoG = new THREE.BoxGeometry(0.36*s, 0.22*s, 0.62*s);
+      const torsoM = new THREE.MeshBasicMaterial({color:outfitColor, depthTest:false, transparent:true, opacity:0.90});
+      const torso  = new THREE.Mesh(torsoG, torsoM);
+      torso.position.set(0, 0, 1.20 * height * s);
+      g.add(torso);
+
+      // Picioare — pivot la șold (translateZ(-0.38) = pivot la vârf)
+      const makeLeg = (xOff) => {
+        const legG = new THREE.BoxGeometry(0.15*s, 0.15*s, 0.76*s);
+        legG.translate(0, 0, -0.38*s);               // pivot la vârf (șold)
+        const legM = new THREE.MeshBasicMaterial({color:0x1e293b, depthTest:false, transparent:true, opacity:0.88});
+        const leg  = new THREE.Mesh(legG, legM);
+        leg.position.set(xOff*s, 0, 0.88 * height * s); // la înălțimea șoldului
+        return leg;
+      };
+      const legL = makeLeg(-0.11);
+      const legR = makeLeg( 0.11);
+      g.add(legL); g.add(legR);
+
+      // Brațe — pivot la umăr
+      const makeArm = (xOff) => {
+        const armG = new THREE.BoxGeometry(0.11*s, 0.11*s, 0.52*s);
+        armG.translate(0, 0, -0.26*s);
+        const armM = new THREE.MeshBasicMaterial({color:outfitColor, depthTest:false, transparent:true, opacity:0.80});
+        const arm  = new THREE.Mesh(armG, armM);
+        arm.position.set(xOff*s, 0, 1.46 * height * s);
+        return arm;
+      };
+      const armL = makeArm(-0.25);
+      const armR = makeArm( 0.25);
+      g.add(armL); g.add(armR);
+
+      return {group:g, legL, legR, armL, armR, torso, head};
+    };
+
+    // ── Spawn 30 pietoni în zona activă ─────────────────────────────
+    const zones   = this._projZones?.filter(z => this.year >= (z.startYr||2026)) || [];
+    const zCenter = zones[0]?.ring || {};
+
+    for(let i = 0; i < 30; i++) {
+      const outfitCol = OUTFIT_COLORS[i % OUTFIT_COLORS.length];
+      const skinCol   = SKIN_COLORS[Math.floor(i / 3) % SKIN_COLORS.length];
+      const height    = 0.90 + Math.random() * 0.20; // 0.90–1.10 × scara normală
+
+      const {group, legL, legR, armL, armR} = makeBiped(outfitCol, skinCol, height);
+
+      // Pozitie initiala
+      const angle = Math.random() * Math.PI * 2;
+      const dist  = 20 + Math.random() * 180;
+      const baseLon = (zCenter.cx || cx) + (dist * Math.sin(angle)) / (R * cp);
+      const baseLat = (zCenter.cy || cy) + (dist * Math.cos(angle)) / R;
+
+      group.userData = {
+        lon:      baseLon,
+        lat:      baseLat,
+        speed:    0.4 + Math.random() * 0.5,   // m/s
+        bearing:  Math.random() * Math.PI * 2,
+        turnTimer:Math.random() * 5,
+        phase:    Math.random() * Math.PI * 2,  // offset animatie
+        legL, legR, armL, armR,
+        height,
+        homeX:    baseLon,
+        homeY:    baseLat,
+      };
+
+      this._3D._scene.add(group);
+      this._svPedestrians.push(group);
+    }
+
+    // ── Loop 1: mișcare (pozitie) — 80ms ────────────────────────────
+    this._svPedInterval = setInterval(() => {
+      if(!this._inStreetView || !this._svPedestrians?.length) return;
+      const dt = 0.08;
+      const _sM = this._3D._scale || 1e-6;
+
+      this._svPedestrians.forEach(g => {
+        const u = g.userData;
+
+        // Schimba directia aleatoriu
+        u.turnTimer -= dt;
+        if(u.turnTimer <= 0) {
+          u.bearing += (Math.random() - 0.5) * 1.4;
+          u.turnTimer = 2 + Math.random() * 5;
+        }
+
+        // Miscare
+        u.lon += Math.sin(u.bearing) * u.speed * dt / (R * cp);
+        u.lat += Math.cos(u.bearing) * u.speed * dt / R;
+
+        // Teleport daca ies prea departe
+        const dx = (u.lon - cx) * R * cp;
+        const dy = (u.lat - cy) * R;
+        if(Math.hypot(dx, dy) > 300) {
+          const aNew = Math.random() * Math.PI * 2;
+          u.lon = cx + (30 * Math.sin(aNew)) / (R * cp);
+          u.lat = cy + (30 * Math.cos(aNew)) / R;
+        }
+
+        // Pozitionam grupul pe harta
+        const x = (u.lon - (this._3D._cx || cx)) * R * cp;
+        const y = (u.lat - (this._3D._cy || cy)) * R;
+        g.position.set(x * _sM, y * _sM, 0);
+
+        // Rotim pieton sa priveasca in directia mersului
+        g.rotation.z = -u.bearing;
+      });
+
+      this._3D._map?.triggerRepaint?.();
+    }, 80);
+
+    // ── Loop 2: animatie vizuala (mers) — rAF ────────────────────────
+    const animateWalk = () => {
+      if(!this._inStreetView) return;
+      const now = Date.now() * 0.001;
+      const _sM = this._3D._scale || 1e-6;
+
+      this._svPedestrians?.forEach(g => {
+        const u = g.userData;
+        const freq  = u.speed * 2.2;        // frecventa pasi per secunda
+        const t     = now * freq + u.phase;
+
+        // Balansul picioarelor — opus
+        if(u.legL) u.legL.rotation.x = Math.sin(t) * 0.42;
+        if(u.legR) u.legR.rotation.x = Math.sin(t + Math.PI) * 0.42;
+
+        // Balansul bratelor — opus picioarelor
+        if(u.armL) u.armL.rotation.x = Math.sin(t + Math.PI) * 0.28;
+        if(u.armR) u.armR.rotation.x = Math.sin(t) * 0.28;
+
+        // Bobbing vertical al corpului — 2 pasi per ciclu complet
+        const bob = Math.abs(Math.sin(t * 2)) * 0.022 * _sM;
+        g.position.z = bob; // oscilatie verticala 2.2cm
+      });
+
+      this._3D._map?.triggerRepaint?.();
+      this._svAnimFrame = requestAnimationFrame(animateWalk);
+    };
+
+    this._svAnimFrame = requestAnimationFrame(animateWalk);
+  },
+
+
+  _removeStreetPedestrians() {
+    // Opreste ambele loop-uri: setInterval (miscare) + rAF (animatie)
+    if(this._svPedInterval) { clearInterval(this._svPedInterval); this._svPedInterval = null; }
+    if(this._svAnimFrame)   { cancelAnimationFrame(this._svAnimFrame); this._svAnimFrame = null; }
+
+    // Curata scene Three.js + memory
+    this._svPedestrians?.forEach(g => {
+      this._3D?._scene?.remove(g);
+      g.traverse(child => {
+        if(child.geometry) child.geometry.dispose();
+        if(child.material) child.material.dispose();
+      });
+    });
+    this._svPedestrians = [];
+  },
+
   async _checkDataStatus() {
     const el = document.getElementById('tci-data-status');
     if(!el) return;
@@ -1000,107 +1517,138 @@ const TCI = {
     const el   = document.getElementById('tci-kpis');
     if(!el || !city.pop2021) return;
 
-    // ── Date din motoarele reale ─────────────────────────────────────────
     const need = this._calcUrbanNeed(city);
     const grav = this._calcGravityScore(city);
     const seis = this._getSeismicAg(city.lon||27.6, city.lat||47.16);
     const clim = this._getClimateProfile(city.judet||'');
     const feas = this._calcFeasibility({}, city, seis.ag);
     const scn  = this._getScenario();
+    const lifecycle = grav.lifecycle || this._calcLifecycleScore(city);
+    const L = lifecycle.score ?? 0;
+    const housingMix = this._calcHousingMix(need, city);
 
-    // ── Investiție estimată (ANCPI + MDLPA cost mediu construcție RO) ───
-    // Bază: cost construcție medie 850 €/m² (MDLPA 2024) + infra 15k €/loc.
-    const invConstr = Math.round(need.totalM2 * 850 / 1e6);   // €M
-    const invInfra  = Math.round(need.locuinteTotale * 15000 / 1e6); // €M
+    const invConstr = Math.round(need.totalM2 * 850 / 1e6);
+    const invInfra  = Math.round(need.locuinteTotale * 15000 / 1e6);
     const invTotal  = invConstr + invInfra;
-
-    // ── Dinamica populației pe an curent ────────────────────────────────
-    const yrFrac  = Math.max(0, (this.year - 2021)) / 34;
-    const popCrt  = Math.round(need.pop2021 + (need.pop2055 - need.pop2021) * yrFrac);
-    const fmt     = n => (n||0).toLocaleString('ro-RO');
-    const trend   = need.pop2055 > need.pop2021 ? '▲' : '▼';
-    const trendC  = need.pop2055 > need.pop2021 ? '#22c55e' : '#f87171';
-
-    // ── Scor risc climatic simplificat ──────────────────────────────────
+    const yrFrac    = Math.max(0, (this.year - 2021)) / 34;
+    const popCrt    = Math.round(need.pop2021 + (need.pop2055 - need.pop2021) * yrFrac);
+    const fmt       = n => (n||0).toLocaleString('ro-RO');
+    const trend     = need.pop2055 > need.pop2021 ? '▲' : '▼';
+    const trendC    = need.pop2055 > need.pop2021 ? '#22c55e' : '#f87171';
     const riskScore = Math.round((clim.uhi/2.2*30) + (clim.flood*25) + (clim.drought*25));
     const riskLbl   = riskScore > 55 ? 'Ridicat' : riskScore > 35 ? 'Mediu' : 'Scăzut';
     const riskC     = riskScore > 55 ? '#f87171' : riskScore > 35 ? '#f59e0b' : '#22c55e';
 
-    const rows = [
-      {l:'Populație '+this.year,  v: fmt(popCrt),                      c:'#60a5fa'},
-      {l:'Proiecție 2055',        v: trend+' '+fmt(need.pop2055),       c: trendC},
-      {l:'Locuințe necesare',     v: fmt(need.locuinteTotale),          c:'#D4AF37'},
-      {l:'Investiție estimată',   v: '≈'+invTotal+' M€',               c:'#a78bfa',
-       t:'Construcție '+invConstr+'M€ + Infrastructură '+invInfra+'M€ · Bază MDLPA 2024'},
-      {l:'Tip urban',             v: grav.growthType,                   c:'#38bdf8'},
-      {l:'hMax legal (seismic)',  v: seis.hMaxStory+' etaje / '+seis.hMaxM+'m', c:'#fb923c'},
-      {l:'Risc climatic 2055',    v: riskLbl+' ('+riskScore+'/100)',    c: riskC},
-      {l:'ROI estimat',           v: feas.roi+'%'+(feas.viable?' ✓':' ⚠'), c: feas.viable?'#22c55e':'#f87171',
-       t:`Brut ${feas.roiBrut}% × factor absorbție → ${feas.roi}% ajustat`},
-      {l:'Absorbție estimată',      v: (feas.absorbtieAn||0).toLocaleString('ro-RO')+' un./an',
-       c: (feas.absorbtieAn||0)>200?'#22c55e':(feas.absorbtieAn||0)>80?'#f59e0b':'#f87171',
-       t:`Accesibilitate credit: ${feas.pctGospodariAcces}% gospodării · Vacanță: ${feas.vacantaLocativa}% · Înlocuire: ${feas.cerereInlocuire} un./an`},
-      {l:'Scenariu',              v: scn.label+' ×'+scn.rateMultiplier, c:'#94a3b8'},
-    ];
+    // ── Lifecycle vizual ────────────────────────────────────────────────
+    const Lcolor      = L > 0.3 ? '#22c55e' : L > -0.2 ? '#f59e0b' : '#f87171';
+    const LbgColor    = L > 0.3 ? 'rgba(34,197,94,0.1)' : L > -0.2 ? 'rgba(245,158,11,0.1)' : 'rgba(248,113,113,0.1)';
+    const LborderColor= L > 0.3 ? 'rgba(34,197,94,0.35)' : L > -0.2 ? 'rgba(245,158,11,0.35)' : 'rgba(248,113,113,0.35)';
+    const Llabel      = L > 0.45 ? 'GROWING' : L > 0.05 ? 'STABLE' : L > -0.20 ? 'WEAKENING' : L > -0.55 ? 'DECLINING' : 'SHRINKING';
+    const LdescMap    = {GROWING:'creștere activă',STABLE:'echilibru urban',WEAKENING:'slăbire demografică',DECLINING:'declin activ',SHRINKING:'contracție severă'};
 
-    // ── Lifecycle Score L + Development Pressure (extra KPIs) ────────────
-    const lifecycle = grav.lifecycle || this._calcLifecycleScore(city);
-    const L = lifecycle.score ?? 0;
-    const Lcolor = L > 0.3 ? '#22c55e' : L > -0.2 ? '#f59e0b' : '#f87171';
-    const Llabel = L > 0.45 ? 'GROWING' : L > 0.10 ? 'STABLE' : L > -0.30 ? 'STABLE' : L > -0.55 ? 'DECLINING' : 'SHRINKING';
-
-    // Development Pressure: Dp = f(Hd, Ig, Ca)
-    // Hd = cerere locuințe (locuinteTotale/pop), Ig = lifecycle.Eg, Ca = coef_hub
     const Hd = Math.min(1, need.locuinteTotale / Math.max(1, city.pop2021) * 10);
     const Ig = Math.max(0, (lifecycle.Eg + 1) / 2);
     const Ca = Math.min(1, (city.coef_hub || 0.7));
     const Dp = Math.round((Hd*0.40 + Ig*0.35 + Ca*0.25) * 100);
     const Dpcolor = Dp > 60 ? '#f59e0b' : Dp > 35 ? '#60a5fa' : '#94a3b8';
 
-    // Housing Mix — breakeven pe tipologii
-    const housingMix = this._calcHousingMix(need, city);
-
-    const extraRows = [
-      {l:'Lifecycle Score L',    v:`${L>=0?'+':''}${L.toFixed(2)} ${Llabel}`,  c:Lcolor},
-      {l:'Dev. Pressure Dp',     v:`${Dp}/100`,                                  c:Dpcolor,
-       t:`Hd=${Hd.toFixed(2)}·Ig=${Ig.toFixed(2)}·Ca=${Ca.toFixed(2)} · Dp=f(Hd,Ig,Ca)`},
+    const rows = [
+      {l:'Populație '+this.year, v:fmt(popCrt), c:'#60a5fa'},
+      {l:'Proiecție 2055',       v:trend+' '+fmt(need.pop2055), c:trendC},
+      {l:'Locuințe necesare',    v:fmt(need.locuinteTotale), c:'#D4AF37'},
+      {l:'Investiție estimată',  v:'≈'+invTotal+' M€', c:'#a78bfa',
+       t:'Construcție '+invConstr+'M€ + Infrastructură '+invInfra+'M€'},
+      {l:'hMax legal (seismic)', v:seis.hMaxStory+' etaje / '+seis.hMaxM+'m', c:'#fb923c'},
+      {l:'Risc climatic 2055',   v:riskLbl+' ('+riskScore+'/100)', c:riskC},
+      {l:'ROI estimat',          v:feas.roi+'%'+(feas.viable?' ✓':' ⚠'), c:feas.viable?'#22c55e':'#f87171',
+       t:'Brut '+feas.roiBrut+'% × factor absorbție → '+feas.roi+'% ajustat'},
+      {l:'Absorbție piață',      v:(feas.absorbtieAn||0).toLocaleString('ro-RO')+' un./an',
+       c:(feas.absorbtieAn||0)>200?'#22c55e':(feas.absorbtieAn||0)>80?'#f59e0b':'#f87171',
+       t:'Credit: '+feas.pctGospodariAcces+'% gospodării · Vacanță: '+feas.vacantaLocativa+'%'},
+      {l:'Dev. Pressure',        v:Dp+'/100', c:Dpcolor},
+      {l:'Scenariu',             v:scn.label+' ×'+scn.rateMultiplier, c:'#94a3b8'},
     ];
-    const allRows = [...rows, ...extraRows];
 
-    el.innerHTML = allRows.map(r=>`
-      <div style="display:flex;justify-content:space-between;align-items:baseline;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04)"
-        ${r.t?`title="${r.t}"`:''}
-      >
-        <span style="font-size:9px;color:rgba(148,163,184,0.6);flex-shrink:0;margin-right:4px">${r.l}</span>
-        <span style="font-size:10px;font-weight:700;color:${r.c};text-align:right">${r.v}</span>
+    // ── HERO SCORE — Lifecycle mare, colorat, ierarhie clară ───────────
+    const heroHTML = `
+      <div style="background:${LbgColor};border:1px solid ${LborderColor};border-radius:10px;padding:12px 14px;margin-bottom:8px;position:relative;overflow:hidden;">
+        <div style="position:absolute;top:-20px;right:-20px;width:80px;height:80px;background:${Lcolor};opacity:0.07;border-radius:50%;filter:blur(20px)"></div>
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:4px">
+          <div>
+            <div style="font-size:8px;color:rgba(148,163,184,0.45);letter-spacing:.08em;text-transform:uppercase;margin-bottom:1px">Lifecycle Score</div>
+            <div style="font-size:26px;font-weight:900;color:${Lcolor};line-height:1">${L>=0?'+':''}${L.toFixed(2)}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:12px;font-weight:800;color:${Lcolor};letter-spacing:.04em">${Llabel}</div>
+            <div style="font-size:7.5px;color:rgba(148,163,184,0.4);margin-top:2px">${LdescMap[Llabel]||''}</div>
+          </div>
+        </div>
+        <div style="height:3px;background:rgba(255,255,255,0.07);border-radius:2px;margin:6px 0 8px">
+          <div style="height:100%;border-radius:2px;background:${Lcolor};width:${Math.round((L+1)/2*100)}%;transition:width 0.6s ease"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:8px">
+          ${[{k:'Pg',v:lifecycle.Pg||0,l:'Demografie'},{k:'Eg',v:lifecycle.Eg||0,l:'Economie'},{k:'Mn',v:lifecycle.Mn||0,l:'Migrație'}].map(s=>{
+            const sc=s.v>0.1?'#22c55e':s.v>-0.1?'#f59e0b':'#f87171';
+            return '<div style="background:rgba(255,255,255,0.04);border-radius:5px;padding:4px 6px;text-align:center"><div style="font-size:9px;font-weight:700;color:'+sc+'">'+(s.v>=0?'+':'')+s.v.toFixed(2)+'</div><div style="font-size:6px;color:rgba(148,163,184,0.4);margin-top:1px">'+s.l+'</div></div>';
+          }).join('')}
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:7.5px;font-weight:700;color:#38bdf8;background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.2);padding:2px 8px;border-radius:4px;letter-spacing:.05em">${grav.growthType}</span>
+          <span style="font-size:7px;color:rgba(148,163,184,0.35)">G=${grav.gravityScore.toFixed(2)} · ag=${seis.ag}g</span>
+        </div>
+
+        <!-- Sparkline traiectorie L → 2055 -->
+        <div style="margin-top:5px;opacity:0.65">
+          <div style="font-size:6px;color:rgba(148,163,184,0.35);margin-bottom:2px">Traiectorie L → 2055</div>
+          <svg width="100%" height="18" viewBox="0 0 160 18" preserveAspectRatio="none"
+            style="display:block;border-radius:2px;overflow:visible">
+            <!-- Linia zero -->
+            <line x1="3" y1="9" x2="157" y2="9" stroke="rgba(255,255,255,0.07)" stroke-width="0.5" stroke-dasharray="2,2"/>
+            <!-- Traiectorie — calculata simplu -->
+            ${(()=>{
+              const pts=[], steps=12;
+              let lc2=L;
+              for(let i=0;i<=steps;i++){
+                const x=3+i*(154/steps), y=9-lc2*7.5;
+                pts.push(x.toFixed(1)+','+y.toFixed(1));
+                lc2=Math.max(-1,Math.min(1, 0.7*lc2+0.3*(lifecycle.rawScore||L)));
+              }
+              const endY=9-(Math.max(-1,Math.min(1,lc2)))*7.5;
+              const endCol=lc2>0.1?'#22c55e':lc2>-0.2?'#f59e0b':'#f87171';
+              return '<path d="M '+pts.join(' L ')+ '" fill="none" stroke="'+Lcolor+'" stroke-width="1.5"/>'
+                +'<circle cx="157" cy="'+endY.toFixed(1)+'" r="2.5" fill="'+endCol+'"/>';
+            })()}
+          </svg>
+        </div>
+      </div>
+      <div style="font-size:7px;font-weight:700;color:rgba(148,163,184,0.3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">DATE LIVE ${this.year}</div>`;
+
+    el.innerHTML = heroHTML + rows.map(r=>`
+      <div style="display:flex;justify-content:space-between;align-items:baseline;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.04)" ${r.t?'title="'+r.t+'"':''}>
+        <span style="font-size:8.5px;color:rgba(148,163,184,0.55);flex-shrink:0;margin-right:4px">${r.l}</span>
+        <span style="font-size:9.5px;font-weight:700;color:${r.c};text-align:right">${r.v}</span>
       </div>`).join('');
 
     const r2 = document.getElementById('tci-kpis-r');
     if(r2) r2.innerHTML = el.innerHTML;
 
-    // ── Housing Mix Panel ──────────────────────────────────────────────
+    // Housing Mix
     const hmEl = document.getElementById('tci-housing-mix');
     if(hmEl && housingMix) {
-      const { mix, totalInvestitie } = housingMix;
-      hmEl.innerHTML = `
-        <div style="font-size:7px;font-weight:700;color:#D4AF37;letter-spacing:.06em;margin-bottom:5px">
-          MIX CERERE LOCUINȚE 2025→2055
-        </div>
+      const {mix,totalInvestitie} = housingMix;
+      hmEl.innerHTML = `<div style="font-size:7px;font-weight:700;color:#D4AF37;letter-spacing:.06em;margin-bottom:5px">MIX CERERE LOCUINȚE 2025→2055</div>
         ${Object.entries(mix).filter(([,v])=>v.unitati>0).map(([k,v])=>`
           <div style="margin-bottom:3px">
-            <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="display:flex;justify-content:space-between">
               <span style="font-size:8px;color:rgba(200,215,235,0.8)">${v.label}</span>
               <span style="font-size:8px;font-weight:700;color:#D4AF37">${v.unitati.toLocaleString('ro-RO')} un.</span>
             </div>
-            <div style="display:flex;gap:6px;margin-top:1px">
-              <span style="font-size:7px;color:rgba(148,163,184,0.5)">${v.pct}% · ${v.m2}m² · ≈${v.investitie_m}M€</span>
-            </div>
-            <div style="height:2px;background:rgba(255,255,255,0.06);border-radius:1px;margin-top:2px">
-              <div style="width:${Math.min(100,v.pct*3)}%;height:100%;background:#D4AF37;border-radius:1px;opacity:0.6"></div>
+            <div style="height:2px;background:rgba(255,255,255,0.06);border-radius:1px;margin-top:3px">
+              <div style="width:${Math.min(100,v.pct*3)}%;height:100%;background:#D4AF37;opacity:0.6;border-radius:1px"></div>
             </div>
           </div>`).join('')}
         <div style="border-top:1px solid rgba(255,255,255,0.08);margin-top:5px;padding-top:4px;display:flex;justify-content:space-between">
-          <span style="font-size:7px;color:rgba(148,163,184,0.5)">Total investiție estimată</span>
+          <span style="font-size:7px;color:rgba(148,163,184,0.5)">Total investiție</span>
           <span style="font-size:9px;font-weight:700;color:#a78bfa">≈${totalInvestitie.toLocaleString('ro-RO')} M€</span>
         </div>`;
     }
@@ -1374,8 +1922,69 @@ const TCI = {
     let scoreA = 0, scoreB = 0;
     rows.forEach(r => { if(r.w==='A') scoreA++; else if(r.w==='B') scoreB++; });
 
+    // ── Radar Chart SVG — 6 axe ────────────────────────────────────
+    // Normalizăm 6 indicatori cheie pe [0,1] pentru vizualizare radar
+    const radarNorm = (v, lo, hi) => v == null ? 0.1 : Math.max(0.05, Math.min(1, (v-lo)/(hi-lo)));
+    const radarAxes = [
+      { label:'Lifecycle L', vA: radarNorm(A.L, -1, 1), vB: radarNorm(B.L, -1, 1) },
+      { label:'Gravity G',   vA: radarNorm(A.grav.gravityScore, 0, 1), vB: radarNorm(B.grav.gravityScore, 0, 1) },
+      { label:'Absorbție',   vA: radarNorm(A.feas.absorbtieAn||0, 0, 800), vB: radarNorm(B.feas.absorbtieAn||0, 0, 800) },
+      { label:'ROI',         vA: radarNorm(A.feas.roi||0, -50, 80), vB: radarNorm(B.feas.roi||0, -50, 80) },
+      { label:'Pop 2055',    vA: radarNorm(A.need.pop2055||0, 0, 500000), vB: radarNorm(B.need.pop2055||0, 0, 500000) },
+      { label:'Seismic ↓',   vA: radarNorm(1-A.seis.ag*2, 0, 1), vB: radarNorm(1-B.seis.ag*2, 0, 1) },
+    ];
+
+    const cx = 100, cy = 95, R = 72, n = radarAxes.length;
+    const pt = (i, v) => {
+      const a = (i / n) * 2 * Math.PI - Math.PI/2;
+      return [cx + v*R*Math.cos(a), cy + v*R*Math.sin(a)];
+    };
+    const poly = (vals, col, opacity=0.18) => {
+      const pts = vals.map((v,i) => pt(i,v).join(',')).join(' ');
+      return `<polygon points="${pts}" fill="${col}" fill-opacity="${opacity}" stroke="${col}" stroke-width="1.5" stroke-opacity="0.8"/>`;
+    };
+    const ptsA = radarAxes.map((ax,i) => pt(i, ax.vA).join(','));
+    const ptsB = radarAxes.map((ax,i) => pt(i, ax.vB).join(','));
+
+    // Grid
+    let gridSVG = '';
+    [0.25, 0.5, 0.75, 1.0].forEach(lv => {
+      const gpts = radarAxes.map((_,i) => pt(i,lv).join(',')).join(' ');
+      gridSVG += `<polygon points="${gpts}" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="0.5"/>`;
+    });
+    // Axes
+    let axesSVG = radarAxes.map((_,i) => {
+      const [x,y] = pt(i,1);
+      return `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/>`;
+    }).join('');
+    // Labels
+    let labelsSVG = radarAxes.map((ax,i) => {
+      const [x,y] = pt(i, 1.28);
+      const anchor = x < cx-5 ? 'end' : x > cx+5 ? 'start' : 'middle';
+      return `<text x="${x}" y="${y}" text-anchor="${anchor}" font-size="7" fill="rgba(148,163,184,0.6)" font-family="system-ui">${ax.label}</text>`;
+    }).join('');
+
+    const radarSVG = `
+      <svg width="200" height="190" viewBox="0 0 200 190">
+        ${gridSVG}${axesSVG}
+        ${poly(radarAxes.map(ax=>ax.vB), '#38bdf8')}
+        ${poly(radarAxes.map(ax=>ax.vA), '#D4AF37')}
+        ${labelsSVG}
+        <!-- Legende -->
+        <rect x="8" y="8" width="8" height="8" fill="#D4AF37" fill-opacity="0.7" rx="1"/>
+        <text x="19" y="15.5" font-size="7.5" fill="rgba(200,215,235,0.7)" font-family="system-ui">${A.d.name||'A'}</text>
+        <rect x="8" y="20" width="8" height="8" fill="#38bdf8" fill-opacity="0.7" rx="1"/>
+        <text x="19" y="27.5" font-size="7.5" fill="rgba(200,215,235,0.7)" font-family="system-ui">${B.d.name||'B'}</text>
+      </svg>`;
+
+
     el.innerHTML = `
       <div style="background:rgba(8,15,35,0.95);border:1px solid rgba(212,175,55,0.2);border-radius:10px;overflow:hidden;margin-top:5px">
+
+        <!-- Radar Chart -->
+        <div style="display:flex;justify-content:center;background:rgba(0,0,0,0.2);padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06)">
+          ${radarSVG}
+        </div>
 
         <!-- Header -->
         <div style="display:grid;grid-template-columns:1fr 1fr;background:rgba(0,0,0,0.3);border-bottom:1px solid rgba(255,255,255,0.06)">
@@ -1541,7 +2150,9 @@ const TCI = {
     const univ = cityData.universitati || 0;
 
     // Pg: creștere demografică normalizată [-1, +1]
-    const Pg = Math.max(-1, Math.min(1, rata / 2.5));
+    // Pg: calibrat pe distributia INS. Rata 4%/an = maxim real in RO.
+    // Anterior 2.5 era prea mic → Iași (+2.19%) dădea Pg=0.88 (aproape maxim)
+    const Pg = Math.max(-1, Math.min(1, rata / 4.0));
 
     // Eg: presiune economică din coef_hub (media RO = 0.78)
     const Eg = Math.max(-1, Math.min(1, (hub - 0.78) * 2.2));
@@ -1578,10 +2189,13 @@ const TCI = {
     if(cityData) cityData._lifecyclePrev = inertiaScore;
     const finalScore = Math.max(-1, Math.min(1, inertiaScore));
 
+    // FIX audit: STABLE [-0.30, +0.10] era prea larg
+    // Botoșani (L=-0.14) și Piatra Neamț (L=-0.25) apăreau STABLE — incorect
+    // Adăugăm WEAKENING ca stare intermediară
     const lifecycleType =
       finalScore >  0.45 ? 'GROWING'   :
-      finalScore >  0.10 ? 'STABLE'    :
-      finalScore > -0.30 ? 'STABLE'    :
+      finalScore >  0.05 ? 'STABLE'    :
+      finalScore > -0.20 ? 'WEAKENING' :
       finalScore > -0.55 ? 'DECLINING' :
                            'SHRINKING';
 
@@ -1613,13 +2227,21 @@ const TCI = {
 
     const lifecycle = this._calcLifecycleScore(cityData);
     const isLargeCity = pop > 250000;
-    const growthType =
+    // FIX audit: comune periurbane cu creștere rapidă apăreau REGIONAL/METROPOLITAN
+    const isComuna_g = (cityData?.tip === 'comuna');
+    const growthTypeBase =
       (score>0.55 || isLargeCity&&score>0.45) ? 'METROPOLITAN' :
       score>0.35 && lifecycle.score>-0.2      ? 'REGIONAL'     :
       lifecycle.score < -0.55                  ? 'SHRINKING'    :
-      lifecycle.score < -0.30                  ? 'DECLINING'    :
+      lifecycle.score < -0.20                  ? 'DECLINING'    :
       score>0.22                               ? 'LOCAL'        :
-                                                 'DECLINING';
+                                                 'DECLINING'    ;
+    // Comune: max GROWING sau LOCAL (nu pol regional sau metropolitan)
+    const growthType = isComuna_g
+      ? (lifecycle.score > 0.45 ? 'GROWING'   :
+         lifecycle.score > 0.05 ? 'LOCAL'      :
+         lifecycle.score > -0.20? 'WEAKENING'  : 'DECLINING')
+      : growthTypeBase;
 
     return { gravityScore:score, growthType,
              ePopulatie:eP, eCrestere:eC, eEducatie:eE, eConectivit:eK, lifecycle };
@@ -1936,10 +2558,11 @@ const TCI = {
   async _analyzeFrontier(cx, cy, radiusKm=5) {
     // ── FIX: DECLINING → frontier analysis irelevant ─────────────────
     const gravity = this._calcGravityScore(this.d);
-    if(gravity.growthType === 'DECLINING') {
-      console.log('[Frontier] DECLINING → frontier analysis blocat. Nicio zonă nouă.');
+    if(gravity.growthType === 'DECLINING' || gravity.growthType === 'SHRINKING') {
+      console.log('[Frontier] ' + gravity.growthType + ' → frontier analysis blocat.');
       return [];
     }
+    // WEAKENING: frontier activ dar raza redusă (nu extindem, densificăm selectiv)
     // LOCAL cu scădere demografică puternică → raza redusă
     const effectiveRadius = gravity.growthType==='LOCAL' && (this.d?.rata_reala_2011_2021||0)<-0.5
       ? Math.min(radiusKm, 3)
@@ -2392,20 +3015,44 @@ const TCI = {
 
     // ── 1. PREȚURI DE VÂNZARE — per tip urban ─────────────────────────
     // Sursă: ANCPI raport piață imobiliară 2024, calibrat per tier
-    const PRET_VANZARE = {
-      METROPOLITAN: 1800,  // €/m² — Iași, Cluj, TM, București periurban
-      REGIONAL:      950,  // €/m² — Oradea, Sibiu, Brașov mic, Bacău
-      LOCAL:         700,  // €/m² — orașe mici
-      DECLINING:     480,  // €/m² — cerere slabă
-      SHRINKING:     320,  // €/m² — piață aproape inexistentă
+    // Prețuri vânzare: per județ dacă disponibil, altfel per tier
+    // Audit: METROPOLITAN unic 1800€/m² era greșit — Oradea ≠ Iași ≠ București
+    // Sursă: ANCPI Raport Piață Imobiliară 2024
+    const PRET_VANZARE_JUDET = {
+      'B':2200,'IF':1700,'CJ':1700,'TM':1600,'BV':1450,'SB':1400,
+      'CT':1350,'IS':1600,'BH':1250,'AR':1150,'PH':1050,'GL':850,
+      'BC':950, 'NT':820, 'BT':700, 'VS':650, 'SV':780, 'MM':950,
+      'MS':900, 'HR':800, 'CV':780, 'CS':780, 'HD':820, 'AB':900,
+      'BN':850, 'SM':900, 'SJ':820, 'BR':800, 'VN':750, 'BZ':900,
+      'PH':1050,'DB':950, 'AG':900, 'OT':700, 'DJ':900, 'GJ':750,
+      'VL':750, 'MH':720, 'TR':680, 'GR':750, 'CL':680, 'IL':720, 'TL':700,
     };
-    const pS = PRET_VANZARE[g.growthType] || 700;
+    const PRET_VANZARE_TIER = {
+      METROPOLITAN:1400, REGIONAL:900, LOCAL:650, DECLINING:450, SHRINKING:300
+    };
+    const pS = PRET_VANZARE_JUDET[cityData?.judet||''] || PRET_VANZARE_TIER[g.growthType] || 700;
 
     // ── 2. COSTURI CONSTRUCȚIE — per caracteristici UAT ───────────────
     const seismic = seismicAg || 0.20;
     const factorSeismic = seismic >= 0.35 ? 1.28 : seismic >= 0.25 ? 1.14 : 1.00;
     const pB = Math.round(850 * factorSeismic); // €/m² construcție + seismic
-    const pL = Math.round(150 * (g.gravityScore || 0.4) * 2.2); // teren variabil
+    // EK_MAP disponibil local pentru calculul pL
+    const EK_MAP = {
+      'B':1.00,'IF':0.92,'TM':0.88,'CJ':0.88,'PH':0.82,'AR':0.82,'BH':0.82,
+      'BV':0.82,'CT':0.82,'SB':0.78,'DJ':0.78,'AB':0.72,'DB':0.72,'AG':0.70,
+      'IS':0.70,'MS':0.68,'HD':0.68,'MM':0.66,'SM':0.66,'GL':0.68,'BC':0.68,
+      'SJ':0.62,'NT':0.62,'SV':0.62,'CS':0.62,'BZ':0.62,'BR':0.62,
+      'BT':0.52,'VS':0.58,'GJ':0.58,'VL':0.58,'OT':0.56,'MH':0.56,
+      'HR':0.56,'BN':0.60,'CV':0.58,'IL':0.56,'VN':0.52,'TR':0.52,'TL':0.48,'CL':0.54,
+    };
+    // pL: teren. Comune = mult mai ieftin decât municipii.
+    // Audit: pL=150×G×2.2 pentru Miroslava dădea ~230€/m², prea mare pentru o comună
+    const tipUAT = cityData?.tip || 'municipiu';
+    const isComuna = tipUAT === 'comuna';
+    const eKForPL  = EK_MAP[cityData?.judet||''] || 0.52;
+    const pL = isComuna
+      ? Math.round(60 * Math.min(1.0, eKForPL * 1.5))   // comună: teren 60€ bază
+      : Math.round(150 * (g.gravityScore || 0.4) * 2.2); // municipiu/oraș: original
     const cF = Math.round(pB * 0.08);  // costuri financiare (credit constructor)
     const cT = pL + pB + cF;
 
@@ -2452,6 +3099,7 @@ const TCI = {
     const vacantaLocativa = g.growthType === 'GROWING'    ? 0.04 :
                             g.growthType === 'STABLE'     ? 0.08 :
                             g.growthType === 'LOCAL'      ? 0.12 :
+                            g.growthType === 'WEAKENING'  ? 0.15 :
                             g.growthType === 'DECLINING'  ? 0.18 :
                                                             0.28; // SHRINKING
     // Fond existent estimat (INS ratio ~0.43 locuinte/persoana)
@@ -2550,6 +3198,12 @@ const TCI = {
         investit: `ROI ${feas.roi}% — marginal. Studiați segmentul senior housing și reconversie industrială. Evitați rezidențial nou fără cerere demonstrată.`,
         oar:      'PUG simplificat cu focus pe zonele construite. Evitați reglementări care blochează reconversia.',
         cnair:    'Conectivitate rutieră — factor critic pentru atragere investiții. Lobby pentru DJ modernizat.',
+      },
+      WEAKENING: {
+        primar:   'Consolidare fond existent înainte de orice extindere. Reabilitare termică și structurală — reduce costul pe termen lung.',
+        investit: `ROI ${'{feas.roi}'}% — marginal. Studiați senior housing și reconversie. Evitați rezidențial nou fără studiu de absorbție local.`,
+        oar:      'Regulament local care încurajează reconversia și reabilitarea. Nu blocați densificarea în centru.',
+        cnair:    'Menținere și modernizare drum național principal — reducerea timpului de acces la municipiu crește valoarea imobiliară local.',
       },
       DECLINING: {
         primar:   'Zero expansiune periferică. Concentrați resursele în centru: reabilitare, spații verzi, servicii de proximitate. Atrageți servicii medicale și sociale.',
@@ -2683,6 +3337,7 @@ tr:nth-child(even) td{background:#f8fafc}
       <strong>Concluzie:</strong> ${
         grav.growthType==='METROPOLITAN' ? 'Presiune imobiliară ridicată. Risc supraaglomerare fără infrastructură adecvată.' :
         grav.growthType==='REGIONAL'     ? 'Creștere moderată sustenabilă. Densificare controlată pe coridoare.' :
+        grav.growthType==='WEAKENING'    ? 'Slăbire demografică moderată. Consolidați centrul, evitați expansiunea. Oportunitate: reabilitare + senior housing.' :
         grav.growthType==='DECLINING'    ? 'Declin activ. Prioritate: reabilitare fond existent, nu extindere.' :
         grav.growthType==='SHRINKING'    ? 'Contracție severă. Plan de densificare a serviciilor în nuclee viabile.' :
         'Echilibru fragil. Densificare selectivă + reabilitare prioritară.'}
@@ -2950,14 +3605,23 @@ ROI = (Vsale - Ctotal) / Ctotal             <span class="v">→ ${feas.roi}% (pr
   // Verde   = Creștere periferică nouă
   // Gri     = Stabil, fără schimbări
   COLORS: {
-    centru:     '#7c3aed',  // violet — max density
-    coridor:    '#d97706',  // amber — boulevards
+    centru:     '#7c3aed',  // violet — max density central
+    coridor:    '#d97706',  // amber — boulevards/corridors
     rezid:      '#2563eb',  // blue — collective housing
     reconv:     '#ea580c',  // red-orange — industrial reconversion
     nou:        '#16a34a',  // green — new growth
-    stabil:     '#374151',  // gray — no change
-    constructie:'#f59e0b',  // yellow — active construction
-    aproape:    '#f97316',  // orange — nearly complete
+    stabil:     '#374151',  // gray — stable, no change
+    constructie:'#fbbf24',  // yellow — active construction (sync cu 3D)
+    aproape:    '#f97316',  // orange — nearly complete (sync cu 3D)
+    // ── Culori per growthType — sincronizate cu tipologiile 3D ─────
+    // Regula: zona 2D și clădirile 3D din ea au aceeași culoare dominantă
+    METROPOLITAN: '#f97316',  // portocaliu — creștere intensă
+    REGIONAL:     '#f59e0b',  // amber — creștere moderată
+    LOCAL:        '#3b82f6',  // albastru — creștere locală
+    GROWING:      '#22c55e',  // verde — creștere rapidă
+    WEAKENING:    '#94a3b8',  // gri-albăstrui — slăbire
+    DECLINING:    '#ef4444',  // roșu — declin
+    SHRINKING:    '#6b7280',  // gri — contracție
   },
 
   // ══════════════════════════════════════════════════════════════════════
@@ -3818,30 +4482,67 @@ out geom qt;`;
     // ── Construiește scene graph din zone ────────────────────────────
     buildSceneGraph(zones, year, constraintBufs) {
       if(!this._ready || typeof THREE === 'undefined') return;
-      // Curăță scene
       while(this._scene.children.length > 2) this._scene.remove(this._scene.children[2]);
       this._entities = [];
       this._mesh = null;
+
+      // ── Tipologie din label zonă ─────────────────────────────────────
+      // Clădirile au geometrie diferită per tipologie — nu mai sunt toate cutii identice
+      const _tipologie = (label='', hMax=12) => {
+        const lb = label.toLowerCase();
+        if(lb.includes('logistic') || lb.includes('industrial') || lb.includes('reconvers'))
+          return 'industrial';   // Hale: late, joase, acoperis în pantă
+        if(lb.includes('senior') || lb.includes('medical') || lb.includes('social'))
+          return 'social';       // Blocuri mici, compacte
+        if(lb.includes('premium') || lb.includes('rezidential') && hMax > 30)
+          return 'premium';      // Turn slender
+        if(lb.includes('verde') || lb.includes('parc') || lb.includes('sport'))
+          return 'verde';        // Structuri joase deschise
+        if(hMax > 40)
+          return 'turn';         // Turn înalt
+        if(hMax < 12)
+          return 'suburban';     // Case — volum mic
+        return 'rezidential';    // Bloc standard
+      };
+
+      // ── Culoare per lifecycle UAT ────────────────────────────────────
+      // Nu mai e uniform portocaliu — culoarea povestește starea urbană
+      const _lifecycleColor = (growthType='', tipZona='') => {
+        const tip = tipZona.toLowerCase();
+        if(tip.includes('medical') || tip.includes('senior'))  return '#a78bfa'; // violet
+        if(tip.includes('logistic') || tip.includes('industr')) return '#64748b'; // gri
+        if(tip.includes('verde'))                               return '#4ade80'; // verde
+        const colMap = {
+          METROPOLITAN: '#f97316', REGIONAL: '#f59e0b', LOCAL: '#60a5fa',
+          GROWING: '#22c55e', WEAKENING: '#94a3b8', DECLINING: '#ef4444', SHRINKING: '#6b7280',
+        };
+        return colMap[growthType] || '#f59e0b';
+      };
+
+      const growthType = window.TCI?._calcGravityScore?.(window.TCI?._city?.())?.growthType || 'LOCAL';
 
       zones.forEach(z => {
         if(!z.hMax || z.hMax === 0) return;
         const coords = window.TCI?._polyFromDef?.(z);
         if(!coords || coords.length < 3) return;
 
-        const density = Math.max(6, Math.min(18, Math.round(z.hMax / 3)));
-        const bbox = this._bboxCoords(coords);
+        const tip     = _tipologie(z.label||'', z.hMax);
+        const baseCol = _lifecycleColor(growthType, z.label||'');
+        const density = tip === 'industrial' ? Math.max(3, Math.round(z.hMax/8))
+                      : tip === 'suburban'   ? Math.max(8, Math.round(z.hMax/2))
+                      : Math.max(6, Math.min(18, Math.round(z.hMax/3)));
 
-        // Buffere de constrângeri — primite ca parametru (nu async!)
-        // Include protecții hardcodate + constrângeri încărcate
+        const bbox  = this._bboxCoords(coords);
         const _bufs = Array.isArray(constraintBufs) ? constraintBufs : [];
-        const _R = 111319.9;
-        const _cp = Math.cos((coords[0]?.[1]||47) * Math.PI/180);
+        const _R    = 111319.9;
+        const _cp   = Math.cos((coords[0]?.[1]||47) * Math.PI/180);
         const _okPos = (lo, la) => {
           for(const b of _bufs) {
-            if(Math.hypot((lo-b.lon)*_R*_cp,(la-b.lat)*_R) < b.r) return false;
+            if(Math.hypot((lo-b.lon)*_R*_cp, (la-b.lat)*_R) < b.r) return false;
           }
           return true;
         };
+
         for(let i = 0; i < density; i++) {
           let lon, lat, tries = 0;
           do {
@@ -3852,40 +4553,117 @@ out geom qt;`;
           if(tries >= 40) continue;
 
           const seed = Math.abs(Math.sin(i * 127.1 + lon * 311.7));
+
+          // Dimensiuni diferențiate per tipologie
+          let wM, dM, hBase, hFinal;
+          switch(tip) {
+            case 'industrial':
+              wM = 40 + seed * 60; dM = 30 + seed * 40;
+              hBase = 6; hFinal = Math.min(z.hMax, 8 + seed * 6);
+              break;
+            case 'suburban':
+              wM = 10 + seed * 8; dM = 8 + seed * 6;
+              hBase = 4; hFinal = Math.min(z.hMax, 5 + seed * 4);
+              break;
+            case 'turn':
+              wM = 14 + seed * 10; dM = 12 + seed * 8;
+              hBase = 20; hFinal = z.hMax * (0.75 + seed * 0.25);
+              break;
+            case 'premium':
+              wM = 16 + seed * 12; dM = 14 + seed * 10;
+              hBase = 15; hFinal = z.hMax * (0.70 + seed * 0.30);
+              break;
+            case 'verde':
+              wM = 20 + seed * 15; dM = 20 + seed * 15;
+              hBase = 3; hFinal = Math.min(z.hMax, 5 + seed * 3);
+              break;
+            default: // rezidential, social
+              wM = 18 + seed * 22; dM = 14 + seed * 18;
+              hBase = Math.max(6, z.hMax * 0.2);
+              hFinal = z.hMax * (0.65 + seed * 0.35);
+          }
+
           this._entities.push({
-            lon, lat,
-            wM: 18 + seed * 25,  // 18-43m lățime
-            dM: 14 + seed * 20,  // 14-34m adâncime
-            hBase: Math.max(6, z.hMax * 0.2),
-            hMax:  z.hMax * (0.65 + seed * 0.35),
+            lon, lat, wM, dM,
+            hBase, hMax: hFinal,
             startYr: z.startYr,
-            color:   new THREE.Color(z.color),
+            color:   new THREE.Color(baseCol),
+            baseCol,
+            tipologie: tip,
             zoneId:  z.id,
+            growthType,
           });
         }
       });
 
-      console.log('[3D] Entities:', this._entities.length, 'pentru', zones.length, 'zone');
+      console.log('[3D] Entities:', this._entities.length,
+        'pentru', zones.length, 'zone',
+        '| tipologii:', [...new Set(this._entities.map(e=>e.tipologie))].join(','));
       this._buildMesh();
       this.updateYear(year);
     },
 
     _buildMesh() {
       if(!this._entities.length) return;
-      while(this._scene.children.length>1)this._scene.remove(this._scene.children[1]);
-      const geom=new THREE.BoxGeometry(1,1,1); geom.translate(0,0,0.5);
-      const sG=new THREE.CircleGeometry(0.72,7);
-      const sM=new THREE.MeshBasicMaterial({color:0x000000,depthTest:false,opacity:0.15,transparent:true,side:THREE.DoubleSide});
-      this._meshes=[]; this._shadows=[];
-      this._entities.forEach(e=>{
-        const mat=new THREE.MeshBasicMaterial({color:e.color,depthTest:false,opacity:0.88,transparent:true});
-        const mesh=new THREE.Mesh(geom.clone(),mat); this._scene.add(mesh); this._meshes.push(mesh);
-        const sh=new THREE.Mesh(sG.clone(),sM.clone()); sh.rotation.x=-Math.PI/2; this._scene.add(sh); this._shadows.push(sh);
+      while(this._scene.children.length>1) this._scene.remove(this._scene.children[1]);
+
+      this._meshes  = [];
+      this._shadows = [];
+
+      this._entities.forEach(e => {
+        // Geometrie diferențiată per tipologie
+        let geom;
+        switch(e.tipologie) {
+          case 'industrial':
+            // Hală — box lat și jos
+            geom = new THREE.BoxGeometry(1, 1, 0.5);
+            geom.translate(0, 0, 0.25);
+            break;
+          case 'suburban':
+            // Casă — box mic cu acoperiș simulat (piramidă deasupra)
+            geom = new THREE.BoxGeometry(1, 1, 1);
+            geom.translate(0, 0, 0.5);
+            break;
+          case 'turn':
+          case 'premium':
+            // Turn — box subțire și înalt
+            geom = new THREE.BoxGeometry(0.7, 0.7, 1);
+            geom.translate(0, 0, 0.5);
+            break;
+          default:
+            geom = new THREE.BoxGeometry(1, 1, 1);
+            geom.translate(0, 0, 0.5);
+        }
+
+        const mat  = new THREE.MeshBasicMaterial({
+          color:       e.color,
+          depthTest:   false,
+          opacity:     e.tipologie === 'verde' ? 0.60 : 0.88,
+          transparent: true,
+        });
+        const mesh = new THREE.Mesh(geom, mat);
+        this._scene.add(mesh);
+        this._meshes.push(mesh);
+
+        // Umbra pe sol — cerc/elipsă, dă sens scării
+        const sRadius = Math.max(0.5, (e.wM / 60));
+        const sG = new THREE.CircleGeometry(sRadius, 8);
+        const sM = new THREE.MeshBasicMaterial({
+          color:0x000000, depthTest:false,
+          opacity: e.tipologie === 'industrial' ? 0.08 : 0.14,
+          transparent:true, side:THREE.DoubleSide,
+        });
+        const sh = new THREE.Mesh(sG, sM);
+        sh.rotation.x = -Math.PI/2;
+        this._scene.add(sh);
+        this._shadows.push(sh);
       });
-      this._mesh={visible:true};
-      this._targetH=new Float32Array(this._entities.length);
-      this._currentH=new Float32Array(this._entities.length).fill(0.1);
+
+      this._mesh      = {visible: true};
+      this._targetH   = new Float32Array(this._entities.length);
+      this._currentH  = new Float32Array(this._entities.length).fill(0.1);
     },
+
 
     // Lumini stradale — puncte calde la 8m înălțime pe arterele principale
     _addStreetLights() {
@@ -3920,24 +4698,95 @@ out geom qt;`;
 
     updateYear(yr) {
       if(!this._ready||!this._meshes?.length) return;
-      const C=window.TCI?.COLORS||{};
+      const FLOOR_H = 3.2; // înălțimea unui etaj în metri
+
       this._entities.forEach((e,i)=>{
-        const m=this._meshes[i]; if(!m)return;
-        let tgt=0.1;
-        if(yr>=e.startYr){const yF=Math.min(1,(yr-e.startYr)/18);tgt=Math.max(0.5,e.hBase+(e.hMax-e.hBase)*yF);}
-        if(this._targetH)this._targetH[i]=tgt;
-        let col;
-        if(!C.stabil||yr<e.startYr)  col=C.stabil||'#374151';
-        else if((yr-e.startYr)<5)     col=C.constructie||'#f59e0b';
-        else if((yr-e.startYr)<10)    col=C.aproape||'#f97316';
-        else                          col='#'+e.color.getHexString();
-        m.material.color.set(col); m.visible=yr>=e.startYr-1;
-        if(this._shadows?.[i])this._shadows[i].visible=m.visible;
+        const m=this._meshes[i]; if(!m) return;
+        const age = yr - (e.startYr||2026);
+        let tgt = 0.1;
+
+        if(age >= 0) {
+          // ── Construcție etaj cu etaj ────────────────────────────────
+          // Faza 0 (age<0.5): fundație — slab plat la sol
+          // Faza 1 (age 0-3): crește etaj cu etaj, vizibil
+          // Faza 2 (age 3+): completat, stabilizat
+          const maxFloors = Math.max(1, Math.ceil(e.hMax / FLOOR_H));
+
+          if(age < 0.3) {
+            // Fundație: 0.6m înălțime
+            tgt = 0.6;
+          } else if(age < 3.5) {
+            // Construcție activă: etaje apar discret
+            // La fiecare ~0.25 ani apare un etaj nou
+            const floorsBuilt = Math.floor(age / 0.25);
+            const floorsTarget = Math.min(maxFloors, floorsBuilt);
+            tgt = Math.min(e.hMax, Math.max(0.6, floorsTarget * FLOOR_H));
+          } else {
+            // Finalizat
+            tgt = e.hMax;
+          }
+        }
+
+        if(this._targetH) this._targetH[i] = tgt;
+
+        // ── Culori per fază construcție ──────────────────────────────
+        let col, opacity=0.88;
+        if(age < 0) {
+          col='#1e293b'; opacity=0.0;              // invizibil — nu a început
+        } else if(age < 0.3) {
+          col='#78716c'; opacity=0.6;              // fundație — beton brut
+        } else if(age < 2.0) {
+          col='#fbbf24'; opacity=0.82;             // schelet — galben construcție
+        } else if(age < 4.0) {
+          col='#f97316'; opacity=0.85;             // faadă — portocaliu aproape gata
+        } else {
+          col=e.baseCol||'#f97316'; opacity=0.88;  // finalizat — culoarea lifecycle
+        }
+
+        m.material.color.set(col);
+        m.material.opacity = opacity;
+        m.visible = age >= -0.5;
+
+        // ── Platforma de construcție (slab orizontal la vârful actual) ──
+        // Vizibilă ca "nivel activ" în faza de construcție
+        const platform = this._platforms?.[i];
+        if(platform) {
+          platform.visible = age >= 0 && age < 3.5 && tgt > 1;
+          if(platform.visible) {
+            // Pozitionam platforma la vârful construcției
+            if(this._3D?._positionEntity) {
+              // Se va actualiza în _animate
+              platform.userData.h = tgt;
+            }
+          }
+        }
+
+        if(this._shadows?.[i]) this._shadows[i].visible = age >= 0;
       });
       this._map?.triggerRepaint();
     },
 
-    updateLOD(zoom){const v=zoom>=12.5;(this._meshes||[]).forEach(m=>{if(m)m.visible=v;});(this._shadows||[]).forEach(s=>{if(s)s.visible=v;});},
+
+    updateLOD(zoom){
+      const v=zoom>=12.5;
+      (this._meshes||[]).forEach(m=>{if(m)m.visible=m.visible&&v;});
+      (this._shadows||[]).forEach(s=>{if(s)s.visible=s.visible&&v;});
+      // La zoom mare (nivel stradă) activăm toate entitățile
+      if(zoom>=17)(this._meshes||[]).forEach((m,i)=>{if(m&&this._entities[i])m.visible=this._entities[i].startYr<=(window.TCI?.year||2030);});
+    },
+
+    // Pozitionează o entitate Three.js pe coordonate geografice
+    // cx,cy=centrul origin, lon/lat=coordonate geografice, scaleX/Y/Z=dimensiuni în metri
+    _positionEntity(mesh, lon, lat, baseH, scaleX, scaleY, scaleZ) {
+      if(!mesh||!this._cx) return;
+      const R=111319.9, cp=Math.cos(this._cy*Math.PI/180);
+      const x=(lon-this._cx)*R*cp;
+      const y=(lat-this._cy)*R;
+      const sM=this._scale||1e-6;
+      mesh.position.set(x*sM, y*sM, baseH*sM);
+      if(scaleX!=null) mesh.scale.set(scaleX*sM, scaleY*sM, scaleZ*sM);
+    },
+
 
     _bboxCoords(coords) {
       let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
@@ -4033,44 +4882,97 @@ out geom qt;`;
         const zonId = p.id || '?';
         const zone = (TCI._projZones||[]).find(z=>z.id===zonId) || p;
 
+        // ── Factori în LIMBAJ UMAN — nu cod tehnic ───────────────────
+        // Un primar sau investitor trebuie să înțeleagă fără explicații
         const factors = [];
-        const Ra = zone._Ra ?? p._Ra;
-        const Db = zone._Db ?? p._Db;
-        const Ce = zone._Ce ?? p._Ce;
-        const Zf = zone._Zf ?? p._Zf;
-        const pg = zone._permitsGrowth ?? p._permitsGrowth;
-        const sl = zone.slopeDeg ?? p.slopeDeg;
-        const st = zone.slopeType ?? p.slopeType;
 
-        if(Ra != null) factors.push({sign:Ra>0.6?'+':Ra>0.3?'~':'-', label:`Accesibilitate rutieră: ${Math.round(Ra*100)}%`, src:'OSM road network'});
-        if(Db != null) factors.push({sign:Db>0.1&&Db<0.8?'+':Db>=0.8?'~':'-', label:`Densitate clădiri vecine: ${Math.round(Db*100)}%`, src:'OSM buildings'});
-        if(Ce != null) factors.push({sign:Ce>0.6?'+':Ce>0.3?'~':'-', label:`Risc climatic/seismic: ${Math.round((1-Ce)*100)}%`, src:'P100-1/2013 + IPCC'});
-        if(Zf != null) factors.push({sign:Zf>0.6?'+':'-', label:`Compatibilitate teren: ${Zf>0.7?'Agricol/construibil':'Restricționat'}`, src:'OSM landuse'});
-        if(pg != null) factors.push({sign:pg>1.1?'+':pg>0.9?'~':'-', label:`Tendință autorizații: ×${Number(pg).toFixed(2)}`, src:'INS TEMPO LOC103A'});
-        if(sl != null) factors.push({sign:sl<10?'+':sl<20?'~':'-', label:`Pantă teren: ${Number(sl).toFixed(1)}° (${st||'?'})`, src:'Mapbox Terrain RGB'});
+        // Acces rutier
+        if(Ra != null) {
+          const raText = Ra > 0.7 ? 'Drum principal la mai puțin de 100m — acces excelent'
+                       : Ra > 0.4 ? 'Drum secundar în apropiere — acces bun'
+                       : 'Acces rutier limitat — drum local sau absent';
+          factors.push({sign: Ra>0.6?'+':Ra>0.3?'~':'-', label: raText, src:'OSM rețea rutieră'});
+        }
 
-        // Accessibility — travel time real OSRM
-        const tm = zone._travelMin ?? p._travelMin;
-        if(tm != null) factors.push({
-          sign: tm<10?'+':tm<25?'~':'-',
-          label:`Timp acces centru: ${tm} minute (OSRM)`,
-          src:'OSRM Routing Engine'
+        // Densitate construită
+        if(Db != null) {
+          const dbText = Db > 0.6 ? 'Zonă semi-construită — extindere naturală a țesutului urban'
+                       : Db > 0.2 ? 'Zonă parțial construită — potențial de densificare'
+                       : Db < 0.1 ? 'Teren liber — extravilan sau periferie nedezvoltată'
+                       : 'Densitate medie — cartier rezidențial existent';
+          factors.push({sign: Db>0.1&&Db<0.8?'+':'-', label: dbText, src:'OSM Buildings'});
+        }
+
+        // Timp de acces — cel mai important factor
+        if(tm != null) {
+          const tmText = tm < 10 ? `${tm} minute până în centrul orașului — accesibilitate maximă`
+                       : tm < 20 ? `${tm} minute până în centru — naveta zilnică fezabilă`
+                       : tm < 35 ? `${tm} minute până în centru — periurban extins`
+                       : `${tm} minute până în centru — distanță mare, risc de nerealizare`;
+          factors.push({sign: tm<10?'+':tm<25?'~':'-', label: tmText, src:'OSRM routing live'});
+        }
+
+        // Pantă teren
+        if(sl != null) {
+          const slText = sl < 5  ? `Teren plan (${sl.toFixed(1)}°) — construcție fără restricții`
+                       : sl < 12 ? `Pantă ușoară (${sl.toFixed(1)}°) — rezidențial cu costuri moderate`
+                       : sl < 20 ? `Pantă moderată (${sl.toFixed(1)}°) — vile și case individuale`
+                       : `Pantă mare (${sl.toFixed(1)}°) — restricții constructive, costuri ridicate`;
+          factors.push({sign: sl<5?'+':sl<15?'~':'-', label: slText, src:'Mapbox Terrain RGB'});
+        }
+
+        // Risc seismic/climatic
+        if(Ce != null) {
+          const risk = Math.round((1-Ce)*100);
+          const ceText = risk < 30 ? 'Risc seismic și climatic scăzut — zona favorabilă'
+                        : risk < 55 ? `Risc moderat (${risk}%) — necesită calcul seismic la proiectare`
+                        : `Risc ridicat (${risk}%) — supracost construcție +14-28% · P100-1/2013`;
+          factors.push({sign: Ce>0.6?'+':Ce>0.3?'~':'-', label: ceText, src:'P100-1/2013 + IPCC AR6'});
+        }
+
+        // Compatibilitate teren
+        if(Zf != null) {
+          const zfText = Zf > 0.7 ? 'Teren agricol sau liber — conversie posibilă prin PUZ'
+                       : Zf > 0.4 ? 'Zonă mixtă — verificați reglementările UTR'
+                       : 'Teren restricționat — pădure, apă sau protecție';
+          factors.push({sign: Zf>0.6?'+':'-', label: zfText, src:'OSM landuse'});
+        }
+
+        // Autorizații
+        if(pg != null && pg !== 1.0) {
+          const pgText = pg > 1.2 ? `Autorizații în creștere (+${Math.round((pg-1)*100)}%) — piață activă`
+                       : pg < 0.8 ? `Autorizații în scădere (${Math.round((pg-1)*100)}%) — piață în contracție`
+                       : 'Autorizații stabile — piață echilibrată';
+          factors.push({sign: pg>1.1?'+':pg>0.9?'~':'-', label: pgText, src:'INS TEMPO LOC103A'});
+        }
+
+        // Lifecycle
+        factors.push({
+          sign: grav.growthType==='DECLINING'||grav.growthType==='SHRINKING'?'-':
+                grav.growthType==='WEAKENING'?'~':
+                grav.growthType==='METROPOLITAN'||grav.growthType==='GROWING'?'+':'~',
+          label: `Dinamica urbană: ${grav.growthType} · L=${L>=0?'+':''}${L.toFixed(2)} · ${
+            L>0.3?'Urban activ — cerere reală de locuințe':
+            L>-0.1?'Urban echilibrat — cerere moderată':
+            'Urban în declin — risc de neabsorbție'}`,
+          src:'Lifecycle Engine'
         });
-        if(zone.startYr||p.startYr) factors.push({sign:'~', label:`Start estimat: ${zone.startYr||p.startYr}`, src:'Model TSS·FG'});
 
-        const grav = TCI._calcGravityScore(TCI.d);
-        const L = grav.lifecycle?.score ?? 0;
-        factors.push({sign:grav.growthType==='DECLINING'?'-':grav.growthType==='METROPOLITAN'?'+':'~',
-          label:`Ciclu urban: ${grav.growthType} (L=${L>=0?'+':''}${L.toFixed(2)})`, src:'Lifecycle Engine'});
+        if(zone.startYr||p.startYr)
+          factors.push({sign:'~', label:`Start estimat construcție: ${zone.startYr||p.startYr}`, src:'Model TSS·FG'});
 
         const factorHtml = factors.length
           ? factors.map(f=>`
-            <div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.06)">
-              <span style="width:16px;flex-shrink:0;color:${f.sign==='+'?'#4ade80':f.sign==='-'?'#f87171':'#fbbf24'};font-size:12px">${f.sign==='+'?'↑':f.sign==='-'?'↓':'→'}</span>
-              <div><div style="font-size:10px;color:#e2e8f0">${f.label}</div>
-                   <div style="font-size:9px;color:#64748b">${f.src}</div></div>
+            <div style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+              <span style="width:18px;flex-shrink:0;font-size:14px;color:${f.sign==='+'?'#4ade80':f.sign==='-'?'#f87171':'#fbbf24'};line-height:1.2">
+                ${f.sign==='+'?'✅':f.sign==='-'?'⚠️':'➡️'}
+              </span>
+              <div>
+                <div style="font-size:9.5px;color:#e2e8f0;line-height:1.4">${f.label}</div>
+                <div style="font-size:8px;color:#475569;margin-top:1px">${f.src}</div>
+              </div>
             </div>`).join('')
-          : '<div style="color:#64748b;font-size:9px;padding:4px 0">Date provenance indisponibile pentru această zonă</div>';
+          : '<div style="color:#64748b;font-size:9px;padding:4px 0">Date provenance indisponibile</div>';
 
         const pct = zone._prob ? Math.round(zone._prob*100) : (Number(p.prob)||50);
         const pColor = pct>65?'#f59e0b':pct>45?'#3b82f6':'#22c55e';
@@ -4991,41 +5893,138 @@ out geom qt;`;
   },
 
   _drawLegend(ctx, W, H, yr) {
-    const yF=Math.max(0,Math.min(1,((yr||this.year)-2025)/25));
-    // Legenda explică CULORILE CLĂDIRILOR + ce înseamnă per an
-    const items=[
-      {c:'#1e3a5f', l:'Clădiri existente pre-2025'},
-      {c:'#f59e0b', l:'Construcție activă '+(2025+Math.round(yF*8))+'–'+(2025+Math.round(yF*15))},
-      {c:'#22c55e', l:'Finalizate · Clădiri noi'},
-      {c:'#0ea5e9', l:'Landmark / Înalt'},
-      {c:'#0f172a', l:'Construcție nouă mică'},
-    ];
-    const LW=185, LH=items.length*14+24, LX=W-LW-10, LY=H-70-LH;
-    ctx.save();
-    ctx.fillStyle='rgba(4,10,24,0.85)';
-    this._rr(ctx,LX,LY,LW,LH,6); ctx.fill();
-    ctx.strokeStyle='rgba(255,255,255,0.07)'; ctx.lineWidth=1;
-    this._rr(ctx,LX,LY,LW,LH,6); ctx.stroke();
-    ctx.fillStyle='#D4AF37'; ctx.font='bold 7.5px "Space Grotesk"';
-    ctx.fillText('CLĂDIRI — '+(yr||this.year), LX+10, LY+14);
-    // Bara progres densificare
-    const bpW=LW-20;
-    ctx.fillStyle='rgba(255,255,255,0.08)'; ctx.fillRect(LX+10,LY+18,bpW,3);
-    ctx.fillStyle='rgba(212,175,55,0.7)';   ctx.fillRect(LX+10,LY+18,bpW*yF,3);
-    items.forEach((it,i)=>{
-      const y=LY+26+i*14;
-      ctx.fillStyle=it.c; ctx.fillRect(LX+10,y,10,10);
-      ctx.strokeStyle='rgba(255,255,255,0.2)'; ctx.lineWidth=0.5;
-      ctx.strokeRect(LX+10,y,10,10);
-      ctx.fillStyle='rgba(200,215,235,0.78)'; ctx.font='8px "Space Grotesk"';
-      ctx.fillText(it.l,LX+25,y+8.5);
+    const year = yr || this.year || 2025;
+    const yF   = Math.max(0, Math.min(1, (year - 2025) / 30));
+    const entities = this._3D?._entities || [];
+
+    // ── Contorizăm clădirile per categorie în ANUL CURENT ──────────────
+    let cActive = 0, cDone = 0, cPending = 0;
+    const tipCounts = {};
+    entities.forEach(e => {
+      const age = year - (e.startYr || 2026);
+      if(age < 0)       { cPending++; }
+      else if(age < 3)  { cActive++; }
+      else              { cDone++; }
+      if(age >= 0) {
+        const t = e.tipologie || 'rezidential';
+        tipCounts[t] = (tipCounts[t]||0) + 1;
+      }
     });
+    const totalActive = cActive + cDone;
+
+    // ── Items legendă cu numere live ──────────────────────────────────
+    const growthType = window.TCI?._calcGravityScore?.(window.TCI?._city?.())?.growthType || '';
+    const colMap = {
+      METROPOLITAN:'#f97316', REGIONAL:'#f59e0b', LOCAL:'#60a5fa',
+      GROWING:'#22c55e', WEAKENING:'#94a3b8', DECLINING:'#ef4444', SHRINKING:'#6b7280',
+    };
+    const mainCol = colMap[growthType] || '#f59e0b';
+
+    const items = [
+      {c:'#1e3a5f',  s:'■', l:'Fond existent 2025',     n: null},
+      {c:'#fbbf24',  s:'■', l:'Construcție activă',      n: cActive > 0 ? cActive+' cl.' : null},
+      {c: mainCol,   s:'■', l:`Finalizat · ${growthType}`, n: cDone > 0 ? cDone+' cl.' : null},
+      {c:'#a78bfa',  s:'■', l:'Social / Medical',         n: tipCounts['social'] ? tipCounts['social']+' cl.' : null},
+      {c:'#64748b',  s:'▬', l:'Industrial / Logistic',    n: tipCounts['industrial'] ? tipCounts['industrial']+' cl.' : null},
+      {c:'#4ade80',  s:'■', l:'Verde / Sport',             n: tipCounts['verde'] ? tipCounts['verde']+' cl.' : null},
+    ].filter(it => it.n !== null || it.c === '#1e3a5f' || it.c === mainCol);
+
+    const LW = 200, LH = items.length * 15 + 38;
+    const LX = W - LW - 10, LY = H - 75 - LH;
+
+    ctx.save();
+    // Background
+    ctx.fillStyle = 'rgba(4,10,24,0.88)';
+    this._rr(ctx, LX, LY, LW, LH, 7); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 1;
+    this._rr(ctx, LX, LY, LW, LH, 7); ctx.stroke();
+
+    // Header
+    ctx.fillStyle = '#D4AF37';
+    ctx.font = 'bold 7.5px "Space Grotesk"';
+    ctx.fillText('CLĂDIRI — ' + year, LX + 10, LY + 13);
+
+    // Bara progres densificare + număr total
+    const bpW = LW - 20;
+    ctx.fillStyle = 'rgba(255,255,255,0.07)'; ctx.fillRect(LX+10, LY+17, bpW, 3);
+    ctx.fillStyle = mainCol; ctx.globalAlpha = 0.65;
+    ctx.fillRect(LX+10, LY+17, bpW * yF, 3);
+    ctx.globalAlpha = 1;
+
+    // Număr total clădiri active
+    if(totalActive > 0) {
+      ctx.fillStyle = 'rgba(148,163,184,0.5)';
+      ctx.font = '7px "Space Grotesk"';
+      ctx.textAlign = 'right';
+      ctx.fillText(totalActive + ' clădiri proiectate', LX + LW - 10, LY + 13);
+      ctx.textAlign = 'left';
+    }
+
+    // Items cu număr live
+    items.forEach((it, i) => {
+      const y = LY + 24 + i * 15;
+      // Pătrat culoare
+      ctx.fillStyle = it.c;
+      if(it.s === '▬') {
+        ctx.fillRect(LX+10, y+2, 12, 6);
+      } else {
+        ctx.fillRect(LX+10, y, 10, 10);
+      }
+      ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+      ctx.lineWidth = 0.5;
+      ctx.strokeRect(LX+10, y, 10, 10);
+
+      // Label
+      ctx.fillStyle = 'rgba(200,215,235,0.80)';
+      ctx.font = '8px "Space Grotesk"';
+      ctx.fillText(it.l, LX + 26, y + 8.5);
+
+      // Număr live — dreapta
+      if(it.n) {
+        ctx.fillStyle = it.c;
+        ctx.font = 'bold 7.5px "Space Grotesk"';
+        ctx.textAlign = 'right';
+        ctx.fillText(it.n, LX + LW - 8, y + 8.5);
+        ctx.textAlign = 'left';
+      }
+    });
+
+    // Notă tipologie dacă există industrial
+    if(tipCounts['turn'] || tipCounts['premium']) {
+      const y = LY + LH - 9;
+      ctx.fillStyle = 'rgba(148,163,184,0.3)';
+      ctx.font = '6.5px "Space Grotesk"';
+      const turnStr = [];
+      if(tipCounts['turn']) turnStr.push(tipCounts['turn']+' turnuri');
+      if(tipCounts['premium']) turnStr.push(tipCounts['premium']+' premium');
+      ctx.fillText('incl. ' + turnStr.join(' · '), LX + 10, y);
+    }
+
     ctx.restore();
   },
+
 
   _rr(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();},
 
   // ── Comenzi ──────────────────────────────────────────────────────────────
+  _updateSliderPhase(yr) {
+    const lbl = document.getElementById('tci-phase-label');
+    if(!lbl) return;
+    const phases = [
+      {end:2030, label:'▶ Inițiere 2025-2030', color:'#475569'},
+      {end:2038, label:'▶ Creștere 2030-2038', color:'#16a34a'},
+      {end:2048, label:'▶ Maturitate 2038-2048', color:'#d97706'},
+      {end:2055, label:'▶ Consolidare 2048-2055', color:'#9333ea'},
+    ];
+    const phase = phases.find(p => yr <= p.end) || phases[phases.length-1];
+    lbl.textContent = phase.label;
+    lbl.style.color = phase.color + 'bb';
+
+    // Actualizam cursorul slider cu culoarea fazei
+    const sl = document.getElementById('tci-scrub');
+    if(sl) sl.style.accentColor = phase.color;
+  },
+
   scrubTo(yr) {
     this.pause();
     const sY=this.startYear; let t=0;
@@ -5067,19 +6066,111 @@ out geom qt;`;
   },
 
   _share() {
-    const p=new URLSearchParams({c:this.cityKey,s:this.scenario,y:this.year,m:this.mode});
-    const url=location.origin+location.pathname+'?tci='+btoa(p);
-    navigator.clipboard?.writeText(url);
-    let box=document.getElementById('tci-share-box');
-    if(!box){ box=document.createElement('div'); box.id='tci-share-box';
-      box.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:3100;background:rgba(4,10,24,0.97);border:1px solid rgba(212,175,55,0.5);border-radius:10px;padding:14px 20px;min-width:360px;font-family:"Space Grotesk",sans-serif;pointer-events:all';
-      document.body.appendChild(box); }
-    box.innerHTML=`<div style="font-size:8px;color:#D4AF37;margin-bottom:6px">🔗 SHARE URL — ${this.d?.name||''} ${this.year}</div>
-      <div style="display:flex;gap:6px"><input readonly value="${url}" onclick="this.select()" style="flex:1;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);color:#fff;padding:7px 9px;border-radius:6px;font-size:9px;font-family:monospace">
-      <button onclick="navigator.clipboard.writeText('${url}').then(()=>{this.textContent='✓ Copiat!';setTimeout(()=>this.textContent='📋 Copiază',2000)})" style="padding:7px 12px;border-radius:6px;background:rgba(212,175,55,0.15);border:1px solid rgba(212,175,55,0.4);color:#D4AF37;font-size:10px;cursor:pointer;font-family:inherit">📋 Copiază</button></div>
-      <button onclick="this.parentElement.remove()" style="position:absolute;top:8px;right:8px;background:none;border:none;color:rgba(148,163,184,0.5);font-size:12px;cursor:pointer">✕</button>`;
-    box.style.display='block';
+    // ── Share URL cu stare completă ──────────────────────────────────
+    // URL codifică: UAT key + an + scenariu + zoom + centru hartă
+    // Când cineva deschide link-ul, TCI Cinema lansează direct în acea stare
+    const city = this.d || {};
+    const mapCenter = this.map?.getCenter?.();
+    const mapZoom   = this.map?.getZoom?.();
+
+    const stateObj = {
+      c: this.cityKey || '',          // UAT key (RO-IS-95060)
+      n: city.name || '',             // Nume UAT (pentru afișare rapidă)
+      s: this.scenario || 'S2',       // Scenariu
+      y: this.year || 2027,           // An curent
+      m: this.mode || 'uat',          // Mod lansare
+      ln: mapCenter?.lng?.toFixed(4) || '',
+      lt: mapCenter?.lat?.toFixed(4) || '',
+      z:  mapZoom?.toFixed(1) || '',
+    };
+
+    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(stateObj))));
+    const url = location.origin + location.pathname + '#tci/' + encoded;
+
+    // Scriem în history fără reload — URL-ul reflectă mereu starea curentă
+    try { history.replaceState(null, '', url); } catch(e) {}
+    navigator.clipboard?.writeText(url).catch(()=>{});
+
+    const lc = this._calcGravityScore?.(city)?.lifecycle?.score ?? 0;
+    const lcLabel = lc>0.45?'GROWING':lc>0.05?'STABLE':lc>-0.20?'WEAKENING':lc>-0.55?'DECLINING':'SHRINKING';
+    const verDate = 'INS SIRUTA dec.2025';
+
+    let box = document.getElementById('tci-share-box');
+    if(!box) {
+      box = document.createElement('div');
+      box.id = 'tci-share-box';
+      box.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:3100;background:rgba(4,10,24,0.97);border:1px solid rgba(212,175,55,0.5);border-radius:12px;padding:16px 20px;min-width:380px;max-width:440px;font-family:"Space Grotesk",sans-serif;pointer-events:all;box-shadow:0 20px 60px rgba(0,0,0,0.6)';
+      document.body.appendChild(box);
+    }
+
+    box.innerHTML = `
+      <button onclick="this.parentElement.remove()" style="position:absolute;top:10px;right:12px;background:none;border:none;color:rgba(148,163,184,0.4);font-size:14px;cursor:pointer;line-height:1">✕</button>
+
+      <div style="font-size:8px;color:#D4AF37;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px">
+        🔗 Share — ${city.name||'UAT'} · ${this.year} · ${this.scenario}
+      </div>
+
+      <!-- URL cu stare completă -->
+      <div style="display:flex;gap:6px;margin-bottom:12px">
+        <input readonly value="${url}"
+          onclick="this.select()"
+          style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#94a3b8;padding:7px 9px;border-radius:6px;font-size:8px;font-family:monospace;overflow:hidden;text-overflow:ellipsis">
+        <button onclick="navigator.clipboard.writeText('${url}').then(()=>{this.textContent='✓';this.style.color='#22c55e';setTimeout(()=>{this.textContent='📋';this.style.color=''},2000)})"
+          style="padding:7px 12px;border-radius:6px;background:rgba(212,175,55,0.12);border:1px solid rgba(212,175,55,0.35);color:#D4AF37;font-size:12px;cursor:pointer;flex-shrink:0">
+          📋
+        </button>
+      </div>
+
+      <!-- Starea codificată — ce vede destinatarul -->
+      <div style="background:rgba(255,255,255,0.04);border-radius:7px;padding:8px 10px;margin-bottom:12px;font-size:8px">
+        <div style="color:rgba(148,163,184,0.6);margin-bottom:4px">La deschidere, destinatarul va vedea:</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px">
+          <div style="color:#e2e8f0">📍 ${city.name||'—'}</div>
+          <div style="color:#e2e8f0">📅 ${this.year}</div>
+          <div style="color:#e2e8f0">📊 Scenariu ${this.scenario}</div>
+          <div style="color:${lc>0?'#22c55e':lc>-0.2?'#f59e0b':'#f87171'}">⚡ ${lcLabel}</div>
+        </div>
+      </div>
+
+      <!-- Metodologie vizibilă — Item 3 -->
+      <div style="border-top:1px solid rgba(255,255,255,0.07);padding-top:10px">
+        <div style="font-size:7.5px;color:rgba(148,163,184,0.5);margin-bottom:5px">📐 Metodologie model</div>
+        <div style="font-size:7.5px;color:rgba(148,163,184,0.45);line-height:1.8">
+          Model calibrat pe <strong style="color:rgba(148,163,184,0.7)">3.181 UAT-uri</strong> · Surse: INS + OSM + OSRM + P100-1/2013 + IPCC AR6<br>
+          Acuratețe estimată: <strong style="color:rgba(148,163,184,0.7)">~70%</strong> · Target: 80% cu geometrii oficiale ANCPI<br>
+          Ultima actualizare date: <strong style="color:rgba(148,163,184,0.7)">${verDate}</strong><br>
+          <span style="color:rgba(100,120,150,0.4)">⚠ Predicție statistică · Nu substituie PUG/PUZ/aviz urbanistic</span>
+        </div>
+      </div>`;
+
+    box.style.display = 'block';
+
+    // ── La inițializare: dacă URL conține stare, o restaurăm ──────────
+    // (apelat o singură dată la încărcarea paginii din _init)
   },
+
+  // Restaurează starea din URL hash la deschidere
+  _restoreFromURL() {
+    try {
+      const hash = location.hash;
+      if(!hash.startsWith('#tci/')) return false;
+      const encoded = hash.slice(5);
+      const state = JSON.parse(decodeURIComponent(escape(atob(encoded))));
+      if(state.c) {
+        this._selectedUATKey = state.c;
+        if(state.n) {
+          const inp = document.getElementById('tci-sel-uat');
+          if(inp) inp.value = state.n;
+        }
+        if(state.y) this._pendingYear = parseInt(state.y);
+        if(state.s) this._pendingScenario = state.s;
+        console.log('[TCI] Stare restaurată din URL:', state.c, 'an:', state.y);
+        return true;
+      }
+    } catch(e) { /* URL invalid sau gol */ }
+    return false;
+  },
+
 
   _recToggle() {
     if(!this._recActive) {
@@ -5146,38 +6237,69 @@ if(typeof _ProjectionEngine!=='undefined'){
   _ProjectionEngine.close          = ()=>{ try{TCI.close();}catch(e){} };
 }
 
-// ── URL Restore ───────────────────────────────────────────────────────────
+// ── URL Restore — suportă atât ?tci= (vechi) cât și #tci/ (nou) ─────────
 (function(){
-  const p=new URLSearchParams(location.search);
-  const tp=p.get('tci'); if(!tp) return;
-  let ck,sc,yr,md;
-  try{ const pp=new URLSearchParams(atob(tp)); ck=pp.get('c')||'iasi'; sc=pp.get('s')||'S2'; yr=parseInt(pp.get('y')||'2026'); md=pp.get('m')||'uat'; } catch(e){ return; }
-  window._TCI_URL_RESTORE={ck,sc,yr,md,done:false};
-  const resolve=key=>{
+  let ck, sc, yr, md;
+
+  // Format nou: #tci/{base64 JSON}
+  const hash = location.hash;
+  if(hash.startsWith('#tci/')) {
+    try {
+      const state = JSON.parse(decodeURIComponent(escape(atob(hash.slice(5)))));
+      ck = state.c; sc = state.s || 'S2';
+      yr = parseInt(state.y) || 2026; md = state.m || 'uat';
+    } catch(e) { /* hash invalid */ }
+  }
+
+  // Format vechi: ?tci= (compatibilitate)
+  if(!ck) {
+    const p = new URLSearchParams(location.search);
+    const tp = p.get('tci'); if(!tp) return;
+    try {
+      const pp = new URLSearchParams(atob(tp));
+      ck=pp.get('c')||'iasi'; sc=pp.get('s')||'S2';
+      yr=parseInt(pp.get('y')||'2026'); md=pp.get('m')||'uat';
+    } catch(e) { return; }
+  }
+
+  if(!ck) return;
+
+  window._TCI_URL_RESTORE = {ck, sc, yr, md, done: false};
+  const resolve = key => {
     if(typeof _RO_CITIES_DB==='undefined') return key;
     if(_RO_CITIES_DB[key]) return key;
     const sm=key.match(/(\d{5,6})$/);
     if(sm){ const f=Object.entries(_RO_CITIES_DB).find(([k,v])=>String(v.siruta)===sm[1]||String(v.SIRUTA)===sm[1]); if(f) return f[0]; }
     return key;
   };
-  const doLaunch=()=>{
+  const doLaunch = () => {
     if(window._TCI_URL_RESTORE.done) return;
-    window._TCI_URL_RESTORE.done=true;
+    window._TCI_URL_RESTORE.done = true;
     document.getElementById('tci-sel')?.remove();
-    try{
-      TCI._selectedUATKey=null;
-      TCI._launch(md,{cityKey:resolve(ck),scenario:sc});
-      const w=setInterval(()=>{
-        if(TCI.year!==undefined){ clearInterval(w); setTimeout(()=>{ try{TCI.scrubTo(yr);}catch(e){} },1500); }
-      },300);
-    }catch(e){ window._TCI_URL_RESTORE.done=false; }
+    try {
+      TCI._selectedUATKey = null;
+      TCI._launch(md, {cityKey: resolve(ck), scenario: sc});
+      const w = setInterval(() => {
+        if(TCI.year !== undefined) {
+          clearInterval(w);
+          setTimeout(() => { try{ TCI.scrubTo(yr); } catch(e){} }, 1500);
+        }
+      }, 300);
+    } catch(e) { window._TCI_URL_RESTORE.done = false; }
   };
-  let tries=0;
-  const tryLaunch=()=>{ if(++tries>30) return; if(typeof TCI!=='undefined'&&typeof _RO_CITIES_DB!=='undefined'&&window.map) doLaunch(); else setTimeout(tryLaunch,400); };
-  setTimeout(tryLaunch,800);
-  document.addEventListener('DOMContentLoaded',()=>setTimeout(tryLaunch,1200));
-  window.addEventListener('load',()=>setTimeout(tryLaunch,600));
+  let tries = 0;
+  const tryLaunch = () => {
+    if(++tries > 30) return;
+    if(typeof TCI !== 'undefined' && typeof _RO_CITIES_DB !== 'undefined' && window.map)
+      doLaunch();
+    else
+      setTimeout(tryLaunch, 400);
+  };
+  setTimeout(tryLaunch, 800);
+  document.addEventListener('DOMContentLoaded', () => setTimeout(tryLaunch, 1200));
+  window.addEventListener('load', () => setTimeout(tryLaunch, 600));
 })();
+
 
 const _origOpenTCI=window.openTCI;
 window.openTCI=(opts)=>{
