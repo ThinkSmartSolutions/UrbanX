@@ -524,8 +524,8 @@ async function _rvExportPlanseA3(){
     pdf.setTextColor(30,45,75); pdf.setFont('helvetica','bold'); pdf.setFontSize(7);
     pdf.text('DATE GENERALE',mid+4,oy+6);
 
-    const sdaTotal=Math.round(b_.bW*b_.bD*P_.pot*b_.niv);
-    const sc2=Math.round(b_.bW*b_.bD*P_.pot);
+    const sdaTotal=Math.round(b_.bW*b_.bD*b_.niv); // SDA total
+    const sc2=Math.round(b_.scArea || b_.bW*b_.bD*P_.pot); // SC la sol
     const rows=[
       ['Suprafață construită:', sc2+'m²'],
       ['Suprafață desfășurată:', sdaTotal+'m²'],
@@ -556,7 +556,7 @@ async function _rvExportPlanseA3(){
   const scH = (H*0.75) / b.bD;
   const sc  = Math.min(scW, scH, 8); // max 8mm/m → 1:125
 
-  const scLabel = 'Sc. 1:'+ Math.round(1000/sc)+'00';
+  const scLabel = 'Sc. 1:'+Math.round(1000/sc);
   const ox0=35, oy0=15;
 
   // ── P1: PLAN PARTER ──────────────────────────────────────────────────────
@@ -583,14 +583,14 @@ async function _rvExportPlanseA3(){
   // ── P4: SECȚIUNE A-A ─────────────────────────────────────────────────────
   const scSect = Math.min((W*0.70)/(b.bD), (H*0.75)/(b.niv*P.hn), 8);
   newPg(); pdf.setFillColor(...C.bg); pdf.rect(0,0,W,H,'F');
-  cartus('04','SECTIUNE A-A LONGITUDINALA','Sc. 1:'+Math.round(1000/scSect)+'00');
+  cartus('04','SECTIUNE A-A LONGITUDINALA','Sc. 1:'+Math.round(1000/scSect));
   drawSectAlb(b, P, ox0+10, oy0+10, scSect, 'AA');
   nord(W-22, oy0+12, P.frontDir, 7);
 
   // ── P5: SECȚIUNE B-B ─────────────────────────────────────────────────────
   const scSect2=Math.min((W*0.55)/(b.bW),(H*0.75)/(b.niv*P.hn),8);
   newPg(); pdf.setFillColor(...C.bg); pdf.rect(0,0,W,H,'F');
-  cartus('05','SECTIUNE B-B TRANSVERSALA','Sc. 1:'+Math.round(1000/scSect2)+'00');
+  cartus('05','SECTIUNE B-B TRANSVERSALA','Sc. 1:'+Math.round(1000/scSect2));
   drawSectAlb(b, P, ox0+10, oy0+10, scSect2, 'BB');
   nord(W-22, oy0+12, P.frontDir, 7);
 
