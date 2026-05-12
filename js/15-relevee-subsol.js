@@ -386,14 +386,24 @@ async function _rvExportSubsol(){
   const _jsPDF=(typeof jsPDF!=='undefined')?jsPDF:window.jspdf?.jsPDF;
   if(!_jsPDF){alert('jsPDF indisponibil.');return;}
 
-  const btn=document.getElementById('rv-subsol-btn');
+  const btn=document.getElementById('rv-subsol-btn')
+         ||document.getElementById('rv-tb-_rvExportSubsol')
+         ||document.querySelector('[onclick*="_rvExportSubsol"]');
   if(btn){btn.innerHTML='⏳ Subsol…';btn.style.opacity='.6';}
   if(typeof ss==='function') ss('⏳ Generez plan subsol…');
 
   const info=_calcSubsolNeeded(b,P);
   if(!info.needsBasement){
-    alert(`✅ Subsol NU este necesar!\n\nParcaje disponibile la sol: ${info.parcSup} loc.\nNecesare (NP 067): ${info.parcNec} loc.\nDispuneți de suprafață suficientă la sol.`);
-    if(btn){btn.innerHTML='🅿 Plan Subsol';btn.style.opacity='1';} return;
+    const forta = confirm(
+      '✅ La această parcelă subsolul NU este obligatoriu conform NP 067/2002.\n\n'+
+      '• Parcaje disponibile la sol: '+info.parcSup+' locuri\n'+
+      '• Necesare (NP 067): '+info.parcNec+' locuri\n\n'+
+      'Doriți totuși să generați planul de subsol? (opțional / pt. proiecte cu cerințe proprii)'
+    );
+    if(!forta){if(btn){btn.innerHTML='🅿 Plan Subsol';btn.style.opacity='1';} return;}
+    // Generăm un subsol cu 1 nivel cu capacitate maximă posibilă
+    info.needsBasement=true; info.nLevels=1;
+    info.deficit=info.parcNec; // forțăm generarea
   }
 
   const W=420,H=297;
