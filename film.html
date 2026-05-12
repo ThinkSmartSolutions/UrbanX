@@ -1,0 +1,1478 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>UrbanX — Film Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Inter',sans-serif}
+
+/* ── FILM CONTAINER ── */
+#film{
+  position:fixed;inset:0;
+  background:#010408;
+  display:flex;align-items:center;justify-content:center;
+}
+#stage{
+  position:relative;
+  width:100%;height:100%;
+  overflow:hidden;
+}
+
+/* ── LETTERBOX ── */
+.lbox-top,.lbox-bot{
+  position:absolute;left:0;right:0;z-index:80;
+  background:#000;
+  height:clamp(24px,5vh,52px);
+  transition:height .4s;
+}
+.lbox-top{top:0}
+.lbox-bot{bottom:0}
+
+/* ── SCENE ── */
+.scene{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;
+  transition:opacity .8s ease;
+  pointer-events:none;
+}
+.scene.active{opacity:1;pointer-events:all}
+.scene.fade-out{opacity:0;transition:opacity .5s ease}
+
+/* ── SUBTITLE / NARRATION ── */
+#subtitle{
+  position:absolute;
+  bottom:clamp(30px,7vh,70px);
+  left:50%;transform:translateX(-50%);
+  z-index:70;
+  text-align:center;
+  max-width:min(760px,90vw);
+  pointer-events:none;
+}
+#sub-title{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(11px,1.6vw,15px);
+  font-weight:700;
+  color:rgba(212,175,55,.7);
+  text-transform:uppercase;
+  letter-spacing:2px;
+  margin-bottom:6px;
+  opacity:0;
+  transform:translateY(8px);
+  transition:all .4s .2s;
+}
+#sub-text{
+  font-size:clamp(14px,2.2vw,20px);
+  font-weight:300;
+  color:rgba(230,238,255,.92);
+  line-height:1.6;
+  text-shadow:0 2px 20px rgba(0,0,0,.8);
+  opacity:0;
+  transform:translateY(8px);
+  transition:all .4s .35s;
+}
+#subtitle.show #sub-title,
+#subtitle.show #sub-text{opacity:1;transform:translateY(0)}
+
+/* ── CONTROLS ── */
+#controls{
+  position:absolute;bottom:0;left:0;right:0;z-index:90;
+  height:clamp(24px,5vh,52px);
+  background:#000;
+  display:flex;align-items:center;
+  padding:0 16px;gap:12px;
+  opacity:.4;
+  transition:opacity .3s;
+}
+#controls:hover{opacity:1}
+#play-btn{
+  background:none;border:none;cursor:pointer;
+  color:#D4AF37;font-size:clamp(12px,2vw,18px);
+  min-width:24px;flex-shrink:0;
+}
+#progress-wrap{
+  flex:1;height:3px;background:rgba(255,255,255,.12);
+  border-radius:2px;cursor:pointer;position:relative;
+}
+#progress-bar{
+  height:100%;background:linear-gradient(90deg,#D4AF37,#f0d060);
+  border-radius:2px;width:0%;
+  transition:width .5s linear;
+}
+#time-label{
+  font-family:'JetBrains Mono',monospace;
+  font-size:clamp(9px,1.3vw,12px);
+  color:rgba(255,255,255,.4);
+  min-width:60px;text-align:right;flex-shrink:0;
+}
+#skip-btns{display:flex;gap:6px}
+.skip-btn{
+  background:none;border:1px solid rgba(255,255,255,.15);
+  color:rgba(255,255,255,.4);
+  font-size:clamp(9px,1.2vw,11px);
+  padding:2px 8px;border-radius:3px;cursor:pointer;
+  white-space:nowrap;
+  transition:all .15s;
+}
+.skip-btn:hover{color:#D4AF37;border-color:rgba(212,175,55,.4)}
+
+/* ── SCENE TITLE OVERLAY ── */
+.sc-title{
+  position:absolute;
+  top:clamp(30px,6vh,60px);left:50%;
+  transform:translateX(-50%);
+  z-index:60;
+  text-align:center;
+  pointer-events:none;
+}
+.sc-num{
+  font-family:'JetBrains Mono',monospace;
+  font-size:clamp(9px,1.2vw,12px);
+  color:rgba(212,175,55,.5);
+  letter-spacing:3px;
+  margin-bottom:6px;
+}
+.sc-name{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(14px,2.5vw,22px);
+  font-weight:800;
+  color:rgba(255,255,255,.85);
+  letter-spacing:-.3px;
+}
+
+/* ── TRANSITION FLASH ── */
+#flash{
+  position:absolute;inset:0;z-index:85;
+  background:#000;
+  opacity:0;pointer-events:none;
+  transition:opacity .25s;
+}
+#flash.on{opacity:1}
+
+/* ════ SCENE BACKGROUNDS ═══ */
+
+/* S0 — INTRO */
+#s0{background:#000}
+.s0-grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(212,175,55,.05) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(212,175,55,.05) 1px,transparent 1px);
+  background-size:80px 80px;
+  animation:gridShift 20s linear infinite;
+}
+@keyframes gridShift{to{background-position:80px 80px}}
+.s0-glow{
+  position:absolute;
+  width:min(700px,90vw);height:min(700px,90vw);
+  border-radius:50%;
+  background:radial-gradient(ellipse,rgba(212,175,55,.08) 0%,transparent 70%);
+  animation:gPulse 4s ease-in-out infinite;
+}
+@keyframes gPulse{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.15);opacity:1}}
+.s0-logo{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(60px,12vw,140px);
+  font-weight:800;
+  color:#fff;
+  letter-spacing:-4px;
+  position:relative;z-index:2;
+  opacity:0;
+  animation:logoIn 1.2s .5s cubic-bezier(.16,1,.3,1) forwards;
+}
+.s0-logo span{color:#D4AF37}
+@keyframes logoIn{
+  from{opacity:0;transform:scale(.85) translateY(30px);filter:blur(20px)}
+  to{opacity:1;transform:scale(1) translateY(0);filter:blur(0)}
+}
+.s0-tagline{
+  position:absolute;
+  margin-top:clamp(60px,10vw,130px);
+  font-size:clamp(12px,2vw,18px);
+  color:rgba(212,175,55,.7);
+  letter-spacing:4px;
+  text-transform:uppercase;
+  font-weight:500;
+  opacity:0;
+  animation:fadeIn .8s 1.8s forwards;
+}
+@keyframes fadeIn{to{opacity:1}}
+.s0-stats{
+  position:absolute;
+  bottom:clamp(70px,12vh,120px);
+  display:flex;gap:clamp(24px,5vw,64px);
+  opacity:0;animation:fadeIn .6s 2.5s forwards;
+}
+.s0-stat{text-align:center}
+.s0-snum{
+  font-family:'JetBrains Mono',monospace;
+  font-size:clamp(20px,4vw,40px);
+  font-weight:600;color:#D4AF37;
+  line-height:1;margin-bottom:4px;
+}
+.s0-slabel{font-size:clamp(9px,1.2vw,12px);color:rgba(255,255,255,.35);letter-spacing:1px;text-transform:uppercase}
+
+/* S1 — PROBLEMA */
+#s1{background:linear-gradient(135deg,#0a0508 0%,#050a10 100%)}
+.s1-pile{position:relative;width:min(500px,85vw)}
+.s1-doc{
+  position:absolute;
+  width:min(280px,70vw);height:min(190px,45vw);
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:4px;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;animation:docIn .5s ease forwards;
+}
+@keyframes docIn{to{opacity:1;transform:none}}
+.s1-doc:nth-child(1){top:0;left:10px;transform:rotate(-5deg) translateY(20px);animation-delay:.2s}
+.s1-doc:nth-child(2){top:18px;left:5px;transform:rotate(-2deg) translateY(20px);animation-delay:.5s}
+.s1-doc:nth-child(3){top:35px;left:0;transform:rotate(1deg) translateY(20px);animation-delay:.8s}
+.doc-lines{padding:20px;width:100%}
+.doc-line{height:5px;background:rgba(255,255,255,.08);border-radius:2px;margin-bottom:8px}
+.doc-line:first-child{width:60%;height:7px;background:rgba(255,255,255,.15)}
+.s1-numbers{
+  position:absolute;right:-20px;top:50%;transform:translateY(-50%);
+  display:flex;flex-direction:column;gap:16px;
+  opacity:0;animation:fadeIn .6s 1.2s forwards;
+}
+.s1-num{
+  background:rgba(248,113,113,.08);
+  border:1px solid rgba(248,113,113,.2);
+  border-radius:8px;padding:10px 16px;
+  font-family:'JetBrains Mono',monospace;
+}
+.s1-num-val{font-size:clamp(18px,3vw,28px);font-weight:600;color:#f87171;line-height:1}
+.s1-num-label{font-size:11px;color:rgba(255,255,255,.4);margin-top:2px}
+
+/* S2 — MAPBOX */
+#s2{background:#060d1e}
+.map-bg{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 60% at 50% 50%,rgba(56,189,248,.04) 0%,transparent 60%);
+}
+.map-grid{
+  position:absolute;inset:0;opacity:.06;
+  background-image:
+    linear-gradient(rgba(56,189,248,1) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(56,189,248,1) 1px,transparent 1px);
+  background-size:40px 40px;
+}
+.map-parcel{
+  position:relative;z-index:2;
+  width:min(420px,85vw);height:min(280px,50vw);
+}
+.parcel-outline{
+  position:absolute;inset:20px;
+  border:2px solid rgba(212,175,55,.6);
+  border-radius:4px;
+  background:rgba(212,175,55,.06);
+  animation:parcelPulse 2s ease-in-out infinite;
+}
+@keyframes parcelPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(212,175,55,.3)}
+  50%{box-shadow:0 0 0 20px rgba(212,175,55,0)}
+}
+.map-pin{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-120%);
+  font-size:clamp(28px,5vw,48px);
+  filter:drop-shadow(0 4px 12px rgba(212,175,55,.6));
+  animation:pinDrop .6s .3s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes pinDrop{from{transform:translate(-50%,-200%) scale(.5);opacity:0}to{transform:translate(-50%,-120%) scale(1);opacity:1}}
+.map-data{
+  position:absolute;right:-180px;top:10px;
+  width:165px;
+  background:rgba(10,18,38,.95);
+  border:1px solid rgba(212,175,55,.2);
+  border-radius:10px;
+  padding:14px;
+  opacity:0;animation:slideIn .5s .8s ease forwards;
+}
+@keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+.map-data-row{
+  display:flex;justify-content:space-between;
+  font-size:clamp(9px,1.3vw,12px);
+  padding:4px 0;
+  border-bottom:1px solid rgba(255,255,255,.05);
+}
+.map-data-row:last-child{border-bottom:none}
+.map-data-key{color:rgba(255,255,255,.4)}
+.map-data-val{font-family:'JetBrains Mono',monospace;color:#D4AF37;font-weight:600}
+.map-data-val.green{color:#34d399}
+.map-timer{
+  position:absolute;top:-40px;left:50%;transform:translateX(-50%);
+  font-family:'JetBrains Mono',monospace;
+  font-size:clamp(26px,5vw,48px);
+  font-weight:600;color:#D4AF37;
+  white-space:nowrap;
+}
+.map-timer span{font-size:.5em;color:rgba(212,175,55,.5)}
+
+/* S3 — AEDIS 3D BUILD */
+#s3{background:#060a18}
+.building-wrap{
+  position:relative;
+  width:min(340px,75vw);
+}
+.floor{
+  width:100%;background:rgba(212,175,55,.1);
+  border:1.5px solid rgba(212,175,55,.4);
+  border-radius:2px;
+  margin-bottom:3px;
+  height:clamp(22px,4vw,38px);
+  opacity:0;
+  transform:scaleY(0);transform-origin:bottom;
+  display:flex;align-items:center;padding:0 12px;
+  position:relative;overflow:hidden;
+}
+.floor::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(212,175,55,.08),transparent);
+  animation:shimmer 2s ease-in-out infinite;
+}
+@keyframes shimmer{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+.floor.glass{background:rgba(56,189,248,.1);border-color:rgba(56,189,248,.4)}
+.floor.glass::after{background:linear-gradient(90deg,transparent,rgba(56,189,248,.1),transparent)}
+.floor-label{
+  font-size:clamp(8px,1.2vw,11px);font-weight:600;
+  color:rgba(255,255,255,.5);z-index:1;
+  font-family:'JetBrains Mono',monospace;
+}
+.floor-wins{
+  position:absolute;right:10px;
+  display:flex;gap:4px;z-index:1;
+}
+.win{width:clamp(8px,1.5vw,14px);height:clamp(10px,1.8vw,18px);background:rgba(56,189,248,.35);border-radius:1px}
+.aedis-config{
+  position:absolute;right:clamp(-140px,-20vw,-100px);top:50%;
+  transform:translateY(-50%);
+  display:flex;flex-direction:column;gap:8px;
+  opacity:0;animation:slideIn .5s 2s ease forwards;
+}
+.cfg-item{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(15,25,50,.9);
+  border:1px solid rgba(212,175,55,.2);
+  border-radius:6px;padding:7px 12px;
+  font-size:clamp(10px,1.4vw,13px);
+}
+.cfg-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.cfg-dot.on{background:#34d399}
+.cfg-dot.off{background:rgba(255,255,255,.15)}
+.cfg-label{color:rgba(255,255,255,.7)}
+
+/* S4 — DNA RADAR */
+#s4{background:#040810}
+.dna-wrap{
+  display:flex;align-items:center;gap:clamp(20px,5vw,60px);
+  flex-wrap:wrap;justify-content:center;
+}
+.radar-svg{
+  width:min(280px,50vw);height:min(280px,50vw);
+  flex-shrink:0;
+}
+.dna-norms{
+  display:flex;flex-direction:column;gap:8px;
+  max-width:min(280px,45vw);
+}
+.dnorm{
+  display:flex;align-items:center;gap:10px;
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:7px;padding:9px 12px;
+  opacity:0;animation:fadeIn .4s ease forwards;
+}
+.dnorm:nth-child(1){animation-delay:.2s}
+.dnorm:nth-child(2){animation-delay:.5s}
+.dnorm:nth-child(3){animation-delay:.8s}
+.dnorm:nth-child(4){animation-delay:1.1s}
+.dnorm:nth-child(5){animation-delay:1.4s}
+.dnorm:nth-child(6){animation-delay:1.7s}
+.dnorm-icon{font-size:clamp(14px,2vw,18px);flex-shrink:0}
+.dnorm-name{font-family:'JetBrains Mono',monospace;font-size:clamp(9px,1.3vw,12px);color:#38bdf8;min-width:60px}
+.dnorm-desc{font-size:clamp(9px,1.3vw,12px);color:rgba(255,255,255,.5);flex:1;line-height:1.4}
+.dnorm-status{font-size:clamp(9px,1.2vw,11px);font-weight:700;padding:2px 7px;border-radius:4px;white-space:nowrap;flex-shrink:0}
+.ok{background:rgba(52,211,153,.12);color:#34d399;border:1px solid rgba(52,211,153,.2)}
+.warn{background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.2)}
+
+/* S5 — RELEVEE */
+#s5{background:#040a18}
+.plans-showcase{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:clamp(8px,2vw,20px);
+  width:min(720px,90vw);
+}
+.plan-item{
+  background:rgba(10,18,38,.9);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:10px;overflow:hidden;
+  opacity:0;animation:planIn .5s ease forwards;
+}
+@keyframes planIn{from{opacity:0;transform:scale(.9) translateY(20px)}to{opacity:1;transform:none}}
+.plan-item:nth-child(1){animation-delay:.1s}
+.plan-item:nth-child(2){animation-delay:.4s}
+.plan-item:nth-child(3){animation-delay:.7s}
+.plan-item:nth-child(4){animation-delay:1.0s}
+.plan-img{
+  height:clamp(80px,12vw,140px);
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(5,10,25,.8);
+  position:relative;overflow:hidden;
+}
+.plan-label{
+  padding:8px 12px;
+  font-size:clamp(10px,1.4vw,13px);font-weight:600;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.plan-fmt{font-size:clamp(8px,1.1vw,10px);color:rgba(212,175,55,.6);font-family:'JetBrains Mono',monospace}
+
+/* S6 — CONTEXT 3D */
+#s6{background:#020610}
+.ctx-before-after{
+  display:flex;align-items:center;gap:clamp(12px,3vw,40px);
+  flex-wrap:wrap;justify-content:center;
+}
+.ctx-panel{
+  width:min(300px,42vw);
+  background:rgba(10,18,40,.8);
+  border-radius:12px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.08);
+}
+.ctx-panel.highlight{border-color:rgba(212,175,55,.4);box-shadow:0 0 40px rgba(212,175,55,.1)}
+.ctx-header{
+  padding:10px 14px;
+  font-size:clamp(9px,1.3vw,12px);font-weight:700;
+  display:flex;align-items:center;gap:8px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.ctx-body{height:clamp(140px,20vw,220px);position:relative;overflow:hidden}
+.ctx-vs{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(20px,4vw,36px);font-weight:800;
+  color:rgba(255,255,255,.2);flex-shrink:0;
+}
+
+/* S7 — TCI FILM */
+#s7{background:#040810}
+.tci-wrap{
+  width:min(720px,90vw);
+  position:relative;
+}
+.tci-timeline{
+  position:relative;
+  height:clamp(40px,6vw,60px);
+  background:rgba(255,255,255,.03);
+  border-radius:8px;overflow:hidden;
+  margin-bottom:clamp(16px,3vw,32px);
+}
+.tci-progress{
+  position:absolute;left:0;top:0;bottom:0;width:0;
+  background:linear-gradient(90deg,rgba(212,175,55,.3),rgba(212,175,55,.1));
+  transition:width 6s linear;
+}
+.tci-years{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 16px;
+}
+.tci-year{
+  font-family:'JetBrains Mono',monospace;
+  font-size:clamp(9px,1.4vw,13px);
+  color:rgba(255,255,255,.3);
+}
+.tci-year.active{color:#D4AF37;font-weight:600}
+.tci-charts{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:clamp(8px,2vw,20px);
+}
+.tci-chart{
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:10px;padding:clamp(10px,2vw,18px);
+  opacity:0;animation:fadeIn .5s ease forwards;
+}
+.tci-chart:nth-child(1){animation-delay:.3s}
+.tci-chart:nth-child(2){animation-delay:.6s}
+.tci-chart:nth-child(3){animation-delay:.9s}
+.tci-chart-title{font-size:clamp(9px,1.3vw,12px);color:rgba(255,255,255,.5);margin-bottom:10px;text-transform:uppercase;letter-spacing:.8px}
+.tci-chart-val{
+  font-family:'JetBrains Mono',monospace;
+  font-size:clamp(22px,4vw,40px);font-weight:600;
+  line-height:1;margin-bottom:4px;
+}
+.tci-chart-sub{font-size:clamp(9px,1.2vw,11px);color:rgba(255,255,255,.3)}
+
+/* S8 — EXPORTURI */
+#s8{background:#020810}
+.export-rain{
+  display:flex;flex-wrap:wrap;gap:clamp(8px,1.5vw,16px);
+  justify-content:center;align-items:center;
+  max-width:min(700px,90vw);
+}
+.exp-pill{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:8px;
+  padding:clamp(8px,1.5vw,14px) clamp(10px,2vw,18px);
+  opacity:0;animation:expIn .4s ease forwards;
+}
+.exp-pill:nth-child(1){animation-delay:.0s}
+.exp-pill:nth-child(2){animation-delay:.12s}
+.exp-pill:nth-child(3){animation-delay:.24s}
+.exp-pill:nth-child(4){animation-delay:.36s}
+.exp-pill:nth-child(5){animation-delay:.48s}
+.exp-pill:nth-child(6){animation-delay:.60s}
+.exp-pill:nth-child(7){animation-delay:.72s}
+.exp-pill:nth-child(8){animation-delay:.84s}
+.exp-pill:nth-child(9){animation-delay:.96s}
+.exp-pill:nth-child(10){animation-delay:1.08s}
+.exp-pill:nth-child(11){animation-delay:1.20s}
+.exp-pill:nth-child(12){animation-delay:1.32s}
+.exp-pill:nth-child(13){animation-delay:1.44s}
+@keyframes expIn{from{opacity:0;transform:translateY(-20px) scale(.8)}to{opacity:1;transform:none}}
+.exp-icon{font-size:clamp(16px,2.5vw,24px);flex-shrink:0}
+.exp-name{font-size:clamp(11px,1.6vw,15px);font-weight:600}
+.exp-desc{font-size:clamp(9px,1.2vw,12px);color:rgba(255,255,255,.35)}
+.exp-pill.gold{border-color:rgba(212,175,55,.3);background:rgba(212,175,55,.06)}
+.exp-pill.blue{border-color:rgba(56,189,248,.3);background:rgba(56,189,248,.06)}
+.exp-pill.green{border-color:rgba(52,211,153,.3);background:rgba(52,211,153,.06)}
+
+/* S9 — PROIECTE COMPLEXE */
+#s9{background:#050a1a}
+.multi-wrap{
+  position:relative;
+  width:min(640px,90vw);
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:clamp(8px,2vw,20px);
+}
+.parcel-card{
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:10px;padding:clamp(10px,2vw,18px);
+  position:relative;
+  opacity:0;animation:fadeIn .4s ease forwards;
+}
+.parcel-card:nth-child(1){animation-delay:.2s;border-color:rgba(56,189,248,.2)}
+.parcel-card:nth-child(2){animation-delay:.5s;border-color:rgba(212,175,55,.2)}
+.parcel-card:nth-child(3){animation-delay:.8s;border-color:rgba(52,211,153,.2)}
+.pc-label{font-size:clamp(8px,1.2vw,11px);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;font-weight:700}
+.pc-building{
+  height:clamp(50px,8vw,80px);
+  border-radius:4px;margin-bottom:8px;
+  position:relative;overflow:hidden;
+  display:flex;align-items:flex-end;
+}
+.pc-floors{
+  width:100%;display:flex;flex-direction:column;gap:2px;
+  padding:4px;
+}
+.pc-floor{
+  height:clamp(6px,1.2vw,10px);border-radius:2px;
+  background:rgba(255,255,255,.15);
+}
+.pc-stats{font-size:clamp(9px,1.3vw,12px);color:rgba(255,255,255,.4)}
+.pc-stat-num{
+  font-family:'JetBrains Mono',monospace;
+  font-size:clamp(16px,3vw,26px);font-weight:600;
+  line-height:1;margin-bottom:2px;
+}
+.multi-total{
+  position:absolute;bottom:clamp(-50px,-7vw,-40px);
+  left:50%;transform:translateX(-50%);
+  background:rgba(10,18,38,.95);
+  border:1px solid rgba(212,175,55,.3);
+  border-radius:8px;padding:10px 20px;
+  white-space:nowrap;
+  font-size:clamp(11px,1.6vw,15px);
+  opacity:0;animation:fadeIn .5s 1.4s ease forwards;
+  text-align:center;
+}
+.multi-total-num{
+  font-family:'JetBrains Mono',monospace;
+  font-size:clamp(18px,3vw,28px);font-weight:600;color:#D4AF37;
+}
+
+/* S10 — OUTRO */
+#s10{background:#000}
+.outro-wrap{
+  text-align:center;position:relative;z-index:2;
+}
+.outro-logo{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(50px,10vw,120px);
+  font-weight:800;color:#fff;
+  letter-spacing:-3px;
+  opacity:0;animation:logoIn 1.2s .3s cubic-bezier(.16,1,.3,1) forwards;
+}
+.outro-logo span{color:#D4AF37}
+.outro-tagline{
+  font-size:clamp(12px,2vw,18px);
+  color:rgba(212,175,55,.6);
+  letter-spacing:4px;text-transform:uppercase;
+  margin-top:clamp(10px,2vw,20px);
+  opacity:0;animation:fadeIn .8s 1.5s forwards;
+}
+.outro-url{
+  font-family:'JetBrains Mono',monospace;
+  font-size:clamp(12px,2vw,18px);
+  color:rgba(255,255,255,.4);
+  margin-top:clamp(12px,2.5vw,24px);
+  opacity:0;animation:fadeIn .8s 2.2s forwards;
+}
+.outro-url a{color:#38bdf8;text-decoration:none}
+.outro-url a:hover{color:#7dd3fc}
+.outro-live{
+  margin-top:clamp(20px,4vw,40px);
+  font-size:clamp(14px,2.5vw,22px);
+  font-weight:500;
+  opacity:0;animation:fadeIn .8s 2.8s forwards;
+}
+.outro-live strong{color:#D4AF37}
+</style>
+</head>
+<body>
+<div id="film">
+  <div id="stage">
+    <!-- FLASH TRANSITION -->
+    <div id="flash"></div>
+
+    <!-- LETTERBOX -->
+    <div class="lbox-top"></div>
+
+    <!-- ════ SCENE 0: INTRO ════ -->
+    <div class="scene active" id="s0">
+      <div class="s0-grid"></div>
+      <div class="s0-glow"></div>
+      <div style="display:flex;flex-direction:column;align-items:center;position:relative;z-index:2">
+        <div class="s0-logo">Urban<span>X</span></div>
+        <div class="s0-tagline">Platforma de Fundamentare Urbanistică Explicabilă</div>
+      </div>
+      <div class="s0-stats">
+        <div class="s0-stat"><div class="s0-snum" id="c-speed">0s</div><div class="s0-slabel">Analiză parcelă</div></div>
+        <div class="s0-stat"><div class="s0-snum" id="c-norms">0</div><div class="s0-slabel">Normative verificate</div></div>
+        <div class="s0-stat"><div class="s0-snum" id="c-exports">0</div><div class="s0-slabel">Formate export</div></div>
+        <div class="s0-stat"><div class="s0-snum" id="c-years">0</div><div class="s0-slabel">Ani proiecții</div></div>
+      </div>
+    </div>
+
+    <!-- ════ SCENE 1: PROBLEMA ════ -->
+    <div class="scene" id="s1">
+      <div class="s1-pile" style="height:min(300px,55vw)">
+        <div class="s1-doc"><div class="doc-lines"><div class="doc-line"></div><div class="doc-line"></div><div class="doc-line"></div><div class="doc-line" style="width:80%"></div><div class="doc-line" style="width:40%"></div></div></div>
+        <div class="s1-doc"><div class="doc-lines"><div class="doc-line"></div><div class="doc-line"></div><div class="doc-line" style="width:70%"></div><div class="doc-line" style="width:90%"></div></div></div>
+        <div class="s1-doc"><div class="doc-lines"><div class="doc-line"></div><div class="doc-line" style="width:85%"></div><div class="doc-line"></div><div class="doc-line" style="width:60%"></div></div></div>
+        <div class="s1-numbers">
+          <div class="s1-num"><div class="s1-num-val">8–12</div><div class="s1-num-label">săptămâni dosar manual</div></div>
+          <div class="s1-num"><div class="s1-num-val">47</div><div class="s1-num-label">normative de verificat</div></div>
+          <div class="s1-num"><div class="s1-num-val">∞</div><div class="s1-num-label">revizii și erori posibile</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ SCENE 2: SELECTARE PARCELĂ ════ -->
+    <div class="scene" id="s2">
+      <div class="map-bg"></div>
+      <div class="map-grid"></div>
+      <div class="map-parcel">
+        <div class="map-timer">1.1<span>s</span></div>
+        <div class="parcel-outline"></div>
+        <div class="map-pin">📍</div>
+        <div class="map-data">
+          <div class="map-data-row"><span class="map-data-key">Nr. cad.</span><span class="map-data-val">174114</span></div>
+          <div class="map-data-row"><span class="map-data-key">UTR</span><span class="map-data-val">G1</span></div>
+          <div class="map-data-row"><span class="map-data-key">Suprafață</span><span class="map-data-val">59.529m²</span></div>
+          <div class="map-data-row"><span class="map-data-key">POT max</span><span class="map-data-val green">40%</span></div>
+          <div class="map-data-row"><span class="map-data-key">CUT max</span><span class="map-data-val green">1.0</span></div>
+          <div class="map-data-row"><span class="map-data-key">H max</span><span class="map-data-val">8m</span></div>
+          <div class="map-data-row"><span class="map-data-key">Front</span><span class="map-data-val">N · 321m</span></div>
+          <div class="map-data-row"><span class="map-data-key">Seismic</span><span class="map-data-val">ag 0.25g</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ SCENE 3: AEDIS BUILD ════ -->
+    <div class="scene" id="s3">
+      <div class="building-wrap" id="building-wrap">
+        <!-- floors inserted by JS -->
+        <div class="aedis-config">
+          <div class="cfg-item"><div class="cfg-dot on"></div><span class="cfg-label">Perete cortină</span></div>
+          <div class="cfg-item"><div class="cfg-dot on"></div><span class="cfg-label">Balcoane larg 2.0m</span></div>
+          <div class="cfg-item"><div class="cfg-dot on"></div><span class="cfg-label">Penthouse retras</span></div>
+          <div class="cfg-item"><div class="cfg-dot off"></div><span class="cfg-label">Mansardă</span></div>
+          <div class="cfg-item"><div class="cfg-dot on"></div><span class="cfg-label">Finisaj travertin</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ SCENE 4: DNA URBAN ════ -->
+    <div class="scene" id="s4">
+      <div class="dna-wrap">
+        <svg class="radar-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <g transform="translate(100,105)">
+            <polygon points="0,-65 56,-32 56,32 0,65 -56,32 -56,-32" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="1"/>
+            <polygon points="0,-45 39,-22 39,22 0,45 -39,22 -39,-22" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="1"/>
+            <polygon points="0,-25 22,-12 22,12 0,25 -22,12 -22,-12" fill="none" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
+            <line x1="0" y1="0" x2="0" y2="-65" stroke="rgba(255,255,255,.07)" stroke-width="1"/>
+            <line x1="0" y1="0" x2="56" y2="-32" stroke="rgba(255,255,255,.07)" stroke-width="1"/>
+            <line x1="0" y1="0" x2="56" y2="32" stroke="rgba(255,255,255,.07)" stroke-width="1"/>
+            <line x1="0" y1="0" x2="0" y2="65" stroke="rgba(255,255,255,.07)" stroke-width="1"/>
+            <line x1="0" y1="0" x2="-56" y2="32" stroke="rgba(255,255,255,.07)" stroke-width="1"/>
+            <line x1="0" y1="0" x2="-56" y2="-32" stroke="rgba(255,255,255,.07)" stroke-width="1"/>
+            <polygon id="radar-poly" points="0,0 0,0 0,0 0,0 0,0 0,0" fill="rgba(212,175,55,.12)" stroke="rgba(212,175,55,.7)" stroke-width="2"/>
+            <circle id="rp1" cx="0" cy="0" r="3" fill="#D4AF37"/>
+            <circle id="rp2" cx="0" cy="0" r="3" fill="#D4AF37"/>
+            <circle id="rp3" cx="0" cy="0" r="3" fill="#f87171"/>
+            <circle id="rp4" cx="0" cy="0" r="3" fill="#f87171"/>
+            <circle id="rp5" cx="0" cy="0" r="3" fill="#f87171"/>
+            <circle id="rp6" cx="0" cy="0" r="3" fill="#D4AF37"/>
+            <text x="0" y="-72" text-anchor="middle" font-size="9" fill="rgba(212,175,55,.8)" font-family="monospace">POT</text>
+            <text x="64" y="-28" font-size="9" fill="rgba(212,175,55,.8)" font-family="monospace">CUT</text>
+            <text x="30" y="48" font-size="9" fill="rgba(248,113,113,.8)" font-family="monospace">OMS</text>
+            <text x="0" y="80" text-anchor="middle" font-size="9" fill="rgba(248,113,113,.8)" font-family="monospace">ISU</text>
+            <text x="-70" y="48" font-size="9" fill="rgba(248,113,113,.8)" font-family="monospace">NP057</text>
+            <text x="-72" y="-28" font-size="9" fill="rgba(212,175,55,.8)" font-family="monospace">Parcaje</text>
+            <rect x="-30" y="-18" width="60" height="36" rx="6" fill="rgba(212,175,55,.1)" stroke="rgba(212,175,55,.25)" stroke-width="1"/>
+            <text x="0" y="6" text-anchor="middle" font-size="20" font-weight="bold" fill="#D4AF37" font-family="monospace">12</text>
+          </g>
+          <text x="100" y="18" text-anchor="middle" font-size="8" fill="rgba(212,175,55,.5)" font-family="monospace">DNA URBAN</text>
+        </svg>
+        <div class="dna-norms">
+          <div class="dnorm"><span class="dnorm-icon">✅</span><span class="dnorm-name">POT</span><span class="dnorm-desc">3% / max 40% · Suprafață construită la sol</span><span class="dnorm-status ok">CONFORM</span></div>
+          <div class="dnorm"><span class="dnorm-icon">✅</span><span class="dnorm-name">CUT</span><span class="dnorm-desc">0.03 / max 1.0 · Coeficient utilizare teren</span><span class="dnorm-status ok">CONFORM</span></div>
+          <div class="dnorm"><span class="dnorm-icon">⚠️</span><span class="dnorm-name">OMS 119</span><span class="dnorm-desc">58 camere cu însorire &lt; 1.5h/zi</span><span class="dnorm-status warn">ATENȚIE</span></div>
+          <div class="dnorm"><span class="dnorm-icon">❌</span><span class="dnorm-name">ISU P118</span><span class="dnorm-desc">Căi evacuare &gt; 30m · SC2 necesar</span><span class="dnorm-status warn">NECONFORM</span></div>
+          <div class="dnorm"><span class="dnorm-icon">⚠️</span><span class="dnorm-name">NP 057</span><span class="dnorm-desc">Camere sub suprafața minimă legală</span><span class="dnorm-status warn">ATENȚIE</span></div>
+          <div class="dnorm"><span class="dnorm-icon">✅</span><span class="dnorm-name">NP 067</span><span class="dnorm-desc">2044 / 36 locuri parcare necesare</span><span class="dnorm-status ok">CONFORM</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ SCENE 5: RELEVEE ════ -->
+    <div class="scene" id="s5">
+      <div class="plans-showcase">
+        <!-- Plan parter -->
+        <div class="plan-item">
+          <div class="plan-img">
+            <svg width="90%" height="90%" viewBox="0 0 200 130">
+              <rect width="200" height="130" fill="#050d1e"/>
+              <rect x="20" y="10" width="160" height="100" fill="rgba(255,255,255,.02)"/>
+              <rect x="20" y="10" width="160" height="5" fill="#1a2b5a"/>
+              <rect x="20" y="105" width="160" height="5" fill="#1a2b5a"/>
+              <rect x="20" y="10" width="5" height="100" fill="#1a2b5a"/>
+              <rect x="175" y="10" width="5" height="100" fill="#1a2b5a"/>
+              <line x1="70" y1="15" x2="70" y2="110" stroke="#2a3d6a" stroke-width="3"/>
+              <line x1="120" y1="15" x2="120" y2="75" stroke="#2a3d6a" stroke-width="3"/>
+              <line x1="25" y1="75" x2="120" y2="75" stroke="#2a3d6a" stroke-width="3"/>
+              <text x="45" y="55" text-anchor="middle" font-size="8" fill="rgba(212,175,55,.8)">LIVING</text>
+              <text x="147" y="47" text-anchor="middle" font-size="7" fill="rgba(255,255,255,.4)">DORMITOR</text>
+              <text x="45" y="96" text-anchor="middle" font-size="7" fill="rgba(255,255,255,.4)">BAIE</text>
+              <text x="147" y="96" text-anchor="middle" font-size="7" fill="rgba(255,255,255,.4)">BUCĂTĂRIE</text>
+            </svg>
+          </div>
+          <div class="plan-label" style="color:#e2e8f0">Plan Parter<span class="plan-fmt">PDF A3</span></div>
+        </div>
+        <!-- Fațadă -->
+        <div class="plan-item">
+          <div class="plan-img">
+            <svg width="90%" height="90%" viewBox="0 0 200 130">
+              <rect width="200" height="130" fill="#050d1e"/>
+              <rect x="15" y="10" width="170" height="100" fill="rgba(240,236,230,.03)" stroke="rgba(212,175,55,.3)" stroke-width="1.5"/>
+              <line x1="15" y1="35" x2="185" y2="35" stroke="rgba(180,190,210,.25)" stroke-width="2"/>
+              <line x1="15" y1="60" x2="185" y2="60" stroke="rgba(180,190,210,.25)" stroke-width="2"/>
+              <line x1="15" y1="85" x2="185" y2="85" stroke="rgba(180,190,210,.25)" stroke-width="2"/>
+              <rect x="22" y="14" width="20" height="18" fill="rgba(56,189,248,.2)" stroke="rgba(56,189,248,.4)" stroke-width="1" rx="1"/>
+              <rect x="50" y="14" width="20" height="18" fill="rgba(56,189,248,.2)" stroke="rgba(56,189,248,.4)" stroke-width="1" rx="1"/>
+              <rect x="78" y="14" width="20" height="18" fill="rgba(56,189,248,.2)" stroke="rgba(56,189,248,.4)" stroke-width="1" rx="1"/>
+              <rect x="106" y="14" width="20" height="18" fill="rgba(56,189,248,.2)" stroke="rgba(56,189,248,.4)" stroke-width="1" rx="1"/>
+              <rect x="134" y="14" width="20" height="18" fill="rgba(56,189,248,.2)" stroke="rgba(56,189,248,.4)" stroke-width="1" rx="1"/>
+              <rect x="22" y="39" width="20" height="18" fill="rgba(56,189,248,.2)" stroke="rgba(56,189,248,.4)" stroke-width="1" rx="1"/>
+              <rect x="50" y="39" width="20" height="18" fill="rgba(56,189,248,.2)" stroke="rgba(56,189,248,.4)" stroke-width="1" rx="1"/>
+              <rect x="78" y="39" width="20" height="18" fill="rgba(56,189,248,.2)" stroke="rgba(56,189,248,.4)" stroke-width="1" rx="1"/>
+              <rect x="106" y="39" width="20" height="18" fill="rgba(56,189,248,.2)" stroke="rgba(56,189,248,.4)" stroke-width="1" rx="1"/>
+              <rect x="22" y="55" width="20" height="8" fill="rgba(120,140,180,.2)" stroke="rgba(120,140,180,.35)" stroke-width="1"/>
+              <rect x="78" y="55" width="20" height="8" fill="rgba(120,140,180,.2)" stroke="rgba(120,140,180,.35)" stroke-width="1"/>
+              <rect x="134" y="55" width="20" height="8" fill="rgba(120,140,180,.2)" stroke="rgba(120,140,180,.35)" stroke-width="1"/>
+              <rect x="85" y="85" width="30" height="25" fill="rgba(140,120,80,.2)" stroke="rgba(180,150,60,.35)" stroke-width="1"/>
+            </svg>
+          </div>
+          <div class="plan-label" style="color:#e2e8f0">Fațadă N/S/E/V<span class="plan-fmt">4×PDF AEDIS</span></div>
+        </div>
+        <!-- Acoperiș -->
+        <div class="plan-item">
+          <div class="plan-img">
+            <svg width="90%" height="90%" viewBox="0 0 200 130">
+              <rect width="200" height="130" fill="#050d1e"/>
+              <rect x="10" y="8" width="180" height="108" fill="rgba(140,115,80,.1)" stroke="rgba(140,100,40,.35)" stroke-width="1.5" rx="2"/>
+              <line x1="20" y1="62" x2="180" y2="62" stroke="rgba(100,70,20,.7)" stroke-width="2.5"/>
+              <text x="100" y="58" text-anchor="middle" font-size="7" fill="rgba(180,130,40,.7)" font-weight="bold">COAMĂ +3.2m</text>
+              <line x1="45" y1="8" x2="70" y2="62" stroke="rgba(56,189,248,.18)" stroke-width="1" stroke-dasharray="3,4"/>
+              <line x1="100" y1="8" x2="100" y2="62" stroke="rgba(56,189,248,.18)" stroke-width="1" stroke-dasharray="3,4"/>
+              <line x1="155" y1="8" x2="130" y2="62" stroke="rgba(56,189,248,.18)" stroke-width="1" stroke-dasharray="3,4"/>
+              <line x1="45" y1="116" x2="70" y2="62" stroke="rgba(56,189,248,.18)" stroke-width="1" stroke-dasharray="3,4"/>
+              <line x1="100" y1="116" x2="100" y2="62" stroke="rgba(56,189,248,.18)" stroke-width="1" stroke-dasharray="3,4"/>
+              <line x1="155" y1="116" x2="130" y2="62" stroke="rgba(56,189,248,.18)" stroke-width="1" stroke-dasharray="3,4"/>
+              <rect x="10" y="6" width="180" height="4" fill="rgba(56,100,200,.3)" rx="1"/>
+              <rect x="10" y="114" width="180" height="4" fill="rgba(56,100,200,.3)" rx="1"/>
+              <circle cx="11" cy="8" r="3.5" fill="rgba(56,100,200,.5)"/>
+              <circle cx="189" cy="8" r="3.5" fill="rgba(56,100,200,.5)"/>
+              <circle cx="11" cy="116" r="3.5" fill="rgba(56,100,200,.5)"/>
+              <circle cx="189" cy="116" r="3.5" fill="rgba(56,100,200,.5)"/>
+            </svg>
+          </div>
+          <div class="plan-label" style="color:#e2e8f0">Plan Acoperiș<span class="plan-fmt">Șarpantă 30°</span></div>
+        </div>
+        <!-- Subsol -->
+        <div class="plan-item">
+          <div class="plan-img">
+            <svg width="90%" height="90%" viewBox="0 0 200 130">
+              <rect width="200" height="130" fill="#050d1e"/>
+              <rect x="8" y="8" width="184" height="112" fill="rgba(20,30,60,.5)" stroke="rgba(56,100,200,.3)" stroke-width="1.5"/>
+              <rect x="8" y="48" width="184" height="28" fill="rgba(40,60,120,.25)"/>
+              <text x="100" y="65" text-anchor="middle" font-size="7" fill="rgba(56,189,248,.7)" font-weight="bold">CULOAR 6.0m</text>
+              <rect x="10" y="10" width="13" height="36" fill="rgba(50,80,150,.2)" stroke="rgba(80,120,200,.3)" stroke-width="1" rx="1"/>
+              <rect x="25" y="10" width="13" height="36" fill="rgba(50,80,150,.2)" stroke="rgba(80,120,200,.3)" stroke-width="1" rx="1"/>
+              <rect x="40" y="10" width="13" height="36" fill="rgba(50,80,150,.2)" stroke="rgba(80,120,200,.3)" stroke-width="1" rx="1"/>
+              <rect x="55" y="10" width="13" height="36" fill="rgba(50,80,150,.2)" stroke="rgba(80,120,200,.3)" stroke-width="1" rx="1"/>
+              <rect x="70" y="10" width="13" height="36" fill="rgba(50,80,150,.2)" stroke="rgba(80,120,200,.3)" stroke-width="1" rx="1"/>
+              <rect x="85" y="10" width="13" height="36" fill="rgba(50,80,150,.2)" stroke="rgba(80,120,200,.3)" stroke-width="1" rx="1"/>
+              <rect x="130" y="78" width="16" height="38" fill="rgba(70,100,180,.2)" stroke="rgba(100,140,220,.4)" stroke-width="1" rx="1"/>
+              <rect x="10" y="78" width="13" height="38" fill="rgba(50,80,150,.2)" stroke="rgba(80,120,200,.3)" stroke-width="1" rx="1"/>
+              <rect x="25" y="78" width="13" height="38" fill="rgba(50,80,150,.2)" stroke="rgba(80,120,200,.3)" stroke-width="1" rx="1"/>
+              <rect x="40" y="78" width="13" height="38" fill="rgba(50,80,150,.2)" stroke="rgba(80,120,200,.3)" stroke-width="1" rx="1"/>
+              <rect x="55" y="78" width="13" height="38" fill="rgba(50,80,150,.2)" stroke="rgba(80,120,200,.3)" stroke-width="1" rx="1"/>
+              <rect x="70" y="78" width="13" height="38" fill="rgba(50,80,150,.2)" stroke="rgba(80,120,200,.3)" stroke-width="1" rx="1"/>
+              <rect x="85" y="78" width="13" height="38" fill="rgba(50,80,150,.2)" stroke="rgba(80,120,200,.3)" stroke-width="1" rx="1"/>
+              <line x1="130" y1="78" x2="146" y2="78" stroke="rgba(248,113,113,.6)" stroke-width="2"/>
+            </svg>
+          </div>
+          <div class="plan-label" style="color:#e2e8f0">Subsol Parcare<span class="plan-fmt">NP 067 · 54 locuri</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ SCENE 6: CONTEXT 3D ════ -->
+    <div class="scene" id="s6">
+      <div class="ctx-before-after">
+        <div class="ctx-panel">
+          <div class="ctx-header" style="color:#f87171">
+            <span style="font-size:16px">❌</span> Fal.ai (eliminat)
+          </div>
+          <div class="ctx-body" style="background:#0a080f;display:flex;align-items:center;justify-content:center;font-size:clamp(10px,1.5vw,13px);color:rgba(248,113,113,.5);text-align:center;padding:20px;line-height:1.8">
+            Imagini inventate<br>Nu respectă AEDIS<br>Context urban inexistent<br>Stiluri și materiale greșite
+          </div>
+        </div>
+        <div class="ctx-vs">→</div>
+        <div class="ctx-panel highlight">
+          <div class="ctx-header" style="color:#34d399">
+            <span style="font-size:16px">✅</span> Three.js PBR + OSM
+          </div>
+          <div class="ctx-body">
+            <svg width="100%" height="100%" viewBox="0 0 260 180">
+              <rect width="260" height="180" fill="#060d20"/>
+              <rect x="0" y="130" width="260" height="50" fill="rgba(10,18,40,.9)"/>
+              <rect x="5" y="90" width="45" height="50" fill="rgba(22,38,75,.8)" rx="1"/>
+              <rect x="8" y="75" width="25" height="65" fill="rgba(18,32,68,.9)" rx="1"/>
+              <rect x="210" y="85" width="45" height="55" fill="rgba(22,38,75,.8)" rx="1"/>
+              <rect x="225" y="70" width="25" height="70" fill="rgba(18,32,68,.9)" rx="1"/>
+              <rect x="95" y="35" width="70" height="95" fill="rgba(212,175,55,.08)" rx="2"/>
+              <rect x="95" y="35" width="70" height="95" fill="none" stroke="rgba(212,175,55,.6)" stroke-width="1.5" rx="2"/>
+              <rect x="98" y="37" width="64" height="91" fill="rgba(56,189,248,.1)" rx="1"/>
+              <line x1="113" y1="35" x2="113" y2="130" stroke="rgba(80,120,180,.35)" stroke-width="1"/>
+              <line x1="130" y1="35" x2="130" y2="130" stroke="rgba(80,120,180,.35)" stroke-width="1"/>
+              <line x1="147" y1="35" x2="147" y2="130" stroke="rgba(80,120,180,.35)" stroke-width="1"/>
+              <line x1="164" y1="35" x2="164" y2="130" stroke="rgba(80,120,180,.35)" stroke-width="1"/>
+              <line x1="95" y1="55" x2="165" y2="55" stroke="rgba(80,120,180,.3)" stroke-width="1"/>
+              <line x1="95" y1="75" x2="165" y2="75" stroke="rgba(80,120,180,.3)" stroke-width="1"/>
+              <line x1="95" y1="95" x2="165" y2="95" stroke="rgba(80,120,180,.3)" stroke-width="1"/>
+              <line x1="95" y1="115" x2="165" y2="115" stroke="rgba(80,120,180,.3)" stroke-width="1"/>
+              <rect x="105" y="23" width="50" height="14" fill="rgba(212,175,55,.15)" rx="2" stroke="rgba(212,175,55,.5)" stroke-width="1"/>
+              <text x="130" y="33" text-anchor="middle" font-family="monospace" font-size="6" fill="#D4AF37">PENTHOUSE</text>
+              <text x="20" y="108" text-anchor="middle" font-family="monospace" font-size="6" fill="rgba(56,189,248,.4)">OSM</text>
+              <text x="240" y="103" text-anchor="middle" font-family="monospace" font-size="6" fill="rgba(56,189,248,.4)">OSM</text>
+              <text x="130" y="145" text-anchor="middle" font-family="monospace" font-size="8" fill="#D4AF37" font-weight="bold">AEDIS PBR · Context Real</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ SCENE 7: TCI CINEMA ════ -->
+    <div class="scene" id="s7">
+      <div class="tci-wrap">
+        <div class="sc-title" style="position:relative;top:auto;left:auto;transform:none;text-align:left;margin-bottom:clamp(12px,2vw,20px)">
+          <div class="sc-num">TCI CINEMA — URBAN INTELLIGENCE</div>
+        </div>
+        <div class="tci-timeline">
+          <div class="tci-progress" id="tci-prog"></div>
+          <div class="tci-years">
+            <span class="tci-year active" id="tci-y1">2024</span>
+            <span class="tci-year" id="tci-y2">2028</span>
+            <span class="tci-year" id="tci-y3">2032</span>
+            <span class="tci-year" id="tci-y4">2036</span>
+            <span class="tci-year" id="tci-y5">2040</span>
+            <span class="tci-year" id="tci-y6">2044</span>
+          </div>
+        </div>
+        <div class="tci-charts">
+          <div class="tci-chart">
+            <div class="tci-chart-title">Populație UAT</div>
+            <div class="tci-chart-val" style="color:#38bdf8" id="pop-val">290K</div>
+            <div class="tci-chart-sub">tendință: +2.1%/an</div>
+          </div>
+          <div class="tci-chart">
+            <div class="tci-chart-title">Autorizații / an</div>
+            <div class="tci-chart-val" style="color:#34d399" id="auth-val">847</div>
+            <div class="tci-chart-sub">trend: pozitiv ↑</div>
+          </div>
+          <div class="tci-chart">
+            <div class="tci-chart-title">Potențial frontier</div>
+            <div class="tci-chart-val" style="color:#D4AF37" id="fron-val">23</div>
+            <div class="tci-chart-sub">zone prioritare</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ SCENE 8: EXPORTURI ════ -->
+    <div class="scene" id="s8">
+      <div class="export-rain">
+        <div class="exp-pill gold"><div class="exp-icon">📐</div><div><div class="exp-name">PDF A3</div><div class="exp-desc">Planșe profesionale</div></div></div>
+        <div class="exp-pill gold"><div class="exp-icon">📝</div><div><div class="exp-name">Memoriu Tehnic</div><div class="exp-desc">Document DAC</div></div></div>
+        <div class="exp-pill blue"><div class="exp-icon">◼</div><div><div class="exp-name">SVG Vectorial</div><div class="exp-desc">Inkscape · LibreCAD</div></div></div>
+        <div class="exp-pill blue"><div class="exp-icon">📏</div><div><div class="exp-name">DXF R2000</div><div class="exp-desc">AutoCAD · QGIS</div></div></div>
+        <div class="exp-pill"><div class="exp-icon">🏗</div><div><div class="exp-name">IFC-lite</div><div class="exp-desc">BIM ISO 16739</div></div></div>
+        <div class="exp-pill"><div class="exp-icon">📦</div><div><div class="exp-name">GLB / glTF</div><div class="exp-desc">Three.js · Blender</div></div></div>
+        <div class="exp-pill"><div class="exp-icon">🎬</div><div><div class="exp-name">Blender .py</div><div class="exp-desc">Randare Cycles</div></div></div>
+        <div class="exp-pill green"><div class="exp-icon">📊</div><div><div class="exp-name">CSV Suprafețe</div><div class="exp-desc">Excel · Power BI</div></div></div>
+        <div class="exp-pill green"><div class="exp-icon">🧱</div><div><div class="exp-name">Tablou Materiale</div><div class="exp-desc">PDF + CSV</div></div></div>
+        <div class="exp-pill gold"><div class="exp-icon">💼</div><div><div class="exp-name">Prezentare</div><div class="exp-desc">5 slide-uri</div></div></div>
+        <div class="exp-pill blue"><div class="exp-icon">📸</div><div><div class="exp-name">PNG 3D</div><div class="exp-desc">4 unghiuri live</div></div></div>
+        <div class="exp-pill"><div class="exp-icon">⚖</div><div><div class="exp-name">Scenarii A/B</div><div class="exp-desc">Comparativ maxim</div></div></div>
+        <div class="exp-pill gold" style="grid-column:span 2;opacity:0;animation:expIn .4s 1.56s ease forwards"><div class="exp-icon" style="font-size:clamp(20px,3vw,28px)">📦</div><div><div class="exp-name" style="font-size:clamp(13px,2vw,17px)">Export Complet</div><div class="exp-desc">Toate documentele · un singur click</div></div></div>
+      </div>
+    </div>
+
+    <!-- ════ SCENE 9: PROIECTE COMPLEXE ════ -->
+    <div class="scene" id="s9">
+      <div class="multi-wrap">
+        <div class="parcel-card">
+          <div class="pc-label" style="color:#38bdf8">Parcelă 1</div>
+          <div class="pc-building" style="background:rgba(56,189,248,.06)">
+            <div class="pc-floors">
+              <div class="pc-floor" style="background:rgba(56,189,248,.25)"></div>
+              <div class="pc-floor" style="background:rgba(56,189,248,.25)"></div>
+              <div class="pc-floor" style="background:rgba(56,189,248,.25)"></div>
+              <div class="pc-floor" style="background:rgba(56,189,248,.25)"></div>
+              <div class="pc-floor" style="background:rgba(56,189,248,.25)"></div>
+              <div class="pc-floor" style="background:rgba(56,189,248,.35);width:70%"></div>
+            </div>
+          </div>
+          <div class="pc-stats">
+            <div class="pc-stat-num" style="color:#38bdf8">P+5E</div>
+            <div style="font-size:clamp(9px,1.3vw,12px);color:rgba(255,255,255,.4)">Rezidențial · 18 apt.<br>SDA 2.100m²</div>
+          </div>
+        </div>
+        <div class="parcel-card">
+          <div class="pc-label" style="color:#D4AF37">Parcelă 2 — Corp A+B</div>
+          <div class="pc-building" style="background:rgba(212,175,55,.06)">
+            <div style="display:flex;gap:4px;height:100%;align-items:flex-end;padding:4px">
+              <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+                <div class="pc-floor" style="background:rgba(212,175,55,.25)"></div>
+                <div class="pc-floor" style="background:rgba(212,175,55,.25)"></div>
+                <div class="pc-floor" style="background:rgba(212,175,55,.25)"></div>
+                <div class="pc-floor" style="background:rgba(212,175,55,.3)"></div>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+                <div class="pc-floor" style="background:rgba(212,175,55,.2)"></div>
+                <div class="pc-floor" style="background:rgba(212,175,55,.2)"></div>
+                <div class="pc-floor" style="background:rgba(212,175,55,.2)"></div>
+                <div class="pc-floor" style="background:rgba(212,175,55,.2)"></div>
+                <div class="pc-floor" style="background:rgba(212,175,55,.2)"></div>
+                <div class="pc-floor" style="background:rgba(212,175,55,.3)"></div>
+              </div>
+            </div>
+          </div>
+          <div class="pc-stats">
+            <div class="pc-stat-num" style="color:#D4AF37">2 corpuri</div>
+            <div style="font-size:clamp(9px,1.3vw,12px);color:rgba(255,255,255,.4)">P+3E + P+5E<br>Mixt rez.+com.</div>
+          </div>
+        </div>
+        <div class="parcel-card">
+          <div class="pc-label" style="color:#34d399">Parcelă 3</div>
+          <div class="pc-building" style="background:rgba(52,211,153,.06)">
+            <div class="pc-floors">
+              <div class="pc-floor" style="background:rgba(52,211,153,.25)"></div>
+              <div class="pc-floor" style="background:rgba(52,211,153,.25)"></div>
+              <div class="pc-floor" style="background:rgba(52,211,153,.25)"></div>
+              <div class="pc-floor" style="background:rgba(52,211,153,.3)"></div>
+            </div>
+          </div>
+          <div class="pc-stats">
+            <div class="pc-stat-num" style="color:#34d399">P+3E</div>
+            <div style="font-size:clamp(9px,1.3vw,12px);color:rgba(255,255,255,.4)">Birouri · 850m²<br>Parter comercial</div>
+          </div>
+        </div>
+        <div class="multi-total">
+          <div style="font-size:clamp(9px,1.3vw,12px);color:rgba(255,255,255,.4);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px">Total proiect complex</div>
+          <div class="multi-total-num">5.050 m² SDA · ~6M€ · 3 parcele</div>
+          <div style="font-size:clamp(9px,1.3vw,11px);color:rgba(255,255,255,.35);margin-top:2px">Export Batch → 40+ documente generate automat</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ SCENE 10: OUTRO ════ -->
+    <div class="scene" id="s10">
+      <div class="s0-grid"></div>
+      <div class="s0-glow"></div>
+      <div class="outro-wrap">
+        <div class="outro-logo">Urban<span>X</span></div>
+        <div class="outro-tagline">TSS·FG · Think Smart Solutions</div>
+        <div class="outro-url"><a href="https://thinksmartsolutions.github.io/UrbanX/" target="_blank">thinksmartsolutions.github.io/UrbanX</a></div>
+        <div class="outro-live">Platforma este live — selectați orice parcelă din România</div>
+      </div>
+    </div>
+
+    <!-- SUBTITLE -->
+    <div id="subtitle">
+      <div id="sub-title"></div>
+      <div id="sub-text"></div>
+    </div>
+
+    <!-- SCENE TITLE -->
+    <div class="sc-title" id="sc-title-overlay" style="position:absolute;top:clamp(28px,5vh,52px)">
+      <div class="sc-num" id="ov-num"></div>
+      <div class="sc-name" id="ov-name"></div>
+    </div>
+
+  </div><!-- /stage -->
+
+  <!-- CONTROLS -->
+  <div id="controls">
+    <button id="play-btn" onclick="togglePlay()">⏸</button>
+    <div id="progress-wrap" onclick="seekFilm(event)">
+      <div id="progress-bar"></div>
+    </div>
+    <div id="time-label">0:00 / 11:00</div>
+    <div id="skip-btns"></div>
+  </div>
+</div><!-- /film -->
+
+<script>
+// ══════════════════════════════════════════════════════════════════════
+// FILM ENGINE
+// ══════════════════════════════════════════════════════════════════════
+const SCENES = [
+  {
+    id:'s0', dur:48,
+    title:'', scene:'',
+    subs:[
+      {at:2.5, title:'', text:'Bun venit la UrbanX — platforma de fundamentare urbanistică explicabilă din România.'},
+      {at:9, title:'', text:'De la selectarea parcelei pe hartă până la dosarul complet autorizabil — în câteva minute.'},
+      {at:17, title:'ANALIZĂ INSTANT', text:'1.1 secunde pentru o analiză completă: UTR, PUG, indicatori urbanistici, normative, seismic.'},
+      {at:26, title:'EXPORTURI PROFESIONALE', text:'15+ formate: PDF, DXF, SVG, IFC, GLB, Blender .py, CSV — toate generate automat.'},
+      {at:36, title:'PROIECȚII 20 DE ANI', text:'TCI Cinema simulează evoluția urbanistică pe 20 de ani: demografic, autorizații, frontier analysis.'},
+    ],
+    onEnter: animateIntroCounters,
+  },
+  {
+    id:'s1', dur:42,
+    title:'CONTEXT', scene:'Problema',
+    subs:[
+      {at:1, title:'PROBLEMA ACTUALĂ', text:'Un dosar de autorizație construire necesită 8–12 săptămâni. 47 de normative de verificat manual.'},
+      {at:12, title:'ERORI ȘI REVIZII', text:'Fiecare verificare manuală introduce posibilitatea de eroare. Fiecare eroare = săptămâni în plus.'},
+      {at:24, title:'COSTURI ASCUNSE', text:'Arhitect, verificator, consultanți — fiecare etapă costă timp și bani înainte de prima autorizație.'},
+      {at:34, title:'SOLUȚIA', text:'UrbanX automatizează verificarea normativelor, generează documentele și calculează indicatorii instant.'},
+    ]
+  },
+  {
+    id:'s2', dur:52,
+    title:'PASUL 1', scene:'Selectare Parcelă',
+    subs:[
+      {at:1, title:'SELECTARE PE HARTĂ', text:'Click pe orice parcelă din România. Geometria vine din cadastru. Analiza pornește instant.'},
+      {at:12, title:'DATE INSTANT', text:'UTR, suprafață, POT max, CUT max, Hmax, retrageri — toate din PUG-ul în vigoare al UAT-ului.'},
+      {at:24, title:'1.1 SECUNDE', text:'În mai puțin de 2 secunde ai toate datele urbanistice necesare pentru fundamentarea proiectului.'},
+      {at:36, title:'DATE VERIFICABILE', text:'Fiecare număr are sursă: ANCPI, INS, PUG, P100-1/2022. Nu estimări — date reale verificate.'},
+    ],
+    onEnter: () => {
+      // Animăm timer-ul 1.1s
+      let n=0;
+      const el=document.getElementById('?'); // placeholder, timer deja în CSS
+    }
+  },
+  {
+    id:'s3', dur:55,
+    title:'PASUL 2', scene:'AEDIS Volumetrie 3D',
+    subs:[
+      {at:1, title:'AEDIS — VOLUM AUTOMAT', text:'Pe baza indicatorilor, AEDIS generează volumetria optimă: dimensiuni, număr niveluri, amprenta la sol.'},
+      {at:14, title:'EDITABIL ÎN TIMP REAL', text:'Modifici orice parametru — niveluri, funcțiune, stil arhitectural — și planșele se actualizează instant.'},
+      {at:28, title:'STILURI ARHITECTURALE', text:'Perete cortină, mansardă, penthouse cu setback, balcoane larg/francez, finisaj clinker/travertin/tablă.'},
+      {at:42, title:'NORMATIVE INTEGRATE', text:'Orice modificare e verificată instant față de POT, CUT, Hmax. Alertă imediată la depășire.'},
+    ],
+    onEnter: animateBuildingFloors,
+  },
+  {
+    id:'s4', dur:55,
+    title:'PASUL 3', scene:'DNA Urban — Normative',
+    subs:[
+      {at:1, title:'DNA URBAN', text:'Motorul de verificare normativă verifică simultan: POT, CUT, OMS însorire, ISU evacuare, NP057, NP067.'},
+      {at:15, title:'RADAR NORMATIVE', text:'Vizualizare grafică a conformității per normativ. Scor 0-100. Verde = conform, roșu = neconform.'},
+      {at:28, title:'SOLUȚII AUTOMATE', text:'DNA nu arată doar problema — îți spune exact ce cameră, ce distanță, ce perete cauzează neconformitatea.'},
+      {at:42, title:'OPTIMIZARE AUTOMATĂ', text:'Butonul DNA Optimizare corectează automat: redimensionează camere, adaugă nuclee scări, recalculează.'},
+    ],
+    onEnter: animateRadar,
+  },
+  {
+    id:'s5', dur:60,
+    title:'PASUL 4', scene:'Relevee Arhitecturale',
+    subs:[
+      {at:1, title:'RELEVEE COMPLETE', text:'Toate documentele arhitecturale generate automat din volumetria AEDIS. Nici un desen manual.'},
+      {at:16, title:'PLAN PARTER', text:'Pereți exteriori 28cm și interiori 14cm, camere cotate, mobilier schematic, parcelă din cadastru.'},
+      {at:28, title:'FAȚADE DIFERENȚIATE', text:'N/S/E/V — fiecare fațadă reflectă exact setările AEDIS: perete cortină, penthouse, balcoane, finisaj.'},
+      {at:40, title:'PLAN ACOPERIȘ + SUBSOL', text:'Șarpantă sau terasă cu pante, rigole, burlane. Subsol parcare cu layout NP 067 generat dacă există deficit.'},
+    ]
+  },
+  {
+    id:'s6', dur:50,
+    title:'PASUL 5', scene:'Context 3D Urban Real',
+    subs:[
+      {at:1, title:'FAL.AI — ELIMINAT', text:'Fal.ai genera imagini inventate care nu respectau stilul AEDIS și nu aveau context urban real.'},
+      {at:14, title:'SOLUȚIA NOASTRĂ', text:'Three.js cu materiale PBR fizice + clădirile vecine reale din OpenStreetMap + CesiumJS 3D Tiles.'},
+      {at:28, title:'MATERIALE FIZICE', text:'Sticla reflectă, betonul e mat, tabla e metalică. Fiecare material din setările AEDIS aplicat exact.'},
+      {at:40, title:'CONTEXT REAL', text:'350m de clădiri vecine din OSM extrudate în scenă. Randare Blender cu clădiri OSM automat descărcate.'},
+    ]
+  },
+  {
+    id:'s7', dur:50,
+    title:'MODUL TCI', scene:'Proiecții Urbanistice 20 Ani',
+    subs:[
+      {at:1, title:'TCI CINEMA', text:'Territorial Cinema Intelligence — simulează evoluția urbanistică a unui UAT pe 20 de ani.'},
+      {at:14, title:'DATE REALE INS', text:'Proiecții demografice bazate pe date INS 2024. Tendințe migrație internă, natalitate, îmbătrânire.'},
+      {at:26, title:'FRONTIER ANALYSIS', text:'Detectează zonele cu potențial maxim de dezvoltare: densitate, autorizații, accesibilitate, gravitate urbană.'},
+      {at:38, title:'DECIZIE INVESTIȚIONALĂ', text:'Știi dacă zona e în creștere sau declin ÎNAINTE de achiziția terenului. Date, nu intuiție.'},
+    ],
+    onEnter: animateTCI,
+  },
+  {
+    id:'s8', dur:52,
+    title:'EXPORTURI', scene:'Dosar Complet — Un Click',
+    subs:[
+      {at:1, title:'15+ FORMATE', text:'Fiecare document generat în formatul potrivit pentru destinatarul lui: PDF pentru autorități, DXF pentru CAD, IFC pentru BIM.'},
+      {at:18, title:'PENTRU AUTORITĂȚI', text:'Memoriu Tehnic complet DAC, planșe A3 profesionale, bilanț suprafețe, tablou materiale — tot ce cere OCPI.'},
+      {at:32, title:'PENTRU PROIECTANȚI', text:'SVG vectorial pentru Inkscape, DXF pentru AutoCAD/QGIS, IFC4 pentru FreeCAD/ArchiCAD, GLB pentru Blender.'},
+      {at:44, title:'EXPORT COMPLET', text:'Un singur click descarcă toate documentele secvențial. Zero configurare manuală.'},
+    ]
+  },
+  {
+    id:'s9', dur:48,
+    title:'PROIECTE COMPLEXE', scene:'Lotizare + Multi-Parcelă',
+    subs:[
+      {at:1, title:'LOTIZARE', text:'Multiple corpuri pe aceeași parcelă. Fiecare corp cu propria funcțiune, niveluri și stilul lui arhitectural.'},
+      {at:14, title:'MULTI-PARCELĂ', text:'Selectezi simultan mai multe parcele. Fiecare cu PUG-ul ei, UTR-ul ei, releveele ei complete.'},
+      {at:28, title:'EXPORT BATCH', text:'Export Toate: iterează prin toate clădirile și generează complet pentru fiecare. 40+ documente automat.'},
+      {at:38, title:'PLAN SITUAȚIE GLOBAL', text:'Plan A3 combinat cu toate parcelele și clădirile la scara corectă. Total SDA, total investiție, comparativ.'},
+    ]
+  },
+  {
+    id:'s10', dur:38,
+    title:'', scene:'',
+    subs:[
+      {at:2, title:'', text:'UrbanX este live acum. Selectați orice parcelă din România.'},
+      {at:12, title:'', text:'thinksmartsolutions.github.io/UrbanX'},
+      {at:22, title:'LIVE ACUM', text:'Selectați orice parcelă din România și obțineți analiza completă în 1.1 secunde.'},
+    ]
+  },
+];
+
+const TOTAL_DUR = SCENES.reduce((s,sc)=>s+sc.dur, 0); // ~550s = ~9 min
+
+let currentScene = 0;
+let elapsed = 0;      // secunde totale scurse
+let sceneElapsed = 0; // secunde în scena curentă
+let playing = true;
+let lastTime = null;
+let rafId = null;
+let subShown = -1;
+
+// Build scene selector buttons
+const skipWrap = document.getElementById('skip-btns');
+SCENES.forEach((sc,i)=>{
+  if(!sc.scene) return;
+  const btn = document.createElement('button');
+  btn.className='skip-btn';
+  btn.textContent = sc.scene.split(' ')[0];
+  btn.title = sc.scene;
+  btn.onclick=()=>jumpToScene(i);
+  skipWrap.appendChild(btn);
+});
+
+function jumpToScene(idx){
+  // Calculăm elapsed total până la scena idx
+  let e=0;
+  for(let i=0;i<idx;i++) e+=SCENES[i].dur;
+  elapsed=e;
+  currentScene=idx;
+  sceneElapsed=0;
+  subShown=-1;
+  showScene(idx);
+  updateProgress();
+}
+
+function showScene(idx){
+  // Flash tranziție
+  const flash=document.getElementById('flash');
+  flash.classList.add('on');
+  setTimeout(()=>{
+    // Activăm scena
+    document.querySelectorAll('.scene').forEach(s=>s.classList.remove('active','fade-out'));
+    const sc=document.getElementById(SCENES[idx].id);
+    if(sc) sc.classList.add('active');
+    // Titlu overlay
+    const ovNum=document.getElementById('ov-num');
+    const ovName=document.getElementById('ov-name');
+    ovNum.textContent=SCENES[idx].title||'';
+    ovName.textContent=SCENES[idx].scene||'';
+    // Subtitlu reset
+    hideSubtitle();
+    subShown=-1;
+    // onEnter callback
+    SCENES[idx].onEnter?.();
+    flash.classList.remove('on');
+  },240);
+}
+
+function showSubtitle(sub){
+  const el=document.getElementById('subtitle');
+  document.getElementById('sub-title').textContent=sub.title||'';
+  document.getElementById('sub-text').textContent=sub.text||'';
+  el.classList.remove('show');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('show')));
+}
+function hideSubtitle(){
+  document.getElementById('subtitle').classList.remove('show');
+}
+
+function updateProgress(){
+  const pct = elapsed/TOTAL_DUR*100;
+  document.getElementById('progress-bar').style.width=pct+'%';
+  const mm=Math.floor(elapsed/60);
+  const ss=String(Math.floor(elapsed%60)).padStart(2,'0');
+  const em=Math.floor(TOTAL_DUR/60);
+  const es=String(Math.floor(TOTAL_DUR%60)).padStart(2,'0');
+  document.getElementById('time-label').textContent=`${mm}:${ss} / ${em}:${es}`;
+}
+
+function tick(ts){
+  if(!playing){rafId=requestAnimationFrame(tick);return;}
+  if(lastTime==null){lastTime=ts;}
+  const dt=(ts-lastTime)/1000;
+  lastTime=ts;
+  elapsed+=dt;
+  sceneElapsed+=dt;
+
+  // Check subtitle triggers
+  const scene=SCENES[currentScene];
+  scene.subs?.forEach((sub,i)=>{
+    if(i>subShown&&sceneElapsed>=sub.at){
+      subShown=i;
+      showSubtitle(sub);
+    }
+  });
+
+  // Check scene advance
+  if(sceneElapsed>=scene.dur){
+    if(currentScene<SCENES.length-1){
+      currentScene++;
+      sceneElapsed=0;
+      subShown=-1;
+      showScene(currentScene);
+    } else {
+      // Film ended — loop
+      elapsed=0; sceneElapsed=0; currentScene=0; subShown=-1;
+      showScene(0);
+    }
+  }
+
+  updateProgress();
+  rafId=requestAnimationFrame(tick);
+}
+
+function togglePlay(){
+  playing=!playing;
+  document.getElementById('play-btn').textContent=playing?'⏸':'▶';
+  if(playing) lastTime=null;
+}
+
+function seekFilm(e){
+  const rect=document.getElementById('progress-wrap').getBoundingClientRect();
+  const pct=(e.clientX-rect.left)/rect.width;
+  elapsed=pct*TOTAL_DUR;
+  // Găsim scena corespunzătoare
+  let acc=0;
+  for(let i=0;i<SCENES.length;i++){
+    if(elapsed<acc+SCENES[i].dur){
+      sceneElapsed=elapsed-acc;
+      if(i!==currentScene){currentScene=i;subShown=-1;showScene(i);}
+      break;
+    }
+    acc+=SCENES[i].dur;
+  }
+  lastTime=null;
+}
+
+// ══ SCENE ANIMATIONS ══
+
+function animateIntroCounters(){
+  // Speed counter
+  let n=0;
+  const t1=setInterval(()=>{
+    n=Math.min(n+0.05,1.1);
+    const el=document.getElementById('c-speed');
+    if(el) el.textContent=n.toFixed(1)+'s';
+    if(n>=1.1) clearInterval(t1);
+  },30);
+  // Norms
+  let n2=0;
+  const t2=setInterval(()=>{
+    n2=Math.min(n2+1,18);
+    const el=document.getElementById('c-norms');
+    if(el) el.textContent=n2;
+    if(n2>=18) clearInterval(t2);
+  },80);
+  // Exports
+  let n3=0;
+  const t3=setInterval(()=>{
+    n3=Math.min(n3+1,15);
+    const el=document.getElementById('c-exports');
+    if(el) el.textContent=n3+'+';
+    if(n3>=15) clearInterval(t3);
+  },80);
+  // Years
+  let n4=0;
+  const t4=setInterval(()=>{
+    n4=Math.min(n4+1,20);
+    const el=document.getElementById('c-years');
+    if(el) el.textContent=n4;
+    if(n4>=20) clearInterval(t4);
+  },60);
+}
+
+function animateBuildingFloors(){
+  const wrap=document.getElementById('building-wrap');
+  // Ștergem etajele vechi
+  wrap.querySelectorAll('.floor').forEach(f=>f.remove());
+  const floors=[
+    {label:'PH',type:'glass',wins:2},
+    {label:'E5',type:'glass',wins:5},
+    {label:'E4',type:'glass',wins:5},
+    {label:'E3',type:'glass',wins:5},
+    {label:'E2',type:'glass',wins:5},
+    {label:'E1',type:'glass',wins:5},
+    {label:'P',type:'',wins:4},
+  ];
+  floors.forEach((fl,i)=>{
+    const div=document.createElement('div');
+    div.className='floor'+(fl.type?' '+fl.type:'');
+    div.style.animationDelay=(i*0.22)+'s';
+    div.style.animationDuration='.4s';
+    div.style.animationFillMode='both';
+    const label=document.createElement('span');
+    label.className='floor-label';
+    label.textContent=fl.label;
+    div.appendChild(label);
+    if(fl.wins){
+      const wins=document.createElement('div');
+      wins.className='floor-wins';
+      for(let w=0;w<fl.wins;w++){
+        const win=document.createElement('div');
+        win.className='win';
+        wins.appendChild(win);
+      }
+      div.appendChild(wins);
+    }
+    wrap.insertBefore(div,wrap.querySelector('.aedis-config'));
+  });
+}
+
+function animateRadar(){
+  // Animăm poligonul radar
+  const poly=document.getElementById('radar-poly');
+  if(!poly) return;
+  // Puncte finale: POT=62, CUT=52, OMS=18, ISU=16, NP057=35, Parc=58
+  const pts=[
+    [0,-62],[52,-30],[18,22],[0,62],[-50,30],[-58,-32]
+  ];
+  let prog=0;
+  const t=setInterval(()=>{
+    prog=Math.min(prog+0.04,1);
+    const p=pts.map(pt=>[pt[0]*prog,pt[1]*prog]);
+    poly.setAttribute('points',p.map(pt=>pt.join(',')).join(' '));
+    // Mutat punctele marcante
+    const ids=['rp1','rp2','rp3','rp4','rp5','rp6'];
+    ids.forEach((id,i)=>{
+      const el=document.getElementById(id);
+      if(el){el.setAttribute('cx',p[i][0]);el.setAttribute('cy',p[i][1]);}
+    });
+    if(prog>=1) clearInterval(t);
+  },20);
+}
+
+function animateTCI(){
+  // Animăm progresul timeline-ului
+  const prog=document.getElementById('tci-prog');
+  if(prog) setTimeout(()=>{prog.style.width='100%';},100);
+  // Highlight ani
+  const years=['tci-y1','tci-y2','tci-y3','tci-y4','tci-y5','tci-y6'];
+  years.forEach((id,i)=>{
+    setTimeout(()=>{
+      years.forEach(y=>document.getElementById(y)?.classList.remove('active'));
+      document.getElementById(id)?.classList.add('active');
+    }, i*1000);
+  });
+  // Animăm valorile
+  let pop=290000, auth=847, fron=23;
+  let tgt_pop=348000, tgt_auth=1240, tgt_fron=31;
+  const steps=80;
+  let s=0;
+  const t=setInterval(()=>{
+    s++;
+    const p=s/steps;
+    const pv=document.getElementById('pop-val');
+    const av=document.getElementById('auth-val');
+    const fv=document.getElementById('fron-val');
+    if(pv) pv.textContent=Math.round(pop+(tgt_pop-pop)*p).toLocaleString('ro').replace(/\./g,'.')+'';
+    if(av) av.textContent=Math.round(auth+(tgt_auth-auth)*p);
+    if(fv) fv.textContent=Math.round(fron+(tgt_fron-fron)*p);
+    if(s>=steps) clearInterval(t);
+  },75);
+}
+
+// Start
+showScene(0);
+animateIntroCounters();
+rafId=requestAnimationFrame(tick);
+
+// Keyboard controls
+document.addEventListener('keydown',e=>{
+  if(e.key===' '){e.preventDefault();togglePlay();}
+  if(e.key==='ArrowRight'&&currentScene<SCENES.length-1) jumpToScene(currentScene+1);
+  if(e.key==='ArrowLeft'&&currentScene>0) jumpToScene(currentScene-1);
+  if(e.key==='f'||e.key==='F'){
+    if(!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+    else document.exitFullscreen?.();
+  }
+});
+
+// Auto fullscreen on click
+document.getElementById('stage').addEventListener('click',()=>{
+  if(!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+});
+</script>
+</body>
+</html>
