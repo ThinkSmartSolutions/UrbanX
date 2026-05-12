@@ -22,29 +22,40 @@
   }
 
   waitReady(()=>{
-    // Injectăm buton în UI
-    setTimeout(_injectButton, 2500);
-    console.log('[Planșe A3] ✅ v1.0 loaded');
+    console.log('[Planșe A3] ✅ v1.0 loaded — aștept deschiderea releveului…');
+    // MutationObserver: injectăm butonul de îndată ce butonul Export PDF Raport apare în DOM
+    const observer = new MutationObserver(() => {
+      const anchor = document.querySelector('.rv-expbtn');
+      if(anchor && !document.getElementById('rv-planseA3-btn')) {
+        _injectButton(anchor);
+      }
+    });
+    observer.observe(document.body, {childList:true, subtree:true});
+    // Retry și pentru cazul în care releveul e deja deschis
+    setTimeout(() => _injectButton(), 1000);
+    setInterval(() => _injectButton(), 2000);
   });
 
-  function _injectButton(){
-    const existing = document.getElementById('rv-planseA3-btn');
-    if(existing) return;
-    const anchor = document.querySelector('button[onclick*="_rvExportPDF"]')
-                || document.querySelector('.rv-expbtn');
-    if(!anchor) return;
+  function _injectButton(anchor){
+    if(document.getElementById('rv-planseA3-btn')) return;
+    const a = anchor || document.querySelector('.rv-expbtn');
+    if(!a) return;
     const btn = document.createElement('button');
     btn.id = 'rv-planseA3-btn';
     btn.innerHTML = '📐 Planșe A3';
-    btn.title = 'Export 7 planșe arhitecturale profesionale (A3 landscape, fond alb)';
-    btn.style.cssText = anchor.style.cssText || [
-      'padding:6px 12px','border-radius:6px','cursor:pointer','font-family:inherit',
-      'font-size:9px','font-weight:700','margin-left:6px',
-      'background:rgba(212,175,55,.2)','border:1px solid rgba(212,175,55,.5)',
-      'color:#D4AF37',
+    btn.title = 'Export 7 planșe arhitecturale profesionale A3 landscape fond alb';
+    btn.style.cssText = [
+      'height:32px','padding:0 12px','border-radius:7px','cursor:pointer',
+      'font-family:inherit','font-size:10px','font-weight:800','margin-left:6px',
+      'background:rgba(99,102,241,.18)','border:1.5px solid rgba(99,102,241,.5)',
+      'color:#818cf8','display:inline-flex','align-items:center','gap:5px',
+      'flex-shrink:0','transition:all .15s',
     ].join(';');
+    btn.onmouseover = () => btn.style.background = 'rgba(99,102,241,.35)';
+    btn.onmouseout  = () => btn.style.background = 'rgba(99,102,241,.18)';
     btn.onclick = () => _rvExportPlanseA3();
-    anchor.parentElement.insertBefore(btn, anchor.nextSibling);
+    a.parentElement.insertBefore(btn, a.nextSibling);
+    console.log('[Planșe A3] ✅ Buton 📐 injectat lângă Export PDF Raport');
   }
 })();
 
