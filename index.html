@@ -895,6 +895,9 @@ canvas#c2d{width:100%;height:100%;display:block}
   </div>
   
   <!-- User button -->
+  <button class="tci-launch-btn" id="relevee-launch-btn" onclick="if(typeof generateRelevee==='function') generateRelevee(); else alert('Selectați o parcelă mai întâi')" title="Planșe tehnice, relevee, documentație preliminară PAC/CU" style="background:rgba(212,175,55,.12);border-color:rgba(212,175,55,.5);color:#D4AF37;">
+    📐 <span class="tci-launch-label">Proiect Preliminar</span>
+  </button>
   <button class="tci-launch-btn" onclick="openTCI()" title="Proiectie Urbanistica Temporala">
     🏙 <span class="tci-launch-label">Temporal City Intelligence</span>
   </button>
@@ -1198,7 +1201,7 @@ canvas#c2d{width:100%;height:100%;display:block}
   </div>
   <div style="padding:5px 8px 3px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.05);margin-top:3px">② Proiectare Preliminară</div>
   <div style="display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:6px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
-    <button onclick="generateRelevee();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#d4af37;padding:4px 8px;cursor:pointer;border-radius:5px;font-size:11.5px;font-weight:700;">📐 Memoriu Tehnic Preliminar</button>
+    <button onclick="generateRelevee();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#d4af37;padding:4px 8px;cursor:pointer;border-radius:5px;font-size:11.5px;font-weight:700;">📐 Planșe & Proiect Preliminar PAC</button>
     <button onclick="infoDrawerOpen('relevee')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37'" onmouseout="this.style.color='#475569'">ⓘ</button>
   </div>
   <div style="display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:6px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
@@ -1287,6 +1290,14 @@ canvas#c2d{width:100%;height:100%;display:block}
     <button onclick="infoDrawerOpen('tci')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:rgba(148,163,184,.6);border-radius:4px;padding:3px 6px;font-size:10px;cursor:pointer">ⓘ</button>
   </div>
   <div style="display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:6px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+
+    <!-- Studiu Sănătate + Seismic (adăugate 13.05.2026) -->
+    <div style="display:flex;gap:4px;align-items:center">
+      <button onclick="generateHealthImpactStudy();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#f472b6;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px">🫁 Studiu Impact Sănătate Publică</button>
+    </div>
+    <div style="display:flex;gap:4px;align-items:center">
+      <button onclick="generateSeismicStudy ? generateSeismicStudy() : generateGeotehnicalStudy();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#fb923c;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px">⚡ Studiu Seismic & Risc Seismic</button>
+    </div>
     <button onclick="generateStabilitateTaluzuri();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#fb923c;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px">⛰ Stabilitate Taluzuri & Versanți</button>
     <button onclick="infoDrawerOpen('stabilitate')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:rgba(148,163,184,.6);border-radius:4px;padding:3px 6px;font-size:10px;cursor:pointer">ⓘ</button>
   </div>
@@ -1428,6 +1439,11 @@ canvas#c2d{width:100%;height:100%;display:block}
   <button class="mnav-btn" data-mt="proiect" onclick="mobNavClick('proiect',this)">
     <span class="mnav-icon">🏗</span>
     <span class="mnav-label">Urban3D</span>
+  </button>
+  <button class="mnav-btn" id="mob-nav-pp" data-mt="proiect-preliminar"
+    onclick="if(typeof generateRelevee==='function') generateRelevee();" title="Proiect Preliminar">
+    <span class="mnav-icon">📐</span>
+    <span class="mnav-label">Proiect</span>
   </button>
   <button class="mnav-btn" id="mob-nav-lot" data-mt="lotizare" 
     onclick="if(typeof toggleLotizare==='function') toggleLotizare();">
@@ -1581,22 +1597,13 @@ canvas#c2d{width:100%;height:100%;display:block}
 <script src="js/07-pdf-utils.js?v=2026050601"></script>
 <script src="js/08-lotizare.js?v=2026050906"></script>
 <script src="js/09-pdf-engine.js?v=2026051006"></script>
-<script src="js/10-studies.js?v=2026051010"></script>
+<script src="js/10-studies-stubs.js?v=2026051301"></script>
+    <script src="js/10-studies.js?v=2026051010"></script>
 <script src="js/11-viewer3d.js?v=2026050904"></script>
 <script src="js/12-admin.js?v=2026050601"></script>
 <script src="js/13-info-drawer.js?v=2026051004"></script>
 <script src="js/14-docx-export.js?v=2026050601"></script>
 <script src="js/15-relevee.js?v=2026050909"></script>
-  <script src="js/15-relevee-planseA3.js?v=2026051204"></script>
-  <script src="js/15-relevee-enhance.js?v=2026051206"></script>
-  <script src="js/15-relevee-walls.js?v=2026051207"></script>
-  <script src="js/15-relevee-dxf.js?v=2026051205"></script>
-  <script src="js/15-relevee-subsol.js?v=2026051208"></script>
-  <script src="js/15-relevee-acoperis.js?v=2026051209"></script>
-  <script src="js/15-relevee-dna-optimize.js?v=2026051210"></script>
-  <script src="js/15-relevee-extras.js?v=2026051211"></script>
-  <script src="js/15-relevee-multibuilding.js?v=2026051213"></script>
-  <script src="js/18-context3d.js?v=2026051212"></script>
 <script src="js/fixes-audit.js?v=2026050601"></script>
 <script src="js/map-resize-fix.js?v=2026050601"></script>
 
