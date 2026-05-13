@@ -1294,11 +1294,33 @@ canvas#c2d{width:100%;height:100%;display:block}
     <!-- Studiu Sănătate + Seismic (adăugate 13.05.2026) -->
     <div style="display:flex;gap:4px;align-items:center">
       <button onclick="generateHealthImpactStudy();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#f472b6;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px">🫁 Studiu Impact Sănătate Publică</button>
+      <button onclick="infoDrawerOpen('sanatate')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#f472b6'" onmouseout="this.style.color='#475569'">ⓘ</button>
     </div>
     <div style="display:flex;gap:4px;align-items:center">
       <button onclick="generateSeismicStudy ? generateSeismicStudy() : generateGeotehnicalStudy();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#fb923c;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px">⚡ Studiu Seismic & Risc Seismic</button>
+      <button onclick="infoDrawerOpen('seismic')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#fb923c'" onmouseout="this.style.color='#475569'">ⓘ</button>
     </div>
-    <button onclick="generateStabilitateTaluzuri();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#fb923c;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px">⛰ Stabilitate Taluzuri & Versanți</button>
+    <!-- Studii noi 2026 -->
+    <div style="border-top:1px solid rgba(212,175,55,.2);margin:8px 0 4px;padding-top:6px">
+      <div style="font-family:var(--mono,monospace);font-size:9px;color:#5a6788;letter-spacing:2px;text-transform:uppercase;padding:0 8px 4px">STUDII NOI 2026</div>
+    </div>
+    <div style="display:flex;gap:4px;align-items:center">
+      <button onclick="generateStudiuPMR();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#a78bfa;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px">♿ Accesibilitate PMR</button>
+      <button onclick="infoDrawerOpen('pmr')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#a78bfa'" onmouseout="this.style.color='#475569'">ⓘ</button>
+    </div>
+    <div style="display:flex;gap:4px;align-items:center">
+      <button onclick="generateStudiuIluminat();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#fbbf24;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px">🌤 Iluminat Natural EN 17037</button>
+      <button onclick="infoDrawerOpen('iluminat')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#fbbf24'" onmouseout="this.style.color='#475569'">ⓘ</button>
+    </div>
+    <div style="display:flex;gap:4px;align-items:center">
+      <button onclick="generateREPA();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#34d399;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px;font-weight:700">📋 Raport Pre-Autorizare (REPA)</button>
+      <button onclick="infoDrawerOpen('repa')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#34d399'" onmouseout="this.style.color='#475569'">ⓘ</button>
+    </div>
+    <div style="display:flex;gap:4px;align-items:center">
+      <button onclick="generateStudiuApePluviale();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#38bdf8;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px">🌧 Gospodărire Ape Pluviale</button>
+      <button onclick="infoDrawerOpen('ape_pluviale')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#38bdf8'" onmouseout="this.style.color='#475569'">ⓘ</button>
+    </div>
+        <button onclick="generateStabilitateTaluzuri();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#fb923c;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px">⛰ Stabilitate Taluzuri & Versanți</button>
     <button onclick="infoDrawerOpen('stabilitate')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:rgba(148,163,184,.6);border-radius:4px;padding:3px 6px;font-size:10px;cursor:pointer">ⓘ</button>
   </div>
   <div style="display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:6px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
@@ -1597,14 +1619,19 @@ canvas#c2d{width:100%;height:100%;display:block}
 <script src="js/07-pdf-utils.js?v=2026050601"></script>
 <script src="js/08-lotizare.js?v=2026050906"></script>
 <script src="js/09-pdf-engine.js?v=2026051006"></script>
-<script src="js/10-studies-stubs.js?v=2026051301"></script>
+<script src="js/10-studies-geo-engine.js?v=2026051301"></script>
+    <script src="js/10-studies-terrain.js?v=2026051301"></script>
+    <script src="js/10-studies-stubs.js?v=2026051301"></script>
     <script src="js/10-studies-fix.js?v=2026051301"></script>
     <script src="js/10-studies.js?v=2026051010"></script>
+    <script src="js/10-studies-connector.js?v=2026051301"></script>
+    <script src="js/10-studies-new.js?v=2026051301"></script>
 <script src="js/11-viewer3d.js?v=2026050904"></script>
 <script src="js/12-admin.js?v=2026050601"></script>
 <script src="js/13-info-drawer.js?v=2026051004"></script>
 <script src="js/14-docx-export.js?v=2026050601"></script>
 <script src="js/15-relevee.js?v=2026050909"></script>
+    <script src="js/15-relevee-canvas-upgrade.js?v=2026051301"></script>
     <!-- UrbanX Relevee Modules — încărcate după motorul principal -->
     <script src="js/15-relevee-walls.js?v=2026051301"></script>
     <script src="js/15-relevee-planseA3.js?v=2026051301"></script>
@@ -1617,6 +1644,7 @@ canvas#c2d{width:100%;height:100%;display:block}
     <script src="js/15-relevee-multibuilding.js?v=2026051301"></script>
     <script src="js/18-context3d.js?v=2026051301"></script>
     <script src="js/15-relevee-toolbar.js?v=2026051301"></script>
+    <script src="js/15-relevee-pdf-upgrade.js?v=2026051301"></script>
 <script src="js/fixes-audit.js?v=2026050601"></script>
 <script src="js/map-resize-fix.js?v=2026050601"></script>
 
@@ -2279,6 +2307,38 @@ window.addEventListener('load', function(){
               + 'secțiune transversală, vedere axonometrică 3D și bilanț complet de suprafețe. '
               + '<br><br><b>⚠ Diferit de Studiu de Amplasament:</b> acesta este un document '
               + 'ARHITECTURAL (ce construiești), nu teritorial (unde construiești).'
+          },
+          pmr: {
+            title: 'Studiu Accesibilitate PMR',
+            badge: 'OBLIGATORIU · Legea 448/2006 · NP 051/2012',
+            desc: 'Verificare conformitate totală pentru persoane cu mobilitate redusă: rampă acces (pantă max. 8%), lift obligatoriu (>P+1E), parcaje PMR dimensionate (3.60×5m, min. 4%), grupuri sanitare PMR, coridoare min. 1.20m, marcaj Braille. '
+              + '<br><br>Nerespectarea Legii 448/2006 poate bloca recepția lucrărilor (amendă 5.000-10.000 lei).'
+          },
+          iluminat: {
+            title: 'Studiu Iluminat Natural — EN 17037',
+            badge: 'STANDARD EUROPEAN · EN 17037:2021 · OMS 119/2014',
+            desc: 'Analiză completă iluminat natural: Factor de Lumini Zimă (FLZ) per funcțiune, ore de însorire OMS 119/2014 (min. 1.5h/21 Dec), protecție supraîncălzire, cerințe sticlă Low-E. GHI solar calculat din coordonate GPS via PVGIS 5.3.'
+          },
+          repa: {
+            title: 'Raport Pre-Autorizare (REPA)',
+            badge: 'CHECKLIST AC · Legea 50/1991 · HG 907/2016',
+            desc: 'Checklist complet pre-autorizare: verificare POT/CUT/H față de PUG, lista avize necesare determinată automat (AACR, utilități, ISU, mediu), calendar Gantt autorizare, costuri estimative taxe și onorarii. '
+              + '<br><br>Economisești timp prin identificarea din timp a tuturor condițiilor înainte de angajarea proiectanților.'
+          },
+          ape_pluviale: {
+            title: 'Studiu Gospodărire Ape Pluviale',
+            badge: 'SR EN 752:2021 · HG 188/2002 · STAS 9470',
+            desc: 'Dimensionare sistem pluvial: debit de calcul Q (formula rațională STAS 9470), precipitații din coordonate GPS, cisternă recuperare ape, pavaj permeabil, risc inundabilitate din NFA și coordonate.'
+          },
+          sanatate: {
+            title: 'Studiu Impact Sănătate Publică',
+            badge: 'OMS · Legea 104/2011 · Dir. 2002/49/CE',
+            desc: 'Evaluare completă pe 6 dimensiuni: calitate aer (PM10/NO2/PM2.5), zgomot urban (Lzsn/Lnoapte per UTR), însorire OMS 119, apă potabilă, radon geogen, câmpuri electromagnetice. Scor 0-100 pe baza EQI.'
+          },
+          seismic: {
+            title: 'Pre-Studiu Seismic',
+            badge: 'P100-1/2013 · EC7 · NP 122/2010',
+            desc: 'Zonare seismică automată per coordonate GPS (P100-1/2013): ag, Tc, MSK. Estimare forță seismică de proiectare, cerințe structurale minime per număr de niveluri, risc lichefiere, corecții pe versanți (EC8 Part 5).'
           },
           amplasament: {
             title: 'Studiu de Amplasament & Context Teritorial',

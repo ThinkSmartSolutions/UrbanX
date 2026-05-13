@@ -210,6 +210,261 @@ const _infoPatchObs = new MutationObserver(()=>{
 _infoPatchObs.observe(document.body, {childList:true, subtree:true});
 setTimeout(()=>{ _patchInfoToggle(); _syncInfoBtn(); }, 2000);
 
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MOBILE FIXES — panel toggle, info button, layout
+// ═══════════════════════════════════════════════════════════════════════════
+
+function _rvMobileFixes(){
+  const isMobile = window.innerWidth <= 840;
+  if(!isMobile) return;
+
+  // ── 1. Left panel toggle — overlay backdrop ─────────────────────────────
+  const menuBtn = document.getElementById('rv-mobile-menu-btn');
+  const lpanel  = document.getElementById('rv-lpanel-main') || document.querySelector('.rv-lpanel');
+  
+  if(menuBtn && lpanel && !menuBtn._mobilePatchedFG){
+    menuBtn._mobilePatchedFG = true;
+
+    // Creăm overlay backdrop
+    let overlay = document.getElementById('rv-mobile-overlay');
+    if(!overlay){
+      overlay = document.createElement('div');
+      overlay.id = 'rv-mobile-overlay';
+      overlay.style.cssText = [
+        'position:fixed','inset:0','z-index:190','background:rgba(0,0,0,.5)',
+        'display:none','backdrop-filter:blur(2px)','-webkit-backdrop-filter:blur(2px)',
+      ].join(';');
+      overlay.onclick = () => closePanel();
+      document.getElementById('rv-modal')?.appendChild(overlay);
+    }
+
+    const openPanel = () => {
+      lpanel.classList.add('rv-lpanel-open');
+      overlay.style.display = 'block';
+      menuBtn.innerHTML = '✕';
+      menuBtn.style.background = 'rgba(212,175,55,.2)';
+      menuBtn.style.borderColor = 'rgba(212,175,55,.5)';
+      menuBtn.style.color = '#D4AF37';
+    };
+    const closePanel = () => {
+      lpanel.classList.remove('rv-lpanel-open');
+      overlay.style.display = 'none';
+      menuBtn.innerHTML = '☰';
+      menuBtn.style.background = 'rgba(255,255,255,.08)';
+      menuBtn.style.borderColor = 'rgba(255,255,255,.15)';
+      menuBtn.style.color = '#fff';
+    };
+
+    // Înlocuim handler-ul onclick inline
+    menuBtn.onclick = null;
+    menuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if(lpanel.classList.contains('rv-lpanel-open')) closePanel();
+      else openPanel();
+    }, { passive: false });
+
+    // Touch swipe: swipe stânga pe panel = close
+    let touchStartX = 0;
+    lpanel.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, {passive:true});
+    lpanel.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      if(dx < -60) closePanel();
+    }, {passive:true});
+  }
+
+  // ── 2. Info button pe mobil — toggle zoombar ─────────────────────────────
+  const infoBtn = document.getElementById('rv-btn-hide-rpanel');
+  const zoombar = document.querySelector('#rv-modal .rv-zoombar');
+  const body    = document.getElementById('rv-body-main');
+
+  if(infoBtn && zoombar && !infoBtn._mobileInfoPatched){
+    infoBtn._mobileInfoPatched = true;
+    infoBtn.onclick = null;
+    
+    // Pe mobil: Info ascunde/arată bara de jos (zoombar)
+    infoBtn.addEventListener('click', () => {
+      const hidden = zoombar.style.display === 'none';
+      if(hidden){
+        zoombar.style.display = '';
+        infoBtn.textContent = '○ Info';
+        infoBtn.style.color = '#38bdf8';
+        infoBtn.style.opacity = '1';
+      } else {
+        zoombar.style.display = 'none';
+        infoBtn.textContent = '◉ Info ↑';
+        infoBtn.style.color = '#94a3b8';
+      }
+    });
+    // Buton flotant pentru a readuce zoombar-ul când e ascuns
+    let floatBtn = document.getElementById('rv-mobile-show-bar');
+    if(!floatBtn){
+      floatBtn = document.createElement('button');
+      floatBtn.id = 'rv-mobile-show-bar';
+      floatBtn.innerHTML = '↑';
+      floatBtn.title = 'Arată controalele';
+      floatBtn.style.cssText = [
+        'position:fixed','bottom:12px','right:12px','z-index:300',
+        'width:40px','height:40px','border-radius:50%',
+        'background:rgba(10,14,26,.9)','border:1.5px solid rgba(212,175,55,.4)',
+        'color:#D4AF37','font-size:16px','cursor:pointer',
+        'display:none','align-items:center','justify-content:center',
+        'box-shadow:0 4px 20px rgba(0,0,0,.5)',
+      ].join(';');
+      floatBtn.onclick = () => {
+        zoombar.style.display = '';
+        floatBtn.style.display = 'none';
+        infoBtn.textContent = '○ Info';
+        infoBtn.style.color = '#38bdf8';
+      };
+      document.getElementById('rv-modal')?.appendChild(floatBtn);
+    }
+
+    // Observer: când zoombar e ascuns arătăm floatBtn
+    const zbObs = new MutationObserver(() => {
+      floatBtn.style.display = zoombar.style.display==='none' ? 'flex' : 'none';
+    });
+    zbObs.observe(zoombar, {attributes:true, attributeFilter:['style']});
+  }
+
+  // ── 3. Canvas — touch pan/zoom nativ ─────────────────────────────────────
+  const canvas = document.querySelector('#rv-modal canvas');
+  if(canvas && !canvas._touchPatched){
+    canvas._touchPatched = true;
+    // Prevenim scroll de pagină când e pe canvas
+    canvas.addEventListener('touchmove', e => e.preventDefault(), {passive:false});
+  }
+
+  // ── 4. Zoombar scroll orizontal pe mobil ─────────────────────────────────
+  const toolbar = document.getElementById('rv-toolbar-main');
+  if(toolbar && !toolbar._scrollPatched){
+    toolbar._scrollPatched = true;
+    toolbar.style.overflowX = 'auto';
+    toolbar.style.overflowY = 'hidden';
+    toolbar.style.webkitOverflowScrolling = 'touch';
+    toolbar.style.msOverflowStyle = 'none';
+    toolbar.style.scrollbarWidth = 'none';
+  }
+}
+
+// Rulăm la injecție și la resize
+const _rvMobileObs = new MutationObserver(() => {
+  if(document.getElementById('rv-mobile-menu-btn')) {
+    _rvMobileFixes();
+  }
+});
+_rvMobileObs.observe(document.body, {childList:true, subtree:true});
+window.addEventListener('resize', _rvMobileFixes);
+setTimeout(_rvMobileFixes, 1500);
+setTimeout(_rvMobileFixes, 3000);
+
+
+// ── CSS mobil îmbunătățit ─────────────────────────────────────────────────
+(function(){
+  const st = document.createElement('style');
+  st.textContent = `
+    /* Overlay backdrop panel stâng */
+    #rv-mobile-overlay {
+      transition: opacity .25s;
+    }
+
+    /* Panel stâng - tranziție smoothă */
+    #rv-lpanel-main, .rv-lpanel {
+      transition: left .28s cubic-bezier(.4,0,.2,1) !important;
+    }
+
+    /* Buton hamburger - mai vizibil pe mobil */
+    @media (max-width: 840px) {
+      #rv-mobile-menu-btn {
+        position: fixed !important;
+        top: 10px !important;
+        left: 10px !important;
+        z-index: 220 !important;
+        width: 38px !important;
+        height: 38px !important;
+        border-radius: 8px !important;
+        font-size: 16px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 !important;
+        box-shadow: 0 2px 12px rgba(0,0,0,.4) !important;
+      }
+
+      /* Topbar pe mobil — ascunde elemente secundare */
+      #rv-modal .rv-logo-t { display: none !important; }
+      #rv-modal .rv-tinfo  { display: none !important; }
+
+      /* Zoombar pe mobil — scroll orizontal */
+      #rv-modal .rv-zoombar {
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
+        flex-wrap: nowrap !important;
+        gap: 5px !important;
+        padding: 6px 8px !important;
+        scrollbar-width: none !important;
+      }
+      #rv-modal .rv-zoombar::-webkit-scrollbar { display: none !important; }
+
+      /* Butoane zoom mai mari pe touch */
+      #rv-modal .rv-zbtn {
+        min-width: 38px !important;
+        height: 38px !important;
+        font-size: 16px !important;
+        flex-shrink: 0 !important;
+      }
+
+      /* Butoane export — mai compacte dar tappable */
+      #rv-modal .rv-expbtn {
+        font-size: 9.5px !important;
+        padding: 5px 9px !important;
+        height: 30px !important;
+        flex-shrink: 0 !important;
+      }
+
+      /* Canvas wrap — full height disponibil */
+      #rv-modal .rv-drawwrap {
+        height: calc(100dvh - 120px) !important;
+        padding: 4px !important;
+      }
+
+      /* Tabs — scroll orizontal */
+      #rv-modal .rv-tabs {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        flex-wrap: nowrap !important;
+        scrollbar-width: none !important;
+      }
+      #rv-modal .rv-tabs::-webkit-scrollbar { display: none !important; }
+      #rv-modal .rv-tab {
+        flex-shrink: 0 !important;
+        padding: 8px 10px !important;
+        font-size: 10px !important;
+      }
+
+      /* Info button pe mobil */
+      #rv-btn-hide-rpanel {
+        flex-shrink: 0 !important;
+      }
+
+      /* Multi-building selector pe mobil */
+      #rv-multi-selector {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none !important;
+        flex-wrap: nowrap !important;
+      }
+    }
+
+    /* Buton flotant "arată bara" */
+    #rv-mobile-show-bar {
+      transition: opacity .2s !important;
+    }
+  `;
+  document.head.appendChild(st);
+})();
+
 console.log('[Toolbar] ✅ Toolbar centralizat activ — 3 grupuri, scroll orizontal');
   if(typeof ss==='function') ss('✅ Toolbar reorganizat: 📐 Planșe · 📊 Rapoarte · 🔧 Tools');
 }

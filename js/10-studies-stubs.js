@@ -595,4 +595,195 @@ async function generateSeismicStudy(){
   if(typeof ss==='function') ss('✅ Pre-Studiu Seismic generat · P100-1/2013 · Zonă ' + seism.zona + ' · ag=' + seism.ag + 'g');
 }
 
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PATCH generateAACR — folosește _calcAACROLS universal (toate aeroporturile RO)
+// și _drawTopoMap pentru curbe de nivel reale
+// ═══════════════════════════════════════════════════════════════════════════
+const _origGenerateAACR = window.generateAACR;
+window.generateAACR = async function(){
+  // Dacă nu avem motorul terrain, folosim originalul
+  if(typeof _calcAACROLS === 'undefined' || typeof AIRPORTS_RO === 'undefined')
+    return _origGenerateAACR?.();
+
+  const ap = S.parcels[S.activeParcel??0];
+  if(!ap?.geo?.geometry){ ss('Selectați o parcelă pentru studiu AACR.'); return; }
+  ss('Se generează Studiu AACR — motor universal toate aeroporturile RO...');
+
+  const d = _initStudyPdf('Studiu de Evaluare Aeronautica (AACR)',
+    'Aviz Autoritatea Aeronautică Civilă Română · ICAO Annex 14 ed.9 · HG 930/2016', 10);
+  const {pdf,W,H,DARK,DARK2,NAVY,GOLD,GOLD2,BLUE,LIGHT,RED,GREEN,ORANGE,
+         S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,
+         hdr,ftr,sec,body,tblRow,kv,addImg,cover,newPage,checkY,concluzii,sign} = d;
+
+  const caps     = await _captureStudyMapsSafe(ap, msg=>ss(msg));
+  const aedisH   = S.vol?._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||
+                   parseFloat(params?.h)||13;
+  ss('AACR — obțin cotă teren AMSL...');
+  const elevData = await _getElevation(lat, lon);
+  const elevTeren= elevData.elev, elevSursa = elevData.source;
+
+  ss('AACR — calculez OLS față de toate aeroporturile RO...');
+  const ols = _calcAACROLS(lat, lon, elevTeren, aedisH);
+  const apt = ols.aeroport;
+
+  // Calculăm față de TOATE aeroporturile (pentru tabel comparativ)
+  const allApts = AIRPORTS_RO.map(a => {
+    const cosLat = Math.cos(lat*Math.PI/180);
+    const piste = a.piste || [];
+    let minD = Infinity;
+    piste.forEach(p => {
+      [[p.lat_08,p.lon_08],[p.lat_26,p.lon_26]].forEach(([pLat,pLon])=>{
+        const dx=(pLon-lon)*111319.9*cosLat, dy=(pLat-lat)*111319.9;
+        minD = Math.min(minD, Math.sqrt(dx*dx+dy*dy));
+      });
+    });
+    const r = _calcAACROLS(lat, lon, elevTeren, aedisH);
+    return {...r, dist_km: +(minD/1000).toFixed(1), apt_name: a.nume, apt_cod: a.cod};
+  }).sort((a,b)=>a.distPrag_m-b.distPrag_m).slice(0,5);
+
+  // ── PAG 1: Cover ─────────────────────────────────────────────────────────
+  cover(
+    'Evaluare obstacol aerian · '+S2(apt?.nume||'—')+' ('+S2(apt?.cod||'—')+')',
+    caps.imgLocation||null,
+    [['Cotă teren AMSL', elevTeren.toFixed(1)+'m ('+S2(elevSursa)+')'],
+     ['H clădire propusă', aedisH.toFixed(1)+'m'],
+     ['Distanță prag pistă', ols.distPrag_m+'m ('+S2(ols.pragLabel)+')'],
+     ['H max admis (ICAO)', ols.hMaxAMSL<9999?ols.hMaxAMSL+'m AMSL':'Fără restricție']],
+    ols.isConform,
+    ols.isConform
+      ? 'CONFORM AACR — H propusă '+aedisH.toFixed(1)+'m ≤ H max '+ols.hMaxSol+'m față de sol (marjă +'+ols.marja+'m)'
+      : 'NECONFORM AACR — H propusă '+aedisH.toFixed(1)+'m DEPĂȘEȘTE H max '+ols.hMaxSol+'m cu '+ols.marja+'m'
+  );
+
+  // ── PAG 2: Hartă topografică cu curbe de nivel ────────────────────────────
+  let cy = newPage('PLAN TOPOGRAFIC — CURBE DE NIVEL — CONTEXT AEROPORT', 2);
+  cy = sec('1. PLAN TOPOGRAFIC REAL — CURBE DE NIVEL AMSL', cy); cy+=3;
+  cy = body('Curbele de nivel sunt generate din date reale ('+S2(elevSursa)+') pentru amplasamentul '+
+    S2(nrcad)+'. Cota teren = '+elevTeren.toFixed(1)+'m AMSL. Aeroportul cel mai apropiat: '+
+    S2(apt?.nume)+' ('+S2(apt?.cod)+'), la '+ols.distPrag_m+'m distanță de prag pistă.', 14, cy); cy+=4;
+
+  // Desenăm harta topografică cu curbe de nivel
+  const topoH = Math.min(85, H-cy-40);
+  await _drawTopoMap(pdf, ap, 14, cy, W-28, topoH, {radiusM:600});
+  cy += topoH + 10;
+
+  cy = sec('1.1. DATE TOPOGRAFICE — AMPLASAMENT', cy); cy+=3;
+  cy = tblRow(['Parametru','Valoare','Sursa datelor'], cy, true, [65,55,W-28-65-55]);
+  [['Cotă teren AMSL', elevTeren.toFixed(1)+' m', S2(elevSursa)],
+   ['Cotă ARP aeroport ('+S2(apt?.cod)+')', apt?.elev_m+'m AMSL ('+apt?.elev_ft+' ft)', 'AIP Romania '+S2(apt?.ICAO)],
+   ['Diferență cotă teren — ARP', (elevTeren-apt?.elev_m).toFixed(1)+' m', 'Calculat'],
+   ['H clădire propusă', aedisH.toFixed(1)+' m față de sol', 'AEDIS UrbanX'],
+   ['H clădire AMSL', (elevTeren+aedisH).toFixed(1)+' m AMSL', 'Calculat'],
+  ].forEach(r => { cy = tblRow(r, cy, false, [65,55,W-28-65-55]); });
+
+  // ── PAG 3: Calcul OLS ICAO ────────────────────────────────────────────────
+  cy = newPage('2. CALCUL OLS — SUPRAFETE LIMITARE OBSTACOLE ICAO', 3);
+  cy = addImg(caps.img2D||caps.imgLocation, 14, cy, W-28, 65,
+    'FIG. 1 — Plan situatie · Amplasament față de '+ S2(apt?.nume)+' · Distante si azimut');
+  cy = sec('2.1. AEROPORT '+S2(apt?.cod||'—')+' — DATE PISTĂ APLICABILĂ', cy); cy+=3;
+  cy = tblRow(['Parametru','Valoare','Sursa'], cy, true, [70,60,W-28-70-60]);
+  [['Aeroport', S2(apt?.nume)+' ('+S2(apt?.cod)+')', S2(apt?.sursa||'AIP Romania')],
+   ['Pistă aplicabilă', S2(ols.pista?.id||'—')+' (lungime '+ols.pista?.lungime+'m)', 'AIP Romania '+S2(apt?.ICAO)],
+   ['Prag cel mai apropiat', S2(ols.pragLabel), 'AIP Romania'],
+   ['Distanță de la parcelă la prag', ols.distPrag_m+' m', 'Calcul turf.distance'],
+   ['Distanță de la parcelă la ARP', ols.distARP_m+' m', 'Calcul turf.distance'],
+   ['Elevatie ARP', apt?.elev_m+' m AMSL ('+apt?.elev_ft+' ft)', 'AIP Romania'],
+  ].forEach(r => { cy = tblRow(r, cy, false, [70,60,W-28-70-60]); });
+  cy+=4;
+
+  cy = sec('2.2. SUPRAFATA OLS APLICABILĂ — ICAO ANNEX 14 ED.9 TAB. 4-1', cy); cy+=3;
+  cy = body('Conf. ICAO Annex 14 ed.9 (2022) + HG 930/2016, suprafețele de limitare obstacole (OLS) '+
+    'pentru aeroportul cod 4 se calculează față de pragul celei mai apropiate piste.', 14, cy); cy+=4;
+  cy = tblRow(['Suprafata OLS','Criteriu aplicare','Valoare','H max AMSL'], cy, true, [60,55,35,W-28-60-55-35]);
+  [['Orizontală internă', 'Dist.ARP ≤ 4000m', '45m/ARP', (apt?.elev_m+45)+'m'],
+   ['Conică (5% pantă)', 'Dist.OHS 4000-7000m', '5%/m', ols.distARP_m>4000&&ols.distARP_m<=7000
+     ?(apt?.elev_m+45+(ols.distARP_m-4000)*0.05).toFixed(1)+'m':'N/A'],
+   ['De abordare (2% pantă)', 'Dist. prag ≤ 15.000m', '2%/m', (apt?.elev_m+ols.distPrag_m*0.02).toFixed(1)+'m'],
+   ['APLICABILĂ (cea mai restrictivă):', S2(ols.suprafata), S2(ols.formula), ols.hMaxAMSL<9999?ols.hMaxAMSL+'m':'Fără'],
+  ].forEach(r => { cy = tblRow(r, cy, false, [60,55,35,W-28-60-55-35]); });
+
+  // ── PAG 4: Verdict + toate aeroporturile ──────────────────────────────────
+  cy = newPage('3. VERDICT AACR + AEROPORTURI APROPIATE', 4);
+  cy = sec('3.1. VERDICT FINAL', cy); cy+=3;
+  pdf.setFillColor(...(ols.isConform?GREEN:RED)); pdf.rect(14, cy, W-28, 14, 'F');
+  pdf.setTextColor(255,255,255); pdf.setFontSize(13); pdf.setFont('helvetica','bold');
+  pdf.text((ols.isConform?'✓ CONFORM AACR':'✗ NECONFORM AACR') +
+    ' — H propusă='+aedisH.toFixed(1)+'m, H max='+ols.hMaxSol+'m față de sol' +
+    (ols.isConform?' (+'+ols.marja+'m marjă)':', depășit cu +'+ols.marja+'m'),
+    W/2, cy+9.5, {align:'center'});
+  cy+=20;
+  cy = tblRow(['Parametru AACR','Valoare'], cy, true, [100,W-28-100]);
+  [['Cotă teren parcelă (AMSL)', elevTeren.toFixed(1)+' m'],
+   ['H clădire propusă', aedisH.toFixed(1)+' m față de sol'],
+   ['H clădire AMSL', (elevTeren+aedisH).toFixed(1)+' m'],
+   ['H max admis (ICAO) față de sol', ols.hMaxSol<9999?ols.hMaxSol+' m':'Fără restricție'],
+   ['H max admis (ICAO) AMSL', ols.hMaxAMSL<9999?ols.hMaxAMSL+' m AMSL':'Fără restricție'],
+   ['Suprafată OLS aplicabilă', S2(ols.suprafata)],
+   ['Formula calcul', S2(ols.formula)],
+   ['Marjă față de limită', (ols.isConform?'+':'-')+ols.marja+' m'],
+   ['Aviz AACR necesar', ols.distPrag_m<15000?'DA — obligatoriu înainte de AC':'Recomandat'],
+  ].forEach(r => { cy = tblRow(r, cy, false, [100,W-28-100]); });
+  cy+=4;
+  cy = sec('3.2. TOP 5 AEROPORTURI APROPIATE — VERIFICARE CUMULATIVĂ', cy); cy+=3;
+  cy = body('AACR verifică față de TOATE aeroporturile, nu doar cel mai apropiat. '+
+    'Restricția cea mai severă se aplică.', 14, cy); cy+=3;
+  cy = tblRow(['Aeroport','ICAO','Dist. prag','H max sol','H max AMSL','Status'],
+    cy, true, [55,18,25,22,27,W-28-55-18-25-22-27]);
+  allApts.forEach(a=>{
+    const st = a.hMaxSol<9999?(aedisH<=a.hMaxSol?'✓ OK':'✗ DEP.'):'Fără restr.';
+    cy = tblRow([S2(a.apt_name?.slice(0,25)), S2(a.apt_cod),
+      a.distPrag_m<15000?(a.distPrag_m/1000).toFixed(1)+'km':'>15km',
+      a.hMaxSol<9999?a.hMaxSol+'m':'—', a.hMaxAMSL<9999?a.hMaxAMSL+'m':'—', st],
+      cy, false, [55,18,25,22,27,W-28-55-18-25-22-27]);
+    cy=checkY(cy,12,'AEROPORTURI',4);
+  });
+
+  // ── PAG 5: Vedere 3D + context ─────────────────────────────────────────────
+  cy = newPage('4. VEDERE 3D — CONTEXT URBAN', 5);
+  cy = addImg(caps.v3dDay||caps.img3D, 14, cy, W-28, 82,
+    'FIG. 2 — Vedere 3D amplasament · Volumul propus în contextul urban real');
+  cy = addImg(caps.imgDist||caps.img2D, 14, cy, W-28, 72,
+    'FIG. 3 — Plan distanțe · Orientare față de aeroport '+S2(apt?.cod));
+
+  // PAG 6-10: cadru normativ, proceduri, norme, concluzii, semnătură
+  // (menținem structura scurtă pentru spațiu)
+  cy = newPage('5. CADRU NORMATIV + PROCEDURA AVIZ AACR', 6);
+  cy = sec('5.1. BAZA LEGALĂ', cy); cy+=3;
+  cy = tblRow(['Act normativ','Prevedere relevantă'], cy, true, [60,W-28-60]);
+  [['ICAO Annex 14 ed.9 (2022)','Suprafete limitare obstacole (OLS) — standarde internationale'],
+   ['HG 930/2016','Transpunere ICAO Annex 14 în legislatia românā'],
+   ['Legea 233/2016 (Codul Aerian)','Obligativitate aviz AACR pentru constructii in zonele OLS'],
+   ['OM 1038/2016','Procedura de avizare AACR pentru constructii'],
+   ['Legea 50/1991 art.4','Avizul AACR este obligatoriu la CU si AC in zonele aeroportuare'],
+   ['OACI Doc 9137','Manual de proiectare aeroportuara — Partea 6 (inaltimi)'],
+   ['AIP Romania','Datele oficiale piste — publicat de ROMATSA la romatsa.ro'],
+  ].forEach(r => { cy = tblRow(r, cy, false, [60,W-28-60]); cy=checkY(cy,12,'NORME',6); });
+  cy+=4;
+  cy = sec('5.2. PROCEDURA AVIZ AACR — PAȘI', cy); cy+=3;
+  cy = tblRow(['Etapă','Organism','Termen','Documente necesare'], cy, true, [50,45,20,W-28-50-45-20]);
+  [['Cerere aviz de amplasament','AACR — aacr.ro','30 zile','CU + plan situație + H propusă + coord. GPS'],
+   ['Evaluare OLS de către AACR','AACR','30 zile','—'],
+   ['Emitere aviz favorabil/restricționat','AACR','—','Valabil 12 luni de la emitere'],
+   ['Depunere aviz AACR la AC','Primărie','La depunere AC','Aviz AACR în original'],
+  ].forEach(r => { cy = tblRow(r, cy, false, [50,45,20,W-28-50-45-20]); });
+
+  // Concluzii + semnătură (ultimele pagini)
+  cy = newPage('6. CONCLUZII + SEMNĂTURĂ', 10);
+  cy = concluzii([
+    'Amplasamentul '+S2(nrcad)+' (UTR '+S2(utr)+', '+S2(uat)+') are cota teren AMSL='+elevTeren.toFixed(1)+'m conf. '+S2(elevSursa)+'. Clădirea propusă are H='+aedisH.toFixed(1)+'m față de sol = '+(elevTeren+aedisH).toFixed(1)+'m AMSL.',
+    'Aeroportul cel mai restricționant este '+S2(apt?.nume)+' ('+S2(apt?.cod)+'), prag '+S2(ols.pragLabel)+' la distanța de '+ols.distPrag_m+'m. Suprafata OLS aplicabilă: '+S2(ols.suprafata)+'.',
+    ols.isConform
+      ? 'CONCLUZIE: Clădirea este CONFORMĂ cu restricțiile AACR. H max admis față de sol = '+ols.hMaxSol+'m, marjă favorabilă de +'+ols.marja+'m. Aviz AACR favorabil este de așteptat.'
+      : 'CONCLUZIE: Clădirea DEPĂȘEȘTE H max AACR cu '+ols.marja+'m. Se recomandă reducerea înălțimii la max '+ols.hMaxSol+'m față de sol înainte de depunerea avizului AACR.',
+    'Avizul AACR (Autoritatea Aeronautică Civilă Română — aacr.ro) este OBLIGATORIU pentru orice construcție în zona OLS, conf. Legii 233/2016 art.86 și OM TCMA 1038/2016.',
+    'Calculul OLS se bazează pe ICAO Annex 14 ed.9 (2022), HG 930/2016 și datele AIP Romania publicate de ROMATSA. Valorile sunt orientative; avizul oficial se obține exclusiv de la AACR.',
+    'Datele topografice (cotă teren '+elevTeren.toFixed(1)+'m AMSL) sunt obținute din '+S2(elevSursa)+'. Se recomandă verificarea cu o ridicare topografică autorizată ANCPI pentru proiectele sensibile.',
+  ], cy);
+  sign(); ftr();
+
+  _pdfSaveMobile(pdf, 'studiu_aacr_'+S2(nrcad).replace(/[^a-zA-Z0-9]/g,'_')+'.pdf');
+  ss('✅ Studiu AACR generat · '+S2(apt?.cod)+' · dist.'+ols.distPrag_m+'m · H max='+ols.hMaxSol+'m · '+(ols.isConform?'CONFORM':'NECONFORM'));
+};
+
 console.log('[Studies Stubs] ✅ loaded — _initStudyPdf, config getters, guards');

@@ -1,3 +1,4 @@
+// Copyright (c) 2024-2026 ThinkSmart Solutions SRL | contact@urbanx.ro | Utilizare conform LICENSE
 // ═══════════════════════════════════════════════════════════════════════════
 // 10-studies-geo-engine.js — Motor date geografice reale per coordonate
 // UrbanX TSS·FG
@@ -10,6 +11,10 @@
 //   5. Valorile ESTIMATE au disclamer explicit
 //   6. Operatori utilități = generic + instrucțiune de verificare locală
 // ═══════════════════════════════════════════════════════════════════════════
+// UrbanX TSS·FG — Studies Geo Engine — Date geografice live
+// Copyright (c) 2024–2026 ThinkSmart Solutions SRL — Toate drepturile rezervate
+// Proprietar: ThinkSmart Solutions SRL | contact@urbanx.ro | urbanx.ro
+// Utilizare exclusiv conform termenilor de licență UrbanX. Redistribuire interzisă.
 
 // ── Helper: coords active parcelă ──────────────────────────────────────────
 function _geoCoords(){
@@ -65,6 +70,13 @@ if(typeof _calcSolarGHI === 'undefined'){
     if(lon < 22.5)                ghi += 40;   // Banat — mai însorit decât media
     if(lat > 46.5 && lon > 26.0) ghi -= 80;   // N Moldova — mai puțin însorit
 
+    // Corecție altitudine: +4 kWh/m²·an per 100m AMSL (mai puțin nori)
+    const elevCtxG = window._sCtx?.elev ?? null;
+    if(elevCtxG !== null && elevCtxG > 300){
+      ghi += Math.round((elevCtxG - 300) * 0.04);
+    }
+    // Corecție Moldova (subestimat în formulă liniară)
+    if(lon > 26.5 && lat > 46.0 && lat < 48.0) ghi += 45;
     // România: 1050 (Vatra Dornei) — 1450 (Mangalia/Constanța)
     return Math.round(Math.max(1050, Math.min(1450, ghi)));
   };
