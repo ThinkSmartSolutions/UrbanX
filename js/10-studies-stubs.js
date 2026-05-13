@@ -45,7 +45,7 @@ if(typeof getUATJudet === 'undefined'){
     const S = window.S;
     return S?.uat?.judet || S?.uatJudet || S?.activeUAT?.judet ||
            S?.parcels?.[S?.activeParcel??0]?.judet ||
-           window._uatJudet || 'Iași';
+           window._uatJudet || 'Județ (neidentificat)';
   };
 }
 
@@ -132,8 +132,8 @@ if(typeof getZgomotConfig === 'undefined'){
 if(typeof getVantConfig === 'undefined'){
   window.getVantConfig = function(){
     const ap  = window.S?.parcels?.[window.S?.activeParcel??0];
-    const lat = ap?.lat || ap?.geo?.geometry?.coordinates?.[0]?.[0]?.[1] || 47.16;
-    const lon = ap?.lon || ap?.geo?.geometry?.coordinates?.[0]?.[0]?.[0] || 27.59;
+    const lat = ap?.lat || ap?.geo?.geometry?.coordinates?.[0]?.[0]?.[1] || 45.9;
+    const lon = ap?.lon || ap?.geo?.geometry?.coordinates?.[0]?.[0]?.[0] || 24.9;
     // Zonare vânt conformă CR 1-1-4/2012 (Cod de proiectare — Acțiunea vântului)
     // Iași/Moldova: zona IV, vb_ref = 36 m/s
     // Banat/Vest: zona II-III, vb_ref = 32 m/s
@@ -154,8 +154,8 @@ if(typeof getVantConfig === 'undefined'){
 if(typeof getSeismConfig === 'undefined'){
   window.getSeismConfig = function(){
     const ap  = window.S?.parcels?.[window.S?.activeParcel??0];
-    const lat = ap?.lat || 47.16;
-    const lon = ap?.lon || 27.59;
+    const lat = ap?.lat || 45.9;
+    const lon = ap?.lon || 24.9;
     // Zonare conformă P100-1/2013 (cod seismic)
     // ag = acceleratie teren (g), Tc = perioadă colț (s)
     let ag = 0.20, Tc = 0.7, zona = 'E', MSK = 'VIII';
@@ -188,7 +188,7 @@ if(typeof getTraficConfig === 'undefined'){
 if(typeof getHidroConfig === 'undefined'){
   window.getHidroConfig = function(){
     const ap  = window.S?.parcels?.[window.S?.activeParcel??0];
-    const lat = ap?.lat || 47.16;
+    const lat = ap?.lat || 45.9;
     // Estimare NFA și portanță (valori orientative fără foraj)
     const nfa = lat > 46.5 ? 3.5 : lat > 45.5 ? 2.5 : 1.8; // adâncime NFA estimativă (m)
     const portanta = nfa > 3 ? 250 : nfa > 2 ? 200 : 150;   // kPa
@@ -214,7 +214,7 @@ if(typeof getEIMConfig === 'undefined'){
       deseuri:       {sistem:'Municipal integrat', frecventa:'2x/saptamana'},
       arii_protejate:{in_arie: false, distanta_min: null},
       natura2000:    {in_sit: false, sit_apropiat: null},
-      ins:           {bazin:'Prut-Barlad', cod:'RO13XXXX'},
+      ins:           {bazin:'Bazin conf. coordonate', cod:'RO13XXXX'},
     };
   };
 }
@@ -225,7 +225,7 @@ if(typeof getApaConfig === 'undefined'){
     const ap  = window.S?.parcels?.[window.S?.activeParcel??0];
     const uat = getUATLabel();
     return {
-      operator_apa: 'Apavital S.A. Iași',
+      operator_apa: 'Operator local (verificați ANRSC)',
       sursa_apa: 'Captare suprafata + foraj',
       retea_canalizare: true,
       risc_inundabil: false,
@@ -233,15 +233,15 @@ if(typeof getApaConfig === 'undefined'){
       nfa: 3.5,
       portanta: 220,
       tip_sol: 'Argila prafoasa',
-      bazin: 'Prut-Barlad',
-      sub_bazin: 'Bahlui',
+      bazin: 'Bazin conf. coordonate',
+      sub_bazin: 'Cursuri din coordonate',
       DA: 'Administratia Bazinala de Apa Prut-Barlad',
       DA_oras: 'Iasi',
-      DA_adresa: 'Str. Theodor Vârnav nr. 2',
-      DA_tel: '0232-218591',
-      DA_email: 'secretariat@abaprutbarlad.ro',
-      DA_web: 'www.abaprutbarlad.ro',
-      cursuri: 'Rau Bahlui (3km N), Pârau Ciric (1.2km E)',
+      DA_adresa: '—',
+      DA_tel: '—',
+      DA_email: 'secretariat@apele.ro',
+      DA_web: 'www.apele.ro',
+      cursuri: 'Cursuri identificate din coordonate (Apele Române)',
       distanta_curs_principal: 3000,
       arie_naturala: false,
       norm_principala: 'NTU < 1, pH 6.5-9.5 (Legea 458/2002)',
@@ -267,8 +267,8 @@ if(typeof getLmiConfig === 'undefined'){
 if(typeof getMediuConfig === 'undefined'){
   window.getMediuConfig = function(){
     return {
-      apa: {calitate:'Buna (Clasa II)', bazin:'Prut-Barlad'},
-      ins: {bazin:'Prut-Barlad', cod:'RO13'},
+      apa: {calitate:'Buna (Clasa II)', bazin:'Bazin conf. coordonate'},
+      ins: {bazin:'Bazin conf. coordonate', cod:'RO13'},
       aer: {PM10:28, PM25:18, NO2:22, O3:62},
       sol: {eroziune:'Moderata', contaminare:false},
     };
@@ -295,11 +295,11 @@ if(typeof getFinanciarConfig === 'undefined'){
 if(typeof getAeroprtConfig === 'undefined'){
   window.getAeroprtConfig = function(){
     const ap  = window.S?.parcels?.[window.S?.activeParcel??0];
-    const lon = ap?.lon || 27.59;
-    const lat = ap?.lat || 47.16;
+    const lon = ap?.lon || 24.9;
+    const lat = ap?.lat || 45.9;
     const airports = [
-      {cod:'LRIA', nume:'Aeroportul Iași', lat:47.178, lon:27.619, dist:0},
-      {cod:'LRBC', nume:'Aeroportul Bacău', lat:46.522, lon:26.910, dist:0},
+      {cod:'LRIA', nume:'Aeroport regional', lat:47.178, lon:27.619, dist:0},
+      {cod:'LRBC', nume:'Aeroport regional', lat:46.522, lon:26.910, dist:0},
       {cod:'LRCL', nume:'Aeroportul Cluj', lat:46.785, lon:23.686, dist:0},
       {cod:'LROP', nume:'Aeroportul Otopeni', lat:44.572, lon:26.102, dist:0},
     ];
