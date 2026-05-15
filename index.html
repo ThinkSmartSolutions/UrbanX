@@ -2565,5 +2565,41 @@ function addBilantExportBtn() {
 new MutationObserver(() => addBilantExportBtn())
   .observe(document.body, {childList:true, subtree:true});
 </script>
+
+
+    <!-- Footer GDPR -->
+    <div id="ux-gdpr-footer" style="
+      position:fixed;bottom:0;left:0;right:0;z-index:100;
+      background:rgba(10,15,30,0.92);color:#64748B;
+      font-family:-apple-system,Arial,sans-serif;font-size:11px;
+      padding:5px 16px;display:flex;justify-content:space-between;
+      align-items:center;backdrop-filter:blur(4px);
+      border-top:1px solid rgba(255,255,255,0.06)">
+      <span>
+        © 2026 <strong style="color:#D4AF37">UrbanX TSS·FG</strong> · 
+        ThinkSmart Solutions SRL · Date orientative — necesită verificare profesionistă
+      </span>
+      <span style="display:flex;gap:12px;flex-shrink:0">
+        <a href="https://app.urbanx.ro/privacy-policy.html" target="_blank"
+           style="color:#64748B;text-decoration:none" 
+           onmouseover="this.style.color='#D4AF37'" onmouseout="this.style.color='#64748B'">
+          Confidențialitate
+        </a>
+        <a href="https://app.urbanx.ro/terms-of-service.html" target="_blank"
+           style="color:#64748B;text-decoration:none"
+           onmouseover="this.style.color='#D4AF37'" onmouseout="this.style.color='#64748B'">
+          Termeni
+        </a>
+        <a href="mailto:dpo@urbanx.ro"
+           style="color:#64748B;text-decoration:none"
+           onmouseover="this.style.color='#D4AF37'" onmouseout="this.style.color='#64748B'">
+          GDPR
+        </a>
+        <button onclick="document.getElementById('ux-gdpr-footer').style.display='none'"
+                style="background:none;border:none;color:#475569;cursor:pointer;font-size:14px;padding:0">×</button>
+      </span>
+    </div>
+    <!-- GDPR Cookie Consent (Legea 506/2004 + GDPR) -->
+    <script src="js/cookie-consent.js?v=2026051301"></script>
 </body>
 </html>
