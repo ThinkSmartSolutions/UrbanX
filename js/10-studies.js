@@ -1940,6 +1940,7 @@ async function generateShadowStudy(){
   ss('Se genereaza Studiu de Umbre & Obstructie...');
 
   const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Studiu de Umbre si Obstructie Vizuala','Studiu umbre',10);
+  let cy = 28;
     cy=_pdfStudyClassBanner(pdf,W,28,'SIMULARE','Studiu Umbre - Simulare orientativa');
 const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
 
@@ -2027,7 +2028,7 @@ const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
 
   // PAG 2: Vedere 3D + analiza context
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONTEXT URBAN 3D - VEDERE PRINCIPALA',2);ftr();
-  let cy=28
+  cy=28
   // #29 Narrative Engine — pagina de context
   const _narrative = _generateNarrative('amplasament',{nrcad,utr,area,lat,lon,uat,params});
   pdf.setFillColor(14,25,50);pdf.rect(14,cy,W-28,2,'F');cy+=4;
@@ -2372,11 +2373,12 @@ async function generateNoiseStudy(){
   pdf.setTextColor(120,60,10);pdf.setFontSize(5.5);pdf.setFont('helvetica','bold');
   pdf.text('⚠ ESTIMARE ORIENTATIVĂ AI (Confidence: OSM 65%) — Nivelurile de zgomot sunt DEDUSE din funcțiunile OSM, NU din măsurători. Un "commercial" poate avea 45–90 dB. Studiu acustic oficial (ISO 9613 / CNOSSOS-EU + măsurători in situ) obligatoriu la faza PT.',5,H-17);
   ftr();
+  let cy = 28;
   cy=_pdfStudyClassBanner(pdf,W,28,'AI_ESTIMAT','Studiu Acustic Urban - Estimare AI pe OSM');
 
   // PAG 2: Vedere 3D + surse zgomot
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONTEXT URBAN 3D - SURSE ZGOMOT IDENTIFICATE',2);ftr();
-  let cy=28;
+  cy=28;
   cy=addImg(caps.img3D,14,cy,W-28,70,'FIG. 1 — Vedere 3D principala · Context urban · Surse de zgomot in raza 200m',{legend:_STUDY_LEGENDS.acoustic,northArrow:true,viewMeta:"3D Acustic · UrbanX"});
   cy=sec('1. SURSE DE ZGOMOT IN RAZA DE 200m - TABEL DETALIAT',cy);cy+=2;
   cy=body('Analiza s-a efectuat prin identificarea tuturor cladirilor si functiunilor OSM in raza de 200m fata de centrul parcelei '+nrcad+'. Nivelul la sursa Ls a fost estimat conform datelor tipice pentru fiecare categorie functionala, iar nivelul la parcela La a fost calculat prin legea de propagare acustica in camp liber: La = Ls - 20·log10(d) - 8 - 0.001·d (ISO 9613-2, propagare hemisferică + reflexie sol + absorbție atmosferică).',14,cy);cy+=4;
@@ -2593,6 +2595,7 @@ async function generateWindStudy(){
   const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Studiu de Vant si Confort Pietonal','Studiu vant',10);
   const vantCfg=getVantConfig();
   const zgomotCfg=getZgomotConfig();
+  let cy = 28;
     cy=_pdfStudyClassBanner(pdf,W,28,'SIMULARE','Studiu Vant - Simulare orientativa');
 const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
 
@@ -2632,7 +2635,7 @@ const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
 
   // PAG 2: Vedere 3D + analiza context vant
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONTEXT 3D - ANALIZA EXPUNERE VANT',2);ftr();
-  let cy=28;
+  cy=28;
   cy=addImg(caps.img3D,14,cy,W-28,72,'FIG. 1 — Vedere 3D principala · Context urban · Evaluare expunere la vant');
   cy=sec('1. CONTEXTUL URBAN SI EXPUNEREA LA VANT',cy);cy+=2;
   cy=body('Analiza confortului pietonal la vant s-a efectuat pentru amplasamentul '+nrcad+' (UTR '+utr+'), avand in vedere configuratia cladirii propuse (H='+aedisH.toFixed(1)+'m) si contextul construit existent (H medie zona='+hMed.toFixed(1)+'m). Raportul H/Hmedie='+((aedisH/Math.max(1,hMed)).toFixed(2))+' indica '+(aedisH>hMed*1.3?'o cladire semnificativ mai inalta decat contextul, cu potential impact aerodinamic important asupra spatiilor pietonale adiacente.':'o cladire compatibila cu contextul construit, cu impact aerodinamic limitat la nivel pietonal.'),14,cy);cy+=4;
@@ -2808,6 +2811,7 @@ async function generateGreenStudy(){
   ss('Se genereaza Studiu Spatii Verzi...');
 
   const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Studiu de Spatii Verzi si Permeabilitate','Studiu spatii verzi',12);
+  let cy = 28;
     cy=_pdfStudyClassBanner(pdf,W,28,'AI_ESTIMAT','Studiu Spatii Verzi - Analiza OSM');
 const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
 
@@ -2848,7 +2852,7 @@ const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
 
   // PAG 2: Vedere 3D + bilanturi
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONTEXT 3D - BILANT SPATII VERZI SI PERMEABILITATE',2);ftr();
-  let cy=28;
+  cy=28;
   cy=addImg(caps.img3D,14,cy,W-28,70,'FIG. 1 — Vedere 3D principala · Identificarea zonelor verzi existente si propuse');
   cy=sec('1. BILANT SPATII VERZI - CALCUL DETALIAT',cy);cy+=2;
   cy=body('Conform Legii nr. 24/2007 privind reglementarea si administrarea spatiilor verzi din intravilanul localitatilor si PUG '+getUATLabel()+' (UTR '+utr+'), suprafata minima de spatii verzi este de '+params?.sv+'% din suprafata terenului, reprezentand '+svMin+' mp. Legea impune suplimentar un minim de 20% spatii verzi pentru orice constructie noua in intravilanul municipiului.',14,cy);cy+=4;
@@ -3088,6 +3092,7 @@ async function generateMobilityStudy(){
   ss('Se genereaza Studiu Mobilitate & Parcaje...');
 
   const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Studiu de Mobilitate si Parcaje','Studiu mobilitate',10);
+  let cy = 28;
     cy=_pdfStudyClassBanner(pdf,W,28,'AI_ESTIMAT','Studiu Mobilitate - Analiza orientativa');
 const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
 
@@ -3131,7 +3136,7 @@ const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
 
   // PAG 2: Vedere 3D + accese identificate
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONTEXT 3D - ACCESE SI CONFIGURATIE STRADALA',2);ftr();
-  let cy=28;
+  cy=28;
   cy=addImg(caps.img3D,14,cy,W-28,70,'FIG. 1 — Vedere 3D principala · Accese auto si pietonale · Context stradal',{legend:_STUDY_LEGENDS.traffic,northArrow:true});
   cy=sec('1. ANALIZA CONFIGURATIEI STRADALE SI A ACCESELOR',cy);cy+=2;
   cy=body('Parcela '+nrcad+' (UTR '+utr+', suprafata '+area+' mp) este amplasata in contextul urban cu urmatoarea configuratie de accese: frontul stradal principal este pe latura marcata cu "FRONT" in planul cadastral. Accesul auto se va realiza din strada adiacenta frontului stradal, cu respectarea normei de gabarit minim de 3.50m pentru un sens si 6.00m pentru doua sensuri, conform STAS 10144/3.',14,cy);cy+=4;
@@ -3290,6 +3295,7 @@ async function generateDensityStudy(){
   ss('Se genereaza Studiu Densitate Urbana...');
 
   const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Studiu de Densitate si Presiune Urbana','Studiu densitate',10);
+  let cy = 28;
     cy=_pdfStudyClassBanner(pdf,W,28,'AI_ESTIMAT','Studiu Densitate Urbana - Analiza');
 const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
 
@@ -3334,7 +3340,7 @@ const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
 
   // PAG 2: Vedere 3D + comparatie indicatori
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONTEXT 3D - COMPARATIE INDICATORI PROPUSI vs ZONA',2);ftr();
-  let cy=28;
+  cy=28;
   cy=addImg(caps.img3D,14,cy,W-28,70,'FIG. 1 — Vedere 3D principala · Volumul propus in contextul urban · Densitate construita vizibila');
   cy=sec('1. COMPARATIE INDICATORI PROPUSI vs PUG vs ZONA',cy);cy+=2;
   cy=body('Analiza compara indicatorii urbanistici propusi pentru parcela '+nrcad+' cu cei reglementati prin PUG '+getUATLabel()+' (UTR '+utr+') si cu valorile reale estimate din contextul construit existent in raza de 200m, pe baza datelor OpenStreetMap actualizate.',14,cy);cy+=3;
@@ -3753,6 +3759,7 @@ async function generateAACR(){
   ss('Se generează Studiu AACR — se obțin cote de nivel AMSL...');
 
   const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Studiu de Evaluare Aeronautica (AACR)','Studiu AACR',10);
+  let cy = 28;
     cy=_pdfStudyClassBanner(pdf,W,28,'AI_ESTIMAT','Studiu AACR - Evaluare aeronautica');
 const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
   const aedisH=S.vol._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||13;
@@ -3861,7 +3868,7 @@ const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
 
   // PAG 2: Hartă context + calcule
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONTEXT AERONAUTIC - VEDERE 3D SI PLAN AMPLASAMENT',2);ftr();
-  let cy=28;
+  cy=28;
   cy=addImg(caps.img3D,14,cy,W-28,68,'\1'+S2(uat)+'\2');
   cy=sec('1. DATE AERONAUTICE AEROPORT IASI (LRIA)',cy);cy+=2;
   cy=tblRow(['Parametru','Valoare','Sursă'],cy,true,[80,60,38]);
@@ -4499,6 +4506,7 @@ async function generateTrafficStudy(){
   
 const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Studiu de Impact asupra Traficului','Studiu trafic',14);
   const traficCfg=getTraficConfig();
+  let cy = 28;
     cy=_pdfStudyClassBanner(pdf,W,28,'AI_ESTIMAT','Studiu Trafic - Analiza orientativa');
 const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
 
@@ -4547,7 +4555,7 @@ const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
 
   // PAG 2: Harta + trafic generat
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONTEXT URBAN 3D - ACCESE SI TRAFIC',2);ftr();
-  let cy=28;
+  cy=28;
   cy=addImg(caps.img3D,14,cy,W-28,68,'FIG. 1 — Vedere 3D principala · Retea stradala si accese vehicule · Context urban',{legend:_STUDY_LEGENDS.traffic,northArrow:true});
   cy=sec('1. TRAFIC GENERAT DE OBIECTIV',cy);cy+=2;
   cy=body('Traficul generat de proiect a fost estimat conform metodologiei ITE (Institute of Transportation Engineers), adaptată la condițiile locale românești. Funcțiunea propusă ('+fnLabel+') cu '+unitatiEst+' unități/angajați și SD='+sdEst+'mp va genera în ora de vârf PM (16:00-18:00) aproximativ '+Math.round(tg.zi_ora_varf)+' vehicule/oră intrare+ieșire.',14,cy);cy+=4;
@@ -4991,11 +4999,12 @@ const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
   });
   if(caps.imgLocation){try{pdf.addImage(caps.imgLocation,'JPEG',14,H-72,W-28,58,undefined,'FAST');pdf.setDrawColor(180,20,20);pdf.setLineWidth(0.4);pdf.rect(14,H-72,W-28,58,'S');pdf.setTextColor(220,60,60);pdf.setFontSize(6);pdf.text('AMPLASAMENT · '+S2(nrcad),W/2,H-75,{align:'center'});}catch(e){}}
   ftr();
+  let cy = 28;
   cy=_pdfStudyClassBanner(pdf,W,28,'AI_ESTIMAT','Studiu Siguranta Foc ISU - Analiza');
 
   // ── PAG 2: DATE GENERALE + CLASIFICARI ───────────────────────────────────
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('DATE GENERALE CONSTRUCTIE - CLASIFICARI SIGURANTA FOC',2);ftr();
-  let cy=28;
+  cy=28;
   cy=addImg(caps.img3D,14,cy,W-28,65,'FIG. 1 — Volumetrie 3D propusa · Context urban · Date constructie');
   cy=sec('1. DATE GENERALE AMPLASAMENT SI CONSTRUCTIE PROPUSA',cy);cy+=2;
   cy=tblRow(['Parametru','Valoare','Obs.'],cy,true,[70,60,52]);
@@ -5637,8 +5646,9 @@ async function generateEnvironmentalImpact(){
   // ─── PAG 2: CONTEXT AMPLASAMENT + VEDERE 3D ──────────────────────────────
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
   hdr('CONTEXT AMPLASAMENT - VEDERE 3D SI INCADRARE TERITORIALA',2);ftr();
+  let cy = 28;
   cy=_pdfStudyClassBanner(pdf,W,28,'AI_ESTIMAT','Studiu EIM - Analiza preliminara');
-  let cy=30;
+  cy=30;
   cy=addImg(caps.img3D,14,cy,W-28,95,'FIG. 1 — Vedere 3D amplasament · Contextul urban construit · '+uat+' · UTR '+utr);cy+=2;
 
   const hw=(W-32)/2;
@@ -5943,6 +5953,7 @@ async function generateIstoricStudy(){
   ss('Se generează Studiu Istoric & Patrimoniu — interogare CIMEC...');
 
   const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Studiu Istoric si de Patrimoniu Urban','Studiu patrimoniu',10);
+  let cy = 28;
   cy=_pdfStudyClassBanner(pdf,W,28,'AI_ESTIMAT','Studiu Patrimoniu & Istoric - Analiza orientativa');
 
 
@@ -6015,7 +6026,7 @@ async function generateIstoricStudy(){
 
   // PAG 2: Hartă CIMEC live + zone protejate
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('HARTA CIMEC - MONUMENTE ISTORICE LIVE (1km raza)',2);ftr();
-  let cy=28;
+  cy=28;
   if(cimecImg){
     try{
       if(cimecImg&&cimecImg.length>100) pdf.addImage(cimecImg,'PNG',14,cy,W-28,90,undefined,'FAST');
@@ -7002,8 +7013,9 @@ async function generateStudiuFezabilitate(paramOverrides){
 
   // ── PAG 2: DATE DE IDENTIFICARE + INDICATORI URBANISTICI ─────────────────
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('DATE DE IDENTIFICARE SI INDICATORI URBANISTICI PUG',2);ftr();
+  let cy = 28;
   cy=_pdfStudyClassBanner(pdf,W,28,'AI_ESTIMAT','Studiu Fezabilitate DALI - Orientativ');
-  let cy=33;
+  cy=33;
   cy=sec('1. DATE DE IDENTIFICARE A INVESTITIEI',cy);cy+=2;
   // KPI-uri
   const kw=(W-28-9)/4;
@@ -7832,6 +7844,7 @@ async function generateStudiuAmplasament(){
   const lmiCfg=getLmiConfig();
   const eim=getEIMConfig();
   const fc=getFinanciarConfig();
+  let cy = 28; // Declarat aici pentru a evita temporal dead zone
 
   // ── Vecinătăți ────────────────────────────────────────────────────────────
   const parcelCtr=turf.centerOfMass(ap.geo).geometry.coordinates;
@@ -8030,7 +8043,7 @@ async function generateStudiuAmplasament(){
   // PAG 2: VIEWER 3D — TOATE 4 VARIANTE DE ILUMINARE (ZI/NOAPTE/GOLDEN/ÎNTUNECAT)
   // ═══════════════════════════════════════════════════════════════════════════
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D URBAN3D - ZI / NOAPTE / GOLDEN HOUR / INTUNECAT',2);ftr();
-  let cy=28;
+  cy=28;
 
   // ── BANNER DISTINCTIV: TERITORIAL vs ARHITECTURAL ────────────────────────
   const half_=Math.floor((W-30)/2);
@@ -9956,11 +9969,12 @@ async function generateCPE(){
   pdf.setTextColor(30,60,130);pdf.setFontSize(5.5);pdf.setFont('helvetica','bold');
   pdf.text('ESTIMARE ORIENTATIVA (Calcul normativ 70%) — Nu inlocuieste CPE oficial semnat de auditor energetic atestat ANRE/MDLPA.',5,H-15);
   ftr();
+  let cy = 28;
   cy=_pdfStudyClassBanner(pdf,W,28,'SIMULARE','CPE - Estimare energetica orientativa');
 
   // ── PAG 2: PARAMETRI TERMICI + BILANȚ ─────────────────────────────────────
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('INDICATORI TERMICI ANVELOPA - C107/4-2022',2);ftr();
-  let cy=33;
+  cy=33;
   cy=sec('1. COEFICIENTI TERMICI ANVELOPA (U-values)',cy);cy+=2;
   cy=tblRow(['Element','U calc (W/m\u00b2K)','U max C107 (W/m\u00b2K)','Suprafata (m\u00b2)','Pierderi (W/K)','Status'],cy,true,[40,28,30,25,25,34]);
   [['Perete exterior EPS 15cm λ=0.040',uWall,uMaxWall,aWall.toFixed(0),(uWall*aWall).toFixed(0),uWall<=uMaxWall?'CONFORM':'DEPASIRE'],
@@ -10235,11 +10249,12 @@ async function generateStabilitateTaluzuri(){
   pdf.setTextColor(80,100,140);pdf.setFontSize(6);pdf.setFont('helvetica','italic');
   pdf.text('ESTIMARE ORIENTATIVA · Calcul normativ 60% · Date DEM '+(elevData.confidence)+'% · Studiu geotehnic certificat obligatoriu (NP 074/2014)',W/2,H-14,{align:'center'});
   ftr();
+  let cy = 28;
   cy=_pdfStudyClassBanner(pdf,W,28,'AI_ESTIMAT','Stabilitate Taluzuri - Calcul orientativ');
 
   // ── PAG 2: PARAMETRI GEOTEHNICI + CALCUL FS ─────────────────────────────
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('PARAMETRI GEOTEHNICI SI CALCUL FACTOR SIGURANTA',2);ftr();
-  let cy=33;
+  cy=33;
   cy=sec('1. PARAMETRI GEOTEHNICI ESTIMATI — NP 074/2014 + EUROCODE 7',cy);cy+=2;
   cy=body('Parametrii geotehnici de mai jos sunt ESTIMATIVI, bazați pe caracteristicile tipice ale depozitelor cuaternare din zona ' + S2(uat) + ' (argile prăfoase, loess, nisipuri fine). Valorile REALE se stabilesc prin STUDIU GEOTEHNIC in situ (NP 074/2014) cu minim 3 foraje + laborator geotehnic.',14,cy);cy+=3;
   cy=tblRow(['Parametru geotehnic','Simbol','Valoare estimata','UM','Sursa / Standard'],cy,true,[65,18,30,15,54]);
