@@ -757,6 +757,10 @@ function _rvInitCanvas(W,H,canvasId){
 
 function _rvRender(){
   if(!_RV.building) return;
+  // Lazy: calculăm etajul dacă nu a fost calculat încă (mobil)
+  if(_RV.floors[_RV.floor] === null){
+    try{ _RV.floors[_RV.floor] = _rvFloor(_RV.building, _RV.floor); }catch(e){}
+  }
   const fl = _RV.floors[_RV.floor] || _RV.floors[0];
   const b  = _RV.building;
   // ── Curăță handler-ul de hover când NU suntem pe Plan ─────────────────────
@@ -992,7 +996,9 @@ function _rvRenderPlan(fl,b){
   ctx.textAlign='left';
 
   // ── OVERLAY SOLAR (animație însorire OMS 119) ──────────────────────────
-  if(_RV.showSolar && _RV.solarAnim){
+  // Pe mobil: solar animation dezactivată automat (prea intensivă pentru iOS)
+  const isMobSolar = window.innerWidth < 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if(_RV.showSolar && _RV.solarAnim && !isMobSolar){
     _rvDrawSolarAnim(ctx,fl,b,ox,oy,SC);
   }
 
@@ -2794,7 +2800,11 @@ async function generateRelevee(){
   try{
   b = _rvCompBuilding(P); _RV.building = b;
   _RV.floors = [];
-  for(let i=0;i<b.niv;i++) _RV.floors.push(_rvFloor(b,i));
+  // Pe mobil: calculăm DOAR floor 0 inițial — celelalte lazy la click tab
+  const isMobDev = window.innerWidth < 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  for(let i=0;i<b.niv;i++){
+    _RV.floors.push(i===0 || !isMobDev ? _rvFloor(b,i) : null);
+  }
 
   // Floor bar
   const fb = document.getElementById('rv-floorbar'); if(fb){ fb.style.display='flex'; }
@@ -2813,7 +2823,9 @@ async function generateRelevee(){
       const availH = wrap.clientHeight - 120;
       const scW = availW / (b.P.W + b.P.rl*2 + 4);
       const scH = availH / (b.P.D + b.P.rf + b.P.rs + 4);
-      const fitSc = Math.min(28, Math.max(6, Math.floor(Math.min(scW, scH))));
+      // Pe mobil: scala maxima 8 pentru a preveni crash iOS din OOM
+      const isMobScale = window.innerWidth < 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      const fitSc = Math.min(isMobScale ? 8 : 28, Math.max(4, Math.floor(Math.min(scW, scH))));
       _RV.scale = fitSc;
       document.getElementById('rv-zval').textContent = Math.round(fitSc/12*100)+'%';
     }
@@ -2843,7 +2855,13 @@ async function generateRelevee(){
   const piEl = document.getElementById('rv-parcel-info');
   if(piEl) piEl.innerHTML = `Nr. cad.: <strong style="color:#D4AF37">${P.nrCad}</strong><br>UTR: ${P.utr}<br>Suprafață: ${P.area}m²<br>Dim. bbox: ${P.W.toFixed(1)}m × ${P.D.toFixed(1)}m<br>Front: ${P.frontDir}<br>POT max: ${Math.round(P.pot*100)}%<br>CUT max: ${P.cut}<br>H max: ${P.hMax}m<br>Niveluri: ${b.niv} niv.<br>H total: ${(b.niv*P.hn).toFixed(1)}m`;
 
-  _rvUpdatePanels(b,P);
+  // Pe mobil: delay _rvUpdatePanels pentru a permite browser-ului să respire
+  const isMobUpd = window.innerWidth < 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if(isMobUpd){
+    setTimeout(()=>{ try{ _rvUpdatePanels(b,P); }catch(e){} }, 300);
+  } else {
+    _rvUpdatePanels(b,P);
+  }
   if(typeof ss === 'function') ss(`✅ Relevee generate în ${secs}s — ${b.niv} niveluri, SDA=${_rvFmt(b.sdaTotal)}m²`);
 }
 

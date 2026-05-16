@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>UrbanX — Audit Tehnic Complet</title>
+<style>
+:root{--bg:#080c18;--p:#111c35;--p2:#18243e;--ln:#1e2d4a;--g:#e8b341;--t:#6ecfc4;--b:#4a9eff;--r:#ff5e5b;--gr:#4ade80;--or:#fb923c;--tx:#e8edf7;--dm:#8a96b3;--mt:#4a5670;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;font-size:14px;line-height:1.6;padding:32px 24px;max-width:1100px;margin:0 auto;}
+h1{font-size:32px;font-weight:900;color:var(--tx);margin-bottom:6px;letter-spacing:-.5px;}
+h1 span{color:var(--g);}
+.meta{font-size:11px;color:var(--mt);font-family:monospace;margin-bottom:32px;letter-spacing:.5px;}
+h2{font-size:16px;font-weight:700;color:var(--t);margin:32px 0 12px;padding-left:12px;border-left:2px solid var(--t);letter-spacing:.5px;text-transform:uppercase;}
+.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:32px;}
+.sum-card{background:var(--p);border:1px solid var(--ln);border-radius:10px;padding:16px;text-align:center;}
+.sum-num{font-size:36px;font-weight:900;line-height:1;}
+.sum-label{font-size:11px;color:var(--dm);margin-top:4px;}
+.c-crit{color:var(--r);}.c-high{color:var(--or);}.c-med{color:var(--g);}.c-low{color:var(--b);}
+.issue{background:var(--p);border:1px solid var(--ln);border-radius:8px;margin-bottom:10px;overflow:hidden;}
+.issue-header{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;cursor:pointer;}
+.badge{flex-shrink:0;width:72px;text-align:center;padding:3px 0;border-radius:4px;font-size:10px;font-weight:700;font-family:monospace;}
+.b-crit{background:rgba(255,94,91,.15);color:var(--r);border:1px solid rgba(255,94,91,.3);}
+.b-high{background:rgba(251,146,60,.12);color:var(--or);border:1px solid rgba(251,146,60,.25);}
+.b-med{background:rgba(74,222,128,.10);color:var(--gr);border:1px solid rgba(74,222,128,.22);}
+.b-low{background:rgba(74,158,255,.10);color:var(--b);border:1px solid rgba(74,158,255,.20);}
+.b-done{background:rgba(74,222,128,.08);color:#6ee7b7;border:1px solid rgba(74,222,128,.15);}
+.issue-title{font-size:13.5px;font-weight:600;color:var(--tx);flex:1;}
+.issue-file{font-family:monospace;font-size:10.5px;color:var(--mt);margin-top:3px;}
+.issue-status{flex-shrink:0;font-size:10px;font-family:monospace;padding:2px 8px;border-radius:20px;}
+.s-fixed{background:rgba(74,222,128,.1);color:#6ee7b7;border:1px solid rgba(74,222,128,.2);}
+.s-open{background:rgba(255,94,91,.08);color:rgba(255,94,91,.8);border:1px solid rgba(255,94,91,.18);}
+.s-partial{background:rgba(251,146,60,.1);color:var(--or);border:1px solid rgba(251,146,60,.2);}
+.issue-body{padding:0 16px 14px;border-top:1px solid var(--ln);}
+.issue-desc{font-size:12.5px;color:var(--dm);margin-top:10px;line-height:1.7;}
+.issue-fix{margin-top:10px;background:rgba(14,26,52,.6);border-radius:6px;padding:10px 12px;font-size:11.5px;}
+.fix-label{font-size:9.5px;font-weight:700;letter-spacing:1.5px;color:var(--g);margin-bottom:5px;font-family:monospace;}
+code{font-family:'JetBrains Mono',monospace;background:rgba(255,255,255,.07);padding:1px 5px;border-radius:3px;font-size:11px;color:var(--t);}
+.file-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.file-tag{font-family:monospace;font-size:10px;padding:3px 8px;border-radius:4px;background:rgba(74,158,255,.1);color:var(--b);border:1px solid rgba(74,158,255,.2);}
+.deploy-box{background:rgba(232,179,65,.06);border:1px solid rgba(232,179,65,.2);border-radius:10px;padding:20px;margin:24px 0;}
+.deploy-title{font-size:13px;font-weight:700;color:var(--g);margin-bottom:10px;font-family:monospace;letter-spacing:.5px;}
+.deploy-cmd{font-family:monospace;font-size:11px;color:var(--tx);background:rgba(0,0,0,.3);padding:12px 14px;border-radius:6px;word-break:break-all;line-height:1.8;}
+</style>
+</head>
+<body>
+<div class="meta">URBANX TSS·FG · AUDIT TEHNIC COMPLET · ''' + __import__('datetime').date.today().strftime('%d %B %Y').upper() + ''' · CLAUDE SONNET 4.6</div>
+<h1><span>Urban</span>X — Audit Tehnic Complet</h1>
+
+<div class="summary">
+  <div class="sum-card"><div class="sum-num c-crit">5</div><div class="sum-label">CRITICE<br>Blochează funcții</div></div>
+  <div class="sum-card"><div class="sum-num c-high">6</div><div class="sum-label">HIGH<br>Impact major UX</div></div>
+  <div class="sum-card"><div class="sum-num c-med">5</div><div class="sum-label">MEDIUM<br>Impact parțial</div></div>
+  <div class="sum-card"><div class="sum-num c-low">4</div><div class="sum-label">LOW<br>Cosmetic / tehnic</div></div>
+</div>
+
+<h2>🔴 Critice — Blochează studii și rapoarte</h2>
+
+<div class="issue">
+  <div class="issue-header">
+    <span class="badge b-crit">CRITIC 1</span>
+    <div style="flex:1">
+      <div class="issue-title">BNR CORS blocat — 5 studii cad fără eroare vizibilă</div>
+      <div class="issue-file">10-studies.js · L4214, L6838, L7751, L10122, L10582</div>
+    </div>
+    <span class="issue-status s-open">DESCHIS</span>
+  </div>
+  <div class="issue-body">
+    <div class="issue-desc">
+      <code>fetch('https://www.bnr.ro/nbrfxrates.xml')</code> este blocat de CORS când platforma rulează pe <code>thinksmartsolutions.github.io</code>. BNR nu trimite header <code>Access-Control-Allow-Origin</code>.<br><br>
+      5 studii apelează <code>await _getBNRRate('EUR')</code> fără <code>.catch()</code> — dacă fetch eșuează, promisea respinsă se propagă și studiul cade complet, fără mesaj de eroare pentru utilizator.<br><br>
+      <strong>Studii afectate:</strong> Studiu Construcții Existente (L4214) · Studiu Fezabilitate/DALI (L6838) · Studiu Amplasament (L7751) · Stabilitate Taluzuri (L10122) · Proiecție Urbanistică (L10582)
+    </div>
+    <div class="issue-fix">
+      <div class="fix-label">FIX NECESAR</div>
+      Adaugă <code>.catch(()=>null)</code> la toate cele 5 apeluri BNR fără catch. Funcția <code>_getBNRRate</code> are deja fallback la 5.05 RON/EUR — problema e că promise rejection propagă înainte să ajungă la fallback.<br><br>
+      <strong>Soluție permanentă:</strong> Proxy CORS gratuit — înlocuiește URL-ul din <code>_getBNRRate</code> cu <code>https://corsproxy.io/?https://www.bnr.ro/nbrfxrates.xml</code> sau configurează un proxy propriu pe Railway (deja aveți backend acolo).
+    </div>
+  </div>
+</div>
+
+<div class="issue">
+  <div class="issue-header">
+    <span class="badge b-crit">CRITIC 2</span>
+    <div style="flex:1">
+      <div class="issue-title">generateStudiuREPA() nu există — butonul REPA nu face nimic</div>
+      <div class="issue-file">03-ui-panel.js L513 vs 10-studies-new.js</div>
+    </div>
+    <span class="issue-status s-open">DESCHIS</span>
+  </div>
+  <div class="issue-body">
+    <div class="issue-desc">
+      Panoul apelează <code>generateStudiuREPA()</code> dar funcția din <code>10-studies-new.js</code> se numește <code>generateREPA()</code>. Orice click pe butonul "Raport Pre-Autorizare (REPA)" aruncă <code>ReferenceError: generateStudiuREPA is not defined</code>.
+    </div>
+    <div class="issue-fix">
+      <div class="fix-label">FIX ÎN 03-UI-PANEL.JS</div>
+      Schimbă <code>generateStudiuREPA()</code> → <code>generateREPA()</code> la linia butonului REPA.
+    </div>
+  </div>
+</div>
+
+<div class="issue">
+  <div class="issue-header">
+    <span class="badge b-crit">CRITIC 3</span>
+    <div style="flex:1">
+      <div class="issue-title">generateStudiuApe() nu există — butonul Ape Pluviale nu face nimic</div>
+      <div class="issue-file">03-ui-panel.js L514 vs 10-studies-new.js</div>
+    </div>
+    <span class="issue-status s-open">DESCHIS</span>
+  </div>
+  <div class="issue-body">
+    <div class="issue-desc">
+      Panoul apelează <code>generateStudiuApe()</code> dar funcția se numește <code>generateStudiuApePluviale()</code>. <code>ReferenceError</code> la click.
+    </div>
+    <div class="issue-fix">
+      <div class="fix-label">FIX ÎN 03-UI-PANEL.JS</div>
+      Schimbă <code>generateStudiuApe()</code> → <code>generateStudiuApePluviale()</code>.
+    </div>
+  </div>
+</div>
+
+<div class="issue">
+  <div class="issue-header">
+    <span class="badge b-crit">CRITIC 4</span>
+    <div style="flex:1">
+      <div class="issue-title">generateStudiuCarbon() și generateStudiuBiodiv() nu există deloc</div>
+      <div class="issue-file">03-ui-panel.js L515-L516</div>
+    </div>
+    <span class="issue-status s-open">DESCHIS</span>
+  </div>
+  <div class="issue-body">
+    <div class="issue-desc">
+      Butoanele "Bilanț Carbon" și "Biodiversitate Urbană" apelează funcții care nu sunt definite în niciun fișier JS. <code>ReferenceError</code> la click. Aceste studii nu au fost implementate încă.
+    </div>
+    <div class="issue-fix">
+      <div class="fix-label">OPȚIUNI</div>
+      <strong>Varianta 1:</strong> Ascunde butoanele temporar din panoul ⑧ până studiile sunt scrise.<br>
+      <strong>Varianta 2:</strong> Adaugă stub-uri goale cu <code>ss('Studiu în dezvoltare...')</code>.<br>
+      <strong>Varianta 3:</strong> Implementez studiile (Carbon = calcul CO₂ din SDA×coef material, Biodiv = verificare Natura 2000 + indice verde).
+    </div>
+  </div>
+</div>
+
+<div class="issue">
+  <div class="issue-header">
+    <span class="badge b-crit">CRITIC 5</span>
+    <div style="flex:1">
+      <div class="issue-title">hidro.nfa.toFixed crash în Studiu Seismic</div>
+      <div class="issue-file">10-studies-stubs.js L543, L558</div>
+    </div>
+    <span class="issue-status s-fixed">REZOLVAT</span>
+  </div>
+  <div class="issue-body">
+    <div class="issue-desc">
+      <code>getHidroConfig()</code> din <code>10-studies-geo-engine.js</code> poate fi suprascrisă de o altă versiune care returnează <code>nfa</code> ca string sau null. <code>hidro.nfa.toFixed(1)</code> aruncă <code>TypeError</code> și studiul cade.
+    </div>
+    <div class="issue-fix">
+      <div class="fix-label">REZOLVAT ÎN ACEASTĂ SESIUNE</div>
+      Înlocuit cu <code>Number(hidro.nfa??2).toFixed(1)</code> în ambele locuri.
+    </div>
+  </div>
+</div>
+
+<h2>🟠 High — Impact major pe utilizator</h2>
+
+<div class="issue">
+  <div class="issue-header">
+    <span class="badge b-high">HIGH 1</span>
+    <div style="flex:1">
+      <div class="issue-title">Relevee blocat — modal frozen, nu poate fi închis (desktop)</div>
+      <div class="issue-file">15-relevee.js</div>
+    </div>
+    <span class="issue-status s-fixed">REZOLVAT</span>
+  </div>
+  <div class="issue-body">
+    <div class="issue-desc">
+      <code>.rv-prog</code> (overlay progres) cu <code>position:absolute;inset:0;pointer-events:all</code> acoperea întreg modalul (inclusiv butonul ✕) când <code>_rvCompBuilding()</code> sau <code>_rvRender()</code> aruncau eroare. <code>prog.classList.remove('rv-on')</code> nu se executa niciodată.
+    </div>
+    <div class="issue-fix">
+      <div class="fix-label">REZOLVAT ÎN ACEASTĂ SESIUNE</div>
+      <code>position:relative</code> pe <code>.rv-body</code> + <code>try/finally</code> garantează că overlay-ul dispare indiferent de erori.
+    </div>
+  </div>
+</div>
+
+<div class="issue">
+  <div class="issue-header">
+    <span class="badge b-high">HIGH 2</span>
+    <div style="flex:1">
+      <div class="issue-title">Relevee blocat la 91% pe iOS — nu se finalizează</div>
+      <div class="issue-file">15-relevee.js</div>
+    </div>
+    <span class="issue-status s-fixed">REZOLVAT</span>
+  </div>
+  <div class="issue-body">
+    <div class="issue-desc">
+      iOS Safari throttlează <code>setTimeout</code> agresiv când memoria e sub presiune. Canvas cu <code>devicePixelRatio=3</code> (iPhone 14 Pro) la 800px lățime = 2400px fizici = presiune de memorie → ultimele <code>_rvSleep()</code> din progres nu se mai rezolvă.
+    </div>
+    <div class="issue-fix">
+      <div class="fix-label">REZOLVAT ÎN ACEASTĂ SESIUNE</div>
+      DPR capped la max 2 + delay-uri 8ms pe mobil vs 40-105ms desktop + guard <code>if(!ctx) return</code>.
+    </div>
+  </div>
+</div>
+
+<div class="issue">
+  <div class="issue-header">
+    <span class="badge b-high">HIGH 3</span>
+    <div style="flex:1">
+      <div class="issue-title">TCI se deschide automat la fiecare refresh pe mobil</div>
+      <div class="issue-file">17-tci-cinema.js</div>
+    </div>
+    <span class="issue-status s-fixed">REZOLVAT</span>
+  </div>
+  <div class="issue-body">
+    <div class="issue-desc">
+      Hash-ul <code>#tci/...</code> rămânea în URL după închiderea TCI. La refresh, <code>tryLaunch()</code> citea hash-ul și redeschidea TCI automat.
+    </div>
+    <div class="issue-fix">
+      <div class="fix-label">REZOLVAT ÎN ACEASTĂ SESIUNE</div>
+      <code>history.replaceState()</code> șterge hash-ul după restore + guard <code>performance.navigation.type===1</code> blochează auto-open pe reload.
+    </div>
+  </div>
+</div>
+
+<div class="issue">
+  <div class="issue-header">
+    <span class="badge b-high">HIGH 4</span>
+    <div style="flex:1">
+      <div class="issue-title">Input UAT din TCI nu acceptă tastare pe iOS</div>
+      <div class="issue-file">17-tci-cinema.js · 17-projection-engine.js</div>
+    </div>
+    <span class="issue-status s-partial">PARȚIAL</span>
+  </div>
+  <div class="issue-body">
+    <div class="issue-desc">
+      <strong>Cauze identificate:</strong><br>
+      • <code>font-size:12px</code> — iOS blochează tastatura sub 16px (zoom prevention)<br>
+      • <code>onclick="event.stopPropagation()"</code> — previne focus pe iOS<br>
+      • Overlay TCI cu <code>backdrop-filter:blur(20px)</code> + <code>position:fixed</code> → iOS nu focusează inputuri în containere fixed complexe<br><br>
+      <strong>Soluție aplicată:</strong> font-size 16px + <code>ontouchend="this.focus()"</code> + overlay dedicat mobil cu input full-width.<br>
+      <strong>Dacă tot nu merge:</strong> problema poate fi MapBox GL absorbind touch events — necesită testare cu <code>map.dragPan.disable()</code> strict la deschiderea TCI pe mobile.
+    </div>
+    <div class="issue-fix">
+      <div class="fix-label">DACĂ PERSISTĂ — UPLOAD 17-tci-cinema.js și testez cu disable map</div>
+    </div>
+  </div>
+</div>
+
+<div class="issue">
+  <div class="issue-header">
+    <span class="badge b-high">HIGH 5</span>
+    <div style="flex:1">
+      <div class="issue-title">Secțiunea "STUDII NOI 2026" apare ca ticker orizontal în loc de listă verticală</div>
+      <div class="issue-file">index.html (ticker neidentificat)</div>
+    </div>
+    <span class="issue-status s-partial">PARȚIAL</span>
+  </div>
+  <div class="issue-body">
+    <div class="issue-desc">
+      Studiile noi (PMR, REPA, Iluminat, Ape Pluviale, Seismic, Sănătate) apar ca un ticker horizontal scrolling la baza panoului. Secțiunea verticală ⑧ a fost adăugată în <code>03-ui-panel.js</code>, dar ticker-ul (definit în <code>index.html</code>) continuă să apară separat.
+    </div>
+    <div class="issue-fix">
+      <div class="fix-label">FIX NECESAR ÎN INDEX.HTML</div>
+      Caută <code>STUDII NOI 2026</code> sau <code>overflow-x</code> sau <code>white-space:nowrap</code> în <code>index.html</code> și șterge acel div. Uploadează <code>index.html</code> ca să văd exact blocul de șters.
+    </div>
+  </div>
+</div>
+
+<div class="issue">
+  <div class="issue-header">
+    <span class="badge b-high">HIGH 6</span>
+    <div style="flex:1">
+      <div class="issue-title">59 de catch(e){} goale în 10-studies.js swallowează erori silențios</div>
+      <div class="issue-file">10-studies.js · 59 locuri</div>
+    </div>
+    <span class="issue-status s-open">DESCHIS</span>
+  </div>
+  <div class="issue-body">
+    <div class="issue-desc">
+      59 de blocuri <code>catch(e){}</code> complet goale — erorile sunt înghițite fără niciun log. Când un studiu eșuează, utilizatorul nu vede niciun mesaj și nu știe ce s-a întâmplat. Asta face debugging imposibil.
+    </div>
+    <div class="issue-fix">
+      <div class="fix-label">FIX RECOMANDAT</div>
+      Înlocuiește toate <code>catch(e){}</code> cu <code>catch(e){console.warn('[Studiu]',e?.message)}</code> — nu afectează comportamentul, dar face debugging posibil.
+    </div>
+  </div>
+</div>
+
+<h2>🟡 Medium — Impact parțial</h2>
+
+<div class="issue">
+  <div class="issue-header">
+    <span class="badge b-med">MED 1</span>
+    <div style="flex:1">
+      <div class="issue-title">app.urbanx.ro — domeniu inexistent, linkuri footer rupte</div>
+      <div class="issue-file">index.html · footer GDPR</div>
+    </div>
+    <span class="issue-status s-fixed">REZOLVAT</span>
+  </div>
+  <div class="issue-body">
+    <div class="issue-desc">Links Confidențialitate și Termeni trimiteau la <code>app.urbanx.ro</code> (DNS_PROBE_FINISHED_NXDOMAIN). GDPR trimitea la <code>dpo@urbanx.ro</code> (inexistent).</div>
+    <div class="issue-fix">
+      <div class="fix-label">REZOLVAT</div>
+      Links actualizate la <code>thinksmartsolutions.github.io/UrbanX_Demo/</code> + GDPR → <code>office@think-ss.eu</code>. Pagini <code>privacy-policy.html</code> și <code>terms-of-service.html</code> create și deployate.
+    </div>
+  </div>
+</div>
+
+<div class="issue">
+  <div class="issue-header">
+    <span class="badge b-med">MED 2</span>
+    <div style="flex:1">
+      <div class="issue-title">BNR returnează fallback 5.05 RON/EUR — calcule economice inexacte</div>
+      <div class="issue-file">10-studies.js · _getBNRRate</div>
+    </div>
+    <span class="issue-status s-open">DESCHIS</span>
+  </div>
+  <div class="issue-body">
+    <div class="issue-desc">Chiar dacă studiile nu cad (au <code>.catch()</code>), cursul BNR nu poate fi obținut din github.io → toate calculele economice (cost construcție, ROI, fezabilitate) folosesc <code>5.05 RON/EUR</code> hardcodat din 2024.</div>
+    <div class="issue-fix">
+      <div class="fix-label">FIX RECOMANDAT</div>
+      Folosește <code>https://corsproxy.io/?https://www.bnr.ro/nbrfxrates.xml</code> ca URL primar. Gratuit, fără setup. Sau adaugă un endpoint pe Railway: <code>GET /api/v1/geo/bnr-rate</code>.
+    </div>
+  </div>
+</div>
+
+<div class="issue">
+  <div class="issue-header">
+    <span class="badge b-med">MED 3</span>
+    <div style="flex:1">
+      <div class="issue-title">Vizualizarea listei de rapoarte — lipsă secțiune ⑧ în versiunea deployată</div>
+      <div class="issue-file">03-ui-panel.js</div>
+    </div>
+    <span class="issue-status s-fixed">REZOLVAT</span>
+  </div>
+  <div class="issue-body">
+    <div class="issue-desc">Secțiunea ⑧ "Studii Noi 2026" adăugată în <code>03-ui-panel.js</code> și deployată. Dar 2 butoane apelează funcții inexistente (CRITIC 2 și 3).</div>
+  </div>
+</div>
+
+<div class="issue">
+  <div class="issue-header">
+    <span class="badge b-med">MED 4</span>
+    <div style="flex:1">
+      <div class="issue-title">Elevație (cotă teren) poate fi null — AACR cade</div>
+      <div class="issue-file">10-studies-stubs.js · generateAACR</div>
+    </div>
+    <span class="issue-status s-open">DESCHIS</span>
+  </div>
+  <div class="issue-body">
+    <div class="issue-desc">
+      <code>const elevTeren = elevData.elev</code> — dacă Mapbox și OpenTopo sunt ambele indisponibile, <code>_getElevEstimate()</code> returnează o valoare default. Dar dacă <code>elevData</code> însuși e null (eroare de rețea neprinsă), <code>elevTeren.toFixed(1)</code> cade cu <code>TypeError</code>.
+    </div>
+    <div class="issue-fix">
+      <div class="fix-label">FIX PREVENTIV</div>
+      <code>const elevTeren = elevData?.elev ?? 80;</code> (80m = fallback rezonabil pentru România).
+    </div>
+  </div>
+</div>
+
+<div class="issue">
+  <div class="issue-header">
+    <span class="badge b-med">MED 5</span>
+    <div style="flex:1">
+      <div class="issue-title">Înălțimea volumului generat apare diferit la zoom depărtat vs aproape</div>
+      <div class="issue-file">02-map-core.js · ctx-height-label</div>
+    </div>
+    <span class="issue-status s-open">DESCHIS</span>
+  </div>
+  <div class="issue-body">
+    <div class="issue-desc">
+      Label-ul de înălțime pe clădirile existente (<code>ctx-height-label</code>) apare doar la <code>minzoom:17</code> (zoom foarte aproape). La zoom depărtat nu există niciun label pe volumul generat → utilizatorul confundă înălțimea clădirii generate cu cea a vecinilor sau nu vede deloc valoarea.
+    </div>
+    <div class="issue-fix">
+      <div class="fix-label">FIX NECESAR (cu atenție)</div>
+      Adaugă layer <code>vol-height-label</code> pe <code>vol-src</code> cu <code>minzoom:14</code> dar FĂRĂ expresia <code>['round']</code> (care cauza eroarea "Ra is not defined" în sesiunea anterioară). Folosește <code>['to-string',['get','top']]</code> simplu.
+    </div>
+  </div>
+</div>
+
+<h2>🔵 Low — Cosmetic / tehnic</h2>
+
+<div class="issue">
+  <div class="issue-header">
+    <span class="badge b-low">LOW 1</span>
+    <div style="flex:1">
+      <div class="issue-title">zsh: bad pattern [200~ la paste comenzi în terminal</div>
+      <div class="issue-file">Terminal macOS</div>
+    </div>
+    <span class="issue-status s-fixed">REZOLVAT</span>
+  </div>
+  <div class="issue-body">
+    <div class="issue-desc">zsh bracketed paste mode adaugă <code>[200~</code> la paste. Fix permanent: <code>unset zle_bracketed_paste</code> în terminal sau adaugă <code>unset zle_bracketed_paste</code> în <code>~/.zshrc</code>.</div>
+  </div>
+</div>
+
+<div class="issue">
+  <div class="issue-header">
+    <span class="badge b-low">LOW 2</span>
+    <div style="flex:1">
+      <div class="issue-title">Privacy/Terms lipseau — 404 la click pe footer</div>
+      <div class="issue-file">GitHub repo</div>
+    </div>
+    <span class="issue-status s-fixed">REZOLVAT</span>
+  </div>
+  <div class="issue-body">
+    <div class="issue-desc">Paginile <code>privacy-policy.html</code> și <code>terms-of-service.html</code> au fost create și deployate pe GitHub Pages.</div>
+  </div>
+</div>
+
+<div class="issue">
+  <div class="issue-header">
+    <span class="badge b-low">LOW 3</span>
+    <div style="flex:1">
+      <div class="issue-title">Listener asincron Chrome — "message channel closed before response"</div>
+      <div class="issue-file">00-globals.js sau extensie Chrome</div>
+    </div>
+    <span class="issue-status s-open">IGNORABIL</span>
+  </div>
+  <div class="issue-body">
+    <div class="issue-desc">
+      Mesajul <em>"A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received"</em> vine de la o extensie Chrome instalată pe browser (probabil AdBlock, Grammarly sau similar), nu din codul platformei. Nu afectează funcționalitatea.
+    </div>
+  </div>
+</div>
+
+<div class="issue">
+  <div class="issue-header">
+    <span class="badge b-low">LOW 4</span>
+    <div style="flex:1">
+      <div class="issue-title">Harta neagră după închidere TCI — cauzată de fix greșit</div>
+      <div class="issue-file">17-projection-engine.js</div>
+    </div>
+    <span class="issue-status s-fixed">REZOLVAT</span>
+  </div>
+  <div class="issue-body">
+    <div class="issue-desc"><code>map.dragPan.disable()</code> la deschiderea TCI a cauzat harta neagră la închidere. Fix-ul a fost reverted. Harta funcționează normal.</div>
+  </div>
+</div>
+
+<h2>📋 Sumar fișiere de deployat</h2>
+
+<div class="deploy-box">
+  <div class="deploy-title">FIȘIERE REZOLVATE ÎN ACEASTĂ SESIUNE — DE DEPLOYAT</div>
+  <div class="file-list">
+    <span class="file-tag">✓ 15-relevee.js</span>
+    <span class="file-tag">✓ 17-tci-cinema.js</span>
+    <span class="file-tag">✓ 17-projection-engine.js</span>
+    <span class="file-tag">✓ 10-studies-stubs.js</span>
+    <span class="file-tag">✓ 03-ui-panel.js</span>
+    <span class="file-tag">✓ index.html</span>
+    <span class="file-tag">✓ privacy-policy.html</span>
+    <span class="file-tag">✓ terms-of-service.html</span>
+  </div>
+</div>
+
+<div class="deploy-box">
+  <div class="deploy-title">FIȘIERE DE MODIFICAT PENTRU CRITICE 1-4</div>
+  <div class="file-list">
+    <span class="file-tag">⚠ 10-studies.js — BNR .catch()</span>
+    <span class="file-tag">⚠ 03-ui-panel.js — fix nume funcții REPA+Ape</span>
+    <span class="file-tag">⚠ 03-ui-panel.js — ascunde/stub Carbon+Biodiv</span>
+    <span class="file-tag">⚠ index.html — șterge ticker STUDII NOI</span>
+  </div>
+  Uploadează-le și le rezolv imediat.
+</div>
+
+<p style="font-size:11px;color:var(--mt);margin-top:32px;font-family:monospace">
+  UrbanX TSS·FG · Audit generat de Claude Sonnet 4.6 · Anthropic · ''' + __import__('datetime').date.today().isoformat() + '''
+</p>
+</body>
+</html>

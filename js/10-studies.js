@@ -177,7 +177,8 @@ async function _getBNRRate(currency = 'EUR') {
 
   try {
     // BNR XML API — permite CORS din browser
-    const url = 'https://www.bnr.ro/nbrfxrates.xml';
+    // CORS proxy necesar pe github.io — BNR nu permite cross-origin direct
+    const url = 'https://corsproxy.io/?url=https://www.bnr.ro/nbrfxrates.xml';
     const resp = await fetch(url, { signal: AbortSignal.timeout(6000) });
     const xml = await resp.text();
     const parser = new DOMParser();
@@ -4211,7 +4212,7 @@ async function generateExistingBldStudy(){
 
 // ── STUDIU GEOTEHNIC PRELIMINAR ────────────────────────────────────────────
 async function generateGeotehnicalStudy(){
-  const _cursEUR = await _getBNRRate('EUR');
+  const _cursEUR = await _getBNRRate('EUR').catch(()=>null);
   const ap=S.parcels[S.activeParcel??0];
   if(!ap?.geo?.geometry){ss('Selectați o parcelă.');return;}
   ss('Se generează Pre-Studiu Geotehnic...');
@@ -6835,7 +6836,7 @@ const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
 
 async function generateStudiuFezabilitate(paramOverrides){
   ss('Studiu Fezabilitate — se obține cursul BNR EUR/RON...');
-  const _cursEUR = await _getBNRRate('EUR');
+  const _cursEUR = await _getBNRRate('EUR').catch(()=>null);
   // #18 TOC Fezabilitate
 
 
@@ -7748,7 +7749,7 @@ async function generateStudiuFezabilitate(paramOverrides){
 // STUDIU AMPLASAMENT — Document fundament pentru toate studiile de specialitate
 // ════════════════════════════════════════════════════════════════════════════
 async function generateStudiuAmplasament(){
-  const _cursEUR = await _getBNRRate('EUR');
+  const _cursEUR = await _getBNRRate('EUR').catch(()=>null);
   const ap=S.parcels[S.activeParcel??0];
   if(!ap?.geo?.geometry){ss('Selectați o parcelă pentru studiu.');return;}
   ss('Se generează Studiu de Amplasament...');
@@ -10119,7 +10120,7 @@ window.generateCPE = generateCPE;
 // Clasificare hazard: P91/2008 + Ord. 1422/2003 (risc geomorfologic)
 // ═══════════════════════════════════════════════════════════════════════════
 async function generateStabilitateTaluzuri(){
-  const _cursEUR = await _getBNRRate('EUR');
+  const _cursEUR = await _getBNRRate('EUR').catch(()=>null);
   const ap=S.parcels[S.activeParcel??0];
   if(!ap?.geo?.geometry){ss('Selectați o parcelă pentru studiu stabilitate.');return;}
   ss('Studiu Stabilitate Taluzuri — se obțin cote de nivel DEM...');
@@ -10579,7 +10580,7 @@ async function generateProiectieUrbanistica() {
   
   ss('Se generează Proiecție Urbanistică 10/20/30 ani...');
   
-  const cursEUR = await _getBNRRate('EUR');
+  const cursEUR = await _getBNRRate('EUR').catch(()=>null);
   const elevData = await _getElevation(ap.lat||47.16, ap.lon||27.59);
   
   const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,

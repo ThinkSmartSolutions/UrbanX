@@ -838,12 +838,12 @@ window.generateStabilitateTaluzuri = async function(){
 
   const caps      = await _captureStudyMapsSafe(ap, msg=>ss(msg));
   const elevData  = await _getElevation(lat, lon);
-  const terrCls   = _classifyTerrain(lat, lon, elevData.elev);
+  const terrCls   = _classifyTerrain(lat, lon, elevData?.elev ?? 80);
   const seism     = getSeismConfig();
   const hidro     = getHidroConfig();
   const areaNum   = parseFloat(area)||300;
   const aedisH    = S.vol?._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||10;
-  const elevTeren = elevData.elev;
+  const elevTeren = elevData?.elev ?? 80;
   const elevSursa = elevData.source;
   const RON       = _cursEUR?.rate || 5.05;
 
@@ -885,13 +885,13 @@ window.generateStabilitateTaluzuri = async function(){
   const kw3 = (W-28)/3;
   [['Cotă teren AMSL',elevTeren.toFixed(1)+' m'],['Sursă elevație',S2(elevSursa)],
    ['Pantă estimată zonă',slopeEst.toFixed(1)+'°'],['Clasif. teren',S2(terrCls?.tip||'—')],
-   ['Categorie geotehnică',hidro.clasa_geotehnica+' (NP 074)'],['NFA estimat',hidro.nfa.toFixed(1)+' m']
+   ['Categorie geotehnică',hidro.clasa_geotehnica+' (NP 074)'],['NFA estimat',Number(hidro.nfa??2).toFixed(1)+' m']
   ].forEach(([l,v],i) => kv(l,v,14+(i%3)*kw3,i<3?cy:cy+24,kw3-2,[BLUE,GOLD,GREEN][i%3]));
   cy+=54;
   cy = tblRow(['Indicator geomorfologic','Valoare estimată','Baza determinare','Impact stabilitate'], cy, true, [60,35,55,W-28-60-35-55]);
   [['Pantă medie zonă', slopeEst.toFixed(1)+'°', 'DEM SRTM 30m', slopeEst<5?'REDUS':slopeEst<15?'MEDIU':'MARE'],
    ['Cotă absolută AMSL', elevTeren.toFixed(1)+' m', S2(elevSursa), '—'],
-   ['Adâncime NFA (estimat)', hidro.nfa.toFixed(1)+' m', 'Hidrogeo regional', hidro.nfa<2?'MARE':hidro.nfa<4?'MEDIU':'REDUS'],
+   ['Adâncime NFA (estimat)', Number(hidro.nfa??2).toFixed(1)+' m', 'Hidrogeo regional', Number(hidro.nfa??2)<2?'MARE':Number(hidro.nfa??2)<4?'MEDIU':'REDUS'],
    ['Erozivitate sol', slopeEst>15?'Ridicată':slopeEst>5?'Medie':'Redusă', 'Textură+pantă', '—'],
    ['Risc alunecări', seism.ag>=0.25&&slopeEst>10?'MODERAT':slopeEst>20?'RIDICAT':'REDUS', 'P91/2008', '—'],
   ].forEach(r => { cy = tblRow(r, cy, false, [60,35,55,W-28-60-35-55]); cy=checkY(cy,12,'GEOMORF',2); });
@@ -902,13 +902,13 @@ window.generateStabilitateTaluzuri = async function(){
   cy = body('Parametrii geotehnici sunt estimați pe baza zonei geografice și clasificării terenului. ' +
     'Forajul geotehnic conform NP 074/2014 este OBLIGATORIU pentru verificarea acestor valori.', 14, cy); cy+=4;
   cy = tblRow(['Parametru','Simbol','Valoare estimată','Unitate','Metodă determinare'], cy, true, [55,18,30,20,W-28-55-18-30-20]);
-  [['Greutate volumică naturală','γ',geo.gamma.toFixed(1),'kN/m³','STAS 1913/1'],
-   ['Coeziune (Mohr-Coulomb)','c',geo.c.toFixed(1),'kPa','STAS 8942/2'],
-   ['Unghi frecare internă','φ',geo.phi.toFixed(1),'grade','STAS 8942/2'],
-   ['Rezist. forfecare nedrenată','Cu',geo.cu.toFixed(1),'kPa','SR EN ISO 22476-1'],
-   ['Adâncime apă freatică','NFA',geo.nfa.toFixed(1),'m','Foraj + piezometru'],
+  [['Greutate volumică naturală','γ',Number(geo.gamma??18).toFixed(1),'kN/m³','STAS 1913/1'],
+   ['Coeziune (Mohr-Coulomb)','c',Number(geo.c??15).toFixed(1),'kPa','STAS 8942/2'],
+   ['Unghi frecare internă','φ',Number(geo.phi??25).toFixed(1),'grade','STAS 8942/2'],
+   ['Rezist. forfecare nedrenată','Cu',Number(geo.cu??50).toFixed(1),'kPa','SR EN ISO 22476-1'],
+   ['Adâncime apă freatică','NFA',Number(geo.nfa??2).toFixed(1),'m','Foraj + piezometru'],
    ['Portanță convențională','pconv',hidro.portanta,'kPa','NP 112/2014'],
-   ['Adâncime fundare minimă','Df','≥'+hidro.adancime_fundare.toFixed(1),'m','NP 112/2014'],
+   ['Adâncime fundare minimă','Df','≥'+Number(hidro.adancime_fundare??0.8).toFixed(1),'m','NP 112/2014'],
   ].forEach(r => { cy = tblRow(r, cy, false, [55,18,30,20,W-28-55-18-30-20]); });
   cy+=4;
   cy = sec('2.2. CLASIFICARE GEOTEHNICĂ — NP 074/2014', cy); cy+=3;
@@ -957,7 +957,7 @@ window.generateStabilitateTaluzuri = async function(){
    ['Risc seismic',seism.ag>=0.25?'RIDICAT':seism.ag>=0.20?'MODERAT':'REDUS','P100-1/2013','Amplificarea mișcării seismice pe versanți (EC8)'],
    ['Eroziune pluvială',slopeEst>10?'MEDIE':'REDUSĂ','SR EN ISO 11274','Sisteme de drenaj + vegetație'],
    ['Inundații',hidro.nfa<2?'POSIBIL':'REDUS','Directiva 2007/60/CE','Verificare zonă inundabilă ANIF'],
-   ['Subsidență (tasare)','Redusă (pcon=' + hidro.portanta + 'kPa)','NP 112/2014','Fundare adecvată Df≥' + hidro.adancime_fundare.toFixed(1) + 'm'],
+   ['Subsidență (tasare)','Redusă (pcon=' + hidro.portanta + 'kPa)','NP 112/2014','Fundare adecvată Df≥' + Number(hidro.adancime_fundare??0.8).toFixed(1) + 'm'],
   ].forEach(r => { cy = tblRow(r, cy, false, [40,30,45,W-28-40-30-45]); });
 
   // ── PAG 6: Măsuri de stabilizare ─────────────────────────────────────────
@@ -994,7 +994,7 @@ window.generateStabilitateTaluzuri = async function(){
   cy = newPage('7. FUNDARE + INTERACȚIUNE SEISM-TEREN', 8);
   cy = sec('7.1. CERINȚE FUNDARE CONF. NP 112/2014 + EC7', cy); cy+=3;
   cy = tblRow(['Parametru fundare','Valoare','Normativ','Obs.'], cy, true, [65,35,40,W-28-65-35-40]);
-  [['Adâncime minimă Df','>'+hidro.adancime_fundare.toFixed(1)+' m','NP 112/2014','Sub linia ingheț'],
+  [['Adâncime minimă Df','>'+Number(hidro.adancime_fundare??0.8).toFixed(1)+' m','NP 112/2014','Sub linia ingheț'],
    ['Portanță convențională pconv',hidro.portanta+' kPa','NP 112/2014 tab.2','Verificare foraj'],
    ['Tip fundație recomandat',hidro.portanta>=250?'Izolată sau continuă':hidro.portanta>=150?'Continuă sau radier':'Radier general','NP 112/2014','Funcție încărcare'],
    ['Adâncime linie îngheț zonă',lat>47?'1.10 m':lat>45?'0.90 m':'0.80 m','NP 082/2004','Minimum pt. fundare'],
@@ -1028,7 +1028,7 @@ window.generateStabilitateTaluzuri = async function(){
   cy = newPage('9. CONCLUZII + SEMNĂTURĂ', 10);
   cy = concluzii([
     'Amplasamentul ' + S2(nrcad) + ' (UTR ' + S2(utr) + ', ' + S2(uat) + ') are cota absolută AMSL de ' + elevTeren.toFixed(1) + 'm (' + S2(elevSursa) + '). Panta estimată a zonei este de ' + slopeEst.toFixed(1) + '°.',
-    'Parametrii geotehnici estimați: γ=' + geo.gamma + ' kN/m³, c=' + geo.c + ' kPa, φ=' + geo.phi + '°, NFA≈' + geo.nfa.toFixed(1) + 'm. Portanță convențională estimată pconv=' + hidro.portanta + ' kPa.',
+    'Parametrii geotehnici estimați: γ=' + geo.gamma + ' kN/m³, c=' + geo.c + ' kPa, φ=' + geo.phi + '°, NFA≈' + Number(geo.nfa??2).toFixed(1) + 'm. Portanță convențională estimată pconv=' + hidro.portanta + ' kPa.',
     'Factorul de siguranță estimat prin metoda Fellenius este Fs≈' + Fs_est.toFixed(2) + ' (teren uscat) și Fs≈' + Fs_crit.toFixed(2) + ' (scenariu critic saturat). Situația este evaluată ca ' + riskLevel + '.',
     'Riscul seismic conf. P100-1/2013 este ag=' + seism.ag + 'g (zona ' + seism.zona + '). Pe versanți cu pantă >10°, accelerația seismică se majorează cu 10-30% conf. EC8 Part 5.',
     'OBLIGATORIU: studiu geotehnic detaliat cu min. 2 foraje la adâncimea Df+3m conform NP 074/2014 înainte de proiectarea fundațiilor.',
