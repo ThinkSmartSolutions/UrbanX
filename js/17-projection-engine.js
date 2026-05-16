@@ -1272,7 +1272,10 @@ const _ProjectionEngine = {
           <div class="tci-city-search-wrap">
             <input type="text" id="tci-city-search" placeholder="🔍 Caută orice oraș din România..." 
               class="tci-city-input" oninput="_ProjectionEngine.searchCity(this.value)"
-              onblur="setTimeout(()=>document.getElementById('tci-city-results').style.display='none',200)">
+              autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+              inputmode="search"
+              onfocus="document.getElementById('tci-city-results').style.display='block'"
+              onblur="setTimeout(()=>{const r=document.getElementById('tci-city-results');if(r&&!r.matches(':hover'))r.style.display='none';},300)">
             <div id="tci-city-results" class="tci-city-results" style="display:none"></div>
           </div>
           <button class="tci-close-btn" onclick="_ProjectionEngine.close()">✕</button>
@@ -2405,6 +2408,8 @@ const _ProjectionEngine = {
     font-family: 'Space Grotesk', 'Inter', sans-serif;
   }
   #tci-modal.tci-open { animation: tciOpen .35s ease; }
+  #tci-modal { touch-action: pan-y; -webkit-overflow-scrolling: touch; }
+  #tci-modal input, #tci-modal textarea, #tci-modal select { touch-action: auto; font-size:16px; }
   @keyframes tciOpen { from{opacity:0;transform:scale(.96)} to{opacity:1;transform:scale(1)} }
 
   .tci-overlay { width:100%;height:100%;display:flex;align-items:center;justify-content:center; }
@@ -2660,8 +2665,13 @@ const _ProjectionEngine = {
   .tci-city-search-wrap { position:relative; }
   .tci-city-input {
     width:180px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);
-    color:#fff;padding:5px 10px;border-radius:7px;font-size:11px;font-family:inherit;outline:none;
-    box-sizing:border-box;
+    color:#fff;padding:8px 12px;border-radius:7px;font-size:14px;font-family:inherit;outline:none;
+    box-sizing:border-box;-webkit-appearance:none;appearance:none;
+  }
+  @media(max-width:768px){
+    .tci-city-input{width:100%;min-width:140px;font-size:16px;padding:10px 14px;}
+    .tci-city-search-wrap{flex:1;min-width:0;}
+    .tci-city-results{width:90vw;right:-10px;}
   }
   .tci-city-input:focus{border-color:rgba(212,175,55,0.4);}
   .tci-city-results {
@@ -3161,5 +3171,8 @@ _ProjectionEngine.open = function() {
 
 // Restore URL on load
 window.addEventListener('load', () => {
-  setTimeout(() => _TCIShare.restoreFromURL(), 1000);
+  // Doar dacă URL-ul are explicit ?tci= - evităm auto-open la zoom/reload
+  if(window.location.search.includes('tci=')) {
+    setTimeout(() => _TCIShare.restoreFromURL(), 1000);
+  }
 });
