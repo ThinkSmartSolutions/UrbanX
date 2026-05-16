@@ -983,6 +983,17 @@ const _ProjectionEngine = {
 
   // ── Deschide panoul complet ─────────────────────────────────────────────
   open() {
+    // Dezactivăm MapBox pe mobil — altfel capturează touch înainte de input
+    try {
+      const m = window.map;
+      if(m) {
+        m.dragPan.disable();
+        m.scrollZoom.disable();
+        m.touchZoomRotate.disable();
+        m.touchPitch && m.touchPitch.disable();
+        m.keyboard && m.keyboard.disable();
+      }
+    } catch(e) {}
     this.isOpen = true;
     let modal = document.getElementById('tci-modal');
     if(!modal) {
@@ -995,6 +1006,20 @@ const _ProjectionEngine = {
     }
     modal.style.display = 'flex';
     setTimeout(() => modal.classList.add('tci-open'), 10);
+      // Stop touch events de la MapBox sa ajunga la modal
+      if(!modal._touchFixed) {
+        modal._touchFixed = true;
+        modal.addEventListener('touchstart', e => e.stopPropagation(), {passive:false, capture:true});
+        modal.addEventListener('touchmove',  e => e.stopPropagation(), {passive:false, capture:true});
+        modal.addEventListener('touchend',   e => e.stopPropagation(), {passive:false, capture:true});
+      }
+      // Focus input dupa animatie pe mobil
+      if(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        setTimeout(() => {
+          const inp = document.getElementById('tci-city-search');
+          if(inp) { inp.removeAttribute('readonly'); inp.focus(); }
+        }, 450);
+      }
     // Sincronizare cu parcela activa din harta
     const activeParcel = window.S?.parcels?.[window.S?.activeParcel??0];
     if(activeParcel?.uat && !this.currentCityData) {
@@ -1248,6 +1273,17 @@ const _ProjectionEngine = {
     this.stopAnimation();
     const modal = document.getElementById('tci-modal');
     if(modal) { modal.classList.remove('tci-open'); setTimeout(()=>modal.style.display='none',400); }
+    // Re-activăm MapBox
+    try {
+      const m = window.map;
+      if(m) {
+        m.dragPan.enable();
+        m.scrollZoom.enable();
+        m.touchZoomRotate.enable();
+        m.touchPitch && m.touchPitch.enable();
+        m.keyboard && m.keyboard.enable();
+      }
+    } catch(e) {}
     document.getElementById('wx-projection-overlay')?.remove();
   },
 
