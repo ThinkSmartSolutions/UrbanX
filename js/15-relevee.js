@@ -745,10 +745,13 @@ function _rvInitCanvas(W,H,canvasId){
     wrap.appendChild(tmp);
     return _rvInitCanvas(W,H,tmp.id);
   }
-  const dpr = window.devicePixelRatio || 1;
+  // iOS: cap DPR la 2 ca să nu depășim limita de memorie canvas (~16MP)
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
   cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr);
   cv.style.width = W+'px'; cv.style.height = H+'px';
-  const ctx = cv.getContext('2d'); ctx.scale(dpr,dpr);
+  const ctx = cv.getContext('2d');
+  if(!ctx){ console.error('[Relevee] Canvas context null - canvas prea mare sau memorie insuficientă'); return {cv,ctx:null,W,H}; }
+  ctx.scale(dpr,dpr);
   return {cv,ctx,cv2:cv,ctx2:ctx,W,H};
 }
 
@@ -777,6 +780,7 @@ function _rvRenderPlan(fl,b){
   const W = bW*SC + pad*2 + P.rl*2*SC + 40;
   const H = bD*SC + pad*2 + (P.rf+P.rs)*SC + 60;
   const {cv,ctx}=_rvInitCanvas(W,H);
+  if(!ctx) return; // canvas init eșuat (memorie insuficientă)
 
   ctx.fillStyle='#060C1A'; ctx.fillRect(0,0,W,H);
   // grid bg
@@ -2765,7 +2769,9 @@ async function generateRelevee(){
   if(psteps) psteps.innerHTML = _RV_STEPS.map((s,i)=>`<div class="rv-pstep" id="rv-ps${i}"><div class="rv-psico">${i+1}</div><span>${s}</span></div>`).join('');
 
   for(let i=0;i<_RV_STEPS.length;i++){
-    await _rvSleep(40+Math.random()*65+(i===_RV_STEPS.length-1?150:0));
+    // iOS: delay scurt - setTimeout-urile lungi sunt throttled pe mobil
+    const isMob = window.innerWidth < 768 || /iPhone|iPad|Android/i.test(navigator.userAgent);
+    await _rvSleep(isMob ? 8 : (40+Math.random()*65+(i===_RV_STEPS.length-1?150:0)));
     document.getElementById(`rv-ps${i}`)?.classList.add('rv-active');
     const pct = Math.round((i+1)/_RV_STEPS.length*100);
     if(ppct) ppct.textContent=pct+'%';
@@ -2783,8 +2789,10 @@ async function generateRelevee(){
   await _rvSleep(200);
   prog?.classList.remove('rv-on');
 
-  // Compute
-  const b = _rvCompBuilding(P); _RV.building = b;
+  // Compute — try/finally garantează că rv-prog dispare indiferent de erori
+  let b;
+  try{
+  b = _rvCompBuilding(P); _RV.building = b;
   _RV.floors = [];
   for(let i=0;i<b.niv;i++) _RV.floors.push(_rvFloor(b,i));
 
@@ -2817,6 +2825,13 @@ async function generateRelevee(){
   try{ window._RV_DataBus?.update(b, P); }catch(e){}
   // ── ROI quick calc ────────────────────────────────────────────────────
   try{ _rvCalcROI(); }catch(e){}
+
+  }catch(computeErr){
+    console.error('[Relevee] Eroare generare:', computeErr);
+  }finally{
+    // ÎNTOTDEAUNA scoatem overlay-ul de progres — evităm blocarea interfeței
+    prog?.classList.remove('rv-on');
+  }
 
   clearInterval(tInt);
   const secs=((performance.now()-t0)/1000).toFixed(1);
@@ -5161,7 +5176,7 @@ function _rvInject(){
     css.textContent=`
 #rv-modal{position:fixed;inset:0;z-index:8000;background:rgba(4,8,18,.0);backdrop-filter:blur(0);display:flex;flex-direction:column;pointer-events:none;transition:all .25s;}
 #rv-modal.rv-modal-open{background:rgba(4,8,18,.96);backdrop-filter:blur(16px);pointer-events:all;}
-#rv-modal .rv-body{display:grid;grid-template-columns:260px 1fr 240px;height:100%;}
+#rv-modal .rv-body{display:grid;grid-template-columns:260px 1fr 240px;height:100%;position:relative;}
 /* lpanel-hidden CSS removed — rv-toggle-lpanel button eliminated */
 /* opacity gestionat pe rv-modal, nu pe body */
 .rv-topbar{display:flex;align-items:center;gap:10px;padding:0 14px;height:50px;background:rgba(6,12,26,.98);border-bottom:1px solid rgba(212,175,55,.15);flex-shrink:0;}
