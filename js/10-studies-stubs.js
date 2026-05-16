@@ -540,7 +540,7 @@ async function generateSeismicStudy(){
   const factori = [
     ['Factor', 'Valoare', 'Impact', 'Observație'],
     ['Zonă seismică P100', seism.zona, seism.ag>=0.25?'MAJOR':seism.ag>=0.20?'SEMNIFICATIV':'MODERAT', 'ag=' + seism.ag + 'g, Tc=' + seism.Tc + 's'],
-    ['Tipul terenului', hidro.tip_sol, hidro.nfa<2?'AMPLIFICATOR':'NORMAL', 'NFA=' + hidro.nfa.toFixed(1) + 'm, portanță=' + hidro.portanta + 'kPa'],
+    ['Tipul terenului', hidro.tip_sol, hidro.nfa<2?'AMPLIFICATOR':'NORMAL', 'NFA=' + Number(hidro.nfa??2).toFixed(1) + 'm, portanță=' + (hidro.portanta??200) + 'kPa'],
     ['Număr niveluri', niv + ' niv.', niv>8?'MAJOR':niv>4?'SEMNIFICATIV':'REDUS', 'H=' + aedisH.toFixed(1) + 'm, T1≈' + T1_est.toFixed(2) + 's'],
     ['Funcțiune', S2(imp.desc), 'Clasa ' + imp.clasa, 'γI=' + imp.gamma_I],
   ];
@@ -555,7 +555,7 @@ async function generateSeismicStudy(){
     seism.ag >= 0.25
       ? 'ATENȚIE SPECIALĂ: amplasamentul se află în zona cu ag≥0.25g — structura necesită proiectare seismică avansată (P100-1/2013 cap. 5)'
       : 'Proiectare seismică standard conform P100-1/2013 — cerințe plastice limitate',
-    'Evitare fundare pe umpluturi necompactate sau terenuri susceptibile la lichefiere (NFA=' + hidro.nfa.toFixed(1) + 'm)',
+    'Evitare fundare pe umpluturi necompactate sau terenuri susceptibile la lichefiere (NFA=' + Number(hidro.nfa??2).toFixed(1) + 'm)',
     niv > 6 ? 'Structura necesită calcul dinamic modal spectral complet (P100 sect.4.3)' : 'Calcul static echivalent (forță laterală) acceptabil pentru H<=' + (niv*3) + 'm',
     'Asigurare ductilitate clasa DCM (medie) sau DCH (înaltă) conform P100-1/2013 cap. 5',
   ];

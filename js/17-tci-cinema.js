@@ -70,8 +70,10 @@ const TCI = {
       <div style="background:rgba(14,26,52,0.8);border:1px solid rgba(59,130,246,0.3);border-radius:12px;padding:24px;width:360px">
         <div style="font-size:11px;font-weight:700;color:#60a5fa;margin-bottom:12px">🏙 Selectează UAT</div>
         <input type="text" id="tci-sel-uat" placeholder="Caută oraș..." value="${city?.name||''}"
-          autocomplete="off" oninput="TCI._selSearch(this.value)" onclick="event.stopPropagation()"
-          style="width:100%;background:rgba(255,255,255,0.08);border:1px solid rgba(59,130,246,0.25);color:#fff;padding:9px 12px;border-radius:7px;font-size:12px;font-family:inherit;box-sizing:border-box;margin-bottom:8px">
+          autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false" inputmode="search"
+          oninput="TCI._selSearch(this.value)"
+          ontouchend="event.stopPropagation();this.focus()"
+          style="width:100%;background:rgba(255,255,255,0.08);border:1px solid rgba(59,130,246,0.25);color:#fff;padding:12px 14px;border-radius:7px;font-size:16px;font-family:inherit;box-sizing:border-box;margin-bottom:8px;-webkit-appearance:none;">
         <div id="tci-sel-res" style="background:rgba(4,10,24,0.97);border:1px solid rgba(255,255,255,0.1);border-radius:7px;max-height:140px;overflow-y:auto;display:none;margin-bottom:12px"></div>
         <button onclick="event.stopPropagation();TCI._launch('uat')"
           style="width:100%;padding:12px;border-radius:8px;background:rgba(59,130,246,0.2);border:1px solid rgba(59,130,246,0.5);color:#60a5fa;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">
@@ -82,6 +84,11 @@ const TCI = {
         style="margin-top:16px;background:none;border:none;color:rgba(148,163,184,0.4);cursor:pointer;font-size:11px;font-family:inherit">Anulează</button>`;
 
     document.body.appendChild(sel);
+    // iOS: focus sincron după append
+    setTimeout(() => {
+      const inp = document.getElementById('tci-sel-uat');
+      if(inp && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) inp.focus();
+    }, 300);
   },
 
   // ── Comune periurbane — supliment față de 20-uats-database.js ──────────
@@ -6275,6 +6282,8 @@ if(typeof _ProjectionEngine!=='undefined'){
   const doLaunch = () => {
     if(window._TCI_URL_RESTORE.done) return;
     window._TCI_URL_RESTORE.done = true;
+    // Ștergem hash-ul din URL ca refreshul să nu redeschidă TCI
+    try { history.replaceState(null, '', location.pathname + location.search); } catch(e) {}
     document.getElementById('tci-sel')?.remove();
     try {
       TCI._selectedUATKey = null;
@@ -6289,6 +6298,8 @@ if(typeof _ProjectionEngine!=='undefined'){
   };
   let tries = 0;
   const tryLaunch = () => {
+    // Nu relansăm TCI dacă pagina a fost reîncărcată (F5/refresh) — hash-ul poate fi vechi
+    try { if(performance.navigation && performance.navigation.type === 1) return; } catch(e){}
     if(++tries > 30) return;
     if(typeof TCI !== 'undefined' && typeof _RO_CITIES_DB !== 'undefined' && window.map)
       doLaunch();
