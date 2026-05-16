@@ -983,17 +983,6 @@ const _ProjectionEngine = {
 
   // ── Deschide panoul complet ─────────────────────────────────────────────
   open() {
-    // Dezactivăm MapBox pe mobil — altfel capturează touch înainte de input
-    try {
-      const m = window.map;
-      if(m) {
-        m.dragPan.disable();
-        m.scrollZoom.disable();
-        m.touchZoomRotate.disable();
-        m.touchPitch && m.touchPitch.disable();
-        m.keyboard && m.keyboard.disable();
-      }
-    } catch(e) {}
     this.isOpen = true;
     let modal = document.getElementById('tci-modal');
     if(!modal) {
@@ -1006,20 +995,6 @@ const _ProjectionEngine = {
     }
     modal.style.display = 'flex';
     setTimeout(() => modal.classList.add('tci-open'), 10);
-      // Stop touch events de la MapBox sa ajunga la modal
-      if(!modal._touchFixed) {
-        modal._touchFixed = true;
-        modal.addEventListener('touchstart', e => e.stopPropagation(), {passive:false, capture:true});
-        modal.addEventListener('touchmove',  e => e.stopPropagation(), {passive:false, capture:true});
-        modal.addEventListener('touchend',   e => e.stopPropagation(), {passive:false, capture:true});
-      }
-      // Focus input dupa animatie pe mobil
-      if(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        setTimeout(() => {
-          const inp = document.getElementById('tci-city-search');
-          if(inp) { inp.removeAttribute('readonly'); inp.focus(); }
-        }, 450);
-      }
     // Sincronizare cu parcela activa din harta
     const activeParcel = window.S?.parcels?.[window.S?.activeParcel??0];
     if(activeParcel?.uat && !this.currentCityData) {
@@ -1273,17 +1248,6 @@ const _ProjectionEngine = {
     this.stopAnimation();
     const modal = document.getElementById('tci-modal');
     if(modal) { modal.classList.remove('tci-open'); setTimeout(()=>modal.style.display='none',400); }
-    // Re-activăm MapBox
-    try {
-      const m = window.map;
-      if(m) {
-        m.dragPan.enable();
-        m.scrollZoom.enable();
-        m.touchZoomRotate.enable();
-        m.touchPitch && m.touchPitch.enable();
-        m.keyboard && m.keyboard.enable();
-      }
-    } catch(e) {}
     document.getElementById('wx-projection-overlay')?.remove();
   },
 
@@ -1313,6 +1277,26 @@ const _ProjectionEngine = {
               onfocus="document.getElementById('tci-city-results').style.display='block'"
               onblur="setTimeout(()=>{const r=document.getElementById('tci-city-results');if(r&&!r.matches(':hover'))r.style.display='none';},300)">
             <div id="tci-city-results" class="tci-city-results" style="display:none"></div>
+          </div>
+          <!-- Buton dedicat mobil — focus sincron din user gesture -->
+          <button class="tci-mob-search-btn" 
+            onclick="document.getElementById('tci-mob-overlay').style.display='flex';setTimeout(()=>document.getElementById('tci-mob-input').focus(),50)"
+            ontouchend="event.preventDefault();document.getElementById('tci-mob-overlay').style.display='flex';document.getElementById('tci-mob-input').focus()">
+            🔍 Caută oraș
+          </button>
+          <!-- Overlay mobil căutare UAT -->
+          <div id="tci-mob-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:#060c1a;flex-direction:column;padding:16px;">
+            <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;">
+              <input type="text" id="tci-mob-input" 
+                placeholder="Scrie orașul..." 
+                autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false"
+                inputmode="search"
+                style="flex:1;font-size:18px;padding:14px 16px;border-radius:10px;border:1px solid rgba(212,175,55,0.4);background:#111c35;color:#fff;outline:none;-webkit-appearance:none;"
+                oninput="_ProjectionEngine.searchCity(this.value);_tciMobShowResults(this.value)">
+              <button onclick="document.getElementById('tci-mob-overlay').style.display='none'" 
+                style="padding:14px 18px;border-radius:10px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;font-size:16px;cursor:pointer;">✕</button>
+            </div>
+            <div id="tci-mob-results" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:2px;"></div>
           </div>
           <button class="tci-close-btn" onclick="_ProjectionEngine.close()">✕</button>
         </div>
@@ -2773,12 +2757,56 @@ const _ProjectionEngine = {
     .tci-slider{width:100%;}
     .tci-close-btn{flex-shrink:0;width:36px;height:36px;font-size:18px;}
   }
+  /* Buton căutare mobil — ascuns pe desktop */
+  .tci-mob-search-btn {
+    display:none;
+  }
+  @media(max-width:768px){
+    .tci-mob-search-btn {
+      display:flex;align-items:center;gap:6px;
+      padding:10px 16px;border-radius:8px;
+      background:rgba(212,175,55,0.15);border:1px solid rgba(212,175,55,0.4);
+      color:#e8b341;font-size:15px;font-weight:600;cursor:pointer;
+      white-space:nowrap;-webkit-appearance:none;
+    }
+    .tci-city-search-wrap { display:none; }
+  }
   `;
   document.head.appendChild(style);
 })();
 
 // ── Buton de lansare global ───────────────────────────────────────────────
 window.openTCI = () => _ProjectionEngine.open();
+
+// Helper mobil: afișează rezultatele în overlay-ul dedicat
+window._tciMobShowResults = function(query) {
+  const el = document.getElementById('tci-mob-results');
+  const src = document.getElementById('tci-city-results');
+  if(!el) return;
+  if(!query || query.length < 2) { el.innerHTML = ''; return; }
+  // Copiem rezultatele din desktop results după un mic delay
+  setTimeout(() => {
+    const items = src ? [...src.querySelectorAll('.tci-city-result')] : [];
+    if(items.length) {
+      el.innerHTML = items.map(it => it.outerHTML).join('');
+      // Închidem overlay-ul la selectare
+      el.querySelectorAll('.tci-city-result').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.getElementById('tci-mob-overlay').style.display = 'none';
+        });
+        btn.addEventListener('touchend', (e) => {
+          e.preventDefault();
+          btn.click();
+          document.getElementById('tci-mob-overlay').style.display = 'none';
+        });
+      });
+    } else {
+      el.innerHTML = query.length >= 2 
+        ? '<div style="padding:20px;text-align:center;color:#64748b;font-size:14px">Niciun rezultat pentru "'+query+'"</div>'
+        : '';
+    }
+  }, 350);
+};
 
 
 

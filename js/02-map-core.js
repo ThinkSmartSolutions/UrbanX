@@ -423,27 +423,9 @@ function addLayers(){
       'text-halo-width':3.5
     }
   });
-  // ── Label înălțime volum generat — vizibil de la zoom 14 ────────────────
-  L({id:'vol-height-label',type:'symbol',source:'vol-src',
-    minzoom:14,
-    filter:['==',['get','floor'],0],
-    layout:{
-      'text-field':['concat',['to-string',['round',['get','top']]],'m'],
-      'text-size':['interpolate',['linear'],['zoom'],14,10,17,13,19,15],
-      'text-font':['DIN Offc Pro Bold','Arial Unicode MS Bold'],
-      'text-anchor':'center',
-      'text-allow-overlap':true,
-      'text-ignore-placement':true,
-    },
-    paint:{
-      'text-color':'#fbbf24',
-      'text-halo-color':'rgba(0,0,0,.85)',
-      'text-halo-width':1.5,
-    }
-  });
   // ── Etichete cladiri context (inaltime + functiune) ─────────────────────
   L({id:'ctx-height-label',type:'symbol',source:'ctx-labels-src',
-    minzoom:14,
+    minzoom:17,
     filter:['any',['all',['has','h'],['>', ['to-number',['get','h'],0], 10]], ['!=', ['coalesce',['get','fn_label'],'Necunoscut'], 'Necunoscut']],
     layout:{
       'text-field':['concat',['get','h_label'],' | ',['get','fn_label']],
@@ -759,7 +741,6 @@ map.on('style.load',()=>setTimeout(()=>{
   // Restaurăm sursele după orice schimbare de stil (inclusiv shortcut-urile din nav)
   if(S.ctx?.features?.length) try{setSource('ctx-src',S.ctx);}catch(e){}
   if(S.vol._lastFeats?.length) try{setSource('vol-src',{type:'FeatureCollection',features:S.vol._lastFeats});}catch(e){}
-  try{map.setLayoutProperty('vol-height-label','visibility','visible');}catch(e){}
   if(S.vol._lastDistFeats?.length) try{setSource('dist-src',{type:'FeatureCollection',features:S.vol._lastDistFeats});}catch(e){}
   const _ctxVis = !S.vol.onlyVol && S.vol.scenariuConstructie !== 'liber' && AEDIS.scenariu!=='demolare' && !AEDIS._demolishActive;
   try{map.setLayoutProperty('ctx-3d','visibility',_ctxVis?'visible':'none');}catch(e){}
