@@ -86,6 +86,8 @@ const _RV = {
   fnParter: null,  // null = same as fn; altfel: funcțiunea parterului P0
 };
 window._RV = _RV; // expus global pentru canvas-upgrade.js și alte module
+// FIX: FN_CONFIG trebuie pe window — PDF engine și alte module îl accesează via window.FN_CONFIG
+// (const la nivel global NU e proprietate pe window în browsere moderne)
 
 // ═══════════════════════════════════════════════════════════════════════════
 // FN_CONFIG — definiții complete per funcțiune
@@ -166,6 +168,7 @@ const FN_CONFIG = {
     norms:['HG 237/2001','P118-3/2015','NP 067/2002','OMS 119/2014'],
   },
 };
+window.FN_CONFIG = FN_CONFIG; // FIX: necesar pentru PDF engine, canvas-upgrade, module externe
 
 // Returnează funcțiunea activă pentru etajul dat (0=parter poate fi diferit)
 function _rvGetFloorFn(floorIdx){
@@ -784,8 +787,21 @@ function _rvInitCanvas(W,H,canvasId){
     wrap.appendChild(tmp);
     return _rvInitCanvas(W,H,tmp.id);
   }
-  // iOS: cap DPR la 2 ca să nu depășim limita de memorie canvas (~16MP)
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  // FIX OOM: reducem DPR când canvasul e mare sau 3D viewer e activ
+  // Un canvas 1500×1000 cu DPR=2 = 3000×2000 = 24MB — prea mult lângă WebGL
+  const rawDPR = window.devicePixelRatio || 1;
+  const canvasPixels = W * H;
+  const viewer3dActive = document.getElementById('topbar')?.classList.contains('viewer-open') ||
+                          document.getElementById('topbar')?.classList.contains('viewer-bg') ||
+                          window._rvViewerWasActive;
+  let dpr;
+  if(viewer3dActive || canvasPixels > 800000) {
+    dpr = 1; // 3D viewer activ sau canvas >800k px → DPR=1 fără scalare
+  } else if(canvasPixels > 400000) {
+    dpr = Math.min(rawDPR, 1.5); // canvas mediu → max 1.5
+  } else {
+    dpr = Math.min(rawDPR, 2);   // canvas mic → max 2 (original)
+  }
   cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr);
   cv.style.width = W+'px'; cv.style.height = H+'px';
   const ctx = cv.getContext('2d');
@@ -3181,6 +3197,32 @@ function _rvOpen(){
   rvM.style.visibility='visible';
   rvM.classList.add('rv-modal-open');
   _RV.open=true;
+
+  // FIX FREEZE: Oprim animațiile 3D care concurează cu canvasul 2D
+  // Mapbox GL + Canvas 2D mare = memory pressure → browser înghețat
+  window._rvViewerWasActive = false;
+  try {
+    // 1. Oprire loop animație TCI Cinema / viewer3d
+    if(typeof window._tciPause === 'function')    { window._tciPause();     window._rvViewerWasActive = true; }
+    if(typeof window._viewer3dPause === 'function'){ window._viewer3dPause();window._rvViewerWasActive = true; }
+    // 2. Cancel rAF-uri cunoscute
+    if(window._tciAnimId)     { cancelAnimationFrame(window._tciAnimId);     window._tciAnimId = null;     window._rvViewerWasActive = true; }
+    if(window._viewer3dAnimId){ cancelAnimationFrame(window._viewer3dAnimId); window._viewer3dAnimId = null; window._rvViewerWasActive = true; }
+    if(window._cinemaAnimId)  { cancelAnimationFrame(window._cinemaAnimId);   window._cinemaAnimId = null;   window._rvViewerWasActive = true; }
+    // 3. Dacă topbar are viewer-open/viewer-bg → 3D viewer activ
+    const tb = document.getElementById('topbar');
+    if(tb && (tb.classList.contains('viewer-open') || tb.classList.contains('viewer-bg'))){
+      window._rvViewerWasActive = true;
+      // Reducem pitch-ul hărții pentru a elibera resurse de randare 3D
+      if(window.map && typeof window.map.easeTo === 'function'){
+        window._rvSavedPitch   = window.map.getPitch();
+        window._rvSavedBearing = window.map.getBearing();
+        // Nu resetăm camera — doar oprim renderer-ul 3D dacă există funcție dedicată
+      }
+    }
+    // 4. Flag global: orice RAF activ se poate verifica înainte de a reranda
+    window._rvReleveeOpen = true;
+  } catch(e) { console.warn('[RV] Pause 3D:', e); }
 }
 
 function closeRelevee(){
@@ -3199,6 +3241,18 @@ function closeRelevee(){
   }, 320);
   // Oprim orice animație solară
   clearInterval(window._rvSolarInterval);
+
+  // FIX FREEZE: Reluăm animațiile 3D oprite la deschidere
+  window._rvReleveeOpen = false;
+  window._rvViewerWasActive = false;
+  try {
+    if(typeof window._tciResume    === 'function') window._tciResume();
+    if(typeof window._viewer3dResume=== 'function') window._viewer3dResume();
+    // Forțăm un repaint al hărții după ce canvasul 2D e eliberat
+    if(window.map && typeof window.map.triggerRepaint === 'function'){
+      setTimeout(()=>{ try{ window.map.triggerRepaint(); }catch(e){} }, 350);
+    }
+  } catch(e) { console.warn('[RV] Resume 3D:', e); }
 }
 
 function openRelevee_safe(){

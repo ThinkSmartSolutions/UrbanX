@@ -134,6 +134,7 @@ window._pdfInjectLiveDataSection = function(pdf, W, cy, ctx){
 
 // ── Wrapper automat pentru fiecare studiu ─────────────────────────────────
 window._wrapAllStudies = function(){
+  // FIX: lista completă — adăugate generateAACR, CPE, PMR, Iluminat, REPA, ApePluviale
   const studyNames = [
     'generateShadowStudy','generateNoiseStudy','generateWindStudy',
     'generateGreenStudy','generateMobilityStudy','generateDensityStudy',
@@ -144,9 +145,12 @@ window._wrapAllStudies = function(){
     'generatePrestudiuBransamente','generateHealthImpactStudy',
     'generateStabilitateTaluzuri','generateProiectieUrbanistica',
     'generateBilantEdificabil','generateSeismicStudy',
-    // AACR gestionat separat cu OLS
+    // Adăugate în fix:
+    'generateAACR','generateCPE',
+    'generateStudiuPMR','generateStudiuIluminat','generateREPA','generateStudiuApePluviale',
   ];
 
+  let wrapped = 0;
   studyNames.forEach(name=>{
     const orig = window[name];
     if(typeof orig !== 'function') return;
@@ -163,17 +167,23 @@ window._wrapAllStudies = function(){
         }
       }catch(e){}
 
-      // Prefetch date live (paralel, înainte de studiu)
+      // Prefetch cu timeout de 8s — dacă durează prea mult, continuăm cu _sCtx=null
       const aedisH=window.S?.vol?._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||12;
-      await _prefetchStudyContext(lat, lon, {
-        aacr: name==='generateAACR',
-        aedisH,
-      });
-      // Rulăm studiul original — _sCtx este acum populat
+      try{
+        await Promise.race([
+          _prefetchStudyContext(lat, lon, { aacr: name==='generateAACR', aedisH }),
+          new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')), 8000))
+        ]);
+      }catch(e){
+        if(e.message !== 'timeout') console.warn('[Connector] prefetch err:', e.message);
+        // Continuăm cu datele parțiale deja în _sCtx
+      }
+      // Rulăm studiul original — _sCtx este populat (sau null la timeout)
       return orig.apply(this, args);
     };
+    wrapped++;
   });
-  console.log('[Connector] ✅ '+studyNames.length+' studii wrapped cu prefetch live');
+  console.log('[Connector] ✅ '+wrapped+'/'+studyNames.length+' studii wrapped cu prefetch live');
 };
 
 // ── Patch-uri specifice pentru studii care NU citesc cotă/seism ──────────

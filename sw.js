@@ -134,10 +134,36 @@ async function handleAPIRequest(request) {
 }
 
 // ── Message handler ───────────────────────────────────────────────────────
+// FIX: Răspundem ÎNTOTDEAUNA pe event.ports[0] dacă există.
+// Altfel Chrome aruncă: "A listener indicated an asynchronous response by
+// returning true, but the message channel closed before a response was received"
 self.addEventListener('message', event => {
-  if(event.data?.type === 'SKIP_WAITING') self.skipWaiting();
-  if(event.data?.type === 'CLEAR_CACHE') {
-    Promise.all([caches.delete(CACHE_STATIC), caches.delete(CACHE_API)])
-      .then(() => event.source?.postMessage({type: 'CACHE_CLEARED'}));
+  // Helper: răspunde pe portul MessageChannel dacă pagina l-a transmis
+  const respond = (data) => {
+    try {
+      if(event.ports && event.ports[0])
+        event.ports[0].postMessage(data || {type:'OK'});
+    } catch(e) { /* portul poate fi deja închis */ }
+  };
+
+  if(event.data?.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+    respond({type:'SKIP_WAITING_DONE'});
+    return;
   }
+
+  if(event.data?.type === 'CLEAR_CACHE') {
+    event.waitUntil(
+      Promise.all([caches.delete(CACHE_STATIC), caches.delete(CACHE_API)])
+        .then(() => {
+          try { event.source?.postMessage({type:'CACHE_CLEARED'}); } catch(e){}
+          respond({type:'CACHE_CLEARED'});
+        })
+        .catch(e => respond({type:'ERROR', message: e.message}))
+    );
+    return;
+  }
+
+  // Orice alt mesaj: acknowledge imediat pentru a nu lăsa portul deschis
+  respond({type:'RECEIVED', received: event.data?.type || 'unknown'});
 });

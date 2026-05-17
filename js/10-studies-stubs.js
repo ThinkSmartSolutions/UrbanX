@@ -323,10 +323,30 @@ if(typeof getDJCPN === 'undefined'){
 
 // ── _captureStudyMaps (alias pentru _captureStudyMapsSafe) ────────────────
 if(typeof _captureStudyMaps === 'undefined'){
-  window._captureStudyMaps = function(ap, progressCb){
-    if(typeof _captureStudyMapsSafe === 'function')
-      return _captureStudyMapsSafe(ap, progressCb);
-    return Promise.resolve({img3D:null, img2D:null, imgLocation:null, imgDist:null, imgCtx:null});
+  // FIX CIRCULAR REFERENCE: Stub-ul vechi apela _captureStudyMapsSafe care apelează
+  // _captureStudyMaps = infinit recursion → browser hang pe jumătate din studii.
+  // Noul stub capturează direct canvas-ul Mapbox fără circular call.
+  window._captureStudyMaps = async function(ap, progressCb){
+    if(typeof progressCb === 'function') progressCb('📸 Capturare hartă...');
+    const result = {img3D:null, img2D:null, imgLocation:null, imgDist:null, imgCtx:null};
+    if(typeof map === 'undefined' || !map) return result;
+    try{
+      // FIX PITCH: reset la 0 pentru captură 2D corectă (nu perspectivă 3D)
+      const prevPitch = map.getPitch();
+      if(prevPitch > 5){
+        map.setPitch(0);
+        await new Promise(r=>setTimeout(r,400));
+      }
+      const canvas = map.getCanvas();
+      if(canvas){
+        result.img2D = canvas.toDataURL('image/png');
+        result.img3D = result.img2D;
+      }
+      if(prevPitch > 5) map.setPitch(prevPitch);
+    }catch(e){
+      console.warn('[_captureStudyMaps stub]', e.message);
+    }
+    return result;
   };
 }
 

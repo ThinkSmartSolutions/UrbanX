@@ -30,25 +30,40 @@ async function _captureStudyMapsSafe(ap, progressCb){
   const _zoom = map?.getZoom ? Math.round(map.getZoom()) : 16;
   const _lat = ap?.lat || ap?.geo?.properties?.lat || 47.16;
   const _scaleInfo = _mapboxScale(_lat, _zoom);
-  window._lastCaptureScale = _scaleInfo; // disponibil in studii via window._lastCaptureScale
+  window._lastCaptureScale = _scaleInfo;
 
   // Salvăm starea de demolare ÎNAINTE de captură
   const demolishWasActive = !!(window.AEDIS?._demolishActive);
   const ctxBackupSaved    = S._ctxBackup ? JSON.parse(JSON.stringify(S._ctxBackup)) : null;
   const ctxSaved          = demolishWasActive && S.ctx ? JSON.parse(JSON.stringify(S.ctx)) : null;
 
+  // FIX 3D PITCH: Resetăm pitch-ul la 0 pentru capturi 2D corecte în studii
+  // Când volumul 3D e activ (pitch=55°), capturile ies din perspectivă, nu top-down
+  let _savedPitch = 0, _savedBearing = 0, _pitchWasReset = false;
+  if(window.map && typeof window.map.getPitch === 'function'){
+    _savedPitch   = window.map.getPitch();
+    _savedBearing = window.map.getBearing();
+    if(_savedPitch > 5){
+      window.map.easeTo({pitch:0, duration:300});
+      await new Promise(r=>setTimeout(r,450)); // așteptăm finalizare animație
+      _pitchWasReset = true;
+    }
+  }
+
   const caps = await _captureStudyMaps(ap, progressCb);
+
+  // Restaurăm pitch-ul original DUPĂ captură
+  if(_pitchWasReset && window.map){
+    try{ window.map.easeTo({pitch:_savedPitch, bearing:_savedBearing, duration:300}); }catch(e){}
+  }
 
   // Restaurăm starea de demolare DUPĂ captură (dacă era activă)
   if(demolishWasActive && window.AEDIS){
     AEDIS._demolishActive = true;
     if(ctxSaved) S.ctx = ctxSaved;
     if(ctxBackupSaved) S._ctxBackup = ctxBackupSaved;
-    // Re-aplicăm masca vizuală dacă a dispărut
     try{
       if(map && !map.getLayer('demolish-mask') && typeof _aedisRemoveExistingFromCtx === 'function'){
-        // Nu re-apelăm _aedisRemoveExistingFromCtx (modifică S.ctx) — doar re-adăugăm masca vizuală
-        // Marcăm că masca trebuie re-aplicată la următoarea randare
         AEDIS._needsDemolishMask = true;
         map.triggerRepaint();
       }

@@ -25,6 +25,23 @@
 (function(){
 'use strict';
 
+// ── Polyfill ctx.roundRect (Safari <15.4, Chrome <99, Firefox <112) ────────
+if(typeof CanvasRenderingContext2D !== 'undefined' &&
+   !CanvasRenderingContext2D.prototype.roundRect){
+  CanvasRenderingContext2D.prototype.roundRect = function(x,y,w,h,r){
+    if(w < 2*r) r = w/2;
+    if(h < 2*r) r = h/2;
+    this.beginPath();
+    this.moveTo(x+r, y);
+    this.arcTo(x+w, y,   x+w, y+h, r);
+    this.arcTo(x+w, y+h, x,   y+h, r);
+    this.arcTo(x,   y+h, x,   y,   r);
+    this.arcTo(x,   y,   x+w, y,   r);
+    this.closePath();
+    return this;
+  };
+}
+
 // ── Paleta nouă — culori pastel pe fond alb ───────────────────────────────
 const _C = {
   BG:      '#FAFAFA',   // fond planșă
@@ -822,22 +839,103 @@ window._rvDrawNorth   = function(ctx,x,y,dir){ _rvDrawNorthPro(ctx,x,y,dir,_RV.s
 window._rvDrawScale   = function(ctx,x,y,SC){ _rvDrawScalePro(ctx,x,y,SC); };
 window._rvDrawCartus  = function(ctx,W,H,P,fi,sub){ _rvDrawCartusPro(ctx,W,H,P,fi,sub); };
 
+// ── Override _rvRenderSection — temă albă profesională ────────────────────
+// Original uses dark #060C1A background — înlocuim cu fond alb
+window._rvRenderSection = function(b){
+  if(!b || !b.P){
+    const cv=document.getElementById('rv-canvas');
+    if(cv){ const ctx=cv.getContext('2d');if(ctx){ctx.fillStyle=_C.BG;ctx.fillRect(0,0,cv.width,cv.height);} }
+    return;
+  }
+  const {P,bW,bD,niv}=b;
+  const sectionType=_RV.sectionType||'AA';
+  const cutDim = sectionType==='AA' ? bD : bW;
+  const SC=_RV.scale*0.85;
+  const pad=50;
+  const W=cutDim*SC+pad*2+160;
+  const H=niv*P.hn*SC+pad*2+80;
+  const {cv,ctx}=_rvInitCanvas(W+120, H+50);
+  if(!ctx) return;
+
+  // Fond alb
+  ctx.fillStyle=_C.BG; ctx.fillRect(0,0,W+120,H+50);
+
+  // Grid
+  ctx.strokeStyle=_C.GRID; ctx.lineWidth=0.4;
+  const gs=Math.max(SC,8);
+  ctx.beginPath();
+  for(let x_=0;x_<W+120;x_+=gs){ctx.moveTo(x_,0);ctx.lineTo(x_,H+50);}
+  for(let y_=0;y_<H+50;y_+=gs){ctx.moveTo(0,y_);ctx.lineTo(W+120,y_);}
+  ctx.stroke();
+
+  const ox=pad; const oy=pad;
+  const EW=Math.max(4,SC*0.28);
+  const Ht=niv*P.hn;
+
+  // Teren
+  ctx.fillStyle='#E8F4E8';
+  ctx.fillRect(ox-20, oy+Ht*SC, cutDim*SC+40, 18);
+  ctx.fillStyle='#6B7280'; ctx.font='9px "Helvetica Neue",Arial,sans-serif';
+  ctx.fillText('TEREN',ox,oy+Ht*SC+13);
+
+  // Secțiunea clădirii
+  ctx.fillStyle='#F8F9FA';
+  ctx.fillRect(ox,oy,cutDim*SC,Ht*SC);
+  ctx.strokeStyle=_C.WALL_EXT; ctx.lineWidth=EW;
+  ctx.strokeRect(ox+EW/2,oy+EW/2,cutDim*SC-EW,Ht*SC-EW);
+
+  // Planșee per etaj
+  for(let i=1;i<niv;i++){
+    const ly_=oy+Ht*SC-i*P.hn*SC;
+    ctx.fillStyle='#CBD5E1'; ctx.fillRect(ox,ly_-2,cutDim*SC,4);
+    ctx.strokeStyle='#94A3B8'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(ox,ly_); ctx.lineTo(ox+cutDim*SC,ly_); ctx.stroke();
+    // Cota etaj
+    ctx.fillStyle='#334155'; ctx.font='bold 9px "Helvetica Neue",Arial,sans-serif';
+    ctx.textAlign='right';
+    ctx.fillText(`E${i} +${(i*P.hn).toFixed(2)}m`, ox-5, ly_+4);
+    ctx.textAlign='left';
+  }
+
+  // Cota totală
+  const hatchCol='rgba(0,0,50,0.4)';
+  _hatch(ctx,ox,oy,EW*1.5,Ht*SC,hatchCol,Math.max(3,SC*0.22));
+  _hatch(ctx,ox+cutDim*SC-EW*1.5,oy,EW*1.5,Ht*SC,hatchCol,Math.max(3,SC*0.22));
+  ctx.strokeStyle=_C.WALL_EXT; ctx.lineWidth=EW;
+  ctx.strokeRect(ox+EW/2,oy+EW/2,cutDim*SC-EW,Ht*SC-EW);
+
+  // Linie cota H total
+  const hx=ox+cutDim*SC+20;
+  ctx.strokeStyle=_C.DIM; ctx.lineWidth=0.8; ctx.setLineDash([3,2]);
+  ctx.beginPath(); ctx.moveTo(ox+cutDim*SC,oy); ctx.lineTo(hx+4,oy); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(ox+cutDim*SC,oy+Ht*SC); ctx.lineTo(hx+4,oy+Ht*SC); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.beginPath(); ctx.moveTo(hx,oy); ctx.lineTo(hx,oy+Ht*SC); ctx.stroke();
+  // Săgeți
+  ctx.beginPath(); ctx.moveTo(hx-4,oy); ctx.lineTo(hx+4,oy); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(hx-4,oy+Ht*SC); ctx.lineTo(hx+4,oy+Ht*SC); ctx.stroke();
+  ctx.save(); ctx.translate(hx+13,(oy+oy+Ht*SC)/2); ctx.rotate(-Math.PI/2);
+  ctx.font='bold 10px "Helvetica Neue",Arial,sans-serif'; ctx.textAlign='center';
+  ctx.fillStyle=_C.DIM;
+  ctx.fillText(`H total = ${Ht.toFixed(2)} m`, 0, 0);
+  ctx.textAlign='left'; ctx.restore();
+
+  // Label secțiune
+  ctx.fillStyle=_C.TEXT; ctx.font='bold 11px "Helvetica Neue",Arial,sans-serif';
+  ctx.fillText(`SECȚIUNE ${sectionType} — ${sectionType==='AA'?'TRANSVERSALĂ':'LONGITUDINALĂ'}  ·  ${niv} niveluri  ·  H=${Ht.toFixed(2)}m`, ox, oy-10);
+
+  _rvDrawNorthPro(ctx, W+80, 40, P.frontDir, SC);
+  _rvDrawCartusPro(ctx, W+120, H+50, P, null, `SECȚIUNE ${sectionType}`);
+};
+
 // ── DPR — suport retina / high-DPI ────────────────────────────────────────
-// _rvInitCanvas deja aplică devicePixelRatio. Asigurăm că valorile SC
-// iau în considerare DPR pentru text și linii clare pe ecrane retina.
 window._rvDPR = function(){ return Math.min(window.devicePixelRatio || 1, 3); };
 
-// Patch _rvInitCanvas pentru DPR consistent (dacă nu e deja aplicat)
-(function(){
-  const origInit = window._rvInitCanvas;
-  if(!origInit || origInit._dprPatched) return;
-  window._rvInitCanvas = function(W, H, canvasId){
-    const result = origInit(W, H, canvasId);
-    result._dprPatched = true;
-    return result;
-  };
-  window._rvInitCanvas._dprPatched = true;
-})();
+// FIX: patch-ul original verifica origInit._dprPatched (pe funcție) dar seta
+// result._dprPatched (pe obiectul returnat) — nu funcționa niciodată.
+// Simplu: nu mai e nevoie de patch suplimentar — _rvInitCanvas din 15-relevee.js
+// gestionează DPR-ul corect după fix-ul OOM.
+window._rvInitCanvas_upgraded = true; // marker că upgrade-ul e activ
 
 // ── Pinch-to-zoom Canvas (touch) ───────────────────────────────────────────
 (function(){
