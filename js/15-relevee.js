@@ -2890,7 +2890,9 @@ async function generateRelevee(){
   try{
   // Yield 1: înainte de calculul clădirii
   await _rvSleep(0);
+  console.log('[RV] Start _rvCompBuilding, P:', JSON.stringify({W:P?.W,D:P?.D,niv:P?.niv,area:P?.area,fn:P?.fn}));
   b = _rvCompBuilding(P); _RV.building = b;
+  console.log('[RV] _rvCompBuilding done:', b ? 'OK bW='+b.bW+' bD='+b.bD+' niv='+b.niv : 'NULL/UNDEFINED');
 
   _RV.floors = [];
   const isMobDev = window.innerWidth < 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -2932,8 +2934,9 @@ async function generateRelevee(){
 
   // Yield 3: înainte de randarea canvas (poate fi lentă pentru planuri complexe)
   await _rvSleep(0);
-  try{ _rvRender(); }catch(renderErr){
-    console.error('[Relevee] Eroare randare canvas:', renderErr);
+  console.log('[RV] Start _rvRender, floors:', _RV.floors?.length, 'floor0:', _RV.floors?.[0]?.rects?.length, 'scale:', _RV.scale);
+  try{ _rvRender(); console.log('[RV] _rvRender done OK'); }catch(renderErr){
+    console.error('[RV] Eroare randare canvas:', renderErr);
   }
 
   // ── Actualizăm DataBus — toate rapoartele sunt notificate ─────────────
