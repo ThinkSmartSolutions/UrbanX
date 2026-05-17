@@ -939,6 +939,34 @@ canvas#c2d{width:100%;height:100%;display:block}
 
 
 <!-- ══ LOGIN OVERLAY ════════════════════════════════════════════════════ -->
+<!-- DEV BYPASS: adaugă ?dev=1 la URL sau setează localStorage ux_dev=1 -->
+<script>
+(function(){
+  const isDev = new URLSearchParams(window.location.search).get('dev')==='1'
+             || localStorage.getItem('ux_dev')==='1';
+  if(isDev){
+    // Ascundem overlay-ul imediat când DOM-ul e gata
+    document.addEventListener('DOMContentLoaded',()=>{
+      const ov=document.getElementById('auth-overlay');
+      if(ov) ov.style.display='none';
+    });
+    // Setăm un user fake pentru development
+    window.addEventListener('load',()=>{
+      const ov=document.getElementById('auth-overlay');
+      if(ov) ov.style.display='none';
+      if(window._USER){
+        _USER.email='florin@tss.ro'; _USER.role='admin';
+        if(typeof _USER.setPackage==='function') _USER.setPackage('studio');
+      }
+      // Afișăm butonul Admin
+      const ba=document.getElementById('btn-admin');
+      if(ba) ba.style.display='flex';
+    });
+    localStorage.setItem('ux_dev','1'); // persistăm pentru reloaduri
+    console.log('[UrbanX] Dev mode activ — auth bypass');
+  }
+})();
+</script>
 <div id="auth-overlay" style="
   position:fixed;inset:0;z-index:99999;
   background:linear-gradient(135deg,#050c18 0%,#0b1628 50%,#0d1f3a 100%);
