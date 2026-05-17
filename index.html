@@ -2271,6 +2271,11 @@ if(typeof window._LOT === 'undefined') window._LOT = {
 <script>
 // FIX: generateRelevee — încearcă toate variantele posibile de nume din 15-relevee.js
 window.addEventListener('load', function(){
+  // DIAGNOSTIC v20260516
+  console.log('[INDEX] load: generateRelevee='+typeof window.generateRelevee+
+    ', _rvRenderPlan='+typeof window._rvRenderPlan+
+    ', _rvInitCanvas='+typeof window._rvInitCanvas+
+    ', _RV='+typeof _RV);
   if(typeof window.generateRelevee !== 'function'){
     // Poate funcția a fost redenumită în 15-relevee.js
     const _alts = ['_rvOpen','openRelevee','rvGenerate','generateMemoriuTehnic','_generateRelevee','generateMTP'];
