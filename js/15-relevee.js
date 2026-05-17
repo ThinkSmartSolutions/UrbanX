@@ -247,29 +247,38 @@ function _rvGetParcelParams(){
   const hMax     = params.h || reg.h || 28;
   const hn       = 3.0;
 
-  // ── MULTIVOLUME / LOTIZARE / PARCELE ADIACENTE ───────────────────────────
-  // FIX: detectăm multi-building din _lastFeats indiferent de S.vol.multiVol
-  // Cazuri: 1) multiVol explicat, 2) lotizare, 3) parcele adiacente cu volume separate
+  // ── DIMENSIUNI DIN AEDIS ─────────────────────────────────────────────────
+  // FIX: detectăm CORECT multi-building vs multi-etaj
+  // bldIdx = index CLĂDIRE (0,1,2...) pentru multivolum
+  // floor  = index ETAJ (0,1,2...) pentru etajele aceleiași clădiri
+  // O clădire cu 7 etaje are floor=0..6 dar bldIdx=undefined sau același număr
+  // → NU înseamnă 7 clădiri separate!
   let aedisH = null, aedisW = null, aedisD = null, aedisArea = null;
   let isMultiBldg = false;
 
   if(!isDemolare && S.vol?._lastFeats?.length) {
     const feats = S.vol._lastFeats;
 
-    // Detectăm dacă există EFECTIV mai multe clădiri distincte (bldIdx sau top diferit)
-    const bldIndices = [...new Set(feats.map(f => f.properties?.bldIdx ?? 0))];
-    const explicitMulti = S.vol.multiVol && feats.some(f => f.properties?.bldIdx != null);
-    isMultiBldg = explicitMulti || bldIndices.length > 1;
+    // Multivolume REAL = flag explicit setat de AEDIS la generare multiple volume
+    // NU detectăm din bldIdx (care poate fi indexul etajului, nu al clădirii)
+    const explicitMulti = S.vol.multiVol === true &&
+                          feats.some(f => f.properties?.bldIdx != null &&
+                                         f.properties?.bldIdx !== f.properties?.floor);
+    isMultiBldg = explicitMulti;
 
     if(isMultiBldg) {
-      // Corp selectat din UI (sau 0 default)
+      // Multivolume real: filtrăm pe corpul selectat
       const selBld = (_RV?.selectedBldIdx != null) ? _RV.selectedBldIdx : 0;
-      const bldFeats = feats.filter(f => (f.properties?.bldIdx ?? 0) === selBld);
-      const srcFeats = bldFeats.length ? bldFeats : feats.filter(f => (f.properties?.bldIdx ?? 0) === bldIndices[0]);
+      // bldIdx real = indexul clădirii (nu al etajului)
+      const realBldIds = [...new Set(feats
+        .filter(f => f.properties?.bldIdx != null && f.properties?.bldIdx !== f.properties?.floor)
+        .map(f => f.properties.bldIdx))];
+      const targetBldId = realBldIds[selBld] ?? realBldIds[0] ?? 0;
+      const srcFeats = feats.filter(f => f.properties?.bldIdx === targetBldId);
 
       if(srcFeats.length) {
         aedisH = srcFeats.reduce((m,f) => Math.max(m, f.properties?.top||0), 0) || null;
-        const bldFloor0 = srcFeats.find(f => f.properties?.floor === 0) || srcFeats[0];
+        const bldFloor0 = srcFeats.find(f => (f.properties?.floor??0) === 0) || srcFeats[0];
         if(bldFloor0?.geometry) {
           try {
             const bb2 = turf.bbox({type:'FeatureCollection', features:[bldFloor0]});
@@ -286,13 +295,14 @@ function _rvGetParcelParams(){
         }
       }
     } else {
-      // Volum unic — comportament original
+      // Volum unic (o clădire, oricare număr de etaje) — luăm max din TOATE features
       aedisH = feats.reduce((m,f) => Math.max(m, f.properties?.top||0), 0) || null;
-      // Pentru volum unic, preluăm W/D din features dacă există
-      const f0 = feats.find(f => f.properties?.floor === 0) || feats[0];
-      if(f0?.geometry) {
+      // Parter = features cu floor===0 sau baza minimă
+      const floor0Feats = feats.filter(f => (f.properties?.floor ?? 0) === 0);
+      const bldFloor0 = floor0Feats[0] || feats[0];
+      if(bldFloor0?.geometry) {
         try {
-          const bb3 = turf.bbox({type:'FeatureCollection', features:[f0]});
+          const bb3 = turf.bbox({type:'FeatureCollection', features:[bldFloor0]});
           aedisW = Math.round(turf.distance(
             {type:'Feature',geometry:{type:'Point',coordinates:[bb3[0],bb3[1]]}},
             {type:'Feature',geometry:{type:'Point',coordinates:[bb3[2],bb3[1]]}},
@@ -301,7 +311,7 @@ function _rvGetParcelParams(){
             {type:'Feature',geometry:{type:'Point',coordinates:[bb3[0],bb3[1]]}},
             {type:'Feature',geometry:{type:'Point',coordinates:[bb3[0],bb3[3]]}},
             {units:'meters'}) * 10) / 10;
-          aedisArea = Math.round(turf.area({type:'FeatureCollection', features:[f0]}));
+          aedisArea = Math.round(turf.area({type:'FeatureCollection', features:[bldFloor0]}));
         } catch(e) {}
       }
     }
@@ -2871,18 +2881,20 @@ async function generateRelevee(){
 
   _rvOpen();
 
-  // ── Selector corp — TOATE cazurile multi-building ────────────────────────
-  // FIX: anterior detecta doar S.vol.multiVol. Acum detectăm și lotizare + parcele adiacente.
+  // ── Selector corp — DOAR pentru multivolume real ─────────────────────────
+  // FIX: nu mai arătăm selector pentru etajele aceleiași clădiri
   {
     const feats = S.vol?._lastFeats || [];
-    const bldIndices = [...new Set(feats.map(f => f.properties?.bldIdx ?? 0))];
-    const hasMulti = bldIndices.length > 1 ||
-                     (S.vol?.multiVol && feats.some(f=>f.properties?.bldIdx!=null));
-    if(hasMulti){
+    const isRealMulti = S.vol?.multiVol === true &&
+                        feats.some(f => f.properties?.bldIdx != null &&
+                                       f.properties?.bldIdx !== f.properties?.floor);
+    if(isRealMulti){
+      const realBldIds = [...new Set(feats
+        .filter(f => f.properties?.bldIdx != null && f.properties?.bldIdx !== f.properties?.floor)
+        .map(f => f.properties.bldIdx))];
+      const bldCount = realBldIds.length;
       _RV.selectedBldIdx = _RV.selectedBldIdx ?? 0;
-      // Reconstruim selectorul dacă nu există sau dacă numărul de corpuri s-a schimbat
       const existingSel = document.getElementById('rv-bld-selector');
-      const bldCount = bldIndices.length;
       if(bldCount > 1 && (!existingSel || existingSel.dataset.count !== String(bldCount))){
         existingSel?.remove();
         const sel = document.createElement('div');
@@ -2893,25 +2905,26 @@ async function generateRelevee(){
           +'display:flex;align-items:center;gap:8px;font-size:12px;color:#e8b341;font-family:monospace;'
           +'box-shadow:0 4px 20px rgba(0,0,0,.5)';
         sel.innerHTML = '🏗 Corp: '
-          + bldIndices.map((bIdx,i)=>{
-              const h = feats.filter(f=>(f.properties?.bldIdx??0)===bIdx)
-                             .reduce((m,f)=>Math.max(m,f.properties?.top||0),0);
+          + realBldIds.map((bId,i)=>{
+              const bldFeats = feats.filter(f=>f.properties?.bldIdx===bId);
+              const h = bldFeats.reduce((m,f)=>Math.max(m,f.properties?.top||0),0);
               const niv = Math.max(1,Math.round(h/3));
-              const label = `Corp ${i+1}<br><small style="font-size:9px;opacity:.7">h=${h.toFixed(1)}m·${niv}niv.</small>`;
-              const active = bIdx === (_RV.selectedBldIdx??0);
-              return `<button onclick="window._RV.selectedBldIdx=${bIdx};`
-                + `document.getElementById('rv-bld-selector').querySelectorAll('button')`
-                + `.forEach((b,j)=>{b.style.background=j===${i}?'#e8b341':'transparent';`
-                + `b.style.color=j===${i}?'#000':'#e8b341';});generateRelevee();" `
-                + `style="background:${active?'#e8b341':'transparent'};color:${active?'#000':'#e8b341'};`
-                + `border:1px solid #e8b341;border-radius:4px;padding:3px 8px;cursor:pointer;`
-                + `font-family:monospace;line-height:1.3">${label}</button>`;
+              const active = i === (_RV.selectedBldIdx??0);
+              return `<button onclick="window._RV.selectedBldIdx=${i};`
+                +`document.getElementById('rv-bld-selector').querySelectorAll('button')`
+                +`.forEach((b,j)=>{b.style.background=j===${i}?'#e8b341':'transparent';`
+                +`b.style.color=j===${i}?'#000':'#e8b341';});generateRelevee();" `
+                +`style="background:${active?'#e8b341':'transparent'};color:${active?'#000':'#e8b341'};`
+                +`border:1px solid #e8b341;border-radius:4px;padding:3px 8px;cursor:pointer;`
+                +`font-family:monospace;line-height:1.3">Corp ${i+1}<br>`
+                +`<small style="font-size:9px;opacity:.7">h=${h.toFixed(1)}m·${niv}niv.</small></button>`;
             }).join('');
         document.body.appendChild(sel);
       }
     } else {
-      // Volum unic — ascundem selectorul dacă era de la o sesiune anterioară
+      // Volum unic sau etaje — fără selector
       document.getElementById('rv-bld-selector')?.remove();
+      _RV.selectedBldIdx = 0;
     }
   }
 
