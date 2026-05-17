@@ -2930,8 +2930,9 @@ async function generateRelevee(){
     console.error('[Relevee] Eroare generare:', computeErr);
   }finally{
     clearTimeout(_rvSafetyTimer);
-    // ÎNTOTDEAUNA scoatem overlay-ul de progres — evităm blocarea interfeței
+    // ÎNTOTDEAUNA scoatem overlay-urile — indiferent de erori
     prog?.classList.remove('rv-on');
+    document.getElementById('rv-empty')?.style.setProperty('display','none');
   }
 
   clearInterval(tInt);
