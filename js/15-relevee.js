@@ -254,69 +254,27 @@ function _rvGetParcelParams(){
   // O clădire cu 7 etaje are floor=0..6 dar bldIdx=undefined sau același număr
   // → NU înseamnă 7 clădiri separate!
   let aedisH = null, aedisW = null, aedisD = null, aedisArea = null;
-  let isMultiBldg = false;
-
   if(!isDemolare && S.vol?._lastFeats?.length) {
     const feats = S.vol._lastFeats;
-
-    // Detecție multivolum CORECTĂ:
-    // O singură clădire cu N etaje → exact 1 feature cu floor=0
-    // N clădiri separate → N features cu floor=0 (câte un parter per clădire)
-    const floor0Count = feats.filter(f => (f.properties?.floor ?? 0) === 0).length;
-    isMultiBldg = S.vol?.multiVol === true && floor0Count > 1;
-
-    if(isMultiBldg) {
-      // Grupăm features pe clădiri (ground floor = start fiecare clădire)
-      const selBld = (_RV?.selectedBldIdx != null) ? _RV.selectedBldIdx : 0;
-      // Sortăm floor=0 features ca să identificăm fiecare clădire
-      const groundFloors = feats.filter(f => (f.properties?.floor ?? 0) === 0);
-      const targetGround = groundFloors[selBld] || groundFloors[0];
-      // Features din aceeași clădire = același bldIdx ca ground-floor-ul selectat
-      const targetBldId = targetGround?.properties?.bldIdx;
-      const srcFeats = targetBldId != null
-        ? feats.filter(f => f.properties?.bldIdx === targetBldId)
-        : [targetGround];
-
-      if(srcFeats.length) {
-        aedisH = srcFeats.reduce((m,f) => Math.max(m, f.properties?.top||0), 0) || null;
-        const bldFloor0 = srcFeats.find(f => (f.properties?.floor??0) === 0) || srcFeats[0];
-        if(bldFloor0?.geometry) {
-          try {
-            const bb2 = turf.bbox({type:'FeatureCollection', features:[bldFloor0]});
-            aedisW = Math.round(turf.distance(
-              {type:'Feature',geometry:{type:'Point',coordinates:[bb2[0],bb2[1]]}},
-              {type:'Feature',geometry:{type:'Point',coordinates:[bb2[2],bb2[1]]}},
-              {units:'meters'}) * 10) / 10;
-            aedisD = Math.round(turf.distance(
-              {type:'Feature',geometry:{type:'Point',coordinates:[bb2[0],bb2[1]]}},
-              {type:'Feature',geometry:{type:'Point',coordinates:[bb2[0],bb2[3]]}},
-              {units:'meters'}) * 10) / 10;
-            aedisArea = Math.round(turf.area({type:'FeatureCollection', features:[bldFloor0]}));
-          } catch(e) {}
-        }
-      }
-    } else {
-      // Volum unic (o clădire, oricare număr de etaje) — luăm max din TOATE features
-      aedisH = feats.reduce((m,f) => Math.max(m, f.properties?.top||0), 0) || null;
-      // Parter = features cu floor===0 sau baza minimă
-      const floor0Feats = feats.filter(f => (f.properties?.floor ?? 0) === 0);
-      const bldFloor0 = floor0Feats[0] || feats[0];
-      if(bldFloor0?.geometry) {
-        try {
-          const bb3 = turf.bbox({type:'FeatureCollection', features:[bldFloor0]});
-          aedisW = Math.round(turf.distance(
-            {type:'Feature',geometry:{type:'Point',coordinates:[bb3[0],bb3[1]]}},
-            {type:'Feature',geometry:{type:'Point',coordinates:[bb3[2],bb3[1]]}},
-            {units:'meters'}) * 10) / 10;
-          aedisD = Math.round(turf.distance(
-            {type:'Feature',geometry:{type:'Point',coordinates:[bb3[0],bb3[1]]}},
-            {type:'Feature',geometry:{type:'Point',coordinates:[bb3[0],bb3[3]]}},
-            {units:'meters'}) * 10) / 10;
-          aedisArea = Math.round(turf.area({type:'FeatureCollection', features:[bldFloor0]}));
-        } catch(e) {}
-      }
+    // SIMPLU: luăm înălțimea maximă și dimensiunile parterului din volum
+    aedisH = feats.reduce((m,f) => Math.max(m, f.properties?.top||0), 0) || null;
+    const bldFloor0 = feats.find(f => (f.properties?.floor ?? 0) === 0) || feats[0];
+    if(bldFloor0?.geometry) {
+      try {
+        const bb = turf.bbox({type:'FeatureCollection', features:[bldFloor0]});
+        aedisW = Math.round(turf.distance(
+          {type:'Feature',geometry:{type:'Point',coordinates:[bb[0],bb[1]]}},
+          {type:'Feature',geometry:{type:'Point',coordinates:[bb[2],bb[1]]}},
+          {units:'meters'}) * 10) / 10;
+        aedisD = Math.round(turf.distance(
+          {type:'Feature',geometry:{type:'Point',coordinates:[bb[0],bb[1]]}},
+          {type:'Feature',geometry:{type:'Point',coordinates:[bb[0],bb[3]]}},
+          {units:'meters'}) * 10) / 10;
+        aedisArea = Math.round(turf.area({type:'FeatureCollection', features:[bldFloor0]}));
+      } catch(e) {}
     }
   }
+
 
   const niv = aedisH ? Math.round(aedisH/hn) : (params.niv || reg.niv || Math.floor(hMax/hn));
 
@@ -348,7 +306,6 @@ function _rvGetParcelParams(){
     hMax,
     frontDir,
     aedisH,
-    isMultiBldg, // FIX: folosit de selector UI și _rvCompBuilding
     lat: turf.centerOfMass(ap.geo).geometry.coordinates[1],
     lon: turf.centerOfMass(ap.geo).geometry.coordinates[0],
   };
@@ -2883,49 +2840,9 @@ async function generateRelevee(){
   _rvOpen();
 
   // ── Selector corp — DOAR pentru multivolume real ─────────────────────────
-  {
-    const feats = S.vol?._lastFeats || [];
-    const floor0Count2 = feats.filter(f => (f.properties?.floor ?? 0) === 0).length;
-    const isRealMulti = S.vol?.multiVol === true && floor0Count2 > 1;
-    if(isRealMulti){
-      const groundFloors = feats.filter(f => (f.properties?.floor ?? 0) === 0);
-      const bldCount = groundFloors.length;
-      _RV.selectedBldIdx = _RV.selectedBldIdx ?? 0;
-      const existingSel = document.getElementById('rv-bld-selector');
-      if(!existingSel || existingSel.dataset.count !== String(bldCount)){
-        existingSel?.remove();
-        const sel = document.createElement('div');
-        sel.id = 'rv-bld-selector';
-        sel.dataset.count = String(bldCount);
-        sel.style.cssText = 'position:fixed;top:54px;left:50%;transform:translateX(-50%);z-index:9999;'
-          +'background:#111c35;border:1px solid #e8b341;border-radius:8px;padding:6px 14px;'
-          +'display:flex;align-items:center;gap:8px;font-size:12px;color:#e8b341;font-family:monospace;'
-          +'box-shadow:0 4px 20px rgba(0,0,0,.5)';
-        sel.innerHTML = '🏗 Corp: '
-          + groundFloors.map((gf,i)=>{
-              const bId = gf?.properties?.bldIdx;
-              const bldFeats = bId != null
-                ? feats.filter(f=>f.properties?.bldIdx===bId)
-                : [gf];
-              const h = bldFeats.reduce((m,f)=>Math.max(m,f.properties?.top||0),0);
-              const niv = Math.max(1,Math.round(h/3));
-              const active = i === (_RV.selectedBldIdx??0);
-              return `<button onclick="window._RV.selectedBldIdx=${i};`
-                +`document.getElementById('rv-bld-selector').querySelectorAll('button')`
-                +`.forEach((b,j)=>{b.style.background=j===${i}?'#e8b341':'transparent';`
-                +`b.style.color=j===${i}?'#000':'#e8b341';});generateRelevee();" `
-                +`style="background:${active?'#e8b341':'transparent'};color:${active?'#000':'#e8b341'};`
-                +`border:1px solid #e8b341;border-radius:4px;padding:3px 8px;cursor:pointer;`
-                +`font-family:monospace;line-height:1.3">Corp ${i+1}<br>`
-                +`<small style="font-size:9px;opacity:.7">h=${h.toFixed(1)}m·${niv}niv.</small></button>`;
-            }).join('');
-        document.body.appendChild(sel);
-      }
-    } else {
-      document.getElementById('rv-bld-selector')?.remove();
-      _RV.selectedBldIdx = 0;
-    }
-  }
+  // Fără selector de corpuri — Releveul generează pentru volumul activ
+  document.getElementById('rv-bld-selector')?.remove();
+  _RV.selectedBldIdx = 0;
 
   const P = _rvGetParcelParams();
   _RV.parcelParams = P;
