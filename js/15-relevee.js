@@ -240,21 +240,54 @@ function _rvGetParcelParams(){
 
   // Orientare din AEDIS sau estimată din bbox
   const frontDir = S.vol?.frontDir || ap.frontDir || 'N';
-
-  // Înălțimea din AEDIS dacă e generat, altfel din params sau din regulament
-  // În scenariul Demolare, ignorăm înălțimea construcției existente
-  const aedisH   = isDemolare ? null :
-    (S.vol?._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0) || null);
   const hMax     = params.h || reg.h || 28;
   const hn       = 3.0;
-  const niv      = aedisH ? Math.round(aedisH/hn) : (params.niv || reg.niv || Math.floor(hMax/hn));
+
+  // ── MULTIVOLUME: folosim corpul selectat, nu max din toate ───────────────
+  // _lastFeats are proprietăți bldIdx (corp) și floor (etaj per corp)
+  let aedisH = null, aedisW = null, aedisD = null, aedisArea = null;
+  if(!isDemolare && S.vol?._lastFeats?.length) {
+    const feats = S.vol._lastFeats;
+    const isMulti = S.vol.multiVol && feats.some(f => f.properties?.bldIdx != null);
+    if(isMulti) {
+      // Corpul selectat = _RV.selectedBldIdx sau 0
+      const selBld = (typeof _RV !== 'undefined' && _RV.selectedBldIdx != null)
+        ? _RV.selectedBldIdx : 0;
+      const bldFeats = feats.filter(f => (f.properties?.bldIdx ?? 0) === selBld);
+      if(bldFeats.length) {
+        // Înălțimea corpului selectat
+        aedisH = bldFeats.reduce((m,f) => Math.max(m, f.properties?.top||0), 0) || null;
+        // Bbox corpului selectat pentru W și D
+        const bldFloor0 = bldFeats.find(f => f.properties?.floor === 0) || bldFeats[0];
+        if(bldFloor0?.geometry) {
+          try {
+            const bb2 = turf.bbox({type:'FeatureCollection',features:[bldFloor0]});
+            aedisW = Math.round(turf.distance(
+              {type:'Feature',geometry:{type:'Point',coordinates:[bb2[0],bb2[1]]}},
+              {type:'Feature',geometry:{type:'Point',coordinates:[bb2[2],bb2[1]]}},
+              {units:'meters'}) * 10) / 10;
+            aedisD = Math.round(turf.distance(
+              {type:'Feature',geometry:{type:'Point',coordinates:[bb2[0],bb2[1]]}},
+              {type:'Feature',geometry:{type:'Point',coordinates:[bb2[0],bb2[3]]}},
+              {units:'meters'}) * 10) / 10;
+            aedisArea = Math.round(turf.area({type:'FeatureCollection',features:[bldFloor0]}));
+          } catch(e) {}
+        }
+      }
+    } else {
+      // Volum unic — comportament existent
+      aedisH = feats.reduce((m,f) => Math.max(m, f.properties?.top||0), 0) || null;
+    }
+  }
+
+  const niv = aedisH ? Math.round(aedisH/hn) : (params.niv || reg.niv || Math.floor(hMax/hn));
 
   return {
     nrCad: ap.nrcad || ap.id || '—',
     utr, fn: S.vol?.fn || ap.fn || 'rezidential_colectiv',
-    W: Math.round(bboxW * 10) / 10,
-    D: Math.round(bboxD * 10) / 10,
-    area: Math.round(areaRaw),
+    W: aedisW || Math.round(bboxW * 10) / 10,
+    D: aedisD || Math.round(bboxD * 10) / 10,
+    area: aedisArea || Math.round(areaRaw),
     rf: params.rf ?? reg.rf ?? 0,
     rl: params.rl ?? reg.rl ?? 3,
     rs: params.rs ?? reg.rs ?? 6,
@@ -2758,6 +2791,23 @@ async function generateRelevee(){
 
   _rvOpen();
 
+  // ── Selector corp pentru multivolume ─────────────────────────────────────
+  if(S.vol?.multiVol && S.vol._lastFeats?.some(f=>f.properties?.bldIdx!=null)){
+    const bldCount = new Set(S.vol._lastFeats.map(f=>f.properties?.bldIdx??0)).size;
+    if(!window._RV) window._RV = {};
+    _RV.selectedBldIdx = _RV.selectedBldIdx ?? 0;
+    const existing = document.getElementById('rv-bld-selector');
+    if(!existing && bldCount > 1){
+      const sel = document.createElement('div');
+      sel.id = 'rv-bld-selector';
+      sel.style.cssText = 'position:fixed;top:54px;left:50%;transform:translateX(-50%);z-index:9999;background:#111c35;border:1px solid #e8b341;border-radius:8px;padding:6px 14px;display:flex;align-items:center;gap:8px;font-size:12px;color:#e8b341;font-family:monospace;';
+      sel.innerHTML = '🏗 Corp: '+[...Array(bldCount)].map((_,i)=>
+        `<button onclick="window._RV.selectedBldIdx=${i};document.getElementById('rv-bld-selector').querySelectorAll('button').forEach((b,j)=>b.style.background=j===${i}?'#e8b341':'transparent');document.getElementById('rv-bld-selector').querySelectorAll('button').forEach((b,j)=>b.style.color=j===${i}?'#000':'#e8b341');generateRelevee();" style="background:${i===(_RV.selectedBldIdx??0)?'#e8b341':'transparent'};color:${i===(_RV.selectedBldIdx??0)?'#000':'#e8b341'};border:1px solid #e8b341;border-radius:4px;padding:3px 8px;cursor:pointer;font-family:monospace;">${i+1}</button>`
+      ).join('');
+      document.body.appendChild(sel);
+    }
+  }
+
   const P = _rvGetParcelParams();
   _RV.parcelParams = P;
 
@@ -3102,6 +3152,8 @@ function closeRelevee(){
   if(!modal) return;
   modal.classList.remove('rv-modal-open');
   _RV.open=false;
+  // Curățăm selectorul de corp la închidere
+  document.getElementById('rv-bld-selector')?.remove();
   _RV.selectedRoom=null;
   _RV.resizing=null;
   // Ascundem complet după tranziție ca să nu interfere cu butoanele din spatele modal-ului
