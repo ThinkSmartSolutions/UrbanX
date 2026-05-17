@@ -6263,33 +6263,24 @@ window.generateRelevee = generateRelevee;
 window.closeRelevee    = closeRelevee;
 
 
-// ── FIX FREEZE: Pre-injectare modal la idle + guard apeluri multiple ──────
-// _rvInject() = ~2000 linii HTML. Pe click + 3D activ = freeze 1-3s sincron.
-// Pre-injectăm la idle → la click modalul e deja gata, zero latență.
-(function(){
-  function doPreInject(){
-    if(!document.getElementById('rv-modal')){
-      try{ _rvInject(); console.log('[Relevee] Modal pre-injectat la idle'); }catch(e){}
-    }
-  }
-  // Așteptăm 2s după load — harta trebuie să se inițializeze prima
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',()=>setTimeout(doPreInject,2000));
-  } else {
-    setTimeout(doPreInject,2000);
-  }
-})();
 
-// Guard: previne rulări simultane (click rapid, selector corp = multiple calls)
+// Guard simplu: previne apeluri duble rapide pe butonul de corpus selector
+// NU face pre-injectare (cauza auto-deschidere la load)
 ;(function(){
   const _orig = window.generateRelevee;
+  if(typeof _orig !== 'function') return;
+  let _running = false;
   window.generateRelevee = async function(...args){
-    if(window._rvGenerating){
-      console.log('[Relevee] Generare în curs — skip duplicat');
-      return;
-    }
-    window._rvGenerating = true;
-    try{ await _orig.apply(this,args); }
-    finally{ window._rvGenerating = false; }
+    if(_running){ return; }
+    _running = true;
+    try{ await _orig.apply(this, args); }
+    catch(e){ console.error('[Relevee] generateRelevee error:', e); }
+    finally{ _running = false; }
   };
+  window.closeRelevee = function(){
+    _running = false; // reset dacă userul anulează
+    const orig = window._rvCloseRelevee_orig || closeRelevee;
+    if(typeof orig === 'function') orig.call(this);
+  };
+  window._rvCloseRelevee_orig = closeRelevee;
 })();
