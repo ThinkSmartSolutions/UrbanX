@@ -81,6 +81,16 @@ function _txtBg(ctx, text, x, y, opts){
 
 // ── Hașură diagonală în zone de perete ────────────────────────────────────
 function _hatch(ctx, x, y, w, h, col, sp, angle){
+  // Simplified: solid fill instead of hatching loops (prevents UI freeze)
+  if(!w||!h||w<=0||h<=0) return;
+  ctx.save();
+  ctx.fillStyle = col;
+  ctx.globalAlpha = 0.18;
+  ctx.fillRect(x, y, w, h);
+  ctx.globalAlpha = 1;
+  ctx.restore();
+  return; // skip original hatching loop
+  // Original hatching below (disabled for performance):
   if(w <= 0 || h <= 0) return;
   ctx.save();
   ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
@@ -269,6 +279,8 @@ function _drawDoor(ctx, dx, dy_d, dw, isMain, swing, extW, SC){
 // PLAN NIVEL — rescriere completă
 // ═══════════════════════════════════════════════════════════════════════════
 window._rvRenderPlan = function(fl, b){
+  if(!fl || !b || !b.P) { console.warn('[Relevee] _rvRenderPlan: fl sau b null'); return; }
+  if(!fl.rects) { console.warn('[Relevee] fl.rects missing'); return; }
   const {P, bW, bD} = b;
   const SC  = _RV.scale;
   const EW  = Math.max(4, SC * 0.28);  // perete exterior ~28cm
