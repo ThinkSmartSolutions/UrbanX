@@ -2796,14 +2796,19 @@ async function generateRelevee(){
   prog?.classList.remove('rv-on');
 
   // Compute — try/finally garantează că rv-prog dispare indiferent de erori
+  // Timeout safety: dacă generarea durează >20s, scoatem overlay-ul forțat
+  const _rvSafetyTimer = setTimeout(()=>{ document.getElementById('rv-prog')?.classList.remove('rv-on'); }, 20000);
   let b;
   try{
   b = _rvCompBuilding(P); _RV.building = b;
   _RV.floors = [];
   // Pe mobil: calculăm DOAR floor 0 inițial — celelalte lazy la click tab
+  // Calculăm max 2 etaje inițial pe orice dispozitiv — restul lazy la click tab
+  // Previne crash OOM pe cladiri mari (7+ corpi, 4+ etaje)
   const isMobDev = window.innerWidth < 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  const maxEagerFloors = isMobDev ? 1 : Math.min(2, b.niv);
   for(let i=0;i<b.niv;i++){
-    _RV.floors.push(i===0 || !isMobDev ? _rvFloor(b,i) : null);
+    _RV.floors.push(i < maxEagerFloors ? _rvFloor(b,i) : null);
   }
 
   // Floor bar
@@ -2841,6 +2846,7 @@ async function generateRelevee(){
   }catch(computeErr){
     console.error('[Relevee] Eroare generare:', computeErr);
   }finally{
+    clearTimeout(_rvSafetyTimer);
     // ÎNTOTDEAUNA scoatem overlay-ul de progres — evităm blocarea interfeței
     prog?.classList.remove('rv-on');
   }
