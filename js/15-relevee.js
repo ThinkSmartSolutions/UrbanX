@@ -1,5 +1,4 @@
 // ═══════════════════════════════════════════════════════════════════════════
-console.log('[Relevee] 15-relevee.js v20260516 LOADED');
 // UrbanX · 15-relevee.js · Relevee Instant Generator
 // Generează planuri funcționale orientative din datele parcelei active.
 // Citește din: S.parcels[activeParcel], REGULI, S.vol (AEDIS), S.ctx (vecini)
@@ -817,7 +816,6 @@ function _rvRender(){
   }
   const fl = _RV.floors[_RV.floor] || _RV.floors[0];
   const b  = _RV.building;
-  console.log('[Relevee] _rvRender: tab='+_RV.tab+' floor='+_RV.floor+' fl='+!!fl+' b='+!!b);
   // ── Curăță handler-ul de hover când NU suntem pe Plan ─────────────────────
   // Bug: hover-ul de plan (tooltip camere) rămâne activ pe canvas la switch tab
   if(_RV.tab !== 'plan'){
@@ -838,11 +836,7 @@ function _rvRenderPlan(fl,b){
   const pad=60; const lm=50;
   const W = bW*SC + pad*2 + P.rl*2*SC + 40;
   const H = bD*SC + pad*2 + (P.rf+P.rs)*SC + 60;
-  // DIAGNOSTIC
-  console.log('[Relevee] _rvRenderPlan: bW='+bW+' bD='+bD+' SC='+SC+' W='+W+' H='+H+' rects='+fl?.rects?.length);
   const {cv,ctx}=_rvInitCanvas(W,H);
-  if(!ctx){ console.error('[Relevee] ctx NULL - canvas init failed W='+W+' H='+H); return; }
-  console.log('[Relevee] ctx OK, canvas='+cv.width+'x'+cv.height);
 
   ctx.fillStyle='#060C1A'; ctx.fillRect(0,0,W,H);
   // grid bg
@@ -2961,28 +2955,6 @@ async function generateRelevee(){
 }
 window.generateRelevee = generateRelevee; // export imediat după funcție
 
-// Pre-injectăm modalul la page load DOAR dacă userul e logat (platforma e activă)
-// Evită MutationObserver cascade (14+ observatori → freeze) fără a bloca login-ul
-if(document.readyState === 'loading'){
-  document.addEventListener('DOMContentLoaded', ()=>{
-    setTimeout(()=>{
-      try{
-        // Injectăm DOAR dacă platforma e încărcată (există harta sau panoul principal)
-        if(!document.getElementById('rv-modal') &&
-           (document.getElementById('map') || document.querySelector('.ux-panel') || document.querySelector('#ux-root')))
-          _rvInject();
-      }catch(e){}
-    }, 2000);
-  });
-} else {
-  setTimeout(()=>{
-    try{
-      if(!document.getElementById('rv-modal') &&
-         (document.getElementById('map') || document.querySelector('.ux-panel') || document.querySelector('#ux-root')))
-        _rvInject();
-    }catch(e){}
-  }, 2000);
-}
 
 function _rvBuildFloorBar(niv){
   const fb=document.getElementById('rv-floorbar'); if(!fb) return;
@@ -6155,4 +6127,3 @@ function _rvInject(){
 window.generateRelevee = generateRelevee;
 window.closeRelevee    = closeRelevee;
 
-console.log("[UrbanX] 15-relevee.js loaded OK -- generateRelevee available");
