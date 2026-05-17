@@ -2961,6 +2961,16 @@ async function generateRelevee(){
 }
 window.generateRelevee = generateRelevee; // export imediat după funcție
 
+// Pre-injectăm modalul la page load pentru a evita MutationObserver cascade
+// (14+ observatori se declanșează simultan la primul _rvInject → freeze)
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', ()=>{
+    setTimeout(()=>{ try{ if(!document.getElementById('rv-modal')) _rvInject(); }catch(e){} }, 1500);
+  });
+} else {
+  setTimeout(()=>{ try{ if(!document.getElementById('rv-modal')) _rvInject(); }catch(e){} }, 1500);
+}
+
 function _rvBuildFloorBar(niv){
   const fb=document.getElementById('rv-floorbar'); if(!fb) return;
   fb.innerHTML=`<span class="rv-fb-label">NIV:</span>`;
