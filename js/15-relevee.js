@@ -1,4 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════
+console.log('[Relevee] 15-relevee.js v20260516 LOADED');
 // UrbanX · 15-relevee.js · Relevee Instant Generator
 // Generează planuri funcționale orientative din datele parcelei active.
 // Citește din: S.parcels[activeParcel], REGULI, S.vol (AEDIS), S.ctx (vecini)
@@ -2957,6 +2958,7 @@ async function generateRelevee(){
   }
   if(typeof ss === 'function') ss(`✅ Relevee generate în ${secs}s — ${b.niv} niveluri, SDA=${_rvFmt(b.sdaTotal)}m²`);
 }
+window.generateRelevee = generateRelevee; // export imediat după funcție
 
 function _rvBuildFloorBar(niv){
   const fb=document.getElementById('rv-floorbar'); if(!fb) return;
