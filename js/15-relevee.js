@@ -282,12 +282,17 @@ function _rvGetParcelParams(){
 
   const niv = aedisH ? Math.round(aedisH/hn) : (params.niv || reg.niv || Math.floor(hMax/hn));
 
+  // Dacă corpul e prea mic pentru un plan meaningful (< 8m), folosim parcela întreagă
+  const finalW = (aedisW && aedisW >= 8) ? aedisW : Math.round(bboxW * 10) / 10;
+  const finalD = (aedisD && aedisD >= 8) ? aedisD : Math.round(bboxD * 10) / 10;
+  const finalArea = (aedisArea && aedisArea >= 50) ? aedisArea : Math.round(areaRaw);
+
   return {
     nrCad: ap.nrcad || ap.id || '—',
     utr, fn: S.vol?.fn || ap.fn || 'rezidential_colectiv',
-    W: aedisW || Math.round(bboxW * 10) / 10,
-    D: aedisD || Math.round(bboxD * 10) / 10,
-    area: aedisArea || Math.round(areaRaw),
+    W: finalW,
+    D: finalD,
+    area: finalArea,
     rf: params.rf ?? reg.rf ?? 0,
     rl: params.rl ?? reg.rl ?? 3,
     rs: params.rs ?? reg.rs ?? 6,
@@ -789,13 +794,28 @@ function _rvInitCanvas(W,H,canvasId){
 }
 
 function _rvRender(){
-  if(!_RV.building) return;
+  if(!_RV.building){
+    // Afișăm mesaj de eroare în canvas
+    const cv = document.getElementById('rv-canvas');
+    if(cv && cv.width > 0){
+      const ctx2 = cv.getContext('2d');
+      if(ctx2){
+        ctx2.fillStyle='#060C1A'; ctx2.fillRect(0,0,cv.width,cv.height);
+        ctx2.fillStyle='rgba(255,94,91,0.8)'; ctx2.font='bold 13px IBM Plex Mono';
+        ctx2.textAlign='center';
+        ctx2.fillText('Eroare la generarea planului.', cv.width/2/Math.min(window.devicePixelRatio||1,2), cv.height/2/Math.min(window.devicePixelRatio||1,2));
+        ctx2.textAlign='left';
+      }
+    }
+    return;
+  }
   // Lazy: calculăm etajul dacă nu a fost calculat încă (mobil)
   if(_RV.floors[_RV.floor] === null){
     try{ _RV.floors[_RV.floor] = _rvFloor(_RV.building, _RV.floor); }catch(e){}
   }
   const fl = _RV.floors[_RV.floor] || _RV.floors[0];
   const b  = _RV.building;
+  console.log('[Relevee] _rvRender: tab='+_RV.tab+' floor='+_RV.floor+' fl='+!!fl+' b='+!!b);
   // ── Curăță handler-ul de hover când NU suntem pe Plan ─────────────────────
   // Bug: hover-ul de plan (tooltip camere) rămâne activ pe canvas la switch tab
   if(_RV.tab !== 'plan'){
@@ -816,8 +836,11 @@ function _rvRenderPlan(fl,b){
   const pad=60; const lm=50;
   const W = bW*SC + pad*2 + P.rl*2*SC + 40;
   const H = bD*SC + pad*2 + (P.rf+P.rs)*SC + 60;
+  // DIAGNOSTIC
+  console.log('[Relevee] _rvRenderPlan: bW='+bW+' bD='+bD+' SC='+SC+' W='+W+' H='+H+' rects='+fl?.rects?.length);
   const {cv,ctx}=_rvInitCanvas(W,H);
-  if(!ctx) return; // canvas init eșuat (memorie insuficientă)
+  if(!ctx){ console.error('[Relevee] ctx NULL - canvas init failed W='+W+' H='+H); return; }
+  console.log('[Relevee] ctx OK, canvas='+cv.width+'x'+cv.height);
 
   ctx.fillStyle='#060C1A'; ctx.fillRect(0,0,W,H);
   // grid bg
@@ -853,6 +876,20 @@ function _rvRenderPlan(fl,b){
 
   // Building fill
   ctx.fillStyle='rgba(16,29,53,.95)';ctx.fillRect(ox,oy,bW*SC,bD*SC);
+
+  // Dacă nu există camere - afișăm mesaj în canvas
+  if(!fl.rects || fl.rects.length === 0){
+    ctx.fillStyle='rgba(232,179,65,0.7)';
+    ctx.font='bold 14px IBM Plex Mono';
+    ctx.textAlign='center';
+    ctx.fillText('Plan în curs de generare...', W/2, H/2 - 20);
+    ctx.font='11px IBM Plex Mono';
+    ctx.fillStyle='rgba(138,150,166,0.8)';
+    ctx.fillText('Dimensiuni corp: '+bW.toFixed(1)+'m × '+bD.toFixed(1)+'m', W/2, H/2+5);
+    ctx.fillText('Selectați un alt corp sau ajustați parametrii', W/2, H/2+22);
+    ctx.textAlign='left';
+    return;
+  }
 
   // Camere
   [...fl.rects].sort((a,m_)=>(a.zIdx||0)-(m_.zIdx||0)).forEach(r=>{
