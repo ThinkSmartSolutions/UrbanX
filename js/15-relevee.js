@@ -2961,14 +2961,27 @@ async function generateRelevee(){
 }
 window.generateRelevee = generateRelevee; // export imediat după funcție
 
-// Pre-injectăm modalul la page load pentru a evita MutationObserver cascade
-// (14+ observatori se declanșează simultan la primul _rvInject → freeze)
+// Pre-injectăm modalul la page load DOAR dacă userul e logat (platforma e activă)
+// Evită MutationObserver cascade (14+ observatori → freeze) fără a bloca login-ul
 if(document.readyState === 'loading'){
   document.addEventListener('DOMContentLoaded', ()=>{
-    setTimeout(()=>{ try{ if(!document.getElementById('rv-modal')) _rvInject(); }catch(e){} }, 1500);
+    setTimeout(()=>{
+      try{
+        // Injectăm DOAR dacă platforma e încărcată (există harta sau panoul principal)
+        if(!document.getElementById('rv-modal') &&
+           (document.getElementById('map') || document.querySelector('.ux-panel') || document.querySelector('#ux-root')))
+          _rvInject();
+      }catch(e){}
+    }, 2000);
   });
 } else {
-  setTimeout(()=>{ try{ if(!document.getElementById('rv-modal')) _rvInject(); }catch(e){} }, 1500);
+  setTimeout(()=>{
+    try{
+      if(!document.getElementById('rv-modal') &&
+         (document.getElementById('map') || document.querySelector('.ux-panel') || document.querySelector('#ux-root')))
+        _rvInject();
+    }catch(e){}
+  }, 2000);
 }
 
 function _rvBuildFloorBar(niv){
