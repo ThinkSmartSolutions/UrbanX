@@ -259,21 +259,19 @@ function _rvGetParcelParams(){
   if(!isDemolare && S.vol?._lastFeats?.length) {
     const feats = S.vol._lastFeats;
 
-    // Multivolume REAL = flag explicit setat de AEDIS la generare multiple volume
-    // NU detectăm din bldIdx (care poate fi indexul etajului, nu al clădirii)
-    const explicitMulti = S.vol.multiVol === true &&
-                          feats.some(f => f.properties?.bldIdx != null &&
-                                         f.properties?.bldIdx !== f.properties?.floor);
-    isMultiBldg = explicitMulti;
+    // Multivolum REAL = mai mult de un bldIdx DISTINCT non-null
+    // O clădire cu N etaje: toate features au același bldIdx (sau null)
+    // Două clădiri: features cu bldIdx=0 și features cu bldIdx=1
+    const uniqueBldIds = [...new Set(
+      feats.filter(f => f.properties?.bldIdx != null)
+           .map(f => f.properties.bldIdx)
+    )];
+    isMultiBldg = S.vol?.multiVol === true && uniqueBldIds.length > 1;
 
     if(isMultiBldg) {
       // Multivolume real: filtrăm pe corpul selectat
       const selBld = (_RV?.selectedBldIdx != null) ? _RV.selectedBldIdx : 0;
-      // bldIdx real = indexul clădirii (nu al etajului)
-      const realBldIds = [...new Set(feats
-        .filter(f => f.properties?.bldIdx != null && f.properties?.bldIdx !== f.properties?.floor)
-        .map(f => f.properties.bldIdx))];
-      const targetBldId = realBldIds[selBld] ?? realBldIds[0] ?? 0;
+      const targetBldId = uniqueBldIds[selBld] ?? uniqueBldIds[0];
       const srcFeats = feats.filter(f => f.properties?.bldIdx === targetBldId);
 
       if(srcFeats.length) {
@@ -2882,20 +2880,18 @@ async function generateRelevee(){
   _rvOpen();
 
   // ── Selector corp — DOAR pentru multivolume real ─────────────────────────
-  // FIX: nu mai arătăm selector pentru etajele aceleiași clădiri
   {
     const feats = S.vol?._lastFeats || [];
-    const isRealMulti = S.vol?.multiVol === true &&
-                        feats.some(f => f.properties?.bldIdx != null &&
-                                       f.properties?.bldIdx !== f.properties?.floor);
+    const uniqueBldIds2 = [...new Set(
+      feats.filter(f => f.properties?.bldIdx != null)
+           .map(f => f.properties.bldIdx)
+    )];
+    const isRealMulti = S.vol?.multiVol === true && uniqueBldIds2.length > 1;
     if(isRealMulti){
-      const realBldIds = [...new Set(feats
-        .filter(f => f.properties?.bldIdx != null && f.properties?.bldIdx !== f.properties?.floor)
-        .map(f => f.properties.bldIdx))];
-      const bldCount = realBldIds.length;
+      const bldCount = uniqueBldIds2.length;
       _RV.selectedBldIdx = _RV.selectedBldIdx ?? 0;
       const existingSel = document.getElementById('rv-bld-selector');
-      if(bldCount > 1 && (!existingSel || existingSel.dataset.count !== String(bldCount))){
+      if(!existingSel || existingSel.dataset.count !== String(bldCount)){
         existingSel?.remove();
         const sel = document.createElement('div');
         sel.id = 'rv-bld-selector';
@@ -2905,7 +2901,7 @@ async function generateRelevee(){
           +'display:flex;align-items:center;gap:8px;font-size:12px;color:#e8b341;font-family:monospace;'
           +'box-shadow:0 4px 20px rgba(0,0,0,.5)';
         sel.innerHTML = '🏗 Corp: '
-          + realBldIds.map((bId,i)=>{
+          + uniqueBldIds2.map((bId,i)=>{
               const bldFeats = feats.filter(f=>f.properties?.bldIdx===bId);
               const h = bldFeats.reduce((m,f)=>Math.max(m,f.properties?.top||0),0);
               const niv = Math.max(1,Math.round(h/3));
@@ -2922,7 +2918,6 @@ async function generateRelevee(){
         document.body.appendChild(sel);
       }
     } else {
-      // Volum unic sau etaje — fără selector
       document.getElementById('rv-bld-selector')?.remove();
       _RV.selectedBldIdx = 0;
     }
