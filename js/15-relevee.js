@@ -2953,19 +2953,28 @@ async function generateRelevee(){
   prog?.classList.remove('rv-on');
 
   // Compute — try/finally garantează că rv-prog dispare indiferent de erori
-  // Timeout safety: dacă generarea durează >20s, scoatem overlay-ul forțat
+  // FIX FREEZE: adăugăm await _rvSleep(0) înainte de fiecare operație grea
+  // → cedăm event loop-ul → browser poate procesa click/scroll/close în orice moment
+  // Fără yield: JS blochează main thread 2-10s → tab înghețat complet
   const _rvSafetyTimer = setTimeout(()=>{ document.getElementById('rv-prog')?.classList.remove('rv-on'); }, 20000);
   let b;
   try{
+  // Yield 1: înainte de calculul clădirii
+  await _rvSleep(0);
   b = _rvCompBuilding(P); _RV.building = b;
+
   _RV.floors = [];
-  // Pe mobil: calculăm DOAR floor 0 inițial — celelalte lazy la click tab
-  // Calculăm max 2 etaje inițial pe orice dispozitiv — restul lazy la click tab
-  // Previne crash OOM pe cladiri mari (7+ corpi, 4+ etaje)
   const isMobDev = window.innerWidth < 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   const maxEagerFloors = isMobDev ? 1 : Math.min(2, b.niv);
+
+  // Yield 2: înainte de generarea fiecărui etaj (poate fi lent pentru clădiri mari)
   for(let i=0;i<b.niv;i++){
-    _RV.floors.push(i < maxEagerFloors ? _rvFloor(b,i) : null);
+    if(i < maxEagerFloors){
+      await _rvSleep(0); // cedăm event loop-ul între etaje
+      _RV.floors.push(_rvFloor(b,i));
+    } else {
+      _RV.floors.push(null);
+    }
   }
 
   // Floor bar
@@ -2981,11 +2990,10 @@ async function generateRelevee(){
   try{
     const wrap = document.getElementById('rv-drawwrap');
     if(wrap && b.P){
-      const availW = wrap.clientWidth  - 140; // pad + dims
+      const availW = wrap.clientWidth  - 140;
       const availH = wrap.clientHeight - 120;
       const scW = availW / (b.P.W + b.P.rl*2 + 4);
       const scH = availH / (b.P.D + b.P.rf + b.P.rs + 4);
-      // Pe mobil: scala maxima 8 pentru a preveni crash iOS din OOM
       const isMobScale = window.innerWidth < 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
       const fitSc = Math.min(isMobScale ? 8 : 28, Math.max(4, Math.floor(Math.min(scW, scH))));
       _RV.scale = fitSc;
@@ -2993,7 +3001,11 @@ async function generateRelevee(){
     }
   }catch(e){}
 
-  _rvRender();
+  // Yield 3: înainte de randarea canvas (poate fi lentă pentru planuri complexe)
+  await _rvSleep(0);
+  try{ _rvRender(); }catch(renderErr){
+    console.error('[Relevee] Eroare randare canvas:', renderErr);
+  }
 
   // ── Actualizăm DataBus — toate rapoartele sunt notificate ─────────────
   try{ window._RV_DataBus?.update(b, P); }catch(e){}
@@ -5476,6 +5488,9 @@ function _rvInject(){
 .rv-empty-ico{font-size:48px;opacity:.18;filter:grayscale(1);}.rv-empty-t{font-size:14px;font-weight:700;color:#374151;font-family:'Space Grotesk',sans-serif;}.rv-empty-s{font-size:11px;line-height:1.6;max-width:240px;text-align:center;}
 .rv-prog{position:absolute;inset:0;background:rgba(6,12,26,.94);backdrop-filter:blur(10px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:50;opacity:0;pointer-events:none;transition:opacity .2s;}
 .rv-prog.rv-on{opacity:1;pointer-events:all;}
+/* FIX: butonul de închidere funcționează MEREU — chiar dacă prog overlay e activ */
+.rv-prog-cancel{position:absolute;top:12px;right:12px;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:#EF4444;border-radius:6px;padding:5px 12px;cursor:pointer;font-size:11px;font-weight:700;z-index:60;}
+.rv-prog.rv-on{opacity:1;pointer-events:all;}
 .rv-pct{font-family:'IBM Plex Mono',monospace;font-size:48px;font-weight:600;color:#D4AF37;line-height:1;}
 .rv-pbar-w{width:240px;height:3px;background:rgba(255,255,255,.07);border-radius:99px;}
 .rv-pbar{height:3px;background:linear-gradient(90deg,#D4AF37,#F5C518);border-radius:99px;transition:width .12s;}
@@ -5941,6 +5956,7 @@ function _rvInject(){
       </div>
       <canvas id="rv-canvas" style="display:block"></canvas>
       <div class="rv-prog" id="rv-prog">
+        <button class="rv-prog-cancel" onclick="closeRelevee()" title="Anulează și închide">✕ Anulează</button>
         <div class="rv-pct" id="rv-ppct">0%</div>
         <div class="rv-pbar-w"><div class="rv-pbar" id="rv-pbar" style="width:0%"></div></div>
         <div class="rv-psteps" id="rv-psteps"></div>
