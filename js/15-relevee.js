@@ -259,20 +259,23 @@ function _rvGetParcelParams(){
   if(!isDemolare && S.vol?._lastFeats?.length) {
     const feats = S.vol._lastFeats;
 
-    // Multivolum REAL = mai mult de un bldIdx DISTINCT non-null
-    // O clădire cu N etaje: toate features au același bldIdx (sau null)
-    // Două clădiri: features cu bldIdx=0 și features cu bldIdx=1
-    const uniqueBldIds = [...new Set(
-      feats.filter(f => f.properties?.bldIdx != null)
-           .map(f => f.properties.bldIdx)
-    )];
-    isMultiBldg = S.vol?.multiVol === true && uniqueBldIds.length > 1;
+    // Detecție multivolum CORECTĂ:
+    // O singură clădire cu N etaje → exact 1 feature cu floor=0
+    // N clădiri separate → N features cu floor=0 (câte un parter per clădire)
+    const floor0Count = feats.filter(f => (f.properties?.floor ?? 0) === 0).length;
+    isMultiBldg = S.vol?.multiVol === true && floor0Count > 1;
 
     if(isMultiBldg) {
-      // Multivolume real: filtrăm pe corpul selectat
+      // Grupăm features pe clădiri (ground floor = start fiecare clădire)
       const selBld = (_RV?.selectedBldIdx != null) ? _RV.selectedBldIdx : 0;
-      const targetBldId = uniqueBldIds[selBld] ?? uniqueBldIds[0];
-      const srcFeats = feats.filter(f => f.properties?.bldIdx === targetBldId);
+      // Sortăm floor=0 features ca să identificăm fiecare clădire
+      const groundFloors = feats.filter(f => (f.properties?.floor ?? 0) === 0);
+      const targetGround = groundFloors[selBld] || groundFloors[0];
+      // Features din aceeași clădire = același bldIdx ca ground-floor-ul selectat
+      const targetBldId = targetGround?.properties?.bldIdx;
+      const srcFeats = targetBldId != null
+        ? feats.filter(f => f.properties?.bldIdx === targetBldId)
+        : [targetGround];
 
       if(srcFeats.length) {
         aedisH = srcFeats.reduce((m,f) => Math.max(m, f.properties?.top||0), 0) || null;
@@ -2882,13 +2885,11 @@ async function generateRelevee(){
   // ── Selector corp — DOAR pentru multivolume real ─────────────────────────
   {
     const feats = S.vol?._lastFeats || [];
-    const uniqueBldIds2 = [...new Set(
-      feats.filter(f => f.properties?.bldIdx != null)
-           .map(f => f.properties.bldIdx)
-    )];
-    const isRealMulti = S.vol?.multiVol === true && uniqueBldIds2.length > 1;
+    const floor0Count2 = feats.filter(f => (f.properties?.floor ?? 0) === 0).length;
+    const isRealMulti = S.vol?.multiVol === true && floor0Count2 > 1;
     if(isRealMulti){
-      const bldCount = uniqueBldIds2.length;
+      const groundFloors = feats.filter(f => (f.properties?.floor ?? 0) === 0);
+      const bldCount = groundFloors.length;
       _RV.selectedBldIdx = _RV.selectedBldIdx ?? 0;
       const existingSel = document.getElementById('rv-bld-selector');
       if(!existingSel || existingSel.dataset.count !== String(bldCount)){
@@ -2901,8 +2902,11 @@ async function generateRelevee(){
           +'display:flex;align-items:center;gap:8px;font-size:12px;color:#e8b341;font-family:monospace;'
           +'box-shadow:0 4px 20px rgba(0,0,0,.5)';
         sel.innerHTML = '🏗 Corp: '
-          + uniqueBldIds2.map((bId,i)=>{
-              const bldFeats = feats.filter(f=>f.properties?.bldIdx===bId);
+          + groundFloors.map((gf,i)=>{
+              const bId = gf?.properties?.bldIdx;
+              const bldFeats = bId != null
+                ? feats.filter(f=>f.properties?.bldIdx===bId)
+                : [gf];
               const h = bldFeats.reduce((m,f)=>Math.max(m,f.properties?.top||0),0);
               const niv = Math.max(1,Math.round(h/3));
               const active = i === (_RV.selectedBldIdx??0);
