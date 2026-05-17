@@ -613,7 +613,7 @@ async function generateStudiuApePluviale(){
   cover('Gospodărire ape pluviale · P.annual≈'+P_an+'mm · Q='+Q_pl.toFixed(2)+'l/s',
     caps.imgLocation||null,
     [['Precipitații anuale',P_an+' mm/an (est.)'],['Debit pluvial de calcul',Q_pl.toFixed(2)+' l/s'],
-     ['Coef. scurgere mediu',psiMed.toFixed(2)],['NFA estimat',hidro?.nfa?.toFixed(1)+'m']],
+     ['Coef. scurgere mediu',psiMed.toFixed(2)],['NFA estimat',Number(hidro?.nfa??2).toFixed(1)+'m']],
     true,'PLAN GOSPODĂRIRE APE PLUVIALE — SR EN 752:2021');
 
   let cy=newPage('1. DATE PLUVIOMETRICE — AMPLASAMENT',2);
@@ -626,7 +626,7 @@ async function generateStudiuApePluviale(){
    ['Durată ploaie calc.','10 min (scurgere suprafață)','P 66-2001 §3.4','Urban compact'],
    ['Coef. scurgere ψ mediu',psiMed.toFixed(2),'STAS 9470 Tab.1','Amestecat '+fn],
    ['Debit pluvial calc. Q',Q_pl.toFixed(2)+' l/s','Formula rațională Q=i·ψ·A/10000','SR EN 752'],
-   ['NFA (nivel apă freatică)','≈'+hidro?.nfa?.toFixed(1)+'m','INHGA estimat','Risc subinfiltrant'],
+   ['NFA (nivel apă freatică)','≈'+Number(hidro?.nfa??2).toFixed(1)+'m','INHGA estimat','Risc subinfiltrant'],
   ].forEach(r=>{cy=tblRow(r,cy,false,[65,40,50,W-28-65-40-50]);cy=checkY(cy,12,'PLUVIO',2);});
 
   cy=newPage('2. SOLUȚII MANAGEMENT APE PLUVIALE',3);
@@ -683,11 +683,11 @@ async function generateStudiuApePluviale(){
       cy=sec('5.1. RISC INUNDABILITATE — DIR. 2007/60/CE',cy);cy+=3;
       const risc_inund=hidro?.nfa<1.5||(lat<44.8&&lon>25.5&&lon<28);
       cy=body('Riscul de inundabilitate pentru amplasamentul '+S2(nrcad)+' este evaluat ca '+
-        (risc_inund?'MODERAT-RIDICAT':'REDUS')+' pe baza NFA='+hidro?.nfa?.toFixed(1)+'m și coordonatelor geografice. '+
+        (risc_inund?'MODERAT-RIDICAT':'REDUS')+' pe baza NFA='+Number(hidro?.nfa??2).toFixed(1)+'m și coordonatelor geografice. '+
         'Verificați harta de risc MMAP (mapgis.rowater.ro) și avizul Apelor Române.',14,cy);cy+=4;
       cy=tblRow(['Risc','Evaluare','Acțiune','Standard'],cy,true,[50,40,55,W-28-50-40-55]);
       [['Inundabilitate luncă',risc_inund?'POSIBIL':'Redus','Verificare ANAR mapgis.rowater.ro','Dir. 2007/60/CE'],
-       ['Înălțare subsol','NFA='+hidro?.nfa?.toFixed(1)+'m','Hidroizolație perimetrală','NP 112/2014'],
+       ['Înălțare subsol','NFA='+Number(hidro?.nfa??2).toFixed(1)+'m','Hidroizolație perimetrală','NP 112/2014'],
        ['Tasare pluvial','Psi_med='+psiMed.toFixed(2),'Dren perimetral + rigole','P 66-2001'],
       ].forEach(r=>{cy=tblRow(r,cy,false,[50,40,55,W-28-50-40-55]);});
     } else if(pg===7){
@@ -709,8 +709,8 @@ async function generateStudiuApePluviale(){
       cy=concluzii([
         'Amplasamentul '+S2(nrcad)+' are precipitații medii estimate la '+P_an+'mm/an (lat='+lat.toFixed(2)+'°N). Debitul pluvial de calcul este Q='+Q_pl.toFixed(2)+'l/s (i='+i_10min+'l/s/ha, T=2ani, ψ='+psiMed.toFixed(2)+').',
         'Se recomandă cisternă de recuperare ape pluviale ('+V_cisterna+'m³) pentru economie de ~'+Math.round(V_24h*0.4*365)+' litri/an apă potabilă.',
-        hidro?.nfa<1.5?'ATENȚIE: NFA estimat ≈'+hidro.nfa.toFixed(1)+'m — hidroizolație perimetrală obligatorie + sistem de drenaj activ (pompe).'
-        :'NFA estimat ≈'+hidro?.nfa?.toFixed(1)+'m — infiltrare locală posibilă cu puț absorbant sau câmp absorbant.',
+        hidro?.nfa<1.5?'ATENȚIE: NFA estimat ≈'+Number(hidro?.nfa??2).toFixed(1)+'m — hidroizolație perimetrală obligatorie + sistem de drenaj activ (pompe).'
+        :'NFA estimat ≈'+Number(hidro?.nfa??2).toFixed(1)+'m — infiltrare locală posibilă cu puț absorbant sau câmp absorbant.',
         'Rețea de canalizare pluvială SEPARATIVĂ față de cea menajeră este obligatorie conform HG 188/2002 (NTPA 002).',
         'Separator de hidrocarburi obligatoriu la ieșirea din parcaj/garaj înainte de evacuare în rețea (SR EN 858 + NTPA 002).',
         'Verificare obligatorie pe harta de risc MMAP (mapgis.rowater.ro) și la Administrația Bazinală de Apă competentă.',

@@ -2257,7 +2257,7 @@ const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
   [5,8,10,12,14,16,18,20,25,28].forEach(h=>{
     const dmin=(h/Math.tan(15*Math.PI/180)).toFixed(0);
     const isCrt=Math.abs(h-aedisH)<1;
-    cy=tblRow([h+'m',sh>500?'>500m':sh.toFixed(0)+'m',dmin+'m',isCrt?'← Cladire propusa':'—'],cy,false,[40,50,60,32]);
+    const shH=shadowLen(h,solarAlt(lat,11,12));cy=tblRow([h+'m',shH>500?'>500m':shH.toFixed(0)+'m',dmin+'m',isCrt?'← Cladire propusa':'—'],cy,false,[40,50,60,32]);
     if(isCrt){pdf.setFillColor(20,60,120);pdf.rect(14,cy-8,W-28,8,'F');pdf.setTextColor(255,255,255);}
   });
   cy+=4;
@@ -3874,7 +3874,7 @@ const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
   cy=tblRow(['Parametru','Valoare','Sursă'],cy,true,[80,60,38]);
   [['Cod ICAO',AACR_DATA.aeroport.split('(')[1]?.replace(')','')+'','ICAO / ROMATSA'],
    ['Pistă',`08/26 (${AACR_DATA.pistA_curs}°/${AACR_DATA.pistB_curs}°)`,'AIP Romania AD 2'],
-   ['Elevație pistă',AACR_DATA.elevatie+' ft AMSL ('+elevAerop.toFixed(0)+'m)','AIP Romania'],
+   ['Elevație pistă',AACR_DATA.elevatie+' ft AMSL ('+elevAerop_m.toFixed(0)+'m)','AIP Romania'],
    ['Distanță prag '+pragAproape,distMin.toFixed(0)+' m','Calcul UrbanX GPS'],
    ['Distanță prag 08',distA.toFixed(0)+' m','Calcul UrbanX GPS'],
    ['Distanță prag 26',distB.toFixed(0)+' m','Calcul UrbanX GPS'],
@@ -4272,8 +4272,8 @@ const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
   const F2_teren = F2||2;
   const F3_mediu = F3||1;
   const sumaFact_struct = F1_struct+F2_teren+F3_mediu;
-  const catGeoNr2 = sumaFact>=7?3 : sumaFact>=4?2 : 1;
-  const catGeo2 = catGeoNr2===3?'3 — Complexă (>7 puncte NP 074)' : catGeoNr2===2?'2 — Curentă (4-6 puncte NP 074)':'1 — Simplă (<=3 puncte NP 074)';
+  const catGeoNr = sumaFact>=7?3 : sumaFact>=4?2 : 1;
+  const catGeo2 = catGeoNr===3?'3 — Complexă (>7 puncte NP 074)' : catGeoNr2===2?'2 — Curentă (4-6 puncte NP 074)':'1 — Simplă (<=3 puncte NP 074)';
 
   // Date hidrologie estimative zona Iași (din hărți geologice IGPG + foraje existente)
   const hidro={
@@ -5103,7 +5103,7 @@ const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
   cy=sec('6. INSTALATIA DE DETECTIE, ALARMARE SI AVERTIZARE LA INCENDIU',cy);cy+=2;
   cy=body('Instalatia de detectie si alarmare la incendiu (DAI) se proiecteaza conform P118-2/2013 Art. 9, SR EN 54 (parti 1-29) si OMAI 163/2007. Sistemul DAI trebuie sa asigure detectia automata a incendiului, alarmarea ocupantilor si transmiterea automata a semnalului la dispeceratul ISU sau la un serviciu privat de paza si interventie.',14,cy);cy+=4;
   const _daiOblig = _needsDetectie;
-  pdf.setFillColor(_daiOblig?[180,20,20]:[15,80,30][0],_daiOblig?20:80,_daiOblig?20:30);
+  pdf.setFillColor(...(_daiOblig?[180,20,20]:[15,80,30]));
   pdf.rect(14,cy,W-28,14,'F');
   pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');
   pdf.text('INSTALATIE DAI — '+(_daiOblig?'OBLIGATORIE (functiune, niv. sau suprafata depaseste pragul)':'RECOMANDATA (sub prag obligativitate, dar recomandata)'),W/2,cy+9,{align:'center'});
@@ -6627,6 +6627,7 @@ const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
     pdf.setFillColor(...bg);pdf.rect(14,cy2-5.5,W-28,8,'F');
     pdf.setDrawColor(200,210,218);pdf.setLineWidth(0.15);pdf.line(14,cy2-5.5+8,W-14,cy2-5.5+8);
     const colWs2=[22,12,12,12,12,12,12,12,12,12,12,12,12,15];
+    const vals=[or.name,...orePerLuna,anual];
     vals.forEach((v,ci)=>{
       const cx=14+colWs2.slice(0,ci).reduce((a,b)=>a+b,0)+2;
       pdf.setFontSize(ci===0?7.5:7);pdf.setFont('helvetica',ci===0?'bold':'normal');
@@ -7687,6 +7688,7 @@ async function generateStudiuFezabilitate(paramOverrides){
   // Capitol statistici INSE (#27) — înainte de salvare
   let inseY = 14;
   pdf.addPage();
+  const pgN=11; // nr. ultimei pagini hardcodate
   hdr('STATISTICI DEMOGRAFICE & PIATĂ IMOBILIARĂ — INSE + DATE LOCALE',pgN+1);
   pdf.setFillColor(255,255,255);pdf.rect(0,12,W,H-19,'F');
   try{
@@ -8455,6 +8457,7 @@ async function generateStudiuAmplasament(){
   let cyESG=33;
   cyESG=sec('ESG SCORING — ENVIRONMENTAL, SOCIAL, GOVERNANCE',cyESG);cyESG+=3;
   cyESG=body('Analiza ESG evalueaza sustenabilitatea proiectului pe 3 dimensiuni. Scorurile sunt ESTIMATIVE pe baza parametrilor proiectului.',14,cyESG);cyESG+=4;
+  const fn=S?.vol?.fn||params?.fn_label?.slice(0,3)||'rez';
   const esgScore=_calcESGScore(ap,params,aedisH,fn);
   cyESG=_pdfESGBlock(pdf,W,cyESG,esgScore);
   // Report JSON (Audit #20)
@@ -10415,6 +10418,7 @@ async function generateStabilitateTaluzuri(){
   cy+=6;
   cy=sec('DATE COTA TEREN AMSL — ELEVATION ENGINE',cy);cy+=2;
   cy=tblRow(['Parametru','Valoare','Sursa','Precizie'],cy,true,[60,35,70,17]);
+  const elevConf=elevData?.confidence??85;
   [['Cotă teren amplasament',elevTeren.toFixed(1)+' m AMSL',elevSursa,elevConf+'%'],
    ['Elevație airport LRIA (ARP)','121.0 m AMSL','AIP Romania (NOTAM)','±0.5m'],
    ['Diferenta teren-ARP',(elevTeren-121).toFixed(1)+' m','Calcul direct','—'],
