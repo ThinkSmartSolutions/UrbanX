@@ -3215,19 +3215,31 @@ function _rvOpen(){
   _RV.open=true;
   window._rvReleveeOpen = true;
 
-  // FIX FREEZE: Resetăm DOAR pitch-ul (async, non-blocking)
-  // NU mai ascundem layerele 3D sincron — setLayoutProperty poate bloca Mapbox
+  // FIX OOM (626MB): golim sursele WebGL ale volumului 3D
+  // setLayoutProperty('visibility','none') NU eliberează memoria WebGL — bufferele rămân alocate
+  // setSource cu FeatureCollection goală → WebGL dealocă bufferele → 200-300MB eliberate
   try{
-    if(window.map && typeof window.map.getPitch==='function'){
+    if(window.map){
+      // Salvăm pitch pentru restaurare
       window._rvSavedPitch   = window.map.getPitch();
       window._rvSavedBearing = window.map.getBearing();
-      if(window._rvSavedPitch > 1){
-        // easeTo e async — nu blochează JS
-        window.map.easeTo({ pitch:0, bearing:0, duration:300 });
-      }
+      // Reset pitch (async, non-blocking)
+      if(window._rvSavedPitch > 1) window.map.easeTo({pitch:0, duration:300});
+      // Golim sursele 3D care ocupă WebGL buffers
+      const emptyGeo = {type:'FeatureCollection',features:[]};
+      const volSrc  = window.map.getSource('vol-src');
+      const ctxSrc  = window.map.getSource('ctx-3d-src');
+      const distSrc = window.map.getSource('dist-src');
+      if(volSrc  && typeof volSrc.setData  === 'function'){ volSrc.setData(emptyGeo);  window._rvSavedVolEmpty = true;  }
+      if(ctxSrc  && typeof ctxSrc.setData  === 'function'){ ctxSrc.setData(emptyGeo);  window._rvSavedCtxEmpty = true;  }
+      if(distSrc && typeof distSrc.setData === 'function'){ distSrc.setData(emptyGeo); window._rvSavedDistEmpty = true; }
+      // Ascundem layerele pentru render skip
+      ['vol-3d','vol-scen-3d','ctx-3d','aedis-dim-layer'].forEach(id=>{
+        try{ if(window.map.getLayer(id)) window.map.setLayoutProperty(id,'visibility','none'); }catch(e){}
+      });
     }
     if(typeof window._tciPause==='function') window._tciPause();
-  }catch(e){}
+  }catch(e){ console.warn('[RV] pause 3D:', e.message); }
 }
 
 function closeRelevee(){
@@ -3247,34 +3259,37 @@ function closeRelevee(){
   // Oprim orice animație solară
   clearInterval(window._rvSolarInterval);
 
-  // FIX FREEZE: Reluăm animațiile 3D oprite la deschidere
+  // FIX OOM: Restaurăm sursele WebGL după închidere
   window._rvReleveeOpen = false;
-  window._rvViewerWasActive = false;
-  try {
-    if(typeof window._tciResume    === 'function') window._tciResume();
-    if(typeof window._viewer3dResume==='function') window._viewer3dResume();
-    // Restaurăm pitch-ul original și layer-ele 3D
-    if(window.map && typeof window.map.easeTo === 'function'){
-      const restorePitch = window._rvSavedPitch || 0;
-      if(restorePitch > 1){
-        window.map.easeTo({ pitch:restorePitch, bearing:window._rvSavedBearing||0, duration:300 });
-        // Reafișăm layer-ele 3D ascunse
-        if(window._rvHid3DLayers){
-          setTimeout(()=>{
-            try{
-              ['aedis-vol','vol-layer','aedis-extrude','building-extrusion','vol-3d']
-                .forEach(layerId=>{
-                  if(window.map?.getLayer(layerId))
-                    window.map.setLayoutProperty(layerId,'visibility','visible');
-                });
-            }catch(e){}
-          }, 350);
-          window._rvHid3DLayers = false;
-        }
+  try{
+    if(window.map && window.S?.vol?._lastFeats?.length){
+      const feats = window.S.vol._lastFeats;
+      const geo = {type:'FeatureCollection',features:feats};
+      if(window._rvSavedVolEmpty){
+        const src = window.map.getSource('vol-src');
+        if(src?.setData) src.setData(geo);
+        window._rvSavedVolEmpty = false;
       }
-      setTimeout(()=>{ try{ window.map.triggerRepaint(); }catch(e){} }, 400);
+      if(window._rvSavedDistEmpty){
+        const src = window.map.getSource('dist-src');
+        if(src?.setData && window.S?.vol?._lastDistFeats?.length)
+          src.setData({type:'FeatureCollection',features:window.S.vol._lastDistFeats});
+        window._rvSavedDistEmpty = false;
+      }
     }
-  } catch(e) { console.warn('[RV] Resume 3D:', e); }
+    // Restaurăm vizibilitatea layerelor
+    ['vol-3d','ctx-3d','aedis-dim-layer'].forEach(id=>{
+      try{ if(window.map?.getLayer(id)) window.map.setLayoutProperty(id,'visibility','visible'); }catch(e){}
+    });
+    // Restaurăm pitch
+    if(window.map && window._rvSavedPitch > 1){
+      setTimeout(()=>{
+        try{ window.map.easeTo({pitch:window._rvSavedPitch, bearing:window._rvSavedBearing||0, duration:400}); }catch(e){}
+      }, 350);
+    }
+    if(typeof window._tciResume==='function') window._tciResume();
+    setTimeout(()=>{ try{ window.map?.triggerRepaint(); }catch(e){} }, 450);
+  }catch(e){ console.warn('[RV] resume 3D:', e.message); }
 }
 
 function openRelevee_safe(){
