@@ -42,12 +42,13 @@
 // ═══════════════════════════════════════════════════════════════════════════
 function _rvDetectBuildingMode(){
   const S = window.S;
-  const nFeats  = (S?.vol?._lastFeats?.length) || 0;
   const nCorps  = (window.AEDIS?.corpuri?.length) || 0;
   const nParc   = (S?.parcels?.length) || 0;
   if(nParc > 1 && S?.multiMode)  return 'multi-parcel';
-  if(nFeats > 1)                  return 'multi-feat';   // Multiple Volume pe o parcelă
-  if(nCorps > 1)                  return 'multi-corp';   // AEDIS.corpuri explicit
+  if(nCorps > 1)                  return 'multi-corp';
+  // FIX: nFeats > 1 NU înseamnă clădiri multiple!
+  // O clădire cu N etaje are N features în _lastFeats (câte un feature pe etaj).
+  // Modul 'multi-feat' se activează NUMAI via AEDIS.corpuri (multi-corp).
   return 'single';
 }
 
