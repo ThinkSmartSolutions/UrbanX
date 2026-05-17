@@ -3267,41 +3267,21 @@ function _rvOpen(){
   rvM.style.visibility='visible';
   rvM.classList.add('rv-modal-open');
   _RV.open=true;
-
-  // FIX FREEZE: Mapbox GL 3D (pitch>0 + extruzii) + Canvas 2D = OOM → freeze
-  // Soluția reală: resetăm pitch la 0 → Mapbox dezactivează 3D rendering → GPU liber
   window._rvReleveeOpen = true;
-  window._rvViewerWasActive = false;
-  try {
-    // 1. Oprim TCI Cinema / viewer3d dacă există funcții dedicate
-    if(typeof window._tciPause    === 'function'){ window._tciPause();     window._rvViewerWasActive = true; }
-    if(typeof window._viewer3dPause==='function'){ window._viewer3dPause();window._rvViewerWasActive = true; }
-    if(window._tciAnimId)    { cancelAnimationFrame(window._tciAnimId);     window._tciAnimId=null;     window._rvViewerWasActive=true; }
-    if(window._viewer3dAnimId){ cancelAnimationFrame(window._viewer3dAnimId);window._viewer3dAnimId=null;window._rvViewerWasActive=true; }
-    if(window._cinemaAnimId) { cancelAnimationFrame(window._cinemaAnimId);  window._cinemaAnimId=null;  window._rvViewerWasActive=true; }
 
-    // 2. FIX PRINCIPAL: resetăm pitch la 0 indiferent de starea viewer-ului
-    // Mapbox GL cu pitch>0 ține activ renderer-ul WebGL 3D buildings (GPU-intensiv)
-    // La pitch=0 → flat map → WebGL mult mai ușor → Canvas 2D funcționează normal
-    if(window.map && typeof window.map.getPitch === 'function'){
-      const currentPitch = window.map.getPitch();
-      window._rvSavedPitch   = currentPitch;
+  // FIX FREEZE: Resetăm DOAR pitch-ul (async, non-blocking)
+  // NU mai ascundem layerele 3D sincron — setLayoutProperty poate bloca Mapbox
+  try{
+    if(window.map && typeof window.map.getPitch==='function'){
+      window._rvSavedPitch   = window.map.getPitch();
       window._rvSavedBearing = window.map.getBearing();
-      if(currentPitch > 1){
-        window._rvViewerWasActive = true;
-        window.map.easeTo({ pitch:0, duration:200 });
-        // Oprim layer-ele 3D extrudate temporar dacă există
-        try{
-          ['aedis-vol','vol-layer','aedis-extrude','building-extrusion','vol-3d']
-            .forEach(layerId=>{
-              if(window.map.getLayer(layerId))
-                window.map.setLayoutProperty(layerId,'visibility','none');
-            });
-          window._rvHid3DLayers = true;
-        }catch(e){}
+      if(window._rvSavedPitch > 1){
+        // easeTo e async — nu blochează JS
+        window.map.easeTo({ pitch:0, bearing:0, duration:300 });
       }
     }
-  } catch(e) { console.warn('[RV] Pause 3D:', e); }
+    if(typeof window._tciPause==='function') window._tciPause();
+  }catch(e){}
 }
 
 function closeRelevee(){
@@ -6282,3 +6262,34 @@ function _rvInject(){
 window.generateRelevee = generateRelevee;
 window.closeRelevee    = closeRelevee;
 
+
+// ── FIX FREEZE: Pre-injectare modal la idle + guard apeluri multiple ──────
+// _rvInject() = ~2000 linii HTML. Pe click + 3D activ = freeze 1-3s sincron.
+// Pre-injectăm la idle → la click modalul e deja gata, zero latență.
+(function(){
+  function doPreInject(){
+    if(!document.getElementById('rv-modal')){
+      try{ _rvInject(); console.log('[Relevee] Modal pre-injectat la idle'); }catch(e){}
+    }
+  }
+  // Așteptăm 2s după load — harta trebuie să se inițializeze prima
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',()=>setTimeout(doPreInject,2000));
+  } else {
+    setTimeout(doPreInject,2000);
+  }
+})();
+
+// Guard: previne rulări simultane (click rapid, selector corp = multiple calls)
+;(function(){
+  const _orig = window.generateRelevee;
+  window.generateRelevee = async function(...args){
+    if(window._rvGenerating){
+      console.log('[Relevee] Generare în curs — skip duplicat');
+      return;
+    }
+    window._rvGenerating = true;
+    try{ await _orig.apply(this,args); }
+    finally{ window._rvGenerating = false; }
+  };
+})();
