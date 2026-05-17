@@ -256,9 +256,22 @@ function _rvGetParcelParams(){
   let aedisH = null, aedisW = null, aedisD = null, aedisArea = null;
   if(!isDemolare && S.vol?._lastFeats?.length) {
     const feats = S.vol._lastFeats;
-    // SIMPLU: luăm înălțimea maximă și dimensiunile parterului din volum
+    // Înălțimea = max din toate features
     aedisH = feats.reduce((m,f) => Math.max(m, f.properties?.top||0), 0) || null;
-    const bldFloor0 = feats.find(f => (f.properties?.floor ?? 0) === 0) || feats[0];
+
+    // Parterul = feature cu ARIA MAXIMĂ (nu feats[0] care poate fi etajul cel mai mic)
+    // O clădire cu setbackuri are parterul cel mai mare — sigur ground floor
+    let bldFloor0 = feats[0];
+    let maxFeatureArea = 0;
+    feats.forEach(f => {
+      try {
+        if(f?.geometry){
+          const a = turf.area(f);
+          if(a > maxFeatureArea){ maxFeatureArea = a; bldFloor0 = f; }
+        }
+      }catch(e){}
+    });
+
     if(bldFloor0?.geometry) {
       try {
         const bb = turf.bbox({type:'FeatureCollection', features:[bldFloor0]});
@@ -270,7 +283,7 @@ function _rvGetParcelParams(){
           {type:'Feature',geometry:{type:'Point',coordinates:[bb[0],bb[1]]}},
           {type:'Feature',geometry:{type:'Point',coordinates:[bb[0],bb[3]]}},
           {units:'meters'}) * 10) / 10;
-        aedisArea = Math.round(turf.area({type:'FeatureCollection', features:[bldFloor0]}));
+        aedisArea = Math.round(maxFeatureArea);
       } catch(e) {}
     }
   }
@@ -281,10 +294,11 @@ function _rvGetParcelParams(){
   // FIX DIMENSIUNI: folosim întotdeauna dimensiunile CLĂDIRII (nu parcelei)
   // când avem date AEDIS valide >= 5m. Parcela de 60×40m cu o clădire de 12×10m
   // NU trebuie să genereze un plan de 60×40m → sute de camere → freeze.
-  const useAedisW = aedisW && aedisW >= 5 && aedisW <= 200;
-  const useAedisD = aedisD && aedisD >= 5 && aedisD <= 150;
-  const finalW = useAedisW ? aedisW : Math.round(bboxW * 10) / 10;
-  const finalD = useAedisD ? aedisD : Math.round(bboxD * 10) / 10;
+  const useAedisW = aedisW && aedisW >= 4 && aedisW <= 200;
+  const useAedisD = aedisD && aedisD >= 4 && aedisD <= 150;
+  // Cap la max 50m lățime și 26m adâncime — previne OOM crash pe parcele mari
+  const finalW = Math.min(50, useAedisW ? aedisW : Math.round(bboxW * 10) / 10);
+  const finalD = Math.min(26, useAedisD ? aedisD : Math.round(bboxD * 10) / 10);
   const finalArea = (aedisArea && aedisArea >= 25) ? aedisArea : Math.round(areaRaw);
 
   // Când folosim dimensiunile clădirii, retrageri sunt deja incluse → le setăm la 0
