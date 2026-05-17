@@ -86,6 +86,7 @@ const _RV = {
   fn: 'rez',       // funcțiunea principală
   fnParter: null,  // null = same as fn; altfel: funcțiunea parterului P0
 };
+window._RV = _RV; // expus global pentru canvas-upgrade.js și alte module
 
 // ═══════════════════════════════════════════════════════════════════════════
 // FN_CONFIG — definiții complete per funcțiune
