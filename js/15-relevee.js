@@ -3198,30 +3198,39 @@ function _rvOpen(){
   rvM.classList.add('rv-modal-open');
   _RV.open=true;
 
-  // FIX FREEZE: Oprim animațiile 3D care concurează cu canvasul 2D
-  // Mapbox GL + Canvas 2D mare = memory pressure → browser înghețat
+  // FIX FREEZE: Mapbox GL 3D (pitch>0 + extruzii) + Canvas 2D = OOM → freeze
+  // Soluția reală: resetăm pitch la 0 → Mapbox dezactivează 3D rendering → GPU liber
+  window._rvReleveeOpen = true;
   window._rvViewerWasActive = false;
   try {
-    // 1. Oprire loop animație TCI Cinema / viewer3d
-    if(typeof window._tciPause === 'function')    { window._tciPause();     window._rvViewerWasActive = true; }
-    if(typeof window._viewer3dPause === 'function'){ window._viewer3dPause();window._rvViewerWasActive = true; }
-    // 2. Cancel rAF-uri cunoscute
-    if(window._tciAnimId)     { cancelAnimationFrame(window._tciAnimId);     window._tciAnimId = null;     window._rvViewerWasActive = true; }
-    if(window._viewer3dAnimId){ cancelAnimationFrame(window._viewer3dAnimId); window._viewer3dAnimId = null; window._rvViewerWasActive = true; }
-    if(window._cinemaAnimId)  { cancelAnimationFrame(window._cinemaAnimId);   window._cinemaAnimId = null;   window._rvViewerWasActive = true; }
-    // 3. Dacă topbar are viewer-open/viewer-bg → 3D viewer activ
-    const tb = document.getElementById('topbar');
-    if(tb && (tb.classList.contains('viewer-open') || tb.classList.contains('viewer-bg'))){
-      window._rvViewerWasActive = true;
-      // Reducem pitch-ul hărții pentru a elibera resurse de randare 3D
-      if(window.map && typeof window.map.easeTo === 'function'){
-        window._rvSavedPitch   = window.map.getPitch();
-        window._rvSavedBearing = window.map.getBearing();
-        // Nu resetăm camera — doar oprim renderer-ul 3D dacă există funcție dedicată
+    // 1. Oprim TCI Cinema / viewer3d dacă există funcții dedicate
+    if(typeof window._tciPause    === 'function'){ window._tciPause();     window._rvViewerWasActive = true; }
+    if(typeof window._viewer3dPause==='function'){ window._viewer3dPause();window._rvViewerWasActive = true; }
+    if(window._tciAnimId)    { cancelAnimationFrame(window._tciAnimId);     window._tciAnimId=null;     window._rvViewerWasActive=true; }
+    if(window._viewer3dAnimId){ cancelAnimationFrame(window._viewer3dAnimId);window._viewer3dAnimId=null;window._rvViewerWasActive=true; }
+    if(window._cinemaAnimId) { cancelAnimationFrame(window._cinemaAnimId);  window._cinemaAnimId=null;  window._rvViewerWasActive=true; }
+
+    // 2. FIX PRINCIPAL: resetăm pitch la 0 indiferent de starea viewer-ului
+    // Mapbox GL cu pitch>0 ține activ renderer-ul WebGL 3D buildings (GPU-intensiv)
+    // La pitch=0 → flat map → WebGL mult mai ușor → Canvas 2D funcționează normal
+    if(window.map && typeof window.map.getPitch === 'function'){
+      const currentPitch = window.map.getPitch();
+      window._rvSavedPitch   = currentPitch;
+      window._rvSavedBearing = window.map.getBearing();
+      if(currentPitch > 1){
+        window._rvViewerWasActive = true;
+        window.map.easeTo({ pitch:0, duration:200 });
+        // Oprim layer-ele 3D extrudate temporar dacă există
+        try{
+          ['aedis-vol','vol-layer','aedis-extrude','building-extrusion','vol-3d']
+            .forEach(layerId=>{
+              if(window.map.getLayer(layerId))
+                window.map.setLayoutProperty(layerId,'visibility','none');
+            });
+          window._rvHid3DLayers = true;
+        }catch(e){}
       }
     }
-    // 4. Flag global: orice RAF activ se poate verifica înainte de a reranda
-    window._rvReleveeOpen = true;
   } catch(e) { console.warn('[RV] Pause 3D:', e); }
 }
 
@@ -3247,10 +3256,27 @@ function closeRelevee(){
   window._rvViewerWasActive = false;
   try {
     if(typeof window._tciResume    === 'function') window._tciResume();
-    if(typeof window._viewer3dResume=== 'function') window._viewer3dResume();
-    // Forțăm un repaint al hărții după ce canvasul 2D e eliberat
-    if(window.map && typeof window.map.triggerRepaint === 'function'){
-      setTimeout(()=>{ try{ window.map.triggerRepaint(); }catch(e){} }, 350);
+    if(typeof window._viewer3dResume==='function') window._viewer3dResume();
+    // Restaurăm pitch-ul original și layer-ele 3D
+    if(window.map && typeof window.map.easeTo === 'function'){
+      const restorePitch = window._rvSavedPitch || 0;
+      if(restorePitch > 1){
+        window.map.easeTo({ pitch:restorePitch, bearing:window._rvSavedBearing||0, duration:300 });
+        // Reafișăm layer-ele 3D ascunse
+        if(window._rvHid3DLayers){
+          setTimeout(()=>{
+            try{
+              ['aedis-vol','vol-layer','aedis-extrude','building-extrusion','vol-3d']
+                .forEach(layerId=>{
+                  if(window.map?.getLayer(layerId))
+                    window.map.setLayoutProperty(layerId,'visibility','visible');
+                });
+            }catch(e){}
+          }, 350);
+          window._rvHid3DLayers = false;
+        }
+      }
+      setTimeout(()=>{ try{ window.map.triggerRepaint(); }catch(e){} }, 400);
     }
   } catch(e) { console.warn('[RV] Resume 3D:', e); }
 }
