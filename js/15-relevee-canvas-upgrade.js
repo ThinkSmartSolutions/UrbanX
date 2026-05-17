@@ -337,10 +337,9 @@ window._rvRenderPlan = function(fl, b){
   ctx.fillStyle = '#FFFFFF';
   ctx.fillRect(ox, oy, bW*SC, bD*SC);
   // Umbra ușoară
-  ctx.shadowColor = 'rgba(0,0,0,0.18)'; ctx.shadowBlur = 8; ctx.shadowOffsetX = 3; ctx.shadowOffsetY = 3;
+  // Shadow dezactivat — ctx.shadowBlur blochează UI pe Safari/WebKit (software render)
   ctx.strokeStyle = _C.WALL_EXT; ctx.lineWidth = EW;
   ctx.strokeRect(ox + EW/2, oy + EW/2, bW*SC - EW, bD*SC - EW);
-  ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0;
 
   // ── Camere ────────────────────────────────────────────────────────────────
   const sorted = [...fl.rects].sort((a,m_)=>(a.zIdx||0)-(m_.zIdx||0));
