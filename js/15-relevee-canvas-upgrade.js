@@ -200,12 +200,14 @@ function _drawFurniture(ctx, t, rx, ry, rw, rh, SC){
   } else if(t === 'core'){
     // Scări: linii orizontale paralele cu săgeată
     const sx2=rx+4, sy2=ry+4, sw3=rw-8, sh3=rh-8;
-    const nSteps=Math.max(3,Math.floor(sh3/Math.max(3,SC*0.18)));
+    const nSteps=Math.max(3,Math.min(12,Math.floor(sh3/Math.max(3,SC*0.18))));
     ctx.strokeStyle='rgba(30,60,120,0.5)'; ctx.lineWidth=0.7;
+    ctx.beginPath();
     for(let i=1;i<nSteps;i++){
       const ly_=sy2+i*(sh3/nSteps);
-      ctx.beginPath(); ctx.moveTo(sx2,ly_); ctx.lineTo(sx2+sw3*0.6,ly_); ctx.stroke();
+      ctx.moveTo(sx2,ly_); ctx.lineTo(sx2+sw3*0.6,ly_);
     }
+    ctx.stroke();
     // Săgeată urcare
     const ay=sy2+sh3*0.4;
     ctx.strokeStyle='rgba(30,60,120,0.8)'; ctx.lineWidth=1.2;
@@ -300,11 +302,13 @@ window._rvRenderPlan = function(fl, b){
   ctx.fillStyle = _C.BG;
   ctx.fillRect(0, 0, W, H);
 
-  // Grid discret
+  // Grid discret — batch într-un singur stroke (previne freeze pe Safari)
   ctx.strokeStyle = _C.GRID; ctx.lineWidth = 0.4;
-  const gsp = SC;
-  for(let x=0; x<W; x+=gsp){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
-  for(let y=0; y<H; y+=gsp){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  const gsp = Math.max(SC, 8); // minim 8px spacing
+  ctx.beginPath();
+  for(let x=0; x<W; x+=gsp){ ctx.moveTo(x,0); ctx.lineTo(x,H); }
+  for(let y=0; y<H; y+=gsp){ ctx.moveTo(0,y); ctx.lineTo(W,y); }
+  ctx.stroke();
 
   // ── Teren ─────────────────────────────────────────────────────────────────
   ctx.fillStyle = _C.PARCEL;
