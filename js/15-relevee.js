@@ -2824,7 +2824,7 @@ async function generateRelevee(){
     return;
   }
 
-  _rvOpen();
+  await _rvOpen();
 
   // ── Selector corp pentru multivolume ─────────────────────────────────────
   if(S.vol?.multiVol && S.vol._lastFeats?.some(f=>f.properties?.bldIdx!=null)){
@@ -3167,7 +3167,7 @@ function _rvDNAGetSolutii(b, P, potOk, cutOk, solarIssues, isuOk, roomsOk, parcS
 // ══════════════════════════════════════════════════════════════════════════
 // MODAL OPEN / CLOSE
 // ══════════════════════════════════════════════════════════════════════════
-function _rvOpen(){
+async function _rvOpen(){
   // GUARD + DEBUG: afișăm call stack ca overlay vizibil
   if(!window._rvAllowOpen){
     try{
@@ -3180,7 +3180,7 @@ function _rvOpen(){
     }catch(e){}
     return;
   }
-  if(!document.getElementById('rv-modal')) _rvInject();
+  if(!document.getElementById('rv-modal')) await _rvInject();
   const rvM=document.getElementById('rv-modal');
   rvM.style.visibility='visible';
   rvM.classList.add('rv-modal-open');
@@ -5285,7 +5285,7 @@ function _rvMobSync(){
 // ══════════════════════════════════════════════════════════════════════════
 // DOM INJECTION — modal + CSS injectate o singură dată
 // ══════════════════════════════════════════════════════════════════════════
-function _rvInject(){
+async function _rvInject(){
   // ── CSS ──────────────────────────────────────────────────────────────────
   if(!document.getElementById('rv-css')){
     const css=document.createElement('style'); css.id='rv-css';
@@ -5504,6 +5504,8 @@ function _rvInject(){
 
   // ── HTML ─────────────────────────────────────────────────────────────────
   const div=document.createElement('div'); div.id='rv-modal';
+  document.body.appendChild(div);
+  await new Promise(r=>requestAnimationFrame(r));
   div.innerHTML=`
 <div class="rv-topbar">
   <svg width="24" height="24" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="#101D35"/><path d="M18 28h26l13 22-13 22H18l15-22z" fill="#DDE6F5"/><path d="M59 28h23L71 49H53z" fill="#D4AF37"/><path d="M53 55h17l13 19H61z" fill="#D4AF37"/></svg>
@@ -6125,7 +6127,7 @@ function _rvInject(){
   </div>
 </div>
 <div id="rv-tip"></div>`;
-  document.body.appendChild(div);
+  await new Promise(r=>requestAnimationFrame(r));
 }
 
 // Expune global
