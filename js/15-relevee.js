@@ -2932,6 +2932,23 @@ async function generateRelevee(){
         if(dw){ dw.scrollTop=0; dw.scrollLeft=0; }
       }catch(e){}
     }, 500);
+    // Click diagnostic - capture phase
+    setTimeout(()=>{
+      try{
+        const modal = document.getElementById('rv-modal');
+        if(!modal) return;
+        modal.addEventListener('click', function _rvClickDiag(e){
+          const t = e.target;
+          // Show what was clicked
+          let ind = document.getElementById('rv-cd');
+          if(!ind){ ind=document.createElement('div'); ind.id='rv-cd';
+            ind.style.cssText='position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:#0f0;color:#000;padding:4px 10px;font:9px monospace;z-index:999999;border-radius:4px;pointer-events:none;';
+            document.body.appendChild(ind); }
+          ind.textContent='CLICK HIT: '+t.tagName+'#'+t.id+'.'+t.className.split(' ')[0];
+          clearTimeout(ind._t); ind._t=setTimeout(()=>ind.remove(),3000);
+        }, true);
+      }catch(e){}
+    }, 600);
     setTimeout(()=>{try{
       const _cv=document.getElementById('rv-canvas');
       const _d=document.createElement('div');
