@@ -784,12 +784,21 @@ function _rvInitCanvas(W,H,canvasId){
     wrap.appendChild(tmp);
     return _rvInitCanvas(W,H,tmp.id);
   }
-  // iOS: cap DPR la 2 ca să nu depășim limita de memorie canvas (~16MP)
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  // Desktop: cap DPR la 1 — harta WebGL consumă GPU memory, canvas mare poate eșua
+  // Mobil: cap DPR la 2 — ecrane retina mici, browsere mai noi
+  const isMobCtx = window.innerWidth < 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  let dpr = Math.min(window.devicePixelRatio || 1, isMobCtx ? 2 : 1);
   cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr);
   cv.style.width = W+'px'; cv.style.height = H+'px';
-  const ctx = cv.getContext('2d');
-  if(!ctx){ console.error('[Relevee] Canvas context null - canvas prea mare sau memorie insuficientă'); return {cv,ctx:null,W,H}; }
+  let ctx = cv.getContext('2d');
+  // Retry la DPR=1 dacă getContext eșuează (GPU OOM pe desktop cu DPR>1)
+  if(!ctx && dpr > 1){
+    console.warn('[Relevee] Canvas ctx null la DPR='+dpr+' ('+Math.round(W*dpr)+'×'+Math.round(H*dpr)+'px) — retry DPR=1');
+    dpr = 1;
+    cv.width = Math.round(W); cv.height = Math.round(H);
+    ctx = cv.getContext('2d');
+  }
+  if(!ctx){ console.error('[Relevee] Canvas context null definitiv — W='+W+' H='+H+' DPR='+window.devicePixelRatio); return {cv,ctx:null,W,H}; }
   ctx.scale(dpr,dpr);
   return {cv,ctx,cv2:cv,ctx2:ctx,W,H};
 }
@@ -837,7 +846,7 @@ function _rvRenderPlan(fl,b){
   const W = bW*SC + pad*2 + P.rl*2*SC + 40;
   const H = bD*SC + pad*2 + (P.rf+P.rs)*SC + 60;
   const {cv,ctx}=_rvInitCanvas(W,H);
-
+  if(!ctx){ console.error('[Relevee] _rvRenderPlan: ctx null ('+W+'×'+H+')'); return; }
   ctx.fillStyle='#060C1A'; ctx.fillRect(0,0,W,H);
   // grid bg
   ctx.strokeStyle='rgba(255,255,255,.018)'; ctx.lineWidth=.5;
@@ -1124,6 +1133,7 @@ function _rvRenderFacade(b){
   const W=Math.max(facadeW_NS,facadeW_EV)+pad*2+120;
   const H=sectionH*4+pad;
   const {cv,ctx}=_rvInitCanvas(W,H);
+  if(!ctx){ console.error('[Relevee] _rvRenderFacade: ctx null'); return; }
   ctx.fillStyle='#060C1A';ctx.fillRect(0,0,W,H);
 
   // ── Helper: desenare o fațadă ──────────────────────────────────────────────
@@ -1297,7 +1307,7 @@ function _rvRenderSection(b){
   const W=cutDim*SC+pad*2+100;
   const H=Ht*SC+pad*2+60;
   const {cv,ctx}=_rvInitCanvas(W+120,H+50);
-
+  if(!ctx){ console.error('[Relevee] _rvRenderSection: ctx null'); return; }
   ctx.fillStyle='#060C1A';ctx.fillRect(0,0,cv.width,H+50);
 
   // ── Selector A-A / B-B ─────────────────────────────────────────────────────
@@ -1507,6 +1517,7 @@ function _rvRenderAxono(b){
 
   const W=900, H=700;
   const {cv,ctx}=_rvInitCanvas(W,H);
+  if(!ctx){ console.error('[Relevee] _rvRenderAxono: ctx null'); return; }
   const CX=280, CY=560;
   const pt=(x,y,z)=>[CX+isoX(x,y,z), CY+isoY(x,y,z)];
 
@@ -2626,6 +2637,7 @@ function _rvBuildAvizeTimeline(b, P){
 function _rvRenderScenarii(b){
   const P=b.P||_RV.parcelParams; if(!P) return;
   const {cv,ctx}=_rvInitCanvas(900,600);
+  if(!ctx){ console.error('[Relevee] _rvRenderScenarii: ctx null'); return; }
   ctx.fillStyle='#060C1A';ctx.fillRect(0,0,900,600);
 
   // Titlu
@@ -2927,7 +2939,24 @@ async function generateRelevee(){
   try{ _rvCalcROI(); }catch(e){}
 
   }catch(computeErr){
-    console.error('[Relevee] Eroare generare:', computeErr);
+    console.error('[Relevee] Eroare generare:', computeErr, computeErr?.stack);
+    // Afișăm eroarea în canvas — utilizatorul vede ce s-a întâmplat
+    try{
+      const cv_err = document.getElementById('rv-canvas');
+      if(cv_err){ cv_err.width=600; cv_err.height=160; cv_err.style.width='600px'; cv_err.style.height='160px';
+        const ctx_e = cv_err.getContext('2d');
+        if(ctx_e){
+          ctx_e.fillStyle='#060C1A'; ctx_e.fillRect(0,0,600,160);
+          ctx_e.fillStyle='rgba(255,94,91,.85)'; ctx_e.font='bold 13px IBM Plex Mono'; ctx_e.textAlign='center';
+          ctx_e.fillText('⚠ Eroare la generarea planului', 300, 55);
+          ctx_e.fillStyle='rgba(138,150,166,.8)'; ctx_e.font='10px IBM Plex Mono';
+          ctx_e.fillText(String(computeErr).slice(0,72), 300, 80);
+          ctx_e.fillStyle='rgba(212,175,55,.5)'; ctx_e.font='9px IBM Plex Mono';
+          ctx_e.fillText('Rulați în consolă: console.log(!!_RV?.building, _RV?.floors?.length, document.getElementById(\'rv-canvas\')?.width)', 300, 110);
+          ctx_e.textAlign='left';
+        }
+      }
+    }catch(e){}
   }finally{
     clearTimeout(_rvSafetyTimer);
     // ÎNTOTDEAUNA scoatem overlay-urile — indiferent de erori
