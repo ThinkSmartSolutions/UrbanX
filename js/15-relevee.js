@@ -6240,6 +6240,18 @@ function _rvInject(){
 window.generateRelevee = generateRelevee;
 window.closeRelevee    = closeRelevee;
 
+// Guard: generateRelevee nu poate rula primele 5s după load
+// Previne orice auto-open din setInterval / MutationObserver / state restore
+window._rvReadyAt = Date.now() + 5000;
+const _origGenerateRelevee = generateRelevee;
+window.generateRelevee = async function(...args){
+  if(Date.now() < window._rvReadyAt){
+    console.log('[RV] Auto-call blocat (prea devreme la load)');
+    return;
+  }
+  return _origGenerateRelevee.apply(this, args);
+};
+
 
 
 // Guard simplu: previne apeluri duble rapide pe butonul de corpus selector
