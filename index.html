@@ -2630,5 +2630,32 @@ new MutationObserver(() => addBilantExportBtn())
     </div>
     <!-- GDPR Cookie Consent (Legea 506/2004 + GDPR) -->
     <script src="js/cookie-consent.js?v=2026051301"></script>
+
+<!-- GUARD: generateRelevee blocat până la click explicit pe Planșe -->
+<script>
+(function(){
+  window._rvAllowOpen = false;
+  function _applyGuard(){
+    if(typeof window.generateRelevee !== 'function'){
+      setTimeout(_applyGuard, 150); return;
+    }
+    if(window.generateRelevee._guarded) return;
+    var _orig = window.generateRelevee;
+    window.generateRelevee = async function(){
+      if(!window._rvAllowOpen){
+        console.log('[RV] BLOCAT auto-open');
+        return;
+      }
+      window._rvAllowOpen = false;
+      return _orig.apply(this, arguments);
+    };
+    window.generateRelevee._guarded = true;
+    console.log('[RV] Guard aplicat ✓');
+  }
+  // Aplicăm imediat și re-aplicăm după load (în caz că 15-relevee.js suprascrie)
+  document.addEventListener('DOMContentLoaded', _applyGuard);
+  window.addEventListener('load', function(){ setTimeout(_applyGuard, 300); });
+})();
+</script>
 </body>
 </html>
