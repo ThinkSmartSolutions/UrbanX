@@ -77,7 +77,7 @@ const _RV = {
   open: false,
   tab: 'plan', floor: 0,
   scale: 12,
-  showSolar: false, showISU: false, showDim: true, showSGrid: false,
+  showSolar: false, showISU: true, showDim: true, showSGrid: false,
   building: null, floors: [],
   parcelParams: null,
   selectedRoom: null, resizing: null, editDirty: false,
@@ -1034,23 +1034,34 @@ function _rvRenderPlan(fl,b){
     if(d.swing==='out'||isMain){
       ctx.fillStyle='rgba(8,15,35,.98)'; ctx.fillRect(dx-1,dy_d-extWallPx,dw+2,extWallPx*2);
     }
-    // Foaia ușii (linie subțire)
-    ctx.strokeStyle=isMain?'#F59E0B':'rgba(203,213,225,.7)';
+    // Foaia ușii + arc deschidere + indicator intrare
+    ctx.strokeStyle=isMain?'#F59E0B':'#334155';
     ctx.lineWidth=isMain?2.5:1.5;
     ctx.beginPath();
     if(isMain||d.swing==='out'){
       ctx.moveTo(dx,dy_d); ctx.lineTo(dx+dw,dy_d); ctx.stroke();
-      // Arc deschidere
-      ctx.strokeStyle=isMain?'rgba(245,158,11,.5)':'rgba(203,213,225,.3)';
+      ctx.strokeStyle=isMain?'rgba(245,158,11,.6)':'rgba(51,65,85,.5)';
       ctx.lineWidth=1;
       ctx.beginPath(); ctx.arc(dx,dy_d,dw,-Math.PI/2,0); ctx.stroke();
+      if(isMain){
+        ctx.fillStyle='#B45309';ctx.font='bold 8px IBM Plex Mono';ctx.textAlign='center';
+        ctx.fillText('▶ INTRARE BLOC',dx+dw/2,dy_d+14);ctx.textAlign='left';
+      }
     } else if(d.swing==='right'){
       ctx.moveTo(dx,dy_d-wallPx); ctx.lineTo(dx+dw,dy_d-wallPx); ctx.stroke();
       ctx.beginPath(); ctx.arc(dx,dy_d-wallPx,dw,0,Math.PI/2); ctx.stroke();
+      // Label intrare apartament
+      ctx.fillStyle='#1D4ED8';ctx.font='7px IBM Plex Mono';ctx.textAlign='center';
+      ctx.fillText('↑ Ap.'+(d.aptIdx||''),dx+dw/2,dy_d-wallPx-4);ctx.textAlign='left';
     } else {
       ctx.moveTo(dx,dy_d-wallPx); ctx.lineTo(dx+dw,dy_d-wallPx); ctx.stroke();
       ctx.beginPath(); ctx.arc(dx+dw,dy_d-wallPx,dw,Math.PI/2,Math.PI); ctx.stroke();
+      ctx.fillStyle='#1D4ED8';ctx.font='7px IBM Plex Mono';ctx.textAlign='center';
+      ctx.fillText('↑ Ap.'+(d.aptIdx||''),dx+dw/2,dy_d-wallPx-4);ctx.textAlign='left';
     }
+    // Dimensiune ușă
+    ctx.fillStyle='#1E40AF';ctx.font='7px IBM Plex Mono';ctx.textAlign='center';
+    ctx.fillText(d.w?.toFixed(2)+'m',dx+dw/2,dy_d+(isMain?-5:-2));ctx.textAlign='left';
   });
 
   // Cote
@@ -1077,6 +1088,8 @@ function _rvRenderPlan(fl,b){
   if(_RV.showISU){
     _rvDrawISUCircles(ctx,b,ox,oy,SC);
   }
+  // ── Trasee de circulație (întotdeauna vizibile) ─────────────────────────
+  _rvDrawCirculation(ctx,b,fl,ox,oy,SC,P);
 
   // ── CAMERĂ SELECTATĂ — highlight + drag handles ───────────────────────
   if(_RV.selectedRoom && _RV.tab==='plan'){
@@ -1892,12 +1905,13 @@ function _rvDrawNorth(ctx,x,y,dir){
 
 function _rvDrawScale(ctx,x,y,SC){
   const m5=SC*5;
-  ctx.strokeStyle='rgba(212,175,55,.5)';ctx.lineWidth=1.5;
-  ctx.beginPath();ctx.moveTo(x,y-6);ctx.lineTo(x,y);ctx.lineTo(x+m5,y);ctx.lineTo(x+m5,y-6);ctx.stroke();
-  ctx.fillStyle='rgba(212,175,55,.6)';ctx.font='9px IBM Plex Mono';ctx.textAlign='center';
-  ctx.fillText('0',x,y+12);ctx.fillText('5m',x+m5,y+12);
-  ctx.fillStyle='rgba(212,175,55,.3)';ctx.font='8px IBM Plex Mono';
-  ctx.fillText('Sc. 1:100',x+m5/2,y+12);ctx.textAlign='left';
+  // Bară de scară arhitecturală vizibilă
+  ctx.fillStyle='#1E293B'; ctx.fillRect(x,y-8,m5/2,8);
+  ctx.fillStyle='#CBD5E1'; ctx.fillRect(x+m5/2,y-8,m5/2,8);
+  ctx.strokeStyle='#1E293B';ctx.lineWidth=1.5; ctx.strokeRect(x,y-8,m5,8);
+  ctx.fillStyle='#1E293B';ctx.font='bold 9px IBM Plex Mono';ctx.textAlign='center';
+  ctx.fillText('0',x,y+11); ctx.fillText('5m',x+m5,y+11);
+  ctx.fillText('Scara 1:'+Math.round(100/(_RV.scale/12)),x+m5/2,y+22);ctx.textAlign='left';
 }
 
 function _rvDrawCartus(ctx,W,H,P,floorIdx,subtitle){
@@ -2250,6 +2264,95 @@ function _rvDrawSolarFatada(ctx, P, bW, bD, niv, ox, oy, W, H){
 // ══════════════════════════════════════════════════════════════════════════
 // OVERLAY: ISU — CERCURI EVACUARE 30m (P118-2/2013)
 // ══════════════════════════════════════════════════════════════════════════
+// ── Trasee de circulație: core → hol etaj → ușă apartament ─────────────────
+function _rvDrawCirculation(ctx, b, fl, ox, oy, SC, P){
+  if(!fl||!b.cores.length) return;
+  const fnCfg = _rvFloorFnCfg(_RV.floor||0);
+  const scaraMin = fnCfg.scaraMin||1.0; // lățime min. casă scări (m)
+  const corMin = fnCfg.isuDist>30?1.5:1.2; // lățime min. coridor etaj
+
+  ctx.save();
+
+  // ── 1. Lățime casă scări / lift (verificare normativă) ──────────────────
+  b.cores.forEach(core=>{
+    const cx=ox+core.x*SC, cy=oy+core.y*SC;
+    const cw=core.w*SC, ch=core.h*SC;
+    const ok=core.w>=scaraMin&&core.h>=scaraMin;
+    // Bordură normativă
+    ctx.strokeStyle=ok?'rgba(34,197,94,.7)':'rgba(239,68,68,.7)';
+    ctx.lineWidth=2; ctx.setLineDash([4,3]);
+    ctx.strokeRect(cx-2,cy-2,cw+4,ch+4); ctx.setLineDash([]);
+    // Label lățime
+    ctx.fillStyle=ok?'#166534':'#991B1B';
+    ctx.font='bold 8px IBM Plex Mono'; ctx.textAlign='center';
+    ctx.fillText((ok?'✓':'✗')+' Sc.'+core.w.toFixed(1)+'×'+core.h.toFixed(1)+'m',cx+cw/2,cy-8);
+    ctx.fillStyle=ok?'rgba(34,197,94,.1)':'rgba(239,68,68,.1)';
+    ctx.fillRect(cx,cy,cw,ch);
+    ctx.fillStyle='#475569'; ctx.font='7px IBM Plex Mono';
+    ctx.fillText('min '+scaraMin+'m ('+fnCfg.isuNorm+')',cx+cw/2,cy+ch/2+4);
+    ctx.textAlign='left';
+  });
+
+  // ── 2. Traseu coridor etaj: de la core la fiecare ușă apartament ─────────
+  const coreCenter={
+    x:(b.cores[0].x+b.cores[0].w/2),
+    y:(b.cores[0].y+b.cores[0].h/2)
+  };
+  // Holuri comune (apt<0, t=hall)
+  const holuri=(fl.rects||[]).filter(r=>r.apt<0&&r.t==='hall');
+  holuri.forEach(h=>{
+    const hx=ox+h.x*SC, hy=oy+h.y*SC, hw=h.w*SC, hh=h.h*SC;
+    // Verificare lățime coridor
+    const latMin=Math.min(h.w,h.h);
+    const corOk=latMin>=corMin;
+    ctx.fillStyle=corOk?'rgba(34,197,94,.08)':'rgba(239,68,68,.1)';
+    ctx.fillRect(hx,hy,hw,hh);
+    ctx.strokeStyle=corOk?'rgba(34,197,94,.4)':'rgba(239,68,68,.5)';
+    ctx.lineWidth=1; ctx.setLineDash([3,3]); ctx.strokeRect(hx,hy,hw,hh); ctx.setLineDash([]);
+    // Lățime coridor
+    ctx.fillStyle=corOk?'#166534':'#991B1B';
+    ctx.font='bold 7px IBM Plex Mono'; ctx.textAlign='center';
+    ctx.fillText((corOk?'✓':'✗')+' lat.'+latMin.toFixed(1)+'m',hx+hw/2,hy+hh/2+4);
+    ctx.textAlign='left';
+  });
+
+  // ── 3. Linie de circulație: core → ușă apartament ──────────────────────
+  const usiFront=fl.doors||[];
+  ctx.strokeStyle='rgba(37,99,235,.5)'; ctx.lineWidth=1.5; ctx.setLineDash([6,3]);
+  usiFront.filter(d=>d.type==='apt').forEach(d=>{
+    const dMx=ox+(d.x+d.w/2)*SC;
+    const dMy=d.y!==undefined?oy+d.y*SC:oy+(b.bD/2)*SC;
+    const ccx=ox+coreCenter.x*SC, ccy=oy+coreCenter.y*SC;
+    ctx.beginPath(); ctx.moveTo(ccx,ccy); ctx.lineTo(dMx,dMy); ctx.stroke();
+    // Săgeată
+    const ang=Math.atan2(dMy-ccy,dMx-ccx);
+    ctx.fillStyle='rgba(37,99,235,.7)';
+    ctx.beginPath();
+    ctx.moveTo(dMx,dMy);
+    ctx.lineTo(dMx-10*Math.cos(ang-0.4),dMy-10*Math.sin(ang-0.4));
+    ctx.lineTo(dMx-10*Math.cos(ang+0.4),dMy-10*Math.sin(ang+0.4));
+    ctx.closePath(); ctx.fill();
+  });
+  ctx.setLineDash([]);
+
+  // ── 4. Circulație internă apartament (hol → camere) ────────────────────
+  const apts=[...new Set((fl.rects||[]).filter(r=>r.apt>0).map(r=>r.apt))];
+  apts.forEach(aptId=>{
+    const rooms=(fl.rects||[]).filter(r=>r.apt===aptId);
+    const holApt=rooms.find(r=>r.t==='hall');
+    if(!holApt) return;
+    const hcx=ox+(holApt.x+holApt.w/2)*SC, hcy=oy+(holApt.y+holApt.h/2)*SC;
+    rooms.filter(r=>r.t!=='hall'&&r.t!=='balcon'&&r.t!=='wc').forEach(r=>{
+      const rcx=ox+(r.x+r.w/2)*SC, rcy=oy+(r.y+r.h/2)*SC;
+      ctx.strokeStyle='rgba(99,102,241,.3)'; ctx.lineWidth=1; ctx.setLineDash([3,4]);
+      ctx.beginPath(); ctx.moveTo(hcx,hcy); ctx.lineTo(rcx,rcy); ctx.stroke();
+    });
+    ctx.setLineDash([]);
+  });
+
+  ctx.restore();
+}
+
 function _rvDrawISUCircles(ctx, b, ox, oy, SC){
   const fnCfg = _rvFloorFnCfg(_RV.floor);
   const isuM  = fnCfg.isuDist || 30;  // distanță din FN_CONFIG per funcțiune
