@@ -2879,8 +2879,10 @@ async function generateRelevee(){
   });
   await _rvSleep(200);
   prog?.classList.remove('rv-on');
+  // Banner verde: apare imediat ce progresul e scos
+  try{const _db=document.createElement('div');_db.id='rv-diag';_db.style.cssText='position:fixed;bottom:12px;left:50%;transform:translateX(-50%);background:#0B1426;border:1.5px solid #22C55E;color:#22C55E;padding:8px 18px;border-radius:8px;font:11px IBM Plex Mono;z-index:99999;white-space:nowrap;';_db.textContent='⏳ prog removed — se calculează...';document.body.appendChild(_db);window._rvDb=_db;}catch(e){}
 
-  // Compute — RAF-uri între pași: browser pictează prog-off ÎNAINTE de orice computație
+  // Compute
   const _rvSafetyTimer = setTimeout(()=>{ document.getElementById('rv-prog')?.classList.remove('rv-on'); }, 3000);
   let b;
   try{
@@ -2907,10 +2909,11 @@ async function generateRelevee(){
   try{
     const wrap = document.getElementById('rv-drawwrap');
     if(wrap && b.P){
-      const availW = wrap.clientWidth  - 140;
+      const availW = wrap.clientWidth  - 140; // pad + dims
       const availH = wrap.clientHeight - 120;
       const scW = availW / (b.P.W + b.P.rl*2 + 4);
       const scH = availH / (b.P.D + b.P.rf + b.P.rs + 4);
+      // Pe mobil: scala maxima 8 pentru a preveni crash iOS din OOM
       const isMobScale = window.innerWidth < 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
       const fitSc = Math.min(isMobScale ? 8 : 28, Math.max(4, Math.floor(Math.min(scW, scH))));
       _RV.scale = fitSc;
@@ -2918,26 +2921,9 @@ async function generateRelevee(){
     }
   }catch(e){}
 
-  await new Promise(r=>requestAnimationFrame(r));
   _rvRender();
-
-  // ── Banner diagnostic — apare 10s după generare ──────────────────────
-  try{
-    const _d=document.createElement('div');
-    _d.id='rv-diag-banner';
-    _d.style.cssText='position:fixed;bottom:12px;left:50%;transform:translateX(-50%);background:#0B1426;border:1.5px solid #D4AF37;color:#D4AF37;padding:8px 18px;border-radius:8px;font:11px/1.6 IBM Plex Mono,monospace;z-index:99999;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.6);';
-    const _cv=document.getElementById('rv-canvas');
-    const _em=document.getElementById('rv-empty');
-    _d.textContent='DIAG: '
-      +'b='+!!_RV?.building
-      +' niv='+(+(_RV?.building?.niv)||'?')
-      +' f0rects='+(+(_RV?.floors?.[0]?.rects?.length)||'?')
-      +' canvas='+(+_cv?.width||'0')+'x'+(+_cv?.height||'0')
-      +' ctx='+(_cv?.getContext('2d')?'OK':'NULL')
-      +' empty='+(_em?.style?.display||'visible');
-    document.body.appendChild(_d);
-    setTimeout(()=>_d.remove(),12000);
-  }catch(e){}
+  // Banner update după render
+  try{const _cv=document.getElementById('rv-canvas');const _em=document.getElementById('rv-empty');if(window._rvDb){window._rvDb.style.borderColor='#D4AF37';window._rvDb.style.color='#D4AF37';window._rvDb.textContent='RENDER: b='+!!_RV?.building+' niv='+(+_RV?.building?.niv||'?')+' f0='+(_RV?.floors?.[0]?.rects?.length||'?')+' cv='+(+_cv?.width||0)+'x'+(+_cv?.height||0)+' ctx='+(_cv?.getContext('2d')?'ok':'NULL')+' empty='+(_em?.style?.display||'vis');setTimeout(()=>window._rvDb?.remove(),15000);}}catch(e){}
 
   // ── Actualizăm DataBus — toate rapoartele sunt notificate ─────────────
   try{ window._RV_DataBus?.update(b, P); }catch(e){}
@@ -2945,7 +2931,8 @@ async function generateRelevee(){
   try{ _rvCalcROI(); }catch(e){}
 
   }catch(computeErr){
-    console.error('[Relevee] Eroare generare:', computeErr);
+    console.error('[RV] ERR:',computeErr?.message,computeErr?.stack?.split('\n')[1]);
+    try{if(window._rvDb){window._rvDb.style.borderColor='#EF4444';window._rvDb.style.color='#EF4444';window._rvDb.textContent='ERR: '+String(computeErr?.message||computeErr).slice(0,80);setTimeout(()=>window._rvDb?.remove(),15000);}}catch(e){}
   }finally{
     clearTimeout(_rvSafetyTimer);
     // ÎNTOTDEAUNA scoatem overlay-urile — indiferent de erori
