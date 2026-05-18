@@ -2947,8 +2947,50 @@ async function generateRelevee(){
   const piEl = document.getElementById('rv-parcel-info');
   if(piEl) piEl.innerHTML = `Nr. cad.: <strong style="color:#D4AF37">${P.nrCad}</strong><br>UTR: ${P.utr}<br>Suprafață: ${P.area}m²<br>Dim. bbox: ${P.W.toFixed(1)}m × ${P.D.toFixed(1)}m<br>Front: ${P.frontDir}<br>POT max: ${Math.round(P.pot*100)}%<br>CUT max: ${P.cut}<br>H max: ${P.hMax}m<br>Niveluri: ${b.niv} niv.<br>H total: ${(b.niv*P.hn).toFixed(1)}m`;
 
-  // Pe mobil: delay _rvUpdatePanels pentru a permite browser-ului să respire
-  setTimeout(()=>{ try{ _rvUpdatePanels(b,P); }catch(e){} }, 300);
+  // Paneluri staggered — fiecare bloc separat, UI rămâne responsiv
+  setTimeout(()=>{ try{
+    const bilant=document.getElementById('rv-bilant');
+    const nrAptEst_=Math.max(1,Math.round(b.sdaTotal/70));
+    const parcNec_=Math.ceil(nrAptEst_*1.2);
+    const parcSup_=Math.floor(Math.max(0,P.area-b.bW*b.bD-200)/28);
+    const deficit_=Math.max(0,parcNec_-parcSup_);
+    if(bilant) bilant.innerHTML=[
+      ['Suprafață parcelă',_rvFmt(P.area)+'m²'],['SC edificiu',_rvFmt(b.scArea)+'m²'],
+      ['SDA totală',_rvFmt(b.sdaTotal)+'m²'],
+      ['POT realizat',_rvFmt(b.scArea/P.area*100)+'% / max '+Math.round(P.pot*100)+'%'],
+      ['CUT realizat',_rvFmtD(b.sdaTotal/P.area)+' / max '+P.cut],
+      ['Niveluri',b.niv+' niv. · H='+(b.niv*P.hn).toFixed(1)+'m'],
+      ['Apartamente est.',_rvFmt(nrAptEst_)+' unități'],
+      ['Parcaje necesare',parcNec_+' loc.'+(deficit_>0?' ⚠ deficit '+deficit_:' ✓')],
+    ].map(([l,v])=>`<div class="rv-stat"><span class="rv-sl">${l}</span><span class="rv-sv">${v}</span></div>`).join('');
+  }catch(e){} }, 300);
+  setTimeout(()=>{ try{
+    const fl0=_RV.floors[0]||{rects:[],isu:{}};
+    const dnaDiv=document.getElementById('rv-dna');
+    if(dnaDiv) dnaDiv.innerHTML=_rvDNARadar(b,P,fl0);
+  }catch(e){} }, 800);
+  setTimeout(()=>{ try{
+    const fl=_RV.floors[0];
+    const potOk=b.scArea/P.area<=P.pot+.001; const cutOk=b.sdaTotal/P.area<=P.cut+.001;
+    const roomsOk=fl?.rects?.every(r=>{const m=_RV_NP057[r.t];return !m||r.w*r.h>=m;})??true;
+    const solarIssues=fl?.rects?.filter(r=>r.solarOk===false).length||0;
+    const isuOk=fl?.isu?.ok!==false;
+    const fnN=FN_CONFIG[_RV.fn]||FN_CONFIG.rez;
+    const norms=document.getElementById('rv-norm');
+    if(norms) norms.innerHTML=[
+      ['POT',potOk?'ok':'err',potOk?'CONFORM':'DEPĂȘIRE','PUG'],
+      ['CUT',cutOk?'ok':'err',cutOk?'CONFORM':'DEPĂȘIRE','PUG'],
+      ['Suprafețe min.',roomsOk?'ok':'warn',roomsOk?'CONFORM':'Verificare','NP 057'],
+      ['Însorire OMS',!fnN.omsInsorire?'ok':solarIssues===0?'ok':'warn',
+        !fnN.omsInsorire?'N/A':solarIssues===0?'CONFORM':solarIssues+' cam.','OMS 119'],
+      ['ISU',isuOk?'ok':'warn',isuOk?'CONFORM':'Verificare',fnN.isuNorm||'P118'],
+      ['Parcaje',fnN.pk_unit==='per_apt'?'warn':'ok',fnN.pk_norm||'-','1/apt'],
+    ].map(([l,cls,v,ref])=>`<div class="rv-norm-item"><div><div class="rv-nl">${l}</div><div class="rv-nref">${ref}</div></div><div class="rv-badge rv-badge-${cls}">${v}</div></div>`).join('');
+  }catch(e){} }, 1400);
+  setTimeout(()=>{ try{
+    const avizeContent=document.getElementById('rv-avize-content');
+    if(avizeContent) avizeContent.innerHTML=_rvBuildAvizeTimeline(b,P);
+  }catch(e){} }, 2200);
   if(typeof ss === 'function') ss(`✅ Relevee generate în ${secs}s — ${b.niv} niveluri, SDA=${_rvFmt(b.sdaTotal)}m²`);
 }
 window.generateRelevee = generateRelevee; // export imediat după funcție
