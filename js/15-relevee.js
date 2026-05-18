@@ -2923,6 +2923,8 @@ async function generateRelevee(){
     clearTimeout(_rvSafetyTimer);
     prog?.classList.remove('rv-on');
     document.getElementById('rv-empty')?.style.setProperty('display','none');
+    // Re-render după 500ms — canvas e vizibil și layoutat corect
+    setTimeout(()=>{ try{ _rvRender(); }catch(e){} }, 500);
     setTimeout(()=>{try{
       const _cv=document.getElementById('rv-canvas');
       const _d=document.createElement('div');
