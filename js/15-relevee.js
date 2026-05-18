@@ -3272,17 +3272,45 @@ async function _rvOpen(){
   rvM.style.zIndex='2147483647';
   rvM.style.background='rgba(4,8,18,.97)';
   rvM.classList.add('rv-modal-open');
-  // Click delegation — asigura ca onclick-urile din modal sunt executate
-  if(!rvM._rvClickDel){
-    rvM._rvClickDel=true;
-    // Listener pe click (nu mousedown) - nu interfereaza cu alte events
-    rvM.addEventListener('click',function(e){
-      document.title='RV-CLICK:'+e.target.tagName+'|UrbanX'; // diagnostic titlu
-      const el=e.target.closest('[onclick]');
-      if(!el||el===rvM) return;
-      // onclick-ul se executa natural prin browser - nu mai facem nimic suplimentar
-    },true); // capture - confirma ca click ajunge la modal
+  // Document-level mousedown - cel mai primitiv nivel posibil
+  if(!window._rvDocMd){
+    window._rvDocMd=true;
+    document.addEventListener('mousedown',function(e){
+      document.title='MD:'+e.target.tagName+'#'+(e.target.id||'?')+'|RV';
+    },true);
+    document.addEventListener('click',function(e){
+      document.title='CK:'+e.target.tagName+'#'+(e.target.id||'?')+'|RV';
+    },true);
   }
+  // Wire butoane direct cu addEventListener (bypass onclick)
+  setTimeout(()=>{
+    // FIT
+    document.querySelectorAll('[onclick*="scale=12"],[onclick*="_rvFit"]').forEach(b=>{
+      if(!b._rvWired){ b._rvWired=true;
+        b.addEventListener('click',()=>{ try{_RV.scale=12;_rvRender();document.title='FIT-OK|RV';}catch(e){document.title='FIT-ERR:'+e.message;} });
+      }
+    });
+    // Tabs
+    document.querySelectorAll('.rv-tab').forEach(t=>{
+      if(!t._rvWired){ t._rvWired=true;
+        t.addEventListener('click',()=>{ try{_rvTabClick(t);document.title='TAB-OK:'+t.dataset.tab+'|RV';}catch(e){document.title='TAB-ERR:'+e.message;} });
+      }
+    });
+    // Zoom buttons
+    document.querySelectorAll('[onclick*="_rvZoom"]').forEach(b=>{
+      if(!b._rvWired){ b._rvWired=true;
+        const d=b.getAttribute('onclick').includes('1')&&!b.getAttribute('onclick').includes('-1')?1:-1;
+        b.addEventListener('click',()=>{ try{_rvZoom(d);document.title='ZOOM-OK|RV';}catch(e){} });
+      }
+    });
+    // Floor tabs
+    document.querySelectorAll('.rv-niv-btn').forEach(b=>{
+      if(!b._rvWired){ b._rvWired=true;
+        b.addEventListener('click',()=>{ try{const fn=b.getAttribute('onclick');if(fn)eval(fn);}catch(e){} });
+      }
+    });
+    document.title='WIRED-OK|RV';
+  },800);
   // CSS nuclear: doar modala primește click-uri, tot restul ignorat
   if(!document.getElementById('rv-pe-override')){
     const s=document.createElement('style');
