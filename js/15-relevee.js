@@ -3254,6 +3254,8 @@ async function _rvOpen(){
   if(!document.getElementById('rv-modal')) await _rvInject();
   const rvM=document.getElementById('rv-modal');
   rvM.style.visibility='visible';
+  rvM.style.pointerEvents='all';
+  rvM.style.background='rgba(4,8,18,.97)';
   rvM.classList.add('rv-modal-open');
   _RV.open=true;
 }
