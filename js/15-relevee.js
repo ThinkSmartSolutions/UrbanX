@@ -2921,6 +2921,24 @@ async function generateRelevee(){
   await new Promise(r=>requestAnimationFrame(r));
   _rvRender();
 
+  // ── Banner diagnostic — apare 10s după generare ──────────────────────
+  try{
+    const _d=document.createElement('div');
+    _d.id='rv-diag-banner';
+    _d.style.cssText='position:fixed;bottom:12px;left:50%;transform:translateX(-50%);background:#0B1426;border:1.5px solid #D4AF37;color:#D4AF37;padding:8px 18px;border-radius:8px;font:11px/1.6 IBM Plex Mono,monospace;z-index:99999;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.6);';
+    const _cv=document.getElementById('rv-canvas');
+    const _em=document.getElementById('rv-empty');
+    _d.textContent='DIAG: '
+      +'b='+!!_RV?.building
+      +' niv='+(+(_RV?.building?.niv)||'?')
+      +' f0rects='+(+(_RV?.floors?.[0]?.rects?.length)||'?')
+      +' canvas='+(+_cv?.width||'0')+'x'+(+_cv?.height||'0')
+      +' ctx='+(_cv?.getContext('2d')?'OK':'NULL')
+      +' empty='+(_em?.style?.display||'visible');
+    document.body.appendChild(_d);
+    setTimeout(()=>_d.remove(),12000);
+  }catch(e){}
+
   // ── Actualizăm DataBus — toate rapoartele sunt notificate ─────────────
   try{ window._RV_DataBus?.update(b, P); }catch(e){}
   // ── ROI quick calc ────────────────────────────────────────────────────
