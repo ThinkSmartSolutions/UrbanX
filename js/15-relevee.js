@@ -2859,25 +2859,12 @@ async function generateRelevee(){
   const pbar   = document.getElementById('rv-pbar');
   if(psteps) psteps.innerHTML = _RV_STEPS.map((s,i)=>`<div class="rv-pstep" id="rv-ps${i}"><div class="rv-psico">${i+1}</div><span>${s}</span></div>`).join('');
 
-  for(let i=0;i<_RV_STEPS.length;i++){
-    // iOS: delay scurt - setTimeout-urile lungi sunt throttled pe mobil
-    const isMob = window.innerWidth < 768 || /iPhone|iPad|Android/i.test(navigator.userAgent);
-    await _rvSleep(isMob ? 8 : (40+Math.random()*65+(i===_RV_STEPS.length-1?150:0)));
-    document.getElementById(`rv-ps${i}`)?.classList.add('rv-active');
-    const pct = Math.round((i+1)/_RV_STEPS.length*100);
-    if(ppct) ppct.textContent=pct+'%';
-    if(pbar) pbar.style.width=pct+'%';
-    if(i>0){
-      const prev = document.getElementById(`rv-ps${i-1}`);
-      prev?.classList.replace('rv-active','rv-done');
-      const ico=prev?.querySelector('.rv-psico'); if(ico) ico.textContent='✓';
-    }
-  }
-  _RV_STEPS.forEach((_,i)=>{
-    const el=document.getElementById(`rv-ps${i}`); el?.classList.replace('rv-active','rv-done');
-    const ico=el?.querySelector('.rv-psico'); if(ico) ico.textContent='✓';
-  });
-  await _rvSleep(200);
+  // Progress sincron — fără await per step (previne blocaj microtask queue)
+  if(psteps) psteps.innerHTML=_RV_STEPS.map((s,i)=>`<div class="rv-pstep rv-done" id="rv-ps${i}"><div class="rv-psico">✓</div><span>${s}</span></div>`).join('');
+  if(ppct) ppct.textContent='100%';
+  if(pbar) pbar.style.width='100%';
+  // Un singur await — browser pictează starea finală
+  await _rvSleep(400);
   prog?.classList.remove('rv-on');
 
   // Compute — try/finally garantează că rv-prog dispare indiferent de erori
@@ -2933,27 +2920,16 @@ async function generateRelevee(){
     clearTimeout(_rvSafetyTimer);
     prog?.classList.remove('rv-on');
     document.getElementById('rv-empty')?.style.setProperty('display','none');
-    // Banner în FINALLY — apare ÎNTOTDEAUNA după generare indiferent de erori
-    setTimeout(()=>{
-      try{
-        const _cv=document.getElementById('rv-canvas');
-        const _em=document.getElementById('rv-empty');
-        const _d=document.createElement('div');
-        _d.style.cssText='position:fixed;top:60px;right:10px;background:#0B1426;border:2px solid #D4AF37;'+
-          'color:#D4AF37;padding:10px 16px;border-radius:8px;font:11px IBM Plex Mono;z-index:99999;'+
-          'min-width:280px;box-shadow:0 4px 20px rgba(0,0,0,.8);';
-        _d.innerHTML='<b>RELEVEE STATUS</b><br>'+
-          'building: '+!!_RV?.building+'<br>'+
-          'niv: '+(_RV?.building?.niv||'?')+'<br>'+
-          'floor0 rects: '+(_RV?.floors?.[0]?.rects?.length||'0')+'<br>'+
-          'canvas: '+(+_cv?.width||0)+'x'+(+_cv?.height||0)+'<br>'+
-          'ctx: '+(_cv?.getContext('2d')?'OK':'NULL')+'<br>'+
-          'rv-empty: '+(_em?.style?.display||'vizibil')+'<br>'+
-          'scale: '+_RV.scale;
-        document.body.appendChild(_d);
-        setTimeout(()=>_d.remove(), 120000); // 2 minute
-      }catch(e){}
-    }, 100);
+    setTimeout(()=>{try{
+      const _cv=document.getElementById('rv-canvas');
+      const _d=document.createElement('div');
+      _d.style.cssText='position:fixed;top:60px;right:10px;background:#0B1426;border:2px solid #D4AF37;color:#D4AF37;padding:10px 14px;border-radius:8px;font:10px IBM Plex Mono;z-index:99999;min-width:240px;';
+      _d.innerHTML='<b>STATUS:</b> b='+!!_RV?.building+' niv='+(_RV?.building?.niv||'?')+
+        ' f0='+(_RV?.floors?.[0]?.rects?.length||0)+
+        ' cv='+(+_cv?.width||0)+'x'+(+_cv?.height||0)+
+        ' ctx='+(_cv?.getContext('2d')?'OK':'NULL');
+      document.body.appendChild(_d);setTimeout(()=>_d.remove(),120000);
+    }catch(e){}},200);
   }
 
   clearInterval(tInt);

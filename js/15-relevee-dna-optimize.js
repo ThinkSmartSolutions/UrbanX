@@ -27,11 +27,12 @@
   }
   waitReady(()=>{
     _injectOptimizeButtons();
-    const obs=new MutationObserver(()=>{
+    // Folosim polling în loc de MutationObserver (previne blocaj microtask queue)
+    const _obsInterval = setInterval(()=>{
       if(document.querySelector('.rv-expbtn')&&!document.getElementById('rv-optim-wrap'))
         _injectOptimizeButtons();
-    });
-    obs.observe(document.body,{childList:true,subtree:true});
+      if(document.getElementById('rv-optim-wrap')) clearInterval(_obsInterval);
+    }, 500);
     console.log('[DNA Optimize Sprint3B] ✅ loaded');
   });
 
