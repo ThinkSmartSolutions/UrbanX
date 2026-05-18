@@ -998,6 +998,7 @@ function _rvRenderPlan(fl,b){
   });
 
   // Pasul 3: ferestre — goluri albe în perete + linie dublă
+  // ── Goluri ferestre cu dimensiuni ─────────────────────────────────────
   fl.wins.forEach(w=>{
     ctx.fillStyle='rgba(56,189,248,.18)';
     ctx.strokeStyle='#38BDF8'; ctx.lineWidth=2;
@@ -1024,6 +1025,7 @@ function _rvRenderPlan(fl,b){
   });
 
   // Pasul 4: uși — arc + foaie ușă
+  // ── Goluri uși cu dimensiuni ──────────────────────────────────────────
   fl.doors.forEach(d=>{
     const dx=ox+d.x*SC, dw=d.w*SC;
     const isMain=d.type==='main';
@@ -1119,6 +1121,14 @@ function _rvRenderPlan(fl,b){
 }
 
 function _rvRenderFacade(b){
+  // ── Config AEDIS ──────────────────────────────────────────────────────
+  const _A=window.AEDIS||{};
+  const _etajRetras=!!_A.activeRetragere;
+  const _parterDiferit=!!_A.parterDiferit;
+  const _fnParter=_A.fnParter||'';
+  const _cortina=Math.max(0,Math.min(100,_A.cortinaProcent||0));
+  const _tipAcoperis=_A.tipAcoperis||'terasa';
+  const _stil=_A.stil||'modern';
   const {P,bW,bD,niv,cores}=b; const Ht=niv*P.hn; const SC=_RV.scale*.85;
   const pad=40;
   // Toate 4 fațade în layout vertical: N(principal), S(posterior), E(lateral), V(lateral)
@@ -1181,12 +1191,14 @@ function _rvRenderFacade(b){
         const wx_=ox_+col*colSp_+(colSp_-wW)/2;
         // Solicitare solara: fațadele S/SE/SV au geamuri mai luminoase
         const solarBoost=(['S','SE','SV'].includes(P.frontDir)&&isMain)||(['N','NE','NV'].includes(P.frontDir)&&!isMain);
-        ctx.fillStyle=`rgba(147,210,250,${solarBoost?.75:.55})`; ctx.fillRect(wx_,wy,wW,wH);
-        ctx.strokeStyle='#0369A1'; ctx.lineWidth=1.5; ctx.strokeRect(wx_,wy,wW,wH);
-        // Cercevele
-        ctx.strokeStyle='rgba(3,105,161,.35)'; ctx.lineWidth=.6;
+        // Perete cortina: geam continuu pe % din fatada
+        const isCortina=_cortina>0 && col<Math.ceil(wCols*_cortina/100);
+        const _wy=wy-(isCortina?4:0), _wh=wH+(isCortina?8:0);
+        ctx.fillStyle=isCortina?'rgba(56,189,248,.8)':`rgba(147,210,250,${solarBoost?.75:.55})`; ctx.fillRect(wx_,_wy,wW,_wh);
+        ctx.strokeStyle=isCortina?'#0EA5E9':'#0369A1'; ctx.lineWidth=isCortina?2:1.5; ctx.strokeRect(wx_,_wy,wW,_wh);
+        if(!isCortina){ctx.strokeStyle='rgba(3,105,161,.35)'; ctx.lineWidth=.6;
         ctx.beginPath();ctx.moveTo(wx_+wW/2,wy);ctx.lineTo(wx_+wW/2,wy+wH);ctx.stroke();
-        ctx.beginPath();ctx.moveTo(wx_,wy+wH/2);ctx.lineTo(wx_+wW,wy+wH/2);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(wx_,wy+wH/2);ctx.lineTo(wx_+wW,wy+wH/2);ctx.stroke();}
       }
     }
 
@@ -1208,6 +1220,39 @@ function _rvRenderFacade(b){
       }
     }
 
+    // Penthouse — etaj retras
+    if(_etajRetras && niv>1){
+      const retras=fW*.12;
+      ctx.fillStyle='rgba(212,175,55,.2)'; ctx.fillRect(ox_+retras,oy_,fW-retras*2,P.hn*SC);
+      ctx.strokeStyle='#CA8A04'; ctx.lineWidth=2; ctx.strokeRect(ox_+retras,oy_,fW-retras*2,P.hn*SC);
+      ctx.fillStyle='#92400E'; ctx.font='bold 7px IBM Plex Mono'; ctx.textAlign='center';
+      ctx.fillText('PENTHOUSE / ETAJ RETRAS',ox_+fW/2,oy_+P.hn*SC/2+3); ctx.textAlign='left';
+    }
+    // Parter cu altă funcțiune
+    if(_parterDiferit && _fnParter){
+      const pdH=P.hn*SC*1.2, pdY=oy_+facadeH-pdH;
+      ctx.fillStyle='rgba(139,92,246,.12)'; ctx.fillRect(ox_,pdY,fW,pdH);
+      ctx.strokeStyle='#7C3AED'; ctx.lineWidth=1.5; ctx.setLineDash([4,3]); ctx.strokeRect(ox_,pdY,fW,pdH); ctx.setLineDash([]);
+      ctx.fillStyle='#6D28D9'; ctx.font='bold 7px IBM Plex Mono'; ctx.textAlign='center';
+      ctx.fillText('PARTER: '+_fnParter.toUpperCase().slice(0,20),ox_+fW/2,pdY+pdH*.5); ctx.textAlign='left';
+    }
+    // Tablou materiale (sub fațadă)
+    const _matY=oy_+facadeH+55;
+    const _mats=[
+      ['Pereți ext.',_cortina>50?'Sticlă curtain wall':'BCA+EPS 15cm','#94A3B8'],
+      ['Ferestre','PVC 5cam. Uw≤1.0','#38BDF8'],
+      ['Balcoane','Parapet sticlă','#D4AF37'],
+      ['Acoperiș',_tipAcoperis==='inclinat'?'Țiglă ceramică':'Terasă inversă XPS','#22C55E'],
+    ];
+    ctx.fillStyle='#F8FAFC'; ctx.fillRect(ox_,_matY,fW,44);
+    ctx.strokeStyle='#CBD5E1'; ctx.lineWidth=1; ctx.strokeRect(ox_,_matY,fW,44);
+    ctx.fillStyle='#1E293B'; ctx.font='bold 7px IBM Plex Mono';
+    ctx.fillText('TABLOU MATERIALE',ox_+4,_matY+10);
+    _mats.forEach(([l,v,c],i)=>{
+      const mx=ox_+(i%2)*(fW/2)+4, my=_matY+20+Math.floor(i/2)*14;
+      ctx.fillStyle=c; ctx.fillRect(mx,my-7,7,7);
+      ctx.fillStyle='#334155'; ctx.font='6.5px IBM Plex Mono'; ctx.fillText(l+': '+v.slice(0,22),mx+10,my-1);
+    });
     // Uță: principală (intrare bloc) sau serviciu (față posterioară)
     if(isMain){
       const doorW=2.4*SC,doorH=3.0*SC;
