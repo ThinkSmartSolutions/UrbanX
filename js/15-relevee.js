@@ -6129,20 +6129,24 @@ window.generateRelevee = generateRelevee;
 window.closeRelevee    = closeRelevee;
 
 
-// ── FIX: Guard anti auto-open — blochează până la primul click/touch ────────
-// generateRelevee() nu poate rula dacă nu există o interacțiune explicită a utilizatorului
-// Previne orice auto-open din setInterval, MutationObserver, restore state, etc.
-window._rvUserInteracted = false;
-['click','keydown','touchstart','pointerdown'].forEach(ev=>{
-  window.addEventListener(ev, ()=>{ window._rvUserInteracted = true; }, {once:true, passive:true});
-});
+// ── FIX DEFINITIV: generateRelevee BLOCAT complet ───────────────────────────
+// Se deblochează NUMAI când butonul Planșe e apăsat explicit
+// (window._rvAllowOpen = true setată în onclick din index.html)
+// Orice auto-call din setTimeout/setInterval/MutationObserver/restore → blocat
+window._rvAllowOpen = false;
 const _origGR = window.generateRelevee;
 if(typeof _origGR === 'function'){
   window.generateRelevee = async function(...args){
-    if(!window._rvUserInteracted){
-      console.log('[RV] Auto-call blocat — fără interacțiune utilizator');
+    if(!window._rvAllowOpen){
+      console.log('[RV] BLOCAT — necesită click explicit pe Planșe');
       return;
     }
+    window._rvAllowOpen = false; // reset după fiecare apel
     return _origGR.apply(this, args);
   };
 }
+// Expus global pentru butonul din index.html
+window._rvTrigger = function(){
+  window._rvAllowOpen = true;
+  if(typeof window.generateRelevee === 'function') window.generateRelevee();
+};
