@@ -3272,6 +3272,18 @@ async function _rvOpen(){
   rvM.style.zIndex='2147483647';
   rvM.style.background='rgba(4,8,18,.97)';
   rvM.classList.add('rv-modal-open');
+  // Mousedown delegation — bypasses orice handler click blocat
+  if(!rvM._rvMdDel){
+    rvM._rvMdDel=true;
+    rvM.addEventListener('mousedown',function(e){
+      const el=e.target.closest('[onclick]');
+      if(!el||el===rvM) return;
+      const oc=el.getAttribute('onclick');
+      if(!oc) return;
+      e.preventDefault(); e.stopPropagation();
+      try{ const fn=new Function('event',oc); fn.call(el,e); }catch(err){ console.error('[RV]',err); }
+    },false);
+  }
   // CSS nuclear: doar modala primește click-uri, tot restul ignorat
   if(!document.getElementById('rv-pe-override')){
     const s=document.createElement('style');
