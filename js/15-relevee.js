@@ -6262,3 +6262,21 @@ window.closeRelevee    = closeRelevee;
   };
   window._rvCloseRelevee_orig = closeRelevee;
 })();
+
+// ── Pre-injectare modal la idle — FIX FREEZE ─────────────────────────────
+// _rvInject() = 2000+ linii DOM, sincron pe click = 3-5s freeze la 600MB+
+// requestIdleCallback injectează când browserul e LIBER, fără presiune memorie
+// La click pe Planșe: modal există deja → _rvOpen() e instant (5 linii)
+(function(){
+  function doPreInject(){
+    if(document.getElementById('rv-modal')) return; // deja injectat
+    try{ _rvInject(); console.log('[RV] Modal pre-injectat la idle ✓'); }catch(e){}
+  }
+  if(typeof requestIdleCallback === 'function'){
+    // Așteptăm până browserul e LIBER — nu interferăm cu Mapbox init
+    requestIdleCallback(doPreInject, {timeout: 8000});
+  } else {
+    // Fallback pentru Safari: după 4s de la load
+    setTimeout(doPreInject, 4000);
+  }
+})();
