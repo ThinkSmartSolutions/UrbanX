@@ -3277,6 +3277,11 @@ async function _rvOpen(){
 function closeRelevee(){
   const modal=document.getElementById('rv-modal');
   if(!modal) return;
+  // Restaurăm elementele ascunse de _rvOpen
+  ['wx-topbar','wx-nav-desktop','wx-nav-mobile','wx-mobile-sheet'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el && el.dataset.rvHidden){ el.style.pointerEvents=''; el.style.visibility=''; delete el.dataset.rvHidden; }
+  });
   modal.classList.remove('rv-modal-open');
   _RV.open=false;
   // Curățăm selectorul de corp la închidere
