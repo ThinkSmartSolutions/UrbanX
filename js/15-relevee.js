@@ -269,7 +269,7 @@ function _rvGetParcelParams(){
           const a = turf.area(f);
           if(a > maxFeatureArea){ maxFeatureArea = a; bldFloor0 = f; }
         }
-      }catch(e){}
+      }catch(e){ /* feature invalid — skip */ }
     });
 
     if(bldFloor0?.geometry) {
@@ -2858,7 +2858,25 @@ async function generateRelevee(){
   document.getElementById('rv-bld-selector')?.remove();
   _RV.selectedBldIdx = 0;
 
-  const P = _rvGetParcelParams();
+  // Referință la overlay pentru cleanup de urgență
+  const prog = document.getElementById('rv-prog');
+  const _progOff = ()=>{ try{ prog?.classList.remove('rv-on'); }catch(e){} };
+
+  let P;
+  try{
+    P = _rvGetParcelParams();
+  }catch(parcelErr){
+    console.error('[RV] _rvGetParcelParams error:', parcelErr);
+    _progOff();
+    document.getElementById('rv-empty')?.style.setProperty('display','none');
+    return;
+  }
+  if(!P || !P.W || !P.D){
+    console.warn('[RV] Parametri parcelă invalizi — P=', P);
+    _progOff();
+    document.getElementById('rv-empty')?.style.setProperty('display','none');
+    return;
+  }
   _RV.parcelParams = P;
 
   const t0 = performance.now();
@@ -2868,7 +2886,7 @@ async function generateRelevee(){
   const tInt = setInterval(()=>{ if(tval) tval.textContent=((performance.now()-t0)/1000).toFixed(1)+'s'; },80);
 
   // Progress
-  const prog = document.getElementById('rv-prog'); prog?.classList.add('rv-on');
+  document.getElementById('rv-prog')?.classList.add('rv-on');
   const psteps = document.getElementById('rv-psteps');
   const ppct   = document.getElementById('rv-ppct');
   const pbar   = document.getElementById('rv-pbar');
