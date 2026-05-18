@@ -868,6 +868,38 @@ canvas#c2d{width:100%;height:100%;display:block}
   .tci-launch-btn { padding: 5px 8px !important; }
 }
 </style>
+<script>
+// GUARD: interceptăm window.generateRelevee chiar în momentul asignării
+window._rvAllowOpen = false;
+document.addEventListener('click', function(){
+  window._rvAllowOpen = true;
+  clearTimeout(window._rvAllowTimer);
+  window._rvAllowTimer = setTimeout(function(){ window._rvAllowOpen = false; }, 2000);
+}, true);
+(function(){
+  var _real = null;
+  Object.defineProperty(window, 'generateRelevee', {
+    configurable: true,
+    enumerable: true,
+    set: function(fn){
+      _real = fn;
+      // Înlocuim cu versiunea cu guard
+      Object.defineProperty(window, 'generateRelevee', {
+        configurable: true, writable: true, enumerable: true,
+        value: async function(){
+          if(!window._rvAllowOpen){
+            console.log('[RV] BLOCAT - fara click utilizator');
+            return;
+          }
+          return _real.apply(this, arguments);
+        }
+      });
+      window.generateRelevee._guarded = true;
+    },
+    get: function(){ return _real; }
+  });
+})();
+</script>
 </head>
 <body>
 <!-- UrbanX Workspace Navigation v3.2 -->
@@ -2625,32 +2657,6 @@ new MutationObserver(() => addBilantExportBtn())
     </div>
     <!-- GDPR Cookie Consent (Legea 506/2004 + GDPR) -->
     <script src="js/cookie-consent.js?v=2026051301"></script>
-<!-- GUARD anti auto-open -->
-<script>
-(function(){
-  window._rvAllowOpen = false;
-  // Orice click deblochează pentru 2s
-  document.addEventListener('click', function(){
-    window._rvAllowOpen = true;
-    clearTimeout(window._rvAllowTimer);
-    window._rvAllowTimer = setTimeout(function(){ window._rvAllowOpen = false; }, 2000);
-  }, true);
-  // Wrappăm generateRelevee când e disponibil
-  function applyGuard(){
-    if(typeof window.generateRelevee !== 'function'){ setTimeout(applyGuard,200); return; }
-    if(window.generateRelevee._guarded) return;
-    var orig = window.generateRelevee;
-    window.generateRelevee = async function(){
-      if(!window._rvAllowOpen){ console.log('[RV] blocat'); return; }
-      return orig.apply(this, arguments);
-    };
-    window.generateRelevee._guarded = true;
-    console.log('[RV] Guard activ');
-  }
-  // Aplicăm imediat la DOMContentLoaded (generateRelevee e deja definit)
-  document.addEventListener('DOMContentLoaded', applyGuard);
-  window.addEventListener('load', applyGuard);
-})();
-</script>
+
 </body>
 </html>
