@@ -2895,13 +2895,15 @@ async function generateRelevee(){
   try{
     const wrap = document.getElementById('rv-drawwrap');
     if(wrap && b.P){
-      const availW = wrap.clientWidth  - 140; // pad + dims
-      const availH = wrap.clientHeight - 120;
-      const scW = availW / (b.P.W + b.P.rl*2 + 4);
-      const scH = availH / (b.P.D + b.P.rf + b.P.rs + 4);
-      // Pe mobil: scala maxima 8 pentru a preveni crash iOS din OOM
       const isMobScale = window.innerWidth < 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-      const fitSc = Math.min(isMobScale ? 8 : 14, Math.max(4, Math.floor(Math.min(scW, scH))));
+      const availW = wrap.clientWidth  - 140;
+      const availH = wrap.clientHeight - 120;
+      let fitSc = isMobScale ? 8 : 10; // fallback decent când clientWidth=0
+      if(availW > 50 && availH > 50){
+        const scW = availW / (b.P.W + b.P.rl*2 + 4);
+        const scH = availH / (b.P.D + b.P.rf + b.P.rs + 4);
+        fitSc = Math.min(isMobScale ? 8 : 14, Math.max(6, Math.floor(Math.min(scW, scH))));
+      }
       _RV.scale = fitSc;
       document.getElementById('rv-zval').textContent = Math.round(fitSc/12*100)+'%';
     }
