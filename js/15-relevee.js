@@ -789,10 +789,7 @@ function _rvInitCanvas(W,H,canvasId){
   cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr);
   cv.style.width = W+'px'; cv.style.height = H+'px';
   let ctx = cv.getContext('2d');
-  if(!ctx && dpr > 1){
-    console.warn('[RV] ctx null DPR='+dpr+', retry 1x'); dpr=1;
-    cv.width=Math.round(W); cv.height=Math.round(H); ctx=cv.getContext('2d');
-  }
+  if(!ctx && dpr > 1){ dpr=1; cv.width=Math.round(W); cv.height=Math.round(H); ctx=cv.getContext('2d'); }
   if(!ctx){ console.error('[RV] ctx null W='+W+' H='+H); return {cv,ctx:null,W,H}; }
   ctx.scale(dpr,dpr);
   return {cv,ctx,cv2:cv,ctx2:ctx,W,H};
@@ -841,8 +838,8 @@ function _rvRenderPlan(fl,b){
   const W = bW*SC + pad*2 + P.rl*2*SC + 40;
   const H = bD*SC + pad*2 + (P.rf+P.rs)*SC + 60;
   const {cv,ctx}=_rvInitCanvas(W,H);
-  if(!ctx){ console.error('[RV] ctx null plan W='+W+' H='+H); return; }
-  if(!fl){ console.error('[RV] fl undefined la render — floors[0]:', _RV.floors[0]); return; }
+  if(!ctx){ console.error('[RV] ctx null plan'); return; }
+  if(!fl){ console.error('[RV] fl undefined'); return; }
   ctx.fillStyle='#060C1A'; ctx.fillRect(0,0,W,H);
   // grid bg
   ctx.strokeStyle='rgba(255,255,255,.018)'; ctx.lineWidth=.5;
@@ -2827,7 +2824,7 @@ async function generateRelevee(){
     return;
   }
 
-  _rvOpen();
+  await _rvOpen();
 
   // ── Selector corp pentru multivolume ─────────────────────────────────────
   if(S.vol?.multiVol && S.vol._lastFeats?.some(f=>f.properties?.bldIdx!=null)){
@@ -2933,7 +2930,7 @@ async function generateRelevee(){
   try{ _rvCalcROI(); }catch(e){}
 
   }catch(computeErr){
-    console.error('[RV] Eroare generare:', computeErr?.message||computeErr, '\nStack:', computeErr?.stack?.split('\n').slice(0,3).join(' | '));
+    console.error('[Relevee] Eroare generare:', computeErr);
   }finally{
     clearTimeout(_rvSafetyTimer);
     // ÎNTOTDEAUNA scoatem overlay-urile — indiferent de erori
@@ -3176,7 +3173,7 @@ function _rvDNAGetSolutii(b, P, potOk, cutOk, solarIssues, isuOk, roomsOk, parcS
 // ══════════════════════════════════════════════════════════════════════════
 // MODAL OPEN / CLOSE
 // ══════════════════════════════════════════════════════════════════════════
-function _rvOpen(){
+async function _rvOpen(){
   // GUARD + DEBUG: afișăm call stack ca overlay vizibil
   if(!window._rvAllowOpen){
     try{
@@ -3189,7 +3186,7 @@ function _rvOpen(){
     }catch(e){}
     return;
   }
-  if(!document.getElementById('rv-modal')) _rvInject();
+  if(!document.getElementById('rv-modal')) await _rvInject();
   const rvM=document.getElementById('rv-modal');
   rvM.style.visibility='visible';
   rvM.classList.add('rv-modal-open');
@@ -5294,7 +5291,7 @@ function _rvMobSync(){
 // ══════════════════════════════════════════════════════════════════════════
 // DOM INJECTION — modal + CSS injectate o singură dată
 // ══════════════════════════════════════════════════════════════════════════
-function _rvInject(){
+async function _rvInject(){
   // ── CSS ──────────────────────────────────────────────────────────────────
   if(!document.getElementById('rv-css')){
     const css=document.createElement('style'); css.id='rv-css';
@@ -5512,8 +5509,14 @@ function _rvInject(){
   }
 
   // ── HTML ─────────────────────────────────────────────────────────────────
+  // ── HTML — injectat în chunks cu RAF între secțiuni (previne freeze UI) ────
   const div=document.createElement('div'); div.id='rv-modal';
-  div.innerHTML=`
+  div.style.cssText='position:fixed;inset:0;z-index:8000;visibility:hidden;';
+  document.body.appendChild(div);
+
+  // Chunk 1: Topbar + rv-body skeleton
+  await new Promise(r=>requestAnimationFrame(r));
+  div.insertAdjacentHTML('beforeend',`
 <div class="rv-topbar">
   <svg width="24" height="24" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="#101D35"/><path d="M18 28h26l13 22-13 22H18l15-22z" fill="#DDE6F5"/><path d="M59 28h23L71 49H53z" fill="#D4AF37"/><path d="M53 55h17l13 19H61z" fill="#D4AF37"/></svg>
   <div><div class="rv-logo-t">UrbanX</div><div class="rv-sub">Relevee Instant</div></div>
@@ -5560,7 +5563,11 @@ function _rvInject(){
       ☰
     </button><button class="rv-close-btn" onclick="closeRelevee()" title="Închide">✕</button>
 </div>
-<div class="rv-body" id="rv-body-main">
+<div class="rv-body" id="rv-body-main">`);
+
+  // Chunk 2: Left panel
+  await new Promise(r=>requestAnimationFrame(r));
+  document.getElementById('rv-body-main').insertAdjacentHTML('beforeend',`
   <!-- LEFT -->
   <div class="rv-lpanel" id="rv-lpanel-main">
   <!-- rv-toggle-lpanel removed: caused unrecoverable black screen -->
@@ -5797,7 +5804,11 @@ function _rvInject(){
       <div class="rv-leg"><div class="rv-legsq" style="background:rgba(37,99,235,.16);border:1px solid #3B82F6"></div>Casa scărilor / Lift</div>
       <div class="rv-leg"><div class="rv-legsq" style="background:rgba(212,175,55,.08);border:1.5px dashed rgba(212,175,55,.45)"></div>Balcon / Terasă</div>
     </div>
-  </div>
+  </div>`);
+
+  // Chunk 3: Center (canvas + tabs + progress)
+  await new Promise(r=>requestAnimationFrame(r));
+  document.getElementById('rv-body-main').insertAdjacentHTML('beforeend',`
   <!-- CENTER -->
   <div class="rv-center">
     <div class="rv-tabs">
@@ -6001,7 +6012,11 @@ function _rvInject(){
         <div id="rv-mob-avize"></div>
       </div>
 
-    </div><!-- end mob-sheet -->
+    </div><!-- end mob-sheet -->`);
+
+  // Chunk 4: Right panel + tip
+  await new Promise(r=>requestAnimationFrame(r));
+  document.getElementById('rv-body-main').insertAdjacentHTML('beforeend',`
   <!-- RIGHT -->
   <div class="rv-rpanel">
 
@@ -6132,9 +6147,9 @@ function _rvInject(){
     </div>
 
   </div>
-</div>
-<div id="rv-tip"></div>`;
-  document.body.appendChild(div);
+</div>`);
+  div.insertAdjacentHTML('beforeend','<div id="rv-tip"></div>');
+  await new Promise(r=>requestAnimationFrame(r));
 }
 
 // Expune global
