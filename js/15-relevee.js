@@ -933,6 +933,8 @@ function _rvRenderPlan(fl,b){
 
   // Hașuri diagonale pentru elemente structurale (cores, pereți BA)
   function _hatch(x,y,w,h,col,sp){
+    const _sp=sp||Math.max(4,SC*0.35); const _iter=(w+h+Math.max(w,h)*2)/_sp;
+    if(_iter>300){ctx.save();ctx.fillStyle=col||'rgba(20,40,90,0.15)';ctx.fillRect(x,y,w,h);ctx.restore();return;}
     ctx.save();
     ctx.beginPath(); ctx.rect(x,y,w,h); ctx.clip();
     ctx.strokeStyle=col||'rgba(20,40,90,0.28)'; ctx.lineWidth=0.7;
@@ -2845,23 +2847,6 @@ async function generateRelevee(){
 
   const P = _rvGetParcelParams();
   _RV.parcelParams = P;
-  // ── Helper banner diagnostic ──────────────────────────────────────────
-  function _rvBanner(msg, color){
-    try{
-      let _d=document.getElementById('rv-diag-live');
-      if(!_d){_d=document.createElement('div');_d.id='rv-diag-live';
-        _d.style.cssText='position:fixed;bottom:10px;left:50%;transform:translateX(-50%);'+
-          'background:#0B1426;border:1.5px solid #D4AF37;color:#D4AF37;'+
-          'padding:7px 16px;border-radius:7px;font:10px IBM Plex Mono;z-index:99999;white-space:nowrap;';
-        document.body.appendChild(_d);}
-      _d.style.borderColor=color||'#D4AF37';
-      _d.style.color=color||'#D4AF37';
-      _d.textContent=msg;
-      clearTimeout(_d._t); _d._t=setTimeout(()=>_d.remove(),20000);
-    }catch(e){}
-  }
-
-  _rvBanner('1/5: P ready W='+P?.W+' D='+P?.D+' niv='+P?.niv);
 
   const t0 = performance.now();
   const tdot = document.getElementById('rv-tdot');
@@ -2896,15 +2881,13 @@ async function generateRelevee(){
   });
   await _rvSleep(200);
   prog?.classList.remove('rv-on');
-  _rvBanner('2/5: prog removed - compute starting...','#22C55E');
 
   // Compute — try/finally garantează că rv-prog dispare indiferent de erori
   // Timeout safety: dacă generarea durează >20s, scoatem overlay-ul forțat
-  const _rvSafetyTimer = setTimeout(()=>{ document.getElementById('rv-prog')?.classList.remove('rv-on'); }, 20000);
+  const _rvSafetyTimer = setTimeout(()=>{ document.getElementById('rv-prog')?.classList.remove('rv-on'); }, 3000);
   let b;
   try{
   b = _rvCompBuilding(P); _RV.building = b;
-  _rvBanner('3/5: building niv='+b.niv+' bW='+Math.round(b.bW)+' bD='+Math.round(b.bD),'#22C55E');
   _RV.floors = [];
   // Pe mobil: calculăm DOAR floor 0 inițial — celelalte lazy la click tab
   // Calculăm max 2 etaje inițial pe orice dispozitiv — restul lazy la click tab
@@ -2933,15 +2916,15 @@ async function generateRelevee(){
       const scH = availH / (b.P.D + b.P.rf + b.P.rs + 4);
       // Pe mobil: scala maxima 8 pentru a preveni crash iOS din OOM
       const isMobScale = window.innerWidth < 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-      const fitSc = Math.min(isMobScale ? 8 : 28, Math.max(4, Math.floor(Math.min(scW, scH))));
+      const fitSc = Math.min(isMobScale ? 8 : 14, Math.max(4, Math.floor(Math.min(scW, scH))));
       _RV.scale = fitSc;
       document.getElementById('rv-zval').textContent = Math.round(fitSc/12*100)+'%';
     }
   }catch(e){}
 
-  _rvBanner('4/5: pre-render scale='+_RV.scale+' canvas='+document.getElementById('rv-canvas')?.width,'#F59E0B');
+  await new Promise(r=>requestAnimationFrame(r));
   _rvRender();
-  _rvBanner('5/5 DONE: b='+!!_RV?.building+' f0='+(_RV?.floors?.[0]?.rects?.length||'?')+' cv='+document.getElementById('rv-canvas')?.width+' ctx='+(document.getElementById('rv-canvas')?.getContext('2d')?'ok':'NULL'),'#22C55E');
+  try{const _cv=document.getElementById('rv-canvas');const _d=document.createElement('div');_d.style.cssText='position:fixed;bottom:10px;left:50%;transform:translateX(-50%);background:#0B1426;border:1.5px solid #D4AF37;color:#D4AF37;padding:7px 16px;border-radius:7px;font:10px IBM Plex Mono;z-index:99999;white-space:nowrap;';_d.textContent='PLAN: '+(_RV?.floors?.[0]?.rects?.length||0)+' camere | canvas '+(_cv?.width||0)+'x'+(_cv?.height||0)+' | sc='+_RV.scale;document.body.appendChild(_d);setTimeout(()=>_d.remove(),15000);}catch(e){}
 
   // ── Actualizăm DataBus — toate rapoartele sunt notificate ─────────────
   try{ window._RV_DataBus?.update(b, P); }catch(e){}
@@ -2949,8 +2932,7 @@ async function generateRelevee(){
   try{ _rvCalcROI(); }catch(e){}
 
   }catch(computeErr){
-    console.error('[RV] ERR:',computeErr);
-    _rvBanner('ERR: '+String(computeErr?.message||computeErr).slice(0,70),'#EF4444');
+    console.error('[Relevee] Eroare generare:', computeErr);
   }finally{
     clearTimeout(_rvSafetyTimer);
     // ÎNTOTDEAUNA scoatem overlay-urile — indiferent de erori
