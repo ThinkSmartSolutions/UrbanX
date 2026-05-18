@@ -2818,24 +2818,18 @@ function _rvCollapseSection(titleEl){
   }
 }
 async function generateRelevee(){
-  // Diagnostic IMEDIAT: JS alive + click capture
+  // Diagnostic: titlul paginii se schimbă = JS e viu
   if(!window._rvDiagInit){
     window._rvDiagInit=true;
-    let _c=0;
+    let _tc=0, _mc=0;
     window._rvAlive=setInterval(()=>{
-      _c++; let el=document.getElementById('rv-alive');
-      if(!el){el=document.createElement('div');el.id='rv-alive';
-        el.style.cssText='position:fixed;bottom:5px;right:5px;background:#111;color:#0f0;padding:3px 8px;font:9px monospace;z-index:9999999;border-radius:4px;pointer-events:none;';
-        document.body.appendChild(el);}
-      el.textContent='JS:'+_c+'s';
+      _tc++;
+      document.title='JS:'+_tc+'s|RV | UrbanX';
     },1000);
-    document.addEventListener('click',(e)=>{
-      let ind=document.getElementById('rv-cd');
-      if(!ind){ind=document.createElement('div');ind.id='rv-cd';
-        ind.style.cssText='position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#0f0;color:#000;padding:5px 12px;font:10px monospace;z-index:9999999;border-radius:4px;pointer-events:none;';
-        document.body.appendChild(ind);}
-      ind.textContent='CLICK:'+e.target.tagName+'#'+(e.target.id||'noid')+'.'+((e.target.className||'').toString().split(' ')[0]);
-      clearTimeout(ind._t);ind._t=setTimeout(()=>ind.remove(),4000);
+    // mousedown pe tot documentul - cel mai de baza event posibil
+    document.addEventListener('mousedown',(e)=>{
+      _mc++;
+      document.title='MD'+_mc+':'+e.target.tagName+'#'+(e.target.id||'?')+'|RV';
     },true);
   }
   const ap = S.parcels[S.activeParcel ?? 0];
