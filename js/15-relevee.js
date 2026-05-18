@@ -2920,8 +2920,29 @@ async function generateRelevee(){
   const _rvSafetyTimer = setTimeout(()=>{ document.getElementById('rv-prog')?.classList.remove('rv-on'); }, 20000);
   let b;
   try{
-  // Yield 1: înainte de calculul clădirii
+  // Yield 1: cedăm event loop IMEDIAT după _rvOpen
+  // Browserul poate repaint modal-ul și procesa eventele
   await _rvSleep(0);
+
+  // FIX OOM: acum că suntem async, putem face operații Mapbox fără a bloca UI
+  // Golim sursele WebGL (200-300MB eliberate) ÎNAINTE de calculul building-ului
+  try{
+    if(window.map){
+      window._rvSavedPitch   = window.map.getPitch();
+      window._rvSavedBearing = window.map.getBearing();
+      if(window._rvSavedPitch > 1) window.map.easeTo({pitch:0, duration:300});
+      const emptyGeo = {type:'FeatureCollection',features:[]};
+      const volSrc = window.map.getSource('vol-src');
+      if(volSrc?.setData){ volSrc.setData(emptyGeo); window._rvSavedVolEmpty = true; }
+      ['vol-3d','vol-scen-3d','ctx-3d'].forEach(id=>{
+        try{ if(window.map.getLayer(id)) window.map.setLayoutProperty(id,'visibility','none'); }catch(e){}
+      });
+    }
+  }catch(e){ console.warn('[RV] Mapbox async pause:', e.message); }
+
+  // Yield 2: lăsăm Mapbox să proceseze setData înainte de calculul building-ului
+  await _rvSleep(50);
+
   console.log('[RV] Start _rvCompBuilding, P:', JSON.stringify({W:P?.W,D:P?.D,niv:P?.niv,area:P?.area,fn:P?.fn}));
   b = _rvCompBuilding(P); _RV.building = b;
   console.log('[RV] _rvCompBuilding done:', b ? 'OK bW='+b.bW+' bD='+b.bD+' niv='+b.niv : 'NULL/UNDEFINED');
@@ -3226,38 +3247,16 @@ function _rvDNAGetSolutii(b, P, potOk, cutOk, solarIssues, isuOk, roomsOk, parcS
 // MODAL OPEN / CLOSE
 // ══════════════════════════════════════════════════════════════════════════
 function _rvOpen(){
+  // FIX FREEZE: _rvOpen TREBUIE să fie instant — fără operații grele sincrone
+  // _rvInject() (2000+ linii HTML) pe browser la 600MB+ = 2-3s freeze sincron
+  // Soluție: injectăm + arătăm modal instant, Mapbox ops se fac ASYNC după primul yield
   if(!document.getElementById('rv-modal')) _rvInject();
   const rvM=document.getElementById('rv-modal');
   rvM.style.visibility='visible';
   rvM.classList.add('rv-modal-open');
   _RV.open=true;
   window._rvReleveeOpen = true;
-
-  // FIX OOM (626MB): golim sursele WebGL ale volumului 3D
-  // setLayoutProperty('visibility','none') NU eliberează memoria WebGL — bufferele rămân alocate
-  // setSource cu FeatureCollection goală → WebGL dealocă bufferele → 200-300MB eliberate
-  try{
-    if(window.map){
-      // Salvăm pitch pentru restaurare
-      window._rvSavedPitch   = window.map.getPitch();
-      window._rvSavedBearing = window.map.getBearing();
-      // Reset pitch (async, non-blocking)
-      if(window._rvSavedPitch > 1) window.map.easeTo({pitch:0, duration:300});
-      // Golim sursele 3D care ocupă WebGL buffers
-      const emptyGeo = {type:'FeatureCollection',features:[]};
-      const volSrc  = window.map.getSource('vol-src');
-      const ctxSrc  = window.map.getSource('ctx-3d-src');
-      const distSrc = window.map.getSource('dist-src');
-      if(volSrc  && typeof volSrc.setData  === 'function'){ volSrc.setData(emptyGeo);  window._rvSavedVolEmpty = true;  }
-      if(ctxSrc  && typeof ctxSrc.setData  === 'function'){ ctxSrc.setData(emptyGeo);  window._rvSavedCtxEmpty = true;  }
-      if(distSrc && typeof distSrc.setData === 'function'){ distSrc.setData(emptyGeo); window._rvSavedDistEmpty = true; }
-      // Ascundem layerele pentru render skip
-      ['vol-3d','vol-scen-3d','ctx-3d','aedis-dim-layer'].forEach(id=>{
-        try{ if(window.map.getLayer(id)) window.map.setLayoutProperty(id,'visibility','none'); }catch(e){}
-      });
-    }
-    if(typeof window._tciPause==='function') window._tciPause();
-  }catch(e){ console.warn('[RV] pause 3D:', e.message); }
+  // Mapbox setData/setLayoutProperty se fac async din generateRelevee după primul await
 }
 
 function closeRelevee(){
