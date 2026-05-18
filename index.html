@@ -896,7 +896,7 @@ canvas#c2d{width:100%;height:100%;display:block}
   </div>
   
   <!-- User button -->
-  <button class="tci-launch-btn" id="relevee-launch-btn" onclick="window._rvAllowOpen=true; if(typeof generateRelevee==='function') generateRelevee(); else alert('Selectați o parcelă mai întâi')" title="Planșe tehnice, relevee, documentație preliminară PAC/CU" style="background:rgba(212,175,55,.12);border-color:rgba(212,175,55,.5);color:#D4AF37;">
+  <button class="tci-launch-btn" id="relevee-launch-btn" onclick="if(typeof generateRelevee==='function') generateRelevee(); else alert('Selectați o parcelă mai întâi')" title="Planșe tehnice, relevee, documentație preliminară PAC/CU" style="background:rgba(212,175,55,.12);border-color:rgba(212,175,55,.5);color:#D4AF37;">
     📐 <span class="tci-launch-label">Proiect Preliminar</span>
   </button>
   <button class="tci-launch-btn" onclick="openTCI()" title="Proiectie Urbanistica Temporala">
@@ -938,28 +938,23 @@ canvas#c2d{width:100%;height:100%;display:block}
 </div>
 
 
-<!-- DEV BYPASS — fără setPackage care triggera auto-open -->
+<!-- DEV BYPASS -->
 <script>
 (function(){
-  const isDev = new URLSearchParams(window.location.search).get('dev')==='1'
-             || localStorage.getItem('ux_dev')==='1';
+  var isDev = location.search.indexOf('dev=1')>-1 || localStorage.getItem('ux_dev')==='1';
   if(!isDev) return;
   localStorage.setItem('ux_dev','1');
-  // Ascundem overlay la DOMContentLoaded
-  document.addEventListener('DOMContentLoaded',()=>{
-    const ov=document.getElementById('auth-overlay');
+  document.addEventListener('DOMContentLoaded',function(){
+    var ov=document.getElementById('auth-overlay');
     if(ov) ov.style.display='none';
   });
-  // Și la load (fallback)
-  window.addEventListener('load',()=>{
-    const ov=document.getElementById('auth-overlay');
+  window.addEventListener('load',function(){
+    var ov=document.getElementById('auth-overlay');
     if(ov) ov.style.display='none';
-    // NU setPackage - triggera applyPackageUI -> auto-open Relevee
-    if(window._USER){ window._USER.role='admin'; window._USER.email='florin@tss.ro'; }
-    const ba=document.getElementById('btn-admin');
+    if(window._USER){ window._USER.role='admin'; }
+    var ba=document.getElementById('btn-admin');
     if(ba) ba.style.display='flex';
   });
-  console.log('[UrbanX] Dev mode — auth bypass (fără setPackage)');
 })();
 </script>
 <!-- ══ LOGIN OVERLAY ════════════════════════════════════════════════════ -->
@@ -1226,7 +1221,7 @@ canvas#c2d{width:100%;height:100%;display:block}
   </div>
   <div style="padding:5px 8px 3px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.05);margin-top:3px">② Proiectare Preliminară</div>
   <div style="display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:6px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
-    <button onclick="window._rvAllowOpen=true; generateRelevee && generateRelevee(); toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#d4af37;padding:4px 8px;cursor:pointer;border-radius:5px;font-size:11.5px;font-weight:700;">📐 Planșe & Proiect Preliminar PAC</button>
+    <button onclick="generateRelevee();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#d4af37;padding:4px 8px;cursor:pointer;border-radius:5px;font-size:11.5px;font-weight:700;">📐 Planșe & Proiect Preliminar PAC</button>
     <button onclick="infoDrawerOpen('relevee')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37'" onmouseout="this.style.color='#475569'">ⓘ</button>
   </div>
   <div style="display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:6px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
@@ -1487,7 +1482,7 @@ canvas#c2d{width:100%;height:100%;display:block}
     <span class="mnav-label">Urban3D</span>
   </button>
   <button class="mnav-btn" id="mob-nav-pp" data-mt="proiect-preliminar"
-    onclick="window._rvAllowOpen=true; if(typeof generateRelevee==='function') generateRelevee();" title="Proiect Preliminar">
+    onclick="if(typeof generateRelevee==='function') generateRelevee();" title="Proiect Preliminar">
     <span class="mnav-icon">📐</span>
     <span class="mnav-label">Proiect</span>
   </button>
@@ -2630,50 +2625,29 @@ new MutationObserver(() => addBilantExportBtn())
     </div>
     <!-- GDPR Cookie Consent (Legea 506/2004 + GDPR) -->
     <script src="js/cookie-consent.js?v=2026051301"></script>
-
-<!-- GUARD: generateRelevee blocat + _rvTrigger definit -->
+<!-- GUARD anti auto-open -->
 <script>
 (function(){
   window._rvAllowOpen = false;
-
-  // _rvTrigger: singurul mod de a deschide Releveul (apelat din butoane)
-  // Funcționează indiferent de versiunea JS cache
-  window._rvTrigger = function(){
-    window._rvAllowOpen = true;
-    if(typeof window.generateRelevee === 'function') window.generateRelevee();
-    else setTimeout(function(){ if(typeof window.generateRelevee==='function') window.generateRelevee(); }, 500);
-  };
-
-  // Deblocăm la orice click (inclusiv butoane din meniuri dinamice)
-  // Reset automat după 2s dacă generateRelevee nu a fost apelat
+  // Orice click deblochează pentru 2s
   document.addEventListener('click', function(){
     window._rvAllowOpen = true;
     clearTimeout(window._rvAllowTimer);
     window._rvAllowTimer = setTimeout(function(){ window._rvAllowOpen = false; }, 2000);
   }, true);
-
-  function _applyGuard(){
-    if(typeof window.generateRelevee !== 'function'){
-      setTimeout(_applyGuard, 150); return;
-    }
+  // Wrappăm generateRelevee când e disponibil
+  function applyGuard(){
+    if(typeof window.generateRelevee !== 'function'){ setTimeout(applyGuard,200); return; }
     if(window.generateRelevee._guarded) return;
-    var _orig = window.generateRelevee;
+    var orig = window.generateRelevee;
     window.generateRelevee = async function(){
-      if(!window._rvAllowOpen){
-        console.log('[RV] BLOCAT auto-open');
-        return;
-      }
-      // Nu resetam _rvAllowOpen aici - inner guard sau timer il reseteaza
-      // Resetare imediata bloca inner guard (double-wrapping bug)
-      return _orig.apply(this, arguments);
+      if(!window._rvAllowOpen){ console.log('[RV] blocat'); return; }
+      return orig.apply(this, arguments);
     };
     window.generateRelevee._guarded = true;
-    console.log('[RV] Guard aplicat ✓');
+    console.log('[RV] Guard activ');
   }
-
-
-  document.addEventListener('DOMContentLoaded', _applyGuard);
-  window.addEventListener('load', function(){ setTimeout(_applyGuard, 300); });
+  window.addEventListener('load', function(){ setTimeout(applyGuard, 500); });
 })();
 </script>
 </body>
