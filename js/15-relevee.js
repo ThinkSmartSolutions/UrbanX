@@ -1468,21 +1468,23 @@ function _rvRenderFacade(b){
     if(hasBalcon){
       for(let row=1;row<niv;row++){
         const bz=oy_+facadeH-row*P.hn*SC;
-        const bH=Math.max(4,aedisAdanc*SC*0.4);
-        // Placa balcon
-        ctx.fillStyle='rgba(226,232,240,.9)'; ctx.fillRect(ox_-8,bz-bH,fW+16,bH);
-        ctx.strokeStyle='#475569'; ctx.lineWidth=1; ctx.strokeRect(ox_-8,bz-bH,fW+16,bH);
-        // Parapet balcon
-        ctx.strokeStyle='rgba(56,189,248,.6)'; ctx.lineWidth=1.5;
-        ctx.beginPath(); ctx.moveTo(ox_-8,bz-bH); ctx.lineTo(ox_+fW+8,bz-bH); ctx.stroke();
+        const bH=Math.max(9,P.hn*SC*0.14); // ~14% din etaj = balcon vizibil
+        // Placă balcon proiectată
+        ctx.fillStyle='rgba(218,226,235,.97)'; ctx.fillRect(ox_-14,bz-bH,fW+28,bH);
+        ctx.strokeStyle='#1E293B'; ctx.lineWidth=2; ctx.strokeRect(ox_-14,bz-bH,fW+28,bH);
+        // Pardoseală
+        ctx.fillStyle='rgba(148,163,184,.4)'; ctx.fillRect(ox_-14,bz-3,fW+28,3);
+        // Parapet
+        ctx.strokeStyle='#0369A1'; ctx.lineWidth=2.5;
+        ctx.beginPath(); ctx.moveTo(ox_-14,bz-bH+2); ctx.lineTo(ox_+fW+14,bz-bH+2); ctx.stroke();
       }
     }
 
-    // Penthouse — etaj retras
+    // Penthouse — ultimul etaj retras
     if(_etajRetras && niv>1){
-      const retras=fW*.12;
-      ctx.fillStyle='rgba(212,175,55,.2)'; ctx.fillRect(ox_+retras,oy_,fW-retras*2,P.hn*SC);
-      ctx.strokeStyle='#CA8A04'; ctx.lineWidth=2; ctx.strokeRect(ox_+retras,oy_,fW-retras*2,P.hn*SC);
+      const retras=fW*.13;
+      ctx.fillStyle='rgba(212,175,55,.3)'; ctx.fillRect(ox_+retras,oy_,fW-retras*2,P.hn*SC);
+      ctx.strokeStyle='#B45309'; ctx.lineWidth=3; ctx.strokeRect(ox_+retras,oy_,fW-retras*2,P.hn*SC);
       ctx.fillStyle='#92400E'; ctx.font='bold 7px IBM Plex Mono'; ctx.textAlign='center';
       ctx.fillText('PENTHOUSE / ETAJ RETRAS',ox_+fW/2,oy_+P.hn*SC/2+3); ctx.textAlign='left';
     }
