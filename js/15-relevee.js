@@ -784,17 +784,16 @@ function _rvInitCanvas(W,H,canvasId){
     wrap.appendChild(tmp);
     return _rvInitCanvas(W,H,tmp.id);
   }
-  // Desktop: DPR 1 (WebGL map consumă GPU); Mobil: DPR 2
   const isMobCtx = window.innerWidth < 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   let dpr = Math.min(window.devicePixelRatio || 1, isMobCtx ? 2 : 1);
   cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr);
   cv.style.width = W+'px'; cv.style.height = H+'px';
   let ctx = cv.getContext('2d');
   if(!ctx && dpr > 1){
-    console.warn('[Relevee] ctx null la DPR='+dpr+', retry DPR=1');
-    dpr=1; cv.width=Math.round(W); cv.height=Math.round(H); ctx=cv.getContext('2d');
+    console.warn('[RV] ctx null DPR='+dpr+', retry 1x'); dpr=1;
+    cv.width=Math.round(W); cv.height=Math.round(H); ctx=cv.getContext('2d');
   }
-  if(!ctx){ console.error('[Relevee] ctx null definitiv W='+W+' H='+H); return {cv,ctx:null,W,H}; }
+  if(!ctx){ console.error('[RV] ctx null W='+W+' H='+H); return {cv,ctx:null,W,H}; }
   ctx.scale(dpr,dpr);
   return {cv,ctx,cv2:cv,ctx2:ctx,W,H};
 }
@@ -842,7 +841,8 @@ function _rvRenderPlan(fl,b){
   const W = bW*SC + pad*2 + P.rl*2*SC + 40;
   const H = bD*SC + pad*2 + (P.rf+P.rs)*SC + 60;
   const {cv,ctx}=_rvInitCanvas(W,H);
-  if(!ctx){ console.error('[RV] _rvRenderPlan ctx null W='+W+' H='+H); return; }
+  if(!ctx){ console.error('[RV] ctx null plan W='+W+' H='+H); return; }
+  if(!fl){ console.error('[RV] fl undefined la render — floors[0]:', _RV.floors[0]); return; }
   ctx.fillStyle='#060C1A'; ctx.fillRect(0,0,W,H);
   // grid bg
   ctx.strokeStyle='rgba(255,255,255,.018)'; ctx.lineWidth=.5;
@@ -879,7 +879,7 @@ function _rvRenderPlan(fl,b){
   ctx.fillStyle='rgba(16,29,53,.95)';ctx.fillRect(ox,oy,bW*SC,bD*SC);
 
   // Dacă nu există camere - afișăm mesaj în canvas
-  if(!fl.rects || fl.rects.length === 0){
+  if(!fl || !fl.rects || fl.rects.length === 0){
     ctx.fillStyle='rgba(232,179,65,0.7)';
     ctx.font='bold 14px IBM Plex Mono';
     ctx.textAlign='center';
@@ -2882,18 +2882,20 @@ async function generateRelevee(){
   });
   await _rvSleep(200);
   prog?.classList.remove('rv-on');
-  // RAF + sleep: garantăm că browser-ul pictează dispariția overlay-ului ÎNAINTE de computație
   await new Promise(r => requestAnimationFrame(r));
   await _rvSleep(32);
 
   // Compute — try/finally garantează că rv-prog dispare indiferent de erori
+  // Timeout safety: dacă generarea durează >20s, scoatem overlay-ul forțat
   const _rvSafetyTimer = setTimeout(()=>{ document.getElementById('rv-prog')?.classList.remove('rv-on'); }, 20000);
   let b;
   try{
   b = _rvCompBuilding(P); _RV.building = b;
   _RV.floors = [];
-  // Calculăm DOAR floor 0 eager — restul lazy la click tab
-  const maxEagerFloors = 1;
+  // Pe mobil: calculăm DOAR floor 0 inițial — celelalte lazy la click tab
+  // Calculăm max 2 etaje inițial pe orice dispozitiv — restul lazy la click tab
+  // Previne crash OOM pe cladiri mari (7+ corpi, 4+ etaje)
+  const maxEagerFloors = 1; // floor 0 only — restul lazy
   for(let i=0;i<b.niv;i++){
     _RV.floors.push(i < maxEagerFloors ? _rvFloor(b,i) : null);
   }
@@ -2931,7 +2933,7 @@ async function generateRelevee(){
   try{ _rvCalcROI(); }catch(e){}
 
   }catch(computeErr){
-    console.error('[Relevee] Eroare generare:', computeErr);
+    console.error('[RV] Eroare generare:', computeErr?.message||computeErr, '\nStack:', computeErr?.stack?.split('\n').slice(0,3).join(' | '));
   }finally{
     clearTimeout(_rvSafetyTimer);
     // ÎNTOTDEAUNA scoatem overlay-urile — indiferent de erori
@@ -2949,8 +2951,8 @@ async function generateRelevee(){
   const piEl = document.getElementById('rv-parcel-info');
   if(piEl) piEl.innerHTML = `Nr. cad.: <strong style="color:#D4AF37">${P.nrCad}</strong><br>UTR: ${P.utr}<br>Suprafață: ${P.area}m²<br>Dim. bbox: ${P.W.toFixed(1)}m × ${P.D.toFixed(1)}m<br>Front: ${P.frontDir}<br>POT max: ${Math.round(P.pot*100)}%<br>CUT max: ${P.cut}<br>H max: ${P.hMax}m<br>Niveluri: ${b.niv} niv.<br>H total: ${(b.niv*P.hn).toFixed(1)}m`;
 
-  // updatePanels mereu deferred — previne freeze sincron desktop
-  setTimeout(()=>{ try{ _rvUpdatePanels(b,P); }catch(e){ console.error('[RV] updatePanels:',e); } }, 300);
+  // Pe mobil: delay _rvUpdatePanels pentru a permite browser-ului să respire
+  setTimeout(()=>{ try{ _rvUpdatePanels(b,P); }catch(e){ console.error('[RV] panels:',e); } }, 300);
   if(typeof ss === 'function') ss(`✅ Relevee generate în ${secs}s — ${b.niv} niveluri, SDA=${_rvFmt(b.sdaTotal)}m²`);
 }
 window.generateRelevee = generateRelevee; // export imediat după funcție
