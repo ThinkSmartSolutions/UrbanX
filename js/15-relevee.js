@@ -2937,7 +2937,7 @@ async function generateRelevee(){
       try{
         const modal = document.getElementById('rv-modal');
         if(!modal) return;
-        modal.addEventListener('click', function _rvClickDiag(e){
+        document.addEventListener('click', function _rvClickDiag(e){
           const t = e.target;
           // Show what was clicked
           let ind = document.getElementById('rv-cd');
@@ -5363,8 +5363,8 @@ async function _rvInject(){
   if(!document.getElementById('rv-css')){
     const css=document.createElement('style'); css.id='rv-css';
     css.textContent=`
-#rv-modal{position:fixed;inset:0;z-index:8000;background:rgba(4,8,18,.0);backdrop-filter:blur(0);display:flex;flex-direction:column;pointer-events:none;transition:all .25s;}
-#rv-modal.rv-modal-open{background:rgba(4,8,18,.97);pointer-events:all;}
+#rv-modal{position:fixed;inset:0;z-index:999999;background:rgba(4,8,18,.0);display:flex;flex-direction:column;pointer-events:none;transition:opacity .25s;}
+#rv-modal.rv-modal-open{background:rgba(4,8,18,.97);pointer-events:all;opacity:1;}
 #rv-modal .rv-body{display:grid;grid-template-columns:260px 1fr 240px;height:100%;min-height:0;position:relative;}
 /* lpanel-hidden CSS removed — rv-toggle-lpanel button eliminated */
 /* opacity gestionat pe rv-modal, nu pe body */
