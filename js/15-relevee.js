@@ -2879,19 +2879,16 @@ async function generateRelevee(){
   });
   await _rvSleep(200);
   prog?.classList.remove('rv-on');
-  await new Promise(r=>requestAnimationFrame(r));
-  await _rvSleep(32);
 
-  // Compute — try/finally garantează că rv-prog dispare indiferent de erori
-  // Timeout safety: dacă generarea durează >20s, scoatem overlay-ul forțat
-  const _rvSafetyTimer = setTimeout(()=>{ document.getElementById('rv-prog')?.classList.remove('rv-on'); }, 20000);
+  // Compute — RAF-uri între pași: browser pictează prog-off ÎNAINTE de orice computație
+  const _rvSafetyTimer = setTimeout(()=>{ document.getElementById('rv-prog')?.classList.remove('rv-on'); }, 3000);
   let b;
   try{
+  await new Promise(r=>requestAnimationFrame(r));
+  await _rvSleep(50);
   b = _rvCompBuilding(P); _RV.building = b;
+  await new Promise(r=>requestAnimationFrame(r));
   _RV.floors = [];
-  // Pe mobil: calculăm DOAR floor 0 inițial — celelalte lazy la click tab
-  // Calculăm max 2 etaje inițial pe orice dispozitiv — restul lazy la click tab
-  // Previne crash OOM pe cladiri mari (7+ corpi, 4+ etaje)
   const maxEagerFloors = 1;
   for(let i=0;i<b.niv;i++){
     _RV.floors.push(i < maxEagerFloors ? _rvFloor(b,i) : null);
@@ -2910,11 +2907,10 @@ async function generateRelevee(){
   try{
     const wrap = document.getElementById('rv-drawwrap');
     if(wrap && b.P){
-      const availW = wrap.clientWidth  - 140; // pad + dims
+      const availW = wrap.clientWidth  - 140;
       const availH = wrap.clientHeight - 120;
       const scW = availW / (b.P.W + b.P.rl*2 + 4);
       const scH = availH / (b.P.D + b.P.rf + b.P.rs + 4);
-      // Pe mobil: scala maxima 8 pentru a preveni crash iOS din OOM
       const isMobScale = window.innerWidth < 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
       const fitSc = Math.min(isMobScale ? 8 : 28, Math.max(4, Math.floor(Math.min(scW, scH))));
       _RV.scale = fitSc;
@@ -2922,6 +2918,7 @@ async function generateRelevee(){
     }
   }catch(e){}
 
+  await new Promise(r=>requestAnimationFrame(r));
   _rvRender();
 
   // ── Actualizăm DataBus — toate rapoartele sunt notificate ─────────────
@@ -5508,7 +5505,7 @@ async function _rvInject(){
     document.head.appendChild(css);
   }
 
-  // ── HTML — div appended first, innerHTML sync, RAF înainte + după ──────
+  // ── HTML ─────────────────────────────────────────────────────────────────
   const div=document.createElement('div'); div.id='rv-modal';
   document.body.appendChild(div);
   await new Promise(r=>requestAnimationFrame(r));
