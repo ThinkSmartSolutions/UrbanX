@@ -1745,8 +1745,10 @@ document.addEventListener('click', function(){
   }
   
   // Observer pe body — prinde apariția/dispariția modalului și schimbări de style
-  const obs = new MutationObserver(_applyLotOpen);
-  obs.observe(document.body, {childList:true, subtree:true, attributes:true, attributeFilter:['style','class']});
+  // Debounce: previne sute de map.resize() la fiecare innerHTML update
+  let _lotDebTimer = null;
+  const obs = new MutationObserver(()=>{ clearTimeout(_lotDebTimer); _lotDebTimer=setTimeout(_applyLotOpen, 150); });
+  obs.observe(document.body, {childList:true, subtree:false, attributes:true, attributeFilter:['style','class']});
   
   // Expunem global ca 08-lotizare.js să îl poată apela explicit după open/close
   window._lotLayoutSync = _applyLotOpen;
@@ -2605,7 +2607,7 @@ window._onParcelSelectedHook = function(parcel) {
 // Hook pentru buton Export PDF in Bilant modal
 function addBilantExportBtn() {
   const modal = document.querySelector(".bilant-modal, #bilant-modal, [class*=bilant]");
-  if(!modal) return;
+  if(!modal) return false;
   if(modal.querySelector(".bilant-export-btn")) return;
   const btn = document.createElement("button");
   btn.className = "bilant-export-btn";
@@ -2615,10 +2617,11 @@ function addBilantExportBtn() {
   modal.querySelector(".bilant-actions, .modal-footer, .btn-row") 
     ? modal.querySelector(".bilant-actions, .modal-footer, .btn-row").appendChild(btn)
     : modal.appendChild(btn);
+  return true;
 }
 // Observer pentru cand se deschide modalul
-new MutationObserver(() => addBilantExportBtn())
-  .observe(document.body, {childList:true, subtree:true});
+const _bilantObs = new MutationObserver(()=>{ if(addBilantExportBtn()) _bilantObs.disconnect(); });
+_bilantObs.observe(document.body, {childList:true, subtree:false});
 </script>
 
 
