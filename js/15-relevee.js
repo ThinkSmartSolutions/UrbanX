@@ -6129,12 +6129,20 @@ window.generateRelevee = generateRelevee;
 window.closeRelevee    = closeRelevee;
 
 
-// ── FIX 1: Guard anti auto-open (5s după load) ───────────────────────────
-window._rvReadyAt = Date.now() + 5000;
+// ── FIX: Guard anti auto-open — blochează până la primul click/touch ────────
+// generateRelevee() nu poate rula dacă nu există o interacțiune explicită a utilizatorului
+// Previne orice auto-open din setInterval, MutationObserver, restore state, etc.
+window._rvUserInteracted = false;
+['click','keydown','touchstart','pointerdown'].forEach(ev=>{
+  window.addEventListener(ev, ()=>{ window._rvUserInteracted = true; }, {once:true, passive:true});
+});
 const _origGR = window.generateRelevee;
 if(typeof _origGR === 'function'){
   window.generateRelevee = async function(...args){
-    if(Date.now() < window._rvReadyAt){ return; }
+    if(!window._rvUserInteracted){
+      console.log('[RV] Auto-call blocat — fără interacțiune utilizator');
+      return;
+    }
     return _origGR.apply(this, args);
   };
 }
