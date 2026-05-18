@@ -55,20 +55,20 @@ const _RV_APT = {
 };
 
 const _RV_COLORS = {
-  living:  {fill:'rgba(180,83,1,.14)',   stroke:'#F97316'},
-  bedroom: {fill:'rgba(21,128,61,.13)',  stroke:'#22C55E'},
-  bedroom2:{fill:'rgba(21,128,61,.13)',  stroke:'#22C55E'},
-  bedroom3:{fill:'rgba(21,128,61,.13)',  stroke:'#22C55E'},
-  kitchen: {fill:'rgba(14,116,144,.15)', stroke:'#06B6D4'},
-  bath:    {fill:'rgba(109,40,217,.13)', stroke:'#A78BFA'},
-  wc:      {fill:'rgba(109,40,217,.1)',  stroke:'#8B5CF6'},
-  hall:    {fill:'rgba(71,85,105,.18)',  stroke:'#64748B'},
-  storage: {fill:'rgba(71,85,105,.12)',  stroke:'#475569'},
-  core:    {fill:'rgba(37,99,235,.16)',  stroke:'#3B82F6'},
-  commercial:{fill:'rgba(147,51,234,.14)',stroke:'#A855F7'},
-  reception: {fill:'rgba(147,51,234,.14)',stroke:'#A855F7'},
-  balcon:  {fill:'rgba(212,175,55,.08)', stroke:'rgba(212,175,55,.45)', dash:true},
-  office:  {fill:'rgba(21,128,61,.13)',  stroke:'#22C55E'},
+  living:  {fill:'rgba(254,215,170,.6)',  stroke:'#EA580C'},
+  bedroom: {fill:'rgba(187,247,208,.6)',  stroke:'#16A34A'},
+  bedroom2:{fill:'rgba(187,247,208,.6)',  stroke:'#16A34A'},
+  bedroom3:{fill:'rgba(187,247,208,.6)',  stroke:'#16A34A'},
+  kitchen: {fill:'rgba(186,230,253,.6)',  stroke:'#0284C7'},
+  bath:    {fill:'rgba(221,214,254,.6)',  stroke:'#7C3AED'},
+  wc:      {fill:'rgba(221,214,254,.5)',  stroke:'#6D28D9'},
+  hall:    {fill:'rgba(226,232,240,.7)',  stroke:'#475569'},
+  storage: {fill:'rgba(226,232,240,.5)',  stroke:'#64748B'},
+  core:    {fill:'rgba(191,219,254,.6)',  stroke:'#1D4ED8'},
+  commercial:{fill:'rgba(233,213,255,.6)',stroke:'#7C3AED'},
+  reception: {fill:'rgba(233,213,255,.6)',stroke:'#7C3AED'},
+  balcon:  {fill:'rgba(254,249,195,.7)',  stroke:'#CA8A04',  dash:true},
+  office:  {fill:'rgba(187,247,208,.6)',  stroke:'#15803D'},
   meeting: {fill:'rgba(180,83,1,.14)',   stroke:'#F97316'},
 };
 
@@ -802,7 +802,7 @@ function _rvRender(){
     if(cv && cv.width > 0){
       const ctx2 = cv.getContext('2d');
       if(ctx2){
-        ctx2.fillStyle='#060C1A'; ctx2.fillRect(0,0,cv.width,cv.height);
+        ctx2.fillStyle='#FFFFFF'; ctx2.fillRect(0,0,cv.width,cv.height);
         ctx2.fillStyle='rgba(255,94,91,0.8)'; ctx2.font='bold 13px IBM Plex Mono';
         ctx2.textAlign='center';
         ctx2.fillText('Eroare la generarea planului.', cv.width/2/Math.min(window.devicePixelRatio||1,2), cv.height/2/Math.min(window.devicePixelRatio||1,2));
@@ -840,7 +840,7 @@ function _rvRenderPlan(fl,b){
   const {cv,ctx}=_rvInitCanvas(W,H);
   if(!ctx){console.error('[RV] ctx null');return;}
   if(!fl){console.error('[RV] fl undefined');return;}
-  ctx.fillStyle='#060C1A'; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#FFFFFF'; ctx.fillRect(0,0,W,H);
   // grid bg
   ctx.strokeStyle='rgba(255,255,255,.018)'; ctx.lineWidth=.5;
   for(let x=0;x<W;x+=SC){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
@@ -850,7 +850,7 @@ function _rvRenderPlan(fl,b){
   _RV.planOx=ox; _RV.planOy=oy; _RV.planSc=SC; // click detection coords
   ctx.strokeStyle='rgba(212,175,55,.35)';ctx.lineWidth=1;ctx.setLineDash([SC*.5,SC*.5]);
   ctx.strokeRect(pad,pad,P.W*SC,P.D*SC); ctx.setLineDash([]);
-  ctx.fillStyle='rgba(212,175,55,.4)';ctx.font='9px IBM Plex Mono';
+  ctx.fillStyle='#334155';ctx.font='bold 8px IBM Plex Mono';
   ctx.fillText(`Nr. cad. ${P.nrCad}  ·  ${P.W}m × ${P.D}m  ·  ${P.area}m²  ·  UTR ${P.utr}`,pad+4,pad-6);
 
   // Retrageri
@@ -859,8 +859,8 @@ function _rvRenderPlan(fl,b){
 
   // Stradă
   const stY=oy+bD*SC+P.rs*SC+8;
-  ctx.fillStyle='rgba(100,116,139,.2)';ctx.fillRect(pad,stY,P.W*SC,20);
-  ctx.fillStyle='#475569';ctx.font='bold 9px IBM Plex Mono';ctx.textAlign='center';
+  ctx.fillStyle='rgba(30,64,175,.08)';ctx.fillRect(pad,stY,P.W*SC,20);
+  ctx.fillStyle='#1e40af';ctx.font='bold 9px IBM Plex Mono';ctx.textAlign='center';
   ctx.fillText('▲  FRONT STRADAL  ·  '+P.frontDir,pad+P.W*SC/2,stY+14);
   ctx.textAlign='left';
 
@@ -873,7 +873,8 @@ function _rvRenderPlan(fl,b){
   }
 
   // Building fill
-  ctx.fillStyle='rgba(16,29,53,.95)';ctx.fillRect(ox,oy,bW*SC,bD*SC);
+  ctx.fillStyle='#F1F5F9';ctx.fillRect(ox,oy,bW*SC,bD*SC);
+  ctx.strokeStyle='#334155';ctx.lineWidth=2;ctx.strokeRect(ox,oy,bW*SC,bD*SC);
 
   // Dacă nu există camere - afișăm mesaj în canvas
   if(!fl||!fl.rects||fl.rects.length===0){
@@ -905,10 +906,10 @@ function _rvRenderPlan(fl,b){
     // Label
     if(rw>22&&rh>14){
       const lines=(r.lbl||r.t).split('\n');
-      ctx.fillStyle=C.stroke; ctx.font=`bold ${Math.min(9,rw/6)}px IBM Plex Mono`; ctx.textAlign='center';
+      ctx.fillStyle='#0F172A'; ctx.font=`bold ${Math.min(9,rw/6)}px IBM Plex Mono`; ctx.textAlign='center';
       lines.forEach((ln,li)=>ctx.fillText(ln,rx+rw/2,ry+rh/2+(li-(lines.length-1)/2)*11));
       if(!r.bal&&rh>24&&r.w*r.h>1){
-        ctx.fillStyle='rgba(255,255,255,.2)';ctx.font=`${Math.min(8,rw/8)}px IBM Plex Mono`;
+        ctx.fillStyle='rgba(0,0,0,.4)';ctx.font=`${Math.min(8,rw/8)}px IBM Plex Mono`;
         ctx.fillText(_rvFmt(r.w*r.h)+'m²',rx+rw/2,ry+rh/2+lines.length*5.5+8);
       }
       ctx.textAlign='left';
@@ -1137,26 +1138,26 @@ function _rvRenderFacade(b){
     ctx.fillText('FAȚADĂ '+label+(isMain?' ◀ PRINCIPALĂ (FRONT STRADAL)':''),pad,oy_-7);
     ctx.textAlign='left';
 
-    // Building fill
-    ctx.fillStyle='rgba(17,27,50,.95)'; ctx.fillRect(ox_,oy_,fW,facadeH);
-    ctx.strokeStyle='#CBD5E1'; ctx.lineWidth=2.5; ctx.strokeRect(ox_,oy_,fW,facadeH);
+    // Building fill — fond alb arhitectural
+    ctx.fillStyle='#EAEFF5'; ctx.fillRect(ox_,oy_,fW,facadeH);
+    ctx.strokeStyle='#1E293B'; ctx.lineWidth=2; ctx.strokeRect(ox_,oy_,fW,facadeH);
 
     // Sol
-    ctx.fillStyle='rgba(60,80,100,.3)'; ctx.fillRect(ox_-10,oy_+facadeH,fW+20,8);
-    ctx.strokeStyle='rgba(100,120,150,.5)'; ctx.lineWidth=1.5;
+    ctx.fillStyle='#94A3B8'; ctx.fillRect(ox_-10,oy_+facadeH,fW+20,8);
+    ctx.strokeStyle='#334155'; ctx.lineWidth=2;
     ctx.beginPath(); ctx.moveTo(ox_-20,oy_+facadeH); ctx.lineTo(ox_+fW+40,oy_+facadeH); ctx.stroke();
-    ctx.fillStyle='#475569'; ctx.font='8px IBM Plex Mono';
+    ctx.fillStyle='#334155'; ctx.font='bold 8px IBM Plex Mono';
     ctx.fillText('COTA ±0.00 (CTN)',ox_,oy_+facadeH+20);
 
     // Planșee (linii orizontale inter-etaj)
     for(let i=1;i<niv;i++){
       const ly=oy_+facadeH-i*P.hn*SC;
-      ctx.fillStyle='rgba(203,213,225,.10)'; ctx.fillRect(ox_,ly-3,fW,3);
-      ctx.strokeStyle='rgba(203,213,225,.2)'; ctx.lineWidth=1;
+      ctx.fillStyle='rgba(30,41,59,.12)'; ctx.fillRect(ox_,ly-3,fW,3);
+      ctx.strokeStyle='#94A3B8'; ctx.lineWidth=1;
       ctx.beginPath(); ctx.moveTo(ox_,ly); ctx.lineTo(ox_+fW,ly); ctx.stroke();
-      ctx.fillStyle='#64748b'; ctx.font='7px IBM Plex Mono';
+      ctx.fillStyle='#334155'; ctx.font='bold 7px IBM Plex Mono';
       ctx.fillText(i===0?'P':`E${i}`,ox_-28,ly+4);
-      ctx.fillStyle='rgba(212,175,55,.5)'; ctx.font='7px IBM Plex Mono';
+      ctx.fillStyle='#1D4ED8'; ctx.font='7px IBM Plex Mono';
       ctx.fillText('+'+(i*P.hn).toFixed(2)+'m',ox_-28,ly+12);
     }
     ctx.fillStyle='#64748b'; ctx.font='7px IBM Plex Mono';
@@ -1172,31 +1173,42 @@ function _rvRenderFacade(b){
       const wy=oy_+facadeH-(row+1)*P.hn*SC+(P.hn*SC-wH)*.28;
       for(let col=0;col<wCols;col++){
         if(col===coreCol_){
-          // Nucleu scărilor (fara geam, culoare diferita)
-          ctx.fillStyle='rgba(37,99,235,.18)'; ctx.fillRect(ox_+col*colSp_+(colSp_-wW*.45)/2,wy,wW*.45,wH);
-          ctx.strokeStyle='rgba(59,130,246,.5)'; ctx.lineWidth=1; ctx.strokeRect(ox_+col*colSp_+(colSp_-wW*.45)/2,wy,wW*.45,wH);
+          // Nucleu scărilor
+          ctx.fillStyle='rgba(148,163,184,.3)'; ctx.fillRect(ox_+col*colSp_+(colSp_-wW*.45)/2,wy,wW*.45,wH);
+          ctx.strokeStyle='#64748B'; ctx.lineWidth=1; ctx.strokeRect(ox_+col*colSp_+(colSp_-wW*.45)/2,wy,wW*.45,wH);
           continue;
         }
         const wx_=ox_+col*colSp_+(colSp_-wW)/2;
         // Solicitare solara: fațadele S/SE/SV au geamuri mai luminoase
         const solarBoost=(['S','SE','SV'].includes(P.frontDir)&&isMain)||(['N','NE','NV'].includes(P.frontDir)&&!isMain);
-        ctx.fillStyle=`rgba(56,189,248,${solarBoost?.40:.18})`; ctx.fillRect(wx_,wy,wW,wH);
-        ctx.strokeStyle='#38BDF8'; ctx.lineWidth=1.5; ctx.strokeRect(wx_,wy,wW,wH);
+        ctx.fillStyle=`rgba(147,210,250,${solarBoost?.75:.55})`; ctx.fillRect(wx_,wy,wW,wH);
+        ctx.strokeStyle='#0369A1'; ctx.lineWidth=1.5; ctx.strokeRect(wx_,wy,wW,wH);
         // Cercevele
-        ctx.strokeStyle='rgba(56,189,248,.4)'; ctx.lineWidth=.6;
+        ctx.strokeStyle='rgba(3,105,161,.35)'; ctx.lineWidth=.6;
         ctx.beginPath();ctx.moveTo(wx_+wW/2,wy);ctx.lineTo(wx_+wW/2,wy+wH);ctx.stroke();
         ctx.beginPath();ctx.moveTo(wx_,wy+wH/2);ctx.lineTo(wx_+wW,wy+wH/2);ctx.stroke();
       }
     }
 
-    // Balcoane (benzi orizontale)
-    for(let row=1;row<niv;row++){
-      const bz=oy_+facadeH-row*P.hn*SC-4;
-      ctx.fillStyle='rgba(212,175,55,.08)'; ctx.fillRect(ox_+8,bz,fW-16,5);
-      ctx.strokeStyle='rgba(212,175,55,.35)'; ctx.lineWidth=1; ctx.strokeRect(ox_+8,bz,fW-16,5);
+    // Balcoane — verificăm config AEDIS
+    const aedisBalc = window.AEDIS?.balconLaturi||[];
+    const aedisAdanc = Math.max(0.8, window.AEDIS?.balconAdancime||1.2);
+    const hasBalcon = aedisBalc.length===0 || // default: balcoane pe toate
+      aedisBalc.some(d=>label.toUpperCase().includes(d.toUpperCase()));
+    if(hasBalcon){
+      for(let row=1;row<niv;row++){
+        const bz=oy_+facadeH-row*P.hn*SC;
+        const bH=Math.max(4,aedisAdanc*SC*0.4);
+        // Placa balcon
+        ctx.fillStyle='rgba(226,232,240,.9)'; ctx.fillRect(ox_-8,bz-bH,fW+16,bH);
+        ctx.strokeStyle='#475569'; ctx.lineWidth=1; ctx.strokeRect(ox_-8,bz-bH,fW+16,bH);
+        // Parapet balcon
+        ctx.strokeStyle='rgba(56,189,248,.6)'; ctx.lineWidth=1.5;
+        ctx.beginPath(); ctx.moveTo(ox_-8,bz-bH); ctx.lineTo(ox_+fW+8,bz-bH); ctx.stroke();
+      }
     }
 
-    // Uța principală (doar fațada principală, parter)
+    // Uță: principală (intrare bloc) sau serviciu (față posterioară)
     if(isMain){
       const doorW=2.4*SC,doorH=3.0*SC;
       const dX=ox_+fW/2-doorW/2,dY=oy_+facadeH-doorH;
@@ -2992,6 +3004,11 @@ async function generateRelevee(){
     const parcNec_=Math.ceil(nrAptEst_*1.2);
     const parcSup_=Math.floor(Math.max(0,P.area-b.bW*b.bD-200)/28);
     const deficit_=Math.max(0,parcNec_-parcSup_);
+    // Calcul parcări cu propunere subsol
+    const subsolNiv_=(()=>{ const n2_=Math.max(1,Math.round(b.sdaTotal/70)); const pN2_=Math.ceil(n2_*1.2); const pS2_=Math.floor(Math.max(0,P.area-b.bW*b.bD-200)/28); const d2_=Math.max(0,pN2_-pS2_); return d2_>0?Math.ceil(d2_/Math.floor(b.bW*b.bD/28)):0; })();
+    const subsolLabel_=subsolNiv_===0?'✓ Suficient pe teren':
+      subsolNiv_===1?`⚠ Propus: 1 subsol (${Math.floor(b.bW*b.bD/28)} loc.)`:
+      `⚠ Propus: ${subsolNiv_} subsoluri (${Math.floor(b.bW*b.bD/28)*subsolNiv_} loc.)`;
     if(bilant) bilant.innerHTML=[
       ['Suprafață parcelă',_rvFmt(P.area)+'m²'],['SC edificiu',_rvFmt(b.scArea)+'m²'],
       ['SDA totală',_rvFmt(b.sdaTotal)+'m²'],
