@@ -6127,26 +6127,3 @@ function _rvInject(){
 // Expune global
 window.generateRelevee = generateRelevee;
 window.closeRelevee    = closeRelevee;
-
-
-// ── FIX DEFINITIV: generateRelevee BLOCAT complet ───────────────────────────
-// Se deblochează NUMAI când butonul Planșe e apăsat explicit
-// (window._rvAllowOpen = true setată în onclick din index.html)
-// Orice auto-call din setTimeout/setInterval/MutationObserver/restore → blocat
-window._rvAllowOpen = false;
-const _origGR = window.generateRelevee;
-if(typeof _origGR === 'function'){
-  window.generateRelevee = async function(...args){
-    if(!window._rvAllowOpen){
-      console.log('[RV] BLOCAT — necesită click explicit pe Planșe');
-      return;
-    }
-    window._rvAllowOpen = false; // reset după fiecare apel
-    return _origGR.apply(this, args);
-  };
-}
-// Expus global pentru butonul din index.html
-window._rvTrigger = function(){
-  window._rvAllowOpen = true;
-  if(typeof window.generateRelevee === 'function') window.generateRelevee();
-};
