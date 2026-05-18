@@ -2922,15 +2922,14 @@ async function generateRelevee(){
   }finally{
     clearTimeout(_rvSafetyTimer);
     prog?.classList.remove('rv-on');
+    if(prog){ prog.style.display='none'; prog.style.visibility='hidden'; prog.style.pointerEvents='none'; }
     document.getElementById('rv-empty')?.style.setProperty('display','none');
     // Re-render după 500ms — canvas e vizibil și layoutat corect
     setTimeout(()=>{
       try{
         _rvRender();
-        // Scroll canvas în vedere
         const dw=document.getElementById('rv-drawwrap');
         if(dw){ dw.scrollTop=0; dw.scrollLeft=0; }
-        document.getElementById('rv-canvas')?.scrollIntoView({block:'start',inline:'start',behavior:'instant'});
       }catch(e){}
     }, 500);
     setTimeout(()=>{try{
@@ -5395,8 +5394,8 @@ async function _rvInject(){
 .rv-drawwrap::-webkit-scrollbar{width:5px;height:5px;}.rv-drawwrap::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:3px;}
 .rv-empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#4A6080;pointer-events:none;}
 .rv-empty-ico{font-size:48px;opacity:.18;filter:grayscale(1);}.rv-empty-t{font-size:14px;font-weight:700;color:#374151;font-family:'Space Grotesk',sans-serif;}.rv-empty-s{font-size:11px;line-height:1.6;max-width:240px;text-align:center;}
-.rv-prog{position:absolute;inset:0;background:rgba(6,12,26,.94);backdrop-filter:blur(10px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:50;opacity:0;pointer-events:none;transition:opacity .2s;}
-.rv-prog.rv-on{opacity:1;pointer-events:all;}
+.rv-prog{position:absolute;inset:0;background:rgba(6,12,26,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:50;opacity:0;pointer-events:none;visibility:hidden;transition:opacity .2s;}
+.rv-prog.rv-on{opacity:1;pointer-events:all;visibility:visible;}
 .rv-pct{font-family:'IBM Plex Mono',monospace;font-size:48px;font-weight:600;color:#D4AF37;line-height:1;}
 .rv-pbar-w{width:240px;height:3px;background:rgba(255,255,255,.07);border-radius:99px;}
 .rv-pbar{height:3px;background:linear-gradient(90deg,#D4AF37,#F5C518);border-radius:99px;transition:width .12s;}
