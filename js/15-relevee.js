@@ -2904,6 +2904,7 @@ async function generateRelevee(){
         const scH = availH / (b.P.D + b.P.rf + b.P.rs + 4);
         fitSc = Math.min(isMobScale ? 8 : 14, Math.max(6, Math.floor(Math.min(scW, scH))));
       }
+      if(!isMobScale && fitSc < 8) fitSc = 8; // min vizibil pe desktop
       _RV.scale = fitSc;
       document.getElementById('rv-zval').textContent = Math.round(fitSc/12*100)+'%';
     }
@@ -5293,7 +5294,7 @@ async function _rvInject(){
     const css=document.createElement('style'); css.id='rv-css';
     css.textContent=`
 #rv-modal{position:fixed;inset:0;z-index:8000;background:rgba(4,8,18,.0);backdrop-filter:blur(0);display:flex;flex-direction:column;pointer-events:none;transition:all .25s;}
-#rv-modal.rv-modal-open{background:rgba(4,8,18,.96);backdrop-filter:blur(16px);pointer-events:all;}
+#rv-modal.rv-modal-open{background:rgba(4,8,18,.97);pointer-events:all;}
 #rv-modal .rv-body{display:grid;grid-template-columns:260px 1fr 240px;height:100%;position:relative;}
 /* lpanel-hidden CSS removed — rv-toggle-lpanel button eliminated */
 /* opacity gestionat pe rv-modal, nu pe body */
