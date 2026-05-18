@@ -20,11 +20,10 @@
   }
   waitReady(()=>{
     _injectButtons();
-    const obs=new MutationObserver(()=>{
-      if(document.querySelector('.rv-expbtn')&&!document.getElementById('rv-walls-btns'))
-        _injectButtons();
-    });
-    obs.observe(document.body,{childList:true,subtree:true});
+    const _wObs=setInterval(()=>{
+      if(document.querySelector('.rv-expbtn')&&!document.getElementById('rv-walls-btns')) _injectButtons();
+      if(document.getElementById('rv-walls-btns')) clearInterval(_wObs);
+    },500);
     console.log('[Walls v1] ✅ loaded');
   });
 
