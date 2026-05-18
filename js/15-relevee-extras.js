@@ -18,11 +18,11 @@
   }
   waitReady(()=>{
     _injectExtrasButtons();
-    const obs=new MutationObserver(()=>{
+    const _extObs=setInterval(()=>{
       if(document.querySelector('.rv-expbtn')&&!document.getElementById('rv-extras-wrap'))
         _injectExtrasButtons();
-    });
-    obs.observe(document.body,{childList:true,subtree:true});
+      if(document.getElementById('rv-extras-wrap')) clearInterval(_extObs);
+    },500);
     _inject3DAnimButtons();
     console.log('[Extras] ✅ loaded');
   });
