@@ -15,12 +15,10 @@
   waitReady(()=>{
     // Așteptăm puțin ca toate modulele să-și fi injectat butoanele lor
     setTimeout(_buildCentralToolbar, 1500);
-    const obs = new MutationObserver(()=>{
-      if(!document.getElementById('rv-central-toolbar')) {
-        setTimeout(_buildCentralToolbar, 800);
-      }
-    });
-    obs.observe(document.body,{childList:true,subtree:true});
+    const _tbObs=setInterval(()=>{
+      if(!document.getElementById('rv-central-toolbar')) setTimeout(_buildCentralToolbar,800);
+      else clearInterval(_tbObs);
+    },500);
   });
 })();
 
@@ -203,11 +201,7 @@ function _patchInfoToggle(){
 }
 
 // Rulăm la fiecare mutație (re-render relevee poate adăuga butonul din nou)
-const _infoPatchObs = new MutationObserver(()=>{
-  _patchInfoToggle();
-  _syncInfoBtn();
-});
-_infoPatchObs.observe(document.body, {childList:true, subtree:true});
+setInterval(()=>{ try{_patchInfoToggle();_syncInfoBtn();}catch(e){} },1000);
 setTimeout(()=>{ _patchInfoToggle(); _syncInfoBtn(); }, 2000);
 
 
@@ -348,12 +342,7 @@ function _rvMobileFixes(){
 }
 
 // Rulăm la injecție și la resize
-const _rvMobileObs = new MutationObserver(() => {
-  if(document.getElementById('rv-mobile-menu-btn')) {
-    _rvMobileFixes();
-  }
-});
-_rvMobileObs.observe(document.body, {childList:true, subtree:true});
+const _rvMobileObs=setInterval(()=>{ if(document.getElementById('rv-mobile-menu-btn')){_rvMobileFixes();clearInterval(_rvMobileObs);} },500);
 window.addEventListener('resize', _rvMobileFixes);
 setTimeout(_rvMobileFixes, 1500);
 setTimeout(_rvMobileFixes, 3000);
