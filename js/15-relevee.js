@@ -2971,12 +2971,12 @@ async function generateRelevee(){
       ['Apartamente est.',_rvFmt(nrAptEst_)+' unități'],
       ['Parcaje necesare',parcNec_+' loc.'+(deficit_>0?' ⚠ deficit '+deficit_:' ✓')],
     ].map(([l,v])=>`<div class="rv-stat"><span class="rv-sl">${l}</span><span class="rv-sv">${v}</span></div>`).join('');
-  }catch(e){} }, 300);
+  }catch(e){} }, 3000);
   setTimeout(()=>{ try{
     const fl0=_RV.floors[0]||{rects:[],isu:{}};
     const dnaDiv=document.getElementById('rv-dna');
     if(dnaDiv) dnaDiv.innerHTML=_rvDNARadar(b,P,fl0);
-  }catch(e){} }, 800);
+  }catch(e){} }, 6000);
   setTimeout(()=>{ try{
     const fl=_RV.floors[0];
     const potOk=b.scArea/P.area<=P.pot+.001; const cutOk=b.sdaTotal/P.area<=P.cut+.001;
@@ -2994,11 +2994,11 @@ async function generateRelevee(){
       ['ISU',isuOk?'ok':'warn',isuOk?'CONFORM':'Verificare',fnN.isuNorm||'P118'],
       ['Parcaje',fnN.pk_unit==='per_apt'?'warn':'ok',fnN.pk_norm||'-','1/apt'],
     ].map(([l,cls,v,ref])=>`<div class="rv-norm-item"><div><div class="rv-nl">${l}</div><div class="rv-nref">${ref}</div></div><div class="rv-badge rv-badge-${cls}">${v}</div></div>`).join('');
-  }catch(e){} }, 1400);
+  }catch(e){} }, 9000);
   setTimeout(()=>{ try{
     const avizeContent=document.getElementById('rv-avize-content');
     if(avizeContent) avizeContent.innerHTML=_rvBuildAvizeTimeline(b,P);
-  }catch(e){} }, 2200);
+  }catch(e){} }, 12000);
   if(typeof ss === 'function') ss(`✅ Relevee generate în ${secs}s — ${b.niv} niveluri, SDA=${_rvFmt(b.sdaTotal)}m²`);
 }
 window.generateRelevee = generateRelevee; // export imediat după funcție
@@ -5347,7 +5347,7 @@ async function _rvInject(){
     css.textContent=`
 #rv-modal{position:fixed;inset:0;z-index:8000;background:rgba(4,8,18,.0);backdrop-filter:blur(0);display:flex;flex-direction:column;pointer-events:none;transition:all .25s;}
 #rv-modal.rv-modal-open{background:rgba(4,8,18,.97);pointer-events:all;}
-#rv-modal .rv-body{display:grid;grid-template-columns:260px 1fr 240px;height:100%;position:relative;}
+#rv-modal .rv-body{display:grid;grid-template-columns:260px 1fr 240px;height:100%;min-height:0;position:relative;}
 /* lpanel-hidden CSS removed — rv-toggle-lpanel button eliminated */
 /* opacity gestionat pe rv-modal, nu pe body */
 .rv-topbar{display:flex;align-items:center;gap:10px;padding:0 14px;height:50px;background:rgba(6,12,26,.98);border-bottom:1px solid rgba(212,175,55,.15);flex-shrink:0;}
@@ -5382,7 +5382,7 @@ async function _rvInject(){
 .rv-tog.rv-tog-on{background:rgba(212,175,55,.28);border-color:rgba(212,175,55,.5);}
 .rv-tog::after{content:'';position:absolute;width:11px;height:11px;border-radius:50%;background:#64748b;top:2px;left:2px;transition:all .2s;}
 .rv-tog.rv-tog-on::after{background:#F5C518;left:17px;}
-.rv-center{display:flex;flex-direction:column;background:#060C1A;overflow:hidden;}
+.rv-center{display:flex;flex-direction:column;background:#060C1A;overflow:hidden;min-height:0;}
 .rv-tabs{display:flex;background:#0B1426;border-bottom:1px solid rgba(212,175,55,.12);flex-shrink:0;}
 .rv-tab{padding:9px 14px;font-size:11px;font-weight:700;cursor:pointer;color:#4A6080;border-bottom:2px solid transparent;transition:all .15s;letter-spacing:.03em;font-family:'Space Grotesk',sans-serif;}
 .rv-tab:hover{color:#DDE6F5;}.rv-tab.rv-on{color:#D4AF37;border-bottom-color:#D4AF37;}
@@ -5391,7 +5391,7 @@ async function _rvInject(){
 .rv-fb-label{font-size:9px;color:#4A6080;white-space:nowrap;font-weight:700;font-family:'IBM Plex Mono',monospace;}
 .rv-fbtn{padding:3px 9px;border-radius:5px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:#4A6080;cursor:pointer;font-size:10px;font-weight:700;white-space:nowrap;transition:all .1s;font-family:'IBM Plex Mono',monospace;}
 .rv-fbtn.rv-on{border-color:#D4AF37;background:rgba(212,175,55,.1);color:#F5C518;}
-.rv-drawwrap{flex:1;overflow:auto;display:flex;align-items:flex-start;justify-content:flex-start;padding:16px;position:relative;min-height:200px;}
+.rv-drawwrap{flex:1;min-height:300px;overflow:auto;display:flex;align-items:flex-start;justify-content:flex-start;padding:16px;position:relative;}
 .rv-drawwrap::-webkit-scrollbar{width:5px;height:5px;}.rv-drawwrap::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:3px;}
 .rv-empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#4A6080;pointer-events:none;}
 .rv-empty-ico{font-size:48px;opacity:.18;filter:grayscale(1);}.rv-empty-t{font-size:14px;font-weight:700;color:#374151;font-family:'Space Grotesk',sans-serif;}.rv-empty-s{font-size:11px;line-height:1.6;max-width:240px;text-align:center;}
