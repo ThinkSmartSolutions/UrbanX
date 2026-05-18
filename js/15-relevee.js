@@ -86,8 +86,6 @@ const _RV = {
   fnParter: null,  // null = same as fn; altfel: funcțiunea parterului P0
 };
 window._RV = _RV; // expus global pentru canvas-upgrade.js și alte module
-// FIX: FN_CONFIG trebuie pe window — PDF engine și alte module îl accesează via window.FN_CONFIG
-// (const la nivel global NU e proprietate pe window în browsere moderne)
 
 // ═══════════════════════════════════════════════════════════════════════════
 // FN_CONFIG — definiții complete per funcțiune
@@ -168,7 +166,6 @@ const FN_CONFIG = {
     norms:['HG 237/2001','P118-3/2015','NP 067/2002','OMS 119/2014'],
   },
 };
-window.FN_CONFIG = FN_CONFIG; // FIX: necesar pentru PDF engine, canvas-upgrade, module externe
 
 // Returnează funcțiunea activă pentru etajul dat (0=parter poate fi diferit)
 function _rvGetFloorFn(floorIdx){
@@ -247,64 +244,49 @@ function _rvGetParcelParams(){
   const hMax     = params.h || reg.h || 28;
   const hn       = 3.0;
 
-  // ── DIMENSIUNI DIN AEDIS ─────────────────────────────────────────────────
-  // FIX: detectăm CORECT multi-building vs multi-etaj
-  // bldIdx = index CLĂDIRE (0,1,2...) pentru multivolum
-  // floor  = index ETAJ (0,1,2...) pentru etajele aceleiași clădiri
-  // O clădire cu 7 etaje are floor=0..6 dar bldIdx=undefined sau același număr
-  // → NU înseamnă 7 clădiri separate!
+  // ── MULTIVOLUME: folosim corpul selectat, nu max din toate ───────────────
+  // _lastFeats are proprietăți bldIdx (corp) și floor (etaj per corp)
   let aedisH = null, aedisW = null, aedisD = null, aedisArea = null;
   if(!isDemolare && S.vol?._lastFeats?.length) {
     const feats = S.vol._lastFeats;
-    // Înălțimea = max din toate features
-    aedisH = feats.reduce((m,f) => Math.max(m, f.properties?.top||0), 0) || null;
-
-    // Parterul = feature cu ARIA MAXIMĂ (nu feats[0] care poate fi etajul cel mai mic)
-    // O clădire cu setbackuri are parterul cel mai mare — sigur ground floor
-    let bldFloor0 = feats[0];
-    let maxFeatureArea = 0;
-    feats.forEach(f => {
-      try {
-        if(f?.geometry){
-          const a = turf.area(f);
-          if(a > maxFeatureArea){ maxFeatureArea = a; bldFloor0 = f; }
+    const isMulti = S.vol.multiVol && feats.some(f => f.properties?.bldIdx != null);
+    if(isMulti) {
+      // Corpul selectat = _RV.selectedBldIdx sau 0
+      const selBld = (typeof _RV !== 'undefined' && _RV.selectedBldIdx != null)
+        ? _RV.selectedBldIdx : 0;
+      const bldFeats = feats.filter(f => (f.properties?.bldIdx ?? 0) === selBld);
+      if(bldFeats.length) {
+        // Înălțimea corpului selectat
+        aedisH = bldFeats.reduce((m,f) => Math.max(m, f.properties?.top||0), 0) || null;
+        // Bbox corpului selectat pentru W și D
+        const bldFloor0 = bldFeats.find(f => f.properties?.floor === 0) || bldFeats[0];
+        if(bldFloor0?.geometry) {
+          try {
+            const bb2 = turf.bbox({type:'FeatureCollection',features:[bldFloor0]});
+            aedisW = Math.round(turf.distance(
+              {type:'Feature',geometry:{type:'Point',coordinates:[bb2[0],bb2[1]]}},
+              {type:'Feature',geometry:{type:'Point',coordinates:[bb2[2],bb2[1]]}},
+              {units:'meters'}) * 10) / 10;
+            aedisD = Math.round(turf.distance(
+              {type:'Feature',geometry:{type:'Point',coordinates:[bb2[0],bb2[1]]}},
+              {type:'Feature',geometry:{type:'Point',coordinates:[bb2[0],bb2[3]]}},
+              {units:'meters'}) * 10) / 10;
+            aedisArea = Math.round(turf.area({type:'FeatureCollection',features:[bldFloor0]}));
+          } catch(e) {}
         }
-      }catch(e){ /* feature invalid — skip */ }
-    });
-
-    if(bldFloor0?.geometry) {
-      try {
-        const bb = turf.bbox({type:'FeatureCollection', features:[bldFloor0]});
-        aedisW = Math.round(turf.distance(
-          {type:'Feature',geometry:{type:'Point',coordinates:[bb[0],bb[1]]}},
-          {type:'Feature',geometry:{type:'Point',coordinates:[bb[2],bb[1]]}},
-          {units:'meters'}) * 10) / 10;
-        aedisD = Math.round(turf.distance(
-          {type:'Feature',geometry:{type:'Point',coordinates:[bb[0],bb[1]]}},
-          {type:'Feature',geometry:{type:'Point',coordinates:[bb[0],bb[3]]}},
-          {units:'meters'}) * 10) / 10;
-        aedisArea = Math.round(maxFeatureArea);
-      } catch(e) {}
+      }
+    } else {
+      // Volum unic — comportament existent
+      aedisH = feats.reduce((m,f) => Math.max(m, f.properties?.top||0), 0) || null;
     }
   }
 
-
   const niv = aedisH ? Math.round(aedisH/hn) : (params.niv || reg.niv || Math.floor(hMax/hn));
 
-  // FIX DIMENSIUNI: folosim întotdeauna dimensiunile CLĂDIRII (nu parcelei)
-  // când avem date AEDIS valide >= 5m. Parcela de 60×40m cu o clădire de 12×10m
-  // NU trebuie să genereze un plan de 60×40m → sute de camere → freeze.
-  const useAedisW = aedisW && aedisW >= 4 && aedisW <= 200;
-  const useAedisD = aedisD && aedisD >= 4 && aedisD <= 150;
-  // Cap la max 50m lățime și 26m adâncime — previne OOM crash pe parcele mari
-  const finalW = Math.min(50, useAedisW ? aedisW : Math.round(bboxW * 10) / 10);
-  const finalD = Math.min(26, useAedisD ? aedisD : Math.round(bboxD * 10) / 10);
-  const finalArea = (aedisArea && aedisArea >= 25) ? aedisArea : Math.round(areaRaw);
-
-  // Când folosim dimensiunile clădirii, retrageri sunt deja incluse → le setăm la 0
-  const rl = useAedisW ? 0 : (params.rl ?? reg.rl ?? 3);
-  const rf = useAedisW ? 0 : (params.rf ?? reg.rf ?? 0);
-  const rs = useAedisW ? 0 : (params.rs ?? reg.rs ?? 6);
+  // Dacă corpul e prea mic pentru un plan meaningful (< 8m), folosim parcela întreagă
+  const finalW = (aedisW && aedisW >= 8) ? aedisW : Math.round(bboxW * 10) / 10;
+  const finalD = (aedisD && aedisD >= 8) ? aedisD : Math.round(bboxD * 10) / 10;
+  const finalArea = (aedisArea && aedisArea >= 50) ? aedisArea : Math.round(areaRaw);
 
   return {
     nrCad: ap.nrcad || ap.id || '—',
@@ -312,7 +294,9 @@ function _rvGetParcelParams(){
     W: finalW,
     D: finalD,
     area: finalArea,
-    rf, rl, rs,
+    rf: params.rf ?? reg.rf ?? 0,
+    rl: params.rl ?? reg.rl ?? 3,
+    rs: params.rs ?? reg.rs ?? 6,
     pot: (params.pot ?? reg.pot ?? 70) / 100,
     cut: params.cut ?? reg.cut ?? 2.0,
     niv: Math.max(1, Math.min(25, niv)),
@@ -800,21 +784,8 @@ function _rvInitCanvas(W,H,canvasId){
     wrap.appendChild(tmp);
     return _rvInitCanvas(W,H,tmp.id);
   }
-  // FIX OOM: reducem DPR când canvasul e mare sau 3D viewer e activ
-  // Un canvas 1500×1000 cu DPR=2 = 3000×2000 = 24MB — prea mult lângă WebGL
-  const rawDPR = window.devicePixelRatio || 1;
-  const canvasPixels = W * H;
-  const viewer3dActive = document.getElementById('topbar')?.classList.contains('viewer-open') ||
-                          document.getElementById('topbar')?.classList.contains('viewer-bg') ||
-                          window._rvViewerWasActive;
-  let dpr;
-  if(viewer3dActive || canvasPixels > 800000) {
-    dpr = 1; // 3D viewer activ sau canvas >800k px → DPR=1 fără scalare
-  } else if(canvasPixels > 400000) {
-    dpr = Math.min(rawDPR, 1.5); // canvas mediu → max 1.5
-  } else {
-    dpr = Math.min(rawDPR, 2);   // canvas mic → max 2 (original)
-  }
+  // iOS: cap DPR la 2 ca să nu depășim limita de memorie canvas (~16MP)
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
   cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr);
   cv.style.width = W+'px'; cv.style.height = H+'px';
   const ctx = cv.getContext('2d');
@@ -2853,30 +2824,24 @@ async function generateRelevee(){
 
   _rvOpen();
 
-  // ── Selector corp — DOAR pentru multivolume real ─────────────────────────
-  // Fără selector de corpuri — Releveul generează pentru volumul activ
-  document.getElementById('rv-bld-selector')?.remove();
-  _RV.selectedBldIdx = 0;
-
-  // Referință la overlay pentru cleanup de urgență
-  const prog = document.getElementById('rv-prog');
-  const _progOff = ()=>{ try{ prog?.classList.remove('rv-on'); }catch(e){} };
-
-  let P;
-  try{
-    P = _rvGetParcelParams();
-  }catch(parcelErr){
-    console.error('[RV] _rvGetParcelParams error:', parcelErr);
-    _progOff();
-    document.getElementById('rv-empty')?.style.setProperty('display','none');
-    return;
+  // ── Selector corp pentru multivolume ─────────────────────────────────────
+  if(S.vol?.multiVol && S.vol._lastFeats?.some(f=>f.properties?.bldIdx!=null)){
+    const bldCount = new Set(S.vol._lastFeats.map(f=>f.properties?.bldIdx??0)).size;
+    if(!window._RV) window._RV = {};
+    _RV.selectedBldIdx = _RV.selectedBldIdx ?? 0;
+    const existing = document.getElementById('rv-bld-selector');
+    if(!existing && bldCount > 1){
+      const sel = document.createElement('div');
+      sel.id = 'rv-bld-selector';
+      sel.style.cssText = 'position:fixed;top:54px;left:50%;transform:translateX(-50%);z-index:9999;background:#111c35;border:1px solid #e8b341;border-radius:8px;padding:6px 14px;display:flex;align-items:center;gap:8px;font-size:12px;color:#e8b341;font-family:monospace;';
+      sel.innerHTML = '🏗 Corp: '+[...Array(bldCount)].map((_,i)=>
+        `<button onclick="window._RV.selectedBldIdx=${i};document.getElementById('rv-bld-selector').querySelectorAll('button').forEach((b,j)=>b.style.background=j===${i}?'#e8b341':'transparent');document.getElementById('rv-bld-selector').querySelectorAll('button').forEach((b,j)=>b.style.color=j===${i}?'#000':'#e8b341');generateRelevee();" style="background:${i===(_RV.selectedBldIdx??0)?'#e8b341':'transparent'};color:${i===(_RV.selectedBldIdx??0)?'#000':'#e8b341'};border:1px solid #e8b341;border-radius:4px;padding:3px 8px;cursor:pointer;font-family:monospace;">${i+1}</button>`
+      ).join('');
+      document.body.appendChild(sel);
+    }
   }
-  if(!P || !P.W || !P.D){
-    console.warn('[RV] Parametri parcelă invalizi — P=', P);
-    _progOff();
-    document.getElementById('rv-empty')?.style.setProperty('display','none');
-    return;
-  }
+
+  const P = _rvGetParcelParams();
   _RV.parcelParams = P;
 
   const t0 = performance.now();
@@ -2886,7 +2851,7 @@ async function generateRelevee(){
   const tInt = setInterval(()=>{ if(tval) tval.textContent=((performance.now()-t0)/1000).toFixed(1)+'s'; },80);
 
   // Progress
-  document.getElementById('rv-prog')?.classList.add('rv-on');
+  const prog = document.getElementById('rv-prog'); prog?.classList.add('rv-on');
   const psteps = document.getElementById('rv-psteps');
   const ppct   = document.getElementById('rv-ppct');
   const pbar   = document.getElementById('rv-pbar');
@@ -2914,51 +2879,19 @@ async function generateRelevee(){
   prog?.classList.remove('rv-on');
 
   // Compute — try/finally garantează că rv-prog dispare indiferent de erori
-  // FIX FREEZE: adăugăm await _rvSleep(0) înainte de fiecare operație grea
-  // → cedăm event loop-ul → browser poate procesa click/scroll/close în orice moment
-  // Fără yield: JS blochează main thread 2-10s → tab înghețat complet
+  // Timeout safety: dacă generarea durează >20s, scoatem overlay-ul forțat
   const _rvSafetyTimer = setTimeout(()=>{ document.getElementById('rv-prog')?.classList.remove('rv-on'); }, 20000);
   let b;
   try{
-  // Yield 1: cedăm event loop IMEDIAT după _rvOpen
-  // Browserul poate repaint modal-ul și procesa eventele
-  await _rvSleep(0);
-
-  // FIX OOM: acum că suntem async, putem face operații Mapbox fără a bloca UI
-  // Golim sursele WebGL (200-300MB eliberate) ÎNAINTE de calculul building-ului
-  try{
-    if(window.map){
-      window._rvSavedPitch   = window.map.getPitch();
-      window._rvSavedBearing = window.map.getBearing();
-      if(window._rvSavedPitch > 1) window.map.easeTo({pitch:0, duration:300});
-      const emptyGeo = {type:'FeatureCollection',features:[]};
-      const volSrc = window.map.getSource('vol-src');
-      if(volSrc?.setData){ volSrc.setData(emptyGeo); window._rvSavedVolEmpty = true; }
-      ['vol-3d','vol-scen-3d','ctx-3d'].forEach(id=>{
-        try{ if(window.map.getLayer(id)) window.map.setLayoutProperty(id,'visibility','none'); }catch(e){}
-      });
-    }
-  }catch(e){ console.warn('[RV] Mapbox async pause:', e.message); }
-
-  // Yield 2: lăsăm Mapbox să proceseze setData înainte de calculul building-ului
-  await _rvSleep(50);
-
-  console.log('[RV] Start _rvCompBuilding, P:', JSON.stringify({W:P?.W,D:P?.D,niv:P?.niv,area:P?.area,fn:P?.fn}));
   b = _rvCompBuilding(P); _RV.building = b;
-  console.log('[RV] _rvCompBuilding done:', b ? 'OK bW='+b.bW+' bD='+b.bD+' niv='+b.niv : 'NULL/UNDEFINED');
-
   _RV.floors = [];
+  // Pe mobil: calculăm DOAR floor 0 inițial — celelalte lazy la click tab
+  // Calculăm max 2 etaje inițial pe orice dispozitiv — restul lazy la click tab
+  // Previne crash OOM pe cladiri mari (7+ corpi, 4+ etaje)
   const isMobDev = window.innerWidth < 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   const maxEagerFloors = isMobDev ? 1 : Math.min(2, b.niv);
-
-  // Yield 2: înainte de generarea fiecărui etaj (poate fi lent pentru clădiri mari)
   for(let i=0;i<b.niv;i++){
-    if(i < maxEagerFloors){
-      await _rvSleep(0); // cedăm event loop-ul între etaje
-      _RV.floors.push(_rvFloor(b,i));
-    } else {
-      _RV.floors.push(null);
-    }
+    _RV.floors.push(i < maxEagerFloors ? _rvFloor(b,i) : null);
   }
 
   // Floor bar
@@ -2974,10 +2907,11 @@ async function generateRelevee(){
   try{
     const wrap = document.getElementById('rv-drawwrap');
     if(wrap && b.P){
-      const availW = wrap.clientWidth  - 140;
+      const availW = wrap.clientWidth  - 140; // pad + dims
       const availH = wrap.clientHeight - 120;
       const scW = availW / (b.P.W + b.P.rl*2 + 4);
       const scH = availH / (b.P.D + b.P.rf + b.P.rs + 4);
+      // Pe mobil: scala maxima 8 pentru a preveni crash iOS din OOM
       const isMobScale = window.innerWidth < 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
       const fitSc = Math.min(isMobScale ? 8 : 28, Math.max(4, Math.floor(Math.min(scW, scH))));
       _RV.scale = fitSc;
@@ -2985,12 +2919,7 @@ async function generateRelevee(){
     }
   }catch(e){}
 
-  // Yield 3: înainte de randarea canvas (poate fi lentă pentru planuri complexe)
-  await _rvSleep(0);
-  console.log('[RV] Start _rvRender, floors:', _RV.floors?.length, 'floor0:', _RV.floors?.[0]?.rects?.length, 'scale:', _RV.scale);
-  try{ _rvRender(); console.log('[RV] _rvRender done OK'); }catch(renderErr){
-    console.error('[RV] Eroare randare canvas:', renderErr);
-  }
+  _rvRender();
 
   // ── Actualizăm DataBus — toate rapoartele sunt notificate ─────────────
   try{ window._RV_DataBus?.update(b, P); }catch(e){}
@@ -3247,16 +3176,11 @@ function _rvDNAGetSolutii(b, P, potOk, cutOk, solarIssues, isuOk, roomsOk, parcS
 // MODAL OPEN / CLOSE
 // ══════════════════════════════════════════════════════════════════════════
 function _rvOpen(){
-  // FIX FREEZE: _rvOpen TREBUIE să fie instant — fără operații grele sincrone
-  // _rvInject() (2000+ linii HTML) pe browser la 600MB+ = 2-3s freeze sincron
-  // Soluție: injectăm + arătăm modal instant, Mapbox ops se fac ASYNC după primul yield
   if(!document.getElementById('rv-modal')) _rvInject();
   const rvM=document.getElementById('rv-modal');
   rvM.style.visibility='visible';
   rvM.classList.add('rv-modal-open');
   _RV.open=true;
-  window._rvReleveeOpen = true;
-  // Mapbox setData/setLayoutProperty se fac async din generateRelevee după primul await
 }
 
 function closeRelevee(){
@@ -3275,38 +3199,6 @@ function closeRelevee(){
   }, 320);
   // Oprim orice animație solară
   clearInterval(window._rvSolarInterval);
-
-  // FIX OOM: Restaurăm sursele WebGL după închidere
-  window._rvReleveeOpen = false;
-  try{
-    if(window.map && window.S?.vol?._lastFeats?.length){
-      const feats = window.S.vol._lastFeats;
-      const geo = {type:'FeatureCollection',features:feats};
-      if(window._rvSavedVolEmpty){
-        const src = window.map.getSource('vol-src');
-        if(src?.setData) src.setData(geo);
-        window._rvSavedVolEmpty = false;
-      }
-      if(window._rvSavedDistEmpty){
-        const src = window.map.getSource('dist-src');
-        if(src?.setData && window.S?.vol?._lastDistFeats?.length)
-          src.setData({type:'FeatureCollection',features:window.S.vol._lastDistFeats});
-        window._rvSavedDistEmpty = false;
-      }
-    }
-    // Restaurăm vizibilitatea layerelor
-    ['vol-3d','ctx-3d','aedis-dim-layer'].forEach(id=>{
-      try{ if(window.map?.getLayer(id)) window.map.setLayoutProperty(id,'visibility','visible'); }catch(e){}
-    });
-    // Restaurăm pitch
-    if(window.map && window._rvSavedPitch > 1){
-      setTimeout(()=>{
-        try{ window.map.easeTo({pitch:window._rvSavedPitch, bearing:window._rvSavedBearing||0, duration:400}); }catch(e){}
-      }, 350);
-    }
-    if(typeof window._tciResume==='function') window._tciResume();
-    setTimeout(()=>{ try{ window.map?.triggerRepaint(); }catch(e){} }, 450);
-  }catch(e){ console.warn('[RV] resume 3D:', e.message); }
 }
 
 function openRelevee_safe(){
@@ -5446,9 +5338,6 @@ function _rvInject(){
 .rv-empty-ico{font-size:48px;opacity:.18;filter:grayscale(1);}.rv-empty-t{font-size:14px;font-weight:700;color:#374151;font-family:'Space Grotesk',sans-serif;}.rv-empty-s{font-size:11px;line-height:1.6;max-width:240px;text-align:center;}
 .rv-prog{position:absolute;inset:0;background:rgba(6,12,26,.94);backdrop-filter:blur(10px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:50;opacity:0;pointer-events:none;transition:opacity .2s;}
 .rv-prog.rv-on{opacity:1;pointer-events:all;}
-/* FIX: butonul de închidere funcționează MEREU — chiar dacă prog overlay e activ */
-.rv-prog-cancel{position:absolute;top:12px;right:12px;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:#EF4444;border-radius:6px;padding:5px 12px;cursor:pointer;font-size:11px;font-weight:700;z-index:60;}
-.rv-prog.rv-on{opacity:1;pointer-events:all;}
 .rv-pct{font-family:'IBM Plex Mono',monospace;font-size:48px;font-weight:600;color:#D4AF37;line-height:1;}
 .rv-pbar-w{width:240px;height:3px;background:rgba(255,255,255,.07);border-radius:99px;}
 .rv-pbar{height:3px;background:linear-gradient(90deg,#D4AF37,#F5C518);border-radius:99px;transition:width .12s;}
@@ -5914,7 +5803,6 @@ function _rvInject(){
       </div>
       <canvas id="rv-canvas" style="display:block"></canvas>
       <div class="rv-prog" id="rv-prog">
-        <button class="rv-prog-cancel" onclick="closeRelevee()" title="Anulează și închide">✕ Anulează</button>
         <div class="rv-pct" id="rv-ppct">0%</div>
         <div class="rv-pbar-w"><div class="rv-pbar" id="rv-pbar" style="width:0%"></div></div>
         <div class="rv-psteps" id="rv-psteps"></div>
@@ -6240,55 +6128,13 @@ function _rvInject(){
 window.generateRelevee = generateRelevee;
 window.closeRelevee    = closeRelevee;
 
-// Guard: generateRelevee nu poate rula primele 5s după load
-// Previne orice auto-open din setInterval / MutationObserver / state restore
+
+// ── FIX 1: Guard anti auto-open (5s după load) ───────────────────────────
 window._rvReadyAt = Date.now() + 5000;
-const _origGenerateRelevee = generateRelevee;
-window.generateRelevee = async function(...args){
-  if(Date.now() < window._rvReadyAt){
-    console.log('[RV] Auto-call blocat (prea devreme la load)');
-    return;
-  }
-  return _origGenerateRelevee.apply(this, args);
-};
-
-
-
-// Guard simplu: previne apeluri duble rapide pe butonul de corpus selector
-// NU face pre-injectare (cauza auto-deschidere la load)
-;(function(){
-  const _orig = window.generateRelevee;
-  if(typeof _orig !== 'function') return;
-  let _running = false;
+const _origGR = window.generateRelevee;
+if(typeof _origGR === 'function'){
   window.generateRelevee = async function(...args){
-    if(_running){ return; }
-    _running = true;
-    try{ await _orig.apply(this, args); }
-    catch(e){ console.error('[Relevee] generateRelevee error:', e); }
-    finally{ _running = false; }
+    if(Date.now() < window._rvReadyAt){ return; }
+    return _origGR.apply(this, args);
   };
-  window.closeRelevee = function(){
-    _running = false; // reset dacă userul anulează
-    const orig = window._rvCloseRelevee_orig || closeRelevee;
-    if(typeof orig === 'function') orig.call(this);
-  };
-  window._rvCloseRelevee_orig = closeRelevee;
-})();
-
-// ── Pre-injectare modal la idle — FIX FREEZE ─────────────────────────────
-// _rvInject() = 2000+ linii DOM, sincron pe click = 3-5s freeze la 600MB+
-// requestIdleCallback injectează când browserul e LIBER, fără presiune memorie
-// La click pe Planșe: modal există deja → _rvOpen() e instant (5 linii)
-(function(){
-  function doPreInject(){
-    if(document.getElementById('rv-modal')) return; // deja injectat
-    try{ _rvInject(); console.log('[RV] Modal pre-injectat la idle ✓'); }catch(e){}
-  }
-  if(typeof requestIdleCallback === 'function'){
-    // Așteptăm până browserul e LIBER — nu interferăm cu Mapbox init
-    requestIdleCallback(doPreInject, {timeout: 8000});
-  } else {
-    // Fallback pentru Safari: după 4s de la load
-    setTimeout(doPreInject, 4000);
-  }
-})();
+}
