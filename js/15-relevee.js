@@ -3176,6 +3176,11 @@ function _rvDNAGetSolutii(b, P, potOk, cutOk, solarIssues, isuOk, roomsOk, parcS
 // MODAL OPEN / CLOSE
 // ══════════════════════════════════════════════════════════════════════════
 function _rvOpen(){
+  // GUARD: nu se deschide fără click explicit al utilizatorului
+  if(!window._rvAllowOpen){
+    console.log('[RV] _rvOpen blocat — lipsește interacțiunea utilizatorului');
+    return;
+  }
   if(!document.getElementById('rv-modal')) _rvInject();
   const rvM=document.getElementById('rv-modal');
   rvM.style.visibility='visible';
