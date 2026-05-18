@@ -786,8 +786,8 @@ function _rvInitCanvas(W,H,canvasId){
   }
   const _mob=window.innerWidth<768||/iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   let dpr=Math.min(window.devicePixelRatio||1,_mob?2:1);
-  cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr);
-  cv.style.width=W+'px'; cv.style.height=H+'px';
+  cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
+  cv.style.width=W+'px';cv.style.height=H+'px';
   let ctx=cv.getContext('2d');
   if(!ctx&&dpr>1){dpr=1;cv.width=Math.round(W);cv.height=Math.round(H);ctx=cv.getContext('2d');}
   if(!ctx){console.error('[RV] ctx null W='+W+' H='+H);return {cv,ctx:null,W,H};}
@@ -5508,9 +5508,11 @@ async function _rvInject(){
     document.head.appendChild(css);
   }
 
-  // ── HTML ─────────────────────────────────────────────────────────────────
-  // ── HTML — chunks cu RAF (${} expresii se evaluează, doar backtick-urile sunt escaped)
-  const _h=`
+  // ── HTML — div appended first, innerHTML sync, RAF înainte + după ──────
+  const div=document.createElement('div'); div.id='rv-modal';
+  document.body.appendChild(div);
+  await new Promise(r=>requestAnimationFrame(r));
+  div.innerHTML=`
 <div class="rv-topbar">
   <svg width="24" height="24" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="#101D35"/><path d="M18 28h26l13 22-13 22H18l15-22z" fill="#DDE6F5"/><path d="M59 28h23L71 49H53z" fill="#D4AF37"/><path d="M53 55h17l13 19H61z" fill="#D4AF37"/></svg>
   <div><div class="rv-logo-t">UrbanX</div><div class="rv-sub">Relevee Instant</div></div>
@@ -5599,11 +5601,11 @@ async function _rvInject(){
             ['ISU','#EF4444','Evacuare max 30m/40m (P118)'],
             ['NP057','#60A5FA','Suprafețe min. camere (NP 057/2002)'],
             ['Parcaje','#F97316','Locuri parcare (NP 067/2002)'],
-          ].map(([ax,col,desc])=>\`
+          ].map(([ax,col,desc])=>`
           <div title="${desc}" style="display:flex;align-items:center;gap:4px;cursor:help">
             <span style="width:6px;height:6px;border-radius:50%;background:${col};flex-shrink:0;display:inline-block"></span>
             <span style="font-size:8px;font-weight:700;color:${col}">${ax}</span>
-          </div>\`).join('')}
+          </div>`).join('')}
         </div>
         <div style="margin-top:5px;display:flex;gap:5px;align-items:center">
           <div style="height:4px;flex:1;background:linear-gradient(90deg,#EF4444,#F59E0B,#22C55E);border-radius:2px"></div>
@@ -5746,7 +5748,7 @@ async function _rvInject(){
           ['apt3','🔵','3 camere','30','#60A5FA'],
           ['apt4','🟡','4 camere','5','#F59E0B'],
           ['ph','🩷','Penthouse','5','#F472B6'],
-        ].map(([k,ico,lbl,def,col])=>\`
+        ].map(([k,ico,lbl,def,col])=>`
         <div style="margin-bottom:6px">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
             <span style="font-size:8.5px;color:#94a3b8">${ico} ${lbl}</span>
@@ -5755,7 +5757,7 @@ async function _rvInject(){
           <input type="range" min="0" max="${k==='ph'?30:80}" step="5" value="${def}" id="rv-mix-${k}"
             oninput="_rvMixChange()"
             style="width:100%;height:3px;accent-color:${col}">
-        </div>\`).join('')}
+        </div>`).join('')}
         <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:6px;border-top:1px solid rgba(255,255,255,.06)">
           <span style="font-size:8px;color:#4A6080">Total</span>
           <span id="rv-mix-total" style="font-size:10px;font-weight:800;color:#22C55E">100%</span>
@@ -5892,12 +5894,12 @@ async function _rvInject(){
               ${[['POT','#22C55E','Ocupare teren'],['CUT','#22C55E','Utilizare teren'],
                  ['OMS','#FCD34D','Însorire OMS 119'],['ISU','#EF4444','Evacuare P118'],
                  ['NP057','#60A5FA','Supraf. min.'],['Parcaje','#F97316','NP 067/2002']
-                ].map(([ax,col,desc])=>\`
+                ].map(([ax,col,desc])=>`
               <div style="display:flex;align-items:center;gap:4px" title="${desc}">
                 <span style="width:6px;height:6px;border-radius:50%;background:${col};flex-shrink:0;display:inline-block"></span>
                 <span style="font-size:7.5px;font-weight:700;color:${col}">${ax}</span>
                 <span style="font-size:7px;color:#3A5070;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${desc}</span>
-              </div>\`).join('')}
+              </div>`).join('')}
             </div>
             <!-- Bara gradient 0→100 -->
             <div style="margin-top:6px;height:3px;background:linear-gradient(90deg,#EF4444,#F59E0B,#22C55E);border-radius:2px"></div>
@@ -6131,19 +6133,6 @@ async function _rvInject(){
   </div>
 </div>
 <div id="rv-tip"></div>`;
-  const _p1=_h.indexOf('  <!-- LEFT -->');
-  const _p2=_h.indexOf('  <!-- CENTER -->');
-  const _p3=_h.indexOf('  <!-- RIGHT -->');
-  const div=document.createElement('div'); div.id='rv-modal';
-  document.body.appendChild(div);
-  await new Promise(r=>requestAnimationFrame(r));
-  div.insertAdjacentHTML('beforeend',_h.slice(0,_p1));
-  await new Promise(r=>requestAnimationFrame(r));
-  document.getElementById('rv-body-main').insertAdjacentHTML('beforeend',_h.slice(_p1,_p2));
-  await new Promise(r=>requestAnimationFrame(r));
-  document.getElementById('rv-body-main').insertAdjacentHTML('beforeend',_h.slice(_p2,_p3));
-  await new Promise(r=>requestAnimationFrame(r));
-  document.getElementById('rv-body-main').insertAdjacentHTML('beforeend',_h.slice(_p3));
   await new Promise(r=>requestAnimationFrame(r));
 }
 
