@@ -2824,7 +2824,7 @@ async function generateRelevee(){
     return;
   }
 
-  await _rvOpen();
+  _rvOpen();
 
   // ── Selector corp pentru multivolume ─────────────────────────────────────
   if(S.vol?.multiVol && S.vol._lastFeats?.some(f=>f.properties?.bldIdx!=null)){
@@ -2879,18 +2879,17 @@ async function generateRelevee(){
   });
   await _rvSleep(200);
   prog?.classList.remove('rv-on');
-  // Banner verde: apare imediat ce progresul e scos
-  try{const _db=document.createElement('div');_db.id='rv-diag';_db.style.cssText='position:fixed;bottom:12px;left:50%;transform:translateX(-50%);background:#0B1426;border:1.5px solid #22C55E;color:#22C55E;padding:8px 18px;border-radius:8px;font:11px IBM Plex Mono;z-index:99999;white-space:nowrap;';_db.textContent='⏳ prog removed — se calculează...';document.body.appendChild(_db);window._rvDb=_db;}catch(e){}
 
-  // Compute
-  const _rvSafetyTimer = setTimeout(()=>{ document.getElementById('rv-prog')?.classList.remove('rv-on'); }, 3000);
+  // Compute — try/finally garantează că rv-prog dispare indiferent de erori
+  // Timeout safety: dacă generarea durează >20s, scoatem overlay-ul forțat
+  const _rvSafetyTimer = setTimeout(()=>{ document.getElementById('rv-prog')?.classList.remove('rv-on'); }, 20000);
   let b;
   try{
-  await new Promise(r=>requestAnimationFrame(r));
-  await _rvSleep(50);
   b = _rvCompBuilding(P); _RV.building = b;
-  await new Promise(r=>requestAnimationFrame(r));
   _RV.floors = [];
+  // Pe mobil: calculăm DOAR floor 0 inițial — celelalte lazy la click tab
+  // Calculăm max 2 etaje inițial pe orice dispozitiv — restul lazy la click tab
+  // Previne crash OOM pe cladiri mari (7+ corpi, 4+ etaje)
   const maxEagerFloors = 1;
   for(let i=0;i<b.niv;i++){
     _RV.floors.push(i < maxEagerFloors ? _rvFloor(b,i) : null);
@@ -2922,8 +2921,7 @@ async function generateRelevee(){
   }catch(e){}
 
   _rvRender();
-  // Banner update după render
-  try{const _cv=document.getElementById('rv-canvas');const _em=document.getElementById('rv-empty');if(window._rvDb){window._rvDb.style.borderColor='#D4AF37';window._rvDb.style.color='#D4AF37';window._rvDb.textContent='RENDER: b='+!!_RV?.building+' niv='+(+_RV?.building?.niv||'?')+' f0='+(_RV?.floors?.[0]?.rects?.length||'?')+' cv='+(+_cv?.width||0)+'x'+(+_cv?.height||0)+' ctx='+(_cv?.getContext('2d')?'ok':'NULL')+' empty='+(_em?.style?.display||'vis');setTimeout(()=>window._rvDb?.remove(),15000);}}catch(e){}
+  try{const _cv=document.getElementById('rv-canvas');const _em=document.getElementById('rv-empty');const _d=document.createElement('div');_d.style.cssText='position:fixed;bottom:10px;left:50%;transform:translateX(-50%);background:#0B1426;border:1.5px solid #D4AF37;color:#D4AF37;padding:7px 16px;border-radius:7px;font:10px IBM Plex Mono;z-index:99999;white-space:nowrap;';_d.textContent='b='+!!_RV?.building+' niv='+(_RV?.building?.niv||'?')+' f0='+(_RV?.floors?.[0]?.rects?.length||'?')+' cv='+(+_cv?.width||0)+'x'+(+_cv?.height||0)+' ctx='+(_cv?.getContext('2d')?'ok':'NULL')+' empty='+(_em?.style?.display||'vis');document.body.appendChild(_d);setTimeout(()=>_d.remove(),15000);}catch(e){}
 
   // ── Actualizăm DataBus — toate rapoartele sunt notificate ─────────────
   try{ window._RV_DataBus?.update(b, P); }catch(e){}
@@ -2931,8 +2929,7 @@ async function generateRelevee(){
   try{ _rvCalcROI(); }catch(e){}
 
   }catch(computeErr){
-    console.error('[RV] ERR:',computeErr?.message,computeErr?.stack?.split('\n')[1]);
-    try{if(window._rvDb){window._rvDb.style.borderColor='#EF4444';window._rvDb.style.color='#EF4444';window._rvDb.textContent='ERR: '+String(computeErr?.message||computeErr).slice(0,80);setTimeout(()=>window._rvDb?.remove(),15000);}}catch(e){}
+    console.error('[Relevee] Eroare generare:', computeErr);
   }finally{
     clearTimeout(_rvSafetyTimer);
     // ÎNTOTDEAUNA scoatem overlay-urile — indiferent de erori
@@ -2951,7 +2948,7 @@ async function generateRelevee(){
   if(piEl) piEl.innerHTML = `Nr. cad.: <strong style="color:#D4AF37">${P.nrCad}</strong><br>UTR: ${P.utr}<br>Suprafață: ${P.area}m²<br>Dim. bbox: ${P.W.toFixed(1)}m × ${P.D.toFixed(1)}m<br>Front: ${P.frontDir}<br>POT max: ${Math.round(P.pot*100)}%<br>CUT max: ${P.cut}<br>H max: ${P.hMax}m<br>Niveluri: ${b.niv} niv.<br>H total: ${(b.niv*P.hn).toFixed(1)}m`;
 
   // Pe mobil: delay _rvUpdatePanels pentru a permite browser-ului să respire
-  setTimeout(()=>{ try{ _rvUpdatePanels(b,P); }catch(e){ console.error('[RV] panels:',e); } }, 300);
+  setTimeout(()=>{ try{ _rvUpdatePanels(b,P); }catch(e){} }, 300);
   if(typeof ss === 'function') ss(`✅ Relevee generate în ${secs}s — ${b.niv} niveluri, SDA=${_rvFmt(b.sdaTotal)}m²`);
 }
 window.generateRelevee = generateRelevee; // export imediat după funcție
@@ -3175,7 +3172,7 @@ function _rvDNAGetSolutii(b, P, potOk, cutOk, solarIssues, isuOk, roomsOk, parcS
 // ══════════════════════════════════════════════════════════════════════════
 // MODAL OPEN / CLOSE
 // ══════════════════════════════════════════════════════════════════════════
-async function _rvOpen(){
+function _rvOpen(){
   // GUARD + DEBUG: afișăm call stack ca overlay vizibil
   if(!window._rvAllowOpen){
     try{
@@ -3188,7 +3185,7 @@ async function _rvOpen(){
     }catch(e){}
     return;
   }
-  if(!document.getElementById('rv-modal')) await _rvInject();
+  if(!document.getElementById('rv-modal')) _rvInject();
   const rvM=document.getElementById('rv-modal');
   rvM.style.visibility='visible';
   rvM.classList.add('rv-modal-open');
@@ -5293,7 +5290,7 @@ function _rvMobSync(){
 // ══════════════════════════════════════════════════════════════════════════
 // DOM INJECTION — modal + CSS injectate o singură dată
 // ══════════════════════════════════════════════════════════════════════════
-async function _rvInject(){
+function _rvInject(){
   // ── CSS ──────────────────────────────────────────────────────────────────
   if(!document.getElementById('rv-css')){
     const css=document.createElement('style'); css.id='rv-css';
@@ -5512,8 +5509,6 @@ async function _rvInject(){
 
   // ── HTML ─────────────────────────────────────────────────────────────────
   const div=document.createElement('div'); div.id='rv-modal';
-  document.body.appendChild(div);
-  await new Promise(r=>requestAnimationFrame(r));
   div.innerHTML=`
 <div class="rv-topbar">
   <svg width="24" height="24" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="#101D35"/><path d="M18 28h26l13 22-13 22H18l15-22z" fill="#DDE6F5"/><path d="M59 28h23L71 49H53z" fill="#D4AF37"/><path d="M53 55h17l13 19H61z" fill="#D4AF37"/></svg>
@@ -6135,7 +6130,7 @@ async function _rvInject(){
   </div>
 </div>
 <div id="rv-tip"></div>`;
-  await new Promise(r=>requestAnimationFrame(r));
+  document.body.appendChild(div);
 }
 
 // Expune global
