@@ -2670,6 +2670,18 @@ new MutationObserver(() => addBilantExportBtn())
     window.generateRelevee._guarded = true;
     console.log('[RV] Guard aplicat ✓');
   }
+  // Pre-injectare modal când browserul e liber
+  // Acum e SIGUR: guard blochează orice auto-open
+  var doPreInject = function(){
+    if(!document.getElementById('rv-modal') && typeof _rvInject === 'function'){
+      try{ _rvInject(); console.log('[RV] Modal pre-injectat ✓'); }catch(e){}
+    }
+  };
+  if(typeof requestIdleCallback !== 'undefined'){
+    requestIdleCallback(doPreInject, {timeout:8000});
+  } else {
+    setTimeout(doPreInject, 4000);
+  }
   document.addEventListener('DOMContentLoaded', _applyGuard);
   window.addEventListener('load', function(){ setTimeout(_applyGuard, 300); });
 })();
