@@ -2663,7 +2663,8 @@ new MutationObserver(() => addBilantExportBtn())
         console.log('[RV] BLOCAT auto-open');
         return;
       }
-      window._rvAllowOpen = false;
+      // Nu resetam _rvAllowOpen aici - inner guard sau timer il reseteaza
+      // Resetare imediata bloca inner guard (double-wrapping bug)
       return _orig.apply(this, arguments);
     };
     window.generateRelevee._guarded = true;
