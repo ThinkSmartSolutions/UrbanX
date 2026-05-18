@@ -784,22 +784,21 @@ function _rvInitCanvas(W,H,canvasId){
     wrap.appendChild(tmp);
     return _rvInitCanvas(W,H,tmp.id);
   }
-  // Desktop: cap DPR la 1 — harta WebGL consumă GPU memory, canvas mare poate eșua
-  // Mobil: cap DPR la 2 — ecrane retina mici, browsere mai noi
+  // Desktop: cap DPR la 1 — harta WebGL consumă GPU memory
+  // Mobil: cap DPR la 2 — ecrane retina mici
   const isMobCtx = window.innerWidth < 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   let dpr = Math.min(window.devicePixelRatio || 1, isMobCtx ? 2 : 1);
   cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr);
   cv.style.width = W+'px'; cv.style.height = H+'px';
   let ctx = cv.getContext('2d');
-  // Retry la DPR=1 dacă getContext eșuează (GPU OOM pe desktop cu DPR>1)
   if(!ctx && dpr > 1){
-    console.warn('[Relevee] Canvas ctx null la DPR='+dpr+' ('+Math.round(W*dpr)+'×'+Math.round(H*dpr)+'px) — retry DPR=1');
-    dpr = 1;
-    cv.width = Math.round(W); cv.height = Math.round(H);
+    console.warn('[Relevee] ctx null DPR='+dpr+' — retry DPR=1');
+    dpr = 1; cv.width = Math.round(W); cv.height = Math.round(H);
     ctx = cv.getContext('2d');
   }
-  if(!ctx){ console.error('[Relevee] Canvas context null definitiv — W='+W+' H='+H+' DPR='+window.devicePixelRatio); return {cv,ctx:null,W,H}; }
-  ctx.scale(dpr,dpr);
+  if(!ctx){ console.error('[Relevee] ctx null definitiv W='+W+' H='+H); return {cv,ctx:null,W,H}; }
+  const actualDpr = Math.round(cv.width) / W;
+  ctx.scale(actualDpr, actualDpr);
   return {cv,ctx,cv2:cv,ctx2:ctx,W,H};
 }
 
@@ -846,7 +845,7 @@ function _rvRenderPlan(fl,b){
   const W = bW*SC + pad*2 + P.rl*2*SC + 40;
   const H = bD*SC + pad*2 + (P.rf+P.rs)*SC + 60;
   const {cv,ctx}=_rvInitCanvas(W,H);
-  if(!ctx){ console.error('[Relevee] _rvRenderPlan: ctx null ('+W+'×'+H+')'); return; }
+  if(!ctx){ console.error('[Relevee] _rvRenderPlan ctx null'); return; }
   ctx.fillStyle='#060C1A'; ctx.fillRect(0,0,W,H);
   // grid bg
   ctx.strokeStyle='rgba(255,255,255,.018)'; ctx.lineWidth=.5;
@@ -1133,7 +1132,7 @@ function _rvRenderFacade(b){
   const W=Math.max(facadeW_NS,facadeW_EV)+pad*2+120;
   const H=sectionH*4+pad;
   const {cv,ctx}=_rvInitCanvas(W,H);
-  if(!ctx){ console.error('[Relevee] _rvRenderFacade: ctx null'); return; }
+  if(!ctx){ console.error("[Relevee] _rvRenderFacade ctx null"); return; }
   ctx.fillStyle='#060C1A';ctx.fillRect(0,0,W,H);
 
   // ── Helper: desenare o fațadă ──────────────────────────────────────────────
@@ -1307,7 +1306,8 @@ function _rvRenderSection(b){
   const W=cutDim*SC+pad*2+100;
   const H=Ht*SC+pad*2+60;
   const {cv,ctx}=_rvInitCanvas(W+120,H+50);
-  if(!ctx){ console.error('[Relevee] _rvRenderSection: ctx null'); return; }
+
+  if(!ctx){ console.error("[Relevee] _rvRenderSection ctx null"); return; }
   ctx.fillStyle='#060C1A';ctx.fillRect(0,0,cv.width,H+50);
 
   // ── Selector A-A / B-B ─────────────────────────────────────────────────────
@@ -1517,7 +1517,7 @@ function _rvRenderAxono(b){
 
   const W=900, H=700;
   const {cv,ctx}=_rvInitCanvas(W,H);
-  if(!ctx){ console.error('[Relevee] _rvRenderAxono: ctx null'); return; }
+  if(!ctx){ console.error('[Relevee] _rvRenderAxono ctx null'); return; }
   const CX=280, CY=560;
   const pt=(x,y,z)=>[CX+isoX(x,y,z), CY+isoY(x,y,z)];
 
@@ -1669,6 +1669,7 @@ function _rvRenderAxono(b){
   { // block scope for subsequent render
   const iso=(x,y,z)=>({px:(x-y)*Math.cos(Math.PI/6)*s, py:(x+y)*Math.sin(Math.PI/6)*s-z*s*.55});
   const {cv,ctx}=_rvInitCanvas(780,560);
+  if(!ctx){ console.error('[Relevee] _rvRenderSection-2 ctx null'); return; }
   ctx.fillStyle='#060C1A';ctx.fillRect(0,0,780,560);
   // Grid background
   ctx.strokeStyle='rgba(255,255,255,.015)';ctx.lineWidth=.5;
@@ -2637,7 +2638,7 @@ function _rvBuildAvizeTimeline(b, P){
 function _rvRenderScenarii(b){
   const P=b.P||_RV.parcelParams; if(!P) return;
   const {cv,ctx}=_rvInitCanvas(900,600);
-  if(!ctx){ console.error('[Relevee] _rvRenderScenarii: ctx null'); return; }
+  if(!ctx){ console.error('[Relevee] _rvRenderScenarii ctx null'); return; }
   ctx.fillStyle='#060C1A';ctx.fillRect(0,0,900,600);
 
   // Titlu
@@ -2889,6 +2890,9 @@ async function generateRelevee(){
   });
   await _rvSleep(200);
   prog?.classList.remove('rv-on');
+  // Așteptăm un frame ca browser-ul să picteze dispariția overlay-ului
+  // FĂRĂ asta: browser-ul nu pictează remove-ul înainte să blocheze computația sincronă
+  await new Promise(r => requestAnimationFrame(r));
 
   // Compute — try/finally garantează că rv-prog dispare indiferent de erori
   // Timeout safety: dacă generarea durează >20s, scoatem overlay-ul forțat
@@ -2897,11 +2901,9 @@ async function generateRelevee(){
   try{
   b = _rvCompBuilding(P); _RV.building = b;
   _RV.floors = [];
-  // Pe mobil: calculăm DOAR floor 0 inițial — celelalte lazy la click tab
-  // Calculăm max 2 etaje inițial pe orice dispozitiv — restul lazy la click tab
-  // Previne crash OOM pe cladiri mari (7+ corpi, 4+ etaje)
-  const isMobDev = window.innerWidth < 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  const maxEagerFloors = isMobDev ? 1 : Math.min(2, b.niv);
+  // Calculăm DOAR floor 0 eager — restul lazy la click tab pe toate dispozitivele
+  // Previne freeze sincron desktop (etaj 1 poate fi lent pe clădiri mari)
+  const maxEagerFloors = 1;
   for(let i=0;i<b.niv;i++){
     _RV.floors.push(i < maxEagerFloors ? _rvFloor(b,i) : null);
   }
@@ -2939,24 +2941,7 @@ async function generateRelevee(){
   try{ _rvCalcROI(); }catch(e){}
 
   }catch(computeErr){
-    console.error('[Relevee] Eroare generare:', computeErr, computeErr?.stack);
-    // Afișăm eroarea în canvas — utilizatorul vede ce s-a întâmplat
-    try{
-      const cv_err = document.getElementById('rv-canvas');
-      if(cv_err){ cv_err.width=600; cv_err.height=160; cv_err.style.width='600px'; cv_err.style.height='160px';
-        const ctx_e = cv_err.getContext('2d');
-        if(ctx_e){
-          ctx_e.fillStyle='#060C1A'; ctx_e.fillRect(0,0,600,160);
-          ctx_e.fillStyle='rgba(255,94,91,.85)'; ctx_e.font='bold 13px IBM Plex Mono'; ctx_e.textAlign='center';
-          ctx_e.fillText('⚠ Eroare la generarea planului', 300, 55);
-          ctx_e.fillStyle='rgba(138,150,166,.8)'; ctx_e.font='10px IBM Plex Mono';
-          ctx_e.fillText(String(computeErr).slice(0,72), 300, 80);
-          ctx_e.fillStyle='rgba(212,175,55,.5)'; ctx_e.font='9px IBM Plex Mono';
-          ctx_e.fillText('Rulați în consolă: console.log(!!_RV?.building, _RV?.floors?.length, document.getElementById(\'rv-canvas\')?.width)', 300, 110);
-          ctx_e.textAlign='left';
-        }
-      }
-    }catch(e){}
+    console.error('[Relevee] Eroare generare:', computeErr);
   }finally{
     clearTimeout(_rvSafetyTimer);
     // ÎNTOTDEAUNA scoatem overlay-urile — indiferent de erori
@@ -2974,13 +2959,8 @@ async function generateRelevee(){
   const piEl = document.getElementById('rv-parcel-info');
   if(piEl) piEl.innerHTML = `Nr. cad.: <strong style="color:#D4AF37">${P.nrCad}</strong><br>UTR: ${P.utr}<br>Suprafață: ${P.area}m²<br>Dim. bbox: ${P.W.toFixed(1)}m × ${P.D.toFixed(1)}m<br>Front: ${P.frontDir}<br>POT max: ${Math.round(P.pot*100)}%<br>CUT max: ${P.cut}<br>H max: ${P.hMax}m<br>Niveluri: ${b.niv} niv.<br>H total: ${(b.niv*P.hn).toFixed(1)}m`;
 
-  // Pe mobil: delay _rvUpdatePanels pentru a permite browser-ului să respire
-  const isMobUpd = window.innerWidth < 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  if(isMobUpd){
-    setTimeout(()=>{ try{ _rvUpdatePanels(b,P); }catch(e){} }, 300);
-  } else {
-    _rvUpdatePanels(b,P);
-  }
+  // _rvUpdatePanels mereu deferred — previne freeze sincron pe desktop
+  setTimeout(()=>{ try{ _rvUpdatePanels(b,P); }catch(e){ console.error('[RV] updatePanels:', e); } }, 300);
   if(typeof ss === 'function') ss(`✅ Relevee generate în ${secs}s — ${b.niv} niveluri, SDA=${_rvFmt(b.sdaTotal)}m²`);
 }
 window.generateRelevee = generateRelevee; // export imediat după funcție
