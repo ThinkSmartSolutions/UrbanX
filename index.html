@@ -2644,6 +2644,14 @@ new MutationObserver(() => addBilantExportBtn())
     else setTimeout(function(){ if(typeof window.generateRelevee==='function') window.generateRelevee(); }, 500);
   };
 
+  // Deblocăm la orice click (inclusiv butoane din meniuri dinamice)
+  // Reset automat după 2s dacă generateRelevee nu a fost apelat
+  document.addEventListener('click', function(){
+    window._rvAllowOpen = true;
+    clearTimeout(window._rvAllowTimer);
+    window._rvAllowTimer = setTimeout(function(){ window._rvAllowOpen = false; }, 2000);
+  }, true);
+
   function _applyGuard(){
     if(typeof window.generateRelevee !== 'function'){
       setTimeout(_applyGuard, 150); return;
