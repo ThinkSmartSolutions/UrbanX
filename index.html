@@ -2670,24 +2670,7 @@ new MutationObserver(() => addBilantExportBtn())
     window.generateRelevee._guarded = true;
     console.log('[RV] Guard aplicat ✓');
   }
-  // Pre-injectare SIGURĂ: creăm modal în background, îl ținem hidden
-  // Guard activ = generateRelevee() blocat = modal nu se deschide singur
-  function _safePreInject(){
-    if(document.getElementById('rv-modal')) return;
-    if(typeof _rvInject !== 'function'){ setTimeout(_safePreInject, 500); return; }
-    try{
-      _rvInject();
-      var m = document.getElementById('rv-modal');
-      if(m){ m.style.visibility='hidden'; m.classList.remove('rv-modal-open'); }
-      if(window._RV) window._RV.open = false;
-      console.log('[RV] Pre-injectat sigur ✓');
-    }catch(e){ console.warn('[RV] Pre-inject failed:', e); }
-  }
-  if(typeof requestIdleCallback !== 'undefined'){
-    requestIdleCallback(_safePreInject, {timeout:10000});
-  } else {
-    setTimeout(_safePreInject, 5000);
-  }
+
 
   document.addEventListener('DOMContentLoaded', _applyGuard);
   window.addEventListener('load', function(){ setTimeout(_applyGuard, 300); });
