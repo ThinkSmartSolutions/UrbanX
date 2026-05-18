@@ -784,12 +784,17 @@ function _rvInitCanvas(W,H,canvasId){
     wrap.appendChild(tmp);
     return _rvInitCanvas(W,H,tmp.id);
   }
-  // iOS: cap DPR la 2 ca să nu depășim limita de memorie canvas (~16MP)
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  // Desktop: DPR 1 (WebGL map consumă GPU); Mobil: DPR 2
+  const isMobCtx = window.innerWidth < 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  let dpr = Math.min(window.devicePixelRatio || 1, isMobCtx ? 2 : 1);
   cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr);
   cv.style.width = W+'px'; cv.style.height = H+'px';
-  const ctx = cv.getContext('2d');
-  if(!ctx){ console.error('[Relevee] Canvas context null - canvas prea mare sau memorie insuficientă'); return {cv,ctx:null,W,H}; }
+  let ctx = cv.getContext('2d');
+  if(!ctx && dpr > 1){
+    console.warn('[Relevee] ctx null la DPR='+dpr+', retry DPR=1');
+    dpr=1; cv.width=Math.round(W); cv.height=Math.round(H); ctx=cv.getContext('2d');
+  }
+  if(!ctx){ console.error('[Relevee] ctx null definitiv W='+W+' H='+H); return {cv,ctx:null,W,H}; }
   ctx.scale(dpr,dpr);
   return {cv,ctx,cv2:cv,ctx2:ctx,W,H};
 }
@@ -837,7 +842,7 @@ function _rvRenderPlan(fl,b){
   const W = bW*SC + pad*2 + P.rl*2*SC + 40;
   const H = bD*SC + pad*2 + (P.rf+P.rs)*SC + 60;
   const {cv,ctx}=_rvInitCanvas(W,H);
-
+  if(!ctx){ console.error('[RV] _rvRenderPlan ctx null W='+W+' H='+H); return; }
   ctx.fillStyle='#060C1A'; ctx.fillRect(0,0,W,H);
   // grid bg
   ctx.strokeStyle='rgba(255,255,255,.018)'; ctx.lineWidth=.5;
@@ -2877,30 +2882,15 @@ async function generateRelevee(){
   });
   await _rvSleep(200);
   prog?.classList.remove('rv-on');
-  // RAF: garantăm că browser-ul pictează dispariția overlay-ului ÎNAINTE de computație
+  // RAF + sleep: garantăm că browser-ul pictează dispariția overlay-ului ÎNAINTE de computație
   await new Promise(r => requestAnimationFrame(r));
-
-  // ── Diagnostic: afișează starea direct în canvas ──────────────────────
-  function _rvDiag(step, isErr){
-    console[isErr?'error':'log']('[RV] '+step);
-    const cv=document.getElementById('rv-canvas');
-    if(!cv) return;
-    if(!cv.width||cv.width<10){ cv.width=640; cv.height=220; cv.style.width='640px'; cv.style.height='220px'; }
-    const ctx2=cv.getContext('2d'); if(!ctx2) return;
-    ctx2.fillStyle='#060C1A'; ctx2.fillRect(0,0,640,220);
-    ctx2.fillStyle=isErr?'#EF4444':'#94A3B8'; ctx2.font='11px IBM Plex Mono'; ctx2.textAlign='left';
-    ctx2.fillText(step.slice(0,90), 14, 50);
-    ctx2.fillStyle='rgba(212,175,55,.5)'; ctx2.font='9px IBM Plex Mono';
-    ctx2.fillText('Dacă vedeți asta, copiați linia de sus și trimiteți-o', 14, 80);
-  }
+  await _rvSleep(32);
 
   // Compute — try/finally garantează că rv-prog dispare indiferent de erori
   const _rvSafetyTimer = setTimeout(()=>{ document.getElementById('rv-prog')?.classList.remove('rv-on'); }, 20000);
   let b;
   try{
-  _rvDiag('STEP1: P='+JSON.stringify({W:P?.W,D:P?.D,niv:P?.niv,area:P?.area,fn:P?.fn}));
   b = _rvCompBuilding(P); _RV.building = b;
-  _rvDiag('STEP2: b='+JSON.stringify({niv:b.niv,bW:Math.round(b.bW),bD:Math.round(b.bD),sc:Math.round(b.scArea)}));
   _RV.floors = [];
   // Calculăm DOAR floor 0 eager — restul lazy la click tab
   const maxEagerFloors = 1;
@@ -2933,9 +2923,7 @@ async function generateRelevee(){
     }
   }catch(e){}
 
-  _rvDiag('STEP3: floors='+_RV.floors.length+' f0rects='+(_RV.floors[0]?.rects?.length)+' scale='+_RV.scale);
   _rvRender();
-  _rvDiag('STEP4: render done, canvas='+document.getElementById('rv-canvas')?.width+'x'+document.getElementById('rv-canvas')?.height);
 
   // ── Actualizăm DataBus — toate rapoartele sunt notificate ─────────────
   try{ window._RV_DataBus?.update(b, P); }catch(e){}
@@ -2943,8 +2931,7 @@ async function generateRelevee(){
   try{ _rvCalcROI(); }catch(e){}
 
   }catch(computeErr){
-    console.error('[Relevee] EROARE generare:', computeErr, computeErr?.stack);
-    _rvDiag('EROARE: '+String(computeErr).slice(0,80), true);
+    console.error('[Relevee] Eroare generare:', computeErr);
   }finally{
     clearTimeout(_rvSafetyTimer);
     // ÎNTOTDEAUNA scoatem overlay-urile — indiferent de erori
@@ -2957,14 +2944,13 @@ async function generateRelevee(){
   if(tdot) tdot.classList.remove('rv-running');
   if(tval) tval.textContent=secs+'s';
   const multiLabel = (S.multiMode&&S.parcels.length>1) ? ` · 📐 ${S.parcels.length} parcele combinate` : '';
-  if(!b){ console.error('[RV] b undefined dupa try/catch — P:', P?.W, P?.D); }
   document.getElementById('rv-tinfo').textContent=`Nr.cad. ${P?.nrCad||'?'}${multiLabel} · ${b?.niv||'?'} niv. · SDA=${_rvFmt(b.sdaTotal)}m² · POT=${_rvFmt(b.scArea/P.area*100)}% · CUT=${_rvFmtD(b.sdaTotal/P.area)} · ${secs}s`;
   // Populăm info parcelă din panoul drept
   const piEl = document.getElementById('rv-parcel-info');
   if(piEl) piEl.innerHTML = `Nr. cad.: <strong style="color:#D4AF37">${P.nrCad}</strong><br>UTR: ${P.utr}<br>Suprafață: ${P.area}m²<br>Dim. bbox: ${P.W.toFixed(1)}m × ${P.D.toFixed(1)}m<br>Front: ${P.frontDir}<br>POT max: ${Math.round(P.pot*100)}%<br>CUT max: ${P.cut}<br>H max: ${P.hMax}m<br>Niveluri: ${b.niv} niv.<br>H total: ${(b.niv*P.hn).toFixed(1)}m`;
 
-  // _rvUpdatePanels mereu deferred — previne freeze sincron
-  setTimeout(()=>{ try{ _rvUpdatePanels(b,P); }catch(e){ console.error('[RV] updatePanels err:',e); } }, 300);
+  // updatePanels mereu deferred — previne freeze sincron desktop
+  setTimeout(()=>{ try{ _rvUpdatePanels(b,P); }catch(e){ console.error('[RV] updatePanels:',e); } }, 300);
   if(typeof ss === 'function') ss(`✅ Relevee generate în ${secs}s — ${b.niv} niveluri, SDA=${_rvFmt(b.sdaTotal)}m²`);
 }
 window.generateRelevee = generateRelevee; // export imediat după funcție
