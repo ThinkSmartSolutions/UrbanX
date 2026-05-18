@@ -2647,7 +2647,9 @@ new MutationObserver(() => addBilantExportBtn())
     window.generateRelevee._guarded = true;
     console.log('[RV] Guard activ');
   }
-  window.addEventListener('load', function(){ setTimeout(applyGuard, 500); });
+  // Aplicăm imediat la DOMContentLoaded (generateRelevee e deja definit)
+  document.addEventListener('DOMContentLoaded', applyGuard);
+  window.addEventListener('load', applyGuard);
 })();
 </script>
 </body>
