@@ -933,8 +933,6 @@ function _rvRenderPlan(fl,b){
 
   // Hașuri diagonale pentru elemente structurale (cores, pereți BA)
   function _hatch(x,y,w,h,col,sp){
-    const _sp=sp||Math.max(4,SC*0.35); const _iter=(w+h+Math.max(w,h)*2)/_sp;
-    if(_iter>300){ctx.save();ctx.fillStyle=col||'rgba(20,40,90,0.15)';ctx.fillRect(x,y,w,h);ctx.restore();return;}
     ctx.save();
     ctx.beginPath(); ctx.rect(x,y,w,h); ctx.clip();
     ctx.strokeStyle=col||'rgba(20,40,90,0.28)'; ctx.lineWidth=0.7;
@@ -2922,9 +2920,7 @@ async function generateRelevee(){
     }
   }catch(e){}
 
-  await new Promise(r=>requestAnimationFrame(r));
   _rvRender();
-  try{const _cv=document.getElementById('rv-canvas');const _d=document.createElement('div');_d.style.cssText='position:fixed;bottom:10px;left:50%;transform:translateX(-50%);background:#0B1426;border:1.5px solid #D4AF37;color:#D4AF37;padding:7px 16px;border-radius:7px;font:10px IBM Plex Mono;z-index:99999;white-space:nowrap;';_d.textContent='PLAN: '+(_RV?.floors?.[0]?.rects?.length||0)+' camere | canvas '+(_cv?.width||0)+'x'+(_cv?.height||0)+' | sc='+_RV.scale;document.body.appendChild(_d);setTimeout(()=>_d.remove(),15000);}catch(e){}
 
   // ── Actualizăm DataBus — toate rapoartele sunt notificate ─────────────
   try{ window._RV_DataBus?.update(b, P); }catch(e){}
@@ -2935,9 +2931,29 @@ async function generateRelevee(){
     console.error('[Relevee] Eroare generare:', computeErr);
   }finally{
     clearTimeout(_rvSafetyTimer);
-    // ÎNTOTDEAUNA scoatem overlay-urile — indiferent de erori
     prog?.classList.remove('rv-on');
     document.getElementById('rv-empty')?.style.setProperty('display','none');
+    // Banner în FINALLY — apare ÎNTOTDEAUNA după generare indiferent de erori
+    setTimeout(()=>{
+      try{
+        const _cv=document.getElementById('rv-canvas');
+        const _em=document.getElementById('rv-empty');
+        const _d=document.createElement('div');
+        _d.style.cssText='position:fixed;top:60px;right:10px;background:#0B1426;border:2px solid #D4AF37;'+
+          'color:#D4AF37;padding:10px 16px;border-radius:8px;font:11px IBM Plex Mono;z-index:99999;'+
+          'min-width:280px;box-shadow:0 4px 20px rgba(0,0,0,.8);';
+        _d.innerHTML='<b>RELEVEE STATUS</b><br>'+
+          'building: '+!!_RV?.building+'<br>'+
+          'niv: '+(_RV?.building?.niv||'?')+'<br>'+
+          'floor0 rects: '+(_RV?.floors?.[0]?.rects?.length||'0')+'<br>'+
+          'canvas: '+(+_cv?.width||0)+'x'+(+_cv?.height||0)+'<br>'+
+          'ctx: '+(_cv?.getContext('2d')?'OK':'NULL')+'<br>'+
+          'rv-empty: '+(_em?.style?.display||'vizibil')+'<br>'+
+          'scale: '+_RV.scale;
+        document.body.appendChild(_d);
+        setTimeout(()=>_d.remove(), 120000); // 2 minute
+      }catch(e){}
+    }, 100);
   }
 
   clearInterval(tInt);
