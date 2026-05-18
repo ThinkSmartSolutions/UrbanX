@@ -2412,7 +2412,7 @@ function _rvMixApply(){
 }
 
 // ══════════════════════════════════════════════════════════════════════════
-// DNA URBAN — Radar SVG dinamic (generare string SVG)
+// Amprentă Normativă — Radar SVG dinamic (generare string SVG)
 // ══════════════════════════════════════════════════════════════════════════
 function _rvDNARadar(b, P, fl){
   if(!b||!P||!fl) return '<svg width="140" height="140" viewBox="0 0 140 140"></svg>';
@@ -3050,7 +3050,7 @@ function _rvUpdatePanels(b,P){
   const avizeContent=document.getElementById('rv-avize-content');
   if(avizeContent) avizeContent.innerHTML=_rvBuildAvizeTimeline(b,P);
 
-  // ── DNA Urban Radar ───────────────────────────────────────────────────
+  // ── Amprentă Normativă Radar ───────────────────────────────────────────────────
   const fl0=_RV.floors[0]||{rects:[],isu:{}};
   const dnaDiv=document.getElementById('rv-dna');
   if(dnaDiv) dnaDiv.innerHTML=_rvDNARadar(b,P,fl0);
@@ -3269,8 +3269,16 @@ async function _rvOpen(){
   const rvM=document.getElementById('rv-modal');
   rvM.style.visibility='visible';
   rvM.style.pointerEvents='all';
+  rvM.style.zIndex='2147483647';
   rvM.style.background='rgba(4,8,18,.97)';
   rvM.classList.add('rv-modal-open');
+  // CSS nuclear: doar modala primește click-uri, tot restul ignorat
+  if(!document.getElementById('rv-pe-override')){
+    const s=document.createElement('style');
+    s.id='rv-pe-override';
+    s.textContent='*:not(#rv-modal):not(#rv-modal *){pointer-events:none!important}';
+    document.head.appendChild(s);
+  }
   _RV.open=true;
 }
 
@@ -3282,6 +3290,7 @@ function closeRelevee(){
     const el=document.getElementById(id);
     if(el && el.dataset.rvHidden){ el.style.pointerEvents=''; el.style.visibility=''; delete el.dataset.rvHidden; }
   });
+  document.getElementById('rv-pe-override')?.remove();
   modal.classList.remove('rv-modal-open');
   _RV.open=false;
   // Curățăm selectorul de corp la închidere
@@ -5135,7 +5144,7 @@ async function _rvExportPDF(){
         pgN++;
         pdf.addPage();
         pdf.setFillColor(6,12,26);pdf.rect(0,0,W,H,'F');
-        hdr('SINTEZĂ ANALIZĂ · FUNCȚIUNE · DNA URBAN · LEGENDĂ · NORMATIVE APLICATE',pgN);
+        hdr('SINTEZĂ ANALIZĂ · FUNCȚIUNE · Amprentă Normativă · LEGENDĂ · NORMATIVE APLICATE',pgN);
         let sy=14;
         const fnCfgPDF=window.FN_CONFIG?.[_RV.fn]||{label:'Rezidențial',norms:['NP 057/2002','OMS 119/2014','P118-2/2013'],isuDist:30,isuNorm:'P118-2/2013',omsInsorire:true};
 
@@ -5156,7 +5165,7 @@ async function _rvExportPDF(){
         // DNA Radar
         pdf.setFillColor(20,40,80);pdf.rect(c1x,sy,c1w,8,'F');pdf.setFillColor(...C.gold);pdf.rect(c1x,sy,1.5,8,'F');
         pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(7);
-        pdf.text('DNA URBAN — SCOR NORMATIV',c1x+4,sy+5.5);sy+=10;
+        pdf.text('Amprentă Normativă — SCOR NORMATIV',c1x+4,sy+5.5);sy+=10;
         if(dnaImg){
           pdf.setFillColor(6,12,26);pdf.rect(c1x,sy,c1w,60,'F');
           try{pdf.addImage(dnaImg,'PNG',c1x+2,sy+2,c1w-4,56);}catch(e){}
@@ -5670,9 +5679,9 @@ async function _rvInject(){
       <div id="rv-mix-types" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px"></div>
     </div>
 
-    <!-- DNA Urban Radar -->
+    <!-- Amprentă Normativă Radar -->
     <div class="rv-rsec rv-dna-sec" id="rv-sec-dna">
-      <div class="rv-sec-t collapsible" onclick="_rvCollapseSection(this)" title="Ascunde/afișează">⬡ DNA Urban — Amprentă Normativă</div>
+      <div class="rv-sec-t collapsible" onclick="_rvCollapseSection(this)" title="Ascunde/afișează">⬡ Amprentă Normativă — Amprentă Normativă</div>
       <div id="rv-dna" style="display:flex;justify-content:center;padding:4px 0">
         <svg width="140" height="140" viewBox="0 0 140 140"><text x="70" y="75" fill="#2A3F60" font-size="9" text-anchor="middle" font-family="monospace">Se generează…</text></svg>
       </div>
@@ -5970,7 +5979,7 @@ async function _rvInject(){
 
       <!-- DNA tab -->
       <div class="rv-mob-panel" id="rv-mob-panel-dna" style="display:none">
-        <div class="rv-rst">⬡ DNA URBAN — AMPRENTĂ NORMATIVĂ</div>
+        <div class="rv-rst">⬡ AMPRENTĂ NORMATIVĂ</div>
         <div style="display:flex;align-items:flex-start;gap:12px;padding:8px 0">
           <div id="rv-mob-dna" style="flex-shrink:0"></div>
           <div style="flex:1;min-width:0">
