@@ -3176,9 +3176,16 @@ function _rvDNAGetSolutii(b, P, potOk, cutOk, solarIssues, isuOk, roomsOk, parcS
 // MODAL OPEN / CLOSE
 // ══════════════════════════════════════════════════════════════════════════
 function _rvOpen(){
-  // GUARD: nu se deschide fără click explicit al utilizatorului
+  // GUARD + DEBUG: afișăm call stack ca overlay vizibil
   if(!window._rvAllowOpen){
-    console.log('[RV] _rvOpen blocat — lipsește interacțiunea utilizatorului');
+    try{
+      var stack = new Error('AutoOpen detectat').stack || 'stack indisponibil';
+      var el = document.createElement('div');
+      el.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:999999;background:#c00;color:#fff;padding:10px;font-size:11px;white-space:pre-wrap;font-family:monospace;max-height:300px;overflow:auto;';
+      el.textContent = '🚫 _rvOpen BLOCAT — cine a apelat:\n' + stack;
+      document.body.appendChild(el);
+      setTimeout(function(){ el.remove(); }, 15000);
+    }catch(e){}
     return;
   }
   if(!document.getElementById('rv-modal')) _rvInject();
