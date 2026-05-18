@@ -2924,7 +2924,15 @@ async function generateRelevee(){
     prog?.classList.remove('rv-on');
     document.getElementById('rv-empty')?.style.setProperty('display','none');
     // Re-render după 500ms — canvas e vizibil și layoutat corect
-    setTimeout(()=>{ try{ _rvRender(); }catch(e){} }, 500);
+    setTimeout(()=>{
+      try{
+        _rvRender();
+        // Scroll canvas în vedere
+        const dw=document.getElementById('rv-drawwrap');
+        if(dw){ dw.scrollTop=0; dw.scrollLeft=0; }
+        document.getElementById('rv-canvas')?.scrollIntoView({block:'start',inline:'start',behavior:'instant'});
+      }catch(e){}
+    }, 500);
     setTimeout(()=>{try{
       const _cv=document.getElementById('rv-canvas');
       const _d=document.createElement('div');
@@ -5383,7 +5391,7 @@ async function _rvInject(){
 .rv-fb-label{font-size:9px;color:#4A6080;white-space:nowrap;font-weight:700;font-family:'IBM Plex Mono',monospace;}
 .rv-fbtn{padding:3px 9px;border-radius:5px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:#4A6080;cursor:pointer;font-size:10px;font-weight:700;white-space:nowrap;transition:all .1s;font-family:'IBM Plex Mono',monospace;}
 .rv-fbtn.rv-on{border-color:#D4AF37;background:rgba(212,175,55,.1);color:#F5C518;}
-.rv-drawwrap{flex:1;overflow:auto;display:flex;align-items:flex-start;justify-content:flex-start;padding:16px;position:relative;}
+.rv-drawwrap{flex:1;overflow:auto;display:flex;align-items:flex-start;justify-content:flex-start;padding:16px;position:relative;min-height:200px;}
 .rv-drawwrap::-webkit-scrollbar{width:5px;height:5px;}.rv-drawwrap::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:3px;}
 .rv-empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#4A6080;pointer-events:none;}
 .rv-empty-ico{font-size:48px;opacity:.18;filter:grayscale(1);}.rv-empty-t{font-size:14px;font-weight:700;color:#374151;font-family:'Space Grotesk',sans-serif;}.rv-empty-s{font-size:11px;line-height:1.6;max-width:240px;text-align:center;}
