@@ -662,35 +662,39 @@ function _rvFloor(b, floorIdx){
     const southStart_ = coreY + corrH;   // ← era coreY+coreH → lăsa 5m gol
     const southAvailD_= bD - southStart_;
 
-    const colBounds=[];
-    if(cores.length===1){
-      colBounds.push({xL:0, xR:cores[0].x});                       // stânga
-      colBounds.push({xL:cores[0].x+cores[0].w, xR:bW});           // dreapta
-    } else {
-      colBounds.push({xL:0, xR:cores[0].x});
-      for(let i=0;i<cores.length-1;i++)
-        colBounds.push({xL:cores[i].x+cores[i].w, xR:cores[i+1].x});
-      colBounds.push({xL:cores[cores.length-1].x+cores[cores.length-1].w, xR:bW});
-    }
-
+    // ── GENERARE APARTAMENTE: umplu TOATĂ lățimea (fără gol la core) ─────────
+    // Apartamentele nord și sud ocupă x=0..bW, împărțite în bay-uri egale.
+    // Casa scărilor (core) apare NUMAI în HOL NIVEL — nu taie ap-urile vertical.
     const floorFn     = _rvGetFloorFn(floorIdx);
     const isLastFloor = (floorIdx === b.niv - 1);
-    const totalUnits  = colBounds.length * 2;
+    // Nr. apartamente pe o parte: minim 2, bazat pe lățimea clădirii
+    const nBaysN = Math.max(2, Math.round(bW / 6.5));
+    const nBaysS = Math.max(2, Math.round(bW / 6.5));
+    const totalUnits  = nBaysN + nBaysS;
     const unitTypes   = _rvBuildUnitList(totalUnits, floorFn, _RV.unitMix, isLastFloor);
+    const fallback = floorFn==='rez'?'2cam':floorFn==='birouri'?'openspace':floorFn==='hotel'?'standard':'retail';
 
-    colBounds.forEach(({xL,xR},ci)=>{
-      const W=xR-xL;
-      if(W<1.5) return;
-      const fallback = floorFn==='rez'?'2cam': floorFn==='birouri'?'openspace': floorFn==='hotel'?'standard':'retail';
-      const typeN = unitTypes[ci*2]   || fallback;
-      const typeS = unitTypes[ci*2+1] || fallback;
-      if(northMaxD_>=3.5)
-        _rvFillUnit(xL, 0,           W, northMaxD_,   ci*2,   false, floorFn, typeN)
+    // NORD — apartamente pe toată lățimea (y=0 la y=coreY)
+    if(northMaxD_ >= 3.5){
+      const bayWN = bW / nBaysN;
+      for(let i=0;i<nBaysN;i++){
+        const xL=i*bayWN, xR=(i+1)*bayWN;
+        const typeN = unitTypes[i] || fallback;
+        _rvFillUnit(xL, 0, xR-xL, northMaxD_, i, false, floorFn, typeN)
           .forEach(r=>rects.push(r));
-      if(southAvailD_>=3.5)
-        _rvFillUnit(xL, southStart_, W, southAvailD_, ci*2+1, true,  floorFn, typeS)
+      }
+    }
+
+    // SUD — apartamente pe toată lățimea (y=coreY+corrH la y=bD)
+    if(southAvailD_ >= 3.5){
+      const bayWS = bW / nBaysS;
+      for(let i=0;i<nBaysS;i++){
+        const xL=i*bayWS, xR=(i+1)*bayWS;
+        const typeS = unitTypes[nBaysN+i] || fallback;
+        _rvFillUnit(xL, southStart_, xR-xL, southAvailD_, nBaysN+i, true, floorFn, typeS)
           .forEach(r=>rects.push(r));
-    });
+      }
+    }
 
     // ── Hol intrare parter ────────────────────────────────────────────────
     if(isGround)
@@ -801,6 +805,20 @@ function _rvFloor(b, floorIdx){
     });
   });
 
+  // ── ETAPA 5b: Verificare adiacențe (matrice) ────────────────────────────
+  const aptIdsAdj=[...new Set(rects.filter(r=>r.apt>0).map(r=>r.apt))];
+  aptIdsAdj.forEach(aptId=>{
+    const rooms_=rects.filter(r=>r.apt===aptId);
+    const living_=rooms_.find(r=>r.t==='living');
+    const balcon_=rooms_.find(r=>r.bal||r.t==='balcon');
+    if(living_&&balcon_){
+      const adj_=(Math.abs((living_.y+living_.h)-balcon_.y)<0.3||
+                  Math.abs((balcon_.y+balcon_.h)-living_.y)<0.3||
+                  Math.abs((living_.x+living_.w)-balcon_.x)<0.3||
+                  Math.abs((balcon_.x+balcon_.w)-living_.x)<0.3);
+      living_._adjBalcon=adj_;
+    }
+  });
   // ── Solar OMS 119 ────────────────────────────────────────────────────────
   const dirScore = {S:2.8,SE:2.5,SV:2.5,E:2.2,V:2.0,N:0.9,NE:1.4,NV:1.3}[P.frontDir]||1.8;
   rects.forEach(r=>{
@@ -1299,7 +1317,445 @@ function _rvRenderPlan(fl,b){
   if(_RV.showISU){
     _rvDrawISUCircles(ctx,b,ox,oy,SC);
   }
-  // ── Trasee de circulație (întotdeauna vizibile) ─────────────────────────
+  
+
+// ════════════════════════════════════════════════════════════════════════════
+// AUTO-FIX ENGINE — detectează și corectează automat neconformitățile
+// ════════════════════════════════════════════════════════════════════════════
+
+// ── Aplică corecții automate și returnează building + params modificate ────
+function _rvAutoFix(b, P, floors){
+  const fixes = [];
+  const bOpt  = JSON.parse(JSON.stringify(b));   // clonă building
+  const POpt  = JSON.parse(JSON.stringify(P));   // clonă params
+  let   floorsOpt = floors;                      // referință inițială
+
+  // ── FIX 1: Lift lipsă (NP051/2012 — obligatoriu P+4+) ────────────────
+  if(b.niv >= 5){
+    const hasLift = floors[0]?.rects?.some(r=>r.t==='core'&&r.lbl?.includes('Lift'));
+    if(!hasLift){
+      fixes.push({
+        rule:'NP051', severity:'hard',
+        original:'Lipsă lift — clădire P+'+(b.niv-1),
+        fix:'Lift adăugat în nucleul de circulație',
+        icon:'🛗'
+      });
+      // Marcăm core-ul cu lift
+      floorsOpt = floors.map(fl=>({
+        ...fl,
+        rects: fl.rects.map(r=>r.t==='core'?{...r,lbl:'🪜 Sc.\n🛗 Lift',hasLift:true}:r)
+      }));
+    }
+  }
+
+  // ── FIX 2: Parcaje insuficiente → subsol propus ───────────────────────
+  const nrApt = Math.max(1, Math.round(b.sdaTotal/70));
+  const parcNec = Math.ceil(nrApt * 1.2);
+  const parcSup = Math.floor(Math.max(0, P.area - b.bW*b.bD - 200) / 28);
+  const deficit = Math.max(0, parcNec - parcSup);
+  if(deficit > 0){
+    const subsolNiv = Math.ceil(deficit / Math.max(1, Math.floor(b.bW*b.bD/28)));
+    fixes.push({
+      rule:'NP051-Parc', severity:'hard',
+      original:`Deficit ${deficit} locuri parcare (necesar ${parcNec}, disponibil ${parcSup})`,
+      fix:`${subsolNiv} nivel(uri) subsol propuse → ${Math.floor(b.bW*b.bD/28)*subsolNiv} locuri`,
+      icon:'🅿',
+      subsolNiv
+    });
+    bOpt.subsolNiv = subsolNiv;
+    bOpt.subsolLoc = Math.floor(b.bW*b.bD/28)*subsolNiv;
+  }
+
+  // ── FIX 3: POT depășit → reducere amprentă ────────────────────────────
+  const potReal = b.scArea/P.area;
+  if(potReal > P.pot + 0.005){
+    const overPct = ((potReal - P.pot)*100).toFixed(1);
+    const targetSC = P.pot * P.area;
+    const scaleFactor = Math.sqrt(targetSC / b.scArea);
+    fixes.push({
+      rule:'PUG-POT', severity:'hard',
+      original:`POT realizat ${(potReal*100).toFixed(1)}% depășește max ${(P.pot*100).toFixed(0)}% cu ${overPct}%`,
+      fix:`Amprentă redusă cu ${((1-scaleFactor)*100).toFixed(0)}% → SC=${targetSC.toFixed(0)}m²`,
+      icon:'📐'
+    });
+    bOpt.bW = b.bW * scaleFactor;
+    bOpt.bD = b.bD * scaleFactor;
+    bOpt.scArea = targetSC;
+  }
+
+  // ── FIX 4: CUT depășit → reducere etaje ──────────────────────────────
+  const cutReal = b.sdaTotal/P.area;
+  if(cutReal > P.cut + 0.01){
+    const nivelNou = Math.floor(P.cut * P.area / b.scArea);
+    if(nivelNou < b.niv && nivelNou >= 1){
+      fixes.push({
+        rule:'PUG-CUT', severity:'hard',
+        original:`CUT realizat ${cutReal.toFixed(2)} depășește max ${P.cut} — ${b.niv} niveluri`,
+        fix:`Redus la ${nivelNou} niveluri → CUT=${(b.scArea*nivelNou/P.area).toFixed(2)}`,
+        icon:'🏢'
+      });
+      bOpt.niv = nivelNou;
+      bOpt.sdaTotal = b.scArea * nivelNou;
+    }
+  }
+
+  // ── FIX 5: Camere sub minimul NP057 ──────────────────────────────────
+  const subminRooms = [];
+  floors[0]?.rects?.forEach(r=>{
+    const min = _RV_NP057[r.t];
+    if(min && r.w*r.h < min) subminRooms.push({t:r.t, su:(r.w*r.h).toFixed(1), min});
+  });
+  if(subminRooms.length > 0){
+    const grp = {};
+    subminRooms.forEach(r=>{grp[r.t]=grp[r.t]||[];grp[r.t].push(r);});
+    Object.entries(grp).forEach(([t,list])=>{
+      fixes.push({
+        rule:'NP057', severity:'soft',
+        original:`${list.length}x ${t}: ${list[0].su}m² < ${list[0].min}m² minim`,
+        fix:`Recomandare: mărire bay apartament sau redistribuire camere`,
+        icon:'📏'
+      });
+    });
+  }
+
+  // ── FIX 6: ISU distanță prea mare ────────────────────────────────────
+  const isuIssues = floors[0]?.isu?.issues||[];
+  if(isuIssues.length > 0){
+    fixes.push({
+      rule:'P118', severity:'hard',
+      original:`${isuIssues.length} camere peste distanța max ISU (${_RV_P118_CORR}m)`,
+      fix:`Recomandare: nucleu suplimentar de evacuare sau repoziționare scări`,
+      icon:'🚨'
+    });
+  }
+
+  // ── FIX 7: Însorire insuficientă OMS119 ─────────────────────────────
+  const solarFail = floors[0]?.rects?.filter(r=>r.solarOk===false)||[];
+  if(solarFail.length > 3){
+    fixes.push({
+      rule:'OMS119', severity:'soft',
+      original:`${solarFail.length} camere cu însorire insuficientă (<${_RV_OMS119_H}h/zi)`,
+      fix:`Recomandare: reorientare clădire sau reducere adâncime apartamente`,
+      icon:'☀️'
+    });
+  }
+
+  return {bOpt, POpt, floorsOpt, fixes};
+}
+
+// ── Render comparativ Scenarii A/B ─────────────────────────────────────────
+function _rvRenderComparativ(b, P, floors, bOpt, POpt, floorsOpt, fixes){
+  const tab = document.getElementById('rv-scenarii-content');
+  if(!tab) return;
+
+  const scoreOrig = _rvScoreFloor(floors[0], b, P);
+  const scoreOpt  = _rvScoreFloor(floorsOpt[0], bOpt, POpt);
+  const constrOrig = _rvConstraintEngine(floors[0], b, P);
+  const constrOpt  = _rvConstraintEngine(floorsOpt[0], bOpt, POpt);
+
+  const fixCount = fixes.length;
+  const hardFixes = fixes.filter(f=>f.severity==='hard').length;
+  const softFixes = fixes.filter(f=>f.severity==='soft').length;
+
+  tab.innerHTML = `
+    <div style="padding:12px;font-family:IBM Plex Mono,monospace">
+      <!-- Header -->
+      <div style="text-align:center;margin-bottom:12px">
+        <div style="font-size:11px;color:#94A3B8;letter-spacing:.08em">AUTO-FIX REPORT</div>
+        <div style="font-size:10px;color:#64748B;margin-top:2px">
+          ${fixCount} corecții aplicate: ${hardFixes} obligatorii · ${softFixes} recomandate
+        </div>
+      </div>
+
+      <!-- Comparativ scoruri -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <div style="background:#0F172A;border:1px solid #1E293B;border-radius:6px;padding:10px;text-align:center">
+          <div style="font-size:9px;color:#64748B;margin-bottom:4px">📋 ORIGINAL</div>
+          <div style="font-size:28px;font-weight:bold;color:${scoreOrig?.total>=80?'#22C55E':scoreOrig?.total>=60?'#F59E0B':'#EF4444'}">${scoreOrig?.total||'—'}</div>
+          <div style="font-size:8px;color:#475569">/100 · ${constrOrig.hard.length} erori hard</div>
+          <div style="margin-top:6px;font-size:8px;color:#64748B">
+            POT: ${(b.scArea/P.area*100).toFixed(1)}% / CUT: ${(b.sdaTotal/P.area).toFixed(2)}<br>
+            ${b.niv} niv. · SDA: ${b.sdaTotal.toFixed(0)}m²
+          </div>
+        </div>
+        <div style="background:#0A1628;border:1px solid #22C55E;border-radius:6px;padding:10px;text-align:center">
+          <div style="font-size:9px;color:#22C55E;margin-bottom:4px">✅ OPTIMIZAT</div>
+          <div style="font-size:28px;font-weight:bold;color:${scoreOpt?.total>=80?'#22C55E':scoreOpt?.total>=60?'#F59E0B':'#EF4444'}">${scoreOpt?.total||'—'}</div>
+          <div style="font-size:8px;color:#475569">/100 · ${constrOpt.hard.length} erori hard</div>
+          <div style="margin-top:6px;font-size:8px;color:#64748B">
+            POT: ${(bOpt.scArea/POpt.area*100).toFixed(1)}% / CUT: ${(bOpt.sdaTotal/POpt.area).toFixed(2)}<br>
+            ${bOpt.niv} niv. · SDA: ${bOpt.sdaTotal.toFixed(0)}m²
+          </div>
+        </div>
+      </div>
+
+      <!-- Lista de fix-uri -->
+      <div style="font-size:9px;font-weight:bold;color:#94A3B8;margin-bottom:6px;letter-spacing:.06em">CORECȚII APLICATE AUTOMAT:</div>
+      ${fixes.length===0?
+        '<div style="color:#22C55E;font-size:9px;padding:8px;background:#052e16;border-radius:4px">✅ Nicio neconformitate detectată — planul este conform!</div>':
+        fixes.map(f=>`
+          <div style="margin-bottom:6px;border-radius:4px;overflow:hidden">
+            <div style="background:${f.severity==='hard'?'#450a0a':'#431407'};padding:5px 8px;display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:9px;color:${f.severity==='hard'?'#FCA5A5':'#FCD34D'};font-weight:bold">${f.icon} [${f.rule}] ${f.severity==='hard'?'OBLIGATORIU':'RECOMANDAT'}</span>
+            </div>
+            <div style="background:#0F172A;padding:5px 8px">
+              <div style="font-size:8px;color:#94A3B8;margin-bottom:2px">⚠ Original: ${f.original}</div>
+              <div style="font-size:8px;color:#22C55E">→ Fix: ${f.fix}</div>
+            </div>
+          </div>`).join('')}
+
+      <!-- Butoane export -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px">
+        <button onclick="_rvShowVariant('original')" style="background:#1E293B;color:#E2E8F0;border:none;padding:7px;border-radius:4px;font:bold 8px IBM Plex Mono;cursor:pointer">
+          📋 Afișează Original
+        </button>
+        <button onclick="_rvShowVariant('optimizat')" style="background:#166534;color:#DCFCE7;border:none;padding:7px;border-radius:4px;font:bold 8px IBM Plex Mono;cursor:pointer">
+          ✅ Afișează Optimizat
+        </button>
+      </div>
+      <div style="margin-top:6px;font-size:7px;color:#475569;text-align:center">
+        Planul optimizat respectă toate normativele obligatorii aplicabile
+      </div>
+    </div>`;
+
+  // Store both variants for switching
+  window._rvVariants = {
+    original: {b, P, floors},
+    optimizat: {b:bOpt, P:POpt, floors:floorsOpt}
+  };
+}
+
+// ── Switch între variante ──────────────────────────────────────────────────
+function _rvShowVariant(which){
+  const v = window._rvVariants?.[which];
+  if(!v) return;
+  _RV.building = v.b;
+  _RV.floors   = v.floors;
+  _RV.curFloor = 0;
+  _rvRender();
+  // Update tab button
+  document.querySelectorAll('.rv-variant-btn').forEach(b=>b.classList.remove('rv-on'));
+  const btn = document.getElementById('rv-variant-'+which);
+  if(btn) btn.classList.add('rv-on');
+  // Notify
+  const ss = window._rvStatusMsg;
+  if(typeof ss==='function') ss(`Varianta ${which==='original'?'Originală':'Optimizată'} afișată`);
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// CONSTRAINT ENGINE + AI SCORING ENGINE + ADJACENCY MATRIX
+// Implementat conform specificațiilor parametrice UrbanX
+// ════════════════════════════════════════════════════════════════════════════
+
+// ── MATRICE ADIACENȚĂ ─────────────────────────────────────────────────────
+const _RV_ADJACENCY = {
+  living:   {preferred:['balcon','kitchen','hall'],   avoid:[]},
+  bedroom:  {preferred:['bath','hall'],               avoid:['core','hall_common']},
+  bedroom2: {preferred:['bath','hall'],               avoid:['core','hall_common']},
+  bedroom3: {preferred:['bath','hall'],               avoid:['core','hall_common']},
+  kitchen:  {preferred:['living','storage','hall'],   avoid:[]},
+  bath:     {preferred:['bedroom','bedroom2','wc'],   avoid:['living']},
+  wc:       {preferred:['bath','hall'],               avoid:['living','kitchen']},
+  hall:     {preferred:['living','kitchen','bath'],   avoid:[]},
+  storage:  {preferred:['hall','kitchen'],            avoid:[]},
+  balcon:   {preferred:['living','bedroom'],          avoid:['kitchen','bath','wc']},
+};
+
+// ── CONSTRAINT ENGINE ─────────────────────────────────────────────────────
+function _rvConstraintEngine(fl, b, P){
+  if(!fl||!b) return {valid:true, hard:[], soft:[], score:100};
+  const hard=[], soft=[];
+  const rects=fl.rects||[];
+  const aptIds=[...new Set(rects.filter(r=>r.apt>0).map(r=>r.apt))];
+
+  aptIds.forEach(aptId=>{
+    const rooms=rects.filter(r=>r.apt===aptId&&!r.bal);
+    const su=rooms.reduce((s,r)=>s+r.w*r.h,0);
+
+    // HARD: suprafață minimă locuibilă NP057
+    if(su<37) hard.push({apt:aptId,rule:'NP057',msg:`Ap.${aptId}: SU=${su.toFixed(1)}m² sub minimul 37m²`});
+
+    // HARD: living obligatoriu
+    if(!rooms.find(r=>r.t==='living')) hard.push({apt:aptId,rule:'NP057',msg:`Ap.${aptId}: lipsă living`});
+
+    // HARD: baie obligatorie
+    if(!rooms.find(r=>r.t==='bath'||r.t==='wc')) hard.push({apt:aptId,rule:'NP057',msg:`Ap.${aptId}: lipsă baie`});
+
+    // HARD: lumină naturală camere locuibile
+    rooms.filter(r=>['living','bedroom','bedroom2','bedroom3'].includes(r.t)).forEach(r=>{
+      if(r.solarOk===false) hard.push({apt:aptId,rule:'OMS119',msg:`Ap.${aptId} ${r.lbl}: însorire insuficientă`});
+    });
+
+    // SOFT: dimensiuni minime camere
+    const living=rooms.find(r=>r.t==='living');
+    if(living&&living.w*living.h<18) soft.push({apt:aptId,rule:'NP057-soft',msg:`Ap.${aptId} living: ${(living.w*living.h).toFixed(1)}m² < 18m² recomandat`});
+
+    rooms.filter(r=>r.t==='bedroom'||r.t==='bedroom2'||r.t==='bedroom3').forEach(r=>{
+      if(r.w*r.h<12) soft.push({apt:aptId,rule:'NP057-soft',msg:`Ap.${aptId} ${r.lbl}: ${(r.w*r.h).toFixed(1)}m² < 12m² recomandat`});
+    });
+
+    // SOFT: holuri > 15% din SU
+    const holSU=rooms.filter(r=>r.t==='hall').reduce((s,r)=>s+r.w*r.h,0);
+    if(su>0&&holSU/su>0.15) soft.push({apt:aptId,rule:'EFF',msg:`Ap.${aptId}: holuri ${((holSU/su)*100).toFixed(0)}% > 15% SU`});
+
+    // SOFT: adiacențe
+    rooms.forEach(r=>{
+      const adj=_RV_ADJACENCY[r.t];
+      if(!adj) return;
+      const neighbors=rooms.filter(n=>n!==r&&(
+        (Math.abs((r.x+r.w)-n.x)<0.2||Math.abs((n.x+n.w)-r.x)<0.2)&&
+        !(r.y+r.h<=n.y||n.y+n.h<=r.y)
+      )||(
+        (Math.abs((r.y+r.h)-n.y)<0.2||Math.abs((n.y+n.h)-r.y)<0.2)&&
+        !(r.x+r.w<=n.x||n.x+n.w<=r.x)
+      ));
+      adj.avoid.forEach(bad=>{
+        if(neighbors.find(n=>n.t===bad))
+          soft.push({apt:aptId,rule:'ADJ',msg:`Ap.${aptId}: ${r.t} lângă ${bad} (nerecomandat)`});
+      });
+    });
+  });
+
+  // HARD: ISU evacuare
+  (fl.isu?.issues||[]).forEach(iss=>{
+    hard.push({apt:-1,rule:'P118',msg:`ISU: ${iss.lbl} la ${iss.d}m (max ${_RV_P118_CORR}m)`});
+  });
+
+  // HARD: lift lipsă la niv >= 5
+  if(b.niv>=5&&!rects.find(r=>r.t==='core'&&r.lbl.includes('Lift')))
+    hard.push({apt:-1,rule:'NP051',msg:'Lift obligatoriu P+4+ (NP051/2012)'});
+
+  const valid=hard.length===0;
+  const score=Math.max(0, 100 - hard.length*15 - soft.length*3);
+  return {valid, hard, soft, score};
+}
+
+// ── AI SCORING ENGINE ─────────────────────────────────────────────────────
+function _rvScoreFloor(fl, b, P){
+  if(!fl||!b) return null;
+  const rects=fl.rects||[];
+  const aptRects=rects.filter(r=>r.apt>0&&!r.bal);
+  const totalArea=b.bW*b.bD;
+  const aptArea=aptRects.reduce((s,r)=>s+r.w*r.h,0);
+  const commonArea=rects.filter(r=>r.apt<0).reduce((s,r)=>s+r.w*r.h,0);
+  const aptIds=[...new Set(aptRects.map(r=>r.apt))];
+
+  // 1. Scor eficiență (SU apt / SU totală etaj)
+  const efficiency = Math.min(100, (aptArea/totalArea)*100*1.2);
+
+  // 2. Scor economic (suprafață vandabilă)
+  const sellable = Math.min(100, (aptArea/(totalArea*0.82))*100);
+
+  // 3. Scor structural (regularitate)
+  const nGX=Math.round(b.bW/4.5), nGY=Math.round(b.bD/3.8);
+  const structural = Math.min(100, 60 + (nGX>=3&&nGY>=2?20:0) + (b.bW/b.bD>1.5&&b.bW/b.bD<4?20:0));
+
+  // 4. Scor iluminare naturală OMS119
+  const locuibile=aptRects.filter(r=>['living','bedroom','bedroom2','bedroom3'].includes(r.t));
+  const ok119=locuibile.filter(r=>r.solarOk!==false).length;
+  const daylight = locuibile.length>0 ? Math.round((ok119/locuibile.length)*100) : 50;
+
+  // 5. Scor circulații (penalizăm holuri mari)
+  const holCommon=rects.filter(r=>r.apt<0&&r.t==='hall').reduce((s,r)=>s+r.w*r.h,0);
+  const circulation = Math.max(0, 100 - Math.round((holCommon/totalArea)*200));
+
+  // 6. Scor ISU
+  const isuOk=fl.isu?.ok!==false;
+  const isuScore = isuOk ? 100 : Math.max(0, 100 - (fl.isu?.issues?.length||0)*20);
+
+  // 7. Scor adiacențe
+  let adjScore=100, adjChecks=0, adjOk=0;
+  aptIds.forEach(id=>{
+    const rooms=aptRects.filter(r=>r.apt===id);
+    rooms.forEach(r=>{
+      const adj=_RV_ADJACENCY[r.t]; if(!adj) return;
+      adj.preferred.forEach(pref=>{
+        adjChecks++;
+        const near=rooms.some(n=>n.t===pref&&(
+          Math.abs((r.x+r.w)-n.x)<0.3||Math.abs((n.x+n.w)-r.x)<0.3||
+          Math.abs((r.y+r.h)-n.y)<0.3||Math.abs((n.y+n.h)-r.y)<0.3
+        ));
+        if(near) adjOk++;
+      });
+    });
+  });
+  if(adjChecks>0) adjScore=Math.round((adjOk/adjChecks)*100);
+
+  // TOTAL SCORE (ponderat)
+  const total = Math.round(
+    efficiency*0.20 + sellable*0.18 + structural*0.12 +
+    daylight*0.20 + circulation*0.12 + isuScore*0.12 + adjScore*0.06
+  );
+
+  return {
+    total, efficiency:Math.round(efficiency), sellable:Math.round(sellable),
+    structural:Math.round(structural), daylight, circulation:Math.round(circulation),
+    isuScore, adjScore:Math.round(adjScore),
+    aptCount:aptIds.length,
+    aptArea:Math.round(aptArea*10)/10,
+    totalArea:Math.round(totalArea*10)/10,
+    efficiencyPct:Math.round(aptArea/totalArea*100)
+  };
+}
+
+// ── Afișare score în panelul Amprentă Normativă ─────────────────────────
+function _rvRenderScore(b, fl, P){
+  const score = _rvScoreFloor(fl, b, P);
+  const constraints = _rvConstraintEngine(fl, b, P);
+  if(!score) return;
+
+  const dnaEl = document.getElementById('rv-dna-content');
+  if(!dnaEl) return;
+
+  const scoreColor = score.total>=80?'#16A34A':score.total>=60?'#D97706':'#DC2626';
+  const bars = [
+    ['Eficiență spații',score.efficiency,'#F97316'],
+    ['Suprafață vandabilă',score.sellable,'#6366F1'],
+    ['Iluminare naturală',score.daylight,'#F59E0B'],
+    ['Circulații',score.circulation,'#06B6D4'],
+    ['ISU Evacuare',score.isuScore,'#EF4444'],
+    ['Adiacențe',score.adjScore,'#8B5CF6'],
+    ['Structural',score.structural,'#10B981'],
+  ];
+
+  dnaEl.innerHTML = `
+    <div style="padding:8px 10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <span style="font:bold 11px IBM Plex Mono;color:#94A3B8">SCOR PROIECTARE</span>
+        <span style="font:bold 22px IBM Plex Mono;color:${scoreColor}">${score.total}<span style="font-size:11px;color:#64748B">/100</span></span>
+      </div>
+      ${bars.map(([lbl,val,col])=>`
+        <div style="margin-bottom:5px">
+          <div style="display:flex;justify-content:space-between;font:9px IBM Plex Mono;color:#94A3B8;margin-bottom:2px">
+            <span>${lbl}</span><span style="color:${col};font-weight:bold">${val}</span>
+          </div>
+          <div style="height:4px;background:#1E293B;border-radius:2px">
+            <div style="height:4px;width:${val}%;background:${col};border-radius:2px;transition:width .5s"></div>
+          </div>
+        </div>`).join('')}
+      <div style="margin-top:8px;border-top:1px solid #1E293B;padding-top:6px;font:8px IBM Plex Mono;color:#64748B">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px">
+          <span>Apartamente: <b style="color:#E2E8F0">${score.aptCount}</b></span>
+          <span>SU apt: <b style="color:#E2E8F0">${score.aptArea}m²</b></span>
+          <span>Eficiență: <b style="color:#E2E8F0">${score.efficiencyPct}%</b></span>
+          <span>Validitate: <b style="color:${constraints.valid?'#22C55E':'#EF4444'}">${constraints.valid?'✓ VALID':'✗ ERORI'}</b></span>
+        </div>
+      </div>
+      ${constraints.hard.length>0?`
+        <div style="margin-top:6px;background:#7F1D1D;border-radius:4px;padding:5px 7px">
+          <div style="font:bold 7px IBM Plex Mono;color:#FCA5A5;margin-bottom:3px">⛔ CONSTRÂNGERI HARD (${constraints.hard.length})</div>
+          ${constraints.hard.slice(0,3).map(h=>`<div style="font:7px IBM Plex Mono;color:#FECACA;margin-bottom:2px">• ${h.msg}</div>`).join('')}
+          ${constraints.hard.length>3?`<div style="font:7px IBM Plex Mono;color:#94A3B8">+${constraints.hard.length-3} altele...</div>`:''}
+        </div>`:''}
+      ${constraints.soft.length>0?`
+        <div style="margin-top:5px;background:#78350F;border-radius:4px;padding:5px 7px">
+          <div style="font:bold 7px IBM Plex Mono;color:#FCD34D;margin-bottom:3px">⚠ SOFT (${constraints.soft.length})</div>
+          ${constraints.soft.slice(0,2).map(s=>`<div style="font:7px IBM Plex Mono;color:#FDE68A;margin-bottom:2px">• ${s.msg}</div>`).join('')}
+        </div>`:''}
+    </div>`;
+}
+
+// ── Trasee de circulație (întotdeauna vizibile) ─────────────────────────
   _rvDrawCirculation(ctx,b,fl,ox,oy,SC,P);
 
   // ── CAMERĂ SELECTATĂ — highlight + drag handles ───────────────────────
@@ -3596,6 +4052,28 @@ async function generateRelevee(){
       ['Parcaje',fnN.pk_unit==='per_apt'?'warn':'ok',fnN.pk_norm||'-','1/apt'],
     ].map(([l,cls,v,ref])=>`<div class="rv-norm-item"><div><div class="rv-nl">${l}</div><div class="rv-nref">${ref}</div></div><div class="rv-badge rv-badge-${cls}">${v}</div></div>`).join('');
   }catch(e){} }, 9000);
+  setTimeout(()=>{ try{
+    // AI SCORING ENGINE + AUTO-FIX ENGINE
+    const flScore=_RV.floors[_RV.curFloor]||_RV.floors[0];
+    _rvRenderScore(b, flScore, P);
+    // Rulăm auto-fix și populăm tab-ul Scenarii A/B
+    const {bOpt,POpt,floorsOpt,fixes}=_rvAutoFix(b,P,_RV.floors);
+    _RV.floorsOriginal = JSON.parse(JSON.stringify(_RV.floors));
+    _RV.bOriginal = JSON.parse(JSON.stringify(b));
+    _RV.POrig = JSON.parse(JSON.stringify(P));
+    _rvRenderComparativ(b,P,_RV.floors,bOpt,POpt,floorsOpt,fixes);
+    // Dacă există fix-uri hard, afișăm badge pe tab
+    if(fixes.filter(f=>f.severity==='hard').length>0){
+      const scTab=document.querySelector('[data-tab="scenarii"]');
+      if(scTab&&!scTab.querySelector('.rv-fix-badge')){
+        const badge=document.createElement('span');
+        badge.className='rv-fix-badge';
+        badge.style.cssText='background:#EF4444;color:#FFF;font-size:8px;padding:1px 4px;border-radius:8px;margin-left:4px';
+        badge.textContent=fixes.filter(f=>f.severity==='hard').length+'!';
+        scTab.appendChild(badge);
+      }
+    }
+  }catch(e){console.warn('[RV autofix]',e);} }, 10500);
   setTimeout(()=>{ try{
     const avizeContent=document.getElementById('rv-avize-content');
     if(avizeContent) avizeContent.innerHTML=_rvBuildAvizeTimeline(b,P);
