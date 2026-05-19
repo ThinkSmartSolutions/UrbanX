@@ -160,11 +160,24 @@ G._WalkabilityEngine = {
     const r = cat.maxDist * 1.5; // radius cu marjă
     const q = `[out:json][timeout:6];node[${cat.osm}](around:${r},${lat},${lon});out 10;`;
     try {
-      const resp = await fetch('https://overpass-api.de/api/interpreter', {
-        method: 'POST',
-        body: 'data='+encodeURIComponent(q),
-        signal: AbortSignal.timeout(6000),
-      });
+      // Overpass direct funcționează din browser (CORS enabled de overpass-api.de)
+      // Fallback la proxy dacă e blocat de rețea locală
+      const OVERPASS_URLS = [
+        'https://overpass-api.de/api/interpreter',
+        'https://overpass.kumi.systems/api/interpreter',
+        'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+      ];
+      let resp = null;
+      for(const oUrl of OVERPASS_URLS){
+        try{
+          resp = await fetch(oUrl, {
+            method: 'POST', body: 'data='+encodeURIComponent(q),
+            signal: AbortSignal.timeout(6000),
+          });
+          if(resp.ok) break;
+        }catch(e){ continue; }
+      }
+      if(!resp?.ok) throw new Error('Toate endpoint-urile Overpass indisponibile');
       const data = await resp.json();
       return (data.elements||[]).map(el => ({
         id:   el.id,

@@ -697,6 +697,7 @@ G._TCITimeline = {
   addToMap() {
     const m = window.map;
     if(!m || typeof m.addSource !== 'function'){ ss?.('Harta nu e disponibilă'); return; }
+    if(!m.loaded?.() && !m.isStyleLoaded?.()){ ss?.('Harta se încarcă, reîncercați în 2 secunde'); return; }
 
     const city = this._city;
     if(!city){ ss?.('Selectați o parcelă mai întâi'); return; }

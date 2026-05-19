@@ -346,6 +346,14 @@ G._TCIStreetView = {
     if(this._raf) cancelAnimationFrame(this._raf);
     if(this._walkInterval) clearInterval(this._walkInterval);
     if(this._canvas) { this._canvas.remove(); this._canvas = null; }
+    // Curăță layerele Mapbox adăugate
+    const m = window.map;
+    if(m){
+      [this.SOURCE_ID, this.LAYER_ID].forEach(id=>{
+        try{ if(m.getLayer?.(id)) m.removeLayer(id); }catch(e){}
+        try{ if(m.getSource?.(id)) m.removeSource(id); }catch(e){}
+      });
+    }
 
     // Revenire la drone view
     const map = window.map;
