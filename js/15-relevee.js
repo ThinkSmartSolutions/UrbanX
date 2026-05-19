@@ -1232,8 +1232,8 @@ function _rvRenderPlan(fl,b){
       const dW=d.w*SC;
       if(d.axis==='H'){
         const dx2=ox+d.x*SC, dy2=oy+d.y*SC;
-        // Gol în perete
-        ctx.fillStyle='#FFFFFF'; ctx.fillRect(dx2,dy2-2,dW,4);
+        // Gol clar în perete
+        ctx.fillStyle='#FFFFFF'; ctx.fillRect(dx2-2,dy2-5,dW+4,10);
         // Foaie ușă
         ctx.strokeStyle=dColor; ctx.lineWidth=1.2;
         ctx.beginPath();ctx.moveTo(dx2,dy2);ctx.lineTo(dx2+dW,dy2);ctx.stroke();
@@ -2039,16 +2039,33 @@ function _rvDrawWallsCanvas(ctx, fl, b, ox, oy, SC){
     const arY=stY+stH*.45;
     ctx.beginPath();ctx.moveTo(stX+stW*.15,arY);ctx.lineTo(stX+stW*.85,arY);ctx.stroke();
     ctx.beginPath();ctx.moveTo(stX+stW*.65,arY-4);ctx.lineTo(stX+stW*.85,arY);ctx.lineTo(stX+stW*.65,arY+4);ctx.stroke();
-    // Lift (dreptunghi cu X)
-    const lW=rw*.38, lH=rh*.48, lX=rx+rw*.55, lY=ry+rh*.18;
-    ctx.fillStyle='rgba(219,234,254,.6)'; ctx.fillRect(lX,lY,lW,lH);
-    ctx.strokeStyle='#1D4ED8'; ctx.lineWidth=1; ctx.strokeRect(lX,lY,lW,lH);
-    ctx.strokeStyle='rgba(29,78,216,.35)'; ctx.lineWidth=.5;
-    ctx.beginPath();ctx.moveTo(lX,lY);ctx.lineTo(lX+lW,lY+lH);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(lX+lW,lY);ctx.lineTo(lX,lY+lH);ctx.stroke();
-    // Etichetă
-    ctx.fillStyle='#1E3A8A'; ctx.font=`bold ${Math.min(8,rw*.12)}px IBM Plex Mono`; ctx.textAlign='center';
-    ctx.fillText('CASA SCĂRILOR',rx+rw/2,ry+rh*.92); ctx.textAlign='left';
+    // ── Lift: zonă separată în dreapta (perete despărțitor între sc+lift) ──
+    const hasLift=c.lbl&&c.lbl.includes('Lift');
+    if(hasLift){
+      // Perete despărțitor vertical
+      const sepX=rx+rw*0.58;
+      ctx.fillStyle='#1E293B'; ctx.fillRect(sepX,ry,2,rh);
+      // Puț lift (dreapta)
+      const lW2=rw*0.42-2, lH2=rh;
+      const lX2=sepX+2, lY2=ry;
+      ctx.fillStyle='rgba(219,234,254,.75)'; ctx.fillRect(lX2,lY2,lW2,lH2);
+      ctx.strokeStyle='#1D4ED8'; ctx.lineWidth=1.5; ctx.strokeRect(lX2,lY2,lW2,lH2);
+      // X în lift
+      ctx.strokeStyle='rgba(29,78,216,.45)'; ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(lX2+2,lY2+2);ctx.lineTo(lX2+lW2-2,lY2+lH2-2);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(lX2+lW2-2,lY2+2);ctx.lineTo(lX2+2,lY2+lH2-2);ctx.stroke();
+      // Ușă lift (linie jos)
+      ctx.fillStyle='#1D4ED8'; ctx.fillRect(lX2+lW2*0.2,lY2+lH2-3,lW2*0.6,3);
+      ctx.fillStyle='#1E3A8A'; ctx.font=`bold ${Math.min(7,lW2*.18)}px IBM Plex Mono`; ctx.textAlign='center';
+      ctx.fillText('LIFT',lX2+lW2/2,lY2+lH2/2+3); ctx.textAlign='left';
+      // Etichetă scări (stânga, mai îngustă)
+      ctx.fillStyle='#1E3A8A'; ctx.font=`bold ${Math.min(7,rw*.1)}px IBM Plex Mono`; ctx.textAlign='center';
+      ctx.fillText('SCĂRI',rx+rw*0.29,ry+rh*.88); ctx.textAlign='left';
+    } else {
+      // Fără lift — etichetă normală
+      ctx.fillStyle='#1E3A8A'; ctx.font=`bold ${Math.min(8,rw*.12)}px IBM Plex Mono`; ctx.textAlign='center';
+      ctx.fillText('CASA SCĂRILOR',rx+rw/2,ry+rh*.92); ctx.textAlign='left';
+    }
   });
 
   // PEREȚI (din _extractWalls)
