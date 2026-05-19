@@ -1684,9 +1684,10 @@ document.addEventListener('click', function(){
     <script src="js/15-relevee-canvas-upgrade.js?v=20260517"></script>
     <!-- UrbanX Relevee Modules — încărcate după motorul principal -->
     <script src="js/15-relevee-walls.js?v=20260519c"></script>
+    <script src="js/15-relevee-walls-patch.js?v=20260519d"></script><!-- FIX: arc uși + culori apt -->
     <script src="js/15-relevee-planseA3.js?v=2026051301"></script>
     <script src="js/15-relevee-enhance.js?v=2026051301"></script>
-    <script src="js/15-relevee-dxf.js?v=2026051301"></script>
+    <script src="js/15-relevee-dxf.js?v=20260519d"></script><!-- FIX v2: EOF + secțiuni reale -->
     <script src="js/15-relevee-subsol.js?v=2026051301"></script>
     <script src="js/15-relevee-acoperis.js?v=2026051301"></script>
     <script src="js/15-relevee-dna-optimize.js?v=20260518j"></script>
@@ -2602,6 +2603,10 @@ window._onParcelSelectedHook = function(parcel) {
 </script>
   <script src="js/20-uats-database.js?v=2026051010"></script>
   <script src="js/21-cloud-sync.js?v=2026051010"></script>
+  <script src="js/22-zoning-connector.js?v=20260519a"></script><!-- Etapa 1: Regulament din Supabase -->
+  <script src="js/23-legal-chain.js?v=20260519a"></script><!-- Etapa 3: Lanț juridic Neo4j -->
+  <script src="js/24-timeline-layer.js?v=20260519a"></script><!-- Etapa 4: Temporal evolution -->
+  <script src="js/25-prediction-layer.js?v=20260519a"></script><!-- Etapa 5: Prediction heatmap -->
   <script src="js/19-ux-polish.js?v=2026051010"></script>
 <script>
 // Hook pentru buton Export PDF in Bilant modal
@@ -2620,8 +2625,15 @@ function addBilantExportBtn() {
   return true;
 }
 // Observer pentru cand se deschide modalul
-const _bilantObs = new MutationObserver(()=>{ if(addBilantExportBtn()) _bilantObs.disconnect(); });
+// FIX: subtree:false păstrat, disconnect automat după găsire
+const _bilantObs = new MutationObserver(()=>{ 
+  if(addBilantExportBtn()){ 
+    _bilantObs.disconnect(); 
+  } 
+});
 _bilantObs.observe(document.body, {childList:true, subtree:false});
+// Fallback: verificare la 3s dacă modalul era deja deschis
+setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
 </script>
 
 
