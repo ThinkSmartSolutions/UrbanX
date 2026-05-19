@@ -592,11 +592,13 @@ function _rvFillApt(x0, y0, W, D, aptIdx, isFlipped, type='auto'){
   const holAptW  = Math.min(W, 1.8);
   const holRestW = Math.max(0, W - holAptW);
   const holRestLabel = holRestW >= 2.5 ? 'Dorm. 3' : holRestW >= 1.2 ? 'Dep.' : null;
+  const _ACb = _rvGetAEDISConfig();
+  const _showBalc = _ACb.hasBalc; // Din AEDIS fn+stil — identic viewer3d
   const balLabel = isPH ? 'Terasă' : 'Balcon';
 
   if(!isFlipped){
     let y=0;
-    push('balcon',0,y,W,bH,balLabel,true); y+=bH;
+    if(_showBalc){ push('balcon',0,y,W,bH,balLabel,true); y+=bH; }
     drawZiSi(y); y+= type==='studio' ? lH+nH : lH;
     if(type!=='studio') { drawNoapte(y); y+=nH; }
     drawServ(y); y+=sH;
@@ -610,7 +612,7 @@ function _rvFillApt(x0, y0, W, D, aptIdx, isFlipped, type='auto'){
     drawServ(y); y+=sH;
     if(type!=='studio') { drawNoapte(y); y+=nH; }
     drawZiSi(y); y+= type==='studio' ? lH+nH : lH;
-    push('balcon',0,y,W,bH,balLabel,true);
+    if(_showBalc){ push('balcon',0,y,W,bH,balLabel,true); }
   }
   return rms;
 }
@@ -3299,17 +3301,35 @@ function _rvDrawTabelApartamente(ctx, fl, b, tx, ty, maxW){
 }
 
 // ── Legendă plan ────────────────────────────────────────────────────────────
-function _rvDrawLegenda(ctx, lx, ly, SC){
-  const items=[
-    {col:'rgba(254,215,170,.7)',lbl:'Living / Camera de zi'},
-    {col:'rgba(187,247,208,.7)',lbl:'Dormitor'},
-    {col:'rgba(186,230,253,.7)',lbl:'Bucătărie'},
-    {col:'rgba(221,214,254,.7)',lbl:'Baie / WC'},
-    {col:'rgba(226,232,240,.7)',lbl:'Hol / Depozitare'},
-    {col:'rgba(191,219,254,.6)',lbl:'Casa scărilor'},
-    {col:'rgba(254,249,195,.7)',lbl:'Balcon / Terasă'},
-    {col:'rgba(148,163,184,.15)',lbl:'Ventilație mecanică (M)'},
-  ];
+function _rvDrawLegenda(ctx, lx, ly, SC, fl){
+  // Legendă DINAMICĂ — doar tipurile care apar pe plan
+  const ALL_ITEMS = {
+    living:    {col:'rgba(254,215,170,.7)', lbl:'Living / Camera de zi'},
+    bedroom:   {col:'rgba(187,247,208,.7)', lbl:'Dormitor'},
+    bedroom2:  {col:'rgba(187,247,208,.7)', lbl:'Dormitor 2'},
+    bedroom3:  {col:'rgba(187,247,208,.7)', lbl:'Dormitor 3'},
+    kitchen:   {col:'rgba(186,230,253,.7)', lbl:'Bucătărie'},
+    bath:      {col:'rgba(221,214,254,.7)', lbl:'Baie'},
+    wc:        {col:'rgba(221,214,254,.5)', lbl:'WC'},
+    hall:      {col:'rgba(226,232,240,.7)', lbl:'Hol / Circulație'},
+    storage:   {col:'rgba(226,232,240,.5)', lbl:'Depozitare / Debara'},
+    core:      {col:'rgba(191,219,254,.6)', lbl:'Casa scărilor / Lift'},
+    balcon:    {col:'rgba(254,249,195,.7)', lbl:'Balcon / Terasă'},
+    commercial:{col:'rgba(233,213,255,.6)', lbl:'Spațiu Comercial'},
+    office:    {col:'rgba(187,247,208,.5)', lbl:'Birou / Open Space'},
+    reception: {col:'rgba(233,213,255,.5)', lbl:'Recepție / Lobby'},
+    meeting:   {col:'rgba(186,230,253,.5)', lbl:'Sală Ședințe'},
+  };
+  // Colectăm tipurile prezente pe plan
+  const presentTypes = new Set((fl?.rects||[]).map(r=>r.t));
+  // Deduplicăm (bedroom/bedroom2/bedroom3 → un singur item)
+  const seen = new Set();
+  const items = Object.entries(ALL_ITEMS)
+    .filter(([t])=>presentTypes.has(t))
+    .filter(([t,v])=>{ if(seen.has(v.lbl)) return false; seen.add(v.lbl); return true; })
+    .map(([,v])=>v);
+  // Adăugăm simboluri speciale mereu
+  items.push({col:'rgba(148,163,184,.15)', lbl:'Vent. mecanică (M)'});
   const legW=120, rowH=13;
   ctx.fillStyle='#FFFFFF'; ctx.fillRect(lx,ly,legW,items.length*rowH+26);
   ctx.strokeStyle='#CBD5E1'; ctx.lineWidth=1; ctx.strokeRect(lx,ly,legW,items.length*rowH+26);
@@ -3329,6 +3349,24 @@ function _rvDrawLegenda(ctx, lx, ly, SC){
   ctx.beginPath();ctx.arc(lx+4,symY,10,0,Math.PI/4);ctx.stroke();
   ctx.fillStyle='#334155'; ctx.font='7px IBM Plex Mono';
   ctx.fillText('Ușă (foaie + arc)',lx+18,symY+4);
+  // Simbol ISU
+  const isuY=symY+14;
+  ctx.strokeStyle='rgba(34,197,94,.6)'; ctx.lineWidth=1; ctx.setLineDash([3,3]);
+  ctx.beginPath();ctx.arc(lx+9,isuY,8,0,Math.PI*2);ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle='#16A34A'; ctx.font='6px IBM Plex Mono';
+  ctx.fillText('Rază evacuare ISU',lx+20,isuY+2);
+  ctx.fillStyle='#64748B'; ctx.font='6px IBM Plex Mono';
+  ctx.fillText('(max 30m de la scări)',lx+20,isuY+10);
+  // Simbol circulație
+  const cirY=isuY+20;
+  ctx.strokeStyle='rgba(37,99,235,.5)'; ctx.lineWidth=1.5; ctx.setLineDash([4,3]);
+  ctx.beginPath();ctx.moveTo(lx+4,cirY);ctx.lineTo(lx+16,cirY);ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle='rgba(37,99,235,.8)'; ctx.beginPath();
+  ctx.moveTo(lx+16,cirY);ctx.lineTo(lx+12,cirY-3);ctx.lineTo(lx+12,cirY+3);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#334155'; ctx.font='6px IBM Plex Mono';
+  ctx.fillText('Traseu evacuare',lx+20,cirY+2);
+  ctx.fillStyle='#64748B'; ctx.font='6px IBM Plex Mono';
+  ctx.fillText('(nucleu→ușă apartament)',lx+20,cirY+10);
 }
 
 function _rvDrawScale(ctx,x,y,SC){
