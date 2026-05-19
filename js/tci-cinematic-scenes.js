@@ -55,22 +55,11 @@ const N = (v,d=0) => isNaN(+v)?'—':Number(v).toLocaleString('ro-RO',{minimumFr
 
 G._ZoneProjections = {
 
-  // Zone reale per UAT — identificate din OSM, cu fallback per județ
-  // Referință: Alonso (1964) Location and Land Use — modelul monocentric
-  // Calibrat pe GHSL densitate reală România
-
-  // Fallback zone cu NUME reale per județ (când OSM nu are admin_level=10)
-  UAT_ZONES: {
-    'IS': ['Centru','Copou','Tătărași','Nicolina','Aurel Vlaicu','Moara de Vânt','Mircea cel Bătrân','Galata'],
-    'CJ': ['Centru','Mărăști','Gheorgheni','Mănăștur','Florești-periurban','Someșeni','Dâmbul Rotund','Iris'],
-    'TM': ['Centru','Fabric','Fratelia','Freidorf','Soarelui','Ghiroda-periurban','Dumbrăvița-periurban','Mehala'],
-    'B':  ['Centru Civic','Floreasca','Băneasa','Berceni','Titan','Drumul Taberei','Militari','Pantelimon'],
-    'BV': ['Centru','Tractorul','Bartolomeu','Astra','Noua','Stupini-periurban','Cristian-periurban','Schei'],
-    'CT': ['Centru','Tomis III','Tomis II','Faleza Nord','Km 4-5','Palazu Mare','Mamaia','Poarta 6'],
-    'BT': ['Centru','Vest','Nord','Catalog','Baisa','Primăverii','Calea Națională','Cornișa'],
-    'SV': ['Centru','Burdujeni','Itcani','Obcini','Ițcani Nord','George Enescu','Iași (Suceava)','Zamca'],
-    'default': ['Centru','Zona Nord','Zona Sud','Zona Est','Zona Vest','Periurbane Nord','Periurbane Sud','Cartiere Noi'],
-  },
+  // Zone identificate DINAMIC: OSM → Transport → Gravitational
+  // Nu mai avem liste hardcodate — _ZoneEngine face totul
+  // Aceste câmpuri sunt menținute pentru compatibilitate cu calculate()
+  // dar sunt populate dinamic în _ZoneEngine.analyze()
+  UAT_ZONES: null, // eliminat — folosim _ZoneEngine
 
   // Ponderile per tip zonă (calibrate pe GHSL România 2021)
   ZONE_WEIGHTS: {
@@ -84,10 +73,19 @@ G._ZoneProjections = {
     'periurban':  { gravWeight:0.10, radius_km:18., densBase:8,   growth_mult:1.60 },
   },
 
-  // Obține zone cu NUME REALE pentru un UAT
+  // Zone identificate dinamic prin _ZoneEngine (OSM + transport + gravitational)
+  // Niciun hardcode — fiecare UAT primește zonele lui specifice
   getZoneNames(city) {
-    const jc = city?.judet_code || city?.judet?.slice(0,2).toUpperCase() || 'IS';
-    return this.UAT_ZONES[jc] || this.UAT_ZONES['default'];
+    // Dacă _ZoneEngine e disponibil, returnează zonele deja calculate
+    const cached = window._ZoneEngine?._cache?.[
+      `zones_${city.siruta||city.lat}_${city.lon}`
+    ];
+    if(cached?.zones) return cached.zones.map(z=>z.name);
+    // Fallback generic (nu hardcodat pe județ)
+    const n = city?.pop2021||100000;
+    if(n > 200000) return ['Centru','Zona 1','Zona 2','Zona 3','Zona 4','Zona 5','Periferie Nord','Periferie Sud'];
+    if(n > 50000)  return ['Centru','Zona Nord','Zona Sud','Zona Est','Zona Vest','Periferie'];
+    return ['Centru','Zona Intermediară','Periferie','Expansiune'];
   },
 
   // Proiecție per zonă pentru un UAT și an dat
@@ -257,9 +255,12 @@ G._SceneEngine = {
     if(c) c.remove();
     c = document.createElement('canvas');
     c.id = 'tci-scene-canvas';
+    const dpr = window.devicePixelRatio || 1;
     c.style.cssText = `position:fixed;inset:0;z-index:3500;width:100%;height:100%;pointer-events:none;`;
-    c.width  = window.innerWidth  * (window.devicePixelRatio||1);
-    c.height = window.innerHeight * (window.devicePixelRatio||1);
+    c.width  = window.innerWidth  * dpr;
+    c.height = window.innerHeight * dpr;
+    const ctx = c.getContext('2d');
+    ctx.scale(dpr, dpr); // Retina/HiDPI support
     document.body.appendChild(c);
     return c;
   },
