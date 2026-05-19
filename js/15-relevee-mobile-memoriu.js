@@ -238,32 +238,13 @@ function _implementMemoriu(){
     return;
   }
 
-  window.generateMemoriu = function(){
-    const P = _RV?.parcelParams;
-    const b = _RV?.building;
-    const floors = _RV?.floors;
-
-    if(!P || !b){
-      if(typeof ss === 'function')
-        ss('⚠️ Generați mai întâi releveele (apăsați butonul principal de generare).');
-      alert('Generați releveele mai întâi.');
-      return;
-    }
-
-    const _jsPDF = (typeof jsPDF !== 'undefined') ? jsPDF : window.jspdf?.jsPDF;
-    if(!_jsPDF){
-      if(typeof ss === 'function') ss('❌ jsPDF indisponibil.');
-      return;
-    }
-
-    if(typeof ss === 'function') ss('⏳ Generez Memoriu Tehnic…');
-
-    try{
-      _generateMemoriuPDF(P, b, floors, _jsPDF);
-    } catch(err){
-      console.error('[generateMemoriu] Eroare:', err);
-      if(typeof ss === 'function') ss('❌ Eroare memoriu: ' + err.message);
-    }
+  // generateMemoriu este definit în 10-studies.js (versiunea completă cu date reale)
+  // Nu suprascriem dacă există deja
+  if(typeof window.generateMemoriu !== 'function'){
+    window.generateMemoriu = function(){
+      ss('⚠️ 10-studies.js nu s-a încărcat. Reîncărcați pagina.');
+      console.warn('[generateMemoriu] fallback — 10-studies.js lipsă');
+    };
   };
 }
 
