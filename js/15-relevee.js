@@ -1074,11 +1074,7 @@ function _rvRenderPlan(fl,b){
     return;
   }
 
-  // ── Pereți reali dacă _extractWalls e disponibil ─────────────────────────
-  if(typeof _extractWalls === 'function'){
-    _rvDrawWallsCanvas(ctx, fl, b, ox, oy, SC);
-  }
-  // Camere (etichete + mobilier — peste pereți)
+  // Camere — fills funcționale (pereții se desenează DUPĂ, la pasul 3)
   [...fl.rects].sort((a,m_)=>(a.zIdx||0)-(m_.zIdx||0)).forEach(r=>{
     const C=_RV_COLORS[r.t]||_RV_COLORS.hall;
     const rx=ox+r.x*SC, ry=oy+r.y*SC, rw=r.w*SC, rh=r.h*SC;
@@ -1260,8 +1256,8 @@ function _rvRenderPlan(fl,b){
       const dW=d.w*SC;
       if(d.axis==='H'){
         const dx2=ox+d.x*SC, dy2=oy+d.y*SC;
-        // Gol clar în perete
-        ctx.fillStyle='#FFFFFF'; ctx.fillRect(dx2-2,dy2-5,dW+4,10);
+        // Gol clar în perete (mai mare)
+        ctx.fillStyle='#FFFFFF'; ctx.fillRect(dx2-2,dy2-6,dW+4,12);
         // Foaie ușă
         ctx.strokeStyle=dColor; ctx.lineWidth=1.2;
         ctx.beginPath();ctx.moveTo(dx2,dy2);ctx.lineTo(dx2+dW,dy2);ctx.stroke();
