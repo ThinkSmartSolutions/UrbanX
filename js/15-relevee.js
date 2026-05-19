@@ -761,7 +761,7 @@ function _rvFloor(b, floorIdx){
     // Adăugăm ușă pe peretele comun hol↔cameră
     aptRooms.filter(r=>r.t!=='hall'&&r.t!=='balcon').forEach(room=>{
       // Detectăm peretele comun (adiacență orizontală sau verticală)
-      const EPS2=0.15;
+      const EPS2=0.25; // toleranță mărită pentru detectare adiacență
       // Perete orizontal comun (hol sus/jos față de cameră)
       if(Math.abs((holApt.y+holApt.h)-room.y)<EPS2||Math.abs((room.y+room.h)-holApt.y)<EPS2){
         const xOverlapStart=Math.max(holApt.x,room.x);
@@ -1291,10 +1291,44 @@ function _rvRenderPlan(fl,b){
   });
 
   // Cote
+  // ── Ventilație obligatorie baie/WC (SR 1907-1:2014) ────────────────────
+  fl.rects.filter(r=>r.t==='bath'||r.t==='wc').forEach(r=>{
+    const rx2=ox+r.x*SC, ry2=oy+r.y*SC, rw2=r.w*SC, rh2=r.h*SC;
+    if(rw2<5||rh2<5) return;
+    // Verificăm dacă e pe perete exterior
+    const EPS=0.15;
+    const onExtWall=(r.x<=EPS||r.y<=EPS||r.x+r.w>=b.bW-EPS||r.y+r.h>=b.bD-EPS);
+    const cx2=rx2+rw2/2, cy2=ry2+rh2/2;
+    if(onExtWall){
+      // Fereastră baie (simbol 3 linii paralele pe peretele exterior)
+      ctx.strokeStyle='#0369A1'; ctx.lineWidth=1.5;
+      const fW2=Math.min(rw2*.4,SC*.6), fX=cx2-fW2/2;
+      if(r.y<=EPS){ // perete nord
+        [-2,0,2].forEach(o=>{ctx.beginPath();ctx.moveTo(fX,ry2+o+1);ctx.lineTo(fX+fW2,ry2+o+1);ctx.stroke();});
+      } else if(r.y+r.h>=b.bD-EPS){ // perete sud
+        [-2,0,2].forEach(o=>{ctx.beginPath();ctx.moveTo(fX,ry2+rh2+o-1);ctx.lineTo(fX+fW2,ry2+rh2+o-1);ctx.stroke();});
+      } else if(r.x<=EPS){ // perete vest
+        [-2,0,2].forEach(o=>{ctx.beginPath();ctx.moveTo(rx2+o+1,cy2-SC*.2);ctx.lineTo(rx2+o+1,cy2+SC*.2);ctx.stroke();});
+      } else if(r.x+r.w>=b.bW-EPS){ // perete est
+        [-2,0,2].forEach(o=>{ctx.beginPath();ctx.moveTo(rx2+rw2+o-1,cy2-SC*.2);ctx.lineTo(rx2+rw2+o-1,cy2+SC*.2);ctx.stroke();});
+      }
+      ctx.fillStyle='#0369A1'; ctx.font=`6px IBM Plex Mono`; ctx.textAlign='center';
+      ctx.fillText('fer.',cx2,cy2+rh2*.35);
+    } else {
+      // Ventilație mecanică (cerc cu M)
+      const vR=Math.min(rw2*.18,rh2*.18,8);
+      ctx.fillStyle='rgba(148,163,184,.2)'; ctx.beginPath();ctx.arc(cx2,cy2-vR*.5,vR,0,Math.PI*2);ctx.fill();
+      ctx.strokeStyle='#64748B'; ctx.lineWidth=1; ctx.beginPath();ctx.arc(cx2,cy2-vR*.5,vR,0,Math.PI*2);ctx.stroke();
+      ctx.fillStyle='#334155'; ctx.font=`bold ${Math.min(vR,7)}px IBM Plex Mono`; ctx.textAlign='center';
+      ctx.fillText('M',cx2,cy2-vR*.5+Math.min(vR,7)*.35);
+      ctx.fillText('vent.mec.',cx2,cy2+rh2*.38);
+    }
+  });
   if(_RV.showDim) _rvDrawDims(ctx,ox,oy,bW*SC,bD*SC,bW,bD,P,SC);
   // Touch/pinch zoom pe mobil
   setTimeout(()=>{ try{_rvInitTouchCanvas(document.getElementById('rv-canvas'));}catch(e){} },200);
   // ── Tabel centralizator apartamente ────────────────────────────────────
+  _rvDrawChainDims(ctx, fl, b, ox, oy, SC);
   _rvDrawTabelApartamente(ctx,fl,b,ox,oy+bD*SC+65,Math.min(bW*SC,400));
   // ── Legendă plan ───────────────────────────────────────────────────────
   _rvDrawLegenda(ctx,ox+bW*SC+30,oy,SC);
@@ -1940,8 +1974,10 @@ function _rvConstraintEngine(fl, b, P){
     // HARD: living obligatoriu
     if(!rooms.find(r=>r.t==='living')) hard.push({apt:aptId,rule:'NP057',msg:`Ap.${aptId}: lipsă living`});
 
-    // HARD: baie obligatorie
-    if(!rooms.find(r=>r.t==='bath'||r.t==='wc')) hard.push({apt:aptId,rule:'NP057',msg:`Ap.${aptId}: lipsă baie`});
+    // HARD: baie obligatorie (NP057 min 3.5m² + ventilație)
+    const baie=rooms.find(r=>r.t==='bath'||r.t==='wc');
+    if(!baie) hard.push({apt:aptId,rule:'NP057',msg:`Ap.${aptId}: lipsă baie`});
+    else if(baie.w*baie.h<3.5) soft.push({apt:aptId,rule:'NP057',msg:`Ap.${aptId} baie: ${(baie.w*baie.h).toFixed(1)}m² < 3.5m² minim`});
 
     // HARD: lumină naturală camere locuibile
     rooms.filter(r=>['living','bedroom','bedroom2','bedroom3'].includes(r.t)).forEach(r=>{
@@ -2206,6 +2242,46 @@ function _rvDrawWallsCanvas(ctx, fl, b, ox, oy, SC){
     });
   }
   ctx.textAlign='left';
+
+  // ── Culori distincte per apartament (standard birou proiectare) ──────────
+  const _APT_TINTS = [
+    'rgba(59,130,246,.10)',  // albastru
+    'rgba(16,185,129,.10)',  // verde
+    'rgba(245,158,11,.10)',  // portocaliu
+    'rgba(239,68,68,.10)',   // roșu
+    'rgba(168,85,247,.10)',  // violet
+    'rgba(236,72,153,.10)',  // roz
+    'rgba(20,184,166,.10)',  // teal
+    'rgba(234,179,8,.10)',   // galben
+  ];
+  const _APT_BORDERS = [
+    'rgba(59,130,246,.35)', 'rgba(16,185,129,.35)', 'rgba(245,158,11,.35)',
+    'rgba(239,68,68,.35)',  'rgba(168,85,247,.35)', 'rgba(236,72,153,.35)',
+    'rgba(20,184,166,.35)', 'rgba(234,179,8,.35)',
+  ];
+  // Calculăm bounding box per apartament și desenăm tint
+  const aptIdsAll = [...new Set(fl.rects.filter(r=>r.apt>0).map(r=>r.apt))].sort((a,b)=>a-b);
+  aptIdsAll.forEach(aptId=>{
+    const aptRooms = fl.rects.filter(r=>r.apt===aptId);
+    if(!aptRooms.length) return;
+    const ax1=Math.min(...aptRooms.map(r=>r.x));
+    const ay1=Math.min(...aptRooms.map(r=>r.y));
+    const ax2=Math.max(...aptRooms.map(r=>r.x+r.w));
+    const ay2=Math.max(...aptRooms.map(r=>r.y+r.h));
+    const ci=(aptId-1)%_APT_TINTS.length;
+    // Tint semi-transparent
+    ctx.fillStyle=_APT_TINTS[ci];
+    ctx.fillRect(ox+ax1*SC, oy+ay1*SC, (ax2-ax1)*SC, (ay2-ay1)*SC);
+    // Bordură colorată apartament
+    ctx.strokeStyle=_APT_BORDERS[ci]; ctx.lineWidth=2; ctx.setLineDash([]);
+    ctx.strokeRect(ox+ax1*SC+1, oy+ay1*SC+1, (ax2-ax1)*SC-2, (ay2-ay1)*SC-2);
+    // Număr apartament (colț stânga-sus)
+    ctx.fillStyle=_APT_BORDERS[ci].replace('.35','.85');
+    ctx.font=`bold ${Math.min(11,(ax2-ax1)*SC*.12)}px IBM Plex Mono`;
+    ctx.textAlign='left';
+    const suTot=aptRooms.filter(r=>!r.bal).reduce((s,r)=>s+r.w*r.h,0);
+    ctx.fillText(`AP.${aptId}  ${suTot.toFixed(0)}m²`, ox+ax1*SC+5, oy+ay1*SC+13);
+  });
 
   // Core scări — simbol arhitectural
   fl.rects.filter(r=>r.t==='core').forEach(c=>{
@@ -3126,6 +3202,32 @@ function _rvRenderAxono(b){
 }
 
   } // end block scope
+// ── Cote în lanț per apartament ─────────────────────────────────────────────
+function _rvDrawChainDims(ctx, fl, b, ox, oy, SC){
+  if(!fl) return;
+  ctx.strokeStyle='#1E40AF'; ctx.fillStyle='#1E40AF';
+  ctx.font='7px IBM Plex Mono'; ctx.lineWidth=.8;
+  // Cotă orizontală deasupra clădirii — dimensiuni bay-uri apartamente
+  const aptIds2=[...new Set(fl.rects.filter(r=>r.apt>0&&!r.bal).map(r=>r.apt))].sort((a,b)=>a-b);
+  const chainY=oy-18;
+  let prevX=ox;
+  aptIds2.forEach(aptId=>{
+    const rooms=fl.rects.filter(r=>r.apt===aptId&&!r.bal);
+    if(!rooms.length) return;
+    const ax1=Math.min(...rooms.map(r=>r.x));
+    const ax2=Math.max(...rooms.map(r=>r.x+r.w));
+    const x1=ox+ax1*SC, x2=ox+ax2*SC;
+    // Linie cotă
+    ctx.beginPath();ctx.moveTo(x1,chainY-4);ctx.lineTo(x1,chainY+4);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(x1,chainY);ctx.lineTo(x2,chainY);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(x2,chainY-4);ctx.lineTo(x2,chainY+4);ctx.stroke();
+    // Valoare
+    ctx.textAlign='center';
+    ctx.fillText(((ax2-ax1)).toFixed(2)+'m', (x1+x2)/2, chainY-6);
+  });
+  ctx.textAlign='left';
+}
+
 function _rvDrawDims(ctx,ox,oy,pw,ph,bW,bD,P,SC){
   ctx.strokeStyle='rgba(212,175,55,.4)';ctx.fillStyle='rgba(212,175,55,.75)';
   ctx.font='bold 9px IBM Plex Mono';ctx.lineWidth=.8;
@@ -3162,8 +3264,8 @@ function _rvDrawTabelApartamente(ctx, fl, b, tx, ty, maxW){
   if(!fl||!b) return;
   const aptIds=[...new Set(fl.rects.filter(r=>r.apt>0).map(r=>r.apt))].sort((a,z)=>a-z);
   if(aptIds.length===0) return;
-  const rowH=14, cols=[60,55,30,50,55];
-  const headers=['APARTAMENT','TIP','CAM.','SU (m²)','SC (m²)'];
+  const rowH=14, cols=[52,48,25,42,42,38];
+  const headers=['APARTAMENT','TIP','CAM.','SU (m²)','SC (m²)','SU BAL.'];
   const tW=cols.reduce((s,c)=>s+c,0);
   // Header
   ctx.fillStyle='#1E293B'; ctx.fillRect(tx,ty,tW,rowH);
@@ -3182,7 +3284,8 @@ function _rvDrawTabelApartamente(ctx, fl, b, tx, ty, maxW){
     ctx.strokeStyle='#CBD5E1'; ctx.lineWidth=.5; ctx.strokeRect(tx,ry2,tW,rowH);
     ctx.fillStyle='#0F172A'; ctx.font=`${idx===0?'bold ':''} 7px IBM Plex Mono`;
     cx2=tx;
-    [`Ap. ${String(aptId).padStart(2,'0')}`, tipMap[nCam]||`${nCam} cam.`, String(nCam), su.toFixed(1), sc.toFixed(1)].forEach((v,i)=>{
+    const suBal=fl.rects.filter(r=>r.apt===aptId&&r.bal).reduce((s,r)=>s+r.w*r.h,0);
+    [`Ap. ${String(aptId).padStart(2,'0')}`, tipMap[nCam]||`${nCam} cam.`, String(nCam), su.toFixed(1), sc.toFixed(1), suBal>0?suBal.toFixed(1):'-'].forEach((v,i)=>{
       ctx.fillStyle='#0F172A'; ctx.fillText(v,cx2+3,ry2+9); cx2+=cols[i];
     });
   });
@@ -3205,6 +3308,7 @@ function _rvDrawLegenda(ctx, lx, ly, SC){
     {col:'rgba(226,232,240,.7)',lbl:'Hol / Depozitare'},
     {col:'rgba(191,219,254,.6)',lbl:'Casa scărilor'},
     {col:'rgba(254,249,195,.7)',lbl:'Balcon / Terasă'},
+    {col:'rgba(148,163,184,.15)',lbl:'Ventilație mecanică (M)'},
   ];
   const legW=120, rowH=13;
   ctx.fillStyle='#FFFFFF'; ctx.fillRect(lx,ly,legW,items.length*rowH+26);
