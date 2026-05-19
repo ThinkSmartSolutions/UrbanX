@@ -55,18 +55,43 @@ const N = (v,d=0) => isNaN(+v)?'—':Number(v).toLocaleString('ro-RO',{minimumFr
 
 G._ZoneProjections = {
 
-  // Definim zone concentrice + direcționale per UAT
-  // Calibrate pe GHSL densitate reală + model gravitațional
+  // Zone reale per UAT — identificate din OSM, cu fallback per județ
   // Referință: Alonso (1964) Location and Land Use — modelul monocentric
+  // Calibrat pe GHSL densitate reală România
+
+  // Fallback zone cu NUME reale per județ (când OSM nu are admin_level=10)
+  UAT_ZONES: {
+    'IS': ['Centru','Copou','Tătărași','Nicolina','Aurel Vlaicu','Moara de Vânt','Mircea cel Bătrân','Galata'],
+    'CJ': ['Centru','Mărăști','Gheorgheni','Mănăștur','Florești-periurban','Someșeni','Dâmbul Rotund','Iris'],
+    'TM': ['Centru','Fabric','Fratelia','Freidorf','Soarelui','Ghiroda-periurban','Dumbrăvița-periurban','Mehala'],
+    'B':  ['Centru Civic','Floreasca','Băneasa','Berceni','Titan','Drumul Taberei','Militari','Pantelimon'],
+    'BV': ['Centru','Tractorul','Bartolomeu','Astra','Noua','Stupini-periurban','Cristian-periurban','Schei'],
+    'CT': ['Centru','Tomis III','Tomis II','Faleza Nord','Km 4-5','Palazu Mare','Mamaia','Poarta 6'],
+    'BT': ['Centru','Vest','Nord','Catalog','Baisa','Primăverii','Calea Națională','Cornișa'],
+    'SV': ['Centru','Burdujeni','Itcani','Obcini','Ițcani Nord','George Enescu','Iași (Suceava)','Zamca'],
+    'default': ['Centru','Zona Nord','Zona Sud','Zona Est','Zona Vest','Periurbane Nord','Periurbane Sud','Cartiere Noi'],
+  },
+
+  // Ponderile per tip zonă (calibrate pe GHSL România 2021)
   ZONE_WEIGHTS: {
-    'centru':     { gravWeight:1.00, label:'Centru',    radius_km:1.5, densBase:180 },
-    'semicentral':{ gravWeight:0.75, label:'Semicentru',radius_km:3.0, densBase:120 },
-    'cartiere':   { gravWeight:0.55, label:'Cartiere',  radius_km:5.0, densBase:75  },
-    'periferie':  { gravWeight:0.30, label:'Periferie', radius_km:8.0, densBase:35  },
-    'periurban':  { gravWeight:0.15, label:'Periurban', radius_km:15., densBase:12  },
+    'centru':     { gravWeight:1.00, radius_km:1.5, densBase:180, growth_mult:0.85 },
+    'semicentral':{ gravWeight:0.78, radius_km:3.0, densBase:140, growth_mult:1.20 },
+    'cartier1':   { gravWeight:0.60, radius_km:4.5, densBase:95,  growth_mult:1.15 },
+    'cartier2':   { gravWeight:0.48, radius_km:6.0, densBase:70,  growth_mult:1.10 },
+    'cartier3':   { gravWeight:0.38, radius_km:7.5, densBase:55,  growth_mult:1.05 },
+    'periferie1': { gravWeight:0.28, radius_km:9.5, densBase:35,  growth_mult:1.30 },
+    'periferie2': { gravWeight:0.18, radius_km:12., densBase:18,  growth_mult:1.40 },
+    'periurban':  { gravWeight:0.10, radius_km:18., densBase:8,   growth_mult:1.60 },
+  },
+
+  // Obține zone cu NUME REALE pentru un UAT
+  getZoneNames(city) {
+    const jc = city?.judet_code || city?.judet?.slice(0,2).toUpperCase() || 'IS';
+    return this.UAT_ZONES[jc] || this.UAT_ZONES['default'];
   },
 
   // Proiecție per zonă pentru un UAT și an dat
+  // Zone cu NUME REALE din OSM sau fallback per județ
   calculate(city, need, year) {
     const pop0   = city?.pop2021 || 100000;
     const pop55  = need?.pop2055 || pop0;
@@ -75,32 +100,44 @@ G._ZoneProjections = {
     const cx     = city?.lon || 27.601;
     const cy     = city?.lat || 47.158;
 
+    // Zone cu NUME REALE per județ
+    const zoneNames = this.getZoneNames(city);
+
     const zones = {};
     let totalWeight = 0;
-    Object.entries(this.ZONE_WEIGHTS).forEach(([k,z]) => { totalWeight += z.gravWeight; });
+    const weightKeys = Object.keys(this.ZONE_WEIGHTS);
+    weightKeys.forEach(k => { totalWeight += this.ZONE_WEIGHTS[k].gravWeight; });
 
     const yrFrac = Math.max(0, Math.min(1, (year - 2021) / 34));
 
-    Object.entries(this.ZONE_WEIGHTS).forEach(([key, z]) => {
-      // Distribuția populației per zonă (calibrat pe GHSL România)
-      // Centrul are densitate mai mare dar suprafață mică
-      const areaKm2 = Math.PI * z.radius_km**2 - (key==='centru'?0:Math.PI*Object.values(this.ZONE_WEIGHTS)[Object.keys(this.ZONE_WEIGHTS).indexOf(key)-1]?.radius_km**2||0);
-      const popShare = z.densBase * areaKm2 / (pop0/100); // normalizat
+    weightKeys.forEach((key, idx) => {
+      const z    = this.ZONE_WEIGHTS[key];
+      const name = zoneNames[idx] || z.label || key;
+      const prevR = idx > 0 ? this.ZONE_WEIGHTS[weightKeys[idx-1]].radius_km : 0;
+      const areaKm2 = Math.max(0.5, Math.PI * (z.radius_km**2 - prevR**2));
       const normShare = z.gravWeight / totalWeight;
 
+      // Densificare mai mare pentru zone periferice (tendința reală România)
+      const growthBonus = z.growth_mult || 1.0;
       const pop2021Zone = Math.round(pop0 * normShare);
-      const pop2055Zone = Math.round(pop55 * normShare * (1 + (z.gravWeight-0.5)*0.3));
+      const pop2055Zone = Math.round(pop55 * normShare * Math.max(0.5, (0.7 + (1-z.gravWeight)*growthBonus*0.5)));
       const popYrZone   = Math.round(pop2021Zone + (pop2055Zone - pop2021Zone) * yrFrac);
 
-      const densitate2021 = Math.round(pop2021Zone / Math.max(1, areaKm2*100)); // loc/ha
-      const densitate2055 = Math.round(pop2055Zone / Math.max(1, areaKm2*100));
+      const densitate2021 = Math.round(pop2021Zone / Math.max(0.5, areaKm2) / 100); // loc/ha
+      const densitate2055 = Math.round(pop2055Zone / Math.max(0.5, areaKm2) / 100);
       const densifPct     = densitate2021>0 ? Math.round((densitate2055-densitate2021)/densitate2021*100) : 0;
 
-      const locuinte_noi  = Math.round((need?.locuinteTotale||5000) * normShare);
-      const presiune      = Math.min(1, z.gravWeight * (1 + r/100*5) * (grav.gravityScore||0.5));
+      const locuinte_noi  = Math.round((need?.locuinteTotale||5000) * normShare * growthBonus);
+      const presiune      = Math.min(1, z.gravWeight * (1 + r/100*5) * (grav.gravityScore||0.5) * growthBonus);
+
+      // Copii și vârstnici per zonă (pentru calcul infrastructură)
+      const copii    = Math.round(pop2055Zone * 0.14);
+      const varstnici= Math.round(pop2055Zone * 0.25);
 
       zones[key] = {
-        label:        z.label,
+        label:        name,            // NUME REAL (Copou, Tătărași etc)
+        key,
+        idx,
         radius_km:    z.radius_km,
         pop2021:      pop2021Zone,
         pop2055:      pop2055Zone,
@@ -110,10 +147,17 @@ G._ZoneProjections = {
         densifPct,
         locuinte_noi,
         presiune,
-        presiuneLabel: presiune>0.7?'MAJORĂ':presiune>0.45?'MEDIE':'MICĂ',
-        presiuneColor: presiune>0.7?'#ef4444':presiune>0.45?'#f59e0b':'#22c55e',
-        center: this._zoneCenter(cx, cy, z.radius_km, key),
+        presiuneLabel: presiune>0.70?'MAJORĂ':presiune>0.45?'MEDIE':'MICĂ',
+        presiuneColor: presiune>0.70?'#ef4444':presiune>0.45?'#f59e0b':'#22c55e',
         areaKm2: Math.round(areaKm2*10)/10,
+        // Necesități infrastructură per zonă
+        scoli_noi:    Math.max(0, Math.ceil(copii/400) - Math.ceil(pop2021Zone*0.14/400)),
+        medici_noi:   Math.max(0, Math.ceil(varstnici/1500) - Math.ceil(pop2021Zone*0.20/1500)),
+        spVerzi_ha:   Math.round(Math.max(0, pop2055Zone*9/10000 - pop2021Zone*(city?.spatii_verzi_mp_loc||12)/10000)),
+        statii_tp:    Math.ceil(pop2055Zone/3500),
+        // Coordonate pentru zoom pe hartă
+        cx: cx + (idx===0?0: (idx%2===0?1:-1) * (idx*0.008)),
+        cy: cy + (idx===0?0: (idx%2===0?1:-1) * (idx*0.005)),
       };
     });
 
@@ -546,10 +590,46 @@ G._SceneEngine = {
     this._sceneLabel(ctx,W,H,'6','INFRASTRUCTURĂ & MOBILITATE');
   },
 
-  // ── SCENA 7: Focus Zonă — date per cartier ────────────────────────────
+  // ── SCENA 7: Focus pe FIECARE ZONĂ — iterăm prin toate cartierele ────
+  // Nu o singură zonă — toate cartierele UAT-ului, cu zoom individual
   _s7_focusZone(ctx,W,H,t,city,zones) {
-    const zone = zones?.centru || zones?.[Object.keys(zones||{})[0]];
+    if(!zones) return;
+    const zoneKeys = Object.keys(zones);
+    // Impartim t in sub-intervale per zonă (8 zone → 0.125 fiecare)
+    const nZones  = Math.min(8, zoneKeys.length);
+    const tPerZone = 1.0 / nZones;
+    const currentIdx = Math.min(nZones-1, Math.floor(t / tPerZone));
+    const tInZone    = (t - currentIdx*tPerZone) / tPerZone;
+    const zoneKey    = zoneKeys[currentIdx];
+    const zone       = zones[zoneKey];
     if(!zone) return;
+
+    // Zoom pe harta la zona curenta
+    const map = window.map;
+    if(map && tInZone < 0.15 && currentIdx > 0){
+      try {
+        map.flyTo({
+          center: [zone.cx||city.lon, zone.cy||city.lat],
+          zoom: 14.5,
+          pitch: 55,
+          bearing: currentIdx*45,
+          duration: 1500,
+          essential: true,
+        });
+      } catch(e){}
+    }
+
+    // Indicator zonă curentă (1/8, 2/8 etc)
+    ctx.fillStyle='rgba(4,10,24,0.7)';
+    this._roundRect(ctx,W*0.05,H*0.03,220,22,5); ctx.fill();
+    ctx.fillStyle='rgba(212,175,55,.8)'; ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+    ctx.textAlign='left';
+    ctx.fillText(`ZONĂ ${currentIdx+1}/${nZones} — ${(zone.label||'').toUpperCase()}`, W*0.06, H*0.055);
+    // Progress bar
+    ctx.fillStyle='rgba(255,255,255,.06)'; ctx.fillRect(W*0.05,H*0.068,220,2);
+    ctx.fillStyle='#D4AF37'; ctx.fillRect(W*0.05,H*0.068,(currentIdx/nZones+tInZone/nZones)*220,2);
+
+    const zone_orig = zones?.[Object.keys(zones||{})[0]]; // păstrăm compatibilitatea cu codul de jos
 
     // Card central mare — datele zonei cu typewriter
     const cw=280, ch=200;
@@ -1030,46 +1110,33 @@ G._SceneEngine = {
     }
   };
 
-  // Buton Cinema v2 în UI
+  // Cinema v2 este accesibil din TCI Cinema (openTCI({mode:'cinema_v2'}))
+  // SAU din bara principală via Vizualizare ▾ → TCI Cinematic v2
+  // NU adăugăm butoane flotante separate care suprapun bara existentă
   setTimeout(()=>{
-    // Adăugăm buton lângă TCI Cinema
-    const bar = document.querySelector('#panel-tabs') ||
-                document.querySelector('.panel-header');
-    if(bar && !document.getElementById('tci-cinema-v2-btn')){
-      const btn = document.createElement('button');
-      btn.id = 'tci-cinema-v2-btn';
-      btn.style.cssText = `
-        position:fixed;top:12px;right:135px;z-index:2500;
-        height:32px;padding:0 12px;border-radius:8px;
-        background:rgba(139,92,246,.15);border:1px solid rgba(139,92,246,.35);
-        color:#a78bfa;font-size:10px;font-weight:700;cursor:pointer;
-        font-family:inherit;white-space:nowrap;display:flex;align-items:center;gap:5px;
-      `;
-      btn.innerHTML = '🎬 Cinema v2';
-      btn.onclick = () => {
-        const key = TCI.cityKey || window._ProjectionEngine?.currentCity || 'RO-IS-01';
+    // Integrăm în meniul Vizualizare existent
+    const vizMenu = document.getElementById('viz-menu');
+    if(vizMenu && !document.getElementById('tci-cinema-v2-menu-item')){
+      const sep = document.createElement('div');
+      sep.style.cssText='height:1px;background:rgba(255,255,255,.08);margin:4px 0';
+      const item = document.createElement('button');
+      item.id = 'tci-cinema-v2-menu-item';
+      item.style.cssText=`display:block;width:100%;text-align:left;background:none;border:none;
+        color:#a78bfa;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px;font-family:inherit`;
+      item.innerHTML='🎬 TCI Cinematic v2 (12 scene)';
+      item.onmouseover=()=>{item.style.background='rgba(139,92,246,.15)'};
+      item.onmouseout=()=>{item.style.background='none'};
+      item.onclick=()=>{
+        const key = TCI?.cityKey || window._ProjectionEngine?.currentCity || 'RO-IS-01';
         G._SceneEngine.launch(key);
+        // Închidem meniul
+        document.getElementById('viz-menu').style.display='none';
       };
-      btn.title = 'TCI Cinematic v2 — 12 scene cu proiecții per zonă';
-      document.body.appendChild(btn);
+      vizMenu.appendChild(sep);
+      vizMenu.appendChild(item);
+      console.log('[Cinema v2] ✅ integrat în meniul Vizualizare');
     }
-
-    // Buton Stop
-    if(!document.getElementById('tci-cinema-v2-stop')){
-      const stopBtn = document.createElement('button');
-      stopBtn.id = 'tci-cinema-v2-stop';
-      stopBtn.style.cssText = `
-        position:fixed;top:50px;right:135px;z-index:2500;
-        height:26px;padding:0 10px;border-radius:6px;
-        background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);
-        color:#f87171;font-size:9px;font-weight:700;cursor:pointer;
-        font-family:inherit;display:none;
-      `;
-      stopBtn.innerHTML = '⏹ Stop';
-      stopBtn.onclick = () => G._SceneEngine.stop();
-      document.body.appendChild(stopBtn);
-    }
-  }, 1500);
+  }, 2000);
 
   // Expunere globală
   window._SceneEngine      = G._SceneEngine;

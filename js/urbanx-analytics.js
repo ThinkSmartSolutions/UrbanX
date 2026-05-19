@@ -1041,8 +1041,12 @@ G._AnalyticsPanel = {
   },
 
   async run15MinCity() {
-    const ap = this._getParcel();
-    if(!ap?.lat) { ss?.('Selectați o parcelă cu coordonate GPS'); return; }
+    const ap_raw = this._getParcel();
+    const city = this._getCity();
+    const _lat = ap_raw?.lat || city?.lat;
+    const _lon = ap_raw?.lon || city?.lon;
+    if(!_lat || !_lon) { ss?.('Selectați o parcelă cu coordonate GPS'); return; }
+    const ap = {...(ap_raw||{}), lat:_lat, lon:_lon};
     const result = await G._FifteenMinCity.analyze(ap.lat, ap.lon);
     const el = document.getElementById('analytics-15min-result');
     if(!el) return;
@@ -1200,9 +1204,12 @@ G._AnalyticsPanel = {
   },
 
   async runSeismic() {
-    const ap = this._getParcel();
-    if(!ap?.lat) { ss?.('Selectați o parcelă cu coordonate GPS'); return; }
+    const ap_raw = this._getParcel();
     const city = this._getCity();
+    const _lat = ap_raw?.lat || city?.lat;
+    const _lon = ap_raw?.lon || city?.lon;
+    if(!_lat || !_lon) { ss?.('Selectați o parcelă cu coordonate GPS'); return; }
+    const ap = {...(ap_raw||{}), lat:_lat, lon:_lon};
     const risk = typeof _getRiskProfile==='function' ? _getRiskProfile(city||{}) : null;
 
     const result = await G._SeismicVulnerability.analyzeArea(ap.lat, ap.lon, risk?.seismic);

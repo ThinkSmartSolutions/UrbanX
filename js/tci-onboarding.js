@@ -493,41 +493,87 @@ G._connectShare = function() {
 // ═══════════════════════════════════════════════════════════════════════════
 
 G._addGlobalButtons = function() {
-  // Buton ? (Help / Ghid) fixed top-right
-  if(!document.getElementById('ux-help-btn')){
-    const btn = document.createElement('button');
-    btn.id = 'ux-help-btn';
-    btn.title = 'Ghid de utilizare';
-    btn.style.cssText = `
-      position:fixed;top:12px;right:52px;z-index:2500;
-      width:32px;height:32px;border-radius:8px;
-      background:rgba(4,10,24,.9);border:1px solid rgba(255,255,255,.1);
-      color:rgba(148,163,184,.6);font-size:14px;cursor:pointer;
-      display:flex;align-items:center;justify-content:center;
-      font-family:inherit;
-    `;
-    btn.innerHTML = '?';
-    btn.onclick = () => G._UserGuide.show(true);
-    document.body.appendChild(btn);
-  }
+  // NU mai adăugăm butoane flotante care se suprapun cu bara existentă.
+  // Integrăm funcționalitățile în meniurile dropdown EXISTENTE.
 
-  // Buton Share global
-  if(!document.getElementById('ux-share-btn-global')){
-    const btn = document.createElement('button');
-    btn.id = 'ux-share-btn-global';
-    btn.title = 'Share scenariu curent';
-    btn.style.cssText = `
-      position:fixed;top:12px;right:90px;z-index:2500;
-      height:32px;padding:0 12px;border-radius:8px;
-      background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.25);
-      color:#60a5fa;font-size:11px;font-weight:700;cursor:pointer;
-      display:flex;align-items:center;gap:5px;font-family:inherit;
-      white-space:nowrap;
-    `;
-    btn.innerHTML = '🔗 Share';
-    btn.onclick = () => G._ShareManager.generate();
-    document.body.appendChild(btn);
+  // 1. Adăugăm Share + Help în meniul Instrumente existent
+  const tryInjectInMenu = () => {
+    // Cautam meniul Instrumente (tools-menu sau toolbar)
+    const toolsMenu = document.getElementById('tools-menu') ||
+                      document.getElementById('tools-group');
+
+    if(toolsMenu && !document.getElementById('ux-share-menu-item')){
+      // Adăugăm separator + Share + Help în meniu
+      const sep = document.createElement('div');
+      sep.style.cssText='height:1px;background:rgba(255,255,255,.08);margin:4px 0';
+
+      const shareItem = document.createElement('button');
+      shareItem.id = 'ux-share-menu-item';
+      shareItem.style.cssText=`display:block;width:100%;text-align:left;background:none;border:none;
+        color:#60a5fa;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px;font-family:inherit`;
+      shareItem.innerHTML='🔗 Share scenariu curent';
+      shareItem.onmouseover=()=>{shareItem.style.background='rgba(59,130,246,.15)'};
+      shareItem.onmouseout=()=>{shareItem.style.background='none'};
+      shareItem.onclick=()=>{ G._ShareManager.generate(); };
+
+      const helpItem = document.createElement('button');
+      helpItem.id = 'ux-help-menu-item';
+      helpItem.style.cssText=`display:block;width:100%;text-align:left;background:none;border:none;
+        color:#a78bfa;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px;font-family:inherit`;
+      helpItem.innerHTML='❓ Ghid utilizare platformă';
+      helpItem.onmouseover=()=>{helpItem.style.background='rgba(139,92,246,.15)'};
+      helpItem.onmouseout=()=>{helpItem.style.background='none'};
+      helpItem.onclick=()=>{ G._UserGuide.show(true); };
+
+      toolsMenu.appendChild(sep);
+      toolsMenu.appendChild(shareItem);
+      toolsMenu.appendChild(helpItem);
+      console.log('[UX] ✅ Share + Help integrate în meniul Instrumente');
+      return true;
+    }
+
+    // Fallback: daca meniul Instrumente nu e găsit, adăugăm discret lângă TCI button
+    const tciBtn = document.querySelector('.tci-launch-btn');
+    if(tciBtn && !document.getElementById('ux-share-compact')){
+      const shareBtn = document.createElement('button');
+      shareBtn.id = 'ux-share-compact';
+      shareBtn.title = 'Share scenariu | Ghid utilizare';
+      shareBtn.className = 'tci-launch-btn';
+      shareBtn.style.cssText = `background:rgba(59,130,246,.1);border-color:rgba(59,130,246,.3);
+        color:#60a5fa;font-size:10px;padding:4px 8px;`;
+      shareBtn.innerHTML = '🔗';
+      shareBtn.onclick = () => G._ShareManager.generate();
+      shareBtn.insertAdjacentElement('afterend', tciBtn);
+
+      const helpBtn = document.createElement('button');
+      helpBtn.id = 'ux-help-compact';
+      helpBtn.title = 'Ghid de utilizare';
+      helpBtn.className = 'tci-launch-btn';
+      helpBtn.style.cssText = `background:rgba(139,92,246,.1);border-color:rgba(139,92,246,.3);
+        color:#a78bfa;font-size:10px;padding:4px 8px;`;
+      helpBtn.innerHTML = '❓';
+      helpBtn.onclick = () => G._UserGuide.show(true);
+      shareBtn.insertAdjacentElement('afterend', helpBtn);
+      console.log('[UX] ✅ Share + Help adăugate lângă TCI button');
+      return true;
+    }
+    return false;
+  };
+
+  // 2. Integrăm Cinema v2 în butonul TCI existent — NU buton separat
+  const injectCinemaV2 = () => {
+    if(document.getElementById('tci-cinema-v2-btn')) return; // deja există din alt modul
+    // Cinema v2 e accesat din TCI Cinema direct (openTCI({mode:'cinema_v2'}))
+    // sau din tab-ul Scen. din panou
+    console.log('[UX] Cinema v2 accesibil via TCI Cinema → mode cinema_v2');
+  };
+
+  // Încercăm imediat și după 2s (meniurile pot fi populate dinamic)
+  if(!tryInjectInMenu()) {
+    setTimeout(tryInjectInMenu, 2000);
+    setTimeout(tryInjectInMenu, 4000);
   }
+  injectCinemaV2();
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
