@@ -78,6 +78,7 @@ const _RV = {
   tab: 'plan', floor: 0,
   scale: 12,
   showSolar: false, showISU: true, showDim: true, showSGrid: false,
+  panX:0, panY:0,
   building: null, floors: [],
   parcelParams: null,
   selectedRoom: null, resizing: null, editDirty: false,
@@ -1291,6 +1292,8 @@ function _rvRenderPlan(fl,b){
 
   // Cote
   if(_RV.showDim) _rvDrawDims(ctx,ox,oy,bW*SC,bD*SC,bW,bD,P,SC);
+  // Touch/pinch zoom pe mobil
+  setTimeout(()=>{ try{_rvInitTouchCanvas(document.getElementById('rv-canvas'));}catch(e){} },200);
   // ── Tabel centralizator apartamente ────────────────────────────────────
   _rvDrawTabelApartamente(ctx,fl,b,ox,oy+bD*SC+65,Math.min(bW*SC,400));
   // ── Legendă plan ───────────────────────────────────────────────────────
@@ -1318,6 +1321,177 @@ function _rvRenderPlan(fl,b){
     _rvDrawISUCircles(ctx,b,ox,oy,SC);
   }
   
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// MOBILE OPTIMIZATION + PMR + ENERGY + PRINT
+// ════════════════════════════════════════════════════════════════════════════
+
+// ── Touch / Pinch-to-zoom pe canvas ──────────────────────────────────────
+function _rvInitTouchCanvas(cv){
+  if(!cv||cv._rvTouchInit) return;
+  cv._rvTouchInit = true;
+  let _t0=null, _sc0=1, _pan={x:0,y:0}, _panStart=null;
+
+  cv.addEventListener('touchstart', e=>{
+    if(e.touches.length===2){
+      _t0 = e.touches;
+      _sc0 = _RV.scale;
+    } else if(e.touches.length===1){
+      _panStart = {x:e.touches[0].clientX, y:e.touches[0].clientY,
+                   sx:(_RV.panX||0), sy:(_RV.panY||0)};
+    }
+  },{passive:true});
+
+  cv.addEventListener('touchmove', e=>{
+    e.preventDefault();
+    if(e.touches.length===2&&_t0){
+      const d0=Math.hypot(_t0[0].clientX-_t0[1].clientX, _t0[0].clientY-_t0[1].clientY);
+      const d1=Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
+      _RV.scale = Math.max(4, Math.min(40, _sc0*(d1/d0)));
+      _rvRender();
+    } else if(e.touches.length===1&&_panStart){
+      const dx=e.touches[0].clientX-_panStart.x;
+      const dy=e.touches[0].clientY-_panStart.y;
+      const wrap=document.getElementById('rv-drawwrap');
+      if(wrap){ wrap.scrollLeft=_panStart.sx-dx; wrap.scrollTop=_panStart.sy-dy; }
+    }
+  },{passive:false});
+
+  cv.addEventListener('touchend',()=>{ _t0=null; _panStart=null; },{passive:true});
+}
+
+// ── PMR — Accesibilitate persoane cu dizabilități (NP051/2012) ────────────
+function _rvCheckPMR(b, fl, P){
+  const issues=[], ok=[];
+  const niv=b.niv;
+
+  // Lift obligatoriu pentru PMR la orice clădire publică sau >P+1
+  if(niv>=3){
+    const hasLift=fl?.rects?.some(r=>r.t==='core'&&r.lbl?.includes('Lift'));
+    if(hasLift) ok.push('✓ Lift disponibil (PMR)');
+    else issues.push('✗ Lift necesar PMR — NP051 §4.2');
+  }
+
+  // Lățime coridor min 1.20m pentru scaun cu rotile
+  const holuri=fl?.rects?.filter(r=>r.apt<0&&r.t==='hall')||[];
+  holuri.forEach(h=>{
+    const lat=Math.min(h.w,h.h);
+    if(lat>=1.20) ok.push(`✓ Coridor ${lat.toFixed(1)}m ≥ 1.20m PMR`);
+    else issues.push(`✗ Coridor ${lat.toFixed(1)}m < 1.20m — PMR necesită min 1.20m`);
+  });
+
+  // Intrare accesibilă (rampă la parter)
+  ok.push('ℹ Rampă acces: verificare necesară la parter');
+
+  // Baie PMR
+  const bai=fl?.rects?.filter(r=>r.t==='bath')||[];
+  if(bai.some(b=>b.w*b.h>=4.5)) ok.push('✓ Baie ≥4.5m² (acceptabil PMR)');
+  else if(bai.length>0) issues.push('⚠ Baie sub 4.5m² — PMR recomandă min 4.5m²');
+
+  return {issues, ok, valid:issues.filter(i=>i.startsWith('✗')).length===0};
+}
+
+// ── Clasă energetică estimată ──────────────────────────────────────────────
+function _rvEnergyRating(b, P, stil){
+  // Estimare simplificată bazată pe: stil arhitectural, nr. etaje, orientare
+  const _A=window.AEDIS||{};
+  const cortina=_A.cortinaProcent||0;
+  const tipAcop=_A.tipAcoperis||'terasa';
+
+  // Coeficient pierderi termice estimat
+  let U = 0.6; // W/m²K bază (pereți BCA+EPS15cm ≈ 0.25 W/m²K)
+  if(cortina>50) U += 0.3; // geam curtain wall mai puțin izolant
+  if(tipAcop==='inclinat') U -= 0.05; // acoperiș mai bun
+  if(b.niv>6) U -= 0.05; // mai puțin pierderi laterale
+
+  // Consum specific estimat (kWh/m²·an)
+  const qAn = Math.round(U * 85 + 20); // formula simplificată
+
+  // Clasă energetică (conform Ordin MC 2641/2017)
+  let cls='C', cls_color='#F59E0B';
+  if(qAn<50){cls='A+';cls_color='#16A34A';}
+  else if(qAn<75){cls='A';cls_color='#22C55E';}
+  else if(qAn<100){cls='B';cls_color='#84CC16';}
+  else if(qAn<125){cls='C';cls_color='#F59E0B';}
+  else if(qAn<150){cls='D';cls_color='#F97316';}
+  else if(qAn<175){cls='E';cls_color='#EF4444';}
+  else{cls='F';cls_color='#DC2626';}
+
+  return {cls, qAn, U:U.toFixed(2), cls_color};
+}
+
+// ── Print layout (A3 format) ───────────────────────────────────────────────
+function _rvPrintLayout(){
+  const cv=document.getElementById('rv-canvas');
+  if(!cv) return;
+  const img=cv.toDataURL('image/png');
+  const b=_RV.building, P=_RV.building?.P;
+  const win=window.open('','_blank','width=1200,height=800');
+  win.document.write(`<!DOCTYPE html><html><head>
+    <title>Plan Arhitectural — UrbanX TSS·FG</title>
+    <style>
+      @page{size:A3 landscape;margin:10mm}
+      body{margin:0;font-family:IBM Plex Mono,monospace;background:#fff}
+      .header{display:flex;justify-content:space-between;align-items:center;
+              border-bottom:2px solid #1E293B;padding:4mm 6mm;margin-bottom:4mm}
+      .logo{font-size:14pt;font-weight:bold;color:#1E293B}
+      .meta{font-size:8pt;color:#475569;text-align:right}
+      .plan{text-align:center;width:100%}
+      .plan img{max-width:100%;max-height:180mm;object-fit:contain}
+      .footer{position:fixed;bottom:5mm;width:100%;display:flex;
+              justify-content:space-between;font-size:7pt;color:#94A3B8;
+              border-top:1px solid #E2E8F0;padding-top:2mm}
+      @media print{.noprint{display:none}}
+    </style>
+  </head><body>
+    <div class="header">
+      <div class="logo">UrbanX TSS·FG — Plan Arhitectural</div>
+      <div class="meta">
+        Nr. cad.: <b>${P?.nrCad||'—'}</b> · UTR: ${P?.utr||'—'}<br>
+        Sc. 1:100 · Data: ${new Date().toLocaleDateString('ro-RO')}<br>
+        ${b?.niv||'—'} niveluri · SDA: ${b?.sdaTotal?.toFixed(0)||'—'}m²
+      </div>
+    </div>
+    <div class="plan"><img src="${img}" /></div>
+    <div class="footer">
+      <span>UrbanX TSS·FG — Generator Preliminar Proiectare</span>
+      <span>Document orientativ · Verificare profesionist autorizat necesară</span>
+      <span>${new Date().toLocaleDateString('ro-RO')}</span>
+    </div>
+    <div class="noprint" style="text-align:center;margin:10px">
+      <button onclick="window.print()" style="padding:8px 20px;background:#1E293B;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:12px">🖨 Printează A3</button>
+    </div>
+  </body></html>`);
+  win.document.close();
+  setTimeout(()=>win.print(),500);
+}
+
+// ── PMR + Energy în panelul Verificare Normative ──────────────────────────
+function _rvUpdateVerificareExtended(b, fl, P){
+  const pmr=_rvCheckPMR(b, fl, P);
+  const energy=_rvEnergyRating(b, P, window.AEDIS?.stil);
+  const normEl=document.getElementById('rv-norm');
+  if(!normEl) return;
+
+  // Adăugăm la finalul normelor existente
+  const existing=normEl.innerHTML;
+  normEl.innerHTML=existing+`
+    <div class="rv-norm-item">
+      <div><div class="rv-nl">PMR Accesibilitate</div><div class="rv-nref">NP051/2012</div></div>
+      <div class="rv-badge rv-badge-${pmr.valid?'ok':'warn'}">${pmr.valid?'CONFORM':pmr.issues.length+' PROB.'}</div>
+    </div>
+    <div class="rv-norm-item">
+      <div><div class="rv-nl">Clasă Energetică est.</div><div class="rv-nref">MC 2641/2017</div></div>
+      <div class="rv-badge" style="background:${energy.cls_color}20;color:${energy.cls_color};border:1px solid ${energy.cls_color}40">
+        ${energy.cls} · ~${energy.qAn}kWh/m²
+      </div>
+    </div>
+    <div class="rv-norm-item">
+      <div><div class="rv-nl">Printare A3</div><div class="rv-nref">Export</div></div>
+      <div class="rv-badge rv-badge-ok" onclick="_rvPrintLayout()" style="cursor:pointer">🖨 PRINT A3</div>
+    </div>`;
+}
 
 // ════════════════════════════════════════════════════════════════════════════
 // AUTO-FIX ENGINE — detectează și corectează automat neconformitățile
@@ -4074,6 +4248,11 @@ async function generateRelevee(){
       }
     }
   }catch(e){console.warn('[RV autofix]',e);} }, 10500);
+  setTimeout(()=>{ try{
+    // PMR + Energy + Print button in normative panel
+    const fl_pmr=_RV.floors[_RV.curFloor]||_RV.floors[0];
+    _rvUpdateVerificareExtended(_RV.building,fl_pmr,_RV.building?.P||P);
+  }catch(e){} }, 11000);
   setTimeout(()=>{ try{
     const avizeContent=document.getElementById('rv-avize-content');
     if(avizeContent) avizeContent.innerHTML=_rvBuildAvizeTimeline(b,P);
