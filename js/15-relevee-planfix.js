@@ -347,7 +347,15 @@ function _patchRenderPlan(){
       ctx.textAlign = 'left';
     });
 
-    // ── STRAT 11: Cote globale ───────────────────────────────────────────
+    // ── STRAT 11: Rampă subsol în Plan Nivel ────────────────────────────
+    // Hook din 15-relevee-subsol.js — rampa apare pe plan situatie/nivel
+    if(typeof _rvSubsolAddRampaToSitePlan === 'function'){
+      _rvSubsolAddRampaToSitePlan(ctx, P, b, ox, oy, SC, {
+        gold:[180,140,30], dark2:[15,25,50]
+      });
+    }
+
+    // ── STRAT 12: Cote globale ───────────────────────────────────────────
     if(_RV.showDim){
       if(typeof _rvDrawDims==='function')
         _rvDrawDims(ctx, ox, oy, bW*SC, bD*SC, bW, bD, P, SC);
@@ -601,6 +609,19 @@ function _patchRenderFacade(){
       ctx.strokeStyle = '#94A3B8'; ctx.lineWidth = .8;
       ctx.strokeRect(ox_-4, oy_+facadeH-soclH, fW+8, soclH);
 
+      // ── Linie nivel subsol (dacă există) ─────────────────────────
+      // Apare sub linia de teren cu cotă -3.00m
+      const subsolH = 3.0*SC; // înălțime estimată subsol
+      const subsolY = oy_ + facadeH + subsolH;
+      ctx.strokeStyle = '#475569'; ctx.lineWidth = 1;
+      ctx.setLineDash([4,3]);
+      ctx.beginPath();ctx.moveTo(ox_-10,subsolY);ctx.lineTo(ox_+fW+10,subsolY);ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = '#475569'; ctx.font = '7px IBM Plex Mono';
+      ctx.textAlign = 'right';
+      ctx.fillText('-3.00 NIVEL SUBSOL (S-1)', ox_-6, subsolY+4);
+      ctx.textAlign = 'left';
+
       // Sol + linie teren
       ctx.fillStyle = '#9CA3AF';
       ctx.fillRect(ox_-12, oy_+facadeH, fW+24, 6);
@@ -847,6 +868,11 @@ function _patchRenderFacade(){
       const oy_ = pad + 30 + idx*sectionH;
       const ox_ = pad + 50;
       drawFatada(label, fW, ox_, oy_, isMain, wins, wallDir);
+      // Rampă subsol în fațadă (hook din 15-relevee-subsol.js)
+      if(typeof _rvSubsolAddRampaToFatada === 'function'){
+        _rvSubsolAddRampaToFatada(ctx, wallDir, P, b, ox_, oy_, SC,
+          {gold:[180,140,30], dark2:[15,25,50]});
+      }
     });
 
     if(typeof _rvDrawNorth==='function')  _rvDrawNorth(ctx, W-40, 50, P.frontDir);
