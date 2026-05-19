@@ -1872,14 +1872,96 @@ function _rvRenderComparativ(b, P, floors, bOpt, POpt, floorsOpt, fixes){
   const tab = document.getElementById('rv-scenarii-content');
   if(!tab) return;
 
-  const scoreOrig = _rvScoreFloor(floors[0], b, P);
-  const scoreOpt  = _rvScoreFloor(floorsOpt[0], bOpt, POpt);
-  const constrOrig = _rvConstraintEngine(floors[0], b, P);
-  const constrOpt  = _rvConstraintEngine(floorsOpt[0], bOpt, POpt);
+  const scoreOrig = _rvScoreFloor(floors[0], b, P)||{total:0};
+  const scoreOpt  = _rvScoreFloor(floorsOpt[0], bOpt, POpt)||{total:0};
+  const constrOrig = _rvConstraintEngine(floors[0], b, P)||{hard:[],soft:[]};
+  const constrOpt  = _rvConstraintEngine(floorsOpt[0], bOpt, POpt)||{hard:[],soft:[]};
+  const hardFixes = fixes.filter(f=>f.severity==='hard');
+  const softFixes = fixes.filter(f=>f.severity==='soft');
 
-  const fixCount = fixes.length;
-  const hardFixes = fixes.filter(f=>f.severity==='hard').length;
-  const softFixes = fixes.filter(f=>f.severity==='soft').length;
+  tab.innerHTML = `
+    <div style="padding:10px 12px;font-family:IBM Plex Mono,monospace;overflow-y:auto;height:100%">
+
+      <!-- CUM SE FOLOSEȘTE -->
+      <div style="background:#0A1628;border:1px solid #1E3A8A;border-radius:6px;padding:8px 10px;margin-bottom:10px">
+        <div style="font:bold 9px IBM Plex Mono;color:#60A5FA;margin-bottom:4px">❓ CUM FUNCȚIONEAZĂ SCENARII A/B</div>
+        <div style="font:7px IBM Plex Mono;color:#93C5FD;line-height:1.6">
+          <b style="color:#FFF">Varianta A (Original)</b> — planul generat din datele tale AEDIS<br>
+          <b style="color:#FFF">Varianta B (Optimizat)</b> — corectat automat pentru conformitate normativă<br>
+          → Apasă butoanele de mai jos pentru a vizualiza fiecare variantă pe plan<br>
+          → Exportă ambele variante și compară-le cu arhitectul
+        </div>
+      </div>
+
+      <!-- COMPARATIV SCORURI -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <div style="background:#0F172A;border:1px solid #334155;border-radius:6px;padding:10px;text-align:center">
+          <div style="font:bold 8px IBM Plex Mono;color:#94A3B8;margin-bottom:2px">🅰 VARIANTA ORIGINALĂ</div>
+          <div style="font:bold 26px IBM Plex Mono;color:${scoreOrig.total>=80?'#22C55E':scoreOrig.total>=60?'#F59E0B':'#EF4444'}">${scoreOrig.total}<span style="font-size:11px;color:#475569">/100</span></div>
+          <div style="font:7px IBM Plex Mono;color:#64748B;margin-top:4px">
+            ${constrOrig.hard.length} erori obligatorii · ${constrOrig.soft.length} avertismente
+          </div>
+          <button onclick="_rvShowVariant('original')" style="margin-top:6px;width:100%;padding:6px;background:#1E293B;color:#E2E8F0;border:1px solid #334155;border-radius:4px;font:bold 8px IBM Plex Mono;cursor:pointer">
+            👁 Afișează pe Plan
+          </button>
+        </div>
+        <div style="background:#052e16;border:1px solid #166534;border-radius:6px;padding:10px;text-align:center">
+          <div style="font:bold 8px IBM Plex Mono;color:#86EFAC;margin-bottom:2px">🅱 VARIANTA OPTIMIZATĂ</div>
+          <div style="font:bold 26px IBM Plex Mono;color:${scoreOpt.total>=80?'#22C55E':scoreOpt.total>=60?'#F59E0B':'#EF4444'}">${scoreOpt.total}<span style="font-size:11px;color:#475569">/100</span></div>
+          <div style="font:7px IBM Plex Mono;color:#64748B;margin-top:4px">
+            ${constrOpt.hard.length} erori obligatorii · ${constrOpt.soft.length} avertismente
+          </div>
+          <button onclick="_rvShowVariant('optimizat')" style="margin-top:6px;width:100%;padding:6px;background:#166534;color:#DCFCE7;border:1px solid #22C55E;border-radius:4px;font:bold 8px IBM Plex Mono;cursor:pointer">
+            ✅ Afișează pe Plan
+          </button>
+        </div>
+      </div>
+
+      <!-- DELTA SCORURI -->
+      ${scoreOpt.total!==scoreOrig.total?`
+      <div style="background:#0F172A;border-radius:4px;padding:6px 8px;margin-bottom:10px;text-align:center">
+        <span style="font:bold 8px IBM Plex Mono;color:${scoreOpt.total>scoreOrig.total?'#22C55E':'#EF4444'}">
+          ${scoreOpt.total>scoreOrig.total?'▲':'▼'} ${Math.abs(scoreOpt.total-scoreOrig.total)} puncte — Optimizarea ${scoreOpt.total>scoreOrig.total?'ÎMBUNĂTĂȚEȘTE':'NU ÎMBUNĂTĂȚEȘTE'} scorul
+        </span>
+      </div>`:''}
+
+      <!-- CORECȚII APLICATE -->
+      <div style="font:bold 8px IBM Plex Mono;color:#94A3B8;margin-bottom:6px;letter-spacing:.05em">
+        🔧 CORECȚII APLICATE AUTOMAT (${fixes.length})
+      </div>
+      ${fixes.length===0?
+        `<div style="background:#052e16;border-radius:4px;padding:8px;font:8px IBM Plex Mono;color:#86EFAC;text-align:center">
+          ✅ Planul original respectă toate normativele obligatorii!
+        </div>`:
+        fixes.map(f=>`
+          <div style="margin-bottom:6px;border-radius:4px;overflow:hidden;border:1px solid ${f.severity==='hard'?'#7F1D1D':'#78350F'}">
+            <div style="background:${f.severity==='hard'?'#450a0a':'#431407'};padding:4px 8px;display:flex;align-items:center;gap:6px">
+              <span style="font-size:12px">${f.icon}</span>
+              <span style="font:bold 8px IBM Plex Mono;color:${f.severity==='hard'?'#FCA5A5':'#FCD34D'}">
+                [${f.rule}] ${f.severity==='hard'?'OBLIGATORIU':'RECOMANDAT'}
+              </span>
+            </div>
+            <div style="background:#0F172A;padding:6px 8px">
+              <div style="font:7px IBM Plex Mono;color:#94A3B8;margin-bottom:3px">
+                <span style="color:#F87171">⚠ Original:</span> ${f.original}
+              </div>
+              <div style="font:7px IBM Plex Mono;color:#86EFAC">
+                <span style="color:#34D399">→ Fix aplicat:</span> ${f.fix}
+              </div>
+            </div>
+          </div>`).join('')}
+
+      <!-- EXPORT -->
+      <div style="margin-top:10px;padding-top:8px;border-top:1px solid #1E293B">
+        <div style="font:bold 7px IBM Plex Mono;color:#64748B;margin-bottom:6px">📤 EXPORT VARIANTE</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <button onclick="_rvExportPNG&&_rvExportPNG('original')" style="padding:6px;background:#1E293B;color:#94A3B8;border:1px solid #334155;border-radius:4px;font:7px IBM Plex Mono;cursor:pointer">⬇ PNG Original</button>
+          <button onclick="_rvExportPNG&&_rvExportPNG('optimizat')" style="padding:6px;background:#166534;color:#86EFAC;border:1px solid #22C55E;border-radius:4px;font:7px IBM Plex Mono;cursor:pointer">⬇ PNG Optimizat</button>
+        </div>
+      </div>
+    </div>`;
+
+  // (variables already declared above)
 
   tab.innerHTML = `
     <div style="padding:12px;font-family:IBM Plex Mono,monospace">
@@ -4525,9 +4607,12 @@ function _rvRenderAcoperis(b){
   if(!b||!b.P) return;
   const {P,bW,bD,niv,cores}=b;
   const _AC=_rvGetAEDISConfig();
-  const SC=_RV.scale*.85;
-  const PAD=60, W=bW*SC+PAD*3+200, H=bD*SC+PAD*3+180;
-  const {cv,ctx}=_rvInitCanvas(W,H,'rv-canvas');
+  const SC=Math.min(_RV.scale*.85, 10);
+  const PAD=60;
+  const W=Math.min(bW*SC+PAD*3+200, 2600), H=Math.min(bD*SC+PAD*3+220, 2000);
+  let cv,ctx;
+  try{ ({cv,ctx}=_rvInitCanvas(W,H,'rv-canvas')); } catch(e){ console.warn('[RV acop]',e.message); return; }
+  if(!ctx||!cv) return;
   ctx.fillStyle='#FFFFFF'; ctx.fillRect(0,0,W,H);
   const ox=PAD+80, oy=PAD+40;
 
@@ -4839,10 +4924,12 @@ function _rvRenderSituatie(b){
   const {P,bW,bD,niv}=b;
   const _AC=_rvGetAEDISConfig();
   const SC=Math.min(_RV.scale*.6, 6);
-  const PAD=80, CONTEXT=40; // context în jurul parcelei
+  const PAD=80, CONTEXT=50; // context în jurul parcelei
   const pW=P.W*SC, pH=P.D*SC;
-  const W=pW+PAD*2+CONTEXT*2+200, H=pH+PAD*2+CONTEXT*2+150;
-  const {cv,ctx}=_rvInitCanvas(W,H,'rv-canvas');
+  const W=Math.min(pW+PAD*2+CONTEXT*2+220,2800), H=Math.min(pH+PAD*2+CONTEXT*2+180,2400);
+  let cv,ctx;
+  try{ ({cv,ctx}=_rvInitCanvas(W,H,'rv-canvas')); } catch(e){ return; }
+  if(!ctx||!cv) return;
   ctx.fillStyle='#FFFFFF'; ctx.fillRect(0,0,W,H);
   const ox=PAD+CONTEXT, oy=PAD+CONTEXT;
 
@@ -4885,27 +4972,32 @@ function _rvRenderSituatie(b){
   ctx.fillText('P+'+niv+' · H='+((niv+1)*P.hn).toFixed(1)+'m',bX+bW*SC/2,bY+bD*SC/2+8);
   ctx.textAlign='left';
 
-  // ── Spații verzi ──────────────────────────────────────────────────────
-  const svPct=Math.max(0.2, (P.pot||0.35)<0.5?0.3:0.2);
-  const svArea=P.area*svPct;
-  // Spațiu verde lateral
-  ctx.fillStyle='rgba(22,163,74,.15)';
-  ctx.fillRect(ox+ret,oy+ret,ret*0.8,pH-ret*2);
-  ctx.fillRect(ox+pW-ret*2.2,oy+ret,ret*0.8,pH-ret*2);
-  ctx.strokeStyle='rgba(22,163,74,.4)'; ctx.lineWidth=1;
-  ctx.strokeRect(ox+ret,oy+ret,ret*0.8,pH-ret*2);
-  ctx.fillStyle='#15803D'; ctx.font='6px IBM Plex Mono'; ctx.textAlign='center';
-  ctx.fillText('Spațiu',ox+ret+ret*.4,oy+pH/2-4);
-  ctx.fillText('verde',ox+ret+ret*.4,oy+pH/2+4);
-  ctx.textAlign='left';
-  // Arbori (simboluri)
-  const treePositions=[[ox+ret*0.4,oy+ret*0.6],[ox+pW-ret*.4,oy+ret*0.6],
-    [ox+ret*0.4,oy+pH-ret*.6],[ox+pW-ret*.4,oy+pH-ret*.6]];
-  treePositions.forEach(([tx,ty])=>{
-    ctx.fillStyle='rgba(22,163,74,.4)'; ctx.beginPath();ctx.arc(tx,ty,8,0,Math.PI*2);ctx.fill();
-    ctx.strokeStyle='#15803D'; ctx.lineWidth=.8; ctx.beginPath();ctx.arc(tx,ty,8,0,Math.PI*2);ctx.stroke();
-    ctx.strokeStyle='#15803D'; ctx.lineWidth=1;
-    ctx.beginPath();ctx.moveTo(tx,ty+4);ctx.lineTo(tx,ty+14);ctx.stroke();
+  // ── Stradă principală ────────────────────────────────────────────────
+  const stradaH2=Math.max(16,5*SC);
+  ctx.fillStyle='rgba(203,213,225,.7)'; ctx.fillRect(ox-CONTEXT,oy-stradaH2,pW+CONTEXT*2,stradaH2);
+  ctx.strokeStyle='rgba(100,116,139,.4)'; ctx.lineWidth=.6; ctx.setLineDash([8,5]);
+  ctx.beginPath();ctx.moveTo(ox-CONTEXT,oy-stradaH2/2);ctx.lineTo(ox+pW+CONTEXT,oy-stradaH2/2);ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle='#475569'; ctx.font='bold 7px IBM Plex Mono'; ctx.textAlign='center';
+  ctx.fillText('STRADĂ (cat.III · ~6m)',ox+pW/2,oy-stradaH2/2+3);
+  ctx.fillStyle='#64748B'; ctx.font='6px IBM Plex Mono';
+  ctx.fillText('~6.0m',ox+pW+CONTEXT*.5,oy-stradaH2/2+3); ctx.textAlign='left';
+  // ── Spații verzi NUMAI în zonele libere ──────────────────────────────
+  const _bX3=ox+(pW-bW*SC)/2, _bY3=oy+(pH-bD*SC)/2;
+  const svL3=_bX3-ox-ret, svR3=(ox+pW-ret)-(_bX3+bW*SC);
+  function drawSV3(x,y,w,h){
+    if(w<4||h<4) return;
+    ctx.fillStyle='rgba(22,163,74,.18)'; ctx.fillRect(x,y,w,h);
+    ctx.strokeStyle='rgba(22,163,74,.5)'; ctx.lineWidth=.7; ctx.strokeRect(x,y,w,h);
+  }
+  drawSV3(ox+ret,_bY3,svL3,bD*SC);
+  drawSV3(_bX3+bW*SC,_bY3,svR3,bD*SC);
+  // Arbori în colțuri parcelă (nu pe clădire)
+  [[ox+ret*.4,oy+ret*.4],[ox+pW-ret*.4,oy+ret*.4],
+   [ox+ret*.4,oy+pH-ret*.4],[ox+pW-ret*.4,oy+pH-ret*.4]].forEach(([tx,ty])=>{
+    ctx.fillStyle='rgba(22,163,74,.55)'; ctx.beginPath();ctx.arc(tx,ty,6,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='#15803D'; ctx.lineWidth=.8; ctx.beginPath();ctx.arc(tx,ty,6,0,Math.PI*2);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(tx,ty+4);ctx.lineTo(tx,ty+10);ctx.stroke();
   });
 
   // ── Circulație pietonală ──────────────────────────────────────────────
@@ -4947,11 +5039,14 @@ function _rvRenderSituatie(b){
   ctx.fillStyle='#1E40AF'; ctx.font='bold 8px IBM Plex Mono'; ctx.textAlign='center';
   ctx.fillText(P.W.toFixed(2)+'m',ox+pW/2,oy-28);
   ctx.fillText(P.D.toFixed(2)+'m',ox-35,oy+pH/2+3);
-  // Cote construcție
+  // Cote construcție (roșu)
+  const _bX4=ox+(pW-bW*SC)/2, _bY4=oy+(pH-bD*SC)/2;
   ctx.strokeStyle='#DC2626'; ctx.lineWidth=.8;
-  ctx.beginPath();ctx.moveTo(bX,bY-14);ctx.lineTo(bX+bW*SC,bY-14);ctx.stroke();
-  ctx.fillStyle='#DC2626'; ctx.font='bold 7px IBM Plex Mono';
-  ctx.fillText(bW.toFixed(2)+'m',bX+bW*SC/2-15,bY-16);
+  ctx.beginPath();ctx.moveTo(_bX4,_bY4-12);ctx.lineTo(_bX4+bW*SC,_bY4-12);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(_bX4,_bY4-8);ctx.lineTo(_bX4,_bY4-16);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(_bX4+bW*SC,_bY4-8);ctx.lineTo(_bX4+bW*SC,_bY4-16);ctx.stroke();
+  ctx.fillStyle='#DC2626'; ctx.font='bold 7px IBM Plex Mono'; ctx.textAlign='center';
+  ctx.fillText(bW.toFixed(2)+'m clădire',_bX4+bW*SC/2,_bY4-14);
   ctx.textAlign='left';
 
   // Tablou suprafețe
