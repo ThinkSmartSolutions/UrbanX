@@ -1493,6 +1493,194 @@ function _rvUpdateVerificareExtended(b, fl, P){
     </div>`;
 }
 
+
+// ════════════════════════════════════════════════════════════════════════════
+// MULTI-BUILDING ENGINE
+// Suport pentru: multi-volum, lotizare, comasare, multi-parcelă
+// Citește din: S.vol._lastFeats (vol-src) + lotizare-src features
+// ════════════════════════════════════════════════════════════════════════════
+
+// ── Detectează și extrage toți corpii de clădire ─────────────────────────
+function _rvDetectBuildings(){
+  const buildings = [];
+
+  try {
+    // ── Scenariul 1: Multi-volum (S.vol.multiVol sau multiple corpuri) ────
+    const volFeats = window.S?.vol?._lastFeats || [];
+    const lotFeats = (window.map?.getSource?.('lotizare-src')?._data?.features) || [];
+    const A = window.AEDIS || {};
+
+    if(volFeats.length > 0){
+      // Grupăm features după centroid/poziție → identificăm corpuri distincte
+      const corpGroups = {};
+      volFeats.forEach(f=>{
+        if(!f.geometry || f.properties?.floor < 0) return; // skip acoperiș
+        // Centroid aproximativ din bounding box
+        const coords = f.geometry.type==='Polygon'
+          ? f.geometry.coordinates[0]
+          : f.geometry.coordinates[0]?.[0] || [];
+        if(coords.length < 3) return;
+        const cx = coords.reduce((s,c)=>s+c[0],0)/coords.length;
+        const cy = coords.reduce((s,c)=>s+c[1],0)/coords.length;
+        // Rotunjim la 4 zecimale pentru clustering
+        const key = `${cx.toFixed(4)}_${cy.toFixed(4)}`;
+        if(!corpGroups[key]) corpGroups[key] = {feats:[], cx, cy};
+        corpGroups[key].feats.push(f);
+      });
+
+      const corpKeys = Object.keys(corpGroups);
+      if(corpKeys.length > 1 || (corpKeys.length===1 && volFeats.length>0)){
+        corpKeys.forEach((key,idx)=>{
+          const grp = corpGroups[key];
+          const groundFeat = grp.feats.find(f=>f.properties?.floor===0) || grp.feats[0];
+          if(!groundFeat) return;
+
+          // Bounding box din geometria parterului → dimensiuni clădire
+          const coords = groundFeat.geometry.type==='Polygon'
+            ? groundFeat.geometry.coordinates[0]
+            : groundFeat.geometry.coordinates[0]?.[0] || [];
+          const bbox = _rvBBoxFromCoords(coords);
+          const niv = Math.max(1, grp.feats.filter(f=>f.properties?.floor>=0).length);
+          const stil = groundFeat.properties?.stil || A.stil || 'modern';
+          const fn = groundFeat.properties?.fn || A.fn || 'rezidential_colectiv';
+          const parterCom = !!groundFeat.properties?.parterComercial;
+          const hasCortina = !!groundFeat.properties?.pereteleCortina || !!A.peretelCortina;
+
+          buildings.push({
+            id: `Corp ${String.fromCharCode(65+idx)}`,
+            idx,
+            bW: bbox.w, bD: bbox.h,
+            niv, stil, fn,
+            parterDiferit: parterCom || A.parterDiferit,
+            fnParter: parterCom ? 'comercial' : A.fnParter,
+            peretelCortina: hasCortina,
+            cortinaProcent: A.cortinaProcent || 60,
+            activeRetragere: A.activeRetragere,
+            tipAcoperis: groundFeat.properties?.roofType || A.tipAcoperis || 'terasa',
+            hNiv: A.corpuri?.[0]?.hNiv || 3.0,
+            source: 'vol',
+          });
+        });
+      }
+    }
+
+    // ── Scenariul 2: Lotizare ─────────────────────────────────────────────
+    if(lotFeats.length > 0){
+      lotFeats.forEach((f,idx)=>{
+        if(!f.geometry) return;
+        const tip = f.properties?.tip || 'individuala';
+        if(['drum','spatiu_verde','parcaj','utilitate'].includes(tip)) return;
+
+        const coords = f.geometry.type==='Polygon'
+          ? f.geometry.coordinates[0]
+          : f.geometry.coordinates[0]?.[0] || [];
+        const bbox = _rvBBoxFromCoords(coords);
+        const stil = f.properties?.stil || A.stil || 'modern';
+
+        // Număr niveluri per tip lot
+        const nivByTip = {
+          individuala:2, duplex:2, insiruit:2, bloc:5,
+          mica_densitate:3, medie_densitate:5, mare_densitate:8
+        };
+        const niv = f.properties?.niv || nivByTip[tip] || 4;
+        const fnByTip = {
+          individuala:'locuinta_individuala', duplex:'locuinta_individuala',
+          insiruit:'locuinta_individuala', bloc:'rezidential_colectiv',
+        };
+
+        buildings.push({
+          id: `Lot ${idx+1} (${tip})`,
+          idx: buildings.length,
+          bW: bbox.w, bD: bbox.h,
+          niv, stil, fn: fnByTip[tip] || A.fn || 'rezidential_colectiv',
+          parterDiferit: !!f.properties?.parterComercial || !!A.parterDiferit,
+          fnParter: f.properties?.parterComercial ? 'comercial' : A.fnParter,
+          peretelCortina: !!f.properties?.pereteleCortina,
+          cortinaProcent: A.cortinaProcent || 60,
+          activeRetragere: A.activeRetragere,
+          tipAcoperis: A.tipAcoperis || 'terasa',
+          hNiv: A.corpuri?.[0]?.hNiv || 3.0,
+          area: f.properties?.area || turf?.area?.(f) || 400,
+          source: 'lot', lotTip: tip,
+        });
+      });
+    }
+
+  } catch(e){ console.warn('[RV multi-bld]', e.message); }
+
+  // Fallback: corp unic din AEDIS
+  if(buildings.length === 0){
+    const A = window.AEDIS || {};
+    buildings.push({
+      id: 'Corp Principal',
+      idx: 0,
+      bW: null, bD: null, // calculat din _rvCompBuilding
+      niv: A.corpuri?.[0]?.niv || 4,
+      stil: A.stil || 'modern',
+      fn: A.fn || 'rezidential_colectiv',
+      parterDiferit: !!A.parterDiferit,
+      fnParter: A.fnParter || '',
+      peretelCortina: !!A.peretelCortina,
+      cortinaProcent: A.cortinaProcent || 60,
+      activeRetragere: !!A.activeRetragere,
+      tipAcoperis: A.tipAcoperis || 'terasa',
+      hNiv: A.corpuri?.[0]?.hNiv || 3.0,
+      source: 'aedis',
+    });
+  }
+
+  return buildings;
+}
+
+// ── Bounding box din coordonate GeoJSON ──────────────────────────────────
+function _rvBBoxFromCoords(coords){
+  if(!coords||coords.length<2) return {w:15, h:12};
+  // coords sunt în grade (lng, lat) — convertim la metri aproximativ
+  const lngs = coords.map(c=>c[0]);
+  const lats = coords.map(c=>c[1]);
+  const dLng = Math.max(...lngs) - Math.min(...lngs);
+  const dLat = Math.max(...lats) - Math.min(...lats);
+  // 1° lat ≈ 111000m, 1° lng ≈ 111000m * cos(lat)
+  const avgLat = (Math.max(...lats) + Math.min(...lats)) / 2;
+  const mLng = dLng * 111000 * Math.cos(avgLat * Math.PI/180);
+  const mLat = dLat * 111000;
+  return { w: Math.max(8, Math.round(mLng*10)/10), h: Math.max(8, Math.round(mLat*10)/10) };
+}
+
+// ── Injectează selector corp în toolbar Relevee ────────────────────────────
+function _rvInjectCorpSelector(buildings, onSelect){
+  const existing = document.getElementById('rv-bld-selector');
+  if(existing) existing.remove();
+  if(buildings.length <= 1) return;
+
+  const bar = document.createElement('div');
+  bar.id = 'rv-bld-selector';
+  bar.style.cssText = 'display:flex;gap:4px;padding:4px 8px;background:#0B1426;border-bottom:1px solid #1E293B;flex-wrap:wrap;align-items:center;';
+  bar.innerHTML = '<span style="font:bold 8px IBM Plex Mono;color:#64748B;margin-right:4px">CORP:</span>';
+
+  buildings.forEach((bld,i)=>{
+    const btn = document.createElement('button');
+    btn.className = 'rv-corp-btn';
+    btn.dataset.idx = i;
+    btn.style.cssText = `padding:3px 8px;border-radius:12px;font:bold 8px IBM Plex Mono;cursor:pointer;border:1px solid #334155;
+      background:${i===0?'#1D4ED8':'#1E293B'};color:${i===0?'#FFF':'#94A3B8'};transition:all .2s;`;
+    btn.title = `${bld.fn} · ${bld.stil} · ${bld.niv} niv.`;
+    btn.textContent = bld.id;
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.rv-corp-btn').forEach(b=>{
+        b.style.background='#1E293B'; b.style.color='#94A3B8';
+      });
+      btn.style.background='#1D4ED8'; btn.style.color='#FFF';
+      onSelect(bld, i);
+    });
+    bar.appendChild(btn);
+  });
+
+  // Inserăm după tabs
+  const tabsBar = document.querySelector('.rv-tabs');
+  if(tabsBar) tabsBar.insertAdjacentElement('afterend', bar);
+}
+
 // ════════════════════════════════════════════════════════════════════════════
 // AUTO-FIX ENGINE — detectează și corectează automat neconformitățile
 // ════════════════════════════════════════════════════════════════════════════
@@ -2113,6 +2301,91 @@ function _rvDrawWallsCanvas(ctx, fl, b, ox, oy, SC){
 }
 
 
+
+// ════════════════════════════════════════════════════════════════════════════
+// AEDIS CONFIG READER — mapare completă, identică cu 11-viewer3d.js
+// Toate proprietățile AEDIS sunt citite și folosite în Relevee
+// ════════════════════════════════════════════════════════════════════════════
+function _rvGetAEDISConfig(){
+  const A = window.AEDIS || {};
+
+  // ── Per stil arhitectural (din viewer3d cfgByStil) ────────────────────
+  const cfgByStil = {
+    modern:          { hasBalc:true,  balcD:0.55, wW:1.20, wH:1.55, pilW:0.0,  bandH:0.14, label:'Modern'         },
+    inovator:        { hasBalc:true,  balcD:0.75, wW:1.40, wH:1.90, pilW:0.0,  bandH:0.18, label:'Inovator'       },
+    clasic:          { hasBalc:false, balcD:0.45, wW:0.80, wH:1.20, pilW:0.28, bandH:0.35, label:'Clasic'         },
+    minimalist:      { hasBalc:true,  balcD:0.50, wW:1.65, wH:1.85, pilW:0.0,  bandH:0.05, label:'Minimalist'     },
+    industrial:      { hasBalc:false, balcD:0.45, wW:0.80, wH:1.00, pilW:0.30, bandH:0.30, label:'Industrial'     },
+    adaptat_context: { hasBalc:true,  balcD:0.55, wW:1.00, wH:1.40, pilW:0.08, bandH:0.20, label:'Adaptat Context'},
+  };
+
+  // ── Per funcțiune (din viewer3d cfgByFn) ──────────────────────────────
+  const cfgByFn = {
+    birouri:              { hasBalc:false, wW:1.40, wH:2.40, label:'Birouri',          curtainForce:true  },
+    hotel:                { hasBalc:true,  balcD:0.75, wW:1.00, wH:1.65, label:'Hotel'                   },
+    comercial:            { hasBalc:false, wW:2.20, wH:2.60, label:'Comercial',        curtainForce:true  },
+    rezidential_colectiv: { hasBalc:true,  balcD:0.60, wW:1.10, wH:1.40, label:'Rezidențial Colectiv'    },
+    locuinta_individuala: { hasBalc:false, wW:0.90, wH:1.20, label:'Locuință Individuală'                },
+    industrial_depozitare:{ hasBalc:false, wW:1.20, wH:0.80, label:'Industrial/Depozitare'               },
+    institutie_publica:   { hasBalc:false, wW:1.00, wH:1.50, label:'Instituție Publică'                  },
+    mixt:                 { hasBalc:true,  wW:1.30, wH:2.00, label:'Mixt'                                },
+  };
+
+  const stil   = A.stil || 'modern';
+  const fn     = A.fn   || 'rezidential_colectiv';
+  const baseC  = cfgByStil[stil]  || cfgByStil.modern;
+  const fnC    = cfgByFn[fn]      || {};
+
+  // hasBalc: funcțiunea are prioritate asupra stilului
+  const hasBalc = fnC.hasBalc !== undefined ? fnC.hasBalc : baseC.hasBalc;
+  const balcD   = fnC.balcD   || baseC.balcD   || 0.60;
+  const wW      = fnC.wW      || baseC.wW      || 1.10;
+  const wH      = fnC.wH      || baseC.wH      || 1.40;
+  const pilW    = fnC.pilW    !== undefined ? fnC.pilW : baseC.pilW || 0;
+  const bandH   = fnC.bandH   || baseC.bandH   || 0.14;
+  const stilLabel = baseC.label || stil;
+  const fnLabel   = fnC.label   || fn;
+
+  // Curtain wall — exact logica din viewer3d
+  const stilAllowsCurtain = ['modern','inovator'].includes(stil);
+  const fnWantsCurtain    = ['birouri','comercial'].includes(fn);
+  const hasCurtainWall    = !!A.peretelCortina ||
+    (stilAllowsCurtain && fnWantsCurtain) ||
+    (fn==='rezidential_colectiv' && stil==='inovator' && (A.cortinaProcent||0)>=80);
+  const cortinaPct = hasCurtainWall ? (A.cortinaProcent || 60) : 0;
+
+  // Penthouse / etaj retras
+  const etajRetras    = !!A.activeRetragere || Object.keys(A.retrageriFineEtaje||{}).length>0;
+  const retragereFine = A.retrageriFineEtaje || {};
+
+  // Parter diferit
+  const parterDiferit = !!A.parterDiferit;
+  const fnParter      = A.fnParter || '';
+  const fnParterLabel = cfgByFn[fnParter]?.label || fnParter || '';
+  const hParter       = parterDiferit ? 4.5 : (A.corpuri?.[0]?.hNiv||3.0);
+
+  // Număr niveluri și înălțime
+  const niv  = A.corpuri?.[0]?.niv  || 4;
+  const hNiv = A.corpuri?.[0]?.hNiv || 3.0;
+
+  // Acoperiș
+  const tipAcoperis = A.tipAcoperis || 'terasa';
+  const acoperisLabel = {terasa:'Terasă plată',terasa_circulabila:'Terasă circulabilă',
+    inclinat:'Acoperiș în pantă',penthouse:'Penthouse',penthouse_terasa:'Penthouse + terasă',
+    combinat:'Combinat'}[tipAcoperis] || tipAcoperis;
+
+  // Formă clădire
+  const forma = A.forma || 'auto';
+
+  return {
+    fn, stil, fnLabel, stilLabel, hasBalc, balcD, wW, wH, pilW, bandH,
+    hasCurtainWall, cortinaPct, etajRetras, retragereFine,
+    parterDiferit, fnParter, fnParterLabel, hParter,
+    niv, hNiv, tipAcoperis, acoperisLabel, forma,
+  };
+}
+
+
 function _rvRenderFacade(b){
   // ── Config AEDIS ──────────────────────────────────────────────────────
   const _A=window.AEDIS||{};
@@ -2196,11 +2469,9 @@ function _rvRenderFacade(b){
     }
 
     // Balcoane — verificăm config AEDIS
-    const aedisBalc = window.AEDIS?.balconLaturi||[];
-    const aedisAdanc = Math.max(0.8, window.AEDIS?.balconAdancime||1.2);
-    const hasBalcon = aedisBalc.length===0 || // default: balcoane pe toate
-      aedisBalc.some(d=>label.toUpperCase().includes(d.toUpperCase()));
-    if(hasBalcon){
+    // Balcoane din AEDIS fn+stil (identic cu viewer3d)
+    const aedisAdanc = _balcD;
+    if(_hasBalc){
       for(let row=1;row<niv;row++){
         const bz=oy_+facadeH-row*P.hn*SC;
         const bH=Math.max(9,P.hn*SC*0.14); // ~14% din etaj = balcon vizibil
@@ -2234,10 +2505,10 @@ function _rvRenderFacade(b){
     // Tablou materiale (sub fațadă)
     const _matY=oy_+facadeH+55;
     const _mats=[
-      ['Pereți ext.',_cortina>50?'Sticlă curtain wall':'BCA+EPS 15cm','#94A3B8'],
-      ['Ferestre','PVC 5cam. Uw≤1.0','#38BDF8'],
-      ['Balcoane','Parapet sticlă','#D4AF37'],
-      ['Acoperiș',_tipAcoperis==='inclinat'?'Țiglă ceramică':'Terasă inversă XPS','#22C55E'],
+      ['Pereți ext.', _hasCortina?`Curtain wall ${_cortina}%`:'BCA+EPS 15cm', '#94A3B8'],
+      ['Ferestre', `${_wW.toFixed(2)}×${_wH.toFixed(2)}m ${_stil==='clasic'?'lemn':'PVC 5cam.'}`, '#38BDF8'],
+      ['Balcoane', _hasBalc?`D=${_balcD}m`:'— fără balcoane', '#D4AF37'],
+      ['Acoperiș', _AC.acoperisLabel, '#22C55E'],
     ];
     ctx.fillStyle='#F8FAFC'; ctx.fillRect(ox_,_matY,fW,44);
     ctx.strokeStyle='#CBD5E1'; ctx.lineWidth=1; ctx.strokeRect(ox_,_matY,fW,44);
@@ -4038,6 +4309,15 @@ async function generateRelevee(){
     window._rvAlive=setInterval(()=>{
       _tc++;
       document.title='JS:'+_tc+'s|RV | UrbanX';
+      // Multi-building detection
+      setTimeout(()=>{try{
+        const blds=_rvDetectBuildings(); window._rvBuildings=blds;
+        if(blds.length>1) _rvInjectCorpSelector(blds,(bld)=>{
+          const Pnew=Object.assign({},_RV.building?.P||{},{_corpOverride:bld});
+          _RV.building=_rvCompBuilding(Pnew); _RV.floors=[]; _RV.curFloor=0;
+          _RV.floors.push(_rvFloor(_RV.building,0)); _rvRender();
+        });
+      }catch(e){console.warn('[RV bld]',e.message);}},900);
     },1000);
     // mousedown pe tot documentul - cel mai de baza event posibil
     document.addEventListener('mousedown',(e)=>{
