@@ -2795,7 +2795,14 @@ function _rvRenderSection(b){
   const hNiv=P.hn||3.0, SC=_RV.scale*.85;
   const Ht=niv*hNiv;
   const PAD=60, DIM_W=50, RIGHT_PAD=80;
-  const sW=bW*SC, sH=Ht*SC;
+  // FIX v20260519: sectionType și cutDim definite ÎNAINTE de sW
+  // A-A (transversală) → vedem lățimea bW
+  // B-B (longitudinală) → vedem adâncimea bD
+  const sectionType=_RV.sectionType||'AA';
+  const cutDim=sectionType==='AA'?bW:bD;
+  const cutLabel=sectionType==='AA'?'SECȚIUNE A-A — TRANSVERSALĂ ('+bW.toFixed(2)+'m)':'SECȚIUNE B-B — LONGITUDINALĂ ('+bD.toFixed(2)+'m)';
+  // FIX: sW folosește cutDim (bW pentru A-A, bD pentru B-B)
+  const sW=cutDim*SC, sH=Ht*SC;
   const W=sW+PAD*2+DIM_W+RIGHT_PAD, H=sH+PAD*2+120;
   const {cv,ctx}=_rvInitCanvas(W,H+40,'rv-canvas');
   ctx.fillStyle='#FFFFFF'; ctx.fillRect(0,0,W,H+40);
@@ -2804,10 +2811,6 @@ function _rvRenderSection(b){
   const SLAB=Math.max(3,0.20*SC); // grosime planșeu 20cm
 
   // ── Selector secțiune A-A / B-B ──────────────────────────────────────
-  const sectionType=_RV.sectionType||'AA';
-  const cutDim=sectionType==='AA'?bW:bD;
-  const cutLabel=sectionType==='AA'?'SECȚIUNE A-A — TRANSVERSALĂ ('+bW.toFixed(2)+'m)':'SECȚIUNE B-B — LONGITUDINALĂ ('+bD.toFixed(2)+'m)';
-
   // ── TITLU ────────────────────────────────────────────────────────────
   ctx.fillStyle='#0F172A'; ctx.font='bold 11px IBM Plex Mono';
   ctx.textAlign='center'; ctx.fillText(cutLabel,ox+sW/2,oy-35);
@@ -2879,6 +2882,13 @@ function _rvRenderSection(b){
   ctx.restore();
 
   // ── CAMERE REALE DIN PLAN (fl.rects) vizibile în secțiune ──────────────
+  // FIX v20260519: proiecție corectă pe axa de tăiere + test intersecție
+  // A-A taie la y=bD/2 → camera vizibilă dacă r.y <= bD/2 <= r.y+r.h
+  // B-B taie la x=bW/2 → camera vizibilă dacă r.x <= bW/2 <= r.x+r.w
+  const cutPos_AA = bD / 2;  // linia de tăiere A-A (pe Y)
+  const cutPos_BB = bW / 2;  // linia de tăiere B-B (pe X)
+  const EPS = 0.05;
+
   const fl0 = _RV.floors?.[_RV.curFloor||0] || _RV.floors?.[0];
   if(fl0?.rects){
     const ROOM_COLS = {
@@ -2889,30 +2899,38 @@ function _rvRenderSection(b){
       storage:'rgba(226,232,240,.25)', core:'rgba(191,219,254,.30)',
       commercial:'rgba(233,213,255,.35)', balcon:'rgba(254,249,195,.30)',
     };
-    // Plane de tăiere: A-A taie la y=bD/2 → afișăm coloanele de rooms pe X
-    // B-B taie la x=bW/2 → afișăm rândurile pe Y
     for(let floor=0; floor<niv; floor++){
       const flY3 = oy + sH - (floor+1)*hNiv*SC;
       const flHpx = hNiv*SC - SLAB;
       const flRects = (_RV.floors?.[floor]||fl0)?.rects || fl0.rects;
       flRects.forEach(r=>{
         if(r.bal) return;
-        const col = ROOM_COLS[r.t] || 'rgba(200,210,220,.25)';
+
         let rx3, rw3;
         if(sectionType==='AA'){
-          // Secțiune transversală: vedem distribuția pe X (lățimea)
-          rx3 = ox + r.x*SC; rw3 = r.w*SC;
+          // A-A: tăiem la y=cutPos_AA — camera trebuie să conțină y=cutPos_AA
+          if(r.y - EPS > cutPos_AA || r.y + r.h + EPS < cutPos_AA) return;
+          // Proiecție pe axa X (lățimea camerei)
+          rx3 = ox + r.x*SC;
+          rw3 = r.w*SC;
         } else {
-          // Secțiune longitudinală: vedem distribuția pe Y (adâncimea)
-          rx3 = ox + r.y*SC; rw3 = r.h*SC;
+          // B-B: tăiem la x=cutPos_BB — camera trebuie să conțină x=cutPos_BB
+          if(r.x - EPS > cutPos_BB || r.x + r.w + EPS < cutPos_BB) return;
+          // Proiecție pe axa Y (adâncimea camerei)
+          rx3 = ox + r.y*SC;
+          rw3 = r.h*SC;
         }
+
         if(rw3 < 2) return;
+
+        const col = ROOM_COLS[r.t] || 'rgba(200,210,220,.25)';
         // Cameră vizibilă în secțiune
         ctx.fillStyle = col;
         ctx.fillRect(rx3, flY3+SLAB, rw3, flHpx);
         // Perete interior (linie verticală la marginea camerei)
         ctx.strokeStyle = 'rgba(51,65,85,.5)'; ctx.lineWidth = 1;
         ctx.beginPath();ctx.moveTo(rx3,flY3+SLAB);ctx.lineTo(rx3,flY3+SLAB+flHpx);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(rx3+rw3,flY3+SLAB);ctx.lineTo(rx3+rw3,flY3+SLAB+flHpx);ctx.stroke();
         // Etichetă cameră (dacă e destul spațiu)
         if(rw3 > 25 && flHpx > 15){
           ctx.fillStyle = '#334155'; ctx.font = `${Math.min(7,rw3*.1)}px IBM Plex Mono`;
