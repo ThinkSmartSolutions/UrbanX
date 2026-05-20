@@ -230,10 +230,34 @@ G._SceneEngine = {
     const map = window.map;
     if(!map) { ss?.('Harta indisponibilă'); return; }
 
-    // Preluăm datele
-    const city = window._RO_CITIES_DB?.[cityKey] ||
-                 Object.values(window._RO_CITIES_DB||{})[0];
-    if(!city) { ss?.('UAT negăsit'); return; }
+    // Fallback minimal pentru orice UAT — funcționează și fără _RO_CITIES_DB
+    const _FALLBACK_CITIES = {
+      'RO-IS-01': { name:'Iași', judet:'Iași', judet_code:'IS', lat:47.158, lon:27.601,
+        pop2021:360633, pop2011:290422, rata_reala_2011_2021:0.82, pib_eur_cap:11800,
+        tip:'municipiu', regiune:'NE', coef_hub:1.4, suprafata_ha:9428,
+        spatii_verzi_mp_loc:11, acoperire_transport:65, autorizatii_2023:420 },
+      'RO-CJ-01': { name:'Cluj-Napoca', judet:'Cluj', judet_code:'CJ', lat:46.769, lon:23.591,
+        pop2021:324576, pop2011:324576, rata_reala_2011_2021:0.00, pib_eur_cap:19800,
+        tip:'municipiu', regiune:'NV', coef_hub:1.8, suprafata_ha:17953,
+        spatii_verzi_mp_loc:14, acoperire_transport:68, autorizatii_2023:580 },
+      'RO-TM-01': { name:'Timișoara', judet:'Timiș', judet_code:'TM', lat:45.749, lon:21.228,
+        pop2021:268000, pop2011:319279, rata_reala_2011_2021:-1.62, pib_eur_cap:18100,
+        tip:'municipiu', regiune:'V', coef_hub:1.6, suprafata_ha:12950,
+        spatii_verzi_mp_loc:13, acoperire_transport:64, autorizatii_2023:490 },
+    };
+
+    // Preluăm datele — cu fallback robust
+    const db = window._RO_CITIES_DB || _FALLBACK_CITIES;
+    const city = db[cityKey] ||
+                 Object.values(db)[0] ||
+                 _FALLBACK_CITIES['RO-IS-01'];
+
+    if(!city) { ss?.('UAT negăsit — verificați conexiunea'); return; }
+    // Daca _RO_CITIES_DB lipsea, avertizam
+    if(!window._RO_CITIES_DB) {
+      console.warn('[Cinema v2] _RO_CITIES_DB indisponibil, folosesc date minime pentru', city.name);
+      ss?.('⚠️ Date limitate — rulează cu date minime pentru ' + city.name);
+    }
 
     this._city   = city;
     this._need   = window._TCIMasterplanPDF?._calcNeed?.(city,'S2') || { pop2055:city.pop2021, locuinteTotale:5000 };

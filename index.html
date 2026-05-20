@@ -877,93 +877,6 @@ canvas#c2d{width:100%;height:100%;display:block}
 </style>
 
 <script>
-// ── URBANX DEBUG HELPER — verificare stare module ──────────────────────
-window._UrbanXStatus = function() {
-  const modules = {
-    'TCI Cinema v2 (_SceneEngine)':     typeof window._SceneEngine !== 'undefined',
-    'Zone Engine (_ZoneEngine)':         typeof window._ZoneEngine !== 'undefined',
-    'Compare Pro (_CompareProEngine)':   typeof window._CompareProEngine !== 'undefined',
-    'Presentation (_PresentationMode)':  typeof window._PresentationMode !== 'undefined',
-    'Planning Score (_PlanningScore)':   typeof window._PlanningScore !== 'undefined',
-    'EU Benchmark (_EUBenchmark)':       typeof window._EUBenchmark !== 'undefined',
-    'AI Narrative (_AIUrbanNarrative)':  typeof window._AIUrbanNarrative !== 'undefined',
-    'Masterplan PDF (_TCIMasterplanPDF)':typeof window._TCIMasterplanPDF !== 'undefined',
-    'Analytics (_AnalyticsPanel)':       typeof window._AnalyticsPanel !== 'undefined',
-    'TCI (17-tci-cinema)':               typeof window.TCI !== 'undefined',
-    '_RO_CITIES_DB (320 UAT-uri)':       typeof window._RO_CITIES_DB !== 'undefined',
-  };
-  console.group('=== UrbanX Module Status ===');
-  Object.entries(modules).forEach(([k,v]) => {
-    console.log((v ? '✅' : '❌'), k);
-  });
-  console.groupEnd();
-  return modules;
-};
-
-// Auto-check dupa 5 secunde
-setTimeout(() => {
-  const status = window._UrbanXStatus();
-  const missing = Object.entries(status).filter(([,v])=>!v).map(([k])=>k);
-  if(missing.length > 0) {
-    console.warn('[UrbanX] Module neinitializate:', missing.join(', '));
-  } else {
-    console.log('[UrbanX] ✅ Toate modulele initializate');
-  }
-}, 5000);
-
-// Fallback robust pentru launch Cinema v2
-window._launchCinemaV2 = function() {
-  const k = window._SceneEngine?._getCityKey?.() ||
-            window.TCI?.cityKey ||
-            window._ProjectionEngine?.currentCity ||
-            Object.keys(window._RO_CITIES_DB||{})[0] ||
-            'RO-IS-01';
-  
-  if(window._SceneEngine && typeof window._SceneEngine.launch === 'function') {
-    console.log('[Cinema v2] Launch pentru:', k);
-    window._SceneEngine.launch(k);
-    return true;
-  }
-  
-  console.error('[Cinema v2] _SceneEngine indisponibil. Status:', window._UrbanXStatus());
-  ss?.('❌ Cinema v2 nu s-a inițializat. Verifică consola (F12) sau reîncarcă pagina.');
-  return false;
-};
-
-// Fallback pentru Compare Pro
-window._launchComparePro = function() {
-  const k = window.TCI?.cityKey || window._ProjectionEngine?.currentCity || 'RO-IS-01';
-  if(window._CompareProEngine && typeof window._CompareProEngine.open === 'function') {
-    window._CompareProEngine.open(k);
-    return true;
-  }
-  ss?.('❌ Compare Pro nu s-a inițializat. Reîncarcă pagina.');
-  return false;
-};
-
-// Fallback pentru Prezentare
-window._launchPresentation = function() {
-  const k = window.TCI?.cityKey || window._ProjectionEngine?.currentCity || 'RO-IS-01';
-  if(window._PresentationMode && typeof window._PresentationMode.open === 'function') {
-    window._PresentationMode.open(k);
-    return true;
-  }
-  ss?.('❌ Prezentare nu s-a inițializat. Reîncarcă pagina.');
-  return false;
-};
-
-// Fallback pentru EU Benchmark
-window._launchEUBenchmark = function() {
-  const k = window.TCI?.cityKey || window._ProjectionEngine?.currentCity || 'RO-IS-01';
-  if(window._EUBenchmark && typeof window._EUBenchmark.open === 'function') {
-    window._EUBenchmark.open(k);
-    return true;
-  }
-  ss?.('❌ EU Benchmark nu s-a inițializat. Reîncarcă pagina.');
-  return false;
-};
-</script>
-<script>
     // Service Worker registration
     if('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -2937,5 +2850,94 @@ window._closeAllMenus = _closeAllMenusAndOverlay;
 console.log('[MobileMenuFix] ✅ Overlay + touch events + buton Close activ');
 </script>
 
+
+
+<script>
+// ── URBANX DEBUG HELPER — verificare stare module ──────────────────────
+window._UrbanXStatus = function() {
+  const modules = {
+    'TCI Cinema v2 (_SceneEngine)':     typeof window._SceneEngine !== 'undefined',
+    'Zone Engine (_ZoneEngine)':         typeof window._ZoneEngine !== 'undefined',
+    'Compare Pro (_CompareProEngine)':   typeof window._CompareProEngine !== 'undefined',
+    'Presentation (_PresentationMode)':  typeof window._PresentationMode !== 'undefined',
+    'Planning Score (_PlanningScore)':   typeof window._PlanningScore !== 'undefined',
+    'EU Benchmark (_EUBenchmark)':       typeof window._EUBenchmark !== 'undefined',
+    'AI Narrative (_AIUrbanNarrative)':  typeof window._AIUrbanNarrative !== 'undefined',
+    'Masterplan PDF (_TCIMasterplanPDF)':typeof window._TCIMasterplanPDF !== 'undefined',
+    'Analytics (_AnalyticsPanel)':       typeof window._AnalyticsPanel !== 'undefined',
+    'TCI (17-tci-cinema)':               typeof window.TCI !== 'undefined',
+    '_RO_CITIES_DB (320 UAT-uri)':       typeof window._RO_CITIES_DB !== 'undefined',
+  };
+  console.group('=== UrbanX Module Status ===');
+  Object.entries(modules).forEach(([k,v]) => {
+    console.log((v ? '✅' : '❌'), k);
+  });
+  console.groupEnd();
+  return modules;
+};
+
+// Auto-check dupa 5 secunde
+setTimeout(() => {
+  const status = window._UrbanXStatus();
+  const missing = Object.entries(status).filter(([,v])=>!v).map(([k])=>k);
+  if(missing.length > 0) {
+    console.warn('[UrbanX] Module neinitializate:', missing.join(', '));
+  } else {
+    console.log('[UrbanX] ✅ Toate modulele initializate');
+  }
+}, 5000);
+
+// Fallback robust pentru launch Cinema v2
+window._launchCinemaV2 = function() {
+  const k = window._SceneEngine?._getCityKey?.() ||
+            window.TCI?.cityKey ||
+            window._ProjectionEngine?.currentCity ||
+            Object.keys(window._RO_CITIES_DB||{})[0] ||
+            'RO-IS-01';
+  
+  if(window._SceneEngine && typeof window._SceneEngine.launch === 'function') {
+    console.log('[Cinema v2] Launch pentru:', k);
+    window._SceneEngine.launch(k);
+    return true;
+  }
+  
+  console.error('[Cinema v2] _SceneEngine indisponibil. Status:', window._UrbanXStatus());
+  ss?.('❌ Cinema v2 nu s-a inițializat. Verifică consola (F12) sau reîncarcă pagina.');
+  return false;
+};
+
+// Fallback pentru Compare Pro
+window._launchComparePro = function() {
+  const k = window.TCI?.cityKey || window._ProjectionEngine?.currentCity || 'RO-IS-01';
+  if(window._CompareProEngine && typeof window._CompareProEngine.open === 'function') {
+    window._CompareProEngine.open(k);
+    return true;
+  }
+  ss?.('❌ Compare Pro nu s-a inițializat. Reîncarcă pagina.');
+  return false;
+};
+
+// Fallback pentru Prezentare
+window._launchPresentation = function() {
+  const k = window.TCI?.cityKey || window._ProjectionEngine?.currentCity || 'RO-IS-01';
+  if(window._PresentationMode && typeof window._PresentationMode.open === 'function') {
+    window._PresentationMode.open(k);
+    return true;
+  }
+  ss?.('❌ Prezentare nu s-a inițializat. Reîncarcă pagina.');
+  return false;
+};
+
+// Fallback pentru EU Benchmark
+window._launchEUBenchmark = function() {
+  const k = window.TCI?.cityKey || window._ProjectionEngine?.currentCity || 'RO-IS-01';
+  if(window._EUBenchmark && typeof window._EUBenchmark.open === 'function') {
+    window._EUBenchmark.open(k);
+    return true;
+  }
+  ss?.('❌ EU Benchmark nu s-a inițializat. Reîncarcă pagina.');
+  return false;
+};
+</script>
 </body>
 </html>
