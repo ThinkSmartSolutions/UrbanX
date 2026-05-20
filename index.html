@@ -3776,5 +3776,34 @@ window.addEventListener('load', function() {
 <script src="js/urbanx-parcel-tools.js?v=20260520d"></script>
 <script src="js/urbanx-public-participation.js?v=20260520e"></script>
 
+
+<script>
+// ── Patch PUG Suceava in UAT_REGISTRY ──────────────────────────────────
+(function(){
+  function apply(){
+    if(typeof UAT_REGISTRY==='undefined') return false;
+    const keys=Object.keys(UAT_REGISTRY);
+    const k=keys.find(k=>
+      (k+'').toLowerCase().includes('suceava')||
+      (UAT_REGISTRY[k]?.label||'').toLowerCase().includes('suceava')||
+      UAT_REGISTRY[k]?.siruta==='146263'||
+      UAT_REGISTRY[k]?.siruta===146263
+    );
+    const target = k || 'municipiul-suceava';
+    if(!UAT_REGISTRY[target]) UAT_REGISTRY[target]={label:'Municipiul Suceava',judet:'Suceava'};
+    Object.assign(UAT_REGISTRY[target],{
+      status:'complet', lat:47.66206, lng:26.26402,
+      pugFile:'js/data/municipiul-suceava/pug.geojson',
+      reguliFile:'js/data/municipiul-suceava/reguli.json',
+      cadastruIndex:null,
+      meta:'js/data/municipiul-suceava/meta.json',
+    });
+    console.log('[UrbanX] PUG Suceava patch OK ->', target);
+    return true;
+  }
+  // Incercam imediat si cu retry
+  if(!apply()){[300,800,2000,5000].forEach(d=>setTimeout(apply,d));}
+})();
+</script>
 </body>
 </html>
