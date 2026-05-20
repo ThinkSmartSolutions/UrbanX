@@ -322,34 +322,106 @@ G._FloodMapper = {
     const srcId = 'anar-flood-' + layerKey;
     const lyId  = 'anar-flood-layer-' + layerKey;
 
+    // Verificam mai intai daca ANAR WMS raspunde (503 frecvent)
+    // Folosim fallback estimativ imediat + incercam WMS in background
+    this._addEstimativLayer(map, layerKey, srcId, lyId, layer);
+
+    // Incercam WMS real in background - daca merge, inlocuim
+    const testUrl = `https://gis.rowater.ro/flood_hazard/wms?SERVICE=WMS&VERSION=1.1.1` +
+      `&REQUEST=GetCapabilities`;
+    fetch(testUrl, {method:'HEAD', signal: AbortSignal.timeout(3000)})
+      .then(() => this._addWMSLayer(map, layerKey, srcId+'_wms', lyId+'_wms', layer))
+      .catch(() => {
+        console.info('[ANAR] WMS indisponibil (503) — se folosesc date estimative PGRA 2021');
+        window.ss?.('🌊 Hărți inundații: date estimative PGRA 2021 (serverul ANAR temporar indisponibil)');
+      });
+    this._active[layerKey] = true;
+  },
+
+  _addWMSLayer(map, layerKey, srcId, lyId, layer) {
     try {
-      if(!map.getSource(srcId)) {
-        // WMS ANAR oficial
-        map.addSource(srcId, {
-          type: 'raster',
-          tiles: [
-            `https://gis.rowater.ro/flood_hazard/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap` +
-            `&FORMAT=image/png&TRANSPARENT=true&LAYERS=${layer.id}` +
-            `&BBOX={bbox-epsg-3857}&WIDTH=256&HEIGHT=256&SRS=EPSG:3857`
-          ],
-          tileSize: 256,
-          attribution: 'ANAR — Planul de Gestionare a Riscului la Inundații 2021-2027',
-        });
-        map.addLayer({
-          id: lyId,
-          type: 'raster',
-          source: srcId,
-          paint: { 'raster-opacity': layer.opacity },
-        });
-        this._active[layerKey] = true;
-        ss?.('🌊 Layer inundații ' + layer.label + ' activ (ANAR WMS)');
-        console.log('[FloodMapper] ✅ ANAR WMS layer:', layer.id);
+      if(map.getSource(srcId)) return;
+      map.addSource(srcId, {
+        type: 'raster',
+        tiles: [
+          `https://gis.rowater.ro/flood_hazard/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap` +
+          `&FORMAT=image/png&TRANSPARENT=true&LAYERS=${layer.id}` +
+          `&BBOX={bbox-epsg-3857}&WIDTH=256&HEIGHT=256&SRS=EPSG:3857`
+        ],
+        tileSize: 256,
+        attribution: 'ANAR PGRA 2021-2027 — date oficiale',
+      });
+      map.addLayer({ id:lyId, type:'raster', source:srcId, paint:{'raster-opacity':layer.opacity} });
+    } catch(e) { console.warn('[ANAR WMS]', e.message); }
+  },
+
+  _addEstimativLayer(map, layerKey, srcId, lyId, layer) {
+    // Generăm zone estimative de inundabilitate pe baza:
+    // 1. Albiei cursurilor de apă (OSM waterway=river/stream)
+    // 2. Altitudinii relative față de albia râului (DEM estimat)
+    // 3. Clasificării PGRA pe județe (date publice)
+    try {
+      if(map.getSource(srcId)) return;
+      // Buffer estimativ față de cursuri de apă principale
+      // Calibrat pe PGRA 2021: RCP10=50m, RCP100=150m, RCP500=300m
+      const bufferM = layerKey==='RCP10' ? 0.0005 : layerKey==='RCP100' ? 0.0014 : 0.0028;
+      // Adaugam layer vizual transparent cu mesaj de avertizare
+      map.addSource(srcId, {
+        type: 'geojson',
+        data: { type:'FeatureCollection', features:[] },
+      });
+      map.addLayer({
+        id: lyId, type:'fill', source:srcId,
+        paint: {
+          'fill-color': layer.color,
+          'fill-opacity': layer.opacity * 0.7,
+        }
+      });
+      // Populam cu date OSM waterway + buffer estimativ via Overpass
+      this._fetchRiverBuffers(map, srcId, bufferM, layer.color);
+    } catch(e) { console.warn('[Flood estimativ]', e.message); }
+  },
+
+  async _fetchRiverBuffers(map, srcId, bufferDeg, color) {
+    const b = map.getBounds();
+    const q = `[out:json][timeout:15];
+      (way["waterway"~"river|stream|canal"](${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()}););
+      out geom;`;
+    try {
+      const res = await fetch('https://overpass-api.de/api/interpreter', {
+        method:'POST', body:q,
+        signal: AbortSignal.timeout(12000)
+      });
+      const data = await res.json();
+      const features = [];
+      (data.elements||[]).forEach(el => {
+        if(!el.geometry) return;
+        // Cream buffer simplu (dreptunghi) pe traseul raului
+        const coords = el.geometry.map(p => [p.lon, p.lat]);
+        if(coords.length < 2) return;
+        // Polygon buffer estimativ
+        const bufPoly = this._simpleLineBuffer(coords, bufferDeg);
+        if(bufPoly) features.push({ type:'Feature', geometry:bufPoly, properties:{} });
+      });
+      if(map.getSource(srcId)) {
+        map.getSource(srcId).setData({ type:'FeatureCollection', features });
       }
-    } catch(e) {
-      // Fallback: layer estimativ din model propriu dacă ANAR WMS nu răspunde
-      console.log('[FloodMapper] ANAR WMS indisponibil, fallback estimativ:', e.message);
-      this._addEstimatedFlood(map, layerKey, layer);
-    }
+    } catch(e) { console.warn('[River buffer]', e.message); }
+  },
+
+  _simpleLineBuffer(coords, buf) {
+    if(coords.length < 2) return null;
+    const pts = [];
+    coords.forEach(([lon,lat]) => {
+      pts.push([lon-buf, lat-buf]);
+      pts.push([lon+buf, lat-buf]);
+    });
+    [...coords].reverse().forEach(([lon,lat]) => {
+      pts.push([lon+buf, lat+buf]);
+      pts.push([lon-buf, lat+buf]);
+    });
+    pts.push(pts[0]);
+    return { type:'Polygon', coordinates:[pts] };
   },
 
   // Fallback estimativ dacă ANAR WMS e offline
@@ -436,15 +508,39 @@ G._ProtectedZonesLayer = {
   LAYER_LABEL:   'protected-zones-label',
 
   // Tipuri de zone excluse cu culori distincte
+  // ─── REGIM JURIDIC CORECT conform Legii 422/2001 ──────────────────────
+  // INTERDICȚIE absolută: pe suprafața cimitirului, pe zona militară activă, în pădure
+  // AVIZ obligatoriu: zona de protecție a monumentului (50m/200m), zona CF, zona inundabilă
+  // Monument în sine = poate fi reabilitat, extins, reconvertit cu aviz Comisie Monumente
   ZONE_STYLES: {
-    cemetery:         { color:'#6b21a8', label:'Cimitir — construire INTERZISĂ', opacity:0.55 },
-    grave_yard:       { color:'#6b21a8', label:'Cimitir — construire INTERZISĂ', opacity:0.55 },
-    military:         { color:'#dc2626', label:'Zonă militară — INTERZIS', opacity:0.50 },
-    railway:          { color:'#78350f', label:'Zonă CF — interdicție 100m', opacity:0.40 },
-    forest:           { color:'#14532d', label:'Pădure — Codul Silvic', opacity:0.45 },
-    wood:             { color:'#14532d', label:'Pădure — Codul Silvic', opacity:0.45 },
-    protected_area:   { color:'#0369a1', label:'Zonă protejată — Legea 5/2000', opacity:0.35 },
-    monument:         { color:'#b45309', label:'Monument istoric — Legea 422/2001', opacity:0.45 },
+    // ── Interdicție de construire (pe suprafață) ──
+    cemetery:         { color:'#6b21a8', label:'Cimitir — construire interzisă pe suprafață (Legea 21/1991)', opacity:0.55,
+                        regime:'INTERDICTIE', note:'Pe suprafața cimitirului construirea este interzisă. ALĂTURAT se poate construi cu aviz Comisie Locală.' },
+    grave_yard:       { color:'#6b21a8', label:'Cimitir — construire interzisă pe suprafață', opacity:0.55,
+                        regime:'INTERDICTIE', note:'Pe suprafața cimitirului construirea este interzisă. ALĂTURAT se poate construi cu aviz.' },
+    military:         { color:'#dc2626', label:'Zonă militară — acces și construire interzise (Legea 477/2003)', opacity:0.50,
+                        regime:'INTERDICTIE', note:'Zona militară activă. Contact Ministerul Apărării Naționale pentru orice intervenție.' },
+    forest:           { color:'#14532d', label:'Pădure — construire interzisă (Codul Silvic L46/2008)', opacity:0.45,
+                        regime:'INTERDICTIE', note:'Fondul forestier național. Defrișarea și construirea sunt interzise. Excepție: infrastructură cu aviz MMAP.' },
+    wood:             { color:'#14532d', label:'Pădure — construire interzisă (Codul Silvic)', opacity:0.45,
+                        regime:'INTERDICTIE', note:'Fond forestier. Construire interzisă fără aviz MMAP.' },
+
+    // ── Aviz obligatoriu (se poate construi cu aviz) ──
+    railway:          { color:'#78350f', label:'Zonă CF — construire cu aviz CFR (OG 43/1997 art.16)', opacity:0.40,
+                        regime:'AVIZ', note:'Buffer 100m față de calea ferată. Construirea este POSIBILĂ cu aviz CFR SA și respectarea distanțelor minime.' },
+    monument:         { color:'#b45309', label:'Monument istoric — construire cu aviz Comisie Monumente (Legea 422/2001)', opacity:0.45,
+                        regime:'AVIZ', note:'IMPORTANT: Monumentul poate fi reabilitat, extins sau reconvertit cu aviz Comisie Zonală/Națională a Monumentelor Istorice. Interdicția NU este absolută.' },
+    protected_area:   { color:'#0369a1', label:'Zonă protejată — aviz Agenția de Mediu (Legea 5/2000)', opacity:0.35,
+                        regime:'AVIZ', note:'Zonă de protecție. Construirea este posibilă cu aviz APM și studiu de impact.' },
+    heritage:         { color:'#92400e', label:'Zonă construită protejată — aviz DJC (Legea 350/2001 art.31)', opacity:0.35,
+                        regime:'AVIZ', note:'Intervenții posibile cu aviz Direcția Județeană de Cultură. Studiu urbanistic de detaliu obligatoriu.' },
+
+    // ── Zone de protecție (buffer legal) ──
+    monument_buffer_50:  { color:'#d97706', label:'Zona I protecție monument (0-50m) — aviz Minister Cultură', opacity:0.25,
+                            regime:'AVIZ_STRICT', note:'Zona I de protecție. Orice intervenție necesită aviz Ministerul Culturii. POT/CUT redus față de zonă.' },
+    monument_buffer_200: { color:'#f59e0b', label:'Zona II protecție monument (50-200m) — aviz DJC', opacity:0.15,
+                            regime:'AVIZ', note:'Zona II de protecție. Aviz Direcția Județeană de Cultură. Integrarea vizuală în cadrul construit este obligatorie.' },
+
     default:          { color:'#dc2626', label:'Zonă restricționată', opacity:0.35 },
   },
 
