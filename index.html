@@ -4211,5 +4211,406 @@ console.log('[UrbanX Patches v20260520] ✅ 8 patch-uri aplicate:',
 })(); // end IIFE
 </script>
 
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// URBANX UTR SYSTEM PATCH v20260520b
+// Rezolvă:
+//  1. _launchPUGSuceava — încarcă PUG Suceava cu fit bounds corect
+//  2. btnUTR — handler complet: încarcă PUG UAT activ + randează chips UTR
+//  3. _renderUTRChips — chips colorate corect cu paleta HG 525/1996
+//  4. PUG Iași nu mai apare când ești pe alt UAT
+// ═══════════════════════════════════════════════════════════════════════════
+(function(){
+'use strict';
+
+// ── Paleta culori UTR (completă, cover toate codurile din PUG RO) ──────────
+const _C = {
+  // Locuire
+  'L':'#FDE68A','L1':'#FDE68A','L1A':'#FDE68A','L1B':'#FCD34D','L1C':'#F59E0B',
+  'L2':'#FCD34D','L3':'#F59E0B','L4':'#D97706','LB':'#FDE68A','LC':'#FCD34D',
+  'LA':'#FDE68A','LI':'#FEF3C7','LS':'#FBBF24',
+  // Mixt
+  'M':'#FCA5A1','M1':'#FCA5A1','M1B':'#F87171','M2':'#EF4444',
+  'M3':'#DC2626','M4':'#B91C1C','MC':'#FCA5A1','MI':'#F87171',
+  // Centre / comercial
+  'C':'#FB923C','C0':'#FB923C','C1':'#F97316','C2':'#EA580C',
+  'C2A':'#F97316','C2B':'#FB923C','C2C':'#FCA5A5','C3':'#DC2626','CC':'#F97316',
+  // Verzi
+  'V':'#86EFAC','V1':'#86EFAC','V1A':'#86EFAC','V1B':'#BBF7D0',
+  'V2':'#4ADE80','V2A':'#4ADE80','V2B':'#22C55E',
+  'V3':'#16A34A','V4':'#86EFAC','VN':'#15803D',
+  // Gospodărire
+  'G':'#93C5FD','G1':'#93C5FD','G2':'#60A5FA','GC':'#6B7280',
+  // Industriale
+  'I':'#CBD5E1','IS':'#94A3B8','IP':'#9CA3AF','Is':'#CBD5E1',
+  // Turism
+  'T':'#C4B5FD','T1':'#C4B5FD','T2':'#A78BFA',
+  // Agro
+  'A':'#BEF264','A1':'#BEF264','A2':'#A3E635',
+  // Transport / Circulații
+  'TR':'#94A3B8','TC':'#94A3B8','C3':'#94A3B8',
+  // Sport
+  'S':'#6EE7B7',
+  // ZCP / Zone centrale protejate
+  'ZCP':'#FDE68A','ZCP1':'#FDE68A','ZCP2':'#FCD34D',
+  'ZCP3':'#F59E0B','ZCP4':'#D97706','ZCP5':'#FDE68A','ZCP6':'#FCD34D',
+  // Zone protejate / restricții
+  'ZP':'#C4B5FD','ZR':'#FCA5A5','F':'#93C5FD',
+  // Instituții publice / educație / sănătate
+  'IE':'#86EFAC','IS2':'#34D399','IA':'#A7F3D0',
+  // Default
+  'DEFAULT':'#CBD5E1',
+};
+
+function _utrColor(code) {
+  if(!code) return _C.DEFAULT;
+  const c = String(code).trim().toUpperCase();
+  if(_C[c]) return _C[c];
+  // Fuzzy: cauta prefix cel mai lung
+  for(let l=c.length-1; l>=1; l--) {
+    const p = c.substring(0,l);
+    if(_C[p]) return _C[p];
+  }
+  return _C.DEFAULT;
+}
+
+// ── Core: încarcă un GeoJSON de PUG și îl afișează pe hartă ───────────────
+async function _loadPUGOnMap(geojsonUrl, cityName, fitCoords) {
+  const map = window.map;
+  if(!map) { window.ss?.('⚠ Harta nu e inițializată'); return null; }
+
+  window.ss?.('⏳ Se încarcă PUG ' + cityName + '…');
+
+  let geojson;
+  try {
+    const resp = await fetch(geojsonUrl + '?v=' + Date.now());
+    if(!resp.ok) throw new Error('HTTP ' + resp.status);
+    geojson = await resp.json();
+  } catch(e) {
+    window.ss?.('❌ PUG ' + cityName + ': ' + e.message);
+    console.error('[PUG Load]', e);
+    return null;
+  }
+
+  if(!geojson?.features?.length) {
+    window.ss?.('⚠ PUG ' + cityName + ': fișier gol sau invalid');
+    return null;
+  }
+
+  // Normalizăm properties (câmpuri variabile între PUG-uri)
+  geojson.features = geojson.features.map(f => {
+    const p = f.properties || {};
+    // Detectăm câmpul UTR (diferit în fiecare PUG)
+    const utrRaw = p.UTR || p.utr || p.TIP_ZONA || p.tip_zona || p.ZONA || p.zona
+                || p.CODE || p.code || p.COD || p.cod || '?';
+    const utr = String(utrRaw).trim().toUpperCase().replace(/\s+/g,'');
+    const color = _utrColor(utr);
+    return {
+      ...f,
+      properties: {
+        ...p,
+        utr,
+        c: color,            // folosit de utr-fill layer din 02-map-core.js
+        denumire: p.DENUMIRE || p.denumire || p.NAME || p.name || utr,
+        pot: p.POT || p.pot || null,
+        cut: p.CUT || p.cut || null,
+        rh: p.RH || p.rh || '—',
+        functiune: p.FUNCTIUNE || p.functiune || p.FUNCTION || '—',
+      }
+    };
+  });
+
+  // Setăm sursa UTR pe hartă
+  try {
+    const src = map.getSource('utr-src');
+    if(src) {
+      src.setData(geojson);
+    } else {
+      map.addSource('utr-src', {type:'geojson', data:geojson});
+    }
+  } catch(e) { console.warn('[PUG setData]', e.message); }
+
+  // Populăm și S.pugIdx pentru lookupUTR (detectare intravilan)
+  if(window.S) {
+    try {
+      window.S.pugIdx = geojson.features
+        .filter(f => f.geometry?.type && f.geometry.type.includes('Polygon'))
+        .map(f => {
+          const coords = f.geometry.type === 'MultiPolygon'
+            ? f.geometry.coordinates[0][0]
+            : f.geometry.coordinates[0];
+          const lons = coords.map(c=>c[0]), lats = coords.map(c=>c[1]);
+          return {
+            utr: f.properties.utr,
+            geom: f.geometry,
+            bb: [Math.min(...lons), Math.min(...lats), Math.max(...lons), Math.max(...lats)]
+          };
+        });
+      window.S.pug = true;
+    } catch(e) { console.warn('[PUG pugIdx]', e.message); }
+  }
+
+  // Fit bounds pe UAT
+  try {
+    const coords = fitCoords || geojson.features
+      .flatMap(f => {
+        const g = f.geometry;
+        if(!g) return [];
+        if(g.type === 'Polygon') return g.coordinates[0] || [];
+        if(g.type === 'MultiPolygon') return (g.coordinates[0]||[])[0] || [];
+        return [];
+      });
+    if(coords.length > 1) {
+      const lons = coords.map(c=>c[0]).filter(Number.isFinite);
+      const lats = coords.map(c=>c[1]).filter(Number.isFinite);
+      if(lons.length && lats.length) {
+        map.fitBounds(
+          [[Math.min(...lons), Math.min(...lats)], [Math.max(...lons), Math.max(...lats)]],
+          {padding:40, duration:1200, maxZoom:14}
+        );
+      }
+    }
+  } catch(e) { console.warn('[PUG fitBounds]', e.message); }
+
+  return geojson;
+}
+
+// ── Randează chips UTR în drawer ───────────────────────────────────────────
+function _renderUTRChips(geojson, cityName) {
+  const chipsEl = document.getElementById('utr-chips');
+  const legEl   = document.getElementById('utr-leg');
+  const titleEl = document.getElementById('utr-drawer-title');
+  const footerEl = document.getElementById('footer-pug-label');
+
+  if(!chipsEl) return;
+
+  // Contorizăm zone per tip UTR
+  const byUTR = {};
+  (geojson?.features || []).forEach(f => {
+    const u = f.properties?.utr || '?';
+    byUTR[u] = (byUTR[u]||0) + 1;
+  });
+
+  const tipuri = Object.keys(byUTR).sort();
+  const total  = geojson?.features?.length || 0;
+
+  // Actualizăm titlul
+  if(titleEl) titleEl.textContent = '🗺 Zone UTR — PUG ' + cityName + ' · Click pe UTR pentru a-l evidenția și a vedea regulamentul';
+  if(footerEl) footerEl.textContent = 'PUG ' + cityName;
+
+  // Randăm chips
+  chipsEl.innerHTML = tipuri.map(utr => {
+    const col = _utrColor(utr);
+    const cnt = byUTR[utr];
+    return `<span class="utr-chip"
+      data-utr="${utr}"
+      style="background:${col}22;border-color:${col};color:${col};cursor:pointer"
+      onclick="_filterUTR('${utr}')"
+      title="${cnt} zone">${utr}<span style="font-size:9px;opacity:.7;margin-left:3px">${cnt}</span></span>`;
+  }).join('');
+
+  // Legenda
+  if(legEl) legEl.textContent = tipuri.length + ' tipuri UTR · ' + total + ' zone · Click pe UTR pentru detalii și zoom';
+
+  // Deschidem drawer
+  const drawer = document.getElementById('utr-drawer');
+  if(drawer) drawer.classList.add('open');
+}
+
+// ── Filtru UTR: click pe chip → highlight pe hartă ─────────────────────────
+window._filterUTR = function(utr) {
+  const map = window.map;
+  if(!map) return;
+  try {
+    // Highlight: opacitate mare pe UTR selectat, mic pe restul
+    map.setPaintProperty('utr-fill', 'fill-opacity', [
+      'case', ['==', ['get','utr'], utr], 0.55, 0.12
+    ]);
+    map.setPaintProperty('utr-line', 'line-opacity', [
+      'case', ['==', ['get','utr'], utr], 1.0, 0.3
+    ]);
+    // Zoom pe zona selectată
+    const src = map.getSource('utr-src');
+    if(src) {
+      const data = src._data || src.serialize()?.data;
+      if(data?.features) {
+        const feats = data.features.filter(f => f.properties?.utr === utr);
+        if(feats.length) {
+          const coords = feats.flatMap(f => {
+            const g = f.geometry;
+            if(g?.type === 'Polygon') return g.coordinates[0];
+            if(g?.type === 'MultiPolygon') return (g.coordinates[0]||[])[0]||[];
+            return [];
+          });
+          const lons = coords.map(c=>c[0]).filter(Number.isFinite);
+          const lats = coords.map(c=>c[1]).filter(Number.isFinite);
+          if(lons.length > 1) {
+            map.fitBounds(
+              [[Math.min(...lons),Math.min(...lats)],[Math.max(...lons),Math.max(...lats)]],
+              {padding:60, duration:800, maxZoom:15}
+            );
+          }
+        }
+      }
+    }
+    // Reset chip activ
+    document.querySelectorAll('#utr-chips .utr-chip').forEach(el => {
+      el.style.boxShadow = el.dataset.utr === utr ? '0 0 0 2px '+_utrColor(utr) : '';
+      el.style.transform = el.dataset.utr === utr ? 'scale(1.1)' : '';
+    });
+    window.ss?.('UTR ' + utr + ' — ' + (document.querySelector(`[data-utr="${utr}"] span`)?.previousSibling?.textContent||'') + ' zone evidențiate');
+  } catch(e) { console.warn('[filterUTR]', e); }
+};
+
+// Reset highlight la click liber
+window.hideUTRFilter = function() {
+  const map = window.map;
+  if(!map) return;
+  try {
+    map.setPaintProperty('utr-fill','fill-opacity', 0.2);
+    map.setPaintProperty('utr-line','line-opacity', 0.7);
+  } catch(e) {}
+  document.querySelectorAll('#utr-chips .utr-chip').forEach(el => {
+    el.style.boxShadow = '';
+    el.style.transform = '';
+  });
+};
+
+// ── _launchPUGSuceava ──────────────────────────────────────────────────────
+window._launchPUGSuceava = async function() {
+  const SUCEAVA = {
+    name: 'Suceava',
+    url: 'js/data/municipiul-suceava/pug.geojson',
+    // Bounding box Suceava (fallback dacă GeoJSON e gol)
+    bbox: [[26.20, 47.60], [26.36, 47.72]],
+    cityKey: 'RO-SV-01',
+  };
+
+  // Setăm UAT activ pe Suceava
+  if(window.TCI) window.TCI.cityKey = SUCEAVA.cityKey;
+  localStorage.setItem('ux_last_city', SUCEAVA.cityKey);
+
+  // Actualizăm badge din topbar
+  document.querySelectorAll('[data-city-name]').forEach(el => el.textContent = SUCEAVA.name);
+  const uatInd = document.getElementById('uat-indicator');
+  if(uatInd) uatInd.textContent = SUCEAVA.name;
+
+  const geojson = await _loadPUGOnMap(SUCEAVA.url, SUCEAVA.name, null);
+
+  if(geojson) {
+    _renderUTRChips(geojson, SUCEAVA.name);
+    window.ss?.('✅ PUG Suceava: ' + geojson.features.length + ' UTR-uri încărcate');
+  } else {
+    // Dacă fișierul nu există încă pe server — fly to Suceava și arată mesaj
+    window.map?.fitBounds(SUCEAVA.bbox, {padding:40, duration:1200});
+    window.ss?.('⚠ PUG Suceava: fișierul pug.geojson nu există încă în js/data/municipiul-suceava/');
+    // Deschide drawer gol cu mesaj
+    const drawer = document.getElementById('utr-drawer');
+    if(drawer) {
+      drawer.classList.add('open');
+      const titleEl = document.getElementById('utr-drawer-title');
+      if(titleEl) titleEl.textContent = '🗺 Zone UTR — PUG Suceava · Fișier GeoJSON lipsă';
+      const chipsEl = document.getElementById('utr-chips');
+      if(chipsEl) chipsEl.innerHTML = '<span style="color:#f59e0b;font-size:11px">⚠ js/data/municipiul-suceava/pug.geojson lipsă din repo — adaugă fișierul și reîncarcă</span>';
+    }
+  }
+};
+
+// ── btnUTR handler — încarcă PUG UAT activ și afișează drawer ─────────────
+function _setupBtnUTR() {
+  const btn = document.getElementById('btnUTR');
+  if(!btn || btn._utrPatched) return;
+  btn._utrPatched = true;
+
+  btn.addEventListener('click', async function() {
+    const drawer = document.getElementById('utr-drawer');
+    if(!drawer) return;
+
+    // Toggle: dacă drawer e deja deschis, închidem
+    if(drawer.classList.contains('open')) {
+      drawer.classList.remove('open');
+      btn.classList.remove('on');
+      window.hideUTRFilter?.();
+      return;
+    }
+
+    btn.classList.add('on');
+
+    // Determinăm UAT activ
+    const k = window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
+    const db = window._RO_CITIES_DB || {};
+    const city = db[k] || {name:'Iași', lat:47.158, lon:27.601};
+    const cityName = city.name || 'Iași';
+
+    // Determinăm URL-ul PUG
+    // Mapăm cityKey → folder din js/data/
+    const _PUG_URLS = {
+      'RO-IS-01': 'js/data/iasi/pug.geojson',
+      'RO-SV-01': 'js/data/municipiul-suceava/pug.geojson',
+      // Alte UAT-uri pot fi adăugate aici
+    };
+    // Fallback: din UAT_REGISTRY
+    const UAT_REG = window.UAT_REGISTRY || {};
+    const regEntry = Object.values(UAT_REG).find(e =>
+      e.label?.toLowerCase().includes(cityName.toLowerCase()) ||
+      e.siruta === city.siruta
+    );
+    const pugUrl = _PUG_URLS[k] || regEntry?.pugFile;
+
+    if(!pugUrl) {
+      // Nu avem PUG pentru acest UAT — deschidem drawer cu mesaj
+      drawer.classList.add('open');
+      const titleEl = document.getElementById('utr-drawer-title');
+      if(titleEl) titleEl.textContent = '🗺 Zone UTR — PUG ' + cityName + ' · Indisponibil';
+      const chipsEl = document.getElementById('utr-chips');
+      if(chipsEl) chipsEl.innerHTML = `<span style="color:#f59e0b;font-size:11px">
+        ⚠ PUG ${cityName} nu este disponibil în platformă.
+        Disponibil: <b>Iași</b> · <b>Suceava</b>.
+        Folosiți <b>Import PUG Digital</b> pentru alte UAT-uri.
+      </span>`;
+      window.ss?.('⚠ PUG ' + cityName + ' indisponibil — folosiți Import PUG Digital');
+      return;
+    }
+
+    // Verificăm dacă e deja încărcat pe hartă (același UAT)
+    const chipsEl = document.getElementById('utr-chips');
+    if(chipsEl?.children?.length > 0 && window.S?.pug && window.S?.pugIdx?.length > 0) {
+      // Deja încărcat — doar deschidem drawer
+      drawer.classList.add('open');
+      return;
+    }
+
+    // Încărcăm PUG
+    const geojson = await _loadPUGOnMap(pugUrl, cityName, null);
+    if(geojson) {
+      _renderUTRChips(geojson, cityName);
+    }
+  });
+}
+
+// ── hideUTRDrawer (override safe) ─────────────────────────────────────────
+window.hideUTRDrawer = function() {
+  const drawer = document.getElementById('utr-drawer');
+  if(drawer) drawer.classList.remove('open');
+  const btn = document.getElementById('btnUTR');
+  if(btn) btn.classList.remove('on');
+  window.hideUTRFilter?.();
+};
+
+// ── Aplicăm setup la DOMContentLoaded și cu retry ─────────────────────────
+document.addEventListener('DOMContentLoaded', () => setTimeout(_setupBtnUTR, 500));
+window.addEventListener('load', () => { _setupBtnUTR(); setTimeout(_setupBtnUTR, 2000); });
+
+// Expunem global
+window._loadPUGOnMap   = _loadPUGOnMap;
+window._renderUTRChips = _renderUTRChips;
+window._utrColor       = _utrColor;
+
+console.log('[UrbanX UTR System] ✅ Patch v20260520b: _launchPUGSuceava + btnUTR + chips colorate');
+
+})();
+</script>
+
 </body>
 </html>
