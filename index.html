@@ -2703,37 +2703,64 @@ window._onParcelSelectedHook = function(parcel) {
 
 <script>
 // ── WATCHDOG _RO_CITIES_DB ──────────────────────────────────────────────
-// Daca 20-uats-database.js nu s-a incarcat (cache vechi SW),
-// il reincarcam fortat fara cache
 (function() {
-  function checkAndReload(attempt) {
-    if(typeof window._RO_CITIES_DB !== 'undefined' && 
-       Object.keys(window._RO_CITIES_DB).length > 10) {
-      console.log('[DB Watchdog] ✅ _RO_CITIES_DB OK:', Object.keys(window._RO_CITIES_DB).length, 'UAT-uri');
-      return;
-    }
-    if(attempt >= 3) {
-      console.warn('[DB Watchdog] _RO_CITIES_DB absent — reîncarc forțat 20-uats-database.js');
-      // Forteaza reload fara cache
-      const s = document.createElement('script');
-      s.src = 'js/20-uats-database.js?nocache=' + Date.now();
-      s.onload = () => {
-        console.log('[DB Watchdog] ✅ Reincarcat! UAT-uri:', Object.keys(window._RO_CITIES_DB||{}).length);
-        // Trigger reinitializare module
-        setTimeout(() => {
-          if(window._ZoneEngine) window._ZoneEngine._cache = {};
-          if(window._CaptureEngine) window._CaptureEngine._frames = [];
-          console.log('[DB Watchdog] Module resetate — gata de utilizare');
-        }, 500);
+  window.addEventListener('load', function() {
+    setTimeout(function() {
+      if(typeof window._RO_CITIES_DB !== 'undefined' &&
+         Object.keys(window._RO_CITIES_DB).length > 10) {
+        console.log('[DB Watchdog] ✅ _RO_CITIES_DB OK:', Object.keys(window._RO_CITIES_DB).length, 'UAT-uri');
+        return;
+      }
+      // Nu reincarcam fisierul (cauzeaza SyntaxError la const redeclarat)
+      // In schimb injectam date minime pentru functionare de baza
+      console.warn('[DB Watchdog] _RO_CITIES_DB absent — injectez date minime');
+      window._RO_CITIES_DB = window._RO_CITIES_DB || {};
+      var fb = {
+        'RO-IS-01':{name:'Iași',judet:'Iași',judet_code:'IS',siruta:'179132',
+          tip:'municipiu',regiune:'NE',lat:47.1585,lon:27.6014,
+          pop2021:360633,pop2011:290422,rata_reala_2011_2021:0.82,
+          pib_eur_cap:11800,coef_hub:1.4,suprafata_ha:9428,
+          spatii_verzi_mp_loc:11,acoperire_transport:65,autorizatii_2023:420},
+        'RO-CJ-01':{name:'Cluj-Napoca',judet:'Cluj',judet_code:'CJ',siruta:'54984',
+          tip:'municipiu',regiune:'NV',lat:46.7712,lon:23.6236,
+          pop2021:324576,pop2011:324576,rata_reala_2011_2021:0.00,
+          pib_eur_cap:19800,coef_hub:1.8,suprafata_ha:17953,
+          spatii_verzi_mp_loc:14,acoperire_transport:68,autorizatii_2023:580},
+        'RO-TM-01':{name:'Timișoara',judet:'Timiș',judet_code:'TM',siruta:'155350',
+          tip:'municipiu',regiune:'V',lat:45.7489,lon:21.2087,
+          pop2021:268000,pop2011:319279,rata_reala_2011_2021:-1.62,
+          pib_eur_cap:18100,coef_hub:1.6,suprafata_ha:12950,
+          spatii_verzi_mp_loc:13,acoperire_transport:64,autorizatii_2023:490},
+        'RO-B-01':{name:'București',judet:'Ilfov',judet_code:'B',siruta:'179141',
+          tip:'municipiu',regiune:'C',lat:44.4268,lon:26.1025,
+          pop2021:1716983,pop2011:1677985,rata_reala_2011_2021:0.24,
+          pib_eur_cap:28400,coef_hub:2.0,suprafata_ha:23839,
+          spatii_verzi_mp_loc:9,acoperire_transport:78,autorizatii_2023:2400},
+        'RO-CT-01':{name:'Constanța',judet:'Constanța',judet_code:'CT',siruta:'61095',
+          tip:'municipiu',regiune:'SE',lat:44.1598,lon:28.6348,
+          pop2021:283872,pop2011:283872,rata_reala_2011_2021:-0.42,
+          pib_eur_cap:12800,coef_hub:1.3,suprafata_ha:7543,
+          spatii_verzi_mp_loc:10,acoperire_transport:58,autorizatii_2023:380},
+        'RO-BT-01':{name:'Botoșani',judet:'Botoșani',judet_code:'BT',siruta:'20964',
+          tip:'municipiu',regiune:'NE',lat:47.7455,lon:26.6657,
+          pop2021:106847,pop2011:115523,rata_reala_2011_2021:-0.77,
+          pib_eur_cap:7200,coef_hub:0.8,suprafata_ha:4128,
+          spatii_verzi_mp_loc:8,acoperire_transport:55,autorizatii_2023:180},
+        'RO-BV-01':{name:'Brașov',judet:'Brașov',judet_code:'BV',siruta:'26895',
+          tip:'municipiu',regiune:'C',lat:45.6427,lon:25.5887,
+          pop2021:253200,pop2011:253200,rata_reala_2011_2021:-0.38,
+          pib_eur_cap:14200,coef_hub:1.3,suprafata_ha:26776,
+          spatii_verzi_mp_loc:17,acoperire_transport:62,autorizatii_2023:320},
+        'RO-SV-01':{name:'Suceava',judet:'Suceava',judet_code:'SV',siruta:'148045',
+          tip:'municipiu',regiune:'NE',lat:47.6635,lon:26.2732,
+          pop2021:92121,pop2011:92959,rata_reala_2011_2021:-0.09,
+          pib_eur_cap:8100,coef_hub:0.9,suprafata_ha:5193,
+          spatii_verzi_mp_loc:9,acoperire_transport:52,autorizatii_2023:210},
       };
-      s.onerror = () => console.error('[DB Watchdog] Eroare reload!');
-      document.head.appendChild(s);
-      return;
-    }
-    setTimeout(() => checkAndReload(attempt + 1), 1500);
-  }
-  // Verificam dupa ce toate scripturile s-au incarcat
-  window.addEventListener('load', () => setTimeout(() => checkAndReload(0), 500));
+      Object.assign(window._RO_CITIES_DB, fb);
+      console.log('[DB Watchdog] ✅ Date minime injectate:', Object.keys(window._RO_CITIES_DB).length, 'UAT-uri');
+    }, 3000);
+  });
 })();
 </script>  <script src="js/21-cloud-sync.js?v=20260520c"></script>
   <script src="js/22-zoning-connector.js?v=20260520c"></script><!-- Etapa 1: Regulament din Supabase -->
