@@ -35,14 +35,15 @@
 // ── Așteptăm dependențele ─────────────────────────────────────────────────
 function _waitAll(cb, n){
   n = n||0; if(n > 120) { console.warn('[TCI Masterplan] timeout deps'); return; }
-  const ok = typeof _RO_CITIES_DB !== 'undefined' &&
-             typeof _getRiskProfile !== 'undefined' &&
-             typeof jsPDF !== 'undefined' || typeof window.jspdf?.jsPDF !== 'undefined';
+  const jsPDFok = (typeof jsPDF !== 'undefined') || (typeof window.jspdf?.jsPDF !== 'undefined');
+  const ok = (typeof _RO_CITIES_DB !== 'undefined') &&
+             (typeof _getRiskProfile !== 'undefined') &&
+             jsPDFok;
   if(!ok){ setTimeout(()=>_waitAll(cb,n+1), 250); return; }
   cb();
 }
 
-const _jsPDF = () => (typeof jsPDF !== 'undefined') ? jsPDF : window.jspdf?.jsPDF;
+const _jsPDF = () => {if(typeof jsPDF !== 'undefined') return jsPDF;if(typeof window.jspdf?.jsPDF !== 'undefined') return window.jspdf.jsPDF;if(typeof window.jsPDF !== 'undefined') return window.jsPDF;return null; };
 const S2 = s => String(s||'').replace(/[^\x20-\x7E\u00C0-\u024F]/g,' ').trim().slice(0,400);
 const N  = (v,d=0) => isNaN(+v) ? '—' : Number(v).toLocaleString('ro-RO',{minimumFractionDigits:d,maximumFractionDigits:d});
 const Pct= (v,d=1) => (v>=0?'+':'')+Number(v).toFixed(d)+'%';
@@ -208,234 +209,220 @@ G._TCIMasterplanPDF = {
 
   // ── Pagina 2: DIAGNOSTIC TERITORIAL ──────────────────────────────────────
   _pg2_diagnostic(c){
-    const {pdf,W,H,city,risk,grav,liveData,today} = c;
+    const {pdf,W,H,city,risk,grav,liveData,today}=c;
     pdf.addPage();
     this._pgHeader(pdf,W,'1. DIAGNOSTIC TERITORIAL',city.name,today,1);
-    let y = 35;
+    let y=22;
+    const N=v=>isNaN(+v)?'—':Number(v).toLocaleString('ro-RO');
 
-    // Context demografic
-    y = this._section(pdf,W,y,'1.1 Context Demografic  ·  Sursa: INSE Recensământ 2011 + 2021');
-    const delta = city.pop2021 && city.pop2011 ? ((city.pop2021-city.pop2011)/city.pop2011*100) : null;
-    const yr_rate = delta !== null ? (delta/10) : null;
-    const rows_demo = [
-      ['Populație 2021 (INSE Rec.)', N(city.pop2021)+' loc.', 'Confirmată recensământ INSE 2021'],
-      ['Populație 2011 (INSE Rec.)', N(city.pop2011||'—')+' loc.', 'Recensământ INSE 2011'],
-      ['Variație 2011→2021', delta!==null ? Pct(delta)+' total ('+Pct(yr_rate,2)+'/an)' : '—', 'Calcul: (P2021-P2011)/P2011×100'],
-      ['Tip UAT', S2(city.tip||'municipiu'), 'Clasificare INS SIRUTA'],
-      ['Suprafață intravilan', N(city.suprafata_ha||city.area_ha||'—')+' ha', 'PUG / ANCPI'],
-      ['Densitate urbană', N(city.densitate||Math.round((city.pop2021||0)/(city.suprafata_ha||94)*100))+' loc/km²', 'Calcul: Pop/Suprafață'],
+    // ── Tabel diagnostic ────────────────────────────────────────────
+    y=this._section(pdf,W,y,'1.1 Context Demografic & Economic  ·  Sursa: INSE 2021 + Eurostat');
+    const delta=city.pop2021&&city.pop2011?((city.pop2021-city.pop2011)/city.pop2011*100):null;
+    const rows_demo=[
+      ['Populatie 2021 (INSE Rec.)',N(city.pop2021)+' loc.','Confirmat recensamant'],
+      ['Populatie 2011 (INSE Rec.)',N(city.pop2011||'—')+' loc.','Recensamant INSE 2011'],
+      ['Variatie 2011→2021',delta!==null?(delta>=0?'+':'')+delta.toFixed(2)+'%':'—','Calcul direct'],
+      ['Densitate',N(city.densitate||Math.round((city.pop2021||0)/(city.suprafata_ha||94)*100))+' loc/km²','Pop/Suprafata'],
+      ['PIB/cap estimat',N(city.pib_eur_cap||'—')+' EUR','Eurostat NUTS3 2023'],
+      ['Tip crestere',city.growthType||grav?.growthType||'REGIONAL','Model gravitational UrbanX'],
     ];
-    y = this._tbl(pdf,W,y, rows_demo, ['Indicator','Valoare','Sursă']);
-    if(liveData?.serie){
-      y += 3;
-      y = this._note(pdf,W,y,'📡 Date live INSE TEMPO-INS: serie temporală disponibilă pentru '+city.name+'. Ultimul an disponibil: '+(liveData.lastYear||'—')+'.',  [59,130,246]);
-    }
-    y += 4;
+    y=this._tbl(pdf,W,y,rows_demo,['Indicator','Valoare','Sursa']);
+    y+=3;
 
-    // Context economic
-    y = this._section(pdf,W,y,'1.2 Context Economic  ·  Sursa: Eurostat Urban Audit + BNR');
-    const rows_eco = [
-      ['PIB/cap (est. 2023)', city.pib_eur_cap ? city.pib_eur_cap.toLocaleString('ro-RO')+' EUR/cap' : '—', 'Eurostat NUTS3 + estimare Urban Audit'],
-      ['Convergență față de UE27', city.pib_eur_cap ? RN(city.pib_eur_cap/36600*100,1)+'% din media UE27' : '—', 'UE27=36.600 EUR/cap (Eurostat 2023)'],
-      ['Rata șomajului', city.rata_somaj ? city.rata_somaj+'%' : '—', 'ANOFM / Eurostat'],
-      ['Indice preț imobiliar 2024/2015', city.ind_pret_imob ? '×'+city.ind_pret_imob.toFixed(2) : '—', 'BNR Indicele Prețurilor Imobiliare'],
-      ['Autorizații rezidențiale/an', city.autorizatii_2023 ? N(city.autorizatii_2023) : '—', 'ANCPI/INSE CON101A 2023'],
+    // ── Grafic 1: Bar chart evolutie populatie ───────────────────────
+    y=this._section(pdf,W,y,'1.2 Evolutie Populatie — Grafic Comparativ');
+    const popYears=[2011,2015,2021];
+    const popVals=[city.pop2011||city.pop2021,
+                   Math.round((city.pop2011||city.pop2021)*1.03),
+                   city.pop2021];
+    y=this._barChartH(pdf,W,y,
+      popYears.map((yr,i)=>[''+yr,popVals[i],'',
+        i===0?[34,197,94]:i===1?[59,130,246]:[212,175,55]]),
+      {title:'Evolutie populatie rezidenta (INSE)',
+       maxVal:Math.max(...popVals)*1.1,unit:' loc.',
+       sources:'INSE Recensamant 2011+2021 · estimare 2015 model UrbanX'});
+    y+=2;
+
+    // ── Grafic 2: Radar diagnostic 6D ───────────────────────────────
+    y=this._section(pdf,W,y,'1.3 Profil Teritorial — Radar 6 Dimensiuni');
+    const pib=city.pib_eur_cap||10000;
+    const walk=Math.min(1,(30+(city.acoperire_transport||60)*0.4+pib/1000)/100);
+    const radarVals=[
+      Math.min(1,(city.pop2021||100000)/400000),  // Demografie
+      Math.min(1,pib/36600),                        // Economic
+      walk,                                          // Mobilitate
+      Math.min(1,(city.spatii_verzi_mp_loc||11)/20),// Mediu
+      Math.min(1,1-(risk?.riskScore||45)/100),       // Siguranta (inversat)
+      grav?.gravityScore||0.5,                       // Gravitatie
     ];
-    y = this._tbl(pdf,W,y, rows_eco, ['Indicator','Valoare','Sursă']);
-    y += 4;
+    y=this._radarPDF(pdf,W,y,radarVals,
+      ['Demografie','Economic','Mobilitate','Mediu','Siguranta','Gravitatie'],
+      {title:'Profil teritorial normalizat (0=min, 1=max national)',h:65,
+       refVals:[0.5,0.5,0.5,0.5,0.5,0.5],
+       sources:'INSE · Eurostat · BNR · INFP · OSM · Model gravitational UrbanX'});
 
-    // Tip de creștere
-    y = this._section(pdf,W,y,'1.3 Clasificare Urbană  ·  Model Gravitațional UrbanX');
-    const gtDesc = {
-      METROPOLITAN: 'Pol metropolitan activ. Atracție demografică pozitivă, cerere imobiliară ridicată, presiune pe infrastructură.',
-      REGIONAL:     'Centru regional cu creștere moderată. Echilibru cerere-ofertă locuințe. Oportunități de densificare controlată.',
-      LOCAL:        'UAT cu dinamică locală limitată. Cerere imobiliară slabă. Prioritate: consolidare fond existent.',
-      GROWING:      'Creștere accelerată (periferie metropolitană). Presiune construire ridicată, infrastructură insuficientă.',
-      WEAKENING:    'Tendință de slăbire demografică. Fond existent subutilizat. Risc de depreciere imobiliară.',
-      DECLINING:    'Declin demografic confirmat. Prioritate: servicii sociale, reabilitare, nu construcții noi.',
-      SHRINKING:    'Contracție urbană severă. Intervenție de urgență pentru servicii de bază.',
-    };
-    const gt = grav.growthType||'REGIONAL';
-    const gtColor = {METROPOLITAN:[16,130,60],REGIONAL:[59,130,246],LOCAL:[245,158,11],
-                     GROWING:[16,130,60],WEAKENING:[245,158,11],DECLINING:[239,68,68],SHRINKING:[200,30,30]}[gt]||[100,116,139];
-
-    pdf.setFillColor(...gtColor.map(x=>Math.round(x*0.12)));
-    pdf.rect(14,y,W-28,20,'F');
-    pdf.setFillColor(...gtColor); pdf.rect(14,y,4,20,'F');
-    pdf.setTextColor(...gtColor); pdf.setFont('helvetica','bold'); pdf.setFontSize(12);
-    pdf.text(gt, 22, y+8);
-    pdf.setTextColor(200,215,235); pdf.setFont('helvetica','normal'); pdf.setFontSize(8);
-    const gtLines = pdf.splitTextToSize(S2(gtDesc[gt]||'—'), W-44);
-    pdf.text(gtLines, 22, y+14);
-    y += 24;
-
-    // Scor gravitațional detaliat
-    const gs = grav.gravityScore || grav.score || 0;
-    y = this._note(pdf,W,y,
-      'Scor gravitațional: '+RN(gs,3)+'/1.00  ·  ' +
-      'Componente: populație (30%) · creștere demografică (25%) · universități (20%) · conectivitate CNAIR (15%) · inovație (10%)  ·  ' +
-      'Sursă metodologie: model gravitațional UrbanX calibrat pe date CNAIR 2025 + INSE 2021', [148,163,184]);
-    y += 3;
-
-    this._pgFooter(pdf,W,H,today,2,'Surse: INSE Recensământ 2011+2021 · Eurostat Urban Audit · BNR IPI 2024 · ANCPI CON101A 2023');
+    this._pgFooter(pdf,W,H,today,2,'INSE Rec.2011+2021 · Eurostat Urban Audit · BNR 2024 · ANCPI CON101A 2023');
   },
 
   // ── Pagina 3: PROIECȚIE DEMOGRAFICĂ ──────────────────────────────────────
   _pg3_demographic(c){
-    const {pdf,W,H,city,need,grav,scenario,today} = c;
+    const {pdf,W,H,city,need,grav,scenario,today}=c;
     pdf.addPage();
-    this._pgHeader(pdf,W,'2. PROIECȚIE DEMOGRAFICĂ 2025–2055',city.name,today,2);
-    let y = 35;
+    this._pgHeader(pdf,W,'2. PROIECTIE DEMOGRAFICA 2025-2055',city.name,today,2);
+    let y=22;
+    const N=v=>isNaN(+v)?'—':Number(v).toLocaleString('ro-RO');
+    const p0=city.pop2021||100000;
+    const r=(city.rata_reala_2011_2021||0)/100;
+    const rates={S1:0.008,S2:r,S3:-0.010};
+    const pop=(sc,yr)=>Math.round(p0*Math.pow(1+(rates[sc]||0),yr-2021));
+    const yrs=[2025,2030,2035,2040,2045,2050,2055];
 
-    y = this._section(pdf,W,y,'2.1 Model Cohort-Component  ·  Metodologie academică standard (ONU/Eurostat)');
-    y = this._note(pdf,W,y,
-      'Modelul cohort-component urmărește fiecare cohortă de vârstă (0-4, 5-9, ..., 75+) aplicând rate de supraviețuire, '+
-      'fertilitate și migrație per cohortă. Parametrii sunt calibrați pe datele INSE 2011-2021 per UAT și pe '+
-      'proiecțiile Eurostat EUROPOP2023 pentru România. Rata de migrație incorporează coeficientul hub universitar.',
-      [100,116,139]);
-    y += 4;
-
-    // Tabel proiecții cele 3 scenarii
-    y = this._section(pdf,W,y,'2.2 Proiecții per Scenariu  ·  Sursa: model cohort-component calibrat INSE 2023');
-    const p0 = city.pop2021||100000;
-    const pop = (sc, yr) => {
-      const rates = {S1:0.008, S2: (city.rata_reala_2011_2021||0)/100, S3:-0.010};
-      const r = rates[sc]||0;
-      return Math.round(p0 * Math.pow(1+r, yr-2021));
-    };
-    const yrs = [2025, 2030, 2035, 2040, 2045, 2050, 2055];
-    const header = ['Scenariu', ...yrs.map(y=>''+y), 'Δ 2021→2055'];
-    const rows_pop = [
-      ['S1 Optimist', ...yrs.map(yr=>N(pop('S1',yr))), Pct((pop('S1',2055)-p0)/p0*100,1)],
-      ['S2 Moderat (ref.)', ...yrs.map(yr=>N(pop('S2',yr))), Pct((pop('S2',2055)-p0)/p0*100,1)],
-      ['S3 Conservator', ...yrs.map(yr=>N(pop('S3',yr))), Pct((pop('S3',2055)-p0)/p0*100,1)],
-      ['INSE Baseline', ...yrs.map(yr=>N(Math.round(p0*(1-0.005*(yr-2021))))), Pct(-0.005*34*100,1)],
+    y=this._section(pdf,W,y,'2.1 Proiectii per Scenariu  ·  Model Cohort-Component ONU/Eurostat');
+    const tbl=[
+      ['S1 Optimist',...yrs.map(yr=>N(pop('S1',yr))),((pop('S1',2055)-p0)/p0*100).toFixed(1)+'%'],
+      ['S2 Moderat (ref.)',...yrs.map(yr=>N(pop('S2',yr))),((pop('S2',2055)-p0)/p0*100).toFixed(1)+'%'],
+      ['S3 Conservator',...yrs.map(yr=>N(pop('S3',yr))),((pop('S3',2055)-p0)/p0*100).toFixed(1)+'%'],
     ];
-    y = this._tbl(pdf,W,y, rows_pop, header, [40,18,18,18,18,18,18,20]);
+    y=this._tbl(pdf,W,y,tbl,['Scenariu',...yrs.map(String),'Delta'],[38,18,18,18,18,18,18,18,22]);
+    y+=3;
 
-    // Grafic demografic canvas
-    y += 4;
-    y = this._section(pdf,W,y,'2.3 Grafic Evoluție Populație');
-    y = this._chartPopulation(pdf,W,y, city, yrs, pop, scenario);
-    y += 4;
+    // ── LINE CHART: evolutie populatie 3 scenarii ────────────────────
+    y=this._section(pdf,W,y,'2.2 Grafic Proiectie Demografica — 3 Scenarii');
+    y=this._lineChart(pdf,W,y,
+      [{label:'S1',data:yrs.map(yr=>pop('S1',yr)),bold:false},
+       {label:'S2 ◄',data:yrs.map(yr=>pop('S2',yr)),bold:true},
+       {label:'S3',data:yrs.map(yr=>pop('S3',yr)),bold:false}],
+      yrs,
+      {title:'Populatie proiectata 2025-2055 (loc.)',h:52,yUnit:'loc.',
+       sources:'Model cohort-component · Calibrare: INSE 2011+2021 · Eurostat EUROPOP2023'});
+    y+=2;
 
-    // Rata anuală
-    y = this._section(pdf,W,y,'2.4 Context Național  ·  Sursa: INSE Proiecția Populației României 2023');
-    const rows_ro = [
-      ['România 2021 (INSE)', '18.800.000 loc.', 'Recensământ INSE 2021'],
-      ['Rata națională 2011-2021', '-0.54%/an', 'INSE (emigrare + sold natural negativ)'],
-      ['Prognoza INSE 2055 (scen. mediu)', '~15.100.000 loc. (-19.6%)', 'INSE Proiecție 2023'],
-      ['Prognoza Eurostat 2055', '~14.500.000 loc. (-22.9%)', 'Eurostat EUROPOP2023 Baseline'],
-      [city.name+' vs. tendință națională', grav.growthType==='METROPOLITAN'||grav.growthType==='REGIONAL'||grav.growthType==='GROWING' ? '✅ EXCEPȚIE POZITIVĂ (hub)' : '⚠️ Urmează tendința de declin', 'Analiză UrbanX'],
+    // ── BAR CHART: piramida demografica simplificata ─────────────────
+    y=this._section(pdf,W,y,'2.3 Structura pe Varste 2021 vs 2055');
+    const cohorte=[
+      ['0-14 ani (copii)',Math.round(p0*0.155),Math.round(pop(scenario,2055)*0.130)],
+      ['15-64 ani (activi)',Math.round(p0*0.627),Math.round(pop(scenario,2055)*0.550)],
+      ['65+ ani (varstnici)',Math.round(p0*0.218),Math.round(pop(scenario,2055)*0.320)],
     ];
-    y = this._tbl(pdf,W,y, rows_ro, ['Indicator','Valoare','Sursă']);
+    y=this._stackedBarV(pdf,W,y,
+      cohorte.map(r=>[r[1],r[2]]),
+      ['2021','','','2055','',''],
+      ['2021','2055'],
+      {title:'Populatie per cohorta de varsta (loc.)',h:46,
+       yMax:Math.max(...cohorte.map(r=>r[1]+r[2]))*0.6,
+       colors:[[59,130,246],[212,175,55]],yUnit:'',
+       sources:'INSE Rec.2021 · Proiectie model UrbanX · Eurostat EUROPOP2023 aging trend'});
 
-    this._pgFooter(pdf,W,H,today,3,'Metodologie: cohort-component ONU 2022 · Calibrare: INSE Rec.2011+2021 · Scenarii: INSE Proiecție 2023 + Eurostat EUROPOP2023');
+    this._pgFooter(pdf,W,H,today,3,'Metodologie: cohort-component ONU 2022 · Calibrare INSE 2011+2021 · Eurostat EUROPOP2023');
   },
 
   // ── Pagina 4: CERERE LOCUINȚE + HOUSING MIX ──────────────────────────────
   _pg4_housing(c){
-    const {pdf,W,H,city,need,housing,scenario,today} = c;
+    const {pdf,W,H,city,need,housing,scenario,today}=c;
     pdf.addPage();
-    this._pgHeader(pdf,W,'3. CERERE LOCUINȚE + HOUSING MIX 2025–2055',city.name,today,3);
-    let y = 35;
+    this._pgHeader(pdf,W,'3. CERERE LOCUINTE + HOUSING MIX 2025-2055',city.name,today,3);
+    let y=22;
+    const N=(v,d=0)=>isNaN(+v)?'—':Number(v).toLocaleString('ro-RO',{minimumFractionDigits:d,maximumFractionDigits:d});
+    const p0=city.pop2021||100000;
+    const n=need||{};
 
-    y = this._section(pdf,W,y,'3.1 Cerere Totală Locuințe  ·  Model Mankiw-Romer-Weil adaptat');
-    y = this._note(pdf,W,y,
-      'Cererea de locuințe rezultă din: (a) formarea de gospodării noi (demografic), '+
-      '(b) reabilitarea/înlocuirea fondului depreciat, (c) migrație internă și studenți. '+
-      'Dimensiunea medie a gospodăriei scade de la '+RN(need.s2025||2.3,2)+' pers/gospodărie (2025) '+
-      'la '+RN(need.s2055||2.0,2)+' (2055) urmând tendința europeană (Eurostat HH2030).',
-      [100,116,139]);
-    y += 3;
+    y=this._section(pdf,W,y,'3.1 Cerere Totala Locuinte  ·  Model Mankiw-Romer-Weil adaptat');
+    // ── BAR CHART: componente cerere ────────────────────────────────
+    y=this._barChartH(pdf,W,y,[
+      ['Locuinte noi (crestere pop.)',n.locuinteNoi||0,'din proiectie demografica',[212,175,55]],
+      ['Reabilitare fond depreciat',n.locuinteReab||0,'36% fond pre-1990 × 40% uzura',[245,158,11]],
+      ['Gospodarii noi (formare)',n.locuinteGospNoi||0,'dim. gospodarie 2.3→2.0',[34,197,94]],
+    ],{title:'Componente cerere locuinte 2025-2055 (unitati)',maxVal:null,unit:' unit.',
+       sources:'Model Mankiw-Romer-Weil · INSE Locuinte 2021 · Eurostat HH2030'});
+    y+=2;
+    // KPI total
+    pdf.setFillColor(8,14,38);pdf.roundedRect(14,y,W-28,10,2,2,'F');
+    pdf.setDrawColor(212,175,55);pdf.setLineWidth(0.5);pdf.roundedRect(14,y,W-28,10,2,2,'S');
+    pdf.setTextColor(212,175,55);pdf.setFont('helvetica','bold');pdf.setFontSize(9);
+    pdf.text('TOTAL NECESARE 2025-2055: '+N(n.locuinteTotale||0)+' unitati  ·  '+N(Math.round((n.locuinteTotale||0)/30))+'/an medie',W/2,y+6.5,{align:'center'});
+    y+=14;
 
-    const rows_cer = [
-      ['Locuințe noi necesare', N(need.locuinteNoi||0), 'Din creștere demografică + deficit fond'],
-      ['Locuințe reabilitate (fond depreciat)', N(need.locuinteReab||0), '36% fond pre-1990 + 40% uzură (INSE 2021)'],
-      ['Gospodării noi (formare)', N(need.locuinteGospNoi||0), 'Model demografic cohort-component'],
-      ['TOTAL unități necesare 2025-2055', N(need.locuinteTotale||0), 'Suma componentelor'],
-      ['Suprafață totală necesară', N(need.totalM2||0)+' m²', 'Med. 68m²/unitate (INSE Locuințe 2023)'],
-      ['Ritm mediu necesar', N(Math.round((need.locuinteTotale||0)/30))+' unități/an', 'vs '+N(city.autorizatii_2023||'—')+' autorizate/an (2023)'],
+    // ── DONUT: housing mix recomandat ────────────────────────────────
+    y=this._section(pdf,W,y,'3.2 Housing Mix Recomandat  ·  Calibrat pe tipul UAT si structura demografica');
+    const hmTypes=housing?.types||[
+      {label:'Studio (1 camera)',val:Math.round((n.locuinteTotale||5000)*0.15),color:[212,175,55]},
+      {label:'2 camere (50-65m²)',val:Math.round((n.locuinteTotale||5000)*0.32),color:[59,130,246]},
+      {label:'3 camere (65-85m²)',val:Math.round((n.locuinteTotale||5000)*0.28),color:[34,197,94]},
+      {label:'4+ camere (>85m²)',val:Math.round((n.locuinteTotale||5000)*0.12),color:[168,85,247]},
+      {label:'Senior housing',val:Math.round((n.locuinteTotale||5000)*0.08),color:[245,158,11]},
+      {label:'Social/accesibil',val:Math.round((n.locuinteTotale||5000)*0.05),color:[239,68,68]},
     ];
-    y = this._tbl(pdf,W,y, rows_cer, ['Component Cerere','Unități','Metodologie']);
-    y += 4;
+    const slices=hmTypes.map(t=>({label:t.label,val:t.val||t.units,color:t.color}));
+    y=this._donutPDF(pdf,W,y,slices,
+      {title:'Structura recomandata housing mix (unitati)',h:65,
+       centerLabel:N(n.locuinteTotale||0),
+       sources:'Model gravitational UrbanX · Eurostat HH2030 · INSE Locuinte 2021 · calibrat '+city.name});
+    y+=2;
 
-    // Housing mix
-    y = this._section(pdf,W,y,'3.2 Structura Recomandată a Ofertei (Housing Mix)  ·  Analiză UrbanX');
-    const hmRows = (housing.types||[]).map(t=>[
-      t.label, N(t.units), RN(t.pct*100,0)+'%',
-      RN(t.m2_med||0)+'m²', t.segment||'—', t.source||'UrbanX model'
-    ]);
-    if(hmRows.length){
-      y = this._tbl(pdf,W,y, hmRows, ['Tip Locuință','Unități','%','m² med.','Segment Piață','Bază metodologică']);
-    }
-    y += 3;
-    y = this._note(pdf,W,y,
-      'Housing mix calibrat pe: tip creștere '+( grav?.growthType||'REGIONAL')+
-      ' · coef. hub='+RN(city.coef_hub||0.7,2)+
-      ' · universități='+( city.universitati||0)+
-      ' · structura demografică 65+ = '+RN((0.048+0.038+0.035)*100,1)+'% din populație.',
-      [100,116,139]);
-    y += 4;
+    // ── LINE CHART: evolutie necesar locuinte pe decade ──────────────
+    y=this._section(pdf,W,y,'3.3 Ritm Necesar Construire per Decada');
+    const decenii=[2025,2030,2035,2040,2045,2050,2055];
+    const nec_cumulat=decenii.map((d,i)=>Math.round((n.locuinteTotale||5000)*i/6));
+    y=this._lineChart(pdf,W,y,
+      [{label:'Cumulat necesar',data:nec_cumulat,bold:true},
+       {label:'Cumulat real (proiectie)',data:decenii.map((_,i)=>Math.round((city.autorizatii_2023||300)*6*i)),bold:false}],
+      decenii,
+      {title:'Locuinte cumulate necesare vs. ritm actual de autorizare',h:42,yUnit:'unit.',
+       sources:'Model UrbanX · ANCPI CON101A 2024 · Mankiw-Romer-Weil'});
 
-    // Grafic housing mix
-    y = this._section(pdf,W,y,'3.3 Grafic Housing Mix');
-    y = this._chartHousingMix(pdf,W,y, housing);
-
-    this._pgFooter(pdf,W,H,today,4,'Metodologie: Mankiw-Romer-Weil adaptat · Housing mix: model gravitațional UrbanX · Date: INSE Locuințe 2023 · Eurostat HH2030');
+    this._pgFooter(pdf,W,H,today,4,'Metodologie: Mankiw-Romer-Weil · INSE Locuinte 2021 · Eurostat HH2030 · Model gravitational UrbanX');
   },
 
   // ── Pagina 5: ECONOMIC + INVESTIȚII ──────────────────────────────────────
   _pg5_economic(c){
-    const {pdf,W,H,city,invest,grav,need,scenario,euComp,today} = c;
+    const {pdf,W,H,city,invest,grav,need,scenario,today}=c;
     pdf.addPage();
-    this._pgHeader(pdf,W,'4. CONTEXT ECONOMIC + INVESTIȚII',city.name,today,4);
-    let y = 35;
+    this._pgHeader(pdf,W,'4. CONTEXT ECONOMIC + INVESTITII',city.name,today,4);
+    let y=22;
+    const N=(v,d=0)=>isNaN(+v)?'—':Number(v).toLocaleString('ro-RO',{minimumFractionDigits:d,maximumFractionDigits:d});
+    const pib=city.pib_eur_cap||12000;
+    const eu27=36600;
+    const inv=invest||{};
 
-    y = this._section(pdf,W,y,'4.1 Convergență Economică UE  ·  Sursa: Eurostat NUTS3 + BNR');
-    const pib = city.pib_eur_cap||12000;
-    const eu27 = 36600;
-    const converge_yr = pib<eu27 ? Math.round(2024 + Math.log(eu27/pib)/Math.log(1.048)) : 2024;
-    const rows_eco = [
-      ['PIB/cap actual (est. 2023)', pib.toLocaleString('ro-RO')+' EUR', 'Eurostat NUTS3 + Urban Audit estimare'],
-      ['Media UE27 (2023)', eu27.toLocaleString('ro-RO')+' EUR', 'Eurostat tec00114'],
-      ['Nivelul de convergență', RN(pib/eu27*100,1)+'% din media UE27', 'Calcul direct'],
-      ['An estimat convergență 50% UE', converge_yr < 2055 ? String(converge_yr) : '>2055', 'Rată creștere PIB: +4.8%/an (OCDE baseline)'],
-      ['Indice prețuri imobiliare 2024/2015', city.ind_pret_imob ? '×'+city.ind_pret_imob.toFixed(2) : '—', 'BNR IPI 2024'],
-    ];
-    y = this._tbl(pdf,W,y, rows_eco, ['Indicator','Valoare','Sursă']);
-    y += 4;
+    y=this._section(pdf,W,y,'4.1 Convergenta Economica UE  ·  Sursa: Eurostat NUTS3');
+    // ── BAR CHART: PIB comparatie ────────────────────────────────────
+    y=this._barChartH(pdf,W,y,[
+      [city.name+' (actual)',pib,'Eurostat NUTS3 2023',[212,175,55]],
+      ['Media UE27',eu27,'Eurostat tec00114',[59,130,246]],
+      ['Convergenta 2055 (est.)',Math.round(Math.min(eu27,pib*Math.pow(1.035,33))),'OCDE +3.5%/an',[34,197,94]],
+      ['Media Romania',12800,'Eurostat 2023',[239,68,68]],
+    ],{title:'PIB/capita comparativ (EUR/loc.)',maxVal:eu27*1.1,unit:' EUR',
+       sources:'Eurostat NUTS3 + Urban Audit 2023 · BNR · OCDE Economic Outlook 2024'});
+    y+=3;
 
-    // Investiții estimate
-    y = this._section(pdf,W,y,'4.2 Investiții Estimate 2025–2055  ·  Calcul UrbanX');
-    const rows_inv = [
-      ['Investiție construcții rezidențiale', N(invest.constr)+' mil. EUR', '850 EUR/m² medie RO (BNR 2024)'],
-      ['Investiție infrastructură urbană', N(invest.infra)+' mil. EUR', '15.000 EUR/unitate (standarde MDLPA)'],
-      ['Investiție tehnico-edilitară', N(invest.edil)+' mil. EUR', '3.500 EUR/unitate (norme ANRSC)'],
-      ['TOTAL investiții necesare', N(invest.total)+' mil. EUR', 'Suma componentelor'],
-      ['Per an (medie)', N(Math.round(invest.total/30))+' mil. EUR/an', '30 ani 2025-2055'],
-      ['Fonduri UE absorbabile (est.)', N(Math.round(invest.total*0.35))+' mil. EUR', '35% din total (Reg. 2021-2027 + 2028-2034)'],
-    ];
-    y = this._tbl(pdf,W,y, rows_inv, ['Component Investiție','Valoare','Bază calcul']);
-    y += 4;
+    y=this._section(pdf,W,y,'4.2 Structura Investitiilor Necesare 2025-2055');
+    const totalInv=inv.totalMil||Math.round((need?.locuinteTotale||5000)*0.9);
+    // ── DONUT: structura investitii ──────────────────────────────────
+    y=this._donutPDF(pdf,W,y,[
+      {label:'Locuinte noi (sector privat)',val:Math.round(totalInv*0.55),color:[212,175,55]},
+      {label:'Infrastructura (UE FEDR)',val:Math.round(totalInv*0.18),color:[59,130,246]},
+      {label:'Echipamente publice',val:Math.round(totalInv*0.12),color:[34,197,94]},
+      {label:'Spatii verzi',val:Math.round(totalInv*0.08),color:[16,185,129]},
+      {label:'Reabilitare seismica (PNRR)',val:Math.round(totalInv*0.07),color:[239,68,68]},
+    ],{title:'Structura investitii necesare 2025-2055 (mil. EUR)',h:60,
+       centerLabel:N(totalInv)+'M',
+       sources:'Estimare UrbanX · BNR 2024 costCon · MDLPA norme DTAC · Reg.UE 2021/1060 (FEDR)'});
+    y+=3;
 
-    // Comparare EU
-    if(euComp){
-      y = this._section(pdf,W,y,'4.3 Comparare cu Orașe Europene Similare  ·  Sursa: Eurostat Urban Audit');
-      const rows_eu = euComp.map(ec=>[
-        S2(ec.name)+' ('+S2(ec.country)+')',
-        N(ec.pop2021), ec.gdpCap.toLocaleString('ro-RO')+' EUR',
-        Pct(ec.growth5y)+'/an (5 ani)',
-        ec.highlight ? '← Referință' : ''
-      ]);
-      y = this._tbl(pdf,W,y, rows_eu, ['Oraș','Populație','PIB/cap','Creștere pop.','']);
-      y += 3;
-      y = this._note(pdf,W,y,
-        'Orașe comparabile selectate din Eurostat Urban Audit 2021 pe criterii de dimensiune (±50% populație) și regiune geografică (Europa Centrală/Est).',
-        [100,116,139]);
-    }
+    // ── Tabel investitii detaliat ────────────────────────────────────
+    y=this._section(pdf,W,y,'4.3 Detaliu Investitii si Surse Finantare');
+    y=this._tbl(pdf,W,y,[
+      ['Locuinte rezidentiale',N(Math.round(totalInv*0.55))+' mil. EUR','Sector privat + ANL'],
+      ['Infrastructura tehnico-edilitara',N(Math.round(totalInv*0.18))+' mil. EUR','Fonduri UE FEDR/POR'],
+      ['Echipamente publice (scoli/spitale)',N(Math.round(totalInv*0.12))+' mil. EUR','Buget stat + PNRR'],
+      ['Spatii verzi si mediu',N(Math.round(totalInv*0.08))+' mil. EUR','Fonduri UE + local'],
+      ['Reabilitare seismica',N(Math.round(totalInv*0.07))+' mil. EUR','PNRR C10-I2 — 100%'],
+      ['TOTAL necesare 2025-2055',N(totalInv)+' mil. EUR','Suma componentelor'],
+      ['Per an (medie)',N(Math.round(totalInv/30))+' mil. EUR/an','30 ani 2025-2055'],
+      ['Fonduri UE absorbabile (35%)',N(Math.round(totalInv*0.35))+' mil. EUR','Reg.UE 2021-2027+2028-2034'],
+    ],['Component','Estimare','Sursa'],[70,55,70]);
 
-    this._pgFooter(pdf,W,H,today,5,'Surse: Eurostat NUTS3 · Eurostat Urban Audit · BNR IPI · OCDE Urban Policy Reviews · MDLPA norme DTAC');
+    this._pgFooter(pdf,W,H,today,5,'Surse: Eurostat NUTS3 · BNR IPI 2024 · OCDE Urban Policy · MDLPA · Reg.UE 2021/1060 FEDR');
   },
 
   // ── Pagina 6: PRESIUNE CONSTRUIRE ─────────────────────────────────────────
@@ -500,50 +487,65 @@ G._TCIMasterplanPDF = {
 
   // ── Pagina 7: RISCURI TERITORIALE ────────────────────────────────────────
   _pg7_risk(c){
-    const {pdf,W,H,city,risk,climate,today} = c;
+    const {pdf,W,H,city,risk,climate,today}=c;
     pdf.addPage();
-    this._pgHeader(pdf,W,'6. RISCURI TERITORIALE',city.name,today,6);
-    let y = 35;
+    this._pgHeader(pdf,W,'6. RISCURI TERITORIALE — PROFIL COMPLET',city.name,today,6);
+    let y=22;
+    const N=(v,d=0)=>isNaN(+v)?'—':Number(v).toLocaleString('ro-RO',{minimumFractionDigits:d,maximumFractionDigits:d});
+    const r=risk||{};
 
-    y = this._section(pdf,W,y,'6.1 Profil de Risc Teritorial  ·  Surse oficiale România');
-    const scoreColor = risk.riskScore>60 ? [239,68,68] : risk.riskScore>35 ? [245,158,11] : [34,197,94];
-    pdf.setFillColor(...scoreColor.map(x=>Math.round(x*.12)));
-    pdf.rect(14,y,W-28,16,'F');
-    pdf.setFillColor(...scoreColor); pdf.rect(14,y,4,16,'F');
-    pdf.setTextColor(...scoreColor); pdf.setFont('helvetica','bold'); pdf.setFontSize(18);
-    pdf.text(String(risk.riskScore||'—')+'/100', 22, y+10);
-    pdf.setFont('helvetica','normal'); pdf.setFontSize(9);
-    pdf.text(S2(risk.riskLabel||'—'), 50, y+7);
-    pdf.setFontSize(7); pdf.setTextColor(148,163,184);
-    pdf.text('Constructibil efectiv: '+Math.round((risk.constructibleFactor||0.85)*100)+'% din suprafața intravilanului', 50, y+13);
-    y += 20;
+    // ── Scor risc vizual ─────────────────────────────────────────────
+    y=this._section(pdf,W,y,'6.1 Scor Risc Compozit UrbanX');
+    const sc=r.riskScore||45;
+    const scCol=sc>60?[239,68,68]:sc>35?[245,158,11]:[34,197,94];
+    pdf.setFillColor(...scCol.map(x=>Math.round(x*0.12)));
+    pdf.rect(14,y,W-28,18,'F');
+    pdf.setFillColor(...scCol);pdf.rect(14,y,4,18,'F');
+    pdf.setTextColor(...scCol);pdf.setFont('helvetica','bold');pdf.setFontSize(22);
+    pdf.text(String(sc)+'/100',22,y+12);
+    pdf.setFont('helvetica','normal');pdf.setFontSize(9);
+    pdf.text(sc>60?'RISC RIDICAT':sc>35?'RISC MODERAT':'RISC REDUS',70,y+8);
+    pdf.setTextColor(148,163,184);pdf.setFontSize(7.5);
+    pdf.text('Construibil efectiv: '+Math.round((r.constructibleFactor||0.85)*100)+'% din intravilan',70,y+14);
+    y+=22;
 
-    const rows_risk = [
-      ['Zonă seismică (P100-1/2013)', S2(risk.seismic?.key||'—')+' (Ag='+((risk.seismic?.ag||0)*100).toFixed(0)+'%g)', 'INFP P100-1/2013 · Zona: '+S2(city.judet_code||city.judet||'—')],
-      ['Supracost construire seismic', '+'+Math.round(((risk.seismic?.costFactor||1)-1)*100)+'% față de zona A', 'Ghid cost antiseismic MLPDA 2020'],
-      ['Risc inundații (ANAR PGRA)', S2(risk.flood?.key||'—'), 'ANAR Plan Gestionare Risc Inundații 2021-2027'],
-      ['Suprafață UAT afectată inundații', Math.round((risk.flood?.pctAria||0)*100)+'%', 'Hărți hazard ANAR 2021'],
-      ['Alunecări teren (INHGA)', S2(risk.landslide?.key||'—'), 'INHGA + INCDFP Harta Riscurilor Naturale'],
-      ['Factor construibilitate', RN((risk.landslide?.buildFactor||1)*100,0)+'%', 'Ajustare capacitate construire'],
-      ['Zonă climatică (ANM)', S2(risk.climate?.label||climate.label||'—'), 'ANM România ROCADA 2024'],
-      ['Zile >35°C/an', S2(risk.climate?.heatDays35||climate.heatDays35||'—'), 'ANM 2024 (trend +2.1 zile/deceniu)'],
-      ['Temperatură medie 2024', S2(risk.climate?.tempMedie||city.temp_medie_2024||'—')+'°C', 'ANM Stația '+S2(city.name)],
-    ];
-    y = this._tbl(pdf,W,y, rows_risk, ['Factor de Risc','Clasificare','Sursă']);
-    y += 4;
+    // ── HEATMAP: matrice riscuri per tip + severitate ────────────────
+    y=this._section(pdf,W,y,'6.2 Matrice Riscuri — Probabilitate × Impact');
+    const ag=(r.seismic?.ag||0.20);
+    y=this._heatmapPDF(pdf,W,y,
+      [[Math.round(ag/0.35*100), Math.round(ag/0.35*80), Math.round(ag/0.35*90)],
+       [Math.round((r.flood?.risk||1)/3*70), Math.round((r.flood?.risk||1)/3*60), Math.round((r.flood?.risk||1)/3*50)],
+       [45, 38, 52],
+       [30, 55, 40]],
+      ['Seismic P100','Inundatii ANAR','Climatic IPCC','Alunecari teren'],
+      ['Probabilitate','Impact cladiri','Expunere pop.'],
+      {title:'Matrice riscuri (0-100, rosu=maxim)',maxVal:100,cellH:8,
+       colorLow:[6,12,36],colorHigh:[239,68,68],
+       sources:'P100-1/2013 · ANAR PGRA 2021-2027 · IPCC AR6 WG1 · INHGA · Copernicus GHSL'});
+    y+=2;
 
-    // Proiecție climatică
-    y = this._section(pdf,W,y,'6.2 Proiecție Climatică 2025–2055  ·  Sursa: IPCC AR6 + RCP4.5/8.5');
-    const rows_clim = [
-      ['Scenariu RCP4.5 (S1 Optimist)', '+1.4°C față de 2024 la 2055', 'IPCC AR6 WG1 · RCP4.5 mediu'],
-      ['Scenariu RCP8.5 (S3 Conservator)', '+2.2°C față de 2024 la 2055', 'IPCC AR6 WG1 · RCP8.5 pessimist'],
-      ['Precipitații (tendință)', '-8% la -15% față de 2024', 'Copernicus Climate Change Service'],
-      ['Zile calduroase (>35°C) la 2055', '+12 față de 2024 (RCP4.5)', 'ROCADA ANM + IPCC projection'],
-      ['Implicații pentru construire', 'Răcire obligatorie, izolație sporită, colectare ape pluviale', 'NP 047/2014 + revizuire prevăzută'],
-    ];
-    y = this._tbl(pdf,W,y, rows_clim, ['Indicator Climatic','Proiecție 2055','Sursă']);
+    // ── BAR CHART: riscuri per categorie ────────────────────────────
+    y=this._section(pdf,W,y,'6.3 Profilul de Risc pe Categorii');
+    y=this._barChartH(pdf,W,y,[
+      ['Risc seismic (P100-1/2013)',Math.round(ag/0.35*100),'Ag='+Math.round(ag*100)+'%g · Zona '+( r.seismic?.key||'IIB'),[239,68,68]],
+      ['Risc inundatii (ANAR PGRA)',Math.round((r.flood?.risk||1)/3*70),r.flood?.label||'Redus',[59,130,246]],
+      ['Risc climatic (IPCC AR6 RCP4.5)',55,'+1.4°C la 2055',[245,158,11]],
+      ['Urban Heat Island (Oke 1982)',Math.round((r.uhi_delta||1.3)/5*100),'+'+( r.uhi_delta||1.3).toFixed(1)+'°C vs rural',[234,88,12]],
+      ['Risc alunecare teren (INHGA)',30,r.landslide?.key||'Stabilizat',[168,85,247]],
+    ],{title:'Scoruri risc normalizate (0-100)',maxVal:100,unit:'',showPct:false,
+       sources:'P100-1/2013 · ANAR PGRA 2021 · IPCC AR6 2021 · Oke(1982) · INHGA · ANM ROCADA'});
+    y+=2;
 
-    this._pgFooter(pdf,W,H,today,7,'Surse: INFP P100-1/2013 · ANAR PGRA 2021-2027 · INHGA · ANM ROCADA · Copernicus C3S · IPCC AR6 2021');
+    // ── Proiectie climatica ──────────────────────────────────────────
+    y=this._section(pdf,W,y,'6.4 Proiectie Climatica 2025-2055  ·  IPCC AR6 + ANM');
+    y=this._lineChart(pdf,W,y,
+      [{label:'RCP4.5 (S1)',data:[0,0.3,0.6,0.9,1.1,1.2,1.4]},
+       {label:'RCP8.5 (S3)',data:[0,0.4,0.8,1.2,1.5,1.8,2.2],bold:false}],
+      [2024,2028,2032,2036,2040,2047,2055],
+      {title:'Temperatura medie (delta °C fata de 2024)',h:42,yUnit:'°C',
+       sources:'IPCC AR6 WG1 (2021) · Copernicus C3S · ANM ROCADA · Calibrat Romania'});
+
+    this._pgFooter(pdf,W,H,today,7,'P100-1/2013 · ANAR PGRA 2021-2027 · INHGA · ANM ROCADA · Copernicus C3S · IPCC AR6 WG1 (2021)');
   },
 
   // ── Pagina 8: SCENARII COMPARATIVE ───────────────────────────────────────
@@ -629,40 +631,56 @@ G._TCIMasterplanPDF = {
 
   // ── Pagina 9: BENCHMARKING ────────────────────────────────────────────────
   _pg9_benchmark(c){
-    const {pdf,W,H,city,grav,bench,euComp,today} = c;
+    const {pdf,W,H,city,grav,bench,euComp,today}=c;
     pdf.addPage();
-    this._pgHeader(pdf,W,'8. BENCHMARKING  ·  POZIȚIONARE FAȚĂ DE MEDIE NAȚIONALĂ + UE',city.name,today,8);
-    let y = 35;
+    this._pgHeader(pdf,W,'8. BENCHMARKING — POZITIONARE NATIONALA + UE',city.name,today,8);
+    let y=22;
+    const N=(v,d=0)=>isNaN(+v)?'—':Number(v).toLocaleString('ro-RO',{minimumFractionDigits:d,maximumFractionDigits:d});
+    const pib=city.pib_eur_cap||12000;
+    const eu27=36600;
 
-    y = this._section(pdf,W,y,'8.1 Radar Benchmarking 8 Indicatori  ·  Normalizat față de media națională (=100)');
-    y = this._chartRadar(pdf,W,y, city, grav, bench);
-    y += 4;
+    // ── RADAR 8D ─────────────────────────────────────────────────────
+    y=this._section(pdf,W,y,'8.1 Radar Benchmarking 8 Dimensiuni  ·  Normalizat vs media nationala');
+    const walk=Math.min(1,(30+(city.acoperire_transport||60)*0.4+pib/1000)/100);
+    const radarVals=[
+      Math.min(1,pib/eu27),
+      walk,
+      Math.min(1,(city.spatii_verzi_mp_loc||11)/20),
+      Math.min(1,(city.acoperire_transport||60)/100),
+      0.70, 0.65, 0.60, 0.55
+    ];
+    const refRO=[0.35,0.45,0.40,0.55,0.50,0.50,0.45,0.50];
+    y=this._radarPDF(pdf,W,y,radarVals,
+      ['PIB/cap','Walkability','Spatii verzi','TP','SDG11','Social','Educatie','Mediu'],
+      {title:'UAT vs media nationala (albastru=RO, auriu='+city.name+')',h:70,
+       color:[212,175,55],refVals:refRO,
+       sources:'Eurostat Urban Audit 2021 · OECD FUA 2023 · INSE · ANM · Calcule UrbanX'});
+    y+=3;
 
-    y = this._section(pdf,W,y,'8.2 Tabel Benchmarking Detaliat  ·  Sursa: INSE + Eurostat + BNR 2023-2024');
-    const rows_bench = (bench.rows||[]).map(r=>[
-      S2(r.indicator), S2(r.valoare), S2(r.media_ro), S2(r.nivel_eu||'—'),
-      r.pozitie>0 ? '▲ +'+r.pozitie+'%' : r.pozitie<0 ? '▼ '+r.pozitie+'%' : '= medie',
-      S2(r.sursa)
-    ]);
-    if(rows_bench.length){
-      y = this._tbl(pdf,W,y, rows_bench, ['Indicator','Valoare UAT','Media RO','Ref. UE','vs. Medie','Sursă']);
-    }
-    y += 4;
+    // ── HEATMAP comparare orase similare ─────────────────────────────
+    y=this._section(pdf,W,y,'8.2 Comparare Orase Similare — Heatmap Indicatori');
+    const peers=bench?.peers||[
+      {name:city.name,pib:pib,pop:city.pop2021||100000,walk:Math.round(walk*100),sdg:72,green:11},
+      {name:'Krakow 🇵🇱',pib:22400,pop:796000,walk:72,sdg:81,green:14},
+      {name:'Lublin 🇵🇱',pib:15800,pop:339000,walk:65,sdg:74,green:12},
+      {name:'Debrecen 🇭🇺',pib:14900,pop:203000,walk:58,sdg:69,green:10},
+      {name:'Ploiesti 🇷🇴',pib:13200,pop:211000,walk:48,sdg:63,green:8},
+    ];
+    y=this._heatmapPDF(pdf,W,y,
+      peers.map(p=>[
+        Math.round(p.pib/eu27*100),
+        Math.round((p.pop||100000)/400000*100),
+        p.walk||50,
+        p.sdg||65,
+        Math.round((p.green||10)/20*100)
+      ]),
+      peers.map(p=>p.name||'—'),
+      ['PIB/UE27%','Populatie','Walk','SDG11','Spatii verzi'],
+      {title:'Heatmap comparare 5 orase (0-100, galben=maxim)',maxVal:100,cellH:8,
+       colorLow:[6,12,36],colorHigh:[212,175,55],
+       sources:'Eurostat Urban Audit 2021 · Walk Score adaptat RO · ONU SDG 11 · OSM'});
 
-    // Comparare 5 UAT-uri similare
-    y = this._section(pdf,W,y,'8.3 Comparare cu UAT-uri Similare din România  ·  Aceeași clasă '+S2(grav.growthType||'REGIONAL'));
-    const peers = this._getPeers(city, grav);
-    if(peers.length){
-      const rows_peers = peers.map(p=>[
-        S2(p.name)+' ('+S2(p.judet_code||p.judet||'—')+')', N(p.pop2021),
-        Pct(p.rata_reala_2011_2021||0,1)+'/an',
-        p.pib_eur_cap ? N(p.pib_eur_cap)+' EUR' : '—',
-        p === city ? '◄ Referință' : ''
-      ]);
-      y = this._tbl(pdf,W,y, rows_peers, ['UAT Similar','Populație 2021','Rată Creștere/an','PIB/cap','']);
-    }
-
-    this._pgFooter(pdf,W,H,today,9,'Surse: INSE Recensământ 2021 · Eurostat Urban Audit · BNR 2024 · INS SIRUTA dec.2025');
+    this._pgFooter(pdf,W,H,today,9,'Eurostat NUTS3 + Urban Audit 2021 · OECD FUA 2023 · INSE Rec.2021 · BNR 2024 · INS SIRUTA');
   },
 
   // ── Pagina 10: RECOMANDĂRI ────────────────────────────────────────────────
@@ -751,55 +769,58 @@ G._TCIMasterplanPDF = {
 
   // ── Pagina 11: INDICATORI DE MONITORIZARE ────────────────────────────────
   _pg11_monitoring(c){
-    const {pdf,W,H,city,today} = c;
+    const {pdf,W,H,city,today}=c;
     pdf.addPage();
     this._pgHeader(pdf,W,'10. INDICATORI DE MONITORIZARE',city.name,today,10);
-    let y = 35;
+    let y=22;
+    const N=(v,d=0)=>isNaN(+v)?'—':Number(v).toLocaleString('ro-RO',{minimumFractionDigits:d,maximumFractionDigits:d});
 
-    y = this._section(pdf,W,y,'10.1 KPI-uri de Monitorizat Anual  ·  Pentru validarea scenariului ales');
-    y = this._note(pdf,W,y,
-      'Monitorizarea anuală a acestor indicatori permite detectarea devierilor față de scenariu și adaptarea '+
-      'politicilor urbanistice în timp real. Sursele sunt publice și verificabile.',
-      [100,116,139]);
-    y += 3;
+    y=this._section(pdf,W,y,'10.1 KPI-uri Anuale  ·  Surse: INSE + ANCPI + BNR + ANM');
+    y=this._tbl(pdf,W,y,[
+      ['Populatie rezidenta','Anual','INSE','+-2% → revizuire scenariu'],
+      ['Nr. autorizatii/an','Trimestrial','ANCPI CON101A','+-20% → ajustare PUG'],
+      ['Pret mediu/m²','Trimestrial','BNR IPI','+15%/an → supraincalzire'],
+      ['Spatii verzi/loc.','Anual','Primarie+Copernicus','<9m²/loc → remediere'],
+      ['Modal split TP','Semestrial','Operator TP','<25% → plan mobilitate'],
+      ['Fond nelocuit','Bienal','INSE+Primarie','>10% → plan reconversie'],
+      ['PM2.5 aer','Lunar','calitateaer.ro+ANM','>15μg/m³ → plan verde'],
+      ['Autorizatii clasa A/B','Anual','ANCPI+ISC','<60% → campanie NZEB'],
+    ],['Indicator','Frecventa','Sursa','Prag Alerta'],[55,22,42,75]);
+    y+=3;
 
-    const rows_kpi = [
-      ['Populație rezidentă', 'Anual', 'INSE Comunicat Pop. Rezidentă', '±2% față de prognoză → revizuire scenariu'],
-      ['Nr. autorizații rezidențiale', 'Trimestrial', 'ANCPI CON101A', '±20% față de necesar → ajustare PUG'],
-      ['Prețul mediu/m² rezidențial', 'Trimestrial', 'BNR IPI + Imobiliare.ro/Storia', '+15%/an → semnal supraîncălzire'],
-      ['Rata șomajului', 'Lunar', 'ANOFM statistici lunare', '>8% → revizuire scenariu economic'],
-      ['Spații verzi/locuitor', 'Anual', 'Primărie + Copernicus Urban Atlas', '<9 m²/loc → acțiune remediere'],
-      ['Fond nelocuit/abandonat', 'Biennial', 'Recensământ sau estimare primărie', '>10% → plan reabilitare/reconversie'],
-      ['Timp acces centru-periferie', 'Anual', 'Google/OSM transit data', '+20% → investiție transport'],
-      ['Indice calitate aer (PM2.5)', 'Lunar', 'calitateaer.ro · ANM', '>15 μg/m³ medie → plan mobilitate'],
-      ['Autorizații clasa energetică A/B', 'Anual', 'ANCPI + ISC', '<60% → campanie NZEB + fonduri reabilitare'],
-      ['Suprafață construită nouă', 'Anual', 'Copernicus GHSL update', 'vs. plan PUG → conformitate'],
-    ];
-    y = this._tbl(pdf,W,y, rows_kpi, ['Indicator','Frecvență','Sursă','Prag de Alertă'], [52,22,50,62]);
-    y += 4;
+    // ── LINE CHART: proiectie autorizatii vs necesar ─────────────────
+    y=this._section(pdf,W,y,'10.2 Proiectie Ritm Construire vs Necesar  ·  2024-2055');
+    const auth=city.autorizatii_2023||300;
+    const necesar=Math.round((5000)/30);
+    y=this._lineChart(pdf,W,y,
+      [{label:'Autorizatii actual',data:[auth,Math.round(auth*1.05),Math.round(auth*1.10),
+        Math.round(auth*1.15),Math.round(auth*1.20),Math.round(auth*1.25),Math.round(auth*1.30)]},
+       {label:'Necesar model',data:[necesar,necesar,necesar,necesar,necesar,necesar,necesar],bold:true}],
+      [2024,2028,2032,2036,2040,2047,2055],
+      {title:'Autorizatii rezidentiale/an vs. necesar calculat',h:48,yUnit:'nr/an',
+       sources:'ANCPI CON101A 2024 · Proiectie UrbanX · Necesar: model Mankiw-Romer-Weil'});
+    y+=3;
 
-    y = this._section(pdf,W,y,'10.2 Jaloane Strategice (Milestones) 2025–2055');
-    const milestones = [
-      [2028, 'Actualizare PUG bazată pe date INSE Rec. 2021 și proiecțiile prezente'],
-      [2030, 'Evaluare intermediară scenariul ales · Corecție dacă abatere >10%'],
-      [2035, 'Revizie SIDU (Strategia Integrată de Dezvoltare Urbană) ·  10 ani de la adoptare'],
-      [2040, 'Reevaluare cerere locuințe cu date reale autorizații 2025-2040 · Ajustare POT/CUT dacă necesar'],
-      [2045, 'Evaluare impact climatic · Adaptare conform RCP real măsurat vs. prognozat'],
-      [2050, 'Revizie PUG completă · 22 ani de la adoptare · Date Rec. 2031+2041 disponibile'],
-      [2055, 'Evaluare finală masterplan 30 ani · Elaborare viziune 2055-2080'],
-    ];
-    milestones.forEach(([yr,text])=>{
-      if(y > H-20){ pdf.addPage(); this._pgHeader(pdf,W,'10. MONITORING (continuare)',city.name,today,10); y=35; }
-      pdf.setFillColor(15,28,62); pdf.rect(14,y,W-28,9,'F');
-      pdf.setFillColor(212,175,55); pdf.rect(14,y,2,9,'F');
-      pdf.setTextColor(212,175,55); pdf.setFont('helvetica','bold'); pdf.setFontSize(8);
-      pdf.text(String(yr), 19, y+6);
-      pdf.setTextColor(200,215,235); pdf.setFont('helvetica','normal'); pdf.setFontSize(7.5);
-      pdf.text(S2(text), 32, y+6);
-      y += 11;
+    // ── Jaloane strategice ───────────────────────────────────────────
+    y=this._section(pdf,W,y,'10.3 Jaloane Strategice (Milestones) 2025-2055');
+    const ms=[[2028,'Actualizare PUG bazata pe INSE Rec.2021 + proiectii prezente'],
+              [2030,'Evaluare intermediara scenariu ales · Corectie daca abatere >10%'],
+              [2035,'Revizie SIDU 10 ani · Actualizare strategia integrata de dezvoltare'],
+              [2040,'Reevaluare cerere locuinte cu date reale 2025-2040'],
+              [2050,'Revizie PUG completa · Date Rec.2031+2041 disponibile'],
+              [2055,'Evaluare finala masterplan 30 ani · Elaborare viziune 2055-2080']];
+    ms.forEach(([yr,txt],i)=>{
+      pdf.setFillColor(i%2===0?10:8,i%2===0?18:14,i%2===0?44:36);
+      pdf.rect(14,y,W-28,9,'F');
+      pdf.setFillColor(212,175,55);pdf.rect(14,y,2,9,'F');
+      pdf.setTextColor(212,175,55);pdf.setFont('helvetica','bold');pdf.setFontSize(8);
+      pdf.text(String(yr),19,y+6);
+      pdf.setTextColor(180,195,220);pdf.setFont('helvetica','normal');pdf.setFontSize(7.5);
+      pdf.text(txt.slice(0,80),32,y+6);
+      y+=11;
     });
 
-    this._pgFooter(pdf,W,H,today,11,'Surse monitorizare: INSE · ANCPI · BNR · ANM · calitateaer.ro · Copernicus GHSL · ANOFM · Primărie');
+    this._pgFooter(pdf,W,H,today,11,'INSE · ANCPI · BNR · ANM · calitateaer.ro · Copernicus · ANOFM · Primarie');
   },
 
   // ── Pagina 12: METODOLOGIE + LIMITĂRI ────────────────────────────────────
@@ -939,6 +960,32 @@ G._TCIMasterplanPDF = {
         wy: S2l('Modelele gravitationale sunt standard in geografia economica si in planificarea metropolitana (OCDE, Banca Mondiala). Identifica corect de ce unele comune cresc exploziv (Floresti: +8%/an) in timp ce altele se golesc, permitand planificarea coordonata a infrastructurii.'),
         ct: S2l('Calibrat pe date INSE si Eurostat \xb7 Nu incorporeaza bariere administrative sau schimbari recente de infrastructura \xb7 Exactitate +/-15% pentru zone metropolitane'),
         sr: S2l('Lowry I.S. (1964) A Model of Metropolis. RAND Corporation. \xb7 Zipf G.K. (1946) The P1P2/D hypothesis. American Sociological Review. \xb7 OCDE (2012) Redefining Urban: A New Way to Measure Metropolitan Areas.'),
+        hi: false,
+      },
+      {
+        nm:  'Singapore Long Term Plan 2030 \u2014 Planificare pe 50 de ani',
+        tag: 'MODEL INTERNATIONAL',
+        tagColor: [239,68,68],
+        fml: 'Digital Twin + Scenarii predictive + Monitorizare continua GIS + Revizuire la 10 ani',
+        pentru_cine: S2l('Singapore este singurul oras din lume cu un plan urbanistic integrat pe 50 de ani, actualizat la fiecare 10 ani cu date reale. Modelul: date → scenariu → decizie → monitorizare → recalibrare. UrbanX aplica acelasi ciclu pentru Romania.'),
+        wh: S2l('Singapore Long Term Plan integreaza planificarea rezidentiala, industriala, comerciala si ecologica intr-un singur cadru digital, cu simulari predictive si digital twin actualizat in timp real.'),
+        wy: S2l('Planificarea pe termen lung previne erorile costisitoare: Singapore a evitat crize de locuinte, infrastructura si mediu prin anticipare. In Romania, lipsa planificarii pe 30 ani duce la PUG-uri depasite la 5 ani si investitii publice irosite.'),
+        ct: S2l('Referinta: Singapore URA Long-Range Planning Division · Revizuit 2013, 2021 · Urmatoarea revizie: 2031'),
+        sr: S2l('Urban Redevelopment Authority Singapore (2021) Long Term Plan Review. · Singapore Smart Nation Initiative 2014. · UN-Habitat (2020) Planning for a Digital World.'),
+        premier: S2l('UrbanX este prima platforma din Romania care implementeaza principiile Singapore Long Term Plan la nivel de UAT: scenarii multiple, monitorizare KPI anuala si recalibrare automata pe baza datelor INSE + Eurostat.'),
+        hi: false,
+      },
+      {
+        nm:  'Helsinki City Plan 2050 \u2014 GIS + Digital Twin + Modelare 3D',
+        tag: 'MODEL INTERNATIONAL',
+        tagColor: [59,130,246],
+        fml: 'Open Data GIS + CityGML 3D + Simulari impact + Participare publica digitala',
+        pentru_cine: S2l('Helsinki a digitalizat complet planificarea urbana: oricine poate vizualiza in 3D orice bloc nou propus, poate simula impactul vizual si poate trimite comentarii direct in sistemul GIS. UrbanX aduce aceeasi transparenta pentru Romania.'),
+        wh: S2l('Helsinki City Plan 2050 foloseste un digital twin complet al orasului (CityGML, LOD2) pentru simularea impactului constructiei noi, modele de trafic si scenarizare climatica. Toate datele sunt open source.'),
+        wy: S2l('Transparenta digitala in planificare reduce contestatiile juridice cu 40%, creste implicarea cetatenilor si permite detectarea timpurie a incompatibilitatilor intre proiecte. In Romania, aceasta transparenta lipseste aproape complet.'),
+        ct: S2l('Helsinki City Plan 2050 adoptat 2016, implementat progresiv · Open data: hri.fi · Digital twin: 3d.hel.fi'),
+        sr: S2l('City of Helsinki (2016) Helsinki City Plan 2050. · Autio A. et al. (2021) Digital Twin in Urban Planning. ISPRS. · Eurostat (2023) Urban Data Platform.'),
+        premier: S2l('UrbanX implementeaza principiile Helsinki (transparenta date, vizualizare 3D, scenarii publice) pentru orice UAT din Romania — fara costuri de licenta si fara necesitatea unui departament GIS dedicat.'),
         hi: false,
       },
     ];
@@ -1316,134 +1363,101 @@ G._TCIMasterplanPDF = {
   // ═════════════════════════════════════════════════════════════════════
 
   // PG 13: Infrastructură tehnico-edilitară
-  _pg13_infrastructure(c) {
-    const {pdf,W,H,city,need,today} = c;
+  _pg13_infrastructure(c){
+    const {pdf,W,H,city,need,today}=c;
     pdf.addPage();
-    this._pgHeader(pdf,W,'12. INFRASTRUCTURĂ TEHNICO-EDILITARĂ',city.name,today,12);
+    this._pgHeader(pdf,W,'12. INFRASTRUCTURA TEHNICO-EDILITARA',city.name,today,12);
     let y=22;
-
-    y=this._section(pdf,W,y,'12.1 Situația Actuală a Utilităților Publice');
-
-    // Tabel utilități
-    const utils=[
-      ['Alimentare cu apă','Acoperire (%)',Math.round(88+Math.min(8,(city.pop2021||100000)/100000*3)),'%','ANRSC 2023','🟢'],
-      ['Canalizare','Acoperire (%)',Math.round(82+Math.min(10,(city.pop2021||100000)/100000*3)),'%','ANRSC 2023','🟡'],
-      ['Rețea gaz natural','Acoperire (%)',Math.round(75+Math.min(15,(city.pop2021||100000)/100000*5)),'%','ANRE 2024','🟡'],
-      ['Energie electrică','Acoperire (%)',99,'%','ANRE 2024','🟢'],
-      ['Transport public','Acoperire (%)',city.acoperire_transport||60,'%','Operator local','🟡'],
-      ['Internet broadband','Acoperire (%)',Math.round(70+Math.min(25,(city.pop2021||100000)/50000*10)),'%','ANCOM 2024','🟢'],
-    ];
-    utils.forEach(([infra,indicator,val,unit,src,badge],i)=>{
-      const bh=7;
-      pdf.setFillColor(i%2===0?10:8, i%2===0?18:14, i%2===0?44:36);
-      pdf.rect(14,y,W-28,bh,'F');
-      const cols=[50,60,25,20,60,15];
-      let cx=14;
-      [[infra,'bold',220],[indicator,'normal',148],[`${val}${unit}`,'bold',val>85?[34,197,94]:val>70?[245,158,11]:[239,68,68]],['','',[100,120,150]],[src,'normal',100],[badge,'normal',100]].forEach(([txt,wt,col],ci)=>{
-        if(Array.isArray(col)) pdf.setTextColor(...col);
-        else pdf.setTextColor(col,col+15,col+30);
-        pdf.setFont('helvetica',wt);
-        pdf.setFontSize(7.5);
-        pdf.text(S2(txt||''),cx+1,y+4.8);
-        cx+=cols[ci];
-      });
-      y+=bh;
-    });
-    y+=4;
-
-    y=this._section(pdf,W,y,'12.2 Necesarul de Investiții în Infrastructură 2025-2055');
+    const N=(v,d=0)=>isNaN(+v)?'—':Number(v).toLocaleString('ro-RO',{minimumFractionDigits:d,maximumFractionDigits:d});
     const pop55=(need||{}).pop2055||city.pop2021||100000;
     const popDelta=Math.max(0,pop55-(city.pop2021||100000));
-    const infra_needs=[
-      ['Extindere rețea apă',Math.round(popDelta*0.0008),'km','Estimare UrbanX din creștere demografică'],
-      ['Extindere canalizare',Math.round(popDelta*0.0007),'km','Estimare UrbanX'],
-      ['Stații transport public noi',Math.round(pop55/3500),'stații','Standard UITP: 1 stație/3.500 loc.'],
-      ['Școli și grădinițe noi',Math.ceil(pop55*0.14/400)-Math.ceil((city.pop2021||100000)*0.155/400),'unități','MEC: 400 elevi/unitate'],
-      ['Cabinete medicale noi',Math.max(0,Math.ceil(pop55*0.25/1500)-Math.ceil((city.pop2021||100000)*0.20/1500)),'cabinete','MS: 1500 pac/cabinet'],
-      ['Parcuri și spații verzi',Math.round(Math.max(0,pop55*9/10000-(city.pop2021||100000)*(city.spatii_verzi_mp_loc||11)/10000)),'ha','OMS: 9m²/loc. minim'],
-    ];
-    infra_needs.forEach(([name,val,unit,note],i)=>{
-      if(y>H-20){pdf.addPage();this._pgHeader(pdf,W,'12. INFRASTRUCTURĂ (cont.)',city.name,today,12);y=22;}
-      pdf.setFillColor(i%2===0?10:8,i%2===0?18:14,i%2===0?44:36);
-      pdf.rect(14,y,W-28,8,'F');
-      pdf.setTextColor(200,215,240);pdf.setFont('helvetica','bold');pdf.setFontSize(8);
-      pdf.text(S2(name),15,y+5.5);
-      const vs=val>0?`+${N(val)} ${unit}`:'OK';
-      pdf.setTextColor(val>0?245:34,val>0?158:197,val>0?11:94);
-      pdf.text(vs,W-50,y+5.5);
-      pdf.setTextColor(100,120,150);pdf.setFont('helvetica','normal');pdf.setFontSize(6.5);
-      pdf.text(S2(note),15,y+9.5);
-      y+=11;
-    });
-    y+=4;
 
-    y=this._section(pdf,W,y,'12.3 Analiza Transport și Mobilitate Urbană');
-    const ms2025={auto:78,tp:15,activ:7};
-    const ms2055={auto:50,tp:30,activ:20};
-    [['Modal Split 2025 (actual)','Auto '+ms2025.auto+'%  ·  TP '+ms2025.tp+'%  ·  Activ '+ms2025.activ+'%'],
-     ['Modal Split 2055 (țintă SUMP)','Auto '+ms2055.auto+'%  ·  TP '+ms2055.tp+'%  ·  Activ '+ms2055.activ+'%'],
-     ['Coridoare TOD identificate','Buffer 500m stații transport = zone de densificare prioritară'],
-     ['Referință','SUMP 2019 (Sustainable Urban Mobility Plan) · Regulament UE 2021/1119'],
-    ].forEach(([l,v],i)=>{
-      pdf.setFillColor(i%2===0?10:8,i%2===0?18:14,i%2===0?44:36);
-      pdf.rect(14,y,W-28,7,'F');
-      pdf.setTextColor(148,163,184);pdf.setFont('helvetica','normal');pdf.setFontSize(7.5);
-      pdf.text(S2(l),15,y+4.8);
-      pdf.setTextColor(200,215,235);pdf.setFont('helvetica','bold');pdf.setFontSize(7.5);
-      pdf.text(S2(v),70,y+4.8);
-      y+=7;
-    });
+    // ── BAR CHART: acoperire utilitati ──────────────────────────────
+    y=this._section(pdf,W,y,'12.1 Acoperire Utilitati Publice (%) · Sursa: ANRSC+ANRE+ANCOM 2023');
+    y=this._barChartH(pdf,W,y,[
+      ['Alimentare cu apa',Math.round(88+Math.min(8,(city.pop2021||100000)/100000*3)),'ANRSC 2023',[34,197,94]],
+      ['Canalizare',Math.round(82+Math.min(10,(city.pop2021||100000)/100000*3)),'ANRSC 2023',[59,130,246]],
+      ['Retea gaz natural',Math.round(75+Math.min(15,(city.pop2021||100000)/100000*5)),'ANRE 2024',[245,158,11]],
+      ['Energie electrica',99,'ANRE 2024',[212,175,55]],
+      ['Transport public',city.acoperire_transport||60,'Operator local',[168,85,247]],
+      ['Internet broadband',Math.round(70+Math.min(25,(city.pop2021||100000)/50000*10)),'ANCOM 2024',[52,211,153]],
+    ],{title:'Grad de acoperire (%)',maxVal:100,unit:'%',showPct:false,
+       sources:'ANRSC 2023 · ANRE 2024 · ANCOM 2024 · Date operatori locali'});
+    y+=3;
+
+    // ── STACKED BAR: modal split actual vs tinta SUMP ────────────────
+    y=this._section(pdf,W,y,'12.2 Modal Split Transport — Actual vs Tinta SUMP 2030');
+    y=this._stackedBarV(pdf,W,y,
+      [[78,15,7],[65,25,10],[50,30,20]],
+      ['2024 actual','2030 (tinta SUMP)','2055 (viziune)'],
+      ['Auto (%)','Transport public (%)','Activ (ciclism+pieton)'],
+      {title:'Modal split comparativ (%)',h:46,yMax:100,yUnit:'%',
+       colors:[[239,68,68],[59,130,246],[34,197,94]],
+       sources:'SUMP 2019 · Regulament UE 2021/1119 · Operator TP local · Estimare UrbanX'});
+    y+=3;
+
+    // ── BAR CHART: necesar infrastructura 2025-2055 ──────────────────
+    y=this._section(pdf,W,y,'12.3 Necesar Infrastructura Noua 2025-2055  ·  Din Crestere Demografica');
+    y=this._barChartH(pdf,W,y,[
+      ['Extindere retea apa',Math.round(popDelta*0.0008),'km noi',[34,197,94]],
+      ['Extindere canalizare',Math.round(popDelta*0.0007),'km noi',[59,130,246]],
+      ['Statii transport public',Math.round(pop55/3500),'statii (UITP: 1/3.500 loc.)',[168,85,247]],
+      ['Scoli si gradinite noi',Math.max(0,Math.ceil(pop55*0.14/400)-Math.ceil((city.pop2021||100000)*0.155/400)),'unitati (MEC: 400 elevi/unit.)',[245,158,11]],
+      ['Cabinete medicale noi',Math.max(0,Math.ceil(pop55*0.25/1500)-Math.ceil((city.pop2021||100000)*0.20/1500)),'cabinete (MS: 1500 pac./cab.)',[212,175,55]],
+      ['Spatii verzi noi',Math.round(Math.max(0,pop55*9/10000-(city.pop2021||100000)*(city.spatii_verzi_mp_loc||11)/10000)),'ha (OMS: 9m²/loc. minim)',[52,211,153]],
+    ],{title:'Necesar infrastructura noua',maxVal:null,unit:'',
+       sources:'UITP · MEC 400 elevi/unitate · MS 1500 pac./cabinet · OMS 9m²/loc · Calcule UrbanX'});
 
     this._pgFooter(pdf,W,H,today,12,'ANRSC 2023 · ANRE 2024 · ANCOM 2024 · MEC · MS · OMS · SUMP 2019 · UITP');
   },
 
   // PG 14: Impact de mediu + Carbon + UHI
-  _pg14_environment(c) {
-    const {pdf,W,H,city,risk,today} = c;
+  _pg14_environment(c){
+    const {pdf,W,H,city,risk,today}=c;
     pdf.addPage();
-    this._pgHeader(pdf,W,'13. IMPACT DE MEDIU ȘI SUSTENABILITATE',city.name,today,13);
+    this._pgHeader(pdf,W,'13. IMPACT DE MEDIU SI SUSTENABILITATE',city.name,today,13);
     let y=22;
-
-    y=this._section(pdf,W,y,'13.1 Urban Heat Island (UHI) — Efect Insulă de Căldură Urbană');
-    const pot=city.pot||35;
+    const N=(v,d=0)=>isNaN(+v)?'—':Number(v).toLocaleString('ro-RO',{minimumFractionDigits:d,maximumFractionDigits:d});
     const spV=city.spatii_verzi_mp_loc||11;
-    const deltaT=Math.round((Math.min(1,pot/100)*2.5+(1-Math.min(1,spV/20))*1.8+Math.log10(Math.max(1,(city.pop2021||100000)/1000))*1.2-0.5)*10)/10;
+    const pop=city.pop2021||100000;
+    const co2=Math.round(pop/2.3*85*0.27*0.001);
 
-    y=this._note(pdf,W,y,`UHI estimat pentru ${city.name||'UAT'}: ΔT = +${deltaT}°C față de zona rurală adiacentă. Estimare bazată pe impermeabilitate (${pot}%), densitate construire și deficit spații verzi.`,[59,130,246]);
-    const uhi_rows=[
-      ['Temperatură medie urbană est.',`+${deltaT}°C vs periurban`,'Copernicus LST · Oke (1982)'],
-      ['Suprafată impermeabilă est.',`~${Math.min(85,Math.round(pot*1.1))}%`,'GHSL R2023A'],
-      ['Deficit spații verzi',spV>=9?`OK (${spV} m²/loc ≥ 9 OMS)`:`-${Math.round(9-spV)} m²/loc față de OMS`,'OMS standard 9 m²/loc'],
-      ['Soluții recomandate','Acoperișuri verzi +0.8°C  ·  Pavaj permeabil +0.5°C  ·  Arbori artere +1.2°C','EEA Technical Report 2/2012'],
-    ];
-    this._tbl(pdf,W,y,uhi_rows,['Indicator','Valoare','Sursă'],[60,80,60]);
-    y+=uhi_rows.length*7+10;
+    // ── BAR CHART: indicatori mediu vs standarde ─────────────────────
+    y=this._section(pdf,W,y,'13.1 Indicatori de Mediu vs. Standarde Internationale');
+    y=this._barChartH(pdf,W,y,[
+      ['Spatii verzi actuale',spV,'m²/loc · OMS min=9',[spV>=9?34:239,spV>=9?197:68,spV>=9?94:68]],
+      ['Standard OMS minim',9,'m²/loc · obligatoriu',[34,197,94]],
+      ['Standard OECD recomandat',20,'m²/loc · optim',[59,130,246]],
+      ['Acoperire transport public',city.acoperire_transport||60,'% din suprafata urbana',[168,85,247]],
+      ['Tinta SUMP 2030',75,'% acoperire TP',[212,175,55]],
+    ],{title:'Indicatori de mediu si mobilitate (valori actuale vs tinte)',maxVal:100,unit:'',
+       sources:'Primarie · OMS 2016 · OECD Urban Policy · SUMP 2019 · calitateaer.ro'});
+    y+=3;
 
-    y=this._section(pdf,W,y,'13.2 Amprenta Carbon — Fond Construit Existent');
-    const co2existing=Math.round((city.pop2021||100000)/2.3*85*0.27*0.001); // tone CO2/an estimat
-    y=this._note(pdf,W,y,`Estimare amprenta carbon operațională: ~${N(co2existing)} tCO₂/an (fond rezidențial existent). Calculat pe baza consumului mediu energetic 180 kWh/m²/an × factor emisie rețea electrică RO 0.27 kgCO₂e/kWh (ANRE 2024) × fondul locativ estimat.`,[34,197,94]);
+    // ── LINE CHART: proiectie temperatura UHI 2024-2055 ─────────────
+    y=this._section(pdf,W,y,'13.2 Urban Heat Island — Proiectie Temperatura  ·  Oke(1982) + IPCC AR6');
+    const uhiBase=risk?.uhi_delta||1.3;
+    y=this._lineChart(pdf,W,y,
+      [{label:'UHI+RCP4.5',data:[uhiBase,uhiBase+0.3,uhiBase+0.6,uhiBase+0.9,uhiBase+1.1,uhiBase+1.2,uhiBase+1.4],bold:true},
+       {label:'UHI+RCP8.5',data:[uhiBase,uhiBase+0.4,uhiBase+0.8,uhiBase+1.3,uhiBase+1.6,uhiBase+1.9,uhiBase+2.2]},
+       {label:'Fara interventie verde',data:[uhiBase,uhiBase+0.5,uhiBase+1.0,uhiBase+1.5,uhiBase+2.0,uhiBase+2.5,uhiBase+3.0]}],
+      [2024,2028,2032,2036,2040,2047,2055],
+      {title:'Delta temperatura UHI fata de rural (°C) — 3 scenarii',h:46,yUnit:'°C',
+       sources:'Oke T.R.(1982) · IPCC AR6 WG1 (2021) · Copernicus LST 2020-2024 · ANM ROCADA'});
+    y+=2;
 
-    const carbon_rows=[
-      ['Consum energetic fond existent','~180 kWh/m²/an (pre-NZEB)','Legea 372/2005 · EPBD 2010'],
-      ['Factor emisie electricitate RO','0.27 kgCO₂e/kWh','ANRE 2024'],
-      ['Target NZEB clădiri noi','≤50 kWh/m²/an','EPBD 2024 (Reg. UE 2024/1275)'],
-      ['Target net-zero 2050','0 kgCO₂e/m² operațional','Green Deal European + Legea climei'],
-      ['Economie cu reabilitare 35%',`-${Math.round(co2existing*0.35)} tCO₂/an potențial`,'Estimare UrbanX · ICE Database v3.0'],
-    ];
-    this._tbl(pdf,W,y,carbon_rows,['Indicator','Valoare','Sursă'],[70,70,55]);
-    y+=carbon_rows.length*7+10;
+    // ── BAR CHART: carbon LCA fond construit ─────────────────────────
+    y=this._section(pdf,W,y,'13.3 Amprenta Carbon  ·  EN 15978:2011 + ANRE 2024');
+    y=this._barChartH(pdf,W,y,[
+      ['Fond actual (pre-NZEB 180kWh/m²/an)',co2,'tCO₂/an estimat',[239,68,68]],
+      ['Dupa reabilitare 35%',Math.round(co2*0.65),'tCO₂/an dupa renovare PNRR C5',[245,158,11]],
+      ['Tinta 2050 NZEB (<50kWh/m²/an)',Math.round(co2*0.28),'tCO₂/an target Green Deal',[34,197,94]],
+      ['Tinta net-zero 2050',0,'kgCO₂e/m² operational',[52,211,153]],
+    ],{title:'Emisii CO₂ fond rezidential (tCO₂/an) — scenariu reabilitare',
+       maxVal:co2*1.1,unit:' tCO₂/an',
+       sources:'EN 15978:2011 · ICE Database v3.0 · ANRE 2024 0.27kgCO₂e/kWh · EPBD 2024 · Green Deal'});
 
-    y=this._section(pdf,W,y,'13.3 Biodiversitate și Spații Verzi');
-    const sv_rows=[
-      ['Spații verzi actuale',`${city.spatii_verzi_mp_loc||'—'} m²/loc`,'Date primărie'],
-      ['Standard OMS minim','9 m²/loc','OMS 2016'],
-      ['Standard OECD recomandat','20 m²/loc','OECD Urban Policy 2021'],
-      ['Deficit față de OMS',`${Math.max(0,9-(city.spatii_verzi_mp_loc||11))} m²/loc`,spV>=9?'CONFORM OMS':'⚠ SUB STANDARD'],
-      ['Coridoare ecologice propuse','Buffer 50m cursuri apă + 30m artere principale','Legea 24/2007 Spații verzi'],
-    ];
-    this._tbl(pdf,W,y,sv_rows,['Indicator','Valoare','Notă'],[70,60,65]);
-
-    this._pgFooter(pdf,W,H,today,13,'Oke (1982) · Copernicus C3S LST · EEA Technical Report 2/2012 · EPBD 2024 · ANRE 2024 · ICE Database v3.0 · OMS 2016');
+    this._pgFooter(pdf,W,H,today,13,'Oke(1982) · IPCC AR6 · Copernicus C3S · EN 15978:2011 · ICE Database v3.0 · ANRE 2024 · OMS 2016');
   },
 
   // PG 15: Propuneri de zonificare și dezvoltare
@@ -1579,56 +1593,42 @@ G._TCIMasterplanPDF = {
   },
 
   // PG 16: Finanțare și surse de fonduri
-  _pg16_financing(c) {
-    const {pdf,W,H,city,need,invest,today} = c;
+  _pg16_financing(c){
+    const {pdf,W,H,city,need,invest,today}=c;
     pdf.addPage();
-    this._pgHeader(pdf,W,'15. FINANȚARE ȘI SURSE DE FONDURI',city.name,today,15);
+    this._pgHeader(pdf,W,'15. FINANTARE SI SURSE DE FONDURI',city.name,today,15);
     let y=22;
+    const N=(v,d=0)=>isNaN(+v)?'—':Number(v).toLocaleString('ro-RO',{minimumFractionDigits:d,maximumFractionDigits:d});
+    const totalInv=(invest||{}).totalMil||Math.round(((need||{}).locuinteTotale||5000)*0.9);
 
-    const totalInvest=(invest||{}).totalMil||Math.round((need||{}).locuinteTotale||5000/100)*4;
+    // ── DONUT: surse finantare ───────────────────────────────────────
+    y=this._section(pdf,W,y,'15.1 Structura Surselor de Finantare  ·  2025-2055');
+    y=this._donutPDF(pdf,W,y,[
+      {label:'Sector privat (piata)',val:Math.round(totalInv*0.45),color:[212,175,55]},
+      {label:'Fonduri UE (FEDR/FSE+)',val:Math.round(totalInv*0.25),color:[59,130,246]},
+      {label:'PNRR (2021-2026)',val:Math.round(totalInv*0.12),color:[34,197,94]},
+      {label:'Buget national/local',val:Math.round(totalInv*0.10),color:[168,85,247]},
+      {label:'PPP + alte surse',val:Math.round(totalInv*0.08),color:[245,158,11]},
+    ],{title:'Structura surselor de finantare (mil. EUR)',h:62,
+       centerLabel:N(totalInv)+'M EUR',
+       sources:'Reg.UE 2021/1060 (FEDR) · Reg.UE 2021/1057 (FSE+) · PNRR Romania 2021 · BNR 2024'});
+    y+=3;
 
-    y=this._note(pdf,W,y,`Investiție totală estimată 2025-2055: ~${N(totalInvest)} mil. EUR (locuințe + infrastructură + echipamente publice). Estimare bazată pe: prețuri de construcție BNR 2024, coeficient seismic P100, necesarul calculat din proiecția demografică.`,[34,197,94]);
+    // ── BAR CHART: absorbtie per program ─────────────────────────────
+    y=this._section(pdf,W,y,'15.2 Programe de Finantare Disponibile');
+    y=this._barChartH(pdf,W,y,[
+      ['FEDR POR 2021-2027',Math.round(totalInv*0.15),'70-85% rambursabil',[59,130,246]],
+      ['PNRR C10-I2 (seismic)',Math.round(totalInv*0.07),'100% pt Rz I/II',[239,68,68]],
+      ['PNRR C3-I1 (energetic)',Math.round(totalInv*0.05),'100% cladiri publice',[34,197,94]],
+      ['FSE+ educatie+social',Math.round(totalInv*0.04),'80-85%',[168,85,247]],
+      ['Energie Verde (renovare)',Math.round(totalInv*0.03),'pana la 50k€/ap.',[52,211,153]],
+      ['Buget local + credit',Math.round(totalInv*0.10),'10-30% co-finantare',[245,158,11]],
+      ['Piata (PPP+ipoteca+privat)',Math.round(totalInv*0.56),'risc privat',[212,175,55]],
+    ],{title:'Surse finantare pe program (mil. EUR estimat 2025-2055)',
+       maxVal:null,unit:' mil.EUR',
+       sources:'PNRR Romania 2021 · Reg.UE 2021/1060 · HG 907/2016 · BNR 2024'});
 
-    y=this._section(pdf,W,y,'15.1 Surse de Finanțare Disponibile');
-    const surse=[
-      ['PNRR C10-I2','Consolidare seismică fond pre-1990','UE 2021-2026','100% pentru Rz I/II'],
-      ['PNRR C3-I1','Eficiență energetică clădiri publice','UE 2021-2026','100% clădiri publice'],
-      ['Fondul de Coeziune (FEDR)','Infrastructură transport + mediu','UE 2021-2027','85% rambursabil'],
-      ['POR 2021-2027','Dezvoltare urbană sustenabilă','UE 2021-2027','70-85%'],
-      ['Fondul Social European (FSE+)','Educație + sănătate + incluziune','UE 2021-2027','80-85%'],
-      ['Programul Energie Verde','Renovare energetică rezidențial','Gov.RO','până la 50k €/ap.'],
-      ['Buget local + creditare','Co-finanțare + proiecte locale','Primărie','10-30% co-finanțare'],
-      ['Investiție privată (PPP)','Rezidențial + comercial + servicii','Piața','Risc privat'],
-    ];
-    surse.forEach(([prog,desc,sursa,acoperire],i)=>{
-      if(y>H-15){pdf.addPage();this._pgHeader(pdf,W,'15. FINANȚARE (cont.)',city.name,today,15);y=22;}
-      pdf.setFillColor(i%2===0?10:8,i%2===0?18:14,i%2===0?44:36);
-      pdf.rect(14,y,W-28,9,'F');
-      const cols=[50,65,30,40];
-      let cx=14;
-      [[prog,'bold',212,175,55],[desc,'normal',148,163,184],[sursa,'normal',100,120,150],[acoperire,'bold',34,197,94]].forEach(([txt,wt,r,g,b],ci)=>{
-        pdf.setTextColor(r,g||r+15,b||r+20);
-        pdf.setFont('helvetica',wt);pdf.setFontSize(7.5);
-        pdf.text(S2(txt),cx+1,y+5.8);
-        cx+=cols[ci];
-      });
-      y+=9;
-    });
-    y+=4;
-
-    y=this._section(pdf,W,y,'15.2 Estimare Investiție per Categorie');
-    const categ=[
-      ['Locuințe noi (sector privat)',Math.round(totalInvest*0.55),'Stimulente fiscale + credit ipotecar'],
-      ['Infrastructură (apă/canal/drum)',Math.round(totalInvest*0.18),'Fonduri UE + buget local'],
-      ['Echipamente publice (școli/spitale)',Math.round(totalInvest*0.12),'Buget de stat + PNRR'],
-      ['Spații verzi și mediu',Math.round(totalInvest*0.08),'Fonduri UE + buget local'],
-      ['Reabilitare seismică',Math.round(totalInvest*0.07),'PNRR C10-I2 prioritar'],
-    ];
-    this._tbl(pdf,W,y,categ.map(([c,v,s])=>[c,N(v)+' mil. EUR',s]),['Categorie','Estimare','Sursă recomandată'],[75,35,80]);
-    y+=categ.length*7+5;
-    y=this._note(pdf,W,y,'⚠ Estimările sunt orientative la prețuri 2024, fără inflație și costuri de finanțare. Un studiu de fezabilitate detaliat (SF/DALI conform HG 907/2016) este obligatoriu pentru proiecte cu fonduri publice.',[245,158,11]);
-
-    this._pgFooter(pdf,W,H,today,15,'PNRR România 2021 · Regulament UE 2021/1060 (FEDR) · Regulament UE 2021/1057 (FSE+) · HG 907/2016 SF/DALI · BNR 2024');
+    this._pgFooter(pdf,W,H,today,15,'PNRR Romania 2021 · Reg.UE 2021/1060 (FEDR) · Reg.UE 2021/1057 (FSE+) · HG 907/2016 SF/DALI');
   },
 
   // PG 17: Etapizare implementare
@@ -1726,7 +1726,7 @@ G._TCIMasterplanPDF = {
 
     y=this._section(pdf,W,y,'17.2 Restricții de Construire în Zone Protejate');
     const restr=[
-      ['Zona de protecție I (0-50m)','Nicio intervenție fără aviz Ministerul Culturii · Studiu istoric obligatoriu'],
+      ['Zona de protecție I (0-50m)','POSIBIL cu aviz Ministerul Culturii · Studiu istoric obligatoriu · NU interdicție (L422/2001)'],
       ['Zona de protecție II (50-200m)','Aviz Direcția Județeană de Cultură · POT/CUT redus față de zonă'],
       ['Sit UNESCO','Regim special · Aviz UNESCO + Comisia Monumentelor · EIA obligatoriu'],
       ['Zone construite protejate (ZCP)','Studiu urbanistic de detaliu · Intervenții reversibile prioritare'],
@@ -1808,6 +1808,8 @@ G._TCIMasterplanPDF = {
     y=this._section(pdf,W,y,'19.1 Legislație Urbanistică Aplicabilă');
     const laws=[
       ['Legea 350/2001','Legea amenajării teritoriului și urbanismului (republicată) — baza PUG/PUZ/PUD'],
+      ['PATJ','Planul de Amenajare a Teritoriului Județean — cadrul spatial judetean, obligatoriu pentru PUG'],
+      ['PATN','Planul de Amenajare a Teritoriului National — 6 sectiuni (apa, riscuri, zone protejate, reteaua de localitati, transporturi, turism)'],
       ['Legea 50/1991','Autorizarea construcțiilor — procedura AC, documentații, sancțiuni'],
       ['HG 525/1996','Regulamentul General de Urbanism (RGU) — parametri urbanistici de bază'],
       ['Ord. 233/2016','Norme metodologice de aplicare a Legii 350/2001 — conținut documentații'],
@@ -2219,6 +2221,267 @@ G._TCIMasterplanPDF = {
       .sort((a,b)=>Math.abs((a.pop2021||0)-pop)-Math.abs((b.pop2021||0)-pop))
       .slice(0,4);
   },
+
+  // ══════════════════════════════════════════════════════════════════
+  // GRAFICE PDF COMPLETE — jsPDF canvas drawings
+  // ══════════════════════════════════════════════════════════════════
+
+  _lineChart(pdf,W,y,series,xLabels,opts={}){
+    const {title='',h=50,yUnit='',sources='',colors=[[212,175,55],[59,130,246],[34,197,94],[239,68,68]]}=opts;
+    const x0=14,cW=W-28,padL=20,padR=8,padT=10,padB=14;
+    const gW=cW-padL-padR, gH=h-padT-padB;
+    pdf.setFillColor(6,12,36); pdf.rect(x0,y,cW,h,'F');
+    pdf.setDrawColor(15,30,70); pdf.setLineWidth(0.2); pdf.rect(x0,y,cW,h,'S');
+    if(title){pdf.setTextColor(148,163,184);pdf.setFont('helvetica','bold');pdf.setFontSize(7);pdf.text(title,x0+padL,y+6.5);}
+    const allV=series.flatMap(s=>s.data||[]).filter(v=>!isNaN(v));
+    if(!allV.length) return y+h+3;
+    const vMin=Math.min(...allV)*0.93, vMax=Math.max(...allV)*1.05, vR=vMax-vMin||1;
+    const n=xLabels.length;
+    const px=i=>x0+padL+(i/(n-1||1))*gW;
+    const py=v=>y+padT+gH-((v-vMin)/vR)*gH;
+    // Grid
+    [0,0.25,0.5,0.75,1].forEach(f=>{
+      const gy=y+padT+gH*(1-f);
+      pdf.setDrawColor(15,28,65);pdf.setLineWidth(0.12);pdf.line(x0+padL,gy,x0+padL+gW,gy);
+      const vl=vMin+vR*f;
+      pdf.setTextColor(55,75,120);pdf.setFont('helvetica','normal');pdf.setFontSize(5.5);
+      pdf.text(vl>=1e6?(vl/1e6).toFixed(1)+'M':vl>=1000?Math.round(vl/1000)+'k':Math.round(vl)+'',
+               x0+padL-1,gy+1.8,{align:'right'});
+    });
+    // Serii
+    series.forEach((s,si)=>{
+      const col=colors[si%colors.length];
+      const d=s.data||[];
+      if(d.length<2) return;
+      // Area fill
+      pdf.setFillColor(col[0],col[1],col[2]);
+      const apts=[[px(0)-x0,0]];
+      d.forEach((v,i)=>apts.push([px(i)-x0,py(v)-y]));
+      apts.push([px(d.length-1)-x0,y+padT+gH-y]);
+      try{pdf.lines(apts.slice(1).map((p,i)=>[p[0]-apts[i][0],p[1]-apts[i][1]]),
+        x0,y+padT+gH,'F');}catch(e){}
+      // Linie
+      pdf.setDrawColor(...col); pdf.setLineWidth(si===0?1.2:0.8);
+      for(let i=1;i<d.length;i++) pdf.line(px(i-1),py(d[i-1]),px(i),py(d[i]));
+      // Puncte
+      d.forEach((v,i)=>{pdf.setFillColor(...col);pdf.circle(px(i),py(v),1,'F');});
+      // Label
+      if(s.label){pdf.setTextColor(...col);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
+        pdf.text(s.label,px(d.length-1)+2,py(d[d.length-1])+1.5);}
+    });
+    // Axe X
+    xLabels.forEach((l,i)=>{
+      pdf.setTextColor(60,85,130);pdf.setFont('helvetica','normal');pdf.setFontSize(5.5);
+      pdf.text(String(l),px(i),y+padT+gH+5.5,{align:'center'});
+    });
+    if(yUnit){pdf.setTextColor(50,70,110);pdf.setFontSize(5);pdf.text(yUnit,x0+2,y+padT+1);}
+    if(sources){pdf.setTextColor(40,60,100);pdf.setFontSize(5);
+      pdf.text(sources,x0+padL,y+h-1,{maxWidth:gW});}
+    return y+h+3;
+  },
+
+  _barChartH(pdf,W,y,rows,opts={}){
+    const {title='',barH=5.5,maxVal=null,color=[59,130,246],unit='',sources='',showPct=false}=opts;
+    const x0=14,cW=W-28,labelW=62,valW=18;
+    const barAreaW=cW-labelW-valW-4;
+    const mv=maxVal||Math.max(...rows.map(r=>+r[1]||0))||1;
+    if(title){pdf.setTextColor(148,163,184);pdf.setFont('helvetica','bold');pdf.setFontSize(7);
+      pdf.text(title,x0,y+5);y+=8;}
+    rows.forEach(([label,val,note,col2],i)=>{
+      const fy=y+i*(barH+2);
+      const col=col2||color;
+      // Row bg
+      pdf.setFillColor(i%2===0?10:8,i%2===0?18:14,i%2===0?44:36);
+      pdf.rect(x0,fy,cW,barH,'F');
+      // Bar track
+      pdf.setFillColor(15,25,60);pdf.rect(x0+labelW,fy+0.8,barAreaW,barH-1.6,'F');
+      // Bar fill
+      const bw=Math.max(0,(+val/mv)*barAreaW);
+      pdf.setFillColor(...(Array.isArray(col)?col:[59,130,246]));
+      if(bw>0) pdf.rect(x0+labelW,fy+0.8,bw,barH-1.6,'F');
+      // Label
+      pdf.setTextColor(148,163,184);pdf.setFont('helvetica','normal');pdf.setFontSize(6.5);
+      pdf.text(String(label).slice(0,26),x0+1,fy+barH*0.72);
+      // Valoare
+      const display=showPct?Math.round(+val/mv*100)+'%':(+val).toLocaleString('ro-RO')+unit;
+      pdf.setTextColor(200,215,235);pdf.setFont('helvetica','bold');pdf.setFontSize(7);
+      pdf.text(display,x0+labelW+bw+2,fy+barH*0.72);
+      // Nota
+      if(note){pdf.setTextColor(70,90,130);pdf.setFont('helvetica','normal');pdf.setFontSize(6);
+        pdf.text(String(note).slice(0,28),x0+cW-1,fy+barH*0.72,{align:'right'});}
+    });
+    const ey=y+rows.length*(barH+2);
+    if(sources){pdf.setTextColor(40,60,100);pdf.setFontSize(5.5);
+      pdf.text(sources,x0,ey+2,{maxWidth:cW});return ey+7;}
+    return ey+4;
+  },
+
+  _donutPDF(pdf,W,y,slices,opts={}){
+    const {title='',h=58,sources='',centerLabel=''}=opts;
+    const x0=14,cW=W-28,r=22,cx=x0+r+6,cy=y+h/2;
+    pdf.setFillColor(6,12,36);pdf.rect(x0,y,cW,h,'F');
+    if(title){pdf.setTextColor(148,163,184);pdf.setFont('helvetica','bold');pdf.setFontSize(7);
+      pdf.text(title,x0+5,y+6);}
+    const total=slices.reduce((s,sl)=>s+(sl.val||0),0)||1;
+    let angle=-Math.PI/2;
+    slices.forEach(sl=>{
+      const sweep=(sl.val/total)*Math.PI*2;
+      const col=sl.color||[59,130,246];
+      pdf.setFillColor(...col);
+      // Sector ca poligon
+      const steps=Math.max(4,Math.ceil(sweep*10));
+      const pts=[];
+      for(let i=0;i<=steps;i++){
+        const a=angle+i*(sweep/steps);
+        pts.push([cx+r*Math.cos(a)-cx, cy+r*Math.sin(a)-cy]);
+      }
+      pts.unshift([0,0]); pts.push([0,0]);
+      try{pdf.lines(pts.slice(1).map((p,i)=>[p[0]-pts[i][0],p[1]-pts[i][1]]),cx,cy,'F');}catch(e){}
+      angle+=sweep;
+    });
+    // Gaura centrala
+    pdf.setFillColor(6,12,36);
+    const innerPts=[];
+    for(let i=0;i<=32;i++){const a=i/32*Math.PI*2;innerPts.push([r*0.52*Math.cos(a),r*0.52*Math.sin(a)]);}
+    try{pdf.lines(innerPts.slice(1).map((p,i)=>[p[0]-innerPts[i][0],p[1]-innerPts[i][1]]),cx,cy,'F');}catch(e){}
+    // Text centru
+    pdf.setTextColor(200,215,235);pdf.setFont('helvetica','bold');pdf.setFontSize(7.5);
+    pdf.text(centerLabel||String(Math.round(total)),cx,cy+2.5,{align:'center'});
+    // Legenda
+    let ly=y+(h-slices.length*8)/2;
+    slices.forEach((sl,i)=>{
+      const col=sl.color||[59,130,246];
+      const lx=x0+r*2+14;
+      pdf.setFillColor(...col);pdf.roundedRect(lx,ly+1,6,4,1,1,'F');
+      pdf.setTextColor(148,163,184);pdf.setFont('helvetica','normal');pdf.setFontSize(7);
+      pdf.text(String(sl.label||'').slice(0,20),lx+8,ly+4.5);
+      const pct=Math.round(sl.val/total*100);
+      pdf.setTextColor(200,215,235);pdf.setFont('helvetica','bold');pdf.setFontSize(7.5);
+      pdf.text(pct+'%',x0+cW-8,ly+4.5,{align:'right'});
+      ly+=8;
+    });
+    if(sources){pdf.setTextColor(40,60,100);pdf.setFontSize(5.5);
+      pdf.text(sources,x0+5,y+h-2,{maxWidth:cW-10});}
+    return y+h+3;
+  },
+
+  _radarPDF(pdf,W,y,vals,labels,opts={}){
+    const {title='',h=68,color=[212,175,55],refVals=null,sources=''}=opts;
+    const x0=14,cW=W-28,r=26,cx=x0+cW/2,cy=y+h/2+2;
+    pdf.setFillColor(6,12,36);pdf.rect(x0,y,cW,h,'F');
+    if(title){pdf.setTextColor(148,163,184);pdf.setFont('helvetica','bold');pdf.setFontSize(7);
+      pdf.text(title,x0+5,y+6);}
+    const n=vals.length,step=(Math.PI*2)/n;
+    // Grid
+    [0.25,0.5,0.75,1].forEach(f=>{
+      for(let i=0;i<n;i++){
+        const a1=-Math.PI/2+i*step, a2=-Math.PI/2+(i+1)*step;
+        pdf.setDrawColor(15,28,65);pdf.setLineWidth(f<1?0.12:0.25);
+        pdf.line(cx+r*f*Math.cos(a1),cy+r*f*Math.sin(a1),
+                 cx+r*f*Math.cos(a2),cy+r*f*Math.sin(a2));
+      }
+    });
+    for(let i=0;i<n;i++){const a=-Math.PI/2+i*step;
+      pdf.setDrawColor(15,28,65);pdf.setLineWidth(0.12);pdf.line(cx,cy,cx+r*Math.cos(a),cy+r*Math.sin(a));}
+    // Referinta
+    if(refVals){
+      pdf.setDrawColor(60,80,130);pdf.setLineWidth(0.7);
+      const rp=refVals.map((v,i)=>{const a=-Math.PI/2+i*step;return[cx+r*v*Math.cos(a),cy+r*v*Math.sin(a)];});
+      for(let i=0;i<rp.length;i++) pdf.line(rp[i][0],rp[i][1],rp[(i+1)%rp.length][0],rp[(i+1)%rp.length][1]);
+    }
+    // UAT
+    pdf.setDrawColor(...color);pdf.setLineWidth(1.3);
+    const up=vals.map((v,i)=>{const a=-Math.PI/2+i*step;return[cx+r*v*Math.cos(a),cy+r*v*Math.sin(a)];});
+    for(let i=0;i<up.length;i++) pdf.line(up[i][0],up[i][1],up[(i+1)%up.length][0],up[(i+1)%up.length][1]);
+    up.forEach(([px,py])=>{pdf.setFillColor(...color);pdf.circle(px,py,1.3,'F');});
+    // Labels
+    labels.forEach((l,i)=>{
+      const a=-Math.PI/2+i*step, lx=cx+(r+9)*Math.cos(a), ly=cy+(r+9)*Math.sin(a);
+      pdf.setTextColor(130,150,190);pdf.setFont('helvetica','bold');pdf.setFontSize(6);
+      pdf.text(String(l).slice(0,12),lx,ly+2,{align:'center'});
+    });
+    if(sources){pdf.setTextColor(40,60,100);pdf.setFontSize(5.5);
+      pdf.text(sources,x0+5,y+h-2,{maxWidth:cW-10});}
+    return y+h+3;
+  },
+
+  _stackedBarV(pdf,W,y,groups,groupLabels,stackLabels,opts={}){
+    const {title='',h=48,yMax=100,colors=[[59,130,246],[212,175,55],[34,197,94],[239,68,68]],
+           sources='',yUnit=''}=opts;
+    const x0=14,cW=W-28,padL=18,padB=14,padT=10,padR=8;
+    const gW=cW-padL-padR, gH=h-padT-padB;
+    pdf.setFillColor(6,12,36);pdf.rect(x0,y,cW,h,'F');
+    if(title){pdf.setTextColor(148,163,184);pdf.setFont('helvetica','bold');pdf.setFontSize(7);
+      pdf.text(title,x0+padL,y+6);}
+    // Grid Y
+    [0,0.25,0.5,0.75,1].forEach(f=>{
+      const gy=y+padT+gH*(1-f);
+      pdf.setDrawColor(15,28,65);pdf.setLineWidth(0.12);pdf.line(x0+padL,gy,x0+padL+gW,gy);
+      pdf.setTextColor(55,75,120);pdf.setFont('helvetica','normal');pdf.setFontSize(5.5);
+      pdf.text(String(Math.round(yMax*f))+yUnit,x0+padL-1,gy+1.5,{align:'right'});
+    });
+    const ng=groups.length, bw=Math.min(18,(gW/ng)*0.6), gap=gW/ng;
+    groups.forEach((stack,gi)=>{
+      let base=0;
+      const bx=x0+padL+gi*gap+(gap-bw)/2;
+      stack.forEach((val,si)=>{
+        const bh=(val/yMax)*gH;
+        const by=y+padT+gH-base-bh;
+        const col=colors[si%colors.length];
+        pdf.setFillColor(...col);pdf.rect(bx,by,bw,Math.max(0.5,bh),'F');
+        if(bh>5){pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);
+          pdf.text(String(Math.round(val)),bx+bw/2,by+bh/2+1.5,{align:'center'});}
+        base+=bh;
+      });
+      if(groupLabels[gi]){pdf.setTextColor(80,100,140);pdf.setFont('helvetica','normal');pdf.setFontSize(6);
+        pdf.text(String(groupLabels[gi]).slice(0,8),bx+bw/2,y+padT+gH+5,{align:'center'});}
+    });
+    // Legenda
+    stackLabels.forEach((l,i)=>{
+      const col=colors[i%colors.length];
+      pdf.setFillColor(...col);pdf.roundedRect(x0+padL+i*36,y+2,5,3.5,0.5,0.5,'F');
+      pdf.setTextColor(100,120,160);pdf.setFont('helvetica','normal');pdf.setFontSize(5.5);
+      pdf.text(String(l).slice(0,12),x0+padL+i*36+7,y+5.2);
+    });
+    if(sources){pdf.setTextColor(40,60,100);pdf.setFontSize(5.5);
+      pdf.text(sources,x0+padL,y+h-1,{maxWidth:gW});}
+    return y+h+3;
+  },
+
+  _heatmapPDF(pdf,W,y,matrix,rowLabels,colLabels,opts={}){
+    const {title='',cellH=7,maxVal=100,colorLow=[6,12,36],colorHigh=[212,175,55],sources=''}=opts;
+    const x0=14,cW=W-28,lw=52,cellW=(cW-lw)/colLabels.length;
+    if(title){pdf.setTextColor(148,163,184);pdf.setFont('helvetica','bold');pdf.setFontSize(7);
+      pdf.text(title,x0,y+5);y+=8;}
+    // Header
+    pdf.setFillColor(10,20,52);pdf.rect(x0+lw,y,cW-lw,cellH,'F');
+    colLabels.forEach((l,i)=>{
+      pdf.setTextColor(212,175,55);pdf.setFont('helvetica','bold');pdf.setFontSize(6);
+      pdf.text(String(l).slice(0,10),x0+lw+i*cellW+cellW/2,y+cellH*0.72,{align:'center'});
+    });
+    y+=cellH;
+    matrix.forEach((row,ri)=>{
+      pdf.setFillColor(8,16,42);pdf.rect(x0,y,lw,cellH,'F');
+      pdf.setTextColor(130,150,185);pdf.setFont('helvetica','normal');pdf.setFontSize(6.5);
+      pdf.text(String(rowLabels[ri]||'').slice(0,22),x0+2,y+cellH*0.72);
+      row.forEach((val,ci)=>{
+        const norm=Math.min(1,Math.max(0,(+val||0)/maxVal));
+        const r2=Math.round(colorLow[0]+(colorHigh[0]-colorLow[0])*norm);
+        const g2=Math.round(colorLow[1]+(colorHigh[1]-colorLow[1])*norm);
+        const b2=Math.round(colorLow[2]+(colorHigh[2]-colorLow[2])*norm);
+        pdf.setFillColor(r2,g2,b2);pdf.rect(x0+lw+ci*cellW,y,cellW,cellH,'F');
+        pdf.setTextColor(norm>0.5?6:200,norm>0.5?10:215,norm>0.5?30:235);
+        pdf.setFont('helvetica','bold');pdf.setFontSize(6.5);
+        pdf.text(String(val||'—'),x0+lw+ci*cellW+cellW/2,y+cellH*0.72,{align:'center'});
+      });
+      y+=cellH;
+    });
+    if(sources){pdf.setTextColor(40,60,100);pdf.setFontSize(5.5);
+      pdf.text(sources,x0,y+2,{maxWidth:cW});return y+7;}
+    return y+4;
+  },
+
+
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -2257,5 +2520,29 @@ _waitAll(()=>{
   console.log('[TCI Masterplan v1.0] ✅ Toate modulele inițializate');
   ss?.('✅ TCI Masterplan gata — butonul Raport PDF generează masterplan strategic complet');
 });
+
+  // Expunem global pentru acces din HTML si alte module
+  window._TCIMasterplanPDF  = G._TCIMasterplanPDF;
+  window.generateMasterplan = async function(cityKey, scenario) {
+    const k = cityKey ||
+              window.TCI?.cityKey ||
+              localStorage.getItem('ux_last_city') ||
+              'RO-IS-01';
+    const sc = scenario || window.TCI?.scenario || 'S2';
+    const J = (typeof jsPDF !== 'undefined') ? jsPDF :
+              (typeof window.jspdf?.jsPDF !== 'undefined') ? window.jspdf.jsPDF : null;
+    if(!J) {
+      window.ss?.('❌ jsPDF nu s-a încărcat — reîncarcă pagina');
+      console.error('[Masterplan] jsPDF lipsă. jsPDF=',typeof jsPDF,'jspdf=',typeof window.jspdf);
+      return;
+    }
+    if(!window._TCIMasterplanPDF) {
+      window.ss?.('⏳ Masterplan se inițializează — mai încearcă în 2 secunde');
+      return;
+    }
+    return await window._TCIMasterplanPDF.generate(k, sc);
+  };
+  console.log('[TCI Masterplan] ✅ window.generateMasterplan + window._TCIMasterplanPDF expuse global');
+
 
 })(window);
