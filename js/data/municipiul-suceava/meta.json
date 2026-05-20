@@ -1,0 +1,12 @@
+{
+  "id": "municipiul-suceava",
+  "label": "Municipiul Suceava",
+  "judet": "Suceava",
+  "status": "complet",
+  "lat": 47.66206,
+  "lng": 26.26402,
+  "data_actualizare": "2026-05-20",
+  "sursa_pug": "sv_pug.shp — Stereo70 EPSG:31700 → WGS84 EPSG:4326",
+  "nr_utr": 713,
+  "utr_unice": 42
+}
