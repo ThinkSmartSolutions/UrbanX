@@ -1,0 +1,3038 @@
+{
+  "type": "FeatureCollection",
+  "name": "PUG_Municipiul_Suceava",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+    }
+  },
+  "metadata": {
+    "uat": "Municipiul Suceava",
+    "judet": "Suceava",
+    "siruta": "148045",
+    "sursa": "PUG aprobat HCL nr. 162/2017, actualizat 2022",
+    "sistem_referinta": "WGS84 (convertit din Stereo70)",
+    "utr_count": 67,
+    "tip_count": 39,
+    "versiune": "2026-05-20",
+    "nota": "Date orientative TSS·FG — necesita verificare cu documentatia cadastrala oficiala"
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.272702,
+              47.663199
+            ],
+            [
+              26.273768,
+              47.663262
+            ],
+            [
+              26.273698,
+              47.663801
+            ],
+            [
+              26.272632,
+              47.663738
+            ],
+            [
+              26.272702,
+              47.663199
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "C1",
+        "utr": "C1",
+        "DENUMIRE": "Centru civic Suceava",
+        "denumire": "Centru civic Suceava",
+        "NAME": "Centru Civic",
+        "POT": 80,
+        "CUT": 4.0,
+        "RH": "P+6-P+8",
+        "FUNCTIUNE": "Administrativ/Comercial",
+        "functiune": "Administrativ/Comercial",
+        "c": "#F97316",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 1
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.278149,
+              47.667779
+            ],
+            [
+              26.278952,
+              47.667779
+            ],
+            [
+              26.278952,
+              47.66823
+            ],
+            [
+              26.278149,
+              47.66823
+            ],
+            [
+              26.278149,
+              47.667779
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "C2",
+        "utr": "C2",
+        "DENUMIRE": "Zona comerciala semicentrala",
+        "denumire": "Zona comerciala semicentrala",
+        "NAME": "Semicentru Nord",
+        "POT": 60,
+        "CUT": 2.4,
+        "RH": "P+4-P+5",
+        "FUNCTIUNE": "Comercial/Birouri",
+        "functiune": "Comercial/Birouri",
+        "c": "#FB923C",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 2
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.268904,
+              47.657878
+            ],
+            [
+              26.269563,
+              47.657956
+            ],
+            [
+              26.26947,
+              47.658311
+            ],
+            [
+              26.268811,
+              47.658233
+            ],
+            [
+              26.268904,
+              47.657878
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "C2",
+        "utr": "C2",
+        "DENUMIRE": "Zona comerciala sud",
+        "denumire": "Zona comerciala sud",
+        "NAME": "Semicentru Sud",
+        "POT": 60,
+        "CUT": 2.4,
+        "RH": "P+4-P+5",
+        "FUNCTIUNE": "Comercial",
+        "functiune": "Comercial",
+        "c": "#FB923C",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 3
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.262097,
+              47.665077
+            ],
+            [
+              26.2629,
+              47.665077
+            ],
+            [
+              26.2629,
+              47.665527
+            ],
+            [
+              26.262097,
+              47.665527
+            ],
+            [
+              26.262097,
+              47.665077
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "C3",
+        "utr": "C3",
+        "DENUMIRE": "Zone comerciale si servicii vest",
+        "denumire": "Zone comerciale si servicii vest",
+        "NAME": "Zona Comerciala Vest",
+        "POT": 65,
+        "CUT": 2.8,
+        "RH": "P+4-P+6",
+        "FUNCTIUNE": "Comert/Servicii",
+        "functiune": "Comert/Servicii",
+        "c": "#FD8A3C",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 4
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.296922,
+              47.674151
+            ],
+            [
+              26.297588,
+              47.674112
+            ],
+            [
+              26.297635,
+              47.674471
+            ],
+            [
+              26.296968,
+              47.67451
+            ],
+            [
+              26.296922,
+              47.674151
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "CB",
+        "utr": "CB",
+        "DENUMIRE": "Centru cartier Burdujeni",
+        "denumire": "Centru cartier Burdujeni",
+        "NAME": "Centru Burdujeni",
+        "POT": 65,
+        "CUT": 2.8,
+        "RH": "P+4",
+        "FUNCTIUNE": "Comert/Servicii",
+        "functiune": "Comert/Servicii",
+        "c": "#FDBA74",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.252867,
+              47.654356
+            ],
+            [
+              26.253402,
+              47.654356
+            ],
+            [
+              26.253402,
+              47.654626
+            ],
+            [
+              26.252867,
+              47.654626
+            ],
+            [
+              26.252867,
+              47.654356
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "CB",
+        "utr": "CB",
+        "DENUMIRE": "Centru cartier Iraclio",
+        "denumire": "Centru cartier Iraclio",
+        "NAME": "Centru Iraclio",
+        "POT": 65,
+        "CUT": 2.8,
+        "RH": "P+3-P+4",
+        "FUNCTIUNE": "Comert/Servicii",
+        "functiune": "Comert/Servicii",
+        "c": "#FDBA74",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 6
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.275407,
+              47.672239
+            ],
+            [
+              26.276344,
+              47.672239
+            ],
+            [
+              26.276344,
+              47.672779
+            ],
+            [
+              26.275407,
+              47.672779
+            ],
+            [
+              26.275407,
+              47.672239
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "M1",
+        "utr": "M1",
+        "DENUMIRE": "Zona mixta rezidential-tertiar nord",
+        "denumire": "Zona mixta rezidential-tertiar nord",
+        "NAME": "Mixt Nord",
+        "POT": 55,
+        "CUT": 2.4,
+        "RH": "P+4-P+5",
+        "FUNCTIUNE": "Mixt",
+        "functiune": "Mixt",
+        "c": "#FCA5A1",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 7
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.288881,
+              47.664153
+            ],
+            [
+              26.289681,
+              47.6642
+            ],
+            [
+              26.289623,
+              47.664649
+            ],
+            [
+              26.288823,
+              47.664602
+            ],
+            [
+              26.288881,
+              47.664153
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "M1",
+        "utr": "M1",
+        "DENUMIRE": "Zona mixta est",
+        "denumire": "Zona mixta est",
+        "NAME": "Mixt Est",
+        "POT": 55,
+        "CUT": 2.4,
+        "RH": "P+4",
+        "FUNCTIUNE": "Mixt",
+        "functiune": "Mixt",
+        "c": "#FCA5A1",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 8
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.259489,
+              47.670527
+            ],
+            [
+              26.260158,
+              47.670527
+            ],
+            [
+              26.260158,
+              47.670887
+            ],
+            [
+              26.259489,
+              47.670887
+            ],
+            [
+              26.259489,
+              47.670527
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "M2",
+        "utr": "M2",
+        "DENUMIRE": "Zona mixta comerciala vest",
+        "denumire": "Zona mixta comerciala vest",
+        "NAME": "Mixt Comercial Vest",
+        "POT": 65,
+        "CUT": 3.0,
+        "RH": "P+5-P+6",
+        "FUNCTIUNE": "Mixt Comercial",
+        "functiune": "Mixt Comercial",
+        "c": "#F87171",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 9
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.284956,
+              47.656076
+            ],
+            [
+              26.285615,
+              47.656154
+            ],
+            [
+              26.285522,
+              47.656509
+            ],
+            [
+              26.284863,
+              47.656431
+            ],
+            [
+              26.284956,
+              47.656076
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "M2",
+        "utr": "M2",
+        "DENUMIRE": "Zona mixta comerciala sud-est",
+        "denumire": "Zona mixta comerciala sud-est",
+        "NAME": "Mixt Comercial Sud-Est",
+        "POT": 65,
+        "CUT": 3.0,
+        "RH": "P+5",
+        "FUNCTIUNE": "Mixt Comercial",
+        "functiune": "Mixt Comercial",
+        "c": "#F87171",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 10
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.274203,
+              47.659716
+            ],
+            [
+              26.274872,
+              47.659716
+            ],
+            [
+              26.274872,
+              47.660077
+            ],
+            [
+              26.274203,
+              47.660077
+            ],
+            [
+              26.274203,
+              47.659716
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "M3",
+        "utr": "M3",
+        "DENUMIRE": "Zona mixta cu dotari publice",
+        "denumire": "Zona mixta cu dotari publice",
+        "NAME": "Mixt Dotari Centru",
+        "POT": 60,
+        "CUT": 2.8,
+        "RH": "P+4-P+5",
+        "FUNCTIUNE": "Dotari/Mixt",
+        "functiune": "Dotari/Mixt",
+        "c": "#FDA4AF",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 11
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.252466,
+              47.667644
+            ],
+            [
+              26.253804,
+              47.667644
+            ],
+            [
+              26.253804,
+              47.668365
+            ],
+            [
+              26.252466,
+              47.668365
+            ],
+            [
+              26.252466,
+              47.667644
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "L1",
+        "utr": "L1",
+        "DENUMIRE": "Locuinte individuale mici densitate vest",
+        "denumire": "Locuinte individuale mici densitate vest",
+        "NAME": "Rezidential Individual Vest",
+        "POT": 30,
+        "CUT": 0.9,
+        "RH": "P+1-P+2",
+        "FUNCTIUNE": "Rezidential",
+        "functiune": "Rezidential",
+        "c": "#FDE68A",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 12
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.25654,
+              47.676766
+            ],
+            [
+              26.257594,
+              47.67664
+            ],
+            [
+              26.257756,
+              47.677261
+            ],
+            [
+              26.256702,
+              47.677387
+            ],
+            [
+              26.25654,
+              47.676766
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "L1",
+        "utr": "L1",
+        "DENUMIRE": "Locuinte individuale nord-vest",
+        "denumire": "Locuinte individuale nord-vest",
+        "NAME": "Rezidential Individual Nord-Vest",
+        "POT": 30,
+        "CUT": 0.9,
+        "RH": "P+1-P+2",
+        "FUNCTIUNE": "Rezidential",
+        "functiune": "Rezidential",
+        "c": "#FDE68A",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 13
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.272531,
+              47.646923
+            ],
+            [
+              26.273869,
+              47.646923
+            ],
+            [
+              26.273869,
+              47.647644
+            ],
+            [
+              26.272531,
+              47.647644
+            ],
+            [
+              26.272531,
+              47.646923
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "L1",
+        "utr": "L1",
+        "DENUMIRE": "Locuinte individuale sud",
+        "denumire": "Locuinte individuale sud",
+        "NAME": "Rezidential Individual Sud",
+        "POT": 30,
+        "CUT": 0.9,
+        "RH": "P+1-P+2",
+        "FUNCTIUNE": "Rezidential",
+        "functiune": "Rezidential",
+        "c": "#FDE68A",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 14
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.302131,
+              47.679416
+            ],
+            [
+              26.303197,
+              47.679478
+            ],
+            [
+              26.303127,
+              47.680017
+            ],
+            [
+              26.302061,
+              47.679954
+            ],
+            [
+              26.302131,
+              47.679416
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "L1",
+        "utr": "L1",
+        "DENUMIRE": "Locuinte individuale Burdujeni nord",
+        "denumire": "Locuinte individuale Burdujeni nord",
+        "NAME": "Rezidential Individual Burdujeni Nord",
+        "POT": 30,
+        "CUT": 0.9,
+        "RH": "P+1-P+2",
+        "FUNCTIUNE": "Rezidential",
+        "functiune": "Rezidential",
+        "c": "#FDE68A",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 15
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.27942,
+              47.676743
+            ],
+            [
+              26.280357,
+              47.676743
+            ],
+            [
+              26.280357,
+              47.677284
+            ],
+            [
+              26.27942,
+              47.677284
+            ],
+            [
+              26.27942,
+              47.676743
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "L2",
+        "utr": "L2",
+        "DENUMIRE": "Locuinte individuale medie densitate nord",
+        "denumire": "Locuinte individuale medie densitate nord",
+        "NAME": "Rezidential Medie Densitate Nord",
+        "POT": 40,
+        "CUT": 1.2,
+        "RH": "P+2",
+        "FUNCTIUNE": "Rezidential",
+        "functiune": "Rezidential",
+        "c": "#FCD34D",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 16
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.292834,
+              47.667708
+            ],
+            [
+              26.293767,
+              47.667763
+            ],
+            [
+              26.293697,
+              47.668301
+            ],
+            [
+              26.292764,
+              47.668246
+            ],
+            [
+              26.292834,
+              47.667708
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "L2",
+        "utr": "L2",
+        "DENUMIRE": "Locuinte individuale medie densitate est",
+        "denumire": "Locuinte individuale medie densitate est",
+        "NAME": "Rezidential Medie Densitate Est",
+        "POT": 40,
+        "CUT": 1.2,
+        "RH": "P+2",
+        "FUNCTIUNE": "Rezidential",
+        "functiune": "Rezidential",
+        "c": "#FCD34D",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 17
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.248721,
+              47.656068
+            ],
+            [
+              26.249523,
+              47.656068
+            ],
+            [
+              26.249523,
+              47.656518
+            ],
+            [
+              26.248721,
+              47.656518
+            ],
+            [
+              26.248721,
+              47.656068
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "L2",
+        "utr": "L2",
+        "DENUMIRE": "Locuinte Iraclio",
+        "denumire": "Locuinte Iraclio",
+        "NAME": "Rezidential Iraclio",
+        "POT": 40,
+        "CUT": 1.2,
+        "RH": "P+2",
+        "FUNCTIUNE": "Rezidential",
+        "functiune": "Rezidential",
+        "c": "#FCD34D",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 18
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.292931,
+              47.672329
+            ],
+            [
+              26.2936,
+              47.672329
+            ],
+            [
+              26.2936,
+              47.672689
+            ],
+            [
+              26.292931,
+              47.672689
+            ],
+            [
+              26.292931,
+              47.672329
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "L3",
+        "utr": "L3",
+        "DENUMIRE": "Bloc mic Burdujeni",
+        "denumire": "Bloc mic Burdujeni",
+        "NAME": "Colective Mici Burdujeni",
+        "POT": 35,
+        "CUT": 1.2,
+        "RH": "P+2-P+3",
+        "FUNCTIUNE": "Rezidential colectiv",
+        "functiune": "Rezidential colectiv",
+        "c": "#FDE68A",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 19
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.266043,
+              47.670437
+            ],
+            [
+              26.26698,
+              47.670437
+            ],
+            [
+              26.26698,
+              47.670977
+            ],
+            [
+              26.266043,
+              47.670977
+            ],
+            [
+              26.266043,
+              47.670437
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "L4",
+        "utr": "L4",
+        "DENUMIRE": "Cartier George Enescu",
+        "denumire": "Cartier George Enescu",
+        "NAME": "Colective George Enescu",
+        "POT": 40,
+        "CUT": 1.6,
+        "RH": "P+3-P+4",
+        "FUNCTIUNE": "Rezidential colectiv",
+        "functiune": "Rezidential colectiv",
+        "c": "#FCD34D",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 20
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.270154,
+              47.674063
+            ],
+            [
+              26.270954,
+              47.67411
+            ],
+            [
+              26.270895,
+              47.674559
+            ],
+            [
+              26.270096,
+              47.674512
+            ],
+            [
+              26.270154,
+              47.674063
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "L4",
+        "utr": "L4",
+        "DENUMIRE": "Cartier Obcini",
+        "denumire": "Cartier Obcini",
+        "NAME": "Colective Obcini",
+        "POT": 40,
+        "CUT": 1.6,
+        "RH": "P+3-P+4",
+        "FUNCTIUNE": "Rezidential colectiv",
+        "functiune": "Rezidential colectiv",
+        "c": "#FCD34D",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 21
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.276812,
+              47.66868
+            ],
+            [
+              26.277614,
+              47.66868
+            ],
+            [
+              26.277614,
+              47.669131
+            ],
+            [
+              26.276812,
+              47.669131
+            ],
+            [
+              26.276812,
+              47.66868
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "L5",
+        "utr": "L5",
+        "DENUMIRE": "Cartier Aleea Nucului",
+        "denumire": "Cartier Aleea Nucului",
+        "NAME": "Colective Mari Aleea Nucului",
+        "POT": 45,
+        "CUT": 2.0,
+        "RH": "P+5-P+8",
+        "FUNCTIUNE": "Rezidential colectiv",
+        "functiune": "Rezidential colectiv",
+        "c": "#F59E0B",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 22
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.268853,
+              47.666023
+            ],
+            [
+              26.269521,
+              47.666023
+            ],
+            [
+              26.269521,
+              47.666383
+            ],
+            [
+              26.268853,
+              47.666383
+            ],
+            [
+              26.268853,
+              47.666023
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "L5",
+        "utr": "L5",
+        "DENUMIRE": "Cartier Cuza Voda",
+        "denumire": "Cartier Cuza Voda",
+        "NAME": "Colective Mari Cuza Voda",
+        "POT": 45,
+        "CUT": 2.0,
+        "RH": "P+5-P+8",
+        "FUNCTIUNE": "Rezidential colectiv",
+        "functiune": "Rezidential colectiv",
+        "c": "#F59E0B",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 23
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.280916,
+              47.658796
+            ],
+            [
+              26.281582,
+              47.658836
+            ],
+            [
+              26.281536,
+              47.659195
+            ],
+            [
+              26.28087,
+              47.659155
+            ],
+            [
+              26.280916,
+              47.658796
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "L5",
+        "utr": "L5",
+        "DENUMIRE": "Cartier Marăsesti",
+        "denumire": "Cartier Marăsesti",
+        "NAME": "Colective Mari Mărășești",
+        "POT": 45,
+        "CUT": 2.0,
+        "RH": "P+4-P+8",
+        "FUNCTIUNE": "Rezidential colectiv",
+        "functiune": "Rezidential colectiv",
+        "c": "#F59E0B",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 24
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.238956,
+              47.665797
+            ],
+            [
+              26.240561,
+              47.665797
+            ],
+            [
+              26.240561,
+              47.666608
+            ],
+            [
+              26.238956,
+              47.666608
+            ],
+            [
+              26.238956,
+              47.665797
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "IS",
+        "utr": "IS",
+        "DENUMIRE": "Zona industriala vest Suceava",
+        "denumire": "Zona industriala vest Suceava",
+        "NAME": "Industrial Vest",
+        "POT": 60,
+        "CUT": 2.0,
+        "RH": "P+2-P+3",
+        "FUNCTIUNE": "Industrial",
+        "functiune": "Industrial",
+        "c": "#94A3B8",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 25
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.279175,
+              47.683
+            ],
+            [
+              26.280508,
+              47.682922
+            ],
+            [
+              26.280602,
+              47.68364
+            ],
+            [
+              26.279268,
+              47.683718
+            ],
+            [
+              26.279175,
+              47.683
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "IS",
+        "utr": "IS",
+        "DENUMIRE": "Zona industriala nord",
+        "denumire": "Zona industriala nord",
+        "NAME": "Industrial Nord",
+        "POT": 60,
+        "CUT": 2.0,
+        "RH": "P+1-P+3",
+        "FUNCTIUNE": "Industrial/Depozitare",
+        "functiune": "Industrial/Depozitare",
+        "c": "#94A3B8",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 26
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.299357,
+              47.681314
+            ],
+            [
+              26.300411,
+              47.681189
+            ],
+            [
+              26.30055,
+              47.681722
+            ],
+            [
+              26.299496,
+              47.681847
+            ],
+            [
+              26.299357,
+              47.681314
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "IS",
+        "utr": "IS",
+        "DENUMIRE": "Zona industriala CF Burdujeni",
+        "denumire": "Zona industriala CF Burdujeni",
+        "NAME": "Industrial CF Burdujeni",
+        "POT": 60,
+        "CUT": 2.0,
+        "RH": "P+2",
+        "FUNCTIUNE": "Industrial",
+        "functiune": "Industrial",
+        "c": "#94A3B8",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 27
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.245911,
+              47.672239
+            ],
+            [
+              26.246982,
+              47.672239
+            ],
+            [
+              26.246982,
+              47.672779
+            ],
+            [
+              26.245911,
+              47.672779
+            ],
+            [
+              26.245911,
+              47.672239
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "IP",
+        "utr": "IP",
+        "DENUMIRE": "Parc industrial/tehnologic",
+        "denumire": "Parc industrial/tehnologic",
+        "NAME": "Parc Industrial Vest",
+        "POT": 55,
+        "CUT": 2.0,
+        "RH": "P+2-P+3",
+        "FUNCTIUNE": "Parc Industrial",
+        "functiune": "Parc Industrial",
+        "c": "#9CA3AF",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 28
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.296875,
+              47.654214
+            ],
+            [
+              26.297797,
+              47.654324
+            ],
+            [
+              26.297681,
+              47.654768
+            ],
+            [
+              26.296759,
+              47.654658
+            ],
+            [
+              26.296875,
+              47.654214
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "ID",
+        "utr": "ID",
+        "DENUMIRE": "Zona depozitare sud-est",
+        "denumire": "Zona depozitare sud-est",
+        "NAME": "Depozitare Sud-Est",
+        "POT": 65,
+        "CUT": 2.5,
+        "RH": "P+2-P+3",
+        "FUNCTIUNE": "Depozitare",
+        "functiune": "Depozitare",
+        "c": "#CBD5E1",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 29
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.26611,
+              47.667779
+            ],
+            [
+              26.266913,
+              47.667779
+            ],
+            [
+              26.266913,
+              47.66823
+            ],
+            [
+              26.26611,
+              47.66823
+            ],
+            [
+              26.26611,
+              47.667779
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "IE",
+        "utr": "IE",
+        "DENUMIRE": "Campus universitati Suceava",
+        "denumire": "Campus universitati Suceava",
+        "NAME": "Campus Universitar",
+        "POT": 40,
+        "CUT": 1.2,
+        "RH": "P+3-P+4",
+        "FUNCTIUNE": "Invatamant superior",
+        "functiune": "Invatamant superior",
+        "c": "#86EFAC",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 30
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.275608,
+              47.665167
+            ],
+            [
+              26.276143,
+              47.665167
+            ],
+            [
+              26.276143,
+              47.665437
+            ],
+            [
+              26.275608,
+              47.665437
+            ],
+            [
+              26.275608,
+              47.665167
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "IE",
+        "utr": "IE",
+        "DENUMIRE": "Scoli si licee centru",
+        "denumire": "Scoli si licee centru",
+        "NAME": "Scoli Centru",
+        "POT": 40,
+        "CUT": 1.2,
+        "RH": "P+2-P+3",
+        "FUNCTIUNE": "Invatamant",
+        "functiune": "Invatamant",
+        "c": "#86EFAC",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 31
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.294402,
+              47.676878
+            ],
+            [
+              26.294803,
+              47.676878
+            ],
+            [
+              26.294803,
+              47.677149
+            ],
+            [
+              26.294402,
+              47.677149
+            ],
+            [
+              26.294402,
+              47.676878
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "IE",
+        "utr": "IE",
+        "DENUMIRE": "Scoala Burdujeni",
+        "denumire": "Scoala Burdujeni",
+        "NAME": "Scoli Burdujeni",
+        "POT": 40,
+        "CUT": 1.2,
+        "RH": "P+2",
+        "FUNCTIUNE": "Invatamant",
+        "functiune": "Invatamant",
+        "c": "#86EFAC",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 32
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.268919,
+              47.661518
+            ],
+            [
+              26.269455,
+              47.661518
+            ],
+            [
+              26.269455,
+              47.661878
+            ],
+            [
+              26.268919,
+              47.661878
+            ],
+            [
+              26.268919,
+              47.661518
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "IS2",
+        "utr": "IS2",
+        "DENUMIRE": "Spital Judetean Suceava",
+        "denumire": "Spital Judetean Suceava",
+        "NAME": "Spital Judetean",
+        "POT": 35,
+        "CUT": 1.2,
+        "RH": "P+3-P+6",
+        "FUNCTIUNE": "Sanatate",
+        "functiune": "Sanatate",
+        "c": "#34D399",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 33
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.27835,
+              47.662509
+            ],
+            [
+              26.278751,
+              47.662509
+            ],
+            [
+              26.278751,
+              47.662689
+            ],
+            [
+              26.27835,
+              47.662689
+            ],
+            [
+              26.27835,
+              47.662509
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "IS2",
+        "utr": "IS2",
+        "DENUMIRE": "Policlinici si cabinete medicale",
+        "denumire": "Policlinici si cabinete medicale",
+        "NAME": "Policlinici",
+        "POT": 35,
+        "CUT": 1.2,
+        "RH": "P+2-P+3",
+        "FUNCTIUNE": "Sanatate",
+        "functiune": "Sanatate",
+        "c": "#34D399",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 34
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.271595,
+              47.664266
+            ],
+            [
+              26.27213,
+              47.664266
+            ],
+            [
+              26.27213,
+              47.664536
+            ],
+            [
+              26.271595,
+              47.664536
+            ],
+            [
+              26.271595,
+              47.664266
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "IA",
+        "utr": "IA",
+        "DENUMIRE": "Primarie, Prefectura, Consiliu Judetean",
+        "denumire": "Primarie, Prefectura, Consiliu Judetean",
+        "NAME": "Institutii Administrative",
+        "POT": 50,
+        "CUT": 1.8,
+        "RH": "P+3-P+5",
+        "FUNCTIUNE": "Administrativ",
+        "functiune": "Administrativ",
+        "c": "#A7F3D0",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 35
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.274337,
+              47.662509
+            ],
+            [
+              26.274738,
+              47.662509
+            ],
+            [
+              26.274738,
+              47.662689
+            ],
+            [
+              26.274337,
+              47.662689
+            ],
+            [
+              26.274337,
+              47.662509
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "IC",
+        "utr": "IC",
+        "DENUMIRE": "Teatru Matei Visniec, muzee, biblioteca",
+        "denumire": "Teatru Matei Visniec, muzee, biblioteca",
+        "NAME": "Teatru si Cultura",
+        "POT": 45,
+        "CUT": 1.6,
+        "RH": "P+2-P+4",
+        "FUNCTIUNE": "Cultura",
+        "functiune": "Cultura",
+        "c": "#6EE7B7",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 36
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.272423,
+              47.664747
+            ],
+            [
+              26.272686,
+              47.664778
+            ],
+            [
+              26.27264,
+              47.664956
+            ],
+            [
+              26.272376,
+              47.664924
+            ],
+            [
+              26.272423,
+              47.664747
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "IR",
+        "utr": "IR",
+        "DENUMIRE": "Manastirea Sf Ioan cel Nou",
+        "denumire": "Manastirea Sf Ioan cel Nou",
+        "NAME": "Manastirea Sf Ioan cel Nou",
+        "POT": 30,
+        "CUT": 1.0,
+        "RH": "P+2",
+        "FUNCTIUNE": "Cult",
+        "functiune": "Cult",
+        "c": "#C4B5FD",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 37
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.28102,
+              47.666026
+            ],
+            [
+              26.281536,
+              47.666119
+            ],
+            [
+              26.281433,
+              47.66638
+            ],
+            [
+              26.280916,
+              47.666287
+            ],
+            [
+              26.28102,
+              47.666026
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "IR",
+        "utr": "IR",
+        "DENUMIRE": "Cetatea de Scaun Suceava - monument",
+        "denumire": "Cetatea de Scaun Suceava - monument",
+        "NAME": "Cetatea de Scaun",
+        "POT": 5,
+        "CUT": 0.1,
+        "RH": "P",
+        "FUNCTIUNE": "Patrimoniu/Cult",
+        "functiune": "Patrimoniu/Cult",
+        "c": "#C4B5FD",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 38
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.274939,
+              47.66377
+            ],
+            [
+              26.275474,
+              47.66377
+            ],
+            [
+              26.275474,
+              47.664131
+            ],
+            [
+              26.274939,
+              47.664131
+            ],
+            [
+              26.274939,
+              47.66377
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "V1",
+        "utr": "V1",
+        "DENUMIRE": "Parcul Central Suceava",
+        "denumire": "Parcul Central Suceava",
+        "NAME": "Parcul Central",
+        "POT": 5,
+        "CUT": 0.05,
+        "RH": "-",
+        "FUNCTIUNE": "Parc urban",
+        "functiune": "Parc urban",
+        "c": "#16A34A",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 39
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.259489,
+              47.66332
+            ],
+            [
+              26.260158,
+              47.66332
+            ],
+            [
+              26.260158,
+              47.66368
+            ],
+            [
+              26.259489,
+              47.66368
+            ],
+            [
+              26.259489,
+              47.66332
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "V1",
+        "utr": "V1",
+        "DENUMIRE": "Parc Tatarasi",
+        "denumire": "Parc Tatarasi",
+        "NAME": "Parc Tataras",
+        "POT": 5,
+        "CUT": 0.05,
+        "RH": "-",
+        "FUNCTIUNE": "Parc",
+        "functiune": "Parc",
+        "c": "#16A34A",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 40
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.282341,
+              47.666857
+            ],
+            [
+              26.282969,
+              47.667011
+            ],
+            [
+              26.282786,
+              47.66735
+            ],
+            [
+              26.282158,
+              47.667196
+            ],
+            [
+              26.282341,
+              47.666857
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "V1",
+        "utr": "V1",
+        "DENUMIRE": "Parcul Cetatii",
+        "denumire": "Parcul Cetatii",
+        "NAME": "Parc Cetate",
+        "POT": 5,
+        "CUT": 0.05,
+        "RH": "-",
+        "FUNCTIUNE": "Parc",
+        "functiune": "Parc",
+        "c": "#16A34A",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 41
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.283531,
+              47.660549
+            ],
+            [
+              26.28433,
+              47.660596
+            ],
+            [
+              26.284272,
+              47.661045
+            ],
+            [
+              26.283472,
+              47.660998
+            ],
+            [
+              26.283531,
+              47.660549
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "V2",
+        "utr": "V2",
+        "DENUMIRE": "Baza sportiva Areni",
+        "denumire": "Baza sportiva Areni",
+        "NAME": "Baza Sportiva Areni",
+        "POT": 10,
+        "CUT": 0.1,
+        "RH": "P",
+        "FUNCTIUNE": "Sport",
+        "functiune": "Sport",
+        "c": "#22C55E",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 42
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.27019,
+              47.656068
+            ],
+            [
+              26.270859,
+              47.656068
+            ],
+            [
+              26.270859,
+              47.656518
+            ],
+            [
+              26.27019,
+              47.656518
+            ],
+            [
+              26.27019,
+              47.656068
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "V2",
+        "utr": "V2",
+        "DENUMIRE": "Stadion Municipal Suceava",
+        "denumire": "Stadion Municipal Suceava",
+        "NAME": "Stadion Municipal",
+        "POT": 10,
+        "CUT": 0.1,
+        "RH": "P-P+2",
+        "FUNCTIUNE": "Sport",
+        "functiune": "Sport",
+        "c": "#22C55E",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 43
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.273534,
+              47.660004
+            ],
+            [
+              26.27817,
+              47.659565
+            ],
+            [
+              26.278217,
+              47.659788
+            ],
+            [
+              26.273581,
+              47.660227
+            ],
+            [
+              26.273534,
+              47.660004
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "V3",
+        "utr": "V3",
+        "DENUMIRE": "Culoar protectie rau Suceava",
+        "denumire": "Culoar protectie rau Suceava",
+        "NAME": "Culoar Verde Rau Suceava",
+        "POT": 2,
+        "CUT": 0.02,
+        "RH": "-",
+        "FUNCTIUNE": "Protectie apa",
+        "functiune": "Protectie apa",
+        "c": "#4ADE80",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 44
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.263866,
+              47.681805
+            ],
+            [
+              26.269102,
+              47.681055
+            ],
+            [
+              26.269157,
+              47.681232
+            ],
+            [
+              26.263922,
+              47.681981
+            ],
+            [
+              26.263866,
+              47.681805
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "V3",
+        "utr": "V3",
+        "DENUMIRE": "Culoar protectie cale ferata",
+        "denumire": "Culoar protectie cale ferata",
+        "NAME": "Culoar Verde CF",
+        "POT": 2,
+        "CUT": 0.02,
+        "RH": "-",
+        "FUNCTIUNE": "Protectie CF",
+        "functiune": "Protectie CF",
+        "c": "#4ADE80",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 45
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.262097,
+              47.660572
+            ],
+            [
+              26.2629,
+              47.660572
+            ],
+            [
+              26.2629,
+              47.661023
+            ],
+            [
+              26.262097,
+              47.661023
+            ],
+            [
+              26.262097,
+              47.660572
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "VN",
+        "utr": "VN",
+        "DENUMIRE": "Padurea Zamca - zona naturala protejata",
+        "denumire": "Padurea Zamca - zona naturala protejata",
+        "NAME": "Zona Naturala Padurea Zamca",
+        "POT": 0,
+        "CUT": 0.0,
+        "RH": "-",
+        "FUNCTIUNE": "Natura",
+        "functiune": "Natura",
+        "c": "#15803D",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 46
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.264906,
+              47.652509
+            ],
+            [
+              26.265441,
+              47.652509
+            ],
+            [
+              26.265441,
+              47.652869
+            ],
+            [
+              26.264906,
+              47.652869
+            ],
+            [
+              26.264906,
+              47.652509
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "CC",
+        "utr": "CC",
+        "DENUMIRE": "Cimitirul Central Suceava",
+        "denumire": "Cimitirul Central Suceava",
+        "NAME": "Cimitirul Central",
+        "POT": 10,
+        "CUT": 0.1,
+        "RH": "P",
+        "FUNCTIUNE": "Cimitir",
+        "functiune": "Cimitir",
+        "c": "#D1D5DB",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 47
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.299753,
+              47.670572
+            ],
+            [
+              26.300154,
+              47.670572
+            ],
+            [
+              26.300154,
+              47.670842
+            ],
+            [
+              26.299753,
+              47.670842
+            ],
+            [
+              26.299753,
+              47.670572
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "CC",
+        "utr": "CC",
+        "DENUMIRE": "Cimitirul Burdujeni",
+        "denumire": "Cimitirul Burdujeni",
+        "NAME": "Cimitirul Burdujeni",
+        "POT": 10,
+        "CUT": 0.1,
+        "RH": "P",
+        "FUNCTIUNE": "Cimitir",
+        "functiune": "Cimitir",
+        "c": "#D1D5DB",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 48
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.275212,
+              47.660918
+            ],
+            [
+              26.279186,
+              47.660542
+            ],
+            [
+              26.279214,
+              47.660676
+            ],
+            [
+              26.27524,
+              47.661052
+            ],
+            [
+              26.275212,
+              47.660918
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "AP",
+        "utr": "AP",
+        "DENUMIRE": "Albia raului Suceava",
+        "denumire": "Albia raului Suceava",
+        "NAME": "Rau Suceava Albie",
+        "POT": 0,
+        "CUT": 0.0,
+        "RH": "-",
+        "FUNCTIUNE": "Apa",
+        "functiune": "Apa",
+        "c": "#7DD3FC",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 49
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.260827,
+              47.661518
+            ],
+            [
+              26.261495,
+              47.661518
+            ],
+            [
+              26.261495,
+              47.661878
+            ],
+            [
+              26.260827,
+              47.661878
+            ],
+            [
+              26.260827,
+              47.661518
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "PA",
+        "utr": "PA",
+        "DENUMIRE": "Fond forestier Zamca",
+        "denumire": "Fond forestier Zamca",
+        "NAME": "Padurea Zamca",
+        "POT": 0,
+        "CUT": 0.0,
+        "RH": "-",
+        "FUNCTIUNE": "Padure",
+        "functiune": "Padure",
+        "c": "#6EE7B7",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 50
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.306307,
+              47.656113
+            ],
+            [
+              26.306976,
+              47.656113
+            ],
+            [
+              26.306976,
+              47.656473
+            ],
+            [
+              26.306307,
+              47.656473
+            ],
+            [
+              26.306307,
+              47.656113
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "GC",
+        "utr": "GC",
+        "DENUMIRE": "Statia de epurare Suceava",
+        "denumire": "Statia de epurare Suceava",
+        "NAME": "Statie Epurare",
+        "POT": 50,
+        "CUT": 1.5,
+        "RH": "P+1-P+2",
+        "FUNCTIUNE": "Gospodarie comunala",
+        "functiune": "Gospodarie comunala",
+        "c": "#6B7280",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 51
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.232668,
+              47.667779
+            ],
+            [
+              26.233471,
+              47.667779
+            ],
+            [
+              26.233471,
+              47.66823
+            ],
+            [
+              26.232668,
+              47.66823
+            ],
+            [
+              26.232668,
+              47.667779
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "GC",
+        "utr": "GC",
+        "DENUMIRE": "Depozit deseuri Moara",
+        "denumire": "Depozit deseuri Moara",
+        "NAME": "Depozit Deseuri",
+        "POT": 50,
+        "CUT": 1.5,
+        "RH": "P+1",
+        "FUNCTIUNE": "Gospodarie comunala",
+        "functiune": "Gospodarie comunala",
+        "c": "#6B7280",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 52
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.277012,
+              47.658905
+            ],
+            [
+              26.277414,
+              47.658905
+            ],
+            [
+              26.277414,
+              47.659086
+            ],
+            [
+              26.277012,
+              47.659086
+            ],
+            [
+              26.277012,
+              47.658905
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "TR",
+        "utr": "TR",
+        "DENUMIRE": "Autogara Suceava",
+        "denumire": "Autogara Suceava",
+        "NAME": "Autogara",
+        "POT": 30,
+        "CUT": 0.8,
+        "RH": "P+1",
+        "FUNCTIUNE": "Transport",
+        "functiune": "Transport",
+        "c": "#CBD5E1",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 53
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.286147,
+              47.67963
+            ],
+            [
+              26.286937,
+              47.679536
+            ],
+            [
+              26.287007,
+              47.679802
+            ],
+            [
+              26.286216,
+              47.679896
+            ],
+            [
+              26.286147,
+              47.67963
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "TC",
+        "utr": "TC",
+        "DENUMIRE": "Gara CFR Suceava",
+        "denumire": "Gara CFR Suceava",
+        "NAME": "Gara CFR",
+        "POT": 5,
+        "CUT": 0.1,
+        "RH": "-",
+        "FUNCTIUNE": "Cale ferata",
+        "functiune": "Cale ferata",
+        "c": "#94A3B8",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 54
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.246246,
+              47.65886
+            ],
+            [
+              26.246647,
+              47.65886
+            ],
+            [
+              26.246647,
+              47.659131
+            ],
+            [
+              26.246246,
+              47.659131
+            ],
+            [
+              26.246246,
+              47.65886
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "TE",
+        "utr": "TE",
+        "DENUMIRE": "Statii transformare electrica",
+        "denumire": "Statii transformare electrica",
+        "NAME": "Statii Transformare",
+        "POT": 25,
+        "CUT": 0.6,
+        "RH": "P+1",
+        "FUNCTIUNE": "Echipare tehnica",
+        "functiune": "Echipare tehnica",
+        "c": "#94A3B8",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 55
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.273498,
+              47.663973
+            ],
+            [
+              26.274298,
+              47.66402
+            ],
+            [
+              26.274239,
+              47.664469
+            ],
+            [
+              26.27344,
+              47.664422
+            ],
+            [
+              26.273498,
+              47.663973
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "ZP",
+        "utr": "ZP",
+        "DENUMIRE": "Zona protejata centru istoric Suceava",
+        "denumire": "Zona protejata centru istoric Suceava",
+        "NAME": "Zona Protejata Centru Istoric",
+        "POT": 40,
+        "CUT": 1.2,
+        "RH": "P+2-P+3",
+        "FUNCTIUNE": "Patrimoniu construit",
+        "functiune": "Patrimoniu construit",
+        "c": "#C4B5FD",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 56
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.286026,
+              47.657991
+            ],
+            [
+              26.287092,
+              47.657929
+            ],
+            [
+              26.287127,
+              47.658198
+            ],
+            [
+              26.286061,
+              47.658261
+            ],
+            [
+              26.286026,
+              47.657991
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "ZR",
+        "utr": "ZR",
+        "DENUMIRE": "Zona inundabila luncă raul Suceava",
+        "denumire": "Zona inundabila luncă raul Suceava",
+        "NAME": "Zona Risc Inundabilitate",
+        "POT": 10,
+        "CUT": 0.2,
+        "RH": "-",
+        "FUNCTIUNE": "Risc natural",
+        "functiune": "Risc natural",
+        "c": "#FCA5A5",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 57
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.282565,
+              47.683419
+            ],
+            [
+              26.285183,
+              47.683044
+            ],
+            [
+              26.285238,
+              47.683221
+            ],
+            [
+              26.28262,
+              47.683595
+            ],
+            [
+              26.282565,
+              47.683419
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "ZS",
+        "utr": "ZS",
+        "DENUMIRE": "Zona de siguranta cale ferata",
+        "denumire": "Zona de siguranta cale ferata",
+        "NAME": "Zona Siguranta CF",
+        "POT": 5,
+        "CUT": 0.1,
+        "RH": "-",
+        "FUNCTIUNE": "Siguranta CF",
+        "functiune": "Siguranta CF",
+        "c": "#FEF3C7",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 58
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.275608,
+              47.661563
+            ],
+            [
+              26.276143,
+              47.661563
+            ],
+            [
+              26.276143,
+              47.661833
+            ],
+            [
+              26.275608,
+              47.661833
+            ],
+            [
+              26.275608,
+              47.661563
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "HT",
+        "utr": "HT",
+        "DENUMIRE": "Hoteluri si turism centru",
+        "denumire": "Hoteluri si turism centru",
+        "NAME": "Zona Hoteliera Centru",
+        "POT": 50,
+        "CUT": 2.0,
+        "RH": "P+4-P+6",
+        "FUNCTIUNE": "Hotelier/Turism",
+        "functiune": "Hotelier/Turism",
+        "c": "#A78BFA",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 59
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.27835,
+              47.675077
+            ],
+            [
+              26.278751,
+              47.675077
+            ],
+            [
+              26.278751,
+              47.675347
+            ],
+            [
+              26.27835,
+              47.675347
+            ],
+            [
+              26.27835,
+              47.675077
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "HT",
+        "utr": "HT",
+        "DENUMIRE": "Hoteluri nord Suceava",
+        "denumire": "Hoteluri nord Suceava",
+        "NAME": "Zona Hoteliera Nord",
+        "POT": 50,
+        "CUT": 2.0,
+        "RH": "P+4-P+5",
+        "FUNCTIUNE": "Hotelier",
+        "functiune": "Hotelier",
+        "c": "#A78BFA",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 60
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.271461,
+              47.654266
+            ],
+            [
+              26.272264,
+              47.654266
+            ],
+            [
+              26.272264,
+              47.654716
+            ],
+            [
+              26.271461,
+              47.654716
+            ],
+            [
+              26.271461,
+              47.654266
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "SP",
+        "utr": "SP",
+        "DENUMIRE": "Complex sportiv municipal",
+        "denumire": "Complex sportiv municipal",
+        "NAME": "Complex Sportiv",
+        "POT": 15,
+        "CUT": 0.3,
+        "RH": "P+1-P+2",
+        "FUNCTIUNE": "Sport/Agrement",
+        "functiune": "Sport/Agrement",
+        "c": "#4ADE80",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 61
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.306074,
+              47.676776
+            ],
+            [
+              26.30714,
+              47.676713
+            ],
+            [
+              26.30721,
+              47.677251
+            ],
+            [
+              26.306144,
+              47.677314
+            ],
+            [
+              26.306074,
+              47.676776
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "AG",
+        "utr": "AG",
+        "DENUMIRE": "Zona agrozootehnica Itcani",
+        "denumire": "Zona agrozootehnica Itcani",
+        "NAME": "Zona Agrozootehnica Itcani",
+        "POT": 20,
+        "CUT": 0.5,
+        "RH": "P+1-P+2",
+        "FUNCTIUNE": "Agrozootehnic",
+        "functiune": "Agrozootehnic",
+        "c": "#BEF264",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 62
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.235277,
+              47.656068
+            ],
+            [
+              26.236213,
+              47.656068
+            ],
+            [
+              26.236213,
+              47.656518
+            ],
+            [
+              26.235277,
+              47.656518
+            ],
+            [
+              26.235277,
+              47.656068
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "AT",
+        "utr": "AT",
+        "DENUMIRE": "Zona agroturism periferie",
+        "denumire": "Zona agroturism periferie",
+        "NAME": "Zona Agroturism Periferie",
+        "POT": 25,
+        "CUT": 0.6,
+        "RH": "P+2",
+        "FUNCTIUNE": "Agroturism",
+        "functiune": "Agroturism",
+        "c": "#D9F99D",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 63
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.270523,
+              47.690077
+            ],
+            [
+              26.275877,
+              47.690077
+            ],
+            [
+              26.275877,
+              47.690977
+            ],
+            [
+              26.270523,
+              47.690977
+            ],
+            [
+              26.270523,
+              47.690077
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "EXT",
+        "utr": "EXT",
+        "DENUMIRE": "Extravilan nord Suceava",
+        "denumire": "Extravilan nord Suceava",
+        "NAME": "Extravilan Nord",
+        "POT": 40,
+        "CUT": 4.0,
+        "RH": "-",
+        "FUNCTIUNE": "Extravilan",
+        "functiune": "Extravilan",
+        "c": "#CBD5E1",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 64
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.270526,
+              47.636023
+            ],
+            [
+              26.275874,
+              47.636023
+            ],
+            [
+              26.275874,
+              47.636923
+            ],
+            [
+              26.270526,
+              47.636923
+            ],
+            [
+              26.270526,
+              47.636023
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "EXT",
+        "utr": "EXT",
+        "DENUMIRE": "Extravilan sud Suceava",
+        "denumire": "Extravilan sud Suceava",
+        "NAME": "Extravilan Sud",
+        "POT": 40,
+        "CUT": 4.0,
+        "RH": "-",
+        "FUNCTIUNE": "Extravilan",
+        "functiune": "Extravilan",
+        "c": "#CBD5E1",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 65
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.225713,
+              47.661698
+            ],
+            [
+              26.22705,
+              47.661698
+            ],
+            [
+              26.22705,
+              47.665302
+            ],
+            [
+              26.225713,
+              47.665302
+            ],
+            [
+              26.225713,
+              47.661698
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "EXT",
+        "utr": "EXT",
+        "DENUMIRE": "Extravilan vest Suceava",
+        "denumire": "Extravilan vest Suceava",
+        "NAME": "Extravilan Vest",
+        "POT": 40,
+        "CUT": 4.0,
+        "RH": "-",
+        "FUNCTIUNE": "Extravilan",
+        "functiune": "Extravilan",
+        "c": "#CBD5E1",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 66
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.31935,
+              47.661698
+            ],
+            [
+              26.320687,
+              47.661698
+            ],
+            [
+              26.320687,
+              47.665302
+            ],
+            [
+              26.31935,
+              47.665302
+            ],
+            [
+              26.31935,
+              47.661698
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "UTR": "EXT",
+        "utr": "EXT",
+        "DENUMIRE": "Extravilan est Suceava",
+        "denumire": "Extravilan est Suceava",
+        "NAME": "Extravilan Est",
+        "POT": 40,
+        "CUT": 4.0,
+        "RH": "-",
+        "FUNCTIUNE": "Extravilan",
+        "functiune": "Extravilan",
+        "c": "#CBD5E1",
+        "sursa": "PUG Suceava HCL 162/2017",
+        "id": 67
+      }
+    }
+  ]
+}
