@@ -4897,7 +4897,21 @@ window.addEventListener('load', function() {
   // Suprascrierea se face imediat si dupa load, garantat
   function _installUATSelector() {
     window.showUATSelector = function() {
-      _showSimpleUATSelector();
+      if(window.TCI && typeof window.TCI._showSelector === 'function') {
+        // Folosim selectorul TCI (cu harta + 30 UAT-uri)
+        // Dar prevenim lansarea automata a filmului la selectie
+        const _origLaunch = window.TCI._launch;
+        window.TCI._launch = function(mode, opts) {
+          // Ignoram lansarea automata - userul va alege manual UTR/TCI
+          window.TCI._launch = _origLaunch; // restauram
+          console.log('[UAT] Selectat, film oprit. Apasa UTR sau Film Cinematic manual.');
+        };
+        window.TCI._showSelector();
+        // Timeout safety — restauram _launch daca selectorul s-a inchis fara selectie
+        setTimeout(function() { window.TCI._launch = _origLaunch; }, 30000);
+      } else {
+        _showSimpleUATSelector();
+      }
     };
     window.showUATSelector._ours = true;
   }
