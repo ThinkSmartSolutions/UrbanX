@@ -5304,16 +5304,8 @@ window.addEventListener('load', function() {
       });
     };
 
-    // Override si pe butonul UTR direct — elimina orice listener vechi
-    const btn = document.getElementById('btnUTR');
-    if(btn) {
-      const newBtn = btn.cloneNode(true);
-      newBtn.onclick = function() { window.toggleUTR(); };
-      btn.parentNode.replaceChild(newBtn, btn);
-    }
-
     console.log('[UrbanX] toggleUTR override activ — UAT dinamic');
-  }, 2000); // dupa ce toate JS-urile s-au incarcat
+  }, 2000);
 });
 </script>
 
