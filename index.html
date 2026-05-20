@@ -791,7 +791,7 @@ canvas#c2d{width:100%;height:100%;display:block}
 </script>
 
   <!-- UrbanX Workspace Styles -->
-  <link rel="stylesheet" href="wx-styles.css?v=2026051010">
+  <link rel="stylesheet" href="wx-styles.css?v=20260520c">
 <style>
 /* Override: integreaza navigatia noua cu structura existenta */
 #app { 
@@ -880,7 +880,7 @@ canvas#c2d{width:100%;height:100%;display:block}
     // Service Worker registration
     if('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=20260516')
+        navigator.serviceWorker.register('./sw.js?v=20260520c')
           .then(r => console.log('[SW] OK v4.0:', r.scope))
           .catch(e => console.warn('[SW] Skip:', e.message));
       });
@@ -1740,7 +1740,7 @@ document.addEventListener('click', function(){
 <!-- UrbanX JS Modules — ordinea de incarcare e importanta -->
 <script src="js/00-globals.js?v=2026050601"></script>
 <script src="js/02-map-core.js?v=2026050804"></script>
-<script src="js/03-ui-panel.js?v=20260516"></script>
+<script src="js/03-ui-panel.js?v=20260520c"></script>
 <script src="js/04-search.js?v=2026050601"></script>
 <script src="js/05-cad-utils.js?v=2026050601"></script>
 <script src="js/06-aedis.js?v=2026050802"></script>
@@ -1749,33 +1749,33 @@ document.addEventListener('click', function(){
 <script src="js/09-pdf-engine.js?v=2026051006"></script>
 <script src="js/10-studies-geo-engine.js?v=2026051301"></script>
     <script src="js/10-studies-terrain.js?v=2026051301"></script>
-    <script src="js/10-studies-stubs.js?v=20260516"></script>
-    <script src="js/10-studies.js?v=20260516"></script>
-    <script src="js/10-studies-fix.js?v=20260516"></script>
-    <script src="js/10-studies-connector.js?v=20260516"></script>
-    <script src="js/10-studies-new.js?v=20260516"></script>
+    <script src="js/10-studies-stubs.js?v=20260520c"></script>
+    <script src="js/10-studies.js?v=20260520c"></script>
+    <script src="js/10-studies-fix.js?v=20260520c"></script>
+    <script src="js/10-studies-connector.js?v=20260520c"></script>
+    <script src="js/10-studies-new.js?v=20260520c"></script>
 <script src="js/11-viewer3d.js?v=2026050904"></script>
 <script src="js/12-admin.js?v=2026050601"></script>
 <script src="js/13-info-drawer.js?v=2026051004"></script>
 <script src="js/14-docx-export.js?v=2026050601"></script>
-<script src="js/15-relevee.js?v=20260519y"></script>
+<script src="js/15-relevee.js?v=20260520cy"></script>
     <script src="js/15-relevee-canvas-upgrade.js?v=20260517"></script>
     <!-- UrbanX Relevee Modules — încărcate după motorul principal -->
-    <script src="js/15-relevee-walls.js?v=20260519c"></script>
-    <script src="js/15-relevee-walls-patch.js?v=20260519d"></script><!-- FIX: arc uși + culori apt -->
-    <script src="js/15-relevee-planfix.js?v=20260519a"></script><!-- FIX: plan+fațadă arhitectural -->
+    <script src="js/15-relevee-walls.js?v=20260520cc"></script>
+    <script src="js/15-relevee-walls-patch.js?v=20260520cd"></script><!-- FIX: arc uși + culori apt -->
+    <script src="js/15-relevee-planfix.js?v=20260520c"></script><!-- FIX: plan+fațadă arhitectural -->
     <script src="js/15-relevee-planseA3.js?v=2026051301"></script>
     <script src="js/15-relevee-enhance.js?v=2026051301"></script>
-    <script src="js/15-relevee-dxf.js?v=20260519d"></script><!-- FIX v2: EOF + secțiuni reale -->
+    <script src="js/15-relevee-dxf.js?v=20260520cd"></script><!-- FIX v2: EOF + secțiuni reale -->
     <script src="js/15-relevee-subsol.js?v=2026051301"></script>
     <script src="js/15-relevee-acoperis.js?v=2026051301"></script>
-    <script src="js/15-relevee-dna-optimize.js?v=20260518j"></script>
-    <script src="js/15-relevee-extras.js?v=20260519c"></script>
+    <script src="js/15-relevee-dna-optimize.js?v=20260520cj"></script>
+    <script src="js/15-relevee-extras.js?v=20260520cc"></script>
     <script src="js/15-relevee-multibuilding.js?v=2026051301"></script>
     <script src="js/18-context3d.js?v=2026051301"></script>
-    <script src="js/15-relevee-toolbar.js?v=20260519c"></script>
+    <script src="js/15-relevee-toolbar.js?v=20260520cc"></script>
     <script src="js/15-relevee-pdf-upgrade.js?v=2026051301"></script>
-<script src="js/fixes-audit.js?v=20260516"></script>
+<script src="js/fixes-audit.js?v=20260520c"></script>
 <script src="js/map-resize-fix.js?v=2026050601"></script>
 
 <script>
@@ -2629,33 +2629,33 @@ setInterval(()=>{
 
 
   <!-- UrbanX Architecture v3.2 -->
-  <script src="js/00-packages.js?v=2026051010"></script>
-  <script src="js/16-projects.js?v=2026051010"></script>
-  <script src="js/17-projection-engine.js?v=20260516"></script>
+  <script src="js/00-packages.js?v=20260520c"></script>
+  <script src="js/16-projects.js?v=20260520c"></script>
+  <script src="js/17-projection-engine.js?v=20260520c"></script>
   <!-- Deck.gl v9 — compatibil cu Mapbox GL JS v3 -->
   <script src="js/uats-registry.js?v=2026051201"></script>
-  <script src="js/17-tci-cinema.js?v=20260516"></script>
+  <script src="js/17-tci-cinema.js?v=20260520c"></script>
   
-  <script src="js/18-animation-engine.js?v=2026051010"></script>
-  <script src="js/uats-extended-data.js?v=20260519a"></script><!-- Date extinse: etnic+ISD+AROPE+geo+poli+TFR+migratii -->
-  <script src="js/tci-masterplan.js?v=20260519a"></script>
-  <script src="js/tci-masterplan-visual.js?v=20260519a"></script>
-  <script src="js/tci-masterplan-qr.js?v=20260519a"></script><!-- QR Code in PDF Masterplan — scanabil cu telefonul → deschide scenariul live -->
-  <script src="js/tci-cinematic-capture.js?v=20260519a"></script><!-- Capture: frames automate Cinema v2 → colaj în Masterplan PDF --><!-- Masterplan visual: cover premium + SWOT + formule + progress bars --><!-- TCI Masterplan: PDF 12pg+grafice+benchmark+metodologie citabilă -->
-  <script src="js/tci-intelligence.js?v=20260519a"></script><!-- TCI Intelligence: Dashboard+4D Timeline+Comparator+Milestones -->
-  <script src="js/tci-data-live.js?v=20260519a"></script>
-  <script src="js/tci-street-experience.js?v=20260519a"></script>
-  <script src="js/tci-street-real.js?v=20260519a"></script><!-- Vehicule OSM reale + cladiri etaj/etaj + iluminat noapte -->
-  <script src="js/urbanx-analytics.js?v=20260519a"></script>
-  <script src="js/tci-transparency.js?v=20260519a"></script>
-  <script src="js/urbanx-urban-intelligence.js?v=20260519a"></script>
-  <script src="js/tci-onboarding.js?v=20260519a"></script>
-  <script src="js/tci-cinematic-scenes.js?v=20260519a"></script>
-  <script src="js/tci-zone-engine.js?v=20260519a"></script>
-  <script src="js/urbanx-compare-pro.js?v=20260519a"></script><!-- Compare Pro + Planning Score + Presentation Mode -->
-  <script src="js/urbanx-science-layer.js?v=20260519a"></script><!-- SpaceSyntax+Noise+Sunlight+Economic+Swipe+ZoneLabels -->
-  <script src="js/urbanx-eu-benchmark.js?v=20260519a"></script><!-- European Benchmarking Pro — 17 orase EU · 12 indicatori · Eurostat Urban Audit 2021 -->
-  <script src="js/urbanx-ai-narrative.js?v=20260519a"></script><!-- AI Narrative Generator — Claude API · Memoriu justificativ urbanistic automat -->
+  <script src="js/18-animation-engine.js?v=20260520c"></script>
+  <script src="js/uats-extended-data.js?v=20260520c"></script><!-- Date extinse: etnic+ISD+AROPE+geo+poli+TFR+migratii -->
+  <script src="js/tci-masterplan.js?v=20260520c"></script>
+  <script src="js/tci-masterplan-visual.js?v=20260520c"></script>
+  <script src="js/tci-masterplan-qr.js?v=20260520c"></script><!-- QR Code in PDF Masterplan — scanabil cu telefonul → deschide scenariul live -->
+  <script src="js/tci-cinematic-capture.js?v=20260520c"></script><!-- Capture: frames automate Cinema v2 → colaj în Masterplan PDF --><!-- Masterplan visual: cover premium + SWOT + formule + progress bars --><!-- TCI Masterplan: PDF 12pg+grafice+benchmark+metodologie citabilă -->
+  <script src="js/tci-intelligence.js?v=20260520c"></script><!-- TCI Intelligence: Dashboard+4D Timeline+Comparator+Milestones -->
+  <script src="js/tci-data-live.js?v=20260520c"></script>
+  <script src="js/tci-street-experience.js?v=20260520c"></script>
+  <script src="js/tci-street-real.js?v=20260520c"></script><!-- Vehicule OSM reale + cladiri etaj/etaj + iluminat noapte -->
+  <script src="js/urbanx-analytics.js?v=20260520c"></script>
+  <script src="js/tci-transparency.js?v=20260520c"></script>
+  <script src="js/urbanx-urban-intelligence.js?v=20260520c"></script>
+  <script src="js/tci-onboarding.js?v=20260520c"></script>
+  <script src="js/tci-cinematic-scenes.js?v=20260520c"></script>
+  <script src="js/tci-zone-engine.js?v=20260520c"></script>
+  <script src="js/urbanx-compare-pro.js?v=20260520c"></script><!-- Compare Pro + Planning Score + Presentation Mode -->
+  <script src="js/urbanx-science-layer.js?v=20260520c"></script><!-- SpaceSyntax+Noise+Sunlight+Economic+Swipe+ZoneLabels -->
+  <script src="js/urbanx-eu-benchmark.js?v=20260520c"></script><!-- European Benchmarking Pro — 17 orase EU · 12 indicatori · Eurostat Urban Audit 2021 -->
+  <script src="js/urbanx-ai-narrative.js?v=20260520c"></script><!-- AI Narrative Generator — Claude API · Memoriu justificativ urbanistic automat -->
 <script>
 // Initializare package selector modal
 function _initPackageModal() {
@@ -2699,15 +2699,50 @@ window._onParcelSelectedHook = function(parcel) {
   if(typeof _wxUpdateParcelInfo === 'function') _wxUpdateParcelInfo(parcel);
 };
 </script>
-  <script src="js/20-uats-database.js?v=2026051010"></script>
-  <script src="js/21-cloud-sync.js?v=2026051010"></script>
-  <script src="js/22-zoning-connector.js?v=20260519a"></script><!-- Etapa 1: Regulament din Supabase -->
-  <script src="js/23-legal-chain.js?v=20260519a"></script><!-- Etapa 3: Lanț juridic Neo4j -->
-  <script src="js/24-timeline-layer.js?v=20260519a"></script><!-- Etapa 4: Temporal evolution -->
-  <script src="js/25-prediction-layer.js?v=20260519a"></script><!-- Etapa 5: Prediction heatmap -->
-  <script src="js/15-relevee-mobile-memoriu.js?v=20260519a"></script><!-- FIX: zoom mobil + generateMemoriu -->
-  <script src="js/15-relevee-fixes-studii.js?v=20260519a"></script><!-- FIX: close mobil + 27 studii definite -->
-  <script src="js/19-ux-polish.js?v=2026051010"></script>
+  <script src="js/20-uats-database.js?v=20260520c"></script>
+
+<script>
+// ── WATCHDOG _RO_CITIES_DB ──────────────────────────────────────────────
+// Daca 20-uats-database.js nu s-a incarcat (cache vechi SW),
+// il reincarcam fortat fara cache
+(function() {
+  function checkAndReload(attempt) {
+    if(typeof window._RO_CITIES_DB !== 'undefined' && 
+       Object.keys(window._RO_CITIES_DB).length > 10) {
+      console.log('[DB Watchdog] ✅ _RO_CITIES_DB OK:', Object.keys(window._RO_CITIES_DB).length, 'UAT-uri');
+      return;
+    }
+    if(attempt >= 3) {
+      console.warn('[DB Watchdog] _RO_CITIES_DB absent — reîncarc forțat 20-uats-database.js');
+      // Forteaza reload fara cache
+      const s = document.createElement('script');
+      s.src = 'js/20-uats-database.js?nocache=' + Date.now();
+      s.onload = () => {
+        console.log('[DB Watchdog] ✅ Reincarcat! UAT-uri:', Object.keys(window._RO_CITIES_DB||{}).length);
+        // Trigger reinitializare module
+        setTimeout(() => {
+          if(window._ZoneEngine) window._ZoneEngine._cache = {};
+          if(window._CaptureEngine) window._CaptureEngine._frames = [];
+          console.log('[DB Watchdog] Module resetate — gata de utilizare');
+        }, 500);
+      };
+      s.onerror = () => console.error('[DB Watchdog] Eroare reload!');
+      document.head.appendChild(s);
+      return;
+    }
+    setTimeout(() => checkAndReload(attempt + 1), 1500);
+  }
+  // Verificam dupa ce toate scripturile s-au incarcat
+  window.addEventListener('load', () => setTimeout(() => checkAndReload(0), 500));
+})();
+</script>  <script src="js/21-cloud-sync.js?v=20260520c"></script>
+  <script src="js/22-zoning-connector.js?v=20260520c"></script><!-- Etapa 1: Regulament din Supabase -->
+  <script src="js/23-legal-chain.js?v=20260520c"></script><!-- Etapa 3: Lanț juridic Neo4j -->
+  <script src="js/24-timeline-layer.js?v=20260520c"></script><!-- Etapa 4: Temporal evolution -->
+  <script src="js/25-prediction-layer.js?v=20260520c"></script><!-- Etapa 5: Prediction heatmap -->
+  <script src="js/15-relevee-mobile-memoriu.js?v=20260520c"></script><!-- FIX: zoom mobil + generateMemoriu -->
+  <script src="js/15-relevee-fixes-studii.js?v=20260520c"></script><!-- FIX: close mobil + 27 studii definite -->
+  <script src="js/19-ux-polish.js?v=20260520c"></script>
 <script>
 // Hook pentru buton Export PDF in Bilant modal
 function addBilantExportBtn() {
