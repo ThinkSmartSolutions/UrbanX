@@ -3742,12 +3742,21 @@ window.addEventListener('load', function() {
   const CITY_KEY = 'ux_last_city';
   const SCN_KEY  = 'ux_last_scenario';
 
-  // Restauram la init
+  // Restauram la init — suprascrie si valoarea default 'iasi' din TCI
   window._restoreLastCity = function() {
-    const saved = localStorage.getItem(CITY_KEY) || 'RO-IS-01';
-    if(window.TCI && !window.TCI.cityKey) {
-      window.TCI.cityKey = saved;
+    const saved = localStorage.getItem(CITY_KEY);
+    if(!saved) return; // nimic salvat = lasam default
+    if(window.TCI) {
+      // Suprascrie INTOTDEAUNA — inclusiv 'iasi' hardcodat din 17-tci-cinema.js
+      try {
+        // Daca cityKey e deja hookedat cu defineProperty, scriem direct
+        window.TCI.cityKey = saved;
+      } catch(e) {
+        // Fallback: scriem in _v direct daca e deja sealed
+        window.TCI._cityKey_override = saved;
+      }
       if(window._ProjectionEngine) _ProjectionEngine.currentCity = saved;
+      console.log('[UrbanX] City restaurat din localStorage:', saved);
     }
   };
 
@@ -3755,7 +3764,19 @@ window.addEventListener('load', function() {
   window._hookCityPersistence = function() {
     if(!window.TCI || window.TCI._ph) return;
     window.TCI._ph = true;
-    let _v = window.TCI.cityKey || localStorage.getItem(CITY_KEY) || 'RO-IS-01';
+    // IMPORTANT: preferăm localStorage față de 'iasi' hardcodat în TCI
+    const _fromLS = localStorage.getItem(CITY_KEY);
+    const _fromTCI = window.TCI.cityKey;
+    // 'iasi' e valoarea default din 17-tci-cinema.js — o ignorăm dacă avem ceva mai bun
+    const _defaultVal = (_fromTCI === 'iasi') ? null : _fromTCI;
+    let _v = _fromLS || _defaultVal || 'RO-IS-01';
+
+    // Dacă TCI are 'iasi' dar localStorage are altceva → folosim localStorage
+    if(_fromTCI === 'iasi' && _fromLS && _fromLS !== 'iasi') {
+      _v = _fromLS;
+      console.log('[UrbanX] Override iasi default → localStorage:', _v);
+    }
+
     try {
       Object.defineProperty(window.TCI, 'cityKey', {
         get()  { return _v; },
@@ -3768,10 +3789,10 @@ window.addEventListener('load', function() {
           const city = window._RO_CITIES_DB?.[v];
           if(city) {
             document.querySelectorAll('[data-city-name]').forEach(el => el.textContent = city.name);
-            const iasi = document.getElementById('btn-uat-iasi') ||
-                         document.querySelector('[data-uat="RO-IS-01"]');
-            // nu mai selectam Iasi default daca user a ales altceva
           }
+          // Actualizeaza titlul UTR drawer
+          const uatInd = document.getElementById('uat-indicator');
+          if(uatInd && city) uatInd.textContent = city.name;
         },
         configurable: true, enumerable: true
       });

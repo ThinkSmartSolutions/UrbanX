@@ -992,7 +992,7 @@ const _ProjectionEngine = {
   // Stare
   currentYear:      2025,
   currentScenario:  'S2',
-  currentCity:      null, // se seteaza din TCI.cityKey la open()
+  currentCity:      localStorage.getItem('ux_last_city') || null, // setat din localStorage
   isPlaying:        false,
   isOpen:           false,
   splitMode:        false,  // comparare 2 ani
