@@ -974,14 +974,14 @@ document.addEventListener('click', function(){
   <button class="tci-launch-btn" id="relevee-launch-btn" onclick="if(typeof generateRelevee==='function') generateRelevee(); else alert('Selectați o parcelă mai întâi')" title="Planșe tehnice, relevee, documentație preliminară PAC/CU" style="background:rgba(212,175,55,.12);border-color:rgba(212,175,55,.5);color:#D4AF37;">
     📐 <span class="tci-launch-label">Proiect Preliminar</span>
   </button>
-  <button class="tci-launch-btn" onclick="openTCI()" title="TCI Cinema clasic">
-    🏙 <span class="tci-launch-label">Temporal City Intelligence</span>
+  <button class="tci-launch-btn" onclick="openTCI()" title="Proiecție Urbană — panoul interactiv cu KPI-uri live, slider temporal, scenarii S1/S2/S3">
+    🏙 <span class="tci-launch-label">Proiecție Urbană</span>
   </button>
   <button class="tci-launch-btn" id="btn-cinema-v2"
     onclick="window._launchCinemaV2()"
-    title="TCI Cinematic v2 — 12 scene cu proiecții per zonă, bare 3D, trafic real"
+    title="Film Cinematic — 12 scene animate · proiecții per cartier · pentru prezentări"
     style="background:rgba(139,92,246,.15);border-color:rgba(139,92,246,.5);color:#a78bfa;">
-    🎬 <span class="tci-launch-label">Cinema v2</span>
+    🎬 <span class="tci-launch-label">Film Cinematic</span>
   </button>
   <div id="wx-user-btn" title="Contul meu">👤</div>
 </div>
@@ -1215,19 +1215,28 @@ document.addEventListener('click', function(){
   <!-- Grup 2: Vizualizare dropdown -->
   <div id="viz-group">
     <button class="tb-btn" onclick="_toggleVizMenu(event)" title="Vizualizare hartă" style="display:flex;align-items:center;gap:4px">
-      🏙 Vizualizare ▾
+      🗺 Hartă ▾
     </button>
   </div>
 
   <!-- Grup 3: Instrumente dropdown -->
   <div id="tools-group">
     <button class="tb-btn" onclick="_toggleToolsMenu(event)" title="Instrumente analiză" style="display:flex;align-items:center;gap:4px">
-      🔧 Instrumente ▾
+      🔬 Analiză ▾
     </button>
   </div>
 
   <!-- Rapoarte (rămâne vizibil — acțiunea principală) -->
   <button class="tb-btn" id="btnPDF" onclick="toggleRapoarteMenu()" title="Rapoarte & Studii" style="display:flex;align-items:center;gap:4px;position:relative">📋 Rapoarte ▾</button>
+
+  <!-- Meniu TCI Avansat — Cinema, Comparatii, AI, Zone -->
+  <div id="tci-group" style="position:relative">
+    <button class="tb-btn" onclick="_toggleTCIMenu(event)" title="Urbanist — toate uneltele avansate: film, comparații, masterplan, AI"
+      style="display:flex;align-items:center;gap:4px;background:rgba(139,92,246,.15);
+        border:1px solid rgba(139,92,246,.4);color:#a78bfa;border-radius:8px">
+      🏛 Urbanist ▾
+    </button>
+  </div>
 
   <!-- Admin & Cont -->
   <button onclick="_adminOpen()" id="btn-admin" title="Panou Admin" style="display:none;background:rgba(212,175,55,.15);border:1px solid rgba(212,175,55,.4);color:#d4af37;border-radius:7px;padding:4px 10px;cursor:pointer;font-size:11px;font-weight:700;flex-shrink:0;align-items:center;gap:4px" onmouseover="this.style.background='rgba(212,175,55,.3)'" onmouseout="this.style.background='rgba(212,175,55,.15)'">⚙️ Admin</button>
@@ -2835,11 +2844,179 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
     <script src="js/cookie-consent.js?v=2026051301"></script>
 
 
+<!-- TCI MENU — TCI Avansat dropdown -->
+<div id="tci-adv-menu" style="display:none;position:fixed;top:48px;
+  background:rgba(7,14,28,.97);border:1px solid rgba(139,92,246,.3);border-radius:12px;
+  padding:6px;min-width:260px;max-width:90vw;max-height:80vh;overflow-y:auto;
+  z-index:9100;box-shadow:0 8px 40px rgba(0,0,0,.8);backdrop-filter:blur(16px);
+  -webkit-overflow-scrolling:touch">
+
+  <!-- Grup: Cinema & Vizualizare -->
+  <div style="padding:4px 8px 3px;font-size:9px;color:#6b21a8;text-transform:uppercase;
+    letter-spacing:.07em;font-weight:700">🎬 Film & Prezentare</div>
+
+  <!-- Toggle mod TCI -->
+  <div style="display:flex;gap:4px;padding:4px 4px 6px;border-bottom:1px solid rgba(255,255,255,.06);margin-bottom:4px">
+    <button onclick="window._switchToTCIClassic&&_switchToTCIClassic()"
+      id="btn-tci-mode-classic"
+      style="flex:1;padding:7px 6px;border-radius:6px;background:rgba(96,165,250,.1);
+        border:1px solid rgba(96,165,250,.3);color:#60a5fa;font-size:11px;cursor:pointer;
+        font-family:inherit;font-weight:600;min-height:36px"
+      title="Butonul TCI din bara → panoul interactiv cu KPI-uri, slider, scenarii">
+      📊 TCI Clasic
+      <div style="font-size:9px;color:rgba(96,165,250,.5);font-weight:400">KPI · Slider · Scenarii</div>
+    </button>
+    <button onclick="window._switchToCinemaV2&&_switchToCinemaV2()"
+      id="btn-tci-mode-v2"
+      style="flex:1;padding:7px 6px;border-radius:6px;background:rgba(139,92,246,.1);
+        border:1px solid rgba(139,92,246,.3);color:#a78bfa;font-size:11px;cursor:pointer;
+        font-family:inherit;font-weight:600;min-height:36px"
+      title="Butonul TCI din bara → filmul cinematic 12 scene">
+      🎬 Cinema v2
+      <div style="font-size:9px;color:rgba(167,139,250,.5);font-weight:400">Film · 12 scene</div>
+    </button>
+  </div>
+
+  <button onclick="window._launchCinemaV2();_closeAllMenusAndOverlay()"
+    style="display:block;width:100%;text-align:left;background:rgba(139,92,246,.08);
+      border:none;color:#a78bfa;padding:10px 12px;cursor:pointer;border-radius:8px;
+      font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
+    onmouseover="this.style.background='rgba(139,92,246,.2)'"
+    onmouseout="this.style.background='rgba(139,92,246,.08)'">
+    🎬 TCI Cinematic v2
+    <div style="font-size:10px;color:rgba(167,139,250,.6);font-weight:400">12 scene · proiecții per cartier · 2 min</div>
+  </button>
+
+  <!-- Grup: Comparatii & Rapoarte -->
+  <div style="padding:6px 8px 3px;font-size:9px;color:#1d4ed8;text-transform:uppercase;
+    letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.06);margin-top:3px">
+    📊 Comparații & Benchmarking</div>
+
+  <button onclick="window._launchComparePro();_closeAllMenusAndOverlay()"
+    style="display:block;width:100%;text-align:left;background:rgba(59,130,246,.08);
+      border:none;color:#60a5fa;padding:10px 12px;cursor:pointer;border-radius:8px;
+      font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
+    onmouseover="this.style.background='rgba(59,130,246,.2)'"
+    onmouseout="this.style.background='rgba(59,130,246,.08)'">
+    🏙 Compare Pro <span onclick="event.stopPropagation();_showInfoDrawer('compare-pro')" title="Ce face această funcție?" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:rgba(148,163,184,.5);font-size:9px;font-weight:700;cursor:pointer;flex-shrink:0;vertical-align:middle;margin-left:4px">?</span>
+    
+    <div style="font-size:10px;color:rgba(96,165,250,.6);font-weight:400">2-5 UAT-uri · 20 indicatori · radar chart</div>
+  </button>
+
+  <button onclick="window._launchEUBenchmark();_closeAllMenusAndOverlay()"
+    style="display:block;width:100%;text-align:left;background:rgba(52,211,153,.08);
+      border:none;color:#34d399;padding:10px 12px;cursor:pointer;border-radius:8px;
+      font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
+    onmouseover="this.style.background='rgba(52,211,153,.2)'"
+    onmouseout="this.style.background='rgba(52,211,153,.08)'">
+    🌍 European Benchmarking Pro <span onclick="event.stopPropagation();_showInfoDrawer('eu-benchmark')" title="Ce face această funcție?" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:rgba(148,163,184,.5);font-size:9px;font-weight:700;cursor:pointer;flex-shrink:0;vertical-align:middle;margin-left:4px">?</span>
+    
+    <div style="font-size:10px;color:rgba(52,211,153,.6);font-weight:400">vs Krakow · Lublin · Debrecen · 12 indicatori EU</div>
+  </button>
+
+  <button onclick="window._launchPresentation();_closeAllMenusAndOverlay()"
+    style="display:block;width:100%;text-align:left;background:rgba(167,139,250,.08);
+      border:none;color:#a78bfa;padding:10px 12px;cursor:pointer;border-radius:8px;
+      font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
+    onmouseover="this.style.background='rgba(167,139,250,.2)'"
+    onmouseout="this.style.background='rgba(167,139,250,.08)'">
+    🎯 Prezentare Primărie <span onclick="event.stopPropagation();_showInfoDrawer('prezentare')" title="Ce face această funcție?" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:rgba(148,163,184,.5);font-size:9px;font-weight:700;cursor:pointer;flex-shrink:0;vertical-align:middle;margin-left:4px">?</span>
+    
+    <div style="font-size:10px;color:rgba(167,139,250,.6);font-weight:400">5 slide-uri · date reale · exportabil PDF</div>
+  </button>
+
+  <!-- Grup: Masterplan & AI -->
+  <div style="padding:6px 8px 3px;font-size:9px;color:#b45309;text-transform:uppercase;
+    letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.06);margin-top:3px">
+    📋 Masterplan & AI</div>
+
+  <button onclick="if(typeof generateMasterplan==='function')generateMasterplan();else{const k=window.TCI?.cityKey||'RO-IS-01';window._TCIMasterplanPDF?.generate(k,'S2');}_closeAllMenusAndOverlay()"
+    style="display:block;width:100%;text-align:left;background:rgba(212,175,55,.08);
+      border:none;color:#D4AF37;padding:10px 12px;cursor:pointer;border-radius:8px;
+      font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
+    onmouseover="this.style.background='rgba(212,175,55,.2)'"
+    onmouseout="this.style.background='rgba(212,175,55,.08)'">
+    📋 Masterplan PDF
+    <div style="font-size:10px;color:rgba(212,175,55,.6);font-weight:400">22 pagini · formule · surse · conf. Legii 350/2001</div>
+  </button>
+
+  <button onclick="(function(){const k=window.TCI?.cityKey||window._ProjectionEngine?.currentCity||'RO-IS-01';window._AIUrbanNarrative?.open(k);_closeAllMenusAndOverlay();})()"
+    style="display:block;width:100%;text-align:left;background:rgba(139,92,246,.08);
+      border:none;color:#c4b5fd;padding:10px 12px;cursor:pointer;border-radius:8px;
+      font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
+    onmouseover="this.style.background='rgba(139,92,246,.2)'"
+    onmouseout="this.style.background='rgba(139,92,246,.08)'">
+    🤖 AI Memoriu Justificativ <span onclick="event.stopPropagation();_showInfoDrawer('ai-memoriu')" title="Ce face această funcție?" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:rgba(148,163,184,.5);font-size:9px;font-weight:700;cursor:pointer;flex-shrink:0;vertical-align:middle;margin-left:4px">?</span>
+    
+    <div style="font-size:10px;color:rgba(196,181,253,.6);font-weight:400">Claude AI · §1.1-§1.6 · text juridic automat</div>
+  </button>
+
+  <!-- Grup: Zone & Harti -->
+  <div style="padding:6px 8px 3px;font-size:9px;color:#dc2626;text-transform:uppercase;
+    letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.06);margin-top:3px">
+    🗺 Zone Speciale & Hărți</div>
+
+  <button onclick="(function(){const map=window.map;const k=window.TCI?.cityKey||'RO-IS-01';const city=(window._RO_CITIES_DB||{})[k]||{lat:47.158,lon:27.601};if(map&&window._ProtectedZonesLayer)window._ProtectedZonesLayer.toggle(map,city.lat,city.lon);_closeAllMenusAndOverlay();})()"
+    style="display:block;width:100%;text-align:left;background:rgba(220,38,38,.08);
+      border:none;color:#f87171;padding:10px 12px;cursor:pointer;border-radius:8px;
+      font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
+    onmouseover="this.style.background='rgba(220,38,38,.2)'"
+    onmouseout="this.style.background='rgba(220,38,38,.08)'">
+    ⛔ Zone Protejate <span onclick="event.stopPropagation();_showInfoDrawer('zone-protejate')" title="Ce face această funcție?" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:rgba(148,163,184,.5);font-size:9px;font-weight:700;cursor:pointer;flex-shrink:0;vertical-align:middle;margin-left:4px">?</span>
+    
+    <div style="font-size:10px;color:rgba(248,113,113,.6);font-weight:400">cimitire · CF · monumente · păduri · restricții legale</div>
+  </button>
+
+  <button onclick="(function(){const map=window.map;const k=window.TCI?.cityKey||'RO-IS-01';const city=(window._RO_CITIES_DB||{})[k]||{lat:47.158,lon:27.601};if(map&&window._FloodMapper)window._FloodMapper.addAll(map);_closeAllMenusAndOverlay();})()"
+    style="display:block;width:100%;text-align:left;background:rgba(59,130,246,.08);
+      border:none;color:#7dd3fc;padding:10px 12px;cursor:pointer;border-radius:8px;
+      font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
+    onmouseover="this.style.background='rgba(59,130,246,.2)'"
+    onmouseout="this.style.background='rgba(59,130,246,.08)'">
+    🌊 Hărți Inundații ANAR <span onclick="event.stopPropagation();_showInfoDrawer('inundatii')" title="Ce face această funcție?" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:rgba(148,163,184,.5);font-size:9px;font-weight:700;cursor:pointer;flex-shrink:0;vertical-align:middle;margin-left:4px">?</span>
+    
+    <div style="font-size:10px;color:rgba(125,211,252,.6);font-weight:400">RCP10 / RCP100 / RCP500 · date oficiale ANAR WMS</div>
+  </button>
+
+  <!-- Buton close mobile -->
+  <button class="menu-close-btn"
+    onclick="_closeAllMenusAndOverlay()"
+    ontouchend="event.preventDefault();_closeAllMenusAndOverlay()"
+    style="display:none;width:calc(100% - 8px);margin:6px 4px 2px;padding:10px;
+      background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);
+      border-radius:8px;color:#f87171;font-size:13px;font-weight:700;
+      cursor:pointer;text-align:center;min-height:44px;font-family:inherit">
+    ✕ Închide
+  </button>
+</div>
+
+
 <script>
 // ── MOBILE MENU FIX — overlay + touch events ──────────────────────────
+function _toggleTCIMenu(event) {
+  if(event) event.stopPropagation();
+  const menu = document.getElementById('tci-adv-menu');
+  const overlay = document.getElementById('menu-overlay');
+  const isOpen = menu && menu.style.display !== 'none';
+  _closeAllMenusAndOverlay();
+  if(!isOpen && menu) {
+    if(event && event.currentTarget) {
+      const btn = event.currentTarget;
+      const rect = btn.getBoundingClientRect();
+      menu.style.top = (rect.bottom + 4) + 'px';
+      const menuW = 280;
+      const left = Math.min(rect.left, window.innerWidth - menuW - 8);
+      menu.style.left = Math.max(4, left) + 'px';
+      menu.style.right = 'auto';
+    }
+    menu.style.display = 'block';
+    if(overlay) overlay.classList.add('active');
+  }
+}
+
 function _closeAllMenusAndOverlay() {
   // Inchidem toate meniurile
-  const menus = ['viz-menu','tools-menu','rapoarte-menu'];
+  const menus = ['viz-menu','tools-menu','rapoarte-menu','tci-adv-menu'];
   menus.forEach(id => {
     const el = document.getElementById(id);
     if(el) el.style.display = 'none';
@@ -3001,5 +3178,381 @@ window._launchEUBenchmark = function() {
   return false;
 };
 </script>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<!-- INFO DRAWER — explică orice funcție la hover/click pe ❓ ───────── -->
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<div id="info-drawer" style="
+  display:none;
+  position:fixed;
+  top:0;right:0;bottom:0;
+  width:340px;
+  z-index:8500;
+  background:rgba(4,10,28,.98);
+  border-left:1px solid rgba(212,175,55,.3);
+  backdrop-filter:blur(20px);
+  font-family:'IBM Plex Mono','Space Grotesk',sans-serif;
+  transform:translateX(100%);
+  transition:transform .3s ease;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+">
+  <!-- Header -->
+  <div style="padding:16px;border-bottom:1px solid rgba(255,255,255,.08);
+    display:flex;align-items:flex-start;justify-content:space-between;
+    position:sticky;top:0;background:rgba(4,10,28,.98);z-index:1">
+    <div>
+      <div id="info-drawer-icon" style="font-size:24px;margin-bottom:4px">ℹ️</div>
+      <div id="info-drawer-title" style="font-size:14px;font-weight:800;color:#D4AF37">
+        Informații
+      </div>
+      <div id="info-drawer-subtitle" style="font-size:9px;color:rgba(148,163,184,.5);
+        margin-top:2px">
+        Selectează o funcție pentru detalii
+      </div>
+    </div>
+    <button onclick="_closeInfoDrawer()" style="background:none;border:none;
+      color:rgba(148,163,184,.5);font-size:18px;cursor:pointer;padding:4px;
+      line-height:1;margin-top:-2px">✕</button>
+  </div>
+
+  <!-- Continut dinamic -->
+  <div id="info-drawer-body" style="padding:16px"></div>
+
+  <!-- Footer -->
+  <div style="padding:12px 16px;border-top:1px solid rgba(255,255,255,.06);
+    position:sticky;bottom:0;background:rgba(4,10,28,.98)">
+    <div style="font-size:7px;color:rgba(100,120,150,.4);line-height:1.5">
+      UrbanX TSS·FG © 2026 · Toate valorile sunt orientative<br>
+      Necesită validare profesionist atestat conform Legii 350/2001
+    </div>
+  </div>
+</div>
+
+<!-- Overlay info drawer -->
+<div id="info-drawer-overlay" onclick="_closeInfoDrawer()" style="
+  display:none;position:fixed;inset:0;z-index:8400;
+  background:rgba(0,0,0,.3);backdrop-filter:blur(2px)"></div>
+
+<script>
+// ── INFO DRAWER ENGINE ────────────────────────────────────────────────────
+
+const _INFO_DATA = {
+
+  // ── BARA DE SUS ──────────────────────────────────────────────────────────
+  'harta': {
+    icon:'🗺', title:'Hartă ▾',
+    subtitle:'Vederi și stiluri de hartă',
+    desc:'Controlează perspectiva și stilul hărții principale. Alege între vedere 3D izometrică (cea mai utilă pentru analiză urbană), vedere 2D pentru plan, sau Street View pentru perspectivă pietonală.',
+    options:[
+      {label:'3D Izometric (60°)', desc:'Vedere oblic — vezi clădirile și densitatea', badge:'Recomandat'},
+      {label:'2D Plan', desc:'Hartă clasică top-down pentru PUG/PUZ'},
+      {label:'Street View', desc:'Perspectivă la nivelul străzii'},
+      {label:'Zone Protejate', desc:'Cimitire, CF, monumente — ⛔ restricții legale', badge:'Important', color:'#ef4444'},
+    ],
+    source:'Mapbox GL JS · OSM · CIMEC',
+  },
+
+  'analiza': {
+    icon:'🔬', title:'Analiză ▾',
+    subtitle:'Instrumente de analiză per parcelă',
+    desc:'Analize tehnice și urbanistice calculate automat pentru orice parcelă selectată. Toate rezultatele sunt bazate pe date oficiale cu surse citate.',
+    options:[
+      {label:'Lotizare teren', desc:'Calcul lot optim, POT/CUT, bilanț edificabil'},
+      {label:'LMI Monumente', desc:'Verificare Lista Monumentelor Istorice — Legea 422/2001'},
+      {label:'Bilanț edificabil', desc:'Calcul suprafețe conform PUG/UTR'},
+    ],
+    tip:'Selectează o parcelă de pe hartă înainte de a rula analizele.',
+    source:'ANCPI · CIMEC LMI 2023 · RGU HG 525/1996',
+  },
+
+  'rapoarte': {
+    icon:'📋', title:'Rapoarte ▾',
+    subtitle:'Generare documente tehnice',
+    desc:'Generează documentații tehnice și studii de fezabilitate bazate pe datele UAT-ului selectat. Toate documentele includ surse, formule și metodologie citabilă academic.',
+    source:'jsPDF · INSE · Eurostat · BNR',
+  },
+
+  // ── MENIU URBANIST ────────────────────────────────────────────────────────
+  'proiectie-urbana': {
+    icon:'📊', title:'Proiecție Urbană',
+    subtitle:'Panoul interactiv TCI — instrument de lucru',
+    desc:'Instrumentul principal de analiză urbanistică. Deschide panoul stânga cu toate datele live ale UAT-ului selectat. Folosit pentru lucrul curent de urbanism.',
+    options:[
+      {label:'KPI-uri live', desc:'Populație 2026, PIB/cap, risc seismic, Dev. Pressure'},
+      {label:'4D Timeline slider', desc:'Trage bara 2025→2055 și vezi cum evoluează orașul'},
+      {label:'Scenarii S1/S2/S3', desc:'Optimist / Moderat / Conservator — comutare instantă'},
+      {label:'Mix cerere locuințe', desc:'Studio/2cam/3cam/senior/rezidențial premium'},
+      {label:'Comparator radar', desc:'Compară 2 UAT-uri simultan în panoul stânga'},
+    ],
+    tip:'Acesta este instrumentul de LUCRU. Folosește-l pentru analiză. Pentru prezentări, folosește Film Cinematic.',
+    badge:'Instrument de lucru',
+    badgeColor:'#60a5fa',
+    source:'INSE Rec.2021 · Eurostat · BNR · ANCPI · Model UrbanX',
+  },
+
+  'film-cinematic': {
+    icon:'🎬', title:'Film Cinematic',
+    subtitle:'TCI Cinema v2 — 12 scene · pentru prezentări',
+    desc:'Film urbanistic automat de ~2 minute care prezintă cinematografic analiza orașului. Ideal pentru prezentări la primărie, investitori, conferințe. Filmul se generează automat din datele reale ale UAT-ului.',
+    options:[
+      {label:'12 scene animate', desc:'De la vedere globală → zoom pe cartiere → concluzii'},
+      {label:'Proiecții per cartier', desc:'Fiecare zonă identificată din OSM primește date proprii'},
+      {label:'Bare 3D presiune', desc:'MAJORĂ/MEDIE/MICĂ per zonă de construire'},
+      {label:'Metropolitan detectat', desc:'Miroslava, Florești etc — incluse automat'},
+      {label:'Colaj în Masterplan', desc:'12 frame-uri capturate → pagina colaj în PDF'},
+    ],
+    tip:'Rulează DUPĂ ce ai analizat cu Proiecție Urbană. Filmul folosește datele deja calculate.',
+    badge:'Pentru prezentări',
+    badgeColor:'#a78bfa',
+    source:'OSM · INSE Rec.2021 · Model cohort UrbanX · Alonso (1964)',
+  },
+
+  'compare-pro': {
+    icon:'🏙', title:'Compare Pro',
+    subtitle:'Comparație simultană 2-5 UAT-uri',
+    desc:'Compară orice 2-5 municipii/orașe din România simultan, cu 20 de indicatori, radar chart vizual și gap analysis față de media națională. Identifică automat de ce un oraș crește și altul scade.',
+    options:[
+      {label:'20 indicatori', desc:'Populație, PIB/cap, rată creștere, walkability, SDG11...'},
+      {label:'Radar chart', desc:'8 dimensiuni vizualizate grafic pentru comparare rapidă'},
+      {label:'Gap Analysis', desc:'Distanța față de media națională per indicator'},
+      {label:'Narrative automat', desc:'"Iași: hub universitar +0.8%/an, PIB 11.500 EUR..."'},
+    ],
+    tip:'Adaugă UAT-uri cu butonul + din interfață. Poți compara până la 5 simultan.',
+    badge:'20 indicatori',
+    badgeColor:'#60a5fa',
+    source:'INSE Rec.2021 · Eurostat NUTS3 · BNR · ANCPI · INFP',
+  },
+
+  'eu-benchmark': {
+    icon:'🌍', title:'European Benchmarking Pro',
+    subtitle:'Iași vs Krakow, Lublin, Debrecen și alte 14 orașe EU',
+    desc:'Compară automat orice oraș românesc cu 17 orașe europene similare ca mărime și profil economic. Peer matching automat — găsește cele mai relevante orașe de comparație.',
+    options:[
+      {label:'17 orașe europene', desc:'PL, HU, CZ, BG, SK, AT, SI, EE, LT — calibrate pe AU 2021'},
+      {label:'Peer matching automat', desc:'Găsește cei mai relevanți perechi europeni'},
+      {label:'12 indicatori Eurostat', desc:'Urban Audit 2021 · comparație la paritate putere cumpărare'},
+      {label:'Gap față de best-in-class', desc:'Ce ar trebui să facă Iașul pentru a atinge nivelul Krakow?'},
+      {label:'Pagină în Masterplan PDF', desc:'Inclus automat în documentul PDF generat'},
+    ],
+    badge:'Eurostat Urban Audit',
+    badgeColor:'#34d399',
+    source:'Eurostat Urban Audit 2021 · OECD FUA 2023 · JRC Urban Observatory',
+  },
+
+  'prezentare': {
+    icon:'🎯', title:'Prezentare Primărie',
+    subtitle:'5 slide-uri auto-generate · gata de prezentat',
+    desc:'Generează instant 5 slide-uri full-screen cu datele reale ale UAT-ului selectat. Navigare cu tastele ←→. Ideal pentru ședințe de consiliu, prezentări la primărie sau conferințe.',
+    options:[
+      {label:'Slide 1', desc:'Context demografic — populație 2021 + proiecție 2055'},
+      {label:'Slide 2', desc:'Zone de dezvoltare — cartierele identificate cu presiunea lor'},
+      {label:'Slide 3', desc:'Necesități infrastructură — școli, medici, spații verzi'},
+      {label:'Slide 4', desc:'Benchmarking — comparație cu 4 orașe similare din România'},
+      {label:'Slide 5', desc:'Recomandări strategice — concrete, bazate pe date'},
+    ],
+    tip:'Navighezi cu ← → de la tastatură sau cu butoanele din interfață. ESC pentru ieșire.',
+    badge:'5 slide-uri',
+    badgeColor:'#a78bfa',
+    source:'INSE · Eurostat · Model UrbanX · Legea 350/2001',
+  },
+
+  'masterplan': {
+    icon:'📋', title:'Masterplan PDF',
+    subtitle:'22 pagini · conform Legii 350/2001 + Ord. 233/2016',
+    desc:'Generează automat un document PDF complet de Masterplan Strategic Urban cu 22 de pagini, metodologie citabilă academic, formule vizualizate, surse citate și structură conformă cu legislația românească.',
+    options:[
+      {label:'22 pagini structurate', desc:'Memoriu, diagnostic, demografic, riscuri, propuneri, etapizare'},
+      {label:'SWOT vizual 4 cadrane', desc:'Puncte tari/slabe/oportunități/amenințări colorate'},
+      {label:'Formule explicate', desc:'P(t)=P0×(1+r)^t cu fiecare componentă detaliată'},
+      {label:'Monte Carlo incertitudine', desc:'±18% la 30 ani — declarat explicit'},
+      {label:'QR code scanabil', desc:'Scanezi și deschizi scenariul live în browser'},
+      {label:'Colaj cinematic', desc:'12 frame-uri din Film Cinematic — dacă a fost rulat'},
+      {label:'AI Memoriu Justificativ', desc:'Text generat de Claude AI — dacă a fost generat'},
+    ],
+    tip:'IMPORTANT: Acesta este un document ORIENTATIV. Necesită validare de un urbanist atestat RUR conform Legii 350/2001.',
+    tipColor:'#ef4444',
+    badge:'22 pagini',
+    badgeColor:'#D4AF37',
+    source:'INSE · Eurostat · BNR · INFP · ANAR · Copernicus · ICE DB v3.0',
+  },
+
+  'ai-memoriu': {
+    icon:'🤖', title:'AI Memoriu Justificativ',
+    subtitle:'Claude AI · §1.1-§1.6 · text juridic automat',
+    desc:'Generează automat 6 secțiuni de memoriu justificativ urbanistic (§1.1 Introducere → §1.6 Concluzii) folosind Claude AI (Anthropic), bazat exclusiv pe datele reale ale UAT-ului selectat.',
+    options:[
+      {label:'§1.1 Introducere & context', desc:'Poziție geografică, importanță regională, bază legală'},
+      {label:'§1.2 Situație demografică', desc:'Evoluție 2011-2021, proiecție 2055, structură vârstă'},
+      {label:'§1.3 Analiză economică', desc:'PIB/cap, convergență UE, piață imobiliară'},
+      {label:'§1.4 Riscuri teritoriale', desc:'Seismic P100, inundații ANAR, climatic IPCC AR6'},
+      {label:'§1.5 Obiective strategice', desc:'Viziune 2055, priorități, coerență Green Deal'},
+      {label:'§1.6 Concluzii', desc:'Scenariu recomandat, etapizare, monitorizare'},
+    ],
+    tip:'Textul generat de AI necesită verificare și asumare de un urbanist atestat. Nu înlocuiește documentația oficială.',
+    tipColor:'#f59e0b',
+    badge:'Claude AI',
+    badgeColor:'#a78bfa',
+    source:'Claude Sonnet · Anthropic · Date UAT: INSE · Eurostat · BNR · INFP · ANAR',
+  },
+
+  'zone-protejate': {
+    icon:'⛔', title:'Zone Protejate',
+    subtitle:'Restricții legale de construire · OSM + CIMEC',
+    desc:'Afișează pe hartă toate zonele unde construirea este INTERZISĂ sau restricționată legal: cimitire, zone feroviare CF, monumente istorice, păduri, zone militare. Sursă: OSM + Lista Monumentelor Istorice CIMEC 2023.',
+    options:[
+      {label:'Cimitire', desc:'Construire INTERZISĂ — Legea 50/1991 art.11', color:'#6b21a8'},
+      {label:'Zone feroviare CF', desc:'Buffer 100m interdicție — OG 43/1997 art.16', color:'#78350f'},
+      {label:'Monumente istorice', desc:'Zonă protecție I (0-50m) și II (50-200m) — Legea 422/2001', color:'#b45309'},
+      {label:'Păduri', desc:'Construire interzisă — Codul Silvic L46/2008', color:'#14532d'},
+      {label:'Zone militare', desc:'Acces și construire interzise', color:'#dc2626'},
+    ],
+    tip:'Verifică ÎNTOTDEAUNA cu Certificatul de Urbanism emis de Primărie. Această hartă este orientativă.',
+    tipColor:'#ef4444',
+    badge:'Legea 422/2001',
+    badgeColor:'#ef4444',
+    source:'OSM Overpass · CIMEC LMI 2023 · Legea 50/1991 · OG 43/1997 · Codul Silvic',
+  },
+
+  'inundatii': {
+    icon:'🌊', title:'Hărți Inundații ANAR',
+    subtitle:'Date oficiale ANAR WMS · 3 scenarii de risc',
+    desc:'Afișează hărțile oficiale de hazard la inundații de la Administrația Națională Apele Române (ANAR), din Planul de Gestionare a Riscului la Inundații 2021-2027.',
+    options:[
+      {label:'RCP10 — Risc ridicat', desc:'Probabilitate 10% într-un an (perioadă revenire 10 ani)', color:'#ef4444'},
+      {label:'RCP100 — Risc mediu', desc:'Probabilitate 1% într-un an (perioadă revenire 100 ani)', color:'#f97316'},
+      {label:'RCP500 — Risc scăzut', desc:'Probabilitate 0.2% într-un an (perioadă revenire 500 ani)', color:'#fbbf24'},
+    ],
+    tip:'Dacă parcela ta se află în oricare din cele 3 zone, Avizul de Gospodărire a Apelor este OBLIGATORIU conform Legii Apelor 107/1996.',
+    badge:'ANAR WMS oficial',
+    badgeColor:'#7dd3fc',
+    source:'ANAR PGRA 2021-2027 · Directiva 2007/60/CE · gis.rowater.ro',
+  },
+};
+
+function _showInfoDrawer(key) {
+  const data = _INFO_DATA[key];
+  if(!data) return;
+
+  const drawer = document.getElementById('info-drawer');
+  const overlay = document.getElementById('info-drawer-overlay');
+  const body = document.getElementById('info-drawer-body');
+
+  // Setam header
+  document.getElementById('info-drawer-icon').textContent = data.icon;
+  document.getElementById('info-drawer-title').textContent = data.title;
+  document.getElementById('info-drawer-subtitle').textContent = data.subtitle || '';
+
+  // Construim body
+  let html = '';
+
+  // Badge
+  if(data.badge) {
+    html += '<div style="margin-bottom:12px">' +
+      '<span style="padding:3px 10px;border-radius:20px;font-size:9px;font-weight:700;' +
+      'background:' + (data.badgeColor||'#D4AF37') + '20;' +
+      'border:1px solid ' + (data.badgeColor||'#D4AF37') + '60;' +
+      'color:' + (data.badgeColor||'#D4AF37') + '">' + data.badge + '</span></div>';
+  }
+
+  // Descriere
+  if(data.desc) {
+    html += '<p style="font-size:12px;color:rgba(200,215,240,.85);line-height:1.6;margin:0 0 14px">' +
+      data.desc + '</p>';
+  }
+
+  // Optiuni / sub-functii
+  if(data.options?.length) {
+    html += '<div style="margin-bottom:14px">';
+    data.options.forEach(opt => {
+      html += '<div style="padding:8px 10px;margin-bottom:4px;border-radius:6px;' +
+        'background:rgba(255,255,255,.04);border-left:2px solid ' + (opt.color||'rgba(212,175,55,.4)') + '">' +
+        '<div style="font-size:11px;font-weight:700;color:rgba(220,232,250,.9)">' + opt.label + '</div>' +
+        '<div style="font-size:10px;color:rgba(148,163,184,.7);margin-top:2px">' + opt.desc + '</div>' +
+        '</div>';
+    });
+    html += '</div>';
+  }
+
+  // Tip (avertisment)
+  if(data.tip) {
+    html += '<div style="padding:10px;border-radius:6px;' +
+      'background:' + (data.tipColor||'#60a5fa') + '10;' +
+      'border:1px solid ' + (data.tipColor||'#60a5fa') + '30;margin-bottom:12px">' +
+      '<div style="font-size:10px;color:' + (data.tipColor||'#60a5fa') + ';line-height:1.5">💡 ' + data.tip + '</div>' +
+      '</div>';
+  }
+
+  // Surse
+  if(data.source) {
+    html += '<div style="font-size:9px;color:rgba(100,120,150,.5);padding-top:8px;' +
+      'border-top:1px solid rgba(255,255,255,.06)">' +
+      '<span style="color:rgba(100,120,150,.4)">Surse: </span>' + data.source + '</div>';
+  }
+
+  body.innerHTML = html;
+
+  // Afisam drawer
+  drawer.style.display = 'block';
+  overlay.style.display = 'block';
+  requestAnimationFrame(() => {
+    drawer.style.transform = 'translateX(0)';
+  });
+}
+
+function _closeInfoDrawer() {
+  const drawer = document.getElementById('info-drawer');
+  const overlay = document.getElementById('info-drawer-overlay');
+  drawer.style.transform = 'translateX(100%)';
+  overlay.style.display = 'none';
+  setTimeout(() => { drawer.style.display = 'none'; }, 320);
+}
+
+// Adaugam ❓ la fiecare buton din toolbar dupa ce DOM e gata
+window.addEventListener('load', function() {
+  setTimeout(function() {
+    const infoMap = {
+      '_toggleVizMenu':   'harta',
+      '_toggleToolsMenu': 'analiza',
+      'toggleRapoarteMenu': 'rapoarte',
+      '_toggleTCIMenu':   null,
+      'openTCI':          'proiectie-urbana',
+    };
+
+    // Adaugam buton ❓ langa fiecare buton din bara de sus
+    [
+      { sel:'button[onclick*="_toggleVizMenu"]',   key:'harta' },
+      { sel:'button[onclick*="_toggleToolsMenu"]', key:'analiza' },
+      { sel:'button[id="btnPDF"]',                 key:'rapoarte' },
+      { sel:'button[onclick*="_toggleTCIMenu"]',   key:null },
+      { sel:'button[onclick*="openTCI"]',          key:'proiectie-urbana' },
+      { sel:'button[id="btn-cinema-v2"]',          key:'film-cinematic' },
+    ].forEach(({sel, key}) => {
+      if(!key) return;
+      const btn = document.querySelector(sel);
+      if(!btn || btn.parentElement.querySelector('.info-q-btn')) return;
+      const q = document.createElement('button');
+      q.className = 'info-q-btn';
+      q.textContent = '?';
+      q.title = 'O ce face această funcție';
+      q.style.cssText = 'background:none;border:1px solid rgba(255,255,255,.15);' +
+        'color:rgba(148,163,184,.5);border-radius:50%;width:18px;height:18px;' +
+        'font-size:9px;cursor:pointer;font-weight:700;display:inline-flex;' +
+        'align-items:center;justify-content:center;margin-left:2px;flex-shrink:0;' +
+        'vertical-align:middle;font-family:inherit;padding:0';
+      q.onclick = (e) => {
+        e.stopPropagation();
+        _showInfoDrawer(key);
+      };
+      btn.parentElement.style.display = 'flex';
+      btn.parentElement.style.alignItems = 'center';
+      btn.parentElement.appendChild(q);
+    });
+
+    console.log('[InfoDrawer] ✅ Butoane ❓ adăugate la funcțiile principale');
+  }, 2000);
+});
+</script>
+
 </body>
 </html>
