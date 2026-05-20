@@ -351,7 +351,11 @@ G._SceneEngine = {
     const loop = () => {
       if(!this._playing) return;
       const t = Math.min(1, (performance.now() - this._startT) / scene.dur);
-      this._renderScene(scene.id, t);
+      try {
+        this._renderScene(scene.id, t);
+      } catch(e) {
+        console.warn('[Cinema v2] Scena '+scene.id+' eroare (continuăm):', e.message);
+      }
       if(t < 1) {
         this._raf = requestAnimationFrame(loop);
       } else {
@@ -359,7 +363,11 @@ G._SceneEngine = {
       }
     };
 
-    this._setupScene(scene.id);
+    try {
+      this._setupScene(scene.id);
+    } catch(e) {
+      console.warn('[Cinema v2] setupScene '+scene.id+' eroare (continuăm):', e.message);
+    }
     this._raf = requestAnimationFrame(loop);
   },
 
@@ -506,9 +514,7 @@ G._SceneEngine = {
       case 23: this._s23_masterplanPreview(ctx,W,H,t,city); break;
       case 24: this._s24_investment(ctx,W,H,t,city); break;
       case 25: this._s25_finale(ctx,W,H,t,city); break;
-      case 9: this._s13_street(ctx,W,H,t,city); break;
-      case 10:this._s14_urban(ctx,W,H,t,city); break;
-      
+      // NOTE: nu mai avem case duplicate — scenele 9 și 10 sunt gestionate mai sus
     }
 
     // Progress bar scenă
@@ -624,6 +630,9 @@ G._SceneEngine = {
   // ── SCENA 5: Dezvoltare Urbană — Bare 3D ─────────────────────────────
   _s5_growth(ctx,W,H,t,city,zones) {
     // Legendă MAJORĂ/MEDIE/MICĂ
+    // Normalizăm zones: poate fi obiect {} sau array []
+    const _zonesObj5 = zones ? (Array.isArray(zones) ? 
+      Object.fromEntries(zones.map((z,i)=>[z.id||z.type||String(i),z])) : zones) : {};
     if(t > 0.2) {
       const lx=W*0.03, ly=H*0.55;
       ctx.fillStyle='rgba(4,10,24,0.92)';
@@ -645,7 +654,7 @@ G._SceneEngine = {
     if(t > 0.4 && zones) {
       const zKeys = ['centru','semicentral','periferie'];
       zKeys.forEach((k,i) => {
-        const z = zones[k];
+        const z = _zonesObj5[k] || Object.values(_zonesObj5)[i];
         if(!z) return;
         const cx = W*(0.25+i*0.28), cy = H*0.12;
         ctx.globalAlpha *= Math.min(1,(t-0.4)/0.3);
@@ -726,7 +735,8 @@ G._SceneEngine = {
 
   _s6_focusZone1(ctx,W,H,t,city,zones) {
     // ─── Layout curat: zona curenta + 3 KPI-uri + RH/POT/functiuni ──────
-    const zArr = zones ? Object.values(zones) : [];
+    // Normalizăm zones: poate fi obiect {} sau array []
+    const zArr = zones ? (Array.isArray(zones) ? zones : Object.values(zones)) : [];
     const nZ   = Math.min(8, zArr.length || 1);
     const tPZ  = 1.0 / nZ;
     const cIdx = Math.min(nZ-1, Math.floor(t / tPZ));
@@ -1978,7 +1988,8 @@ G._SceneEngine = {
 
   // ── SCENA 7: Focus Zonă 2 — Reconversie Industrială ────────────────────
   _s7_focusZone2(ctx,W,H,t,city,zones) {
-    const zone = zones?.[1] || zones?.[0];
+    const _zArr7 = zones ? (Array.isArray(zones) ? zones : Object.values(zones)) : [];
+    const zone = _zArr7[1] || _zArr7[0];
     if(!zone) { this._s6_focusZone1(ctx,W,H,t,city,zones); return; }
     const pct  = zone.densif_pct || 15;
     const N    = v => Number(v||0).toLocaleString('ro-RO');
@@ -2028,7 +2039,8 @@ G._SceneEngine = {
 
   // ── SCENA 8: Focus Zonă 3 — Expansiune Controlată ──────────────────────
   _s8_focusZone3(ctx,W,H,t,city,zones) {
-    const zone = zones?.[2] || zones?.[0];
+    const _zArr8 = zones ? (Array.isArray(zones) ? zones : Object.values(zones)) : [];
+    const zone = _zArr8[2] || _zArr8[0];
     if(!zone) { this._s6_focusZone1(ctx,W,H,t,city,zones); return; }
     const pct  = zone.densif_pct || 8;
     const N    = v => Number(v||0).toLocaleString('ro-RO');
@@ -2332,8 +2344,9 @@ G._SceneEngine = {
       ctx.fillText('Conf. Legii 350/2001 + HG 525/1996 RGU + Ord. 233/2016',W/2,H*0.16,W*0.88);
       ctx.globalAlpha=1;
     }
-    // Card stack per zona
-    const displayZones = zones?.slice(0,4) || [];
+    // Card stack per zona — zones poate fi obiect {} sau array []
+    const _zonesArr19 = zones ? (Array.isArray(zones) ? zones : Object.values(zones)) : [];
+    const displayZones = _zonesArr19.slice(0,4);
     const intColors = {
       DENSIFICARE: '#22c55e', 'DENSIFICARE MODERATĂ': '#4ade80',
       'DENSIFICARE INTENSIVĂ': '#16a34a', 'RECONVERSIE': '#f59e0b',

@@ -32,7 +32,24 @@
 (function(G){
 'use strict';
 
-// ── Așteptăm dependențele ─────────────────────────────────────────────────
+// ── Helper: wrap text to fit page width ────────────────────────────────────
+// Wrappăm orice text lung la maxWidth mm, returnând linii multiple
+function _pdfText(pdf, text, x, y, opts) {
+  opts = opts || {};
+  const maxW = opts.maxWidth || 180;
+  const fs   = pdf.getFontSize ? pdf.getFontSize() : 8;
+  const lines = pdf.splitTextToSize(String(text||''), maxW);
+  const lh    = opts.lineHeight || fs * 0.352778 * 1.4; // pt → mm × 1.4
+  if(opts.align === 'center') {
+    lines.forEach((l,i) => pdf.text(l, x, y + i*lh, {align:'center', maxWidth:maxW}));
+  } else if(opts.align === 'right') {
+    lines.forEach((l,i) => pdf.text(l, x, y + i*lh, {align:'right'}));
+  } else {
+    lines.forEach((l,i) => pdf.text(l, x, y + i*lh, {maxWidth:maxW}));
+  }
+  return y + lines.length * lh; // returnează Y după text
+}
+window._pdfText = _pdfText;
 function _waitAll(cb, n){
   n = n||0; if(n > 120) { console.warn('[TCI Masterplan] timeout deps'); return; }
   const jsPDFok = (typeof jsPDF !== 'undefined') || (typeof window.jspdf?.jsPDF !== 'undefined');
@@ -44,7 +61,29 @@ function _waitAll(cb, n){
 }
 
 const _jsPDF = () => {if(typeof jsPDF !== 'undefined') return jsPDF;if(typeof window.jspdf?.jsPDF !== 'undefined') return window.jspdf.jsPDF;if(typeof window.jsPDF !== 'undefined') return window.jsPDF;return null; };
-const S2 = s => String(s||'').replace(/[^\x20-\x7E\u00C0-\u024F]/g,' ').trim().slice(0,400);
+// S2: sanitizare text pentru jsPDF — transliterare diacritice RO + trunchiare
+// jsPDF cu font helvetica nu suportă ă/â/î/ș/ț — le transliterăm explicit
+const _RO_DIACRITICS = {
+  'ă':'a','â':'a','î':'i','ș':'s','ț':'t',
+  'Ă':'A','Â':'A','Î':'I','Ș':'S','Ț':'T',
+  // variante Unicode (cedilă vs virgulă)
+  '\u015F':'s','\u015E':'S','\u0163':'t','\u0162':'T',
+  '\u0219':'s','\u0218':'S','\u021B':'t','\u021A':'T',
+  // alte caractere comune în română
+  'ö':'o','ü':'u','é':'e','è':'e','ê':'e','ë':'e',
+  '–':'—','…':'...','\u00AD':'',  // soft hyphen
+};
+const S2 = s => {
+  if(s == null) return '';
+  return String(s)
+    .split('')
+    .map(c => _RO_DIACRITICS[c] !== undefined ? _RO_DIACRITICS[c] : c)
+    .join('')
+    .replace(/[^\x20-\x7E]/g,' ')  // elimină orice non-ASCII rămas
+    .replace(/\s+/g,' ')
+    .trim()
+    .slice(0,400);
+};
 const N  = (v,d=0) => isNaN(+v) ? '—' : Number(v).toLocaleString('ro-RO',{minimumFractionDigits:d,maximumFractionDigits:d});
 const Pct= (v,d=1) => (v>=0?'+':'')+Number(v).toFixed(d)+'%';
 const RN = (v,d=2) => isNaN(+v) ? '—' : Number(v).toFixed(d);
@@ -158,8 +197,8 @@ G._TCIMasterplanPDF = {
 
     // Subtitlu
     pdf.setTextColor(148,163,184); pdf.setFont('helvetica','normal'); pdf.setFontSize(8);
-    pdf.text('Proiecție urbanistică pe 30 ani  ·  Date oficiale INSE · Eurostat · BNR · INFP · ANAR · ANM', W/2, 92, {align:'center'});
-    pdf.text(`Scenariu: ${scenario==='S1'?'S1 — Optimist':scenario==='S2'?'S2 — Moderat (referință)':'S3 — Conservator'}`, W/2, 99, {align:'center'});
+    pdf.text(S2('Proiectie urbanistica pe 30 ani  ·  Date oficiale INSE · Eurostat · BNR · INFP · ANAR · ANM'), W/2, 92, {align:'center', maxWidth:W-20});
+    pdf.text(S2('Scenariu: '+(scenario==='S1'?'S1 - Optimist':scenario==='S2'?'S2 - Moderat (referinta)':'S3 - Conservator')), W/2, 99, {align:'center', maxWidth:W-20});
 
     // Date UAT - box central
     const bX=14, bY=110, bW=W-28, bH=75;
@@ -191,20 +230,20 @@ G._TCIMasterplanPDF = {
     const sc = scColors[scenario]||[59,130,246];
     pdf.setFillColor(...sc); pdf.roundedRect(bX+bW-52,bY+bH-14,50,12,2,2,'F');
     pdf.setTextColor(255,255,255); pdf.setFont('helvetica','bold'); pdf.setFontSize(8);
-    pdf.text(scenario==='S1'?'S1 OPTIMIST':scenario==='S2'?'S2 REFERINȚĂ':'S3 CONSERVATOR',
+    pdf.text(S2(scenario==='S1'?'S1 OPTIMIST':scenario==='S2'?'S2 REFERINTA':'S3 CONSERVATOR'),
              bX+bW-27, bY+bH-6, {align:'center'});
 
     // Harta localizare (placeholder - dacă există captura)
     pdf.setFillColor(15,30,65); pdf.rect(14,195,W-28,52,'F');
     pdf.setDrawColor(...GOLD); pdf.setLineWidth(0.3); pdf.rect(14,195,W-28,52,'S');
     pdf.setTextColor(60,80,120); pdf.setFont('helvetica','italic'); pdf.setFontSize(8);
-    pdf.text('Hartă amplasament UAT — deschide TCI pentru vizualizare 4D interactivă', W/2, 222, {align:'center'});
+    pdf.text(S2('Harta amplasament UAT — deschide TCI pentru vizualizare 4D interactiva'), W/2, 222, {align:'center'});
 
     // Footer
     pdf.setTextColor(71,85,105); pdf.setFont('helvetica','italic'); pdf.setFontSize(6.5);
     pdf.text(S2('Document generat: '+today+' · UrbanX TSS·FG · Date: INSE '+iso.slice(0,7)+' · Eurostat · BNR · INFP · ANAR · ANM'),
              W/2, H-10, {align:'center'});
-    pdf.text('Proiecție orientativă. Nu înlocuiește studiile de specialitate autorizate.', W/2, H-4.5, {align:'center'});
+    pdf.text(S2('Proiectie orientativa. Nu inlocuieste studiile de specialitate autorizate.'), W/2, H-4.5, {align:'center'});
   },
 
   // ── Pagina 2: DIAGNOSTIC TERITORIAL ──────────────────────────────────────
@@ -1266,13 +1305,13 @@ G._TCIMasterplanPDF = {
     pdf.setDrawColor(212,175,55); pdf.setLineWidth(0.3); pdf.line(0,H-11,W,H-11);
     // Data generarii — centru footer
     pdf.setTextColor(80,100,140); pdf.setFont('helvetica','normal'); pdf.setFontSize(5.5);
-    pdf.text('Generat: '+(today||'')+'  ·  UrbanX TSS·FG v2.0  ·  Document orientativ — necesita validare urbanist atestat RUR', W/2, H-4, {align:'center'});
+    pdf.text(S2('Generat: '+(today||'')+'  ·  UrbanX TSS·FG v2.0  ·  Document orientativ - necesita validare urbanist atestat RUR'), W/2, H-4, {align:'center', maxWidth:W-12});
     pdf.setTextColor(60,80,110); pdf.setFont('helvetica','italic'); pdf.setFontSize(5.5);
-    pdf.text(S2(sources||''), 6, H-6.5);
+    pdf.text(S2(sources||''), 6, H-6.5, {maxWidth:W-20});
     pdf.setTextColor(100,120,150); pdf.setFont('helvetica','bold'); pdf.setFontSize(6);
     pdf.text('pg. '+pgNum, W-6, H-6, {align:'right'});
     pdf.setFont('helvetica','normal'); pdf.setFontSize(5.5); pdf.setTextColor(50,65,90);
-    pdf.text('UrbanX TSS·FG · Document orientativ · '+today, W/2, H-1.5, {align:'center'});
+    pdf.text(S2('UrbanX TSS·FG · Document orientativ · '+today), W/2, H-1.5, {align:'center', maxWidth:W-12});
   },
 
   _section(pdf,W,y,title){
@@ -1355,6 +1394,33 @@ G._TCIMasterplanPDF = {
     }
     if(!city && typeof _RO_CITIES_DB !== 'undefined')
       city = Object.values(_RO_CITIES_DB)[0]; // fallback Iași
+
+    // ── Îmbogățim cu date DataEngine dacă există ────────────────────────
+    if(city) {
+      // Clonăm ca să nu mutăm originalul
+      city = Object.assign({}, city);
+
+      // PIB din DataEngine dacă lipsește sau e 0
+      if((!city.pib_eur_cap || city.pib_eur_cap < 1) && window._DataEngine?._cache?.[cityKey]) {
+        const cached = window._DataEngine._cache[cityKey];
+        city.pib_eur_cap = cached.pib_eur_cap || cached.gdpPerCapita || cached.pib || city.pib_eur_cap || 0;
+      }
+      // Fallback PIB din TCI
+      if((!city.pib_eur_cap || city.pib_eur_cap < 1) && window.TCI?.pib) {
+        city.pib_eur_cap = window.TCI.pib;
+      }
+      // Fallback PIB minimal regional dacă tot e 0
+      if(!city.pib_eur_cap || city.pib_eur_cap < 1) {
+        const _PIB_BY_REGION = {
+          'NE':8200,'NV':14500,'V':17200,'C':16800,'SE':10400,'S':9800,'SV':8900,'B':28400
+        };
+        city.pib_eur_cap = _PIB_BY_REGION[city.regiune] || 10000;
+      }
+
+      // Pop fallback
+      if(!city.pop2021 || city.pop2021 < 1) city.pop2021 = city.population || 50000;
+    }
+
     return city;
   },
 
