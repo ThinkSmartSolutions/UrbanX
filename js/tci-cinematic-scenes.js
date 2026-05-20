@@ -580,7 +580,7 @@ G._SceneEngine = {
       ctx.textAlign='left';
       ctx.fillText('POPULATIE 2021',cx+10,cy+16);
       ctx.fillStyle='#fff';ctx.font=`900 ${W*0.028}px "Space Grotesk",sans-serif`;
-      ctx.fillText(N(pop0),cx+10,cy+46,cw-20);
+      ctx.fillText(N(pop0),cx+10,cy+46,W-20);
 
       // POPULATIE 2050
       if(t>0.35){
@@ -590,7 +590,7 @@ G._SceneEngine = {
         ctx.fillText('POPULATIE 2050 (S2)',cx+10,cy+66);
         ctx.fillStyle='#22c55e';ctx.font=`900 ${W*0.022}px "Space Grotesk",sans-serif`;
         const chars=Math.floor(N(pop50).length*Math.min(1,(t-0.35)/0.3)*3);
-        ctx.fillText(N(pop50).slice(0,chars),cx+10,cy+90,cw-20);
+        ctx.fillText(N(pop50).slice(0,chars),cx+10,cy+90,W-20);
         ctx.globalAlpha/=pa;
       }
       ctx.fillStyle='rgba(34,197,94,.7)'; ctx.font=`bold ${W*0.010}px "IBM Plex Mono"`;
