@@ -1231,13 +1231,24 @@ G._SceneEngine = {
     if(typeof TCI !== 'undefined' && typeof window.openTCI === 'function') {
       const origOpen = window.openTCI;
       window.openTCI = function(opts){
-        if(opts?.mode==='cinema_v2'||opts?.scenes){
-          const key = opts?.cityKey || TCI.cityKey ||
+        if(opts?.mode==='cinema_v2' || opts?.scenes || window._preferCinemaV2){
+          // Cinema v2 — film cinematic cu 12 scene
+          const key = opts?.cityKey || (typeof TCI!=='undefined'?TCI.cityKey:null) ||
             window._ProjectionEngine?.currentCity || 'RO-IS-01';
           G._SceneEngine.launch(key);
         } else {
+          // TCI clasic — panoul interactiv cu KPI-uri
           if(origOpen) origOpen(opts);
         }
+      };
+      // Expunem flag pentru a comuta TCI vechi ↔ v2
+      window._switchToCinemaV2 = () => {
+        window._preferCinemaV2 = true;
+        ss?.('🎬 Cinema v2 activ — butonul TCI din bara deschide acum filmul cinematic');
+      };
+      window._switchToTCIClassic = () => {
+        window._preferCinemaV2 = false;
+        ss?.('📊 TCI Clasic activ — butonul TCI deschide panoul interactiv cu KPI-uri');
       };
       console.log('[TCI Cinematic v2] ✅ openTCI override aplicat');
     } else if(attempt < 40) {

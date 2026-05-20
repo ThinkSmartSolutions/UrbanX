@@ -110,6 +110,17 @@ G._CompareProEngine = {
     if(ind.auth>600) reasons.push(`${N(ind.auth)} autorizații/an — presiune construire intensă`);
     if(ind.seismic>0.25) reasons.push(`Ag=${ind.seismic}g — zonă seismică I (P100)`);
     if(city.coef_hub>1.0) reasons.push(`hub universitar/economic — magnet regional`);
+    // Adaugam si tipul de interventie dominant din Zone Engine
+    const cacheKey = `zones_${city.siruta||city.lat}_${city.lon}`;
+    const zoneCache = window._ZoneEngine?._cache?.[cacheKey];
+    if(zoneCache?.zones?.length > 0) {
+      const dominantIntervention = zoneCache.zones
+        .sort((a,b)=>(b.pop2055||0)-(a.pop2055||0))[0]?.intervention;
+      if(dominantIntervention) {
+        reasons.push(`strategie dominanta: ${dominantIntervention}`);
+      }
+    }
+
     return reasons.length
       ? `${city.name}: ${reasons.slice(0,3).join('; ')}.`
       : `${city.name}: profil urban echilibrat.`;
@@ -252,6 +263,28 @@ G._CompareProEngine = {
             style="margin-top:10px;width:100%;padding:7px;border-radius:6px;background:transparent;
               border:1px solid rgba(255,255,255,.1);color:rgba(148,163,184,.6);font-size:10px;cursor:pointer;font-family:inherit">Anulează</button>
         </div>
+
+      <!-- METODOLOGIE + DE CE + DISCLAIMER -->
+      <div style="padding:12px 16px;border-top:1px solid rgba(255,255,255,.06);background:rgba(4,8,24,.5)">
+        <div style="font-size:8px;font-weight:700;color:#60a5fa;margin-bottom:4px;letter-spacing:.04em">
+          📐 DE CE COMPARAREA SIMULTANA A MAI MULTOR UAT-URI?
+        </div>
+        <div style="font-size:7.5px;color:rgba(180,200,230,.8);line-height:1.55;margin-bottom:6px">
+          Analiza comparativa elimina iluziile optice ale datelor izolate. Un oras poate parea performant
+          in termeni absoluti dar sa fie sub media regionala. Compararea pe 20 de indicatori simultan
+          ofera o imagine sistemica, nu fragmentata, a competitivitatii urbane.
+        </div>
+        <div style="font-size:7px;font-style:italic;color:rgba(96,165,250,.7);padding:4px 8px;
+          background:rgba(96,165,250,.06);border-radius:4px;margin-bottom:6px">
+          ★ UrbanX Compare Pro integreaza date din 6 surse oficiale (INSE, Eurostat, BNR, ANCPI, INFP, ANAR)
+          intr-o singura interfata — disponibila in timp real pentru toate cele 320 de UAT-uri urbane din Romania.
+        </div>
+        <div style="font-size:7px;color:rgba(239,68,68,.6);padding:4px 8px;background:rgba(239,68,68,.05);
+          border-radius:4px;border-left:2px solid rgba(239,68,68,.3)">
+          ⚠ Document orientativ generat automat de UrbanX TSS·FG v2.0. Nu inlocuieste documentatii PUG/PUZ.
+          <span style="color:rgba(100,120,150,.5)"> | Generat: ${new Date().toLocaleDateString('ro-RO')}</span>
+        </div>
+      </div>
       </div>`;
   },
 
@@ -506,7 +539,10 @@ G._PresentationMode = {
     const cached=window._ZoneEngine?._cache?.[`zones_${city.siruta||city.lat}_${city.lon}`];
     const zones=cached?.zones?.slice(0,6)||[];
     if(!zones.length) return `<div style="color:rgba(148,163,184,.5);padding:30px;text-align:center;font-size:14px">
-      Zone se calculează... Lansați TCI Cinematic v2 mai întâi (Vizualizare ▾ → TCI Cinematic v2)</div>`;
+      <div style="font-size:28px;margin-bottom:10px">🎬</div>
+      Zone se calculează din OSM...<br>
+      <span style="font-size:11px">Lansați <strong style="color:#a78bfa">🏛 Urbanist ▾ → 🎬 Film Cinematic</strong> mai întâi<br>pentru a identifica zonele reale ale orașului.</span>
+    </div>`;
     return `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
       ${zones.map(z=>`
         <div style="background:rgba(8,14,34,.7);border-radius:10px;padding:14px;border:1px solid rgba(255,255,255,.06);border-left:3px solid ${z.pressureColor||'#D4AF37'}">
@@ -655,6 +691,25 @@ G._PresentationMode = {
   const addMenuItems=()=>{
     const vizMenu=document.getElementById('viz-menu');
     if(!vizMenu||document.getElementById('compare-pro-menu-item')) return;
+    // Buton Zone Protejate
+    if(!document.getElementById('protected-zones-menu-item')) {
+      const pbtn = document.createElement('button');
+      pbtn.id = 'protected-zones-menu-item';
+      pbtn.style.cssText = 'display:block;width:100%;text-align:left;background:none;border:none;color:#ef4444;padding:11px 10px;cursor:pointer;border-radius:6px;font-size:13px;font-family:inherit;min-height:44px;-webkit-tap-highlight-color:transparent';
+      pbtn.innerHTML = '⛔ Zone Protejate (cimitire · CF · monumente)';
+      pbtn.onmouseover=()=>{pbtn.style.background='rgba(239,68,68,.1)'};
+      pbtn.onmouseout=()=>{pbtn.style.background='none'};
+      pbtn.addEventListener('click', ()=>{
+        const map=window.map;
+        const key=window.TCI?.cityKey||window._ProjectionEngine?.currentCity||'RO-IS-01';
+        const city=(window._RO_CITIES_DB||{})[key]||{lat:47.158,lon:27.601};
+        if(map&&window._ProtectedZonesLayer) window._ProtectedZonesLayer.toggle(map,city.lat,city.lon);
+        if(typeof _closeAllMenusAndOverlay==='function') _closeAllMenusAndOverlay();
+      });
+      pbtn.addEventListener('touchend',(e)=>{e.preventDefault();pbtn.click();},{passive:false});
+      vizMenu.appendChild(pbtn);
+    }
+
     const sep=document.createElement('div');
     sep.style.cssText='height:1px;background:rgba(255,255,255,.08);margin:4px 0';
     vizMenu.appendChild(sep);

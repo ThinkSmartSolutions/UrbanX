@@ -422,4 +422,177 @@ G._FloodMapper = {
 };
 window._FloodMapper = G._FloodMapper;
 
+// ═══════════════════════════════════════════════════════════════════════════
+// PROTECTED ZONES LAYER — Zone excluse din construire
+// OSM: cimitire, CF, militar, păduri, ape + CIMEC monumente
+// Vizual: strat ROȘU SEMI-TRANSPARENT distinct de cladirile galbene
+// Referinta legala: Legea 50/1991 · Legea 422/2001 · OG 43/1997 · Codul Silvic
+// ═══════════════════════════════════════════════════════════════════════════
+G._ProtectedZonesLayer = {
+  _active: false,
+  SOURCE_ID: 'protected-zones-src',
+  LAYER_ID:  'protected-zones-fill',
+  LAYER_OUTLINE: 'protected-zones-outline',
+  LAYER_LABEL:   'protected-zones-label',
+
+  // Tipuri de zone excluse cu culori distincte
+  ZONE_STYLES: {
+    cemetery:         { color:'#6b21a8', label:'Cimitir — construire INTERZISĂ', opacity:0.55 },
+    grave_yard:       { color:'#6b21a8', label:'Cimitir — construire INTERZISĂ', opacity:0.55 },
+    military:         { color:'#dc2626', label:'Zonă militară — INTERZIS', opacity:0.50 },
+    railway:          { color:'#78350f', label:'Zonă CF — interdicție 100m', opacity:0.40 },
+    forest:           { color:'#14532d', label:'Pădure — Codul Silvic', opacity:0.45 },
+    wood:             { color:'#14532d', label:'Pădure — Codul Silvic', opacity:0.45 },
+    protected_area:   { color:'#0369a1', label:'Zonă protejată — Legea 5/2000', opacity:0.35 },
+    monument:         { color:'#b45309', label:'Monument istoric — Legea 422/2001', opacity:0.45 },
+    default:          { color:'#dc2626', label:'Zonă restricționată', opacity:0.35 },
+  },
+
+  async add(map, lat, lon) {
+    if(!map || this._active) return;
+
+    ss?.('🔍 Încărc zone protejate din OSM...');
+
+    // Fetch OSM zone excluse
+    const q = `[out:json][timeout:12];
+(
+  way["landuse"~"^(cemetery|railway|military|forest)$"](around:6000,${lat},${lon});
+  way["amenity"="grave_yard"](around:6000,${lat},${lon});
+  way["natural"~"^(wood|water)$"](around:3000,${lat},${lon});
+  way["military"](around:6000,${lat},${lon});
+  way["historic"~"^(monument|castle|memorial|archaeological_site)$"](around:4000,${lat},${lon});
+  relation["landuse"~"^(cemetery|military|forest)$"](around:6000,${lat},${lon});
+)->.prot;
+.prot out geom tags;`;
+
+    let features = [];
+    try {
+      const r = await fetch('https://overpass-api.de/api/interpreter',{
+        method:'POST', body:'data='+encodeURIComponent(q),
+        signal: AbortSignal.timeout(12000),
+      });
+      const data = await r.json();
+
+      features = (data.elements||[])
+        .filter(el => el.geometry?.length > 2)
+        .map(el => {
+          const type = el.tags?.landuse || el.tags?.amenity ||
+                       el.tags?.natural || el.tags?.military ||
+                       el.tags?.historic || 'default';
+          const style = this.ZONE_STYLES[type] || this.ZONE_STYLES.default;
+          const name  = el.tags?.name || el.tags?.['name:ro'] || style.label;
+          const coords = el.geometry
+            .filter(p => p.lat && p.lon)
+            .map(p => [p.lon, p.lat]);
+          if(coords.length < 3) return null;
+          return {
+            type: 'Feature',
+            properties: { type, name, label: style.label, color: style.color, opacity: style.opacity },
+            geometry: { type:'Polygon', coordinates:[coords] }
+          };
+        })
+        .filter(Boolean);
+
+      console.log(`[ProtectedZones] ${features.length} zone protejate găsite`);
+
+    } catch(e) {
+      console.warn('[ProtectedZones] OSM fetch error:', e.message);
+    }
+
+    if(!features.length) { ss?.('ℹ️ Nicio zonă protejată în raza 6km'); return; }
+
+    try {
+      // Adăugăm sursa
+      if(map.getSource(this.SOURCE_ID)) map.removeSource(this.SOURCE_ID);
+      map.addSource(this.SOURCE_ID, {
+        type: 'geojson',
+        data: { type:'FeatureCollection', features }
+      });
+
+      // Fill semi-transparent
+      if(map.getLayer(this.LAYER_ID)) map.removeLayer(this.LAYER_ID);
+      map.addLayer({
+        id: this.LAYER_ID,
+        type: 'fill',
+        source: this.SOURCE_ID,
+        paint: {
+          'fill-color': ['get','color'],
+          'fill-opacity': ['get','opacity'],
+        }
+      });
+
+      // Contur solid
+      if(map.getLayer(this.LAYER_OUTLINE)) map.removeLayer(this.LAYER_OUTLINE);
+      map.addLayer({
+        id: this.LAYER_OUTLINE,
+        type: 'line',
+        source: this.SOURCE_ID,
+        paint: {
+          'line-color': ['get','color'],
+          'line-width': 2,
+          'line-dasharray': [4,2],
+        }
+      });
+
+      this._active = true;
+      this._features = features;
+      ss?.(`⛔ ${features.length} zone protejate marcate — construire INTERZISĂ sau restricționată`);
+
+      // Popup click pe zonă protejată
+      map.on('click', this.LAYER_ID, (e) => {
+        const p = e.features[0]?.properties;
+        if(!p) return;
+        new mapboxgl.Popup({ closeButton:true, maxWidth:'320px' })
+          .setLngLat(e.lngLat)
+          .setHTML(`
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;background:#040a1c;color:#e2e8f0;padding:10px;border-radius:6px">
+              <div style="color:#ef4444;font-weight:800;margin-bottom:6px">⛔ ZONĂ EXCLUSĂ DIN CONSTRUIRE</div>
+              <div style="font-weight:700;color:#fbbf24;margin-bottom:4px">${p.name}</div>
+              <div style="color:#f87171;font-size:11px;line-height:1.5">${p.label}</div>
+              <div style="color:rgba(148,163,184,.5);font-size:10px;margin-top:6px">
+                Sursa: OSM · Verificați cu Certificat Urbanism<br>
+                emis de Primărie (Legea 50/1991 art.6)
+              </div>
+            </div>`)
+          .addTo(map);
+      });
+      map.on('mouseenter', this.LAYER_ID, ()=>{ map.getCanvas().style.cursor='not-allowed'; });
+      map.on('mouseleave', this.LAYER_ID, ()=>{ map.getCanvas().style.cursor=''; });
+
+    } catch(e) {
+      console.error('[ProtectedZones] Map error:', e.message);
+    }
+  },
+
+  remove(map) {
+    if(!map) return;
+    [this.LAYER_ID, this.LAYER_OUTLINE, this.LAYER_LABEL].forEach(id => {
+      try { if(map.getLayer(id)) map.removeLayer(id); } catch(e){}
+    });
+    try { if(map.getSource(this.SOURCE_ID)) map.removeSource(this.SOURCE_ID); } catch(e){}
+    this._active = false;
+    ss?.('Zone protejate ascunse');
+  },
+
+  toggle(map, lat, lon) {
+    if(this._active) this.remove(map);
+    else this.add(map, lat, lon);
+  },
+
+  // Verifică dacă o coordonată e în zonă exclusă
+  isProtected(lat, lon) {
+    if(!this._features) return null;
+    for(const f of this._features) {
+      const [cx,cy] = [
+        f.geometry.coordinates[0].reduce((s,p)=>s+p[0],0)/f.geometry.coordinates[0].length,
+        f.geometry.coordinates[0].reduce((s,p)=>s+p[1],0)/f.geometry.coordinates[0].length,
+      ];
+      const dist = Math.sqrt(Math.pow((lat-cy)*111000,2)+Math.pow((lon-cx)*111000*Math.cos(lat*Math.PI/180),2));
+      if(dist < 500) return f.properties;
+    }
+    return null;
+  },
+};
+window._ProtectedZonesLayer = G._ProtectedZonesLayer;
+
 })(window);

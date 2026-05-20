@@ -74,8 +74,20 @@ G._ZoneEngine = {
     // Pas 4: Metropolitan — comune periurbane adiacente
     const metro = this._findMetropolitanZones(city);
 
-    // Pas 5: Calculăm predicțiile per zonă
-    const zonePredictions = this._predictPerZone(zones, city, need);
+    // Pas 4b: Zone EXCLUSE din construire (OSM: cimitire, CF, militar, păduri)
+    // Referință: Legea 50/1991 · Legea 422/2001 · OG 43/1997
+    let excludedZones = [];
+    try {
+      excludedZones = await this._fetchExcludedZones(lat, lon, radius);
+      if(excludedZones.length > 0) {
+        console.log(`[ZoneEngine] ⚠️ ${excludedZones.length} zone excluse din construire:`,
+          excludedZones.map(z=>z.name).join(', '));
+      }
+    } catch(e) { console.log('[ZoneEngine] Excluded zones:', e.message); }
+    this._excludedZones = excludedZones;
+
+    // Pas 5: Calculăm predicțiile per zonă — EXCLUZÂND zonele protejate
+    const zonePredictions = this._predictPerZone(zones, city, need, excludedZones);
     const metroPredictions = this._predictMetropolitan(metro, city, need);
 
     const result = {
@@ -354,7 +366,7 @@ G._ZoneEngine = {
   },
 
   // ── Predicții per zonă ──────────────────────────────────────────────────────
-  _predictPerZone(zones, city, need) {
+  _predictPerZone(zones, city, need, excludedZones = []) {
     const pop0  = city.pop2021 || 100000;
     const pop55 = need?.pop2055 || pop0;
     const r     = city.rata_reala_2011_2021 || 0;
@@ -391,12 +403,51 @@ G._ZoneEngine = {
 
       // Tipul de intervenție recomandat
       const interventionType =
-        z._type === 'centru'    ? 'DENSIFICARE' :
-        z._type === 'expansion' ? 'EXPANSIUNE CONTROLATĂ' :
-        z._type === 'industrial'? 'RECONVERSIE INDUSTRIALĂ' :
-        densif > 20             ? 'DENSIFICARE MODERATĂ' :
-        densif < -5             ? 'REABILITARE FOND' :
-                                  'CONSOLIDARE';
+          z._type === 'centru'     ? 'DENSIFICARE' :
+          z._type === 'expansion'  ? 'EXPANSIUNE CONTROLATĂ' :
+          z._type === 'industrial' ? 'RECONVERSIE INDUSTRIALĂ' :
+          densif > 25              ? 'DENSIFICARE INTENSIVĂ' :
+          densif > 10              ? 'DENSIFICARE MODERATĂ' :
+          densif < -10             ? 'REABILITARE FOND' :
+                                     'CONSOLIDARE';
+
+        // ── Regim înălțime propus (RH) ─────────────────────────────────
+        // Ref: RGU HG 525/1996 + Ord. 233/2016
+        const gravS = grav?.gravityScore || 0.5;
+        const rh_propus =
+          z._type === 'centru'     ? (gravS > 0.7 ? 'P+8—P+12' : 'P+5—P+8') :
+          z._type === 'expansion'  ? (gravS > 0.6 ? 'P+3—P+6'  : 'P+2—P+4') :
+          z._type === 'industrial' ? 'P+3—P+6 (reconversie)' :
+          z._type === 'residential'? (i === 0 ? 'P+4—P+8' : 'P+2—P+5') :
+          z._type === 'mixed'      ? 'P+3—P+7' : 'P+2—P+4';
+
+        // ── POT/CUT propus ──────────────────────────────────────────────
+        const _potcutMap = {
+          centru:      { pot:80, cut:4.0, fn:'Mixt: Comercial+Rezidential+Servicii' },
+          expansion:   { pot:40, cut:1.2, fn:'Rezidential extensiv + spatii verzi' },
+          industrial:  { pot:60, cut:2.0, fn:'Reconversie: Rezidential+Birouri' },
+          residential: { pot:50, cut:1.8, fn:'Rezidential, parter comercial permis' },
+          mixed:       { pot:65, cut:2.5, fn:'Mixt: Rezidential+Comercial+Tertiar' },
+        };
+        const _pc = _potcutMap[z._type] || { pot:45, cut:1.5, fn:'Rezidential cu functiuni complementare' };
+
+        // ── Functiuni propuse ───────────────────────────────────────────
+        const functiuni_propuse =
+          z._type === 'centru'     ? ['Rezidential premium','Birouri clasa A','Retail stradal','Hotel'] :
+          z._type === 'expansion'  ? ['Rezidential familial','Gradinite/scoli','Spatii verzi','Sport'] :
+          z._type === 'industrial' ? ['Lofturi rezidentiale','Coworking/birouri','Retail','Cultura'] :
+          z._type === 'residential'? ['Rezidential mediu','Servicii proximitate','Educatie','Sanatate'] :
+          ['Rezidential','Servicii','Spatii verzi'];
+
+        // ── Mix rezidential recomandat ──────────────────────────────────
+        const mix_rez = {
+          studio:   Math.round(locuinte_noi * 0.15),
+          cam2:     Math.round(locuinte_noi * 0.32),
+          cam3:     Math.round(locuinte_noi * 0.28),
+          cam4plus: Math.round(locuinte_noi * 0.12),
+          senior:   Math.round(locuinte_noi * 0.08),
+          social:   Math.round(locuinte_noi * 0.05),
+        };
 
       // Necesități infrastructură
       const copii2055    = Math.round(pop2055z * 0.14);
@@ -422,6 +473,11 @@ G._ZoneEngine = {
         pressureColor:   constructionPressure>0.7?'#ef4444':constructionPressure>0.45?'#f59e0b':'#22c55e',
         // Intervenție
         intervention:    interventionType,
+        rh_propus,
+        pot: _pc.pot,
+        cut: _pc.cut,
+        functiuni: functiuni_propuse,
+        mix_rez,
         // Infrastructură necesară
         scoli_noi:       Math.max(0, Math.ceil(copii2055/400) - Math.ceil(copii2021/400)),
         medici_noi:      Math.max(0, Math.ceil(varstnici2055/1500) - Math.ceil(varstnici2021/1500)),
@@ -457,6 +513,83 @@ G._ZoneEngine = {
         warning: `Comună periurbană cu creștere rapidă +${r.toFixed(1)}%/an. Necesită coordonare cu ${city.name}!`,
         sursa_date: 'INSE Rec.2021 · _EXTRA_UATS · Model cohort UrbanX',
       };
+    });
+  },
+
+  // ── Zone EXCLUSE din construire ────────────────────────────────────────────
+  // Surse: OSM (cimitire, CF, militar, aeroport, paduri) + CIMEC (monumente)
+  // Referință: Legea 50/1991, Legea 422/2001, OG 43/1997 (drumuri),
+  //            Legea 24/2007 (spatii verzi), Legea 7/1996 (cadastru)
+  _EXCLUDED_OSM_TYPES: [
+    // Cimitire - NICIODATA nu se construieste
+    "landuse=cemetery", "amenity=grave_yard",
+    // Monumente si zone protejate
+    "historic=monument", "historic=memorial", "historic=castle",
+    "boundary=protected_area", "boundary=national_park",
+    // Infrastructura tehnica - zona de siguranta
+    "landuse=railway", "railway=rail", "railway=station",
+    // Militar
+    "landuse=military", "military=barracks",
+    // Paduri si ape - protejate
+    "landuse=forest", "natural=wood", "natural=water",
+    "waterway=river", "waterway=stream",
+    // Aeroporturi
+    "aeroway=aerodrome", "aeroway=runway",
+  ],
+
+  async _fetchExcludedZones(lat, lon, radius) {
+    const q = `[out:json][timeout:10];
+(
+  way["landuse"~"^(cemetery|railway|military|forest)$"](around:${radius},${lat},${lon});
+  way["amenity"="grave_yard"](around:${radius},${lat},${lon});
+  way["natural"~"^(wood|water)$"](around:${radius},${lat},${lon});
+  way["military"](around:${radius},${lat},${lon});
+  relation["boundary"~"^(protected_area|national_park)$"](around:${radius},${lat},${lon});
+)->.excl;
+.excl out center tags;`;
+    try {
+      const r = await fetch('https://overpass-api.de/api/interpreter',{
+        method:'POST', body:'data='+encodeURIComponent(q),
+        signal: AbortSignal.timeout(10000),
+      });
+      const data = await r.json();
+      return (data.elements||[]).map(el=>({
+        type:    el.tags?.landuse || el.tags?.amenity || el.tags?.natural || el.tags?.military || 'exclus',
+        name:    el.tags?.name || el.tags?.['name:ro'] || 'Zonă protejată',
+        lat:     el.lat || el.center?.lat || lat,
+        lon:     el.lon || el.center?.lon || lon,
+        legal:   this._getLegalBasis(el.tags),
+        tags:    el.tags,
+      }));
+    } catch(e) {
+      console.log('[ZoneEngine] Excluded zones fetch error:', e.message);
+      return [];
+    }
+  },
+
+  _getLegalBasis(tags) {
+    if(tags?.landuse === 'cemetery' || tags?.amenity === 'grave_yard')
+      return 'Interzis construire — Legea 50/1991 art.11 + Legea cimitirelor';
+    if(tags?.landuse === 'military' || tags?.military)
+      return 'Zonă militară — acces și construire interzise';
+    if(tags?.landuse === 'railway' || tags?.railway)
+      return 'Culoar protecție CF — OG 43/1997 art.16, min.100m';
+    if(tags?.landuse === 'forest' || tags?.natural === 'wood')
+      return 'Pădure — construire interzisă (Codul Silvic)';
+    if(tags?.boundary)
+      return 'Zonă protejată — Legea 5/2000 + OUG 57/2007';
+    return 'Zonă restricționată legal';
+  },
+
+  // Verifică dacă o coordonată e în zonă exclusă (cu buffer)
+  isExcluded(lat, lon, excludedZones, bufferM = 50) {
+    return excludedZones.some(z => {
+      const dist = this._dist(lat, lon, z.lat, z.lon) * 1000; // în metri
+      const buf = z.type === 'cemetery' ? 0 :     // cimitirul însuși
+                  z.type === 'railway'  ? 100 :    // 100m zona CF
+                  z.type === 'military' ? 200 :    // 200m zona militară
+                  bufferM;
+      return dist < buf;
     });
   },
 
@@ -649,7 +782,7 @@ G._ZoneProjections_Real = {
     ctx.fillStyle = isMetro?'#f97316':'#D4AF37'; ctx.fillRect(W*0.05, H*0.075, (currentIdx/nZones+tInZone/nZones)*300, 2);
 
     // Card principal cu datele zonei
-    const cw=280, ch=180, cx2=W*0.06, cy2=H*0.12;
+    const cw=290, ch=210, cx2=W*0.05, cy2=H*0.10;
     ctx.fillStyle='rgba(4,10,24,0.94)';
     G._SceneEngine._roundRect?.(ctx,cx2,cy2,cw,ch,10); ctx.fill();
     ctx.strokeStyle = zone.pressureColor||'#D4AF37'; ctx.lineWidth=1.5;
@@ -674,12 +807,46 @@ G._ZoneProjections_Real = {
     };
 
     const pct = zone.densif_pct || 0;
-    showNum('DENSIFICARE', (pct>=0?'+':'')+pct+'%', 28, zone.pressureColor||'#f59e0b', 0.05);
-    showNum('LOCUINȚE NOI', (zone.locuinte_noi||0).toLocaleString('ro-RO'), 68, '#fff', 0.25);
-    showNum('POPULAȚIE 2055', (zone.pop2055||0).toLocaleString('ro-RO'), 108, '#22c55e', 0.45);
+    showNum('DENSIFICARE', (pct>=0?'+':'')+pct+'%', 22, zone.pressureColor||'#f59e0b', 0.05);
+    showNum('LOCUINTE NOI', (zone.locuinte_noi||0).toLocaleString('ro-RO'), 54, '#fff', 0.20);
+    showNum('POPULATIE 2055', (zone.pop2055||0).toLocaleString('ro-RO'), 86, '#22c55e', 0.38);
+
+    // Regim înălțime propus
+    if(zone.rh_propus && tInZone > 0.40) {
+      const rhA = Math.min(1,(tInZone-0.40)/0.15);
+      ctx.globalAlpha *= rhA;
+      ctx.fillStyle='rgba(148,163,184,.6)'; ctx.font=`${W*0.0068}px "IBM Plex Mono"`;
+      ctx.fillText('REGIM INALTIME:', cx2+8, cy2+112);
+      ctx.fillStyle='#fbbf24'; ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.fillText(zone.rh_propus||'—', cx2+8, cy2+122);
+      ctx.globalAlpha /= rhA;
+    }
+
+    // POT / CUT propus
+    if(zone.pot && tInZone > 0.52) {
+      const pa = Math.min(1,(tInZone-0.52)/0.12);
+      ctx.globalAlpha *= pa;
+      ctx.fillStyle='rgba(148,163,184,.6)'; ctx.font=`${W*0.0068}px "IBM Plex Mono"`;
+      ctx.fillText(`POT max ${zone.pot||'—'}%  ·  CUT max ${zone.cut||'—'}`, cx2+8, cy2+136);
+      ctx.globalAlpha /= pa;
+    }
+
+    // Funcțiuni propuse
+    if(zone.functiuni?.length && tInZone > 0.60) {
+      const fa = Math.min(1,(tInZone-0.60)/0.15);
+      ctx.globalAlpha *= fa;
+      ctx.fillStyle='rgba(148,163,184,.6)'; ctx.font=`${W*0.0065}px "IBM Plex Mono"`;
+      ctx.fillText('FUNCTIUNI PROPUSE:', cx2+8, cy2+150);
+      ctx.fillStyle='rgba(200,215,240,.85)'; ctx.font=`${W*0.0072}px "IBM Plex Mono"`;
+      ctx.fillText((zone.functiuni||[]).slice(0,3).join(' · '), cx2+8, cy2+160);
+      ctx.globalAlpha /= fa;
+    }
+
+    // Tip intervenție
     if(zone.intervention) {
-      ctx.fillStyle='rgba(148,163,184,.65)'; ctx.font=`${W*0.007}px "IBM Plex Mono"`;
-      ctx.fillText('TIP INTERVENȚIE: '+zone.intervention, cx2+8, cy2+ch-18);
+      ctx.fillStyle=zone.pressureColor||'rgba(245,158,11,.8)';
+      ctx.font=`bold ${W*0.007}px "IBM Plex Mono"`;
+      ctx.fillText('TIP: '+zone.intervention, cx2+8, cy2+ch-18);
     }
     ctx.fillStyle='rgba(100,120,150,.4)'; ctx.font=`${W*0.006}px "IBM Plex Mono"`;
     ctx.fillText(zone.source||'INSE·OSM·UrbanX', cx2+8, cy2+ch-5);
