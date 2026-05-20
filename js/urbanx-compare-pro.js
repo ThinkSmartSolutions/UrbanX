@@ -667,11 +667,19 @@ G._PresentationMode = {
       const btn=document.createElement('button');
       btn.id=id;
       btn.style.cssText=`display:block;width:100%;text-align:left;background:none;border:none;
-        color:${col};padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px;font-family:inherit`;
+        color:${col};padding:11px 10px;cursor:pointer;border-radius:6px;font-size:13px;
+        font-family:inherit;min-height:44px;-webkit-tap-highlight-color:transparent`;
       btn.innerHTML=`${icon} ${label}`;
       btn.onmouseover=()=>{btn.style.background='rgba(255,255,255,.06)'};
       btn.onmouseout=()=>{btn.style.background='none'};
-      btn.setAttribute('onclick',action);
+      // addEventListener in loc de setAttribute — merge pe iOS Safari
+      btn.addEventListener('click', ()=>{
+        try { eval(action); } catch(e){ console.error('[Menu]',e); }
+      });
+      btn.addEventListener('touchend', (e)=>{
+        e.preventDefault();
+        try { eval(action); } catch(e){ console.error('[Menu touch]',e); }
+      }, {passive:false});
       vizMenu.appendChild(btn);
     });
   };
