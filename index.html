@@ -2730,14 +2730,14 @@ function _closeMobileSheet() {
 }
 
 // Swipe down to close sheet
-let sheetStartY = 0;
-document.getElementById('wx-mobile-sheet')?.addEventListener('touchstart', e => { sheetStartY = e.touches[0].clientY; });
+window.sheetStartY = 0;
+document.getElementById('wx-mobile-sheet')?.addEventListener('touchstart', e => { window.sheetStartY = e.touches[0].clientY; });
 document.getElementById('wx-mobile-sheet')?.addEventListener('touchend', e => {
   if(e.changedTouches[0].clientY - sheetStartY > 80) _closeMobileSheet();
 });
 
 // Hook parcel click pentru a actualiza discover panel
-const _origParcelClick = window.onParcelSelect;
+window._origParcelClick = window.onParcelSelect;
 window._onParcelSelectedHook = function(parcel) {
   if(typeof _wxUpdateParcelInfo === 'function') _wxUpdateParcelInfo(parcel);
 };
@@ -2986,7 +2986,7 @@ function addBilantExportBtn() {
 }
 // Observer pentru cand se deschide modalul
 // FIX: subtree:false păstrat, disconnect automat după găsire
-const _bilantObs = new MutationObserver(()=>{ 
+window._bilantObs = new MutationObserver(()=>{ 
   if(addBilantExportBtn()){ 
     _bilantObs.disconnect(); 
   } 
@@ -3349,7 +3349,7 @@ function _closeAllMenusAndOverlay() {
 }
 
 // Override _toggleVizMenu pentru a activa overlay-ul
-const _origToggleViz = window._toggleVizMenu;
+window._origToggleViz = window._toggleVizMenu;
 window._toggleVizMenu = function(event) {
   if(event) event.stopPropagation();
   const menu = document.getElementById('viz-menu');
@@ -3377,7 +3377,7 @@ window._toggleVizMenu = function(event) {
 };
 
 // Acelasi pentru Tools menu
-const _origToggleTools = window._toggleToolsMenu;
+window._origToggleTools = window._toggleToolsMenu;
 window._toggleToolsMenu = function(event) {
   if(event) event.stopPropagation();
   const menu = document.getElementById('tools-menu');
@@ -3563,7 +3563,7 @@ window._launchEUBenchmark = function() {
 <script>
 // ── INFO DRAWER ENGINE ────────────────────────────────────────────────────
 
-const _INFO_DATA = {
+window._INFO_DATA = {
 
   // ── BARA DE SUS ──────────────────────────────────────────────────────────
   'harta': {
@@ -4027,7 +4027,7 @@ function _updateUTRDrawerTitle(cityKey) {
 }
 
 // Hook pe city persistence — se apelează la orice schimbare de UAT
-const _origHookCP = window._hookCityPersistence;
+window._origHookCP = window._hookCityPersistence;
 window._hookCityPersistence = function() {
   if (_origHookCP) _origHookCP.call(this);
   // Verificăm periodic dacă TCI.cityKey s-a schimbat
@@ -4257,7 +4257,7 @@ function _patchSceneEngine() {
 }
 
 // Aplicăm patch când SceneEngine e disponibil
-let _scenePatchTries = 0;
+window._scenePatchTries = 0;
 const _scenePatchInterval = setInterval(function() {
   if (++_scenePatchTries > 40) { clearInterval(_scenePatchInterval); return; }
   if (_patchSceneEngine()) clearInterval(_scenePatchInterval);
@@ -4309,7 +4309,7 @@ const _scenePatchInterval = setInterval(function() {
 // Problema: pib_eur_cap nereîncărcat din _RO_CITIES_DB sau DataEngine înainte de build PDF
 // Fix: asigurăm că înainte de generateMasterplan, cityData are pib_eur_cap nenul
 
-const _origGenMasterplan = window.generateMasterplan;
+window._origGenMasterplan = window.generateMasterplan;
 window.generateMasterplan = function() {
   // Asigurăm date corecte din DB
   const k = window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
@@ -4370,7 +4370,7 @@ if (_btnUTR && !_btnUTR._colorPatchApplied) {
 // ── PATCH 8: Cinematic — scene > 17 continuă după eroare ─────────────────
 // Wrappăm _launchCinemaV2 pentru a prinde erori globale
 
-const _origLaunchCinema = window._launchCinemaV2;
+window._origLaunchCinema = window._launchCinemaV2;
 window._launchCinemaV2 = function() {
   try {
     if (typeof _origLaunchCinema === 'function') return _origLaunchCinema.apply(this, arguments);
