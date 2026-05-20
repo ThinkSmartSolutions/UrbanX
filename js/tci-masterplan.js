@@ -56,13 +56,14 @@ G._TCIMasterplanPDF = {
   // ── Intrare principală ────────────────────────────────────────────────────
   async generate(cityKey, scenario){
     const J = _jsPDF();
-    if(!J){ ss?.('❌ jsPDF indisponibil'); return; }
+    if(!J){ ss?.('❌ jsPDF indisponibil — reîncarcă pagina'); return; }
 
     ss?.('📋 Generez Masterplan Strategic… (30-45 sec)');
 
+    try {
     // ── Culegem toate datele ─────────────────────────────────────────────
     const city    = this._resolveCity(cityKey);
-    if(!city){ ss?.('⚠️ UAT negăsit: '+cityKey); return; }
+    if(!city){ ss?.('⚠️ UAT negăsit: '+cityKey+' — selectați mai întâi un UAT'); return; }
 
     scenario      = scenario || 'S2';
     const risk    = (typeof _getRiskProfile === 'function') ? _getRiskProfile(city) : this._defaultRisk(city);
@@ -124,6 +125,10 @@ G._TCIMasterplanPDF = {
     pdf.save(fn);
     ss?.('✅ Masterplan generat: '+fn+' · '+city.name+' · '+scenario);
     return fn;
+    } catch(err) {
+      console.error('[Masterplan] Eroare generare:', err);
+      ss?.('❌ Eroare Masterplan: '+err.message.slice(0,60)+' — verificați consola (F12)');
+    }
   },
 
   // ── Pagina 1: COVER ───────────────────────────────────────────────────────
@@ -1054,12 +1059,18 @@ G._TCIMasterplanPDF = {
   // GRAFICE CANVAS
   // ══════════════════════════════════════════════════════════════════════════
 
-  _chartPopulation(pdf,W,y, city,yrs,pop,scenario){
+  _chartPopulation(pdf,W,y, city,yrs,popFn,scenario){
     const cW=W-28, cH=45, x0=14, y0=y;
     pdf.setFillColor(8,16,38); pdf.rect(x0,y0,cW,cH,'F');
     pdf.setDrawColor(30,50,100); pdf.setLineWidth(0.2); pdf.rect(x0,y0,cW,cH,'S');
 
     const p0=city.pop2021||100000;
+    const r=(city.rata_reala_2011_2021||0)/100;
+    // Robust: daca popFn nu e functie, cream una intern
+    const pop = typeof popFn==='function' ? popFn : (sc,yr)=>{
+      const rates={S1:0.008,S2:r,S3:-0.010};
+      return Math.round(p0*Math.pow(1+(rates[sc]||r),yr-2021));
+    };
     const pMin=Math.min(...['S1','S2','S3'].map(s=>pop(s,2055)))*0.95;
     const pMax=Math.max(...['S1','S2','S3'].map(s=>pop(s,2055)))*1.05;
 

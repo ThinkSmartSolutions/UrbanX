@@ -2866,26 +2866,16 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
       📊 TCI Clasic
       <div style="font-size:9px;color:rgba(96,165,250,.5);font-weight:400">KPI · Slider · Scenarii</div>
     </button>
-    <button onclick="window._switchToCinemaV2&&_switchToCinemaV2()"
+    <button onclick="window._switchToCinemaV2&&_switchToCinemaV2();window._launchCinemaV2&&setTimeout(_launchCinemaV2,100)"
       id="btn-tci-mode-v2"
       style="flex:1;padding:7px 6px;border-radius:6px;background:rgba(139,92,246,.1);
         border:1px solid rgba(139,92,246,.3);color:#a78bfa;font-size:11px;cursor:pointer;
         font-family:inherit;font-weight:600;min-height:36px"
-      title="Butonul TCI din bara → filmul cinematic 12 scene">
-      🎬 Cinema v2
-      <div style="font-size:9px;color:rgba(167,139,250,.5);font-weight:400">Film · 12 scene</div>
+      title="Pornește Film Cinematic — 25 scene, 6.2 minute">
+      🎬 Film Cinematic
+      <div style="font-size:9px;color:rgba(167,139,250,.5);font-weight:400">25 scene · 6.2 min · pornește acum</div>
     </button>
   </div>
-
-  <button onclick="window._launchCinemaV2();_closeAllMenusAndOverlay()"
-    style="display:block;width:100%;text-align:left;background:rgba(139,92,246,.08);
-      border:none;color:#a78bfa;padding:10px 12px;cursor:pointer;border-radius:8px;
-      font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
-    onmouseover="this.style.background='rgba(139,92,246,.2)'"
-    onmouseout="this.style.background='rgba(139,92,246,.08)'">
-    🎬 TCI Cinematic v2
-    <div style="font-size:10px;color:rgba(167,139,250,.6);font-weight:400">12 scene · proiecții per cartier · 2 min</div>
-  </button>
 
   <!-- Grup: Comparatii & Rapoarte -->
   <div style="padding:6px 8px 3px;font-size:9px;color:#1d4ed8;text-transform:uppercase;
@@ -2956,7 +2946,18 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
     letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.06);margin-top:3px">
     🗺 Zone Speciale & Hărți</div>
 
-  <button onclick="(function(){const map=window.map;const k=window.TCI?.cityKey||'RO-IS-01';const city=(window._RO_CITIES_DB||{})[k]||{lat:47.158,lon:27.601};if(map&&window._ProtectedZonesLayer)window._ProtectedZonesLayer.toggle(map,city.lat,city.lon);_closeAllMenusAndOverlay();})()"
+  <button onclick="(function(){
+  const map=window.map;
+  if(!map){ss?.('Harta nu e disponibilă');return;}
+  const k=window.TCI?.cityKey||window._ProjectionEngine?.currentCity||'RO-IS-01';
+  const db=window._RO_CITIES_DB||{};
+  const city=db[k]||Object.values(db)[0]||{lat:47.158,lon:27.601,name:'Iași'};
+  const lat=city.lat||map.getCenter().lat;
+  const lon=city.lon||map.getCenter().lng;
+  if(window._ProtectedZonesLayer) window._ProtectedZonesLayer.toggle(map,lat,lon);
+  else ss?.('Zone Protejate se inițializează — mai încearcă în 3 secunde');
+  _closeAllMenusAndOverlay();
+})()"
     style="display:block;width:100%;text-align:left;background:rgba(220,38,38,.08);
       border:none;color:#f87171;padding:10px 12px;cursor:pointer;border-radius:8px;
       font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
@@ -2967,7 +2968,17 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
     <div style="font-size:10px;color:rgba(248,113,113,.6);font-weight:400">cimitire · CF · monumente · păduri · restricții legale</div>
   </button>
 
-  <button onclick="(function(){const map=window.map;const k=window.TCI?.cityKey||'RO-IS-01';const city=(window._RO_CITIES_DB||{})[k]||{lat:47.158,lon:27.601};if(map&&window._FloodMapper)window._FloodMapper.addAll(map);_closeAllMenusAndOverlay();})()"
+  <button onclick="(function(){
+  const map=window.map;
+  if(!map){ss?.('Harta nu e disponibilă');return;}
+  if(window._FloodMapper){
+    window._FloodMapper.addAll(map);
+    ss?.('🌊 Hărți inundații ANAR activate — RCP10/100/500');
+  } else {
+    ss?.('Hărți Inundații se inițializează — mai încearcă în 3 secunde');
+  }
+  _closeAllMenusAndOverlay();
+})()"
     style="display:block;width:100%;text-align:left;background:rgba(59,130,246,.08);
       border:none;color:#7dd3fc;padding:10px 12px;cursor:pointer;border-radius:8px;
       font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
