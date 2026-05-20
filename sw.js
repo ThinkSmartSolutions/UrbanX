@@ -3,9 +3,9 @@
 // Fix: versiunile vechi nu mai sunt servite din cache pentru fișiere JS
 // ═══════════════════════════════════════════════════════════════════════════
 
-const CACHE_VERSION = 'urbanx-v4.0';
-const CACHE_STATIC  = 'urbanx-static-v4.0';
-const CACHE_API     = 'urbanx-api-v4.0';
+const CACHE_VERSION = 'urbanx-v4.1';
+const CACHE_STATIC  = 'urbanx-static-v4.1';
+const CACHE_API     = 'urbanx-api-v4.1';
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24h pentru API
 
 // Domenii API care se cacheaza (24h)
