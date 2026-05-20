@@ -4572,17 +4572,14 @@ function _setupBtnUTR() {
     // Determinăm UAT activ
     const k = window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
     const db = window._RO_CITIES_DB || {};
-    const city = db[k] || {name:'Iași', lat:47.158, lon:27.601};
-    const cityName = city.name || 'Iași';
+    const city = db[k] || {name:'UAT', lat:47.158, lon:27.601};
+    const cityName = city.name || 'UAT';
 
     // Determinăm URL-ul PUG
-    // Mapăm cityKey → folder din js/data/
     const _PUG_URLS = {
       'RO-IS-01': 'js/data/iasi/pug.geojson',
       'RO-SV-01': 'js/data/municipiul-suceava/pug.geojson',
-      // Alte UAT-uri pot fi adăugate aici
     };
-    // Fallback: din UAT_REGISTRY
     const UAT_REG = window.UAT_REGISTRY || {};
     const regEntry = Object.values(UAT_REG).find(e =>
       e.label?.toLowerCase().includes(cityName.toLowerCase()) ||
@@ -4591,7 +4588,6 @@ function _setupBtnUTR() {
     const pugUrl = _PUG_URLS[k] || regEntry?.pugFile;
 
     if(!pugUrl) {
-      // Nu avem PUG pentru acest UAT — deschidem drawer cu mesaj
       drawer.classList.add('open');
       const titleEl = document.getElementById('utr-drawer-title');
       if(titleEl) titleEl.textContent = '🗺 Zone UTR — PUG ' + cityName + ' · Indisponibil';
@@ -4605,15 +4601,23 @@ function _setupBtnUTR() {
       return;
     }
 
-    // Verificăm dacă e deja încărcat pe hartă (același UAT)
+    // Verificăm dacă PUG-ul deja încărcat e al UAT-ului ACTIV (nu al altuia)
     const chipsEl = document.getElementById('utr-chips');
-    if(chipsEl?.children?.length > 0 && window.S?.pug && window.S?.pugIdx?.length > 0) {
-      // Deja încărcat — doar deschidem drawer
+    const titleEl2 = document.getElementById('utr-drawer-title');
+    const loadedCityInTitle = titleEl2?.textContent?.includes(cityName);
+    const alreadyLoaded = chipsEl?.children?.length > 0 &&
+                          window.S?.pug &&
+                          window.S?.pugIdx?.length > 0 &&
+                          loadedCityInTitle; // doar dacă e al UAT-ului curent
+
+    if(alreadyLoaded) {
+      // Deja încărcat pentru acest UAT — doar deschidem drawer
       drawer.classList.add('open');
       return;
     }
 
-    // Încărcăm PUG
+    // Încărcăm PUG (UAT nou sau prima dată)
+    window.S && (window.S.pug = false); // resetăm flag ca să forțăm re-încărcare
     const geojson = await _loadPUGOnMap(pugUrl, cityName, null);
     if(geojson) {
       _renderUTRChips(geojson, cityName);
