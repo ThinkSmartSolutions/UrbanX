@@ -17,9 +17,10 @@ if(_mapEl) _mapEl.style.visibility = 'visible';
 
 // ── DETECTARE INTRAVILAN/EXTRAVILAN ─────────────────────────────────────
 // SURSE DE DATE:
-// 1. lookupUTR(lng,lat) -> UTR valid = INTRAVILAN Municipiul Iasi (din PUG)
+// 1. lookupUTR(lng,lat) -> UTR valid = INTRAVILAN UAT activ (din PUG)
 // 2. Nominatim reverse geocoding -> UAT real (async)
-// 3. Daca nu e in PUG si Nominatim nu raspunde -> "In afara PUG Iasi"
+// 3. Daca nu e in PUG si Nominatim nu raspunde -> "In afara PUG {UAT activ}"
+// UAT activ = TCI.cityKey → _RO_CITIES_DB[key].name (dinamic, nu hardcodat)
 
 // Helper comun: verifică dacă UTR-ul provine din PUG
 function _checkPUGZone(utr){
@@ -30,23 +31,40 @@ function _checkPUGZone(utr){
   return {utrClean, isFromPUG};
 }
 
+// ── Helper: returnează numele UAT activ (din TCI.cityKey sau fallback Iași) ──
+function _getActiveUATName() {
+  const k = window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
+  const db = window._RO_CITIES_DB || {};
+  return (db[k]?.name) || 'Iași';
+}
+function _getActivePUGLabel() {
+  return 'PUG ' + _getActiveUATName();
+}
+
 // Versiunea sincrona (folosita pentru UI instant) - doar pe baza UTR
 function detectZoneType(lat, lng, utr){
   const {utrClean, isFromPUG} = _checkPUGZone(utr);
+  const uatName = _getActiveUATName();
   if(isFromPUG){
-    return {type:'intravilan', utr:utrClean, label:'🏙 Intravilan Municipiul Iași — UTR '+utrClean, color:'#34d399'};
+    return {type:'intravilan', utr:utrClean, label:'🏙 Intravilan ' + uatName + ' — UTR '+utrClean, color:'#34d399'};
   }
-  return {type:'necunoscut', utr:utrClean||'EXT_COM', label:'📍 În afara PUG Municipiul Iași — se verifică UAT-ul…', color:'#94a3b8'};
+  return {type:'necunoscut', utr:utrClean||'EXT_COM', label:'📍 În afara ' + _getActivePUGLabel() + ' — se verifică UAT-ul…', color:'#94a3b8'};
 }
 
 // Versiunea async - interogheaza Nominatim pentru UAT real
 async function detectZoneTypeAsync(lat, lng, utr){
   const {utrClean: utrCl, isFromPUG: fromPUG} = _checkPUGZone(utr);
+  const uatName = _getActiveUATName();
+  const k = window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
+  const db = window._RO_CITIES_DB || {};
+  const activeCity = db[k] || {};
+  const activeName = activeCity.name || 'Iași';
+
   if(fromPUG){
-    return {type:'intravilan', utr:utrCl, label:'🏙 Intravilan Municipiul Iași — UTR '+utrCl, color:'#34d399', uat:'Municipiul Iași'};
+    return {type:'intravilan', utr:utrCl, label:'🏙 Intravilan ' + activeName + ' — UTR '+utrCl, color:'#34d399', uat:activeName};
   }
   
-  // Nu e in PUG Iasi - interogam Nominatim pentru UAT real
+  // Nu e in PUG activ - interogam Nominatim pentru UAT real
   try{
     const r = await fetch(
       `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=10&accept-language=ro`,
@@ -57,16 +75,19 @@ async function detectZoneTypeAsync(lat, lng, utr){
       const addr = data.address || {};
       const uat = addr.municipality || addr.city || addr.town || addr.village || addr.suburb || '';
       const county = addr.county || addr.state || '';
-      const isIasi = uat.toLowerCase().includes('iași') || uat.toLowerCase().includes('iasi');
+      // Verificam daca e in UAT-ul activ (nu neapărat Iași)
+      const activeNameLower = activeName.toLowerCase();
+      const uatLower = uat.toLowerCase();
+      const isActiveUAT = uatLower.includes(activeNameLower) || activeNameLower.includes(uatLower);
       
-      if(isIasi){
-        // E in UAT Iasi dar in afara PUG = extravilan Iasi
+      if(isActiveUAT && uat){
+        // E in UAT activ dar in afara PUG = extravilan
         return {
           type:'extravilan_iasi',
           utr:'EXT',
-          label:'🌿 Extravilan Municipiul Iași (în afara PUG)',
+          label:'🌿 Extravilan ' + activeName + ' (în afara PUG)',
           color:'#f59e0b',
-          uat:'Municipiul Iași'
+          uat: activeName
         };
       } else if(uat){
         // Alta UAT din judet
@@ -86,7 +107,7 @@ async function detectZoneTypeAsync(lat, lng, utr){
   return {
     type:'necunoscut',
     utr:'EXT_COM',
-    label:'📍 În afara PUG Municipiul Iași',
+    label:'📍 În afara ' + _getActivePUGLabel(),
     color:'#94a3b8',
     uat:'necunoscut'
   };
