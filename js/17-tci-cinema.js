@@ -11,7 +11,7 @@ const TCI = {
   running: false, speed: 1,
   year: 2025, startYear: 2025,
   scenario: 'S2', mode: 'uat',
-  cityKey: localStorage.getItem('ux_last_city') || null, cityData: null, // setat din localStorage sau la open()
+  cityKey: 'iasi', cityData: null,
   raf: null, startTime: 0, pausedAt: 0,
   bearing: 0,
   _selectedUATKey: null,
@@ -58,12 +58,7 @@ const TCI = {
     sel.id = 'tci-sel';
     sel.style.cssText='position:fixed;inset:0;z-index:3000;background:rgba(2,6,15,0.96);backdrop-filter:blur(20px);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:"Space Grotesk","Inter",sans-serif;';
 
-    const uatKey = window.TCI?.cityKey ||
-                   window.S?.activeUAT ||
-                   window._ProjectionEngine?.currentCity ||
-                   localStorage.getItem('ux_last_city') ||
-                   Object.keys(window._RO_CITIES_DB||{})[0] ||
-                   'RO-IS-01';
+    const uatKey = window.S?.activeUAT || window._ProjectionEngine?.currentCity || 'iasi';
     const city = (typeof _RO_CITIES_DB !== 'undefined') ? _RO_CITIES_DB[uatKey] : null;
 
     sel.innerHTML = `
@@ -253,6 +248,23 @@ const TCI = {
 
   _selPick(key, name) {
     this._selectedUATKey = key;
+
+    // ── SETĂM IMEDIAT cityKey și localStorage ────────────────────────────
+    // Acesta e momentul în care userul a ales un UAT — salvăm persistent
+    this.cityKey = key;
+    try { localStorage.setItem('ux_last_city', key); } catch(e) {}
+    if(window._ProjectionEngine) window._ProjectionEngine.currentCity = key;
+    if(window._SceneEngine) window._SceneEngine._cityKey = key;
+
+    // Actualizăm badge-ul din topbar
+    const uatInd = document.getElementById('uat-indicator');
+    if(uatInd) uatInd.textContent = name;
+    // Actualizăm butonul UAT din topbar (📍 Suceava)
+    const tbUAT = document.querySelector('[data-city-name], #btn-uat-active');
+    if(tbUAT) tbUAT.textContent = name;
+
+    console.log('[TCI] UAT selectat:', key, '—', name, '→ salvat în localStorage');
+
     const inp = document.getElementById('tci-sel-uat');
     if(inp) inp.value = name;
     const res = document.getElementById('tci-sel-res');
@@ -354,12 +366,7 @@ const TCI = {
     this.mode      = mode;
     const _prevKey = this.cityKey;
     this.cityKey   = this._selectedUATKey || opts.cityKey
-      || window.TCI?.cityKey
-      || window.S?.activeUAT
-      || window._ProjectionEngine?.currentCity
-      || localStorage.getItem('ux_last_city')
-      || Object.keys(window._RO_CITIES_DB||{})[0]
-      || 'RO-IS-01';
+      || window.S?.activeUAT || window._ProjectionEngine?.currentCity || 'iasi';
     this._selectedUATKey = null;
     // ── Lookup cityData — 3 strategii ────────────────────────────────────
     // 1. Key direct în _RO_CITIES_DB (ex: 'RO-IS-01' din projection-engine)
@@ -3670,48 +3677,15 @@ ROI = (Vsale - Ctotal) / Ctotal             <span class="v">→ ${feas.roi}% (pr
         {lon:26.6680, lat:47.7420, r:80,  reason:'Cimitirul Central Botoșani'},
         {lon:26.6350, lat:47.7550, r:200, reason:'Parcul Naturăl Botoșani'},
       ],
-      'suceava': [
-        {lon:26.2680, lat:47.6635, r:150, reason:'Cetatea de Scaun Suceava — LMI'},
-        {lon:26.2520, lat:47.6580, r:120, reason:'Mănăstirea Zamca — LMI'},
-        {lon:26.2950, lat:47.6710, r:100, reason:'Cimitirul Central Suceava'},
-        {lon:26.2400, lat:47.6550, r:300, reason:'Pădurea Zamca — rezervație'},
-        {lon:26.3200, lat:47.6500, r:80,  reason:'Stadionul Municipal Suceava'},
-        {lon:26.2550, lat:47.6590, r:90,  reason:'Mănăstirea Sf Ioan cel Nou — LMI'},
-      ],
       'cluj': [
         {lon:23.5902, lat:46.7712, r:100, reason:'Cimitirul Central Cluj'},
         {lon:23.5825, lat:46.7834, r:300, reason:'Parcul Felie Cluj'},
       ],
       'timisoara': [
         {lon:21.2240, lat:45.7519, r:100, reason:'Cimitirul Eroilor Timișoara'},
-        {lon:21.2100, lat:45.7600, r:150, reason:'Parcul Rozelor Timișoara'},
       ],
       'constanta': [
         {lon:28.6330, lat:44.1715, r:150, reason:'Cimitirul Municipal Constanța'},
-        {lon:28.6600, lat:44.1800, r:200, reason:'Portul Constanța — restricții'},
-      ],
-      'bacau': [
-        {lon:26.9040, lat:46.5700, r:100, reason:'Cimitirul Central Bacău'},
-      ],
-      'brasov': [
-        {lon:25.5800, lat:45.6560, r:200, reason:'Cetatea Brașovului — LMI'},
-        {lon:25.5570, lat:45.6580, r:150, reason:'Cimitirul Lutheran Brașov'},
-      ],
-      'galati': [
-        {lon:28.0400, lat:45.4350, r:200, reason:'Portul Galați — restricții'},
-        {lon:28.0580, lat:45.4500, r:100, reason:'Cimitirul Eternitatea Galați'},
-      ],
-      'craiova': [
-        {lon:23.7950, lat:44.3260, r:150, reason:'Cimitirul Central Craiova'},
-        {lon:23.8100, lat:44.3400, r:200, reason:'Parcul Nicolae Romanescu'},
-      ],
-      'oradea': [
-        {lon:21.9280, lat:47.0620, r:150, reason:'Cetatea Oradea — LMI'},
-        {lon:21.9200, lat:47.0700, r:100, reason:'Cimitirul Municipal Oradea'},
-      ],
-      'sibiu': [
-        {lon:24.1500, lat:45.7960, r:200, reason:'Centrul Istoric Sibiu — LMI'},
-        {lon:24.1650, lat:45.7870, r:100, reason:'Cimitirul Evanghelic Sibiu'},
       ],
       // Template pentru adăugare UAT nou:
       // 'key-uat': [{lon, lat, r_in_meters, reason}, ...]
@@ -4269,13 +4243,17 @@ out geom qt;`;
         builtUp: likelyBuiltUp,
       };
     });
-    // Protecții per UAT activ — din PROTECTED_RO (nu hardcodat Iași)
-    const _cityKeyNorm = (this.cityKey||'').toLowerCase();
-    const _nameNorm = (this.d?.name||'')
-      .toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').split(/[-\s]/)[0];
-    const CITY_PROTECTED = this._CONSTRAINT?.PROTECTED_RO?.[_cityKeyNorm] ||
-                           this._CONSTRAINT?.PROTECTED_RO?.[_nameNorm] || [];
-    const allBufs = [...bufs, ...roadBufs, ...CITY_PROTECTED];
+    // Protecții hardcodate Iași (mereu active)
+    const IASI_PROTECTED = [
+      {lon:27.5895, lat:47.1521, r:150, reason:'Cimitirul Eternitatea'},
+      {lon:27.6050, lat:47.1910, r:100, reason:'Cimitirul Sf. Apostoli Petru și Pavel'},
+      {lon:27.6218, lat:47.1955, r:100, reason:'Cimitirul Armenesc'},
+      {lon:27.6350, lat:47.1950, r:320, reason:'Pădurea Ciric'},
+      {lon:27.5850, lat:47.1650, r:180, reason:'Lacul Ciric'},
+      {lon:27.5640, lat:47.1680, r:90,  reason:'Stadionul TEPRO'},
+      {lon:27.5960, lat:47.1560, r:120, reason:'Grădina Botanică'},
+    ];
+    const allBufs = [...bufs, ...roadBufs, ...IASI_PROTECTED];
     const R   = 111319.9;
     const cp  = Math.cos(cy * Math.PI / 180);
     const ok  = (lon, lat, extraR=0) => {
@@ -5375,7 +5353,7 @@ out geom qt;`;
       const yr=T.year||2025;
       const county=d.judet||'';
       const rate=(d.rata_reala_2011_2021||0).toFixed(2);
-      const sc=Math.pow((d.pop2021||100000)/Math.max(50000, d.pop2021||100000), 0.4);
+      const sc=Math.pow((d.pop2021||100000)/360000, 0.4);
 
       // ── Date din motoarele reale — folosite în toate scenele ──────────
       const need = T._calcUrbanNeed?.(d) || {pop2021:d.pop2021||100000,pop2055:Math.round((d.pop2021||100000)*1.1),locuinteTotale:5000,totalM2:340000,cladiri:{centru:10,inner:12,coridor:14,rezid:14,expansie:8,logistica:4}};
@@ -6277,7 +6255,7 @@ window.TCI     = TCI;
 window.openTCI = (opts) => TCI.open(opts||{});
 
 if(typeof _ProjectionEngine!=='undefined'){
-  _ProjectionEngine.open           = ()=>TCI.open({cityKey:_ProjectionEngine.currentCity||localStorage.getItem('ux_last_city')||'RO-IS-01'});
+  _ProjectionEngine.open           = ()=>TCI.open({cityKey:_ProjectionEngine.currentCity||'iasi'});
   _ProjectionEngine.startAnimation = ()=>TCI.toggle();
   _ProjectionEngine.stopAnimation  = ()=>{ try{TCI.pause();}catch(e){} };
   _ProjectionEngine.close          = ()=>{ try{TCI.close();}catch(e){} };
@@ -6303,7 +6281,7 @@ if(typeof _ProjectionEngine!=='undefined'){
     const tp = p.get('tci'); if(!tp) return;
     try {
       const pp = new URLSearchParams(atob(tp));
-      ck=pp.get('c')||localStorage.getItem('ux_last_city')||'RO-IS-01'; sc=pp.get('s')||'S2';
+      ck=pp.get('c')||'iasi'; sc=pp.get('s')||'S2';
       yr=parseInt(pp.get('y')||'2026'); md=pp.get('m')||'uat';
     } catch(e) { return; }
   }
