@@ -1292,6 +1292,16 @@ document.addEventListener('click', function(){
     <option value="streets">🗺 Streets</option>
     <option value="sat">🛰 Satelitar</option>
   </select>
+  <!-- Zone Protejate + Hărți Inundații (scurtătură rapidă) -->
+  <div style="padding:5px 8px 2px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.06);margin-top:3px">Zone speciale</div>
+  <button onclick="(function(){const k=window.TCI?.cityKey||localStorage.getItem('ux_last_city')||'RO-IS-01';const db=window._RO_CITIES_DB||{};const city=db[k]||{lat:47.158,lon:27.601};const lat=city.lat||map.getCenter().lat;const lon=city.lon||map.getCenter().lng;if(window._ProtectedZonesLayer)window._ProtectedZonesLayer.toggle(map,lat,lon);else ss?.('Zone Protejate se inițializează');_closeAllMenus();})()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#f87171;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">⛔ Zone Protejate (cimitire · CF · monumente)</button>
+  <button onclick="(function(){if(window._FloodMapper){window._FloodMapper.addAll(map);ss?.('🌊 Hărți inundații ANAR activate');}else{ss?.('Hărți Inundații se inițializează');}; _closeAllMenus();})()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#7dd3fc;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🌊 Hărți Inundații ANAR</button>
+  <!-- Compare / Benchmarking (scurtătură) -->
+  <div style="padding:5px 8px 2px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.06);margin-top:3px">Comparații</div>
+  <button onclick="window._launchComparePro?.();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#60a5fa;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏙 Compare Pro (2-5 UAT-uri)</button>
+  <button onclick="window._launchPresentation?.();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#f59e0b;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🎯 Prezentare Primărie (5 slide-uri)</button>
+  <button onclick="window._launchEUBenchmark?.();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#4ade80;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🌍 European Benchmarking Pro</button>
+  <button onclick="window._launchCinemaV2?.();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#a78bfa;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🎬 TCI Cinematic v2 (12 scene + proiecții per zonă)</button>
   <button class="menu-close-btn" 
     onclick="_closeAllMenusAndOverlay()" 
     ontouchend="event.preventDefault();_closeAllMenusAndOverlay()" 
@@ -1590,12 +1600,10 @@ document.addEventListener('click', function(){
 
 <!-- MOBILE BOTTOM NAV BAR - mereu vizibil -->
 <nav id="mob-nav">
-  <button onclick="openTCI&&openTCI()" 
-          style="background:rgba(212,175,55,0.15);border:1px solid rgba(212,175,55,0.3);
-          color:#D4AF37;border-radius:6px;padding:6px 10px;font-size:10px;font-weight:700;
-          cursor:pointer;font-family:inherit;white-space:nowrap">
-          🏙 TCI
-        </button><button class="mnav-btn active" data-mt="search" onclick="mobNavClick('search',this)">
+  <button class="mnav-btn" data-mt="tci" onclick="openTCI&&openTCI()">
+    <span class="mnav-icon">🏙</span>
+    <span class="mnav-label">TCI</span>
+  </button><button class="mnav-btn active" data-mt="search" onclick="mobNavClick('search',this)">
     <span class="mnav-icon" style="display:flex;align-items:center;justify-content:center"><span style="width:20px;height:20px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" style="display:inline-block;vertical-align:middle">
   <defs>
     <linearGradient id="ubg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1e2c42"/><stop offset="1" stop-color="#070d16"/></linearGradient>
@@ -3281,21 +3289,38 @@ setTimeout(() => {
   }
 }, 5000);
 
-// Fallback robust pentru launch Cinema v2
+// Fallback robust pentru launch Cinema v2 — folosește ÎNTOTDEAUNA UAT-ul activ
 window._launchCinemaV2 = function() {
-  const k = window._SceneEngine?._getCityKey?.() ||
-            window.TCI?.cityKey ||
+  // UAT activ: TCI.cityKey > localStorage > primul din DB — NICIODATĂ hardcodat RO-IS-01
+  const k = window.TCI?.cityKey ||
+            localStorage.getItem('ux_last_city') ||
             window._ProjectionEngine?.currentCity ||
-            Object.keys(window._RO_CITIES_DB||{})[0] ||
+            (window._RO_CITIES_DB ? Object.keys(window._RO_CITIES_DB)[0] : null) ||
             'RO-IS-01';
-  
+
+  const db = window._RO_CITIES_DB || {};
+  const cityName = db[k]?.name || k;
+
+  // Actualizăm cityKey în _SceneEngine dacă există
+  if(window._SceneEngine) {
+    window._SceneEngine._cityKey = k;
+    // Override _getCityKey dacă nu există
+    if(typeof window._SceneEngine._getCityKey !== 'function') {
+      window._SceneEngine._getCityKey = function() { return this._cityKey || k; };
+    }
+  }
+
+  // Sincronizăm _ProjectionEngine
+  if(window._ProjectionEngine) window._ProjectionEngine.currentCity = k;
+
+  console.log('[Cinema v2] Launch pentru UAT:', k, '—', cityName);
+
   if(window._SceneEngine && typeof window._SceneEngine.launch === 'function') {
-    console.log('[Cinema v2] Launch pentru:', k);
     window._SceneEngine.launch(k);
     return true;
   }
-  
-  console.error('[Cinema v2] _SceneEngine indisponibil. Status:', window._UrbanXStatus());
+
+  console.error('[Cinema v2] _SceneEngine indisponibil. Status:', window._UrbanXStatus?.());
   ss?.('❌ Cinema v2 nu s-a inițializat. Verifică consola (F12) sau reîncarcă pagina.');
   return false;
 };
@@ -4608,6 +4633,274 @@ window._renderUTRChips = _renderUTRChips;
 window._utrColor       = _utrColor;
 
 console.log('[UrbanX UTR System] ✅ Patch v20260520b: _launchPUGSuceava + btnUTR + chips colorate');
+
+})();
+</script>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// URBANX SYSTEM PATCH v20260520c
+// 1. Cinema + openTCI → UAT activ (nu Iași hardcodat)
+// 2. Relevee mobil → buton Close vizibil + zoom pinch
+// 3. Sincronizare UAT la schimbare din selector
+// ═══════════════════════════════════════════════════════════════════════════
+(function(){
+'use strict';
+
+// ── Helper: UAT activ ────────────────────────────────────────────────────
+function _activeKey() {
+  return window.TCI?.cityKey ||
+         localStorage.getItem('ux_last_city') ||
+         window._ProjectionEngine?.currentCity ||
+         'RO-IS-01';
+}
+
+// ── FIX: openTCI — wrapper care injectează UAT activ ──────────────────────
+// openTCI e definit în 17-tci-cinema.js — îl wrappăm după load
+window.addEventListener('load', function() {
+  setTimeout(function() {
+    const _origOpenTCI = window.openTCI;
+    if(typeof _origOpenTCI === 'function' && !_origOpenTCI._uatPatched) {
+      window.openTCI = function(opts) {
+        const k = _activeKey();
+        // Sincronizăm TCI și ProjectionEngine cu UAT activ
+        if(window.TCI && window.TCI.cityKey !== k) window.TCI.cityKey = k;
+        if(window._ProjectionEngine) window._ProjectionEngine.currentCity = k;
+        // Injectăm cityKey în opts dacă nu e specificat
+        const mergedOpts = Object.assign({cityKey: k}, opts || {});
+        return _origOpenTCI.call(this, mergedOpts);
+      };
+      window.openTCI._uatPatched = true;
+      console.log('[UrbanX] openTCI wrappat pentru UAT activ');
+    }
+  }, 3000);
+});
+
+// ── FIX: Selectare UAT → sincronizare completă ───────────────────────────
+// Când userul schimbă UAT din selector, sincronizăm TOATE modulele
+const _origShowUATSelector = window.showUATSelector;
+window.showUATSelector = function() {
+  if(typeof _origShowUATSelector === 'function') _origShowUATSelector.apply(this, arguments);
+};
+
+// Hook pe orice schimbare de TCI.cityKey → notificăm toate modulele
+let _lastSyncedCity = null;
+setInterval(function() {
+  const k = _activeKey();
+  if(k === _lastSyncedCity) return;
+  _lastSyncedCity = k;
+  const db = window._RO_CITIES_DB || {};
+  const name = db[k]?.name || k;
+
+  // Sincronizăm toate modulele care au nevoie de cityKey
+  if(window._ProjectionEngine) window._ProjectionEngine.currentCity = k;
+  if(window._SceneEngine) {
+    window._SceneEngine._cityKey = k;
+    if(typeof window._SceneEngine._getCityKey !== 'function') {
+      window._SceneEngine._getCityKey = () => k;
+    }
+  }
+  if(window._TCIMasterplanPDF) window._TCIMasterplanPDF._currentCity = k;
+  if(window._CompareProEngine?._currentCity !== undefined) window._CompareProEngine._currentCity = k;
+
+  console.log('[UrbanX] UAT sincronizat:', k, '—', name);
+}, 1000);
+
+// ── FIX: Relevee mobil — Close + Zoom pinch ──────────────────────────────
+// Injectăm buton Close și activăm touch-zoom pe canvas-ul relevee
+
+function _patchReleveeMobile() {
+  // Observer pentru apariția modalului relevee (creat dinamic de 15-relevee.js)
+  const obs = new MutationObserver(function(mutations) {
+    mutations.forEach(function(m) {
+      m.addedNodes.forEach(function(node) {
+        if(!node || node.nodeType !== 1) return;
+        // Detectăm modal relevee: are id rv-modal sau class rv-modal-open
+        const modal = (node.id === 'rv-modal' || node.classList?.contains('rv-modal'))
+          ? node
+          : node.querySelector?.('#rv-modal, .rv-modal, [class*="rv-modal"]');
+        if(!modal) return;
+
+        _addReleveeMobileUI(modal);
+      });
+    });
+  });
+  obs.observe(document.body, { childList: true, subtree: false });
+
+  // Verificare și la apariția clasei rv-modal-open pe body
+  const bodyObs = new MutationObserver(function() {
+    if(document.body.classList.contains('rv-modal-open') ||
+       document.body.classList.contains('relevee-open')) {
+      const modal = document.querySelector('#rv-modal, .rv-modal, [id*="rv-modal"]');
+      if(modal && !modal._mobilePatched) _addReleveeMobileUI(modal);
+    }
+  });
+  bodyObs.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+
+  // Polling fallback
+  let _patchTries = 0;
+  const _poll = setInterval(function() {
+    if(++_patchTries > 20) clearInterval(_poll);
+    const modal = document.querySelector('#rv-modal, [id*="rv-modal"], .rv-modal-open');
+    if(modal && !modal._mobilePatched) {
+      _addReleveeMobileUI(modal);
+      clearInterval(_poll);
+    }
+  }, 300);
+}
+
+function _addReleveeMobileUI(modal) {
+  if(!modal || modal._mobilePatched) return;
+  modal._mobilePatched = true;
+
+  // Solo pe mobil (max 840px)
+  if(window.innerWidth >= 841) return;
+
+  // ── Buton Close mare, vizibil, în colț dreapta-sus ─────────────────
+  if(!modal.querySelector('._rv-mob-close')) {
+    const closeBtn = document.createElement('button');
+    closeBtn.className = '_rv-mob-close';
+    closeBtn.innerHTML = '✕ Închide';
+    closeBtn.style.cssText = `
+      position:fixed;top:8px;right:8px;z-index:99999;
+      background:rgba(239,68,68,.9);border:none;color:#fff;
+      border-radius:10px;padding:10px 18px;font-size:15px;font-weight:700;
+      cursor:pointer;font-family:inherit;box-shadow:0 4px 16px rgba(0,0,0,.5);
+      min-height:44px;min-width:80px;-webkit-tap-highlight-color:transparent;
+      touch-action:manipulation;letter-spacing:.02em;
+    `;
+    closeBtn.addEventListener('click', function() {
+      try {
+        if(typeof window.closeRelevee === 'function') window.closeRelevee();
+        else if(typeof window._rvClose === 'function') window._rvClose();
+        else {
+          modal.style.display = 'none';
+          modal.classList.remove('rv-modal-open','open','show');
+          document.body.classList.remove('rv-modal-open','relevee-open');
+        }
+      } catch(e) { modal.style.display = 'none'; }
+    });
+    closeBtn.addEventListener('touchend', function(e) {
+      e.preventDefault();
+      closeBtn.click();
+    });
+    document.body.appendChild(closeBtn);
+
+    // Curățăm butonul când modalul se închide
+    const cleanObs = new MutationObserver(function() {
+      const visible = modal.style.display !== 'none' &&
+                      !modal.classList.contains('hidden') &&
+                      (modal.offsetParent !== null || modal.style.position === 'fixed');
+      closeBtn.style.display = visible ? 'block' : 'none';
+    });
+    cleanObs.observe(modal, { attributes: true, attributeFilter: ['style','class'] });
+  }
+
+  // ── Zoom pinch pe canvas-ul relevee ────────────────────────────────
+  const canvas = modal.querySelector('canvas');
+  if(canvas && !canvas._pinchPatched) {
+    canvas._pinchPatched = true;
+    canvas.style.touchAction = 'none'; // permite pinch custom
+
+    let _startDist = 0;
+    let _startScale = 1;
+    let _curScale = 1;
+    let _translateX = 0, _translateY = 0;
+    let _startTX = 0, _startTY = 0;
+    let _startMidX = 0, _startMidY = 0;
+    let _lastTouches = [];
+
+    function _dist(t1, t2) {
+      return Math.hypot(t2.clientX-t1.clientX, t2.clientY-t1.clientY);
+    }
+    function _mid(t1, t2) {
+      return {x:(t1.clientX+t2.clientX)/2, y:(t1.clientY+t2.clientY)/2};
+    }
+    function _applyTransform() {
+      const s = Math.max(0.5, Math.min(5, _curScale));
+      canvas.style.transform = `translate(${_translateX}px,${_translateY}px) scale(${s})`;
+      canvas.style.transformOrigin = '0 0';
+    }
+
+    canvas.addEventListener('touchstart', function(e) {
+      _lastTouches = Array.from(e.touches);
+      if(e.touches.length === 2) {
+        e.preventDefault();
+        _startDist = _dist(e.touches[0], e.touches[1]);
+        _startScale = _curScale;
+        const m = _mid(e.touches[0], e.touches[1]);
+        _startMidX = m.x; _startMidY = m.y;
+        _startTX = _translateX; _startTY = _translateY;
+      } else if(e.touches.length === 1 && _curScale > 1) {
+        e.preventDefault();
+        _startTX = _translateX; _startTY = _translateY;
+        _startMidX = e.touches[0].clientX;
+        _startMidY = e.touches[0].clientY;
+      }
+    }, {passive:false});
+
+    canvas.addEventListener('touchmove', function(e) {
+      if(e.touches.length === 2) {
+        e.preventDefault();
+        const d = _dist(e.touches[0], e.touches[1]);
+        _curScale = _startScale * (d / _startDist);
+        // Pan proporcional cu pinch
+        const m = _mid(e.touches[0], e.touches[1]);
+        _translateX = _startTX + (m.x - _startMidX);
+        _translateY = _startTY + (m.y - _startMidY);
+        _applyTransform();
+      } else if(e.touches.length === 1 && _curScale > 1) {
+        e.preventDefault();
+        _translateX = _startTX + (e.touches[0].clientX - _startMidX);
+        _translateY = _startTY + (e.touches[0].clientY - _startMidY);
+        _applyTransform();
+      }
+    }, {passive:false});
+
+    canvas.addEventListener('touchend', function(e) {
+      if(e.touches.length === 0 && _curScale < 1.05) {
+        // Reset la scale normal
+        _curScale = 1; _translateX = 0; _translateY = 0;
+        canvas.style.transform = '';
+      }
+    });
+
+    // Double-tap pentru reset zoom
+    let _lastTap = 0;
+    canvas.addEventListener('touchend', function(e) {
+      const now = Date.now();
+      if(now - _lastTap < 300) {
+        _curScale = 1; _translateX = 0; _translateY = 0;
+        canvas.style.transform = '';
+        canvas.style.transition = 'transform .3s ease';
+        setTimeout(() => canvas.style.transition = '', 300);
+      }
+      _lastTap = now;
+    });
+  }
+
+  // ── Butoane zoom +/-/FIT din toolbar relevee ────────────────────────
+  // Dacă există butoane în modal, le facem mai mari pe mobil
+  modal.querySelectorAll('button').forEach(function(btn) {
+    const t = btn.textContent.trim();
+    if(['+','-','FIT','Fit'].includes(t)) {
+      btn.style.minWidth = '44px';
+      btn.style.minHeight = '44px';
+      btn.style.fontSize = '18px';
+    }
+  });
+}
+
+// Aplicăm la load (pentru cazul când relevee e deja deschis)
+window.addEventListener('load', function() {
+  setTimeout(_patchReleveeMobile, 1000);
+});
+document.addEventListener('DOMContentLoaded', _patchReleveeMobile);
+
+// Expunem global pentru apeluri externe
+window._patchReleveeMobile = _patchReleveeMobile;
+
+console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + relevee mobile');
 
 })();
 </script>
