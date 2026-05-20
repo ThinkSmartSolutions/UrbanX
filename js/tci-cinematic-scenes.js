@@ -2497,8 +2497,11 @@ G._SceneEngine = {
     console.log('[Cinema v2] ✅ integrat în Vizualizare menu');
     return true;
   };
-  // Retry la 2s, 4s, 8s - meniul poate fi populat dinamic
-  [2000,4000,8000].forEach(delay => setTimeout(_injectCinemaV2Menu, delay));
+  // Cinema v2 e deja in viz-menu si tci-adv-menu — nu mai injectam duplicate
+  // _injectCinemaV2Menu dezactivat — previne duplicatele in meniul Harta
+  console.log('[Cinema v2] ✅ integrat — butoane deja in viz-menu si UrbanX Pro');
+  // Retry-urile sunt dezactivate
+  // [2000,4000,8000].forEach(delay => setTimeout(_injectCinemaV2Menu, delay));
 
   // Expunere globală
   // window._SceneEngine deja setat la inceputul _init

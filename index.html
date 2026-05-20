@@ -1315,10 +1315,14 @@ document.addEventListener('click', function(){
 </div>
 
 <!-- TOOLS MENU — fixed, outside topbar -->
-<div id="tools-menu" style="display:none;position:fixed;top:48px;background:rgba(7,14,28,.97);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:6px;min-width:210px;z-index:9100;box-shadow:0 8px 32px rgba(0,0,0,.7);backdrop-filter:blur(12px)">
+<div id="tools-menu" data-locked="true" style="display:none;position:fixed;top:48px;background:rgba(7,14,28,.97);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:6px;min-width:210px;z-index:9100;box-shadow:0 8px 32px rgba(0,0,0,.7);backdrop-filter:blur(12px)">
   <button id="btnLotizare" onclick="toggleLotizare();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#a78bfa;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏘 Lotizare teren</button>
   <button id="btnCimec" onclick="showCimecWidget();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#fbbf24;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏛 LMI Monumente</button>
   <button id="btnBilant" onclick="toggleBilant();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#4ade80;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">📐 Bilanț edificabil</button>
+  <div style="height:1px;background:rgba(255,255,255,.06);margin:4px 0"></div>
+  <button onclick="if(typeof _shareCurrentScenario==='function')_shareCurrentScenario();else{const url=window.location.href;navigator.clipboard?.writeText(url);ss?.('🔗 URL copiat');}_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#60a5fa;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🔗 Share scenariu curent</button>
+  <button onclick="_toggleQuickStart?.();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#818cf8;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">❓ Ghid utilizare platformă</button>
+  <button onclick="(function(){const k=window.TCI?.cityKey||localStorage.getItem('ux_last_city')||'RO-IS-01';window._AIUrbanNarrative?.open(k);_closeAllMenus();})()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#c084fc;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🤖 AI Memoriu Justificativ</button>
   <button class="menu-close-btn" 
     onclick="_closeAllMenusAndOverlay()" 
     ontouchend="event.preventDefault();_closeAllMenusAndOverlay()"
@@ -4905,6 +4909,68 @@ window._patchReleveeMobile = _patchReleveeMobile;
 
 console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + relevee mobile');
 
+})();
+</script>
+
+<script>
+// ── MENU LOCK — blochează injectările externe în meniuri fixe ─────────────
+// 19-ux-polish.js și alte fișiere injectează butoane în tools-menu și viz-menu
+// după ce DOM-ul e gata. Le blocăm pentru meniurile cu data-locked="true"
+(function() {
+  'use strict';
+  function _lockMenus() {
+    // Blocăm appendChild/insertBefore pe meniurile locked
+    ['tools-menu', 'viz-menu'].forEach(function(id) {
+      const el = document.getElementById(id);
+      if(!el || el._locked) return;
+      el._locked = true;
+      // Snapshot: elementele actuale sunt corecte — orice adăugare ulterioară e duplicat
+      const _allowedIds = new Set(
+        Array.from(el.querySelectorAll('[id]')).map(e => e.id)
+      );
+      const _origAppend = el.appendChild.bind(el);
+      const _origInsert = el.insertBefore.bind(el);
+
+      el.appendChild = function(node) {
+        // Permitem doar dacă e separator sau are id cunoscut
+        if(node.nodeType !== 1) return _origAppend(node);
+        const nodeId = node.id || '';
+        const nodeText = node.textContent?.trim() || '';
+        // Detectăm duplicate după text
+        const isDuplicate = Array.from(el.children).some(function(child) {
+          return child !== node &&
+                 child.textContent?.trim() === nodeText &&
+                 nodeText.length > 5;
+        });
+        if(isDuplicate) {
+          console.warn('[MenuLock] Blocat injectare duplicat în #' + id + ':', nodeText.slice(0,40));
+          return node;
+        }
+        return _origAppend(node);
+      };
+
+      el.insertBefore = function(node, ref) {
+        if(node.nodeType !== 1) return _origInsert(node, ref);
+        const nodeText = node.textContent?.trim() || '';
+        const isDuplicate = Array.from(el.children).some(function(child) {
+          return child !== node &&
+                 child.textContent?.trim() === nodeText &&
+                 nodeText.length > 5;
+        });
+        if(isDuplicate) {
+          console.warn('[MenuLock] Blocat insertBefore duplicat în #' + id + ':', nodeText.slice(0,40));
+          return node;
+        }
+        return _origInsert(node, ref);
+      };
+    });
+  }
+
+  // Aplicăm după ce DOM e gata
+  document.addEventListener('DOMContentLoaded', function() { setTimeout(_lockMenus, 100); });
+  window.addEventListener('load', function() { setTimeout(_lockMenus, 500); setTimeout(_lockMenus, 2000); });
+  window._lockMenus = _lockMenus;
+  console.log('[MenuLock] ✅ Protecție anti-duplicate activă pentru tools-menu și viz-menu');
 })();
 </script>
 
