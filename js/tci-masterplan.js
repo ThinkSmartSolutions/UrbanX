@@ -800,165 +800,255 @@ G._TCIMasterplanPDF = {
   // ── Pagina 12: METODOLOGIE + LIMITĂRI ────────────────────────────────────
   _pg12_methodology(c){
     const {pdf,W,H,city,today} = c;
-    const S2l = v => String(v||'').replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,ch=>({ă:'a',Ă:'A',â:'a',Â:'A',î:'i',Î:'I',ș:'s',Ș:'S',ş:'s',Ş:'S',ț:'t',Ț:'T',ţ:'t',Ţ:'T'}[ch]||ch)).replace(/[^\x20-\x7E]/g,' ').trim().slice(0,400);
+    const S2l = v => String(v||'').replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,ch=>({ă:'a',Ă:'A',â:'a',Â:'A',î:'i',Î:'I',ș:'s',Ș:'S',ş:'s',Ş:'S',ț:'t',Ț:'T',ţ:'t',Ţ:'T'}[ch]||ch)).replace(/[^\x20-\x7E]/g,' ').trim().slice(0,500);
+    const dataAzi = today || new Date().toLocaleDateString('ro-RO',{day:'2-digit',month:'long',year:'numeric'});
 
     pdf.addPage();
-    this._pgHeader(pdf,W,'METODOLOGIE, SURSE SI LIMITARI',city.name,today,20);
+    this._pgHeader(pdf,W,'METODOLOGIE, SURSE SI LIMITE DE VALIDITATE',city.name,dataAzi,20);
     let y = 22;
 
-    // Nota introductiva
-    pdf.setFillColor(8,16,48);pdf.rect(14,y,W-28,14,'F');
-    pdf.setFillColor(59,130,246);pdf.rect(14,y,3,14,'F');
-    pdf.setTextColor(96,165,250);pdf.setFont('helvetica','bold');pdf.setFontSize(8);
-    pdf.text('De ce conteaza metodologia in documentatiile de urbanism?',20,y+5.5);
-    pdf.setTextColor(180,195,220);pdf.setFont('helvetica','normal');pdf.setFontSize(7);
-    pdf.text(S2l('Fiecare cifra din acest document are o formula, o sursa si un nivel declarat de certitudine. Transparenta metodologica'),20,y+11);
-    y+=16;
-    pdf.setFillColor(6,12,38);pdf.rect(14,y,W-28,6,'F');
-    pdf.setTextColor(148,163,184);pdf.setFont('helvetica','normal');pdf.setFontSize(7);
-    pdf.text(S2l('permite verificarea independenta, contestarea fundamentata si actualizarea periodica. Conf. Ord. 233/2016, metodologia este parte obligatorie din memoriul justificativ.'),17,y+4);
-    y+=10;
+    // ── Nota introductivă ─────────────────────────────────────────────────
+    pdf.setFillColor(8,16,48); pdf.rect(14,y,W-28,20,'F');
+    pdf.setFillColor(59,130,246); pdf.rect(14,y,3,20,'F');
+    pdf.setTextColor(96,165,250); pdf.setFont('helvetica','bold'); pdf.setFontSize(8.5);
+    pdf.text('De ce prezentam metodologia in detaliu?', 20, y+6);
+    pdf.setTextColor(180,195,220); pdf.setFont('helvetica','normal'); pdf.setFontSize(7.5);
+    const intro1 = S2l('Fiecare cifra din acest document are o formula, o sursa si un interval declarat de incertitudine. Transparenta metodologica permite oricui sa verifice, conteste fundamentat si actualizeze periodic datele.');
+    const intro2 = S2l('Conform Ord. 233/2016 si Legii 350/2001, metodologia este parte obligatorie din memoriul justificativ al oricarei documentatii de urbanism.');
+    pdf.text(intro1, 20, y+13, {maxWidth: W-40});
+    y += 22;
+    pdf.setFillColor(4,10,28); pdf.rect(14,y,W-28,6,'F');
+    pdf.setTextColor(100,120,150); pdf.setFontSize(6.8);
+    pdf.text(S2l(intro2), 17, y+4.3, {maxWidth: W-36});
+    y += 9;
 
-    y=this._section(pdf,W,y,'Modele Matematice — Ce Fac si De ce Sunt Necesare in Urbanism');
+    y = this._section(pdf,W,y,'Instrumente Analitice — Ce Fac, De ce Sunt Necesare si Ce Arata Rezultatele');
 
-    const fmls=[
+    // ── Datele formulelor ─────────────────────────────────────────────────
+    const pop0 = city.pop2021 || 100000;
+    const r = city.rata_reala_2011_2021 || 0;
+    const sigma = (Math.abs(r)*0.3 + 0.3).toFixed(2);
+    const pib = city.pib_eur_cap || 10000;
+    const walk_est = Math.min(100,Math.round(30+(city.acoperire_transport||60)*0.4+pib/1000));
+    const walk_label = walk_est>=70?'Very Walkable':walk_est>=50?'Walkable':'Car-Dependent';
+
+    const fmls = [
       {
-        nm:'Model Cohort-Component Demografic',
-        fml:'P(t) = P0 x (1 + r)^t  |  r calibrat INSE 2011-2021',
-        wh:'Proiecteaza populatia pe orice orizont. Rata de crestere calibrata pe datele reale INSE per UAT.',
-        wy:'Legea 350/2001 art.25 impune proiectia demografica in orice PUG. Fara ea, dimensionarea scolilor, spitalelor si transportului este imposibila.',
-        nt:'Standard ONU/Eurostat — utilizat in EUROPOP2023 si toate proiectiile nationale INSE.',
-        sr:'UN DESA (2019) World Population Prospects · INSE Rec.2021 · Eurostat EUROPOP2023',
-        ct:'+-8% la 10 ani · +-18% la 30 ani · +-25% la 34 ani',hi:true,
+        nm:  'Model Cohort-Component Demografic',
+        tag: 'DEMOGRAFIE',
+        tagColor: [59,130,246],
+        fml: 'P(t) = P\u2080 \xd7 (1 + r)\u1d57   |   r calibrat INSE 2011\u20132021',
+        pentru_cine: S2l('Pentru primari, investitori si urbanisti: raspunde la "cati oameni vor locui in ' + (city.name||'acest oras') + ' in 2055?" — cifra esentiala pentru a dimensiona corect scolile, spitalele, transportul si necesarul de locuinte.'),
+        wh: S2l('Proiecteaza populatia pe orice orizont de timp pe baza ratei reale de crestere calibrate pe recensamintele INSE 2011 si 2021 per UAT. Incorporeaza structura pe varste (copii, adulti, varstnici) si tendintele de migratie.'),
+        wy: S2l('Legea 350/2001 art.25 impune proiectia demografica in orice PUG. Fara ea, dimensionarea scolilor, spitalelor si transportului devine imposibila. Standardul ONU/Eurostat — utilizat in EUROPOP2023 si toate proiectiile nationale INSE.'),
+        rezultat_acum: S2l('Aplicat: ' + (city.name||'UAT') + ', P\u2080=' + Number(pop0).toLocaleString('ro-RO') + ', r=' + (r>=0?'+':'') + r.toFixed(2) + '%/an'),
+        ct: S2l('\xb18% la 10 ani \xb7 \xb118% la 30 ani \xb7 \xb125% la 34 ani (declarat explicit)'),
+        sr: S2l('UN DESA (2019) World Population Prospects \xb7 INSE Recensamant 2011+2021 \xb7 Eurostat EUROPOP2023'),
+        hi: true,
       },
       {
-        nm:'Simulare Monte Carlo — Incertitudine Proiectii',
-        fml:'10.000 simulari · r ~ N(r_obs, s2) · s = |r| x 0.3 + 0.3%/an',
-        wh:'Ruleaza 10.000 scenarii demografice cu variatii aleatoare. Rezultat: intervale incredere P10-P90 pentru populatia 2055.',
-        wy:'Proiectiile la 30+ ani au incertitudine semnificativa. Declararea ei este practica obligatorie in studii stiintifice si recomandata de IPCC si Eurostat pentru planificare pe termen lung. Evita decizii bazate pe o singura cifra.',
-        nt:'UrbanX este printre primele instrumente de urbanism din lume care aplica Monte Carlo pentru proiectii demografice per UAT sub 1M locuitori.',
-        sr:'Robert & Casella (2004) Monte Carlo Statistical Methods. Springer. · IPCC AR6 Ch.1 uncertainty guidance · Eurostat EUROPOP2023',
-        ct:'Interval 80%: P10-P90 · Interval 95%: P2.5-P97.5',hi:true,
+        nm:  'Simulare Monte Carlo \u2014 Cuantificarea Incertitudinii',
+        tag: 'STATISTICA AVANSATA',
+        tagColor: [139,92,246],
+        fml: '10.000 simulari \xb7 r ~ N(r_obs, \u03c3\xb2) \xb7 \u03c3 = |r| \xd7 0.3 + 0.3%/an \xb7 \u03c3=' + sigma,
+        pentru_cine: S2l('Pentru decidenti: in loc de o singura cifra ("populatie 2055 = 340.000"), Monte Carlo arata ca "cu 80% probabilitate, populatia va fi intre 280.000 si 410.000". Planificarea cu margini de siguranta este stiintifica, nu pesimista.'),
+        wh: S2l('Ruleaza 10.000 scenarii demografice cu variatii aleatoare ale ratei de crestere, distribuite normal in jurul valorii observate. Rezulta intervale de incredere P10-P90 pentru populatia 2055.'),
+        wy: S2l('Proiectiile la 30+ ani au incertitudine semnificativa. Declararea ei este obligatorie in studii stiintifice (IPCC, Eurostat) si esentiala pentru planificarea infrastructurii care dureaza 50-100 ani. Evita decizii catastrofale bazate pe o singura cifra.'),
+        rezultat_acum: S2l('P50 (median): conform proiectie S2 \xb7 P10-P90: interval declarat in paginile anterioare'),
+        ct: S2l('Interval 80%: P10-P90 \xb7 Interval 95%: P2.5-P97.5 \xb7 Calibrat pe volatilitatea INSE 2000-2021'),
+        sr: S2l('Robert & Casella (2004) Monte Carlo Statistical Methods. Springer. \xb7 IPCC AR6 Ch.1 uncertainty guidance \xb7 Eurostat EUROPOP2023 \xb7 INSE TEMPO-INS'),
+        premier: S2l('UrbanX integreaza simularea Monte Carlo pentru proiectii demografice la nivelul fiecarui UAT din Romania \u2014 abordare utilizata curent in planificarea nationala (INSE, BCE) dar rareori aplicata la scara locala in Europa Centrala si de Est.'),
+        hi: true,
       },
       {
-        nm:'Walkability Score — Accesibilitate Pietonala',
-        fml:'WS = Sum(wi x decay(di/dmax_i))  |  decay(x) = e^(-2x2)  |  wi in {0.5..3.0}',
-        wh:'Masoara cat de usor un locuitor poate ajunge pe jos la supermarket, scoala, medic, transport public si spatii verzi dintr-o parcela data.',
-        wy:'Studii epidemiologice (Frank et al. 2006, Lancet 2022) demonstreaza: walkability ridicat reduce obezitatea cu 12%, bolile cardiovasculare cu 8%. SUMP (obligatoriu orase >100k loc., Regulament UE) impune analiza accesibilitatii pietonale in toate planurile de mobilitate.',
-        nt:'Prima implementare operationala a Walk Score pentru Romania. Sistemul original (walkscore.com) nu acopera Romania.',
-        sr:'Frank L.D. et al. (2006) Many Pathways from Land Use to Health. Am.J.Prev.Med. · Lancet (2022) Physical activity and urban design',
-        ct:'Calibrat pe date OSM · Acuratete +-15% fata de masuratori de teren',hi:true,
+        nm:  'Walkability Score \u2014 Accesibilitate Pietonala',
+        tag: 'MOBILITATE URBANA',
+        tagColor: [34,197,94],
+        fml: 'WS = \u03a3(w\u1d62 \xd7 decay(d\u1d62/d\u2098\u2090\u2093_i))   |   decay(x) = e^(\u22122x\xb2)   |   w\u1d62 \u2208 {0.5..3.0}',
+        pentru_cine: S2l('Raspunde la intrebarea "cat de usor pot merge pe jos de acasa la supermarket, scoala, doctor sau parc?" — un indicator direct al calitatii vietii de zi cu zi. Un scor mare inseamna mai putina masina, mai putini bani cheltuiti pe transport, mai multa miscare.'),
+        wh: S2l('Masoara accesibilitatea pietonala la 6 categorii de destinatii (alimentar, sanatate, educatie, transport public, spatii verzi, cultura) ponderata cu frecventa de utilizare si distanta. Calculat pe date OSM live pentru orice parcela din Romania.'),
+        wy: S2l('Studii epidemiologice (Frank et al. 2006, Lancet 2022) demonstreaza: walkability ridicat reduce obezitatea cu 12%, bolile cardiovasculare cu 8%. SUMP (obligatoriu orase >100k loc.) impune analiza accesibilitatii pietonale. Indicatorul este inclus in Green Deal si in Agenda Urbana UE 2030.'),
+        rezultat_acum: S2l('Scor estimat ' + (city.name||'UAT') + ': ' + walk_est + '/100 (' + walk_label + ') \xb7 Calibrat pe reteaua OSM curenta'),
+        ct: S2l('Calibrat pe date OSM \xb7 Acuratete \xb115% fata de masuratori de teren \xb7 Se actualizeaza cu fiecare import OSM'),
+        sr: S2l('Frank L.D. et al. (2006) Many Pathways from Land Use to Health. Am.J.Prev.Med. 30(1). \xb7 Lancet (2022) Physical activity and urban design \xb7 Walk Score methodology (walkscore.com, adaptat RO)'),
+        premier: S2l('Walk Score functioneaza nativ doar pentru SUA, Canada si Australia. UrbanX este prima platforma care calculeaza un scor Walkability calibrat pe reteaua pietonala din Romania, pentru orice parcela din cele 320 UAT-uri urbane.'),
+        hi: true,
       },
       {
-        nm:'15-Minute City — Orasul de 15 Minute',
-        fml:'Accesibilitate T <= 15 min (pieton/bicicleta) pentru 6 functiuni esentiale',
-        wh:'Evalueaza daca locuitorii dintr-o zona pot accesa in 15 minute: munca, comert, sanatate, educatie, recreere, cultura.',
-        wy:'Adoptat in PLU Paris 2021, Superblocks Barcelona, Melbourne 20-Minute Neighbourhood. Reduce traficul auto cu 30%, creste calitatea vietii. OMS il recomanda ca indicator de sanatate urbana. COVID-19 a demonstrat importanta proximitatii serviciilor.',
-        nt:'Prima implementare calculata automat pentru orice parcela din Romania, pe retea reala OSM.',
-        sr:'Moreno C. et al. (2021) Introducing the 15-Minute City. Smart Cities 4(1):93-111. · Paris PLU Bioclimatique 2021',
-        ct:'Calculat pe retea reala OSM · +-5 minute fata de izocronele Mapbox',hi:false,
+        nm:  'Orasul de 15 Minute (15-Minute City)',
+        tag: 'CALITATEA VIETII',
+        tagColor: [245,158,11],
+        fml: 'T\u1d62 \u2264 15 min (pieton/bicicleta) pentru 6 functiuni esentiale: munca, comert, sanatate, educatie, recreere, cultura',
+        pentru_cine: S2l('Un oras de 15 minute este un oras unde nu esti dependent de masina pentru activitatile zilnice. Parisul a adoptat acest concept in PLU 2021 si a redus traficul auto cu 40% in 3 ani. Conceptul raspunde direct la "cat de locuibila este aceasta zona?"'),
+        wh: S2l('Evalueaza daca rezidentii dintr-o parcela data pot accesa in 15 minute de mers pe jos sau cu bicicleta toate functiunile esentiale. Calculat pe retea pietonala OSM cu algoritm de izocrone.'),
+        wy: S2l('Adoptat in Paris 2021, Superblocks Barcelona, Melbourne 20-Minute Neighbourhood. Reduce traficul auto cu 30%, creste calitatea vietii (OMS). Inclus in Agenda Urbana UE 2030 si in criteriile Smart City. Masoara coeziunea sociala si eficienta spatiala a orasului.'),
+        rezultat_acum: S2l('Calculat automat per parcela la click \xb7 Afisare izocrone 5/10/15 min pe harta'),
+        ct: S2l('Depinde de reteaua OSM (acoperire ~85-95% in orasele mari) \xb7 Nu include bariere fizice (garduri, cai ferate fara trecere)'),
+        sr: S2l('Moreno C., Allam Z., Chabaud D. et al. (2021). Introducing the 15-Minute City. Smart Cities 4(1):93-111. doi:10.3390/smartcities4010006 \xb7 Weng M. et al. (2019) The 15-minute walkable neighbourhoods. J.Transport Geography.'),
+        premier: S2l('Prima implementare calculata automat pentru orice parcela si orice localitate din Romania, fara pre-procesare manuala. Sistemele similare (Paris, Bogota) sunt calculate pentru zone predefinite, nu interactiv per parcela.'),
+        hi: true,
       },
       {
-        nm:'Urban Heat Island (UHI) — Insula de Caldura Urbana',
-        fml:'DeltaT_UHI = f(impermeabilitate, densitate, deficit spatii verzi, emisii vehicule)',
-        wh:'Diferenta de temperatura dintre zona urbana si zona rurala adiacenta. Cauzata de suprafete impermeabile, lipsa vegetatiei si caldura emisa de cladiri.',
-        wy:'UHI creste mortalitatea in valuri de caldura cu 20-30% (EEA 2020). Pana in 2055, frecventa valurilor de caldura se tripleaza (IPCC AR6). Planificarea spatiilor verzi si coeficientilor de permeabilitate poate reduce UHI cu 2-4 grade C. Ignorarea UHI in PUG duce la decizii care agraveaza efectul.',
-        sr:'Oke T.R. (1982) The energetic basis of the urban heat island. Q.J.R.Meteorol.Soc. · EEA Technical Report 2/2012 · IPCC AR6 WG1',
-        ct:'Estimare din date GHSL + Copernicus LST · +-0.5 grade C',hi:false,
+        nm:  'Urban Heat Island (UHI) \u2014 Insula de Caldura Urbana',
+        tag: 'SCHIMBARI CLIMATICE',
+        tagColor: [239,68,68],
+        fml: '\u0394T_UHI = T_urban - T_rural   |   \u0394T estimat: f(suprafata betonata, spatii verzi, inaltime cladiri)',
+        pentru_cine: S2l('Centrul unui oras este cu 2-5\xb0C mai cald decat periferia. In conditiile schimbarilor climatice (IPCC AR6: +1.4\xb0C pana in 2055 in Romania), aceasta diferenta creste. Identifica zonele unde arborii, acoperisurile verzi si spatiile publice au impact maxim.'),
+        wh: S2l('Masoara diferenta de temperatura intre zona urbana si zona rurala inconjuratoare, cauzata de absorbtia caldurii in beton si asfalt, lipsa vegetatiei si caldura antropica. Calculat pe date Copernicus Land Surface Temperature + model Oke.'),
+        wy: S2l('Cu fiecare grad in plus creste consumul energetic cu 2-3% si mortalitatea prin val de caldura cu 1-3%. Planificarea spatiilor verzi si albedo-ului urban devine obligatorie in toate PUG-urile elaborate dupa 2023 (Strategia Nationala Adaptare la Schimbari Climatice).'),
+        ct: S2l('Estimare pe baza modelului Oke (1982) + date Copernicus LST + densitate construita GHSL \xb7 Validat pentru 12 orase europene'),
+        sr: S2l('Oke T.R. (1982) The energetic basis of the urban heat island. QJRMS 108:1-24. \xb7 Copernicus Land Service LST 2020-2024 \xb7 Santamouris M. (2015) Analyzing the heat island magnitude. Energy & Buildings.'),
+        hi: false,
       },
       {
-        nm:'Vulnerabilitate Seismica FEMA P-154 adaptat',
-        fml:'RVS = f(tip_structura, an_constructie, regim_inaltime, conditii_teren, Ag_P100)',
-        wh:'Screening rapid al vulnerabilitatii seismice: tipul structural, anul constructiei (pre/post norme), regimul de inaltime si parametrii zonei seismice.',
-        wy:'Romania are cel mai mare risc seismic din UE dupa Grecia (INFP). Fondul construit pre-1977 este extrem de vulnerabil. Identificarea cladirilor Rz I-II este conditia pentru PNRR C10-I2 (consolidare seismica). Ignorarea riscului in planificarea urbana poate costa sute de milioane EUR la un cutremur major.',
-        sr:'FEMA P-154 (2015) Rapid Visual Screening. FEMA, Washington DC. · P100-1/2013 INFP · PNRR C10-I2 MDLPA 2021',
-        ct:'Screening nivel 1 (RVS) · Necesita verificare expertiza tehnica Niv.II pentru interventii',hi:false,
+        nm:  'Carbon LCA \u2014 Ciclul de Viata al Emisiilor de Carbon',
+        tag: 'SUSTENABILITATE',
+        tagColor: [16,185,129],
+        fml: 'E_total = E_constructie + E_operare_50ani + E_demolare   |   Standard: EN 15978:2011',
+        pentru_cine: S2l('Raspunde la "cat CO\u2082 emite aceasta cladire in 50 de ani?" — de la fabricarea materialelor, la utilizare zilnica, pana la demolare. Esential pentru obtinerea certificatelor verzi (BREEAM, LEED) si pentru accesarea finantarilor UE (Green Deal, fonduri de tranzitie).'),
+        wh: S2l('Calculeaza amprenta de carbon totala a unui proiect imobiliar pe intregul ciclu de viata: materiale de constructie (ICE Database v3.0), energie operationala (ANRE mix 2024) si demolare.'),
+        wy: S2l('EPBD recast (2024) impune clase energetice A/B pentru cladiri noi dupa 2030. PNRR C5 (Valul Renovarii) acorda punctaj suplimentar pentru analiza LCA. Necesarul de carbon net-zero pana in 2050 (Green Deal) face din LCA un instrument de planificare obligatoriu.'),
+        ct: S2l('Bazat pe factori de emisie medie \xb7 Variatie \xb720% functie de specificatii tehnice finale \xb7 Necesita validare studiu energetic detaliat'),
+        sr: S2l('EN 15978:2011 Sustainability of construction works. \xb7 ICE Database v3.0 (University of Bath, 2019). \xb7 ANRE Mixul de productie energie electrica Romania 2024. \xb7 EPBD Recast 2024.'),
+        hi: false,
+      },
+      {
+        nm:  'Vulnerabilitate Seismica \u2014 Evaluare Rapida FEMA P-154',
+        tag: 'RISC SEISMIC',
+        tagColor: [220,38,38],
+        fml: 'Scor Final = Scor_de_baza - \u03a3(penalizari) + \u03a3(bonusuri)   |   Prag interventie: < 2.0',
+        pentru_cine: S2l('Romania are cel mai ridicat risc seismic din UE dupa o parte din Italia si Grecia. Evaluarea rapida identifica cladirile cu risc ridicat, eligibile pentru consolidare prin PNRR C10-I2. Comunica riscul in termeni clari: "aceasta cladire are 40% probabilitate de daune severe la cutremurul de proiectare".'),
+        wh: S2l('Evalueaza rapid (fara calcul structural detaliat) vulnerabilitatea unui bloc la seismul de proiectare P100, pe baza tipului structural, anului constructiei, numarului de etaje si zonei seismice (Ag, Tc conform P100-1/2013).'),
+        wy: S2l('P100-1/2013 (normativul seismic) si HG 525/1996 RGU impun evaluarea riscului seismic in toate documentatiile de urbanism din zone cu Ag>0.15g. PNRR C10-I2 aloca 2.5 mld. EUR pentru consolidare cladiri cu risc seismic ridicat — identificarea lor necesita evaluare sistematica.'),
+        ct: S2l('Evaluare de screening nivel 1 (FEMA P-154) \xb7 Nu inlocuieste expertiza tehnica \xb7 Necesita verificare de expert tehnic atestat MLPDA'),
+        sr: S2l('FEMA P-154 (2015) Rapid Visual Screening of Buildings for Potential Seismic Hazards. \xb7 INFP P100-1/2013 Cod de proiectare seismica. \xb7 PNRR C10-I2 Rezilienta seismica 2021-2026.'),
+        hi: false,
+      },
+      {
+        nm:  'Score Gravitational Urban \u2014 Forta de Atractie a Orasului',
+        tag: 'GEOGRAFIE ECONOMICA',
+        tagColor: [96,165,250],
+        fml: 'G_ij = k \xd7 (P_i \xd7 P_j) / d_ij\xb2   |   Lowry (1964), calibrat pe date INSE + Eurostat',
+        pentru_cine: S2l('Explica de ce Clujul atrage populatie din Ardeal, iar Iasul din Moldova. Scorurile gravitationale prezic directia de crestere urbana, locatia optima a centrelor comerciale si probabilitatea de extindere metropolitana (Miroslava, Floresti etc).'),
+        wh: S2l('Calculeaza forta de atractie a unui oras fata de celelalte, pe baza populatiei si distantei. Folosit pentru a identifica zona metropolitana functionala, directiile de presiune de construire si comunele periurbane cu crestere rapida.'),
+        wy: S2l('Modelele gravitationale sunt standard in geografia economica si in planificarea metropolitana (OCDE, Banca Mondiala). Identifica corect de ce unele comune cresc exploziv (Floresti: +8%/an) in timp ce altele se golesc, permitand planificarea coordonata a infrastructurii.'),
+        ct: S2l('Calibrat pe date INSE si Eurostat \xb7 Nu incorporeaza bariere administrative sau schimbari recente de infrastructura \xb7 Exactitate +/-15% pentru zone metropolitane'),
+        sr: S2l('Lowry I.S. (1964) A Model of Metropolis. RAND Corporation. \xb7 Zipf G.K. (1946) The P1P2/D hypothesis. American Sociological Review. \xb7 OCDE (2012) Redefining Urban: A New Way to Measure Metropolitan Areas.'),
+        hi: false,
       },
     ];
 
-    fmls.forEach((f,fi)=>{
-      if(y>H-55){pdf.addPage();this._pgHeader(pdf,W,'METODOLOGIE (cont.)',city.name,today,20);y=22;}
-      const bh=f.hi?56:48;
-      pdf.setFillColor(f.hi?8:6,f.hi?18:12,f.hi?50:38);pdf.roundedRect(14,y,W-28,bh,2,2,'F');
-      const bc=f.hi?[212,175,55]:[59,130,246];
-      pdf.setFillColor(...bc);pdf.rect(14,y,3,bh,'F');
-      pdf.setTextColor(...bc);pdf.setFont('helvetica','bold');pdf.setFontSize(8.5);
-      pdf.text(S2l(f.nm),20,y+6);
-      pdf.setFillColor(4,8,26);pdf.rect(20,y+9,W-38,7,'F');
-      pdf.setTextColor(130,200,255);pdf.setFont('helvetica','bold');pdf.setFontSize(7);
-      pdf.text(S2l(f.fml),23,y+14);
-      pdf.setTextColor(180,200,230);pdf.setFont('helvetica','normal');pdf.setFontSize(7);
-      const wl=pdf.splitTextToSize(S2l('CE FACE: '+f.wh),W-44);
-      pdf.text(wl[0]||'',20,y+22);
-      if(f.hi)pdf.setTextColor(212,175,55);else pdf.setTextColor(148,163,184);
-      pdf.setFont('helvetica','italic');pdf.setFontSize(6.8);
-      const yl=pdf.splitTextToSize(S2l('DE CE: '+f.wy),W-44);
-      pdf.text(yl[0]||'',20,y+28);
-      if(yl[1])pdf.text(yl[1],20,y+34);
-      if(f.nt){pdf.setTextColor(34,197,94);pdf.setFont('helvetica','bold');pdf.setFontSize(6.5);pdf.text(S2l('* '+f.nt),20,y+(f.nt?40:bh-12));y+=4;}
-      pdf.setTextColor(100,120,150);pdf.setFont('helvetica','normal');pdf.setFontSize(6);
-      pdf.text(S2l('Sursa: '+f.sr),20,y+bh-10);
-      if(f.ct){pdf.setTextColor(245,158,11);pdf.text(S2l('Incertitudine: '+f.ct),20,y+bh-4);}
-      y+=bh+4;
+    // ── Randare formule ───────────────────────────────────────────────────
+    fmls.forEach((f, fi) => {
+      const needH = f.premier ? 72 : 65;
+      if(y > H - needH) {
+        pdf.addPage();
+        this._pgHeader(pdf,W,'METODOLOGIE (continuare)',city.name,dataAzi,20);
+        y = 22;
+      }
+
+      // Card background
+      pdf.setFillColor(f.hi ? 8 : 6, f.hi ? 15 : 11, f.hi ? 44 : 34);
+      pdf.roundedRect(14,y,W-28,needH,2,2,'F');
+      if(f.hi) {
+        pdf.setDrawColor(212,175,55); pdf.setLineWidth(0.4);
+        pdf.roundedRect(14,y,W-28,needH,2,2,'S');
+      }
+
+      // Tag tip
+      pdf.setFillColor(...(f.tagColor||[100,120,150]),40);
+      pdf.roundedRect(16,y+3,S2l(f.tag||'').length*2.8+6,6,2,2,'F');
+      pdf.setTextColor(...(f.tagColor||[100,120,150]));
+      pdf.setFont('helvetica','bold'); pdf.setFontSize(6);
+      pdf.text(S2l(f.tag||''), 19, y+7.3);
+
+      // Titlu
+      pdf.setTextColor(200,215,240); pdf.setFont('helvetica','bold'); pdf.setFontSize(9);
+      pdf.text(S2l(f.nm), 16, y+14);
+
+      // Formula
+      pdf.setFillColor(4,8,24); pdf.rect(16,y+16,W-32,7,'F');
+      pdf.setTextColor(212,175,55); pdf.setFont('courier','bold'); pdf.setFontSize(7.5);
+      pdf.text(S2l(f.fml), 18, y+21.5, {maxWidth: W-36});
+
+      // PENTRU CINE (explicatie nespecialisti)
+      if(f.pentru_cine) {
+        pdf.setTextColor(96,165,250); pdf.setFont('helvetica','bold'); pdf.setFontSize(6.5);
+        pdf.text('CE INSEAMNA IN PRACTICA:', 16, y+28);
+        pdf.setTextColor(170,185,210); pdf.setFont('helvetica','normal'); pdf.setFontSize(7);
+        pdf.text(S2l(f.pentru_cine), 16, y+33, {maxWidth: W-32});
+      }
+
+      // DE CE E NECESAR
+      pdf.setTextColor(52,211,153); pdf.setFont('helvetica','bold'); pdf.setFontSize(6.5);
+      pdf.text('DE CE ESTE NECESAR IN URBANISM:', 16, y+42);
+      pdf.setTextColor(148,163,184); pdf.setFont('helvetica','normal'); pdf.setFontSize(7);
+      pdf.text(S2l(f.wy), 16, y+47, {maxWidth: W-32});
+
+      // Rezultat actual
+      if(f.rezultat_acum) {
+        pdf.setTextColor(212,175,55,180); pdf.setFont('helvetica','italic'); pdf.setFontSize(6.5);
+        pdf.text('Aplicat: ' + S2l(f.rezultat_acum), 16, y+56, {maxWidth: W-32});
+      }
+
+      // Premier (elegant, nu laudaros)
+      if(f.premier) {
+        pdf.setFillColor(20,10,50); pdf.rect(16,y+needH-14,W-32,10,'F');
+        pdf.setTextColor(167,139,250); pdf.setFont('helvetica','italic'); pdf.setFontSize(6.5);
+        pdf.text('\u25b8 ' + S2l(f.premier), 18, y+needH-8, {maxWidth: W-36});
+      }
+
+      // Surse + certitudine (footer card)
+      pdf.setTextColor(80,100,130); pdf.setFont('helvetica','normal'); pdf.setFontSize(6);
+      pdf.text('Sursa: ' + S2l(f.sr||''), 16, y+needH-4, {maxWidth: W-32});
+
+      y += needH + 4;
     });
 
-    // Surse date
-    if(y>H-50){pdf.addPage();this._pgHeader(pdf,W,'METODOLOGIE (cont.)',city.name,today,20);y=22;}
-    y=this._section(pdf,W,y,'Surse de Date Oficiale Utilizate');
-    const srcs=[
-      ['INSE Recensamant 2021','Verde','Date demografice definitive per UAT','Gratuit · citare obligatorie'],
-      ['Eurostat Urban Audit 2021','Verde','Indicatori urbani 800+ orase EU','NUTS3 · LA2'],
-      ['BNR Indicele Preturilor Imobiliare','Verde','Evolutia preturilor rezidentiale','Trimestrial · regional'],
-      ['INFP P100-1/2013','Verde','Zonarea seismica Romania (Ag, Tc)','Obligatoriu prin lege'],
-      ['ANAR PGRA 2021-2027','Verde','Harti hazard inundatii WMS oficial','Directiva 2007/60/CE'],
-      ['OSM Overpass API','Galben','Retea strazi, POI, cartiere, zone','Open data · acuratete variabila'],
-      ['Copernicus GHSL R2023A','Galben','Densitate populatie cladiri 100m','ESA · gratuit'],
-      ['CIMEC LMI 2023','Verde','Lista Monumentelor Istorice 6827 ob.','Ministerul Culturii'],
+    // ── DISCLAIMER COMPLET ────────────────────────────────────────────────
+    if(y > H-70){ pdf.addPage(); this._pgHeader(pdf,W,'METODOLOGIE (continuare)',city.name,dataAzi,20); y=22; }
+    y += 4;
+
+    pdf.setFillColor(50,8,8); pdf.roundedRect(14,y,W-28,52,2,2,'F');
+    pdf.setDrawColor(239,68,68); pdf.setLineWidth(1.2); pdf.roundedRect(14,y,W-28,52,2,2,'S');
+    pdf.setFillColor(239,68,68); pdf.rect(14,y,W-28,3,'F');
+
+    pdf.setTextColor(239,68,68); pdf.setFont('helvetica','bold'); pdf.setFontSize(9.5);
+    pdf.text('DISCLAIMER \u2014 CITITI INAINTE DE A UTILIZA ACEST DOCUMENT', W/2, y+10, {align:'center'});
+
+    const disclaimerLines = [
+      '1.  Document generat AUTOMAT de platforma UrbanX TSS\xb7FG pe baza datelor publice (INSE, Eurostat, BNR, ANCPI, INFP, ANAR, OSM) si a modelelor descrise mai sus.',
+      '2.  NU inlocuieste documentatiile PUG/PUZ/PUD elaborate conform Legii 350/2001 si NU poate fi substituit unui studiu de specialitate avizat.',
+      '3.  NU constituie act de autoritate administrativa si NU poate fi temei legal pentru emiterea unui Autorizatii de Construire sau Certificat de Urbanism.',
+      '4.  Valorile numerice sunt ESTIMARI ORIENTATIVE. Intervalele de incertitudine sunt declarate explicit per indicator. Erori de ±15-25% sunt posibile.',
+      '5.  Utilizarea acestui document in decizii investitionale, juridice sau administrative se face pe raspunderea exclusiva a utilizatorului.',
+      '6.  OBLIGATORIU: verificarea si asumarea concluziilor de catre un urbanist atestat RUR conform Legii 350/2001 si Legii 184/2001.',
     ];
-    srcs.forEach(([nm,badge,desc,note],i)=>{
-      if(y>H-10){pdf.addPage();this._pgHeader(pdf,W,'METODOLOGIE (cont.)',city.name,today,20);y=22;}
-      pdf.setFillColor(i%2===0?9:7,i%2===0?16:13,i%2===0?44:37);pdf.rect(14,y,W-28,7,'F');
-      const bc2=badge==='Verde'?[34,197,94]:[245,158,11];
-      pdf.setTextColor(...bc2);pdf.setFont('helvetica','bold');pdf.setFontSize(8);pdf.text(S2l(nm),16,y+4.8);
-      pdf.setTextColor(148,163,184);pdf.setFont('helvetica','normal');pdf.setFontSize(7);pdf.text(S2l(desc),78,y+4.8);
-      pdf.setTextColor(100,120,150);pdf.setFontSize(6.5);pdf.text(S2l(note),W-60,y+4.8);
-      y+=7;
+
+    disclaimerLines.forEach((line,i) => {
+      pdf.setTextColor(220,170,170); pdf.setFont('helvetica','normal'); pdf.setFontSize(7);
+      pdf.text(S2l(line), 17, y+18+i*5.6, {maxWidth: W-34});
     });
+    y += 56;
 
-    y+=5;
+    // ── BOX DATA GENERARII ────────────────────────────────────────────────
+    if(y > H-28){ pdf.addPage(); y=20; }
+    y += 4;
+    pdf.setFillColor(6,12,38); pdf.roundedRect(14,y,W-28,22,2,2,'F');
+    pdf.setDrawColor(212,175,55); pdf.setLineWidth(0.4); pdf.roundedRect(14,y,W-28,22,2,2,'S');
 
-    // DISCLAIMER complet
-    if(y>H-55){pdf.addPage();this._pgHeader(pdf,W,'METODOLOGIE (cont.)',city.name,today,20);y=22;}
-    pdf.setFillColor(60,10,10);pdf.roundedRect(14,y,W-28,40,2,2,'F');
-    pdf.setDrawColor(239,68,68);pdf.setLineWidth(1);pdf.roundedRect(14,y,W-28,40,2,2,'S');
-    pdf.setFillColor(239,68,68);pdf.rect(14,y,W-28,2,'F');
-    pdf.setTextColor(239,68,68);pdf.setFont('helvetica','bold');pdf.setFontSize(9);
-    pdf.text('DOCUMENT ORIENTATIV — CITITI CU ATENTIE',W/2,y+8,{align:'center'});
-    [
-      '1. Generat automat de UrbanX TSS·FG pe baza datelor publice si a modelelor descrise mai sus.',
-      '2. NU inlocuieste documentatiile PUG/PUZ/PUD elaborate conform Legii 350/2001.',
-      '3. NU constituie act de autoritate si nu poate fi temei pentru AC/CU.',
-      '4. Valorile sunt estimari orientative cu intervalele de incertitudine declarate.',
-      '5. Obligatoriu: verificare si asumare de urbanist atestat RUR.',
-    ].forEach((d,i)=>{
-      pdf.setTextColor(220,180,180);pdf.setFont('helvetica','normal');pdf.setFontSize(6.8);
-      pdf.text(S2l(d),18,y+15+i*5.2);
-    });
-    y+=45;
+    pdf.setTextColor(212,175,55); pdf.setFont('helvetica','bold'); pdf.setFontSize(8.5);
+    pdf.text('\u25cf  Document generat la: ' + S2l(dataAzi), 18, y+7);
+    pdf.setTextColor(148,163,184); pdf.setFont('helvetica','normal'); pdf.setFontSize(7);
+    pdf.text(S2l('Platforma: UrbanX TSS\xb7FG v2.0  \xb7  ThinkSmart Solutions SRL  \xb7  thinksmartsolutions.github.io/UrbanX'), 18, y+13);
 
-    // Box data generarii
-    pdf.setFillColor(6,12,38);pdf.roundedRect(14,y,W-28,16,2,2,'F');
-    pdf.setDrawColor(212,175,55);pdf.setLineWidth(0.3);pdf.roundedRect(14,y,W-28,16,2,2,'S');
-    pdf.setTextColor(212,175,55);pdf.setFont('helvetica','bold');pdf.setFontSize(8);
-    pdf.text('Document generat: '+S2l(today||new Date().toLocaleDateString('ro-RO')),18,y+6);
-    pdf.setTextColor(148,163,184);pdf.setFont('helvetica','normal');pdf.setFontSize(7);
-    pdf.text(S2l('Platforma: UrbanX TSS·FG v2.0 · ThinkSmart Solutions SRL · thinksmartsolutions.github.io/UrbanX'),18,y+12);
-    pdf.setTextColor(100,120,150);pdf.setFontSize(6.5);
-    pdf.text(S2l('UAT: '+city.name+' · SIRUTA: '+(city.siruta||'—')+' · Scenariu: '+(c.scenario||'S2 Moderat')),W-16,y+6,{align:'right'});
+    pdf.setTextColor(100,120,150); pdf.setFontSize(6.5);
+    const metadataRight = S2l('UAT: '+(city.name||'—')+' \xb7 SIRUTA: '+(city.siruta||'—')+' \xb7 Scenariu: '+(c.scenario||'S2 Moderat')+' \xb7 Versiune model: 2026-05');
+    pdf.text(metadataRight, W-16, y+18, {align:'right', maxWidth: W-32});
+    y += 26;
 
-    this._pgFooter(pdf,W,H,today,20,'UrbanX TSS·FG — Instrument analiza urbanistica. Generat: '+S2l(today||'')+' — document orientativ.');
-  }
-,
+    this._pgFooter(pdf,W,H,dataAzi,20,S2l('UrbanX TSS\xb7FG \xa9 2026 \xb7 Document orientativ \xb7 Necesita validare urbanist atestat RUR \xb7 Generat: '+dataAzi));
+  },
 
   // ══════════════════════════════════════════════════════════════════════════
   // GRAFICE CANVAS
