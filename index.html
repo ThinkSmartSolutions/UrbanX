@@ -1211,7 +1211,32 @@ document.addEventListener('click', function(){
   </span>
 
   <!-- Grup 1: Navigare & Căutare -->
-  <button class="tb-btn" id="btnUTR">🗺 UTR</button>
+  <button class="tb-btn" id="btnUTR" onclick="(function(){
+    const k = window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
+    const db = window._RO_CITIES_DB || {};
+    const cityName = db[k]?.name || k;
+    const _PUG = {'RO-IS-01':'js/data/iasi/pug.geojson','RO-SV-01':'js/data/municipiul-suceava/pug.geojson'};
+    const pugUrl = _PUG[k];
+    const drawer = document.getElementById('utr-drawer');
+    const titleEl = document.getElementById('utr-drawer-title');
+    // Daca drawer e deschis si e al aceluiasi oras, inchidem
+    if(drawer?.classList.contains('open') && titleEl?.textContent?.includes(cityName)) {
+      hideUTRDrawer?.(); return;
+    }
+    // Deschidem drawer
+    drawer?.classList.add('open');
+    document.getElementById('btnUTR')?.classList.add('on');
+    if(!pugUrl) {
+      if(titleEl) titleEl.textContent = 'Zone UTR — PUG ' + cityName + ' indisponibil';
+      ss?.('⚠ PUG ' + cityName + ' indisponibil'); return;
+    }
+    // Resetam si incarcam
+    if(window.S) window.S.pug = false;
+    if(titleEl) titleEl.textContent = '';
+    _loadPUGOnMap(pugUrl, cityName, null).then(function(g) {
+      if(g) _renderUTRChips(g, cityName);
+    });
+  })()">🗺 UTR</button>
   <button class="tb-btn" id="btnGPS">📍 GPS</button>
   <button class="tb-btn" id="btnMulti" title="Multiselect parcele">🔲 Multi</button>
 
