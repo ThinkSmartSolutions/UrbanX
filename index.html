@@ -4896,18 +4896,10 @@ window.addEventListener('load', function() {
   // ── showUATSelector: folosim TCI._showSelector care are _selPick cu localStorage ──
   // Suprascrierea se face imediat si dupa load, garantat
   function _installUATSelector() {
-    // Versiunea noastra completa - deschide TCI selector care salveaza in localStorage
     window.showUATSelector = function() {
-      if(window.TCI && typeof window.TCI._showSelector === 'function') {
-        // TCI._showSelector are _selPick care seteaza TCI.cityKey + localStorage
-        window.TCI._showSelector();
-      } else {
-        // Fallback: selector simplu inline
-        _showSimpleUATSelector();
-      }
+      _showSimpleUATSelector();
     };
     window.showUATSelector._ours = true;
-    console.log('[UrbanX] showUATSelector instalat — foloseste TCI._showSelector');
   }
 
   function _showSimpleUATSelector() {
