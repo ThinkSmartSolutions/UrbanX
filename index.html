@@ -5256,5 +5256,66 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
 })();
 </script>
 
+<script>
+// ── OVERRIDE toggleUTR — înlocuiește versiunea din repo care ignoră UAT activ ──
+window.addEventListener('load', function() {
+  setTimeout(function() {
+    window.toggleUTR = function() {
+      const k = window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
+      const db = window._RO_CITIES_DB || {};
+      const name = db[k]?.name || k;
+      const pugs = {
+        'RO-IS-01': 'js/data/iasi/pug.geojson',
+        'RO-SV-01': 'js/data/municipiul-suceava/pug.geojson',
+      };
+      // Fallback din UAT_REGISTRY
+      const reg = window.UAT_REGISTRY || {};
+      const regEntry = Object.values(reg).find(e => e.siruta === db[k]?.siruta);
+      const url = pugs[k] || regEntry?.pugFile;
+
+      const drawer = document.getElementById('utr-drawer');
+      const btn = document.getElementById('btnUTR');
+
+      // Toggle: dacă e deschis și același UAT, închidem
+      if(drawer?.classList.contains('open')) {
+        drawer.classList.remove('open');
+        btn?.classList.remove('on');
+        return;
+      }
+
+      drawer?.classList.add('open');
+      btn?.classList.add('on');
+
+      if(!url) {
+        const t = document.getElementById('utr-drawer-title');
+        if(t) t.textContent = '🗺 PUG ' + name + ' — indisponibil';
+        window.ss?.('⚠ PUG ' + name + ' indisponibil');
+        return;
+      }
+
+      // Forțăm re-încărcare dacă UAT s-a schimbat
+      const t = document.getElementById('utr-drawer-title');
+      const sameCity = t?.textContent?.includes(name);
+      if(sameCity && window.S?.pug && window.S?.pugIdx?.length > 0) return;
+
+      if(window.S) window.S.pug = false;
+      window._loadPUGOnMap(url, name, null).then(function(g) {
+        if(g) window._renderUTRChips(g, name);
+      });
+    };
+
+    // Override si pe butonul UTR direct — elimina orice listener vechi
+    const btn = document.getElementById('btnUTR');
+    if(btn) {
+      const newBtn = btn.cloneNode(true);
+      newBtn.onclick = function() { window.toggleUTR(); };
+      btn.parentNode.replaceChild(newBtn, btn);
+    }
+
+    console.log('[UrbanX] toggleUTR override activ — UAT dinamic');
+  }, 2000); // dupa ce toate JS-urile s-au incarcat
+});
+</script>
+
 </body>
 </html>
