@@ -660,9 +660,9 @@ G._PresentationMode = {
     vizMenu.appendChild(sep);
     [
       {id:'compare-pro-menu-item',icon:'🏙',label:'Compare Pro (2-5 UAT-uri)',col:'#60a5fa',
-       action:`_CompareProEngine.open(window.TCI?.cityKey||window._ProjectionEngine?.currentCity||null);document.getElementById('viz-menu').style.display='none'`},
+       action:`window._closeAllMenusAndOverlay&&_closeAllMenusAndOverlay();window._launchComparePro()`},
       {id:'presentation-menu-item',icon:'🎯',label:'Prezentare Primărie (5 slide-uri)',col:'#a78bfa',
-       action:`_PresentationMode.open(window.TCI?.cityKey||window._ProjectionEngine?.currentCity||null);document.getElementById('viz-menu').style.display='none'`},
+       action:`window._closeAllMenusAndOverlay&&_closeAllMenusAndOverlay();window._launchPresentation()`},
     ].forEach(({id,icon,label,col,action})=>{
       const btn=document.createElement('button');
       btn.id=id;
@@ -709,5 +709,11 @@ G._PresentationMode = {
   console.log('[Compare Pro v1.0] ✅ Compare Pro + Planning Score + Presentation Mode');
   ss?.('🏙 Compare Pro + Planning Score + Prezentare activ · Vizualizare ▾');
 })(0);
+
+// EXPUNERE IMEDIATA — indiferent de panel-tabs
+// Astfel butoanele din viz-menu functioneaza inainte de init complet
+window._CompareProEngine  = window._CompareProEngine  || G._CompareProEngine;
+window._PlanningScore     = window._PlanningScore     || G._PlanningScore;
+window._PresentationMode  = window._PresentationMode  || G._PresentationMode;
 
 })(window);

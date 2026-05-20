@@ -1108,18 +1108,40 @@ G._SceneEngine = {
 
 (function _init(n){
   if(n>80) return;
-  if(typeof TCI==='undefined'){ setTimeout(()=>_init(n+1),300); return; }
 
-  // Override openTCI: lansează SceneEngine v2 dacă e disponibil
-  const origOpen = window.openTCI;
-  window.openTCI = function(opts){
-    if(opts?.mode==='cinema_v2'||opts?.scenes){
-      const key = opts?.cityKey || TCI.cityKey ||
-        window._ProjectionEngine?.currentCity || 'RO-IS-01';
-      G._SceneEngine.launch(key);
-    } else {
-      if(origOpen) origOpen(opts);
+  // IMPORTANT: Setam window._SceneEngine IMEDIAT, fara sa asteptam TCI
+  // TCI e folosit doar pentru cityKey cand utilizatorul apasa butonul
+  window._SceneEngine     = G._SceneEngine;
+  window._ZoneProjections = G._ZoneProjections;
+  console.log('[TCI Cinematic v2] ✅ _SceneEngine disponibil imediat');
+
+  // Override openTCI cand devine disponibil (nu blocam initializarea)
+  const _tryPatchOpenTCI = (attempt) => {
+    if(typeof TCI !== 'undefined' && typeof window.openTCI === 'function') {
+      const origOpen = window.openTCI;
+      window.openTCI = function(opts){
+        if(opts?.mode==='cinema_v2'||opts?.scenes){
+          const key = opts?.cityKey || TCI.cityKey ||
+            window._ProjectionEngine?.currentCity || 'RO-IS-01';
+          G._SceneEngine.launch(key);
+        } else {
+          if(origOpen) origOpen(opts);
+        }
+      };
+      console.log('[TCI Cinematic v2] ✅ openTCI override aplicat');
+    } else if(attempt < 40) {
+      setTimeout(()=>_tryPatchOpenTCI(attempt+1), 500);
     }
+  };
+  _tryPatchOpenTCI(0);
+
+  // Helper robust pentru cityKey - functioneaza cu sau fara TCI
+  G._SceneEngine._getCityKey = function() {
+    return window.TCI?.cityKey ||
+           window._ProjectionEngine?.currentCity ||
+           window._lastSelectedCity ||
+           Object.keys(window._RO_CITIES_DB||{})[0] ||
+           'RO-IS-01';
   };
 
   // Cinema v2 accesibil din bara de sus (buton direct btn-cinema-v2)
@@ -1150,9 +1172,7 @@ G._SceneEngine = {
   [2000,4000,8000].forEach(delay => setTimeout(_injectCinemaV2Menu, delay));
 
   // Expunere globală
-  window._SceneEngine      = G._SceneEngine;
-  window._ZoneProjections  = G._ZoneProjections;
-
+  // window._SceneEngine deja setat la inceputul _init
   console.log('[TCI Cinematic Scenes v2.0] ✅ 12 scene + proiecții per zonă + bare 3D + trafic + slider');
   ss?.('🎬 Cinema v2: 12 scene storyboard + proiecții per cartier + infrastructură necesară');
 })(0);

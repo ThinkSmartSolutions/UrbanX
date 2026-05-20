@@ -528,7 +528,7 @@ G._HeritageLayer = {
         lon + m2deg(radius, lat), lat + radius/111000,
       ].join(',');
 
-      const url = `http://cimec.ro/Monumente/qgis-server/?SERVICE=WFS&REQUEST=GetFeature`+
+      const url = `https://cimec.ro/Monumente/qgis-server/?SERVICE=WFS&REQUEST=GetFeature`+
         `&TYPENAME=Lista_monumentelor_istorice&BBOX=${bbox}&OUTPUTFORMAT=application/json`;
 
       const r = await fetch(url, { signal: AbortSignal.timeout(6000) });

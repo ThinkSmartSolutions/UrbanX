@@ -606,11 +606,19 @@ G._EUBenchmarkPDFPage = {
       btn.innerHTML = '🌍 European Benchmarking Pro';
       btn.onmouseover = ()=>{ btn.style.background='rgba(52,211,153,.12)'; };
       btn.onmouseout  = ()=>{ btn.style.background='none'; };
-      btn.onclick = () => {
-        const key = window.TCI?.cityKey || window._ProjectionEngine?.currentCity || 'RO-IS-01';
-        G._EUBenchmark.open(key);
-        document.getElementById('viz-menu').style.display='none';
-      };
+      btn.addEventListener('click', () => {
+        if(typeof window._closeAllMenusAndOverlay === 'function') _closeAllMenusAndOverlay();
+        window._launchEUBenchmark?.() || G._EUBenchmark.open(
+          window.TCI?.cityKey || window._ProjectionEngine?.currentCity || 'RO-IS-01'
+        );
+      });
+      btn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        if(typeof window._closeAllMenusAndOverlay === 'function') _closeAllMenusAndOverlay();
+        window._launchEUBenchmark?.() || G._EUBenchmark.open(
+          window.TCI?.cityKey || window._ProjectionEngine?.currentCity || 'RO-IS-01'
+        );
+      }, {passive: false});
       vizMenu.appendChild(btn);
       return true;
     }
