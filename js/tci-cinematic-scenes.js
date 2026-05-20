@@ -351,11 +351,7 @@ G._SceneEngine = {
     const loop = () => {
       if(!this._playing) return;
       const t = Math.min(1, (performance.now() - this._startT) / scene.dur);
-      try {
-        this._renderScene(scene.id, t);
-      } catch(e) {
-        console.warn('[Cinema v2] Scena '+scene.id+' eroare (continuăm):', e.message);
-      }
+      this._renderScene(scene.id, t);
       if(t < 1) {
         this._raf = requestAnimationFrame(loop);
       } else {
@@ -363,11 +359,7 @@ G._SceneEngine = {
       }
     };
 
-    try {
-      this._setupScene(scene.id);
-    } catch(e) {
-      console.warn('[Cinema v2] setupScene '+scene.id+' eroare (continuăm):', e.message);
-    }
+    this._setupScene(scene.id);
     this._raf = requestAnimationFrame(loop);
   },
 
@@ -514,7 +506,9 @@ G._SceneEngine = {
       case 23: this._s23_masterplanPreview(ctx,W,H,t,city); break;
       case 24: this._s24_investment(ctx,W,H,t,city); break;
       case 25: this._s25_finale(ctx,W,H,t,city); break;
-      // NOTE: nu mai avem case duplicate — scenele 9 și 10 sunt gestionate mai sus
+      case 9: this._s13_street(ctx,W,H,t,city); break;
+      case 10:this._s14_urban(ctx,W,H,t,city); break;
+      
     }
 
     // Progress bar scenă
@@ -548,21 +542,30 @@ G._SceneEngine = {
   _s2_moldova(ctx,W,H,t,city) {
     // Overlay subtil
     ctx.fillStyle='rgba(0,0,0,0.2)'; ctx.fillRect(0,0,W,H);
+    const regiune = city?.regiune || 'NE';
+    const regionLabel = {
+      'NE':'MOLDOVA — REGIUNE NE', 'NV':'NORD-VEST', 'V':'VEST',
+      'C':'CENTRU', 'SE':'SUD-EST', 'S':'SUD', 'SV':'SUD-VEST', 'B':'BUCURESTI'
+    }[regiune] || ('REGIUNE ' + regiune);
 
     if(t > 0.3) {
-      // Card cu date regionale Moldova
+      // Card cu date regionale dinamice
       const cx=W*0.75, cy=H*0.35;
-      this._card(ctx,cx,cy,220,120,'#60a5fa','MOLDOVA — REGIUNE NE');
+      this._card(ctx,cx,cy,220,120,'#60a5fa', regionLabel);
       ctx.fillStyle='rgba(200,215,235,.9)'; ctx.font=`bold ${W*0.013}px "IBM Plex Mono"`;
       ctx.textAlign='left';
-      ctx.fillText('Populație: 3.2M loc.', cx+10, cy+30);
-      ctx.fillText('PIB/cap: 8.200 €', cx+10, cy+48);
-      ctx.fillText('Creștere: −0.8%/an', cx+10, cy+66);
+      const pop = city?.pop2021 ? (city.pop2021/1000).toFixed(0)+'K loc.' : '—';
+      const pib = city?.pib_eur_cap ? city.pib_eur_cap.toLocaleString('ro-RO')+' €/cap' : '—';
+      const rata = city?.rata_reala_2011_2021 != null ? (city.rata_reala_2011_2021>0?'+':'')+city.rata_reala_2011_2021.toFixed(1)+'%/an' : '—';
+      ctx.fillText('Populație: '+pop, cx+10, cy+30);
+      ctx.fillText('PIB/cap: '+pib, cx+10, cy+48);
+      ctx.fillText('Creștere: '+rata, cx+10, cy+66);
       ctx.fillStyle='#D4AF37'; ctx.font=`bold ${W*0.010}px "IBM Plex Mono"`;
-      ctx.fillText('⭐ POL REGIONAL: IAȘI', cx+10, cy+90);
-      ctx.fillText('360.633 loc · Hub universitar', cx+10, cy+106);
+      const tip = (city?.tip||'municipiu').toUpperCase();
+      ctx.fillText('⭐ '+tip+': '+(city?.name||'—').toUpperCase(), cx+10, cy+90);
+      ctx.fillText(N(city?.pop2021||0)+' loc.', cx+10, cy+106);
     }
-    this._sceneLabel(ctx,W,H,'2','ZOOM — MOLDOVA');
+    this._sceneLabel(ctx,W,H,'2','ZOOM — '+(city?.regiune||'REGIUNE'));
   },
 
   // ── SCENA 3: Approach cu date live ───────────────────────────────────
@@ -603,7 +606,7 @@ G._SceneEngine = {
       if(t > 0.55) ctx.fillText('+'+delta+'%', cx+120, cy+88);
     }
     ctx.globalAlpha = Math.min(1,ctx.globalAlpha+0.3);
-    this._sceneLabel(ctx,W,H,'3','APPROACH — '+city.name?.toUpperCase());
+    this._sceneLabel(ctx,W,H,'3','APPROACH — '+(city?.name||'').toUpperCase());
   },
 
   // ── SCENA 4: City Overview 3D + densitate ────────────────────────────
@@ -630,9 +633,6 @@ G._SceneEngine = {
   // ── SCENA 5: Dezvoltare Urbană — Bare 3D ─────────────────────────────
   _s5_growth(ctx,W,H,t,city,zones) {
     // Legendă MAJORĂ/MEDIE/MICĂ
-    // Normalizăm zones: poate fi obiect {} sau array []
-    const _zonesObj5 = zones ? (Array.isArray(zones) ? 
-      Object.fromEntries(zones.map((z,i)=>[z.id||z.type||String(i),z])) : zones) : {};
     if(t > 0.2) {
       const lx=W*0.03, ly=H*0.55;
       ctx.fillStyle='rgba(4,10,24,0.92)';
@@ -654,7 +654,7 @@ G._SceneEngine = {
     if(t > 0.4 && zones) {
       const zKeys = ['centru','semicentral','periferie'];
       zKeys.forEach((k,i) => {
-        const z = _zonesObj5[k] || Object.values(_zonesObj5)[i];
+        const z = zones[k];
         if(!z) return;
         const cx = W*(0.25+i*0.28), cy = H*0.12;
         ctx.globalAlpha *= Math.min(1,(t-0.4)/0.3);
@@ -735,8 +735,7 @@ G._SceneEngine = {
 
   _s6_focusZone1(ctx,W,H,t,city,zones) {
     // ─── Layout curat: zona curenta + 3 KPI-uri + RH/POT/functiuni ──────
-    // Normalizăm zones: poate fi obiect {} sau array []
-    const zArr = zones ? (Array.isArray(zones) ? zones : Object.values(zones)) : [];
+    const zArr = zones ? Object.values(zones) : [];
     const nZ   = Math.min(8, zArr.length || 1);
     const tPZ  = 1.0 / nZ;
     const cIdx = Math.min(nZ-1, Math.floor(t / tPZ));
@@ -1988,8 +1987,7 @@ G._SceneEngine = {
 
   // ── SCENA 7: Focus Zonă 2 — Reconversie Industrială ────────────────────
   _s7_focusZone2(ctx,W,H,t,city,zones) {
-    const _zArr7 = zones ? (Array.isArray(zones) ? zones : Object.values(zones)) : [];
-    const zone = _zArr7[1] || _zArr7[0];
+    const zone = zones?.[1] || zones?.[0];
     if(!zone) { this._s6_focusZone1(ctx,W,H,t,city,zones); return; }
     const pct  = zone.densif_pct || 15;
     const N    = v => Number(v||0).toLocaleString('ro-RO');
@@ -2039,8 +2037,7 @@ G._SceneEngine = {
 
   // ── SCENA 8: Focus Zonă 3 — Expansiune Controlată ──────────────────────
   _s8_focusZone3(ctx,W,H,t,city,zones) {
-    const _zArr8 = zones ? (Array.isArray(zones) ? zones : Object.values(zones)) : [];
-    const zone = _zArr8[2] || _zArr8[0];
+    const zone = zones?.[2] || zones?.[0];
     if(!zone) { this._s6_focusZone1(ctx,W,H,t,city,zones); return; }
     const pct  = zone.densif_pct || 8;
     const N    = v => Number(v||0).toLocaleString('ro-RO');
@@ -2344,9 +2341,8 @@ G._SceneEngine = {
       ctx.fillText('Conf. Legii 350/2001 + HG 525/1996 RGU + Ord. 233/2016',W/2,H*0.16,W*0.88);
       ctx.globalAlpha=1;
     }
-    // Card stack per zona — zones poate fi obiect {} sau array []
-    const _zonesArr19 = zones ? (Array.isArray(zones) ? zones : Object.values(zones)) : [];
-    const displayZones = _zonesArr19.slice(0,4);
+    // Card stack per zona
+    const displayZones = zones?.slice(0,4) || [];
     const intColors = {
       DENSIFICARE: '#22c55e', 'DENSIFICARE MODERATĂ': '#4ade80',
       'DENSIFICARE INTENSIVĂ': '#16a34a', 'RECONVERSIE': '#f59e0b',
@@ -2436,9 +2432,11 @@ G._SceneEngine = {
       const origOpen = window.openTCI;
       window.openTCI = function(opts){
         if(opts?.mode==='cinema_v2' || opts?.scenes || window._preferCinemaV2){
-          // Cinema v2 — film cinematic cu 12 scene
-          const key = opts?.cityKey || (typeof TCI!=='undefined'?TCI.cityKey:null) ||
-            window._ProjectionEngine?.currentCity || 'RO-IS-01';
+          // Cinema v2 — citim cityKey FRESH la momentul apelului
+          const key = opts?.cityKey ||
+            G._SceneEngine._getCityKey() ||
+            'RO-IS-01';
+          console.log('[Cinema v2] openTCI → launch pentru UAT:', key);
           G._SceneEngine.launch(key);
         } else {
           // TCI clasic — panoul interactiv cu KPI-uri
@@ -2461,13 +2459,16 @@ G._SceneEngine = {
   };
   _tryPatchOpenTCI(0);
 
-  // Helper robust pentru cityKey - functioneaza cu sau fara TCI
+  // Helper robust pentru cityKey - citeste MEREU valoarea curenta, nu din closure
   G._SceneEngine._getCityKey = function() {
-    return window.TCI?.cityKey ||
-           window._ProjectionEngine?.currentCity ||
-           window._lastSelectedCity ||
-           Object.keys(window._RO_CITIES_DB||{})[0] ||
-           'RO-IS-01';
+    // Citim direct din surse - nu din closure capturat la init
+    const fromTCI = (typeof window.TCI !== 'undefined') ? window.TCI.cityKey : null;
+    const fromLS  = localStorage.getItem('ux_last_city');
+    const fromPE  = window._ProjectionEngine?.currentCity;
+    const fromDB  = window._RO_CITIES_DB ? Object.keys(window._RO_CITIES_DB)[0] : null;
+    const key = fromTCI || fromLS || fromPE || fromDB || 'RO-IS-01';
+    console.log('[Cinema] _getCityKey →', key, '(TCI:', fromTCI, 'LS:', fromLS, ')');
+    return key;
   };
 
   // Cinema v2 accesibil din bara de sus (buton direct btn-cinema-v2)
@@ -2485,7 +2486,9 @@ G._SceneEngine = {
     item.onmouseover=()=>{item.style.background='rgba(139,92,246,.15)'};
     item.onmouseout=()=>{item.style.background='none'};
     item.onclick=()=>{
-      const key = window.TCI?.cityKey || window._ProjectionEngine?.currentCity || 'RO-IS-01';
+      // Citim cityKey FRESH — nu din closure vechi
+      const key = G._SceneEngine._getCityKey();
+      console.log('[Cinema v2] menu click → launch pentru UAT:', key);
       G._SceneEngine.launch(key);
       document.getElementById('viz-menu').style.display='none';
     };

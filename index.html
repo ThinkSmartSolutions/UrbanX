@@ -3291,8 +3291,9 @@ setTimeout(() => {
 
 // Fallback robust pentru launch Cinema v2 — folosește ÎNTOTDEAUNA UAT-ul activ
 window._launchCinemaV2 = function() {
-  // UAT activ: TCI.cityKey > localStorage > primul din DB — NICIODATĂ hardcodat RO-IS-01
-  const k = window.TCI?.cityKey ||
+  // Citim cityKey FRESH — nu din closure
+  const k = (window._SceneEngine?._getCityKey?.()) ||
+            window.TCI?.cityKey ||
             localStorage.getItem('ux_last_city') ||
             window._ProjectionEngine?.currentCity ||
             (window._RO_CITIES_DB ? Object.keys(window._RO_CITIES_DB)[0] : null) ||
@@ -3301,19 +3302,11 @@ window._launchCinemaV2 = function() {
   const db = window._RO_CITIES_DB || {};
   const cityName = db[k]?.name || k;
 
-  // Actualizăm cityKey în _SceneEngine dacă există
-  if(window._SceneEngine) {
-    window._SceneEngine._cityKey = k;
-    // Override _getCityKey dacă nu există
-    if(typeof window._SceneEngine._getCityKey !== 'function') {
-      window._SceneEngine._getCityKey = function() { return this._cityKey || k; };
-    }
-  }
-
-  // Sincronizăm _ProjectionEngine
+  // Sincronizăm toate modulele
   if(window._ProjectionEngine) window._ProjectionEngine.currentCity = k;
+  if(window._SceneEngine?._cityKey !== undefined) window._SceneEngine._cityKey = k;
 
-  console.log('[Cinema v2] Launch pentru UAT:', k, '—', cityName);
+  console.log('[Cinema v2] _launchCinemaV2 → UAT:', k, '—', cityName);
 
   if(window._SceneEngine && typeof window._SceneEngine.launch === 'function') {
     window._SceneEngine.launch(k);
