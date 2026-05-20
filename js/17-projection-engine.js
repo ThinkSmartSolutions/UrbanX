@@ -795,8 +795,16 @@ const _TCI_DATA = {
  * Sursa metodologie: Eurostat "Manual on Methods for Regional Population Projections" (2022)
  */
 function _cohortSurvivalModel(basePopulation, year, scenario, cityId) {
-  const city = _TCI_DATA.cities[cityId || 'iasi'];
-  const hubBonus = _TCI_DATA.inseProjections.hub_bonus[cityId || 'iasi'];
+  // Rezolvam orasul din DB complet (320+ UAT-uri), nu doar din _TCI_DATA.cities
+  const _db = window._RO_CITIES_DB || {};
+  const city = _TCI_DATA.cities[cityId] || _db[cityId] ||
+               Object.values(_db).find(c => c.siruta === cityId) ||
+               _TCI_DATA.cities['iasi'];
+  // Hub bonus: din DB daca nu e in lista hardcodata
+  const _hub = _TCI_DATA.inseProjections.hub_bonus;
+  const hubBonus = _hub[cityId] || (city ?
+    { annual: city.rata_reala_2011_2021 || 0,
+      note: 'Date INSE ' + (city.name || cityId) } : _hub['iasi']);
 
   // Parametri per scenariu
   const params = {
@@ -836,7 +844,10 @@ function _cohortSurvivalModel(basePopulation, year, scenario, cityId) {
  * Cerere locuinte = f(PIB/cap, rata dobanda, populatie activa, formare gospodarii)
  */
 function _housingDemandModel(year, scenario, cityId) {
-  const city = _TCI_DATA.cities[cityId || 'iasi'];
+  const _db = window._RO_CITIES_DB || {};
+  const city = _TCI_DATA.cities[cityId] || _db[cityId] ||
+               Object.values(_db).find(c => c.siruta === cityId) ||
+               _TCI_DATA.cities['iasi'];
   const conv = _TCI_DATA.economic.convergenceEU;
 
   // Convergenta PIB cu UE per scenariu
@@ -880,19 +891,22 @@ function _housingDemandModel(year, scenario, cityId) {
  * Sursa: White & Engelen (1993) + adaptare date ANCPI/Copernicus Land
  */
 function _urbanGrowthModel(year, scenario, cityId) {
-  const city = _TCI_DATA.cities[cityId || 'iasi'];
+  const _db = window._RO_CITIES_DB || {};
+  const city = _TCI_DATA.cities[cityId] || _db[cityId] ||
+               Object.values(_db).find(c => c.siruta === cityId) ||
+               _TCI_DATA.cities['iasi'];
   const dt = year - 2021;
   const growthRate = { S1: 0.018, S2: 0.012, S3: 0.006, S4: 0.008 }[scenario] || 0.012;
+  const suprafata = city.suprafata_ha || city.area_ha || 5000;
 
-  const suprafataUrbana = Math.round(city.suprafata_ha * Math.pow(1 + growthRate * 0.4, dt));
+  const suprafataUrbana = Math.round(suprafata * Math.pow(1 + growthRate * 0.4, dt));
   const densitateNoua = Math.round((city.pop2021 * _cohortSurvivalModel(city.pop2021, year, scenario, cityId).value / city.pop2021) / (suprafataUrbana / 100));
-  const sprawlIndex = suprafataUrbana / city.suprafata_ha;
+  const sprawlIndex = suprafataUrbana / suprafata;
 
-  // Green infrastructure necesar (OMS: 9mp/loc + adaptare clima)
   const climYear = Math.min(2055, Math.max(2030, year));
   const greenNeeded = _TCI_DATA.climate.impacts.greenNeeded[climYear] || 18;
   const popProj = _cohortSurvivalModel(city.pop2021, year, scenario, cityId).value;
-  const greenRequired = Math.round(popProj * greenNeeded / 10000); // ha
+  const greenRequired = Math.round(popProj * greenNeeded / 10000);
 
   return {
     suprafataUrbana,
@@ -907,13 +921,16 @@ function _urbanGrowthModel(year, scenario, cityId) {
 /**
  * PROIECTIE CLIMATICA — RCP 4.5 / RCP 8.5 (IPCC AR6)
  */
-function _climateProjection(year, scenario) {
+function _climateProjection(year, scenario, cityId) {
+  const _db = window._RO_CITIES_DB || {};
+  const city = (cityId && (_TCI_DATA.cities[cityId] || _db[cityId])) || _TCI_DATA.cities['iasi'];
   const climScenario = (scenario === 'S1') ? 'rcp45' : 'rcp85';
   const keyYear = [2030,2040,2050,2055].reduce((prev,cur) =>
     Math.abs(cur-year)<Math.abs(prev-year)?cur:prev);
   const deltaT = _TCI_DATA.climate[climScenario][keyYear] || 0;
   const heatDays = _TCI_DATA.climate.impacts.heatDays[keyYear] || 10;
-  const baseTemp = _TCI_DATA.cities.iasi.temp_medie_2024 || 11.8;
+  // Temperatura medie de baza per UAT (din DB sau fallback national)
+  const baseTemp = city.temp_medie_2024 || city.temp_medie || 11.0;
   const floodRisk = _TCI_DATA.climate.impacts.floodRisk[keyYear] || 'SCAZUT';
 
   return {
@@ -928,8 +945,12 @@ function _climateProjection(year, scenario) {
 
 // ── Calcul complet pentru un an si scenariu ───────────────────────────────
 function _getProjectionData(year, scenario, cityId) {
-  cityId = cityId || 'iasi';
-  const city = _TCI_DATA.cities[cityId];
+  const _db = window._RO_CITIES_DB || {};
+  // Rezolvam cityId -> city object din orice sursa disponibila
+  cityId = cityId || (window.TCI?.cityKey) || localStorage.getItem('ux_last_city') || localStorage.getItem('ux_last_city') || 'RO-IS-01';
+  const city = _TCI_DATA.cities[cityId] || _db[cityId] ||
+               Object.values(_db).find(c => c.siruta === cityId) ||
+               _TCI_DATA.cities['iasi'];
   if(!city) return null;
 
   const demo    = _cohortSurvivalModel(city.pop2021, year, scenario, cityId);
@@ -971,7 +992,7 @@ const _ProjectionEngine = {
   // Stare
   currentYear:      2025,
   currentScenario:  'S2',
-  currentCity:      'iasi',
+  currentCity:      null, // se seteaza din TCI.cityKey la open()
   isPlaying:        false,
   isOpen:           false,
   splitMode:        false,  // comparare 2 ani
@@ -1261,7 +1282,7 @@ const _ProjectionEngine = {
       <header class="tci-header">
         <div class="tci-header-left">
           <div class="tci-badge">🏙 TEMPORAL CITY INTELLIGENCE</div>
-          <h1 class="tci-title">Proiecție Urbanistică <span id="tci-city-name">Iași</span></h1>
+          <h1 class="tci-title">Proiecție Urbanistică <span id="tci-city-name">—</span></h1>
           <div class="tci-subtitle">Date oficiale INSE · Eurostat · ANCPI · BNR · IPCC AR6</div>
         </div>
         <div class="tci-header-right">
@@ -1561,7 +1582,7 @@ const _ProjectionEngine = {
               </div>
             </div>
             <div class="tci-conv-note" id="tci-conv-note">
-              <span id="tci-conv-city">Iași</span> = <span id="tci-conv-val">74</span>% din media UE-27 PIB/cap
+              <span id="tci-conv-city">UAT</span> = <span id="tci-conv-val">—</span>% din media UE-27 PIB/cap
             </div>
             <div class="tci-source-mini">Eurostat Regional GDP + Partnership Agreement RO 2021-27</div>
           </div>
@@ -2187,12 +2208,16 @@ const _ProjectionEngine = {
     ctx.fillRect(0,0,W,H);
 
     const years = [2021,2025,2030,2035,2040,2045,2050,2055];
+    const _ck = this.currentCity || window.TCI?.cityKey || localStorage.getItem('ux_last_city') || localStorage.getItem('ux_last_city') || 'RO-IS-01';
+    const _db = window._RO_CITIES_DB || {};
+    const _cityObj = _TCI_DATA.cities[_ck] || _db[_ck] || _TCI_DATA.cities['iasi'];
+    const _pop0 = _cityObj?.pop2021 || 100000;
     const metrics = [
-      { key:'pop',    color:'#8b5cf6', values: years.map(y => _cohortSurvivalModel(360633,y,this.currentScenario,'iasi').value/3606.33), label:'Populație (%)' },
-      { key:'house',  color:'#f59e0b', values: years.map(y => _housingDemandModel(y,this.currentScenario,'iasi').cerereAnuala/8.47), label:'Construcții' },
-      { key:'pib',    color:'#22c55e', values: years.map(y => _housingDemandModel(y,this.currentScenario,'iasi').pibCapProj/142), label:'PIB/cap (EUR/100)' },
-      { key:'temp',   color:'#ef4444', values: years.map(y => (_climateProjection(y,this.currentScenario).tempProj-8)*10), label:'Temperatură' },
-      { key:'esg',    color:'#38bdf8', values: years.map(y => _getProjectionData(y,this.currentScenario,'iasi')?.esg?.total||60), label:'ESG Score' },
+      { key:'pop',    color:'#8b5cf6', values: years.map(y => _cohortSurvivalModel(_pop0,y,this.currentScenario,_ck).value/(_pop0/100)), label:'Populație (%)' },
+      { key:'house',  color:'#f59e0b', values: years.map(y => _housingDemandModel(y,this.currentScenario,_ck).cerereAnuala/Math.max(1,(_cityObj?.autorizatii_2023||100)/100)), label:'Construcții' },
+      { key:'pib',    color:'#22c55e', values: years.map(y => _housingDemandModel(y,this.currentScenario,_ck).pibCapProj/Math.max(1,(_cityObj?.pib_eur_cap||10000)/100)), label:'PIB/cap (EUR/100)' },
+      { key:'temp',   color:'#ef4444', values: years.map(y => (_climateProjection(y,this.currentScenario,_ck).tempProj-8)*10), label:'Temperatură' },
+      { key:'esg',    color:'#38bdf8', values: years.map(y => _getProjectionData(y,this.currentScenario,_ck)?.esg?.total||60), label:'ESG Score' },
     ];
 
     // Normalizam la 0-100 pentru display
@@ -2978,7 +3003,7 @@ const _InvestmentROI = {
     const yearEnd   = yearStart + horizon;
     const result  = this.calculate(invest, yearStart, yearEnd,
       _ProjectionEngine.currentScenario || 'S2',
-      _ProjectionEngine.currentCity     || 'iasi');
+      _ProjectionEngine.currentCity || window.TCI?.cityKey || localStorage.getItem('ux_last_city'));
     if(!result) return;
 
     const pctColor = result.profit > 0 ? '#22c55e' : '#ef4444';
@@ -3044,7 +3069,7 @@ const _CityCompare = {
   },
 
   renderComparison(city1Key, city2Key) {
-    const c1 = _RO_CITIES_DB[city1Key] || _TCI_DATA.cities.iasi;
+    const c1 = _RO_CITIES_DB[city1Key] || _TCI_DATA.cities[city1Key] || Object.values(_RO_CITIES_DB||{})[0];
     const c2 = _RO_CITIES_DB[city2Key];
     if(!c1 || !c2) return '<div style="font-size:9px;color:#ef4444">Selectati ambele orase</div>';
 
@@ -3097,7 +3122,7 @@ const _GrowthVectors = {
     const W = canvas.width, H = canvas.height;
     const year = _ProjectionEngine.currentYear || 2025;
     const totalT = (year - 2021) / 34;
-    const d = _getProjectionData(year, _ProjectionEngine.currentScenario||'S2', _ProjectionEngine.currentCity||'iasi');
+    const d = _getProjectionData(year, _ProjectionEngine.currentScenario||'S2', _ProjectionEngine.currentCity || window.TCI?.cityKey || localStorage.getItem('ux_last_city'));
     const risk = d?.riskProfile;
 
     // Grila de vectori (10x8)
@@ -3168,7 +3193,7 @@ const _GrowthVectors = {
 const _TCIShare = {
   generateURL() {
     const state = {
-      c: _ProjectionEngine.currentCity || 'iasi',
+      c: _ProjectionEngine.currentCity || window.TCI?.cityKey || localStorage.getItem('ux_last_city'),
       s: _ProjectionEngine.currentScenario || 'S2',
       y: _ProjectionEngine.currentYear || 2025,
     };
@@ -3184,7 +3209,7 @@ const _TCIShare = {
     if(!tciParam) return;
     try {
       const state = new URLSearchParams(atob(tciParam));
-      const cityKey = state.get('c') || 'iasi';
+      const cityKey = state.get('c') || localStorage.getItem('ux_last_city') || 'RO-IS-01';
       const scenario = state.get('s') || 'S2';
       const year = parseInt(state.get('y') || '2025');
       setTimeout(() => {

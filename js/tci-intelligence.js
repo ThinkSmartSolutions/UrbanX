@@ -455,7 +455,11 @@ G._TCIDashboard = {
   },
 
   _genMasterplan() {
-    const key = this._currentCityKey||'RO-IS-01';
+    const key = this._currentCityKey ||
+                window.TCI?.cityKey ||
+                localStorage.getItem('ux_last_city') ||
+                Object.keys(window._RO_CITIES_DB||{})[0] ||
+                'RO-IS-01';
     const sc   = this._currentScenario||'S2';
     if(G._TCIMasterplanPDF) G._TCIMasterplanPDF.generate(key, sc);
     else if(typeof _ProjectionEngine !== 'undefined') _ProjectionEngine.exportPDF?.();

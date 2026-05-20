@@ -109,12 +109,24 @@ function doAddr(q, immediate){
     try{
       const ctr=map.getCenter();
       const TOKEN='pk.eyJ1IjoiZWk4aHRlciIsImEiOiJjajhhNGtiN3YwOW50MnFwOHBnOGJtcjVtIn0.dT4Ld3v1GoeQRCaIzxNn2g';
-      const isNearIasi=Math.abs(ctr.lat-47.16)<0.15&&Math.abs(ctr.lng-27.58)<0.2;
-      const qEnh=isNearIasi&&!/ia[sș]i/i.test(q)?q+' Iași':q;
-      const viewbox=isNearIasi?'27.45,47.22,27.72,47.10':`${ctr.lng-0.3},${ctr.lat+0.3},${ctr.lng+0.3},${ctr.lat-0.3}`;
+      // Contextul de cautare: orasul activ, nu hardcodat Iasi
+      const _activeK = window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
+      const _activeCity = (window._RO_CITIES_DB||{})[_activeK] || {name:'Romania', lat:ctr.lat, lon:ctr.lng};
+      const _activeName = _activeCity.name || '';
+      const _radius = 0.2; // 20km radius in grade
+      const isNearActiveCity = Math.abs(ctr.lat - (_activeCity.lat||ctr.lat)) < _radius &&
+                               Math.abs(ctr.lng - (_activeCity.lon||ctr.lng)) < _radius;
+      // Adaugam numele orasului la query doar daca nu e deja mentionat
+      const cityMentioned = _activeName && new RegExp(_activeName.split(' ')[0],'i').test(q);
+      const qEnh = isNearActiveCity && !cityMentioned && _activeName ? q + ' ' + _activeName : q;
+      // Viewbox dinamic centrat pe orasul activ
+      const _lon = _activeCity.lon || ctr.lng;
+      const _lat = _activeCity.lat || ctr.lat;
+      const viewbox = isNearActiveCity
+        ? `${_lon-0.3},${_lat+0.3},${_lon+0.3},${_lat-0.3}`
+        : `${ctr.lng-0.3},${ctr.lat+0.3},${ctr.lng+0.3},${ctr.lat-0.3}`;
 
-      // NOTĂ: fără User-Agent customizat — blocat de CORS preflight pe iOS/Android
-      const nomUrl=`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=8&q=${encodeURIComponent(qEnh)}&viewbox=${viewbox}&bounded=${isNearIasi?1:0}&countrycodes=ro&addressdetails=1&accept-language=ro`;
+      const nomUrl=`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=8&q=${encodeURIComponent(qEnh)}&viewbox=${viewbox}&bounded=${isNearActiveCity?1:0}&countrycodes=ro&addressdetails=1&accept-language=ro`;
       const mbUrl=`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?access_token=${TOKEN}&language=ro&limit=5&proximity=${ctr.lng.toFixed(4)},${ctr.lat.toFixed(4)}&bbox=27.40,47.05,27.75,47.28&types=address,poi,place,locality`;
 
       const [nomRes,mbRes]=await Promise.allSettled([
@@ -151,7 +163,7 @@ function doAddr(q, immediate){
       window._pendingAddrResults=combined;
 
       if(!combined.length){
-        _addrSetBox(`<div class="re">Niciun rezultat pentru "<b>${esc(q)}</b>".<br><small>Încercați: "Teatrul Național Iași", "Hotel Traian Iași"</small></div>`);
+        _addrSetBox(`<div class="re">Niciun rezultat pentru "<b>${esc(q)}</b>".<br><small>Încercați: adresă completă, număr de stradă, sau coordonate GPS</small></div>`);
         return;
       }
 
@@ -424,7 +436,7 @@ function onCadInput(val){
 
   const setCadBox = (htmlStr) => {
     if(isMob){
-      if(htmlStr) mobSearchOverlayShow('🔢 Cadastru Iași', htmlStr);
+      if(htmlStr) mobSearchOverlayShow('🔢 Cadastru '+(((window._RO_CITIES_DB||{})[window.TCI?.cityKey||localStorage.getItem('ux_last_city')||'RO-IS-01']||{}).name||'UAT'), htmlStr);
       else mobSearchOverlayClose();
     } else {
       const box = document.querySelector('#cad-box');

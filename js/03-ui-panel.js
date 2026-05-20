@@ -731,7 +731,7 @@ function htmlSearch(){
     <div class="help" style="margin-top:6px">Adresă, stradă, POI — orice localitate din România și lume.</div>
   </div>
 
-  <div class="section">🔢 Număr cadastral Iași</div>
+  <div class="section">🔢 Număr cadastral ${(()=>{const k=window.TCI?.cityKey||localStorage.getItem('ux_last_city')||'RO-IS-01';const db=window._RO_CITIES_DB||{};return db[k]?.name||'UAT';})()}</div>
   <div class="card">
     <input class="inp" id="inp-cad" placeholder="Ex: 127835" inputmode="numeric" autocomplete="off"
       value="${cadVal}"
@@ -843,7 +843,7 @@ function htmlIndicatori(){
 
   return`
   <div class="card">
-    <div style="font-size:13px;color:#d4af37;font-weight:700;margin-bottom:10px">Indicatori Urbanistici — PUG Iași · UTR: ${esc(ap.utr||'—')}</div>
+    <div style="font-size:13px;color:#d4af37;font-weight:700;margin-bottom:10px">Indicatori Urbanistici — PUG ${(()=>{const k=window.TCI?.cityKey||localStorage.getItem('ux_last_city')||'RO-IS-01';const db=window._RO_CITIES_DB||{};return db[k]?.name||'UAT';})()}  · UTR: ${esc(ap.utr||'—')}</div>
     <div class="warn-box" style="margin-bottom:10px;font-size:11px">ℹ️ Valorile de mai jos sunt <b>maxime admise</b> conform PUG. POT = %, CUT = mp.ADC/mp.teren, H și aliniamente = metri, spații verzi = %, parcaje = nr. locuri (valori minime).</div>
     <table class="tbl">
       <tr><th>Indicator</th><th>PUG max/min</th><th>Pe teren tău (${m2?Math.round(m2)+'m²':'?'})</th></tr>
@@ -1055,7 +1055,7 @@ function htmlProiect(){
       REGULI[utrResolved] = {
         d:'UTR '+utrResolved+' — reguli detaliate nedefinite în aplicație',
         pot:null,cut:null,niv:null,h:null,rf:null,rl:null,rs:null,sv:null,pk:null,
-        ua:'Consultați PUG Iași - Regulament Local de Urbanism pentru UTR '+utrResolved,
+        ua:'Consultați PUG UAT-ului activ — Regulament Local de Urbanism pentru UTR '+utrResolved,
         uc:'—',ui:'—',
         obs:'⚠️ Regulile pentru UTR '+utrResolved+' nu sunt complet definite în UrbanX. Verificați PUG oficial.'
       };

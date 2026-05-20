@@ -1082,17 +1082,17 @@ var REGULI={
 "T1B":{d:"Transport 1B",pot:35,cut:1.0,niv:1,h:8,rf:5,rl:5,rs:5,sv:15,pk:0,ao:"NU",fm:null,ua:"Infrastructură",uc:"Conexe",ui:"Locuire"},
 // ── ZONE SPECIALE ──────────────────────────────────────────────────────────
 "EXT":{
-  d:"Extravilan Municipiul Iași — PUZ",
+  d:"Extravilan UAT — necesită PUZ",
   pot:40,cut:4,niv:null,h:null,
   rf:5,rl:3,rs:5,sv:30,pk:2,
   ao:"NU",fm:null,
   ua:"Locuire individuală, servicii, agrement, agricol",
   uc:"Orice funcțiune cu PUZ aprobat. POT max 40%, CUT max 4",
   ui:"Industrie grea, activități poluante fără PUZ",
-  obs:"Parametri conform PUZ Iași - Extravilan. CUT se poate modifica doar în jos față de max. H rezultă din POT și CUT."
+  obs:"Parametri orientativi conform Legea 350/2001 art.32. CUT se poate modifica doar în jos față de max. Verificați PUG al UAT-ului."
 },
 "EXT_COM":{
-  d:"Extravilan comună/sat județul Iași",
+  d:"Extravilan localitate rurală",
   pot:30,cut:1.5,niv:2,h:8,
   rf:5,rl:3,rs:5,sv:40,pk:1,
   ao:"NU",fm:null,
