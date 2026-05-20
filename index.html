@@ -4893,82 +4893,85 @@ window.addEventListener('load', function() {
   'use strict';
 
   // Interceptăm showUATSelector să adauge hook pe iteme
-  function _patchUATSelector() {
-    const orig = window.showUATSelector;
-    if(!orig || orig._patched) return;
-
+  // ── showUATSelector: folosim TCI._showSelector care are _selPick cu localStorage ──
+  // Suprascrierea se face imediat si dupa load, garantat
+  function _installUATSelector() {
+    // Versiunea noastra completa - deschide TCI selector care salveaza in localStorage
     window.showUATSelector = function() {
-      orig.apply(this, arguments);
-      // Așteptăm să apară modal-ul, apoi hookim click-urile
-      setTimeout(_hookUATModalClicks, 200);
-      setTimeout(_hookUATModalClicks, 500);
-      setTimeout(_hookUATModalClicks, 1000);
+      if(window.TCI && typeof window.TCI._showSelector === 'function') {
+        // TCI._showSelector are _selPick care seteaza TCI.cityKey + localStorage
+        window.TCI._showSelector();
+      } else {
+        // Fallback: selector simplu inline
+        _showSimpleUATSelector();
+      }
     };
-    window.showUATSelector._patched = true;
+    window.showUATSelector._ours = true;
+    console.log('[UrbanX] showUATSelector instalat — foloseste TCI._showSelector');
   }
 
-  function _hookUATModalClicks() {
-    // Găsim toate elementele care arată ca item UAT în modal
-    // Căutăm în orice modal deschis care conține chei de tip RO-XX-XX
-    const allBtns = document.querySelectorAll(
-      '#uat-selector-modal button, #tci-uat-modal button, ' +
-      '[id*="uat-modal"] button, [class*="uat-item"], ' +
-      '[data-uat-key], [data-key]'
-    );
+  function _showSimpleUATSelector() {
+    // Selector simplu daca TCI nu e disponibil
+    const db = window._RO_CITIES_DB || {};
+    const cities = Object.entries(db).filter(function(e) {
+      return e[1].tip && e[1].lat;
+    }).sort(function(a,b) { return (b[1].pop2021||0)-(a[1].pop2021||0); });
 
-    allBtns.forEach(function(btn) {
-      if(btn._uatHooked) return;
-      btn._uatHooked = true;
+    let existing = document.getElementById('_simple-uat-modal');
+    if(existing) { existing.style.display='flex'; return; }
 
-      const key = btn.dataset.uatKey || btn.dataset.key || btn.dataset.uat || '';
-      if(!key.match(/^RO-[A-Z]+-\d+$/)) return; // doar chei valide
+    const modal = document.createElement('div');
+    modal.id = '_simple-uat-modal';
+    modal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(2,6,15,.95);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:20px;overflow-y:auto;font-family:"Space Grotesk","Inter",sans-serif';
+
+    const title = document.createElement('div');
+    title.style.cssText = 'color:#D4AF37;font-size:18px;font-weight:800;margin-bottom:16px;width:100%;max-width:500px;display:flex;justify-content:space-between;align-items:center';
+    title.innerHTML = '📍 Selectează UAT <button onclick="document.getElementById(\'_simple-uat-modal\').style.display=\'none\'" style="background:rgba(239,68,68,.2);border:1px solid rgba(239,68,68,.4);color:#f87171;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:14px">✕</button>';
+
+    const list = document.createElement('div');
+    list.style.cssText = 'width:100%;max-width:500px;display:flex;flex-direction:column;gap:6px';
+
+    cities.forEach(function(entry) {
+      const key = entry[0], city = entry[1];
+      const btn = document.createElement('button');
+      btn.style.cssText = 'background:rgba(14,26,52,.8);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#e2e8f0;padding:10px 14px;cursor:pointer;text-align:left;font-size:13px;font-family:inherit;display:flex;justify-content:space-between;align-items:center';
+      btn.innerHTML = '<b>' + city.name + '</b><span style="color:#475569;font-size:11px">' + (city.judet||'') + ' · ' + ((city.pop2021||0)/1000).toFixed(0) + 'K loc.</span>';
+
+      // Verificam daca are PUG
+      const hasPUG = {'RO-IS-01':1,'RO-SV-01':1}[key];
+      if(hasPUG) btn.style.borderColor = 'rgba(212,175,55,.4)';
 
       btn.addEventListener('click', function() {
-        const name = btn.querySelector('b')?.textContent ||
-                     btn.textContent?.trim().split('·')[0].trim() || key;
+        // Setam UAT activ
         try { localStorage.setItem('ux_last_city', key); } catch(e) {}
         if(window.TCI) window.TCI.cityKey = key;
         if(window._ProjectionEngine) window._ProjectionEngine.currentCity = key;
+        // Actualizam badge topbar
         const ind = document.getElementById('uat-indicator');
-        if(ind) ind.textContent = name;
-        console.log('[UAT Selector] Selectat:', key, '—', name);
-      }, { capture: true });
+        if(ind) ind.textContent = city.name;
+        // Sincronizam _SceneEngine
+        if(window._SceneEngine) window._SceneEngine._cityKey = key;
+        // Inchidem modal
+        modal.style.display = 'none';
+        console.log('[UAT] Selectat:', key, '—', city.name);
+        // Flyto pe harta
+        if(window.map && city.lat && city.lon) {
+          window.map.flyTo({center:[city.lon,city.lat], zoom:12, duration:1200});
+        }
+      });
+      list.appendChild(btn);
     });
 
-    // Alternativ: MutationObserver pe body pentru modal-uri create dinamic
+    modal.appendChild(title);
+    modal.appendChild(list);
+    document.body.appendChild(modal);
   }
 
-  // Observer global pe click — dacă click-ul are data-key sau text cu "Municipiul"
-  document.addEventListener('click', function(e) {
-    const btn = e.target.closest('button, [role="button"]');
-    if(!btn) return;
-
-    // Verificăm data attributes
-    const key = btn.dataset?.uatKey || btn.dataset?.key || btn.dataset?.uat || btn.dataset?.cityKey;
-    if(key && key.match(/^RO-[A-Z]+-\d+$/)) {
-      const name = btn.querySelector('b')?.textContent ||
-                   btn.dataset?.name ||
-                   btn.textContent?.trim().split('·')[0].trim().replace(/^[^A-Za-zÀ-ÖØ-öø-ÿ]+/,'') || '';
-      try { localStorage.setItem('ux_last_city', key); } catch(e) {}
-      if(window.TCI) window.TCI.cityKey = key;
-      if(window._ProjectionEngine) window._ProjectionEngine.currentCity = key;
-      const ind = document.getElementById('uat-indicator');
-      if(ind && name) ind.textContent = name;
-      console.log('[UAT Click] Interceptat:', key, '—', name);
-    }
-  }, { capture: true });
-
-  // Aplicăm patch la load
-  document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(_patchUATSelector, 500);
-    setTimeout(_patchUATSelector, 2000);
-  });
-  window.addEventListener('load', function() {
-    setTimeout(_patchUATSelector, 200);
-  });
-
-  window._patchUATSelector = _patchUATSelector;
-  window._hookUATModalClicks = _hookUATModalClicks;
+  // Instalam imediat si cu retry
+  _installUATSelector();
+  setTimeout(_installUATSelector, 1000);
+  setTimeout(_installUATSelector, 3000);
+  window.addEventListener('load', function() { setTimeout(_installUATSelector, 500); });
 })();
 
 // Hook pe orice schimbare de TCI.cityKey → notificăm toate modulele
