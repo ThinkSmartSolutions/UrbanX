@@ -4361,6 +4361,18 @@ async function _loadPUGOnMap(geojsonUrl, cityName, fitCoords) {
     } else {
       map.addSource('utr-src', {type:'geojson', data:geojson});
     }
+    // Forțăm vizibilitatea layerelor UTR și repaint
+    ['utr-fill','utr-line','utr-lbl'].forEach(function(lid) {
+      try {
+        if(map.getLayer(lid)) {
+          map.setLayoutProperty(lid, 'visibility', 'visible');
+        }
+      } catch(e2) {}
+    });
+    // Repaint explicit
+    setTimeout(function() {
+      try { map.triggerRepaint(); } catch(e2) {}
+    }, 100);
   } catch(e) { console.warn('[PUG setData]', e.message); }
 
   // Populăm și S.pugIdx pentru lookupUTR (detectare intravilan)
@@ -4923,31 +4935,25 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
 (function() {
   'use strict';
   function _lockMenus() {
-    // Blocăm appendChild/insertBefore pe meniurile locked
     ['tools-menu', 'viz-menu'].forEach(function(id) {
       const el = document.getElementById(id);
       if(!el || el._locked) return;
       el._locked = true;
-      // Snapshot: elementele actuale sunt corecte — orice adăugare ulterioară e duplicat
-      const _allowedIds = new Set(
-        Array.from(el.querySelectorAll('[id]')).map(e => e.id)
-      );
+      let _blockedCount = 0;
+
       const _origAppend = el.appendChild.bind(el);
       const _origInsert = el.insertBefore.bind(el);
 
       el.appendChild = function(node) {
-        // Permitem doar dacă e separator sau are id cunoscut
         if(node.nodeType !== 1) return _origAppend(node);
-        const nodeId = node.id || '';
         const nodeText = node.textContent?.trim() || '';
-        // Detectăm duplicate după text
-        const isDuplicate = Array.from(el.children).some(function(child) {
-          return child !== node &&
-                 child.textContent?.trim() === nodeText &&
-                 nodeText.length > 5;
+        const isDuplicate = nodeText.length > 5 && Array.from(el.children).some(function(child) {
+          return child !== node && child.textContent?.trim() === nodeText;
         });
         if(isDuplicate) {
-          console.warn('[MenuLock] Blocat injectare duplicat în #' + id + ':', nodeText.slice(0,40));
+          _blockedCount++;
+          // Log silențios — nu spam în consolă
+          if(_blockedCount === 1) console.info('[MenuLock] Bloc duplicate activ pe #' + id);
           return node;
         }
         return _origAppend(node);
@@ -4956,13 +4962,11 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
       el.insertBefore = function(node, ref) {
         if(node.nodeType !== 1) return _origInsert(node, ref);
         const nodeText = node.textContent?.trim() || '';
-        const isDuplicate = Array.from(el.children).some(function(child) {
-          return child !== node &&
-                 child.textContent?.trim() === nodeText &&
-                 nodeText.length > 5;
+        const isDuplicate = nodeText.length > 5 && Array.from(el.children).some(function(child) {
+          return child !== node && child.textContent?.trim() === nodeText;
         });
         if(isDuplicate) {
-          console.warn('[MenuLock] Blocat insertBefore duplicat în #' + id + ':', nodeText.slice(0,40));
+          _blockedCount++;
           return node;
         }
         return _origInsert(node, ref);
