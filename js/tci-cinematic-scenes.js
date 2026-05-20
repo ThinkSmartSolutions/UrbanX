@@ -212,18 +212,26 @@ G._SceneEngine = {
   _ctx:      null,
 
   SCENES: [
-    { id:1,  dur:6000,  label:'Overview — România' },
-    { id:2,  dur:6000,  label:'Zoom — Moldova' },
-    { id:3,  dur:8000,  label:'Approach — Iași' },
-    { id:4,  dur:10000, label:'City Overview 3D' },
-    { id:5,  dur:12000, label:'Dezvoltare Urbană' },
-    { id:6,  dur:13000, label:'Infrastructură & Mobilitate' },
-    { id:7,  dur:15000, label:'Focus Zonă' },
-    { id:8,  dur:10000, label:'Comparație UAT-uri' },
-    { id:9,  dur:8000,  label:'Street Level' },
-    { id:10, dur:12000, label:'Viața Urbană' },
-    { id:11, dur:12000, label:'Evoluție Temporală' },
-    { id:12, dur:18000, label:'Concluzie & Viziune' },
+    { id:1,  dur:8000,  label:'Overview — România în Europa' },
+    { id:2,  dur:7000,  label:'Zoom Regional — Moldova' },
+    { id:3,  dur:10000, label:'Approach — Date în Zbor' },
+    { id:4,  dur:14000, label:'City Overview 3D — Orbit' },
+    { id:5,  dur:16000, label:'Presiune Construire — Bare 3D' },
+    { id:6,  dur:14000, label:'Focus Zonă 1 — Densificare' },
+    { id:7,  dur:14000, label:'Focus Zonă 2 — Reconversie' },
+    { id:8,  dur:14000, label:'Focus Zonă 3 — Expansiune' },
+    { id:9,  dur:16000, label:'Infrastructură & Mobilitate' },
+    { id:10, dur:14000, label:'Riscuri Teritoriale' },
+    { id:11, dur:12000, label:'Comparație UAT-uri' },
+    { id:12, dur:10000, label:'European Benchmarking' },
+    { id:13, dur:12000, label:'Street Level — Pieton' },
+    { id:14, dur:14000, label:'Viața Urbană 2055' },
+    { id:15, dur:14000, label:'Evoluție Temporală 4D' },
+    { id:16, dur:12000, label:'Demografic — Monte Carlo' },
+    { id:17, dur:10000, label:'Economic — Convergență UE' },
+    { id:18, dur:12000, label:'Sustenabilitate & SDG 11' },
+    { id:19, dur:14000, label:'Masterplan — Indicatori Propuși' },
+    { id:20, dur:20000, label:'Concluzie & Viziune 2055' },
   ],
 
   async launch(cityKey) {
@@ -409,17 +417,29 @@ G._SceneEngine = {
     ctx.globalAlpha = alpha;
 
     switch(sceneId) {
-      case 1: this._s1_overview(ctx,W,H,t,city); break;
-      case 2: this._s2_moldova(ctx,W,H,t,city); break;
-      case 3: this._s3_approach(ctx,W,H,t,city); break;
-      case 4: this._s4_city3d(ctx,W,H,t,city); break;
-      case 5: this._s5_growth(ctx,W,H,t,city,zones); break;
-      case 6: this._s6_mobility(ctx,W,H,t,city); break;
-      case 7: this._s7_focusZone(ctx,W,H,t,city,zones); break;
-      case 8: this._s8_compare(ctx,W,H,t,city); break;
-      case 9: this._s9_street(ctx,W,H,t,city); break;
-      case 10:this._s10_urban(ctx,W,H,t,city); break;
-      case 12:this._s12_conclusion(ctx,W,H,t,city); break;
+      case 1:  this._s1_overview(ctx,W,H,t,city); break;
+      case 2:  this._s2_moldova(ctx,W,H,t,city); break;
+      case 3:  this._s3_approach(ctx,W,H,t,city); break;
+      case 4:  this._s4_city3d(ctx,W,H,t,city); break;
+      case 5:  this._s5_growth(ctx,W,H,t,city,zones); break;
+      case 6:  this._s6_focusZone1(ctx,W,H,t,city,zones); break;
+      case 7:  this._s7_focusZone2(ctx,W,H,t,city,zones); break;
+      case 8:  this._s8_focusZone3(ctx,W,H,t,city,zones); break;
+      case 9:  this._s9_mobility(ctx,W,H,t,city); break;
+      case 10: this._s10_risks(ctx,W,H,t,city); break;
+      case 11: this._s11_compare(ctx,W,H,t,city); break;
+      case 12: this._s12_euBench(ctx,W,H,t,city); break;
+      case 13: this._s13_street(ctx,W,H,t,city); break;
+      case 14: this._s14_urban(ctx,W,H,t,city); break;
+      case 15: this._s15_timeline(ctx,W,H,t,city); break;
+      case 16: this._s16_monteCarlo(ctx,W,H,t,city); break;
+      case 17: this._s17_economic(ctx,W,H,t,city); break;
+      case 18: this._s18_sdg(ctx,W,H,t,city); break;
+      case 19: this._s19_masterplan(ctx,W,H,t,city,zones); break;
+      case 20: this._s20_finale(ctx,W,H,t,city); break;
+      case 9: this._s13_street(ctx,W,H,t,city); break;
+      case 10:this._s14_urban(ctx,W,H,t,city); break;
+      
     }
 
     // Progress bar scenă
@@ -571,7 +591,7 @@ G._SceneEngine = {
   },
 
   // ── SCENA 6: Infrastructură & Mobilitate ─────────────────────────────
-  _s6_mobility(ctx,W,H,t,city) {
+  _s9_mobility(ctx,W,H,t,city) {
     const pop = city?.pop2021||100000;
     // Legendă trafic
     const lx=W*0.03, ly=H*0.45;
@@ -628,7 +648,7 @@ G._SceneEngine = {
 
   // ── SCENA 7: Focus pe FIECARE ZONĂ — iterăm prin toate cartierele ────
   // Nu o singură zonă — toate cartierele UAT-ului, cu zoom individual
-  _s7_focusZone(ctx,W,H,t,city,zones) {
+  _s6_focusZone1(ctx,W,H,t,city,zones) {
     if(!zones) return;
     const zoneKeys = Object.keys(zones);
     // Impartim t in sub-intervale per zonă (8 zone → 0.125 fiecare)
@@ -746,7 +766,7 @@ G._SceneEngine = {
   },
 
   // ── SCENA 8: Comparație 2 UAT-uri ────────────────────────────────────
-  _s8_compare(ctx,W,H,t,city) {
+  _s11_compare(ctx,W,H,t,city) {
     const grav1 = window._TCIMasterplanPDF?._calcGravity?.(city)||{gravityScore:0.5,growthType:'METROPOLITAN'};
     // UAT comparabil — luăm din _RO_CITIES_DB
     const cities = Object.values(window._RO_CITIES_DB||{});
@@ -799,7 +819,7 @@ G._SceneEngine = {
   },
 
   // ── SCENA 9: Street Level ────────────────────────────────────────────
-  _s9_street(ctx,W,H,t,city) {
+  _s13_street(ctx,W,H,t,city) {
     ctx.fillStyle='rgba(0,0,0,0.15)'; ctx.fillRect(0,0,W,H);
     // Info nivel stradă
     ctx.fillStyle='rgba(4,10,24,0.75)';
@@ -813,7 +833,7 @@ G._SceneEngine = {
   },
 
   // ── SCENA 10: Viața Urbană ───────────────────────────────────────────
-  _s10_urban(ctx,W,H,t,city) {
+  _s14_urban(ctx,W,H,t,city) {
     const pop = city?.pop2021||100000;
     const pietoni = Math.round(pop * 0.068); // 6.8% din pop merg zilnic pe jos
 
@@ -854,7 +874,7 @@ G._SceneEngine = {
   },
 
   // ── SCENA 12: Concluzie & Viziune ────────────────────────────────────
-  _s12_conclusion(ctx,W,H,t,city) {
+  _s20_finale(ctx,W,H,t,city) {
     const grav = window._TCIMasterplanPDF?._calcGravity?.(city)||{growthType:'METROPOLITAN'};
     const need = this._need;
     const pop55 = need?.pop2055||city?.pop2021||100000;
@@ -1169,6 +1189,257 @@ G._SceneEngine = {
     ctx.arcTo(x,y,x+r,y,r); ctx.closePath();
   },
 
+
+  // ── HELPER TEHNICI VIZUALE NOI ────────────────────────────────────────────
+
+  // Counter animat: 0 → valoare finala cu ease-out
+  _countUp(val, t, start=0) {
+    const ease = t < 1 ? 1 - Math.pow(1-t, 3) : 1;
+    return Math.round(start + (val - start) * ease);
+  },
+
+  // Pulse/glow animat pe un dreptunghi
+  _pulse(ctx, x, y, w, h, r, t, color='#D4AF37') {
+    const pulseFactor = 0.5 + 0.5 * Math.sin(t * Math.PI * 4);
+    const alpha = 0.3 + 0.4 * pulseFactor;
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 10 + 15 * pulseFactor;
+    ctx.strokeStyle = color.replace(')', `,${alpha})`).replace('rgb(','rgba(') || `rgba(212,175,55,${alpha})`;
+    ctx.lineWidth = 1.5 + pulseFactor;
+    this._roundRect(ctx, x, y, w, h, r);
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+  },
+
+  // Progress bar animat cu label
+  _progressBar(ctx, x, y, w, h, pct, color, label, sublabel, t, delay=0) {
+    const a = Math.min(1, Math.max(0, (t - delay) / 0.3));
+    if(a <= 0) return;
+    ctx.globalAlpha *= a;
+    // Track
+    ctx.fillStyle = 'rgba(255,255,255,.06)';
+    this._roundRect(ctx, x, y, w, h, h/2); ctx.fill();
+    // Fill animat
+    const fillW = w * Math.min(1, pct) * a;
+    if(fillW > 0) {
+      const grad = ctx.createLinearGradient(x, 0, x+w, 0);
+      grad.addColorStop(0, color);
+      grad.addColorStop(1, color + '88');
+      ctx.fillStyle = grad;
+      this._roundRect(ctx, x, y, fillW, h, h/2); ctx.fill();
+    }
+    // Label
+    ctx.fillStyle = 'rgba(200,215,240,.9)';
+    ctx.font = `bold ${h*1.1}px "IBM Plex Mono"`;
+    ctx.textAlign = 'left';
+    ctx.fillText(label, x, y - 3);
+    // Procent
+    ctx.textAlign = 'right';
+    ctx.fillStyle = color;
+    ctx.fillText(sublabel, x+w, y - 3);
+    ctx.globalAlpha /= a;
+  },
+
+  // Donut/arc chart animat
+  _donutArc(ctx, cx, cy, r, pct, color, label, sublabel, t, delay=0) {
+    const a = Math.min(1, Math.max(0, (t - delay) / 0.4));
+    if(a <= 0) return;
+    ctx.globalAlpha *= a;
+    const startAngle = -Math.PI/2;
+    const endAngle = startAngle + Math.PI * 2 * pct * a;
+    // Track
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2);
+    ctx.strokeStyle = 'rgba(255,255,255,.08)'; ctx.lineWidth = r*0.35; ctx.stroke();
+    // Arc
+    ctx.beginPath(); ctx.arc(cx, cy, r, startAngle, endAngle);
+    ctx.strokeStyle = color; ctx.lineWidth = r*0.35; ctx.stroke();
+    // Label central
+    ctx.fillStyle = 'rgba(255,255,255,.9)';
+    ctx.font = `bold ${r*0.55}px "IBM Plex Mono"`;
+    ctx.textAlign = 'center'; ctx.fillText(sublabel, cx, cy+r*0.2);
+    ctx.font = `${r*0.28}px "IBM Plex Mono"`;
+    ctx.fillStyle = 'rgba(148,163,184,.7)';
+    ctx.fillText(label, cx, cy + r*0.65);
+    ctx.globalAlpha /= a;
+  },
+
+  // Fan chart (Monte Carlo envelope)
+  _fanChart(ctx, W, H, data, t) {
+    const { p10, p50, p90, years, color } = data;
+    if(!p10?.length || !years?.length) return;
+    const n = years.length;
+    const px = (i) => W*0.08 + i*(W*0.84)/(n-1);
+    const minV = Math.min(...p10) * 0.95;
+    const maxV = Math.max(...p90) * 1.05;
+    const py = (v) => H*0.85 - ((v-minV)/(maxV-minV))*(H*0.65);
+    const drawPct = Math.min(1, t / 0.8);
+
+    // P10-P90 envelope (fan)
+    ctx.beginPath();
+    for(let i=0; i<Math.floor(n*drawPct); i++) ctx[i?'lineTo':'moveTo'](px(i), py(p10[i]));
+    for(let i=Math.floor(n*drawPct)-1; i>=0; i--) ctx.lineTo(px(i), py(p90[i]));
+    ctx.closePath();
+    ctx.fillStyle = `${color}22`; ctx.fill();
+
+    // P10, P90 lines
+    [[p10,'rgba(245,158,11,.5)'],[p90,'rgba(245,158,11,.5)']].forEach(([arr,c])=>{
+      ctx.beginPath();
+      for(let i=0; i<Math.floor(n*drawPct); i++) ctx[i?'lineTo':'moveTo'](px(i), py(arr[i]));
+      ctx.strokeStyle=c; ctx.lineWidth=0.8; ctx.setLineDash([3,2]); ctx.stroke();
+      ctx.setLineDash([]);
+    });
+
+    // P50 line (median)
+    ctx.beginPath();
+    for(let i=0; i<Math.floor(n*drawPct); i++) ctx[i?'lineTo':'moveTo'](px(i), py(p50[i]));
+    ctx.strokeStyle=color; ctx.lineWidth=2; ctx.stroke();
+
+    // Year labels
+    years.forEach((yr,i)=>{
+      ctx.fillStyle='rgba(100,120,150,.6)';
+      ctx.font=`${W*0.007}px "IBM Plex Mono"`;
+      ctx.textAlign='center';
+      ctx.fillText(yr, px(i), H*0.92);
+    });
+  },
+
+  // Radar chart animat (8 dimensiuni)
+  _radarChart(ctx, cx, cy, r, vals, labels, colors, t) {
+    const n = vals.length;
+    const step = (Math.PI*2)/n;
+    const drawPct = Math.min(1, t/0.6);
+
+    // Axe si grid
+    [0.25,0.5,0.75,1].forEach(f=>{
+      ctx.beginPath();
+      for(let i=0;i<n;i++){
+        const a=-Math.PI/2+i*step;
+        const [x,y]=[cx+r*f*Math.cos(a), cy+r*f*Math.sin(a)];
+        i?ctx.lineTo(x,y):ctx.moveTo(x,y);
+      }
+      ctx.closePath();
+      ctx.strokeStyle=`rgba(255,255,255,${f<1?0.06:0.12})`;
+      ctx.lineWidth=0.5; ctx.stroke();
+    });
+    for(let i=0;i<n;i++){
+      const a=-Math.PI/2+i*step;
+      ctx.beginPath();ctx.moveTo(cx,cy);
+      ctx.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a));
+      ctx.strokeStyle='rgba(255,255,255,.06)';ctx.lineWidth=0.4;ctx.stroke();
+    }
+
+    // Poligon date
+    ctx.beginPath();
+    for(let i=0;i<n;i++){
+      const a=-Math.PI/2+i*step;
+      const v=vals[i]*drawPct;
+      const [x,y]=[cx+r*v*Math.cos(a), cy+r*v*Math.sin(a)];
+      i?ctx.lineTo(x,y):ctx.moveTo(x,y);
+    }
+    ctx.closePath();
+    ctx.fillStyle='rgba(212,175,55,.15)'; ctx.fill();
+    ctx.strokeStyle='#D4AF37'; ctx.lineWidth=2; ctx.stroke();
+
+    // Puncte si labels
+    if(t > 0.4) {
+      const la = Math.min(1,(t-0.4)/0.3);
+      vals.forEach((v,i)=>{
+        const a=-Math.PI/2+i*step;
+        const [px,py]=[cx+r*v*Math.cos(a), cy+r*v*Math.sin(a)];
+        ctx.fillStyle='#D4AF37'; ctx.beginPath();ctx.arc(px,py,3,0,Math.PI*2);ctx.fill();
+        const [lx,ly]=[cx+(r+16)*Math.cos(a), cy+(r+16)*Math.sin(a)];
+        ctx.fillStyle=`rgba(148,163,184,${la})`;
+        ctx.font=`bold ${r*0.12}px "IBM Plex Mono"`;
+        ctx.textAlign=Math.cos(a)>0.1?'left':Math.cos(a)<-0.1?'right':'center';
+        ctx.fillText(labels[i], lx, ly+r*0.04);
+      });
+    }
+  },
+
+  // Particle system simplu
+  _drawParticles(ctx, W, H, t, count=30, color='rgba(212,175,55,0.4)') {
+    if(!this._particles) {
+      this._particles = Array.from({length:count}, (_,i) => ({
+        x: Math.random()*W, y: Math.random()*H,
+        vx: (Math.random()-0.5)*0.3, vy: -Math.random()*0.5-0.1,
+        r: Math.random()*2+0.5, life: Math.random(),
+      }));
+    }
+    this._particles.forEach(p => {
+      p.x += p.vx; p.y += p.vy; p.life -= 0.003;
+      if(p.life <= 0 || p.y < 0) {
+        p.x=Math.random()*W; p.y=H+5; p.life=0.5+Math.random()*0.5;
+      }
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+      ctx.fillStyle = color.replace('0.4', String(p.life*0.6));
+      ctx.fill();
+    });
+  },
+
+  // Scanline effect (subtle CRT vibe)
+  _scanlines(ctx, W, H, alpha=0.04) {
+    for(let y=0; y<H; y+=3) {
+      ctx.fillStyle = `rgba(0,0,0,${alpha})`;
+      ctx.fillRect(0, y, W, 1);
+    }
+  },
+
+  // Card cu reveal animat de sus in jos
+  _revealCard(ctx, x, y, w, h, r, t, delay, fillColor, strokeColor) {
+    const a = Math.min(1, Math.max(0, (t-delay)/0.2));
+    if(a <= 0) return 0;
+    const revH = h * a;
+    ctx.save();
+    ctx.beginPath(); ctx.rect(x, y, w, revH); ctx.clip();
+    ctx.fillStyle = fillColor || 'rgba(8,15,44,.9)';
+    this._roundRect(ctx, x, y, w, h, r); ctx.fill();
+    if(strokeColor) {
+      ctx.strokeStyle = strokeColor;
+      ctx.lineWidth = 1;
+      this._roundRect(ctx, x, y, w, h, r); ctx.stroke();
+    }
+    ctx.restore();
+    return a;
+  },
+
+  // Wipe reveal (stanga → dreapta)
+  _wipeReveal(ctx, W, H, t, color='rgba(4,10,24,1)') {
+    if(t >= 1) return;
+    ctx.fillStyle = color;
+    ctx.fillRect(W*t, 0, W*(1-t), H);
+  },
+
+  // KPI card cu counter animat
+  _kpiCard(ctx, x, y, w, h, label, value, unit, color, t, delay=0, prefix='') {
+    const a = Math.min(1, Math.max(0, (t-delay)/0.25));
+    if(a <= 0) return;
+    ctx.globalAlpha *= a;
+    // Background
+    ctx.fillStyle = 'rgba(4,10,24,.92)';
+    this._roundRect(ctx, x, y, w, h, 6); ctx.fill();
+    // Accent bar top
+    ctx.fillStyle = color;
+    this._roundRect(ctx, x, y, w, 2.5, 1); ctx.fill();
+    // Label
+    ctx.fillStyle = 'rgba(148,163,184,.8)';
+    ctx.font = `bold ${w*0.065}px "IBM Plex Mono"`;
+    ctx.textAlign = 'left';
+    ctx.fillText(label.toUpperCase(), x+8, y+h*0.32);
+    // Value counter
+    const displayVal = typeof value === 'number'
+      ? this._countUp(value, Math.min(1,(t-delay)/0.6)).toLocaleString('ro-RO')
+      : value;
+    ctx.fillStyle = color;
+    ctx.font = `900 ${w*0.22}px "Space Grotesk", sans-serif`;
+    ctx.fillText(prefix+displayVal, x+8, y+h*0.75);
+    // Unit
+    ctx.fillStyle = 'rgba(148,163,184,.5)';
+    ctx.font = `${w*0.065}px "IBM Plex Mono"`;
+    ctx.fillText(unit, x+8, y+h*0.92);
+    ctx.globalAlpha /= a;
+  },
+
+
   _sceneLabel(ctx,W,H,num,title){
     ctx.fillStyle='rgba(4,10,24,0.85)';
     this._roundRect(ctx,12,12,380,32,6); ctx.fill();
@@ -1211,6 +1482,429 @@ G._SceneEngine = {
     });
     document.getElementById('tci-time-slider')?.remove();
   },
+
+  // ── SCENA 7: Focus Zonă 2 — Reconversie Industrială ────────────────────
+  _s7_focusZone2(ctx,W,H,t,city,zones) {
+    const zone = zones?.[1] || zones?.[0];
+    if(!zone) { this._s6_focusZone1(ctx,W,H,t,city,zones); return; }
+    const pct  = zone.densif_pct || 15;
+    const N    = v => Number(v||0).toLocaleString('ro-RO');
+    // Overlay cinematic
+    const gr = ctx.createLinearGradient(0,0,0,H);
+    gr.addColorStop(0,'rgba(4,10,24,.6)'); gr.addColorStop(1,'rgba(4,10,24,.95)');
+    ctx.fillStyle=gr; ctx.fillRect(0,0,W,H);
+    this._scanlines(ctx,W,H,0.03);
+    // Titlu
+    if(t>0.06) {
+      const ta=Math.min(1,(t-0.06)/0.2);
+      ctx.globalAlpha=ta;
+      ctx.fillStyle='#f59e0b'; ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='left'; ctx.fillText('RECONVERSIE INDUSTRIALĂ', W*0.05, H*0.1);
+      ctx.fillStyle='rgba(255,255,255,.9)'; ctx.font=`900 ${W*0.025}px "Space Grotesk",sans-serif`;
+      ctx.fillText((zone.name||'ZONA 2').toUpperCase(), W*0.05, H*0.17);
+      ctx.globalAlpha=1;
+    }
+    // KPI cards cu counter animat
+    [[`DENSIFICARE`,pct,'%','#f59e0b',0.15,pct>=0?'+':''],
+     ['LOCUINTE NOI',zone.locuinte_noi||0,'unități','#60a5fa',0.32,''],
+     ['POPULATIE 2055',zone.pop2055||0,'loc.','#22c55e',0.49,'']
+    ].forEach(([l,v,u,c,d,pfx],i)=>{
+      this._kpiCard(ctx, W*0.05+i*(W*0.31), H*0.55, W*0.28, H*0.22, l, v, u, c, t, d, pfx);
+    });
+    // RH / POT / Functiuni
+    if(t>0.60) {
+      const ia=Math.min(1,(t-0.60)/0.2);
+      ctx.globalAlpha=ia;
+      ctx.fillStyle='rgba(8,16,44,.85)'; this._roundRect(ctx,W*0.05,H*0.8,W*0.9,H*0.14,6); ctx.fill();
+      ctx.fillStyle='#f59e0b'; ctx.font=`bold ${W*0.0075}px "IBM Plex Mono"`;
+      ctx.textAlign='left';
+      ctx.fillText(`RH: ${zone.rh_propus||'P+3—P+6'} · POT: ${zone.pot||60}% · CUT: ${zone.cut||2.0}`, W*0.07, H*0.865);
+      ctx.fillStyle='rgba(200,215,240,.8)'; ctx.font=`${W*0.007}px "IBM Plex Mono"`;
+      ctx.fillText('FUNCTIUNI: '+(zone.functiuni||['Lofturi','Birouri','Retail']).slice(0,3).join(' · '), W*0.07, H*0.9);
+      ctx.globalAlpha=1;
+    }
+    // Tip interventie badge pulsant
+    if(t>0.3) {
+      this._pulse(ctx, W*0.68, H*0.08, W*0.27, H*0.1, 6, t, '#f59e0b');
+      ctx.fillStyle='rgba(8,16,44,.85)'; this._roundRect(ctx,W*0.68,H*0.08,W*0.27,H*0.1,6); ctx.fill();
+      ctx.fillStyle='#f59e0b'; ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='center'; ctx.fillText('RECONVERSIE', W*0.815, H*0.14);
+    }
+    this._sceneLabel(ctx,W,H,'7','FOCUS ZONĂ 2');
+  },
+
+  // ── SCENA 8: Focus Zonă 3 — Expansiune Controlată ──────────────────────
+  _s8_focusZone3(ctx,W,H,t,city,zones) {
+    const zone = zones?.[2] || zones?.[0];
+    if(!zone) { this._s6_focusZone1(ctx,W,H,t,city,zones); return; }
+    const pct  = zone.densif_pct || 8;
+    const N    = v => Number(v||0).toLocaleString('ro-RO');
+    const gr = ctx.createLinearGradient(0,0,0,H);
+    gr.addColorStop(0,'rgba(4,10,24,.5)'); gr.addColorStop(1,'rgba(4,10,24,.92)');
+    ctx.fillStyle=gr; ctx.fillRect(0,0,W,H);
+    this._scanlines(ctx,W,H,0.025);
+    if(t>0.05) {
+      const ta=Math.min(1,(t-0.05)/0.2);
+      ctx.globalAlpha=ta;
+      ctx.fillStyle='#60a5fa'; ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='left'; ctx.fillText('EXPANSIUNE CONTROLATĂ', W*0.05, H*0.1);
+      ctx.fillStyle='rgba(255,255,255,.9)'; ctx.font=`900 ${W*0.025}px "Space Grotesk",sans-serif`;
+      ctx.fillText((zone.name||'ZONA PERIFERICĂ').toUpperCase(), W*0.05, H*0.17);
+      ctx.globalAlpha=1;
+    }
+    [['DENSIFICARE',pct,'%','#60a5fa',0.12,pct>=0?'+':''],
+     ['LOCUINTE NOI',zone.locuinte_noi||0,'unități','#a78bfa',0.30,''],
+     ['POPULATIE 2055',zone.pop2055||0,'loc.','#34d399',0.48,'']
+    ].forEach(([l,v,u,c,d,pfx],i)=>{
+      this._kpiCard(ctx, W*0.05+i*(W*0.31), H*0.55, W*0.28, H*0.22, l, v, u, c, t, d, pfx);
+    });
+    // Avertisment zone protejate
+    if(t>0.55 && zone.excludedWarning) {
+      const wa=Math.min(1,(t-0.55)/0.2);
+      ctx.globalAlpha=wa;
+      ctx.fillStyle='rgba(60,10,10,.9)'; this._roundRect(ctx,W*0.05,H*0.8,W*0.9,H*0.12,6); ctx.fill();
+      ctx.strokeStyle='rgba(239,68,68,.5)'; ctx.lineWidth=1;
+      this._roundRect(ctx,W*0.05,H*0.8,W*0.9,H*0.12,6); ctx.stroke();
+      ctx.fillStyle='#ef4444'; ctx.font=`bold ${W*0.0075}px "IBM Plex Mono"`;
+      ctx.textAlign='left'; ctx.fillText('⚠ ZONE PROTEJATE: '+zone.excludedWarning.slice(0,60), W*0.07, H*0.87);
+      ctx.globalAlpha=1;
+    } else if(t>0.55) {
+      const ia=Math.min(1,(t-0.55)/0.2);
+      ctx.globalAlpha=ia;
+      ctx.fillStyle='rgba(8,16,44,.85)'; this._roundRect(ctx,W*0.05,H*0.8,W*0.9,H*0.12,6); ctx.fill();
+      ctx.fillStyle='#60a5fa'; ctx.font=`bold ${W*0.0075}px "IBM Plex Mono"`;
+      ctx.textAlign='left';
+      ctx.fillText(`RH: ${zone.rh_propus||'P+2—P+4'} · POT: ${zone.pot||40}% · CUT: ${zone.cut||1.2}`, W*0.07, H*0.865);
+      ctx.fillStyle='rgba(200,215,240,.8)'; ctx.font=`${W*0.007}px "IBM Plex Mono"`;
+      ctx.fillText('FUNCTIUNI: '+(zone.functiuni||['Rezidential familial','Scoli','Spatii verzi']).slice(0,3).join(' · '), W*0.07, H*0.9);
+      ctx.globalAlpha=1;
+    }
+    if(t>0.3) {
+      this._pulse(ctx, W*0.68, H*0.08, W*0.27, H*0.1, 6, t, '#60a5fa');
+      ctx.fillStyle='rgba(8,16,44,.85)'; this._roundRect(ctx,W*0.68,H*0.08,W*0.27,H*0.1,6); ctx.fill();
+      ctx.fillStyle='#60a5fa'; ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='center'; ctx.fillText('EXPANSIUNE', W*0.815, H*0.14);
+    }
+    this._sceneLabel(ctx,W,H,'8','FOCUS ZONĂ 3');
+  },
+
+  // ── SCENA 10: Riscuri Teritoriale ──────────────────────────────────────
+  _s10_risks(ctx,W,H,t,city) {
+    const risk = window._getRiskProfile?.(city) || { seismic:{ag:0.20,tc:'0.7'}, flood:{label:'Redus',risk:1}, riskScore:45 };
+    const gr = ctx.createLinearGradient(0,0,0,H);
+    gr.addColorStop(0,'rgba(30,4,4,.7)'); gr.addColorStop(1,'rgba(4,10,24,.97)');
+    ctx.fillStyle=gr; ctx.fillRect(0,0,W,H);
+    this._scanlines(ctx,W,H,0.04);
+    if(t>0.05) {
+      const ta=Math.min(1,(t-0.05)/0.18);
+      ctx.globalAlpha=ta;
+      ctx.fillStyle='#ef4444'; ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='center'; ctx.fillText('RISCURI TERITORIALE — PROFIL DE RISC', W/2, H*0.1);
+      ctx.fillStyle='rgba(255,255,255,.6)'; ctx.font=`${W*0.0075}px "IBM Plex Mono"`;
+      ctx.fillText('P100-1/2013 · ANAR PGRA 2021-2027 · IPCC AR6 · ANM ROCADA', W/2, H*0.16);
+      ctx.globalAlpha=1;
+    }
+    // Scor risc central (donut mare)
+    if(t>0.15) {
+      this._donutArc(ctx, W*0.5, H*0.45, H*0.14, (risk.riskScore||45)/100, '#ef4444',
+        'RISC', (risk.riskScore||45)+'/100', t, 0.15);
+    }
+    // 3 riscuri cu progress bars
+    const risks = [
+      ['SEISMIC P100', (risk.seismic?.ag||0.20)/0.35, `Ag=${(risk.seismic?.ag||0.20)}g`, '#ef4444'],
+      ['INUNDATII ANAR', (risk.flood?.risk||1)/3, risk.flood?.label||'Redus', '#f97316'],
+      ['CLIMATIC IPCC AR6', 0.55, '+1.4°C la 2055', '#fbbf24'],
+    ];
+    risks.forEach(([l,p,sub,c],i) => {
+      this._progressBar(ctx, W*0.08, H*(0.62+i*0.1), W*0.84, H*0.025, p, c, l, sub, t, 0.25+i*0.1);
+    });
+    this._sceneLabel(ctx,W,H,'10','RISCURI TERITORIALE');
+  },
+
+  // ── SCENA 12: European Benchmarking ────────────────────────────────────
+  _s12_euBench(ctx,W,H,t,city) {
+    const pib = city.pib_eur_cap || 10000;
+    const eu27 = 36600;
+    const gr = ctx.createLinearGradient(0,0,W,H);
+    gr.addColorStop(0,'rgba(4,10,24,.85)'); gr.addColorStop(1,'rgba(8,20,50,.97)');
+    ctx.fillStyle=gr; ctx.fillRect(0,0,W,H);
+    if(t>0.05) {
+      const ta=Math.min(1,(t-0.05)/0.2);
+      ctx.globalAlpha=ta;
+      ctx.fillStyle='#34d399'; ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='center'; ctx.fillText('EUROPEAN BENCHMARKING — POZIȚIONARE UE', W/2, H*0.1);
+      ctx.fillStyle='rgba(200,215,240,.7)'; ctx.font=`${W*0.0075}px "IBM Plex Mono"`;
+      ctx.fillText('Eurostat Urban Audit 2021 · OECD FUA 2023 · vs Krakow · Lublin · Debrecen', W/2, H*0.16);
+      ctx.globalAlpha=1;
+    }
+    // Radar animat
+    if(t>0.15) {
+      const walk_est = Math.min(1, Math.round(30+(city.acoperire_transport||60)*0.4+pib/1000)/100);
+      const vals = [pib/eu27, walk_est, (city.spatii_verzi_mp_loc||11)/20,
+                    (city.acoperire_transport||60)/100, 0.7, 0.65, 0.6, 0.5];
+      const labels = ['PIB/cap','Walk','Verde','TP','SDG11','Social','Educatie','Risc(-)'];
+      this._radarChart(ctx, W*0.38, H*0.55, H*0.28, vals, labels, ['#D4AF37'], Math.min(1,(t-0.15)/0.5));
+    }
+    // Convergenta UE progress bar
+    const conv = Math.round(pib/eu27*100);
+    this._progressBar(ctx, W*0.68, H*0.35, W*0.26, H*0.025, conv/100, '#34d399',
+      'CONVERGENTA UE27', conv+'%', t, 0.20);
+    // Peer cities cards
+    if(t > 0.45) {
+      const ia = Math.min(1,(t-0.45)/0.3);
+      const peers = [
+        {name:'KRAKOW 🇵🇱', pib:22400, sdg:78},
+        {name:'LUBLIN 🇵🇱', pib:15800, sdg:71},
+        {name:'DEBRECEN 🇭🇺', pib:14900, sdg:68},
+      ];
+      peers.forEach((p,i)=>{
+        const pa = Math.min(1,Math.max(0,(t-0.45-i*0.08)/0.2));
+        ctx.globalAlpha=pa*ia;
+        ctx.fillStyle='rgba(8,16,44,.9)'; this._roundRect(ctx,W*0.67,H*(0.45+i*0.14),W*0.27,H*0.11,5); ctx.fill();
+        ctx.strokeStyle='rgba(52,211,153,.3)'; ctx.lineWidth=0.8;
+        this._roundRect(ctx,W*0.67,H*(0.45+i*0.14),W*0.27,H*0.11,5); ctx.stroke();
+        ctx.fillStyle='#34d399'; ctx.font=`bold ${W*0.008}px "IBM Plex Mono"`;
+        ctx.textAlign='left'; ctx.fillText(p.name, W*0.68, H*(0.45+i*0.14)+H*0.04);
+        ctx.fillStyle='rgba(148,163,184,.8)'; ctx.font=`${W*0.007}px "IBM Plex Mono"`;
+        ctx.fillText(p.pib.toLocaleString('ro-RO')+' EUR/cap · SDG11: '+p.sdg+'/100', W*0.68, H*(0.45+i*0.14)+H*0.075);
+        ctx.globalAlpha=1;
+      });
+    }
+    this._sceneLabel(ctx,W,H,'12','EU BENCHMARKING');
+  },
+
+  // ── SCENA 15: Evoluție Temporală 4D ────────────────────────────────────
+  _s15_timeline(ctx,W,H,t,city) {
+    const pop0 = city.pop2021 || 100000;
+    const r    = (city.rata_reala_2011_2021||0)/100;
+    const gr = ctx.createLinearGradient(0,0,0,H);
+    gr.addColorStop(0,'rgba(4,10,24,.75)'); gr.addColorStop(1,'rgba(4,10,24,.96)');
+    ctx.fillStyle=gr; ctx.fillRect(0,0,W,H);
+    this._scanlines(ctx,W,H,0.03);
+    if(t>0.05) {
+      const ta=Math.min(1,(t-0.05)/0.18);
+      ctx.globalAlpha=ta;
+      ctx.fillStyle='#a78bfa'; ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='center'; ctx.fillText('EVOLUȚIE TEMPORALĂ 1990 → 2055', W/2, H*0.1);
+      ctx.globalAlpha=1;
+    }
+    // Fan chart Monte Carlo simplificat
+    const years = [1990,2000,2010,2021,2030,2040,2055];
+    const p50 = years.map(yr=>Math.round(pop0*Math.pow(1+r,yr-2021)));
+    const p10 = years.map(yr=>Math.round(pop0*Math.pow(1+r-0.005,yr-2021)));
+    const p90 = years.map(yr=>Math.round(pop0*Math.pow(1+r+0.005,yr-2021)));
+    this._fanChart(ctx, W, H, {p10,p50,p90,years,color:'#a78bfa'}, t);
+    // Label actual (2021)
+    if(t>0.5) {
+      const ia=Math.min(1,(t-0.5)/0.2);
+      ctx.globalAlpha=ia;
+      ctx.fillStyle='rgba(8,16,44,.9)'; this._roundRect(ctx,W*0.04,H*0.12,W*0.28,H*0.14,5); ctx.fill();
+      ctx.strokeStyle='rgba(167,139,250,.4)'; ctx.lineWidth=0.8;
+      this._roundRect(ctx,W*0.04,H*0.12,W*0.28,H*0.14,5); ctx.stroke();
+      ctx.fillStyle='rgba(148,163,184,.8)'; ctx.font=`${W*0.0075}px "IBM Plex Mono"`;
+      ctx.textAlign='left'; ctx.fillText('P10-P90: interval 80%', W*0.05, H*0.18);
+      ctx.fillText('P50: scenariu S2', W*0.05, H*0.22);
+      ctx.fillStyle='rgba(100,120,150,.5)'; ctx.font=`${W*0.006}px "IBM Plex Mono"`;
+      ctx.fillText('Robert & Casella (2004) Monte Carlo', W*0.05, H*0.235);
+      ctx.globalAlpha=1;
+    }
+    this._sceneLabel(ctx,W,H,'15','EVOLUȚIE TEMPORALĂ');
+  },
+
+  // ── SCENA 16: Monte Carlo Demografic ───────────────────────────────────
+  _s16_monteCarlo(ctx,W,H,t,city) {
+    const pop0 = city.pop2021 || 100000;
+    const r = (city.rata_reala_2011_2021||0)/100;
+    const gr = ctx.createLinearGradient(0,0,0,H);
+    gr.addColorStop(0,'rgba(20,4,50,.8)'); gr.addColorStop(1,'rgba(4,10,24,.97)');
+    ctx.fillStyle=gr; ctx.fillRect(0,0,W,H);
+    if(t>0.05) {
+      const ta=Math.min(1,(t-0.05)/0.18);
+      ctx.globalAlpha=ta;
+      ctx.fillStyle='#c4b5fd'; ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='center'; ctx.fillText('MONTE CARLO — 10.000 SIMULĂRI · INCERTITUDINE DECLARATĂ', W/2, H*0.1);
+      ctx.fillStyle='rgba(200,215,240,.6)'; ctx.font=`${W*0.007}px "IBM Plex Mono"`;
+      ctx.fillText('Robert & Casella (2004) · σ calibrat INSE 2000-2021', W/2, H*0.16);
+      ctx.globalAlpha=1;
+    }
+    // KPI cards: P10, P50, P90
+    const z = {10:-1.28, 50:0, 90:1.28};
+    const sigma = Math.abs(r)*0.3+0.003;
+    [[10,'#f59e0b'],[50,'#a78bfa'],[90,'#22c55e']].forEach(([pct,c],i)=>{
+      const pop55 = Math.round(pop0*Math.pow(1+r+z[pct]*sigma, 34));
+      this._kpiCard(ctx, W*0.05+i*(W*0.31), H*0.4, W*0.28, H*0.2,
+        'PERCENTILA '+pct+'%', pop55, 'loc. 2055', c, t, 0.2+i*0.12, '');
+    });
+    // Bara incertitudine vizuala
+    if(t>0.55) {
+      const ia=Math.min(1,(t-0.55)/0.25);
+      ctx.globalAlpha=ia;
+      const p10v = Math.round(pop0*Math.pow(1+r-1.28*sigma,34));
+      const p90v = Math.round(pop0*Math.pow(1+r+1.28*sigma,34));
+      ctx.fillStyle='rgba(8,16,44,.85)'; this._roundRect(ctx,W*0.05,H*0.65,W*0.9,H*0.15,6); ctx.fill();
+      ctx.fillStyle='#c4b5fd'; ctx.font=`bold ${W*0.0075}px "IBM Plex Mono"`;
+      ctx.textAlign='left';
+      ctx.fillText(`INTERVAL 80%: ${p10v.toLocaleString('ro-RO')} — ${p90v.toLocaleString('ro-RO')} loc. (2055)`, W*0.07, H*0.715);
+      ctx.fillStyle='rgba(148,163,184,.7)'; ctx.font=`${W*0.007}px "IBM Plex Mono"`;
+      ctx.fillText('Planificarea infrastructurii trebuie sa acomodeze intregul interval, nu doar valoarea medie.', W*0.07, H*0.77);
+      ctx.globalAlpha=1;
+    }
+    this._sceneLabel(ctx,W,H,'16','MONTE CARLO');
+  },
+
+  // ── SCENA 17: Convergența Economică UE ─────────────────────────────────
+  _s17_economic(ctx,W,H,t,city) {
+    const pib   = city.pib_eur_cap || 10000;
+    const eu27  = 36600;
+    const conv  = Math.round(pib/eu27*100);
+    const gr = ctx.createLinearGradient(0,0,0,H);
+    gr.addColorStop(0,'rgba(4,24,10,.7)'); gr.addColorStop(1,'rgba(4,10,24,.97)');
+    ctx.fillStyle=gr; ctx.fillRect(0,0,W,H);
+    if(t>0.05) {
+      const ta=Math.min(1,(t-0.05)/0.18);
+      ctx.globalAlpha=ta;
+      ctx.fillStyle='#22c55e'; ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='center'; ctx.fillText('CONVERGENȚĂ ECONOMICĂ SPRE UE27', W/2, H*0.1);
+      ctx.globalAlpha=1;
+    }
+    // Donut convergenta
+    if(t>0.15) this._donutArc(ctx, W*0.28, H*0.5, H*0.15, conv/100, '#22c55e', 'DIN UE27', conv+'%', t, 0.15);
+    // PIB vs EU progress bars
+    [
+      ['PIB LOCAL', pib.toLocaleString('ro-RO')+' EUR', pib/eu27, '#22c55e', 0.20],
+      ['MEDIA UE27', eu27.toLocaleString('ro-RO')+' EUR', 1.0, 'rgba(100,120,150,.4)', 0.28],
+      ['CONVERGENTA 2055 (est)', Math.round(Math.min(eu27,pib*Math.pow(1.035,33))/eu27*100)+'%', Math.min(1,pib*Math.pow(1.035,33)/eu27), '#34d399', 0.36],
+    ].forEach(([l,sub,p,c,d],i)=>{
+      this._progressBar(ctx, W*0.55, H*(0.3+i*0.14), W*0.38, H*0.025, p, c, l, sub, t, d);
+    });
+    // KPI PIB/cap cu counter
+    this._kpiCard(ctx, W*0.55, H*0.65, W*0.38, H*0.18, 'PIB/CAPITA', pib, 'EUR/loc. · Eurostat NUTS3', '#22c55e', t, 0.4);
+    this._sceneLabel(ctx,W,H,'17','CONVERGENȚĂ UE');
+  },
+
+  // ── SCENA 18: Sustenabilitate & SDG 11 ─────────────────────────────────
+  _s18_sdg(ctx,W,H,t,city) {
+    const spV  = city.spatii_verzi_mp_loc || 11;
+    const pib  = city.pib_eur_cap || 10000;
+    const walk = Math.min(100, Math.round(30+(city.acoperire_transport||60)*0.4+pib/1000));
+    const sdg11 = Math.round(55 + walk*0.15 + (spV>=9?5:0));
+    const gr = ctx.createLinearGradient(0,0,0,H);
+    gr.addColorStop(0,'rgba(4,20,10,.7)'); gr.addColorStop(1,'rgba(4,10,24,.97)');
+    ctx.fillStyle=gr; ctx.fillRect(0,0,W,H);
+    if(t>0.05) {
+      const ta=Math.min(1,(t-0.05)/0.18);
+      ctx.globalAlpha=ta;
+      ctx.fillStyle='#86efac'; ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='center'; ctx.fillText('SUSTENABILITATE · SDG 11 · OMS · EPBD 2024', W/2, H*0.1);
+      ctx.globalAlpha=1;
+    }
+    // 4 donut-uri SDG
+    const donuts = [
+      { label:'SDG 11', val:sdg11/100, sub:sdg11+'/100', c:'#22c55e', cx:W*0.18, cy:H*0.42 },
+      { label:'SPATII VERZI', val:Math.min(1,spV/20), sub:spV+'m²/loc', c:'#4ade80', cx:W*0.42, cy:H*0.42 },
+      { label:'WALKABILITY', val:walk/100, sub:walk+'/100', c:'#a78bfa', cx:W*0.66, cy:H*0.42 },
+      { label:'CARBON', val:0.65, sub:'65% net0', c:'#34d399', cx:W*0.88, cy:H*0.42 },
+    ];
+    donuts.forEach((d,i)=>{
+      if(t > 0.15+i*0.1) this._donutArc(ctx, d.cx, d.cy, H*0.1, d.val, d.c, d.label, d.sub, t, 0.15+i*0.1);
+    });
+    // OMS standard
+    if(t>0.6) {
+      const ia=Math.min(1,(t-0.6)/0.2);
+      ctx.globalAlpha=ia;
+      ctx.fillStyle='rgba(8,16,44,.85)'; this._roundRect(ctx,W*0.05,H*0.7,W*0.9,H*0.16,6); ctx.fill();
+      ctx.fillStyle='#86efac'; ctx.font=`bold ${W*0.0075}px "IBM Plex Mono"`;
+      ctx.textAlign='left'; ctx.fillText('OMS STANDARD: 9m²/loc spații verzi · EPBD 2024: NZEB obligatoriu clădiri noi', W*0.07, H*0.765);
+      ctx.fillStyle='rgba(148,163,184,.7)'; ctx.font=`${W*0.007}px "IBM Plex Mono"`;
+      ctx.fillText('Green Deal European · Agenda Urbana UE 2030 · ONU SDG 11 (2015)', W*0.07, H*0.82);
+      ctx.globalAlpha=1;
+    }
+    this._sceneLabel(ctx,W,H,'18','SDG 11 & SUSTENABILITATE');
+  },
+
+  // ── SCENA 19: Masterplan — Indicatori Propuși ──────────────────────────
+  _s19_masterplan(ctx,W,H,t,city,zones) {
+    const gr = ctx.createLinearGradient(0,0,0,H);
+    gr.addColorStop(0,'rgba(4,10,24,.8)'); gr.addColorStop(1,'rgba(4,10,24,.98)');
+    ctx.fillStyle=gr; ctx.fillRect(0,0,W,H);
+    this._scanlines(ctx,W,H,0.03);
+    if(t>0.05) {
+      const ta=Math.min(1,(t-0.05)/0.18);
+      ctx.globalAlpha=ta;
+      ctx.fillStyle='#D4AF37'; ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='center'; ctx.fillText('MASTERPLAN STRATEGIC 2025—2055 · INDICATORI PROPUȘI', W/2, H*0.1);
+      ctx.fillStyle='rgba(200,215,240,.6)'; ctx.font=`${W*0.0075}px "IBM Plex Mono"`;
+      ctx.fillText('Conf. Legii 350/2001 + HG 525/1996 RGU + Ord. 233/2016', W/2, H*0.16);
+      ctx.globalAlpha=1;
+    }
+    // Card stack per zona
+    const displayZones = zones?.slice(0,4) || [];
+    const intColors = {
+      DENSIFICARE: '#22c55e', 'DENSIFICARE MODERATĂ': '#4ade80',
+      'DENSIFICARE INTENSIVĂ': '#16a34a', 'RECONVERSIE': '#f59e0b',
+      'RECONVERSIE INDUSTRIALĂ': '#f59e0b', 'EXPANSIUNE': '#60a5fa',
+      'EXPANSIUNE CONTROLATĂ': '#60a5fa', 'REABILITARE': '#ef4444',
+      'REABILITARE FOND': '#ef4444', 'CONSOLIDARE': '#94a3b8',
+    };
+    if(displayZones.length > 0) {
+      displayZones.forEach((z,i)=>{
+        const cardA = this._revealCard(ctx, W*0.05+i*(W*0.22+4), H*0.22, W*0.22, H*0.62, 6,
+          t, 0.12+i*0.1, 'rgba(8,16,44,.92)',
+          (intColors[z.intervention] || '#D4AF37') + '55');
+        if(cardA <= 0) return;
+        ctx.globalAlpha = cardA;
+        const c = intColors[z.intervention] || '#D4AF37';
+        // Titlu zona
+        ctx.fillStyle = c; ctx.font = `bold ${W*0.0075}px "IBM Plex Mono"`;
+        ctx.textAlign = 'left';
+        ctx.fillText((z.name||'ZONA '+(i+1)).slice(0,14), W*0.06+i*(W*0.22+4), H*0.285);
+        // Tip interventie
+        ctx.fillStyle = 'rgba(148,163,184,.7)'; ctx.font = `${W*0.0058}px "IBM Plex Mono"`;
+        ctx.fillText((z.intervention||'').slice(0,16), W*0.06+i*(W*0.22+4), H*0.315);
+        // RH
+        ctx.fillStyle = 'rgba(200,215,240,.9)'; ctx.font = `bold ${W*0.0065}px "IBM Plex Mono"`;
+        ctx.fillText('RH: '+(z.rh_propus||'—'), W*0.06+i*(W*0.22+4), H*0.38);
+        ctx.fillText('POT: '+(z.pot||'—')+'%', W*0.06+i*(W*0.22+4), H*0.42);
+        ctx.fillText('CUT: '+(z.cut||'—'), W*0.06+i*(W*0.22+4), H*0.46);
+        // Functiuni
+        (z.functiuni||[]).slice(0,3).forEach((fn,fi)=>{
+          ctx.fillStyle = 'rgba(148,163,184,.65)'; ctx.font = `${W*0.0055}px "IBM Plex Mono"`;
+          ctx.fillText('· '+fn.slice(0,18), W*0.06+i*(W*0.22+4), H*(0.52+fi*0.05));
+        });
+        // Densificare badge
+        const pct = z.densif_pct || 0;
+        ctx.fillStyle = c; ctx.font = `900 ${W*0.015}px "Space Grotesk",sans-serif`;
+        ctx.fillText((pct>=0?'+':'')+pct+'%', W*0.06+i*(W*0.22+4), H*0.77);
+        ctx.fillStyle = 'rgba(100,120,150,.5)'; ctx.font = `${W*0.0055}px "IBM Plex Mono"`;
+        ctx.fillText('densificare', W*0.06+i*(W*0.22+4), H*0.8);
+        ctx.globalAlpha = 1;
+      });
+    } else {
+      // Fallback fara zone
+      const fbCards = [
+        {t:'CENTRU CIVIC',rh:'P+8—P+12',pot:80,cut:4.0,int:'DENSIFICARE',c:'#22c55e'},
+        {t:'REZIDENTIAL',rh:'P+4—P+6',pot:50,cut:1.8,int:'DENSIF. MODERATĂ',c:'#4ade80'},
+        {t:'INDUSTRIAL',rh:'P+3—P+6',pot:60,cut:2.0,int:'RECONVERSIE',c:'#f59e0b'},
+        {t:'PERIURBAN',rh:'P+2—P+4',pot:40,cut:1.2,int:'EXPANSIUNE',c:'#60a5fa'},
+      ];
+      fbCards.forEach((z,i)=>{
+        this._revealCard(ctx, W*0.05+i*(W*0.22+4), H*0.22, W*0.22, H*0.58, 6, t, 0.12+i*0.1, 'rgba(8,16,44,.92)', z.c+'55');
+        const ca = Math.min(1,Math.max(0,(t-0.12-i*0.1)/0.25));
+        if(ca<=0) return;
+        ctx.globalAlpha=ca;
+        ctx.fillStyle=z.c; ctx.font=`bold ${W*0.0075}px "IBM Plex Mono"`;
+        ctx.textAlign='left'; ctx.fillText(z.t, W*0.06+i*(W*0.22+4), H*0.285);
+        ctx.fillStyle='rgba(200,215,240,.9)'; ctx.font=`bold ${W*0.0065}px "IBM Plex Mono"`;
+        ctx.fillText('RH: '+z.rh, W*0.06+i*(W*0.22+4), H*0.36);
+        ctx.fillText('POT: '+z.pot+'%', W*0.06+i*(W*0.22+4), H*0.41);
+        ctx.fillText('CUT: '+z.cut, W*0.06+i*(W*0.22+4), H*0.46);
+        ctx.fillStyle=z.c; ctx.font=`bold ${W*0.007}px "IBM Plex Mono"`;
+        ctx.fillText(z.int, W*0.06+i*(W*0.22+4), H*0.55);
+        ctx.globalAlpha=1;
+      });
+    }
+    this._sceneLabel(ctx,W,H,'19','MASTERPLAN');
+  },
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1222,6 +1916,8 @@ G._SceneEngine = {
 
   // IMPORTANT: Setam window._SceneEngine IMEDIAT, fara sa asteptam TCI
   // TCI e folosit doar pentru cityKey cand utilizatorul apasa butonul
+
+
   window._SceneEngine     = G._SceneEngine;
   window._ZoneProjections = G._ZoneProjections;
   console.log('[TCI Cinematic v2] ✅ _SceneEngine disponibil imediat');
@@ -1298,5 +1994,6 @@ G._SceneEngine = {
   console.log('[TCI Cinematic Scenes v2.0] ✅ 12 scene + proiecții per zonă + bare 3D + trafic + slider');
   ss?.('🎬 Cinema v2: 12 scene storyboard + proiecții per cartier + infrastructură necesară');
 })(0);
+
 
 })(window);
