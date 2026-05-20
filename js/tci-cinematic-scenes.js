@@ -223,7 +223,7 @@ G._SceneEngine = {
     { id:9,  dur:8000,  label:'Street Level' },
     { id:10, dur:12000, label:'Viața Urbană' },
     { id:11, dur:12000, label:'Evoluție Temporală' },
-    { id:12, dur:13000, label:'Concluzie & Viziune' },
+    { id:12, dur:18000, label:'Concluzie & Viziune' },
   ],
 
   async launch(cityKey) {
@@ -857,59 +857,146 @@ G._SceneEngine = {
   _s12_conclusion(ctx,W,H,t,city) {
     const grav = window._TCIMasterplanPDF?._calcGravity?.(city)||{growthType:'METROPOLITAN'};
     const need = this._need;
-
-    // Overlay dramatiq
-    const gr = ctx.createLinearGradient(0,0,0,H);
-    gr.addColorStop(0,'rgba(0,0,0,0)');
-    gr.addColorStop(0.6,'rgba(4,10,24,0.6)');
-    gr.addColorStop(1,'rgba(4,10,24,0.92)');
-    ctx.fillStyle=gr; ctx.fillRect(0,0,W,H);
-
-    // Titlu
-    ctx.fillStyle='rgba(255,255,255,0.95)';
-    ctx.font=`900 ${W*0.022}px "Space Grotesk",sans-serif`;
-    ctx.textAlign='center';
-    ctx.fillText((city?.name?.toUpperCase()||'IAȘI')+' 2055', W/2, H*0.68);
-    ctx.fillStyle='rgba(212,175,55,0.7)';
-    ctx.font=`${W*0.010}px "IBM Plex Mono"`;
-    ctx.fillText('VIZIUNEA URBANISTICĂ', W/2, H*0.73);
-
-    // Checklist animat
     const pop55 = need?.pop2055||city?.pop2021||100000;
-    const items = [
-      { label:`Populație estimată: ${N(pop55)} loc.`, ok:pop55>(city?.pop2021||100000) },
-      { label:'Mobilitate verde: TP +62%, ciclism +180%', ok:true },
-      { label:'Locuințe noi: '+N(need?.locuinteTotale||0)+' unități', ok:true },
-      { label:`Convergență UE: ${city?.pib_eur_cap?Math.round(city.pib_eur_cap*1.65/36600*100)+'%':'est. 75%'}`, ok:true },
-      { label:'Spații verzi: ≥9m²/loc (OMS standard)', ok:(city?.spatii_verzi_mp_loc||12)>8 },
-      { label:`Carbon net-zero: obiectiv EPBD 2050`, ok:true },
-    ];
+    const cityName = city?.name?.toUpperCase() || 'IAȘI';
 
-    items.forEach((item,i)=>{
-      const showT = 0.45+i*0.085;
-      if(t < showT) return;
-      const fade = Math.min(1,(t-showT)/0.08);
-      ctx.globalAlpha *= fade;
-      const fy = H*0.80+i*H*0.028;
-      ctx.fillStyle = item.ok ? '#22c55e' : '#ef4444';
-      ctx.font=`${W*0.014}px "IBM Plex Mono"`;
-      ctx.textAlign='left';
-      ctx.fillText(item.ok?'✅':'❌', W*0.25, fy);
-      ctx.fillStyle='rgba(220,230,245,.9)';
-      ctx.font=`${W*0.009}px "IBM Plex Mono"`;
-      ctx.fillText(item.label, W*0.28, fy);
-      ctx.globalAlpha /= fade;
-    });
-
-    // Surse finale
-    if(t > 0.90) {
-      ctx.fillStyle='rgba(100,120,150,.5)'; ctx.font=`${W*0.007}px "IBM Plex Mono"`;
-      ctx.textAlign='center';
-      ctx.fillText('Date: INSE · Eurostat · BNR · IPCC AR6 · OSM · Copernicus', W/2, H*0.97);
+    // ── Fade-in dramatic din negru ─────────────────────────────────────────
+    if(t < 0.08) {
+      ctx.fillStyle = `rgba(4,10,24,${1-t/0.08})`;
+      ctx.fillRect(0,0,W,H); return;
     }
 
+    // ── Overlay gradient cinematic ─────────────────────────────────────────
+    const gr = ctx.createLinearGradient(0,0,0,H);
+    gr.addColorStop(0,'rgba(4,10,24,0.75)');
+    gr.addColorStop(0.4,'rgba(4,10,24,0.50)');
+    gr.addColorStop(0.7,'rgba(4,10,24,0.85)');
+    gr.addColorStop(1,'rgba(4,10,24,0.97)');
+    ctx.fillStyle=gr; ctx.fillRect(0,0,W,H);
+
+    // ── Linie aurie separator sus ──────────────────────────────────────────
+    const lineAlpha = Math.min(1,(t-0.08)/0.15);
+    ctx.strokeStyle=`rgba(212,175,55,${lineAlpha*0.6})`;
+    ctx.lineWidth=1; ctx.beginPath();
+    ctx.moveTo(W*0.08,H*0.12); ctx.lineTo(W*0.92,H*0.12); ctx.stroke();
+
+    // ── Titlu principal — apare la t=0.10 ─────────────────────────────────
+    if(t > 0.10) {
+      const ta = Math.min(1,(t-0.10)/0.18);
+      const ty = H*0.18 - (1-ta)*20;
+      ctx.globalAlpha = ta;
+      ctx.fillStyle='#D4AF37'; ctx.font=`800 ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='center';
+      ctx.fillText('VIZIUNE STRATEGICĂ 2025 — 2055', W/2, ty);
+      ctx.fillStyle='rgba(255,255,255,0.95)';
+      ctx.font=`900 ${W*0.028}px "Space Grotesk",sans-serif`;
+      ctx.fillText(cityName, W/2, ty+W*0.032);
+      ctx.globalAlpha=1;
+    }
+
+    // ── 3 Recomandări principale — apar progresiv ─────────────────────────
+    const recs = [
+      { icon:'🏗', title:'DENSIFICARE', text:`${N(need?.locuinteTotale||5000)} locuințe noi în zone TOD`, color:'#22c55e' },
+      { icon:'🚌', title:'MOBILITATE', text:'Transport public +62% · Ciclism +180% · Modal shift 2055', color:'#60a5fa' },
+      { icon:'🌳', title:'SUSTENABILITATE', text:'Carbon net-zero 2050 · Spații verzi ≥9m²/loc · SDG 11', color:'#D4AF37' },
+    ];
+    recs.forEach((rec,i) => {
+      const showAt = 0.28 + i*0.16;
+      if(t <= showAt) return;
+      const ra = Math.min(1,(t-showAt)/0.14);
+      const rx = W*0.10 + i*(W*0.27);
+      const ry = H*0.35;
+      const rw = W*0.25, rh = H*0.22;
+      ctx.globalAlpha = ra;
+      // Card background
+      ctx.fillStyle='rgba(4,10,28,0.88)';
+      this._roundRect(ctx,rx,ry,rw,rh,8); ctx.fill();
+      ctx.strokeStyle=rec.color; ctx.lineWidth=1.5;
+      this._roundRect(ctx,rx,ry,rw,rh,8); ctx.stroke();
+      ctx.fillStyle=rec.color; ctx.fillRect(rx,ry,rw,3);
+      // Icon + title
+      ctx.fillStyle=rec.color; ctx.font=`bold ${W*0.016}px "IBM Plex Mono"`;
+      ctx.textAlign='left';
+      ctx.fillText(rec.icon+' '+rec.title, rx+10, ry+W*0.018);
+      // Text
+      ctx.fillStyle='rgba(200,215,240,.85)'; ctx.font=`${W*0.0075}px "IBM Plex Mono"`;
+      const lines = ctx.measureText(rec.text).width > rw-20
+        ? [rec.text.slice(0,Math.ceil(rec.text.length/2)), rec.text.slice(Math.ceil(rec.text.length/2))]
+        : [rec.text];
+      lines.forEach((l,li) => ctx.fillText(l, rx+10, ry+W*0.030+li*W*0.012));
+      ctx.globalAlpha=1;
+    });
+
+    // ── Checklist KPI — apare la t=0.60 ───────────────────────────────────
+    if(t > 0.60) {
+      const ca = Math.min(1,(t-0.60)/0.15);
+      ctx.globalAlpha=ca;
+      const items = [
+        { label:`Populație 2055: ${N(pop55)} loc.`, ok:pop55>(city?.pop2021||100000)*0.95 },
+        { label:`Convergență UE: ${city?.pib_eur_cap?Math.round(city.pib_eur_cap*1.65/36600*100):'est.75'}%`, ok:true },
+        { label:`Risc seismic gestionat (PNRR C10-I2)`, ok:true },
+        { label:`Deficit școlar rezolvat: +${Math.max(0,Math.ceil((pop55-(city?.pop2021||100000))*0.14/400))} unități`, ok:true },
+      ];
+      items.forEach((item,i) => {
+        if(t < 0.60+i*0.08) return;
+        const fy = H*0.65+i*H*0.06;
+        const ia = Math.min(1,(t-0.60-i*0.08)/0.10);
+        ctx.globalAlpha=ia*ca;
+        ctx.fillStyle=item.ok?'#22c55e':'#f59e0b';
+        ctx.font=`bold ${W*0.011}px "IBM Plex Mono"`;
+        ctx.textAlign='left';
+        ctx.fillText(item.ok?'✅':'⚠', W*0.15, fy);
+        ctx.fillStyle='rgba(220,235,250,.9)'; ctx.font=`${W*0.009}px "IBM Plex Mono"`;
+        ctx.fillText(item.label, W*0.20, fy);
+      });
+      ctx.globalAlpha=1;
+    }
+
+    // ── CTA final — la t=0.82 ─────────────────────────────────────────────
+    if(t > 0.82) {
+      const fa = Math.min(1,(t-0.82)/0.12);
+      ctx.globalAlpha = fa;
+      // Box CTA
+      ctx.fillStyle='rgba(212,175,55,0.10)';
+      this._roundRect(ctx, W*0.25, H*0.855, W*0.50, H*0.065, 8); ctx.fill();
+      ctx.strokeStyle='rgba(212,175,55,0.4)'; ctx.lineWidth=1;
+      this._roundRect(ctx, W*0.25, H*0.855, W*0.50, H*0.065, 8); ctx.stroke();
+      ctx.fillStyle='#D4AF37'; ctx.font=`bold ${W*0.010}px "IBM Plex Mono"`;
+      ctx.textAlign='center';
+      ctx.fillText('📋 Generează Masterplan PDF complet · 📊 Analizează per parcelă', W/2, H*0.892);
+      ctx.globalAlpha=1;
+    }
+
+    // ── Fade-out final spre harta ─────────────────────────────────────────
+    if(t > 0.92) {
+      const fo = (t-0.92)/0.08;
+      ctx.fillStyle=`rgba(4,10,24,${fo*0.7})`;
+      ctx.fillRect(0,0,W,H);
+      // Harta revine progresiv
+      if(t > 0.95 && window.map) {
+        try {
+          window.map.setConfigProperty?.('basemap','lightPreset','day');
+        } catch(e) {}
+      }
+    }
+
+    // ── Surse ─────────────────────────────────────────────────────────────
+    if(t > 0.25 && t < 0.90) {
+      ctx.fillStyle='rgba(100,120,150,.4)';
+      ctx.font=`${W*0.007}px "IBM Plex Mono"`;
+      ctx.textAlign='center';
+      ctx.fillText('Date: INSE Rec.2021 · Eurostat · BNR · IPCC AR6 · Copernicus GHSL · OSM · UrbanX Model 2026', W/2, H*0.975);
+    }
+
+    // ── Watermark ─────────────────────────────────────────────────────────
+    ctx.fillStyle='rgba(212,175,55,0.2)';
+    ctx.font=`bold ${W*0.008}px "IBM Plex Mono"`;
+    ctx.textAlign='right';
+    ctx.fillText('UrbanX TSS·FG © 2026', W-12, H-8);
+
     this._sceneLabel(ctx,W,H,'12','CONCLUZIE & VIZIUNE');
-  },
+  }
+,
 
   // ═══ LAYERS MAPBOX per scenă ═══════════════════════════════════════════
 
