@@ -215,8 +215,8 @@ G._SceneEngine = {
     { id:1,  dur:8000,  label:'Overview — România în Europa' },
     { id:2,  dur:7000,  label:'Zoom Regional — Moldova' },
     { id:3,  dur:10000, label:'Approach — Date în Zbor' },
-    { id:4,  dur:14000, label:'City Overview 3D — Orbit' },
-    { id:5,  dur:16000, label:'Presiune Construire — Bare 3D' },
+    { id:4,  dur:18000, label:'City Overview 3D — Orbit 360°' },
+    { id:5,  dur:20000, label:'Presiune Construire — Bare 3D' },
     { id:6,  dur:14000, label:'Focus Zonă 1 — Densificare' },
     { id:7,  dur:14000, label:'Focus Zonă 2 — Reconversie' },
     { id:8,  dur:14000, label:'Focus Zonă 3 — Expansiune' },
@@ -231,7 +231,12 @@ G._SceneEngine = {
     { id:17, dur:10000, label:'Economic — Convergență UE' },
     { id:18, dur:12000, label:'Sustenabilitate & SDG 11' },
     { id:19, dur:14000, label:'Masterplan — Indicatori Propuși' },
-    { id:20, dur:20000, label:'Concluzie & Viziune 2055' },
+    { id:20, dur:14000, label:'Zone Protejate — Restricții Legale' },
+    { id:21, dur:16000, label:'Street View Real — Vehicule & Pietoni' },
+    { id:22, dur:14000, label:'AI Narrative — Memoriu Justificativ Live' },
+    { id:23, dur:14000, label:'Masterplan PDF — Structura Documentului' },
+    { id:24, dur:16000, label:'Investiții & Finanțare UE 2025-2055' },
+    { id:25, dur:24000, label:'Concluzie & Viziune 2055 — Finale Epic' },
   ],
 
   async launch(cityKey) {
@@ -436,7 +441,12 @@ G._SceneEngine = {
       case 17: this._s17_economic(ctx,W,H,t,city); break;
       case 18: this._s18_sdg(ctx,W,H,t,city); break;
       case 19: this._s19_masterplan(ctx,W,H,t,city,zones); break;
-      case 20: this._s20_finale(ctx,W,H,t,city); break;
+      case 20: this._s20_protectedZones(ctx,W,H,t,city); break;
+      case 21: this._s21_streetViewReal(ctx,W,H,t,city); break;
+      case 22: this._s22_aiNarrative(ctx,W,H,t,city); break;
+      case 23: this._s23_masterplanPreview(ctx,W,H,t,city); break;
+      case 24: this._s24_investment(ctx,W,H,t,city); break;
+      case 25: this._s25_finale(ctx,W,H,t,city); break;
       case 9: this._s13_street(ctx,W,H,t,city); break;
       case 10:this._s14_urban(ctx,W,H,t,city); break;
       
@@ -874,7 +884,363 @@ G._SceneEngine = {
   },
 
   // ── SCENA 12: Concluzie & Viziune ────────────────────────────────────
-  _s20_finale(ctx,W,H,t,city) {
+
+// Scenele noi 20-24 pentru tci-cinematic-scenes.js
+// Adaugam in G._SceneEngine inainte de _s25_finale
+
+  // ── SCENA 20: Zone Protejate — Restricții Legale ──────────────────────
+  _s20_protectedZones(ctx,W,H,t,city) {
+    const gr=ctx.createLinearGradient(0,0,0,H);
+    gr.addColorStop(0,'rgba(30,4,4,.75)');gr.addColorStop(1,'rgba(4,10,24,.98)');
+    ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);
+    this._scanlines(ctx,W,H,0.04);
+
+    if(t>0.04){
+      const ta=Math.min(1,(t-0.04)/0.15);
+      ctx.globalAlpha=ta;
+      ctx.fillStyle='#ef4444';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='center';
+      ctx.fillText('ZONE EXCLUSE DIN CONSTRUIRE — RESTRICȚII LEGALE',W/2,H*0.1);
+      ctx.fillStyle='rgba(200,215,240,.6)';ctx.font=`${W*0.007}px "IBM Plex Mono"`;
+      ctx.fillText('Legea 422/2001 · Legea 50/1991 · OG 43/1997 · Codul Silvic',W/2,H*0.16);
+      ctx.globalAlpha=1;
+    }
+
+    const zones=[
+      {label:'CIMITIRE',icon:'⛪',law:'Legea 50/1991 art.11',buf:'Construire INTERZISĂ',c:'#7c3aed',d:0.15},
+      {label:'ZONE FEROVIARE CF',icon:'🚂',law:'OG 43/1997 art.16',buf:'Buffer 100m interdicție',c:'#78350f',d:0.25},
+      {label:'MONUMENTE ISTORICE',icon:'🏛',law:'Legea 422/2001',buf:'Zona I: 0-50m · Zona II: 50-200m',c:'#b45309',d:0.35},
+      {label:'PĂDURI',icon:'🌲',law:'Codul Silvic L46/2008',buf:'Construire interzisă integral',c:'#14532d',d:0.45},
+      {label:'ZONE MILITARE',icon:'🔒',law:'Accces și construire interzise',buf:'Buffer 200m interdicție',c:'#dc2626',d:0.55},
+      {label:'ZONE INUNDABILE ANAR',icon:'🌊',law:'Directiva 2007/60/CE',buf:'Aviz GA obligatoriu',c:'#1d4ed8',d:0.65},
+    ];
+
+    zones.forEach((z,i)=>{
+      const a=Math.min(1,Math.max(0,(t-z.d)/0.15));
+      if(a<=0)return;
+      const cy=H*(0.28+i*0.095);
+      ctx.globalAlpha=a;
+      ctx.fillStyle='rgba(8,16,44,.88)';
+      this._roundRect(ctx,W*0.05,cy,W*0.9,H*0.075,5);ctx.fill();
+      ctx.fillStyle=z.c;ctx.rect(W*0.05,cy,3,H*0.075);ctx.fill();
+      // Icon + label
+      ctx.fillStyle=z.c;ctx.font=`bold ${W*0.0085}px "IBM Plex Mono"`;
+      ctx.textAlign='left';
+      ctx.fillText(z.icon+' '+z.label,W*0.07,cy+H*0.038);
+      // Lege
+      ctx.fillStyle='rgba(148,163,184,.7)';ctx.font=`${W*0.007}px "IBM Plex Mono"`;
+      ctx.fillText(z.law,W*0.35,cy+H*0.028);
+      ctx.fillStyle='rgba(200,215,240,.85)';ctx.font=`${W*0.0072}px "IBM Plex Mono"`;
+      ctx.fillText(z.buf,W*0.35,cy+H*0.052);
+      ctx.globalAlpha=1;
+    });
+
+    if(t>0.82){
+      const ia=Math.min(1,(t-0.82)/0.12);
+      ctx.globalAlpha=ia;
+      ctx.fillStyle='rgba(50,8,8,.9)';
+      this._roundRect(ctx,W*0.15,H*0.91,W*0.7,H*0.06,4);ctx.fill();
+      ctx.strokeStyle='rgba(239,68,68,.4)';ctx.lineWidth=1;
+      this._roundRect(ctx,W*0.15,H*0.91,W*0.7,H*0.06,4);ctx.stroke();
+      ctx.fillStyle='#fca5a5';ctx.font=`bold ${W*0.008}px "IBM Plex Mono"`;
+      ctx.textAlign='center';
+      ctx.fillText('⚠ Verificați ÎNTOTDEAUNA cu Certificatul de Urbanism',W/2,H*0.945);
+      ctx.globalAlpha=1;
+    }
+    this._sceneLabel(ctx,W,H,'20','ZONE PROTEJATE');
+  },
+
+  // ── SCENA 21: Street View Real — Vehicule & Pietoni ───────────────────
+  _s21_streetViewReal(ctx,W,H,t,city) {
+    // Overlay cinematic street-level
+    const gr=ctx.createLinearGradient(0,0,0,H);
+    gr.addColorStop(0,'rgba(0,0,0,0)');gr.addColorStop(0.5,'rgba(4,10,24,.2)');
+    gr.addColorStop(1,'rgba(4,10,24,.92)');
+    ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);
+
+    // Elemente strada animate
+    if(t>0.1){
+      const walk=Math.min(100,Math.round(30+(city.acoperire_transport||60)*0.4+(city.pib_eur_cap||10000)/1000));
+      const ta=Math.min(1,(t-0.1)/0.2);
+      ctx.globalAlpha=ta;
+
+      // Stats laterale
+      ctx.fillStyle='rgba(4,10,24,.88)';
+      this._roundRect(ctx,W*0.68,H*0.1,W*0.28,H*0.55,8);ctx.fill();
+      ctx.strokeStyle='rgba(212,175,55,.3)';ctx.lineWidth=0.8;
+      this._roundRect(ctx,W*0.68,H*0.1,W*0.28,H*0.55,8);ctx.stroke();
+
+      ctx.fillStyle='#D4AF37';ctx.font=`bold ${W*0.0085}px "IBM Plex Mono"`;
+      ctx.textAlign='left';ctx.fillText('WALKABILITY LIVE',W*0.695,H*0.155);
+
+      // Scor mare
+      ctx.fillStyle=walk>=70?'#22c55e':walk>=50?'#f59e0b':'#ef4444';
+      ctx.font=`900 ${W*0.055}px "Space Grotesk",sans-serif`;
+      ctx.fillText(this._countUp(walk,Math.min(1,(t-0.15)/0.5))+'/100',W*0.695,H*0.28);
+
+      ctx.fillStyle='rgba(148,163,184,.7)';ctx.font=`${W*0.007}px "IBM Plex Mono"`;
+      ctx.fillText(walk>=70?'VERY WALKABLE':walk>=50?'WALKABLE':'CAR-DEPENDENT',W*0.695,H*0.32);
+
+      // Progress bars mobilitate
+      [
+        ['TRANSPORT PUBLIC',(city.acoperire_transport||60)/100,'#60a5fa',0.30],
+        ['PISTE CICLIȘTI',0.35,'#22c55e',0.40],
+        ['ZONĂ PIETONALĂ',0.55,'#a78bfa',0.50],
+      ].forEach(([l,p,c,d])=>{
+        this._progressBar(ctx,W*0.695,H*0.38+[0,0.09,0.18][['TRANSPORT PUBLIC','PISTE CICLIȘTI','ZONĂ PIETONALĂ'].indexOf(l)]*H,
+          W*0.24,H*0.02,p,c,l,Math.round(p*100)+'%',t,d);
+      });
+
+      ctx.globalAlpha=1;
+    }
+
+    // Text bottom
+    if(t>0.15){
+      const ba=Math.min(1,(t-0.15)/0.2);
+      ctx.globalAlpha=ba;
+      ctx.fillStyle='rgba(4,10,24,.85)';
+      this._roundRect(ctx,W*0.05,H*0.86,W*0.58,H*0.08,5);ctx.fill();
+      ctx.fillStyle='rgba(200,215,240,.9)';ctx.font=`${W*0.0085}px "IBM Plex Mono"`;
+      ctx.textAlign='left';
+      ctx.fillText('Experiența pietonului · Frank et al. (2006) · OSM live',W*0.07,H*0.905);
+      ctx.globalAlpha=1;
+    }
+
+    // Vehicule simulate pe strada (puncte animate)
+    if(t>0.2){
+      const numVeh=Math.floor(t*8);
+      for(let i=0;i<numVeh;i++){
+        const phase=(t*0.8+i*0.15)%1;
+        const vx=W*0.05+phase*W*0.55;
+        const vy=H*(0.42+i*0.06);
+        const alpha=Math.sin(phase*Math.PI)*0.8;
+        ctx.globalAlpha=alpha;
+        ctx.fillStyle=i%3===0?'#f97316':i%3===1?'#60a5fa':'#22c55e';
+        ctx.beginPath();ctx.ellipse(vx,vy,W*0.012,H*0.018,0,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle='rgba(255,255,255,.6)';ctx.font=`${W*0.006}px "IBM Plex Mono"`;
+        ctx.textAlign='center';ctx.fillText(i%3===0?'🚗':i%3===1?'🚌':'🚲',vx,vy+2);
+        ctx.globalAlpha=1;
+      }
+    }
+    this._sceneLabel(ctx,W,H,'21','STREET VIEW REAL');
+  },
+
+  // ── SCENA 22: AI Narrative — Memoriu Justificativ Live ────────────────
+  _s22_aiNarrative(ctx,W,H,t,city) {
+    const gr=ctx.createLinearGradient(0,0,W*0.5,H);
+    gr.addColorStop(0,'rgba(20,4,50,.85)');gr.addColorStop(1,'rgba(4,10,24,.97)');
+    ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);
+    this._scanlines(ctx,W,H,0.03);
+
+    if(t>0.05){
+      const ta=Math.min(1,(t-0.05)/0.15);
+      ctx.globalAlpha=ta;
+      ctx.fillStyle='#c4b5fd';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='center';
+      ctx.fillText('🤖 AI MEMORIU JUSTIFICATIV — GENERAT AUTOMAT',W/2,H*0.09);
+      ctx.fillStyle='rgba(167,139,250,.5)';ctx.font=`${W*0.0068}px "IBM Plex Mono"`;
+      ctx.fillText('Claude AI · Anthropic · §1.1-§1.6 · Legea 350/2001 · Unic în lume pentru urbanism',W/2,H*0.145);
+      ctx.globalAlpha=1;
+    }
+
+    // Cele 6 sectiuni cu reveal progresiv
+    const sections=[
+      {id:'§1.1',title:'Introducere & Context Teritorial',c:'#60a5fa',d:0.12},
+      {id:'§1.2',title:'Situația Demografică & Tendințe',c:'#a78bfa',d:0.24},
+      {id:'§1.3',title:'Analiză Economică & Potențial',c:'#22c55e',d:0.36},
+      {id:'§1.4',title:'Riscuri Teritoriale & Constrângeri',c:'#ef4444',d:0.48},
+      {id:'§1.5',title:'Obiective Strategice 2025-2055',c:'#D4AF37',d:0.60},
+      {id:'§1.6',title:'Concluzii & Recomandări',c:'#34d399',d:0.72},
+    ];
+
+    sections.forEach((s,i)=>{
+      const a=Math.min(1,Math.max(0,(t-s.d)/0.14));
+      if(a<=0)return;
+      const sy=H*(0.21+i*0.115);
+      ctx.globalAlpha=a;
+
+      // Card
+      ctx.fillStyle='rgba(8,16,44,.85)';
+      this._roundRect(ctx,W*0.05,sy,W*0.9,H*0.1,5);ctx.fill();
+      ctx.fillStyle=s.c;ctx.rect(W*0.05,sy,3,H*0.1);ctx.fill();
+
+      // Section badge
+      ctx.fillStyle=s.c;ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='left';ctx.fillText(s.id,W*0.07,sy+H*0.04);
+
+      // Title cu typewriter
+      const chars=Math.floor(s.title.length*Math.min(1,(t-s.d-0.02)/0.15));
+      ctx.fillStyle='rgba(200,215,240,.9)';ctx.font=`${W*0.0075}px "IBM Plex Mono"`;
+      ctx.fillText(s.title.slice(0,chars),W*0.14,sy+H*0.04);
+
+      // Cursor blink
+      if(chars<s.title.length){
+        ctx.fillStyle=Math.sin(t*15)>0?s.c:'transparent';
+        ctx.fillText('▌',W*0.14+chars*W*0.0038,sy+H*0.04);
+      }
+
+      // Preview text (random chars → text real)
+      if(a>0.5){
+        const previewA=Math.min(1,(a-0.5)/0.4);
+        ctx.fillStyle=`rgba(100,120,150,${previewA*0.5})`;
+        ctx.font=`${W*0.006}px "IBM Plex Mono"`;
+        ctx.fillText('Generat pe date: INSE · Eurostat · BNR · INFP · ANAR · OSM...',W*0.14,sy+H*0.072);
+      }
+      ctx.globalAlpha=1;
+    });
+
+    // Badge bottom
+    if(t>0.88){
+      const ba=Math.min(1,(t-0.88)/0.1);
+      ctx.globalAlpha=ba;
+      ctx.fillStyle='rgba(139,92,246,.15)';
+      this._roundRect(ctx,W*0.2,H*0.925,W*0.6,H*0.055,4);ctx.fill();
+      ctx.strokeStyle='rgba(139,92,246,.4)';ctx.lineWidth=0.8;
+      this._roundRect(ctx,W*0.2,H*0.925,W*0.6,H*0.055,4);ctx.stroke();
+      ctx.fillStyle='#c4b5fd';ctx.font=`bold ${W*0.0075}px "IBM Plex Mono"`;
+      ctx.textAlign='center';
+      ctx.fillText('Disponibil în: 🏛 Urbanist ▾ → 🤖 AI Memoriu Justificativ',W/2,H*0.958);
+      ctx.globalAlpha=1;
+    }
+    this._sceneLabel(ctx,W,H,'22','AI MEMORIU');
+  },
+
+  // ── SCENA 23: Masterplan PDF — Structura Documentului ─────────────────
+  _s23_masterplanPreview(ctx,W,H,t,city) {
+    const gr=ctx.createLinearGradient(0,0,0,H);
+    gr.addColorStop(0,'rgba(4,10,24,.8)');gr.addColorStop(1,'rgba(4,10,24,.98)');
+    ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);
+
+    if(t>0.04){
+      const ta=Math.min(1,(t-0.04)/0.15);
+      ctx.globalAlpha=ta;
+      ctx.fillStyle='#D4AF37';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='center';
+      ctx.fillText('📋 MASTERPLAN STRATEGIC URBAN — 22 PAGINI',W/2,H*0.09);
+      ctx.fillStyle='rgba(212,175,55,.5)';ctx.font=`${W*0.0068}px "IBM Plex Mono"`;
+      ctx.fillText('Conf. Legii 350/2001 + Ord. 233/2016 + HG 907/2016 · Generat automat din date reale',W/2,H*0.145);
+      ctx.globalAlpha=1;
+    }
+
+    // Pagini animate ca stiva de carti
+    const pages=[
+      {pg:'1',title:'Copertă & Localizare',c:'#D4AF37',d:0.10},
+      {pg:'2-3',title:'Diagnostic Teritorial',c:'#60a5fa',d:0.17},
+      {pg:'4-5',title:'Proiecție Demografică',c:'#a78bfa',d:0.24},
+      {pg:'6-7',title:'Cerere Locuințe & Housing Mix',c:'#22c55e',d:0.31},
+      {pg:'8-9',title:'Context Economic & Investiții',c:'#f59e0b',d:0.38},
+      {pg:'10-11',title:'Riscuri Teritoriale',c:'#ef4444',d:0.45},
+      {pg:'12-13',title:'Scenarii & Recomandări',c:'#34d399',d:0.52},
+      {pg:'14',title:'Zone Propuse RH/POT/CUT',c:'#D4AF37',d:0.59},
+      {pg:'15-16',title:'Infrastructură & Finanțare',c:'#60a5fa',d:0.66},
+      {pg:'17-19',title:'Etapizare & Monitorizare',c:'#a78bfa',d:0.73},
+      {pg:'20-22',title:'Metodologie & Disclaimer',c:'#94a3b8',d:0.80},
+    ];
+
+    const cols=3, rows=Math.ceil(pages.length/cols);
+    pages.forEach((p,i)=>{
+      const a=Math.min(1,Math.max(0,(t-p.d)/0.12));
+      if(a<=0)return;
+      const col=i%cols, row=Math.floor(i/cols);
+      const px=W*(0.06+col*0.31);
+      const py=H*(0.21+row*0.165);
+      const pw=W*0.28, ph=H*0.13;
+
+      ctx.globalAlpha=a;
+      // Pagina background (A4 ratio)
+      ctx.fillStyle='rgba(8,16,44,.92)';
+      this._roundRect(ctx,px,py,pw,ph,4);ctx.fill();
+      ctx.strokeStyle=p.c+'66';ctx.lineWidth=0.8;
+      this._roundRect(ctx,px,py,pw,ph,4);ctx.stroke();
+      // Accent top
+      ctx.fillStyle=p.c;this._roundRect(ctx,px,py,pw,3,1);ctx.fill();
+      // Numar pagina
+      ctx.fillStyle=p.c;ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='left';ctx.fillText('pg.'+p.pg,px+6,py+ph*0.4);
+      // Titlu
+      ctx.fillStyle='rgba(200,215,240,.85)';ctx.font=`${W*0.0065}px "IBM Plex Mono"`;
+      const titleChars=Math.floor(p.title.length*Math.min(1,(t-p.d-0.02)/0.12));
+      ctx.fillText(p.title.slice(0,titleChars),px+6,py+ph*0.7);
+      ctx.globalAlpha=1;
+    });
+
+    // CTA final
+    if(t>0.9){
+      const ca=Math.min(1,(t-0.9)/0.08);
+      ctx.globalAlpha=ca;
+      ctx.fillStyle='rgba(212,175,55,.1)';
+      this._roundRect(ctx,W*0.2,H*0.92,W*0.6,H*0.055,4);ctx.fill();
+      ctx.strokeStyle='rgba(212,175,55,.4)';ctx.lineWidth=0.8;
+      this._roundRect(ctx,W*0.2,H*0.92,W*0.6,H*0.055,4);ctx.stroke();
+      ctx.fillStyle='#D4AF37';ctx.font=`bold ${W*0.008}px "IBM Plex Mono"`;
+      ctx.textAlign='center';
+      ctx.fillText('Click parcelă → Masterplan PDF · sau 🏛 Urbanist ▾ → 📋 Masterplan PDF',W/2,H*0.953);
+      ctx.globalAlpha=1;
+    }
+    this._sceneLabel(ctx,W,H,'23','MASTERPLAN PDF');
+  },
+
+  // ── SCENA 24: Investiții & Finanțare UE 2025-2055 ─────────────────────
+  _s24_investment(ctx,W,H,t,city) {
+    const need=this._need;
+    const invest_total=Math.round((need?.locuinteTotale||5000)*0.9);
+    const gr=ctx.createLinearGradient(0,0,0,H);
+    gr.addColorStop(0,'rgba(4,20,4,.8)');gr.addColorStop(1,'rgba(4,10,24,.98)');
+    ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);
+
+    if(t>0.04){
+      const ta=Math.min(1,(t-0.04)/0.15);
+      ctx.globalAlpha=ta;
+      ctx.fillStyle='#22c55e';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='center';
+      ctx.fillText('INVESTIȚII NECESARE 2025—2055 · SURSE FINANȚARE UE',W/2,H*0.09);
+      ctx.fillStyle='rgba(34,197,94,.5)';ctx.font=`${W*0.007}px "IBM Plex Mono"`;
+      ctx.fillText('PNRR · FEDR · POR 2021-2027 · Fonduri de Coeziune · Buget local · Investiție privată',W/2,H*0.145);
+      ctx.globalAlpha=1;
+    }
+
+    // KPI total investitie
+    if(t>0.12) this._kpiCard(ctx,W*0.05,H*0.2,W*0.27,H*0.18,'TOTAL INVESTIȚIE',invest_total,'mil. EUR · 2025-2055','#22c55e',t,0.12);
+
+    // Breakdown investitii cu progress bars
+    const items=[
+      ['LOCUINȚE NOI',0.55,'Sector privat + ANL',   '#22c55e',0.22],
+      ['INFRASTRUCTURĂ',0.18,'Fonduri UE FEDR/POR',  '#60a5fa',0.30],
+      ['ECHIPAMENTE PUBLICE',0.12,'Buget stat + PNRR','#a78bfa',0.38],
+      ['SPAȚII VERZI',0.08,'Fonduri UE + local',     '#4ade80',0.46],
+      ['CONSOLIDARE SEISMICĂ',0.07,'PNRR C10-I2 UE', '#ef4444',0.54],
+    ];
+    items.forEach(([l,p,sub,c,d])=>{
+      this._progressBar(ctx,W*0.37,H*(0.22+items.indexOf(items.find(x=>x[0]===l))*0.12),W*0.56,H*0.025,p,c,l,Math.round(p*100)+'% — '+sub,t,d);
+    });
+
+    // ROI timeline
+    if(t>0.65){
+      const ra=Math.min(1,(t-0.65)/0.2);
+      ctx.globalAlpha=ra;
+      ctx.fillStyle='rgba(8,16,44,.85)';
+      this._roundRect(ctx,W*0.05,H*0.77,W*0.9,H*0.13,5);ctx.fill();
+      ctx.strokeStyle='rgba(34,197,94,.3)';ctx.lineWidth=0.8;
+      this._roundRect(ctx,W*0.05,H*0.77,W*0.9,H*0.13,5);ctx.stroke();
+      ctx.fillStyle='#22c55e';ctx.font=`bold ${W*0.008}px "IBM Plex Mono"`;
+      ctx.textAlign='left';ctx.fillText('ROI ESTIMAT:',W*0.07,H*0.815);
+      ctx.fillStyle='rgba(200,215,240,.85)';ctx.font=`${W*0.0075}px "IBM Plex Mono"`;
+      ctx.fillText('2025-2030: consolidare infrastructură · 2031-2040: recuperare investiție · 2041-2055: valoare adaugată +35%',W*0.07,H*0.855);
+      ctx.globalAlpha=1;
+    }
+
+    // Badge finantare EU
+    if(t>0.82){
+      const ba=Math.min(1,(t-0.82)/0.1);
+      ctx.globalAlpha=ba;
+      this._donutArc(ctx,W*0.18,H*0.55,H*0.1,0.35,'#60a5fa','FONDURI UE','35%',t,0.82);
+      ctx.globalAlpha=1;
+    }
+    this._sceneLabel(ctx,W,H,'24','INVESTIȚII & FINANȚARE');
+  },
+
+
+  _s25_finale(ctx,W,H,t,city) {
     const grav = window._TCIMasterplanPDF?._calcGravity?.(city)||{growthType:'METROPOLITAN'};
     const need = this._need;
     const pop55 = need?.pop2055||city?.pop2021||100000;
