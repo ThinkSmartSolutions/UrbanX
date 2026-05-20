@@ -770,6 +770,23 @@ canvas#c2d{width:100%;height:100%;display:block}
 .adm-guide-txt{color:#94a3b8;font-size:11px;line-height:1.6}
 
 @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.4)} }
+
+    /* ── TCI Cinema v2 — ascunde tot UI-ul ────────────── */
+    body.tci-cinema-active #panel,
+    body.tci-cinema-active #panel-tabs,
+    body.tci-cinema-active #panel-body,
+    body.tci-cinema-active #mob-light-panel {
+      display: none !important;
+      visibility: hidden !important;
+    }
+    body.tci-cinema-active #map {
+      left: 0 !important;
+      right: 0 !important;
+      width: 100vw !important;
+    }
+    #tci-scene-canvas {
+      touch-action: none;
+    }
 </style>
 
 <script>
@@ -1072,7 +1089,7 @@ document.addEventListener('click', function(){
           box-shadow:0 0 30px rgba(212,175,55,.2);
         ">X</div>
         <div style="font-size:22px;font-weight:800;color:#fff;letter-spacing:.04em">UrbanX</div>
-        <div style="font-size:11px;color:#d4af37;letter-spacing:.15em;text-transform:uppercase;margin-top:4px">Platformă Urbanistică</div>
+        <div style="font-size:11px;color:#d4af37;letter-spacing:.15em;text-transform:uppercase;margin-top:4px">Platformă de Analiză Urbană</div>
       </div>
 
       <!-- Tabs: Login / Register -->
@@ -1231,10 +1248,10 @@ document.addEventListener('click', function(){
 
   <!-- Meniu TCI Avansat — Cinema, Comparatii, AI, Zone -->
   <div id="tci-group" style="position:relative">
-    <button class="tb-btn" onclick="_toggleTCIMenu(event)" title="Urbanist — toate uneltele avansate: film, comparații, masterplan, AI"
+    <button class="tb-btn" onclick="_toggleTCIMenu(event)" title="UrbanX Pro — film cinematic, film cinematic, masterplan PDF, comparații, rapoarte, AI"
       style="display:flex;align-items:center;gap:4px;background:rgba(139,92,246,.15);
         border:1px solid rgba(139,92,246,.4);color:#a78bfa;border-radius:8px">
-      🏛 Urbanist ▾
+      🏙 UrbanX Pro ▾
     </button>
   </div>
 
@@ -2877,6 +2894,71 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
     </button>
   </div>
 
+  <!-- Grup: Dashboard & Date Live -->
+  <div style="padding:6px 8px 3px;font-size:10px;color:rgba(212,175,55,.5);font-weight:700;
+    letter-spacing:.08em;text-transform:uppercase">📊 Intelligence & Date Live</div>
+
+  <button onclick="window._launchUATDashboard&&_launchUATDashboard(window.TCI?.cityKey||localStorage.getItem('ux_last_city')||'RO-IS-01');_closeAllMenusAndOverlay()"
+    style="display:block;width:100%;text-align:left;background:rgba(212,175,55,.15);
+      border:1px solid rgba(212,175,55,.3);color:#D4AF37;padding:12px 12px;cursor:pointer;border-radius:8px;
+      font-size:13px;font-weight:700;min-height:48px;font-family:inherit;margin-bottom:4px"
+    onmouseover="this.style.background='rgba(212,175,55,.25)'"
+    onmouseout="this.style.background='rgba(212,175,55,.15)'"
+    title="Dashboard interactiv cu date live INSE + Eurostat + OSM + Copernicus GHSL">
+    📊 Dashboard UAT Live
+    <div style="font-size:10px;color:rgba(212,175,55,.6);font-weight:400">INSE · Eurostat · OSM · GHSL · Cohort-Component</div>
+  </button>
+
+  <button onclick="(function(){const m=window.map||window._map;if(!m){ss?.('Harta nu e pregătită');return;}const k=window.TCI?.cityKey||localStorage.getItem('ux_last_city')||'RO-IS-01';if(window._GHSLLayer){_GHSLLayer.init(m,k);_GHSLLayer.toggle(m);}else{ss?.('GHSL: module se inițializează');}; _closeAllMenusAndOverlay();})()"
+    style="display:block;width:100%;text-align:left;background:rgba(96,165,250,.08);
+      border:none;color:#60a5fa;padding:10px 12px;cursor:pointer;border-radius:8px;
+      font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
+    onmouseover="this.style.background='rgba(96,165,250,.18)'"
+    onmouseout="this.style.background='rgba(96,165,250,.08)'"
+    title="Evoluție suprafață construită 1975→2055 pe hartă — Copernicus GHSL R2023A">
+    🛰 GHSL · Suprafață Construită 1975-2055
+    <div style="font-size:10px;color:rgba(96,165,250,.6);font-weight:400">Copernicus · JRC EUR 31461 EN · Slider temporal</div>
+  </button>
+
+  <!-- Grup: Planificare Strategica -->
+  <div style="padding:6px 8px 3px;font-size:10px;color:rgba(96,165,250,.5);font-weight:700;
+    letter-spacing:.08em;text-transform:uppercase;margin-top:4px">🗺 Planificare Strategică</div>
+
+  <button onclick="(function(){const k=window.TCI?.cityKey||localStorage.getItem('ux_last_city')||'RO-IS-01';const m=window.map||window._map;if(!m){ss?.('Harta nu e pregătită');return;}window._DataEngine?.fetchCityData(k).then(ld=>{if(window._ZoneEngine?.run){window._ZoneEngine.run(k).then(zd=>{const c=window._CorridorsLayer?.generateCorridors(k,zd,ld)||[];window._CorridorsLayer?.showOnMap(m,k,c);ss?.('✅ '+c.length+' coridoare pe hartă');});}else{const c=window._CorridorsLayer?.generateCorridors(k,null,ld)||[];window._CorridorsLayer?.showOnMap(m,k,c);ss?.('✅ '+c.length+' coridoare pe hartă');}});_closeAllMenusAndOverlay();})()"
+    style="display:block;width:100%;text-align:left;background:rgba(212,175,55,.08);
+      border:none;color:#D4AF37;padding:10px 12px;cursor:pointer;border-radius:8px;
+      font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
+    onmouseover="this.style.background='rgba(212,175,55,.18)'"
+    onmouseout="this.style.background='rgba(212,175,55,.08)'"
+    title="Coridoare TOD · Verde · Economic · Mobilitate pe hartă">
+    🗺 Coridoare Dezvoltare Spațială
+    <div style="font-size:10px;color:rgba(212,175,55,.6);font-weight:400">TOD · Verde · Economic · Mobilitate regională</div>
+  </button>
+
+  <button onclick="window.generatePortfolio?.();_closeAllMenusAndOverlay()"
+    style="display:block;width:100%;text-align:left;background:rgba(34,197,94,.08);
+      border:none;color:#22c55e;padding:10px 12px;cursor:pointer;border-radius:8px;
+      font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
+    onmouseover="this.style.background='rgba(34,197,94,.18)'"
+    onmouseout="this.style.background='rgba(34,197,94,.08)'"
+    title="Portofoliu proiecte strategice — 6 axe · costuri · fazare · FEDR+PNRR">
+    📋 Portofoliu Strategic 2025-2055
+    <div style="font-size:10px;color:rgba(34,197,94,.6);font-weight:400">6 axe · costuri · fazare · FEDR+PNRR+PPP</div>
+  </button>
+
+  <button onclick="window.openPUGImport?.();_closeAllMenusAndOverlay()"
+    style="display:block;width:100%;text-align:left;background:rgba(167,139,250,.08);
+      border:none;color:#a78bfa;padding:10px 12px;cursor:pointer;border-radius:8px;
+      font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
+    onmouseover="this.style.background='rgba(167,139,250,.18)'"
+    onmouseout="this.style.background='rgba(167,139,250,.08)'"
+    title="Import PUG digital — GeoJSON · KML · comparare cu UrbanX">
+    📐 Import PUG Digital
+    <div style="font-size:10px;color:rgba(167,139,250,.6);font-weight:400">GeoJSON · KML · UTR-uri · corelare UrbanX</div>
+  </button>
+
+  <!-- Grup:
+
   <!-- Grup: Comparatii & Rapoarte -->
   <div style="padding:6px 8px 3px;font-size:9px;color:#1d4ed8;text-transform:uppercase;
     letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.06);margin-top:3px">
@@ -2920,7 +3002,10 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
     letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.06);margin-top:3px">
     📋 Masterplan & AI</div>
 
-  <button onclick="if(typeof generateMasterplan==='function')generateMasterplan();else{const k=window.TCI?.cityKey||'RO-IS-01';window._TCIMasterplanPDF?.generate(k,'S2');}_closeAllMenusAndOverlay()"
+  <button onclick="if(typeof generateMasterplan==='function')generateMasterplan();else{const k=window.TCI?.cityKey||localStorage.getItem('ux_last_city')||'RO-IS-01';
+  if(!window._TCIMasterplanPDF){ss?.('⏳ Masterplan se inițializează — mai încearcă în 3 secunde');return;}
+  if(!window.jspdf&&!window.jsPDF){ss?.('❌ jsPDF nu s-a incarcat — reîncarcă pagina (Ctrl+R)');return;}
+  window._TCIMasterplanPDF.generate(k,'S2');}_closeAllMenusAndOverlay()"
     style="display:block;width:100%;text-align:left;background:rgba(212,175,55,.08);
       border:none;color:#D4AF37;padding:10px 12px;cursor:pointer;border-radius:8px;
       font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
@@ -2928,6 +3013,54 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
     onmouseout="this.style.background='rgba(212,175,55,.08)'">
     📋 Masterplan PDF
     <div style="font-size:10px;color:rgba(212,175,55,.6);font-weight:400">22 pagini · formule · surse · conf. Legii 350/2001</div>
+  </button></button>
+
+  <!-- PPTX Export -->
+  <button onclick="if(typeof generatePPTX==='function')generatePPTX();else ss?.('⏳ Se inițializează...');_closeAllMenusAndOverlay()"
+    style="display:block;width:100%;text-align:left;background:rgba(96,165,250,.08);
+      border:none;color:#60a5fa;padding:10px 12px;cursor:pointer;border-radius:8px;
+      font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
+    onmouseover="this.style.background='rgba(96,165,250,.18)'"
+    onmouseout="this.style.background='rgba(96,165,250,.08)'"
+    title="Exportă prezentare PowerPoint cu 10 slide-uri automate — pentru ședințe Consiliu">
+    📊 Export PowerPoint (.pptx)
+    <div style="font-size:10px;color:rgba(96,165,250,.6);font-weight:400">10 slide-uri · date reale · pentru ședință Consiliu</div>
+  </button>
+
+  <!-- Fisa Urbanism -->
+  <button onclick="if(typeof generateParcelFisa==='function')generateParcelFisa();else ss?.('Selectați o parcelă mai întâi');_closeAllMenusAndOverlay()"
+    style="display:block;width:100%;text-align:left;background:rgba(34,197,94,.08);
+      border:none;color:#22c55e;padding:10px 12px;cursor:pointer;border-radius:8px;
+      font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
+    onmouseover="this.style.background='rgba(34,197,94,.18)'"
+    onmouseout="this.style.background='rgba(34,197,94,.08)'"
+    title="Generează Fișa de Urbanism A4 pentru parcela selectată — cu toți indicatorii">
+    📋 Fișă Urbanism per parcelă
+    <div style="font-size:10px;color:rgba(34,197,94,.6);font-weight:400">PDF A4 · POT/CUT/RH · avize · printabil</div>
+  </button>
+
+  <!-- Matrice Avize -->
+  <button onclick="if(typeof showAvize==='function')showAvize();else ss?.('Selectați o parcelă mai întâi');_closeAllMenusAndOverlay()"
+    style="display:block;width:100%;text-align:left;background:rgba(245,158,11,.08);
+      border:none;color:#f59e0b;padding:10px 12px;cursor:pointer;border-radius:8px;
+      font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
+    onmouseover="this.style.background='rgba(245,158,11,.18)'"
+    onmouseout="this.style.background='rgba(245,158,11,.08)'"
+    title="Generează automat lista avizelor necesare bazat pe risc, patrimoniu, infrastructură">
+    ⚖️ Matrice Avize Necesare
+    <div style="font-size:10px;color:rgba(245,158,11,.6);font-weight:400">automat · Legea 50/1991 · Apele Române · ISU · Monumente</div>
+  </button>
+
+  <!-- Participare Publica -->
+  <button onclick="window._PublicParticipation?.toggle();_closeAllMenusAndOverlay()"
+    style="display:block;width:100%;text-align:left;background:rgba(212,175,55,.08);
+      border:none;color:#D4AF37;padding:10px 12px;cursor:pointer;border-radius:8px;
+      font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
+    onmouseover="this.style.background='rgba(212,175,55,.18)'"
+    onmouseout="this.style.background='rgba(212,175,55,.08)'"
+    title="Cetățenii adaugă comentarii pe hartă. Realtime Supabase. Inspirat Helsinki City Plan 2050.">
+    💬 Participare Publică
+    <div style="font-size:10px;color:rgba(212,175,55,.55);font-weight:400">comentarii pe hartă · realtime · Helsinki model</div>
   </button>
 
   <button onclick="(function(){const k=window.TCI?.cityKey||window._ProjectionEngine?.currentCity||'RO-IS-01';window._AIUrbanNarrative?.open(k);_closeAllMenusAndOverlay();})()"
@@ -3564,6 +3697,72 @@ window.addEventListener('load', function() {
   }, 2000);
 });
 </script>
+
+
+<script src="js/tci-corridors.js?v=20260520f"></script>
+<script src="js/tci-portfolio.js?v=20260520f"></script>
+<script src="js/tci-pug-import.js?v=20260520f"></script>
+<script src="js/tci-data-engine.js?v=20260520e"></script>
+<script src="js/tci-ghsl-layer.js?v=20260520e"></script>
+<script src="js/tci-uat-dashboard.js?v=20260520e"></script>
+<script>
+// ── UrbanX City Persistence — salvare UAT selectat ─────────────────────
+(function() {
+  'use strict';
+  const CITY_KEY = 'ux_last_city';
+  const SCN_KEY  = 'ux_last_scenario';
+
+  // Restauram la init
+  window._restoreLastCity = function() {
+    const saved = localStorage.getItem(CITY_KEY) || 'RO-IS-01';
+    if(window.TCI && !window.TCI.cityKey) {
+      window.TCI.cityKey = saved;
+      if(window._ProjectionEngine) _ProjectionEngine.currentCity = saved;
+    }
+  };
+
+  // Hook global: oricine scrie TCI.cityKey → salvam automat
+  window._hookCityPersistence = function() {
+    if(!window.TCI || window.TCI._ph) return;
+    window.TCI._ph = true;
+    let _v = window.TCI.cityKey || localStorage.getItem(CITY_KEY) || 'RO-IS-01';
+    try {
+      Object.defineProperty(window.TCI, 'cityKey', {
+        get()  { return _v; },
+        set(v) {
+          if(!v) return;
+          _v = v;
+          localStorage.setItem(CITY_KEY, v);
+          if(window._ProjectionEngine) _ProjectionEngine.currentCity = v;
+          // Actualizeaza badge bara de sus
+          const city = window._RO_CITIES_DB?.[v];
+          if(city) {
+            document.querySelectorAll('[data-city-name]').forEach(el => el.textContent = city.name);
+            const iasi = document.getElementById('btn-uat-iasi') ||
+                         document.querySelector('[data-uat="RO-IS-01"]');
+            // nu mai selectam Iasi default daca user a ales altceva
+          }
+        },
+        configurable: true, enumerable: true
+      });
+    } catch(e) { /* deja hookedat */ }
+  };
+
+  // Aplicam imediat + la fiecare 1s pana reusim
+  let _tries = 0;
+  const _tryHook = setInterval(() => {
+    if(++_tries > 30) clearInterval(_tryHook);
+    if(window.TCI) {
+      clearInterval(_tryHook);
+      window._restoreLastCity();
+      window._hookCityPersistence();
+      console.log('[UrbanX] City persistence activ — UAT:', localStorage.getItem(CITY_KEY)||'RO-IS-01');
+    }
+  }, 300);
+})();
+</script>
+<script src="js/urbanx-parcel-tools.js?v=20260520d"></script>
+<script src="js/urbanx-public-participation.js?v=20260520e"></script>
 
 </body>
 </html>
