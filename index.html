@@ -831,6 +831,49 @@ canvas#c2d{width:100%;height:100%;display:block}
   50%      { box-shadow: 0 0 12px rgba(212,175,55,0.2); }
 }
 @media(max-width:900px) { .tci-launch-label { display:none; } }
+@media(max-width:900px) { #btn-cinema-v2 .tci-launch-label { display:inline; } }
+@media(max-width:900px) { #btn-cinema-v2 { padding:5px 8px; } }
+
+/* ── MOBILE MENU FIXES ─────────────────────────────────────────── */
+/* Touch targets minime 44px Apple HIG */
+#viz-menu button, #tools-menu button, .viz-menu-item {
+  min-height: 44px !important;
+  padding: 10px 12px !important;
+  font-size: 13px !important;
+  -webkit-tap-highlight-color: rgba(255,255,255,0.1);
+  touch-action: manipulation;
+}
+/* Overlay pentru close meniu cu tap in afara */
+#menu-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9050;
+  background: transparent;
+  -webkit-tap-highlight-color: transparent;
+}
+#menu-overlay.active { display: block; }
+/* viz-menu scroll pe mobile */
+#viz-menu { -webkit-overflow-scrolling: touch; }
+/* Buton Close explicit in meniu pe mobile */
+.menu-close-btn {
+  display: none;
+  width: 100%;
+  padding: 10px;
+  background: rgba(239,68,68,.08);
+  border: 1px solid rgba(239,68,68,.2);
+  border-radius: 8px;
+  color: #f87171;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 6px;
+  text-align: center;
+  min-height: 44px;
+  -webkit-tap-highlight-color: transparent;
+  font-family: inherit;
+}
+@media(max-width:768px) { .menu-close-btn { display: block; } }
 </style>
 <script>
     // Service Worker registration
@@ -930,8 +973,32 @@ document.addEventListener('click', function(){
   <button class="tci-launch-btn" id="relevee-launch-btn" onclick="if(typeof generateRelevee==='function') generateRelevee(); else alert('Selectați o parcelă mai întâi')" title="Planșe tehnice, relevee, documentație preliminară PAC/CU" style="background:rgba(212,175,55,.12);border-color:rgba(212,175,55,.5);color:#D4AF37;">
     📐 <span class="tci-launch-label">Proiect Preliminar</span>
   </button>
-  <button class="tci-launch-btn" onclick="openTCI()" title="Proiectie Urbanistica Temporala">
+  <button class="tci-launch-btn" onclick="openTCI()" title="TCI Cinema clasic">
     🏙 <span class="tci-launch-label">Temporal City Intelligence</span>
+  </button>
+  <button class="tci-launch-btn" id="btn-cinema-v2"
+    onclick="(function(){
+  const k=window.TCI?.cityKey||window._ProjectionEngine?.currentCity||'RO-IS-01';
+  if(window._SceneEngine&&typeof window._SceneEngine.launch==='function'){
+    window._SceneEngine.launch(k);
+  } else {
+    // Retry de 5 ori la 1s interval
+    let tries=0;
+    const retry=setInterval(()=>{
+      tries++;
+      if(window._SceneEngine&&typeof window._SceneEngine.launch==='function'){
+        clearInterval(retry);
+        window._SceneEngine.launch(k);
+      } else if(tries>=5){
+        clearInterval(retry);
+        ss?.('Cinema v2 se initializeaza — mai asteapta 3 sec si apasa din nou');
+      }
+    },1000);
+  }
+})()"
+    title="TCI Cinematic v2 — 12 scene cu proiecții per zonă, bare 3D, trafic real"
+    style="background:rgba(139,92,246,.15);border-color:rgba(139,92,246,.5);color:#a78bfa;">
+    🎬 <span class="tci-launch-label">Cinema v2</span>
   </button>
   <div id="wx-user-btn" title="Contul meu">👤</div>
 </div>
@@ -1186,8 +1253,16 @@ document.addEventListener('click', function(){
   </button>
 </div>
 
+<!-- OVERLAY transparent pentru close meniu cu tap în afară (mobile) -->
+<div id="menu-overlay" onclick="_closeAllMenusAndOverlay()" 
+     ontouchend="_closeAllMenusAndOverlay();event.preventDefault()"></div>
+
 <!-- VIZ MENU — fixed, outside topbar -->
-<div id="viz-menu" style="display:none;position:fixed;top:48px;background:rgba(7,14,28,.97);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:6px;min-width:200px;z-index:9100;box-shadow:0 8px 32px rgba(0,0,0,.7);backdrop-filter:blur(12px)">
+<div id="viz-menu" style="display:none;position:fixed;top:48px;right:4px;
+  background:rgba(7,14,28,.97);border:1px solid rgba(255,255,255,.15);border-radius:12px;
+  padding:6px;min-width:220px;max-width:90vw;max-height:80vh;overflow-y:auto;
+  z-index:9100;box-shadow:0 8px 40px rgba(0,0,0,.8);backdrop-filter:blur(16px);
+  -webkit-overflow-scrolling:touch">
   <div style="padding:4px 8px 5px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700">Perspectivă hartă</div>
   <button id="btn3D" onclick="set3D(60,-20);_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏙 Vedere 3D izometrică (60°)</button>
   <button id="btn2D" onclick="set3D(0,0);_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">⬛ Vedere 2D — Plan</button>
@@ -1208,6 +1283,16 @@ document.addEventListener('click', function(){
     <option value="streets">🗺 Streets</option>
     <option value="sat">🛰 Satelitar</option>
   </select>
+  <button class="menu-close-btn" 
+    onclick="_closeAllMenusAndOverlay()" 
+    ontouchend="event.preventDefault();_closeAllMenusAndOverlay()" 
+    style="display:none;width:calc(100% - 8px);margin:6px 4px 2px;padding:10px;
+      background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);
+      border-radius:8px;color:#f87171;font-size:13px;font-weight:700;
+      cursor:pointer;text-align:center;min-height:44px;font-family:inherit;
+      -webkit-tap-highlight-color:transparent">
+    ✕ Închide
+  </button>
 </div>
 
 <!-- TOOLS MENU — fixed, outside topbar -->
@@ -1215,6 +1300,16 @@ document.addEventListener('click', function(){
   <button id="btnLotizare" onclick="toggleLotizare();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#a78bfa;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏘 Lotizare teren</button>
   <button id="btnCimec" onclick="showCimecWidget();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#fbbf24;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏛 LMI Monumente</button>
   <button id="btnBilant" onclick="toggleBilant();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#4ade80;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">📐 Bilanț edificabil</button>
+  <button class="menu-close-btn" 
+    onclick="_closeAllMenusAndOverlay()" 
+    ontouchend="event.preventDefault();_closeAllMenusAndOverlay()"
+    style="display:none;width:calc(100% - 8px);margin:6px 4px 2px;padding:10px;
+      background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);
+      border-radius:8px;color:#f87171;font-size:13px;font-weight:700;
+      cursor:pointer;text-align:center;min-height:44px;font-family:inherit;
+      -webkit-tap-highlight-color:transparent">
+    ✕ Închide
+  </button>
 </div>
 
 <!-- RAPOARTE DROPDOWN — direct pe body pentru a evita overflow clipping din topbar -->
@@ -2560,7 +2655,10 @@ setInterval(()=>{
   
   <script src="js/18-animation-engine.js?v=2026051010"></script>
   <script src="js/uats-extended-data.js?v=20260519a"></script><!-- Date extinse: etnic+ISD+AROPE+geo+poli+TFR+migratii -->
-  <script src="js/tci-masterplan.js?v=20260519a"></script><!-- TCI Masterplan: PDF 12pg+grafice+benchmark+metodologie citabilă -->
+  <script src="js/tci-masterplan.js?v=20260519a"></script>
+  <script src="js/tci-masterplan-visual.js?v=20260519a"></script>
+  <script src="js/tci-masterplan-qr.js?v=20260519a"></script><!-- QR Code in PDF Masterplan — scanabil cu telefonul → deschide scenariul live -->
+  <script src="js/tci-cinematic-capture.js?v=20260519a"></script><!-- Capture: frames automate Cinema v2 → colaj în Masterplan PDF --><!-- Masterplan visual: cover premium + SWOT + formule + progress bars --><!-- TCI Masterplan: PDF 12pg+grafice+benchmark+metodologie citabilă -->
   <script src="js/tci-intelligence.js?v=20260519a"></script><!-- TCI Intelligence: Dashboard+4D Timeline+Comparator+Milestones -->
   <script src="js/tci-data-live.js?v=20260519a"></script>
   <script src="js/tci-street-experience.js?v=20260519a"></script>
@@ -2573,8 +2671,8 @@ setInterval(()=>{
   <script src="js/tci-zone-engine.js?v=20260519a"></script>
   <script src="js/urbanx-compare-pro.js?v=20260519a"></script><!-- Compare Pro + Planning Score + Presentation Mode -->
   <script src="js/urbanx-science-layer.js?v=20260519a"></script><!-- SpaceSyntax+Noise+Sunlight+Economic+Swipe+ZoneLabels -->
-  <script src="js/urbanx-compare-pro.js?v=20260519a"></script><!-- Compare Pro + Gap Analysis + Presentation Mode --><!-- Zone Engine: OSM+gravitational+metropolitan, fara hardcode --><!-- TCI Cinematic v2: 12 scene storyboard + proiecții per zonă + bare 3D --><!-- UX: ghid+share URL+panou rezultate+butoane globale -->
-  <script src="js/urbanx-science-layer.js?v=20260519a"></script><!-- Science: Affordability+BidRent+SpaceSyntax+Noise+GreenConn+AirQuality+PWD --><!-- Urban Intel: coridoare+intravilan+patrimoniu+land use+infrastructura --><!-- Transparenta: surse+formule+legende+metodologie --><!-- Analytics: Walkability+15MinCity+ROI+Carbon+UHI+SDG11+SeismicVulnerability --><!-- Imersiv: intro cinematic+stradă+pietoni+macarale+momente dramatice --><!-- TCI Live Data: INSE+Eurostat+GHSL+Heatmap presiune construire -->
+  <script src="js/urbanx-eu-benchmark.js?v=20260519a"></script><!-- European Benchmarking Pro — 17 orase EU · 12 indicatori · Eurostat Urban Audit 2021 -->
+  <script src="js/urbanx-ai-narrative.js?v=20260519a"></script><!-- AI Narrative Generator — Claude API · Memoriu justificativ urbanistic automat -->
 <script>
 // Initializare package selector modal
 function _initPackageModal() {
@@ -2690,6 +2788,84 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
     </div>
     <!-- GDPR Cookie Consent (Legea 506/2004 + GDPR) -->
     <script src="js/cookie-consent.js?v=2026051301"></script>
+
+
+<script>
+// ── MOBILE MENU FIX — overlay + touch events ──────────────────────────
+function _closeAllMenusAndOverlay() {
+  // Inchidem toate meniurile
+  const menus = ['viz-menu','tools-menu','rapoarte-menu'];
+  menus.forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.style.display = 'none';
+  });
+  // Inchidem si orice dropdown deschis
+  document.querySelectorAll('[id$="-menu"]').forEach(m => {
+    if(m.style.display !== 'none' && m.id !== 'menu-overlay') {
+      m.style.display = 'none';
+    }
+  });
+  // Ascundem overlay-ul
+  const overlay = document.getElementById('menu-overlay');
+  if(overlay) overlay.classList.remove('active');
+}
+
+// Override _toggleVizMenu pentru a activa overlay-ul
+const _origToggleViz = window._toggleVizMenu;
+window._toggleVizMenu = function(event) {
+  if(event) event.stopPropagation();
+  const menu = document.getElementById('viz-menu');
+  const overlay = document.getElementById('menu-overlay');
+  const isOpen = menu && menu.style.display !== 'none';
+  
+  // Inchidem mai intai toate celelalte
+  _closeAllMenusAndOverlay();
+  
+  if(!isOpen && menu) {
+    // Pozitionam corect fata de butonul apasat
+    if(event && event.currentTarget) {
+      const btn = event.currentTarget;
+      const rect = btn.getBoundingClientRect();
+      menu.style.top = (rect.bottom + 4) + 'px';
+      // Pe mobile: aliniem la dreapta ecranului daca debordeza
+      const menuW = 240;
+      const left = Math.min(rect.left, window.innerWidth - menuW - 8);
+      menu.style.left = Math.max(4, left) + 'px';
+      menu.style.right = 'auto';
+    }
+    menu.style.display = 'block';
+    if(overlay) overlay.classList.add('active');
+  }
+};
+
+// Acelasi pentru Tools menu
+const _origToggleTools = window._toggleToolsMenu;
+window._toggleToolsMenu = function(event) {
+  if(event) event.stopPropagation();
+  const menu = document.getElementById('tools-menu');
+  const overlay = document.getElementById('menu-overlay');
+  const isOpen = menu && menu.style.display !== 'none';
+  _closeAllMenusAndOverlay();
+  if(!isOpen && menu) {
+    if(event && event.currentTarget) {
+      const btn = event.currentTarget;
+      const rect = btn.getBoundingClientRect();
+      menu.style.top = (rect.bottom + 4) + 'px';
+      const menuW = 220;
+      const left = Math.min(rect.left, window.innerWidth - menuW - 8);
+      menu.style.left = Math.max(4, left) + 'px';
+      menu.style.right = 'auto';
+    }
+    menu.style.display = 'block';
+    if(overlay) overlay.classList.add('active');
+  }
+};
+
+// Expune global _closeAllMenus ca alias
+window._closeAllMenus = _closeAllMenusAndOverlay;
+
+console.log('[MobileMenuFix] ✅ Overlay + touch events + buton Close activ');
+</script>
 
 </body>
 </html>

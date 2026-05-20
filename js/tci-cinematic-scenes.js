@@ -298,13 +298,24 @@ G._SceneEngine = {
 
   _finish() {
     this._playing = false;
-    if(this._canvas) {
-      this._canvas.style.transition = 'opacity 1s';
-      this._canvas.style.opacity = '0';
-      setTimeout(()=>this._canvas?.remove(), 1000);
+    if(this._raf) cancelAnimationFrame(this._raf);
+    // Fix: curăță canvas-ul complet — nu mai rămâne ecran negru
+    const canvas = document.getElementById('tci-scene-canvas');
+    if(canvas) {
+      canvas.style.transition='opacity .6s';
+      canvas.style.opacity='0';
+      setTimeout(()=>{
+        try{ canvas.remove(); }catch(e){}
+      },700);
     }
+    this._canvas=null; this._ctx=null;
     this._cleanupMapLayers();
-    ss?.('✅ TCI Cinematic finalizat — '+(this._city?.name));
+    // Revenim la harta normală
+    try{
+      window.map?.flyTo?.({zoom:13,pitch:45,bearing:0,duration:1200,essential:true});
+      window.map?.setConfigProperty?.('basemap','lightPreset','day');
+    }catch(e){}
+    ss?.('✅ TCI Cinematic finalizat — '+(this._city?.name||''));
   },
 
   // ── Setup per scenă (camera + layers Mapbox) ──────────────────────────
@@ -1111,33 +1122,32 @@ G._SceneEngine = {
     }
   };
 
-  // Cinema v2 este accesibil din TCI Cinema (openTCI({mode:'cinema_v2'}))
-  // SAU din bara principală via Vizualizare ▾ → TCI Cinematic v2
-  // NU adăugăm butoane flotante separate care suprapun bara existentă
-  setTimeout(()=>{
-    // Integrăm în meniul Vizualizare existent
+  // Cinema v2 accesibil din bara de sus (buton direct btn-cinema-v2)
+  // + injectat în Vizualizare ▾ cu retry robust
+  const _injectCinemaV2Menu = () => {
+    if(document.getElementById('tci-cinema-v2-menu-item')) return true;
     const vizMenu = document.getElementById('viz-menu');
-    if(vizMenu && !document.getElementById('tci-cinema-v2-menu-item')){
-      const sep = document.createElement('div');
-      sep.style.cssText='height:1px;background:rgba(255,255,255,.08);margin:4px 0';
-      const item = document.createElement('button');
-      item.id = 'tci-cinema-v2-menu-item';
-      item.style.cssText=`display:block;width:100%;text-align:left;background:none;border:none;
-        color:#a78bfa;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px;font-family:inherit`;
-      item.innerHTML='🎬 TCI Cinematic v2 (12 scene)';
-      item.onmouseover=()=>{item.style.background='rgba(139,92,246,.15)'};
-      item.onmouseout=()=>{item.style.background='none'};
-      item.onclick=()=>{
-        const key = TCI?.cityKey || window._ProjectionEngine?.currentCity || 'RO-IS-01';
-        G._SceneEngine.launch(key);
-        // Închidem meniul
-        document.getElementById('viz-menu').style.display='none';
-      };
-      vizMenu.appendChild(sep);
-      vizMenu.appendChild(item);
-      console.log('[Cinema v2] ✅ integrat în meniul Vizualizare');
-    }
-  }, 2000);
+    if(!vizMenu) return false;
+    const sep = document.createElement('div');
+    sep.style.cssText='height:1px;background:rgba(255,255,255,.08);margin:4px 0';
+    const item = document.createElement('button');
+    item.id = 'tci-cinema-v2-menu-item';
+    item.style.cssText='display:block;width:100%;text-align:left;background:none;border:none;color:#a78bfa;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px;font-family:inherit';
+    item.innerHTML='🎬 TCI Cinematic v2 (12 scene + proiecții per zonă)';
+    item.onmouseover=()=>{item.style.background='rgba(139,92,246,.15)'};
+    item.onmouseout=()=>{item.style.background='none'};
+    item.onclick=()=>{
+      const key = window.TCI?.cityKey || window._ProjectionEngine?.currentCity || 'RO-IS-01';
+      G._SceneEngine.launch(key);
+      document.getElementById('viz-menu').style.display='none';
+    };
+    vizMenu.appendChild(sep);
+    vizMenu.appendChild(item);
+    console.log('[Cinema v2] ✅ integrat în Vizualizare menu');
+    return true;
+  };
+  // Retry la 2s, 4s, 8s - meniul poate fi populat dinamic
+  [2000,4000,8000].forEach(delay => setTimeout(_injectCinemaV2Menu, delay));
 
   // Expunere globală
   window._SceneEngine      = G._SceneEngine;
