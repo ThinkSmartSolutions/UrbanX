@@ -808,7 +808,7 @@ canvas#c2d{width:100%;height:100%;display:block}
 </script>
 
   <!-- UrbanX Workspace Styles -->
-  <link rel="stylesheet" href="wx-styles.css?v=20260520d">
+  <link rel="stylesheet" href="wx-styles.css?v=20260520c">
 <style>
 /* Override: integreaza navigatia noua cu structura existenta */
 #app { 
@@ -894,17 +894,12 @@ canvas#c2d{width:100%;height:100%;display:block}
 </style>
 
 <script>
-    // Service Worker v4.1 — JS mereu din network, API cache 24h
+    // Service Worker registration
     if('serviceWorker' in navigator) {
-      // Unregister SW vechi înainte de a înregistra noul
-      navigator.serviceWorker.getRegistrations().then(function(regs) {
-        regs.forEach(function(r) { r.unregister(); });
-      }).then(function() {
-        return navigator.serviceWorker.register('./sw.js?v=20260520e');
-      }).then(function(r) {
-        console.log('[SW] OK v4.1:', r.scope);
-      }).catch(function(e) {
-        console.warn('[SW] Skip:', e.message);
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js?v=20260520c')
+          .then(r => console.log('[SW] OK v4.0:', r.scope))
+          .catch(e => console.warn('[SW] Skip:', e.message));
       });
     }
   </script>
@@ -1211,32 +1206,7 @@ document.addEventListener('click', function(){
   </span>
 
   <!-- Grup 1: Navigare & Căutare -->
-  <button class="tb-btn" id="btnUTR" onclick="(function(){
-    const k = window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
-    const db = window._RO_CITIES_DB || {};
-    const cityName = db[k]?.name || k;
-    const _PUG = {'RO-IS-01':'js/data/iasi/pug.geojson','RO-SV-01':'js/data/municipiul-suceava/pug.geojson'};
-    const pugUrl = _PUG[k];
-    const drawer = document.getElementById('utr-drawer');
-    const titleEl = document.getElementById('utr-drawer-title');
-    // Daca drawer e deschis si e al aceluiasi oras, inchidem
-    if(drawer?.classList.contains('open') && titleEl?.textContent?.includes(cityName)) {
-      hideUTRDrawer?.(); return;
-    }
-    // Deschidem drawer
-    drawer?.classList.add('open');
-    document.getElementById('btnUTR')?.classList.add('on');
-    if(!pugUrl) {
-      if(titleEl) titleEl.textContent = 'Zone UTR — PUG ' + cityName + ' indisponibil';
-      ss?.('⚠ PUG ' + cityName + ' indisponibil'); return;
-    }
-    // Resetam si incarcam
-    if(window.S) window.S.pug = false;
-    if(titleEl) titleEl.textContent = '';
-    _loadPUGOnMap(pugUrl, cityName, null).then(function(g) {
-      if(g) _renderUTRChips(g, cityName);
-    });
-  })()">🗺 UTR</button>
+  <button class="tb-btn" id="btnUTR">🗺 UTR</button>
   <button class="tb-btn" id="btnGPS">📍 GPS</button>
   <button class="tb-btn" id="btnMulti" title="Multiselect parcele">🔲 Multi</button>
 
@@ -1806,45 +1776,45 @@ document.addEventListener('click', function(){
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <!-- UrbanX JS Modules — ordinea de incarcare e importanta -->
-<script src="js/00-globals.js?v=20260520d"></script>
-<script src="js/02-map-core.js?v=20260520d"></script>
-<script src="js/03-ui-panel.js?v=20260520d"></script>
-<script src="js/04-search.js?v=20260520d"></script>
-<script src="js/05-cad-utils.js?v=20260520d"></script>
-<script src="js/06-aedis.js?v=20260520d"></script>
-<script src="js/07-pdf-utils.js?v=20260520d"></script>
-<script src="js/08-lotizare.js?v=20260520d"></script>
+<script src="js/00-globals.js?v=2026050601"></script>
+<script src="js/02-map-core.js?v=2026050804"></script>
+<script src="js/03-ui-panel.js?v=20260520c"></script>
+<script src="js/04-search.js?v=2026050601"></script>
+<script src="js/05-cad-utils.js?v=2026050601"></script>
+<script src="js/06-aedis.js?v=2026050802"></script>
+<script src="js/07-pdf-utils.js?v=2026050601"></script>
+<script src="js/08-lotizare.js?v=2026050906"></script>
 <script src="js/09-pdf-engine.js?v=2026051006"></script>
 <script src="js/10-studies-geo-engine.js?v=2026051301"></script>
     <script src="js/10-studies-terrain.js?v=2026051301"></script>
-    <script src="js/10-studies-stubs.js?v=20260520d"></script>
-    <script src="js/10-studies.js?v=20260520d"></script>
-    <script src="js/10-studies-fix.js?v=20260520d"></script>
-    <script src="js/10-studies-connector.js?v=20260520d"></script>
-    <script src="js/10-studies-new.js?v=20260520d"></script>
-<script src="js/11-viewer3d.js?v=20260520d"></script>
-<script src="js/12-admin.js?v=20260520d"></script>
+    <script src="js/10-studies-stubs.js?v=20260520c"></script>
+    <script src="js/10-studies.js?v=20260520c"></script>
+    <script src="js/10-studies-fix.js?v=20260520c"></script>
+    <script src="js/10-studies-connector.js?v=20260520c"></script>
+    <script src="js/10-studies-new.js?v=20260520c"></script>
+<script src="js/11-viewer3d.js?v=2026050904"></script>
+<script src="js/12-admin.js?v=2026050601"></script>
 <script src="js/13-info-drawer.js?v=2026051004"></script>
-<script src="js/14-docx-export.js?v=20260520d"></script>
-<script src="js/15-relevee.js?v=20260520dy"></script>
+<script src="js/14-docx-export.js?v=2026050601"></script>
+<script src="js/15-relevee.js?v=20260520cy"></script>
     <script src="js/15-relevee-canvas-upgrade.js?v=20260517"></script>
     <!-- UrbanX Relevee Modules — încărcate după motorul principal -->
-    <script src="js/15-relevee-walls.js?v=20260520dc"></script>
-    <script src="js/15-relevee-walls-patch.js?v=20260520dd"></script><!-- FIX: arc uși + culori apt -->
-    <script src="js/15-relevee-planfix.js?v=20260520d"></script><!-- FIX: plan+fațadă arhitectural -->
+    <script src="js/15-relevee-walls.js?v=20260520cc"></script>
+    <script src="js/15-relevee-walls-patch.js?v=20260520cd"></script><!-- FIX: arc uși + culori apt -->
+    <script src="js/15-relevee-planfix.js?v=20260520c"></script><!-- FIX: plan+fațadă arhitectural -->
     <script src="js/15-relevee-planseA3.js?v=2026051301"></script>
     <script src="js/15-relevee-enhance.js?v=2026051301"></script>
-    <script src="js/15-relevee-dxf.js?v=20260520dd"></script><!-- FIX v2: EOF + secțiuni reale -->
+    <script src="js/15-relevee-dxf.js?v=20260520cd"></script><!-- FIX v2: EOF + secțiuni reale -->
     <script src="js/15-relevee-subsol.js?v=2026051301"></script>
     <script src="js/15-relevee-acoperis.js?v=2026051301"></script>
-    <script src="js/15-relevee-dna-optimize.js?v=20260520dj"></script>
-    <script src="js/15-relevee-extras.js?v=20260520dc"></script>
+    <script src="js/15-relevee-dna-optimize.js?v=20260520cj"></script>
+    <script src="js/15-relevee-extras.js?v=20260520cc"></script>
     <script src="js/15-relevee-multibuilding.js?v=2026051301"></script>
     <script src="js/18-context3d.js?v=2026051301"></script>
-    <script src="js/15-relevee-toolbar.js?v=20260520dc"></script>
+    <script src="js/15-relevee-toolbar.js?v=20260520cc"></script>
     <script src="js/15-relevee-pdf-upgrade.js?v=2026051301"></script>
-<script src="js/fixes-audit.js?v=20260520d"></script>
-<script src="js/map-resize-fix.js?v=20260520d"></script>
+<script src="js/fixes-audit.js?v=20260520c"></script>
+<script src="js/map-resize-fix.js?v=2026050601"></script>
 
 <script>
 // ── Lotizare layout: decalează harta când panoul e vizibil ─────────────────
@@ -2697,33 +2667,33 @@ setInterval(()=>{
 
 
   <!-- UrbanX Architecture v3.2 -->
-  <script src="js/00-packages.js?v=20260520d"></script>
-  <script src="js/16-projects.js?v=20260520d"></script>
-  <script src="js/17-projection-engine.js?v=20260520d"></script>
+  <script src="js/00-packages.js?v=20260520c"></script>
+  <script src="js/16-projects.js?v=20260520c"></script>
+  <script src="js/17-projection-engine.js?v=20260520c"></script>
   <!-- Deck.gl v9 — compatibil cu Mapbox GL JS v3 -->
   <script src="js/uats-registry.js?v=2026051201"></script>
-  <script src="js/17-tci-cinema.js?v=20260520d"></script>
+  <script src="js/17-tci-cinema.js?v=20260520c"></script>
   
-  <script src="js/18-animation-engine.js?v=20260520d"></script>
-  <script src="js/uats-extended-data.js?v=20260520d"></script><!-- Date extinse: etnic+ISD+AROPE+geo+poli+TFR+migratii -->
-  <script src="js/tci-masterplan.js?v=20260520d"></script>
-  <script src="js/tci-masterplan-visual.js?v=20260520d"></script>
-  <script src="js/tci-masterplan-qr.js?v=20260520d"></script><!-- QR Code in PDF Masterplan — scanabil cu telefonul → deschide scenariul live -->
-  <script src="js/tci-cinematic-capture.js?v=20260520d"></script><!-- Capture: frames automate Cinema v2 → colaj în Masterplan PDF --><!-- Masterplan visual: cover premium + SWOT + formule + progress bars --><!-- TCI Masterplan: PDF 12pg+grafice+benchmark+metodologie citabilă -->
-  <script src="js/tci-intelligence.js?v=20260520d"></script><!-- TCI Intelligence: Dashboard+4D Timeline+Comparator+Milestones -->
-  <script src="js/tci-data-live.js?v=20260520d"></script>
-  <script src="js/tci-street-experience.js?v=20260520d"></script>
-  <script src="js/tci-street-real.js?v=20260520d"></script><!-- Vehicule OSM reale + cladiri etaj/etaj + iluminat noapte -->
-  <script src="js/urbanx-analytics.js?v=20260520d"></script>
-  <script src="js/tci-transparency.js?v=20260520d"></script>
-  <script src="js/urbanx-urban-intelligence.js?v=20260520d"></script>
-  <script src="js/tci-onboarding.js?v=20260520d"></script>
-  <script src="js/tci-cinematic-scenes.js?v=20260520d"></script>
-  <script src="js/tci-zone-engine.js?v=20260520d"></script>
-  <script src="js/urbanx-compare-pro.js?v=20260520d"></script><!-- Compare Pro + Planning Score + Presentation Mode -->
-  <script src="js/urbanx-science-layer.js?v=20260520d"></script><!-- SpaceSyntax+Noise+Sunlight+Economic+Swipe+ZoneLabels -->
-  <script src="js/urbanx-eu-benchmark.js?v=20260520d"></script><!-- European Benchmarking Pro — 17 orase EU · 12 indicatori · Eurostat Urban Audit 2021 -->
-  <script src="js/urbanx-ai-narrative.js?v=20260520d"></script><!-- AI Narrative Generator — Claude API · Memoriu justificativ urbanistic automat -->
+  <script src="js/18-animation-engine.js?v=20260520c"></script>
+  <script src="js/uats-extended-data.js?v=20260520c"></script><!-- Date extinse: etnic+ISD+AROPE+geo+poli+TFR+migratii -->
+  <script src="js/tci-masterplan.js?v=20260520c"></script>
+  <script src="js/tci-masterplan-visual.js?v=20260520c"></script>
+  <script src="js/tci-masterplan-qr.js?v=20260520c"></script><!-- QR Code in PDF Masterplan — scanabil cu telefonul → deschide scenariul live -->
+  <script src="js/tci-cinematic-capture.js?v=20260520c"></script><!-- Capture: frames automate Cinema v2 → colaj în Masterplan PDF --><!-- Masterplan visual: cover premium + SWOT + formule + progress bars --><!-- TCI Masterplan: PDF 12pg+grafice+benchmark+metodologie citabilă -->
+  <script src="js/tci-intelligence.js?v=20260520c"></script><!-- TCI Intelligence: Dashboard+4D Timeline+Comparator+Milestones -->
+  <script src="js/tci-data-live.js?v=20260520c"></script>
+  <script src="js/tci-street-experience.js?v=20260520c"></script>
+  <script src="js/tci-street-real.js?v=20260520c"></script><!-- Vehicule OSM reale + cladiri etaj/etaj + iluminat noapte -->
+  <script src="js/urbanx-analytics.js?v=20260520c"></script>
+  <script src="js/tci-transparency.js?v=20260520c"></script>
+  <script src="js/urbanx-urban-intelligence.js?v=20260520c"></script>
+  <script src="js/tci-onboarding.js?v=20260520c"></script>
+  <script src="js/tci-cinematic-scenes.js?v=20260520c"></script>
+  <script src="js/tci-zone-engine.js?v=20260520c"></script>
+  <script src="js/urbanx-compare-pro.js?v=20260520c"></script><!-- Compare Pro + Planning Score + Presentation Mode -->
+  <script src="js/urbanx-science-layer.js?v=20260520c"></script><!-- SpaceSyntax+Noise+Sunlight+Economic+Swipe+ZoneLabels -->
+  <script src="js/urbanx-eu-benchmark.js?v=20260520c"></script><!-- European Benchmarking Pro — 17 orase EU · 12 indicatori · Eurostat Urban Audit 2021 -->
+  <script src="js/urbanx-ai-narrative.js?v=20260520c"></script><!-- AI Narrative Generator — Claude API · Memoriu justificativ urbanistic automat -->
 <script>
 // Initializare package selector modal
 function _initPackageModal() {
@@ -2755,19 +2725,19 @@ function _closeMobileSheet() {
 }
 
 // Swipe down to close sheet
-window.sheetStartY = 0;
-document.getElementById('wx-mobile-sheet')?.addEventListener('touchstart', e => { window.sheetStartY = e.touches[0].clientY; });
+let sheetStartY = 0;
+document.getElementById('wx-mobile-sheet')?.addEventListener('touchstart', e => { sheetStartY = e.touches[0].clientY; });
 document.getElementById('wx-mobile-sheet')?.addEventListener('touchend', e => {
   if(e.changedTouches[0].clientY - sheetStartY > 80) _closeMobileSheet();
 });
 
 // Hook parcel click pentru a actualiza discover panel
-window._origParcelClick = window.onParcelSelect;
+const _origParcelClick = window.onParcelSelect;
 window._onParcelSelectedHook = function(parcel) {
   if(typeof _wxUpdateParcelInfo === 'function') _wxUpdateParcelInfo(parcel);
 };
 </script>
-  <script src="js/20-uats-database.js?v=20260520d"></script>
+  <script src="js/20-uats-database.js?v=20260520c"></script>
 <script>
 // ── DB INLINE — garantează că _RO_CITIES_DB e disponibil IMEDIAT ──────────
 // Rulează indiferent dacă 20-uats-database.js s-a încărcat sau nu
@@ -2985,14 +2955,14 @@ window._onParcelSelectedHook = function(parcel) {
     }, 500);
   });
 })();
-</script>  <script src="js/21-cloud-sync.js?v=20260520d"></script>
-  <script src="js/22-zoning-connector.js?v=20260520d"></script><!-- Etapa 1: Regulament din Supabase -->
-  <script src="js/23-legal-chain.js?v=20260520d"></script><!-- Etapa 3: Lanț juridic Neo4j -->
-  <script src="js/24-timeline-layer.js?v=20260520d"></script><!-- Etapa 4: Temporal evolution -->
-  <script src="js/25-prediction-layer.js?v=20260520d"></script><!-- Etapa 5: Prediction heatmap -->
-  <script src="js/15-relevee-mobile-memoriu.js?v=20260520d"></script><!-- FIX: zoom mobil + generateMemoriu -->
-  <script src="js/15-relevee-fixes-studii.js?v=20260520d"></script><!-- FIX: close mobil + 27 studii definite -->
-  <script src="js/19-ux-polish.js?v=20260520d"></script>
+</script>  <script src="js/21-cloud-sync.js?v=20260520c"></script>
+  <script src="js/22-zoning-connector.js?v=20260520c"></script><!-- Etapa 1: Regulament din Supabase -->
+  <script src="js/23-legal-chain.js?v=20260520c"></script><!-- Etapa 3: Lanț juridic Neo4j -->
+  <script src="js/24-timeline-layer.js?v=20260520c"></script><!-- Etapa 4: Temporal evolution -->
+  <script src="js/25-prediction-layer.js?v=20260520c"></script><!-- Etapa 5: Prediction heatmap -->
+  <script src="js/15-relevee-mobile-memoriu.js?v=20260520c"></script><!-- FIX: zoom mobil + generateMemoriu -->
+  <script src="js/15-relevee-fixes-studii.js?v=20260520c"></script><!-- FIX: close mobil + 27 studii definite -->
+  <script src="js/19-ux-polish.js?v=20260520c"></script>
 <script>
 // Hook pentru buton Export PDF in Bilant modal
 function addBilantExportBtn() {
@@ -3011,7 +2981,7 @@ function addBilantExportBtn() {
 }
 // Observer pentru cand se deschide modalul
 // FIX: subtree:false păstrat, disconnect automat după găsire
-window._bilantObs = new MutationObserver(()=>{ 
+const _bilantObs = new MutationObserver(()=>{ 
   if(addBilantExportBtn()){ 
     _bilantObs.disconnect(); 
   } 
@@ -3374,7 +3344,7 @@ function _closeAllMenusAndOverlay() {
 }
 
 // Override _toggleVizMenu pentru a activa overlay-ul
-window._origToggleViz = window._toggleVizMenu;
+const _origToggleViz = window._toggleVizMenu;
 window._toggleVizMenu = function(event) {
   if(event) event.stopPropagation();
   const menu = document.getElementById('viz-menu');
@@ -3402,7 +3372,7 @@ window._toggleVizMenu = function(event) {
 };
 
 // Acelasi pentru Tools menu
-window._origToggleTools = window._toggleToolsMenu;
+const _origToggleTools = window._toggleToolsMenu;
 window._toggleToolsMenu = function(event) {
   if(event) event.stopPropagation();
   const menu = document.getElementById('tools-menu');
@@ -3588,7 +3558,7 @@ window._launchEUBenchmark = function() {
 <script>
 // ── INFO DRAWER ENGINE ────────────────────────────────────────────────────
 
-window._INFO_DATA = {
+const _INFO_DATA = {
 
   // ── BARA DE SUS ──────────────────────────────────────────────────────────
   'harta': {
@@ -4052,7 +4022,7 @@ function _updateUTRDrawerTitle(cityKey) {
 }
 
 // Hook pe city persistence — se apelează la orice schimbare de UAT
-window._origHookCP = window._hookCityPersistence;
+const _origHookCP = window._hookCityPersistence;
 window._hookCityPersistence = function() {
   if (_origHookCP) _origHookCP.call(this);
   // Verificăm periodic dacă TCI.cityKey s-a schimbat
@@ -4282,7 +4252,7 @@ function _patchSceneEngine() {
 }
 
 // Aplicăm patch când SceneEngine e disponibil
-window._scenePatchTries = 0;
+let _scenePatchTries = 0;
 const _scenePatchInterval = setInterval(function() {
   if (++_scenePatchTries > 40) { clearInterval(_scenePatchInterval); return; }
   if (_patchSceneEngine()) clearInterval(_scenePatchInterval);
@@ -4334,7 +4304,7 @@ const _scenePatchInterval = setInterval(function() {
 // Problema: pib_eur_cap nereîncărcat din _RO_CITIES_DB sau DataEngine înainte de build PDF
 // Fix: asigurăm că înainte de generateMasterplan, cityData are pib_eur_cap nenul
 
-window._origGenMasterplan = window.generateMasterplan;
+const _origGenMasterplan = window.generateMasterplan;
 window.generateMasterplan = function() {
   // Asigurăm date corecte din DB
   const k = window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
@@ -4395,7 +4365,7 @@ if (_btnUTR && !_btnUTR._colorPatchApplied) {
 // ── PATCH 8: Cinematic — scene > 17 continuă după eroare ─────────────────
 // Wrappăm _launchCinemaV2 pentru a prinde erori globale
 
-window._origLaunchCinema = window._launchCinemaV2;
+const _origLaunchCinema = window._launchCinemaV2;
 window._launchCinemaV2 = function() {
   try {
     if (typeof _origLaunchCinema === 'function') return _origLaunchCinema.apply(this, arguments);
@@ -4893,76 +4863,82 @@ window.addEventListener('load', function() {
   'use strict';
 
   // Interceptăm showUATSelector să adauge hook pe iteme
-  // ── showUATSelector: selector simplu propriu — nu TCI ──────────────────
-  function _installUATSelector() {
+  function _patchUATSelector() {
+    const orig = window.showUATSelector;
+    if(!orig || orig._patched) return;
+
     window.showUATSelector = function() {
-      _showSimpleUATSelector();
+      orig.apply(this, arguments);
+      // Așteptăm să apară modal-ul, apoi hookim click-urile
+      setTimeout(_hookUATModalClicks, 200);
+      setTimeout(_hookUATModalClicks, 500);
+      setTimeout(_hookUATModalClicks, 1000);
     };
-    window.showUATSelector._ours = true;
+    window.showUATSelector._patched = true;
   }
 
-  function _showSimpleUATSelector() {
-    // Selector simplu daca TCI nu e disponibil
-    const db = window._RO_CITIES_DB || {};
-    const cities = Object.entries(db).filter(function(e) {
-      return e[1].tip && e[1].lat;
-    }).sort(function(a,b) { return (b[1].pop2021||0)-(a[1].pop2021||0); });
+  function _hookUATModalClicks() {
+    // Găsim toate elementele care arată ca item UAT în modal
+    // Căutăm în orice modal deschis care conține chei de tip RO-XX-XX
+    const allBtns = document.querySelectorAll(
+      '#uat-selector-modal button, #tci-uat-modal button, ' +
+      '[id*="uat-modal"] button, [class*="uat-item"], ' +
+      '[data-uat-key], [data-key]'
+    );
 
-    let existing = document.getElementById('_simple-uat-modal');
-    if(existing) { existing.style.display='flex'; return; }
+    allBtns.forEach(function(btn) {
+      if(btn._uatHooked) return;
+      btn._uatHooked = true;
 
-    const modal = document.createElement('div');
-    modal.id = '_simple-uat-modal';
-    modal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(2,6,15,.95);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:20px;overflow-y:auto;font-family:"Space Grotesk","Inter",sans-serif';
-
-    const title = document.createElement('div');
-    title.style.cssText = 'color:#D4AF37;font-size:18px;font-weight:800;margin-bottom:16px;width:100%;max-width:500px;display:flex;justify-content:space-between;align-items:center';
-    title.innerHTML = '📍 Selectează UAT <button onclick="document.getElementById(\'_simple-uat-modal\').style.display=\'none\'" style="background:rgba(239,68,68,.2);border:1px solid rgba(239,68,68,.4);color:#f87171;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:14px">✕</button>';
-
-    const list = document.createElement('div');
-    list.style.cssText = 'width:100%;max-width:500px;display:flex;flex-direction:column;gap:6px';
-
-    cities.forEach(function(entry) {
-      const key = entry[0], city = entry[1];
-      const btn = document.createElement('button');
-      btn.style.cssText = 'background:rgba(14,26,52,.8);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#e2e8f0;padding:10px 14px;cursor:pointer;text-align:left;font-size:13px;font-family:inherit;display:flex;justify-content:space-between;align-items:center';
-      btn.innerHTML = '<b>' + city.name + '</b><span style="color:#475569;font-size:11px">' + (city.judet||'') + ' · ' + ((city.pop2021||0)/1000).toFixed(0) + 'K loc.</span>';
-
-      // Verificam daca are PUG
-      const hasPUG = {'RO-IS-01':1,'RO-SV-01':1}[key];
-      if(hasPUG) btn.style.borderColor = 'rgba(212,175,55,.4)';
+      const key = btn.dataset.uatKey || btn.dataset.key || btn.dataset.uat || '';
+      if(!key.match(/^RO-[A-Z]+-\d+$/)) return; // doar chei valide
 
       btn.addEventListener('click', function() {
-        // Setam UAT activ
+        const name = btn.querySelector('b')?.textContent ||
+                     btn.textContent?.trim().split('·')[0].trim() || key;
         try { localStorage.setItem('ux_last_city', key); } catch(e) {}
         if(window.TCI) window.TCI.cityKey = key;
         if(window._ProjectionEngine) window._ProjectionEngine.currentCity = key;
-        // Actualizam badge topbar
         const ind = document.getElementById('uat-indicator');
-        if(ind) ind.textContent = city.name;
-        // Sincronizam _SceneEngine
-        if(window._SceneEngine) window._SceneEngine._cityKey = key;
-        // Inchidem modal
-        modal.style.display = 'none';
-        console.log('[UAT] Selectat:', key, '—', city.name);
-        // Flyto pe harta
-        if(window.map && city.lat && city.lon) {
-          window.map.flyTo({center:[city.lon,city.lat], zoom:12, duration:1200});
-        }
-      });
-      list.appendChild(btn);
+        if(ind) ind.textContent = name;
+        console.log('[UAT Selector] Selectat:', key, '—', name);
+      }, { capture: true });
     });
 
-    modal.appendChild(title);
-    modal.appendChild(list);
-    document.body.appendChild(modal);
+    // Alternativ: MutationObserver pe body pentru modal-uri create dinamic
   }
 
-  // Instalam imediat si cu retry
-  _installUATSelector();
-  setTimeout(_installUATSelector, 1000);
-  setTimeout(_installUATSelector, 3000);
-  window.addEventListener('load', function() { setTimeout(_installUATSelector, 500); });
+  // Observer global pe click — dacă click-ul are data-key sau text cu "Municipiul"
+  document.addEventListener('click', function(e) {
+    const btn = e.target.closest('button, [role="button"]');
+    if(!btn) return;
+
+    // Verificăm data attributes
+    const key = btn.dataset?.uatKey || btn.dataset?.key || btn.dataset?.uat || btn.dataset?.cityKey;
+    if(key && key.match(/^RO-[A-Z]+-\d+$/)) {
+      const name = btn.querySelector('b')?.textContent ||
+                   btn.dataset?.name ||
+                   btn.textContent?.trim().split('·')[0].trim().replace(/^[^A-Za-zÀ-ÖØ-öø-ÿ]+/,'') || '';
+      try { localStorage.setItem('ux_last_city', key); } catch(e) {}
+      if(window.TCI) window.TCI.cityKey = key;
+      if(window._ProjectionEngine) window._ProjectionEngine.currentCity = key;
+      const ind = document.getElementById('uat-indicator');
+      if(ind && name) ind.textContent = name;
+      console.log('[UAT Click] Interceptat:', key, '—', name);
+    }
+  }, { capture: true });
+
+  // Aplicăm patch la load
+  document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(_patchUATSelector, 500);
+    setTimeout(_patchUATSelector, 2000);
+  });
+  window.addEventListener('load', function() {
+    setTimeout(_patchUATSelector, 200);
+  });
+
+  window._patchUATSelector = _patchUATSelector;
+  window._hookUATModalClicks = _hookUATModalClicks;
 })();
 
 // Hook pe orice schimbare de TCI.cityKey → notificăm toate modulele
@@ -5239,59 +5215,6 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
   window._lockMenus = _lockMenus;
   console.log('[MenuLock] ✅ Protecție anti-duplicate activă pentru tools-menu și viz-menu');
 })();
-</script>
-
-<script>
-// ── OVERRIDE toggleUTR — înlocuiește versiunea din repo care ignoră UAT activ ──
-window.addEventListener('load', function() {
-  setTimeout(function() {
-    window.toggleUTR = function() {
-      const k = window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
-      const db = window._RO_CITIES_DB || {};
-      const name = db[k]?.name || k;
-      const pugs = {
-        'RO-IS-01': 'js/data/iasi/pug.geojson',
-        'RO-SV-01': 'js/data/municipiul-suceava/pug.geojson',
-      };
-      // Fallback din UAT_REGISTRY
-      const reg = window.UAT_REGISTRY || {};
-      const regEntry = Object.values(reg).find(e => e.siruta === db[k]?.siruta);
-      const url = pugs[k] || regEntry?.pugFile;
-
-      const drawer = document.getElementById('utr-drawer');
-      const btn = document.getElementById('btnUTR');
-
-      // Toggle: dacă e deschis și același UAT, închidem
-      if(drawer?.classList.contains('open')) {
-        drawer.classList.remove('open');
-        btn?.classList.remove('on');
-        return;
-      }
-
-      drawer?.classList.add('open');
-      btn?.classList.add('on');
-
-      if(!url) {
-        const t = document.getElementById('utr-drawer-title');
-        if(t) t.textContent = '🗺 PUG ' + name + ' — indisponibil';
-        window.ss?.('⚠ PUG ' + name + ' indisponibil');
-        return;
-      }
-
-      // Forțăm re-încărcare dacă UAT s-a schimbat
-      const t = document.getElementById('utr-drawer-title');
-      const sameCity = t?.textContent?.includes(name);
-      if(sameCity && window.S?.pug && window.S?.pugIdx?.length > 0) return;
-
-      if(window.S) window.S.pug = false;
-      window._loadPUGOnMap(url, name, null).then(function(g) {
-        if(g) window._renderUTRChips(g, name);
-      });
-    };
-
-    console.log('[UrbanX] toggleUTR override activ — UAT dinamic');
-  }, 2000);
-});
 </script>
 
 </body>
