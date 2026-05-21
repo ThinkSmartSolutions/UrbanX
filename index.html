@@ -1285,23 +1285,6 @@ document.addEventListener('click', function(){
   </div>
   <button id="btnSV" onclick="svOpen();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px;border-top:1px solid rgba(255,255,255,.06);margin-top:3px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🚶 Street View</button>
   <button id="btnLegend" onclick="toggleFnLegend(this);_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🎨 Legendă funcțiuni</button>
-  <div style="padding:5px 8px 2px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.06);margin-top:3px">Stil hartă</div>
-  <select class="tb-sel" id="selBase" style="display:block;width:calc(100% - 4px);margin:4px 2px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#e2e8f0;padding:6px 8px;font-size:12px;cursor:pointer">
-    <option value="custom">🌆 Urban 3D</option>
-    <option value="standard">☀ Standard 3D ✦</option>
-    <option value="streets">🗺 Streets</option>
-    <option value="sat">🛰 Satelitar</option>
-  </select>
-  <!-- Zone Protejate + Hărți Inundații (scurtătură rapidă) -->
-  <div style="padding:5px 8px 2px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.06);margin-top:3px">Zone speciale</div>
-  <button onclick="(function(){const k=window.TCI?.cityKey||localStorage.getItem('ux_last_city')||'RO-IS-01';const db=window._RO_CITIES_DB||{};const city=db[k]||{lat:47.158,lon:27.601};const lat=city.lat||map.getCenter().lat;const lon=city.lon||map.getCenter().lng;if(window._ProtectedZonesLayer)window._ProtectedZonesLayer.toggle(map,lat,lon);else ss?.('Zone Protejate se inițializează');_closeAllMenus();})()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#f87171;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">⛔ Zone Protejate (cimitire · CF · monumente)</button>
-  <button onclick="(function(){if(window._FloodMapper){window._FloodMapper.addAll(map);ss?.('🌊 Hărți inundații ANAR activate');}else{ss?.('Hărți Inundații se inițializează');}; _closeAllMenus();})()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#7dd3fc;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🌊 Hărți Inundații ANAR</button>
-  <!-- Compare / Benchmarking (scurtătură) -->
-  <div style="padding:5px 8px 2px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.06);margin-top:3px">Comparații</div>
-  <button onclick="window._launchComparePro?.();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#60a5fa;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏙 Compare Pro (2-5 UAT-uri)</button>
-  <button onclick="window._launchPresentation?.();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#f59e0b;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🎯 Prezentare Primărie (5 slide-uri)</button>
-  <button onclick="window._launchEUBenchmark?.();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#4ade80;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🌍 European Benchmarking Pro</button>
-  <button onclick="window._launchCinemaV2?.();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#a78bfa;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🎬 TCI Cinematic v2 (12 scene + proiecții per zonă)</button>
   <button class="menu-close-btn" 
     onclick="_closeAllMenusAndOverlay()" 
     ontouchend="event.preventDefault();_closeAllMenusAndOverlay()" 
@@ -1315,14 +1298,10 @@ document.addEventListener('click', function(){
 </div>
 
 <!-- TOOLS MENU — fixed, outside topbar -->
-<div id="tools-menu" data-locked="true" style="display:none;position:fixed;top:48px;background:rgba(7,14,28,.97);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:6px;min-width:210px;z-index:9100;box-shadow:0 8px 32px rgba(0,0,0,.7);backdrop-filter:blur(12px)">
+<div id="tools-menu" style="display:none;position:fixed;top:48px;background:rgba(7,14,28,.97);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:6px;min-width:210px;z-index:9100;box-shadow:0 8px 32px rgba(0,0,0,.7);backdrop-filter:blur(12px)">
   <button id="btnLotizare" onclick="toggleLotizare();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#a78bfa;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏘 Lotizare teren</button>
   <button id="btnCimec" onclick="showCimecWidget();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#fbbf24;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏛 LMI Monumente</button>
   <button id="btnBilant" onclick="toggleBilant();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#4ade80;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">📐 Bilanț edificabil</button>
-  <div style="height:1px;background:rgba(255,255,255,.06);margin:4px 0"></div>
-  <button onclick="if(typeof _shareCurrentScenario==='function')_shareCurrentScenario();else{const url=window.location.href;navigator.clipboard?.writeText(url);ss?.('🔗 URL copiat');}_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#60a5fa;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🔗 Share scenariu curent</button>
-  <button onclick="_toggleQuickStart?.();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#818cf8;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">❓ Ghid utilizare platformă</button>
-  <button onclick="(function(){const k=window.TCI?.cityKey||localStorage.getItem('ux_last_city')||'RO-IS-01';window._AIUrbanNarrative?.open(k);_closeAllMenus();})()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#c084fc;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🤖 AI Memoriu Justificativ</button>
   <button class="menu-close-btn" 
     onclick="_closeAllMenusAndOverlay()" 
     ontouchend="event.preventDefault();_closeAllMenusAndOverlay()"
@@ -1519,7 +1498,7 @@ document.addEventListener('click', function(){
 <!-- UTR DRAWER -->
 <div id="utr-drawer">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px">
-    <b id="utr-drawer-title" style="color:#d4af37">🗺 Zone UTR — PUG Iași · Click pe UTR pentru a-l evidenția și a vedea regulamentul</b>
+    <b style="color:#d4af37">🗺 Zone UTR — PUG Iași · Click pe UTR pentru a-l evidenția și a vedea regulamentul</b>
     <button id="btnCloseUTR" onclick="hideUTRDrawer()" title="Ascunde bara — UTR-urile rămân pe hartă (Esc)" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:#f87171;border-radius:7px;padding:5px 14px;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;letter-spacing:.05em">✕ Ascunde bara</button>
   </div>
   <div id="utr-chips"></div>
@@ -1604,10 +1583,12 @@ document.addEventListener('click', function(){
 
 <!-- MOBILE BOTTOM NAV BAR - mereu vizibil -->
 <nav id="mob-nav">
-  <button class="mnav-btn" data-mt="tci" onclick="openTCI&&openTCI()">
-    <span class="mnav-icon">🏙</span>
-    <span class="mnav-label">TCI</span>
-  </button><button class="mnav-btn active" data-mt="search" onclick="mobNavClick('search',this)">
+  <button onclick="openTCI&&openTCI()" 
+          style="background:rgba(212,175,55,0.15);border:1px solid rgba(212,175,55,0.3);
+          color:#D4AF37;border-radius:6px;padding:6px 10px;font-size:10px;font-weight:700;
+          cursor:pointer;font-family:inherit;white-space:nowrap">
+          🏙 TCI
+        </button><button class="mnav-btn active" data-mt="search" onclick="mobNavClick('search',this)">
     <span class="mnav-icon" style="display:flex;align-items:center;justify-content:center"><span style="width:20px;height:20px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" style="display:inline-block;vertical-align:middle">
   <defs>
     <linearGradient id="ubg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1e2c42"/><stop offset="1" stop-color="#070d16"/></linearGradient>
@@ -1692,7 +1673,7 @@ document.addEventListener('click', function(){
 </svg></span>
     <span>UrbanX · <span style="opacity:0.6;font-size:9px">TSS·FG</span></span>
   </span>
-  <span>Mapbox GL · Cadastru · <span id="footer-pug-label">PUG Iași</span> · OSM</span>
+  <span>Mapbox GL · Cadastru · PUG Iași · OSM</span>
 </div>
 <div id="aedis-modal">
   <div id="aedis-header">
@@ -2738,221 +2719,66 @@ window._onParcelSelectedHook = function(parcel) {
 };
 </script>
   <script src="js/20-uats-database.js?v=20260520c"></script>
-<script>
-// ── DB INLINE — garantează că _RO_CITIES_DB e disponibil IMEDIAT ──────────
-// Rulează indiferent dacă 20-uats-database.js s-a încărcat sau nu
-(function() {
-  window._RO_CITIES_DB = window._RO_CITIES_DB || {};
-  // Extindem cu toate UAT-urile necesare (nu suprascrie ce există deja)
-  var _extra = {
-    'RO-IS-01':{name:'Iași',judet:'Iași',judet_code:'IS',siruta:'105309',
-      tip:'municipiu_mare',regiune:'NE',lat:47.1585,lon:27.6014,
-      pop2021:360633,pop2011:290422,rata_reala_2011_2021:0.82,
-      pib_eur_cap:14200,coef_hub:1.4,suprafata_ha:9428,
-      spatii_verzi_mp_loc:15,acoperire_transport:72,autorizatii_2023:847,
-      temp_medie_2024:11.8,universitati:5},
-    'RO-SV-01':{name:'Suceava',judet:'Suceava',judet_code:'SV',siruta:'148045',
-      tip:'municipiu',regiune:'NE',lat:47.6635,lon:26.2732,
-      pop2021:92121,pop2011:92959,rata_reala_2011_2021:-0.09,
-      pib_eur_cap:8100,coef_hub:0.9,suprafata_ha:5193,
-      spatii_verzi_mp_loc:9,acoperire_transport:52,autorizatii_2023:210,
-      temp_medie_2024:10.2,universitati:1},
-    'RO-BT-01':{name:'Botoșani',judet:'Botoșani',judet_code:'BT',siruta:'20964',
-      tip:'municipiu',regiune:'NE',lat:47.7455,lon:26.6657,
-      pop2021:106847,pop2011:115523,rata_reala_2011_2021:-0.77,
-      pib_eur_cap:7200,coef_hub:0.8,suprafata_ha:4128,
-      spatii_verzi_mp_loc:8,acoperire_transport:55,autorizatii_2023:180},
-    'RO-NT-01':{name:'Piatra-Neamț',judet:'Neamț',judet_code:'NT',siruta:'123369',
-      tip:'municipiu',regiune:'NE',lat:46.9215,lon:26.3719,
-      pop2021:68959,pop2011:85055,rata_reala_2011_2021:-2.04,
-      pib_eur_cap:7800,coef_hub:0.75,suprafata_ha:4498,
-      spatii_verzi_mp_loc:12,acoperire_transport:48,autorizatii_2023:120},
-    'RO-NT-02':{name:'Roman',judet:'Neamț',judet_code:'NT',siruta:'136527',
-      tip:'municipiu',regiune:'NE',lat:46.9219,lon:26.9240,
-      pop2021:51900,pop2011:58420,rata_reala_2011_2021:-1.18,
-      pib_eur_cap:6800,coef_hub:0.65},
-    'RO-BC-01':{name:'Bacău',judet:'Bacău',judet_code:'BC',siruta:'8392',
-      tip:'municipiu_mare',regiune:'NE',lat:46.5671,lon:26.9146,
-      pop2021:122170,pop2011:144307,rata_reala_2011_2021:-1.66,
-      pib_eur_cap:9200,coef_hub:1.0,suprafata_ha:4327,
-      spatii_verzi_mp_loc:10,acoperire_transport:58,autorizatii_2023:250},
-    'RO-VS-01':{name:'Vaslui',judet:'Vaslui',judet_code:'VS',siruta:'162426',
-      tip:'municipiu',regiune:'NE',lat:46.6376,lon:27.7284,
-      pop2021:51988,pop2011:55407,rata_reala_2011_2021:-0.64,
-      pib_eur_cap:5900,coef_hub:0.6},
-    'RO-GL-01':{name:'Galați',judet:'Galați',judet_code:'GL',siruta:'79810',
-      tip:'municipiu_mare',regiune:'SE',lat:45.4353,lon:28.0501,
-      pop2021:233488,pop2011:249432,rata_reala_2011_2021:-0.65,
-      pib_eur_cap:9800,coef_hub:0.95,suprafata_ha:2454},
-    'RO-VN-01':{name:'Focșani',judet:'Vrancea',judet_code:'VN',siruta:'78046',
-      tip:'municipiu',regiune:'SE',lat:45.6963,lon:27.1828,
-      pop2021:74799,pop2011:79315,rata_reala_2011_2021:-0.58,
-      pib_eur_cap:8200,coef_hub:0.8},
-    'RO-CJ-01':{name:'Cluj-Napoca',judet:'Cluj',judet_code:'CJ',siruta:'54984',
-      tip:'municipiu_mare',regiune:'NV',lat:46.7712,lon:23.6236,
-      pop2021:324576,pop2011:324576,rata_reala_2011_2021:0.00,
-      pib_eur_cap:19800,coef_hub:1.8,suprafata_ha:17953,
-      spatii_verzi_mp_loc:14,acoperire_transport:68,autorizatii_2023:1240,
-      temp_medie_2024:10.5,universitati:6},
-    'RO-TM-01':{name:'Timișoara',judet:'Timiș',judet_code:'TM',siruta:'155350',
-      tip:'municipiu_mare',regiune:'V',lat:45.7489,lon:21.2087,
-      pop2021:268000,pop2011:319279,rata_reala_2011_2021:-1.62,
-      pib_eur_cap:18100,coef_hub:1.6,suprafata_ha:12950,
-      spatii_verzi_mp_loc:13,acoperire_transport:64,autorizatii_2023:892},
-    'RO-B-01':{name:'București',judet:'Ilfov',judet_code:'B',siruta:'179141',
-      tip:'capitala',regiune:'B',lat:44.4268,lon:26.1025,
-      pop2021:1716983,pop2011:1677985,rata_reala_2011_2021:0.24,
-      pib_eur_cap:28400,coef_hub:2.0,suprafata_ha:23839,
-      spatii_verzi_mp_loc:9,acoperire_transport:78,autorizatii_2023:4120},
-    'RO-BV-01':{name:'Brașov',judet:'Brașov',judet_code:'BV',siruta:'26895',
-      tip:'municipiu_mare',regiune:'C',lat:45.6427,lon:25.5887,
-      pop2021:253200,pop2011:253200,rata_reala_2011_2021:-0.38,
-      pib_eur_cap:14200,coef_hub:1.3,suprafata_ha:26776,
-      spatii_verzi_mp_loc:17,acoperire_transport:62,autorizatii_2023:320},
-    'RO-CT-01':{name:'Constanța',judet:'Constanța',judet_code:'CT',siruta:'61095',
-      tip:'municipiu_mare',regiune:'SE',lat:44.1598,lon:28.6348,
-      pop2021:283872,pop2011:283872,rata_reala_2011_2021:-0.42,
-      pib_eur_cap:12800,coef_hub:1.3},
-    'RO-SB-01':{name:'Sibiu',judet:'Sibiu',judet_code:'SB',siruta:'141485',
-      tip:'municipiu_mare',regiune:'C',lat:45.7983,lon:24.1256,
-      pop2021:148802,pop2011:155045,rata_reala_2011_2021:-0.41,
-      pib_eur_cap:14800,coef_hub:1.02},
-    'RO-MS-01':{name:'Târgu Mureș',judet:'Mureș',judet_code:'MS',siruta:'152926',
-      tip:'municipiu_mare',regiune:'C',lat:46.5451,lon:24.5575,
-      pop2021:130090,pop2011:134290,rata_reala_2011_2021:-0.32,
-      pib_eur_cap:11200,coef_hub:0.88},
-    'RO-BH-01':{name:'Oradea',judet:'Bihor',judet_code:'BH',siruta:'114294',
-      tip:'municipiu_mare',regiune:'NV',lat:47.0465,lon:21.9189,
-      pop2021:196367,pop2011:206614,rata_reala_2011_2021:-0.50,
-      pib_eur_cap:13500,coef_hub:1.05},
-    'RO-AR-01':{name:'Arad',judet:'Arad',judet_code:'AR',siruta:'9740',
-      tip:'municipiu_mare',regiune:'V',lat:46.1667,lon:21.3167,
-      pop2021:157918,pop2011:172827,rata_reala_2011_2021:-0.90,
-      pib_eur_cap:12800,coef_hub:0.92},
-    'RO-PH-01':{name:'Ploiești',judet:'Prahova',judet_code:'PH',siruta:'131141',
-      tip:'municipiu_mare',regiune:'S',lat:44.9440,lon:26.0194,
-      pop2021:186604,pop2011:209945,rata_reala_2011_2021:-1.18,
-      pib_eur_cap:11500,coef_hub:0.85},
-    'RO-DJ-01':{name:'Craiova',judet:'Dolj',judet_code:'DJ',siruta:'70114',
-      tip:'municipiu_mare',regiune:'SW',lat:44.3302,lon:23.7949,
-      pop2021:254249,pop2011:269506,rata_reala_2011_2021:-0.58,
-      pib_eur_cap:9800,coef_hub:0.9},
-    'RO-IS-02':{name:'Pașcani',judet:'Iași',judet_code:'IS',siruta:'120257',
-      tip:'oras',regiune:'NE',lat:47.2500,lon:26.7228,
-      pop2021:36000,pop2011:41000,rata_reala_2011_2021:-1.30,
-      pib_eur_cap:6500,coef_hub:0.5},
-    'RO-SV-02':{name:'Rădăuți',judet:'Suceava',judet_code:'SV',siruta:'134979',
-      tip:'municipiu',regiune:'NE',lat:47.8432,lon:25.9207,
-      pop2021:22490,pop2011:25737,rata_reala_2011_2021:-1.35,
-      pib_eur_cap:6200,coef_hub:0.6},
-    'RO-SV-03':{name:'Fălticeni',judet:'Suceava',judet_code:'SV',siruta:'75491',
-      tip:'municipiu',regiune:'NE',lat:47.4580,lon:26.3015,
-      pop2021:27290,pop2011:29665,rata_reala_2011_2021:-0.84,
-      pib_eur_cap:6800,coef_hub:0.55},
-  };
-
-  // Adăugăm doar ce lipsește (nu suprascrie datele complete din 20-uats-database.js)
-  Object.keys(_extra).forEach(function(k) {
-    if(!window._RO_CITIES_DB[k]) window._RO_CITIES_DB[k] = _extra[k];
-  });
-
-  // Marcăm DB-ul ca gata și restaurăm city-ul selectat
-  window._roCitiesDbReady = true;
-  if(typeof window._restoreLastCity === 'function') window._restoreLastCity();
-  if(typeof window._hookCityPersistence === 'function') window._hookCityPersistence();
-
-  console.log('[DB Inline] ✅ _RO_CITIES_DB gata:', Object.keys(window._RO_CITIES_DB).length, 'UAT-uri | localStorage:', localStorage.getItem('ux_last_city'));
-})();
-</script>
 
 <script>
-// ── WATCHDOG _RO_CITIES_DB — rulează IMEDIAT, nu după 3 secunde ──────────
+// ── WATCHDOG _RO_CITIES_DB ──────────────────────────────────────────────
 (function() {
-  function _injectFallback() {
-    if(typeof window._RO_CITIES_DB !== 'undefined' &&
-       Object.keys(window._RO_CITIES_DB).length > 10) {
-      // DB OK — notificăm că e gata pentru city restore
-      window._roCitiesDbReady = true;
-      window._restoreLastCity?.();
-      window._hookCityPersistence?.();
-      console.log('[DB Watchdog] ✅ _RO_CITIES_DB OK:', Object.keys(window._RO_CITIES_DB).length, 'UAT-uri');
-      return true;
-    }
-    return false;
-  }
-
-  // Încercăm imediat
-  if(!_injectFallback()) {
-    // DB absent — injectăm date minime ACUM (nu după 3s)
-    console.warn('[DB Watchdog] _RO_CITIES_DB absent — injectez date minime');
-    window._RO_CITIES_DB = window._RO_CITIES_DB || {};
-    var fb = {
-      'RO-IS-01':{name:'Iași',judet:'Iași',judet_code:'IS',siruta:'179132',
-        tip:'municipiu',regiune:'NE',lat:47.1585,lon:27.6014,
-        pop2021:360633,pop2011:290422,rata_reala_2011_2021:0.82,
-        pib_eur_cap:11800,coef_hub:1.4,suprafata_ha:9428,
-        spatii_verzi_mp_loc:11,acoperire_transport:65,autorizatii_2023:420},
-      'RO-CJ-01':{name:'Cluj-Napoca',judet:'Cluj',judet_code:'CJ',siruta:'54984',
-        tip:'municipiu',regiune:'NV',lat:46.7712,lon:23.6236,
-        pop2021:324576,pop2011:324576,rata_reala_2011_2021:0.00,
-        pib_eur_cap:19800,coef_hub:1.8,suprafata_ha:17953,
-        spatii_verzi_mp_loc:14,acoperire_transport:68,autorizatii_2023:580},
-      'RO-TM-01':{name:'Timișoara',judet:'Timiș',judet_code:'TM',siruta:'155350',
-        tip:'municipiu',regiune:'V',lat:45.7489,lon:21.2087,
-        pop2021:268000,pop2011:319279,rata_reala_2011_2021:-1.62,
-        pib_eur_cap:18100,coef_hub:1.6,suprafata_ha:12950,
-        spatii_verzi_mp_loc:13,acoperire_transport:64,autorizatii_2023:490},
-      'RO-B-01':{name:'București',judet:'Ilfov',judet_code:'B',siruta:'179141',
-        tip:'municipiu',regiune:'C',lat:44.4268,lon:26.1025,
-        pop2021:1716983,pop2011:1677985,rata_reala_2011_2021:0.24,
-        pib_eur_cap:28400,coef_hub:2.0,suprafata_ha:23839,
-        spatii_verzi_mp_loc:9,acoperire_transport:78,autorizatii_2023:2400},
-      'RO-CT-01':{name:'Constanța',judet:'Constanța',judet_code:'CT',siruta:'61095',
-        tip:'municipiu',regiune:'SE',lat:44.1598,lon:28.6348,
-        pop2021:283872,pop2011:283872,rata_reala_2011_2021:-0.42,
-        pib_eur_cap:12800,coef_hub:1.3,suprafata_ha:7543,
-        spatii_verzi_mp_loc:10,acoperire_transport:58,autorizatii_2023:380},
-      'RO-BT-01':{name:'Botoșani',judet:'Botoșani',judet_code:'BT',siruta:'20964',
-        tip:'municipiu',regiune:'NE',lat:47.7455,lon:26.6657,
-        pop2021:106847,pop2011:115523,rata_reala_2011_2021:-0.77,
-        pib_eur_cap:7200,coef_hub:0.8,suprafata_ha:4128,
-        spatii_verzi_mp_loc:8,acoperire_transport:55,autorizatii_2023:180},
-      'RO-BV-01':{name:'Brașov',judet:'Brașov',judet_code:'BV',siruta:'26895',
-        tip:'municipiu',regiune:'C',lat:45.6427,lon:25.5887,
-        pop2021:253200,pop2011:253200,rata_reala_2011_2021:-0.38,
-        pib_eur_cap:14200,coef_hub:1.3,suprafata_ha:26776,
-        spatii_verzi_mp_loc:17,acoperire_transport:62,autorizatii_2023:320},
-      'RO-SV-01':{name:'Suceava',judet:'Suceava',judet_code:'SV',siruta:'148045',
-        tip:'municipiu',regiune:'NE',lat:47.6635,lon:26.2732,
-        pop2021:92121,pop2011:92959,rata_reala_2011_2021:-0.09,
-        pib_eur_cap:8100,coef_hub:0.9,suprafata_ha:5193,
-        spatii_verzi_mp_loc:9,acoperire_transport:52,autorizatii_2023:210},
-    };
-    Object.assign(window._RO_CITIES_DB, fb);
-    window._roCitiesDbReady = true;
-    console.log('[DB Watchdog] ✅ Date minime injectate:', Object.keys(window._RO_CITIES_DB).length, 'UAT-uri');
-
-    // Acum că DB-ul e gata, restaurăm city-ul
-    window._restoreLastCity?.();
-    window._hookCityPersistence?.();
-
-    // Re-verificăm după 2s dacă 20-uats-database.js a încărcat date complete
-    setTimeout(function() {
-      if(Object.keys(window._RO_CITIES_DB).length > 20) {
-        console.log('[DB Watchdog] ✅ DB complet:', Object.keys(window._RO_CITIES_DB).length, 'UAT-uri');
-        // Re-aplicăm city restore cu DB-ul complet
-        window._restoreLastCity?.();
-      }
-    }, 2000);
-  }
-
-  // Hook: când 20-uats-database.js setează _RO_CITIES_DB, re-restaurăm city
   window.addEventListener('load', function() {
     setTimeout(function() {
-      if(Object.keys(window._RO_CITIES_DB || {}).length > 20) {
-        window._restoreLastCity?.();
+      if(typeof window._RO_CITIES_DB !== 'undefined' &&
+         Object.keys(window._RO_CITIES_DB).length > 10) {
+        console.log('[DB Watchdog] ✅ _RO_CITIES_DB OK:', Object.keys(window._RO_CITIES_DB).length, 'UAT-uri');
+        return;
       }
-    }, 500);
+      // Nu reincarcam fisierul (cauzeaza SyntaxError la const redeclarat)
+      // In schimb injectam date minime pentru functionare de baza
+      console.warn('[DB Watchdog] _RO_CITIES_DB absent — injectez date minime');
+      window._RO_CITIES_DB = window._RO_CITIES_DB || {};
+      var fb = {
+        'RO-IS-01':{name:'Iași',judet:'Iași',judet_code:'IS',siruta:'179132',
+          tip:'municipiu',regiune:'NE',lat:47.1585,lon:27.6014,
+          pop2021:360633,pop2011:290422,rata_reala_2011_2021:0.82,
+          pib_eur_cap:11800,coef_hub:1.4,suprafata_ha:9428,
+          spatii_verzi_mp_loc:11,acoperire_transport:65,autorizatii_2023:420},
+        'RO-CJ-01':{name:'Cluj-Napoca',judet:'Cluj',judet_code:'CJ',siruta:'54984',
+          tip:'municipiu',regiune:'NV',lat:46.7712,lon:23.6236,
+          pop2021:324576,pop2011:324576,rata_reala_2011_2021:0.00,
+          pib_eur_cap:19800,coef_hub:1.8,suprafata_ha:17953,
+          spatii_verzi_mp_loc:14,acoperire_transport:68,autorizatii_2023:580},
+        'RO-TM-01':{name:'Timișoara',judet:'Timiș',judet_code:'TM',siruta:'155350',
+          tip:'municipiu',regiune:'V',lat:45.7489,lon:21.2087,
+          pop2021:268000,pop2011:319279,rata_reala_2011_2021:-1.62,
+          pib_eur_cap:18100,coef_hub:1.6,suprafata_ha:12950,
+          spatii_verzi_mp_loc:13,acoperire_transport:64,autorizatii_2023:490},
+        'RO-B-01':{name:'București',judet:'Ilfov',judet_code:'B',siruta:'179141',
+          tip:'municipiu',regiune:'C',lat:44.4268,lon:26.1025,
+          pop2021:1716983,pop2011:1677985,rata_reala_2011_2021:0.24,
+          pib_eur_cap:28400,coef_hub:2.0,suprafata_ha:23839,
+          spatii_verzi_mp_loc:9,acoperire_transport:78,autorizatii_2023:2400},
+        'RO-CT-01':{name:'Constanța',judet:'Constanța',judet_code:'CT',siruta:'61095',
+          tip:'municipiu',regiune:'SE',lat:44.1598,lon:28.6348,
+          pop2021:283872,pop2011:283872,rata_reala_2011_2021:-0.42,
+          pib_eur_cap:12800,coef_hub:1.3,suprafata_ha:7543,
+          spatii_verzi_mp_loc:10,acoperire_transport:58,autorizatii_2023:380},
+        'RO-BT-01':{name:'Botoșani',judet:'Botoșani',judet_code:'BT',siruta:'20964',
+          tip:'municipiu',regiune:'NE',lat:47.7455,lon:26.6657,
+          pop2021:106847,pop2011:115523,rata_reala_2011_2021:-0.77,
+          pib_eur_cap:7200,coef_hub:0.8,suprafata_ha:4128,
+          spatii_verzi_mp_loc:8,acoperire_transport:55,autorizatii_2023:180},
+        'RO-BV-01':{name:'Brașov',judet:'Brașov',judet_code:'BV',siruta:'26895',
+          tip:'municipiu',regiune:'C',lat:45.6427,lon:25.5887,
+          pop2021:253200,pop2011:253200,rata_reala_2011_2021:-0.38,
+          pib_eur_cap:14200,coef_hub:1.3,suprafata_ha:26776,
+          spatii_verzi_mp_loc:17,acoperire_transport:62,autorizatii_2023:320},
+        'RO-SV-01':{name:'Suceava',judet:'Suceava',judet_code:'SV',siruta:'148045',
+          tip:'municipiu',regiune:'NE',lat:47.6635,lon:26.2732,
+          pop2021:92121,pop2011:92959,rata_reala_2011_2021:-0.09,
+          pib_eur_cap:8100,coef_hub:0.9,suprafata_ha:5193,
+          spatii_verzi_mp_loc:9,acoperire_transport:52,autorizatii_2023:210},
+      };
+      Object.assign(window._RO_CITIES_DB, fb);
+      console.log('[DB Watchdog] ✅ Date minime injectate:', Object.keys(window._RO_CITIES_DB).length, 'UAT-uri');
+    }, 3000);
   });
 })();
 </script>  <script src="js/21-cloud-sync.js?v=20260520c"></script>
@@ -3111,6 +2937,17 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
     title="Portofoliu proiecte strategice — 6 axe · costuri · fazare · FEDR+PNRR">
     📋 Portofoliu Strategic 2025-2055
     <div style="font-size:10px;color:rgba(34,197,94,.6);font-weight:400">6 axe · costuri · fazare · FEDR+PNRR+PPP</div>
+  </button>
+
+  <button onclick="window._launchPUGSuceava?.();_closeAllMenusAndOverlay()"
+    style="display:block;width:100%;text-align:left;background:rgba(249,115,22,.08);
+      border:none;color:#f97316;padding:10px 12px;cursor:pointer;border-radius:8px;
+      font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
+    onmouseover="this.style.background='rgba(249,115,22,.18)'"
+    onmouseout="this.style.background='rgba(249,115,22,.08)'"
+    title="PUG Suceava vectorizat — 713 UTR-uri · 42 categorii · Stereo70→WGS84">
+    🏙 PUG Suceava — 713 UTR-uri
+    <div style="font-size:10px;color:rgba(249,115,22,.6);font-weight:400">42 categorii · Stereo70→WGS84 · date reale</div>
   </button>
 
   <button onclick="window.openPUGImport?.();_closeAllMenusAndOverlay()"
@@ -3437,31 +3274,21 @@ setTimeout(() => {
   }
 }, 5000);
 
-// Fallback robust pentru launch Cinema v2 — folosește ÎNTOTDEAUNA UAT-ul activ
+// Fallback robust pentru launch Cinema v2
 window._launchCinemaV2 = function() {
-  // Citim cityKey FRESH — nu din closure
-  const k = (window._SceneEngine?._getCityKey?.()) ||
+  const k = window._SceneEngine?._getCityKey?.() ||
             window.TCI?.cityKey ||
-            localStorage.getItem('ux_last_city') ||
             window._ProjectionEngine?.currentCity ||
-            (window._RO_CITIES_DB ? Object.keys(window._RO_CITIES_DB)[0] : null) ||
+            Object.keys(window._RO_CITIES_DB||{})[0] ||
             'RO-IS-01';
-
-  const db = window._RO_CITIES_DB || {};
-  const cityName = db[k]?.name || k;
-
-  // Sincronizăm toate modulele
-  if(window._ProjectionEngine) window._ProjectionEngine.currentCity = k;
-  if(window._SceneEngine?._cityKey !== undefined) window._SceneEngine._cityKey = k;
-
-  console.log('[Cinema v2] _launchCinemaV2 → UAT:', k, '—', cityName);
-
+  
   if(window._SceneEngine && typeof window._SceneEngine.launch === 'function') {
+    console.log('[Cinema v2] Launch pentru:', k);
     window._SceneEngine.launch(k);
     return true;
   }
-
-  console.error('[Cinema v2] _SceneEngine indisponibil. Status:', window._UrbanXStatus?.());
+  
+  console.error('[Cinema v2] _SceneEngine indisponibil. Status:', window._UrbanXStatus());
   ss?.('❌ Cinema v2 nu s-a inițializat. Verifică consola (F12) sau reîncarcă pagina.');
   return false;
 };
@@ -3890,21 +3717,12 @@ window.addEventListener('load', function() {
   const CITY_KEY = 'ux_last_city';
   const SCN_KEY  = 'ux_last_scenario';
 
-  // Restauram la init — suprascrie si valoarea default 'iasi' din TCI
+  // Restauram la init
   window._restoreLastCity = function() {
-    const saved = localStorage.getItem(CITY_KEY);
-    if(!saved) return; // nimic salvat = lasam default
-    if(window.TCI) {
-      // Suprascrie INTOTDEAUNA — inclusiv 'iasi' hardcodat din 17-tci-cinema.js
-      try {
-        // Daca cityKey e deja hookedat cu defineProperty, scriem direct
-        window.TCI.cityKey = saved;
-      } catch(e) {
-        // Fallback: scriem in _v direct daca e deja sealed
-        window.TCI._cityKey_override = saved;
-      }
+    const saved = localStorage.getItem(CITY_KEY) || 'RO-IS-01';
+    if(window.TCI && !window.TCI.cityKey) {
+      window.TCI.cityKey = saved;
       if(window._ProjectionEngine) _ProjectionEngine.currentCity = saved;
-      console.log('[UrbanX] City restaurat din localStorage:', saved);
     }
   };
 
@@ -3912,19 +3730,7 @@ window.addEventListener('load', function() {
   window._hookCityPersistence = function() {
     if(!window.TCI || window.TCI._ph) return;
     window.TCI._ph = true;
-    // IMPORTANT: preferăm localStorage față de 'iasi' hardcodat în TCI
-    const _fromLS = localStorage.getItem(CITY_KEY);
-    const _fromTCI = window.TCI.cityKey;
-    // 'iasi' e valoarea default din 17-tci-cinema.js — o ignorăm dacă avem ceva mai bun
-    const _defaultVal = (_fromTCI === 'iasi') ? null : _fromTCI;
-    let _v = _fromLS || _defaultVal || 'RO-IS-01';
-
-    // Dacă TCI are 'iasi' dar localStorage are altceva → folosim localStorage
-    if(_fromTCI === 'iasi' && _fromLS && _fromLS !== 'iasi') {
-      _v = _fromLS;
-      console.log('[UrbanX] Override iasi default → localStorage:', _v);
-    }
-
+    let _v = window.TCI.cityKey || localStorage.getItem(CITY_KEY) || 'RO-IS-01';
     try {
       Object.defineProperty(window.TCI, 'cityKey', {
         get()  { return _v; },
@@ -3937,10 +3743,10 @@ window.addEventListener('load', function() {
           const city = window._RO_CITIES_DB?.[v];
           if(city) {
             document.querySelectorAll('[data-city-name]').forEach(el => el.textContent = city.name);
+            const iasi = document.getElementById('btn-uat-iasi') ||
+                         document.querySelector('[data-uat="RO-IS-01"]');
+            // nu mai selectam Iasi default daca user a ales altceva
           }
-          // Actualizeaza titlul UTR drawer
-          const uatInd = document.getElementById('uat-indicator');
-          if(uatInd && city) uatInd.textContent = city.name;
         },
         configurable: true, enumerable: true
       });
@@ -3992,1230 +3798,5 @@ window.addEventListener('load', function() {
   if(!apply()){[300,800,2000,5000].forEach(d=>setTimeout(apply,d));}
 })();
 </script>
-
-<script>
-// ═══════════════════════════════════════════════════════════════════════════
-// URBANX PATCHES v20260520 — FIX consolidat sesiunea 20 mai 2026
-// Autori: TSS·FG
-// ═══════════════════════════════════════════════════════════════════════════
-
-(function(){
-'use strict';
-
-// ── PATCH 1: UTR Drawer — titlu dinamic per UAT ────────────────────────────
-// Problema: titlul rămâne hardcodat "PUG Iași" indiferent de UAT selectat
-// Fix: hook pe TCI.cityKey setter → actualizăm titlul la fiecare schimbare UAT
-
-function _updateUTRDrawerTitle(cityKey) {
-  const db = window._RO_CITIES_DB || {};
-  const city = db[cityKey];
-  const name = city ? city.name : (cityKey || 'Iași');
-  const titleEl = document.getElementById('utr-drawer-title');
-  const footerEl = document.getElementById('footer-pug-label');
-  if (titleEl) titleEl.textContent = '🗺 Zone UTR — PUG ' + name + ' · Click pe UTR pentru a-l evidenția și a vedea regulamentul';
-  if (footerEl) footerEl.textContent = 'PUG ' + name;
-  // Actualizăm și status bar-ul din drawer (ex: "42 tipuri UTR · 713 zone")
-  const legEl = document.getElementById('utr-leg');
-  if (legEl && legEl.textContent && legEl.textContent.includes('zone')) {
-    // nu suprascriem dacă are deja conținut live — va fi actualizat de modulul UTR
-  }
-}
-
-// Hook pe city persistence — se apelează la orice schimbare de UAT
-const _origHookCP = window._hookCityPersistence;
-window._hookCityPersistence = function() {
-  if (_origHookCP) _origHookCP.call(this);
-  // Verificăm periodic dacă TCI.cityKey s-a schimbat
-  let _lastCity = null;
-  setInterval(function() {
-    const k = window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
-    if (k !== _lastCity) {
-      _lastCity = k;
-      _updateUTRDrawerTitle(k);
-    }
-  }, 800);
-};
-
-// Aplicăm imediat la load
-window.addEventListener('load', function() {
-  setTimeout(function() {
-    const k = window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
-    _updateUTRDrawerTitle(k);
-  }, 1500);
-  // Și la orice apăsare a butonului UTR
-  const btnUTR = document.getElementById('btnUTR');
-  if (btnUTR) {
-    const _origClick = btnUTR.onclick;
-    btnUTR.addEventListener('click', function() {
-      const k = window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
-      _updateUTRDrawerTitle(k);
-    }, true);
-  }
-});
-
-
-// ── PATCH 2: UTR Chips — culori standardizate conform HG 525/1996 ─────────
-// Problema: pe Suceava chips-urile apar gri/fără culoare; pe Iași sunt colorate
-// Fix: override renderUTRChips / _renderUTRChips cu paletă completă de culori
-
-window._UTR_COLORS = window._UTR_COLORS || {
-  // Locuire
-  'L':    { fill:'rgba(255,220,120,0.25)', border:'#f59e0b' },
-  'LA':   { fill:'rgba(255,220,120,0.25)', border:'#f59e0b' },
-  'L1':   { fill:'rgba(255,235,150,0.25)', border:'#fbbf24' },
-  'L1A':  { fill:'rgba(255,235,150,0.25)', border:'#fbbf24' },
-  'L1B':  { fill:'rgba(255,215,100,0.25)', border:'#f59e0b' },
-  'L1C':  { fill:'rgba(255,200,80,0.25)',  border:'#d97706' },
-  'L2':   { fill:'rgba(255,190,60,0.25)',  border:'#d97706' },
-  'L3':   { fill:'rgba(255,170,40,0.25)',  border:'#b45309' },
-  'L4':   { fill:'rgba(255,150,30,0.25)',  border:'#92400e' },
-  'LB':   { fill:'rgba(255,220,120,0.25)', border:'#f59e0b' },
-  'LC':   { fill:'rgba(255,200,90,0.25)',  border:'#d97706' },
-  'LI':   { fill:'rgba(255,230,140,0.2)',  border:'#fbbf24' },
-  // Mixtă
-  'M':    { fill:'rgba(251,191,36,0.2)',   border:'#d4af37' },
-  'M1':   { fill:'rgba(251,191,36,0.2)',   border:'#d4af37' },
-  'M1B':  { fill:'rgba(234,179,8,0.2)',    border:'#ca8a04' },
-  'M2':   { fill:'rgba(245,158,11,0.2)',   border:'#b45309' },
-  'M3':   { fill:'rgba(217,119,6,0.2)',    border:'#92400e' },
-  'M4':   { fill:'rgba(180,83,9,0.2)',     border:'#7c2d12' },
-  'MC':   { fill:'rgba(251,191,36,0.15)',  border:'#d4af37' },
-  'MI':   { fill:'rgba(245,158,11,0.15)',  border:'#b45309' },
-  // Centre
-  'C':    { fill:'rgba(249,115,22,0.2)',   border:'#ea580c' },
-  'C0':   { fill:'rgba(249,115,22,0.2)',   border:'#ea580c' },
-  'C1':   { fill:'rgba(251,146,60,0.2)',   border:'#f97316' },
-  'C2':   { fill:'rgba(253,186,116,0.2)',  border:'#fb923c' },
-  'C2A':  { fill:'rgba(253,186,116,0.2)',  border:'#fb923c' },
-  'C2B':  { fill:'rgba(252,165,165,0.15)', border:'#f87171' },
-  'C2C':  { fill:'rgba(248,113,113,0.15)', border:'#ef4444' },
-  'C3':   { fill:'rgba(239,68,68,0.2)',    border:'#dc2626' },
-  'CC':   { fill:'rgba(249,115,22,0.15)',  border:'#ea580c' },
-  // Industriale
-  'I':    { fill:'rgba(148,163,184,0.2)',  border:'#94a3b8' },
-  'Is':   { fill:'rgba(148,163,184,0.2)',  border:'#94a3b8' },
-  // Verzi
-  'V':    { fill:'rgba(74,222,128,0.2)',   border:'#22c55e' },
-  'V1':   { fill:'rgba(74,222,128,0.2)',   border:'#22c55e' },
-  'V1A':  { fill:'rgba(74,222,128,0.2)',   border:'#22c55e' },
-  'V1B':  { fill:'rgba(134,239,172,0.2)',  border:'#4ade80' },
-  'V2':   { fill:'rgba(34,197,94,0.2)',    border:'#16a34a' },
-  'V2A':  { fill:'rgba(34,197,94,0.2)',    border:'#16a34a' },
-  'V2B':  { fill:'rgba(21,128,61,0.2)',    border:'#15803d' },
-  'V3':   { fill:'rgba(20,83,45,0.2)',     border:'#166534' },
-  'V4':   { fill:'rgba(134,239,172,0.15)', border:'#4ade80' },
-  // Gospodărire
-  'G':    { fill:'rgba(96,165,250,0.15)',  border:'#60a5fa' },
-  'G1':   { fill:'rgba(96,165,250,0.15)',  border:'#60a5fa' },
-  'G2':   { fill:'rgba(59,130,246,0.15)',  border:'#3b82f6' },
-  // Turism
-  'T':    { fill:'rgba(192,132,252,0.2)',  border:'#c084fc' },
-  'T1':   { fill:'rgba(192,132,252,0.2)',  border:'#c084fc' },
-  'T2':   { fill:'rgba(167,139,250,0.2)',  border:'#a78bfa' },
-  // Transport
-  'TR':   { fill:'rgba(148,163,184,0.15)', border:'#94a3b8' },
-  'TC':   { fill:'rgba(148,163,184,0.15)', border:'#94a3b8' },
-  // Agro / Producție
-  'A':    { fill:'rgba(163,230,53,0.2)',   border:'#84cc16' },
-  'A1':   { fill:'rgba(163,230,53,0.2)',   border:'#84cc16' },
-  'A2':   { fill:'rgba(132,204,22,0.2)',   border:'#65a30d' },
-  // Zone Centrale Protejate
-  'ZCP':  { fill:'rgba(251,191,36,0.25)',  border:'#f59e0b' },
-  'ZCP1': { fill:'rgba(251,191,36,0.25)',  border:'#f59e0b' },
-  'ZCP2': { fill:'rgba(245,158,11,0.25)',  border:'#d97706' },
-  'ZCP3': { fill:'rgba(217,119,6,0.25)',   border:'#b45309' },
-  'ZCP4': { fill:'rgba(180,83,9,0.25)',    border:'#92400e' },
-  'ZCP5': { fill:'rgba(251,191,36,0.2)',   border:'#d4af37' },
-  'ZCP6': { fill:'rgba(212,175,55,0.2)',   border:'#ca8a04' },
-  // Sport
-  'S':    { fill:'rgba(52,211,153,0.2)',   border:'#34d399' },
-  // Instituții publice
-  'F':    { fill:'rgba(96,165,250,0.2)',   border:'#3b82f6' },
-  // DEFAULT
-  'DEFAULT': { fill:'rgba(100,116,139,0.15)', border:'#64748b' }
-};
-
-// Patch pe funcția care rendează chips-urile UTR (va fi apelată de tci-pug-import.js)
-// Interceptăm inserția în #utr-chips și re-colorăm elementele fără culoare
-const _utrChipsEl = document.getElementById('utr-chips');
-if (_utrChipsEl) {
-  const _chipObs = new MutationObserver(function() {
-    const chips = _utrChipsEl.querySelectorAll('.utr-chip');
-    chips.forEach(function(chip) {
-      // Dacă chip-ul are culoare gri/nulă, aplicăm culoarea din paletă
-      const utrCode = chip.dataset.utr || chip.textContent.trim().split(/\s/)[0];
-      if (!utrCode) return;
-      // Extragem codul base (ex: "C2C" din "C2C (12 zone)")
-      const code = utrCode.replace(/\s.*/, '').toUpperCase();
-      const col = window._UTR_COLORS[code] || _getUTRColorFuzzy(code);
-      if (!col) return;
-      // Aplicăm doar dacă e gri (culoarea default)
-      const cs = window.getComputedStyle(chip);
-      const borderColor = chip.style.borderColor || cs.borderColor;
-      if (!chip.style.borderColor || borderColor === 'rgb(100, 116, 139)' || borderColor === 'transparent') {
-        chip.style.borderColor = col.border;
-        chip.style.backgroundColor = col.fill;
-        chip.style.color = col.border;
-      }
-    });
-  });
-  _chipObs.observe(_utrChipsEl, { childList: true, subtree: true });
-}
-
-function _getUTRColorFuzzy(code) {
-  if (!code) return null;
-  // Caută prefix cel mai lung care se potrivește
-  for (let len = code.length; len >= 1; len--) {
-    const prefix = code.substring(0, len);
-    if (window._UTR_COLORS[prefix]) return window._UTR_COLORS[prefix];
-  }
-  return window._UTR_COLORS['DEFAULT'];
-}
-window._getUTRColor = _getUTRColorFuzzy;
-
-
-// ── PATCH 3: TCI Cinematic — zones?.slice is not a function ───────────────
-// Problema: zones e un obiect {zones:[...]} sau {data:[...]} în loc de array direct
-// Fix: normalizăm zones la array oriunde e folosit în _SceneEngine
-
-function _normalizeZones(z) {
-  if (!z) return [];
-  if (Array.isArray(z)) return z;
-  if (z.zones && Array.isArray(z.zones)) return z.zones;
-  if (z.data && Array.isArray(z.data)) return z.data;
-  if (z.features && Array.isArray(z.features)) return z.features; // GeoJSON
-  // Dacă e un obiect cu chei numerice sau string (hash map), convertim la array
-  const vals = Object.values(z);
-  if (vals.length > 0 && typeof vals[0] === 'object') return vals;
-  return [];
-}
-window._normalizeZones = _normalizeZones;
-
-// Patch pe _SceneEngine după ce se încarcă
-function _patchSceneEngine() {
-  if (!window._SceneEngine) return false;
-  const SE = window._SceneEngine;
-
-  // Wrappăm metoda principală launch/render să prindă erori și să normalizeze zones
-  const _origLaunch = SE.launch;
-  if (_origLaunch && !SE._patched_launch) {
-    SE._patched_launch = true;
-    SE.launch = function(cityKey) {
-      // Normalizăm zones în datele stocate
-      if (SE._cityData) {
-        if (SE._cityData.zones) SE._cityData.zones = _normalizeZones(SE._cityData.zones);
-        if (SE._cityData.zoneData) SE._cityData.zoneData = _normalizeZones(SE._cityData.zoneData);
-      }
-      try {
-        return _origLaunch.call(this, cityKey);
-      } catch(e) {
-        console.warn('[Cinema] launch error prinsă:', e.message);
-        // Continuăm cu scena următoare dacă e posibil
-        if (SE._currentScene != null && SE._scenes) {
-          SE._currentScene = Math.min(SE._currentScene + 1, SE._scenes.length - 1);
-        }
-      }
-    };
-  }
-
-  // Patch pe _renderScene / renderScene
-  ['_renderScene', 'renderScene', '_s19_masterplan', '_runScene'].forEach(function(method) {
-    if (SE[method] && !SE['_patched_' + method]) {
-      SE['_patched_' + method] = true;
-      const orig = SE[method];
-      SE[method] = function() {
-        // Normalizăm zones în context
-        if (SE._cityData?.zones) SE._cityData.zones = _normalizeZones(SE._cityData.zones);
-        try {
-          return orig.apply(this, arguments);
-        } catch(e) {
-          console.warn('[Cinema] ' + method + ' error prinsă (scena continuă):', e.message);
-          // Nu blocăm — avansăm la scena următoare
-          if (typeof SE._nextScene === 'function') {
-            setTimeout(function() { try { SE._nextScene(); } catch(_) {} }, 500);
-          } else if (SE._timer != null) {
-            clearTimeout(SE._timer);
-            if (SE._currentScene != null && SE._scenes) {
-              SE._currentScene = (SE._currentScene || 0) + 1;
-              if (SE._currentScene < SE._scenes.length) {
-                SE._timer = setTimeout(function() {
-                  try { SE._runScene?.(SE._currentScene); } catch(_) {}
-                }, 200);
-              }
-            }
-          }
-        }
-      };
-    }
-  });
-  return true;
-}
-
-// Aplicăm patch când SceneEngine e disponibil
-let _scenePatchTries = 0;
-const _scenePatchInterval = setInterval(function() {
-  if (++_scenePatchTries > 40) { clearInterval(_scenePatchInterval); return; }
-  if (_patchSceneEngine()) clearInterval(_scenePatchInterval);
-}, 500);
-
-
-// ── PATCH 4: rgba cu virgulă în loc de spațiu → eroare CanvasGradient ─────
-// Problema: 'rgba(100,120,150,4)88' — opacitate concatenată greșit
-// Fix: override global addColorStop pentru a sanitiza culoarea
-
-(function() {
-  const _origAddColorStop = CanvasGradient.prototype.addColorStop;
-  CanvasGradient.prototype.addColorStop = function(offset, color) {
-    if (typeof color === 'string') {
-      // Fixăm rgba cu cifre concatenate ex: 'rgba(100,120,150,4)88' → 'rgba(100,120,150,0.88)'
-      color = color.replace(/rgba?\(([^)]+)\)(\d+)/g, function(_, inner, extra) {
-        const parts = inner.split(',').map(s => s.trim());
-        if (parts.length === 4) {
-          // Opacitatea corectă: dacă ultima parte e > 1, probabil e procent/100
-          const a = parseFloat(parts[3]);
-          const extraA = parseFloat('0.' + extra);
-          parts[3] = isNaN(extraA) ? Math.min(1, a/100) : extraA;
-        } else if (parts.length === 3 && extra) {
-          const extraA = parseFloat('0.' + extra);
-          parts.push(isNaN(extraA) ? 0.88 : extraA);
-        }
-        return 'rgba(' + parts.join(',') + ')';
-      });
-      // Fixăm și opacitatea > 1: rgba(r,g,b,88) → rgba(r,g,b,0.88)
-      color = color.replace(/rgba?\((\d+),(\d+),(\d+),(\d+)\)/g, function(_, r, g, b, a) {
-        const af = parseFloat(a);
-        return 'rgba(' + r + ',' + g + ',' + b + ',' + (af > 1 ? af/100 : af) + ')';
-      });
-      // Fixăm spații lipsă în rgba: rgba(100,120,150,.4) → valid
-      color = color.replace(/rgba?\s*\(/g, 'rgba(');
-    }
-    try {
-      return _origAddColorStop.call(this, Math.max(0, Math.min(1, offset)), color);
-    } catch(e) {
-      console.warn('[UTR/Cinema] addColorStop salvat de patch:', color, e.message);
-      // Fallback la o culoare transparentă dacă tot nu merge
-      try { return _origAddColorStop.call(this, Math.max(0, Math.min(1, offset)), 'rgba(100,120,150,0.4)'); } catch(_) {}
-    }
-  };
-})();
-
-
-// ── PATCH 5: Masterplan — PIB/locuitor = 0 ────────────────────────────────
-// Problema: pib_eur_cap nereîncărcat din _RO_CITIES_DB sau DataEngine înainte de build PDF
-// Fix: asigurăm că înainte de generateMasterplan, cityData are pib_eur_cap nenul
-
-const _origGenMasterplan = window.generateMasterplan;
-window.generateMasterplan = function() {
-  // Asigurăm date corecte din DB
-  const k = window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
-  const db = window._RO_CITIES_DB || {};
-  const city = db[k];
-  if (city && window.TCI) {
-    // Injectăm valorile corecte în TCI dacă sunt 0 sau lipsesc
-    if (!TCI.pib || TCI.pib < 1) TCI.pib = city.pib_eur_cap || 0;
-    if (!TCI.pop || TCI.pop < 1) TCI.pop = city.pop2021 || 0;
-    if (!TCI.cityName) TCI.cityName = city.name;
-    // Injectăm și în DataEngine dacă există
-    if (window._DataEngine?._cache?.[k]) {
-      const cached = _DataEngine._cache[k];
-      if (!cached.pib_eur_cap || cached.pib_eur_cap < 1) cached.pib_eur_cap = city.pib_eur_cap || 0;
-      if (!cached.gdpPerCapita || cached.gdpPerCapita < 1) cached.gdpPerCapita = city.pib_eur_cap || 0;
-    }
-  }
-  if (typeof _origGenMasterplan === 'function') {
-    return _origGenMasterplan.apply(this, arguments);
-  } else {
-    // Fallback dacă generateMasterplan a fost definit inline
-    const _pkg = window._TCIMasterplanPDF || window._MasterplanPDF;
-    if (_pkg?.generate) return _pkg.generate(k, 'S2');
-    ss?.('⏳ Masterplan se inițializează — mai încearcă în 3 secunde');
-  }
-};
-
-
-// ── PATCH 6: Botoșani în meniu PUG — ascundem datele de debug din UI ──────
-// Problema: _RO_CITIES_DB fallback injectează Botoșani vizibil în UAT selector
-// Fix: nu e un bug vizibil direct în meniu; Botoșani e în DB din motive legitime
-// (e unul din cele 8 UAT-uri de fallback) — nu facem nimic, e corect să fie acolo.
-// Dacă apare în PUG selector — e bug în tci-pug-import.js, nu în index.html
-
-
-// ── PATCH 7: UTR colorate la toggle buton UTR ─────────────────────────────
-// Asigurăm că la apăsarea butonului UTR, chips-urile sunt re-colorate
-const _btnUTR = document.getElementById('btnUTR');
-if (_btnUTR && !_btnUTR._colorPatchApplied) {
-  _btnUTR._colorPatchApplied = true;
-  _btnUTR.addEventListener('click', function() {
-    setTimeout(function() {
-      const chips = document.querySelectorAll('#utr-chips .utr-chip');
-      chips.forEach(function(chip) {
-        const utrCode = (chip.dataset.utr || chip.textContent.trim().split(/[\s(]/)[0]).toUpperCase();
-        const col = _getUTRColorFuzzy(utrCode);
-        if (col && (!chip.style.borderColor || chip.style.borderColor === 'rgb(100, 116, 139)')) {
-          chip.style.borderColor = col.border;
-          chip.style.backgroundColor = col.fill;
-          chip.style.color = col.border;
-        }
-      });
-    }, 300);
-  });
-}
-
-
-// ── PATCH 8: Cinematic — scene > 17 continuă după eroare ─────────────────
-// Wrappăm _launchCinemaV2 pentru a prinde erori globale
-
-const _origLaunchCinema = window._launchCinemaV2;
-window._launchCinemaV2 = function() {
-  try {
-    if (typeof _origLaunchCinema === 'function') return _origLaunchCinema.apply(this, arguments);
-  } catch(e) {
-    console.warn('[Cinema] _launchCinemaV2 eroare la start:', e.message);
-  }
-  // Fallback: folosim direct _SceneEngine dacă există
-  const k = window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
-  if (window._SceneEngine?.launch) {
-    try { window._SceneEngine.launch(k); } catch(e2) {
-      console.warn('[Cinema] _SceneEngine.launch fallback eroare:', e2.message);
-      ss?.('⚠ Cinematic: eroare la scenă — încearcă din nou sau schimbă UAT-ul');
-    }
-  }
-};
-
-
-// ── LOG final ──────────────────────────────────────────────────────────────
-console.log('[UrbanX Patches v20260520] ✅ 8 patch-uri aplicate:',
-  '1-UTR titlu dinamic',
-  '2-UTR culori chips',
-  '3-Cinematic zones normalize',
-  '4-Canvas rgba fix',
-  '5-Masterplan PIB fix',
-  '6-Botosani note',
-  '7-UTR recolor on click',
-  '8-Cinema error recovery'
-);
-
-})(); // end IIFE
-</script>
-
-
-<script>
-// ═══════════════════════════════════════════════════════════════════════════
-// URBANX UTR SYSTEM PATCH v20260520b
-// Rezolvă:
-//  1. _launchPUGSuceava — încarcă PUG Suceava cu fit bounds corect
-//  2. btnUTR — handler complet: încarcă PUG UAT activ + randează chips UTR
-//  3. _renderUTRChips — chips colorate corect cu paleta HG 525/1996
-//  4. PUG Iași nu mai apare când ești pe alt UAT
-// ═══════════════════════════════════════════════════════════════════════════
-(function(){
-'use strict';
-
-// ── Paleta culori UTR (completă, cover toate codurile din PUG RO) ──────────
-const _C = {
-  // Locuire
-  'L':'#FDE68A','L1':'#FDE68A','L1A':'#FDE68A','L1B':'#FCD34D','L1C':'#F59E0B',
-  'L2':'#FCD34D','L3':'#F59E0B','L4':'#D97706','LB':'#FDE68A','LC':'#FCD34D',
-  'LA':'#FDE68A','LI':'#FEF3C7','LS':'#FBBF24',
-  // Mixt
-  'M':'#FCA5A1','M1':'#FCA5A1','M1B':'#F87171','M2':'#EF4444',
-  'M3':'#DC2626','M4':'#B91C1C','MC':'#FCA5A1','MI':'#F87171',
-  // Centre / comercial
-  'C':'#FB923C','C0':'#FB923C','C1':'#F97316','C2':'#EA580C',
-  'C2A':'#F97316','C2B':'#FB923C','C2C':'#FCA5A5','C3':'#DC2626','CC':'#F97316',
-  // Verzi
-  'V':'#86EFAC','V1':'#86EFAC','V1A':'#86EFAC','V1B':'#BBF7D0',
-  'V2':'#4ADE80','V2A':'#4ADE80','V2B':'#22C55E',
-  'V3':'#16A34A','V4':'#86EFAC','VN':'#15803D',
-  // Gospodărire
-  'G':'#93C5FD','G1':'#93C5FD','G2':'#60A5FA','GC':'#6B7280',
-  // Industriale
-  'I':'#CBD5E1','IS':'#94A3B8','IP':'#9CA3AF','Is':'#CBD5E1',
-  // Turism
-  'T':'#C4B5FD','T1':'#C4B5FD','T2':'#A78BFA',
-  // Agro
-  'A':'#BEF264','A1':'#BEF264','A2':'#A3E635',
-  // Transport / Circulații
-  'TR':'#94A3B8','TC':'#94A3B8','C3':'#94A3B8',
-  // Sport
-  'S':'#6EE7B7',
-  // ZCP / Zone centrale protejate
-  'ZCP':'#FDE68A','ZCP1':'#FDE68A','ZCP2':'#FCD34D',
-  'ZCP3':'#F59E0B','ZCP4':'#D97706','ZCP5':'#FDE68A','ZCP6':'#FCD34D',
-  // Zone protejate / restricții
-  'ZP':'#C4B5FD','ZR':'#FCA5A5','F':'#93C5FD',
-  // Instituții publice / educație / sănătate
-  'IE':'#86EFAC','IS2':'#34D399','IA':'#A7F3D0',
-  // Default
-  'DEFAULT':'#CBD5E1',
-};
-
-function _utrColor(code) {
-  if(!code) return _C.DEFAULT;
-  const c = String(code).trim().toUpperCase();
-  if(_C[c]) return _C[c];
-  // Fuzzy: cauta prefix cel mai lung
-  for(let l=c.length-1; l>=1; l--) {
-    const p = c.substring(0,l);
-    if(_C[p]) return _C[p];
-  }
-  return _C.DEFAULT;
-}
-
-// ── Core: încarcă un GeoJSON de PUG și îl afișează pe hartă ───────────────
-async function _loadPUGOnMap(geojsonUrl, cityName, fitCoords) {
-  const map = window.map;
-  if(!map) { window.ss?.('⚠ Harta nu e inițializată'); return null; }
-
-  window.ss?.('⏳ Se încarcă PUG ' + cityName + '…');
-
-  let geojson;
-  try {
-    const resp = await fetch(geojsonUrl + '?v=' + Date.now());
-    if(!resp.ok) throw new Error('HTTP ' + resp.status);
-    geojson = await resp.json();
-  } catch(e) {
-    window.ss?.('❌ PUG ' + cityName + ': ' + e.message);
-    console.error('[PUG Load]', e);
-    return null;
-  }
-
-  if(!geojson?.features?.length) {
-    window.ss?.('⚠ PUG ' + cityName + ': fișier gol sau invalid');
-    return null;
-  }
-
-  // Normalizăm properties (câmpuri variabile între PUG-uri)
-  geojson.features = geojson.features.map(f => {
-    const p = f.properties || {};
-    // Detectăm câmpul UTR (diferit în fiecare PUG)
-    const utrRaw = p.UTR || p.utr || p.TIP_ZONA || p.tip_zona || p.ZONA || p.zona
-                || p.CODE || p.code || p.COD || p.cod || '?';
-    const utr = String(utrRaw).trim().toUpperCase().replace(/\s+/g,'');
-    const color = _utrColor(utr);
-    return {
-      ...f,
-      properties: {
-        ...p,
-        utr,
-        c: color,            // folosit de utr-fill layer din 02-map-core.js
-        denumire: p.DENUMIRE || p.denumire || p.NAME || p.name || utr,
-        pot: p.POT || p.pot || null,
-        cut: p.CUT || p.cut || null,
-        rh: p.RH || p.rh || '—',
-        functiune: p.FUNCTIUNE || p.functiune || p.FUNCTION || '—',
-      }
-    };
-  });
-
-  // Setăm sursa UTR pe hartă
-  try {
-    const src = map.getSource('utr-src');
-    if(src) {
-      src.setData(geojson);
-    } else {
-      map.addSource('utr-src', {type:'geojson', data:geojson});
-    }
-    // Forțăm vizibilitatea layerelor UTR și repaint
-    ['utr-fill','utr-line','utr-lbl'].forEach(function(lid) {
-      try {
-        if(map.getLayer(lid)) {
-          map.setLayoutProperty(lid, 'visibility', 'visible');
-        }
-      } catch(e2) {}
-    });
-    // Repaint explicit
-    setTimeout(function() {
-      try { map.triggerRepaint(); } catch(e2) {}
-    }, 100);
-  } catch(e) { console.warn('[PUG setData]', e.message); }
-
-  // Populăm și S.pugIdx pentru lookupUTR (detectare intravilan)
-  if(window.S) {
-    try {
-      window.S.pugIdx = geojson.features
-        .filter(f => f.geometry?.type && f.geometry.type.includes('Polygon'))
-        .map(f => {
-          const coords = f.geometry.type === 'MultiPolygon'
-            ? f.geometry.coordinates[0][0]
-            : f.geometry.coordinates[0];
-          const lons = coords.map(c=>c[0]), lats = coords.map(c=>c[1]);
-          return {
-            utr: f.properties.utr,
-            geom: f.geometry,
-            bb: [Math.min(...lons), Math.min(...lats), Math.max(...lons), Math.max(...lats)]
-          };
-        });
-      window.S.pug = true;
-    } catch(e) { console.warn('[PUG pugIdx]', e.message); }
-  }
-
-  // Fit bounds pe UAT
-  try {
-    const coords = fitCoords || geojson.features
-      .flatMap(f => {
-        const g = f.geometry;
-        if(!g) return [];
-        if(g.type === 'Polygon') return g.coordinates[0] || [];
-        if(g.type === 'MultiPolygon') return (g.coordinates[0]||[])[0] || [];
-        return [];
-      });
-    if(coords.length > 1) {
-      const lons = coords.map(c=>c[0]).filter(Number.isFinite);
-      const lats = coords.map(c=>c[1]).filter(Number.isFinite);
-      if(lons.length && lats.length) {
-        map.fitBounds(
-          [[Math.min(...lons), Math.min(...lats)], [Math.max(...lons), Math.max(...lats)]],
-          {padding:40, duration:1200, maxZoom:14}
-        );
-      }
-    }
-  } catch(e) { console.warn('[PUG fitBounds]', e.message); }
-
-  return geojson;
-}
-
-// ── Randează chips UTR în drawer ───────────────────────────────────────────
-function _renderUTRChips(geojson, cityName) {
-  const chipsEl = document.getElementById('utr-chips');
-  const legEl   = document.getElementById('utr-leg');
-  const titleEl = document.getElementById('utr-drawer-title');
-  const footerEl = document.getElementById('footer-pug-label');
-
-  if(!chipsEl) return;
-
-  // Contorizăm zone per tip UTR
-  const byUTR = {};
-  (geojson?.features || []).forEach(f => {
-    const u = f.properties?.utr || '?';
-    byUTR[u] = (byUTR[u]||0) + 1;
-  });
-
-  const tipuri = Object.keys(byUTR).sort();
-  const total  = geojson?.features?.length || 0;
-
-  // Actualizăm titlul
-  if(titleEl) titleEl.textContent = '🗺 Zone UTR — PUG ' + cityName + ' · Click pe UTR pentru a-l evidenția și a vedea regulamentul';
-  if(footerEl) footerEl.textContent = 'PUG ' + cityName;
-
-  // Randăm chips
-  chipsEl.innerHTML = tipuri.map(utr => {
-    const col = _utrColor(utr);
-    const cnt = byUTR[utr];
-    return `<span class="utr-chip"
-      data-utr="${utr}"
-      style="background:${col}22;border-color:${col};color:${col};cursor:pointer"
-      onclick="_filterUTR('${utr}')"
-      title="${cnt} zone">${utr}<span style="font-size:9px;opacity:.7;margin-left:3px">${cnt}</span></span>`;
-  }).join('');
-
-  // Legenda
-  if(legEl) legEl.textContent = tipuri.length + ' tipuri UTR · ' + total + ' zone · Click pe UTR pentru detalii și zoom';
-
-  // Deschidem drawer
-  const drawer = document.getElementById('utr-drawer');
-  if(drawer) drawer.classList.add('open');
-}
-
-// ── Filtru UTR: click pe chip → highlight pe hartă ─────────────────────────
-window._filterUTR = function(utr) {
-  const map = window.map;
-  if(!map) return;
-  try {
-    // Highlight: opacitate mare pe UTR selectat, mic pe restul
-    map.setPaintProperty('utr-fill', 'fill-opacity', [
-      'case', ['==', ['get','utr'], utr], 0.55, 0.12
-    ]);
-    map.setPaintProperty('utr-line', 'line-opacity', [
-      'case', ['==', ['get','utr'], utr], 1.0, 0.3
-    ]);
-    // Zoom pe zona selectată
-    const src = map.getSource('utr-src');
-    if(src) {
-      const data = src._data || src.serialize()?.data;
-      if(data?.features) {
-        const feats = data.features.filter(f => f.properties?.utr === utr);
-        if(feats.length) {
-          const coords = feats.flatMap(f => {
-            const g = f.geometry;
-            if(g?.type === 'Polygon') return g.coordinates[0];
-            if(g?.type === 'MultiPolygon') return (g.coordinates[0]||[])[0]||[];
-            return [];
-          });
-          const lons = coords.map(c=>c[0]).filter(Number.isFinite);
-          const lats = coords.map(c=>c[1]).filter(Number.isFinite);
-          if(lons.length > 1) {
-            map.fitBounds(
-              [[Math.min(...lons),Math.min(...lats)],[Math.max(...lons),Math.max(...lats)]],
-              {padding:60, duration:800, maxZoom:15}
-            );
-          }
-        }
-      }
-    }
-    // Reset chip activ
-    document.querySelectorAll('#utr-chips .utr-chip').forEach(el => {
-      el.style.boxShadow = el.dataset.utr === utr ? '0 0 0 2px '+_utrColor(utr) : '';
-      el.style.transform = el.dataset.utr === utr ? 'scale(1.1)' : '';
-    });
-    window.ss?.('UTR ' + utr + ' — ' + (document.querySelector(`[data-utr="${utr}"] span`)?.previousSibling?.textContent||'') + ' zone evidențiate');
-  } catch(e) { console.warn('[filterUTR]', e); }
-};
-
-// Reset highlight la click liber
-window.hideUTRFilter = function() {
-  const map = window.map;
-  if(!map) return;
-  try {
-    map.setPaintProperty('utr-fill','fill-opacity', 0.2);
-    map.setPaintProperty('utr-line','line-opacity', 0.7);
-  } catch(e) {}
-  document.querySelectorAll('#utr-chips .utr-chip').forEach(el => {
-    el.style.boxShadow = '';
-    el.style.transform = '';
-  });
-};
-
-// ── _launchPUGSuceava ──────────────────────────────────────────────────────
-window._launchPUGSuceava = async function() {
-  const SUCEAVA = {
-    name: 'Suceava',
-    url: 'js/data/municipiul-suceava/pug.geojson',
-    // Bounding box Suceava (fallback dacă GeoJSON e gol)
-    bbox: [[26.20, 47.60], [26.36, 47.72]],
-    cityKey: 'RO-SV-01',
-  };
-
-  // Setăm UAT activ pe Suceava
-  if(window.TCI) window.TCI.cityKey = SUCEAVA.cityKey;
-  localStorage.setItem('ux_last_city', SUCEAVA.cityKey);
-
-  // Actualizăm badge din topbar
-  document.querySelectorAll('[data-city-name]').forEach(el => el.textContent = SUCEAVA.name);
-  const uatInd = document.getElementById('uat-indicator');
-  if(uatInd) uatInd.textContent = SUCEAVA.name;
-
-  const geojson = await _loadPUGOnMap(SUCEAVA.url, SUCEAVA.name, null);
-
-  if(geojson) {
-    _renderUTRChips(geojson, SUCEAVA.name);
-    window.ss?.('✅ PUG Suceava: ' + geojson.features.length + ' UTR-uri încărcate');
-  } else {
-    // Dacă fișierul nu există încă pe server — fly to Suceava și arată mesaj
-    window.map?.fitBounds(SUCEAVA.bbox, {padding:40, duration:1200});
-    window.ss?.('⚠ PUG Suceava: fișierul pug.geojson nu există încă în js/data/municipiul-suceava/');
-    // Deschide drawer gol cu mesaj
-    const drawer = document.getElementById('utr-drawer');
-    if(drawer) {
-      drawer.classList.add('open');
-      const titleEl = document.getElementById('utr-drawer-title');
-      if(titleEl) titleEl.textContent = '🗺 Zone UTR — PUG Suceava · Fișier GeoJSON lipsă';
-      const chipsEl = document.getElementById('utr-chips');
-      if(chipsEl) chipsEl.innerHTML = '<span style="color:#f59e0b;font-size:11px">⚠ js/data/municipiul-suceava/pug.geojson lipsă din repo — adaugă fișierul și reîncarcă</span>';
-    }
-  }
-};
-
-// ── btnUTR handler — încarcă PUG UAT activ și afișează drawer ─────────────
-function _setupBtnUTR() {
-  const btn = document.getElementById('btnUTR');
-  if(!btn || btn._utrPatched) return;
-  btn._utrPatched = true;
-
-  btn.addEventListener('click', async function() {
-    const drawer = document.getElementById('utr-drawer');
-    if(!drawer) return;
-
-    // Toggle: dacă drawer e deja deschis, închidem
-    if(drawer.classList.contains('open')) {
-      drawer.classList.remove('open');
-      btn.classList.remove('on');
-      window.hideUTRFilter?.();
-      return;
-    }
-
-    btn.classList.add('on');
-
-    // Determinăm UAT activ
-    const k = window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
-    const db = window._RO_CITIES_DB || {};
-    const city = db[k] || {name:'UAT', lat:47.158, lon:27.601};
-    const cityName = city.name || 'UAT';
-
-    // Determinăm URL-ul PUG
-    const _PUG_URLS = {
-      'RO-IS-01': 'js/data/iasi/pug.geojson',
-      'RO-SV-01': 'js/data/municipiul-suceava/pug.geojson',
-    };
-    const UAT_REG = window.UAT_REGISTRY || {};
-    const regEntry = Object.values(UAT_REG).find(e =>
-      e.label?.toLowerCase().includes(cityName.toLowerCase()) ||
-      e.siruta === city.siruta
-    );
-    const pugUrl = _PUG_URLS[k] || regEntry?.pugFile;
-
-    if(!pugUrl) {
-      drawer.classList.add('open');
-      const titleEl = document.getElementById('utr-drawer-title');
-      if(titleEl) titleEl.textContent = '🗺 Zone UTR — PUG ' + cityName + ' · Indisponibil';
-      const chipsEl = document.getElementById('utr-chips');
-      if(chipsEl) chipsEl.innerHTML = `<span style="color:#f59e0b;font-size:11px">
-        ⚠ PUG ${cityName} nu este disponibil în platformă.
-        Disponibil: <b>Iași</b> · <b>Suceava</b>.
-        Folosiți <b>Import PUG Digital</b> pentru alte UAT-uri.
-      </span>`;
-      window.ss?.('⚠ PUG ' + cityName + ' indisponibil — folosiți Import PUG Digital');
-      return;
-    }
-
-    // Verificăm dacă PUG-ul deja încărcat e al UAT-ului ACTIV (nu al altuia)
-    const chipsEl = document.getElementById('utr-chips');
-    const titleEl2 = document.getElementById('utr-drawer-title');
-    const loadedCityInTitle = titleEl2?.textContent?.includes(cityName);
-    const alreadyLoaded = chipsEl?.children?.length > 0 &&
-                          window.S?.pug &&
-                          window.S?.pugIdx?.length > 0 &&
-                          loadedCityInTitle; // doar dacă e al UAT-ului curent
-
-    if(alreadyLoaded) {
-      // Deja încărcat pentru acest UAT — doar deschidem drawer
-      drawer.classList.add('open');
-      return;
-    }
-
-    // Încărcăm PUG (UAT nou sau prima dată)
-    window.S && (window.S.pug = false); // resetăm flag ca să forțăm re-încărcare
-    const geojson = await _loadPUGOnMap(pugUrl, cityName, null);
-    if(geojson) {
-      _renderUTRChips(geojson, cityName);
-    }
-  });
-}
-
-// ── hideUTRDrawer (override safe) ─────────────────────────────────────────
-window.hideUTRDrawer = function() {
-  const drawer = document.getElementById('utr-drawer');
-  if(drawer) drawer.classList.remove('open');
-  const btn = document.getElementById('btnUTR');
-  if(btn) btn.classList.remove('on');
-  window.hideUTRFilter?.();
-};
-
-// ── Aplicăm setup la DOMContentLoaded și cu retry ─────────────────────────
-document.addEventListener('DOMContentLoaded', () => setTimeout(_setupBtnUTR, 500));
-window.addEventListener('load', () => { _setupBtnUTR(); setTimeout(_setupBtnUTR, 2000); });
-
-// Expunem global
-window._loadPUGOnMap   = _loadPUGOnMap;
-window._renderUTRChips = _renderUTRChips;
-window._utrColor       = _utrColor;
-
-console.log('[UrbanX UTR System] ✅ Patch v20260520b: _launchPUGSuceava + btnUTR + chips colorate');
-
-})();
-</script>
-
-<script>
-// ═══════════════════════════════════════════════════════════════════════════
-// URBANX SYSTEM PATCH v20260520c
-// 1. Cinema + openTCI → UAT activ (nu Iași hardcodat)
-// 2. Relevee mobil → buton Close vizibil + zoom pinch
-// 3. Sincronizare UAT la schimbare din selector
-// ═══════════════════════════════════════════════════════════════════════════
-(function(){
-'use strict';
-
-// ── Helper: UAT activ ────────────────────────────────────────────────────
-function _activeKey() {
-  return window.TCI?.cityKey ||
-         localStorage.getItem('ux_last_city') ||
-         window._ProjectionEngine?.currentCity ||
-         'RO-IS-01';
-}
-
-// ── FIX: openTCI — wrapper care injectează UAT activ ──────────────────────
-// openTCI e definit în 17-tci-cinema.js — îl wrappăm după load
-window.addEventListener('load', function() {
-  setTimeout(function() {
-    const _origOpenTCI = window.openTCI;
-    if(typeof _origOpenTCI === 'function' && !_origOpenTCI._uatPatched) {
-      window.openTCI = function(opts) {
-        const k = _activeKey();
-        // Sincronizăm TCI și ProjectionEngine cu UAT activ
-        if(window.TCI && window.TCI.cityKey !== k) window.TCI.cityKey = k;
-        if(window._ProjectionEngine) window._ProjectionEngine.currentCity = k;
-        // Injectăm cityKey în opts dacă nu e specificat
-        const mergedOpts = Object.assign({cityKey: k}, opts || {});
-        return _origOpenTCI.call(this, mergedOpts);
-      };
-      window.openTCI._uatPatched = true;
-      console.log('[UrbanX] openTCI wrappat pentru UAT activ');
-    }
-  }, 3000);
-});
-
-// ── FIX: Selectare UAT → sincronizare completă ───────────────────────────
-// Când userul schimbă UAT din selector, sincronizăm TOATE modulele
-// ── FIX: Interceptăm selecția UAT din modal (📍 topbar) ─────────────────
-// showUATSelector() e definit în 03-ui-panel.js din repo
-// Când userul face click pe un UAT din lista modală, salvăm în localStorage
-(function() {
-  'use strict';
-
-  // Interceptăm showUATSelector să adauge hook pe iteme
-  function _patchUATSelector() {
-    const orig = window.showUATSelector;
-    if(!orig || orig._patched) return;
-
-    window.showUATSelector = function() {
-      orig.apply(this, arguments);
-      // Așteptăm să apară modal-ul, apoi hookim click-urile
-      setTimeout(_hookUATModalClicks, 200);
-      setTimeout(_hookUATModalClicks, 500);
-      setTimeout(_hookUATModalClicks, 1000);
-    };
-    window.showUATSelector._patched = true;
-  }
-
-  function _hookUATModalClicks() {
-    // Găsim toate elementele care arată ca item UAT în modal
-    // Căutăm în orice modal deschis care conține chei de tip RO-XX-XX
-    const allBtns = document.querySelectorAll(
-      '#uat-selector-modal button, #tci-uat-modal button, ' +
-      '[id*="uat-modal"] button, [class*="uat-item"], ' +
-      '[data-uat-key], [data-key]'
-    );
-
-    allBtns.forEach(function(btn) {
-      if(btn._uatHooked) return;
-      btn._uatHooked = true;
-
-      const key = btn.dataset.uatKey || btn.dataset.key || btn.dataset.uat || '';
-      if(!key.match(/^RO-[A-Z]+-\d+$/)) return; // doar chei valide
-
-      btn.addEventListener('click', function() {
-        const name = btn.querySelector('b')?.textContent ||
-                     btn.textContent?.trim().split('·')[0].trim() || key;
-        try { localStorage.setItem('ux_last_city', key); } catch(e) {}
-        if(window.TCI) window.TCI.cityKey = key;
-        if(window._ProjectionEngine) window._ProjectionEngine.currentCity = key;
-        const ind = document.getElementById('uat-indicator');
-        if(ind) ind.textContent = name;
-        console.log('[UAT Selector] Selectat:', key, '—', name);
-      }, { capture: true });
-    });
-
-    // Alternativ: MutationObserver pe body pentru modal-uri create dinamic
-  }
-
-  // Observer global pe click — dacă click-ul are data-key sau text cu "Municipiul"
-  document.addEventListener('click', function(e) {
-    const btn = e.target.closest('button, [role="button"]');
-    if(!btn) return;
-
-    // Verificăm data attributes
-    const key = btn.dataset?.uatKey || btn.dataset?.key || btn.dataset?.uat || btn.dataset?.cityKey;
-    if(key && key.match(/^RO-[A-Z]+-\d+$/)) {
-      const name = btn.querySelector('b')?.textContent ||
-                   btn.dataset?.name ||
-                   btn.textContent?.trim().split('·')[0].trim().replace(/^[^A-Za-zÀ-ÖØ-öø-ÿ]+/,'') || '';
-      try { localStorage.setItem('ux_last_city', key); } catch(e) {}
-      if(window.TCI) window.TCI.cityKey = key;
-      if(window._ProjectionEngine) window._ProjectionEngine.currentCity = key;
-      const ind = document.getElementById('uat-indicator');
-      if(ind && name) ind.textContent = name;
-      console.log('[UAT Click] Interceptat:', key, '—', name);
-    }
-  }, { capture: true });
-
-  // Aplicăm patch la load
-  document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(_patchUATSelector, 500);
-    setTimeout(_patchUATSelector, 2000);
-  });
-  window.addEventListener('load', function() {
-    setTimeout(_patchUATSelector, 200);
-  });
-
-  window._patchUATSelector = _patchUATSelector;
-  window._hookUATModalClicks = _hookUATModalClicks;
-})();
-
-// Hook pe orice schimbare de TCI.cityKey → notificăm toate modulele
-let _lastSyncedCity = null;
-setInterval(function() {
-  const k = _activeKey();
-  if(k === _lastSyncedCity) return;
-  _lastSyncedCity = k;
-  const db = window._RO_CITIES_DB || {};
-  const name = db[k]?.name || k;
-
-  // Sincronizăm toate modulele care au nevoie de cityKey
-  if(window._ProjectionEngine) window._ProjectionEngine.currentCity = k;
-  if(window._SceneEngine) {
-    window._SceneEngine._cityKey = k;
-    if(typeof window._SceneEngine._getCityKey !== 'function') {
-      window._SceneEngine._getCityKey = () => k;
-    }
-  }
-  if(window._TCIMasterplanPDF) window._TCIMasterplanPDF._currentCity = k;
-  if(window._CompareProEngine?._currentCity !== undefined) window._CompareProEngine._currentCity = k;
-
-  console.log('[UrbanX] UAT sincronizat:', k, '—', name);
-}, 1000);
-
-// ── FIX: Relevee mobil — Close + Zoom pinch ──────────────────────────────
-// Injectăm buton Close și activăm touch-zoom pe canvas-ul relevee
-
-function _patchReleveeMobile() {
-  // Observer pentru apariția modalului relevee (creat dinamic de 15-relevee.js)
-  const obs = new MutationObserver(function(mutations) {
-    mutations.forEach(function(m) {
-      m.addedNodes.forEach(function(node) {
-        if(!node || node.nodeType !== 1) return;
-        // Detectăm modal relevee: are id rv-modal sau class rv-modal-open
-        const modal = (node.id === 'rv-modal' || node.classList?.contains('rv-modal'))
-          ? node
-          : node.querySelector?.('#rv-modal, .rv-modal, [class*="rv-modal"]');
-        if(!modal) return;
-
-        _addReleveeMobileUI(modal);
-      });
-    });
-  });
-  obs.observe(document.body, { childList: true, subtree: false });
-
-  // Verificare și la apariția clasei rv-modal-open pe body
-  const bodyObs = new MutationObserver(function() {
-    if(document.body.classList.contains('rv-modal-open') ||
-       document.body.classList.contains('relevee-open')) {
-      const modal = document.querySelector('#rv-modal, .rv-modal, [id*="rv-modal"]');
-      if(modal && !modal._mobilePatched) _addReleveeMobileUI(modal);
-    }
-  });
-  bodyObs.observe(document.body, { attributes: true, attributeFilter: ['class'] });
-
-  // Polling fallback
-  let _patchTries = 0;
-  const _poll = setInterval(function() {
-    if(++_patchTries > 20) clearInterval(_poll);
-    const modal = document.querySelector('#rv-modal, [id*="rv-modal"], .rv-modal-open');
-    if(modal && !modal._mobilePatched) {
-      _addReleveeMobileUI(modal);
-      clearInterval(_poll);
-    }
-  }, 300);
-}
-
-function _addReleveeMobileUI(modal) {
-  if(!modal || modal._mobilePatched) return;
-  modal._mobilePatched = true;
-
-  // Solo pe mobil (max 840px)
-  if(window.innerWidth >= 841) return;
-
-  // ── Buton Close mare, vizibil, în colț dreapta-sus ─────────────────
-  if(!modal.querySelector('._rv-mob-close')) {
-    const closeBtn = document.createElement('button');
-    closeBtn.className = '_rv-mob-close';
-    closeBtn.innerHTML = '✕ Închide';
-    closeBtn.style.cssText = `
-      position:fixed;top:8px;right:8px;z-index:99999;
-      background:rgba(239,68,68,.9);border:none;color:#fff;
-      border-radius:10px;padding:10px 18px;font-size:15px;font-weight:700;
-      cursor:pointer;font-family:inherit;box-shadow:0 4px 16px rgba(0,0,0,.5);
-      min-height:44px;min-width:80px;-webkit-tap-highlight-color:transparent;
-      touch-action:manipulation;letter-spacing:.02em;
-    `;
-    closeBtn.addEventListener('click', function() {
-      try {
-        if(typeof window.closeRelevee === 'function') window.closeRelevee();
-        else if(typeof window._rvClose === 'function') window._rvClose();
-        else {
-          modal.style.display = 'none';
-          modal.classList.remove('rv-modal-open','open','show');
-          document.body.classList.remove('rv-modal-open','relevee-open');
-        }
-      } catch(e) { modal.style.display = 'none'; }
-    });
-    closeBtn.addEventListener('touchend', function(e) {
-      e.preventDefault();
-      closeBtn.click();
-    });
-    document.body.appendChild(closeBtn);
-
-    // Curățăm butonul când modalul se închide
-    const cleanObs = new MutationObserver(function() {
-      const visible = modal.style.display !== 'none' &&
-                      !modal.classList.contains('hidden') &&
-                      (modal.offsetParent !== null || modal.style.position === 'fixed');
-      closeBtn.style.display = visible ? 'block' : 'none';
-    });
-    cleanObs.observe(modal, { attributes: true, attributeFilter: ['style','class'] });
-  }
-
-  // ── Zoom pinch pe canvas-ul relevee ────────────────────────────────
-  const canvas = modal.querySelector('canvas');
-  if(canvas && !canvas._pinchPatched) {
-    canvas._pinchPatched = true;
-    canvas.style.touchAction = 'none'; // permite pinch custom
-
-    let _startDist = 0;
-    let _startScale = 1;
-    let _curScale = 1;
-    let _translateX = 0, _translateY = 0;
-    let _startTX = 0, _startTY = 0;
-    let _startMidX = 0, _startMidY = 0;
-    let _lastTouches = [];
-
-    function _dist(t1, t2) {
-      return Math.hypot(t2.clientX-t1.clientX, t2.clientY-t1.clientY);
-    }
-    function _mid(t1, t2) {
-      return {x:(t1.clientX+t2.clientX)/2, y:(t1.clientY+t2.clientY)/2};
-    }
-    function _applyTransform() {
-      const s = Math.max(0.5, Math.min(5, _curScale));
-      canvas.style.transform = `translate(${_translateX}px,${_translateY}px) scale(${s})`;
-      canvas.style.transformOrigin = '0 0';
-    }
-
-    canvas.addEventListener('touchstart', function(e) {
-      _lastTouches = Array.from(e.touches);
-      if(e.touches.length === 2) {
-        e.preventDefault();
-        _startDist = _dist(e.touches[0], e.touches[1]);
-        _startScale = _curScale;
-        const m = _mid(e.touches[0], e.touches[1]);
-        _startMidX = m.x; _startMidY = m.y;
-        _startTX = _translateX; _startTY = _translateY;
-      } else if(e.touches.length === 1 && _curScale > 1) {
-        e.preventDefault();
-        _startTX = _translateX; _startTY = _translateY;
-        _startMidX = e.touches[0].clientX;
-        _startMidY = e.touches[0].clientY;
-      }
-    }, {passive:false});
-
-    canvas.addEventListener('touchmove', function(e) {
-      if(e.touches.length === 2) {
-        e.preventDefault();
-        const d = _dist(e.touches[0], e.touches[1]);
-        _curScale = _startScale * (d / _startDist);
-        // Pan proporcional cu pinch
-        const m = _mid(e.touches[0], e.touches[1]);
-        _translateX = _startTX + (m.x - _startMidX);
-        _translateY = _startTY + (m.y - _startMidY);
-        _applyTransform();
-      } else if(e.touches.length === 1 && _curScale > 1) {
-        e.preventDefault();
-        _translateX = _startTX + (e.touches[0].clientX - _startMidX);
-        _translateY = _startTY + (e.touches[0].clientY - _startMidY);
-        _applyTransform();
-      }
-    }, {passive:false});
-
-    canvas.addEventListener('touchend', function(e) {
-      if(e.touches.length === 0 && _curScale < 1.05) {
-        // Reset la scale normal
-        _curScale = 1; _translateX = 0; _translateY = 0;
-        canvas.style.transform = '';
-      }
-    });
-
-    // Double-tap pentru reset zoom
-    let _lastTap = 0;
-    canvas.addEventListener('touchend', function(e) {
-      const now = Date.now();
-      if(now - _lastTap < 300) {
-        _curScale = 1; _translateX = 0; _translateY = 0;
-        canvas.style.transform = '';
-        canvas.style.transition = 'transform .3s ease';
-        setTimeout(() => canvas.style.transition = '', 300);
-      }
-      _lastTap = now;
-    });
-  }
-
-  // ── Butoane zoom +/-/FIT din toolbar relevee ────────────────────────
-  // Dacă există butoane în modal, le facem mai mari pe mobil
-  modal.querySelectorAll('button').forEach(function(btn) {
-    const t = btn.textContent.trim();
-    if(['+','-','FIT','Fit'].includes(t)) {
-      btn.style.minWidth = '44px';
-      btn.style.minHeight = '44px';
-      btn.style.fontSize = '18px';
-    }
-  });
-}
-
-// Aplicăm la load (pentru cazul când relevee e deja deschis)
-window.addEventListener('load', function() {
-  setTimeout(_patchReleveeMobile, 1000);
-});
-document.addEventListener('DOMContentLoaded', _patchReleveeMobile);
-
-// Expunem global pentru apeluri externe
-window._patchReleveeMobile = _patchReleveeMobile;
-
-console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + relevee mobile');
-
-})();
-</script>
-
-<script>
-// ── MENU LOCK — blochează injectările externe în meniuri fixe ─────────────
-// 19-ux-polish.js și alte fișiere injectează butoane în tools-menu și viz-menu
-// după ce DOM-ul e gata. Le blocăm pentru meniurile cu data-locked="true"
-(function() {
-  'use strict';
-  function _lockMenus() {
-    ['tools-menu', 'viz-menu'].forEach(function(id) {
-      const el = document.getElementById(id);
-      if(!el || el._locked) return;
-      el._locked = true;
-      let _blockedCount = 0;
-
-      const _origAppend = el.appendChild.bind(el);
-      const _origInsert = el.insertBefore.bind(el);
-
-      el.appendChild = function(node) {
-        if(node.nodeType !== 1) return _origAppend(node);
-        const nodeText = node.textContent?.trim() || '';
-        const isDuplicate = nodeText.length > 5 && Array.from(el.children).some(function(child) {
-          return child !== node && child.textContent?.trim() === nodeText;
-        });
-        if(isDuplicate) {
-          _blockedCount++;
-          // Log silențios — nu spam în consolă
-          if(_blockedCount === 1) console.info('[MenuLock] Bloc duplicate activ pe #' + id);
-          return node;
-        }
-        return _origAppend(node);
-      };
-
-      el.insertBefore = function(node, ref) {
-        if(node.nodeType !== 1) return _origInsert(node, ref);
-        const nodeText = node.textContent?.trim() || '';
-        const isDuplicate = nodeText.length > 5 && Array.from(el.children).some(function(child) {
-          return child !== node && child.textContent?.trim() === nodeText;
-        });
-        if(isDuplicate) {
-          _blockedCount++;
-          return node;
-        }
-        return _origInsert(node, ref);
-      };
-    });
-  }
-
-  // Aplicăm după ce DOM e gata
-  document.addEventListener('DOMContentLoaded', function() { setTimeout(_lockMenus, 100); });
-  window.addEventListener('load', function() { setTimeout(_lockMenus, 500); setTimeout(_lockMenus, 2000); });
-  window._lockMenus = _lockMenus;
-  console.log('[MenuLock] ✅ Protecție anti-duplicate activă pentru tools-menu și viz-menu');
-})();
-</script>
-
 </body>
 </html>
