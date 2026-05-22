@@ -234,6 +234,7 @@ G._SceneEngine = {
   async launch(cityKey) {
     const map = window.map;
     if(!map) { ss?.('Harta indisponibilă'); return; }
+    this._map = map; // Salvam referinta pentru acces din orice functie
 
     // Fallback minimal pentru orice UAT — funcționează și fără _RO_CITIES_DB
     const _FALLBACK_CITIES = {
@@ -538,12 +539,19 @@ G._SceneEngine = {
         break;
 
       case 5: // PREDICTII DEZVOLTARE 2025-2055
-        // Jump imediat la zoom corect, apoi animatie cinematica
-        map.jumpTo({center:[cx,cy], zoom:10.5, pitch:0, bearing:0});
+        // Zoom pe tot orasul - jumpTo instant la zoom corect
+        try {
+          map.setZoom(10.5);
+          map.setCenter([cx, cy]);
+          map.setPitch(0);
+          map.setBearing(0);
+        } catch(e){}
         setTimeout(()=>{
-          map.flyTo({center:[cx,cy], zoom:10.8, pitch:52, bearing:10,
-            duration:2000, essential:true});
-        }, 100);
+          try {
+            map.flyTo({center:[cx,cy], zoom:10.8, pitch:52, bearing:10,
+              duration:1500, essential:true});
+          } catch(e){}
+        }, 200);
         try{ map.setConfigProperty('basemap','lightPreset','night'); }catch(e){}
         // Ascundem layerele UTR 2D ca sa nu acopere barele 3D
         ['utr-fill','utr-line','utr-lbl'].forEach(id=>{
