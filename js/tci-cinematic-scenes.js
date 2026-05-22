@@ -538,7 +538,12 @@ G._SceneEngine = {
         break;
 
       case 5: // PREDICTII DEZVOLTARE 2025-2055
-        map.flyTo({center:[cx,cy], zoom:10.8, pitch:52, bearing:10, duration:3000, essential:true});
+        // Jump imediat la zoom corect, apoi animatie cinematica
+        map.jumpTo({center:[cx,cy], zoom:10.5, pitch:0, bearing:0});
+        setTimeout(()=>{
+          map.flyTo({center:[cx,cy], zoom:10.8, pitch:52, bearing:10,
+            duration:2000, essential:true});
+        }, 100);
         try{ map.setConfigProperty('basemap','lightPreset','night'); }catch(e){}
         // Ascundem layerele UTR 2D ca sa nu acopere barele 3D
         ['utr-fill','utr-line','utr-lbl'].forEach(id=>{
@@ -1126,30 +1131,25 @@ G._SceneEngine = {
         {c:'#D4AF37',l:'CONSERVARE',sub:'Centru istoric protejat'},
         {c:'#94a3b8',l:'MONITORIZARE',sub:'Fara interventie majora'},
       ];
-      const lh=H*0.072;
-      const boxH=entries.length*lh+H*0.065;
-      ctx.fillStyle='rgba(4,10,24,.94)';
-      this._roundRect(ctx,lx,ly,W*0.32,boxH,8);ctx.fill();
-      ctx.strokeStyle='rgba(212,175,55,.5)';ctx.lineWidth=1.5;
-      this._roundRect(ctx,lx,ly,W*0.32,boxH,8);ctx.stroke();
-      // Titlu
-      ctx.fillStyle='#D4AF37';ctx.font=`bold ${W*0.01}px "IBM Plex Mono"`;
+      // Legenda compacta - max 28% din inaltime ecran, jos stanga
+      const lx2=W*0.02, ly2=H*0.72;
+      const lh=H*0.048;
+      const boxH=entries.length*lh+H*0.05;
+      ctx.fillStyle='rgba(4,10,24,.92)';
+      this._roundRect(ctx,lx2,ly2,W*0.28,boxH,6);ctx.fill();
+      ctx.strokeStyle='rgba(212,175,55,.4)';ctx.lineWidth=1;
+      this._roundRect(ctx,lx2,ly2,W*0.28,boxH,6);ctx.stroke();
+      ctx.fillStyle='#D4AF37';ctx.font=`bold ${W*0.0085}px "IBM Plex Mono"`;
       ctx.textAlign='left';
-      ctx.fillText('PREDICTIE DEZVOLTARE 2025-2055',lx+W*0.014,ly+H*0.032);
-      ctx.fillStyle='rgba(148,163,184,.6)';ctx.font=`${W*0.0072}px "IBM Plex Mono"`;
-      ctx.fillText('Model gravitational UrbanX · date INSE+RLU',lx+W*0.014,ly+H*0.052);
-      // Intrari legenda
+      ctx.fillText('PREDICTIE 2025-2055',lx2+W*0.012,ly2+H*0.028);
       entries.forEach(({c,l,sub},i)=>{
-        const ey=ly+H*0.072+i*lh;
-        const ea=Math.min(1,Math.max(0,(t-0.1-i*0.05)/0.2));
-        ctx.globalAlpha=la*ea;
-        ctx.fillStyle=c;
-        this._roundRect(ctx,lx+W*0.014,ey,W*0.018,H*0.038,3);ctx.fill();
-        ctx.fillStyle='rgba(220,230,245,.92)';ctx.font=`bold ${W*0.0082}px "IBM Plex Mono"`;
-        ctx.textAlign='left';
-        ctx.fillText(l,lx+W*0.038,ey+H*0.022,W*0.27);
-        ctx.fillStyle='rgba(148,163,184,.6)';ctx.font=`${W*0.0068}px "IBM Plex Mono"`;
-        ctx.fillText(sub,lx+W*0.038,ey+H*0.042,W*0.27);
+        const ey=ly2+H*0.046+i*lh;
+        ctx.globalAlpha=la;
+        ctx.fillStyle=c;ctx.fillRect(lx2+W*0.012,ey-H*0.008,W*0.012,H*0.022);
+        ctx.fillStyle='rgba(220,230,245,.9)';ctx.font=`bold ${W*0.0072}px "IBM Plex Mono"`;
+        ctx.fillText(l,lx2+W*0.03,ey+H*0.008,W*0.23);
+        ctx.fillStyle='rgba(148,163,184,.55)';ctx.font=`${W*0.006}px "IBM Plex Mono"`;
+        ctx.fillText(sub,lx2+W*0.03,ey+H*0.024,W*0.23);
       });
       ctx.globalAlpha=1;
     }
