@@ -688,9 +688,9 @@ G._PresentationMode = {
   };
 
   // Compare Pro + Presentation în Vizualizare menu
+  // Butoanele sunt gestionate de UrbanX Pro menu — nu le injectam in viz-menu
   const addMenuItems=()=>{
-    const vizMenu=document.getElementById('viz-menu');
-    if(!vizMenu||document.getElementById('compare-pro-menu-item')) return;
+    return; // dezactivat — evitam duplicate in meniul Hartă
     // Buton Zone Protejate
     if(!document.getElementById('protected-zones-menu-item')) {
       const pbtn = document.createElement('button');
