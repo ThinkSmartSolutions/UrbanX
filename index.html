@@ -4348,7 +4348,7 @@ const _scenePatchInterval = setInterval(function() {
 const _origGenMasterplan = window.generateMasterplan;
 window.generateMasterplan = function() {
   // Asigurăm date corecte din DB
-  const k = window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
+  const k = localStorage.getItem('ux_last_city') || window.TCI?.cityKey || 'RO-IS-01';
   const db = window._RO_CITIES_DB || {};
   const city = db[k];
   if (city && window.TCI) {
@@ -4414,7 +4414,7 @@ window._launchCinemaV2 = function() {
     console.warn('[Cinema] _launchCinemaV2 eroare la start:', e.message);
   }
   // Fallback: folosim direct _SceneEngine dacă există
-  const k = window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
+  const k = localStorage.getItem('ux_last_city') || window.TCI?.cityKey || 'RO-IS-01';
   if (window._SceneEngine?.launch) {
     try { window._SceneEngine.launch(k); } catch(e2) {
       console.warn('[Cinema] _SceneEngine.launch fallback eroare:', e2.message);
@@ -4814,18 +4814,8 @@ function _setupBtnUTR() {
     const titleEl2 = document.getElementById('utr-drawer-title');
     const loadedCityInTitle = titleEl2?.textContent?.includes(cityName);
     const loadedCityKey = window.S?._loadedCityKey;
-    const alreadyLoaded = chipsEl?.children?.length > 0 &&
-                          window.S?.pug &&
-                          window.S?.pugIdx?.length > 0 &&
-                          loadedCityInTitle &&
-                          loadedCityKey === k &&
-                          k === (localStorage.getItem('ux_last_city') || k);
-
-    if(alreadyLoaded) {
-      // Deja încărcat pentru acest UAT — doar deschidem drawer
-      drawer.classList.add('open');
-      return;
-    }
+    // Nu mai verificăm alreadyLoaded - reîncărcăm mereu UAT-ul corect
+    const alreadyLoaded = false;
 
     // Încărcăm PUG (UAT nou sau prima dată)
     window.S && (window.S.pug = false); // resetăm flag ca să forțăm re-încărcare
