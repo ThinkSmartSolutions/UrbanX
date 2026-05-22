@@ -2181,71 +2181,116 @@ G._SceneEngine = {
   },
 
   _setupDensityLayer(map, city) {
-    // Heatmap densitate din populatia per zona
-    const cx=city?.lon||27.601, cy=city?.lat||47.158;
-    const points = [];
-    for(let a=0;a<360;a+=15){
-      for(let r=0.001;r<0.06;r+=0.008){
-        const lon=cx+r*Math.cos(a*Math.PI/180);
-        const lat=cy+r*0.65*Math.sin(a*Math.PI/180);
-        const dens=Math.max(0, 200-r*3000 + Math.sin(a*4)*20);
-        points.push([lon,lat,dens]);
-      }
+    const pug = this._pugGeo;
+    const reg = this._reguli || {};
+    const features = [];
+
+    if(pug?.features?.length) {
+      // Pondere densitate dupa tipul UTR din reguli.json
+      const tipWeight = {
+        'centru':1.0,'centru_protejat':0.9,'mixt':0.85,'comercial':0.8,
+        'educational':0.7,'rezidential_mare':0.75,'rezidential_mediu':0.6,
+        'rezidential_mic':0.45,'rezidential_vila':0.35,'industrial':0.5,
+        'verde':0.05,'agrement':0.1,'turism':0.2,'public':0.4,
+        'tehnic':0.3,'rezerva':0.1,'necunoscut':0.1,
+      };
+      pug.features.forEach(f => {
+        try {
+          const utr = (f.properties?.utr||'').trim();
+          if(!utr || utr==='?'||utr==='??') return;
+          const tip = reg[utr]?.tip || 'necunoscut';
+          const w   = tipWeight[tip] || 0.3;
+          // Centroid simplu
+          const coords = f.geometry?.coordinates;
+          if(!coords) return;
+          const lons=[], lats=[];
+          const flat = a => typeof a[0]==='number'
+            ? (lons.push(a[0]), lats.push(a[1]))
+            : a.forEach(flat);
+          flat(coords);
+          if(!lons.length) return;
+          features.push({type:'Feature',
+            geometry:{type:'Point',coordinates:[
+              lons.reduce((a,b)=>a+b,0)/lons.length,
+              lats.reduce((a,b)=>a+b,0)/lats.length
+            ]},
+            properties:{weight: w}
+          });
+        } catch(e){}
+      });
+      console.log('[Cinema Density] heatmap din', features.length, 'centroide UTR reale');
     }
+    if(!features.length) return;
+
     try {
-      if(!map.getSource('tci-density-heat')){
-        map.addSource('tci-density-heat',{type:'geojson',data:{type:'FeatureCollection',features:
-          points.map(([lon,lat,mag])=>({type:'Feature',geometry:{type:'Point',coordinates:[lon,lat]},properties:{mag}}))
-        }});
-        map.addLayer({id:'tci-density-layer',type:'heatmap',source:'tci-density-heat',paint:{
-          'heatmap-weight':['interpolate',['linear'],['get','mag'],0,0,200,1],
-          'heatmap-intensity':['interpolate',['linear'],['zoom'],11,1,15,3],
+      if(map.getSource('tci-density-heat')) {
+        map.getSource('tci-density-heat').setData({type:'FeatureCollection',features});
+      } else {
+        map.addSource('tci-density-heat',{type:'geojson',
+          data:{type:'FeatureCollection',features}});
+        map.addLayer({id:'tci-density-layer',type:'heatmap',
+          source:'tci-density-heat',paint:{
+          'heatmap-weight':['interpolate',['linear'],['get','weight'],0,0,1,1],
+          'heatmap-intensity':['interpolate',['linear'],['zoom'],10,1,15,3],
           'heatmap-color':['interpolate',['linear'],['heatmap-density'],
-            0,'rgba(0,0,255,0)',0.2,'#1d4ed8',0.4,'#22c55e',0.6,'#f59e0b',0.8,'#ef4444',1,'#7f1d1d'],
-          'heatmap-radius':['interpolate',['linear'],['zoom'],11,15,15,30],
-          'heatmap-opacity':0.7,
+            0,'rgba(0,0,0,0)',
+            0.15,'rgba(29,78,216,0.5)',
+            0.35,'rgba(59,130,246,0.7)',
+            0.55,'rgba(234,179,8,0.85)',
+            0.75,'rgba(249,115,22,0.9)',
+            1,'rgba(239,68,68,1)'],
+          'heatmap-radius':['interpolate',['linear'],['zoom'],10,18,15,40],
+          'heatmap-opacity':0.8,
         }});
       }
-    } catch(e){}
+    } catch(e){ console.warn('[Cinema Density]', e.message); }
   },
 
   _setup3DGrowthBars(map, city) {
-    const cx=city?.lon||27.601, cy=city?.lat||47.158;
-    const zones_data = G._ZoneProjections.calculate(city, this._need, 2050);
+    const map2 = map;
+    const pug  = this._pugGeo;
+    const reg  = this._reguli || {};
     const features = [];
 
-    Object.values(zones_data||{}).forEach((z,idx) => {
-      const nRings = 24;
-      for(let i=0;i<nRings;i++){
-        const angle = (i/nRings)*2*Math.PI;
-        const r = (z.radius_km/2) / 111;
-        const lon = cx + r*Math.cos(angle);
-        const lat = cy + r*0.65*Math.sin(angle);
-        const w   = 0.0004;
+    if(pug?.features?.length) {
+      pug.features.forEach(f => {
+        const utr = (f.properties?.utr || '').trim();
+        if(!utr || utr === '?' || utr === '??') return;
+        const ruleset = reg[utr] || {};
+        const h = ruleset.inaltime_m || 8;
+        const c = ruleset.culoare   || '#60a5fa';
+        if(h <= 0) return;
         features.push({
-          type:'Feature',
-          geometry:{type:'Polygon',coordinates:[[[lon-w,lat-w*0.65],[lon+w,lat-w*0.65],[lon+w,lat+w*0.65],[lon-w,lat+w*0.65],[lon-w,lat-w*0.65]]]},
-          properties:{
-            height: Math.max(5, z.presiune*80 + Math.sin(i*z.gravWeight)*10),
-            color:  z.presiuneColor,
-            label:  z.presiuneLabel,
-            zone:   z.label,
+          type: 'Feature',
+          geometry: f.geometry,
+          properties: { height: h, color: c, utr: utr,
+            functiune: ruleset.functiune || utr }
+        });
+      });
+      console.log('[Cinema 3D] bare din PUG real:', features.length, 'zone');
+    }
+
+    if(!features.length) return; // fara PUG = fara bare
+
+    try {
+      if(map2.getSource('tci-growth-bars')) {
+        map2.getSource('tci-growth-bars').setData({type:'FeatureCollection',features});
+      } else {
+        map2.addSource('tci-growth-bars', {type:'geojson',
+          data:{type:'FeatureCollection',features}});
+        map2.addLayer({
+          id: 'tci-growth-bars-layer',
+          type: 'fill-extrusion',
+          source: 'tci-growth-bars',
+          paint: {
+            'fill-extrusion-color':   ['get','color'],
+            'fill-extrusion-height':  ['get','height'],
+            'fill-extrusion-base':    0,
+            'fill-extrusion-opacity': 0.82,
           }
         });
       }
-    });
-
-    try {
-      if(!map.getSource('tci-growth-bars')){
-        map.addSource('tci-growth-bars',{type:'geojson',data:{type:'FeatureCollection',features}});
-        map.addLayer({id:'tci-growth-bars-layer',type:'fill-extrusion',source:'tci-growth-bars',paint:{
-          'fill-extrusion-color':['get','color'],
-          'fill-extrusion-height':['get','height'],
-          'fill-extrusion-base':0,
-          'fill-extrusion-opacity':0.75,
-        }});
-      }
-    } catch(e){}
+    } catch(e){ console.warn('[Cinema 3D bars]', e.message); }
   },
 
   _setupTrafficLayer(map, city) {
@@ -2695,42 +2740,46 @@ G._SceneEngine = {
 
   // ── Coridoare de dezvoltare animat (scena 5) ──────────────────────────
   _setupCorridorsLayer(map, city) {
-    const cx = city?.lon||27.601, cy = city?.lat||47.158;
-    const corridors = [
-      // Coridor N-S principal
-      { coords: [[cx,cy+0.08],[cx,cy+0.04],[cx,cy],[cx,cy-0.04],[cx,cy-0.08]], type:'densificare', width:600 },
-      // Coridor E-V
-      { coords: [[cx-0.1,cy],[cx-0.05,cy],[cx,cy],[cx+0.05,cy],[cx+0.1,cy]], type:'densificare', width:500 },
-      // Coridor diagonal NE
-      { coords: [[cx-0.06,cy-0.04],[cx-0.03,cy-0.02],[cx,cy],[cx+0.04,cy+0.025]], type:'reconversie', width:400 },
-      // Coridor expansiune NV
-      { coords: [[cx,cy],[cx-0.04,cy+0.025],[cx-0.08,cy+0.05]], type:'expansiune', width:350 },
-      // Coridor expansiune SE
-      { coords: [[cx,cy],[cx+0.03,cy-0.02],[cx+0.07,cy-0.045]], type:'expansiune', width:300 },
-    ];
-    const colorMap = { densificare:'#ef4444', reconversie:'#f59e0b', expansiune:'#22c55e' };
-    const features = corridors.map(c => ({
-      type:'Feature',
-      geometry: { type:'LineString', coordinates: c.coords },
-      properties: { color: colorMap[c.type], width: c.width/50, type: c.type }
-    }));
+    const pug = this._pugGeo;
+    const reg = this._reguli || {};
+    const features = [];
+
+    const corridorTips = {
+      'centru':'#ef4444','centru_protejat':'#D4AF37',
+      'mixt':'#f97316','comercial':'#60a5fa','educational':'#a78bfa',
+      'industrial':'#b45309',
+    };
+
+    if(pug?.features?.length) {
+      pug.features.forEach(f => {
+        const utr = (f.properties?.utr||'').trim();
+        if(!utr||utr==='?'||utr==='??') return;
+        const tip = reg[utr]?.tip;
+        const c   = corridorTips[tip];
+        if(!c) return; // doar tipurile de coridor
+        features.push({type:'Feature', geometry:f.geometry,
+          properties:{color:c, width:3, tip:tip, utr:utr}});
+      });
+      console.log('[Cinema Corridors]', features.length, 'zone coridor din PUG');
+    }
+    if(!features.length) return;
+
     try {
-      if(!map.getSource('tci-corridors')) {
-        map.addSource('tci-corridors', {type:'geojson', data:{type:'FeatureCollection',features}});
-        map.addLayer({
-          id:'tci-corridors-layer', type:'line', source:'tci-corridors',
-          paint:{
-            'line-color':['get','color'],
-            'line-width':['get','width'],
-            'line-opacity':0.7,
-            'line-blur':3,
-          }
-        });
+      if(map.getSource('tci-corridors')) {
+        map.getSource('tci-corridors').setData({type:'FeatureCollection',features});
+      } else {
+        map.addSource('tci-corridors',{type:'geojson',
+          data:{type:'FeatureCollection',features}});
+        map.addLayer({id:'tci-corridors-layer',type:'fill',
+          source:'tci-corridors',paint:{
+          'fill-color':['get','color'],
+          'fill-opacity':0.55,
+          'fill-outline-color':['get','color'],
+        }});
       }
-    } catch(e) { console.warn('[TCI corridors]',e); }
+    } catch(e){ console.warn('[Cinema Corridors]', e.message); }
   },
 
-  // ── Layer transport public (scena 7) ──────────────────────────────────
   _setupTPLayer(map, city) {
     const cx = city?.lon||27.601, cy = city?.lat||47.158;
     const acop = city?.acoperire_transport||60;
