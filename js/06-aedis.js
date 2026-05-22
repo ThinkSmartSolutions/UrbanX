@@ -463,7 +463,7 @@ function loadScen(i){const sc=S.scenarios[i];if(!sc)return;Object.assign(S.vol,{
 // ═══ BUTOANE GLOBALE ═══════════════════════════════════════════════════════
 // Butoane topbar - null-safe pentru toate
 const safeOn=(id,fn)=>{const el=document.getElementById(id);if(el)el.onclick=fn;else console.warn('Missing element:',id);};
-// btnUTR gestionat exclusiv de _setupBtnUTR din index.html (single handler)
+safeOn('btnUTR',toggleUTR);
 safeOn('btnCloseUTR',hideUTRDrawer);
 safeOn('btnGPS',doGPS);
 // btnANCPI eliminat
@@ -1759,6 +1759,21 @@ async function switchUAT(uatId){
   if(!cfg){ ss('⚠️ UAT necunoscut: '+uatId); return; }
 
   S_UAT = {id:uatId, ...cfg};
+
+  // Sincronizăm localStorage cu cheia TCI (RO-XX-NN) pentru _setupBtnUTR
+  const _UAT_TO_TCI = {
+    'municipiul-iasi':    'RO-IS-01',
+    'municipiul-suceava': 'RO-SV-01',
+    'municipiul-botosani':'RO-BT-01',
+  };
+  const tciKey = _UAT_TO_TCI[uatId];
+  if(tciKey) {
+    try { localStorage.setItem('ux_last_city', tciKey); } catch(e) {}
+    if(window.TCI) window.TCI.cityKey = tciKey;
+  }
+
+  // Resetăm PUG încărcat — forțăm re-încărcare la următorul click UTR
+  if(window.S) { window.S.pug = null; window.S.pugIdx = []; window.S._loadedCityKey = null; }
 
   // Actualizăm titlul paginii dinamic
   document.title = `UrbanX – ${cfg.short||cfg.label}`;
