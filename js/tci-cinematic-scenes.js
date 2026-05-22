@@ -457,21 +457,114 @@ G._SceneEngine = {
     const cx   = city?.lon||27.601, cy = city?.lat||47.158;
     if(!map) return;
 
-    const flyOpts = {
-      1:  { center:[23.5,46.0], zoom:4.5, pitch:0,  bearing:0,  dur:4000 }, // România
-      2:  { center:[cx,cy],     zoom:7.5, pitch:20, bearing:-8, dur:3500 }, // Zoom regional
-      3:  { center:[cx,cy],     zoom:11,  pitch:30, bearing:-10,dur:3000 }, // Approach
-      4:  { center:[cx,cy],     zoom:13,  pitch:50, bearing:-15,dur:2000 }, // City 3D
-      5:  { center:[cx,cy],     zoom:12,  pitch:45, bearing:20, dur:2000 }, // Dezvoltare
-      6:  { center:[cx,cy],     zoom:13,  pitch:40, bearing:-10,dur:1500 }, // Infrastructură
-      7:  { center:[cx,cy+0.02],zoom:14,  pitch:55, bearing:30, dur:2000 }, // Focus zonă
-      8:  { center:[cx,cy],     zoom:11,  pitch:35, bearing:0,  dur:2000 }, // Comparație
-      9:  { center:[cx,cy],     zoom:17,  pitch:82, bearing:20, dur:2500 }, // Street
-      10: { center:[cx,cy],     zoom:15,  pitch:60, bearing:-20,dur:1500 }, // Viata
-      11: { center:[cx,cy],     zoom:12,  pitch:45, bearing:0,  dur:1000 }, // Slider
-      12: { center:[cx,cy],     zoom:11,  pitch:40, bearing:-30,dur:3000 }, // Concluzie
-    }[sceneId];
+    // ── Curățăm layerele TCI din scena anterioară ────────────────────────
+    this._cleanupTCILayers(map);
 
+    // ── Configurăm harta și layerele per scenă ───────────────────────────
+    switch(sceneId) {
+
+      case 1: // IDENTITATE — zoom out la România, stil noapte
+        map.flyTo({center:[cx,cy], zoom:11, pitch:0, bearing:0, duration:3000, essential:true});
+        try{ map.setConfigProperty('basemap','lightPreset','night'); }catch(e){}
+        break;
+
+      case 2: // CONTEXT GEOGRAFIC — zoom regional cu relief
+        map.flyTo({center:[cx,cy], zoom:8, pitch:25, bearing:-5, duration:3500, essential:true});
+        try{ map.setConfigProperty('basemap','lightPreset','dusk'); }catch(e){}
+        break;
+
+      case 3: // DEMOGRAFIE — city overview 3D dimineata
+        map.flyTo({center:[cx,cy], zoom:12, pitch:45, bearing:10, duration:3000, essential:true});
+        try{ map.setConfigProperty('basemap','lightPreset','dawn'); }catch(e){}
+        this._setupDensityLayer(map, city);
+        break;
+
+      case 4: // ECONOMIE — city 3D zi, zoom pe centru
+        map.flyTo({center:[cx,cy], zoom:13.5, pitch:55, bearing:-20, duration:2500, essential:true});
+        try{ map.setConfigProperty('basemap','lightPreset','day'); }catch(e){}
+        break;
+
+      case 5: // CORIDOARE DEZVOLTARE — bare 3D dezvoltare + rotatie
+        map.flyTo({center:[cx,cy], zoom:12, pitch:55, bearing:15, duration:2500, essential:true});
+        try{ map.setConfigProperty('basemap','lightPreset','day'); }catch(e){}
+        this._setup3DGrowthBars(map, city);
+        this._setupCorridorsLayer(map, city);
+        // Rotatie lenta pentru efect cinematic
+        this._startMapRotation(map, 15, 0.03);
+        break;
+
+      case 6: // MOBILITATE AUTO — trafic + congestie
+        map.flyTo({center:[cx,cy], zoom:13, pitch:40, bearing:0, duration:2000, essential:true});
+        try{ map.setConfigProperty('basemap','lightPreset','night'); }catch(e){}
+        this._setupTrafficLayer(map, city);
+        break;
+
+      case 7: // TRANSPORT PUBLIC — acoperire TP + walkability
+        map.flyTo({center:[cx,cy], zoom:13, pitch:40, bearing:-15, duration:2000, essential:true});
+        try{ map.setConfigProperty('basemap','lightPreset','day'); }catch(e){}
+        this._setupTPLayer(map, city);
+        break;
+
+      case 8: // RISC SEISMIC — stil dramatic noapte
+        map.flyTo({center:[cx,cy], zoom:12, pitch:35, bearing:0, duration:2500, essential:true});
+        try{ map.setConfigProperty('basemap','lightPreset','night'); }catch(e){}
+        this._setupSeismicLayer(map, city);
+        break;
+
+      case 9: // INUNDATII — activam FloodMapper ANAR real
+        map.flyTo({center:[cx,cy], zoom:12, pitch:30, bearing:0, duration:2500, essential:true});
+        try{ map.setConfigProperty('basemap','lightPreset','dawn'); }catch(e){}
+        this._setupFloodLayer(map, city);
+        break;
+
+      case 10: // PROIECTIE DEMOGRAFICA — city overview + fan chart
+        map.flyTo({center:[cx,cy], zoom:11.5, pitch:45, bearing:-10, duration:2500, essential:true});
+        try{ map.setConfigProperty('basemap','lightPreset','dusk'); }catch(e){}
+        break;
+
+      case 11: // INFRASTRUCTURA — zoom pe cartiere cu deficit
+        map.flyTo({center:[cx,cy], zoom:13, pitch:50, bearing:20, duration:2000, essential:true});
+        try{ map.setConfigProperty('basemap','lightPreset','day'); }catch(e){}
+        this._setupInfraLayer(map, city);
+        break;
+
+      case 12: // INVESTITII — zi, overview
+        map.flyTo({center:[cx,cy], zoom:12, pitch:40, bearing:-5, duration:2000, essential:true});
+        try{ map.setConfigProperty('basemap','lightPreset','day'); }catch(e){}
+        break;
+
+      case 13: // SCENARII — pitch inalt, vedere bird's eye
+        map.flyTo({center:[cx,cy], zoom:11, pitch:30, bearing:0, duration:2500, essential:true});
+        try{ map.setConfigProperty('basemap','lightPreset','day'); }catch(e){}
+        this._setupScenariiLayer(map, city);
+        break;
+
+      case 14: // CALITATEA VIETII — spații verzi vizibile
+        map.flyTo({center:[cx,cy], zoom:13, pitch:45, bearing:10, duration:2000, essential:true});
+        try{ map.setConfigProperty('basemap','lightPreset','day'); }catch(e){}
+        break;
+
+      case 15: // BENCHMARKING — overview
+        map.flyTo({center:[cx,cy], zoom:12, pitch:40, bearing:-10, duration:2000, essential:true});
+        try{ map.setConfigProperty('basemap','lightPreset','day'); }catch(e){}
+        break;
+
+      case 16: // AGENDA PRIMARULUI — zi, clear
+        map.flyTo({center:[cx,cy], zoom:13, pitch:50, bearing:5, duration:2000, essential:true});
+        try{ map.setConfigProperty('basemap','lightPreset','day'); }catch(e){}
+        this._setupPrioritiesLayer(map, city);
+        break;
+
+      case 17: // VIZIUNEA 2055 — sunset dramatic + rotatie
+        map.flyTo({center:[cx,cy], zoom:12, pitch:60, bearing:-20, duration:3000, essential:true});
+        try{ map.setConfigProperty('basemap','lightPreset','dusk'); }catch(e){}
+        this._setup3DGrowthBars(map, city);
+        this._startMapRotation(map, -20, 0.02);
+        break;
+    }
+
+    // ── Legacy flyOpts pentru compatibilitate ─────────────────────────────
+    const flyOpts = null; // dezactivat — folosim switch de mai sus
     if(flyOpts) {
       try {
         map.flyTo({
@@ -2575,15 +2668,278 @@ G._SceneEngine = {
     ctx.textAlign='left';
   },
 
+  // ── Rotatie hartă animată (cinematic) ─────────────────────────────────
+  _startMapRotation(map, startBearing, speed) {
+    if(this._rotInterval) clearInterval(this._rotInterval);
+    let bearing = startBearing;
+    this._rotInterval = setInterval(() => {
+      if(!this._playing) { clearInterval(this._rotInterval); return; }
+      bearing += speed;
+      try { map.setBearing(bearing); } catch(e) { clearInterval(this._rotInterval); }
+    }, 50);
+  },
+
+  // ── Curăță DOAR layerele TCI (nu atinge layerele platformei) ──────────
+  _cleanupTCILayers(map) {
+    if(this._rotInterval) { clearInterval(this._rotInterval); this._rotInterval = null; }
+    const tciLayers = [
+      'tci-density-layer','tci-growth-bars-layer','tci-traffic-cong-layer',
+      'tci-corridors-layer','tci-tp-layer','tci-seismic-layer',
+      'tci-flood-layer','tci-infra-layer','tci-scenarii-layer','tci-priorities-layer',
+    ];
+    const tciSources = [
+      'tci-density-heat','tci-growth-bars','tci-traffic-congestion',
+      'tci-corridors','tci-tp','tci-seismic','tci-flood','tci-infra','tci-scenarii','tci-priorities',
+    ];
+    tciLayers.forEach(id => { try{ if(map.getLayer(id)) map.removeLayer(id); }catch(e){} });
+    tciSources.forEach(id => { try{ if(map.getSource(id)) map.removeSource(id); }catch(e){} });
+  },
+
+  // ── Coridoare de dezvoltare animat (scena 5) ──────────────────────────
+  _setupCorridorsLayer(map, city) {
+    const cx = city?.lon||27.601, cy = city?.lat||47.158;
+    const corridors = [
+      // Coridor N-S principal
+      { coords: [[cx,cy+0.08],[cx,cy+0.04],[cx,cy],[cx,cy-0.04],[cx,cy-0.08]], type:'densificare', width:600 },
+      // Coridor E-V
+      { coords: [[cx-0.1,cy],[cx-0.05,cy],[cx,cy],[cx+0.05,cy],[cx+0.1,cy]], type:'densificare', width:500 },
+      // Coridor diagonal NE
+      { coords: [[cx-0.06,cy-0.04],[cx-0.03,cy-0.02],[cx,cy],[cx+0.04,cy+0.025]], type:'reconversie', width:400 },
+      // Coridor expansiune NV
+      { coords: [[cx,cy],[cx-0.04,cy+0.025],[cx-0.08,cy+0.05]], type:'expansiune', width:350 },
+      // Coridor expansiune SE
+      { coords: [[cx,cy],[cx+0.03,cy-0.02],[cx+0.07,cy-0.045]], type:'expansiune', width:300 },
+    ];
+    const colorMap = { densificare:'#ef4444', reconversie:'#f59e0b', expansiune:'#22c55e' };
+    const features = corridors.map(c => ({
+      type:'Feature',
+      geometry: { type:'LineString', coordinates: c.coords },
+      properties: { color: colorMap[c.type], width: c.width/50, type: c.type }
+    }));
+    try {
+      if(!map.getSource('tci-corridors')) {
+        map.addSource('tci-corridors', {type:'geojson', data:{type:'FeatureCollection',features}});
+        map.addLayer({
+          id:'tci-corridors-layer', type:'line', source:'tci-corridors',
+          paint:{
+            'line-color':['get','color'],
+            'line-width':['get','width'],
+            'line-opacity':0.7,
+            'line-blur':3,
+          }
+        });
+      }
+    } catch(e) { console.warn('[TCI corridors]',e); }
+  },
+
+  // ── Layer transport public (scena 7) ──────────────────────────────────
+  _setupTPLayer(map, city) {
+    const cx = city?.lon||27.601, cy = city?.lat||47.158;
+    const acop = city?.acoperire_transport||60;
+    // Generăm rute TP radiale din centru
+    const routes = [];
+    const nRoutes = Math.round(acop/15);
+    for(let i=0;i<nRoutes;i++) {
+      const angle = (i/nRoutes)*Math.PI*2;
+      const coords = [];
+      for(let s=0;s<=8;s++) {
+        const r = s*0.008;
+        coords.push([cx+r*Math.cos(angle), cy+r*0.7*Math.sin(angle)]);
+      }
+      routes.push({ type:'Feature', geometry:{type:'LineString',coordinates:coords},
+        properties:{color:acop>=65?'#60a5fa':'#f59e0b', width:2.5} });
+    }
+    try {
+      if(!map.getSource('tci-tp')) {
+        map.addSource('tci-tp', {type:'geojson', data:{type:'FeatureCollection',features:routes}});
+        map.addLayer({ id:'tci-tp-layer', type:'line', source:'tci-tp',
+          paint:{'line-color':['get','color'],'line-width':['get','width'],'line-opacity':0.8,'line-blur':1} });
+      }
+    } catch(e) {}
+  },
+
+  // ── Layer risc seismic — heatmap fond vulnerabil (scena 8) ────────────
+  _setupSeismicLayer(map, city) {
+    const cx = city?.lon||27.601, cy = city?.lat||47.158;
+    const ag = city?.ag_seismic||0.2;
+    const fond = city?.fond_pre77_pct||35;
+    const points = [];
+    // Generăm puncte de vulnerabilitate concentrate în centru vechi
+    for(let i=0;i<200;i++) {
+      const r = Math.random()*0.04;
+      const a = Math.random()*Math.PI*2;
+      const weight = Math.max(0, 1 - r/0.04 + Math.random()*0.3) * (fond/100) * ag * 3;
+      points.push({type:'Feature',
+        geometry:{type:'Point',coordinates:[cx+r*Math.cos(a),cy+r*0.7*Math.sin(a)]},
+        properties:{weight}});
+    }
+    try {
+      if(!map.getSource('tci-seismic')) {
+        map.addSource('tci-seismic', {type:'geojson', data:{type:'FeatureCollection',features:points}});
+        map.addLayer({ id:'tci-seismic-layer', type:'heatmap', source:'tci-seismic',
+          paint:{
+            'heatmap-weight':['interpolate',['linear'],['get','weight'],0,0,1,1],
+            'heatmap-intensity':2,
+            'heatmap-color':['interpolate',['linear'],['heatmap-density'],
+              0,'rgba(0,0,0,0)',0.2,'rgba(254,240,138,.4)',0.5,'rgba(251,146,60,.7)',0.8,'rgba(239,68,68,.9)',1,'rgba(127,29,29,1)'],
+            'heatmap-radius':25,
+            'heatmap-opacity':0.8,
+          }
+        });
+      }
+    } catch(e) {}
+  },
+
+  // ── Layer inundații — activăm FloodMapper ANAR sau fallback (scena 9) ─
+  _setupFloodLayer(map, city) {
+    // Încercăm să activăm FloodMapper real (date ANAR WMS)
+    try {
+      if(window._FloodMapper && typeof window._FloodMapper.addAll === 'function') {
+        window._FloodMapper.addAll(map);
+        console.log('[Cinema] FloodMapper ANAR activat');
+        return;
+      }
+    } catch(e) {}
+    // Fallback: generăm flood zones simulate pe baza altitudinii
+    const cx = city?.lon||27.601, cy = city?.lat||47.158;
+    const features = [];
+    // Zone de risc de-a lungul văilor (simulate)
+    const riverAngles = [0.3, 1.1, 3.9, 5.2]; // unghiuri pentru văi
+    riverAngles.forEach(angle => {
+      const coords = [];
+      for(let i=-15;i<=15;i++) {
+        const t = i/15;
+        coords.push([cx + t*0.12*Math.cos(angle) + Math.sin(t*8)*0.006,
+                     cy + t*0.08*Math.sin(angle) + Math.cos(t*6)*0.004]);
+      }
+      features.push({type:'Feature', geometry:{type:'LineString',coordinates:coords},
+        properties:{risk:'RCP100',color:'rgba(29,78,216,0.6)',width:8}});
+      // Zona inundabila mai larga
+      features.push({type:'Feature', geometry:{type:'LineString',coordinates:coords.map(([x,y])=>[x+0.003,y+0.002])},
+        properties:{risk:'RCP500',color:'rgba(59,130,246,0.3)',width:16}});
+    });
+    try {
+      if(!map.getSource('tci-flood')) {
+        map.addSource('tci-flood', {type:'geojson', data:{type:'FeatureCollection',features}});
+        map.addLayer({ id:'tci-flood-layer', type:'line', source:'tci-flood',
+          paint:{'line-color':['get','color'],'line-width':['get','width'],'line-opacity':0.75,'line-blur':4} });
+      }
+    } catch(e) {}
+  },
+
+  // ── Layer infrastructură — zone cu deficit (scena 11) ─────────────────
+  _setupInfraLayer(map, city) {
+    const cx = city?.lon||27.601, cy = city?.lat||47.158;
+    const pop = city?.pop2021||100000;
+    // Cercuri concentrice cu nivel de acoperire servicii
+    const rings = [
+      {r:0.015, label:'Centru', coverage:0.9, color:'#22c55e'},
+      {r:0.035, label:'Semicentral', coverage:0.7, color:'#f59e0b'},
+      {r:0.06,  label:'Cartiere', coverage:0.5, color:'#f97316'},
+      {r:0.09,  label:'Periferie', coverage:0.3, color:'#ef4444'},
+    ];
+    const features = [];
+    rings.forEach(ring => {
+      const coords = [];
+      for(let a=0;a<=360;a+=5) {
+        const rad = a*Math.PI/180;
+        coords.push([cx+ring.r*Math.cos(rad), cy+ring.r*0.7*Math.sin(rad)]);
+      }
+      features.push({type:'Feature',
+        geometry:{type:'LineString',coordinates:coords},
+        properties:{color:ring.color, width:3, coverage:ring.coverage}});
+    });
+    try {
+      if(!map.getSource('tci-infra')) {
+        map.addSource('tci-infra', {type:'geojson', data:{type:'FeatureCollection',features}});
+        map.addLayer({ id:'tci-infra-layer', type:'line', source:'tci-infra',
+          paint:{'line-color':['get','color'],'line-width':['get','width'],'line-opacity':0.65,'line-dasharray':[2,1]} });
+      }
+    } catch(e) {}
+  },
+
+  // ── Layer scenarii — zone colorate S1/S2/S3 (scena 13) ────────────────
+  _setupScenariiLayer(map, city) {
+    const cx = city?.lon||27.601, cy = city?.lat||47.158;
+    // S1: extindere maxima (roșu), S2: moderata (galben), S3: compact (verde)
+    const scenarios = [
+      { r:0.12, color:'rgba(34,197,94,0.15)', border:'#22c55e', label:'S1' },
+      { r:0.09, color:'rgba(212,175,55,0.2)',  border:'#D4AF37', label:'S2' },
+      { r:0.06, color:'rgba(96,165,250,0.15)', border:'#60a5fa', label:'S3' },
+    ];
+    const features = [];
+    scenarios.forEach(s => {
+      const coords = [];
+      for(let a=0;a<=360;a+=3) {
+        const rad=a*Math.PI/180;
+        const noise=1+Math.sin(a*7)*0.08+Math.cos(a*11)*0.05;
+        coords.push([cx+s.r*noise*Math.cos(rad), cy+s.r*0.7*noise*Math.sin(rad)]);
+      }
+      features.push({type:'Feature',geometry:{type:'LineString',coordinates:coords},
+        properties:{color:s.border,width:2.5}});
+    });
+    try {
+      if(!map.getSource('tci-scenarii')) {
+        map.addSource('tci-scenarii', {type:'geojson', data:{type:'FeatureCollection',features}});
+        map.addLayer({ id:'tci-scenarii-layer', type:'line', source:'tci-scenarii',
+          paint:{'line-color':['get','color'],'line-width':['get','width'],'line-opacity':0.8,'line-blur':2} });
+      }
+    } catch(e) {}
+  },
+
+  // ── Layer priorități primărie — puncte de intervenție (scena 16) ──────
+  _setupPrioritiesLayer(map, city) {
+    const cx = city?.lon||27.601, cy = city?.lat||47.158;
+    const ag = city?.ag_seismic||0.2;
+    const acop = city?.acoperire_transport||60;
+    const priorities = [];
+    // Prioritate 1: seismic (centru)
+    if(ag>=0.3) priorities.push({lon:cx+0.005,lat:cy+0.003,color:'#ef4444',r:500,label:'P1 Seismic'});
+    // Prioritate 2: TP coridor
+    priorities.push({lon:cx-0.02,lat:cy+0.01,color:'#60a5fa',r:400,label:'P2 Transport'});
+    // Prioritate 3: spații verzi
+    priorities.push({lon:cx+0.015,lat:cy-0.01,color:'#22c55e',r:350,label:'P3 Spații verzi'});
+    // Prioritate 4: infrastructură periferie
+    priorities.push({lon:cx-0.03,lat:cy-0.02,color:'#f59e0b',r:300,label:'P4 Utilități'});
+
+    const features = priorities.map(p => ({
+      type:'Feature',
+      geometry:{type:'Point',coordinates:[p.lon,p.lat]},
+      properties:{color:p.color,radius:p.r}
+    }));
+    try {
+      if(!map.getSource('tci-priorities')) {
+        map.addSource('tci-priorities', {type:'geojson', data:{type:'FeatureCollection',features}});
+        map.addLayer({ id:'tci-priorities-layer', type:'circle', source:'tci-priorities',
+          paint:{
+            'circle-color':['get','color'],
+            'circle-radius':['interpolate',['linear'],['zoom'],10,8,14,20],
+            'circle-opacity':0.6,
+            'circle-blur':0.4,
+            'circle-stroke-color':['get','color'],
+            'circle-stroke-width':2,
+          }
+        });
+      }
+    } catch(e) {}
+  },
+
   _cleanupMapLayers() {
     const map = window.map;
     if(!map) return;
-    ['tci-density-heat','tci-growth-bars','tci-traffic-congestion'].forEach(src=>{
-      ['tci-density-layer','tci-growth-bars-layer','tci-traffic-cong-layer'].forEach(id=>{
-        try{ if(map.getLayer(id)) map.removeLayer(id); }catch(e){}
-      });
-      try{ if(map.getSource(src)) map.removeSource(src); }catch(e){}
-    });
+    if(this._rotInterval) { clearInterval(this._rotInterval); this._rotInterval = null; }
+    // Curatam toate layerele TCI
+    ['tci-density-layer','tci-growth-bars-layer','tci-traffic-cong-layer',
+     'tci-corridors-layer','tci-tp-layer','tci-seismic-layer',
+     'tci-flood-layer','tci-infra-layer','tci-scenarii-layer','tci-priorities-layer']
+    .forEach(id=>{ try{ if(map.getLayer(id)) map.removeLayer(id); }catch(e){} });
+    ['tci-density-heat','tci-growth-bars','tci-traffic-congestion',
+     'tci-corridors','tci-tp','tci-seismic','tci-flood','tci-infra','tci-scenarii','tci-priorities']
+    .forEach(src=>{ try{ if(map.getSource(src)) map.removeSource(src); }catch(e){} });
+    // Oprim FloodMapper daca era activ
+    try{ window._FloodMapper?.removeAll?.(map); }catch(e){}
+    // Resetam stilul la zi
+    try{ map.setConfigProperty('basemap','lightPreset','day'); }catch(e){}
     document.getElementById('tci-time-slider')?.remove();
   },
 
