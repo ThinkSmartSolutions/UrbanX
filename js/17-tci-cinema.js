@@ -11,7 +11,7 @@ const TCI = {
   running: false, speed: 1,
   year: 2025, startYear: 2025,
   scenario: 'S2', mode: 'uat',
-  cityKey: 'iasi', cityData: null,
+  cityKey: (function(){try{return localStorage.getItem('ux_last_city')||'RO-IS-01';}catch(e){return 'RO-IS-01';}}()), cityData: null,
   raf: null, startTime: 0, pausedAt: 0,
   bearing: 0,
   _selectedUATKey: null,
