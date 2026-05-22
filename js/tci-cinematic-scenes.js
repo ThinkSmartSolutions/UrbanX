@@ -539,19 +539,19 @@ G._SceneEngine = {
         break;
 
       case 5: // PREDICTII DEZVOLTARE 2025-2055
-        // Zoom pe tot orasul - jumpTo instant la zoom corect
+        // Zoom pe tot orasul cu unghi 3D
         try {
           map.setZoom(10.5);
           map.setCenter([cx, cy]);
-          map.setPitch(0);
-          map.setBearing(0);
+          map.setPitch(52);
+          map.setBearing(10);
         } catch(e){}
         setTimeout(()=>{
           try {
-            map.flyTo({center:[cx,cy], zoom:10.8, pitch:52, bearing:10,
-              duration:1500, essential:true});
+            map.flyTo({center:[cx,cy], zoom:11.0, pitch:55, bearing:15,
+              duration:2000, essential:true});
           } catch(e){}
-        }, 200);
+        }, 300);
         try{ map.setConfigProperty('basemap','lightPreset','night'); }catch(e){}
         // Ascundem layerele UTR 2D ca sa nu acopere barele 3D
         ['utr-fill','utr-line','utr-lbl'].forEach(id=>{
@@ -1047,7 +1047,7 @@ G._SceneEngine = {
     });
 
     // Bara convergentă UE
-    if(t>0.45){
+    if(t>0.35){
       const ba=Math.min(1,(t-0.45)/0.3);
       ctx.globalAlpha=ba;
       ctx.fillStyle='rgba(4,10,24,.9)';
@@ -1127,8 +1127,8 @@ G._SceneEngine = {
     }
 
     // LEGENDA - stanga sus - vizibila de la inceputul scenei
-    if(t>0.1){
-      const la=Math.min(1,(t-0.1)/0.2);
+    if(t>0.02){
+      const la=Math.min(1,(t-0.02)/0.15);
       ctx.globalAlpha=la;
       const lx=W*0.02, ly=H*0.1;
       const entries=[
@@ -1186,7 +1186,7 @@ G._SceneEngine = {
     }
 
     // CONCLUZIE - jos centru la finalul scenei
-    if(t>0.78){
+    if(t>0.68){
       const ta=Math.min(1,(t-0.78)/0.15);
       ctx.globalAlpha=ta;
       ctx.fillStyle='rgba(4,10,24,.95)';
