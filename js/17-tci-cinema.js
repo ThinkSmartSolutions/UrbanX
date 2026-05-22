@@ -253,6 +253,24 @@ const TCI = {
     // Acesta e momentul în care userul a ales un UAT — salvăm persistent
     this.cityKey = key;
     try { localStorage.setItem('ux_last_city', key); } catch(e) {}
+
+    // ── Bridge TCI → 06-aedis.js (switchUAT) ────────────────────────────
+    // Citim registry-ul dinamic dacă există, altfel fallback la map static
+    (function(){
+      const reg = window._PUG_REGISTRY;
+      const uatId = reg?.[key]?.id || {
+        'RO-IS-01':'municipiul-iasi',
+        'RO-SV-01':'municipiul-suceava',
+        'RO-BT-01':'municipiul-botosani',
+      }[key];
+      if(uatId && typeof window.switchUAT === 'function') {
+        console.log('[TCI] bridge → switchUAT('+uatId+')');
+        window.switchUAT(uatId);
+      }
+      // Resetăm PUG încărcat ca să forțăm re-încărcare pentru noul UAT
+      if(window.S) { window.S.pug = false; window.S._loadedCityKey = null; }
+    })();
+
     if(window._ProjectionEngine) window._ProjectionEngine.currentCity = key;
     if(window._SceneEngine) window._SceneEngine._cityKey = key;
 

@@ -4783,17 +4783,17 @@ function _setupBtnUTR() {
     const city = db[k] || {name:'UAT', lat:47.158, lon:27.601};
     const cityName = city.name || 'UAT';
 
-    // Determinăm URL-ul PUG
-    const _PUG_URLS = {
-      'RO-IS-01': 'data/municipiul-iasi/pug.geojson',
-      'RO-SV-01': 'js/data/municipiul-suceava/pug.geojson',
-    };
-    const UAT_REG = window.UAT_REGISTRY || {};
-    const regEntry = Object.values(UAT_REG).find(e =>
-      e.label?.toLowerCase().includes(cityName.toLowerCase()) ||
-      e.siruta === city.siruta
-    );
-    const pugUrl = _PUG_URLS[k] || regEntry?.pugFile;
+    // Determinăm URL-ul PUG — citim din _PUG_REGISTRY (single source of truth)
+    const _reg = window._PUG_REGISTRY || {};
+    const pugUrl = _reg[k]?.pugFile || (() => {
+      // Fallback legacy — UAT_REGISTRY sau map static
+      const UAT_REG = window.UAT_REGISTRY || {};
+      const regEntry = Object.values(UAT_REG).find(e =>
+        e.label?.toLowerCase().includes(cityName.toLowerCase()) ||
+        e.siruta === city.siruta
+      );
+      return regEntry?.pugFile || null;
+    })();
 
     if(!pugUrl) {
       drawer.classList.add('open');
@@ -4854,7 +4854,20 @@ window._loadPUGOnMap   = _loadPUGOnMap;
 window._renderUTRChips = _renderUTRChips;
 window._utrColor       = _utrColor;
 
-console.log('[UrbanX UTR System] ✅ Patch v20260520b: _launchPUGSuceava + btnUTR + chips colorate');
+// ── _PUG_REGISTRY — single source of truth pentru toate UAT-urile ─────────
+// Pentru a adăuga un UAT nou: adaugi un rând aici. Nu atingi altceva.
+window._PUG_REGISTRY = window._PUG_REGISTRY || {};
+Object.assign(window._PUG_REGISTRY, {
+  'RO-IS-01': { id:'municipiul-iasi',    name:'Municipiul Iași',    pugFile:'data/municipiul-iasi/pug.geojson',              reguli:'data/municipiul-iasi/reguli.json' },
+  'RO-SV-01': { id:'municipiul-suceava', name:'Municipiul Suceava', pugFile:'js/data/municipiul-suceava/pug.geojson',         reguli:'js/data/municipiul-suceava/reguli.json' },
+  'RO-BT-01': { id:'municipiul-botosani',name:'Municipiul Botoșani',pugFile:'js/data/municipiul-botosani/pug.geojson',        reguli:'js/data/municipiul-botosani/reguli.json' },
+  // ── Adaugă UAT-uri noi mai jos — fără alte modificări în cod ────────────
+  // 'RO-BC-01': { id:'municipiul-bacau',   name:'Municipiul Bacău',   pugFile:'js/data/municipiul-bacau/pug.geojson',           reguli:'js/data/municipiul-bacau/reguli.json' },
+  // 'RO-VN-01': { id:'municipiul-vaslui',  name:'Municipiul Vaslui',  pugFile:'js/data/municipiul-vaslui/pug.geojson',          reguli:'js/data/municipiul-vaslui/reguli.json' },
+});
+console.log('[UrbanX] _PUG_REGISTRY inițializat —', Object.keys(window._PUG_REGISTRY).length, 'UAT-uri disponibile');
+
+console.log('[UrbanX UTR System] ✅ Patch v20260522a: _PUG_REGISTRY + TCI bridge + culori UTR');
 
 })();
 </script>
