@@ -315,6 +315,16 @@ G._SceneEngine = {
     this._scene  = 0;
     this._playing = true;
 
+    // Pe mobil: reducem la primele 12 scene si durate mai scurte pentru performanta
+    const isMobile = window.innerWidth < 768;
+    const _originalScenes = this._SCENES_ORIG || (this._SCENES_ORIG = [...this.SCENES]);
+    if(isMobile) {
+      this._activeScenes = _originalScenes.slice(0, 12).map(s => ({...s, dur: Math.min(s.dur, 8000)}));
+      console.log('[Cinema v2] Mobil detectat — 12 scene, durate reduse');
+    } else {
+      this._activeScenes = [..._originalScenes];
+    }
+
     // Canvas overlay fullscreen
     this._canvas = this._createCanvas();
     this._ctx    = this._canvas.getContext('2d');
@@ -341,10 +351,11 @@ G._SceneEngine = {
   },
 
   _runScene(idx) {
-    if(!this._playing || idx >= this.SCENES.length) {
+    const _scenes = this._activeScenes || this.SCENES;
+    if(!this._playing || idx >= _scenes.length) {
       this._finish(); return;
     }
-    const scene = this.SCENES[idx];
+    const scene = _scenes[idx];
     this._scene   = idx;
     this._startT  = performance.now();
 
@@ -417,7 +428,7 @@ G._SceneEngine = {
 
     const flyOpts = {
       1:  { center:[23.5,46.0], zoom:4.5, pitch:0,  bearing:0,  dur:4000 }, // România
-      2:  { center:[27.0,47.2], zoom:7,   pitch:15, bearing:-5, dur:3000 }, // Moldova
+      2:  { center:[cx,cy],     zoom:7,   pitch:15, bearing:-5, dur:3000 }, // Zoom regional dinamic
       3:  { center:[cx,cy],     zoom:11,  pitch:30, bearing:-10,dur:3000 }, // Approach
       4:  { center:[cx,cy],     zoom:13,  pitch:50, bearing:-15,dur:2000 }, // City 3D
       5:  { center:[cx,cy],     zoom:12,  pitch:45, bearing:20, dur:2000 }, // Dezvoltare
@@ -449,9 +460,11 @@ G._SceneEngine = {
     try { map.setConfigProperty?.('basemap','lightPreset', lights[sceneId]||'day'); } catch(e){}
 
     // Setup layers per scenă
-    if(sceneId===4) this._setupDensityLayer(map, city);
-    if(sceneId===5) this._setup3DGrowthBars(map, city);
-    if(sceneId===6) this._setupTrafficLayer(map, city);
+    // Pe mobil sarim layerele WebGL grele - canvas-ul singur e suficient
+    const _mob = window.innerWidth < 768;
+    if(sceneId===4 && !_mob) this._setupDensityLayer(map, city);
+    if(sceneId===5 && !_mob) this._setup3DGrowthBars(map, city);
+    if(sceneId===6 && !_mob) this._setupTrafficLayer(map, city);
     if(sceneId===11) this._showTimeSlider(city);
     if(sceneId!==11) document.getElementById('tci-time-slider')?.remove();
   },
@@ -506,9 +519,6 @@ G._SceneEngine = {
       case 23: this._s23_masterplanPreview(ctx,W,H,t,city); break;
       case 24: this._s24_investment(ctx,W,H,t,city); break;
       case 25: this._s25_finale(ctx,W,H,t,city); break;
-      case 9: this._s13_street(ctx,W,H,t,city); break;
-      case 10:this._s14_urban(ctx,W,H,t,city); break;
-      
     }
 
     // Progress bar scenă
@@ -1126,23 +1136,59 @@ G._SceneEngine = {
       ctx.globalAlpha=1;
     }
 
-    // Vehicule simulate pe strada (puncte animate)
+    // Modal split animat - distributie moduri transport
     if(t>0.2){
-      const numVeh=Math.floor(t*8);
-      for(let i=0;i<numVeh;i++){
-        const phase=(t*0.8+i*0.15)%1;
-        const vx=W*0.05+phase*W*0.55;
-        const vy=H*(0.42+i*0.06);
-        const alpha=Math.sin(phase*Math.PI)*0.8;
-        ctx.globalAlpha=alpha;
-        ctx.fillStyle=i%3===0?'#f97316':i%3===1?'#60a5fa':'#22c55e';
-        ctx.beginPath();ctx.ellipse(vx,vy,W*0.012,H*0.018,0,0,Math.PI*2);ctx.fill();
-        ctx.fillStyle='rgba(255,255,255,.6)';ctx.font=`${W*0.006}px "IBM Plex Mono"`;
-        ctx.textAlign='center';ctx.fillText(i%3===0?'🚗':i%3===1?'🚌':'🚲',vx,vy+2);
+      const auto   = Math.round(100-(city.acoperire_transport||60)*0.5);
+      const tp     = Math.round((city.acoperire_transport||60)*0.5);
+      const ciclo  = Math.max(5, Math.round(tp*0.15));
+      const pieton = 100-auto-tp-ciclo;
+
+      const modes = [
+        {label:'AUTO', pct:auto, color:'#ef4444', icon:'🚗'},
+        {label:'TRANSPORT PUBLIC', pct:tp, color:'#60a5fa', icon:'🚌'},
+        {label:'PIETONAL', pct:pieton, color:'#a78bfa', icon:'🚶'},
+        {label:'CICLIST', pct:ciclo, color:'#22c55e', icon:'🚲'},
+      ];
+
+      const bx=W*0.05, by=H*0.42, bw=W*0.55, bh=H*0.06;
+      // Bara modal split
+      let xoff=0;
+      modes.forEach(m=>{
+        const w=bw*(m.pct/100);
+        const anim=Math.min(1,(t-0.2)/0.4);
+        ctx.fillStyle=m.color;
+        ctx.globalAlpha=0.85*anim;
+        this._roundRect(ctx,bx+xoff,by,w*anim,bh,4);ctx.fill();
+        if(w*anim>W*0.05){
+          ctx.fillStyle='#fff';ctx.font=`bold ${W*0.0075}px "IBM Plex Mono"`;
+          ctx.textAlign='center';ctx.globalAlpha=anim;
+          ctx.fillText(m.icon+' '+m.pct+'%', bx+xoff+w*anim/2, by+bh*0.65);
+        }
+        xoff+=w;
+      });
+      ctx.globalAlpha=1;
+
+      // Label modal split
+      ctx.fillStyle='rgba(200,215,235,.8)';ctx.font=`${W*0.008}px "IBM Plex Mono"`;
+      ctx.textAlign='left';
+      ctx.fillText('MODAL SPLIT '+city.name+' · Sursa: operator TP + model UrbanX', bx, by-8);
+
+      // Tinta SUMP 2030
+      if(t>0.6){
+        const ta=Math.min(1,(t-0.6)/0.2);
+        ctx.globalAlpha=ta;
+        ctx.strokeStyle='#fbbf24';ctx.lineWidth=1.5;ctx.setLineDash([4,4]);
+        const xSUMP=bx+bw*0.45;
+        ctx.beginPath();ctx.moveTo(xSUMP,by-5);ctx.lineTo(xSUMP,by+bh+5);ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle='#fbbf24';ctx.font=`${W*0.007}px "IBM Plex Mono"`;
+        ctx.textAlign='center';
+        ctx.fillText('← TINTĂ SUMP 2030', xSUMP, by+bh+18);
+        ctx.fillText('AUTO max 45%', xSUMP, by+bh+30);
         ctx.globalAlpha=1;
       }
     }
-    this._sceneLabel(ctx,W,H,'21','STREET VIEW REAL');
+    this._sceneLabel(ctx,W,H,'21','MOBILITATE URBANĂ — MODAL SPLIT');
   },
 
   // ── SCENA 22: AI Narrative — Memoriu Justificativ Live ────────────────
