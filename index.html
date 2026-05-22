@@ -1811,7 +1811,7 @@ document.addEventListener('click', function(){
 <script src="js/03-ui-panel.js?v=20260520c"></script>
 <script src="js/04-search.js?v=2026050601"></script>
 <script src="js/05-cad-utils.js?v=2026050601"></script>
-<script src="js/06-aedis.js?v=2026050802"></script>
+<script src="js/06-aedis.js?v=20260522b"></script>
 <script src="js/07-pdf-utils.js?v=2026050601"></script>
 <script src="js/08-lotizare.js?v=2026050906"></script>
 <script src="js/09-pdf-engine.js?v=2026051006"></script>
@@ -3152,46 +3152,6 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
     title="Import PUG digital — GeoJSON · KML · comparare cu UrbanX">
     📐 Import PUG Digital
     <div style="font-size:10px;color:rgba(167,139,250,.6);font-weight:400">GeoJSON · KML · UTR-uri · corelare UrbanX</div>
-  </button>
-
-  <!-- Grup:
-
-  <!-- Grup: Comparatii & Rapoarte -->
-  <div style="padding:6px 8px 3px;font-size:9px;color:#1d4ed8;text-transform:uppercase;
-    letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.06);margin-top:3px">
-    📊 Comparații & Benchmarking</div>
-
-  <button onclick="window._launchComparePro();_closeAllMenusAndOverlay()"
-    style="display:block;width:100%;text-align:left;background:rgba(59,130,246,.08);
-      border:none;color:#60a5fa;padding:10px 12px;cursor:pointer;border-radius:8px;
-      font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
-    onmouseover="this.style.background='rgba(59,130,246,.2)'"
-    onmouseout="this.style.background='rgba(59,130,246,.08)'">
-    🏙 Compare Pro <span onclick="event.stopPropagation();_showInfoDrawer('compare-pro')" title="Ce face această funcție?" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:rgba(148,163,184,.5);font-size:9px;font-weight:700;cursor:pointer;flex-shrink:0;vertical-align:middle;margin-left:4px">?</span>
-    
-    <div style="font-size:10px;color:rgba(96,165,250,.6);font-weight:400">2-5 UAT-uri · 20 indicatori · radar chart</div>
-  </button>
-
-  <button onclick="window._launchEUBenchmark();_closeAllMenusAndOverlay()"
-    style="display:block;width:100%;text-align:left;background:rgba(52,211,153,.08);
-      border:none;color:#34d399;padding:10px 12px;cursor:pointer;border-radius:8px;
-      font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
-    onmouseover="this.style.background='rgba(52,211,153,.2)'"
-    onmouseout="this.style.background='rgba(52,211,153,.08)'">
-    🌍 European Benchmarking Pro <span onclick="event.stopPropagation();_showInfoDrawer('eu-benchmark')" title="Ce face această funcție?" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:rgba(148,163,184,.5);font-size:9px;font-weight:700;cursor:pointer;flex-shrink:0;vertical-align:middle;margin-left:4px">?</span>
-    
-    <div style="font-size:10px;color:rgba(52,211,153,.6);font-weight:400">vs Krakow · Lublin · Debrecen · 12 indicatori EU</div>
-  </button>
-
-  <button onclick="window._launchPresentation();_closeAllMenusAndOverlay()"
-    style="display:block;width:100%;text-align:left;background:rgba(167,139,250,.08);
-      border:none;color:#a78bfa;padding:10px 12px;cursor:pointer;border-radius:8px;
-      font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
-    onmouseover="this.style.background='rgba(167,139,250,.2)'"
-    onmouseout="this.style.background='rgba(167,139,250,.08)'">
-    🎯 Prezentare Primărie <span onclick="event.stopPropagation();_showInfoDrawer('prezentare')" title="Ce face această funcție?" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:rgba(148,163,184,.5);font-size:9px;font-weight:700;cursor:pointer;flex-shrink:0;vertical-align:middle;margin-left:4px">?</span>
-    
-    <div style="font-size:10px;color:rgba(167,139,250,.6);font-weight:400">5 slide-uri · date reale · exportabil PDF</div>
   </button>
 
   <!-- Grup: Masterplan & AI -->

@@ -41,6 +41,8 @@ function toggleUTR(){
   _g('utr-drawer').classList.toggle('open',utrOpen);
   if(!utrOpen){clearSource('utr-src');return;}
   if(!S.pug)return;
+  const map = window.map;
+  if(!map){ss('⚠ Harta nu e pregătită — mai încearcă');return;}
   const fc={type:'FeatureCollection',features:S.pug.features.map(f=>({...f,properties:{...f.properties,utr:normU(f.properties?.utr||''),c:ucol(normU(f.properties?.utr||''))}}))};
   setSource('utr-src',fc);
   const bb=turf.bbox(S.pug);map.fitBounds([[bb[0],bb[1]],[bb[2],bb[3]]],{padding:40,duration:800});
