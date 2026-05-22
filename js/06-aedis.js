@@ -1,11 +1,5 @@
 // UrbanX — Urban3D, UAT_REGISTRY, FAL.AI
 
-var _TCI_TO_UAT = {
-  'RO-IS-01': 'municipiul-iasi',
-  'RO-SV-01': 'municipiul-suceava',
-  'RO-BT-01': 'municipiul-botosani',
-};
-
 function toggleMulti(v){
   S.multiMode=v;
   _g('btnMulti')?.classList.toggle('multi-on',v);
@@ -46,9 +40,6 @@ function toggleUTR(){
   _g('btnUTR').classList.toggle('on',utrOpen);
   _g('utr-drawer').classList.toggle('open',utrOpen);
   if(!utrOpen){clearSource('utr-src');return;}
-  // Verificam daca PUG-ul din S e al UAT-ului activ
-  const _activeK = localStorage.getItem('ux_last_city') || window.TCI?.cityKey || 'RO-IS-01';
-  if(S._loadedCityKey && S._loadedCityKey !== _activeK) S.pug = null;
   if(!S.pug)return;
   const fc={type:'FeatureCollection',features:S.pug.features.map(f=>({...f,properties:{...f.properties,utr:normU(f.properties?.utr||''),c:ucol(normU(f.properties?.utr||''))}}))};
   setSource('utr-src',fc);
@@ -471,17 +462,6 @@ function loadScen(i){const sc=S.scenarios[i];if(!sc)return;Object.assign(S.vol,{
 // Butoane topbar - null-safe pentru toate
 const safeOn=(id,fn)=>{const el=document.getElementById(id);if(el)el.onclick=fn;else console.warn('Missing element:',id);};
 safeOn('btnUTR',toggleUTR);
-
-// Restaurăm UAT-ul din localStorage la pornire
-(function(){
-  var saved = localStorage.getItem('ux_last_city');
-  if(!saved) return;
-  var uatId = _TCI_TO_UAT[saved];
-  if(uatId && UAT_REGISTRY[uatId]){
-    setTimeout(function(){ switchUAT(uatId); }, 1500);
-    console.log('[06-aedis] UAT restaurat din localStorage:', uatId);
-  }
-})();
 safeOn('btnCloseUTR',hideUTRDrawer);
 safeOn('btnGPS',doGPS);
 // btnANCPI eliminat
@@ -1053,9 +1033,9 @@ const UAT_REGISTRY = {
     label:'Municipiul Suceava', short:'Suceava',
     judet:'Suceava', judetCode:'SV', siruta:'285386',
     center:[26.2531,47.6535], zoom:13,
-    pugFile:'./js/data/municipiul-suceava/pug.geojson',
-    cadastruIndex:'./js/data/municipiul-suceava/meta.json',
-    reguliFile:'./js/data/municipiul-suceava/reguli.json',
+    pugFile:'./data/suceava/pug.geojson',
+    cadastruIndex:'./data/suceava/cadastru_index.json',
+    reguliFile:'./data/suceava/reguli.json',
     status:'empty',
     primar:'Primăria Municipiului Suceava',
     daU:'Direcția de Urbanism și Amenajarea Teritoriului',
@@ -1771,26 +1751,6 @@ function getEIMConfig(){
   };
 }
 
-// ── Mapping TCI cityKey → UAT_REGISTRY id ────────────────────────────────
-// _TCI_TO_UAT moved to top
-
-// Hook TCI._selPick → switchUAT automat
-(function(){
-  var _t = setInterval(function(){
-    if(!window.TCI || !window.TCI._selPick) return;
-    clearInterval(_t);
-    var _orig = window.TCI._selPick.bind(window.TCI);
-    window.TCI._selPick = function(key, name){
-      _orig(key, name);
-      var uatId = _TCI_TO_UAT[key];
-      if(uatId && typeof switchUAT === 'function'){
-        switchUAT(uatId);
-      }
-    };
-    console.log('[06-aedis] TCI._selPick → switchUAT hook activ');
-  }, 200);
-})();
-
 // ── Schimbare UAT ─────────────────────────────────────────────────────────
 async function switchUAT(uatId){
   const cfg = UAT_REGISTRY[uatId];
@@ -2324,7 +2284,6 @@ async function loadData(uatId){
       S.pugIdx.sort((a,b)=>a.area-b.area);
       if(path!==pugFile) console.warn('PUG loaded from fallback path:',path);
       ss(`⏳ PUG OK (${S.pug.features.length} zone). Se încarcă cadastrul…`);
-      S._loadedCityKey = localStorage.getItem('ux_last_city') || window.TCI?.cityKey || 'RO-IS-01';
       pugLoaded=true;
       break;
     }catch(e){}
