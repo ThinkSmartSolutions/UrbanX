@@ -1264,6 +1264,9 @@ document.addEventListener('click', function(){
     ❓ Ghid rapid
   </button>
 
+  <!-- Ghid utilizare — buton ? standalone -->
+  <button onclick="_toggleQuickStart?.()" title="Ghid utilizare platformă" style="background:none;border:1px solid rgba(255,255,255,.15);color:rgba(148,163,184,.6);border-radius:50%;width:28px;height:28px;font-size:13px;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:inherit;padding:0;transition:all .15s" onmouseover="this.style.borderColor='rgba(129,140,248,.6)';this.style.color='#818cf8'" onmouseout="this.style.borderColor='rgba(255,255,255,.15)';this.style.color='rgba(148,163,184,.6)'">?</button>
+
   <!-- Grup 2: Vizualizare dropdown -->
   <div id="viz-group">
     <button class="tb-btn" onclick="_toggleVizMenu(event)" title="Vizualizare hartă" style="display:flex;align-items:center;gap:4px">
@@ -1349,10 +1352,7 @@ document.addEventListener('click', function(){
   <button id="btnLotizare" onclick="toggleLotizare();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#a78bfa;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏘 Lotizare teren</button>
   <button id="btnCimec" onclick="showCimecWidget();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#fbbf24;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏛 LMI Monumente</button>
   <button id="btnBilant" onclick="toggleBilant();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#4ade80;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">📐 Bilanț edificabil</button>
-  <div style="height:1px;background:rgba(255,255,255,.06);margin:4px 0"></div>
-  <button onclick="if(typeof _shareCurrentScenario==='function')_shareCurrentScenario();else{const url=window.location.href;navigator.clipboard?.writeText(url);ss?.('🔗 URL copiat');}_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#60a5fa;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🔗 Share scenariu curent</button>
-  <button onclick="_toggleQuickStart?.();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#818cf8;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">❓ Ghid utilizare platformă</button>
-  <button onclick="(function(){const k=window.TCI?.cityKey||localStorage.getItem('ux_last_city')||'RO-IS-01';window._AIUrbanNarrative?.open(k);_closeAllMenus();})()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#c084fc;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🤖 AI Memoriu Justificativ</button>
+
   <button class="menu-close-btn" 
     onclick="_closeAllMenusAndOverlay()" 
     ontouchend="event.preventDefault();_closeAllMenusAndOverlay()"
@@ -1811,7 +1811,7 @@ document.addEventListener('click', function(){
 <script src="js/03-ui-panel.js?v=20260520c"></script>
 <script src="js/04-search.js?v=2026050601"></script>
 <script src="js/05-cad-utils.js?v=2026050601"></script>
-<script src="js/06-aedis.js?v=20260522h"></script>
+<script src="js/06-aedis.js?v=20260522i"></script>
 <script src="js/07-pdf-utils.js?v=2026050601"></script>
 <script src="js/08-lotizare.js?v=2026050906"></script>
 <script src="js/09-pdf-engine.js?v=2026051006"></script>
@@ -3226,6 +3226,24 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
       font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
     onmouseover="this.style.background='rgba(139,92,246,.2)'"
     onmouseout="this.style.background='rgba(139,92,246,.08)'">
+
+  <button onclick="if(typeof _shareCurrentScenario==='function')_shareCurrentScenario();else{const url=window.location.href;navigator.clipboard?.writeText(url);ss?.('🔗 URL copiat');}_closeAllMenusAndOverlay()"
+    style="display:block;width:100%;text-align:left;background:rgba(96,165,250,.08);
+      border:none;color:#60a5fa;padding:10px 12px;cursor:pointer;border-radius:8px;
+      font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
+    onmouseover="this.style.background='rgba(96,165,250,.2)'"
+    onmouseout="this.style.background='rgba(96,165,250,.08)'">
+    🔗 Share scenariu curent
+    <div style="font-size:10px;color:rgba(96,165,250,.6);font-weight:400">copiază URL · partajează cu echipa</div>
+  </button>
+
+  <button onclick="(function(){const k=window.TCI?.cityKey||window._ProjectionEngine?.currentCity||'RO-IS-01';window._AIUrbanNarrative?.open(k);_closeAllMenusAndOverlay();})()"
+    style="display:block;width:100%;text-align:left;background:rgba(139,92,246,.08);
+      border:none;color:#c4b5fd;padding:10px 12px;cursor:pointer;border-radius:8px;
+      font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
+    onmouseover="this.style.background='rgba(139,92,246,.2)'"
+    onmouseout="this.style.background='rgba(139,92,246,.08)'">
+    🤖 AI Memoriu Justificativ <span onclick="event.stopPropagation();_showInfoDrawer('ai-memoriu')" title="Ce face această funcție?" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:rgba(148,163,184,.5);font-size:9px;font-weight:700;cursor:pointer;flex-shrink:0;vertical-align:middle;margin-left:4px">?</span>
     🤖 AI Memoriu Justificativ <span onclick="event.stopPropagation();_showInfoDrawer('ai-memoriu')" title="Ce face această funcție?" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:rgba(148,163,184,.5);font-size:9px;font-weight:700;cursor:pointer;flex-shrink:0;vertical-align:middle;margin-left:4px">?</span>
     
     <div style="font-size:10px;color:rgba(196,181,253,.6);font-weight:400">Claude AI · §1.1-§1.6 · text juridic automat</div>
