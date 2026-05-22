@@ -1,12 +1,38 @@
 {
+  "_meta": {
+    "sursa": "RLU PUG Municipiul Iasi - aprobat 1992, actualizat 2018",
+    "normativ_seismic": "P100-1/2013 Zona II - Ag=0.2g Tc=0.7s",
+    "nota": "POT in %, CUT adimensional (mp ADC/mp teren), inaltime_m in metri",
+    "generata": "22 mai 2026 - extras OCR din RLU original"
+  },
   "CP": {
     "pot": 50,
     "cut": 2.5,
-    "rh": "P+3",
-    "inaltime_m": 13,
-    "functiune": "Zona centrala protejata - monumente istorice",
+    "rh": "P+2",
+    "inaltime_m": 9,
+    "functiune": "Zona centrala - perimertru protectie istorica",
     "culoare": "#D4AF37",
-    "tip": "centru_protejat"
+    "tip": "centru_protejat",
+    "functiuni_admise": [
+      "Locuinte existente - se mentin neschimbate",
+      "Institutii publice si servicii de interes general",
+      "Comert cu amanuntul, restaurante, servicii personale la parter",
+      "Lacasuri de cult - cu aviz MCPN",
+      "Spatii verzi amenajate, scuaruri"
+    ],
+    "functiuni_conditionari": [
+      "Restaurante cu bauturi alcoolice - min 100m de institutii publice si lacasuri de cult",
+      "Functiuni fara acces public - numai daca parterul spre strada e destinat comertului/serviciilor",
+      "Orice interventie necesita aviz MCPN/Directia Judeteana Cultura"
+    ],
+    "functiuni_interzise": [
+      "Activitati productive poluante sau cu risc tehnologic",
+      "Constructii provizorii de orice natura",
+      "Depozitare en gros",
+      "Depozitare substante inflamabile sau toxice in cantitati mari",
+      "Activitati care utilizeaza terenul vizibil din circulatii publice pentru depozitare/productie",
+      "Orice modificare a parcelarului existent"
+    ]
   },
   "CC": {
     "pot": 50,
@@ -15,16 +41,82 @@
     "inaltime_m": 22,
     "functiune": "Zona centrala complexa - functiuni mixte",
     "culoare": "#ef4444",
-    "tip": "centru"
+    "tip": "centru",
+    "functiuni_admise": [
+      "Institutii si servicii publice de interes general",
+      "Comert cu amanuntul, alimentatie publica, servicii personale",
+      "Sedii companii, servicii profesionale, financiar-bancare",
+      "Hoteluri, restaurante, loisir",
+      "Locuinte la nivelurile superioare"
+    ],
+    "functiuni_conditionari": [
+      "Locuintele vor fi prevazute la nivelurile superioare, parterul destinat functiunilor publice",
+      "Parcaje supraetajate - numai cu arhitectura adecvata caracterului zonei"
+    ],
+    "functiuni_interzise": [
+      "Activitati productive poluante sau cu risc tehnologic",
+      "Constructii provizorii de orice natura",
+      "Depozitare en gros",
+      "Curatatorii chimice"
+    ]
   },
   "CM": {
     "pot": 50,
     "cut": 2.5,
-    "rh": "P+4",
-    "inaltime_m": 17,
-    "functiune": "Zona mixta - institutii, servicii, comert",
+    "rh": "P+6",
+    "inaltime_m": 22,
+    "functiune": "Zona mixta - institutii, servicii, comert, locuire",
     "culoare": "#f97316",
-    "tip": "mixt"
+    "tip": "mixt",
+    "functiuni_admise": [
+      "Institutii, servicii si echipamente publice",
+      "Lacasuri de cult",
+      "Sedii companii, servicii profesionale, proiectare, cercetare, consultanta",
+      "Servicii sociale, colective si personale",
+      "Comert cu amanuntul la parter",
+      "Hoteluri, restaurante",
+      "Locuinte cu partiu special (profesiuni liberale la parter)"
+    ],
+    "functiuni_conditionari": [
+      "Toate cladirile vor avea la parterul spre strada functiuni cu acces public permanent",
+      "Se tine seama de conditiile geotehnice privind inaltimile recomandabile",
+      "Locuinte sociale - max 30% din orice operatiune"
+    ],
+    "functiuni_interzise": [
+      "Activitati productive poluante cu risc tehnologic",
+      "Constructii provizorii de orice natura",
+      "Depozitare en gros",
+      "Curatatorii chimice",
+      "Activitati cu program dupa ora 22.00 care produc zgomot"
+    ]
+  },
+  "CA": {
+    "pot": 50,
+    "cut": 2.5,
+    "rh": "P+3",
+    "inaltime_m": 13,
+    "functiune": "Activitati diverse - comert, servicii, institutii",
+    "culoare": "#f59e0b",
+    "tip": "mixt",
+    "functiuni_admise": [
+      "Functiuni publice reprezentative supramunicipale si municipale",
+      "Sedii organisme internationale si zonale",
+      "Functiuni manageriale, tehnice, profesionale, financiar-bancare",
+      "Telecomunicatii, hoteluri, restaurante",
+      "Parcaje de descongestionare a centrului",
+      "CA2-CA4: locuinte la niveluri superioare cu spatii pentru profesiuni liberale"
+    ],
+    "functiuni_conditionari": [
+      "Restaurante cu bauturi alcoolice - min 100m de institutii publice",
+      "Locuintele la niveluri superioare - de preferinta cu partiu adaptat profesiunilor liberale"
+    ],
+    "functiuni_interzise": [
+      "Activitati productive poluante sau cu risc tehnologic",
+      "Constructii provizorii de orice natura",
+      "Depozitare en gros",
+      "Depozitare substante inflamabile sau toxice",
+      "Activitati care utilizeaza terenul vizibil din circulatii pentru depozitare"
+    ]
   },
   "CB1": {
     "pot": 55,
@@ -33,7 +125,26 @@
     "inaltime_m": 22,
     "functiune": "Pol tertiar principal - Pacurari/Chirita",
     "culoare": "#60a5fa",
-    "tip": "comercial"
+    "tip": "comercial",
+    "functiuni_admise": [
+      "Institutii si servicii publice supramunicipale si municipale",
+      "Sedii companii, servicii avansate pentru intreprinderi",
+      "Cercetare-dezvoltare, servicii financiar-bancare si asigurari",
+      "Releu infrastructura, posta si telecomunicatii",
+      "Servicii profesionale, colective si personale",
+      "Hoteluri, restaurante, comert, loisir",
+      "Locuinte cu program special",
+      "Industrie mica nepoluanta"
+    ],
+    "functiuni_conditionari": [
+      "Parcaje supraetajate - cu arhitectura adecvata caracterului zonei",
+      "Realizarea se va derula in etape conform PUZ"
+    ],
+    "functiuni_interzise": [
+      "Orice activitati care nu corespund caracterului zonei si indeparteaza investitorii",
+      "Activitati productive poluante sau cu risc tehnologic",
+      "Activitati care genereaza trafic de marfa incompatibil cu zona"
+    ]
   },
   "CB2": {
     "pot": 55,
@@ -42,25 +153,82 @@
     "inaltime_m": 22,
     "functiune": "Pol tertiar secundar - Tutora/Fortus",
     "culoare": "#60a5fa",
-    "tip": "comercial"
+    "tip": "comercial",
+    "functiuni_admise": [
+      "Institutii si servicii publice supramunicipale si municipale",
+      "Sedii companii, servicii avansate pentru intreprinderi",
+      "Cercetare-dezvoltare, servicii financiar-bancare si asigurari",
+      "Releu infrastructura, posta si telecomunicatii",
+      "Servicii profesionale, colective si personale",
+      "Hoteluri, restaurante, comert, loisir",
+      "Locuinte cu program special",
+      "Industrie mica nepoluanta"
+    ],
+    "functiuni_conditionari": [
+      "Parcaje supraetajate - cu arhitectura adecvata caracterului zonei",
+      "Realizarea se va derula in etape conform PUZ"
+    ],
+    "functiuni_interzise": [
+      "Orice activitati care nu corespund caracterului zonei si indeparteaza investitorii",
+      "Activitati productive poluante sau cu risc tehnologic",
+      "Activitati care genereaza trafic de marfa incompatibil cu zona"
+    ]
   },
   "CB3": {
     "pot": 60,
     "cut": 3.0,
-    "rh": "P+8",
-    "inaltime_m": 29,
+    "rh": "P+6",
+    "inaltime_m": 22,
     "functiune": "Centru International Conferinte",
     "culoare": "#3b82f6",
-    "tip": "comercial"
+    "tip": "comercial",
+    "functiuni_admise": [
+      "Institutii si servicii publice supramunicipale si municipale",
+      "Sedii companii, servicii avansate pentru intreprinderi",
+      "Cercetare-dezvoltare, servicii financiar-bancare si asigurari",
+      "Releu infrastructura, posta si telecomunicatii",
+      "Servicii profesionale, colective si personale",
+      "Hoteluri, restaurante, comert, loisir",
+      "Locuinte cu program special",
+      "Industrie mica nepoluanta"
+    ],
+    "functiuni_conditionari": [
+      "Parcaje supraetajate - cu arhitectura adecvata caracterului zonei",
+      "Realizarea se va derula in etape conform PUZ"
+    ],
+    "functiuni_interzise": [
+      "Orice activitati care nu corespund caracterului zonei si indeparteaza investitorii",
+      "Activitati productive poluante sau cu risc tehnologic",
+      "Activitati care genereaza trafic de marfa incompatibil cu zona"
+    ]
   },
   "CB4": {
     "pot": 60,
     "cut": 3.0,
-    "rh": "P+8",
-    "inaltime_m": 29,
+    "rh": "P+6",
+    "inaltime_m": 22,
     "functiune": "Centrul Expozitional Moldova",
     "culoare": "#3b82f6",
-    "tip": "comercial"
+    "tip": "comercial",
+    "functiuni_admise": [
+      "Institutii si servicii publice supramunicipale si municipale",
+      "Sedii companii, servicii avansate pentru intreprinderi",
+      "Cercetare-dezvoltare, servicii financiar-bancare si asigurari",
+      "Releu infrastructura, posta si telecomunicatii",
+      "Servicii profesionale, colective si personale",
+      "Hoteluri, restaurante, comert, loisir",
+      "Locuinte cu program special",
+      "Industrie mica nepoluanta"
+    ],
+    "functiuni_conditionari": [
+      "Parcaje supraetajate - cu arhitectura adecvata caracterului zonei",
+      "Realizarea se va derula in etape conform PUZ"
+    ],
+    "functiuni_interzise": [
+      "Orice activitati care nu corespund caracterului zonei si indeparteaza investitorii",
+      "Activitati productive poluante sau cu risc tehnologic",
+      "Activitati care genereaza trafic de marfa incompatibil cu zona"
+    ]
   },
   "CB5": {
     "pot": 55,
@@ -69,124 +237,357 @@
     "inaltime_m": 22,
     "functiune": "Campus universitar - cercetare",
     "culoare": "#a78bfa",
-    "tip": "educational"
+    "tip": "educational",
+    "functiuni_admise": [
+      "Institutii si servicii publice supramunicipale si municipale",
+      "Sedii companii, servicii avansate pentru intreprinderi",
+      "Cercetare-dezvoltare, servicii financiar-bancare si asigurari",
+      "Releu infrastructura, posta si telecomunicatii",
+      "Servicii profesionale, colective si personale",
+      "Hoteluri, restaurante, comert, loisir",
+      "Locuinte cu program special",
+      "Industrie mica nepoluanta"
+    ],
+    "functiuni_conditionari": [
+      "Parcaje supraetajate - cu arhitectura adecvata caracterului zonei",
+      "Realizarea se va derula in etape conform PUZ"
+    ],
+    "functiuni_interzise": [
+      "Orice activitati care nu corespund caracterului zonei si indeparteaza investitorii",
+      "Activitati productive poluante sau cu risc tehnologic",
+      "Activitati care genereaza trafic de marfa incompatibil cu zona"
+    ]
   },
   "CB6": {
     "pot": 50,
     "cut": 2.0,
     "rh": "P+4",
-    "inaltime_m": 17,
+    "inaltime_m": 15,
     "functiune": "Centru studii teologice",
     "culoare": "#a78bfa",
-    "tip": "educational"
+    "tip": "educational",
+    "functiuni_admise": [
+      "Institutii si servicii publice supramunicipale si municipale",
+      "Sedii companii, servicii avansate pentru intreprinderi",
+      "Cercetare-dezvoltare, servicii financiar-bancare si asigurari",
+      "Releu infrastructura, posta si telecomunicatii",
+      "Servicii profesionale, colective si personale",
+      "Hoteluri, restaurante, comert, loisir",
+      "Locuinte cu program special",
+      "Industrie mica nepoluanta"
+    ],
+    "functiuni_conditionari": [
+      "Parcaje supraetajate - cu arhitectura adecvata caracterului zonei",
+      "Realizarea se va derula in etape conform PUZ"
+    ],
+    "functiuni_interzise": [
+      "Orice activitati care nu corespund caracterului zonei si indeparteaza investitorii",
+      "Activitati productive poluante sau cu risc tehnologic",
+      "Activitati care genereaza trafic de marfa incompatibil cu zona"
+    ]
   },
   "CB7": {
     "pot": 50,
     "cut": 2.0,
     "rh": "P+4",
-    "inaltime_m": 17,
+    "inaltime_m": 15,
     "functiune": "Unitati tertiale dispersate",
     "culoare": "#8b5cf6",
-    "tip": "comercial"
-  },
-  "CA": {
-    "pot": 50,
-    "cut": 2.5,
-    "rh": "P+6",
-    "inaltime_m": 22,
-    "functiune": "Activitati diverse conform PUZ",
-    "culoare": "#f59e0b",
-    "tip": "mixt"
+    "tip": "comercial",
+    "functiuni_admise": [
+      "Institutii si servicii publice supramunicipale si municipale",
+      "Sedii companii, servicii avansate pentru intreprinderi",
+      "Cercetare-dezvoltare, servicii financiar-bancare si asigurari",
+      "Releu infrastructura, posta si telecomunicatii",
+      "Servicii profesionale, colective si personale",
+      "Hoteluri, restaurante, comert, loisir",
+      "Locuinte cu program special",
+      "Industrie mica nepoluanta"
+    ],
+    "functiuni_conditionari": [
+      "Parcaje supraetajate - cu arhitectura adecvata caracterului zonei",
+      "Realizarea se va derula in etape conform PUZ"
+    ],
+    "functiuni_interzise": [
+      "Orice activitati care nu corespund caracterului zonei si indeparteaza investitorii",
+      "Activitati productive poluante sau cu risc tehnologic",
+      "Activitati care genereaza trafic de marfa incompatibil cu zona"
+    ]
   },
   "LA": {
     "pot": 25,
     "cut": 2.0,
     "rh": "P+10",
-    "inaltime_m": 32,
-    "functiune": "Locuinte colective mari - blocuri existente",
+    "inaltime_m": 33,
+    "functiune": "Locuinte colective mari - blocuri P+10 existente",
     "culoare": "#D4AF37",
-    "tip": "rezidential_mare"
+    "tip": "rezidential_mare",
+    "functiuni_admise": [
+      "Locuinte in proprietate privata",
+      "Constructii aferente echiparii tehnico-edilitare",
+      "Cai de acces carosabile si pietonale private, parcaje, garaje",
+      "Spatii plantate, locuri de joaca pentru copii",
+      "Amenajari de sport pentru uz propriu"
+    ],
+    "functiuni_conditionari": [
+      "Locuinte sociale - max 30% din numarul total al locuintelor",
+      "Echipamente publice la parterul blocurilor - numai cu aviz special",
+      "Conversii ale locuintelor - numai catre functiunile specificate la Art.1"
+    ],
+    "functiuni_interzise": [
+      "Conversia locuintelor in alte functiuni cu exceptia celor admise",
+      "Depozite, alimentatie publica in spatii deja convertite anterior",
+      "Activitati productive de orice natura",
+      "Constructii provizorii"
+    ]
   },
   "LA1": {
     "pot": 25,
     "cut": 2.0,
     "rh": "P+10",
-    "inaltime_m": 32,
+    "inaltime_m": 33,
     "functiune": "Locuinte colective mari subansamblu",
     "culoare": "#ca8a04",
-    "tip": "rezidential_mare"
+    "tip": "rezidential_mare",
+    "functiuni_admise": [
+      "Locuinte in proprietate privata",
+      "Constructii aferente echiparii tehnico-edilitare",
+      "Cai de acces carosabile si pietonale private, parcaje, garaje",
+      "Spatii plantate, locuri de joaca pentru copii",
+      "Amenajari de sport pentru uz propriu"
+    ],
+    "functiuni_conditionari": [
+      "Locuinte sociale - max 30% din numarul total al locuintelor",
+      "Echipamente publice la parterul blocurilor - numai cu aviz special",
+      "Conversii ale locuintelor - numai catre functiunile specificate la Art.1"
+    ],
+    "functiuni_interzise": [
+      "Conversia locuintelor in alte functiuni cu exceptia celor admise",
+      "Depozite, alimentatie publica in spatii deja convertite anterior",
+      "Activitati productive de orice natura",
+      "Constructii provizorii"
+    ]
   },
   "LB": {
     "pot": 40,
-    "cut": 1.8,
+    "cut": 1.3,
     "rh": "P+3",
     "inaltime_m": 13,
-    "functiune": "Locuinte colective medii max P+3",
+    "functiune": "Locuinte colective medii maxim P+3",
     "culoare": "#fbbf24",
-    "tip": "rezidential_mediu"
+    "tip": "rezidential_mediu",
+    "functiuni_admise": [
+      "Locuinte in proprietate privata",
+      "Constructii aferente echiparii tehnico-edilitare",
+      "Cai de acces, parcaje, garaje, spatii plantate",
+      "Locuri de joaca copii, amenajari sport uz propriu"
+    ],
+    "functiuni_conditionari": [
+      "Locuinte sociale - max 30% dintr-o operatiune",
+      "Functiuni comerciale si servicii - max 200 mp ADC, numai la parter"
+    ],
+    "functiuni_interzise": [
+      "Activitati productive de orice natura",
+      "Constructii provizorii de orice natura",
+      "Depozitare en gros",
+      "Curatatorii chimice",
+      "Lucrari de terasament care provoaca scurgeri pe parcelele vecine"
+    ]
   },
   "LB,C2": {
     "pot": 35,
-    "cut": 1.5,
+    "cut": 1.0,
     "rh": "P+3",
     "inaltime_m": 13,
     "functiune": "Locuinte colective medii",
     "culoare": "#fbbf24",
-    "tip": "rezidential_mediu"
+    "tip": "rezidential_mediu",
+    "functiuni_admise": [
+      "Locuinte in proprietate privata",
+      "Constructii aferente echiparii tehnico-edilitare",
+      "Cai de acces, parcaje, garaje, spatii plantate",
+      "Locuri de joaca copii, amenajari sport uz propriu"
+    ],
+    "functiuni_conditionari": [
+      "Locuinte sociale - max 30% dintr-o operatiune",
+      "Functiuni comerciale si servicii - max 200 mp ADC, numai la parter"
+    ],
+    "functiuni_interzise": [
+      "Activitati productive de orice natura",
+      "Constructii provizorii de orice natura",
+      "Depozitare en gros",
+      "Curatatorii chimice",
+      "Lucrari de terasament care provoaca scurgeri pe parcelele vecine"
+    ]
   },
   "LB,C 2": {
     "pot": 35,
-    "cut": 1.5,
+    "cut": 1.0,
     "rh": "P+3",
     "inaltime_m": 13,
     "functiune": "Locuinte colective medii",
     "culoare": "#fbbf24",
-    "tip": "rezidential_mediu"
+    "tip": "rezidential_mediu",
+    "functiuni_admise": [
+      "Locuinte in proprietate privata",
+      "Constructii aferente echiparii tehnico-edilitare",
+      "Cai de acces, parcaje, garaje, spatii plantate",
+      "Locuri de joaca copii, amenajari sport uz propriu"
+    ],
+    "functiuni_conditionari": [
+      "Locuinte sociale - max 30% dintr-o operatiune",
+      "Functiuni comerciale si servicii - max 200 mp ADC, numai la parter"
+    ],
+    "functiuni_interzise": [
+      "Activitati productive de orice natura",
+      "Constructii provizorii de orice natura",
+      "Depozitare en gros",
+      "Curatatorii chimice",
+      "Lucrari de terasament care provoaca scurgeri pe parcelele vecine"
+    ]
   },
   "LC": {
     "pot": 30,
-    "cut": 0.9,
-    "rh": "P+1",
-    "inaltime_m": 7,
-    "functiune": "Locuinte individuale si colective mici P+1",
+    "cut": 0.6,
+    "rh": "P+2",
+    "inaltime_m": 9,
+    "functiune": "Locuinte individuale si colective mici P+2 max",
     "culoare": "#86efac",
-    "tip": "rezidential_mic"
+    "tip": "rezidential_mic",
+    "functiuni_admise": [
+      "Locuinte individuale si colective mici izolate si cuplate",
+      "Echipamente publice de nivel rezidential (gradinita, dispensar)"
+    ],
+    "functiuni_conditionari": [
+      "Functiuni comerciale si servicii profesionale - max 200 mp ADC",
+      "Sa nu afecteze linistea, securitatea si salubritatea zonei",
+      "Sa nu genereze trafic important sau program dupa ora 22.00"
+    ],
+    "functiuni_interzise": [
+      "Functiuni comerciale si servicii care depasesc 200 mp ADC",
+      "Activitati care genereaza trafic important de persoane si marfuri",
+      "Activitati productive poluante cu risc tehnologic",
+      "Depozitare en gros",
+      "Constructii provizorii"
+    ]
   },
   "LL": {
     "pot": 30,
-    "cut": 0.9,
+    "cut": 0.6,
     "rh": "P+1",
     "inaltime_m": 7,
-    "functiune": "Locuinte individuale mici",
+    "functiune": "Locuinte individuale mici - conf. proiect initial",
     "culoare": "#4ade80",
-    "tip": "rezidential_mic"
+    "tip": "rezidential_mic",
+    "functiuni_admise": [
+      "LL1: Locuinte cuplate - conform proiect initial standardizat",
+      "LL2: Locuinte izolate si cuplate"
+    ],
+    "functiuni_conditionari": [
+      "Functiuni comerciale si servicii - max 200 mp ADC, fara impact asupra zonei"
+    ],
+    "functiuni_interzise": [
+      "Functiuni comerciale care depasesc 200 mp ADC",
+      "Activitati care genereaza trafic important sau program dupa ora 22.00",
+      "Activitati productive poluante",
+      "Depozitare en gros",
+      "Constructii care modifica caracterul initial al lotizarii"
+    ]
   },
   "LL2": {
     "pot": 30,
-    "cut": 0.9,
-    "rh": "P+1",
-    "inaltime_m": 7,
-    "functiune": "Locuinte individuale mici",
+    "cut": 0.8,
+    "rh": "P+2",
+    "inaltime_m": 8,
+    "functiune": "Locuinte individuale mici subansamblu",
     "culoare": "#4ade80",
-    "tip": "rezidential_mic"
+    "tip": "rezidential_mic",
+    "functiuni_admise": [
+      "LL1: Locuinte cuplate - conform proiect initial standardizat",
+      "LL2: Locuinte izolate si cuplate"
+    ],
+    "functiuni_conditionari": [
+      "Functiuni comerciale si servicii - max 200 mp ADC, fara impact asupra zonei"
+    ],
+    "functiuni_interzise": [
+      "Functiuni comerciale care depasesc 200 mp ADC",
+      "Activitati care genereaza trafic important sau program dupa ora 22.00",
+      "Activitati productive poluante",
+      "Depozitare en gros",
+      "Constructii care modifica caracterul initial al lotizarii"
+    ]
   },
   "LV": {
     "pot": 35,
-    "cut": 1.2,
-    "rh": "P+2",
-    "inaltime_m": 10,
-    "functiune": "Locuinte tip vila P+2",
+    "cut": 0.24,
+    "rh": "P+M",
+    "inaltime_m": 6,
+    "functiune": "Locuinte tip vila P+M max 6m",
     "culoare": "#22c55e",
-    "tip": "rezidential_vila"
+    "tip": "rezidential_vila",
+    "functiuni_admise": [
+      "Locuinte individuale si colective mici izolate",
+      "Echipamente publice de nivel rezidential"
+    ],
+    "functiuni_conditionari": [
+      "Functiuni comerciale si servicii - max 200 mp ADC",
+      "Sa nu genereze transport greu sau program dupa ora 22.00",
+      "LV1: nu se construieste pe pante >5%"
+    ],
+    "functiuni_interzise": [
+      "Functiuni comerciale care depasesc 200 mp ADC",
+      "Activitati productive poluante",
+      "Lucrari de terasament care provoaca scurgeri pe parcelele vecine",
+      "Depozitare en gros"
+    ]
   },
   "LV??": {
     "pot": 35,
-    "cut": 1.2,
+    "cut": 0.6,
     "rh": "P+2",
-    "inaltime_m": 10,
-    "functiune": "Locuinte tip vila nedefinite",
+    "inaltime_m": 9,
+    "functiune": "Locuinte vila nedefinite (digitizare)",
     "culoare": "#22c55e",
-    "tip": "rezidential_vila"
+    "tip": "rezidential_vila",
+    "functiuni_admise": [
+      "Locuinte individuale si colective mici izolate",
+      "Echipamente publice de nivel rezidential"
+    ],
+    "functiuni_conditionari": [
+      "Functiuni comerciale si servicii - max 200 mp ADC",
+      "Sa nu genereze transport greu sau program dupa ora 22.00",
+      "LV1: nu se construieste pe pante >5%"
+    ],
+    "functiuni_interzise": [
+      "Functiuni comerciale care depasesc 200 mp ADC",
+      "Activitati productive poluante",
+      "Lucrari de terasament care provoaca scurgeri pe parcelele vecine",
+      "Depozitare en gros"
+    ]
+  },
+  "LV ?": {
+    "pot": 35,
+    "cut": 0.24,
+    "rh": "P+M",
+    "inaltime_m": 6,
+    "functiune": "Locuinte vila (incert digitizare)",
+    "culoare": "#22c55e",
+    "tip": "rezidential_vila",
+    "functiuni_admise": [
+      "Locuinte individuale si colective mici izolate",
+      "Echipamente publice de nivel rezidential"
+    ],
+    "functiuni_conditionari": [
+      "Functiuni comerciale si servicii - max 200 mp ADC",
+      "Sa nu genereze transport greu sau program dupa ora 22.00",
+      "LV1: nu se construieste pe pante >5%"
+    ],
+    "functiuni_interzise": [
+      "Functiuni comerciale care depasesc 200 mp ADC",
+      "Activitati productive poluante",
+      "Lucrari de terasament care provoaca scurgeri pe parcelele vecine",
+      "Depozitare en gros"
+    ]
   },
   "P": {
     "pot": 5,
@@ -195,7 +596,23 @@
     "inaltime_m": 4,
     "functiune": "Parc urban - constructii strict necesare",
     "culoare": "#86efac",
-    "tip": "verde"
+    "tip": "verde",
+    "functiuni_admise": [
+      "Spatii plantate cu vegetatie inalta si mica",
+      "Circulatii pietonale (unele ocazional carosabile pentru intretinere)",
+      "Mobilier urban, amenajari pentru joc si odihna",
+      "Constructii strict necesare intretinerii parcului (max 5% POT)"
+    ],
+    "functiuni_conditionari": [
+      "P2c: orice interventie necesita documentatii specifice aprobate conform Legii 137/1995",
+      "P6: utilizare temporara pentru manifestari culturale cu aviz Primarie"
+    ],
+    "functiuni_interzise": [
+      "Constructii permanente de orice natura in afara celor necesare intretinerii",
+      "Parcaje carosabile permanente",
+      "Depozitari de orice natura",
+      "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
+    ]
   },
   "P1": {
     "pot": 5,
@@ -204,7 +621,23 @@
     "inaltime_m": 4,
     "functiune": "Parc urban principal",
     "culoare": "#4ade80",
-    "tip": "verde"
+    "tip": "verde",
+    "functiuni_admise": [
+      "Spatii plantate cu vegetatie inalta si mica",
+      "Circulatii pietonale (unele ocazional carosabile pentru intretinere)",
+      "Mobilier urban, amenajari pentru joc si odihna",
+      "Constructii strict necesare intretinerii parcului (max 5% POT)"
+    ],
+    "functiuni_conditionari": [
+      "P2c: orice interventie necesita documentatii specifice aprobate conform Legii 137/1995",
+      "P6: utilizare temporara pentru manifestari culturale cu aviz Primarie"
+    ],
+    "functiuni_interzise": [
+      "Constructii permanente de orice natura in afara celor necesare intretinerii",
+      "Parcaje carosabile permanente",
+      "Depozitari de orice natura",
+      "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
+    ]
   },
   "P1a": {
     "pot": 5,
@@ -213,7 +646,23 @@
     "inaltime_m": 4,
     "functiune": "Parc urban subzona a",
     "culoare": "#4ade80",
-    "tip": "verde"
+    "tip": "verde",
+    "functiuni_admise": [
+      "Spatii plantate cu vegetatie inalta si mica",
+      "Circulatii pietonale (unele ocazional carosabile pentru intretinere)",
+      "Mobilier urban, amenajari pentru joc si odihna",
+      "Constructii strict necesare intretinerii parcului (max 5% POT)"
+    ],
+    "functiuni_conditionari": [
+      "P2c: orice interventie necesita documentatii specifice aprobate conform Legii 137/1995",
+      "P6: utilizare temporara pentru manifestari culturale cu aviz Primarie"
+    ],
+    "functiuni_interzise": [
+      "Constructii permanente de orice natura in afara celor necesare intretinerii",
+      "Parcaje carosabile permanente",
+      "Depozitari de orice natura",
+      "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
+    ]
   },
   "P1b": {
     "pot": 5,
@@ -222,7 +671,23 @@
     "inaltime_m": 4,
     "functiune": "Parc urban subzona b",
     "culoare": "#4ade80",
-    "tip": "verde"
+    "tip": "verde",
+    "functiuni_admise": [
+      "Spatii plantate cu vegetatie inalta si mica",
+      "Circulatii pietonale (unele ocazional carosabile pentru intretinere)",
+      "Mobilier urban, amenajari pentru joc si odihna",
+      "Constructii strict necesare intretinerii parcului (max 5% POT)"
+    ],
+    "functiuni_conditionari": [
+      "P2c: orice interventie necesita documentatii specifice aprobate conform Legii 137/1995",
+      "P6: utilizare temporara pentru manifestari culturale cu aviz Primarie"
+    ],
+    "functiuni_interzise": [
+      "Constructii permanente de orice natura in afara celor necesare intretinerii",
+      "Parcaje carosabile permanente",
+      "Depozitari de orice natura",
+      "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
+    ]
   },
   "P2": {
     "pot": 3,
@@ -231,7 +696,23 @@
     "inaltime_m": 3,
     "functiune": "Parc periurban",
     "culoare": "#86efac",
-    "tip": "verde"
+    "tip": "verde",
+    "functiuni_admise": [
+      "Spatii plantate cu vegetatie inalta si mica",
+      "Circulatii pietonale (unele ocazional carosabile pentru intretinere)",
+      "Mobilier urban, amenajari pentru joc si odihna",
+      "Constructii strict necesare intretinerii parcului (max 5% POT)"
+    ],
+    "functiuni_conditionari": [
+      "P2c: orice interventie necesita documentatii specifice aprobate conform Legii 137/1995",
+      "P6: utilizare temporara pentru manifestari culturale cu aviz Primarie"
+    ],
+    "functiuni_interzise": [
+      "Constructii permanente de orice natura in afara celor necesare intretinerii",
+      "Parcaje carosabile permanente",
+      "Depozitari de orice natura",
+      "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
+    ]
   },
   "P2a": {
     "pot": 3,
@@ -240,7 +721,23 @@
     "inaltime_m": 3,
     "functiune": "Parc periurban a",
     "culoare": "#86efac",
-    "tip": "verde"
+    "tip": "verde",
+    "functiuni_admise": [
+      "Spatii plantate cu vegetatie inalta si mica",
+      "Circulatii pietonale (unele ocazional carosabile pentru intretinere)",
+      "Mobilier urban, amenajari pentru joc si odihna",
+      "Constructii strict necesare intretinerii parcului (max 5% POT)"
+    ],
+    "functiuni_conditionari": [
+      "P2c: orice interventie necesita documentatii specifice aprobate conform Legii 137/1995",
+      "P6: utilizare temporara pentru manifestari culturale cu aviz Primarie"
+    ],
+    "functiuni_interzise": [
+      "Constructii permanente de orice natura in afara celor necesare intretinerii",
+      "Parcaje carosabile permanente",
+      "Depozitari de orice natura",
+      "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
+    ]
   },
   "P2b": {
     "pot": 3,
@@ -249,7 +746,23 @@
     "inaltime_m": 3,
     "functiune": "Parc periurban b",
     "culoare": "#86efac",
-    "tip": "verde"
+    "tip": "verde",
+    "functiuni_admise": [
+      "Spatii plantate cu vegetatie inalta si mica",
+      "Circulatii pietonale (unele ocazional carosabile pentru intretinere)",
+      "Mobilier urban, amenajari pentru joc si odihna",
+      "Constructii strict necesare intretinerii parcului (max 5% POT)"
+    ],
+    "functiuni_conditionari": [
+      "P2c: orice interventie necesita documentatii specifice aprobate conform Legii 137/1995",
+      "P6: utilizare temporara pentru manifestari culturale cu aviz Primarie"
+    ],
+    "functiuni_interzise": [
+      "Constructii permanente de orice natura in afara celor necesare intretinerii",
+      "Parcaje carosabile permanente",
+      "Depozitari de orice natura",
+      "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
+    ]
   },
   "P2c": {
     "pot": 3,
@@ -258,25 +771,48 @@
     "inaltime_m": 3,
     "functiune": "Parc periurban c",
     "culoare": "#86efac",
-    "tip": "verde"
-  },
-  "P2c ?": {
-    "pot": 3,
-    "cut": 0.03,
-    "rh": "P",
-    "inaltime_m": 3,
-    "functiune": "Parc periurban c (incert digitizare)",
-    "culoare": "#86efac",
-    "tip": "verde"
+    "tip": "verde",
+    "functiuni_admise": [
+      "Spatii plantate cu vegetatie inalta si mica",
+      "Circulatii pietonale (unele ocazional carosabile pentru intretinere)",
+      "Mobilier urban, amenajari pentru joc si odihna",
+      "Constructii strict necesare intretinerii parcului (max 5% POT)"
+    ],
+    "functiuni_conditionari": [
+      "P2c: orice interventie necesita documentatii specifice aprobate conform Legii 137/1995",
+      "P6: utilizare temporara pentru manifestari culturale cu aviz Primarie"
+    ],
+    "functiuni_interzise": [
+      "Constructii permanente de orice natura in afara celor necesare intretinerii",
+      "Parcaje carosabile permanente",
+      "Depozitari de orice natura",
+      "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
+    ]
   },
   "P3": {
     "pot": 5,
     "cut": 0.05,
     "rh": "P",
     "inaltime_m": 4,
-    "functiune": "Gradini publice de cartier",
+    "functiune": "Gradini publice cartier",
     "culoare": "#4ade80",
-    "tip": "verde"
+    "tip": "verde",
+    "functiuni_admise": [
+      "Spatii plantate cu vegetatie inalta si mica",
+      "Circulatii pietonale (unele ocazional carosabile pentru intretinere)",
+      "Mobilier urban, amenajari pentru joc si odihna",
+      "Constructii strict necesare intretinerii parcului (max 5% POT)"
+    ],
+    "functiuni_conditionari": [
+      "P2c: orice interventie necesita documentatii specifice aprobate conform Legii 137/1995",
+      "P6: utilizare temporara pentru manifestari culturale cu aviz Primarie"
+    ],
+    "functiuni_interzise": [
+      "Constructii permanente de orice natura in afara celor necesare intretinerii",
+      "Parcaje carosabile permanente",
+      "Depozitari de orice natura",
+      "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
+    ]
   },
   "P4": {
     "pot": 5,
@@ -285,7 +821,23 @@
     "inaltime_m": 4,
     "functiune": "Scuaruri",
     "culoare": "#4ade80",
-    "tip": "verde"
+    "tip": "verde",
+    "functiuni_admise": [
+      "Spatii plantate cu vegetatie inalta si mica",
+      "Circulatii pietonale (unele ocazional carosabile pentru intretinere)",
+      "Mobilier urban, amenajari pentru joc si odihna",
+      "Constructii strict necesare intretinerii parcului (max 5% POT)"
+    ],
+    "functiuni_conditionari": [
+      "P2c: orice interventie necesita documentatii specifice aprobate conform Legii 137/1995",
+      "P6: utilizare temporara pentru manifestari culturale cu aviz Primarie"
+    ],
+    "functiuni_interzise": [
+      "Constructii permanente de orice natura in afara celor necesare intretinerii",
+      "Parcaje carosabile permanente",
+      "Depozitari de orice natura",
+      "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
+    ]
   },
   "P5": {
     "pot": 5,
@@ -294,7 +846,23 @@
     "inaltime_m": 4,
     "functiune": "Spatii verzi de protectie",
     "culoare": "#bbf7d0",
-    "tip": "verde"
+    "tip": "verde",
+    "functiuni_admise": [
+      "Spatii plantate cu vegetatie inalta si mica",
+      "Circulatii pietonale (unele ocazional carosabile pentru intretinere)",
+      "Mobilier urban, amenajari pentru joc si odihna",
+      "Constructii strict necesare intretinerii parcului (max 5% POT)"
+    ],
+    "functiuni_conditionari": [
+      "P2c: orice interventie necesita documentatii specifice aprobate conform Legii 137/1995",
+      "P6: utilizare temporara pentru manifestari culturale cu aviz Primarie"
+    ],
+    "functiuni_interzise": [
+      "Constructii permanente de orice natura in afara celor necesare intretinerii",
+      "Parcaje carosabile permanente",
+      "Depozitari de orice natura",
+      "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
+    ]
   },
   "P6": {
     "pot": 5,
@@ -303,133 +871,344 @@
     "inaltime_m": 4,
     "functiune": "Spatii plantate pe artere",
     "culoare": "#bbf7d0",
-    "tip": "verde"
+    "tip": "verde",
+    "functiuni_admise": [
+      "Spatii plantate cu vegetatie inalta si mica",
+      "Circulatii pietonale (unele ocazional carosabile pentru intretinere)",
+      "Mobilier urban, amenajari pentru joc si odihna",
+      "Constructii strict necesare intretinerii parcului (max 5% POT)"
+    ],
+    "functiuni_conditionari": [
+      "P2c: orice interventie necesita documentatii specifice aprobate conform Legii 137/1995",
+      "P6: utilizare temporara pentru manifestari culturale cu aviz Primarie"
+    ],
+    "functiuni_interzise": [
+      "Constructii permanente de orice natura in afara celor necesare intretinerii",
+      "Parcaje carosabile permanente",
+      "Depozitari de orice natura",
+      "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
+    ]
   },
   "AI1": {
-    "pot": 60,
+    "pot": 55,
     "cut": 2.0,
-    "rh": "P+3",
-    "inaltime_m": 15,
-    "functiune": "Industrie mare - Dancu, Holboca",
+    "rh": "P+5",
+    "inaltime_m": 20,
+    "functiune": "Industrie mare - Dancu, Holboca, Galata",
     "culoare": "#78350f",
-    "tip": "industrial"
+    "tip": "industrial",
+    "functiuni_admise": [
+      "Activitati agro-industriale nepoluante compatibile cu vecinatatile",
+      "Servicii catre intreprinderi",
+      "IMM cu profil nepoluant",
+      "Depozite si logistica"
+    ],
+    "functiuni_conditionari": [
+      "Activitatile actuale - permise cu conditia reducerii poluarii cu 50% in 5 ani",
+      "Extinderi - numai cu PUZ aprobat"
+    ],
+    "functiuni_interzise": [
+      "Extinderi ale unitatilor existente fara PUZ",
+      "Unitati de invatamant si servicii de interes general",
+      "Locuinte de orice tip",
+      "Activitati cu impact major asupra mediului fara studiu de impact"
+    ]
   },
   "AI2A": {
-    "pot": 60,
+    "pot": 55,
     "cut": 2.0,
-    "rh": "P+3",
-    "inaltime_m": 15,
-    "functiune": "Industrie mijlocie subzona A",
+    "rh": "P+5",
+    "inaltime_m": 20,
+    "functiune": "Industrie mijlocie - platforma principala",
     "culoare": "#92400e",
-    "tip": "industrial"
+    "tip": "industrial",
+    "functiuni_admise": [
+      "Activitati agro-industriale nepoluante compatibile cu vecinatatile",
+      "Servicii catre intreprinderi",
+      "IMM cu profil nepoluant",
+      "Depozite si logistica"
+    ],
+    "functiuni_conditionari": [
+      "Activitatile actuale - permise cu conditia reducerii poluarii cu 50% in 5 ani",
+      "Extinderi - numai cu PUZ aprobat"
+    ],
+    "functiuni_interzise": [
+      "Extinderi ale unitatilor existente fara PUZ",
+      "Unitati de invatamant si servicii de interes general",
+      "Locuinte de orice tip",
+      "Activitati cu impact major asupra mediului fara studiu de impact"
+    ]
   },
   "AI2a": {
-    "pot": 60,
+    "pot": 55,
     "cut": 2.0,
-    "rh": "P+3",
-    "inaltime_m": 15,
+    "rh": "P+5",
+    "inaltime_m": 20,
     "functiune": "Industrie mijlocie subzona a",
     "culoare": "#92400e",
-    "tip": "industrial"
+    "tip": "industrial",
+    "functiuni_admise": [
+      "Activitati agro-industriale nepoluante compatibile cu vecinatatile",
+      "Servicii catre intreprinderi",
+      "IMM cu profil nepoluant",
+      "Depozite si logistica"
+    ],
+    "functiuni_conditionari": [
+      "Activitatile actuale - permise cu conditia reducerii poluarii cu 50% in 5 ani",
+      "Extinderi - numai cu PUZ aprobat"
+    ],
+    "functiuni_interzise": [
+      "Extinderi ale unitatilor existente fara PUZ",
+      "Unitati de invatamant si servicii de interes general",
+      "Locuinte de orice tip",
+      "Activitati cu impact major asupra mediului fara studiu de impact"
+    ]
   },
   "AI2b": {
-    "pot": 60,
+    "pot": 55,
     "cut": 2.0,
-    "rh": "P+3",
-    "inaltime_m": 14,
+    "rh": "P+4",
+    "inaltime_m": 16,
     "functiune": "Industrie - cariere reabilitate",
     "culoare": "#92400e",
-    "tip": "industrial"
+    "tip": "industrial",
+    "functiuni_admise": [
+      "Activitati agro-industriale nepoluante compatibile cu vecinatatile",
+      "Servicii catre intreprinderi",
+      "IMM cu profil nepoluant",
+      "Depozite si logistica"
+    ],
+    "functiuni_conditionari": [
+      "Activitatile actuale - permise cu conditia reducerii poluarii cu 50% in 5 ani",
+      "Extinderi - numai cu PUZ aprobat"
+    ],
+    "functiuni_interzise": [
+      "Extinderi ale unitatilor existente fara PUZ",
+      "Unitati de invatamant si servicii de interes general",
+      "Locuinte de orice tip",
+      "Activitati cu impact major asupra mediului fara studiu de impact"
+    ]
   },
   "AI2c": {
-    "pot": 60,
+    "pot": 55,
     "cut": 2.0,
-    "rh": "P+3",
-    "inaltime_m": 13,
+    "rh": "P+4",
+    "inaltime_m": 16,
     "functiune": "Industrie - cariere in exploatare",
     "culoare": "#a16207",
-    "tip": "industrial"
+    "tip": "industrial",
+    "functiuni_admise": [
+      "Activitati agro-industriale nepoluante compatibile cu vecinatatile",
+      "Servicii catre intreprinderi",
+      "IMM cu profil nepoluant",
+      "Depozite si logistica"
+    ],
+    "functiuni_conditionari": [
+      "Activitatile actuale - permise cu conditia reducerii poluarii cu 50% in 5 ani",
+      "Extinderi - numai cu PUZ aprobat"
+    ],
+    "functiuni_interzise": [
+      "Extinderi ale unitatilor existente fara PUZ",
+      "Unitati de invatamant si servicii de interes general",
+      "Locuinte de orice tip",
+      "Activitati cu impact major asupra mediului fara studiu de impact"
+    ]
   },
   "AI2d": {
-    "pot": 60,
+    "pot": 55,
     "cut": 2.0,
-    "rh": "P+3",
-    "inaltime_m": 13,
+    "rh": "P+4",
+    "inaltime_m": 16,
     "functiune": "Industrie - cariere refacere peisaj",
     "culoare": "#a16207",
-    "tip": "industrial"
+    "tip": "industrial",
+    "functiuni_admise": [
+      "Activitati agro-industriale nepoluante compatibile cu vecinatatile",
+      "Servicii catre intreprinderi",
+      "IMM cu profil nepoluant",
+      "Depozite si logistica"
+    ],
+    "functiuni_conditionari": [
+      "Activitatile actuale - permise cu conditia reducerii poluarii cu 50% in 5 ani",
+      "Extinderi - numai cu PUZ aprobat"
+    ],
+    "functiuni_interzise": [
+      "Extinderi ale unitatilor existente fara PUZ",
+      "Unitati de invatamant si servicii de interes general",
+      "Locuinte de orice tip",
+      "Activitati cu impact major asupra mediului fara studiu de impact"
+    ]
   },
   "AI3": {
-    "pot": 55,
+    "pot": 50,
     "cut": 1.5,
-    "rh": "P+2",
-    "inaltime_m": 11,
-    "functiune": "Industrie mica, depozitare, servicii",
+    "rh": "P+5",
+    "inaltime_m": 20,
+    "functiune": "Industrie mica, depozitare, servicii comerciale",
     "culoare": "#b45309",
-    "tip": "industrial"
+    "tip": "industrial",
+    "functiuni_admise": [
+      "Activitati agro-industriale nepoluante compatibile cu vecinatatile",
+      "Servicii catre intreprinderi",
+      "IMM cu profil nepoluant",
+      "Depozite si logistica"
+    ],
+    "functiuni_conditionari": [
+      "Activitatile actuale - permise cu conditia reducerii poluarii cu 50% in 5 ani",
+      "Extinderi - numai cu PUZ aprobat"
+    ],
+    "functiuni_interzise": [
+      "Extinderi ale unitatilor existente fara PUZ",
+      "Unitati de invatamant si servicii de interes general",
+      "Locuinte de orice tip",
+      "Activitati cu impact major asupra mediului fara studiu de impact"
+    ]
   },
   "AI4": {
-    "pot": 55,
+    "pot": 50,
     "cut": 1.5,
-    "rh": "P+2",
-    "inaltime_m": 11,
+    "rh": "P+3",
+    "inaltime_m": 13,
     "functiune": "Unitati industriale dispersate",
     "culoare": "#b45309",
-    "tip": "industrial"
+    "tip": "industrial",
+    "functiuni_admise": [
+      "Activitati agro-industriale nepoluante compatibile cu vecinatatile",
+      "Servicii catre intreprinderi",
+      "IMM cu profil nepoluant",
+      "Depozite si logistica"
+    ],
+    "functiuni_conditionari": [
+      "Activitatile actuale - permise cu conditia reducerii poluarii cu 50% in 5 ani",
+      "Extinderi - numai cu PUZ aprobat"
+    ],
+    "functiuni_interzise": [
+      "Extinderi ale unitatilor existente fara PUZ",
+      "Unitati de invatamant si servicii de interes general",
+      "Locuinte de orice tip",
+      "Activitati cu impact major asupra mediului fara studiu de impact"
+    ]
   },
   "AI4a": {
-    "pot": 55,
+    "pot": 50,
     "cut": 1.5,
-    "rh": "P+2",
-    "inaltime_m": 11,
+    "rh": "P+3",
+    "inaltime_m": 13,
     "functiune": "Unitati industriale dispersate mentinute",
     "culoare": "#d97706",
-    "tip": "industrial"
+    "tip": "industrial",
+    "functiuni_admise": [
+      "Activitati agro-industriale nepoluante compatibile cu vecinatatile",
+      "Servicii catre intreprinderi",
+      "IMM cu profil nepoluant",
+      "Depozite si logistica"
+    ],
+    "functiuni_conditionari": [
+      "Activitatile actuale - permise cu conditia reducerii poluarii cu 50% in 5 ani",
+      "Extinderi - numai cu PUZ aprobat"
+    ],
+    "functiuni_interzise": [
+      "Extinderi ale unitatilor existente fara PUZ",
+      "Unitati de invatamant si servicii de interes general",
+      "Locuinte de orice tip",
+      "Activitati cu impact major asupra mediului fara studiu de impact"
+    ]
   },
   "AI5": {
-    "pot": 50,
+    "pot": 45,
     "cut": 1.5,
-    "rh": "P+2",
-    "inaltime_m": 11,
-    "functiune": "Zona mixta productiva depozitare",
+    "rh": "P+3",
+    "inaltime_m": 13,
+    "functiune": "Zona mixta productiva, depozitare, servicii",
     "culoare": "#d97706",
-    "tip": "industrial"
+    "tip": "industrial",
+    "functiuni_admise": [
+      "Activitati agro-industriale nepoluante compatibile cu vecinatatile",
+      "Servicii catre intreprinderi",
+      "IMM cu profil nepoluant",
+      "Depozite si logistica"
+    ],
+    "functiuni_conditionari": [
+      "Activitatile actuale - permise cu conditia reducerii poluarii cu 50% in 5 ani",
+      "Extinderi - numai cu PUZ aprobat"
+    ],
+    "functiuni_interzise": [
+      "Extinderi ale unitatilor existente fara PUZ",
+      "Unitati de invatamant si servicii de interes general",
+      "Locuinte de orice tip",
+      "Activitati cu impact major asupra mediului fara studiu de impact"
+    ]
   },
   "AI6": {
-    "pot": 50,
+    "pot": 45,
     "cut": 1.5,
     "rh": "P+2",
     "inaltime_m": 10,
     "functiune": "Parc de activitati",
     "culoare": "#f59e0b",
-    "tip": "industrial"
+    "tip": "industrial",
+    "functiuni_admise": [
+      "Activitati agro-industriale nepoluante compatibile cu vecinatatile",
+      "Servicii catre intreprinderi",
+      "IMM cu profil nepoluant",
+      "Depozite si logistica"
+    ],
+    "functiuni_conditionari": [
+      "Activitatile actuale - permise cu conditia reducerii poluarii cu 50% in 5 ani",
+      "Extinderi - numai cu PUZ aprobat"
+    ],
+    "functiuni_interzise": [
+      "Extinderi ale unitatilor existente fara PUZ",
+      "Unitati de invatamant si servicii de interes general",
+      "Locuinte de orice tip",
+      "Activitati cu impact major asupra mediului fara studiu de impact"
+    ]
   },
   "AA": {
     "pot": 15,
     "cut": 0.3,
     "rh": "P+1",
     "inaltime_m": 6,
-    "functiune": "Agrement, turism, sport",
+    "functiune": "Agrement, sport, turism",
     "culoare": "#34d399",
-    "tip": "agrement"
+    "tip": "agrement",
+    "functiuni_admise": [
+      "Agrement, sport si recreere",
+      "Terenuri sport in aer liber",
+      "Spatii verzi amenajate",
+      "Constructii pentru agrement cu caracter temporar"
+    ],
+    "functiuni_conditionari": [
+      "Constructiile permanente - max 15% POT, conform PUZ"
+    ],
+    "functiuni_interzise": [
+      "Locuinte permanente",
+      "Activitati industriale sau comerciale de tip magazin",
+      "Depozitare de orice natura"
+    ]
   },
   "D1": {
-    "pot": 40,
-    "cut": 1.5,
-    "rh": "P+3",
-    "inaltime_m": 13,
-    "functiune": "Activitati balnearo-turistice",
+    "pot": 15,
+    "cut": 0.3,
+    "rh": "P+2",
+    "inaltime_m": 9,
+    "functiune": "Activitati balnearo-turistice Chirita",
     "culoare": "#67e8f9",
-    "tip": "turism"
-  },
-  "EP6": {
-    "pot": 20,
-    "cut": 0.5,
-    "rh": "P+1",
-    "inaltime_m": 7,
-    "functiune": "Echipamente publice dispersate",
-    "culoare": "#c084fc",
-    "tip": "public"
+    "tip": "turism",
+    "functiuni_admise": [
+      "Tratament balnear",
+      "Hoteluri cu facilitati pentru tratament balnear",
+      "Restaurante, pensiuni turistice",
+      "Amenajari sportive si de recreere"
+    ],
+    "functiuni_conditionari": [
+      "Toate functiunile se vor dispune astfel incat sa formeze enclave in spatiul plantat",
+      "Sa fie cat mai putin prezente in peisaj"
+    ],
+    "functiuni_interzise": [
+      "Orice functiuni fara legatura cu tratamentul balnear si turismul",
+      "Constructii care diminueaza valoarea peisagistica si ecologica"
+    ]
   },
   "ET3": {
     "pot": 10,
@@ -438,16 +1217,61 @@
     "inaltime_m": 5,
     "functiune": "Zone rezervate extindere functiuni",
     "culoare": "#e2e8f0",
-    "tip": "rezerva"
+    "tip": "rezerva",
+    "functiuni_admise": [
+      "Zone rezervate pentru extinderea unor functiuni urbane - conform PUZ viitor"
+    ],
+    "functiuni_conditionari": [
+      "Utilizarile sunt temporare pana la aprobarea unui PUZ specific"
+    ],
+    "functiuni_interzise": [
+      "Constructii permanente de orice natura",
+      "Parcelari pentru locuinte",
+      "Activitati economice permanente"
+    ]
+  },
+  "EP6": {
+    "pot": 20,
+    "cut": 0.5,
+    "rh": "P+1",
+    "inaltime_m": 7,
+    "functiune": "Echipamente publice dispersate",
+    "culoare": "#c084fc",
+    "tip": "public",
+    "functiuni_admise": [
+      "Echipamente publice dispersate: scoli, gradinite, dispensare, biserici",
+      "Constructii pentru servicii de interes general"
+    ],
+    "functiuni_conditionari": [
+      "Fiecare constructie necesita PUZ sau studiu de amplasament"
+    ],
+    "functiuni_interzise": [
+      "Activitati productive sau comerciale",
+      "Locuinte",
+      "Depozitare"
+    ]
   },
   "G1": {
     "pot": 50,
-    "cut": 1.5,
-    "rh": "P+2",
-    "inaltime_m": 9,
+    "cut": 1.8,
+    "rh": "P+3",
+    "inaltime_m": 12,
     "functiune": "Constructii gospodarie comunala",
     "culoare": "#475569",
-    "tip": "tehnic"
+    "tip": "tehnic",
+    "functiuni_admise": [
+      "Constructii si amenajari pentru gospodarie comunala",
+      "Statii de epurare, depozite de deseuri controlate",
+      "Unitati de salubrizare"
+    ],
+    "functiuni_conditionari": [
+      "Orice extindere necesita studiu de impact asupra zonelor rezidentiale vecine"
+    ],
+    "functiuni_interzise": [
+      "Locuinte de orice tip",
+      "Institutii publice sau servicii de interes general",
+      "Activitati incompatibile cu functiunea de gospodarie comunala"
+    ]
   },
   "G2": {
     "pot": 10,
@@ -456,7 +1280,18 @@
     "inaltime_m": 4,
     "functiune": "Cimitire",
     "culoare": "#94a3b8",
-    "tip": "tehnic"
+    "tip": "tehnic",
+    "functiuni_admise": [
+      "Cimitire si constructii aferente (capele, depozite flori, birouri administrare)"
+    ],
+    "functiuni_conditionari": [
+      "Extinderile necesita studiu de impact si aviz DSP"
+    ],
+    "functiuni_interzise": [
+      "Orice functiuni fara legatura cu functiunea de cimitir",
+      "Locuinte",
+      "Activitati economice"
+    ]
   },
   "G/P9": {
     "pot": 10,
@@ -465,7 +1300,17 @@
     "inaltime_m": 4,
     "functiune": "Gospodarie comunala / parc",
     "culoare": "#94a3b8",
-    "tip": "tehnic"
+    "tip": "tehnic",
+    "functiuni_admise": [
+      "Gospodarie comunala si/sau parc - functiune determinata prin PUZ"
+    ],
+    "functiuni_conditionari": [
+      "Functiunea exacta se stabileste prin PUZ aprobat"
+    ],
+    "functiuni_interzise": [
+      "Activitati poluante",
+      "Locuinte permanente"
+    ]
   },
   "P1a,P1b": {
     "pot": 5,
@@ -474,7 +1319,23 @@
     "inaltime_m": 4,
     "functiune": "Parc urban combinat",
     "culoare": "#4ade80",
-    "tip": "verde"
+    "tip": "verde",
+    "functiuni_admise": [
+      "Spatii plantate cu vegetatie inalta si mica",
+      "Circulatii pietonale (unele ocazional carosabile pentru intretinere)",
+      "Mobilier urban, amenajari pentru joc si odihna",
+      "Constructii strict necesare intretinerii parcului (max 5% POT)"
+    ],
+    "functiuni_conditionari": [
+      "P2c: orice interventie necesita documentatii specifice aprobate conform Legii 137/1995",
+      "P6: utilizare temporara pentru manifestari culturale cu aviz Primarie"
+    ],
+    "functiuni_interzise": [
+      "Constructii permanente de orice natura in afara celor necesare intretinerii",
+      "Parcaje carosabile permanente",
+      "Depozitari de orice natura",
+      "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
+    ]
   },
   "P1a/P1b": {
     "pot": 5,
@@ -483,67 +1344,158 @@
     "inaltime_m": 4,
     "functiune": "Parc urban combinat",
     "culoare": "#4ade80",
-    "tip": "verde"
+    "tip": "verde",
+    "functiuni_admise": [
+      "Spatii plantate cu vegetatie inalta si mica",
+      "Circulatii pietonale (unele ocazional carosabile pentru intretinere)",
+      "Mobilier urban, amenajari pentru joc si odihna",
+      "Constructii strict necesare intretinerii parcului (max 5% POT)"
+    ],
+    "functiuni_conditionari": [
+      "P2c: orice interventie necesita documentatii specifice aprobate conform Legii 137/1995",
+      "P6: utilizare temporara pentru manifestari culturale cu aviz Primarie"
+    ],
+    "functiuni_interzise": [
+      "Constructii permanente de orice natura in afara celor necesare intretinerii",
+      "Parcaje carosabile permanente",
+      "Depozitari de orice natura",
+      "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
+    ]
   },
-  "?": {
-    "pot": 0,
-    "cut": 0,
-    "rh": "?",
-    "inaltime_m": 5,
-    "functiune": "Zona neclasificata - eroare digitizare",
-    "culoare": "#94a3b8",
-    "tip": "necunoscut"
-  },
-  "??": {
-    "pot": 0,
-    "cut": 0,
-    "rh": "?",
-    "inaltime_m": 5,
-    "functiune": "Zona neclasificata - eroare digitizare",
-    "culoare": "#94a3b8",
-    "tip": "necunoscut"
+  "P2c ?": {
+    "pot": 3,
+    "cut": 0.03,
+    "rh": "P",
+    "inaltime_m": 3,
+    "functiune": "Parc periurban (incert digitizare)",
+    "culoare": "#86efac",
+    "tip": "verde",
+    "functiuni_admise": [
+      "Spatii plantate cu vegetatie inalta si mica",
+      "Circulatii pietonale (unele ocazional carosabile pentru intretinere)",
+      "Mobilier urban, amenajari pentru joc si odihna",
+      "Constructii strict necesare intretinerii parcului (max 5% POT)"
+    ],
+    "functiuni_conditionari": [
+      "P2c: orice interventie necesita documentatii specifice aprobate conform Legii 137/1995",
+      "P6: utilizare temporara pentru manifestari culturale cu aviz Primarie"
+    ],
+    "functiuni_interzise": [
+      "Constructii permanente de orice natura in afara celor necesare intretinerii",
+      "Parcaje carosabile permanente",
+      "Depozitari de orice natura",
+      "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
+    ]
   },
   "CC ?": {
     "pot": 50,
     "cut": 3.0,
     "rh": "P+6",
     "inaltime_m": 22,
-    "functiune": "Zona centrala (incert digitizare)",
+    "functiune": "Zona centrala complexa (incert digitizare)",
     "culoare": "#ef4444",
-    "tip": "centru"
+    "tip": "centru",
+    "functiuni_admise": [
+      "Institutii si servicii publice de interes general",
+      "Comert cu amanuntul, alimentatie publica, servicii personale",
+      "Sedii companii, servicii profesionale, financiar-bancare",
+      "Hoteluri, restaurante, loisir",
+      "Locuinte la nivelurile superioare"
+    ],
+    "functiuni_conditionari": [
+      "Locuintele vor fi prevazute la nivelurile superioare, parterul destinat functiunilor publice",
+      "Parcaje supraetajate - numai cu arhitectura adecvata caracterului zonei"
+    ],
+    "functiuni_interzise": [
+      "Activitati productive poluante sau cu risc tehnologic",
+      "Constructii provizorii de orice natura",
+      "Depozitare en gros",
+      "Curatatorii chimice"
+    ]
   },
   "CC?": {
     "pot": 50,
     "cut": 3.0,
     "rh": "P+6",
     "inaltime_m": 22,
-    "functiune": "Zona centrala (incert digitizare)",
+    "functiune": "Zona centrala complexa (incert digitizare)",
     "culoare": "#ef4444",
-    "tip": "centru"
+    "tip": "centru",
+    "functiuni_admise": [
+      "Institutii si servicii publice de interes general",
+      "Comert cu amanuntul, alimentatie publica, servicii personale",
+      "Sedii companii, servicii profesionale, financiar-bancare",
+      "Hoteluri, restaurante, loisir",
+      "Locuinte la nivelurile superioare"
+    ],
+    "functiuni_conditionari": [
+      "Locuintele vor fi prevazute la nivelurile superioare, parterul destinat functiunilor publice",
+      "Parcaje supraetajate - numai cu arhitectura adecvata caracterului zonei"
+    ],
+    "functiuni_interzise": [
+      "Activitati productive poluante sau cu risc tehnologic",
+      "Constructii provizorii de orice natura",
+      "Depozitare en gros",
+      "Curatatorii chimice"
+    ]
   },
   "LL ?": {
     "pot": 30,
-    "cut": 0.9,
+    "cut": 0.6,
     "rh": "P+1",
     "inaltime_m": 7,
     "functiune": "Locuinte individuale (incert digitizare)",
     "culoare": "#4ade80",
-    "tip": "rezidential_mic"
+    "tip": "rezidential_mic",
+    "functiuni_admise": [
+      "LL1: Locuinte cuplate - conform proiect initial standardizat",
+      "LL2: Locuinte izolate si cuplate"
+    ],
+    "functiuni_conditionari": [
+      "Functiuni comerciale si servicii - max 200 mp ADC, fara impact asupra zonei"
+    ],
+    "functiuni_interzise": [
+      "Functiuni comerciale care depasesc 200 mp ADC",
+      "Activitati care genereaza trafic important sau program dupa ora 22.00",
+      "Activitati productive poluante",
+      "Depozitare en gros",
+      "Constructii care modifica caracterul initial al lotizarii"
+    ]
   },
-  "LV ?": {
-    "pot": 35,
-    "cut": 1.2,
-    "rh": "P+2",
-    "inaltime_m": 10,
-    "functiune": "Locuinte vila (incert digitizare)",
-    "culoare": "#22c55e",
-    "tip": "rezidential_vila"
+  "?": {
+    "pot": 0,
+    "cut": 0,
+    "rh": "?",
+    "inaltime_m": 0,
+    "functiune": "Zona neclasificata - eroare digitizare",
+    "culoare": "#374151",
+    "tip": "necunoscut",
+    "functiuni_admise": [
+      "Zona neclasificata - se aplica regulile zonei adiacente"
+    ],
+    "functiuni_conditionari": [
+      "Necesita clarificarea UTR-ului prin actualizare PUG"
+    ],
+    "functiuni_interzise": [
+      "Orice constructie pana la clarificarea incadrarii"
+    ]
   },
-  "_meta": {
-    "sursa": "RLU PUG Municipiul Iasi (aprobat 1992, actualizat 2018) + Normativ P100-1/2013",
-    "nota": "Inaltimile sunt in METRI (inaltime_m), nu in etaje. Zona seismica P100: Ag=0.2g Tc=0.7s (Zona II). POT in %, CUT adimensional.",
-    "seismic": "Ag=0.2g Tc=0.7s - Zona II INFP P100-1/2013",
-    "generata": "22 mai 2026",
-    "total_utr": 60
+  "??": {
+    "pot": 0,
+    "cut": 0,
+    "rh": "?",
+    "inaltime_m": 0,
+    "functiune": "Zona neclasificata - eroare digitizare",
+    "culoare": "#374151",
+    "tip": "necunoscut",
+    "functiuni_admise": [
+      "Zona neclasificata - se aplica regulile zonei adiacente"
+    ],
+    "functiuni_conditionari": [
+      "Necesita clarificarea UTR-ului prin actualizare PUG"
+    ],
+    "functiuni_interzise": [
+      "Orice constructie pana la clarificarea incadrarii"
+    ]
   }
 }
