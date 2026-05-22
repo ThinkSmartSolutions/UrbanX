@@ -4365,6 +4365,9 @@ console.log('[UrbanX Patches v20260520] ✅ 8 patch-uri aplicate:',
   '8-Cinema error recovery'
 );
 
+// Expunem global pentru _setupBtnUTR din IIFE-ul UTR
+window._updateUTRDrawerTitle = _updateUTRDrawerTitle;
+
 })(); // end IIFE
 </script>
 
@@ -4724,7 +4727,7 @@ function _setupBtnUTR() {
     const cityName = city.name || 'UAT';
 
     // Actualizăm titlul drawer-ului cu UAT-ul curent
-    _updateUTRDrawerTitle(k);
+    window._updateUTRDrawerTitle?.(k);
 
     // URL PUG din registry (single source of truth)
     const _reg = window._PUG_REGISTRY || {};
