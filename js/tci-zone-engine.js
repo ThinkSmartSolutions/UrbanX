@@ -78,7 +78,8 @@ G._ZoneEngine = {
     // Referință: Legea 50/1991 · Legea 422/2001 · OG 43/1997
     let excludedZones = [];
     try {
-      excludedZones = await this._fetchExcludedZones(lat, lon, radius);
+      const _exclRadius = (city.pop2021||100000) > 200000 ? 8000 : 5000;
+      excludedZones = await this._fetchExcludedZones(lat, lon, _exclRadius);
       if(excludedZones.length > 0) {
         console.log(`[ZoneEngine] ⚠️ ${excludedZones.length} zone excluse din construire:`,
           excludedZones.map(z=>z.name).join(', '));
@@ -121,7 +122,7 @@ G._ZoneEngine = {
       const r = await fetch('https://overpass-api.de/api/interpreter', {
         method: 'POST',
         body: 'data=' + encodeURIComponent(q),
-        signal: AbortSignal.timeout(12000),
+        signal: AbortSignal.timeout(4000), // 4s max - daca nu raspunde, mergem la fallback
       });
       if(!r.ok) throw new Error('HTTP '+r.status);
       const data = await r.json();
@@ -167,7 +168,7 @@ G._ZoneEngine = {
       const r = await fetch('https://overpass-api.de/api/interpreter', {
         method: 'POST',
         body: 'data=' + encodeURIComponent(q),
-        signal: AbortSignal.timeout(10000),
+        signal: AbortSignal.timeout(4000),
       });
       const data = await r.json();
 
@@ -703,10 +704,18 @@ G._ZoneProjections_Real = {
 
     // Continuăm cu lansarea filmului
     if(origLaunch) {
-      // Resetăm câmpurile pentru a evita re-fetch
-      this._city   = city;
-      this._need   = this._need;
-      // Pornim direct (fără re-fetch city)
+      try {
+        await origLaunch.call(this, cityKey);
+      } catch(e) {
+        console.warn('[ZoneEngine] origLaunch error:', e.message);
+        // Pornire directa fara origLaunch
+        this._scene  = 0;
+        this._playing = true;
+        this._canvas = this._createCanvas?.();
+        this._ctx    = this._canvas?.getContext('2d');
+        this._runScene?.(0);
+      }
+    } else {
       this._scene  = 0;
       this._playing = true;
       this._canvas = this._createCanvas?.();
