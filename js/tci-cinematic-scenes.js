@@ -537,13 +537,15 @@ G._SceneEngine = {
         try{ map.setConfigProperty('basemap','lightPreset','day'); }catch(e){}
         break;
 
-      case 5: // CORIDOARE DEZVOLTARE — bare 3D dezvoltare + rotatie
-        map.flyTo({center:[cx,cy], zoom:12, pitch:55, bearing:15, duration:2500, essential:true});
-        try{ map.setConfigProperty('basemap','lightPreset','day'); }catch(e){}
+      case 5: // CORIDOARE DEZVOLTARE — bare 3D reale din PUG
+        map.flyTo({center:[cx,cy], zoom:13, pitch:58, bearing:15, duration:2500, essential:true});
+        try{ map.setConfigProperty('basemap','lightPreset','night'); }catch(e){}
+        // Ascundem layerele UTR 2D ca sa nu acopere barele 3D
+        ['utr-fill','utr-line','utr-lbl'].forEach(id=>{
+          try{ if(map.getLayer(id)) map.setLayoutProperty(id,'visibility','none'); }catch(e){}
+        });
         this._setup3DGrowthBars(map, city);
-        this._setupCorridorsLayer(map, city);
-        // Rotatie lenta pentru efect cinematic
-        this._startMapRotation(map, 15, 0.03);
+        this._startMapRotation(map, 15, 0.025);
         break;
 
       case 6: // MOBILITATE AUTO — trafic + congestie
@@ -609,8 +611,11 @@ G._SceneEngine = {
         break;
 
       case 17: // VIZIUNEA 2055 — sunset dramatic + rotatie
-        map.flyTo({center:[cx,cy], zoom:12, pitch:60, bearing:-20, duration:3000, essential:true});
+        map.flyTo({center:[cx,cy], zoom:13, pitch:62, bearing:-20, duration:3000, essential:true});
         try{ map.setConfigProperty('basemap','lightPreset','dusk'); }catch(e){}
+        ['utr-fill','utr-line','utr-lbl'].forEach(id=>{
+          try{ if(map.getLayer(id)) map.setLayoutProperty(id,'visibility','none'); }catch(e){}
+        });
         this._setup3DGrowthBars(map, city);
         this._startMapRotation(map, -20, 0.02);
         break;
@@ -2765,6 +2770,10 @@ G._SceneEngine = {
   // ── Curăță DOAR layerele TCI (nu atinge layerele platformei) ──────────
   _cleanupTCILayers(map) {
     if(this._rotInterval) { clearInterval(this._rotInterval); this._rotInterval = null; }
+    // Restauram layerele UTR normale
+    ['utr-fill','utr-line','utr-lbl'].forEach(id=>{
+      try{ if(map.getLayer(id)) map.setLayoutProperty(id,'visibility','visible'); }catch(e){}
+    });
     const tciLayers = [
       'tci-density-layer','tci-growth-bars-layer','tci-traffic-cong-layer',
       'tci-corridors-layer','tci-tp-layer','tci-seismic-layer',
@@ -3015,6 +3024,10 @@ G._SceneEngine = {
     const map = window.map;
     if(!map) return;
     if(this._rotInterval) { clearInterval(this._rotInterval); this._rotInterval = null; }
+    // Restauram layerele UTR
+    ['utr-fill','utr-line','utr-lbl'].forEach(id=>{
+      try{ if(map.getLayer(id)) map.setLayoutProperty(id,'visibility','visible'); }catch(e){}
+    });
     // Curatam toate layerele TCI
     ['tci-density-layer','tci-growth-bars-layer','tci-traffic-cong-layer',
      'tci-corridors-layer','tci-tp-layer','tci-seismic-layer',
