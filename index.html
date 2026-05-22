@@ -946,8 +946,8 @@ canvas#c2d{width:100%;height:100%;display:block}
     // Service Worker registration
     if('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=20260520c')
-          .then(r => console.log('[SW] OK v4.0:', r.scope))
+        navigator.serviceWorker.register('./sw.js?v=20260522d')
+          .then(r => console.log('[SW] OK v4.3:', r.scope))
           .catch(e => console.warn('[SW] Skip:', e.message));
       });
     }
