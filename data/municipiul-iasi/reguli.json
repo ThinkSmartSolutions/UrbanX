@@ -1,8 +1,0 @@
-{
-  "LL":  {"d":"Locuinte individuale","pot":35,"cut":1.0,"niv":2,"h":10,"rf":5,"rl":3,"rs":5,"sv":30,"pk":2,"ao":"NU","fm":null,"ua":"Locuinte si functiuni compatibile","uc":"Comert mic","ui":"Industrie"},
-  "LC":  {"d":"Locuinte colective","pot":40,"cut":1.6,"niv":4,"h":16,"rf":5,"rl":3,"rs":5,"sv":25,"pk":1,"ao":"NU","fm":null,"ua":"Locuinte colective, servicii","uc":"Comert la parter","ui":"Industrie"},
-  "CM":  {"d":"Zona mixta","pot":60,"cut":3.0,"niv":6,"h":24,"rf":0,"rl":3,"rs":5,"sv":20,"pk":3,"ao":"DA","fm":18,"ua":"Comert, birouri, servicii, locuire","uc":"Functiuni sensibile","ui":"Industrie poluanta"},
-  "CA":  {"d":"Zona centrala","pot":80,"cut":4.0,"niv":7,"h":28,"rf":0,"rl":0,"rs":3,"sv":10,"pk":2,"ao":"DA","fm":12,"ua":"Functiuni mixte interes public si privat","uc":"Activitati culturale","ui":"Industrie"},
-  "P1":  {"d":"Parc","pot":5,"cut":0.1,"niv":1,"h":5,"rf":10,"rl":10,"rs":10,"sv":90,"pk":0,"ao":"NU","fm":null,"ua":"Parcuri, alei","uc":"Agrement","ui":"Constructii"},
-  "EXT": {"d":"Extravilan Iasi","pot":40,"cut":4,"niv":null,"h":null,"rf":5,"rl":3,"rs":5,"sv":30,"pk":2,"ao":"NU","fm":null,"ua":"Locuire, servicii, agrement","uc":"Orice functiune cu PUZ aprobat","ui":"Industrie grea"}
-}
