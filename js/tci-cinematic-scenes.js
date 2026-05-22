@@ -2293,23 +2293,43 @@ G._SceneEngine = {
     if(!features.length) return; // fara PUG = fara bare
 
     try {
+      // Pitch minim 45 pentru fill-extrusion vizibil
+      if(map2.getPitch() < 45) map2.setPitch(55);
+
       if(map2.getSource('tci-growth-bars')) {
         map2.getSource('tci-growth-bars').setData({type:'FeatureCollection',features});
+        if(!map2.getLayer('tci-growth-bars-layer')) {
+          map2.addLayer({
+            id:'tci-growth-bars-layer', type:'fill-extrusion',
+            source:'tci-growth-bars',
+            paint:{
+              'fill-extrusion-color':['get','color'],
+              'fill-extrusion-height':['get','height'],
+              'fill-extrusion-base':0,
+              'fill-extrusion-opacity':0.82,
+              'fill-extrusion-vertical-gradient':true,
+            }
+          });
+        }
       } else {
-        map2.addSource('tci-growth-bars', {type:'geojson',
-          data:{type:'FeatureCollection',features}});
+        map2.addSource('tci-growth-bars', {
+          type:'geojson',
+          data:{type:'FeatureCollection',features}
+        });
         map2.addLayer({
-          id: 'tci-growth-bars-layer',
-          type: 'fill-extrusion',
-          source: 'tci-growth-bars',
-          paint: {
-            'fill-extrusion-color':   ['get','color'],
-            'fill-extrusion-height':  ['get','height'],
-            'fill-extrusion-base':    0,
-            'fill-extrusion-opacity': 0.82,
+          id:'tci-growth-bars-layer',
+          type:'fill-extrusion',
+          source:'tci-growth-bars',
+          paint:{
+            'fill-extrusion-color':['get','color'],
+            'fill-extrusion-height':['get','height'],
+            'fill-extrusion-base':0,
+            'fill-extrusion-opacity':0.82,
+            'fill-extrusion-vertical-gradient':true,
           }
         });
       }
+      console.log('[Cinema 3D] layer adaugat cu', features.length, 'bare');
     } catch(e){ console.warn('[Cinema 3D bars]', e.message); }
   },
 
