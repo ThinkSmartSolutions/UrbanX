@@ -2,20 +2,15 @@
 <html lang="ro">
 <head><script>
 (function(){
-  var _f=window.fetch, _x=XMLHttpRequest.prototype.open;
+  var _f=window.fetch,_x=XMLHttpRequest.prototype.open;
   var M=[
-    [/\/UrbanX\/data\/municipii[_-]iasi\//gi,    '/UrbanX/data/municipiul-iasi/'],
-    [/\/UrbanX\/js\/data\/iasi\//gi,              '/UrbanX/data/municipiul-iasi/'],
-    [/\/UrbanX\/js\/data\/municipiul-iasi\//gi,   '/UrbanX/data/municipiul-iasi/'],
-    [/\/UrbanX\/[gq][Gg]is[_.]pug[_.][^?]*/gi,   '/UrbanX/data/municipiul-iasi/pug.geojson'],
-    [/\/UrbanX\/cadastru_index\.json(\?|$)/gi,    '/UrbanX/data/municipiul-iasi/cadastru_index.json'],
-    [/\/UrbanX\/data\/municipii[_-]suceava\//gi,  '/UrbanX/js/data/municipiul-suceava/'],
+    [/\/UrbanX\/data\/municipii[_\-]iasi\//gi,    '/UrbanX/data/municipiul-iasi/'],
+    [/\/UrbanX\/js\/data\/(iasi|municipiul-iasi)\//gi,'/UrbanX/data/municipiul-iasi/'],
+    [/\/UrbanX\/[gq][Gg]is[_\.]pug[_\.]?iasi[^?]*/gi,'/UrbanX/data/municipiul-iasi/pug.geojson'],
+    [/\/UrbanX\/cadastru_index\.json/gi,           '/UrbanX/data/municipiul-iasi/cadastru_index.json'],
+    [/\/UrbanX\/data\/municipii[_\-]suceava\//gi,  '/UrbanX/js/data/municipiul-suceava/'],
   ];
-  function fix(u){
-    if(typeof u!=='string') return u;
-    for(var i=0;i<M.length;i++) u=u.replace(M[i][0],M[i][1]);
-    return u;
-  }
+  function fix(u){if(typeof u!=='string')return u;M.forEach(function(r){u=u.replace(r[0],r[1]);});return u;}
   window.fetch=function(u,o){return _f.call(this,fix(u),o);};
   XMLHttpRequest.prototype.open=function(m,u){arguments[1]=fix(u);return _x.apply(this,arguments);};
 })();
@@ -916,7 +911,7 @@ canvas#c2d{width:100%;height:100%;display:block}
     // Service Worker registration
     if('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=20260522f')
+        navigator.serviceWorker.register('./sw.js?v=20260522h')
           .then(r => console.log('[SW] OK v4.0:', r.scope))
           .catch(e => console.warn('[SW] Skip:', e.message));
       });
@@ -1315,12 +1310,7 @@ document.addEventListener('click', function(){
   <div style="padding:5px 8px 2px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.06);margin-top:3px">Zone speciale</div>
   <button onclick="(function(){const k=window.TCI?.cityKey||localStorage.getItem('ux_last_city')||'RO-IS-01';const db=window._RO_CITIES_DB||{};const city=db[k]||{lat:47.158,lon:27.601};const lat=city.lat||map.getCenter().lat;const lon=city.lon||map.getCenter().lng;if(window._ProtectedZonesLayer)window._ProtectedZonesLayer.toggle(map,lat,lon);else ss?.('Zone Protejate se inițializează');_closeAllMenus();})()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#f87171;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">⛔ Zone Protejate (cimitire · CF · monumente)</button>
   <button onclick="(function(){if(window._FloodMapper){window._FloodMapper.addAll(map);ss?.('🌊 Hărți inundații ANAR activate');}else{ss?.('Hărți Inundații se inițializează');}; _closeAllMenus();})()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#7dd3fc;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🌊 Hărți Inundații ANAR</button>
-  <!-- Compare / Benchmarking (scurtătură) -->
-  <div style="padding:5px 8px 2px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.06);margin-top:3px">Comparații</div>
-  <button onclick="window._launchComparePro?.();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#60a5fa;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏙 Compare Pro (2-5 UAT-uri)</button>
-  <button onclick="window._launchPresentation?.();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#f59e0b;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🎯 Prezentare Primărie (5 slide-uri)</button>
-  <button onclick="window._launchEUBenchmark?.();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#4ade80;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🌍 European Benchmarking Pro</button>
-  <button onclick="window._launchCinemaV2?.();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#a78bfa;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🎬 TCI Cinematic v2 (12 scene + proiecții per zonă)</button>
+
   <button class="menu-close-btn" 
     onclick="_closeAllMenusAndOverlay()" 
     ontouchend="event.preventDefault();_closeAllMenusAndOverlay()" 
@@ -3309,6 +3299,17 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
   </button>
 
   <!-- Buton close mobile -->
+  
+  <!-- Predicție Urbanistică — mutat din topbar -->
+  <div style="padding:6px 8px 3px;font-size:10px;color:rgba(139,92,246,.5);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-top:4px">🔮 Predicții</div>
+  <button onclick="document.getElementById('btn-prediction')?.click();_closeAllMenusAndOverlay()"
+    style="display:block;width:100%;text-align:left;background:rgba(139,92,246,.08);border:none;color:#a78bfa;padding:10px 12px;cursor:pointer;border-radius:8px;font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
+    onmouseover="this.style.background='rgba(139,92,246,.18)'"
+    onmouseout="this.style.background='rgba(139,92,246,.08)'"
+    title="Heatmap probabilitate dezvoltare urbanistică — 2/5/10/30 ani">
+    🔮 Predicție Urbanistică
+    <div style="font-size:10px;color:rgba(167,139,250,.6);font-weight:400">Heatmap · Orizont 2-30 ani · UTR score</div>
+  </button>
   <button class="menu-close-btn"
     onclick="_closeAllMenusAndOverlay()"
     ontouchend="event.preventDefault();_closeAllMenusAndOverlay()"
@@ -4517,7 +4518,7 @@ async function _loadPUGOnMap(geojsonUrl, cityName, fitCoords) {
       properties: {
         ...p,
         utr,
-        c: color,            // folosit de utr-fill layer din 02-map-core.js
+        c: (p.c && p.c !== '#CBD5E1' && p.c !== 'undefined' ? p.c : color),
         denumire: p.DENUMIRE || p.denumire || p.NAME || p.name || utr,
         pot: p.POT || p.pot || null,
         cut: p.CUT || p.cut || null,
