@@ -397,6 +397,26 @@ G._SceneEngine = {
     this._runScene(0);
     document.body.classList.add('tci-cinema-active');
     ss?.('🎬 TCI Cinematic v2.0 pornit: '+city.name);
+
+    // Debug overlay - dispare dupa 4 secunde
+    setTimeout(() => {
+      const pugN  = this._pugGeo?.features?.length || 0;
+      const regN  = Object.keys(this._reguli||{}).length;
+      const msg   = pugN > 0
+        ? '✅ PUG: '+pugN+' UTR-uri · Reguli: '+regN+' · '+city.name
+        : '⚠ PUG neîncarcat — bare 3D indisponibile · verifică consola';
+      const col   = pugN > 0 ? '#22c55e' : '#ef4444';
+      const el = document.createElement('div');
+      el.id = 'tci-debug-overlay';
+      el.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);'+
+        'background:rgba(4,10,24,.95);border:1px solid '+col+';color:'+col+';'+
+        'font:bold 13px "IBM Plex Mono",monospace;padding:10px 20px;border-radius:8px;'+
+        'z-index:999999;pointer-events:none;white-space:nowrap;';
+      el.textContent = msg;
+      document.body.appendChild(el);
+      console.log('[TCI Debug] PUG:', pugN, 'Reguli:', regN, 'City:', city.name);
+      setTimeout(() => el.remove(), 5000);
+    }, 2500);
   },
 
   _createCanvas() {
