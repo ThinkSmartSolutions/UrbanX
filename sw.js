@@ -1,93 +1,96 @@
-/* UrbanX Service Worker v4.3 — 20260522
-   - Ucide cache-ul v4.0, v4.1, v4.2
-   - index.html: no-store (mereu proaspăt)
-   - JS/CSS: network-first cu timeout 4s
-   - GeoJSON/JSON data: network-first
+/* UrbanX Service Worker v4.3e — 20260522
+   Ucide cache v4.0/4.1/4.2/4.3
+   Iasi: data/municipiul-iasi/ (root)
+   Suceava: js/data/municipiul-suceava/
 */
-const CACHE = 'urbanx-v4.3';
-const OLD_CACHES = ['urbanx-v4.0','urbanx-v4.1','urbanx-v4.2','mapbox-tiles'];
-
-/* Redirect căi greșite și la nivel SW */
-const PATH_FIX = {
-  '/UrbanX/data/municipii-iasi/pug.geojson':       '/UrbanX/js/data/municipiul-iasi/pug.geojson',
-  '/UrbanX/data/municipii-iasi/reguli.json':        '/UrbanX/js/data/municipiul-iasi/reguli.json',
-  '/UrbanX/data/municipii-iasi/cadastru_index.json':'/UrbanX/js/data/municipiul-iasi/meta.json',
-  '/UrbanX/data/municipii-suceava/pug.geojson':     '/UrbanX/js/data/municipiul-suceava/pug.geojson',
-  '/UrbanX/data/municipii-suceava/reguli.json':     '/UrbanX/js/data/municipiul-suceava/reguli.json',
-  '/UrbanX/gGis_pug_iasi.geojson':                 '/UrbanX/js/data/municipiul-iasi/pug.geojson',
-  '/UrbanX/qGis_pug_iasi.geojson':                 '/UrbanX/js/data/municipiul-iasi/pug.geojson',
-  '/UrbanX/qGis_pug.iasi.geojson':                 '/UrbanX/js/data/municipiul-iasi/pug.geojson',
-  '/UrbanX/cadastru_index.json':                   '/UrbanX/js/data/municipiul-iasi/meta.json',
-};
+const CACHE = 'urbanx-v4.3e';
+const OLD = ['urbanx-v4.0','urbanx-v4.1','urbanx-v4.2','urbanx-v4.3','mapbox-tiles'];
 
 function fixUrl(url) {
-  var u = new URL(url);
-  var fixed = PATH_FIX[u.pathname];
-  if (fixed) return new URL(fixed, u.origin).href;
-  /* prefix js/data/iasi/ → municipiul-iasi/ */
-  if (u.pathname.includes('/js/data/iasi/')) {
-    u.pathname = u.pathname.replace('/js/data/iasi/', '/js/data/municipiul-iasi/');
-    return u.href;
-  }
+  try {
+    var u = new URL(url);
+    var p = u.pathname;
+    /* Iasi - variante gresite */
+    if (/\/data\/municipii[_-]iasi\//i.test(p))
+      return url.replace(/\/data\/municipii[_-]iasi\//i, '/data/municipiul-iasi/');
+    if (/\/js\/data\/(iasi|municipiul-iasi)\//i.test(p))
+      return url.replace(/\/js\/data\/(iasi|municipiul-iasi)\//i, '/data/municipiul-iasi/');
+    if (/\/[gq][Gg]is[_.]pug[_.]?iasi/i.test(p))
+      return url.replace(/\/[gq][Gg]is[_.]pug[_.]?iasi[^?]*/i, '/data/municipiul-iasi/pug.geojson');
+    if (p.endsWith('/cadastru_index.json') && !p.includes('/data/'))
+      return url.replace('/cadastru_index.json', '/data/municipiul-iasi/cadastru_index.json');
+    /* Suceava - variante gresite */
+    if (/\/data\/municipii[_-]suceava\//i.test(p))
+      return url.replace(/\/data\/municipii[_-]suceava\//i, '/js/data/municipiul-suceava/');
+  } catch(e) {}
   return url;
 }
 
 self.addEventListener('install', e => {
-  console.log('[SW v4.3] Install');
+  console.log('[SW v4.3e] Install');
   self.skipWaiting();
 });
 
 self.addEventListener('activate', e => {
-  console.log('[SW v4.3] Activate — șterg cache vechi');
+  console.log('[SW v4.3e] Activate — sterg cache vechi');
   e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => OLD_CACHES.includes(k) || (k.startsWith('urbanx-') && k !== CACHE))
-        .map(k => { console.log('[SW v4.3] Șterg:', k); return caches.delete(k); }))
-    ).then(() => self.clients.claim())
+    caches.keys()
+      .then(keys => Promise.all(
+        keys.filter(k => OLD.includes(k) || (k.startsWith('urbanx-') && k !== CACHE))
+          .map(k => { console.log('[SW v4.3e] Sterg:', k); return caches.delete(k); })
+      ))
+      .then(() => self.clients.claim())
   );
 });
 
 self.addEventListener('fetch', e => {
   const req = e.request;
-  const url = fixUrl(req.url);
-  const fixedReq = url !== req.url ? new Request(url, { method: req.method, headers: req.headers, mode: req.mode === 'navigate' ? 'same-origin' : req.mode, credentials: req.credentials, redirect: req.redirect }) : req;
-  const pathname = new URL(url).pathname;
+  /* Ignora POST/PUT/DELETE - nu se pot pune in cache */
+  if (req.method !== 'GET') return;
 
-  /* index.html: no-store mereu */
-  if (pathname === '/UrbanX/' || pathname === '/UrbanX/index.html') {
-    e.respondWith(fetch(fixedReq, { cache: 'no-store' }).catch(() => caches.match(fixedReq)));
+  const fixed = fixUrl(req.url);
+  const useReq = fixed !== req.url ? new Request(fixed, {
+    headers: req.headers,
+    credentials: req.credentials,
+    redirect: req.redirect
+  }) : req;
+
+  const path = new URL(fixed).pathname;
+
+  /* index.html: mereu de la network */
+  if (path === '/UrbanX/' || path === '/UrbanX/index.html') {
+    e.respondWith(fetch(useReq, { cache: 'no-store' }).catch(() => caches.match(req)));
     return;
   }
 
-  /* JS/CSS/GeoJSON/JSON: network-first cu timeout 4s */
-  if (/\.(js|css|geojson|json)(\?|$)/.test(pathname)) {
+  /* JS/CSS/JSON/GeoJSON: network-first */
+  if (/\.(js|css|geojson|json)(\?|$)/.test(path)) {
     e.respondWith(
-      Promise.race([
-        fetch(fixedReq).then(r => {
-          if (r.ok && (pathname.endsWith('.js') || pathname.endsWith('.css'))) {
+      fetch(useReq, { cache: 'no-store' })
+        .then(r => {
+          if (r.ok && r.status === 200) {
             const clone = r.clone();
-            caches.open(CACHE).then(c => c.put(fixedReq, clone));
+            caches.open(CACHE).then(c => c.put(useReq, clone));
           }
           return r;
-        }),
-        new Promise((_, reject) => setTimeout(() => reject('timeout'), 4000))
-      ]).catch(() => caches.match(fixedReq))
+        })
+        .catch(() => caches.match(useReq) || caches.match(req))
     );
     return;
   }
 
   /* Mapbox tiles: cache-first */
-  if (url.includes('mapbox') || url.includes('tiles')) {
+  if (fixed.includes('mapbox') || fixed.includes('tiles')) {
     e.respondWith(
-      caches.match(req).then(cached => cached || fetch(req).then(r => {
-        const clone = r.clone();
-        caches.open(CACHE).then(c => c.put(req, clone));
-        return r;
-      }))
+      caches.match(req).then(cached =>
+        cached || fetch(req).then(r => {
+          if (r.ok) caches.open(CACHE).then(c => c.put(req, r.clone()));
+          return r;
+        })
+      )
     );
     return;
   }
 
-  /* Rest: network */
-  e.respondWith(fetch(fixedReq));
+  e.respondWith(fetch(useReq));
 });

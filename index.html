@@ -2,52 +2,49 @@
 <html lang="ro">
 <head>
 <script>
-/* UrbanX FetchFix v20260522 — în <head> înainte de orice JS */
+/* UrbanX FetchFix v20260522e — correct paths */
 (function(){
   'use strict';
   var _of = window.fetch;
-  /* Toate căile greșite → corecte */
-  var M = {
-    'data/municipii-iasi/pug.geojson':       'js/data/municipiul-iasi/pug.geojson',
-    'data/municipii-iasi/reguli.json':        'js/data/municipiul-iasi/reguli.json',
-    'data/municipii-iasi/cadastru_index.json':'js/data/municipiul-iasi/meta.json',
-    'data/municipii-suceava/pug.geojson':     'js/data/municipiul-suceava/pug.geojson',
-    'data/municipii-suceava/reguli.json':     'js/data/municipiul-suceava/reguli.json',
-    'data/municipii-suceava/cadastru_index.json':'js/data/municipiul-suceava/meta.json',
-    'gGis_pug_iasi.geojson':                 'js/data/municipiul-iasi/pug.geojson',
-    'qGis_pug_iasi.geojson':                 'js/data/municipiul-iasi/pug.geojson',
-    'qGis_pug_iasi':                         'js/data/municipiul-iasi/pug.geojson',
-    'cadastru_index.json':                   'js/data/municipiul-iasi/meta.json',
-    'js/data/iasi/pug.geojson':              'js/data/municipiul-iasi/pug.geojson',
-    'js/data/iasi/reguli.json':              'js/data/municipiul-iasi/reguli.json',
-    'js/data/iasi/meta.json':                'js/data/municipiul-iasi/meta.json',
-    'js/data/iasi/cadastru_index.json':      'js/data/municipiul-iasi/meta.json',
-  };
+  var _ox = XMLHttpRequest.prototype.open;
+  
+  /* Toate variantele gresite → calea corecta */
+  var FIXES = [
+    /* Iasi - calea corecta e data/municipiul-iasi/ (la root, fara js/) */
+    [/\/UrbanX\/data\/municipii[_-]iasi\//g,     '/UrbanX/data/municipiul-iasi/'],
+    [/\/UrbanX\/data\/municipiul_iasi\//g,        '/UrbanX/data/municipiul-iasi/'],
+    [/\/UrbanX\/js\/data\/iasi\//g,               '/UrbanX/data/municipiul-iasi/'],
+    [/\/UrbanX\/js\/data\/municipiul-iasi\//g,    '/UrbanX/data/municipiul-iasi/'],
+    /* gGis / qGis variante */
+    [/\/UrbanX\/[gq]Gis[_.]pug[_.]?iasi[^?]*/gi, '/UrbanX/data/municipiul-iasi/pug.geojson'],
+    [/\/UrbanX\/[gq]gis[_.]pug[_.]?iasi[^?]*/gi, '/UrbanX/data/municipiul-iasi/pug.geojson'],
+    /* cadastru_index la root */
+    [/\/UrbanX\/cadastru_index\.json/g,           '/UrbanX/data/municipiul-iasi/cadastru_index.json'],
+    /* Suceava variante gresite */
+    [/\/UrbanX\/data\/municipii[_-]suceava\//g,   '/UrbanX/js/data/municipiul-suceava/'],
+  ];
+  
   function _fix(url){
-    if(!url||typeof url!=='string') return url;
-    var base=url.split('?')[0];
-    var qs=url.includes('?')?'?'+url.split('?').slice(1).join('?'):'';
-    /* caută key care apare în URL */
-    for(var k in M){
-      if(base.indexOf(k)!==-1){
-        /* reconstruim URL: păstrăm originea + calea corectă */
-        var origin=base.indexOf('/UrbanX/')!==-1?base.split('/UrbanX/')[0]+'/UrbanX/':'';
-        var fixed=origin+M[k]+qs;
-        console.log('[FetchFix]',k,'→',M[k]);
-        return fixed;
-      }
+    if(!url || typeof url !== 'string') return url;
+    var u = url;
+    for(var i=0; i<FIXES.length; i++){
+      u = u.replace(FIXES[i][0], FIXES[i][1]);
     }
-    return url;
+    if(u !== url) console.log('[FetchFix]', url.split('/UrbanX/')[1], '→', u.split('/UrbanX/')[1]);
+    return u;
   }
-  window.fetch=function(url,opts){
-    return _of.call(window,_fix(typeof url==='string'?url:url),opts);
+  
+  window.fetch = function(url, opts){
+    var u = typeof url === 'string' ? _fix(url) : url;
+    return _of.call(window, u, opts);
   };
-  /* Interceptăm și XMLHttpRequest */
-  var _XHRopen=XMLHttpRequest.prototype.open;
-  XMLHttpRequest.prototype.open=function(m,url){
-    arguments[1]=_fix(url)||url;
-    return _XHRopen.apply(this,arguments);
+  
+  XMLHttpRequest.prototype.open = function(m, url){
+    if(typeof url === 'string') arguments[1] = _fix(url);
+    return _ox.apply(this, arguments);
   };
+  
+  console.log('[FetchFix v20260522e] activ');
 })();
 </script>
 <meta charset="utf-8"/>
@@ -946,7 +943,7 @@ canvas#c2d{width:100%;height:100%;display:block}
     // Service Worker registration
     if('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=20260522d')
+        navigator.serviceWorker.register('./sw.js?v=20260522e')
           .then(r => console.log('[SW] OK v4.3:', r.scope))
           .catch(e => console.warn('[SW] Skip:', e.message));
       });
@@ -4793,7 +4790,7 @@ function _setupBtnUTR() {
 
     // Determinăm URL-ul PUG
     const _PUG_URLS = {
-      'RO-IS-01': 'js/data/municipiul-iasi/pug.geojson',
+      'RO-IS-01': 'data/municipiul-iasi/pug.geojson',
       'RO-SV-01': 'js/data/municipiul-suceava/pug.geojson',
     };
     const UAT_REG = window.UAT_REGISTRY || {};
@@ -5268,37 +5265,28 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
 
 
 <script>
-/* UrbanX TopbarLock v20260522 */
+/* UrbanX TopbarLock v20260522e */
 (function(){
-  'use strict';
-  var BLOCKED=['3dtravels','Predicți','predicti','prediction-layer','Predicție'];
-  function _bad(n){
+  var B=['3dtravels','Predicți','predicti','prediction-layer'];
+  function bad(n){
     if(!n||n.nodeType!==1) return false;
     var t=((n.textContent||'')+(n.getAttribute('title')||'')+(n.id||'')).toLowerCase();
-    return BLOCKED.some(function(b){return t.indexOf(b.toLowerCase())!==-1;});
+    return B.some(function(b){return t.indexOf(b.toLowerCase())!==-1;});
   }
-  function _clean(){
+  function clean(){
     var tb=document.getElementById('topbar');
     if(!tb) return;
-    Array.from(tb.querySelectorAll('button,a,[role="button"]')).forEach(function(n){
-      if(_bad(n)){n.style.display='none';n.remove&&n.remove();}
-    });
+    Array.from(tb.querySelectorAll('button,a')).forEach(function(n){if(bad(n))n.remove();});
   }
-  function _lock(){
+  function lock(){
     var tb=document.getElementById('topbar');
-    if(!tb||tb._lk) return;
-    tb._lk=true;
-    var _a=tb.appendChild.bind(tb),_i=tb.insertBefore.bind(tb);
-    tb.appendChild=function(n){return _bad(n)?n:_a(n);};
-    tb.insertBefore=function(n,r){return _bad(n)?n:_i(n,r);};
+    if(!tb||tb._lk) return; tb._lk=true;
+    var a=tb.appendChild.bind(tb),i=tb.insertBefore.bind(tb);
+    tb.appendChild=function(n){return bad(n)?n:a(n);};
+    tb.insertBefore=function(n,r){return bad(n)?n:i(n,r);};
   }
-  document.addEventListener('DOMContentLoaded',function(){
-    setTimeout(_lock,50);setTimeout(_clean,100);setTimeout(_clean,1000);setTimeout(_clean,3000);
-  });
-  window.addEventListener('load',function(){
-    setTimeout(_lock,100);setTimeout(_clean,500);setTimeout(_clean,2500);
-  });
-  window._cleanTopbar=_clean;
+  document.addEventListener('DOMContentLoaded',function(){setTimeout(lock,50);setTimeout(clean,200);setTimeout(clean,1500);});
+  window.addEventListener('load',function(){setTimeout(clean,500);setTimeout(clean,3000);});
 })();
 </script>
 </body>
