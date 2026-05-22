@@ -212,7 +212,7 @@ G._SceneEngine = {
   _ctx:      null,
 
   SCENES: [
-    { id:1,  dur:18000, label:'Identitate — Cine ești, de unde vii' },
+    { id:1,  dur:14000, label:'Identitate — Cine ești, de unde vii' },
     { id:2,  dur:15000, label:'Context Geografic & Regional' },
     { id:3,  dur:16000, label:'Portretul Comunității — Demografie' },
     { id:4,  dur:16000, label:'Economie & Putere de Cumpărare' },
@@ -321,33 +321,43 @@ G._SceneEngine = {
     this._canvas = this._createCanvas();
     this._ctx    = this._canvas.getContext('2d');
 
-    // Fetch Wikipedia pentru scena 1 (istoric UAT)
-    this._wikiText = '';
-    this._loadingWiki = true;
+    // Fetch Wikipedia pentru scena 1 — cu fallback imediat din date locale
+    const _cityForWiki = city;
+    this._wikiLang = 'ro';
+    // Fallback imediat din date disponibile — se afiseaza pana vine Wikipedia
+    this._wikiText = [
+      _cityForWiki.name + ' este un ' + (_cityForWiki.tip||'municipiu') + ' din județul ' + (_cityForWiki.judet||'—') + ', România.',
+      'Populație: ' + (_cityForWiki.pop2021||0).toLocaleString('ro-RO') + ' locuitori (Recensământ 2021).',
+      'Suprafață: ' + (_cityForWiki.suprafata_ha ? Math.round(_cityForWiki.suprafata_ha/100) + ' km²' : '—') + '.',
+      'PIB/capita: ' + (_cityForWiki.pib_eur_cap ? _cityForWiki.pib_eur_cap.toLocaleString('ro-RO') + ' EUR' : '—') + ' (Eurostat 2022).',
+      'Hub urban ' + (_cityForWiki.regiune||'') + ' · Tip creștere: ' + (_cityForWiki.coef_hub>=1.5?'metropolitan':_cityForWiki.coef_hub>=1?'regional':'local') + '.',
+    ].join(' ');
+    // Fetch Wikipedia async — înlocuieste fallback-ul când sosește
     (async () => {
       try {
-        const cityName = city.name || '';
-        // Incearca intai romana, apoi engleza
+        const cityName = _cityForWiki.name || '';
         for(const lang of ['ro','en']) {
-          const url = `https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(cityName)}`;
-          const resp = await fetch(url, {signal: AbortSignal.timeout(5000)});
-          if(resp.ok) {
-            const data = await resp.json();
-            if(data.extract && data.extract.length > 50) {
-              // Curatam textul - max 600 caractere
-              this._wikiText = data.extract.replace(/\s+/g,' ').trim().substring(0,600);
-              if(this._wikiText.length === 600) this._wikiText += '...';
-              this._wikiLang = lang;
-              console.log('[Cinema] Wikipedia', lang, 'OK:', cityName);
-              break;
+          const ctrl = new AbortController();
+          const timer = setTimeout(()=>ctrl.abort(), 3000);
+          try {
+            const resp = await fetch(
+              'https://'+lang+'.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(cityName),
+              {signal: ctrl.signal}
+            );
+            clearTimeout(timer);
+            if(resp.ok) {
+              const data = await resp.json();
+              if(data.extract && data.extract.length > 80) {
+                this._wikiText = data.extract.replace(/\s+/g,' ').trim().substring(0,700);
+                if(this._wikiText.length===700) this._wikiText += '...';
+                this._wikiLang = lang;
+                console.log('[Cinema] Wikipedia', lang, 'OK:', cityName);
+                break;
+              }
             }
-          }
+          } catch(fetchErr) { clearTimeout(timer); }
         }
-      } catch(e) {
-        console.warn('[Cinema] Wikipedia fetch failed:', e.message);
-        this._wikiText = city.name + ' — date istorice indisponibile momentan.';
-      }
-      this._loadingWiki = false;
+      } catch(e) { console.warn('[Cinema] Wikipedia failed:', e.message); }
     })();
 
     // Pornim
@@ -569,28 +579,32 @@ G._SceneEngine = {
 
     // Text Wikipedia — afișat progresiv
     const wikiText = this._wikiText || '';
-    if(wikiText && t>0.2){
-      const ta=Math.min(1,(t-0.2)/0.25);
+    // Textul apare intotdeauna - fie din fallback local, fie din Wikipedia
+    if(t>0.15){
+      const ta=Math.min(1,(t-0.15)/0.2);
       ctx.globalAlpha=ta;
-      const lines = this._wrapText(ctx, wikiText, W*0.76, `${W*0.0085}px "IBM Plex Mono"`);
-      const maxLines = Math.min(lines.length, Math.floor(t*lines.length*1.5+2));
-      ctx.fillStyle='rgba(200,215,235,.85)';
-      ctx.font=`${W*0.0085}px "IBM Plex Mono"`;
-      ctx.textAlign='left';
+      const font14=`${W*0.009}px "IBM Plex Mono"`;
+      const lineH = H*0.042;
       const startY = H*0.3;
-      const lineH = H*0.038;
-      lines.slice(0,maxLines).forEach((line,i)=>{
+      // Calculam cate linii incap pe ecran intre startY si 0.75H
+      const maxVisible = Math.floor((H*0.75 - startY) / lineH);
+      const lines = this._wrapText(ctx, wikiText||'...', W*0.76, font14);
+      // Afisam progresiv pana la maxVisible linii
+      const showN = Math.min(maxVisible, Math.floor((t-0.15)/(0.85/Math.max(1,Math.min(lines.length,maxVisible)))+1));
+      ctx.fillStyle='rgba(200,215,235,.88)';
+      ctx.font=font14;
+      ctx.textAlign='left';
+      lines.slice(0, showN).forEach((line,i)=>{
         ctx.fillText(line, W*0.12, startY+i*lineH, W*0.76);
       });
-      ctx.globalAlpha=1;
-    } else if(!wikiText && t>0.2) {
-      // Loading indicator
-      const ta=Math.min(1,(t-0.2)/0.2);
-      ctx.globalAlpha=ta*0.5;
-      ctx.fillStyle='rgba(148,163,184,.6)';
-      ctx.font=`${W*0.009}px "IBM Plex Mono"`;
-      ctx.textAlign='center';
-      ctx.fillText('Se încarcă istoricul din Wikipedia...', W/2, H*0.5);
+      // Sursa Wikipedia — sub text, intotdeauna in ecran
+      if(t>0.75 && this._wikiLang){
+        const sa=Math.min(1,(t-0.75)/0.15);
+        ctx.globalAlpha*=sa;
+        ctx.fillStyle='rgba(96,165,250,.55)';
+        ctx.font=`${W*0.0065}px "IBM Plex Mono"`;
+        ctx.fillText('Sursă: '+this._wikiLang+'.wikipedia.org', W*0.12, H*0.77);
+      }
       ctx.globalAlpha=1;
     }
 
