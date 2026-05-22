@@ -2287,7 +2287,7 @@ G._SceneEngine = {
         if(h_real <= 0) return;
         // Factor amplificare: 8x pentru vizibilitate cinematica la zoom 12-13
         // LA (33m reali) → 264m vizual, CC (22m) → 176m, LC (9m) → 72m, P (4m) → 32m
-        const h = h_real * 8;
+        const h = h_real * 64;
         features.push({
           type: 'Feature',
           geometry: f.geometry,
