@@ -36,9 +36,9 @@
   },
   "CC": {
     "pot": 50,
-    "cut": 3.0,
-    "rh": "P+6",
-    "inaltime_m": 22,
+    "cut": 2.5,
+    "rh": "P+6 (4 fire) / P+3 (2 fire)",
+    "inaltime_m": 21,
     "functiune": "Zona centrala complexa - functiuni mixte",
     "culoare": "#ef4444",
     "tip": "centru",
@@ -59,13 +59,14 @@
       "Depozitare en gros",
       "Curatatorii chimice"
     ],
-    "nota_reglementare": "CC1+CC2: conform PUZ cu recomandari orientative (RLU Art.15). Valorile POT/CUT sunt recomandari, nu prescriptii."
+    "nota_reglementare": "CUT max=2.5. H: P+6(21m) strazi 4 fire / P+3(12m) strazi 2 fire. (sursa: RLU Art.10+16)",
+    "inaltime_2fire_m": 12
   },
   "CM": {
     "pot": 50,
-    "cut": 2.5,
-    "rh": "P+6",
-    "inaltime_m": 22,
+    "cut": 1.8,
+    "rh": "P+10 (6 fire) / P+6 (4 fire) / P+3 (2 fire) / CM5: P+2",
+    "inaltime_m": 21,
     "functiune": "Zona mixta - institutii, servicii, comert, locuire",
     "culoare": "#f97316",
     "tip": "mixt",
@@ -90,7 +91,11 @@
       "Curatatorii chimice",
       "Activitati cu program dupa ora 22.00 care produc zgomot"
     ],
-    "nota_reglementare": "CM1-CM5: conform PUZ cu recomandari orientative (RLU Art.15). POT ses=50%, versanti=35%, podis=45%."
+    "nota_reglementare": "CUT=1.8. CM1-4: H P+10(33m)/P+6(21m)/P+3(12m) dupa nr.fire. CM5: H=P+2(9m). Conditii geotehnice obligatorii. (sursa: RLU Art.10+16 + captura)",
+    "inaltime_6fire_m": 33,
+    "inaltime_4fire_m": 21,
+    "inaltime_2fire_m": 12,
+    "inaltime_cm5_m": 9
   },
   "CA": {
     "pot": 50,
@@ -121,10 +126,10 @@
     ]
   },
   "CB1": {
-    "pot": 55,
-    "cut": 2.5,
-    "rh": "P+6",
-    "inaltime_m": 22,
+    "pot": 50,
+    "cut": 1.8,
+    "rh": "P+6 (4 fire) / P+3 (2 fire)",
+    "inaltime_m": 21,
     "functiune": "Pol tertiar principal - Pacurari/Chirita",
     "culoare": "#60a5fa",
     "tip": "comercial",
@@ -146,13 +151,15 @@
       "Orice activitati care nu corespund caracterului zonei si indeparteaza investitorii",
       "Activitati productive poluante sau cu risc tehnologic",
       "Activitati care genereaza trafic de marfa incompatibil cu zona"
-    ]
+    ],
+    "inaltime_2fire_m": 12,
+    "nota_reglementare": "Conform PUZ cu recomandari: POT=50%, CUT=1.8. H: ca la CC - P+6(21m)/P+3(12m). (sursa: RLU + precizari urbanist)"
   },
   "CB2": {
-    "pot": 55,
-    "cut": 2.0,
-    "rh": "P+6",
-    "inaltime_m": 22,
+    "pot": 50,
+    "cut": 1.8,
+    "rh": "P+6 (4 fire) / P+3 (2 fire)",
+    "inaltime_m": 21,
     "functiune": "Pol tertiar secundar - Tutora/Fortus",
     "culoare": "#60a5fa",
     "tip": "comercial",
@@ -174,13 +181,15 @@
       "Orice activitati care nu corespund caracterului zonei si indeparteaza investitorii",
       "Activitati productive poluante sau cu risc tehnologic",
       "Activitati care genereaza trafic de marfa incompatibil cu zona"
-    ]
+    ],
+    "inaltime_2fire_m": 12,
+    "nota_reglementare": "Conform PUZ cu recomandari: POT=50%, CUT=1.8. H: ca la CC - P+6(21m)/P+3(12m). (sursa: RLU + precizari urbanist)"
   },
   "CB3": {
-    "pot": 60,
-    "cut": 3.0,
-    "rh": "P+6",
-    "inaltime_m": 22,
+    "pot": 50,
+    "cut": 1.8,
+    "rh": "P+6 (4 fire) / P+3 (2 fire)",
+    "inaltime_m": 21,
     "functiune": "Centru International Conferinte",
     "culoare": "#3b82f6",
     "tip": "comercial",
@@ -202,13 +211,15 @@
       "Orice activitati care nu corespund caracterului zonei si indeparteaza investitorii",
       "Activitati productive poluante sau cu risc tehnologic",
       "Activitati care genereaza trafic de marfa incompatibil cu zona"
-    ]
+    ],
+    "inaltime_2fire_m": 12,
+    "nota_reglementare": "Conform PUZ cu recomandari: POT=50%, CUT=1.8. H: ca la CC - P+6(21m)/P+3(12m). (sursa: RLU + precizari urbanist)"
   },
   "CB4": {
-    "pot": 60,
-    "cut": 3.0,
-    "rh": "P+6",
-    "inaltime_m": 22,
+    "pot": 50,
+    "cut": 1.8,
+    "rh": "P+6 (4 fire) / P+3 (2 fire)",
+    "inaltime_m": 21,
     "functiune": "Centrul Expozitional Moldova",
     "culoare": "#3b82f6",
     "tip": "comercial",
@@ -230,13 +241,15 @@
       "Orice activitati care nu corespund caracterului zonei si indeparteaza investitorii",
       "Activitati productive poluante sau cu risc tehnologic",
       "Activitati care genereaza trafic de marfa incompatibil cu zona"
-    ]
+    ],
+    "inaltime_2fire_m": 12,
+    "nota_reglementare": "Conform PUZ cu recomandari: POT=50%, CUT=1.8. H: ca la CC - P+6(21m)/P+3(12m). (sursa: RLU + precizari urbanist)"
   },
   "CB5": {
-    "pot": 55,
-    "cut": 2.5,
-    "rh": "P+6",
-    "inaltime_m": 22,
+    "pot": 50,
+    "cut": 1.8,
+    "rh": "P+6 (4 fire) / P+3 (2 fire)",
+    "inaltime_m": 21,
     "functiune": "Campus universitar - cercetare",
     "culoare": "#a78bfa",
     "tip": "educational",
@@ -258,13 +271,15 @@
       "Orice activitati care nu corespund caracterului zonei si indeparteaza investitorii",
       "Activitati productive poluante sau cu risc tehnologic",
       "Activitati care genereaza trafic de marfa incompatibil cu zona"
-    ]
+    ],
+    "inaltime_2fire_m": 12,
+    "nota_reglementare": "Conform PUZ cu recomandari: POT=50%, CUT=1.8. H: ca la CC - P+6(21m)/P+3(12m). (sursa: RLU + precizari urbanist)"
   },
   "CB6": {
     "pot": 50,
-    "cut": 2.0,
-    "rh": "P+4",
-    "inaltime_m": 15,
+    "cut": 1.8,
+    "rh": "P+6 (4 fire) / P+3 (2 fire)",
+    "inaltime_m": 21,
     "functiune": "Centru studii teologice",
     "culoare": "#a78bfa",
     "tip": "educational",
@@ -286,13 +301,15 @@
       "Orice activitati care nu corespund caracterului zonei si indeparteaza investitorii",
       "Activitati productive poluante sau cu risc tehnologic",
       "Activitati care genereaza trafic de marfa incompatibil cu zona"
-    ]
+    ],
+    "inaltime_2fire_m": 12,
+    "nota_reglementare": "Conform PUZ cu recomandari: POT=50%, CUT=1.8. H: ca la CC - P+6(21m)/P+3(12m). (sursa: RLU + precizari urbanist)"
   },
   "CB7": {
     "pot": 50,
-    "cut": 2.0,
-    "rh": "P+4",
-    "inaltime_m": 15,
+    "cut": 1.8,
+    "rh": "P+6 (4 fire) / P+3 (2 fire)",
+    "inaltime_m": 21,
     "functiune": "Unitati tertiale dispersate",
     "culoare": "#8b5cf6",
     "tip": "comercial",
@@ -314,13 +331,15 @@
       "Orice activitati care nu corespund caracterului zonei si indeparteaza investitorii",
       "Activitati productive poluante sau cu risc tehnologic",
       "Activitati care genereaza trafic de marfa incompatibil cu zona"
-    ]
+    ],
+    "inaltime_2fire_m": 12,
+    "nota_reglementare": "Conform PUZ cu recomandari: POT=50%, CUT=1.8. H: ca la CC - P+6(21m)/P+3(12m). (sursa: RLU + precizari urbanist)"
   },
   "LA": {
-    "pot": 25,
-    "cut": 2.0,
-    "rh": "P+10",
-    "inaltime_m": 33,
+    "pot": null,
+    "cut": null,
+    "rh": "conform PUZ",
+    "inaltime_m": null,
     "functiune": "Locuinte colective mari - blocuri P+10 existente",
     "culoare": "#D4AF37",
     "tip": "rezidential_mare",
@@ -341,13 +360,18 @@
       "Depozite, alimentatie publica in spatii deja convertite anterior",
       "Activitati productive de orice natura",
       "Constructii provizorii"
-    ]
+    ],
+    "pot_text": "conform PUZ",
+    "cut_text": "conform PUZ, max 4 (HG 525)",
+    "cut_max": 4.0,
+    "inaltime_text": "conform PUZ, max H vecini + 2 etaje",
+    "nota_reglementare": "conform PUZ. In lipsa PUZ: HG 525/1996 - CUT max 4, H max = H cladiri invecinate + max 2 etaje. H max = H cladiri direct invecinate + max 2 etaje. (sursa: RLU + HG 525/1996)"
   },
   "LA1": {
-    "pot": 25,
-    "cut": 2.0,
-    "rh": "P+10",
-    "inaltime_m": 33,
+    "pot": null,
+    "cut": null,
+    "rh": "conform PUZ",
+    "inaltime_m": null,
     "functiune": "Locuinte colective mari subansamblu",
     "culoare": "#ca8a04",
     "tip": "rezidential_mare",
@@ -369,13 +393,17 @@
       "Activitati productive de orice natura",
       "Constructii provizorii"
     ],
-    "nota_reglementare": "LA1+LA1a+LA2+LA3: conform PUZ (RLU Art.15+16)"
+    "nota_reglementare": "conform PUZ. In lipsa PUZ: HG 525/1996 - CUT max 4, H max = H cladiri invecinate + max 2 etaje. H max = H cladiri direct invecinate + max 2 etaje. (sursa: RLU + HG 525/1996)",
+    "pot_text": "conform PUZ",
+    "cut_text": "conform PUZ, max 4 (HG 525)",
+    "cut_max": 4.0,
+    "inaltime_text": "conform PUZ, max H vecini + 2 etaje"
   },
   "LB": {
-    "pot": 40,
-    "cut": 1.3,
-    "rh": "P+3",
-    "inaltime_m": 13,
+    "pot": null,
+    "cut": null,
+    "rh": "conform PUZ",
+    "inaltime_m": 12,
     "functiune": "Locuinte colective medii maxim P+3",
     "culoare": "#fbbf24",
     "tip": "rezidential_mediu",
@@ -395,14 +423,26 @@
       "Depozitare en gros",
       "Curatatorii chimice",
       "Lucrari de terasament care provoaca scurgeri pe parcelele vecine"
-    ]
+    ],
+    "pot_colective": 20,
+    "cut_text": "conform PUZ. Recomandare: CUT=0.6 individuale / 0.8 colective",
+    "inaltime_retras_m": 9,
+    "nota_reglementare": "Conform PUZ. Recomandari: POT=40%/20%, CUT=0.6/0.8. H colective: 12m(P+3), max 15m cu cond. medie<=12m. H individuale: max 9m, medie<=7m. (sursa: RLU cap.2 + captura)",
+    "pot_text": "conform PUZ. Recomandare: POT=40% individuale / 20% colective",
+    "pot_ind": 40,
+    "pot_col": 20,
+    "cut_ind": 0.6,
+    "cut_col": 0.8,
+    "inaltime_max_m": 15,
+    "inaltime_ind_m": 9,
+    "inaltime_ind_medie_m": 7
   },
   "LB,C2": {
-    "pot": 35,
-    "cut": 1.0,
-    "rh": "P+3",
-    "inaltime_m": 13,
-    "functiune": "Locuinte colective medii",
+    "pot": null,
+    "cut": null,
+    "rh": "conform PUZ",
+    "inaltime_m": 12,
+    "functiune": "Locuinte colective medii maxim P+3",
     "culoare": "#fbbf24",
     "tip": "rezidential_mediu",
     "functiuni_admise": [
@@ -421,14 +461,26 @@
       "Depozitare en gros",
       "Curatatorii chimice",
       "Lucrari de terasament care provoaca scurgeri pe parcelele vecine"
-    ]
+    ],
+    "pot_colective": 20,
+    "cut_text": "conform PUZ. Recomandare: CUT=0.6 individuale / 0.8 colective",
+    "inaltime_retras_m": 9,
+    "nota_reglementare": "Conform PUZ. Recomandari: POT=40%/20%, CUT=0.6/0.8. H colective: 12m(P+3), max 15m cu cond. medie<=12m. H individuale: max 9m, medie<=7m. (sursa: RLU cap.2 + captura)",
+    "pot_text": "conform PUZ. Recomandare: POT=40% individuale / 20% colective",
+    "pot_ind": 40,
+    "pot_col": 20,
+    "cut_ind": 0.6,
+    "cut_col": 0.8,
+    "inaltime_max_m": 15,
+    "inaltime_ind_m": 9,
+    "inaltime_ind_medie_m": 7
   },
   "LB,C 2": {
-    "pot": 35,
-    "cut": 1.0,
-    "rh": "P+3",
-    "inaltime_m": 13,
-    "functiune": "Locuinte colective medii",
+    "pot": null,
+    "cut": null,
+    "rh": "conform PUZ",
+    "inaltime_m": 12,
+    "functiune": "Locuinte colective medii maxim P+3",
     "culoare": "#fbbf24",
     "tip": "rezidential_mediu",
     "functiuni_admise": [
@@ -447,12 +499,24 @@
       "Depozitare en gros",
       "Curatatorii chimice",
       "Lucrari de terasament care provoaca scurgeri pe parcelele vecine"
-    ]
+    ],
+    "pot_colective": 20,
+    "cut_text": "conform PUZ. Recomandare: CUT=0.6 individuale / 0.8 colective",
+    "inaltime_retras_m": 9,
+    "nota_reglementare": "Conform PUZ. Recomandari: POT=40%/20%, CUT=0.6/0.8. H colective: 12m(P+3), max 15m cu cond. medie<=12m. H individuale: max 9m, medie<=7m. (sursa: RLU cap.2 + captura)",
+    "pot_text": "conform PUZ. Recomandare: POT=40% individuale / 20% colective",
+    "pot_ind": 40,
+    "pot_col": 20,
+    "cut_ind": 0.6,
+    "cut_col": 0.8,
+    "inaltime_max_m": 15,
+    "inaltime_ind_m": 9,
+    "inaltime_ind_medie_m": 7
   },
   "LC": {
     "pot": 30,
-    "cut": 0.6,
-    "rh": "P+2",
+    "cut": 0.9,
+    "rh": "P+2 max",
     "inaltime_m": 9,
     "functiune": "Locuinte individuale si colective mici P+2 max",
     "culoare": "#86efac",
@@ -472,13 +536,16 @@
       "Activitati productive poluante cu risc tehnologic",
       "Depozitare en gros",
       "Constructii provizorii"
-    ]
+    ],
+    "cut_p2": 0.9,
+    "nota_reglementare": "POT=30%. CUT: P+1=0.6, P+2=0.9 mp.ADC/mp.teren. H max=9m(P+2). (sursa: RLU Art.15+16 + precizari urbanist)",
+    "cut_p1": 0.6
   },
   "LL": {
     "pot": 30,
     "cut": 0.6,
-    "rh": "P+1",
-    "inaltime_m": 7,
+    "rh": "P+1 standard / P+2 special",
+    "inaltime_m": 9,
     "functiune": "Locuinte individuale mici - conf. proiect initial",
     "culoare": "#4ade80",
     "tip": "rezidential_mic",
@@ -495,13 +562,17 @@
       "Activitati productive poluante",
       "Depozitare en gros",
       "Constructii care modifica caracterul initial al lotizarii"
-    ]
+    ],
+    "cut_p2": 0.9,
+    "rh_special": "P+2",
+    "nota_reglementare": "POT=30%. CUT: P+1=0.6, P+2=0.9. H max=9m. Inaltimea LL1: conf. proiect initial standardizat. (sursa: RLU Art.15+16)",
+    "cut_p1": 0.6
   },
   "LL2": {
     "pot": 30,
-    "cut": 0.8,
-    "rh": "P+2",
-    "inaltime_m": 8,
+    "cut": 0.9,
+    "rh": "P+2 max",
+    "inaltime_m": 9,
     "functiune": "Locuinte individuale mici subansamblu",
     "culoare": "#4ade80",
     "tip": "rezidential_mic",
@@ -518,12 +589,15 @@
       "Activitati productive poluante",
       "Depozitare en gros",
       "Constructii care modifica caracterul initial al lotizarii"
-    ]
+    ],
+    "cut_p1": 0.6,
+    "cut_p2": 0.9,
+    "nota_reglementare": "Ca LC: POT=30%, CUT P+1=0.6/P+2=0.9, H max=9m. (sursa: RLU + precizari urbanist)"
   },
   "LV": {
-    "pot": 35,
+    "pot": 15,
     "cut": 0.24,
-    "rh": "P+M",
+    "rh": "LV1: P+1/P+M | LV2: P+2",
     "inaltime_m": 6,
     "functiune": "Locuinte tip vila P+M max 6m",
     "culoare": "#22c55e",
@@ -542,14 +616,22 @@
       "Activitati productive poluante",
       "Lucrari de terasament care provoaca scurgeri pe parcelele vecine",
       "Depozitare en gros"
-    ]
+    ],
+    "pot_text": "conform PUZ",
+    "cut_p": 0.15,
+    "cut_p1": 0.3,
+    "rh_lv2": "P+2",
+    "inaltime_lv2_m": 9,
+    "nota_reglementare": "POT=15%. LV1: CUT P=0.15/P+M=0.24/P+1=0.30, H=6m(P+1,P+M). LV2: CUT P+2=0.45, H=9m(P+2). (sursa: RLU Art.16 captura + Art.10 captura + precizari urbanist)",
+    "cut_pm": 0.24,
+    "cut_lv2_p2": 0.45
   },
   "LV??": {
-    "pot": 35,
-    "cut": 0.6,
-    "rh": "P+2",
-    "inaltime_m": 9,
-    "functiune": "Locuinte vila nedefinite (digitizare)",
+    "pot": 15,
+    "cut": 0.24,
+    "rh": "LV1: P+1/P+M | LV2: P+2",
+    "inaltime_m": 6,
+    "functiune": "Locuinte tip vila P+M max 6m",
     "culoare": "#22c55e",
     "tip": "rezidential_vila",
     "functiuni_admise": [
@@ -566,14 +648,22 @@
       "Activitati productive poluante",
       "Lucrari de terasament care provoaca scurgeri pe parcelele vecine",
       "Depozitare en gros"
-    ]
+    ],
+    "pot_text": "conform PUZ",
+    "cut_p": 0.15,
+    "cut_p1": 0.3,
+    "rh_lv2": "P+2",
+    "inaltime_lv2_m": 9,
+    "nota_reglementare": "POT=15%. LV1: CUT P=0.15/P+M=0.24/P+1=0.30, H=6m(P+1,P+M). LV2: CUT P+2=0.45, H=9m(P+2). (sursa: RLU Art.16 captura + Art.10 captura + precizari urbanist)",
+    "cut_pm": 0.24,
+    "cut_lv2_p2": 0.45
   },
   "LV ?": {
-    "pot": 35,
+    "pot": 15,
     "cut": 0.24,
-    "rh": "P+M",
+    "rh": "LV1: P+1/P+M | LV2: P+2",
     "inaltime_m": 6,
-    "functiune": "Locuinte vila (incert digitizare)",
+    "functiune": "Locuinte tip vila P+M max 6m",
     "culoare": "#22c55e",
     "tip": "rezidential_vila",
     "functiuni_admise": [
@@ -590,12 +680,20 @@
       "Activitati productive poluante",
       "Lucrari de terasament care provoaca scurgeri pe parcelele vecine",
       "Depozitare en gros"
-    ]
+    ],
+    "pot_text": "conform PUZ",
+    "cut_p": 0.15,
+    "cut_p1": 0.3,
+    "rh_lv2": "P+2",
+    "inaltime_lv2_m": 9,
+    "nota_reglementare": "POT=15%. LV1: CUT P=0.15/P+M=0.24/P+1=0.30, H=6m(P+1,P+M). LV2: CUT P+2=0.45, H=9m(P+2). (sursa: RLU Art.16 captura + Art.10 captura + precizari urbanist)",
+    "cut_pm": 0.24,
+    "cut_lv2_p2": 0.45
   },
   "P": {
     "pot": null,
     "cut": null,
-    "rh": "conf. PUZ",
+    "rh": "conform PUZ",
     "inaltime_m": null,
     "functiune": "Parc urban - constructii strict necesare",
     "culoare": "#86efac",
@@ -616,15 +714,17 @@
       "Depozitari de orice natura",
       "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
     ],
-    "nota_reglementare": "P1-P9: conform studiilor de specialitate avizate conform legii (RLU Art.10, Art.15, Art.16). In lipsa PUZ: HG 525/1996 Art.23 - se aplica regulile zonei adiacente.",
+    "nota_reglementare": "conform PUZ. In lipsa PUZ: HG 525/1996 - CUT max 4, H max = H cladiri invecinate + max 2 etaje",
     "pot_text": "conform PUZ",
-    "cut_text": "conform PUZ",
-    "h_text": "conform PUZ"
+    "cut_text": "conform PUZ, max 4 (HG 525)",
+    "h_text": "conform PUZ",
+    "cut_max": 4.0,
+    "inaltime_text": "conform PUZ, max H vecini + 2 etaje"
   },
   "P1": {
     "pot": null,
     "cut": null,
-    "rh": "conf. PUZ",
+    "rh": "conform PUZ",
     "inaltime_m": null,
     "functiune": "Parc urban principal",
     "culoare": "#4ade80",
@@ -645,15 +745,17 @@
       "Depozitari de orice natura",
       "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
     ],
-    "nota_reglementare": "P1-P9: conform studiilor de specialitate avizate conform legii (RLU Art.10, Art.15, Art.16). In lipsa PUZ: HG 525/1996 Art.23 - se aplica regulile zonei adiacente.",
+    "nota_reglementare": "conform PUZ. In lipsa PUZ: HG 525/1996 - CUT max 4, H max = H cladiri invecinate + max 2 etaje",
     "pot_text": "conform PUZ",
-    "cut_text": "conform PUZ",
-    "h_text": "conform PUZ"
+    "cut_text": "conform PUZ, max 4 (HG 525)",
+    "h_text": "conform PUZ",
+    "cut_max": 4.0,
+    "inaltime_text": "conform PUZ, max H vecini + 2 etaje"
   },
   "P1a": {
     "pot": null,
     "cut": null,
-    "rh": "conf. PUZ",
+    "rh": "conform PUZ",
     "inaltime_m": null,
     "functiune": "Parc urban subzona a",
     "culoare": "#4ade80",
@@ -674,15 +776,17 @@
       "Depozitari de orice natura",
       "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
     ],
-    "nota_reglementare": "P1-P9: conform studiilor de specialitate avizate conform legii (RLU Art.10, Art.15, Art.16). In lipsa PUZ: HG 525/1996 Art.23 - se aplica regulile zonei adiacente.",
+    "nota_reglementare": "conform PUZ. In lipsa PUZ: HG 525/1996 - CUT max 4, H max = H cladiri invecinate + max 2 etaje",
     "pot_text": "conform PUZ",
-    "cut_text": "conform PUZ",
-    "h_text": "conform PUZ"
+    "cut_text": "conform PUZ, max 4 (HG 525)",
+    "h_text": "conform PUZ",
+    "cut_max": 4.0,
+    "inaltime_text": "conform PUZ, max H vecini + 2 etaje"
   },
   "P1b": {
     "pot": null,
     "cut": null,
-    "rh": "conf. PUZ",
+    "rh": "conform PUZ",
     "inaltime_m": null,
     "functiune": "Parc urban subzona b",
     "culoare": "#4ade80",
@@ -703,15 +807,17 @@
       "Depozitari de orice natura",
       "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
     ],
-    "nota_reglementare": "P1-P9: conform studiilor de specialitate avizate conform legii (RLU Art.10, Art.15, Art.16). In lipsa PUZ: HG 525/1996 Art.23 - se aplica regulile zonei adiacente.",
+    "nota_reglementare": "conform PUZ. In lipsa PUZ: HG 525/1996 - CUT max 4, H max = H cladiri invecinate + max 2 etaje",
     "pot_text": "conform PUZ",
-    "cut_text": "conform PUZ",
-    "h_text": "conform PUZ"
+    "cut_text": "conform PUZ, max 4 (HG 525)",
+    "h_text": "conform PUZ",
+    "cut_max": 4.0,
+    "inaltime_text": "conform PUZ, max H vecini + 2 etaje"
   },
   "P2": {
     "pot": null,
     "cut": null,
-    "rh": "conf. PUZ",
+    "rh": "conform PUZ",
     "inaltime_m": null,
     "functiune": "Parc periurban",
     "culoare": "#86efac",
@@ -732,15 +838,17 @@
       "Depozitari de orice natura",
       "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
     ],
-    "nota_reglementare": "P1-P9: conform studiilor de specialitate avizate conform legii (RLU Art.10, Art.15, Art.16). In lipsa PUZ: HG 525/1996 Art.23 - se aplica regulile zonei adiacente.",
+    "nota_reglementare": "conform PUZ. In lipsa PUZ: HG 525/1996 - CUT max 4, H max = H cladiri invecinate + max 2 etaje",
     "pot_text": "conform PUZ",
-    "cut_text": "conform PUZ",
-    "h_text": "conform PUZ"
+    "cut_text": "conform PUZ, max 4 (HG 525)",
+    "h_text": "conform PUZ",
+    "cut_max": 4.0,
+    "inaltime_text": "conform PUZ, max H vecini + 2 etaje"
   },
   "P2a": {
     "pot": null,
     "cut": null,
-    "rh": "conf. PUZ",
+    "rh": "conform PUZ",
     "inaltime_m": null,
     "functiune": "Parc periurban a",
     "culoare": "#86efac",
@@ -761,15 +869,17 @@
       "Depozitari de orice natura",
       "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
     ],
-    "nota_reglementare": "P1-P9: conform studiilor de specialitate avizate conform legii (RLU Art.10, Art.15, Art.16). In lipsa PUZ: HG 525/1996 Art.23 - se aplica regulile zonei adiacente.",
+    "nota_reglementare": "conform PUZ. In lipsa PUZ: HG 525/1996 - CUT max 4, H max = H cladiri invecinate + max 2 etaje",
     "pot_text": "conform PUZ",
-    "cut_text": "conform PUZ",
-    "h_text": "conform PUZ"
+    "cut_text": "conform PUZ, max 4 (HG 525)",
+    "h_text": "conform PUZ",
+    "cut_max": 4.0,
+    "inaltime_text": "conform PUZ, max H vecini + 2 etaje"
   },
   "P2b": {
     "pot": null,
     "cut": null,
-    "rh": "conf. PUZ",
+    "rh": "conform PUZ",
     "inaltime_m": null,
     "functiune": "Parc periurban b",
     "culoare": "#86efac",
@@ -790,15 +900,17 @@
       "Depozitari de orice natura",
       "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
     ],
-    "nota_reglementare": "P1-P9: conform studiilor de specialitate avizate conform legii (RLU Art.10, Art.15, Art.16). In lipsa PUZ: HG 525/1996 Art.23 - se aplica regulile zonei adiacente.",
+    "nota_reglementare": "conform PUZ. In lipsa PUZ: HG 525/1996 - CUT max 4, H max = H cladiri invecinate + max 2 etaje",
     "pot_text": "conform PUZ",
-    "cut_text": "conform PUZ",
-    "h_text": "conform PUZ"
+    "cut_text": "conform PUZ, max 4 (HG 525)",
+    "h_text": "conform PUZ",
+    "cut_max": 4.0,
+    "inaltime_text": "conform PUZ, max H vecini + 2 etaje"
   },
   "P2c": {
     "pot": null,
     "cut": null,
-    "rh": "conf. PUZ",
+    "rh": "conform PUZ",
     "inaltime_m": null,
     "functiune": "Parc periurban c",
     "culoare": "#86efac",
@@ -819,15 +931,17 @@
       "Depozitari de orice natura",
       "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
     ],
-    "nota_reglementare": "P1-P9: conform studiilor de specialitate avizate conform legii (RLU Art.10, Art.15, Art.16). In lipsa PUZ: HG 525/1996 Art.23 - se aplica regulile zonei adiacente.",
+    "nota_reglementare": "conform PUZ. In lipsa PUZ: HG 525/1996 - CUT max 4, H max = H cladiri invecinate + max 2 etaje",
     "pot_text": "conform PUZ",
-    "cut_text": "conform PUZ",
-    "h_text": "conform PUZ"
+    "cut_text": "conform PUZ, max 4 (HG 525)",
+    "h_text": "conform PUZ",
+    "cut_max": 4.0,
+    "inaltime_text": "conform PUZ, max H vecini + 2 etaje"
   },
   "P3": {
     "pot": null,
     "cut": null,
-    "rh": "conf. PUZ",
+    "rh": "conform PUZ",
     "inaltime_m": null,
     "functiune": "Gradini publice cartier",
     "culoare": "#4ade80",
@@ -848,15 +962,17 @@
       "Depozitari de orice natura",
       "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
     ],
-    "nota_reglementare": "P1-P9: conform studiilor de specialitate avizate conform legii (RLU Art.10, Art.15, Art.16). In lipsa PUZ: HG 525/1996 Art.23 - se aplica regulile zonei adiacente.",
+    "nota_reglementare": "conform PUZ. In lipsa PUZ: HG 525/1996 - CUT max 4, H max = H cladiri invecinate + max 2 etaje",
     "pot_text": "conform PUZ",
-    "cut_text": "conform PUZ",
-    "h_text": "conform PUZ"
+    "cut_text": "conform PUZ, max 4 (HG 525)",
+    "h_text": "conform PUZ",
+    "cut_max": 4.0,
+    "inaltime_text": "conform PUZ, max H vecini + 2 etaje"
   },
   "P4": {
     "pot": null,
     "cut": null,
-    "rh": "conf. PUZ",
+    "rh": "conform PUZ",
     "inaltime_m": null,
     "functiune": "Scuaruri",
     "culoare": "#4ade80",
@@ -877,15 +993,17 @@
       "Depozitari de orice natura",
       "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
     ],
-    "nota_reglementare": "P1-P9: conform studiilor de specialitate avizate conform legii (RLU Art.10, Art.15, Art.16). In lipsa PUZ: HG 525/1996 Art.23 - se aplica regulile zonei adiacente.",
+    "nota_reglementare": "conform PUZ. In lipsa PUZ: HG 525/1996 - CUT max 4, H max = H cladiri invecinate + max 2 etaje",
     "pot_text": "conform PUZ",
-    "cut_text": "conform PUZ",
-    "h_text": "conform PUZ"
+    "cut_text": "conform PUZ, max 4 (HG 525)",
+    "h_text": "conform PUZ",
+    "cut_max": 4.0,
+    "inaltime_text": "conform PUZ, max H vecini + 2 etaje"
   },
   "P5": {
     "pot": null,
     "cut": null,
-    "rh": "conf. PUZ",
+    "rh": "conform PUZ",
     "inaltime_m": null,
     "functiune": "Spatii verzi de protectie",
     "culoare": "#bbf7d0",
@@ -906,15 +1024,17 @@
       "Depozitari de orice natura",
       "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
     ],
-    "nota_reglementare": "P1-P9: conform studiilor de specialitate avizate conform legii (RLU Art.10, Art.15, Art.16). In lipsa PUZ: HG 525/1996 Art.23 - se aplica regulile zonei adiacente.",
+    "nota_reglementare": "conform PUZ. In lipsa PUZ: HG 525/1996 - CUT max 4, H max = H cladiri invecinate + max 2 etaje",
     "pot_text": "conform PUZ",
-    "cut_text": "conform PUZ",
-    "h_text": "conform PUZ"
+    "cut_text": "conform PUZ, max 4 (HG 525)",
+    "h_text": "conform PUZ",
+    "cut_max": 4.0,
+    "inaltime_text": "conform PUZ, max H vecini + 2 etaje"
   },
   "P6": {
     "pot": null,
     "cut": null,
-    "rh": "conf. PUZ",
+    "rh": "conform PUZ",
     "inaltime_m": null,
     "functiune": "Spatii plantate pe artere",
     "culoare": "#bbf7d0",
@@ -935,16 +1055,18 @@
       "Depozitari de orice natura",
       "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
     ],
-    "nota_reglementare": "P1-P9: conform studiilor de specialitate avizate conform legii (RLU Art.10, Art.15, Art.16). In lipsa PUZ: HG 525/1996 Art.23 - se aplica regulile zonei adiacente.",
+    "nota_reglementare": "conform PUZ. In lipsa PUZ: HG 525/1996 - CUT max 4, H max = H cladiri invecinate + max 2 etaje",
     "pot_text": "conform PUZ",
-    "cut_text": "conform PUZ",
-    "h_text": "conform PUZ"
+    "cut_text": "conform PUZ, max 4 (HG 525)",
+    "h_text": "conform PUZ",
+    "cut_max": 4.0,
+    "inaltime_text": "conform PUZ, max H vecini + 2 etaje"
   },
   "AI1": {
-    "pot": 55,
-    "cut": 2.0,
-    "rh": "P+5",
-    "inaltime_m": 20,
+    "pot": 50,
+    "cut": 1.0,
+    "rh": "conform PUZ",
+    "inaltime_m": null,
     "functiune": "Industrie mare - Dancu, Holboca, Galata",
     "culoare": "#78350f",
     "tip": "industrial",
@@ -963,13 +1085,15 @@
       "Unitati de invatamant si servicii de interes general",
       "Locuinte de orice tip",
       "Activitati cu impact major asupra mediului fara studiu de impact"
-    ]
+    ],
+    "nota_reglementare": "POT max=50%, CUT=1.0. H: conform PUZ, max H vecini+2 etaje. (sursa: RLU + precizari urbanist)",
+    "inaltime_text": "conform PUZ, max H vecini + 2 etaje"
   },
   "AI2A": {
-    "pot": 55,
-    "cut": 2.0,
-    "rh": "P+5",
-    "inaltime_m": 20,
+    "pot": 50,
+    "cut": 1.0,
+    "rh": "conform PUZ",
+    "inaltime_m": null,
     "functiune": "Industrie mijlocie - platforma principala",
     "culoare": "#92400e",
     "tip": "industrial",
@@ -988,13 +1112,15 @@
       "Unitati de invatamant si servicii de interes general",
       "Locuinte de orice tip",
       "Activitati cu impact major asupra mediului fara studiu de impact"
-    ]
+    ],
+    "nota_reglementare": "POT max=50%, CUT=1.0. H: conform PUZ, max H vecini+2 etaje. (sursa: RLU + precizari urbanist)",
+    "inaltime_text": "conform PUZ, max H vecini + 2 etaje"
   },
   "AI2a": {
-    "pot": 55,
-    "cut": 2.0,
-    "rh": "P+5",
-    "inaltime_m": 20,
+    "pot": 50,
+    "cut": 1.0,
+    "rh": "conform PUZ",
+    "inaltime_m": null,
     "functiune": "Industrie mijlocie subzona a",
     "culoare": "#92400e",
     "tip": "industrial",
@@ -1013,13 +1139,15 @@
       "Unitati de invatamant si servicii de interes general",
       "Locuinte de orice tip",
       "Activitati cu impact major asupra mediului fara studiu de impact"
-    ]
+    ],
+    "nota_reglementare": "POT max=50%, CUT=1.0. H: conform PUZ, max H vecini+2 etaje. (sursa: RLU + precizari urbanist)",
+    "inaltime_text": "conform PUZ, max H vecini + 2 etaje"
   },
   "AI2b": {
-    "pot": 55,
-    "cut": 2.0,
-    "rh": "P+4",
-    "inaltime_m": 16,
+    "pot": 50,
+    "cut": 1.0,
+    "rh": "conform PUZ",
+    "inaltime_m": null,
     "functiune": "Industrie - cariere reabilitate",
     "culoare": "#92400e",
     "tip": "industrial",
@@ -1038,13 +1166,15 @@
       "Unitati de invatamant si servicii de interes general",
       "Locuinte de orice tip",
       "Activitati cu impact major asupra mediului fara studiu de impact"
-    ]
+    ],
+    "nota_reglementare": "POT max=50%, CUT=1.0. H: conform PUZ, max H vecini+2 etaje. (sursa: RLU + precizari urbanist)",
+    "inaltime_text": "conform PUZ, max H vecini + 2 etaje"
   },
   "AI2c": {
-    "pot": 55,
-    "cut": 2.0,
-    "rh": "P+4",
-    "inaltime_m": 16,
+    "pot": 50,
+    "cut": 1.0,
+    "rh": "conform PUZ",
+    "inaltime_m": null,
     "functiune": "Industrie - cariere in exploatare",
     "culoare": "#a16207",
     "tip": "industrial",
@@ -1063,13 +1193,15 @@
       "Unitati de invatamant si servicii de interes general",
       "Locuinte de orice tip",
       "Activitati cu impact major asupra mediului fara studiu de impact"
-    ]
+    ],
+    "nota_reglementare": "POT max=50%, CUT=1.0. H: conform PUZ, max H vecini+2 etaje. (sursa: RLU + precizari urbanist)",
+    "inaltime_text": "conform PUZ, max H vecini + 2 etaje"
   },
   "AI2d": {
-    "pot": 55,
-    "cut": 2.0,
-    "rh": "P+4",
-    "inaltime_m": 16,
+    "pot": 50,
+    "cut": 1.0,
+    "rh": "conform PUZ",
+    "inaltime_m": null,
     "functiune": "Industrie - cariere refacere peisaj",
     "culoare": "#a16207",
     "tip": "industrial",
@@ -1088,13 +1220,15 @@
       "Unitati de invatamant si servicii de interes general",
       "Locuinte de orice tip",
       "Activitati cu impact major asupra mediului fara studiu de impact"
-    ]
+    ],
+    "nota_reglementare": "POT max=50%, CUT=1.0. H: conform PUZ, max H vecini+2 etaje. (sursa: RLU + precizari urbanist)",
+    "inaltime_text": "conform PUZ, max H vecini + 2 etaje"
   },
   "AI3": {
     "pot": 50,
-    "cut": 1.5,
-    "rh": "P+5",
-    "inaltime_m": 20,
+    "cut": 4.5,
+    "rh": "conform PUZ",
+    "inaltime_m": null,
     "functiune": "Industrie mica, depozitare, servicii comerciale",
     "culoare": "#b45309",
     "tip": "industrial",
@@ -1113,13 +1247,15 @@
       "Unitati de invatamant si servicii de interes general",
       "Locuinte de orice tip",
       "Activitati cu impact major asupra mediului fara studiu de impact"
-    ]
+    ],
+    "nota_reglementare": "POT max=50%, CUT=4.5. H: conform PUZ, max H vecini+2 etaje. (sursa: RLU + precizari urbanist)",
+    "inaltime_text": "conform PUZ, max H vecini + 2 etaje"
   },
   "AI4": {
     "pot": 50,
-    "cut": 1.5,
-    "rh": "P+3",
-    "inaltime_m": 13,
+    "cut": 4.5,
+    "rh": "conform PUZ",
+    "inaltime_m": null,
     "functiune": "Unitati industriale dispersate",
     "culoare": "#b45309",
     "tip": "industrial",
@@ -1138,13 +1274,15 @@
       "Unitati de invatamant si servicii de interes general",
       "Locuinte de orice tip",
       "Activitati cu impact major asupra mediului fara studiu de impact"
-    ]
+    ],
+    "nota_reglementare": "POT max=50%, CUT=4.5. H: conform PUZ, max H vecini+2 etaje. (sursa: RLU + precizari urbanist)",
+    "inaltime_text": "conform PUZ, max H vecini + 2 etaje"
   },
   "AI4a": {
     "pot": 50,
-    "cut": 1.5,
-    "rh": "P+3",
-    "inaltime_m": 13,
+    "cut": 4.5,
+    "rh": "conform PUZ",
+    "inaltime_m": null,
     "functiune": "Unitati industriale dispersate mentinute",
     "culoare": "#d97706",
     "tip": "industrial",
@@ -1163,13 +1301,15 @@
       "Unitati de invatamant si servicii de interes general",
       "Locuinte de orice tip",
       "Activitati cu impact major asupra mediului fara studiu de impact"
-    ]
+    ],
+    "nota_reglementare": "POT max=50%, CUT=4.5. H: conform PUZ, max H vecini+2 etaje. (sursa: RLU + precizari urbanist)",
+    "inaltime_text": "conform PUZ, max H vecini + 2 etaje"
   },
   "AI5": {
-    "pot": 45,
-    "cut": 1.5,
-    "rh": "P+3",
-    "inaltime_m": 13,
+    "pot": 50,
+    "cut": 1.0,
+    "rh": "conform PUZ",
+    "inaltime_m": null,
     "functiune": "Zona mixta productiva, depozitare, servicii",
     "culoare": "#d97706",
     "tip": "industrial",
@@ -1188,13 +1328,15 @@
       "Unitati de invatamant si servicii de interes general",
       "Locuinte de orice tip",
       "Activitati cu impact major asupra mediului fara studiu de impact"
-    ]
+    ],
+    "nota_reglementare": "POT max=50%, CUT=1.0. H: conform PUZ, max H vecini+2 etaje. (sursa: RLU + precizari urbanist)",
+    "inaltime_text": "conform PUZ, max H vecini + 2 etaje"
   },
   "AI6": {
-    "pot": 45,
-    "cut": 1.5,
-    "rh": "P+2",
-    "inaltime_m": 10,
+    "pot": 50,
+    "cut": 1.0,
+    "rh": "conform PUZ",
+    "inaltime_m": null,
     "functiune": "Parc de activitati",
     "culoare": "#f59e0b",
     "tip": "industrial",
@@ -1213,36 +1355,36 @@
       "Unitati de invatamant si servicii de interes general",
       "Locuinte de orice tip",
       "Activitati cu impact major asupra mediului fara studiu de impact"
-    ]
+    ],
+    "nota_reglementare": "POT max=50%, CUT=1.0. H: conform PUZ, max H vecini+2 etaje. (sursa: RLU + precizari urbanist)",
+    "inaltime_text": "conform PUZ, max H vecini + 2 etaje"
   },
   "AA": {
-    "pot": 15,
-    "cut": 0.3,
+    "pot": 50,
+    "cut": 1.8,
     "rh": "P+1",
-    "inaltime_m": 6,
+    "inaltime_m": 12,
     "functiune": "Agrement, sport, turism",
     "culoare": "#34d399",
     "tip": "agrement",
     "functiuni_admise": [
-      "Agrement, sport si recreere",
-      "Terenuri sport in aer liber",
-      "Spatii verzi amenajate",
-      "Constructii pentru agrement cu caracter temporar"
+      "Activitati agro-industriale nepoluante"
     ],
     "functiuni_conditionari": [
-      "Constructiile permanente - max 15% POT, conform PUZ"
+      "Conversia activitatilor actuale permisa numai cu conditia sa nu agraveze situatia poluarii"
     ],
     "functiuni_interzise": [
-      "Locuinte permanente",
-      "Activitati industriale sau comerciale de tip magazin",
-      "Depozitare de orice natura"
-    ]
+      "Extinderi - nu sunt permise",
+      "Amplasare unitati de invatamant si orice alte servicii de interes general",
+      "Amplasare locuinte de orice tip"
+    ],
+    "nota_reglementare": "POT=50%, CUT=1.8, H max=12m (cu exceptia instalatiilor si cosurilor). (sursa: RLU + captura 6)"
   },
   "D1": {
-    "pot": 15,
-    "cut": 0.3,
+    "pot": null,
+    "cut": null,
     "rh": "P+2",
-    "inaltime_m": 9,
+    "inaltime_m": null,
     "functiune": "Activitati balnearo-turistice Chirita",
     "culoare": "#67e8f9",
     "tip": "turism",
@@ -1259,13 +1401,18 @@
     "functiuni_interzise": [
       "Orice functiuni fara legatura cu tratamentul balnear si turismul",
       "Constructii care diminueaza valoarea peisagistica si ecologica"
-    ]
+    ],
+    "pot_text": "conform PUZ",
+    "cut_text": "conform PUZ, max 4 (HG 525)",
+    "cut_max": 4.0,
+    "inaltime_text": "conform PUZ, max H vecini + 2 etaje",
+    "nota_reglementare": "conform PUZ. In lipsa PUZ: HG 525/1996 - CUT max 4, H max = H cladiri invecinate + max 2 etaje"
   },
   "ET3": {
-    "pot": 10,
-    "cut": 0.2,
+    "pot": null,
+    "cut": null,
     "rh": "P",
-    "inaltime_m": 5,
+    "inaltime_m": null,
     "functiune": "Zone rezervate extindere functiuni",
     "culoare": "#e2e8f0",
     "tip": "rezerva",
@@ -1279,13 +1426,18 @@
       "Constructii permanente de orice natura",
       "Parcelari pentru locuinte",
       "Activitati economice permanente"
-    ]
+    ],
+    "pot_text": "conform PUZ",
+    "cut_text": "conform PUZ, max 4 (HG 525)",
+    "cut_max": 4.0,
+    "inaltime_text": "conform PUZ, max H vecini + 2 etaje",
+    "nota_reglementare": "conform PUZ. In lipsa PUZ: HG 525/1996 - CUT max 4, H max = H cladiri invecinate + max 2 etaje"
   },
   "EP6": {
-    "pot": 20,
-    "cut": 0.5,
+    "pot": null,
+    "cut": null,
     "rh": "P+1",
-    "inaltime_m": 7,
+    "inaltime_m": null,
     "functiune": "Echipamente publice dispersate",
     "culoare": "#c084fc",
     "tip": "public",
@@ -1300,7 +1452,12 @@
       "Activitati productive sau comerciale",
       "Locuinte",
       "Depozitare"
-    ]
+    ],
+    "pot_text": "conform PUZ",
+    "cut_text": "conform PUZ, max 4 (HG 525)",
+    "cut_max": 4.0,
+    "inaltime_text": "conform PUZ, max H vecini + 2 etaje",
+    "nota_reglementare": "conform PUZ. In lipsa PUZ: HG 525/1996 - CUT max 4, H max = H cladiri invecinate + max 2 etaje"
   },
   "G1": {
     "pot": 50,
@@ -1322,13 +1479,14 @@
       "Locuinte de orice tip",
       "Institutii publice sau servicii de interes general",
       "Activitati incompatibile cu functiunea de gospodarie comunala"
-    ]
+    ],
+    "nota_reglementare": "POT=50%, CUT=1.8, H max=12m (cu exceptia instalatiilor si cosurilor). (sursa: RLU Art.10+15+16)"
   },
   "G2": {
-    "pot": 10,
-    "cut": 0.1,
+    "pot": 50,
+    "cut": 1.8,
     "rh": "P",
-    "inaltime_m": 4,
+    "inaltime_m": 12,
     "functiune": "Cimitire",
     "culoare": "#94a3b8",
     "tip": "tehnic",
@@ -1342,13 +1500,14 @@
       "Orice functiuni fara legatura cu functiunea de cimitir",
       "Locuinte",
       "Activitati economice"
-    ]
+    ],
+    "nota_reglementare": "POT=50%, CUT=1.8, H max=12m (cu exceptia instalatiilor si cosurilor). (sursa: RLU Art.10+15+16)"
   },
   "G/P9": {
-    "pot": 10,
-    "cut": 0.1,
+    "pot": null,
+    "cut": null,
     "rh": "P",
-    "inaltime_m": 4,
+    "inaltime_m": null,
     "functiune": "Gospodarie comunala / parc",
     "culoare": "#94a3b8",
     "tip": "tehnic",
@@ -1361,12 +1520,17 @@
     "functiuni_interzise": [
       "Activitati poluante",
       "Locuinte permanente"
-    ]
+    ],
+    "nota_reglementare": "conform PUZ. In lipsa PUZ: HG 525/1996 - CUT max 4, H max = H cladiri invecinate + max 2 etaje",
+    "pot_text": "conform PUZ",
+    "cut_text": "conform PUZ, max 4 (HG 525)",
+    "cut_max": 4.0,
+    "inaltime_text": "conform PUZ, max H vecini + 2 etaje"
   },
   "P1a,P1b": {
     "pot": null,
     "cut": null,
-    "rh": "conf. PUZ",
+    "rh": "conform PUZ",
     "inaltime_m": null,
     "functiune": "Parc urban combinat",
     "culoare": "#4ade80",
@@ -1387,15 +1551,17 @@
       "Depozitari de orice natura",
       "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
     ],
-    "nota_reglementare": "P1-P9: conform studiilor de specialitate avizate conform legii (RLU Art.10, Art.15, Art.16). In lipsa PUZ: HG 525/1996 Art.23 - se aplica regulile zonei adiacente.",
+    "nota_reglementare": "conform PUZ. In lipsa PUZ: HG 525/1996 - CUT max 4, H max = H cladiri invecinate + max 2 etaje",
     "pot_text": "conform PUZ",
-    "cut_text": "conform PUZ",
-    "h_text": "conform PUZ"
+    "cut_text": "conform PUZ, max 4 (HG 525)",
+    "h_text": "conform PUZ",
+    "cut_max": 4.0,
+    "inaltime_text": "conform PUZ, max H vecini + 2 etaje"
   },
   "P1a/P1b": {
     "pot": null,
     "cut": null,
-    "rh": "conf. PUZ",
+    "rh": "conform PUZ",
     "inaltime_m": null,
     "functiune": "Parc urban combinat",
     "culoare": "#4ade80",
@@ -1416,15 +1582,17 @@
       "Depozitari de orice natura",
       "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
     ],
-    "nota_reglementare": "P1-P9: conform studiilor de specialitate avizate conform legii (RLU Art.10, Art.15, Art.16). In lipsa PUZ: HG 525/1996 Art.23 - se aplica regulile zonei adiacente.",
+    "nota_reglementare": "conform PUZ. In lipsa PUZ: HG 525/1996 - CUT max 4, H max = H cladiri invecinate + max 2 etaje",
     "pot_text": "conform PUZ",
-    "cut_text": "conform PUZ",
-    "h_text": "conform PUZ"
+    "cut_text": "conform PUZ, max 4 (HG 525)",
+    "h_text": "conform PUZ",
+    "cut_max": 4.0,
+    "inaltime_text": "conform PUZ, max H vecini + 2 etaje"
   },
   "P2c ?": {
     "pot": null,
     "cut": null,
-    "rh": "conf. PUZ",
+    "rh": "conform PUZ",
     "inaltime_m": null,
     "functiune": "Parc periurban (incert digitizare)",
     "culoare": "#86efac",
@@ -1445,16 +1613,18 @@
       "Depozitari de orice natura",
       "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
     ],
-    "nota_reglementare": "P1-P9: conform studiilor de specialitate avizate conform legii (RLU Art.10, Art.15, Art.16). In lipsa PUZ: HG 525/1996 Art.23 - se aplica regulile zonei adiacente.",
+    "nota_reglementare": "conform PUZ. In lipsa PUZ: HG 525/1996 - CUT max 4, H max = H cladiri invecinate + max 2 etaje",
     "pot_text": "conform PUZ",
-    "cut_text": "conform PUZ",
-    "h_text": "conform PUZ"
+    "cut_text": "conform PUZ, max 4 (HG 525)",
+    "h_text": "conform PUZ",
+    "cut_max": 4.0,
+    "inaltime_text": "conform PUZ, max H vecini + 2 etaje"
   },
   "CC ?": {
     "pot": 50,
-    "cut": 3.0,
-    "rh": "P+6",
-    "inaltime_m": 22,
+    "cut": 2.5,
+    "rh": "P+6 (4 fire) / P+3 (2 fire)",
+    "inaltime_m": 21,
     "functiune": "Zona centrala complexa (incert digitizare)",
     "culoare": "#ef4444",
     "tip": "centru",
@@ -1475,13 +1645,14 @@
       "Depozitare en gros",
       "Curatatorii chimice"
     ],
-    "nota_reglementare": "CC1+CC2: conform PUZ cu recomandari orientative (RLU Art.15). Valorile POT/CUT sunt recomandari, nu prescriptii."
+    "nota_reglementare": "CUT max=2.5. H: P+6(21m) strazi 4 fire / P+3(12m) strazi 2 fire. (sursa: RLU Art.10+16)",
+    "inaltime_2fire_m": 12
   },
   "CC?": {
     "pot": 50,
-    "cut": 3.0,
-    "rh": "P+6",
-    "inaltime_m": 22,
+    "cut": 2.5,
+    "rh": "P+6 (4 fire) / P+3 (2 fire)",
+    "inaltime_m": 21,
     "functiune": "Zona centrala complexa (incert digitizare)",
     "culoare": "#ef4444",
     "tip": "centru",
@@ -1502,13 +1673,14 @@
       "Depozitare en gros",
       "Curatatorii chimice"
     ],
-    "nota_reglementare": "CC1+CC2: conform PUZ cu recomandari orientative (RLU Art.15). Valorile POT/CUT sunt recomandari, nu prescriptii."
+    "nota_reglementare": "CUT max=2.5. H: P+6(21m) strazi 4 fire / P+3(12m) strazi 2 fire. (sursa: RLU Art.10+16)",
+    "inaltime_2fire_m": 12
   },
   "LL ?": {
     "pot": 30,
     "cut": 0.6,
-    "rh": "P+1",
-    "inaltime_m": 7,
+    "rh": "P+1 standard / P+2 special",
+    "inaltime_m": 9,
     "functiune": "Locuinte individuale (incert digitizare)",
     "culoare": "#4ade80",
     "tip": "rezidential_mic",
@@ -1525,7 +1697,8 @@
       "Activitati productive poluante",
       "Depozitare en gros",
       "Constructii care modifica caracterul initial al lotizarii"
-    ]
+    ],
+    "nota_reglementare": "POT=30%. CUT: P+1=0.6, P+2=0.9. H max=9m. Inaltimea LL1: conf. proiect initial standardizat. (sursa: RLU Art.15+16)"
   },
   "?": {
     "pot": 0,
