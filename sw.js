@@ -1,6 +1,10 @@
-/* UrbanX SW v4.3h */
-const CACHE='urbanx-v4.3h';
-const OLD=['urbanx-v4.0','urbanx-v4.1','urbanx-v4.2','urbanx-v4.3','urbanx-v4.3e','urbanx-v4.3f','mapbox-tiles'];
+/* UrbanX SW v4.4a */
+const CACHE='urbanx-v4.4a';
+const OLD=[
+  'urbanx-v4.0','urbanx-v4.1','urbanx-v4.2','urbanx-v4.3',
+  'urbanx-v4.3e','urbanx-v4.3f','urbanx-v4.3h','mapbox-tiles',
+  'urbanx-v4.3i','urbanx-v4.3j'
+];
 
 function fix(url){
   try{
@@ -13,24 +17,37 @@ function fix(url){
   return url;
 }
 
-self.addEventListener('install',e=>{console.log('[SW v4.3h] Install');self.skipWaiting();});
+self.addEventListener('install', e => {
+  console.log('[SW v4.4a] Install');
+  // Forteaza activarea imediata - inlocuieste orice SW vechi
+  e.waitUntil(self.skipWaiting());
+});
 
-self.addEventListener('activate',e=>{
-  console.log('[SW v4.3h] Activate');
+self.addEventListener('activate', e => {
+  console.log('[SW v4.4a] Activate');
   e.waitUntil(
-    caches.keys().then(keys=>Promise.all(
-      keys.filter(k=>OLD.includes(k)||(k.startsWith('urbanx-')&&k!==CACHE))
-        .map(k=>{console.log('[SW v4.3h] Sterg:',k);return caches.delete(k);})
-    )).then(()=>self.clients.claim())
+    caches.keys().then(keys => Promise.all(
+      keys.filter(k => k !== CACHE)
+        .map(k => { console.log('[SW v4.4a] Sterg:', k); return caches.delete(k); })
+    )).then(() => {
+      console.log('[SW v4.4a] Claim clients');
+      return self.clients.claim();
+    })
   );
 });
 
-self.addEventListener('fetch',e=>{
-  if(e.request.method!=='GET') return;
-  const url=fix(e.request.url);
-  const req=url!==e.request.url
-    ?new Request(url,{headers:e.request.headers,credentials:e.request.credentials,redirect:e.request.redirect})
-    :e.request;
-  /* Toate requesturile: network direct, fara cache logic */
-  e.respondWith(fetch(req,{cache:'no-store'}).catch(()=>caches.match(e.request)));
+self.addEventListener('fetch', e => {
+  if(e.request.method !== 'GET') return;
+  const url = fix(e.request.url);
+  const req = url !== e.request.url
+    ? new Request(url, {
+        headers: e.request.headers,
+        credentials: e.request.credentials,
+        redirect: e.request.redirect
+      })
+    : e.request;
+  // Network first, no cache - toate requesturile directe
+  e.respondWith(
+    fetch(req, {cache: 'no-store'}).catch(() => caches.match(e.request))
+  );
 });
