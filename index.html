@@ -976,6 +976,27 @@ document.addEventListener('click', function(){
 </script>
 </head>
 <body>
+<script>
+/* UrbanX CityKey Init — rulează primul, înainte de orice modul */
+(function(){
+  try {
+    var k = localStorage.getItem('ux_last_city');
+    if(!k) return;
+    /* Interceptăm TCI înainte să se definească */
+    var _origDefine = Object.defineProperty;
+    var _patched = false;
+    var _checkTCI = setInterval(function(){
+      if(!window.TCI || _patched) { if(_patched) clearInterval(_checkTCI); return; }
+      _patched = true;
+      clearInterval(_checkTCI);
+      if(window.TCI.cityKey !== k) {
+        window.TCI.cityKey = k;
+        console.log('[CityInit] ✅ cityKey setat din localStorage:', k);
+      }
+    }, 30);
+  } catch(e) {}
+})();
+</script>
 <!-- UrbanX Workspace Navigation v3.2 -->
 <div id="wx-topbar" style="display:none!important">
   <div id="wx-logo">
@@ -4792,10 +4813,12 @@ function _setupBtnUTR() {
     const chipsEl = document.getElementById('utr-chips');
     const titleEl2 = document.getElementById('utr-drawer-title');
     const loadedCityInTitle = titleEl2?.textContent?.includes(cityName);
+    const loadedCityKey = window.S?._loadedCityKey;
     const alreadyLoaded = chipsEl?.children?.length > 0 &&
                           window.S?.pug &&
                           window.S?.pugIdx?.length > 0 &&
-                          loadedCityInTitle; // doar dacă e al UAT-ului curent
+                          loadedCityInTitle &&
+                          loadedCityKey === k; // verificăm și cityKey exact
 
     if(alreadyLoaded) {
       // Deja încărcat pentru acest UAT — doar deschidem drawer
@@ -4808,6 +4831,7 @@ function _setupBtnUTR() {
     const geojson = await _loadPUGOnMap(pugUrl, cityName, null);
     if(geojson) {
       _renderUTRChips(geojson, cityName);
+      if(window.S) window.S._loadedCityKey = k; // marcăm ce UAT e încărcat
     }
   });
 }
