@@ -963,7 +963,7 @@ document.addEventListener('click', function(){
 </head>
 <body>
 <!-- UrbanX Workspace Navigation v3.2 -->
-<div id="wx-topbar">
+<div id="wx-topbar" style="display:none!important">
   <div id="wx-logo">
     <svg width="24" height="24" viewBox="0 0 100 100" style="flex-shrink:0">
       <rect width="100" height="100" rx="18" fill="#101D35"/>
@@ -2679,10 +2679,7 @@ setInterval(()=>{
   <script src="js/tci-masterplan.js?v=20260520c"></script>
   <script src="js/tci-masterplan-visual.js?v=20260520c"></script>
   <script src="js/tci-masterplan-qr.js?v=20260520c"></script><!-- QR Code in PDF Masterplan — scanabil cu telefonul → deschide scenariul live -->
-  <script src="js/tci-cinematic-capture.js?v=20260520c"></script>
-<script src="js/utr-color-fix.js?v=20260522"></script>
-<script src="js/menu-lock-v2.js?v=20260522"></script>
-<script src="js/tci-citykey-fix.js?v=20260522"></script><!-- Capture: frames automate Cinema v2 → colaj în Masterplan PDF --><!-- Masterplan visual: cover premium + SWOT + formule + progress bars --><!-- TCI Masterplan: PDF 12pg+grafice+benchmark+metodologie citabilă -->
+  <script src="js/tci-cinematic-capture.js?v=20260520c"></script><!-- Capture: frames automate Cinema v2 → colaj în Masterplan PDF --><!-- Masterplan visual: cover premium + SWOT + formule + progress bars --><!-- TCI Masterplan: PDF 12pg+grafice+benchmark+metodologie citabilă -->
   <script src="js/tci-intelligence.js?v=20260520c"></script><!-- TCI Intelligence: Dashboard+4D Timeline+Comparator+Milestones -->
   <script src="js/tci-data-live.js?v=20260520c"></script>
   <script src="js/tci-street-experience.js?v=20260520c"></script>
@@ -4747,7 +4744,7 @@ function _setupBtnUTR() {
 
     // Determinăm URL-ul PUG
     const _PUG_URLS = {
-      'RO-IS-01': 'js/data/iasi/pug.geojson',
+      'RO-IS-01': 'js/data/municipiul-iasi/pug.geojson',
       'RO-SV-01': 'js/data/municipiul-suceava/pug.geojson',
     };
     const UAT_REG = window.UAT_REGISTRY || {};
@@ -5217,6 +5214,112 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
   window.addEventListener('load', function() { setTimeout(_lockMenus, 500); setTimeout(_lockMenus, 2000); });
   window._lockMenus = _lockMenus;
   console.log('[MenuLock] ✅ Protecție anti-duplicate activă pentru tools-menu și viz-menu');
+})();
+</script>
+
+
+<script>
+// ── FETCH PATH INTERCEPTOR — redirecționează toate căile greșite ─────────
+// Fișierele JS din repo mai încearcă căi vechi. Interceptăm global.
+(function() {
+  'use strict';
+  var _origFetch = window.fetch;
+  var PATH_MAP = {
+    '/UrbanX/data/municipii-iasi/pug.geojson': '/UrbanX/js/data/municipiul-iasi/pug.geojson',
+    '/UrbanX/data/municipii-iasi/reguli.json': '/UrbanX/js/data/municipiul-iasi/reguli.json',
+    '/UrbanX/data/municipii-iasi/cadastru_index.json': '/UrbanX/js/data/municipiul-iasi/meta.json',
+    '/UrbanX/data/municipii-suceava/pug.geojson': '/UrbanX/js/data/municipiul-suceava/pug.geojson',
+    '/UrbanX/data/municipii-suceava/reguli.json': '/UrbanX/js/data/municipiul-suceava/reguli.json',
+    '/UrbanX/data/municipii-suceava/cadastru_index.json': '/UrbanX/js/data/municipiul-suceava/meta.json',
+    '/UrbanX/gGis_pug_iasi.geojson': '/UrbanX/js/data/municipiul-iasi/pug.geojson',
+    '/UrbanX/cadastru_index.json': '/UrbanX/js/data/municipiul-iasi/meta.json',
+    '/UrbanX/js/data/iasi/pug.geojson': '/UrbanX/js/data/municipiul-iasi/pug.geojson',
+    '/UrbanX/js/data/iasi/reguli.json': '/UrbanX/js/data/municipiul-iasi/reguli.json',
+    '/UrbanX/js/data/iasi/meta.json': '/UrbanX/js/data/municipiul-iasi/meta.json',
+    '/UrbanX/js/data/iasi/cadastru_index.json': '/UrbanX/js/data/municipiul-iasi/meta.json',
+  };
+  window.fetch = function(url, opts) {
+    var str = typeof url === 'string' ? url : (url && url.url) || String(url);
+    // Strip query string for matching
+    var base = str.split('?')[0];
+    var mapped = PATH_MAP[base];
+    if (mapped) {
+      var qs = str.includes('?') ? '?' + str.split('?')[1] : '';
+      console.log('[FetchFix] Redirecționat:', base, '→', mapped);
+      url = mapped + qs;
+    }
+    return _origFetch.call(window, url, opts);
+  };
+  console.log('[FetchFix] ✅ Interceptor căi PUG activ');
+})();
+
+// ── TOPBAR LOCK — blochează injectarea de butoane externe în #topbar ──────
+(function() {
+  'use strict';
+  // Butoane care NU trebuie să apară în topbar (injectate de repo JS)
+  var BLOCKED_TEXT = ['3dtravels', 'Predicți', 'prediction', 'Predicti'];
+  
+  function _shouldBlock(node) {
+    if (!node || node.nodeType !== 1) return false;
+    var txt = (node.textContent || node.innerText || node.getAttribute('title') || '').toLowerCase();
+    var id = (node.id || '').toLowerCase();
+    var title = (node.getAttribute('title') || '').toLowerCase();
+    return BLOCKED_TEXT.some(function(b) {
+      return txt.includes(b.toLowerCase()) || id.includes(b.toLowerCase()) || title.includes(b.toLowerCase());
+    });
+  }
+
+  function _lockTopbar() {
+    var tb = document.getElementById('topbar');
+    if (!tb || tb._topbarLocked) return;
+    tb._topbarLocked = true;
+
+    var _oa = tb.appendChild.bind(tb);
+    var _oi = tb.insertBefore.bind(tb);
+
+    tb.appendChild = function(node) {
+      if (_shouldBlock(node)) {
+        console.info('[TopbarLock] Blocat:', node.textContent?.trim()?.slice(0,30));
+        return node;
+      }
+      return _oa(node);
+    };
+    tb.insertBefore = function(node, ref) {
+      if (_shouldBlock(node)) {
+        console.info('[TopbarLock] Blocat insertBefore:', node.textContent?.trim()?.slice(0,30));
+        return node;
+      }
+      return _oi(node, ref);
+    };
+    console.log('[TopbarLock] ✅ Topbar protejat');
+  }
+
+  // Îndepărtăm butoanele deja injectate (dacă au ajuns înainte de lock)
+  function _cleanTopbar() {
+    var tb = document.getElementById('topbar');
+    if (!tb) return;
+    Array.from(tb.children).forEach(function(node) {
+      if (_shouldBlock(node)) {
+        node.remove();
+        console.info('[TopbarLock] Eliminat existent:', node.textContent?.trim()?.slice(0,30));
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(_lockTopbar, 50);
+    setTimeout(_cleanTopbar, 100);
+    setTimeout(_cleanTopbar, 1000);
+    setTimeout(_cleanTopbar, 3000);
+  });
+  window.addEventListener('load', function() {
+    setTimeout(_lockTopbar, 100);
+    setTimeout(_cleanTopbar, 200);
+    setTimeout(_cleanTopbar, 2000);
+  });
+
+  window._cleanTopbar = _cleanTopbar;
+  console.log('[TopbarLock] ✅ Inițializat');
 })();
 </script>
 
