@@ -1,5 +1,5 @@
-/* UrbanX SW v4.3g */
-const CACHE='urbanx-v4.3g';
+/* UrbanX SW v4.3h */
+const CACHE='urbanx-v4.3h';
 const OLD=['urbanx-v4.0','urbanx-v4.1','urbanx-v4.2','urbanx-v4.3','urbanx-v4.3e','urbanx-v4.3f','mapbox-tiles'];
 
 function fix(url){
@@ -13,14 +13,14 @@ function fix(url){
   return url;
 }
 
-self.addEventListener('install',e=>{console.log('[SW v4.3g] Install');self.skipWaiting();});
+self.addEventListener('install',e=>{console.log('[SW v4.3h] Install');self.skipWaiting();});
 
 self.addEventListener('activate',e=>{
-  console.log('[SW v4.3g] Activate');
+  console.log('[SW v4.3h] Activate');
   e.waitUntil(
     caches.keys().then(keys=>Promise.all(
       keys.filter(k=>OLD.includes(k)||(k.startsWith('urbanx-')&&k!==CACHE))
-        .map(k=>{console.log('[SW v4.3g] Sterg:',k);return caches.delete(k);})
+        .map(k=>{console.log('[SW v4.3h] Sterg:',k);return caches.delete(k);})
     )).then(()=>self.clients.claim())
   );
 });
