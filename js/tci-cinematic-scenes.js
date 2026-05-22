@@ -538,7 +538,7 @@ G._SceneEngine = {
         break;
 
       case 5: // CORIDOARE DEZVOLTARE — bare 3D reale din PUG
-        map.flyTo({center:[cx,cy], zoom:13, pitch:58, bearing:15, duration:2500, essential:true});
+        map.flyTo({center:[cx,cy], zoom:11.5, pitch:55, bearing:15, duration:2500, essential:true});
         try{ map.setConfigProperty('basemap','lightPreset','night'); }catch(e){}
         // Ascundem layerele UTR 2D ca sa nu acopere barele 3D
         ['utr-fill','utr-line','utr-lbl'].forEach(id=>{
@@ -1115,25 +1115,43 @@ G._SceneEngine = {
       ctx.globalAlpha=1;
     }
 
-    // Legendă coridoare - stânga jos
+    // Legendă UTR-uri reale din PUG
     if(t > 0.3) {
       const la = Math.min(1,(t-0.3)/0.2);
       ctx.globalAlpha=la;
-      const lx=W*0.03, ly=H*0.72;
-      ctx.fillStyle='rgba(4,10,24,.88)';
-      this._roundRect(ctx,lx,ly,W*0.28,H*0.2,8);ctx.fill();
+      const lx=W*0.03, ly=H*0.58;
+      const entries = [
+        {c:'#ef4444', l:'CC — Zona centrală complexă', sub:'H max 22m · CUT 2.5'},
+        {c:'#f97316', l:'CM — Zona mixtă servicii', sub:'H max 21m · CUT 1.8'},
+        {c:'#60a5fa', l:'CB — Poli comerciali/birouri', sub:'H max 21m · CUT 1.8'},
+        {c:'#D4AF37', l:'LA — Blocuri colective mari', sub:'H max 33m · existent'},
+        {c:'#fbbf24', l:'LB — Colective medii P+3', sub:'H max 12m · CUT 0.8'},
+        {c:'#4ade80', l:'LC/LL — Locuinte individuale', sub:'H max 9m · POT 30%'},
+        {c:'#22c55e', l:'LV — Vile', sub:'H max 6-9m · POT 15%'},
+        {c:'#86efac', l:'P — Parcuri/spatii verzi', sub:'POT conf. PUZ'},
+        {c:'#b45309', l:'AI — Zone industriale', sub:'reconversie posibila'},
+      ];
+      const lh = H*0.037;
+      const boxH = entries.length*lh + H*0.05;
+      ctx.fillStyle='rgba(4,10,24,.92)';
+      this._roundRect(ctx,lx,ly,W*0.3,boxH,8);ctx.fill();
       ctx.strokeStyle='rgba(212,175,55,.3)';ctx.lineWidth=1;
-      this._roundRect(ctx,lx,ly,W*0.28,H*0.2,8);ctx.stroke();
+      this._roundRect(ctx,lx,ly,W*0.3,boxH,8);ctx.stroke();
+
       ctx.fillStyle='#D4AF37';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
-      ctx.textAlign='left';ctx.fillText('CORIDOARE DEZVOLTARE 2025-2055',lx+W*0.01,ly+H*0.03);
-      [
-        {c:'#ef4444',l:'DENSIFICARE — Centru + axe TP (P+4→P+8)'},
-        {c:'#f59e0b',l:'RECONVERSIE — Zone industriale vechi'},
-        {c:'#22c55e',l:'EXPANSIUNE — Periurban controlat'},
-      ].forEach(({c,l},i)=>{
-        ctx.fillStyle=c;ctx.fillRect(lx+W*0.012,ly+H*0.065+i*H*0.042,W*0.018,H*0.008);
-        ctx.fillStyle='rgba(200,215,235,.85)';ctx.font=`${W*0.0072}px "IBM Plex Mono"`;
-        ctx.fillText(l,lx+W*0.036,ly+H*0.074+i*H*0.042,W*0.23);
+      ctx.textAlign='left';
+      ctx.fillText('ZONIFICARE PUG — EXISTENT 2024',lx+W*0.012,ly+H*0.028);
+      ctx.fillStyle='rgba(148,163,184,.5)';ctx.font=`${W*0.007}px "IBM Plex Mono"`;
+      ctx.fillText('Inaltime = regim maxim admis din RLU',lx+W*0.012,ly+H*0.044);
+
+      entries.forEach(({c,l,sub},i)=>{
+        const ey = ly+H*0.058+i*lh;
+        ctx.fillStyle=c;
+        this._roundRect(ctx,lx+W*0.012,ey-H*0.012,W*0.016,H*0.022,2);ctx.fill();
+        ctx.fillStyle='rgba(200,215,235,.9)';ctx.font=`bold ${W*0.0072}px "IBM Plex Mono"`;
+        ctx.fillText(l,lx+W*0.034,ey,W*0.25);
+        ctx.fillStyle='rgba(148,163,184,.55)';ctx.font=`${W*0.0062}px "IBM Plex Mono"`;
+        ctx.fillText(sub,lx+W*0.034,ey+H*0.016,W*0.25);
       });
       ctx.globalAlpha=1;
     }
