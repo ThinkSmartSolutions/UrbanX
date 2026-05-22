@@ -977,7 +977,7 @@ document.addEventListener('click', function(){
 </head>
 <body>
 <script>
-/* CityInit - kept for compatibility */
+/* UrbanX CityKey Init — rulează primul, înainte de orice modul */
 (function(){
   try {
     var k = localStorage.getItem('ux_last_city');
@@ -4818,8 +4818,7 @@ function _setupBtnUTR() {
                           window.S?.pug &&
                           window.S?.pugIdx?.length > 0 &&
                           loadedCityInTitle &&
-                          loadedCityKey === k &&
-                          
+                          loadedCityKey === k;
 
     if(alreadyLoaded) {
       // Deja încărcat pentru acest UAT — doar deschidem drawer

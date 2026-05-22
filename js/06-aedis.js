@@ -1766,7 +1766,7 @@ function getEIMConfig(){
 }
 
 // ── Mapping TCI cityKey → UAT_REGISTRY id ────────────────────────────────
-const _TCI_TO_UAT = {
+var _TCI_TO_UAT = {
   'RO-IS-01': 'municipiul-iasi',
   'RO-SV-01': 'municipiul-suceava',
   'RO-BT-01': 'municipiul-botosani',
