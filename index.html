@@ -1811,7 +1811,7 @@ document.addEventListener('click', function(){
 <script src="js/03-ui-panel.js?v=20260520c"></script>
 <script src="js/04-search.js?v=2026050601"></script>
 <script src="js/05-cad-utils.js?v=2026050601"></script>
-<script src="js/06-aedis.js?v=20260522i"></script>
+<script src="js/06-aedis.js?v=20260522j"></script>
 <script src="js/07-pdf-utils.js?v=2026050601"></script>
 <script src="js/08-lotizare.js?v=2026050906"></script>
 <script src="js/09-pdf-engine.js?v=2026051006"></script>
@@ -5174,9 +5174,13 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
     ['tci-adv-menu', 'viz-menu', 'tools-menu'].forEach(function(id) {
       var el = document.getElementById(id);
       if(!el) return;
-      // Sterge butoanele blocate
+      // Sterge butoanele blocate — dar Share/Ghid/AI Memoriu sunt permise in tci-adv-menu
+      var strictBlockList = ['compare pro', 'prezentare prim', 'european benchmarking'];
+      var toolsBlockList  = ['compare pro', 'prezentare prim', 'european benchmarking', 'share scenariu', 'ghid utilizare', 'ai memoriu justificativ'];
+      var blockList = (id === 'tools-menu') ? toolsBlockList : strictBlockList;
       Array.from(el.querySelectorAll('button,a,div[onclick]')).forEach(function(n){
-        if(_isBlocked(n)) n.remove();
+        var t = (n.textContent || '').toLowerCase();
+        if(blockList.some(function(b){ return t.indexOf(b) !== -1; })) n.remove();
       });
       // Sterge separatoarele orphane (div height:1px injectate de compare-pro)
       // Un separator e orphan daca urmatorul element e tot un separator sau nu exista
