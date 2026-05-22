@@ -1110,6 +1110,7 @@ G._SceneEngine = {
 
   // ── SCENA 5: UNDE CREȘTE ORAȘUL — Coridoare de dezvoltare ─────────────
   _s5_growth_corridors(ctx,W,H,t,city,zones) {
+    if(t < 0.05) this._s5_zoomed = false; // reset la fiecare rulare
     const need = this._need||{};
     const locuinte = need.locuinteTotale||Math.round((city?.pop2021||100000)*0.03*30);
 
@@ -1204,21 +1205,19 @@ G._SceneEngine = {
       ctx.globalAlpha=1;
     }
 
-    // ZOOM CINEMATIC la final - zoom in pe zona cu cea mai mare presiune
-    if(t>0.88){
-      const za=Math.min(1,(t-0.88)/0.1);
-      if(za>0.5 && window.map && !this._s5_zoomed){
-        this._s5_zoomed=true;
-        // Zoom pe centrul orasului unde e presiunea maxima
-        const zx=city?.lon||27.601, zy=city?.lat||47.158;
-        window.map.flyTo({
-          center:[zx+0.015,zy-0.005], // usor offset spre zona mixta
-          zoom:13.5, pitch:62, bearing:25,
-          duration:1800, essential:true
+    // ZOOM CINEMATIC la final - zoom in pe zona cu presiune maxima
+    if(t>0.86 && !this._s5_zoomed){
+      this._s5_zoomed = true;
+      const zmap = window.map || this._map;
+      if(zmap){
+        const zx = city?.lon||27.601, zy = city?.lat||47.158;
+        // Zoom pe zona mixta/comerciala - presiune maxima de dezvoltare
+        zmap.flyTo({
+          center:[zx+0.012, zy-0.008],
+          zoom:13.5, pitch:65, bearing:25,
+          duration:2500, essential:true
         });
       }
-    } else {
-      this._s5_zoomed=false;
     }
 
     this._sceneLabel(ctx,W,H,'5','PREDICTIE DEZVOLTARE — '+(city?.name||'').toUpperCase());
