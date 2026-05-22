@@ -1,6 +1,55 @@
 <!DOCTYPE html>
 <html lang="ro">
 <head>
+<script>
+/* UrbanX FetchFix v20260522 — în <head> înainte de orice JS */
+(function(){
+  'use strict';
+  var _of = window.fetch;
+  /* Toate căile greșite → corecte */
+  var M = {
+    'data/municipii-iasi/pug.geojson':       'js/data/municipiul-iasi/pug.geojson',
+    'data/municipii-iasi/reguli.json':        'js/data/municipiul-iasi/reguli.json',
+    'data/municipii-iasi/cadastru_index.json':'js/data/municipiul-iasi/meta.json',
+    'data/municipii-suceava/pug.geojson':     'js/data/municipiul-suceava/pug.geojson',
+    'data/municipii-suceava/reguli.json':     'js/data/municipiul-suceava/reguli.json',
+    'data/municipii-suceava/cadastru_index.json':'js/data/municipiul-suceava/meta.json',
+    'gGis_pug_iasi.geojson':                 'js/data/municipiul-iasi/pug.geojson',
+    'qGis_pug_iasi.geojson':                 'js/data/municipiul-iasi/pug.geojson',
+    'qGis_pug_iasi':                         'js/data/municipiul-iasi/pug.geojson',
+    'cadastru_index.json':                   'js/data/municipiul-iasi/meta.json',
+    'js/data/iasi/pug.geojson':              'js/data/municipiul-iasi/pug.geojson',
+    'js/data/iasi/reguli.json':              'js/data/municipiul-iasi/reguli.json',
+    'js/data/iasi/meta.json':                'js/data/municipiul-iasi/meta.json',
+    'js/data/iasi/cadastru_index.json':      'js/data/municipiul-iasi/meta.json',
+  };
+  function _fix(url){
+    if(!url||typeof url!=='string') return url;
+    var base=url.split('?')[0];
+    var qs=url.includes('?')?'?'+url.split('?').slice(1).join('?'):'';
+    /* caută key care apare în URL */
+    for(var k in M){
+      if(base.indexOf(k)!==-1){
+        /* reconstruim URL: păstrăm originea + calea corectă */
+        var origin=base.indexOf('/UrbanX/')!==-1?base.split('/UrbanX/')[0]+'/UrbanX/':'';
+        var fixed=origin+M[k]+qs;
+        console.log('[FetchFix]',k,'→',M[k]);
+        return fixed;
+      }
+    }
+    return url;
+  }
+  window.fetch=function(url,opts){
+    return _of.call(window,_fix(typeof url==='string'?url:url),opts);
+  };
+  /* Interceptăm și XMLHttpRequest */
+  var _XHRopen=XMLHttpRequest.prototype.open;
+  XMLHttpRequest.prototype.open=function(m,url){
+    arguments[1]=_fix(url)||url;
+    return _XHRopen.apply(this,arguments);
+  };
+})();
+</script>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
@@ -5219,109 +5268,38 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
 
 
 <script>
-// ── FETCH PATH INTERCEPTOR — redirecționează toate căile greșite ─────────
-// Fișierele JS din repo mai încearcă căi vechi. Interceptăm global.
-(function() {
+/* UrbanX TopbarLock v20260522 */
+(function(){
   'use strict';
-  var _origFetch = window.fetch;
-  var PATH_MAP = {
-    '/UrbanX/data/municipii-iasi/pug.geojson': '/UrbanX/js/data/municipiul-iasi/pug.geojson',
-    '/UrbanX/data/municipii-iasi/reguli.json': '/UrbanX/js/data/municipiul-iasi/reguli.json',
-    '/UrbanX/data/municipii-iasi/cadastru_index.json': '/UrbanX/js/data/municipiul-iasi/meta.json',
-    '/UrbanX/data/municipii-suceava/pug.geojson': '/UrbanX/js/data/municipiul-suceava/pug.geojson',
-    '/UrbanX/data/municipii-suceava/reguli.json': '/UrbanX/js/data/municipiul-suceava/reguli.json',
-    '/UrbanX/data/municipii-suceava/cadastru_index.json': '/UrbanX/js/data/municipiul-suceava/meta.json',
-    '/UrbanX/gGis_pug_iasi.geojson': '/UrbanX/js/data/municipiul-iasi/pug.geojson',
-    '/UrbanX/cadastru_index.json': '/UrbanX/js/data/municipiul-iasi/meta.json',
-    '/UrbanX/js/data/iasi/pug.geojson': '/UrbanX/js/data/municipiul-iasi/pug.geojson',
-    '/UrbanX/js/data/iasi/reguli.json': '/UrbanX/js/data/municipiul-iasi/reguli.json',
-    '/UrbanX/js/data/iasi/meta.json': '/UrbanX/js/data/municipiul-iasi/meta.json',
-    '/UrbanX/js/data/iasi/cadastru_index.json': '/UrbanX/js/data/municipiul-iasi/meta.json',
-  };
-  window.fetch = function(url, opts) {
-    var str = typeof url === 'string' ? url : (url && url.url) || String(url);
-    // Strip query string for matching
-    var base = str.split('?')[0];
-    var mapped = PATH_MAP[base];
-    if (mapped) {
-      var qs = str.includes('?') ? '?' + str.split('?')[1] : '';
-      console.log('[FetchFix] Redirecționat:', base, '→', mapped);
-      url = mapped + qs;
-    }
-    return _origFetch.call(window, url, opts);
-  };
-  console.log('[FetchFix] ✅ Interceptor căi PUG activ');
-})();
-
-// ── TOPBAR LOCK — blochează injectarea de butoane externe în #topbar ──────
-(function() {
-  'use strict';
-  // Butoane care NU trebuie să apară în topbar (injectate de repo JS)
-  var BLOCKED_TEXT = ['3dtravels', 'Predicți', 'prediction', 'Predicti'];
-  
-  function _shouldBlock(node) {
-    if (!node || node.nodeType !== 1) return false;
-    var txt = (node.textContent || node.innerText || node.getAttribute('title') || '').toLowerCase();
-    var id = (node.id || '').toLowerCase();
-    var title = (node.getAttribute('title') || '').toLowerCase();
-    return BLOCKED_TEXT.some(function(b) {
-      return txt.includes(b.toLowerCase()) || id.includes(b.toLowerCase()) || title.includes(b.toLowerCase());
+  var BLOCKED=['3dtravels','Predicți','predicti','prediction-layer','Predicție'];
+  function _bad(n){
+    if(!n||n.nodeType!==1) return false;
+    var t=((n.textContent||'')+(n.getAttribute('title')||'')+(n.id||'')).toLowerCase();
+    return BLOCKED.some(function(b){return t.indexOf(b.toLowerCase())!==-1;});
+  }
+  function _clean(){
+    var tb=document.getElementById('topbar');
+    if(!tb) return;
+    Array.from(tb.querySelectorAll('button,a,[role="button"]')).forEach(function(n){
+      if(_bad(n)){n.style.display='none';n.remove&&n.remove();}
     });
   }
-
-  function _lockTopbar() {
-    var tb = document.getElementById('topbar');
-    if (!tb || tb._topbarLocked) return;
-    tb._topbarLocked = true;
-
-    var _oa = tb.appendChild.bind(tb);
-    var _oi = tb.insertBefore.bind(tb);
-
-    tb.appendChild = function(node) {
-      if (_shouldBlock(node)) {
-        console.info('[TopbarLock] Blocat:', node.textContent?.trim()?.slice(0,30));
-        return node;
-      }
-      return _oa(node);
-    };
-    tb.insertBefore = function(node, ref) {
-      if (_shouldBlock(node)) {
-        console.info('[TopbarLock] Blocat insertBefore:', node.textContent?.trim()?.slice(0,30));
-        return node;
-      }
-      return _oi(node, ref);
-    };
-    console.log('[TopbarLock] ✅ Topbar protejat');
+  function _lock(){
+    var tb=document.getElementById('topbar');
+    if(!tb||tb._lk) return;
+    tb._lk=true;
+    var _a=tb.appendChild.bind(tb),_i=tb.insertBefore.bind(tb);
+    tb.appendChild=function(n){return _bad(n)?n:_a(n);};
+    tb.insertBefore=function(n,r){return _bad(n)?n:_i(n,r);};
   }
-
-  // Îndepărtăm butoanele deja injectate (dacă au ajuns înainte de lock)
-  function _cleanTopbar() {
-    var tb = document.getElementById('topbar');
-    if (!tb) return;
-    Array.from(tb.children).forEach(function(node) {
-      if (_shouldBlock(node)) {
-        node.remove();
-        console.info('[TopbarLock] Eliminat existent:', node.textContent?.trim()?.slice(0,30));
-      }
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(_lockTopbar, 50);
-    setTimeout(_cleanTopbar, 100);
-    setTimeout(_cleanTopbar, 1000);
-    setTimeout(_cleanTopbar, 3000);
+  document.addEventListener('DOMContentLoaded',function(){
+    setTimeout(_lock,50);setTimeout(_clean,100);setTimeout(_clean,1000);setTimeout(_clean,3000);
   });
-  window.addEventListener('load', function() {
-    setTimeout(_lockTopbar, 100);
-    setTimeout(_cleanTopbar, 200);
-    setTimeout(_cleanTopbar, 2000);
+  window.addEventListener('load',function(){
+    setTimeout(_lock,100);setTimeout(_clean,500);setTimeout(_clean,2500);
   });
-
-  window._cleanTopbar = _cleanTopbar;
-  console.log('[TopbarLock] ✅ Inițializat');
+  window._cleanTopbar=_clean;
 })();
 </script>
-
 </body>
 </html>
