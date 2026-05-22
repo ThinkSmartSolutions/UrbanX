@@ -520,6 +520,8 @@ G._AInarrativePDFPatch = {
   if(n > 80) return;
 
   const injectMenu = () => {
+    // Dezactivat — AI Memoriu Justificativ e in UrbanX Pro (tci-adv-menu)
+    return true;
     // În Instrumente ▾
     const toolsMenu = document.getElementById('tools-menu');
     if(toolsMenu && !document.getElementById('ai-narrative-menu-item')) {

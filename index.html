@@ -1811,7 +1811,7 @@ document.addEventListener('click', function(){
 <script src="js/03-ui-panel.js?v=20260520c"></script>
 <script src="js/04-search.js?v=2026050601"></script>
 <script src="js/05-cad-utils.js?v=2026050601"></script>
-<script src="js/06-aedis.js?v=20260522j"></script>
+<script src="js/06-aedis.js?v=20260522k"></script>
 <script src="js/07-pdf-utils.js?v=2026050601"></script>
 <script src="js/08-lotizare.js?v=2026050906"></script>
 <script src="js/09-pdf-engine.js?v=2026051006"></script>
@@ -2723,7 +2723,7 @@ setInterval(()=>{
   <script src="js/urbanx-compare-pro.js?v=20260522g"></script><!-- Compare Pro + Planning Score + Presentation Mode -->
   <script src="js/urbanx-science-layer.js?v=20260520c"></script><!-- SpaceSyntax+Noise+Sunlight+Economic+Swipe+ZoneLabels -->
   <script src="js/urbanx-eu-benchmark.js?v=20260520c"></script><!-- European Benchmarking Pro — 17 orase EU · 12 indicatori · Eurostat Urban Audit 2021 -->
-  <script src="js/urbanx-ai-narrative.js?v=20260520c"></script><!-- AI Narrative Generator — Claude API · Memoriu justificativ urbanistic automat -->
+  <script src="js/urbanx-ai-narrative.js?v=20260522k"></script><!-- AI Narrative Generator — Claude API · Memoriu justificativ urbanistic automat -->
 <script>
 // Initializare package selector modal
 function _initPackageModal() {
@@ -3227,6 +3227,7 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
     onmouseover="this.style.background='rgba(139,92,246,.2)'"
     onmouseout="this.style.background='rgba(139,92,246,.08)'">
 
+
   <button onclick="if(typeof _shareCurrentScenario==='function')_shareCurrentScenario();else{const url=window.location.href;navigator.clipboard?.writeText(url);ss?.('🔗 URL copiat');}_closeAllMenusAndOverlay()"
     style="display:block;width:100%;text-align:left;background:rgba(96,165,250,.08);
       border:none;color:#60a5fa;padding:10px 12px;cursor:pointer;border-radius:8px;
@@ -3243,7 +3244,6 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
       font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
     onmouseover="this.style.background='rgba(139,92,246,.2)'"
     onmouseout="this.style.background='rgba(139,92,246,.08)'">
-    🤖 AI Memoriu Justificativ <span onclick="event.stopPropagation();_showInfoDrawer('ai-memoriu')" title="Ce face această funcție?" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:rgba(148,163,184,.5);font-size:9px;font-weight:700;cursor:pointer;flex-shrink:0;vertical-align:middle;margin-left:4px">?</span>
     🤖 AI Memoriu Justificativ <span onclick="event.stopPropagation();_showInfoDrawer('ai-memoriu')" title="Ce face această funcție?" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:rgba(148,163,184,.5);font-size:9px;font-weight:700;cursor:pointer;flex-shrink:0;vertical-align:middle;margin-left:4px">?</span>
     
     <div style="font-size:10px;color:rgba(196,181,253,.6);font-weight:400">Claude AI · §1.1-§1.6 · text juridic automat</div>
