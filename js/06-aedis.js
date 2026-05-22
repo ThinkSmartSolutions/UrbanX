@@ -1,5 +1,11 @@
 // UrbanX — Urban3D, UAT_REGISTRY, FAL.AI
 
+var _TCI_TO_UAT = {
+  'RO-IS-01': 'municipiul-iasi',
+  'RO-SV-01': 'municipiul-suceava',
+  'RO-BT-01': 'municipiul-botosani',
+};
+
 function toggleMulti(v){
   S.multiMode=v;
   _g('btnMulti')?.classList.toggle('multi-on',v);
@@ -1766,11 +1772,7 @@ function getEIMConfig(){
 }
 
 // ── Mapping TCI cityKey → UAT_REGISTRY id ────────────────────────────────
-var _TCI_TO_UAT = {
-  'RO-IS-01': 'municipiul-iasi',
-  'RO-SV-01': 'municipiul-suceava',
-  'RO-BT-01': 'municipiul-botosani',
-};
+// _TCI_TO_UAT moved to top
 
 // Hook TCI._selPick → switchUAT automat
 (function(){
