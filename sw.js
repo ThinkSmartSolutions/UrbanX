@@ -28,25 +28,42 @@ self.addEventListener('activate',e=>{
 self.addEventListener('fetch',e=>{
   if(e.request.method!=='GET') return;
   const url=fix(e.request.url);
-  const req=url!==e.request.url?new Request(url,{headers:e.request.headers,credentials:e.request.credentials,redirect:e.request.redirect}):e.request;
+  const req=url!==e.request.url
+    ?new Request(url,{headers:e.request.headers,credentials:e.request.credentials,redirect:e.request.redirect})
+    :e.request;
   const path=new URL(url).pathname;
 
   if(path==='/UrbanX/'||path==='/UrbanX/index.html'){
     e.respondWith(fetch(req,{cache:'no-store'}).catch(()=>caches.match(req)));
     return;
   }
+
   if(/\.(js|css|geojson|json)(\?|$)/.test(path)){
     e.respondWith(
       fetch(req,{cache:'no-store'}).then(r=>{
-        if(r.ok){const c=r.clone();caches.open(CACHE).then(ch=>ch.put(req,c));}
+        if(r.ok && r.status===200){
+          /* clone INAINTE de a returna */
+          const clone=r.clone();
+          caches.open(CACHE).then(ch=>ch.put(req,clone));
+        }
         return r;
       }).catch(()=>caches.match(req))
     );
     return;
   }
+
   if(url.includes('mapbox')){
-    e.respondWith(caches.match(req).then(c=>c||fetch(req).then(r=>{if(r.ok)caches.open(CACHE).then(ch=>ch.put(req,r.clone()));return r;})));
+    e.respondWith(
+      caches.match(req).then(cached=>{
+        if(cached) return cached;
+        return fetch(req).then(r=>{
+          if(r.ok){const clone=r.clone();caches.open(CACHE).then(ch=>ch.put(req,clone));}
+          return r;
+        });
+      })
+    );
     return;
   }
+
   e.respondWith(fetch(req));
 });
