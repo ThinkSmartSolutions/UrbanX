@@ -1330,10 +1330,7 @@ document.addEventListener('click', function(){
     <option value="streets">🗺 Streets</option>
     <option value="sat">🛰 Satelitar</option>
   </select>
-  <!-- Zone Protejate + Hărți Inundații (scurtătură rapidă) -->
-  <div style="padding:5px 8px 2px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.06);margin-top:3px">Zone speciale</div>
-  <button onclick="(function(){const k=window.TCI?.cityKey||localStorage.getItem('ux_last_city')||'RO-IS-01';const db=window._RO_CITIES_DB||{};const city=db[k]||{lat:47.158,lon:27.601};const lat=city.lat||map.getCenter().lat;const lon=city.lon||map.getCenter().lng;if(window._ProtectedZonesLayer)window._ProtectedZonesLayer.toggle(map,lat,lon);else ss?.('Zone Protejate se inițializează');_closeAllMenus();})()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#f87171;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">⛔ Zone Protejate (cimitire · CF · monumente)</button>
-  <button onclick="(function(){if(window._FloodMapper){window._FloodMapper.addAll(map);ss?.('🌊 Hărți inundații ANAR activate');}else{ss?.('Hărți Inundații se inițializează');}; _closeAllMenus();})()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#7dd3fc;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🌊 Hărți Inundații ANAR</button>
+
 
   <button class="menu-close-btn" 
     onclick="_closeAllMenusAndOverlay()" 
@@ -1811,7 +1808,7 @@ document.addEventListener('click', function(){
 <script src="js/03-ui-panel.js?v=20260520c"></script>
 <script src="js/04-search.js?v=2026050601"></script>
 <script src="js/05-cad-utils.js?v=2026050601"></script>
-<script src="js/06-aedis.js?v=20260522k"></script>
+<script src="js/06-aedis.js?v=20260522l"></script>
 <script src="js/07-pdf-utils.js?v=2026050601"></script>
 <script src="js/08-lotizare.js?v=2026050906"></script>
 <script src="js/09-pdf-engine.js?v=2026051006"></script>
@@ -5181,6 +5178,13 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
       Array.from(el.querySelectorAll('button,a,div[onclick]')).forEach(function(n){
         var t = (n.textContent || '').toLowerCase();
         if(blockList.some(function(b){ return t.indexOf(b) !== -1; })) n.remove();
+      });
+      // Sterge div-uri complet goale (injectate de scripturi externe)
+      Array.from(el.children).forEach(function(n) {
+        if(n.tagName === 'DIV' && !n.textContent.trim() && !n.querySelector('button,input,select,a')) {
+          var h = n.style.height;
+          if(!h || h === '0px') n.remove();
+        }
       });
       // Sterge separatoarele orphane (div height:1px injectate de compare-pro)
       // Un separator e orphan daca urmatorul element e tot un separator sau nu exista
