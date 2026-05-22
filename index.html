@@ -1811,7 +1811,7 @@ document.addEventListener('click', function(){
 <script src="js/03-ui-panel.js?v=20260520c"></script>
 <script src="js/04-search.js?v=2026050601"></script>
 <script src="js/05-cad-utils.js?v=2026050601"></script>
-<script src="js/06-aedis.js?v=20260522e"></script>
+<script src="js/06-aedis.js?v=20260522f"></script>
 <script src="js/07-pdf-utils.js?v=2026050601"></script>
 <script src="js/08-lotizare.js?v=2026050906"></script>
 <script src="js/09-pdf-engine.js?v=2026051006"></script>
@@ -3830,52 +3830,6 @@ function _closeInfoDrawer() {
   setTimeout(() => { drawer.style.display = 'none'; }, 320);
 }
 
-// Adaugam ❓ la fiecare buton din toolbar dupa ce DOM e gata
-window.addEventListener('load', function() {
-  setTimeout(function() {
-    const infoMap = {
-      '_toggleVizMenu':   'harta',
-      '_toggleToolsMenu': 'analiza',
-      'toggleRapoarteMenu': 'rapoarte',
-      '_toggleTCIMenu':   null,
-      'openTCI':          'proiectie-urbana',
-    };
-
-    // Adaugam buton ❓ langa fiecare buton din bara de sus
-    [
-      { sel:'button[onclick*="_toggleVizMenu"]',   key:'harta' },
-      { sel:'button[onclick*="_toggleToolsMenu"]', key:'analiza' },
-      { sel:'button[id="btnPDF"]',                 key:'rapoarte' },
-      { sel:'button[onclick*="_toggleTCIMenu"]',   key:null },
-      { sel:'button[onclick*="openTCI"]',          key:'proiectie-urbana' },
-      { sel:'button[id="btn-cinema-v2"]',          key:'film-cinematic' },
-    ].forEach(({sel, key}) => {
-      if(!key) return;
-      const btn = document.querySelector(sel);
-      if(!btn || btn.parentElement.querySelector('.info-q-btn')) return;
-      const q = document.createElement('button');
-      q.className = 'info-q-btn';
-      q.textContent = '?';
-      q.title = 'O ce face această funcție';
-      q.style.cssText = 'background:none;border:1px solid rgba(255,255,255,.15);' +
-        'color:rgba(148,163,184,.5);border-radius:50%;width:18px;height:18px;' +
-        'font-size:9px;cursor:pointer;font-weight:700;display:inline-flex;' +
-        'align-items:center;justify-content:center;margin-left:2px;flex-shrink:0;' +
-        'vertical-align:middle;font-family:inherit;padding:0';
-      q.onclick = (e) => {
-        e.stopPropagation();
-        _showInfoDrawer(key);
-      };
-      btn.parentElement.style.display = 'flex';
-      btn.parentElement.style.alignItems = 'center';
-      btn.parentElement.appendChild(q);
-    });
-
-    console.log('[InfoDrawer] ✅ Butoane ❓ adăugate la funcțiile principale');
-  }, 2000);
-});
-</script>
-
 
 <script src="js/tci-corridors.js?v=20260520f"></script>
 <script src="js/tci-portfolio.js?v=20260520f"></script>
@@ -5221,7 +5175,7 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
 
 <script>
 (function(){
-  var B=['3dtravels','predicti','prediction'];
+  var B=['3dtravels','predicti','prediction','predic\u021b','predic\u0163'];
   function bad(n){
     var t=((n.textContent||'')+(n.getAttribute&&n.getAttribute('title')||'')).toLowerCase();
     return B.some(function(b){return t.indexOf(b)!==-1;});
