@@ -1811,7 +1811,7 @@ document.addEventListener('click', function(){
 <script src="js/03-ui-panel.js?v=20260520c"></script>
 <script src="js/04-search.js?v=2026050601"></script>
 <script src="js/05-cad-utils.js?v=2026050601"></script>
-<script src="js/06-aedis.js?v=20260522b"></script>
+<script src="js/06-aedis.js?v=20260522c"></script>
 <script src="js/07-pdf-utils.js?v=2026050601"></script>
 <script src="js/08-lotizare.js?v=2026050906"></script>
 <script src="js/09-pdf-engine.js?v=2026051006"></script>
@@ -2702,7 +2702,7 @@ setInterval(()=>{
   <script src="js/17-projection-engine.js?v=20260520c"></script>
   <!-- Deck.gl v9 — compatibil cu Mapbox GL JS v3 -->
   <script src="js/uats-registry.js?v=2026051201"></script>
-  <script src="js/17-tci-cinema.js?v=20260520c"></script>
+  <script src="js/17-tci-cinema.js?v=20260522c"></script>
   
   <script src="js/18-animation-engine.js?v=20260520c"></script>
   <script src="js/uats-extended-data.js?v=20260520c"></script><!-- Date extinse: etnic+ISD+AROPE+geo+poli+TFR+migratii -->
@@ -4043,15 +4043,6 @@ window.addEventListener('load', function() {
     const k = localStorage.getItem('ux_last_city') || window.TCI?.cityKey || 'RO-IS-01';
     _updateUTRDrawerTitle(k);
   }, 1500);
-  // Și la orice apăsare a butonului UTR
-  const btnUTR = document.getElementById('btnUTR');
-  if (btnUTR) {
-    const _origClick = btnUTR.onclick;
-    btnUTR.addEventListener('click', function() {
-      const k = localStorage.getItem('ux_last_city') || window.TCI?.cityKey || 'RO-IS-01';
-      _updateUTRDrawerTitle(k);
-    }, true);
-  }
 });
 
 
@@ -4339,28 +4330,6 @@ window.generateMasterplan = function() {
 // Fix: nu e un bug vizibil direct în meniu; Botoșani e în DB din motive legitime
 // (e unul din cele 8 UAT-uri de fallback) — nu facem nimic, e corect să fie acolo.
 // Dacă apare în PUG selector — e bug în tci-pug-import.js, nu în index.html
-
-
-// ── PATCH 7: UTR colorate la toggle buton UTR ─────────────────────────────
-// Asigurăm că la apăsarea butonului UTR, chips-urile sunt re-colorate
-const _btnUTR = document.getElementById('btnUTR');
-if (_btnUTR && !_btnUTR._colorPatchApplied) {
-  _btnUTR._colorPatchApplied = true;
-  _btnUTR.addEventListener('click', function() {
-    setTimeout(function() {
-      const chips = document.querySelectorAll('#utr-chips .utr-chip');
-      chips.forEach(function(chip) {
-        const utrCode = (chip.dataset.utr || chip.textContent.trim().split(/[\s(]/)[0]).toUpperCase();
-        const col = _getUTRColorFuzzy(utrCode);
-        if (col && (!chip.style.borderColor || chip.style.borderColor === 'rgb(100, 116, 139)')) {
-          chip.style.borderColor = col.border;
-          chip.style.backgroundColor = col.fill;
-          chip.style.color = col.border;
-        }
-      });
-    }, 300);
-  });
-}
 
 
 // ── PATCH 8: Cinematic — scene > 17 continuă după eroare ─────────────────
@@ -4717,7 +4686,8 @@ window._launchPUGSuceava = async function() {
   }
 };
 
-// ── btnUTR handler — încarcă PUG UAT activ și afișează drawer ─────────────
+// ── btnUTR handler — SINGURUL handler pentru butonul UTR ──────────────────
+// Nu mai există alți addEventListener sau safeOn pe btnUTR în altă parte.
 function _setupBtnUTR() {
   const btn = document.getElementById('btnUTR');
   if(!btn || btn._utrPatched) return;
@@ -4727,34 +4697,40 @@ function _setupBtnUTR() {
     const drawer = document.getElementById('utr-drawer');
     if(!drawer) return;
 
-    // Toggle: dacă drawer e deja deschis, închidem
+    // ── ÎNCHIDERE ──────────────────────────────────────────────────────────
     if(drawer.classList.contains('open')) {
       drawer.classList.remove('open');
       btn.classList.remove('on');
       window.hideUTRFilter?.();
+      // Curăță layerul de pe hartă la închidere
+      try {
+        const m = window.map;
+        if(m) {
+          ['utr-fill','utr-line','utr-lbl'].forEach(lid => {
+            try { if(m.getLayer(lid)) m.setLayoutProperty(lid,'visibility','none'); } catch(e){}
+          });
+        }
+      } catch(e){}
       return;
     }
 
+    // ── DESCHIDERE ─────────────────────────────────────────────────────────
     btn.classList.add('on');
 
-    // Determinăm UAT activ
+    // UAT activ — sursa unică de adevăr: localStorage (setat de TCI._selPick)
     const k = localStorage.getItem('ux_last_city') || window.TCI?.cityKey || 'RO-IS-01';
     const db = window._RO_CITIES_DB || {};
     const city = db[k] || {name:'UAT', lat:47.158, lon:27.601};
     const cityName = city.name || 'UAT';
 
-    // Determinăm URL-ul PUG — citim din _PUG_REGISTRY (single source of truth)
-    const _reg = window._PUG_REGISTRY || {};
-    const pugUrl = _reg[k]?.pugFile || (() => {
-      // Fallback legacy — UAT_REGISTRY sau map static
-      const UAT_REG = window.UAT_REGISTRY || {};
-      const regEntry = Object.values(UAT_REG).find(e =>
-        e.label?.toLowerCase().includes(cityName.toLowerCase()) ||
-        e.siruta === city.siruta
-      );
-      return regEntry?.pugFile || null;
-    })();
+    // Actualizăm titlul drawer-ului cu UAT-ul curent
+    _updateUTRDrawerTitle(k);
 
+    // URL PUG din registry (single source of truth)
+    const _reg = window._PUG_REGISTRY || {};
+    const pugUrl = _reg[k]?.pugFile || null;
+
+    // PUG indisponibil
     if(!pugUrl) {
       drawer.classList.add('open');
       const titleEl = document.getElementById('utr-drawer-title');
@@ -4765,33 +4741,39 @@ function _setupBtnUTR() {
         Disponibil: <b>Iași</b> · <b>Suceava</b>.
         Folosiți <b>Import PUG Digital</b> pentru alte UAT-uri.
       </span>`;
-      window.ss?.('⚠ PUG ' + cityName + ' indisponibil — folosiți Import PUG Digital');
+      window.ss?.('⚠ PUG ' + cityName + ' indisponibil');
       return;
     }
 
-    // Verificăm dacă PUG-ul deja încărcat e al UAT-ului ACTIV (nu al altuia)
+    // Dacă PUG-ul acestui UAT e deja încărcat — doar redeschide
+    const loadedKey = window.S?._loadedCityKey;
     const chipsEl = document.getElementById('utr-chips');
-    const titleEl2 = document.getElementById('utr-drawer-title');
-    const loadedCityInTitle = titleEl2?.textContent?.includes(cityName);
-    const loadedCityKey = window.S?._loadedCityKey;
-    const alreadyLoaded = chipsEl?.children?.length > 0 &&
+    const alreadyLoaded = loadedKey === k &&
                           window.S?.pug &&
                           window.S?.pugIdx?.length > 0 &&
-                          loadedCityInTitle &&
-                          loadedCityKey === k;
+                          chipsEl?.children?.length > 0;
 
     if(alreadyLoaded) {
-      // Deja încărcat pentru acest UAT — doar deschidem drawer
       drawer.classList.add('open');
+      // Re-afișează layerele pe hartă
+      try {
+        const m = window.map;
+        if(m && window.S.pug) {
+          ['utr-fill','utr-line','utr-lbl'].forEach(lid => {
+            try { if(m.getLayer(lid)) m.setLayoutProperty(lid,'visibility','visible'); } catch(e){}
+          });
+        }
+      } catch(e){}
       return;
     }
 
-    // Încărcăm PUG (UAT nou sau prima dată)
-    window.S && (window.S.pug = false); // resetăm flag ca să forțăm re-încărcare
+    // UAT nou sau forțat reload — resetăm și încărcăm
+    if(window.S) { window.S.pug = null; window.S.pugIdx = []; window.S._loadedCityKey = null; }
     const geojson = await _loadPUGOnMap(pugUrl, cityName, null);
     if(geojson) {
       _renderUTRChips(geojson, cityName);
-      if(window.S) window.S._loadedCityKey = k; // marcăm ce UAT e încărcat
+      if(window.S) window.S._loadedCityKey = k;
+      drawer.classList.add('open');
     }
   });
 }

@@ -268,7 +268,7 @@ const TCI = {
         window.switchUAT(uatId);
       }
       // Resetăm PUG încărcat ca să forțăm re-încărcare pentru noul UAT
-      if(window.S) { window.S.pug = false; window.S._loadedCityKey = null; }
+      if(window.S) { window.S.pug = null; window.S.pugIdx = []; window.S._loadedCityKey = null; }
     })();
 
     if(window._ProjectionEngine) window._ProjectionEngine.currentCity = key;

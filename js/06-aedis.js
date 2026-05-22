@@ -463,7 +463,7 @@ function loadScen(i){const sc=S.scenarios[i];if(!sc)return;Object.assign(S.vol,{
 // ═══ BUTOANE GLOBALE ═══════════════════════════════════════════════════════
 // Butoane topbar - null-safe pentru toate
 const safeOn=(id,fn)=>{const el=document.getElementById(id);if(el)el.onclick=fn;else console.warn('Missing element:',id);};
-safeOn('btnUTR',toggleUTR);
+// btnUTR gestionat exclusiv de _setupBtnUTR din index.html (single handler)
 safeOn('btnCloseUTR',hideUTRDrawer);
 safeOn('btnGPS',doGPS);
 // btnANCPI eliminat
