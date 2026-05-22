@@ -1,50 +1,23 @@
 <!DOCTYPE html>
 <html lang="ro">
-<head>
-<script>
-/* UrbanX FetchFix v20260522e — correct paths */
+<head><script>
 (function(){
-  'use strict';
-  var _of = window.fetch;
-  var _ox = XMLHttpRequest.prototype.open;
-  
-  /* Toate variantele gresite → calea corecta */
-  var FIXES = [
-    /* Iasi - calea corecta e data/municipiul-iasi/ (la root, fara js/) */
-    [/\/UrbanX\/data\/municipii[_-]iasi\//g,     '/UrbanX/data/municipiul-iasi/'],
-    [/\/UrbanX\/data\/municipiul_iasi\//g,        '/UrbanX/data/municipiul-iasi/'],
-    [/\/UrbanX\/js\/data\/iasi\//g,               '/UrbanX/data/municipiul-iasi/'],
-    [/\/UrbanX\/js\/data\/municipiul-iasi\//g,    '/UrbanX/data/municipiul-iasi/'],
-    /* gGis / qGis variante */
-    [/\/UrbanX\/[gq]Gis[_.]pug[_.]?iasi[^?]*/gi, '/UrbanX/data/municipiul-iasi/pug.geojson'],
-    [/\/UrbanX\/[gq]gis[_.]pug[_.]?iasi[^?]*/gi, '/UrbanX/data/municipiul-iasi/pug.geojson'],
-    /* cadastru_index la root */
-    [/\/UrbanX\/cadastru_index\.json/g,           '/UrbanX/data/municipiul-iasi/cadastru_index.json'],
-    /* Suceava variante gresite */
-    [/\/UrbanX\/data\/municipii[_-]suceava\//g,   '/UrbanX/js/data/municipiul-suceava/'],
+  var _f=window.fetch, _x=XMLHttpRequest.prototype.open;
+  var M=[
+    [/\/UrbanX\/data\/municipii[_-]iasi\//gi,    '/UrbanX/data/municipiul-iasi/'],
+    [/\/UrbanX\/js\/data\/iasi\//gi,              '/UrbanX/data/municipiul-iasi/'],
+    [/\/UrbanX\/js\/data\/municipiul-iasi\//gi,   '/UrbanX/data/municipiul-iasi/'],
+    [/\/UrbanX\/[gq][Gg]is[_.]pug[_.][^?]*/gi,   '/UrbanX/data/municipiul-iasi/pug.geojson'],
+    [/\/UrbanX\/cadastru_index\.json(\?|$)/gi,    '/UrbanX/data/municipiul-iasi/cadastru_index.json'],
+    [/\/UrbanX\/data\/municipii[_-]suceava\//gi,  '/UrbanX/js/data/municipiul-suceava/'],
   ];
-  
-  function _fix(url){
-    if(!url || typeof url !== 'string') return url;
-    var u = url;
-    for(var i=0; i<FIXES.length; i++){
-      u = u.replace(FIXES[i][0], FIXES[i][1]);
-    }
-    if(u !== url) console.log('[FetchFix]', url.split('/UrbanX/')[1], '→', u.split('/UrbanX/')[1]);
+  function fix(u){
+    if(typeof u!=='string') return u;
+    for(var i=0;i<M.length;i++) u=u.replace(M[i][0],M[i][1]);
     return u;
   }
-  
-  window.fetch = function(url, opts){
-    var u = typeof url === 'string' ? _fix(url) : url;
-    return _of.call(window, u, opts);
-  };
-  
-  XMLHttpRequest.prototype.open = function(m, url){
-    if(typeof url === 'string') arguments[1] = _fix(url);
-    return _ox.apply(this, arguments);
-  };
-  
-  console.log('[FetchFix v20260522e] activ');
+  window.fetch=function(u,o){return _f.call(this,fix(u),o);};
+  XMLHttpRequest.prototype.open=function(m,u){arguments[1]=fix(u);return _x.apply(this,arguments);};
 })();
 </script>
 <meta charset="utf-8"/>
@@ -943,8 +916,8 @@ canvas#c2d{width:100%;height:100%;display:block}
     // Service Worker registration
     if('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=20260522e')
-          .then(r => console.log('[SW] OK v4.3:', r.scope))
+        navigator.serviceWorker.register('./sw.js?v=20260522f')
+          .then(r => console.log('[SW] OK v4.0:', r.scope))
           .catch(e => console.warn('[SW] Skip:', e.message));
       });
     }
@@ -5263,15 +5236,12 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
 })();
 </script>
 
-
 <script>
-/* UrbanX TopbarLock v20260522e */
 (function(){
-  var B=['3dtravels','Predicți','predicti','prediction-layer'];
+  var B=['3dtravels','predicti','prediction'];
   function bad(n){
-    if(!n||n.nodeType!==1) return false;
-    var t=((n.textContent||'')+(n.getAttribute('title')||'')+(n.id||'')).toLowerCase();
-    return B.some(function(b){return t.indexOf(b.toLowerCase())!==-1;});
+    var t=((n.textContent||'')+(n.getAttribute&&n.getAttribute('title')||'')).toLowerCase();
+    return B.some(function(b){return t.indexOf(b)!==-1;});
   }
   function clean(){
     var tb=document.getElementById('topbar');
@@ -5285,7 +5255,9 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
     tb.appendChild=function(n){return bad(n)?n:a(n);};
     tb.insertBefore=function(n,r){return bad(n)?n:i(n,r);};
   }
-  document.addEventListener('DOMContentLoaded',function(){setTimeout(lock,50);setTimeout(clean,200);setTimeout(clean,1500);});
+  document.addEventListener('DOMContentLoaded',function(){
+    setTimeout(lock,50);setTimeout(clean,200);setTimeout(clean,2000);
+  });
   window.addEventListener('load',function(){setTimeout(clean,500);setTimeout(clean,3000);});
 })();
 </script>
