@@ -1811,7 +1811,7 @@ document.addEventListener('click', function(){
 <script src="js/03-ui-panel.js?v=20260520c"></script>
 <script src="js/04-search.js?v=2026050601"></script>
 <script src="js/05-cad-utils.js?v=2026050601"></script>
-<script src="js/06-aedis.js?v=20260522f"></script>
+<script src="js/06-aedis.js?v=20260522g"></script>
 <script src="js/07-pdf-utils.js?v=2026050601"></script>
 <script src="js/08-lotizare.js?v=2026050906"></script>
 <script src="js/09-pdf-engine.js?v=2026051006"></script>
@@ -3830,6 +3830,7 @@ function _closeInfoDrawer() {
   setTimeout(() => { drawer.style.display = 'none'; }, 320);
 }
 
+</script>
 
 <script src="js/tci-corridors.js?v=20260520f"></script>
 <script src="js/tci-portfolio.js?v=20260520f"></script>
@@ -5121,55 +5122,49 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
 
 <script>
 // ── MENU LOCK — blochează injectările externe în meniuri fixe ─────────────
-// 19-ux-polish.js și alte fișiere injectează butoane în tools-menu și viz-menu
-// după ce DOM-ul e gata. Le blocăm pentru meniurile cu data-locked="true"
 (function() {
   'use strict';
+  var _BLOCKED_TEXTS = ['compare pro', 'prezentare prim', 'european benchmarking'];
+  function _isBlocked(node) {
+    var t = (node.textContent || '').toLowerCase();
+    return _BLOCKED_TEXTS.some(function(b) { return t.indexOf(b) !== -1; });
+  }
   function _lockMenus() {
-    ['tools-menu', 'viz-menu'].forEach(function(id) {
-      const el = document.getElementById(id);
+    ['tools-menu', 'viz-menu', 'tci-adv-menu'].forEach(function(id) {
+      var el = document.getElementById(id);
       if(!el || el._locked) return;
       el._locked = true;
-      let _blockedCount = 0;
-
-      const _origAppend = el.appendChild.bind(el);
-      const _origInsert = el.insertBefore.bind(el);
-
+      var _origAppend = el.appendChild.bind(el);
+      var _origInsert = el.insertBefore.bind(el);
       el.appendChild = function(node) {
         if(node.nodeType !== 1) return _origAppend(node);
-        const nodeText = node.textContent?.trim() || '';
-        const isDuplicate = nodeText.length > 5 && Array.from(el.children).some(function(child) {
-          return child !== node && child.textContent?.trim() === nodeText;
-        });
-        if(isDuplicate) {
-          _blockedCount++;
-          // Log silențios — nu spam în consolă
-          if(_blockedCount === 1) console.info('[MenuLock] Bloc duplicate activ pe #' + id);
-          return node;
-        }
-        return _origAppend(node);
+        if(_isBlocked(node)) return node;
+        var t = (node.textContent||'').trim();
+        var dup = t.length > 5 && Array.from(el.children).some(function(c){return c!==node&&(c.textContent||'').trim()===t;});
+        return dup ? node : _origAppend(node);
       };
-
       el.insertBefore = function(node, ref) {
         if(node.nodeType !== 1) return _origInsert(node, ref);
-        const nodeText = node.textContent?.trim() || '';
-        const isDuplicate = nodeText.length > 5 && Array.from(el.children).some(function(child) {
-          return child !== node && child.textContent?.trim() === nodeText;
-        });
-        if(isDuplicate) {
-          _blockedCount++;
-          return node;
-        }
-        return _origInsert(node, ref);
+        if(_isBlocked(node)) return node;
+        var t = (node.textContent||'').trim();
+        var dup = t.length > 5 && Array.from(el.children).some(function(c){return c!==node&&(c.textContent||'').trim()===t;});
+        return dup ? node : _origInsert(node, ref);
       };
     });
   }
-
-  // Aplicăm după ce DOM e gata
-  document.addEventListener('DOMContentLoaded', function() { setTimeout(_lockMenus, 100); });
-  window.addEventListener('load', function() { setTimeout(_lockMenus, 500); setTimeout(_lockMenus, 2000); });
+  function _cleanMenus() {
+    ['tci-adv-menu', 'viz-menu', 'tools-menu'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if(!el) return;
+      Array.from(el.querySelectorAll('button,a,div[onclick]')).forEach(function(n){
+        if(_isBlocked(n)) n.remove();
+      });
+    });
+  }
+  document.addEventListener('DOMContentLoaded', function() { setTimeout(_lockMenus,100); setTimeout(_cleanMenus,600); });
+  window.addEventListener('load', function() { setTimeout(_lockMenus,500); setTimeout(_cleanMenus,900); setTimeout(_cleanMenus,3500); });
   window._lockMenus = _lockMenus;
-  console.log('[MenuLock] ✅ Protecție anti-duplicate activă pentru tools-menu și viz-menu');
+  console.log('[MenuLock] ✅ tools-menu + viz-menu + tci-adv-menu protejate');
 })();
 </script>
 
