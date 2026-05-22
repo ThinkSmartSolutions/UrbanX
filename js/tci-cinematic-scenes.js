@@ -2282,13 +2282,16 @@ G._SceneEngine = {
         const utr = (f.properties?.utr || '').trim();
         if(!utr || utr === '?' || utr === '??') return;
         const ruleset = reg[utr] || {};
-        const h = ruleset.inaltime_m || 8;
-        const c = ruleset.culoare   || '#60a5fa';
-        if(h <= 0) return;
+        const h_real = ruleset.inaltime_m || 8;
+        const c = ruleset.culoare || '#60a5fa';
+        if(h_real <= 0) return;
+        // Factor amplificare: 8x pentru vizibilitate cinematica la zoom 12-13
+        // LA (33m reali) → 264m vizual, CC (22m) → 176m, LC (9m) → 72m, P (4m) → 32m
+        const h = h_real * 8;
         features.push({
           type: 'Feature',
           geometry: f.geometry,
-          properties: { height: h, color: c, utr: utr,
+          properties: { height: h, height_real: h_real, color: c, utr: utr,
             functiune: ruleset.functiune || utr }
         });
       });
