@@ -1121,15 +1121,13 @@ G._SceneEngine = {
       ctx.globalAlpha=la;
       const lx=W*0.03, ly=H*0.58;
       const entries = [
-        {c:'#ef4444', l:'CC — Zona centrală complexă', sub:'H max 22m · CUT 2.5'},
-        {c:'#f97316', l:'CM — Zona mixtă servicii', sub:'H max 21m · CUT 1.8'},
-        {c:'#60a5fa', l:'CB — Poli comerciali/birouri', sub:'H max 21m · CUT 1.8'},
-        {c:'#D4AF37', l:'LA — Blocuri colective mari', sub:'H max 33m · existent'},
-        {c:'#fbbf24', l:'LB — Colective medii P+3', sub:'H max 12m · CUT 0.8'},
-        {c:'#4ade80', l:'LC/LL — Locuinte individuale', sub:'H max 9m · POT 30%'},
-        {c:'#22c55e', l:'LV — Vile', sub:'H max 6-9m · POT 15%'},
-        {c:'#86efac', l:'P — Parcuri/spatii verzi', sub:'POT conf. PUZ'},
-        {c:'#b45309', l:'AI — Zone industriale', sub:'reconversie posibila'},
+        {c:'#ef4444', l:'DENSIFICARE P+6/P+8', sub:'Centru + zone mixte + poli comerciali'},
+        {c:'#f59e0b', l:'RECONVERSIE → mixt/rezidential', sub:'Zone industriale — potential maxim'},
+        {c:'#22c55e', l:'EXPANSIUNE CONTROLATA', sub:'Periurban + zone rezerva'},
+        {c:'#60a5fa', l:'REABILITARE/CONSOLIDARE', sub:'Blocuri existente — nu densificare'},
+        {c:'#D4AF37', l:'CONSERVARE', sub:'Centrul istoric protejat'},
+        {c:'#94a3b8', l:'MONITORIZARE', sub:'Fara interventie majora 2025-2055'},
+        {c:'#475569', l:'STABIL', sub:'Parcuri, spatii verzi, tehnic'},
       ];
       const lh = H*0.037;
       const boxH = entries.length*lh + H*0.05;
@@ -1140,9 +1138,9 @@ G._SceneEngine = {
 
       ctx.fillStyle='#D4AF37';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
       ctx.textAlign='left';
-      ctx.fillText('ZONIFICARE PUG — EXISTENT 2024',lx+W*0.012,ly+H*0.028);
+      ctx.fillText('PREDICTIE DEZVOLTARE 2025-2055',lx+W*0.012,ly+H*0.028);
       ctx.fillStyle='rgba(148,163,184,.5)';ctx.font=`${W*0.007}px "IBM Plex Mono"`;
-      ctx.fillText('Inaltime = regim maxim admis din RLU',lx+W*0.012,ly+H*0.044);
+      ctx.fillText('Inaltime = intensitate construire proiectata',lx+W*0.012,ly+H*0.044);
 
       entries.forEach(({c,l,sub},i)=>{
         const ey = ly+H*0.058+i*lh;
@@ -2292,71 +2290,43 @@ G._SceneEngine = {
   _setup3DGrowthBars(map, city) {
     const map2 = map;
     const pug  = this._pugGeo;
-    const reg  = this._reguli || {};
     const features = [];
+
+    // Predictii presiune constructie 2025-2055
+    // Culori: rosu=densificare, portocaliu=reconversie, verde=expansiune, albastru=reabilitare
+    const PRED = {"CP":{"presiune":0.012,"interventie":"CONSERVARE","culoare_predictie":"#D4AF37","inaltime_pred":576,"tip":"centru_protejat","dist_centru_km":0.4,"capacitate_reziduala":0.08},"CC":{"presiune":0.381,"interventie":"MONITORIZARE","culoare_predictie":"#94a3b8","inaltime_pred":840,"tip":"centru","dist_centru_km":1.2,"capacitate_reziduala":0.22},"CM":{"presiune":0.543,"interventie":"DENSIFICARE P+6/P+8","culoare_predictie":"#ef4444","inaltime_pred":1344,"tip":"mixt","dist_centru_km":2.0,"capacitate_reziduala":0.4},"CA":{"presiune":0.571,"interventie":"DENSIFICARE P+6/P+8","culoare_predictie":"#ef4444","inaltime_pred":832,"tip":"mixt","dist_centru_km":1.8,"capacitate_reziduala":0.4},"CB1":{"presiune":0.531,"interventie":"DENSIFICARE P+6/P+8","culoare_predictie":"#ef4444","inaltime_pred":1344,"tip":"comercial","dist_centru_km":3.5,"capacitate_reziduala":0.5},"CB2":{"presiune":0.469,"interventie":"DENSIFICARE P+6/P+8","culoare_predictie":"#ef4444","inaltime_pred":1344,"tip":"comercial","dist_centru_km":4.0,"capacitate_reziduala":0.5},"CB3":{"presiune":0.602,"interventie":"DENSIFICARE P+6/P+8","culoare_predictie":"#ef4444","inaltime_pred":1344,"tip":"comercial","dist_centru_km":3.0,"capacitate_reziduala":0.5},"CB4":{"presiune":0.414,"interventie":"DENSIFICARE P+6/P+8","culoare_predictie":"#ef4444","inaltime_pred":1344,"tip":"comercial","dist_centru_km":4.5,"capacitate_reziduala":0.5},"CB5":{"presiune":0.107,"interventie":"STABIL - fara interventie","culoare_predictie":"#475569","inaltime_pred":420,"tip":"educational","dist_centru_km":2.5,"capacitate_reziduala":0.5},"CB6":{"presiune":0.137,"interventie":"STABIL - fara interventie","culoare_predictie":"#475569","inaltime_pred":420,"tip":"educational","dist_centru_km":1.5,"capacitate_reziduala":0.5},"CB7":{"presiune":0.365,"interventie":"MONITORIZARE","culoare_predictie":"#94a3b8","inaltime_pred":840,"tip":"comercial","dist_centru_km":5.0,"capacitate_reziduala":0.5},"LA":{"presiune":0.048,"interventie":"REABILITARE/CONSOLIDARE","culoare_predictie":"#60a5fa","inaltime_pred":2112,"tip":"rezidential_mare","dist_centru_km":2.5,"capacitate_reziduala":0.6},"LA1":{"presiune":0.043,"interventie":"REABILITARE/CONSOLIDARE","culoare_predictie":"#60a5fa","inaltime_pred":2112,"tip":"rezidential_mare","dist_centru_km":3.0,"capacitate_reziduala":0.6},"LB":{"presiune":0.158,"interventie":"MONITORIZARE","culoare_predictie":"#94a3b8","inaltime_pred":480,"tip":"rezidential_mediu","dist_centru_km":3.5,"capacitate_reziduala":0.6},"LB,C2":{"presiune":0.139,"interventie":"STABIL - fara interventie","culoare_predictie":"#475569","inaltime_pred":240,"tip":"rezidential_mediu","dist_centru_km":4.0,"capacitate_reziduala":0.6},"LB,C 2":{"presiune":0.139,"interventie":"STABIL - fara interventie","culoare_predictie":"#475569","inaltime_pred":240,"tip":"rezidential_mediu","dist_centru_km":4.0,"capacitate_reziduala":0.6},"LC":{"presiune":0.198,"interventie":"MONITORIZARE","culoare_predictie":"#94a3b8","inaltime_pred":360,"tip":"rezidential_mic","dist_centru_km":4.5,"capacitate_reziduala":0.52},"LL":{"presiune":0.174,"interventie":"MONITORIZARE","culoare_predictie":"#94a3b8","inaltime_pred":360,"tip":"rezidential_mic","dist_centru_km":5.0,"capacitate_reziduala":0.52},"LL2":{"presiune":0.224,"interventie":"MONITORIZARE","culoare_predictie":"#94a3b8","inaltime_pred":360,"tip":"rezidential_mic","dist_centru_km":4.0,"capacitate_reziduala":0.52},"LV":{"presiune":0.213,"interventie":"MONITORIZARE","culoare_predictie":"#94a3b8","inaltime_pred":240,"tip":"rezidential_vila","dist_centru_km":4.0,"capacitate_reziduala":0.58},"LV??":{"presiune":0.213,"interventie":"MONITORIZARE","culoare_predictie":"#94a3b8","inaltime_pred":240,"tip":"rezidential_vila","dist_centru_km":4.0,"capacitate_reziduala":0.58},"LV ?":{"presiune":0.213,"interventie":"MONITORIZARE","culoare_predictie":"#94a3b8","inaltime_pred":240,"tip":"rezidential_vila","dist_centru_km":4.0,"capacitate_reziduala":0.58},"P":{"presiune":0.015,"interventie":"STABIL - fara interventie","culoare_predictie":"#475569","inaltime_pred":160,"tip":"verde","dist_centru_km":2.0,"capacitate_reziduala":0.6},"P1":{"presiune":0.009,"interventie":"STABIL - fara interventie","culoare_predictie":"#475569","inaltime_pred":160,"tip":"verde","dist_centru_km":4.0,"capacitate_reziduala":0.6},"P1a":{"presiune":0.009,"interventie":"STABIL - fara interventie","culoare_predictie":"#475569","inaltime_pred":160,"tip":"verde","dist_centru_km":4.0,"capacitate_reziduala":0.6},"P1b":{"presiune":0.009,"interventie":"STABIL - fara interventie","culoare_predictie":"#475569","inaltime_pred":160,"tip":"verde","dist_centru_km":4.0,"capacitate_reziduala":0.6},"P2":{"presiune":0.009,"interventie":"STABIL - fara interventie","culoare_predictie":"#475569","inaltime_pred":160,"tip":"verde","dist_centru_km":4.0,"capacitate_reziduala":0.6},"P2a":{"presiune":0.009,"interventie":"STABIL - fara interventie","culoare_predictie":"#475569","inaltime_pred":160,"tip":"verde","dist_centru_km":4.0,"capacitate_reziduala":0.6},"P2b":{"presiune":0.009,"interventie":"STABIL - fara interventie","culoare_predictie":"#475569","inaltime_pred":160,"tip":"verde","dist_centru_km":4.0,"capacitate_reziduala":0.6},"P2c":{"presiune":0.009,"interventie":"STABIL - fara interventie","culoare_predictie":"#475569","inaltime_pred":160,"tip":"verde","dist_centru_km":4.0,"capacitate_reziduala":0.6},"P3":{"presiune":0.009,"interventie":"STABIL - fara interventie","culoare_predictie":"#475569","inaltime_pred":160,"tip":"verde","dist_centru_km":4.0,"capacitate_reziduala":0.6},"P4":{"presiune":0.009,"interventie":"STABIL - fara interventie","culoare_predictie":"#475569","inaltime_pred":160,"tip":"verde","dist_centru_km":4.0,"capacitate_reziduala":0.6},"P5":{"presiune":0.009,"interventie":"STABIL - fara interventie","culoare_predictie":"#475569","inaltime_pred":160,"tip":"verde","dist_centru_km":4.0,"capacitate_reziduala":0.6},"P6":{"presiune":0.009,"interventie":"STABIL - fara interventie","culoare_predictie":"#475569","inaltime_pred":160,"tip":"verde","dist_centru_km":4.0,"capacitate_reziduala":0.6},"AI1":{"presiune":0.353,"interventie":"RECONVERSIE → mixt/rezidential","culoare_predictie":"#f59e0b","inaltime_pred":960,"tip":"industrial","dist_centru_km":6.0,"capacitate_reziduala":0.55},"AI2A":{"presiune":0.4,"interventie":"RECONVERSIE → mixt/rezidential","culoare_predictie":"#f59e0b","inaltime_pred":960,"tip":"industrial","dist_centru_km":5.5,"capacitate_reziduala":0.55},"AI2a":{"presiune":0.4,"interventie":"RECONVERSIE → mixt/rezidential","culoare_predictie":"#f59e0b","inaltime_pred":960,"tip":"industrial","dist_centru_km":5.5,"capacitate_reziduala":0.55},"AI2b":{"presiune":0.583,"interventie":"RECONVERSIE → mixt/rezidential","culoare_predictie":"#f59e0b","inaltime_pred":960,"tip":"industrial","dist_centru_km":4.0,"capacitate_reziduala":0.55},"AI2c":{"presiune":0.583,"interventie":"RECONVERSIE → mixt/rezidential","culoare_predictie":"#f59e0b","inaltime_pred":960,"tip":"industrial","dist_centru_km":4.0,"capacitate_reziduala":0.55},"AI2d":{"presiune":0.583,"interventie":"RECONVERSIE → mixt/rezidential","culoare_predictie":"#f59e0b","inaltime_pred":960,"tip":"industrial","dist_centru_km":4.0,"capacitate_reziduala":0.55},"AI3":{"presiune":0.454,"interventie":"RECONVERSIE → mixt/rezidential","culoare_predictie":"#f59e0b","inaltime_pred":960,"tip":"industrial","dist_centru_km":5.0,"capacitate_reziduala":0.55},"AI4":{"presiune":0.514,"interventie":"RECONVERSIE → mixt/rezidential","culoare_predictie":"#f59e0b","inaltime_pred":960,"tip":"industrial","dist_centru_km":4.5,"capacitate_reziduala":0.55},"AI4a":{"presiune":0.514,"interventie":"RECONVERSIE → mixt/rezidential","culoare_predictie":"#f59e0b","inaltime_pred":960,"tip":"industrial","dist_centru_km":4.5,"capacitate_reziduala":0.55},"AI5":{"presiune":0.583,"interventie":"RECONVERSIE → mixt/rezidential","culoare_predictie":"#f59e0b","inaltime_pred":960,"tip":"industrial","dist_centru_km":4.0,"capacitate_reziduala":0.55},"AI6":{"presiune":0.66,"interventie":"RECONVERSIE → mixt/rezidential","culoare_predictie":"#f59e0b","inaltime_pred":960,"tip":"industrial","dist_centru_km":3.5,"capacitate_reziduala":0.55},"AA":{"presiune":0.018,"interventie":"STABIL - fara interventie","culoare_predictie":"#475569","inaltime_pred":240,"tip":"agrement","dist_centru_km":6.0,"capacitate_reziduala":0.5},"D1":{"presiune":0.05,"interventie":"STABIL - fara interventie","culoare_predictie":"#475569","inaltime_pred":160,"tip":"turism","dist_centru_km":7.0,"capacitate_reziduala":0.6},"ET3":{"presiune":0.107,"interventie":"STABIL - fara interventie","culoare_predictie":"#475569","inaltime_pred":160,"tip":"rezerva","dist_centru_km":8.0,"capacitate_reziduala":0.6},"EP6":{"presiune":0.071,"interventie":"STABIL - fara interventie","culoare_predictie":"#475569","inaltime_pred":160,"tip":"public","dist_centru_km":4.0,"capacitate_reziduala":0.6},"G1":{"presiune":0.026,"interventie":"STABIL - fara interventie","culoare_predictie":"#475569","inaltime_pred":240,"tip":"tehnic","dist_centru_km":4.0,"capacitate_reziduala":0.3},"G2":{"presiune":0.021,"interventie":"STABIL - fara interventie","culoare_predictie":"#475569","inaltime_pred":240,"tip":"tehnic","dist_centru_km":5.0,"capacitate_reziduala":0.3},"G/P9":{"presiune":0.053,"interventie":"STABIL - fara interventie","culoare_predictie":"#475569","inaltime_pred":160,"tip":"tehnic","dist_centru_km":4.0,"capacitate_reziduala":0.6},"P1a,P1b":{"presiune":0.009,"interventie":"STABIL - fara interventie","culoare_predictie":"#475569","inaltime_pred":160,"tip":"verde","dist_centru_km":4.0,"capacitate_reziduala":0.6},"P1a/P1b":{"presiune":0.009,"interventie":"STABIL - fara interventie","culoare_predictie":"#475569","inaltime_pred":160,"tip":"verde","dist_centru_km":4.0,"capacitate_reziduala":0.6},"P2c ?":{"presiune":0.009,"interventie":"STABIL - fara interventie","culoare_predictie":"#475569","inaltime_pred":160,"tip":"verde","dist_centru_km":4.0,"capacitate_reziduala":0.6},"CC ?":{"presiune":0.189,"interventie":"MONITORIZARE","culoare_predictie":"#94a3b8","inaltime_pred":840,"tip":"centru","dist_centru_km":4.0,"capacitate_reziduala":0.22},"CC?":{"presiune":0.189,"interventie":"MONITORIZARE","culoare_predictie":"#94a3b8","inaltime_pred":840,"tip":"centru","dist_centru_km":4.0,"capacitate_reziduala":0.22},"LL ?":{"presiune":0.224,"interventie":"MONITORIZARE","culoare_predictie":"#94a3b8","inaltime_pred":360,"tip":"rezidential_mic","dist_centru_km":4.0,"capacitate_reziduala":0.52}};
 
     if(pug?.features?.length) {
       pug.features.forEach(f => {
-        const utr = (f.properties?.utr || '').trim();
-        if(!utr || utr === '?' || utr === '??') return;
-        const ruleset = reg[utr] || {};
-        const h_real = ruleset.inaltime_m || 8;
-        const c = ruleset.culoare || '#60a5fa';
-        if(h_real <= 0) return;
-        // Factor amplificare: 8x pentru vizibilitate cinematica la zoom 12-13
-        // LA (33m reali) → 264m vizual, CC (22m) → 176m, LC (9m) → 72m, P (4m) → 32m
-        const h = h_real * 64;
-        features.push({
-          type: 'Feature',
-          geometry: f.geometry,
-          properties: { height: h, height_real: h_real, color: c, utr: utr,
-            functiune: ruleset.functiune || utr }
-        });
+        const utr = (f.properties?.utr||'').trim();
+        if(!utr||utr==='?'||utr==='??') return;
+        const p = PRED[utr] || {};
+        const h = p.inaltime_pred || 320;
+        const c = p.culoare_predictie || '#60a5fa';
+        features.push({type:'Feature', geometry:f.geometry,
+          properties:{height:h, color:c, utr:utr,
+            interventie:p.interventie||'—', presiune:p.presiune||0}});
       });
-      console.log('[Cinema 3D] bare din PUG real:', features.length, 'zone');
+      console.log('[Cinema 3D] predictii 2055:', features.length, 'zone');
     }
-
-    if(!features.length) return; // fara PUG = fara bare
-
+    if(!features.length) return;
+    if(map2.getPitch()<55) map2.setPitch(58);
     try {
-      // Pitch minim 45 pentru fill-extrusion vizibil
-      if(map2.getPitch() < 45) map2.setPitch(55);
-
       if(map2.getSource('tci-growth-bars')) {
         map2.getSource('tci-growth-bars').setData({type:'FeatureCollection',features});
-        if(!map2.getLayer('tci-growth-bars-layer')) {
-          map2.addLayer({
-            id:'tci-growth-bars-layer', type:'fill-extrusion',
-            source:'tci-growth-bars',
-            paint:{
-              'fill-extrusion-color':['get','color'],
-              'fill-extrusion-height':['get','height'],
-              'fill-extrusion-base':0,
-              'fill-extrusion-opacity':0.82,
-              'fill-extrusion-vertical-gradient':true,
-            }
-          });
-        }
+        if(!map2.getLayer('tci-growth-bars-layer'))
+          map2.addLayer({id:'tci-growth-bars-layer',type:'fill-extrusion',
+            source:'tci-growth-bars',paint:{'fill-extrusion-color':['get','color'],
+            'fill-extrusion-height':['get','height'],'fill-extrusion-base':0,
+            'fill-extrusion-opacity':0.85,'fill-extrusion-vertical-gradient':true}});
       } else {
-        map2.addSource('tci-growth-bars', {
-          type:'geojson',
-          data:{type:'FeatureCollection',features}
-        });
-        map2.addLayer({
-          id:'tci-growth-bars-layer',
-          type:'fill-extrusion',
-          source:'tci-growth-bars',
-          paint:{
-            'fill-extrusion-color':['get','color'],
-            'fill-extrusion-height':['get','height'],
-            'fill-extrusion-base':0,
-            'fill-extrusion-opacity':0.82,
-            'fill-extrusion-vertical-gradient':true,
-          }
-        });
+        map2.addSource('tci-growth-bars',{type:'geojson',data:{type:'FeatureCollection',features}});
+        map2.addLayer({id:'tci-growth-bars-layer',type:'fill-extrusion',
+          source:'tci-growth-bars',paint:{'fill-extrusion-color':['get','color'],
+          'fill-extrusion-height':['get','height'],'fill-extrusion-base':0,
+          'fill-extrusion-opacity':0.85,'fill-extrusion-vertical-gradient':true}});
       }
-      console.log('[Cinema 3D] layer adaugat cu', features.length, 'bare');
-    } catch(e){ console.warn('[Cinema 3D bars]', e.message); }
+    } catch(e){ console.warn('[Cinema 3D]',e.message); }
   },
 
   _setupTrafficLayer(map, city) {
