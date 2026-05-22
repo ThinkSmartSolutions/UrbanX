@@ -58,7 +58,8 @@
       "Constructii provizorii de orice natura",
       "Depozitare en gros",
       "Curatatorii chimice"
-    ]
+    ],
+    "nota_reglementare": "CC1+CC2: conform PUZ cu recomandari orientative (RLU Art.15). Valorile POT/CUT sunt recomandari, nu prescriptii."
   },
   "CM": {
     "pot": 50,
@@ -88,7 +89,8 @@
       "Depozitare en gros",
       "Curatatorii chimice",
       "Activitati cu program dupa ora 22.00 care produc zgomot"
-    ]
+    ],
+    "nota_reglementare": "CM1-CM5: conform PUZ cu recomandari orientative (RLU Art.15). POT ses=50%, versanti=35%, podis=45%."
   },
   "CA": {
     "pot": 50,
@@ -366,7 +368,8 @@
       "Depozite, alimentatie publica in spatii deja convertite anterior",
       "Activitati productive de orice natura",
       "Constructii provizorii"
-    ]
+    ],
+    "nota_reglementare": "LA1+LA1a+LA2+LA3: conform PUZ (RLU Art.15+16)"
   },
   "LB": {
     "pot": 40,
@@ -590,10 +593,10 @@
     ]
   },
   "P": {
-    "pot": 5,
-    "cut": 0.05,
-    "rh": "P",
-    "inaltime_m": 4,
+    "pot": null,
+    "cut": null,
+    "rh": "conf. PUZ",
+    "inaltime_m": null,
     "functiune": "Parc urban - constructii strict necesare",
     "culoare": "#86efac",
     "tip": "verde",
@@ -612,13 +615,17 @@
       "Parcaje carosabile permanente",
       "Depozitari de orice natura",
       "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
-    ]
+    ],
+    "nota_reglementare": "P1-P9: conform studiilor de specialitate avizate conform legii (RLU Art.10, Art.15, Art.16). In lipsa PUZ: HG 525/1996 Art.23 - se aplica regulile zonei adiacente.",
+    "pot_text": "conform PUZ",
+    "cut_text": "conform PUZ",
+    "h_text": "conform PUZ"
   },
   "P1": {
-    "pot": 5,
-    "cut": 0.05,
-    "rh": "P",
-    "inaltime_m": 4,
+    "pot": null,
+    "cut": null,
+    "rh": "conf. PUZ",
+    "inaltime_m": null,
     "functiune": "Parc urban principal",
     "culoare": "#4ade80",
     "tip": "verde",
@@ -637,13 +644,17 @@
       "Parcaje carosabile permanente",
       "Depozitari de orice natura",
       "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
-    ]
+    ],
+    "nota_reglementare": "P1-P9: conform studiilor de specialitate avizate conform legii (RLU Art.10, Art.15, Art.16). In lipsa PUZ: HG 525/1996 Art.23 - se aplica regulile zonei adiacente.",
+    "pot_text": "conform PUZ",
+    "cut_text": "conform PUZ",
+    "h_text": "conform PUZ"
   },
   "P1a": {
-    "pot": 5,
-    "cut": 0.05,
-    "rh": "P",
-    "inaltime_m": 4,
+    "pot": null,
+    "cut": null,
+    "rh": "conf. PUZ",
+    "inaltime_m": null,
     "functiune": "Parc urban subzona a",
     "culoare": "#4ade80",
     "tip": "verde",
@@ -662,13 +673,17 @@
       "Parcaje carosabile permanente",
       "Depozitari de orice natura",
       "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
-    ]
+    ],
+    "nota_reglementare": "P1-P9: conform studiilor de specialitate avizate conform legii (RLU Art.10, Art.15, Art.16). In lipsa PUZ: HG 525/1996 Art.23 - se aplica regulile zonei adiacente.",
+    "pot_text": "conform PUZ",
+    "cut_text": "conform PUZ",
+    "h_text": "conform PUZ"
   },
   "P1b": {
-    "pot": 5,
-    "cut": 0.05,
-    "rh": "P",
-    "inaltime_m": 4,
+    "pot": null,
+    "cut": null,
+    "rh": "conf. PUZ",
+    "inaltime_m": null,
     "functiune": "Parc urban subzona b",
     "culoare": "#4ade80",
     "tip": "verde",
@@ -687,13 +702,17 @@
       "Parcaje carosabile permanente",
       "Depozitari de orice natura",
       "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
-    ]
+    ],
+    "nota_reglementare": "P1-P9: conform studiilor de specialitate avizate conform legii (RLU Art.10, Art.15, Art.16). In lipsa PUZ: HG 525/1996 Art.23 - se aplica regulile zonei adiacente.",
+    "pot_text": "conform PUZ",
+    "cut_text": "conform PUZ",
+    "h_text": "conform PUZ"
   },
   "P2": {
-    "pot": 3,
-    "cut": 0.03,
-    "rh": "P",
-    "inaltime_m": 3,
+    "pot": null,
+    "cut": null,
+    "rh": "conf. PUZ",
+    "inaltime_m": null,
     "functiune": "Parc periurban",
     "culoare": "#86efac",
     "tip": "verde",
@@ -712,13 +731,17 @@
       "Parcaje carosabile permanente",
       "Depozitari de orice natura",
       "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
-    ]
+    ],
+    "nota_reglementare": "P1-P9: conform studiilor de specialitate avizate conform legii (RLU Art.10, Art.15, Art.16). In lipsa PUZ: HG 525/1996 Art.23 - se aplica regulile zonei adiacente.",
+    "pot_text": "conform PUZ",
+    "cut_text": "conform PUZ",
+    "h_text": "conform PUZ"
   },
   "P2a": {
-    "pot": 3,
-    "cut": 0.03,
-    "rh": "P",
-    "inaltime_m": 3,
+    "pot": null,
+    "cut": null,
+    "rh": "conf. PUZ",
+    "inaltime_m": null,
     "functiune": "Parc periurban a",
     "culoare": "#86efac",
     "tip": "verde",
@@ -737,13 +760,17 @@
       "Parcaje carosabile permanente",
       "Depozitari de orice natura",
       "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
-    ]
+    ],
+    "nota_reglementare": "P1-P9: conform studiilor de specialitate avizate conform legii (RLU Art.10, Art.15, Art.16). In lipsa PUZ: HG 525/1996 Art.23 - se aplica regulile zonei adiacente.",
+    "pot_text": "conform PUZ",
+    "cut_text": "conform PUZ",
+    "h_text": "conform PUZ"
   },
   "P2b": {
-    "pot": 3,
-    "cut": 0.03,
-    "rh": "P",
-    "inaltime_m": 3,
+    "pot": null,
+    "cut": null,
+    "rh": "conf. PUZ",
+    "inaltime_m": null,
     "functiune": "Parc periurban b",
     "culoare": "#86efac",
     "tip": "verde",
@@ -762,13 +789,17 @@
       "Parcaje carosabile permanente",
       "Depozitari de orice natura",
       "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
-    ]
+    ],
+    "nota_reglementare": "P1-P9: conform studiilor de specialitate avizate conform legii (RLU Art.10, Art.15, Art.16). In lipsa PUZ: HG 525/1996 Art.23 - se aplica regulile zonei adiacente.",
+    "pot_text": "conform PUZ",
+    "cut_text": "conform PUZ",
+    "h_text": "conform PUZ"
   },
   "P2c": {
-    "pot": 3,
-    "cut": 0.03,
-    "rh": "P",
-    "inaltime_m": 3,
+    "pot": null,
+    "cut": null,
+    "rh": "conf. PUZ",
+    "inaltime_m": null,
     "functiune": "Parc periurban c",
     "culoare": "#86efac",
     "tip": "verde",
@@ -787,13 +818,17 @@
       "Parcaje carosabile permanente",
       "Depozitari de orice natura",
       "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
-    ]
+    ],
+    "nota_reglementare": "P1-P9: conform studiilor de specialitate avizate conform legii (RLU Art.10, Art.15, Art.16). In lipsa PUZ: HG 525/1996 Art.23 - se aplica regulile zonei adiacente.",
+    "pot_text": "conform PUZ",
+    "cut_text": "conform PUZ",
+    "h_text": "conform PUZ"
   },
   "P3": {
-    "pot": 5,
-    "cut": 0.05,
-    "rh": "P",
-    "inaltime_m": 4,
+    "pot": null,
+    "cut": null,
+    "rh": "conf. PUZ",
+    "inaltime_m": null,
     "functiune": "Gradini publice cartier",
     "culoare": "#4ade80",
     "tip": "verde",
@@ -812,13 +847,17 @@
       "Parcaje carosabile permanente",
       "Depozitari de orice natura",
       "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
-    ]
+    ],
+    "nota_reglementare": "P1-P9: conform studiilor de specialitate avizate conform legii (RLU Art.10, Art.15, Art.16). In lipsa PUZ: HG 525/1996 Art.23 - se aplica regulile zonei adiacente.",
+    "pot_text": "conform PUZ",
+    "cut_text": "conform PUZ",
+    "h_text": "conform PUZ"
   },
   "P4": {
-    "pot": 5,
-    "cut": 0.05,
-    "rh": "P",
-    "inaltime_m": 4,
+    "pot": null,
+    "cut": null,
+    "rh": "conf. PUZ",
+    "inaltime_m": null,
     "functiune": "Scuaruri",
     "culoare": "#4ade80",
     "tip": "verde",
@@ -837,13 +876,17 @@
       "Parcaje carosabile permanente",
       "Depozitari de orice natura",
       "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
-    ]
+    ],
+    "nota_reglementare": "P1-P9: conform studiilor de specialitate avizate conform legii (RLU Art.10, Art.15, Art.16). In lipsa PUZ: HG 525/1996 Art.23 - se aplica regulile zonei adiacente.",
+    "pot_text": "conform PUZ",
+    "cut_text": "conform PUZ",
+    "h_text": "conform PUZ"
   },
   "P5": {
-    "pot": 5,
-    "cut": 0.05,
-    "rh": "P",
-    "inaltime_m": 4,
+    "pot": null,
+    "cut": null,
+    "rh": "conf. PUZ",
+    "inaltime_m": null,
     "functiune": "Spatii verzi de protectie",
     "culoare": "#bbf7d0",
     "tip": "verde",
@@ -862,13 +905,17 @@
       "Parcaje carosabile permanente",
       "Depozitari de orice natura",
       "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
-    ]
+    ],
+    "nota_reglementare": "P1-P9: conform studiilor de specialitate avizate conform legii (RLU Art.10, Art.15, Art.16). In lipsa PUZ: HG 525/1996 Art.23 - se aplica regulile zonei adiacente.",
+    "pot_text": "conform PUZ",
+    "cut_text": "conform PUZ",
+    "h_text": "conform PUZ"
   },
   "P6": {
-    "pot": 5,
-    "cut": 0.05,
-    "rh": "P",
-    "inaltime_m": 4,
+    "pot": null,
+    "cut": null,
+    "rh": "conf. PUZ",
+    "inaltime_m": null,
     "functiune": "Spatii plantate pe artere",
     "culoare": "#bbf7d0",
     "tip": "verde",
@@ -887,7 +934,11 @@
       "Parcaje carosabile permanente",
       "Depozitari de orice natura",
       "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
-    ]
+    ],
+    "nota_reglementare": "P1-P9: conform studiilor de specialitate avizate conform legii (RLU Art.10, Art.15, Art.16). In lipsa PUZ: HG 525/1996 Art.23 - se aplica regulile zonei adiacente.",
+    "pot_text": "conform PUZ",
+    "cut_text": "conform PUZ",
+    "h_text": "conform PUZ"
   },
   "AI1": {
     "pot": 55,
@@ -1313,10 +1364,10 @@
     ]
   },
   "P1a,P1b": {
-    "pot": 5,
-    "cut": 0.05,
-    "rh": "P",
-    "inaltime_m": 4,
+    "pot": null,
+    "cut": null,
+    "rh": "conf. PUZ",
+    "inaltime_m": null,
     "functiune": "Parc urban combinat",
     "culoare": "#4ade80",
     "tip": "verde",
@@ -1335,13 +1386,17 @@
       "Parcaje carosabile permanente",
       "Depozitari de orice natura",
       "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
-    ]
+    ],
+    "nota_reglementare": "P1-P9: conform studiilor de specialitate avizate conform legii (RLU Art.10, Art.15, Art.16). In lipsa PUZ: HG 525/1996 Art.23 - se aplica regulile zonei adiacente.",
+    "pot_text": "conform PUZ",
+    "cut_text": "conform PUZ",
+    "h_text": "conform PUZ"
   },
   "P1a/P1b": {
-    "pot": 5,
-    "cut": 0.05,
-    "rh": "P",
-    "inaltime_m": 4,
+    "pot": null,
+    "cut": null,
+    "rh": "conf. PUZ",
+    "inaltime_m": null,
     "functiune": "Parc urban combinat",
     "culoare": "#4ade80",
     "tip": "verde",
@@ -1360,13 +1415,17 @@
       "Parcaje carosabile permanente",
       "Depozitari de orice natura",
       "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
-    ]
+    ],
+    "nota_reglementare": "P1-P9: conform studiilor de specialitate avizate conform legii (RLU Art.10, Art.15, Art.16). In lipsa PUZ: HG 525/1996 Art.23 - se aplica regulile zonei adiacente.",
+    "pot_text": "conform PUZ",
+    "cut_text": "conform PUZ",
+    "h_text": "conform PUZ"
   },
   "P2c ?": {
-    "pot": 3,
-    "cut": 0.03,
-    "rh": "P",
-    "inaltime_m": 3,
+    "pot": null,
+    "cut": null,
+    "rh": "conf. PUZ",
+    "inaltime_m": null,
     "functiune": "Parc periurban (incert digitizare)",
     "culoare": "#86efac",
     "tip": "verde",
@@ -1385,7 +1444,11 @@
       "Parcaje carosabile permanente",
       "Depozitari de orice natura",
       "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
-    ]
+    ],
+    "nota_reglementare": "P1-P9: conform studiilor de specialitate avizate conform legii (RLU Art.10, Art.15, Art.16). In lipsa PUZ: HG 525/1996 Art.23 - se aplica regulile zonei adiacente.",
+    "pot_text": "conform PUZ",
+    "cut_text": "conform PUZ",
+    "h_text": "conform PUZ"
   },
   "CC ?": {
     "pot": 50,
@@ -1411,7 +1474,8 @@
       "Constructii provizorii de orice natura",
       "Depozitare en gros",
       "Curatatorii chimice"
-    ]
+    ],
+    "nota_reglementare": "CC1+CC2: conform PUZ cu recomandari orientative (RLU Art.15). Valorile POT/CUT sunt recomandari, nu prescriptii."
   },
   "CC?": {
     "pot": 50,
@@ -1437,7 +1501,8 @@
       "Constructii provizorii de orice natura",
       "Depozitare en gros",
       "Curatatorii chimice"
-    ]
+    ],
+    "nota_reglementare": "CC1+CC2: conform PUZ cu recomandari orientative (RLU Art.15). Valorile POT/CUT sunt recomandari, nu prescriptii."
   },
   "LL ?": {
     "pot": 30,
