@@ -1,8 +1,549 @@
 {
-  "LL":  {"d":"Locuinte individuale","pot":35,"cut":1.0,"niv":2,"h":10,"rf":5,"rl":3,"rs":5,"sv":30,"pk":2,"ao":"NU","fm":null,"ua":"Locuinte si functiuni compatibile","uc":"Comert mic","ui":"Industrie"},
-  "LC":  {"d":"Locuinte colective","pot":40,"cut":1.6,"niv":4,"h":16,"rf":5,"rl":3,"rs":5,"sv":25,"pk":1,"ao":"NU","fm":null,"ua":"Locuinte colective, servicii","uc":"Comert la parter","ui":"Industrie"},
-  "CM":  {"d":"Zona mixta","pot":60,"cut":3.0,"niv":6,"h":24,"rf":0,"rl":3,"rs":5,"sv":20,"pk":3,"ao":"DA","fm":18,"ua":"Comert, birouri, servicii, locuire","uc":"Functiuni sensibile","ui":"Industrie poluanta"},
-  "CA":  {"d":"Zona centrala","pot":80,"cut":4.0,"niv":7,"h":28,"rf":0,"rl":0,"rs":3,"sv":10,"pk":2,"ao":"DA","fm":12,"ua":"Functiuni mixte interes public si privat","uc":"Activitati culturale","ui":"Industrie"},
-  "P1":  {"d":"Parc","pot":5,"cut":0.1,"niv":1,"h":5,"rf":10,"rl":10,"rs":10,"sv":90,"pk":0,"ao":"NU","fm":null,"ua":"Parcuri, alei","uc":"Agrement","ui":"Constructii"},
-  "EXT": {"d":"Extravilan Iasi","pot":40,"cut":4,"niv":null,"h":null,"rf":5,"rl":3,"rs":5,"sv":30,"pk":2,"ao":"NU","fm":null,"ua":"Locuire, servicii, agrement","uc":"Orice functiune cu PUZ aprobat","ui":"Industrie grea"}
+  "CP": {
+    "pot": 50,
+    "cut": 2.5,
+    "rh": "P+3",
+    "inaltime_m": 13,
+    "functiune": "Zona centrala protejata - monumente istorice",
+    "culoare": "#D4AF37",
+    "tip": "centru_protejat"
+  },
+  "CC": {
+    "pot": 50,
+    "cut": 3.0,
+    "rh": "P+6",
+    "inaltime_m": 22,
+    "functiune": "Zona centrala complexa - functiuni mixte",
+    "culoare": "#ef4444",
+    "tip": "centru"
+  },
+  "CM": {
+    "pot": 50,
+    "cut": 2.5,
+    "rh": "P+4",
+    "inaltime_m": 17,
+    "functiune": "Zona mixta - institutii, servicii, comert",
+    "culoare": "#f97316",
+    "tip": "mixt"
+  },
+  "CB1": {
+    "pot": 55,
+    "cut": 2.5,
+    "rh": "P+6",
+    "inaltime_m": 22,
+    "functiune": "Pol tertiar principal - Pacurari/Chirita",
+    "culoare": "#60a5fa",
+    "tip": "comercial"
+  },
+  "CB2": {
+    "pot": 55,
+    "cut": 2.0,
+    "rh": "P+6",
+    "inaltime_m": 22,
+    "functiune": "Pol tertiar secundar - Tutora/Fortus",
+    "culoare": "#60a5fa",
+    "tip": "comercial"
+  },
+  "CB3": {
+    "pot": 60,
+    "cut": 3.0,
+    "rh": "P+8",
+    "inaltime_m": 29,
+    "functiune": "Centru International Conferinte",
+    "culoare": "#3b82f6",
+    "tip": "comercial"
+  },
+  "CB4": {
+    "pot": 60,
+    "cut": 3.0,
+    "rh": "P+8",
+    "inaltime_m": 29,
+    "functiune": "Centrul Expozitional Moldova",
+    "culoare": "#3b82f6",
+    "tip": "comercial"
+  },
+  "CB5": {
+    "pot": 55,
+    "cut": 2.5,
+    "rh": "P+6",
+    "inaltime_m": 22,
+    "functiune": "Campus universitar - cercetare",
+    "culoare": "#a78bfa",
+    "tip": "educational"
+  },
+  "CB6": {
+    "pot": 50,
+    "cut": 2.0,
+    "rh": "P+4",
+    "inaltime_m": 17,
+    "functiune": "Centru studii teologice",
+    "culoare": "#a78bfa",
+    "tip": "educational"
+  },
+  "CB7": {
+    "pot": 50,
+    "cut": 2.0,
+    "rh": "P+4",
+    "inaltime_m": 17,
+    "functiune": "Unitati tertiale dispersate",
+    "culoare": "#8b5cf6",
+    "tip": "comercial"
+  },
+  "CA": {
+    "pot": 50,
+    "cut": 2.5,
+    "rh": "P+6",
+    "inaltime_m": 22,
+    "functiune": "Activitati diverse conform PUZ",
+    "culoare": "#f59e0b",
+    "tip": "mixt"
+  },
+  "LA": {
+    "pot": 25,
+    "cut": 2.0,
+    "rh": "P+10",
+    "inaltime_m": 32,
+    "functiune": "Locuinte colective mari - blocuri existente",
+    "culoare": "#D4AF37",
+    "tip": "rezidential_mare"
+  },
+  "LA1": {
+    "pot": 25,
+    "cut": 2.0,
+    "rh": "P+10",
+    "inaltime_m": 32,
+    "functiune": "Locuinte colective mari subansamblu",
+    "culoare": "#ca8a04",
+    "tip": "rezidential_mare"
+  },
+  "LB": {
+    "pot": 40,
+    "cut": 1.8,
+    "rh": "P+3",
+    "inaltime_m": 13,
+    "functiune": "Locuinte colective medii max P+3",
+    "culoare": "#fbbf24",
+    "tip": "rezidential_mediu"
+  },
+  "LB,C2": {
+    "pot": 35,
+    "cut": 1.5,
+    "rh": "P+3",
+    "inaltime_m": 13,
+    "functiune": "Locuinte colective medii",
+    "culoare": "#fbbf24",
+    "tip": "rezidential_mediu"
+  },
+  "LB,C 2": {
+    "pot": 35,
+    "cut": 1.5,
+    "rh": "P+3",
+    "inaltime_m": 13,
+    "functiune": "Locuinte colective medii",
+    "culoare": "#fbbf24",
+    "tip": "rezidential_mediu"
+  },
+  "LC": {
+    "pot": 30,
+    "cut": 0.9,
+    "rh": "P+1",
+    "inaltime_m": 7,
+    "functiune": "Locuinte individuale si colective mici P+1",
+    "culoare": "#86efac",
+    "tip": "rezidential_mic"
+  },
+  "LL": {
+    "pot": 30,
+    "cut": 0.9,
+    "rh": "P+1",
+    "inaltime_m": 7,
+    "functiune": "Locuinte individuale mici",
+    "culoare": "#4ade80",
+    "tip": "rezidential_mic"
+  },
+  "LL2": {
+    "pot": 30,
+    "cut": 0.9,
+    "rh": "P+1",
+    "inaltime_m": 7,
+    "functiune": "Locuinte individuale mici",
+    "culoare": "#4ade80",
+    "tip": "rezidential_mic"
+  },
+  "LV": {
+    "pot": 35,
+    "cut": 1.2,
+    "rh": "P+2",
+    "inaltime_m": 10,
+    "functiune": "Locuinte tip vila P+2",
+    "culoare": "#22c55e",
+    "tip": "rezidential_vila"
+  },
+  "LV??": {
+    "pot": 35,
+    "cut": 1.2,
+    "rh": "P+2",
+    "inaltime_m": 10,
+    "functiune": "Locuinte tip vila nedefinite",
+    "culoare": "#22c55e",
+    "tip": "rezidential_vila"
+  },
+  "P": {
+    "pot": 5,
+    "cut": 0.05,
+    "rh": "P",
+    "inaltime_m": 4,
+    "functiune": "Parc urban - constructii strict necesare",
+    "culoare": "#86efac",
+    "tip": "verde"
+  },
+  "P1": {
+    "pot": 5,
+    "cut": 0.05,
+    "rh": "P",
+    "inaltime_m": 4,
+    "functiune": "Parc urban principal",
+    "culoare": "#4ade80",
+    "tip": "verde"
+  },
+  "P1a": {
+    "pot": 5,
+    "cut": 0.05,
+    "rh": "P",
+    "inaltime_m": 4,
+    "functiune": "Parc urban subzona a",
+    "culoare": "#4ade80",
+    "tip": "verde"
+  },
+  "P1b": {
+    "pot": 5,
+    "cut": 0.05,
+    "rh": "P",
+    "inaltime_m": 4,
+    "functiune": "Parc urban subzona b",
+    "culoare": "#4ade80",
+    "tip": "verde"
+  },
+  "P2": {
+    "pot": 3,
+    "cut": 0.03,
+    "rh": "P",
+    "inaltime_m": 3,
+    "functiune": "Parc periurban",
+    "culoare": "#86efac",
+    "tip": "verde"
+  },
+  "P2a": {
+    "pot": 3,
+    "cut": 0.03,
+    "rh": "P",
+    "inaltime_m": 3,
+    "functiune": "Parc periurban a",
+    "culoare": "#86efac",
+    "tip": "verde"
+  },
+  "P2b": {
+    "pot": 3,
+    "cut": 0.03,
+    "rh": "P",
+    "inaltime_m": 3,
+    "functiune": "Parc periurban b",
+    "culoare": "#86efac",
+    "tip": "verde"
+  },
+  "P2c": {
+    "pot": 3,
+    "cut": 0.03,
+    "rh": "P",
+    "inaltime_m": 3,
+    "functiune": "Parc periurban c",
+    "culoare": "#86efac",
+    "tip": "verde"
+  },
+  "P2c ?": {
+    "pot": 3,
+    "cut": 0.03,
+    "rh": "P",
+    "inaltime_m": 3,
+    "functiune": "Parc periurban c (incert digitizare)",
+    "culoare": "#86efac",
+    "tip": "verde"
+  },
+  "P3": {
+    "pot": 5,
+    "cut": 0.05,
+    "rh": "P",
+    "inaltime_m": 4,
+    "functiune": "Gradini publice de cartier",
+    "culoare": "#4ade80",
+    "tip": "verde"
+  },
+  "P4": {
+    "pot": 5,
+    "cut": 0.05,
+    "rh": "P",
+    "inaltime_m": 4,
+    "functiune": "Scuaruri",
+    "culoare": "#4ade80",
+    "tip": "verde"
+  },
+  "P5": {
+    "pot": 5,
+    "cut": 0.05,
+    "rh": "P",
+    "inaltime_m": 4,
+    "functiune": "Spatii verzi de protectie",
+    "culoare": "#bbf7d0",
+    "tip": "verde"
+  },
+  "P6": {
+    "pot": 5,
+    "cut": 0.05,
+    "rh": "P",
+    "inaltime_m": 4,
+    "functiune": "Spatii plantate pe artere",
+    "culoare": "#bbf7d0",
+    "tip": "verde"
+  },
+  "AI1": {
+    "pot": 60,
+    "cut": 2.0,
+    "rh": "P+3",
+    "inaltime_m": 15,
+    "functiune": "Industrie mare - Dancu, Holboca",
+    "culoare": "#78350f",
+    "tip": "industrial"
+  },
+  "AI2A": {
+    "pot": 60,
+    "cut": 2.0,
+    "rh": "P+3",
+    "inaltime_m": 15,
+    "functiune": "Industrie mijlocie subzona A",
+    "culoare": "#92400e",
+    "tip": "industrial"
+  },
+  "AI2a": {
+    "pot": 60,
+    "cut": 2.0,
+    "rh": "P+3",
+    "inaltime_m": 15,
+    "functiune": "Industrie mijlocie subzona a",
+    "culoare": "#92400e",
+    "tip": "industrial"
+  },
+  "AI2b": {
+    "pot": 60,
+    "cut": 2.0,
+    "rh": "P+3",
+    "inaltime_m": 14,
+    "functiune": "Industrie - cariere reabilitate",
+    "culoare": "#92400e",
+    "tip": "industrial"
+  },
+  "AI2c": {
+    "pot": 60,
+    "cut": 2.0,
+    "rh": "P+3",
+    "inaltime_m": 13,
+    "functiune": "Industrie - cariere in exploatare",
+    "culoare": "#a16207",
+    "tip": "industrial"
+  },
+  "AI2d": {
+    "pot": 60,
+    "cut": 2.0,
+    "rh": "P+3",
+    "inaltime_m": 13,
+    "functiune": "Industrie - cariere refacere peisaj",
+    "culoare": "#a16207",
+    "tip": "industrial"
+  },
+  "AI3": {
+    "pot": 55,
+    "cut": 1.5,
+    "rh": "P+2",
+    "inaltime_m": 11,
+    "functiune": "Industrie mica, depozitare, servicii",
+    "culoare": "#b45309",
+    "tip": "industrial"
+  },
+  "AI4": {
+    "pot": 55,
+    "cut": 1.5,
+    "rh": "P+2",
+    "inaltime_m": 11,
+    "functiune": "Unitati industriale dispersate",
+    "culoare": "#b45309",
+    "tip": "industrial"
+  },
+  "AI4a": {
+    "pot": 55,
+    "cut": 1.5,
+    "rh": "P+2",
+    "inaltime_m": 11,
+    "functiune": "Unitati industriale dispersate mentinute",
+    "culoare": "#d97706",
+    "tip": "industrial"
+  },
+  "AI5": {
+    "pot": 50,
+    "cut": 1.5,
+    "rh": "P+2",
+    "inaltime_m": 11,
+    "functiune": "Zona mixta productiva depozitare",
+    "culoare": "#d97706",
+    "tip": "industrial"
+  },
+  "AI6": {
+    "pot": 50,
+    "cut": 1.5,
+    "rh": "P+2",
+    "inaltime_m": 10,
+    "functiune": "Parc de activitati",
+    "culoare": "#f59e0b",
+    "tip": "industrial"
+  },
+  "AA": {
+    "pot": 15,
+    "cut": 0.3,
+    "rh": "P+1",
+    "inaltime_m": 6,
+    "functiune": "Agrement, turism, sport",
+    "culoare": "#34d399",
+    "tip": "agrement"
+  },
+  "D1": {
+    "pot": 40,
+    "cut": 1.5,
+    "rh": "P+3",
+    "inaltime_m": 13,
+    "functiune": "Activitati balnearo-turistice",
+    "culoare": "#67e8f9",
+    "tip": "turism"
+  },
+  "EP6": {
+    "pot": 20,
+    "cut": 0.5,
+    "rh": "P+1",
+    "inaltime_m": 7,
+    "functiune": "Echipamente publice dispersate",
+    "culoare": "#c084fc",
+    "tip": "public"
+  },
+  "ET3": {
+    "pot": 10,
+    "cut": 0.2,
+    "rh": "P",
+    "inaltime_m": 5,
+    "functiune": "Zone rezervate extindere functiuni",
+    "culoare": "#e2e8f0",
+    "tip": "rezerva"
+  },
+  "G1": {
+    "pot": 50,
+    "cut": 1.5,
+    "rh": "P+2",
+    "inaltime_m": 9,
+    "functiune": "Constructii gospodarie comunala",
+    "culoare": "#475569",
+    "tip": "tehnic"
+  },
+  "G2": {
+    "pot": 10,
+    "cut": 0.1,
+    "rh": "P",
+    "inaltime_m": 4,
+    "functiune": "Cimitire",
+    "culoare": "#94a3b8",
+    "tip": "tehnic"
+  },
+  "G/P9": {
+    "pot": 10,
+    "cut": 0.1,
+    "rh": "P",
+    "inaltime_m": 4,
+    "functiune": "Gospodarie comunala / parc",
+    "culoare": "#94a3b8",
+    "tip": "tehnic"
+  },
+  "P1a,P1b": {
+    "pot": 5,
+    "cut": 0.05,
+    "rh": "P",
+    "inaltime_m": 4,
+    "functiune": "Parc urban combinat",
+    "culoare": "#4ade80",
+    "tip": "verde"
+  },
+  "P1a/P1b": {
+    "pot": 5,
+    "cut": 0.05,
+    "rh": "P",
+    "inaltime_m": 4,
+    "functiune": "Parc urban combinat",
+    "culoare": "#4ade80",
+    "tip": "verde"
+  },
+  "?": {
+    "pot": 0,
+    "cut": 0,
+    "rh": "?",
+    "inaltime_m": 5,
+    "functiune": "Zona neclasificata - eroare digitizare",
+    "culoare": "#94a3b8",
+    "tip": "necunoscut"
+  },
+  "??": {
+    "pot": 0,
+    "cut": 0,
+    "rh": "?",
+    "inaltime_m": 5,
+    "functiune": "Zona neclasificata - eroare digitizare",
+    "culoare": "#94a3b8",
+    "tip": "necunoscut"
+  },
+  "CC ?": {
+    "pot": 50,
+    "cut": 3.0,
+    "rh": "P+6",
+    "inaltime_m": 22,
+    "functiune": "Zona centrala (incert digitizare)",
+    "culoare": "#ef4444",
+    "tip": "centru"
+  },
+  "CC?": {
+    "pot": 50,
+    "cut": 3.0,
+    "rh": "P+6",
+    "inaltime_m": 22,
+    "functiune": "Zona centrala (incert digitizare)",
+    "culoare": "#ef4444",
+    "tip": "centru"
+  },
+  "LL ?": {
+    "pot": 30,
+    "cut": 0.9,
+    "rh": "P+1",
+    "inaltime_m": 7,
+    "functiune": "Locuinte individuale (incert digitizare)",
+    "culoare": "#4ade80",
+    "tip": "rezidential_mic"
+  },
+  "LV ?": {
+    "pot": 35,
+    "cut": 1.2,
+    "rh": "P+2",
+    "inaltime_m": 10,
+    "functiune": "Locuinte vila (incert digitizare)",
+    "culoare": "#22c55e",
+    "tip": "rezidential_vila"
+  },
+  "_meta": {
+    "sursa": "RLU PUG Municipiul Iasi (aprobat 1992, actualizat 2018) + Normativ P100-1/2013",
+    "nota": "Inaltimile sunt in METRI (inaltime_m), nu in etaje. Zona seismica P100: Ag=0.2g Tc=0.7s (Zona II). POT in %, CUT adimensional.",
+    "seismic": "Ag=0.2g Tc=0.7s - Zona II INFP P100-1/2013",
+    "generata": "22 mai 2026",
+    "total_utr": 60
+  }
 }
