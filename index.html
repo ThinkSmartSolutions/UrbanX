@@ -4069,7 +4069,7 @@ window._hookCityPersistence = function() {
   // Verificăm periodic dacă TCI.cityKey s-a schimbat
   let _lastCity = null;
   setInterval(function() {
-    const k = window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
+    const k = localStorage.getItem('ux_last_city') || window.TCI?.cityKey || 'RO-IS-01';
     if (k !== _lastCity) {
       _lastCity = k;
       _updateUTRDrawerTitle(k);
@@ -4080,7 +4080,7 @@ window._hookCityPersistence = function() {
 // Aplicăm imediat la load
 window.addEventListener('load', function() {
   setTimeout(function() {
-    const k = window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
+    const k = localStorage.getItem('ux_last_city') || window.TCI?.cityKey || 'RO-IS-01';
     _updateUTRDrawerTitle(k);
   }, 1500);
   // Și la orice apăsare a butonului UTR
@@ -4088,7 +4088,7 @@ window.addEventListener('load', function() {
   if (btnUTR) {
     const _origClick = btnUTR.onclick;
     btnUTR.addEventListener('click', function() {
-      const k = window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
+      const k = localStorage.getItem('ux_last_city') || window.TCI?.cityKey || 'RO-IS-01';
       _updateUTRDrawerTitle(k);
     }, true);
   }
@@ -4778,7 +4778,7 @@ function _setupBtnUTR() {
     btn.classList.add('on');
 
     // Determinăm UAT activ
-    const k = window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
+    const k = localStorage.getItem('ux_last_city') || window.TCI?.cityKey || 'RO-IS-01';
     const db = window._RO_CITIES_DB || {};
     const city = db[k] || {name:'UAT', lat:47.158, lon:27.601};
     const cityName = city.name || 'UAT';
