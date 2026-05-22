@@ -212,31 +212,23 @@ G._SceneEngine = {
   _ctx:      null,
 
   SCENES: [
-    { id:1,  dur:8000,  label:'Overview — România în Europa' },
-    { id:2,  dur:7000,  label:'Zoom Regional — Moldova' },
-    { id:3,  dur:10000, label:'Approach — Date în Zbor' },
-    { id:4,  dur:18000, label:'City Overview 3D — Orbit 360°' },
-    { id:5,  dur:20000, label:'Presiune Construire — Bare 3D' },
-    { id:6,  dur:14000, label:'Focus Zonă 1 — Densificare' },
-    { id:7,  dur:14000, label:'Focus Zonă 2 — Reconversie' },
-    { id:8,  dur:14000, label:'Focus Zonă 3 — Expansiune' },
-    { id:9,  dur:16000, label:'Infrastructură & Mobilitate' },
-    { id:10, dur:14000, label:'Riscuri Teritoriale' },
-    { id:11, dur:12000, label:'Comparație UAT-uri' },
-    { id:12, dur:10000, label:'European Benchmarking' },
-    { id:13, dur:12000, label:'Street Level — Pieton' },
-    { id:14, dur:14000, label:'Viața Urbană 2055' },
-    { id:15, dur:14000, label:'Evoluție Temporală 4D' },
-    { id:16, dur:12000, label:'Demografic — Monte Carlo' },
-    { id:17, dur:10000, label:'Economic — Convergență UE' },
-    { id:18, dur:12000, label:'Sustenabilitate & SDG 11' },
-    { id:19, dur:14000, label:'Masterplan — Indicatori Propuși' },
-    { id:20, dur:14000, label:'Zone Protejate — Restricții Legale' },
-    { id:21, dur:16000, label:'Street View Real — Vehicule & Pietoni' },
-    { id:22, dur:14000, label:'AI Narrative — Memoriu Justificativ Live' },
-    { id:23, dur:14000, label:'Masterplan PDF — Structura Documentului' },
-    { id:24, dur:16000, label:'Investiții & Finanțare UE 2025-2055' },
-    { id:25, dur:24000, label:'Concluzie & Viziune 2055 — Finale Epic' },
+    { id:1,  dur:18000, label:'Identitate — Cine ești, de unde vii' },
+    { id:2,  dur:15000, label:'Context Geografic & Regional' },
+    { id:3,  dur:16000, label:'Portretul Comunității — Demografie' },
+    { id:4,  dur:16000, label:'Economie & Putere de Cumpărare' },
+    { id:5,  dur:18000, label:'Unde Crește Orașul — Coridoare 2055' },
+    { id:6,  dur:16000, label:'Mobilitate Auto — Congestie & Pasaje' },
+    { id:7,  dur:16000, label:'Transport Public & Walkability' },
+    { id:8,  dur:16000, label:'Risc Seismic — Fond Vulnerabil & PNRR' },
+    { id:9,  dur:16000, label:'Riscuri Climatice — Inundații & UHI' },
+    { id:10, dur:18000, label:'Proiecție Demografică 2055 — Monte Carlo' },
+    { id:11, dur:16000, label:'Infrastructură Necesară 2025-2055' },
+    { id:12, dur:16000, label:'Investiții în Derulare — SICAP Live' },
+    { id:13, dur:18000, label:'Scenarii Comparate S1/S2/S3' },
+    { id:14, dur:16000, label:'Calitatea Vieții — SDG11 & Mediu' },
+    { id:15, dur:16000, label:'Benchmarking European — Peer Group' },
+    { id:16, dur:18000, label:'Agenda Primarului — Priorități 2025-2030' },
+    { id:17, dur:20000, label:'Viziunea 2055 — Orașul Posibil' },
   ],
 
   async launch(cityKey) {
@@ -328,6 +320,35 @@ G._SceneEngine = {
     // Canvas overlay fullscreen
     this._canvas = this._createCanvas();
     this._ctx    = this._canvas.getContext('2d');
+
+    // Fetch Wikipedia pentru scena 1 (istoric UAT)
+    this._wikiText = '';
+    this._loadingWiki = true;
+    (async () => {
+      try {
+        const cityName = city.name || '';
+        // Incearca intai romana, apoi engleza
+        for(const lang of ['ro','en']) {
+          const url = `https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(cityName)}`;
+          const resp = await fetch(url, {signal: AbortSignal.timeout(5000)});
+          if(resp.ok) {
+            const data = await resp.json();
+            if(data.extract && data.extract.length > 50) {
+              // Curatam textul - max 600 caractere
+              this._wikiText = data.extract.replace(/\s+/g,' ').trim().substring(0,600);
+              if(this._wikiText.length === 600) this._wikiText += '...';
+              this._wikiLang = lang;
+              console.log('[Cinema] Wikipedia', lang, 'OK:', cityName);
+              break;
+            }
+          }
+        }
+      } catch(e) {
+        console.warn('[Cinema] Wikipedia fetch failed:', e.message);
+        this._wikiText = city.name + ' — date istorice indisponibile momentan.';
+      }
+      this._loadingWiki = false;
+    })();
 
     // Pornim
     this._runScene(0);
@@ -428,7 +449,7 @@ G._SceneEngine = {
 
     const flyOpts = {
       1:  { center:[23.5,46.0], zoom:4.5, pitch:0,  bearing:0,  dur:4000 }, // România
-      2:  { center:[cx,cy],     zoom:7,   pitch:15, bearing:-5, dur:3000 }, // Zoom regional dinamic
+      2:  { center:[cx,cy],     zoom:7.5, pitch:20, bearing:-8, dur:3500 }, // Zoom regional
       3:  { center:[cx,cy],     zoom:11,  pitch:30, bearing:-10,dur:3000 }, // Approach
       4:  { center:[cx,cy],     zoom:13,  pitch:50, bearing:-15,dur:2000 }, // City 3D
       5:  { center:[cx,cy],     zoom:12,  pitch:45, bearing:20, dur:2000 }, // Dezvoltare
@@ -494,31 +515,23 @@ G._SceneEngine = {
     ctx.globalAlpha = alpha;
 
     switch(sceneId) {
-      case 1:  this._s1_overview(ctx,W,H,t,city); break;
-      case 2:  this._s2_moldova(ctx,W,H,t,city); break;
-      case 3:  this._s3_approach(ctx,W,H,t,city); break;
-      case 4:  this._s4_city3d(ctx,W,H,t,city); break;
-      case 5:  this._s5_growth(ctx,W,H,t,city,zones); break;
-      case 6:  this._s6_focusZone1(ctx,W,H,t,city,zones); break;
-      case 7:  this._s7_focusZone2(ctx,W,H,t,city,zones); break;
-      case 8:  this._s8_focusZone3(ctx,W,H,t,city,zones); break;
-      case 9:  this._s9_mobility(ctx,W,H,t,city); break;
-      case 10: this._s10_risks(ctx,W,H,t,city); break;
-      case 11: this._s11_compare(ctx,W,H,t,city); break;
-      case 12: this._s12_euBench(ctx,W,H,t,city); break;
-      case 13: this._s13_street(ctx,W,H,t,city); break;
-      case 14: this._s14_urban(ctx,W,H,t,city); break;
-      case 15: this._s15_timeline(ctx,W,H,t,city); break;
-      case 16: this._s16_monteCarlo(ctx,W,H,t,city); break;
-      case 17: this._s17_economic(ctx,W,H,t,city); break;
-      case 18: this._s18_sdg(ctx,W,H,t,city); break;
-      case 19: this._s19_masterplan(ctx,W,H,t,city,zones); break;
-      case 20: this._s20_protectedZones(ctx,W,H,t,city); break;
-      case 21: this._s21_streetViewReal(ctx,W,H,t,city); break;
-      case 22: this._s22_aiNarrative(ctx,W,H,t,city); break;
-      case 23: this._s23_masterplanPreview(ctx,W,H,t,city); break;
-      case 24: this._s24_investment(ctx,W,H,t,city); break;
-      case 25: this._s25_finale(ctx,W,H,t,city); break;
+      case 1:  this._s1_historic(ctx,W,H,t,city); break;
+      case 2:  this._s2_context(ctx,W,H,t,city); break;
+      case 3:  this._s3_demographics(ctx,W,H,t,city); break;
+      case 4:  this._s4_economy(ctx,W,H,t,city); break;
+      case 5:  this._s5_growth_corridors(ctx,W,H,t,city,zones); break;
+      case 6:  this._s6_mobility_auto(ctx,W,H,t,city); break;
+      case 7:  this._s7_mobility_public(ctx,W,H,t,city); break;
+      case 8:  this._s8_seismic(ctx,W,H,t,city); break;
+      case 9:  this._s9_climate(ctx,W,H,t,city); break;
+      case 10: this._s10_projection(ctx,W,H,t,city); break;
+      case 11: this._s11_infrastructure(ctx,W,H,t,city); break;
+      case 12: this._s12_investments(ctx,W,H,t,city); break;
+      case 13: this._s13_scenarios(ctx,W,H,t,city,zones); break;
+      case 14: this._s14_quality(ctx,W,H,t,city); break;
+      case 15: this._s15_benchmark(ctx,W,H,t,city); break;
+      case 16: this._s16_actions(ctx,W,H,t,city); break;
+      case 17: this._s17_vision(ctx,W,H,t,city); break;
     }
 
     // Progress bar scenă
@@ -527,1030 +540,1540 @@ G._SceneEngine = {
     ctx.restore();
   },
 
-  // ── SCENA 1: Overview România ─────────────────────────────────────────
-  _s1_overview(ctx,W,H,t,city) {
-    // Vignette
-    const vig = ctx.createRadialGradient(W/2,H/2,H*0.2,W/2,H/2,H*0.7);
-    vig.addColorStop(0,'rgba(0,0,0,0)'); vig.addColorStop(1,'rgba(0,0,0,0.5)');
-    ctx.fillStyle=vig; ctx.fillRect(0,0,W,H);
+  // ═══════════════════════════════════════════════════════════════════════
+  // SCENELE TCI CINEMATIC — rescrise complet
+  // Fiecare scenă transmite o informație acționabilă, cu date reale per UAT
+  // ═══════════════════════════════════════════════════════════════════════
 
-    // Text intro
-    if(t > 0.2) {
-      ctx.fillStyle='rgba(255,255,255,0.95)';
-      ctx.font=`bold ${W*0.018}px "Space Grotesk",sans-serif`;
-      ctx.textAlign='center';
-      ctx.fillText('TEMPORAL CITY INTELLIGENCE',W/2,H*0.15,W*0.88);
-      ctx.fillStyle='rgba(212,175,55,0.9)';
-      ctx.font=`${W*0.012}px "IBM Plex Mono"`;
-      ctx.fillText('România · Context European · Date Oficiale INSE + Eurostat',W/2,H*0.20,W*0.88);
-    }
-    // Label scenă
-    this._sceneLabel(ctx,W,H,'1','OVERVIEW — ROMÂNIA');
-  },
-
-  // ── SCENA 2: Zoom Moldova ─────────────────────────────────────────────
-  _s2_moldova(ctx,W,H,t,city) {
-    // Overlay subtil
-    ctx.fillStyle='rgba(0,0,0,0.2)'; ctx.fillRect(0,0,W,H);
-    const regiune = city?.regiune || 'NE';
-    const regionLabel = {
-      'NE':'MOLDOVA — REGIUNE NE', 'NV':'NORD-VEST', 'V':'VEST',
-      'C':'CENTRU', 'SE':'SUD-EST', 'S':'SUD', 'SV':'SUD-VEST', 'B':'BUCURESTI'
-    }[regiune] || ('REGIUNE ' + regiune);
-
-    if(t > 0.3) {
-      // Card cu date regionale dinamice
-      const cx=W*0.75, cy=H*0.35;
-      this._card(ctx,cx,cy,220,120,'#60a5fa', regionLabel);
-      ctx.fillStyle='rgba(200,215,235,.9)'; ctx.font=`bold ${W*0.013}px "IBM Plex Mono"`;
-      ctx.textAlign='left';
-      const pop = city?.pop2021 ? (city.pop2021/1000).toFixed(0)+'K loc.' : '—';
-      const pib = city?.pib_eur_cap ? city.pib_eur_cap.toLocaleString('ro-RO')+' €/cap' : '—';
-      const rata = city?.rata_reala_2011_2021 != null ? (city.rata_reala_2011_2021>0?'+':'')+city.rata_reala_2011_2021.toFixed(1)+'%/an' : '—';
-      ctx.fillText('Populație: '+pop, cx+10, cy+30);
-      ctx.fillText('PIB/cap: '+pib, cx+10, cy+48);
-      ctx.fillText('Creștere: '+rata, cx+10, cy+66);
-      ctx.fillStyle='#D4AF37'; ctx.font=`bold ${W*0.010}px "IBM Plex Mono"`;
-      const tip = (city?.tip||'municipiu').toUpperCase();
-      ctx.fillText('⭐ '+tip+': '+(city?.name||'—').toUpperCase(), cx+10, cy+90);
-      ctx.fillText(N(city?.pop2021||0)+' loc.', cx+10, cy+106);
-    }
-    this._sceneLabel(ctx,W,H,'2','ZOOM — '+(city?.regiune||'REGIUNE'));
-  },
-
-  // ── SCENA 3: Approach cu date live ───────────────────────────────────
-  _s3_approach(ctx,W,H,t,city) {
-    const pop0  = city?.pop2021||100000;
-    const pop50 = this._need?.pop2055||pop0;
-    const delta = ((pop50-pop0)/pop0*100).toFixed(1);
-
-    // Card date populate
-    if(t > 0.15) {
-      const fade = Math.min(1,(t-0.15)/0.25);
-      ctx.globalAlpha *= fade;
-
-      const cx=W*0.08, cy=H*0.22;
-      ctx.fillStyle='rgba(4,10,24,0.88)';
-      this._roundRect(ctx,cx,cy,200,110,8); ctx.fill();
-      ctx.strokeStyle='rgba(212,175,55,0.6)'; ctx.lineWidth=1;
-      ctx.stroke();
-      // POPULAȚIE 2021
-      ctx.fillStyle='rgba(212,175,55,.8)';ctx.font=`bold ${W*0.0075}px "IBM Plex Mono"`;
-      ctx.textAlign='left';
-      ctx.fillText('POPULATIE 2021',cx+10,cy+16);
-      ctx.fillStyle='#fff';ctx.font=`900 ${W*0.028}px "Space Grotesk",sans-serif`;
-      ctx.fillText(N(pop0),cx+10,cy+46,W-20);
-
-      // POPULATIE 2050
-      if(t>0.35){
-        const pa=Math.min(1,(t-0.35)/0.25);
-        ctx.globalAlpha*=pa;
-        ctx.fillStyle='rgba(148,163,184,.7)';ctx.font=`bold ${W*0.0075}px "IBM Plex Mono"`;
-        ctx.fillText('POPULATIE 2050 (S2)',cx+10,cy+66);
-        ctx.fillStyle='#22c55e';ctx.font=`900 ${W*0.022}px "Space Grotesk",sans-serif`;
-        const chars=Math.floor(N(pop50).length*Math.min(1,(t-0.35)/0.3)*3);
-        ctx.fillText(N(pop50).slice(0,chars),cx+10,cy+90,W-20);
-        ctx.globalAlpha/=pa;
-      }
-      ctx.fillStyle='rgba(34,197,94,.7)'; ctx.font=`bold ${W*0.010}px "IBM Plex Mono"`;
-      if(t > 0.55) ctx.fillText('+'+delta+'%', cx+120, cy+88);
-    }
-    ctx.globalAlpha = Math.min(1,ctx.globalAlpha+0.3);
-    this._sceneLabel(ctx,W,H,'3','APPROACH — '+(city?.name||'').toUpperCase());
-  },
-
-  // ── SCENA 4: City Overview 3D + densitate ────────────────────────────
-  _s4_city3d(ctx,W,H,t,city) {
-    // Legendă densitate
-    if(t > 0.25) {
-      const lx=W-160, ly=H*0.25;
-      ctx.fillStyle='rgba(4,10,24,0.9)';
-      this._roundRect(ctx,lx,ly,150,140,8); ctx.fill();
-      ctx.strokeStyle='rgba(255,255,255,0.1)'; ctx.lineWidth=0.8; ctx.stroke();
-      ctx.fillStyle='rgba(212,175,55,.8)'; ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
-      ctx.textAlign='left';
-      ctx.fillText('DENSITATE LOC./HA', lx+8, ly+16);
-      [['>200','#7f1d1d'],['>150','#ef4444'],['>100','#f97316'],
-       ['>50','#f59e0b'],['>20','#22c55e'],['0-20','#1d4ed8']].forEach(([l,c],i)=>{
-        ctx.fillStyle=c; ctx.fillRect(lx+8, ly+24+i*17, 12, 12);
-        ctx.fillStyle='rgba(200,215,235,.8)'; ctx.font=`${W*0.008}px "IBM Plex Mono"`;
-        ctx.fillText(l+' loc/ha', lx+26, ly+34+i*17);
-      });
-    }
-    this._sceneLabel(ctx,W,H,'4','CITY OVERVIEW 3D — '+city.name?.toUpperCase());
-  },
-
-  // ── SCENA 5: Dezvoltare Urbană — Bare 3D ─────────────────────────────
-  _s5_growth(ctx,W,H,t,city,zones) {
-    // Legendă MAJORĂ/MEDIE/MICĂ
-    if(t > 0.2) {
-      const lx=W*0.03, ly=H*0.55;
-      ctx.fillStyle='rgba(4,10,24,0.92)';
-      this._roundRect(ctx,lx,ly,160,100,8); ctx.fill();
-      ctx.strokeStyle='rgba(212,175,55,.3)'; ctx.lineWidth=0.8; ctx.stroke();
-      ctx.fillStyle='#D4AF37'; ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
-      ctx.textAlign='left';
-      ctx.fillText('DEZVOLTARE 2025-2050', lx+8, ly+14);
-      [['MAJORĂ','>20%','#ef4444'],['MEDIE','10-20%','#f59e0b'],['MICĂ','<10%','#22c55e']].forEach(([l,pct,c],i)=>{
-        ctx.fillStyle=c; ctx.fillRect(lx+8, ly+22+i*22, 12, 14);
-        ctx.fillStyle='rgba(200,215,235,.9)'; ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
-        ctx.fillText(l, lx+26, ly+32+i*22);
-        ctx.fillStyle='rgba(148,163,184,.6)'; ctx.font=`${W*0.008}px "IBM Plex Mono"`;
-        ctx.fillText(pct, lx+90, ly+32+i*22);
-      });
-    }
-
-    // Carduri zone
-    if(t > 0.4 && zones) {
-      const zKeys = ['centru','semicentral','periferie'];
-      zKeys.forEach((k,i) => {
-        const z = zones[k];
-        if(!z) return;
-        const cx = W*(0.25+i*0.28), cy = H*0.12;
-        ctx.globalAlpha *= Math.min(1,(t-0.4)/0.3);
-        ctx.fillStyle='rgba(4,10,24,0.88)';
-        this._roundRect(ctx,cx,cy,140,70,6); ctx.fill();
-        ctx.strokeStyle=z.presiuneColor; ctx.lineWidth=1.5; ctx.stroke();
-        ctx.fillStyle=z.presiuneColor; ctx.font=`bold ${W*0.010}px "IBM Plex Mono"`;
-        ctx.textAlign='center';
-        ctx.fillText(z.label.toUpperCase(), cx+70, cy+16);
-        ctx.fillStyle='#fff'; ctx.font=`900 ${W*0.016}px "IBM Plex Mono"`;
-        ctx.fillText((z.densifPct>=0?'+':'')+z.densifPct+'%', cx+70, cy+40);
-        ctx.fillStyle='rgba(148,163,184,.7)'; ctx.font=`${W*0.008}px "IBM Plex Mono"`;
-        ctx.fillText(z.presiuneLabel+' · '+N(z.locuinte_noi)+' apt', cx+70, cy+58);
-        ctx.globalAlpha /= Math.min(1,(t-0.4)/0.3);
-      });
-    }
-    this._sceneLabel(ctx,W,H,'5','DEZVOLTARE URBANĂ');
-  },
-
-  // ── SCENA 6: Infrastructură & Mobilitate ─────────────────────────────
-  _s9_mobility(ctx,W,H,t,city) {
-    const pop = city?.pop2021||100000;
-    // Legendă trafic
-    const lx=W*0.03, ly=H*0.45;
-    ctx.fillStyle='rgba(4,10,24,0.92)';
-    this._roundRect(ctx,lx,ly,155,85,8); ctx.fill();
-    ctx.strokeStyle='rgba(255,255,255,.1)'; ctx.lineWidth=0.8; ctx.stroke();
-    ctx.fillStyle='rgba(212,175,55,.8)'; ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
-    ctx.textAlign='left';
-    ctx.fillText('TRAFIC URBAN', lx+8, ly+15);
-    [['AGLOMERAT','#ef4444'],['MODERAT','#f59e0b'],['FLUID','#22c55e']].forEach(([l,c],i)=>{
-      ctx.fillStyle=c; ctx.fillRect(lx+8, ly+22+i*18, 24, 6);
-      ctx.fillStyle='rgba(200,215,235,.9)'; ctx.font=`${W*0.009}px "IBM Plex Mono"`;
-      ctx.fillText(l, lx+40, ly+30+i*18);
-    });
-
-    // Modal split evolutiv
-    if(t > 0.4) {
-      const ms2025 = {auto:78,tp:15,activ:7};
-      const ms2050 = {auto:50,tp:30,activ:20};
-      const prog = Math.min(1,(t-0.4)/0.5);
-
-      const cx=W*0.75, cy=H*0.3;
-      ctx.fillStyle='rgba(4,10,24,0.9)';
-      this._roundRect(ctx,cx,cy,180,130,8); ctx.fill();
-      ctx.strokeStyle='rgba(59,130,246,.4)'; ctx.lineWidth=1; ctx.stroke();
-
-      ctx.fillStyle='#60a5fa'; ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
-      ctx.textAlign='left';
-      ctx.fillText('MODAL SPLIT 2025→2050', cx+8, cy+15);
-
-      const ms_now = {
-        auto: Math.round(ms2025.auto + (ms2050.auto-ms2025.auto)*prog),
-        tp:   Math.round(ms2025.tp   + (ms2050.tp  -ms2025.tp  )*prog),
-        activ:Math.round(ms2025.activ+ (ms2050.activ-ms2025.activ)*prog),
-      };
-
-      [['🚗 Auto', ms_now.auto+'%','#ef4444'],
-       ['🚌 Transport public', ms_now.tp+'%','#3b82f6'],
-       ['🚶🚲 Activ',ms_now.activ+'%','#22c55e']].forEach(([l,v,c],i)=>{
-        ctx.fillStyle='rgba(148,163,184,.7)'; ctx.font=`${W*0.009}px "IBM Plex Mono"`;
-        ctx.fillText(l, cx+8, cy+35+i*28);
-        // Bara
-        const barW = (parseInt(v)/100)*(160);
-        ctx.fillStyle=c+'33'; ctx.fillRect(cx+8, cy+40+i*28, 160, 10);
-        ctx.fillStyle=c;      ctx.fillRect(cx+8, cy+40+i*28, barW, 10);
-        ctx.fillStyle=c; ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
-        ctx.textAlign='right';
-        ctx.fillText(v, cx+175, cy+49+i*28);
-        ctx.textAlign='left';
-      });
-    }
-    this._sceneLabel(ctx,W,H,'6','INFRASTRUCTURĂ & MOBILITATE');
-  },
-
-  // ── SCENA 7: Focus pe FIECARE ZONĂ — iterăm prin toate cartierele ────
-  // Nu o singură zonă — toate cartierele UAT-ului, cu zoom individual
-
-  _s6_focusZone1(ctx,W,H,t,city,zones) {
-    // ─── Layout curat: zona curenta + 3 KPI-uri + RH/POT/functiuni ──────
-    const zArr = zones ? Object.values(zones) : [];
-    const nZ   = Math.min(8, zArr.length || 1);
-    const tPZ  = 1.0 / nZ;
-    const cIdx = Math.min(nZ-1, Math.floor(t / tPZ));
-    const tIn  = (t - cIdx*tPZ) / tPZ;
-    const zone = zArr[cIdx] || { label:'Zona', densif_pct:15, locuinte_noi:5000, pop2055:50000 };
-    const N    = v => Number(v||0).toLocaleString('ro-RO');
-    const pct  = zone.densif_pct || zone.densifPct || 0;
-    const pColor = zone.pressureColor || (pct>20?'#ef4444':pct>10?'#f59e0b':'#22c55e');
-    const intColors = {
-      'DENSIFICARE':'#22c55e','DENSIFICARE MODERATĂ':'#4ade80','DENSIFICARE INTENSIVĂ':'#16a34a',
-      'RECONVERSIE INDUSTRIALĂ':'#f59e0b','RECONVERSIE':'#f59e0b',
-      'EXPANSIUNE CONTROLATĂ':'#60a5fa','EXPANSIUNE':'#60a5fa',
-      'REABILITARE FOND':'#ef4444','REABILITARE':'#ef4444','CONSOLIDARE':'#94a3b8',
-    };
-    const intColor = intColors[zone.intervention] || pColor;
-
-    // ─── Gradient overlay (max 85% opacitate jos) ───────────────────────
-    const gr = ctx.createLinearGradient(0, 0, 0, H);
-    gr.addColorStop(0, 'rgba(4,10,24,0)');
-    gr.addColorStop(0.45, 'rgba(4,10,24,.35)');
-    gr.addColorStop(1, 'rgba(4,10,24,.88)');
-    ctx.fillStyle = gr; ctx.fillRect(0,0,W,H);
-    this._scanlines(ctx, W, H, 0.025);
-
-    // ─── Titlu zona (stanga sus, mare) ──────────────────────────────────
-    if(tIn > 0.05) {
-      const ta = Math.min(1,(tIn-0.05)/0.2);
-      ctx.globalAlpha = ta;
-      // Scena counter
-      ctx.fillStyle = intColor;
-      ctx.font = `bold ${W*0.008}px "IBM Plex Mono"`;
-      ctx.textAlign = 'left';
-      ctx.fillText(`ZONA ${cIdx+1}/${nZ} — ${(zone.intervention||'DENSIFICARE').toUpperCase()}`, W*0.04, H*0.1);
-      // Nume zona - mare
-      ctx.fillStyle = 'rgba(255,255,255,.95)';
-      ctx.font = `900 ${W*0.03}px "Space Grotesk",sans-serif`;
-      ctx.fillText((zone.name||`ZONA ${cIdx+1}`).toUpperCase().slice(0,20), W*0.04, H*0.18);
-      ctx.globalAlpha = 1;
-    }
-
-    // ─── Card principal stanga: Densificare + Locuinte + Pop ─────────────
-    // Card background (stanga, ocupa 40% din latime, 35% din inaltime)
-    if(tIn > 0.08) {
-      const ca = Math.min(1,(tIn-0.08)/0.22);
-      ctx.globalAlpha = ca;
-      ctx.fillStyle = 'rgba(4,10,24,.88)';
-      this._roundRect(ctx, W*0.04, H*0.58, W*0.38, H*0.34, 8); ctx.fill();
-      ctx.strokeStyle = intColor; ctx.lineWidth = 1;
-      this._roundRect(ctx, W*0.04, H*0.58, W*0.38, H*0.34, 8); ctx.stroke();
-      // Accent bar top
-      ctx.fillStyle = intColor;
-      this._roundRect(ctx, W*0.04, H*0.58, W*0.38, 3, 1); ctx.fill();
-      ctx.globalAlpha = 1;
-    }
-
-    // ─── KPI 1: Densificare ──────────────────────────────────────────────
-    if(tIn > 0.12) {
-      const ka = Math.min(1,(tIn-0.12)/0.3);
-      ctx.globalAlpha = ka;
-      ctx.fillStyle = 'rgba(148,163,184,.7)';
-      ctx.font = `bold ${W*0.007}px "IBM Plex Mono"`;
-      ctx.textAlign = 'left';
-      ctx.fillText('DENSIFICARE PROGNOZATĂ', W*0.06, H*0.63);
-      ctx.fillStyle = pColor;
-      ctx.font = `900 ${W*0.045}px "Space Grotesk",sans-serif`;
-      ctx.fillText((pct>=0?'+':'')+this._countUp(pct, Math.min(1,(tIn-0.15)/0.4))+'%', W*0.06, H*0.70);
-      ctx.globalAlpha = 1;
-    }
-
-    // ─── KPI 2: Locuinte + Populatie (rand 2 in card) ────────────────────
-    if(tIn > 0.28) {
-      const k2a = Math.min(1,(tIn-0.28)/0.2);
-      ctx.globalAlpha = k2a;
-      // Linie separator
-      ctx.strokeStyle = 'rgba(255,255,255,.08)'; ctx.lineWidth = 0.6;
-      ctx.beginPath(); ctx.moveTo(W*0.06, H*0.73); ctx.lineTo(W*0.40, H*0.73); ctx.stroke();
-      // Locuinte
-      ctx.fillStyle = 'rgba(148,163,184,.6)'; ctx.font = `bold ${W*0.006}px "IBM Plex Mono"`;
-      ctx.fillText('LOCUINȚE NOI', W*0.06, H*0.76);
-      ctx.fillStyle = '#fff'; ctx.font = `bold ${W*0.014}px "Space Grotesk",sans-serif`;
-      ctx.fillText(N(zone.locuinte_noi||0), W*0.06, H*0.80);
-      // Populatie
-      ctx.fillStyle = 'rgba(148,163,184,.6)'; ctx.font = `bold ${W*0.006}px "IBM Plex Mono"`;
-      ctx.fillText('POPULAȚIE 2055', W*0.22, H*0.76);
-      ctx.fillStyle = '#22c55e'; ctx.font = `bold ${W*0.014}px "Space Grotesk",sans-serif`;
-      ctx.fillText(N(zone.pop2055||0), W*0.22, H*0.80);
-      ctx.globalAlpha = 1;
-    }
-
-    // ─── Card RH/POT/Functiuni (dreapta, apare mai tarziu) ───────────────
-    if(tIn > 0.42) {
-      const ra = Math.min(1,(tIn-0.42)/0.2);
-      ctx.globalAlpha = ra;
-      ctx.fillStyle = 'rgba(4,10,24,.88)';
-      this._roundRect(ctx, W*0.48, H*0.58, W*0.48, H*0.34, 8); ctx.fill();
-      ctx.strokeStyle = 'rgba(212,175,55,.35)'; ctx.lineWidth = 0.8;
-      this._roundRect(ctx, W*0.48, H*0.58, W*0.48, H*0.34, 8); ctx.stroke();
-      ctx.fillStyle = 'rgba(212,175,55,.8)'; this._roundRect(ctx, W*0.48, H*0.58, W*0.48, 3, 1); ctx.fill();
-
-      ctx.fillStyle = '#D4AF37'; ctx.font = `bold ${W*0.007}px "IBM Plex Mono"`;
-      ctx.fillText('INDICATORI URBANISTICI PROPUȘI', W*0.50, H*0.625);
-      // RH
-      ctx.fillStyle = 'rgba(148,163,184,.65)'; ctx.font = `${W*0.0065}px "IBM Plex Mono"`;
-      ctx.fillText('Regim înălțime:', W*0.50, H*0.655);
-      ctx.fillStyle = '#fbbf24'; ctx.font = `bold ${W*0.009}px "IBM Plex Mono"`;
-      ctx.fillText(zone.rh_propus||'P+4—P+8', W*0.50, H*0.672);
-      // POT/CUT
-      ctx.fillStyle = 'rgba(148,163,184,.65)'; ctx.font = `${W*0.0065}px "IBM Plex Mono"`;
-      ctx.fillText('POT / CUT:', W*0.50, H*0.700);
-      ctx.fillStyle = 'rgba(200,215,240,.9)'; ctx.font = `bold ${W*0.009}px "IBM Plex Mono"`;
-      ctx.fillText(`${zone.pot||50}%  /  ${zone.cut||1.8}`, W*0.50, H*0.717);
-      // Functiuni
-      ctx.fillStyle = 'rgba(148,163,184,.65)'; ctx.font = `${W*0.0065}px "IBM Plex Mono"`;
-      ctx.fillText('Funcțiuni propuse:', W*0.50, H*0.745);
-      const fns = (zone.functiuni||['Rezidențial','Servicii','Spații verzi']).slice(0,2);
-      ctx.fillStyle = 'rgba(200,215,240,.8)'; ctx.font = `${W*0.007}px "IBM Plex Mono"`;
-      ctx.fillText(fns.join(' · ').slice(0,30), W*0.50, H*0.762);
-      // Sursa
-      ctx.fillStyle = 'rgba(80,100,140,.5)'; ctx.font = `${W*0.006}px "IBM Plex Mono"`;
-      ctx.fillText(zone._source||'OSM · INSE · UrbanX', W*0.50, H*0.88);
-      ctx.globalAlpha = 1;
-    }
-
-    // ─── Badge tip interventie (pulsant, dreapta sus) ────────────────────
-    if(tIn > 0.18) {
-      const ba = Math.min(1,(tIn-0.18)/0.15);
-      ctx.globalAlpha = ba;
-      const pulse = 0.5 + 0.5*Math.sin(tIn*Math.PI*6);
-      ctx.shadowColor = intColor; ctx.shadowBlur = 8 + 6*pulse;
-      ctx.fillStyle = `rgba(4,10,24,${0.8+0.1*pulse})`;
-      this._roundRect(ctx, W*0.73, H*0.06, W*0.23, H*0.075, 6); ctx.fill();
-      ctx.strokeStyle = intColor; ctx.lineWidth = 1 + 0.5*pulse;
-      this._roundRect(ctx, W*0.73, H*0.06, W*0.23, H*0.075, 6); ctx.stroke();
-      ctx.shadowBlur = 0;
-      ctx.fillStyle = intColor; ctx.font = `bold ${W*0.0085}px "IBM Plex Mono"`;
-      ctx.textAlign = 'center';
-      ctx.fillText(zone.intervention||'DENSIFICARE', W*0.845, H*0.1);
-      ctx.globalAlpha = 1;
-      ctx.textAlign = 'left';
-    }
-
-    // ─── Progress bar zone (jos) ─────────────────────────────────────────
-    if(nZ > 1 && tIn > 0.85) {
-      const pa = Math.min(1,(tIn-0.85)/0.1);
-      ctx.globalAlpha = pa;
-      const bw = W*0.9 / nZ;
-      for(let i=0;i<nZ;i++){
-        const bx = W*0.05 + i*bw;
-        const by = H*0.955;
-        ctx.fillStyle = i<cIdx?'rgba(212,175,55,.5)':i===cIdx?'rgba(212,175,55,.95)':'rgba(255,255,255,.08)';
-        this._roundRect(ctx, bx+1, by, bw-3, H*0.012, 2); ctx.fill();
-      }
-      ctx.globalAlpha = 1;
-    }
-
-    this._sceneLabel(ctx, W, H, '6', 'FOCUS ZONĂ — PRESIUNE URBANĂ');
-  },
-
-
-  // ── SCENA 8: Comparație 2 UAT-uri ────────────────────────────────────
-  _s11_compare(ctx,W,H,t,city) {
-    const grav1 = window._TCIMasterplanPDF?._calcGravity?.(city)||{gravityScore:0.5,growthType:'METROPOLITAN'};
-    // UAT comparabil — luăm din _RO_CITIES_DB
-    const cities = Object.values(window._RO_CITIES_DB||{});
-    const peer = cities.find(c=>c!==city && Math.abs((c.pop2021||0)-(city.pop2021||0))<(city.pop2021||100000)*0.3) || cities[1];
-    const grav2 = window._TCIMasterplanPDF?._calcGravity?.(peer)||{gravityScore:0.5,growthType:'REGIONAL'};
-
-    // Linie centrala
-    ctx.strokeStyle='rgba(212,175,55,0.4)'; ctx.lineWidth=2;
-    ctx.setLineDash([5,5]);
-    ctx.beginPath(); ctx.moveTo(W/2,0); ctx.lineTo(W/2,H); ctx.stroke();
-    ctx.setLineDash([]);
-
-    // Label stânga
-    ctx.fillStyle='rgba(212,175,55,0.9)'; ctx.font=`bold ${W*0.013}px "IBM Plex Mono"`;
-    ctx.textAlign='center';
-    ctx.fillText(city?.name?.toUpperCase()||'UAT 1', W*0.25, H*0.08);
-
-    // Label dreapta
-    ctx.fillStyle='rgba(96,165,250,0.9)';
-    ctx.fillText((peer?.name||'UAT 2').toUpperCase(), W*0.75, H*0.08);
-
-    // Date comparative
-    if(t > 0.2) {
-      const metrics = [
-        ['DENSITATE',
-          Math.round((city?.pop2021||0)/(city?.suprafata_ha||3000)*100)+'loc/ha',
-          Math.round((peer?.pop2021||0)/(peer?.suprafata_ha||3000)*100)+'loc/ha'],
-        ['RATĂ CREȘT.',
-          (city?.rata_reala_2011_2021||0).toFixed(1)+'%/an',
-          (peer?.rata_reala_2011_2021||0).toFixed(1)+'%/an'],
-        ['PIB/CAP',
-          (city?.pib_eur_cap||0).toLocaleString('ro-RO')+'€',
-          (peer?.pib_eur_cap||0).toLocaleString('ro-RO')+'€'],
-        ['TIP CREȘTI.',  grav1.growthType||'—', grav2.growthType||'—'],
-        ['AUTORIZAȚII', N(city?.autorizatii_2023||0)+'/an', N(peer?.autorizatii_2023||0)+'/an'],
-      ];
-
-      metrics.forEach(([label,v1,v2],i) => {
-        const fy = H*0.25+i*H*0.10;
-        ctx.fillStyle='rgba(148,163,184,.5)'; ctx.font=`${W*0.008}px "IBM Plex Mono"`;
-        ctx.textAlign='center';
-        ctx.fillText(label, W/2, fy);
-        ctx.fillStyle='rgba(212,175,55,.9)'; ctx.font=`bold ${W*0.011}px "IBM Plex Mono"`;
-        ctx.textAlign='right'; ctx.fillText(v1, W/2-20, fy+16);
-        ctx.fillStyle='rgba(96,165,250,.9)';
-        ctx.textAlign='left'; ctx.fillText(v2, W/2+20, fy+16);
-      });
-    }
-    this._sceneLabel(ctx,W,H,'8','COMPARAȚIE — 2 UAT-URI');
-  },
-
-  // ── SCENA 9: Street Level ────────────────────────────────────────────
-  _s13_street(ctx,W,H,t,city) {
-    ctx.fillStyle='rgba(0,0,0,0.15)'; ctx.fillRect(0,0,W,H);
-    // Info nivel stradă
-    ctx.fillStyle='rgba(4,10,24,0.75)';
-    this._roundRect(ctx,W*0.03,H*0.85,200,55,8); ctx.fill();
-    ctx.fillStyle='#22c55e'; ctx.font=`bold ${W*0.010}px "IBM Plex Mono"`;
-    ctx.textAlign='left';
-    ctx.fillText('🚶 NIVEL STRADĂ · '+city?.name, W*0.04, H*0.89);
-    ctx.fillStyle='rgba(148,163,184,.7)'; ctx.font=`${W*0.008}px "IBM Plex Mono"`;
-    ctx.fillText('Pitch 82° · Vehicule OSM reale · Light: dusk', W*0.04, H*0.94);
-    this._sceneLabel(ctx,W,H,'9','STREET TRANSITION');
-  },
-
-  // ── SCENA 10: Viața Urbană ───────────────────────────────────────────
-  _s14_urban(ctx,W,H,t,city) {
-    const pop = city?.pop2021||100000;
-    const pietoni = Math.round(pop * 0.068); // 6.8% din pop merg zilnic pe jos
-
-    // Card transport public
-    const cx=W*0.06, cy=H*0.12;
-    ctx.fillStyle='rgba(4,10,24,0.92)';
-    this._roundRect(ctx,cx,cy,200,145,8); ctx.fill();
-    ctx.strokeStyle='rgba(59,130,246,.5)'; ctx.lineWidth=1.5; ctx.stroke();
-
-    ctx.fillStyle='#60a5fa'; ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
-    ctx.textAlign='left';
-    ctx.fillText('TRANSPORT PUBLIC', cx+10, cy+18);
-
-    ctx.fillStyle='rgba(148,163,184,.7)'; ctx.font=`${W*0.009}px "IBM Plex Mono"`;
-    ctx.fillText('creștere TP 2025→2050', cx+10, cy+35);
-    ctx.fillStyle='#22c55e'; ctx.font=`900 ${W*0.022}px "IBM Plex Mono"`;
-    const pct = Math.round(t*62);
-    ctx.fillText('+'+pct+'%', cx+10, cy+62);
-
-    ctx.fillStyle='rgba(148,163,184,.7)'; ctx.font=`${W*0.009}px "IBM Plex Mono"`;
-    ctx.fillText('PIETONI / ZI', cx+10, cy+85);
-    ctx.fillStyle='#fff'; ctx.font=`900 ${W*0.018}px "IBM Plex Mono"`;
-    ctx.fillText(N(Math.round(pietoni*t)), cx+10, cy+108);
-
-    // Mini grafic trend
-    ctx.strokeStyle='rgba(34,197,94,.7)'; ctx.lineWidth=1.5;
-    ctx.beginPath();
-    for(let i=0;i<=10;i++){
-      const gx=cx+10+i*17;
-      const gy=cy+135-i*4+Math.sin(i*0.8)*3;
-      i===0?ctx.moveTo(gx,gy):ctx.lineTo(gx,gy);
-    }
-    ctx.stroke();
-    ctx.fillStyle='rgba(100,120,150,.5)'; ctx.font=`${W*0.007}px "IBM Plex Mono"`;
-    ctx.fillText('Trend 2025→2050', cx+10, cy+145);
-
-    this._sceneLabel(ctx,W,H,'10','VIAȚA URBANĂ');
-  },
-
-  // ── SCENA 12: Concluzie & Viziune ────────────────────────────────────
-
-// Scenele noi 20-24 pentru tci-cinematic-scenes.js
-// Adaugam in G._SceneEngine inainte de _s25_finale
-
-  // ── SCENA 20: Zone Protejate — Restricții Legale ──────────────────────
-  _s20_protectedZones(ctx,W,H,t,city) {
+  // ── SCENA 1: IDENTITATE — Cine ești, de unde vii ──────────────────────
+  // Wikipedia API: istoric, înființare, cultură, monumente emblematice
+  _s1_historic(ctx,W,H,t,city) {
     const gr=ctx.createLinearGradient(0,0,0,H);
-    gr.addColorStop(0,'rgba(30,4,4,0.6)');gr.addColorStop(1,'rgba(4,10,24,0.92)');
+    gr.addColorStop(0,'rgba(4,10,24,.85)');gr.addColorStop(1,'rgba(4,10,24,.96)');
     ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);
-    this._scanlines(ctx,W,H,0.04);
+    this._scanlines(ctx,W,H,0.025);
 
-    if(t>0.04){
-      const ta=Math.min(1,(t-0.04)/0.15);
+    // Titlu orașului — mare, centrat
+    if(t>0.05){
+      const ta=Math.min(1,(t-0.05)/0.3);
       ctx.globalAlpha=ta;
-      ctx.fillStyle='#ef4444';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
-      ctx.textAlign='center';
-      ctx.fillText('ZONE EXCLUSE DIN CONSTRUIRE — RESTRICȚII LEGALE',W/2,H*0.1,W*0.88);
-      ctx.fillStyle='rgba(200,215,240,.6)';ctx.font=`${W*0.007}px "IBM Plex Mono"`;
-      ctx.fillText('Legea 422/2001 · Legea 50/1991 · OG 43/1997 · Codul Silvic',W/2,H*0.16,W*0.88);
-      ctx.globalAlpha=1;
-    }
-
-    const zones=[
-      {label:'CIMITIRE',icon:'⛪',law:'Legea 50/1991 art.11',buf:'Construire INTERZISĂ',c:'#7c3aed',d:0.15},
-      {label:'ZONE FEROVIARE CF',icon:'🚂',law:'OG 43/1997 art.16',buf:'Buffer 100m interdicție',c:'#78350f',d:0.25},
-      {label:'MONUMENTE ISTORICE',icon:'🏛',law:'Legea 422/2001',buf:'Zona I: 0-50m · Zona II: 50-200m',c:'#b45309',d:0.35},
-      {label:'PĂDURI',icon:'🌲',law:'Codul Silvic L46/2008',buf:'Construire interzisă integral',c:'#14532d',d:0.45},
-      {label:'ZONE MILITARE',icon:'🔒',law:'Accces și construire interzise',buf:'Buffer 200m interdicție',c:'#dc2626',d:0.55},
-      {label:'ZONE INUNDABILE ANAR',icon:'🌊',law:'Directiva 2007/60/CE',buf:'Aviz GA obligatoriu',c:'#1d4ed8',d:0.65},
-    ];
-
-    zones.forEach((z,i)=>{
-      const a=Math.min(1,Math.max(0,(t-z.d)/0.15));
-      if(a<=0)return;
-      const cy=H*(0.28+i*0.095);
-      ctx.globalAlpha=a;
-      ctx.fillStyle='rgba(8,16,44,.88)';
-      this._roundRect(ctx,W*0.05,cy,W*0.9,H*0.075,5);ctx.fill();
-      ctx.fillStyle=z.c;ctx.rect(W*0.05,cy,3,H*0.075);ctx.fill();
-      // Icon + label
-      ctx.fillStyle=z.c;ctx.font=`bold ${W*0.0085}px "IBM Plex Mono"`;
-      ctx.textAlign='left';
-      ctx.fillText(z.icon+' '+z.label,W*0.07,cy+H*0.038);
-      // Lege
-      ctx.fillStyle='rgba(148,163,184,.7)';ctx.font=`${W*0.007}px "IBM Plex Mono"`;
-      ctx.fillText(z.law,W*0.35,cy+H*0.028);
-      ctx.fillStyle='rgba(200,215,240,.85)';ctx.font=`${W*0.0072}px "IBM Plex Mono"`;
-      ctx.fillText(z.buf,W*0.35,cy+H*0.052);
-      ctx.globalAlpha=1;
-    });
-
-    if(t>0.82){
-      const ia=Math.min(1,(t-0.82)/0.12);
-      ctx.globalAlpha=ia;
-      ctx.fillStyle='rgba(50,8,8,.9)';
-      this._roundRect(ctx,W*0.15,H*0.91,W*0.7,H*0.06,4);ctx.fill();
-      ctx.strokeStyle='rgba(239,68,68,.4)';ctx.lineWidth=1;
-      this._roundRect(ctx,W*0.15,H*0.91,W*0.7,H*0.06,4);ctx.stroke();
-      ctx.fillStyle='#fca5a5';ctx.font=`bold ${W*0.008}px "IBM Plex Mono"`;
-      ctx.textAlign='center';
-      ctx.fillText('⚠ Verificați ÎNTOTDEAUNA cu Certificatul de Urbanism',W/2,H*0.945,W*0.88);
-      ctx.globalAlpha=1;
-    }
-    this._sceneLabel(ctx,W,H,'20','ZONE PROTEJATE');
-  },
-
-  // ── SCENA 21: Street View Real — Vehicule & Pietoni ───────────────────
-  _s21_streetViewReal(ctx,W,H,t,city) {
-    // Overlay cinematic street-level
-    const gr=ctx.createLinearGradient(0,0,0,H);
-    gr.addColorStop(0,'rgba(0,0,0,0)');gr.addColorStop(0.5,'rgba(4,10,24,.2)');
-    gr.addColorStop(1,'rgba(4,10,24,.92)');
-    ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);
-
-    // Elemente strada animate
-    if(t>0.1){
-      const walk=Math.min(100,Math.round(30+(city.acoperire_transport||60)*0.4+(city.pib_eur_cap||10000)/1000));
-      const ta=Math.min(1,(t-0.1)/0.2);
-      ctx.globalAlpha=ta;
-
-      // Stats laterale
-      ctx.fillStyle='rgba(4,10,24,.88)';
-      this._roundRect(ctx,W*0.68,H*0.1,W*0.28,H*0.55,8);ctx.fill();
-      ctx.strokeStyle='rgba(212,175,55,.3)';ctx.lineWidth=0.8;
-      this._roundRect(ctx,W*0.68,H*0.1,W*0.28,H*0.55,8);ctx.stroke();
-
-      ctx.fillStyle='#D4AF37';ctx.font=`bold ${W*0.0085}px "IBM Plex Mono"`;
-      ctx.textAlign='left';ctx.fillText('WALKABILITY LIVE',W*0.695,H*0.155);
-
-      // Scor mare
-      ctx.fillStyle=walk>=70?'#22c55e':walk>=50?'#f59e0b':'#ef4444';
+      ctx.fillStyle='#D4AF37';
       ctx.font=`900 ${W*0.055}px "Space Grotesk",sans-serif`;
-      ctx.fillText(this._countUp(walk,Math.min(1,(t-0.15)/0.5))+'/100',W*0.695,H*0.28);
-
-      ctx.fillStyle='rgba(148,163,184,.7)';ctx.font=`${W*0.007}px "IBM Plex Mono"`;
-      ctx.fillText(walk>=70?'VERY WALKABLE':walk>=50?'WALKABLE':'CAR-DEPENDENT',W*0.695,H*0.32);
-
-      // Progress bars mobilitate
-      [
-        ['TRANSPORT PUBLIC',(city.acoperire_transport||60)/100,'#60a5fa',0.30],
-        ['PISTE CICLIȘTI',0.35,'#22c55e',0.40],
-        ['ZONĂ PIETONALĂ',0.55,'#a78bfa',0.50],
-      ].forEach(([l,p,c,d])=>{
-        this._progressBar(ctx,W*0.695,H*0.38+[0,0.09,0.18][['TRANSPORT PUBLIC','PISTE CICLIȘTI','ZONĂ PIETONALĂ'].indexOf(l)]*H,
-          W*0.24,H*0.02,p,c,l,Math.round(p*100)+'%',t,d);
-      });
-
+      ctx.textAlign='center';
+      ctx.fillText((city?.name||'').toUpperCase(), W/2, H*0.18);
+      ctx.fillStyle='rgba(148,163,184,.7)';
+      ctx.font=`${W*0.013}px "IBM Plex Mono"`;
+      ctx.fillText((city?.judet||'')+ ' · Romania · Est. '+(city?.infiintat||'—'), W/2, H*0.235);
       ctx.globalAlpha=1;
     }
 
-    // Text bottom
-    if(t>0.15){
-      const ba=Math.min(1,(t-0.15)/0.2);
-      ctx.globalAlpha=ba;
-      ctx.fillStyle='rgba(4,10,24,.85)';
-      this._roundRect(ctx,W*0.05,H*0.86,W*0.58,H*0.08,5);ctx.fill();
-      ctx.fillStyle='rgba(200,215,240,.9)';ctx.font=`${W*0.0085}px "IBM Plex Mono"`;
+    // Text Wikipedia — afișat progresiv
+    const wikiText = this._wikiText || '';
+    if(wikiText && t>0.2){
+      const ta=Math.min(1,(t-0.2)/0.25);
+      ctx.globalAlpha=ta;
+      const lines = this._wrapText(ctx, wikiText, W*0.76, `${W*0.0085}px "IBM Plex Mono"`);
+      const maxLines = Math.min(lines.length, Math.floor(t*lines.length*1.5+2));
+      ctx.fillStyle='rgba(200,215,235,.85)';
+      ctx.font=`${W*0.0085}px "IBM Plex Mono"`;
       ctx.textAlign='left';
-      ctx.fillText('Experiența pietonului · Frank et al. (2006) · OSM live',W*0.07,H*0.905);
+      const startY = H*0.3;
+      const lineH = H*0.038;
+      lines.slice(0,maxLines).forEach((line,i)=>{
+        ctx.fillText(line, W*0.12, startY+i*lineH, W*0.76);
+      });
+      ctx.globalAlpha=1;
+    } else if(!wikiText && t>0.2) {
+      // Loading indicator
+      const ta=Math.min(1,(t-0.2)/0.2);
+      ctx.globalAlpha=ta*0.5;
+      ctx.fillStyle='rgba(148,163,184,.6)';
+      ctx.font=`${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='center';
+      ctx.fillText('Se încarcă istoricul din Wikipedia...', W/2, H*0.5);
       ctx.globalAlpha=1;
     }
 
-    // Modal split animat - distributie moduri transport
-    if(t>0.2){
-      const auto   = Math.round(100-(city.acoperire_transport||60)*0.5);
-      const tp     = Math.round((city.acoperire_transport||60)*0.5);
-      const ciclo  = Math.max(5, Math.round(tp*0.15));
-      const pieton = 100-auto-tp-ciclo;
-
-      const modes = [
-        {label:'AUTO', pct:auto, color:'#ef4444', icon:'🚗'},
-        {label:'TRANSPORT PUBLIC', pct:tp, color:'#60a5fa', icon:'🚌'},
-        {label:'PIETONAL', pct:pieton, color:'#a78bfa', icon:'🚶'},
-        {label:'CICLIST', pct:ciclo, color:'#22c55e', icon:'🚲'},
+    // KPI-uri identitate jos
+    if(t>0.5){
+      const ta=Math.min(1,(t-0.5)/0.3);
+      const kpis=[
+        {l:'ÎNFIINȚAT',v:city?.infiintat||'—',u:'',c:'#D4AF37'},
+        {l:'POPULAȚIE',v:(city?.pop2021||0).toLocaleString('ro-RO'),u:'loc. 2021',c:'#60a5fa'},
+        {l:'SUPRAFAȚĂ',v:city?.suprafata_ha?Math.round(city.suprafata_ha/100)+'km²':'—',u:'',c:'#22c55e'},
+        {l:'STATUT',v:(city?.tip||'municipiu').toUpperCase(),u:'',c:'#a78bfa'},
       ];
-
-      const bx=W*0.05, by=H*0.42, bw=W*0.55, bh=H*0.06;
-      // Bara modal split
-      let xoff=0;
-      modes.forEach(m=>{
-        const w=bw*(m.pct/100);
-        const anim=Math.min(1,(t-0.2)/0.4);
-        ctx.fillStyle=m.color;
-        ctx.globalAlpha=0.85*anim;
-        this._roundRect(ctx,bx+xoff,by,w*anim,bh,4);ctx.fill();
-        if(w*anim>W*0.05){
-          ctx.fillStyle='#fff';ctx.font=`bold ${W*0.0075}px "IBM Plex Mono"`;
-          ctx.textAlign='center';ctx.globalAlpha=anim;
-          ctx.fillText(m.icon+' '+m.pct+'%', bx+xoff+w*anim/2, by+bh*0.65);
-        }
-        xoff+=w;
-      });
-      ctx.globalAlpha=1;
-
-      // Label modal split
-      ctx.fillStyle='rgba(200,215,235,.8)';ctx.font=`${W*0.008}px "IBM Plex Mono"`;
-      ctx.textAlign='left';
-      ctx.fillText('MODAL SPLIT '+city.name+' · Sursa: operator TP + model UrbanX', bx, by-8);
-
-      // Tinta SUMP 2030
-      if(t>0.6){
-        const ta=Math.min(1,(t-0.6)/0.2);
-        ctx.globalAlpha=ta;
-        ctx.strokeStyle='#fbbf24';ctx.lineWidth=1.5;ctx.setLineDash([4,4]);
-        const xSUMP=bx+bw*0.45;
-        ctx.beginPath();ctx.moveTo(xSUMP,by-5);ctx.lineTo(xSUMP,by+bh+5);ctx.stroke();
-        ctx.setLineDash([]);
-        ctx.fillStyle='#fbbf24';ctx.font=`${W*0.007}px "IBM Plex Mono"`;
-        ctx.textAlign='center';
-        ctx.fillText('← TINTĂ SUMP 2030', xSUMP, by+bh+18);
-        ctx.fillText('AUTO max 45%', xSUMP, by+bh+30);
+      kpis.forEach((k,i)=>{
+        const kx=W*(0.06+i*0.235), ky=H*0.78;
+        const ka=Math.min(1,Math.max(0,(t-0.5-i*0.06)/0.25));
+        ctx.globalAlpha=ka;
+        ctx.fillStyle='rgba(4,10,24,.9)';
+        this._roundRect(ctx,kx,ky,W*0.21,H*0.14,6);ctx.fill();
+        ctx.strokeStyle=k.c+'55';ctx.lineWidth=1;
+        this._roundRect(ctx,kx,ky,W*0.21,H*0.14,6);ctx.stroke();
+        ctx.fillStyle='rgba(148,163,184,.6)';ctx.font=`bold ${W*0.0065}px "IBM Plex Mono"`;
+        ctx.textAlign='left';ctx.fillText(k.l,kx+8,ky+H*0.038);
+        ctx.fillStyle=k.c;ctx.font=`900 ${W*0.016}px "Space Grotesk",sans-serif`;
+        ctx.fillText(k.v,kx+8,ky+H*0.095,W*0.19);
+        ctx.fillStyle='rgba(148,163,184,.5)';ctx.font=`${W*0.006}px "IBM Plex Mono"`;
+        ctx.fillText(k.u,kx+8,ky+H*0.128);
         ctx.globalAlpha=1;
-      }
+      });
     }
-    this._sceneLabel(ctx,W,H,'21','MOBILITATE URBANĂ — MODAL SPLIT');
+    this._sceneLabel(ctx,W,H,'1','IDENTITATE — '+(city?.name||'').toUpperCase());
   },
 
-  // ── SCENA 22: AI Narrative — Memoriu Justificativ Live ────────────────
-  _s22_aiNarrative(ctx,W,H,t,city) {
-    const gr=ctx.createLinearGradient(0,0,W*0.5,H);
-    gr.addColorStop(0,'rgba(20,4,50,0.7)');gr.addColorStop(1,'rgba(4,10,24,0.92)');
+  // ── SCENA 2: PORTRETUL ORAȘULUI — Context geografic + regional ─────────
+  _s2_context(ctx,W,H,t,city) {
+    const gr=ctx.createLinearGradient(0,0,0,H);
+    gr.addColorStop(0,'rgba(4,10,24,.75)');gr.addColorStop(1,'rgba(4,10,24,.92)');
     ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);
-    this._scanlines(ctx,W,H,0.03);
+    this._scanlines(ctx,W,H,0.025);
+
+    // Titlu regiune
+    if(t>0.08){
+      const ta=Math.min(1,(t-0.08)/0.2);
+      ctx.globalAlpha=ta;
+      const regLabel={'NE':'MOLDOVA — NORD-EST','NV':'ARDEAL — NORD-VEST','V':'BANAT — VEST',
+        'C':'CENTRU','SE':'SUD-EST','S':'SUD MUNTENIA','SV':'OLTENIA','B':'BUCUREȘTI-ILFOV'}[city?.regiune]||'REGIUNE';
+      ctx.fillStyle='rgba(212,175,55,.9)';
+      ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;ctx.textAlign='left';
+      ctx.fillText('CONTEXT GEOGRAFIC & REGIONAL',W*0.05,H*0.1);
+      ctx.fillStyle='rgba(255,255,255,.95)';
+      ctx.font=`900 ${W*0.022}px "Space Grotesk",sans-serif`;
+      ctx.fillText(regLabel,W*0.05,H*0.16);
+      ctx.globalAlpha=1;
+    }
+
+    // Card poziție geografică
+    if(t>0.2){
+      const ca=Math.min(1,(t-0.2)/0.25);
+      ctx.globalAlpha=ca;
+      ctx.fillStyle='rgba(4,10,24,.92)';
+      this._roundRect(ctx,W*0.05,H*0.2,W*0.42,H*0.35,8);ctx.fill();
+      ctx.strokeStyle='rgba(96,165,250,.3)';ctx.lineWidth=1;
+      this._roundRect(ctx,W*0.05,H*0.2,W*0.42,H*0.35,8);ctx.stroke();
+
+      const rows=[
+        ['Coordonate',`${city?.lat?.toFixed(4)||'—'}°N, ${city?.lon?.toFixed(4)||'—'}°E`],
+        ['Județ',city?.judet||'—'],
+        ['Regiune de dezvoltare',city?.regiune_label||city?.regiune||'—'],
+        ['Tip localitate',(city?.tip||'municipiu').charAt(0).toUpperCase()+(city?.tip||'municipiu').slice(1)],
+        ['Suprafață',city?.suprafata_ha?`${Math.round(city.suprafata_ha)} ha (${Math.round(city.suprafata_ha/100)} km²)`:'—'],
+        ['Altitudine',city?.altitudine?city.altitudine+' m s.m.':'—'],
+      ];
+      ctx.font=`${W*0.0085}px "IBM Plex Mono"`;ctx.textAlign='left';
+      rows.forEach(([k,v],i)=>{
+        const y=H*0.25+i*H*0.048;
+        ctx.fillStyle='rgba(148,163,184,.6)';ctx.fillText(k,W*0.07,y);
+        ctx.fillStyle='rgba(200,215,235,.9)';ctx.font=`bold ${W*0.0085}px "IBM Plex Mono"`;
+        ctx.fillText(v,W*0.26,y);
+        ctx.font=`${W*0.0085}px "IBM Plex Mono"`;
+      });
+      ctx.globalAlpha=1;
+    }
+
+    // Card conectivitate teritorială
+    if(t>0.35){
+      const ca=Math.min(1,(t-0.35)/0.25);
+      ctx.globalAlpha=ca;
+      ctx.fillStyle='rgba(4,10,24,.92)';
+      this._roundRect(ctx,W*0.52,H*0.2,W*0.43,H*0.35,8);ctx.fill();
+      ctx.strokeStyle='rgba(212,175,55,.3)';ctx.lineWidth=1;
+      this._roundRect(ctx,W*0.52,H*0.2,W*0.43,H*0.35,8);ctx.stroke();
+      ctx.fillStyle='#D4AF37';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.fillText('CONECTIVITATE TERITORIALĂ',W*0.54,H*0.235);
+
+      const conn=[
+        ['Autostradă',city?.autostrada_km!=null?city.autostrada_km+'km':'în studiu','#22c55e'],
+        ['Aeroport',city?.aeroport||'regional','#60a5fa'],
+        ['Cale ferată',city?.cale_ferata||'da','#a78bfa'],
+        ['Drum național',city?.drum_national||'DN conectat','#f59e0b'],
+      ];
+      conn.forEach(([k,v,c],i)=>{
+        const y=H*0.285+i*H*0.055;
+        ctx.fillStyle=c;ctx.font=`bold ${W*0.0085}px "IBM Plex Mono"`;
+        ctx.fillText('▸ ',W*0.54,y);
+        ctx.fillStyle='rgba(148,163,184,.7)';ctx.font=`${W*0.0085}px "IBM Plex Mono"`;
+        ctx.fillText(k+':',W*0.555,y);
+        ctx.fillStyle='rgba(200,215,235,.9)';ctx.font=`bold ${W*0.0085}px "IBM Plex Mono"`;
+        ctx.fillText(v,W*0.67,y);
+      });
+      ctx.globalAlpha=1;
+    }
+
+    // Card hub urban + gravitatie
+    if(t>0.55){
+      const ca=Math.min(1,(t-0.55)/0.25);
+      ctx.globalAlpha=ca;
+      const hubScore=city?.coef_hub||0.5;
+      const hubLabel=hubScore>=1.5?'HUB MAJOR':hubScore>=1.0?'HUB REGIONAL':hubScore>=0.7?'POL URBAN':'CENTRU LOCAL';
+      const hubColor=hubScore>=1.5?'#D4AF37':hubScore>=1.0?'#60a5fa':hubScore>=0.7?'#22c55e':'#94a3b8';
+      ctx.fillStyle='rgba(4,10,24,.92)';
+      this._roundRect(ctx,W*0.05,H*0.62,W*0.9,H*0.12,8);ctx.fill();
+      ctx.strokeStyle=hubColor+'55';ctx.lineWidth=1.5;
+      this._roundRect(ctx,W*0.05,H*0.62,W*0.9,H*0.12,8);ctx.stroke();
+      ctx.fillStyle=hubColor;ctx.font=`900 ${W*0.018}px "Space Grotesk",sans-serif`;
+      ctx.textAlign='center';
+      ctx.fillText('⭐ '+hubLabel, W/2, H*0.69);
+      ctx.fillStyle='rgba(148,163,184,.7)';ctx.font=`${W*0.0085}px "IBM Plex Mono"`;
+      ctx.fillText('Scor gravitațional: '+hubScore.toFixed(1)+'/2.0 · Model UrbanX · INSE 2021', W/2, H*0.715);
+      ctx.globalAlpha=1;
+    }
+    this._sceneLabel(ctx,W,H,'2','CONTEXT GEOGRAFIC — '+(city?.name||'').toUpperCase());
+  },
+
+  // ── SCENA 3: PORTRETUL LOCUITORILOR ────────────────────────────────────
+  _s3_demographics(ctx,W,H,t,city) {
+    const gr=ctx.createLinearGradient(0,H*0.5,0,H);
+    gr.addColorStop(0,'rgba(4,10,24,.7)');gr.addColorStop(1,'rgba(4,10,24,.96)');
+    ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);
+    this._scanlines(ctx,W,H,0.025);
+
+    const pop=city?.pop2021||100000;
+    const pop11=city?.pop2011||pop;
+    const rata=city?.rata_reala_2011_2021||0;
+    const varsta_med=city?.varsta_medie||42;
+    const tineri=city?.pct_0_14||15.5;
+    const varstnici=city?.pct_65plus||21.8;
+    const maturi=100-tineri-varstnici;
 
     if(t>0.05){
-      const ta=Math.min(1,(t-0.05)/0.15);
-      ctx.globalAlpha=ta;
-      ctx.fillStyle='#c4b5fd';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
-      ctx.textAlign='center';
-      ctx.fillText('🤖 AI MEMORIU JUSTIFICATIV — GENERAT AUTOMAT',W/2,H*0.09,W*0.88);
-      ctx.fillStyle='rgba(167,139,250,.5)';ctx.font=`${W*0.0068}px "IBM Plex Mono"`;
-      ctx.fillText('Claude AI · Anthropic · §1.1-§1.6 · Legea 350/2001 · Unic în lume pentru urbanism',W/2,H*0.145,W*0.88);
-      ctx.globalAlpha=1;
-    }
-
-    // Cele 6 sectiuni cu reveal progresiv
-    const sections=[
-      {id:'§1.1',title:'Introducere & Context Teritorial',c:'#60a5fa',d:0.12},
-      {id:'§1.2',title:'Situația Demografică & Tendințe',c:'#a78bfa',d:0.24},
-      {id:'§1.3',title:'Analiză Economică & Potențial',c:'#22c55e',d:0.36},
-      {id:'§1.4',title:'Riscuri Teritoriale & Constrângeri',c:'#ef4444',d:0.48},
-      {id:'§1.5',title:'Obiective Strategice 2025-2055',c:'#D4AF37',d:0.60},
-      {id:'§1.6',title:'Concluzii & Recomandări',c:'#34d399',d:0.72},
-    ];
-
-    sections.forEach((s,i)=>{
-      const a=Math.min(1,Math.max(0,(t-s.d)/0.14));
-      if(a<=0)return;
-      const sy=H*(0.21+i*0.115);
-      ctx.globalAlpha=a;
-
-      // Card
-      ctx.fillStyle='rgba(8,16,44,.85)';
-      this._roundRect(ctx,W*0.05,sy,W*0.9,H*0.1,5);ctx.fill();
-      ctx.fillStyle=s.c;ctx.rect(W*0.05,sy,3,H*0.1);ctx.fill();
-
-      // Section badge
-      ctx.fillStyle=s.c;ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
-      ctx.textAlign='left';ctx.fillText(s.id,W*0.07,sy+H*0.04);
-
-      // Title cu typewriter
-      const chars=Math.floor(s.title.length*Math.min(1,(t-s.d-0.02)/0.15));
-      ctx.fillStyle='rgba(200,215,240,.9)';ctx.font=`${W*0.0075}px "IBM Plex Mono"`;
-      ctx.fillText(s.title.slice(0,chars),W*0.14,sy+H*0.04);
-
-      // Cursor blink
-      if(chars<s.title.length){
-        ctx.fillStyle=Math.sin(t*15)>0?s.c:'transparent';
-        ctx.fillText('▌',W*0.14+chars*W*0.0038,sy+H*0.04);
-      }
-
-      // Preview text (random chars → text real)
-      if(a>0.5){
-        const previewA=Math.min(1,(a-0.5)/0.4);
-        ctx.fillStyle=`rgba(100,120,150,${previewA*0.5})`;
-        ctx.font=`${W*0.006}px "IBM Plex Mono"`;
-        ctx.fillText('Generat pe date: INSE · Eurostat · BNR · INFP · ANAR · OSM...',W*0.14,sy+H*0.072);
-      }
-      ctx.globalAlpha=1;
-    });
-
-    // Badge bottom
-    if(t>0.88){
-      const ba=Math.min(1,(t-0.88)/0.1);
-      ctx.globalAlpha=ba;
-      ctx.fillStyle='rgba(139,92,246,.15)';
-      this._roundRect(ctx,W*0.2,H*0.925,W*0.6,H*0.055,4);ctx.fill();
-      ctx.strokeStyle='rgba(139,92,246,.4)';ctx.lineWidth=0.8;
-      this._roundRect(ctx,W*0.2,H*0.925,W*0.6,H*0.055,4);ctx.stroke();
-      ctx.fillStyle='#c4b5fd';ctx.font=`bold ${W*0.0075}px "IBM Plex Mono"`;
-      ctx.textAlign='center';
-      ctx.fillText('Disponibil în: 🏛 Urbanist ▾ → 🤖 AI Memoriu Justificativ',W/2,H*0.958,W*0.88);
-      ctx.globalAlpha=1;
-    }
-    this._sceneLabel(ctx,W,H,'22','AI MEMORIU');
-  },
-
-  // ── SCENA 23: Masterplan PDF — Structura Documentului ─────────────────
-  _s23_masterplanPreview(ctx,W,H,t,city) {
-    const gr=ctx.createLinearGradient(0,0,0,H);
-    gr.addColorStop(0,'rgba(4,10,24,0.65)');gr.addColorStop(1,'rgba(4,10,24,0.92)');
-    ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);
-
-    if(t>0.04){
-      const ta=Math.min(1,(t-0.04)/0.15);
-      ctx.globalAlpha=ta;
+      ctx.globalAlpha=Math.min(1,(t-0.05)/0.2);
       ctx.fillStyle='#D4AF37';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
-      ctx.textAlign='center';
-      ctx.fillText('📋 MASTERPLAN STRATEGIC URBAN — 22 PAGINI',W/2,H*0.09,W*0.88);
-      ctx.fillStyle='rgba(212,175,55,.5)';ctx.font=`${W*0.0068}px "IBM Plex Mono"`;
-      ctx.fillText('Conf. Legii 350/2001 + Ord. 233/2016 + HG 907/2016 · Generat automat din date reale',W/2,H*0.145,W*0.88);
+      ctx.textAlign='left';ctx.fillText('PORTRETUL COMUNITĂȚII',W*0.05,H*0.09);
+      ctx.fillStyle='rgba(255,255,255,.9)';ctx.font=`900 ${W*0.022}px "Space Grotesk",sans-serif`;
+      ctx.fillText((city?.name||'').toUpperCase()+' · RECENSĂMÎNT 2021',W*0.05,H*0.145);
       ctx.globalAlpha=1;
     }
 
-    // Pagini animate ca stiva de carti
-    const pages=[
-      {pg:'1',title:'Copertă & Localizare',c:'#D4AF37',d:0.10},
-      {pg:'2-3',title:'Diagnostic Teritorial',c:'#60a5fa',d:0.17},
-      {pg:'4-5',title:'Proiecție Demografică',c:'#a78bfa',d:0.24},
-      {pg:'6-7',title:'Cerere Locuințe & Housing Mix',c:'#22c55e',d:0.31},
-      {pg:'8-9',title:'Context Economic & Investiții',c:'#f59e0b',d:0.38},
-      {pg:'10-11',title:'Riscuri Teritoriale',c:'#ef4444',d:0.45},
-      {pg:'12-13',title:'Scenarii & Recomandări',c:'#34d399',d:0.52},
-      {pg:'14',title:'Zone Propuse RH/POT/CUT',c:'#D4AF37',d:0.59},
-      {pg:'15-16',title:'Infrastructură & Finanțare',c:'#60a5fa',d:0.66},
-      {pg:'17-19',title:'Etapizare & Monitorizare',c:'#a78bfa',d:0.73},
-      {pg:'20-22',title:'Metodologie & Disclaimer',c:'#94a3b8',d:0.80},
+    // KPI-uri demografice
+    const kpis=[
+      {l:'POPULAȚIE 2021',v:pop,u:'locuitori',c:'#60a5fa',d:0.15},
+      {l:'VARIAȚIE 2011-21',v:Math.abs(rata).toFixed(1),u:(rata>=0?'creștere':'declin')+'/an',c:rata>=0?'#22c55e':'#ef4444',d:0.25,pfx:rata>=0?'+':'-'},
+      {l:'VÂRSTĂ MEDIE',v:varsta_med,u:'ani',c:'#f59e0b',d:0.35},
+      {l:'DENSITATE',v:city?.suprafata_ha?Math.round(pop/(city.suprafata_ha/100)):0,u:'loc/km²',c:'#a78bfa',d:0.45},
     ];
-
-    const cols=3, rows=Math.ceil(pages.length/cols);
-    pages.forEach((p,i)=>{
-      const a=Math.min(1,Math.max(0,(t-p.d)/0.12));
-      if(a<=0)return;
-      const col=i%cols, row=Math.floor(i/cols);
-      const px=W*(0.06+col*0.31);
-      const py=H*(0.21+row*0.165);
-      const pw=W*0.28, ph=H*0.13;
-
-      ctx.globalAlpha=a;
-      // Pagina background (A4 ratio)
-      ctx.fillStyle='rgba(8,16,44,.92)';
-      this._roundRect(ctx,px,py,pw,ph,4);ctx.fill();
-      ctx.strokeStyle='rgba(212,175,55,.4)';ctx.lineWidth=0.8;
-      this._roundRect(ctx,px,py,pw,ph,4);ctx.stroke();
-      // Accent top
-      ctx.fillStyle=p.c;this._roundRect(ctx,px,py,pw,3,1);ctx.fill();
-      // Numar pagina
-      ctx.fillStyle=p.c;ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
-      ctx.textAlign='left';ctx.fillText('pg.'+p.pg,px+6,py+ph*0.4);
-      // Titlu
-      ctx.fillStyle='rgba(200,215,240,.85)';ctx.font=`${W*0.0065}px "IBM Plex Mono"`;
-      const titleChars=Math.floor(p.title.length*Math.min(1,(t-p.d-0.02)/0.12));
-      ctx.fillText(p.title.slice(0,titleChars),px+6,py+ph*0.7);
-      ctx.globalAlpha=1;
+    kpis.forEach((k,i)=>{
+      this._kpiCard(ctx,W*(0.04+i*0.24),H*0.2,W*0.22,H*0.18,k.l,k.v,k.u,k.c,t,k.d,k.pfx||'');
     });
 
-    // CTA final
-    if(t>0.9){
-      const ca=Math.min(1,(t-0.9)/0.08);
-      ctx.globalAlpha=ca;
-      ctx.fillStyle='rgba(212,175,55,.1)';
-      this._roundRect(ctx,W*0.2,H*0.92,W*0.6,H*0.055,4);ctx.fill();
-      ctx.strokeStyle='rgba(212,175,55,.4)';ctx.lineWidth=0.8;
-      this._roundRect(ctx,W*0.2,H*0.92,W*0.6,H*0.055,4);ctx.stroke();
-      ctx.fillStyle='#D4AF37';ctx.font=`bold ${W*0.008}px "IBM Plex Mono"`;
-      ctx.textAlign='center';
-      ctx.fillText('Click parcelă → Masterplan PDF · sau 🏛 Urbanist ▾ → 📋 Masterplan PDF',W/2,H*0.953,W*0.88);
-      ctx.globalAlpha=1;
-    }
-    this._sceneLabel(ctx,W,H,'23','MASTERPLAN PDF');
-  },
-
-  // ── SCENA 24: Investiții & Finanțare UE 2025-2055 ─────────────────────
-  _s24_investment(ctx,W,H,t,city) {
-    const need=this._need;
-    const invest_total=Math.round((need?.locuinteTotale||5000)*0.9);
-    const gr=ctx.createLinearGradient(0,0,0,H);
-    gr.addColorStop(0,'rgba(4,20,8,.55)');gr.addColorStop(1,'rgba(4,10,24,.88)');
-    ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);
-
-    if(t>0.04){
-      const ta=Math.min(1,(t-0.04)/0.15);
-      ctx.globalAlpha=ta;
-      ctx.fillStyle='#22c55e';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
-      ctx.textAlign='center';
-      ctx.fillText('INVESTIȚII NECESARE 2025—2055 · SURSE FINANȚARE UE',W/2,H*0.09,W*0.88);
-      ctx.fillStyle='rgba(34,197,94,.5)';ctx.font=`${W*0.007}px "IBM Plex Mono"`;
-      ctx.fillText('PNRR · FEDR · POR 2021-2027 · Fonduri de Coeziune · Buget local · Investiție privată',W/2,H*0.145,W*0.88);
-      ctx.globalAlpha=1;
-    }
-
-    // KPI total investitie
-    if(t>0.12) this._kpiCard(ctx,W*0.05,H*0.2,W*0.27,H*0.18,'TOTAL INVESTIȚIE',invest_total,'mil. EUR · 2025-2055','#22c55e',t,0.12);
-
-    // Breakdown investitii cu progress bars
-    const items=[
-      ['LOCUINȚE NOI',0.55,'Sector privat + ANL',   '#22c55e',0.22],
-      ['INFRASTRUCTURĂ',0.18,'Fonduri UE FEDR/POR',  '#60a5fa',0.30],
-      ['ECHIPAMENTE PUBLICE',0.12,'Buget stat + PNRR','#a78bfa',0.38],
-      ['SPAȚII VERZI',0.08,'Fonduri UE + local',     '#4ade80',0.46],
-      ['CONSOLIDARE SEISMICĂ',0.07,'PNRR C10-I2 UE', '#ef4444',0.54],
-    ];
-    items.forEach(([l,p,sub,c,d])=>{
-      this._progressBar(ctx,W*0.37,H*(0.22+items.indexOf(items.find(x=>x[0]===l))*0.12),W*0.56,H*0.025,p,c,l,Math.round(p*100)+'% — '+sub,t,d);
-    });
-
-    // ROI timeline
-    if(t>0.65){
-      const ra=Math.min(1,(t-0.65)/0.2);
-      ctx.globalAlpha=ra;
-      ctx.fillStyle='rgba(8,16,44,.85)';
-      this._roundRect(ctx,W*0.05,H*0.77,W*0.9,H*0.13,5);ctx.fill();
-      ctx.strokeStyle='rgba(34,197,94,.3)';ctx.lineWidth=0.8;
-      this._roundRect(ctx,W*0.05,H*0.77,W*0.9,H*0.13,5);ctx.stroke();
-      ctx.fillStyle='#22c55e';ctx.font=`bold ${W*0.008}px "IBM Plex Mono"`;
-      ctx.textAlign='left';ctx.fillText('ROI ESTIMAT:',W*0.07,H*0.815);
-      ctx.fillStyle='rgba(200,215,240,.85)';ctx.font=`${W*0.0075}px "IBM Plex Mono"`;
-      ctx.fillText('2025-2030: consolidare infrastructură · 2031-2040: recuperare investiție · 2041-2055: valoare adaugată +35%',W*0.07,H*0.855);
-      ctx.globalAlpha=1;
-    }
-
-    // Badge finantare EU
-    if(t>0.55){
-      const ba=Math.min(1,(t-0.55)/0.2);
+    // Piramida vârstelor — bara orizontală
+    if(t>0.5){
+      const ba=Math.min(1,(t-0.5)/0.3);
       ctx.globalAlpha=ba;
-      this._donutArc(ctx,W*0.18,H*0.52,H*0.1,0.35,'#60a5fa','FONDURI UE','35%',t,0.55);
+      ctx.fillStyle='rgba(4,10,24,.9)';
+      this._roundRect(ctx,W*0.04,H*0.44,W*0.92,H*0.2,8);ctx.fill();
+      ctx.strokeStyle='rgba(255,255,255,.08)';ctx.lineWidth=1;
+      this._roundRect(ctx,W*0.04,H*0.44,W*0.92,H*0.2,8);ctx.stroke();
+
+      ctx.fillStyle='rgba(200,215,235,.8)';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='left';ctx.fillText('STRUCTURA PE VÂRSTE',W*0.06,H*0.475);
+
+      const segments=[
+        {l:'0-14 ani (copii)',pct:tineri/100,c:'#60a5fa'},
+        {l:'15-64 ani (activi)',pct:maturi/100,c:'#22c55e'},
+        {l:'65+ ani (seniori)',pct:varstnici/100,c:'#f59e0b'},
+      ];
+      const bx=W*0.06,by=H*0.5,bw=W*0.88,bh=H*0.065;
+      let ox=0;
+      segments.forEach(s=>{
+        const sw=bw*s.pct*ba;
+        ctx.fillStyle=s.c;ctx.globalAlpha=0.85;
+        this._roundRect(ctx,bx+ox,by,sw,bh,2);ctx.fill();
+        if(sw>W*0.06){
+          ctx.fillStyle='rgba(255,255,255,.9)';ctx.font=`bold ${W*0.008}px "IBM Plex Mono"`;
+          ctx.textAlign='center';ctx.globalAlpha=ba;
+          ctx.fillText(Math.round(s.pct*100)+'%',bx+ox+sw/2,by+bh*0.64);
+        }
+        ox+=sw;
+      });
+      ctx.globalAlpha=1;
+      // Legend
+      let lx=W*0.06;
+      segments.forEach(s=>{
+        ctx.fillStyle=s.c;ctx.fillRect(lx,by+bh+H*0.012,W*0.012,H*0.01);
+        ctx.fillStyle='rgba(148,163,184,.7)';ctx.font=`${W*0.0075}px "IBM Plex Mono"`;
+        ctx.textAlign='left';ctx.fillText(s.l,lx+W*0.016,by+bh+H*0.021);
+        lx+=W*0.3;
+      });
+    }
+
+    // Trend și alertă
+    if(t>0.72){
+      const ta=Math.min(1,(t-0.72)/0.2);
+      ctx.globalAlpha=ta;
+      const isDeclin=rata<-0.3;
+      const alertColor=isDeclin?'#ef4444':'#22c55e';
+      const alertText=isDeclin
+        ?`⚠ ALERTĂ: Declin demografic ${rata.toFixed(1)}%/an — necesită politici de retenție și atragere tineri`
+        :`✓ Tendință stabilă ${rata>=0?'+':''}${rata.toFixed(1)}%/an · Presiune moderată pe servicii`;
+      ctx.fillStyle=isDeclin?'rgba(127,29,29,.85)':'rgba(5,46,22,.85)';
+      this._roundRect(ctx,W*0.04,H*0.72,W*0.92,H*0.075,6);ctx.fill();
+      ctx.strokeStyle=alertColor+'55';ctx.lineWidth=1.5;
+      this._roundRect(ctx,W*0.04,H*0.72,W*0.92,H*0.075,6);ctx.stroke();
+      ctx.fillStyle=alertColor;ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='center';
+      ctx.fillText(alertText,W/2,H*0.766,W*0.88);
       ctx.globalAlpha=1;
     }
-    this._sceneLabel(ctx,W,H,'24','INVESTIȚII & FINANȚARE');
+
+    this._sceneLabel(ctx,W,H,'3','DEMOGRAFIA — '+(city?.name||'').toUpperCase());
   },
 
+  // ── SCENA 4: PUTEREA DE CUMPĂRARE & ECONOMIA LOCALĂ ───────────────────
+  _s4_economy(ctx,W,H,t,city) {
+    const gr=ctx.createLinearGradient(0,0,W,H);
+    gr.addColorStop(0,'rgba(4,10,24,.8)');gr.addColorStop(1,'rgba(10,20,44,.95)');
+    ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);
+    this._scanlines(ctx,W,H,0.025);
 
-  _s25_finale(ctx,W,H,t,city) {
-    const grav = window._TCIMasterplanPDF?._calcGravity?.(city)||{growthType:'METROPOLITAN'};
-    const need = this._need;
-    const pop55 = need?.pop2055||city?.pop2021||100000;
-    const cityName = city?.name?.toUpperCase() || 'IAȘI';
+    const pib=city?.pib_eur_cap||10000;
+    const pibUE=36600;
+    const conv=Math.round(pib/pibUE*100);
+    const somaj=city?.somaj_pct||5.2;
 
-    // ── Fade-in dramatic din negru ─────────────────────────────────────────
-    if(t < 0.08) {
-      ctx.fillStyle = `rgba(4,10,24,${1-t/0.08})`;
-      ctx.fillRect(0,0,W,H); return;
-    }
-
-    // ── Overlay gradient cinematic ─────────────────────────────────────────
-    const gr = ctx.createLinearGradient(0,0,0,H);
-    gr.addColorStop(0,'rgba(4,10,24,0.6)');
-    gr.addColorStop(0.4,'rgba(4,10,24,0.50)');
-    gr.addColorStop(0.7,'rgba(4,10,24,0.85)');
-    gr.addColorStop(1,'rgba(4,10,24,0.92)');
-    ctx.fillStyle=gr; ctx.fillRect(0,0,W,H);
-
-    // ── Linie aurie separator sus ──────────────────────────────────────────
-    const lineAlpha = Math.min(1,(t-0.08)/0.15);
-    ctx.strokeStyle=`rgba(212,175,55,${lineAlpha*0.6})`;
-    ctx.lineWidth=1; ctx.beginPath();
-    ctx.moveTo(W*0.08,H*0.12); ctx.lineTo(W*0.92,H*0.12); ctx.stroke();
-
-    // ── Titlu principal — apare la t=0.10 ─────────────────────────────────
-    if(t > 0.10) {
-      const ta = Math.min(1,(t-0.10)/0.18);
-      const ty = H*0.18 - (1-ta)*20;
-      ctx.globalAlpha = ta;
-      ctx.fillStyle='#D4AF37'; ctx.font=`800 ${W*0.009}px "IBM Plex Mono"`;
-      ctx.textAlign='center';
-      ctx.fillText('VIZIUNE STRATEGICĂ 2025 — 2055',W/2,ty,W*0.88);
-      ctx.fillStyle='rgba(255,255,255,0.95)';
-      ctx.font=`900 ${W*0.028}px "Space Grotesk",sans-serif`;
-      ctx.fillText(cityName, W/2, ty+W*0.032);
+    if(t>0.05){
+      ctx.globalAlpha=Math.min(1,(t-0.05)/0.2);
+      ctx.fillStyle='#D4AF37';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='left';ctx.fillText('ECONOMIE & PUTERE DE CUMPĂRARE',W*0.05,H*0.09);
+      ctx.fillStyle='rgba(255,255,255,.9)';ctx.font=`900 ${W*0.022}px "Space Grotesk",sans-serif`;
+      ctx.fillText('SURSE: EUROSTAT · BNR · INSE 2022',W*0.05,H*0.145);
       ctx.globalAlpha=1;
     }
 
-    // ── 3 Recomandări principale — apar progresiv ─────────────────────────
-    const recs = [
-      { icon:'🏗', title:'DENSIFICARE', text:`${N(need?.locuinteTotale||5000)} locuințe noi în zone TOD`, color:'#22c55e' },
-      { icon:'🚌', title:'MOBILITATE', text:'Transport public +62% · Ciclism +180% · Modal shift 2055', color:'#60a5fa' },
-      { icon:'🌳', title:'SUSTENABILITATE', text:'Carbon net-zero 2050 · Spații verzi ≥9m²/loc · SDG 11', color:'#D4AF37' },
-    ];
-    recs.forEach((rec,i) => {
-      const showAt = 0.28 + i*0.16;
-      if(t <= showAt) return;
-      const ra = Math.min(1,(t-showAt)/0.14);
-      const rx = W*0.10 + i*(W*0.27);
-      const ry = H*0.35;
-      const rw = W*0.25, rh = H*0.22;
-      ctx.globalAlpha = ra;
-      // Card background
-      ctx.fillStyle='rgba(4,10,28,0.88)';
-      this._roundRect(ctx,rx,ry,rw,rh,8); ctx.fill();
-      ctx.strokeStyle=rec.color; ctx.lineWidth=1.5;
-      this._roundRect(ctx,rx,ry,rw,rh,8); ctx.stroke();
-      ctx.fillStyle=rec.color; ctx.fillRect(rx,ry,rw,3);
-      // Icon + title
-      ctx.fillStyle=rec.color; ctx.font=`bold ${W*0.016}px "IBM Plex Mono"`;
-      ctx.textAlign='left';
-      ctx.fillText(rec.icon+' '+rec.title, rx+10, ry+W*0.018);
-      // Text
-      ctx.fillStyle='rgba(200,215,240,.85)'; ctx.font=`${W*0.0075}px "IBM Plex Mono"`;
-      const lines = ctx.measureText(rec.text).width > rw-20
-        ? [rec.text.slice(0,Math.ceil(rec.text.length/2)), rec.text.slice(Math.ceil(rec.text.length/2))]
-        : [rec.text];
-      lines.forEach((l,li) => ctx.fillText(l, rx+10, ry+W*0.030+li*W*0.012));
-      ctx.globalAlpha=1;
+    // KPI-uri economice
+    [[`PIB/CAP`,pib,'EUR/loc.','#D4AF37',0.15],
+     ['VS MEDIA UE',conv,'% din UE27','#60a5fa',0.28],
+     ['ȘOMAJ',somaj,'%','#ef4444',0.41],
+     ['UNIV.',city?.universitati||0,'univ.','#a78bfa',0.54],
+    ].forEach(([l,v,u,c,d],i)=>{
+      this._kpiCard(ctx,W*(0.04+i*0.24),H*0.18,W*0.22,H*0.18,l,v,u,c,t,d,'');
     });
 
-    // ── Checklist KPI — apare la t=0.60 ───────────────────────────────────
-    if(t > 0.60) {
-      const ca = Math.min(1,(t-0.60)/0.15);
-      ctx.globalAlpha=ca;
-      const items = [
-        { label:`Populație 2055: ${N(pop55)} loc.`, ok:pop55>(city?.pop2021||100000)*0.95 },
-        { label:`Convergență UE: ${city?.pib_eur_cap?Math.round(city.pib_eur_cap*1.65/36600*100):'est.75'}%`, ok:true },
-        { label:`Risc seismic gestionat (PNRR C10-I2)`, ok:true },
-        { label:`Deficit școlar rezolvat: +${Math.max(0,Math.ceil((pop55-(city?.pop2021||100000))*0.14/400))} unități`, ok:true },
+    // Bara convergentă UE
+    if(t>0.45){
+      const ba=Math.min(1,(t-0.45)/0.3);
+      ctx.globalAlpha=ba;
+      ctx.fillStyle='rgba(4,10,24,.9)';
+      this._roundRect(ctx,W*0.04,H*0.42,W*0.92,H*0.16,8);ctx.fill();
+      ctx.strokeStyle='rgba(212,175,55,.2)';ctx.lineWidth=1;
+      this._roundRect(ctx,W*0.04,H*0.42,W*0.92,H*0.16,8);ctx.stroke();
+
+      ctx.fillStyle='rgba(200,215,235,.8)';ctx.font=`bold ${W*0.0085}px "IBM Plex Mono"`;
+      ctx.textAlign='left';ctx.fillText('CONVERGENȚĂ FAȚĂ DE MEDIA UE27 (36.600 EUR/cap)',W*0.06,H*0.455);
+
+      // Track
+      const bx=W*0.06,by=H*0.48,bw=W*0.88,bh=H*0.05;
+      ctx.fillStyle='rgba(255,255,255,.06)';
+      this._roundRect(ctx,bx,by,bw,bh,bh/2);ctx.fill();
+      // Fill animat
+      const fillW=bw*(conv/100)*ba;
+      if(fillW>0){
+        const gd=ctx.createLinearGradient(bx,0,bx+bw,0);
+        gd.addColorStop(0,'#1d4ed8');gd.addColorStop(conv/100,'#D4AF37');
+        ctx.fillStyle=gd;
+        this._roundRect(ctx,bx,by,fillW,bh,bh/2);ctx.fill();
+      }
+      // Marker 100%
+      ctx.strokeStyle='rgba(34,197,94,.6)';ctx.lineWidth=1.5;ctx.setLineDash([3,3]);
+      ctx.beginPath();ctx.moveTo(bx+bw,by-H*0.01);ctx.lineTo(bx+bw,by+bh+H*0.01);ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle='rgba(34,197,94,.8)';ctx.font=`${W*0.007}px "IBM Plex Mono"`;
+      ctx.textAlign='center';ctx.fillText('MEDIA UE',bx+bw,by-H*0.014);
+
+      ctx.fillStyle='#D4AF37';ctx.font=`bold ${W*0.011}px "IBM Plex Mono"`;
+      ctx.textAlign='left';ctx.fillText(conv+'% din media UE27',bx+4,by+bh+H*0.025);
+
+      // Proiecție 2055
+      const conv2055=Math.min(100,Math.round(conv*Math.pow(1.035,34)));
+      ctx.fillStyle='rgba(148,163,184,.6)';ctx.font=`${W*0.0085}px "IBM Plex Mono"`;
+      ctx.fillText(`Proiecție 2055: ~${conv2055}% din UE27 (rata +3.5%/an OCDE)`,bx+4,by+bh+H*0.044);
+      ctx.globalAlpha=1;
+    }
+
+    // Sectoare economice
+    if(t>0.7){
+      const ta=Math.min(1,(t-0.7)/0.25);
+      ctx.globalAlpha=ta;
+      const sectoare=city?.sectoare||[
+        {n:'Servicii',pct:55,c:'#60a5fa'},
+        {n:'Industrie',pct:25,c:'#f59e0b'},
+        {n:'Construcții',pct:10,c:'#a78bfa'},
+        {n:'Agricultură',pct:10,c:'#22c55e'},
       ];
-      items.forEach((item,i) => {
-        if(t < 0.60+i*0.08) return;
-        const fy = H*0.65+i*H*0.06;
-        const ia = Math.min(1,(t-0.60-i*0.08)/0.10);
-        ctx.globalAlpha=ia*ca;
-        ctx.fillStyle=item.ok?'#22c55e':'#f59e0b';
-        ctx.font=`bold ${W*0.011}px "IBM Plex Mono"`;
-        ctx.textAlign='left';
-        ctx.fillText(item.ok?'✅':'⚠', W*0.15, fy);
-        ctx.fillStyle='rgba(220,235,250,.9)'; ctx.font=`${W*0.009}px "IBM Plex Mono"`;
-        ctx.fillText(item.label, W*0.20, fy);
+      ctx.fillStyle='rgba(200,215,235,.8)';ctx.font=`bold ${W*0.0085}px "IBM Plex Mono"`;
+      ctx.textAlign='left';ctx.fillText('STRUCTURA ECONOMICĂ (estimat model UrbanX)',W*0.06,H*0.68);
+      sectoare.forEach((s,i)=>{
+        this._progressBar(ctx,W*(0.06+i*0.23),H*0.705,W*0.2,H*0.018,s.pct/100,s.c,s.n,s.pct+'%',t,0.7+i*0.04);
       });
       ctx.globalAlpha=1;
     }
 
-    // ── CTA final — la t=0.82 ─────────────────────────────────────────────
-    if(t > 0.82) {
-      const fa = Math.min(1,(t-0.82)/0.12);
-      ctx.globalAlpha = fa;
-      // Box CTA
-      ctx.fillStyle='rgba(212,175,55,0.10)';
-      this._roundRect(ctx, W*0.25, H*0.855, W*0.50, H*0.065, 8); ctx.fill();
-      ctx.strokeStyle='rgba(212,175,55,0.4)'; ctx.lineWidth=1;
-      this._roundRect(ctx, W*0.25, H*0.855, W*0.50, H*0.065, 8); ctx.stroke();
-      ctx.fillStyle='#D4AF37'; ctx.font=`bold ${W*0.010}px "IBM Plex Mono"`;
-      ctx.textAlign='center';
-      ctx.fillText('📋 Generează Masterplan PDF complet · 📊 Analizează per parcelă',W/2,H*0.892,W*0.88);
+    this._sceneLabel(ctx,W,H,'4','ECONOMIE — '+(city?.name||'').toUpperCase());
+  },
+
+  // ── SCENA 5: UNDE CREȘTE ORAȘUL — Coridoare de dezvoltare ─────────────
+  _s5_growth_corridors(ctx,W,H,t,city,zones) {
+    const gr=ctx.createLinearGradient(0,0,0,H);
+    gr.addColorStop(0,'rgba(4,10,24,.65)');gr.addColorStop(1,'rgba(4,10,24,.92)');
+    ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);
+    this._scanlines(ctx,W,H,0.025);
+
+    const pop=city?.pop2021||100000;
+    const need=this._need||{};
+    const locuinte=need.locuinteTotale||Math.round(pop*0.03);
+
+    if(t>0.05){
+      ctx.globalAlpha=Math.min(1,(t-0.05)/0.2);
+      ctx.fillStyle='#D4AF37';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='left';ctx.fillText('UNDE CREȘTE ORAȘUL 2025-2055',W*0.05,H*0.09);
+      ctx.fillStyle='rgba(255,255,255,.9)';ctx.font=`900 ${W*0.022}px "Space Grotesk",sans-serif`;
+      ctx.fillText('CORIDOARE DE DEZVOLTARE · PRESIUNE URBANĂ · EXTINDERE INTRAVILAN',W*0.05,H*0.145);
       ctx.globalAlpha=1;
     }
 
-    // ── Fade-out final spre harta ─────────────────────────────────────────
-    if(t > 0.92) {
-      const fo = (t-0.92)/0.08;
-      ctx.fillStyle=`rgba(4,10,24,${fo*0.7})`;
-      ctx.fillRect(0,0,W,H);
-      // Harta revine progresiv
-      if(t > 0.95 && window.map) {
-        try {
-          window.map.setConfigProperty?.('basemap','lightPreset','day');
-        } catch(e) {}
+    // Zone de presiune — 3 tipuri
+    if(t>0.2){
+      const za=Math.min(1,(t-0.2)/0.3);
+      const zoneTypes=[
+        {titlu:'DENSIFICARE',subz:'Centru + coridoare TP',desc:'Zone cu POT rezidual. Construcție P+4→P+8 pe axe de transport.',pct:65,need:Math.round(locuinte*0.45),c:'#ef4444',icon:'⬆'},
+        {titlu:'RECONVERSIE',subz:'Zone industriale vechi',desc:'Fabrici dezafectate → lofturi, birouri, cultură. ROI ridicat.',pct:42,need:Math.round(locuinte*0.3),c:'#f59e0b',icon:'🔄'},
+        {titlu:'EXPANSIUNE',subz:'Periurban controlat',desc:'Extindere intravilan cu infrastructură pregătită. P+1→P+3.',pct:28,need:Math.round(locuinte*0.25),c:'#22c55e',icon:'➡'},
+      ];
+      zoneTypes.forEach((z,i)=>{
+        const cx=W*(0.06+i*0.32);
+        const cy=H*0.2;
+        const cw=W*0.29;
+        const ch=H*0.35;
+        const ca=Math.min(1,Math.max(0,(t-0.2-i*0.08)/0.25));
+        ctx.globalAlpha=ca;
+        ctx.fillStyle='rgba(4,10,24,.92)';
+        this._roundRect(ctx,cx,cy,cw,ch,8);ctx.fill();
+        ctx.strokeStyle=z.c+'55';ctx.lineWidth=1.5;
+        this._roundRect(ctx,cx,cy,cw,ch,8);ctx.stroke();
+        // Header color
+        ctx.fillStyle=z.c+'33';ctx.fillRect(cx,cy,cw,H*0.045);
+        ctx.fillStyle=z.c;ctx.font=`bold ${W*0.013}px "IBM Plex Mono"`;
+        ctx.textAlign='center';ctx.fillText(z.icon+' '+z.titlu,cx+cw/2,cy+H*0.03);
+        ctx.fillStyle='rgba(148,163,184,.7)';ctx.font=`${W*0.008}px "IBM Plex Mono"`;
+        ctx.fillText(z.subz,cx+cw/2,cy+H*0.073);
+        // POT utilizat
+        this._progressBar(ctx,cx+cw*0.08,cy+H*0.1,cw*0.84,H*0.018,z.pct/100,z.c,'POT UTILIZAT',z.pct+'%',t,0.2+i*0.08+0.1);
+        // Locuinte necesare
+        ctx.fillStyle='rgba(200,215,235,.85)';ctx.font=`900 ${W*0.018}px "Space Grotesk",sans-serif`;
+        ctx.textAlign='center';
+        ctx.fillText(z.need.toLocaleString('ro-RO'),cx+cw/2,cy+H*0.215);
+        ctx.fillStyle='rgba(148,163,184,.6)';ctx.font=`${W*0.0075}px "IBM Plex Mono"`;
+        ctx.fillText('locuințe necesare 2025-2055',cx+cw/2,cy+H*0.25);
+        // Descriere
+        ctx.fillStyle='rgba(200,215,235,.7)';ctx.font=`${W*0.0075}px "IBM Plex Mono"`;
+        const descLines=this._wrapText(ctx,z.desc,cw-W*0.03,`${W*0.0075}px "IBM Plex Mono"`);
+        descLines.slice(0,3).forEach((l,li)=>ctx.fillText(l,cx+cw/2,cy+H*0.285+li*H*0.038,cw-W*0.02));
+        ctx.globalAlpha=1;
+      });
+    }
+
+    // Totaluri jos
+    if(t>0.72){
+      const ta=Math.min(1,(t-0.72)/0.2);
+      ctx.globalAlpha=ta;
+      ctx.fillStyle='rgba(4,10,24,.9)';
+      this._roundRect(ctx,W*0.04,H*0.62,W*0.92,H*0.115,8);ctx.fill();
+      ctx.strokeStyle='rgba(212,175,55,.3)';ctx.lineWidth=1;
+      this._roundRect(ctx,W*0.04,H*0.62,W*0.92,H*0.115,8);ctx.stroke();
+      const tots=[
+        {l:'TOTAL LOCUINȚE NECESARE',v:locuinte.toLocaleString('ro-RO'),u:'2025-2055',c:'#D4AF37'},
+        {l:'RITM NECESAR',v:Math.round(locuinte/30).toLocaleString('ro-RO'),u:'locuințe/an',c:'#60a5fa'},
+        {l:'EXTINDERE INTRAVILAN',v:city?.extindere_ha_s2||Math.round(city?.suprafata_ha*0.08||500),u:'ha (S2 moderat)',c:'#22c55e'},
+      ];
+      tots.forEach((t2,i)=>{
+        const tx=W*(0.08+i*0.32);
+        ctx.fillStyle='rgba(148,163,184,.6)';ctx.font=`bold ${W*0.007}px "IBM Plex Mono"`;
+        ctx.textAlign='left';ctx.fillText(t2.l,tx,H*0.655);
+        ctx.fillStyle=t2.c;ctx.font=`900 ${W*0.022}px "Space Grotesk",sans-serif`;
+        ctx.fillText(t2.v,tx,H*0.705);
+        ctx.fillStyle='rgba(148,163,184,.5)';ctx.font=`${W*0.007}px "IBM Plex Mono"`;
+        ctx.fillText(t2.u,tx,H*0.722);
+      });
+      ctx.globalAlpha=1;
+    }
+
+    this._sceneLabel(ctx,W,H,'5','CORIDOARE DE DEZVOLTARE — '+(city?.name||'').toUpperCase());
+  },
+
+  // ── SCENA 6: MOBILITATE AUTO — Fluxuri, congestie, pasaje necesare ─────
+  _s6_mobility_auto(ctx,W,H,t,city) {
+    const gr=ctx.createLinearGradient(0,0,0,H);
+    gr.addColorStop(0,'rgba(4,10,24,.6)');gr.addColorStop(1,'rgba(4,10,24,.94)');
+    ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);
+    this._scanlines(ctx,W,H,0.025);
+
+    const pop=city?.pop2021||100000;
+    const autoPct=Math.round(72-(city?.acoperire_transport||60)*0.2);
+    const congestieH=city?.ore_congestie_zi||2.5;
+    const pasajeNec=city?.pasaje_necesare||Math.round(pop/50000)*2;
+
+    if(t>0.05){
+      ctx.globalAlpha=Math.min(1,(t-0.05)/0.2);
+      ctx.fillStyle='#ef4444';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='left';ctx.fillText('MOBILITATE AUTO · CONGESTIE · INFRASTRUCTURĂ',W*0.05,H*0.09);
+      ctx.fillStyle='rgba(255,255,255,.9)';ctx.font=`900 ${W*0.022}px "Space Grotesk",sans-serif`;
+      ctx.fillText('FLUXURI DE TRAFIC 2025-2055 · PASAJE NECESARE · CENTURI',W*0.05,H*0.145);
+      ctx.globalAlpha=1;
+    }
+
+    // KPI-uri mobilitate auto
+    [[`MODAL SPLIT AUTO`,autoPct,'% din deplasări','#ef4444',0.18],
+     ['ORE CONGESTIE/ZI',congestieH,'ore/zi peak','#f59e0b',0.3],
+     ['PASAJE NECESARE',pasajeNec,'rutiere + pietonale','#60a5fa',0.42],
+     ['CENTURA OCOLITOARE',city?.centura||'necesară','','#22c55e',0.54],
+    ].forEach(([l,v,u,c,d],i)=>{
+      this._kpiCard(ctx,W*(0.04+i*0.24),H*0.18,W*0.22,H*0.18,l,typeof v==='number'?v:0,u,c,t,d,'');
+      if(typeof v==='string'){
+        const ka=Math.min(1,Math.max(0,(t-d)/0.25));
+        ctx.globalAlpha=ka;
+        ctx.fillStyle=c;ctx.font=`900 ${W*0.014}px "Space Grotesk",sans-serif`;
+        ctx.textAlign='left';ctx.fillText(v.toUpperCase(),W*(0.05+i*0.24),H*0.322,W*0.2);
+        ctx.globalAlpha=1;
       }
+    });
+
+    // Zone de congestie 2025 vs 2055
+    if(t>0.5){
+      const ba=Math.min(1,(t-0.5)/0.3);
+      ctx.globalAlpha=ba;
+      ctx.fillStyle='rgba(4,10,24,.9)';
+      this._roundRect(ctx,W*0.04,H*0.42,W*0.92,H*0.24,8);ctx.fill();
+      ctx.strokeStyle='rgba(239,68,68,.2)';ctx.lineWidth=1;
+      this._roundRect(ctx,W*0.04,H*0.42,W*0.92,H*0.24,8);ctx.stroke();
+      ctx.fillStyle='rgba(200,215,235,.8)';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='left';ctx.fillText('CAPACITATE REȚEA RUTIERĂ vs CERERE PROIECTATĂ',W*0.06,H*0.455);
+
+      const ani=[2025,2030,2035,2040,2050,2055];
+      const cerere=ani.map((y,i)=>Math.round(pop*(1+i*0.04)*(autoPct/100)*0.7));
+      const capacitate=ani.map((_y,i)=>Math.round(pop*0.6*(1+i*0.01)));
+
+      const cx2=W*0.06,cw2=W*0.88,ch2=H*0.14,cy2=H*0.475;
+      const maxV=Math.max(...cerere,...capacitate)*1.1;
+      const px=(i)=>cx2+i*(cw2/(ani.length-1));
+      const py2=(v)=>cy2+ch2*(1-v/maxV);
+
+      // Capacitate (verde)
+      ctx.beginPath();
+      ani.forEach((y,i)=>{const x=px(i),yv=py2(capacitate[i]);i?ctx.lineTo(x,yv):ctx.moveTo(x,yv);});
+      ctx.strokeStyle='rgba(34,197,94,.7)';ctx.lineWidth=2;ctx.setLineDash([4,3]);ctx.stroke();ctx.setLineDash([]);
+
+      // Cerere (rosu animat)
+      const drawN=Math.floor(ani.length*Math.min(1,t*1.5));
+      ctx.beginPath();
+      for(let i=0;i<drawN;i++){const x=px(i),yv=py2(cerere[i]);i?ctx.lineTo(x,yv):ctx.moveTo(x,yv);}
+      ctx.strokeStyle='#ef4444';ctx.lineWidth=2.5;ctx.stroke();
+
+      // Labels ani
+      ani.forEach((y,i)=>{
+        ctx.fillStyle='rgba(100,120,150,.6)';ctx.font=`${W*0.007}px "IBM Plex Mono"`;
+        ctx.textAlign='center';ctx.fillText(y,px(i),cy2+ch2+H*0.02);
+      });
+
+      // Legenda
+      [['CERERE ESTIMATĂ','#ef4444','—'],['CAPACITATE REȚEA','rgba(34,197,94,.7)','- -']].forEach(([l,c,_s],i)=>{
+        ctx.fillStyle=c;ctx.fillRect(W*0.06+i*W*0.22,cy2+ch2+H*0.042,W*0.018,3);
+        ctx.fillStyle='rgba(148,163,184,.7)';ctx.font=`${W*0.0075}px "IBM Plex Mono"`;
+        ctx.textAlign='left';ctx.fillText(l,W*0.082+i*W*0.22,cy2+ch2+H*0.047);
+      });
+      ctx.globalAlpha=1;
     }
 
-    // ── Surse ─────────────────────────────────────────────────────────────
-    if(t > 0.25 && t < 0.90) {
-      ctx.fillStyle='rgba(100,120,150,.4)';
-      ctx.font=`${W*0.007}px "IBM Plex Mono"`;
+    // Recomandare acționabilă
+    if(t>0.82){
+      const ta=Math.min(1,(t-0.82)/0.15);
+      ctx.globalAlpha=ta;
+      const saturat=cerere[cerere.length-1]>capacitate[capacitate.length-1];
+      ctx.fillStyle=saturat?'rgba(127,29,29,.85)':'rgba(5,46,22,.85)';
+      this._roundRect(ctx,W*0.04,H*0.72,W*0.92,H*0.065,6);ctx.fill();
+      ctx.strokeStyle=saturat?'rgba(239,68,68,.5)':'rgba(34,197,94,.5)';ctx.lineWidth=1.5;
+      this._roundRect(ctx,W*0.04,H*0.72,W*0.92,H*0.065,6);ctx.stroke();
+      ctx.fillStyle=saturat?'#fca5a5':'#86efac';
+      ctx.font=`bold ${W*0.0085}px "IBM Plex Mono"`;ctx.textAlign='center';
+      const rec=saturat
+        ?`⚠ Rețeaua rutieră va fi SATURATĂ până în 2035 — necesare ${pasajeNec} pasaje noi + centură ocolitoare + extindere TP`
+        :`✓ Capacitate rutieră suficientă până în 2040 — prioritate: modal shift spre TP și mobilitate activă`;
+      ctx.fillText(rec,W/2,H*0.758,W*0.88);
+      ctx.globalAlpha=1;
+    }
+
+    this._sceneLabel(ctx,W,H,'6','MOBILITATE AUTO — '+(city?.name||'').toUpperCase());
+  },
+
+  // ── SCENA 7: TRANSPORT PUBLIC & WALKABILITY ────────────────────────────
+  _s7_mobility_public(ctx,W,H,t,city) {
+    const gr=ctx.createLinearGradient(0,0,0,H);
+    gr.addColorStop(0,'rgba(4,10,24,.65)');gr.addColorStop(1,'rgba(4,10,24,.94)');
+    ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);
+    this._scanlines(ctx,W,H,0.025);
+
+    const acop=city?.acoperire_transport||60;
+    const walk=Math.min(100,Math.round(30+acop*0.4+(city?.pib_eur_cap||10000)/1500));
+    const walkLabel=walk>=70?'VERY WALKABLE':walk>=50?'WALKABLE':walk>=35?'CAR-FRIENDLY':'CAR-DEPENDENT';
+    const walkColor=walk>=70?'#22c55e':walk>=50?'#f59e0b':walk>=35?'#f97316':'#ef4444';
+
+    if(t>0.05){
+      ctx.globalAlpha=Math.min(1,(t-0.05)/0.2);
+      ctx.fillStyle='#60a5fa';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='left';ctx.fillText('TRANSPORT PUBLIC · WALKABILITY · 15-MINUTE CITY',W*0.05,H*0.09);
+      ctx.fillStyle='rgba(255,255,255,.9)';ctx.font=`900 ${W*0.022}px "Space Grotesk",sans-serif`;
+      ctx.fillText('ACOPERIRE · TIMPI ACCES · CORIDOARE PRIORITARE',W*0.05,H*0.145);
+      ctx.globalAlpha=1;
+    }
+
+    // Scor walkability mare - stânga
+    if(t>0.18){
+      const wa=Math.min(1,(t-0.18)/0.3);
+      ctx.globalAlpha=wa;
+      ctx.fillStyle='rgba(4,10,24,.92)';
+      this._roundRect(ctx,W*0.04,H*0.2,W*0.3,H*0.42,8);ctx.fill();
+      ctx.strokeStyle=walkColor+'55';ctx.lineWidth=2;
+      this._roundRect(ctx,W*0.04,H*0.2,W*0.3,H*0.42,8);ctx.stroke();
+      ctx.fillStyle='rgba(148,163,184,.7)';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='center';ctx.fillText('WALKABILITY SCORE',W*0.19,H*0.245);
+      ctx.fillStyle=walkColor;
+      ctx.font=`900 ${W*0.068}px "Space Grotesk",sans-serif`;
+      ctx.fillText(this._countUp(walk,Math.min(1,(t-0.2)/0.5)),W*0.19,H*0.38);
+      ctx.font=`${W*0.012}px "IBM Plex Mono"`;ctx.fillText('/100',W*0.19,H*0.42);
+      ctx.fillStyle=walkColor;ctx.font=`bold ${W*0.011}px "IBM Plex Mono"`;
+      ctx.fillText(walkLabel,W*0.19,H*0.47);
+      ctx.fillStyle='rgba(148,163,184,.5)';ctx.font=`${W*0.007}px "IBM Plex Mono"`;
+      ctx.fillText('Frank et al. (2006)',W*0.19,H*0.51);
+      ctx.fillText('Moreno — 15min City',W*0.19,H*0.528);
+      ctx.globalAlpha=1;
+    }
+
+    // Servicii accesibile în 15 minute — dreapta
+    if(t>0.3){
+      const sa=Math.min(1,(t-0.3)/0.3);
+      ctx.globalAlpha=sa;
+      ctx.fillStyle='rgba(4,10,24,.92)';
+      this._roundRect(ctx,W*0.38,H*0.2,W*0.58,H*0.42,8);ctx.fill();
+      ctx.strokeStyle='rgba(96,165,250,.3)';ctx.lineWidth=1;
+      this._roundRect(ctx,W*0.38,H*0.2,W*0.58,H*0.42,8);ctx.stroke();
+      ctx.fillStyle='rgba(200,215,235,.8)';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='left';ctx.fillText('ACCESIBILITATE LA SERVICII ESENȚIALE (15min city)',W*0.4,H*0.237);
+
+      const servicii=[
+        {n:'🏥 Urgențe medicale',t:'10 min',ok:acop>=60,std:'10 min standard EU'},
+        {n:'🏫 Școli primare',t:'10 min',ok:acop>=50,std:'10 min standard MEC'},
+        {n:'🛒 Supermarket',t:'5 min',ok:walk>=50,std:'5 min OMS'},
+        {n:'🌳 Parc urban',t:'5 min',ok:(city?.spatii_verzi_mp_loc||0)>=9,std:'OMS 9m²/loc'},
+        {n:'🚌 Stație TP',t:'5 min',ok:acop>=65,std:'400m UITP'},
+        {n:'💼 Centru servicii',t:'15 min',ok:walk>=45,std:'15min city Moreno'},
+      ];
+      servicii.forEach((s,i)=>{
+        const sy=H*0.275+i*H*0.052;
+        const sc=s.ok?'#22c55e':'#ef4444';
+        ctx.fillStyle=sc+'33';ctx.fillRect(W*0.4,sy-H*0.015,W*0.54,H*0.04);
+        ctx.fillStyle=sc;ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+        ctx.textAlign='left';ctx.fillText(s.ok?'✓':'✗',W*0.4,sy);
+        ctx.fillStyle='rgba(200,215,235,.9)';ctx.font=`${W*0.009}px "IBM Plex Mono"`;
+        ctx.fillText(s.n,W*0.415,sy);
+        ctx.fillStyle=sc;ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+        ctx.textAlign='right';ctx.fillText(s.t,W*0.88,sy);
+        ctx.fillStyle='rgba(100,120,150,.5)';ctx.font=`${W*0.0065}px "IBM Plex Mono"`;
+        ctx.fillText(s.std,W*0.88,sy+H*0.022);
+      });
+      ctx.globalAlpha=1;
+    }
+
+    // Recomandare TP
+    if(t>0.75){
+      const ta=Math.min(1,(t-0.75)/0.2);
+      ctx.globalAlpha=ta;
+      const tintaSUMP=75;
+      const deficit=tintaSUMP-acop;
+      ctx.fillStyle=deficit>20?'rgba(127,29,29,.85)':deficit>5?'rgba(69,52,4,.85)':'rgba(5,46,22,.85)';
+      this._roundRect(ctx,W*0.04,H*0.68,W*0.92,H*0.12,8);ctx.fill();
+      ctx.strokeStyle=deficit>20?'rgba(239,68,68,.5)':deficit>5?'rgba(245,158,11,.5)':'rgba(34,197,94,.5)';
+      ctx.lineWidth=1.5;this._roundRect(ctx,W*0.04,H*0.68,W*0.92,H*0.12,8);ctx.stroke();
+      ctx.fillStyle='rgba(200,215,235,.9)';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
       ctx.textAlign='center';
-      ctx.fillText('Date: INSE Rec.2021 · Eurostat · BNR · IPCC AR6 · Copernicus GHSL · OSM · UrbanX Model 2026',W/2,H*0.975,W*0.88);
+      ctx.fillText(`ACOPERIRE TP ACTUALĂ: ${acop}% · ȚINTĂ SUMP 2030: ${tintaSUMP}%`,W/2,H*0.715);
+      const rec2=deficit>20
+        ?`⚠ DEFICIT MAJOR: +${deficit}% acoperire TP necesară · Prioritate: coridoare BRT + extindere rețea`
+        :deficit>5
+        ?`⚡ DEFICIT MODERAT: +${deficit}% acoperire TP necesară · Plan: 3-5 linii noi, frecvență +40%`
+        :`✓ Acoperire TP satisfăcătoare · Focalizare pe creșterea frecvenței și calității`
+      ctx.fillStyle=deficit>20?'#fca5a5':deficit>5?'#fde68a':'#86efac';
+      ctx.font=`${W*0.009}px "IBM Plex Mono"`;
+      ctx.fillText(rec2,W/2,H*0.748,W*0.88);
+      ctx.globalAlpha=1;
     }
 
-    // ── Watermark ─────────────────────────────────────────────────────────
-    ctx.fillStyle='rgba(212,175,55,0.2)';
-    ctx.font=`bold ${W*0.008}px "IBM Plex Mono"`;
-    ctx.textAlign='right';
-    ctx.fillText('UrbanX TSS·FG © 2026', W-12, H-8);
+    this._sceneLabel(ctx,W,H,'7','TRANSPORT PUBLIC & WALKABILITY');
+  },
 
-    this._sceneLabel(ctx,W,H,'12','CONCLUZIE & VIZIUNE');
-  }
-,
+  // ── SCENA 8: RISCURI SEISMICE — Fond vulnerabil, PNRR eligibil ─────────
+  _s8_seismic(ctx,W,H,t,city) {
+    const gr=ctx.createLinearGradient(0,0,0,H);
+    gr.addColorStop(0,'rgba(4,10,24,.65)');gr.addColorStop(1,'rgba(10,4,4,.96)');
+    ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);
+    this._scanlines(ctx,W,H,0.025);
 
-  // ═══ LAYERS MAPBOX per scenă ═══════════════════════════════════════════
+    const ag=city?.ag_seismic||0.2;
+    const tc=city?.tc_seismic||0.7;
+    const fond_pre77=city?.fond_pre77_pct||35;
+    const pnrr_eligibil=city?.pnrr_eligibil||Math.round((city?.pop2021||100000)*fond_pre77/100*0.3);
+    const zonaRisc=ag>=0.4?'IA — RIDICAT':ag>=0.3?'IB — MEDIU-RIDICAT':ag>=0.2?'II — MEDIU':'III — SCĂZUT';
+    const zonaColor=ag>=0.4?'#ef4444':ag>=0.3?'#f97316':ag>=0.2?'#f59e0b':'#22c55e';
+
+    if(t>0.05){
+      ctx.globalAlpha=Math.min(1,(t-0.05)/0.2);
+      ctx.fillStyle='#ef4444';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='left';ctx.fillText('RISC SEISMIC · FOND VULNERABIL · PNRR C10-I2',W*0.05,H*0.09);
+      ctx.fillStyle='rgba(255,255,255,.9)';ctx.font=`900 ${W*0.022}px "Space Grotesk",sans-serif`;
+      ctx.fillText('SURSE: INFP P100-1/2013 · AMCCRS · MDLPA',W*0.05,H*0.145);
+      ctx.globalAlpha=1;
+    }
+
+    // Zona seismică — mare, centrat
+    if(t>0.15){
+      const za=Math.min(1,(t-0.15)/0.3);
+      ctx.globalAlpha=za;
+      ctx.fillStyle='rgba(4,10,24,.92)';
+      this._roundRect(ctx,W*0.04,H*0.19,W*0.44,H*0.25,8);ctx.fill();
+      ctx.strokeStyle=zonaColor+'88';ctx.lineWidth=2;
+      this._roundRect(ctx,W*0.04,H*0.19,W*0.44,H*0.25,8);ctx.stroke();
+      ctx.fillStyle='rgba(148,163,184,.7)';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='center';ctx.fillText('ZONA SEISMICĂ',W*0.26,H*0.225);
+      ctx.fillStyle=zonaColor;ctx.font=`900 ${W*0.028}px "Space Grotesk",sans-serif`;
+      ctx.fillText(zonaRisc,W*0.26,H*0.295);
+      ctx.fillStyle='rgba(200,215,235,.8)';ctx.font=`bold ${W*0.0095}px "IBM Plex Mono"`;
+      ctx.fillText(`Ag=${ag}g · Tc=${tc}s`,W*0.26,H*0.337);
+      ctx.fillStyle='rgba(148,163,184,.5)';ctx.font=`${W*0.007}px "IBM Plex Mono"`;
+      ctx.fillText('Normativ P100-1/2013 · INFP',W*0.26,H*0.36);
+      ctx.globalAlpha=1;
+    }
+
+    // Fond vulnerabil
+    if(t>0.3){
+      const fa=Math.min(1,(t-0.3)/0.3);
+      ctx.globalAlpha=fa;
+      ctx.fillStyle='rgba(4,10,24,.92)';
+      this._roundRect(ctx,W*0.52,H*0.19,W*0.44,H*0.25,8);ctx.fill();
+      ctx.strokeStyle='rgba(249,115,22,.4)';ctx.lineWidth=1.5;
+      this._roundRect(ctx,W*0.52,H*0.19,W*0.44,H*0.25,8);ctx.stroke();
+      ctx.fillStyle='rgba(148,163,184,.7)';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='center';ctx.fillText('FOND LOCATIV VULNERABIL',W*0.74,H*0.225);
+      this._progressBar(ctx,W*0.545,H*0.255,W*0.38,H*0.022,fond_pre77/100,'#f97316','CLĂDIRI PRE-1977',fond_pre77+'%',t,0.32);
+      this._progressBar(ctx,W*0.545,H*0.305,W*0.38,H*0.022,(fond_pre77*0.4/100),'#ef4444','RISC SEISMIC Rz I/II',Math.round(fond_pre77*0.4)+'%',t,0.38);
+      ctx.fillStyle='rgba(200,215,235,.8)';ctx.font=`${W*0.0085}px "IBM Plex Mono"`;
+      ctx.fillText(pnrr_eligibil.toLocaleString('ro-RO')+' unități PNRR eligibile',W*0.74,H*0.41);
+      ctx.globalAlpha=1;
+    }
+
+    // Impact + necesitate intervenție
+    if(t>0.5){
+      const ia=Math.min(1,(t-0.5)/0.3);
+      ctx.globalAlpha=ia;
+      ctx.fillStyle='rgba(4,10,24,.9)';
+      this._roundRect(ctx,W*0.04,H*0.5,W*0.92,H*0.2,8);ctx.fill();
+      ctx.strokeStyle='rgba(239,68,68,.2)';ctx.lineWidth=1;
+      this._roundRect(ctx,W*0.04,H*0.5,W*0.92,H*0.2,8);ctx.stroke();
+      ctx.fillStyle='rgba(200,215,235,.8)';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='left';ctx.fillText('IMPACT ESTIMAT CUTREMUR MAJOR (P100 Ag)',W*0.06,H*0.535);
+
+      const impacts=[
+        {l:'Cost reconstrucție estimat',v:'€'+Math.round(ag*pop*city?.pib_eur_cap*0.002||500)+'M',c:'#ef4444'},
+        {l:'Clădiri risc maxim (Rz I)',v:Math.round((city?.pop2021||100000)*0.005)+'',c:'#f97316'},
+        {l:'Persoane expuse',v:Math.round((city?.pop2021||100000)*fond_pre77/100*0.3).toLocaleString('ro-RO'),c:'#f59e0b'},
+        {l:'Finanțare PNRR C10-I2',v:'100% rambursabil',c:'#22c55e'},
+      ];
+      const pop2=city?.pop2021||100000;
+      impacts[1].v=Math.round(pop2*0.005)+'';
+      impacts[2].v=Math.round(pop2*fond_pre77/100*0.3).toLocaleString('ro-RO');
+
+      impacts.forEach((im,i)=>{
+        const ix=W*(0.06+i*0.235);
+        ctx.fillStyle='rgba(148,163,184,.6)';ctx.font=`${W*0.007}px "IBM Plex Mono"`;
+        ctx.textAlign='left';ctx.fillText(im.l,ix,H*0.57);
+        ctx.fillStyle=im.c;ctx.font=`900 ${W*0.016}px "Space Grotesk",sans-serif`;
+        ctx.fillText(im.v,ix,H*0.618,W*0.21);
+      });
+      ctx.globalAlpha=1;
+    }
+
+    // Call to action PNRR
+    if(t>0.78){
+      const ta=Math.min(1,(t-0.78)/0.15);
+      ctx.globalAlpha=ta;
+      ctx.fillStyle='rgba(5,30,10,.9)';
+      this._roundRect(ctx,W*0.04,H*0.76,W*0.92,H*0.075,6);ctx.fill();
+      ctx.strokeStyle='rgba(34,197,94,.5)';ctx.lineWidth=1.5;
+      this._roundRect(ctx,W*0.04,H*0.76,W*0.92,H*0.075,6);ctx.stroke();
+      ctx.fillStyle='#86efac';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='center';
+      ctx.fillText('💡 ACȚIUNE: Identificați clădirile Rz I/II · Aplicați PNRR C10-I2 (100% rambursabil) · Prioritate: blocuri P+4+ pre-1977',W/2,H*0.8,W*0.88);
+      ctx.globalAlpha=1;
+    }
+
+    this._sceneLabel(ctx,W,H,'8','RISC SEISMIC — '+(city?.name||'').toUpperCase());
+  },
+
+  // ── SCENA 9: RISCURI CLIMATICE — Inundații, secetă, UHI ───────────────
+  _s9_climate(ctx,W,H,t,city) {
+    const gr=ctx.createLinearGradient(0,0,W*0.5,H);
+    gr.addColorStop(0,'rgba(4,10,44,.8)');gr.addColorStop(1,'rgba(4,10,24,.95)');
+    ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);
+    this._scanlines(ctx,W,H,0.025);
+
+    const rcp45=city?.temp_delta_rcp45||1.4;
+    const rcp85=city?.temp_delta_rcp85||2.2;
+    const zileCaniculare=city?.zile_caniculare_2055||22;
+    const uhi=city?.uhi_delta||1.8;
+    const riscInund=city?.risc_inundatii||'mediu';
+    const riscColor={'scăzut':'#22c55e','mediu':'#f59e0b','ridicat':'#f97316','foarte ridicat':'#ef4444'}[riscInund]||'#f59e0b';
+
+    if(t>0.05){
+      ctx.globalAlpha=Math.min(1,(t-0.05)/0.2);
+      ctx.fillStyle='#38bdf8';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='left';ctx.fillText('RISCURI CLIMATICE · INUNDAȚII · SECETĂ · UHI',W*0.05,H*0.09);
+      ctx.fillStyle='rgba(255,255,255,.9)';ctx.font=`900 ${W*0.022}px "Space Grotesk",sans-serif`;
+      ctx.fillText('IPCC AR6 · ANAR PGRA 2021-2027 · ANM ROCADA',W*0.05,H*0.145);
+      ctx.globalAlpha=1;
+    }
+
+    // Temperatura — grafic RCP4.5 vs RCP8.5
+    if(t>0.18){
+      const ga=Math.min(1,(t-0.18)/0.35);
+      ctx.globalAlpha=ga;
+      ctx.fillStyle='rgba(4,10,24,.9)';
+      this._roundRect(ctx,W*0.04,H*0.19,W*0.56,H*0.36,8);ctx.fill();
+      ctx.strokeStyle='rgba(56,189,248,.25)';ctx.lineWidth=1;
+      this._roundRect(ctx,W*0.04,H*0.19,W*0.56,H*0.36,8);ctx.stroke();
+      ctx.fillStyle='rgba(200,215,235,.8)';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='left';ctx.fillText('PROIECȚIE TEMPERATURĂ 2024-2055',W*0.06,H*0.225);
+
+      const ani2=[2024,2030,2035,2040,2050,2055];
+      const t45=ani2.map((y)=>rcp45*(y-2024)/31);
+      const t85=ani2.map((y)=>rcp85*(y-2024)/31);
+      const gx=W*0.06,gw=W*0.5,gh=H*0.22,gy=H*0.245;
+      const maxT=rcp85*1.15;
+      const gpx=(i)=>gx+i*(gw/(ani2.length-1));
+      const gpy=(v)=>gy+gh*(1-v/maxT);
+
+      // Grid
+      [0,0.5,1,1.5,2].forEach(v=>{
+        ctx.strokeStyle='rgba(255,255,255,.06)';ctx.lineWidth=0.5;
+        ctx.beginPath();ctx.moveTo(gx,gpy(v));ctx.lineTo(gx+gw,gpy(v));ctx.stroke();
+        ctx.fillStyle='rgba(100,120,150,.5)';ctx.font=`${W*0.006}px "IBM Plex Mono"`;
+        ctx.textAlign='right';ctx.fillText('+'+v.toFixed(1)+'°C',gx-4,gpy(v)+3);
+      });
+
+      // RCP8.5 area
+      ctx.beginPath();
+      ani2.forEach((y,i)=>{const v=t85[i];i?ctx.lineTo(gpx(i),gpy(v)):ctx.moveTo(gpx(i),gpy(v));});
+      ctx.lineTo(gpx(ani2.length-1),gpy(0));ctx.lineTo(gx,gpy(0));ctx.closePath();
+      ctx.fillStyle='rgba(239,68,68,.12)';ctx.fill();
+
+      // RCP4.5 line
+      const dN45=Math.floor(ani2.length*Math.min(1,t*1.8));
+      ctx.beginPath();
+      for(let i=0;i<dN45;i++){i?ctx.lineTo(gpx(i),gpy(t45[i])):ctx.moveTo(gpx(i),gpy(t45[i]));}
+      ctx.strokeStyle='#f59e0b';ctx.lineWidth=2;ctx.stroke();
+
+      // RCP8.5 line
+      const dN85=Math.floor(ani2.length*Math.min(1,t*1.6));
+      ctx.beginPath();
+      for(let i=0;i<dN85;i++){i?ctx.lineTo(gpx(i),gpy(t85[i])):ctx.moveTo(gpx(i),gpy(t85[i]));}
+      ctx.strokeStyle='#ef4444';ctx.lineWidth=2.5;ctx.stroke();
+
+      ani2.forEach((y,i)=>{ctx.fillStyle='rgba(100,120,150,.6)';ctx.font=`${W*0.006}px "IBM Plex Mono"`;ctx.textAlign='center';ctx.fillText(y,gpx(i),gy+gh+H*0.018);});
+      [['RCP4.5 (emisii reduse)','#f59e0b'],['RCP8.5 (tendința actuală)','#ef4444']].forEach(([l,c],i)=>{
+        ctx.fillStyle=c;ctx.fillRect(gx+i*W*0.24,gy+gh+H*0.038,W*0.018,2);
+        ctx.fillStyle='rgba(148,163,184,.7)';ctx.font=`${W*0.0065}px "IBM Plex Mono"`;
+        ctx.textAlign='left';ctx.fillText(l,gx+i*W*0.24+W*0.022,gy+gh+H*0.044);
+      });
+      ctx.globalAlpha=1;
+    }
+
+    // KPI-uri risc climatic — dreapta
+    if(t>0.32){
+      const ka=Math.min(1,(t-0.32)/0.3);
+      ctx.globalAlpha=ka;
+      [['CREȘTERE TEMP 2055',rcp45,'+°C (RCP4.5)','#f59e0b',0.32],
+       ['ZILE CANICULE/AN',zileCaniculare,'zile >35°C la 2055','#f97316',0.44],
+       ['UHI URBAN','+'+uhi,'°C vs rural','#ef4444',0.56],
+       ['RISC INUNDAȚII',riscInund.toUpperCase(),'ANAR PGRA 2021',riscColor,0.68],
+      ].forEach(([l,v,u,c,d],i)=>{
+        const isStr=typeof v==='string';
+        this._kpiCard(ctx,W*0.64,H*(0.19+i*0.145),W*0.32,H*0.12,l,isStr?0:v,u,c,t,d,isStr?'':'');
+        if(isStr){
+          const ka2=Math.min(1,Math.max(0,(t-d)/0.25));
+          ctx.globalAlpha=ka2;
+          ctx.fillStyle=c;ctx.font=`900 ${W*0.016}px "Space Grotesk",sans-serif`;
+          ctx.textAlign='left';ctx.fillText(v,W*0.655,H*(0.245+i*0.145),W*0.28);
+          ctx.globalAlpha=1;
+        }
+      });
+      ctx.globalAlpha=1;
+    }
+
+    // Recomandări adaptare climatică
+    if(t>0.8){
+      const ta=Math.min(1,(t-0.8)/0.15);
+      ctx.globalAlpha=ta;
+      ctx.fillStyle='rgba(4,20,44,.9)';
+      this._roundRect(ctx,W*0.04,H*0.77,W*0.92,H*0.09,6);ctx.fill();
+      ctx.strokeStyle='rgba(56,189,248,.4)';ctx.lineWidth=1.5;
+      this._roundRect(ctx,W*0.04,H*0.77,W*0.92,H*0.09,6);ctx.stroke();
+      ctx.fillStyle='#7dd3fc';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='center';
+      ctx.fillText('💡 ADAPTARE: Coridoare verzi anti-UHI · Retenție apă pluvială · NZEB obligatoriu · Fonduri verzi EU 2025-2030',W/2,H*0.808,W*0.88);
+      ctx.fillStyle='rgba(148,163,184,.7)';ctx.font=`${W*0.0075}px "IBM Plex Mono"`;
+      ctx.fillText(`Fără intervenție: +${uhi+rcp85}°C față de rural în 2055 · Costuri adaptare estimate: €${Math.round((city?.pop2021||100000)*0.02)}M`,W/2,H*0.836,W*0.88);
+      ctx.globalAlpha=1;
+    }
+
+    this._sceneLabel(ctx,W,H,'9','RISCURI CLIMATICE — '+(city?.name||'').toUpperCase());
+  },
+
+  // ── SCENA 10: PROIECȚIE DEMOGRAFICĂ 2055 — Monte Carlo ─────────────────
+  _s10_projection(ctx,W,H,t,city) {
+    const gr=ctx.createLinearGradient(0,0,0,H);
+    gr.addColorStop(0,'rgba(4,10,24,.7)');gr.addColorStop(1,'rgba(4,10,24,.96)');
+    ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);
+    this._scanlines(ctx,W,H,0.025);
+
+    const pop0=city?.pop2021||100000;
+    const r=city?.rata_reala_2011_2021||0;
+    const proj=(rate)=>Math.round(pop0*Math.pow(1+rate/100,34));
+    const s1=proj(Math.max(r+0.5,0.3));
+    const s2=proj(r);
+    const s3=proj(r-0.5);
+    const years=[2021,2025,2030,2035,2040,2050,2055];
+    const mc_p10=years.map(y=>Math.round(pop0*Math.pow(1+(r-1)/100,(y-2021))));
+    const mc_p50=years.map(y=>Math.round(pop0*Math.pow(1+r/100,(y-2021))));
+    const mc_p90=years.map(y=>Math.round(pop0*Math.pow(1+(r+1)/100,(y-2021))));
+
+    if(t>0.05){
+      ctx.globalAlpha=Math.min(1,(t-0.05)/0.2);
+      ctx.fillStyle='#a78bfa';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='left';ctx.fillText('PROIECȚIE DEMOGRAFICĂ 2025-2055 · SIMULARE MONTE CARLO',W*0.05,H*0.09);
+      ctx.fillStyle='rgba(255,255,255,.9)';ctx.font=`900 ${W*0.022}px "Space Grotesk",sans-serif`;
+      ctx.fillText('3 SCENARII · 10.000 SIMULĂRI · INSE + EUROSTAT EUROPOP2023',W*0.05,H*0.145);
+      ctx.globalAlpha=1;
+    }
+
+    // Fan chart Monte Carlo
+    if(t>0.18){
+      const fa=Math.min(1,(t-0.18)/0.1);
+      ctx.globalAlpha=fa;
+      ctx.fillStyle='rgba(4,10,24,.9)';
+      this._roundRect(ctx,W*0.04,H*0.19,W*0.56,H*0.46,8);ctx.fill();
+      ctx.strokeStyle='rgba(167,139,250,.2)';ctx.lineWidth=1;
+      this._roundRect(ctx,W*0.04,H*0.56,W*0.56,H*0.0,8);ctx.stroke();
+      ctx.globalAlpha=fa;
+      this._fanChart(ctx,W*0.6,H*0.38,{p10:mc_p10,p50:mc_p50,p90:mc_p90,years,color:'#a78bfa'},Math.min(1,(t-0.18)/0.7));
+      ctx.globalAlpha=1;
+    }
+
+    // Cele 3 scenarii — carduri
+    [[`S1 OPTIMIST`,s1,'+0.5%/an','#22c55e',0.2,'▲'],
+     ['S2 MODERAT ★',s2,`${r>=0?'+':''}${r.toFixed(1)}%/an (referință)`,'#D4AF37',0.32,'→'],
+     ['S3 CONSERVATOR',s3,'-0.5%/an','#ef4444',0.44,'▼'],
+    ].forEach(([l,v,u,c,d,arrow],i)=>{
+      const ca=Math.min(1,Math.max(0,(t-d)/0.25));
+      ctx.globalAlpha=ca;
+      const cx2=W*0.62;
+      const cy2=H*(0.19+i*0.155);
+      const cw2=W*0.34;
+      const ch2=H*0.13;
+      ctx.fillStyle='rgba(4,10,24,.92)';
+      this._roundRect(ctx,cx2,cy2,cw2,ch2,6);ctx.fill();
+      ctx.strokeStyle=c+'55';ctx.lineWidth=1.5;
+      this._roundRect(ctx,cx2,cy2,cw2,ch2,6);ctx.stroke();
+      ctx.fillStyle=c;ctx.font=`bold ${W*0.0085}px "IBM Plex Mono"`;
+      ctx.textAlign='left';ctx.fillText(l,cx2+8,cy2+ch2*0.28);
+      ctx.font=`900 ${W*0.022}px "Space Grotesk",sans-serif`;
+      ctx.fillText(arrow+' '+v.toLocaleString('ro-RO'),cx2+8,cy2+ch2*0.68,cw2-16);
+      ctx.fillStyle='rgba(148,163,184,.6)';ctx.font=`${W*0.007}px "IBM Plex Mono"`;
+      ctx.fillText(u,cx2+8,cy2+ch2*0.88);
+      const delta=v-pop0;
+      ctx.fillStyle=delta>=0?'#22c55e':'#ef4444';
+      ctx.textAlign='right';ctx.font=`bold ${W*0.0075}px "IBM Plex Mono"`;
+      ctx.fillText((delta>=0?'+':'')+delta.toLocaleString('ro-RO')+' loc.',cx2+cw2-8,cy2+ch2*0.88);
+      ctx.globalAlpha=1;
+    });
+
+    // Implicații urbane
+    if(t>0.72){
+      const ta=Math.min(1,(t-0.72)/0.2);
+      ctx.globalAlpha=ta;
+      ctx.fillStyle='rgba(4,10,24,.9)';
+      this._roundRect(ctx,W*0.04,H*0.7,W*0.56,H*0.115,8);ctx.fill();
+      ctx.strokeStyle='rgba(167,139,250,.3)';ctx.lineWidth=1;
+      this._roundRect(ctx,W*0.04,H*0.7,W*0.56,H*0.115,8);ctx.stroke();
+      const isDeclin=r<0;
+      ctx.fillStyle='rgba(200,215,235,.85)';ctx.font=`bold ${W*0.0085}px "IBM Plex Mono"`;
+      ctx.textAlign='left';ctx.fillText('IMPLICAȚII PENTRU PLANIFICARE:',W*0.06,H*0.73);
+      ctx.font=`${W*0.0082}px "IBM Plex Mono"`;
+      const impl=isDeclin
+        ?[`→ Infrastructură: nu extindeți rețeaua! Optimizați ce există`,`→ Locuire: reconversie fond vechi > construcție nouă`,`→ Servicii: consolidați școli și dispensare în zone dense`]
+        :[`→ Infrastructură: extindeți TP și utilități pe coridoare noi`,`→ Locuire: ${Math.round(Math.abs(s1-pop0)/30)}/an locuințe noi necesare`,`→ Servicii: planificați școli și clinici în zone noi`];
+      impl.forEach((l,i)=>ctx.fillText(l,W*0.06,H*0.758+i*H*0.032,W*0.5));
+      ctx.globalAlpha=1;
+    }
+
+    this._sceneLabel(ctx,W,H,'10','PROIECȚIE DEMOGRAFICĂ 2025-2055');
+  },
+
+  // ── SCENA 11: NECESARUL DE INFRASTRUCTURĂ ─────────────────────────────
+  _s11_infrastructure(ctx,W,H,t,city) {
+    const gr=ctx.createLinearGradient(0,0,0,H);
+    gr.addColorStop(0,'rgba(4,10,24,.7)');gr.addColorStop(1,'rgba(4,10,24,.96)');
+    ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);
+    this._scanlines(ctx,W,H,0.025);
+
+    const pop=city?.pop2021||100000;
+    const need=this._need||{};
+    const spatiiVerzi=city?.spatii_verzi_mp_loc||11;
+    const sVDeficit=Math.max(0,9-spatiiVerzi);
+
+    // Calcule necesare
+    const scoli_nec=Math.max(0,Math.round((need.pop2055||pop)*0.155/400-(city?.scoli||Math.round(pop*0.155/400))));
+    const cabinete_nec=Math.max(0,Math.round((need.pop2055||pop)/1500-(city?.cabinete||Math.round(pop/1500))));
+    const sv_ha_nec=Math.max(0,Math.round(((need.pop2055||pop)*9/10000)-(city?.suprafata_ha||5000)*spatiiVerzi/10000));
+    const statii_nec=Math.round((need.pop2055||pop)/3500);
+
+    if(t>0.05){
+      ctx.globalAlpha=Math.min(1,(t-0.05)/0.2);
+      ctx.fillStyle='#22c55e';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='left';ctx.fillText('NECESARUL DE INFRASTRUCTURĂ 2025-2055',W*0.05,H*0.09);
+      ctx.fillStyle='rgba(255,255,255,.9)';ctx.font=`900 ${W*0.022}px "Space Grotesk",sans-serif`;
+      ctx.fillText('ȘCOLI · SĂNĂTATE · SPAȚII VERZI · STAȚII TP · PARCĂRI',W*0.05,H*0.145);
+      ctx.globalAlpha=1;
+    }
+
+    // Grid 6 categorii
+    const cats=[
+      {titlu:'ȘCOLI & GRĂDINIȚE',icon:'🏫',necesar:scoli_nec,u:'unități noi',std:'400 elevi/unitate MEC',c:'#60a5fa',d:0.18},
+      {titlu:'CABINETE MEDICALE',icon:'🏥',necesar:cabinete_nec,u:'cabinete noi',std:'1.500 pacienți/cabinet MS',c:'#ef4444',d:0.25},
+      {titlu:'SPAȚII VERZI',icon:'🌳',necesar:sv_ha_nec,u:'ha necesare',std:'OMS min 9m²/loc',c:'#22c55e',d:0.32},
+      {titlu:'STAȚII TRANSPORT',icon:'🚌',necesar:statii_nec,u:'stații TP',std:'1/3.500 loc. UITP',c:'#a78bfa',d:0.39},
+      {titlu:'LOCURI PARCARE',icon:'🅿',necesar:Math.round(pop*0.12),u:'locuri',std:'0.5 loc/ap. RGU',c:'#f59e0b',d:0.46},
+      {titlu:'PASAJE PIETONALE',icon:'🚶',necesar:Math.round(pop/30000)*2,u:'pasaje noi',std:'siguranță pietoni',c:'#38bdf8',d:0.53},
+    ];
+
+    cats.forEach((cat,i)=>{
+      const col=i%3,row=Math.floor(i/3);
+      const cx2=W*(0.04+col*0.32);
+      const cy2=H*(0.19+row*0.22);
+      const cw2=W*0.29;
+      const ch2=H*0.19;
+      const ca=Math.min(1,Math.max(0,(t-cat.d)/0.25));
+      ctx.globalAlpha=ca;
+      ctx.fillStyle='rgba(4,10,24,.92)';
+      this._roundRect(ctx,cx2,cy2,cw2,ch2,8);ctx.fill();
+      ctx.strokeStyle=cat.c+'44';ctx.lineWidth=1.5;
+      this._roundRect(ctx,cx2,cy2,cw2,ch2,8);ctx.stroke();
+      // Icon
+      ctx.font=`${W*0.022}px sans-serif`;ctx.textAlign='center';
+      ctx.fillText(cat.icon,cx2+cw2*0.18,cy2+ch2*0.45);
+      // Titlu
+      ctx.fillStyle='rgba(148,163,184,.7)';ctx.font=`bold ${W*0.0068}px "IBM Plex Mono"`;
+      ctx.textAlign='left';ctx.fillText(cat.titlu,cx2+cw2*0.3,cy2+ch2*0.28);
+      // Valoare
+      const isUrgent=cat.necesar>0;
+      ctx.fillStyle=isUrgent?cat.c:'#22c55e';
+      ctx.font=`900 ${W*0.02}px "Space Grotesk",sans-serif`;
+      ctx.fillText(isUrgent?'+'+cat.necesar.toLocaleString('ro-RO'):'OK',cx2+cw2*0.3,cy2+ch2*0.58,cw2*0.65);
+      ctx.fillStyle='rgba(148,163,184,.6)';ctx.font=`${W*0.0065}px "IBM Plex Mono"`;
+      ctx.fillText(isUrgent?cat.u:'acoperit',cx2+cw2*0.3,cy2+ch2*0.74);
+      ctx.fillText(cat.std,cx2+cw2*0.06,cy2+ch2*0.9,cw2*0.88);
+      ctx.globalAlpha=1;
+    });
+
+    // Cost total
+    if(t>0.78){
+      const ta=Math.min(1,(t-0.78)/0.15);
+      ctx.globalAlpha=ta;
+      const costTotal=Math.round((scoli_nec*3+cabinete_nec*0.5+sv_ha_nec*0.2+statii_nec*0.1)*city?.pib_eur_cap/100||50);
+      ctx.fillStyle='rgba(4,10,24,.9)';
+      this._roundRect(ctx,W*0.04,H*0.815,W*0.92,H*0.065,6);ctx.fill();
+      ctx.strokeStyle='rgba(212,175,55,.4)';ctx.lineWidth=1.5;
+      this._roundRect(ctx,W*0.04,H*0.815,W*0.92,H*0.065,6);ctx.stroke();
+      ctx.fillStyle='#D4AF37';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='center';
+      ctx.fillText(`COST ESTIMAT INFRASTRUCTURĂ NOUĂ: ~€${costTotal}M · Surse: FEDR/FSE+ 2021-2034 · PNRR · Buget local`,W/2,H*0.85,W*0.88);
+      ctx.globalAlpha=1;
+    }
+
+    this._sceneLabel(ctx,W,H,'11','INFRASTRUCTURĂ NECESARĂ 2025-2055');
+  },
+
+  // ── SCENA 12: INVESTIȚII ÎN DERULARE + PROIECTE PUBLICE ───────────────
+  _s12_investments(ctx,W,H,t,city) {
+    const gr=ctx.createLinearGradient(0,0,W,H);
+    gr.addColorStop(0,'rgba(4,10,24,.75)');gr.addColorStop(1,'rgba(10,20,44,.95)');
+    ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);
+    this._scanlines(ctx,W,H,0.025);
+
+    if(t>0.05){
+      ctx.globalAlpha=Math.min(1,(t-0.05)/0.2);
+      ctx.fillStyle='#D4AF37';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='left';ctx.fillText('INVESTIȚII & PROIECTE PUBLICE ÎN DERULARE',W*0.05,H*0.09);
+      ctx.fillStyle='rgba(255,255,255,.9)';ctx.font=`900 ${W*0.022}px "Space Grotesk",sans-serif`;
+      ctx.fillText('SURSE: SICAP · CNI · MDLPA · PNRR · FEDR',W*0.05,H*0.145);
+      ctx.globalAlpha=1;
+    }
+
+    // Proiecte din date live (cu fallback)
+    const proiecte=city?.proiecte_live||[
+      {titlu:'PNRR C10-I2 Consolidare seismică',val:city?.pnrr_seismic_mil||15,sursa:'PNRR 100%',status:'derulare',c:'#22c55e'},
+      {titlu:'FEDR POR 2021-2027 Transport urban',val:city?.fedr_transport_mil||22,sursa:'FEDR 85%',status:'contractat',c:'#60a5fa'},
+      {titlu:'Reabilitare fond locativ NZEB',val:city?.pnrr_nzeb_mil||8,sursa:'PNRR C3-I1',status:'derulare',c:'#a78bfa'},
+      {titlu:'Extindere rețea apă-canal',val:city?.apa_canal_mil||12,sursa:'FEDR + local',status:'studiu SF',c:'#38bdf8'},
+      {titlu:'Modernizare transport public',val:city?.tp_mil||18,sursa:'Fonduri proprii',status:'licitație',c:'#f59e0b'},
+    ];
+
+    // Loading indicator dacă nu avem date live
+    if(this._loadingProjects && t>0.2 && t<0.6){
+      const la=Math.min(1,(t-0.2)/0.2)*Math.min(1,(0.6-t)/0.1);
+      ctx.globalAlpha=la*0.7;
+      ctx.fillStyle='rgba(148,163,184,.5)';ctx.font=`${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='center';ctx.fillText('⏳ Se caută proiecte active din SICAP / CNI...',W/2,H*0.35);
+      ctx.globalAlpha=1;
+    }
+
+    // Cards proiecte
+    if(t>0.25){
+      proiecte.forEach((p,i)=>{
+        const pa=Math.min(1,Math.max(0,(t-0.25-i*0.08)/0.25));
+        ctx.globalAlpha=pa;
+        const py=H*(0.19+i*0.12);
+        const pw=W*0.92;
+        ctx.fillStyle='rgba(4,10,24,.92)';
+        this._roundRect(ctx,W*0.04,py,pw,H*0.1,6);ctx.fill();
+        ctx.strokeStyle=p.c+'44';ctx.lineWidth=1.5;
+        this._roundRect(ctx,W*0.04,py,pw,H*0.1,6);ctx.stroke();
+        // Status badge
+        const sc={'derulare':'#22c55e','contractat':'#60a5fa','studiu SF':'#f59e0b','licitație':'#a78bfa','planificat':'#94a3b8'}[p.status]||'#94a3b8';
+        ctx.fillStyle=sc+'33';this._roundRect(ctx,W*0.76,py+H*0.015,W*0.22,H*0.028,4);ctx.fill();
+        ctx.strokeStyle=sc+'88';ctx.lineWidth=0.8;this._roundRect(ctx,W*0.76,py+H*0.015,W*0.22,H*0.028,4);ctx.stroke();
+        ctx.fillStyle=sc;ctx.font=`bold ${W*0.007}px "IBM Plex Mono"`;ctx.textAlign='center';
+        ctx.fillText(p.status.toUpperCase(),W*0.87,py+H*0.033);
+        // Titlu
+        ctx.fillStyle='rgba(200,215,235,.9)';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+        ctx.textAlign='left';ctx.fillText(p.titlu,W*0.06,py+H*0.038,W*0.68);
+        // Valoare + sursa
+        ctx.fillStyle=p.c;ctx.font=`900 ${W*0.014}px "Space Grotesk",sans-serif`;
+        ctx.fillText('€'+p.val+'M',W*0.06,py+H*0.075);
+        ctx.fillStyle='rgba(148,163,184,.6)';ctx.font=`${W*0.0075}px "IBM Plex Mono"`;
+        ctx.fillText(p.sursa,W*0.13,py+H*0.078);
+        ctx.globalAlpha=1;
+      });
+    }
+
+    // Total investiții
+    if(t>0.85){
+      const ta=Math.min(1,(t-0.85)/0.1);
+      ctx.globalAlpha=ta;
+      const total=proiecte.reduce((s,p)=>s+(p.val||0),0);
+      ctx.fillStyle='rgba(4,10,24,.9)';
+      this._roundRect(ctx,W*0.04,H*0.84,W*0.92,H*0.055,6);ctx.fill();
+      ctx.strokeStyle='rgba(212,175,55,.4)';ctx.lineWidth=1.5;
+      this._roundRect(ctx,W*0.04,H*0.84,W*0.92,H*0.055,6);ctx.stroke();
+      ctx.fillStyle='#D4AF37';ctx.font=`bold ${W*0.0095}px "IBM Plex Mono"`;
+      ctx.textAlign='center';
+      ctx.fillText(`TOTAL PROIECTE IDENTIFICATE: €${total}M · Deschide SICAP.ro pentru lista completă`,W/2,H*0.872,W*0.88);
+      ctx.globalAlpha=1;
+    }
+
+    this._sceneLabel(ctx,W,H,'12','INVESTIȚII ÎN DERULARE — '+(city?.name||'').toUpperCase());
+  },
+
+  // ── SCENA 13: SCENARII DE DEZVOLTARE — S1/S2/S3 pe hartă ─────────────
+  _s13_scenarios(ctx,W,H,t,city) {
+    const gr=ctx.createLinearGradient(0,0,0,H);
+    gr.addColorStop(0,'rgba(4,10,24,.65)');gr.addColorStop(1,'rgba(4,10,24,.94)');
+    ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);
+    this._scanlines(ctx,W,H,0.025);
+
+    const pop=city?.pop2021||100000;
+    const r=city?.rata_reala_2011_2021||0;
+    const pib=city?.pib_eur_cap||10000;
+
+    if(t>0.05){
+      ctx.globalAlpha=Math.min(1,(t-0.05)/0.2);
+      ctx.fillStyle='#a78bfa';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='left';ctx.fillText('SCENARII DE DEZVOLTARE COMPARATE 2025-2055',W*0.05,H*0.09);
+      ctx.fillStyle='rgba(255,255,255,.9)';ctx.font=`900 ${W*0.022}px "Space Grotesk",sans-serif`;
+      ctx.fillText('CE SE ÎNTÂMPLĂ DACĂ... · IMPACT · DECIZII NECESARE',W*0.05,H*0.145);
+      ctx.globalAlpha=1;
+    }
+
+    const scenarios=[
+      {
+        id:'S1',titlu:'SCENARIU OPTIMIST',sub:'Investiții majore · Retenție tineri · Autostradă',
+        pop55:Math.round(pop*Math.pow(1+Math.max(r+0.5,0.4)/100,34)),
+        invest:Math.round(pop*pib*0.0008),locuinte:Math.round(pop*0.05*34),
+        pib55:Math.round(pib*Math.pow(1.045,34)),extravilan:Math.round((city?.suprafata_ha||5000)*0.15),
+        c:'#22c55e',icon:'▲',
+        conditii:['Autostradă finalizată','Parcuri industriale noi','Retenție 60% absolvenți','Investiții UE max'],
+        riscuri:['Supraaglomerare centru','Speculație imobiliară'],
+        d:0.18
+      },
+      {
+        id:'S2',titlu:'SCENARIU MODERAT ★',sub:'Trendul actual · PNRR partial · Stabilitate',
+        pop55:Math.round(pop*Math.pow(1+r/100,34)),
+        invest:Math.round(pop*pib*0.0005),locuinte:Math.round(pop*0.03*34),
+        pib55:Math.round(pib*Math.pow(1.028,34)),extravilan:Math.round((city?.suprafata_ha||5000)*0.08),
+        c:'#D4AF37',icon:'→',
+        conditii:['PNRR absorbit 60%','TP modernizat','PUG actualizat'],
+        riscuri:['Dezechilibru cerere/ofertă','Periurbanizare moderată'],
+        d:0.35
+      },
+      {
+        id:'S3',titlu:'SCENARIU CONSERVATOR',sub:'Stagnare · Emigrare · Infrastructură minimă',
+        pop55:Math.round(pop*Math.pow(1+(r-0.5)/100,34)),
+        invest:Math.round(pop*pib*0.0002),locuinte:Math.round(pop*0.015*34),
+        pib55:Math.round(pib*Math.pow(1.01,34)),extravilan:0,
+        c:'#ef4444',icon:'▼',
+        conditii:['Fără investiții majore','Emigrare accelerată','Degradare fond vechi'],
+        riscuri:['Depopulare periferie','Deficit servicii','Fond locativ degradat'],
+        d:0.52
+      },
+    ];
+
+    scenarios.forEach((s,i)=>{
+      const sa=Math.min(1,Math.max(0,(t-s.d)/0.3));
+      ctx.globalAlpha=sa;
+      const sx=W*(0.04+i*0.323);
+      const sy=H*0.19;
+      const sw=W*0.3;
+      const sh=H*0.6;
+      ctx.fillStyle='rgba(4,10,24,.92)';this._roundRect(ctx,sx,sy,sw,sh,8);ctx.fill();
+      ctx.strokeStyle=s.c+'66';ctx.lineWidth=i===1?2:1;this._roundRect(ctx,sx,sy,sw,sh,8);ctx.stroke();
+      if(i===1){ctx.strokeStyle='#D4AF37';ctx.lineWidth=2;this._roundRect(ctx,sx,sy,sw,sh,8);ctx.stroke();}
+      // Header
+      ctx.fillStyle=s.c+'22';ctx.fillRect(sx,sy,sw,H*0.06);
+      ctx.fillStyle=s.c;ctx.font=`bold ${W*0.011}px "IBM Plex Mono"`;
+      ctx.textAlign='center';ctx.fillText(s.icon+' '+s.id,sx+sw/2,sy+H*0.025);
+      ctx.fillStyle='rgba(255,255,255,.85)';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.fillText(s.titlu,sx+sw/2,sy+H*0.048);
+      // KPI-uri
+      const kpis2=[
+        ['POPULAȚIE 2055',s.pop55.toLocaleString('ro-RO')],
+        ['PIB/CAP 2055','€'+Math.round(s.pib55/1000)+'K'],
+        ['INVESTIȚII TOTALE','€'+s.invest+'M'],
+        ['LOCUINȚE NOI',s.locuinte.toLocaleString('ro-RO')],
+        ['EXTINDERE INTRAVILAN',s.extravilan>0?'+'+s.extravilan+'ha':'0'],
+      ];
+      kpis2.forEach(([l,v],ki)=>{
+        ctx.fillStyle='rgba(148,163,184,.6)';ctx.font=`${W*0.007}px "IBM Plex Mono"`;
+        ctx.textAlign='left';ctx.fillText(l,sx+sw*0.06,sy+H*(0.1+ki*0.07));
+        ctx.fillStyle=s.c;ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+        ctx.fillText(v,sx+sw*0.06,sy+H*(0.122+ki*0.07));
+      });
+      // Condiții
+      ctx.fillStyle='rgba(200,215,235,.6)';ctx.font=`bold ${W*0.007}px "IBM Plex Mono"`;
+      ctx.fillText('CONDIȚII:',sx+sw*0.06,sy+H*0.48);
+      s.conditii.forEach((c2,ci)=>{
+        ctx.fillStyle='rgba(148,163,184,.7)';ctx.font=`${W*0.0065}px "IBM Plex Mono"`;
+        ctx.fillText('· '+c2,sx+sw*0.06,sy+H*(0.505+ci*0.032),sw*0.88);
+      });
+      ctx.globalAlpha=1;
+    });
+
+    this._sceneLabel(ctx,W,H,'13','SCENARII 2025-2055 — '+(city?.name||'').toUpperCase());
+  },
+
+  // ── SCENA 14: CALITATEA VIEȚII — SDG11, spații verzi, poluare ─────────
+  _s14_quality(ctx,W,H,t,city) {
+    const gr=ctx.createLinearGradient(0,0,0,H);
+    gr.addColorStop(0,'rgba(4,10,24,.65)');gr.addColorStop(1,'rgba(4,10,24,.94)');
+    ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);
+    this._scanlines(ctx,W,H,0.025);
+
+    const sv=city?.spatii_verzi_mp_loc||11;
+    const acop=city?.acoperire_transport||60;
+    const sdg=Math.round(60+(sv-9)*2+(acop-55)*0.3+(city?.pib_eur_cap||10000)/2000);
+    const co2=city?.co2_tona_cap||7;
+
+    if(t>0.05){
+      ctx.globalAlpha=Math.min(1,(t-0.05)/0.2);
+      ctx.fillStyle='#22c55e';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='left';ctx.fillText('CALITATEA VIEȚII · SDG 11 · MEDIU · SĂNĂTATE',W*0.05,H*0.09);
+      ctx.fillStyle='rgba(255,255,255,.9)';ctx.font=`900 ${W*0.022}px "Space Grotesk",sans-serif`;
+      ctx.fillText('OMS · ONU SDG11 · EUROSTAT URBAN AUDIT 2021',W*0.05,H*0.145);
+      ctx.globalAlpha=1;
+    }
+
+    // Radar 8 dimensiuni
+    if(t>0.18){
+      const ra=Math.min(1,(t-0.18)/0.1);
+      ctx.globalAlpha=ra;
+      const vals=[
+        Math.min(1,sv/20),Math.min(1,acop/100),Math.min(1,sdg/100),
+        Math.min(1,(city?.walkability||60)/100),Math.min(1,1-co2/15),
+        Math.min(1,(city?.universitati||1)/5),Math.min(1,(city?.pib_eur_cap||10000)/40000),
+        Math.min(1,0.6),
+      ];
+      const labels=['Spații Verzi','Acoperire TP','SDG 11','Walkability','Aer Curat','Educație','PIB/cap','Reziliență'];
+      this._radarChart(ctx,W*0.28,H*0.52,Math.min(W*0.22,H*0.25),vals,labels,['#22c55e'],Math.min(1,(t-0.2)/0.6));
+      ctx.globalAlpha=1;
+    }
+
+    // KPI-uri calitate viață
+    const kpis3=[
+      {l:'SPAȚII VERZI',v:sv,u:'m²/loc (OMS min: 9)',c:sv>=9?'#22c55e':'#ef4444',d:0.2},
+      {l:'SDG 11 SCORE',v:Math.min(100,sdg),u:'/100 (ONU 2030)',c:sdg>=70?'#22c55e':sdg>=50?'#f59e0b':'#ef4444',d:0.3},
+      {l:'CO₂/CAPITA',v:co2,u:'tCO₂/an (țintă 2050: 0)',c:co2<=5?'#22c55e':co2<=8?'#f59e0b':'#ef4444',d:0.4},
+      {l:'FOND REABILITAT',v:city?.fond_reabilitat_pct||5,u:'% (țintă 2055: 40%)',c:'#60a5fa',d:0.5},
+    ];
+    kpis3.forEach((k,i)=>{
+      this._kpiCard(ctx,W*0.52,H*(0.19+i*0.155),W*0.44,H*0.13,k.l,k.v,k.u,k.c,t,k.d,'');
+    });
+
+    // Deficit spații verzi
+    if(t>0.68){
+      const da=Math.min(1,(t-0.68)/0.2);
+      ctx.globalAlpha=da;
+      const deficit_sv=Math.max(0,Math.round(((city?.pop2021||100000)*(9-sv))/10000));
+      ctx.fillStyle='rgba(4,10,24,.9)';
+      this._roundRect(ctx,W*0.04,H*0.78,W*0.44,H*0.1,6);ctx.fill();
+      ctx.strokeStyle=sv>=9?'rgba(34,197,94,.4)':'rgba(239,68,68,.4)';ctx.lineWidth=1.5;
+      this._roundRect(ctx,W*0.04,H*0.78,W*0.44,H*0.1,6);ctx.stroke();
+      ctx.fillStyle='rgba(200,215,235,.85)';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='center';
+      if(sv<9){
+        ctx.fillText(`⚠ DEFICIT SPAȚII VERZI: ${deficit_sv} ha necesare`,W*0.26,H*0.814);
+        ctx.fillStyle='rgba(148,163,184,.6)';ctx.font=`${W*0.0075}px "IBM Plex Mono"`;
+        ctx.fillText('Surse: Fond Mediu + FEDR axă urbană + terenuri publice',W*0.26,H*0.844);
+      } else {
+        ctx.fillText(`✓ Spații verzi CONFORM OMS: ${sv}m²/loc`,W*0.26,H*0.83);
+      }
+      ctx.globalAlpha=1;
+    }
+
+    this._sceneLabel(ctx,W,H,'14','CALITATEA VIEȚII — '+(city?.name||'').toUpperCase());
+  },
+
+  // ── SCENA 15: BENCHMARKING EUROPEAN ────────────────────────────────────
+  _s15_benchmark(ctx,W,H,t,city) {
+    const gr=ctx.createLinearGradient(0,0,0,H);
+    gr.addColorStop(0,'rgba(4,10,24,.7)');gr.addColorStop(1,'rgba(4,10,24,.96)');
+    ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);
+    this._scanlines(ctx,W,H,0.025);
+
+    if(t>0.05){
+      ctx.globalAlpha=Math.min(1,(t-0.05)/0.2);
+      ctx.fillStyle='#38bdf8';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='left';ctx.fillText('BENCHMARKING EUROPEAN · PEER GROUP ANALYSIS',W*0.05,H*0.09);
+      ctx.fillStyle='rgba(255,255,255,.9)';ctx.font=`900 ${W*0.022}px "Space Grotesk",sans-serif`;
+      ctx.fillText('EUROSTAT URBAN AUDIT 2021 · OECD FUA 2023 · JRC URBAN OBSERVATORY',W*0.05,H*0.145);
+      ctx.globalAlpha=1;
+    }
+
+    // Orase comparabile (calibrate pe profil UAT)
+    const pib=city?.pib_eur_cap||10000;
+    const pop=city?.pop2021||100000;
+    const peers=city?.peer_cities||[
+      {n:city?.name||'UAT',pib,pop,walk:city?.walkability||60,sv:city?.spatii_verzi_mp_loc||11,tp:city?.acoperire_transport||60,c:'#D4AF37',curent:true},
+      {n:'Debrecen',pib:22400,pop:202000,walk:74,sv:13,tp:82,c:'#60a5fa',curent:false},
+      {n:'Lublin',pib:15800,pop:339000,walk:68,sv:15,tp:74,c:'#a78bfa',curent:false},
+      {n:'Krakow',pib:19200,pop:779000,walk:72,sv:18,tp:84,c:'#22c55e',curent:false},
+      {n:'Varna',pib:12100,pop:338000,walk:61,sv:11,tp:65,c:'#f59e0b',curent:false},
+    ];
+
+    const indicatori=['PIB/cap (EUR)','Walkability','Sp. Verzi (m²)','Acop. TP (%)','Pop. (mii)'];
+    const getVal=(p,k)=>k==='PIB/cap (EUR)'?p.pib:k==='Walkability'?p.walk:k==='Sp. Verzi (m²)'?p.sv:k==='Acop. TP (%)'?p.tp:Math.round(p.pop/1000);
+
+    // Header tabel
+    if(t>0.18){
+      const ha=Math.min(1,(t-0.18)/0.25);
+      ctx.globalAlpha=ha;
+      const colW=W*0.15;
+      ctx.fillStyle='rgba(4,10,24,.95)';
+      this._roundRect(ctx,W*0.04,H*0.19,W*0.92,H*0.65,8);ctx.fill();
+      ctx.strokeStyle='rgba(56,189,248,.2)';ctx.lineWidth=1;
+      this._roundRect(ctx,W*0.04,H*0.19,W*0.92,H*0.65,8);ctx.stroke();
+
+      // Header row
+      ctx.fillStyle='rgba(56,189,248,.15)';ctx.fillRect(W*0.04,H*0.19,W*0.92,H*0.065);
+      ctx.fillStyle='rgba(148,163,184,.7)';ctx.font=`bold ${W*0.008}px "IBM Plex Mono"`;
+      ctx.textAlign='center';
+      ctx.fillText('ORAȘ',W*0.12,H*0.23);
+      indicatori.forEach((ind,i)=>ctx.fillText(ind,W*(0.28+i*0.15),H*0.23));
+
+      // Rows
+      peers.forEach((p,pi)=>{
+        const ry=H*(0.265+pi*0.105);
+        if(p.curent){ctx.fillStyle=p.c+'18';ctx.fillRect(W*0.04,ry-H*0.02,W*0.92,H*0.1);}
+        ctx.fillStyle=p.c;ctx.font=`bold ${W*0.0085}px "IBM Plex Mono"`;
+        ctx.textAlign='center';
+        ctx.fillText((p.curent?'★ ':'')+p.n,W*0.12,ry+H*0.015,W*0.15);
+
+        indicatori.forEach((ind,i)=>{
+          const v=getVal(p,ind);
+          // Compara cu media peers
+          const allV=peers.map(pp=>getVal(pp,ind));
+          const maxV2=Math.max(...allV);
+          const isMax=v===maxV2;
+          const isCurent=p.curent;
+          ctx.fillStyle=isMax?'#22c55e':isCurent?p.c:'rgba(200,215,235,.8)';
+          ctx.font=isMax?`900 ${W*0.009}px "Space Grotesk",sans-serif`:`${W*0.009}px "IBM Plex Mono"`;
+          ctx.fillText((isMax?'★ ':'')+v.toLocaleString('ro-RO'),W*(0.28+i*0.15),ry+H*0.015);
+        });
+      });
+      ctx.globalAlpha=1;
+    }
+
+    // Concluzie poziționare
+    if(t>0.82){
+      const ta=Math.min(1,(t-0.82)/0.15);
+      ctx.globalAlpha=ta;
+      const pibBest=Math.max(...peers.map(p=>p.pib));
+      const gap=pibBest-pib;
+      ctx.fillStyle='rgba(4,10,24,.9)';
+      this._roundRect(ctx,W*0.04,H*0.875,W*0.92,H*0.07,6);ctx.fill();
+      ctx.strokeStyle='rgba(56,189,248,.4)';ctx.lineWidth=1.5;
+      this._roundRect(ctx,W*0.04,H*0.875,W*0.92,H*0.07,6);ctx.stroke();
+      ctx.fillStyle='#7dd3fc';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='center';
+      ctx.fillText(`GAP față de best-in-class: €${gap.toLocaleString('ro-RO')}/cap · La rata OCDE (+3.5%/an): convergență în ~${Math.round(Math.log(pibBest/pib)/Math.log(1.035))} ani`,W/2,H*0.91,W*0.88);
+      ctx.globalAlpha=1;
+    }
+
+    this._sceneLabel(ctx,W,H,'15','BENCHMARKING EUROPEAN');
+  },
+
+  // ── SCENA 16: CE TREBUIE SĂ FACĂ PRIMARUL — Recomandări concrete ──────
+  _s16_actions(ctx,W,H,t,city) {
+    const gr=ctx.createLinearGradient(0,0,0,H);
+    gr.addColorStop(0,'rgba(4,10,24,.7)');gr.addColorStop(1,'rgba(10,18,44,.97)');
+    ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);
+    this._scanlines(ctx,W,H,0.025);
+
+    const pop=city?.pop2021||100000;
+    const ag=city?.ag_seismic||0.2;
+    const sv=city?.spatii_verzi_mp_loc||11;
+    const acop=city?.acoperire_transport||60;
+    const r=city?.rata_reala_2011_2021||0;
+
+    if(t>0.05){
+      ctx.globalAlpha=Math.min(1,(t-0.05)/0.2);
+      ctx.fillStyle='#D4AF37';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='left';ctx.fillText('AGENDA PRIMARULUI 2025-2030',W*0.05,H*0.09);
+      ctx.fillStyle='rgba(255,255,255,.9)';ctx.font=`900 ${W*0.022}px "Space Grotesk",sans-serif`;
+      ctx.fillText('PRIORITĂȚI ACȚIONABILE · TERMENE · SURSE FINANȚARE',W*0.05,H*0.145);
+      ctx.globalAlpha=1;
+    }
+
+    // Generăm recomandări pe baza datelor UAT-ului
+    const recs=[];
+    if(ag>=0.3) recs.push({p:1,titlu:'CONSOLIDARE SEISMICĂ URGENTĂ',desc:`Identificați Rz I/II · Aplicați PNRR C10-I2 (100%) · ${Math.round(pop*0.005)} clădiri prioritare`,termen:'2025-2027',sursa:'PNRR C10-I2',c:'#ef4444'});
+    if(acop<65) recs.push({p:2,titlu:'EXTINDERE TRANSPORT PUBLIC',desc:`Deficit ${65-acop}% acoperire · BRT pe coridoare principale · Frecvență +40%`,termen:'2025-2030',sursa:'FEDR POR',c:'#60a5fa'});
+    recs.push({p:recs.length+1,titlu:'ACTUALIZARE PUG',desc:`PUG actual depășit · Zone densificare + reconversie + expansiune controlată · Digitalizare`,termen:'2025-2026',sursa:'Buget local + FEDR',c:'#a78bfa'});
+    if(sv<9) recs.push({p:recs.length+1,titlu:'SPAȚII VERZI — DEFICIT OMS',desc:`Necesar +${Math.max(0,Math.round(pop*(9-sv)/10000))}ha · Coridor verde · Reconversie teren industrial`,termen:'2026-2030',sursa:'Fond Mediu + UE',c:'#22c55e'});
+    recs.push({p:recs.length+1,titlu:'EFICIENȚĂ ENERGETICĂ FOND LOCATIV',desc:`NZEB obligatoriu construcții noi · Reabilitare 500 ap/an · PNRR C3-I1`,termen:'2025-2030',sursa:'PNRR + privat',c:'#f59e0b'});
+    if(r<-0.5) recs.push({p:recs.length+1,titlu:'RETENȚIE TINERI — POLITICI DEMOGRAFICE',desc:`Declin ${r.toFixed(1)}%/an · Stimulente locuire tineri · Atragere companii tech`,termen:'2025-2028',sursa:'Fonduri locale + FSE+',c:'#D4AF37'});
+
+    const maxRecs=Math.min(recs.length,5);
+    recs.slice(0,maxRecs).forEach((rec,i)=>{
+      const ra=Math.min(1,Math.max(0,(t-0.18-i*0.1)/0.28));
+      ctx.globalAlpha=ra;
+      const ry=H*(0.19+i*0.13);
+      ctx.fillStyle='rgba(4,10,24,.92)';this._roundRect(ctx,W*0.04,ry,W*0.92,H*0.115,6);ctx.fill();
+      ctx.strokeStyle=rec.c+'55';ctx.lineWidth=i===0?2:1;this._roundRect(ctx,W*0.04,ry,W*0.92,H*0.115,6);ctx.stroke();
+      // Prioritate
+      ctx.fillStyle=rec.c;ctx.font=`900 ${W*0.022}px "Space Grotesk",sans-serif`;
+      ctx.textAlign='center';ctx.fillText('#'+rec.p,W*0.085,ry+H*0.068);
+      // Titlu
+      ctx.fillStyle='rgba(255,255,255,.92)';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='left';ctx.fillText(rec.titlu,W*0.13,ry+H*0.04);
+      // Desc
+      ctx.fillStyle='rgba(148,163,184,.8)';ctx.font=`${W*0.0075}px "IBM Plex Mono"`;
+      ctx.fillText(rec.desc,W*0.13,ry+H*0.068,W*0.58);
+      // Termen + sursa
+      ctx.fillStyle=rec.c;ctx.font=`bold ${W*0.0075}px "IBM Plex Mono"`;
+      ctx.textAlign='right';ctx.fillText('⏰ '+rec.termen,W*0.92,ry+H*0.04);
+      ctx.fillStyle='rgba(148,163,184,.6)';ctx.font=`${W*0.007}px "IBM Plex Mono"`;
+      ctx.fillText('💰 '+rec.sursa,W*0.92,ry+H*0.062);
+      ctx.globalAlpha=1;
+    });
+
+    this._sceneLabel(ctx,W,H,'16','AGENDA PRIMARULUI — '+(city?.name||'').toUpperCase());
+  },
+
+  // ── SCENA 17: VIZIUNEA 2055 — Orașul posibil ────────────────────────────
+  _s17_vision(ctx,W,H,t,city) {
+    const gr=ctx.createLinearGradient(0,0,W,H);
+    gr.addColorStop(0,'rgba(4,10,24,.6)');gr.addColorStop(0.5,'rgba(10,5,30,.8)');
+    gr.addColorStop(1,'rgba(4,10,24,.95)');
+    ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);
+    this._scanlines(ctx,W,H,0.02);
+    this._drawParticles(ctx,W,H,t,25,'rgba(212,175,55,0.3)');
+
+    const pop=city?.pop2021||100000;
+    const need=this._need||{};
+    const r=city?.rata_reala_2011_2021||0;
+    const pop55=need.pop2055||Math.round(pop*Math.pow(1+r/100,34));
+    const pib=city?.pib_eur_cap||10000;
+    const pib55=Math.round(pib*Math.pow(1.028,34));
+
+    if(t>0.05){
+      const ta=Math.min(1,(t-0.05)/0.3);
+      ctx.globalAlpha=ta;
+      ctx.fillStyle='rgba(4,10,24,.7)';ctx.fillRect(0,H*0.08,W,H*0.14);
+      ctx.fillStyle='rgba(212,175,55,.6)';ctx.fillRect(0,H*0.08,W,2);ctx.fillRect(0,H*0.22,W,2);
+      ctx.fillStyle='#D4AF37';ctx.font=`900 ${W*0.038}px "Space Grotesk",sans-serif`;
+      ctx.textAlign='center';
+      ctx.fillText((city?.name||'').toUpperCase()+' 2055',W/2,H*0.17);
+      ctx.fillStyle='rgba(148,163,184,.8)';ctx.font=`${W*0.012}px "IBM Plex Mono"`;
+      ctx.fillText('VIZIUNEA PENTRU GENERAȚIA URMĂTOARE',W/2,H*0.205);
+      ctx.globalAlpha=1;
+    }
+
+    // Transformările vizuale animate
+    if(t>0.3){
+      const va=Math.min(1,(t-0.3)/0.35);
+      const viziuni=[
+        {icon:'🏙',titlu:'DENSITATE INTELIGENTĂ',desc:`Centru dens P+8, periurban P+3. POT optimizat. ${Math.round(need.locuinteTotale||5000)} locuințe noi, 0ha sprawl necontrolat.`,c:'#60a5fa',d:0},
+        {icon:'🚇',titlu:'MOBILITATE VERDE',desc:`Modal split: 45% TP, 20% pietonal, 15% ciclist. BRT pe 3 coridoare. Centura ocolitoare finalizată.`,c:'#22c55e',d:0.08},
+        {icon:'🌳',titlu:'ORAȘ REZISTENT CLIMATIC',desc:`Rețea 12km coridor verde anti-UHI. 100% NZEB construcții noi. CO₂ -60% față de 2024.`,c:'#34d399',d:0.16},
+        {icon:'💡',titlu:'ECONOMIE CONVERGENTĂ UE',desc:`PIB/cap: €${Math.round(pib55/1000)}K (${Math.round(pib55/36600*100)}% UE27). Hub regional consolidat. 5.000 locuri muncă tech.`,c:'#D4AF37',d:0.24},
+        {icon:'👥',titlu:'COMUNITATE VIBRANTĂ',desc:`${pop55.toLocaleString('ro-RO')} locuitori stabili. Indice 15min city: 82/100. SDG11 score: 78/100.`,c:'#a78bfa',d:0.32},
+      ];
+      viziuni.forEach((v,i)=>{
+        const ca=Math.min(1,Math.max(0,(t-0.3-v.d)/0.28))*va;
+        ctx.globalAlpha=ca;
+        const vy=H*(0.28+i*0.126);
+        ctx.fillStyle='rgba(4,10,24,.88)';this._roundRect(ctx,W*0.04,vy,W*0.92,H*0.108,6);ctx.fill();
+        ctx.strokeStyle=v.c+'44';ctx.lineWidth=1;this._roundRect(ctx,W*0.04,vy,W*0.92,H*0.108,6);ctx.stroke();
+        ctx.font=`${W*0.024}px sans-serif`;ctx.textAlign='center';
+        ctx.fillText(v.icon,W*0.085,vy+H*0.065);
+        ctx.fillStyle=v.c;ctx.font=`bold ${W*0.0085}px "IBM Plex Mono"`;
+        ctx.textAlign='left';ctx.fillText(v.titlu,W*0.13,vy+H*0.04);
+        ctx.fillStyle='rgba(200,215,235,.75)';ctx.font=`${W*0.0078}px "IBM Plex Mono"`;
+        ctx.fillText(v.desc,W*0.13,vy+H*0.072,W*0.78);
+        ctx.globalAlpha=1;
+      });
+    }
+
+    // Final message
+    if(t>0.88){
+      const ta=Math.min(1,(t-0.88)/0.08);
+      ctx.globalAlpha=ta;
+      ctx.fillStyle='rgba(4,10,24,.95)';ctx.fillRect(0,H*0.93,W,H*0.07);
+      ctx.fillStyle='rgba(212,175,55,.5)';ctx.fillRect(0,H*0.93,W,1);
+      ctx.fillStyle='#D4AF37';ctx.font=`bold ${W*0.009}px "IBM Plex Mono"`;
+      ctx.textAlign='center';
+      ctx.fillText(`Generat live pentru ${city?.name||'UAT'} · Date reale INSE · Eurostat · INFP · ANAR · BNR · UrbanX TSS.FG v2.0`,W/2,H*0.963,W*0.9);
+      ctx.globalAlpha=1;
+    }
+
+    this._sceneLabel(ctx,W,H,'17','VIZIUNEA 2055 — '+(city?.name||'').toUpperCase());
+  },
 
   _setupDensityLayer(map, city) {
     // Heatmap densitate din populatia per zona
@@ -1972,6 +2495,25 @@ G._SceneEngine = {
     ctx.globalAlpha /= a;
   },
 
+
+  // Helper: wrap text la latimea data
+  _wrapText(ctx, text, maxW, font) {
+    ctx.font = font;
+    const words = text.split(' ');
+    const lines = [];
+    let line = '';
+    words.forEach(word => {
+      const test = line ? line + ' ' + word : word;
+      if(ctx.measureText(test).width > maxW && line) {
+        lines.push(line);
+        line = word;
+      } else {
+        line = test;
+      }
+    });
+    if(line) lines.push(line);
+    return lines;
+  },
 
   _sceneLabel(ctx,W,H,num,title){
     // Label scena: fundal solid, text clar
