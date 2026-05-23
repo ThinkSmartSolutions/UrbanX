@@ -194,23 +194,19 @@ window._startCinema = function(cityKey) {
     if(SE._rotInt){clearInterval(SE._rotInt);SE._rotInt=null;}
     switch(id){
       case 'intro':
-        // Porneste de sus — Romania — noapte
-        try{map.jumpTo({center:[24.0,45.8],zoom:6,pitch:0,bearing:0});}catch(e){}
+        // Jump direct la vedere 3D - fara zbor lung care se blocheaza
         lp('night');
-        // Zbor spre oras
-        setTimeout(function(){
-          try{map.flyTo({center:[cx,cy],zoom:11,pitch:40,bearing:0,duration:5000,essential:true});}catch(e){}
-        },500);
-        setTimeout(function(){
-          try{map.flyTo({center:[cx,cy],zoom:14,pitch:62,bearing:15,duration:5000,essential:true});}catch(e){}
-        },6000);
+        try{map.jumpTo({center:[cx,cy],zoom:15.5,pitch:72,bearing:0});}catch(e){}
+        // Rotatie lenta din start
+        rot(0,0.020);
         break;
 
       case 'zoom_in':
-        // Continua zborui — mai aproape
         lp('night');
-        try{map.flyTo({center:[cx,cy],zoom:15.5,pitch:72,bearing:25,duration:8000,essential:true});}catch(e){}
-        rot(25,0.012);
+        try{map.jumpTo({center:[cx,cy],zoom:15.5,pitch:72,bearing:25});}catch(e){}
+        // Zbor subtil pe oras
+        try{map.flyTo({center:[cx+0.01,cy-0.008],zoom:15.5,pitch:72,bearing:60,duration:8000,essential:true});}catch(e){}
+        rot(25,0.015);
         break;
 
       case 'azi_3d':
@@ -227,50 +223,52 @@ window._startCinema = function(cityKey) {
         break;
 
       case 'cartiere':
-        // Zbor intre cartiere — nord, centru, sud
         lp('day');
-        try{map.flyTo({center:[cx-0.02,cy+0.015],zoom:15,pitch:68,bearing:60,duration:4000,essential:true});}catch(e){}
+        try{map.jumpTo({center:[cx-0.02,cy+0.015],zoom:15,pitch:68,bearing:60});}catch(e){}
         setTimeout(function(){
+          if(!SE._playing)return;
           try{map.flyTo({center:[cx,cy],zoom:15.5,pitch:72,bearing:120,duration:5000,essential:true});}catch(e){}
-        },5000);
+        },4000);
         setTimeout(function(){
-          try{map.flyTo({center:[cx+0.02,cy-0.015],zoom:15,pitch:68,bearing:180,duration:4000,essential:true});}catch(e){}
-        },11000);
+          if(!SE._playing)return;
+          try{map.flyTo({center:[cx+0.02,cy-0.015],zoom:15,pitch:68,bearing:200,duration:5000,essential:true});}catch(e){}
+        },10000);
         break;
 
       case 'crestere':
-        // BARE 3D CRESC: sari DIRECT la pozitia corecta, fara flyTo lung
         lp('night');
-        // Jump direct - nu flyTo - ca sa nu reseteze layerele
         try{map.jumpTo({center:[cx,cy],zoom:15.5,pitch:72,bearing:20});}catch(e){}
-        // Asteapta harta sa fie complet idle APOI adauga 3D
-        try{
-          map.once('idle',function(){
-            if(!SE._playing)return;
-            add3D(true);
-            rot(20,0.015);
-            // Acum poate face flyTo subtil
-            setTimeout(function(){
-              if(!SE._playing)return;
-              try{map.flyTo({center:[cx,cy],zoom:15.5,pitch:72,bearing:45,duration:12000,essential:true});}catch(e){}
-            },2000);
-          });
-        }catch(e){
-          setTimeout(function(){if(!SE._playing)return;add3D(true);rot(20,0.015);},500);
-        }
+        // Apeleaza exact cum merge din consola, dupa idle
+        map.once('idle',function(){
+          if(!SE._playing)return;
+          SE._city=SE._city||(window._RO_CITIES_DB||{})['RO-IS-01'];
+          SE._pred=SE._pred||window._PredEngine.calc(SE._city);
+          try{SE._add3DGrowth.call(SE,map);}catch(e){console.error('3D err:',e);}
+          rot(20,0.015);
+          setTimeout(function(){
+            if(!SE._playing||!SE._gf)return;
+            // Bare la h=1 initial
+            try{map.getSource('v8-gr').setData({type:'FeatureCollection',
+              features:SE._gf.map(function(f){
+                return Object.assign({},f,{properties:Object.assign({},f.properties,{h:1})});
+              })});}catch(e){}
+          },200);
+        });
         break;
 
       case 'mobil1':
-        // Retea rutiera OSM — zoom pe intregul oras
         lp('night');
-        try{map.flyTo({center:[cx,cy],zoom:12.5,pitch:55,bearing:0,duration:3000,essential:true});}catch(e){}
-        fetchOSM(function(ft){
+        try{map.jumpTo({center:[cx,cy],zoom:12.5,pitch:55,bearing:0});}catch(e){}
+        map.once('idle',function(){
           if(!SE._playing)return;
-          addOSM(ft);
-          // Zoom pe centura si artere principale
-          setTimeout(function(){
-            try{map.flyTo({center:[cx,cy],zoom:13.5,pitch:62,bearing:15,duration:4000,essential:true});}catch(e){}
-          },3500);
+          fetchOSM(function(ft){
+            if(!SE._playing)return;
+            addOSM(ft);
+            setTimeout(function(){
+              if(!SE._playing)return;
+              try{map.flyTo({center:[cx,cy],zoom:13.5,pitch:62,bearing:15,duration:4000,essential:true});}catch(e){}
+            },500);
+          });
         });
         break;
 
@@ -295,15 +293,21 @@ window._startCinema = function(cityKey) {
 
       case 'seismic':
         lp('night');
-        try{map.flyTo({center:[cx,cy],zoom:13,pitch:55,bearing:0,duration:3000,essential:true});}catch(e){}
-        try{SE._addSeismic&&SE._addSeismic.call(SE,map);}catch(e){}
+        try{map.jumpTo({center:[cx,cy],zoom:13,pitch:55,bearing:0});}catch(e){}
+        map.once('idle',function(){
+          if(!SE._playing)return;
+          try{SE._addSeismic.call(SE,map);}catch(e){console.warn('seismic:',e);}
+        });
         break;
 
       case 'inund':
         lp('dawn');
-        try{map.flyTo({center:[cx,cy],zoom:12.5,pitch:50,bearing:5,duration:3000,essential:true});}catch(e){}
-        try{SE._addFlood&&SE._addFlood.call(SE,map);}catch(e){}
-        try{SE._addRoads&&SE._addRoads.call(SE,map);}catch(e){}
+        try{map.jumpTo({center:[cx,cy],zoom:12.5,pitch:50,bearing:5});}catch(e){}
+        map.once('idle',function(){
+          if(!SE._playing)return;
+          try{SE._addFlood.call(SE,map);}catch(e){console.warn('flood:',e);}
+          try{SE._addRoads.call(SE,map);}catch(e){}
+        });
         break;
 
       case 'clima':
@@ -336,22 +340,24 @@ window._startCinema = function(cityKey) {
         break;
 
       case 'viziune':
-        // Finale — jump direct, bare 3D maxim dupa idle
         lp('dusk');
         try{map.jumpTo({center:[cx,cy],zoom:15.5,pitch:72,bearing:30});}catch(e){}
-        try{
-          map.once('idle',function(){
-            if(!SE._playing)return;
-            add3D(false);
-            rot(30,0.010);
-            setTimeout(function(){
-              if(!SE._playing)return;
-              try{map.flyTo({center:[cx,cy],zoom:15.5,pitch:72,bearing:120,duration:16000,essential:true});}catch(e){}
-            },2000);
-          });
-        }catch(e){
-          setTimeout(function(){if(!SE._playing)return;add3D(false);rot(30,0.010);},500);
-        }
+        map.once('idle',function(){
+          if(!SE._playing)return;
+          SE._city=SE._city||(window._RO_CITIES_DB||{})['RO-IS-01'];
+          SE._pred=SE._pred||window._PredEngine.calc(SE._city);
+          try{SE._add3DGrowth.call(SE,map);}catch(e){console.error('3D err:',e);}
+          rot(30,0.010);
+          // Bare la inaltime maxima
+          setTimeout(function(){
+            if(!SE._gf)return;
+            try{map.getSource('v8-gr').setData({type:'FeatureCollection',
+              features:SE._gf.map(function(f){
+                return Object.assign({},f,{properties:Object.assign({},f.properties,{h:f.properties.hFinal||f.properties.h||20})});
+              })});}catch(e){}
+            try{map.flyTo({center:[cx,cy],zoom:15.5,pitch:72,bearing:120,duration:14000,essential:true});}catch(e){}
+          },500);
+        });
         break;
     }
   }
@@ -772,17 +778,30 @@ window._startCinema = function(cityKey) {
   console.log('[Cinema v4.0] START —',name);
 };
 
-// Aliases pentru toate butoanele
+// Patch openTCI dupa ce toate scripturile s-au incarcat
 window._launchCinemaV2=function(){
   window._startCinema(window.TCI?.cityKey||localStorage.getItem('ux_last_city')||'RO-IS-01');
 };
-window._switchToCinemaV2=function(){window._preferCinemaV2=true;};
-var _origOTCI=window.openTCI;
-window.openTCI=function(opts){
-  if(window._preferCinemaV2||opts?.mode==='cinema_v2'){
-    window._startCinema(opts?.cityKey||window.TCI?.cityKey||localStorage.getItem('ux_last_city')||'RO-IS-01');
-  }else if(_origOTCI)_origOTCI(opts);
-};
 
-console.log('[Cinema Launcher v4.0] ✅ 16 scene · 3D · _launchCinemaV2 activ');
+function _patchOpenTCI(attempt){
+  if(typeof window.openTCI==='function'){
+    var orig=window.openTCI;
+    window.openTCI=function(opts){
+      // Cinematicul nostru e default acum
+      window._startCinema(opts?.cityKey||window.TCI?.cityKey||localStorage.getItem('ux_last_city')||'RO-IS-01');
+    };
+    console.log('[Cinema v4] openTCI patched ✅');
+  } else if(attempt<30){
+    setTimeout(function(){_patchOpenTCI(attempt+1);},300);
+  }
+}
+
+// Asteapta DOM complet incarcat
+if(document.readyState==='complete'){
+  _patchOpenTCI(0);
+}else{
+  window.addEventListener('load',function(){_patchOpenTCI(0);});
+}
+
+console.log('[Cinema Launcher v4.0] ✅ 16 scene · 3D · buton activ');
 })();
