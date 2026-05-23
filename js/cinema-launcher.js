@@ -114,7 +114,7 @@ window._startCinema = function(cityKey) {
     var map = SE._map;
     var cx = SE._city.lon||27.6, cy = SE._city.lat||47.15;
     if(scene.id==='s2'){
-      // Orasul azi — zoom aproape, orbita lenta
+      // Orasul azi — zoom aproape, orbita lenta cu cladiri 3D
       try{map.flyTo({center:[cx,cy],zoom:14.5,pitch:62,bearing:20,duration:3000,essential:true});}catch(e){}
       try{map.setConfigProperty('basemap','lightPreset','day');}catch(e){}
       setTimeout(function(){
@@ -122,6 +122,47 @@ window._startCinema = function(cityKey) {
         if(SE._rotInt)clearInterval(SE._rotInt);
         SE._rotInt=setInterval(function(){if(!SE._playing){clearInterval(SE._rotInt);return;}b+=0.03;try{map.setBearing(b%360);}catch(e){};},50);
       },1000);
+    }
+    // TRAFIC — retea OSM reala colorata pe congestie
+    if(scene.id==='s5'){
+      try{map.flyTo({center:[cx,cy],zoom:13,pitch:45,bearing:0,duration:3000,essential:true});}catch(e){}
+      try{map.setConfigProperty('basemap','lightPreset','night');}catch(e){}
+      // Fetch OSM roads via Overpass
+      var overpassQ='[out:json][timeout:25];(way["highway"~"motorway|trunk|primary|secondary|tertiary"](around:8000,'+cy+','+cx+'););out geom;';
+      fetch('https://urbanx-proxy.3dtravelsoftart.workers.dev/osm?q='+encodeURIComponent(overpassQ))
+        .then(function(r){return r.json();})
+        .then(function(data){
+          if(!SE._playing)return;
+          var features=[];
+          (data.elements||[]).forEach(function(el){
+            if(el.type!=='way'||!el.geometry)return;
+            var coords=el.geometry.map(function(n){return[n.lon,n.lat];});
+            var hw=el.tags&&el.tags.highway||'tertiary';
+            // Culoare si grosime dupa tip + congestie simulata
+            var c,w;
+            if(hw==='motorway'||hw==='trunk'){c='#ef4444';w=8;}
+            else if(hw==='primary'){c='#f97316';w=6;}
+            else if(hw==='secondary'){c='#f59e0b';w=4;}
+            else{c='#22c55e';w=2;}
+            features.push({type:'Feature',geometry:{type:'LineString',coordinates:coords},properties:{c:c,w:w,hw:hw}});
+          });
+          console.log('[Cinema] OSM roads:',features.length);
+          if(features.length>0){
+            try{
+              if(map.getLayer('v8-osm-l'))map.removeLayer('v8-osm-l');
+              if(map.getSource('v8-osm'))map.removeSource('v8-osm');
+              map.addSource('v8-osm',{type:'geojson',data:{type:'FeatureCollection',features:features}});
+              map.addLayer({id:'v8-osm-l',type:'line',source:'v8-osm',
+                paint:{'line-color':['get','c'],'line-width':['get','w'],'line-opacity':0.85,'line-blur':0.3},
+                layout:{'line-cap':'round','line-join':'round'}
+              });
+            }catch(e){console.warn('[Cinema] OSM layer err:',e.message);}
+          }
+        }).catch(function(e){
+          console.warn('[Cinema] OSM fetch err:',e.message);
+          // Fallback - retea simulata mai densa
+          SE._addTrafficPulse&&SE._addTrafficPulse.call(SE,map);
+        });
     }
     if(scene.id==='s4'){
       // Coridoare 2055 — zoom APROAPE pe cladiri 3D, pitch maxim
@@ -157,6 +198,8 @@ window._startCinema = function(cityKey) {
         SE._raf = requestAnimationFrame(loop);
       } else {
         try { SE._cleanLayers.call(SE); } catch(e) {}
+    try{if(map.getLayer('v8-osm-l'))map.removeLayer('v8-osm-l');}catch(e){}
+    try{if(map.getSource('v8-osm'))map.removeSource('v8-osm');}catch(e){}
         runScene(idx + 1);
       }
     };
