@@ -113,16 +113,6 @@ window._startCinema = function(cityKey) {
     // Override camera pentru scene cinematice
     var map = SE._map;
     var cx = SE._city.lon||27.6, cy = SE._city.lat||47.15;
-    if(scene.id==='s2'){
-      // Orasul azi — zoom aproape, orbita lenta cu cladiri 3D
-      try{map.flyTo({center:[cx,cy],zoom:14.5,pitch:62,bearing:20,duration:3000,essential:true});}catch(e){}
-      try{map.setConfigProperty('basemap','lightPreset','day');}catch(e){}
-      setTimeout(function(){
-        var b=20;
-        if(SE._rotInt)clearInterval(SE._rotInt);
-        SE._rotInt=setInterval(function(){if(!SE._playing){clearInterval(SE._rotInt);return;}b+=0.03;try{map.setBearing(b%360);}catch(e){};},50);
-      },1000);
-    }
     // TRAFIC — retea OSM reala colorata pe congestie
     if(scene.id==='s5'){
       try{map.flyTo({center:[cx,cy],zoom:13,pitch:45,bearing:0,duration:3000,essential:true});}catch(e){}
@@ -165,10 +155,15 @@ window._startCinema = function(cityKey) {
         });
     }
     if(scene.id==='s4'){
-      // Coridoare 2055 — zoom APROAPE pe cladiri 3D, pitch maxim
+      // CORIDOARE 2055 — zoom APROAPE pe cladiri 3D care CRESC ANIMAT
       try{map.jumpTo({center:[cx,cy],zoom:13,pitch:55,bearing:10});}catch(e){}
-      setTimeout(function(){try{map.flyTo({center:[cx,cy],zoom:15,pitch:68,bearing:25,duration:5000,essential:true});}catch(e){}},500);
       try{map.setConfigProperty('basemap','lightPreset','night');}catch(e){}
+      // Adauga barele 3D imediat
+      try{SE._add3DGrowth.call(SE,map);}catch(e){console.warn('3D growth err:',e.message);}
+      // Zbor dramatic spre cladiri
+      setTimeout(function(){
+        try{map.flyTo({center:[cx,cy],zoom:15.5,pitch:72,bearing:25,duration:6000,essential:true});}catch(e){}
+      },500);
       // Rotatie lenta
       setTimeout(function(){
         var b=25;
@@ -176,11 +171,33 @@ window._startCinema = function(cityKey) {
         SE._rotInt=setInterval(function(){if(!SE._playing){clearInterval(SE._rotInt);return;}b+=0.015;try{map.setBearing(b%360);}catch(e){};},50);
       },1000);
     }
+    // S2 - orasul azi cu cladiri 3D Standard Mapbox
+    if(scene.id==='s2'){
+      try{map.jumpTo({center:[cx,cy],zoom:13,pitch:55,bearing:20});}catch(e){}
+      try{map.setConfigProperty('basemap','lightPreset','day');}catch(e){}
+      setTimeout(function(){
+        try{map.flyTo({center:[cx,cy],zoom:15,pitch:65,bearing:40,duration:5000,essential:true});}catch(e){}
+      },300);
+      setTimeout(function(){
+        var b=40;
+        if(SE._rotInt)clearInterval(SE._rotInt);
+        SE._rotInt=setInterval(function(){if(!SE._playing){clearInterval(SE._rotInt);return;}b+=0.025;try{map.setBearing(b%360);}catch(e){};},50);
+      },1000);
+    }
     if(scene.id==='s11'){
-      // Viziunea 2055 — zoom pe cladiri la maxim, sunset
+      // Viziunea 2055 — cladiri 3D la maxim, sunset, rotatie
       try{map.jumpTo({center:[cx,cy],zoom:13,pitch:55,bearing:0});}catch(e){}
-      setTimeout(function(){try{map.flyTo({center:[cx,cy],zoom:15,pitch:68,bearing:40,duration:6000,essential:true});}catch(e){}},500);
       try{map.setConfigProperty('basemap','lightPreset','dusk');}catch(e){}
+      // Bare 3D la inaltime maxima
+      try{SE._add3DGrowthFull&&SE._add3DGrowthFull.call(SE,map);}catch(e){}
+      try{SE._add3DGrowth.call(SE,map);}catch(e){}
+      setTimeout(function(){
+        // Seteaza toate barele la inaltime maxima
+        if(SE._gf&&map.getSource('v8-gr')){
+          try{map.getSource('v8-gr').setData({type:'FeatureCollection',features:SE._gf.map(function(f){return Object.assign({},f,{properties:Object.assign({},f.properties,{h:f.properties.hFinal||f.properties.h})});})});}catch(e){}
+        }
+        try{map.flyTo({center:[cx,cy],zoom:15.5,pitch:72,bearing:40,duration:6000,essential:true});}catch(e){}
+      },500);
       setTimeout(function(){
         var b=40;
         if(SE._rotInt)clearInterval(SE._rotInt);
