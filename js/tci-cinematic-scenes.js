@@ -118,7 +118,7 @@ G._SceneEngine={
     const db=window._RO_CITIES_DB||{};
     const city=db[cityKey]||Object.values(db)[0]||{name:'Municipiu',lat:45.5,lon:25.0,pop2021:100000,pop2011:100000,pib_eur_cap:9000,regiune:'C',tip:'municipiu',coef_hub:1.0,suprafata_ha:5000,spatii_verzi_mp_loc:10,acoperire_transport:55};
     this._city=city; this._pred=_PRED.calc(city);
-    this._hideUI(); const _mE=document.getElementById("map"); if(_mE){_mE.dataset.oh=_mE.style.height; _mE.style.height="100vh";} setTimeout(()=>{try{window.map?.resize();}catch(e){}},200);
+    this._hideUI();
     this._canvas=this._createCanvas(); this._ctx=this._canvas.getContext('2d');
     this._pugGeo=null;this._reguli=null;this._wikiText='';
     this._loadAssets(city);
@@ -168,7 +168,7 @@ G._SceneEngine={
   stop(){
     this._playing=false;if(this._raf)cancelAnimationFrame(this._raf);if(this._rotInt){clearInterval(this._rotInt);this._rotInt=null;}
     this._canvas?.remove();this._canvas=null;this._ctx=null;document.getElementById('tci-v5-ctrl')?.remove();
-    this._cleanupMapLayers();this._restoreUI(); const _mR=document.getElementById("map"); if(_mR&&_mR.dataset.oh!==undefined){_mR.style.height=_mR.dataset.oh; delete _mR.dataset.oh; setTimeout(()=>{try{window.map?.resize();}catch(e){}},200);}
+    this._cleanupMapLayers();this._restoreUI();
     try{window.map?.flyTo({zoom:13,pitch:45,bearing:0,duration:1500,essential:true});}catch(e){}
     ss('⏹ TCI oprit');
   },
@@ -368,19 +368,19 @@ G._SceneEngine={
     const bgT=(op=0.85)=>{const g=ctx.createLinearGradient(0,0,0,H*0.28);g.addColorStop(0,`rgba(3,7,18,${op})`);g.addColorStop(1,'rgba(3,7,18,0)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H*0.28);};
     const bgB=(op=0.85)=>{const g=ctx.createLinearGradient(0,H*0.72,0,H);g.addColorStop(0,'rgba(3,7,18,0)');g.addColorStop(1,`rgba(3,7,18,${op})`);ctx.fillStyle=g;ctx.fillRect(0,H*0.72,W,H*0.28);};
     const wrap=(txt,x,y,mw,lh,font,clr,ml=4)=>{ctx.font=font;ctx.fillStyle=clr;ctx.textAlign='left';const ws=txt.split(' ');let line='',lines=[],done=false;ws.forEach(w=>{if(done)return;const test=line+w+' ';if(ctx.measureText(test).width>mw&&line){lines.push(line.trim());if(lines.length>=ml){done=true;return;}line=w+' ';}else line=test;});if(!done&&line)lines.push(line.trim());lines.forEach((l,i)=>ctx.fillText(l,x,y+i*lh));};
-    const card=(x,y,w,h,fill='rgba(5,10,28,0.90)',stroke='rgba(255,255,255,0.08)')=>{ctx.save();ctx.fillStyle=fill;ctx.strokeStyle=stroke;ctx.lineWidth=1;const r=10;ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();};
+    const card=(x,y,w,h,fill='rgba(5,10,28,0.82)',stroke='rgba(255,255,255,0.08)')=>{ctx.save();ctx.fillStyle=fill;ctx.strokeStyle=stroke;ctx.lineWidth=1;const r=10;ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();};
     const gl=(x,y,wm,tr)=>{const w=wm*tr;const g=ctx.createLinearGradient(x,y,x+w,y);g.addColorStop(0,'#D4AF37');g.addColorStop(1,'rgba(212,175,55,0)');ctx.fillStyle=g;ctx.fillRect(x,y,w,2);};
     const lbl=(txt,x,y,clr='rgba(148,163,184,0.85)',sz=W*0.0065)=>{ctx.fillStyle=clr;ctx.font=`${sz}px "IBM Plex Mono",monospace`;ctx.textAlign='left';ctx.fillText(txt,x,y);};
     const big=(txt,x,y,clr='#D4AF37',sz=W*0.055)=>{ctx.fillStyle=clr;ctx.font=`900 ${sz}px "Space Grotesk",sans-serif`;ctx.textAlign='left';ctx.fillText(txt,x,y);};
     const bar=(x,y,w,h,pct,clr,bg='rgba(255,255,255,0.06)')=>{ctx.fillStyle=bg;ctx.fillRect(x,y,w,h);ctx.fillStyle=clr;ctx.fillRect(x,y,w*Math.min(1,Math.max(0,pct)),h);};
     const an=(v,tr)=>Math.round(v*easeOut(tr));
-    const prog=()=>{al(sA*0.7);ctx.fillStyle='rgba(255,255,255,0.08)';ctx.fillRect(W*0.2,H-28,W*0.6,3);ctx.fillStyle='#D4AF37';ctx.fillRect(W*0.2,H-28,W*0.6*((this._sceneIdx+t)/this.SCENES.length),3);ctx.fillStyle='rgba(148,163,184,0.7)';ctx.font=`${W*0.006}px "IBM Plex Mono",monospace`;ctx.textAlign='center';ctx.fillText(`${scene?.label||""} · ${this._sceneIdx+1}/${this.SCENES.length}`,W/2,H-10);al(1);};
+    const prog=()=>{al(sA*0.7);ctx.fillStyle='rgba(255,255,255,0.08)';ctx.fillRect(W*0.2,H-28,W*0.6,3);ctx.fillStyle='#D4AF37';ctx.fillRect(W*0.2,H-28,W*0.6*((this._sceneIdx+t)/this.SCENES.length),3);ctx.fillStyle='rgba(148,163,184,0.7)';ctx.font=`${W*0.006}px "IBM Plex Mono",monospace`;ctx.textAlign='center';ctx.fillText(`${scene.label} · ${this._sceneIdx+1}/${this.SCENES.length}`,W/2,H-10);al(1);};
     const grain=()=>{ctx.save();al(0.018);for(let i=0;i<160;i++){ctx.fillStyle=Math.random()>.5?'#fff':'#000';ctx.fillRect(Math.random()*W,Math.random()*H,1,1);}ctx.restore();};
 
     switch(id){
     // ── S1 INTRO ─────────────────────────────────────────────────────────────
     case 'intro':{
-      al(sA);bgT(0.9);bgB(0.92);
+      al(sA);bgT(0.9);bgB(0.75);
       al(sA*rE(0.05,0.4)*0.10);ctx.fillStyle='#D4AF37';ctx.font=`900 ${W*0.38}px "Space Grotesk",sans-serif`;ctx.textAlign='right';ctx.fillText((city.judet_code||name.slice(0,2)||'RO').toUpperCase(),W*0.97,H*0.78);
       al(sA);
       al(sA*rE(0.06,0.2));lbl(`${(city.tip||'municipiu').toUpperCase()} · JUD. ${(city.judet||'—').toUpperCase()} · REG. ${city.regiune||'—'}`,W*0.06,H*0.30,'rgba(148,163,184,0.7)',W*0.0072);
@@ -397,11 +397,11 @@ G._SceneEngine={
     }
     // ── S2 PORTRAIT ──────────────────────────────────────────────────────────
     case 'portrait':{
-      al(sA);bgL(0.90);bgT(0.80);bgB(0.85);
+      al(sA);bgL(0.72);bgT(0.70);bgB(0.70);
       al(sA*rE(0.05,0.2));lbl('PORTRETUL COMUNITĂȚII',W*0.05,H*0.12,'rgba(148,163,184,0.7)',W*0.0072);
       al(sA*rE(0.07,0.25));gl(W*0.05,H*0.145,W*0.5,rE(0.06,0.3));ctx.fillStyle='#ffffff';ctx.font=`900 ${W*0.04}px "Space Grotesk",sans-serif`;ctx.textAlign='left';ctx.fillText(name+' · Demografie & Profil',W*0.05,H*0.22);
       // Card demografic
-      al(sA*rE(0.12,0.25));card(W*0.04,H*0.26,W*0.38,H*0.57,'rgba(5,10,28,0.88)');al(sA*rE(0.12,0.25));
+      al(sA*rE(0.12,0.25));card(W*0.04,H*0.26,W*0.38,H*0.57,'rgba(5,10,28,0.80)');al(sA*rE(0.12,0.25));
       lbl('POPULAȚIE ACTUALĂ',W*0.07,H*0.32,'#D4AF37',W*0.0065);
       big(N(an(pred.p21,rev(0.12,0.35))),W*0.07,H*0.42,'#ffffff',W*0.045);
       lbl('LOCUITORI · RECENSĂMÂNT 2021',W*0.07,H*0.46,'#D4AF37',W*0.006);
@@ -413,34 +413,34 @@ G._SceneEngine={
       lbl('POP.2011: '+N(pred.p11)+' · VARIAȚIE: '+(pred.p21>pred.p11?'+':'')+N(pred.p21-pred.p11),W*0.07,H*0.70,'rgba(100,130,170,0.7)',W*0.0058);
       [[pred.natalitate+'‰','NATALITATE',W*0.07,H*0.77],[pred.mortalit+'‰','MORTALITATE',W*0.18,H*0.77],[(pred.sporNat>=0?'+':'')+pred.sporNat+'‰','SPOR NATURAL',W*0.29,H*0.77]].forEach(([v,l2,x,y])=>{lbl(l2,x,y,'rgba(148,163,184,0.65)',W*0.0055);lbl(v,x,y+H*0.038,pred.sporNat>0?'#22c55e':'#ef4444',W*0.008);});
       // Piramidă vârstă
-      al(sA*rE(0.28,0.3));card(W*0.46,H*0.26,W*0.22,H*0.57,'rgba(5,10,28,0.88)');al(sA*rE(0.28,0.3));
+      al(sA*rE(0.28,0.3));card(W*0.46,H*0.26,W*0.22,H*0.57,'rgba(5,10,28,0.80)');al(sA*rE(0.28,0.3));
       lbl('STRUCTURĂ VÂRSTĂ 2021',W*0.49,H*0.32,'#D4AF37',W*0.006);
       const vK=Object.keys(pred.varste),mV=Math.max(...Object.values(pred.varste));
       vK.forEach((k,i)=>{const v=pred.varste[k],bw=W*0.17*(v/mV)*easeOut(rev(0.30+i*0.05,0.25)),yb=H*(0.38+i*0.09),cl=i===0?'#60a5fa':i===4?'#ef4444':'#D4AF37';lbl(k,W*0.485,yb+H*0.028,'rgba(148,163,184,0.7)',W*0.0055);ctx.fillStyle=cl;ctx.fillRect(W*0.525,yb+H*0.015,bw,H*0.028);lbl(N(v),W*0.528+bw,yb+H*0.030,cl,W*0.0055);});
       // Profil socio-ec
-      al(sA*rE(0.40,0.3));card(W*0.72,H*0.26,W*0.24,H*0.57,'rgba(5,10,28,0.88)');al(sA*rE(0.40,0.3));
+      al(sA*rE(0.40,0.3));card(W*0.72,H*0.26,W*0.24,H*0.57,'rgba(5,10,28,0.80)');al(sA*rE(0.40,0.3));
       lbl('PROFIL SOCIO-ECONOMIC',W*0.75,H*0.32,'#D4AF37',W*0.006);
       [[N(pred.salariu)+' EUR/LUN','SALARIU MEDIU NET',H*0.40],[pred.ocupare+'%','RATA OCUPARE',H*0.49],[pred.somaj+'%','RATA ȘOMAJ',H*0.58],[(pred.migNeta>=0?'+':'')+N(pred.migNeta)+'/AN','MIGRAȚIE NETĂ',H*0.67]].forEach(([v,l2,y])=>{lbl(l2,W*0.75,y,'rgba(148,163,184,0.65)',W*0.0055);lbl(v,W*0.75,y+H*0.038,'#ffffff',W*0.009);});
       // Ocupație
-      al(sA*rE(0.55,0.3));card(W*0.04,H*0.855,W*0.92,H*0.10,'rgba(5,10,28,0.88)');al(sA*rE(0.55,0.3));
+      al(sA*rE(0.55,0.3));card(W*0.04,H*0.855,W*0.92,H*0.10,'rgba(5,10,28,0.80)');al(sA*rE(0.55,0.3));
       lbl('STRUCTURĂ OCUPAȚIE:',W*0.07,H*0.888,'rgba(148,163,184,0.7)',W*0.006);let ox=W*0.22;
       Object.entries(pred.ocupatie).forEach(([k,v])=>{lbl(k.toUpperCase(),ox,H*0.882,'rgba(148,163,184,0.6)',W*0.0055);lbl(v+'%',ox,H*0.905,'#D4AF37',W*0.008);ox+=W*0.14;});
       al(1);prog();grain();break;
     }
     // ── S3 ECONOMY ───────────────────────────────────────────────────────────
     case 'economy':{
-      al(sA);bgL(0.88);bgT(0.80);bgB(0.88);
+      al(sA);bgL(0.72);bgT(0.70);bgB(0.75);
       al(sA*rE(0.05,0.2));lbl('ECONOMIE & PUTERE DE CUMPĂRARE',W*0.05,H*0.12,'rgba(148,163,184,0.7)',W*0.0072);lbl('SURSE: EUROSTAT · BNR · INSE 2022',W*0.05,H*0.16,'rgba(100,130,170,0.6)',W*0.006);
       al(sA*rE(0.07,0.3));gl(W*0.05,H*0.19,W*0.5,rE(0.06,0.3));
       al(sA*rE(0.09,0.25));ctx.fillStyle='#ffffff';ctx.font=`900 ${W*0.04}px "Space Grotesk",sans-serif`;ctx.textAlign='left';ctx.fillText(name+' · Context European',W*0.05,H*0.27);
-      al(sA*rE(0.12,0.25));card(W*0.04,H*0.30,W*0.42,H*0.55,'rgba(5,10,28,0.88)');al(sA*rE(0.12,0.25));
+      al(sA*rE(0.12,0.25));card(W*0.04,H*0.30,W*0.42,H*0.55,'rgba(5,10,28,0.80)');al(sA*rE(0.12,0.25));
       lbl('PIB/LOCUITOR ACTUAL',W*0.07,H*0.38,'rgba(148,163,184,0.8)',W*0.0065);
       big(N(an(pred.pib,rev(0.14,0.4)))+' EUR',W*0.07,H*0.48,'#D4AF37',W*0.043);lbl('EUR/LOCUITOR · EUROSTAT 2022',W*0.07,H*0.52,'#D4AF37',W*0.0065);
       lbl('VS MEDIA UE27: 36.600 EUR',W*0.07,H*0.58,'rgba(148,163,184,0.7)',W*0.006);
       bar(W*0.07,H*0.61,W*0.36,H*0.015,pred.pctUE/100*rE(0.25,0.3),'#D4AF37');
       big(N(an(pred.pctUE,rev(0.25,0.35)))+'%',W*0.07,H*0.715,pred.pctUE>=75?'#22c55e':'#f59e0b',W*0.038);lbl('DIN MEDIA UE27',W*0.07,H*0.75,'#D4AF37',W*0.006);
       if(pred.pctUE<75)lbl('CONVERGENȚĂ ESTIMATĂ: ~'+pred.anConv,W*0.07,H*0.79,'rgba(148,163,184,0.7)',W*0.006);
-      al(sA*rE(0.30,0.25));card(W*0.50,H*0.30,W*0.46,H*0.55,'rgba(5,10,28,0.88)');al(sA*rE(0.30,0.25));
+      al(sA*rE(0.30,0.25));card(W*0.50,H*0.30,W*0.46,H*0.55,'rgba(5,10,28,0.80)');al(sA*rE(0.30,0.25));
       lbl('PROIECȚIE PIB/CAP',W*0.53,H*0.37,'#D4AF37',W*0.0065);lbl('RATĂ CREȘTERE: +'+pred.rPIB.toFixed(1)+'%/AN',W*0.53,H*0.41,'rgba(100,130,170,0.6)',W*0.006);
       [[2035,pred.pib35,pred.pctUE35,0.35],[2055,pred.pib55,pred.pctUE55,0.55]].forEach(([yr,p,pc,td],i)=>{al(sA*rE(td,0.25));lbl(yr+'',W*0.53,H*(0.50+i*0.20),'rgba(148,163,184,0.7)',W*0.007);big(N(p)+' EUR',W*0.53,H*(0.59+i*0.20),'#ffffff',W*0.028);lbl(pc+'% din UE27',W*0.53,H*(0.63+i*0.20),pc>=75?'#22c55e':'#f59e0b',W*0.0065);bar(W*0.53,H*(0.655+i*0.20),W*0.40,H*0.012,pc/100*rE(td+0.05,0.3),pc>=75?'#22c55e':'#f59e0b');});
       // Graf convergență
@@ -457,7 +457,7 @@ G._SceneEngine={
     // ── S4 GROWTH ─────────────────────────────────────────────────────────────
     case 'growth':{
       this._updateGrowthBars(Math.min(1,t*1.4));
-      al(sA);bgT(0.82);bgB(0.88);
+      al(sA);bgT(0.70);bgB(0.75);
       al(sA*rE(0.05,0.2));lbl('UNDE CREȘTE ORAȘUL — CORIDOARE 2025·2055',W*0.05,H*0.085,'rgba(148,163,184,0.7)',W*0.007);lbl('MODEL UrbanX · DATE PUG + ANCPI — BARE 3D CRESC ÎN TIMP REAL',W*0.05,H*0.125,'rgba(100,130,170,0.6)',W*0.006);
       al(sA*rE(0.07,0.3));gl(W*0.05,H*0.155,W*0.6,rE(0.06,0.3));
       al(sA*rE(0.09,0.25));ctx.fillStyle='#ffffff';ctx.font=`900 ${W*0.038}px "Space Grotesk",sans-serif`;ctx.textAlign='left';ctx.fillText(name+' · Predicție Dezvoltare Urbană',W*0.05,H*0.22);
@@ -465,12 +465,12 @@ G._SceneEngine={
       [[N(an(pred.defLoc,rev(0.12,0.4)))+' UN.','DEFICIT LOCUINȚE 2055','#ef4444',W*0.07],[N(pred.recHa)+' HA','RECONVERSIE DISPONIBILĂ','#f59e0b',W*0.30],[N(pred.auth),'AUTORIZAȚII 2023 (BAZĂ)','#22c55e',W*0.55],[(pred.r10>=0?'+':'')+pred.r10.toFixed(2)+'%/AN','RITM CREȘTERE ACTUAL','#60a5fa',W*0.76]].forEach(([v,l2,c,x])=>{lbl(l2,x,H*0.295,'rgba(148,163,184,0.65)',W*0.006);big(v,x,H*0.330,c,W*0.022);});
       pred.coridoare.forEach((cor,i)=>{
         const ci=rE(0.20+i*0.10,0.25),cx2=W*(0.04+i*0.235);
-        al(sA*ci);card(cx2,H*0.37,W*0.22,H*0.39,'rgba(5,10,28,0.90)',cor.c+'44');al(sA*ci);
+        al(sA*ci);card(cx2,H*0.37,W*0.22,H*0.39,'rgba(5,10,28,0.82)',cor.c+'44');al(sA*ci);
         ctx.fillStyle=cor.c;ctx.font=`900 ${W*0.020}px "Space Grotesk",sans-serif`;ctx.textAlign='left';ctx.fillText(cor.dir,cx2+W*0.015,H*0.42);lbl(cor.tip,cx2+W*0.015,H*0.455,'rgba(148,163,184,0.7)',W*0.006);
         lbl('LOCUINȚE NOI',cx2+W*0.015,H*0.50,'rgba(148,163,184,0.65)',W*0.006);big(N(an(cor.locuinte,rev(0.22+i*0.10,0.35))),cx2+W*0.015,H*0.565,cor.c,W*0.028);
         lbl('POP. ABSORBITĂ 2055',cx2+W*0.015,H*0.612,'rgba(148,163,184,0.65)',W*0.006);lbl('+'+N(cor.pop)+' loc.',cx2+W*0.015,H*0.648,'rgba(200,215,240,0.85)',W*0.007);bar(cx2+W*0.015,H*0.67,W*0.19,H*0.012,cor.pct*3.5,cor.c);
       });
-      al(sA*rE(0.65,0.25));card(W*0.04,H*0.775,W*0.90,H*0.10,'rgba(5,10,28,0.85)');al(sA*rE(0.65,0.25));
+      al(sA*rE(0.65,0.25));card(W*0.04,H*0.775,W*0.90,H*0.10,'rgba(5,10,28,0.78)');al(sA*rE(0.65,0.25));
       lbl('LEGENDĂ 3D HARTĂ — PRESIUNE URBANISTICĂ PER UTR:',W*0.07,H*0.815,'rgba(148,163,184,0.7)',W*0.006);
       [['#ef4444','MAJORĂ — CC/CP'],['#f59e0b','MEDIE — CM/CB'],['#60a5fa','MICĂ — LA/LB'],['#22c55e','RECONVERSIE — AI/AA']].forEach(([c,txt],i)=>{ctx.fillStyle=c;ctx.fillRect(W*(0.07+i*0.22),H*0.842,W*0.025,8);lbl(txt,W*(0.10+i*0.22),H*0.850,c,W*0.0058);});
       if(t>0.78){
@@ -483,15 +483,15 @@ G._SceneEngine={
     }
     // ── S5 MOBILITY ──────────────────────────────────────────────────────────
     case 'mobility':{
-      al(sA);bgL(0.88);bgT(0.80);bgB(0.88);
+      al(sA);bgL(0.72);bgT(0.70);bgB(0.75);
       al(sA*rE(0.05,0.2));lbl('MOBILITATE AUTO — CONGESTIE & SATURARE',W*0.05,H*0.12,'rgba(148,163,184,0.7)',W*0.007);lbl('HARTA ARATĂ: ROȘU=AGLOMERAT · GALBEN=MODERAT · VERDE=FLUID · VIOLET=CENTURĂ',W*0.05,H*0.16,'rgba(100,130,170,0.6)',W*0.006);
       al(sA*rE(0.07,0.25));gl(W*0.05,H*0.19,W*0.5,rE(0.06,0.3));ctx.fillStyle='#ffffff';ctx.font=`900 ${W*0.038}px "Space Grotesk",sans-serif`;ctx.textAlign='left';ctx.fillText(name+' · Presiunea Traficului',W*0.05,H*0.265);
-      al(sA*rE(0.10,0.2));card(W*0.04,H*0.30,W*0.44,H*0.42,'rgba(5,10,28,0.88)');al(sA*rE(0.10,0.2));
+      al(sA*rE(0.10,0.2));card(W*0.04,H*0.30,W*0.44,H*0.42,'rgba(5,10,28,0.80)');al(sA*rE(0.10,0.2));
       lbl('GRAD MOTORIZARE (VEH/1000 LOC.)',W*0.07,H*0.36,'#D4AF37',W*0.0065);
       [[2024,pred.mot24,'rgba(148,163,184,0.9)',0.11],[2035,pred.mot35,'#f59e0b',0.20],[2055,pred.mot55,'#ef4444',0.30]].forEach(([yr,val,c,td],i)=>{al(sA*rE(td,0.2));lbl(yr+'',W*0.07,H*(0.405+i*0.09),'rgba(100,130,170,0.7)',W*0.006);big(N(Math.round(val)),W*0.15,H*(0.405+i*0.09),c,W*0.022);lbl('veh/1000',W*0.295,H*(0.405+i*0.09),c,W*0.006);bar(W*0.07,H*(0.420+i*0.09),W*0.38,H*0.012,val/710*rE(td+0.05,0.25),c);});
-      al(sA*rE(0.25,0.25));card(W*0.04,H*0.585,W*0.44,H*0.27,'rgba(5,10,28,0.88)');al(sA*rE(0.25,0.25));
+      al(sA*rE(0.25,0.25));card(W*0.04,H*0.585,W*0.44,H*0.27,'rgba(5,10,28,0.80)');al(sA*rE(0.25,0.25));
       lbl('AN SATURARE REȚEA',W*0.07,H*0.635,'rgba(148,163,184,0.7)',W*0.006);big('~'+pred.satAn,W*0.07,H*0.710,pred.satAn<=2040?'#ef4444':pred.satAn<=2050?'#f59e0b':'#22c55e',W*0.042);lbl('CAP. REZIDUALĂ 2055: '+pred.capRez+'%',W*0.07,H*0.755,'rgba(148,163,184,0.7)',W*0.006);bar(W*0.07,H*0.770,W*0.36,H*0.012,pred.capRez/100,'#22c55e');lbl('FLUX ORĂ VÂRF EST.: '+N(pred.fluxOra)+' veh/h',W*0.07,H*0.820,'rgba(148,163,184,0.7)',W*0.006);
-      al(sA*rE(0.32,0.25));card(W*0.52,H*0.30,W*0.44,H*0.55,'rgba(5,10,28,0.88)');al(sA*rE(0.32,0.25));
+      al(sA*rE(0.32,0.25));card(W*0.52,H*0.30,W*0.44,H*0.55,'rgba(5,10,28,0.80)');al(sA*rE(0.32,0.25));
       lbl('SOLUȚII NECESARE',W*0.55,H*0.36,'#D4AF37',W*0.0065);lbl('PASAJE DENIVELATE: '+pred.pasaje+' buc.',W*0.55,H*0.42,'rgba(200,215,240,0.85)',W*0.007);lbl('VARIANTE OCOLITOARE: ~'+Math.ceil(pred.hub*12)+' KM',W*0.55,H*0.475,'rgba(200,215,240,0.85)',W*0.007);lbl('CENTURA: '+(pred.hub>=1.4?'URGENTĂ':'RECOMANDATĂ'),W*0.55,H*0.530,pred.hub>=1.4?'#ef4444':'#f59e0b',W*0.007);
       lbl('PARKINGURI MULTIETAJ: '+Math.round(pred.hub*3+pred.p21/80000*2),W*0.55,H*0.585,'rgba(200,215,240,0.85)',W*0.007);
       lbl('COST TOTAL INFRA MOBILITATE',W*0.55,H*0.645,'rgba(148,163,184,0.7)',W*0.006);big(N(pred.invMob)+' M EUR',W*0.55,H*0.720,'#D4AF37',W*0.030);lbl('ESTIMARE ORIZONTUL 2055',W*0.55,H*0.760,'rgba(100,130,170,0.6)',W*0.006);
@@ -500,42 +500,42 @@ G._SceneEngine={
     }
     // ── S6 TRANSIT ───────────────────────────────────────────────────────────
     case 'transit':{
-      al(sA);bgL(0.88);bgT(0.80);bgB(0.88);
+      al(sA);bgL(0.72);bgT(0.70);bgB(0.75);
       al(sA*rE(0.05,0.2));lbl('TRANSPORT PUBLIC & WALKABILITY',W*0.05,H*0.12,'rgba(148,163,184,0.7)',W*0.007);lbl('HARTĂ: ALBASTRU=ACOPERIRE TP ACTUALĂ · VIOLET PUNCTAT=BRT PROPUS',W*0.05,H*0.16,'rgba(100,130,170,0.6)',W*0.006);
       al(sA*rE(0.07,0.25));gl(W*0.05,H*0.19,W*0.5,rE(0.06,0.3));ctx.fillStyle='#ffffff';ctx.font=`900 ${W*0.038}px "Space Grotesk",sans-serif`;ctx.textAlign='left';ctx.fillText(name+' · Acoperire Transport',W*0.05,H*0.265);
-      al(sA*rE(0.12,0.25));card(W*0.04,H*0.30,W*0.42,H*0.54,'rgba(5,10,28,0.88)');al(sA*rE(0.12,0.25));
+      al(sA*rE(0.12,0.25));card(W*0.04,H*0.30,W*0.42,H*0.54,'rgba(5,10,28,0.80)');al(sA*rE(0.12,0.25));
       lbl('ACOPERIRE TP ACTUALĂ',W*0.07,H*0.37,'#60a5fa',W*0.007);
       const tpC=pred.tp>=70?'#22c55e':pred.tp>=50?'#f59e0b':'#ef4444';
       big(N(an(pred.tp,rev(0.13,0.4)))+'%',W*0.07,H*0.470,tpC,W*0.055);lbl('DIN POPULAȚIE ACOPERITĂ',W*0.07,H*0.510,'#D4AF37',W*0.006);bar(W*0.07,H*0.530,W*0.36,H*0.015,pred.tp/100*rE(0.25,0.3),tpC);lbl('DEFICIT: '+pred.defTP+'pp față de standard 75%',W*0.07,H*0.590,'rgba(148,163,184,0.7)',W*0.006);lbl('WALK SCORE ESTIMAT',W*0.07,H*0.650,'rgba(148,163,184,0.7)',W*0.006);big(pred.walkScore+'/100',W*0.07,H*0.730,pred.walkScore>=65?'#22c55e':'#f59e0b',W*0.035);bar(W*0.07,H*0.745,W*0.36,H*0.012,pred.walkScore/100*rE(0.35,0.3),pred.walkScore>=65?'#22c55e':'#f59e0b');
-      al(sA*rE(0.30,0.25));card(W*0.50,H*0.30,W*0.46,H*0.54,'rgba(5,10,28,0.88)');al(sA*rE(0.30,0.25));
+      al(sA*rE(0.30,0.25));card(W*0.50,H*0.30,W*0.46,H*0.54,'rgba(5,10,28,0.80)');al(sA*rE(0.30,0.25));
       lbl('NECESITAR BRT / EXTINDERE TP',W*0.53,H*0.37,'#a78bfa',W*0.0065);lbl('TRASEE BRT NECESARE',W*0.53,H*0.43,'rgba(148,163,184,0.7)',W*0.006);big(pred.kmBRT+' KM',W*0.53,H*0.515,'#a78bfa',W*0.040);lbl('COST: '+N(pred.costBRT)+' M EUR (3,5 M EUR/km)',W*0.53,H*0.560,'rgba(148,163,184,0.7)',W*0.007);lbl('STAȚII NOI NECESARE',W*0.53,H*0.615,'rgba(148,163,184,0.7)',W*0.006);big(N(pred.statiiNoi),W*0.53,H*0.690,'#ffffff',W*0.035);lbl('AN ATINGERE SUMP 75%: ~'+pred.anSUMP,W*0.53,H*0.740,'#D4AF37',W*0.0065);lbl('CU INVESTIȚII CURENTE: ~'+(pred.anSUMP+8),W*0.53,H*0.775,'rgba(100,130,170,0.6)',W*0.006);
       if(t>0.78){const ta=Math.min(1,(t-0.78)/0.15);al(sA*ta);card(W*0.04,H*0.875,W*0.92,H*0.068,'rgba(96,165,250,0.10)','rgba(96,165,250,0.3)');al(sA*ta);const txt=pred.defTP>20?`⚡ Deficit critic (${pred.defTP}pp). BRT ${pred.kmBRT} km = ${N(pred.costBRT)} M EUR. Surse: FEDR Axa 4 + buget local. SUMP ~${pred.anSUMP} dacă investițiile încep 2025.`:`⚡ TP funcțional. BRT ${pred.kmBRT} km consolidează accesul periferic. Reducere congestionare ~${Math.round(pred.kmBRT*1.8)}%.`;wrap(txt,W*0.07,H*0.908,W*0.86,H*0.030,`${W*0.0062}px "IBM Plex Mono",monospace`,'#93c5fd',2);}
       al(1);prog();grain();break;
     }
     // ── S7 SEISMIC ───────────────────────────────────────────────────────────
     case 'seismic':{
-      al(sA);bgL(0.90);bgT(0.82);bgB(0.90);
+      al(sA);bgL(0.72);bgT(0.70);bgB(0.75);
       al(sA*rE(0.05,0.2));lbl('RISC SEISMIC & PNRR',W*0.05,H*0.12,'rgba(148,163,184,0.7)',W*0.007);lbl('DATE: INFP · P100-1/2013 · PNRR 2021-2027 · HARTĂ: GRADIENT SEISMIC',W*0.05,H*0.16,'rgba(100,130,170,0.6)',W*0.006);
       al(sA*rE(0.07,0.25));gl(W*0.05,H*0.19,W*0.5,rE(0.06,0.3));ctx.fillStyle='#ffffff';ctx.font=`900 ${W*0.038}px "Space Grotesk",sans-serif`;ctx.textAlign='left';ctx.fillText(name+' · Fond Vulnerabil',W*0.05,H*0.265);
       const agC=pred.ag>=0.30?'#ef4444':pred.ag>=0.20?'#f59e0b':'#22c55e';
       al(sA*rE(0.10,0.2));card(W*0.04,H*0.30,W*0.44,H*0.19,agC+'22',agC+'66');al(sA*rE(0.10,0.2));lbl('ACCELERAȚIE SEISMICĂ PROIECTARE',W*0.07,H*0.35,agC,W*0.0065);big('ag = '+pred.ag.toFixed(2)+'g',W*0.07,H*0.44,agC,W*0.048);lbl('P100-1/2013 · IMR=225 ANI',W*0.07,H*0.47,'rgba(148,163,184,0.7)',W*0.006);
-      al(sA*rE(0.20,0.25));card(W*0.04,H*0.505,W*0.44,H*0.40,'rgba(5,10,28,0.88)');al(sA*rE(0.20,0.25));
+      al(sA*rE(0.20,0.25));card(W*0.04,H*0.505,W*0.44,H*0.40,'rgba(5,10,28,0.80)');al(sA*rE(0.20,0.25));
       lbl('FOND CONSTRUIT LA RISC SEISMIC',W*0.07,H*0.555,'#ef4444',W*0.007);big(N(an(pred.fond,rev(0.21,0.4)))+' CL.',W*0.07,H*0.635,'#ef4444',W*0.043);lbl('CLĂDIRI RS I-III ESTIMATE 2021',W*0.07,H*0.675,'rgba(148,163,184,0.7)',W*0.006);lbl('FĂRĂ INTERVENȚIE:',W*0.07,H*0.730,'rgba(148,163,184,0.8)',W*0.007);lbl('2035: '+N(pred.fond35)+' clădiri vulnerabile',W*0.07,H*0.775,'#f59e0b',W*0.007);lbl('2045: '+N(pred.fond45)+' clădiri vulnerabile',W*0.07,H*0.820,'#ef4444',W*0.007);lbl('(degradare fond +5%/decadă fără intervenție)',W*0.07,H*0.860,'rgba(100,130,170,0.6)',W*0.006);
-      al(sA*rE(0.35,0.25));card(W*0.52,H*0.30,W*0.44,H*0.61,'rgba(5,10,28,0.88)');al(sA*rE(0.35,0.25));
+      al(sA*rE(0.35,0.25));card(W*0.52,H*0.30,W*0.44,H*0.61,'rgba(5,10,28,0.80)');al(sA*rE(0.35,0.25));
       lbl('PROGRAM PNRR — REABILITARE',W*0.55,H*0.37,'#22c55e',W*0.007);lbl('APT. REABILITATE (ESTIMAT)',W*0.55,H*0.43,'rgba(148,163,184,0.7)',W*0.006);big(N(an(pred.pnrrAp,rev(0.36,0.4))),W*0.55,H*0.520,'#22c55e',W*0.040);lbl('COST REABILITARE FOND TOTAL',W*0.55,H*0.580,'rgba(148,163,184,0.7)',W*0.006);big(N(pred.costReab)+' M EUR',W*0.55,H*0.650,'#D4AF37',W*0.032);lbl('(~85k EUR/clădire medie)',W*0.55,H*0.690,'rgba(100,130,170,0.6)',W*0.006);lbl('AN ELIMINARE FOND (CU PNRR)',W*0.55,H*0.745,'rgba(148,163,184,0.7)',W*0.006);big('~'+pred.anElim,W*0.55,H*0.820,pred.anElim<=2040?'#22c55e':pred.anElim<=2050?'#f59e0b':'#ef4444',W*0.042);
       if(t>0.78){const ta=Math.min(1,(t-0.78)/0.15);al(sA*ta);const txt=pred.fond>500?`⚡ Risc CRITIC: ${N(pred.fond)} clădiri vulnerabile. PNRR reabilitează ~${N(pred.pnrrAp)} ap. Fond eliminat ~${pred.anElim}. Fără intervenție: +${N(pred.fond45-pred.fond)} clădiri până 2045.`:pred.fond>100?`⚡ Risc MEDIU: ${N(pred.fond)} clădiri. PNRR acoperă 25%. Post-2027 necesară continuare. Cadastrare completă — prioritate 1.`:`⚡ Risc SCĂZUT: ${N(pred.fond)} clădiri. ag=${pred.ag.toFixed(2)}g. Accent pe monitoring digital și prevenție.`;card(W*0.04,H*0.905,W*0.92,H*0.065,'rgba(239,68,68,0.10)','rgba(239,68,68,0.3)');al(sA*ta);wrap(txt,W*0.07,H*0.936,W*0.86,H*0.028,`${W*0.0062}px "IBM Plex Mono",monospace`,'#fca5a5',2);}
       al(1);prog();grain();break;
     }
     // ── S8 CLIMATE ───────────────────────────────────────────────────────────
     case 'climate':{
-      al(sA);bgL(0.88);bgT(0.80);bgB(0.88);
+      al(sA);bgL(0.72);bgT(0.70);bgB(0.75);
       al(sA*rE(0.05,0.2));lbl('RISCURI CLIMATICE — INUNDAȚII & ADAPTARE',W*0.05,H*0.12,'rgba(148,163,184,0.7)',W*0.007);lbl('HARTĂ: ALBASTRU=INUNDABIL · GALBEN=AUTOSTRADĂ · PORTOCALIU=CENTURĂ',W*0.05,H*0.16,'rgba(100,130,170,0.6)',W*0.006);
       al(sA*rE(0.07,0.25));gl(W*0.05,H*0.19,W*0.5,rE(0.06,0.3));ctx.fillStyle='#ffffff';ctx.font=`900 ${W*0.038}px "Space Grotesk",sans-serif`;ctx.textAlign='left';ctx.fillText(name+' · Vulnerabilitate Climatică',W*0.05,H*0.265);
-      al(sA*rE(0.12,0.25));card(W*0.04,H*0.30,W*0.42,H*0.29,'rgba(5,10,28,0.88)');al(sA*rE(0.12,0.25));
+      al(sA*rE(0.12,0.25));card(W*0.04,H*0.30,W*0.42,H*0.29,'rgba(5,10,28,0.80)');al(sA*rE(0.12,0.25));
       lbl('RISC INUNDAȚII (ANAR)',W*0.07,H*0.360,'#3b82f6',W*0.007);const rIC=pred.riscIn==='RIDICAT'?'#ef4444':pred.riscIn==='MEDIU'?'#f59e0b':'#22c55e';big(pred.riscIn,W*0.07,H*0.445,rIC,W*0.040);lbl('ZONA INUNDABILĂ VIZIBILĂ PE HARTĂ',W*0.07,H*0.485,'rgba(148,163,184,0.7)',W*0.006);lbl('Directiva Inundații 2007/60/CE · Date ANAR',W*0.07,H*0.520,'rgba(100,130,170,0.6)',W*0.006);
-      al(sA*rE(0.25,0.25));card(W*0.04,H*0.615,W*0.42,H*0.27,'rgba(5,10,28,0.88)');al(sA*rE(0.25,0.25));
+      al(sA*rE(0.25,0.25));card(W*0.04,H*0.615,W*0.42,H*0.27,'rgba(5,10,28,0.80)');al(sA*rE(0.25,0.25));
       lbl('ZILE CANICULARE >35°C',W*0.07,H*0.665,'#f59e0b',W*0.007);[[2024,pred.zile24,'rgba(148,163,184,0.8)'],[2055,pred.zile55,'#ef4444']].forEach(([yr,v,c],i)=>{lbl(yr+':',W*0.07,H*(0.710+i*0.07),'rgba(100,130,170,0.7)',W*0.006);big(v+' ZILE/AN',W*0.14,H*(0.710+i*0.07),c,W*0.025);});lbl('CREȘTERE: +'+(pred.zile55-pred.zile24)+' zile (+'+Math.round((pred.zile55/pred.zile24-1)*100)+'%) · RCP4.5',W*0.07,H*0.858,'#ef4444',W*0.006);
-      al(sA*rE(0.38,0.25));card(W*0.50,H*0.30,W*0.46,H*0.59,'rgba(5,10,28,0.88)');al(sA*rE(0.38,0.25));
+      al(sA*rE(0.38,0.25));card(W*0.50,H*0.30,W*0.46,H*0.59,'rgba(5,10,28,0.80)');al(sA*rE(0.38,0.25));
       lbl('EFECT INSULĂ TERMICĂ (UHI)',W*0.53,H*0.360,'#f59e0b',W*0.007);big('+'+pred.uhi+'°C',W*0.53,H*0.440,'#f97316',W*0.050);lbl('MAI CALD VS ZONA RURALĂ ÎNCONJURĂTOARE',W*0.53,H*0.480,'rgba(148,163,184,0.7)',W*0.006);
       lbl('COST ADAPTARE CLIMATICĂ',W*0.53,H*0.545,'rgba(148,163,184,0.7)',W*0.007);big(N(pred.costAd)+' M EUR',W*0.53,H*0.615,'#22c55e',W*0.032);lbl('COST INACȚIUNE (×4.5 — Banca Mondială)',W*0.53,H*0.670,'rgba(148,163,184,0.7)',W*0.007);big(N(pred.costIn)+' M EUR',W*0.53,H*0.740,'#ef4444',W*0.032);lbl('⚡ ROI ADAPTARE vs INACȚIUNE: +350%',W*0.53,H*0.795,'#22c55e',W*0.007);lbl('Surse: ANAR · Banca Mondială · IPCC 2021',W*0.53,H*0.840,'rgba(100,130,170,0.6)',W*0.006);
       if(t>0.78){const ta=Math.min(1,(t-0.78)/0.15);al(sA*ta);card(W*0.04,H*0.900,W*0.92,H*0.065,'rgba(59,130,246,0.10)','rgba(59,130,246,0.3)');al(sA*ta);wrap(`⚡ ${name}: Inundații ${pred.riscIn.toLowerCase()}, +${pred.uhi}°C UHI, ${pred.zile55} zile caniculare/an în 2055. Adaptare ${N(pred.costAd)} M EUR vs ${N(pred.costIn)} M EUR inacțiune. FEDR Axa 5 + PNRR.`,W*0.07,H*0.933,W*0.86,H*0.028,`${W*0.0062}px "IBM Plex Mono",monospace`,'#93c5fd',2);}
@@ -543,7 +543,7 @@ G._SceneEngine={
     }
     // ── S9 MONTECARLO ─────────────────────────────────────────────────────────
     case 'montecarlo':{
-      al(sA);bgT(0.88);bgB(0.88);
+      al(sA);bgT(0.75);bgB(0.75);
       al(sA*rE(0.05,0.2));lbl('PROIECȚIE DEMOGRAFICĂ 2055 — ANALIZĂ MONTE CARLO',W*0.05,H*0.09,'rgba(148,163,184,0.7)',W*0.007);lbl('MODEL STOCHASTIC · 10.000 SIMULĂRI · HARTĂ: INELE EXTINDERE INTRAVILAN',W*0.05,H*0.13,'rgba(100,130,170,0.6)',W*0.006);
       al(sA*rE(0.07,0.3));gl(W*0.05,H*0.155,W*0.7,rE(0.06,0.3));ctx.fillStyle='#ffffff';ctx.font=`900 ${W*0.04}px "Space Grotesk",sans-serif`;ctx.textAlign='left';ctx.fillText(name+' · Unde Suntem în 2055?',W*0.05,H*0.225);
       al(sA*rE(0.12,0.2));card(W*0.04,H*0.26,W*0.90,H*0.055,'rgba(5,10,28,0.82)');al(sA*rE(0.12,0.2));
@@ -553,30 +553,30 @@ G._SceneEngine={
       scen.forEach((sc,i)=>{
         const pop=Math.round(pred.p21*Math.pow(1+sc.r/100,34)),delta=pop-pred.p21;
         const ci=rE(0.18+i*0.14,0.25),cX=W*(0.04+i*0.32);
-        al(sA*ci);card(cX,H*0.35,W*0.30,H*0.53,'rgba(5,10,28,0.90)',sc.c+'33');al(sA*ci);
+        al(sA*ci);card(cX,H*0.35,W*0.30,H*0.53,'rgba(5,10,28,0.82)',sc.c+'33');al(sA*ci);
         ctx.fillStyle=sc.c;ctx.font=`900 ${W*0.018}px "Space Grotesk",sans-serif`;ctx.textAlign='left';ctx.fillText(sc.lbl+' — '+sc.full,cX+W*0.015,H*0.420);lbl(sc.desc,cX+W*0.015,H*0.455,'rgba(148,163,184,0.7)',W*0.006);
         lbl('POPULAȚIE 2055',cX+W*0.015,H*0.510,'rgba(148,163,184,0.7)',W*0.006);big(N(an(pop,rev(0.20+i*0.14,0.4))),cX+W*0.015,H*0.595,sc.c,W*0.038);lbl('LOCUITORI',cX+W*0.015,H*0.635,sc.c,W*0.006);
         lbl((delta>=0?'+':'')+N(delta)+' față de 2021',cX+W*0.015,H*0.680,'rgba(200,215,240,0.8)',W*0.0065);lbl('RATĂ: '+(sc.r>=0?'+':'')+sc.r.toFixed(2)+'%/AN',cX+W*0.015,H*0.725,'rgba(100,130,170,0.6)',W*0.006);
         const mxP=Math.round(pred.p21*Math.pow(1+(rB+0.9)/100,34));bar(cX+W*0.015,H*0.748,W*0.27,H*0.014,pop/mxP*rE(0.22+i*0.14,0.3),sc.c);
         lbl('DEF.LOC.: '+N(Math.max(0,Math.round((pop-pred.p21)*35/90)))+' un.',cX+W*0.015,H*0.805,sc.c,W*0.006);
       });
-      al(sA*rE(0.62,0.3));const pMin=Math.round(pred.p21*Math.pow(1+(rB-0.8)/100,34)),pMax=Math.round(pred.p21*Math.pow(1+(rB+0.9)/100,34));card(W*0.04,H*0.882,W*0.92,H*0.074,'rgba(5,10,28,0.85)');al(sA*rE(0.62,0.3));lbl('INTERVAL ÎNCREDERE 90% — 2055:',W*0.07,H*0.912,'rgba(148,163,184,0.7)',W*0.007);big('['+N(pMin)+' — '+N(pMax)+'] LOC.',W*0.07,H*0.946,'#a78bfa',W*0.024);lbl('S2 TENDINȚĂ: ~55% · S3: ~25% · S1: ~20%',W*0.60,H*0.946,'rgba(100,130,170,0.7)',W*0.006);
+      al(sA*rE(0.62,0.3));const pMin=Math.round(pred.p21*Math.pow(1+(rB-0.8)/100,34)),pMax=Math.round(pred.p21*Math.pow(1+(rB+0.9)/100,34));card(W*0.04,H*0.882,W*0.92,H*0.074,'rgba(5,10,28,0.78)');al(sA*rE(0.62,0.3));lbl('INTERVAL ÎNCREDERE 90% — 2055:',W*0.07,H*0.912,'rgba(148,163,184,0.7)',W*0.007);big('['+N(pMin)+' — '+N(pMax)+'] LOC.',W*0.07,H*0.946,'#a78bfa',W*0.024);lbl('S2 TENDINȚĂ: ~55% · S3: ~25% · S1: ~20%',W*0.60,H*0.946,'rgba(100,130,170,0.7)',W*0.006);
       al(1);prog();grain();break;
     }
     // ── S10 INFRA ─────────────────────────────────────────────────────────────
     case 'infra':{
-      al(sA);bgT(0.88);bgB(0.88);
+      al(sA);bgT(0.75);bgB(0.75);
       al(sA*rE(0.05,0.2));lbl('INFRASTRUCTURĂ NECESARĂ 2025-2055',W*0.05,H*0.09,'#22c55e',W*0.008);lbl('CALCULE: ΔPOP × NORME MEC · MS · OMS — '+name,W*0.05,H*0.13,'rgba(100,130,170,0.6)',W*0.006);al(sA*rE(0.07,0.3));gl(W*0.05,H*0.155,W*0.7,rE(0.06,0.3));
       ctx.fillStyle='#ffffff';ctx.font=`900 ${W*0.04}px "Space Grotesk",sans-serif`;ctx.textAlign='left';al(sA*rE(0.09,0.25));ctx.fillText('Ce trebuie construit în '+name+' până în 2055?',W*0.05,H*0.225);
       al(sA*rE(0.10,0.2));card(W*0.04,H*0.26,W*0.92,H*0.055,'rgba(5,10,28,0.82)');al(sA*rE(0.10,0.2));lbl('BAZĂ CALCUL: CREȘTERE '+(pred.deltaP>=0?'+':'')+N(pred.deltaP)+' LOCUITORI · '+N(pred.p21)+' → '+N(pred.pop55)+' · 2021-2055',W*0.07,H*0.288,'#22c55e',W*0.007);lbl('MEC 400 ELEVI/UNITATE · MS 1800 PAC./CABINET · OMS 9 MP SP.VERZI/LOC',W*0.07,H*0.305,'rgba(100,130,170,0.6)',W*0.006);
       const items=[{ic:'🏫',lbl:'ȘCOLI & GRĂDINIȚE',val:pred.scoliNoi+pred.gradNoi,unit:'unități noi',sub:pred.scoliNoi+' școli + '+pred.gradNoi+' grădinițe',c:'#60a5fa'},{ic:'🏥',lbl:'CABINETE MEDICALE',val:pred.cabMed,unit:'cabinete noi',sub:'1.800 pac./cabinet MS',c:'#ef4444'},{ic:'🌳',lbl:'SPAȚII VERZI',val:pred.svHa,unit:'ha necesare',sub:'Standard OMS 9 mp/loc.',c:'#22c55e'},{ic:'🚌',lbl:'STAȚII TRANSPORT',val:pred.statiiNoi,unit:'stații noi',sub:'Acoperire target 75%',c:'#f59e0b'},{ic:'🅿️',lbl:'PARKINGURI STRUCT.',val:Math.round(pred.hub*3+pred.p21/80000*2),unit:'structuri',sub:'Multietaj centru+periferie',c:'#a78bfa'},{ic:'⚡',lbl:'REȚELE TEHNICE',val:Math.round(Math.max(0,pred.deltaP)/5000),unit:'km extindere',sub:'Apă · Canal · Gaz · Fibră',c:'#D4AF37'}];
-      items.forEach((it,i)=>{const col=i%3,row=Math.floor(i/3),cx2=W*(0.04+col*0.32),cy2=H*(0.34+row*0.30),ci=rE(0.15+i*0.07,0.25);al(sA*ci);card(cx2,cy2,W*0.30,H*0.265,'rgba(5,10,28,0.88)',it.c+'33');al(sA*ci);ctx.font=`${W*0.022}px sans-serif`;ctx.textAlign='left';ctx.fillText(it.ic,cx2+W*0.012,cy2+H*0.075);lbl(it.lbl,cx2+W*0.06,cy2+H*0.065,it.c,W*0.006);big('+'+N(an(it.val,rev(0.17+i*0.07,0.35))),cx2+W*0.015,cy2+H*0.170,it.c,W*0.038);lbl(it.unit,cx2+W*0.015,cy2+H*0.208,'#D4AF37',W*0.006);lbl(it.sub,cx2+W*0.015,cy2+H*0.238,'rgba(100,130,170,0.6)',W*0.0055);});
-      al(sA*rE(0.65,0.3));card(W*0.04,H*0.915,W*0.92,H*0.065,'rgba(5,10,28,0.85)');al(sA*rE(0.65,0.3));lbl('NECESAR TOTAL: '+N(pred.invTotal)+' M EUR · MOB. '+N(pred.invMob)+' · SOC. '+N(pred.invSoc)+' · SEIS. '+N(pred.invSeis)+' · VERDE '+N(pred.invVerde)+' M EUR',W*0.07,H*0.950,'#D4AF37',W*0.0065);lbl('Fonduri UE ~60% · Gap: '+N(Math.round(pred.invTotal*0.40))+' M EUR din buget național/local',W*0.07,H*0.970,'rgba(100,130,170,0.6)',W*0.006);
+      items.forEach((it,i)=>{const col=i%3,row=Math.floor(i/3),cx2=W*(0.04+col*0.32),cy2=H*(0.34+row*0.30),ci=rE(0.15+i*0.07,0.25);al(sA*ci);card(cx2,cy2,W*0.30,H*0.265,'rgba(5,10,28,0.80)',it.c+'33');al(sA*ci);ctx.font=`${W*0.022}px sans-serif`;ctx.textAlign='left';ctx.fillText(it.ic,cx2+W*0.012,cy2+H*0.075);lbl(it.lbl,cx2+W*0.06,cy2+H*0.065,it.c,W*0.006);big('+'+N(an(it.val,rev(0.17+i*0.07,0.35))),cx2+W*0.015,cy2+H*0.170,it.c,W*0.038);lbl(it.unit,cx2+W*0.015,cy2+H*0.208,'#D4AF37',W*0.006);lbl(it.sub,cx2+W*0.015,cy2+H*0.238,'rgba(100,130,170,0.6)',W*0.0055);});
+      al(sA*rE(0.65,0.3));card(W*0.04,H*0.915,W*0.92,H*0.065,'rgba(5,10,28,0.78)');al(sA*rE(0.65,0.3));lbl('NECESAR TOTAL: '+N(pred.invTotal)+' M EUR · MOB. '+N(pred.invMob)+' · SOC. '+N(pred.invSoc)+' · SEIS. '+N(pred.invSeis)+' · VERDE '+N(pred.invVerde)+' M EUR',W*0.07,H*0.950,'#D4AF37',W*0.0065);lbl('Fonduri UE ~60% · Gap: '+N(Math.round(pred.invTotal*0.40))+' M EUR din buget național/local',W*0.07,H*0.970,'rgba(100,130,170,0.6)',W*0.006);
       al(1);prog();grain();break;
     }
     // ── S11 SDG ──────────────────────────────────────────────────────────────
     case 'sdg':{
-      al(sA);bgL(0.88);bgT(0.80);bgB(0.88);
+      al(sA);bgL(0.72);bgT(0.70);bgB(0.75);
       al(sA*rE(0.05,0.2));lbl('CALITATEA VIEȚII — SDG11 & BENCHMARKING EUROPEAN',W*0.05,H*0.12,'rgba(148,163,184,0.7)',W*0.007);lbl('ONU SDG11 · EUROSTAT URBAN AUDIT 2021 · HARTĂ: SPAȚII VERZI COLORATE',W*0.05,H*0.16,'rgba(100,130,170,0.6)',W*0.006);
       al(sA*rE(0.07,0.25));gl(W*0.05,H*0.19,W*0.5,rE(0.06,0.3));ctx.fillStyle='#ffffff';ctx.font=`900 ${W*0.038}px "Space Grotesk",sans-serif`;ctx.textAlign='left';al(sA*rE(0.09,0.25));ctx.fillText(name+' · Locul Tău în Europa',W*0.05,H*0.265);
       // Spider chart SDG
@@ -587,8 +587,8 @@ G._SceneEngine={
       ctx.fillStyle='rgba(212,175,55,0.15)';ctx.strokeStyle='#D4AF37';ctx.lineWidth=2;ctx.beginPath();dims.forEach((d,i)=>{const a=(i/dims.length)*Math.PI*2-Math.PI/2,r=radR*(d.s/10)*ar;if(i===0)ctx.moveTo(cxR+r*Math.cos(a),cyR+r*Math.sin(a));else ctx.lineTo(cxR+r*Math.cos(a),cyR+r*Math.sin(a));});ctx.closePath();ctx.fill();ctx.stroke();
       dims.forEach((d,i)=>{const a=(i/dims.length)*Math.PI*2-Math.PI/2,r=radR*(d.s/10)*ar;ctx.fillStyle=d.c;ctx.beginPath();ctx.arc(cxR+r*Math.cos(a),cyR+r*Math.sin(a),6,0,Math.PI*2);ctx.fill();lbl(d.l+' '+d.s+'/10',cxR+(radR+22)*Math.cos(a)-30,cyR+(radR+22)*Math.sin(a)+5,d.c,W*0.006);});
       al(sA*rE(0.40,0.25));big(Math.round(an(pred.sdgTotal*10,rev(0.40,0.4)))/10+'/10',cxR-W*0.045,cyR+H*0.035,pred.sdgTotal>=7?'#22c55e':pred.sdgTotal>=5?'#f59e0b':'#ef4444',W*0.05);lbl('SCOR SDG11',cxR-W*0.02,cyR+H*0.075,'#D4AF37',W*0.006);
-      al(sA*rE(0.20,0.25));card(W*0.52,H*0.30,W*0.44,H*0.30,'rgba(5,10,28,0.88)');al(sA*rE(0.20,0.25));lbl('DEFICIT SPAȚII VERZI',W*0.55,H*0.37,'#22c55e',W*0.007);big(N(an(pred.svHa,rev(0.22,0.35)))+' HA',W*0.55,H*0.445,pred.svHa>200?'#ef4444':pred.svHa>50?'#f59e0b':'#22c55e',W*0.040);lbl('ACTUAL: '+pred.sv+' MP/LOC · STANDARD OMS: 9 MP/LOC',W*0.55,H*0.500,'rgba(148,163,184,0.7)',W*0.006);lbl('SPAȚII VERZI VIZIBILE PE HARTĂ (VERDE)',W*0.55,H*0.538,'rgba(100,130,170,0.6)',W*0.006);lbl('NECESAR 2055: '+N(pred.svHa+Math.round(pred.svHa*0.15))+' HA TOTAL',W*0.55,H*0.576,'#22c55e',W*0.007);
-      al(sA*rE(0.38,0.3));card(W*0.52,H*0.62,W*0.44,H*0.30,'rgba(5,10,28,0.88)');al(sA*rE(0.38,0.3));lbl('PEER GROUP EUROPEAN (EUROSTAT 2021)',W*0.55,H*0.678,'#a78bfa',W*0.007);
+      al(sA*rE(0.20,0.25));card(W*0.52,H*0.30,W*0.44,H*0.30,'rgba(5,10,28,0.80)');al(sA*rE(0.20,0.25));lbl('DEFICIT SPAȚII VERZI',W*0.55,H*0.37,'#22c55e',W*0.007);big(N(an(pred.svHa,rev(0.22,0.35)))+' HA',W*0.55,H*0.445,pred.svHa>200?'#ef4444':pred.svHa>50?'#f59e0b':'#22c55e',W*0.040);lbl('ACTUAL: '+pred.sv+' MP/LOC · STANDARD OMS: 9 MP/LOC',W*0.55,H*0.500,'rgba(148,163,184,0.7)',W*0.006);lbl('SPAȚII VERZI VIZIBILE PE HARTĂ (VERDE)',W*0.55,H*0.538,'rgba(100,130,170,0.6)',W*0.006);lbl('NECESAR 2055: '+N(pred.svHa+Math.round(pred.svHa*0.15))+' HA TOTAL',W*0.55,H*0.576,'#22c55e',W*0.007);
+      al(sA*rE(0.38,0.3));card(W*0.52,H*0.62,W*0.44,H*0.30,'rgba(5,10,28,0.80)');al(sA*rE(0.38,0.3));lbl('PEER GROUP EUROPEAN (EUROSTAT 2021)',W*0.55,H*0.678,'#a78bfa',W*0.007);
       const allP=[{n:name,pib:pred.pib,sv:pred.sv,tp:pred.tp,self:true},...pred.peers];
       allP.forEach((p,i)=>{const y2=H*(0.718+i*0.045),cl=p.self?'#D4AF37':'rgba(200,215,240,0.8)';if(p.self){ctx.fillStyle='rgba(212,175,55,0.08)';ctx.fillRect(W*0.52,y2-H*0.02,W*0.44,H*0.04);}lbl(p.n,W*0.55,y2,cl,W*0.007);lbl(N(p.pib)+' €',W*0.72,y2,cl,W*0.006);lbl(p.sv+' mp/loc',W*0.81,y2,cl,W*0.006);lbl(p.tp+'% TP',W*0.91,y2,cl,W*0.006);});
       al(sA*rE(0.60,0.25));const bP=pred.peers[0];lbl('⚡ GAP vs '+bP.n+': PIB +'+N(bP.pib-pred.pib)+' EUR/cap · TP +'+(bP.tp-pred.tp)+'pp · SV +'+(bP.sv-pred.sv)+' mp/loc',W*0.52,H*0.938,'#a78bfa',W*0.006);
@@ -606,10 +606,10 @@ G._SceneEngine={
       const sub=pred.rRef>0.5?'UN ORAȘ ÎN CREȘTERE CARE ALEGE SĂ CREASCĂ INTELIGENT':pred.rRef>0?'UN ORAȘ CARE POATE DEVENI MOTOR REGIONAL':pred.r10>-1?'UN ORAȘ CARE ALEGE SĂ SE REINVENTEZE':'UN ORAȘ CARE ALEGE CALITATEA, NU CANTITATEA';ctx.fillText(sub,W/2,H*0.35);
       al(sA*rE(0.18,0.25));const glin=ctx.createLinearGradient(W*0.1,0,W*0.9,0);glin.addColorStop(0,'rgba(212,175,55,0)');glin.addColorStop(0.5,'#D4AF37');glin.addColorStop(1,'rgba(212,175,55,0)');ctx.fillStyle=glin;ctx.fillRect(W*0.1,H*0.37,W*0.8,2);
       // Agenda primar stânga
-      al(sA*rE(0.20,0.3));card(W*0.03,H*0.40,W*0.38,H*0.48,'rgba(5,10,28,0.88)');al(sA*rE(0.20,0.3));lbl('AGENDA PRIMARULUI 2025-2030',W*0.06,H*0.448,'#D4AF37',W*0.007);lbl('PRIORITĂȚI DIN SCORURI UAT',W*0.06,H*0.478,'rgba(100,130,170,0.6)',W*0.006);
+      al(sA*rE(0.20,0.3));card(W*0.03,H*0.40,W*0.38,H*0.48,'rgba(5,10,28,0.80)');al(sA*rE(0.20,0.3));lbl('AGENDA PRIMARULUI 2025-2030',W*0.06,H*0.448,'#D4AF37',W*0.007);lbl('PRIORITĂȚI DIN SCORURI UAT',W*0.06,H*0.478,'rgba(100,130,170,0.6)',W*0.006);
       pred.agenda.forEach((pr,i)=>{const pi=rE(0.25+i*0.08,0.2);al(sA*pi);ctx.fillStyle=pr.c;ctx.font=`900 ${W*0.018}px "Space Grotesk",sans-serif`;ctx.textAlign='left';ctx.fillText((i+1)+'.',W*0.06,H*(0.528+i*0.08));ctx.fillStyle='rgba(220,230,255,0.9)';ctx.font=`600 ${W*0.013}px "Space Grotesk",sans-serif`;ctx.fillText(pr.lbl,W*0.09,H*(0.528+i*0.08));bar(W*0.06,H*(0.538+i*0.08),W*0.32,H*0.010,Math.min(1,pr.score/80)*pi,pr.c);});
       // Concluzii dreapta
-      al(sA*rE(0.30,0.3));card(W*0.59,H*0.40,W*0.38,H*0.48,'rgba(5,10,28,0.88)');al(sA*rE(0.30,0.3));lbl('CU CE RĂMÂNEM',W*0.62,H*0.448,'#D4AF37',W*0.007);lbl('CONCLUZII PRINCIPALE',W*0.62,H*0.478,'rgba(100,130,170,0.6)',W*0.006);
+      al(sA*rE(0.30,0.3));card(W*0.59,H*0.40,W*0.38,H*0.48,'rgba(5,10,28,0.80)');al(sA*rE(0.30,0.3));lbl('CU CE RĂMÂNEM',W*0.62,H*0.448,'#D4AF37',W*0.007);lbl('CONCLUZII PRINCIPALE',W*0.62,H*0.478,'rgba(100,130,170,0.6)',W*0.006);
       [{ok:pred.pop55>pred.p21,txt:'Pop.2055: '+N(pred.pop55)+' loc. ('+(pred.pop55>pred.p21?'CREȘTERE':'SCĂDERE')+' '+Math.abs(Math.round((pred.pop55-pred.p21)/pred.p21*100))+'%)'},{ok:pred.pctUE55>=75,txt:'PIB 2055: '+N(pred.pib55)+' EUR/cap ('+pred.pctUE55+'% UE27)'},{ok:pred.anSUMP<=2035,txt:'SUMP atingibil ~'+pred.anSUMP+' cu investiții BRT'},{ok:pred.sdgTotal>=6,txt:'SDG11: '+pred.sdgTotal+'/10 — cal. '+(pred.sdgTotal>=7?'bună':'de îmbunătățit')},{ok:pred.anElim<=2045,txt:'Fond seismic eliminat ~'+pred.anElim}].forEach((c2,i)=>{const ci=rE(0.35+i*0.07,0.2);al(sA*ci);ctx.fillStyle=c2.ok?'#22c55e':'#f59e0b';ctx.font=`700 ${W*0.018}px "Space Grotesk",sans-serif`;ctx.textAlign='left';ctx.fillText(c2.ok?'✓':'◎',W*0.62,H*(0.538+i*0.08));lbl(c2.txt,W*0.65,H*(0.540+i*0.08),'rgba(220,230,255,0.88)',W*0.0068);});
       // Footer
       al(sA*rE(0.65,0.3));ctx.fillStyle='rgba(212,175,55,0.18)';ctx.fillRect(0,H*0.905,W,H*0.095);ctx.fillStyle='#D4AF37';ctx.font=`${W*0.008}px "IBM Plex Mono",monospace`;ctx.textAlign='center';ctx.fillText('UrbanX TSS·FG · PLATFORMĂ NAȚIONALĂ PENTRU URBANISM DIGITAL',W/2,H*0.940);ctx.fillStyle='rgba(148,163,184,0.55)';ctx.font=`${W*0.006}px "IBM Plex Mono",monospace`;ctx.fillText('© 2026 ThinkSmart Solutions SRL · Valori orientative · Predicțiile se recalculează per UAT',W/2,H*0.962);ctx.fillText(name+' · '+( city.judet||'—')+' · Generat '+new Date().toLocaleDateString('ro-RO'),W/2,H*0.980);
