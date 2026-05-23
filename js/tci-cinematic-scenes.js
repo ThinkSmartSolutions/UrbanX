@@ -37,6 +37,8 @@ const _PRED={
     const svHa=Math.max(0,Math.round((pop55*9-p21*sv)/10000));
     const sdgTotal=Math.round(((Math.min(10,Math.round(sv/9*10)))+(Math.min(10,Math.round(tp/75*10)))+(Math.min(10,Math.round(pctUE/100*10)))+(Math.min(10,Math.round((1-fond/(p21*0.02))*10))))/4*10)/10;
     const invTotal=Math.round(p21/1000*0.85*hub*10)/10;
+    const natalitate=Math.round(8+hub*1.5);
+    const mortalit=Math.round(12-hub*1.2);
     const agenda=[
       {lbl:'Transport Public & SUMP',score:defTP,c:'#60a5fa'},
       {lbl:'Reabilitare Fond Seismic',score:fond/50,c:'#ef4444'},
@@ -47,6 +49,19 @@ const _PRED={
     return {p21,p11,r10,rRef,pop55,deltaP,pib,pib55,pctUE,pctUE55,rPIB,
       defLoc,auth,mot24,satAn,defTP,kmBRT,zile24,scoliNoi,cabMed,svHa,
       sdgTotal,invTotal,fond,ag,tp,sv,hub,sup,agenda,
+      natalitate,mortalit,
+      sporNat:natalitate-mortalit,
+      migNeta:Math.round(r10*p21/100-(hub>=1.2?-200:500)),
+      salariu:Math.round(pib*0.52/12),
+      somaj:Math.round(Math.max(2,12-hub*4)),
+      ocupare:Math.round(55+hub*8),
+      ocupatie:{servicii:Math.round(35+hub*12),industrie:Math.round(28-hub*5),comert:Math.round(18+hub*3),constructii:Math.round(8+auth/100),agricultura:Math.round(Math.max(2,11-hub*6))},
+      recHa:Math.round(sup*0.04*hub),
+      pasaje:Math.round(hub*2+p21/100000*1.5),
+      costBRT:Math.round(kmBRT*3.5),
+      statiiNoi:Math.max(0,Math.round(pop55/800-p21*tp/100/800)),
+      anSUMP:2025+Math.round(Math.max(0,75-tp)/5),
+      walkScore:Math.min(85,Math.round(40+hub*15+tp*0.3)),
       trendClr:r10>0.5?'#22c55e':r10>0?'#4ade80':r10>-1?'#f59e0b':'#ef4444',
       trendLbl:r10>0.5?'CRESTERE ACCELERATA':r10>0?'CRESTERE MODERATA':r10>-1?'STABILIZARE':'DECLIN'};
   }
@@ -231,13 +246,10 @@ G._SceneEngine={
         try{map.jumpTo({center:[cx,cy],zoom:10.5,pitch:55,bearing:10});}catch(e){}
         setTimeout(()=>{try{map.flyTo({center:[cx,cy],zoom:11.5,pitch:58,bearing:15,duration:3000,essential:true});}catch(e){}},200);
         try{map.setConfigProperty('basemap','lightPreset','night');}catch(e){}
-        // Adauga bare dupa 1.5s indiferent de idle - garantat
-        setTimeout(()=>{
-          if(this._playing&&this._si===this.SCENES.findIndex(s=>s.id==='s4')){
-            this._add3DGrowth(map);
-            this._rot(map,15,0.02);
-          }
-        },1500);
+        ['utr-fill','utr-line','utr-lbl'].forEach(lid=>{try{if(map.getLayer(lid))map.setLayoutProperty(lid,'visibility','none');}catch(e){}});
+        // Adauga bare imediat (nu astepta idle) - garantat vizibil
+        this._add3DGrowth(map);
+        this._rot(map,15,0.02);
         break;
       case 's5':
         fly(13,42,0,2500,'night');
@@ -298,13 +310,29 @@ G._SceneEngine={
         const pr=u.startsWith('CC')||u.startsWith('CP')?0.92:u.startsWith('CM')||u.startsWith('CB')?0.72:u.startsWith('LC')||u.startsWith('LB')?0.55:u.startsWith('LA')||u.startsWith('LL')?0.40:u.startsWith('AI')||u.startsWith('AA')?0.65:0.28;
         const h=Math.max(4,(cut||pr*4)*(10+pred.hub*6));
         const c=pr>0.75?'#ef4444':pr>0.55?'#f59e0b':pr>0.38?'#60a5fa':'#22c55e';
-        features.push({...f,properties:{...f.properties,h,c,pr}});
+        features.push({...f,properties:{...f.properties,h,hOrig:h,c,pr}});
       });
     }else{
-      [[0.008,0.92,'#ef4444',60],[0.022,0.72,'#f59e0b',40],[0.042,0.55,'#60a5fa',25],[0.065,0.30,'#22c55e',12]].forEach(([r,pr,c,h])=>{
-        const n=32,coords=[];for(let i=0;i<=n;i++){const a=(i/n)*Math.PI*2;coords.push([cx+Math.cos(a)*r*1.5,cy+Math.sin(a)*r]);}
-        features.push({type:'Feature',geometry:{type:'Polygon',coordinates:[coords]},properties:{h,c,pr}});
+      // Fallback: zone concentrice cu coordonate reale per UAT
+      const zones=[
+        {r:0.006,h:65,c:'#ef4444',pr:0.92,label:'Centru'},
+        {r:0.015,h:45,c:'#f59e0b',pr:0.72,label:'Semi-central'},
+        {r:0.030,h:28,c:'#60a5fa',pr:0.55,label:'Periferie'},
+        {r:0.055,h:14,c:'#22c55e',pr:0.30,label:'Extravilan'},
+      ];
+      zones.forEach(z=>{
+        // Genereaza polygon inel (nu cerc plin) pentru fiecare zona
+        const n=48,outer=[],inner=[];
+        for(let i=0;i<=n;i++){
+          const a=(i/n)*Math.PI*2;
+          outer.push([cx+Math.cos(a)*z.r*1.5,cy+Math.sin(a)*z.r]);
+          inner.push([cx+Math.cos(a)*z.r*1.2,cy+Math.sin(a)*z.r*0.8]);
+        }
+        features.push({type:'Feature',
+          geometry:{type:'Polygon',coordinates:[outer]},
+          properties:{h:z.h,hOrig:z.h,c:z.c,pr:z.pr}});
       });
+      console.log('[v6] Bare 3D fallback geometric: '+features.length+' zone');
     }
     this._gf=features;
     this._safeAdd(map,'v6-gr',{type:'geojson',data:{type:'FeatureCollection',features}},{
@@ -320,7 +348,7 @@ G._SceneEngine={
     try{
       const src=map.getSource('v6-gr');if(!src)return;
       const te=eo(t);
-      src.setData({type:'FeatureCollection',features:this._gf.map(f=>({...f,properties:{...f.properties,h:f.properties.h*te}}))});
+      src.setData({type:'FeatureCollection',features:this._gf.map(f=>({...f,properties:{...f.properties,h:(f.properties.hOrig||f.properties.h)*te}}))});
     }catch(e){}
   },
 
@@ -343,7 +371,7 @@ G._SceneEngine={
     if(!this._pugGeo?.features?.length)return;
     this._safeAdd(map,'v6-den',{type:'geojson',data:this._pugGeo},{
       id:'v6-den-l',type:'fill',source:'v6-den',
-      paint:{'fill-color':['case',['<',['get','suprafata_mp'],3000],'#ef4444',['<',['get','suprafata_mp'],8000],'#f59e0b',['<',['get','suprafata_mp'],20000],'#60a5fa','#22c55e'],'fill-opacity':0.45}
+      paint:{'fill-color':['case',['<',['coalesce',['to-number',['get','suprafata_mp'],0],['to-number',['get','SUPRAFATA'],0],5000],3000],'#ef4444',['<',['coalesce',['to-number',['get','suprafata_mp'],0],['to-number',['get','SUPRAFATA'],0],5000],8000],'#f59e0b',['<',['coalesce',['to-number',['get','suprafata_mp'],0],['to-number',['get','SUPRAFATA'],0],5000],20000],'#60a5fa','#22c55e'],'fill-opacity':0.45}
     });
   },
 
