@@ -1,5 +1,5 @@
-/* UrbanX SW v4.4a */
-const CACHE='urbanx-v4.4a';
+/* UrbanX SW v4.4b */
+const CACHE='urbanx-v4.4b';
 const OLD=[
   'urbanx-v4.0','urbanx-v4.1','urbanx-v4.2','urbanx-v4.3',
   'urbanx-v4.3e','urbanx-v4.3f','urbanx-v4.3h','mapbox-tiles',
@@ -18,19 +18,19 @@ function fix(url){
 }
 
 self.addEventListener('install', e => {
-  console.log('[SW v4.4a] Install');
+  console.log('[SW v4.4b] Install');
   // Forteaza activarea imediata - inlocuieste orice SW vechi
   e.waitUntil(self.skipWaiting());
 });
 
 self.addEventListener('activate', e => {
-  console.log('[SW v4.4a] Activate');
+  console.log('[SW v4.4b] Activate');
   e.waitUntil(
     caches.keys().then(keys => Promise.all(
       keys.filter(k => k !== CACHE)
-        .map(k => { console.log('[SW v4.4a] Sterg:', k); return caches.delete(k); })
+        .map(k => { console.log('[SW v4.4b] Sterg:', k); return caches.delete(k); })
     )).then(() => {
-      console.log('[SW v4.4a] Claim clients');
+      console.log('[SW v4.4b] Claim clients');
       return self.clients.claim();
     })
   );
