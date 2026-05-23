@@ -174,14 +174,21 @@ G._SceneEngine={
     this._city=db[cityKey]||Object.values(db)[0]||{name:'Municipiu',lat:45.5,lon:25.0,pop2021:100000,pop2011:100000,pib_eur_cap:9000,regiune:'C',tip:'municipiu',coef_hub:1.0,suprafata_ha:5000,spatii_verzi_mp_loc:10,acoperire_transport:55};
     this._pred=_PRED.calc(this._city);
     this._pugGeo=null;this._reguli=null;this._wikiText='';this._assetsReady=false;
-    this._hideUI();
-    // Curata orice canvas vechi
+    // Curata orice canvas vechi PRIMA
     ['tci-c8','tci-c6','tci-c7'].forEach(id=>document.getElementById(id)?.remove());
     this._canvas=this._mkCanvas();
     if(!this._canvas){ss('❌ Canvas fail');return;}
     this._ctx=this._canvas.getContext('2d');
     if(!this._ctx){ss('❌ Context fail');return;}
-    console.log('[v8] Canvas OK:',this._canvas.width,'x',this._canvas.height,'ctx:',!!this._ctx);
+    console.log('[v8] Canvas OK pre-hideUI');
+    // Ascunde UI dupa canvas
+    this._hideUI();
+    // Re-verifica canvas dupa hideUI
+    if(!document.getElementById('tci-c8')){
+      console.warn('[v8] Canvas sters de hideUI — recreare');
+      this._canvas=this._mkCanvas();
+      this._ctx=this._canvas.getContext('2d');
+    }
     this._mkCtrl();
     this._si=0;this._playing=true;
     // Async — nu blocheaza startul
@@ -228,8 +235,9 @@ G._SceneEngine={
     c.style.cssText=`position:fixed;top:0;left:0;width:${W}px;height:${H}px;z-index:99999;pointer-events:none;`;
     const ctx2=c.getContext('2d');
     if(ctx2)ctx2.scale(dpr,dpr);
-    document.body.appendChild(c);
-    console.log('[v8] Canvas creat:',c.width,'x',c.height,'z:99999 dpr:',dpr);
+    // Ataseaza la documentElement (html) nu body — evita stergerea de catre alte module
+    document.documentElement.appendChild(c);
+    console.log('[v8] Canvas creat:',c.width,'x',c.height,'z:99999 parent:html');
     return c;
   },
 
