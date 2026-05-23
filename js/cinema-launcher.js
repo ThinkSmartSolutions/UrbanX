@@ -755,8 +755,18 @@ window._startCinema = function(cityKey) {
     // Restaureaza _setupMap pentru alte functii care il folosesc
     SE._setupMap = _origSetupMap;
 
+    var _cameraSet=false;
     var loop=function(){
       if(!SE._playing)return;
+      // Forteaza camera la primul frame
+      if(!_cameraSet){
+        _cameraSet=true;
+        var s3D=['crestere','azi_3d','cartiere','zoom_in','intro','viziune'];
+        if(s3D.indexOf(scene.id)>=0){
+          try{map.jumpTo({center:[cx,cy],zoom:15.5,pitch:72,bearing:20});}catch(e){}
+          try{SE._add3DGrowth.call(SE,map);}catch(e){}
+        }
+      }
       var t=Math.min(1,Math.max(0.001,(performance.now()-SE._startT)/scene.dur));
       var W=window.innerWidth,H=window.innerHeight;
       SE._ctx.clearRect(0,0,W,H);
