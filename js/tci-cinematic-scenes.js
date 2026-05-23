@@ -78,11 +78,27 @@ const _PRED={
   },
   // INSE TEMPO live — populatie, rata, somaj per UAT
   async fetchINSE(siruta){
+    // Proxy Cloudflare cu ssl:false spre INSE HTTP:8077
+    // URL: /inse?matrice=POP107D&user=...&pass=...&lang=ro
     try{
-      const url=`https://statistici.insse.ro:8077/tempo-ins/matrix/POP107D?user=${encodeURIComponent(INSE_USER)}&password=${encodeURIComponent(INSE_PASS)}&lang=ro&query={"lang":"ro","arr":["SEX","JUDET","MEDIU"],"matrix":"POP107D"}`;
-      const r=await fetch(`${PROXY}/inse?url=${encodeURIComponent(url)}`,{signal:AbortSignal.timeout(8000)});
-      if(r.ok){const d=await r.json();console.log('[v8] INSE OK',d);return d;}
-    }catch(e){console.warn('[v8] INSE fallback:',e.message);}
+      const params=new URLSearchParams({
+        matrice:'POP107D',
+        user:INSE_USER,
+        pass:INSE_PASS,
+        lang:'ro'
+      });
+      const r=await fetch(`${PROXY}/inse?${params}`,{signal:AbortSignal.timeout(10000)});
+      if(r.ok){const d=await r.json();if(!d.error){console.log('[v8] INSE OK',Object.keys(d));return d;}}
+    }catch(e){console.warn('[v8] INSE unavailable:',e.message);}
+    return null;
+  },
+  // Fetch populatie pe judete din INSE
+  async fetchPOP(judet){
+    try{
+      const params=new URLSearchParams({matrice:'POP107D',lang:'ro'});
+      const r=await fetch(`${PROXY}/inse?${params}`,{signal:AbortSignal.timeout(8000)});
+      if(r.ok){const d=await r.json();return d;}
+    }catch(e){}
     return null;
   }
 };
