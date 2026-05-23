@@ -174,21 +174,16 @@ G._SceneEngine={
     this._city=db[cityKey]||Object.values(db)[0]||{name:'Municipiu',lat:45.5,lon:25.0,pop2021:100000,pop2011:100000,pib_eur_cap:9000,regiune:'C',tip:'municipiu',coef_hub:1.0,suprafata_ha:5000,spatii_verzi_mp_loc:10,acoperire_transport:55};
     this._pred=_PRED.calc(this._city);
     this._pugGeo=null;this._reguli=null;this._wikiText='';this._assetsReady=false;
-    // Curata orice canvas vechi PRIMA
-    ['tci-c8','tci-c6','tci-c7'].forEach(id=>document.getElementById(id)?.remove());
-    this._canvas=this._mkCanvas();
-    if(!this._canvas){ss('❌ Canvas fail');return;}
-    this._ctx=this._canvas.getContext('2d');
-    if(!this._ctx){ss('❌ Context fail');return;}
-    console.log('[v8] Canvas OK pre-hideUI');
-    // Ascunde UI dupa canvas
+    // 1. Ascunde UI primul
     this._hideUI();
-    // Re-verifica canvas dupa hideUI
-    if(!document.getElementById('tci-c8')){
-      console.warn('[v8] Canvas sters de hideUI — recreare');
-      this._canvas=this._mkCanvas();
-      this._ctx=this._canvas.getContext('2d');
-    }
+    // 2. Curata canvas vechi
+    ['tci-c8','tci-c6','tci-c7'].forEach(id=>document.getElementById(id)?.remove());
+    // 3. Creeaza canvas
+    this._canvas=this._mkCanvas();
+    this._ctx=this._canvas.getContext('2d');
+    console.log('[v8] Canvas:', !!this._canvas, !!this._ctx);
+    // 4. Protejeaza canvas cu MutationObserver
+    this._guardCanvas();
     this._mkCtrl();
     this._si=0;this._playing=true;
     // Async — nu blocheaza startul
@@ -287,6 +282,7 @@ G._SceneEngine={
     this._playing=false;
     if(this._raf)cancelAnimationFrame(this._raf);
     if(this._rotInt){clearInterval(this._rotInt);this._rotInt=null;}
+    if(this._canvasObserver){this._canvasObserver.disconnect();this._canvasObserver=null;}
     document.getElementById('tci-c8')?.remove();
     document.getElementById('tci-c8-ctrl')?.remove();
     this._cleanLayers();this._restoreUI();
@@ -663,6 +659,22 @@ G._SceneEngine={
       id:'v8-inf-l',type:'circle',source:'v8-inf',
       paint:{'circle-radius':['get','r'],'circle-color':['get','c'],'circle-opacity':0.9,'circle-stroke-width':3,'circle-stroke-color':'rgba(255,255,255,0.5)','circle-blur':0.1}
     });
+  },
+
+  // Protejeaza canvas-ul — il re-adauga daca e sters de platforma
+  _guardCanvas(){
+    if(this._canvasObserver)this._canvasObserver.disconnect();
+    const self=this;
+    this._canvasObserver=new MutationObserver(()=>{
+      if(!self._playing)return;
+      if(!document.getElementById('tci-c8')){
+        console.warn('[v8] Canvas sters — re-adaug');
+        const c=self._canvas;
+        if(c)document.documentElement.appendChild(c);
+      }
+    });
+    this._canvasObserver.observe(document.documentElement,{childList:true,subtree:false});
+    this._canvasObserver.observe(document.body,{childList:true,subtree:false});
   },
 
   _cleanLayers(){
