@@ -49,7 +49,9 @@ window._startCinema = function(cityKey) {
   var hidden = [];
   ['#panel','#panel-tabs','#panel-body','#topbar','#mob-sheet','#utr-drawer',
    '#info-drawer','#ux-gdpr-footer','.mapboxgl-ctrl-bottom-left',
-   '.mapboxgl-ctrl-bottom-right','nav','#tci-adv-menu'].forEach(function(sel){
+   '.mapboxgl-ctrl-bottom-right','nav','#tci-adv-menu','#viz-menu',
+   '#rapoarte-menu','#analize-menu','[id*="menu"]','[id*="drawer"]',
+   '.tci-launch-btn','.tb-btn','.mnav-btn'].forEach(function(sel){
     document.querySelectorAll(sel).forEach(function(el){
       if(!el._cs)el._cs=el.style.cssText;
       el.style.setProperty('display','none','important');
@@ -182,9 +184,9 @@ window._startCinema = function(cityKey) {
         break;
 
       case 's3': // Orasul azi — orbita 3D pe cladiri reale
-        jump(13,55,0); lp('day');
-        setTimeout(function(){fly(15.5,72,30,6000);},300);
-        setTimeout(function(){rot(30,0.020);},1500);
+        jump(14,62,0); lp('day');
+        setTimeout(function(){fly(15.5,72,30,5000);},300);
+        setTimeout(function(){rot(30,0.020);},1000);
         break;
 
       case 's4': // Populatia — heatmap densitate, zbor pe zone dense
@@ -206,10 +208,13 @@ window._startCinema = function(cityKey) {
         break;
 
       case 's7': // Unde creste orasul — BARE 3D CRESC ANIMAT
-        jump(12,50,10); lp('night');
+        // Incepe deja aproape - pitch maxim de la start
+        jump(14,65,10); lp('night');
+        // Bare 3D imediat
         try{SE._add3DGrowth.call(SE,map);}catch(e){console.warn('3DG:',e.message);}
-        setTimeout(function(){fly(15.5,72,25,7000);},600);
-        setTimeout(function(){rot(25,0.015);},1600);
+        // Zbor si mai aproape
+        setTimeout(function(){fly(15.5,72,25,5000);},500);
+        setTimeout(function(){rot(25,0.015);},1200);
         break;
 
       case 's8': // Mobilitate — retea OSM reala colorata
@@ -287,7 +292,7 @@ window._startCinema = function(cityKey) {
         break;
 
       case 's19': // Viziunea 2055 — bare 3D maxim, sunset
-        jump(12,55,0); lp('dusk');
+        jump(14,65,0); lp('dusk');
         try{SE._add3DGrowth.call(SE,map);}catch(e){}
         setTimeout(function(){
           if(SE._gf&&map.getSource('v8-gr')){
