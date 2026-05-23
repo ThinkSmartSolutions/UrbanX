@@ -261,7 +261,7 @@ G._CinemaEngine={
   _restoreUI(){this._hiddenEls.forEach(e=>{e.style.cssText=e.dataset.c8h||'';delete e.dataset.c8h;});this._hiddenEls=[];},
 
   _runScene(idx){
-    const self=this;
+    const self=window._CinemaEngine; // referinta directa, nu this
     if(!self._playing||idx>=self.SCENES.length){self._finish();return;}
     const scene=self.SCENES[idx];
     self._si=idx;self._startT=performance.now();
@@ -277,7 +277,6 @@ G._CinemaEngine={
       else{self._cleanLayers();self._runScene(idx+1);}
     };
     self._raf=requestAnimationFrame(loop);
-    console.log('[v8] Scene',idx,scene.id,'RAF:',self._raf);
   },
 
   stop(){
@@ -292,6 +291,8 @@ G._CinemaEngine={
   },
 
   _finish(){
+    const self=window._CinemaEngine;
+    self._playing=false;
     this._playing=false;
     if(this._raf)cancelAnimationFrame(this._raf);
     if(this._rotInt){clearInterval(this._rotInt);this._rotInt=null;}
