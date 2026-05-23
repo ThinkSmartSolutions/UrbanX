@@ -673,7 +673,6 @@ G._CinemaEngine={
         if(c)document.documentElement.appendChild(c);
       }
     });
-    this._canvasObserver.observe(document.documentElement,{childList:true,subtree:false});
     this._canvasObserver.observe(document.body,{childList:true,subtree:false});
   },
 
