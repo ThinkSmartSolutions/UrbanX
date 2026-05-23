@@ -374,7 +374,7 @@ G._SceneEngine={
     const big=(txt,x,y,clr='#D4AF37',sz=W*0.055)=>{ctx.fillStyle=clr;ctx.font=`900 ${sz}px "Space Grotesk",sans-serif`;ctx.textAlign='left';ctx.fillText(txt,x,y);};
     const bar=(x,y,w,h,pct,clr,bg='rgba(255,255,255,0.06)')=>{ctx.fillStyle=bg;ctx.fillRect(x,y,w,h);ctx.fillStyle=clr;ctx.fillRect(x,y,w*Math.min(1,Math.max(0,pct)),h);};
     const an=(v,tr)=>Math.round(v*easeOut(tr));
-    const prog=()=>{al(sA*0.7);ctx.fillStyle='rgba(255,255,255,0.08)';ctx.fillRect(W*0.2,H-28,W*0.6,3);ctx.fillStyle='#D4AF37';ctx.fillRect(W*0.2,H-28,W*0.6*((this._sceneIdx+t)/this.SCENES.length),3);ctx.fillStyle='rgba(148,163,184,0.7)';ctx.font=`${W*0.006}px "IBM Plex Mono",monospace`;ctx.textAlign='center';ctx.fillText(`${scene.label} · ${this._sceneIdx+1}/${this.SCENES.length}`,W/2,H-10);al(1);};
+    const prog=()=>{al(sA*0.7);ctx.fillStyle='rgba(255,255,255,0.08)';ctx.fillRect(W*0.2,H-28,W*0.6,3);ctx.fillStyle='#D4AF37';ctx.fillRect(W*0.2,H-28,W*0.6*((this._sceneIdx+t)/this.SCENES.length),3);ctx.fillStyle='rgba(148,163,184,0.7)';ctx.font=`${W*0.006}px "IBM Plex Mono",monospace`;ctx.textAlign='center';ctx.fillText(`${scene?.label||""} · ${this._sceneIdx+1}/${this.SCENES.length}`,W/2,H-10);al(1);};
     const grain=()=>{ctx.save();al(0.018);for(let i=0;i<160;i++){ctx.fillStyle=Math.random()>.5?'#fff':'#000';ctx.fillRect(Math.random()*W,Math.random()*H,1,1);}ctx.restore();};
 
     switch(id){
