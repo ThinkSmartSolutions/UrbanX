@@ -1,465 +1,847 @@
 {
+  "_meta": {
+    "sursa": "RLU PUG Municipiul Suceava",
+    "nota": "POT in %, CUT adimensional, inaltime_m in metri",
+    "generata": "23 mai 2026"
+  },
   "C0": {
-    "cod": "C0",
-    "denumire": "Subzona instituțiilor și serviciilor publice de interes general, înălțime medie și mare, regim discontinuu, Zona Centrală",
-    "POT": "70",
-    "CUT": "4.0",
-    "RH": "P+4 - P+8",
-    "Hmax": "",
-    "utilizari_admise": "Funcţiuni de interes general: instituţii de învăţământ (grădiniţe, şcoli); instituţii de sănătate (spitale); sedii de companii şi firme în clădiri specializate pentru birouri; servicii financiar-bancare şi de asigurări; servicii tehnice şi profesionale autonome; servicii de informare; servicii pentru transporturi; biblioteci; poştă şi telecomunicaţii; edituri; activităţi recreative diverse; hotelu",
-    "utilizari_conditionate": "Locuințe individuale, funcțiuni cu impact moderat",
-    "utilizari_interzise": "Activități productive poluante, depozite, autobaze, activități cu impact negativ",
-    "retrageri": "Conform aliniamentului stradal existent"
+    "pot": 70,
+    "cut": 4.0,
+    "rh": "P+4 - P+8",
+    "inaltime_m": 31.0,
+    "functiune": "Subzona instituțiilor și serviciilor publice de interes general, înălțime medie și mare, regim discontinuu, Zona Centrală",
+    "tip": "centru",
+    "culoare": "#ef4444",
+    "functiuni_admise": [
+      "Funcţiuni de interes general: instituţii de învăţământ (grădiniţe, şcoli); instituţii de sănătate (spitale); sedii de companii şi firme în clădiri specializate pentru birouri; servicii financiar-bancare şi de asigurări; servicii tehnice şi profesionale autonome; servicii de informare; servicii pentru transporturi; biblioteci; poştă şi telecomunicaţii; edituri; activităţi recreative diverse; hotelu"
+    ],
+    "functiuni_conditionari": [
+      "Locuințe individuale, funcțiuni cu impact moderat"
+    ],
+    "functiuni_interzise": [
+      "Activități productive poluante, depozite, autobaze, activități cu impact negativ"
+    ],
+    "retrageri": "Conform aliniamentului stradal existent",
+    "nota_reglementare": "RLU PUG Suceava · P+4 - P+8"
   },
   "C1": {
-    "cod": "C1",
-    "denumire": "Subzona instituțiilor publice dispersate la nivelul orașului",
-    "POT": "60",
-    "CUT": "3.0",
-    "RH": "P+2 - P+6",
-    "utilizari_admise": "Vor fi menţinute neschimbate acele utilizări iniţiale ale construcțiilor care corespund cerinţelor actuale. Conversiile funcţiunilor vor fi adminse doar în condiţiile în care orice schimbare de destinaţie a clădirilor monument de arhitectură se avizează conform legii; Sunt admise următoarele utilizări funcționale: instituții administrative; muzee în aer liber sau în spații închise; centre cultural",
-    "utilizari_conditionate": "Locuințe compatibile cu zona, comerț",
-    "utilizari_interzise": "Activități industriale, depozite, funcțiuni incompatibile",
-    "retrageri": ""
+    "pot": 60,
+    "cut": 3.0,
+    "rh": "P+2 - P+6",
+    "inaltime_m": 24.0,
+    "functiune": "Subzona instituțiilor publice dispersate la nivelul orașului",
+    "tip": "centru",
+    "culoare": "#ef4444",
+    "functiuni_admise": [
+      "Vor fi menţinute neschimbate acele utilizări iniţiale ale construcțiilor care corespund cerinţelor actuale. Conversiile funcţiunilor vor fi adminse doar în condiţiile în care orice schimbare de destinaţie a clădirilor monument de arhitectură se avizează conform legii; Sunt admise următoarele utilizări funcționale: instituții administrative; muzee în aer liber sau în spații închise; centre cultural"
+    ],
+    "functiuni_conditionari": [
+      "Locuințe compatibile cu zona, comerț"
+    ],
+    "functiuni_interzise": [
+      "Activități industriale, depozite, funcțiuni incompatibile"
+    ],
+    "retrageri": "",
+    "nota_reglementare": "RLU PUG Suceava · P+2 - P+6"
   },
   "C2a": {
-    "cod": "C2a",
-    "denumire": "Dotări de interes public dispersate la nivelul orașului (predominant învățământ și sănătate)",
-    "POT": "60",
-    "CUT": "3.0",
-    "RH": "P+2 - P+4",
-    "utilizari_admise": "Vor fi menţinute neschimbate acele utilizări iniţiale ale construcțiilor care corespund cerinţelor actuale. Conversiile funcţiunilor vor fi adminse doar în condiţiile în care orice schimbare de destinaţie a clădirilor monument de arhitectură se avizează conform legii; Activităţile productive manufacturiere compatibile cu statutul zonei şi care pot fi atractive pentru turismul cultural vor fi păstr",
-    "utilizari_conditionate": "Locuințe de serviciu, funcțiuni complementare dotărilor",
-    "utilizari_interzise": "Activități comerciale cu impact, industrie, depozite",
-    "retrageri": ""
+    "pot": 60,
+    "cut": 3.0,
+    "rh": "P+2 - P+4",
+    "inaltime_m": 17.0,
+    "functiune": "Dotări de interes public dispersate la nivelul orașului (predominant învățământ și sănătate)",
+    "tip": "public",
+    "culoare": "#a78bfa",
+    "functiuni_admise": [
+      "Vor fi menţinute neschimbate acele utilizări iniţiale ale construcțiilor care corespund cerinţelor actuale. Conversiile funcţiunilor vor fi adminse doar în condiţiile în care orice schimbare de destinaţie a clădirilor monument de arhitectură se avizează conform legii; Activităţile productive manufacturiere compatibile cu statutul zonei şi care pot fi atractive pentru turismul cultural vor fi păstr"
+    ],
+    "functiuni_conditionari": [
+      "Locuințe de serviciu, funcțiuni complementare dotărilor"
+    ],
+    "functiuni_interzise": [
+      "Activități comerciale cu impact, industrie, depozite"
+    ],
+    "retrageri": "",
+    "nota_reglementare": "RLU PUG Suceava · P+2 - P+4"
   },
   "C2b": {
-    "cod": "C2b",
-    "denumire": "Funcțiuni de interes local, municipal și supramunicipal dispersate la nivelul orașului - existente",
-    "POT": "70",
-    "CUT": "3.5",
-    "RH": "P+3 - P+6",
-    "utilizari_admise": "Funcțiuni mixte: comerț, servicii, birouri, locuințe colective; Planuri Urbanistice de Detaliu obligatorii pentru construcții noi",
-    "utilizari_conditionate": "Locuințe individuale, activități cu impact redus",
-    "utilizari_interzise": "Activități industriale, depozite, funcțiuni poluante",
-    "retrageri": "Conform PUD"
+    "pot": 70,
+    "cut": 3.5,
+    "rh": "P+3 - P+6",
+    "inaltime_m": 24.0,
+    "functiune": "Funcțiuni de interes local, municipal și supramunicipal dispersate la nivelul orașului - existente",
+    "tip": "mixt",
+    "culoare": "#f97316",
+    "functiuni_admise": [
+      "Funcțiuni mixte: comerț, servicii, birouri, locuințe colective; Planuri Urbanistice de Detaliu obligatorii pentru construcții noi"
+    ],
+    "functiuni_conditionari": [
+      "Locuințe individuale, activități cu impact redus"
+    ],
+    "functiuni_interzise": [
+      "Activități industriale, depozite, funcțiuni poluante"
+    ],
+    "retrageri": "Conform PUD",
+    "nota_reglementare": "RLU PUG Suceava · P+3 - P+6"
   },
   "C2c": {
-    "cod": "C2c",
-    "denumire": "Funcțiuni de interes local, municipal și supramunicipal propuse",
-    "POT": "60",
-    "CUT": "4.0",
-    "RH": "P+4 - P+8",
-    "utilizari_admise": "Funcțiuni mixte propuse: comerț, servicii, birouri, locuințe colective; Planuri Urbanistice Zonale obligatorii",
-    "utilizari_conditionate": "Funcțiuni complementare zonei",
-    "utilizari_interzise": "Activități incompatibile cu funcțiunile propuse",
-    "retrageri": "Conform PUZ"
+    "pot": 60,
+    "cut": 4.0,
+    "rh": "P+4 - P+8",
+    "inaltime_m": 31.0,
+    "functiune": "Funcțiuni de interes local, municipal și supramunicipal propuse",
+    "tip": "mixt",
+    "culoare": "#f97316",
+    "functiuni_admise": [
+      "Funcțiuni mixte propuse: comerț, servicii, birouri, locuințe colective; Planuri Urbanistice Zonale obligatorii"
+    ],
+    "functiuni_conditionari": [
+      "Funcțiuni complementare zonei"
+    ],
+    "functiuni_interzise": [
+      "Activități incompatibile cu funcțiunile propuse"
+    ],
+    "retrageri": "Conform PUZ",
+    "nota_reglementare": "RLU PUG Suceava · P+4 - P+8"
   },
   "Mc": {
-    "cod": "Mc",
-    "denumire": "Subzonă mixtă aflată în limita Zonei Centrale – Locuințe și dotări compatibile cu zona centrală",
-    "POT": "70",
-    "CUT": "2.5",
-    "RH": "P+2 - P+4",
-    "utilizari_admise": "Sunt admise următoarele utilizări funcționale: locuinţe colective; locuinţe cu partiu special având incluse spaţii pentru profesiuni liberale; funcţiuni de interes general: - servicii tehnice şi profesionale; - servicii de informare; - servicii pentru transporturi; - biblioteci, librării; - poşta şi telecomunicaţii; - edituri; - expoziţii, centre şi galerii de artă; - agenţii diverse (imobiliare, ",
-    "utilizari_conditionate": "Funcțiuni cu impact moderat asupra zonei centrale",
-    "utilizari_interzise": "Industrie, depozite, activități incompatibile cu zona centrală",
-    "retrageri": ""
+    "pot": 70,
+    "cut": 2.5,
+    "rh": "P+2 - P+4",
+    "inaltime_m": 17.0,
+    "functiune": "Subzonă mixtă aflată în limita Zonei Centrale – Locuințe și dotări compatibile cu zona centrală",
+    "tip": "mixt",
+    "culoare": "#f97316",
+    "functiuni_admise": [
+      "Sunt admise următoarele utilizări funcționale: locuinţe colective; locuinţe cu partiu special având incluse spaţii pentru profesiuni liberale; funcţiuni de interes general: - servicii tehnice şi profesionale; - servicii de informare; - servicii pentru transporturi; - biblioteci, librării; - poşta şi telecomunicaţii; - edituri; - expoziţii, centre şi galerii de artă; - agenţii diverse (imobiliare, "
+    ],
+    "functiuni_conditionari": [
+      "Funcțiuni cu impact moderat asupra zonei centrale"
+    ],
+    "functiuni_interzise": [
+      "Industrie, depozite, activități incompatibile cu zona centrală"
+    ],
+    "retrageri": "",
+    "nota_reglementare": "RLU PUG Suceava · P+2 - P+4"
   },
   "Mi": {
-    "cod": "Mi",
-    "denumire": "Subzonă mixtă grefată pe sistemul de locuire individuală, aflată în limita Zonei Centrale",
-    "POT": "50",
-    "CUT": "1.5",
-    "RH": "P+2",
-    "utilizari_admise": "Sunt admise următoarele utilizări funcționale: • locuinţe individuale; • locuinţe cu partiu special având incluse spaţii pentru profesiuni liberale; • funcţiuni de interes general: - servicii de informare; - biblioteci, librării; - edituri; - expoziţii; - agenţii diverse (imobiliare, de turism etc.); - servicii financiar-bancare şi de asigurări; - cofetării, cafenele; Reactualizare Plan Urbanistic",
-    "utilizari_conditionate": "Funcțiuni mixte cu impact redus",
-    "utilizari_interzise": "Industrie, activități poluante, depozite",
-    "retrageri": ""
+    "pot": 50,
+    "cut": 1.5,
+    "rh": "P+2",
+    "inaltime_m": 10.0,
+    "functiune": "Subzonă mixtă grefată pe sistemul de locuire individuală, aflată în limita Zonei Centrale",
+    "tip": "mixt",
+    "culoare": "#f97316",
+    "functiuni_admise": [
+      "Sunt admise următoarele utilizări funcționale: • locuinţe individuale; • locuinţe cu partiu special având incluse spaţii pentru profesiuni liberale; • funcţiuni de interes general: - servicii de informare; - biblioteci, librării; - edituri; - expoziţii; - agenţii diverse (imobiliare, de turism etc.); - servicii financiar-bancare şi de asigurări; - cofetării, cafenele; Reactualizare Plan Urbanistic"
+    ],
+    "functiuni_conditionari": [
+      "Funcțiuni mixte cu impact redus"
+    ],
+    "functiuni_interzise": [
+      "Industrie, activități poluante, depozite"
+    ],
+    "retrageri": "",
+    "nota_reglementare": "RLU PUG Suceava · P+2"
   },
   "M1": {
-    "cod": "M1",
-    "denumire": "Subzonă mixtă aferentă locuințelor colective înalte",
-    "POT": "70",
-    "CUT": "3.5",
-    "RH": "P+4 - P+8",
-    "utilizari_admise": "Sunt admise următoarele utilizări: Pentru M1, M2 și M3: instituţii, servicii şi dotări publice (şcoli, grădiniţe, after-school-uri, dispensare, cămine culturale, poştă, etc); sedii ale unor firme, servicii pentru întreprinderi, proiectare, consultanţă în Reactualizare Plan Urbanistic General Municipiul Suceava, Judeţul Suceava volumul II - regulament local d e urbanism elaboratori: s.c. urban team",
-    "utilizari_conditionate": "Activități cu impact moderat",
-    "utilizari_interzise": "Industrie, depozite, activități incompatibile cu locuința",
-    "retrageri": ""
+    "pot": 70,
+    "cut": 3.5,
+    "rh": "P+4 - P+8",
+    "inaltime_m": 31.0,
+    "functiune": "Subzonă mixtă aferentă locuințelor colective înalte",
+    "tip": "mixt",
+    "culoare": "#f97316",
+    "functiuni_admise": [
+      "Sunt admise următoarele utilizări: Pentru M1, M2 și M3: instituţii, servicii şi dotări publice (şcoli, grădiniţe, after-school-uri, dispensare, cămine culturale, poştă, etc); sedii ale unor firme, servicii pentru întreprinderi, proiectare, consultanţă în Reactualizare Plan Urbanistic General Municipiul Suceava, Judeţul Suceava volumul II - regulament local d e urbanism elaboratori: s.c. urban team"
+    ],
+    "functiuni_conditionari": [
+      "Activități cu impact moderat"
+    ],
+    "functiuni_interzise": [
+      "Industrie, depozite, activități incompatibile cu locuința"
+    ],
+    "retrageri": "",
+    "nota_reglementare": "RLU PUG Suceava · P+4 - P+8"
   },
   "M2": {
-    "cod": "M2",
-    "denumire": "Subzonă mixtă aferentă locuințelor individuale sau colective cu înălțime medie",
-    "POT": "60",
-    "CUT": "3.0",
-    "RH": "P+2 - P+4",
-    "utilizari_admise": "Locuințe individuale și colective medii, servicii, comerț de proximitate, dotări",
-    "utilizari_conditionate": "Funcțiuni mixte cu impact redus",
-    "utilizari_interzise": "Industrie, depozite, activități incompatibile",
-    "retrageri": ""
+    "pot": 60,
+    "cut": 3.0,
+    "rh": "P+2 - P+4",
+    "inaltime_m": 17.0,
+    "functiune": "Subzonă mixtă aferentă locuințelor individuale sau colective cu înălțime medie",
+    "tip": "mixt",
+    "culoare": "#f97316",
+    "functiuni_admise": [
+      "Locuințe individuale și colective medii, servicii, comerț de proximitate, dotări"
+    ],
+    "functiuni_conditionari": [
+      "Funcțiuni mixte cu impact redus"
+    ],
+    "functiuni_interzise": [
+      "Industrie, depozite, activități incompatibile"
+    ],
+    "retrageri": "",
+    "nota_reglementare": "RLU PUG Suceava · P+2 - P+4"
   },
   "M3": {
-    "cod": "M3",
-    "denumire": "Subzonă mixtă cu regim maxim de înălțime de P+2, dezvoltată în zone preponderent rezidențiale sau mixte existente",
-    "POT": "50",
-    "CUT": "1.5",
-    "RH": "max P+2",
-    "utilizari_admise": "Locuințe individuale, servicii de proximitate, dotări mici, activități compatibile cu locuința",
-    "utilizari_conditionate": "Funcțiuni mixte cu impact redus la scară mică",
-    "utilizari_interzise": "Industrie, depozite, activități poluante, funcțiuni incompatibile",
-    "retrageri": "Min. 5m față de stradă, min. 3m față de vecini"
+    "pot": 50,
+    "cut": 1.5,
+    "rh": "max P+2",
+    "inaltime_m": 10.0,
+    "functiune": "Subzonă mixtă cu regim maxim de înălțime de P+2, dezvoltată în zone preponderent rezidențiale sau mixte existente",
+    "tip": "mixt",
+    "culoare": "#f97316",
+    "functiuni_admise": [
+      "Locuințe individuale, servicii de proximitate, dotări mici, activități compatibile cu locuința"
+    ],
+    "functiuni_conditionari": [
+      "Funcțiuni mixte cu impact redus la scară mică"
+    ],
+    "functiuni_interzise": [
+      "Industrie, depozite, activități poluante, funcțiuni incompatibile"
+    ],
+    "retrageri": "Min. 5m față de stradă, min. 3m față de vecini",
+    "nota_reglementare": "RLU PUG Suceava · max P+2"
   },
   "M4": {
-    "cod": "M4",
-    "denumire": "Subzonă mixtă dezvoltată în foste zone industriale sau în noile extinderi pentru locuire și activități",
-    "POT": "50",
-    "CUT": "2.5",
-    "RH": "P+2 - P+4",
-    "utilizari_admise": "Reconversie funcțională: locuințe, servicii, birouri, activități ușoare nepolante, comerț",
-    "utilizari_conditionate": "Activități productive nepoluante, depozite curate",
-    "utilizari_interzise": "Industrie grea, activități poluante",
-    "retrageri": ""
+    "pot": 50,
+    "cut": 2.5,
+    "rh": "P+2 - P+4",
+    "inaltime_m": 17.0,
+    "functiune": "Subzonă mixtă dezvoltată în foste zone industriale sau în noile extinderi pentru locuire și activități",
+    "tip": "mixt",
+    "culoare": "#f97316",
+    "functiuni_admise": [
+      "Reconversie funcțională: locuințe, servicii, birouri, activități ușoare nepolante, comerț"
+    ],
+    "functiuni_conditionari": [
+      "Activități productive nepoluante, depozite curate"
+    ],
+    "functiuni_interzise": [
+      "Industrie grea, activități poluante"
+    ],
+    "retrageri": "",
+    "nota_reglementare": "RLU PUG Suceava · P+2 - P+4"
   },
   "Li": {
-    "cod": "Li",
-    "denumire": "Subzona locuințelor individuale pe lot situate în Zona Centrală",
-    "POT": "40",
-    "CUT": "1.0",
-    "RH": "max P+2",
-    "utilizari_admise": "• locuinţe colective tip bloc; • locuinţe cu partiu special având incluse spaţii pentru profesiuni liberale.",
-    "utilizari_conditionate": "Activități compatibile cu locuința individuală",
-    "utilizari_interzise": "Industrie, depozite, funcțiuni incompatibile cu locuirea individuală",
-    "retrageri": "Min. 5m față de stradă, min. 3m lateral, min. 5m posterior"
+    "pot": 40,
+    "cut": 1.0,
+    "rh": "max P+2",
+    "inaltime_m": 10.0,
+    "functiune": "Subzona locuințelor individuale pe lot situate în Zona Centrală",
+    "tip": "rezidential_mare",
+    "culoare": "#D4AF37",
+    "functiuni_admise": [
+      "• locuinţe colective tip bloc; • locuinţe cu partiu special având incluse spaţii pentru profesiuni liberale."
+    ],
+    "functiuni_conditionari": [
+      "Activități compatibile cu locuința individuală"
+    ],
+    "functiuni_interzise": [
+      "Industrie, depozite, funcțiuni incompatibile cu locuirea individuală"
+    ],
+    "retrageri": "Min. 5m față de stradă, min. 3m lateral, min. 5m posterior",
+    "nota_reglementare": "RLU PUG Suceava · max P+2"
   },
   "Lc": {
-    "cod": "Lc",
-    "denumire": "Subzona locuințelor colective de înălțime mică (P+1-2), medie (P+3-6) sau mare (P+7+)",
-    "POT": "50 (P+1-2) / 35 (P+3-6) / 20 (P+7+)",
-    "CUT": "2.5",
-    "RH": "P+1 - P+10+",
-    "utilizari_admise": "Pentru L1a, L1b și L1c locuinţe individuale şi colective mici cu maxim P+2 niveluri în regim de construire înşiruit, cuplat sau izolat; echipamente publice specifice zonei rezidenţiale (mic comerţ de proximitate, învăţământ, cultură şi culte, sănătate); amenajări sport (spaţii deschise), agrement şi loisir; circulatii carosabile și pietonale parcaje publice la sol de maxim 30 locuri parcaje public",
-    "utilizari_conditionate": "Funcțiuni complementare la parter",
-    "utilizari_interzise": "Industrie, depozite, activități incompatibile cu locuirea colectivă",
-    "retrageri": "Conform normelor P100, distanțe egale cu H la cornișă față de vecini"
+    "pot": null,
+    "cut": 2.5,
+    "rh": "P+1 - P+10+",
+    "inaltime_m": 38.0,
+    "functiune": "Subzona locuințelor colective de înălțime mică (P+1-2), medie (P+3-6) sau mare (P+7+)",
+    "tip": "rezidential_mediu",
+    "culoare": "#fbbf24",
+    "functiuni_admise": [
+      "Pentru L1a, L1b și L1c locuinţe individuale şi colective mici cu maxim P+2 niveluri în regim de construire înşiruit, cuplat sau izolat; echipamente publice specifice zonei rezidenţiale (mic comerţ de proximitate, învăţământ, cultură şi culte, sănătate); amenajări sport (spaţii deschise), agrement şi loisir; circulatii carosabile și pietonale parcaje publice la sol de maxim 30 locuri parcaje public"
+    ],
+    "functiuni_conditionari": [
+      "Funcțiuni complementare la parter"
+    ],
+    "functiuni_interzise": [
+      "Industrie, depozite, activități incompatibile cu locuirea colectivă"
+    ],
+    "retrageri": "Conform normelor P100, distanțe egale cu H la cornișă față de vecini",
+    "nota_reglementare": "RLU PUG Suceava · P+1 - P+10+"
   },
   "L1a": {
-    "cod": "L1a",
-    "denumire": "Locuințe cu regim redus de înălțime (P-P+2) situate în zona centrală protejată",
-    "POT": "45",
-    "CUT": "2.0",
-    "RH": "max P+2",
-    "utilizari_admise": "Sunt admise următoarele utilizări: locuinţe în proprietate privată; construcţii aferente echipării tehnico-edilitare; amenajări aferente locuinţelor: căi de acces carosabile şi pietonale private, parcaje, garaje, spaţii plantate, locuri de joacă pentru copii, amenajări de sport pentru tineret, împrejmuiri",
-    "utilizari_conditionate": "Dotări mici de proximitate, servicii",
-    "utilizari_interzise": "Industrie, depozite, activități incompatibile cu zona protejată",
-    "retrageri": "Minim 5m față de stradă"
+    "pot": 45,
+    "cut": 2.0,
+    "rh": "max P+2",
+    "inaltime_m": 10.0,
+    "functiune": "Locuințe cu regim redus de înălțime (P-P+2) situate în zona centrală protejată",
+    "tip": "rezidential_mic",
+    "culoare": "#4ade80",
+    "functiuni_admise": [
+      "Sunt admise următoarele utilizări: locuinţe în proprietate privată; construcţii aferente echipării tehnico-edilitare; amenajări aferente locuinţelor: căi de acces carosabile şi pietonale private, parcaje, garaje, spaţii plantate, locuri de joacă pentru copii, amenajări de sport pentru tineret, împrejmuiri"
+    ],
+    "functiuni_conditionari": [
+      "Dotări mici de proximitate, servicii"
+    ],
+    "functiuni_interzise": [
+      "Industrie, depozite, activități incompatibile cu zona protejată"
+    ],
+    "retrageri": "Minim 5m față de stradă",
+    "nota_reglementare": "RLU PUG Suceava · max P+2"
   },
   "L1b": {
-    "cod": "L1b",
-    "denumire": "Locuințe cu regim redus de înălțime (P-P+2) situate în enclave rezidențiale",
-    "POT": "45",
-    "CUT": "2.0",
-    "RH": "max P+2",
-    "utilizari_admise": "Locuințe individuale și colective mici max P+2 în regim înșiruit, cuplat sau izolat",
-    "utilizari_conditionate": "Dotări de proximitate, servicii compatibile",
-    "utilizari_interzise": "Industrie, depozite, activități incompatibile",
-    "retrageri": "Min. 5m față de stradă, min. 3m lateral"
+    "pot": 45,
+    "cut": 2.0,
+    "rh": "max P+2",
+    "inaltime_m": 10.0,
+    "functiune": "Locuințe cu regim redus de înălțime (P-P+2) situate în enclave rezidențiale",
+    "tip": "rezidential_mic",
+    "culoare": "#4ade80",
+    "functiuni_admise": [
+      "Locuințe individuale și colective mici max P+2 în regim înșiruit, cuplat sau izolat"
+    ],
+    "functiuni_conditionari": [
+      "Dotări de proximitate, servicii compatibile"
+    ],
+    "functiuni_interzise": [
+      "Industrie, depozite, activități incompatibile"
+    ],
+    "retrageri": "Min. 5m față de stradă, min. 3m lateral",
+    "nota_reglementare": "RLU PUG Suceava · max P+2"
   },
   "L1c": {
-    "cod": "L1c",
-    "denumire": "Locuințe cu regim redus de înălțime (P-P+2) situate în noile extinderi",
-    "POT": "35",
-    "CUT": "2.0",
-    "RH": "max P+2",
-    "utilizari_admise": "Locuințe individuale max P+2, dotări de proximitate",
-    "utilizari_conditionate": "Servicii mici, funcțiuni complementare",
-    "utilizari_interzise": "Industrie, depozite, activități incompatibile",
-    "retrageri": "Min. 5m față de stradă, min. 3m lateral, min. 5m posterior"
+    "pot": 35,
+    "cut": 2.0,
+    "rh": "max P+2",
+    "inaltime_m": 10.0,
+    "functiune": "Locuințe cu regim redus de înălțime (P-P+2) situate în noile extinderi",
+    "tip": "rezidential_mic",
+    "culoare": "#4ade80",
+    "functiuni_admise": [
+      "Locuințe individuale max P+2, dotări de proximitate"
+    ],
+    "functiuni_conditionari": [
+      "Servicii mici, funcțiuni complementare"
+    ],
+    "functiuni_interzise": [
+      "Industrie, depozite, activități incompatibile"
+    ],
+    "retrageri": "Min. 5m față de stradă, min. 3m lateral, min. 5m posterior",
+    "nota_reglementare": "RLU PUG Suceava · max P+2"
   },
   "L2": {
-    "cod": "L2",
-    "denumire": "Subzona locuințelor colective medii (P+3-P+4) situate în ansambluri predominant rezidențiale",
-    "POT": "40",
-    "CUT": "2.0",
-    "RH": "P+3 - P+4",
-    "utilizari_admise": "Clădirile înalte situate în zonele de protecţie se menţin în situaţia actuală. Se consideră inoportun ca în viitor să se mai dispună blocuri înalte de locuit în zonele protejate. Sunt admise următoarele utilizări: locuinţe colective; amenajări aferente locuinţelor: căi de acces carosabile şi pietonale private, parcaje, garaje semiîngropate şi subterane, spaţii plantate, locuri de joacă pentru copi",
-    "utilizari_conditionate": "Funcțiuni complementare locuirii",
-    "utilizari_interzise": "Industrie, depozite, activități incompatibile cu locuirea",
-    "retrageri": "Conform normelor seismice P100"
+    "pot": 40,
+    "cut": 2.0,
+    "rh": "P+3 - P+4",
+    "inaltime_m": 17.0,
+    "functiune": "Subzona locuințelor colective medii (P+3-P+4) situate în ansambluri predominant rezidențiale",
+    "tip": "rezidential_mic",
+    "culoare": "#4ade80",
+    "functiuni_admise": [
+      "Clădirile înalte situate în zonele de protecţie se menţin în situaţia actuală. Se consideră inoportun ca în viitor să se mai dispună blocuri înalte de locuit în zonele protejate. Sunt admise următoarele utilizări: locuinţe colective; amenajări aferente locuinţelor: căi de acces carosabile şi pietonale private, parcaje, garaje semiîngropate şi subterane, spaţii plantate, locuri de joacă pentru copi"
+    ],
+    "functiuni_conditionari": [
+      "Funcțiuni complementare locuirii"
+    ],
+    "functiuni_interzise": [
+      "Industrie, depozite, activități incompatibile cu locuirea"
+    ],
+    "retrageri": "Conform normelor seismice P100",
+    "nota_reglementare": "RLU PUG Suceava · P+3 - P+4"
   },
   "L3": {
-    "cod": "L3",
-    "denumire": "Subzona locuințelor colective înalte (P+5-P+10) situate în ansambluri predominant rezidențiale",
-    "POT": "40",
-    "CUT": "3.0",
-    "RH": "P+5 - P+10",
-    "utilizari_admise": "Sunt admise următoarele utilizări: locuinţe colective; amenajări aferente locuinţelor: căi de acces carosabile şi pietonale private, parcaje, garaje semiîngropate şi subterane, spaţii plantate, locuri de joacă pentru copii, spaţii pentru sport şi loisir, construcţii pentru echiparea tehnică, împrejmuiri; comerț / servicii.",
-    "utilizari_conditionate": "Funcțiuni complementare locuirii colective",
-    "utilizari_interzise": "Industrie, activități incompatibile",
-    "retrageri": "Distanțe egale cu H la cornișă față de vecini"
+    "pot": 40,
+    "cut": 3.0,
+    "rh": "P+5 - P+10",
+    "inaltime_m": 38.0,
+    "functiune": "Subzona locuințelor colective înalte (P+5-P+10) situate în ansambluri predominant rezidențiale",
+    "tip": "rezidential_mic",
+    "culoare": "#4ade80",
+    "functiuni_admise": [
+      "Sunt admise următoarele utilizări: locuinţe colective; amenajări aferente locuinţelor: căi de acces carosabile şi pietonale private, parcaje, garaje semiîngropate şi subterane, spaţii plantate, locuri de joacă pentru copii, spaţii pentru sport şi loisir, construcţii pentru echiparea tehnică, împrejmuiri; comerț / servicii."
+    ],
+    "functiuni_conditionari": [
+      "Funcțiuni complementare locuirii colective"
+    ],
+    "functiuni_interzise": [
+      "Industrie, activități incompatibile"
+    ],
+    "retrageri": "Distanțe egale cu H la cornișă față de vecini",
+    "nota_reglementare": "RLU PUG Suceava · P+5 - P+10"
   },
   "L4": {
-    "cod": "L4",
-    "denumire": "Subzona locuințelor colective înalte (regim de înălțime mai mare de P+10)",
-    "POT": "40",
-    "CUT": "3.5",
-    "RH": "P+10+",
-    "utilizari_admise": "Sunt admise următoarele utilizări funcționale: activităţi industriale productive şi de servicii, IMM desfăşurate în construcţii industriale mici şi mijlocii, distribuţia şi depozitarea bunurilor şi materialelor produse; servicii pentru zona industrială, transporturi, depozitare comercială, servicii comerciale legate de transporturi şi depozitare; parcaje; staţii de întreţinere şi reparaţii auto; s",
-    "utilizari_conditionate": "Funcțiuni mixte compatibile",
-    "utilizari_interzise": "Industrie, depozite, activități incompatibile",
-    "retrageri": "Conform normelor P100 Ag=0.4g"
+    "pot": 40,
+    "cut": 3.5,
+    "rh": "P+10+",
+    "inaltime_m": 38.0,
+    "functiune": "Subzona locuințelor colective înalte (regim de înălțime mai mare de P+10)",
+    "tip": "rezidential_mic",
+    "culoare": "#4ade80",
+    "functiuni_admise": [
+      "Sunt admise următoarele utilizări funcționale: activităţi industriale productive şi de servicii, IMM desfăşurate în construcţii industriale mici şi mijlocii, distribuţia şi depozitarea bunurilor şi materialelor produse; servicii pentru zona industrială, transporturi, depozitare comercială, servicii comerciale legate de transporturi şi depozitare; parcaje; staţii de întreţinere şi reparaţii auto; s"
+    ],
+    "functiuni_conditionari": [
+      "Funcțiuni mixte compatibile"
+    ],
+    "functiuni_interzise": [
+      "Industrie, depozite, activități incompatibile"
+    ],
+    "retrageri": "Conform normelor P100 Ag=0.4g",
+    "nota_reglementare": "RLU PUG Suceava · P+10+"
   },
   "A1": {
-    "cod": "A1",
-    "denumire": "Subzona activităților agrozootehnice",
-    "POT": "60",
-    "CUT": "2.0",
-    "RH": "max P+2",
-    "utilizari_admise": "Sunt admise următoarele utilizări: lăcaşuri de cult; chilii, case egumeneşti, muzee. turnuri-clopotniţă. servicii pentru culte; activităţi sociale ale asociaţiilor religioase; activităţi complementare rezidenţiale formate pentru din bisericile locuinţe parohiale colective din necesare ansamblurile pentru ritualuri religioase care nu pot avea loc în apartamentele blocurilor (de exemplu capele pentr",
-    "utilizari_conditionate": "Locuințe de serviciu aferente activităților agrozootehnice",
-    "utilizari_interzise": "Locuințe permanente, industrie neagricolă",
-    "retrageri": ""
+    "pot": 60,
+    "cut": 2.0,
+    "rh": "max P+2",
+    "inaltime_m": 10.0,
+    "functiune": "Subzona activităților agrozootehnice",
+    "tip": "industrial",
+    "culoare": "#b45309",
+    "functiuni_admise": [
+      "Sunt admise următoarele utilizări: lăcaşuri de cult; chilii, case egumeneşti, muzee. turnuri-clopotniţă. servicii pentru culte; activităţi sociale ale asociaţiilor religioase; activităţi complementare rezidenţiale formate pentru din bisericile locuinţe parohiale colective din necesare ansamblurile pentru ritualuri religioase care nu pot avea loc în apartamentele blocurilor (de exemplu capele pentr"
+    ],
+    "functiuni_conditionari": [
+      "Locuințe de serviciu aferente activităților agrozootehnice"
+    ],
+    "functiuni_interzise": [
+      "Locuințe permanente, industrie neagricolă"
+    ],
+    "retrageri": "",
+    "nota_reglementare": "RLU PUG Suceava · max P+2"
   },
   "A2": {
-    "cod": "A2",
-    "denumire": "Subzona activităților industriale și depozitare",
-    "POT": "60",
-    "CUT": "2.0",
-    "RH": "Conform tehnologiei",
-    "utilizari_admise": "Sunt admise următoarele utilizări: servicii specializate și conexe activității de bază; activități de formare profesională; locuințe de serviciu; spații comerciale, alimentație publică; servicii personale; facilități pentru angajați și clienți; parcaje.",
-    "utilizari_conditionate": "Birouri de administrare aferente, servicii industriale",
-    "utilizari_interzise": "Locuințe permanente, instituții publice, funcțiuni incompatibile",
-    "retrageri": "Min. 50m față de zone rezidențiale pentru industrie poluantă"
+    "pot": 60,
+    "cut": 2.0,
+    "rh": "Conform tehnologiei",
+    "inaltime_m": null,
+    "functiune": "Subzona activităților industriale și depozitare",
+    "tip": "industrial",
+    "culoare": "#b45309",
+    "functiuni_admise": [
+      "Sunt admise următoarele utilizări: servicii specializate și conexe activității de bază; activități de formare profesională; locuințe de serviciu; spații comerciale, alimentație publică; servicii personale; facilități pentru angajați și clienți; parcaje."
+    ],
+    "functiuni_conditionari": [
+      "Birouri de administrare aferente, servicii industriale"
+    ],
+    "functiuni_interzise": [
+      "Locuințe permanente, instituții publice, funcțiuni incompatibile"
+    ],
+    "retrageri": "Min. 50m față de zone rezidențiale pentru industrie poluantă",
+    "nota_reglementare": "RLU PUG Suceava · Conform tehnologiei"
   },
   "F": {
-    "cod": "F",
-    "denumire": "Zonă dotări culte (lăcașuri de cult)",
-    "POT": "50",
-    "CUT": "2.4",
-    "RH": "Specific funcțiunii",
-    "utilizari_admise": "Lăcașuri de cult, clopotnițe, capele, anexe cultice, reședințe episcopale, mănăstiri",
-    "utilizari_conditionate": "Locuințe de serviciu, dotări social-culturale aferente cultului",
-    "utilizari_interzise": "Industrie, comerț, activități incompatibile cu destinația cultică",
-    "retrageri": ""
+    "pot": 50,
+    "cut": 2.4,
+    "rh": "Specific funcțiunii",
+    "inaltime_m": null,
+    "functiune": "Zonă dotări culte (lăcașuri de cult)",
+    "tip": "rezerva",
+    "culoare": "#e2e8f0",
+    "functiuni_admise": [
+      "Lăcașuri de cult, clopotnițe, capele, anexe cultice, reședințe episcopale, mănăstiri"
+    ],
+    "functiuni_conditionari": [
+      "Locuințe de serviciu, dotări social-culturale aferente cultului"
+    ],
+    "functiuni_interzise": [
+      "Industrie, comerț, activități incompatibile cu destinația cultică"
+    ],
+    "retrageri": "",
+    "nota_reglementare": "RLU PUG Suceava · Specific funcțiunii"
   },
   "S": {
-    "cod": "S",
-    "denumire": "Zonă cu destinație specială",
-    "POT": "50",
-    "CUT": "1.8",
-    "RH": "Conform funcțiunii",
-    "utilizari_admise": "Funcțiuni cu destinație specială: armată, ordine publică, obiective strategice",
-    "utilizari_conditionate": "Funcțiuni complementare destinației speciale",
-    "utilizari_interzise": "Orice utilizare incompatibilă cu destinația specială",
-    "retrageri": "Conform reglementărilor specifice"
+    "pot": 50,
+    "cut": 1.8,
+    "rh": "Conform funcțiunii",
+    "inaltime_m": null,
+    "functiune": "Zonă cu destinație specială",
+    "tip": "public",
+    "culoare": "#a78bfa",
+    "functiuni_admise": [
+      "Funcțiuni cu destinație specială: armată, ordine publică, obiective strategice"
+    ],
+    "functiuni_conditionari": [
+      "Funcțiuni complementare destinației speciale"
+    ],
+    "functiuni_interzise": [
+      "Orice utilizare incompatibilă cu destinația specială"
+    ],
+    "retrageri": "Conform reglementărilor specifice",
+    "nota_reglementare": "RLU PUG Suceava · Conform funcțiunii"
   },
   "V1a": {
-    "cod": "V1a",
-    "denumire": "Spații verzi publice (parcuri, grădini publice, scuaruri)",
-    "POT": "5",
-    "CUT": "0.1",
-    "RH": "max P",
-    "utilizari_admise": "Parcuri, grădini publice, scuaruri, alei pietonale, amenajări peisagistice, construcții de agrement și foișoare",
-    "utilizari_conditionate": "Construcții mici de deservire (toalete publice, chioșcuri), sport în aer liber",
-    "utilizari_interzise": "Construcții permanente, locuințe, industrie, parcări supraterane mari",
-    "retrageri": ""
+    "pot": 5,
+    "cut": 0.1,
+    "rh": "max P",
+    "inaltime_m": null,
+    "functiune": "Spații verzi publice (parcuri, grădini publice, scuaruri)",
+    "tip": "verde",
+    "culoare": "#86efac",
+    "functiuni_admise": [
+      "Parcuri, grădini publice, scuaruri, alei pietonale, amenajări peisagistice, construcții de agrement și foișoare"
+    ],
+    "functiuni_conditionari": [
+      "Construcții mici de deservire (toalete publice, chioșcuri), sport în aer liber"
+    ],
+    "functiuni_interzise": [
+      "Construcții permanente, locuințe, industrie, parcări supraterane mari"
+    ],
+    "retrageri": "",
+    "nota_reglementare": "RLU PUG Suceava · max P"
   },
   "V1b": {
-    "cod": "V1b",
-    "denumire": "Spații verzi protejate",
-    "POT": "2",
-    "CUT": "0.05",
-    "RH": "Interzis",
-    "utilizari_admise": "Spații verzi protejate, plantații de protecție, coridoare ecologice",
-    "utilizari_conditionate": "Alei pietonale, mobilier urban minimal",
-    "utilizari_interzise": "Orice construcție, tăiere de arbori, impermeabilizare",
-    "retrageri": ""
+    "pot": 2,
+    "cut": 0.05,
+    "rh": "Interzis",
+    "inaltime_m": null,
+    "functiune": "Spații verzi protejate",
+    "tip": "verde",
+    "culoare": "#86efac",
+    "functiuni_admise": [
+      "Spații verzi protejate, plantații de protecție, coridoare ecologice"
+    ],
+    "functiuni_conditionari": [
+      "Alei pietonale, mobilier urban minimal"
+    ],
+    "functiuni_interzise": [
+      "Orice construcție, tăiere de arbori, impermeabilizare"
+    ],
+    "retrageri": "",
+    "nota_reglementare": "RLU PUG Suceava · Interzis"
   },
   "V2a": {
-    "cod": "V2a",
-    "denumire": "Culoare de protecție față de căile de comunicație majore",
-    "POT": "2",
-    "CUT": "0.05",
-    "RH": "Interzis",
-    "utilizari_admise": "Plantații de protecție fonică și vizuală, perdele verzi",
-    "utilizari_conditionate": "Alei cicliste, pietonale",
-    "utilizari_interzise": "Construcții, locuințe, activități productive",
-    "retrageri": ""
+    "pot": 2,
+    "cut": 0.05,
+    "rh": "Interzis",
+    "inaltime_m": null,
+    "functiune": "Culoare de protecție față de căile de comunicație majore",
+    "tip": "verde",
+    "culoare": "#86efac",
+    "functiuni_admise": [
+      "Plantații de protecție fonică și vizuală, perdele verzi"
+    ],
+    "functiuni_conditionari": [
+      "Alei cicliste, pietonale"
+    ],
+    "functiuni_interzise": [
+      "Construcții, locuințe, activități productive"
+    ],
+    "retrageri": "",
+    "nota_reglementare": "RLU PUG Suceava · Interzis"
   },
   "V2b": {
-    "cod": "V2b",
-    "denumire": "Spații verzi amenajate pentru protecția cursurilor de apă",
-    "POT": "2",
-    "CUT": "0.05",
-    "RH": "Interzis",
-    "utilizari_admise": "Plantații de protecție, maluri naturalizate, zone tampon față de cursuri de apă",
-    "utilizari_conditionate": "Trasee pietonale și cicliste",
-    "utilizari_interzise": "Construcții, impermeabilizare, deversări",
-    "retrageri": "Min. 10m față de malul cursului de apă"
+    "pot": 2,
+    "cut": 0.05,
+    "rh": "Interzis",
+    "inaltime_m": null,
+    "functiune": "Spații verzi amenajate pentru protecția cursurilor de apă",
+    "tip": "verde",
+    "culoare": "#86efac",
+    "functiuni_admise": [
+      "Plantații de protecție, maluri naturalizate, zone tampon față de cursuri de apă"
+    ],
+    "functiuni_conditionari": [
+      "Trasee pietonale și cicliste"
+    ],
+    "functiuni_interzise": [
+      "Construcții, impermeabilizare, deversări"
+    ],
+    "retrageri": "Min. 10m față de malul cursului de apă",
+    "nota_reglementare": "RLU PUG Suceava · Interzis"
   },
   "V2c": {
-    "cod": "V2c",
-    "denumire": "Amenajări pentru agrement în proximitatea cursurilor și oglinzilor de apă",
-    "POT": "5",
-    "CUT": "0.1",
-    "RH": "max P",
-    "utilizari_admise": "Amenajări recreative, plaje, pontoane, baze nautice mici, terase sezoniere",
-    "utilizari_conditionate": "Construcții mici de agrement",
-    "utilizari_interzise": "Construcții permanente, locuințe, industrie",
-    "retrageri": ""
+    "pot": 5,
+    "cut": 0.1,
+    "rh": "max P",
+    "inaltime_m": null,
+    "functiune": "Amenajări pentru agrement în proximitatea cursurilor și oglinzilor de apă",
+    "tip": "verde",
+    "culoare": "#86efac",
+    "functiuni_admise": [
+      "Amenajări recreative, plaje, pontoane, baze nautice mici, terase sezoniere"
+    ],
+    "functiuni_conditionari": [
+      "Construcții mici de agrement"
+    ],
+    "functiuni_interzise": [
+      "Construcții permanente, locuințe, industrie"
+    ],
+    "retrageri": "",
+    "nota_reglementare": "RLU PUG Suceava · max P"
   },
   "V3": {
-    "cod": "V3",
-    "denumire": "Subzona spațiilor pentru agrement și sport",
-    "POT": "10",
-    "CUT": "0.3",
-    "RH": "max P+1",
-    "utilizari_admise": "Baze sportive, terenuri de sport, piscine, săli de sport, amenajări pentru agrement",
-    "utilizari_conditionate": "Construcții aferente funcțiunii sportive: vestiare, tribune, săli",
-    "utilizari_interzise": "Locuințe, industrie, activități incompatibile",
-    "retrageri": ""
+    "pot": 10,
+    "cut": 0.3,
+    "rh": "max P+1",
+    "inaltime_m": 6.5,
+    "functiune": "Subzona spațiilor pentru agrement și sport",
+    "tip": "verde",
+    "culoare": "#86efac",
+    "functiuni_admise": [
+      "Baze sportive, terenuri de sport, piscine, săli de sport, amenajări pentru agrement"
+    ],
+    "functiuni_conditionari": [
+      "Construcții aferente funcțiunii sportive: vestiare, tribune, săli"
+    ],
+    "functiuni_interzise": [
+      "Locuințe, industrie, activități incompatibile"
+    ],
+    "retrageri": "",
+    "nota_reglementare": "RLU PUG Suceava · max P+1"
   },
   "V4": {
-    "cod": "V4",
-    "denumire": "Subzona păduri de agrement aflate în intravilan",
-    "POT": "1",
-    "CUT": "0.01",
-    "RH": "Interzis",
-    "utilizari_admise": "Păduri de agrement, trasee pietonale, puncte de belvedere",
-    "utilizari_conditionate": "Construcții minime pentru administrare forestieră",
-    "utilizari_interzise": "Defrișare, construcții, activități incompatibile",
-    "retrageri": ""
+    "pot": 1,
+    "cut": 0.01,
+    "rh": "Interzis",
+    "inaltime_m": null,
+    "functiune": "Subzona păduri de agrement aflate în intravilan",
+    "tip": "verde",
+    "culoare": "#86efac",
+    "functiuni_admise": [
+      "Păduri de agrement, trasee pietonale, puncte de belvedere"
+    ],
+    "functiuni_conditionari": [
+      "Construcții minime pentru administrare forestieră"
+    ],
+    "functiuni_interzise": [
+      "Defrișare, construcții, activități incompatibile"
+    ],
+    "retrageri": "",
+    "nota_reglementare": "RLU PUG Suceava · Interzis"
   },
   "G1": {
-    "cod": "G1",
-    "denumire": "Subzona gospodărire comunală (cimitire)",
-    "POT": "50",
-    "CUT": "1.8",
-    "RH": "max P+1",
-    "utilizari_admise": "Sunt admise următoarele utilizări funcționale: Pentru G1 cimitire şi clădiri anexe: capelă mortuară; mausoleu; pavilion pentru administraţie, depozitare şi anexe sanitare. circulaţii carosabile; circulaţii pietonale; parcaje; plantaţii; Pentru G2 construcţii, instalaţii şi amenajări pentru gospodăria comunală; birouri autonome; incinte tehnice cu clădiri şi instalaţii pentru sistemul de alimentare",
-    "utilizari_conditionate": "Locuințe de serviciu pentru personal",
-    "utilizari_interzise": "Locuințe permanente, industrie, activități incompatibile",
-    "retrageri": ""
+    "pot": 50,
+    "cut": 1.8,
+    "rh": "max P+1",
+    "inaltime_m": 6.5,
+    "functiune": "Subzona gospodărire comunală (cimitire)",
+    "tip": "tehnic",
+    "culoare": "#475569",
+    "functiuni_admise": [
+      "Sunt admise următoarele utilizări funcționale: Pentru G1 cimitire şi clădiri anexe: capelă mortuară; mausoleu; pavilion pentru administraţie, depozitare şi anexe sanitare. circulaţii carosabile; circulaţii pietonale; parcaje; plantaţii; Pentru G2 construcţii, instalaţii şi amenajări pentru gospodăria comunală; birouri autonome; incinte tehnice cu clădiri şi instalaţii pentru sistemul de alimentare"
+    ],
+    "functiuni_conditionari": [
+      "Locuințe de serviciu pentru personal"
+    ],
+    "functiuni_interzise": [
+      "Locuințe permanente, industrie, activități incompatibile"
+    ],
+    "retrageri": "",
+    "nota_reglementare": "RLU PUG Suceava · max P+1"
   },
   "G2": {
-    "cod": "G2",
-    "denumire": "Subzona gospodărire comunală (instalații și echipamente de interes public)",
-    "POT": "50",
-    "CUT": "1.8",
-    "RH": "Conform funcțiunii",
-    "utilizari_admise": "Stații epurare, stații de pompare, depozite ecologice, instalații tehnico-edilitare",
-    "utilizari_conditionate": "Construcții aferente funcțiunii",
-    "utilizari_interzise": "Locuințe, funcțiuni incompatibile cu infrastructura tehnico-edilitară",
-    "retrageri": "Zone de protecție conform normelor specifice"
+    "pot": 50,
+    "cut": 1.8,
+    "rh": "Conform funcțiunii",
+    "inaltime_m": null,
+    "functiune": "Subzona gospodărire comunală (instalații și echipamente de interes public)",
+    "tip": "tehnic",
+    "culoare": "#475569",
+    "functiuni_admise": [
+      "Stații epurare, stații de pompare, depozite ecologice, instalații tehnico-edilitare"
+    ],
+    "functiuni_conditionari": [
+      "Construcții aferente funcțiunii"
+    ],
+    "functiuni_interzise": [
+      "Locuințe, funcțiuni incompatibile cu infrastructura tehnico-edilitară"
+    ],
+    "retrageri": "Zone de protecție conform normelor specifice",
+    "nota_reglementare": "RLU PUG Suceava · Conform funcțiunii"
   },
   "T1": {
-    "cod": "T1",
-    "denumire": "Subzona transporturilor rutiere",
-    "POT": "50",
-    "CUT": "2.4",
-    "RH": "max P+2",
-    "utilizari_admise": "Se pot amplasa cu avizul organelor publice specializate: construcţii şi instalaţii aferente exploatării şi întreţinerii liniilor de cale ferată; construcţii şi instalaţii pentru exploatarea materialului rulant şi a mijloacelor de restabilire a circulaţiei; Reactualizare Plan Urbanistic General Municipiul Suceava, Judeţul Suceava volumul II - regulament local d e urbanism elaboratori: s.c. urban te",
-    "utilizari_conditionate": "Construcții de deservire rutieră: stații benzină, service auto",
-    "utilizari_interzise": "Locuințe, activități incompatibile cu infrastructura rutieră",
-    "retrageri": "Conform normelor de protecție față de căile de comunicație"
+    "pot": 50,
+    "cut": 2.4,
+    "rh": "max P+2",
+    "inaltime_m": 10.0,
+    "functiune": "Subzona transporturilor rutiere",
+    "tip": "tehnic",
+    "culoare": "#475569",
+    "functiuni_admise": [
+      "Se pot amplasa cu avizul organelor publice specializate: construcţii şi instalaţii aferente exploatării şi întreţinerii liniilor de cale ferată; construcţii şi instalaţii pentru exploatarea materialului rulant şi a mijloacelor de restabilire a circulaţiei; Reactualizare Plan Urbanistic General Municipiul Suceava, Judeţul Suceava volumul II - regulament local d e urbanism elaboratori: s.c. urban te"
+    ],
+    "functiuni_conditionari": [
+      "Construcții de deservire rutieră: stații benzină, service auto"
+    ],
+    "functiuni_interzise": [
+      "Locuințe, activități incompatibile cu infrastructura rutieră"
+    ],
+    "retrageri": "Conform normelor de protecție față de căile de comunicație",
+    "nota_reglementare": "RLU PUG Suceava · max P+2"
   },
   "T2": {
-    "cod": "T2",
-    "denumire": "Subzona transporturilor feroviare (CF)",
-    "POT": "50",
-    "CUT": "2.4",
-    "RH": "max P+2",
-    "utilizari_admise": "Infrastructură feroviară, gări, triaje, depouri, construcții tehnice CF",
-    "utilizari_conditionate": "Construcții de deservire feroviară",
-    "utilizari_interzise": "Locuințe, activități incompatibile cu infrastructura CF",
-    "retrageri": "Min. 20m față de calea ferată"
+    "pot": 50,
+    "cut": 2.4,
+    "rh": "max P+2",
+    "inaltime_m": 10.0,
+    "functiune": "Subzona transporturilor feroviare (CF)",
+    "tip": "tehnic",
+    "culoare": "#475569",
+    "functiuni_admise": [
+      "Infrastructură feroviară, gări, triaje, depouri, construcții tehnice CF"
+    ],
+    "functiuni_conditionari": [
+      "Construcții de deservire feroviară"
+    ],
+    "functiuni_interzise": [
+      "Locuințe, activități incompatibile cu infrastructura CF"
+    ],
+    "retrageri": "Min. 20m față de calea ferată",
+    "nota_reglementare": "RLU PUG Suceava · max P+2"
   },
   "ZCP1": {
-    "cod": "ZCP1",
-    "denumire": "Zonă construită protejată 1",
-    "POT": "60",
-    "CUT": "2.0",
-    "RH": "max P+2",
-    "utilizari_admise": "Funcțiuni existente + compatibile cu zona protejată",
-    "utilizari_conditionate": "Intervenții cu aviz Ministerul Culturii",
-    "utilizari_interzise": "Demolări neautorizate, modificări ale caracterului arhitectural",
-    "retrageri": ""
+    "pot": 60,
+    "cut": 2.0,
+    "rh": "max P+2",
+    "inaltime_m": 10.0,
+    "functiune": "Zonă construită protejată 1",
+    "tip": "centru_protejat",
+    "culoare": "#D4AF37",
+    "functiuni_admise": [
+      "Funcțiuni existente + compatibile cu zona protejată"
+    ],
+    "functiuni_conditionari": [
+      "Intervenții cu aviz Ministerul Culturii"
+    ],
+    "functiuni_interzise": [
+      "Demolări neautorizate, modificări ale caracterului arhitectural"
+    ],
+    "retrageri": "",
+    "nota_reglementare": "RLU PUG Suceava · max P+2"
   },
   "ZCP2": {
-    "cod": "ZCP2",
-    "denumire": "Zonă construită protejată 2",
-    "POT": "50",
-    "CUT": "1.5",
-    "RH": "max P+2",
-    "utilizari_admise": "Funcțiuni existente + compatibile",
-    "utilizari_conditionate": "Intervenții cu aviz Direcția Județeană de Cultură",
-    "utilizari_interzise": "Modificări ale caracterului zonei protejate",
-    "retrageri": ""
+    "pot": 50,
+    "cut": 1.5,
+    "rh": "max P+2",
+    "inaltime_m": 10.0,
+    "functiune": "Zonă construită protejată 2",
+    "tip": "centru_protejat",
+    "culoare": "#D4AF37",
+    "functiuni_admise": [
+      "Funcțiuni existente + compatibile"
+    ],
+    "functiuni_conditionari": [
+      "Intervenții cu aviz Direcția Județeană de Cultură"
+    ],
+    "functiuni_interzise": [
+      "Modificări ale caracterului zonei protejate"
+    ],
+    "retrageri": "",
+    "nota_reglementare": "RLU PUG Suceava · max P+2"
   },
   "ZCP3": {
-    "cod": "ZCP3",
-    "denumire": "Zonă construită protejată 3",
-    "POT": "50",
-    "CUT": "1.5",
-    "RH": "max P+3",
-    "utilizari_admise": "Funcțiuni existente, intervenții reversibile",
-    "utilizari_conditionate": "Modificări cu aviz",
-    "utilizari_interzise": "Demolări, modificări ireversibile",
-    "retrageri": ""
+    "pot": 50,
+    "cut": 1.5,
+    "rh": "max P+3",
+    "inaltime_m": 13.5,
+    "functiune": "Zonă construită protejată 3",
+    "tip": "centru_protejat",
+    "culoare": "#D4AF37",
+    "functiuni_admise": [
+      "Funcțiuni existente, intervenții reversibile"
+    ],
+    "functiuni_conditionari": [
+      "Modificări cu aviz"
+    ],
+    "functiuni_interzise": [
+      "Demolări, modificări ireversibile"
+    ],
+    "retrageri": "",
+    "nota_reglementare": "RLU PUG Suceava · max P+3"
   },
   "ZCP4": {
-    "cod": "ZCP4",
-    "denumire": "Zonă construită protejată 4",
-    "POT": "45",
-    "CUT": "1.2",
-    "RH": "max P+2",
-    "utilizari_admise": "Conservare și restaurare patrimoniu construit",
-    "utilizari_conditionate": "Intervenții cu studiu urbanistic de detaliu",
-    "utilizari_interzise": "Schimbări de destinație incompatibile",
-    "retrageri": ""
+    "pot": 45,
+    "cut": 1.2,
+    "rh": "max P+2",
+    "inaltime_m": 10.0,
+    "functiune": "Zonă construită protejată 4",
+    "tip": "centru_protejat",
+    "culoare": "#D4AF37",
+    "functiuni_admise": [
+      "Conservare și restaurare patrimoniu construit"
+    ],
+    "functiuni_conditionari": [
+      "Intervenții cu studiu urbanistic de detaliu"
+    ],
+    "functiuni_interzise": [
+      "Schimbări de destinație incompatibile"
+    ],
+    "retrageri": "",
+    "nota_reglementare": "RLU PUG Suceava · max P+2"
   },
   "ZCP5": {
-    "cod": "ZCP5",
-    "denumire": "Zonă construită protejată 5",
-    "POT": "45",
-    "CUT": "1.2",
-    "RH": "max P+2",
-    "utilizari_admise": "Funcțiuni compatibile cu patrimoniul",
-    "utilizari_conditionate": "Aviz Ministerul Culturii obligatoriu",
-    "utilizari_interzise": "Construcții noi incompatibile",
-    "retrageri": ""
+    "pot": 45,
+    "cut": 1.2,
+    "rh": "max P+2",
+    "inaltime_m": 10.0,
+    "functiune": "Zonă construită protejată 5",
+    "tip": "centru_protejat",
+    "culoare": "#D4AF37",
+    "functiuni_admise": [
+      "Funcțiuni compatibile cu patrimoniul"
+    ],
+    "functiuni_conditionari": [
+      "Aviz Ministerul Culturii obligatoriu"
+    ],
+    "functiuni_interzise": [
+      "Construcții noi incompatibile"
+    ],
+    "retrageri": "",
+    "nota_reglementare": "RLU PUG Suceava · max P+2"
   },
   "ZCP6": {
-    "cod": "ZCP6",
-    "denumire": "Zonă construită protejată 6",
-    "POT": "40",
-    "CUT": "1.0",
-    "RH": "max P+1",
-    "utilizari_admise": "Conservare strictă patrimoniu",
-    "utilizari_conditionate": "Intervenții minime reversibile",
-    "utilizari_interzise": "Orice construcție nouă fără aviz",
-    "retrageri": ""
+    "pot": 40,
+    "cut": 1.0,
+    "rh": "max P+1",
+    "inaltime_m": 6.5,
+    "functiune": "Zonă construită protejată 6",
+    "tip": "centru_protejat",
+    "culoare": "#D4AF37",
+    "functiuni_admise": [
+      "Conservare strictă patrimoniu"
+    ],
+    "functiuni_conditionari": [
+      "Intervenții minime reversibile"
+    ],
+    "functiuni_interzise": [
+      "Orice construcție nouă fără aviz"
+    ],
+    "retrageri": "",
+    "nota_reglementare": "RLU PUG Suceava · max P+1"
   },
   "PP": {
-    "cod": "PP",
-    "denumire": "Parcare publică",
-    "POT": "80",
-    "CUT": "0.5",
-    "RH": "max P+1",
-    "utilizari_admise": "Parcaje publice, parcaje etajate",
-    "utilizari_conditionate": "Dotări minimale de serviciu",
-    "utilizari_interzise": "Locuințe, activități incompatibile",
-    "retrageri": ""
+    "pot": 80,
+    "cut": 0.5,
+    "rh": "max P+1",
+    "inaltime_m": 6.5,
+    "functiune": "Parcare publică",
+    "tip": "verde",
+    "culoare": "#86efac",
+    "functiuni_admise": [
+      "Parcaje publice, parcaje etajate"
+    ],
+    "functiuni_conditionari": [
+      "Dotări minimale de serviciu"
+    ],
+    "functiuni_interzise": [
+      "Locuințe, activități incompatibile"
+    ],
+    "retrageri": "",
+    "nota_reglementare": "RLU PUG Suceava · max P+1"
   },
   "TP": {
-    "cod": "TP",
-    "denumire": "Traseu pietonal",
-    "POT": "0",
-    "CUT": "0",
-    "RH": "Interzis",
-    "utilizari_admise": "Alei pietonale, mobilier urban, vegetație",
-    "utilizari_conditionate": "Terase sezoniere",
-    "utilizari_interzise": "Circulație auto, construcții permanente",
-    "retrageri": ""
+    "pot": 0,
+    "cut": 0.0,
+    "rh": "Interzis",
+    "inaltime_m": null,
+    "functiune": "Traseu pietonal",
+    "tip": "tehnic",
+    "culoare": "#475569",
+    "functiuni_admise": [
+      "Alei pietonale, mobilier urban, vegetație"
+    ],
+    "functiuni_conditionari": [
+      "Terase sezoniere"
+    ],
+    "functiuni_interzise": [
+      "Circulație auto, construcții permanente"
+    ],
+    "retrageri": "",
+    "nota_reglementare": "RLU PUG Suceava · Interzis"
   }
 }
