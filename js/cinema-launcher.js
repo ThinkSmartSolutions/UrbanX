@@ -742,6 +742,12 @@ window._startCinema = function(cityKey) {
 
     setupCamera(scene.id);
 
+    // Forteaza camera la pitch 72 zoom 15.5 pentru scenele cu 3D
+    var scene3D=['crestere','azi_3d','cartiere','zoom_in','intro','viziune'];
+    if(scene3D.indexOf(scene.id)>=0){
+      try{map.jumpTo({center:[cx,cy],zoom:15.5,pitch:72,bearing:20});}catch(e){}
+    }
+
     var loop=function(){
       if(!SE._playing)return;
       var t=Math.min(1,Math.max(0.001,(performance.now()-SE._startT)/scene.dur));
