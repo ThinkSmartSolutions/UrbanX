@@ -105,9 +105,47 @@ window._startCinema = function(cityKey) {
     var scene = SE.SCENES[idx];
     SE._si = idx;
     SE._startT = performance.now();
+    // Opreste rotatia din scena anterioara
+    if(SE._rotInt){clearInterval(SE._rotInt);SE._rotInt=null;}
 
-    // Setup harta
+    // Setup harta — zoom cinematic per scena
     try { SE._setupMap.call(SE, scene.id); } catch(e) { console.warn('[Cinema] setupMap err:', e.message); }
+    // Override camera pentru scene cinematice
+    var map = SE._map;
+    var cx = SE._city.lon||27.6, cy = SE._city.lat||47.15;
+    if(scene.id==='s2'){
+      // Orasul azi — zoom aproape, orbita lenta
+      try{map.flyTo({center:[cx,cy],zoom:14.5,pitch:62,bearing:20,duration:3000,essential:true});}catch(e){}
+      try{map.setConfigProperty('basemap','lightPreset','day');}catch(e){}
+      setTimeout(function(){
+        var b=20;
+        if(SE._rotInt)clearInterval(SE._rotInt);
+        SE._rotInt=setInterval(function(){if(!SE._playing){clearInterval(SE._rotInt);return;}b+=0.03;try{map.setBearing(b%360);}catch(e){};},50);
+      },1000);
+    }
+    if(scene.id==='s4'){
+      // Coridoare 2055 — zoom APROAPE pe cladiri 3D, pitch maxim
+      try{map.jumpTo({center:[cx,cy],zoom:13,pitch:55,bearing:10});}catch(e){}
+      setTimeout(function(){try{map.flyTo({center:[cx,cy],zoom:15,pitch:68,bearing:25,duration:5000,essential:true});}catch(e){}},500);
+      try{map.setConfigProperty('basemap','lightPreset','night');}catch(e){}
+      // Rotatie lenta
+      setTimeout(function(){
+        var b=25;
+        if(SE._rotInt)clearInterval(SE._rotInt);
+        SE._rotInt=setInterval(function(){if(!SE._playing){clearInterval(SE._rotInt);return;}b+=0.015;try{map.setBearing(b%360);}catch(e){};},50);
+      },1000);
+    }
+    if(scene.id==='s11'){
+      // Viziunea 2055 — zoom pe cladiri la maxim, sunset
+      try{map.jumpTo({center:[cx,cy],zoom:13,pitch:55,bearing:0});}catch(e){}
+      setTimeout(function(){try{map.flyTo({center:[cx,cy],zoom:15,pitch:68,bearing:40,duration:6000,essential:true});}catch(e){}},500);
+      try{map.setConfigProperty('basemap','lightPreset','dusk');}catch(e){}
+      setTimeout(function(){
+        var b=40;
+        if(SE._rotInt)clearInterval(SE._rotInt);
+        SE._rotInt=setInterval(function(){if(!SE._playing){clearInterval(SE._rotInt);return;}b+=0.012;try{map.setBearing(b%360);}catch(e){};},50);
+      },1000);
+    }
 
     // Render loop
     var loop = function() {
