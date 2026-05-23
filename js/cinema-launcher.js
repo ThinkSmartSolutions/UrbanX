@@ -214,13 +214,16 @@ window._startCinema = function(cityKey) {
         break;
 
       case 'azi_3d':
-        // VIEW-UL CONFIRMAT: zoom 15.5 pitch 72 — cladiri 3D din PUG
-        try{map.jumpTo({center:[cx,cy],zoom:14,pitch:65,bearing:10});}catch(e){}
+        // VIEW-UL CONFIRMAT: jump direct la zoom 15.5 pitch 72
         lp('day');
+        try{map.jumpTo({center:[cx,cy],zoom:15.5,pitch:72,bearing:10});}catch(e){}
+        // Rotatie imediata
+        rot(10,0.018);
+        // Zbor subtil intre cartiere
         setTimeout(function(){
-          try{map.flyTo({center:[cx,cy],zoom:15.5,pitch:72,bearing:30,duration:5000,essential:true});}catch(e){}
-          rot(30,0.018);
-        },300);
+          if(!SE._playing)return;
+          try{map.flyTo({center:[cx-0.01,cy+0.008],zoom:15.5,pitch:72,bearing:50,duration:6000,essential:true});}catch(e){}
+        },3000);
         break;
 
       case 'cartiere':
@@ -236,14 +239,25 @@ window._startCinema = function(cityKey) {
         break;
 
       case 'crestere':
-        // BARE 3D CRESC: camera aproape, adauga 3D dupa ce ajunge
+        // BARE 3D CRESC: sari DIRECT la pozitia corecta, fara flyTo lung
         lp('night');
-        try{map.flyTo({center:[cx,cy],zoom:15.5,pitch:72,bearing:20,duration:4000,essential:true});}catch(e){}
-        setTimeout(function(){
-          if(!SE._playing)return;
-          add3D(true); // incepe mic
-          rot(20,0.015);
-        },4500);
+        // Jump direct - nu flyTo - ca sa nu reseteze layerele
+        try{map.jumpTo({center:[cx,cy],zoom:15.5,pitch:72,bearing:20});}catch(e){}
+        // Asteapta harta sa fie complet idle APOI adauga 3D
+        try{
+          map.once('idle',function(){
+            if(!SE._playing)return;
+            add3D(true);
+            rot(20,0.015);
+            // Acum poate face flyTo subtil
+            setTimeout(function(){
+              if(!SE._playing)return;
+              try{map.flyTo({center:[cx,cy],zoom:15.5,pitch:72,bearing:45,duration:12000,essential:true});}catch(e){}
+            },2000);
+          });
+        }catch(e){
+          setTimeout(function(){if(!SE._playing)return;add3D(true);rot(20,0.015);},500);
+        }
         break;
 
       case 'mobil1':
@@ -322,17 +336,22 @@ window._startCinema = function(cityKey) {
         break;
 
       case 'viziune':
-        // Finale — bare 3D la maxim, sunset, rotatie lenta
+        // Finale — jump direct, bare 3D maxim dupa idle
         lp('dusk');
-        try{map.flyTo({center:[cx,cy],zoom:15,pitch:68,bearing:30,duration:4000,essential:true});}catch(e){}
-        setTimeout(function(){
-          if(!SE._playing)return;
-          add3D(false); // la inaltime maxima
-          rot(30,0.010);
-          setTimeout(function(){
-            try{map.flyTo({center:[cx,cy],zoom:15.5,pitch:72,bearing:60,duration:8000,essential:true});}catch(e){}
-          },2000);
-        },4500);
+        try{map.jumpTo({center:[cx,cy],zoom:15.5,pitch:72,bearing:30});}catch(e){}
+        try{
+          map.once('idle',function(){
+            if(!SE._playing)return;
+            add3D(false);
+            rot(30,0.010);
+            setTimeout(function(){
+              if(!SE._playing)return;
+              try{map.flyTo({center:[cx,cy],zoom:15.5,pitch:72,bearing:120,duration:16000,essential:true});}catch(e){}
+            },2000);
+          });
+        }catch(e){
+          setTimeout(function(){if(!SE._playing)return;add3D(false);rot(30,0.010);},500);
+        }
         break;
     }
   }
