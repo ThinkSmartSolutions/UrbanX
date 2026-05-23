@@ -506,7 +506,7 @@ G._SceneEngine = {
 
   // ── Setup per scenă (camera + layers Mapbox) ──────────────────────────
   _setupScene(sceneId) {
-    const map  = window.map;
+    const map  = window.map || this._map;
     const city = this._city;
     const cx   = city?.lon||27.601, cy = city?.lat||47.158;
     if(!map) return;
@@ -658,7 +658,7 @@ G._SceneEngine = {
     // Pe mobil sarim layerele WebGL grele - canvas-ul singur e suficient
     const _mob = window.innerWidth < 768;
     if(sceneId===4 && !_mob) this._setupDensityLayer(map, city);
-    if(sceneId===5 && !_mob) this._setup3DGrowthBars(map, city);
+    // sceneId===5: _setup3DGrowthBars deja apelat in switch case 5 de mai sus — nu repetam
     if(sceneId===6 && !_mob) this._setupTrafficLayer(map, city);
     if(sceneId===11) this._showTimeSlider(city);
     if(sceneId!==11) document.getElementById('tci-time-slider')?.remove();
@@ -1187,7 +1187,7 @@ G._SceneEngine = {
     }
 
     // CONCLUZIE - jos centru la finalul scenei
-    if(t>0.68){
+    if(t>0.78){
       const ta=Math.min(1,(t-0.78)/0.15);
       ctx.globalAlpha=ta;
       ctx.fillStyle='rgba(4,10,24,.95)';
