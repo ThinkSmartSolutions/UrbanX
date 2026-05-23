@@ -175,7 +175,13 @@ G._SceneEngine={
     this._pred=_PRED.calc(this._city);
     this._pugGeo=null;this._reguli=null;this._wikiText='';this._assetsReady=false;
     this._hideUI();
-    this._canvas=this._mkCanvas();this._ctx=this._canvas.getContext('2d');
+    // Curata orice canvas vechi
+    ['tci-c8','tci-c6','tci-c7'].forEach(id=>document.getElementById(id)?.remove());
+    this._canvas=this._mkCanvas();
+    if(!this._canvas){ss('❌ Canvas fail');return;}
+    this._ctx=this._canvas.getContext('2d');
+    if(!this._ctx){ss('❌ Context fail');return;}
+    console.log('[v8] Canvas OK:',this._canvas.width,'x',this._canvas.height,'ctx:',!!this._ctx);
     this._mkCtrl();
     this._si=0;this._playing=true;
     // Async — nu blocheaza startul
@@ -212,13 +218,19 @@ G._SceneEngine={
   },
 
   _mkCanvas(){
-    document.getElementById('tci-c8')?.remove();
-    const c=document.createElement('canvas');c.id='tci-c8';
+    ['tci-c8','tci-c6','tci-c7'].forEach(id=>document.getElementById(id)?.remove());
+    const c=document.createElement('canvas');
+    c.id='tci-c8';
     const dpr=window.devicePixelRatio||1;
-    c.style.cssText='position:fixed;top:0;left:0;z-index:95000;width:100vw;height:100vh;pointer-events:none;';
-    c.width=window.innerWidth*dpr;c.height=window.innerHeight*dpr;
-    c.getContext('2d').scale(dpr,dpr);
-    document.body.appendChild(c);return c;
+    const W=window.innerWidth,H=window.innerHeight;
+    c.width=Math.round(W*dpr);
+    c.height=Math.round(H*dpr);
+    c.style.cssText=`position:fixed;top:0;left:0;width:${W}px;height:${H}px;z-index:99999;pointer-events:none;`;
+    const ctx2=c.getContext('2d');
+    if(ctx2)ctx2.scale(dpr,dpr);
+    document.body.appendChild(c);
+    console.log('[v8] Canvas creat:',c.width,'x',c.height,'z:99999 dpr:',dpr);
+    return c;
   },
 
   _mkCtrl(){
