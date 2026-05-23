@@ -155,7 +155,7 @@ G._SceneEngine={
     this._setupMap(scene.id);
     const loop=()=>{
       if(!this._playing)return;
-      const t=Math.min(1,(performance.now()-this._startT)/scene.dur);
+      const t=Math.min(1,Math.max(0.001,(performance.now()-this._startT)/scene.dur));
       if(this._ctx&&this._canvas){
         this._ctx.clearRect(0,0,this._canvas.width,this._canvas.height);
         try{this._draw(scene.id,t);}catch(e){console.warn('[v6]',e.message);}
@@ -468,7 +468,7 @@ G._SceneEngine={
 
     const rev=(d,s=0.25)=>Math.min(1,Math.max(0,(t-d)/s));
     const rE=(d,s=0.25)=>eo(rev(d,s));
-    const sA=t<0.07?t/0.07:t>0.88?Math.max(0,(1-t)/0.12):1;
+    const sA=t>0.92?Math.max(0,(1-t)/0.08):1;
     const al=(a)=>{ctx.globalAlpha=Math.max(0,Math.min(1,a));};
 
     // Gradient sus subtil — lasă harta vizibilă
