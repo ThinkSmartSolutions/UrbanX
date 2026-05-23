@@ -145,7 +145,7 @@ const _PRED={
 };
 
 // ── SCENE ENGINE v8 IMERSIV ─────────────────────────────────────────────────
-G._SceneEngine={
+G._CinemaEngine={
   _playing:false,_raf:null,_startT:0,_si:0,
   _city:null,_pred:null,_canvas:null,_ctx:null,_map:null,
   _rotInt:null,_hiddenEls:[],_pugGeo:null,_reguli:null,
@@ -169,11 +169,6 @@ G._SceneEngine={
   async launch(cityKey){
     const map=window.map;
     if(!map){ss('Harta indisponibila');return;}
-    // Asteapta harta sa fie complet incarcata
-    await new Promise(resolve=>{
-      if(map.loaded()){resolve();}
-      else{map.once('load',resolve);setTimeout(resolve,3000);}
-    });
     this._map=map;
     const db=window._RO_CITIES_DB||{};
     this._city=db[cityKey]||Object.values(db)[0]||{name:'Municipiu',lat:45.5,lon:25.0,pop2021:100000,pop2011:100000,pib_eur_cap:9000,regiune:'C',tip:'municipiu',coef_hub:1.0,suprafata_ha:5000,spatii_verzi_mp_loc:10,acoperire_transport:55};
@@ -1028,7 +1023,7 @@ G._SceneEngine={
 
 // ── INIT ────────────────────────────────────────────────────────────────────
 (function(){
-  window._SceneEngine=G._SceneEngine;
+  window._SceneEngine=G._CinemaEngine;
   window._PredEngine=_PRED;
   console.log('[TCI Cinematic v8.0] ✅ Imersiv — harta e actorul');
   const patch=(n)=>{
@@ -1036,7 +1031,7 @@ G._SceneEngine={
       const orig=window.openTCI;
       window.openTCI=function(opts){
         if(opts?.mode==='cinema_v2'||opts?.scenes||window._preferCinemaV2){
-          G._SceneEngine.launch(opts?.cityKey||G._SceneEngine._getCityKey());
+          G._CinemaEngine.launch(opts?.cityKey||G._CinemaEngine._getCityKey());
         }else{orig?.(opts);}
       };
       window._switchToCinemaV2=()=>{window._preferCinemaV2=true;ss('🎬 Cinema v8 activ');};
