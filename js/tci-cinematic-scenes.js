@@ -169,6 +169,11 @@ G._SceneEngine={
   async launch(cityKey){
     const map=window.map;
     if(!map){ss('Harta indisponibila');return;}
+    // Asteapta harta sa fie complet incarcata
+    await new Promise(resolve=>{
+      if(map.loaded()){resolve();}
+      else{map.once('load',resolve);setTimeout(resolve,3000);}
+    });
     this._map=map;
     const db=window._RO_CITIES_DB||{};
     this._city=db[cityKey]||Object.values(db)[0]||{name:'Municipiu',lat:45.5,lon:25.0,pop2021:100000,pop2011:100000,pib_eur_cap:9000,regiune:'C',tip:'municipiu',coef_hub:1.0,suprafata_ha:5000,spatii_verzi_mp_loc:10,acoperire_transport:55};
