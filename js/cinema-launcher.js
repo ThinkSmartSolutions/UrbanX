@@ -778,6 +778,11 @@ window._startCinema = function(cityKey) {
     console.log('[Cinema v4]',idx,scene.id,name);
   }
 
+  // Suprascrie _setupMap din CinemaEngine - face flyTo cu parametri gresiti
+  SE._setupMap = function(id){
+    // NOP - camera e controlata de cinema-launcher
+  };
+
   runScene(0);
   console.log('[Cinema v4.0] START —',name);
 };
