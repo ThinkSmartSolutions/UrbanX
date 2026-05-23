@@ -722,5 +722,22 @@ window._startCinema = function(cityKey) {
 };
 
 window._openTCICinema=window._startCinema;
-console.log('[Cinema Launcher v3.0] ✅ 20 scene · 3D · text adaptat');
+
+// ── Aliases pentru toate butoanele din platforma ──────────────────────────
+window._launchCinemaV2=function(){
+  var k=window.TCI?.cityKey||localStorage.getItem('ux_last_city')||'RO-IS-01';
+  window._startCinema(k);
+};
+window._switchToCinemaV2=function(){window._preferCinemaV2=true;};
+// Patch openTCI sa foloseasca _startCinema cand e in mod cinema
+var _origOpenTCI=window.openTCI;
+window.openTCI=function(opts){
+  if(window._preferCinemaV2||opts?.mode==='cinema_v2'){
+    window._startCinema(opts?.cityKey||window.TCI?.cityKey||localStorage.getItem('ux_last_city')||'RO-IS-01');
+  }else if(_origOpenTCI){
+    _origOpenTCI(opts);
+  }
+};
+
+console.log('[Cinema Launcher v3.0] ✅ 20 scene · 3D · _launchCinemaV2 activ');
 })();
