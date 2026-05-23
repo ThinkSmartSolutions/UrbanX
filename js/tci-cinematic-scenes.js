@@ -1023,6 +1023,7 @@ G._CinemaEngine={
 
 // ── INIT ────────────────────────────────────────────────────────────────────
 (function(){
+  window._CinemaEngine=G._CinemaEngine;
   window._SceneEngine=G._CinemaEngine;
   window._PredEngine=_PRED;
   console.log('[TCI Cinematic v8.0] ✅ Imersiv — harta e actorul');
