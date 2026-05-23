@@ -153,6 +153,11 @@ G._SceneEngine={
     const scene=this.SCENES[idx];this._si=idx;this._startT=performance.now();
     // Setup harta pentru scena curenta
     this._setupMap(scene.id);
+    // Forteaza primul frame imediat
+    if(this._ctx&&this._canvas){
+      this._ctx.clearRect(0,0,this._canvas.width,this._canvas.height);
+      try{this._draw(scene.id,0.01);}catch(e){console.warn('[v6 first]',e.message);}
+    }
     const loop=()=>{
       if(!this._playing)return;
       const t=Math.min(1,Math.max(0.001,(performance.now()-this._startT)/scene.dur));
