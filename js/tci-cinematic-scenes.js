@@ -118,7 +118,7 @@ G._SceneEngine={
     const db=window._RO_CITIES_DB||{};
     const city=db[cityKey]||Object.values(db)[0]||{name:'Municipiu',lat:45.5,lon:25.0,pop2021:100000,pop2011:100000,pib_eur_cap:9000,regiune:'C',tip:'municipiu',coef_hub:1.0,suprafata_ha:5000,spatii_verzi_mp_loc:10,acoperire_transport:55};
     this._city=city; this._pred=_PRED.calc(city);
-    this._hideUI();
+    this._hideUI(); const _mE=document.getElementById("map"); if(_mE){_mE.dataset.oh=_mE.style.height; _mE.style.height="100vh";} setTimeout(()=>{try{window.map?.resize();}catch(e){}},200);
     this._canvas=this._createCanvas(); this._ctx=this._canvas.getContext('2d');
     this._pugGeo=null;this._reguli=null;this._wikiText='';
     this._loadAssets(city);
@@ -168,7 +168,7 @@ G._SceneEngine={
   stop(){
     this._playing=false;if(this._raf)cancelAnimationFrame(this._raf);if(this._rotInt){clearInterval(this._rotInt);this._rotInt=null;}
     this._canvas?.remove();this._canvas=null;this._ctx=null;document.getElementById('tci-v5-ctrl')?.remove();
-    this._cleanupMapLayers();this._restoreUI();
+    this._cleanupMapLayers();this._restoreUI(); const _mR=document.getElementById("map"); if(_mR&&_mR.dataset.oh!==undefined){_mR.style.height=_mR.dataset.oh; delete _mR.dataset.oh; setTimeout(()=>{try{window.map?.resize();}catch(e){}},200);}
     try{window.map?.flyTo({zoom:13,pitch:45,bearing:0,duration:1500,essential:true});}catch(e){}
     ss('⏹ TCI oprit');
   },
