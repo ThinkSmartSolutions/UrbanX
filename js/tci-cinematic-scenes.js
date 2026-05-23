@@ -158,6 +158,13 @@ G._SceneEngine={
       this._ctx.clearRect(0,0,this._canvas.width,this._canvas.height);
       try{this._draw(scene.id,0.01);}catch(e){console.warn('[v6 first]',e.message);}
     }
+    // Sterge layerele scenei PRECEDENTE (nu ale celei curente)
+    if(idx > 0) this._cleanLayers();
+    // Forteaza primul frame imediat
+    if(this._ctx&&this._canvas){
+      this._ctx.clearRect(0,0,this._canvas.width,this._canvas.height);
+      try{this._draw(scene.id,0.01);}catch(e){}
+    }
     const loop=()=>{
       if(!this._playing)return;
       const t=Math.min(1,Math.max(0.001,(performance.now()-this._startT)/scene.dur));
@@ -166,7 +173,7 @@ G._SceneEngine={
         try{this._draw(scene.id,t);}catch(e){console.warn('[v6]',e.message);}
       }
       if(t<1){this._raf=requestAnimationFrame(loop);}
-      else{this._cleanLayers();this._runScene(idx+1);}
+      else{this._runScene(idx+1);}
     };
     this._raf=requestAnimationFrame(loop);
   },
@@ -224,7 +231,13 @@ G._SceneEngine={
         try{map.jumpTo({center:[cx,cy],zoom:10.5,pitch:55,bearing:10});}catch(e){}
         setTimeout(()=>{try{map.flyTo({center:[cx,cy],zoom:11.5,pitch:58,bearing:15,duration:3000,essential:true});}catch(e){}},200);
         try{map.setConfigProperty('basemap','lightPreset','night');}catch(e){}
-        onIdle(()=>{this._add3DGrowth(map);this._rot(map,15,0.02);});
+        // Adauga bare dupa 1.5s indiferent de idle - garantat
+        setTimeout(()=>{
+          if(this._playing&&this._si===this.SCENES.findIndex(s=>s.id==='s4')){
+            this._add3DGrowth(map);
+            this._rot(map,15,0.02);
+          }
+        },1500);
         break;
       case 's5':
         fly(13,42,0,2500,'night');
