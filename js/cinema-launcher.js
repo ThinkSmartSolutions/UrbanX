@@ -740,13 +740,20 @@ window._startCinema = function(cityKey) {
     try{if(map.getLayer('cin-osm'))map.removeLayer('cin-osm');}catch(e){}
     try{if(map.getSource('cin-osm'))map.removeSource('cin-osm');}catch(e){}
 
+    // Dezactiveaza _setupMap din _CinemaEngine - il suprascrie cu pitch gresit
+    var _origSetupMap = SE._setupMap;
+    SE._setupMap = function(){};  // noop temporar
+
     setupCamera(scene.id);
 
-    // Forteaza camera la pitch 72 zoom 15.5 pentru scenele cu 3D
+    // Forteaza camera DUPA setupCamera
     var scene3D=['crestere','azi_3d','cartiere','zoom_in','intro','viziune'];
     if(scene3D.indexOf(scene.id)>=0){
       try{map.jumpTo({center:[cx,cy],zoom:15.5,pitch:72,bearing:20});}catch(e){}
     }
+
+    // Restaureaza _setupMap pentru alte functii care il folosesc
+    SE._setupMap = _origSetupMap;
 
     var loop=function(){
       if(!SE._playing)return;
