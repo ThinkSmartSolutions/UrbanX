@@ -1027,19 +1027,8 @@ G._CinemaEngine={
   window._SceneEngine=G._CinemaEngine;
   window._PredEngine=_PRED;
   console.log('[TCI Cinematic v8.0] ✅ Imersiv — harta e actorul');
-  const patch=(n)=>{
-    if(typeof TCI!=='undefined'&&typeof window.openTCI==='function'){
-      const orig=window.openTCI;
-      window.openTCI=function(opts){
-        if(opts?.mode==='cinema_v2'||opts?.scenes||window._preferCinemaV2){
-          G._CinemaEngine.launch(opts?.cityKey||G._CinemaEngine._getCityKey());
-        }else{orig?.(opts);}
-      };
-      window._switchToCinemaV2=()=>{window._preferCinemaV2=true;ss('🎬 Cinema v8 activ');};
-      window._switchToTCIClassic=()=>{window._preferCinemaV2=false;ss('📊 Clasic activ');};
-    }else if(n<40)setTimeout(()=>patch(n+1),500);
-  };
-  patch(0);
+  // Nu mai patchuim openTCI - cauzeaza interceptari
+  window._launchCinema = (k) => G._CinemaEngine['launch'](k||G._CinemaEngine._getCityKey());
   ss('🎬 TCI v8.0 — imersiv · harta vie · orice UAT · INSE live');
 })();
 
