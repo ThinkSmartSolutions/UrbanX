@@ -185,7 +185,7 @@ G._SceneEngine={
       if(!d)return;
       this._inseData=d;
       // Imbogateste _pred cu date reale INSE
-      this._pred=this._enrichPredFromINSE(this._pred,d);
+      this._pred=_PRED._enrichPredFromINSE(this._pred,d);
       ss('📊 INSE live: '+(d._locLabel||siruta||'date incarcate'));
     });
     this._runScene(0);
