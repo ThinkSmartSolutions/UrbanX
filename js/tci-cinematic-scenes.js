@@ -261,21 +261,23 @@ G._CinemaEngine={
   _restoreUI(){this._hiddenEls.forEach(e=>{e.style.cssText=e.dataset.c8h||'';delete e.dataset.c8h;});this._hiddenEls=[];},
 
   _runScene(idx){
-    if(!this._playing||idx>=this.SCENES.length){this._finish();return;}
-    const scene=this.SCENES[idx];
-    this._si=idx;this._startT=performance.now();
-    this._setupMap(scene.id);
+    const self=this;
+    if(!self._playing||idx>=self.SCENES.length){self._finish();return;}
+    const scene=self.SCENES[idx];
+    self._si=idx;self._startT=performance.now();
+    self._setupMap(scene.id);
     const loop=()=>{
-      if(!this._playing)return;
-      const t=Math.min(1,Math.max(0.001,(performance.now()-this._startT)/scene.dur));
-      if(this._ctx&&this._canvas){
-        this._ctx.clearRect(0,0,this._canvas.width,this._canvas.height);
-        try{this._draw(scene.id,t);}catch(e){console.warn('[v8]',scene.id,e.message);}
+      if(!self._playing)return;
+      const t=Math.min(1,Math.max(0.001,(performance.now()-self._startT)/scene.dur));
+      if(self._ctx&&self._canvas){
+        self._ctx.clearRect(0,0,self._canvas.width,self._canvas.height);
+        try{self._draw(scene.id,t);}catch(e){console.warn('[v8]',scene.id,e.message);}
       }
-      if(t<1){this._raf=requestAnimationFrame(loop);}
-      else{this._cleanLayers();this._runScene(idx+1);}
+      if(t<1){self._raf=requestAnimationFrame(loop);}
+      else{self._cleanLayers();self._runScene(idx+1);}
     };
-    this._raf=requestAnimationFrame(loop);
+    self._raf=requestAnimationFrame(loop);
+    console.log('[v8] Scene',idx,scene.id,'RAF:',self._raf);
   },
 
   stop(){
