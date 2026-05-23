@@ -208,13 +208,24 @@ window._startCinema = function(cityKey) {
         break;
 
       case 's7': // Unde creste orasul — BARE 3D CRESC ANIMAT
-        // Incepe deja aproape - pitch maxim de la start
-        jump(14,65,10); lp('night');
-        // Bare 3D imediat
-        try{SE._add3DGrowth.call(SE,map);}catch(e){console.warn('3DG:',e.message);}
-        // Zbor si mai aproape
-        setTimeout(function(){fly(15.5,72,25,5000);},500);
-        setTimeout(function(){rot(25,0.015);},1200);
+        lp('night');
+        // PASUL 1: zbor aproape de cladiri
+        try{map.jumpTo({center:[cx,cy],zoom:14,pitch:65,bearing:10});}catch(e){}
+        try{map.flyTo({center:[cx,cy],zoom:15.5,pitch:72,bearing:25,duration:5000,essential:true});}catch(e){}
+        // PASUL 2: dupa ce camera a ajuns, adauga barele 3D
+        setTimeout(function(){
+          if(!SE._playing)return;
+          try{SE._add3DGrowth.call(SE,map);}catch(e){console.warn('3DG:',e.message);}
+          // Incepe barele de la 0 (2026 = stare actuala mica)
+          if(SE._gf&&map.getSource('v8-gr')){
+            try{map.getSource('v8-gr').setData({type:'FeatureCollection',
+              features:SE._gf.map(function(f){
+                return Object.assign({},f,{properties:Object.assign({},f.properties,{h:2})});
+              })
+            });}catch(e){}
+          }
+          rot(25,0.015);
+        },5500);
         break;
 
       case 's8': // Mobilitate — retea OSM reala colorata
@@ -518,13 +529,34 @@ window._startCinema = function(cityKey) {
       break;
 
     case 's7':
-      // Bare 3D — update animat
-      try{SE._updateGrowth&&SE._updateGrowth.call(SE,t);}catch(e){}
-      titlu('Unde Creste Orasul','Bare 3D din PUG real · Presiune zonala');
-      linie();
-      cifra(N(Math.round(pred.defLoc*Math.min(1,t*1.2))),'Deficit locuinte 2055','#ef4444');
-      cifra2(N(pred.recHa)+' ha','Potential reconversie','#f59e0b');
-      narativ('Zonele rosii = presiune maxima (CC/CP). Galben = semidental. Albastru = rezidential. Verde = reconversie posibila.');
+      // Bare 3D cresc animat — de la 0 (2026) la inaltime maxima (2055)
+      // Animatia incepe dupa t=0.35 (dupa ce camera a ajuns)
+      if(t>0.35&&SE._gf&&SE._map){
+        var tAnim=Math.min(1,(t-0.35)/0.60);
+        var tEased=1-Math.pow(1-tAnim,3);
+        try{
+          var src7=SE._map.getSource('v8-gr');
+          if(src7)src7.setData({type:'FeatureCollection',
+            features:SE._gf.map(function(f){
+              var hFin=f.properties.hFinal||f.properties.h||10;
+              return Object.assign({},f,{properties:Object.assign({},f.properties,{h:Math.max(1,hFin*tEased)})});
+            })
+          });
+        }catch(e){}
+      }
+      // Titlu schimbat in timp
+      if(t<0.38){
+        titlu('Iasi 2026 — Starea Actuala','Cladiri existente · Inaltime reala din PUG');
+        cifra(N(pred.p21),'Locuitori actuali','#94a3b8');
+        cifra2(N(pred.auth),'Autorizatii constructie 2023','#60a5fa');
+      } else {
+        var tPct=Math.round(Math.min(100,((t-0.35)/0.60)*100));
+        titlu('Unde Creste Orasul 2055','Bare 3D cresc · Rosu=maxim · Verde=redus');
+        linie();
+        cifra(N(Math.round(pred.defLoc*(t-0.35)/0.65)),'Deficit locuinte 2055','#ef4444');
+        cifra2(tPct+'%','Dezvoltare proiectata');
+        if(t>0.70)narativ('Rosu/portocaliu = zone CC/CP cu presiune maxima. Albastru = rezidential. Verde = reconversie. '+N(pred.defLoc)+' unitati necesare pana in 2055.');
+      }
       break;
 
     case 's8':
