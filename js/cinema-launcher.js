@@ -239,36 +239,29 @@ window._startCinema = function(cityKey) {
         lp('night');
         try{map.jumpTo({center:[cx,cy],zoom:15.5,pitch:72,bearing:20});}catch(e){}
         // Apeleaza exact cum merge din consola, dupa idle
-        map.once('idle',function(){
-          if(!SE._playing)return;
-          SE._city=SE._city||(window._RO_CITIES_DB||{})['RO-IS-01'];
-          SE._pred=SE._pred||window._PredEngine.calc(SE._city);
-          try{SE._add3DGrowth.call(SE,map);}catch(e){console.error('3D err:',e);}
-          rot(20,0.015);
-          setTimeout(function(){
-            if(!SE._playing||!SE._gf)return;
-            // Bare la h=1 initial
-            try{map.getSource('v8-gr').setData({type:'FeatureCollection',
-              features:SE._gf.map(function(f){
-                return Object.assign({},f,{properties:Object.assign({},f.properties,{h:1})});
-              })});}catch(e){}
-          },200);
-        });
+        // Apel direct — nu mai asteapta idle
+        try{SE._add3DGrowth.call(SE,map);}catch(e){console.error('3D err:',e);}
+        rot(20,0.015);
+        // Bare la h=1 initial dupa 200ms
+        setTimeout(function(){
+          if(!SE._playing||!SE._gf)return;
+          try{map.getSource('v8-gr').setData({type:'FeatureCollection',
+            features:SE._gf.map(function(f){
+              return Object.assign({},f,{properties:Object.assign({},f.properties,{h:1})});
+            })});}catch(e){}
+        },300);
         break;
 
       case 'mobil1':
         lp('night');
         try{map.jumpTo({center:[cx,cy],zoom:12.5,pitch:55,bearing:0});}catch(e){}
-        map.once('idle',function(){
+        fetchOSM(function(ft){
           if(!SE._playing)return;
-          fetchOSM(function(ft){
+          addOSM(ft);
+          setTimeout(function(){
             if(!SE._playing)return;
-            addOSM(ft);
-            setTimeout(function(){
-              if(!SE._playing)return;
-              try{map.flyTo({center:[cx,cy],zoom:13.5,pitch:62,bearing:15,duration:4000,essential:true});}catch(e){}
-            },500);
-          });
+            try{map.flyTo({center:[cx,cy],zoom:13.5,pitch:62,bearing:15,duration:4000,essential:true});}catch(e){}
+          },500);
         });
         break;
 
@@ -294,20 +287,14 @@ window._startCinema = function(cityKey) {
       case 'seismic':
         lp('night');
         try{map.jumpTo({center:[cx,cy],zoom:13,pitch:55,bearing:0});}catch(e){}
-        map.once('idle',function(){
-          if(!SE._playing)return;
-          try{SE._addSeismic.call(SE,map);}catch(e){console.warn('seismic:',e);}
-        });
+        try{SE._addSeismic.call(SE,map);}catch(e){console.warn('seismic:',e);}
         break;
 
       case 'inund':
         lp('dawn');
         try{map.jumpTo({center:[cx,cy],zoom:12.5,pitch:50,bearing:5});}catch(e){}
-        map.once('idle',function(){
-          if(!SE._playing)return;
-          try{SE._addFlood.call(SE,map);}catch(e){console.warn('flood:',e);}
-          try{SE._addRoads.call(SE,map);}catch(e){}
-        });
+        try{SE._addFlood.call(SE,map);}catch(e){console.warn('flood:',e);}
+        try{SE._addRoads.call(SE,map);}catch(e){}
         break;
 
       case 'clima':
@@ -342,22 +329,16 @@ window._startCinema = function(cityKey) {
       case 'viziune':
         lp('dusk');
         try{map.jumpTo({center:[cx,cy],zoom:15.5,pitch:72,bearing:30});}catch(e){}
-        map.once('idle',function(){
-          if(!SE._playing)return;
-          SE._city=SE._city||(window._RO_CITIES_DB||{})['RO-IS-01'];
-          SE._pred=SE._pred||window._PredEngine.calc(SE._city);
-          try{SE._add3DGrowth.call(SE,map);}catch(e){console.error('3D err:',e);}
-          rot(30,0.010);
-          // Bare la inaltime maxima
-          setTimeout(function(){
-            if(!SE._gf)return;
-            try{map.getSource('v8-gr').setData({type:'FeatureCollection',
-              features:SE._gf.map(function(f){
-                return Object.assign({},f,{properties:Object.assign({},f.properties,{h:f.properties.hFinal||f.properties.h||20})});
-              })});}catch(e){}
-            try{map.flyTo({center:[cx,cy],zoom:15.5,pitch:72,bearing:120,duration:14000,essential:true});}catch(e){}
-          },500);
-        });
+        try{SE._add3DGrowth.call(SE,map);}catch(e){console.error('3D err:',e);}
+        rot(30,0.010);
+        setTimeout(function(){
+          if(!SE._gf)return;
+          try{map.getSource('v8-gr').setData({type:'FeatureCollection',
+            features:SE._gf.map(function(f){
+              return Object.assign({},f,{properties:Object.assign({},f.properties,{h:f.properties.hFinal||f.properties.h||20})});
+            })});}catch(e){}
+          try{map.flyTo({center:[cx,cy],zoom:15.5,pitch:72,bearing:120,duration:14000,essential:true});}catch(e){}
+        },500);
         break;
     }
   }
