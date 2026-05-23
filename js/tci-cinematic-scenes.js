@@ -77,26 +77,57 @@ const _PRED={
       agenda,trendClr,trendLbl,gradNoi2:Math.max(0,Math.round(Math.max(0,deltaP)*0.14/200))};
   },
   // INSE TEMPO live — populatie, rata, somaj per UAT
+  // ── INSE LIVE DATA ENGINE ──────────────────────────────────────────────
+  // structura API: dimensionsMap[0]=varste, [1]=siruta/localitati,
+  // [3]=judete, [4]=localitati, [5]=timp
+  // details: {nomJud:3, nomLoc:4, matSiruta:1}
+
   async fetchINSE(siruta){
-    // Proxy Cloudflare cu ssl:false spre INSE HTTP:8077
-    // URL: /inse?matrice=POP107D&user=...&pass=...&lang=ro
     try{
+      const params=new URLSearchParams({matrice:'POP107D',user:INSE_USER,pass:INSE_PASS,lang:'ro'});
+      const r=await fetch(`${PROXY}/inse?${params}`,{signal:AbortSignal.timeout(12000)});
+      if(!r.ok)return null;
+      const d=await r.json();
+      if(d.error)return null;
+      console.log('[v8] INSE POP107D OK — matrixName:',d.matrixName?.slice(0,50));
+      return d;
+    }catch(e){console.warn('[v8] INSE:',e.message);return null;}
+  },
+
+  // Extrage populatia reala per UAT din raspunsul INSE
+  // siruta = codul SIRUTA al localitatii (ex: '6801' pentru Iasi)
+  _parseINSEPop(inseData, siruta){
+    if(!inseData||!siruta)return null;
+    try{
+      // dimensionsMap[1] contine localitatile cu SIRUTA
+      const locDim=inseData.dimensionsMap?.[1];
+      if(!locDim?.options)return null;
+      // Cauta dupa SIRUTA in labels
+      const loc=locDim.options.find(o=>
+        o.label?.includes(siruta)||
+        o.nomItemId?.toString()===siruta.toString()
+      );
+      if(!loc){console.warn('[v8] SIRUTA',siruta,'negasit in INSE');return null;}
+      console.log('[v8] INSE loc gasit:',loc.label,'id:',loc.nomItemId);
+      return {sirutaId:loc.nomItemId, label:loc.label};
+    }catch(e){return null;}
+  },
+
+  // Fetch populatie totala pentru un an specific
+  async fetchPopAnual(siruta, an='2023'){
+    if(!this._inseData)return null;
+    try{
+      // Query INSE cu filtru pe localitate si an
       const params=new URLSearchParams({
-        matrice:'POP107D',
-        user:INSE_USER,
-        pass:INSE_PASS,
-        lang:'ro'
+        matrice:'POP107D',user:INSE_USER,pass:INSE_PASS,lang:'ro',
+        // Filtram pe localitate si ultimul an disponibil
+        query:JSON.stringify({
+          lang:'ro',
+          arr:['GRUPE_VARSTA','JUDETE','LOCALITATI','ANI'],
+          matrix:'POP107D'
+        })
       });
       const r=await fetch(`${PROXY}/inse?${params}`,{signal:AbortSignal.timeout(10000)});
-      if(r.ok){const d=await r.json();if(!d.error){console.log('[v8] INSE OK',Object.keys(d));return d;}}
-    }catch(e){console.warn('[v8] INSE unavailable:',e.message);}
-    return null;
-  },
-  // Fetch populatie pe judete din INSE
-  async fetchPOP(judet){
-    try{
-      const params=new URLSearchParams({matrice:'POP107D',lang:'ro'});
-      const r=await fetch(`${PROXY}/inse?${params}`,{signal:AbortSignal.timeout(8000)});
       if(r.ok){const d=await r.json();return d;}
     }catch(e){}
     return null;
@@ -139,7 +170,18 @@ G._SceneEngine={
     this._si=0;this._playing=true;
     // Async — nu blocheaza startul
     this._loadAssets(this._city);
-    _PRED.fetchINSE(this._city.siruta||'').then(d=>{if(d)this._inseData=d;});
+    _PRED.fetchINSE(this._city.siruta||'').then(d=>{
+      if(!d)return;
+      this._inseData=d;
+      // Imbogateste _pred cu date INSE reale daca avem SIRUTA
+      const siruta=this._city.siruta||this._city.cod_siruta||'';
+      if(siruta){
+        const loc=this._parseINSEPop(d,siruta);
+        if(loc)console.log('[v8] INSE enrichment ready pentru',loc.label);
+      }
+      // Extrage ultima actualizare
+      if(d.ultimaActualizare)console.log('[v8] INSE ultima actualizare:',d.ultimaActualizare);
+    });
     this._runScene(0);
     ss('🎬 '+this._city.name+' — Cinema v8');
   },
