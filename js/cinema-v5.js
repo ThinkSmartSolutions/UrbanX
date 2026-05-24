@@ -87,6 +87,24 @@ window._startCinema = function(cityKey) {
 
   // Butoane
   document.getElementById('tci-c8-ctrl')?.remove();
+  // Legenda cladiri
+  document.getElementById('cin-legend')?.remove();
+  var leg=document.createElement('div');
+  leg.id='cin-legend';
+  leg.style.cssText='position:fixed;top:80px;right:16px;z-index:1000000;background:rgba(2,6,18,0.82);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 14px;font-family:"Space Grotesk",sans-serif;font-size:12px;color:#e2e8f0;min-width:160px;';
+  leg.innerHTML='<div style="font-size:10px;font-weight:700;color:#D4AF37;letter-spacing:.1em;margin-bottom:6px">TIPURI CLADIRI</div>'
+    +'<div style="display:flex;flex-direction:column;gap:3px">'
+    +'<div><span style="display:inline-block;width:10px;height:10px;background:#3b82f6;border-radius:2px;margin-right:6px"></span>Apartamente</div>'
+    +'<div><span style="display:inline-block;width:10px;height:10px;background:#93c5fd;border-radius:2px;margin-right:6px"></span>Case</div>'
+    +'<div><span style="display:inline-block;width:10px;height:10px;background:#f59e0b;border-radius:2px;margin-right:6px"></span>Comercial</div>'
+    +'<div><span style="display:inline-block;width:10px;height:10px;background:#a78bfa;border-radius:2px;margin-right:6px"></span>Birouri</div>'
+    +'<div><span style="display:inline-block;width:10px;height:10px;background:#22c55e;border-radius:2px;margin-right:6px"></span>Scoli</div>'
+    +'<div><span style="display:inline-block;width:10px;height:10px;background:#ef4444;border-radius:2px;margin-right:6px"></span>Spitale</div>'
+    +'<div><span style="display:inline-block;width:10px;height:10px;background:#d97706;border-radius:2px;margin-right:6px"></span>Biserici</div>'
+    +'<div><span style="display:inline-block;width:10px;height:10px;background:#6b7280;border-radius:2px;margin-right:6px"></span>Industrial</div>'
+    +'</div>';
+  document.body.appendChild(leg);
+
   var ctrl=document.createElement('div');
   ctrl.id='tci-c8-ctrl';
   ctrl.style.cssText='position:fixed;bottom:24px;right:20px;z-index:1000000;display:flex;gap:8px;';
@@ -112,6 +130,7 @@ window._startCinema = function(cityKey) {
     try{if(origColor)map.setPaintProperty('building-extrusion','fill-extrusion-color',origColor);}catch(e){}
     document.getElementById('tci-c8')?.remove();
     document.getElementById('tci-c8-ctrl')?.remove();
+    document.getElementById('cin-legend')?.remove();
     hidden.forEach(function(el){el.style.cssText=el._cs||'';delete el._cs;});
     try{map.flyTo({center:[cx,cy],zoom:13,pitch:45,bearing:0,duration:1500,essential:true});}catch(e){}
     try{map.setConfigProperty('basemap','lightPreset','day');}catch(e){}
@@ -397,6 +416,265 @@ window._startCinema = function(cityKey) {
   }
 
 
+  // ── CANVAS OVERLAY per scena ─────────────────────────────────────────
+  function cinDraw(id,t,ctx,W,H,pred,name,SE){
+    if(!ctx||!pred)return;
+    var sA=t<0.06?t/0.06:t>0.92?(1-t)/0.08:1;
+    var eo=function(x){return 1-Math.pow(1-Math.max(0,Math.min(1,x)),3);};
+    var rE=function(d,s){return eo(Math.min(1,Math.max(0,(t-(d||0))/((s||0.25)))));};
+    var N=function(v){return isNaN(+v)?'—':Number(v).toLocaleString('ro-RO',{maximumFractionDigits:0});};
+    var FS={t:Math.min(W*0.034,46),s:Math.min(W*0.016,20),d:Math.min(W*0.058,78),l:Math.min(W*0.011,14),n:Math.min(W*0.014,18)};
+
+    // Vigneta sus
+    var gT=ctx.createLinearGradient(0,0,0,H*0.22);
+    gT.addColorStop(0,'rgba(2,5,14,0.90)');gT.addColorStop(1,'rgba(2,5,14,0)');
+    ctx.fillStyle=gT;ctx.fillRect(0,0,W,H*0.22);
+    // Vigneta jos
+    var gB=ctx.createLinearGradient(0,H*0.78,0,H);
+    gB.addColorStop(0,'rgba(2,5,14,0)');gB.addColorStop(1,'rgba(2,5,14,0.88)');
+    ctx.fillStyle=gB;ctx.fillRect(0,H*0.78,W,H*0.22);
+
+    function titlu(txt,sub){
+      ctx.globalAlpha=sA*rE(0.05,0.20);
+      ctx.fillStyle='rgba(212,175,55,0.95)';
+      ctx.font='700 '+FS.t+'px "IBM Plex Mono",monospace';
+      ctx.textAlign='left';ctx.letterSpacing='0.06em';
+      ctx.fillText(txt.slice(0,38),W*0.04,H*0.09);
+      if(sub){
+        ctx.globalAlpha=sA*rE(0.08,0.20)*0.65;
+        ctx.fillStyle='rgba(148,163,184,0.80)';
+        ctx.font=FS.s+'px "IBM Plex Mono",monospace';
+        ctx.fillText(sub.slice(0,52),W*0.04,H*0.09+FS.s*1.8);
+      }
+      ctx.globalAlpha=1;
+    }
+    function linie(){
+      ctx.globalAlpha=sA*rE(0.07,0.28);
+      var g=ctx.createLinearGradient(W*0.04,0,W*0.04+W*0.38,0);
+      g.addColorStop(0,'rgba(212,175,55,0.9)');g.addColorStop(1,'rgba(212,175,55,0)');
+      ctx.fillStyle=g;ctx.fillRect(W*0.04,H*0.108,W*0.38*rE(0.07,0.32),1.5);
+      ctx.globalAlpha=1;
+    }
+    function cifra(val,lbl,clr){
+      ctx.globalAlpha=sA*rE(0.15,0.25);
+      ctx.fillStyle=clr||'#ffffff';
+      ctx.font='900 '+FS.d+'px "Space Grotesk",sans-serif';
+      ctx.textAlign='left';
+      ctx.fillText(String(val).slice(0,11),W*0.04,H*0.885);
+      ctx.globalAlpha=sA*rE(0.18,0.20)*0.65;
+      ctx.fillStyle='rgba(148,163,184,0.72)';
+      ctx.font='600 '+FS.l+'px "IBM Plex Mono",monospace';
+      ctx.letterSpacing='0.08em';
+      ctx.fillText(String(lbl).toUpperCase().slice(0,32),W*0.04,H*0.910);
+      ctx.globalAlpha=1;
+    }
+    function cifra2(val,lbl,clr){
+      ctx.globalAlpha=sA*rE(0.22,0.22);
+      ctx.fillStyle=clr||'rgba(212,175,55,0.95)';
+      ctx.font='900 '+Math.min(W*0.034,46)+'px "Space Grotesk",sans-serif';
+      ctx.textAlign='right';
+      ctx.fillText(String(val).slice(0,13),W*0.96,H*0.885);
+      ctx.globalAlpha=sA*rE(0.25,0.20)*0.60;
+      ctx.fillStyle='rgba(148,163,184,0.65)';
+      ctx.font='600 '+FS.l+'px "IBM Plex Mono",monospace';
+      ctx.textAlign='right';
+      ctx.fillText(String(lbl).toUpperCase().slice(0,26),W*0.96,H*0.908);
+      ctx.globalAlpha=1;
+    }
+    function narativ(txt){
+      if(t<0.55)return;
+      ctx.globalAlpha=Math.min(1,(t-0.55)/0.18)*sA;
+      ctx.fillStyle='rgba(220,228,255,0.82)';
+      ctx.font='500 '+FS.n+'px "Space Grotesk",sans-serif';
+      ctx.textAlign='left';
+      var mW=W*0.54,words=txt.split(' '),line='',y=H*0.934,n=0;
+      words.forEach(function(w){
+        var test=line+(line?' ':'')+w;
+        if(ctx.measureText(test).width>mW&&line&&n<2){ctx.fillText(line,W*0.04,y);y+=FS.n*1.4;line=w;n++;}
+        else line=test;
+      });
+      if(n<2)ctx.fillText(line,W*0.04,y);
+      ctx.globalAlpha=1;
+    }
+    // Progress
+    ctx.globalAlpha=0.45;
+    ctx.fillStyle='rgba(255,255,255,0.08)';ctx.fillRect(W*0.35,H-11,W*0.30,2);
+    var gp=ctx.createLinearGradient(W*0.35,0,W*0.65,0);
+    gp.addColorStop(0,'#D4AF37');gp.addColorStop(1,'rgba(212,175,55,0.15)');
+    ctx.fillStyle=gp;ctx.fillRect(W*0.35,H-11,W*0.30*((SE._si+t)/SE.SCENES.length),2);
+    ctx.fillStyle='rgba(148,163,184,0.35)';
+    ctx.font='500 '+Math.min(W*0.009,11)+'px "IBM Plex Mono",monospace';
+    ctx.textAlign='center';
+    ctx.fillText((SE._si+1)+'/'+SE.SCENES.length+' — '+(SE.SCENES[SE._si]?.label||''),W/2,H-1);
+    ctx.globalAlpha=1;
+
+    switch(id){
+    case 'intro':
+      ctx.globalAlpha=sA*rE(0.20,0.40);
+      ctx.fillStyle='rgba(255,255,255,0.94)';
+      ctx.font='900 '+Math.min(W*0.085,108)+'px "Space Grotesk",sans-serif';
+      ctx.textAlign='center';
+      ctx.fillText(name.toUpperCase(),W/2,H*0.48);
+      ctx.globalAlpha=sA*rE(0.30,0.25)*0.78;
+      ctx.fillStyle='#D4AF37';
+      ctx.font='600 '+Math.min(W*0.016,21)+'px "Space Grotesk",sans-serif';
+      ctx.textAlign='center';
+      ctx.fillText((SE._city?.judet||'—').toUpperCase()+' · '+N(pred.p21)+' LOCUITORI · '+(SE._city?.regiune||''),W/2,H*0.552);
+      cifra(N(pred.p21),'Locuitori 2021');
+      cifra2(N(Math.round((SE._city?.suprafata_ha||9800)/100))+' km²','Suprafata');
+      break;
+    case 'oras3d':
+      titlu('Orasul Azi — 3D','Cladiri reale · Tipuri · Densitate');linie();
+      cifra(N(pred.p21),'Locuitori 2021');
+      cifra2(N(pred.pib||14200)+' €/loc','PIB per locuitor');
+      narativ('Albastru=blocuri · Portocaliu=comercial · Verde=scoli · Violet=birouri · Rosu=spitale · Maro=biserici');
+      break;
+    case 'demo':
+      titlu('Populatia','Densitate · Tendinta · 2055');linie();
+      cifra((pred.r10>=0?'+':'')+pred.r10.toFixed(2)+'%/an',pred.trendLbl||'tendinta',pred.trendClr||'#f59e0b');
+      cifra2(N(pred.pop55),'Estimat 2055');
+      narativ(N(pred.p21)+' loc. in 2021. Tendinta: '+(pred.trendLbl||'stabila')+'. Proiectie 2055: '+N(pred.pop55)+' loc. ('+((pred.pop55>pred.p21?'+':'')+N(pred.pop55-pred.p21))+')');
+      break;
+    case 'eco':
+      titlu('Economia','PIB · Convergenta UE · Sectoare');linie();
+      cifra(N(pred.pib||14200)+' €','PIB per locuitor',(pred.pctUE||39)>=75?'#22c55e':'#f59e0b');
+      cifra2((pred.pctUE||39)+'% UE27','Convergenta');
+      narativ(name+' = '+(pred.pctUE||39)+'% din media UE27. Convergenta estimata ~'+(pred.anConv||2047)+'. Servicii '+(pred.ocupatie?.servicii||48)+'%, industrie '+(pred.ocupatie?.industrie||23)+'%.');
+      break;
+    case 'crestere':
+      var tG=t<0.15?0:Math.min(1,(t-0.15)/0.70);
+      var tE=1-Math.pow(1-tG,3);
+      if(t<0.18){
+        titlu('Iasi 2026 — Starea Actuala','Constructii existente');linie();
+        cifra(N(pred.p21),'Locuitori actuali','#94a3b8');
+        cifra2(N(pred.auth||430),'Autorizatii 2023','#60a5fa');
+      } else {
+        titlu('Unde Creste Orasul 2055','Presiune constructibila');linie();
+        ctx.globalAlpha=sA*tE;
+        ctx.fillStyle='#ef4444';
+        ctx.font='900 '+FS.d+'px "Space Grotesk",sans-serif';
+        ctx.textAlign='left';
+        ctx.fillText(N(Math.round((pred.defLoc||5000)*tE)),W*0.04,H*0.885);
+        ctx.globalAlpha=sA*0.65;
+        ctx.fillStyle='rgba(148,163,184,0.72)';
+        ctx.font='600 '+FS.l+'px "IBM Plex Mono",monospace';
+        ctx.fillText('UNITATI LOCATIVE NECESARE 2055',W*0.04,H*0.910);
+        cifra2(N(pred.recHa||390)+' ha','Potential reconversie','#f59e0b');
+        if(tE>0.5)narativ('Verde=joase/potential densificare. Galben=medii. Rosu=inalte/presiune maxima CC/CP. '+(pred.defLoc||5000)+' unitati necesare.');
+        ctx.globalAlpha=1;
+      }
+      break;
+    case 'mobil':
+      titlu('Mobilitate Urbana','Retea OSM reala · Congestie · Solutii');linie();
+      cifra(N(pred.mot24||400),'Vehicule/1000 loc',(pred.mot24||400)>500?'#ef4444':'#f59e0b');
+      cifra2('~'+(pred.satAn||2038),'An saturare retea');
+      // Legenda artere
+      ctx.globalAlpha=sA*rE(0.25,0.20);
+      [['#dc2626','AUTOSTRADA'],['#ea580c','TRUNK'],['#f59e0b','PRIMAR'],['#16a34a','SECUNDAR'],['#0ea5e9','TERTIAR']].forEach(function(it,i){
+        ctx.fillStyle=it[0];ctx.fillRect(W*(0.04+i*0.165),H*0.928,W*0.020,7);
+        ctx.fillStyle='rgba(220,230,255,0.75)';
+        ctx.font='500 '+Math.min(W*0.010,13)+'px "IBM Plex Mono",monospace';
+        ctx.textAlign='left';
+        ctx.fillText(it[1],W*(0.065+i*0.165),H*0.937);
+      });
+      ctx.globalAlpha=1;
+      narativ(N(pred.fluxOra||28800)+' veh/h la varf. Saturatie ~'+(pred.satAn||2038)+'. '+(pred.pasaje||8)+' pasaje necesare. Cost: '+N(pred.invMob||162)+' M EUR.');
+      break;
+    case 'tp':
+      titlu('Transport Public','Acoperire · BRT · SUMP');linie();
+      cifra((pred.tp||72)+'%','Populatie acoperita',(pred.tp||72)>=70?'#22c55e':(pred.tp||72)>=50?'#f59e0b':'#ef4444');
+      cifra2((pred.kmBRT||47)+' km BRT','Cost: '+N(pred.costBRT||165)+' M €');
+      narativ('Deficit '+(pred.defTP||3)+'pp vs standard 75%. Walk Score: '+(pred.walkScore||72)+'/100. Statii noi: '+N(pred.statiiNoi||180)+'. SUMP: '+(pred.anSUMP||2026)+'.');
+      break;
+    case 'seismic':
+      titlu('Risc Seismic','P100 · Fond vulnerabil · PNRR');linie();
+      var agC=(pred.ag||0.25)>=0.30?'#ef4444':(pred.ag||0.25)>=0.20?'#f59e0b':'#22c55e';
+      cifra('ag='+(pred.ag||0.25).toFixed(2)+'g','Acceleratie seismica P100',agC);
+      cifra2(N(pred.fond||2885)+' cladiri','Fond risc RS I-III','#ef4444');
+      // Legenda seismic
+      ctx.globalAlpha=sA*rE(0.25,0.20);
+      [['#166534','SIGUR (<8m)'],['#854d0e','ATENTIE (8-15m)'],['#dc2626','RISC (>25m)']].forEach(function(it,i){
+        ctx.fillStyle=it[0];ctx.fillRect(W*(0.04+i*0.22),H*0.928,W*0.020,7);
+        ctx.fillStyle='rgba(220,230,255,0.75)';
+        ctx.font='500 '+Math.min(W*0.010,13)+'px "IBM Plex Mono",monospace';
+        ctx.textAlign='left';
+        ctx.fillText(it[1],W*(0.065+i*0.22),H*0.937);
+      });
+      ctx.globalAlpha=1;
+      narativ(N(pred.fond||2885)+' cladiri la risc. PNRR: '+N(Math.round((pred.fond||2885)*0.25))+' apartamente reabilitabile. Cost: '+N(Math.round((pred.fond||2885)*0.085))+' M EUR.');
+      break;
+    case 'inund':
+      titlu('Inundatii & Clima','Zone risc · Lunca · 2055');linie();
+      cifra((pred.zile24||22)+' zile','Caniculare >35°C azi','#f59e0b');
+      cifra2(Math.round((pred.zile24||22)*2.2)+' zile','Proiectie 2055','#ef4444');
+      narativ('Zona albastra = lunca inundabila activa. Autostrada si centura marcate. In 2055: '+Math.round((pred.zile24||22)*2.2)+' zile caniculare (+'+Math.round((pred.zile24||22)*1.2)+').');
+      break;
+    case 'mc2055':
+      var rB=pred.rRef||0.1;
+      var pO=Math.round((pred.p21||360633)*Math.pow(1+(rB+0.9)/100,34));
+      var pR=Math.round((pred.p21||360633)*Math.pow(1+(rB-0.8)/100,34));
+      titlu('Monte Carlo 2055','3 Scenarii · Probabilitati');linie();
+      [['S1 REGRES: '+N(pR)+' loc.','#ef4444',0.18],
+       ['S2 TENDINTA: '+N(pred.pop55||373000)+' loc.','#f59e0b',0.28],
+       ['S3 OPTIMIST: '+N(pO)+' loc.','#22c55e',0.38]].forEach(function(s,i){
+        ctx.globalAlpha=sA*rE(s[2],0.20);
+        ctx.fillStyle=s[1];
+        ctx.font='700 '+Math.min(W*0.015,19)+'px "Space Grotesk",sans-serif';
+        ctx.textAlign='left';
+        ctx.fillText(s[0],W*0.04,H*(0.80+i*0.036));
+      });
+      ctx.globalAlpha=1;
+      cifra('['+N(pR)+'–'+N(pO)+']','Interval 90%','#f59e0b');
+      narativ('Diferenta intre scenarii: '+N(pO-pR)+' persoane. Decizia de azi determina scenariul. S3 necesita investitii de '+N(pred.invTotal||311)+' M EUR.');
+      break;
+    case 'infra':
+      titlu('Ce Construim 2025–2055','Scoli · Cabinete · SV · Retele');linie();
+      cifra(N(pred.invTotal||311)+' M €','Total investitii','#D4AF37');
+      cifra2('~60% UE','Finantare','#22c55e');
+      [['🏫 SCOLI: +'+(pred.scoliNoi||2),0.16],['🏥 CABINETE: +'+(pred.cabMed||7),0.24],
+       ['🌳 SPATII VERZI: +'+(pred.svHa||280)+' ha',0.32],['🚌 STATII TP: +'+(pred.statiiNoi||180),0.40]].forEach(function(it,i){
+        ctx.globalAlpha=sA*rE(it[1],0.16);
+        ctx.fillStyle='rgba(220,230,255,0.82)';
+        ctx.font='600 '+Math.min(W*0.013,16)+'px "Space Grotesk",sans-serif';
+        ctx.textAlign='left';
+        ctx.fillText(it[0],W*0.04,H*(0.78+i*0.034));
+      });
+      ctx.globalAlpha=1;
+      narativ('Mobilitate: '+N(pred.invMob||162)+' M EUR. Social: '+N(pred.invSoc||100)+' M EUR. Finantare UE ~60% prin REGIO+PNRR.');
+      break;
+    case 'viziune':
+      ctx.globalAlpha=sA*rE(0.05,0.5)*0.055;
+      ctx.fillStyle='#D4AF37';
+      ctx.font='900 '+Math.min(W*0.26,320)+'px "Space Grotesk",sans-serif';
+      ctx.textAlign='center';
+      ctx.fillText('2055',W/2,H*0.62);
+      titlu(name+' 2055','Viziunea posibila');linie();
+      ctx.globalAlpha=sA*rE(0.14,0.28);
+      ctx.fillStyle='rgba(255,255,255,0.93)';
+      ctx.font='900 '+Math.min(W*0.050,65)+'px "Space Grotesk",sans-serif';
+      ctx.textAlign='center';
+      ctx.fillText(name.toUpperCase(),W/2,H*0.27);
+      [{ok:(pred.pop55||373000)>(pred.p21||360633),txt:'Pop 2055: '+N(pred.pop55||373000)+' loc.'},
+       {ok:(pred.pctUE55||62)>=75,txt:'PIB 2055: '+(pred.pctUE55||62)+'% UE27'},
+       {ok:(pred.anSUMP||2026)<=2035,txt:'SUMP: ~'+(pred.anSUMP||2026)},
+       {ok:(pred.sdgTotal||6.8)>=6,txt:'SDG11: '+(pred.sdgTotal||6.8)+'/10'},
+       {ok:true,txt:'Investitii: '+N(pred.invTotal||311)+' M EUR'}
+      ].forEach(function(ch,i){
+        ctx.globalAlpha=sA*rE(0.26+i*0.06,0.16);
+        ctx.fillStyle=ch.ok?'#22c55e':'#f59e0b';
+        ctx.font='700 '+Math.min(W*0.015,19)+'px sans-serif';
+        ctx.textAlign='right';
+        ctx.fillText(ch.ok?'✓':'◎',W*0.96,H*(0.72+i*0.036));
+        ctx.fillStyle='rgba(220,228,255,0.85)';
+        ctx.font=Math.min(W*0.013,16)+'px "Space Grotesk",sans-serif';
+        ctx.textAlign='right';
+        ctx.fillText(ch.txt.slice(0,42),W*0.950,H*(0.72+i*0.036));
+      });
+      ctx.globalAlpha=1;
+      break;
+    }
+  }
+
   // ── RENDER LOOP ──────────────────────────────────────────────────────
   function runScene(idx){
     if(!SE._playing||idx>=SE.SCENES.length){
@@ -424,7 +702,8 @@ window._startCinema = function(cityKey) {
         try{map.setPaintProperty('building-extrusion','fill-extrusion-height',
           ['*',['get','height'],Math.max(0.05,tE)]);}catch(e){}
       }
-      try{SE._draw.call(SE,scene.id,t);}catch(e){console.warn('[Cinema]',scene.id,e.message);}
+      // Overlay canvas cu date per scena
+      try{cinDraw(scene.id,t,SE._ctx,window.innerWidth,window.innerHeight,pred,name,SE);}catch(e){}
       if(t<1){SE._raf=requestAnimationFrame(loop);}
       else{runScene(idx+1);}
     };
