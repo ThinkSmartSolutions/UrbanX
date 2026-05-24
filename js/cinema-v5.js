@@ -278,85 +278,93 @@ window._startCinema = function(cityKey) {
     }catch(e){}
   }
 
-  // Cartiere offset pentru zbor dinamic
-  var offsets = [
-    [cx, cy],
-    [cx-0.018, cy+0.012],
-    [cx+0.020, cy-0.010],
-    [cx-0.010, cy-0.018],
-    [cx+0.015, cy+0.015],
+  // Zone ale orasului pentru zbor dinamic - nord, centru, sud, est, vest
+  var zones = [
+    {c:[cx,       cy      ], b:20,  z:15.5}, // centru
+    {c:[cx-0.022, cy+0.015], b:60,  z:15.0}, // nord-vest (Copou/Tatarasi)
+    {c:[cx+0.025, cy-0.012], b:120, z:15.0}, // sud-est (Pacurari/Nicolina)
+    {c:[cx-0.012, cy-0.020], b:180, z:15.0}, // sud (Galata/Barnova)
+    {c:[cx+0.018, cy+0.018], b:300, z:15.0}, // nord-est (Miroslava)
   ];
 
-  // ── SETUP per scena: camera dinamica + culoare cladiri ──────────────────
+  // ── SETUP per scena: camera cursiva + culoare cladiri ──────────────────
   function setupScene(id){
     if(SE._rotInt){clearInterval(SE._rotInt);SE._rotInt=null;}
-
-    // Culoare cladiri specifica scenei
     setColor(id);
 
-    // Helper: dive 2D -> 3D pe un punct
-    function dive(center, lpMode, delay, finalBearing){
-      lp(lpMode||'night');
-      delay = delay || 0;
-      finalBearing = finalBearing || 20;
+    // Helper: coborare lina 2D -> 3D
+    // zoom 10 pitch 0 -> zoom 12 pitch 25 -> zoom 15.5 pitch 72
+    function smoothDive(zone, preset, startDelay){
+      lp(preset||'night');
+      var z = zone || zones[0];
       setTimeout(function(){
         if(!SE._playing)return;
-        // 1. Vedere de ansamblu 2D
-        try{map.jumpTo({center:center,zoom:10,pitch:0,bearing:0});}catch(e){}
-        // 2. Incepe sa coboare si sa incline
+        try{map.jumpTo({center:z.c, zoom:10, pitch:0, bearing:0});}catch(e){}
         setTimeout(function(){
           if(!SE._playing)return;
-          try{map.flyTo({center:center,zoom:12.5,pitch:35,bearing:finalBearing*0.3,duration:3000,essential:true});}catch(e){}
+          try{map.flyTo({center:z.c, zoom:12, pitch:20, bearing:z.b*0.2,
+            duration:4000, essential:true,
+            easing:function(t){return t<0.5?2*t*t:(1-Math.pow(-2*t+2,2)/2);}
+          });}catch(e){}
         },300);
-        // 3. Scufundare in 3D
         setTimeout(function(){
           if(!SE._playing)return;
-          try{map.flyTo({center:center,zoom:15.5,pitch:72,bearing:finalBearing,duration:5000,essential:true});}catch(e){}
-        },3500);
+          try{map.flyTo({center:z.c, zoom:z.z, pitch:68, bearing:z.b,
+            duration:6000, essential:true,
+            easing:function(t){return t<0.5?2*t*t:(1-Math.pow(-2*t+2,2)/2);}
+          });}catch(e){}
+        },4500);
+      }, startDelay||0);
+    }
+
+    // Helper: glisare lina intre zone la nivel 3D
+    function glide(zone, delay){
+      setTimeout(function(){
+        if(!SE._playing)return;
+        try{map.flyTo({center:zone.c, zoom:zone.z, pitch:68, bearing:zone.b,
+          duration:8000, essential:true,
+          easing:function(t){return t<0.5?2*t*t:(1-Math.pow(-2*t+2,2)/2);}
+        });}catch(e){}
       }, delay);
     }
 
     switch(id){
       case 'intro':
-        // Romania -> Moldova -> Iasi: zoom dramatic
         lp('night');
-        try{map.jumpTo({center:[25,45.5],zoom:6,pitch:0,bearing:0});}catch(e){}
-        setTimeout(function(){if(!SE._playing)return;try{map.flyTo({center:[27,47],zoom:9,pitch:0,bearing:0,duration:3000,essential:true});}catch(e){}},300);
-        setTimeout(function(){if(!SE._playing)return;dive([cx,cy],'night',3500,20);},3500);
+        // Romania -> regional -> oras
+        try{map.jumpTo({center:[24.5,45.8], zoom:6, pitch:0, bearing:0});}catch(e){}
+        setTimeout(function(){if(!SE._playing)return;
+          try{map.flyTo({center:[27.2,47.0], zoom:8, pitch:0, bearing:0,
+            duration:4000, essential:true});}catch(e){}
+        },300);
+        setTimeout(function(){if(!SE._playing)return; smoothDive(zones[0],'night',0);},4500);
         break;
 
       case 'oras3d':
-        // Vedere generala 2D -> scufundare pe centru -> zbor pe cartiere
-        dive([cx,cy],'day',0,30);
-        setTimeout(function(){if(!SE._playing)return;try{map.flyTo({center:offsets[1],zoom:15.5,pitch:72,bearing:90,duration:6000,essential:true});}catch(e){}},10000);
-        setTimeout(function(){if(!SE._playing)return;try{map.flyTo({center:offsets[2],zoom:15.5,pitch:72,bearing:150,duration:5000,essential:true});}catch(e){}},17000);
+        lp('day');
+        smoothDive(zones[0],'day',0);
+        glide(zones[1], 11000);
+        glide(zones[2], 20000);
         break;
 
       case 'demo':
-        // Heatmap populatie: vedere 2D din sus -> coboara pe zone dense
         lp('dawn');
-        try{map.jumpTo({center:[cx,cy],zoom:10,pitch:0,bearing:0});}catch(e){}
-        setTimeout(function(){if(!SE._playing)return;try{map.flyTo({center:[cx,cy],zoom:12.5,pitch:30,bearing:0,duration:3000,essential:true});}catch(e){}},300);
-        setTimeout(function(){if(!SE._playing)return;try{map.flyTo({center:offsets[3],zoom:14.5,pitch:62,bearing:-20,duration:5000,essential:true});}catch(e){}},4000);
+        smoothDive(zones[0],'dawn',0);
+        glide(zones[3], 11000);
         break;
 
       case 'eco':
-        // Economie: vedere regionala 2D -> zona comerciala 3D
-        dive([cx,cy],'day',0,50);
-        setTimeout(function(){if(!SE._playing)return;rot(50,0.015);},9500);
+        lp('day');
+        smoothDive(zones[0],'day',0);
+        glide(zones[4], 11000);
         break;
 
       case 'crestere':
-        // 2D overview -> scufundare -> cladiri cresc
         lp('night');
-        try{map.jumpTo({center:[cx,cy],zoom:10,pitch:0,bearing:0});}catch(e){}
         try{map.setPaintProperty('building-extrusion','fill-extrusion-height',1);}catch(e){}
-        try{map.setPaintProperty('building-extrusion','fill-extrusion-base',0);}catch(e){}
-        setTimeout(function(){if(!SE._playing)return;try{map.flyTo({center:[cx,cy],zoom:13,pitch:40,bearing:10,duration:3000,essential:true});}catch(e){}},300);
-        setTimeout(function(){if(!SE._playing)return;try{map.flyTo({center:[cx,cy],zoom:15.5,pitch:72,bearing:25,duration:5000,essential:true});}catch(e){}},4000);
-        // Zbor pe cartiere in timp ce cresc cladirile
-        setTimeout(function(){if(!SE._playing)return;try{map.flyTo({center:offsets[1],zoom:15.5,pitch:72,bearing:70,duration:7000,essential:true});}catch(e){}},10000);
-        setTimeout(function(){if(!SE._playing)return;try{map.flyTo({center:offsets[2],zoom:15.5,pitch:72,bearing:120,duration:7000,essential:true});}catch(e){}},18000);
+        smoothDive(zones[0],'night',0);
+        glide(zones[1], 11000);
+        glide(zones[2], 20000);
         break;
       case 'mobil':
         lp('night');
