@@ -1035,7 +1035,7 @@ document.addEventListener('click', function(){
     🏙 <span class="tci-launch-label">Proiecție Urbană</span>
   </button>
   <button class="tci-launch-btn" id="btn-cinema-v2"
-    onclick="window._launchCinemaV2()"
+    onclick="try{TCI.pause?.();TCI.close?.();}catch(e){};setTimeout(()=>window._startCinema(),300)"
     title="Film Cinematic — 12 scene animate · proiecții per cartier · pentru prezentări"
     style="background:rgba(139,92,246,.15);border-color:rgba(139,92,246,.5);color:#a78bfa;">
     🎬 <span class="tci-launch-label">Film Cinematic</span>
