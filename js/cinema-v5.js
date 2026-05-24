@@ -7,6 +7,21 @@
 (function(){
 'use strict';
 
+// ── ANI DINAMICI — se calculeaza la runtime, nu hardcodate ───────────────
+var _NOW       = new Date().getFullYear();           // anul curent real
+var _START     = _NOW;                               // primul an al proiectiei
+var _HORIZON   = 30;                                 // orizont implicit 30 ani
+var _END       = _START + _HORIZON;                  // ex: 2027+30=2057
+var _PHASE1    = _START + 5;                         // faza 1: +5 ani
+var _PHASE2    = _START + 15;                        // faza 2: +15 ani
+var _PHASE3    = _END;                               // faza 3: orizont final
+// Daca TCI are an de start setat, il folosim
+function _getStart(){ return (window.TCI && window.TCI.startYear) || _START; }
+function _getEnd()  { return _getStart() + _HORIZON; }
+function _getP1()   { return _getStart() + 5; }
+function _getP2()   { return _getStart() + 15; }
+
+
 // ── PROXY & ENDPOINTS ────────────────────────────────────────────────────
 var PROXY = 'https://urbanx-proxy.3dtravelsoftart.workers.dev';
 var INSE_USER = 'office@think-ss.eu';
@@ -23,20 +38,20 @@ var SCENES = [
   {id:'s5_proiecte',    dur:18000, label:'PROIECTE & INFRA',  bloc:2, legend:'infra'},
   // BLOC 3 — URBANISM
   {id:'s6_fond',        dur:16000, label:'FOND CONSTRUIT',    bloc:3, legend:'buildings'},
-  {id:'s7_coridoare',   dur:20000, label:'CORIDOARE 2055',    bloc:3, legend:'growth'},
+  {id:'s7_coridoare',   dur:20000, label:'CORIDOARE '+_getEnd(),    bloc:3, legend:'growth'},
   {id:'s8_mobilitate',  dur:18000, label:'MOBILITATE AUTO',   bloc:3, legend:'roads'},
   {id:'s9_transport',   dur:16000, label:'TRANSPORT PUBLIC',  bloc:3, legend:'tp'},
   // BLOC 4 — RISCURI
   {id:'s10_seismic',    dur:16000, label:'RISC SEISMIC',      bloc:4, legend:'seismic'},
   {id:'s11_clima',      dur:18000, label:'CLIMA & INUNDATII', bloc:4, legend:'flood'},
   // BLOC 5 — PREDICTII
-  {id:'s12_montecarlo', dur:20000, label:'MONTE CARLO 2055',  bloc:5, legend:'scenarios'},
+  {id:'s12_montecarlo', dur:20000, label:'MONTE CARLO '+_getEnd(),  bloc:5, legend:'scenarios'},
   {id:'s13_infra_nec',  dur:16000, label:'INFRASTRUCTURA NEC.',bloc:5,legend:'needs'},
   {id:'s14_benchmark',  dur:16000, label:'BENCHMARK EU',      bloc:5, legend:'none'},
   // BLOC 6 — VIZIUNE & DECIZIE
   {id:'s15_sdg',        dur:16000, label:'CALITATE VIATA SDG',bloc:6, legend:'sdg'},
   {id:'s16_agenda',     dur:16000, label:'AGENDA PRIMARULUI', bloc:6, legend:'none'},
-  {id:'s17_viziune',    dur:22000, label:'VIZIUNEA 2055',     bloc:6, legend:'none'},
+  {id:'s17_viziune',    dur:22000, label:'VIZIUNEA '+_getEnd(),     bloc:6, legend:'none'},
 ];
 
 // ── LEGENDE per tip scena ─────────────────────────────────────────────────
@@ -952,11 +967,11 @@ function _startFilm(map, SE, city, pred, cx, cy, name, siruta, hidden) {
 
       // S3 — PROFIL LOCUITOR
       case 's3_profil':
-        titlu('Profil Locuitori', 'Demografie · Migratie · Ocupatie · 2021-2055'); linie();
+        titlu('Profil Locuitori', 'Demografie · Migratie · Ocupatie · '+_getStart()+'-'+_getEnd()); linie();
         var rataClr = r10>=0.5?'#22c55e':r10>=-0.5?'#f59e0b':'#ef4444';
         var trendLbl = r10>=1?'crestere accelerata':r10>=0?'crestere lenta':'declin demografic';
         cifra((r10>=0?'+':'')+r10.toFixed(2)+'%/an', trendLbl, rataClr);
-        cifra2(N(pred.pop55||Math.round(pop21*Math.pow(1+r10/100,34))), 'Proiectie 2055');
+        cifra2(N(pred.pop55||Math.round(pop21*Math.pow(1+r10/100,34))), 'Proiectie '+_getEnd());
         // Date INSE daca disponibile
         if(_liveData.inse) {
           ctx.globalAlpha=sA*rE(0.22,0.20);
@@ -1002,7 +1017,7 @@ function _startFilm(map, SE, city, pred, cx, cy, name, siruta, hidden) {
         [
           ['🛣  Autostrazi/drum expres in raza: '+nProj+' segmente OSM', 0.60],
           ['💰  PNRR C10-I2: consolidare seismica '+N(pred.fond||1000)+' cladiri eligibile', 0.64],
-          ['🏗  Necesare: '+N(pred.defLoc||3000)+' unitati locative pana 2055', 0.68],
+          ['🏗  Necesare: '+N(pred.defLoc||3000)+' unitati locative pana '+_getEnd(), 0.68],
           ['📊  Investitie estimata: '+N(pred.invTotal||500)+' M EUR total', 0.72],
           ['🇪🇺  Fonduri UE absorbabile: ~'+N(Math.round((pred.invTotal||500)*0.35))+' M EUR', 0.76],
         ].forEach(function(it){
@@ -1010,7 +1025,7 @@ function _startFilm(map, SE, city, pred, cx, cy, name, siruta, hidden) {
           ctx.fillText(it[0], W*0.04, H*it[1]);
         });
         ctx.globalAlpha=1;
-        cifra(N(pred.invTotal||500)+' M €', 'Investitii necesare 2025-2055', '#D4AF37');
+        cifra(N(pred.invTotal||500)+' M €', 'Investitii necesare '+_getStart()+'-'+_getEnd(), '#D4AF37');
         cifra2('~35% UE', 'Finantare FEDR+PNRR');
         narativ('Portocaliu/rosu=autostrazi. Fiecare km autostrada in raza 20km creste valoarea terenurilor cu 15-40% pe coridorul sau (model gravitational UrbanX).');
         concluzie('Un proiect major de infrastructura anuntat = coridorul sau devine prioritate de investitie imobiliara');
@@ -1033,11 +1048,11 @@ function _startFilm(map, SE, city, pred, cx, cy, name, siruta, hidden) {
         try{ map.setPaintProperty('building-extrusion','fill-extrusion-height',
           ['*',['get','height'],Math.max(0.04,tE)]); }catch(e){}
         if(t < 0.16) {
-          titlu(name+' 2025 — Starea Actuala', 'Fond construit la zi'); linie();
+          titlu(name+' '+_getStart()+' — Starea Actuala', 'Fond construit la zi'); linie();
           cifra(N(pop21), 'Locuitori actuali', '#94a3b8');
           cifra2(N(pred.auth||300), 'Autorizatii/an', '#60a5fa');
         } else {
-          titlu('Unde Creste Orasul 2055', 'Coridoare · Presiune constructibila'); linie();
+          titlu('Unde Creste Orasul '+_getEnd(), 'Coridoare · Presiune constructibila'); linie();
           ctx.globalAlpha=sA*tE;
           ctx.fillStyle='#ef4444';
           ctx.font='900 '+FD+'px "Space Grotesk",sans-serif';
@@ -1047,9 +1062,9 @@ function _startFilm(map, SE, city, pred, cx, cy, name, siruta, hidden) {
           ctx.fillStyle='rgba(148,163,184,0.75)';
           ctx.font='600 '+FL+'px "IBM Plex Mono",monospace';
           ctx.letterSpacing='0.06em';
-          ctx.fillText('UNITATI LOCATIVE NECESARE 2055', W*0.04, H*0.912);
+          ctx.fillText('UNITATI LOCATIVE NECESARE '+_getEnd(), W*0.04, H*0.912);
           cifra2(N(pred.recHa||200)+' ha', 'Potential reconversie', '#f59e0b');
-          if(tE>0.45) narativ('Verde=densitate mica/potential. Galben=mediu. Rosu=presiune maxima CC/CP depasit. Crestere cladiri animata = proiectie 2025→2055. '+N(pred.defLoc||5000)+' unitati necesare.');
+          if(tE>0.45) narativ('Verde=densitate mica/potential. Galben=mediu. Rosu=presiune maxima CC/CP depasit. Crestere cladiri animata = proiectie 2025→'+_getEnd()+'. '+N(pred.defLoc||5000)+' unitati necesare.');
           ctx.globalAlpha=1;
         }
         concluzie('Corido rele de crestere: axa transport public + zone reconversie industriala = prioritate PUZ');
@@ -1070,7 +1085,7 @@ function _startFilm(map, SE, city, pred, cx, cy, name, siruta, hidden) {
           ctx.fillText(it[1],W*(0.062+i*0.16),H*0.938);
         });
         ctx.globalAlpha=1;
-        narativ(N(pred.fluxOra||25000)+' veh/h la varf. Saturatie retea estimata ~'+(pred.satAn||2040)+'. '+(pred.pasaje||5)+' pasaje noi necesare. '+(pred.invMob||120)+' M EUR total mobilitate 2025-2055.');
+        narativ(N(pred.fluxOra||25000)+' veh/h la varf. Saturatie retea estimata ~'+(pred.satAn||2040)+'. '+(pred.pasaje||5)+' pasaje noi necesare. '+(pred.invMob||120)+' M EUR total mobilitate '+_getStart()+'-'+_getEnd()+'.');
         concluzie('Fara pasaje noi si centura: reteaua rutiera intra in colaps dupa '+(pred.satAn||2040));
         break;
 
@@ -1110,34 +1125,34 @@ function _startFilm(map, SE, city, pred, cx, cy, name, siruta, hidden) {
 
       // S11 — CLIMA & INUNDATII
       case 's11_clima':
-        titlu('Clima & Inundatii', 'ANAR PGRA · UHI · RCP4.5/8.5 · 2055'); linie();
+        titlu('Clima & Inundatii', 'ANAR PGRA · UHI · RCP4.5/8.5 · '+_getEnd()); linie();
         var zile = pred.zile24 || 18;
         cifra(zile+' zile', 'Caniculare >35C azi (ANM)', '#f59e0b');
-        cifra2(Math.round(zile*2.1)+' zile', 'Proiectie 2055 RCP4.5', '#ef4444');
-        narativ('Albastru=lunca inundabila activa ANAR. UHI: +'+(pred.uhi||1.8)+'C vs rural. In 2055: '+Math.round(zile*2.1)+' zile caniculare (+'+Math.round(zile*1.1)+'). Risc seceta: '+(pred.drought||'moderat')+'. Autostrazi si centura marcate.');
-        concluzie('UHI + canicular 2055: fara spatii verzi suplimentare si acoperisuri verzi, temperatura urbana devine critica');
+        cifra2(Math.round(zile*2.1)+' zile', 'Proiectie '+_getEnd()+' RCP4.5', '#ef4444');
+        narativ('Albastru=lunca inundabila activa ANAR. UHI: +'+(pred.uhi||1.8)+'C vs rural. In '+_getEnd()+': '+Math.round(zile*2.1)+' zile caniculare (+'+Math.round(zile*1.1)+'). Risc seceta: '+(pred.drought||'moderat')+'. Autostrazi si centura marcate.');
+        concluzie('UHI + canicular '+_getEnd()+': fara spatii verzi suplimentare si acoperisuri verzi, temperatura urbana devine critica');
         break;
 
       // S12 — MONTE CARLO 2055
       case 's12_montecarlo':
         var rB  = r10 || 0;
-        var pO  = Math.round(pop21*Math.pow(1+(rB+0.9)/100,34));
-        var pR  = Math.round(pop21*Math.pow(1+(rB-0.8)/100,34));
-        var pM  = pred.pop55 || Math.round(pop21*Math.pow(1+rB/100,34));
-        titlu('Monte Carlo 2055', '10.000 simulari · 3 Scenarii · Interval 90%'); linie();
+        var pO  = Math.round(pop21*Math.pow(1+(rB+0.9)/100,_HORIZON));
+        var pR  = Math.round(pop21*Math.pow(1+(rB-0.8)/100,_HORIZON));
+        var pM  = pred.pop55 || Math.round(pop21*Math.pow(1+rB/100,_HORIZON));
+        titlu('Monte Carlo '+_getEnd(), '10.000 simulari · 3 Scenarii · Interval 90%'); linie();
         // Fan chart
         if(t > 0.10) {
           _drawMonteCarlo(ctx, W, H, Math.min(1,(t-0.10)/0.25)*sA, pR, pM, pO, pop21);
         }
-        cifra('['+N(pR)+'–'+N(pO)+']', 'Interval 90% populatie 2055', '#f59e0b');
+        cifra('['+N(pR)+'–'+N(pO)+']', 'Interval 90% populatie '+_getEnd(), '#f59e0b');
         cifra2(N(pO-pR)+' persoane', 'Diferenta intre scenarii');
         narativ('S1 Regres: '+N(pR)+' loc. S2 Tendinta: '+N(pM)+' loc. S3 Optimist: '+N(pO)+' loc. Diferenta: '+N(pO-pR)+' persoane = '+N(Math.round((pO-pR)*45000/1000))+'k m² suprafata locativa diferita.');
-        concluzie('Decizia PUG de azi determina scenariul 2055 — suprafata intravilan trebuie dimensionata pe S2+20%');
+        concluzie('Decizia PUG de azi determina scenariul '+_getEnd() — suprafata intravilan trebuie dimensionata pe S2+20%');
         break;
 
       // S13 — INFRASTRUCTURA NECESARA
       case 's13_infra_nec':
-        titlu('Infrastructura Necesara 2025–2055', 'Scoli · Sanatate · SV · Utilitati'); linie();
+        titlu('Infrastructura Necesara '+_getStart()+'–'+_getEnd(), 'Scoli · Sanatate · SV · Utilitati'); linie();
         cifra(N(pred.invTotal||300)+' M €', 'Total investitii necesare', '#D4AF37');
         cifra2('~60% UE', 'Finantare REGIO+PNRR', '#22c55e');
         [
@@ -1173,7 +1188,7 @@ function _startFilm(map, SE, city, pred, cx, cy, name, siruta, hidden) {
 
       // S15 — CALITATE VIATA SDG11
       case 's15_sdg':
-        titlu('Calitate Viata — SDG 11', 'Obiective dezvoltare durabila ONU · 2030'); linie();
+        titlu('Calitate Viata — SDG 11', 'Obiective ONU · Target '+_getP1()); linie();
         cifra((pred.sdgTotal||6.4)+'/10', 'Scor SDG11 estimat', (pred.sdgTotal||6.4)>=7?'#22c55e':'#f59e0b');
         cifra2((pred.walkScore||58)+'/100', 'Walk Score urban');
         if(t > 0.20) {
@@ -1185,7 +1200,7 @@ function _startFilm(map, SE, city, pred, cx, cy, name, siruta, hidden) {
 
       // S16 — AGENDA PRIMARULUI
       case 's16_agenda':
-        titlu('Agenda Primarului 2025–2030', 'Prioritati · Urgente · Finantare'); linie();
+        titlu('Agenda Primarului '+_getStart()+'–'+_getP1(), 'Prioritati · Urgente · Finantare'); linie();
         var urgente = _buildAgenda(pred, city);
         urgente.forEach(function(it, i){
           ctx.globalAlpha=sA*rE(0.12+i*0.05,0.18);
@@ -1198,8 +1213,8 @@ function _startFilm(map, SE, city, pred, cx, cy, name, siruta, hidden) {
           ctx.fillText(it.text, W*0.12, H*(0.58+i*0.052));
         });
         ctx.globalAlpha=1;
-        cifra(urgente.length+' prioritati', 'Identificate 2025-2030', '#D4AF37');
-        cifra2(N(Math.round(pred.invTotal||300)*0.30)+' M €', 'Faza 1: 2025-2030');
+        cifra(urgente.length+' prioritati', 'Identificate '+_getStart()+'-'+_getP1(), '#D4AF37');
+        cifra2(N(Math.round(pred.invTotal||300)*0.30)+' M €', 'Faza 1: '+_getStart()+'-'+_getP1());
         narativ('Prioritatile sunt calculate pe baza: risc seismic ag='+((pred.ag||0.20).toFixed(2))+'g, deficit locuinte '+N(pred.defLoc||3000)+', saturatie trafic '+(pred.satAn||2040)+', convergenta UE '+(pred.pctUE||38)+'%.');
         break;
 
@@ -1209,9 +1224,9 @@ function _startFilm(map, SE, city, pred, cx, cy, name, siruta, hidden) {
         ctx.fillStyle='#D4AF37';
         ctx.font='900 '+Math.min(W*0.28,340)+'px "Space Grotesk",sans-serif';
         ctx.textAlign='center';
-        ctx.fillText('2055', W/2, H*0.62);
+        ctx.fillText(String(_getEnd()), W/2, H*0.62);
 
-        titlu(name.toUpperCase()+' 2055', 'Viziunea posibila'); linie();
+        titlu(name.toUpperCase()+' '+_getEnd(), 'Viziune '+_getStart()+' → '+_getEnd()); linie();
 
         ctx.globalAlpha=sA*rE(0.12,0.25);
         ctx.fillStyle='rgba(255,255,255,0.94)';
@@ -1220,10 +1235,10 @@ function _startFilm(map, SE, city, pred, cx, cy, name, siruta, hidden) {
         ctx.fillText(name.toUpperCase(), W/2, H*0.27);
         ctx.globalAlpha=1;
 
-        var pop55 = pred.pop55 || Math.round(pop21*Math.pow(1+r10/100,34));
+        var pop55 = pred.pop55 || Math.round(pop21*Math.pow(1+r10/100,_HORIZON));
         [
-          {ok: pop55>pop21,                           txt:'Pop 2055: '+N(pop55)+' loc.'},
-          {ok: (pred.pctUE55||pred.pctUE+20)>=75,    txt:'PIB 2055: ~'+(pred.pctUE55||(pred.pctUE||38)+20)+'% UE27'},
+          {ok: pop55>pop21,                           txt:'Pop '+_getEnd()+': '+N(pop55)+' loc.'},
+          {ok: (pred.pctUE55||pred.pctUE+20)>=75,    txt:'PIB '+_getEnd()+': ~'+(pred.pctUE55||(pred.pctUE||38)+20)+'% UE27'},
           {ok: (pred.anSUMP||2028)<=2030,             txt:'SUMP aprobat: '+(pred.anSUMP||2028)},
           {ok: (pred.tp||62)>=75,                     txt:'Transport public: '+(pred.tp||62)+'% acoperire'},
           {ok: (pred.sdgTotal||6.4)>=7,               txt:'SDG11: '+(pred.sdgTotal||6.4)+'/10'},
@@ -1412,7 +1427,7 @@ function _drawMonteCarlo(ctx, W, H, alpha, pR, pM, pO, pop21) {
   ctx.fillStyle='rgba(148,163,184,0.5)';
   ctx.font='700 '+Math.min(W*0.009,10)+'px "IBM Plex Mono",monospace';
   ctx.textAlign='left';
-  ctx.fillText('MONTE CARLO 2055 — 3 SCENARII', x0+10, y0+14);
+  ctx.fillText('MONTE CARLO '+_getEnd()+' — 3 SCENARII', x0+10, y0+14);
 
   var scenarios = [
     {lbl:'S1 REGRES', v:pR, c:'#ef4444'},
@@ -1521,7 +1536,7 @@ function _buildFallbackPred(city) {
   var pop = city.pop2021 || city.pop || 100000;
   var r = city.rata_reala_2011_2021 || 0;
   return {
-    p21:pop, r10:r, pop55:Math.round(pop*Math.pow(1+r/100,34)),
+    p21:pop, r10:r, pop55:Math.round(pop*Math.pow(1+r/100,_HORIZON)),
     pib:14200, pctUE:39, pctUE55:59, anConv:2050,
     defLoc:Math.max(0,Math.round(pop*0.08)), recHa:Math.round(pop/300),
     ag:0.20, fond:Math.round(pop/50),
