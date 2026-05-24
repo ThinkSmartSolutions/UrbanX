@@ -81,6 +81,24 @@ window._startCinema = function(cityKey) {
   var cx=SE._city.lon||27.601, cy=SE._city.lat||47.158;
   var pred=SE._pred, name=SE._city.name||'UAT';
 
+  // Opreste TCI director care reseteaza camera
+  try{TCI._playing=false;TCI._stopped=true;}catch(e){}
+  try{if(TCI._director){TCI._director._playing=false;}}catch(e){}
+  try{TCI.pause?.();}catch(e){}
+
+  // Override flyTo/jumpTo — blocheaza apelurile cu pitch<60 sau zoom<14 din TCI
+  var _oFly=map.flyTo.bind(map), _oJump=map.jumpTo.bind(map);
+  map.flyTo=function(o){
+    if(!SE._playing){map.flyTo=_oFly;map.jumpTo=_oJump;return _oFly(o);}
+    if((o.pitch||0)<60||(o.zoom||20)<14)return map;
+    return _oFly(o);
+  };
+  map.jumpTo=function(o){
+    if(!SE._playing){map.flyTo=_oFly;map.jumpTo=_oJump;return _oJump(o);}
+    if((o.pitch||0)<60||(o.zoom||20)<14)return _oJump(Object.assign({},o,{pitch:72,zoom:15.5}));
+    return _oJump(o);
+  };
+
   // Butoane
   document.getElementById('tci-c8-ctrl')?.remove();
   var ctrl=document.createElement('div');
@@ -97,6 +115,8 @@ window._startCinema = function(cityKey) {
 
   function stopAll(){
     SE._playing=false;
+    // Restaureaza flyTo/jumpTo originale
+    try{map.flyTo=_oFly;map.jumpTo=_oJump;}catch(e){}
     if(SE._raf)cancelAnimationFrame(SE._raf);
     if(SE._rotInt){clearInterval(SE._rotInt);SE._rotInt=null;}
     try{SE._cleanLayers.call(SE);}catch(e){}
