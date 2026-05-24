@@ -76,7 +76,9 @@ window._startCinema = function(cityKey) {
   var _oFly=map.flyTo.bind(map), _oJump=map.jumpTo.bind(map);
   map.flyTo=function(o){
     if(!SE._playing){map.flyTo=_oFly;map.jumpTo=_oJump;return _oFly(o);}
-    if((o.pitch||0)<60||(o.zoom||20)<14)return map;
+    var sid=SE.SCENES[SE._si]?.id;
+    var isIntro=(sid==='intro'||sid==='oras3d');
+    if(!isIntro&&((o.pitch||0)<60||(o.zoom||20)<14))return map;
     return _oFly(o);
   };
   map.jumpTo=function(o){
@@ -109,6 +111,7 @@ window._startCinema = function(cityKey) {
   ctrl.id='tci-c8-ctrl';
   ctrl.style.cssText='position:fixed;bottom:24px;right:20px;z-index:1000000;display:flex;gap:8px;';
   ctrl.innerHTML='<button id="c8p" style="background:rgba(0,0,0,.8);border:1px solid rgba(255,255,255,.15);color:#fff;padding:10px 18px;border-radius:10px;cursor:pointer;font:700 13px monospace">◀</button>'
+    +'<button id="c8pause" style="background:rgba(0,0,0,.8);border:1px solid rgba(255,255,255,.15);color:#fff;padding:10px 16px;border-radius:10px;cursor:pointer;font:700 13px monospace">⏸</button>'
     +'<button id="c8n" style="background:rgba(0,0,0,.8);border:1px solid rgba(255,255,255,.15);color:#fff;padding:10px 18px;border-radius:10px;cursor:pointer;font:700 13px monospace">▶</button>'
     +'<button id="c8s" style="background:rgba(150,0,0,.8);border:1px solid rgba(255,60,60,.3);color:#ffaaaa;padding:10px 14px;border-radius:10px;cursor:pointer;font:700 13px monospace">✕</button>';
   document.body.appendChild(ctrl);
@@ -149,6 +152,31 @@ window._startCinema = function(cityKey) {
   }
 
   document.getElementById('c8s').onclick=stopAll;
+  document.getElementById('c8pause').onclick=function(){
+    if(SE._playing){
+      SE._playing=false;
+      if(SE._raf)cancelAnimationFrame(SE._raf);
+      if(SE._rotInt){clearInterval(SE._rotInt);SE._rotInt=null;}
+      document.getElementById('c8pause').textContent='▶';
+    } else {
+      SE._playing=true;
+      document.getElementById('c8pause').textContent='⏸';
+      // Repornim loop-ul de la t curent
+      var scene=SE.SCENES[SE._si];
+      var elapsed=scene.dur*(1-(scene.dur-(performance.now()-SE._startT))/scene.dur);
+      SE._startT=performance.now()-elapsed;
+      var loop2=function(){
+        if(!SE._playing)return;
+        var t=Math.min(1,Math.max(0.001,(performance.now()-SE._startT)/scene.dur));
+        SE._ctx.clearRect(0,0,window.innerWidth,window.innerHeight);
+        if(scene.id==='crestere'){var tG=t<0.15?0:Math.min(1,(t-0.15)/0.70);var tE=1-Math.pow(1-tG,3);try{map.setPaintProperty('building-extrusion','fill-extrusion-height',['*',['get','height'],Math.max(0.05,tE)]);}catch(e){}}
+        try{cinDraw(scene.id,t,SE._ctx,window.innerWidth,window.innerHeight,pred,name,SE);}catch(e){}
+        if(t<1){SE._raf=requestAnimationFrame(loop2);}
+        else{goScene(SE._si+1);}
+      };
+      SE._raf=requestAnimationFrame(loop2);
+    }
+  };
   document.getElementById('c8n').onclick=function(){goScene(SE._si+1);};
   document.getElementById('c8p').onclick=function(){goScene(SE._si-1);};
 
@@ -685,9 +713,11 @@ window._startCinema = function(cityKey) {
     var scene=SE.SCENES[idx];
     SE._si=idx;SE._startT=performance.now();
 
-    try{SE._cleanLayers.call(SE);}catch(e){}
+    // Curata DOAR layerele noastre - nu cleanLayers care strica stilul
     try{if(map.getLayer('cin-osm'))map.removeLayer('cin-osm');}catch(e){}
     try{if(map.getSource('cin-osm'))map.removeSource('cin-osm');}catch(e){}
+    // Restaureaza inaltimea normala a cladirilor
+    try{map.setPaintProperty('building-extrusion','fill-extrusion-height',['get','height']);}catch(e){}
 
     setupScene(scene.id);
 
@@ -703,7 +733,7 @@ window._startCinema = function(cityKey) {
           ['*',['get','height'],Math.max(0.05,tE)]);}catch(e){}
       }
       // Overlay canvas cu date per scena
-      try{cinDraw(scene.id,t,SE._ctx,window.innerWidth,window.innerHeight,pred,name,SE);}catch(e){if(Math.random()<0.01)console.warn('[cinDraw]',scene.id,e.message);}
+      try{cinDraw(scene.id,t,SE._ctx,window.innerWidth,window.innerHeight,pred,name,SE);}catch(e){console.error('[cinDraw ERROR]',scene.id,e.message,e.stack?.split('\n')[1]);}
       if(t<1){SE._raf=requestAnimationFrame(loop);}
       else{runScene(idx+1);}
     };
