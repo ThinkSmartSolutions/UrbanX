@@ -19,21 +19,7 @@ var SCENES = [
   {id:'viziune', dur:20000, label:'VIZIUNEA 2055'},
 ];
 
-// Culori per scena pentru building-extrusion
-var SCENE_COLORS = {
-  'intro':   ['interpolate',['linear'],['get','height'],0,'#1e293b',10,'#334155',30,'#475569',60,'#64748b'],
-  'oras3d':  ['interpolate',['linear'],['get','height'],0,'#1e3a5f',5,'#1d4ed8',15,'#2563eb',30,'#3b82f6',60,'#60a5fa'],
-  'demo':    ['interpolate',['linear'],['get','height'],0,'#14532d',5,'#166534',15,'#15803d',30,'#16a34a'],
-  'eco':     ['interpolate',['linear'],['get','height'],0,'#713f12',5,'#92400e',15,'#b45309',30,'#d97706',60,'#f59e0b'],
-  'crestere':['interpolate',['linear'],['get','height'],0,'#052e16',5,'#14532d',10,'#166534',20,'#15803d',35,'#f59e0b',50,'#ef4444',80,'#dc2626'],
-  'mobil':   ['interpolate',['linear'],['get','height'],0,'#1e1b4b',5,'#312e81',15,'#3730a3',30,'#4338ca',60,'#6366f1'],
-  'tp':      ['interpolate',['linear'],['get','height'],0,'#0c4a6e',5,'#075985',15,'#0369a1',30,'#0284c7',60,'#38bdf8'],
-  'seismic': ['interpolate',['linear'],['get','height'],0,'#450a0a',5,'#7f1d1d',10,'#991b1b',20,'#b91c1c',35,'#dc2626',50,'#ef4444'],
-  'inund':   ['interpolate',['linear'],['get','height'],0,'#172554',5,'#1e3a8a',15,'#1d4ed8',30,'#2563eb'],
-  'mc2055':  ['interpolate',['linear'],['get','height'],0,'#2e1065',5,'#4a044e',15,'#701a75',30,'#86198f',60,'#a21caf'],
-  'infra':   ['interpolate',['linear'],['get','height'],0,'#0f2417',5,'#14532d',15,'#166534',30,'#15803d',60,'#22c55e'],
-  'viziune': ['interpolate',['linear'],['get','height'],0,'#1c1917',5,'#44403c',15,'#78716c',30,'#d97706',60,'#f59e0b',80,'#fbbf24'],
-};
+// Culorile sunt definite in setColor() dupa tipul real al cladirii
 
 window._startCinema = function(cityKey) {
   cityKey = cityKey||window.TCI?.cityKey||localStorage.getItem('ux_last_city')||'RO-IS-01';
@@ -156,11 +142,48 @@ window._startCinema = function(cityKey) {
       b+=spd;try{map.setBearing(b%360);}catch(e){}
     },50);
   }
+  // Culori dupa tipul real al cladirii din OSM
+  var COLOR_BY_TYPE = ['match',['get','type'],
+    'apartments','#3b82f6',        // albastru - bloc apartamente
+    'residential','#60a5fa',       // albastru deschis - casa
+    'house','#93c5fd',             // albastru pal - casa individuala
+    'commercial','#f59e0b',        // portocaliu - comercial
+    'retail','#fbbf24',            // galben - retail
+    'office','#a78bfa',            // violet - birouri
+    'industrial','#6b7280',        // gri - industrial
+    'warehouse','#4b5563',         // gri inchis - depozit
+    'school','#22c55e',            // verde - scoala
+    'university','#16a34a',        // verde inchis - universitate
+    'hospital','#ef4444',          // rosu - spital
+    'church','#d97706',            // maro - biserica
+    'cathedral','#92400e',         // maro inchis - catedrala
+    'civic','#8b5cf6',             // violet - civic/primarie
+    'public','#7c3aed',            // violet inchis - public
+    'hotel','#ec4899',             // roz - hotel
+    'garage','#374151',            // gri foarte inchis - garaj
+    'parking','#1f2937',           // aproape negru - parcare
+    '#94a3b8'                      // default - gri albastru
+  ];
+
   function setColor(sceneId){
-    var col=SCENE_COLORS[sceneId]||SCENE_COLORS['oras3d'];
-    try{map.setPaintProperty('building-extrusion','fill-extrusion-color',col);}catch(e){}
-    // Asigura ca cladirile sunt vizibile
-    try{map.setPaintProperty('building-extrusion','fill-extrusion-opacity',0.95);}catch(e){}
+    // Scenele speciale au culori tematice, restul dupa tip real
+    if(sceneId==='seismic'){
+      try{map.setPaintProperty('building-extrusion','fill-extrusion-color',
+        ['interpolate',['linear'],['get','height'],
+          0,'#166534', 8,'#854d0e', 15,'#b91c1c', 25,'#dc2626', 40,'#ef4444']);}catch(e){}
+    } else if(sceneId==='inund'){
+      try{map.setPaintProperty('building-extrusion','fill-extrusion-color',
+        ['interpolate',['linear'],['get','height'],
+          0,'#1e3a8a', 5,'#1d4ed8', 15,'#3b82f6', 30,'#93c5fd']);}catch(e){}
+    } else if(sceneId==='crestere'){
+      try{map.setPaintProperty('building-extrusion','fill-extrusion-color',
+        ['interpolate',['linear'],['get','height'],
+          0,'#14532d', 8,'#15803d', 20,'#f59e0b', 35,'#ef4444']);}catch(e){}
+    } else {
+      // Toate celelalte scene: culori reale dupa tipul cladirii
+      try{map.setPaintProperty('building-extrusion','fill-extrusion-color',COLOR_BY_TYPE);}catch(e){}
+    }
+    try{map.setPaintProperty('building-extrusion','fill-extrusion-opacity',0.90);}catch(e){}
   }
 
   // OSM roads cache
