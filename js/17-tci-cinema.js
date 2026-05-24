@@ -466,7 +466,7 @@ const TCI = {
                 this._EXTRA_UATS[this.cityKey].lat = newLat;
               }
               // Salt la coordonatele corecte
-              try { this.map.flyTo({center:[newLon,newLat], zoom:12, pitch:45, bearing:-10, duration:2000}); } catch(e){}
+              try { this.map.flyTo({center:[newLon,newLat], zoom:15.5, pitch:65, bearing:20, duration:2000}); } catch(e){}
             }
           })
           .catch(e=>console.warn('[TCI] Geocodare comună:', e.message));
@@ -493,7 +493,7 @@ const TCI = {
     }
 
     this._buildUI(cx, cy);
-    this.map.jumpTo({ center:[cx,cy], zoom:zoomForUAT, pitch:35, bearing:-12 });
+    this.map.jumpTo({ center:[cx,cy], zoom:15.5, pitch:65, bearing:20 });
 
     const onStyleReady = () => {
       this._setLight('dusk');
@@ -501,13 +501,13 @@ const TCI = {
       this._initVehicles();
       this._initLeftMap(cx, cy);
       // Jump explicit la orașul selectat — după setStyle camera poate rătăci
-      try { this.map.jumpTo({center:[cx,cy], zoom:zoomForUAT, pitch:35, bearing:-12}); } catch(e){}
+      try { this.map.jumpTo({center:[cx,cy], zoom:15.5, pitch:65, bearing:20}); } catch(e){}
       setTimeout(() => {
         this._director.init(this);
         this.start();
         // A doua garanție — dacă directorul crapa, camera e tot pe orașul corect
         setTimeout(() => {
-          try { this.map.flyTo({center:[cx,cy], zoom:12, pitch:40, bearing:-10, duration:2000}); } catch(e){}
+          try { this.map.flyTo({center:[cx,cy], zoom:15.5, pitch:65, bearing:30, duration:2000}); } catch(e){}
         }, 2500);
         console.log('[TCI] ✅ Split screen: EXISTENT 2025 | PROIECTAT · '+this.d?.name);
       }, 800);
@@ -5345,14 +5345,14 @@ out geom qt;`;
         const name=d.name||'UAT';
         this._scenes=[
           {id:'fb1',dur:60000,light:'dusk',
-           cam:{center:[cx,cy],zoom:11.0,pitch:35,bearing:-12,duration:2800},
+           cam:{center:[cx,cy],zoom:15.5,pitch:65,bearing:20,duration:2800},
            chain:[{center:[cx,cy],zoom:13.0,pitch:52,bearing:-8,duration:5000,delay:6000},
                   {center:[cx,cy],zoom:15.0,pitch:68,bearing:10,duration:5000,delay:16000}],
            title:'🏙 '+name,body:name+' — proiecție urbanistică 2025-2055',src:'UrbanX TSS·FG'},
           {id:'fb2',dur:60000,light:'dusk',
            cam:{center:[cx,cy],zoom:13.5,pitch:55,bearing:-25,duration:3000},
            chain:[{center:[cx,cy],zoom:16.5,pitch:76,bearing:20,duration:6000,delay:12000},
-                  {center:[cx,cy],zoom:12,pitch:40,bearing:0,duration:5000,delay:35000}],
+                  {center:[cx,cy],zoom:15.5,pitch:65,bearing:30,duration:5000,delay:35000}],
            title:'📊 Date Oficiale '+name,body:'Proiecție calibrată: INSE · Eurostat · ANCPI · BNR · IPCC AR6',src:'UrbanX TSS·FG'},
         ];
         console.log('[Director] Fallback la',cx.toFixed(3),cy.toFixed(3),'pentru',name);
@@ -5404,7 +5404,7 @@ out geom qt;`;
         // S1 — DIRECT PE ORAȘ (nu mai facem tur turistic al României)
         // ── Aterizare imediată + date live ────────────────────────────────
         {id:'s1',dur:20000,light:'dusk',
-         cam:{center:[cx,cy],zoom:11.0,pitch:35,bearing:-12,duration:2800},
+         cam:{center:[cx,cy],zoom:15.5,pitch:65,bearing:20,duration:2800},
          chain:[
            {center:[cx,cy],zoom:13.0,pitch:52,bearing:-8,duration:4000,delay:5000},
            {center:[cx,cy],zoom:14.5,pitch:64,bearing:8,duration:5000,delay:13000},
@@ -5583,7 +5583,7 @@ out geom qt;`;
       const is3D=['s4','s5','s6','s7','s8','s9','s10','s11','s12'].includes(sc.id);
       if(is3D && (T.map?.getZoom?.()||4)<13.5){
         try{const cx=T.d?.lon||27.601,cy=T.d?.lat||47.158;
-          T.map.jumpTo({center:[cx,cy],zoom:13.5,pitch:40,bearing:0});}catch(e){}
+          T.map.jumpTo({center:[cx,cy],zoom:15.5,pitch:65,bearing:20});}catch(e){}
       }
       try{T.map.flyTo({...sc.cam,essential:true,easing:ease});T.bearing=sc.cam.bearing||0;}catch(e){}
 
