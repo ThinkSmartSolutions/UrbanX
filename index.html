@@ -5234,33 +5234,4 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
 <script src="js/cinema-v5.js?v=1"></script>
 </body>
 </html>
-<script>
-window._startCinema=function(k){
-  k=k||window.TCI?.cityKey||localStorage.getItem('ux_last_city')||'RO-IS-01';
-  document.querySelectorAll('#panel,#mob-sheet,#topbar,nav,[id*="drawer"]').forEach(e=>e.style.setProperty('display','none','important'));
-  var SE=window._CinemaEngine;
-  if(!SE){alert('CinemaEngine not loaded');return;}
-  SE._map=window.map;SE._city=window._RO_CITIES_DB[k];
-  SE._pred=window._PredEngine.calc(SE._city);
-  SE._playing=true;SE._si=0;
-  document.querySelectorAll('#tci-c8,#tci-c6,#tci-c7').forEach(e=>e.remove());
-  var c=document.createElement('canvas');
-  c.id='tci-c8';c.width=window.innerWidth;c.height=window.innerHeight;
-  c.style.cssText='position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:999999;pointer-events:none;';
-  document.body.appendChild(c);SE._canvas=c;SE._ctx=c.getContext('2d');
-  SE._mkCtrl.call(SE);
-  function rs(i){
-    if(!SE._playing||i>=SE.SCENES.length)return;
-    var s=SE.SCENES[i];SE._si=i;SE._startT=performance.now();SE._setupMap.call(SE,s.id);
-    var loop=function(){
-      if(!SE._playing)return;
-      var t=Math.min(1,Math.max(0.001,(performance.now()-SE._startT)/s.dur));
-      SE._ctx.clearRect(0,0,c.width,c.height);
-      try{SE._draw.call(SE,s.id,t);}catch(e){}
-      if(t<1)SE._raf=requestAnimationFrame(loop);
-      else{SE._cleanLayers.call(SE);rs(i+1);}
-    };SE._raf=requestAnimationFrame(loop);
-  }
-  rs(0);
-};
-</script>
+<!-- cinema-v5.js defineste _startCinema -->
