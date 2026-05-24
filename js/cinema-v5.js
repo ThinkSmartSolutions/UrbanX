@@ -217,42 +217,69 @@ window._startCinema = function(cityKey) {
     // Culoare cladiri specifica scenei
     setColor(id);
 
+    // Helper: dive 2D -> 3D pe un punct
+    function dive(center, lpMode, delay, finalBearing){
+      lp(lpMode||'night');
+      delay = delay || 0;
+      finalBearing = finalBearing || 20;
+      setTimeout(function(){
+        if(!SE._playing)return;
+        // 1. Vedere de ansamblu 2D
+        try{map.jumpTo({center:center,zoom:10,pitch:0,bearing:0});}catch(e){}
+        // 2. Incepe sa coboare si sa incline
+        setTimeout(function(){
+          if(!SE._playing)return;
+          try{map.flyTo({center:center,zoom:12.5,pitch:35,bearing:finalBearing*0.3,duration:3000,essential:true});}catch(e){}
+        },300);
+        // 3. Scufundare in 3D
+        setTimeout(function(){
+          if(!SE._playing)return;
+          try{map.flyTo({center:center,zoom:15.5,pitch:72,bearing:finalBearing,duration:5000,essential:true});}catch(e){}
+        },3500);
+      }, delay);
+    }
+
     switch(id){
       case 'intro':
+        // Romania -> Moldova -> Iasi: zoom dramatic
         lp('night');
-        try{map.jumpTo({center:[cx,cy],zoom:7,pitch:0,bearing:0});}catch(e){}
-        setTimeout(function(){if(!SE._playing)return;try{map.flyTo({center:[cx,cy],zoom:12,pitch:55,bearing:15,duration:5000,essential:true});}catch(e){}},300);
-        setTimeout(function(){if(!SE._playing)return;try{map.flyTo({center:[cx,cy],zoom:15.5,pitch:72,bearing:30,duration:5000,essential:true});}catch(e){}rot(30,0.018);},6000);
+        try{map.jumpTo({center:[25,45.5],zoom:6,pitch:0,bearing:0});}catch(e){}
+        setTimeout(function(){if(!SE._playing)return;try{map.flyTo({center:[27,47],zoom:9,pitch:0,bearing:0,duration:3000,essential:true});}catch(e){}},300);
+        setTimeout(function(){if(!SE._playing)return;dive([cx,cy],'night',3500,20);},3500);
         break;
+
       case 'oras3d':
-        lp('day');
-        try{map.jumpTo({center:[cx,cy],zoom:15.5,pitch:72,bearing:0});}catch(e){}
-        rot(0,0.020);
-        setTimeout(function(){if(!SE._playing)return;try{map.flyTo({center:offsets[1],zoom:15.5,pitch:72,bearing:60,duration:6000,essential:true});}catch(e){}},4000);
-        setTimeout(function(){if(!SE._playing)return;try{map.flyTo({center:offsets[2],zoom:15.5,pitch:72,bearing:120,duration:5000,essential:true});}catch(e){}},11000);
+        // Vedere generala 2D -> scufundare pe centru -> zbor pe cartiere
+        dive([cx,cy],'day',0,30);
+        setTimeout(function(){if(!SE._playing)return;try{map.flyTo({center:offsets[1],zoom:15.5,pitch:72,bearing:90,duration:6000,essential:true});}catch(e){}},10000);
+        setTimeout(function(){if(!SE._playing)return;try{map.flyTo({center:offsets[2],zoom:15.5,pitch:72,bearing:150,duration:5000,essential:true});}catch(e){}},17000);
         break;
+
       case 'demo':
+        // Heatmap populatie: vedere 2D din sus -> coboara pe zone dense
         lp('dawn');
-        try{map.jumpTo({center:[cx,cy],zoom:12,pitch:50,bearing:0});}catch(e){}
-        setTimeout(function(){if(!SE._playing)return;try{map.flyTo({center:[cx,cy],zoom:13.5,pitch:58,bearing:-15,duration:4000,essential:true});}catch(e){}},500);
-        setTimeout(function(){if(!SE._playing)return;try{map.flyTo({center:offsets[3],zoom:14,pitch:62,bearing:20,duration:5000,essential:true});}catch(e){}},6000);
+        try{map.jumpTo({center:[cx,cy],zoom:10,pitch:0,bearing:0});}catch(e){}
+        setTimeout(function(){if(!SE._playing)return;try{map.flyTo({center:[cx,cy],zoom:12.5,pitch:30,bearing:0,duration:3000,essential:true});}catch(e){}},300);
+        setTimeout(function(){if(!SE._playing)return;try{map.flyTo({center:offsets[3],zoom:14.5,pitch:62,bearing:-20,duration:5000,essential:true});}catch(e){}},4000);
         break;
+
       case 'eco':
-        lp('day');
-        try{map.jumpTo({center:[cx,cy],zoom:14,pitch:65,bearing:20});}catch(e){}
-        rot(20,0.015);
-        setTimeout(function(){if(!SE._playing)return;try{map.flyTo({center:offsets[4],zoom:15,pitch:68,bearing:80,duration:6000,essential:true});}catch(e){}},4000);
+        // Economie: vedere regionala 2D -> zona comerciala 3D
+        dive([cx,cy],'day',0,50);
+        setTimeout(function(){if(!SE._playing)return;rot(50,0.015);},9500);
         break;
+
       case 'crestere':
+        // 2D overview -> scufundare -> cladiri cresc
         lp('night');
-        try{map.jumpTo({center:[cx,cy],zoom:15.5,pitch:72,bearing:10});}catch(e){}
-        rot(10,0.012);
-        // Cladirile pornesc mici
+        try{map.jumpTo({center:[cx,cy],zoom:10,pitch:0,bearing:0});}catch(e){}
         try{map.setPaintProperty('building-extrusion','fill-extrusion-height',1);}catch(e){}
         try{map.setPaintProperty('building-extrusion','fill-extrusion-base',0);}catch(e){}
-        // Zbor lent pe cartiere in timp ce cresc
-        setTimeout(function(){if(!SE._playing)return;try{map.flyTo({center:offsets[1],zoom:15.5,pitch:72,bearing:50,duration:8000,essential:true});}catch(e){}},5000);
-        setTimeout(function(){if(!SE._playing)return;try{map.flyTo({center:offsets[2],zoom:15.5,pitch:72,bearing:100,duration:7000,essential:true});}catch(e){}},14000);
+        setTimeout(function(){if(!SE._playing)return;try{map.flyTo({center:[cx,cy],zoom:13,pitch:40,bearing:10,duration:3000,essential:true});}catch(e){}},300);
+        setTimeout(function(){if(!SE._playing)return;try{map.flyTo({center:[cx,cy],zoom:15.5,pitch:72,bearing:25,duration:5000,essential:true});}catch(e){}},4000);
+        // Zbor pe cartiere in timp ce cresc cladirile
+        setTimeout(function(){if(!SE._playing)return;try{map.flyTo({center:offsets[1],zoom:15.5,pitch:72,bearing:70,duration:7000,essential:true});}catch(e){}},10000);
+        setTimeout(function(){if(!SE._playing)return;try{map.flyTo({center:offsets[2],zoom:15.5,pitch:72,bearing:120,duration:7000,essential:true});}catch(e){}},18000);
         break;
       case 'mobil':
         lp('night');
