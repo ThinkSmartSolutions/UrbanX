@@ -237,22 +237,52 @@ window._startCinema = function(cityKey) {
       case 'crestere':
         lp('night');
         rot(20,0.012);
-        // Anima inaltimea cladirilor: incepe mic, creste
-        try{map.setPaintProperty('building-extrusion','fill-extrusion-height',
-          ['interpolate',['linear'],['zoom'],14,['*',['get','height'],0.3],16,['get','height']]);}catch(e){}
+        // Start cu cladiri mici - cresc in draw loop
+        try{map.setPaintProperty('building-extrusion','fill-extrusion-height',1);}catch(e){}
+        try{map.setPaintProperty('building-extrusion','fill-extrusion-base',0);}catch(e){}
         break;
       case 'mobil':
         lp('night');
-        try{map.jumpTo({center:[cx,cy],zoom:12.5,pitch:55,bearing:0});}catch(e){}
+        try{map.jumpTo({center:[cx,cy],zoom:11.5,pitch:50,bearing:0});}catch(e){}
         setColor('mobil');
-        fetchOSM(function(ft){
-          if(!SE._playing)return;
-          addOSM(ft);
-          setTimeout(function(){
+        // Fetch OSM cu radius mare - tot orasul
+        var qMob='[out:json][timeout:30];(way["highway"~"motorway|trunk|primary|secondary|tertiary|residential"](around:12000,'+cy+','+cx+'););out geom;';
+        fetch('https://urbanx-proxy.3dtravelsoftart.workers.dev/osm?q='+encodeURIComponent(qMob))
+          .then(function(r){return r.json();})
+          .then(function(d){
             if(!SE._playing)return;
-            try{map.flyTo({center:[cx,cy],zoom:13.5,pitch:62,bearing:15,duration:5000,essential:true});}catch(e){}
-          },500);
-        });
+            var ft=[];
+            (d.elements||[]).forEach(function(el){
+              if(el.type!=='way'||!el.geometry)return;
+              var coords=el.geometry.map(function(n){return[n.lon,n.lat];});
+              var hw=(el.tags&&el.tags.highway)||'residential';
+              var col,w;
+              if(hw==='motorway'){col='#dc2626';w=8;}
+              else if(hw==='trunk'){col='#ea580c';w=6;}
+              else if(hw==='primary'){col='#f59e0b';w=5;}
+              else if(hw==='secondary'){col='#16a34a';w=3;}
+              else if(hw==='tertiary'){col='#0ea5e9';w=2;}
+              else{col='#334155';w=1;}
+              ft.push({type:'Feature',geometry:{type:'LineString',coordinates:coords},
+                properties:{c:col,w:w,hw:hw}});
+            });
+            console.log('[Cinema] OSM roads:',ft.length);
+            if(ft.length>0){
+              try{
+                if(map.getLayer('cin-osm'))map.removeLayer('cin-osm');
+                if(map.getSource('cin-osm'))map.removeSource('cin-osm');
+                map.addSource('cin-osm',{type:'geojson',data:{type:'FeatureCollection',features:ft}});
+                map.addLayer({id:'cin-osm',type:'line',source:'cin-osm',
+                  paint:{'line-color':['get','c'],'line-width':['get','w'],'line-opacity':0.92,'line-blur':0.3},
+                  layout:{'line-cap':'round','line-join':'round'}
+                });
+              }catch(e){console.warn('OSM layer:',e);}
+            }
+            setTimeout(function(){
+              if(!SE._playing)return;
+              try{map.flyTo({center:[cx,cy],zoom:12.5,pitch:58,bearing:15,duration:5000,essential:true});}catch(e){}
+            },300);
+          }).catch(function(e){console.warn('OSM fetch:',e);});
         break;
       case 'tp':
         lp('day');
@@ -263,12 +293,22 @@ window._startCinema = function(cityKey) {
         lp('night');
         rot(0,0.010);
         try{SE._addSeismic&&SE._addSeismic.call(SE,map);}catch(e){}
+        // Coloreaza cladiri dupa risc
+        try{map.setPaintProperty('building-extrusion','fill-extrusion-color',
+          ['interpolate',['linear'],['get','height'],
+            0,'#1a0505', 5,'#7f1d1d', 10,'#b91c1c', 20,'#dc2626', 40,'#ef4444', 80,'#fca5a5']);}catch(e){}
         break;
       case 'inund':
         lp('dawn');
-        try{map.jumpTo({center:[cx,cy],zoom:12,pitch:50,bearing:5});}catch(e){}
+        try{map.jumpTo({center:[cx,cy],zoom:11.5,pitch:48,bearing:5});}catch(e){}
         setColor('inund');
         try{SE._addFlood&&SE._addFlood.call(SE,map);}catch(e){}
+        try{SE._addRoads&&SE._addRoads.call(SE,map);}catch(e){}
+        // Zoom lent spre zona de risc
+        setTimeout(function(){
+          if(!SE._playing)return;
+          try{map.flyTo({center:[cx,cy],zoom:12.5,pitch:55,bearing:10,duration:5000,essential:true});}catch(e){}
+        },2000);
         break;
       case 'mc2055':
         lp('dusk');
