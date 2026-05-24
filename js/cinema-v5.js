@@ -152,24 +152,31 @@ window._startCinema = function(cityKey) {
   }
 
   document.getElementById('c8s').onclick=stopAll;
+  var _pausedT = 0; // t-ul la care s-a apăsat pauza
   document.getElementById('c8pause').onclick=function(){
     if(SE._playing){
+      // PAUZA
+      _pausedT = Math.min(1,Math.max(0.001,(performance.now()-SE._startT)/SE.SCENES[SE._si].dur));
       SE._playing=false;
       if(SE._raf)cancelAnimationFrame(SE._raf);
       if(SE._rotInt){clearInterval(SE._rotInt);SE._rotInt=null;}
       document.getElementById('c8pause').textContent='▶';
     } else {
+      // PLAY — reporneste de la t-ul salvat
       SE._playing=true;
       document.getElementById('c8pause').textContent='⏸';
-      // Repornim loop-ul de la t curent
       var scene=SE.SCENES[SE._si];
-      var elapsed=scene.dur*(1-(scene.dur-(performance.now()-SE._startT))/scene.dur);
-      SE._startT=performance.now()-elapsed;
+      // Recalculeaza startT astfel incat t sa fie _pausedT
+      SE._startT = performance.now() - _pausedT * scene.dur;
       var loop2=function(){
         if(!SE._playing)return;
         var t=Math.min(1,Math.max(0.001,(performance.now()-SE._startT)/scene.dur));
         SE._ctx.clearRect(0,0,window.innerWidth,window.innerHeight);
-        if(scene.id==='crestere'){var tG=t<0.15?0:Math.min(1,(t-0.15)/0.70);var tE=1-Math.pow(1-tG,3);try{map.setPaintProperty('building-extrusion','fill-extrusion-height',['*',['get','height'],Math.max(0.05,tE)]);}catch(e){}}
+        if(scene.id==='crestere'){
+          var tG=t<0.15?0:Math.min(1,(t-0.15)/0.70);
+          var tE=1-Math.pow(1-tG,3);
+          try{map.setPaintProperty('building-extrusion','fill-extrusion-height',['*',['get','height'],Math.max(0.05,tE)]);}catch(e){}
+        }
         try{cinDraw(scene.id,t,SE._ctx,window.innerWidth,window.innerHeight,pred,name,SE);}catch(e){}
         if(t<1){SE._raf=requestAnimationFrame(loop2);}
         else{goScene(SE._si+1);}
