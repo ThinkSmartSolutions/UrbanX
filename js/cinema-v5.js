@@ -703,7 +703,7 @@ window._startCinema = function(cityKey) {
           ['*',['get','height'],Math.max(0.05,tE)]);}catch(e){}
       }
       // Overlay canvas cu date per scena
-      try{cinDraw(scene.id,t,SE._ctx,window.innerWidth,window.innerHeight,pred,name,SE);}catch(e){}
+      try{cinDraw(scene.id,t,SE._ctx,window.innerWidth,window.innerHeight,pred,name,SE);}catch(e){if(Math.random()<0.01)console.warn('[cinDraw]',scene.id,e.message);}
       if(t<1){SE._raf=requestAnimationFrame(loop);}
       else{runScene(idx+1);}
     };
