@@ -1,0 +1,3826 @@
+{
+  "_meta": {
+    "uat": "Municipiul Botoșani",
+    "uat_key": "RO-BT-01",
+    "sursa": "RLUB Municipiul Botoșani — S.C. URBANA S.A., mai 1999; Contract nr. 19/22.07.1997 (act adițional nr. 1/1999); Beneficiar: Consiliul Local al Municipiului Botoșani",
+    "versiune": "1.0.0",
+    "data_generare": "2026-05-25",
+    "generare_nota": "Generat automat din RLUB Vol.1 (Art. 7) + Vol.2 (Art. 8.1–8.62) — 62 UTR-uri, 20 subzone funcționale",
+    "seismic": {
+      "ag": 0.2,
+      "Tc": 1.4,
+      "zona": "D",
+      "nota": "P100-1/2013 — Botoșani zona seismică D, ag=0.20g, Tc=1.4s"
+    },
+    "hdd": 2900,
+    "hdd_nota": "Grade-zile încălzire Botoșani (conf. C107/4-2022)",
+    "nr_utrs": 62,
+    "nr_subzone": 20
+  },
+  "subzone": {
+    "C_CP": {
+      "denumire": "Zona Centrală — Centru Principal Botoșani",
+      "zona_parinte": "C",
+      "pot_baza": 40,
+      "pot_cumulat": 40,
+      "cut_baza": null,
+      "cut_cumulat": null,
+      "cut_note": "conf. PUZ+R elaborat și aprobat",
+      "hmax_m": null,
+      "niv_max": null,
+      "regim": "conf. PUG / PUZ+R",
+      "spatii_verzi_pct": 10,
+      "parcaje_min": "1 loc/apart.; conf. normative pt. funcțiuni IS",
+      "suprafata_min_mp": null,
+      "lung_min_aliniament_m": null,
+      "adancime_min_m": null,
+      "aliniament_note": "prin PUZ+R elaborat și aprobat conform actelor normative în vigoare",
+      "ref_vol1": "Art. 7.2 — C Zona Centrală",
+      "fn_complementare": [
+        "LMu1",
+        "LIu1",
+        "Pcs",
+        "CCr"
+      ],
+      "fn_interzise": [
+        "LMr",
+        "I",
+        "A",
+        "GC"
+      ]
+    },
+    "C_CS": {
+      "denumire": "Zona Centrală — Centre Secundare (Gară-Popăuți, Răchiți, Tulbureni)",
+      "zona_parinte": "C",
+      "pot_baza": 40,
+      "pot_cumulat": 40,
+      "cut_baza": null,
+      "cut_cumulat": null,
+      "cut_note": "conf. PUZ+R",
+      "hmax_m": null,
+      "niv_max": null,
+      "regim": "conf. PUZ+R",
+      "spatii_verzi_pct": 10,
+      "parcaje_min": "1 loc/apart.; conf. normative pt. IS",
+      "suprafata_min_mp": null,
+      "lung_min_aliniament_m": null,
+      "adancime_min_m": null,
+      "aliniament_note": "prin PUZ+R aprobat",
+      "ref_vol1": "Art. 7.2 — C Zona Centrală (centre secundare)",
+      "fn_complementare": [
+        "LMu1",
+        "Pcs",
+        "CCr",
+        "TE"
+      ],
+      "fn_interzise": [
+        "LMr",
+        "I",
+        "A",
+        "GC"
+      ]
+    },
+    "LMu1": {
+      "denumire": "Rezidențial urban exclusiv — clădiri P, P+1, P+2 (max. 10 m)",
+      "zona_parinte": "LM",
+      "pot_baza": 35,
+      "pot_cumulat": 38,
+      "cut_baza": 1.0,
+      "cut_cumulat": 1.2,
+      "cut_note": "ZCAD: CUT bază 1,0 → max 1,1; afara ZCAD: CUT bază 1,0 → max 1,2",
+      "hmax_m": 10.0,
+      "niv_max": 3,
+      "regim": "P+2",
+      "spatii_verzi_pct": 10,
+      "parcaje_min": "1 loc/apartament; max 5 autoturisme/parcelă",
+      "suprafata_min_mp": 200,
+      "lung_min_aliniament_m": 9.0,
+      "adancime_min_m": 12.0,
+      "aliniament_note": "ZCAD: prin PA aferent PZCAD conf. RAEC; afara ZCAD: prin PA și/sau PUZ+R",
+      "tip_cladire": [
+        "IZ (SC min 64mp, lung 8m)",
+        "CL (SC min 48mp, lung 6m)",
+        "FI (SC min 54mp, lung 9m)"
+      ],
+      "ref_vol1": "Art. 7.3.1 — LMu subzona cu clădiri de tip urban",
+      "fn_complementare": [
+        "LI",
+        "IS (excl. ISsp)",
+        "I (excl. poluante)",
+        "Pp",
+        "GC_TE",
+        "CCp"
+      ],
+      "fn_interzise": [
+        "LMr",
+        "ISsp",
+        "I poluante",
+        "A",
+        "Pcs",
+        "GC_TE (altele)",
+        "CC"
+      ]
+    },
+    "LMu2": {
+      "denumire": "Rezidențial urban predominant — clădiri P, P+1, P+2 (max. 10 m)",
+      "zona_parinte": "LM",
+      "pot_baza": 45,
+      "pot_cumulat": 50,
+      "cut_baza": 1.3,
+      "cut_cumulat": 1.5,
+      "cut_note": "bază 1,3 → max cumulat 1,5; niv. 3,0 → max 3,2",
+      "hmax_m": 10.0,
+      "niv_max": 3,
+      "regim": "P+2",
+      "spatii_verzi_pct": 10,
+      "parcaje_min": "1 loc/apartament; max 5 autoturisme/parcelă",
+      "suprafata_min_mp": 200,
+      "lung_min_aliniament_m": 9.0,
+      "adancime_min_m": 12.0,
+      "aliniament_note": "prin PA și/sau PUZ+R",
+      "tip_cladire": [
+        "IZ (SC min 64mp, lung 8m)",
+        "CL (SC min 48mp, lung 6m)",
+        "FI (SC min 54mp, lung 9m)"
+      ],
+      "ref_vol1": "Art. 7.3.1 — LMu subzona cu clădiri de tip urban",
+      "fn_complementare": [
+        "IS",
+        "LMu",
+        "LIu",
+        "I (excl. pol.)",
+        "Pp",
+        "GC_TE",
+        "CCr",
+        "CCp"
+      ],
+      "fn_interzise": [
+        "LMr",
+        "ISsp",
+        "I poluante",
+        "A",
+        "Pcs",
+        "GC_TE (altele)",
+        "CC"
+      ]
+    },
+    "LMre1": {
+      "denumire": "Rezidențial rural cu echipare urbană — exclusiv rezidențial",
+      "zona_parinte": "LM",
+      "pot_baza": 15,
+      "pot_cumulat": 18,
+      "cut_baza": 0.15,
+      "cut_cumulat": 0.35,
+      "cut_note": "bază 0,15 → max cumulat 0,35; niv. 1,0 → max 2,0",
+      "hmax_m": 5.0,
+      "niv_max": 2,
+      "regim": "P (max. 5m clădiri dominante); P+1 cu PUD aprobat",
+      "spatii_verzi_pct": null,
+      "spatii_verzi_note": "facultativ — recomandat",
+      "parcaje_min": "1 loc/apartament; max 5 autoturisme/parcelă",
+      "suprafata_min_mp": 400,
+      "lung_min_aliniament_m": 8.0,
+      "adancime_min_m": 17.0,
+      "aliniament_note": "ZCAD: prin PA aferent PZCAD + RAEC; afara ZCAD: prin PA și/sau PUZ+R",
+      "tip_cladire": [
+        "IZ (SC min 64mp, lung 8m)",
+        "CL (SC min 48mp, lung 6m)",
+        "FI (SC min 54mp, lung 9m)"
+      ],
+      "ref_vol1": "Art. 7.3.2.a — LMre subzona rurală cu echipare de tip urban",
+      "fn_complementare": [
+        "LMu",
+        "IS",
+        "I (excl. pol.)",
+        "A",
+        "P",
+        "GC_TE",
+        "CC",
+        "S"
+      ],
+      "fn_interzise": [
+        "LI",
+        "I poluante",
+        "tăierea vitelor"
+      ]
+    },
+    "LMre2": {
+      "denumire": "Rezidențial rural cu echipare urbană — predominant rezidențial",
+      "zona_parinte": "LM",
+      "pot_baza": 15,
+      "pot_cumulat": 18,
+      "cut_baza": 0.15,
+      "cut_cumulat": 0.35,
+      "cut_note": "bază 0,15 → max cumulat 0,35; niv. 1,0 → max 2,0",
+      "hmax_m": 5.0,
+      "niv_max": 2,
+      "regim": "P predominant; P+1 cu PUD aprobat",
+      "spatii_verzi_pct": null,
+      "spatii_verzi_note": "facultativ",
+      "parcaje_min": "1 loc/apartament; max 5 autoturisme/parcelă",
+      "suprafata_min_mp": 400,
+      "lung_min_aliniament_m": 6.0,
+      "adancime_min_m": 17.0,
+      "aliniament_note": "prin PA și/sau PUZ+R",
+      "tip_cladire": [
+        "IZ (SC min 64mp, lung 8m)",
+        "CL (SC min 48mp, lung 6m)",
+        "FI (SC min 54mp, lung 9m)"
+      ],
+      "ref_vol1": "Art. 7.3.2.a — LMre subzona rurală cu echipare de tip urban",
+      "fn_complementare": [
+        "LMu",
+        "IS",
+        "I (excl. pol.)",
+        "A",
+        "P",
+        "GC_TE",
+        "CC",
+        "S"
+      ],
+      "fn_interzise": [
+        "LI",
+        "I poluante",
+        "tăierea vitelor"
+      ]
+    },
+    "LMrf1": {
+      "denumire": "Rezidențial rural fără echipare urbană — exclusiv rezidențial",
+      "zona_parinte": "LM",
+      "pot_baza": 15,
+      "pot_cumulat": 18,
+      "cut_baza": 0.15,
+      "cut_cumulat": 0.35,
+      "cut_note": "bază 0,15 → max cumulat 0,35; niv. 1,0 → max 2,0",
+      "hmax_m": 5.0,
+      "niv_max": 2,
+      "regim": "P predominant; P+1 cu PUD aprobat",
+      "spatii_verzi_pct": null,
+      "spatii_verzi_note": "facultativ",
+      "parcaje_min": "1 loc/apartament; max 5 autoturisme/parcelă",
+      "suprafata_min_mp": 400,
+      "lung_min_aliniament_m": 8.0,
+      "adancime_min_m": 17.0,
+      "aliniament_note": "ZCAD: prin PA aferent PZCAD + RAEC; afara ZCAD: prin PA și/sau PUZ+R",
+      "tip_cladire": [
+        "IZ (SC min 64mp, lung 8m)",
+        "CL (SC min 48mp, lung 6m)",
+        "FI (SC min 54mp, lung 9m)"
+      ],
+      "ref_vol1": "Art. 7.3.2.b — LMrf subzona rurală fără echipare de tip urban",
+      "fn_complementare": [
+        "IS",
+        "I (excl. pol.)",
+        "A",
+        "P",
+        "GC_TE",
+        "CC",
+        "S"
+      ],
+      "fn_interzise": [
+        "LI",
+        "I poluante",
+        "tăierea vitelor"
+      ]
+    },
+    "LMrf2": {
+      "denumire": "Rezidențial rural fără echipare urbană — predominant rezidențial",
+      "zona_parinte": "LM",
+      "pot_baza": 15,
+      "pot_cumulat": 18,
+      "cut_baza": 0.15,
+      "cut_cumulat": 0.35,
+      "cut_note": "bază 0,15 → max cumulat 0,35; niv. 1,0 → max 2,0",
+      "hmax_m": 5.0,
+      "niv_max": 2,
+      "regim": "P predominant; P+1 cu PUD aprobat",
+      "spatii_verzi_pct": null,
+      "spatii_verzi_note": "facultativ",
+      "parcaje_min": "1 loc/apartament; max 5 autoturisme/parcelă",
+      "suprafata_min_mp": 400,
+      "lung_min_aliniament_m": 6.0,
+      "adancime_min_m": 17.0,
+      "aliniament_note": "prin PA și/sau PUZ+R",
+      "tip_cladire": [
+        "IZ (SC min 64mp, lung 8m)",
+        "CL (SC min 48mp, lung 6m)",
+        "FI (SC min 54mp, lung 9m)"
+      ],
+      "ref_vol1": "Art. 7.3.2.b — LMrf subzona rurală fără echipare de tip urban",
+      "fn_complementare": [
+        "IS",
+        "I (excl. pol.)",
+        "A",
+        "P",
+        "GC_TE",
+        "CC",
+        "S"
+      ],
+      "fn_interzise": [
+        "LI",
+        "I poluante",
+        "tăierea vitelor"
+      ]
+    },
+    "LIu1": {
+      "denumire": "Rezidențial colectiv exclusiv — clădiri cu mai mult de 3 niveluri (max. 15 m / P+4)",
+      "zona_parinte": "LI",
+      "pot_baza": 40,
+      "pot_cumulat": 40,
+      "cut_baza": 2.0,
+      "cut_cumulat": 2.2,
+      "cut_note": "bază 2,0; max cumulat 2,2 (niv. × 1,1); pt. H max 15m: CUT 2,0 niv. 5,0",
+      "hmax_m": 15.0,
+      "niv_max": 5,
+      "regim": "max P+4 (15m)",
+      "spatii_verzi_pct": 10,
+      "parcaje_min": "1 loc/apartament; min 10m față de ferestrele locuințelor",
+      "suprafata_min_mp": 200,
+      "lung_min_aliniament_m": 9.0,
+      "adancime_min_m": 12.0,
+      "aliniament_note": "ZCAD: conf. RAEC; non-ZCAD: prin PUZ+R (clădiri noi la min 10m față de existente)",
+      "tip_cladire": [
+        "IZ (SC min 64mp, lung 8m)",
+        "CL (SC min 48mp, lung 6m)",
+        "FI (SC min 54mp, lung 9m)"
+      ],
+      "ref_vol1": "Art. 7.4 — LI Zona rezidențială cu clădiri cu mai mult de 3 niveluri",
+      "fn_complementare": [
+        "LI",
+        "IS (excl. ISsp)",
+        "I (excl. pol.)",
+        "Pp",
+        "GC_TE",
+        "CCp",
+        "LMu"
+      ],
+      "fn_interzise": [
+        "LMr",
+        "ISsp",
+        "I poluante",
+        "A",
+        "Pcs",
+        "GC_TE (altele)",
+        "CC"
+      ]
+    },
+    "LIu2": {
+      "denumire": "Rezidențial colectiv predominant — clădiri cu mai mult de 3 niveluri (max. 25 m / P+7)",
+      "zona_parinte": "LI",
+      "pot_baza": 40,
+      "pot_cumulat": 40,
+      "cut_baza": 3.2,
+      "cut_cumulat": 3.52,
+      "cut_note": "bază 3,2; max cumulat 3,52 (niv. × 1,1); pt. H max 25m: CUT 3,2 niv. 8,0",
+      "hmax_m": 25.0,
+      "niv_max": 8,
+      "regim": "max P+7 (25m)",
+      "spatii_verzi_pct": 10,
+      "parcaje_min": "1 loc/apartament; min 10m față de ferestrele locuințelor",
+      "suprafata_min_mp": 200,
+      "lung_min_aliniament_m": 9.0,
+      "adancime_min_m": 12.0,
+      "aliniament_note": "prin PUZ+R aprobat (clădiri noi la min 10m față de existente)",
+      "tip_cladire": [
+        "IZ (SC min 64mp, lung 8m)",
+        "CL (SC min 48mp, lung 6m)",
+        "FI (SC min 54mp, lung 9m)"
+      ],
+      "ref_vol1": "Art. 7.4 — LI Zona rezidențială cu clădiri cu mai mult de 3 niveluri",
+      "fn_complementare": [
+        "IS (excl. ISsp)",
+        "I (excl. pol.)",
+        "Pp",
+        "GC_TE",
+        "CCp",
+        "LMu"
+      ],
+      "fn_interzise": [
+        "LMr",
+        "ISsp",
+        "I poluante",
+        "A",
+        "Pcs",
+        "GC_TE (altele)",
+        "CC"
+      ]
+    },
+    "IS": {
+      "denumire": "Instituții publice și servicii de interes general",
+      "zona_parinte": "IS",
+      "pot_baza": 50,
+      "pot_cumulat": 50,
+      "cut_baza": null,
+      "cut_cumulat": null,
+      "cut_note": "POT 50% pe teren IS; POT 40% pe teren LM/LI conf. 7.2.24; CUT conf. PUZ+R și PUD",
+      "hmax_m": null,
+      "niv_max": null,
+      "regim": "conf. PUZ+R și PUD",
+      "spatii_verzi_pct": null,
+      "spatii_verzi_note": "conf. funcțiunii specifice",
+      "parcaje_min": "conf. normative specifice fiecărei funcțiuni",
+      "suprafata_min_mp": null,
+      "lung_min_aliniament_m": null,
+      "adancime_min_m": null,
+      "aliniament_note": "prin PUZ+R aprobat",
+      "subzone": [
+        "ISa",
+        "ISf",
+        "ISc",
+        "IScu",
+        "ISct",
+        "ISi",
+        "ISs",
+        "ISt",
+        "ISsp",
+        "ISas",
+        "ISps",
+        "ISm"
+      ],
+      "ref_vol1": "Art. 7.5 — IS Zona de instituții publice și servicii de interes general",
+      "fn_complementare": [
+        "LMu2",
+        "LIu2",
+        "I (mici, nepoluante)",
+        "S (birouri)",
+        "CCp"
+      ],
+      "fn_interzise": [
+        "LMr",
+        "I poluante",
+        "A",
+        "GC",
+        "TA"
+      ]
+    },
+    "I1": {
+      "denumire": "Industrie și depozitare — exclusiv (unități industriale, depozite, transport)",
+      "zona_parinte": "I",
+      "pot_baza": null,
+      "pot_cumulat": null,
+      "cut_baza": null,
+      "cut_cumulat": null,
+      "cut_note": "conf. PUZ+R",
+      "hmax_m": null,
+      "niv_max": null,
+      "regim": "conf. PUZ+R",
+      "spatii_verzi_pct": null,
+      "spatii_verzi_note": "conf. normative de mediu",
+      "parcaje_min": "conf. normative în vigoare",
+      "suprafata_min_mp": null,
+      "lung_min_aliniament_m": null,
+      "adancime_min_m": null,
+      "aliniament_note": "prin PUZ+R aprobat",
+      "ref_vol1": "Art. 7.6 — I Zona de unități industriale, depozitare și transport",
+      "fn_complementare": [
+        "LIu1 (parcele distincte)",
+        "IS (excl. pol.)",
+        "LMu2 (parcele distincte)"
+      ],
+      "fn_interzise": [
+        "LMr",
+        "ISsp",
+        "A",
+        "CCf",
+        "S"
+      ]
+    },
+    "I2": {
+      "denumire": "Industrie și depozitare — predominant cu funcțiuni mixte",
+      "zona_parinte": "I",
+      "pot_baza": null,
+      "pot_cumulat": null,
+      "cut_baza": null,
+      "cut_cumulat": null,
+      "cut_note": "conf. PUZ+R",
+      "hmax_m": null,
+      "niv_max": null,
+      "regim": "conf. PUZ+R",
+      "spatii_verzi_pct": null,
+      "spatii_verzi_note": "conf. normative de mediu",
+      "parcaje_min": "conf. normative în vigoare",
+      "suprafata_min_mp": null,
+      "lung_min_aliniament_m": null,
+      "adancime_min_m": null,
+      "aliniament_note": "prin PUZ+R aprobat",
+      "ref_vol1": "Art. 7.6 — I Zona de unități industriale, depozitare și transport",
+      "fn_complementare": [
+        "LMu",
+        "LIu",
+        "IS",
+        "funcțiuni mixte"
+      ],
+      "fn_interzise": [
+        "LMr",
+        "LMu1",
+        "LMu2",
+        "ISsp",
+        "A",
+        "CCf"
+      ]
+    },
+    "A": {
+      "denumire": "Terenuri agricole (arabil, fânețe, pășuni, vii, livezi)",
+      "zona_parinte": "A",
+      "pot_baza": null,
+      "pot_cumulat": null,
+      "cut_baza": null,
+      "cut_cumulat": null,
+      "cut_note": "construcții permanente interzise",
+      "hmax_m": null,
+      "niv_max": null,
+      "regim": "fără construcții permanente",
+      "spatii_verzi_pct": null,
+      "parcaje_min": null,
+      "suprafata_min_mp": null,
+      "lung_min_aliniament_m": null,
+      "adancime_min_m": null,
+      "aliniament_note": null,
+      "ref_vol1": "Art. 7 — A Terenuri agricole",
+      "fn_complementare": [],
+      "fn_interzise": [
+        "IS",
+        "LMu",
+        "LMr",
+        "LIu",
+        "I",
+        "Pcs",
+        "CCf",
+        "S"
+      ]
+    },
+    "Pp": {
+      "denumire": "Parcuri, grădini de cartier, scuaruri",
+      "zona_parinte": "P",
+      "pot_baza": null,
+      "pot_cumulat": null,
+      "cut_baza": null,
+      "cut_cumulat": null,
+      "cut_note": "100% spațiu verde — fără construcții permanente de locuire",
+      "hmax_m": null,
+      "niv_max": null,
+      "regim": "amenajări peisagistice",
+      "spatii_verzi_pct": 100,
+      "parcaje_min": null,
+      "suprafata_min_mp": null,
+      "lung_min_aliniament_m": null,
+      "adancime_min_m": null,
+      "aliniament_note": null,
+      "ref_vol1": "Art. 7 — P Zona de parcuri, grădini, scuaruri",
+      "fn_complementare": [
+        "IS (pavilion)",
+        "Pcs",
+        "GC_TE",
+        "CCr"
+      ],
+      "fn_interzise": [
+        "LMu",
+        "LMr",
+        "LIu",
+        "I",
+        "A",
+        "CCf",
+        "S"
+      ]
+    },
+    "Pcs": {
+      "denumire": "Complexe sportive",
+      "zona_parinte": "P",
+      "pot_baza": null,
+      "pot_cumulat": null,
+      "cut_baza": null,
+      "cut_cumulat": null,
+      "cut_note": "conf. PUZ+R",
+      "hmax_m": null,
+      "niv_max": null,
+      "regim": "conf. PUZ+R",
+      "spatii_verzi_pct": null,
+      "parcaje_min": "conf. normative",
+      "suprafata_min_mp": null,
+      "lung_min_aliniament_m": null,
+      "adancime_min_m": null,
+      "aliniament_note": "prin PUZ+R",
+      "ref_vol1": "Art. 7 — Pcs Complexe sportive",
+      "fn_complementare": [
+        "IS",
+        "Pp",
+        "GC_TE",
+        "CCr"
+      ],
+      "fn_interzise": [
+        "LMu",
+        "LMr",
+        "LIu",
+        "I",
+        "A",
+        "CCf",
+        "S"
+      ]
+    },
+    "GC_TE": {
+      "denumire": "Gospodărie comunală, cimitire și echipare tehnico-edilitară",
+      "zona_parinte": "GC_TE",
+      "pot_baza": null,
+      "pot_cumulat": null,
+      "cut_baza": null,
+      "cut_cumulat": null,
+      "cut_note": "conf. PUZ+R",
+      "hmax_m": null,
+      "niv_max": null,
+      "regim": "conf. PUZ+R",
+      "spatii_verzi_pct": null,
+      "parcaje_min": null,
+      "suprafata_min_mp": null,
+      "lung_min_aliniament_m": null,
+      "adancime_min_m": null,
+      "aliniament_note": "prin PUZ+R",
+      "ref_vol1": "Art. 7 — GC+TE Zona de gospodărie comunală",
+      "fn_complementare": [],
+      "fn_interzise": [
+        "LMu",
+        "LMr",
+        "LIu",
+        "I",
+        "IS",
+        "A",
+        "CC",
+        "S"
+      ]
+    },
+    "CCr": {
+      "denumire": "Căi de comunicație rutieră și construcții aferente",
+      "zona_parinte": "CC",
+      "pot_baza": null,
+      "cut_baza": null,
+      "hmax_m": null,
+      "niv_max": null,
+      "regim": "infrastructură rutieră",
+      "spatii_verzi_pct": null,
+      "parcaje_min": null,
+      "suprafata_min_mp": null,
+      "lung_min_aliniament_m": null,
+      "adancime_min_m": null,
+      "aliniament_note": null,
+      "ref_vol1": "Art. 7 — CCr Căi de comunicație rutieră",
+      "fn_complementare": [],
+      "fn_interzise": []
+    },
+    "CCp": {
+      "denumire": "Circulație pietonală majoră și piețe civice",
+      "zona_parinte": "CC",
+      "pot_baza": null,
+      "cut_baza": null,
+      "hmax_m": null,
+      "niv_max": null,
+      "regim": "spații pietonale",
+      "spatii_verzi_pct": null,
+      "parcaje_min": null,
+      "suprafata_min_mp": null,
+      "lung_min_aliniament_m": null,
+      "adancime_min_m": null,
+      "aliniament_note": null,
+      "ref_vol1": "Art. 7 — CCp Circulație pietonală",
+      "fn_complementare": [],
+      "fn_interzise": []
+    },
+    "CCf": {
+      "denumire": "Căi de comunicație feroviară și construcții aferente",
+      "zona_parinte": "CC",
+      "pot_baza": null,
+      "cut_baza": null,
+      "hmax_m": null,
+      "niv_max": null,
+      "regim": "infrastructură feroviară",
+      "spatii_verzi_pct": null,
+      "parcaje_min": null,
+      "suprafata_min_mp": null,
+      "lung_min_aliniament_m": null,
+      "adancime_min_m": null,
+      "aliniament_note": null,
+      "ref_vol1": "Art. 7 — CCf Căi de comunicație feroviară",
+      "fn_complementare": [],
+      "fn_interzise": []
+    },
+    "S": {
+      "denumire": "Zonă cu destinație specială (unități militare, penitenciare etc.)",
+      "zona_parinte": "S",
+      "pot_baza": null,
+      "cut_baza": null,
+      "cut_note": "conf. RAEC anexat RLUB",
+      "hmax_m": null,
+      "niv_max": null,
+      "regim": "conf. RAEC anexat RLUB",
+      "spatii_verzi_pct": null,
+      "parcaje_min": null,
+      "suprafata_min_mp": null,
+      "lung_min_aliniament_m": null,
+      "adancime_min_m": null,
+      "aliniament_note": "conf. RAEC",
+      "ref_vol1": "Art. 7 — S Zona cu destinație specială",
+      "fn_complementare": [],
+      "fn_interzise": []
+    },
+    "TAG": {
+      "denumire": "Terenuri agricole de protecție (perdele, fâșii de protecție)",
+      "zona_parinte": "TAG",
+      "pot_baza": null,
+      "cut_baza": null,
+      "hmax_m": null,
+      "niv_max": null,
+      "regim": "plantații de protecție — construcții interzise",
+      "spatii_verzi_pct": 100,
+      "parcaje_min": null,
+      "suprafata_min_mp": null,
+      "lung_min_aliniament_m": null,
+      "adancime_min_m": null,
+      "aliniament_note": null,
+      "ref_vol1": "Art. 7 — TAG Terenuri agricole de protecție",
+      "fn_complementare": [],
+      "fn_interzise": [
+        "construcții permanente"
+      ]
+    },
+    "TA": {
+      "denumire": "Râuri, lacuri naturale/artificiale, bălți, canale evacuare ape pluviale",
+      "zona_parinte": "TA",
+      "pot_baza": null,
+      "cut_baza": null,
+      "hmax_m": null,
+      "niv_max": null,
+      "regim": "cursuri de apă — construcții interzise",
+      "spatii_verzi_pct": null,
+      "parcaje_min": null,
+      "suprafata_min_mp": null,
+      "lung_min_aliniament_m": null,
+      "adancime_min_m": null,
+      "aliniament_note": null,
+      "ref_vol1": "Art. 7 — TA Râuri, lacuri",
+      "fn_complementare": [],
+      "fn_interzise": [
+        "construcții permanente"
+      ]
+    },
+    "PS": {
+      "denumire": "Plantații speciale pentru îmbunătățirea stabilității versanților",
+      "zona_parinte": "PS",
+      "pot_baza": null,
+      "cut_baza": null,
+      "hmax_m": null,
+      "niv_max": null,
+      "regim": "plantații stabilizare versanți — construcții interzise",
+      "spatii_verzi_pct": 100,
+      "parcaje_min": null,
+      "suprafata_min_mp": null,
+      "lung_min_aliniament_m": null,
+      "adancime_min_m": null,
+      "aliniament_note": null,
+      "ref_vol1": "Art. 7 — PS Plantații speciale",
+      "fn_complementare": [],
+      "fn_interzise": [
+        "construcții permanente"
+      ]
+    },
+    "PA": {
+      "denumire": "Păduri, perdele de protecție",
+      "zona_parinte": "PA",
+      "pot_baza": null,
+      "cut_baza": null,
+      "hmax_m": null,
+      "niv_max": null,
+      "regim": "conf. Codului Silvic",
+      "spatii_verzi_pct": 100,
+      "parcaje_min": null,
+      "suprafata_min_mp": null,
+      "lung_min_aliniament_m": null,
+      "adancime_min_m": null,
+      "aliniament_note": null,
+      "ref_vol1": "Art. 7 — PA Păduri",
+      "fn_complementare": [],
+      "fn_interzise": []
+    }
+  },
+  "utrs": {
+    "1": {
+      "denumire": "Centru Istoric",
+      "sup_ha": 24.9,
+      "sup_cp_ha": 24.9,
+      "subzone_admise": [
+        "IS",
+        "LMu2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "Pp",
+        "GC_TE",
+        "CCr",
+        "CCp"
+      ],
+      "fn_dominanta": "IS",
+      "fn_complementare": [
+        "LMu2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "Pp",
+        "GC_TE",
+        "CCr",
+        "CCp"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "LMrf2",
+        "I1 (excl. exist.)",
+        "I2",
+        "A",
+        "Pcs",
+        "S",
+        "CCf"
+      ],
+      "avize": [
+        "Aviz geotehnic",
+        "Avize zone istorice protejate (centru istoric, monumente izolate, protecție acestora)",
+        "Avize și proceduri speciale obiective arheologice",
+        "Avize protecție DN28B Hârlău–Iași (Calea Națională), inclusiv acord administrator drum",
+        "Aviz protecție sanitară a unor funcțiuni din vecinătate",
+        "Acord de mediu pentru construcțiile și amenajările care necesită studii",
+        "Alte acorduri/avize cerute prin lege"
+      ],
+      "interdictii": "Până la aprobarea DU care detaliază PUGB/RLUB; Până la PUZ+R în zone de interes public: zona centrală (CP Botoșani), zonele istorice protejate ale municipiului, zona pietonală din centrul istoric",
+      "zcad_ha": null,
+      "ref": "Art. 8.1, RLUB Vol.2 + Art. 7.2 (C Zona Centrală), RLUB Vol.1"
+    },
+    "2": {
+      "denumire": "Grivița 2",
+      "sup_ha": 20.3,
+      "sup_cp_ha": 5.1,
+      "subzone_admise": [
+        "IS",
+        "LMu2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "Pp",
+        "CCr"
+      ],
+      "fn_dominanta": "LIu1",
+      "fn_complementare": [
+        "IS",
+        "LMu2",
+        "LIu2",
+        "I1 (exist.)",
+        "Pp",
+        "CCr"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "LMrf2",
+        "I1 (excl. exist.)",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic",
+        "Avize zone istorice protejate (monumente izolate)",
+        "Avize protecție DN28B Hârlău–Iași, DN29 Săveni, DN29D Ștefănești",
+        "Acord de mediu",
+        "Alte avize cerute prin lege"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: zona centrală (CP Botoșani)",
+      "zcad_ha": null,
+      "ref": "Art. 8.2, RLUB Vol.2 + Art. 7.4 (LI), RLUB Vol.1"
+    },
+    "3": {
+      "denumire": "Independenței",
+      "sup_ha": 15.1,
+      "sup_cp_ha": 3.8,
+      "subzone_admise": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "Pp",
+        "CCr"
+      ],
+      "fn_dominanta": "LIu1",
+      "fn_complementare": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LIu2",
+        "I1 (exist.)",
+        "Pp",
+        "CCr"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "LMrf2",
+        "I1 (excl. exist.)",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic",
+        "Avize zone istorice (zona istorică Botoșani – Subzona Armenească)",
+        "Avize protecție DN29D Ștefănești, DN28B",
+        "Proceduri speciale obiective arheologice",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: zona centrală, zone istorice protejate, suprafețe plantate publice (scuar din Str. Vornic Boldur)",
+      "zcad_ha": null,
+      "ref": "Art. 8.3, RLUB Vol.2 + Art. 7.4 (LI), RLUB Vol.1"
+    },
+    "4": {
+      "denumire": "Sofian",
+      "sup_ha": 17.6,
+      "sup_cp_ha": 17.6,
+      "subzone_admise": [
+        "IS",
+        "LMu2",
+        "Pp",
+        "GC_TE",
+        "CCr",
+        "CCp"
+      ],
+      "fn_dominanta": "LMu2",
+      "fn_complementare": [
+        "IS",
+        "Pp",
+        "GC_TE",
+        "CCr",
+        "CCp"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "LMrf2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic",
+        "Avize zone istorice (Zona istorică – Subzona Armenească)",
+        "Avize protecție DN29D Ștefănești",
+        "Avize protecție sanitară Cimitirul Evreiesc",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: zona centrală, zone istorice, pietonale majore, suprafețe plantate (Str. Marașal Antonescu)",
+      "zcad_ha": null,
+      "ref": "Art. 8.4, RLUB Vol.2 + Art. 7.3.1 (LMu), RLUB Vol.1"
+    },
+    "5": {
+      "denumire": "Miorita",
+      "sup_ha": 18.5,
+      "sup_cp_ha": 7.6,
+      "subzone_admise": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LIu1",
+        "LIu2",
+        "CCr"
+      ],
+      "fn_dominanta": "LIu1",
+      "fn_complementare": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LIu2",
+        "CCr",
+        "Pp"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "LMrf2",
+        "I1",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic",
+        "Avize zone istorice (centru istoric, Zona istorică – Subzona Armenească)",
+        "Proceduri speciale obiective arheologice",
+        "Avize protecție DN28B",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: zona centrală, zone istorice protejate",
+      "zcad_ha": null,
+      "ref": "Art. 8.5, RLUB Vol.2 + Art. 7.4 (LI), RLUB Vol.1"
+    },
+    "6": {
+      "denumire": "Centru Administrativ",
+      "sup_ha": 20.0,
+      "sup_cp_ha": 20.0,
+      "subzone_admise": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LIu1",
+        "LIu2",
+        "Pp",
+        "CCr",
+        "CCp"
+      ],
+      "fn_dominanta": "IS",
+      "fn_complementare": [
+        "LMu1",
+        "LMu2",
+        "LIu1",
+        "LIu2",
+        "Pp",
+        "CCr",
+        "CCp"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "LMrf2",
+        "I1",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic",
+        "Avize zone istorice (centru istoric, monumente izolate)",
+        "Proceduri speciale obiective arheologice",
+        "Avize protecție DN28B",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: zona centrală, zone istorice, pietonale majore, suprafețe plantate (Calea Națională, Str. Cuza Vodă)",
+      "zcad_ha": null,
+      "ref": "Art. 8.6, RLUB Vol.2 + Art. 7.2 (C – CP), RLUB Vol.1"
+    },
+    "7": {
+      "denumire": "Unirii",
+      "sup_ha": 36.0,
+      "sup_cp_ha": 29.9,
+      "subzone_admise": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "Pp",
+        "CCr",
+        "CCp"
+      ],
+      "fn_dominanta": "LIu1",
+      "fn_complementare": [
+        "LMu1",
+        "LMu2",
+        "LIu2",
+        "I1 (exist.)",
+        "Pp",
+        "CCr",
+        "CCp"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "I1 (excl. exist.)",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic",
+        "Avize zone istorice (centru istoric, Zona istorică – Subzona Bd. Mihai Eminescu Nord)",
+        "Proceduri speciale obiective arheologice",
+        "Avize protecție DN28B",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la PUZ+R: zona centrală, zone istorice protejate, pietonale majore (Str. Unirii), suprafețe plantate (Str. Unirii)",
+      "zcad_ha": null,
+      "ref": "Art. 8.7, RLUB Vol.2 + Art. 7.4 (LI), RLUB Vol.1"
+    },
+    "8": {
+      "denumire": "Moara de Foc",
+      "sup_ha": 36.6,
+      "sup_cp_ha": 0,
+      "subzone_admise": [
+        "LMu2",
+        "LMrf1",
+        "LIu1",
+        "I1",
+        "Pp",
+        "CCr",
+        "TAG",
+        "TA"
+      ],
+      "fn_dominanta": "LMrf1",
+      "fn_complementare": [
+        "LMu2",
+        "LIu1 (exist.)",
+        "I1 (exist.)",
+        "Pp",
+        "CCr",
+        "TAG (zona inundabilă)",
+        "TA"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "LIu (excl. exist.)",
+        "I1 (excl. exist.)",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S",
+        "TAG (excl. zone 8.21.3)"
+      ],
+      "avize": [
+        "Aviz geotehnic (special zone versanți)",
+        "Proceduri speciale obiective arheologice (podul de piatră medievală Luizoaia, Str. Vâlcele)",
+        "Avize protecție DN29 Săveni (Str. Împarat Traian)",
+        "Avize protecție râuri și lacuri (pârâul Luizoaia)",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: zone completare sistem circulații (lărgirea Str. Vâlcele, realizarea de pod peste pârâul Luizoaia), suprafețe plantate (Str. Vâlcele)",
+      "zcad_ha": null,
+      "ref": "Art. 8.8, RLUB Vol.2 + Art. 7.3.2 (LMr), RLUB Vol.1"
+    },
+    "9": {
+      "denumire": "Parcul Tineretului–Blocuri",
+      "sup_ha": 24.7,
+      "sup_cp_ha": 0,
+      "subzone_admise": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LIu1",
+        "LIu2",
+        "Pp",
+        "CCr"
+      ],
+      "fn_dominanta": "LIu1",
+      "fn_complementare": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LIu1",
+        "LIu2",
+        "Pp",
+        "CCr"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "LMrf2",
+        "I1",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic (special zone versanți)",
+        "Avize zone istorice (zona de protecție monumente izolate)",
+        "Avize protecție/siguranță zone destinație specială (S)",
+        "Avize protecție DN29 Săveni și DN29D Ștefănești",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: zone completare sistem circulații (reorganizarea intersecției Str. Săvenilor – Str. Sf. Ion Elefterescu)",
+      "zcad_ha": null,
+      "ref": "Art. 8.9, RLUB Vol.2 + Art. 7.4 (LI), RLUB Vol.1"
+    },
+    "10": {
+      "denumire": "Lipoveni",
+      "sup_ha": 22.7,
+      "sup_cp_ha": 0.6,
+      "subzone_admise": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LMre1",
+        "I1",
+        "Pp",
+        "CCr"
+      ],
+      "fn_dominanta": "LMu1",
+      "fn_complementare": [
+        "IS",
+        "LMu2",
+        "LMre1",
+        "I1 (exist.)",
+        "Pp",
+        "CCr"
+      ],
+      "fn_interzise": [
+        "LMrf1",
+        "LMrf2",
+        "LIu1",
+        "LIu2",
+        "I1 (excl. exist.)",
+        "I2",
+        "A",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic (special zone versanți)",
+        "Avize zone istorice (monumente izolate, zona de protecție)",
+        "Avize protecție DN29D Ștefănești",
+        "Avize protecție sanitară",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: zona centrală, zone completare sistem circulații (arteră legătură cu cartierul nou Tătarilor – UTR57), suprafețe plantate (artera de legătură cu cartierul Tătarilor)",
+      "zcad_ha": 5.8,
+      "ref": "Art. 8.10, RLUB Vol.2 + Art. 7.3.1 (LMu), RLUB Vol.1"
+    },
+    "11": {
+      "denumire": "Elie Radu",
+      "sup_ha": 15.4,
+      "sup_cp_ha": 1.1,
+      "subzone_admise": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "Pp",
+        "CCr"
+      ],
+      "fn_dominanta": "LMu1",
+      "fn_complementare": [
+        "IS",
+        "LMu2",
+        "Pp",
+        "CCr"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "LMrf2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic",
+        "Avize zone istorice (Zona istorică – Subzona Armenească, monumente izolate)",
+        "Avize protecție DN29D Ștefănești",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: zona centrală, zone istorice (Subzona Armenească), suprafețe plantate (Str. Victoriei, Petru Rareș)",
+      "zcad_ha": null,
+      "ref": "Art. 8.11, RLUB Vol.2 + Art. 7.3.1 (LMu), RLUB Vol.1"
+    },
+    "12": {
+      "denumire": "Sfinții Voievozi",
+      "sup_ha": 11.1,
+      "sup_cp_ha": 3.4,
+      "subzone_admise": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "Pp",
+        "CCr"
+      ],
+      "fn_dominanta": "LMu1",
+      "fn_complementare": [
+        "IS",
+        "LMu2",
+        "Pp",
+        "CCr"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "LMrf2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic (special zone versanți)",
+        "Avize zone istorice (centru istoric, Zona istorică – Subzona Armenească)",
+        "Proceduri speciale obiective arheologice",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: zona centrală, zone istorice (CI Botoșani, Zona istorică – Subzona Armenească), suprafețe plantate (Str. Victoriei, Str. Petru Rareș)",
+      "zcad_ha": 4.6,
+      "ref": "Art. 8.12, RLUB Vol.2 + Art. 7.3.1 (LMu), RLUB Vol.1"
+    },
+    "13": {
+      "denumire": "Armeni",
+      "sup_ha": 14.4,
+      "sup_cp_ha": 0,
+      "subzone_admise": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "Pp",
+        "CCr"
+      ],
+      "fn_dominanta": "LMu1",
+      "fn_complementare": [
+        "IS",
+        "LMu2",
+        "Pp",
+        "CCr"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "LMrf2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic (special zone versanți)",
+        "Avize zone istorice (centru istoric, zona istorică)",
+        "Proceduri speciale obiective arheologice",
+        "Avize protecție DN28B Hârlău–Iași",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: zone istorice (CI Botoșani, Zona istorică – Subzona Armenească), suprafețe plantate (Str. Petru Rareș)",
+      "zcad_ha": 7.6,
+      "ref": "Art. 8.13, RLUB Vol.2 + Art. 7.3.1 (LMu), RLUB Vol.1"
+    },
+    "14": {
+      "denumire": "Laurian",
+      "sup_ha": 16.0,
+      "sup_cp_ha": 8.4,
+      "subzone_admise": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "Pp",
+        "CCr"
+      ],
+      "fn_dominanta": "LIu1",
+      "fn_complementare": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LIu2",
+        "I1 (exist.)",
+        "Pp",
+        "CCr"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "LMrf2",
+        "I1 (excl. exist.)",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic",
+        "Avize zone istorice (monumente istorice, zona de protecție)",
+        "Avize protecție DN28B și DC61 Curtești (Str. Petru Rareș)",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: zona centrală, suprafețe plantate (Str. Petru Rareș, Str. Nicolae Iorga)",
+      "zcad_ha": null,
+      "ref": "Art. 8.14, RLUB Vol.2 + Art. 7.4 (LI), RLUB Vol.1"
+    },
+    "15": {
+      "denumire": "Spitalului",
+      "sup_ha": 11.0,
+      "sup_cp_ha": 11.0,
+      "subzone_admise": [
+        "IS",
+        "LMu2",
+        "LIu1",
+        "Pp",
+        "CCr"
+      ],
+      "fn_dominanta": "IS",
+      "fn_complementare": [
+        "LMu2",
+        "LIu1",
+        "Pp",
+        "CCr"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "LMrf2",
+        "I1",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic",
+        "Avize zone istorice (zona istorică Botoșani)",
+        "Proceduri speciale obiective arheologice",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: zona centrală, zone istorice (Zona istorică – Subzona Bd. Mihai Eminescu Sud), suprafețe plantate (Str. Cuza Vodă, Nicolae Iorga)",
+      "zcad_ha": null,
+      "ref": "Art. 8.15, RLUB Vol.2 + Art. 7.5 (IS), RLUB Vol.1"
+    },
+    "16": {
+      "denumire": "Parcul Eminescu",
+      "sup_ha": 19.2,
+      "sup_cp_ha": 19.2,
+      "subzone_admise": [
+        "IS",
+        "LMu2",
+        "LIu2",
+        "Pp",
+        "Pcs",
+        "GC_TE",
+        "CCr",
+        "CCp"
+      ],
+      "fn_dominanta": "Pp",
+      "fn_complementare": [
+        "IS",
+        "LMu2",
+        "LIu2",
+        "Pcs",
+        "GC_TE",
+        "CCr",
+        "CCp"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "LMrf2",
+        "I1",
+        "I2",
+        "A",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic",
+        "Avize zone istorice (centru istoric, monumente istorice)",
+        "Proceduri speciale obiective arheologice",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: zona centrală, zone istorice, pietonale majore (alee între Bd. Mihai Eminescu și Str. Vârnav), suprafețe plantate – scuarul nou (Bd. Mihai Eminescu)",
+      "zcad_ha": null,
+      "ref": "Art. 8.16, RLUB Vol.2"
+    },
+    "17": {
+      "denumire": "Sportului",
+      "sup_ha": 17.6,
+      "sup_cp_ha": 0,
+      "subzone_admise": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LIu1",
+        "LIu2",
+        "Pp",
+        "Pcs",
+        "GC_TE",
+        "CCr",
+        "CCp"
+      ],
+      "fn_dominanta": "Pcs",
+      "fn_complementare": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LIu1",
+        "LIu2",
+        "Pp",
+        "GC_TE",
+        "CCr",
+        "CCp"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "LMrf2",
+        "I1",
+        "I2",
+        "A",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic",
+        "Avize zone istorice",
+        "Proceduri speciale obiective arheologice",
+        "Avize protecție DN28B Hârlău–Iași și DN29 Suceava",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: sistem intersecții Km 0 al municipiului (DN29, DN29B, DN28B, DJ296)",
+      "zcad_ha": null,
+      "ref": "Art. 8.17, RLUB Vol.2"
+    },
+    "18": {
+      "denumire": "Grivița 1",
+      "sup_ha": 15.1,
+      "sup_cp_ha": 0,
+      "subzone_admise": [
+        "IS",
+        "LMu2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "Pp",
+        "CCr"
+      ],
+      "fn_dominanta": "LIu1",
+      "fn_complementare": [
+        "IS",
+        "LMu2",
+        "LIu2",
+        "I1 (exist.)",
+        "Pp",
+        "CCr"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "LMrf2",
+        "I1 (excl. exist.)",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic",
+        "Avize zone istorice (zona de protecție monumente izolate)",
+        "Avize protecție DN28B Hârlău–Iași și DN29 Săveni",
+        "Avize protecție infrastructuri feroviare",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: sistem intersecții Km 0 al municipiului",
+      "zcad_ha": null,
+      "ref": "Art. 8.18, RLUB Vol.2 + Art. 7.4 (LI), RLUB Vol.1"
+    },
+    "19": {
+      "denumire": "Dobosari",
+      "sup_ha": 33.3,
+      "sup_cp_ha": 0,
+      "subzone_admise": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LMrf1",
+        "I1",
+        "Pp",
+        "CCr",
+        "TAG",
+        "TA"
+      ],
+      "fn_dominanta": "LMrf1",
+      "fn_complementare": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "I1",
+        "Pp",
+        "CCr",
+        "TAG (zona inundabilă)",
+        "TA"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "LIu1",
+        "LIu2",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S",
+        "TAG (excl. zone 8.19.3)"
+      ],
+      "avize": [
+        "Aviz geotehnic (special zone versanți)",
+        "Avize zone istorice (monumente izolate)",
+        "Avize protecție DN29 Săveni și DJ296 Roma",
+        "Avize protecție infrastructuri feroviare",
+        "Avize protecție râuri și lacuri (pârâul Luizoaia)",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: zone completare sistem circulații (prelungirea Str. Tomis, lărgirea Str. Hatman Arbore, lărgirea DJ296 Roma), sistem intersecții Km 0, zone infrastructuri turistice, lucrări stabilizare versanți",
+      "zcad_ha": null,
+      "ref": "Art. 8.19, RLUB Vol.2 + Art. 7.3.2 (LMr), RLUB Vol.1"
+    },
+    "20": {
+      "denumire": "Tomis",
+      "sup_ha": 69.4,
+      "sup_cp_ha": 9.1,
+      "subzone_admise": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LMrf1",
+        "Pp",
+        "TAG"
+      ],
+      "fn_dominanta": "LMu1",
+      "fn_complementare": [
+        "IS",
+        "LMu2",
+        "LMrf1",
+        "Pp",
+        "TAG (zona inundabilă)"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "I1",
+        "I2",
+        "A",
+        "CCf",
+        "S",
+        "TAG (excl. zone 8.21.3)"
+      ],
+      "avize": [
+        "Aviz geotehnic (special zone versanți – zone LMrf)",
+        "Avize protecție DJ296 Roma (Str. Dobosari)",
+        "Avize protecție râuri și lacuri",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: zone de dezvoltare ale municipiului (Cartierul Răchiți – tratare unitară UTR 20, 62); zona centrală municipiu (CS Răchiți); zone completare sistem circulații; suprafețe plantate; zone infrastructuri turistice – stabilizare versanți",
+      "zcad_ha": null,
+      "ref": "Art. 8.20, RLUB Vol.2 + Art. 7.3.1 (LMu), RLUB Vol.1"
+    },
+    "21": {
+      "denumire": "Donici",
+      "sup_ha": 27.8,
+      "sup_cp_ha": 0,
+      "subzone_admise": [
+        "LMu1",
+        "LMu2",
+        "LMrf1",
+        "LMrf2",
+        "Pp",
+        "CCr",
+        "TAG",
+        "TA"
+      ],
+      "fn_dominanta": "LMrf1",
+      "fn_complementare": [
+        "LMu1 (din Str. Împarat Traian)",
+        "LMu2 (din Str. Împarat Traian)",
+        "LMrf2",
+        "Pp",
+        "CCr",
+        "TAG (zona inundabilă pârâul Luizoaia)",
+        "TA"
+      ],
+      "fn_interzise": [
+        "IS",
+        "LMu1 (excl. zone 8.21.3)",
+        "LMu2 (excl. zone 8.21.3)",
+        "LMre1",
+        "LMre2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S",
+        "TAG (excl. zone 8.21.3)"
+      ],
+      "avize": [
+        "Aviz geotehnic (special zone versanți)",
+        "Proceduri speciale obiective arheologice (podul de piatră medieval Luizoaia)",
+        "Avize protecție DN29 Săveni",
+        "Avize protecție râuri și lacuri (pârâul Luizoaia)",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: zone completare sistem circulații (lărgirea Str. Vâlcele, realizarea de pod peste pârâul Luizoaia), suprafețe plantate (Str. Vâlcele)",
+      "zcad_ha": null,
+      "ref": "Art. 8.21, RLUB Vol.2 + Art. 7.3.2 (LMr), RLUB Vol.1"
+    },
+    "22": {
+      "denumire": "Parcul Tineretului–Case",
+      "sup_ha": 8.3,
+      "sup_cp_ha": 0,
+      "subzone_admise": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LMrf1",
+        "LMrf2",
+        "CCr"
+      ],
+      "fn_dominanta": "LMrf1",
+      "fn_complementare": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LMrf2",
+        "CCr"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic (special zone versanți)",
+        "Avize protecție DN29 Săveni (Str. Împarat Traian)",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la aprobarea DU care detaliază PUGB/RLUB",
+      "zcad_ha": null,
+      "ref": "Art. 8.22, RLUB Vol.2 + Art. 7.3.2 (LMr), RLUB Vol.1"
+    },
+    "23": {
+      "denumire": "Săvenilor",
+      "sup_ha": 7.3,
+      "sup_cp_ha": 0,
+      "subzone_admise": [
+        "LMu1",
+        "LMu2",
+        "LMre1",
+        "LMrf1",
+        "LMrf2",
+        "LIu2",
+        "Pp",
+        "CCr"
+      ],
+      "fn_dominanta": "LMu1",
+      "fn_complementare": [
+        "LMu2",
+        "LMre1",
+        "LMrf1",
+        "LMrf2",
+        "LIu2",
+        "Pp",
+        "CCr"
+      ],
+      "fn_interzise": [
+        "IS",
+        "I1",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic (special zone versanți)",
+        "Avize zone istorice (zona de protecție monumente istorice)",
+        "Avize protecție DN29 Săveni",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: pietonale majore (lărgirea Str. Slt. Ion Elefterescu, Str. Săvenilor); zone completare sistem circulații; sistem intersecții Km 0",
+      "zcad_ha": null,
+      "ref": "Art. 8.23, RLUB Vol.2 + Art. 7.3.1 (LMu), RLUB Vol.1"
+    },
+    "24": {
+      "denumire": "Drumul Tătarilor",
+      "sup_ha": 52.8,
+      "sup_cp_ha": 0,
+      "subzone_admise": [
+        "LMre1",
+        "LMrf1",
+        "Pp",
+        "CCr",
+        "TAG"
+      ],
+      "fn_dominanta": "LMrf1",
+      "fn_complementare": [
+        "LMre1",
+        "Pp",
+        "CCr",
+        "TAG (zone inundabile)"
+      ],
+      "fn_interzise": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S",
+        "TAG (excl. zone 8.24.3)"
+      ],
+      "avize": [
+        "Aviz geotehnic (special zone versanți)",
+        "Avize zone istorice (zona de protecție monumente izolate)",
+        "Avize protecție DN29 Săveni",
+        "Avize protecție sanitară",
+        "Avize protecție râuri și lacuri (pârâul Luizoaia)",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: zone completare sistem circulații (prelungirea Drumului Tătarilor)",
+      "zcad_ha": null,
+      "ref": "Art. 8.24, RLUB Vol.2 + Art. 7.3.2 (LMr), RLUB Vol.1"
+    },
+    "25": {
+      "denumire": "Humăriei",
+      "sup_ha": 19.2,
+      "sup_cp_ha": 0,
+      "subzone_admise": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LMre1",
+        "Pp",
+        "GC_TE",
+        "CCr",
+        "TAG",
+        "TA"
+      ],
+      "fn_dominanta": "LMu1",
+      "fn_complementare": [
+        "IS",
+        "LMu2",
+        "LMre1",
+        "Pp",
+        "GC_TE",
+        "CCr",
+        "TAG (zone inundabile)",
+        "TA"
+      ],
+      "fn_interzise": [
+        "LMrf1",
+        "LMrf2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S",
+        "TAG (excl. zone 8.25.3)"
+      ],
+      "avize": [
+        "Aviz geotehnic (special zone versanți)",
+        "Avize protecție sanitară",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: suprafețe plantate (Str. Humăriei, Eternității, Tătarilor)",
+      "zcad_ha": null,
+      "ref": "Art. 8.25, RLUB Vol.2 + Art. 7.3.1 (LMu), RLUB Vol.1"
+    },
+    "26": {
+      "denumire": "I.L. Caragiale",
+      "sup_ha": 28.3,
+      "sup_cp_ha": 0,
+      "subzone_admise": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LMre1",
+        "Pp",
+        "CCr"
+      ],
+      "fn_dominanta": "LMu1",
+      "fn_complementare": [
+        "IS",
+        "LMu2",
+        "LMre1",
+        "Pp",
+        "CCr"
+      ],
+      "fn_interzise": [
+        "LMrf1",
+        "LMrf2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic (special zone versanți)",
+        "Avize zone istorice (zona de protecție monumente izolate)",
+        "Avize protecție DN29D Ștefănești",
+        "Avize protecție sanitară",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: suprafețe plantate (parcuri, grădini, scuaruri, plantații aliniament – Str. Petru Rareș)",
+      "zcad_ha": 7.9,
+      "ref": "Art. 8.26, RLUB Vol.2 + Art. 7.3.1 (LMu), RLUB Vol.1"
+    },
+    "27": {
+      "denumire": "Iuliu Maniu",
+      "sup_ha": 22.7,
+      "sup_cp_ha": 0,
+      "subzone_admise": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LMre1",
+        "Pp",
+        "CCr"
+      ],
+      "fn_dominanta": "LMu1",
+      "fn_complementare": [
+        "IS",
+        "LMu2",
+        "LMre1",
+        "Pp",
+        "CCr"
+      ],
+      "fn_interzise": [
+        "LMrf1",
+        "LMrf2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic (special zone versanți)",
+        "Avize zone istorice (zona de protecție monumente izolate)",
+        "Avize protecție sanitară",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: suprafețe plantate (parc public între Str. Iuliu Maniu, Verona, Pușkin, V. Lupu) și plantații aliniament (Str. Petru Rareș)",
+      "zcad_ha": 7.7,
+      "ref": "Art. 8.27, RLUB Vol.2 + Art. 7.3.1 (LMu), RLUB Vol.1"
+    },
+    "28": {
+      "denumire": "Pușkin",
+      "sup_ha": 25.8,
+      "sup_cp_ha": 0,
+      "subzone_admise": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LMre1",
+        "Pp",
+        "CCr"
+      ],
+      "fn_dominanta": "LMre1",
+      "fn_complementare": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "Pp",
+        "CCr"
+      ],
+      "fn_interzise": [
+        "LMrf1",
+        "LMrf2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic (special zone versanți)",
+        "Avize zone istorice (zona de protecție monumente izolate)",
+        "Avize protecție sanitară",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: suprafețe plantate (Str. Petru Rareș)",
+      "zcad_ha": 8.2,
+      "ref": "Art. 8.28, RLUB Vol.2 + Art. 7.3.2.a (LMre), RLUB Vol.1"
+    },
+    "29": {
+      "denumire": "Codrului",
+      "sup_ha": 16.5,
+      "sup_cp_ha": 0,
+      "subzone_admise": [
+        "LMu1",
+        "LMu2",
+        "LMre1",
+        "Pp",
+        "CCr"
+      ],
+      "fn_dominanta": "LMre1",
+      "fn_complementare": [
+        "LMu1",
+        "LMu2",
+        "Pp",
+        "CCr"
+      ],
+      "fn_interzise": [
+        "LMrf1",
+        "LMrf2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic (special zone versanți)",
+        "Avize protecție DN28B Hârlău–Iași (Calea Națională)",
+        "Avize protecție sanitară",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: suprafețe plantate (Calea Națională, Str. Petru Rareș)",
+      "zcad_ha": 5.3,
+      "ref": "Art. 8.29, RLUB Vol.2 + Art. 7.3.2.a (LMre), RLUB Vol.1"
+    },
+    "30": {
+      "denumire": "Poșta Veche",
+      "sup_ha": 14.9,
+      "sup_cp_ha": 0,
+      "subzone_admise": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "I1",
+        "Pp",
+        "CCr"
+      ],
+      "fn_dominanta": "LMu1",
+      "fn_complementare": [
+        "IS",
+        "LMu2",
+        "I1 (exist.)",
+        "Pp",
+        "CCr"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "LMrf2",
+        "LIu1",
+        "LIu2",
+        "I1 (excl. exist.)",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic",
+        "Avize protecție DN28B Hârlău–Iași și DC61 Curtești (Str. Petru Rareș)",
+        "Avize protecție sanitară",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: zone completare sistem circulații (prelungirea Str. Vasile Lupu până în Bd. Eminescu); suprafețe plantate (parc public și scuar, plantații aliniament: Bd. Eminescu, Str. Petru Rareș, Calea Națională)",
+      "zcad_ha": 2.2,
+      "ref": "Art. 8.30, RLUB Vol.2 + Art. 7.3.1 (LMu), RLUB Vol.1"
+    },
+    "31": {
+      "denumire": "Trandafirilor",
+      "sup_ha": 9.0,
+      "sup_cp_ha": 1.1,
+      "subzone_admise": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "Pp",
+        "CCr"
+      ],
+      "fn_dominanta": "LMu1",
+      "fn_complementare": [
+        "IS",
+        "LMu2",
+        "Pp",
+        "CCr"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "LMrf2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic",
+        "Avize zone istorice (zona de protecție monumente izolate)",
+        "Avize protecție DC61 Curtești",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: zona centrală (CP Botoșani), suprafețe plantate (Str. Nicolae Iorga, Bd. M. Eminescu)",
+      "zcad_ha": 2.9,
+      "ref": "Art. 8.31, RLUB Vol.2 + Art. 7.3.1 (LMu), RLUB Vol.1"
+    },
+    "32": {
+      "denumire": "Bucovina",
+      "sup_ha": 45.0,
+      "sup_cp_ha": 11.5,
+      "subzone_admise": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "Pp",
+        "CCr"
+      ],
+      "fn_dominanta": "LIu1",
+      "fn_complementare": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LIu2",
+        "I1 (exist.)",
+        "Pp",
+        "CCr"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "LMrf2",
+        "I1 (excl. exist.)",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic",
+        "Avize zone istorice (Zona istorică – Subzona Bd. Mihai Eminescu Sud, monumente izolate)",
+        "Proceduri speciale obiective arheologice",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: zona centrală, zone istorice (Zona istorică – Subzona Bd. Mihai Eminescu Sud), suprafețe plantate (Str. Nicolae Iorga, Bd. Mihai Eminescu)",
+      "zcad_ha": null,
+      "ref": "Art. 8.32, RLUB Vol.2 + Art. 7.4 (LI), RLUB Vol.1"
+    },
+    "33": {
+      "denumire": "Vârnav",
+      "sup_ha": 14.2,
+      "sup_cp_ha": 14.2,
+      "subzone_admise": [
+        "IS",
+        "LMu2",
+        "LIu1",
+        "LIu2",
+        "CCr",
+        "CCp"
+      ],
+      "fn_dominanta": "LIu1",
+      "fn_complementare": [
+        "IS",
+        "LMu2",
+        "LIu2",
+        "CCr",
+        "CCp"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "LMrf2",
+        "I1",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic",
+        "Avize zone istorice (Zona istorică – Subzona Bd. Mihai Eminescu Nord, monumente izolate)",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: zona centrală (CP Botoșani), zone istorice (Zona istorică – Subzona Bd. Mihai Eminescu Nord), pietonale majore (între Str. Vârnav și Str. Primăverii)",
+      "zcad_ha": null,
+      "ref": "Art. 8.33, RLUB Vol.2 + Art. 7.4 (LI), RLUB Vol.1"
+    },
+    "34": {
+      "denumire": "Prieteniei",
+      "sup_ha": 34.5,
+      "sup_cp_ha": 1.3,
+      "subzone_admise": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LIu1",
+        "LIu2",
+        "Pp",
+        "GC_TE",
+        "CCr"
+      ],
+      "fn_dominanta": "LIu1",
+      "fn_complementare": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LIu2",
+        "Pp",
+        "GC_TE",
+        "CCr"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "LMrf2",
+        "I1",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic",
+        "Avize zone istorice (Zona istorică – Subzona Bd. Mihai Eminescu Nord, monumente izolate)",
+        "Avize protecție DN29 Suceava (Str. Sucevei)",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: zona centrală, zone istorice (Zona istorică – Subzona Bd. Mihai Eminescu Nord), sistem intersecții Km 0, suprafețe plantate (Str. Sucevei)",
+      "zcad_ha": null,
+      "ref": "Art. 8.34, RLUB Vol.2 + Art. 7.4 (LI), RLUB Vol.1"
+    },
+    "35": {
+      "denumire": "Popăuți",
+      "sup_ha": 13.8,
+      "sup_cp_ha": 11.5,
+      "subzone_admise": [
+        "IS",
+        "LMu2",
+        "I1",
+        "Pp",
+        "CCr",
+        "S"
+      ],
+      "fn_dominanta": "LMu2",
+      "fn_complementare": [
+        "IS",
+        "I1 (exist.)",
+        "Pp",
+        "CCr",
+        "S (exist.)"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "LMrf2",
+        "LIu1",
+        "LIu2",
+        "I1 (excl. exist., afara exist.)",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S (afara exist.)"
+      ],
+      "avize": [
+        "Aviz geotehnic (special zone versanți)",
+        "Avize zone istorice (centru istoric, monumente izolate)",
+        "Proceduri speciale obiective arheologice",
+        "Avize protecție zone destinație specială (UM Str. Ștefan cel Mare)",
+        "Avize protecție DN29 Săveni și DJ296 Roma (Str. Ștefan cel Mare)",
+        "Avize protecție infrastructuri feroviare",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: zona centrală (CS Gară-Popăuți, pasarelă peste calea ferată); zone istorice protejate (CI Popăuți); sistem intersecții Km 0; zone completare sistem circulații; suprafețe plantate",
+      "zcad_ha": null,
+      "ref": "Art. 8.35, RLUB Vol.2 + Art. 7.3.1 (LMu), RLUB Vol.1"
+    },
+    "36": {
+      "denumire": "Cișmea",
+      "sup_ha": 114.3,
+      "sup_cp_ha": 0,
+      "subzone_admise": [
+        "LMrf1",
+        "LMrf2",
+        "Pp",
+        "CCr",
+        "TAG",
+        "TA"
+      ],
+      "fn_dominanta_intravilan": "LMrf1",
+      "fn_dominanta_extravilan": "TAG",
+      "fn_dominanta": "LMrf1",
+      "fn_complementare": [
+        "LMrf2",
+        "Pp",
+        "CCr",
+        "TAG (zona inundabilă)",
+        "TA (intravilan)",
+        "LMrf (locuințe funcțiuni agricole)",
+        "A",
+        "GC_TE",
+        "PA",
+        "CD (extravilan)"
+      ],
+      "fn_interzise": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LMre1",
+        "LMre2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S",
+        "TAG (excl. zone 8.36.3 intravilan)"
+      ],
+      "avize": [
+        "Aviz geotehnic (special zone versanți)",
+        "Proceduri speciale obiective arheologice (podul de piatră medieval Luizoaia)",
+        "Avize protecție DN29 Săveni",
+        "Avize protecție râuri și lacuri (pârâul Luizoaia și Sitna)",
+        "Acord de mediu",
+        "Alte avize",
+        "Aprobare de folosire definitivă sau temporară a terenurilor agricole din extravilan"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: zone completare sistem circulații (dezvoltarea rețelei stradale din UTR, prelungirea Str. Cărămidari, realizarea a două artere de legătură cu Str. Cișmelei și prelungirea Str. Sitna – UTR 21)",
+      "zcad_ha": 12.6,
+      "ref": "Art. 8.36, RLUB Vol.2 + Art. 7.3.2 (LMr), RLUB Vol.1"
+    },
+    "37": {
+      "denumire": "Plopilor",
+      "sup_ha": 6.9,
+      "sup_cp_ha": 0,
+      "subzone_admise": [
+        "LMrf1",
+        "I1",
+        "CCr",
+        "TAG"
+      ],
+      "fn_dominanta": "LMrf1",
+      "fn_complementare": [
+        "I1 (exist.)",
+        "CCr",
+        "TAG (zona inundabilă pârâul Luizoaia)"
+      ],
+      "fn_interzise": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LMre1",
+        "LMre2",
+        "LIu1",
+        "LIu2",
+        "I1 (excl. exist.)",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S",
+        "TAG (excl. zone 8.21.3)"
+      ],
+      "avize": [
+        "Aviz geotehnic (special zone versanți)",
+        "Avize protecție DN29 Săveni (Str. Săvenilor)",
+        "Avize protecție râuri și lacuri",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la aprobarea DU care detaliază PUGB/RLUB",
+      "zcad_ha": null,
+      "ref": "Art. 8.37, RLUB Vol.2 + Art. 7.3.2 (LMr), RLUB Vol.1"
+    },
+    "38": {
+      "denumire": "Cărămidăriei",
+      "sup_ha": 11.4,
+      "sup_cp_ha": 0,
+      "subzone_admise": [
+        "IS",
+        "LMrf1",
+        "CCr",
+        "TAG",
+        "TA"
+      ],
+      "fn_dominanta": "LMrf1",
+      "fn_complementare": [
+        "IS",
+        "CCr",
+        "Pp (zone inundabile)",
+        "TAG",
+        "TA"
+      ],
+      "fn_interzise": [
+        "LMu1",
+        "LMu2",
+        "LMre1",
+        "LMre2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S",
+        "TAG (excl. zone 8.38.3)"
+      ],
+      "avize": [
+        "Aviz geotehnic (special zone versanți)",
+        "Avize protecție DN29 Săveni",
+        "Avize protecție râuri și lacuri (pârâul Luizoaia și lacurile de acumulare)",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la aprobarea DU care detaliază PUGB/RLUB",
+      "zcad_ha": null,
+      "ref": "Art. 8.38, RLUB Vol.2 + Art. 7.3.2 (LMr), RLUB Vol.1"
+    },
+    "39": {
+      "denumire": "Maior Ignat",
+      "sup_ha": 12.4,
+      "sup_cp_ha": 0,
+      "subzone_admise": [
+        "LMu1",
+        "LMu2",
+        "Pp",
+        "GC_TE",
+        "CCr"
+      ],
+      "fn_dominanta": "LMu1",
+      "fn_complementare": [
+        "LMu2",
+        "Pp",
+        "GC_TE",
+        "CCr"
+      ],
+      "fn_interzise": [
+        "IS",
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "LMrf2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic (special zone versanți)",
+        "Avize zone istorice (zona de protecție monumente izolate)",
+        "Avize protecție DC61 Curtești (Str. Maior Ignat, Str. Bucovina)",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la realizarea stabilizării versanților (3,0 ha din zona LMu1, la sud de Str. Maior Ignat, până la limita UTR); Până la DU; Până la PUZ+R: suprafețe plantate (Str. Bucovina, Str. Maior Ignat)",
+      "zcad_ha": 2.7,
+      "ref": "Art. 8.39, RLUB Vol.2 + Art. 7.3.1 (LMu), RLUB Vol.1"
+    },
+    "40": {
+      "denumire": "Curcubeului",
+      "sup_ha": 27.3,
+      "sup_cp_ha": 0,
+      "subzone_admise": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LIu1",
+        "LIu2",
+        "A",
+        "Pp",
+        "CCr",
+        "CCp"
+      ],
+      "fn_dominanta": "LIu1",
+      "fn_complementare": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LIu2",
+        "A",
+        "Pp",
+        "CCr",
+        "CCp"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "LMrf2",
+        "I1",
+        "I2",
+        "Pcs",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic",
+        "Avize protecție sanitară",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: pietonale majore (între Str. Păcii și Str. Primăverii), suprafețe plantate (Str. Păcii)",
+      "zcad_ha": null,
+      "ref": "Art. 8.40, RLUB Vol.2 + Art. 7.4 (LI), RLUB Vol.1"
+    },
+    "41": {
+      "denumire": "Nucului",
+      "sup_ha": 14.6,
+      "sup_cp_ha": 0,
+      "subzone_admise": [
+        "IS",
+        "LIu1",
+        "LIu2",
+        "Pp",
+        "CCr"
+      ],
+      "fn_dominanta": "LIu1",
+      "fn_complementare": [
+        "IS",
+        "LIu2",
+        "Pp",
+        "CCr"
+      ],
+      "fn_interzise": [
+        "LMu1",
+        "LMu2",
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "LMrf2",
+        "I1",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic",
+        "Avize protecție DN29 Suceava",
+        "Avize protecție sanitară",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: suprafețe plantate (Str. Păcii, Str. Sucevei)",
+      "zcad_ha": null,
+      "ref": "Art. 8.41, RLUB Vol.2 + Art. 7.4 (LI), RLUB Vol.1"
+    },
+    "42": {
+      "denumire": "Gării",
+      "sup_ha": 8.1,
+      "sup_cp_ha": 7.6,
+      "subzone_admise": [
+        "IS",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "Pp",
+        "CCr"
+      ],
+      "fn_dominanta": "CCr",
+      "fn_complementare": [
+        "IS",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "Pp"
+      ],
+      "fn_interzise": [
+        "LMu1",
+        "LMu2",
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "LMrf2",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic",
+        "Avize zone istorice (centru istoric, zona de protecție monumente izolate)",
+        "Avize protecție DN29 Săveni și DN29B Dorohoi (Calea Națională)",
+        "Avize protecție infrastructuri feroviare",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: zona centrală municipiu (CS Gară-Popăuți, asigurarea legăturii pietonale – pasarelă peste calea ferată); zone istorice (CI Popăuți); sistem intersecții Km 0; suprafețe plantate (scuar – piața gării)",
+      "zcad_ha": null,
+      "ref": "Art. 8.42, RLUB Vol.2"
+    },
+    "43": {
+      "denumire": "Luizoaia 1",
+      "sup_ha": 34.4,
+      "sup_cp_ha": 0,
+      "subzone_admise": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LMrf1",
+        "Pp",
+        "CCr",
+        "TA"
+      ],
+      "fn_dominanta": "Pp",
+      "fn_complementare": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LMrf1",
+        "CCr",
+        "TA"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "I2",
+        "A",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic (special zone versanți)",
+        "Avize protecție DJ296 Roma (Str. Dobosari)",
+        "Avize protecție infrastructuri feroviare",
+        "Avize protecție râuri și lacuri",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: zone completare sistem circulații (lărgirea/completarea arterei CF Nord, lărgirea DJ296 Roma, lărgirea Str. Popăuți și Str. Hatman Arbore, realizarea unei artere paralele cu Luizoaia); zone infrastructuri turistice și recreere, lucrări stabilizare versanți",
+      "zcad_ha": null,
+      "ref": "Art. 8.43, RLUB Vol.2"
+    },
+    "44": {
+      "denumire": "Luizoaia 2",
+      "sup_ha": 28.1,
+      "sup_cp_ha": 0,
+      "subzone_admise": [
+        "LMrf1",
+        "Pp",
+        "CCr",
+        "TAG",
+        "TA"
+      ],
+      "fn_dominanta": "Pp",
+      "fn_complementare": [
+        "LMrf1",
+        "CCr",
+        "TA"
+      ],
+      "fn_interzise": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LMre1",
+        "LMre2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic (special zone versanți)",
+        "Avize protecție/siguranță zone destinație specială (S)",
+        "Avize protecție infrastructuri feroviare",
+        "Avize protecție râuri și lacuri",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: zone completare sistem circulații (lărgirea/completarea arterei CF Nord, prelungire Str. Popăuți, arteră nouă paralelă cu Luizoaia, lărgirea Str. Manolești-Deal), zone infrastructuri turistice și recreere, lucrări stabilizare versanți",
+      "zcad_ha": null,
+      "ref": "Art. 8.44, RLUB Vol.2"
+    },
+    "45": {
+      "denumire": "Pulberăria",
+      "sup_ha": 19.1,
+      "sup_cp_ha": 0,
+      "subzone_admise": [
+        "Pp",
+        "CCr",
+        "CCf",
+        "S",
+        "TAG",
+        "TA"
+      ],
+      "fn_dominanta": "S",
+      "fn_complementare": [
+        "Pp",
+        "CCr",
+        "CCf (intravilan)",
+        "Pp",
+        "CCr",
+        "TAG (extravilan)"
+      ],
+      "fn_interzise": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "LMrf2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "I2",
+        "A",
+        "Pcs"
+      ],
+      "avize": [
+        "Aviz geotehnic (special zone versanți)",
+        "Avize protecție/siguranță zone destinație specială (S)",
+        "Avize protecție infrastructuri feroviare",
+        "Avize protecție râuri și lacuri",
+        "Acord de mediu",
+        "Alte avize",
+        "Aprobare de folosire definitivă sau temporară a terenurilor agricole din extravilan"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: suprafețe plantate (Str. Manolești, limita de N a UM spre pârâul Luizoaia)",
+      "zcad_ha": null,
+      "ref": "Art. 8.45, RLUB Vol.2"
+    },
+    "46": {
+      "denumire": "Sitna",
+      "sup_ha": 10.7,
+      "sup_cp_ha": 0,
+      "subzone_admise": [
+        "LMrf1",
+        "Pp",
+        "CCr",
+        "TAG",
+        "TA"
+      ],
+      "fn_dominanta": "TAG",
+      "fn_complementare": [
+        "LMrf1",
+        "Pp",
+        "CCr",
+        "TA (intravilan)",
+        "LMrf (funcțiuni agricole)",
+        "A",
+        "GC_TE",
+        "PA",
+        "CD (extravilan)"
+      ],
+      "fn_interzise": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LMre1",
+        "LMre2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S (intravilan)"
+      ],
+      "avize": [
+        "Aviz geotehnic (special zone versanți)",
+        "Avize protecție DN29 Săveni",
+        "Avize protecție sanitară",
+        "Avize protecție râuri și lacuri",
+        "Acord de mediu",
+        "Alte avize",
+        "Aprobare folosire definitivă sau temporară terenuri agricole extravilan"
+      ],
+      "interdictii": "Până la aprobarea DU care detaliază PUGB/RLUB",
+      "zcad_ha": null,
+      "ref": "Art. 8.46, RLUB Vol.2"
+    },
+    "47": {
+      "denumire": "Fermei",
+      "sup_ha": 33.7,
+      "sup_cp_ha": 0,
+      "subzone_admise": [
+        "A",
+        "GC_TE",
+        "CCr",
+        "TAG",
+        "TA"
+      ],
+      "fn_dominanta": "A",
+      "fn_complementare": [
+        "Pp",
+        "GC_TE",
+        "CCr",
+        "TA (intravilan)",
+        "LMrf (funcțiuni agricole)",
+        "GC_TE",
+        "PA",
+        "CD (extravilan)"
+      ],
+      "fn_interzise": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "LMrf2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "I2",
+        "Pcs",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic (special zone versanți)",
+        "Avize protecție DN29 Săveni",
+        "Avize protecție sanitară",
+        "Avize protecție râuri și lacuri",
+        "Acord de mediu",
+        "Alte avize",
+        "Aprobare folosire definitivă sau temporară terenuri agricole extravilan"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: zone completare sistem circulații (continuarea Drumului Tătarilor până la intersecția cu DN29 Săveni)",
+      "zcad_ha": null,
+      "ref": "Art. 8.47, RLUB Vol.2"
+    },
+    "48": {
+      "denumire": "Bariera Iașiului",
+      "sup_ha": 10.3,
+      "sup_cp_ha": 0,
+      "subzone_admise": [
+        "IS",
+        "LMu1",
+        "I1",
+        "Pp",
+        "GC_TE",
+        "CCr"
+      ],
+      "fn_dominanta": "GC_TE",
+      "fn_complementare": [
+        "IS",
+        "LMu1",
+        "I1",
+        "Pp",
+        "CCr"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "LMrf2",
+        "LIu1",
+        "LIu2",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic",
+        "Avize protecție DN28B Hârlău–Iași (Calea Națională)",
+        "Avize protecție sanitară",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: suprafețe plantate (Bd. Mihai Eminescu, Calea Națională)",
+      "zcad_ha": null,
+      "ref": "Art. 8.48, RLUB Vol.2"
+    },
+    "49": {
+      "denumire": "Bucovina-Intrare",
+      "sup_ha": 36.2,
+      "sup_cp_ha": 0,
+      "subzone_admise": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "Pp",
+        "CCr",
+        "PS"
+      ],
+      "fn_dominanta": "LMu1",
+      "fn_complementare": [
+        "IS",
+        "LMu2",
+        "Pp",
+        "CCr",
+        "PS"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "LMrf2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic (special zone versanți)",
+        "Avize protecție DC61 Curtești (Str. Bucovina)",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la realizarea stabilizării versanților (17,4 ha din zona LMu1 la vest de Str. M. Kogălniceanu și la nord de Str. Bucovina); Până la DU; Până la PUZ+R: zone completare sistem circulații (arteră nouă între Str. M. Kogălniceanu și Str. Maior Ignat; intrarea în municipiu pe DC61 Curtești – PUZ comun UTR 49 și 60); suprafețe plantate; zone infrastructuri turistice/recreere/stabilizare versanți",
+      "zcad_ha": null,
+      "ref": "Art. 8.49, RLUB Vol.2 + Art. 7.3.1 (LMu), RLUB Vol.1"
+    },
+    "50": {
+      "denumire": "Intrarea Sucevei",
+      "sup_ha": 50.8,
+      "sup_cp_ha": 0,
+      "subzone_admise": [
+        "IS",
+        "LMu1",
+        "I1",
+        "Pp",
+        "Pcs",
+        "GC_TE",
+        "CCr",
+        "CCp",
+        "PS"
+      ],
+      "fn_dominanta": "PS",
+      "fn_complementare": [
+        "IS",
+        "LMu1",
+        "I1",
+        "Pp",
+        "GC_TE",
+        "CCr",
+        "CCp"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "LMrf2",
+        "LIu1",
+        "LIu2",
+        "I2",
+        "A",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic (special zone versanți)",
+        "Avize protecție DN29 Suceava",
+        "Avize protecție sanitară",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la realizarea stabilizării versanților (1,7 ha IS, 2,7 ha LMu1, 1,6 ha I1, 1,4 ha Pcs); Până la DU; Până la PUZ+R: pietonale majore (spre Cornișa Sucevei pe Str. Păcii); suprafețe plantate (Str. Păcii); zone infrastructuri turistice/recreere/stabilizare versanți",
+      "zcad_ha": null,
+      "ref": "Art. 8.50, RLUB Vol.2"
+    },
+    "51": {
+      "denumire": "Calea Ferată",
+      "sup_ha": 15.4,
+      "sup_cp_ha": 0.4,
+      "subzone_admise": [
+        "IS",
+        "CCr",
+        "CCp",
+        "CCf"
+      ],
+      "fn_dominanta": "CCf",
+      "fn_complementare": [
+        "IS",
+        "CCr",
+        "CCp"
+      ],
+      "fn_interzise": [
+        "LMu1",
+        "LMu2",
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "LMrf2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "I2",
+        "A",
+        "Pcs",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic (special zone versanți)",
+        "Avize zone istorice (centru istoric, monumente izolate, zona de protecție)",
+        "Avize protecție/siguranță zone destinație specială (S)",
+        "Avize protecție DN29 Săveni",
+        "Avize protecție infrastructuri feroviare",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la realizarea stabilizării versanților (în zone definite); Până la DU; Până la PUZ+R: zona centrală (CS Gară-Popăuți); zone istorice (CI Popăuți); pietonale majore (pasarelă între zona gării și cartierul Popăuți); zone completare sistem circulații (lărgirea și completarea arterelor CF Nord și CF Sud); sistem intersecții Km 0",
+      "zcad_ha": null,
+      "ref": "Art. 8.51, RLUB Vol.2"
+    },
+    "52": {
+      "denumire": "Tulbureni",
+      "sup_ha": 91.5,
+      "sup_cp_ha": 5.9,
+      "subzone_admise": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LMrf1",
+        "I2",
+        "Pp",
+        "GC_TE",
+        "CCr",
+        "TAG"
+      ],
+      "fn_dominanta": "LMu1",
+      "fn_complementare": [
+        "IS",
+        "LMu2",
+        "LMrf1",
+        "I2",
+        "Pp",
+        "GC_TE",
+        "CCr",
+        "TAG"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "A",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic (special zone versanți)",
+        "Avize protecție sanitară",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: zone de dezvoltare ale municipiului (cartierul Tulbureni – UTR 52, 59); zona centrală municipiu (CS Tulbureni – tratare unitară PUZ Zona de dezvoltare Tulbureni); zone completare sistem circulații; suprafețe plantate",
+      "zcad_ha": null,
+      "ref": "Art. 8.52, RLUB Vol.2 + Art. 7.3.1 (LMu), RLUB Vol.1"
+    },
+    "53": {
+      "denumire": "Zona Industrială I",
+      "sup_ha": 81.1,
+      "sup_cp_ha": 1.2,
+      "subzone_admise": [
+        "IS",
+        "LMu2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "I2",
+        "A",
+        "Pp",
+        "GC_TE",
+        "CCr"
+      ],
+      "fn_dominanta": "I1",
+      "fn_complementare": [
+        "IS",
+        "LMu2",
+        "LIu1",
+        "LIu2",
+        "I2",
+        "A",
+        "Pp",
+        "GC_TE",
+        "CCr"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "LMrf2",
+        "A",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic (special zone versanți)",
+        "Avize protecție DN29 Suceava și DN29B Dorohoi (Calea Națională)",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: zone de dezvoltare (Platforma industrială NV Botoșani; incinta zonei cu destinație specială); zona centrală municipiu (CS Gară-Popăuți); zone completare sistem circulații (arteră nouă-1 între Str. Manolești și Ocolitorul SV; arteră nouă-2 în incinta zonei cu destinație specială); sistem intersecții Km 0; suprafețe plantate",
+      "zcad_ha": null,
+      "ref": "Art. 8.53, RLUB Vol.2 + Art. 7.6 (I), RLUB Vol.1"
+    },
+    "54": {
+      "denumire": "Zona Industrială II",
+      "sup_ha": 27.8,
+      "sup_cp_ha": 0,
+      "subzone_admise": [
+        "LMu1",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "Pp",
+        "CCr"
+      ],
+      "fn_dominanta": "I1",
+      "fn_complementare": [
+        "LMu1",
+        "LIu1",
+        "LIu2",
+        "Pp",
+        "CCr"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "LMrf2",
+        "I2",
+        "A",
+        "Pcs",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic",
+        "Avize protecție/siguranță zone destinație specială (S)",
+        "Avize protecție DN29B Dorohoi (Calea Națională)",
+        "Avize protecție infrastructuri feroviare",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: zone de dezvoltare (Platforma industrială NV Botoșani); zone completare sistem circulații (completarea arterei CF Sud); suprafețe plantate (scuar din Calea Națională, plantații aliniament: C. Națională, Str. Manolești-Deal)",
+      "zcad_ha": null,
+      "ref": "Art. 8.54, RLUB Vol.2 + Art. 7.6 (I), RLUB Vol.1"
+    },
+    "55": {
+      "denumire": "Zona Industrială III",
+      "sup_ha": 31.5,
+      "sup_cp_ha": 0,
+      "subzone_admise": [
+        "IS",
+        "LMu2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "I2",
+        "Pp",
+        "Pcs",
+        "GC_TE",
+        "CCr"
+      ],
+      "fn_dominanta": "I1",
+      "fn_complementare": [
+        "IS",
+        "LMu2",
+        "LIu1",
+        "LIu2",
+        "I2",
+        "Pp",
+        "Pcs",
+        "GC_TE",
+        "CCr"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "LMrf2",
+        "A",
+        "CCf",
+        "S"
+      ],
+      "avize": [
+        "Aviz geotehnic",
+        "Avize protecție DN29B Dorohoi (Calea Națională)",
+        "Avize protecție sanitară",
+        "Acord de mediu",
+        "Alte avize"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: zone de dezvoltare (Platforma industrială NV); zone completare sistem circulații (arteră nouă între Str. Manolești și artera situată la S de SC Mecanex SA); suprafețe plantate",
+      "zcad_ha": null,
+      "ref": "Art. 8.55, RLUB Vol.2 + Art. 7.6 (I), RLUB Vol.1"
+    },
+    "56": {
+      "denumire": "Zona Industrială IV",
+      "sup_ha": 89.3,
+      "sup_cp_ha": 0,
+      "subzone_admise": [
+        "IS",
+        "LMu1",
+        "LIu1",
+        "I1",
+        "I2",
+        "Pp",
+        "GC_TE",
+        "CCr",
+        "TAG"
+      ],
+      "fn_dominanta_intravilan": "I1",
+      "fn_dominanta_extravilan": "TAG",
+      "fn_dominanta": "I1",
+      "fn_complementare": [
+        "IS",
+        "LMu1",
+        "LIu1",
+        "I2",
+        "Pp",
+        "GC_TE",
+        "CCr (intravilan)",
+        "LMrf (locuințe funcțiuni agricole)",
+        "A",
+        "GC_TE (extravilan)"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "LMrf2",
+        "A",
+        "CCf",
+        "S (intravilan)",
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LMre1",
+        "LMre2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "I2",
+        "Pcs",
+        "CCf (extravilan)"
+      ],
+      "avize": [
+        "Aviz geotehnic",
+        "Avize protecție/siguranță zone destinație specială (S)",
+        "Avize protecție DN29B Dorohoi (Calea Națională)",
+        "Avize protecție infrastructuri feroviare",
+        "Acord de mediu",
+        "Alte avize",
+        "Aprobare folosire definitivă sau temporară terenuri agricole extravilan"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: zone de dezvoltare (Platforma industrială NV); zone completare sistem circulații (prelungirea arterei CF Sud, arteră nouă între Calea Națională și artera CF SUD); suprafețe plantate",
+      "zcad_ha": null,
+      "ref": "Art. 8.56, RLUB Vol.2 + Art. 7.6 (I), RLUB Vol.1"
+    },
+    "57": {
+      "denumire": "Intrarea Ștefănești",
+      "sup_ha": 556.2,
+      "sup_cp_ha": 0,
+      "subzone_admise": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LMre1",
+        "LMre2",
+        "LIu2",
+        "I1",
+        "A",
+        "Pp",
+        "Pcs",
+        "GC_TE",
+        "CCr",
+        "TAG",
+        "TA"
+      ],
+      "fn_dominanta_intravilan": "LMu1",
+      "fn_dominanta_extravilan": "TAG",
+      "fn_dominanta": "LMu1",
+      "fn_complementare": [
+        "IS",
+        "LMu2",
+        "LMre1",
+        "LMre2",
+        "LIu2",
+        "I1",
+        "A",
+        "Pp",
+        "Pcs",
+        "GC_TE",
+        "CCr",
+        "TAG (zone inundabile)",
+        "TA (intravilan)",
+        "LMrf (funcțiuni agricole)",
+        "A",
+        "GC_TE",
+        "CD (extravilan)"
+      ],
+      "fn_interzise": [
+        "LMrf1",
+        "LMrf2",
+        "I2",
+        "A",
+        "CCf",
+        "S",
+        "TAG (excl. zone 8.57.3 intravilan)"
+      ],
+      "avize": [
+        "Aviz geotehnic (special zone versanți)",
+        "Avize protecție DN29D Ștefănești (Str. I.C. Brătianu)",
+        "Avize protecție sanitară",
+        "Avize protecție râuri și lacuri (pârâul Sitna)",
+        "Acord de mediu",
+        "Alte avize",
+        "Aprobare folosire definitivă sau temporară terenuri agricole extravilan"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: zone de dezvoltare (cartierul Rediu, cartierul Tătarilor); zone completare sistem circulații (tratare unitară PUZ Zona de dezvoltare Rediu, respectiv PUZ Zona de dezvoltare Tătarilor); suprafețe plantate",
+      "zcad_ha": null,
+      "ref": "Art. 8.57, RLUB Vol.2 + Art. 7.3.1 (LMu), RLUB Vol.1"
+    },
+    "58": {
+      "denumire": "Penitenciarului",
+      "sup_ha": 734.1,
+      "sup_cp_ha": 0,
+      "subzone_admise": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LMre1",
+        "I1",
+        "A",
+        "Pp",
+        "GC_TE",
+        "CCr",
+        "S",
+        "PA",
+        "TAG",
+        "TA"
+      ],
+      "fn_dominanta_intravilan": "GC_TE",
+      "fn_dominanta_extravilan": "TAG",
+      "fn_dominanta": "GC_TE",
+      "fn_complementare": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LMre1",
+        "I1",
+        "A",
+        "Pp",
+        "CCr",
+        "S",
+        "TA (intravilan)",
+        "LMrf (funcțiuni agricole)",
+        "A",
+        "GC_TE",
+        "PA",
+        "TA",
+        "CD (extravilan)"
+      ],
+      "fn_interzise": [
+        "LMrf1",
+        "LMrf2",
+        "LIu1",
+        "LIu2",
+        "I2",
+        "CCf (intravilan)",
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LMre1",
+        "LMre2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "I2",
+        "Pcs",
+        "CCf",
+        "S (extravilan)"
+      ],
+      "avize": [
+        "Aviz geotehnic (special zone versanți)",
+        "Avize protecție/siguranță zone destinație specială (S)",
+        "Avize protecție DN29D Ștefănești (Str. I.C. Brătianu)",
+        "Avize protecție sanitară",
+        "Avize protecție râuri și lacuri (pârâul Teascu)",
+        "Acord de mediu",
+        "Alte avize",
+        "Aprobare folosire definitivă sau temporară terenuri agricole extravilan",
+        "Conf. Codului Silvic pentru zonele de tip PA"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: zone completare sistem circulații (arteră nouă între Str. I. Creangă și Str. I.C. Brătianu); zone infrastructuri turistice (zona situată la S de DN29D Ștefănești, în legătură cu pădurea Rediu)",
+      "zcad_ha": null,
+      "ref": "Art. 8.58, RLUB Vol.2"
+    },
+    "59": {
+      "denumire": "I.L.F.",
+      "sup_ha": 313.6,
+      "sup_cp_ha": 11.6,
+      "subzone_admise": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LMre1",
+        "I1",
+        "I2",
+        "A",
+        "Pp",
+        "Pcs",
+        "GC_TE",
+        "CCr",
+        "PA",
+        "TAG",
+        "TA"
+      ],
+      "fn_dominanta_intravilan": "LMu1",
+      "fn_dominanta_extravilan": "TAG",
+      "fn_dominanta": "LMu1",
+      "fn_complementare": [
+        "IS",
+        "LMu2",
+        "LMre1",
+        "I1 (Calea Națională)",
+        "I2",
+        "A",
+        "Pp",
+        "Pcs",
+        "GC_TE",
+        "CCr",
+        "TA (intravilan)",
+        "LMrf (funcțiuni agricole)",
+        "A",
+        "GC_TE",
+        "PA",
+        "TA",
+        "CD (extravilan)"
+      ],
+      "fn_interzise": [
+        "LMrf1",
+        "LMrf2",
+        "LMre2 (excl. zona 8.59.3)",
+        "LIu1",
+        "LIu2",
+        "CCf",
+        "S (intravilan)",
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LMre1",
+        "LMre2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "I2",
+        "Pcs",
+        "CCf",
+        "S (extravilan)"
+      ],
+      "avize": [
+        "Aviz geotehnic (special zone versanți)",
+        "Avize protecție DN28B Hârlău–Iași (Calea Națională)",
+        "Avize protecție sanitară",
+        "Acord de mediu",
+        "Alte avize",
+        "Aprobare folosire definitivă sau temporară terenuri agricole extravilan",
+        "Conf. RLUB și regulamentul aferent PUZ Zona de agrement Lebăda",
+        "Conf. Codului Silvic pentru zonele de tip PA"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: zone de dezvoltare (cartierul Tulbureni – UTR 52, 59); zona centrală municipiu (CS Tulbureni); zone completare sistem circulații; zone infrastructuri turistice/recreere/stabilizare versanți; suprafețe plantate",
+      "zcad_ha": null,
+      "ref": "Art. 8.59, RLUB Vol.2 + Art. 7.3.1 (LMu), RLUB Vol.1"
+    },
+    "60": {
+      "denumire": "Cimitirul Evreiesc",
+      "sup_ha": 164.5,
+      "sup_cp_ha": 0,
+      "subzone_admise": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "Pp",
+        "GC_TE",
+        "CCr",
+        "S",
+        "TAG",
+        "CD"
+      ],
+      "fn_dominanta_intravilan": "S",
+      "fn_dominanta_extravilan": "TAG",
+      "fn_dominanta": "S",
+      "fn_complementare": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "Pp",
+        "GC_TE",
+        "CCr",
+        "CD (intravilan)",
+        "LMrf (funcțiuni agricole)",
+        "A",
+        "GC_TE",
+        "TAG",
+        "TA",
+        "CD (extravilan)"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "LMrf2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "I2",
+        "A",
+        "CCf (intravilan)",
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LMre1",
+        "LMre2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "I2",
+        "Pcs",
+        "CCf",
+        "S (extravilan)"
+      ],
+      "avize": [
+        "Aviz geotehnic (special zone versanți)",
+        "Avize protecție/siguranță zone destinație specială (S)",
+        "Avize protecție DC61 Curtești (Str. Maior Ignat, Str. Petru Rareș, Str. Bucovina)",
+        "Avize protecție sanitară",
+        "Avize protecție canalului paralel cu Str. Bucovina și a acumulării Curtești",
+        "Acord de mediu",
+        "Alte avize",
+        "Aprobare folosire definitivă sau temporară terenuri agricole extravilan",
+        "Conf. Codului Silvic pentru zonele de tip PA"
+      ],
+      "interdictii": "Până la realizarea stabilizării versanților (3,8 ha din zona LMu1, între limita de vest a UTR, zona cu destinație specială și Str. Bucovina); Până la DU; Până la PUZ+R: zone completare sistem circulații (intrarea în municipiu pe DC61 Curtești – PUZ comun UTR 49 și 60; artera de legătură-1 și artera nouă de legătură-2 între Str. Maior Ignat și Bd. Mihai Eminescu); suprafețe plantate",
+      "zcad_ha": null,
+      "ref": "Art. 8.60, RLUB Vol.2"
+    },
+    "61": {
+      "denumire": "Stația de Gaze",
+      "sup_ha": 126.3,
+      "sup_cp_ha": 0,
+      "subzone_admise": [
+        "IS",
+        "LMu1",
+        "Pp",
+        "GC_TE",
+        "CCr",
+        "S",
+        "PS",
+        "PSs",
+        "CD"
+      ],
+      "fn_dominanta_intravilan": "LMu1",
+      "fn_dominanta_extravilan": "TAG",
+      "fn_dominanta": "LMu1",
+      "fn_complementare": [
+        "IS",
+        "I1",
+        "Pp",
+        "GC_TE",
+        "CCr",
+        "PS",
+        "CD (intravilan)",
+        "LMrf (funcțiuni agricole)",
+        "A",
+        "GC_TE",
+        "TAG",
+        "PS",
+        "PSs",
+        "TA",
+        "CD (extravilan)"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "LMrf2",
+        "LIu1",
+        "LIu2",
+        "I2",
+        "A",
+        "CCf",
+        "S (intravilan)",
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LMre1",
+        "LMre2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "I2",
+        "Pcs",
+        "CCf (extravilan)"
+      ],
+      "avize": [
+        "Aviz geotehnic (special zone versanți)",
+        "Avize zone istorice (centru istoric, monumente izolate, zona de protecție)",
+        "Avize protecție/siguranță zone destinație specială (S)",
+        "Avize protecție DN29 Suceava",
+        "Avize protecție canalul U.P.E.E.T. Dresleuca",
+        "Acord de mediu",
+        "Alte avize",
+        "Aprobare folosire definitivă sau temporară terenuri agricole extravilan"
+      ],
+      "interdictii": "Până la realizarea stabilizării versanților (9,9 ha din zona tip LMu1 – sudul cartierului nou Sucevei); Până la DU; Până la PUZ+R: zone de dezvoltare (cartierul Sucevei); zona centrală municipiu (CS Sucevei); zone completare sistem circulații; zone infrastructuri turistice/recreere/stabilizare versanți; suprafețe plantate",
+      "zcad_ha": null,
+      "ref": "Art. 8.61, RLUB Vol.2 + Art. 7.3.1 (LMu), RLUB Vol.1"
+    },
+    "62": {
+      "denumire": "Costești",
+      "sup_ha": 677.4,
+      "sup_cp_ha": 9.1,
+      "subzone_admise": [
+        "IS",
+        "LMu1",
+        "LMu2",
+        "I1",
+        "I2",
+        "Pp",
+        "GC_TE",
+        "CCr",
+        "TAG",
+        "PS"
+      ],
+      "fn_dominanta_intravilan": "LMu1",
+      "fn_dominanta_extravilan": "TAG",
+      "fn_dominanta": "LMu1",
+      "fn_complementare": [
+        "IS",
+        "LMu2",
+        "I2",
+        "I1",
+        "Pp",
+        "GC_TE",
+        "CCr",
+        "PS (intravilan)",
+        "LMrf (funcțiuni agricole)",
+        "A",
+        "GC_TE",
+        "TAG",
+        "PS",
+        "TA",
+        "CD (extravilan)"
+      ],
+      "fn_interzise": [
+        "LMre1",
+        "LMre2",
+        "LMrf1",
+        "LMrf2",
+        "LIu1",
+        "LIu2",
+        "A",
+        "CCf",
+        "S (intravilan)",
+        "IS",
+        "LMu1",
+        "LMu2",
+        "LMre1",
+        "LMre2",
+        "LIu1",
+        "LIu2",
+        "I1",
+        "I2",
+        "Pcs",
+        "CCf",
+        "S (extravilan)"
+      ],
+      "avize": [
+        "Aviz geotehnic (special zone versanți)",
+        "Proceduri speciale obiective arheologice",
+        "Avize protecție/siguranță zone destinație specială (S)",
+        "Avize protecție DJ296 Roma (Str. Dobosari)",
+        "Avize protecție râuri și lacuri (acumularea Cătămărești, pârâul Sitna)",
+        "Acord de mediu",
+        "Alte avize",
+        "Aprobare folosire definitivă sau temporară terenuri agricole extravilan"
+      ],
+      "interdictii": "Până la DU; Până la PUZ+R: zone de dezvoltare (cartierul nou Răchiți – UTR 20, 62); zona centrală municipiu (CS Răchiți); zone completare sistem circulații (Zona Răchiți – tratare unitară PUZ Zona de dezvoltare Răchiți; arteră de legătură între Str. Răchiți și Str. Manolești-Deal, paralelă cu pârâul Luizoaia); zone infrastructuri turistice/recreere/stabilizare versanți; suprafețe plantate",
+      "zcad_ha": null,
+      "ref": "Art. 8.62, RLUB Vol.2 + Art. 7.3.1 (LMu), RLUB Vol.1"
+    }
+  }
+}
