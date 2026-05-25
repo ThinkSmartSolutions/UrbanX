@@ -4780,7 +4780,7 @@ Object.assign(window._PUG_REGISTRY, {
   'RO-BT-18073': { id:'comuna-baluseni',  name:'Comuna Bălușeni',  pugFile:'data/comuna-baluseni/pug.geojson',  reguli:'data/comuna-baluseni/reguli.json' },
   'RO-IS-94951': { id:'comuna-holboca',   name:'Comuna Holboca',   pugFile:'data/comuna-holboca/pug.geojson',   reguli:'data/comuna-holboca/reguli.json' },
   'RO-GL-77595': { id:'comuna-cuzavoda',  name:'Comuna Cuza Vodă', pugFile:'data/comuna-cuzavoda/pug.geojson',  reguli:'data/comuna-cuzavoda/reguli.json' },
-  'RO-BT-38063': { id:'comuna-mihaieminescu', name:'Comuna Mihai Eminescu', pugFile:'data/comuna-mihaieminescu/pug.geojson', reguli:null },
+  'RO-BT-38063': { id:'comuna-mihaieminescu', name:'Comuna Mihai Eminescu', pugFile:'data/comuna-mihaieminescu/pug.geojson', reguli:'data/comuna-mihaieminescu/reguli.json' },
   // ── Alias-uri retrocompatibilitate ────────────────────────────────────────
   'RO-IS-COM-MIROSLAVA': { id:'comuna-miroslava', name:'Comuna Miroslava', pugFile:'data/comuna-miroslava/pug.geojson', reguli:'data/comuna-miroslava/reguli.json' },
   'RO-IS-COM-ARONEANU':  { id:'comuna-aroneanu',  name:'Comuna Aroneanu',  pugFile:'data/comuna-aroneanu/pug.geojson',  reguli:'data/comuna-aroneanu/reguli.json' },
@@ -5249,7 +5249,7 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
 <script src="js/rlu-rediu.js?v=20260525a"></script>
 <script src="js/rlu-holboca.js?v=20260525a"></script>
 <script src="js/rlu-cuzavoda.js?v=20260525a"></script>
-<script src="js/rlu-mihaieminescu.js?v=20260525a"></script>
+<script src="js/rlu-mihaieminescu.js?v=20260525b"></script>
 
 <script>
 // ── Comune RLU în #uat-selector — cu ierarhie pe județe ──────────────────
@@ -5262,7 +5262,7 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
     {id:'comuna-holboca',        name:'Holboca',         judet:'iași',     badge:'✅ RLU', key:'RO-IS-94951'},
     // BOTOȘANI — apar în grupul "Moldova — Botoșani"
     {id:'comuna-baluseni',       name:'Bălușeni',        judet:'botoșani', badge:'✅ RLU', key:'RO-BT-18073'},
-    {id:'comuna-mihaieminescu',  name:'Mihai Eminescu',  judet:'botoșani', badge:'🗺 Limite', key:'RO-BT-38063'},
+    {id:'comuna-mihaieminescu',  name:'Mihai Eminescu',  judet:'botoșani', badge:'✅ RLU', key:'RO-BT-38063'},
     // GALAȚI — grup nou creat automat
     {id:'comuna-cuzavoda',       name:'Cuza Vodă',       judet:'galați/vrancea', badge:'✅ RLU', key:'RO-GL-77595'},
   ];

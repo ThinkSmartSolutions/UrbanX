@@ -1,0 +1,484 @@
+{
+  "uat": "Comuna Mihai Eminescu",
+  "judet": "Botoșani",
+  "siruta": "RO-BT-38063",
+  "sursa": "Actualizare PUG UAT Comuna Mihai Eminescu, Județul Botoșani — Volum II: Regulament Local de Urbanism, PR.NR.236/2020",
+  "proiectant": "Blue-Print / Tehno Instal Nord + Proiect Botoșani S.R.L.",
+  "utr": [
+    {
+      "id": "UTR-5",
+      "sat": "Manolești",
+      "denumire": "Locuințe și funcțiuni complementare",
+      "tip": "rezidential",
+      "subzone": ["Lm.e.", "Lm.p.", "Lb."],
+      "utilizari_admise": [
+        "Construcții de locuințe individuale și colective mici izolate și cuplate",
+        "Anexe gospodărești, completări și extinderi",
+        "Lucrări de construire, întreținere, renovare, modernizare la fondul construit existent",
+        "Supraetajări pentru clădiri P, P+1, P+2, P+2+M",
+        "Lucrări de îmbunătățire a confortului urban (coșuri de gunoi, panouri publicitate, banchete, adăposturi)",
+        "Echipamente publice de nivel rezidențial"
+      ],
+      "utilizari_admise_conditionari": [
+        "Inserții și reconstrucții cu menținerea funcțiunii rezidențiale",
+        "Construcții în zona de protecție a Monumentelor istorice — 200,00 m (cu aviz DJCPN)",
+        "Ocuparea și construirea pe terenuri libere pentru unități productive mici și mijlocii (H.G. nr. 525/1996)",
+        "Modernizarea tramei stradale principale și secundare",
+        "Construcții din domeniul obiectivelor de utilitate publică"
+      ],
+      "utilizari_interzise": [
+        "Funcțiuni industriale, servicii, comerciale cu poluare sau riscuri tehnologice",
+        "Depozitarea cantităților mari de substanțe inflamabile sau toxice",
+        "Depozitări de materiale refolosibile sau stații de transfer a deșeurilor",
+        "Activități cu depozitare și producție vizibile din circulațiile publice sau instituții publice",
+        "Lucrări de terasament care provoacă scurgerea apelor pe parcelele vecine",
+        "Construirea de clădiri în zonele hașurate cu alunecări de teren și pericol de inundabilitate",
+        "Construirea de clădiri în zona PD (păduri) fără avizul Romsilva"
+      ],
+      "zone_protectie": {
+        "Cr_Dc_drum_comunal": "18,00 m între axul drumului și garduri sau construcții",
+        "TEa_gospodarie_ape": "30 m de la ziduri",
+        "AH_albii": "15 m",
+        "ISct_cimitire": "50 m de la limita acestuia",
+        "TEel_LEA_20kV": "24 m zona de protecție",
+        "TEel_LEA_110kV": "36 m zona de protecție"
+      },
+      "parcela_minima": {
+        "suprafata_mp": 300,
+        "front_stradal_m": 12,
+        "front_constructii_izolate_m": 10,
+        "acces_carosabil_m": 4
+      },
+      "amplasare": {
+        "retragere_fata_aliniament_m": 6,
+        "retragere_laterala_min_m": 3,
+        "retragere_posterioara_min_m": 5,
+        "distanta_intre_cladiri_min_m": 3
+      },
+      "POT_max": 30,
+      "CUT_max": 0.60,
+      "H_max_m": 12,
+      "H_cornisa_m": 12,
+      "regim_inaltime": "P; P+1; P+1+M",
+      "imprejmuiri": {
+        "gard_strada_h_m": 1.70,
+        "soclu_opac_m": 0.30,
+        "parte_transparenta_m": 1.50,
+        "gard_separativ_max_m": 2.20
+      },
+      "note": "Modificarea POT/CUT se poate face cu cel mult 20% prin PUZ/PUD cu avizul compartimentului Urbanism CL Mihai Eminescu și CJ Botoșani"
+    },
+    {
+      "id": "UTR-6a",
+      "sat": "Cucorăni",
+      "denumire": "Locuințe și funcțiuni complementare",
+      "tip": "rezidential",
+      "subzone": ["Lm.e.", "Lm.p.", "Lb."],
+      "utilizari_admise": [
+        "Construcții de locuințe individuale și colective mici izolate și cuplate",
+        "Anexe gospodărești, completări și extinderi",
+        "Lucrări de construire, întreținere, renovare, modernizare la fondul construit existent",
+        "Supraetajări pentru clădiri P, P+1, P+2, P+2+M",
+        "Lucrări de îmbunătățire a confortului urban",
+        "Echipamente publice de nivel rezidențial"
+      ],
+      "utilizari_admise_conditionari": [
+        "Inserții și reconstrucții cu menținerea funcțiunii rezidențiale",
+        "Construcții în zona de protecție a Monumentelor istorice — 200,00 m (cu aviz DJCPN)",
+        "Ocuparea și construirea pe terenuri libere pentru unități productive mici și mijlocii",
+        "Modernizarea tramei stradale principale și secundare",
+        "Construcții din domeniul obiectivelor de utilitate publică"
+      ],
+      "utilizari_interzise": [
+        "Funcțiuni industriale, servicii, comerciale cu poluare sau riscuri tehnologice",
+        "Depozitarea cantităților mari de substanțe inflamabile sau toxice",
+        "Depozitări de materiale refolosibile sau stații de transfer a deșeurilor",
+        "Activități cu depozitare și producție vizibile din circulațiile publice",
+        "Lucrări de terasament care provoacă scurgerea apelor pe parcelele vecine",
+        "Construirea de clădiri în zonele hașurate cu alunecări de teren și pericol de inundabilitate",
+        "Construirea de clădiri în zona PD (păduri) fără avizul Romsilva"
+      ],
+      "zone_protectie": {
+        "Cr_Dn_drum_national": "22,00 m între axul drumului și garduri sau construcții",
+        "Cr_Dc_drum_comunal": "18,00 m între axul drumului și garduri sau construcții",
+        "TEa_gospodarie_ape": "30 m de la ziduri",
+        "AH_albii": "15 m",
+        "ISct_cimitire": "50 m de la limita acestuia",
+        "TEel_LEA_20kV": "24 m zona de protecție",
+        "TEel_LEA_110kV": "36 m zona de protecție"
+      },
+      "parcela_minima": {
+        "suprafata_mp": 300,
+        "front_stradal_m": 12,
+        "front_constructii_izolate_m": 10,
+        "acces_carosabil_m": 4
+      },
+      "amplasare": {
+        "retragere_fata_aliniament_m": 6,
+        "retragere_laterala_min_m": 3,
+        "retragere_posterioara_min_m": 5,
+        "distanta_intre_cladiri_min_m": 3
+      },
+      "POT_max": 30,
+      "CUT_max": 0.60,
+      "H_max_m": 12,
+      "H_cornisa_m": 12,
+      "regim_inaltime": "P; P+1; P+1+M",
+      "imprejmuiri": {
+        "gard_strada_h_m": 1.70,
+        "soclu_opac_m": 0.30,
+        "parte_transparenta_m": 1.50,
+        "gard_separativ_max_m": 2.20
+      }
+    },
+    {
+      "id": "UTR-6b",
+      "sat": "Cucorăni",
+      "denumire": "Zonă de producție agricolă",
+      "tip": "productie_agricola",
+      "subzone": ["A", "C", "Cr", "Te", "Tea", "Teel"],
+      "propuse": ["ID2 (unități industria alimentară)", "Az (microferme zootehnice)", "Asu (servicii, utilaje agricole)"],
+      "utilizari_admise": [
+        "Lucrări de construire, întreținere, renovare, modernizare la fondul construit existent",
+        "Construirea de obiective în legătură cu activitatea industrială sau deservire a industriei",
+        "Activități industriale nepoluante",
+        "Servicii către întreprinderi, IMM cu profil nepoluant",
+        "Activități productive nepoluante și depozitare comercială",
+        "Transporturi, servicii comerciale legate de transporturi",
+        "Construcții și amenajări aferente rețelelor tehnico-edilitare"
+      ],
+      "utilizari_admise_conditionari": [
+        "Extinderea sau conversia activităților actuale fără agravarea situației poluării",
+        "Construirea locuințelor strict necesare pentru asigurarea conducerii, supravegherii și pazei",
+        "Autorizarea construcțiilor în subzonele TE cu respectarea distanțelor minime de protecție sanitară"
+      ],
+      "utilizari_interzise": [
+        "Amplasarea locuințelor",
+        "Amplasarea unităților de învățământ și alte servicii de interes general"
+      ],
+      "zone_protectie": {
+        "TEa_gospodarie_ape": "30 m de la ziduri",
+        "AH_albii": "15 m",
+        "ISct_cimitire": "50 m de la limita acestuia",
+        "TEel_LEA_20kV": "24 m zona de protecție",
+        "TEel_LEA_110kV": "36 m zona de protecție"
+      },
+      "parcela_minima": {
+        "suprafata_mp": 1000,
+        "front_stradal_m": 20,
+        "acces_carosabil_m": 4
+      },
+      "POT_max": 50,
+      "CUT_max": 1.00,
+      "H_max_m": 9,
+      "H_min_m": 4,
+      "regim_inaltime": "minim 4m, maxim 9m la streașină/atic"
+    },
+    {
+      "id": "UTR-7",
+      "sat": "Baișa",
+      "denumire": "Locuințe și funcțiuni complementare",
+      "tip": "rezidential",
+      "subzone": ["Lm.e.", "Lm.p.", "Lb."],
+      "utilizari_admise": [
+        "Construcții de locuințe individuale și colective mici izolate și cuplate",
+        "Anexe gospodărești, completări și extinderi",
+        "Lucrări de construire, întreținere, renovare, modernizare la fondul construit existent",
+        "Supraetajări pentru clădiri P, P+1, P+2, P+2+M",
+        "Lucrări de îmbunătățire a confortului urban",
+        "Echipamente publice de nivel rezidențial"
+      ],
+      "utilizari_admise_conditionari": [
+        "Inserții și reconstrucții cu menținerea funcțiunii rezidențiale",
+        "Construcții în zona de protecție a Monumentelor istorice — 200,00 m (cu aviz DJCPN)",
+        "Ocuparea și construirea pe terenuri libere pentru unități productive mici și mijlocii",
+        "Modernizarea tramei stradale principale și secundare"
+      ],
+      "utilizari_interzise": [
+        "Funcțiuni industriale, servicii, comerciale cu poluare sau riscuri tehnologice",
+        "Depozitarea cantităților mari de substanțe inflamabile sau toxice",
+        "Depozitări de materiale refolosibile sau stații de transfer a deșeurilor",
+        "Construirea de clădiri în zonele hașurate cu alunecări de teren și pericol de inundabilitate",
+        "Construirea de clădiri în zona PD (păduri) fără avizul Romsilva"
+      ],
+      "zone_protectie": {
+        "Cr_Dn_drum_national": "22,00 m între axul drumului și garduri sau construcții",
+        "Cr_Dc_drum_comunal": "18,00 m între axul drumului și garduri sau construcții",
+        "TEa_gospodarie_ape": "30 m de la ziduri",
+        "AH_albii": "15 m",
+        "ISct_cimitire": "50 m de la limita acestuia",
+        "TEel_LEA_20kV": "24 m zona de protecție",
+        "TEel_LEA_110kV": "36 m zona de protecție"
+      },
+      "parcela_minima": {
+        "suprafata_mp": 300,
+        "front_stradal_m": 12,
+        "front_constructii_izolate_m": 10,
+        "acces_carosabil_m": 4
+      },
+      "amplasare": {
+        "retragere_fata_aliniament_m": 6,
+        "retragere_laterala_min_m": 3,
+        "retragere_posterioara_min_m": 5,
+        "distanta_intre_cladiri_min_m": 3
+      },
+      "POT_max": 30,
+      "CUT_max": 0.60,
+      "H_max_m": 12,
+      "H_cornisa_m": 12,
+      "regim_inaltime": "P; P+1; P+1+M",
+      "imprejmuiri": {
+        "gard_strada_h_m": 1.70,
+        "soclu_opac_m": 0.30,
+        "parte_transparenta_m": 1.50,
+        "gard_separativ_max_m": 2.20
+      }
+    },
+    {
+      "id": "UTR-8a",
+      "sat": "Cătămărăști-Deal",
+      "denumire": "Locuințe și funcțiuni complementare",
+      "tip": "rezidential",
+      "subzone": ["Lm.e.", "Lm.p.", "Lb."],
+      "utilizari_admise": [
+        "Construcții de locuințe individuale și colective mici izolate și cuplate",
+        "Anexe gospodărești, completări și extinderi",
+        "Lucrări de construire, întreținere, renovare, modernizare la fondul construit existent",
+        "Supraetajări pentru clădiri P, P+1, P+2, P+2+M",
+        "Lucrări de îmbunătățire a confortului urban",
+        "Echipamente publice de nivel rezidențial"
+      ],
+      "utilizari_admise_conditionari": [
+        "Inserții și reconstrucții cu menținerea funcțiunii rezidențiale",
+        "Construcții în zona de protecție a Monumentelor istorice — 200,00 m (cu aviz DJCPN)",
+        "Ocuparea și construirea pe terenuri libere pentru unități productive mici și mijlocii",
+        "Modernizarea tramei stradale principale și secundare"
+      ],
+      "utilizari_interzise": [
+        "Funcțiuni industriale, servicii, comerciale cu poluare sau riscuri tehnologice",
+        "Depozitarea cantităților mari de substanțe inflamabile sau toxice",
+        "Depozitări de materiale refolosibile sau stații de transfer a deșeurilor",
+        "Construirea de clădiri în zonele hașurate cu alunecări de teren și pericol de inundabilitate",
+        "Construirea de clădiri în zona PD (păduri) fără avizul Romsilva"
+      ],
+      "zone_protectie": {
+        "Cr_Dn_drum_national": "22,00 m între axul drumului și garduri sau construcții",
+        "Cr_Dc_drum_comunal": "18,00 m între axul drumului și garduri sau construcții",
+        "TEa_gospodarie_ape": "30 m de la ziduri",
+        "AH_albii": "15 m",
+        "ISct_cimitire": "50 m de la limita acestuia",
+        "TEel_LEA_20kV": "24 m zona de protecție",
+        "TEel_LEA_110kV": "36 m zona de protecție"
+      },
+      "parcela_minima": {
+        "suprafata_mp": 300,
+        "front_stradal_m": 12,
+        "front_constructii_izolate_m": 10,
+        "acces_carosabil_m": 4
+      },
+      "amplasare": {
+        "retragere_fata_aliniament_m": 6,
+        "retragere_laterala_min_m": 3,
+        "retragere_posterioara_min_m": 5,
+        "distanta_intre_cladiri_min_m": 3
+      },
+      "POT_max": 30,
+      "CUT_max": 0.60,
+      "H_max_m": 12,
+      "H_cornisa_m": 12,
+      "regim_inaltime": "P; P+1; P+1+M",
+      "imprejmuiri": {
+        "gard_strada_h_m": 1.70,
+        "soclu_opac_m": 0.30,
+        "parte_transparenta_m": 1.50,
+        "gard_separativ_max_m": 2.20
+      }
+    },
+    {
+      "id": "UTR-8b",
+      "sat": "Cătămărăști-Deal",
+      "denumire": "Zonă de unități industriale — EMAGROCOM",
+      "tip": "industrial",
+      "subzone": ["I", "C", "Cr", "Te-", "Tea", "Teel"],
+      "propuse": ["Mărirea dimensiunii exploatațiilor existente și înființarea de noi unități cu tehnologii eficiente"],
+      "utilizari_admise": [
+        "Lucrări de construire, întreținere, renovare, modernizare la fondul construit existent",
+        "Construirea de obiective în legătură cu activitatea industrială",
+        "Activități industriale nepoluante",
+        "Servicii către întreprinderi, IMM cu profil nepoluant",
+        "Activități productive nepoluante și depozitare comercială",
+        "Transporturi, servicii comerciale legate de transporturi",
+        "Construcții și amenajări aferente rețelelor tehnico-edilitare"
+      ],
+      "utilizari_admise_conditionari": [
+        "Extinderea sau conversia activităților actuale fără agravarea situației poluării",
+        "Construirea locuințelor strict necesare pentru conducere/supraveghere/pază",
+        "Autorizarea construcțiilor în subzonele TE cu respectarea distanțelor de protecție sanitară"
+      ],
+      "utilizari_interzise": [
+        "Amplasarea locuințelor",
+        "Amplasarea unităților de învățământ și alte servicii de interes general"
+      ],
+      "zone_protectie": {
+        "Cr_Dn_drum_national": "22,00 m între axul drumului și garduri sau construcții",
+        "Cr_Dc_drum_comunal": "18,00 m între axul drumului și garduri sau construcții",
+        "TEa_gospodarie_ape": "30 m de la ziduri",
+        "AH_albii": "15 m",
+        "ISct_cimitire": "50 m de la limita acestuia",
+        "TEel_LEA_20kV": "24 m zona de protecție",
+        "TEel_LEA_110kV": "36 m zona de protecție"
+      },
+      "parcela_minima": {
+        "suprafata_mp": 1000,
+        "front_stradal_m": 20,
+        "acces_carosabil_m": 4
+      },
+      "amplasare": {
+        "retragere_fata_aliniament_m": 6,
+        "retragere_laterala_min_m": 6,
+        "retragere_posterioara_min_m": 5,
+        "distanta_intre_cladiri_min_m": 6
+      },
+      "POT_max": 50,
+      "CUT_max": 1.50,
+      "H_max_m": 9,
+      "H_min_m": 4,
+      "regim_inaltime": "minim 4m, maxim 9m la streașină/atic"
+    },
+    {
+      "id": "UTR-8c",
+      "sat": "Cătămărăști-Deal",
+      "denumire": "Zonă de unități industriale și servicii — VAMA",
+      "tip": "industrial_servicii",
+      "subzone": ["I", "IS", "C", "Cr", "Te-", "Tea", "Teel"],
+      "propuse": ["Mărirea dimensiunii exploatațiilor existente și înființarea de noi unități cu tehnologii eficiente"],
+      "utilizari_admise": [
+        "Lucrări de construire, întreținere, renovare, modernizare la fondul construit existent",
+        "Construirea de obiective în legătură cu activitatea industrială",
+        "Activități industriale nepoluante",
+        "Servicii către întreprinderi, IMM cu profil nepoluant",
+        "Activități productive nepoluante și depozitare comercială",
+        "Transporturi, servicii comerciale legate de transporturi",
+        "Construcții și amenajări aferente rețelelor tehnico-edilitare"
+      ],
+      "utilizari_admise_conditionari": [
+        "Extinderea sau conversia activităților actuale fără agravarea situației poluării",
+        "Construirea locuințelor strict necesare pentru conducere/supraveghere/pază"
+      ],
+      "utilizari_interzise": [
+        "Amplasarea locuințelor",
+        "Amplasarea unităților de învățământ și alte servicii de interes general"
+      ],
+      "zone_protectie": {
+        "Cr_Dn_drum_national": "22,00 m între axul drumului și garduri sau construcții",
+        "Cr_Dc_drum_comunal": "18,00 m între axul drumului și garduri sau construcții",
+        "TEa_gospodarie_ape": "30 m de la ziduri",
+        "AH_albii": "15 m",
+        "ISct_cimitire": "50 m de la limita acestuia",
+        "TEel_LEA_20kV": "24 m zona de protecție",
+        "TEel_LEA_110kV": "36 m zona de protecție"
+      },
+      "parcela_minima": {
+        "suprafata_mp": 1000,
+        "front_stradal_m": 20,
+        "acces_carosabil_m": 4
+      },
+      "amplasare": {
+        "retragere_fata_aliniament_m": 6,
+        "retragere_laterala_min_m": 6,
+        "retragere_posterioara_min_m": 5,
+        "distanta_intre_cladiri_min_m": 6
+      },
+      "POT_max": 50,
+      "CUT_max": 1.50,
+      "H_max_m": 9,
+      "H_min_m": 4,
+      "regim_inaltime": "minim 4m, maxim 9m la streașină/atic"
+    },
+    {
+      "id": "UTR-8d",
+      "sat": "Cătămărăști-Deal",
+      "denumire": "Zonă de producție agricolă — DN29B",
+      "tip": "productie_agricola",
+      "subzone": ["A", "C", "Cr", "Te", "Tea", "Teel"],
+      "propuse": ["ID2 (unități industria alimentară)", "Az (microferme zootehnice)", "Asu (servicii, utilaje agricole)"],
+      "utilizari_admise": [
+        "Lucrări de construire, întreținere, renovare, modernizare la fondul construit existent",
+        "Construirea de obiective în legătură cu activitatea industrială sau deservire a industriei",
+        "Activități industriale nepoluante",
+        "Servicii către întreprinderi, IMM cu profil nepoluant",
+        "Activități productive nepoluante și depozitare comercială",
+        "Transporturi, servicii comerciale legate de transporturi",
+        "Construcții și amenajări aferente rețelelor tehnico-edilitare"
+      ],
+      "utilizari_interzise": [
+        "Amplasarea locuințelor",
+        "Amplasarea unităților de învățământ și alte servicii de interes general"
+      ],
+      "zone_protectie": {
+        "Cr_Dn_drum_national": "22,00 m între axul drumului și garduri sau construcții",
+        "Cr_Dc_drum_comunal": "18,00 m între axul drumului și garduri sau construcții",
+        "TEa_gospodarie_ape": "30 m de la ziduri",
+        "AH_albii": "15 m",
+        "ISct_cimitire": "50 m de la limita acestuia",
+        "TEel_LEA_20kV": "24 m zona de protecție",
+        "TEel_LEA_110kV": "36 m zona de protecție"
+      },
+      "parcela_minima": {
+        "suprafata_mp": 1000,
+        "front_stradal_m": 20,
+        "acces_carosabil_m": 4
+      },
+      "POT_max": 50,
+      "CUT_max": 1.50,
+      "H_max_m": 9,
+      "H_min_m": 4,
+      "regim_inaltime": "minim 4m, maxim 9m la streașină/atic"
+    },
+    {
+      "id": "UTR-8e",
+      "sat": "Cătămărăști-Deal",
+      "denumire": "Zonă spații verzi amenajate și agrement — Iazul Pulberăriei",
+      "tip": "spatii_verzi_agrement",
+      "subzone": ["Lm.e.", "IS", "IS ps", "Is t", "TAG", "TA", "PA", "Cr"],
+      "propuse": ["Ppp — Amenajarea de spații verzi publice pentru recreerea cetățenilor"],
+      "utilizari_admise": [
+        "Amplasarea locuințelor, clădirilor destinate depozitelor, industriilor, construcții tehnico-edilitare, ferme agricole, căi de comunicare majore",
+        "Pe domeniul privat — construcții cu funcțiunea de prestări servicii, turism, cazare, agrement",
+        "Amenajări peisagistice, pietonale, parcuri și parcări în condițiile impuse de caracterul zonei"
+      ],
+      "utilizari_interzise": [
+        "Amplasarea clădirilor destinate instituțiilor și serviciilor de interes general",
+        "Construirea de clădiri în zonele hașurate cu alunecări de teren"
+      ],
+      "zone_protectie": {
+        "TEa_gospodarie_ape": "30 m de la ziduri",
+        "AH_albii": "15 m",
+        "TEel_LEA_20kV": "24 m zona de protecție",
+        "TEel_LEA_110kV": "36 m zona de protecție"
+      },
+      "parcela_minima": {
+        "suprafata_mp": 1000,
+        "front_stradal_m": 20,
+        "acces_carosabil_m": 4
+      },
+      "POT_max": 30,
+      "CUT_max": 0.60,
+      "H_max_m": 9,
+      "H_min_m": 4,
+      "regim_inaltime": "minim 4m, maxim 9m la streașină/atic",
+      "note": "Zonă de agrement, relaxare meditativă și turism. Domeniu public 30%, domeniu privat 70%."
+    }
+  ],
+  "sate_componente": [
+    "Ipotești", "Stăncești", "Cătămărăști", "Cătămărăști Deal",
+    "Cucorăni", "Cervicești", "Mânăiești", "Bâlseni", "Manolești", "Baișa"
+  ],
+  "note_generale": [
+    "Modificarea POT/CUT se poate face cu cel mult 20% prin PUZ/PUD cu avizul CL Mihai Eminescu și CJ Botoșani",
+    "Toate clădirile vor fi racordate la rețelele edilitare existente",
+    "Se interzice folosirea azbocimentului pentru acoperirea locuințelor",
+    "Volumele construite vor fi simple și se vor armoniza cu vecinătățile imediate",
+    "Parcarea autovehiculelor se admite numai în interiorul parcelei"
+  ]
+}
