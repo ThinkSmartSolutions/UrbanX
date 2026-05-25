@@ -1251,7 +1251,7 @@ document.addEventListener('click', function(){
   <button class="tb-btn" id="btnMulti" title="Multiselect parcele">🔲 Multi</button>
 
   <!-- UAT activ -->
-  <button class="tb-btn" onclick="showUATSelector();setTimeout(function(){window._injectComuneRLU&&window._injectComuneRLU()},150);setTimeout(function(){window._injectComuneRLU&&window._injectComuneRLU()},500)" title="Schimbă UAT-ul activ" style="border-color:rgba(212,175,55,.4);color:#d4af37;display:flex;align-items:center;gap:4px">📍 <span id="uat-indicator">Iași</span></button>
+  <button class="tb-btn" onclick="showUATSelector();setTimeout(function(){window._injectComuneRLU&&window._injectComuneRLU()},300)" title="Schimbă UAT-ul activ" style="border-color:rgba(212,175,55,.4);color:#d4af37;display:flex;align-items:center;gap:4px">📍 <span id="uat-indicator">Iași</span></button>
 
   <div class="spacer"></div>
   <!-- Ascunde/afișează panel lateral — desktop (#12 audit) -->
@@ -4770,17 +4770,14 @@ window._utrColor       = _utrColor;
 // Pentru a adăuga un UAT nou: adaugi un rând aici. Nu atingi altceva.
 window._PUG_REGISTRY = window._PUG_REGISTRY || {};
 Object.assign(window._PUG_REGISTRY, {
-  // ── Municipii ─────────────────────────────────────────────────────────────
   'RO-IS-01': { id:'municipiul-iasi',    name:'Municipiul Iași',    pugFile:'data/municipiul-iasi/pug.geojson',        reguli:'data/municipiul-iasi/reguli.json' },
   'RO-SV-01': { id:'municipiul-suceava', name:'Municipiul Suceava', pugFile:'js/data/municipiul-suceava/pug.geojson', reguli:'js/data/municipiul-suceava/reguli.json' },
   'RO-BT-01': { id:'municipiul-botosani',name:'Municipiul Botoșani',pugFile:'data/municipiul-botosani/pug.geojson',   reguli:'data/municipiul-botosani/reguli.json' },
-  // ── Comune cu RLU — chei IDENTICE cu TCI._EXTRA_UATS (17-tci-cinema.js) ──
   'RO-IS-95042': { id:'comuna-miroslava', name:'Comuna Miroslava', pugFile:'data/comuna-miroslava/pug.geojson', reguli:'data/comuna-miroslava/reguli.json' },
   'RO-IS-95087': { id:'comuna-rediu',     name:'Comuna Rediu',     pugFile:'data/comuna-rediu/pug.geojson',     reguli:'data/comuna-rediu/reguli.json' },
   'RO-IS-94889': { id:'comuna-aroneanu',  name:'Comuna Aroneanu',  pugFile:'data/comuna-aroneanu/pug.geojson',  reguli:'data/comuna-aroneanu/reguli.json' },
   'RO-BT-18073': { id:'comuna-baluseni',  name:'Comuna Bălușeni',  pugFile:'data/comuna-baluseni/pug.geojson',  reguli:'data/comuna-baluseni/reguli.json' },
   'RO-IS-94951': { id:'comuna-holboca',   name:'Comuna Holboca',   pugFile:'data/comuna-holboca/pug.geojson',   reguli:'data/comuna-holboca/reguli.json' },
-  // ── Alias-uri retrocompatibilitate ────────────────────────────────────────
   'RO-IS-COM-MIROSLAVA': { id:'comuna-miroslava', name:'Comuna Miroslava', pugFile:'data/comuna-miroslava/pug.geojson', reguli:'data/comuna-miroslava/reguli.json' },
   'RO-IS-COM-ARONEANU':  { id:'comuna-aroneanu',  name:'Comuna Aroneanu',  pugFile:'data/comuna-aroneanu/pug.geojson',  reguli:'data/comuna-aroneanu/reguli.json' },
   'RO-BT-COM-BALUSENI':  { id:'comuna-baluseni',  name:'Comuna Bălușeni',  pugFile:'data/comuna-baluseni/pug.geojson',  reguli:'data/comuna-baluseni/reguli.json' },
@@ -4868,7 +4865,7 @@ window.addEventListener('load', function() {
       btn._uatHooked = true;
 
       const key = btn.dataset.uatKey || btn.dataset.key || btn.dataset.uat || '';
-      if(!key.match(/^RO-[A-Z]+-([0-9]+|COM-[A-Z]+)$/)) return; // chei valide: municipii + comune
+      if(!key.match(/^RO-[A-Z]+-([0-9]+|COM-[A-Z]+)$/)) return; // chei valide
 
       btn.addEventListener('click', function() {
         const name = btn.querySelector('b')?.textContent ||
@@ -5249,18 +5246,14 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
 <script src="js/rlu-holboca.js?v=20260525a"></script>
 
 <script>
-// ── PATCH v20260525e: Comune RLU în selectorul de UAT-uri ─────────────────
-// Injectăm direct după click pe butonul din topbar — știm exact că modalul
-// există în DOM și e vizibil în acel moment.
 (function() {
   'use strict';
-
-  var COMUNE_RLU = [
-    { key: 'RO-IS-95042', name: 'Comuna Miroslava' },
-    { key: 'RO-IS-95087', name: 'Comuna Rediu'     },
-    { key: 'RO-IS-94889', name: 'Comuna Aroneanu'  },
-    { key: 'RO-IS-94951', name: 'Comuna Holboca'   },
-    { key: 'RO-BT-18073', name: 'Comuna Bălușeni'  },
+  var COMUNE = [
+    { key:'RO-IS-95042', name:'Comuna Miroslava' },
+    { key:'RO-IS-95087', name:'Comuna Rediu'     },
+    { key:'RO-IS-94889', name:'Comuna Aroneanu'  },
+    { key:'RO-IS-94951', name:'Comuna Holboca'   },
+    { key:'RO-BT-18073', name:'Comuna Bălușeni'  },
   ];
 
   function _selectUAT(key, name) {
@@ -5269,107 +5262,74 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
     if (window._ProjectionEngine) window._ProjectionEngine.currentCity = key;
     var ind = document.getElementById('uat-indicator');
     if (ind) ind.textContent = name.replace('Municipiul ','').replace('Comuna ','');
-    // Închidem orice modal vizibil care conține lista UAT
-    document.querySelectorAll('body > div[style*="position:fixed"]').forEach(function(el) {
-      if (el.textContent.indexOf('Selecteaz') > -1 || el.textContent.indexOf('30 UAT') > -1) {
+    // Închidem modalul — cel mai mare div fixed vizibil cu text UAT
+    document.querySelectorAll('body > div').forEach(function(el) {
+      if (el.style.position === 'fixed' && el.textContent.indexOf('Selecteaz') > -1)
         el.style.display = 'none';
-      }
     });
     setTimeout(function(){
-      window.dispatchEvent(new CustomEvent('ux:city_changed', {detail:{key:key,name:name}}));
+      window.dispatchEvent(new CustomEvent('ux:city_changed',{detail:{key:key,name:name}}));
     }, 50);
-    console.log('[UAT Comune] ✅', key, name);
   }
 
-  function _injectComuneRLU() {
-    // Căutăm TOATE div-urile fixed vizibile — unul dintre ele e selectorul UAT
-    var candidates = Array.from(document.querySelectorAll('body > div[style*="position:fixed"], body > div[style*="position: fixed"]'))
-      .filter(function(el) {
-        return el.style.display !== 'none' &&
-               el.offsetParent !== null &&
-               el.textContent.length > 100;
-      });
-
-    // Fallback: orice div cu "Selectează UAT" în text
-    if (!candidates.length) {
-      candidates = Array.from(document.querySelectorAll('div')).filter(function(el) {
-        return el.textContent.indexOf('Selectează UAT') > -1 &&
-               el.style.display !== 'none';
-      });
-    }
-
-    var inserted = false;
-    candidates.forEach(function(modal) {
-      if (modal.querySelector('#ux-comune-rlu-grp')) return; // deja injectat
-
-      // Găsim containerul scrollabil sau cel mai probabil loc de inserare
-      // Căutăm un div care conține butoanele cu UAT-uri (cele cu "Gol", "Complet", "Parțial")
-      var scrollContainer = modal.querySelector('[style*="overflow"]') ||
-                            modal.querySelector('[style*="max-height"]') ||
-                            modal.lastElementChild;
-
-      // Dacă nu găsim, appendăm direct în modal înainte de butonul Închide
-      var closeBtn = Array.from(modal.querySelectorAll('button')).find(function(b) {
-        return b.textContent.trim().indexOf('nchide') > -1 || b.textContent.trim().indexOf('nulare') > -1;
-      });
-      var insertTarget = closeBtn ? closeBtn.parentElement : (scrollContainer || modal);
-
-      var grp = document.createElement('div');
-      grp.id = 'ux-comune-rlu-grp';
-      grp.style.cssText = 'padding:0 16px 12px';
-      grp.innerHTML =
-        '<div style="font-size:9px;font-weight:700;color:#6b7280;letter-spacing:.12em;' +
-        'padding:12px 0 6px;border-top:1px solid rgba(255,255,255,0.1)">' +
-        'IAȘI + BOTOȘANI — COMUNE CU RLU</div>' +
-        COMUNE_RLU.map(function(c){
-          return '<button style="display:flex;justify-content:space-between;align-items:center;' +
-            'width:100%;padding:10px 14px;margin:2px 0;background:rgba(255,255,255,0.04);' +
-            'border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#e2e8f0;' +
-            'cursor:pointer;font-size:13px;font-family:inherit;text-align:left" ' +
-            'data-uat-key="'+c.key+'">' +
-            '<b>'+c.name+'</b>' +
-            '<span style="font-size:10px;padding:2px 8px;border-radius:10px;white-space:nowrap;' +
-            'background:rgba(5,150,105,0.2);color:#34d399;border:1px solid rgba(5,150,105,0.4)">✅ RLU</span>' +
-            '</button>';
-        }).join('');
-
-      grp.addEventListener('click', function(e) {
-        var btn = e.target.closest('button[data-uat-key]');
-        if (!btn) return;
-        _selectUAT(btn.dataset.uatKey, btn.querySelector('b').textContent);
-      });
-
-      // Inserăm înainte de butonul Închide, sau la final
-      if (closeBtn && closeBtn.parentElement === modal) {
-        modal.insertBefore(grp, closeBtn);
-      } else {
-        insertTarget.appendChild(grp);
+  window._injectComuneRLU = function() {
+    // Găsim SINGURUL modal vizibil cu "Selectează UAT"
+    var modal = null;
+    document.querySelectorAll('body > div').forEach(function(el) {
+      if (!modal && el.style.position === 'fixed' &&
+          el.offsetParent !== null &&
+          el.textContent.indexOf('Selecteaz') > -1 &&
+          el.textContent.indexOf('UAT') > -1) {
+        modal = el;
       }
-      inserted = true;
-      console.log('[UrbanX] ✅ Comune RLU injectate în selector UAT');
+    });
+    if (!modal) return;
+
+    // GUARD: dacă deja injectat în ACEST modal, nu mai facem nimic
+    if (modal.querySelector('#ux-comune-rlu')) return;
+
+    // Găsim butonul "Închide" pentru a insera înaintea lui
+    var closeBtn = null;
+    modal.querySelectorAll('button').forEach(function(b) {
+      if (!closeBtn && /nchide|nulare/i.test(b.textContent)) closeBtn = b;
     });
 
-    if (!inserted) {
-      console.warn('[UrbanX] Modal UAT negăsit — retry...');
-    }
-    return inserted;
-  }
+    var grp = document.createElement('div');
+    grp.id = 'ux-comune-rlu';
+    grp.style.cssText = 'padding:8px 16px 4px';
+    grp.innerHTML =
+      '<div style="font-size:9px;font-weight:700;color:#6b7280;letter-spacing:.12em;' +
+      'padding:8px 0 6px;border-top:1px solid rgba(255,255,255,0.1)">' +
+      'IAȘI + BOTOȘANI — COMUNE CU RLU</div>' +
+      COMUNE.map(function(c) {
+        return '<button style="display:flex;justify-content:space-between;align-items:center;' +
+          'width:100%;padding:9px 12px;margin:2px 0;background:rgba(255,255,255,0.04);' +
+          'border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#e2e8f0;' +
+          'cursor:pointer;font-size:13px;font-family:inherit;text-align:left" ' +
+          'data-k="'+c.key+'">' +
+          '<b>'+c.name+'</b>' +
+          '<span style="font-size:10px;padding:2px 8px;border-radius:10px;white-space:nowrap;' +
+          'background:rgba(5,150,105,0.2);color:#34d399;border:1px solid rgba(5,150,105,0.3)">✅ RLU</span>' +
+          '</button>';
+      }).join('');
 
-  // Expunem global pentru apelul din onclick
-  window._injectComuneRLU = _injectComuneRLU;
-  window._selectUAT = _selectUAT;
+    grp.addEventListener('click', function(e) {
+      var btn = e.target.closest('[data-k]');
+      if (btn) _selectUAT(btn.dataset.k, btn.querySelector('b').textContent);
+    });
 
-  // Actualizare indicator topbar la schimbare UAT
+    if (closeBtn) closeBtn.parentElement.insertBefore(grp, closeBtn);
+    else modal.appendChild(grp);
+
+    console.log('[UrbanX] ✅ Comune RLU injectate');
+  };
+
   window.addEventListener('ux:city_changed', function(e) {
-    var key = (e.detail && e.detail.key) || window.TCI?.cityKey || localStorage.getItem('ux_last_city');
-    var pug = window._PUG_REGISTRY && window._PUG_REGISTRY[key];
-    if (pug) {
-      var ind = document.getElementById('uat-indicator');
-      if (ind) ind.textContent = pug.name.replace('Municipiul ','').replace('Comuna ','');
-    }
+    var key = (e.detail&&e.detail.key)||window.TCI?.cityKey||localStorage.getItem('ux_last_city');
+    var pug = window._PUG_REGISTRY&&window._PUG_REGISTRY[key];
+    if (pug) { var i=document.getElementById('uat-indicator');
+      if(i) i.textContent=pug.name.replace('Municipiul ','').replace('Comuna ',''); }
   });
-
-  console.log('[UrbanX] Patch comune RLU v20260525e încărcat (injectare directă după click)');
 })();
 </script>
 </body>
