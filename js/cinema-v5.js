@@ -268,10 +268,45 @@ window._startCinema = function(cityKey){
     if(prg) prg.style.width='100%';
     if(D.inse&&window._PredEngine&&window._PredEngine._enrichPredFromINSE)
       pred=window._PredEngine._enrichPredFromINSE(pred,D.inse);
-    setTimeout(function(){
-      ld.style.transition='opacity .8s';ld.style.opacity='0';
+
+    // Enrichment async cu date live INSE + Eurostat (tci-data-live.js)
+    var _startFilmFn = function(){
+      ld.style.transition='opacity .8s'; ld.style.opacity='0';
       setTimeout(function(){ ld.remove(); _film(map,SE,city,pred,cx,cy,name,siruta); },800);
-    },500);
+    };
+
+    // Incearca enrichment live — daca nu e disponibil, porneste oricum
+    var enrichPromises = [];
+    if(window._TCILiveINSE && city.siruta){
+      enrichPromises.push(
+        window._TCILiveINSE.enrichCity(city).then(function(enriched){
+          if(enriched && enriched !== city){
+            city = enriched;
+            if(enriched.pop2021) pred.p21 = enriched.pop2021;
+            if(enriched.autorizatii_2023) pred.auth = enriched.autorizatii_2023;
+            console.log('[v9] INSE live: pop='+enriched.pop2021+' auth='+enriched.autorizatii_2023);
+          }
+        }).catch(function(){})
+      );
+    }
+    if(window._TCILiveEurostat && city.judet){
+      enrichPromises.push(
+        window._TCILiveEurostat.enrichCity(city).then(function(enriched){
+          if(enriched && enriched.pib_eur_cap){
+            city = Object.assign({}, city, enriched);
+            pred.pib = enriched.pib_eur_cap;
+            pred.pctUE = Math.round(enriched.pib_eur_cap / 366);
+            console.log('[v9] Eurostat live: PIB='+enriched.pib_eur_cap+' EUR/cap');
+          }
+        }).catch(function(){})
+      );
+    }
+
+    // Asteapta max 4s pentru date live, apoi porneste oricum
+    var timeout = new Promise(function(res){ setTimeout(res, 4000); });
+    Promise.race([Promise.all(enrichPromises), timeout]).then(function(){
+      setTimeout(_startFilmFn, 300);
+    });
   });
 };
 
@@ -494,6 +529,15 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
       case 'b2s1':
         lp('dawn');
         fly(Z.C,13,48,0,4000,0,'dawn');
+        // Heatmap presiune construire din tci-data-live.js
+        setTimeout(function(){
+          if(!SE._playing) return;
+          if(window._TCIPressureHeatmap){
+            window._TCIPressureHeatmap._city = city;
+            window._TCIPressureHeatmap._year = _S();
+            window._TCIPressureHeatmap._build(map, city, _S());
+          }
+        },2000);
         onIdle(function(){try{SE._addDensityHeat&&SE._addDensityHeat(map);}catch(e){}});
         setTimeout(function(){
           if(!SE._playing) return;
@@ -1658,6 +1702,29 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         ctx.fillText(name.toUpperCase(),W/2,H*0.265);
         ctx.globalAlpha=1;
         var pop_e=pred.pop55||Math.round(pop21*Math.pow(1+r10/100,_HORIZON));
+        // Urban Health Score real
+        var urbanScore = window._calcUrbanScore ? window._calcUrbanScore(pred,city) : null;
+        // Afiseaza Urban Health Score daca e disponibil
+        if(urbanScore && t>0.14) {
+          ctx.globalAlpha=sA*rE(0.14,0.18);
+          ctx.fillStyle='rgba(4,10,24,0.80)';
+          ctx.fillRect(W*0.04,H*0.62,Math.min(W*0.30,250),H*0.06);
+          ctx.fillStyle='rgba(148,163,184,0.52)';
+          ctx.font='700 '+Math.min(W*0.008,10)+'px "IBM Plex Mono",monospace';
+          ctx.textAlign='left'; ctx.letterSpacing='.05em';
+          ctx.fillText('URBAN HEALTH INDEX',W*0.05,H*0.635);
+          ctx.fillStyle=urbanScore.color;
+          ctx.font='900 '+Math.min(W*0.028,36)+'px "Space Grotesk",sans-serif';
+          ctx.fillText(urbanScore.nota_actual+'/10',W*0.05,H*0.668);
+          ctx.fillStyle='rgba(34,197,94,0.80)';
+          ctx.font='700 '+Math.min(W*0.014,18)+'px "Space Grotesk",sans-serif';
+          ctx.fillText('→ '+urbanScore.nota_potential+'/10 potential',W*0.18,H*0.668);
+          ctx.fillStyle='rgba(148,163,184,0.50)';
+          ctx.font='500 '+Math.min(W*0.009,11)+'px "Space Grotesk",sans-serif';
+          ctx.fillText(urbanScore.label,W*0.05,H*0.682);
+          ctx.globalAlpha=1;
+        }
+
         [
           {ok:pop_e>pop21,              txt:'Populatie '+_E()+': '+N2(pop_e)+' loc.'},
           {ok:(pred.pctUE55||(pred.pctUE||38)+20)>=75, txt:'PIB '+_E()+': ~'+(pred.pctUE55||(pred.pctUE||38)+20)+'% UE27'},
@@ -1897,6 +1964,11 @@ function _drawModalFull(ctx,W,H,a,pred){
 }
 
 function _drawPopHist(ctx,W,H,a,pred){
+  // Daca avem GHSL live, folosim datele reale
+  var ghslSeries = null;
+  if(window._TCILiveGHSL && pred._city) {
+    try{ ghslSeries = window._TCILiveGHSL.getTimeSeries(pred._city); }catch(e){}
+  }
   ctx.save();
   var x=W*0.57,y=H*0.58,w=Math.min(W*0.38,340),h=H*0.24;
   ctx.globalAlpha=a*0.88;ctx.fillStyle='rgba(4,10,24,0.80)';ctx.beginPath();ctx.roundRect&&ctx.roundRect(x,y,w,h,7);ctx.fill();
@@ -2251,6 +2323,8 @@ function _agendaPts(cx,cy,pred){
 }
 
 function _cleanV9(map){
+  // Curata heatmap presiune
+  try{if(window._TCIPressureHeatmap&&window._TCIPressureHeatmap._active)window._TCIPressureHeatmap.hide();}catch(e){}
   ['v9-hw','v9-hw-buf','v9-rail','v9-apt','v9-urb','v9-urb-maj','v9-green','v9-mon',
    'v9-cim','v9-utils','v9-amenity','v9-agenda','v9-mob-pts',
    'corridors-src','corridors-line','corridors-glow','corridors-zones','corridors-dev-zones'].forEach(function(id){
