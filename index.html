@@ -5379,17 +5379,16 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
           alreadyInjected[el.getAttribute('data-rlu-key')]=true;
         });
 
-        // Găsim ultimul item nativ (înainte de comunele noastre) ca punct de inserție
-        // = ultimul copil al grupului care NU are data-rlu-key
-        var lastNativeChild = null;
-        Array.from(targetGrup.children).forEach(function(child){
-          if(!child.getAttribute || !child.getAttribute('data-rlu-key')){
-            lastNativeChild = child;
-          }
-        });
-
-        // Inserăm separator dacă nu există
+        // Inserăm separator imediat după primul item (municipiul), nu după ultimul
         var hasSep = !!targetGrup.querySelector('[data-rlu-sep]');
+        // Găsim primul item clickabil din grup (municipiul)
+        var firstClickable = null;
+        Array.from(targetGrup.children).forEach(function(child){
+          if(firstClickable) return;
+          if(child.style && child.style.cursor === 'pointer') firstClickable = child;
+          else if(child.onclick) firstClickable = child;
+          else if(child.getAttribute && child.getAttribute('data-key')) firstClickable = child;
+        });
         if(!hasSep && comuneList.some(function(c){return !alreadyInjected[c.key];})){
           var sep=document.createElement('div');
           sep.setAttribute('data-rlu-sep','1');
@@ -5398,18 +5397,22 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
             'letter-spacing:.07em;font-weight:700;padding:5px 4px 3px;'+
             'margin-top:4px;border-top:1px solid rgba(52,211,153,0.2)';
           sep.textContent='── Comune cu RLU ──';
-          if(lastNativeChild && lastNativeChild.nextSibling){
-            targetGrup.insertBefore(sep, lastNativeChild.nextSibling);
+          if(firstClickable && firstClickable.nextSibling){
+            targetGrup.insertBefore(sep, firstClickable.nextSibling);
           } else {
             targetGrup.appendChild(sep);
           }
         }
-
-        // Injectăm fiecare comună care nu e deja prezentă
+        // Injectăm comunele după separator
+        var sepEl = targetGrup.querySelector('[data-rlu-sep]');
         comuneList.forEach(function(c){
           if(alreadyInjected[c.key]) return;
           var item=makeItem(c, true);
-          targetGrup.appendChild(item);
+          if(sepEl && sepEl.nextSibling){
+            targetGrup.insertBefore(item, sepEl.nextSibling);
+          } else {
+            targetGrup.appendChild(item);
+          }
         });
 
       } else {
