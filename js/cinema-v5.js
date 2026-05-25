@@ -275,6 +275,15 @@ window._startCinema = function(cityKey){
       setTimeout(function(){ ld.remove(); _film(map,SE,city,pred,cx,cy,name,siruta); },800);
     };
 
+    // Preload surse Grup A (CNAIR, Aeroporturi, AQI, MDLPA, GTFS)
+    if(window._LiveSources){
+      window._LiveSources.preloadAll(city).then(function(r){
+        // Salveaza pe city pentru acces in scene
+        city._live = r;
+        console.log('[v9] LiveSources preloaded:', Object.keys(r).join(', '));
+      }).catch(function(){});
+    }
+
     // Incearca enrichment live — daca nu e disponibil, porneste oricum
     var enrichPromises = [];
     if(window._TCILiveINSE && city.siruta){
@@ -510,9 +519,27 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
             addLine('v9-rail',D.rail,{'line-color':'#a78bfa','line-width':2,'line-opacity':0.6,'line-dasharray':[4,2]});
             _flowLine(map,'v9-rail');
           }
-          if(D.airports&&D.airports.length){
-            addCircle('v9-apt',D.airports.map(function(a){return{type:'Feature',geometry:{type:'Point',coordinates:[a.lon,a.lat]},properties:{c:'#22c55e',r:14,n:a.name}};}));
-            setTimeout(function(){_pulse(map,'v9-apt','circle-radius',8,18,8);},1000);
+          // Aeroporturi cu clasificare ROMARTSA din _LiveTerrain
+          var aeroList = (window._LiveTerrain&&city._live&&city._live.aeroporturi)
+            ? city._live.aeroporturi
+            : D.airports||[];
+          if(aeroList.length){
+            var aeroFeats = aeroList.map(function(a){
+              var hasIata=a.iata&&a.iata.length>0;
+              return {type:'Feature',geometry:{type:'Point',
+                coordinates:[a.lon||a.lon,a.lat||a.lat]},
+                properties:{c:hasIata?'#22c55e':'#60a5fa',r:hasIata?16:10,
+                  n:(a.name||'')+(a.iata?' ('+a.iata+')':'')+(a.distKm?' — '+a.distKm+'km':''),
+                  iata:a.iata||''}};
+            });
+            addCircle('v9-apt',aeroFeats);
+            setTimeout(function(){_pulse(map,'v9-apt','circle-radius',8,20,7);},1000);
+          }
+          // CNAIR pe harta - autostrazi planificate
+          if(window._LiveCNAIR&&city){
+            setTimeout(function(){
+              if(SE._playing) window._LiveCNAIR.showOnMap(map, city, {radiusKm:100});
+            },3000);
           }
         },2500);
         fly([cx,cy],9,20,-10,5000,6000,'night');
@@ -522,6 +549,11 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
       case 'b1s3':
         lp('day');
         try{map.jumpTo({center:[24.5,45.9],zoom:7,pitch:15,bearing:0});}catch(e){}
+        // Avioane live deasupra Romaniei
+        setTimeout(function(){
+          if(!SE._playing) return;
+          if(window._LiveOpenSky) window._LiveOpenSky.showOnMap(map,city);
+        },3000);
         fly([cx,cy],10,30,0,5000,1000,'day');
         fly([cx,cy],13,52,20,5000,9000,'day');
         fly(Z.C,14.5,62,35,5000,16000,'dusk');
@@ -622,9 +654,17 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         setTimeout(function(){
           if(!SE._playing) return;
           if(D.urban&&D.urban.length){
-            addLine('v9-urb',D.urban);
+            // CESTRIN - trafic estimat cu culori saturatie
+            if(window._LiveCESTRIN){
+              window._LiveCESTRIN.buildTrafficLayer(map,D.urban,city);
+            } else {
+              addLine('v9-urb',D.urban);
+            }
             var maj=D.urban.filter(function(f){return f.properties&&(f.properties.hw==='primary'||f.properties.hw==='motorway'||f.properties.hw==='trunk');});
-            if(maj.length){ addLine('v9-urb-maj',maj,{'line-color':['get','c'],'line-width':['get','w'],'line-opacity':0.5}); _pulse(map,'v9-urb-maj','line-opacity',0.3,1.0,8); }
+            if(maj.length&&!window._LiveCESTRIN){
+              addLine('v9-urb-maj',maj,{'line-color':['get','c'],'line-width':['get','w'],'line-opacity':0.5});
+              _pulse(map,'v9-urb-maj','line-opacity',0.3,1.0,8);
+            }
           }
           try{SE._addTrafficPulse&&SE._addTrafficPulse(map);}catch(e){}
         },1500);
@@ -657,6 +697,10 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
             addCircle('v9-apt',D.airports.map(function(a){return{type:'Feature',geometry:{type:'Point',coordinates:[a.lon,a.lat]},properties:{c:'#22c55e',r:14,n:a.name}};}));
             _pulse(map,'v9-apt','circle-radius',8,20,6);
           }
+          // CNAIR autostrazi planificate Romania
+          if(window._LiveCNAIR&&city){
+            window._LiveCNAIR.showOnMap(map,city,{radiusKm:120});
+          }
         },2000);
         fly([cx,cy],10,22,-10,5000,7500,'day');
         fly([cx,cy],12.5,42,18,5000,14000,'day');
@@ -671,6 +715,15 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
           }
         }catch(e){}
         onIdle(function(){try{SE._addTransitExpand&&SE._addTransitExpand(map);}catch(e){}});
+        // GTFS trasee TP reale din OSM
+        setTimeout(function(){
+          if(!SE._playing) return;
+          if(window._LiveGTFS){
+            window._LiveGTFS.showOnMap(map,city,true).then(function(){
+              console.log('[v9] GTFS trasee TP afisate');
+            }).catch(function(){});
+          }
+        },1500);
         // BRT coridoare propuse cu flow animat
         setTimeout(function(){
           if(!SE._playing) return;
@@ -705,6 +758,11 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         lp('night');
         try{map.setPaintProperty('building-extrusion','fill-extrusion-color',['interpolate',['linear'],['get','height'],0,'#166534',8,'#854d0e',15,'#b91c1c',25,'#dc2626',40,'#ef4444']);}catch(e){}
         onIdle(function(){try{SE._addSeismicHeat&&SE._addSeismicHeat(map);}catch(e){}});
+        // Restrictii aeroporturi ROMARTSA
+        setTimeout(function(){
+          if(!SE._playing) return;
+          if(window._LiveTerrain) window._LiveTerrain.showRestrictii(map,city);
+        },3000);
         fly([cx,cy],12.5,52,5,4000,0,'night');
         fly(Z.NV,14,62,30,6500,8000,'night');
         fly(Z.SE2,14,60,-22,6500,15000,'night');
@@ -1283,6 +1341,9 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         break;
 
       case 'b4s2':
+        // Date CNAIR si aeroporturi din LiveSources
+        var _cnairList = city&&city._live&&city._live.cnair || (window._LiveCNAIR?window._LiveCNAIR.getForCity(city,80):[]);
+        var _distAero = city&&city._live&&city._live.distAero || (window._LiveTerrain?window._LiveTerrain.getDistanta(city):null);
         titlu('Conectivitate Regionala','Autostrazi \u00b7 CFR \u00b7 Aeroporturi \u00b7 Coridoare TEN-T'); linie();
         var nMot2=(D.roads||[]).filter(function(r){return r.properties&&r.properties.t==='motorway';}).length;
         [
@@ -1301,7 +1362,15 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         ctx.globalAlpha=1;
         cifra(N2(pop21),'Populatie UAT');
         cifra2((city.coef_hub||0.78).toFixed(2)+' hub','Gravitatie');
-        narativ('Portocaliu/rosu fade-in = autostrazi. Violet dashoffset = cale ferata. Verde pulsant = aeroporturi. Infrastructura regionala este cel mai puternic predictor al cresterii economice pe 30 ani. Aeroport in raza 60km poate adauga 1.5-2.5pp la rata convergenta UE.');
+        var _cnairText = window._LiveCNAIR
+          ? window._LiveCNAIR.getNarativ(city)
+          : (_cnairList.length>0
+             ? _cnairList.slice(0,2).map(function(a){return a.name+' ('+a.distKm+'km)';}).join('. ')
+             : 'Fara autostrada in raza 80km');
+        var _aeroText = _distAero
+          ? _distAero.aeroport.name+' — '+_distAero.distKm+'km ('+_distAero.clasificare+')'
+          : 'Fara aeroport international in raza 120km';
+        narativ('CNAIR: '+_cnairText+'. Aeroport: '+_aeroText+'. Infrastructura regionala este cel mai puternic predictor al cresterii economice pe 30 ani. Fiecare km autostrada noua in raza 20km = +15-40% valoare teren pe coridor.');
         concluzie('Conectivitatea la coridoarele TEN-T europene determina competitivitatea pentru investitii straine directe');
         negativ('Izolarea de TEN-T = cost transport +35% = competitivitate industriala redusa = investitorii aleg alte locatii');
         break;
@@ -1378,12 +1447,20 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         break;
 
       case 'b5s2':
+        // AQI live din _LiveANPM
+        var _aqi = city&&city._live&&city._live.aqi || (window._LiveANPM?window._LiveANPM._estimateAQI(city):null);
+        if(_aqi && t>0.30) {
+          window._LiveANPM&&window._LiveANPM.renderCanvas(ctx,W,H,Math.min(1,(t-0.30)/0.20)*sA,_aqi);
+        }
         titlu('Clima & Inundatii','ANAR PGRA 2021-2027 \u00b7 WMS real \u00b7 UHI \u00b7 RCP4.5/8.5'); linie();
-        var zile=pred.zile24||18;
+        var zile=(city&&city._live&&city._live.zileCaniculare)||pred.zile24||18;
+        // Meteo live
+        var _meteo=city&&city._live&&city._live.meteo;
         cifra(zile+' zile/an','Caniculare >35\u00b0C azi (ANM)','#f59e0b');
         cifra2(Math.round(zile*2.1)+' zile/an','Proiectie '+_E()+' RCP4.5','#ef4444');
         if(t>0.20) _drawClima(ctx,W,H,Math.min(1,(t-0.20)/0.22)*sA,pred,zile);
-        narativ('HARTA ANAR REALA. Albastru inchis = RCP10 (revenire 10 ani). Mediu = RCP100. Deschis = RCP500. Verde pulsant = spatii verzi racire UHI. UHI estimat: +'+(pred.uhi||1.8)+'\u00b0C vs rural. In '+_E()+': '+Math.round(zile*2.1)+' zile caniculare. Costul inactiunii: x4.5 mai mare decat investitia in adaptare.');
+        var _tempAzi=_meteo?_meteo.temp+'°C ('+_meteo.desc+')':'date indisponibile';
+        narativ('Meteo azi: '+_tempAzi+'. HARTA ANAR REALA afisata. Zile caniculare >35°C in '+_NOW+': '+zile+' zile (sursa: '+(city&&city._live&&city._live.zileCaniculare?'Open-Meteo arhiva':'estimare')+'. In '+_E()+': '+Math.round(zile*2.1)+' zile proiectie RCP4.5. UHI estimat: +'+(pred.uhi||1.8)+'°C. Costul inactiunii climatice: x4.5 mai mare decat adaptarea.');
         concluzie('Spatii verzi + acoperisuri verzi = -1.5-2.5\u00b0C temperatura urbana = vietii salvate in valuri caldura');
         negativ('Val caldura '+_E()+' fara adaptare: '+Math.round(pop21*0.0003)+' spitalizari/val + blocaje termocentrale + '+N2(Math.round(pop21*0.0003*8000/1000000))+' M EUR/val cost sanatate');
         break;
@@ -2352,7 +2429,8 @@ function _fp(city){
     mot24:380,satAn:_S()+15,fluxOra:Math.round(pop*0.08),pasaje:5,kmOcol:20,
     tp:62,kmBRT:Math.round(pop/8000),costBRT:Math.round(pop/2000),
     defTP:13,walkScore:58,statiiNoi:Math.round(pop/1200),anSUMP:_P1(),
-    zile24:18,uhi:1.8,drought:'moderat',flood:'Mediu',
+    zile24:(city&&city._live&&city._live.zileCaniculare)||18,
+    uhi:1.8,drought:'moderat',flood:'Mediu',
     scoliNoi:Math.max(0,Math.round(pop/60000)),cabMed:Math.max(1,Math.round(pop/15000)),
     svHa:Math.round(pop/400),svM2:11,sdgTotal:6.4,
     spatiiPublice:65,locuireSDG:70,siguranta:72,
@@ -2424,7 +2502,14 @@ function _cleanV9(map){
   ['v9-hw','v9-hw-buf','v9-rail','v9-apt','v9-urb','v9-urb-maj','v9-green','v9-mon',
    'v9-cim','v9-utils','v9-amenity','v9-agenda','v9-mob-pts',
    'corridors-src','corridors-line','corridors-glow','corridors-zones','corridors-dev-zones',
-   'v9-brt','v9-corr','v9-corr-line','v9-corr-glow'].forEach(function(id){
+   'v9-brt','v9-corr','v9-corr-line','v9-corr-glow',
+   'cnair-src','cnair-op','cnair-wip','cnair-plan','cnair-op-glow','cnair-wip-glow',
+   'cestrin-src','cestrin-lines','cestrin-glow',
+   'gtfs-src','gtfs-lines','gtfs-glow',
+   'aero-src','aero-zone','aero-border','aero-pts',
+   'mdlpa-wms',
+   'opensky-src','opensky-pts',
+   'mdlpa-src','mdlpa-fill','mdlpa-border'].forEach(function(id){
     try{if(map.getLayer(id))map.removeLayer(id);}catch(e){}
     try{if(map.getSource(id))map.removeSource(id);}catch(e){}
   });
