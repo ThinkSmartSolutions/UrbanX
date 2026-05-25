@@ -499,8 +499,17 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         try{map.jumpTo({center:[24.5,45.9],zoom:6,pitch:0,bearing:0});}catch(e){}
         setTimeout(function(){
           if(!SE._playing) return;
-          if(D.roads&&D.roads.length){ addLine('v9-hw',D.roads); setTimeout(function(){_pulse(map,'v9-hw','line-opacity',0.4,0.95,12);},500); }
-          if(D.rail&&D.rail.length) addLine('v9-rail',D.rail,{'line-color':'#a78bfa','line-width':2,'line-opacity':0.7,'line-dasharray':[5,3]});
+          if(D.roads&&D.roads.length){
+            addLine('v9-hw',D.roads,{'line-color':['get','c'],'line-width':['get','w'],'line-opacity':0.3});
+            setTimeout(function(){
+              if(!SE._playing) return;
+              _pulse(map,'v9-hw','line-opacity',0.4,1.0,8);
+            },600);
+          }
+          if(D.rail&&D.rail.length){
+            addLine('v9-rail',D.rail,{'line-color':'#a78bfa','line-width':2,'line-opacity':0.6,'line-dasharray':[4,2]});
+            _flowLine(map,'v9-rail');
+          }
           if(D.airports&&D.airports.length){
             addCircle('v9-apt',D.airports.map(function(a){return{type:'Feature',geometry:{type:'Point',coordinates:[a.lon,a.lat]},properties:{c:'#22c55e',r:14,n:a.name}};}));
             setTimeout(function(){_pulse(map,'v9-apt','circle-radius',8,18,8);},1000);
@@ -594,12 +603,16 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         lp('day');
         setTimeout(function(){
           if(!SE._playing) return;
-          if(D.roads&&D.roads.length) addLine('v9-hw',D.roads);
+          if(D.roads&&D.roads.length){
+            addLine('v9-hw',D.roads,{'line-color':['get','c'],'line-width':['get','w'],'line-opacity':0.3});
+            setTimeout(function(){ if(SE._playing) _pulse(map,'v9-hw','line-opacity',0.4,1.0,8); },800);
+          }
           if(D.rail&&D.rail.length) addLine('v9-rail',D.rail,{'line-color':'#a78bfa','line-width':2,'line-opacity':0.7});
         },500);
-        fly([cx,cy],11.5,35,0,4000,0,'day');
-        fly(Z.C,14,58,20,6000,9000,'day');
-        fly(Z.PER,13,50,60,6000,17000,'dusk');
+        // Zoom pe CBD (center of gravity - cel mai cautat), apoi zona universitara, apoi periferie premium
+        fly(Z.CBD,15.5,68,15,4000,0,'day');       // centru civic - cel mai scump
+        fly(Z.UNI,15.5,68,35,6000,8000,'day');    // zona universitara - premium
+        fly(Z.PER,14.0,60,80,6000,16000,'dusk');  // periferie - potential crestere
         break;
 
       // BLOC 4 ───────────────────────────────────────────────────────────
@@ -615,8 +628,8 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
           }
           try{SE._addTrafficPulse&&SE._addTrafficPulse(map);}catch(e){}
         },1500);
-        fly(Z.C,13.5,55,15,6000,9000,'night');
-        fly(Z.SE2,13,50,-22,6000,17000,'night');
+        fly(Z.C,14.0,60,15,6000,9000,'night');   // zoom mai aproape
+        fly(Z.CBD,14.5,65,-10,5500,16000,'night'); // centru - noduri congestie
         break;
 
       case 'b4s2':
@@ -633,8 +646,13 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
               if(op>=0.92) clearInterval(fiv);
             },60);
             _ivs.push(fiv);
+            // Puls pe autostrazi
+            setTimeout(function(){ if(SE._playing) _pulse(map,'v9-hw','line-opacity',0.5,1.0,10); },2000);
           }
-          if(D.rail&&D.rail.length){ addLine('v9-rail',D.rail,{'line-color':'#a78bfa','line-width':2,'line-opacity':0.7}); _flowLine(map,'v9-rail'); }
+          if(D.rail&&D.rail.length){
+            addLine('v9-rail',D.rail,{'line-color':'#a78bfa','line-width':2,'line-opacity':0.7,'line-dasharray':[4,2]});
+            _flowLine(map,'v9-rail');
+          }
           if(D.airports&&D.airports.length){
             addCircle('v9-apt',D.airports.map(function(a){return{type:'Feature',geometry:{type:'Point',coordinates:[a.lon,a.lat]},properties:{c:'#22c55e',r:14,n:a.name}};}));
             _pulse(map,'v9-apt','circle-radius',8,20,6);
@@ -647,13 +665,26 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
       case 'b4s3':
         lp('day');
         try{
-          if(map.getLayer('tci-tp-layer')){ map.setLayoutProperty('tci-tp-layer','visibility','visible'); _pulse(map,'tci-tp-layer','line-opacity',0.4,1.0,10); }
+          if(map.getLayer('tci-tp-layer')){
+            map.setLayoutProperty('tci-tp-layer','visibility','visible');
+            _pulse(map,'tci-tp-layer','line-opacity',0.4,1.0,10);
+          }
         }catch(e){}
         onIdle(function(){try{SE._addTransitExpand&&SE._addTransitExpand(map);}catch(e){}});
-        rot(20,0.009);
+        // BRT coridoare propuse cu flow animat
+        setTimeout(function(){
+          if(!SE._playing) return;
+          var brtFeats=[
+            {type:'Feature',geometry:{type:'LineString',coordinates:[[cx-0.025,cy],[cx,cy],[cx+0.028,cy-0.005]]},properties:{c:'#ef4444',w:5}},
+            {type:'Feature',geometry:{type:'LineString',coordinates:[[cx,cy-0.022],[cx,cy],[cx,cy+0.025]]},properties:{c:'#ef4444',w:5}},
+            {type:'Feature',geometry:{type:'LineString',coordinates:[[cx-0.018,cy-0.012],[cx,cy],[cx+0.020,cy+0.015]]},properties:{c:'#3b82f6',w:3}},
+          ];
+          addLine('v9-brt',brtFeats,{'line-color':['get','c'],'line-width':['get','w'],'line-opacity':0.8});
+          _flowLine(map,'v9-brt');
+        },2000);
         fly(Z.C,13.5,52,0,4000,0,'day');
-        fly(Z.NV,14,60,30,6000,10000,'day');
-        fly(Z.SE2,13.5,55,-25,5500,18000,'day');
+        fly(Z.NV,14.5,62,30,6000,10000,'day');
+        fly(Z.SE2,14.0,58,-25,5500,18000,'day');
         break;
 
       case 'b4s4':
@@ -681,9 +712,12 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
 
       case 'b5s2':
         lp('dawn');
+        // Curata EXPLICIT orice ramas din scenele anterioare
+        try{window._FloodMapper&&window._FloodMapper.hideAll&&window._FloodMapper.hideAll(map);}catch(e){}
         fly([cx,cy],11.5,45,8,4000,0,'dawn');
         setTimeout(function(){
           if(!SE._playing) return;
+          // Acum adaugam harta ANAR curata
           try{
             if(window._FloodMapper&&typeof window._FloodMapper.addAll==='function'){
               window._FloodMapper.addAll(map);
@@ -694,8 +728,10 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
           if(D.green&&D.green.length){ addCircle('v9-green',D.green); _pulse(map,'v9-green','circle-radius',5,12,8); }
           if(D.roads&&D.roads.length) addLine('v9-hw',D.roads);
         },2000);
-        fly(Z.SV,12.5,50,15,6000,9000,'dawn');
-        fly(Z.C,13,55,-5,5500,17000,'day');
+        // Zoom pe zone inundabile - lunca raului
+        fly([cx,cy],12.5,48,5,4000,0,'dawn');
+        fly(Z.SV,13.5,58,15,6000,9000,'dawn');   // zona de lunca tipica SV
+        fly(Z.C,14.0,62,-5,5500,17000,'day');    // centru cu zone risc
         break;
 
       case 'b5s3':
@@ -726,18 +762,20 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         try{map.setPaintProperty('building-extrusion','fill-extrusion-height',0.5);}catch(e){}
         onIdle(function(){try{SE._add3DGrowth&&SE._add3DGrowth(map);}catch(e){}});
         try{map.setPaintProperty('building-extrusion','fill-extrusion-color',['interpolate',['linear'],['get','height'],0,'#14532d',6,'#15803d',15,'#f59e0b',28,'#ef4444']);}catch(e){}
-        fly(Z.C,14.5,62,10,4000,0,'night');
-        rot(20,0.015);
-        fly(Z.NV,14.5,65,55,7500,12000,'night');
-        fly(Z.SE2,14,62,135,7000,21000,'dusk');
+        // Zoom aproape - cladirile 3D trebuie sa se vada
+        fly(Z.CBD,15.5,68,20,4000,0,'night');
+        rot(18,0.012);
+        fly(Z.NV,15.5,70,55,7000,11000,'night');
+        fly(Z.SE2,15.0,68,135,7000,19000,'dusk');
         break;
 
       case 'b6s3':
         lp('dusk');
         onIdle(function(){try{SE._addExpansionRings&&SE._addExpansionRings(map);}catch(e){}});
-        fly([cx,cy],11.5,48,-5,4000,0,'dusk');
-        fly(Z.PER,12,45,40,7000,10000,'dusk');
-        fly(Z.C,13,52,-10,6000,19000,'night');
+        // Zoom la nivel oras - inelele sa fie vizibile dar nu sa acopere tot judetul
+        fly([cx,cy],12.5,48,-5,4000,0,'dusk');
+        fly(Z.C,13.5,55,20,6000,9000,'dusk');
+        fly(Z.PER,13.0,50,60,6000,16000,'night');
         break;
 
       // BLOC 7 ───────────────────────────────────────────────────────────
@@ -1220,7 +1258,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         var roi=pred.roi||8;
         cifra(roi+'%/an','ROI imobiliar estimat brut',roi>=10?'#22c55e':roi>=7?'#f59e0b':'#ef4444');
         cifra2(N2(Math.round(pred.invTotal*0.55))+' M \u20ac','Investitii private estimate '+_S()+'-'+_E());
-        narativ('ROI ajustat cu risc seismic (ag='+pred.ag.toFixed(2)+'g, factor '+(pred.ag>=0.30?'1.28x':pred.ag>=0.20?'1.14x':'1.0x')+'). Zone maxim ROI: coridoare autostrada/DN + proximity TP. Zone risc: fond pre-1977 neevaluat seismic + zone inundabile ANAR RCP10. Total investitii private estimate: '+N2(Math.round(pred.invTotal*0.55))+' M EUR in '+_HORIZON+' ani.');
+        narativ('Camera zboara pe 3 zone de maxim interes imobiliar. CENTRU CIVIC: premium, cerere constanta, risc seismic verificat obligatoriu. ZONA UNIVERSITARA: IT+servicii+studenti, ROI stabil +8-12%/an. PERIFERIE PREMIUM: langa axe TP propuse si autostrazi planificate, crestere potentiala +15-40% la anuntul infrastructurii. ag='+((pred.ag||0.20)).toFixed(2)+'g risc seismic — factor ajustare '+(pred.ag>=0.30?'1.28x':pred.ag>=0.20?'1.14x':'1.0x')+'.');
         concluzie('Coridoarele infrastructurii noi sunt cele mai predictibile zone de crestere a valorii imobiliare');
         negativ('Investitie in fond fara verificare seismica = risc maxim — cutremur >7.0 poate sterge 100% din valoare in zone RS I');
         break;
@@ -1269,7 +1307,23 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         break;
 
       case 'b4s3':
-        titlu('Transport Public','Trasee existente \u00b7 BRT propus \u00b7 Modal Split \u00b7 SUMP '+_P1()); linie();
+        // Explicatie BRT in primele 20% din scena
+        if(t<0.22){
+          ctx.globalAlpha=sA*rE(0.04,0.18)*0.85;
+          ctx.fillStyle='rgba(4,10,24,0.82)';
+          ctx.fillRect(W*0.04,H*0.30,Math.min(W*0.55,520),H*0.22);
+          ctx.strokeStyle='rgba(239,68,68,0.3)';ctx.lineWidth=1;ctx.stroke();
+          ctx.fillStyle='rgba(239,68,68,0.95)';
+          ctx.font='700 '+Math.min(W*0.014,18)+'px "IBM Plex Mono",monospace';
+          ctx.textAlign='left';ctx.letterSpacing='.04em';
+          ctx.fillText('CE ESTE BRT?',W*0.06,H*0.335);
+          ctx.fillStyle='rgba(210,225,255,0.88)';
+          ctx.font='400 '+Math.min(W*0.012,15)+'px "Space Grotesk",sans-serif';
+          ctx.letterSpacing='0';
+          wrap(ctx,'Bus Rapid Transit = autobuze pe benzi dedicate, cu prioritate la semafoare, statii moderne si frecventa ridicata. Cost: 3-5x mai mic decat tramvai, 10-15x mai mic decat metrou. Reduce congestia cu 25-35% pe coridor.',W*0.06,H*0.360,Math.min(W*0.50,480),Math.min(W*0.014,18)*1.5,4);
+          ctx.globalAlpha=1;
+        }
+        titlu('Transport Public','· BRT propus · Modal Split · SUMP '+_P1()); linie();
         cifra((pred.tp||62)+'%','Acoperire populatie TP',(pred.tp||62)>=70?'#22c55e':(pred.tp||62)>=50?'#f59e0b':'#ef4444');
         cifra2((pred.kmBRT||30)+' km BRT','Coridoare rapide propuse');
         if(t>0.20) _drawModal(ctx,W,H,Math.min(1,(t-0.20)/0.22)*sA,pred);
@@ -1811,7 +1865,13 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
     SE._cleanLayers&&SE._cleanLayers();
     _cleanV9(map);
     if(sc.id!=='b6s2'){try{map.setPaintProperty('building-extrusion','fill-extrusion-height',['get','height']);}catch(e){}}
+    // Curata AGRESIV flood WMS + layere flood v8.0
     try{window._FloodMapper&&window._FloodMapper.hideAll&&window._FloodMapper.hideAll(map);}catch(e){}
+    ['flood-layer','flood-rcp10','flood-rcp100','flood-rcp500','tci-flood-layer','tci-flood-src',
+     'flood-expand-layer','flood-expand-src'].forEach(function(id){
+      try{if(map.getLayer(id))map.removeLayer(id);}catch(e){}
+      try{if(map.getSource(id))map.removeSource(id);}catch(e){}
+    });
     try{if(map.getLayer('tci-tp-layer'))map.setLayoutProperty('tci-tp-layer','visibility','none');}catch(e){}
     updateLegend(sc);
     setup(sc.id);
@@ -2266,10 +2326,29 @@ function _fp(city){
     pop55:Math.round(pop*Math.pow(1+r/100,_HORIZON)),
     pib:city.pib_eur_cap||14200,pctUE:39,pctUE55:62,rPIB:3.8,anConv:2050,
     deltaP:0,natalitate:9,mortalit:13,sporNat:-4,migNeta:-500,
-    salariu:(window._getSalariu&&city.judet?window._getSalariu(city.judet):3500),somaj:5,ocupare:60,roi:8,
+    salariu:(function(){
+      // Incearca cinema-data.js, fallback la valori hardcodate per judet
+      if(window._getSalariu&&city.judet) return window._getSalariu(city.judet);
+      var sal={'B':5800,'CJ':4900,'TM':4600,'BV':4400,'SB':4300,'CT':4200,
+               'IS':4100,'AR':4000,'BH':3900,'PH':3800,'GL':3700,'DJ':3700,
+               'BC':3600,'GR':3400,'BT':3200,'VS':3100,'NT':3000,'SV':3200};
+      var j=(city.judet||'').toUpperCase().replace('RO-','').split('-')[0];
+      return sal[j]||3500;
+    })(),somaj:5,ocupare:60,roi:8,
     ocupatie:{servicii:52,industrie:28,comert:18,constructii:8,agricultura:5},
     defLoc:Math.max(0,Math.round(pop*0.08)),recHa:Math.round(pop/300),
-    ag:(window._getSeismic&&city.judet?window._getSeismic(city.judet).ag:0.20),fond:Math.round(pop/50),
+    ag:(function(){
+      if(window._getSeismic&&city.judet) return window._getSeismic(city.judet).ag;
+      var ag={'VN':0.40,'BZ':0.40,'IS':0.35,'GL':0.35,'BC':0.35,'NT':0.35,
+              'VS':0.35,'B':0.35,'IF':0.35,'PH':0.35,'BR':0.35,'IL':0.35,
+              'GR':0.25,'TR':0.25,'OT':0.25,'DJ':0.25,'GJ':0.25,'AG':0.25,
+              'DB':0.25,'VL':0.25,'BT':0.20,'SV':0.20,'MH':0.20,'CT':0.20,
+              'AB':0.15,'SB':0.15,'MS':0.15,'HR':0.15,'CV':0.15,'CS':0.15,
+              'HD':0.15,'BV':0.15,'CJ':0.10,'BH':0.10,'AR':0.10,'TM':0.10,
+              'SM':0.10,'MM':0.10,'SJ':0.10,'BN':0.10};
+      var j=(city.judet||'').toUpperCase().replace('RO-','').split('-')[0];
+      return ag[j]||0.20;
+    })(),fond:Math.round(pop/50),
     mot24:380,satAn:_S()+15,fluxOra:Math.round(pop*0.08),pasaje:5,kmOcol:20,
     tp:62,kmBRT:Math.round(pop/8000),costBRT:Math.round(pop/2000),
     defTP:13,walkScore:58,statiiNoi:Math.round(pop/1200),anSUMP:_P1(),
@@ -2330,11 +2409,22 @@ function _agendaPts(cx,cy,pred){
 }
 
 function _cleanV9(map){
-  // Curata heatmap presiune
-  try{if(window._TCIPressureHeatmap&&window._TCIPressureHeatmap._active)window._TCIPressureHeatmap.hide();}catch(e){}
+  // Curata AGRESIV heatmap presiune - toate layerele cunoscute
+  try{
+    if(window._TCIPressureHeatmap){
+      window._TCIPressureHeatmap._active = false;
+      // Fortat - stergem layerele direct, indiferent de _active
+      ['tci-pressure-layer','tci-pressure-layer-outline','tci-pressure-labels',
+       'tci-pressure-src'].forEach(function(id){
+        try{if(map.getLayer(id))map.removeLayer(id);}catch(e){}
+        try{if(map.getSource(id))map.removeSource(id);}catch(e){}
+      });
+    }
+  }catch(e){}
   ['v9-hw','v9-hw-buf','v9-rail','v9-apt','v9-urb','v9-urb-maj','v9-green','v9-mon',
    'v9-cim','v9-utils','v9-amenity','v9-agenda','v9-mob-pts',
-   'corridors-src','corridors-line','corridors-glow','corridors-zones','corridors-dev-zones'].forEach(function(id){
+   'corridors-src','corridors-line','corridors-glow','corridors-zones','corridors-dev-zones',
+   'v9-brt','v9-corr','v9-corr-line','v9-corr-glow'].forEach(function(id){
     try{if(map.getLayer(id))map.removeLayer(id);}catch(e){}
     try{if(map.getSource(id))map.removeSource(id);}catch(e){}
   });
