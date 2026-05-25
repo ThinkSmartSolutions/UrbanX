@@ -840,9 +840,13 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         lp('day');
         setTimeout(function(){
           if(!SE._playing) return;
-          addCircle('v9-agenda',_agendaPts(cx,cy,pred));
-          _pulse(map,'v9-agenda','circle-radius',8,22,7);
+          // Coridoare prioritati apar progresiv pe harta
+          var agendaCorridors = _buildAgendaCorridors(cx,cy,pred);
+          _showCorridorsOnMap(map, agendaCorridors, 1500);
           if(D.roads&&D.roads.length) addLine('v9-hw',D.roads);
+          // Puncte prioritati deasupra
+          addCircle('v9-agenda',_agendaPts(cx,cy,pred));
+          setTimeout(function(){ if(SE._playing) _pulse(map,'v9-agenda','circle-radius',8,22,7); },2000);
         },2000);
         fly([cx,cy],13,52,0,4000,0,'day');
         fly(Z.C,14.5,62,22,6000,9500,'day');
@@ -1123,7 +1127,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
 
       case 'b2s4':
         titlu('Profil Cumparatori & Putere de Cumparare','Salariu \u00b7 Ocupatie \u00b7 Segmente imobiliare'); linie();
-        var sal=pred.salariu||2800;
+        var sal=(window._getSalariu&&city&&city.judet)?window._getSalariu(city.judet):(pred.salariu||3500);
         cifra(N2(sal)+' RON/luna','Salariu mediu estimat',sal>=4000?'#22c55e':sal>=2500?'#f59e0b':'#ef4444');
         cifra2((pred.pctUE||39)+'% UE27','Convergenta economica');
         if(t>0.20) _drawOccup(ctx,W,H,Math.min(1,(t-0.20)/0.22)*sA,pred);
@@ -1256,7 +1260,9 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
 
       case 'b5s1':
         titlu('Risc Seismic','P100-1/2013 \u00b7 Fond vulnerabil \u00b7 PNRR C10-I2 \u00b7 UTR-uri'); linie();
-        var ag=pred.ag||0.20, agC=ag>=0.30?'#ef4444':ag>=0.20?'#f59e0b':'#22c55e';
+        var ag=(window._getSeismic&&city&&city.judet)?window._getSeismic(city.judet).ag:(pred.ag||0.20);
+        var agTc=(window._getSeismic&&city&&city.judet)?window._getSeismic(city.judet).Tc:1.0;
+        var agC=ag>=0.30?'#ef4444':ag>=0.20?'#f59e0b':'#22c55e';
         cifra('ag='+ag.toFixed(2)+'g','Acceleratie seismica P100-1/2013',agC);
         cifra2(N2(pred.fond||0)+' cladiri','Fond risc RS I-III estimat','#ef4444');
         [['#166534','<8m SIGUR'],['#854d0e','8-15m ATENTIE'],['#b91c1c','15-25m RISC'],['#dc2626','>25m MAXIM']].forEach(function(it,i){
@@ -1992,6 +1998,188 @@ function _drawQR(ctx,W,H,a){
 
 // ── HELPERS ───────────────────────────────────────────────────────────────
 
+
+// ── CORIDOARE PROGRESIVE pe Mapbox ────────────────────────────────────────
+// Foloseste _CorridorsLayer din tci-corridors.js
+// Apare un coridor pe rand, cu delay, in timp ce te uiti
+function _showCorridorsProgressive(map, city, zoneData, delay_ms) {
+  if(!window._CorridorsLayer) {
+    console.warn('[v9] _CorridorsLayer lipsa — include tci-corridors.js');
+    return;
+  }
+  var CL = window._CorridorsLayer;
+  var corridors = CL.generateCorridors(
+    null, // cityKey — folosim city direct
+    zoneData || { zones: [], metro: [] },
+    null
+  );
+  // Patch: injectam city manual daca generateCorridors nu il gaseste
+  if(!corridors || !corridors.length) {
+    corridors = _buildFallbackCorridors(city);
+  }
+  if(!corridors || !corridors.length) return;
+
+  // Curata coridoarele anterioare
+  ['corridors-src','corridors-line','corridors-glow','corridors-zones','corridors-dev-zones'].forEach(function(id){
+    try{if(map.getLayer(id))map.removeLayer(id);}catch(e){}
+    try{if(map.getSource(id))map.removeSource(id);}catch(e){}
+  });
+
+  // Initializeaza sursa goala
+  try{
+    map.addSource('corridors-src',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
+    // Glow
+    map.addLayer({id:'corridors-glow',type:'line',source:'corridors-src',
+      filter:['==',['geometry-type'],'LineString'],
+      layout:{'line-join':'round','line-cap':'round'},
+      paint:{'line-color':['get','color'],'line-width':14,'line-opacity':0.12,'line-blur':10}});
+    // Fill zone
+    map.addLayer({id:'corridors-dev-zones',type:'fill',source:'corridors-src',
+      filter:['==',['geometry-type'],'Polygon'],
+      paint:{'fill-color':['get','color'],'fill-opacity':0.10}});
+    // Contur zone
+    map.addLayer({id:'corridors-zones',type:'line',source:'corridors-src',
+      filter:['==',['geometry-type'],'Polygon'],
+      paint:{'line-color':['get','color'],'line-width':1.5,'line-opacity':0.5,'line-dasharray':[4,2]}});
+    // Linia principala
+    map.addLayer({id:'corridors-line',type:'line',source:'corridors-src',
+      filter:['==',['geometry-type'],'LineString'],
+      layout:{'line-join':'round','line-cap':'round'},
+      paint:{'line-color':['get','color'],'line-width':['get','width'],'line-opacity':0.88}});
+  }catch(e){ console.warn('[corridors]',e.message); return; }
+
+  // Adauga coridoarele progresiv
+  var shown = [], idx = 0;
+  var iv = setInterval(function(){
+    if(idx >= corridors.length){ clearInterval(iv); return; }
+    var c = corridors[idx]; idx++;
+    if(!c.geometry_line && !c.coordinates) return;
+
+    var cfg = CL.CORRIDOR_TYPES[c.type] || CL.CORRIDOR_TYPES.MIXT;
+
+    // Feature linie principala
+    var lineFeat = {type:'Feature',
+      geometry: c.geometry_line || {type:'LineString',
+        coordinates: c.coordinates && c.coordinates.type==='LineString' ? c.coordinates.coordinates :
+          (c.node_start&&c.node_end ? [[c.node_start.lon||city.lon, c.node_start.lat||city.lat],[c.node_end.lon,c.node_end.lat]] :
+          [[city.lon-0.01,city.lat],[city.lon+0.01,city.lat]])},
+      properties:{color:cfg.color,width:cfg.width,name:c.name,type:c.type,
+        functiuni:(c.functiuni||[]).join(' · '),finantare:(c.finantare||[]).join(' · ')}};
+
+    shown.push(lineFeat);
+
+    // Feature zona buffer (daca exista)
+    if(c.coordinates && c.coordinates.type==='Polygon') {
+      shown.push({type:'Feature',geometry:c.coordinates,
+        properties:{color:cfg.color,width:1,name:c.name,type:c.type,
+          functiuni:(c.functiuni||[]).join(' · '),finantare:(c.finantare||[]).join(' · ')}});
+    }
+
+    try{
+      if(map.getSource('corridors-src'))
+        map.getSource('corridors-src').setData({type:'FeatureCollection',features:shown});
+    }catch(e){}
+  }, delay_ms || 1800);
+  _ivs.push(iv);
+}
+
+// Coridoare fallback bazate pe geometria UAT-ului
+function _buildFallbackCorridors(city) {
+  if(!city || !city.lat) return [];
+  var cx=city.lon||27.601, cy=city.lat||47.158;
+  var CL = window._CorridorsLayer;
+  var cfg_tod = CL ? CL.CORRIDOR_TYPES.TOD : {color:'#D4AF37',width:4};
+  var cfg_eco = CL ? CL.CORRIDOR_TYPES.ECONOMIC : {color:'#60a5fa',width:3};
+  var cfg_ver = CL ? CL.CORRIDOR_TYPES.VERDE : {color:'#22c55e',width:3};
+  var cfg_mob = CL ? CL.CORRIDOR_TYPES.MOBILITATE : {color:'#a78bfa',width:3};
+  var cfg_mix = CL ? CL.CORRIDOR_TYPES.MIXT : {color:'#f97316',width:2};
+
+  return [
+    {id:'tod1',type:'TOD',name:'Coridor TOD — Centru-Gara',
+     geometry_line:{type:'LineString',coordinates:[[cx,cy],[cx-0.012,cy+0.018]]},
+     coordinates:{type:'Polygon',coordinates:[[[cx-0.01,cy+0.016],[cx-0.014,cy+0.020],[cx-0.016,cy+0.014],[cx-0.008,cy+0.012],[cx-0.01,cy+0.016]]]},
+     node_start:{lon:cx,lat:cy,label:'Centru'},node_end:{lon:cx-0.012,lat:cy+0.018,label:'Gara CFR'},
+     functiuni:['Rezidential','Servicii','Comert'],finantare:['FEDR POR 2021-2027'],
+     justificare:'Cervero&Kockelman(1997) TOD — densificare 400-800m fata de statie',prioritate:1},
+    {id:'eco1',type:'ECONOMIC',name:'Coridor Economic — Zona Industriala Vest',
+     geometry_line:{type:'LineString',coordinates:[[cx,cy],[cx-0.022,cy-0.015]]},
+     coordinates:{type:'Polygon',coordinates:[[[cx-0.020,cy-0.013],[cx-0.024,cy-0.017],[cx-0.026,cy-0.011],[cx-0.018,cy-0.009],[cx-0.020,cy-0.013]]]},
+     functiuni:['Reconversie industriala','Birouri','Logistica'],finantare:['InvestEU','PPP'],
+     justificare:'OECD(2021) Urban Economic Analysis — reconversie brownfield',prioritate:2},
+    {id:'ver1',type:'VERDE',name:'Coridor Verde — Retea Ecologica',
+     geometry_line:{type:'LineString',coordinates:[[cx-0.015,cy+0.010],[cx,cy],[cx+0.012,cy-0.008],[cx+0.020,cy+0.005]]},
+     functiuni:['Spatii verzi','Piste ciclism','Coridor fauna'],finantare:['Green Deal UE'],
+     justificare:'Forman(1995) Land Mosaics — conectivitate ecologica',prioritate:2},
+    {id:'mob1',type:'MOBILITATE',name:'Coridor Mobilitate — Centru-Periferie Nord',
+     geometry_line:{type:'LineString',coordinates:[[cx,cy],[cx+0.008,cy+0.025],[cx+0.012,cy+0.040]]},
+     functiuni:['BRT rapid','Velo-autostrada','Park&Ride'],finantare:['FC Coheziune OS2.3'],
+     justificare:'ESPON(2021) Metropolitan Areas — conectivitate policentrica',prioritate:1},
+    {id:'mix1',type:'MIXT',name:'Coridor Mixt — Densificare Est',
+     geometry_line:{type:'LineString',coordinates:[[cx,cy],[cx+0.018,cy+0.008],[cx+0.028,cy+0.012]]},
+     functiuni:['Rezidential mixt','Servicii proximitate'],finantare:['FEDR POR','Privat'],
+     justificare:'HG 525/1996 + Ord.233/2016 — densificare controlata',prioritate:3},
+    {id:'mix2',type:'MIXT',name:'Coridor Mixt — Densificare Sud-Vest',
+     geometry_line:{type:'LineString',coordinates:[[cx,cy],[cx-0.016,cy-0.020],[cx-0.022,cy-0.032]]},
+     functiuni:['Rezidential','Servicii'],finantare:['FEDR POR','Privat'],
+     justificare:'HG 525/1996 — densificare controlata zona rezidentiala',prioritate:3},
+  ];
+}
+
+// Afiseaza coridoare simple pe harta (fara animatie progresiva)
+function _showCorridorsOnMap(map, corridors, delay_ms) {
+  if(!corridors||!corridors.length) return;
+  try{
+    if(map.getLayer('v9-corr-line'))map.removeLayer('v9-corr-line');
+    if(map.getLayer('v9-corr-glow'))map.removeLayer('v9-corr-glow');
+    if(map.getSource('v9-corr'))map.removeSource('v9-corr');
+    map.addSource('v9-corr',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
+    map.addLayer({id:'v9-corr-glow',type:'line',source:'v9-corr',
+      layout:{'line-join':'round','line-cap':'round'},
+      paint:{'line-color':['get','color'],'line-width':16,'line-opacity':0.10,'line-blur':12}});
+    map.addLayer({id:'v9-corr-line',type:'line',source:'v9-corr',
+      layout:{'line-join':'round','line-cap':'round'},
+      paint:{'line-color':['get','color'],'line-width':['get','w'],'line-opacity':0.85,
+        'line-dasharray':[3,1.5]}});
+  }catch(e){ return; }
+  var shown=[],i=0;
+  var iv=setInterval(function(){
+    if(i>=corridors.length){clearInterval(iv);return;}
+    shown.push(corridors[i]);i++;
+    try{if(map.getSource('v9-corr'))map.getSource('v9-corr').setData({type:'FeatureCollection',features:shown});}catch(e){}
+  },delay_ms||1500);
+  _ivs.push(iv);
+}
+
+// Coridoare pentru Agenda Primarului — zone de interventie localizate
+function _buildAgendaCorridors(cx,cy,pred) {
+  var ag=pred.ag||0.20;
+  var feats=[];
+  // Coridor seismic — zona fondului vulnerabil
+  feats.push({type:'Feature',
+    geometry:{type:'LineString',coordinates:[[cx-0.018,cy+0.012],[cx-0.008,cy+0.004],[cx+0.005,cy-0.002]]},
+    properties:{color:ag>=0.30?'#ef4444':'#f59e0b',w:5,label:'Zona fond seismic vulnerabil'}});
+  // Coridor BRT propus
+  feats.push({type:'Feature',
+    geometry:{type:'LineString',coordinates:[[cx-0.025,cy],[cx-0.010,cy],[cx,cy],[cx+0.015,cy],[cx+0.028,cy-0.005]]},
+    properties:{color:'#3b82f6',w:4,label:'Coridor BRT propus'}});
+  // Zona densificare PUZ
+  feats.push({type:'Feature',
+    geometry:{type:'LineString',coordinates:[[cx+0.010,cy+0.008],[cx+0.020,cy+0.015],[cx+0.028,cy+0.020]]},
+    properties:{color:'#f59e0b',w:3,label:'Zona densificare PUZ propusa'}});
+  // Coridor spatii verzi
+  feats.push({type:'Feature',
+    geometry:{type:'LineString',coordinates:[[cx-0.020,cy+0.018],[cx-0.010,cy+0.010],[cx,cy+0.005],[cx+0.012,cy+0.015]]},
+    properties:{color:'#22c55e',w:3,label:'Coridor spatii verzi propuse'}});
+  // Centura/pasaj propus
+  if(pred.pasaje&&pred.pasaje>2){
+    feats.push({type:'Feature',
+      geometry:{type:'LineString',coordinates:[[cx-0.015,cy-0.018],[cx-0.008,cy-0.012],[cx+0.005,cy-0.015],[cx+0.018,cy-0.010]]},
+      properties:{color:'#dc2626',w:4,label:'Pasaje rutiere propuse'}});
+  }
+  return feats;
+}
+
+
 function _fp(city){
   var pop=city.pop2021||city.pop||100000,r=city.rata_reala_2011_2021||0;
   return {
@@ -1999,10 +2187,10 @@ function _fp(city){
     pop55:Math.round(pop*Math.pow(1+r/100,_HORIZON)),
     pib:city.pib_eur_cap||14200,pctUE:39,pctUE55:62,rPIB:3.8,anConv:2050,
     deltaP:0,natalitate:9,mortalit:13,sporNat:-4,migNeta:-500,
-    salariu:2800,somaj:5,ocupare:60,roi:8,
+    salariu:(window._getSalariu&&city.judet?window._getSalariu(city.judet):3500),somaj:5,ocupare:60,roi:8,
     ocupatie:{servicii:52,industrie:28,comert:18,constructii:8,agricultura:5},
     defLoc:Math.max(0,Math.round(pop*0.08)),recHa:Math.round(pop/300),
-    ag:0.20,fond:Math.round(pop/50),
+    ag:(window._getSeismic&&city.judet?window._getSeismic(city.judet).ag:0.20),fond:Math.round(pop/50),
     mot24:380,satAn:_S()+15,fluxOra:Math.round(pop*0.08),pasaje:5,kmOcol:20,
     tp:62,kmBRT:Math.round(pop/8000),costBRT:Math.round(pop/2000),
     defTP:13,walkScore:58,statiiNoi:Math.round(pop/1200),anSUMP:_P1(),
@@ -2013,6 +2201,7 @@ function _fp(city){
     auth:Math.round(pop/800),modalAuto:68,
     invMob:Math.round(pop/800),invSoc:Math.round(pop/1000),invTotal:Math.round(pop/300),
     trendClr:'#f59e0b',trendLbl:'STAGNEAZA',gradNoi2:5,
+    urbanScore:(window._calcUrbanScore?null:null), // calculat la runtime
   };
 }
 
@@ -2063,7 +2252,8 @@ function _agendaPts(cx,cy,pred){
 
 function _cleanV9(map){
   ['v9-hw','v9-hw-buf','v9-rail','v9-apt','v9-urb','v9-urb-maj','v9-green','v9-mon',
-   'v9-cim','v9-utils','v9-amenity','v9-agenda','v9-mob-pts'].forEach(function(id){
+   'v9-cim','v9-utils','v9-amenity','v9-agenda','v9-mob-pts',
+   'corridors-src','corridors-line','corridors-glow','corridors-zones','corridors-dev-zones'].forEach(function(id){
     try{if(map.getLayer(id))map.removeLayer(id);}catch(e){}
     try{if(map.getSource(id))map.removeSource(id);}catch(e){}
   });
