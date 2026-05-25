@@ -12,8 +12,8 @@
 // Sursa: Harta de zonare seismica P100-1/2013, Fig. 3.1 si 3.2
 window._SEISMIC_ZONES = {
   // Zone cu ag = 0.35g (Vrancea — zona critica)
-  'VN': {ag:0.35, Tc:1.6, zona:'E', risc:'FOARTE RIDICAT'},
-  'BZ': {ag:0.35, Tc:1.6, zona:'E', risc:'FOARTE RIDICAT'},
+  'VN': {ag:0.40, Tc:1.6, zona:'E', risc:'EXTREM'},
+  'BZ': {ag:0.40, Tc:1.6, zona:'E', risc:'EXTREM'},
   'PH': {ag:0.35, Tc:1.6, zona:'E', risc:'FOARTE RIDICAT'},
 
   // Zone cu ag = 0.30g
@@ -21,9 +21,9 @@ window._SEISMIC_ZONES = {
   'IL': {ag:0.30, Tc:1.6, zona:'D', risc:'RIDICAT'},
   'CL': {ag:0.30, Tc:1.6, zona:'D', risc:'RIDICAT'},
   'BR': {ag:0.30, Tc:1.6, zona:'D', risc:'RIDICAT'},
-  'GL': {ag:0.30, Tc:1.6, zona:'D', risc:'RIDICAT'},
+  'GL': {ag:0.35, Tc:1.6, zona:'D', risc:'RIDICAT'},
   'TL': {ag:0.30, Tc:0.7, zona:'D', risc:'RIDICAT'},
-  'B':  {ag:0.30, Tc:1.6, zona:'D', risc:'RIDICAT'}, // Bucuresti
+  'B':  {ag:0.35, Tc:1.6, zona:'D', risc:'RIDICAT'}, // Bucuresti
 
   // Zone cu ag = 0.25g
   'BC': {ag:0.25, Tc:1.0, zona:'C', risc:'MODERAT-RIDICAT'},
@@ -64,7 +64,7 @@ window._SEISMIC_ZONES = {
   'SM': {ag:0.10, Tc:0.7, zona:'A', risc:'SCAZUT'},
   'SB': {ag:0.10, Tc:0.7, zona:'A', risc:'SCAZUT'},
   'BV': {ag:0.10, Tc:0.7, zona:'A', risc:'SCAZUT'},
-  'PH': {ag:0.10, Tc:0.7, zona:'A', risc:'SCAZUT'}, // zona nord
+  'PH': {ag:0.35, Tc:1.6, zona:'D', risc:'RIDICAT'}, // zona nord
 };
 
 // Getter principal — folosit in cinematicul v9 si in calculatorul PUG/PUZ

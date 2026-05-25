@@ -2075,8 +2075,15 @@ function _drawQR(ctx,W,H,a){
 // Foloseste _CorridorsLayer din tci-corridors.js
 // Apare un coridor pe rand, cu delay, in timp ce te uiti
 function _showCorridorsProgressive(map, city, zoneData, delay_ms) {
+  if(!map) return;
+  if(!city || !city.lat || !city.lon) {
+    console.warn('[v9] _showCorridorsProgressive: city null sau fara coordonate');
+    return;
+  }
   if(!window._CorridorsLayer) {
     console.warn('[v9] _CorridorsLayer lipsa — include tci-corridors.js');
+    // Fallback la coridoare geometrice simple
+    _buildFallbackCorridors(city);
     return;
   }
   var CL = window._CorridorsLayer;
