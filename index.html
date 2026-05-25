@@ -4770,14 +4770,17 @@ window._utrColor       = _utrColor;
 // Pentru a adăuga un UAT nou: adaugi un rând aici. Nu atingi altceva.
 window._PUG_REGISTRY = window._PUG_REGISTRY || {};
 Object.assign(window._PUG_REGISTRY, {
-  'RO-IS-01': { id:'municipiul-iasi',    name:'Municipiul Iași',    pugFile:'data/municipiul-iasi/pug.geojson',        reguli:'data/municipiul-iasi/reguli.json' },
-  'RO-SV-01': { id:'municipiul-suceava', name:'Municipiul Suceava', pugFile:'js/data/municipiul-suceava/pug.geojson', reguli:'js/data/municipiul-suceava/reguli.json' },
-  'RO-BT-01': { id:'municipiul-botosani',name:'Municipiul Botoșani',pugFile:'data/municipiul-botosani/pug.geojson',   reguli:'data/municipiul-botosani/reguli.json' },
+  'RO-IS-01': { id:'municipiul-iasi',    name:'Municipiul Iași',    pugFile:'data/municipiul-iasi/pug.geojson',              reguli:'data/municipiul-iasi/reguli.json' },
+  'RO-SV-01': { id:'municipiul-suceava', name:'Municipiul Suceava', pugFile:'js/data/municipiul-suceava/pug.geojson',         reguli:'js/data/municipiul-suceava/reguli.json' },
+  'RO-BT-01': { id:'municipiul-botosani',name:'Municipiul Botoșani',pugFile:'data/municipiul-botosani/pug.geojson',        reguli:'data/municipiul-botosani/reguli.json' },
+  // ── Comune cu RLU — chei IDENTICE cu TCI._EXTRA_UATS ─────────────────────
   'RO-IS-95042': { id:'comuna-miroslava', name:'Comuna Miroslava', pugFile:'data/comuna-miroslava/pug.geojson', reguli:'data/comuna-miroslava/reguli.json' },
   'RO-IS-95087': { id:'comuna-rediu',     name:'Comuna Rediu',     pugFile:'data/comuna-rediu/pug.geojson',     reguli:'data/comuna-rediu/reguli.json' },
   'RO-IS-94889': { id:'comuna-aroneanu',  name:'Comuna Aroneanu',  pugFile:'data/comuna-aroneanu/pug.geojson',  reguli:'data/comuna-aroneanu/reguli.json' },
   'RO-BT-18073': { id:'comuna-baluseni',  name:'Comuna Bălușeni',  pugFile:'data/comuna-baluseni/pug.geojson',  reguli:'data/comuna-baluseni/reguli.json' },
   'RO-IS-94951': { id:'comuna-holboca',   name:'Comuna Holboca',   pugFile:'data/comuna-holboca/pug.geojson',   reguli:'data/comuna-holboca/reguli.json' },
+  'RO-GL-77595': { id:'comuna-cuzavoda',  name:'Comuna Cuza Vodă', pugFile:'data/comuna-cuzavoda/pug.geojson',  reguli:'data/comuna-cuzavoda/reguli.json' },
+  // ── Alias-uri retrocompatibilitate ────────────────────────────────────────
   'RO-IS-COM-MIROSLAVA': { id:'comuna-miroslava', name:'Comuna Miroslava', pugFile:'data/comuna-miroslava/pug.geojson', reguli:'data/comuna-miroslava/reguli.json' },
   'RO-IS-COM-ARONEANU':  { id:'comuna-aroneanu',  name:'Comuna Aroneanu',  pugFile:'data/comuna-aroneanu/pug.geojson',  reguli:'data/comuna-aroneanu/reguli.json' },
   'RO-BT-COM-BALUSENI':  { id:'comuna-baluseni',  name:'Comuna Bălușeni',  pugFile:'data/comuna-baluseni/pug.geojson',  reguli:'data/comuna-baluseni/reguli.json' },
@@ -5244,40 +5247,25 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
 <script src="js/rlu-aroneanu.js?v=20260525a"></script>
 <script src="js/rlu-rediu.js?v=20260525a"></script>
 <script src="js/rlu-holboca.js?v=20260525a"></script>
+<script src="js/rlu-cuzavoda.js?v=20260525a"></script>
 
 <script>
-// ── Comune RLU în #uat-selector — v10 cu ierarhie corectă ────────────────
-// Structura modalului (din DevTools):
-//   #uat-selector > div[overflow-y:auto] > div[margin-bottom:10px] (grup per județ)
-//     > div (header grup: "Moldova — Iași + zona")
-//     > div[onclick="switchUAT(...)"] (item UAT)
-//
-// Fiecare comună se injectează în grupul județului ei, cu switchUAT() identic.
-// Scalabil: pentru orice județ nou, adaugi în COMUNE_CONFIG cu judet_text corect.
+// ── Comune RLU în #uat-selector — cu ierarhie pe județe ──────────────────
 (function(){
-
-  // ── Configurare comune cu RLU ──────────────────────────────────────────
-  // judet_text = textul exact din headerul grupului în modal (lowercase)
   var COMUNE_CONFIG = [
-    // IAȘI
-    {id:'comuna-miroslava', name:'Miroslava',  judet:'iași', badge:'✅ RLU', key:'RO-IS-95042'},
-    {id:'comuna-rediu',     name:'Rediu',      judet:'iași', badge:'✅ RLU', key:'RO-IS-95087'},
-    {id:'comuna-aroneanu',  name:'Aroneanu',   judet:'iași', badge:'✅ RLU', key:'RO-IS-94889'},
-    {id:'comuna-holboca',   name:'Holboca',    judet:'iași', badge:'✅ RLU', key:'RO-IS-94951'},
-    // BOTOȘANI
+    {id:'comuna-miroslava', name:'Miroslava',  judet:'iași',   badge:'✅ RLU', key:'RO-IS-95042'},
+    {id:'comuna-rediu',     name:'Rediu',      judet:'iași',   badge:'✅ RLU', key:'RO-IS-95087'},
+    {id:'comuna-aroneanu',  name:'Aroneanu',   judet:'iași',   badge:'✅ RLU', key:'RO-IS-94889'},
+    {id:'comuna-holboca',   name:'Holboca',    judet:'iași',   badge:'✅ RLU', key:'RO-IS-94951'},
     {id:'comuna-baluseni',  name:'Bălușeni',   judet:'botoșani', badge:'✅ RLU', key:'RO-BT-18073'},
-    // Template pentru viitor:
-    // {id:'comuna-xyz', name:'Xyz', judet:'suceava', badge:'✅ RLU', key:'RO-SV-XXXXX'},
+    {id:'comuna-cuzavoda',  name:'Cuza Vodă',  judet:'galați', badge:'✅ RLU', key:'RO-GL-77595'},
   ];
 
   function closeModal(){
-    var m=document.getElementById('uat-selector');
-    if(m)m.remove();
-    var b=document.getElementById('uat-selector-backdrop');
-    if(b)b.remove();
+    var m=document.getElementById('uat-selector');if(m)m.remove();
+    var b=document.getElementById('uat-selector-backdrop');if(b)b.remove();
   }
 
-  // Construiește un item identic cu cele din modal (onclick switchUAT)
   function makeItem(c){
     var div=document.createElement('div');
     div.style.cssText='display:flex;align-items:center;justify-content:space-between;'+
@@ -5292,11 +5280,9 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
       'background:rgba(5,150,105,0.2);color:#34d399;border:1px solid rgba(5,150,105,0.3)">'+
       c.badge+'</span>';
     div.addEventListener('click',function(){
-      // Folosim switchUAT exact ca itemele native, + salvăm cheia RO-IS-XXXX
       try{localStorage.setItem('ux_last_city',c.key);}catch(e){}
       if(window.TCI)window.TCI.cityKey=c.key;
       if(window._ProjectionEngine)window._ProjectionEngine.currentCity=c.key;
-      // switchUAT folosește id-ul slug (comuna-miroslava etc)
       if(window.switchUAT)window.switchUAT(c.id);
       var ind=document.getElementById('uat-indicator');
       if(ind)ind.textContent=c.name;
@@ -5304,42 +5290,36 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
       setTimeout(function(){
         window.dispatchEvent(new CustomEvent('ux:city_changed',{detail:{key:c.key,name:c.name}}));
       },50);
-      console.log('[Comune RLU] ✅',c.key,c.name);
     });
     return div;
   }
 
   function injectInSelector(modal){
-    // Găsim containerul scroll
     var scroll=null;
     for(var i=0;i<modal.children.length;i++){
-      if(modal.children[i].style&&modal.children[i].style.overflowY==='auto'||
-         modal.children[i].style&&modal.children[i].style.overflow==='auto'||
-         (modal.children[i].style&&modal.children[i].style.flex==='1')){
-        scroll=modal.children[i]; break;
+      var ch=modal.children[i];
+      if(ch.style&&(ch.style.overflowY==='auto'||ch.style.flex==='1'||ch.style.overflow==='auto')){
+        scroll=ch; break;
       }
     }
-    // Fallback: al doilea child (primul e header-ul)
     if(!scroll&&modal.children.length>1) scroll=modal.children[1];
-    if(!scroll) scroll=modal;
+    if(!scroll) return;
 
-    // Grupăm comunele pe județ
+    // Grupeaza pe judet
     var byJudet={};
     COMUNE_CONFIG.forEach(function(c){
       if(!byJudet[c.judet])byJudet[c.judet]=[];
       byJudet[c.judet].push(c);
     });
 
-    // Pentru fiecare județ, găsim grupul existent și adăugăm comunele după ultimul item
+    // Injecteaza in grupul judetului corect
     Array.from(scroll.children).forEach(function(grup){
       var header=grup.firstElementChild;
       if(!header)return;
       var headerText=header.textContent.toLowerCase();
       Object.keys(byJudet).forEach(function(judet){
         if(headerText.indexOf(judet)>-1){
-          // Verificăm dacă deja am injectat
           if(grup.querySelector('[data-rlu]'))return;
-          // Adăugăm un separator vizual și comunele
           var sep=document.createElement('div');
           sep.style.cssText='font-size:8px;color:#34d399;text-transform:uppercase;'+
             'letter-spacing:.07em;font-weight:700;padding:6px 4px 3px;'+
@@ -5355,22 +5335,52 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
         }
       });
     });
+
+    // Judete noi (nu exista inca in lista din cinema-data.js) — grup nou la final
+    var injectedJudete={};
+    Array.from(scroll.children).forEach(function(grup){
+      var header=grup.firstElementChild;
+      if(!header)return;
+      var ht=header.textContent.toLowerCase();
+      Object.keys(byJudet).forEach(function(j){ if(ht.indexOf(j)>-1) injectedJudete[j]=true; });
+    });
+    Object.keys(byJudet).forEach(function(judet){
+      if(injectedJudete[judet])return;
+      // Creeaza grup nou
+      var grup=document.createElement('div');
+      grup.style.cssText='margin-bottom:10px';
+      grup.setAttribute('data-rlu-grup',judet);
+      var hdr=document.createElement('div');
+      hdr.style.cssText='font-size:8.5px;color:#475569;text-transform:uppercase;'+
+        'letter-spacing:.07em;font-weight:700;padding:4px 4px 4px 0;'+
+        'border-bottom:1px solid rgba(255,255,255,.05);margin-bottom:4px';
+      hdr.textContent='Moldova — '+judet.charAt(0).toUpperCase()+judet.slice(1)+' + zona';
+      grup.appendChild(hdr);
+      var sep=document.createElement('div');
+      sep.style.cssText='font-size:8px;color:#34d399;text-transform:uppercase;'+
+        'letter-spacing:.07em;font-weight:700;padding:4px 4px 3px';
+      sep.textContent='── Comune cu RLU ──';
+      grup.appendChild(sep);
+      byJudet[judet].forEach(function(c){
+        var item=makeItem(c);
+        grup.appendChild(item);
+      });
+      scroll.appendChild(grup);
+    });
+
     console.log('[Comune RLU] ✅ injectate în grupurile județelor');
   }
 
-  // MutationObserver — prinde #uat-selector când e adăugat în body
+  // MutationObserver pe body — prinde #uat-selector când e adăugat
   var obs=new MutationObserver(function(muts){
     muts.forEach(function(m){
       m.addedNodes.forEach(function(node){
-        if(node.id==='uat-selector'){
-          setTimeout(function(){injectInSelector(node);},80);
-        }
+        if(node.id==='uat-selector') setTimeout(function(){injectInSelector(node);},80);
       });
     });
   });
   obs.observe(document.body,{childList:true,subtree:false});
 
-  // Actualizare indicator topbar
   window.addEventListener('ux:city_changed',function(e){
     var key=(e.detail&&e.detail.key)||window.TCI?.cityKey||localStorage.getItem('ux_last_city');
     var pug=window._PUG_REGISTRY&&window._PUG_REGISTRY[key];
@@ -5378,7 +5388,7 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
       if(i)i.textContent=pug.name.replace('Municipiul ','').replace('Comuna ','');}
   });
 
-  console.log('[Comune RLU] v10 activ — ierarhie pe județe, scalabil');
+  console.log('[Comune RLU] v10 activ — 6 comune, ierarhie pe județe');
 })();
 </script>
 </body>

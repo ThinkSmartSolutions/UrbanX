@@ -1,0 +1,287 @@
+{
+  "_meta": {
+    "uat": "Comuna Cuza Vodă",
+    "uat_key": "RO-GL-77595",
+    "judet": "Galați",
+    "siruta": 77595,
+    "hcl": "10/2022",
+    "data_aprobare": "2022-03-03",
+    "data_expirare": "2032-03-03",
+    "sursa": "PUG Cuza Vodă — datelocale.mdlpa.ro (GL_Cuza_Voda_77595_PUG_20220303.gpkg)",
+    "elaborator": "MDLPA GeoPackage oficial",
+    "arie_adm_ha": 2564.6,
+    "arie_intravilan_ha": 293.46,
+    "seismic": { "ag": 0.25, "Tc": 1.0, "zona": "E" },
+    "nr_subzone": 10,
+    "nr_features_pug": 216
+  },
+  "subzone": {
+    "L": {
+      "denumire": "Zonă de locuit",
+      "pot_max": 30,
+      "cut_max": 1.1,
+      "hmax_m": 10,
+      "rh_max": "P+2E+M",
+      "parcela_min_mp": 600,
+      "front_min_m": null,
+      "retragere_fata_m": null,
+      "retragere_spate_m": null,
+      "spatii_verzi_pct": null,
+      "utilizari_admise": [
+        "Locuințe individuale mici cu maxim P+2E+M niveluri",
+        "Clădiri colective sau instituții publice și de turism/agrement (max P+2E+M)",
+        "Activități comerciale și de servicii cu suprafată maximă de 250 mp",
+        "Parcaje, garaje",
+        "Spații plantate, grădini"
+      ],
+      "utilizari_interzise": [
+        "Activități productive poluante, cu risc tehnologic",
+        "Activități incomode prin traficul generat",
+        "Depozite en-gros",
+        "Stații de întreținere auto"
+      ],
+      "note": "Se vor menține caracteristicile parcelarului existent. Noile parcelări: min 600 mp și front min la stradă conform profilelor stradale. Respectarea caracterului tradițional al aliniamentului."
+    },
+    "ZIP": {
+      "denumire": "Subzona instituțiilor publice și serviciilor",
+      "pot_max": 50,
+      "cut_max": 2.0,
+      "hmax_m": null,
+      "rh_max": "P+3E",
+      "parcela_min_mp": 1000,
+      "front_min_m": 15,
+      "retragere_fata_m": 5,
+      "utilizari_admise": [
+        "Instituții publice: primărie, judecătorie, poliție, pompieri",
+        "Servicii: bănci, poștă, telecomunicații",
+        "Comerț, alimentație publică",
+        "Hoteluri, pensiuni",
+        "Servicii medicale și sociale"
+      ],
+      "utilizari_interzise": [
+        "Activități industriale sau productive",
+        "Depozite",
+        "Locuințe individuale izolate"
+      ],
+      "note": "Clădirile publice se retrag de la aliniament cu min 5 m sau se dispun la aliniament în funcție de profilul stradal. Documentație PUZ obligatorie pentru funcțiuni cu impact major."
+    },
+    "ZB": {
+      "denumire": "Subzona activităților legate de culte",
+      "pot_max": 50,
+      "cut_max": 2.2,
+      "hmax_m": 12,
+      "rh_max": null,
+      "parcela_min_mp": 1000,
+      "front_min_m": 15,
+      "retragere_fata_m": 5,
+      "utilizari_admise": [
+        "Lăcașuri de cult (biserici, mânăstiri, capele)",
+        "Clădiri anexe ale cultelor",
+        "Locuințe pentru personal slujitor",
+        "Spații verzi și grădini"
+      ],
+      "utilizari_interzise": [
+        "Activități comerciale incompatibile cu caracterul zonei",
+        "Activități productive sau industriale"
+      ],
+      "note": "Unitățile viitoare se vor realiza ca funcțiuni complementare în zonele de locuințe. Interdicții temporare în cazul necesității elaborării PUZ."
+    },
+    "ZC": {
+      "denumire": "Subzona activităților legate de cultură și educație",
+      "pot_max": 25,
+      "cut_max": 0.5,
+      "hmax_m": null,
+      "rh_max": "P+1E",
+      "parcela_min_mp": 1000,
+      "front_min_m": 15,
+      "retragere_fata_m": 5,
+      "utilizari_admise": [
+        "Școli, grădinițe, licee",
+        "Biblioteci, muzee, case de cultură",
+        "Centre comunitare",
+        "Terenuri de sport aferente"
+      ],
+      "utilizari_interzise": [
+        "Activități industriale sau productive",
+        "Locuințe individuale",
+        "Activități comerciale de mari dimensiuni"
+      ],
+      "note": "Clădirile se retrag de la aliniament cu min 5 m. Unitățile viitoare ca funcțiuni complementare în zone de locuințe."
+    },
+    "ZD": {
+      "denumire": "Clădiri cu destinație specială",
+      "pot_max": 50,
+      "cut_max": 1.5,
+      "hmax_m": null,
+      "rh_max": "P+2E",
+      "utilizari_admise": [
+        "Construcții și amenajări specifice destinației speciale",
+        "Locuințe de serviciu",
+        "Servicii aferente funcțiunii de bază"
+      ],
+      "utilizari_interzise": [
+        "Conform legislației și normativelor în vigoare"
+      ],
+      "note": "Se va păstra parcelarea existentă. Reparcelarea doar în baza documentație urbanistice aprobate. Retragerile conform profilurilor stradale — planșa U9."
+    },
+    "ZI": {
+      "denumire": "Subzona unităților industriale cu factor redus de poluare și depozitare",
+      "pot_max": 50,
+      "cut_max": 1.2,
+      "hmax_m": 12,
+      "rh_max": null,
+      "parcela_min_mp": 1000,
+      "front_min_m": 15,
+      "retragere_fata_m": 15,
+      "utilizari_admise": [
+        "Activități industriale și productive cu poluare redusă",
+        "Depozitare și logistică (parcuri logistice)",
+        "IMM în construcții industriale mici și mijlocii",
+        "Servicii aferente: birouri, showroom",
+        "Construcții tehnice și infrastructură"
+      ],
+      "utilizari_interzise": [
+        "Locuințe (cu excepția celor de serviciu stricte)",
+        "Activități cu risc tehnologic major",
+        "Activități care produc poluare incompatibilă cu vecinătățile",
+        "Unități cu profil incompatibil zonei"
+      ],
+      "note": "Retragere 15 m față de străzile principale, 10 m față de secundare, 5 m față de vecini. PUZ obligatoriu pentru incinte >5000 mp."
+    },
+    "ZG": {
+      "denumire": "Subzona cimitirelor și clădirilor anexe",
+      "pot_max": 50,
+      "cut_max": 0.5,
+      "hmax_m": 4,
+      "rh_max": null,
+      "utilizari_admise": [
+        "Cimitire",
+        "Capelă mortuară",
+        "Mausoleu — osuar",
+        "Circulații carosabile și pietonale",
+        "Parcaje",
+        "Plantații",
+        "Pavilion administrație și depozitare"
+      ],
+      "utilizari_interzise": [
+        "Orice utilizări altele decât cele admise",
+        "Densificarea cimitirelor existente prin reducerea spațiului minim per loc de veci",
+        "Construcții permanente cu altă destinație"
+      ],
+      "note": "Locurile de veci se retrag față de aliniament cu min 10 m."
+    },
+    "GC": {
+      "denumire": "Subzona echipare edilitară",
+      "pot_max": 50,
+      "cut_max": 1.0,
+      "hmax_m": null,
+      "rh_max": null,
+      "utilizari_admise": [
+        "Birouri autonome GC",
+        "Incinte tehnice pentru alimentare cu apă și canalizare",
+        "Stații pentru energie electrică, termică și gaze naturale",
+        "Infrastructură edilitară în general"
+      ],
+      "utilizari_interzise": [
+        "Activități cu risc tehnologic în zone rezidențiale sau mixte",
+        "Activități poluante incompatibile cu vecinătățile"
+      ],
+      "note": "PUZ obligatoriu pentru incinte tehnice cu impact major. Retragere min 5 m față de aliniament când fronturile dominante sunt retrase."
+    },
+    "ZV 1": {
+      "denumire": "Subzona spațiilor verzi publice cu acces nelimitat",
+      "pot_max": 20,
+      "cut_max": 0.6,
+      "hmax_m": 6,
+      "rh_max": "P+1E",
+      "utilizari_admise": [
+        "Spații plantate: grădini publice, scuaruri, parcuri",
+        "Circulații pietonale",
+        "Circulații carosabile ocazionale pentru întreținere",
+        "Mobilier urban și amenajări de agrement",
+        "Fântâni arteziene, pergole, pavilione"
+      ],
+      "utilizari_interzise": [
+        "Construcții permanente cu altă destinație decât cea a spațiului verde",
+        "Intervenții care depreciază calitatea peisagistică",
+        "Modificarea proiectului inițial fără aviz"
+      ],
+      "note": "Amenajările se vor face conform studiilor de specialitate avizate conform legii."
+    },
+    "ZV 2": {
+      "denumire": "Subzona spațiilor verzi de protecție a cursurilor de apă",
+      "pot_max": 10,
+      "cut_max": 0.3,
+      "hmax_m": 6,
+      "rh_max": "P+1E",
+      "utilizari_admise": [
+        "Spații plantate de protecție",
+        "Fâșii publice plantate",
+        "Circulații pietonale de întreținere"
+      ],
+      "utilizari_interzise": [
+        "Orice construcții permanente",
+        "Activități care afectează regimul hidrologic"
+      ],
+      "note": "Fâșii de protecție obligatorie față de cursurile de apă. Amenajări conform studiilor hidrologice avizate."
+    }
+  },
+  "zone_restrictive": {
+    "ZRI": {
+      "denumire": "Interdicție temporară — zonă cu risc de inundații",
+      "tip": "interdictie_temporara",
+      "descriere": "Zonă cu risc de inundații conform ANAR/INHGA. Interdicție temporară de construire până la realizarea lucrărilor de apărare împotriva inundațiilor.",
+      "constructii_permise": false,
+      "aviz_necesar": "Aviz ABA Prut-Bârlad obligatoriu"
+    },
+    "ZIPC": {
+      "denumire": "Zonă cu interdicție permanentă de construire",
+      "tip": "interdictie_permanenta",
+      "descriere": "Interdicție permanentă de construire. Include albii minore, zone de protecție strictă.",
+      "constructii_permise": false
+    },
+    "S1": {
+      "denumire": "Situl arheologic nr. 1 — urme de locuire medievală",
+      "tip": "sit_arheologic",
+      "descriere": "Sit arheologic cu urme de locuire medievală. Orice intervenție în sol necesită descărcare arheologică.",
+      "aviz_necesar": "Aviz DJPC Galați + descărcare de sarcină arheologică obligatorie",
+      "constructii_permise": "condiționat"
+    },
+    "S2": {
+      "denumire": "Situl arheologic nr. 2 — urme de locuire medievală",
+      "tip": "sit_arheologic",
+      "descriere": "Sit arheologic cu urme de locuire medievală.",
+      "aviz_necesar": "Aviz DJPC Galați + descărcare de sarcină arheologică obligatorie",
+      "constructii_permise": "condiționat"
+    },
+    "ZPF": {
+      "denumire": "Zonă de protecție cablu fibră optică",
+      "tip": "protectie_infrastructura",
+      "constructii_permise": "condiționat",
+      "aviz_necesar": "Aviz operator telecomunicații"
+    },
+    "ZPOP": {
+      "denumire": "Interdicție temporară — zonă de protecție obiective cu valoare peisagistică",
+      "tip": "interdictie_temporara",
+      "constructii_permise": false
+    },
+    "ZPS": {
+      "denumire": "Zonă protejată pe baza normelor sanitare",
+      "tip": "protectie_sanitara",
+      "constructii_permise": "condiționat",
+      "aviz_necesar": "Aviz DSP Galați"
+    },
+    "DJ 251": {
+      "denumire": "Zonă de protecție și siguranță drum județean DJ 251",
+      "tip": "protectie_drum",
+      "constructii_permise": "condiționat",
+      "aviz_necesar": "Aviz CJ Galați — Direcția Drumuri Județene"
+    },
+    "Z.P.LEA 20": {
+      "denumire": "Zonă de protecție rețea înaltă tensiune LEA 20kV",
+      "tip": "protectie_retea_electrica",
+      "constructii_permise": false,
+      "aviz_necesar": "Aviz Distribuție Energie Electrică"
+    }
+  }
+}
