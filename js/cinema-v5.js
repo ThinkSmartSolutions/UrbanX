@@ -208,43 +208,11 @@ window._startCinema = function(cityKey){
   if(!SE){console.error('[v9] _CinemaEngine lipsa');return;}
 
   var city=null;
-  // 1. Key direct
   if(window._RO_CITIES_DB) city=window._RO_CITIES_DB[cityKey];
   if(!city&&window._UAT_DB) city=window._UAT_DB[cityKey];
   if(!city&&window.TCI&&window.TCI._EXTRA_UATS) city=window.TCI._EXTRA_UATS[cityKey];
-  // 2. Cauta dupa id (format 'comuna-vladeni')
-  if(!city&&window._PUG_REGISTRY) {
-    var regEntry = Object.entries(window._PUG_REGISTRY).find(function(e){
-      return e[1].id===cityKey||e[0]===cityKey;
-    });
-    if(regEntry&&window.TCI&&window.TCI._EXTRA_UATS)
-      city=window.TCI._EXTRA_UATS[regEntry[0]];
-    if(!city&&regEntry) {
-      // Construieste city minim din registry
-      city={name:regEntry[1].name||cityKey,lat:47.158,lon:27.601,
-            judet:'IS',regiune:'NE',tip:'comuna',pop2021:5000,
-            pugFile:regEntry[1].pugFile,reguli:regEntry[1].reguli,
-            _fromRegistry:true};
-    }
-  }
-  // 3. Cauta dupa siruta
-  if(!city&&window._RO_CITIES_DB) {
-    var siruta=cityKey.split('-').pop();
-    city=Object.values(window._RO_CITIES_DB).find(function(c){
-      return String(c.siruta)===siruta||String(c.SIRUTA)===siruta;
-    });
-  }
-  // 4. Cauta in TCI._EXTRA_UATS dupa siruta
-  if(!city&&window.TCI&&window.TCI._EXTRA_UATS) {
-    var siruta2=cityKey.split('-').pop();
-    city=Object.values(window.TCI._EXTRA_UATS).find(function(c){
-      return String(c.siruta)===siruta2;
-    });
-  }
-  // 5. Fallback primul din DB
   if(!city&&window._RO_CITIES_DB) city=Object.values(window._RO_CITIES_DB)[0];
-  if(!city){console.error('[v9] city negasit pentru key:',cityKey);return;}
-  console.log('[v9] City rezolvat:', city.name, 'din key:', cityKey);
+  if(!city){console.error('[v9] city negasit');return;}
 
   var pred=null;
   try{if(window._PredEngine&&typeof window._PredEngine.calc==='function') pred=window._PredEngine.calc(city);}catch(e){}
