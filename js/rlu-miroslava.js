@@ -14,7 +14,7 @@
   /* ─────────────────────────────────────────────
      CONFIG
   ───────────────────────────────────────────── */
-  const UAT_KEY    = 'RO-IS-COM-MIROSLAVA';
+  const UAT_KEY    = 'RO-IS-95042';
   const UAT_NAME   = 'Comuna Miroslava';
   const JUDET      = 'Iași';
   const REGULI_URL = 'js/data/comuna-miroslava/reguli.json';
@@ -508,5 +508,16 @@
   } else {
     _init();
   }
+
+
+  // ── Export window._RLU pentru compatibilitate cu platforma ──────────────
+  window._RLU = window._RLU || {};
+  window._RLU['RO-IS-95042'] = {
+    getUTR:    typeof getUTR === 'function' ? getUTR : null,
+    getSubzona:typeof getSubzona === 'function' ? getSubzona : null,
+    isReady:   () => _ready,
+    getReguli: () => _reguli,
+    uat_key:   'RO-IS-95042'
+  };
 
 })();

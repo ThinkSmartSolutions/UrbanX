@@ -767,4 +767,14 @@ if (document.readyState === 'loading') {
 // Re-încearcă și după load complet (pentru cazuri de race condition)
 window.addEventListener('load', () => setTimeout(_init, 1500));
 
+
+// ── Export window._RLU pentru compatibilitate cu platforma ──────────────
+window._RLU = window._RLU || {};
+window._RLU['RO-BT-01'] = {
+  getUTR:    typeof getUTR === 'function' ? getUTR : (typeof _RLU_BT !== 'undefined' ? _RLU_BT.getUTR : null),
+  isReady:   () => typeof _ready !== 'undefined' ? _ready : false,
+  getReguli: () => typeof _reguli !== 'undefined' ? _reguli : null,
+  uat_key:   'RO-BT-01'
+};
+
 })();

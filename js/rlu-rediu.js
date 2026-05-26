@@ -312,6 +312,16 @@
   } else {
     _init(); setTimeout(_hookParcela, 1200);
   }
+  
+  // ── Export window._RLU pentru compatibilitate cu platforma ──────────────
+  window._RLU = window._RLU || {};
+  window._RLU['RO-IS-95087'] = {
+    getUTR:    typeof getUTR === 'function' ? getUTR : null,
+    getSubzona:typeof getSubzona === 'function' ? getSubzona : null,
+    isReady:   () => _ready,
+    getReguli: () => _reguli,
+    uat_key:   'RO-IS-95087'
+  };
   window.addEventListener('ux:city_changed', _init);
   console.log('[RLU-RED] Module Rediu v1.0 încărcat');
 })();

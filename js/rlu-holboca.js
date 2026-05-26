@@ -287,6 +287,16 @@
     _init();
     setTimeout(_hookParcela, 1500);
   }
+  
+  // ── Export window._RLU pentru compatibilitate cu platforma ──────────────
+  window._RLU = window._RLU || {};
+  window._RLU['RO-IS-94951'] = {
+    getUTR:    typeof getUTR === 'function' ? getUTR : null,
+    getSubzona:typeof getSubzona === 'function' ? getSubzona : null,
+    isReady:   () => _ready,
+    getReguli: () => _reguli,
+    uat_key:   'RO-IS-94951'
+  };
   window.addEventListener('ux:city_changed', _init);
 
   console.log('[RLU-HOL] Module Holboca v1.0 încărcat — PUG digital 2025');

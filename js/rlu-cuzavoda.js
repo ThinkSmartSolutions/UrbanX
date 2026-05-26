@@ -369,7 +369,17 @@
                     localStorage.getItem('ux_last_city') || '';
     if (activeUAT !== UAT_KEY) {
       // Așteptăm schimbarea UAT
-      window.addEventListener('ux:city_changed', function (e) {
+      
+  // ── Export window._RLU pentru compatibilitate cu platforma ──────────────
+  window._RLU = window._RLU || {};
+  window._RLU['RO-GL-77595'] = {
+    getUTR:    typeof getUTR === 'function' ? getUTR : null,
+    getSubzona:typeof getSubzona === 'function' ? getSubzona : null,
+    isReady:   () => _ready,
+    getReguli: () => _reguli,
+    uat_key:   'RO-GL-77595'
+  };
+  window.addEventListener('ux:city_changed', function (e) {
         if ((e.detail && e.detail.key) === UAT_KEY) _doInit();
       });
       return;
