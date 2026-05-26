@@ -1,0 +1,636 @@
+{
+  "_meta": {
+    "uat": "Comuna Aroneanu",
+    "uat_key": "RO-IS-94889",
+    "judet": "Iași",
+    "proiect": "PUG nr. 14275/1997 — S.C. Habitat Proiect S.A. Iași (arh. Cristina Andrei)",
+    "seismic": {
+      "ag": 0.2,
+      "Tc": 1.0,
+      "zona": "C"
+    },
+    "hdd": 2900,
+    "sate": [
+      "Aroneanu",
+      "Dorobanț",
+      "Rediu Aldei",
+      "Șorogari"
+    ],
+    "nr_utrs_total": 42,
+    "note": "12 UTR Aroneanu; 10 UTR Dorobanț; 7 UTR Rediu Aldei; 13 UTR Șorogari. Zona I siguranță aeroport Iași (parțial Aroneanu și Dorobanț — integral)."
+  },
+  "subzone": {
+    "L": {
+      "denumire": "Locuințe și funcțiuni complementare tip rural",
+      "pot_max": 30,
+      "cut_max": 0.6,
+      "hmax_m": 6,
+      "niv_max": 2,
+      "regim": "izolat",
+      "sup_min_mp": 150,
+      "front_min_m": 8,
+      "note": "P (preponderent) și P+1; lot minim 150mp clădiri înșiruite, 200mp izolat"
+    },
+    "IS": {
+      "denumire": "Instituții publice și servicii de interes general",
+      "pot_max": 20,
+      "cut_max": 0.3,
+      "hmax_m": 6,
+      "niv_max": 2,
+      "regim": "izolat",
+      "note": "P și P+1E; PUZ obligatoriu înainte de construire"
+    },
+    "I": {
+      "denumire": "Construcții industriale și depozitare",
+      "pot_max": 0,
+      "cut_max": 0,
+      "hmax_m": 0,
+      "niv_max": 0,
+      "regim": "PUZ",
+      "note": "POT/CUT stabilite prin PUZ obligatoriu; studiu impact"
+    },
+    "A": {
+      "denumire": "Unități agricole și prestatoare de servicii agricole",
+      "pot_max": 0,
+      "cut_max": 0,
+      "hmax_m": 0,
+      "niv_max": 0,
+      "regim": "PUZ",
+      "note": "Condiții prin studii de specialitate"
+    },
+    "P": {
+      "denumire": "Zone de parcuri, spații verzi, sport, perdele protecție",
+      "pot_max": 10,
+      "cut_max": 0.2,
+      "hmax_m": 6,
+      "niv_max": 1,
+      "regim": "izolat",
+      "note": "Max 10-15% construibil; conform plan de amenajare"
+    },
+    "GC": {
+      "denumire": "Gospodărie comunală — cimitire și platforme de gunoi",
+      "pot_max": 20,
+      "cut_max": 0.3,
+      "hmax_m": 6,
+      "niv_max": 1,
+      "regim": "izolat",
+      "note": "Cimitir la marginea localității; platformă gunoi 500-1000m de intravilan"
+    },
+    "C": {
+      "denumire": "Căi de comunicație și echipări tehnico-edilitare",
+      "pot_max": 0,
+      "cut_max": 0,
+      "hmax_m": 0,
+      "niv_max": 0,
+      "regim": "N/A",
+      "note": "Zone de protecție: 20kV=25m; 220kV=50m"
+    }
+  },
+  "utrs": {
+    "ARO-1": {
+      "sat": "Aroneanu",
+      "nr_utr": "1",
+      "denumire": "Zona centrală — Aroneanu",
+      "fn_dominanta": "IS",
+      "subzone_admise": [
+        "IS",
+        "L"
+      ],
+      "pot_max": 20,
+      "cut_max": 0.3,
+      "hmax_m": 6,
+      "niv_max": 2,
+      "sup_min_mp": 300,
+      "front_min_m": 12,
+      "aliniament_note": "PUZ obligatoriu; regim înălțime P și P+1E; integrare calitate arhitecturală",
+      "avize": [
+        "Aviz Aeroport Iași (zona I)",
+        "Aviz DJCPCN (monument BT-II-m-A-01948 adiacent)",
+        "Aviz Apele Române"
+      ],
+      "interdictii": "Fără construcții care depășesc linia de pantă 2% față de originea pistei de decolare",
+      "ref": "UTR 1, Localitate Aroneanu — Vol. IV RLU PUG nr.14275/1997"
+    },
+    "ARO-2": {
+      "sat": "Aroneanu",
+      "nr_utr": "2",
+      "denumire": "Vatra veche (zonă protejată de interes local) — Aroneanu",
+      "fn_dominanta": "L",
+      "subzone_admise": [
+        "L"
+      ],
+      "pot_max": 30,
+      "cut_max": 0.6,
+      "hmax_m": 5,
+      "niv_max": 2,
+      "sup_min_mp": 150,
+      "front_min_m": 5,
+      "aliniament_note": "Aliniament tradițional 5-7m față de limita proprietății; tramă medievală protejată",
+      "avize": [
+        "Aviz Aeroport Iași (zona I)",
+        "Aviz DJCPCN"
+      ],
+      "interdictii": "Fără modificare tramă stradală medievală; fără arhitectură agresivă față de scara tradițională; evitat materiale nespecifice",
+      "ref": "UTR 2 și UTR 4, Localitate Aroneanu — Vol. IV RLU"
+    },
+    "ARO-2a": {
+      "sat": "Aroneanu",
+      "nr_utr": "2a",
+      "denumire": "Incinta fostei mânăstiri Aroneanu (monument istoric) — Aroneanu",
+      "fn_dominanta": "IS",
+      "subzone_admise": [
+        "IS"
+      ],
+      "pot_max": 20,
+      "cut_max": 0.3,
+      "hmax_m": 0,
+      "niv_max": 0,
+      "aliniament_note": "Zonă de protecție 100m pe tot perimetrul; amenajare spații verzi; dotări turism",
+      "avize": [
+        "Aviz Comisia Monumentelor Istorice",
+        "Aviz Aeroport Iași (zona I)"
+      ],
+      "interdictii": "Nicio construcție sau amenajare în incinta bisericii fără aprobare CMI; fără construcții care afectează imaginea monumentului",
+      "ref": "UTR 2a, Localitate Aroneanu — Vol. IV RLU"
+    },
+    "ARO-2b": {
+      "sat": "Aroneanu",
+      "nr_utr": "2b",
+      "denumire": "Teren liber adiacent zonei de protecție monument — Aroneanu",
+      "fn_dominanta": "IS",
+      "subzone_admise": [
+        "IS"
+      ],
+      "pot_max": 0,
+      "cut_max": 0,
+      "hmax_m": 0,
+      "niv_max": 0,
+      "aliniament_note": "Proiect cu aviz CMI; complex de creație/artă/tabără; arhitectură dialog cu monumentul",
+      "avize": [
+        "Aviz Comisia Monumentelor Istorice",
+        "Aviz Aeroport Iași"
+      ],
+      "interdictii": "Nu se impun POT/CUT restrictive; înălțime conform zona I aeroport (linia pantă 2%)",
+      "ref": "UTR 2b, Localitate Aroneanu — Vol. IV RLU"
+    },
+    "ARO-3": {
+      "sat": "Aroneanu",
+      "nr_utr": "3",
+      "denumire": "Terenuri libere pe cornișă (vile vacanță/turism) — Aroneanu",
+      "fn_dominanta": "L",
+      "subzone_admise": [
+        "L",
+        "IS"
+      ],
+      "pot_max": 0,
+      "cut_max": 0,
+      "hmax_m": 0,
+      "niv_max": 2,
+      "aliniament_note": "POT/CUT stabilite prin PUZ/plan de lotizare; vile P-P+1 pe loturi ~500mp",
+      "avize": [
+        "Aviz Aeroport Iași (zona I)",
+        "Aviz CMI"
+      ],
+      "interdictii": "Fără depășirea liniei de pantă 2% față de originea pistei; program de turism integrat",
+      "ref": "UTR 3, 5, 6, Localitate Aroneanu — Vol. IV RLU"
+    },
+    "ARO-5": {
+      "sat": "Aroneanu",
+      "nr_utr": "5",
+      "denumire": "Zona locuințe individuale (jumătatea de S a satului) — Aroneanu",
+      "fn_dominanta": "L",
+      "subzone_admise": [
+        "L"
+      ],
+      "pot_max": 30,
+      "cut_max": 0.6,
+      "hmax_m": 5,
+      "niv_max": 2,
+      "sup_min_mp": 150,
+      "front_min_m": 8,
+      "aliniament_note": "Program de îndesire; P și P+1; tramă stradală rezistentă",
+      "avize": [
+        "Aviz Aeroport Iași (zona I)"
+      ],
+      "interdictii": "Fără depășire linie pantă 2% aeroport; fără modificare tramă stradală existentă",
+      "ref": "UTR 5, Localitate Aroneanu — Vol. IV RLU"
+    },
+    "ARO-7": {
+      "sat": "Aroneanu",
+      "nr_utr": "7",
+      "denumire": "Parc localitate și terenuri sportive — Aroneanu",
+      "fn_dominanta": "P",
+      "subzone_admise": [
+        "P"
+      ],
+      "pot_max": 10,
+      "cut_max": 0.2,
+      "hmax_m": 6,
+      "niv_max": 1,
+      "avize": [
+        "Aviz Aeroport Iași"
+      ],
+      "interdictii": "Zona se organizează conform PUZ; fără construcții permanente fără aprobare",
+      "ref": "UTR 7, Localitate Aroneanu — Vol. IV RLU"
+    },
+    "ARO-8": {
+      "sat": "Aroneanu",
+      "nr_utr": "8",
+      "denumire": "Teren nou introdus în intravilan (NE) — Aroneanu",
+      "fn_dominanta": "L",
+      "subzone_admise": [
+        "L"
+      ],
+      "pot_max": 30,
+      "cut_max": 0.6,
+      "hmax_m": 6,
+      "niv_max": 3,
+      "sup_min_mp": 200,
+      "front_min_m": 10,
+      "aliniament_note": "Densitate mai mare ~150 loc/ha; P+1 sau P+2; plan de lotizare obligatoriu",
+      "avize": [
+        "Aviz Aeroport Iași (zona I)"
+      ],
+      "interdictii": "Plan de lotizare înainte de construire; materiale durabile de calitate",
+      "ref": "UTR 8, 9, 12, Localitate Aroneanu — Vol. IV RLU"
+    },
+    "ARO-10": {
+      "sat": "Aroneanu",
+      "nr_utr": "10",
+      "denumire": "Zona unități productive (est) — Aroneanu",
+      "fn_dominanta": "I",
+      "subzone_admise": [
+        "I"
+      ],
+      "pot_max": 0,
+      "cut_max": 0,
+      "hmax_m": 0,
+      "niv_max": 0,
+      "avize": [
+        "Aviz Aeroport Iași (zona I)",
+        "Aviz mediu"
+      ],
+      "interdictii": "PUZ obligatoriu; nicio construcție fără PUZ; aviz aeroport pentru toate obiectivele",
+      "ref": "UTR 10, Localitate Aroneanu — Vol. IV RLU"
+    },
+    "ARO-11": {
+      "sat": "Aroneanu",
+      "nr_utr": "11",
+      "denumire": "Zona agro-zootechnică (ferma PRODAVIS) — Aroneanu",
+      "fn_dominanta": "A",
+      "subzone_admise": [
+        "A"
+      ],
+      "pot_max": 0,
+      "cut_max": 0,
+      "hmax_m": 0,
+      "niv_max": 0,
+      "avize": [
+        "Aviz Aeroport Iași (zona I)",
+        "Aviz mediu"
+      ],
+      "interdictii": "Fără activități care periclitează siguranța zborului (ceață artificială, fum, substanțe nocive); aviz aeroport obligatoriu; PUZ pentru orice obiectiv nou",
+      "ref": "UTR 11, Localitate Aroneanu — Vol. IV RLU"
+    },
+    "DOR-1": {
+      "sat": "Dorobanț",
+      "nr_utr": "1",
+      "denumire": "Zona centrală — Dorobanț",
+      "fn_dominanta": "IS",
+      "subzone_admise": [
+        "IS",
+        "L"
+      ],
+      "pot_max": 20,
+      "cut_max": 0.3,
+      "hmax_m": 6,
+      "niv_max": 2,
+      "aliniament_note": "PUZ înainte de construire; P și P+1; integrare calitate",
+      "avize": [
+        "Aviz Aeroport Iași (zona I-II)",
+        "Aviz Apele Române"
+      ],
+      "interdictii": "Dorobanț aproape integral în zona aerodrom — aviz obligatoriu; fără depășire pantă 2.5%",
+      "ref": "UTR 1, Localitate Dorobanț — Vol. IV RLU"
+    },
+    "DOR-2": {
+      "sat": "Dorobanț",
+      "nr_utr": "2",
+      "denumire": "Zona locuințe (2/3 din sat, partea de S) — Dorobanț",
+      "fn_dominanta": "L",
+      "subzone_admise": [
+        "L"
+      ],
+      "pot_max": 30,
+      "cut_max": 0.6,
+      "hmax_m": 5,
+      "niv_max": 2,
+      "sup_min_mp": 150,
+      "front_min_m": 8,
+      "aliniament_note": "P și P+1; program îndesire; consolidare versant obligatorie înainte de construire (UTR 5,6,8)",
+      "avize": [
+        "Aviz Aeroport Iași"
+      ],
+      "interdictii": "Zona UTR 2,3,4 — fără pantă >2.5%; UTR 5,6,8 în nord — consolidare versant înainte de orice construcție",
+      "ref": "UTR 2-4 și 5,6,8, Localitate Dorobanț — Vol. IV RLU"
+    },
+    "DOR-7": {
+      "sat": "Dorobanț",
+      "nr_utr": "7",
+      "denumire": "Parc localitate și terenuri sportive — Dorobanț",
+      "fn_dominanta": "P",
+      "subzone_admise": [
+        "P"
+      ],
+      "pot_max": 10,
+      "cut_max": 0.2,
+      "hmax_m": 6,
+      "niv_max": 1,
+      "avize": [
+        "Aviz Aeroport Iași"
+      ],
+      "interdictii": "PUZ obligatoriu; consolidare teren prin plantații (studiu de specialitate)",
+      "ref": "UTR 7, Localitate Dorobanț — Vol. IV RLU"
+    },
+    "DOR-9": {
+      "sat": "Dorobanț",
+      "nr_utr": "9",
+      "denumire": "Teren nou intravilan (N) — Dorobanț",
+      "fn_dominanta": "L",
+      "subzone_admise": [
+        "L"
+      ],
+      "pot_max": 30,
+      "cut_max": 0.6,
+      "hmax_m": 6,
+      "niv_max": 3,
+      "sup_min_mp": 200,
+      "front_min_m": 10,
+      "avize": [
+        "Aviz Aeroport Iași"
+      ],
+      "interdictii": "Plan de lotizare obligatoriu; eventual program Primăria Iași stabiliri în Dorobanț",
+      "ref": "UTR 9, 11, Localitate Dorobanț — Vol. IV RLU"
+    },
+    "DOR-10": {
+      "sat": "Dorobanț",
+      "nr_utr": "10",
+      "denumire": "Baza sportivă Dorobanț",
+      "fn_dominanta": "P",
+      "subzone_admise": [
+        "P"
+      ],
+      "pot_max": 10,
+      "cut_max": 0.2,
+      "hmax_m": 6,
+      "niv_max": 1,
+      "avize": [
+        "Aviz Aeroport Iași"
+      ],
+      "interdictii": "Concesionare/vânzare interzisă; dezvoltare cu plan special de amenajare; aviz aeroport obligatoriu",
+      "ref": "UTR 10, Localitate Dorobanț — Vol. IV RLU"
+    },
+    "DOR-12": {
+      "sat": "Dorobanț",
+      "nr_utr": "12",
+      "denumire": "Zona agro-industrială (N, în zona aerodrom) — Dorobanț",
+      "fn_dominanta": "I",
+      "subzone_admise": [
+        "I",
+        "A"
+      ],
+      "pot_max": 0,
+      "cut_max": 0,
+      "hmax_m": 0,
+      "niv_max": 0,
+      "avize": [
+        "Aviz Aeroport Iași (zona I)",
+        "Aviz mediu"
+      ],
+      "interdictii": "PUZ; fără activități periculoase pentru siguranța zborului; aviz aeroport toate obiectivele",
+      "ref": "UTR 12, Localitate Dorobanț — Vol. IV RLU"
+    },
+    "RED-1": {
+      "sat": "Rediu Aldei",
+      "nr_utr": "1",
+      "denumire": "Zona centrală — Rediu Aldei",
+      "fn_dominanta": "IS",
+      "subzone_admise": [
+        "IS",
+        "L"
+      ],
+      "pot_max": 20,
+      "cut_max": 0.3,
+      "hmax_m": 6,
+      "niv_max": 2,
+      "aliniament_note": "PUZ; P și P+1E",
+      "avize": [
+        "Aviz Apele Române (Pârâul Chirița)",
+        "Aviz Aeroport Iași"
+      ],
+      "interdictii": "Interdic. construire în zonele cu alunecări până la studiu geotehnic (UTR 2,3); fără construcții în zona protecție albii Chirița 30m",
+      "ref": "UTR 1, Localitate Rediu Aldei — Vol. IV RLU"
+    },
+    "RED-2": {
+      "sat": "Rediu Aldei",
+      "nr_utr": "2",
+      "denumire": "Vatra veche a satului (zone cu alunecări) — Rediu Aldei",
+      "fn_dominanta": "L",
+      "subzone_admise": [
+        "L"
+      ],
+      "pot_max": 30,
+      "cut_max": 0.6,
+      "hmax_m": 5,
+      "niv_max": 2,
+      "sup_min_mp": 150,
+      "front_min_m": 8,
+      "aliniament_note": "Studiu stabilitate/consolidare OBLIGATORIU înainte de orice construcție; posibil strămutare",
+      "avize": [
+        "Aviz geotehnician",
+        "Aviz Apele Române"
+      ],
+      "interdictii": "Nicio autorizație până la studiu geotehnic de stabilitate; risc alunecare activ",
+      "ref": "UTR 2-3, Localitate Rediu Aldei — Vol. IV RLU"
+    },
+    "RED-4": {
+      "sat": "Rediu Aldei",
+      "nr_utr": "4",
+      "denumire": "Zone noi locuințe (S și N, pantă >5-15%) — Rediu Aldei",
+      "fn_dominanta": "L",
+      "subzone_admise": [
+        "L"
+      ],
+      "pot_max": 30,
+      "cut_max": 0.6,
+      "hmax_m": 6,
+      "niv_max": 2,
+      "sup_min_mp": 1000,
+      "front_min_m": 15,
+      "aliniament_note": "Parcele ~1000mp (pantă mare); plan lotizare; indicatori stabiliți prin PUZ",
+      "avize": [
+        "Aviz geotehnician",
+        "Aviz Aeroport Iași"
+      ],
+      "interdictii": "Plan de lotizare obligatoriu; eventual program Primăria Iași stabiliri în Rediu Aldei",
+      "ref": "UTR 4, 6, 7, Localitate Rediu Aldei — Vol. IV RLU"
+    },
+    "RED-5": {
+      "sat": "Rediu Aldei",
+      "nr_utr": "5",
+      "denumire": "Zona alunecări menținute — Rediu Aldei",
+      "fn_dominanta": "L",
+      "subzone_admise": [
+        "L"
+      ],
+      "pot_max": 30,
+      "cut_max": 0.6,
+      "hmax_m": 5,
+      "niv_max": 2,
+      "aliniament_note": "Construcțiile noi respectă aliniamentul existent; grad confort îmbunătățit",
+      "avize": [
+        "Aviz geotehnician"
+      ],
+      "interdictii": "Fără construcții noi fără studiu geotehnic; parcelele libere rămân libere",
+      "ref": "UTR 5, Localitate Rediu Aldei — Vol. IV RLU"
+    },
+    "RED-8": {
+      "sat": "Rediu Aldei",
+      "nr_utr": "8",
+      "denumire": "Ateliere meșteșugărești mici (SE) — Rediu Aldei",
+      "fn_dominanta": "I",
+      "subzone_admise": [
+        "I"
+      ],
+      "pot_max": 0,
+      "cut_max": 0,
+      "hmax_m": 0,
+      "niv_max": 0,
+      "avize": [
+        "Aviz mediu",
+        "Aviz Aeroport Iași"
+      ],
+      "interdictii": "PUZ obligatoriu pentru orice obiectiv",
+      "ref": "UTR 8, Localitate Rediu Aldei — Vol. IV RLU"
+    },
+    "SOR-1": {
+      "sat": "Șorogari",
+      "nr_utr": "1",
+      "denumire": "Zona centrală — Șorogari",
+      "fn_dominanta": "IS",
+      "subzone_admise": [
+        "IS",
+        "L"
+      ],
+      "pot_max": 20,
+      "cut_max": 0.3,
+      "hmax_m": 6,
+      "niv_max": 2,
+      "aliniament_note": "PUZ; P și P+1E; calitate arhitecturală reprezentativă",
+      "avize": [
+        "Aviz Aeroport Iași"
+      ],
+      "interdictii": "PUZ obligatoriu înainte de construire",
+      "ref": "UTR 1, Localitate Șorogari — Vol. IV RLU"
+    },
+    "SOR-2": {
+      "sat": "Șorogari",
+      "nr_utr": "2",
+      "denumire": "Parcul localității și spații verzi — Șorogari",
+      "fn_dominanta": "P",
+      "subzone_admise": [
+        "P"
+      ],
+      "pot_max": 10,
+      "cut_max": 0.2,
+      "hmax_m": 6,
+      "niv_max": 1,
+      "avize": [
+        "Aviz Aeroport Iași"
+      ],
+      "interdictii": "PUZ obligatoriu; fără construcții permanente",
+      "ref": "UTR 2-3, Localitate Șorogari — Vol. IV RLU"
+    },
+    "SOR-4": {
+      "sat": "Șorogari",
+      "nr_utr": "4",
+      "denumire": "Vatra veche locuințe — Șorogari",
+      "fn_dominanta": "L",
+      "subzone_admise": [
+        "L"
+      ],
+      "pot_max": 30,
+      "cut_max": 0.6,
+      "hmax_m": 5,
+      "niv_max": 2,
+      "sup_min_mp": 150,
+      "front_min_m": 8,
+      "aliniament_note": "Păstrare funcțiuni existente; program îndesire; front stradă favorabil construcției",
+      "avize": [
+        "Aviz Aeroport Iași"
+      ],
+      "interdictii": "Fără modificare tramă stradală; îmbunătățire calitativă",
+      "ref": "UTR 4-5, Localitate Șorogari — Vol. IV RLU"
+    },
+    "SOR-6": {
+      "sat": "Șorogari",
+      "nr_utr": "6",
+      "denumire": "Zone noi locuințe (NE intravilan) — Șorogari",
+      "fn_dominanta": "L",
+      "subzone_admise": [
+        "L"
+      ],
+      "pot_max": 30,
+      "cut_max": 0.6,
+      "hmax_m": 6,
+      "niv_max": 2,
+      "sup_min_mp": 200,
+      "front_min_m": 10,
+      "aliniament_note": "Plan de lotizare obligatoriu; alinieri și indicatori stabiliți prin lotizare",
+      "avize": [
+        "Aviz Aeroport Iași"
+      ],
+      "interdictii": "Plan de lotizare înainte de construire; eventual program Primăria Iași stabiliri în Șorogari",
+      "ref": "UTR 6-7, Localitate Șorogari — Vol. IV RLU"
+    },
+    "SOR-8": {
+      "sat": "Șorogari",
+      "nr_utr": "8",
+      "denumire": "Corpuri izolate (locuințe și terenuri industriale) — Șorogari",
+      "fn_dominanta": "L",
+      "subzone_admise": [
+        "L",
+        "I"
+      ],
+      "pot_max": 30,
+      "cut_max": 0.6,
+      "hmax_m": 6,
+      "niv_max": 2,
+      "avize": [
+        "Aviz Aeroport Iași"
+      ],
+      "interdictii": "Creștere calitativă; UTR 12 — plan de parcelare înainte de amplasare case",
+      "ref": "UTR 8-12, Localitate Șorogari — Vol. IV RLU"
+    }
+  },
+  "zone_protectie": {
+    "drum_national_DN": 18,
+    "drum_comunal_DC": 18,
+    "albii_rauri": 30,
+    "lac": 10,
+    "surse_apa_sanitara_sever": 50,
+    "cimitire_GC": 50,
+    "LEA_20kV": 25,
+    "LEA_220kV": 50
+  },
+  "restrictii_aeroport": {
+    "nota": "Aeroportul Iași — toate satelele comunei sunt în zona II de siguranță (construcții >45m necesită balizare); Aroneanu (parțial) și Dorobanț (aproape integral) — zona I de aerodrom",
+    "zona_I_pantamax_pct": 2.0,
+    "zona_II_pantamax_pct": 2.5,
+    "aviz_obligatoriu_pentru": "Toate construcțiile din zonele Aroneanu și Dorobanț — se cere aviz Aeroportul Iași"
+  },
+  "monumente_istorice": [
+    "IS-II-m-A — Biserica Mânăstirii Aroneanu (monument de importanță națională)",
+    "IS-II-m-A — Clopotnița Mânăstirii Aroneanu"
+  ]
+}

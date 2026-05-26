@@ -1,0 +1,508 @@
+{
+  "_meta": {
+    "uat": "Comuna Bălușeni",
+    "uat_key": "RO-BT-18073",
+    "judet": "Botoșani",
+    "proiect": "PUG nr. 283/2008 — S.C. Pro Activ Consulting S.R.L. Iași",
+    "seismic": {
+      "ag": 0.2,
+      "Tc": 1.4,
+      "zona": "D"
+    },
+    "hdd": 2900,
+    "sate": [
+      "Bălușeni",
+      "Draxini",
+      "Bălușeni Noi",
+      "Zăicești",
+      "Buzeni",
+      "Coșuleni"
+    ],
+    "nr_utrs_total": 40,
+    "note": "10 UTR Bălușeni; 7 UTR Draxini; 2 UTR Bălușeni Noi; 9 UTR Zăicești; 9 UTR Buzeni; 3 UTR Coșuleni"
+  },
+  "subzone": {
+    "Li": {
+      "denumire": "Locuințe individuale existente P-P+2",
+      "pot_max": 30,
+      "cut_max": 0.9,
+      "hmax_m": 9,
+      "niv_max": 3,
+      "regim": "izolat/cuplat",
+      "sup_min_mp": 300,
+      "front_min_m": 12
+    },
+    "Lp": {
+      "denumire": "Locuințe propuse P+1+2+M tip urban",
+      "pot_max": 30,
+      "cut_max": 0.9,
+      "hmax_m": 9,
+      "niv_max": 3,
+      "regim": "izolat/cuplat",
+      "sup_min_mp": 300,
+      "front_min_m": 12
+    },
+    "IS": {
+      "denumire": "Instituții publice și servicii (zona centrală)",
+      "pot_max": 50,
+      "cut_max": 1.5,
+      "hmax_m": 12,
+      "niv_max": 4,
+      "regim": "izolat",
+      "note": "H streaș. 6-12m; funcțiuni reprezentative"
+    },
+    "ISct": {
+      "denumire": "Instituții — Culte (cimitir, schit)",
+      "pot_max": 30,
+      "cut_max": 0.9,
+      "hmax_m": 9,
+      "niv_max": 3,
+      "regim": "izolat",
+      "note": "Protecție mon. istorice"
+    },
+    "ID": {
+      "denumire": "Unități industriale și depozitare (agro-industriale)",
+      "pot_max": 40,
+      "cut_max": 1.2,
+      "hmax_m": 12,
+      "niv_max": 4,
+      "regim": "izolat",
+      "note": "ID1-mică industrie; ID2-agrozootehnice"
+    },
+    "A": {
+      "denumire": "Unități agro-zootehnice",
+      "pot_max": 50,
+      "cut_max": 1.5,
+      "hmax_m": 10,
+      "niv_max": 3,
+      "regim": "izolat",
+      "note": "Asu-servicii; Az-microferme"
+    },
+    "P": {
+      "denumire": "Parcuri, spații verzi, agrement, turism",
+      "pot_max": 10,
+      "cut_max": 0.2,
+      "hmax_m": 6,
+      "niv_max": 1,
+      "regim": "izolat",
+      "note": "Max 10-15% din suprafață construibil"
+    },
+    "GC": {
+      "denumire": "Gospodărie comunală și cimitire",
+      "pot_max": 20,
+      "cut_max": 0.4,
+      "hmax_m": 6,
+      "niv_max": 1,
+      "regim": "izolat",
+      "note": "GCc-cimitire; GCse-depozit; GCp-colectare"
+    },
+    "TE": {
+      "denumire": "Echipare tehnico-edilitară",
+      "pot_max": 60,
+      "cut_max": 1.2,
+      "hmax_m": 12,
+      "niv_max": 2,
+      "regim": "izolat",
+      "note": "TEa-ape; TEel-energie; TEe-epurare"
+    },
+    "CR": {
+      "denumire": "Căi de comunicație rutiere și feroviare",
+      "pot_max": 0,
+      "cut_max": 0,
+      "hmax_m": 0,
+      "niv_max": 0,
+      "regim": "N/A",
+      "note": "Infrastructură rutieră/feroviară"
+    }
+  },
+  "utrs": {
+    "BAL-1": {
+      "sat": "Bălușeni",
+      "nr_utr": "1",
+      "denumire": "Zona centrală cu funcțiuni mixte — Bălușeni",
+      "fn_dominanta": "IS",
+      "subzone_admise": [
+        "IS",
+        "Li",
+        "Lp"
+      ],
+      "pot_max": 50,
+      "cut_max": 1.5,
+      "hmax_m": 12,
+      "niv_max": 4,
+      "sup_min_mp": 300,
+      "front_min_m": 12,
+      "aliniament_note": "Retras minim 6m sau conform aliniament existent",
+      "avize": [
+        "Aviz Aeroport Iași (zona II siguranță)",
+        "Aviz EON Moldova (LEA)",
+        "Aviz Apele Române"
+      ],
+      "interdictii": "Fără funcțiuni industriale; fără depozite materiale toxice; fără creștere animale mari",
+      "ref": "UTR 1, Sat Bălușeni — Vol. II RLU PUG nr.283/2008"
+    },
+    "BAL-2": {
+      "sat": "Bălușeni",
+      "nr_utr": "2",
+      "denumire": "Zona locuințe individuale P-P+2 — Bălușeni",
+      "fn_dominanta": "Li",
+      "subzone_admise": [
+        "Li",
+        "Lp"
+      ],
+      "pot_max": 30,
+      "cut_max": 0.9,
+      "hmax_m": 9,
+      "niv_max": 3,
+      "sup_min_mp": 300,
+      "front_min_m": 12,
+      "aliniament_note": "Conform aliniament existent; retragere laterală min H/2 ≥ 3m; posterior min 5m",
+      "avize": [
+        "Aviz Aeroport Iași",
+        "Aviz EON Moldova"
+      ],
+      "interdictii": "Fără funcțiuni industriale sau servicii poluante; fără depozite mari",
+      "ref": "UTR 2, Sat Bălușeni — Vol. II RLU"
+    },
+    "BAL-3": {
+      "sat": "Bălușeni",
+      "nr_utr": "3",
+      "denumire": "Zona locuințe individuale P-P+2 — Bălușeni",
+      "fn_dominanta": "Li",
+      "subzone_admise": [
+        "Li",
+        "Lp"
+      ],
+      "pot_max": 30,
+      "cut_max": 0.9,
+      "hmax_m": 9,
+      "niv_max": 3,
+      "sup_min_mp": 300,
+      "front_min_m": 12,
+      "aliniament_note": "Conform aliniament existent",
+      "avize": [
+        "Aviz Aeroport Iași"
+      ],
+      "interdictii": "Fără industriale sau servicii poluante",
+      "ref": "UTR 3, Sat Bălușeni — Vol. II RLU"
+    },
+    "BAL-4": {
+      "sat": "Bălușeni",
+      "nr_utr": "4",
+      "denumire": "Zona instituții-culte și cimitir — Bălușeni",
+      "fn_dominanta": "ISct",
+      "subzone_admise": [
+        "ISct",
+        "GC"
+      ],
+      "pot_max": 30,
+      "cut_max": 0.9,
+      "hmax_m": 9,
+      "niv_max": 2,
+      "sup_min_mp": 500,
+      "front_min_m": 15,
+      "aliniament_note": "Distanță min 10m față de limita laterală și posterioară (biserici)",
+      "avize": [
+        "Aviz Comisia Monumentelor Istorice",
+        "Aviz Aeroport Iași"
+      ],
+      "interdictii": "Protecție 50m față de cimitir; fără construcții care afectează monumentele",
+      "ref": "UTR 4, Sat Bălușeni — Vol. II RLU"
+    },
+    "BAL-5": {
+      "sat": "Bălușeni",
+      "nr_utr": "5",
+      "denumire": "Echipări tehnico-edilitare — Bălușeni",
+      "fn_dominanta": "TE",
+      "subzone_admise": [
+        "TE"
+      ],
+      "pot_max": 60,
+      "cut_max": 1.2,
+      "hmax_m": 12,
+      "niv_max": 2,
+      "avize": [
+        "Aviz EON Moldova",
+        "Aviz Apele Române"
+      ],
+      "interdictii": "Exclusiv funcțiuni tehnico-edilitare",
+      "ref": "UTR 5, Sat Bălușeni — Vol. II RLU"
+    },
+    "BAL-6": {
+      "sat": "Bălușeni",
+      "nr_utr": "6",
+      "denumire": "Zona agro-industrială — Bălușeni",
+      "fn_dominanta": "ID",
+      "subzone_admise": [
+        "ID",
+        "A"
+      ],
+      "pot_max": 40,
+      "cut_max": 1.2,
+      "hmax_m": 12,
+      "niv_max": 3,
+      "avize": [
+        "Aviz mediu",
+        "Aviz Aeroport Iași"
+      ],
+      "interdictii": "Fără locuințe în apropierea fermei zootehnice fără zonă sanitară 500m",
+      "ref": "UTR 6, Sat Bălușeni — Vol. II RLU"
+    },
+    "BAL-7": {
+      "sat": "Bălușeni",
+      "nr_utr": "7",
+      "denumire": "Zona locuințe individuale P-P+2 — Bălușeni",
+      "fn_dominanta": "Li",
+      "subzone_admise": [
+        "Li",
+        "Lp"
+      ],
+      "pot_max": 30,
+      "cut_max": 0.9,
+      "hmax_m": 9,
+      "niv_max": 3,
+      "sup_min_mp": 300,
+      "front_min_m": 12,
+      "aliniament_note": "Conform aliniament existent",
+      "avize": [
+        "Aviz Aeroport Iași"
+      ],
+      "interdictii": "Fără industriale",
+      "ref": "UTR 7, Sat Bălușeni — Vol. II RLU"
+    },
+    "BAL-8": {
+      "sat": "Bălușeni",
+      "nr_utr": "8",
+      "denumire": "Echipări tehnico-edilitare — Bălușeni",
+      "fn_dominanta": "TE",
+      "subzone_admise": [
+        "TE"
+      ],
+      "pot_max": 60,
+      "cut_max": 1.2,
+      "hmax_m": 12,
+      "niv_max": 2,
+      "avize": [
+        "Aviz EON Moldova"
+      ],
+      "interdictii": "Exclusiv funcțiuni tehnico-edilitare",
+      "ref": "UTR 8, Sat Bălușeni — Vol. II RLU"
+    },
+    "BAL-9": {
+      "sat": "Bălușeni",
+      "nr_utr": "9",
+      "denumire": "Zona instituții-culte (Schit Zosin) — Bălușeni",
+      "fn_dominanta": "ISct",
+      "subzone_admise": [
+        "ISct"
+      ],
+      "pot_max": 30,
+      "cut_max": 0.9,
+      "hmax_m": 9,
+      "niv_max": 2,
+      "avize": [
+        "Aviz Comisia Monumentelor Istorice",
+        "Aviz Aeroport Iași"
+      ],
+      "interdictii": "Monument istoric protejat; fără construcții care afectează monumentul",
+      "ref": "UTR 9, Sat Bălușeni — Vol. II RLU"
+    },
+    "BAL-10": {
+      "sat": "Bălușeni",
+      "nr_utr": "10",
+      "denumire": "Echipări tehnico-edilitare — Bălușeni",
+      "fn_dominanta": "TE",
+      "subzone_admise": [
+        "TE"
+      ],
+      "pot_max": 60,
+      "cut_max": 1.2,
+      "hmax_m": 12,
+      "niv_max": 2,
+      "avize": [
+        "Aviz EON Moldova",
+        "Aviz Apele Române"
+      ],
+      "interdictii": "Exclusiv funcțiuni tehnico-edilitare",
+      "ref": "UTR 10, Sat Bălușeni — Vol. II RLU"
+    },
+    "DRX-1": {
+      "sat": "Draxini",
+      "nr_utr": "1",
+      "denumire": "Zona locuințe individuale P-P+2 — Draxini",
+      "fn_dominanta": "Li",
+      "subzone_admise": [
+        "Li",
+        "Lp"
+      ],
+      "pot_max": 30,
+      "cut_max": 0.9,
+      "hmax_m": 9,
+      "niv_max": 3,
+      "sup_min_mp": 300,
+      "front_min_m": 12,
+      "avize": [
+        "Aviz Aeroport Iași"
+      ],
+      "interdictii": "Sit arheologic Draxini — interdicție construire în aria sitului fără studiu",
+      "ref": "UTR 1, Sat Draxini — Vol. II RLU"
+    },
+    "DRX-2": {
+      "sat": "Draxini",
+      "nr_utr": "2",
+      "denumire": "Zona locuințe individuale P-P+2 — Draxini",
+      "fn_dominanta": "Li",
+      "subzone_admise": [
+        "Li",
+        "Lp"
+      ],
+      "pot_max": 30,
+      "cut_max": 0.9,
+      "hmax_m": 9,
+      "niv_max": 3,
+      "sup_min_mp": 300,
+      "front_min_m": 12,
+      "avize": [
+        "Aviz Aeroport Iași",
+        "Aviz DJCPCN (sit arheologic)"
+      ],
+      "interdictii": "Sit arheologic Draxini — Vatra satului (Latene și medieval); supravegheat de arheolog la săpături",
+      "ref": "UTR 2, Sat Draxini — Vol. II RLU"
+    },
+    "DRX-3": {
+      "sat": "Draxini",
+      "nr_utr": "3",
+      "denumire": "Gospodărie comunală — cimitir Draxini",
+      "fn_dominanta": "GC",
+      "subzone_admise": [
+        "GC"
+      ],
+      "pot_max": 20,
+      "cut_max": 0.4,
+      "hmax_m": 6,
+      "niv_max": 1,
+      "avize": [
+        "Aviz DJCPCN"
+      ],
+      "interdictii": "Zonă cimitir; protecție 50m",
+      "ref": "UTR 3, Sat Draxini — Vol. II RLU"
+    },
+    "DRX-4": {
+      "sat": "Draxini",
+      "nr_utr": "4",
+      "denumire": "Zona agro-industrială — Draxini",
+      "fn_dominanta": "ID",
+      "subzone_admise": [
+        "ID",
+        "A"
+      ],
+      "pot_max": 40,
+      "cut_max": 1.2,
+      "hmax_m": 12,
+      "niv_max": 3,
+      "avize": [
+        "Aviz mediu"
+      ],
+      "interdictii": "Fără locuințe noi în zona de protecție",
+      "ref": "UTR 4-6, Sat Draxini — Vol. II RLU"
+    },
+    "DRX-7": {
+      "sat": "Draxini",
+      "nr_utr": "7",
+      "denumire": "Spații verzi, agrement, turism — Draxini",
+      "fn_dominanta": "P",
+      "subzone_admise": [
+        "P"
+      ],
+      "pot_max": 10,
+      "cut_max": 0.2,
+      "hmax_m": 6,
+      "niv_max": 1,
+      "avize": [
+        "Aviz mediu"
+      ],
+      "interdictii": "Fără construcții permanente; max 10-15% construibil",
+      "ref": "UTR 7, Sat Draxini — Vol. II RLU"
+    },
+    "ZAI-1": {
+      "sat": "Zăicești",
+      "nr_utr": "1",
+      "denumire": "Zona locuințe individuale P-P+2 — Zăicești",
+      "fn_dominanta": "Li",
+      "subzone_admise": [
+        "Li",
+        "Lp"
+      ],
+      "pot_max": 30,
+      "cut_max": 0.9,
+      "hmax_m": 9,
+      "niv_max": 3,
+      "sup_min_mp": 300,
+      "front_min_m": 12,
+      "avize": [
+        "Aviz Aeroport Iași"
+      ],
+      "interdictii": "Fără industriale poluante",
+      "ref": "UTR 1-2, Sat Zăicești — Vol. II RLU"
+    },
+    "BUZ-1": {
+      "sat": "Buzeni",
+      "nr_utr": "1",
+      "denumire": "Zona locuințe individuale P-P+2 — Buzeni",
+      "fn_dominanta": "Li",
+      "subzone_admise": [
+        "Li",
+        "Lp"
+      ],
+      "pot_max": 30,
+      "cut_max": 0.9,
+      "hmax_m": 9,
+      "niv_max": 3,
+      "sup_min_mp": 300,
+      "front_min_m": 12,
+      "avize": [
+        "Aviz Aeroport Iași",
+        "Aviz Apele Române (pârâul Ionașcu)"
+      ],
+      "interdictii": "Fără construcții în zona de protecție albii 15m",
+      "ref": "UTR 1-2, Sat Buzeni — Vol. II RLU"
+    },
+    "COS-1": {
+      "sat": "Coșuleni",
+      "nr_utr": "1",
+      "denumire": "Zona locuințe individuale P-P+2 — Coșuleni",
+      "fn_dominanta": "Li",
+      "subzone_admise": [
+        "Li",
+        "Lp"
+      ],
+      "pot_max": 30,
+      "cut_max": 0.9,
+      "hmax_m": 9,
+      "niv_max": 3,
+      "sup_min_mp": 300,
+      "front_min_m": 12,
+      "avize": [
+        "Aviz Aeroport Iași"
+      ],
+      "interdictii": "Fără industriale poluante",
+      "ref": "UTR 1-2, Sat Coșuleni — Vol. II RLU"
+    }
+  },
+  "zone_protectie": {
+    "drum_national_DN": 26,
+    "drum_judetean_DJ": 24,
+    "drum_comunal_DC": 20,
+    "gospodarie_ape_TEa": 30,
+    "albii_AH": 15,
+    "cimitire_ISct": 50,
+    "LEA_20kV": 24,
+    "LEA_110kV": 36
+  },
+  "monumente_istorice": [
+    "BT-II-m-A-01948 — Schit Zosin (sec. XVIII-XX), Bălușeni",
+    "BT-II-m-A-01948.02 — Clopotniță (sec. XIX-XX), Bălușeni",
+    "BT-I-s-B-01781 — Sit arheologic Draxini (Epoca migrațiilor)",
+    "BT-I-m-B-01781.02 — Așezare Draxini (sec. IV-V)"
+  ]
+}
