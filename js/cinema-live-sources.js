@@ -34,13 +34,42 @@ var TTL_5M  = 5*60*1000;
 function cGet(k){ var e=_cache[k]; return (e&&Date.now()-e.ts<(e.ttl||TTL_24H))?e.v:null; }
 function cSet(k,v,ttl){ _cache[k]={v:v,ts:Date.now(),ttl:ttl||TTL_24H}; return v; }
 
-// Fetch cu retry si timeout
+// Fetch cu proxy Cloudflare pentru CORS
+// Toate URL-urile externe merg prin proxy
+var NEEDS_PROXY = [
+  'openaq.org', 'open-meteo.com', 'opensky-network.org',
+  'hartiand.cnadnr.ro', 'observator.mdlpa.ro', 'arcgis.com',
+  'utility.arcgis.com', 'cestrin.maps.arcgis.com',
+  'archive-api.open-meteo.com',
+];
+
+function _needsProxy(url) {
+  return NEEDS_PROXY.some(function(d){ return url.includes(d); });
+}
+
+function _proxyUrl(url) {
+  return PROXY + '/proxy?url=' + encodeURIComponent(url);
+}
+
 async function safeFetch(url, opts, timeoutMs) {
+  var fetchUrl = _needsProxy(url) ? _proxyUrl(url) : url;
   try {
-    var r = await fetch(url, Object.assign({signal:AbortSignal.timeout(timeoutMs||10000)},opts||{}));
+    var r = await fetch(fetchUrl, Object.assign({
+      signal: AbortSignal.timeout(timeoutMs||12000)
+    }, opts||{}));
     if(!r.ok) throw new Error('HTTP '+r.status);
     return await r.json();
   } catch(e) {
+    // Daca proxy a esuat, incearca direct
+    if(fetchUrl !== url) {
+      try {
+        var r2 = await fetch(url, Object.assign({
+          signal: AbortSignal.timeout(timeoutMs||12000)
+        }, opts||{}));
+        if(!r2.ok) throw new Error('HTTP '+r2.status);
+        return await r2.json();
+      } catch(e2) {}
+    }
     console.warn('[LiveSources] fetch fail:', url.slice(0,60), e.message);
     return null;
   }
@@ -52,7 +81,10 @@ async function safeFetch(url, opts, timeoutMs) {
 // ═══════════════════════════════════════════════════════════════════════════
 G._LiveCNAIR = {
 
-  BASE: 'https://hartiand.cnadnr.ro/arcgis/rest/services/Hosted/Harta_Investitii/FeatureServer',
+  // URL real verificat din configuratia CESTRIN ArcGIS
+  BASE: 'https://utility.arcgis.com/usrsvcs/servers/a55600f1d1aa482ab17fa5f0691587b4/rest/services/ProgramConstructie/FeatureServer',
+  // Fallback: hartiand (poate fi indisponibil)
+  BASE_FALLBACK: 'https://hartiand.cnadnr.ro/arcgis/rest/services/Hosted/Harta_Investitii/FeatureServer',
   // Layer 0 = tronsoane, Layer 1 = noduri, Layer 2 = investitii
   LAYER_TRONSOANE: 0,
   LAYER_INVESTITII: 1,
@@ -135,10 +167,11 @@ G._LiveCNAIR = {
     var features = await this.fetchTronsoane(bbox);
     if(!features||!features.length) return;
 
-    ['cnair-src','cnair-glow','cnair-wip','cnair-op','cnair-plan'].forEach(function(id){
+    // Sterge layerele INAINTE de source
+    ['cnair-glow','cnair-wip','cnair-op','cnair-plan'].forEach(function(id){
       try{if(map.getLayer(id))map.removeLayer(id);}catch(e){}
-      try{if(map.getSource(id))map.removeSource(id);}catch(e){}
     });
+    try{if(map.getSource('cnair-src'))map.removeSource('cnair-src');}catch(e){}
 
     try{
       // Normalizeaza properties
@@ -282,10 +315,10 @@ G._LiveMDLPA = {
 
     if(map) {
       try{
-        ['mdlpa-fill','mdlpa-border','mdlpa-src'].forEach(function(id){
+        ['mdlpa-fill','mdlpa-border'].forEach(function(id){
           try{if(map.getLayer(id))map.removeLayer(id);}catch(e){}
-          try{if(map.getSource(id))map.removeSource(id);}catch(e){}
         });
+        try{if(map.getSource('mdlpa-src'))map.removeSource('mdlpa-src');}catch(e){}
         map.addSource('mdlpa-src',{type:'geojson',data:data});
         map.addLayer({id:'mdlpa-fill',type:'fill',source:'mdlpa-src',
           paint:{'fill-color':'#3b82f6','fill-opacity':0.12}});
@@ -563,10 +596,10 @@ G._LiveOpenSky = {
     });
 
     try{
-      ['opensky-pts','opensky-src'].forEach(function(id){
+      ['opensky-pts'].forEach(function(id){
         try{if(map.getLayer(id))map.removeLayer(id);}catch(e){}
-        try{if(map.getSource(id))map.removeSource(id);}catch(e){}
       });
+      try{if(map.getSource('opensky-src'))map.removeSource('opensky-src');}catch(e){}
       map.addSource('opensky-src',{type:'geojson',
         data:{type:'FeatureCollection',features:features}});
       map.addLayer({id:'opensky-pts',type:'circle',source:'opensky-src',
@@ -657,10 +690,10 @@ G._LiveGTFS = {
     });
 
     try{
-      ['gtfs-src','gtfs-glow','gtfs-lines'].forEach(function(id){
+      ['gtfs-glow','gtfs-lines'].forEach(function(id){
         try{if(map.getLayer(id))map.removeLayer(id);}catch(e){}
-        try{if(map.getSource(id))map.removeSource(id);}catch(e){}
       });
+      try{if(map.getSource('gtfs-src'))map.removeSource('gtfs-src');}catch(e){}
       map.addSource('gtfs-src',{type:'geojson',
         data:{type:'FeatureCollection',features:features}});
       map.addLayer({id:'gtfs-glow',type:'line',source:'gtfs-src',
@@ -781,10 +814,10 @@ G._LiveTerrain = {
     });
 
     try{
-      ['aero-src','aero-zone','aero-border','aero-pts'].forEach(function(id){
+      ['aero-zone','aero-border','aero-pts'].forEach(function(id){
         try{if(map.getLayer(id))map.removeLayer(id);}catch(e){}
-        try{if(map.getSource(id))map.removeSource(id);}catch(e){}
       });
+      try{if(map.getSource('aero-src'))map.removeSource('aero-src');}catch(e){}
       map.addSource('aero-src',{type:'geojson',data:{type:'FeatureCollection',features:features}});
       map.addLayer({id:'aero-zone',type:'fill',source:'aero-src',
         filter:['==',['geometry-type'],'Polygon'],
@@ -856,10 +889,10 @@ G._LiveCESTRIN = {
     features.sort(function(a,b){return (a.properties.sat||0)-(b.properties.sat||0);});
 
     try{
-      ['cestrin-src','cestrin-glow','cestrin-lines'].forEach(function(id){
+      ['cestrin-glow','cestrin-lines'].forEach(function(id){
         try{if(map.getLayer(id))map.removeLayer(id);}catch(e){}
-        try{if(map.getSource(id))map.removeSource(id);}catch(e){}
       });
+      try{if(map.getSource('cestrin-src'))map.removeSource('cestrin-src');}catch(e){}
       map.addSource('cestrin-src',{type:'geojson',data:{type:'FeatureCollection',features:features}});
       map.addLayer({id:'cestrin-glow',type:'line',source:'cestrin-src',
         filter:['==',['get','congestionat'],true],

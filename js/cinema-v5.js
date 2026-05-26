@@ -328,9 +328,32 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
   if(!cv){console.error('[v9] Canvas lipsa');return;}
   SE._canvas=cv; SE._ctx=cv.getContext('2d');
   if(!SE._ctx){console.error('[v9] Canvas context lipsa');return;}
-  SE._map=map; SE._city=city; SE._pred=pred;
-  SE._playing=true; SE._si=0; SE.SCENES=SCENES;
+
+  // ── FOLOSIM DATELE REALE DIN SE — nu le reconstruim ─────────────────
+  // SE._city, SE._pugGeo, SE._reguli sunt deja populate din _SceneEngine.launch()
+  // Daca SE le are, le folosim. Altfel fallback la parametrii nostri.
+  if(SE._city&&SE._city.lat) {
+    city = SE._city;
+    cx = city.lon; cy = city.lat; name = city.name;
+    console.log('[v9] Folosesc SE._city real:', city.name, cx, cy);
+  } else {
+    SE._city = city;
+  }
+  if(SE._pred) pred = SE._pred;
+  else SE._pred = pred;
+
+  // Recalculeaza pred cu date reale
+  if(window._PredEngine&&typeof window._PredEngine.calc==='function') {
+    try{ pred = window._PredEngine.calc(city); SE._pred = pred; }catch(e){}
+  }
+
+  SE._map=map; SE._playing=true; SE._si=0; SE.SCENES=SCENES;
   SE._guardCanvas&&SE._guardCanvas();
+
+  // ── ZONE REALE DIN PUG pentru camera ──────────────────────────────────
+  // Calculeaza bounding box-uri per tip UTR din pugGeo real
+  var pugZones = _calcPUGZones(SE._pugGeo, cx, cy);
+  console.log('[v9] Zone PUG detectate:', Object.keys(pugZones).join(', '));
 
   var _oFly=map.flyTo.bind(map), _oJump=map.jumpTo.bind(map);
   map.flyTo=function(o){
@@ -381,13 +404,26 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
     },dly||0);
   }
 
-  // Zone dinamice per UAT
+  // Zone REALE din PUG — nu offset-uri fixe
+  // pugZones calculat din UTR-urile PUG reale ale UAT-ului
+  var pz = pugZones || {};
   var Z={
-    C:[cx,cy], NV:[cx-0.024,cy+0.018], SE2:[cx+0.026,cy-0.015],
-    SV:[cx-0.017,cy-0.020], NE:[cx+0.022,cy+0.019],
-    PER:[cx+0.048,cy-0.034], FAR:[cx+0.090,cy-0.060],
-    CBD:[cx-0.004,cy+0.003], UNI:[cx+0.010,cy+0.015], IND:[cx-0.020,cy-0.012],
+    C:  [cx, cy],
+    CBD:[pz.CBD?pz.CBD.lon:cx-0.004,     pz.CBD?pz.CBD.lat:cy+0.003],
+    UNI:[pz.UNI?pz.UNI.lon:cx+0.010,     pz.UNI?pz.UNI.lat:cy+0.015],
+    IND:[pz.IND?pz.IND.lon:cx-0.020,     pz.IND?pz.IND.lat:cy-0.012],
+    RES:[pz.RES?pz.RES.lon:cx+0.008,     pz.RES?pz.RES.lat:cy-0.005],
+    VERDE:[pz.VERDE?pz.VERDE.lon:cx-0.015, pz.VERDE?pz.VERDE.lat:cy+0.010],
+    PER:[pz.PER?pz.PER.lon:cx+0.045,     pz.PER?pz.PER.lat:cy-0.030],
+    FAR:[cx+0.090,cy-0.060],
+    NV: [cx-0.024, cy+0.018],
+    SE2:[cx+0.026, cy-0.015],
+    SV: [cx-0.017, cy-0.020],
+    NE: [cx+0.022, cy+0.019],
   };
+  console.log('[v9] Zone camera:', 'CBD='+Z.CBD[0].toFixed(3)+','+Z.CBD[1].toFixed(3),
+    'UNI='+Z.UNI[0].toFixed(3)+','+Z.UNI[1].toFixed(3),
+    'IND='+Z.IND[0].toFixed(3)+','+Z.IND[1].toFixed(3));
 
   // Layer helpers
   function addLine(id,ft,paint){
@@ -424,6 +460,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
     _cleanV9(map);
     try{if(origColor)map.setPaintProperty('building-extrusion','fill-extrusion-color',origColor);}catch(e){}
     try{map.setPaintProperty('building-extrusion','fill-extrusion-height',['get','height']);}catch(e){}
+    try{map.setLayoutProperty('building-extrusion','visibility','visible');}catch(e){}
     document.getElementById('tci-c8')&&document.getElementById('tci-c8').remove();
     document.getElementById('tci-c8-ctrl')&&document.getElementById('tci-c8-ctrl').remove();
     document.getElementById('cin-legend')&&document.getElementById('cin-legend').remove();
@@ -995,9 +1032,13 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
 
       case 'b11s2':
         lp('dusk');
-        onIdle(function(){try{SE._add3DGrowthFull&&SE._add3DGrowthFull(map);}catch(e){}});
+        try{map.setLayoutProperty('building-extrusion','visibility','none');}catch(e){}
+        onIdle(function(){
+          try{SE._add3DGrowthFull&&SE._add3DGrowthFull(map);}catch(e){}
+        });
         rot(30,0.007);
-        fly(Z.C,15.5,72,120,20000,2000,'dusk');
+        fly(Z.CBD,15.5,72,30,5000,0,'dusk');
+        fly(Z.CBD,16.0,75,120,18000,5000,'dusk');
         break;
     }
   }
@@ -1322,7 +1363,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         break;
 
       case 'b4s1':
-        try{SE._updateTraffic&&SE._updateTraffic(t);}catch(e){}
+        try{if(SE._updateTraffic) SE._updateTraffic(t);}catch(e){}
         titlu('Retea Rutiera','OSM real \u00b7 Congestie \u00b7 Blocaje \u00b7 Saturatie'); linie();
         cifra(N2(pred.mot24),'Vehicule/1000 loc',(pred.mot24||380)>450?'#ef4444':'#f59e0b');
         cifra2('~'+(pred.satAn||2040),'An saturare retea');
@@ -1511,10 +1552,31 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         break;
 
       case 'b6s2':
-        var tG=t<0.11?0:Math.min(1,(t-0.11)/0.76);
+        var tG=t<0.08?0:Math.min(1,(t-0.08)/0.84);
         var tE=1-Math.pow(1-tG,3);
-        try{SE._updateGrowth&&SE._updateGrowth(tE);}catch(e){}
-        if(tE>0.01){ try{map.setPaintProperty('building-extrusion','fill-extrusion-height',['*',['get','height'],Math.max(0.04,tE)]);}catch(e){} }
+        // _updateGrowth la fiecare frame — inaltimile cresc vizibil
+        try{ if(SE._updateGrowth) SE._updateGrowth(tE); }catch(e){}
+        // Cladirile Mapbox standard ascunse — bara 3D PUG le inlocuiesc
+        try{map.setLayoutProperty('building-extrusion','visibility','none');}catch(e){}
+        // Afisare progres animatie in canvas
+        if(tE > 0.05) {
+          ctx.save();
+          ctx.globalAlpha = sA * Math.min(1, tE * 1.5) * 0.85;
+          ctx.fillStyle = 'rgba(4,10,24,0.80)';
+          ctx.fillRect(W*0.04, H*0.86, Math.min(W*0.45, 400), H*0.055);
+          // Bar progress animatie
+          ctx.fillStyle = 'rgba(255,255,255,0.08)';
+          ctx.fillRect(W*0.04+10, H*0.87, Math.min(W*0.44,380)-20, H*0.030);
+          var progClr = tE<0.33?'#22c55e':tE<0.66?'#f59e0b':'#ef4444';
+          ctx.fillStyle = progClr;
+          ctx.fillRect(W*0.04+10, H*0.87, (Math.min(W*0.44,380)-20)*tE, H*0.030);
+          ctx.fillStyle = 'rgba(220,228,255,0.85)';
+          ctx.font = '700 '+Math.min(W*0.009,11)+'px "IBM Plex Mono",monospace';
+          ctx.textAlign = 'left'; ctx.letterSpacing = '.04em';
+          var yr_anim = Math.round(_S() + tE * _HORIZON);
+          ctx.fillText(_S()+' ─ '+yr_anim+' ─ '+_E()+' | '+Math.round(tE*100)+'% din proiectie', W*0.04+10, H*0.9105);
+          ctx.restore();
+        }
         if(t<0.13){
           titlu(name+' '+_S()+' \u2014 Starea Actuala','Fond construit la zi \u00b7 Densitate reala'); linie();
           cifra(N2(pop21),'Locuitori actuali','#94a3b8');
@@ -1553,7 +1615,8 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         break;
 
       case 'b7s1':
-        try{SE._updateTraffic&&SE._updateTraffic(t);}catch(e){}
+        // _updateTraffic la fiecare frame - animeaza vehiculele pe retea
+        try{if(SE._updateTraffic) SE._updateTraffic(t);}catch(e){}
         titlu('Trafic & Congestie','Flux real OSM \u00b7 Noduri critice \u00b7 Saturatie'); linie();
         cifra(N2(pred.mot24),'Vehicule/1000 loc',(pred.mot24||380)>450?'#ef4444':'#f59e0b');
         cifra2(N2(pred.fluxOra)+' veh/h','Flux ora varf estimat');
@@ -1941,12 +2004,20 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
     SE._si=idx; SE._startT=performance.now();
     SE._cleanLayers&&SE._cleanLayers();
     _cleanV9(map);
-    if(sc.id!=='b6s2'){try{map.setPaintProperty('building-extrusion','fill-extrusion-height',['get','height']);}catch(e){}}
+    // Restaureaza cladirile Mapbox standard pentru scenele fara bare 3D PUG
+    if(sc.id!=='b6s2'&&sc.id!=='b11s2'){
+      try{map.setLayoutProperty('building-extrusion','visibility','visible');}catch(e){}
+      try{map.setPaintProperty('building-extrusion','fill-extrusion-height',['get','height']);}catch(e){}
+    }
     // Curata AGRESIV flood WMS + layere flood v8.0
     try{window._FloodMapper&&window._FloodMapper.hideAll&&window._FloodMapper.hideAll(map);}catch(e){}
-    ['flood-layer','flood-rcp10','flood-rcp100','flood-rcp500','tci-flood-layer','tci-flood-src',
-     'flood-expand-layer','flood-expand-src'].forEach(function(id){
+    // Flood layers - sterge inainte de source
+    ['flood-layer','flood-rcp10','flood-rcp100','flood-rcp500',
+     'tci-flood-layer','flood-expand-layer'].forEach(function(id){
       try{if(map.getLayer(id))map.removeLayer(id);}catch(e){}
+    });
+    ['tci-flood-src','flood-expand-src',
+     'flood-rcp10','flood-rcp100','flood-rcp500'].forEach(function(id){
       try{if(map.getSource(id))map.removeSource(id);}catch(e){}
     });
     try{if(map.getLayer('tci-tp-layer'))map.setLayoutProperty('tci-tp-layer','visibility','none');}catch(e){}
@@ -2396,6 +2467,88 @@ function _buildAgendaCorridors(cx,cy,pred) {
 }
 
 
+
+// ── ZONE REALE DIN PUG ────────────────────────────────────────────────────
+// Calculeaza centroizii UTR-urilor per tip functional
+// Returneaza zone cu coordonate reale pentru camera
+function _calcPUGZones(pugGeo, cx, cy) {
+  var zones = {
+    CBD:  {lon:cx,     lat:cy,     label:'Centru civic'},
+    UNI:  {lon:cx+0.010, lat:cy+0.015, label:'Zona universitara'},
+    IND:  {lon:cx-0.020, lat:cy-0.012, label:'Zona industriala'},
+    RES:  {lon:cx+0.008, lat:cy-0.005, label:'Rezidential'},
+    PER:  {lon:cx+0.045, lat:cy-0.030, label:'Periferie'},
+    VERDE:{lon:cx-0.015, lat:cy+0.010, label:'Spatii verzi'},
+  };
+
+  if(!pugGeo||!pugGeo.features||!pugGeo.features.length) return zones;
+
+  // Grupeaza UTR-urile dupa prefix cod
+  var groups = {};
+  pugGeo.features.forEach(function(f){
+    var utr = (f.properties&&(f.properties.utr_cod||f.properties.cod_utr||''))||'';
+    var prefix = utr.slice(0,2).toUpperCase();
+    if(!prefix) return;
+    if(!groups[prefix]) groups[prefix]={lons:[],lats:[],count:0};
+    // Calculeaza centroidul poligonului
+    var coords = f.geometry&&f.geometry.coordinates&&f.geometry.coordinates[0]||[];
+    if(!coords.length) return;
+    var sumLon=0, sumLat=0;
+    coords.forEach(function(c){sumLon+=c[0];sumLat+=c[1];});
+    groups[prefix].lons.push(sumLon/coords.length);
+    groups[prefix].lats.push(sumLat/coords.length);
+    groups[prefix].count++;
+  });
+
+  // Mapeaza prefixe la zone functionale
+  var PREFMAP = {
+    'CC':'CBD','CP':'CBD',             // Centru comercial/civic
+    'CM':'CBD','CB':'CBD',             // Mixt/birouri centru
+    'LB':'UNI','LC':'UNI',            // Locuire colectiva (zona universitara tipic)
+    'AI':'IND','II':'IND','DS':'IND', // Industrial/depozitare
+    'LA':'RES','LL':'RES',            // Locuire mica/libera
+    'V1':'VERDE','V2':'VERDE',        // Spatii verzi
+    'PP':'PER','ZP':'PER',            // Periferie/plantat
+  };
+
+  Object.entries(groups).forEach(function(e){
+    var prefix=e[0], g=e[1];
+    var zkey = PREFMAP[prefix];
+    if(!zkey||!g.lons.length) return;
+    // Media centroizilor = centrul zonei functionale
+    var avgLon = g.lons.reduce(function(a,b){return a+b;},0)/g.lons.length;
+    var avgLat = g.lats.reduce(function(a,b){return a+b;},0)/g.lats.length;
+    zones[zkey] = {lon:avgLon, lat:avgLat, label:zones[zkey]&&zones[zkey].label||prefix, count:g.count};
+  });
+
+  console.log('[v9] Zone PUG:', JSON.stringify(
+    Object.entries(zones).map(function(e){return e[0]+':'+e[1].lon.toFixed(3)+','+e[1].lat.toFixed(3);})
+  ));
+  return zones;
+}
+
+// Construieste bounding box din UTR-uri PUG pentru un tip
+function _getPUGBBox(pugGeo, utrPrefix) {
+  if(!pugGeo||!pugGeo.features) return null;
+  var minLon=Infinity,minLat=Infinity,maxLon=-Infinity,maxLat=-Infinity;
+  var found=0;
+  pugGeo.features.forEach(function(f){
+    var utr=(f.properties&&(f.properties.utr_cod||f.properties.cod_utr||''))||'';
+    if(!utr.toUpperCase().startsWith(utrPrefix.toUpperCase())) return;
+    var coords=f.geometry&&f.geometry.coordinates&&f.geometry.coordinates[0]||[];
+    coords.forEach(function(c){
+      minLon=Math.min(minLon,c[0]);minLat=Math.min(minLat,c[1]);
+      maxLon=Math.max(maxLon,c[0]);maxLat=Math.max(maxLat,c[1]);
+    });
+    found++;
+  });
+  if(!found) return null;
+  return {
+    lon:(minLon+maxLon)/2, lat:(minLat+maxLat)/2,
+    zoom:14-Math.log2(Math.max(maxLon-minLon,maxLat-minLat)*111),
+  };
+}
+
 function _fp(city){
   var pop=city.pop2021||city.pop||100000,r=city.rata_reala_2011_2021||0;
   return {
@@ -2499,18 +2652,26 @@ function _cleanV9(map){
       });
     }
   }catch(e){}
-  ['v9-hw','v9-hw-buf','v9-rail','v9-apt','v9-urb','v9-urb-maj','v9-green','v9-mon',
-   'v9-cim','v9-utils','v9-amenity','v9-agenda','v9-mob-pts',
-   'corridors-src','corridors-line','corridors-glow','corridors-zones','corridors-dev-zones',
-   'v9-brt','v9-corr','v9-corr-line','v9-corr-glow',
-   'cnair-src','cnair-op','cnair-wip','cnair-plan','cnair-op-glow','cnair-wip-glow',
-   'cestrin-src','cestrin-lines','cestrin-glow',
-   'gtfs-src','gtfs-lines','gtfs-glow',
-   'aero-src','aero-zone','aero-border','aero-pts',
-   'mdlpa-wms',
-   'opensky-src','opensky-pts',
-   'mdlpa-src','mdlpa-fill','mdlpa-border'].forEach(function(id){
+  // Sterge LAYERELE inainte de SOURCE (ordinea corecta Mapbox)
+  var _layers9 = ['v9-hw','v9-hw-buf','v9-rail','v9-apt','v9-urb','v9-urb-maj',
+    'v9-green','v9-mon','v9-cim','v9-utils','v9-amenity','v9-agenda','v9-mob-pts',
+    'corridors-line','corridors-glow','corridors-zones','corridors-dev-zones',
+    'v9-brt','v9-corr-line','v9-corr-glow',
+    'cnair-glow','cnair-wip','cnair-op','cnair-plan',
+    'cestrin-lines','cestrin-glow',
+    'gtfs-lines','gtfs-glow',
+    'aero-zone','aero-border','aero-pts',
+    'opensky-pts',
+    'mdlpa-fill','mdlpa-border','mdlpa-wms'];
+  var _sources9 = ['corridors-src','v9-corr','cnair-src','cestrin-src',
+    'gtfs-src','aero-src','opensky-src','mdlpa-src',
+    'v9-hw','v9-hw-buf','v9-rail','v9-apt','v9-urb','v9-urb-maj',
+    'v9-green','v9-mon','v9-cim','v9-utils','v9-amenity','v9-agenda',
+    'v9-mob-pts','v9-brt'];
+  _layers9.forEach(function(id){
     try{if(map.getLayer(id))map.removeLayer(id);}catch(e){}
+  });
+  _sources9.forEach(function(id){
     try{if(map.getSource(id))map.removeSource(id);}catch(e){}
   });
 }
