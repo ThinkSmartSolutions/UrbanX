@@ -1247,6 +1247,12 @@ document.addEventListener('click', function(){
 
   <!-- Grup 1: Navigare & Căutare -->
   <button class="tb-btn" id="btnUTR">🗺 UTR</button>
+  <button class="tb-btn" id="btn-cadastru-bt" 
+    title="Toggle cadastru Botoșani (vizibil zoom 13+)"
+    style="display:none;color:#94a3b8;border-color:rgba(255,255,255,0.15)"
+    onclick="window._toggleCadastru(window.TCI?.cityKey||localStorage.getItem('ux_last_city')||'RO-BT-01')">
+    🗺 Cadastru
+  </button>
   <button class="tb-btn" id="btnGPS">📍 GPS</button>
   <button class="tb-btn" id="btnMulti" title="Multiselect parcele">🔲 Multi</button>
 
@@ -4772,7 +4778,7 @@ window._PUG_REGISTRY = window._PUG_REGISTRY || {};
 Object.assign(window._PUG_REGISTRY, {
   'RO-IS-01': { id:'municipiul-iasi',    name:'Municipiul Iași',    pugFile:'data/municipiul-iasi/pug.geojson',              reguli:'data/municipiul-iasi/reguli.json' },
   'RO-SV-01': { id:'municipiul-suceava', name:'Municipiul Suceava', pugFile:'js/data/municipiul-suceava/pug.geojson',         reguli:'js/data/municipiul-suceava/reguli.json' },
-  'RO-BT-01': { id:'municipiul-botosani',name:'Municipiul Botoșani',pugFile:'data/municipiul-botosani/pug.geojson',        reguli:'data/municipiul-botosani/reguli.json' },
+  'RO-BT-01': { id:'municipiul-botosani',name:'Municipiul Botoșani',pugFile:'data/municipiul-botosani/pug.geojson', reguli:'js/data/municipiul-botosani/reguli.json', cadastruFile:'data/municipiul-botosani/cadastru.geojson' },
   // ── Comune cu RLU — chei IDENTICE cu TCI._EXTRA_UATS ─────────────────────
   'RO-IS-95042': { id:'comuna-miroslava', name:'Comuna Miroslava', pugFile:'data/comuna-miroslava/pug.geojson', reguli:'data/comuna-miroslava/reguli.json' },
   'RO-IS-95087': { id:'comuna-rediu',     name:'Comuna Rediu',     pugFile:'data/comuna-rediu/pug.geojson',     reguli:'data/comuna-rediu/reguli.json' },
@@ -4781,8 +4787,7 @@ Object.assign(window._PUG_REGISTRY, {
   'RO-IS-94951': { id:'comuna-holboca',   name:'Comuna Holboca',   pugFile:'data/comuna-holboca/pug.geojson',   reguli:'data/comuna-holboca/reguli.json' },
   'RO-GL-77595': { id:'comuna-cuzavoda',  name:'Comuna Cuza Vodă', pugFile:'data/comuna-cuzavoda/pug.geojson',  reguli:'data/comuna-cuzavoda/reguli.json' },
   'RO-BT-38063': { id:'comuna-mihaieminescu', name:'Comuna Mihai Eminescu', pugFile:'data/comuna-mihaieminescu/pug.geojson', reguli:'data/comuna-mihaieminescu/reguli.json' },
-  'RO-IS-95424': { id:'comuna-popricani',     name:'Comuna Popricani',     pugFile:'data/comuna-popricani/pug.geojson',     reguli:'data/comuna-popricani/reguli.json' },
-  'RO-IS-100148': { id:'comuna-vladeni',       name:'Comuna Vlădeni',       pugFile:'data/comuna-vladeni/pug.geojson',       reguli:'data/comuna-vladeni/reguli.json' },
+  'RO-IS-95424': { id:'comuna-popricani',     name:'Comuna Popricani',      pugFile:'data/comuna-popricani/pug.geojson',      reguli:'data/comuna-popricani/reguli.json' },
   // ── Alias-uri retrocompatibilitate ────────────────────────────────────────
   'RO-IS-COM-MIROSLAVA': { id:'comuna-miroslava', name:'Comuna Miroslava', pugFile:'data/comuna-miroslava/pug.geojson', reguli:'data/comuna-miroslava/reguli.json' },
   'RO-IS-COM-ARONEANU':  { id:'comuna-aroneanu',  name:'Comuna Aroneanu',  pugFile:'data/comuna-aroneanu/pug.geojson',  reguli:'data/comuna-aroneanu/reguli.json' },
@@ -5254,38 +5259,23 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
 <script src="js/rlu-cuzavoda.js?v=20260525a"></script>
 <script src="js/rlu-mihaieminescu.js?v=20260525b"></script>
 <script src="js/rlu-popricani.js?v=20260525a"></script>
-<script src="js/rlu-vladeni.js?v=20260525a"></script>
 
 <script>
 // ── Comune RLU în #uat-selector — v12: injectare fiabilă cu tree styling ──
 (function(){
   var COMUNE_CONFIG = [
-    // IAȘI — sub Municipiul Iași
-    {id:'comuna-miroslava',      name:'Miroslava',       judet:'iași',     badge:'✅ RLU', key:'RO-IS-95042'},
-    {id:'comuna-rediu',          name:'Rediu',           judet:'iași',     badge:'✅ RLU', key:'RO-IS-95087'},
-    {id:'comuna-aroneanu',       name:'Aroneanu',        judet:'iași',     badge:'✅ RLU', key:'RO-IS-94889'},
-    {id:'comuna-holboca',        name:'Holboca',         judet:'iași',     badge:'✅ RLU', key:'RO-IS-94951'},
-    {id:'comuna-popricani',      name:'Popricani',       judet:'iași',     badge:'✅ RLU', key:'RO-IS-95424'},
-    {id:'comuna-vladeni',        name:'Vlădeni',         judet:'iași',     badge:'✅ RLU', key:'RO-IS-100148'},
-    // BOTOȘANI — sub Municipiul Botoșani
-    {id:'comuna-baluseni',       name:'Bălușeni',        judet:'botoșani', badge:'✅ RLU', key:'RO-BT-18073'},
-    {id:'comuna-mihaieminescu',  name:'Mihai Eminescu',  judet:'botoșani', badge:'✅ RLU', key:'RO-BT-38063'},
-    // GALAȚI/VRANCEA — grup separat
+    {id:'comuna-miroslava',      name:'Miroslava',       judet:'iași',     badge:'✅ RLU',     key:'RO-IS-95042'},
+    {id:'comuna-rediu',          name:'Rediu',           judet:'iași',     badge:'✅ RLU',     key:'RO-IS-95087'},
+    {id:'comuna-aroneanu',       name:'Aroneanu',        judet:'iași',     badge:'✅ RLU',     key:'RO-IS-94889'},
+    {id:'comuna-holboca',        name:'Holboca',         judet:'iași',     badge:'✅ RLU',     key:'RO-IS-94951'},
+    {id:'comuna-popricani',      name:'Popricani',       judet:'iași',     badge:'🗺 Limite', key:'RO-IS-95424'},
+    {id:'comuna-baluseni',       name:'Bălușeni',        judet:'botoșani', badge:'✅ RLU',     key:'RO-BT-18073'},
+    {id:'comuna-mihaieminescu',  name:'Mihai Eminescu',  judet:'botoșani', badge:'✅ RLU',     key:'RO-BT-38063'},
     {id:'comuna-cuzavoda',       name:'Cuza Vodă',       judet:'galați/vrancea', badge:'✅ RLU', key:'RO-GL-77595'},
   ];
 
-  // Judet → text care apare în headerul grupului nativ
   var JUDET_HEADER = {
-    'iași':           'iași',
-    'botoșani':       'botoșani',
-    'galați/vrancea': 'galați'
-  };
-
-  // Judet → text care identifică municipiul/orașul din grup (primul item clickabil)
-  var JUDET_PARENT_TEXT = {
-    'iași':           'iași',
-    'botoșani':       'botoșani',
-    'galați/vrancea': null
+    'iași': 'iași', 'botoșani': 'botoșani', 'galați/vrancea': 'galați'
   };
 
   function closeModal(){
@@ -5297,7 +5287,6 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
     var div=document.createElement('div');
     div.setAttribute('data-rlu-key', c.key);
     if(isChild){
-      // Styling tree child: indentare + linie verzuie
       div.style.cssText=
         'display:flex;align-items:center;justify-content:space-between;'+
         'padding:5px 10px 5px 28px;border-radius:7px;cursor:pointer;'+
@@ -5311,19 +5300,14 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
         'border:1px solid rgba(255,255,255,0.05);background:transparent;'+
         'margin-bottom:2px;transition:background 0.15s';
     }
-    div.onmouseover=function(){
-      this.style.background=isChild?'rgba(52,211,153,0.06)':'rgba(255,255,255,.04)';
-    };
+    div.onmouseover=function(){this.style.background=isChild?'rgba(52,211,153,0.06)':'rgba(255,255,255,.04)';};
     div.onmouseout=function(){this.style.background='transparent';};
-
     var badgeBg = c.badge.indexOf('RLU')>-1
       ? 'background:rgba(5,150,105,0.2);color:#34d399;border:1px solid rgba(5,150,105,0.3)'
       : 'background:rgba(59,130,246,0.2);color:#93c5fd;border:1px solid rgba(59,130,246,0.3)';
-
     div.innerHTML=
       '<span style="font-size:'+(isChild?'12':'13')+'px;color:'+(isChild?'#cbd5e1':'#e2e8f0')+';font-weight:500">'+c.name+'</span>'+
       '<span style="font-size:10px;padding:2px 7px;border-radius:10px;white-space:nowrap;'+badgeBg+'">'+c.badge+'</span>';
-
     div.addEventListener('click',function(){
       try{localStorage.setItem('ux_last_city',c.key);}catch(e){}
       if(window.TCI)window.TCI.cityKey=c.key;
@@ -5340,93 +5324,56 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
   }
 
   function injectInSelector(modal){
-    // Găsim containerul scrollabil
     var scroll=null;
     for(var i=0;i<modal.children.length;i++){
       var ch=modal.children[i];
-      if(ch.style&&(ch.style.overflowY==='auto'||ch.style.flex==='1'||ch.style.overflow==='auto')){
-        scroll=ch; break;
-      }
+      if(ch.style&&(ch.style.overflowY==='auto'||ch.style.flex==='1'||ch.style.overflow==='auto')){scroll=ch;break;}
     }
     if(!scroll&&modal.children.length>1) scroll=modal.children[1];
     if(!scroll) scroll=modal;
 
-    // Grupare comune pe județ
     var byJudet={};
     COMUNE_CONFIG.forEach(function(c){
-      var j=c.judet;
-      if(!byJudet[j])byJudet[j]=[];
-      byJudet[j].push(c);
+      if(!byJudet[c.judet])byJudet[c.judet]=[];
+      byJudet[c.judet].push(c);
     });
 
-    // Pentru fiecare județ, găsim grupul nativ și injectăm comunele
     Object.keys(byJudet).forEach(function(judet){
-      var headerFragment = JUDET_HEADER[judet] || judet;
+      var headerFragment = JUDET_HEADER[judet]||judet;
       var comuneList = byJudet[judet];
-
-      // Găsim grupul nativ al județului
       var targetGrup = null;
       Array.from(scroll.children).forEach(function(grup){
         if(targetGrup) return;
         var hdr=grup.firstElementChild;
         if(!hdr) return;
-        if(hdr.textContent.toLowerCase().indexOf(headerFragment) > -1){
-          targetGrup = grup;
-        }
+        if(hdr.textContent.toLowerCase().indexOf(headerFragment)>-1) targetGrup=grup;
       });
 
       if(targetGrup){
-        // Verificăm ce comune sunt deja injectate
         var alreadyInjected={};
         Array.from(targetGrup.querySelectorAll('[data-rlu-key]')).forEach(function(el){
           alreadyInjected[el.getAttribute('data-rlu-key')]=true;
         });
-
-        // Inserăm separator imediat după primul item (municipiul), nu după ultimul
-        var hasSep = !!targetGrup.querySelector('[data-rlu-sep]');
-        // Găsim primul item clickabil din grup (municipiul)
-        var firstClickable = null;
-        Array.from(targetGrup.children).forEach(function(child){
-          if(firstClickable) return;
-          if(child.style && child.style.cursor === 'pointer') firstClickable = child;
-          else if(child.onclick) firstClickable = child;
-          else if(child.getAttribute && child.getAttribute('data-key')) firstClickable = child;
-        });
+        var hasSep=!!targetGrup.querySelector('[data-rlu-sep]');
         if(!hasSep && comuneList.some(function(c){return !alreadyInjected[c.key];})){
           var sep=document.createElement('div');
           sep.setAttribute('data-rlu-sep','1');
-          sep.style.cssText=
-            'font-size:8px;color:#34d399;text-transform:uppercase;'+
+          sep.style.cssText='font-size:8px;color:#34d399;text-transform:uppercase;'+
             'letter-spacing:.07em;font-weight:700;padding:5px 4px 3px;'+
             'margin-top:4px;border-top:1px solid rgba(52,211,153,0.2)';
           sep.textContent='── Comune cu RLU ──';
-          if(firstClickable && firstClickable.nextSibling){
-            targetGrup.insertBefore(sep, firstClickable.nextSibling);
-          } else {
-            targetGrup.appendChild(sep);
-          }
+          targetGrup.appendChild(sep);
         }
-        // Injectăm comunele după separator
-        var sepEl = targetGrup.querySelector('[data-rlu-sep]');
         comuneList.forEach(function(c){
           if(alreadyInjected[c.key]) return;
-          var item=makeItem(c, true);
-          if(sepEl && sepEl.nextSibling){
-            targetGrup.insertBefore(item, sepEl.nextSibling);
-          } else {
-            targetGrup.appendChild(item);
-          }
+          targetGrup.appendChild(makeItem(c, true));
         });
-
       } else {
-        // Grup nou pentru județe fără municipiu în lista nativă
-        var alreadyGrup = scroll.querySelector('[data-rlu-grup="'+judet+'"]');
+        var alreadyGrup=scroll.querySelector('[data-rlu-grup="'+judet+'"]');
         if(alreadyGrup){
-          // Verificăm ce comune lipsesc
           comuneList.forEach(function(c){
-            if(!alreadyGrup.querySelector('[data-rlu-key="'+c.key+'"]')){
-              alreadyGrup.appendChild(makeItem(c, false));
-            }
+            if(!alreadyGrup.querySelector('[data-rlu-key="'+c.key+'"]'))
+              alreadyGrup.appendChild(makeItem(c,false));
           });
           return;
         }
@@ -5434,31 +5381,24 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
         grup.style.cssText='margin-bottom:10px';
         grup.setAttribute('data-rlu-grup',judet);
         var hdr=document.createElement('div');
-        hdr.style.cssText=
-          'font-size:8.5px;color:#475569;text-transform:uppercase;'+
+        hdr.style.cssText='font-size:8.5px;color:#475569;text-transform:uppercase;'+
           'letter-spacing:.07em;font-weight:700;padding:4px 4px 4px 0;'+
           'border-bottom:1px solid rgba(255,255,255,.05);margin-bottom:4px';
         hdr.textContent='Moldova — '+judet.charAt(0).toUpperCase()+judet.slice(1);
         grup.appendChild(hdr);
         var sep2=document.createElement('div');
         sep2.setAttribute('data-rlu-sep','1');
-        sep2.style.cssText=
-          'font-size:8px;color:#34d399;text-transform:uppercase;'+
+        sep2.style.cssText='font-size:8px;color:#34d399;text-transform:uppercase;'+
           'letter-spacing:.07em;font-weight:700;padding:4px 4px 3px';
         sep2.textContent='── Comune cu RLU ──';
         grup.appendChild(sep2);
-        comuneList.forEach(function(c){
-          grup.appendChild(makeItem(c, false));
-        });
+        comuneList.forEach(function(c){grup.appendChild(makeItem(c,false));});
         scroll.appendChild(grup);
       }
     });
-
-    console.log('[Comune RLU] ✅ v12 injectat — ' +
-      document.querySelectorAll('[data-rlu-key]').length + ' comune vizibile');
+    console.log('[Comune RLU] v12 ✅ — '+document.querySelectorAll('[data-rlu-key]').length+' comune');
   }
 
-  // MutationObserver pe body — prinde #uat-selector când e adăugat
   var obs=new MutationObserver(function(muts){
     muts.forEach(function(m){
       m.addedNodes.forEach(function(node){
@@ -5475,7 +5415,83 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
       if(i)i.textContent=pug.name.replace('Municipiul ','').replace('Comuna ','').replace('Orașul ','');}
   });
 
-  console.log('[Comune RLU] v12 activ — 8 comune, injectare fiabilă per-cheie');
+  console.log('[Comune RLU] v12 activ — 8 comune (7 RLU + 1 Limite)');
+})();
+</script>
+<script>
+// ── Cadastru Lazy Loader — Municipiul Botoșani ────────────────────────────
+(function(){
+  var _cadLoaded=false, _cadVisible=false, _cadLoading=false;
+
+  window._toggleCadastru=function(cityKey){
+    var map=window.map;
+    if(!map){window.ss?.('⚠ Harta nu e inițializată');return;}
+    var reg=window._PUG_REGISTRY&&window._PUG_REGISTRY[cityKey];
+    if(!reg||!reg.cadastruFile){window.ss?.('⚠ Cadastru indisponibil pentru acest UAT');return;}
+    if(_cadLoaded){
+      _cadVisible=!_cadVisible;
+      try{if(map.getLayer('cadastru-lines'))map.setLayoutProperty('cadastru-lines','visibility',_cadVisible?'visible':'none');}catch(e){}
+      window.ss?.(_cadVisible?'🗺 Cadastru activ':'🗺 Cadastru ascuns');
+      _syncBtn(_cadVisible);return;
+    }
+    if(_cadLoading)return;
+    _cadLoading=true;
+    window.ss?.('⏳ Se încarcă cadastru Botoșani (~12MB)…');
+    var btn=document.getElementById('btn-cadastru-bt');
+    if(btn){btn.disabled=true;btn.textContent='⏳ Loading…';}
+    fetch(reg.cadastruFile+'?v='+Date.now())
+      .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+      .then(function(geojson){
+        _cadLoading=false;_cadLoaded=true;_cadVisible=true;
+        try{
+          if(map.getSource('cadastru-src'))map.getSource('cadastru-src').setData(geojson);
+          else map.addSource('cadastru-src',{type:'geojson',data:geojson,tolerance:0.5});
+          if(!map.getLayer('cadastru-lines'))
+            map.addLayer({id:'cadastru-lines',type:'line',source:'cadastru-src',minzoom:13,
+              paint:{'line-color':'#94a3b8',
+                'line-width':['interpolate',['linear'],['zoom'],13,0.3,16,0.8,18,1.2],
+                'line-opacity':['interpolate',['linear'],['zoom'],13,0.4,16,0.7,18,0.9]
+              }},'utr-line');
+          window.ss?.('✅ Cadastru Botoșani — '+geojson.features.length.toLocaleString()+' parcele');
+        }catch(e){console.error('[Cadastru]',e);window.ss?.('❌ '+e.message);_cadLoading=false;}
+        _syncBtn(true);
+      })
+      .catch(function(e){
+        _cadLoading=false;
+        window.ss?.('❌ Cadastru: '+e.message);
+        var btn2=document.getElementById('btn-cadastru-bt');
+        if(btn2){btn2.disabled=false;btn2.textContent='🗺 Cadastru';}
+      });
+  };
+
+  function _syncBtn(active){
+    var btn=document.getElementById('btn-cadastru-bt');if(!btn)return;
+    btn.disabled=false;
+    btn.textContent=active?'🗺 Cadastru ✓':'🗺 Cadastru';
+    btn.style.borderColor=active?'rgba(52,211,153,0.5)':'rgba(255,255,255,0.15)';
+    btn.style.color=active?'#34d399':'#94a3b8';
+  }
+
+  function _showHideCadBtn(key){
+    var btn=document.getElementById('btn-cadastru-bt');if(!btn)return;
+    var reg=window._PUG_REGISTRY&&window._PUG_REGISTRY[key];
+    btn.style.display=(reg&&reg.cadastruFile)?'flex':'none';
+  }
+
+  window.addEventListener('ux:city_changed',function(e){
+    var key=e.detail&&e.detail.key;
+    _showHideCadBtn(key);
+    if(key!=='RO-BT-01'&&_cadVisible){
+      try{var m=window.map;if(m&&m.getLayer('cadastru-lines'))m.setLayoutProperty('cadastru-lines','visibility','none');}catch(e2){}
+      _cadVisible=false;_syncBtn(false);
+    }
+  });
+
+  setTimeout(function(){
+    _showHideCadBtn(window.TCI?.cityKey||localStorage.getItem('ux_last_city')||'RO-IS-01');
+  },1500);
+
+  console.log('[Cadastru BT] lazy loader ready');
 })();
 </script>
 </body>
