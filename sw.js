@@ -1,5 +1,5 @@
 /* UrbanX SW v4.5 */
-const CACHE='urbanx-v4.5';
+const CACHE='urbanx-v4.6';
 const OLD=[
   'urbanx-v4.0','urbanx-v4.1','urbanx-v4.2','urbanx-v4.3',
   'urbanx-v4.3e','urbanx-v4.3f','urbanx-v4.3h','mapbox-tiles',
