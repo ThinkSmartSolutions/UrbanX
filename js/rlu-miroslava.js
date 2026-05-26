@@ -17,7 +17,7 @@
   const UAT_KEY    = 'RO-IS-95042';
   const UAT_NAME   = 'Comuna Miroslava';
   const JUDET      = 'Iași';
-  const REGULI_URL = 'js/data/comuna-miroslava/reguli.json';
+  const REGULI_URL = 'data/comuna-miroslava/reguli.json';
   const AUDIT_KEY  = 'ux_miroslava_subzona_audit';
 
   /* ─────────────────────────────────────────────
