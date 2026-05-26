@@ -826,9 +826,56 @@ function htmlUTR(){
     <div class="met" style="margin-top:6px"><div class="ml">🚫 Interzise</div><div class="mv">${esc(r.ui||'-')}</div></div>
     `:''}
   </div>
-  <div class="section">🏗 Validare funcțiune propusă</div>
-  <div class="${fnVal.status==='ok'?'ok-box':fnVal.status==='warn'?'warn-box':'err-box'}">${fnVal.msg}</div>
-  ${fnData?`<div class="help">🅿️ Parcaje necesare: <b>${calcParcaje(S.vol.fn,ap.area,0,0)}</b></div>`:''}`;
+  <div class="section">🔍 Ce vrei să construiești?</div>
+  <div id="fn-engine-card" style="padding:0 4px">
+    ${(()=>{
+      // Lookup UTR numeric din S.pug.features (sincron)
+      let utrNr = ap.utr_nr;
+      if (!utrNr && ap.geo && S.pugIdx && S.pug) {
+        try {
+          const pts = ap.geo.geometry?.coordinates?.[0];
+          if (pts && pts.length) {
+            const cx = pts.reduce((s,p)=>s+p[0],0)/pts.length;
+            const cy = pts.reduce((s,p)=>s+p[1],0)/pts.length;
+            const pt = {type:'Feature',geometry:{type:'Point',coordinates:[cx,cy]},properties:{}};
+            for (const idx of S.pugIdx) {
+              if (cx<idx.bb[0]||cx>idx.bb[2]||cy<idx.bb[1]||cy>idx.bb[3]) continue;
+              if (turf.booleanPointInPolygon(pt,{type:'Feature',geometry:idx.geom,properties:{}})) {
+                for (const pf of S.pug.features) {
+                  if (pf.properties?.utr === idx.utr) {
+                    if (turf.booleanPointInPolygon(pt,{type:'Feature',geometry:pf.geometry,properties:{}})) {
+                      utrNr = pf.properties?.UTR ? String(pf.properties.UTR) : null;
+                      if (utrNr) { ap.utr_nr = utrNr; break; }
+                    }
+                  }
+                }
+                if (utrNr) break;
+              }
+            }
+          }
+        } catch(e) {}
+      }
+      const cityKey = window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
+      const d = window._PUG_REGULI && window._PUG_REGULI[cityKey];
+      const CATS = window._FunctionEngine?.cats || [];
+      if (!d || !utrNr || !d.utrs[String(utrNr)] || !CATS.length) {
+        return '<div class="'+( fnVal.status==='ok'?'ok-box':fnVal.status==='warn'?'warn-box':'err-box')+'">'+fnVal.msg+'</div>'
+          +(fnData?'<div class="help">🅿️ Parcaje: <b>'+calcParcaje(S.vol.fn,ap.area,0,0)+'</b></div>':'');
+      }
+      const catBtns = CATS.map(cat =>
+        '<button onclick="window._selCat(\'' + cat.id + '\')" data-cat="' + cat.id + '" '
+        +'style="display:flex;flex-direction:column;align-items:center;justify-content:center;'
+        +'padding:8px 4px;border-radius:9px;cursor:pointer;border:1px solid rgba(255,255,255,0.1);'
+        +'background:rgba(255,255,255,0.04);color:#94a3b8;font-size:10px;font-weight:600;'
+        +'transition:all 0.15s;flex:1;min-height:52px">'
+        +'<span style="font-size:18px;margin-bottom:2px">'+cat.icon+'</span>'
+        +'<span>'+cat.label+'</span></button>'
+      ).join('');
+      return '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:8px">'+catBtns+'</div>'
+        +'<div id="fn-items-list" style="display:none;margin-bottom:4px"></div>'
+        +'<div id="fn-result"></div>';
+    })()}
+  </div>`;
 }
 
 // ═══ HTML INDICATORI ══════════════════════════════════════════════════════
