@@ -5339,69 +5339,61 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
 </script>
 <script>
 // ════════════════════════════════════════════════════════════════════════════
-// FUNCTION ENGINE v2.0 — "Ce vreau să construiesc?" → verificare PUG
-// Utilizator alege funcțiunea în limbaj uman → sistem verifică UTR
-// Replicabil pentru orice UAT cu reguli.json structurat
+// FUNCTION ENGINE v2.1 — lookup spațial direct din S.pug.features
+// Nu mai depinde de ap.utr_nr — face point-in-polygon la click
 // ════════════════════════════════════════════════════════════════════════════
 (function(){
 'use strict';
 
-// ── Categorii și funcțiuni în limbaj uman ────────────────────────────────────
-var CATEGORIES = [
-  { id:'locuire',    icon:'🏠', label:'Locuire',
-    items:[
-      { id:'casa_mica',   label:'Casă / vilă P+1E',       codes:['LMu1','LMre1','LMrf1'] },
-      { id:'casa_mare',   label:'Casă P+2E și mai mare',  codes:['LMu2','LMre2','LMrf2'] },
-      { id:'bloc_mic',    label:'Bloc mic (până la P+4E)', codes:['LIu1'] },
-      { id:'bloc_mare',   label:'Bloc mare (P+5E+)',       codes:['LIu2'] },
-      { id:'anexa',       label:'Anexă gospodărească',     codes:['LMu1','LMre1','LMrf1'] },
-    ]
-  },
-  { id:'servicii',   icon:'🏢', label:'Servicii',
-    items:[
-      { id:'magazin',     label:'Magazin / spațiu comercial', codes:['C_CP','C_CS','IS'] },
-      { id:'birou',       label:'Birou / cabinet / sediu',    codes:['C_CP','C_CS','IS'] },
-      { id:'restaurant',  label:'Restaurant / cafenea',       codes:['C_CP','C_CS'] },
-      { id:'hotel',       label:'Hotel / pensiune / turism',  codes:['C_CP','IS'] },
-      { id:'clinica',     label:'Clinică / farmacie',         codes:['IS'] },
-      { id:'scoala',      label:'Școală / grădiniță',         codes:['IS'] },
-    ]
-  },
-  { id:'productie',  icon:'🏭', label:'Producție',
-    items:[
-      { id:'hala',        label:'Hală producție',             codes:['I1','I2'] },
-      { id:'depozit',     label:'Depozit / logistică',        codes:['I1','I2'] },
-      { id:'atelier',     label:'Atelier / meșteșug',         codes:['I2'] },
-    ]
-  },
-  { id:'verde',      icon:'🌳', label:'Spații verzi',
-    items:[
-      { id:'parc',        label:'Parc / scuar / grădină',     codes:['Pp'] },
-      { id:'sport',       label:'Teren sport / bază sportivă',codes:['Pcs'] },
-      { id:'padure',      label:'Pădure / perdea verde',      codes:['PA','PS'] },
-    ]
-  },
-  { id:'transport',  icon:'🚗', label:'Transport',
-    items:[
-      { id:'parcare_sol', label:'Parcare la sol',              codes:['CCr'] },
-      { id:'parcare_sup', label:'Parcare supraetajată',        codes:['CCr','C_CP','C_CS'] },
-      { id:'garaj',       label:'Garaj / service auto',       codes:['CCr'] },
-      { id:'statie',      label:'Stație transport public',     codes:['CCr','CCp'] },
-    ]
-  },
-  { id:'speciale',   icon:'⛪', label:'Speciale',
-    items:[
-      { id:'biserica',    label:'Biserică / lăcaș de cult',   codes:['IS','GC_TE'] },
-      { id:'cimitir',     label:'Cimitir / capelă',           codes:['GC_TE'] },
-      { id:'muzeu',       label:'Muzeu / obiectiv turistic',  codes:['IS','C_CP'] },
-      { id:'militar',     label:'Unitate militară / specială',codes:['S'] },
-    ]
-  },
+var CATS = [
+  {id:'locuire',   icon:'🏠', label:'Locuire',
+   items:[
+    {id:'casa_mica',  label:'Casă / vilă P+1E',        codes:['LMu1','LMre1','LMrf1']},
+    {id:'casa_mare',  label:'Casă P+2E și mai mare',   codes:['LMu2','LMre2','LMrf2']},
+    {id:'bloc_mic',   label:'Bloc mic (până la P+4E)', codes:['LIu1']},
+    {id:'bloc_mare',  label:'Bloc mare (P+5E+)',        codes:['LIu2']},
+    {id:'anexa',      label:'Anexă / gospodărie',       codes:['LMu1','LMre1','LMrf1']},
+  ]},
+  {id:'servicii',  icon:'🏢', label:'Servicii',
+   items:[
+    {id:'magazin',    label:'Magazin / spațiu comercial', codes:['C_CP','C_CS','IS']},
+    {id:'birou',      label:'Birou / cabinet / sediu',    codes:['C_CP','C_CS','IS']},
+    {id:'restaurant', label:'Restaurant / cafenea',       codes:['C_CP','C_CS']},
+    {id:'hotel',      label:'Hotel / pensiune',           codes:['C_CP','IS']},
+    {id:'clinica',    label:'Clinică / farmacie',         codes:['IS']},
+    {id:'scoala',     label:'Școală / grădiniță',         codes:['IS']},
+  ]},
+  {id:'productie', icon:'🏭', label:'Producție',
+   items:[
+    {id:'hala',       label:'Hală producție',             codes:['I1','I2']},
+    {id:'depozit',    label:'Depozit / logistică',        codes:['I1','I2']},
+    {id:'atelier',    label:'Atelier / meșteșug',         codes:['I2']},
+  ]},
+  {id:'verde',     icon:'🌳', label:'Spații verzi',
+   items:[
+    {id:'parc',       label:'Parc / scuar / grădină',     codes:['Pp']},
+    {id:'sport',      label:'Teren sport / bază sportivă',codes:['Pcs']},
+    {id:'padure',     label:'Pădure / perdea verde',      codes:['PA','PS']},
+  ]},
+  {id:'transport', icon:'🚗', label:'Transport',
+   items:[
+    {id:'parcare_sol',label:'Parcare la sol',              codes:['CCr']},
+    {id:'parcare_sup',label:'Parcare supraetajată',        codes:['CCr','C_CP','C_CS']},
+    {id:'garaj',      label:'Garaj / service auto',       codes:['CCr']},
+    {id:'statie',     label:'Stație transport public',     codes:['CCr','CCp']},
+  ]},
+  {id:'speciale',  icon:'⛪', label:'Speciale',
+   items:[
+    {id:'biserica',   label:'Biserică / lăcaș de cult',   codes:['IS','GC_TE']},
+    {id:'cimitir',    label:'Cimitir / capelă',            codes:['GC_TE']},
+    {id:'muzeu',      label:'Muzeu / obiectiv turistic',  codes:['IS','C_CP']},
+    {id:'militar',    label:'Unitate militară / specială',codes:['S']},
+  ]},
 ];
 
-// ── Cache reguli per UAT ─────────────────────────────────────────────────────
 window._PUG_REGULI = window._PUG_REGULI || {};
 
+// ── Încarcă reguli.json ───────────────────────────────────────────────────────
 async function _loadReguli(cityKey) {
   if (window._PUG_REGULI[cityKey]) return window._PUG_REGULI[cityKey];
   var reg = window._PUG_REGISTRY && window._PUG_REGISTRY[cityKey];
@@ -5420,8 +5412,70 @@ function _cityKey() {
   return window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
 }
 
-// ── Verifică dacă o funcțiune e permisă în UTR ──────────────────────────────
-// returnează: 'dominant' | 'complementar' | 'interzis' | 'necunoscut'
+// ── Lookup UTR numeric din pug.geojson folosind point-in-polygon ──────────────
+// Caută în S.pug.features (nu în pugIdx) și returnează UTR numeric (ex: '33')
+function _findUTRNumericForParcel(ap) {
+  // 1. Dacă deja stocat pe parcelă
+  if (ap.utr_nr) return ap.utr_nr;
+  
+  // 2. Caută centrul parcelei
+  var lng, lat;
+  try {
+    if (ap.geo && ap.geo.geometry) {
+      var ctr = turf.centerOfMass(ap.geo);
+      lng = ctr.geometry.coordinates[0];
+      lat = ctr.geometry.coordinates[1];
+    } else if (window.S && window.S.ll) {
+      lng = window.S.ll.lng;
+      lat = window.S.ll.lat;
+    } else {
+      return null;
+    }
+  } catch(e) { return null; }
+
+  // 3. Caută în S.pugIdx (bbox check rapid) + booleanPointInPolygon
+  var pugIdx = window.S && window.S.pugIdx;
+  var pugFeats = window.S && window.S.pug && window.S.pug.features;
+  if (!pugIdx || !pugFeats) return null;
+
+  var pt = {type:'Feature', geometry:{type:'Point', coordinates:[lng, lat]}, properties:{}};
+
+  // Parcurge pugIdx (sortat după arie crescătoare — primul match = zona cea mai mică = cea mai specifică)
+  for (var i = 0; i < pugIdx.length; i++) {
+    var idx = pugIdx[i];
+    // Bbox check
+    if (lng < idx.bb[0] || lng > idx.bb[2] || lat < idx.bb[1] || lat > idx.bb[3]) continue;
+    // Point in polygon
+    try {
+      var feat = {type:'Feature', geometry: idx.geom, properties:{}};
+      if (turf.booleanPointInPolygon(pt, feat)) {
+        // Găsit în pugIdx — acum căutăm UTR numeric în S.pug.features
+        // cu același cod funcțional și bbox similar
+        for (var j = 0; j < pugFeats.length; j++) {
+          var pf = pugFeats[j];
+          if (pf.properties && pf.properties.utr === idx.utr) {
+            // Verificăm că e același feature (bbox similar)
+            try {
+              var pfFeat = {type:'Feature', geometry: pf.geometry, properties:{}};
+              if (turf.booleanPointInPolygon(pt, pfFeat)) {
+                var utrNr = pf.properties.UTR || pf.properties.utr_nr;
+                if (utrNr) {
+                  ap.utr_nr = String(utrNr); // cache pe parcelă
+                  return ap.utr_nr;
+                }
+              }
+            } catch(e2) {}
+          }
+        }
+        // Fallback: returnăm codul funcțional dacă nu găsim numeric
+        return idx.utr;
+      }
+    } catch(e) {}
+  }
+  return null;
+}
+
+// ── Verifică dacă funcțiunea e permisă ──────────────────────────────────────
 function _checkFn(fnCodes, utrData) {
   var fnDom = utrData.fn_dominanta || '';
   var fnCompl = utrData.fn_complementare || [];
@@ -5430,264 +5484,235 @@ function _checkFn(fnCodes, utrData) {
 
   for (var i = 0; i < fnCodes.length; i++) {
     var code = fnCodes[i];
-    // Verificăm în interzise (cu wildcards parțiale)
-    var isInt = fnInt.some(function(fi) { return fi.indexOf(code) === 0 || code.indexOf(fi.split(' ')[0]) === 0; });
-    if (isInt) continue; // încearcă alt cod
-    
-    // E dominant?
+    var isInt = fnInt.some(function(fi){ return fi.split(' ')[0] === code || fi === code; });
+    if (isInt) continue;
     if (fnDom === code || fnDom.indexOf(code) === 0) return {status:'dominant', code:code};
-    
-    // E în subzone admise?
     if (fnAdmise.indexOf(code) > -1) return {status:'complementar', code:code};
-    
-    // E în fn_complementare?
-    var isCompl = fnCompl.some(function(fc) { return fc.indexOf(code) === 0 || code.indexOf(fc.split(' ')[0]) === 0; });
-    if (isCompl) return {status:'complementar', code:code};
+    if (fnCompl.some(function(fc){ return fc.split(' ')[0] === code || fc === code; }))
+      return {status:'complementar', code:code};
   }
-  
-  // Toate codurile sunt interzise sau necunoscute
-  var allInt = fnCodes.every(function(code) {
-    return fnInt.some(function(fi) { return fi.indexOf(code) === 0 || code.indexOf(fi.split(' ')[0]) === 0; });
+  var allInt = fnCodes.every(function(code){
+    return fnInt.some(function(fi){ return fi.split(' ')[0] === code || fi === code; });
   });
   return {status: allInt ? 'interzis' : 'necunoscut', code: fnCodes[0]};
 }
 
-// ── Obține parametrii subzonei pentru funcțiunea aleasă ─────────────────────
 function _getParams(result, d) {
   var code = result.code;
   var sz = d.subzone[code];
   if (!sz) {
-    // Caută subzonă cu același prefix
     var keys = Object.keys(d.subzone);
     for (var i = 0; i < keys.length; i++) {
-      if (keys[i].indexOf(code) === 0 || code.indexOf(keys[i]) === 0) {
-        sz = d.subzone[keys[i]];
-        break;
-      }
+      if (keys[i].indexOf(code) === 0 || code.indexOf(keys[i]) === 0) { sz = d.subzone[keys[i]]; break; }
     }
   }
   return sz || {};
 }
 
-// ── Construiește HTML rezultat ───────────────────────────────────────────────
-function _buildResultHTML(fnItem, result, params, utrNr, utrDen) {
-  var statusConfig = {
-    'dominant':    { bg:'rgba(52,211,153,0.12)', border:'rgba(52,211,153,0.4)', color:'#34d399', icon:'✅', label:'PERMIS — funcțiune dominantă' },
-    'complementar':{ bg:'rgba(251,191,36,0.12)',  border:'rgba(251,191,36,0.4)',  color:'#fbbf24', icon:'🟡', label:'PERMIS CU CONDIȚII — funcțiune complementară' },
-    'interzis':    { bg:'rgba(239,68,68,0.12)',   border:'rgba(239,68,68,0.4)',   color:'#ef4444', icon:'⛔', label:'INTERZIS în această zonă' },
-    'necunoscut':  { bg:'rgba(148,163,184,0.12)', border:'rgba(148,163,184,0.3)', color:'#94a3b8', icon:'❓', label:'Verificați cu primăria' },
+function _pbox(label, val, color) {
+  return '<div style="background:rgba(0,0,0,0.2);border-radius:6px;padding:5px 7px">'
+    +'<div style="font-size:9px;color:#64748b">'+label+'</div>'
+    +'<div style="font-size:13px;font-weight:700;color:'+color+'">'+val+'</div></div>';
+}
+
+function _buildResult(fnItem, result, params, utrNr, utrDen) {
+  var SC = {
+    dominant:    {bg:'rgba(52,211,153,0.12)',  bd:'rgba(52,211,153,0.4)',  c:'#34d399', icon:'✅', label:'PERMIS — funcțiune dominantă'},
+    complementar:{bg:'rgba(251,191,36,0.12)',  bd:'rgba(251,191,36,0.4)',  c:'#fbbf24', icon:'🟡', label:'PERMIS CU CONDIȚII — funcțiune complementară'},
+    interzis:    {bg:'rgba(239,68,68,0.12)',   bd:'rgba(239,68,68,0.4)',   c:'#ef4444', icon:'⛔', label:'INTERZIS în această zonă'},
+    necunoscut:  {bg:'rgba(148,163,184,0.12)', bd:'rgba(148,163,184,0.3)', c:'#94a3b8', icon:'❓', label:'Verificați cu primăria'},
   };
-  var sc = statusConfig[result.status] || statusConfig['necunoscut'];
-  
+  var sc = SC[result.status] || SC.necunoscut;
   var paramsHtml = '';
   if (result.status !== 'interzis' && params.pot_baza != null) {
     paramsHtml = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px">'
-      + _paramBox('POT max', params.pot_baza != null ? params.pot_baza+'%' : '—', '#fbbf24')
-      + _paramBox('CUT max', params.cut_baza != null ? params.cut_baza+' mp/mp' : '—', '#fbbf24')
-      + _paramBox('H max',   params.hmax_m   != null ? params.hmax_m+'m' : '—', '#34d399')
-      + _paramBox('Regim',   params.niv_max  != null ? params.niv_max+' niv' : (params.regim||'—'), '#34d399')
-      + '</div>';
-    if (params.regim) {
-      paramsHtml += '<div style="font-size:9px;color:#64748b;margin-top:5px">'+params.regim+'</div>';
-    }
+      +_pbox('POT max', params.pot_baza+'%', '#fbbf24')
+      +_pbox('CUT max', params.cut_baza!=null?params.cut_baza+' mp/mp':'—', '#fbbf24')
+      +_pbox('H max',   params.hmax_m!=null?params.hmax_m+'m':'—', '#34d399')
+      +_pbox('Regim',   params.niv_max!=null?params.niv_max+' niv':(params.regim||'—'), '#34d399')
+      +'</div>';
   }
-
-  return '<div style="margin-top:10px;padding:10px;border-radius:9px;background:'+sc.bg+';border:1px solid '+sc.border+'">'
-    + '<div style="font-size:11px;font-weight:700;color:'+sc.color+'">'+sc.icon+' '+sc.label+'</div>'
-    + '<div style="font-size:10px;color:#94a3b8;margin-top:3px">'+fnItem.label+' · UTR '+utrNr+' ('+utrDen+')</div>'
-    + paramsHtml
-    + (result.status==='complementar' ? '<div style="font-size:9px;color:#fbbf24;margin-top:5px">⚠ Necesită documentație urbanistică suplimentară</div>' : '')
-    + (result.status==='interzis' ? '<div style="font-size:9px;color:#ef4444;margin-top:5px">Alegeți un alt teren sau o altă funcțiune.</div>' : '')
-    + '<button onclick="window._showFunctionDetails()" style="width:100%;margin-top:8px;padding:5px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:6px;color:#94a3b8;font-size:10px;cursor:pointer">📋 Vezi toate funcțiunile admise</button>'
-    + '</div>';
+  return '<div id="fn-result-inner" style="margin-top:10px;padding:10px;border-radius:9px;background:'+sc.bg+';border:1px solid '+sc.bd+'">'
+    +'<div style="font-size:11px;font-weight:700;color:'+sc.c+'">'+sc.icon+' '+sc.label+'</div>'
+    +'<div style="font-size:10px;color:#94a3b8;margin-top:3px">'+fnItem.label+' · UTR '+utrNr+' ('+utrDen+')</div>'
+    +paramsHtml
+    +(result.status==='complementar'?'<div style="font-size:9px;color:#fbbf24;margin-top:5px">⚠ Necesită documentație urbanistică (PUZ/PUD)</div>':'')
+    +(result.status==='interzis'?'<div style="font-size:9px;color:#ef4444;margin-top:5px">Alegeți alt teren sau altă funcțiune.</div>':'')
+    +'<button onclick="window._showAllFunctions()" style="width:100%;margin-top:8px;padding:5px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:6px;color:#94a3b8;font-size:10px;cursor:pointer">📋 Toate funcțiunile admise</button>'
+    +'</div>';
 }
 
-function _paramBox(label, val, color) {
-  return '<div style="background:rgba(0,0,0,0.2);border-radius:6px;padding:5px 7px">'
-    + '<div style="font-size:9px;color:#64748b">'+label+'</div>'
-    + '<div style="font-size:13px;font-weight:700;color:'+color+'">'+val+'</div>'
-    + '</div>';
-}
-
-// ── Fișa completă funcțiuni admise ──────────────────────────────────────────
-window._showFunctionDetails = function() {
+// ── Modal toate funcțiunile ───────────────────────────────────────────────────
+window._showAllFunctions = function() {
   var cityKey = _cityKey();
   var d = window._PUG_REGULI[cityKey];
   var ap = window.S?.parcels?.[window.S?.activeParcel??0];
   if (!d || !ap) return;
-  var utrNr = ap.utr_nr;
+  var utrNr = _findUTRNumericForParcel(ap);
   if (!utrNr) return;
   var utrData = d.utrs[String(utrNr)];
   if (!utrData) return;
 
-  var rows = CATEGORIES.map(function(cat) {
-    return cat.items.map(function(item) {
+  var rows = CATS.map(function(cat){
+    return cat.items.map(function(item){
       var result = _checkFn(item.codes, utrData);
-      var sc = {
-        'dominant':    '✅', 'complementar':'🟡',
-        'interzis':    '⛔', 'necunoscut':  '❓'
-      }[result.status];
-      var color = {'dominant':'#34d399','complementar':'#fbbf24','interzis':'#ef4444','necunoscut':'#64748b'}[result.status];
+      var icon = {dominant:'✅',complementar:'🟡',interzis:'⛔',necunoscut:'❓'}[result.status];
+      var color = {dominant:'#34d399',complementar:'#fbbf24',interzis:'#ef4444',necunoscut:'#64748b'}[result.status];
       return '<tr style="border-bottom:1px solid rgba(255,255,255,0.05)">'
-        + '<td style="padding:6px 8px;font-size:11px">'+cat.icon+'</td>'
-        + '<td style="padding:6px 8px;font-size:11px;color:#e2e8f0">'+item.label+'</td>'
-        + '<td style="padding:6px 8px;font-size:13px;text-align:center">'+sc+'</td>'
-        + '<td style="padding:6px 8px;font-size:10px;color:'+color+'">'+result.status+'</td>'
-        + '</tr>';
+        +'<td style="padding:6px 8px;font-size:11px">'+cat.icon+'</td>'
+        +'<td style="padding:6px 8px;font-size:11px;color:#e2e8f0">'+item.label+'</td>'
+        +'<td style="padding:6px 8px;font-size:14px;text-align:center">'+icon+'</td>'
+        +'<td style="padding:6px 8px;font-size:9px;color:'+color+'">'+result.status+'</td>'
+        +'</tr>';
     }).join('');
   }).join('');
 
   var modal = document.createElement('div');
-  modal.id = 'fn-details-modal';
+  modal.id = 'fn-all-modal';
   modal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;padding:16px';
-  modal.innerHTML = '<div style="background:#0b1220;border:1px solid rgba(212,175,55,0.4);border-radius:14px;max-width:480px;width:100%;max-height:88vh;overflow-y:auto;padding:20px">'
-    + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">'
-    + '<div><div style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em">Toate funcțiunile</div>'
-    + '<div style="font-size:16px;font-weight:700;color:#d4af37">UTR ' + utrNr + ' — ' + (utrData.denumire||'') + '</div></div>'
-    + '<button onclick="document.getElementById(\'fn-details-modal\').remove()" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:#f87171;border-radius:8px;padding:6px 12px;cursor:pointer;font-weight:700">✕</button>'
-    + '</div>'
-    + '<div style="font-size:10px;color:#64748b;margin-bottom:8px">✅ Permis dominant &nbsp; 🟡 Permis cu condiții &nbsp; ⛔ Interzis</div>'
-    + '<table style="width:100%;border-collapse:collapse"><tbody>'+rows+'</tbody></table>'
-    + '</div>';
-  modal.addEventListener('click', function(e) { if(e.target===modal) modal.remove(); });
+  modal.innerHTML = '<div style="background:#0b1220;border:1px solid rgba(212,175,55,0.4);border-radius:14px;max-width:440px;width:100%;max-height:88vh;overflow-y:auto;padding:20px">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">'
+    +'<div><div style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em">Toate funcțiunile</div>'
+    +'<div style="font-size:15px;font-weight:700;color:#d4af37">UTR '+utrNr+' — '+(utrData.denumire||'')+'</div></div>'
+    +'<button onclick="document.getElementById(\'fn-all-modal\').remove()" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:#f87171;border-radius:8px;padding:6px 12px;cursor:pointer;font-weight:700">✕</button>'
+    +'</div>'
+    +'<div style="font-size:10px;color:#64748b;margin-bottom:8px">✅ Dominant &nbsp;🟡 Cu condiții &nbsp;⛔ Interzis</div>'
+    +'<table style="width:100%;border-collapse:collapse"><tbody>'+rows+'</tbody></table>'
+    +'</div>';
+  modal.addEventListener('click',function(e){if(e.target===modal)modal.remove();});
   document.body.appendChild(modal);
 };
 
-// ── Construiește selectorul categoria → funcțiune ────────────────────────────
-window._buildFunctionSelector = function(utrNr, d) {
-  var utrData = d.utrs[String(utrNr)];
-  if (!utrData) return '';
-  var utrDen = utrData.denumire || ('UTR ' + utrNr);
-  
-  var catBtns = CATEGORIES.map(function(cat) {
-    return '<button onclick="window._selectFnCategory(\''+cat.id+'\')" '
-      + 'data-cat="'+cat.id+'" '
-      + 'style="display:flex;flex-direction:column;align-items:center;justify-content:center;'
-      + 'padding:8px 4px;border-radius:9px;cursor:pointer;border:1px solid rgba(255,255,255,0.1);'
-      + 'background:rgba(255,255,255,0.04);color:#94a3b8;font-size:10px;font-weight:600;'
-      + 'transition:all 0.15s;flex:1;min-height:52px">'
-      + '<span style="font-size:18px;margin-bottom:2px">'+cat.icon+'</span>'
-      + '<span>'+cat.label+'</span>'
-      + '</button>';
+// ── Selector categorie → funcțiune ───────────────────────────────────────────
+window._buildFunctionSelector = function(utrNr, utrDen) {
+  var catBtns = CATS.map(function(cat){
+    return '<button onclick="window._selCat(\''+cat.id+'\')" data-cat="'+cat.id+'" '
+      +'style="display:flex;flex-direction:column;align-items:center;justify-content:center;'
+      +'padding:8px 4px;border-radius:9px;cursor:pointer;border:1px solid rgba(255,255,255,0.1);'
+      +'background:rgba(255,255,255,0.04);color:#94a3b8;font-size:10px;font-weight:600;'
+      +'transition:all 0.15s;flex:1;min-height:52px">'
+      +'<span style="font-size:18px;margin-bottom:2px">'+cat.icon+'</span>'
+      +'<span>'+cat.label+'</span></button>';
   }).join('');
-
   return '<div id="fn-selector-card" style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(212,175,55,0.3)">'
-    + '<div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">🔍 Ce vrei să construiești?</div>'
-    + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:8px">'+catBtns+'</div>'
-    + '<div id="fn-items-list" style="display:none"></div>'
-    + '<div id="fn-result" style="display:none"></div>'
-    + '</div>';
+    +'<div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">🔍 Ce vrei să construiești?</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:8px">'+catBtns+'</div>'
+    +'<div id="fn-items-list" style="display:none"></div>'
+    +'<div id="fn-result"></div>'
+    +'</div>';
 };
 
-// ── Selectare categorie ──────────────────────────────────────────────────────
-window._selectFnCategory = function(catId) {
-  // Highlight buton activ
-  document.querySelectorAll('[data-cat]').forEach(function(btn) {
-    var active = btn.getAttribute('data-cat') === catId;
-    btn.style.background = active ? 'rgba(212,175,55,0.15)' : 'rgba(255,255,255,0.04)';
-    btn.style.borderColor = active ? 'rgba(212,175,55,0.5)' : 'rgba(255,255,255,0.1)';
-    btn.style.color = active ? '#d4af37' : '#94a3b8';
+window._selCat = function(catId) {
+  document.querySelectorAll('[data-cat]').forEach(function(btn){
+    var a = btn.getAttribute('data-cat')===catId;
+    btn.style.background=a?'rgba(212,175,55,0.15)':'rgba(255,255,255,0.04)';
+    btn.style.borderColor=a?'rgba(212,175,55,0.5)':'rgba(255,255,255,0.1)';
+    btn.style.color=a?'#d4af37':'#94a3b8';
   });
-
-  var cat = CATEGORIES.find(function(c) { return c.id === catId; });
+  var cat = CATS.find(function(c){return c.id===catId;});
   if (!cat) return;
-
   var listEl = document.getElementById('fn-items-list');
-  var resultEl = document.getElementById('fn-result');
+  var resEl = document.getElementById('fn-result');
   if (!listEl) return;
-
-  listEl.style.display = 'block';
-  resultEl.style.display = 'none';
-  resultEl.innerHTML = '';
-
-  var btns = cat.items.map(function(item) {
-    return '<button onclick="window._checkFunction(\''+item.id+'\',\''+catId+'\')" '
-      + 'style="display:block;width:100%;text-align:left;padding:8px 10px;border-radius:7px;'
-      + 'cursor:pointer;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);'
-      + 'color:#cbd5e1;font-size:12px;margin-bottom:4px;transition:background 0.15s" '
-      + 'onmouseover="this.style.background=\'rgba(255,255,255,0.07)\'" '
-      + 'onmouseout="this.style.background=\'rgba(255,255,255,0.03)\'">'
-      + item.label
-      + '</button>';
+  listEl.style.display='block';
+  if(resEl){resEl.innerHTML='';}
+  listEl.innerHTML = cat.items.map(function(item){
+    return '<button onclick="window._checkFnUser(\''+item.id+'\',\''+catId+'\')" '
+      +'style="display:block;width:100%;text-align:left;padding:8px 10px;border-radius:7px;'
+      +'cursor:pointer;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);'
+      +'color:#cbd5e1;font-size:12px;margin-bottom:4px;transition:background 0.15s" '
+      +'onmouseover="this.style.background=\'rgba(255,255,255,0.07)\'" '
+      +'onmouseout="this.style.background=\'rgba(255,255,255,0.03)\'">'
+      +item.label+'</button>';
   }).join('');
-
-  listEl.innerHTML = btns;
 };
 
-// ── Verificare funcțiune aleasă ──────────────────────────────────────────────
-window._checkFunction = async function(fnId, catId) {
-  var cat = CATEGORIES.find(function(c) { return c.id === catId; });
-  if (!cat) return;
-  var fnItem = cat.items.find(function(i) { return i.id === fnId; });
+window._checkFnUser = async function(fnId, catId) {
+  var cat = CATS.find(function(c){return c.id===catId;});
+  var fnItem = cat && cat.items.find(function(i){return i.id===fnId;});
   if (!fnItem) return;
-
   var ap = window.S?.parcels?.[window.S?.activeParcel??0];
   if (!ap) { window.ss?.('⚠ Selectează o parcelă mai întâi'); return; }
-
-  var utrNr = ap.utr_nr;
-  if (!utrNr) { window.ss?.('⚠ UTR necunoscut pentru această parcelă'); return; }
-
   var cityKey = _cityKey();
   var d = await _loadReguli(cityKey);
   if (!d) { window.ss?.('⚠ Regulamentul nu este disponibil pentru acest UAT'); return; }
 
+  // Lookup UTR numeric — PUNCT CHEIE: folosim pug.features, nu ap.utr_nr
+  var utrNr = _findUTRNumericForParcel(ap);
+  if (!utrNr) { window.ss?.('⚠ UTR necunoscut — asigurați-vă că PUG Botoșani este încărcat'); return; }
+
   var utrData = d.utrs[String(utrNr)];
-  if (!utrData) { window.ss?.('⚠ UTR ' + utrNr + ' nu e în regulament'); return; }
+  if (!utrData) {
+    // Poate utrNr e codul funcțional (ex: 'L1') — fallback
+    var resEl2 = document.getElementById('fn-result');
+    if (resEl2) {
+      resEl2.innerHTML = '<div style="padding:8px;background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);border-radius:8px;font-size:11px;color:#fbbf24">⚠ UTR '+utrNr+' — regulament detaliat indisponibil pentru acest UAT. Verificați cu primăria.</div>';
+    }
+    return;
+  }
 
   var result = _checkFn(fnItem.codes, utrData);
   var params = result.status !== 'interzis' ? _getParams(result, d) : {};
-  var html = _buildResultHTML(fnItem, result, params, utrNr, utrData.denumire||'');
-
-  var resultEl = document.getElementById('fn-result');
-  if (resultEl) {
-    resultEl.style.display = 'block';
-    resultEl.innerHTML = html;
-    // Scroll la rezultat
-    setTimeout(function() { resultEl.scrollIntoView({behavior:'smooth', block:'nearest'}); }, 100);
+  var html = _buildResult(fnItem, result, params, utrNr, utrData.denumire||'');
+  var resEl = document.getElementById('fn-result');
+  if (resEl) {
+    resEl.innerHTML = html;
+    setTimeout(function(){resEl.scrollIntoView({behavior:'smooth',block:'nearest'});},100);
   }
 };
 
-// ── Hook pe popup: injectează selectorul ─────────────────────────────────────
-function _injectSelector() {
+// ── Injectare în popup ────────────────────────────────────────────────────────
+function _inject() {
   if (!window.S?.popup) return;
   if (document.getElementById('fn-selector-card')) return;
-  var cityKey = _cityKey();
-  var d = window._PUG_REGULI[cityKey];
-  if (!d) return;
   var ap = window.S?.parcels?.[window.S?.activeParcel??0];
-  if (!ap || !ap.utr_nr) return;
-  if (!d.utrs[String(ap.utr_nr)]) return;
+  if (!ap) return;
+  // Verificăm că avem PUG cu subzone (nu orice UAT)
+  var cityKey = _cityKey();
+  var pugFeats = window.S?.pug?.features;
+  if (!pugFeats || !pugFeats.length) return;
+  // Verificăm că reguli.json există și are structura nouă
+  var d = window._PUG_REGULI[cityKey];
+  // Dacă reguli nu e încărcat încă, încearcă în background și reinjectează
+  if (!d) {
+    _loadReguli(cityKey).then(function(loaded) {
+      if (loaded) setTimeout(_inject, 100);
+    });
+    return;
+  }
+  // Obținem UTR numeric
+  var utrNr = _findUTRNumericForParcel(ap);
+  if (!utrNr) return;
+  var utrData = d.utrs[String(utrNr)];
+  if (!utrData) return;
   var popupContent = document.querySelector('.ux-popup .mapboxgl-popup-content > div');
   if (!popupContent) return;
   var card = document.createElement('div');
-  card.innerHTML = window._buildFunctionSelector(ap.utr_nr, d);
+  card.innerHTML = window._buildFunctionSelector(utrNr, utrData.denumire||'');
   popupContent.appendChild(card.firstElementChild);
 }
 
-// ── Hook pe S.popup ──────────────────────────────────────────────────────────
 function _hookPopup() {
   if (!window.S) { setTimeout(_hookPopup, 500); return; }
   var _pv = window.S.popup || null;
-  Object.defineProperty(window.S, 'popup', {
-    get() { return _pv; },
-    set(v) { _pv = v; if (v) setTimeout(_injectSelector, 80); },
-    configurable: true
-  });
+  try {
+    Object.defineProperty(window.S, 'popup', {
+      get() { return _pv; },
+      set(v) { _pv = v; if (v) setTimeout(_inject, 120); },
+      configurable: true
+    });
+  } catch(e) { console.warn('[FnEngine] popup hook failed:', e.message); }
 }
-setTimeout(_hookPopup, 1000);
+setTimeout(_hookPopup, 1200);
 
-// ── Pre-încărcare reguli ─────────────────────────────────────────────────────
-async function _preload() {
-  var k = _cityKey();
-  await _loadReguli(k);
-}
+// Pre-încărcare
 window.addEventListener('ux:city_changed', function(e) {
   if (e.detail?.key) _loadReguli(e.detail.key);
 });
-setTimeout(_preload, 2000);
+setTimeout(function(){ _loadReguli(_cityKey()); }, 2500);
 
-window._FunctionEngine = { check: window._checkFunction, categories: CATEGORIES };
-console.log('[FunctionEngine] v2.0 — "Ce vreau să construiesc?" activ');
+window._FunctionEngine = {v:'2.1', cats:CATS, findUTR:_findUTRNumericForParcel};
+console.log('[FunctionEngine] v2.1 — point-in-polygon UTR lookup activ');
 })();
 </script>
 </body>
