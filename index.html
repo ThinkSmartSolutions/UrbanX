@@ -5558,11 +5558,14 @@ window._showAllFunctions = function() {
       var result = _checkFn(item.codes, utrData);
       var icon = {dominant:'✅',complementar:'🟡',interzis:'⛔',necunoscut:'❓'}[result.status];
       var color = {dominant:'#34d399',complementar:'#fbbf24',interzis:'#ef4444',necunoscut:'#64748b'}[result.status];
-      return '<tr style="border-bottom:1px solid rgba(255,255,255,0.05)">'
-        +'<td style="padding:6px 8px;font-size:11px">'+cat.icon+'</td>'
-        +'<td style="padding:6px 8px;font-size:11px;color:#e2e8f0">'+item.label+'</td>'
-        +'<td style="padding:6px 8px;font-size:14px;text-align:center">'+icon+'</td>'
-        +'<td style="padding:6px 8px;font-size:9px;color:'+color+'">'+result.status+'</td>'
+      var clickable = result.status !== 'interzis';
+      var rowStyle = 'border-bottom:1px solid rgba(255,255,255,0.05);'+(clickable?'cursor:pointer;':'opacity:0.5;');
+      var onclickAttr = clickable ? 'onclick="window._checkFnUser(\''+item.id+'\',\''+cat.id+'\');document.getElementById(\'fn-all-modal\').remove()" onmouseover="this.style.background=\'rgba(255,255,255,0.04)\'" onmouseout="this.style.background=\'\'"' : '';
+      return '<tr style="'+rowStyle+'" '+onclickAttr+'>'
+        +'<td style="padding:8px 8px;font-size:12px">'+cat.icon+'</td>'
+        +'<td style="padding:8px 8px;font-size:12px;color:#e2e8f0">'+item.label+'</td>'
+        +'<td style="padding:8px 8px;font-size:14px;text-align:center">'+icon+'</td>'
+        +'<td style="padding:8px 8px;font-size:10px;color:'+color+';font-weight:600">'+result.status+'</td>'
         +'</tr>';
     }).join('');
   }).join('');
