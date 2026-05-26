@@ -1035,7 +1035,7 @@ document.addEventListener('click', function(){
     🏙 <span class="tci-launch-label">Proiecție Urbană</span>
   </button>
   <button class="tci-launch-btn" id="btn-cinema-v2"
-    onclick="try{TCI.pause?.();TCI.close?.();}catch(e){};setTimeout(()=>{const k=window.TCI?.cityKey||window.TCI?._selectedUATKey||localStorage.getItem('ux_last_city')||'RO-IS-01';window._startCinema(k);},300)"
+    onclick="try{TCI.pause?.();TCI.close?.();}catch(e){};setTimeout(()=>{var k=window.TCI&&window.TCI.cityKey||localStorage.getItem('ux_last_city')||'RO-IS-01';window._startCinema(k);},300)"
     title="Film Cinematic — 12 scene animate · proiecții per cartier · pentru prezentări"
     style="background:rgba(139,92,246,.15);border-color:rgba(139,92,246,.5);color:#a78bfa;">
     🎬 <span class="tci-launch-label">Film Cinematic</span>
@@ -4766,54 +4766,34 @@ window._loadPUGOnMap   = _loadPUGOnMap;
 window._renderUTRChips = _renderUTRChips;
 window._utrColor       = _utrColor;
 
-// ── _PUG_REGISTRY — SINGLE SOURCE OF TRUTH pentru toate UAT-urile ─────────
-//
-// CUM ADAUGI UN UAT NOU:
-// 1. Creezi folderul: data/{tip}-{nume}/pug.geojson + reguli.json
-// 2. Adaugi O SINGURA LINIE mai jos cu formatul:
-//    'RO-{JUDET}-{SIRUTA}': { id:'{tip}-{nume}', name:'Numele UAT', pugFile:'data/{tip}-{nume}/pug.geojson', reguli:'data/{tip}-{nume}/reguli.json' },
-// 3. Commit + push. Gata. Cinematicul il recunoaste automat.
-//
-// NOTA: key-ul trebuie sa fie IDENTIC cu cel din TCI._EXTRA_UATS (pentru comune)
-//       sau din _RO_CITIES_DB (pentru municipii/orase)
-//
+// ── _PUG_REGISTRY — single source of truth pentru toate UAT-urile ─────────
+// Pentru a adăuga un UAT nou: adaugi un rând aici. Nu atingi altceva.
 window._PUG_REGISTRY = window._PUG_REGISTRY || {};
 Object.assign(window._PUG_REGISTRY, {
-
-  // ── MUNICIPII ─────────────────────────────────────────────────────────────
-  'RO-IS-01':    { id:'municipiul-iasi',         name:'Municipiul Iași',         pugFile:'data/municipiul-iasi/pug.geojson',         reguli:'data/municipiul-iasi/reguli.json' },
-  'RO-SV-01':    { id:'municipiul-suceava',      name:'Municipiul Suceava',      pugFile:'js/data/municipiul-suceava/pug.geojson',   reguli:'js/data/municipiul-suceava/reguli.json' },
-  'RO-BT-01':    { id:'municipiul-botosani',     name:'Municipiul Botoșani',     pugFile:'data/municipiul-botosani/pug.geojson',     reguli:'data/municipiul-botosani/reguli.json' },
-
-  // ── COMUNE IS ─────────────────────────────────────────────────────────────
-  'RO-IS-95042': { id:'comuna-miroslava',        name:'Miroslava',               pugFile:'data/comuna-miroslava/pug.geojson',        reguli:'data/comuna-miroslava/reguli.json' },
-  'RO-IS-95087': { id:'comuna-rediu',            name:'Rediu',                   pugFile:'data/comuna-rediu/pug.geojson',            reguli:'data/comuna-rediu/reguli.json' },
-  'RO-IS-94889': { id:'comuna-aroneanu',         name:'Aroneanu',                pugFile:'data/comuna-aroneanu/pug.geojson',         reguli:'data/comuna-aroneanu/reguli.json' },
-  'RO-IS-94951': { id:'comuna-holboca',          name:'Holboca',                 pugFile:'data/comuna-holboca/pug.geojson',          reguli:'data/comuna-holboca/reguli.json' },
-  'RO-IS-95176': { id:'comuna-vladeni',          name:'Vlădeni',                 pugFile:'data/comuna-vladeni/pug.geojson',          reguli:'data/comuna-vladeni/reguli.json' },
-  'RO-IS-95023': { id:'comuna-popricani',        name:'Popricani',               pugFile:'data/comuna-popricani/pug.geojson',        reguli:'data/comuna-popricani/reguli.json' },
-
-  // ── COMUNE BT ─────────────────────────────────────────────────────────────
-  'RO-BT-18073': { id:'comuna-baluseni',         name:'Bălușeni',                pugFile:'data/comuna-baluseni/pug.geojson',         reguli:'data/comuna-baluseni/reguli.json' },
-  'RO-BT-38063': { id:'comuna-mihaieminescu',    name:'Mihai Eminescu',          pugFile:'data/comuna-mihaieminescu/pug.geojson',    reguli:'data/comuna-mihaieminescu/reguli.json' },
-
-  // ── COMUNE GL ─────────────────────────────────────────────────────────────
-  'RO-GL-77595': { id:'comuna-cuzavoda',         name:'Cuza Vodă',               pugFile:'data/comuna-cuzavoda/pug.geojson',         reguli:'data/comuna-cuzavoda/reguli.json' },
-
-  // ── ALIAS-URI retrocompatibilitate (nu sterge) ────────────────────────────
-  'RO-IS-COM-MIROSLAVA':  { id:'comuna-miroslava',     name:'Miroslava',    pugFile:'data/comuna-miroslava/pug.geojson',     reguli:'data/comuna-miroslava/reguli.json' },
-  'RO-IS-COM-ARONEANU':   { id:'comuna-aroneanu',      name:'Aroneanu',     pugFile:'data/comuna-aroneanu/pug.geojson',      reguli:'data/comuna-aroneanu/reguli.json' },
-  'RO-IS-COM-HOLBOCA':    { id:'comuna-holboca',       name:'Holboca',      pugFile:'data/comuna-holboca/pug.geojson',       reguli:'data/comuna-holboca/reguli.json' },
-  'RO-IS-COM-REDIU':      { id:'comuna-rediu',         name:'Rediu',        pugFile:'data/comuna-rediu/pug.geojson',         reguli:'data/comuna-rediu/reguli.json' },
-  'RO-IS-COM-VLADENI':    { id:'comuna-vladeni',       name:'Vlădeni',      pugFile:'data/comuna-vladeni/pug.geojson',       reguli:'data/comuna-vladeni/reguli.json' },
-  'RO-IS-COM-POPRICANI':  { id:'comuna-popricani',     name:'Popricani',    pugFile:'data/comuna-popricani/pug.geojson',     reguli:'data/comuna-popricani/reguli.json' },
-  'RO-BT-COM-BALUSENI':   { id:'comuna-baluseni',      name:'Bălușeni',     pugFile:'data/comuna-baluseni/pug.geojson',      reguli:'data/comuna-baluseni/reguli.json' },
-
-  // ── UAT-URI NOI — adauga aici ─────────────────────────────────────────────
-  // 'RO-XX-SIRUTA': { id:'tip-nume', name:'Numele', pugFile:'data/tip-nume/pug.geojson', reguli:'data/tip-nume/reguli.json' },
-
+  'RO-IS-01': { id:'municipiul-iasi',    name:'Municipiul Iași',    pugFile:'data/municipiul-iasi/pug.geojson',              reguli:'data/municipiul-iasi/reguli.json' },
+  'RO-SV-01': { id:'municipiul-suceava', name:'Municipiul Suceava', pugFile:'js/data/municipiul-suceava/pug.geojson',         reguli:'js/data/municipiul-suceava/reguli.json' },
+  'RO-BT-01': { id:'municipiul-botosani',name:'Municipiul Botoșani',pugFile:'data/municipiul-botosani/pug.geojson',        reguli:'data/municipiul-botosani/reguli.json' },
+  // ── Comune cu RLU — chei IDENTICE cu TCI._EXTRA_UATS ─────────────────────
+  'RO-IS-95042': { id:'comuna-miroslava', name:'Comuna Miroslava', pugFile:'data/comuna-miroslava/pug.geojson', reguli:'data/comuna-miroslava/reguli.json' },
+  'RO-IS-95087': { id:'comuna-rediu',     name:'Comuna Rediu',     pugFile:'data/comuna-rediu/pug.geojson',     reguli:'data/comuna-rediu/reguli.json' },
+  'RO-IS-94889': { id:'comuna-aroneanu',  name:'Comuna Aroneanu',  pugFile:'data/comuna-aroneanu/pug.geojson',  reguli:'data/comuna-aroneanu/reguli.json' },
+  'RO-BT-18073': { id:'comuna-baluseni',  name:'Comuna Bălușeni',  pugFile:'data/comuna-baluseni/pug.geojson',  reguli:'data/comuna-baluseni/reguli.json' },
+  'RO-IS-94951': { id:'comuna-holboca',   name:'Comuna Holboca',   pugFile:'data/comuna-holboca/pug.geojson',   reguli:'data/comuna-holboca/reguli.json' },
+  'RO-GL-77595': { id:'comuna-cuzavoda',  name:'Comuna Cuza Vodă', pugFile:'data/comuna-cuzavoda/pug.geojson',  reguli:'data/comuna-cuzavoda/reguli.json' },
+  'RO-BT-38063': { id:'comuna-mihaieminescu', name:'Comuna Mihai Eminescu', pugFile:'data/comuna-mihaieminescu/pug.geojson', reguli:'data/comuna-mihaieminescu/reguli.json' },
+  // ── Alias-uri retrocompatibilitate ────────────────────────────────────────
+  'RO-IS-COM-MIROSLAVA': { id:'comuna-miroslava', name:'Comuna Miroslava', pugFile:'data/comuna-miroslava/pug.geojson', reguli:'data/comuna-miroslava/reguli.json' },
+  'RO-IS-COM-ARONEANU':  { id:'comuna-aroneanu',  name:'Comuna Aroneanu',  pugFile:'data/comuna-aroneanu/pug.geojson',  reguli:'data/comuna-aroneanu/reguli.json' },
+  'RO-BT-COM-BALUSENI':  { id:'comuna-baluseni',  name:'Comuna Baluseni',  pugFile:'data/comuna-baluseni/pug.geojson',  reguli:'data/comuna-baluseni/reguli.json' },
+  'RO-IS-COM-HOLBOCA':   { id:'comuna-holboca',   name:'Holboca',          pugFile:'data/comuna-holboca/pug.geojson',   reguli:'data/comuna-holboca/reguli.json' },
+  'RO-IS-COM-VLADENI':   { id:'comuna-vladeni',   name:'Vladeni',          pugFile:'data/comuna-vladeni/pug.geojson',   reguli:'data/comuna-vladeni/reguli.json' },
+  'RO-IS-COM-POPRICANI': { id:'comuna-popricani', name:'Popricani',        pugFile:'data/comuna-popricani/pug.geojson', reguli:'data/comuna-popricani/reguli.json' },
+  'RO-IS-95176': { id:'comuna-vladeni',   name:'Vladeni',   pugFile:'data/comuna-vladeni/pug.geojson',   reguli:'data/comuna-vladeni/reguli.json' },
+  'RO-IS-95023': { id:'comuna-popricani', name:'Popricani', pugFile:'data/comuna-popricani/pug.geojson', reguli:'data/comuna-popricani/reguli.json' },
+  'RO-BT-38063': { id:'comuna-mihaieminescu', name:'Mihai Eminescu', pugFile:'data/comuna-mihaieminescu/pug.geojson', reguli:'data/comuna-mihaieminescu/reguli.json' },
+  'RO-GL-77595': { id:'comuna-cuzavoda',  name:'Cuza Voda', pugFile:'data/comuna-cuzavoda/pug.geojson',  reguli:'data/comuna-cuzavoda/reguli.json' },
 });
-console.log('[UrbanX] _PUG_REGISTRY:', Object.keys(window._PUG_REGISTRY).length, 'UAT-uri');bile');
+console.log('[UrbanX] _PUG_REGISTRY inițializat —', Object.keys(window._PUG_REGISTRY).length, 'UAT-uri disponibile');
 
 console.log('[UrbanX UTR System] ✅ Patch v20260522a: _PUG_REGISTRY + TCI bridge + culori UTR');
 
