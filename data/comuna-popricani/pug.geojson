@@ -1,1 +1,876 @@
-{"type":"FeatureCollection","name":"UAT Popricani - Trupuri Intravilan (PUG_POPRICANI_CONTUR.dwg)","crs":{"type":"name","properties":{"name":"urn:ogc:def:crs:OGC:1.3:CRS84"}},"features":[{"type":"Feature","properties":{"sat":"Popricani","id":"sat-popricani","tip":"intravilan","sursa":"PUG_POPRICANI_CONTUR.dwg","nr_puncte":24,"area_ha_approx":240.9,"center_lng":27.53397,"center_lat":47.24085,"utr":"LI","cod":"LI","ZONA":"LI","denumire":"Popricani","functiune":"Locuințe și funcțiuni complementare"},"geometry":{"type":"Polygon","coordinates":[[[27.523602,47.244996],[27.527148,47.236383],[27.533848,47.228175],[27.538534,47.232806],[27.5419,47.248423],[27.537261,47.252298],[27.528648,47.252084],[27.523602,47.244996]]]}},{"type":"Feature","properties":{"sat":"Cuza Vodă","id":"sat-cuzavoda","tip":"intravilan","sursa":"PUG_POPRICANI_CONTUR.dwg","nr_puncte":21,"area_ha_approx":225.5,"center_lng":27.49731,"center_lat":47.29666,"utr":"LI","cod":"LI","ZONA":"LI","denumire":"Cuza Vodă","functiune":"Locuințe și funcțiuni complementare"},"geometry":{"type":"Polygon","coordinates":[[[27.486658,47.295821],[27.494422,47.286785],[27.498002,47.285648],[27.498869,47.286068],[27.510822,47.30349],[27.510375,47.30421],[27.507114,47.30496],[27.504782,47.305179],[27.489308,47.301689],[27.486658,47.295821]]]}},{"type":"Feature","properties":{"sat":"Stăuceni","id":"sat-stauceni","tip":"intravilan","sursa":"PUG_POPRICANI_CONTUR.dwg","nr_puncte":16,"area_ha_approx":223.7,"center_lng":27.55141,"center_lat":47.30576,"utr":"LI","cod":"LI","ZONA":"LI","denumire":"Stăuceni","functiune":"Locuințe și funcțiuni complementare"},"geometry":{"type":"Polygon","coordinates":[[[27.5403,47.307346],[27.548386,47.297259],[27.555694,47.296233],[27.557521,47.296284],[27.559977,47.300046],[27.555431,47.31889],[27.554364,47.319362],[27.5403,47.307346]]]}},{"type":"Feature","properties":{"sat":"Valea Ursului","id":"sat-valeaursului","tip":"intravilan","sursa":"PUG_POPRICANI_CONTUR.dwg","nr_puncte":11,"area_ha_approx":149.1,"center_lng":27.55745,"center_lat":47.21349,"utr":"LI","cod":"LI","ZONA":"LI","denumire":"Valea Ursului","functiune":"Locuințe și funcțiuni complementare"},"geometry":{"type":"Polygon","coordinates":[[[27.54994,47.222984],[27.551599,47.205477],[27.555153,47.205574],[27.567712,47.213687],[27.567335,47.214067],[27.551295,47.223996],[27.54994,47.222984]]]}},{"type":"Feature","properties":{"sat":"Rediu Mitropoliei","id":"sat-rediumitropoliei","tip":"intravilan","sursa":"PUG_POPRICANI_CONTUR.dwg","nr_puncte":9,"area_ha_approx":110.3,"center_lng":27.47913,"center_lat":47.29601,"utr":"LI","cod":"LI","ZONA":"LI","denumire":"Rediu Mitropoliei","functiune":"Locuințe și funcțiuni complementare"},"geometry":{"type":"Polygon","coordinates":[[[27.471372,47.292236],[27.473917,47.291594],[27.486415,47.292541],[27.490709,47.296139],[27.474024,47.302385],[27.472445,47.301918],[27.471372,47.292236]]]}},{"type":"Feature","properties":{"sat":"Ursărești","id":"sat-ursaresti","tip":"intravilan","sursa":"PUG_POPRICANI_CONTUR.dwg","nr_puncte":9,"area_ha_approx":140.1,"center_lng":27.57728,"center_lat":47.23617,"utr":"LI","cod":"LI","ZONA":"LI","denumire":"Ursărești","functiune":"Locuințe și funcțiuni complementare"},"geometry":{"type":"Polygon","coordinates":[[[27.563559,47.228466],[27.585119,47.231375],[27.585138,47.231475],[27.578763,47.244384],[27.576071,47.243881],[27.563559,47.228466]]]}},{"type":"Feature","properties":{"sat":"Moimești","id":"sat-moimesti","tip":"intravilan","sursa":"PUG_POPRICANI_CONTUR.dwg","nr_puncte":7,"area_ha_approx":183.9,"center_lng":27.5092,"center_lat":47.28692,"utr":"LI","cod":"LI","ZONA":"LI","denumire":"Moimești","functiune":"Locuințe și funcțiuni complementare"},"geometry":{"type":"Polygon","coordinates":[[[27.499577,47.289895],[27.507978,47.273551],[27.512424,47.274928],[27.516055,47.297286],[27.513847,47.297161],[27.499577,47.289895]]]}},{"type":"Feature","properties":{"sat":"Valea Ursului","id":"sat-valeaursului","tip":"intravilan","sursa":"PUG_POPRICANI_CONTUR.dwg","nr_puncte":7,"area_ha_approx":49.2,"center_lng":27.54124,"center_lat":47.22679,"utr":"LI","cod":"LI","ZONA":"LI","denumire":"Valea Ursului","functiune":"Locuințe și funcțiuni complementare"},"geometry":{"type":"Polygon","coordinates":[[[27.534725,47.228179],[27.54586,47.220887],[27.546785,47.222761],[27.542618,47.230993],[27.539046,47.231414],[27.534725,47.228179]]]}},{"type":"Feature","properties":{"sat":"Sat necunoscut","id":"sat-unknown","tip":"intravilan","sursa":"PUG_POPRICANI_CONTUR.dwg","nr_puncte":7,"area_ha_approx":40.0,"center_lng":27.50859,"center_lat":47.25019,"utr":"LI","cod":"LI","ZONA":"LI","denumire":"Sat necunoscut","functiune":"Locuințe și funcțiuni complementare"},"geometry":{"type":"Polygon","coordinates":[[[27.499355,47.255344],[27.513508,47.245537],[27.514967,47.245839],[27.515641,47.24661],[27.512258,47.251406],[27.501648,47.255431],[27.499355,47.255344]]]}},{"type":"Feature","properties":{"sat":"Sat necunoscut","id":"sat-unknown","tip":"intravilan","sursa":"PUG_POPRICANI_CONTUR.dwg","nr_puncte":6,"area_ha_approx":59.2,"center_lng":27.51532,"center_lat":47.23092,"utr":"LI","cod":"LI","ZONA":"LI","denumire":"Sat necunoscut","functiune":"Locuințe și funcțiuni complementare"},"geometry":{"type":"Polygon","coordinates":[[[27.511015,47.237829],[27.515095,47.223572],[27.517168,47.223482],[27.521918,47.224883],[27.513413,47.23825],[27.511015,47.237829]]]}},{"type":"Feature","properties":{"sat":"Moimești","id":"sat-moimesti","tip":"intravilan","sursa":"PUG_POPRICANI_CONTUR.dwg","nr_puncte":5,"area_ha_approx":77.4,"center_lng":27.52287,"center_lat":47.27824,"utr":"LI","cod":"LI","ZONA":"LI","denumire":"Moimești","functiune":"Locuințe și funcțiuni complementare"},"geometry":{"type":"Polygon","coordinates":[[[27.514618,47.27652],[27.528508,47.273546],[27.525787,47.28746],[27.514618,47.27652]]]}},{"type":"Feature","properties":{"sat":"Moimești","id":"sat-moimesti","tip":"intravilan","sursa":"PUG_POPRICANI_CONTUR.dwg","nr_puncte":5,"area_ha_approx":35.1,"center_lng":27.5169,"center_lat":47.27182,"utr":"LI","cod":"LI","ZONA":"LI","denumire":"Moimești","functiune":"Locuințe și funcțiuni complementare"},"geometry":{"type":"Polygon","coordinates":[[[27.509002,47.271737],[27.525208,47.268721],[27.513242,47.276131],[27.509002,47.271737]]]}},{"type":"Feature","properties":{"sat":"Popricani","id":"sat-popricani","tip":"intravilan","sursa":"PUG_POPRICANI_CONTUR.dwg","nr_puncte":4,"area_ha_approx":69.8,"center_lng":27.53327,"center_lat":47.25712,"utr":"LI","cod":"LI","ZONA":"LI","denumire":"Popricani","functiune":"Locuințe și funcțiuni complementare"},"geometry":{"type":"Polygon","coordinates":[[[27.523219,47.260611],[27.539193,47.249879],[27.539826,47.259898],[27.523219,47.260611]]]}},{"type":"Feature","properties":{"sat":"Moimești","id":"sat-moimesti","tip":"intravilan","sursa":"PUG_POPRICANI_CONTUR.dwg","nr_puncte":3,"area_ha_approx":25.7,"center_lng":27.5051,"center_lat":47.27449,"utr":"LI","cod":"LI","ZONA":"LI","denumire":"Moimești","functiune":"Locuințe și funcțiuni complementare"},"geometry":{"type":"Polygon","coordinates":[[[27.497188,47.275579],[27.514458,47.271325],[27.501366,47.278109],[27.497188,47.275579]]]}},{"type":"Feature","properties":{"sat":"Popricani","id":"sat-popricani","tip":"intravilan","sursa":"PUG_POPRICANI_CONTUR.dwg","nr_puncte":3,"area_ha_approx":8.6,"center_lng":27.52228,"center_lat":47.25294,"utr":"LI","cod":"LI","ZONA":"LI","denumire":"Popricani","functiune":"Locuințe și funcțiuni complementare"},"geometry":{"type":"Polygon","coordinates":[[[27.520137,47.246862],[27.521302,47.246392],[27.524682,47.262675],[27.520137,47.246862]]]}},{"type":"Feature","properties":{"sat":"Cuza Vodă","id":"sat-cuzavoda","tip":"intravilan","sursa":"PUG_POPRICANI_CONTUR.dwg","nr_puncte":2,"area_ha_approx":30.1,"center_lng":27.51489,"center_lat":47.29899,"utr":"LI","cod":"LI","ZONA":"LI","denumire":"Cuza Vodă","functiune":"Locuințe și funcțiuni complementare"},"geometry":{"type":"Polygon","coordinates":[[[27.512242,47.29575],[27.518242,47.29575],[27.518242,47.30175],[27.512242,47.30175],[27.512242,47.29575]]]}},{"type":"Feature","properties":{"sat":"Trup 27.535,47.298","id":"trup-27.5349-47.2976","tip":"intravilan","sursa":"PUG_POPRICANI_CONTUR.dwg","nr_puncte":2,"area_ha_approx":30.1,"center_lng":27.53493,"center_lat":47.29765,"utr":"LI","cod":"LI","ZONA":"LI","denumire":"Trup 27.535,47.298","functiune":"Locuințe și funcțiuni complementare"},"geometry":{"type":"Polygon","coordinates":[[[27.531465,47.294944],[27.537465,47.294944],[27.537465,47.300944],[27.531465,47.300944],[27.531465,47.294944]]]}},{"type":"Feature","properties":{"sat":"Ursărești","id":"sat-ursaresti","tip":"intravilan","sursa":"PUG_POPRICANI_CONTUR.dwg","nr_puncte":2,"area_ha_approx":30.1,"center_lng":27.56488,"center_lat":47.22972,"utr":"LI","cod":"LI","ZONA":"LI","denumire":"Ursărești","functiune":"Locuințe și funcțiuni complementare"},"geometry":{"type":"Polygon","coordinates":[[[27.561308,47.226753],[27.567308,47.226753],[27.567308,47.232753],[27.561308,47.232753],[27.561308,47.226753]]]}},{"type":"Feature","properties":{"sat":"Vânători","id":"sat-vanatori","tip":"intravilan","sursa":"PUG_POPRICANI_CONTUR.dwg","nr_puncte":2,"area_ha_approx":30.1,"center_lng":27.55447,"center_lat":47.24076,"utr":"LI","cod":"LI","ZONA":"LI","denumire":"Vânători","functiune":"Locuințe și funcțiuni complementare"},"geometry":{"type":"Polygon","coordinates":[[[27.550966,47.237946],[27.556966,47.237946],[27.556966,47.243946],[27.550966,47.243946],[27.550966,47.237946]]]}},{"type":"Feature","properties":{"sat":"Trup 27.486,47.261","id":"trup-27.4861-47.2614","tip":"intravilan","sursa":"PUG_POPRICANI_CONTUR.dwg","nr_puncte":2,"area_ha_approx":30.1,"center_lng":27.48605,"center_lat":47.2614,"utr":"LI","cod":"LI","ZONA":"LI","denumire":"Trup 27.486,47.261","functiune":"Locuințe și funcțiuni complementare"},"geometry":{"type":"Polygon","coordinates":[[[27.48238,47.258137],[27.48838,47.258137],[27.48838,47.264137],[27.48238,47.264137],[27.48238,47.258137]]]}}]}
+{
+  "type": "FeatureCollection",
+  "name": "UAT Popricani - Trupuri Intravilan (PUG_POPRICANI_CONTUR.dwg)",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "sat": "Popricani",
+        "id": "sat-popricani",
+        "tip": "intravilan",
+        "sursa": "PUG_POPRICANI_CONTUR.dwg",
+        "nr_puncte": 24,
+        "area_ha_approx": 240.9,
+        "center_lng": 27.53397,
+        "center_lat": 47.24085
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              27.523602,
+              47.244996
+            ],
+            [
+              27.527148,
+              47.236383
+            ],
+            [
+              27.533848,
+              47.228175
+            ],
+            [
+              27.538534,
+              47.232806
+            ],
+            [
+              27.5419,
+              47.248423
+            ],
+            [
+              27.537261,
+              47.252298
+            ],
+            [
+              27.528648,
+              47.252084
+            ],
+            [
+              27.523602,
+              47.244996
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "sat": "Cuza Vodă",
+        "id": "sat-cuzavoda",
+        "tip": "intravilan",
+        "sursa": "PUG_POPRICANI_CONTUR.dwg",
+        "nr_puncte": 21,
+        "area_ha_approx": 225.5,
+        "center_lng": 27.49731,
+        "center_lat": 47.29666
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              27.486658,
+              47.295821
+            ],
+            [
+              27.494422,
+              47.286785
+            ],
+            [
+              27.498002,
+              47.285648
+            ],
+            [
+              27.498869,
+              47.286068
+            ],
+            [
+              27.510822,
+              47.30349
+            ],
+            [
+              27.510375,
+              47.30421
+            ],
+            [
+              27.507114,
+              47.30496
+            ],
+            [
+              27.504782,
+              47.305179
+            ],
+            [
+              27.489308,
+              47.301689
+            ],
+            [
+              27.486658,
+              47.295821
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "sat": "Stăuceni",
+        "id": "sat-stauceni",
+        "tip": "intravilan",
+        "sursa": "PUG_POPRICANI_CONTUR.dwg",
+        "nr_puncte": 16,
+        "area_ha_approx": 223.7,
+        "center_lng": 27.55141,
+        "center_lat": 47.30576
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              27.5403,
+              47.307346
+            ],
+            [
+              27.548386,
+              47.297259
+            ],
+            [
+              27.555694,
+              47.296233
+            ],
+            [
+              27.557521,
+              47.296284
+            ],
+            [
+              27.559977,
+              47.300046
+            ],
+            [
+              27.555431,
+              47.31889
+            ],
+            [
+              27.554364,
+              47.319362
+            ],
+            [
+              27.5403,
+              47.307346
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "sat": "Valea Ursului",
+        "id": "sat-valeaursului",
+        "tip": "intravilan",
+        "sursa": "PUG_POPRICANI_CONTUR.dwg",
+        "nr_puncte": 11,
+        "area_ha_approx": 149.1,
+        "center_lng": 27.55745,
+        "center_lat": 47.21349
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              27.54994,
+              47.222984
+            ],
+            [
+              27.551599,
+              47.205477
+            ],
+            [
+              27.555153,
+              47.205574
+            ],
+            [
+              27.567712,
+              47.213687
+            ],
+            [
+              27.567335,
+              47.214067
+            ],
+            [
+              27.551295,
+              47.223996
+            ],
+            [
+              27.54994,
+              47.222984
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "sat": "Rediu Mitropoliei",
+        "id": "sat-rediumitropoliei",
+        "tip": "intravilan",
+        "sursa": "PUG_POPRICANI_CONTUR.dwg",
+        "nr_puncte": 9,
+        "area_ha_approx": 110.3,
+        "center_lng": 27.47913,
+        "center_lat": 47.29601
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              27.471372,
+              47.292236
+            ],
+            [
+              27.473917,
+              47.291594
+            ],
+            [
+              27.486415,
+              47.292541
+            ],
+            [
+              27.490709,
+              47.296139
+            ],
+            [
+              27.474024,
+              47.302385
+            ],
+            [
+              27.472445,
+              47.301918
+            ],
+            [
+              27.471372,
+              47.292236
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "sat": "Ursărești",
+        "id": "sat-ursaresti",
+        "tip": "intravilan",
+        "sursa": "PUG_POPRICANI_CONTUR.dwg",
+        "nr_puncte": 9,
+        "area_ha_approx": 140.1,
+        "center_lng": 27.57728,
+        "center_lat": 47.23617
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              27.563559,
+              47.228466
+            ],
+            [
+              27.585119,
+              47.231375
+            ],
+            [
+              27.585138,
+              47.231475
+            ],
+            [
+              27.578763,
+              47.244384
+            ],
+            [
+              27.576071,
+              47.243881
+            ],
+            [
+              27.563559,
+              47.228466
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "sat": "Moimești",
+        "id": "sat-moimesti",
+        "tip": "intravilan",
+        "sursa": "PUG_POPRICANI_CONTUR.dwg",
+        "nr_puncte": 7,
+        "area_ha_approx": 183.9,
+        "center_lng": 27.5092,
+        "center_lat": 47.28692
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              27.499577,
+              47.289895
+            ],
+            [
+              27.507978,
+              47.273551
+            ],
+            [
+              27.512424,
+              47.274928
+            ],
+            [
+              27.516055,
+              47.297286
+            ],
+            [
+              27.513847,
+              47.297161
+            ],
+            [
+              27.499577,
+              47.289895
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "sat": "Valea Ursului",
+        "id": "sat-valeaursului",
+        "tip": "intravilan",
+        "sursa": "PUG_POPRICANI_CONTUR.dwg",
+        "nr_puncte": 7,
+        "area_ha_approx": 49.2,
+        "center_lng": 27.54124,
+        "center_lat": 47.22679
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              27.534725,
+              47.228179
+            ],
+            [
+              27.54586,
+              47.220887
+            ],
+            [
+              27.546785,
+              47.222761
+            ],
+            [
+              27.542618,
+              47.230993
+            ],
+            [
+              27.539046,
+              47.231414
+            ],
+            [
+              27.534725,
+              47.228179
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "sat": "Sat necunoscut",
+        "id": "sat-unknown",
+        "tip": "intravilan",
+        "sursa": "PUG_POPRICANI_CONTUR.dwg",
+        "nr_puncte": 7,
+        "area_ha_approx": 40.0,
+        "center_lng": 27.50859,
+        "center_lat": 47.25019
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              27.499355,
+              47.255344
+            ],
+            [
+              27.513508,
+              47.245537
+            ],
+            [
+              27.514967,
+              47.245839
+            ],
+            [
+              27.515641,
+              47.24661
+            ],
+            [
+              27.512258,
+              47.251406
+            ],
+            [
+              27.501648,
+              47.255431
+            ],
+            [
+              27.499355,
+              47.255344
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "sat": "Sat necunoscut",
+        "id": "sat-unknown",
+        "tip": "intravilan",
+        "sursa": "PUG_POPRICANI_CONTUR.dwg",
+        "nr_puncte": 6,
+        "area_ha_approx": 59.2,
+        "center_lng": 27.51532,
+        "center_lat": 47.23092
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              27.511015,
+              47.237829
+            ],
+            [
+              27.515095,
+              47.223572
+            ],
+            [
+              27.517168,
+              47.223482
+            ],
+            [
+              27.521918,
+              47.224883
+            ],
+            [
+              27.513413,
+              47.23825
+            ],
+            [
+              27.511015,
+              47.237829
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "sat": "Moimești",
+        "id": "sat-moimesti",
+        "tip": "intravilan",
+        "sursa": "PUG_POPRICANI_CONTUR.dwg",
+        "nr_puncte": 5,
+        "area_ha_approx": 77.4,
+        "center_lng": 27.52287,
+        "center_lat": 47.27824
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              27.514618,
+              47.27652
+            ],
+            [
+              27.528508,
+              47.273546
+            ],
+            [
+              27.525787,
+              47.28746
+            ],
+            [
+              27.514618,
+              47.27652
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "sat": "Moimești",
+        "id": "sat-moimesti",
+        "tip": "intravilan",
+        "sursa": "PUG_POPRICANI_CONTUR.dwg",
+        "nr_puncte": 5,
+        "area_ha_approx": 35.1,
+        "center_lng": 27.5169,
+        "center_lat": 47.27182
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              27.509002,
+              47.271737
+            ],
+            [
+              27.525208,
+              47.268721
+            ],
+            [
+              27.513242,
+              47.276131
+            ],
+            [
+              27.509002,
+              47.271737
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "sat": "Popricani",
+        "id": "sat-popricani",
+        "tip": "intravilan",
+        "sursa": "PUG_POPRICANI_CONTUR.dwg",
+        "nr_puncte": 4,
+        "area_ha_approx": 69.8,
+        "center_lng": 27.53327,
+        "center_lat": 47.25712
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              27.523219,
+              47.260611
+            ],
+            [
+              27.539193,
+              47.249879
+            ],
+            [
+              27.539826,
+              47.259898
+            ],
+            [
+              27.523219,
+              47.260611
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "sat": "Moimești",
+        "id": "sat-moimesti",
+        "tip": "intravilan",
+        "sursa": "PUG_POPRICANI_CONTUR.dwg",
+        "nr_puncte": 3,
+        "area_ha_approx": 25.7,
+        "center_lng": 27.5051,
+        "center_lat": 47.27449
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              27.497188,
+              47.275579
+            ],
+            [
+              27.514458,
+              47.271325
+            ],
+            [
+              27.501366,
+              47.278109
+            ],
+            [
+              27.497188,
+              47.275579
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "sat": "Popricani",
+        "id": "sat-popricani",
+        "tip": "intravilan",
+        "sursa": "PUG_POPRICANI_CONTUR.dwg",
+        "nr_puncte": 3,
+        "area_ha_approx": 8.6,
+        "center_lng": 27.52228,
+        "center_lat": 47.25294
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              27.520137,
+              47.246862
+            ],
+            [
+              27.521302,
+              47.246392
+            ],
+            [
+              27.524682,
+              47.262675
+            ],
+            [
+              27.520137,
+              47.246862
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "sat": "Cuza Vodă",
+        "id": "sat-cuzavoda",
+        "tip": "intravilan",
+        "sursa": "PUG_POPRICANI_CONTUR.dwg",
+        "nr_puncte": 2,
+        "area_ha_approx": 30.1,
+        "center_lng": 27.51489,
+        "center_lat": 47.29899
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              27.512242,
+              47.29575
+            ],
+            [
+              27.518242,
+              47.29575
+            ],
+            [
+              27.518242,
+              47.30175
+            ],
+            [
+              27.512242,
+              47.30175
+            ],
+            [
+              27.512242,
+              47.29575
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "sat": "Trup 27.535,47.298",
+        "id": "trup-27.5349-47.2976",
+        "tip": "intravilan",
+        "sursa": "PUG_POPRICANI_CONTUR.dwg",
+        "nr_puncte": 2,
+        "area_ha_approx": 30.1,
+        "center_lng": 27.53493,
+        "center_lat": 47.29765
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              27.531465,
+              47.294944
+            ],
+            [
+              27.537465,
+              47.294944
+            ],
+            [
+              27.537465,
+              47.300944
+            ],
+            [
+              27.531465,
+              47.300944
+            ],
+            [
+              27.531465,
+              47.294944
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "sat": "Ursărești",
+        "id": "sat-ursaresti",
+        "tip": "intravilan",
+        "sursa": "PUG_POPRICANI_CONTUR.dwg",
+        "nr_puncte": 2,
+        "area_ha_approx": 30.1,
+        "center_lng": 27.56488,
+        "center_lat": 47.22972
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              27.561308,
+              47.226753
+            ],
+            [
+              27.567308,
+              47.226753
+            ],
+            [
+              27.567308,
+              47.232753
+            ],
+            [
+              27.561308,
+              47.232753
+            ],
+            [
+              27.561308,
+              47.226753
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "sat": "Vânători",
+        "id": "sat-vanatori",
+        "tip": "intravilan",
+        "sursa": "PUG_POPRICANI_CONTUR.dwg",
+        "nr_puncte": 2,
+        "area_ha_approx": 30.1,
+        "center_lng": 27.55447,
+        "center_lat": 47.24076
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              27.550966,
+              47.237946
+            ],
+            [
+              27.556966,
+              47.237946
+            ],
+            [
+              27.556966,
+              47.243946
+            ],
+            [
+              27.550966,
+              47.243946
+            ],
+            [
+              27.550966,
+              47.237946
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "sat": "Trup 27.486,47.261",
+        "id": "trup-27.4861-47.2614",
+        "tip": "intravilan",
+        "sursa": "PUG_POPRICANI_CONTUR.dwg",
+        "nr_puncte": 2,
+        "area_ha_approx": 30.1,
+        "center_lng": 27.48605,
+        "center_lat": 47.2614
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              27.48238,
+              47.258137
+            ],
+            [
+              27.48838,
+              47.258137
+            ],
+            [
+              27.48838,
+              47.264137
+            ],
+            [
+              27.48238,
+              47.264137
+            ],
+            [
+              27.48238,
+              47.258137
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}
