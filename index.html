@@ -5638,30 +5638,52 @@ window._checkFnUser = async function(fnId, catId) {
   if (!ap) { window.ss?.('⚠ Selectează o parcelă mai întâi'); return; }
   var cityKey = _cityKey();
   var d = await _loadReguli(cityKey);
-  if (!d) { window.ss?.('⚠ Regulamentul nu este disponibil pentru acest UAT'); return; }
+  if (!d) {
+    window.ss?.('⚠ Regulamentul nu este disponibil pentru acest UAT');
+    return;
+  }
 
-  // Lookup UTR numeric — PUNCT CHEIE: folosim pug.features, nu ap.utr_nr
   var utrNr = _findUTRNumericForParcel(ap);
-  if (!utrNr) { window.ss?.('⚠ UTR necunoscut — asigurați-vă că PUG Botoșani este încărcat'); return; }
+  if (!utrNr) { window.ss?.('⚠ UTR necunoscut — încarcă PUG mai întâi (buton UTR)'); return; }
 
   var utrData = d.utrs[String(utrNr)];
   if (!utrData) {
-    // Poate utrNr e codul funcțional (ex: 'L1') — fallback
     var resEl2 = document.getElementById('fn-result');
-    if (resEl2) {
-      resEl2.innerHTML = '<div style="padding:8px;background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);border-radius:8px;font-size:11px;color:#fbbf24">⚠ UTR '+utrNr+' — regulament detaliat indisponibil pentru acest UAT. Verificați cu primăria.</div>';
-    }
+    if (resEl2) resEl2.innerHTML = '<div style="padding:8px;background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);border-radius:8px;font-size:11px;color:#fbbf24">⚠ UTR '+utrNr+' — regulament detaliat indisponibil. Verificați cu primăria.</div>';
     return;
   }
 
   var result = _checkFn(fnItem.codes, utrData);
   var params = result.status !== 'interzis' ? _getParams(result, d) : {};
+
+  // ── APLICĂM SUBZONA PE PARCELĂ — actualizare automată indicatori ────────
+  if (result.status !== 'interzis' && result.code) {
+    var sz = d.subzone[result.code] || {};
+    ap._subzona = result.code;
+    ap._subzona_den = sz.denumire || result.code;
+    // Actualizăm params pentru volum 3D
+    if (!ap.params) ap.params = {};
+    if (sz.pot_baza != null)        ap.params.pot = sz.pot_baza;
+    if (sz.cut_baza != null)        ap.params.cut = sz.cut_baza;
+    if (sz.hmax_m != null)          ap.params.h   = sz.hmax_m;
+    if (sz.niv_max != null)         ap.params.niv = sz.niv_max;
+    if (sz.spatii_verzi_pct != null)ap.params.sv  = sz.spatii_verzi_pct;
+    ap.params._regim = sz.regim || '';
+    if (window.S) window.S.rule = Object.assign({}, ap.params);
+  }
+
   var html = _buildResult(fnItem, result, params, utrNr, utrData.denumire||'');
   var resEl = document.getElementById('fn-result');
   if (resEl) {
     resEl.innerHTML = html;
     setTimeout(function(){resEl.scrollIntoView({behavior:'smooth',block:'nearest'});},100);
   }
+
+  // Re-render tab UTR ca să reflecte noua subzonă și indicatorii actualizați
+  if (typeof renderTab === 'function') {
+    setTimeout(function(){ renderTab('utr'); }, 150);
+  }
+  if (typeof updateMap === 'function') updateMap();
 };
 
 // ── Injectare în popup ────────────────────────────────────────────────────────

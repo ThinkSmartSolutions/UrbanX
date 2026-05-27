@@ -826,56 +826,125 @@ function htmlUTR(){
     <div class="met" style="margin-top:6px"><div class="ml">🚫 Interzise</div><div class="mv">${esc(r.ui||'-')}</div></div>
     `:''}
   </div>
-  <div class="section">🔍 Ce vrei să construiești?</div>
-  <div id="fn-engine-card" style="padding:0 4px">
-    ${(()=>{
-      // Lookup UTR numeric din S.pug.features (sincron)
-      let utrNr = ap.utr_nr;
-      if (!utrNr && ap.geo && S.pugIdx && S.pug) {
-        try {
-          const pts = ap.geo.geometry?.coordinates?.[0];
-          if (pts && pts.length) {
-            const cx = pts.reduce((s,p)=>s+p[0],0)/pts.length;
-            const cy = pts.reduce((s,p)=>s+p[1],0)/pts.length;
-            const pt = {type:'Feature',geometry:{type:'Point',coordinates:[cx,cy]},properties:{}};
-            for (const idx of S.pugIdx) {
-              if (cx<idx.bb[0]||cx>idx.bb[2]||cy<idx.bb[1]||cy>idx.bb[3]) continue;
-              if (turf.booleanPointInPolygon(pt,{type:'Feature',geometry:idx.geom,properties:{}})) {
-                for (const pf of S.pug.features) {
-                  if (pf.properties?.utr === idx.utr) {
-                    if (turf.booleanPointInPolygon(pt,{type:'Feature',geometry:pf.geometry,properties:{}})) {
-                      utrNr = pf.properties?.UTR ? String(pf.properties.UTR) : null;
-                      if (utrNr) { ap.utr_nr = utrNr; break; }
-                    }
-                  }
+  <div class="section" style="margin-top:10px">🔍 Ce vrei să construiești?</div>
+  ${(()=>{
+    // ── Lookup UTR numeric din pug.geojson ───────────────────────────────
+    let utrNr = ap.utr_nr;
+    if (!utrNr && ap.geo && S.pugIdx && S.pug) {
+      try {
+        const ring = ap.geo.geometry?.coordinates?.[0];
+        if (ring && ring.length) {
+          const cx = ring.reduce((s,p)=>s+p[0],0)/ring.length;
+          const cy = ring.reduce((s,p)=>s+p[1],0)/ring.length;
+          const pt = {type:'Feature',geometry:{type:'Point',coordinates:[cx,cy]},properties:{}};
+          for (const idx of S.pugIdx) {
+            if (cx<idx.bb[0]||cx>idx.bb[2]||cy<idx.bb[1]||cy>idx.bb[3]) continue;
+            if (turf.booleanPointInPolygon(pt,{type:'Feature',geometry:idx.geom,properties:{}})) {
+              for (const pf of S.pug.features) {
+                if (pf.properties?.utr === idx.utr &&
+                    turf.booleanPointInPolygon(pt,{type:'Feature',geometry:pf.geometry,properties:{}})) {
+                  if (pf.properties?.UTR) { utrNr = String(pf.properties.UTR); ap.utr_nr = utrNr; break; }
                 }
-                if (utrNr) break;
               }
+              if (utrNr) break;
             }
           }
-        } catch(e) {}
-      }
-      const cityKey = window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
-      const d = window._PUG_REGULI && window._PUG_REGULI[cityKey];
-      const CATS = window._FunctionEngine?.cats || [];
-      if (!d || !utrNr || !d.utrs[String(utrNr)] || !CATS.length) {
-        return '<div class="'+( fnVal.status==='ok'?'ok-box':fnVal.status==='warn'?'warn-box':'err-box')+'">'+fnVal.msg+'</div>'
-          +(fnData?'<div class="help">🅿️ Parcaje: <b>'+calcParcaje(S.vol.fn,ap.area,0,0)+'</b></div>':'');
-      }
-      const catBtns = CATS.map(cat =>
-        '<button onclick="window._selCat(\'' + cat.id + '\')" data-cat="' + cat.id + '" '
+        }
+      } catch(e) {}
+    }
+
+    const cityKey = window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
+    const d = window._PUG_REGULI && window._PUG_REGULI[cityKey];
+    const CATS = window._FunctionEngine?.cats || [];
+
+    // ── Fallback la sistemul vechi dacă nu avem reguli noi ───────────────
+    if (!d || !utrNr || !d.utrs[String(utrNr)] || !CATS.length) {
+      return '<div class="'+(fnVal.status==='ok'?'ok-box':fnVal.status==='warn'?'warn-box':'err-box')+'">'+fnVal.msg+'</div>'
+        +(fnData?'<div class="help">🅿️ Parcaje: <b>'+calcParcaje(S.vol.fn,ap.area,0,0)+'</b></div>':'');
+    }
+
+    const utrData = d.utrs[String(utrNr)];
+    const subzone = d.subzone;
+    const domSz = utrData.fn_dominanta;
+    const domData = subzone[domSz] || {};
+    const curSz = ap._subzona || domSz;
+    const curData = subzone[curSz] || domData;
+    const area = ap.area || 0;
+
+    // ── Helper: box indicator ─────────────────────────────────────────────
+    function ibox(label, val, unit, color, calc) {
+      const display = val != null ? val+unit : '—';
+      const calcStr = calc ? '<div style="font-size:9px;color:#64748b;margin-top:1px">'+calc+'</div>' : '';
+      return '<div style="background:rgba(0,0,0,0.2);border-radius:7px;padding:6px 8px">'
+        +'<div style="font-size:9px;color:#64748b;margin-bottom:2px">'+label+'</div>'
+        +'<div style="font-size:14px;font-weight:700;color:'+color+'">'+display+'</div>'
+        +calcStr+'</div>';
+    }
+
+    // ── Card indicatori subzonă curentă ───────────────────────────────────
+    const pot = curData.pot_baza;
+    const cut = curData.cut_baza;
+    const h   = curData.hmax_m;
+    const niv = curData.niv_max;
+    const sv  = curData.spatii_verzi_pct;
+    const pk  = curData.parcaje_min;
+    const sf  = curData.suprafata_min_mp;
+    const reg = curData.regim || '';
+
+    const scSol  = pot && area ? Math.round(area * pot / 100) : null;
+    const sdTot  = cut && area ? Math.round(area * cut)       : null;
+    const svMp   = sv  && area ? Math.round(area * sv  / 100) : null;
+
+    // Stare subzonă: dominant / complementar / PUZ
+    const isDom   = curSz === domSz;
+    const isAdm   = utrData.subzone_admise?.includes(curSz);
+    const needPUZ = !isDom && isAdm;
+    const statusBadge = isDom
+      ? '<span style="background:rgba(52,211,153,0.15);color:#34d399;border:1px solid rgba(52,211,153,0.3);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600">✅ Funcțiune dominantă — fără PUZ</span>'
+      : needPUZ
+      ? '<span style="background:rgba(251,191,36,0.15);color:#fbbf24;border:1px solid rgba(251,191,36,0.3);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600">🟡 Admisă cu condiții — necesită PUZ/PUD</span>'
+      : '<span style="background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.3);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600">⛔ Interzisă în UTR '+utrNr+'</span>';
+
+    // ── Selector subzonă (funcțiuni în limbaj uman) ───────────────────────
+    const catBtns = CATS.map(cat => {
+      return '<button onclick="window._selCat(\''+cat.id+'\',this)" data-cat="'+cat.id+'" '
         +'style="display:flex;flex-direction:column;align-items:center;justify-content:center;'
-        +'padding:8px 4px;border-radius:9px;cursor:pointer;border:1px solid rgba(255,255,255,0.1);'
-        +'background:rgba(255,255,255,0.04);color:#94a3b8;font-size:10px;font-weight:600;'
-        +'transition:all 0.15s;flex:1;min-height:52px">'
-        +'<span style="font-size:18px;margin-bottom:2px">'+cat.icon+'</span>'
-        +'<span>'+cat.label+'</span></button>'
-      ).join('');
-      return '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:8px">'+catBtns+'</div>'
-        +'<div id="fn-items-list" style="display:none;margin-bottom:4px"></div>'
-        +'<div id="fn-result"></div>';
-    })()}
-  </div>`;
+        +'padding:7px 2px;border-radius:8px;cursor:pointer;border:1px solid rgba(255,255,255,0.08);'
+        +'background:rgba(255,255,255,0.03);color:#94a3b8;font-size:9px;font-weight:600;'
+        +'transition:all 0.15s;flex:1;min-height:48px">'
+        +'<span style="font-size:16px;margin-bottom:2px">'+cat.icon+'</span>'
+        +'<span style="line-height:1.2;text-align:center">'+cat.label+'</span></button>';
+    }).join('');
+
+    return (
+      // Header UTR + subzonă curentă
+      '<div style="background:rgba(212,175,55,0.06);border:1px solid rgba(212,175,55,0.2);border-radius:9px;padding:10px;margin-bottom:8px">'
+        +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
+          +'<div>'
+            +'<div style="font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.06em">UTR '+utrNr+' — '+esc(utrData.denumire||'')+'</div>'
+            +'<div style="font-size:11px;color:#e2e8f0;margin-top:2px;font-weight:600">Subzonă: <span style="color:#d4af37">'+curSz+'</span> — '+esc((curData.denumire||'').slice(0,45))+'</div>'
+          +'</div>'
+        +'</div>'
+        +statusBadge
+        // Grid indicatori
+        +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:8px">'
+          +ibox('POT max', pot, '%', '#fbbf24', scSol ? scSol+'m² la sol' : null)
+          +ibox('CUT max', cut, '', '#fbbf24', sdTot ? sdTot+'mp ADC' : null)
+          +ibox('H max', h, 'm', '#34d399', niv ? niv+' niv' : null)
+          +ibox('Sp. verzi', sv, '%', '#86efac', svMp ? svMp+'m²' : null)
+          +ibox('Sf. min', sf, 'm²', '#94a3b8', null)
+          +ibox('Regim', null, '', '#94a3b8', reg || '—')
+        +'</div>'
+        +(pk ? '<div style="font-size:10px;color:#64748b;margin-top:6px">🅿️ '+esc(pk)+'</div>' : '')
+        +(curData.aliniament_note ? '<div style="font-size:9px;color:#475569;margin-top:4px">📐 '+esc(curData.aliniament_note.slice(0,80))+'</div>' : '')
+      +'</div>'
+      // Selector funcțiune
+      +'<div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Schimbă funcțiunea</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:6px">'+catBtns+'</div>'
+      +'<div id="fn-items-list" style="display:none;margin-bottom:4px"></div>'
+      +'<div id="fn-result"></div>'
+    );
+  })()}`;
 }
 
 // ═══ HTML INDICATORI ══════════════════════════════════════════════════════
