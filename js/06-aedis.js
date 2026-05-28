@@ -1867,22 +1867,19 @@ async function switchUAT(uatId){
   if(cfg.status!=='empty'){
     await loadData(uatId);
     ss(`✅ UAT activ: ${cfg.label} (${cfg.status})`);
-    // Încarcă automat PUG pe hartă (populează pugIdx cu UTR numeric + colorează harta)
-    if(cfg.pugFile && typeof window._loadPUGOnMap === 'function') {
-      window._loadPUGOnMap(cfg.pugFile, cfg.short||cfg.label, null)
-        .then(function(){
-          // Colorează automat harta cu UTR-urile (fără să deschidă drawer-ul)
-          if(S.pug && S.pug.features) {
-            const fc={type:'FeatureCollection',features:S.pug.features.map(f=>({...f,properties:{...f.properties,utr:normU(f.properties?.utr||''),c:ucol(normU(f.properties?.utr||''))}}))};
-            setSource('utr-src', fc);
-            // Activează butonul UTR vizual
-            const btnU = _g('btnUTR');
-            if(btnU) btnU.classList.add('on');
-          }
-          ss('🗺 PUG ' + (cfg.short||cfg.label) + ' încărcat — ' + (S.pug?.features?.length||0) + ' zone UTR');
-        })
-        .catch(function(){});
-    }
+    // Activează automat UTR după ce loadData termină
+    setTimeout(function(){
+      if(S.pug && S.pug.features && S.pug.features.length) {
+        utrOpen = true;
+        const btnU = _g('btnUTR');
+        if(btnU) { btnU.classList.add('on'); }
+        const utrDrawer = _g('utr-drawer');
+        if(utrDrawer) utrDrawer.classList.add('open');
+        const fc={type:'FeatureCollection',features:S.pug.features.map(f=>({...f,properties:{...f.properties,utr:normU(f.properties?.utr||''),c:ucol(normU(f.properties?.utr||''))}}))};
+        setSource('utr-src', fc);
+        ss('🗺 PUG ' + (cfg.short||cfg.label) + ' — ' + S.pug.features.length + ' zone UTR');
+      }
+    }, 1500);
   } else {
     // Reset PUG — UAT fără date
     S.pug=null; S.pugIdx=[];
