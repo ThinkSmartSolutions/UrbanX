@@ -817,24 +817,65 @@ function normalizeReguliEntry(v) {
 }
 
 // Patch Object.assign(REGULI, ...) — normalizăm orice reguli.json la merge
-function mergeIntoREGULI(newReguli) {
+// ── Conversie format nou (subzone+utrs) → format vechi (cod→params) ────────
+function _convertReguliNew2Old(d) {
+  if (!d || !d.subzone || !d.utrs) return {};
+  const subzone = d.subzone;
+  const result = {};
+  
+  const ZONA_TO_OLD = {
+    'C':'CC','LM':'L1','LI':'L2','IS':'IS','I':'I',
+    'A':'A','P':'V','GC_TE':'GC','CC':'TR','S':'IS',
+    'TAG':'A','TA':'V','PS':'V','PA':'V',
+  };
+  
+  // Entry per subzonă
+  Object.entries(subzone).forEach(function([szId, sz]) {
+    const zona = sz.zona_parinte || '';
+    const oldCode = ZONA_TO_OLD[zona] || zona;
+    const entry = {
+      d: sz.denumire || szId,
+      pot: sz.pot_baza,
+      cut: sz.cut_baza,
+      h: sz.hmax_m,
+      niv: sz.niv_max,
+      sv: sz.spatii_verzi_pct,
+      fm: sz.suprafata_min_mp,
+      ao: sz.regim,
+      rf: sz.rf_m || null,
+      rl: sz.rl_m || null,
+      rs: sz.rr_m || null,
+      pk: sz.pk_locuri || sz.parcaje_min || null,
+      ua: Array.isArray(sz.fn_complementare) ? sz.fn_complementare.join('; ') : null,
+      ui: Array.isArray(sz.fn_interzise) ? sz.fn_interzise.join('; ') : null,
+      _subzona: szId,
+      _zona: zona,
+    };
+    result[szId] = entry;
+    if (oldCode && !result[oldCode]) result[oldCode] = entry;
+  });
+  
+  return result;
+}
+
+function mergeIntoREGULI(newReguli, cityKey) {
   if (!newReguli || typeof newReguli !== 'object') return;
-  // Format nou (Botoșani): { _meta, subzone, utrs }
+  const ck = cityKey || window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
+  // Format nou (Botoșani cu subzone+utrs)
   if (newReguli.subzone && newReguli.utrs) {
-    if (typeof _convertReguliNew2Old === 'function') {
-      const converted = _convertReguliNew2Old(newReguli);
-      Object.entries(converted).forEach(([k,v]) => { REGULI[k] = normalizeReguliEntry(v); });
-    }
+    const converted = _convertReguliNew2Old(newReguli);
+    Object.entries(converted).forEach(([k,v]) => { REGULI[k] = normalizeReguliEntry(v); });
     window._PUG_REGULI = window._PUG_REGULI || {};
-    const ck = window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
     window._PUG_REGULI[ck] = newReguli;
+    console.log('[mergeIntoREGULI] format nou BT →', Object.keys(converted).length, 'coduri, cityKey=', ck);
     return;
   }
-  // Format standard (Iași, Suceava etc.)
+  // Format standard (Iași, Suceava, comune)
   Object.entries(newReguli).forEach(([k,v]) => {
     if (k.startsWith('_') || typeof v !== 'object') return;
     REGULI[k] = normalizeReguliEntry(v);
   });
+  console.log('[mergeIntoREGULI] format standard →', Object.keys(newReguli).length, 'coduri, cityKey=', ck);
 }
 
 // ═══ MAPBOX ═══════════════════════════════════════════════════════════════

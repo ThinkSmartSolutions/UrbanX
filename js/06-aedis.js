@@ -1803,10 +1803,9 @@ async function switchUAT(uatId){
       if(r.ok){
         const newReguli=await r.json();
         if (typeof mergeIntoREGULI === 'function') {
-          mergeIntoREGULI(newReguli);
-        } else {
-          Object.assign(REGULI,newReguli);
-        }
+          const ck2 = window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
+          mergeIntoREGULI(newReguli, ck2);
+        } else { Object.assign(REGULI,newReguli); }
         ss('📋 Reguli PUG '+cfg.label+' încărcate');
       }
     }catch(e){}
@@ -2317,13 +2316,10 @@ async function loadData(uatId){
       const rr=await fetch(reguliFile);
       if(rr.ok){
         const newReguli=await rr.json();
-        // Merge normalizat în REGULI global
         if (typeof mergeIntoREGULI === 'function') {
-          mergeIntoREGULI(newReguli);
-          console.log('Reguli încărcate și normalizate din', reguliFile);
-        } else {
-          Object.assign(REGULI, newReguli);
-        }
+          const ck = window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
+          mergeIntoREGULI(newReguli, ck);
+        } else { Object.assign(REGULI, newReguli); }
       }
     }catch(e){ console.warn('reguli.json indisponibil:', e.message); }
   }
