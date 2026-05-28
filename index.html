@@ -5294,8 +5294,14 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
       Array.from(scroll.children).forEach(function(g){if(tg)return;var h=g.firstElementChild;if(h&&h.textContent.toLowerCase().indexOf(hf)>-1)tg=g;});
       if(tg){
         var ai={};Array.from(tg.querySelectorAll('[data-rlu-key]')).forEach(function(el){ai[el.getAttribute('data-rlu-key')]=true;});
-        if(!tg.querySelector('[data-rlu-sep]')&&cl.some(function(c){return!ai[c.key];})){var sep=document.createElement('div');sep.setAttribute('data-rlu-sep','1');sep.style.cssText='font-size:8px;color:#34d399;text-transform:uppercase;letter-spacing:.07em;font-weight:700;padding:5px 4px 3px;margin-top:4px;border-top:1px solid rgba(52,211,153,0.2)';sep.textContent='── Comune cu RLU ──';tg.appendChild(sep);}
-        cl.forEach(function(c){if(!ai[c.key])tg.appendChild(makeItem(c,true));});
+        if(cl.some(function(c){return!ai[c.key];})){
+          // Inserăm imediat după primul item din grup (municipiul principal)
+          var firstItem=null;Array.from(tg.children).forEach(function(ch){if(!firstItem&&ch.style&&ch.style.cursor==='pointer')firstItem=ch;});
+          var insertAfter=firstItem||tg.firstElementChild;
+          if(!tg.querySelector('[data-rlu-sep]')){var sep=document.createElement('div');sep.setAttribute('data-rlu-sep','1');sep.style.cssText='font-size:8px;color:#34d399;text-transform:uppercase;letter-spacing:.07em;font-weight:700;padding:5px 4px 3px;margin-top:4px;border-top:1px solid rgba(52,211,153,0.2)';sep.textContent='── Comune cu RLU ──';insertAfter.insertAdjacentElement('afterend',sep);insertAfter=sep;}
+          else{insertAfter=tg.querySelector('[data-rlu-sep]');}
+          cl.forEach(function(c){if(!ai[c.key]){var el=makeItem(c,true);insertAfter.insertAdjacentElement('afterend',el);insertAfter=el;}});
+        }
       } else {
         var ag=scroll.querySelector('[data-rlu-grup="'+j+'"]');
         if(ag){cl.forEach(function(c){if(!ag.querySelector('[data-rlu-key="'+c.key+'"]'))ag.appendChild(makeItem(c,false));});return;}
