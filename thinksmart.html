@@ -1,0 +1,1646 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ThinkSmart Solutions — Urbanism digital pentru România</title>
+<meta name="description" content="ThinkSmart Solutions construiește UrbanX — platforma GIS+AI care transformă urbanismul românesc. PUG digital, planșe automate, TCI cinematografic.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════
+   TOKENS
+═══════════════════════════════════════════════════════ */
+:root {
+  --black: #0A0A0C;
+  --deep: #111118;
+  --dark: #1A1A24;
+  --card: #1E1E2A;
+  --border: rgba(255,255,255,.08);
+  --border-m: rgba(255,255,255,.14);
+  --gold: #C8A951;
+  --gold-l: #E4CC7E;
+  --gold-d: #8B6F25;
+  --gold-subtle: rgba(200,169,81,.1);
+  --gold-border: rgba(200,169,81,.25);
+  --cream: #F5F0E8;
+  --cream-d: #E8E0CC;
+  --text: #E8E4DC;
+  --text-2: #A8A098;
+  --text-3: #686068;
+  --ok: #3D9970;
+  --ok-l: rgba(61,153,112,.15);
+  --err: #C0392B;
+  --warn: #D68910;
+  --blue: #2980B9;
+
+  --serif: 'Cormorant Garamond', Georgia, serif;
+  --sans: 'Outfit', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+
+  --r: 10px;
+  --r-lg: 18px;
+  --r-xl: 28px;
+  --shadow: 0 8px 40px rgba(0,0,0,.4);
+  --shadow-gold: 0 0 60px rgba(200,169,81,.08);
+}
+
+/* ═══════════════════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  background: var(--black);
+  font-family: var(--sans);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+::selection { background: var(--gold); color: var(--black); }
+
+/* ═══════════════════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════════════════ */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: 64px;
+  background: rgba(10,10,12,.85);
+  backdrop-filter: blur(24px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+}
+.nav-inner {
+  max-width: 1280px; margin: 0 auto;
+  padding: 0 32px;
+  width: 100%;
+  display: flex; align-items: center; gap: 0;
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  text-decoration: none; margin-right: auto;
+}
+.nav-logo-mark {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--gold-d) 0%, var(--gold-l) 100%);
+  border-radius: 9px;
+  display: grid; place-items: center;
+  font-family: var(--serif);
+  font-size: 15px; font-weight: 600;
+  color: var(--black);
+  letter-spacing: -.02em;
+  flex-shrink: 0;
+}
+.nav-brand {
+  display: flex; flex-direction: column; gap: 0;
+}
+.nav-brand-main {
+  font-family: var(--serif);
+  font-size: 17px; font-weight: 600;
+  color: var(--cream);
+  letter-spacing: -.01em; line-height: 1;
+}
+.nav-brand-sub {
+  font-family: var(--mono);
+  font-size: 9px; color: var(--gold);
+  letter-spacing: .12em; text-transform: uppercase;
+  opacity: .7; margin-top: 2px;
+}
+.nav-links {
+  display: flex; align-items: center; gap: 4px;
+  margin: 0 24px;
+}
+.nav-link {
+  color: var(--text-2); font-size: 13px; font-weight: 400;
+  padding: 6px 12px; border-radius: 6px;
+  text-decoration: none; transition: all .15s;
+  letter-spacing: .01em;
+}
+.nav-link:hover { color: var(--cream); background: rgba(255,255,255,.06); }
+.nav-link.active { color: var(--cream); }
+.nav-cta {
+  background: var(--gold);
+  color: var(--black);
+  font-size: 12px; font-weight: 700;
+  padding: 9px 20px; border-radius: 20px;
+  border: none; cursor: pointer;
+  font-family: var(--sans);
+  letter-spacing: .03em;
+  transition: all .2s;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.nav-cta:hover { background: var(--gold-l); transform: translateY(-1px); }
+
+/* ═══════════════════════════════════════════════════════
+   HERO
+═══════════════════════════════════════════════════════ */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column; justify-content: center;
+  padding-top: 64px;
+  position: relative; overflow: hidden;
+  background: var(--black);
+}
+.hero-bg {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 70% 60% at 60% 30%, rgba(200,169,81,.07) 0%, transparent 65%),
+    radial-gradient(ellipse 40% 50% at 20% 70%, rgba(41,128,185,.04) 0%, transparent 60%);
+}
+.hero-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(200,169,81,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(200,169,81,.04) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
+}
+.hero-content {
+  position: relative; z-index: 2;
+  max-width: 1280px; margin: 0 auto;
+  padding: 64px 32px 80px;
+  width: 100%;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
+}
+.hero-left {}
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--gold-subtle);
+  border: 1px solid var(--gold-border);
+  border-radius: 20px; padding: 5px 14px;
+  margin-bottom: 28px;
+}
+.hero-eyebrow-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--gold);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: .4; transform: scale(.8); }
+}
+.hero-eyebrow-text {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--gold); letter-spacing: .1em; text-transform: uppercase;
+}
+.hero-title {
+  font-family: var(--serif);
+  font-size: clamp(42px, 5.5vw, 72px);
+  font-weight: 300; line-height: 1.05;
+  letter-spacing: -.03em;
+  color: var(--cream); margin-bottom: 20px;
+}
+.hero-title em {
+  font-style: italic; color: var(--gold-l);
+}
+.hero-title strong { font-weight: 600; }
+.hero-desc {
+  font-size: 16px; color: var(--text-2);
+  line-height: 1.75; font-weight: 300;
+  max-width: 480px; margin-bottom: 40px;
+}
+.hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 56px; }
+.btn-primary {
+  background: var(--gold); color: var(--black);
+  font-size: 13px; font-weight: 700;
+  padding: 13px 28px; border-radius: 28px;
+  border: none; cursor: pointer; font-family: var(--sans);
+  letter-spacing: .03em; transition: all .2s;
+  text-decoration: none; display: inline-flex; align-items: center; gap: 7px;
+}
+.btn-primary:hover { background: var(--gold-l); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(200,169,81,.3); }
+.btn-ghost {
+  background: transparent; color: var(--text);
+  font-size: 13px; font-weight: 500;
+  padding: 13px 28px; border-radius: 28px;
+  border: 1px solid var(--border-m); cursor: pointer; font-family: var(--sans);
+  letter-spacing: .02em; transition: all .2s;
+  text-decoration: none; display: inline-flex; align-items: center; gap: 7px;
+}
+.btn-ghost:hover { border-color: rgba(255,255,255,.3); background: rgba(255,255,255,.04); }
+.hero-stats {
+  display: flex; gap: 36px; flex-wrap: wrap;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+}
+.hero-stat-val {
+  font-family: var(--serif); font-size: 32px; font-weight: 300;
+  color: var(--cream); letter-spacing: -.03em; display: block; line-height: 1;
+}
+.hero-stat-lbl {
+  font-size: 10px; color: var(--text-3);
+  text-transform: uppercase; letter-spacing: .07em;
+  margin-top: 4px; display: block;
+}
+
+/* Hero right — platform preview */
+.hero-right { position: relative; }
+.hero-mockup {
+  background: var(--deep);
+  border: 1px solid var(--border-m);
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow), var(--shadow-gold);
+  position: relative;
+}
+.hero-mockup::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  opacity: .5;
+}
+.hm-chrome {
+  height: 32px; background: rgba(0,0,0,.5);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; padding: 0 14px; gap: 6px;
+}
+.hm-dot { width: 8px; height: 8px; border-radius: 50%; }
+.hm-url {
+  flex: 1; max-width: 200px; margin-left: 8px;
+  height: 16px; background: rgba(255,255,255,.06); border-radius: 4px;
+  display: flex; align-items: center; padding: 0 8px;
+}
+.hm-url-text { font-family: var(--mono); font-size: 8px; color: var(--text-3); }
+.hm-body { height: 360px; position: relative; overflow: hidden; }
+/* Map simulation */
+.hm-map {
+  position: absolute; inset: 0;
+  background: #0D1626;
+}
+.hm-map-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(41,128,185,.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(41,128,185,.06) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+.hm-zone {
+  position: absolute; border-radius: 3px; opacity: .5;
+}
+.hm-parcel {
+  position: absolute;
+  border: 2px solid var(--gold);
+  background: rgba(200,169,81,.15);
+  border-radius: 2px;
+  animation: parcel-glow 2.5s ease-in-out infinite;
+}
+@keyframes parcel-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(200,169,81,.4); }
+  50% { box-shadow: 0 0 0 6px rgba(200,169,81,0); }
+}
+.hm-vol {
+  position: absolute;
+  background: rgba(41,128,185,.45);
+  border: 1.5px solid rgba(100,160,220,.8);
+  border-radius: 2px;
+}
+.hm-tooltip {
+  position: absolute;
+  background: rgba(10,10,12,.95);
+  border: 1px solid var(--gold-border);
+  border-radius: 8px; padding: 8px 12px;
+  font-size: 10px; color: var(--cream);
+  white-space: nowrap;
+  box-shadow: 0 4px 20px rgba(0,0,0,.5);
+}
+/* Panel overlay */
+.hm-panel {
+  position: absolute; right: 0; top: 0; bottom: 0;
+  width: 200px;
+  background: rgba(17,17,24,.97);
+  border-left: 1px solid var(--border);
+  display: flex; flex-direction: column;
+}
+.hm-panel-tab {
+  height: 32px; background: rgba(0,0,0,.4);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; padding: 0 12px;
+  font-size: 9px; color: var(--gold); font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase;
+  font-family: var(--mono); gap: 5px;
+}
+.hm-panel-body { padding: 10px; flex: 1; }
+.hm-kpi {
+  background: rgba(255,255,255,.04);
+  border-radius: 7px; padding: 8px 10px; margin-bottom: 6px;
+  border: 1px solid var(--border);
+}
+.hm-kpi-val {
+  font-family: var(--serif); font-size: 18px; font-weight: 400;
+  color: var(--cream); letter-spacing: -.02em;
+}
+.hm-kpi-val.ok { color: #4ADE80; }
+.hm-kpi-val.err { color: #F87171; }
+.hm-kpi-lbl { font-size: 8px; color: var(--text-3); margin-top: 1px; text-transform: uppercase; letter-spacing: .06em; }
+.hm-action {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 10px; border-radius: 7px;
+  background: var(--gold-subtle); border: 1px solid var(--gold-border);
+  margin-bottom: 5px; cursor: pointer;
+  font-size: 9px; color: var(--gold); font-weight: 600;
+}
+.hm-action-sm {
+  display: flex; align-items: center; gap: 5px;
+  padding: 6px 8px; border-radius: 6px;
+  border: 1px solid var(--border);
+  margin-bottom: 4px; cursor: pointer;
+  font-size: 8.5px; color: var(--text-2);
+}
+
+/* Floating labels */
+.hm-float-label {
+  position: absolute;
+  background: var(--gold);
+  color: var(--black);
+  font-family: var(--mono); font-size: 8px; font-weight: 700;
+  padding: 3px 7px; border-radius: 4px;
+  white-space: nowrap; letter-spacing: .05em;
+}
+
+/* ═══════════════════════════════════════════════════════
+   SECTIONS LAYOUT
+═══════════════════════════════════════════════════════ */
+.section {
+  padding: 96px 0;
+  position: relative;
+}
+.section-inner {
+  max-width: 1280px; margin: 0 auto; padding: 0 32px;
+}
+.section-eyebrow {
+  font-family: var(--mono); font-size: 10px; font-weight: 500;
+  color: var(--gold); letter-spacing: .15em; text-transform: uppercase;
+  margin-bottom: 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.section-eyebrow::before {
+  content: ''; width: 24px; height: 1px; background: var(--gold);
+}
+.section-title {
+  font-family: var(--serif);
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 300; line-height: 1.1;
+  letter-spacing: -.03em; color: var(--cream);
+  margin-bottom: 14px;
+}
+.section-title em { font-style: italic; color: var(--gold-l); }
+.section-sub {
+  font-size: 16px; color: var(--text-2);
+  line-height: 1.7; font-weight: 300; max-width: 580px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   DIVIDER
+═══════════════════════════════════════════════════════ */
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-m), transparent);
+  margin: 0 32px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   PROBLEM / SOLUTION — Manifest
+═══════════════════════════════════════════════════════ */
+.manifest {
+  background: var(--deep);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.manifest-grid {
+  display: grid; grid-template-columns: 1fr 1px 1fr;
+  gap: 0; min-height: 320px;
+}
+.manifest-divider {
+  background: linear-gradient(to bottom, transparent, var(--border-m), transparent);
+  align-self: stretch;
+}
+.manifest-col {
+  padding: 64px 56px;
+}
+.manifest-col:first-child { border-right: none; }
+.manifest-label {
+  font-family: var(--mono); font-size: 9px; font-weight: 500;
+  letter-spacing: .14em; text-transform: uppercase;
+  margin-bottom: 20px; display: flex; align-items: center; gap: 8px;
+}
+.manifest-label.prob { color: #F87171; }
+.manifest-label.sol { color: var(--gold); }
+.manifest-label::before {
+  content: ''; width: 16px; height: 1px;
+}
+.manifest-label.prob::before { background: #F87171; }
+.manifest-label.sol::before { background: var(--gold); }
+.manifest-text {
+  font-family: var(--serif);
+  font-size: clamp(20px, 2.2vw, 28px);
+  font-weight: 300; line-height: 1.5;
+  color: var(--text); letter-spacing: -.01em;
+}
+.manifest-text em { font-style: italic; }
+.manifest-text strong { font-weight: 600; color: var(--cream); }
+
+/* ═══════════════════════════════════════════════════════
+   PRODUS — UrbanX
+═══════════════════════════════════════════════════════ */
+.product-intro {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
+  margin-top: 64px;
+}
+.product-badge {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: rgba(200,169,81,.08);
+  border: 1px solid var(--gold-border);
+  border-radius: 20px; padding: 5px 14px; margin-bottom: 20px;
+  font-family: var(--mono); font-size: 9px; color: var(--gold);
+  letter-spacing: .1em; text-transform: uppercase;
+}
+.product-title {
+  font-family: var(--serif);
+  font-size: clamp(36px, 4vw, 56px);
+  font-weight: 300; line-height: 1.1;
+  letter-spacing: -.03em; color: var(--cream); margin-bottom: 16px;
+}
+.product-title em { font-style: italic; color: var(--gold-l); }
+.product-desc {
+  font-size: 15px; color: var(--text-2);
+  line-height: 1.75; font-weight: 300; margin-bottom: 32px;
+}
+.product-features { display: flex; flex-direction: column; gap: 10px; margin-bottom: 36px; }
+.pf {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 13px; color: var(--text-2); line-height: 1.5;
+}
+.pf-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--gold); flex-shrink: 0; margin-top: 5px;
+}
+
+/* Modules grid */
+.modules-title {
+  font-family: var(--serif);
+  font-size: 28px; font-weight: 300;
+  color: var(--cream); letter-spacing: -.02em; margin-bottom: 32px;
+  text-align: center;
+}
+.modules-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px; margin-top: 20px;
+}
+.module-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 24px;
+  transition: all .2s; cursor: default;
+  position: relative; overflow: hidden;
+}
+.module-card::before {
+  content: ''; position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(200,169,81,.3), transparent);
+  opacity: 0; transition: opacity .2s;
+}
+.module-card:hover { border-color: var(--border-m); transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,.4); }
+.module-card:hover::before { opacity: 1; }
+.module-card.featured {
+  background: linear-gradient(135deg, rgba(200,169,81,.08) 0%, rgba(200,169,81,.02) 100%);
+  border-color: var(--gold-border);
+}
+.module-card.featured::before { opacity: 1; }
+.module-icon { font-size: 22px; margin-bottom: 12px; display: block; }
+.module-tag {
+  font-family: var(--mono); font-size: 8px; font-weight: 500;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 8px; opacity: .8;
+}
+.module-name {
+  font-family: var(--serif); font-size: 18px; font-weight: 600;
+  color: var(--cream); letter-spacing: -.01em; margin-bottom: 8px;
+}
+.module-desc {
+  font-size: 12px; color: var(--text-2);
+  line-height: 1.6; font-weight: 300;
+}
+.module-meta {
+  margin-top: 12px; padding-top: 12px;
+  border-top: 1px solid var(--border);
+  font-family: var(--mono); font-size: 9px; color: var(--text-3);
+}
+
+/* ═══════════════════════════════════════════════════════
+   TCI SECTION — Dark statement
+═══════════════════════════════════════════════════════ */
+.tci-section {
+  background: var(--deep);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  overflow: hidden; position: relative;
+}
+.tci-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 70% 60% at 70% 50%, rgba(123,36,28,.15) 0%, transparent 70%);
+}
+.tci-grid-bg {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(200,169,81,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(200,169,81,.025) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+.tci-content {
+  position: relative; z-index: 2;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
+}
+.tci-screen {
+  background: #04060C;
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.07);
+  box-shadow: 0 20px 60px rgba(0,0,0,.6);
+  position: relative;
+}
+.tci-screen::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  z-index: 2;
+}
+.tci-prog-rail {
+  position: absolute; top: 2px; left: 0; right: 0;
+  height: 2px; background: rgba(255,255,255,.04); z-index: 3;
+}
+.tci-prog-fill {
+  height: 100%; width: 45%;
+  background: linear-gradient(90deg, var(--gold-d), var(--gold-l));
+}
+.tci-body-inner {
+  height: 320px;
+  background: radial-gradient(ellipse 120% 80% at 60% 60%, #0D1F35 0%, #050A10 100%);
+  position: relative; overflow: hidden;
+}
+.tci-city-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(200,169,81,.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(200,169,81,.02) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+.tci-glow {
+  position: absolute; width: 300px; height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(26,60,110,.5) 0%, transparent 70%);
+  top: 30%; left: 25%; transform: translate(-50%, -50%);
+}
+.tci-overlay-content {
+  position: absolute; inset: 0;
+  padding: 24px 28px;
+  display: flex; flex-direction: column;
+}
+.tci-bloc-tag {
+  font-family: var(--mono); font-size: 8px; color: var(--gold);
+  letter-spacing: .18em; text-transform: uppercase; margin-bottom: 8px; opacity: .8;
+}
+.tci-title {
+  font-family: var(--serif);
+  font-size: clamp(22px, 3vw, 38px);
+  font-weight: 300; color: var(--cream);
+  letter-spacing: -.04em; line-height: 1.05; margin-bottom: 6px;
+}
+.tci-title em { font-style: italic; color: var(--gold-l); }
+.tci-subtitle { font-size: 10px; color: rgba(232,228,220,.3); letter-spacing: .04em; }
+.tci-data-cards {
+  display: flex; gap: 8px; margin-top: auto;
+}
+.tci-dc {
+  background: rgba(4,6,12,.8); border: 1px solid rgba(200,169,81,.1);
+  border-radius: 9px; padding: 10px 14px; flex: 1;
+  backdrop-filter: blur(10px);
+}
+.tci-dc-val {
+  font-family: var(--serif); font-size: clamp(16px, 2vw, 26px);
+  font-weight: 300; color: var(--cream); letter-spacing: -.04em; line-height: 1;
+}
+.tci-dc-lbl {
+  font-size: 8px; color: rgba(232,228,220,.28);
+  margin-top: 4px; text-transform: uppercase; letter-spacing: .06em;
+}
+.tci-scene-dots {
+  position: absolute; bottom: 14px; left: 28px;
+  display: flex; gap: 5px; align-items: center;
+}
+.scene-dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,.12); }
+.scene-dot.active { background: var(--gold); width: 16px; border-radius: 2.5px; }
+.scene-dot.done { background: rgba(200,169,81,.3); }
+.tci-text {}
+.tci-label {
+  font-family: var(--mono); font-size: 9px; color: #C0392B;
+  letter-spacing: .12em; text-transform: uppercase; margin-bottom: 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+.tci-label::before { content: ''; width: 16px; height: 1px; background: #C0392B; }
+.tci-heading {
+  font-family: var(--serif);
+  font-size: clamp(28px, 3.5vw, 46px);
+  font-weight: 300; line-height: 1.1;
+  letter-spacing: -.03em; color: var(--cream); margin-bottom: 16px;
+}
+.tci-heading em { font-style: italic; color: var(--gold-l); }
+.tci-desc { font-size: 14px; color: var(--text-2); line-height: 1.7; font-weight: 300; margin-bottom: 28px; }
+.tci-specs { display: flex; flex-direction: column; gap: 8px; }
+.tci-spec {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 12px; color: var(--text-2);
+}
+.tci-spec-icon { font-size: 14px; width: 20px; text-align: center; flex-shrink: 0; }
+
+/* ═══════════════════════════════════════════════════════
+   STATS / NUMBERS
+═══════════════════════════════════════════════════════ */
+.stats-strip {
+  background: var(--deep);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 56px 0;
+}
+.stats-grid {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 0;
+}
+.stat-item {
+  text-align: center; padding: 0 20px;
+  border-right: 1px solid var(--border);
+}
+.stat-item:last-child { border-right: none; }
+.stat-val {
+  font-family: var(--serif);
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 300; color: var(--cream);
+  letter-spacing: -.04em; line-height: 1; display: block;
+}
+.stat-val span { color: var(--gold); }
+.stat-lbl {
+  font-size: 11px; color: var(--text-3);
+  text-transform: uppercase; letter-spacing: .08em;
+  margin-top: 8px; display: block;
+}
+
+/* ═══════════════════════════════════════════════════════
+   PENTRU CINE — Audiențe
+═══════════════════════════════════════════════════════ */
+.audience-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+  margin-top: 48px;
+}
+.audience-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r-xl); padding: 32px;
+  transition: all .2s; position: relative; overflow: hidden;
+}
+.audience-card::after {
+  content: ''; position: absolute;
+  bottom: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold-border), transparent);
+  opacity: 0; transition: opacity .2s;
+}
+.audience-card:hover { border-color: var(--border-m); transform: translateY(-4px); box-shadow: var(--shadow); }
+.audience-card:hover::after { opacity: 1; }
+.audience-who {
+  font-family: var(--mono); font-size: 9px; font-weight: 500;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 14px; opacity: .8;
+}
+.audience-icon { font-size: 32px; margin-bottom: 14px; display: block; }
+.audience-title {
+  font-family: var(--serif); font-size: 22px; font-weight: 600;
+  color: var(--cream); letter-spacing: -.01em; margin-bottom: 10px;
+}
+.audience-desc {
+  font-size: 13px; color: var(--text-2);
+  line-height: 1.65; font-weight: 300; margin-bottom: 20px;
+}
+.audience-wins { display: flex; flex-direction: column; gap: 7px; }
+.audience-win {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-size: 12px; color: var(--text-2); line-height: 1.4;
+}
+.aw-check { color: var(--ok); flex-shrink: 0; margin-top: 1px; font-size: 11px; }
+
+/* ═══════════════════════════════════════════════════════
+   PRICING
+═══════════════════════════════════════════════════════ */
+.pricing-toggle {
+  display: flex; align-items: center; gap: 12px;
+  justify-content: center; margin: 24px 0 40px;
+}
+.toggle-track {
+  width: 40px; height: 22px;
+  background: var(--gold); border-radius: 99px;
+  position: relative; cursor: pointer;
+}
+.toggle-thumb {
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--black);
+  position: absolute; right: 3px; top: 3px;
+}
+.toggle-lbl { font-size: 12px; color: var(--text-2); }
+.toggle-lbl.active { color: var(--cream); font-weight: 600; }
+.pricing-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+  margin-top: 8px;
+}
+.price-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r-xl); padding: 28px 24px;
+  position: relative; transition: all .2s;
+}
+.price-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+.price-card.featured {
+  background: linear-gradient(135deg, rgba(200,169,81,.1) 0%, rgba(200,169,81,.03) 100%);
+  border-color: var(--gold-border);
+}
+.price-card.featured::before {
+  content: '';position: absolute; inset: -1px;
+  border-radius: calc(var(--r-xl) + 1px);
+  background: linear-gradient(135deg, var(--gold-d), var(--gold-l));
+  z-index: -1;
+}
+.price-badge {
+  position: absolute; top: -11px; left: 50%; transform: translateX(-50%);
+  background: linear-gradient(135deg, var(--gold-d), var(--gold-l));
+  color: var(--black); font-size: 9px; font-weight: 700;
+  padding: 4px 14px; border-radius: 20px; white-space: nowrap; letter-spacing: .06em;
+}
+.price-tier {
+  font-family: var(--mono); font-size: 9px; font-weight: 500;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--text-3); margin-bottom: 12px;
+}
+.price-card.featured .price-tier { color: var(--gold); }
+.price-amount {
+  font-family: var(--serif); font-size: 40px; font-weight: 300;
+  color: var(--cream); letter-spacing: -.04em; line-height: 1;
+}
+.price-unit { font-size: 12px; color: var(--text-3); font-family: var(--sans); font-weight: 400; }
+.price-desc {
+  font-size: 11px; color: var(--text-3);
+  margin: 8px 0 18px; line-height: 1.5; font-weight: 300;
+}
+.price-btn {
+  width: 100%; padding: 10px; border-radius: 8px;
+  font-size: 11px; font-weight: 700; font-family: var(--sans);
+  cursor: pointer; letter-spacing: .04em; border: none; margin-bottom: 18px; transition: all .15s;
+}
+.price-btn.dark { background: var(--cream); color: var(--black); }
+.price-btn.dark:hover { background: var(--gold-l); }
+.price-btn.gold { background: linear-gradient(135deg, var(--gold-d), var(--gold-l)); color: var(--black); }
+.price-btn.gold:hover { filter: brightness(1.07); }
+.price-btn.outline { background: transparent; border: 1px solid var(--border-m); color: var(--text); }
+.price-btn.outline:hover { border-color: var(--gold-border); }
+.price-features { display: flex; flex-direction: column; gap: 7px; }
+.price-feat {
+  display: flex; align-items: flex-start; gap: 7px;
+  font-size: 11px; color: var(--text-2); line-height: 1.4;
+}
+.pf-ok { color: var(--ok); flex-shrink: 0; font-size: 10px; margin-top: 1px; }
+.pf-star { color: var(--gold); flex-shrink: 0; font-size: 10px; margin-top: 1px; }
+.pf-gem { color: #9B59B6; flex-shrink: 0; font-size: 10px; margin-top: 1px; }
+
+/* ═══════════════════════════════════════════════════════
+   DESPRE COMPANIE
+═══════════════════════════════════════════════════════ */
+.about-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start;
+}
+.about-text {}
+.about-manifesto {
+  font-family: var(--serif);
+  font-size: clamp(18px, 2vw, 24px);
+  font-weight: 300; line-height: 1.6;
+  color: var(--text); letter-spacing: -.01em; margin-bottom: 24px;
+}
+.about-manifesto em { font-style: italic; color: var(--gold-l); }
+.about-manifesto strong { font-weight: 600; color: var(--cream); }
+.about-meta { font-size: 13px; color: var(--text-3); line-height: 1.7; margin-bottom: 28px; }
+.trl-badge {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--gold-subtle);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--r); padding: 10px 16px;
+  margin-bottom: 10px;
+}
+.trl-level {
+  font-family: var(--serif); font-size: 24px; font-weight: 600;
+  color: var(--gold); letter-spacing: -.02em; line-height: 1;
+}
+.trl-text { font-size: 11px; color: var(--text-2); line-height: 1.4; }
+.trl-text strong { color: var(--cream); display: block; margin-bottom: 2px; }
+.about-right {}
+.about-values { display: flex; flex-direction: column; gap: 0; }
+.about-value {
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border);
+  display: flex; gap: 16px; align-items: flex-start;
+}
+.about-value:first-child { padding-top: 0; }
+.av-num {
+  font-family: var(--mono); font-size: 11px; color: var(--gold-d);
+  flex-shrink: 0; margin-top: 2px; font-weight: 500;
+}
+.av-title {
+  font-family: var(--serif); font-size: 17px; font-weight: 600;
+  color: var(--cream); letter-spacing: -.01em; margin-bottom: 5px;
+}
+.av-desc { font-size: 12px; color: var(--text-2); line-height: 1.6; font-weight: 300; }
+
+/* ═══════════════════════════════════════════════════════
+   CONTACT / CTA
+═══════════════════════════════════════════════════════ */
+.cta-section {
+  background: var(--deep);
+  border-top: 1px solid var(--border);
+  text-align: center; position: relative; overflow: hidden;
+}
+.cta-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(200,169,81,.06) 0%, transparent 70%);
+}
+.cta-content { position: relative; z-index: 2; }
+.cta-title {
+  font-family: var(--serif);
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 300; line-height: 1.1;
+  letter-spacing: -.04em; color: var(--cream); margin-bottom: 16px;
+}
+.cta-title em { font-style: italic; color: var(--gold-l); }
+.cta-desc {
+  font-size: 15px; color: var(--text-2); line-height: 1.7;
+  font-weight: 300; max-width: 500px; margin: 0 auto 40px;
+}
+.cta-form {
+  display: flex; gap: 10px; max-width: 480px; margin: 0 auto 16px;
+}
+.cta-input {
+  flex: 1; background: rgba(255,255,255,.06);
+  border: 1px solid var(--border-m); border-radius: 10px;
+  padding: 13px 16px; font-size: 13px;
+  font-family: var(--sans); color: var(--cream); outline: none;
+  transition: all .15s;
+}
+.cta-input:focus { border-color: var(--gold-border); box-shadow: 0 0 0 3px rgba(200,169,81,.1); }
+.cta-input::placeholder { color: var(--text-3); }
+.cta-submit {
+  background: var(--gold); color: var(--black);
+  font-size: 13px; font-weight: 700; font-family: var(--sans);
+  padding: 13px 24px; border-radius: 10px;
+  border: none; cursor: pointer; letter-spacing: .03em;
+  transition: all .2s; white-space: nowrap;
+}
+.cta-submit:hover { background: var(--gold-l); }
+.cta-note { font-size: 11px; color: var(--text-3); }
+.cta-links { display: flex; gap: 24px; justify-content: center; margin-top: 40px; }
+.cta-link {
+  font-size: 12px; color: var(--text-2);
+  text-decoration: none; display: flex; align-items: center; gap: 6px;
+  transition: color .15s;
+}
+.cta-link:hover { color: var(--gold); }
+
+/* ═══════════════════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════════════════ */
+footer {
+  background: var(--black);
+  border-top: 1px solid var(--border);
+  padding: 40px 0;
+}
+.footer-inner {
+  max-width: 1280px; margin: 0 auto; padding: 0 32px;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;
+}
+.footer-brand { display: flex; align-items: center; gap: 10px; }
+.footer-links { display: flex; gap: 20px; }
+.footer-link { font-size: 12px; color: var(--text-3); text-decoration: none; transition: color .15s; }
+.footer-link:hover { color: var(--text-2); }
+.footer-legal { font-size: 11px; color: var(--text-3); }
+
+/* ═══════════════════════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════════════════════ */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.anim { animation: fade-up .7s ease forwards; opacity: 0; }
+.anim-1 { animation-delay: .1s; }
+.anim-2 { animation-delay: .2s; }
+.anim-3 { animation-delay: .3s; }
+.anim-4 { animation-delay: .4s; }
+.anim-5 { animation-delay: .55s; }
+
+/* ═══════════════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .hero-content { grid-template-columns: 1fr; gap: 48px; }
+  .hero-right { display: none; }
+  .product-intro { grid-template-columns: 1fr; gap: 40px; }
+  .modules-grid { grid-template-columns: repeat(2, 1fr); }
+  .tci-content { grid-template-columns: 1fr; gap: 40px; }
+  .audience-grid { grid-template-columns: 1fr; }
+  .pricing-grid { grid-template-columns: repeat(2, 1fr); }
+  .about-grid { grid-template-columns: 1fr; gap: 40px; }
+  .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .stat-item { border-right: none; border-bottom: 1px solid var(--border); padding-bottom: 24px; margin-bottom: 4px; }
+  .manifest-grid { grid-template-columns: 1fr; }
+  .manifest-divider { display: none; }
+  .manifest-col { padding: 40px 32px; }
+  .nav-links { display: none; }
+}
+@media (max-width: 640px) {
+  .pricing-grid { grid-template-columns: 1fr; }
+  .modules-grid { grid-template-columns: 1fr; }
+  .hero-stats { gap: 20px; }
+  .cta-form { flex-direction: column; }
+  .footer-inner { flex-direction: column; align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════
+     NAV
+════════════════════════════════════════════════════ -->
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="#hero">
+      <div class="nav-logo-mark">TS</div>
+      <div class="nav-brand">
+        <div class="nav-brand-main">ThinkSmart Solutions</div>
+        <div class="nav-brand-sub">Urbanism Digital</div>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a class="nav-link" href="#produs">UrbanX</a>
+      <a class="nav-link" href="#module">Module</a>
+      <a class="nav-link" href="#tci">TCI Studio</a>
+      <a class="nav-link" href="#pricing">Prețuri</a>
+      <a class="nav-link" href="#despre">Despre</a>
+    </div>
+    <a class="nav-cta" href="#contact">Solicită demo →</a>
+  </div>
+</nav>
+
+<!-- ════════════════════════════════════════════════════
+     HERO
+════════════════════════════════════════════════════ -->
+<section class="hero" id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-left">
+      <div class="hero-eyebrow anim anim-1">
+        <div class="hero-eyebrow-dot"></div>
+        <span class="hero-eyebrow-text">TRL 5–6 · Live în 12 municipii</span>
+      </div>
+      <h1 class="hero-title anim anim-2">
+        Urbanismul digital<br>
+        al <em>României.</em><br>
+        <strong>Construit acum.</strong>
+      </h1>
+      <p class="hero-desc anim anim-3">
+        ThinkSmart Solutions construiește UrbanX — platforma GIS+AI care transformă modul în care arhitecții, urbanistii și primăriile lucrează cu PUG-ul, planșele și masterplanurile urbane.
+      </p>
+      <div class="hero-actions anim anim-4">
+        <a href="#contact" class="btn-primary">Solicită demo gratuit →</a>
+        <a href="#produs" class="btn-ghost">Explorează platforma</a>
+      </div>
+      <div class="hero-stats anim anim-5">
+        <div>
+          <span class="hero-stat-val">12<span style="color:var(--gold)">+</span></span>
+          <span class="hero-stat-lbl">Municipii cu PUG digital</span>
+        </div>
+        <div>
+          <span class="hero-stat-val">60<span style="color:var(--gold)">k</span></span>
+          <span class="hero-stat-lbl">Parcele indexate offline</span>
+        </div>
+        <div>
+          <span class="hero-stat-val">32</span>
+          <span class="hero-stat-lbl">Studii tehnice automate</span>
+        </div>
+        <div>
+          <span class="hero-stat-val">118</span>
+          <span class="hero-stat-lbl">Funcționalități</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Platform preview -->
+    <div class="hero-right anim anim-3">
+      <div class="hero-mockup">
+        <div class="hm-chrome">
+          <div class="hm-dot" style="background:#ef4444"></div>
+          <div class="hm-dot" style="background:#f59e0b"></div>
+          <div class="hm-dot" style="background:#22c55e"></div>
+          <div class="hm-url"><span class="hm-url-text">app.urbanx.ro · Municipiul Iași</span></div>
+        </div>
+        <div class="hm-body">
+          <div class="hm-map">
+            <div class="hm-map-grid"></div>
+            <!-- Roads -->
+            <div style="position:absolute;width:70%;height:2px;top:38%;left:0;background:rgba(80,95,130,.4)"></div>
+            <div style="position:absolute;width:2px;height:65%;left:42%;top:10%;background:rgba(80,95,130,.3)"></div>
+            <!-- Zones -->
+            <div class="hm-zone" style="background:#4E7FBF;width:160px;height:120px;left:5%;top:5%"></div>
+            <div class="hm-zone" style="background:#3D7A54;width:90px;height:80px;left:50%;top:8%"></div>
+            <div class="hm-zone" style="background:#C9A84C;width:110px;height:72px;left:35%;top:14%"></div>
+            <div class="hm-zone" style="background:#4E7FBF;width:140px;height:100px;left:55%;top:40%;opacity:.35"></div>
+            <!-- Selected parcel -->
+            <div class="hm-parcel" style="width:46px;height:38px;left:43%;top:28%"></div>
+            <div class="hm-vol" style="width:30px;height:22px;left:45%;top:30%"></div>
+            <!-- Tooltip -->
+            <div class="hm-tooltip" style="left:52%;top:24%">
+              LC2a · 452m² · P+2E ✓
+            </div>
+            <!-- UTR labels -->
+            <div style="position:absolute;background:rgba(10,10,12,.88);border:1px solid rgba(78,127,191,.35);border-radius:4px;padding:2px 6px;font-size:7.5px;color:rgba(173,198,230,.85);white-space:nowrap;left:7%;top:20%">LC1a · Locuire mică</div>
+            <div style="position:absolute;background:rgba(10,10,12,.88);border:1px solid rgba(200,169,81,.3);border-radius:4px;padding:2px 6px;font-size:7.5px;color:var(--gold-l);white-space:nowrap;left:36%;top:22%">M1 · Mixt</div>
+            <!-- Float label -->
+            <div class="hm-float-label" style="left:5%;bottom:12%">UrbanX Build · DNA 5/6 ✓</div>
+          </div>
+          <!-- Panel -->
+          <div class="hm-panel">
+            <div class="hm-panel-tab">◎ Parcelă</div>
+            <div class="hm-panel-body">
+              <div class="hm-kpi">
+                <div class="hm-kpi-val ok">35%</div>
+                <div class="hm-kpi-lbl">POT calc. · max 45% ✓</div>
+              </div>
+              <div class="hm-kpi">
+                <div class="hm-kpi-val ok">0.70</div>
+                <div class="hm-kpi-lbl">CUT calc. · max 1.4 ✓</div>
+              </div>
+              <div class="hm-kpi">
+                <div class="hm-kpi-val err">20%</div>
+                <div class="hm-kpi-lbl">SV calc. · min 25% ✗</div>
+              </div>
+              <div class="hm-action">⚡ UrbanX Build</div>
+              <div class="hm-action-sm">📋 Raport Complet</div>
+              <div class="hm-action-sm">🤖 AI Memoriu</div>
+              <div class="hm-action-sm">🎬 TCI Studio</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════
+     MANIFEST
+════════════════════════════════════════════════════ -->
+<div class="manifest" id="manifest">
+  <div style="max-width:1280px;margin:0 auto;padding:0 32px">
+    <div class="manifest-grid">
+      <div class="manifest-col">
+        <div class="manifest-label prob">Problema</div>
+        <div class="manifest-text">
+          Un arhitect petrece <em>3–5 zile</em> pe documentație pentru un singur dosar CU. Primăriile au <strong>PUG-uri pe hârtie</strong> din anii 2000, digitalizate manual cu erori. Finanțatorii internaționali cer <strong>date urbane</strong> pe care nimeni nu le are structurate.
+        </div>
+      </div>
+      <div class="manifest-divider"></div>
+      <div class="manifest-col">
+        <div class="manifest-label sol">Soluția UrbanX</div>
+        <div class="manifest-text">
+          PUG digital, analizat în <em>secunde</em>. Planșe PAC generate automat. 32 studii tehnice dintr-un click. Masterplan urban cu <strong>date live</strong> din 8 surse. Tot ce trebuia să dureze săptămâni, durează <em>minute</em>.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════
+     PRODUS — UrbanX
+════════════════════════════════════════════════════ -->
+<section class="section" id="produs">
+  <div class="section-inner">
+    <div class="section-eyebrow">Produsul nostru</div>
+    <h2 class="section-title">UrbanX — <em>platforma</em></h2>
+    <p class="section-sub">O singură platformă pentru tot fluxul de urbanism: de la selectarea parcelei până la masterplanul prezentat Băncii Mondiale.</p>
+
+    <div class="product-intro">
+      <div>
+        <div class="product-badge">● Live · TRL 5–6</div>
+        <h3 class="product-title">GIS + AI.<br><em>Date reale.</em><br>Decizii rapide.</h3>
+        <p class="product-desc">UrbanX integrează PUG-ul digital al municipiilor cu un motor AI de interpretare a regulamentelor, un generator de volumetrie 3D și un motor cinematografic pentru prezentări de nivel internațional.</p>
+        <div class="product-features">
+          <div class="pf"><div class="pf-dot"></div>PUG + RLU integrat pentru 12+ municipii — offline, &lt;100ms</div>
+          <div class="pf"><div class="pf-dot"></div>UrbanX Build: volum 3D + planșe DXF AutoCAD în 60 secunde</div>
+          <div class="pf"><div class="pf-dot"></div>32 studii tehnice PDF generate automat (însorire, seismic, EIM, CPE...)</div>
+          <div class="pf"><div class="pf-dot"></div>TCI Studio: documentar urban cinematografic pentru finanțatori internaționali</div>
+          <div class="pf"><div class="pf-dot"></div>AI Memoriu Justificativ per audiență: dosar CU, investitor, primar, Banca Mondială</div>
+          <div class="pf"><div class="pf-dot"></div>PWA nativ — instalabil pe iOS, Android, Desktop. Funcționează offline.</div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <a href="#contact" class="btn-primary">Solicită demo →</a>
+          <a href="#pricing" class="btn-ghost">Vezi prețurile</a>
+        </div>
+      </div>
+      <div>
+        <!-- Stats visual -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px;text-align:center">
+            <div style="font-family:var(--serif);font-size:38px;font-weight:300;color:var(--cream);letter-spacing:-.04em;line-height:1">118</div>
+            <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-top:6px">Funcționalități</div>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--gold-border);border-radius:var(--r-lg);padding:20px;text-align:center">
+            <div style="font-family:var(--serif);font-size:38px;font-weight:300;color:var(--gold-l);letter-spacing:-.04em;line-height:1">88</div>
+            <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-top:6px">Module JS</div>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px;text-align:center">
+            <div style="font-family:var(--serif);font-size:38px;font-weight:300;color:var(--cream);letter-spacing:-.04em;line-height:1">34</div>
+            <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-top:6px">Scene TCI cinematice</div>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px;text-align:center">
+            <div style="font-family:var(--serif);font-size:38px;font-weight:300;color:var(--cream);letter-spacing:-.04em;line-height:1">8</div>
+            <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-top:6px">Surse date live</div>
+          </div>
+        </div>
+        <div style="margin-top:10px;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px 20px;display:flex;align-items:center;gap:14px">
+          <div style="font-family:var(--serif);font-size:28px;font-weight:300;color:var(--ok);letter-spacing:-.03em">5–6</div>
+          <div>
+            <div style="font-size:11px;font-weight:600;color:var(--cream);margin-bottom:2px">Technology Readiness Level</div>
+            <div style="font-size:10px;color:var(--text-3)">Demonstrat în mediu operațional real · 12 municipii</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════
+     MODULE
+════════════════════════════════════════════════════ -->
+<div class="divider"></div>
+<section class="section" id="module">
+  <div class="section-inner">
+    <div class="section-eyebrow">Arhitectura platformei</div>
+    <h2 class="section-title">12 module.<br><em>Un singur flux.</em></h2>
+    <p class="section-sub">De la baza de date cadastrală până la masterplanul prezentat ministerelor — toate modulele lucrează împreună, în același ecran.</p>
+
+    <div class="modules-grid">
+      <div class="module-card featured">
+        <span class="module-icon">🏗</span>
+        <div class="module-tag">M3 + M7 · Core</div>
+        <div class="module-name">UrbanX Build</div>
+        <div class="module-desc">Generare volumetrie 3D din parametrii PUG. 8 forme planimetrice, 4 scenarii, multivolum. Planșe PAC complete: plan, fațade, secțiuni, axonometrie, DXF AutoCAD, PDF A3. DNA Radar conformitate instant.</div>
+        <div class="module-meta">15-relevee.js + 14 extensii · buildFP() · turf.js</div>
+      </div>
+      <div class="module-card">
+        <span class="module-icon">🗺</span>
+        <div class="module-tag">M1 · GIS</div>
+        <div class="module-name">Bază Date Urbanistică</div>
+        <div class="module-desc">12+ municipii cu PUG digital georeferențiat. 60.377 parcele Iași indexate offline (&lt;100ms). Căutare 4 moduri: cadastru, adresă, GPS, click. Hartă 4 stiluri Mapbox GL.</div>
+        <div class="module-meta">Mapbox GL JS v3.11 · UAT_REGISTRY · 60k parcele offline</div>
+      </div>
+      <div class="module-card">
+        <span class="module-icon">🤖</span>
+        <div class="module-tag">M2 · AI</div>
+        <div class="module-name">Interpretare AI Reguli</div>
+        <div class="module-desc">Parser structural propriu pentru RLU — nu depinde de GPT extern pentru cazurile standard. Conformitate automată propus vs. PUG. DNA Radar scor normativ. Lanț juridic Neo4j.</div>
+        <div class="module-meta">valFunctiune() 2 treceri · 22-zoning-connector.js</div>
+      </div>
+      <div class="module-card">
+        <span class="module-icon">📋</span>
+        <div class="module-tag">M5 · Studii</div>
+        <div class="module-name">32 Studii Tehnice PDF</div>
+        <div class="module-desc">Însorire OMS 119, ISU, Geotehnic NP 074, EIM, Acustic SR 10009, Seismic P100, CPE, PMR, REPA Pre-Autorizare, Fezabilitate/DALI, AI Memoriu Justificativ Claude API.</div>
+        <div class="module-meta">09-pdf-engine.js · 10-studies.js · 6 fișiere studii</div>
+      </div>
+      <div class="module-card">
+        <span class="module-icon">🧊</span>
+        <div class="module-tag">M6 · 3D</div>
+        <div class="module-name">Randare 3D & Export</div>
+        <div class="module-desc">Viewer Three.js r128: 7 stiluri PBR, 4 iluminări, context urban procedural (mașini, arbori, felinare). Export GLB pentru BIM (Revit, Blender, Archicad). Randare HD 4K locală.</div>
+        <div class="module-meta">Three.js r128 · PCFSoftShadow · ACESFilmic · GLB/GLTF</div>
+      </div>
+      <div class="module-card">
+        <span class="module-icon">🔮</span>
+        <div class="module-tag">M9 · Intelligence</div>
+        <div class="module-name">Analize Urbane Avansate</div>
+        <div class="module-desc">Walkability Score + 15-Minute City + Izocrone. Urban Heat Island. SDG 11 per UAT. Coridoare Dezvoltare Spațială. SpaceSyntax + Noise + Sunlight layers. Scor gravitațional per parcelă.</div>
+        <div class="module-meta">urbanx-science-layer.js · urbanx-urban-intelligence.js</div>
+      </div>
+      <div class="module-card">
+        <span class="module-icon">🗺</span>
+        <div class="module-tag">M8 · Rapoarte</div>
+        <div class="module-name">Hartă Rapoarte & Conexiuni</div>
+        <div class="module-desc">Vizualizare grafică a conexiunilor între toate rapoartele generate. Fișă Urbanism per parcelă PDF A4. Matrice Avize Necesare automate (Legea 50/1991). Hărți Inundații ANAR RCP10/100/500.</div>
+        <div class="module-meta">openStudyMap() · 25-prediction-layer.js · _FloodMapper</div>
+      </div>
+      <div class="module-card">
+        <span class="module-icon">☁️</span>
+        <div class="module-tag">M10 · Cloud</div>
+        <div class="module-name">Proiecte & Cloud Sync</div>
+        <div class="module-desc">Salvare scenarii cloud Supabase. Regulament PUG din DB. Portofoliu Strategic 2025-2055. Import PUG Digital (GeoJSON/KML). Export PowerPoint 10 slide-uri pentru Consiliul Local.</div>
+        <div class="module-meta">Supabase · 16-projects.js · 21-cloud-sync.js</div>
+      </div>
+      <div class="module-card">
+        <span class="module-icon">🔬</span>
+        <div class="module-tag">ML · Pipeline</div>
+        <div class="module-name">ML Automatizare Date</div>
+        <div class="module-desc">Pipeline vectorizare PUG: PDF/TIFF → GeoJSON automat. Extragere RLU din PDF: NLP → reguli.json. Onboarding UAT self-service. Dataset TSS-FG: 50+ planșe PUG românești. (Roadmap P3)</div>
+        <div class="module-meta">Computer Vision · pdfplumber + NER + LLM · Roadmap P3</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════
+     TCI STUDIO
+════════════════════════════════════════════════════ -->
+<section class="section tci-section" id="tci">
+  <div class="tci-bg"></div>
+  <div class="tci-grid-bg"></div>
+  <div class="section-inner">
+    <div class="tci-content">
+      <!-- Screen mockup -->
+      <div class="tci-screen">
+        <div class="tci-prog-rail"><div class="tci-prog-fill"></div></div>
+        <div class="tci-body-inner">
+          <div class="tci-city-grid"></div>
+          <div class="tci-glow"></div>
+          <div class="tci-overlay-content">
+            <div class="tci-bloc-tag">Bloc 9 · Scenarii Predictive</div>
+            <div class="tci-title">Monte Carlo <em>2056</em></div>
+            <div class="tci-subtitle">10.000 simulări · CI 90% · 3 scenarii · Benchmark 17 orașe EU</div>
+            <div class="tci-data-cards">
+              <div class="tci-dc">
+                <div class="tci-dc-val">349.640</div>
+                <div class="tci-dc-lbl">Populație 2021 · INSE live</div>
+              </div>
+              <div class="tci-dc">
+                <div class="tci-dc-val" style="color:#F87171">312.000</div>
+                <div class="tci-dc-lbl">Prognoză 2055 · −10.8%</div>
+              </div>
+              <div class="tci-dc">
+                <div class="tci-dc-val" style="color:var(--gold-l)">S2 · 50%</div>
+                <div class="tci-dc-lbl">Scenariu cel mai probabil</div>
+              </div>
+            </div>
+            <div class="tci-scene-dots">
+              <div class="scene-dot done"></div>
+              <div class="scene-dot done"></div>
+              <div class="scene-dot done"></div>
+              <div class="scene-dot active"></div>
+              <div class="scene-dot"></div>
+              <div class="scene-dot"></div>
+              <div class="scene-dot"></div>
+              <div class="scene-dot"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Text -->
+      <div class="tci-text">
+        <div class="tci-label">TCI Studio · UrbanX Studio</div>
+        <h2 class="tci-heading">34 scene.<br><em>O poveste.</em><br>Calitate Banca Mondială.</h2>
+        <p class="tci-desc">Documentar urban cinematografic pentru autorități locale, ministere și finanțatori internaționali. Date live din 8 surse. Motor predictiv cu 10.000 simulări Monte Carlo. Benchmark față de 17 orașe europene.</p>
+        <div class="tci-specs">
+          <div class="tci-spec"><div class="tci-spec-icon">🎬</div>34 scene, 11 blocuri tematice, ~60 minute</div>
+          <div class="tci-spec"><div class="tci-spec-icon">📡</div>8 surse date live: INSE, CNAIR, Eurostat, ANAR, OpenAQ, OSM</div>
+          <div class="tci-spec"><div class="tci-spec-icon">🎲</div>Monte Carlo 10.000 simulări, interval credibilitate 90%</div>
+          <div class="tci-spec"><div class="tci-spec-icon">🌍</div>Benchmark 17 orașe europene, Eurostat Urban Audit 2021</div>
+          <div class="tci-spec"><div class="tci-spec-icon">📊</div>Masterplan PDF 22 pagini + Export PowerPoint Consiliu Local</div>
+          <div class="tci-spec"><div class="tci-spec-icon">🏙</div>GHSL Suprafață Construită 1975–2055 cu slider temporal</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════
+     STATS STRIP
+════════════════════════════════════════════════════ -->
+<div class="stats-strip">
+  <div class="section-inner">
+    <div class="stats-grid">
+      <div class="stat-item">
+        <span class="stat-val">12<span>+</span></span>
+        <span class="stat-lbl">Municipii cu PUG digital</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-val">60<span>k</span></span>
+        <span class="stat-lbl">Parcele indexate Iași</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-val">32</span>
+        <span class="stat-lbl">Studii tehnice automate</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-val">88</span>
+        <span class="stat-lbl">Module JavaScript</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-val">5<span>–6</span></span>
+        <span class="stat-lbl">Technology Readiness Level</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════
+     AUDIENȚE
+════════════════════════════════════════════════════ -->
+<section class="section" id="audienta">
+  <div class="section-inner">
+    <div class="section-eyebrow">Pentru cine</div>
+    <h2 class="section-title">Trei audiențe.<br><em>Un produs.</em></h2>
+    <p class="section-sub">UrbanX vorbește diferit cu fiecare tip de utilizator — aceleași date, prezentate pentru decizia corectă.</p>
+
+    <div class="audience-grid">
+      <div class="audience-card">
+        <div class="audience-who">Arhitecți & Urbanisti</div>
+        <span class="audience-icon">📐</span>
+        <div class="audience-title">Proiectezi mai repede. Livrezi mai mult.</div>
+        <p class="audience-desc">Tot ce-ți trebuie pentru un dosar CU — regulamentul, bilanțul, planșele și studiile — în câteva minute, nu zile.</p>
+        <div class="audience-wins">
+          <div class="audience-win"><div class="aw-check">✓</div>PUG + RLU instant pentru 12 municipii</div>
+          <div class="audience-win"><div class="aw-check">✓</div>Planșe PAC: DXF AutoCAD + PDF A3 în 60 secunde</div>
+          <div class="audience-win"><div class="aw-check">✓</div>32 studii tehnice PDF generate automat</div>
+          <div class="audience-win"><div class="aw-check">✓</div>REPA Pre-Autorizare cu checklist complet CU</div>
+          <div class="audience-win"><div class="aw-check">✓</div>AI Memoriu Justificativ §1.1–§1.6 editabil</div>
+        </div>
+      </div>
+
+      <div class="audience-card">
+        <div class="audience-who">Primari & Autorități Locale</div>
+        <span class="audience-icon">🏛</span>
+        <div class="audience-title">Decizi pe date. Prezinți cu impact.</div>
+        <p class="audience-desc">PUG-ul tău digitalizat, date urbane live, masterplan profesionist pentru finanțatori europeni — fără să aștepți luni consultanți externi.</p>
+        <div class="audience-wins">
+          <div class="audience-win"><div class="aw-check">✓</div>Dashboard UAT Live: INSE, Eurostat, GHSL, OSM</div>
+          <div class="audience-win"><div class="aw-check">✓</div>TCI Studio: prezentare cinematică pentru ministere și BM</div>
+          <div class="audience-win"><div class="aw-check">✓</div>Masterplan PDF 22 pag + PowerPoint Consiliu Local</div>
+          <div class="audience-win"><div class="aw-check">✓</div>Portofoliu Strategic 2025–2055 cu FEDR+PNRR+PPP</div>
+          <div class="audience-win"><div class="aw-check">✓</div>Predicție urbanistică heatmap 2–30 ani</div>
+        </div>
+      </div>
+
+      <div class="audience-card">
+        <div class="audience-who">Investitori & Finanțatori</div>
+        <span class="audience-icon">📈</span>
+        <div class="audience-title">Date reale. ROI calculat. Risc vizibil.</div>
+        <p class="audience-desc">Orice parcelă din 12 municipii analizată în secunde: potențial construibil, ROI estimat, risc seismic, predicție urbanistică, benchmark EU.</p>
+        <div class="audience-wins">
+          <div class="audience-win"><div class="aw-check">✓</div>Scor gravitațional per parcelă — accesibilitate, dotări, UTR</div>
+          <div class="audience-win"><div class="aw-check">✓</div>Studiu Fezabilitate/DALI: cost, piață, ROI automat</div>
+          <div class="audience-win"><div class="aw-check">✓</div>Monte Carlo 10.000 simulări, 3 scenarii, CI 90%</div>
+          <div class="audience-win"><div class="aw-check">✓</div>Walkability + 15-Min City + Urban Heat Island</div>
+          <div class="audience-win"><div class="aw-check">✓</div>SDG 11 per UAT — conformitate internațională</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════
+     PRICING
+════════════════════════════════════════════════════ -->
+<div class="divider"></div>
+<section class="section" id="pricing">
+  <div class="section-inner">
+    <div class="section-eyebrow">Pachete SaaS</div>
+    <h2 class="section-title">Simplu.<br><em>Justificat.</em></h2>
+    <p class="section-sub">De la arhitectul independent la primărie și instituții publice internaționale. Fără costuri ascunse.</p>
+    <div class="pricing-toggle">
+      <span class="toggle-lbl">Lunar</span>
+      <div class="toggle-track"><div class="toggle-thumb"></div></div>
+      <span class="toggle-lbl active">Anual <span style="background:rgba(200,169,81,.15);color:var(--gold);border:1px solid var(--gold-border);border-radius:99px;padding:1px 8px;font-size:10px;font-weight:700;margin-left:4px">−20%</span></span>
+    </div>
+    <div class="pricing-grid">
+      <!-- Core -->
+      <div class="price-card">
+        <div class="price-tier">UrbanX Core</div>
+        <div class="price-amount">€49<span class="price-unit">/lună</span></div>
+        <div class="price-desc">Per utilizator · anual<br>Arhitect independent</div>
+        <button class="price-btn dark">Începe gratuit 14 zile</button>
+        <div class="price-features">
+          <div class="price-feat"><div class="pf-ok">✓</div>GIS & Cadastru 12+ municipii</div>
+          <div class="price-feat"><div class="pf-ok">✓</div>AI Reguli (parser propriu)</div>
+          <div class="price-feat"><div class="pf-ok">✓</div>UrbanX Build — volumetrie 3D</div>
+          <div class="price-feat"><div class="pf-ok">✓</div>18 studii tehnice PDF core</div>
+          <div class="price-feat"><div class="pf-ok">✓</div>Planșe PAC + DXF + PDF A3</div>
+          <div class="price-feat"><div class="pf-ok">✓</div>Raport Urbanistic 8 pagini</div>
+          <div class="price-feat"><div class="pf-ok">✓</div>PWA + offline parțial</div>
+        </div>
+      </div>
+      <!-- Build -->
+      <div class="price-card">
+        <div class="price-tier">UrbanX Build</div>
+        <div class="price-amount">€89<span class="price-unit">/lună</span></div>
+        <div class="price-desc">Per utilizator · anual<br>Birou de arhitectură</div>
+        <button class="price-btn dark">Alege Build</button>
+        <div class="price-features">
+          <div style="font-size:10px;color:var(--text-3);margin-bottom:7px;font-weight:500">Tot Core, plus:</div>
+          <div class="price-feat"><div class="pf-ok">✓</div>32 studii tehnice PDF (complet)</div>
+          <div class="price-feat"><div class="pf-ok">✓</div>Viewer 3D PBR + 4 iluminări</div>
+          <div class="price-feat"><div class="pf-ok">✓</div>Export GLB BIM (Revit/Blender)</div>
+          <div class="price-feat"><div class="pf-ok">✓</div>Randare HD 4K (Three.js)</div>
+          <div class="price-feat"><div class="pf-ok">✓</div>AI Memoriu Justificativ Claude</div>
+          <div class="price-feat"><div class="pf-ok">✓</div>Cloud Sync scenarii</div>
+        </div>
+      </div>
+      <!-- Pro -->
+      <div class="price-card featured">
+        <div class="price-badge">Cel mai popular</div>
+        <div class="price-tier">UrbanX Pro</div>
+        <div class="price-amount">€189<span class="price-unit">/lună</span></div>
+        <div class="price-desc">Per UAT · anual<br>Primărie & consultanță</div>
+        <button class="price-btn gold">Alege Pro</button>
+        <div class="price-features">
+          <div style="font-size:10px;color:rgba(200,169,81,.6);margin-bottom:7px;font-weight:500">Tot Build, plus:</div>
+          <div class="price-feat"><div class="pf-star">★</div>TCI Studio — 34 scene cinematice</div>
+          <div class="price-feat"><div class="pf-star">★</div>Dashboard UAT Live (INSE+GHSL)</div>
+          <div class="price-feat"><div class="pf-star">★</div>Masterplan PDF 22 pag + PPTX</div>
+          <div class="price-feat"><div class="pf-star">★</div>Analize Avansate (Walkability, SDG11)</div>
+          <div class="price-feat"><div class="pf-star">★</div>Monte Carlo + Benchmark 17 orașe EU</div>
+          <div class="price-feat"><div class="pf-star">★</div>5 utilizatori incluși</div>
+        </div>
+      </div>
+      <!-- Infinity -->
+      <div class="price-card">
+        <div class="price-tier">UrbanX Infinity</div>
+        <div class="price-amount" style="color:#9B59B6">Custom</div>
+        <div class="price-desc">Instituții & Fonduri UE<br>Ministere & MDLPA</div>
+        <button class="price-btn outline">Contactează-ne →</button>
+        <div class="price-features">
+          <div style="font-size:10px;color:var(--text-3);margin-bottom:7px;font-weight:500">Tot Pro, plus:</div>
+          <div class="price-feat"><div class="pf-gem">◆</div>Multi-tenant SaaS per UAT</div>
+          <div class="price-feat"><div class="pf-gem">◆</div>ML vectorizare PUG PDF→GeoJSON</div>
+          <div class="price-feat"><div class="pf-gem">◆</div>NLP extragere RLU din PDF</div>
+          <div class="price-feat"><div class="pf-gem">◆</div>API REST + SDK + webhooks</div>
+          <div class="price-feat"><div class="pf-gem">◆</div>White-label branding</div>
+          <div class="price-feat"><div class="pf-gem">◆</div>SLA dedicat + suport prioritar</div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:20px;font-size:11px;color:var(--text-3)">
+      Toate planurile: GDPR Compliant · Hosted EU · Supabase Auth · GitHub Pages · Support tehnic în română
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════
+     DESPRE COMPANIE
+════════════════════════════════════════════════════ -->
+<div class="divider"></div>
+<section class="section" id="despre">
+  <div class="section-inner">
+    <div class="section-eyebrow">Despre noi</div>
+    <h2 class="section-title">ThinkSmart<br><em>Solutions.</em></h2>
+
+    <div class="about-grid" style="margin-top:48px">
+      <div class="about-text">
+        <p class="about-manifesto">
+          Construim <em>infrastructura digitală</em> a urbanismului românesc. Nu consultanță, nu rapoarte — <strong>software care funcționează</strong> în mâinile arhitectului, urbanistului și primarului din România.
+        </p>
+        <p class="about-meta">
+          ThinkSmart Solutions SRL este o companie de software cu sediul în Botoșani, România. Produsul nostru principal, UrbanX, este o platformă GIS+AI pentru urbanism demonstrată în mediu operațional real în 12+ municipii din România.
+        </p>
+        <div class="trl-badge">
+          <div class="trl-level">TRL 5–6</div>
+          <div class="trl-text">
+            <strong>Technology Readiness Level</strong>
+            Demonstrat în mediu operațional real · 12 municipii
+          </div>
+        </div>
+      </div>
+
+      <div class="about-right">
+        <div class="about-values">
+          <div class="about-value">
+            <div class="av-num">01</div>
+            <div>
+              <div class="av-title">Date reale, nu estimări</div>
+              <div class="av-desc">Fiecare număr din platformă vine dintr-o sursă verificabilă: INSE TEMPO, Eurostat, ANCPI, CNAIR, ANAR. Nu modele statistice generice — date din România, pentru România.</div>
+            </div>
+          </div>
+          <div class="about-value">
+            <div class="av-num">02</div>
+            <div>
+              <div class="av-title">Software care livrează, nu promite</div>
+              <div class="av-desc">118 funcționalități implementate și funcționale. 88 module JavaScript. TRL 5–6 demonstrat. Nu un prototip, nu un MVP — o platformă care funcționează azi în 12 municipii.</div>
+            </div>
+          </div>
+          <div class="about-value">
+            <div class="av-num">03</div>
+            <div>
+              <div class="av-title">Construit pentru profesioniști</div>
+              <div class="av-desc">Designat pentru arhitecți RUR, urbanisti atestați și manageri UAT — nu pentru demonstrații. Fiecare funcționalitate rezolvă o problemă reală din fluxul de autorizare din România.</div>
+            </div>
+          </div>
+          <div class="about-value" style="border-bottom:none">
+            <div class="av-num">04</div>
+            <div>
+              <div class="av-title">Scalabilitate națională</div>
+              <div class="av-desc">Arhitectura SaaS multi-tenant permite onboarding la nivel național. Pipeline ML pentru vectorizare automată PUG elimină blocajul principal: lipsa datelor digitale.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════
+     CTA / CONTACT
+════════════════════════════════════════════════════ -->
+<section class="section cta-section" id="contact">
+  <div class="cta-bg"></div>
+  <div class="section-inner cta-content">
+    <div class="section-eyebrow" style="justify-content:center;margin-bottom:20px">Solicită demo</div>
+    <h2 class="cta-title">Gata să vezi<br><em>UrbanX în acțiune?</em></h2>
+    <p class="cta-desc">Demo gratuit, 45 minute, pe parcela și UAT-ul tău. Fără prezentări PowerPoint generice — arătăm platforma cu datele tale reale.</p>
+    <div class="cta-form">
+      <input class="cta-input" type="email" placeholder="Email instituțional sau profesional">
+      <button class="cta-submit">Solicită demo →</button>
+    </div>
+    <p class="cta-note">Răspundem în 24 de ore · Fără obligații · Demo pe UAT-ul tău</p>
+    <div class="cta-links">
+      <a class="cta-link" href="mailto:office@thinksmartsolutions.ro">✉ office@thinksmartsolutions.ro</a>
+      <a class="cta-link" href="https://thinksmartsolutions.github.io/UrbanX/" target="_blank">🔗 Platforma UrbanX (live)</a>
+      <a class="cta-link" href="https://github.com/ThinkSmartSolutions/UrbanX" target="_blank">⌥ GitHub Repository</a>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════
+     FOOTER
+════════════════════════════════════════════════════ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="nav-logo-mark" style="width:28px;height:28px;font-size:12px">TS</div>
+      <div>
+        <div style="font-family:var(--serif);font-size:14px;font-weight:600;color:var(--text);letter-spacing:-.01em">ThinkSmart Solutions SRL</div>
+        <div style="font-size:10px;color:var(--text-3);margin-top:1px">Botoșani, România · office@thinksmartsolutions.ro</div>
+      </div>
+    </div>
+    <div class="footer-links">
+      <a class="footer-link" href="#produs">UrbanX</a>
+      <a class="footer-link" href="#pricing">Prețuri</a>
+      <a class="footer-link" href="#despre">Despre</a>
+      <a class="footer-link" href="#contact">Contact</a>
+      <a class="footer-link" href="https://thinksmartsolutions.github.io/UrbanX/" target="_blank">↗ Platformă</a>
+    </div>
+    <div class="footer-legal">© 2026 ThinkSmart Solutions SRL · GDPR Compliant · Hosted EU</div>
+  </div>
+</footer>
+
+<script>
+// Nav scroll highlight
+const sections = ['manifest','produs','module','tci','audienta','pricing','despre','contact'];
+const links = document.querySelectorAll('.nav-link');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.getBoundingClientRect().top < 100) current = id;
+  });
+  links.forEach(l => {
+    l.classList.remove('active');
+    const href = l.getAttribute('href').replace('#', '');
+    if (href === current) l.classList.add('active');
+  });
+});
+
+// Smooth scroll for all anchor links
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const id = a.getAttribute('href').slice(1);
+    const el = document.getElementById(id);
+    if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth' }); }
+  });
+});
+
+// CTA form
+document.querySelector('.cta-submit').addEventListener('click', () => {
+  const input = document.querySelector('.cta-input');
+  if (input.value && input.value.includes('@')) {
+    input.style.borderColor = 'var(--ok)';
+    document.querySelector('.cta-submit').textContent = 'Trimis! ✓';
+    document.querySelector('.cta-submit').style.background = 'var(--ok)';
+    setTimeout(() => {
+      input.style.borderColor = '';
+      document.querySelector('.cta-submit').textContent = 'Solicită demo →';
+      document.querySelector('.cta-submit').style.background = '';
+      input.value = '';
+    }, 3000);
+  }
+});
+</script>
+</body>
+</html>
