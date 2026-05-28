@@ -414,7 +414,7 @@ function renderTab(tab){
 function getContent(tab){
   switch(tab){
     case'search':return htmlSearch();
-    case'utr':return htmlUTR();
+    case'utr':return htmlUTR()+htmlIndicatori();
     case'indicatori':return htmlIndicatori();
     case'proiect':return htmlProiect();
     case'multi':return htmlMulti();
@@ -810,14 +810,14 @@ function htmlUTR(){
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
       <div>
         <span class="badge b-b">📋 ${esc(ap.nrcad||'—')}</span>
-        ${u?`<span class="badge b-g">🗺 UTR: ${esc(u)}</span>`:`<span class="badge b-y">⚠️ UTR necunoscut</span>`}
+        ${u?`<span class="badge b-g">🗺 UTR: ${esc(utrNr||u)}</span>`:`<span class="badge b-y">⚠️ UTR necunoscut</span>`}
         <span class="badge" style="background:rgba(212,175,55,.15);color:#d4af37">${'📐 Cadastru local'}</span>
       </div>
       <button class="btn-s" onclick="centerOnParcel()" title="Centrează harta pe parcelă" style="padding:4px 10px;font-size:11px;flex-shrink:0">📍 Centrează</button>
     </div>
     <div class="g2" style="margin-top:9px">
       <div class="met"><div class="ml">Suprafață teren</div><div class="mv">${ap.area?Math.round(ap.area)+' m²':'—'}</div></div>
-      <div class="met"><div class="ml">UTR</div><div class="mv">${esc(u||'—')}</div></div>
+      <div class="met"><div class="ml">UTR</div><div class="mv">${esc(utrNr||u||'—')}</div></div>
       ${r.d?`<div class="met" style="grid-column:span 2"><div class="ml">Descriere zonă</div><div class="mv">${esc(r.d)}</div></div>`:''}
     </div>
     ${r.ua?`
