@@ -1662,6 +1662,85 @@ const UAT_REGISTRY = {
     trafic:{viteza_proiectare:50,TMA_ref:14000,norm_parcaje:'NP 051/2012 rev.',acces_transport_public:true},
     mediu:{sv_minim_procent:20,norm:'Legea 24/2007'},
   },
+  // ── COMUNE CU PUG+RLU VECTORIZAT ────────────────────────────────────────
+  'comuna-miroslava': {
+    label:'Comuna Miroslava', short:'Miroslava',
+    judet:'Iași', judetCode:'IS', siruta:'95042',
+    center:[27.5280,47.1050], zoom:13,
+    pugFile:'./data/comuna-miroslava/pug.geojson',
+    reguliFile:'./data/comuna-miroslava/reguli.json',
+    status:'partial', primar:'Primăria Comunei Miroslava',
+    daU:'Compartiment Urbanism', djcpn:'DJCPN Iași',
+    seism:{zona:'E',ag:0.20,Tc:1.6,norm:'P100-1/2013'},
+    hidro:{nfa:'2-5m',tip_sol:'Loess, argilă',portanta:'130-170 kPa',studiu_obligatoriu:'Da'},
+  },
+  'comuna-rediu': {
+    label:'Comuna Rediu', short:'Rediu',
+    judet:'Iași', judetCode:'IS', siruta:'95087',
+    center:[27.5680,47.1890], zoom:13,
+    pugFile:'./data/comuna-rediu/pug.geojson',
+    reguliFile:'./data/comuna-rediu/reguli.json',
+    status:'partial', primar:'Primăria Comunei Rediu',
+    daU:'Compartiment Urbanism', djcpn:'DJCPN Iași',
+    seism:{zona:'E',ag:0.20,Tc:1.6,norm:'P100-1/2013'},
+    hidro:{nfa:'2-5m',tip_sol:'Loess',portanta:'130-160 kPa',studiu_obligatoriu:'Da'},
+  },
+  'comuna-aroneanu': {
+    label:'Comuna Aroneanu', short:'Aroneanu',
+    judet:'Iași', judetCode:'IS', siruta:'94889',
+    center:[27.6980,47.1760], zoom:13,
+    pugFile:'./data/comuna-aroneanu/pug.geojson',
+    reguliFile:'./data/comuna-aroneanu/reguli.json',
+    status:'partial', primar:'Primăria Comunei Aroneanu',
+    daU:'Compartiment Urbanism', djcpn:'DJCPN Iași',
+    seism:{zona:'E',ag:0.20,Tc:1.6,norm:'P100-1/2013'},
+    hidro:{nfa:'2-5m',tip_sol:'Loess, argilă',portanta:'130-170 kPa',studiu_obligatoriu:'Da'},
+  },
+  'comuna-holboca': {
+    label:'Comuna Holboca', short:'Holboca',
+    judet:'Iași', judetCode:'IS', siruta:'94951',
+    center:[27.7280,47.1450], zoom:13,
+    pugFile:'./data/comuna-holboca/pug.geojson',
+    reguliFile:'./data/comuna-holboca/reguli.json',
+    status:'partial', primar:'Primăria Comunei Holboca',
+    daU:'Compartiment Urbanism', djcpn:'DJCPN Iași',
+    seism:{zona:'E',ag:0.20,Tc:1.6,norm:'P100-1/2013'},
+    hidro:{nfa:'2-5m',tip_sol:'Loess, aluviuni',portanta:'120-160 kPa',studiu_obligatoriu:'Da'},
+  },
+  'comuna-popricani': {
+    label:'Comuna Popricani', short:'Popricani',
+    judet:'Iași', judetCode:'IS', siruta:'95424',
+    center:[27.6050,47.2550], zoom:13,
+    pugFile:'./data/comuna-popricani/pug.geojson',
+    reguliFile:'./data/comuna-popricani/reguli.json',
+    status:'partial', primar:'Primăria Comunei Popricani',
+    daU:'Compartiment Urbanism', djcpn:'DJCPN Iași',
+    seism:{zona:'E',ag:0.20,Tc:1.6,norm:'P100-1/2013'},
+    hidro:{nfa:'2-5m',tip_sol:'Loess',portanta:'130-170 kPa',studiu_obligatoriu:'Da'},
+  },
+  'comuna-baluseni': {
+    label:'Comuna Bălușeni', short:'Bălușeni',
+    judet:'Botoșani', judetCode:'BT', siruta:'18073',
+    center:[26.8730,47.5320], zoom:13,
+    pugFile:'./data/comuna-baluseni/pug.geojson',
+    reguliFile:'./data/comuna-baluseni/reguli.json',
+    status:'partial', primar:'Primăria Comunei Bălușeni',
+    daU:'Compartiment Urbanism', djcpn:'DJCPN Botoșani',
+    seism:{zona:'E',ag:0.20,Tc:1.6,norm:'P100-1/2013'},
+    hidro:{nfa:'2-5m',tip_sol:'Loess',portanta:'130-170 kPa',studiu_obligatoriu:'Da'},
+  },
+  'comuna-mihaieminescu': {
+    label:'Comuna Mihai Eminescu', short:'M. Eminescu',
+    judet:'Botoșani', judetCode:'BT', siruta:'38063',
+    center:[26.5380,47.6120], zoom:13,
+    pugFile:'./data/comuna-mihaieminescu/pug.geojson',
+    reguliFile:'./data/comuna-mihaieminescu/reguli.json',
+    status:'partial', primar:'Primăria Comunei Mihai Eminescu',
+    daU:'Compartiment Urbanism', djcpn:'DJCPN Botoșani',
+    seism:{zona:'E',ag:0.20,Tc:1.6,norm:'P100-1/2013'},
+    hidro:{nfa:'2-5m',tip_sol:'Loess',portanta:'130-170 kPa',studiu_obligatoriu:'Da'},
+  },
+
 };
 
 // ── Funcții helper UAT ────────────────────────────────────────────────────
@@ -1755,13 +1834,7 @@ function getEIMConfig(){
 
 // ── Schimbare UAT ─────────────────────────────────────────────────────────
 async function switchUAT(uatId){
-  // Caută în UAT_REGISTRY, cu fallback în _PUG_REGISTRY pentru comune
-  const _pugRegEntry = window._PUG_REGISTRY && Object.values(window._PUG_REGISTRY).find(r => r.id === uatId);
-  const cfg = UAT_REGISTRY[uatId] || (_pugRegEntry ? {
-    label: _pugRegEntry.name, short: _pugRegEntry.name.replace('Comuna ','').replace('Municipiul ','').replace('Orașul ',''),
-    pugFile: _pugRegEntry.pugFile, reguliFile: _pugRegEntry.reguli,
-    status: 'partial', center: null, zoom: 13,
-  } : null);
+  const cfg = UAT_REGISTRY[uatId];
   if(!cfg){ ss('⚠️ UAT necunoscut: '+uatId); return; }
 
   S_UAT = {id:uatId, ...cfg};
@@ -1866,8 +1939,8 @@ function showUATSelector(){
 
   // Grupăm pe regiuni
   const REGIUNI = {
-    'Moldova — Iași + zona':     ['municipiul-iasi'],
-    'Moldova — Botoșani':        ['municipiul-botosani','oras-dorohoi'],
+    'Moldova — Iași + zona':     ['municipiul-iasi','comuna-miroslava','comuna-rediu','comuna-aroneanu','comuna-holboca','comuna-popricani'],
+    'Moldova — Botoșani':        ['municipiul-botosani','oras-dorohoi','comuna-baluseni','comuna-mihaieminescu'],
     'Moldova — Suceava':         ['municipiul-suceava','municipiul-falticeni','municipiul-radauti'],
     'Moldova — Neamț':           ['municipiul-piatra-neamt','municipiul-roman','oras-targu-neamt'],
     'Moldova — Bacău':           ['municipiul-bacau','municipiul-onesti','municipiul-moinesti'],
@@ -2304,7 +2377,7 @@ async function loadData(uatId){
       S.pugIdx=[];
       S.pug.features.forEach(f=>{
         const u=normU(f.properties?.utr||'');if(!u||u==='?'||u==='??')return;
-        try{const bb=turf.bbox(f);const area=turf.area(f);S.pugIdx.push({utr:u,geom:f.geometry,bb:[bb[0],bb[1],bb[2],bb[3]],area});}catch(e){}
+        try{const bb=turf.bbox(f);const area=turf.area(f);S.pugIdx.push({utr:u, UTR: f.properties?.UTR||f.properties?.utr_nr||null, geom:f.geometry,bb:[bb[0],bb[1],bb[2],bb[3]],area});}catch(e){}
       });
       S.pugIdx.sort((a,b)=>a.area-b.area);
       if(path!==pugFile) console.warn('PUG loaded from fallback path:',path);
