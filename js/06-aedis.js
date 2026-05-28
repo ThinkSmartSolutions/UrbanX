@@ -1802,8 +1802,12 @@ async function switchUAT(uatId){
       const r=await fetch(cfg.reguliFile);
       if(r.ok){
         const newReguli=await r.json();
-        Object.assign(REGULI,newReguli);
-        ss(`📋 Reguli PUG ${cfg.label} încărcate (${Object.keys(newReguli).length} UTR-uri)`);
+        if (typeof mergeIntoREGULI === 'function') {
+          mergeIntoREGULI(newReguli);
+        } else {
+          Object.assign(REGULI,newReguli);
+        }
+        ss('📋 Reguli PUG '+cfg.label+' încărcate');
       }
     }catch(e){}
   }
@@ -2313,9 +2317,13 @@ async function loadData(uatId){
       const rr=await fetch(reguliFile);
       if(rr.ok){
         const newReguli=await rr.json();
-        // Merge în REGULI global — suprascriem doar cheile din noul UAT
-        Object.assign(REGULI, newReguli);
-        console.log(`Reguli încărcate: ${Object.keys(newReguli).length} UTR-uri din ${reguliFile}`);
+        // Merge normalizat în REGULI global
+        if (typeof mergeIntoREGULI === 'function') {
+          mergeIntoREGULI(newReguli);
+          console.log('Reguli încărcate și normalizate din', reguliFile);
+        } else {
+          Object.assign(REGULI, newReguli);
+        }
       }
     }catch(e){ console.warn('reguli.json indisponibil:', e.message); }
   }
