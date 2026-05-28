@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>UrbanX — UI Vision & Product Design</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,300&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --ink:#0A0E17;--ink2:#141929;--ink3:#1E2640;
+  --surface:#F4F2EE;--surf2:#ECEAE4;--surf3:#E2DFD7;--cream:#F9F6EF;
+  --gold:#C9A84C;--goldl:#E8CC7A;--goldd:#8B6A1F;
+  --slate:#3D4A6B;--slatel:#8595B8;--mist:#B8C4D8;
+  --ok:#2D7A4F;--okl:#E8F5EE;--warn:#C4690A;--warnl:#FDF0E4;
+  --err:#9B2C2C;--errl:#FEE8E8;--info:#1A5C8A;--infol:#E5F0F8;
+  --font:'DM Sans',system-ui,sans-serif;
+  --disp:'Fraunces',Georgia,serif;
+  --mono:'DM Mono',monospace;
+  --sh-sm:0 1px 3px rgba(10,14,23,.08),0 1px 2px rgba(10,14,23,.06);
+  --sh-md:0 4px 12px rgba(10,14,23,.1),0 2px 6px rgba(10,14,23,.07);
+  --sh-lg:0 12px 40px rgba(10,14,23,.14),0 4px 12px rgba(10,14,23,.08);
+  --r:8px;--rl:14px;--rxl:20px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--surface);font-family:var(--font);color:var(--ink);line-height:1.6;overflow-x:hidden}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(244,242,238,.92);backdrop-filter:blur(20px);border-bottom:1px solid rgba(10,14,23,.06)}
+.nav-i{max-width:1400px;margin:0 auto;padding:0 28px;height:54px;display:flex;align-items:center;gap:20px}
+.nav-logo{display:flex;align-items:center;gap:9px;text-decoration:none}
+.nl-mark{width:30px;height:30px;background:var(--ink);border-radius:7px;display:grid;place-items:center}
+.nl-letter{color:var(--gold);font-family:var(--disp);font-size:13px;font-weight:700}
+.nl-text{font-family:var(--disp);font-size:16px;font-weight:700;color:var(--ink);letter-spacing:-.02em}
+.nav-links{display:flex;gap:2px;flex:1;overflow-x:auto;scrollbar-width:none}
+.nav-links::-webkit-scrollbar{display:none}
+.nl{color:var(--slatel);font-size:11px;font-weight:500;padding:5px 10px;border-radius:5px;text-decoration:none;white-space:nowrap;transition:.15s}
+.nl:hover{color:var(--ink);background:rgba(10,14,23,.05)}
+.nl.on{color:var(--cream);background:var(--ink)}
+.nav-cta{background:var(--gold);color:var(--ink);font-size:11px;font-weight:700;padding:7px 16px;border-radius:20px;border:none;cursor:pointer;font-family:var(--font);letter-spacing:.02em;white-space:nowrap}
+.nav-cta:hover{background:var(--goldl)}
+
+/* PAGE */
+.pg{padding:72px 28px;max-width:1400px;margin:0 auto}
+.eyebrow{font-family:var(--mono);font-size:10px;font-weight:500;color:var(--goldd);letter-spacing:.14em;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.eyebrow::before{content:'';width:22px;height:1px;background:var(--gold)}
+.stitle{font-family:var(--disp);font-size:clamp(26px,3.5vw,46px);font-weight:300;color:var(--ink);line-height:1.1;letter-spacing:-.03em;margin-bottom:10px}
+.stitle em{font-style:italic;color:var(--goldd)}
+.ssub{color:var(--slatel);font-size:14px;line-height:1.7;max-width:580px;font-weight:300}
+.hr{height:1px;background:linear-gradient(90deg,transparent,rgba(10,14,23,.08),transparent);margin:56px 28px}
+
+/* HERO */
+.hero{min-height:100vh;background:var(--ink);display:flex;flex-direction:column;justify-content:flex-end;padding-top:54px;position:relative;overflow:hidden}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 65% 40%,rgba(201,168,76,.07) 0%,transparent 70%)}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(201,168,76,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,.035) 1px,transparent 1px);background-size:64px 64px}
+.hero-c{position:relative;z-index:2;padding:56px 28px 72px;max-width:1400px;margin:0 auto;width:100%}
+.hero-tag{display:inline-flex;align-items:center;gap:7px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.22);border-radius:20px;padding:5px 13px;margin-bottom:28px}
+.hero-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero-tag-text{font-family:var(--mono);font-size:9px;color:var(--gold);letter-spacing:.1em;text-transform:uppercase}
+.hero-title{font-family:var(--disp);font-size:clamp(38px,6vw,80px);font-weight:300;color:var(--cream);line-height:1.05;letter-spacing:-.04em;margin-bottom:20px}
+.hero-title em{font-style:italic;color:var(--goldl)}
+.hero-title strong{font-weight:700;display:block}
+.hero-desc{color:var(--mist);font-size:15px;font-weight:300;line-height:1.7;max-width:500px;margin-bottom:40px}
+.hero-btns{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:64px}
+.btn-p{background:var(--gold);color:var(--ink);font-size:12px;font-weight:700;padding:12px 26px;border-radius:28px;border:none;cursor:pointer;font-family:var(--font);letter-spacing:.03em;transition:all .2s}
+.btn-p:hover{background:var(--goldl);transform:translateY(-1px)}
+.btn-o{background:transparent;color:var(--cream);font-size:12px;font-weight:500;padding:12px 26px;border-radius:28px;border:1px solid rgba(244,242,238,.18);cursor:pointer;font-family:var(--font);transition:.2s}
+.btn-o:hover{border-color:rgba(244,242,238,.36)}
+.hero-stats{display:flex;gap:44px;padding-top:28px;border-top:1px solid rgba(244,242,238,.07);flex-wrap:wrap}
+.hs-val{font-family:var(--disp);font-size:30px;font-weight:300;color:var(--cream);letter-spacing:-.03em;display:block}
+.hs-lbl{font-size:10px;color:var(--mist);font-weight:300;letter-spacing:.05em;text-transform:uppercase}
+
+/* SCREEN FRAME */
+.frame{background:var(--cream);border-radius:var(--rxl);overflow:hidden;box-shadow:var(--sh-lg);border:1px solid rgba(10,14,23,.06)}
+.frame-chrome{height:30px;background:var(--surf2);border-bottom:1px solid rgba(10,14,23,.06);display:flex;align-items:center;padding:0 12px;gap:5px}
+.fdot{width:8px;height:8px;border-radius:50%}
+.fbar{flex:1;max-width:260px;height:14px;background:rgba(10,14,23,.05);border-radius:4px;padding:0 7px;display:flex;align-items:center}
+.furl{font-family:var(--mono);font-size:8px;color:var(--slatel)}
+
+/* TOPBAR */
+.tb{height:44px;background:var(--ink);display:flex;align-items:center;padding:0 14px;gap:8px;flex-shrink:0}
+.tb-logo{width:26px;height:26px;background:linear-gradient(135deg,var(--goldd),var(--goldl));border-radius:6px;display:grid;place-items:center;flex-shrink:0}
+.tb-logo-l{font-family:var(--disp);font-size:11px;font-weight:700;color:var(--ink)}
+.tb-name{font-family:var(--disp);font-size:13px;font-weight:700;color:var(--cream);letter-spacing:-.01em;flex-shrink:0}
+.tb-div{width:1px;height:18px;background:rgba(244,242,238,.1);margin:0 2px;flex-shrink:0}
+.tb-btn{background:rgba(244,242,238,.07);border:1px solid rgba(244,242,238,.1);color:rgba(244,242,238,.65);border-radius:6px;padding:4px 9px;font-size:9.5px;font-family:var(--font);cursor:pointer;white-space:nowrap;transition:.12s;flex-shrink:0}
+.tb-btn:hover{background:rgba(244,242,238,.12);color:var(--cream)}
+.tb-btn.hl{background:rgba(201,168,76,.15);border-color:rgba(201,168,76,.3);color:var(--goldl);font-weight:700}
+.tb-btn.tci{background:rgba(147,51,234,.12);border-color:rgba(147,51,234,.3);color:#C084FC}
+.tb-sp{flex:1}
+.tb-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--goldd),var(--goldl));display:grid;place-items:center;font-family:var(--disp);font-size:10px;font-weight:700;color:var(--ink);cursor:pointer;flex-shrink:0}
+
+/* MAP */
+.map-a{flex:1;background:#0D1626;position:relative;overflow:hidden}
+.mg{position:absolute;inset:0;background-image:linear-gradient(rgba(45,106,159,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(45,106,159,.06) 1px,transparent 1px);background-size:32px 32px}
+.mzone{position:absolute;border-radius:3px;opacity:.45}
+.mzone.r{background:#4E7FBF}.mzone.m{background:#C9A84C}.mzone.g{background:#3D7A54}.mzone.i{background:#8B6B3D}.mzone.s{background:#7B55A0}
+.mparcel{position:absolute;border:2px solid var(--gold);background:rgba(201,168,76,.12);border-radius:2px;animation:pp 2s ease-in-out infinite}
+@keyframes pp{0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,.4)}50%{box-shadow:0 0 0 5px rgba(201,168,76,0)}}
+.mvol{position:absolute;background:rgba(90,140,200,.4);border:1.5px solid rgba(100,160,220,.8);border-radius:2px}
+.mtt{position:absolute;background:var(--ink);border:1px solid rgba(201,168,76,.25);border-radius:7px;padding:6px 9px;font-size:8px;color:var(--cream);white-space:nowrap;box-shadow:var(--sh-md)}
+.mtt.g{background:rgba(201,168,76,.95);color:var(--ink);border:none}
+.mctrl-g{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:2px}
+.mctrl{width:26px;height:26px;background:rgba(13,22,38,.9);border:1px solid rgba(244,242,238,.1);border-radius:5px;display:grid;place-items:center;cursor:pointer;color:rgba(244,242,238,.5);font-size:10px}
+.msw{position:absolute;bottom:10px;left:10px;display:flex;gap:3px}
+.mswb{background:rgba(13,22,38,.85);border:1px solid rgba(244,242,238,.1);border-radius:16px;padding:3px 9px;font-size:8px;font-family:var(--font);color:rgba(244,242,238,.45);cursor:pointer;white-space:nowrap}
+.mswb.on{background:rgba(201,168,76,.14);border-color:rgba(201,168,76,.32);color:var(--goldl);font-weight:700}
+
+/* PANEL */
+.panel{width:320px;background:var(--cream);border-left:1px solid rgba(10,14,23,.06);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
+.ptabs{display:flex;background:var(--ink);overflow-x:auto;scrollbar-width:none;flex-shrink:0}
+.ptabs::-webkit-scrollbar{display:none}
+.ptab{flex-shrink:0;height:38px;padding:0 12px;display:flex;align-items:center;gap:4px;font-size:9.5px;font-weight:500;color:rgba(244,242,238,.3);border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;font-family:var(--font);white-space:nowrap;transition:.12s}
+.ptab.on{color:var(--goldl);border-bottom-color:var(--gold);font-weight:700}
+.ptab:hover:not(.on){color:rgba(244,242,238,.55)}
+.pbody{flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(10,14,23,.08) transparent}
+
+/* PARCEL CARD */
+.pcard{background:var(--ink);margin:10px;border-radius:var(--rl);overflow:hidden}
+.pcard-hd{padding:12px 14px;border-bottom:1px solid rgba(244,242,238,.06)}
+.pcard-ey{font-family:var(--mono);font-size:7.5px;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;margin-bottom:3px;opacity:.8}
+.pcard-name{font-family:var(--disp);font-size:15px;font-weight:300;color:var(--cream);letter-spacing:-.02em;margin-bottom:2px}
+.pcard-meta{font-size:9px;color:rgba(244,242,238,.38)}
+.pcard-meta span{color:rgba(244,242,238,.65);font-weight:500}
+.pcard-stats{display:grid;grid-template-columns:1fr 1fr}
+.pstat{padding:9px 14px;border-right:1px solid rgba(244,242,238,.05);border-bottom:1px solid rgba(244,242,238,.05)}
+.pstat:nth-child(2n){border-right:none}
+.pstat:nth-last-child(-n+2){border-bottom:none}
+.psv{font-family:var(--disp);font-size:14px;font-weight:300;color:var(--cream);letter-spacing:-.02em}
+.psl{font-size:8px;color:rgba(244,242,238,.32);text-transform:uppercase;letter-spacing:.05em;margin-top:1px}
+.pss{font-family:var(--mono);font-size:7px;color:rgba(244,242,238,.18);margin-top:1px}
+
+/* GRAVITY */
+.gcard{margin:10px;background:var(--surf2);border-radius:var(--r);border:1px solid rgba(10,14,23,.06);padding:12px 14px;display:flex;align-items:center;gap:12px}
+.gring{width:48px;height:48px;flex-shrink:0}
+.gscore-lbl{font-family:var(--mono);font-size:7.5px;color:var(--slatel);letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px}
+.gscore-val{font-family:var(--disp);font-size:20px;font-weight:700;color:var(--ink);letter-spacing:-.03em;line-height:1}
+.gtier{display:inline-flex;align-items:center;gap:3px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.18);border-radius:10px;padding:2px 7px;font-size:8px;font-weight:700;color:var(--goldd);margin-top:3px}
+
+/* UTR */
+.usect{padding:10px;border-top:1px solid rgba(10,14,23,.06)}
+.slbl{font-family:var(--mono);font-size:8.5px;color:var(--slatel);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;padding:0 2px}
+.utr-hd{background:var(--ink);border-radius:var(--r);padding:10px 12px;margin-bottom:7px;display:flex;justify-content:space-between;align-items:flex-start}
+.utr-code{font-family:var(--disp);font-size:16px;font-weight:700;color:var(--goldl);letter-spacing:-.02em}
+.utr-nm{font-size:9px;color:rgba(244,242,238,.45);margin-top:1px}
+.utr-pill{background:rgba(78,127,191,.18);color:#94B8E0;border:1px solid rgba(78,127,191,.28);border-radius:10px;padding:2px 7px;font-size:8px;font-weight:600}
+.ind-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:7px}
+.ind{background:var(--surf2);border-radius:6px;padding:7px 8px;border:1px solid rgba(10,14,23,.05)}
+.ind-v{font-family:var(--disp);font-size:14px;font-weight:700;color:var(--ink);letter-spacing:-.02em}
+.ind-v.ok{color:var(--ok)}.ind-v.err{color:var(--err)}.ind-v.w{color:var(--warn)}
+.ind-l{font-size:8px;color:var(--slatel);margin-top:1px}
+.ind-lm{font-family:var(--mono);font-size:7px;color:var(--mist);margin-top:1px}
+.cbar{background:var(--surf2);border-radius:var(--r);padding:9px 11px;border:1px solid rgba(10,14,23,.05);margin-bottom:7px}
+.crow{display:flex;align-items:center;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(10,14,23,.04)}
+.crow:last-child{border-bottom:none}
+.cn{font-size:9.5px;color:var(--slate);display:flex;align-items:center;gap:5px}
+.cdot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.cv{font-family:var(--mono);font-size:9.5px;font-weight:500}
+.cs{font-size:8.5px;font-weight:700;padding:1px 5px;border-radius:8px}
+.cs.ok{background:var(--okl);color:var(--ok)}
+.cs.err{background:var(--errl);color:var(--err)}
+.cs.w{background:var(--warnl);color:var(--warn)}
+
+/* ACTIONS */
+.acts{padding:8px 10px;display:flex;flex-direction:column;gap:4px;border-top:1px solid rgba(10,14,23,.06)}
+.ab{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:var(--r);border:1px solid rgba(10,14,23,.06);background:var(--surface);cursor:pointer;transition:all .15s;font-family:var(--font);text-align:left;width:100%}
+.ab:hover{background:var(--surf3);border-color:rgba(10,14,23,.1);transform:translateX(2px)}
+.ab.p{background:var(--ink);border-color:transparent}
+.ab.p:hover{background:var(--ink3)}
+.ab.gld{background:linear-gradient(135deg,rgba(201,168,76,.09),rgba(232,204,122,.04));border-color:rgba(201,168,76,.18)}
+.ab.gld:hover{border-color:rgba(201,168,76,.32)}
+.ai{width:26px;height:26px;border-radius:6px;display:grid;place-items:center;font-size:12px;flex-shrink:0}
+.ai.d{background:rgba(244,242,238,.07)}.ai.g{background:rgba(201,168,76,.14)}.ai.gr{background:rgba(45,122,79,.11)}.ai.b{background:rgba(26,92,138,.09)}
+.at{flex:1}
+.at-t{font-size:10.5px;font-weight:600;color:var(--ink);line-height:1.3}
+.ab.p .at-t{color:var(--goldl)}
+.at-s{font-size:8.5px;color:var(--slatel);margin-top:1px}
+.aa{font-size:9px;color:var(--mist);flex-shrink:0}
+
+/* BUILD PANEL */
+.bp{background:var(--ink);color:var(--cream);display:flex;flex-direction:column}
+.bp-hd{padding:18px 18px 14px;border-bottom:1px solid rgba(244,242,238,.06)}
+.bp-title{font-family:var(--disp);font-size:18px;font-weight:300;color:var(--cream);letter-spacing:-.03em;margin-bottom:3px}
+.bp-title em{font-style:italic;color:var(--goldl)}
+.bp-meta{font-size:9px;color:rgba(244,242,238,.32);display:flex;align-items:center;gap:5px}
+.bp-body{flex:1;overflow-y:auto;padding:14px 18px;scrollbar-width:thin;scrollbar-color:rgba(244,242,238,.08) transparent}
+.bsect{margin-bottom:18px}
+.bstitle{font-family:var(--mono);font-size:8.5px;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;margin-bottom:9px;display:flex;align-items:center;gap:7px}
+.bstitle::after{content:'';flex:1;height:1px;background:rgba(201,168,76,.13)}
+.scen-g{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.sc{padding:9px 11px;border-radius:7px;border:1px solid rgba(244,242,238,.08);cursor:pointer;transition:.15s}
+.sc.on{background:rgba(201,168,76,.09);border-color:rgba(201,168,76,.28)}
+.sc:hover:not(.on){background:rgba(244,242,238,.03)}
+.sc-icon{font-size:14px;margin-bottom:3px}
+.sc-name{font-size:9.5px;font-weight:700;color:rgba(244,242,238,.75)}
+.sc.on .sc-name{color:var(--goldl)}
+.sc-desc{font-size:8px;color:rgba(244,242,238,.3);margin-top:1px;line-height:1.35}
+.shape-g{display:grid;grid-template-columns:repeat(4,1fr);gap:3px}
+.shb{aspect-ratio:1;border-radius:5px;border:1px solid rgba(244,242,238,.07);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;transition:.12s;background:rgba(244,242,238,.02)}
+.shb.on{background:rgba(201,168,76,.09);border-color:rgba(201,168,76,.28)}
+.shb svg{width:18px;height:18px}
+.shb-n{font-size:7px;color:rgba(244,242,238,.38);text-align:center}
+.shb.on .shb-n{color:var(--goldl)}
+.pr{display:flex;align-items:center;gap:9px;margin-bottom:7px}
+.prl{font-size:9.5px;color:rgba(244,242,238,.45);width:90px;flex-shrink:0}
+.prsl{flex:1;-webkit-appearance:none;height:2.5px;border-radius:99px;background:rgba(244,242,238,.1);outline:none;cursor:pointer}
+.prsl::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--gold);cursor:pointer;box-shadow:0 0 0 3px rgba(201,168,76,.18)}
+.prv{font-family:var(--mono);font-size:9.5px;font-weight:500;color:var(--goldl);min-width:38px;text-align:right}
+.bp-gen{padding:12px 18px;background:linear-gradient(to top,rgba(201,168,76,.07),transparent);border-top:1px solid rgba(201,168,76,.09);display:flex;gap:7px;flex-shrink:0}
+.bg-main{flex:1;background:var(--gold);color:var(--ink);border:none;border-radius:7px;padding:11px;font-size:11px;font-weight:700;font-family:var(--font);cursor:pointer;letter-spacing:.03em;display:flex;align-items:center;justify-content:center;gap:5px;transition:.15s}
+.bg-main:hover{background:var(--goldl)}
+.bg-sec{background:rgba(244,242,238,.07);border:1px solid rgba(244,242,238,.1);color:rgba(244,242,238,.65);border-radius:7px;padding:11px 14px;font-size:11px;font-weight:600;font-family:var(--font);cursor:pointer;transition:.15s}
+.bg-sec:hover{background:rgba(244,242,238,.11)}
+
+/* DRAWING BOARD */
+.drw{background:#090E18;flex:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.drw-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(90,140,200,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(90,140,200,.05) 1px,transparent 1px);background-size:24px 24px}
+.drw-tb{position:absolute;top:10px;left:50%;transform:translateX(-50%);display:flex;gap:3px;background:rgba(9,14,24,.9);border:1px solid rgba(244,242,238,.07);border-radius:9px;padding:4px}
+.dt{width:26px;height:26px;border-radius:5px;border:none;background:transparent;color:rgba(244,242,238,.38);font-size:10px;cursor:pointer;display:grid;place-items:center;transition:.1s}
+.dt.on{background:rgba(201,168,76,.14);color:var(--goldl)}
+.dt:hover:not(.on){background:rgba(244,242,238,.05);color:rgba(244,242,238,.65)}
+.dt-div{width:1px;height:14px;background:rgba(244,242,238,.07);margin:0 2px;align-self:center}
+.drw-exp{position:absolute;bottom:10px;right:10px;display:flex;gap:4px}
+.ep{background:rgba(9,14,24,.9);border:1px solid rgba(244,242,234,.09);border-radius:16px;padding:4px 10px;font-size:8.5px;font-family:var(--font);color:rgba(244,242,238,.5);cursor:pointer;transition:.12s;font-weight:500;display:flex;align-items:center;gap:4px}
+.ep:hover{background:rgba(201,168,76,.11);border-color:rgba(201,168,76,.28);color:var(--goldl)}
+.ep.hl{background:rgba(201,168,76,.11);border-color:rgba(201,168,76,.28);color:var(--goldl)}
+.drw-panel{width:220px;background:rgba(9,14,24,.95);border-left:1px solid rgba(244,242,238,.06);padding:12px;overflow-y:auto}
+.dna-title{font-family:var(--mono);font-size:8px;color:var(--gold);letter-spacing:.11em;text-transform:uppercase;margin-bottom:10px}
+
+/* REPORTS */
+.rep-shell{display:flex;height:500px}
+.rep-sb{width:220px;background:var(--ink);flex-shrink:0;overflow-y:auto;display:flex;flex-direction:column}
+.rep-sb-hd{padding:16px 16px 12px;border-bottom:1px solid rgba(244,242,238,.05)}
+.rep-sb-t{font-family:var(--disp);font-size:13px;font-weight:700;color:var(--cream);letter-spacing:-.01em;margin-bottom:1px}
+.rep-sb-s{font-size:8.5px;color:rgba(244,242,238,.28)}
+.rep-grp-lbl{padding:9px 16px 5px;font-family:var(--mono);font-size:8px;color:rgba(244,242,238,.22);letter-spacing:.1em;text-transform:uppercase}
+.rep-item{display:flex;align-items:center;gap:8px;padding:7px 16px;cursor:pointer;transition:.12s;border-left:2px solid transparent}
+.rep-item:hover{background:rgba(244,242,238,.04);border-left-color:rgba(244,242,234,.1)}
+.rep-item.on{background:rgba(201,168,76,.07);border-left-color:var(--gold)}
+.ri-icon{font-size:11px;flex-shrink:0;width:18px;text-align:center}
+.ri-t{font-size:9.5px;font-weight:600;color:rgba(244,242,238,.65);flex:1;line-height:1.3}
+.rep-item.on .ri-t{color:var(--goldl)}
+.ri-m{font-size:7.5px;color:rgba(244,242,238,.22);margin-top:1px}
+.ri-b{font-size:8px;font-weight:700;padding:1px 4px;border-radius:6px;flex-shrink:0}
+.rep-content{flex:1;padding:24px 28px;overflow-y:auto}
+.rep-title{font-family:var(--disp);font-size:24px;font-weight:300;color:var(--ink);letter-spacing:-.03em;margin-bottom:4px}
+.rep-title em{font-style:italic}
+.rep-meta{display:flex;gap:14px;margin-bottom:20px;flex-wrap:wrap}
+.rmi{font-family:var(--mono);font-size:8.5px;color:var(--slatel);display:flex;align-items:center;gap:3px}
+.rep-sect-t{font-family:var(--mono);font-size:8.5px;font-weight:500;color:var(--slatel);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid rgba(10,14,23,.06)}
+.rkpi-g{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:14px}
+.rkpi{background:var(--surf2);border-radius:var(--r);padding:10px 12px;border:1px solid rgba(10,14,23,.05)}
+.rkpi.ok{background:var(--okl);border-color:rgba(45,122,79,.14)}
+.rkpi.err{background:var(--errl);border-color:rgba(155,44,44,.14)}
+.rkpi.w{background:var(--warnl);border-color:rgba(196,105,10,.14)}
+.rkpi-v{font-family:var(--disp);font-size:18px;font-weight:700;color:var(--ink);letter-spacing:-.03em}
+.rkpi.ok .rkpi-v{color:var(--ok)}.rkpi.err .rkpi-v{color:var(--err)}.rkpi.w .rkpi-v{color:var(--warn)}
+.rkpi-l{font-size:8.5px;color:var(--slatel);margin-top:2px}
+.rkpi-lm{font-family:var(--mono);font-size:7px;color:var(--mist);margin-top:1px}
+.rep-btns{display:flex;gap:7px;margin-top:18px;padding-top:18px;border-top:1px solid rgba(10,14,23,.06);flex-wrap:wrap}
+.rb{padding:9px 18px;border-radius:18px;font-size:10.5px;font-weight:700;font-family:var(--font);cursor:pointer;letter-spacing:.03em;transition:.15s;border:none;display:flex;align-items:center;gap:5px}
+.rb.p{background:var(--ink);color:var(--cream)}.rb.p:hover{background:var(--ink3)}
+.rb.s{background:var(--surf2);color:var(--slate);border:1px solid rgba(10,14,23,.09)}.rb.s:hover{background:var(--surf3)}
+.rb.g{background:linear-gradient(135deg,var(--goldd),var(--gold));color:var(--cream)}
+
+/* TCI */
+.tci-shell{background:#060B12;border-radius:var(--rxl);overflow:hidden;box-shadow:var(--sh-lg);display:flex;flex-direction:column;position:relative}
+.tci-chrome{height:26px;background:#030508;display:flex;align-items:center;padding:0 10px;gap:4px;flex-shrink:0}
+.tci-prog{position:absolute;top:26px;left:0;right:0;height:2px;background:rgba(255,255,255,.04);z-index:10}
+.tci-prog-fill{height:100%;background:linear-gradient(90deg,var(--goldd),var(--goldl));transition:width 1s ease}
+.tci-body{flex:1;position:relative;overflow:hidden}
+.tci-map-bg{position:absolute;inset:0;background:radial-gradient(ellipse 120% 80% at 60% 60%,#0D1F35 0%,#050A10 100%)}
+.tci-ov{position:absolute;inset:0;display:flex;flex-direction:column;padding:22px 26px}
+.tci-bloc-tag{font-family:var(--mono);font-size:7.5px;color:var(--gold);letter-spacing:.18em;text-transform:uppercase;margin-bottom:7px;opacity:.8}
+.tci-t{font-family:var(--disp);font-size:clamp(22px,3.2vw,38px);font-weight:300;color:var(--cream);letter-spacing:-.04em;line-height:1.05;margin-bottom:5px}
+.tci-t em{font-style:italic;color:var(--goldl)}
+.tci-sub{font-size:10px;color:rgba(244,242,238,.3);font-weight:300;letter-spacing:.03em}
+.tci-ctrls{position:absolute;top:14px;right:18px;display:flex;gap:5px}
+.tci-ctrl{background:rgba(6,11,18,.85);border:1px solid rgba(244,242,238,.07);border-radius:16px;padding:4px 10px;color:rgba(244,242,238,.45);font-size:8.5px;font-weight:700;font-family:var(--font);cursor:pointer;letter-spacing:.05em;transition:.12s}
+.tci-ctrl:hover{color:var(--cream);border-color:rgba(244,242,234,.18)}
+.tci-ctrl.stop{border-color:rgba(239,68,68,.25);color:rgba(239,68,68,.6)}
+.tci-data-row{display:flex;gap:9px;margin-top:auto}
+.tdc{background:rgba(6,11,18,.8);border:1px solid rgba(201,168,76,.1);border-radius:9px;padding:11px 14px;flex:1;backdrop-filter:blur(10px)}
+.tdv{font-family:var(--disp);font-size:clamp(16px,2.2vw,26px);font-weight:300;color:var(--cream);letter-spacing:-.04em;line-height:1}
+.tdl{font-size:8px;color:rgba(244,242,238,.28);margin-top:3px;text-transform:uppercase;letter-spacing:.06em}
+.tdd{font-family:var(--mono);font-size:8.5px;font-weight:500;margin-top:2px}
+.scene-nav-wrap{position:absolute;bottom:14px;left:26px;right:26px}
+.sn-lbl{font-family:var(--mono);font-size:7px;color:rgba(244,242,238,.18);letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px}
+.sn-dots{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+.sd{width:5px;height:5px;border-radius:50%;background:rgba(244,242,238,.1);cursor:pointer;transition:.12s}
+.sd.on{background:var(--gold);width:18px;border-radius:2.5px}
+.sd.done{background:rgba(201,168,76,.28)}
+
+/* ADMIN */
+.adm-shell{display:flex;height:480px}
+.adm-sb{width:180px;background:var(--ink);flex-shrink:0;padding:12px 0}
+.adm-sb-hd{padding:10px 14px;border-bottom:1px solid rgba(244,242,238,.05);margin-bottom:6px}
+.adm-it{display:flex;align-items:center;gap:7px;padding:7px 14px;cursor:pointer;border-left:2px solid transparent;font-size:10.5px;color:rgba(244,242,238,.42);transition:.1s}
+.adm-it.on{color:var(--goldl);border-left-color:var(--gold);background:rgba(201,168,76,.07)}
+.adm-it:hover:not(.on){color:rgba(244,242,238,.65);background:rgba(244,242,238,.03)}
+.adm-main{flex:1;padding:16px;overflow-y:auto;background:var(--cream)}
+.adm-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.astat{background:var(--surf2);border-radius:10px;padding:10px 12px;border:1px solid rgba(10,14,23,.05);text-align:center}
+.astat-v{font-family:var(--disp);font-size:22px;font-weight:300;color:var(--ink);letter-spacing:-.03em}
+.astat-l{font-size:8.5px;color:var(--slatel);margin-top:1px}
+.astat-d{font-size:8px;margin-top:2px;font-weight:600}
+.adm-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.acard{background:var(--surface);border:1px solid rgba(10,14,23,.06);border-radius:var(--rl);padding:12px 14px}
+.acard-t{font-family:var(--disp);font-size:13px;font-weight:700;color:var(--ink);margin-bottom:9px;letter-spacing:-.01em;display:flex;justify-content:space-between;align-items:center}
+.urow{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(10,14,23,.04)}
+.urow:last-child{border-bottom:none}
+.uav{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:700;flex-shrink:0}
+.urole{font-size:8px;font-weight:700;padding:1px 5px;border-radius:5px;border:1px solid;flex-shrink:0}
+.uat-row{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:7px;border:1px solid rgba(10,14,23,.06);background:var(--surf2);margin-bottom:4px;cursor:pointer}
+.uat-row.sel{border-color:rgba(201,168,76,.3);background:linear-gradient(135deg,rgba(201,168,76,.07),rgba(201,168,76,.03))}
+.ust{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.diag-row{display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(10,14,23,.04)}
+.diag-row:last-child{border-bottom:none}
+.diag-k{font-family:var(--mono);font-size:9px;color:var(--slatel)}
+.diag-ok{font-size:9px;color:var(--ok);font-weight:700}
+.diag-err{font-size:9px;color:var(--err);font-weight:700}
+.diag-w{font-size:9px;color:var(--warn);font-weight:700}
+.ab-sm{display:flex;align-items:center;gap:7px;padding:7px 9px;border-radius:var(--r);border:1px solid rgba(10,14,23,.06);background:var(--surface);cursor:pointer;transition:.15s;font-family:var(--font);text-align:left;width:100%;margin-bottom:3px;font-size:10px;color:var(--slate)}
+.ab-sm:hover{background:var(--surf3);transform:translateX(2px)}
+.alert-box{background:rgba(155,44,44,.05);border:1px solid rgba(155,44,44,.15);border-radius:7px;padding:7px 9px;margin-top:6px}
+
+/* PRICING */
+.price-toggle{display:flex;align-items:center;gap:10px;margin:16px 0 28px;justify-content:center}
+.toggle-pill{width:38px;height:20px;background:var(--gold);border-radius:99px;position:relative;cursor:pointer}
+.toggle-thumb{width:14px;height:14px;background:white;border-radius:50%;position:absolute;right:3px;top:3px;transition:.15s}
+.price-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.pc{background:var(--cream);border:1px solid rgba(10,14,23,.08);border-radius:var(--rxl);padding:24px 20px;position:relative;transition:.2s}
+.pc:hover{transform:translateY(-3px);box-shadow:var(--sh-lg)}
+.pc.feat{background:var(--ink);border-color:transparent}
+.pc.feat::before{content:'';position:absolute;inset:-1px;border-radius:calc(var(--rxl)+1px);background:linear-gradient(135deg,var(--goldd),var(--goldl));z-index:-1}
+.pc-badge{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--goldd),var(--goldl));color:var(--ink);font-size:8.5px;font-weight:700;padding:3px 12px;border-radius:18px;white-space:nowrap;letter-spacing:.05em}
+.pc-tier{font-family:var(--mono);font-size:8.5px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px;color:var(--slatel)}
+.pc.feat .pc-tier{color:var(--gold)}
+.pc-price{font-family:var(--disp);font-size:38px;font-weight:300;color:var(--ink);letter-spacing:-.04em;line-height:1;margin-bottom:4px}
+.pc.feat .pc-price{color:var(--cream)}
+.pc-unit{font-size:11px;font-weight:400;color:var(--slatel);font-family:var(--font)}
+.pc-desc{font-size:10.5px;color:var(--slatel);margin-bottom:18px;line-height:1.5;font-weight:300}
+.pc.feat .pc-desc{color:rgba(244,242,238,.38)}
+.pc-btn{width:100%;padding:10px;border-radius:7px;font-size:10.5px;font-weight:700;font-family:var(--font);cursor:pointer;letter-spacing:.04em;border:none;margin-bottom:18px;transition:.15s}
+.pc-btn.d{background:var(--ink);color:var(--cream)}.pc-btn.d:hover{background:var(--ink3)}
+.pc-btn.g{background:linear-gradient(135deg,var(--goldd),var(--goldl));color:var(--ink)}
+.pc-btn.g:hover{filter:brightness(1.06)}
+.pc-btn.ol{background:transparent;border:1px solid rgba(244,242,238,.18);color:var(--cream)}
+.pc-btn.ol:hover{background:rgba(244,242,238,.05)}
+.pf{display:flex;align-items:flex-start;gap:7px;font-size:10px;color:var(--slate);line-height:1.4;margin-bottom:5px}
+.pc.feat .pf{color:rgba(244,242,238,.55)}
+.pf-d{width:14px;height:14px;border-radius:50%;display:grid;place-items:center;font-size:7.5px;flex-shrink:0;margin-top:1px}
+.pf-d.ok{background:var(--okl);color:var(--ok)}
+.pf-d.star{background:rgba(201,168,76,.14);color:var(--goldd)}
+.pf-d.dia{background:rgba(147,51,234,.1);color:#9333EA}
+
+/* INSIGHTS / CALLOUTS */
+.ins-g{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:28px 0}
+.ic{background:var(--cream);border:1px solid rgba(10,14,23,.07);border-radius:var(--rl);padding:18px;transition:.2s}
+.ic:hover{box-shadow:var(--sh-md);transform:translateY(-2px)}
+.ic-icon{font-size:26px;margin-bottom:10px}
+.ic-lbl{font-size:11px;font-weight:600;color:var(--slate);margin-bottom:3px}
+.ic-det{font-size:10px;color:var(--mist);line-height:1.5}
+.callout{background:linear-gradient(135deg,rgba(201,168,76,.07),rgba(201,168,76,.02));border:1px solid rgba(201,168,76,.18);border-radius:var(--rl);padding:18px 22px;margin:16px 0}
+.callout-t{font-family:var(--disp);font-size:15px;font-weight:700;color:var(--goldd);margin-bottom:5px;letter-spacing:-.01em}
+.callout-d{font-size:11.5px;color:var(--slate);line-height:1.65;font-weight:300}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.pl-wrap{display:inline-flex;align-items:center;gap:8px;margin-bottom:36px}
+.pl-num{width:30px;height:30px;border-radius:50%;background:var(--ink);color:var(--gold);display:grid;place-items:center;font-family:var(--mono);font-size:11px;font-weight:700;flex-shrink:0}
+.pl-t{font-family:var(--disp);font-size:12px;font-weight:300;color:var(--slatel);letter-spacing:-.01em;font-style:italic}
+.flow-diag{background:var(--cream);border-radius:var(--rxl);padding:28px;border:1px solid rgba(10,14,23,.06);margin:36px 0;overflow-x:auto}
+.flow-t{font-family:var(--disp);font-size:13px;font-weight:300;color:var(--slatel);font-style:italic;margin-bottom:20px;letter-spacing:-.01em}
+.flow-track{display:flex;align-items:center;gap:0;min-width:780px}
+.fn{background:var(--surf2);border:1px solid rgba(10,14,23,.08);border-radius:11px;padding:12px 16px;min-width:120px;text-align:center;flex-shrink:0;cursor:pointer;transition:.2s}
+.fn:hover{transform:translateY(-2px);box-shadow:var(--sh-md);border-color:rgba(201,168,76,.28)}
+.fn.on{background:var(--ink);border-color:transparent}
+.fn.br{background:linear-gradient(135deg,rgba(201,168,76,.07),rgba(201,168,76,.03));border-color:rgba(201,168,76,.18)}
+.fn-num{font-family:var(--mono);font-size:8px;color:var(--mist);letter-spacing:.06em;margin-bottom:5px}
+.fn.on .fn-num{color:var(--gold)}
+.fn-icon{font-size:16px;margin-bottom:4px}
+.fn-lbl{font-size:10.5px;font-weight:700;color:var(--ink);margin-bottom:2px}
+.fn.on .fn-lbl{color:var(--cream)}
+.fn-sub{font-size:8px;color:var(--slatel)}
+.farrow{width:28px;flex-shrink:0;position:relative;height:2px}
+.farrow::after{content:'';position:absolute;width:20px;height:1px;background:rgba(10,14,23,.15);top:0;left:50%;transform:translateX(-50%)}
+.farrow::before{content:'▸';position:absolute;right:1px;top:-5px;color:rgba(10,14,23,.18);font-size:8.5px}
+
+/* LOGIN VISION */
+.lgn-shell{display:flex;border-radius:var(--rxl);overflow:hidden;box-shadow:var(--sh-lg)}
+.lgn-l{flex:1;background:var(--ink);position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:36px}
+.lgn-bg-geo{position:absolute;inset:0;opacity:.04;background:repeating-linear-gradient(45deg,transparent,transparent 28px,rgba(201,168,76,.5) 28px,rgba(201,168,76,.5) 29px)}
+.lgn-bg-rad{position:absolute;inset:0;background:radial-gradient(ellipse 70% 55% at 50% 65%,rgba(201,168,76,.05) 0%,transparent 70%)}
+.lgn-bm{width:44px;height:44px;background:linear-gradient(135deg,var(--goldd),var(--goldl));border-radius:11px;display:grid;place-items:center;margin-bottom:20px;position:relative;z-index:1}
+.lgn-bml{font-family:var(--disp);font-size:20px;font-weight:700;color:var(--ink)}
+.lgn-hl{font-family:var(--disp);font-size:clamp(22px,3vw,34px);font-weight:300;color:var(--cream);letter-spacing:-.04em;line-height:1.15;margin-bottom:14px;position:relative;z-index:1}
+.lgn-hl em{font-style:italic;color:var(--goldl)}
+.lgn-perks{display:flex;flex-direction:column;gap:7px;position:relative;z-index:1;margin-bottom:20px}
+.lgn-perk{display:flex;align-items:center;gap:9px;font-size:11px;color:rgba(244,242,238,.45);font-weight:300}
+.lgn-pd{width:4px;height:4px;border-radius:50%;background:var(--gold);flex-shrink:0}
+.lgn-trust{display:flex;gap:6px;flex-wrap:wrap;position:relative;z-index:1}
+.trust-p{background:rgba(244,242,238,.05);border:1px solid rgba(244,242,238,.07);border-radius:18px;padding:3px 10px;font-size:8.5px;color:rgba(244,242,238,.3);font-weight:500}
+.lgn-r{width:320px;background:var(--cream);flex-shrink:0;display:flex;flex-direction:column;justify-content:center;padding:36px 32px}
+.lgn-ft{font-family:var(--disp);font-size:21px;font-weight:300;color:var(--ink);letter-spacing:-.03em;margin-bottom:3px}
+.lgn-fs{font-size:11px;color:var(--slatel);margin-bottom:24px;font-weight:300}
+.form-lbl{display:block;font-family:var(--mono);font-size:8.5px;font-weight:500;color:var(--slatel);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+.form-inp{width:100%;background:var(--surf2);border:1px solid rgba(10,14,23,.09);border-radius:7px;padding:10px 12px;font-size:12px;font-family:var(--font);color:var(--ink);outline:none;transition:.15s;margin-bottom:12px}
+.form-inp:focus{border-color:rgba(201,168,76,.45);box-shadow:0 0 0 3px rgba(201,168,76,.09)}
+.form-inp::placeholder{color:var(--mist)}
+.form-sub{width:100%;padding:12px;background:var(--ink);border:none;border-radius:7px;color:var(--cream);font-size:12px;font-weight:700;font-family:var(--font);cursor:pointer;letter-spacing:.03em;margin-bottom:14px;transition:.15s}
+.form-sub:hover{background:var(--ink3)}
+.form-div{display:flex;align-items:center;gap:9px;margin:10px 0}
+.form-div::before,.form-div::after{content:'';flex:1;height:1px;background:rgba(10,14,23,.07)}
+.form-div-t{font-size:9.5px;color:var(--mist)}
+.form-goog{width:100%;padding:10px;background:white;border:1px solid rgba(10,14,23,.1);border-radius:7px;font-size:11.5px;font-weight:600;font-family:var(--font);color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:.15s}
+.form-goog:hover{border-color:rgba(10,14,23,.18);box-shadow:var(--sh-sm)}
+.form-foot{font-size:9.5px;color:var(--slatel);text-align:center;margin-top:14px}
+.form-foot a{color:var(--goldd);text-decoration:none;font-weight:600}
+
+@media(max-width:900px){.g2,.price-grid,.ins-g{grid-template-columns:1fr}.hero-stats{flex-wrap:wrap;gap:20px}.lgn-r{width:100%}.lgn-shell{flex-direction:column}.flow-track{overflow-x:auto}}
+</style>
+</head>
+<body>
+<!-- NAV -->
+<nav>
+  <div class="nav-i">
+    <a class="nav-logo" href="#hero"><div class="nl-mark"><span class="nl-letter">Ux</span></div><div class="nl-text">UrbanX</div></a>
+    <div class="nav-links">
+      <a class="nl on" href="#hero">Viziune</a>
+      <a class="nl" href="#principii">Principii</a>
+      <a class="nl" href="#flux">Flux</a>
+      <a class="nl" href="#login">Login</a>
+      <a class="nl" href="#harta">Hartă</a>
+      <a class="nl" href="#build">Build</a>
+      <a class="nl" href="#planse">Planșe</a>
+      <a class="nl" href="#rapoarte">Rapoarte</a>
+      <a class="nl" href="#tci">TCI</a>
+      <a class="nl" href="#admin">Admin</a>
+      <a class="nl" href="#pricing">Pricing</a>
+    </div>
+    <button class="nav-cta">Export PDF →</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="hero-bg"></div><div class="hero-grid"></div>
+  <div class="hero-c">
+    <div class="hero-tag"><div class="hero-dot"></div><span class="hero-tag-text">UI Vision · Product Design · UrbanX TRL 5–6</span></div>
+    <h1 class="hero-title"><em>Urbanism inteligent.</em><strong>Design pentru profesioniști.</strong></h1>
+    <p class="hero-desc">Propunere completă de redesign UrbanX — flux optimizat, vizual premium, experiență construită pentru arhitect, urbanist și primar. Fiecare decizie de design are un motiv.</p>
+    <div class="hero-btns">
+      <button class="btn-p" onclick="document.getElementById('flux').scrollIntoView({behavior:'smooth'})">Explorează viziunea ↓</button>
+      <button class="btn-o" onclick="document.getElementById('principii').scrollIntoView({behavior:'smooth'})">Principii de design →</button>
+    </div>
+    <div class="hero-stats">
+      <div><span class="hs-val">9</span><span class="hs-lbl">Ecrane redesigned</span></div>
+      <div><span class="hs-val">118</span><span class="hs-lbl">Funcționalități</span></div>
+      <div><span class="hs-val">4</span><span class="hs-lbl">Pachete SaaS</span></div>
+      <div><span class="hs-val">12+</span><span class="hs-lbl">UAT-uri</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- PRINCIPII -->
+<section class="pg" id="principii">
+  <div class="eyebrow">Principii de design</div>
+  <h2 class="stitle">De ce arată <em>diferit</em></h2>
+  <p class="ssub">Fiecare decizie vizuală vine dintr-un principiu clar. Nu estetică de dragul esteticii — fiecare alegere servește utilizatorul.</p>
+  <div class="ins-g">
+    <div class="ic"><div class="ic-icon">⚡</div><div class="ic-lbl">Context first, nu funcționalitate first</div><div class="ic-det">Harta e centrul, nu panoul. Informația apare în context geografic. Utilizatorul vede răspunsul pe teren, nu în tabele.</div></div>
+    <div class="ic"><div class="ic-icon">🎯</div><div class="ic-lbl">Progressive disclosure</div><div class="ic-det">Un utilizator nou vede 3 lucruri. Un expert vede toate 118 funcționalitățile. Complexitatea se dezvăluie la cerere.</div></div>
+    <div class="ic"><div class="ic-icon">📐</div><div class="ic-lbl">Tipografie ca ierarhie de decizie</div><div class="ic-det">Fraunces serif pentru valori critice (numerele sunt decizii). DM Mono pentru date tehnice. DM Sans pentru navigare.</div></div>
+    <div class="ic"><div class="ic-icon">🌙</div><div class="ic-lbl">Dark map + Light panel</div><div class="ic-det">Harta întunecată lasă culorile PUG să respire. Panoul crem creează separare vizuală clară. Nu dark mode pentru estetică.</div></div>
+    <div class="ic"><div class="ic-icon">🟡</div><div class="ic-lbl">Aurul ca limbaj de acțiune</div><div class="ic-det">#C9A84C nu decorează — semnalizează acțiunea principală, datele live și starea activă. Restul e monocrom.</div></div>
+    <div class="ic"><div class="ic-icon">📊</div><div class="ic-lbl">Numerele sunt decizii</div><div class="ic-det">POT 35% nu e o cifră — e răspunsul la "pot construi mai mult?". Designul face această distincție prin dimensiune și culoare semantică.</div></div>
+  </div>
+  <div class="callout">
+    <div class="callout-t">Filosofia UX: zero dead-ends</div>
+    <div class="callout-d">Un arhitect care deschide UrbanX are o parcelă în minte și o întrebare: <em>pot construi, cât, cum?</em> Toate cele 118 funcționalitățile servesc această întrebare. Designul trebuie să aducă răspunsul în față în &lt;3 click-uri. Fiecare acțiune propune logic pasul următor — raportul generează planșele, bilanțul neconform propune reajustarea automată.</div>
+  </div>
+</section>
+
+<!-- FLUX -->
+<div class="hr"></div>
+<section class="pg" id="flux">
+  <div class="eyebrow">Flux utilizator</div>
+  <h2 class="stitle">Cum se <em>mișcă</em> utilizatorul</h2>
+  <p class="ssub">3 tipuri de utilizatori, 3 fluxuri principale. Toate converg pe ecranul hartă — de acolo se ramifică pe baza intenției.</p>
+  <div class="flow-diag">
+    <div class="flow-t">Fluxul principal — Arhitect / Urbanist</div>
+    <div class="flow-track">
+      <div class="fn on"><div class="fn-num">00</div><div class="fn-icon">🔐</div><div class="fn-lbl">Login</div><div class="fn-sub">Email sau Google SSO</div></div>
+      <div class="farrow"></div>
+      <div class="fn"><div class="fn-num">01</div><div class="fn-icon">🗺</div><div class="fn-lbl">Hartă + UAT</div><div class="fn-sub">PUG colorat automat</div></div>
+      <div class="farrow"></div>
+      <div class="fn"><div class="fn-num">02</div><div class="fn-icon">📍</div><div class="fn-lbl">Parcelă selectată</div><div class="fn-sub">Click sau căutare</div></div>
+      <div class="farrow"></div>
+      <div class="fn"><div class="fn-num">03</div><div class="fn-icon">📊</div><div class="fn-lbl">UTR + Bilanț</div><div class="fn-sub">Regulament instant</div></div>
+      <div class="farrow"></div>
+      <div class="fn br"><div class="fn-num">↕ ramifică</div><div class="fn-icon">🔀</div><div class="fn-lbl">Intent utilizator</div><div class="fn-sub">Ce vrei să faci?</div></div>
+    </div>
+    <div style="margin-top:20px;padding-top:18px;border-top:1px solid rgba(10,14,23,.06)">
+      <div style="font-family:var(--mono);font-size:8.5px;color:var(--mist);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px">Ramuri →</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <div style="background:linear-gradient(135deg,rgba(20,90,50,.07),rgba(52,211,153,.03));border:1px solid rgba(52,211,153,.18);border-radius:9px;padding:12px 16px;flex:1;min-width:150px">
+          <div style="font-family:var(--mono);font-size:8px;color:#2D7A4F;letter-spacing:.08em;margin-bottom:5px">PROIECTARE</div>
+          <div style="font-size:11px;font-weight:700;color:var(--ink);margin-bottom:2px">UrbanX Build</div>
+          <div style="font-size:9px;color:var(--slatel)">Volum 3D → Planșe PAC → DXF/PDF A3</div>
+        </div>
+        <div style="background:linear-gradient(135deg,rgba(26,58,92,.05),rgba(74,144,217,.03));border:1px solid rgba(74,144,217,.18);border-radius:9px;padding:12px 16px;flex:1;min-width:150px">
+          <div style="font-family:var(--mono);font-size:8px;color:#1A5C8A;letter-spacing:.08em;margin-bottom:5px">STUDII</div>
+          <div style="font-size:11px;font-weight:700;color:var(--ink);margin-bottom:2px">Rapoarte & Studii</div>
+          <div style="font-size:9px;color:var(--slatel)">32 studii PDF → REPA → AI Memoriu</div>
+        </div>
+        <div style="background:linear-gradient(135deg,rgba(123,36,28,.07),rgba(192,57,43,.03));border:1px solid rgba(192,57,43,.18);border-radius:9px;padding:12px 16px;flex:1;min-width:150px">
+          <div style="font-family:var(--mono);font-size:8px;color:#7B241C;letter-spacing:.08em;margin-bottom:5px">PREZENTARE</div>
+          <div style="font-size:11px;font-weight:700;color:var(--ink);margin-bottom:2px">TCI Studio</div>
+          <div style="font-size:9px;color:var(--slatel)">34 scene → Masterplan → PowerPoint</div>
+        </div>
+        <div style="background:linear-gradient(135deg,rgba(110,47,138,.06),rgba(167,139,250,.02));border:1px solid rgba(167,139,250,.18);border-radius:9px;padding:12px 16px;flex:1;min-width:150px">
+          <div style="font-family:var(--mono);font-size:8px;color:#6E2F8A;letter-spacing:.08em;margin-bottom:5px">ANALIZE</div>
+          <div style="font-size:11px;font-weight:700;color:var(--ink);margin-bottom:2px">Analize Avansate</div>
+          <div style="font-size:9px;color:var(--slatel)">Walkability → SDG11 → Heat Island</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LOGIN -->
+<div class="hr"></div>
+<section class="pg" id="login">
+  <div class="pl-wrap"><div class="pl-num">00</div><div class="pl-t">Prima impresie contează cel mai mult</div></div>
+  <div class="eyebrow">Ecranul de autentificare</div>
+  <h2 class="stitle">Login care <em>convinge</em></h2>
+  <p class="ssub">Split-screen: stânga comunică valoarea produsului în 5 secunde, dreapta permite accesul în 3 click-uri. Zero câmpuri inutile.</p>
+  <div class="lgn-shell" style="margin-top:24px">
+    <div class="lgn-l">
+      <div class="lgn-bg-geo"></div><div class="lgn-bg-rad"></div>
+      <div class="lgn-bm"><div class="lgn-bml">Ux</div></div>
+      <div class="lgn-hl">Urbanism digital.<br><em>Date reale.</em><br>Decizii rapide.</div>
+      <div class="lgn-perks">
+        <div class="lgn-perk"><div class="lgn-pd"></div>PUG + RLU integrat pentru 12+ municipii</div>
+        <div class="lgn-perk"><div class="lgn-pd"></div>Planșe PAC + DXF AutoCAD în 60 secunde</div>
+        <div class="lgn-perk"><div class="lgn-pd"></div>32 studii tehnice PDF generate automat</div>
+        <div class="lgn-perk"><div class="lgn-pd"></div>TCI Studio: calitate Banca Mondială</div>
+      </div>
+      <div class="lgn-trust">
+        <div class="trust-p">TRL 5–6</div><div class="trust-p">GDPR Compliant</div>
+        <div class="trust-p">Hosted EU</div><div class="trust-p">Supabase Auth</div>
+      </div>
+    </div>
+    <div class="lgn-r">
+      <div class="lgn-ft">Bun venit</div>
+      <div class="lgn-fs">Intră în platforma ta UrbanX</div>
+      <label class="form-lbl">Email instituțional</label>
+      <input class="form-inp" type="email" placeholder="architect@firma.ro">
+      <label class="form-lbl">Parolă</label>
+      <input class="form-inp" type="password" placeholder="••••••••••••">
+      <div style="text-align:right;margin:-6px 0 12px"><a href="#" style="font-size:9.5px;color:var(--goldd);text-decoration:none;font-weight:600">Am uitat parola</a></div>
+      <button class="form-sub">Autentificare →</button>
+      <div class="form-div"><span class="form-div-t">sau</span></div>
+      <button class="form-goog"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M7 5.73V8.4h3.82c-.16.83-.62 1.54-1.33 2.01l2.1 1.63c1.23-1.13 1.94-2.8 1.94-4.78 0-.46-.04-.9-.1-1.33H7z" fill="#4285F4"/><path d="M3.53 8.35l-.47.36-1.67 1.3C2.26 11.33 4.48 12.6 7 12.6c1.9 0 3.5-.63 4.66-1.7l-2.1-1.63c-.63.42-1.43.67-2.56.67-1.97 0-3.64-1.33-4.24-3.12l-.23.53z" fill="#34A853"/><path d="M1.39 3.99C.96 4.85.71 5.8.71 6.8c0 1 .25 1.95.68 2.81l2.14-1.66C3.38 7.58 3.27 7.2 3.27 6.8s.11-.78.26-1.14L1.39 3.99z" fill="#FBBC05"/><path d="M7 2.2c1.07 0 2.03.37 2.78 1.09l2.08-2.08C10.5.82 8.9.2 7 .2 4.48.2 2.26 1.47 1.39 3.41l2.14 1.66C4.13 3.5 5.91 2.2 7 2.2z" fill="#EA4335"/></svg> Continuă cu Google</button>
+      <div class="form-foot">Nu ai cont? <a href="#">Solicită acces →</a></div>
+    </div>
+  </div>
+  <div class="callout">
+    <div class="callout-t">De ce invite-only?</div>
+    <div class="callout-d">UrbanX conține date cadastrale și urbanistice sensibile per UAT. Accesul necontrolat creează risc juridic. Invite-only cu whitelist pe domeniu (@primarie-iasi.ro, @rur.ro) asigură că utilizatorii sunt verificați și că platforma rămâne premium, nu commodity.</div>
+  </div>
+</section>
+<!-- HARTA PRINCIPALA -->
+<div class="hr"></div>
+<section class="pg" id="harta">
+  <div class="pl-wrap"><div class="pl-num">01</div><div class="pl-t">Inima platformei — unde se petrece totul</div></div>
+  <div class="eyebrow">Ecranul principal</div>
+  <h2 class="stitle">Hartă + Panel — <em>context și decizie</em></h2>
+  <p class="ssub">Topbar minimal. Panel cu ton propriu (crem vs. hartă întunecată). Informație în 3 niveluri: context → regulament → acțiune. Tab-uri redenumite semantic.</p>
+  <div class="frame" style="margin-top:24px">
+    <div class="frame-chrome"><div class="fdot" style="background:#ef4444"></div><div class="fdot" style="background:#f59e0b"></div><div class="fdot" style="background:#22c55e"></div><div class="fbar"><span class="furl">app.urbanx.ro · Municipiul Iași · Parcelă selectată</span></div></div>
+    <div style="display:flex;flex-direction:column;height:560px">
+      <div class="tb">
+        <div class="tb-logo"><span class="tb-logo-l">Ux</span></div>
+        <span class="tb-name">UrbanX</span>
+        <div class="tb-div"></div>
+        <button class="tb-btn" style="color:var(--goldl);border-color:rgba(201,168,76,.28)">📍 Municipiul Iași ▾</button>
+        <div class="tb-div"></div>
+        <button class="tb-btn">Vizualizare ▾</button>
+        <button class="tb-btn">Instrumente ▾</button>
+        <button class="tb-btn">Rapoarte ▾</button>
+        <div class="tb-sp"></div>
+        <button class="tb-btn hl">📐 UrbanX Build</button>
+        <button class="tb-btn tci">🎬 TCI Studio</button>
+        <div class="tb-div"></div>
+        <div class="tb-av">A</div>
+      </div>
+      <div style="display:flex;flex:1;overflow:hidden">
+        <div class="map-a">
+          <div class="mg"></div>
+          <!-- Roads -->
+          <div style="position:absolute;width:80%;height:2px;top:38%;left:0;background:rgba(80,95,130,.45)"></div>
+          <div style="position:absolute;width:2px;height:70%;left:44%;top:10%;background:rgba(80,95,130,.35)"></div>
+          <div style="position:absolute;width:55%;height:2px;top:68%;left:12%;background:rgba(80,95,130,.3)"></div>
+          <div style="position:absolute;width:2px;height:55%;left:68%;top:18%;background:rgba(80,95,130,.25)"></div>
+          <!-- River -->
+          <div style="position:absolute;width:180px;height:24px;left:4%;top:24%;background:rgba(30,60,110,.32);border-radius:40px;transform:rotate(-7deg)"></div>
+          <!-- Zones -->
+          <div class="mzone r" style="width:175px;height:135px;left:7%;top:5%"></div>
+          <div class="mzone r" style="width:125px;height:98px;left:29%;top:47%"></div>
+          <div class="mzone m" style="width:115px;height:78px;left:39%;top:14%"></div>
+          <div class="mzone g" style="width:95px;height:88px;left:56%;top:7%"></div>
+          <div class="mzone r" style="width:155px;height:108px;left:61%;top:42%"></div>
+          <div class="mzone s" style="width:88px;height:68px;left:21%;top:62%"></div>
+          <div class="mzone i" style="width:105px;height:65px;left:73%;top:64%"></div>
+          <!-- Selected parcel -->
+          <div class="mparcel" style="width:52px;height:42px;left:46%;top:28%">
+            <div class="mtt g" style="top:-26px;left:50%;transform:translateX(-50%);font-weight:700">LC2a · 452m²</div>
+          </div>
+          <div class="mvol" style="width:34px;height:26px;left:48%;top:30%">
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="font-family:var(--mono);font-size:7px;color:rgba(200,230,255,.85)">P+2E</span></div>
+          </div>
+          <!-- Tooltip -->
+          <div class="mtt" style="left:calc(48% + 48px);top:27%">P+2E · 9m<br><span style="color:var(--goldl)">35% POT ✓</span></div>
+          <!-- UTR labels -->
+          <div style="position:absolute;background:rgba(13,22,38,.88);border:1px solid rgba(78,127,191,.35);border-radius:5px;padding:2px 7px;font-size:7.5px;color:rgba(173,198,230,.9);white-space:nowrap;left:9%;top:19%">LC1a · Locuire mică</div>
+          <div style="position:absolute;background:rgba(13,22,38,.88);border:1px solid rgba(201,168,76,.3);border-radius:5px;padding:2px 7px;font-size:7.5px;color:var(--goldl);white-space:nowrap;left:40%;top:22%">M1 · Mixt comercial</div>
+          <div style="position:absolute;background:rgba(13,22,38,.88);border:1px solid rgba(61,122,84,.35);border-radius:5px;padding:2px 7px;font-size:7.5px;color:rgba(130,200,160,.85);white-space:nowrap;left:57%;top:11%">V · Spații verzi</div>
+          <!-- Legenda -->
+          <div style="position:absolute;top:8px;left:8px;background:rgba(13,22,38,.9);border:1px solid rgba(244,242,238,.09);border-radius:8px;padding:7px 10px">
+            <div style="font-family:var(--mono);font-size:7.5px;color:rgba(244,242,238,.35);letter-spacing:.08em;margin-bottom:5px;text-transform:uppercase">Zone PUG</div>
+            <div style="display:flex;flex-direction:column;gap:2px">
+              <div style="display:flex;align-items:center;gap:5px"><div style="width:8px;height:8px;border-radius:2px;background:#4E7FBF;opacity:.65"></div><span style="font-size:8px;color:rgba(244,242,238,.6)">LC · Locuire</span></div>
+              <div style="display:flex;align-items:center;gap:5px"><div style="width:8px;height:8px;border-radius:2px;background:#3D7A54;opacity:.65"></div><span style="font-size:8px;color:rgba(244,242,238,.6)">V · Verzi</span></div>
+              <div style="display:flex;align-items:center;gap:5px"><div style="width:8px;height:8px;border-radius:2px;background:#C9A84C;opacity:.65"></div><span style="font-size:8px;color:rgba(244,242,238,.6)">M · Mixt</span></div>
+              <div style="display:flex;align-items:center;gap:5px"><div style="width:8px;height:8px;border-radius:2px;background:#7B55A0;opacity:.65"></div><span style="font-size:8px;color:rgba(244,242,238,.6)">IS · Inst.</span></div>
+            </div>
+          </div>
+          <div class="mctrl-g"><div class="mctrl">+</div><div class="mctrl">−</div><div class="mctrl" style="margin-top:5px">📍</div><div class="mctrl">🧭</div><div class="mctrl">3D</div></div>
+          <div class="msw"><div class="mswb on">Urban 3D</div><div class="mswb">Satelit</div><div class="mswb">Plan</div><div class="mswb">Street</div></div>
+        </div>
+        <!-- Panel -->
+        <div class="panel">
+          <div class="ptabs">
+            <button class="ptab on">◎ Parcelă</button>
+            <button class="ptab">⬡ UTR</button>
+            <button class="ptab">≡ Bilanț</button>
+            <button class="ptab">⚡ Build</button>
+            <button class="ptab">▤ Multi</button>
+            <button class="ptab">◷ Scen.</button>
+          </div>
+          <div class="pbody">
+            <div class="pcard">
+              <div class="pcard-hd">
+                <div class="pcard-ey">Parcelă selectată</div>
+                <div class="pcard-name">Nr. cad. necunoscut</div>
+                <div class="pcard-meta">Zona <span>LC2a</span> · <span>452 m²</span> · <span>Municipiul Iași</span></div>
+              </div>
+              <div class="pcard-stats">
+                <div class="pstat"><div class="psv">349.640</div><div class="psl">Populație UAT</div><div class="pss">INSE Rec.2021</div></div>
+                <div class="pstat"><div class="psv" style="color:rgba(248,113,113,.85)">312.000</div><div class="psl">Prognoză 2055</div><div class="pss">Model cohort S2</div></div>
+                <div class="pstat"><div class="psv">—</div><div class="psl">Aut./an</div><div class="pss">ANCPI 2023</div></div>
+                <div class="pstat"><div class="psv" style="font-size:12px">IIIA</div><div class="psl">Risc seismic</div><div class="pss">P100-1/2013</div></div>
+              </div>
+            </div>
+            <!-- Gravity -->
+            <div class="gcard">
+              <div class="gring">
+                <svg width="48" height="48" viewBox="0 0 48 48">
+                  <circle cx="24" cy="24" r="18" fill="none" stroke="rgba(10,14,23,.08)" stroke-width="5"/>
+                  <circle cx="24" cy="24" r="18" fill="none" stroke="url(#gg)" stroke-width="5" stroke-linecap="round" stroke-dasharray="113" stroke-dashoffset="80" transform="rotate(-90 24 24)"/>
+                  <defs><linearGradient id="gg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#8B6A1F"/><stop offset="100%" stop-color="#E8CC7A"/></linearGradient></defs>
+                  <text x="24" y="28" text-anchor="middle" font-family="DM Mono" font-size="11" font-weight="700" fill="#3D4A6B">29</text>
+                </svg>
+              </div>
+              <div>
+                <div class="gscore-lbl">Scor gravitațional</div>
+                <div class="gscore-val">29 / 100</div>
+                <div class="gtier">⬡ LOCAL</div>
+              </div>
+            </div>
+            <div class="acts">
+              <button class="ab p">
+                <div class="ai d" style="font-size:13px">⚡</div>
+                <div class="at"><div class="at-t">Deschide UrbanX Build</div><div class="at-s">Generează volumul maxim admis</div></div>
+                <div class="aa">→</div>
+              </button>
+              <button class="ab gld">
+                <div class="ai g" style="font-size:13px">📋</div>
+                <div class="at"><div class="at-t">Raport Urbanistic Complet</div><div class="at-s">PDF 8 pagini · date reale</div></div>
+                <div class="aa" style="color:var(--goldd)">→</div>
+              </button>
+              <button class="ab">
+                <div class="ai b" style="font-size:13px">🗺</div>
+                <div class="at"><div class="at-t">Walkability + Izocrone</div><div class="at-s">15-Min City · scor compozit</div></div>
+                <div class="aa">→</div>
+              </button>
+              <button class="ab">
+                <div class="ai gr" style="font-size:13px">🤖</div>
+                <div class="at"><div class="at-t">AI Memoriu Justificativ</div><div class="at-s">Claude API · §1.1–§1.6 editabil</div></div>
+                <div class="aa">→</div>
+              </button>
+              <button class="ab">
+                <div class="ai" style="background:rgba(123,36,28,.1);font-size:13px">🎬</div>
+                <div class="at"><div class="at-t">TCI Studio — Masterplan</div><div class="at-s">Prezentare cinematică 60 min</div></div>
+                <div class="aa">→</div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="g2" style="margin-top:20px">
+    <div class="callout"><div class="callout-t">Ce s-a schimbat față de UI-ul actual</div><div class="callout-d">Topbar comprimat la jumătate (mai puțin zgomot cognitiv). Tab-uri redenumite semantic: Parcelă / UTR / Bilanț / Build — nu coduri. Scorul gravitațional cu ring vizual ca prim element de context. Acțiunile ierarhizate: prima acțiune e mereu cea mai logică pentru contextul curent.</div></div>
+    <div class="callout"><div class="callout-t">Progressive disclosure în panel</div><div class="callout-d">Tab Parcelă: context și acțiuni disponibile. Tab UTR: regulamentul complet cu funcțiuni UA/UC/UI. Tab Bilanț: calculele și conformitatea. Tab Build: parametrii și sliders. Utilizatorul merge în adâncime doar când are nevoie — nu vede slidere de POT dacă vrea doar un raport.</div></div>
+  </div>
+</section>
+<!-- URBANX BUILD -->
+<div class="hr"></div>
+<section class="pg" id="build">
+  <div class="pl-wrap"><div class="pl-num">03</div><div class="pl-t">Nucleul tehnic — unde se ia decizia de construire</div></div>
+  <div class="eyebrow">UrbanX Build</div>
+  <h2 class="stitle">Volumetrie ca <em>conversație</em></h2>
+  <p class="ssub">Nu un panel cu 30 de câmpuri — un dialog. Platforma propune, utilizatorul modifică, rezultatul apare instant pe hartă. Dark panel stânga, dark map dreapta — tot fluxul de proiectare într-un singur ecran.</p>
+  <div class="frame" style="margin-top:24px">
+    <div class="frame-chrome"><div class="fdot" style="background:#ef4444"></div><div class="fdot" style="background:#f59e0b"></div><div class="fdot" style="background:#22c55e"></div><div class="fbar"><span class="furl">UrbanX Build · 173583 · LC2a · Iași</span></div></div>
+    <div style="display:flex;height:540px">
+      <!-- Build Panel -->
+      <div class="bp" style="width:320px">
+        <div class="bp-hd">
+          <div class="bp-title">UrbanX <em>Build</em></div>
+          <div class="bp-meta"><span>LC2a · Locuire colectivă</span><span style="color:rgba(244,242,234,.18)">·</span><span>452 m²</span><span style="color:rgba(244,242,234,.18)">·</span><span style="color:var(--gold);font-weight:700">5/6 ✓</span></div>
+        </div>
+        <div class="bp-body" style="height:calc(100% - 110px)">
+          <div class="bsect">
+            <div class="bstitle">Scenariu</div>
+            <div class="scen-g">
+              <div class="sc on"><div class="sc-icon">🏗</div><div class="sc-name">Demolare + Nou</div><div class="sc-desc">Clădire nouă pe teren liber</div></div>
+              <div class="sc"><div class="sc-icon">⬆</div><div class="sc-name">Extindere verticală</div><div class="sc-desc">Supraelevare existentă</div></div>
+              <div class="sc"><div class="sc-icon">↔</div><div class="sc-name">Extindere laterală</div><div class="sc-desc">Corp nou alăturat</div></div>
+              <div class="sc"><div class="sc-icon">⊞</div><div class="sc-name">Multivolum</div><div class="sc-desc">Corp A + Corp B</div></div>
+            </div>
+          </div>
+          <div class="bsect">
+            <div class="bstitle">Formă planimetrică</div>
+            <div class="shape-g">
+              <div class="shb on"><svg viewBox="0 0 18 18"><rect x="2" y="2" width="14" height="14" fill="none" stroke="rgba(201,168,76,.8)" stroke-width="1.5" rx="1"/></svg><div class="shb-n">Auto</div></div>
+              <div class="shb"><svg viewBox="0 0 18 18"><rect x="3" y="3" width="12" height="12" fill="none" stroke="rgba(244,242,234,.25)" stroke-width="1.5" rx="1"/></svg><div class="shb-n">Pătrat</div></div>
+              <div class="shb"><svg viewBox="0 0 18 18"><rect x="1" y="4" width="16" height="10" fill="none" stroke="rgba(244,242,234,.25)" stroke-width="1.5" rx="1"/></svg><div class="shb-n">Dreptunghi</div></div>
+              <div class="shb"><svg viewBox="0 0 18 18"><path d="M2 2h9v9H7v7H2z" fill="none" stroke="rgba(244,242,234,.25)" stroke-width="1.5"/></svg><div class="shb-n">Formă L</div></div>
+              <div class="shb"><svg viewBox="0 0 18 18"><path d="M2 2h14v14H11V7H7v9H2z" fill="none" stroke="rgba(244,242,234,.25)" stroke-width="1.5"/></svg><div class="shb-n">Formă U</div></div>
+              <div class="shb"><svg viewBox="0 0 18 18"><path d="M2 2h14v5H11v11H7V7H2z" fill="none" stroke="rgba(244,242,234,.25)" stroke-width="1.5"/></svg><div class="shb-n">Formă T</div></div>
+              <div class="shb"><svg viewBox="0 0 18 18"><rect x="2" y="2" width="14" height="14" fill="none" stroke="rgba(244,242,234,.25)" stroke-width="1.5"/><rect x="5" y="5" width="8" height="8" fill="none" stroke="rgba(244,242,234,.18)" stroke-width="1" stroke-dasharray="2 1"/></svg><div class="shb-n">Curte int.</div></div>
+              <div class="shb"><svg viewBox="0 0 18 18"><rect x="1" y="5" width="16" height="8" fill="none" stroke="rgba(244,242,234,.25)" stroke-width="1.5" rx="1"/></svg><div class="shb-n">Bară</div></div>
+            </div>
+          </div>
+          <div class="bsect">
+            <div class="bstitle">Parametri volumetrici</div>
+            <div class="pr"><div class="prl">POT max (%)</div><input type="range" class="prsl" min="0" max="80" value="45"><div class="prv">45%</div></div>
+            <div class="pr"><div class="prl">CUT max</div><input type="range" class="prsl" min="0" max="30" value="14"><div class="prv">1.40</div></div>
+            <div class="pr"><div class="prl">Niveluri</div><input type="range" class="prsl" min="1" max="20" value="3"><div class="prv">P+2E</div></div>
+            <div class="pr"><div class="prl">H total (m)</div><input type="range" class="prsl" min="3" max="45" value="9"><div class="prv">9m</div></div>
+          </div>
+          <div class="bsect">
+            <div class="bstitle">Retrageri (m)</div>
+            <div class="pr"><div class="prl">Față</div><input type="range" class="prsl" min="0" max="15" value="5"><div class="prv">5m</div></div>
+            <div class="pr"><div class="prl">Spate</div><input type="range" class="prsl" min="0" max="15" value="5"><div class="prv">5m</div></div>
+            <div class="pr"><div class="prl">Lateral</div><input type="range" class="prsl" min="0" max="10" value="3"><div class="prv">3m</div></div>
+            <div class="pr"><div class="prl" style="color:rgba(248,113,113,.65)">SV minim</div><input type="range" class="prsl" min="0" max="60" value="20" style="accent-color:#F87171"><div class="prv" style="color:#F87171">20% ⚠</div></div>
+          </div>
+        </div>
+        <div class="bp-gen">
+          <button class="bg-main">⚡ Generează volum 3D</button>
+          <button class="bg-sec">📐 Planșe →</button>
+        </div>
+      </div>
+      <!-- Map with build overlay -->
+      <div class="map-a" style="flex:1">
+        <div class="mg"></div>
+        <div class="mzone r" style="width:100%;height:100%;opacity:.1"></div>
+        <div style="position:absolute;width:2px;height:100%;left:62%;background:rgba(80,95,130,.2)"></div>
+        <div style="position:absolute;width:100%;height:2px;top:72%;background:rgba(80,95,130,.25)"></div>
+        <!-- Edificabil area -->
+        <div style="position:absolute;border:1.5px dashed rgba(201,168,76,.25);border-radius:2px;left:18%;top:12%;width:58%;height:68%"></div>
+        <!-- Parcel -->
+        <div class="mparcel" style="width:230px;height:185px;left:18%;top:12%"></div>
+        <!-- Volume -->
+        <div class="mvol" style="width:145px;height:115px;left:25%;top:19%">
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px">
+            <div style="font-family:var(--mono);font-size:10px;color:rgba(200,230,255,.9);font-weight:700">P+2E</div>
+            <div style="font-size:8px;color:rgba(200,230,255,.5)">9m · 158m² SC</div>
+          </div>
+        </div>
+        <!-- Retragere lines -->
+        <div style="position:absolute;left:18%;top:11%;width:58%;height:1px;border-top:1.5px dashed rgba(248,113,113,.5)"></div>
+        <div style="position:absolute;left:17.5%;top:12%;width:1px;height:68%;background:rgba(201,168,76,.28)"></div>
+        <!-- Labels -->
+        <div class="mtt g" style="left:26%;top:7%">Front stradal detectat · NE 42° · 1 față</div>
+        <div class="mtt" style="left:55%;top:20%">POT 35% ✓<br>CUT 0.70 ✓<br><span style="color:#F87171">SV 20% ✗</span></div>
+        <!-- DNA Radar -->
+        <div style="position:absolute;bottom:14px;left:14px;background:rgba(9,14,24,.92);border:1px solid rgba(201,168,76,.18);border-radius:11px;padding:11px 13px">
+          <div style="font-family:var(--mono);font-size:7.5px;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">DNA Radar · 5/6 conform</div>
+          <svg width="86" height="86" viewBox="-43 -43 86 86">
+            <polygon points="0,-36 31,-18 31,18 0,36 -31,18 -31,-18" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="1"/>
+            <polygon points="0,-24 21,-12 21,12 0,24 -21,12 -21,-12" fill="none" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
+            <polygon points="0,-32 29,-14 27,16 0,31 -30,16 -30,-17" fill="rgba(201,168,76,.11)" stroke="#C9A84C" stroke-width="1.5"/>
+            <circle cx="0" cy="-32" r="3.5" fill="#4ADE80"/>
+            <circle cx="29" cy="-14" r="3.5" fill="#4ADE80"/>
+            <circle cx="27" cy="16" r="3.5" fill="#F87171"/>
+            <circle cx="0" cy="31" r="3.5" fill="#4ADE80"/>
+            <circle cx="-30" cy="16" r="3.5" fill="#4ADE80"/>
+            <circle cx="-30" cy="-17" r="3.5" fill="#4ADE80"/>
+            <text x="0" y="-39" fill="rgba(244,242,238,.3)" font-size="5" text-anchor="middle" font-family="DM Mono">POT✓</text>
+            <text x="36" y="-17" fill="rgba(244,242,238,.3)" font-size="5" text-anchor="start" font-family="DM Mono">CUT✓</text>
+            <text x="34" y="23" fill="#F87171" font-size="5" text-anchor="start" font-family="DM Mono">SV✗</text>
+            <text x="0" y="43" fill="rgba(244,242,238,.3)" font-size="5" text-anchor="middle" font-family="DM Mono">H✓</text>
+            <text x="-36" y="22" fill="rgba(244,242,238,.3)" font-size="5" text-anchor="end" font-family="DM Mono">Ret✓</text>
+            <text x="-35" y="-21" fill="rgba(244,242,238,.3)" font-size="5" text-anchor="end" font-family="DM Mono">Parc✓</text>
+          </svg>
+        </div>
+        <div class="mctrl-g"><div class="mctrl">+</div><div class="mctrl">−</div><div class="mctrl" style="margin-top:5px">🧭</div></div>
+        <div class="msw"><div class="mswb on">Urban 3D</div><div class="mswb">Satelit</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="callout" style="margin-top:20px">
+    <div class="callout-t">De ce panoul Build e dark, nu light?</div>
+    <div class="callout-d">Când lucrezi la parametri tehnici de proiectare, contextul vizual trebuie să se retragă. Panoul dark reduces oboseala vizuală în sesiunile lungi. Sliders cu accent auriu sunt mai ușor de urmărit pe fundal întunecat. DNA Radar cu verde/roșu iese mai clar pe dark. Contrast deliberat, nu estetic.</div>
+  </div>
+</section>
+
+<!-- PLANSE -->
+<div class="hr"></div>
+<section class="pg" id="planse">
+  <div class="pl-wrap"><div class="pl-num">04</div><div class="pl-t">Proiectare arhitecturală — planșele ca document livrant</div></div>
+  <div class="eyebrow">UrbanX Build — Planșe PAC</div>
+  <h2 class="stitle">Planșe generate. <em>Proiect real.</em></h2>
+  <p class="ssub">Canvas 2D generat automat din volumul 3D. Plan parter cotat, fațade per orientare, secțiuni reale, axonometrie, plan situație A3. Export DXF AutoCAD + PDF A3. DNA Radar conformitate instant.</p>
+  <div class="frame" style="margin-top:24px">
+    <div class="frame-chrome"><div class="fdot" style="background:#ef4444"></div><div class="fdot" style="background:#f59e0b"></div><div class="fdot" style="background:#22c55e"></div><div class="fbar"><span class="furl">UrbanX Build → Planșe PAC · 173583</span></div></div>
+    <div style="height:500px;display:flex;flex-direction:column">
+      <!-- Toolbar planșe -->
+      <div style="height:38px;background:rgba(9,14,24,.95);border-bottom:1px solid rgba(244,242,238,.07);display:flex;align-items:center;padding:0 12px;gap:4px;flex-shrink:0;overflow-x:auto">
+        <button class="dt on" style="width:auto;padding:0 9px;font-size:9px">Plan parter</button>
+        <button class="dt" style="width:auto;padding:0 9px;font-size:9px">Etaj 1</button>
+        <button class="dt" style="width:auto;padding:0 9px;font-size:9px">Etaj 2</button>
+        <button class="dt" style="width:auto;padding:0 9px;font-size:9px">Fațadă N</button>
+        <button class="dt" style="width:auto;padding:0 9px;font-size:9px">Fațadă S</button>
+        <button class="dt" style="width:auto;padding:0 9px;font-size:9px">Secțiune A-A'</button>
+        <button class="dt" style="width:auto;padding:0 9px;font-size:9px">Axonometrie</button>
+        <button class="dt" style="width:auto;padding:0 9px;font-size:9px">Plan situație</button>
+        <button class="dt" style="width:auto;padding:0 9px;font-size:9px">Plan acoperis</button>
+        <div style="flex:1"></div>
+        <span style="color:rgba(244,242,238,.3);font-size:9px;font-family:var(--mono)">1:100</span>
+        <div class="dt-div"></div>
+        <button class="ep hl">⬇ DXF AutoCAD</button>
+        <button class="ep">⬇ PDF A3</button>
+        <button class="ep">⬇ GLB BIM</button>
+      </div>
+      <div style="display:flex;flex:1;overflow:hidden">
+        <!-- Drawing canvas -->
+        <div class="drw">
+          <div class="drw-grid"></div>
+          <svg width="380" height="320" viewBox="0 0 380 320">
+            <!-- Outline edificiu -->
+            <rect x="48" y="28" width="272" height="196" fill="rgba(74,144,217,.04)" stroke="#3D4A6B" stroke-width="1.5" rx="1"/>
+            <!-- Walls exterior -->
+            <rect x="48" y="28" width="272" height="7" fill="#1E2640"/>
+            <rect x="48" y="217" width="272" height="7" fill="#1E2640"/>
+            <rect x="48" y="28" width="7" height="196" fill="#1E2640"/>
+            <rect x="313" y="28" width="7" height="196" fill="#1E2640"/>
+            <!-- Interior walls -->
+            <line x1="174" y1="35" x2="174" y2="217" stroke="#1E2640" stroke-width="3.5"/>
+            <line x1="55" y1="136" x2="174" y2="136" stroke="#1E2640" stroke-width="3.5"/>
+            <!-- Windows -->
+            <rect x="58" y="24" width="36" height="11" fill="rgba(90,140,200,.28)" rx="1"/>
+            <rect x="112" y="24" width="36" height="11" fill="rgba(90,140,200,.28)" rx="1"/>
+            <rect x="192" y="24" width="36" height="11" fill="rgba(90,140,200,.28)" rx="1"/>
+            <rect x="248" y="24" width="46" height="11" fill="rgba(90,140,200,.28)" rx="1"/>
+            <!-- Doors -->
+            <path d="M 122 224 Q 142 206 162 224" fill="none" stroke="#C9A84C" stroke-width="1.5"/>
+            <line x1="122" y1="224" x2="122" y2="217" stroke="#C9A84C" stroke-width="1.5"/>
+            <path d="M 174 88 Q 194 88 194 108" fill="none" stroke="#C9A84C" stroke-width="1.5"/>
+            <!-- Room labels -->
+            <text x="108" y="88" fill="#8595B8" font-size="7" text-anchor="middle" font-family="DM Sans">Living</text>
+            <text x="243" y="88" fill="#8595B8" font-size="7" text-anchor="middle" font-family="DM Sans">Dormitor 1</text>
+            <text x="108" y="180" fill="#8595B8" font-size="7" text-anchor="middle" font-family="DM Sans">Bucătărie</text>
+            <text x="243" y="180" fill="#8595B8" font-size="7" text-anchor="middle" font-family="DM Sans">Dormitor 2</text>
+            <!-- Dim lines -->
+            <line x1="48" y1="14" x2="320" y2="14" stroke="#8595B8" stroke-width=".5" stroke-dasharray="4 3"/>
+            <text x="184" y="12" fill="#8595B8" font-size="7" text-anchor="middle" font-family="DM Mono">14.00 m</text>
+            <line x1="34" y1="28" x2="34" y2="224" stroke="#8595B8" stroke-width=".5" stroke-dasharray="4 3"/>
+            <text x="18" y="126" fill="#8595B8" font-size="7" text-anchor="middle" transform="rotate(-90,18,126)" font-family="DM Mono">10.00 m</text>
+            <line x1="55" y1="130" x2="170" y2="130" stroke="#8595B8" stroke-width=".5" stroke-dasharray="3 2"/>
+            <text x="112" y="128" fill="#8595B8" font-size="6" text-anchor="middle" font-family="DM Mono">6.10 m</text>
+            <!-- Compass -->
+            <g transform="translate(342,46)">
+              <circle cx="0" cy="0" r="13" fill="rgba(9,14,24,.85)" stroke="rgba(255,255,255,.1)" stroke-width="1"/>
+              <polygon points="0,-10 2,4 0,2 -2,4" fill="#C9A84C"/>
+              <polygon points="0,10 2,-4 0,-2 -2,-4" fill="rgba(255,255,255,.22)"/>
+              <text x="0" y="-12" fill="#C9A84C" font-size="6" text-anchor="middle" font-family="DM Mono" font-weight="700">N</text>
+            </g>
+            <!-- Scale bar -->
+            <g transform="translate(48,257)">
+              <rect x="0" y="0" width="44" height="4" fill="rgba(255,255,255,.45)"/>
+              <rect x="44" y="0" width="44" height="4" fill="rgba(100,120,150,.45)"/>
+              <text x="0" y="13" fill="#8595B8" font-size="6" font-family="DM Mono">0</text>
+              <text x="40" y="13" fill="#8595B8" font-size="6" font-family="DM Mono">5m</text>
+              <text x="80" y="13" fill="#8595B8" font-size="6" font-family="DM Mono">10m</text>
+            </g>
+            <!-- Title block -->
+            <rect x="48" y="276" width="272" height="34" fill="#141929" rx="2" stroke="rgba(255,255,255,.07)" stroke-width="1"/>
+            <text x="56" y="289" fill="#E8CC7A" font-size="7" font-family="DM Mono" font-weight="700">PLAN PARTER · sc. 1:100</text>
+            <text x="56" y="299" fill="rgba(244,242,238,.3)" font-size="6" font-family="DM Mono">Nr. cad.: 173583 · LC2a · Municipiul Iași</text>
+            <text x="56" y="306" fill="rgba(244,242,238,.18)" font-size="5.5" font-family="DM Mono">UrbanX Build v1.0 · ThinkSmart Solutions SRL · 28.05.2026</text>
+            <rect x="270" y="278" width="42" height="28" fill="rgba(9,14,24,.7)" rx="2" stroke="rgba(201,168,76,.22)" stroke-width="1"/>
+            <text x="291" y="297" fill="#C9A84C" font-size="13" font-weight="700" text-anchor="middle" font-family="Fraunces">Ux</text>
+          </svg>
+          <!-- Export bar -->
+          <div class="drw-exp">
+            <button class="ep hl">⬇ DXF</button>
+            <button class="ep hl">⬇ PDF A3</button>
+            <button class="ep">⬇ GLB</button>
+            <button class="ep">⬇ 4K HD</button>
+          </div>
+        </div>
+        <!-- Right panel: DNA + navigare -->
+        <div class="drw-panel">
+          <div class="dna-title">DNA Urban Radar</div>
+          <div style="background:rgba(13,22,38,.8);border-radius:10px;padding:10px;margin-bottom:12px;text-align:center">
+            <svg width="100" height="100" viewBox="-50 -50 100 100" style="display:block;margin:0 auto">
+              <polygon points="0,-40 35,-20 35,20 0,40 -35,20 -35,-20" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="1"/>
+              <polygon points="0,-26 22,-13 22,13 0,26 -22,13 -22,-13" fill="none" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
+              <polygon points="0,-36 32,-16 28,18 0,35 -34,17 -33,-18" fill="rgba(201,168,76,.1)" stroke="#C9A84C" stroke-width="1.5"/>
+              <circle cx="0" cy="-36" r="4" fill="#4ADE80"/>
+              <circle cx="32" cy="-16" r="4" fill="#4ADE80"/>
+              <circle cx="28" cy="18" r="4" fill="#F87171"/>
+              <circle cx="0" cy="35" r="4" fill="#4ADE80"/>
+              <circle cx="-34" cy="17" r="4" fill="#4ADE80"/>
+              <circle cx="-33" cy="-18" r="4" fill="#4ADE80"/>
+              <text x="0" y="-44" fill="#8595B8" font-size="6" text-anchor="middle" font-family="DM Mono">POT ✓</text>
+              <text x="40" y="-20" fill="#8595B8" font-size="6" text-anchor="start" font-family="DM Mono">CUT ✓</text>
+              <text x="36" y="25" fill="#F87171" font-size="6" text-anchor="start" font-family="DM Mono">SV ✗</text>
+              <text x="0" y="48" fill="#8595B8" font-size="6" text-anchor="middle" font-family="DM Mono">H ✓</text>
+              <text x="-40" y="23" fill="#8595B8" font-size="6" text-anchor="end" font-family="DM Mono">Ret ✓</text>
+              <text x="-40" y="-22" fill="#8595B8" font-size="6" text-anchor="end" font-family="DM Mono">Parc ✓</text>
+            </svg>
+            <div style="color:rgba(244,242,238,.8);font-size:9.5px;font-weight:700;margin-top:3px">5/6 Conform</div>
+            <div style="color:#F87171;font-size:8px;margin-top:1px">SV: 20% &lt; 25% minim</div>
+            <button style="margin-top:8px;width:100%;padding:5px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);border-radius:5px;color:var(--goldl);font-size:8.5px;font-weight:700;cursor:pointer;font-family:var(--font)">🔄 Reajustare automată</button>
+          </div>
+          <div style="font-family:var(--mono);font-size:8px;color:rgba(244,242,238,.28);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">Tablou materiale</div>
+          <div style="display:flex;flex-direction:column;gap:3px;margin-bottom:12px">
+            <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(244,242,238,.05)"><span style="font-size:9px;color:rgba(244,242,238,.45)">Pereți ext.</span><span style="font-family:var(--mono);font-size:9px;color:rgba(244,242,238,.75)">210 m²</span></div>
+            <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(244,242,238,.05)"><span style="font-size:9px;color:rgba(244,242,238,.45)">Tâmplărie</span><span style="font-family:var(--mono);font-size:9px;color:rgba(244,242,238,.75)">48 m²</span></div>
+            <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(244,242,238,.05)"><span style="font-size:9px;color:rgba(244,242,238,.45)">Acoperiș</span><span style="font-family:var(--mono);font-size:9px;color:rgba(244,242,238,.75)">158 m²</span></div>
+            <div style="display:flex;justify-content:space-between;padding:3px 0"><span style="font-size:9px;color:rgba(244,242,238,.45)">Planșee</span><span style="font-family:var(--mono);font-size:9px;color:rgba(244,242,238,.75)">316 m²</span></div>
+          </div>
+          <div style="font-family:var(--mono);font-size:8px;color:rgba(244,242,238,.28);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">Navigare planșe</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px">
+            <div style="background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.25);border-radius:4px;padding:4px 5px;font-size:8px;color:var(--goldl);text-align:center;cursor:pointer;font-weight:700">Plan parter</div>
+            <div style="background:rgba(244,242,238,.04);border:1px solid rgba(244,242,238,.07);border-radius:4px;padding:4px 5px;font-size:8px;color:rgba(244,242,238,.38);text-align:center;cursor:pointer">Etaj 1</div>
+            <div style="background:rgba(244,242,238,.04);border:1px solid rgba(244,242,238,.07);border-radius:4px;padding:4px 5px;font-size:8px;color:rgba(244,242,238,.38);text-align:center;cursor:pointer">Fațadă N</div>
+            <div style="background:rgba(244,242,238,.04);border:1px solid rgba(244,242,238,.07);border-radius:4px;padding:4px 5px;font-size:8px;color:rgba(244,242,238,.38);text-align:center;cursor:pointer">Secțiune</div>
+            <div style="background:rgba(244,242,238,.04);border:1px solid rgba(244,242,238,.07);border-radius:4px;padding:4px 5px;font-size:8px;color:rgba(244,242,238,.38);text-align:center;cursor:pointer">Axonometrie</div>
+            <div style="background:rgba(244,242,238,.04);border:1px solid rgba(244,242,238,.07);border-radius:4px;padding:4px 5px;font-size:8px;color:rgba(244,242,238,.38);text-align:center;cursor:pointer">Plan sit.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- RAPOARTE -->
+<div class="hr"></div>
+<section class="pg" id="rapoarte">
+  <div class="pl-wrap"><div class="pl-num">05</div><div class="pl-t">Documentația care autorizează proiectul</div></div>
+  <div class="eyebrow">Rapoarte & Studii Tehnice</div>
+  <h2 class="stitle">32 studii. <em>Un singur click.</em></h2>
+  <p class="ssub">Sidebar structurat pe categorii, preview raport în panoul dreapta. Fiecare studiu cu metadata, status și acțiune directă. Nu un dropdown — o interfață dedicată.</p>
+  <div class="frame" style="margin-top:24px">
+    <div class="frame-chrome"><div class="fdot" style="background:#ef4444"></div><div class="fdot" style="background:#f59e0b"></div><div class="fdot" style="background:#22c55e"></div><div class="fbar"><span class="furl">app.urbanx.ro → Rapoarte & Studii · 173583</span></div></div>
+    <div class="rep-shell">
+      <!-- Sidebar rapoarte -->
+      <div class="rep-sb">
+        <div class="rep-sb-hd">
+          <div class="rep-sb-t">Rapoarte & Studii</div>
+          <div class="rep-sb-s">173583 · LC2a · Iași</div>
+        </div>
+        <div class="rep-group">
+          <div class="rep-grp-lbl">Hartă conexiuni</div>
+          <div class="rep-item" style="border-left-color:rgba(201,168,76,.4);background:rgba(201,168,76,.05)">
+            <div class="ri-icon">🗺</div>
+            <div class="ri-t" style="color:var(--goldl)">Hartă Rapoarte & Conexiuni</div>
+          </div>
+        </div>
+        <div class="rep-group">
+          <div class="rep-grp-lbl">Rapoarte principale</div>
+          <div class="rep-item">
+            <div class="ri-icon">🗺</div>
+            <div style="flex:1"><div class="ri-t">Studiu Amplasament</div><div class="ri-m">UTR · restricții · LMI</div></div>
+          </div>
+          <div class="rep-item on">
+            <div class="ri-icon">📄</div>
+            <div style="flex:1"><div class="ri-t">Raport Urbanistic Complet</div><div class="ri-m">8 pag · 7 vederi 3D · PDF</div></div>
+            <div class="ri-b" style="background:rgba(201,168,76,.12);color:var(--goldl);border:1px solid rgba(201,168,76,.2)">→</div>
+          </div>
+          <div class="rep-item">
+            <div class="ri-icon">📐</div>
+            <div style="flex:1"><div class="ri-t">Planșe & Proiect PAC</div><div class="ri-m">DXF · PDF A3 · GLB</div></div>
+          </div>
+          <div class="rep-item">
+            <div class="ri-icon">🏗</div>
+            <div style="flex:1"><div class="ri-t">Memoriu Tehnic Avize</div><div class="ri-m">Date teren · autorizare</div></div>
+          </div>
+          <div class="rep-item">
+            <div class="ri-icon">📋</div>
+            <div style="flex:1"><div class="ri-t" style="color:rgba(45,122,79,.9)">REPA Pre-Autorizare</div><div class="ri-m">Checklist CU complet</div></div>
+          </div>
+        </div>
+        <div class="rep-group">
+          <div class="rep-grp-lbl">Studii tehnice (27)</div>
+          <div class="rep-item"><div class="ri-icon">☀</div><div style="flex:1"><div class="ri-t">Studiu Însorire (2 var.)</div><div class="ri-m">OMS 119/2014 · NOAA</div></div></div>
+          <div class="rep-item"><div class="ri-icon">🔥</div><div style="flex:1"><div class="ri-t">Siguranță Foc ISU</div><div class="ri-m">Distanțe surse OSM</div></div></div>
+          <div class="rep-item"><div class="ri-icon">🪨</div><div style="flex:1"><div class="ri-t">Pre-Studiu Geotehnic</div><div class="ri-m">NP 074/2014</div></div></div>
+          <div class="rep-item"><div class="ri-icon">⚡</div><div style="flex:1"><div class="ri-t">Studiu Seismic P100</div><div class="ri-m">ag · Tc · zonă · structuri</div></div></div>
+          <div class="rep-item"><div class="ri-icon">💧</div><div style="flex:1"><div class="ri-t">Gospodărire Ape DTGA</div><div class="ri-m">Rețele OSM 100m</div></div></div>
+          <div class="rep-item"><div class="ri-icon">🚦</div><div style="flex:1"><div class="ri-t">Impact Trafic</div><div class="ri-m">Rețea rutieră OSM</div></div></div>
+          <div class="rep-item"><div class="ri-icon">📊</div><div style="flex:1"><div class="ri-t">Fezabilitate / DALI</div><div class="ri-m">Cost · ROI · piață</div></div></div>
+          <div class="rep-item"><div class="ri-icon">⚡</div><div style="flex:1"><div class="ri-t">CPE Energetic</div><div class="ri-m">Clasă energetică · C107</div></div></div>
+          <div class="rep-item" style="opacity:.5"><div class="ri-icon">+</div><div class="ri-t">+19 studii disponibile</div></div>
+        </div>
+        <div class="rep-group">
+          <div class="rep-grp-lbl">AI Asistent</div>
+          <div class="rep-item" style="border-left-color:rgba(147,51,234,.4);background:rgba(147,51,234,.06)">
+            <div class="ri-icon">🤖</div>
+            <div style="flex:1"><div class="ri-t" style="color:#C084FC">AI Memoriu Justificativ</div><div class="ri-m">Claude API · §1.1–§1.6</div></div>
+          </div>
+        </div>
+      </div>
+      <!-- Report content preview -->
+      <div class="rep-content">
+        <div class="rep-title">Raport Urbanistic <em>Complet</em></div>
+        <div class="rep-meta">
+          <div class="rmi">📍 173583 · LC2a · Iași</div>
+          <div class="rmi">📅 28.05.2026</div>
+          <div class="rmi">📄 8 pagini PDF</div>
+          <div class="rmi">🏗 UrbanX Build v1.0</div>
+        </div>
+        <div style="margin-bottom:18px">
+          <div class="rep-sect-t">Bilanț suprafețe</div>
+          <div class="rkpi-g">
+            <div class="rkpi ok"><div class="rkpi-v">158 m²</div><div class="rkpi-l">SC propus</div><div class="rkpi-lm">buildFP()</div></div>
+            <div class="rkpi ok"><div class="rkpi-v">316 m²</div><div class="rkpi-l">Sd propus</div><div class="rkpi-lm">SC × 2 niveluri</div></div>
+            <div class="rkpi ok"><div class="rkpi-v">P+2E</div><div class="rkpi-l">Nr. niveluri</div><div class="rkpi-lm">9m total</div></div>
+          </div>
+        </div>
+        <div style="margin-bottom:18px">
+          <div class="rep-sect-t">Conformitate vs. PUG</div>
+          <div class="rkpi-g">
+            <div class="rkpi ok"><div class="rkpi-v">35%</div><div class="rkpi-l">POT calculat</div><div class="rkpi-lm">max 45% ✓</div></div>
+            <div class="rkpi ok"><div class="rkpi-v">0.70</div><div class="rkpi-l">CUT calculat</div><div class="rkpi-lm">max 1.4 ✓</div></div>
+            <div class="rkpi err"><div class="rkpi-v">20%</div><div class="rkpi-l">SV calculat</div><div class="rkpi-lm">min 25% ✗</div></div>
+            <div class="rkpi ok"><div class="rkpi-v">9m</div><div class="rkpi-l">H total</div><div class="rkpi-lm">max 14m ✓</div></div>
+            <div class="rkpi ok"><div class="rkpi-v">5m</div><div class="rkpi-l">Retragere față</div><div class="rkpi-lm">min 5m ✓</div></div>
+            <div class="rkpi ok"><div class="rkpi-v">4 loc</div><div class="rkpi-l">Parcaje</div><div class="rkpi-lm">min 4 ✓</div></div>
+          </div>
+          <div style="background:rgba(155,44,44,.06);border:1px solid rgba(155,44,44,.14);border-radius:var(--r);padding:10px 12px;margin-top:8px">
+            <div style="color:var(--err);font-size:10px;font-weight:700;margin-bottom:3px">⚠ Reajustare necesară</div>
+            <div style="color:var(--slatel);font-size:10px;line-height:1.5">SV propus 20% &lt; minim 25%. Reduceți SC cu 23m² sau măriți SV propus. Reajustare automată disponibilă.</div>
+          </div>
+        </div>
+        <div class="rep-btns">
+          <button class="rb p">⬇ Export PDF</button>
+          <button class="rb g">⬇ Export DOCX</button>
+          <button class="rb s">🔗 Share URL</button>
+          <button class="rb s">🔄 Reajustare auto</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TCI STUDIO -->
+<div class="hr"></div>
+<section class="pg" id="tci">
+  <div class="pl-wrap"><div class="pl-num">06</div><div class="pl-t">Prezentarea care câștigă finanțarea</div></div>
+  <div class="eyebrow">TCI Studio — UrbanX Studio</div>
+  <h2 class="stitle">34 scene. <em>O poveste.</em></h2>
+  <p class="ssub">Documentar urban cinematografic pentru autorități locale, ministere și finanțatori internaționali. Date live INSE + Eurostat + CNAIR + OSM. Monte Carlo 10.000 simulări. Calitate Banca Mondială.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px">
+    <!-- Loading screen -->
+    <div>
+      <div style="font-family:var(--mono);font-size:9px;color:var(--slatel);margin-bottom:8px;letter-spacing:.06em">Loading screen — preload date live</div>
+      <div class="tci-shell" style="height:290px">
+        <div class="tci-chrome"><div class="fdot" style="background:#ef4444"></div><div class="fdot" style="background:#f59e0b"></div><div class="fdot" style="background:#22c55e"></div></div>
+        <div class="tci-prog"><div class="tci-prog-fill" style="width:62%"></div></div>
+        <div style="height:264px;background:#02050E;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden">
+          <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(201,168,76,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,.02) 1px,transparent 1px);background-size:40px 40px"></div>
+          <div style="position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 50% 60%,rgba(13,31,53,.7) 0%,transparent 70%)"></div>
+          <div style="position:relative;z-index:2;text-align:center;width:260px">
+            <div style="font-family:var(--mono);font-size:7.5px;font-weight:700;color:var(--gold);letter-spacing:.22em;margin-bottom:10px;text-transform:uppercase;opacity:.8">UrbanX TCI Cinematic v9.0</div>
+            <div style="font-family:var(--disp);font-size:26px;font-weight:300;color:var(--cream);margin-bottom:4px;letter-spacing:-.03em">MUNICIPIUL IAȘI</div>
+            <div style="font-size:8px;color:rgba(244,242,238,.25);margin-bottom:20px;letter-spacing:.04em">Documentar urban · 2026→2056 · Date live INSE · OSM · ANAR</div>
+            <div style="width:240px;height:2.5px;background:rgba(255,255,255,.06);border-radius:2px;margin:0 auto 7px"><div style="height:100%;width:62%;background:linear-gradient(90deg,var(--goldd),var(--goldl));border-radius:2px"></div></div>
+            <div style="font-size:8px;color:rgba(244,242,238,.22);letter-spacing:.07em;text-transform:uppercase;margin-bottom:14px">OSM infrastructura — se inițializează...</div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px">
+              <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:5px;padding:5px 3px;text-align:center"><div style="color:#4ADE80;font-size:7px">✓</div><div style="color:rgba(244,242,238,.28);font-size:7px">Wikipedia</div></div>
+              <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:5px;padding:5px 3px;text-align:center"><div style="color:#4ADE80;font-size:7px">✓</div><div style="color:rgba(244,242,238,.28);font-size:7px">INSE</div></div>
+              <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:5px;padding:5px 3px;text-align:center"><div style="color:#F59E0B;font-size:7px">⟳</div><div style="color:rgba(244,242,238,.28);font-size:7px">OSM</div></div>
+              <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:5px;padding:5px 3px;text-align:center"><div style="color:rgba(244,242,238,.3);font-size:7px">…</div><div style="color:rgba(244,242,238,.28);font-size:7px">CNAIR</div></div>
+            </div>
+          </div>
+          <div style="position:absolute;bottom:7px;font-size:5.5px;color:rgba(244,242,238,.12);letter-spacing:.05em">THINKSMARTS SOLUTIONS SRL · DATE ORIENTATIVE · NECESITĂ VALIDARE URBANIST ATESTAT RUR</div>
+        </div>
+      </div>
+    </div>
+    <!-- Scene B2S1 -->
+    <div>
+      <div style="font-family:var(--mono);font-size:9px;color:var(--slatel);margin-bottom:8px;letter-spacing:.06em">Scenă B2S1 — Demografie Live</div>
+      <div class="tci-shell" style="height:290px">
+        <div class="tci-chrome"><div class="fdot" style="background:#ef4444"></div><div class="fdot" style="background:#f59e0b"></div><div class="fdot" style="background:#22c55e"></div></div>
+        <div class="tci-prog"><div class="tci-prog-fill" style="width:38%"></div></div>
+        <div class="tci-body" style="height:264px">
+          <div class="tci-map-bg"></div>
+          <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(201,168,76,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,.025) 1px,transparent 1px);background-size:48px 48px"></div>
+          <div style="position:absolute;width:280px;height:180px;border-radius:50%;background:radial-gradient(ellipse,rgba(26,60,110,.45) 0%,transparent 70%);top:30%;left:30%;transform:translate(-50%,-50%)"></div>
+          <div class="tci-ov">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start">
+              <div>
+                <div class="tci-bloc-tag">Bloc 2 · Cine sunt locuitorii</div>
+                <div class="tci-t">Demografie<br><em>Live</em></div>
+                <div class="tci-sub">Date INSE TEMPO · Rec.2021 · Model cohort 2055</div>
+              </div>
+              <div class="tci-ctrls">
+                <div class="tci-ctrl">⏮</div>
+                <div class="tci-ctrl stop">■ Stop</div>
+                <div class="tci-ctrl">Skip ⏭</div>
+              </div>
+            </div>
+            <div class="tci-data-row" style="margin-top:16px">
+              <div class="tdc"><div class="tdv">349.640</div><div class="tdl">Populație 2021</div><div class="tdd" style="color:#4ADE80">INSE live</div></div>
+              <div class="tdc"><div class="tdv" style="color:#F87171">312.000</div><div class="tdl">Prognoză 2055</div><div class="tdd" style="color:#F87171">−10.8%</div></div>
+              <div class="tdc"><div class="tdv" style="color:#F59E0B">-37.640</div><div class="tdl">Declin 30 ani</div><div class="tdd" style="color:rgba(244,242,238,.3)">Model S2</div></div>
+            </div>
+            <div class="scene-nav-wrap" style="margin-top:12px">
+              <div class="sn-lbl">SCENĂ 5/34 · 11 BLOCURI</div>
+              <div class="sn-dots">
+                <div class="sd done"></div><div class="sd done"></div><div class="sd done"></div><div class="sd done"></div>
+                <div class="sd on"></div>
+                <div class="sd"></div><div class="sd"></div><div class="sd"></div><div class="sd"></div><div class="sd"></div><div class="sd"></div><div class="sd"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Monte Carlo scene full width -->
+  <div style="margin-top:16px">
+    <div style="font-family:var(--mono);font-size:9px;color:var(--slatel);margin-bottom:8px;letter-spacing:.06em">Scenă B9S1 — Monte Carlo 10.000 simulări · CI 90%</div>
+    <div class="tci-shell" style="height:230px">
+      <div class="tci-chrome"><div class="fdot" style="background:#ef4444"></div><div class="fdot" style="background:#f59e0b"></div><div class="fdot" style="background:#22c55e"></div><div style="flex:1;max-width:220px;height:12px;background:rgba(255,255,255,.04);border-radius:2px;margin-left:8px;padding:0 6px;display:flex;align-items:center"><span style="font-family:var(--mono);font-size:7px;color:rgba(244,242,238,.3)">TCI Studio · Bloc 9 · Scenarii Predictive</span></div></div>
+      <div class="tci-prog"><div class="tci-prog-fill" style="width:75%"></div></div>
+      <div class="tci-body" style="height:204px">
+        <div class="tci-map-bg"></div>
+        <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(201,168,76,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,.02) 1px,transparent 1px);background-size:48px 48px"></div>
+        <div class="tci-ov" style="flex-direction:row;gap:20px">
+          <div style="flex:1">
+            <div class="tci-bloc-tag">Bloc 9 · Scenarii Predictive</div>
+            <div style="font-family:var(--disp);font-size:20px;font-weight:300;color:var(--cream);letter-spacing:-.04em;margin-bottom:4px">Monte Carlo <em style="color:var(--goldl)">2056</em></div>
+            <div style="font-size:9px;color:rgba(244,242,238,.28);margin-bottom:10px">10.000 simulări · Interval credibilitate 90% · 3 Scenarii</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="background:rgba(45,122,79,.12);border:1px solid rgba(45,122,79,.25);border-radius:7px;padding:7px 10px"><div style="color:#4ADE80;font-size:9px;font-weight:700">S1 OPTIMIST — Prob. 25%</div><div style="color:var(--cream);font-size:10px;font-weight:700">+12.400 loc. · PIB +38% · 2.100 aut./an</div></div>
+              <div style="background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.22);border-radius:7px;padding:7px 10px"><div style="color:var(--gold);font-size:9px;font-weight:700">S2 MEDIU — Prob. 50%</div><div style="color:var(--cream);font-size:10px;font-weight:700">-8.200 loc. · PIB +18% · 1.450 aut./an</div></div>
+              <div style="background:rgba(155,44,44,.1);border:1px solid rgba(155,44,44,.22);border-radius:7px;padding:7px 10px"><div style="color:#F87171;font-size:9px;font-weight:700">S3 PESIMIST — Prob. 25%</div><div style="color:var(--cream);font-size:10px;font-weight:700">-32.000 loc. · PIB -4% · 890 aut./an</div></div>
+            </div>
+          </div>
+          <div style="width:155px;flex-shrink:0;display:flex;flex-direction:column;justify-content:center">
+            <div style="font-family:var(--mono);font-size:7px;color:rgba(244,242,238,.2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:7px">Distribuție probabilitate</div>
+            <svg width="150" height="90" viewBox="0 0 150 90">
+              <path d="M 8,86 Q 26,86 44,70 Q 58,26 72,12 Q 86,26 102,70 Q 120,86 140,86" fill="rgba(201,168,76,.1)" stroke="#C9A84C" stroke-width="1.5"/>
+              <line x1="26" y1="8" x2="26" y2="86" stroke="rgba(45,122,79,.35)" stroke-width="1" stroke-dasharray="3 2"/>
+              <line x1="120" y1="8" x2="120" y2="86" stroke="rgba(45,122,79,.35)" stroke-width="1" stroke-dasharray="3 2"/>
+              <text x="72" y="96" fill="rgba(244,242,238,.2)" font-size="6" text-anchor="middle" font-family="DM Mono">CI 90%</text>
+              <text x="26" y="6" fill="#4ADE80" font-size="5" text-anchor="middle" font-family="DM Mono">S1</text>
+              <text x="72" y="6" fill="#C9A84C" font-size="5" text-anchor="middle" font-family="DM Mono">S2</text>
+              <text x="120" y="6" fill="#F87171" font-size="5" text-anchor="middle" font-family="DM Mono">S3</text>
+            </svg>
+            <div style="font-size:7.5px;color:rgba(244,242,238,.25);line-height:1.5;margin-top:5px">Motor: _PredEngine v8<br>Sursă: INSE + Eurostat live<br>Benchmark: 17 orașe UE</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ADMIN -->
+<div class="hr"></div>
+<section class="pg" id="admin">
+  <div class="pl-wrap"><div class="pl-num">07</div><div class="pl-t">Controlul platformei — admin și SaaS management</div></div>
+  <div class="eyebrow">Panou Admin & SaaS</div>
+  <h2 class="stitle">Administrare <em>simplă</em></h2>
+  <p class="ssub">Dashboard cu statistici live, gestiune utilizatori cu roluri, UAT-uri cu status, diagnostics module în timp real. Alertă vizibilă pentru orice gap critic (TomTom key lipsă etc.).</p>
+  <div class="frame" style="margin-top:24px">
+    <div class="frame-chrome"><div class="fdot" style="background:#ef4444"></div><div class="fdot" style="background:#f59e0b"></div><div class="fdot" style="background:#22c55e"></div><div class="fbar"><span class="furl">app.urbanx.ro/admin</span></div></div>
+    <div class="adm-shell">
+      <div class="adm-sb">
+        <div class="adm-sb-hd"><div style="color:var(--gold);font-size:8.5px;font-weight:700;letter-spacing:.06em">ADMIN PANEL</div><div style="color:rgba(244,242,238,.25);font-size:8px;margin-top:1px">ThinkSmart Solutions</div></div>
+        <div class="adm-it on">📊 Dashboard</div>
+        <div class="adm-it">👥 Utilizatori</div>
+        <div class="adm-it">🏛 UAT-uri</div>
+        <div class="adm-it">📦 Pachete</div>
+        <div class="adm-it">🔧 Diagnostics</div>
+        <div class="adm-it">⚙️ Configurare</div>
+        <div class="adm-it">📋 Logs acces</div>
+      </div>
+      <div class="adm-main">
+        <div class="adm-stats">
+          <div class="astat"><div class="astat-v">24</div><div class="astat-l">Utilizatori activi</div><div class="astat-d" style="color:var(--ok)">+3 luna aceasta</div></div>
+          <div class="astat"><div class="astat-v">12</div><div class="astat-l">UAT-uri active</div><div class="astat-d" style="color:var(--gold)">10 RLU complet</div></div>
+          <div class="astat"><div class="astat-v">847</div><div class="astat-l">Rapoarte / lună</div><div class="astat-d" style="color:var(--ok)">+124 vs luna trec.</div></div>
+          <div class="astat"><div class="astat-v">2.341</div><div class="astat-l">Parcele analizate</div><div class="astat-d" style="color:var(--ok)">din 60k indexate</div></div>
+        </div>
+        <div class="adm-grid">
+          <div class="acard">
+            <div class="acard-t">Utilizatori <button style="background:rgba(26,92,138,.1);border:1px solid rgba(26,92,138,.2);border-radius:5px;padding:3px 8px;color:var(--info);font-size:8.5px;font-weight:700;cursor:pointer;font-family:var(--font)">+ Invită</button></div>
+            <div class="urow">
+              <div class="uav" style="background:rgba(201,168,76,.12);color:var(--goldd)">MA</div>
+              <div style="flex:1"><div style="font-size:10px;font-weight:600;color:var(--ink)">Mihai Arhitectu</div><div style="font-size:8px;color:var(--slatel)">m.a@firma.ro</div></div>
+              <div class="urole" style="background:rgba(201,168,76,.1);color:var(--goldd);border-color:rgba(201,168,76,.2)">admin</div>
+            </div>
+            <div class="urow">
+              <div class="uav" style="background:rgba(45,122,79,.1);color:var(--ok)">AP</div>
+              <div style="flex:1"><div style="font-size:10px;font-weight:600;color:var(--ink)">Ana Popescu</div><div style="font-size:8px;color:var(--slatel)">a.popescu@primarie-iasi.ro</div></div>
+              <div class="urole" style="background:var(--okl);color:var(--ok);border-color:rgba(45,122,79,.15)">user</div>
+            </div>
+            <div class="urow">
+              <div class="uav" style="background:rgba(26,92,138,.1);color:var(--info)">CI</div>
+              <div style="flex:1"><div style="font-size:10px;font-weight:600;color:var(--ink)">Cosmin Ionescu</div><div style="font-size:8px;color:var(--slatel)">c.ionescu@urbanist.ro</div></div>
+              <div class="urole" style="background:var(--okl);color:var(--ok);border-color:rgba(45,122,79,.15)">user</div>
+            </div>
+            <div class="urow">
+              <div class="uav" style="background:rgba(61,74,107,.12);color:var(--slatel)">MR</div>
+              <div style="flex:1"><div style="font-size:10px;font-weight:600;color:var(--slatel)">Maria Radu</div><div style="font-size:8px;color:var(--mist)">invitație trimisă</div></div>
+              <div class="urole" style="background:var(--warnl);color:var(--warn);border-color:rgba(196,105,10,.15)">pending</div>
+            </div>
+          </div>
+          <div class="acard">
+            <div class="acard-t">UAT-uri active <button style="background:rgba(45,122,79,.08);border:1px solid rgba(45,122,79,.18);border-radius:5px;padding:3px 8px;color:var(--ok);font-size:8.5px;font-weight:700;cursor:pointer;font-family:var(--font)">+ UAT</button></div>
+            <div class="uat-row sel"><div class="ust" style="background:var(--ok)"></div><div style="flex:1"><div style="font-size:10px;font-weight:600;color:var(--ink)">Municipiul Iași</div><div style="font-size:8px;color:var(--slatel)">586 zone UTR · RLU complet</div></div><span style="font-size:8.5px;font-weight:700;color:var(--ok)">✅</span></div>
+            <div class="uat-row"><div class="ust" style="background:var(--ok)"></div><div style="flex:1"><div style="font-size:10px;font-weight:600;color:var(--ink)">Municipiul Botoșani</div><div style="font-size:8px;color:var(--slatel)">~140 zone UTR · complet</div></div><span style="font-size:8.5px;font-weight:700;color:var(--ok)">✅</span></div>
+            <div class="uat-row"><div class="ust" style="background:var(--warn)"></div><div style="flex:1"><div style="font-size:10px;font-weight:600;color:var(--ink)">Municipiul Vaslui</div><div style="font-size:8px;color:var(--slatel)">~90 zone UTR · parțial</div></div><span style="font-size:8.5px;font-weight:700;color:var(--warn)">🔄</span></div>
+            <div class="uat-row"><div class="ust" style="background:var(--mist)"></div><div style="flex:1"><div style="font-size:10px;font-weight:600;color:var(--slatel)">Municipiul Roman</div><div style="font-size:8px;color:var(--mist)">import în curs</div></div><span style="font-size:8.5px;font-weight:700;color:var(--mist)">⭕</span></div>
+          </div>
+          <div class="acard">
+            <div class="acard-t">Diagnostics module</div>
+            <div class="diag-row"><span class="diag-k">AI Narrative</span><span class="diag-ok">✓ loaded</span></div>
+            <div class="diag-row"><span class="diag-k">_FloodMapper</span><span class="diag-ok">✓ loaded</span></div>
+            <div class="diag-row"><span class="diag-k">_PredEngine</span><span class="diag-ok">✓ loaded</span></div>
+            <div class="diag-row"><span class="diag-k">generateRelevee</span><span class="diag-ok">✓ function</span></div>
+            <div class="diag-row"><span class="diag-k">_LiveSources</span><span class="diag-ok">✓ loaded</span></div>
+            <div class="diag-row"><span class="diag-k">TomTom Traffic</span><span class="diag-err">✗ API key lipsă</span></div>
+            <div class="diag-row"><span class="diag-k">GHSL stream</span><span class="diag-w">⚠ parțial</span></div>
+            <div class="diag-row"><span class="diag-k">Supabase Auth</span><span class="diag-ok">✓ connected</span></div>
+          </div>
+          <div class="acard">
+            <div class="acard-t">Acțiuni rapide</div>
+            <div class="ab-sm">📐 Import PUG Digital (GeoJSON/KML)</div>
+            <div class="ab-sm">👤 Invită utilizator nou</div>
+            <div class="ab-sm">🔄 Sync cloud Supabase</div>
+            <div class="ab-sm">📊 Export raport utilizare</div>
+            <div class="alert-box"><div style="color:var(--err);font-size:9.5px;font-weight:700;margin-bottom:2px">⚠ Acțiune necesară</div><div style="color:var(--slatel);font-size:9px;line-height:1.4">TomTom Traffic API key lipsă — B7S1 Trafic fără date live. Configurare din Settings.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- PRICING -->
+<div class="hr"></div>
+<section class="pg" id="pricing">
+  <div class="pl-wrap"><div class="pl-num">08</div><div class="pl-t">Pachetele care monetizează platforma</div></div>
+  <div class="eyebrow">Pricing SaaS</div>
+  <h2 class="stitle">Simplu, clar, <em>justificat</em></h2>
+  <p class="ssub">4 pachete cu separare clară de valoare. Core pentru arhitectul independent. Pro pentru primărie. Infinity pentru instituții și fonduri europene. Prețuri în EUR, facturare anuală cu discount 20%.</p>
+  <div class="price-toggle">
+    <span style="font-size:11px;color:var(--slatel)">Lunar</span>
+    <div class="toggle-pill"><div class="toggle-thumb"></div></div>
+    <span style="font-size:11px;font-weight:600;color:var(--ink)">Anual <span style="background:rgba(201,168,76,.1);color:var(--goldd);border:1px solid rgba(201,168,76,.2);border-radius:99px;padding:1px 7px;font-size:9px;font-weight:700">−20%</span></span>
+  </div>
+  <div class="price-grid">
+    <div class="pc">
+      <div class="pc-tier">UrbanX Core</div>
+      <div class="pc-price">€49<span class="pc-unit">/lună</span></div>
+      <div class="pc-desc">Per utilizator · facturare anuală<br>Ideal pentru arhitectul independent</div>
+      <button class="pc-btn d">Începe gratuit 14 zile</button>
+      <div class="pf"><div class="pf-d ok">✓</div>GIS & Cadastru 12+ UAT-uri</div>
+      <div class="pf"><div class="pf-d ok">✓</div>AI Reguli (parser propriu)</div>
+      <div class="pf"><div class="pf-d ok">✓</div>UrbanX Build — volumetrie</div>
+      <div class="pf"><div class="pf-d ok">✓</div>Circulații & Drum Acces</div>
+      <div class="pf"><div class="pf-d ok">✓</div>18 studii tehnice PDF core</div>
+      <div class="pf"><div class="pf-d ok">✓</div>Planșe PAC + DXF + PDF A3</div>
+      <div class="pf"><div class="pf-d ok">✓</div>Raport Urbanistic 8 pagini</div>
+      <div class="pf"><div class="pf-d ok">✓</div>PWA + offline parțial</div>
+    </div>
+    <div class="pc">
+      <div class="pc-tier">UrbanX Build</div>
+      <div class="pc-price">€89<span class="pc-unit">/lună</span></div>
+      <div class="pc-desc">Per utilizator · facturare anuală<br>Ideal pentru birou de arhitectură</div>
+      <button class="pc-btn d">Alege Build</button>
+      <div style="font-size:10px;color:var(--slatel);margin-bottom:8px;font-weight:600">Tot Core, plus:</div>
+      <div class="pf"><div class="pf-d ok">✓</div>32 studii tehnice PDF (complet)</div>
+      <div class="pf"><div class="pf-d ok">✓</div>Viewer 3D PBR + 4 iluminări</div>
+      <div class="pf"><div class="pf-d ok">✓</div>Export GLB BIM (Revit/Blender)</div>
+      <div class="pf"><div class="pf-d ok">✓</div>Randare HD 4K (Three.js)</div>
+      <div class="pf"><div class="pf-d ok">✓</div>AI Memoriu Justificativ Claude</div>
+      <div class="pf"><div class="pf-d ok">✓</div>Cloud Sync scenarii</div>
+      <div class="pf"><div class="pf-d ok">✓</div>Hartă Rapoarte & Conexiuni</div>
+    </div>
+    <div class="pc feat">
+      <div class="pc-badge">Cel mai popular</div>
+      <div class="pc-tier">UrbanX Pro</div>
+      <div class="pc-price">€189<span class="pc-unit">/lună</span></div>
+      <div class="pc-desc">Per UAT · facturare anuală<br>Ideal pentru primărie sau consultanță</div>
+      <button class="pc-btn g">Alege Pro</button>
+      <div style="font-size:10px;color:rgba(244,242,238,.35);margin-bottom:8px;font-weight:600">Tot Build, plus:</div>
+      <div class="pf"><div class="pf-d star">★</div>TCI Studio — 34 scene cinematice</div>
+      <div class="pf"><div class="pf-d star">★</div>Dashboard UAT Live (INSE+GHSL)</div>
+      <div class="pf"><div class="pf-d star">★</div>Masterplan PDF 22 pag + PPTX</div>
+      <div class="pf"><div class="pf-d star">★</div>Walkability + SDG11 + Analize</div>
+      <div class="pf"><div class="pf-d star">★</div>Monte Carlo + Benchmark EU</div>
+      <div class="pf"><div class="pf-d star">★</div>Portofoliu Strategic 2025-2055</div>
+      <div class="pf"><div class="pf-d star">★</div>5 utilizatori inclus</div>
+    </div>
+    <div class="pc">
+      <div class="pc-tier">UrbanX Infinity</div>
+      <div class="pc-price" style="color:#9333EA">Custom</div>
+      <div class="pc-desc">Instituții · Fonduri UE · Enterprise<br>Ideal pentru ministere și MDLPA</div>
+      <button class="pc-btn ol" style="border-color:rgba(147,51,234,.3);color:#C084FC">Contactează-ne →</button>
+      <div style="font-size:10px;color:var(--slatel);margin-bottom:8px;font-weight:600">Tot Pro, plus:</div>
+      <div class="pf"><div class="pf-d dia">◆</div>Multi-tenant SaaS per UAT</div>
+      <div class="pf"><div class="pf-d dia">◆</div>ML vectorizare PUG PDF→GeoJSON</div>
+      <div class="pf"><div class="pf-d dia">◆</div>NLP extragere RLU din PDF</div>
+      <div class="pf"><div class="pf-d dia">◆</div>Onboarding UAT self-service</div>
+      <div class="pf"><div class="pf-d dia">◆</div>SLA dedicat + suport prioritar</div>
+      <div class="pf"><div class="pf-d dia">◆</div>API complet + webhooks</div>
+      <div class="pf"><div class="pf-d dia">◆</div>White-label branding</div>
+    </div>
+  </div>
+  <div style="text-align:center;margin-top:18px;color:var(--mist);font-size:10px">Toate planurile includ: GDPR Compliant · Hosted EU · Supabase Auth · GitHub Pages · Support tehnic</div>
+</section>
+
+<!-- FOOTER -->
+<div class="hr"></div>
+<div style="padding:40px 28px;text-align:center;max-width:1400px;margin:0 auto">
+  <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px">
+    <div style="width:32px;height:32px;background:var(--ink);border-radius:8px;display:grid;place-items:center"><span style="color:var(--gold);font-family:var(--disp);font-size:13px;font-weight:700">Ux</span></div>
+    <span style="font-family:var(--disp);font-size:16px;font-weight:700;color:var(--ink)">UrbanX — UI Vision v1.0</span>
+  </div>
+  <div style="color:var(--slatel);font-size:11px;line-height:1.8">
+    ThinkSmart Solutions SRL · 2026 · TRL 5–6<br>
+    Toate ecranele sunt propuneri de design bazate pe funcționalitățile reale implementate în platformă.<br>
+    <span style="color:var(--goldd);font-weight:600">9 ecrane · Flow complet · M1–M10 + TCI Studio + UrbanX Build</span>
+  </div>
+</div>
+
+<script>
+// Nav scroll highlight
+const sections=['principii','flux','login','harta','build','planse','rapoarte','tci','admin','pricing'];
+window.addEventListener('scroll',()=>{
+  let cur='hero';
+  sections.forEach(id=>{const el=document.getElementById(id);if(el&&el.getBoundingClientRect().top<80)cur=id;});
+  document.querySelectorAll('.nl').forEach(a=>{
+    a.classList.remove('on');
+    const href=a.getAttribute('href');
+    if(href==='#'+cur||(cur==='hero'&&href==='#hero'))a.classList.add('on');
+  });
+});
+// Nav click
+document.querySelectorAll('.nl').forEach(a=>{
+  a.addEventListener('click',()=>{
+    document.querySelectorAll('.nl').forEach(x=>x.classList.remove('on'));
+    a.classList.add('on');
+  });
+});
+</script>
+</body>
+</html>
