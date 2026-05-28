@@ -1867,19 +1867,21 @@ async function switchUAT(uatId){
   if(cfg.status!=='empty'){
     await loadData(uatId);
     ss(`✅ UAT activ: ${cfg.label} (${cfg.status})`);
-    // Activează automat UTR după ce loadData termină
+    // Activează automat UTR pe hartă după loadData
     setTimeout(function(){
-      if(S.pug && S.pug.features && S.pug.features.length) {
+      if(!utrOpen){
         utrOpen = true;
         const btnU = _g('btnUTR');
-        if(btnU) { btnU.classList.add('on'); }
+        if(btnU) btnU.classList.add('on');
         const utrDrawer = _g('utr-drawer');
         if(utrDrawer) utrDrawer.classList.add('open');
+      }
+      if(S.pug && S.pug.features && S.pug.features.length){
         const fc={type:'FeatureCollection',features:S.pug.features.map(f=>({...f,properties:{...f.properties,utr:normU(f.properties?.utr||''),c:ucol(normU(f.properties?.utr||''))}}))};
         setSource('utr-src', fc);
-        ss('🗺 PUG ' + (cfg.short||cfg.label) + ' — ' + S.pug.features.length + ' zone UTR');
+        ss('🗺 PUG '+cfg.label+' — '+S.pug.features.length+' zone UTR');
       }
-    }, 1500);
+    }, 800);
   } else {
     // Reset PUG — UAT fără date
     S.pug=null; S.pugIdx=[];
