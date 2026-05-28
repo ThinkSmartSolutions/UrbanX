@@ -861,6 +861,30 @@ function htmlUTR(){
 
     // ── Fallback la sistemul vechi dacă nu avem reguli noi ───────────────
     if (!d || !utrNr || !d.utrs[String(utrNr)] || !CATS.length) {
+      // Diagnostic: ce lipsește?
+      const pugLoaded = S.pugIdx && S.pugIdx.length > 0;
+      const reguliLoaded = !!d;
+      if (!pugLoaded) {
+        // PUG-ul nu e încărcat — auto-trigger dacă există butonul
+        setTimeout(function() {
+          const btn = document.getElementById('btn-utr') || document.querySelector('[onclick*="loadUTR"],[onclick*="_loadPUG"]');
+          if (btn && typeof btn.click === 'function') btn.click();
+        }, 200);
+        return '<div class="warn-box" style="text-align:center;padding:12px">'
+          +'<div style="font-size:18px;margin-bottom:6px">🗺</div>'
+          +'<div style="font-weight:600;margin-bottom:4px">PUG-ul nu este încărcat</div>'
+          +'<div style="font-size:11px;color:#94a3b8;margin-bottom:10px">Apasă butonul <b>UTR</b> din bara de sus pentru a încărca zonele PUG ale UAT-ului selectat</div>'
+          +'<button onclick="const b=document.getElementById(\'btn-utr\')||document.querySelector(\'[onclick*=loadUTR],[onclick*=_loadPUG]\');if(b)b.click();else if(typeof loadUTRLayer===\'function\')loadUTRLayer();" '
+          +'style="background:rgba(212,175,55,0.15);border:1px solid rgba(212,175,55,0.4);color:#d4af37;padding:6px 16px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600">▶ Încarcă PUG acum</button>'
+          +'</div>';
+      }
+      if (!reguliLoaded) {
+        return '<div class="warn-box">⚠️ Regulamentul urbanistic nu este disponibil pentru acest UAT.</div>';
+      }
+      if (!utrNr) {
+        return '<div class="warn-box">⚠️ Parcela selectată nu se suprapune cu nicio zonă UTR din PUG. Verificați că sunteți în intravilanul UAT-ului selectat.</div>';
+      }
+      // Sistemul vechi ca fallback final
       return '<div class="'+(fnVal.status==='ok'?'ok-box':fnVal.status==='warn'?'warn-box':'err-box')+'">'+fnVal.msg+'</div>'
         +(fnData?'<div class="help">🅿️ Parcaje: <b>'+calcParcaje(S.vol.fn,ap.area,0,0)+'</b></div>':'');
     }
