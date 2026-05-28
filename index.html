@@ -5605,11 +5605,11 @@ window._buildFunctionSelector = function(utrNr, utrDen) {
     +'</div>';
 };
 
-window._selCat = function(catId) {
+window._selCat = function(catId, btnEl) {
   document.querySelectorAll('[data-cat]').forEach(function(btn){
     var a = btn.getAttribute('data-cat')===catId;
-    btn.style.background=a?'rgba(212,175,55,0.15)':'rgba(255,255,255,0.04)';
-    btn.style.borderColor=a?'rgba(212,175,55,0.5)':'rgba(255,255,255,0.1)';
+    btn.style.background=a?'rgba(212,175,55,0.15)':'rgba(255,255,255,0.03)';
+    btn.style.borderColor=a?'rgba(212,175,55,0.5)':'rgba(255,255,255,0.08)';
     btn.style.color=a?'#d4af37':'#94a3b8';
   });
   var cat = CATS.find(function(c){return c.id===catId;});
@@ -5730,11 +5730,33 @@ function _hookPopup() {
 }
 setTimeout(_hookPopup, 1200);
 
-// Pre-încărcare
+// Pre-încărcare — agresivă: la startup, la UAT change, la renderTab('utr')
 window.addEventListener('ux:city_changed', function(e) {
   if (e.detail?.key) _loadReguli(e.detail.key);
 });
-setTimeout(function(){ _loadReguli(_cityKey()); }, 2500);
+setTimeout(function(){ _loadReguli(_cityKey()); }, 800);
+
+// Hook pe renderTab — asigurăm că reguli sunt încărcate când se deschide tab UTR
+(function() {
+  function hookRT() {
+    if (!window.renderTab || window._rtHooked) { 
+      if (!window.renderTab) setTimeout(hookRT, 500);
+      return; 
+    }
+    window._rtHooked = true;
+    var orig = window.renderTab;
+    window.renderTab = function(tab) {
+      orig.apply(this, arguments);
+      if (tab === 'utr' || tab === 'search') {
+        var ck = (window.TCI && window.TCI.cityKey) || localStorage.getItem('ux_last_city') || 'RO-IS-01';
+        if (!window._PUG_REGULI[ck]) {
+          _loadReguli(ck).then(function(d) { if (d) orig('utr'); });
+        }
+      }
+    };
+  }
+  setTimeout(hookRT, 1500);
+})();
 
 window._FunctionEngine = {v:'2.1', cats:CATS, findUTR:_findUTRNumericForParcel};
 console.log('[FunctionEngine] v2.1 — point-in-polygon UTR lookup activ');

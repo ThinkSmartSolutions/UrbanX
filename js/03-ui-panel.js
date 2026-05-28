@@ -857,10 +857,47 @@ function htmlUTR(){
     const d = window._PUG_REGULI && window._PUG_REGULI[cityKey];
     const CATS = window._FunctionEngine?.cats || [];
 
-    // ── Fallback la sistemul vechi dacă nu avem reguli noi ───────────────
-    if (!d || !utrNr || !d.utrs[String(utrNr)] || !CATS.length) {
+    // ── Fallback la sistemul vechi doar dacă nu avem categorii ─────────
+    if (!CATS.length) {
       return '<div class="'+(fnVal.status==='ok'?'ok-box':fnVal.status==='warn'?'warn-box':'err-box')+'">'+fnVal.msg+'</div>'
         +(fnData?'<div class="help">🅿️ Parcaje: <b>'+calcParcaje(S.vol.fn,ap.area,0,0)+'</b></div>':'');
+    }
+
+    // Dacă reguli nu sunt încărcate, le încărcăm async și re-render
+    if (!d || !utrNr || !d.utrs[String(utrNr)]) {
+      // Trigger async load + re-render când termină
+      (async function() {
+        if (window._SubzoneEngine || window._FunctionEngine) {
+          const ck = window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
+          const reg = window._PUG_REGISTRY && window._PUG_REGISTRY[ck];
+          if (reg && reg.reguli) {
+            try {
+              const r = await fetch(reg.reguli + '?v=20260527');
+              if (r.ok) {
+                const dd = await r.json();
+                if (dd.subzone && dd.utrs) {
+                  window._PUG_REGULI[ck] = dd;
+                  if (typeof renderTab === 'function') renderTab('utr');
+                }
+              }
+            } catch(e) {}
+          }
+        }
+      })();
+      // Afișăm selectorul de categorii fără indicatori (vor apărea după load)
+      const catBtnsOnly = CATS.map(cat =>
+        '<button onclick="window._selCat(\''+cat.id+'\',this)" data-cat="'+cat.id+'" '
+        +'style="display:flex;flex-direction:column;align-items:center;justify-content:center;'
+        +'padding:7px 2px;border-radius:8px;cursor:pointer;border:1px solid rgba(255,255,255,0.08);'
+        +'background:rgba(255,255,255,0.03);color:#94a3b8;font-size:9px;font-weight:600;'
+        +'transition:all 0.15s;flex:1;min-height:48px">'
+        +'<span style="font-size:16px;margin-bottom:2px">'+cat.icon+'</span>'
+        +'<span style="line-height:1.2;text-align:center">'+cat.label+'</span></button>'
+      ).join('');
+      return '<div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Ce vrei să construiești?</div>'
+        +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:6px">'+catBtnsOnly+'</div>'
+        +'<div id="fn-items-list" style="display:none;margin-bottom:4px"></div>'
+        +'<div id="fn-result"></div>';
     }
 
     const utrData = d.utrs[String(utrNr)];
