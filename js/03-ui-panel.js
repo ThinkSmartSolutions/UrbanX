@@ -805,6 +805,31 @@ function htmlUTR(){
   const r=REGULI[ap.utr]||{},u=ap.utr;
   const fnData=FN_UTR[S.vol.fn];
   const fnVal=valFunctiune(S.vol.fn,u);
+
+  // ── utrNr calculat ÎNAINTE de return, disponibil în tot template-ul ──
+  let utrNr = ap.utr_nr;
+  if (!utrNr && typeof window._findUTRNumericForParcel === 'function') {
+    utrNr = window._findUTRNumericForParcel(ap);
+  }
+  if (!utrNr && S.pugIdx && S.pugIdx.length && ap.geo?.geometry) {
+    try {
+      const ring = ap.geo.geometry.coordinates?.[0];
+      if (ring?.length) {
+        const cx = ring.reduce((s,p)=>s+p[0],0)/ring.length;
+        const cy = ring.reduce((s,p)=>s+p[1],0)/ring.length;
+        const pt = {type:'Feature',geometry:{type:'Point',coordinates:[cx,cy]},properties:{}};
+        for (const entry of S.pugIdx) {
+          if (cx<entry.bb[0]||cx>entry.bb[2]||cy<entry.bb[1]||cy>entry.bb[3]) continue;
+          if (turf.booleanPointInPolygon(pt,{type:'Feature',geometry:entry.geom,properties:{}})) {
+            utrNr = entry.UTR ? String(entry.UTR) : null;
+            if (utrNr) ap.utr_nr = utrNr;
+            break;
+          }
+        }
+      }
+    } catch(e) {}
+  }
+
   return`
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
@@ -828,33 +853,7 @@ function htmlUTR(){
   </div>
   <div class="section" style="margin-top:10px">🔍 Ce vrei să construiești?</div>
   ${(()=>{
-    // ── Lookup UTR numeric folosind _findUTRNumericForParcel sau pugIdx direct ──
-    let utrNr = ap.utr_nr;
-    if (!utrNr) {
-      // Folosim funcția din index.html dacă există
-      if (typeof window._findUTRNumericForParcel === 'function') {
-        utrNr = window._findUTRNumericForParcel(ap);
-      } else if (S.pugIdx && S.pugIdx.length && ap.geo?.geometry) {
-        // Fallback inline
-        try {
-          const ring = ap.geo.geometry.coordinates?.[0];
-          if (ring?.length) {
-            const cx = ring.reduce((s,p)=>s+p[0],0)/ring.length;
-            const cy = ring.reduce((s,p)=>s+p[1],0)/ring.length;
-            const pt = {type:'Feature',geometry:{type:'Point',coordinates:[cx,cy]},properties:{}};
-            for (const entry of S.pugIdx) {
-              if (cx<entry.bb[0]||cx>entry.bb[2]||cy<entry.bb[1]||cy>entry.bb[3]) continue;
-              if (turf.booleanPointInPolygon(pt,{type:'Feature',geometry:entry.geom,properties:{}})) {
-                utrNr = entry.UTR ? String(entry.UTR) : entry.utr;
-                if (utrNr) { ap.utr_nr = utrNr; }
-                break;
-              }
-            }
-          }
-        } catch(e) {}
-      }
-    }
-
+    // utrNr calculat la topul funcției htmlUTR()
     const cityKey = window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
     const d = window._PUG_REGULI && window._PUG_REGULI[cityKey];
     const CATS = window._FunctionEngine?.cats || [];
