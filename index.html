@@ -5543,9 +5543,86 @@ window._checkFnUser = async function(fnId, catId) {
     setTimeout(function(){resEl.scrollIntoView({behavior:'smooth',block:'nearest'});},100);
   }
 
-  // Re-render tab UTR ca să reflecte noua subzonă și indicatorii actualizați
-  if (typeof renderTab === 'function') {
-    setTimeout(function(){ renderTab('utr'); }, 150);
+  // ── Actualizare in-place a cardului de indicatori (fără re-render complet) ──
+  // Dacă cardul există deja în DOM îl actualizăm direct, păstrând selectorul de funcțiuni
+  var indCard = document.getElementById('utr-indicators-card');
+  if (indCard && result.code && d) {
+    var curSzNew  = ap._subzona || result.code;
+    var curDataNew = d.subzone[curSzNew] || {};
+    var domSzNew  = utrData.fn_dominanta;
+    var area2     = ap.area || 0;
+
+    // Helper ibox inline
+    function _ibox(label, val, unit, color, calc) {
+      var display = val != null ? val+unit : '—';
+      var calcStr = calc ? '<div style="font-size:9px;color:#64748b;margin-top:1px">'+calc+'</div>' : '';
+      return '<div style="background:rgba(0,0,0,0.2);border-radius:7px;padding:6px 8px">'
+        +'<div style="font-size:9px;color:#64748b;margin-bottom:2px">'+label+'</div>'
+        +'<div style="font-size:14px;font-weight:700;color:'+color+'">'+display+'</div>'
+        +calcStr+'</div>';
+    }
+
+    // Actualizăm textele din card fără a distruge structura
+    var elSz  = document.getElementById('utr-cur-sz');
+    var elDen = document.getElementById('utr-cur-den');
+    if (elSz)  elSz.textContent  = curSzNew;
+    if (elDen) elDen.textContent = (curDataNew.denumire||'').slice(0,55);
+
+    // Status badge
+    var isDomNew   = curSzNew === domSzNew;
+    var isAdmNew   = utrData.subzone_admise && utrData.subzone_admise.includes(curSzNew);
+    var badgeEl = document.getElementById('utr-status-badge');
+    if (badgeEl) {
+      badgeEl.innerHTML = isDomNew
+        ? '<span style="background:rgba(52,211,153,0.15);color:#34d399;border:1px solid rgba(52,211,153,0.3);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600">✅ Funcțiune dominantă — fără PUZ</span>'
+        : isAdmNew
+        ? '<span style="background:rgba(251,191,36,0.15);color:#fbbf24;border:1px solid rgba(251,191,36,0.3);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600">🟡 Admisă cu condiții — necesită PUZ/PUD</span>'
+        : '<span style="background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.3);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600">⛔ Interzisă în UTR '+utrNr+'</span>';
+    }
+
+    // Grid indicatori
+    var gridEl = document.getElementById('utr-ibox-grid');
+    if (gridEl) {
+      var pot2 = curDataNew.pot_baza, cut2 = curDataNew.cut_baza, h2 = curDataNew.hmax_m;
+      var niv2 = curDataNew.niv_max, sv2 = curDataNew.spatii_verzi_pct, sf2 = curDataNew.suprafata_min_mp;
+      var reg2 = curDataNew.regim || '';
+      var sc2 = pot2 && area2 ? Math.round(area2*pot2/100) : null;
+      var sd2 = cut2 && area2 ? Math.round(area2*cut2)     : null;
+      var sv2mp= sv2  && area2 ? Math.round(area2*sv2/100) : null;
+      gridEl.innerHTML =
+        _ibox('POT max', pot2, '%', '#fbbf24', sc2 ? sc2+'m² la sol' : null)
+       +_ibox('CUT max', cut2, '', '#fbbf24', sd2 ? sd2+'mp ADC' : null)
+       +_ibox('H max', h2, 'm', '#34d399', niv2 ? niv2+' niv' : null)
+       +_ibox('Sp. verzi', sv2, '%', '#86efac', sv2mp ? sv2mp+'m²' : null)
+       +_ibox('Sf. min parcelă', sf2, 'm²', '#94a3b8', null)
+       +_ibox('Regim', null, '', '#94a3b8', reg2 || '—');
+    }
+
+    // Aliniamente — actualizare sau creare rând
+    var lung2  = curDataNew.lung_min_aliniament_m;
+    var adnc2  = curDataNew.adancime_min_m;
+    var aNote2 = curDataNew.aliniament_note || '';
+    var alinEl = document.getElementById('utr-alin-row');
+    var newAlinHtml = (lung2 || adnc2 || aNote2)
+      ? '<div id="utr-alin-row" style="background:rgba(56,189,248,0.06);border:1px solid rgba(56,189,248,0.15);border-radius:7px;padding:8px;margin-top:6px">'
+          +'<div style="font-size:9px;color:#38bdf8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">📐 Aliniamente parcelă</div>'
+          +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">'
+            +(lung2 ? _ibox('Front min stradal', lung2, 'm', '#38bdf8', null) : '')
+            +(adnc2 ? _ibox('Adâncime min', adnc2, 'm', '#38bdf8', null) : '')
+          +'</div>'
+          +(aNote2 ? '<div style="font-size:9px;color:#475569;margin-top:5px;line-height:1.4">'+aNote2+'</div>' : '')
+        +'</div>'
+      : '';
+    if (alinEl) {
+      alinEl.outerHTML = newAlinHtml || '';
+    } else if (newAlinHtml) {
+      indCard.insertAdjacentHTML('beforeend', newAlinHtml);
+    }
+  } else {
+    // Fallback: re-render complet tab (prima afișare)
+    if (typeof renderTab === 'function') {
+      setTimeout(function(){ renderTab('utr'); }, 150);
+    }
   }
   if (typeof updateMap === 'function') updateMap();
 };

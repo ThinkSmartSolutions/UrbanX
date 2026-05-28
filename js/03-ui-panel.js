@@ -884,20 +884,23 @@ function htmlUTR(){
     }
 
     // ── Card indicatori subzonă curentă ───────────────────────────────────
-    const pot = curData.pot_baza;
-    const cut = curData.cut_baza;
-    const h   = curData.hmax_m;
-    const niv = curData.niv_max;
-    const sv  = curData.spatii_verzi_pct;
-    const pk  = curData.parcaje_min;
-    const sf  = curData.suprafata_min_mp;
-    const reg = curData.regim || '';
+    const pot  = curData.pot_baza;
+    const cut  = curData.cut_baza;
+    const h    = curData.hmax_m;
+    const niv  = curData.niv_max;
+    const sv   = curData.spatii_verzi_pct;
+    const pk   = curData.parcaje_min;
+    const sf   = curData.suprafata_min_mp;
+    const reg  = curData.regim || '';
+    const lung = curData.lung_min_aliniament_m;  // front minim stradal
+    const adnc = curData.adancime_min_m;          // adâncime parcelă minimă
+    const alinNote = curData.aliniament_note || '';
 
     const scSol  = pot && area ? Math.round(area * pot / 100) : null;
     const sdTot  = cut && area ? Math.round(area * cut)       : null;
     const svMp   = sv  && area ? Math.round(area * sv  / 100) : null;
 
-    // Stare subzonă: dominant / complementar / PUZ
+    // Stare subzonă: dominant / complementar / interzis
     const isDom   = curSz === domSz;
     const isAdm   = utrData.subzone_admise?.includes(curSz);
     const needPUZ = !isDom && isAdm;
@@ -918,27 +921,39 @@ function htmlUTR(){
         +'<span style="line-height:1.2;text-align:center">'+cat.label+'</span></button>';
     }).join('');
 
+    // ── Rând aliniamente (afișat doar dacă există date) ───────────────────
+    const alinRow = (lung || adnc || alinNote)
+      ? '<div style="background:rgba(56,189,248,0.06);border:1px solid rgba(56,189,248,0.15);border-radius:7px;padding:8px;margin-top:6px">'
+          +'<div style="font-size:9px;color:#38bdf8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">📐 Aliniamente parcelă</div>'
+          +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">'
+            +(lung ? ibox('Front min stradal', lung, 'm', '#38bdf8', null) : '')
+            +(adnc ? ibox('Adâncime min', adnc, 'm', '#38bdf8', null) : '')
+          +'</div>'
+          +(alinNote ? '<div style="font-size:9px;color:#475569;margin-top:5px;line-height:1.4">'+esc(alinNote)+'</div>' : '')
+        +'</div>'
+      : '';
+
     return (
-      // Header UTR + subzonă curentă
-      '<div style="background:rgba(212,175,55,0.06);border:1px solid rgba(212,175,55,0.2);border-radius:9px;padding:10px;margin-bottom:8px">'
+      // Header UTR + subzonă curentă — id stabil pentru actualizare in-place
+      '<div id="utr-indicators-card" style="background:rgba(212,175,55,0.06);border:1px solid rgba(212,175,55,0.2);border-radius:9px;padding:10px;margin-bottom:8px">'
         +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
           +'<div>'
             +'<div style="font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.06em">UTR '+utrNr+' — '+esc(utrData.denumire||'')+'</div>'
-            +'<div style="font-size:11px;color:#e2e8f0;margin-top:2px;font-weight:600">Subzonă: <span style="color:#d4af37">'+curSz+'</span> — '+esc((curData.denumire||'').slice(0,45))+'</div>'
+            +'<div style="font-size:11px;color:#e2e8f0;margin-top:2px;font-weight:600">Subzonă: <span id="utr-cur-sz" style="color:#d4af37">'+curSz+'</span> — <span id="utr-cur-den">'+esc((curData.denumire||'').slice(0,55))+'</span></div>'
           +'</div>'
         +'</div>'
-        +statusBadge
+        +'<div id="utr-status-badge">'+statusBadge+'</div>'
         // Grid indicatori
-        +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:8px">'
+        +'<div id="utr-ibox-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:8px">'
           +ibox('POT max', pot, '%', '#fbbf24', scSol ? scSol+'m² la sol' : null)
           +ibox('CUT max', cut, '', '#fbbf24', sdTot ? sdTot+'mp ADC' : null)
           +ibox('H max', h, 'm', '#34d399', niv ? niv+' niv' : null)
           +ibox('Sp. verzi', sv, '%', '#86efac', svMp ? svMp+'m²' : null)
-          +ibox('Sf. min', sf, 'm²', '#94a3b8', null)
+          +ibox('Sf. min parcelă', sf, 'm²', '#94a3b8', null)
           +ibox('Regim', null, '', '#94a3b8', reg || '—')
         +'</div>'
         +(pk ? '<div style="font-size:10px;color:#64748b;margin-top:6px">🅿️ '+esc(pk)+'</div>' : '')
-        +(curData.aliniament_note ? '<div style="font-size:9px;color:#475569;margin-top:4px">📐 '+esc(curData.aliniament_note.slice(0,80))+'</div>' : '')
+        +alinRow
       +'</div>'
       // Selector funcțiune
       +'<div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Schimbă funcțiunea</div>'
