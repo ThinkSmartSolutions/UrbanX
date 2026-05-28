@@ -769,7 +769,17 @@ var UTR_ALIASES={
   'P5':['P6','P8','P9','GP9','G/P9','P9?'],
   'P2':['P2a','P2A','P2b','P2B','P2c','P2C'],
   'P1':['P1a,P1b','P1a/P1b','P1A,P1B','P1A/P1B'],
-  'PP':['PP?'],'CC':['CC?'],'LL':['LL?'],'LV':['LV?','LV??'],
+  'PP':['PP?'],'CC':['CC?'],'LV':['LV?','LV??'],
+  // Coduri generice din pug.geojson → coduri specifice reguli.json
+  'LL':['LL?','L1','l1','LR','lr'],  // Rezidențial individual
+  'LC':['L2','l2'],              // Rezidențial colectiv
+  'CC':['CC','cc'],              // Comercial/comerț
+  'D1':['IS','is'],              // Instituții și servicii
+  'AI2A':['I','i','I1','i1'],    // Industrial
+  'P1':['V','v','V1','v1'],      // Spații verzi/parcuri
+  'P5':['TR','tr'],              // Transport
+  'G1':['GC','gc'],              // Gospodărire comunală
+  'AA':['A','a'],                // Agricol
 };
 // Inversa: UTR_brut_normalizat -> UTR_canonic
 var UTR_MAP={};
@@ -779,6 +789,53 @@ Object.entries(UTR_ALIASES).forEach(([canon,variants])=>{
 // Rezolva UTR: normalizare + alias lookup
 const resolveUTR=raw=>{ const n=normU(raw); return UTR_MAP[n]||n; };
 const fmt=(v,s='')=>v!=null&&!isNaN(v)?`${v}${s}`:'—';
+
+// Normalizare reguli.json (orice format) → format intern standard
+function normalizeReguliEntry(v) {
+  if (!v || typeof v !== 'object') return v;
+  const e = Object.assign({}, v);
+  if (!e.h)   e.h   = e.inaltime_m || e.inaltime_max_m || e.hmax_m || null;
+  if (!e.d)   e.d   = e.functiune || e.denumire || null;
+  if (!e.niv) e.niv = e.niv_max || null;
+  if (!e.sv)  e.sv  = e.spatii_verzi_pct || null;
+  if (!e.ao)  e.ao  = e.rh || e.regim || null;
+  if (!e.fm)  e.fm  = e.suprafata_min_mp || null;
+  // ua/uc/ui — normalizare array → string
+  if (!e.ua) {
+    const raw = e.functiuni_admise || e.fn_complementare || [];
+    e.ua = Array.isArray(raw) ? raw.join('; ') : (raw || null);
+  }
+  if (!e.uc) {
+    const raw = e.functiuni_conditionari || [];
+    e.uc = Array.isArray(raw) ? raw.join('; ') : (raw || null);
+  }
+  if (!e.ui) {
+    const raw = e.functiuni_interzise || e.fn_interzise || [];
+    e.ui = Array.isArray(raw) ? raw.join('; ') : (raw || null);
+  }
+  return e;
+}
+
+// Patch Object.assign(REGULI, ...) — normalizăm orice reguli.json la merge
+function mergeIntoREGULI(newReguli) {
+  if (!newReguli || typeof newReguli !== 'object') return;
+  // Format nou (Botoșani): { _meta, subzone, utrs }
+  if (newReguli.subzone && newReguli.utrs) {
+    if (typeof _convertReguliNew2Old === 'function') {
+      const converted = _convertReguliNew2Old(newReguli);
+      Object.entries(converted).forEach(([k,v]) => { REGULI[k] = normalizeReguliEntry(v); });
+    }
+    window._PUG_REGULI = window._PUG_REGULI || {};
+    const ck = window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
+    window._PUG_REGULI[ck] = newReguli;
+    return;
+  }
+  // Format standard (Iași, Suceava etc.)
+  Object.entries(newReguli).forEach(([k,v]) => {
+    if (k.startsWith('_') || typeof v !== 'object') return;
+    REGULI[k] = normalizeReguliEntry(v);
+  });
+}
 
 // ═══ MAPBOX ═══════════════════════════════════════════════════════════════
 mapboxgl.accessToken='pk.eyJ1IjoiZWk4aHRlciIsImEiOiJjajhhNGtiN3YwOW50MnFwOHBnOGJtcjVtIn0.dT4Ld3v1GoeQRCaIzxNn2g';
