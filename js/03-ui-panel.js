@@ -414,7 +414,7 @@ function renderTab(tab){
 function getContent(tab){
   switch(tab){
     case'search':return htmlSearch();
-    case'utr':return htmlUTR()+htmlIndicatori();
+    case'utr':return htmlUTR();
     case'indicatori':return htmlIndicatori();
     case'proiect':return htmlProiect();
     case'multi':return htmlMulti();
