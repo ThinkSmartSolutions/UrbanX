@@ -601,23 +601,6 @@ function addLayers(){
       const area = Math.round(turf.area({type:'Feature',geometry:f.geometry,properties:{}}));
       const nrcad = f.properties?.nrcad||f.properties?.EntityHandle||f.properties?.NR_CAD||'—';
       const utr = resolveUTR(f.properties?.utr||'')||lookupUTR(e.lngLat.lng,e.lngLat.lat)||'';
-      // Cauta UTR numeric din pugIdx (ex: '7', '30') pt afisare in popup
-      const utrNrRaw = f.properties?.UTR || f.properties?.utr_nr || null;
-      let utrNr = utrNrRaw ? String(utrNrRaw) : null;
-      if (!utrNr && S.pugIdx?.length) {
-        try {
-          const cx = e.lngLat.lng, cy = e.lngLat.lat;
-          const pt = {type:'Feature',geometry:{type:'Point',coordinates:[cx,cy]},properties:{}};
-          for (const entry of S.pugIdx) {
-            if (cx<entry.bb[0]||cx>entry.bb[2]||cy<entry.bb[1]||cy>entry.bb[3]) continue;
-            if (turf.booleanPointInPolygon(pt,{type:'Feature',geometry:entry.geom,properties:{}})) {
-              utrNr = entry.UTR ? String(entry.UTR) : null;
-              break;
-            }
-          }
-        } catch(er) {}
-      }
-      const utrDisplay = utrNr || utr || '—';
       const parcelObj = {
         geo:{type:'Feature',geometry:f.geometry,properties:f.properties},
         nrcad, utr, area, source:'cadastru',
@@ -653,7 +636,7 @@ function addLayers(){
         S.ctx=null; S.vol.genDone=false;
         clearSource('vol-src'); clearSource('ctx-src');
         try{const bb=turf.bbox(parcelObj.geo);map.fitBounds([[bb[0],bb[1]],[bb[2],bb[3]]],{padding:100,maxZoom:19,duration:600});}catch(er){}
-        ss('✅ Parcelă '+nrcad+' | UTR: '+(utrDisplay)+' | '+area+' m²');
+        ss('✅ Parcelă '+nrcad+' | UTR: '+utrDisplay+' | '+area+' m²');
       // Mobile: deschidem automat tab Proiect
       if(window.innerWidth<=840){
         S.tab='proiect';
@@ -671,6 +654,9 @@ function addLayers(){
       } catch(er) {}
       popup('<b>'+(S.multiMode?'➕ Adăugată':isApprox?'⚠️ Aproximativ':'✅ Selectată')+'</b><br>Cad: <b>'+nrcad+'</b><br>UTR: <b>'+utrDisplay+'</b><br>Suprafață: <b>'+area+' m²</b>',popupLngLat);
       updateMap(); renderAll();
+      if(window.S && S.tab === 'utr' && typeof renderTab === 'function') {
+        setTimeout(function(){ renderTab('utr'); }, 200);
+      }
       if(!S.multiMode) loadContext();
       
       // ── Auto-detect front stradal dupa selectare parcela ─────────────────
