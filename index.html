@@ -919,9 +919,8 @@ canvas#c2d{width:100%;height:100%;display:block}
     }
   </script>
 <style>
-/* Fix mobile nav bottom visibility - DOAR PE MOBIL */
-@media (max-width: 840px) {
-#mob-nav, .mob-nav-bottom, nav[id*="mob"], nav[id*="mobile"],
+/* Fix mobile nav bottom visibility */
+#mob-nav, .mob-nav-bottom, nav[id*="mob"], nav[id*="mobile"], 
 .bottom-nav, #bottom-nav {
   position: fixed !important;
   bottom: 0 !important;
@@ -931,11 +930,6 @@ canvas#c2d{width:100%;height:100%;display:block}
   padding-bottom: max(8px, env(safe-area-inset-bottom, 0px)) !important;
   background: rgba(6,12,26,0.97) !important;
   border-top: 1px solid rgba(212,175,55,0.15) !important;
-}
-}
-@media (min-width: 841px) {
-  #mob-nav, .mob-nav-bottom, nav[id*="mob"], nav[id*="mobile"],
-  .bottom-nav, #bottom-nav { display: none !important; }
 }
 /* Spatiu pentru nav jos */
 #app, #rv-app, .main-content {
@@ -5507,49 +5501,51 @@ window._selCat = function(catId) {
 };
 
 
-// ── _checkFn ────────────────────────────────────────────────────────────────
-function _checkFn(codes, utrData) {
-  var admise    = utrData.subzone_admise || [];
-  var dominanta = utrData.fn_dominanta   || '';
-  var interzise = utrData.fn_interzise   || [];
-  for (var i = 0; i < codes.length; i++) {
-    var code = codes[i];
-    if (interzise.some(function(x){return x===code||x.indexOf(code)===0;})) continue;
-    if (code === dominanta)         return {status:'ok',   code:code};
-    if (admise.indexOf(code) > -1)  return {status:'warn', code:code};
+  // ── _checkFn ──────────────────────────────────────────────────────────────
+  function _checkFn(codes, utrData) {
+    var admise    = utrData.subzone_admise || [];
+    var dominanta = utrData.fn_dominanta   || '';
+    var interzise = utrData.fn_interzise   || [];
+    for (var i = 0; i < codes.length; i++) {
+      var code = codes[i];
+      if (interzise.some(function(x){return x===code||x.indexOf(code)===0;})) continue;
+      if (code === dominanta)         return {status:'ok',   code:code};
+      if (admise.indexOf(code) > -1)  return {status:'warn', code:code};
+    }
+    return {status:'interzis', code:dominanta};
   }
-  return {status:'interzis', code:dominanta};
-}
-// ── _getParams ───────────────────────────────────────────────────────────────
-function _getParams(result, d) {
-  if (!result.code || !d.subzone) return {};
-  var sz = d.subzone[result.code] || {};
-  return {
-    pot:sz.pot_baza, cut:sz.cut_baza, h:sz.hmax_m, niv:sz.niv_max,
-    sv:sz.spatii_verzi_pct, sf:sz.suprafata_min_mp, reg:sz.regim||'',
-    pk:sz.parcaje_min||'', lung:sz.lung_min_aliniament_m, adnc:sz.adancime_min_m,
-    alinNote:sz.aliniament_note||'', denumire:sz.denumire||result.code,
-  };
-}
-// ── _buildResult ─────────────────────────────────────────────────────────────
-function _buildResult(fnItem, result, params, utrNr, utrDen) {
-  var sc=result.status, col=sc==='ok'?'#34d399':sc==='warn'?'#fbbf24':'#ef4444';
-  var stxt=sc==='ok'?'✅ Funcțiune dominantă — fără PUZ':sc==='warn'?'🟡 Admisă cu condiții — necesită PUZ/PUD':'⛔ Interzisă în UTR '+utrNr;
-  if(sc==='interzis') return '<div style="padding:10px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;font-size:12px;color:#ef4444"><b>'+fnItem.label+'</b> — interzisă în UTR '+utrNr+'<div style="font-size:10px;margin-top:4px;color:#94a3b8">Schimbați funcțiunea sau solicitați PUZ.</div></div>';
-  function ib(lbl,val,unit,clr){return val!=null?'<div style="background:rgba(0,0,0,0.2);border-radius:6px;padding:5px 8px"><div style="font-size:9px;color:#64748b">'+lbl+'</div><div style="font-size:13px;font-weight:700;color:'+(clr||col)+'">'+val+unit+'</div></div>':'';}
-  return '<div style="background:rgba(212,175,55,0.06);border:1px solid rgba(212,175,55,0.2);border-radius:9px;padding:10px;margin-top:6px">'
-    +'<div style="font-size:11px;font-weight:700;color:#e2e8f0;margin-bottom:5px">'+fnItem.label+'</div>'
-    +'<span style="background:rgba(52,211,153,0.1);color:'+col+';border:1px solid '+col+'44;padding:2px 8px;border-radius:10px;font-size:10px">'+stxt+'</span>'
-    +'<div style="font-size:10px;color:#94a3b8;margin:6px 0 4px">Subzonă: <b style="color:#d4af37">'+result.code+'</b>'+(params.denumire?' — '+params.denumire:'')+'</div>'
-    +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:3px">'
-      +ib('POT max',params.pot,'%','#fbbf24')+ib('CUT max',params.cut,'','#fbbf24')+ib('H max',params.h,'m','#34d399')
-      +ib('Sp. verzi',params.sv,'%','#86efac')+ib('Sf. min',params.sf,'m²','#94a3b8')+(params.reg?ib('Regim',params.reg,'','#94a3b8'):'')
-    +'</div>'
-    +(params.pk?'<div style="font-size:10px;color:#64748b;margin-top:5px">🅿️ '+params.pk+'</div>':'')
-    +((params.lung||params.adnc)?'<div style="font-size:10px;color:#38bdf8;margin-top:5px">📐 Front min: '+(params.lung||'—')+'m · Adâncime min: '+(params.adnc||'—')+'m</div>':'')
-    +(params.alinNote?'<div style="font-size:9px;color:#475569;margin-top:3px">'+params.alinNote+'</div>':'')
-  +'</div>';
-}
+
+  // ── _getParams ─────────────────────────────────────────────────────────────
+  function _getParams(result, d) {
+    if (!result.code || !d.subzone) return {};
+    var sz = d.subzone[result.code] || {};
+    return {
+      pot:sz.pot_baza, cut:sz.cut_baza, h:sz.hmax_m, niv:sz.niv_max,
+      sv:sz.spatii_verzi_pct, sf:sz.suprafata_min_mp, reg:sz.regim||'',
+      pk:sz.parcaje_min||'', lung:sz.lung_min_aliniament_m, adnc:sz.adancime_min_m,
+      alinNote:sz.aliniament_note||'', denumire:sz.denumire||result.code,
+    };
+  }
+
+  // ── _buildResult ───────────────────────────────────────────────────────────
+  function _buildResult(fnItem, result, params, utrNr, utrDen) {
+    var sc=result.status, col=sc==='ok'?'#34d399':sc==='warn'?'#fbbf24':'#ef4444';
+    var stxt=sc==='ok'?'✅ Funcțiune dominantă — fără PUZ':sc==='warn'?'🟡 Admisă cu condiții — necesită PUZ/PUD':'⛔ Interzisă în UTR '+utrNr;
+    if(sc==='interzis') return '<div style="padding:10px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;font-size:12px;color:#ef4444"><b>'+fnItem.label+'</b> — interzisă în UTR '+utrNr+'<div style="font-size:10px;margin-top:4px;color:#94a3b8">Schimbați funcțiunea sau solicitați PUZ.</div></div>';
+    function ib(lbl,val,unit,clr){return val!=null?'<div style="background:rgba(0,0,0,0.2);border-radius:6px;padding:5px 8px"><div style="font-size:9px;color:#64748b">'+lbl+'</div><div style="font-size:13px;font-weight:700;color:'+(clr||col)+'">'+val+unit+'</div></div>':'';}
+    return '<div style="background:rgba(212,175,55,0.06);border:1px solid rgba(212,175,55,0.2);border-radius:9px;padding:10px;margin-top:6px">'
+      +'<div style="font-size:11px;font-weight:700;color:#e2e8f0;margin-bottom:5px">'+fnItem.label+'</div>'
+      +'<span style="background:rgba(52,211,153,0.1);color:'+col+';border:1px solid '+col+'44;padding:2px 8px;border-radius:10px;font-size:10px">'+stxt+'</span>'
+      +'<div style="font-size:10px;color:#94a3b8;margin:6px 0 4px">Subzonă: <b style="color:#d4af37">'+result.code+'</b>'+(params.denumire?' — '+params.denumire:'')+'</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:3px">'
+        +ib('POT max',params.pot,'%','#fbbf24')+ib('CUT max',params.cut,'','#fbbf24')+ib('H max',params.h,'m','#34d399')
+        +ib('Sp. verzi',params.sv,'%','#86efac')+ib('Sf. min',params.sf,'m²','#94a3b8')+(params.reg?ib('Regim',params.reg,'','#94a3b8'):'')
+      +'</div>'
+      +(params.pk?'<div style="font-size:10px;color:#64748b;margin-top:5px">🅿️ '+params.pk+'</div>':'')
+      +((params.lung||params.adnc)?'<div style="font-size:10px;color:#38bdf8;margin-top:5px">📐 Front min: '+(params.lung||'—')+'m · Adâncime min: '+(params.adnc||'—')+'m</div>':'')
+      +(params.alinNote?'<div style="font-size:9px;color:#475569;margin-top:3px">'+params.alinNote+'</div>':'')
+    +'</div>';
+  }
 
 window._checkFnUser = async function(fnId, catId) {
   var cat = CATS.find(function(c){return c.id===catId;});
@@ -5649,8 +5645,7 @@ function _hookPopup() {
     });
   } catch(e) { console.warn('[FnEngine] popup hook failed:', e.message); }
 }
-// Selectorul de funcțiuni e exclusiv în tab UTR
-// setTimeout(_hookPopup, 1200);
+setTimeout(_hookPopup, 1200);
 
 // Pre-încărcare
 window.addEventListener('ux:city_changed', function(e) {
