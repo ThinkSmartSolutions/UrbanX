@@ -414,7 +414,7 @@ function renderTab(tab){
 function getContent(tab){
   switch(tab){
     case'search':return htmlSearch();
-    case'utr':return htmlUTR();
+    case'utr':return htmlUTR()+htmlIndicatori();
     case'indicatori':return htmlIndicatori();
     case'proiect':return htmlProiect();
     case'multi':return htmlMulti();
@@ -805,44 +805,19 @@ function htmlUTR(){
   const r=REGULI[ap.utr]||{},u=ap.utr;
   const fnData=FN_UTR[S.vol.fn];
   const fnVal=valFunctiune(S.vol.fn,u);
-
-  // Calculăm utrNr o singură dată, disponibil în toată funcția
-  let utrNr = ap.utr_nr;
-  if (!utrNr && typeof window._findUTRNumericForParcel === 'function') {
-    utrNr = window._findUTRNumericForParcel(ap);
-  }
-  if (!utrNr && S.pugIdx && S.pugIdx.length && ap.geo?.geometry) {
-    try {
-      const ring = ap.geo.geometry.coordinates?.[0];
-      if (ring?.length) {
-        const cx = ring.reduce((s,p)=>s+p[0],0)/ring.length;
-        const cy = ring.reduce((s,p)=>s+p[1],0)/ring.length;
-        const pt = {type:'Feature',geometry:{type:'Point',coordinates:[cx,cy]},properties:{}};
-        for (const entry of S.pugIdx) {
-          if (cx<entry.bb[0]||cx>entry.bb[2]||cy<entry.bb[1]||cy>entry.bb[3]) continue;
-          if (turf.booleanPointInPolygon(pt,{type:'Feature',geometry:entry.geom,properties:{}})) {
-            utrNr = entry.UTR ? String(entry.UTR) : entry.utr;
-            if (utrNr) { ap.utr_nr = utrNr; }
-            break;
-          }
-        }
-      }
-    } catch(e) {}
-  }
-
   return`
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
       <div>
         <span class="badge b-b">📋 ${esc(ap.nrcad||'—')}</span>
-        ${u?`<span class="badge b-g">🗺 UTR: ${esc(utrNr||u)}</span>`:`<span class="badge b-y">⚠️ UTR necunoscut</span>`}
+        ${u?`<span class="badge b-g">🗺 UTR: ${esc(u)}</span>`:`<span class="badge b-y">⚠️ UTR necunoscut</span>`}
         <span class="badge" style="background:rgba(212,175,55,.15);color:#d4af37">${'📐 Cadastru local'}</span>
       </div>
       <button class="btn-s" onclick="centerOnParcel()" title="Centrează harta pe parcelă" style="padding:4px 10px;font-size:11px;flex-shrink:0">📍 Centrează</button>
     </div>
     <div class="g2" style="margin-top:9px">
       <div class="met"><div class="ml">Suprafață teren</div><div class="mv">${ap.area?Math.round(ap.area)+' m²':'—'}</div></div>
-      <div class="met"><div class="ml">UTR</div><div class="mv">${esc(utrNr||u||'—')}</div></div>
+      <div class="met"><div class="ml">UTR</div><div class="mv">${esc(u||'—')}</div></div>
       ${r.d?`<div class="met" style="grid-column:span 2"><div class="ml">Descriere zonă</div><div class="mv">${esc(r.d)}</div></div>`:''}
     </div>
     ${r.ua?`
@@ -853,18 +828,43 @@ function htmlUTR(){
   </div>
   <div class="section" style="margin-top:10px">🔍 Ce vrei să construiești?</div>
   ${(()=>{
-    // utrNr calculat deja la începutul funcției htmlUTR()
+    // ── Lookup UTR numeric folosind _findUTRNumericForParcel sau pugIdx direct ──
+    let utrNr = ap.utr_nr;
+    if (!utrNr) {
+      // Folosim funcția din index.html dacă există
+      if (typeof window._findUTRNumericForParcel === 'function') {
+        utrNr = window._findUTRNumericForParcel(ap);
+      } else if (S.pugIdx && S.pugIdx.length && ap.geo?.geometry) {
+        // Fallback inline
+        try {
+          const ring = ap.geo.geometry.coordinates?.[0];
+          if (ring?.length) {
+            const cx = ring.reduce((s,p)=>s+p[0],0)/ring.length;
+            const cy = ring.reduce((s,p)=>s+p[1],0)/ring.length;
+            const pt = {type:'Feature',geometry:{type:'Point',coordinates:[cx,cy]},properties:{}};
+            for (const entry of S.pugIdx) {
+              if (cx<entry.bb[0]||cx>entry.bb[2]||cy<entry.bb[1]||cy>entry.bb[3]) continue;
+              if (turf.booleanPointInPolygon(pt,{type:'Feature',geometry:entry.geom,properties:{}})) {
+                utrNr = entry.UTR ? String(entry.UTR) : entry.utr;
+                if (utrNr) { ap.utr_nr = utrNr; }
+                break;
+              }
+            }
+          }
+        } catch(e) {}
+      }
+    }
+
     const cityKey = window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
     const d = window._PUG_REGULI && window._PUG_REGULI[cityKey];
     const CATS = window._FunctionEngine?.cats || [];
 
     // ── Fallback la sistemul vechi dacă nu avem reguli noi ───────────────
     if (!d || !utrNr || !d.utrs[String(utrNr)] || !CATS.length) {
-      // Diagnostic: ce lipsește?
       const pugLoaded = S.pugIdx && S.pugIdx.length > 0;
       const reguliLoaded = !!d;
+      // Dacă pugIdx e gol (PUG neîncărcat) — arată mesaj
       if (!pugLoaded) {
-        // PUG-ul nu e încărcat — auto-trigger dacă există butonul
         setTimeout(function() {
           const btn = document.getElementById('btn-utr') || document.querySelector('[onclick*="loadUTR"],[onclick*="_loadPUG"]');
           if (btn && typeof btn.click === 'function') btn.click();
@@ -877,13 +877,7 @@ function htmlUTR(){
           +'style="background:rgba(212,175,55,0.15);border:1px solid rgba(212,175,55,0.4);color:#d4af37;padding:6px 16px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600">▶ Încarcă PUG acum</button>'
           +'</div>';
       }
-      if (!reguliLoaded) {
-        return '<div class="warn-box">⚠️ Regulamentul urbanistic nu este disponibil pentru acest UAT.</div>';
-      }
-      if (!utrNr) {
-        return '<div class="warn-box">⚠️ Parcela selectată nu se suprapune cu nicio zonă UTR din PUG. Verificați că sunteți în intravilanul UAT-ului selectat.</div>';
-      }
-      // Sistemul vechi ca fallback final
+      // pugIdx e populat dar nu avem reguli noi (ex: Iași sistem vechi) → fallback la sistemul vechi
       return '<div class="'+(fnVal.status==='ok'?'ok-box':fnVal.status==='warn'?'warn-box':'err-box')+'">'+fnVal.msg+'</div>'
         +(fnData?'<div class="help">🅿️ Parcaje: <b>'+calcParcaje(S.vol.fn,ap.area,0,0)+'</b></div>':'');
     }
