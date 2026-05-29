@@ -806,28 +806,29 @@ function htmlUTR(){
   const fnData=FN_UTR[S.vol.fn];
   const fnVal=valFunctiune(S.vol.fn,u);
 
-  // ── utrNr calculat ÎNAINTE de return, disponibil în tot template-ul ──
+  // ── utrNr calculat ÎNAINTE de return (accesibil în tot template-ul) ──────
   let utrNr = ap.utr_nr;
   if (!utrNr && typeof window._findUTRNumericForParcel === 'function') {
     utrNr = window._findUTRNumericForParcel(ap);
   }
-  if (!utrNr && S.pugIdx && S.pugIdx.length && ap.geo?.geometry) {
+  if (!utrNr && S.pugIdx && S.pugIdx.length && ap.geo && ap.geo.geometry) {
     try {
-      const ring = ap.geo.geometry.coordinates?.[0];
-      if (ring?.length) {
-        const cx = ring.reduce((s,p)=>s+p[0],0)/ring.length;
-        const cy = ring.reduce((s,p)=>s+p[1],0)/ring.length;
-        const pt = {type:'Feature',geometry:{type:'Point',coordinates:[cx,cy]},properties:{}};
-        for (const entry of S.pugIdx) {
-          if (cx<entry.bb[0]||cx>entry.bb[2]||cy<entry.bb[1]||cy>entry.bb[3]) continue;
-          if (turf.booleanPointInPolygon(pt,{type:'Feature',geometry:entry.geom,properties:{}})) {
-            utrNr = entry.UTR ? String(entry.UTR) : null;
+      const _ring = ap.geo.geometry.coordinates && ap.geo.geometry.coordinates[0];
+      if (_ring && _ring.length) {
+        const _cx = _ring.reduce(function(s,p){return s+p[0];},0)/_ring.length;
+        const _cy = _ring.reduce(function(s,p){return s+p[1];},0)/_ring.length;
+        const _pt = {type:'Feature',geometry:{type:'Point',coordinates:[_cx,_cy]},properties:{}};
+        for (var _ei=0; _ei<S.pugIdx.length; _ei++) {
+          const _e = S.pugIdx[_ei];
+          if (_cx<_e.bb[0]||_cx>_e.bb[2]||_cy<_e.bb[1]||_cy>_e.bb[3]) continue;
+          if (turf.booleanPointInPolygon(_pt,{type:'Feature',geometry:_e.geom,properties:{}})) {
+            utrNr = _e.UTR ? String(_e.UTR) : null;
             if (utrNr) ap.utr_nr = utrNr;
             break;
           }
         }
       }
-    } catch(e) {}
+    } catch(_e2) {}
   }
 
   return`
@@ -853,6 +854,7 @@ function htmlUTR(){
   </div>
   <div class="section" style="margin-top:10px">🔍 Ce vrei să construiești?</div>
   ${(()=>{
+    // ── Lookup UTR numeric folosind _findUTRNumericForParcel sau pugIdx direct ──
     // utrNr calculat la topul funcției htmlUTR()
     const cityKey = window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
     const d = window._PUG_REGULI && window._PUG_REGULI[cityKey];
@@ -883,9 +885,24 @@ function htmlUTR(){
       if (!utrNr) {
         return '<div class="warn-box">⚠️ Parcela selectată nu se suprapune cu nicio zonă UTR din PUG. Verificați că sunteți în intravilanul UAT-ului selectat.</div>';
       }
-      // Sistemul vechi ca fallback final
+      // Fallback: afișăm din REGULI[u] (sistem Iași) sau mesaj neutru
+      var rFb = (typeof REGULI !== 'undefined' ? REGULI : window.REGULI||{})[u] || {};
+      if (rFb.d || rFb.ua || rFb.pot) {
+        return '<div id="utr-indicators-card" style="background:rgba(212,175,55,0.06);border:1px solid rgba(212,175,55,0.2);border-radius:9px;padding:10px;margin-bottom:8px">'
+          +'<div style="font-size:10px;color:#64748b;text-transform:uppercase;margin-bottom:4px">UTR '+esc(u||'?')+'</div>'
+          +'<div style="font-size:12px;color:#e2e8f0;font-weight:600;margin-bottom:8px">'+esc(rFb.d||'')+'</div>'
+          +(rFb.ua?'<div style="margin-bottom:6px"><div style="font-size:9px;color:#34d399;font-weight:700;text-transform:uppercase;margin-bottom:3px">\u2705 Utilizări admise</div><div style="font-size:11px;color:#cbd5e1">'+esc(rFb.ua)+'</div></div>':'')
+          +(rFb.uc?'<div style="margin-bottom:6px"><div style="font-size:9px;color:#fbbf24;font-weight:700;text-transform:uppercase;margin-bottom:3px">\u26a0\ufe0f Condiționate</div><div style="font-size:11px;color:#cbd5e1">'+esc(rFb.uc)+'</div></div>':'')
+          +(rFb.ui?'<div style="margin-bottom:6px"><div style="font-size:9px;color:#ef4444;font-weight:700;text-transform:uppercase;margin-bottom:3px">\U0001f6ab Interzise</div><div style="font-size:11px;color:#cbd5e1">'+esc(rFb.ui)+'</div></div>':'')
+          +(rFb.pot?'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:6px">'
+            +'<div style="background:rgba(0,0,0,0.2);border-radius:7px;padding:6px 8px"><div style="font-size:9px;color:#64748b">POT max</div><div style="font-size:14px;font-weight:700;color:#fbbf24">'+rFb.pot+'%</div></div>'
+            +(rFb.cut?'<div style="background:rgba(0,0,0,0.2);border-radius:7px;padding:6px 8px"><div style="font-size:9px;color:#64748b">CUT max</div><div style="font-size:14px;font-weight:700;color:#fbbf24">'+rFb.cut+'</div></div>':'')
+            +(rFb.h?'<div style="background:rgba(0,0,0,0.2);border-radius:7px;padding:6px 8px"><div style="font-size:9px;color:#64748b">H max</div><div style="font-size:14px;font-weight:700;color:#34d399">'+rFb.h+'m</div></div>':'')
+            +'</div>':'')
+        +'</div>';
+      }
       return '<div class="'+(fnVal.status==='ok'?'ok-box':fnVal.status==='warn'?'warn-box':'err-box')+'">'+fnVal.msg+'</div>'
-        +(fnData?'<div class="help">🅿️ Parcaje: <b>'+calcParcaje(S.vol.fn,ap.area,0,0)+'</b></div>':'');
+        +(fnData?'<div class="help">\U0001f17f\ufe0f Parcaje: <b>'+calcParcaje(S.vol.fn,ap.area,0,0)+'</b></div>':'');
     }
 
     const utrData = d.utrs[String(utrNr)];
@@ -966,6 +983,13 @@ function htmlUTR(){
           +'</div>'
         +'</div>'
         +'<div id="utr-status-badge">'+statusBadge+'</div>'
+        // Funcțiuni UTR din RLU Botoșani
+        +(utrData.fn_dominanta?'<div style="margin:6px 0 4px"><span style="font-size:9px;color:#34d399;font-weight:700;text-transform:uppercase">Funcț. dominantă: </span>'
+          +'<span style="font-size:11px;color:#e2e8f0;font-weight:600">'+esc(utrData.fn_dominanta)+(subzone[utrData.fn_dominanta]?' — '+esc((subzone[utrData.fn_dominanta].denumire||'').slice(0,50)):'')+'</span></div>':'')
+        +((utrData.fn_complementare||[]).length?'<div style="margin-bottom:4px"><span style="font-size:9px;color:#38bdf8;font-weight:700;text-transform:uppercase">Admise: </span>'
+          +'<span style="font-size:10px;color:#94a3b8">'+esc((utrData.fn_complementare||[]).join(', '))+'</span></div>':'')
+        +((utrData.fn_interzise||[]).length?'<div style="margin-bottom:6px"><span style="font-size:9px;color:#ef4444;font-weight:700;text-transform:uppercase">\U0001f6ab Interzise: </span>'
+          +'<span style="font-size:10px;color:#94a3b8">'+esc((utrData.fn_interzise||[]).join(', '))+'</span></div>':'')
         // Grid indicatori
         +'<div id="utr-ibox-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:8px">'
           +ibox('POT max', pot, '%', '#fbbf24', scSol ? scSol+'m² la sol' : null)

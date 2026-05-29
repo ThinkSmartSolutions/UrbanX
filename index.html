@@ -1811,7 +1811,7 @@ document.addEventListener('click', function(){
 <!-- UrbanX JS Modules — ordinea de incarcare e importanta -->
 <script src="js/00-globals.js?v=2026050601"></script>
 <script src="js/02-map-core.js?v=2026050804"></script>
-<script src="js/03-ui-panel.js?v=20260528z"></script>
+<script src="js/03-ui-panel.js?v=20260529a"></script>
 <script src="js/04-search.js?v=2026050601"></script>
 <script src="js/05-cad-utils.js?v=2026050601"></script>
 <script src="js/06-aedis.js?v=20260522w"></script>
@@ -5501,47 +5501,41 @@ window._selCat = function(catId) {
 };
 
 
-  // ── _checkFn ──────────────────────────────────────────────────────────────
   function _checkFn(codes, utrData) {
-    var admise    = utrData.subzone_admise || [];
-    var dominanta = utrData.fn_dominanta   || '';
-    var interzise = utrData.fn_interzise   || [];
+    var admise = utrData.subzone_admise || [];
+    var dominanta = utrData.fn_dominanta || '';
+    var interzise = utrData.fn_interzise || [];
     for (var i = 0; i < codes.length; i++) {
       var code = codes[i];
       if (interzise.some(function(x){return x===code||x.indexOf(code)===0;})) continue;
-      if (code === dominanta)         return {status:'ok',   code:code};
-      if (admise.indexOf(code) > -1)  return {status:'warn', code:code};
+      if (code === dominanta) return {status:'ok', code:code};
+      if (admise.indexOf(code) > -1) return {status:'warn', code:code};
     }
     return {status:'interzis', code:dominanta};
   }
-  // ── _getParams ─────────────────────────────────────────────────────────────
   function _getParams(result, d) {
     if (!result.code || !d.subzone) return {};
     var sz = d.subzone[result.code] || {};
-    return {
-      pot:sz.pot_baza, cut:sz.cut_baza, h:sz.hmax_m, niv:sz.niv_max,
+    return {pot:sz.pot_baza, cut:sz.cut_baza, h:sz.hmax_m, niv:sz.niv_max,
       sv:sz.spatii_verzi_pct, sf:sz.suprafata_min_mp, reg:sz.regim||'',
       pk:sz.parcaje_min||'', lung:sz.lung_min_aliniament_m, adnc:sz.adancime_min_m,
-      alinNote:sz.aliniament_note||'', denumire:sz.denumire||result.code,
-    };
+      alinNote:sz.aliniament_note||'', denumire:sz.denumire||result.code};
   }
-  // ── _buildResult ───────────────────────────────────────────────────────────
-  function _buildResult(fnItem, result, params, utrNr, utrDen) {
-    var sc=result.status, col=sc==='ok'?'#34d399':sc==='warn'?'#fbbf24':'#ef4444';
-    var stxt=sc==='ok'?'✅ Funcțiune dominantă — fără PUZ':sc==='warn'?'🟡 Admisă cu condiții — necesită PUZ/PUD':'⛔ Interzisă în UTR '+utrNr;
-    if(sc==='interzis') return '<div style="padding:10px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;font-size:12px;color:#ef4444"><b>'+fnItem.label+'</b> — interzisă în UTR '+utrNr+'<div style="font-size:10px;margin-top:4px;color:#94a3b8">Schimbați funcțiunea sau solicitați PUZ.</div></div>';
-    function ib(lbl,val,unit,clr){return val!=null?'<div style="background:rgba(0,0,0,0.2);border-radius:6px;padding:5px 8px"><div style="font-size:9px;color:#64748b">'+lbl+'</div><div style="font-size:13px;font-weight:700;color:'+(clr||col)+'">'+val+unit+'</div></div>':'';}
+  function _buildResult(fnItem, result, params, utrNr2) {
+    var sc=result.status,col=sc==='ok'?'#34d399':sc==='warn'?'#fbbf24':'#ef4444';
+    var stxt=sc==='ok'?'\u2705 Funcție dominantă \u2014 fără PUZ':sc==='warn'?'\U0001f7e1 Admisă cu condiții \u2014 necesită PUZ/PUD':'\u26d4 Interzisă în UTR '+utrNr2;
+    if(sc==='interzis') return '<div style="padding:10px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;font-size:12px;color:#ef4444"><b>'+fnItem.label+'</b> \u2014 interzisă în UTR '+utrNr2+'</div>';
+    function ib(l,v,u2,c){return v!=null?'<div style="background:rgba(0,0,0,0.2);border-radius:6px;padding:5px 8px"><div style="font-size:9px;color:#64748b">'+l+'</div><div style="font-size:13px;font-weight:700;color:'+c+'">'+v+u2+'</div></div>':'';}
     return '<div style="background:rgba(212,175,55,0.06);border:1px solid rgba(212,175,55,0.2);border-radius:9px;padding:10px;margin-top:6px">'
       +'<div style="font-size:11px;font-weight:700;color:#e2e8f0;margin-bottom:5px">'+fnItem.label+'</div>'
-      +'<span style="background:rgba(52,211,153,0.1);color:'+col+';border:1px solid '+col+'44;padding:2px 8px;border-radius:10px;font-size:10px">'+stxt+'</span>'
-      +'<div style="font-size:10px;color:#94a3b8;margin:6px 0 4px">Subzonă: <b style="color:#d4af37">'+result.code+'</b>'+(params.denumire?' — '+params.denumire:'')+'</div>'
+      +'<span style="color:'+col+';font-size:10px">'+stxt+'</span>'
+      +'<div style="font-size:10px;color:#94a3b8;margin:4px 0">Subzonă: <b style="color:#d4af37">'+result.code+'</b>'+(params.denumire?' \u2014 '+params.denumire:'')+'</div>'
       +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:3px">'
         +ib('POT max',params.pot,'%','#fbbf24')+ib('CUT max',params.cut,'','#fbbf24')+ib('H max',params.h,'m','#34d399')
-        +ib('Sp. verzi',params.sv,'%','#86efac')+ib('Sf. min',params.sf,'m²','#94a3b8')+(params.reg?ib('Regim',params.reg,'','#94a3b8'):'')
+        +ib('Sp. verzi',params.sv,'%','#86efac')+ib('Sf. min',params.sf,'m\u00b2','#94a3b8')+(params.reg?ib('Regim',params.reg,'','#94a3b8'):'')
       +'</div>'
-      +(params.pk?'<div style="font-size:10px;color:#64748b;margin-top:5px">🅿️ '+params.pk+'</div>':'')
-      +((params.lung||params.adnc)?'<div style="font-size:10px;color:#38bdf8;margin-top:5px">📐 Front min: '+(params.lung||'—')+'m · Adâncime min: '+(params.adnc||'—')+'m</div>':'')
-      +(params.alinNote?'<div style="font-size:9px;color:#475569;margin-top:3px">'+params.alinNote+'</div>':'')
+      +(params.pk?'<div style="font-size:10px;color:#64748b;margin-top:4px">\U0001f17f\ufe0f '+params.pk+'</div>':'')
+      +((params.lung||params.adnc)?'<div style="font-size:10px;color:#38bdf8;margin-top:4px">\U0001f4d0 Front min: '+(params.lung||'\u2014')+'m \u00b7 Adânc. min: '+(params.adnc||'\u2014')+'m</div>':'')
     +'</div>';
   }
 
@@ -5594,9 +5588,49 @@ window._checkFnUser = async function(fnId, catId) {
     setTimeout(function(){resEl.scrollIntoView({behavior:'smooth',block:'nearest'});},100);
   }
 
-  // Re-render tab UTR ca să reflecte noua subzonă și indicatorii actualizați
-  if (typeof renderTab === 'function') {
-    setTimeout(function(){ renderTab('utr'); }, 150);
+  // Actualizare in-place a indicatorilor (fără re-render complet care resetează selectorul)
+  var _card = document.getElementById('utr-indicators-card');
+  if (_card && result.code && d) {
+    var _elSz = document.getElementById('utr-cur-sz');
+    var _elDen = document.getElementById('utr-cur-den');
+    var _szData = d.subzone[result.code] || {};
+    if (_elSz) _elSz.textContent = result.code;
+    if (_elDen) _elDen.textContent = (_szData.denumire||'').slice(0,55);
+    var _isDom = result.code === utrData.fn_dominanta;
+    var _isAdm = utrData.subzone_admise && utrData.subzone_admise.indexOf(result.code) > -1;
+    var _bEl = document.getElementById('utr-status-badge');
+    if (_bEl) _bEl.innerHTML = _isDom
+      ? '<span style="background:rgba(52,211,153,0.15);color:#34d399;border:1px solid rgba(52,211,153,0.3);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600">\u2705 Funcțiune dominantă \u2014 fără PUZ</span>'
+      : _isAdm
+      ? '<span style="background:rgba(251,191,36,0.15);color:#fbbf24;border:1px solid rgba(251,191,36,0.3);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600">\U0001f7e1 Admisă cu condiții \u2014 necesită PUZ/PUD</span>'
+      : '<span style="background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.3);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600">\u26d4 Interzisă în UTR '+utrNr+'</span>';
+    var _gEl = document.getElementById('utr-ibox-grid');
+    if (_gEl) {
+      var _a2 = ap.area||0;
+      function _ib(l,v,u2,c,ca){var d2=v!=null?v+u2:'\u2014';var c2=ca?'<div style="font-size:9px;color:#64748b;margin-top:1px">'+ca+'</div>':'';return '<div style="background:rgba(0,0,0,0.2);border-radius:7px;padding:6px 8px"><div style="font-size:9px;color:#64748b;margin-bottom:2px">'+l+'</div><div style="font-size:14px;font-weight:700;color:'+c+'">'+d2+'</div>'+c2+'</div>';}
+      var _sc=_szData.pot_baza&&_a2?Math.round(_a2*_szData.pot_baza/100):null;
+      var _sd=_szData.cut_baza&&_a2?Math.round(_a2*_szData.cut_baza):null;
+      var _sv2=_szData.spatii_verzi_pct&&_a2?Math.round(_a2*_szData.spatii_verzi_pct/100):null;
+      _gEl.innerHTML=_ib('POT max',_szData.pot_baza,'%','#fbbf24',_sc?_sc+'m\u00b2 la sol':null)
+        +_ib('CUT max',_szData.cut_baza,'','#fbbf24',_sd?_sd+'mp ADC':null)
+        +_ib('H max',_szData.hmax_m,'m','#34d399',_szData.niv_max?_szData.niv_max+' niv':null)
+        +_ib('Sp. verzi',_szData.spatii_verzi_pct,'%','#86efac',_sv2?_sv2+'m\u00b2':null)
+        +_ib('Sf. min parc.',_szData.suprafata_min_mp,'m\u00b2','#94a3b8',null)
+        +_ib('Regim',null,'','#94a3b8',_szData.regim||'\u2014');
+    }
+    var _aEl = document.getElementById('utr-alin-row');
+    var _aHtml = (_szData.lung_min_aliniament_m||_szData.adancime_min_m)?
+      '<div id="utr-alin-row" style="background:rgba(56,189,248,0.06);border:1px solid rgba(56,189,248,0.15);border-radius:7px;padding:8px;margin-top:6px">'
+      +'<div style="font-size:9px;color:#38bdf8;text-transform:uppercase;margin-bottom:5px">\U0001f4d0 Aliniamente parcelă</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">'
+      +(_szData.lung_min_aliniament_m?'<div style="background:rgba(0,0,0,0.2);border-radius:7px;padding:6px 8px"><div style="font-size:9px;color:#64748b">Front min stradal</div><div style="font-size:14px;font-weight:700;color:#38bdf8">'+_szData.lung_min_aliniament_m+'m</div></div>':'')
+      +(_szData.adancime_min_m?'<div style="background:rgba(0,0,0,0.2);border-radius:7px;padding:6px 8px"><div style="font-size:9px;color:#64748b">Adâncime min</div><div style="font-size:14px;font-weight:700;color:#38bdf8">'+_szData.adancime_min_m+'m</div></div>':'')
+      +'</div>'
+      +(_szData.aliniament_note?'<div style="font-size:9px;color:#475569;margin-top:5px">'+_szData.aliniament_note+'</div>':'')
+      +'</div>':''
+    if (_aEl) { _aEl.outerHTML = _aHtml||''; } else if (_aHtml) { _card.insertAdjacentHTML('beforeend',_aHtml); }
+  } else if (typeof renderTab === 'function') {
+    setTimeout(function(){ renderTab('utr'); }, 200);
   }
   if (typeof updateMap === 'function') updateMap();
 };
