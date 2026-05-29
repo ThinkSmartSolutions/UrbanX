@@ -1,0 +1,265 @@
+{
+  "_meta": {
+    "uat": "com-baluseni-zaicesti",
+    "sursa": "PUG com. Baluseni - RLU Vol.II - Proiect 283/2008 - S.C. Pro Activ Consulting SRL Iasi",
+    "aprobat": "Consiliul Local Baluseni",
+    "valabilitate": "10 ani de la aprobare",
+    "nr_utrs": 9,
+    "localitate": "Zaicesti, com. Baluseni, jud. Botosani"
+  },
+  "subzone": {
+    "L": {
+      "denumire": "Locuințe individuale P-P+1+2M",
+      "pot_baza": 30,
+      "cut_baza": 0.9,
+      "hmax_m": 8,
+      "niv_max": 3,
+      "spatii_verzi_pct": 20,
+      "suprafata_min_mp": 300,
+      "lung_min_aliniament_m": 12,
+      "retragere_fata_m": 6,
+      "retragere_lateral_m": 3,
+      "retragere_spate_m": 5,
+      "regim": "P-P+1+2M discontinuu",
+      "parcaje_min": "1 loc/locuință în interiorul parcelei",
+      "aliniament_note": "Gard stradal H max 1,70m (soclu 0,30m + transparent 1,50m)"
+    },
+    "ID": {
+      "denumire": "Zona Agro-Industrială (UTR 4,5,6,8,9)",
+      "pot_baza": 50,
+      "cut_baza": 1.5,
+      "hmax_m": 9,
+      "hmin_m": 4,
+      "niv_max": 2,
+      "spatii_verzi_pct": 40,
+      "suprafata_min_mp": 1000,
+      "lung_min_aliniament_m": 20,
+      "retragere_fata_m": 6,
+      "retragere_lateral_m": 6,
+      "retragere_spate_m": 5,
+      "regim": "P-P+1 industrial",
+      "parcaje_min": "În interiorul parcelei, max 30% din retragere față",
+      "aliniament_note": "Gard stradal H 1,50m (soclu 0,30m + transparent 1,20m) + gard viu. Porți retrase față aliniament.",
+      "fn_complementare": [
+        "servicii IMM nepoluante",
+        "depozitare comerciala",
+        "transport",
+        "servicii comerciale transport"
+      ],
+      "fn_interzise": [
+        "locuinte",
+        "scoli",
+        "servicii interes general"
+      ],
+      "zone_protectie": {
+        "drum_national_m": 26,
+        "drum_judetean_m": 24,
+        "drum_comunal_m": 20,
+        "ape_m": 15,
+        "cimitir_m": 50,
+        "LEA_20kV_m": 24,
+        "LEA_110kV_m": 36
+      }
+    },
+    "GC": {
+      "denumire": "Gospodărie Comunală - Cimitir (UTR 3)",
+      "pot_baza": 10,
+      "cut_baza": 0.1,
+      "hmax_m": 4,
+      "niv_max": 1,
+      "suprafata_min_mp": 1000,
+      "regim": "construcții specifice",
+      "aliniament_note": "Zona cu destinație specială - cimitir"
+    },
+    "V": {
+      "denumire": "Spații Verzi, Agrement, Turism (UTR 7)",
+      "pot_baza": 5,
+      "cut_baza": 0.05,
+      "hmax_m": 6,
+      "niv_max": 1,
+      "spatii_verzi_pct": 80,
+      "regim": "P amenajari peisagere",
+      "aliniament_note": "Amenajări peisagere, agrement, turism rural"
+    }
+  },
+  "utrs": {
+    "1": {
+      "denumire": "UTR 1 - Zona Locuinte Nord",
+      "fn_dominanta": "L",
+      "subzone_admise": [
+        "L",
+        "IS"
+      ],
+      "fn_complementare": [
+        "servicii rezidenţiale",
+        "comerţ mic"
+      ],
+      "fn_interzise": [
+        "industrie poluantă",
+        "depozite mari"
+      ],
+      "avize": [
+        "Aviz Consiliul Local Baluseni"
+      ],
+      "sup_ha": 35.0
+    },
+    "2": {
+      "denumire": "UTR 2 - Zona Locuinte Central (cu monument istoric)",
+      "fn_dominanta": "L",
+      "subzone_admise": [
+        "L",
+        "IS"
+      ],
+      "fn_complementare": [
+        "servicii rezidenţiale"
+      ],
+      "fn_interzise": [
+        "industrie",
+        "depozite"
+      ],
+      "avize": [
+        "Aviz Min. Culturii (zona protectie monument BT-II-m-B-02030)",
+        "Aviz Consiliul Local"
+      ],
+      "interdictii": "Zona de protecție 200m față de biserica monument BT-II-m-B-02030 'Adormirea Maicii Domnului' (1816)",
+      "sup_ha": 40.0
+    },
+    "3": {
+      "denumire": "UTR 3 - Gospodărie Comunală (Cimitir)",
+      "fn_dominanta": "GC",
+      "subzone_admise": [
+        "GC"
+      ],
+      "fn_interzise": [
+        "locuinte",
+        "industrie",
+        "comert"
+      ],
+      "sup_ha": 3.0
+    },
+    "4": {
+      "denumire": "UTR 4 - Zona Agro-Industrială",
+      "fn_dominanta": "ID",
+      "subzone_admise": [
+        "ID"
+      ],
+      "fn_complementare": [
+        "servicii IMM",
+        "depozitare",
+        "transport"
+      ],
+      "fn_interzise": [
+        "locuinte",
+        "scoli",
+        "servicii publice generale"
+      ],
+      "avize": [
+        "Aviz mediu",
+        "Aviz ISU",
+        "Aviz ANRE (LEA)"
+      ],
+      "sup_ha": 15.0
+    },
+    "5": {
+      "denumire": "UTR 5 - Zona Agro-Industrială",
+      "fn_dominanta": "ID",
+      "subzone_admise": [
+        "ID"
+      ],
+      "fn_complementare": [
+        "servicii IMM",
+        "depozitare"
+      ],
+      "fn_interzise": [
+        "locuinte",
+        "scoli"
+      ],
+      "avize": [
+        "Aviz mediu",
+        "Aviz ISU"
+      ],
+      "sup_ha": 12.0
+    },
+    "6": {
+      "denumire": "UTR 6 - Zona Agro-Industrială",
+      "fn_dominanta": "ID",
+      "subzone_admise": [
+        "ID"
+      ],
+      "fn_complementare": [
+        "servicii IMM",
+        "depozitare",
+        "comert en-gros"
+      ],
+      "fn_interzise": [
+        "locuinte",
+        "scoli"
+      ],
+      "avize": [
+        "Aviz mediu",
+        "Aviz ISU"
+      ],
+      "sup_ha": 18.0
+    },
+    "7": {
+      "denumire": "UTR 7 - Spații Verzi și Agrement",
+      "fn_dominanta": "V",
+      "subzone_admise": [
+        "V"
+      ],
+      "fn_complementare": [
+        "turism rural",
+        "agrement"
+      ],
+      "fn_interzise": [
+        "industrie",
+        "locuinte noi",
+        "comert"
+      ],
+      "sup_ha": 8.0
+    },
+    "8": {
+      "denumire": "UTR 8 - Zona Agro-Industrială (PUZ Pandoras)",
+      "fn_dominanta": "ID",
+      "subzone_admise": [
+        "ID"
+      ],
+      "fn_complementare": [
+        "servicii IMM nepoluante",
+        "depozitare comerciala",
+        "transport",
+        "birouri",
+        "comert alimentatie publica"
+      ],
+      "fn_interzise": [
+        "locuinte",
+        "scoli",
+        "activitati poluante"
+      ],
+      "avize": [
+        "Aviz mediu",
+        "Aviz ISU",
+        "Aviz ANRE",
+        "Aviz ANCPI receptie PUZ"
+      ],
+      "interdictii": "Propus introducere intravilan prin PUZ 5632/2023 - SC Pandoras Courier SRL",
+      "sup_ha": 5.235
+    },
+    "9": {
+      "denumire": "UTR 9 - Zona Agro-Industrială",
+      "fn_dominanta": "ID",
+      "subzone_admise": [
+        "ID"
+      ],
+      "fn_complementare": [
+        "servicii IMM",
+        "depozitare"
+      ],
+      "fn_interzise": [
+        "locuinte",
+        "scoli"
+      ],
+      "sup_ha": 10.0
+    }
+  }
+}
