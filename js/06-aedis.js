@@ -1721,7 +1721,7 @@ const UAT_REGISTRY = {
   'comuna-baluseni': {
     label:'Comuna Bălușeni', short:'Bălușeni',
     judet:'Botoșani', judetCode:'BT', siruta:'18073',
-    center:[27.4841, 47.1343], zoom:14,
+    center:[27.4839, 47.1342], zoom:14,
     pugFile:'./data/com-baluseni/pug.geojson',
     reguliFile:'./js/data/com-baluseni/reguli.json',
     leaFile:'./data/com-baluseni/lea.geojson',
