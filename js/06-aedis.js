@@ -1721,13 +1721,15 @@ const UAT_REGISTRY = {
   'comuna-baluseni': {
     label:'Comuna Bălușeni', short:'Bălușeni',
     judet:'Botoșani', judetCode:'BT', siruta:'18073',
-    center:[26.8730,47.5320], zoom:13,
-    pugFile:'./data/comuna-baluseni/pug.geojson',
-    reguliFile:'./data/comuna-baluseni/reguli.json',
+    center:[27.4841, 47.1343], zoom:14,
+    pugFile:'./data/com-baluseni/pug.geojson',
+    reguliFile:'./js/data/com-baluseni/reguli.json',
+    leaFile:'./data/com-baluseni/lea.geojson',
+    puzFile:'./data/com-baluseni/puz_complet.geojson',
     status:'partial', primar:'Primăria Comunei Bălușeni',
     daU:'Compartiment Urbanism', djcpn:'DJCPN Botoșani',
     seism:{zona:'E',ag:0.20,Tc:1.6,norm:'P100-1/2013'},
-    hidro:{nfa:'2-5m',tip_sol:'Loess',portanta:'130-170 kPa',studiu_obligatoriu:'Da'},
+    hidro:{nfa:'2-5m',tip_sol:'Loess, argilă',portanta:'130-160 kPa',studiu_obligatoriu:'Da'},
   },
   'comuna-mihaieminescu': {
     label:'Comuna Mihai Eminescu', short:'M. Eminescu',
@@ -1739,20 +1741,6 @@ const UAT_REGISTRY = {
     daU:'Compartiment Urbanism', djcpn:'DJCPN Botoșani',
     seism:{zona:'E',ag:0.20,Tc:1.6,norm:'P100-1/2013'},
     hidro:{nfa:'2-5m',tip_sol:'Loess',portanta:'130-170 kPa',studiu_obligatoriu:'Da'},
-  },
-
-  // ── COMUNĂ BĂLUȘENI ────────────────────────────────────────────────────
-  'com-baluseni': {
-    label:'Comuna Bălușeni', short:'Bălușeni',
-    judet:'Botoșani', judetCode:'BT', siruta:'18073',
-    center:[27.4853, 47.1365], zoom:14,
-    pugFile:'./data/com-baluseni/pug.geojson',
-    reguliFile:'./js/data/com-baluseni/reguli.json',
-    status:'partial',
-    primar:'Primăria Comunei Bălușeni',
-    daU:'Compartiment Urbanism', djcpn:'DJCPN Botoșani',
-    seism:{zona:'E',ag:0.20,Tc:1.6,norm:'P100-1/2013'},
-    hidro:{nfa:'2-5m',tip_sol:'Loess, argilă',portanta:'130-160 kPa',studiu_obligatoriu:'Da'},
   },
 
 };
@@ -1881,6 +1869,22 @@ async function switchUAT(uatId){
   if(cfg.status!=='empty'){
     await loadData(uatId);
     ss(`✅ UAT activ: ${cfg.label} (${cfg.status})`);
+    // Auto-load PUG + LEA dupa loadData
+    setTimeout(function(){
+      if(!utrOpen && S.pug && S.pug.features && S.pug.features.length){
+        utrOpen=true;
+        const btnU=_g('btnUTR'); if(btnU) btnU.classList.add('on');
+        const utrD=_g('utr-drawer'); if(utrD) utrD.classList.add('open');
+        const fc={type:'FeatureCollection',features:S.pug.features.map(f=>({...f,properties:{...f.properties,utr:normU(f.properties?.utr||''),c:ucol(normU(f.properties?.utr||''))}}))};
+        setSource('utr-src', fc);
+        ss('🗺 PUG '+cfg.label+' — '+S.pug.features.length+' zone UTR');
+      }
+      if(cfg.leaFile){
+        fetch(cfg.leaFile+'?cb='+Date.now()).then(r=>r.ok?r.json():null).then(function(d){
+          if(d){ try{setSource('lea-src',d); ss('⚡ LEA încărcate');}catch(e){} }
+        }).catch(function(){});
+      }
+    }, 1000);
     // Încarcă automat PUG pe hartă (populează pugIdx cu UTR numeric)
     if(cfg.pugFile && typeof window._loadPUGOnMap === 'function') {
       window._loadPUGOnMap(cfg.pugFile, cfg.short||cfg.label, null)
@@ -1960,7 +1964,7 @@ function showUATSelector(){
   // Grupăm pe regiuni
   const REGIUNI = {
     'Moldova — Iași + zona':     ['municipiul-iasi','comuna-miroslava','comuna-rediu','comuna-aroneanu','comuna-holboca','comuna-popricani'],
-    'Moldova — Botoșani':        ['municipiul-botosani','oras-dorohoi','com-baluseni','comuna-baluseni','comuna-mihaieminescu'],
+    'Moldova — Botoșani':        ['municipiul-botosani','oras-dorohoi','comuna-baluseni','comuna-mihaieminescu'],
     'Moldova — Suceava':         ['municipiul-suceava','municipiul-falticeni','municipiul-radauti'],
     'Moldova — Neamț':           ['municipiul-piatra-neamt','municipiul-roman','oras-targu-neamt'],
     'Moldova — Bacău':           ['municipiul-bacau','municipiul-onesti','municipiul-moinesti'],
@@ -2397,7 +2401,7 @@ async function loadData(uatId){
       S.pugIdx=[];
       S.pug.features.forEach(f=>{
         const u=normU(f.properties?.utr||'');if(!u||u==='?'||u==='??')return;
-        try{const bb=turf.bbox(f);const area=turf.area(f);S.pugIdx.push({utr:u,geom:f.geometry,bb:[bb[0],bb[1],bb[2],bb[3]],area});}catch(e){}
+        try{const bb=turf.bbox(f);const area=turf.area(f);S.pugIdx.push({utr:u, UTR: f.properties?.UTR||null, geom:f.geometry,bb:[bb[0],bb[1],bb[2],bb[3]],area});}catch(e){}
       });
       S.pugIdx.sort((a,b)=>a.area-b.area);
       if(path!==pugFile) console.warn('PUG loaded from fallback path:',path);

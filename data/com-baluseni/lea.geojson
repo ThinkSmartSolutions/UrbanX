@@ -1,0 +1,84 @@
+{
+  "type": "FeatureCollection",
+  "name": "LEA Zaicesti - 20kV",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "LEA-1",
+        "tensiune": "20kV",
+        "label": "LEA 20kV linia 1",
+        "zona_protectie_m": 24,
+        "aviz": "E-ON Moldova SA",
+        "nota": "Pozitie aproximativa - verificare cu aviz E-ON",
+        "stroke": "#1d4ed8",
+        "stroke-width": 3
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            27.4841361,
+            47.1348132
+          ],
+          [
+            27.4852695,
+            47.1379384
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "LEA-2",
+        "tensiune": "20kV",
+        "label": "LEA 20kV linia 2",
+        "zona_protectie_m": 24,
+        "aviz": "E-ON Moldova SA",
+        "nota": "Pozitie aproximativa - verificare cu aviz E-ON",
+        "stroke": "#1d4ed8",
+        "stroke-width": 3
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            27.4853876,
+            47.1347863
+          ],
+          [
+            27.486521,
+            47.1379115
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "LEA-3",
+        "tensiune": "20kV",
+        "label": "LEA 20kV linia 3",
+        "zona_protectie_m": 24,
+        "aviz": "E-ON Moldova SA",
+        "nota": "Pozitie aproximativa - verificare cu aviz E-ON",
+        "stroke": "#1d4ed8",
+        "stroke-width": 3
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            27.4865982,
+            47.1353002
+          ],
+          [
+            27.4873358,
+            47.1369941
+          ]
+        ]
+      }
+    }
+  ]
+}
