@@ -601,6 +601,26 @@ function addLayers(){
       const area = Math.round(turf.area({type:'Feature',geometry:f.geometry,properties:{}}));
       const nrcad = f.properties?.nrcad||f.properties?.EntityHandle||f.properties?.NR_CAD||'—';
       const utr = resolveUTR(f.properties?.utr||'')||lookupUTR(e.lngLat.lng,e.lngLat.lat)||'';
+      // Calculeaza utrNr (numarul UTR din PUG) prin point-in-polygon pe pugIdx
+      let utrNrCalc = null;
+      if(window.S && S.pugIdx && S.pugIdx.length) {
+        try {
+          const _ring = f.geometry.coordinates?.[0];
+          if(_ring && _ring.length) {
+            const _cx = _ring.reduce((s,p)=>s+p[0],0)/_ring.length;
+            const _cy = _ring.reduce((s,p)=>s+p[1],0)/_ring.length;
+            const _pt = {type:'Feature',geometry:{type:'Point',coordinates:[_cx,_cy]},properties:{}};
+            for(const _e of S.pugIdx) {
+              if(_cx<_e.bb[0]||_cx>_e.bb[2]||_cy<_e.bb[1]||_cy>_e.bb[3]) continue;
+              if(turf.booleanPointInPolygon(_pt,{type:'Feature',geometry:_e.geom,properties:{}})) {
+                utrNrCalc = _e.UTR ? String(_e.UTR) : _e.utr || null;
+                break;
+              }
+            }
+          }
+        } catch(_e2) {}
+      }
+      const utrDisplay = utrNrCalc || utr || '—';
       const parcelObj = {
         geo:{type:'Feature',geometry:f.geometry,properties:f.properties},
         nrcad, utr, area, source:'cadastru',

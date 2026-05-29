@@ -843,7 +843,7 @@ function htmlUTR(){
     </div>
     <div class="g2" style="margin-top:9px">
       <div class="met"><div class="ml">Suprafață teren</div><div class="mv">${ap.area?Math.round(ap.area)+' m²':'—'}</div></div>
-      <div class="met"><div class="ml">UTR</div><div class="mv">${esc(utrNr||u||'—')}</div></div>
+      <div class="met"><div class="ml">UTR</div><div class="mv" style="font-weight:700;color:#fbbf24">${esc(utrNr||u||'—')}</div></div>
       ${r.d?`<div class="met" style="grid-column:span 2"><div class="ml">Descriere zonă</div><div class="mv">${esc(r.d)}</div></div>`:''}
     </div>
     ${r.ua?`
@@ -855,7 +855,9 @@ function htmlUTR(){
   <div class="section" style="margin-top:10px">🔍 Ce vrei să construiești?</div>
   ${(()=>{
     // ── Lookup UTR numeric folosind _findUTRNumericForParcel sau pugIdx direct ──
-    // utrNr calculat la topul funcției htmlUTR()
+    // Guard: dacă pugIdx e corupt, resetăm sigur
+  if (S.pugIdx && !Array.isArray(S.pugIdx)) { S.pugIdx = []; }
+  // utrNr calculat la topul funcției htmlUTR()
     const cityKey = window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
     const d = window._PUG_REGULI && window._PUG_REGULI[cityKey];
     const CATS = window._FunctionEngine?.cats || [];
@@ -879,11 +881,12 @@ function htmlUTR(){
           +'style="background:rgba(212,175,55,0.15);border:1px solid rgba(212,175,55,0.4);color:#d4af37;padding:6px 16px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600">▶ Încarcă PUG acum</button>'
           +'</div>';
       }
-      if (!reguliLoaded) {
-        return '<div class="warn-box">⚠️ Regulamentul urbanistic nu este disponibil pentru acest UAT.</div>';
+      if (!reguliLoaded && !utrNr) {
+        // Nu avem nici reguli noi nici utrNr → direct la fallback REGULI[u]
       }
-      if (!utrNr) {
-        return '<div class="warn-box">⚠️ Parcela selectată nu se suprapune cu nicio zonă UTR din PUG. Verificați că sunteți în intravilanul UAT-ului selectat.</div>';
+      if (utrNr && !reguliLoaded) {
+        // Avem utrNr dar nu reguli noi → mesaj informativ
+        return '<div class="warn-box" style="font-size:11px">ℹ️ UTR '+esc(String(utrNr))+' — Regulament detaliat indisponibil pentru acest UAT. Consultați RLU la primărie.</div>';
       }
       // Fallback: afișăm din REGULI[u] (sistem Iași) sau mesaj neutru
       var rFb = (typeof REGULI !== 'undefined' ? REGULI : window.REGULI||{})[u] || {};
