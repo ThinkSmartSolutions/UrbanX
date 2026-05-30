@@ -1,51 +1,47 @@
 {
   "_meta": {
-    "sursa": "PUZ HCL 42/2024 — com. Baluseni, Zaicesti",
-    "data": "28.08.2024",
-    "proiectant": "S.C. MA-DA PROIECT S.R.L."
+    "sursa": "PUZ HCL 42/2024 + propunere PUZ modificator rezidential",
+    "data": "2026"
   },
   "utrs": {
     "5": {
-      "denumire": "Zona industriala/depozitare/servicii — Intravilan PUZ",
+      "denumire": "UTR 5 Intravilan PUZ",
       "pot_baza": 50,
       "cut_baza": 1.5,
       "hmax_m": 9,
       "hmax_str": "P+2",
-      "fn_dominanta": "Industrial nepoluant, depozitare, servicii, comert, birouri, locuire",
-      "fn_complementare": [
-        "Spatii verzi amenajate",
-        "Cai de acces, parcaje",
-        "Utilitati"
-      ],
+      "fn_dominanta": "Industrial/depozitare/servicii",
       "fn_interzise": [
-        "Industrie poluanta",
-        "Depozite deseuri",
-        "Activitati cu risc tehnologic major"
+        "Industrie poluanta"
       ],
-      "retrageri": "minim 5m fata de limitele parcelei",
-      "accese": "Din DC50",
-      "observatii": "Aviz Min.Cultura 7/U/2024 obligatoriu pentru lucrari la sol/subsol in zona ZP-39"
+      "retrageri": "min 5m",
+      "accese": "DC50"
     },
-    "EXT": {
-      "denumire": "Extravilan — fara reglementare urbanistica",
-      "pot_baza": null,
-      "cut_baza": null,
-      "hmax_m": null,
-      "fn_dominanta": "Agricol (arabil/pasune)",
-      "fn_interzise": [
-        "Orice constructie pana la operarea introducerii in intravilan"
+    "6": {
+      "denumire": "UTR 6 Extravilan — indicatori propusi PUZ modificator",
+      "pot_baza": 35,
+      "cut_baza": 0.9,
+      "hmax_m": 8,
+      "hmax_str": "P+1+M",
+      "fn_dominanta": "Locuinte individuale/cuplate/insirate",
+      "fn_complementare": [
+        "Spatii verzi",
+        "Dotari publice",
+        "Parcaje"
       ],
-      "observatii": "Introducere in intravilan prevazuta prin PUZ HCL 42/2024 dar neoperata inca in cadastru. Nu se poate autoriza constructia."
+      "fn_interzise": [
+        "Industrie",
+        "Depozite mari"
+      ],
+      "retrageri": "D=H (minim 3m laterale, 5m fata)",
+      "accese": "DC50 + strazi noi propuse",
+      "observatii": "INDICATORI PROPUSI — de aprobat prin PUZ modificator"
     },
     "ZP39": {
-      "denumire": "Zona protectie monument RAN 36364.08 — Necropola Zaicesti",
+      "denumire": "Zona protectie RAN 36364.08",
       "pot_baza": null,
       "cut_baza": null,
-      "hmax_m": null,
-      "fn_interzise": [
-        "Edificare pe zona de sit arheologic"
-      ],
-      "conditii_speciale": "Aviz Directia Judeteana Cultura Botosani obligatoriu. Lucrari la sol/subsol = supraveghere arheologica (DTAC). Baza legala: Legea 422/2001, Aviz 7/U/19.01.2024"
+      "conditii_speciale": "Aviz Cultura + supraveghere arheologica DTAC obligatorie"
     }
   }
 }
