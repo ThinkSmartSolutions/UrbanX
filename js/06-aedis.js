@@ -1989,8 +1989,8 @@ function showUATSelector(){
 
   // Grupăm pe regiuni
   const REGIUNI = {
-    'Moldova — Iași + zona':     ['municipiul-iasi','comuna-miroslava','comuna-rediu','comuna-aroneanu','comuna-holboca','comuna-popricani'],
-    'Moldova — Botoșani':        ['municipiul-botosani','oras-dorohoi','comuna-baluseni','comuna-mihaieminescu'],
+    'Moldova — Iași + zona':     ['municipiul-iasi'],
+    'Moldova — Botoșani':        ['municipiul-botosani','oras-dorohoi','com-baluseni'],
     'Moldova — Suceava':         ['municipiul-suceava','municipiul-falticeni','municipiul-radauti'],
     'Moldova — Neamț':           ['municipiul-piatra-neamt','municipiul-roman','oras-targu-neamt'],
     'Moldova — Bacău':           ['municipiul-bacau','municipiul-onesti','municipiul-moinesti'],
