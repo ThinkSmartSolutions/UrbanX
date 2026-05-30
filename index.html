@@ -4475,7 +4475,12 @@ async function _loadPUGOnMap(geojsonUrl, cityName, fitCoords) {
   if(window.S) {
     try {
       window.S.pugIdx = geojson.features
-        .filter(f => f.geometry?.type && f.geometry.type.includes('Polygon'))
+        .filter(f => {
+          if(!f.geometry?.type || !f.geometry.type.includes('Polygon')) return false;
+          if(!f.geometry.coordinates?.length || !f.geometry.coordinates[0]?.length) return false;
+          if(f.geometry.type === 'MultiPolygon' && !f.geometry.coordinates[0][0]?.length) return false;
+          return true;
+        })
         .map(f => {
           const coords = f.geometry.type === 'MultiPolygon'
             ? f.geometry.coordinates[0][0]
