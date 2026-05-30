@@ -1718,7 +1718,7 @@ const UAT_REGISTRY = {
     seism:{zona:'E',ag:0.20,Tc:1.6,norm:'P100-1/2013'},
     hidro:{nfa:'2-5m',tip_sol:'Loess',portanta:'130-170 kPa',studiu_obligatoriu:'Da'},
   },
-  'comuna-baluseni': {
+  'com-baluseni': {
     label:'Comuna Bălușeni', short:'Bălușeni',
     judet:'Botoșani', judetCode:'BT', siruta:'18073',
     center:[26.71692, 47.68204], zoom:15,
