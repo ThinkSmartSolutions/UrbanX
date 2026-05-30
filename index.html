@@ -4482,17 +4482,19 @@ async function _loadPUGOnMap(geojsonUrl, cityName, fitCoords) {
           return true;
         })
         .map(f => {
-          const coords = f.geometry.type === 'MultiPolygon'
-            ? f.geometry.coordinates[0][0]
-            : f.geometry.coordinates[0];
-          const lons = coords.map(c=>c[0]), lats = coords.map(c=>c[1]);
-          return {
-            utr: f.properties.utr,
-            UTR: f.properties.UTR || null,
-            geom: f.geometry,
-            bb: [Math.min(...lons), Math.min(...lats), Math.max(...lons), Math.max(...lats)]
-          };
-        });
+          try {
+            const coords = f.geometry.type === 'MultiPolygon'
+              ? f.geometry.coordinates[0][0]
+              : f.geometry.coordinates[0];
+            const lons = coords.map(c=>c[0]), lats = coords.map(c=>c[1]);
+            return {
+              utr: f.properties.utr,
+              UTR: f.properties.UTR || null,
+              geom: f.geometry,
+              bb: [Math.min(...lons), Math.min(...lats), Math.max(...lons), Math.max(...lats)]
+            };
+          } catch(_fe) { return null; }
+        }).filter(Boolean);
       window.S.pug = geojson; // stocăm geojson pentru FunctionEngine
     } catch(e) { console.warn('[PUG pugIdx]', e.message); }
   }

@@ -464,12 +464,12 @@
     "UTR": "LEA20",
     "c": "#fbbf24",
     "color": "#fbbf24",
+    "tip": "lea_protectie",
     "denumire": "Culoar LEA 20kV 24m — NECONSTRUIBIL",
     "tensiune": "20kV",
     "POT": null,
     "CUT": null,
-    "rh": "—",
-    "conditii": "NECONSTRUIBIL. Aviz E-ON Moldova SA obligatoriu."
+    "rh": "—"
    },
    "geometry": {
     "type": "Polygon",
@@ -514,9 +514,9 @@
     "UTR": "LEA20",
     "c": "#f59e0b",
     "color": "#f59e0b",
-    "denumire": "LEA 20kV existentă (DWG RT 2023)",
-    "tensiune": "20kV",
-    "tip": "linie"
+    "tip": "lea_linie",
+    "denumire": "LEA 20kV existentă",
+    "tensiune": "20kV"
    },
    "geometry": {
     "type": "LineString",
@@ -539,12 +539,12 @@
     "UTR": "LEA400",
     "c": "#ef4444",
     "color": "#ef4444",
+    "tip": "lea_protectie",
     "denumire": "Culoar LEA 400kV 75m — NECONSTRUIBIL",
     "tensiune": "400kV",
     "POT": null,
     "CUT": null,
-    "rh": "—",
-    "conditii": "NECONSTRUIBIL. Aviz Transelectrica obligatoriu."
+    "rh": "—"
    },
    "geometry": {
     "type": "Polygon",
@@ -597,9 +597,9 @@
     "UTR": "LEA400",
     "c": "#dc2626",
     "color": "#dc2626",
+    "tip": "lea_linie",
     "denumire": "LEA 400kV proiectată NNE→SSW",
-    "tensiune": "400kV",
-    "tip": "linie"
+    "tensiune": "400kV"
    },
    "geometry": {
     "type": "LineString",
@@ -622,8 +622,8 @@
     "UTR": "ZP39",
     "c": "#7c3aed",
     "color": "#7c3aed",
+    "tip": "restrictie",
     "denumire": "ZP-39 Necropola Zăicești RAN 36364.08",
-    "baza_legala": "Legea 422/2001+Aviz 7/U/2024",
     "POT": null,
     "CUT": null,
     "rh": "—",
@@ -904,8 +904,8 @@
     "UTR": "ZP26",
     "c": "#6d28d9",
     "color": "#6d28d9",
+    "tip": "restrictie",
     "denumire": "ZP-26 Movila de la Fermă RAN 36364.07",
-    "baza_legala": "Legea 422/2001",
     "POT": null,
     "CUT": null,
     "rh": "—"
