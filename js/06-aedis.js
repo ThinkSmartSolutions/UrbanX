@@ -1726,6 +1726,7 @@ const UAT_REGISTRY = {
     reguliFile:'./js/data/com-baluseni/reguli.json',
     leaFile:'./data/com-baluseni/lea.geojson',
     puzFile:'./data/com-baluseni/puz_complet.geojson',
+    cadastruIndex:'./data/com-baluseni/cadastru_index.json',
     status:'partial', primar:'Primăria Comunei Bălușeni',
     daU:'Compartiment Urbanism', djcpn:'DJCPN Botoșani',
     seism:{zona:'E',ag:0.20,Tc:1.6,norm:'P100-1/2013'},
