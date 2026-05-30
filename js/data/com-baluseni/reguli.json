@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "sursa": "PUZ HCL 42/2024 + propunere PUZ modificator",
+    "sursa": "PUZ HCL 42/2024 + propunere modificator",
     "data": "2026"
   },
   "utrs": {
@@ -10,16 +10,15 @@
       "cut_baza": 1.5,
       "hmax_m": 9,
       "hmax_str": "P+2",
-      "fn_dominanta": "Industrial/depozitare/servicii/birouri",
+      "fn_dominanta": "Industrial/depozitare/servicii",
       "fn_interzise": [
         "Industrie poluanta"
       ],
       "retrageri": "min 5m",
-      "accese": "DC50",
-      "hcl": "42/28.08.2024"
+      "accese": "DC50"
     },
     "6": {
-      "denumire": "UTR 6 — Indicatori propusi PUZ modificator rezidential",
+      "denumire": "UTR 6 — indicatori propusi PUZ modificator rezidential",
       "pot_baza": 35,
       "cut_baza": 0.9,
       "hmax_m": 8,
@@ -28,22 +27,20 @@
       "fn_complementare": [
         "Spatii verzi",
         "Dotari publice",
-        "Parcaje",
-        "Servicii"
+        "Parcaje"
       ],
       "fn_interzise": [
         "Industrie",
-        "Depozite mari"
+        "Depozite",
+        "Poluanti"
       ],
-      "retrageri": "D=H (min 3m laterale, 5m fata/spate)",
-      "accese": "DC50 + strazi noi",
-      "observatii": "PROPUS PUZ modificator — de aprobat. Proiectare posibila in UrbanX."
+      "retrageri": "D=H (min 3m lat, 5m fata/spate)",
+      "accese": "DC50 + strazi noi propuse",
+      "observatii": "PROPUS PUZ modificator — proiectare posibila in UrbanX"
     },
     "ZP39": {
       "denumire": "ZP-39 Necropola Zaicesti RAN 36364.08",
-      "pot_baza": null,
-      "cut_baza": null,
-      "conditii_speciale": "Aviz Directia Cultura Botosani. Supraveghere arheologica DTAC obligatorie."
+      "conditii_speciale": "Aviz Directia Cultura Botosani + supraveghere arh. DTAC obligatorie"
     }
   }
 }
