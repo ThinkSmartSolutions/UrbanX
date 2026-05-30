@@ -1721,7 +1721,7 @@ const UAT_REGISTRY = {
   'comuna-baluseni': {
     label:'Comuna Bălușeni', short:'Bălușeni',
     judet:'Botoșani', judetCode:'BT', siruta:'18073',
-    center:[27.482082, 47.135608], zoom:15,
+    center:[26.71692, 47.68204], zoom:15,
     pugFile:'./data/com-baluseni/pug.geojson',
     reguliFile:'./js/data/com-baluseni/reguli.json',
     leaFile:'./data/com-baluseni/lea.geojson',
@@ -1881,23 +1881,7 @@ async function switchUAT(uatId){
       }
       if(cfg.leaFile){
         fetch(cfg.leaFile+'?cb='+Date.now()).then(r=>r.ok?r.json():null).then(function(d){
-          if(!d) return;
-          try {
-            if(!map.getSource('lea-src')){
-              map.addSource('lea-src',{type:'geojson',data:d,tolerance:0.5});
-              map.addLayer({id:'lea-corridor',type:'fill',source:'lea-src',
-                filter:['==',['get','tip'],'lea_protectie'],
-                paint:{'fill-color':'#f97316','fill-opacity':0.18}},'utr-line');
-              map.addLayer({id:'lea-line',type:'line',source:'lea-src',
-                filter:['==',['get','tip'],'lea_linie'],
-                paint:{'line-color':'#ea580c','line-width':2,'line-dasharray':[5,3],'line-opacity':0.9}},'utr-line');
-              map.addLayer({id:'lea-lbl',type:'symbol',source:'lea-src',
-                filter:['all',['==',['get','tip'],'lea_protectie']],
-                layout:{'text-field':'⚡ LEA 400kV','text-size':10,'symbol-placement':'line','text-offset':[0,-1]},
-                paint:{'text-color':'#ea580c','text-halo-color':'#fff','text-halo-width':1}},'utr-line');
-            } else { setSource('lea-src',d); }
-            ss('⚡ LEA 400kV Bălușeni încărcată');
-          } catch(e){ console.warn('[LEA layer]',e.message); }
+          if(d){ try{setSource('lea-src',d); ss('⚡ LEA încărcate');}catch(e){} }
         }).catch(function(){});
       }
     }, 1000);
