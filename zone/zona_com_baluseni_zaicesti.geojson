@@ -1,6 +1,6 @@
 {
  "type": "FeatureCollection",
- "name": "zona_com_baluseni_zaicesti",
+ "name": "zona",
  "crs": {
   "type": "name",
   "properties": {
@@ -15,15 +15,7 @@
     "nc": "56832",
     "nrcad": "56832",
     "uat": "com-baluseni",
-    "siruta": "18073",
-    "suprafata_mp": 119500,
-    "suprafata_ha": 11.95,
-    "proprietar": "S.C. PANDORAS COURIER S.R.L.",
-    "cui": "34032503",
-    "puz": "HCL 42/28.08.2024",
-    "proiectant": "MA-DA PROIECT SRL",
-    "utr": "5",
-    "UTR": 5
+    "suprafata_mp": 119500
    },
    "geometry": {
     "type": "Polygon",
