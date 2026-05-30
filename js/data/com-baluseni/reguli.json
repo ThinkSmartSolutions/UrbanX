@@ -1,46 +1,75 @@
 {
   "_meta": {
-    "sursa": "PUZ HCL 42/2024 + propunere modificator",
-    "data": "2026"
+    "sursa": "PUZ HCL 42/2024 + propunere PUZ modificator",
+    "data": "2026",
+    "proiectant": "S.C. MA-DA PROIECT S.R.L.",
+    "beneficiar": "PANDORAS COURIER S.R.L.",
+    "note": "UTR 5/6 temporar split N/S. Split corect vine din DWG (poligon albastru=intravilan, verde=extravilan)."
   },
   "utrs": {
     "5": {
-      "denumire": "UTR 5 Intravilan PUZ",
+      "denumire": "UTR 5 — Intravilan PUZ HCL 42/2024",
       "pot_baza": 50,
       "cut_baza": 1.5,
       "hmax_m": 9,
       "hmax_str": "P+2",
-      "fn_dominanta": "Industrial/depozitare/servicii",
-      "fn_interzise": [
-        "Industrie poluanta"
+      "fn_dominanta": "Industrial nepoluant, depozitare, servicii, birouri, comerț",
+      "fn_complementare": [
+        "Spații verzi amenajate",
+        "Căi de acces, parcaje",
+        "Utilități"
       ],
-      "retrageri": "min 5m",
-      "accese": "DC50"
+      "fn_interzise": [
+        "Industrie poluantă",
+        "Depozite deșeuri",
+        "Activități cu risc major"
+      ],
+      "retrageri": "minim 5m față de limitele parcelei",
+      "accese": "Din DC50",
+      "hcl": "42/28.08.2024 Consiliul Local Bălușeni",
+      "aviz_cj": "26/22.08.2024 Consiliul Județean Botoșani",
+      "observatii": "Aviz Min. Cultură 7/U/2024 obligatoriu pentru orice lucrări la sol/subsol în ZP-39"
     },
     "6": {
-      "denumire": "UTR 6 — indicatori propusi PUZ modificator rezidential",
+      "denumire": "UTR 6 — Extravilan / PUZ modificator propus (indicatori propuși)",
       "pot_baza": 35,
       "cut_baza": 0.9,
       "hmax_m": 8,
       "hmax_str": "P+1+M",
-      "fn_dominanta": "Locuinte individuale/cuplate/insirate",
+      "fn_dominanta": "Locuințe individuale, cuplate, înșiruite",
       "fn_complementare": [
-        "Spatii verzi",
-        "Dotari publice",
-        "Parcaje"
+        "Spații verzi",
+        "Dotări publice",
+        "Parcaje",
+        "Servicii complementare"
       ],
       "fn_interzise": [
         "Industrie",
-        "Depozite",
-        "Poluanti"
+        "Depozite mari",
+        "Construcții poluante"
       ],
-      "retrageri": "D=H (min 3m lat, 5m fata/spate)",
-      "accese": "DC50 + strazi noi propuse",
-      "observatii": "PROPUS PUZ modificator — proiectare posibila in UrbanX"
+      "retrageri": "D=H (min 3m laterale, 5m față/spate)",
+      "accese": "DC50 + străzi noi propuse prin PUZ modificator",
+      "observatii": "Indicatori PROPUȘI pentru PUZ modificator rezidențial. Proiectare posibilă în UrbanX ca propunere."
     },
     "ZP39": {
-      "denumire": "ZP-39 Necropola Zaicesti RAN 36364.08",
-      "conditii_speciale": "Aviz Directia Cultura Botosani + supraveghere arh. DTAC obligatorie"
+      "denumire": "ZP-39 Necropola Zăicești RAN 36364.08",
+      "pot_baza": null,
+      "cut_baza": null,
+      "hmax_m": null,
+      "conditii_speciale": "Aviz Direcția Județeană pentru Cultură Botoșani obligatoriu. Supraveghere arheologică DTAC obligatorie pentru orice lucrări la sol/subsol."
+    },
+    "LEA400": {
+      "denumire": "Culoar LEA 400kV 75m",
+      "pot_baza": null,
+      "cut_baza": null,
+      "conditii_speciale": "NECONSTRUIBIL. Amenajabil ca spațiu verde/parc. Aviz Transelectrica obligatoriu."
+    },
+    "LEA20": {
+      "denumire": "Culoar LEA 20kV 24m",
+      "pot_baza": null,
+      "cut_baza": null,
+      "conditii_speciale": "NECONSTRUIBIL. Aviz E-ON Moldova SA obligatoriu."
     }
   }
 }

@@ -1727,6 +1727,7 @@ const UAT_REGISTRY = {
     leaFile:'./data/com-baluseni/lea.geojson',
     puzFile:'./data/com-baluseni/puz_complet.geojson',
     cadastruIndex:'./data/com-baluseni/cadastru_index.json',
+    zonaFile:'./zone/zona_com_baluseni_zaicesti.geojson',
     status:'partial', primar:'Primăria Comunei Bălușeni',
     daU:'Compartiment Urbanism', djcpn:'DJCPN Botoșani',
     seism:{zona:'E',ag:0.20,Tc:1.6,norm:'P100-1/2013'},
@@ -1870,6 +1871,30 @@ async function switchUAT(uatId){
   if(cfg.status!=='empty'){
     await loadData(uatId);
     ss(`✅ UAT activ: ${cfg.label} (${cfg.status})`);
+    // ── Auto-load zona tile (poligon cadastral) daca exista zonaFile ──
+    if(cfg.zonaFile){
+      try{
+        const _rz=await fetch(cfg.zonaFile+'?cb='+Date.now());
+        if(_rz.ok){
+          const _zd=await _rz.json();
+          if(_zd&&_zd.features&&_zd.features.length){
+            S.cadData=_zd; S.cadHasPolygons=true;
+            _zd.features.forEach(function(_f){
+              const _nc=_f.properties?.nc||_f.properties?.cad||_f.properties?.nrcad;
+              if(_nc){
+                try{
+                  const _bb=turf.bbox(_f);
+                  const _ctr=[(_bb[0]+_bb[2])/2,(_bb[1]+_bb[3])/2];
+                  S.cadIdx.set(String(_nc).toLowerCase(),
+                    Object.assign({},_f,{properties:Object.assign({},_f.properties,{nrcad:_nc,center:_ctr})}));
+                }catch(_e){}
+              }
+            });
+            ss('📦 Parcele cadastrale '+(cfg.short||cfg.label)+' — '+_zd.features.length+' parcele incarcate');
+          }
+        }
+      }catch(_ez){console.warn('zonaFile error',_ez);}
+    }
     // Auto-load PUG + LEA dupa loadData
     setTimeout(function(){
       if(!utrOpen && S.pug && S.pug.features && S.pug.features.length){
