@@ -1,74 +1,201 @@
 {
-  "type": "FeatureCollection",
-  "features": [
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "LEA-1",
-        "tensiune": "20kV",
-        "zona_protectie_m": 24,
-        "stroke": "#1d4ed8",
-        "stroke-width": 3
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            27.4841361,
-            47.1348132
-          ],
-          [
-            27.4852695,
-            47.1379384
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "LEA-2",
-        "tensiune": "20kV",
-        "zona_protectie_m": 24,
-        "stroke": "#1d4ed8",
-        "stroke-width": 3
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            27.4853876,
-            47.1347863
-          ],
-          [
-            27.486521,
-            47.1379115
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "LEA-3",
-        "tensiune": "20kV",
-        "zona_protectie_m": 24,
-        "stroke": "#1d4ed8",
-        "stroke-width": 3
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            27.4865982,
-            47.1353002
-          ],
-          [
-            27.4873358,
-            47.1369941
-          ]
-        ]
-      }
-    }
-  ]
+ "type": "FeatureCollection",
+ "name": "lea_com_baluseni",
+ "crs": {
+  "type": "name",
+  "properties": {
+   "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+  }
+ },
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "tip": "lea_linie",
+    "utr": "LEA400",
+    "c": "#f97316",
+    "denumire": "LEA 400kV Suceava–Bălți (aprox. — aviz Transelectrica)",
+    "tensiune_kv": 400,
+    "protectie_m": 75
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      27.48159551022536,
+      47.136910467305114
+     ],
+     [
+      27.482903527247572,
+      47.13482519413201
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "tip": "lea_protectie",
+    "utr": "LEA400",
+    "c": "#fed7aa",
+    "denumire": "Culoar protectie LEA 400kV (75m total) — NECONSTRUIBIL, amenajabil ca parc",
+    "tensiune_kv": 400,
+    "protectie_m": 75,
+    "precizie": "APROX — de confirmat Transelectrica"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       27.48120610635265,
+       47.13667411637722
+      ],
+      [
+       27.48198491751234,
+       47.137146816869006
+      ],
+      [
+       27.48329016083972,
+       47.135065946325454
+      ],
+      [
+       27.482516897109583,
+       47.13458444059209
+      ],
+      [
+       27.48120610635265,
+       47.13667411637722
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "tip": "lea_linie",
+    "utr": "LEA400",
+    "c": "#f97316",
+    "denumire": "LEA 400kV Suceava–Bălți (aprox. — aviz Transelectrica)",
+    "tensiune_kv": 400,
+    "protectie_m": 75
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      27.481906867511974,
+      47.137099444934904
+     ],
+     [
+      27.483212666773674,
+      47.13501769196163
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "tip": "lea_protectie",
+    "utr": "LEA400",
+    "c": "#fed7aa",
+    "denumire": "Culoar protectie LEA 400kV (75m total) — NECONSTRUIBIL, amenajabil ca parc",
+    "tensiune_kv": 400,
+    "protectie_m": 75,
+    "precizie": "APROX — de confirmat Transelectrica"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       27.481517460909313,
+       47.13686309509766
+      ],
+      [
+       27.482296277528903,
+       47.137335793408184
+      ],
+      [
+       27.483599303127665,
+       47.13525844307844
+      ],
+      [
+       27.48282603387386,
+       47.13477693949833
+      ],
+      [
+       27.481517460909313,
+       47.13686309509766
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "tip": "lea_linie",
+    "utr": "LEA400",
+    "c": "#f97316",
+    "denumire": "LEA 400kV Suceava–Bălți (aprox. — aviz Transelectrica)",
+    "tensiune_kv": 400,
+    "protectie_m": 75
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      27.48221822698135,
+      47.13728842169271
+     ],
+     [
+      27.483521808508065,
+      47.13521018893041
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "tip": "lea_protectie",
+    "utr": "LEA400",
+    "c": "#fed7aa",
+    "denumire": "Culoar protectie LEA 400kV (75m total) — NECONSTRUIBIL, amenajabil ca parc",
+    "tensiune_kv": 400,
+    "protectie_m": 75,
+    "precizie": "APROX — de confirmat Transelectrica"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       27.481828817648758,
+       47.137052072946055
+      ],
+      [
+       27.48260763972828,
+       47.13752476907535
+      ],
+      [
+       27.483908447623925,
+       47.135450938970536
+      ],
+      [
+       27.483135172846396,
+       47.134969437543724
+      ],
+      [
+       27.481828817648758,
+       47.137052072946055
+      ]
+     ]
+    ]
+   }
+  }
+ ]
 }
