@@ -1,210 +1,51 @@
 {
   "_meta": {
-    "uat": "com-baluseni",
-    "localitate": "Zaicesti, com. Baluseni, jud. Botosani",
-    "sursa": "PUZ aprobat HCL 42/28.08.2024 - S.C. MA-DA PROIECT S.R.L.",
-    "proiect_nr": "365.U/2023",
-    "aviz_cj": "Aviz CJ Botosani nr. 26/22.08.2024",
-    "proiectant": "urb.arh. Dan Octavian BOTEZ, arh. Ionut FRASINESCU, arh. Dana GHIGA",
-    "beneficiar": "S.C. PANDORAS COURIER S.R.L.",
-    "hotarare": "HCL 42/28.08.2024 - Consiliul Local Baluseni",
-    "suprafata_totala_mp": 126316,
-    "nota_extravilan": "Zona extravilan reglementata EXCLUSIV prin PUZ - nu exista PUG aprobat pentru com. Baluseni in vigoare",
-    "display_fields": [
-      {
-        "key": "fn_dominanta",
-        "label": "Funcțiune dominantă",
-        "type": "badge_green"
-      },
-      {
-        "key": "subzone_admise",
-        "label": "Admise",
-        "type": "list_green"
-      },
-      {
-        "key": "fn_complementare",
-        "label": "Admise complementar",
-        "type": "list_blue"
-      },
-      {
-        "key": "fn_interzise",
-        "label": "Interzise",
-        "type": "list_red"
-      },
-      {
-        "key": "avize",
-        "label": "Avize obligatorii",
-        "type": "list_warn"
-      },
-      {
-        "key": "interdictii",
-        "label": "Restricții speciale",
-        "type": "text_warn"
-      }
-    ]
-  },
-  "subzone": {
-    "ID6": {
-      "denumire": "Zona Industrială/Depozitare Centrală",
-      "pot_baza": 50,
-      "cut_baza": 1.5,
-      "hmax_m": 9,
-      "hmin_m": 4,
-      "niv_max": 2,
-      "spatii_verzi_pct": 40,
-      "suprafata_min_mp": 1000,
-      "lung_min_aliniament_m": 20,
-      "adancime_min_m": null,
-      "retragere_fata_m": 6,
-      "retragere_lateral_m": 6,
-      "retragere_spate_m": 5,
-      "regim": "P-P+1 industrial/depozitare",
-      "parcaje_min": "în interiorul parcelei, max 30% din retragere față cu gard viu H 1.20m",
-      "aliniament_note": "Gard stradal H 1.50m (soclu 0.30m + transparent 1.20m) + gard viu. Porți retrase față aliniament."
-    },
-    "ID5": {
-      "denumire": "Zona Industrială/Depozitare Sud-Vest",
-      "pot_baza": 50,
-      "cut_baza": 1.5,
-      "hmax_m": 9,
-      "hmin_m": 4,
-      "niv_max": 2,
-      "spatii_verzi_pct": 40,
-      "suprafata_min_mp": 1000,
-      "lung_min_aliniament_m": 20,
-      "adancime_min_m": null,
-      "retragere_fata_m": 6,
-      "retragere_lateral_m": 6,
-      "retragere_spate_m": 5,
-      "regim": "P-P+1 industrial/depozitare",
-      "parcaje_min": "în interiorul parcelei",
-      "aliniament_note": "Conf. PUZ aprobat HCL 42/2024"
-    },
-    "L1": {
-      "denumire": "Zona Locuințe și Funcțiuni Complementare",
-      "pot_baza": 30,
-      "cut_baza": 0.9,
-      "hmax_m": 8,
-      "niv_max": 2,
-      "spatii_verzi_pct": 30,
-      "suprafata_min_mp": 300,
-      "lung_min_aliniament_m": 12,
-      "adancime_min_m": null,
-      "retragere_fata_m": 6,
-      "retragere_lateral_m": 3,
-      "retragere_spate_m": 5,
-      "regim": "P-P+1+M",
-      "parcaje_min": "1 loc/locuință în interiorul parcelei",
-      "aliniament_note": "Gard stradal H 1.70m (soclu 0.30m + transparent/opac 1.50m)"
-    },
-    "V": {
-      "denumire": "Spații Verzi și Agrement",
-      "pot_baza": 5,
-      "cut_baza": 0.05,
-      "hmax_m": 4,
-      "niv_max": 1,
-      "spatii_verzi_pct": 85,
-      "suprafata_min_mp": 500,
-      "regim": "P - amenajări peisagere",
-      "aliniament_note": "Fără construcții permanente"
-    },
-    "ZP": {
-      "denumire": "Zonă protecție monument istoric",
-      "pot_baza": 0,
-      "cut_baza": 0,
-      "hmax_m": 0,
-      "regim": "INTERDICȚIE construire",
-      "aliniament_note": "AVIZ OBLIGATORIU Min. Culturii - Legea 422/2001. Orice lucrare necesita aviz prealabil."
-    }
+    "sursa": "PUZ HCL 42/2024 — com. Baluseni, Zaicesti",
+    "data": "28.08.2024",
+    "proiectant": "S.C. MA-DA PROIECT S.R.L."
   },
   "utrs": {
     "5": {
-      "denumire": "UTR 5 — Zona Industrială/Depozitare (SV)",
-      "fn_dominanta": "ID5",
-      "subzone_admise": [
-        "ID5"
-      ],
+      "denumire": "Zona industriala/depozitare/servicii — Intravilan PUZ",
+      "pot_baza": 50,
+      "cut_baza": 1.5,
+      "hmax_m": 9,
+      "hmax_str": "P+2",
+      "fn_dominanta": "Industrial nepoluant, depozitare, servicii, comert, birouri, locuire",
       "fn_complementare": [
-        "Servicii IMM nepoluante",
-        "Depozitare comercială",
-        "Transport și servicii transport",
-        "Birouri administrative"
+        "Spatii verzi amenajate",
+        "Cai de acces, parcaje",
+        "Utilitati"
       ],
       "fn_interzise": [
-        "Locuințe (exclusiv cele pt. pază)",
-        "Unități de învățământ",
-        "Servicii de interes general",
-        "Activități poluante / risc tehnologic"
+        "Industrie poluanta",
+        "Depozite deseuri",
+        "Activitati cu risc tehnologic major"
       ],
-      "avize": [
-        "Aviz mediu (APM Botoșani)",
-        "Aviz ISU Botoșani",
-        "Aviz E-ON Moldova SA (LEA 20kV — obligatoriu)",
-        "Aviz Min. Culturii dacă în raza 100m monument RAN"
-      ],
-      "interdictii": "Zona protecție LEA 20kV = 24m de la ax. Monumente RAN 36364.07 și 36364.08 în proximitate — zona 100m cu aviz obligatoriu Min. Culturii.",
-      "sup_ha": 6.0,
-      "ref_puz": "HCL 42/28.08.2024 — Planșa U03 Reglementări Urbanistice"
+      "retrageri": "minim 5m fata de limitele parcelei",
+      "accese": "Din DC50",
+      "observatii": "Aviz Min.Cultura 7/U/2024 obligatoriu pentru lucrari la sol/subsol in zona ZP-39"
     },
-    "6": {
-      "denumire": "UTR 6 — Zona Industrială/Depozitare (Centrală)",
-      "fn_dominanta": "ID6",
-      "subzone_admise": [
-        "ID6"
-      ],
-      "fn_complementare": [
-        "Servicii IMM nepoluante",
-        "Depozitare comercială",
-        "Transport și logistică",
-        "Birouri, comerț, alimentație publică",
-        "Locuire (max. 2 unități strict necesare pază)"
-      ],
+    "EXT": {
+      "denumire": "Extravilan — fara reglementare urbanistica",
+      "pot_baza": null,
+      "cut_baza": null,
+      "hmax_m": null,
+      "fn_dominanta": "Agricol (arabil/pasune)",
       "fn_interzise": [
-        "Locuințe colective",
-        "Unități de învățământ",
-        "Activități poluante sau cu risc tehnologic",
-        "Depozite substanțe inflamabile/toxice fără autorizație"
+        "Orice constructie pana la operarea introducerii in intravilan"
       ],
-      "avize": [
-        "Aviz mediu (APM Botoșani)",
-        "Aviz ISU Botoșani",
-        "Aviz ANRE (instalații electrice)",
-        "Aviz E-ON Moldova SA (LEA 20kV — obligatoriu)",
-        "Aviz Min. Culturii pentru lucrări în raza 100m monument RAN 36364.08"
-      ],
-      "interdictii": "Monument RAN 36364.08 (Dealul Porcului) în NE terenului — zonă protecție 100m cu aviz obligatoriu Min. Culturii (Legea 422/2001). LEA 20kV traversează terenul — zona protecție 24m.",
-      "sup_ha": 8.0,
-      "ref_puz": "HCL 42/28.08.2024 — Planșa U03 Reglementări Urbanistice"
+      "observatii": "Introducere in intravilan prevazuta prin PUZ HCL 42/2024 dar neoperata inca in cadastru. Nu se poate autoriza constructia."
     },
     "ZP39": {
-      "denumire": "Zonă Protecție Monument RAN 36364.08 — Dealul Porcului",
-      "fn_dominanta": "ZP",
-      "subzone_admise": [
-        "ZP"
-      ],
+      "denumire": "Zona protectie monument RAN 36364.08 — Necropola Zaicesti",
+      "pot_baza": null,
+      "cut_baza": null,
+      "hmax_m": null,
       "fn_interzise": [
-        "orice constructie fara aviz Min. Culturii"
+        "Edificare pe zona de sit arheologic"
       ],
-      "avize": [
-        "OBLIGATORIU: Aviz Min. Culturii și Patrimoniului Național (Legea 422/2001)"
-      ],
-      "interdictii": "INTERDICȚIE TOTALĂ de construire fără aviz prealabil Min. Culturii. Necropola Latène timpuriu sec. VI-IV a.Chr.",
-      "ref_puz": "Planșa U01.2 — Extras Harta Repertoriu Arheologic Jud. Botoșani"
-    },
-    "ZP26": {
-      "denumire": "Zonă Protecție Monument RAN 36364.07 — Movila de la Fermă",
-      "fn_dominanta": "ZP",
-      "subzone_admise": [
-        "ZP"
-      ],
-      "fn_interzise": [
-        "orice constructie fara aviz Min. Culturii"
-      ],
-      "avize": [
-        "OBLIGATORIU: Aviz Min. Culturii și Patrimoniului Național (Legea 422/2001)"
-      ],
-      "interdictii": "INTERDICȚIE TOTALĂ de construire fără aviz prealabil Min. Culturii. Tumul / movilă.",
-      "ref_puz": "Planșa U01.2 — Extras Harta Repertoriu Arheologic Jud. Botoșani"
+      "conditii_speciale": "Aviz Directia Judeteana Cultura Botosani obligatoriu. Lucrari la sol/subsol = supraveghere arheologica (DTAC). Baza legala: Legea 422/2001, Aviz 7/U/19.01.2024"
     }
   }
 }
