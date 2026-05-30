@@ -172,57 +172,6 @@
     "functiune": "Locuinte individuale / cuplate / insirate",
     "FUNCTIUNE": "Locuinte individuale / cuplate / insirate",
     "status": "extravilan_puz_propus",
-    "suprafata_mp": 4234
-   },
-   "geometry": {
-    "type": "Polygon",
-    "coordinates": [
-     [
-      [
-       26.72123962195205,
-       47.683711416536774
-      ],
-      [
-       26.721560981718454,
-       47.683490272821146
-      ],
-      [
-       26.720920389871374,
-       47.68310432292318
-      ],
-      [
-       26.720318815271742,
-       47.68356121432321
-      ],
-      [
-       26.720904962268083,
-       47.68391487839674
-      ],
-      [
-       26.72123962195205,
-       47.683711416536774
-      ]
-     ]
-    ]
-   }
-  },
-  {
-   "type": "Feature",
-   "properties": {
-    "utr": "6",
-    "UTR": 6,
-    "c": "#059669",
-    "color": "#059669",
-    "denumire": "UTR 6 — Extravilan — PUZ modificator propus",
-    "POT": 35,
-    "pot": 35,
-    "CUT": 0.9,
-    "cut": 0.9,
-    "rh": "P+1+M",
-    "RH": "P+1+M",
-    "functiune": "Locuinte individuale / cuplate / insirate",
-    "FUNCTIUNE": "Locuinte individuale / cuplate / insirate",
-    "status": "extravilan_puz_propus",
     "suprafata_mp": 62976
    },
    "geometry": {
@@ -460,10 +409,224 @@
   {
    "type": "Feature",
    "properties": {
-    "utr": "?",
+    "utr": "6",
+    "UTR": 6,
+    "c": "#059669",
+    "color": "#059669",
+    "denumire": "UTR 6 — Extravilan — PUZ modificator propus",
+    "POT": 35,
+    "pot": 35,
+    "CUT": 0.9,
+    "cut": 0.9,
+    "rh": "P+1+M",
+    "RH": "P+1+M",
+    "functiune": "Locuinte individuale / cuplate / insirate",
+    "FUNCTIUNE": "Locuinte individuale / cuplate / insirate",
+    "status": "extravilan_puz_propus",
+    "suprafata_mp": 4234
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       26.72123962195205,
+       47.683711416536774
+      ],
+      [
+       26.721560981718454,
+       47.683490272821146
+      ],
+      [
+       26.720920389871374,
+       47.68310432292318
+      ],
+      [
+       26.720318815271742,
+       47.68356121432321
+      ],
+      [
+       26.720904962268083,
+       47.68391487839674
+      ],
+      [
+       26.72123962195205,
+       47.683711416536774
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "utr": "LEA",
+    "UTR": "LEA20",
+    "c": "#fbbf24",
+    "color": "#fbbf24",
+    "denumire": "Culoar LEA 20kV 24m — NECONSTRUIBIL",
+    "tensiune": "20kV",
+    "POT": null,
+    "CUT": null,
+    "rh": "—",
+    "conditii": "NECONSTRUIBIL. Aviz E-ON Moldova SA obligatoriu."
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       26.72181759914019,
+       47.683270799272265
+      ],
+      [
+       26.72194231073567,
+       47.68315317183429
+      ],
+      [
+       26.721990090529328,
+       47.683109177431916
+      ],
+      [
+       26.72212338921936,
+       47.68283939696464
+      ],
+      [
+       26.722096523085966,
+       47.68200662480292
+      ],
+      [
+       26.72176963027481,
+       47.681783632829706
+      ],
+      [
+       26.72181759914019,
+       47.683270799272265
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "utr": "LEA",
+    "UTR": "LEA20",
+    "c": "#f59e0b",
+    "color": "#f59e0b",
+    "denumire": "LEA 20kV existentă (DWG RT 2023)",
+    "tensiune": "20kV",
+    "tip": "linie"
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      26.721972754286114,
+      47.68312514020848
+     ],
+     [
+      26.72193307633671,
+      47.6818951289361
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "utr": "LEA",
+    "UTR": "LEA400",
+    "c": "#ef4444",
+    "color": "#ef4444",
+    "denumire": "Culoar LEA 400kV 75m — NECONSTRUIBIL",
+    "tensiune": "400kV",
+    "POT": null,
+    "CUT": null,
+    "rh": "—",
+    "conditii": "NECONSTRUIBIL. Aviz Transelectrica obligatoriu."
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       26.721601840116072,
+       47.68166917262419
+      ],
+      [
+       26.719440137479218,
+       47.68019447271714
+      ],
+      [
+       26.721709401957593,
+       47.68337286981429
+      ],
+      [
+       26.721796512926215,
+       47.68329068763331
+      ],
+      [
+       26.72194231073567,
+       47.68315317183429
+      ],
+      [
+       26.721990090529328,
+       47.683109177431916
+      ],
+      [
+       26.72217120951975,
+       47.68274261374268
+      ],
+      [
+       26.722251529668068,
+       47.6825791003351
+      ],
+      [
+       26.721601840116072,
+       47.68166917262419
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "utr": "LEA",
+    "UTR": "LEA400",
+    "c": "#dc2626",
+    "color": "#dc2626",
+    "denumire": "LEA 400kV proiectată NNE→SSW",
+    "tensiune": "400kV",
+    "tip": "linie"
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      26.720520973768192,
+      47.680931827908154
+     ],
+     [
+      26.72202504996591,
+      47.68303842402888
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "utr": "ZP",
+    "UTR": "ZP39",
     "c": "#7c3aed",
-    "tip": "restrictie",
+    "color": "#7c3aed",
     "denumire": "ZP-39 Necropola Zăicești RAN 36364.08",
+    "baza_legala": "Legea 422/2001+Aviz 7/U/2024",
+    "POT": null,
+    "CUT": null,
+    "rh": "—",
     "conditii": "EVITARE EDIFICARE. Supraveghere arh. DTAC."
    },
    "geometry": {
@@ -737,10 +900,15 @@
   {
    "type": "Feature",
    "properties": {
-    "utr": "?",
+    "utr": "ZP",
+    "UTR": "ZP26",
     "c": "#6d28d9",
-    "tip": "restrictie",
-    "denumire": "ZP-26 Movila de la Fermă RAN 36364.07"
+    "color": "#6d28d9",
+    "denumire": "ZP-26 Movila de la Fermă RAN 36364.07",
+    "baza_legala": "Legea 422/2001",
+    "POT": null,
+    "CUT": null,
+    "rh": "—"
    },
    "geometry": {
     "type": "Polygon",
@@ -1005,150 +1173,6 @@
       [
        26.72433143170167,
        47.68098026481144
-      ]
-     ]
-    ]
-   }
-  },
-  {
-   "type": "Feature",
-   "properties": {
-    "utr": "?",
-    "c": "#f59e0b",
-    "tip": "lea_linie",
-    "denumire": "LEA 20kV existentă",
-    "tensiune": "20kV"
-   },
-   "geometry": {
-    "type": "LineString",
-    "coordinates": [
-     [
-      26.721972754286114,
-      47.68312514020848
-     ],
-     [
-      26.72193307633671,
-      47.6818951289361
-     ]
-    ]
-   }
-  },
-  {
-   "type": "Feature",
-   "properties": {
-    "utr": "?",
-    "c": "#fef3c7",
-    "tip": "lea_protectie",
-    "denumire": "Culoar LEA 20kV 24m — NECONSTRUIBIL",
-    "tensiune": "20kV"
-   },
-   "geometry": {
-    "type": "Polygon",
-    "coordinates": [
-     [
-      [
-       26.72181759914019,
-       47.683270799272265
-      ],
-      [
-       26.72194231073567,
-       47.68315317183429
-      ],
-      [
-       26.721990090529328,
-       47.683109177431916
-      ],
-      [
-       26.72212338921936,
-       47.68283939696464
-      ],
-      [
-       26.722096523085966,
-       47.68200662480292
-      ],
-      [
-       26.72176963027481,
-       47.681783632829706
-      ],
-      [
-       26.72181759914019,
-       47.683270799272265
-      ]
-     ]
-    ]
-   }
-  },
-  {
-   "type": "Feature",
-   "properties": {
-    "utr": "?",
-    "c": "#dc2626",
-    "tip": "lea_linie",
-    "denumire": "LEA 400kV proiectată",
-    "tensiune": "400kV"
-   },
-   "geometry": {
-    "type": "LineString",
-    "coordinates": [
-     [
-      26.720520973768192,
-      47.680931827908154
-     ],
-     [
-      26.72202504996591,
-      47.68303842402888
-     ]
-    ]
-   }
-  },
-  {
-   "type": "Feature",
-   "properties": {
-    "utr": "?",
-    "c": "#fee2e2",
-    "tip": "lea_protectie",
-    "denumire": "Culoar LEA 400kV 75m — NECONSTRUIBIL",
-    "tensiune": "400kV"
-   },
-   "geometry": {
-    "type": "Polygon",
-    "coordinates": [
-     [
-      [
-       26.721601840116072,
-       47.68166917262419
-      ],
-      [
-       26.719440137479218,
-       47.68019447271714
-      ],
-      [
-       26.721709401957593,
-       47.68337286981429
-      ],
-      [
-       26.721796512926215,
-       47.68329068763331
-      ],
-      [
-       26.72194231073567,
-       47.68315317183429
-      ],
-      [
-       26.721990090529328,
-       47.683109177431916
-      ],
-      [
-       26.72217120951975,
-       47.68274261374268
-      ],
-      [
-       26.722251529668068,
-       47.6825791003351
-      ],
-      [
-       26.721601840116072,
-       47.68166917262419
       ]
      ]
     ]
