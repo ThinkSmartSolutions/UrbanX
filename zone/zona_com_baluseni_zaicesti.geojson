@@ -18,8 +18,7 @@
     "suprafata_mp": 119500,
     "suprafata_ha": 11.95,
     "utr": "5",
-    "UTR": 5,
-    "sursa": "CF 56832 OCPI Botosani — 65 pct Stereo70 — X=Easting Y=Northing"
+    "UTR": 5
    },
    "geometry": {
     "type": "Polygon",

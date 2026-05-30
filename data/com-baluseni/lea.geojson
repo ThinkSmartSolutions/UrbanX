@@ -12,22 +12,19 @@
    "type": "Feature",
    "properties": {
     "tip": "lea_linie",
-    "utr": "LEA400",
     "c": "#f97316",
-    "denumire": "LEA 400kV Suceava–Bălți (aprox. — aviz Transelectrica)",
-    "tensiune_kv": 400,
-    "protectie_m": 75
+    "denumire": "LEA 400kV Suceava-Balti (aprox, aviz Transelectrica)"
    },
    "geometry": {
     "type": "LineString",
     "coordinates": [
      [
-      27.48159551022536,
-      47.136910467305114
+      26.71757343661509,
+      47.68198958672456
      ],
      [
-      27.482903527247572,
-      47.13482519413201
+      26.71978464787208,
+      47.68042950383584
      ]
     ]
    }
@@ -36,36 +33,32 @@
    "type": "Feature",
    "properties": {
     "tip": "lea_protectie",
-    "utr": "LEA400",
     "c": "#fed7aa",
-    "denumire": "Culoar protectie LEA 400kV (75m total) — NECONSTRUIBIL, amenajabil ca parc",
-    "tensiune_kv": 400,
-    "protectie_m": 75,
-    "precizie": "APROX — de confirmat Transelectrica"
+    "denumire": "Culoar protectie LEA 400kV 75m — NECONSTRUIBIL"
    },
    "geometry": {
     "type": "Polygon",
     "coordinates": [
      [
       [
-       27.48120610635265,
-       47.13667411637722
+       26.717217581142403,
+       47.68175291231339
       ],
       [
-       27.48198491751234,
-       47.137146816869006
+       26.71792929526368,
+       47.68222626000213
       ],
       [
-       27.48329016083972,
-       47.135065946325454
+       26.720136108325978,
+       47.68066927316634
       ],
       [
-       27.482516897109583,
-       47.13458444059209
+       26.71943319059649,
+       47.68018973339776
       ],
       [
-       27.48120610635265,
-       47.13667411637722
+       26.717217581142403,
+       47.68175291231339
       ]
      ]
     ]
@@ -75,22 +68,19 @@
    "type": "Feature",
    "properties": {
     "tip": "lea_linie",
-    "utr": "LEA400",
     "c": "#f97316",
-    "denumire": "LEA 400kV Suceava–Bălți (aprox. — aviz Transelectrica)",
-    "tensiune_kv": 400,
-    "protectie_m": 75
+    "denumire": "LEA 400kV Suceava-Balti (aprox, aviz Transelectrica)"
    },
    "geometry": {
     "type": "LineString",
     "coordinates": [
      [
-      27.481906867511974,
-      47.137099444934904
+      26.71781067536127,
+      47.68214736903558
      ],
      [
-      27.483212666773674,
-      47.13501769196163
+      26.720018954488193,
+      47.68058935017925
      ]
     ]
    }
@@ -99,36 +89,32 @@
    "type": "Feature",
    "properties": {
     "tip": "lea_protectie",
-    "utr": "LEA400",
     "c": "#fed7aa",
-    "denumire": "Culoar protectie LEA 400kV (75m total) — NECONSTRUIBIL, amenajabil ca parc",
-    "tensiune_kv": 400,
-    "protectie_m": 75,
-    "precizie": "APROX — de confirmat Transelectrica"
+    "denumire": "Culoar protectie LEA 400kV 75m — NECONSTRUIBIL"
    },
    "geometry": {
     "type": "Polygon",
     "coordinates": [
      [
       [
-       27.481517460909313,
-       47.13686309509766
+       26.717454817771323,
+       47.68191069538017
       ],
       [
-       27.482296277528903,
-       47.137335793408184
+       26.71816653612714,
+       47.682384041557384
       ],
       [
-       27.483599303127665,
-       47.13525844307844
+       26.720370417060998,
+       47.68082911877134
       ],
       [
-       27.48282603387386,
-       47.13477693949833
+       26.719667495093738,
+       47.68034958047956
       ],
       [
-       27.481517460909313,
-       47.13686309509766
+       26.717454817771323,
+       47.68191069538017
       ]
      ]
     ]
@@ -138,22 +124,19 @@
    "type": "Feature",
    "properties": {
     "tip": "lea_linie",
-    "utr": "LEA400",
     "c": "#f97316",
-    "denumire": "LEA 400kV Suceava–Bălți (aprox. — aviz Transelectrica)",
-    "tensiune_kv": 400,
-    "protectie_m": 75
+    "denumire": "LEA 400kV Suceava-Balti (aprox, aviz Transelectrica)"
    },
    "geometry": {
     "type": "LineString",
     "coordinates": [
      [
-      27.48221822698135,
-      47.13728842169271
+      26.71804791551897,
+      47.682305150842744
      ],
      [
-      27.483521808508065,
-      47.13521018893041
+      26.720253262516916,
+      47.680749196030376
      ]
     ]
    }
@@ -162,36 +145,32 @@
    "type": "Feature",
    "properties": {
     "tip": "lea_protectie",
-    "utr": "LEA400",
     "c": "#fed7aa",
-    "denumire": "Culoar protectie LEA 400kV (75m total) — NECONSTRUIBIL, amenajabil ca parc",
-    "tensiune_kv": 400,
-    "protectie_m": 75,
-    "precizie": "APROX — de confirmat Transelectrica"
+    "denumire": "Culoar protectie LEA 400kV 75m — NECONSTRUIBIL"
    },
    "geometry": {
     "type": "Polygon",
     "coordinates": [
      [
       [
-       27.481828817648758,
-       47.137052072946055
+       26.717692055811746,
+       47.68206847794306
       ],
       [
-       27.48260763972828,
-       47.13752476907535
+       26.718403778402124,
+       47.68254182260869
       ],
       [
-       27.483908447623925,
-       47.135450938970536
+       26.720604727208624,
+       47.68098896388407
       ],
       [
-       27.483135172846396,
-       47.134969437543724
+       26.719901801003562,
+       47.68050942706904
       ],
       [
-       27.481828817648758,
-       47.137052072946055
+       26.717692055811746,
+       47.68206847794306
       ]
      ]
     ]
