@@ -4482,19 +4482,17 @@ async function _loadPUGOnMap(geojsonUrl, cityName, fitCoords) {
           return true;
         })
         .map(f => {
-          try {
-            const coords = f.geometry.type === 'MultiPolygon'
-              ? f.geometry.coordinates[0][0]
-              : f.geometry.coordinates[0];
-            const lons = coords.map(c=>c[0]), lats = coords.map(c=>c[1]);
-            return {
-              utr: f.properties.utr,
-              UTR: f.properties.UTR || null,
-              geom: f.geometry,
-              bb: [Math.min(...lons), Math.min(...lats), Math.max(...lons), Math.max(...lats)]
-            };
-          } catch(_fe) { return null; }
-        }).filter(Boolean);
+          const coords = f.geometry.type === 'MultiPolygon'
+            ? f.geometry.coordinates[0][0]
+            : f.geometry.coordinates[0];
+          const lons = coords.map(c=>c[0]), lats = coords.map(c=>c[1]);
+          return {
+            utr: f.properties.utr,
+            UTR: f.properties.UTR || null,
+            geom: f.geometry,
+            bb: [Math.min(...lons), Math.min(...lats), Math.max(...lons), Math.max(...lats)]
+          };
+        });
       window.S.pug = geojson; // stocăm geojson pentru FunctionEngine
     } catch(e) { console.warn('[PUG pugIdx]', e.message); }
   }
@@ -4782,12 +4780,12 @@ Object.assign(window._PUG_REGISTRY, {
   'RO-IS-01': { id:'municipiul-iasi',    name:'Municipiul Iași',    pugFile:'data/municipiul-iasi/pug.geojson',              reguli:'data/municipiul-iasi/reguli.json' },
   'RO-SV-01': { id:'municipiul-suceava', name:'Municipiul Suceava', pugFile:'js/data/municipiul-suceava/pug.geojson',         reguli:'js/data/municipiul-suceava/reguli.json' },
   'RO-BT-01': { id:'municipiul-botosani',name:'Municipiul Botoșani',pugFile:'data/municipiul-botosani/pug.geojson', reguli:'js/data/municipiul-botosani/reguli.json', cadastruFile:'data/municipiul-botosani/cadastru.geojson' },
-  'RO-BT-18073': { id:'com-baluseni', name:'Comuna Bălușeni', pugFile:'data/com-baluseni/pug.geojson', reguli:'js/data/com-baluseni/reguli.json' },
+  'RO-BT-18073': { id:'com-baluseni', name:'Comuna Bălușeni', pugFile:'data/com-baluseni/pug.geojson', reguli:'js/data/com-baluseni/reguli.json' ,  cadastruFile:'zone/zona_com_baluseni_zaicesti.geojson' },
   // ── Comune cu RLU — chei IDENTICE cu TCI._EXTRA_UATS ─────────────────────
   'RO-IS-95042': { id:'comuna-miroslava', name:'Comuna Miroslava', pugFile:'data/comuna-miroslava/pug.geojson', reguli:'data/comuna-miroslava/reguli.json' },
   'RO-IS-95087': { id:'comuna-rediu',     name:'Comuna Rediu',     pugFile:'data/comuna-rediu/pug.geojson',     reguli:'data/comuna-rediu/reguli.json' },
   'RO-IS-94889': { id:'comuna-aroneanu',  name:'Comuna Aroneanu',  pugFile:'data/comuna-aroneanu/pug.geojson',  reguli:'data/comuna-aroneanu/reguli.json' },
-  'RO-BT-18073': { id:'com-baluseni',  name:'Comuna Bălușeni',  pugFile:'data/com-baluseni/pug.geojson',  reguli:'js/data/com-baluseni/reguli.json' },
+  'RO-BT-18073': { id:'com-baluseni',  name:'Comuna Bălușeni',  pugFile:'data/com-baluseni/pug.geojson',  reguli:'js/data/com-baluseni/reguli.json' ,  cadastruFile:'zone/zona_com_baluseni_zaicesti.geojson' },
   'RO-IS-94951': { id:'comuna-holboca',   name:'Comuna Holboca',   pugFile:'data/comuna-holboca/pug.geojson',   reguli:'data/comuna-holboca/reguli.json' },
   'RO-GL-77595': { id:'comuna-cuzavoda',  name:'Comuna Cuza Vodă', pugFile:'data/comuna-cuzavoda/pug.geojson',  reguli:'data/comuna-cuzavoda/reguli.json' },
   'RO-BT-38063': { id:'comuna-mihaieminescu', name:'Comuna Mihai Eminescu', pugFile:'data/comuna-mihaieminescu/pug.geojson', reguli:'data/comuna-mihaieminescu/reguli.json' },
@@ -5272,7 +5270,7 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
     {id:'comuna-aroneanu',      name:'Aroneanu',       judet:'iași',           badge:'✅ RLU',     key:'RO-IS-94889'},
     {id:'comuna-holboca',       name:'Holboca',        judet:'iași',           badge:'✅ RLU',     key:'RO-IS-94951'},
     {id:'comuna-popricani',     name:'Popricani',      judet:'iași',           badge:'🗺 Limite', key:'RO-IS-95424'},
-    {id:'com-baluseni',      name:'Bălușeni',       judet:'botoșani',       badge:'✅ RLU',     key:'RO-BT-18073'},
+    {id:'com-baluseni',      name:'Bălușeni',       judet:'botoșani',       badge:'✅ RLU',     key:'RO-BT-18073',  cadastruFile:'zone/zona_com_baluseni_zaicesti.geojson' },
     {id:'comuna-mihaieminescu', name:'Mihai Eminescu', judet:'botoșani',       badge:'✅ RLU',     key:'RO-BT-38063'},
     {id:'comuna-cuzavoda',      name:'Cuza Vodă',      judet:'galați/vrancea', badge:'✅ RLU',     key:'RO-GL-77595'},
   ];
