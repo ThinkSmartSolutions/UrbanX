@@ -1892,7 +1892,57 @@ window.VTour = (function(){
     const RV = window._RV;
     const baseY = anchor.baseY;
 
-    // Interior — per cameră
+    // ── 0. AUTO-DETECT FAȚADA PRINCIPALĂ + INTRARE — din _RV.floors[0].doors cu type:'main'
+    let mainEntrance = null; // { worldX, worldZ, normalX, normalZ, axis }
+    if(RV && Array.isArray(RV.floors) && RV.floors.length){
+      const f0 = RV.floors[0];
+      const bW = (RV.building && RV.building.bW) || anchor.bW;
+      const bD = (RV.building && RV.building.bD) || anchor.bD;
+      const ox = anchor.cx - bW/2;
+      const oz = anchor.cz - bD/2;
+      const mainDoor = (f0.doors || []).find(d => d.type === 'main') || (f0.doors || [])[0];
+      if(mainDoor){
+        // Determinăm latura din coordonatele relative (mainDoor.y == bD ⇒ fațada SUD)
+        const dx = mainDoor.x + (mainDoor.w || 1.8)/2;
+        const dy = mainDoor.y;
+        let normalX = 0, normalZ = 0;
+        if(dy >= bD - 0.5)       normalZ = 1;  // S
+        else if(dy <= 0.5)       normalZ = -1; // N
+        else if(dx >= bW - 0.5)  normalX = 1;  // E
+        else if(dx <= 0.5)       normalX = -1; // V
+        else                     normalZ = 1;  // fallback S
+        mainEntrance = {
+          worldX: ox + dx,
+          worldZ: oz + dy,
+          normalX, normalZ,
+          axis: (normalX !== 0) ? 'V' : 'H',
+        };
+        STATE._mainEntrance = mainEntrance;
+        console.log('[VTour] Intrare principală detectată:', mainEntrance);
+      }
+    }
+
+    // ── 1. HOTSPOTS EXTERIOR — start în fața intrării principale (street view)
+    if(mainEntrance){
+      // a. Stradă · în fața intrării (6m depărtare pe normala fațadei)
+      STATE.hotspots.push({
+        x: mainEntrance.worldX + mainEntrance.normalX * 6,
+        y: baseY + STATE.eyeHeight,
+        z: mainEntrance.worldZ + mainEntrance.normalZ * 6,
+        label: 'Stradă · Intrare principală', kind: 'exterior', floorIdx: -1,
+        lookAt: { x: mainEntrance.worldX, z: mainEntrance.worldZ },
+      });
+      // b. Pe pragul ușii (1.5m exterior)
+      STATE.hotspots.push({
+        x: mainEntrance.worldX + mainEntrance.normalX * 1.5,
+        y: baseY + STATE.eyeHeight,
+        z: mainEntrance.worldZ + mainEntrance.normalZ * 1.5,
+        label: 'Pragul ușii — intră în clădire', kind: 'exterior', floorIdx: -1,
+        lookAt: { x: mainEntrance.worldX, z: mainEntrance.worldZ },
+      });
+    }
+
+    // ── 2. HOTSPOTS INTERIOR — per cameră
     if(RV && Array.isArray(RV.floors) && RV.floors.length){
       const bW = (RV.building && RV.building.bW) || anchor.bW;
       const bD = (RV.building && RV.building.bD) || anchor.bD;
@@ -1910,7 +1960,8 @@ window.VTour = (function(){
             living:'Living', bedroom:'Dormitor 1', bedroom2:'Dormitor 2', bedroom3:'Dormitor 3',
             kitchen:'Bucătărie', bath:'Baie', wc:'WC', hall:'Hol',
             office:'Birou', meeting:'Sală ședințe', reception:'Recepție',
-            commercial:'Comercial', core:'Casa scării', storage:'Depozit'
+            commercial:'Spațiu comercial', core:'🪜 Casa scării · 🛗 Lift',
+            storage:'Depozit',
           };
           const lbl = (labels[r.t] || r.t || 'Cameră') + (RV.floors.length > 1 ? ` · E${fIdx}` : '');
           STATE.hotspots.push({
@@ -1923,28 +1974,60 @@ window.VTour = (function(){
       });
     }
 
-    // Exterior cardinal
-    const exterior = [
-      { x: anchor.cx,                        z: anchor.cz + anchor.bD*0.9,  label: 'Exterior · Față' },
-      { x: anchor.cx + anchor.bW*0.9,        z: anchor.cz,                  label: 'Exterior · Dreapta' },
-      { x: anchor.cx,                        z: anchor.cz - anchor.bD*0.9,  label: 'Exterior · Spate' },
-      { x: anchor.cx - anchor.bW*0.9,        z: anchor.cz,                  label: 'Exterior · Stânga' },
-      { x: anchor.cx,                        z: anchor.cz + anchor.bD*2.0,  label: 'Stradă' },
-    ];
-    exterior.forEach(p => {
-      STATE.hotspots.push({
-        x: p.x, y: baseY + STATE.eyeHeight, z: p.z, label: p.label, kind: 'exterior', floorIdx: -1,
-      });
-    });
+    // ── 3. HOTSPOT PENTHOUSE TERASĂ — dacă există penthouse activ
+    if(aedisModel.flags.penthouseActiv){
+      const penthouseFloor = aedisModel.floors.find(f => f.isPenthouse);
+      if(penthouseFloor){
+        STATE.hotspots.push({
+          x: anchor.cx + anchor.bW * 0.25,
+          y: baseY + penthouseFloor.topY + 0.3, // pe acoperișul penthouse-ului
+          z: anchor.cz + anchor.bD * 0.25,
+          label: '🌅 Terasă Penthouse · Vedere panoramică',
+          kind: 'terrace', floorIdx: penthouseFloor.idx,
+        });
+      }
+    }
 
-    // Markeri 3D
+    // ── 4. HOTSPOTS EXTERIOR CARDINAL (mai puține — doar dacă nu există intrare detectată)
+    if(!mainEntrance){
+      const exterior = [
+        { x: anchor.cx,                z: anchor.cz + anchor.bD*0.9, label: 'Exterior · Față' },
+        { x: anchor.cx + anchor.bW*0.9, z: anchor.cz,                label: 'Exterior · Dreapta' },
+        { x: anchor.cx,                z: anchor.cz - anchor.bD*0.9, label: 'Exterior · Spate' },
+        { x: anchor.cx - anchor.bW*0.9, z: anchor.cz,                label: 'Exterior · Stânga' },
+      ];
+      exterior.forEach(p => {
+        STATE.hotspots.push({
+          x: p.x, y: baseY + STATE.eyeHeight, z: p.z, label: p.label, kind: 'exterior', floorIdx: -1,
+        });
+      });
+    } else {
+      // Cu intrare detectată, adăugăm doar înconjurul clădirii (3 puncte)
+      STATE.hotspots.push({
+        x: anchor.cx + anchor.bW*0.9, z: anchor.cz, y: baseY + STATE.eyeHeight,
+        label: 'Exterior · Lateral E', kind: 'exterior', floorIdx: -1,
+      });
+      STATE.hotspots.push({
+        x: anchor.cx - anchor.bW*0.9, z: anchor.cz, y: baseY + STATE.eyeHeight,
+        label: 'Exterior · Lateral V', kind: 'exterior', floorIdx: -1,
+      });
+      STATE.hotspots.push({
+        x: anchor.cx, z: anchor.cz - anchor.bD*0.9, y: baseY + STATE.eyeHeight,
+        label: 'Exterior · Spate', kind: 'exterior', floorIdx: -1,
+      });
+    }
+
+    // Markeri 3D cu indicator special pentru INTRARE
     STATE.hotspots.forEach((hp, i) => {
       const geo = new THREE.CylinderGeometry(0.32, 0.32, 0.05, 24);
       const isInt = hp.kind === 'interior';
+      const isEntry = hp.label.includes('Pragul') || hp.label.includes('Intrare');
+      const isTerrace = hp.kind === 'terrace';
+      const colorMain = isEntry ? 0xfbbf24 : isTerrace ? 0xec4899 : isInt ? 0x00ddff : 0x00ff88;
+      const colorEm   = isEntry ? 0xd97706 : isTerrace ? 0xbe185d : isInt ? 0x0099cc : 0x00cc44;
       const mat = new THREE.MeshStandardMaterial({
-        color: isInt ? 0x00ddff : 0x00ff88,
-        emissive: isInt ? 0x0099cc : 0x00cc44,
-        emissiveIntensity: 0.7,
+        color: colorMain, emissive: colorEm,
+        emissiveIntensity: isEntry ? 1.2 : 0.7,
         roughness: 0.4, metalness: 0.1,
         transparent: true, opacity: 0.88,
       });
@@ -1955,7 +2038,7 @@ window.VTour = (function(){
       scene.add(disc);
     });
 
-    console.log(`[VTour] ✅ Hotspots: ${STATE.hotspots.length} (int:${STATE.hotspots.filter(h=>h.kind==='interior').length} ext:${STATE.hotspots.filter(h=>h.kind==='exterior').length})`);
+    console.log(`[VTour] ✅ Hotspots: ${STATE.hotspots.length} (int:${STATE.hotspots.filter(h=>h.kind==='interior').length} ext:${STATE.hotspots.filter(h=>h.kind==='exterior').length} terrace:${STATE.hotspots.filter(h=>h.kind==='terrace').length})`);
   }
 
   // ═════════════════════════════════════════════════════════════════════════
@@ -2921,6 +3004,8 @@ window.VTour = (function(){
       const lbl = document.getElementById('vtour-cur-label');
       if(lbl) lbl.textContent = cur.label;
     }
+    // ── Navigator vertical: când utilizatorul e ÎN casa scării, oferă "Urcă/Coboară"
+    _updateStairsNavigator();
     // Re-render floorplan (cu poziția nouă a userului)
     _renderFloorplan();
     // Actualizăm pozițiile etichetelor de măsurătoare
@@ -2938,6 +3023,82 @@ window.VTour = (function(){
         label.style.display = (v.z > 1 || v.z < -1) ? 'none' : '';
       });
     }
+  }
+
+  // Buton "Urcă/Coboară" apare lipit jos-stânga când utilizatorul e ÎN hotspot 'core'
+  function _updateStairsNavigator(){
+    if(STATE.mode !== 'walkthrough'){
+      const ex = document.getElementById('vtour-stairs-nav');
+      if(ex) ex.style.display = 'none';
+      return;
+    }
+    // Cea mai apropiată hotspot core de poziția curentă
+    if(!STATE.tourCam) return;
+    const cx = STATE.tourCam.position.x, cz = STATE.tourCam.position.z;
+    let inCore = false;
+    let curFloor = STATE.currentFloorIdx;
+    for(const h of STATE.hotspots){
+      if(h.kind !== 'interior' || h.roomType !== 'core') continue;
+      const d = Math.hypot(h.x - cx, h.z - cz);
+      const sameFloor = (h.floorIdx === curFloor);
+      if(sameFloor && d < 3.5){ inCore = true; break; }
+    }
+    let nav = document.getElementById('vtour-stairs-nav');
+    if(!inCore){
+      if(nav) nav.style.display = 'none';
+      return;
+    }
+    if(!nav){
+      nav = document.createElement('div');
+      nav.id = 'vtour-stairs-nav';
+      nav.style.cssText = `
+        position:absolute;bottom:160px;left:24px;
+        background:rgba(0,0,0,.88);border:1px solid rgba(167,139,250,.5);
+        border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:8px;
+        z-index:60;pointer-events:auto;backdrop-filter:blur(12px);
+        box-shadow:0 8px 24px rgba(0,0,0,.5);
+        min-width:140px;
+      `;
+      STATE.overlay.appendChild(nav);
+    }
+    nav.style.display = '';
+    const niv = window._RV?.floors?.length || 1;
+    const canUp   = curFloor < niv - 1;
+    const canDown = curFloor > 0;
+    nav.innerHTML = `
+      <div style="font-size:9px;color:#a78bfa;font-weight:700;letter-spacing:.7px;text-align:center;text-transform:uppercase">🪜 Casa scării</div>
+      <button data-act="up" ${!canUp ? 'disabled' : ''}
+        style="background:${canUp?'linear-gradient(90deg,#3b82f6,#8b5cf6)':'rgba(255,255,255,.04)'};color:${canUp?'white':'#475569'};
+        border:none;padding:10px 14px;border-radius:8px;font-size:11px;font-weight:700;
+        cursor:${canUp?'pointer':'not-allowed'};letter-spacing:.4px">
+        ↑ Urcă la E${curFloor + 1}
+      </button>
+      <button data-act="down" ${!canDown ? 'disabled' : ''}
+        style="background:${canDown?'rgba(96,165,250,.18)':'rgba(255,255,255,.04)'};color:${canDown?'#60a5fa':'#475569'};
+        border:1px solid ${canDown?'rgba(96,165,250,.4)':'transparent'};padding:10px 14px;border-radius:8px;font-size:11px;font-weight:700;
+        cursor:${canDown?'pointer':'not-allowed'};letter-spacing:.4px">
+        ↓ Coboară la E${curFloor - 1}
+      </button>
+    `;
+    // Event handlers (refresh la fiecare frame e ok pentru că textul se schimbă cu etaj)
+    nav.querySelectorAll('button').forEach(b => {
+      b.onclick = () => {
+        const act = b.dataset.act;
+        const targetFloor = act === 'up' ? curFloor + 1 : curFloor - 1;
+        if(targetFloor < 0 || targetFloor >= niv) return;
+        // Găsim hotspot core la etajul țintă
+        const coreOnTarget = STATE.hotspots.findIndex(h =>
+          h.kind === 'interior' && h.roomType === 'core' && h.floorIdx === targetFloor);
+        if(coreOnTarget >= 0){
+          _glideTo(coreOnTarget);
+        } else {
+          // fallback: primul hotspot interior de pe etajul țintă
+          const anyOnTarget = STATE.hotspots.findIndex(h =>
+            h.kind === 'interior' && h.floorIdx === targetFloor);
+          if(anyOnTarget >= 0) _glideTo(anyOnTarget);
+        }
+      };
+    });
   }
 
   function _setLoadingProgress(pct, msg){
@@ -3204,18 +3365,25 @@ window.VTour = (function(){
     STATE.tourCam = new THREE.PerspectiveCamera(72, aspect, 0.05, 800);
     V3D.scene.add(STATE.tourCam);
 
-    // Teleport la primul hotspot interior
-    const firstInt = STATE.hotspots.findIndex(h => h.kind === 'interior');
-    const firstIdx = firstInt >= 0 ? firstInt : 0;
+    // Teleport la primul hotspot — preferăm EXTERIORUL "Stradă · Intrare" (start ca Matterport)
+    let firstIdx = STATE.hotspots.findIndex(h => h.label && h.label.includes('Stradă · Intrare'));
+    if(firstIdx < 0) firstIdx = STATE.hotspots.findIndex(h => h.kind === 'interior');
+    if(firstIdx < 0) firstIdx = 0;
     if(STATE.hotspots[firstIdx]){
       const h = STATE.hotspots[firstIdx];
       STATE.tourCam.position.set(h.x, h.y, h.z);
       STATE.currentHotspot = firstIdx;
       STATE.currentFloorIdx = h.floorIdx >= 0 ? h.floorIdx : 0;
+      // Yaw inițial spre intrarea principală dacă există
+      if(h.lookAt){
+        const dx = h.lookAt.x - h.x;
+        const dz = h.lookAt.z - h.z;
+        STATE.yaw = Math.atan2(-dx, -dz);
+      }
     } else {
       STATE.tourCam.position.set(anchor.cx, anchor.baseY + STATE.eyeHeight, anchor.cz + anchor.bD);
     }
-    STATE.yaw = 0; STATE.pitch = 0;
+    STATE.pitch = 0;
 
     // 13. Post-processing
     STATE.composer = _setupComposer(V3D.r, V3D.scene, STATE.tourCam);
@@ -3507,17 +3675,112 @@ window.VTour = (function(){
   // INJECT BUTTON — buton "Tur 3D" în UI viewer
   // ═════════════════════════════════════════════════════════════════════════
 
+  // ═════════════════════════════════════════════════════════════════════════
+  // ENTRANCE MARKER — săgeată 3D deasupra ușii principale
+  // Apare în viewer 3D AEDIS (înainte de tur), să vadă utilizatorul pe unde intră
+  // ═════════════════════════════════════════════════════════════════════════
+  let _entranceMarker = null;
+
+  function toggleEntranceMarker(){
+    if(_entranceMarker){
+      const scene = window.V3D && window.V3D.scene;
+      if(scene && _entranceMarker.parent) _entranceMarker.parent.remove(_entranceMarker);
+      if(_entranceMarker._vtourAnim) clearInterval(_entranceMarker._vtourAnim);
+      _entranceMarker.traverse(o => {
+        if(o.geometry) o.geometry.dispose();
+        if(o.material) o.material.dispose();
+      });
+      _entranceMarker = null;
+      // Update buton state
+      const btn = document.getElementById('vtour-entrance-btn');
+      if(btn){ btn.style.background = 'rgba(251,191,36,.1)'; btn.style.color = '#fbbf24'; }
+      return false;
+    }
+    const shown = _showEntranceMarker();
+    if(shown){
+      const btn = document.getElementById('vtour-entrance-btn');
+      if(btn){ btn.style.background = 'rgba(251,191,36,.35)'; btn.style.color = '#fff8e0'; }
+    }
+    return shown;
+  }
+
+  function _showEntranceMarker(){
+    const V3D = window.V3D;
+    const THREE = window.THREE;
+    if(!V3D || !V3D.scene || !THREE) return false;
+    if(!Array.isArray(V3D.aedis) || !V3D.aedis.length) return false;
+    const anchor = _computeAnchor(V3D.scene);
+    let wx, wy, wz;
+    if(window._RV && window._RV.floors && window._RV.floors[0]){
+      const f0 = window._RV.floors[0];
+      const bW = (window._RV.building && window._RV.building.bW) || anchor.bW;
+      const bD = (window._RV.building && window._RV.building.bD) || anchor.bD;
+      const mainDoor = (f0.doors || []).find(d => d.type === 'main') || (f0.doors || [])[0];
+      if(mainDoor){
+        const ox = anchor.cx - bW/2;
+        const oz = anchor.cz - bD/2;
+        wx = ox + mainDoor.x + (mainDoor.w || 1.8)/2;
+        wz = oz + mainDoor.y;
+      } else {
+        wx = anchor.cx;
+        wz = anchor.cz + bD/2;
+      }
+      const aedisModel = _readAedisModel();
+      const hParter = aedisModel.floors[0]?.hNiv || 3.5;
+      wy = anchor.baseY + hParter + 0.8;
+    } else {
+      wx = anchor.cx; wz = anchor.cz + anchor.bD/2; wy = anchor.baseY + 4;
+    }
+    const group = _makeEntranceMarkerMesh(THREE, wx, wy, wz);
+    V3D.scene.add(group);
+    _entranceMarker = group;
+    return true;
+  }
+
+  function _makeEntranceMarkerMesh(THREE, x, y, z){
+    const group = new THREE.Group();
+    group._vtourEntranceMarker = true;
+    group.position.set(x, y, z);
+    const cone = new THREE.Mesh(
+      new THREE.ConeGeometry(1.0, 2.2, 12),
+      new THREE.MeshStandardMaterial({
+        color: 0xfbbf24, emissive: 0xfbbf24, emissiveIntensity: 1.4,
+        transparent: true, opacity: 0.95, roughness: 0.4,
+      })
+    );
+    cone.rotation.x = Math.PI;
+    cone.position.y = 1.7;
+    group.add(cone);
+    const ring = new THREE.Mesh(
+      new THREE.TorusGeometry(0.9, 0.06, 8, 32),
+      new THREE.MeshStandardMaterial({
+        color: 0xfbbf24, emissive: 0xfbbf24, emissiveIntensity: 1.6,
+        transparent: true, opacity: 0.85,
+      })
+    );
+    ring.rotation.x = Math.PI/2;
+    ring.position.y = 0.4;
+    group.add(ring);
+    group._vtourAnim = setInterval(() => {
+      if(!group.parent) { clearInterval(group._vtourAnim); return; }
+      const t = performance.now() / 500;
+      cone.position.y = 1.7 + Math.sin(t) * 0.18;
+      ring.scale.setScalar(1 + Math.sin(t * 1.4) * 0.12);
+      ring.material.opacity = 0.55 + Math.sin(t * 1.4) * 0.3;
+      if(window.V3D) window.V3D._dirty = true;
+    }, 50);
+    return group;
+  }
+
   function _injectButton(){
-    // Funcție internă — încearcă să injecteze butonul ÎN bara viewer-ului 3D (#v3d-topbar)
-    // Se rechemă automat când modal-ul viewer-ului se deschide (MutationObserver).
     const tryInject = () => {
       if(document.getElementById('vtour-launch-btn')) return true;
-      // Locul corect: a doua "div" din #v3d-topbar (rândul cu butoanele light/ctx/dist/legend)
       const topbar = document.getElementById('v3d-topbar');
       if(!topbar) return false;
       const rows = topbar.querySelectorAll(':scope > div');
-      // Rând 2 (controale orizontale cu overflow-x:auto)
       const targetRow = rows[1] || topbar;
+
+      // 1. Buton TUR VIRTUAL
       const btn = document.createElement('button');
       btn.id = 'vtour-launch-btn';
       btn.title = 'Tur Virtual 3D Matterport — intră în clădire';
@@ -3534,19 +3797,27 @@ window.VTour = (function(){
       btn.addEventListener('mouseenter', () => btn.style.boxShadow = '0 0 16px rgba(0,255,136,.35)');
       btn.addEventListener('mouseleave', () => btn.style.boxShadow = '0 0 8px rgba(0,255,136,.15)');
       targetRow.appendChild(btn);
+
+      // 2. Buton ARATĂ INTRARE — marker auriu deasupra ușii principale (vizibil în viewer 3D AEDIS)
+      const entBtn = document.createElement('button');
+      entBtn.id = 'vtour-entrance-btn';
+      entBtn.title = 'Marchează fațada principală — săgeată deasupra ușii de intrare';
+      entBtn.innerHTML = '🚪 Intrare';
+      entBtn.style.cssText = `
+        background:rgba(251,191,36,.1);color:#fbbf24;
+        border:1px solid rgba(251,191,36,.4);border-radius:8px;
+        padding:5px 11px;font-size:11px;font-weight:700;cursor:pointer;
+        flex-shrink:0;min-height:36px;touch-action:manipulation;
+        letter-spacing:.3px;white-space:nowrap;
+      `;
+      entBtn.addEventListener('click', () => toggleEntranceMarker());
+      targetRow.appendChild(entBtn);
+
       return true;
     };
 
-    // Încearcă imediat dacă modal-ul există
     if(tryInject()) return;
-
-    // Altfel, observă DOM-ul pentru când se deschide modal-ul viewer3D
-    const observer = new MutationObserver(() => {
-      if(tryInject()){
-        // Continuăm să observăm — utilizatorul poate închide+redeschide modal-ul
-        // și DOM-ul se reconstruiește. Re-injectăm la următoarea deschidere.
-      }
-    });
+    const observer = new MutationObserver(() => { tryInject(); });
     observer.observe(document.body, { childList: true, subtree: true });
   }
 
@@ -3577,6 +3848,7 @@ window.VTour = (function(){
   // ═════════════════════════════════════════════════════════════════════════
   return {
     init, start, stop,
+    toggleEntranceMarker,
     _fpFloor,
     // Debug helpers
     _state: STATE, _cfg: CFG,
