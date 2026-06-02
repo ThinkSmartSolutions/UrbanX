@@ -3040,7 +3040,7 @@ window.VTour = (function(){
     if(STATE.active){ console.warn('[VTour] deja activ'); return; }
     options = options || {};
     const V3D = window.V3D;
-    if(!V3D || !V3D.scene || !V3D.renderer){
+    if(!V3D || !V3D.scene || !V3D.r){
       _showError('Viewer 3D nu este activ',
         'Deschide întâi viewer-ul 3D apăsând "Vedere 3D" din panoul AEDIS, apoi apasă din nou Tur Virtual.');
       return;
@@ -3057,8 +3057,8 @@ window.VTour = (function(){
     if(!THREE){ _showError('Three.js nu este încărcat', ''); return; }
 
     STATE.active = true;
-    STATE.canvas = V3D.renderer.domElement;
-    STATE.renderer = V3D.renderer;
+    STATE.canvas = V3D.r.domElement;
+    STATE.renderer = V3D.r;
     STATE.collisionMeshes = [];
     STATE.currentFloorIdx = 0;
 
@@ -3091,7 +3091,7 @@ window.VTour = (function(){
 
     // 5. HDRI încercăm să încărcăm (graceful fallback)
     try {
-      await _loadHDRI(V3D.renderer, V3D.scene, CFG.hdriExterior);
+      await _loadHDRI(V3D.r, V3D.scene, CFG.hdriExterior);
     } catch(e){}
     _setLoadingProgress(45, 'Construiesc volum exterior…');
 
@@ -3139,14 +3139,14 @@ window.VTour = (function(){
     STATE.yaw = 0; STATE.pitch = 0;
 
     // 13. Post-processing
-    STATE.composer = _setupComposer(V3D.renderer, V3D.scene, STATE.tourCam);
+    STATE.composer = _setupComposer(V3D.r, V3D.scene, STATE.tourCam);
 
     // 14. Tone mapping pe renderer (ACES)
-    V3D.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    V3D.renderer.toneMappingExposure = 1.05;
-    V3D.renderer.outputEncoding = THREE.sRGBEncoding;
-    V3D.renderer.shadowMap.enabled = true;
-    V3D.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    V3D.r.toneMapping = THREE.ACESFilmicToneMapping;
+    V3D.r.toneMappingExposure = 1.05;
+    V3D.r.outputEncoding = THREE.sRGBEncoding;
+    V3D.r.shadowMap.enabled = true;
+    V3D.r.shadowMap.type = THREE.PCFSoftShadowMap;
 
     // 15. Input
     _setupInput();
@@ -3182,7 +3182,7 @@ window.VTour = (function(){
     _teardownInput();
 
     const scene = window.V3D && window.V3D.scene;
-    const renderer = window.V3D && window.V3D.renderer;
+    const renderer = window.V3D && window.V3D.r;
 
     // Eliminăm grupurile generate
     [STATE.interiorGroup, STATE.volumeGroup, STATE.roofGroup, STATE.furnitureGroup, STATE.mattertagGroup].forEach(g => {
@@ -3274,8 +3274,8 @@ window.VTour = (function(){
     _texCache.clear();
 
     // Render scene fără tur (pentru a actualiza vizual)
-    if(renderer && scene && window.V3D.camera){
-      try { renderer.render(scene, window.V3D.camera); } catch(e){}
+    if(renderer && scene && window.V3D.cam){
+      try { renderer.render(scene, window.V3D.cam); } catch(e){}
     }
 
     console.log('[VTour] ✅ STOP complet');
