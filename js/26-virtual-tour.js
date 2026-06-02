@@ -102,7 +102,7 @@ window.VTour = (function(){
     hdriExterior: 'assets/tur3d/hdri/exterior.hdr',
     glideDuration: 0.85,
     collisionPadding: 0.32,
-    shadowMapSize: 2048,
+    shadowMapSize: 1024,
     maxAnisotropy: 8,
     enableSSAO: true,
     enableBloom: true,
@@ -111,7 +111,7 @@ window.VTour = (function(){
     enableMattertags: true,
     enableDollhouse: true,
     enableFloorplan: true,
-    skipExteriorRebuild: false,  // dacă AEDIS deja a construit volumul corect, nu-l rebuildăm
+    skipExteriorRebuild: true,  // dacă AEDIS deja a construit volumul corect, nu-l rebuildăm
   };
 
   // Cache materiale
@@ -1751,10 +1751,10 @@ window.VTour = (function(){
     const foliage = _foliageMaterial();
     const fh = height || 1.3;
     const fw = fh * 0.6;
-    for(let i = 0; i < 3; i++){
+    for(let i = 0; i < 2; i++){
       const plane = new THREE.Mesh(new THREE.PlaneGeometry(fw, fh), foliage);
       plane.position.set(cx, baseY + 0.33 + fh/2, cz);
-      plane.rotation.y = (i * Math.PI / 3);
+      plane.rotation.y = (i * Math.PI / 2);
       plane.castShadow = true; plane.receiveShadow = true;
       group.add(plane);
     }
@@ -1791,11 +1791,9 @@ window.VTour = (function(){
     }
     // PointLight real
     if(CFG.enableLighting){
-      const pl = new THREE.PointLight(0xfff0d0, variant === 'compact' ? 1.2 : 2.0, 8, 2);
+      const pl = new THREE.PointLight(0xfff0d0, variant === 'compact' ? 1.0 : 1.6, 6, 2);
       pl.position.set(cx, ceilY - 0.3, cz);
-      pl.castShadow = true;
-      pl.shadow.mapSize.set(512, 512);
-      pl.shadow.bias = -0.005;
+      pl.castShadow = false; // perf — prea multe lumini interior cu shadow
       group.add(pl);
     }
   }
@@ -3062,6 +3060,21 @@ window.VTour = (function(){
     STATE.collisionMeshes = [];
     STATE.currentFloorIdx = 0;
 
+    // Dacă folosim AEDIS shell (default), adăugăm mesh-urile lui la collision
+    // pentru ca utilizatorul să se ciocnească de pereții clădirii când e exterior
+    if(CFG.skipExteriorRebuild && Array.isArray(V3D.aedis)){
+      V3D.aedis.forEach(m => {
+        if(m && m.isMesh) STATE.collisionMeshes.push(m);
+      });
+    }
+
+    // Releveu lipsă? Avertizăm user — turul rămâne funcțional doar exterior
+    const hasReleveu = window._RV && Array.isArray(window._RV.floors) && window._RV.floors.length > 0;
+    if(!hasReleveu){
+      _showInfoToast('Tur exterior',
+        'Pentru această parcelă nu există releveu — vei vedea doar exteriorul clădirii. Pentru tur interior complet Matterport (camere, mobilier, etc.) încarcă un fișier releveu .json în panoul AEDIS și redeschide turul.');
+    }
+
     // Save state previous pentru restore
     STATE.prevFog = V3D.scene.fog;
     STATE.prevBg = V3D.scene.background;
@@ -3319,6 +3332,36 @@ window.VTour = (function(){
     `;
     document.body.appendChild(el);
     setTimeout(() => { if(el.parentNode) el.remove(); }, 12000);
+  }
+
+  // Toast info — non-blocant, jos dreapta, auto-dismiss 8s
+  function _showInfoToast(title, desc){
+    const ex = document.getElementById('vtour-info-toast');
+    if(ex) ex.remove();
+    const el = document.createElement('div');
+    el.id = 'vtour-info-toast';
+    el.style.cssText = `
+      position:fixed;bottom:90px;right:24px;
+      background:linear-gradient(135deg,rgba(15,23,42,.96) 0%,rgba(30,41,59,.96) 100%);
+      color:white;padding:14px 18px;border-radius:12px;max-width:340px;
+      z-index:99998;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      box-shadow:0 8px 24px rgba(0,0,0,.5);border:1px solid rgba(96,165,250,.35);
+      backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+      animation:vtourSlideIn .35s ease;
+    `;
+    el.innerHTML = `
+      <div style="display:flex;align-items:flex-start;gap:10px">
+        <div style="font-size:20px;flex-shrink:0">ℹ️</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:700;font-size:13px;color:#60a5fa;margin-bottom:4px">${title}</div>
+          ${desc ? `<div style="color:#cbd5e1;font-size:11px;line-height:1.5">${desc}</div>` : ''}
+        </div>
+        <div onclick="document.getElementById('vtour-info-toast').remove()"
+             style="cursor:pointer;color:#94a3b8;font-size:14px;flex-shrink:0;padding:0 4px">✕</div>
+      </div>
+    `;
+    document.body.appendChild(el);
+    setTimeout(() => { if(el.parentNode){ el.style.opacity = '0'; el.style.transition = 'opacity .4s'; setTimeout(() => el.remove(), 500); } }, 8000);
   }
 
   // ═════════════════════════════════════════════════════════════════════════
