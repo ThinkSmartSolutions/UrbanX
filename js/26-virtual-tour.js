@@ -3068,11 +3068,44 @@ window.VTour = (function(){
       });
     }
 
-    // Releveu lipsă? Avertizăm user — turul rămâne funcțional doar exterior
+    // Releveu lipsă? Oferim utilizatorului 2 opțiuni — generare automată sau doar exterior
     const hasReleveu = window._RV && Array.isArray(window._RV.floors) && window._RV.floors.length > 0;
     if(!hasReleveu){
-      _showInfoToast('Tur exterior',
-        'Pentru această parcelă nu există releveu — vei vedea doar exteriorul clădirii. Pentru tur interior complet Matterport (camere, mobilier, etc.) încarcă un fișier releveu .json în panoul AEDIS și redeschide turul.');
+      // Dacă există funcția globală generateRelevee, oferim dialog
+      if(typeof window.generateRelevee === 'function'){
+        STATE.active = false; // oprim temporar — vom reporni după alegerea utilizatorului
+        if(STATE.overlay){ STATE.overlay.remove(); STATE.overlay = null; }
+        const choice = await _askReleveuChoice();
+        if(choice === 'exterior'){
+          // Continuă tur exterior
+          STATE.active = true;
+          _createOverlay();
+          _setLoadingProgress(45, 'Construiesc tur exterior…');
+        } else if(choice === 'generate'){
+          // Generăm releveu și relansăm turul
+          _showInfoToast('Generare releveu', 'Se construiesc planurile interioare. Va dura câteva secunde…');
+          try {
+            await window.generateRelevee();
+            // Închidem panoul releveu (dacă s-a deschis)
+            if(typeof window.closeRelevee === 'function'){
+              try { window.closeRelevee(); } catch(e){}
+            }
+            await new Promise(r => setTimeout(r, 800)); // așteptăm finalizare
+            // Re-lansăm start()
+            return start(options);
+          } catch(e){
+            console.error('[VTour] generateRelevee failed:', e);
+            STATE.active = true;
+            _createOverlay();
+            _setLoadingProgress(45, 'Tur exterior — releveu indisponibil…');
+          }
+        } else {
+          return; // utilizatorul a închis dialogul
+        }
+      } else {
+        _showInfoToast('Tur exterior',
+          'Pentru această parcelă nu există releveu — vei vedea doar exteriorul clădirii. Pentru tur interior complet Matterport încarcă un releveu .json.');
+      }
     }
 
     // Save state previous pentru restore
@@ -3362,6 +3395,79 @@ window.VTour = (function(){
     `;
     document.body.appendChild(el);
     setTimeout(() => { if(el.parentNode){ el.style.opacity = '0'; el.style.transition = 'opacity .4s'; setTimeout(() => el.remove(), 500); } }, 8000);
+  }
+
+  // Dialog interactiv pentru alegere releveu — returnează Promise<'generate' | 'exterior' | null>
+  function _askReleveuChoice(){
+    return new Promise(resolve => {
+      const ex = document.getElementById('vtour-choice');
+      if(ex) ex.remove();
+      const el = document.createElement('div');
+      el.id = 'vtour-choice';
+      el.style.cssText = `
+        position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+        background:linear-gradient(135deg,rgba(15,23,42,.98) 0%,rgba(30,41,59,.98) 100%);
+        color:white;padding:32px 36px;border-radius:18px;max-width:480px;width:92%;
+        z-index:100000;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+        box-shadow:0 24px 64px rgba(0,0,0,.7);border:1px solid rgba(96,165,250,.4);
+        backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+      `;
+      el.innerHTML = `
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+          <div style="font-size:38px">🏠</div>
+          <div>
+            <div style="font-weight:800;font-size:17px;color:#60a5fa;line-height:1.2">Cum pornim turul?</div>
+            <div style="font-size:11px;color:#94a3b8;margin-top:3px">Pentru această parcelă nu există încă releveu</div>
+          </div>
+        </div>
+        <div style="color:#cbd5e1;font-size:13px;line-height:1.6;margin-bottom:22px">
+          Releveul = planul interior detaliat al clădirii (camere, uși, ferestre).
+          Pot să-l generez automat pentru tine pe baza setărilor AEDIS — sau pot porni
+          turul doar pe exterior dacă vrei să vezi rapid volumul.
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <button id="vtour-choice-gen"
+            style="background:linear-gradient(90deg,#3b82f6,#8b5cf6);color:white;border:none;
+            padding:14px 18px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;
+            letter-spacing:.4px;text-align:left;display:flex;align-items:center;gap:12px;
+            box-shadow:0 4px 12px rgba(59,130,246,.35)">
+            <span style="font-size:22px">✨</span>
+            <div>
+              <div>Generează releveu automat</div>
+              <div style="font-size:10px;opacity:.85;font-weight:500;margin-top:2px">
+                Tur Matterport complet — camere, mobilier, lumini, plante (recomandat)
+              </div>
+            </div>
+          </button>
+          <button id="vtour-choice-ext"
+            style="background:rgba(255,255,255,.06);color:#cbd5e1;border:1px solid rgba(255,255,255,.18);
+            padding:14px 18px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;
+            letter-spacing:.4px;text-align:left;display:flex;align-items:center;gap:12px">
+            <span style="font-size:22px">🏗</span>
+            <div>
+              <div>Doar exterior</div>
+              <div style="font-size:10px;opacity:.7;font-weight:500;margin-top:2px">
+                Plimbare în jurul clădirii AEDIS, fără interior
+              </div>
+            </div>
+          </button>
+          <button id="vtour-choice-cancel"
+            style="background:transparent;color:#94a3b8;border:none;padding:8px;
+            font-size:11px;cursor:pointer;letter-spacing:.5px;margin-top:4px">
+            ANULEAZĂ
+          </button>
+        </div>
+      `;
+      document.body.appendChild(el);
+      const close = (val) => { el.remove(); resolve(val); };
+      document.getElementById('vtour-choice-gen').onclick = () => close('generate');
+      document.getElementById('vtour-choice-ext').onclick = () => close('exterior');
+      document.getElementById('vtour-choice-cancel').onclick = () => close(null);
+      document.getElementById('vtour-choice-gen').onmouseenter = (e) => e.target.style.transform = 'translateY(-1px)';
+      document.getElementById('vtour-choice-gen').onmouseleave = (e) => e.target.style.transform = '';
+      document.getElementById('vtour-choice-ext').onmouseenter = (e) => e.target.style.background = 'rgba(255,255,255,.10)';
+      document.getElementById('vtour-choice-ext').onmouseleave = (e) => e.target.style.background = 'rgba(255,255,255,.06)';
+    });
   }
 
   // ═════════════════════════════════════════════════════════════════════════
