@@ -1299,22 +1299,66 @@ window.VTour = (function(){
     const bD = (RV.building && RV.building.bD) || anchor.bD;
     const baseY = anchor.baseY;
 
-    RV.floors.forEach((floor, fIdx) => {
-      if(!floor || !Array.isArray(floor.rects)) return;
+    // LIMITĂ HARD: selectăm doar camere KEY (max 8 total în întreaga clădire)
+    // Strategia: o cameră reprezentativă din fiecare tip relevant pe etajul cu cele mai multe
+    const PRIORITY_TYPES = ['living', 'bedroom', 'kitchen', 'bath', 'office', 'meeting', 'reception'];
+    const MAX_FURNISHED_ROOMS = 8;
+    const selectedRooms = []; // {floor, fIdx, rect}
+    const seenTypes = new Set();
+    // Prima trecere: o cameră per tip prioritar (cea mai mare)
+    PRIORITY_TYPES.forEach(type => {
+      let best = null, bestArea = 0;
+      RV.floors.forEach((floor, fIdx) => {
+        if(!floor || !Array.isArray(floor.rects)) return;
+        floor.rects.forEach(r => {
+          if(r.bal || r.t !== type) return;
+          const area = r.w * r.h;
+          if(area > bestArea && area > 4){
+            bestArea = area;
+            best = { floor, fIdx, rect: r };
+          }
+        });
+      });
+      if(best && selectedRooms.length < MAX_FURNISHED_ROOMS){
+        selectedRooms.push(best);
+        seenTypes.add(type);
+      }
+    });
+    // A doua trecere: completăm cu camere mari neselectate (orice tip)
+    if(selectedRooms.length < MAX_FURNISHED_ROOMS){
+      const remaining = [];
+      RV.floors.forEach((floor, fIdx) => {
+        if(!floor || !Array.isArray(floor.rects)) return;
+        floor.rects.forEach(r => {
+          if(r.bal || r.w * r.h < 6) return;
+          if(!selectedRooms.find(s => s.rect === r)){
+            remaining.push({ floor, fIdx, rect: r, area: r.w * r.h });
+          }
+        });
+      });
+      remaining.sort((a, b) => b.area - a.area);
+      remaining.slice(0, MAX_FURNISHED_ROOMS - selectedRooms.length).forEach(s => selectedRooms.push(s));
+    }
+
+    console.log(`[VTour] Mobilier în ${selectedRooms.length} camere selectate (din total ${RV.floors.reduce((n,f)=>n+(f?.rects?.length||0),0)})`);
+
+    // Construim mobilier doar în camerele selectate
+    let pointLightCount = 0;
+    const MAX_POINT_LIGHTS = 3;
+
+    selectedRooms.forEach(({ floor, fIdx, rect: r }) => {
       const aedisFloor = aedisModel.floors[fIdx] || aedisModel.floors[aedisModel.floors.length - 1];
       const yBottom = baseY + aedisFloor.baseY;
       const fScale = aedisFloor.footprintScale || 1.0;
       const ox = anchor.cx - (bW * fScale)/2;
       const oz = anchor.cz - (bD * fScale)/2;
+      const rx = ox + (r.x + r.w/2) * fScale;
+      const rz = oz + (r.y + r.h/2) * fScale;
+      const rw = r.w * fScale, rh = r.h * fScale;
 
-      floor.rects.forEach(r => {
-        if(r.bal) return;
-        const area = r.w * r.h;
-        if(area < 2) return; // camera prea mică
-        const rx = ox + (r.x + r.w/2) * fScale;
-        const rz = oz + (r.y + r.h/2) * fScale;
-        const rw = r.w * fScale, rh = r.h * fScale;
-
+      // Setăm un flag global temporar pentru a limita PointLights în primitives
+      window.__vtourLightBudget = pointLightCount < MAX_POINT_LIGHTS;
+      try {
         switch(r.t){
           case 'living':    _placeLiving(group, rx, yBottom, rz, rw, rh); break;
           case 'bedroom': case 'bedroom2': case 'bedroom3':
@@ -1328,12 +1372,16 @@ window.VTour = (function(){
           case 'meeting':   _placeMeeting(group, rx, yBottom, rz, rw, rh); break;
           case 'commercial':_placeCommercial(group, rx, yBottom, rz, rw, rh); break;
         }
-      });
+        if(pointLightCount < MAX_POINT_LIGHTS) pointLightCount++;
+      } catch(err){
+        console.warn('[VTour] Eroare la mobilare cameră', r.t, ':', err.message);
+      }
     });
+    delete window.__vtourLightBudget;
 
     scene.add(group);
     STATE.furnitureGroup = group;
-    console.log('[VTour] ✅ Mobilier:', group.children.length, 'obiecte');
+    console.log('[VTour] ✅ Mobilier:', group.children.length, 'mesh-uri,', pointLightCount, 'PointLights');
     return group;
   }
 
@@ -1576,7 +1624,7 @@ window.VTour = (function(){
     cone.castShadow = true;
     group.add(cone);
     // Point light real
-    if(CFG.enableLighting){
+    if(CFG.enableLighting && window.__vtourLightBudget){
       const pl = new THREE.PointLight(0xfff0c8, 0.6, 4, 2);
       pl.position.set(cx, baseY + 0.4, cz);
       pl.castShadow = false; // off pentru performanță (multe lampe)
@@ -1789,8 +1837,8 @@ window.VTour = (function(){
         group.add(bulb);
       }
     }
-    // PointLight real
-    if(CFG.enableLighting){
+    // PointLight real — DOAR dacă budget-ul global permite
+    if(CFG.enableLighting && window.__vtourLightBudget){
       const pl = new THREE.PointLight(0xfff0d0, variant === 'compact' ? 1.0 : 1.6, 6, 2);
       pl.position.set(cx, ceilY - 0.3, cz);
       pl.castShadow = false; // perf — prea multe lumini interior cu shadow
@@ -2942,38 +2990,9 @@ window.VTour = (function(){
 
   function _setupProceduralSky(scene){
     const THREE = window.THREE;
-    // Gradient simplu cu un sphere mare inversat
-    const skyGeo = new THREE.SphereGeometry(500, 32, 16);
-    const skyMat = new THREE.ShaderMaterial({
-      uniforms: {
-        topColor:    { value: new THREE.Color(0x4488bb) },
-        bottomColor: { value: new THREE.Color(0xdde6f0) },
-        offset:      { value: 33 },
-        exponent:    { value: 0.6 },
-      },
-      vertexShader: `
-        varying vec3 vWorldPos;
-        void main(){
-          vec4 worldPos = modelMatrix * vec4(position, 1.0);
-          vWorldPos = worldPos.xyz;
-          gl_Position = projectionMatrix * viewMatrix * worldPos;
-        }`,
-      fragmentShader: `
-        uniform vec3 topColor;
-        uniform vec3 bottomColor;
-        uniform float offset;
-        uniform float exponent;
-        varying vec3 vWorldPos;
-        void main(){
-          float h = normalize(vWorldPos + offset).y;
-          gl_FragColor = vec4(mix(bottomColor, topColor, max(pow(max(h,0.0), exponent), 0.0)), 1.0);
-        }`,
-      side: THREE.BackSide,
-    });
-    const sky = new THREE.Mesh(skyGeo, skyMat);
-    sky._vtourGenerated = true;
-    scene.add(sky);
-    return sky;
+    // SAFE: folosim background solid (NU ShaderMaterial — cauza erorilor uniform 'value' din r128)
+    scene.background = new THREE.Color(0xb8d4e8);
+    return null;
   }
 
   // ═════════════════════════════════════════════════════════════════════════
@@ -2984,49 +3003,63 @@ window.VTour = (function(){
     if(!STATE.active) return;
     requestAnimationFrame(_loop);
 
-    const dt = Math.min(0.1, (now - (STATE._lastTime || now)) / 1000);
-    STATE._lastTime = now;
+    try {
+      const dt = Math.min(0.1, (now - (STATE._lastTime || now)) / 1000);
+      STATE._lastTime = now;
 
-    // Update mișcare/glide/auto-walk
-    if(!_updateGlide(now)){
-      _updateMovement(dt);
-    }
+      // Update mișcare/glide/auto-walk
+      if(!_updateGlide(now)){
+        _updateMovement(dt);
+      }
 
-    // Animă hotspots (pulse)
-    const scene = window.V3D && window.V3D.scene;
-    if(scene){
-      const t = now / 600;
-      scene.traverse(o => {
-        if(o._vtourHotspot !== undefined){
-          o.position.y += Math.sin(t + o._vtourHotspot) * 0.0008;
-          o.rotation.y += 0.012;
-        }
-        if(o._vtourMattertag !== undefined){
-          o.scale.setScalar(1 + Math.sin(t * 2 + o._vtourMattertag) * 0.08);
-        }
-      });
-    }
+      // Animă hotspots (pulse) — sample doar la fiecare 4 frame-uri pentru perf
+      const scene = window.V3D && window.V3D.scene;
+      if(scene && (STATE._frame = (STATE._frame||0) + 1) % 3 === 0){
+        const t = now / 600;
+        scene.traverse(o => {
+          if(o._vtourHotspot !== undefined){
+            o.position.y += Math.sin(t + o._vtourHotspot) * 0.0008;
+            o.rotation.y += 0.012;
+          }
+          if(o._vtourMattertag !== undefined){
+            o.scale.setScalar(1 + Math.sin(t * 2 + o._vtourMattertag) * 0.08);
+          }
+        });
+      }
 
-    // Aplicăm yaw + pitch pe cameră
-    if(STATE.tourCam && STATE.mode === 'walkthrough'){
-      const THREE = window.THREE;
-      const q = new THREE.Quaternion();
-      const eYaw = new THREE.Euler(0, STATE.yaw, 0, 'YXZ');
-      const ePitch = new THREE.Euler(STATE.pitch, 0, 0, 'YXZ');
-      const qY = new THREE.Quaternion().setFromEuler(eYaw);
-      const qP = new THREE.Quaternion().setFromEuler(ePitch);
-      q.multiplyQuaternions(qY, qP);
-      STATE.tourCam.quaternion.copy(q);
-    }
+      // Aplicăm yaw + pitch pe cameră
+      if(STATE.tourCam && STATE.mode === 'walkthrough'){
+        const THREE = window.THREE;
+        const q = new THREE.Quaternion();
+        const eYaw = new THREE.Euler(0, STATE.yaw, 0, 'YXZ');
+        const ePitch = new THREE.Euler(STATE.pitch, 0, 0, 'YXZ');
+        const qY = new THREE.Quaternion().setFromEuler(eYaw);
+        const qP = new THREE.Quaternion().setFromEuler(ePitch);
+        q.multiplyQuaternions(qY, qP);
+        STATE.tourCam.quaternion.copy(q);
+      }
 
-    _updateOverlay();
+      _updateOverlay();
 
-    // Render
-    const camera = (STATE.mode === 'dollhouse' && STATE.dollhouseCam) ? STATE.dollhouseCam : STATE.tourCam;
-    if(STATE.composer && STATE.mode === 'walkthrough'){
-      STATE.composer.render();
-    } else if(STATE.renderer && scene && camera){
-      STATE.renderer.render(scene, camera);
+      // Render
+      const camera = (STATE.mode === 'dollhouse' && STATE.dollhouseCam) ? STATE.dollhouseCam : STATE.tourCam;
+      if(STATE.composer && STATE.mode === 'walkthrough'){
+        STATE.composer.render();
+      } else if(STATE.renderer && scene && camera){
+        STATE.renderer.render(scene, camera);
+      }
+    } catch(err){
+      STATE._errCount = (STATE._errCount || 0) + 1;
+      if(STATE._errCount <= 3){
+        console.error('[VTour] Eroare în loop:', err.message);
+      } else if(STATE._errCount === 4){
+        console.error('[VTour] Erori repetate — silentirea log-urilor (verificați materialele scenei)');
+      }
+      // Auto-stop dacă peste 60 frame-uri consecutive cu eroare → oprim turul
+      if(STATE._errCount > 60){
+        console.error('[VTour] Prea multe erori consecutive — opresc turul');
+        try { window.VTour.stop(); } catch(e){}
+      }
     }
   }
 
@@ -3126,9 +3159,9 @@ window.VTour = (function(){
     STATE._anchor = anchor;
     console.log('[VTour] Anchor:', anchor);
 
-    // 3. Sky procedural (dacă HDRI lipsește, măcar avem un cer)
-    _setupProceduralSky(V3D.scene);
-    V3D.scene.fog = new THREE.Fog(0xc8d4e0, 50, 400);
+    // 3. Sky procedural (skip dacă V3D are deja background)
+    if(!V3D.scene.background) _setupProceduralSky(V3D.scene);
+    // NU modificăm scene.fog — V3D are propriul fog optimizat
     _setLoadingProgress(25, 'Configurez iluminat…');
 
     // 4. Lighting
