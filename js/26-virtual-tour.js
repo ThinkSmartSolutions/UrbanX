@@ -111,12 +111,12 @@ window.VTour = (function(){
     enableMattertags: true,
     enableDollhouse: true,
     enableFloorplan: true,
-    enableBokeh: true,            // DOF cu BokehPass
-    enableCubeProbes: true,       // CubeCamera reflection probes per cameră
-    enableVertexAO: true,         // Vertex AO proximity bake
-    enableContactShadows: true,   // Contact shadows sub mobilier
-    enableReflector: true,        // Planar reflector (oglinzi reale)
-    enableLUT: true,              // LUT 3D color grading
+    enableBokeh: false,           // DOF dezactivat default — re-activabil manual
+    enableCubeProbes: false,      // CubeCamera dezactivat — cauza posibilă a iterator crash
+    enableVertexAO: false,        // Vertex AO dezactivat — NaN guards insuficiente
+    enableContactShadows: true,   // Contact shadows e sigur
+    enableReflector: false,       // Reflector dezactivat — necesită test isolat
+    enableLUT: true,              // LUT 3D color grading e sigur (pur shader)
     skipExteriorRebuild: true,
   };
 
@@ -1784,6 +1784,13 @@ window.VTour = (function(){
 
   function _makeBox(group, x, y, z, w, h, d, mat, rotY){
     const THREE = window.THREE;
+    // GUARD: input finite + pozitiv
+    if(!isFinite(x) || !isFinite(y) || !isFinite(z) ||
+       !isFinite(w) || !isFinite(h) || !isFinite(d) ||
+       w <= 0 || h <= 0 || d <= 0){
+      return null;
+    }
+    if(!group || !group.add || !mat) return null;
     const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
     m.position.set(x, y, z);
     if(rotY) m.rotation.y = rotY;
@@ -1796,8 +1803,15 @@ window.VTour = (function(){
   // este enormă; orice piesă de mobilier reală are muchii cu raza de cel puțin 2-3mm
   function _makeRoundedBox(group, x, y, z, w, h, d, radius, mat, rotY){
     const THREE = window.THREE;
+    // GUARD: input finite + pozitiv
+    if(!isFinite(x) || !isFinite(y) || !isFinite(z) ||
+       !isFinite(w) || !isFinite(h) || !isFinite(d) ||
+       w <= 0.001 || h <= 0.001 || d <= 0.001){
+      return null; // skip silent — geometry corupt
+    }
+    if(!group || !group.add || !mat) return null;
     radius = Math.min(radius, w/2 - 0.001, h/2 - 0.001, d/2 - 0.001);
-    if(radius <= 0.005){
+    if(!isFinite(radius) || radius <= 0.005){
       return _makeBox(group, x, y, z, w, h, d, mat, rotY);
     }
     // Shape 2D dreptunghi cu colțuri rotunjite (în planul XY)
@@ -4313,12 +4327,12 @@ window.VTour = (function(){
     } catch(err){
       STATE._errCount = (STATE._errCount || 0) + 1;
       if(STATE._errCount <= 3){
-        console.error('[VTour] Eroare în loop:', err.message);
+        console.error('[VTour] Eroare în loop:', err.message, err.stack);
       } else if(STATE._errCount === 4){
         console.error('[VTour] Erori repetate — silentirea log-urilor (verificați materialele scenei)');
       }
-      // Auto-stop dacă peste 60 frame-uri consecutive cu eroare → oprim turul
-      if(STATE._errCount > 60){
+      // Fail-fast: după 5 erori consecutive, oprim turul (era 60 — prea tolerant)
+      if(STATE._errCount > 5){
         console.error('[VTour] Prea multe erori consecutive — opresc turul');
         try { window.VTour.stop(); } catch(e){}
       }
@@ -5109,7 +5123,28 @@ window.VTour = (function(){
         flex-shrink:0;min-height:36px;touch-action:manipulation;
         letter-spacing:.3px;white-space:nowrap;
       `;
-      entBtn.addEventListener('click', () => toggleEntranceMarker());
+      entBtn.addEventListener('click', async () => {
+        // Comportament nou: dacă turul NU e activ → pornește tur și plasează la intrare.
+        // Dacă turul E activ → teleport la hotspot intrare. Dacă nu există → toggle marker.
+        if(STATE.active && STATE.hotspots && STATE.hotspots.length){
+          const idx = STATE.hotspots.findIndex(h =>
+            h.label && (h.label.includes('Pragul') || h.label.includes('Stradă · Intrare')));
+          if(idx >= 0){
+            _glideTo(idx);
+            return;
+          }
+        }
+        if(!STATE.active){
+          try {
+            await start({ startAtEntrance: true });
+          } catch(e){
+            console.error('[VTour] start failed:', e);
+            toggleEntranceMarker();
+          }
+          return;
+        }
+        toggleEntranceMarker();
+      });
       targetRow.appendChild(entBtn);
 
       return true;
