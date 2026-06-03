@@ -372,6 +372,122 @@
   }
 
   // ═════════════════════════════════════════════════════════════════════════
+  // INLINE ORBIT CONTROLS — fallback robust fără dependențe externe
+  // mouse drag pentru rotire, scroll pentru zoom, touch pentru mobile
+  // ═════════════════════════════════════════════════════════════════════════
+  function _createInlineOrbit(camera, dom, opts){
+    opts = opts || {};
+    const THREE = window.THREE;
+    const target = new THREE.Vector3(
+      opts.target ? opts.target.x : 0,
+      opts.target ? opts.target.y : 0,
+      opts.target ? opts.target.z : 0
+    );
+    const minDist = opts.minDistance || 2;
+    const maxDist = opts.maxDistance || 200;
+
+    // Coordonate sferice (azimut + polar) calculate din poziția curentă camera
+    const offset = new THREE.Vector3();
+    offset.copy(camera.position).sub(target);
+    let radius = offset.length();
+    let theta = Math.atan2(offset.x, offset.z);          // azimut (orizontal)
+    let phi = Math.acos(Math.max(-1, Math.min(1, offset.y / radius))); // polar (vertical, 0=sus, PI=jos)
+
+    let targetTheta = theta, targetPhi = phi, targetRadius = radius;
+
+    let dragging = false;
+    let lastX = 0, lastY = 0;
+    let activeTouches = []; // pentru pinch-zoom
+
+    function onDown(x, y){
+      dragging = true;
+      lastX = x; lastY = y;
+    }
+    function onMove(x, y){
+      if(!dragging) return;
+      const dx = x - lastX;
+      const dy = y - lastY;
+      lastX = x; lastY = y;
+      // Sensibilitate
+      targetTheta -= dx * 0.005;
+      targetPhi = Math.max(0.1, Math.min(Math.PI * 0.49, targetPhi - dy * 0.005));
+    }
+    function onUp(){ dragging = false; }
+    function onWheel(deltaY){
+      // Scroll wheel: zoom in/out exponențial
+      const factor = Math.exp(deltaY * 0.001);
+      targetRadius = Math.max(minDist, Math.min(maxDist, targetRadius * factor));
+    }
+
+    // MOUSE
+    dom.addEventListener('mousedown', (e) => onDown(e.clientX, e.clientY));
+    window.addEventListener('mousemove', (e) => onMove(e.clientX, e.clientY));
+    window.addEventListener('mouseup', onUp);
+    dom.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      onWheel(e.deltaY);
+    }, { passive: false });
+
+    // TOUCH
+    dom.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      activeTouches = Array.from(e.touches);
+      if(e.touches.length === 1){
+        onDown(e.touches[0].clientX, e.touches[0].clientY);
+      } else if(e.touches.length === 2){
+        dragging = false; // pinch, nu rotire
+      }
+    }, { passive: false });
+
+    dom.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      if(e.touches.length === 1 && dragging){
+        onMove(e.touches[0].clientX, e.touches[0].clientY);
+      } else if(e.touches.length === 2 && activeTouches.length === 2){
+        // Pinch-zoom
+        const d1 = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        const d0 = Math.hypot(
+          activeTouches[0].clientX - activeTouches[1].clientX,
+          activeTouches[0].clientY - activeTouches[1].clientY
+        );
+        if(d0 > 0){
+          const factor = d0 / d1;
+          targetRadius = Math.max(minDist, Math.min(maxDist, targetRadius * factor));
+        }
+        activeTouches = Array.from(e.touches);
+      }
+    }, { passive: false });
+
+    dom.addEventListener('touchend', (e) => {
+      activeTouches = Array.from(e.touches);
+      if(e.touches.length === 0) onUp();
+    });
+
+    // Update — lerp soft între current și target
+    function update(){
+      theta += (targetTheta - theta) * 0.12;
+      phi += (targetPhi - phi) * 0.12;
+      radius += (targetRadius - radius) * 0.12;
+      const sinPhi = Math.sin(phi);
+      camera.position.x = target.x + radius * sinPhi * Math.sin(theta);
+      camera.position.y = target.y + radius * Math.cos(phi);
+      camera.position.z = target.z + radius * sinPhi * Math.cos(theta);
+      camera.lookAt(target);
+    }
+
+    function dispose(){
+      // remove listeners — păstrăm referințele pentru cleanup
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    }
+
+    return { update, dispose, target };
+  }
+
+  // ═════════════════════════════════════════════════════════════════════════
   // OVERLAY
   // ═════════════════════════════════════════════════════════════════════════
   function _createOverlay(){
@@ -497,9 +613,15 @@
       STATE.controls.minDistance = 5;
       STATE.controls.maxDistance = 150;
       STATE.controls.maxPolarAngle = Math.PI * 0.49;
+      console.log('[VTour S1] ✅ OrbitControls activ');
     } else {
-      console.warn('[VTour S1] OrbitControls lipsește');
-      STATE.camera.lookAt(anchor.cx, targetY, anchor.cz);
+      // FALLBACK INLINE — mouse drag + scroll + touch (fără dependențe externe)
+      console.warn('[VTour S1] OrbitControls lipsește — folosesc fallback inline');
+      STATE.controls = _createInlineOrbit(STATE.camera, STATE.canvas, {
+        target: { x: anchor.cx, y: targetY, z: anchor.cz },
+        minDistance: 5,
+        maxDistance: 150,
+      });
     }
 
     _setupLighting();
