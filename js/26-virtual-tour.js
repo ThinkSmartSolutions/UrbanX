@@ -111,8 +111,77 @@ window.VTour = (function(){
     enableMattertags: true,
     enableDollhouse: true,
     enableFloorplan: true,
-    skipExteriorRebuild: true,  // dacă AEDIS deja a construit volumul corect, nu-l rebuildăm
+    enableBokeh: true,            // DOF cu BokehPass
+    enableCubeProbes: true,       // CubeCamera reflection probes per cameră
+    enableVertexAO: true,         // Vertex AO proximity bake
+    enableContactShadows: true,   // Contact shadows sub mobilier
+    enableReflector: true,        // Planar reflector (oglinzi reale)
+    enableLUT: true,              // LUT 3D color grading
+    skipExteriorRebuild: true,
   };
+
+  // ═════════════════════════════════════════════════════════════════════════
+  // PERFORMANCE DETECTION — pe device-uri slabe dezactivează features scumpe
+  // pentru a menține FPS > 30. Apelat la începutul start().
+  // ═════════════════════════════════════════════════════════════════════════
+  function _detectPerformance(){
+    const ua = navigator.userAgent || '';
+    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(ua);
+    const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    const lowScreen = Math.min(window.innerWidth, window.innerHeight) < 768;
+    // Memory hint dacă există (Chrome only)
+    let lowMem = false;
+    try {
+      if(navigator.deviceMemory && navigator.deviceMemory < 4) lowMem = true;
+    } catch(e){}
+    // GPU detection — tier estimate (poate eșua silent pe browser-uri restrictive)
+    let gpuTier = 'high';
+    try {
+      const canvas = document.createElement('canvas');
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      if(gl){
+        const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+        const renderer = dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : '';
+        if(/Adreno [123]\d\d|Mali-[345]\d\d|PowerVR (SGX|G6)|Intel.*HD Graphics [2-4]\d\d/i.test(renderer)){
+          gpuTier = 'low';
+        } else if(/Adreno [45]\d\d|Mali-G[57]\d|Intel.*Iris Graphics|Intel UHD/i.test(renderer)){
+          gpuTier = 'mid';
+        }
+        try { gl.getExtension('WEBGL_lose_context'); } catch(e){}
+      }
+    } catch(e){}
+    // MOBILE = safe mode complet — toate features grele OFF
+    // Risc memory pressure / context lost / long sync work pe device cu 1-3GB RAM
+    const safeMobile = isMobile || isTouch || lowMem || lowScreen;
+    const profile = {
+      isMobile, isTouch, lowScreen, gpuTier, lowMem, safeMobile,
+      // SAFE MODE: features GRELE off pentru mobile / GPU slab / low memory
+      cubeProbes:      !safeMobile && gpuTier === 'high',
+      bokeh:           !safeMobile && gpuTier === 'high',
+      vertexAO:        !safeMobile && gpuTier !== 'low',
+      contactShadows:  !safeMobile,    // încă vizibil, dar costă render targets
+      reflector:       !safeMobile && gpuTier === 'high',
+      lut:             true,           // ieftin, mereu activ
+      ssao:            !safeMobile && gpuTier !== 'low',
+      bloom:           true,           // ieftin
+      shadowMap:       safeMobile ? 512 : (gpuTier === 'high' ? 2048 : 1024),
+      pixelRatio:      safeMobile ? 1.0 : Math.min(window.devicePixelRatio || 1, gpuTier === 'high' ? 2 : 1.5),
+    };
+    console.log('[VTour] Performance profile:', profile);
+    return profile;
+  }
+
+  function _applyPerformanceProfile(profile){
+    if(!profile) return;
+    if(!profile.cubeProbes)     CFG.enableCubeProbes = false;
+    if(!profile.bokeh)          CFG.enableBokeh = false;
+    if(!profile.vertexAO)       CFG.enableVertexAO = false;
+    if(!profile.reflector)      CFG.enableReflector = false;
+    if(!profile.ssao)           CFG.enableSSAO = false;
+    CFG.shadowMapSize = profile.shadowMap;
+    STATE._lowPerfMode = profile.isMobile || profile.gpuTier === 'low';
+    STATE._perfProfile = profile;
+  }
 
   // Cache materiale
   const _matCache = new Map();
@@ -2212,9 +2281,42 @@ window.VTour = (function(){
   }
 
   function _makeMirror(group, cx, baseY, cz, w, h, rotY){
-    const mirror = new (window.THREE.MeshStandardMaterial)({color:0xeef2f7, roughness:0.02, metalness:1.0, envMapIntensity:2.0});
+    const THREE = window.THREE;
+    // Folosim Reflector pentru oglindă reală — reflectă scena efectiv
+    if(THREE.Reflector && CFG.enableReflector && !STATE._lowPerfMode){
+      const geo = new THREE.PlaneGeometry(w, h);
+      const reflector = new THREE.Reflector(geo, {
+        clipBias: 0.003,
+        textureWidth: Math.min(512, window.innerWidth) || 512,
+        textureHeight: Math.min(512, window.innerHeight) || 512,
+        color: 0xc8ccd0,
+      });
+      reflector.position.set(cx, baseY, cz);
+      // Reflector planul default e XY — pentru oglindă pe perete trebuie să rotim conform rotY
+      // Plus dacă perete-pe-care-stă oglinda are normal pe X, rotim 90° pe Y
+      if(rotY) reflector.rotation.y = rotY;
+      reflector._vtourGenerated = true;
+      group.add(reflector);
+      STATE._reflectors = STATE._reflectors || [];
+      STATE._reflectors.push(reflector);
+
+      // Ramă lemn în jurul oglinzii (pe planul oglinzii, ușor proeminentă)
+      const frameMat = _woodMaterial('dark');
+      const frameThick = 0.025;
+      // Ramă orizontală sus + jos
+      _makeRoundedBox(group, cx, baseY + h/2 + frameThick/2, cz, w + frameThick*2, frameThick, frameThick*2, 0.008, frameMat, rotY);
+      _makeRoundedBox(group, cx, baseY - h/2 - frameThick/2, cz, w + frameThick*2, frameThick, frameThick*2, 0.008, frameMat, rotY);
+      // Ramă verticală stânga + dreapta (orientate conform rotY)
+      const sX = Math.cos(rotY||0), sZ = -Math.sin(rotY||0);
+      _makeRoundedBox(group, cx + sX * (w/2 + frameThick/2), baseY, cz + sZ * (w/2 + frameThick/2),
+                      frameThick*2, h + frameThick*2, frameThick, 0.008, frameMat, rotY);
+      _makeRoundedBox(group, cx - sX * (w/2 + frameThick/2), baseY, cz - sZ * (w/2 + frameThick/2),
+                      frameThick*2, h + frameThick*2, frameThick, 0.008, frameMat, rotY);
+      return reflector;
+    }
+    // Fallback (Reflector lipsă sau low-perf): mesh cu metalness 1
+    const mirror = new THREE.MeshStandardMaterial({color:0xeef2f7, roughness:0.02, metalness:1.0, envMapIntensity:2.0});
     _makeBox(group, cx, baseY, cz, 0.05, h, w, mirror, rotY);
-    // Ramă subțire
     _makeBox(group, cx, baseY + h/2 + 0.025, cz, 0.06, 0.05, w + 0.04, _woodMaterial('dark'), rotY);
     _makeBox(group, cx, baseY - h/2 - 0.025, cz, 0.06, 0.05, w + 0.04, _woodMaterial('dark'), rotY);
   }
@@ -2399,6 +2501,7 @@ window.VTour = (function(){
   // Aplică ca vertex colors → MeshPhysicalMaterial modulează diffuse natural.
   // ═════════════════════════════════════════════════════════════════════════
   function _bakeProximityAO(){
+    if(!CFG.enableVertexAO) return;
     if(!STATE.furnitureGroup) return;
     const THREE = window.THREE;
     const t0 = performance.now();
@@ -2482,6 +2585,7 @@ window.VTour = (function(){
   // Efect "ground shadow" Matterport — mobilierul nu mai pare că plutește
   // ═════════════════════════════════════════════════════════════════════════
   function _addContactShadows(scene){
+    if(!CFG.enableContactShadows) return;
     if(!STATE.furnitureGroup) return;
     const THREE = window.THREE;
     if(STATE._shadowsGroup){
@@ -2554,6 +2658,7 @@ window.VTour = (function(){
   // Diferența vizibilă: oglinda din baie reflectă camera baiei, nu HDRI global.
   // ═════════════════════════════════════════════════════════════════════════
   function _setupCubeCameras(renderer, scene){
+    if(!CFG.enableCubeProbes) return;
     if(!STATE._selectedRooms || !STATE._selectedRooms.length) return;
     if(!renderer || !scene) return;
     const THREE = window.THREE;
@@ -3472,9 +3577,9 @@ window.VTour = (function(){
       if(pt) _addMeasurePoint(pt);
       return;
     }
-    // Altfel cerem pointer lock
-    if(STATE.mode === 'walkthrough' && STATE.canvas.requestPointerLock){
-      STATE.canvas.requestPointerLock();
+    // Altfel cerem pointer lock — DOAR pe desktop (pe mobile/touch dă eroare)
+    if(STATE.mode === 'walkthrough' && STATE.canvas.requestPointerLock && !STATE._perfProfile?.isTouch){
+      try { STATE.canvas.requestPointerLock(); } catch(e){ /* ignor — touch device */ }
     }
   }
 
@@ -4009,7 +4114,7 @@ window.VTour = (function(){
         composer.addPass(bloom);
       }
       // BokehPass DOF — focus dinamic pe direcția de privire (efect Matterport real)
-      if(THREE.BokehPass){
+      if(CFG.enableBokeh && THREE.BokehPass){
         try {
           const bokeh = new THREE.BokehPass(scene, camera, {
             focus: 3.5,           // distanța inițială focus (update dinamic în loop)
@@ -4025,7 +4130,7 @@ window.VTour = (function(){
           console.warn('[VTour] BokehPass setup failed:', e.message);
         }
       }
-      // Vignette + film grain — touch cinematic final (după bloom)
+      // Vignette + film grain + LUT 3D color grading — touch cinematic final (după bloom)
       if(THREE.ShaderPass){
         const cinematicShader = {
           uniforms: {
@@ -4034,6 +4139,7 @@ window.VTour = (function(){
             vignetteAmount:  { value: 1.15 },
             vignetteOffset:  { value: 1.0 },
             grainAmount:     { value: 0.045 },
+            lutStrength:     { value: CFG.enableLUT ? 0.65 : 0.0 },
           },
           vertexShader: `
             varying vec2 vUv;
@@ -4048,22 +4154,51 @@ window.VTour = (function(){
             uniform float vignetteAmount;
             uniform float vignetteOffset;
             uniform float grainAmount;
+            uniform float lutStrength;
             varying vec2 vUv;
             float rand(vec2 co){
               return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
             }
+            // Saturare hue-preserving
+            vec3 satAdj(vec3 c, float s){
+              float l = dot(c, vec3(0.2126, 0.7152, 0.0722));
+              return mix(vec3(l), c, s);
+            }
+            // Split-tone color grading: shadows cool, highlights warm (cinematic teal-orange)
+            vec3 splitTone(vec3 c){
+              float lum = dot(c, vec3(0.2126, 0.7152, 0.0722));
+              // Shadow tint: ușor teal (cool blue-green)
+              vec3 shadowTint = vec3(0.92, 1.02, 1.08);
+              // Highlight tint: ușor orange (warm)
+              vec3 highlightTint = vec3(1.06, 1.0, 0.92);
+              // Blend bazat pe luminance
+              float t = smoothstep(0.15, 0.85, lum);
+              vec3 tint = mix(shadowTint, highlightTint, t);
+              return c * tint;
+            }
+            // Curve filmic — S-curve subtilă (Reinhard-like)
+            vec3 filmCurve(vec3 c){
+              return c * (1.0 + c * 0.18) / (1.0 + c * 0.95);
+            }
             void main() {
               vec4 color = texture2D(tDiffuse, vUv);
-              // Vignette — darken corners (smoothstep pentru tranziție soft)
+              // 1. LUT 3D color grading (split-tone teal-orange + curve + saturation)
+              if(lutStrength > 0.0){
+                vec3 graded = splitTone(color.rgb);
+                graded = filmCurve(graded);
+                graded = satAdj(graded, 1.08); // boost saturation 8%
+                color.rgb = mix(color.rgb, graded, lutStrength);
+              }
+              // 2. Vignette — darken corners (smoothstep pentru tranziție soft)
               vec2 centered = vUv - 0.5;
               float dist = length(centered);
               float vignette = smoothstep(0.85, 0.35 / vignetteAmount, dist) * vignetteOffset
                              + (1.0 - vignetteOffset);
               color.rgb *= vignette;
-              // Film grain — noise per frame
+              // 3. Film grain — noise per frame
               float grain = (rand(vUv + fract(time * 0.001)) - 0.5) * grainAmount;
               color.rgb += grain;
-              // ușor lift pe negre (efect cinematic)
+              // 4. Lift subtil pe negre (efect cinematic — never pure black)
               color.rgb = color.rgb * 0.98 + 0.012;
               gl_FragColor = color;
             }
@@ -4074,7 +4209,7 @@ window.VTour = (function(){
         composer.addPass(cinematicPass);
         STATE._cinematicPass = cinematicPass; // pentru update time în loop
       }
-      console.log('[VTour] ✅ Composer cu SSAO + Bloom + Vignette/Grain activate');
+      console.log('[VTour] ✅ Composer cu SSAO + Bloom + Bokeh + LUT/Vignette/Grain activate');
       return composer;
     } catch(e){
       console.warn('[VTour] Composer setup failed:', e.message);
@@ -4214,6 +4349,10 @@ window.VTour = (function(){
     const THREE = window.THREE;
     if(!THREE){ _showError('Three.js nu este încărcat', ''); return; }
 
+    // Detect performanță device și aplică profile (dezactivează features scumpe pe mobile/GPU slab)
+    const perfProfile = _detectPerformance();
+    _applyPerformanceProfile(perfProfile);
+
     STATE.active = true;
     STATE.canvas = V3D.r.domElement;
     STATE.renderer = V3D.r;
@@ -4286,66 +4425,99 @@ window.VTour = (function(){
     _createOverlay();
     _setLoadingProgress(5, 'Analizez setările AEDIS…');
 
+    // Helper: rulează o etapă protejat — dacă crashează, continuă cu următoarele
+    const _step = (label, fn) => {
+      try {
+        return fn();
+      } catch(err){
+        console.error('[VTour] ❌ Eroare la etapa "' + label + '":', err);
+        STATE._lastErrorStep = label;
+        STATE._lastErrorMsg = err.message;
+        return null;
+      }
+    };
+    const _stepAsync = async (label, fn) => {
+      try {
+        return await fn();
+      } catch(err){
+        console.error('[VTour] ❌ Eroare la etapa "' + label + '":', err);
+        STATE._lastErrorStep = label;
+        STATE._lastErrorMsg = err.message;
+        return null;
+      }
+    };
+
     // 1. Citim modelul AEDIS complet
-    const aedisModel = _readAedisModel();
+    const aedisModel = _step('readAedisModel', () => _readAedisModel());
+    if(!aedisModel){
+      _showError('Eroare critică', 'Nu pot citi modelul AEDIS. Verifică în consolă.');
+      STATE.active = false;
+      return;
+    }
     console.log('[VTour] AEDIS model:', aedisModel);
     _setLoadingProgress(15, 'Calculez ancore geometrice…');
 
     // 2. Anchor (poziție în lume)
-    const anchor = _computeAnchor(V3D.scene);
+    const anchor = _step('computeAnchor', () => _computeAnchor(V3D.scene));
+    if(!anchor){
+      _showError('Eroare critică', 'Nu pot calcula anchor-ul. Verifică în consolă.');
+      STATE.active = false;
+      return;
+    }
     STATE._anchor = anchor;
     console.log('[VTour] Anchor:', anchor);
 
     // 3. Sky procedural (skip dacă V3D are deja background)
-    if(!V3D.scene.background) _setupProceduralSky(V3D.scene);
-    // NU modificăm scene.fog — V3D are propriul fog optimizat
+    _step('proceduralSky', () => {
+      if(!V3D.scene.background) _setupProceduralSky(V3D.scene);
+    });
     _setLoadingProgress(25, 'Configurez iluminat…');
 
     // 4. Lighting
-    _setupLights(V3D.scene);
+    _step('setupLights', () => _setupLights(V3D.scene));
     _setLoadingProgress(35, 'Încarc texturi HDR (opțional)…');
 
     // 5. HDRI încercăm să încărcăm (graceful fallback)
-    try {
-      await _loadHDRI(V3D.r, V3D.scene, CFG.hdriExterior);
-    } catch(e){}
+    await _stepAsync('loadHDRI', () => _loadHDRI(V3D.r, V3D.scene, CFG.hdriExterior));
     _setLoadingProgress(45, 'Construiesc volum exterior…');
 
     // 6. Volum exterior (opțional — în mod default skip pentru a folosi AEDIS)
-    if(!CFG.skipExteriorRebuild) _buildVolumeExterior(V3D.scene, anchor, aedisModel);
+    _step('buildVolumeExterior', () => {
+      if(!CFG.skipExteriorRebuild) _buildVolumeExterior(V3D.scene, anchor, aedisModel);
+    });
     _setLoadingProgress(55, 'Construiesc interior din releveu…');
 
     // 7. Interior
-    _buildInterior(V3D.scene, anchor, aedisModel);
+    _step('buildInterior', () => _buildInterior(V3D.scene, anchor, aedisModel));
     _setLoadingProgress(70, 'Plasez mobilierul…');
 
     // 8. Mobilier (await — așteaptă încărcarea modelelor GLB)
-    await _buildFurniture(V3D.scene, anchor, aedisModel);
+    await _stepAsync('buildFurniture', () => _buildFurniture(V3D.scene, anchor, aedisModel));
     _setLoadingProgress(76, 'Calculez vertex AO…');
 
-    // 8.4 Vertex AO proximity — darkening în colțuri/sub mobilier
-    _bakeProximityAO();
+    // 8.4 Vertex AO proximity (skip pe mobile via CFG.enableVertexAO=false)
+    _step('bakeProximityAO', () => _bakeProximityAO());
     _setLoadingProgress(78, 'Adaug umbre contact…');
 
-    // 8.5 Contact shadows sub mobilier (efect Matterport ground shadow)
-    _addContactShadows(V3D.scene);
+    // 8.5 Contact shadows sub mobilier
+    _step('addContactShadows', () => _addContactShadows(V3D.scene));
     _setLoadingProgress(80, 'Construiesc acoperișul…');
 
     // 9. Acoperiș
-    _buildRoof(V3D.scene, anchor, aedisModel);
+    _step('buildRoof', () => _buildRoof(V3D.scene, anchor, aedisModel));
     _setLoadingProgress(85, 'Calculez reflexii fotorealiste…');
 
-    // 9.5 CubeCamera reflection probes — reflexii reale per cameră (oglinzi, sticlă, metal)
-    _setupCubeCameras(V3D.r, V3D.scene);
+    // 9.5 CubeCamera reflection probes (skip pe mobile via CFG.enableCubeProbes=false)
+    _step('setupCubeCameras', () => _setupCubeCameras(V3D.r, V3D.scene));
     _setLoadingProgress(88, 'Plasez hotspot-uri și mattertag-uri…');
 
     // 10. Hotspots + Mattertags
-    _buildHotspots(V3D.scene, anchor, aedisModel);
-    _buildMattertags(V3D.scene, anchor, aedisModel);
+    _step('buildHotspots', () => _buildHotspots(V3D.scene, anchor, aedisModel));
+    _step('buildMattertags', () => _buildMattertags(V3D.scene, anchor, aedisModel));
     _setLoadingProgress(94, 'Inițializez floorplan…');
 
     // 11. Floorplan
-    _buildFloorplanMinimap();
+    _step('buildFloorplanMinimap', () => _buildFloorplanMinimap());
     _setLoadingProgress(98, 'Configurez post-processing…');
 
     // 12. Cameră tur — folosim camera viewer-ului existent
@@ -4383,13 +4555,18 @@ window.VTour = (function(){
     V3D.r.shadowMap.enabled = true;
     V3D.r.shadowMap.type = THREE.PCFSoftShadowMap;
     V3D.r.physicallyCorrectLights = true; // intensitate fizic corectă
-    // Salvăm stat-ul anterior ca să restaurăm la stop()
+    // Salvăm stat-ul anterior + setăm pixel ratio adaptat performanței
+    const prevPixelRatio = V3D.r.getPixelRatio();
+    if(perfProfile && perfProfile.pixelRatio){
+      V3D.r.setPixelRatio(perfProfile.pixelRatio);
+    }
     STATE._rendererState = {
       toneMapping: V3D.r.toneMapping,
       toneMappingExposure: V3D.r.toneMappingExposure,
       outputEncoding: V3D.r.outputEncoding,
       shadowEnabled: V3D.r.shadowMap.enabled,
       physicallyCorrectLights: V3D.r.physicallyCorrectLights,
+      pixelRatio: prevPixelRatio,
     };
 
     // 15. Input
@@ -4413,8 +4590,31 @@ window.VTour = (function(){
       STATE._lastTime = performance.now();
       requestAnimationFrame(_loop);
       _showStartHint();
+      // Afișăm banner dacă vreo etapă a eșuat
+      if(STATE._lastErrorStep){
+        _showStepErrorBanner(STATE._lastErrorStep, STATE._lastErrorMsg);
+      }
     }, 400);
-    console.log('[VTour] ✅ START complet');
+    console.log('[VTour] ✅ START complet' + (STATE._lastErrorStep ? ` (cu erori: ${STATE._lastErrorStep})` : ''));
+  }
+
+  // Banner roșu jos cu eroarea ultimei etape eșuate — vizibil pe device fără DevTools
+  function _showStepErrorBanner(step, msg){
+    if(document.getElementById('vtour-error-banner')) return;
+    const banner = document.createElement('div');
+    banner.id = 'vtour-error-banner';
+    banner.style.cssText = `
+      position:absolute;bottom:80px;left:50%;transform:translateX(-50%);
+      background:rgba(127,29,29,.92);color:#ffd5d5;padding:10px 16px;border-radius:10px;
+      font-size:11px;font-weight:600;letter-spacing:.2px;z-index:98;
+      border:1px solid rgba(248,113,113,.5);backdrop-filter:blur(8px);
+      max-width:90vw;line-height:1.4;text-align:center;
+      pointer-events:auto;cursor:pointer;
+    `;
+    banner.innerHTML = `⚠ Etapa "${step}" a eșuat<br><span style="font-size:9px;opacity:.8">${(msg||'?').substring(0,80)}</span><br><span style="font-size:8px;opacity:.6">Restul turului funcționează. Tap pentru închidere.</span>`;
+    banner.onclick = () => banner.remove();
+    setTimeout(() => { if(banner.parentNode) banner.remove(); }, 12000);
+    STATE.overlay.appendChild(banner);
   }
 
   // Hint mare în centrul ecranului — "Click pentru a începe"
@@ -4536,6 +4736,19 @@ window.VTour = (function(){
       STATE._shadowTexture = null;
     }
 
+    // Reflectori planari (oglinzi) — dispose render targets interne
+    if(STATE._reflectors){
+      STATE._reflectors.forEach(r => {
+        try {
+          if(r.getRenderTarget){
+            const rt = r.getRenderTarget();
+            if(rt) rt.dispose();
+          }
+        } catch(e){}
+      });
+      STATE._reflectors = null;
+    }
+
     // Restore AEDIS visibility
     if(window.V3D && Array.isArray(window.V3D.aedis)){
       window.V3D.aedis.forEach(m => {
@@ -4567,6 +4780,9 @@ window.VTour = (function(){
         renderer.toneMappingExposure = STATE._rendererState.toneMappingExposure;
         renderer.outputEncoding = STATE._rendererState.outputEncoding;
         renderer.physicallyCorrectLights = STATE._rendererState.physicallyCorrectLights;
+        if(STATE._rendererState.pixelRatio){
+          renderer.setPixelRatio(STATE._rendererState.pixelRatio);
+        }
       } catch(e){}
       STATE._rendererState = null;
     }
