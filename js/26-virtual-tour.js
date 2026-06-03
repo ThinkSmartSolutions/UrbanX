@@ -919,61 +919,134 @@
 })();
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   UrbanX · Tur Virtual 3D · Sesiunea Curată S2
+   UrbanX · Tur Virtual 3D · Sesiunea Curată S2b
    ──────────────────────────────────────────────────────────────────────────
-   3D FLOOR PLAN — vedere axonometric 45° per nivel, cu mobilier identificabil
-   • Paletă oficială UrbanX (Living=albastru, Dormitor=verde, etc.)
-   • Etichete text 3D plutind deasupra fiecărei camere
-   • Buton P/E1/E2 pentru switch nivel
-   • "Decupaj" — ascund etajele DEASUPRA nivelului selectat
-   • Mobilier identificabil din top-down: paturi cu pătură, sofa în L, cadă cu margini
+   3D FLOOR PLAN — match cu imaginea referință (RoomSketcher style)
+   • Podea cu textură procedurală de scânduri lemn
+   • Pereți negri subțiri (#1f2937) doar perimetrul + separatoare
+   • Mobilier cu siluetă recognoscibilă (pat cu pătură verde, sofa în L galben)
+   • ZERO etichete text — geometria vorbește
+   • Fără acoperiș — vezi direct interior la nivelul ales
+   • Panouri verticale lemn slats pe perete dormitor
+   • Decupaj per nivel — fiecare nivel se vede izolat
    ═══════════════════════════════════════════════════════════════════════════ */
 
 (function(){
   'use strict';
 
-  const VERSION = '20260604-S2-FLOORPLAN';
-  console.log('[VTour S2] versiune', VERSION);
+  const VERSION = '20260604-S2b-FLOORPLAN';
+  console.log('[VTour S2b] versiune', VERSION);
 
   const STATE = {
     active: false, overlay: null, canvas: null,
     renderer: null, scene: null, camera: null, controls: null,
-    floorGroups: [],         // câte un group per etaj
-    currentFloor: 0,         // nivelul afișat curent
+    floorGroups: [], currentFloor: 0,
     raf: null, _anchor: null, _aedisFloors: null,
-    _labels: [],             // sprite-uri text pentru etichete
+    _woodTex: null, _marbleTex: null, _carpetTex: null,
   };
 
   // ═════════════════════════════════════════════════════════════════════════
-  // PALETĂ OFICIALĂ UrbanX (din 15-relevee.js linia 7952)
+  // TEXTURI PROCEDURALE (Canvas2D → CanvasTexture)
   // ═════════════════════════════════════════════════════════════════════════
-  const PAL = {
-    living:     '#3B82F6',  // albastru
-    bedroom:    '#34D399',  // verde mentă
-    kitchen:    '#F59E0B',  // galben/portocaliu
-    bath:       '#A78BFA',  // mov
-    wc:         '#A78BFA',  // mov
-    hall:       '#94A3B8',  // gri deschis
-    corridor:   '#94A3B8',
-    storage:    '#6B7280',  // gri închis
-    core:       '#2563EB',  // albastru închis (scări/lift)
-    balcon:     '#D4AF37',  // auriu
-    office:     '#0EA5E9',  // cyan
-    commercial: '#F97316',  // portocaliu
-    meeting:    '#EC4899',  // roz
-    reception:  '#06B6D4',  // turcoaz
-    default:    '#CBD5E1',  // gri foarte deschis
-  };
-
-  function _matFor(type, opts){
+  function _makeWoodTexture(){
     const THREE = window.THREE;
-    const hex = PAL[type] || PAL.default;
-    return new THREE.MeshStandardMaterial({
-      color: new THREE.Color(hex),
-      roughness: 0.85,
-      metalness: 0,
-      ...(opts || {}),
-    });
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024; canvas.height = 1024;
+    const ctx = canvas.getContext('2d');
+    // Fundal lemn natural cald
+    ctx.fillStyle = '#c89968';
+    ctx.fillRect(0,0,1024,1024);
+    // Scânduri verticale (linii orizontale între scânduri)
+    const plankH = 110;
+    for(let y = 0; y < 1024; y += plankH){
+      // Variație culoare per scândură
+      const variation = Math.floor(Math.random() * 35 - 17);
+      const r = Math.max(100, Math.min(230, 200 + variation));
+      const g = Math.max(80, Math.min(180, 153 + variation - 5));
+      const b = Math.max(60, Math.min(140, 104 + variation - 8));
+      ctx.fillStyle = `rgb(${r},${g},${b})`;
+      ctx.fillRect(0, y, 1024, plankH);
+      // Linia despărțitoare scânduri (umbră închisă)
+      ctx.fillStyle = 'rgba(40,25,15,0.6)';
+      ctx.fillRect(0, y + plankH - 3, 1024, 3);
+    }
+    // Noduri lemn ovale
+    for(let i = 0; i < 50; i++){
+      const x = Math.random() * 1024;
+      const y = Math.random() * 1024;
+      const r = 6 + Math.random() * 12;
+      ctx.fillStyle = `rgba(60,30,10,${0.15 + Math.random() * 0.15})`;
+      ctx.beginPath();
+      ctx.ellipse(x, y, r, r*0.6, 0, 0, Math.PI*2);
+      ctx.fill();
+    }
+    // Liniuțe granulare lungimea scândurilor
+    ctx.strokeStyle = 'rgba(40,20,10,0.12)';
+    ctx.lineWidth = 0.6;
+    for(let i = 0; i < 400; i++){
+      const y = Math.random() * 1024;
+      const x1 = Math.random() * 1024;
+      const x2 = x1 + 40 + Math.random() * 200;
+      ctx.beginPath();
+      ctx.moveTo(x1, y);
+      ctx.lineTo(x2, y);
+      ctx.stroke();
+    }
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.encoding = THREE.sRGBEncoding;
+    return tex;
+  }
+
+  function _makeMarbleTexture(){
+    const THREE = window.THREE;
+    const canvas = document.createElement('canvas');
+    canvas.width = 512; canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    // Fundal marmură deschisă
+    ctx.fillStyle = '#f0eee8';
+    ctx.fillRect(0,0,512,512);
+    // Vinete marmură (linii subțiri vinerice)
+    ctx.strokeStyle = 'rgba(100,90,80,0.25)';
+    ctx.lineWidth = 1.2;
+    for(let i = 0; i < 25; i++){
+      ctx.beginPath();
+      const x1 = Math.random() * 512;
+      const y1 = Math.random() * 512;
+      ctx.moveTo(x1, y1);
+      // Curbe random
+      for(let j = 0; j < 5; j++){
+        const cx = Math.random() * 512;
+        const cy = Math.random() * 512;
+        const ex = Math.random() * 512;
+        const ey = Math.random() * 512;
+        ctx.quadraticCurveTo(cx, cy, ex, ey);
+      }
+      ctx.stroke();
+    }
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.encoding = THREE.sRGBEncoding;
+    return tex;
+  }
+
+  function _makeCarpetTexture(color){
+    const THREE = window.THREE;
+    const canvas = document.createElement('canvas');
+    canvas.width = 256; canvas.height = 256;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = color || '#d4d0c4';
+    ctx.fillRect(0,0,256,256);
+    // Pattern textil — puncte mici
+    for(let i = 0; i < 2000; i++){
+      const x = Math.random() * 256;
+      const y = Math.random() * 256;
+      ctx.fillStyle = `rgba(0,0,0,${0.04 + Math.random() * 0.06})`;
+      ctx.fillRect(x, y, 1, 1);
+    }
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    return tex;
   }
 
   // ═════════════════════════════════════════════════════════════════════════
@@ -986,10 +1059,9 @@
       if(!topbar) return false;
       const rows = topbar.querySelectorAll(':scope > div');
       const targetRow = rows[1] || topbar;
-
       const btn = document.createElement('button');
       btn.id = 'vtour-fp-btn';
-      btn.title = '3D Floor Plan — vedere axonometric per nivel cu mobilier';
+      btn.title = '3D Floor Plan — stil RoomSketcher';
       btn.innerHTML = '📐 3D Plan';
       btn.style.cssText = `
         background:linear-gradient(90deg,rgba(59,130,246,.18),rgba(167,139,250,.15));
@@ -999,7 +1071,7 @@
       `;
       btn.addEventListener('click', () => startFP());
       targetRow.appendChild(btn);
-      console.log('[VTour S2] Buton 3D Plan injectat');
+      console.log('[VTour S2b] Buton 3D Plan injectat');
       return true;
     };
     if(tryInject()) return;
@@ -1008,7 +1080,7 @@
   }
 
   // ═════════════════════════════════════════════════════════════════════════
-  // CITIRE AEDIS — corp + niv corect
+  // CITIRE AEDIS
   // ═════════════════════════════════════════════════════════════════════════
   function _readAedis(){
     const A = window.AEDIS;
@@ -1034,7 +1106,7 @@
       floors.push({ idx: i, baseY: cumY, height: h });
       cumY += h;
     }
-    console.log(`[VTour S2] AEDIS: niv=${niv}, parter=${hParter}m, etaj=${hNiv}m`);
+    console.log(`[VTour S2b] AEDIS: niv=${niv}, parter=${hParter}m, etaj=${hNiv}m`);
     return { floors, totalHeight: cumY, niv };
   }
 
@@ -1068,43 +1140,7 @@
   }
 
   // ═════════════════════════════════════════════════════════════════════════
-  // ETICHETĂ TEXT 3D — Canvas2D → CanvasTexture → Sprite (always face camera)
-  // ═════════════════════════════════════════════════════════════════════════
-  function _makeLabel(text, area){
-    const THREE = window.THREE;
-    const canvas = document.createElement('canvas');
-    canvas.width = 256;
-    canvas.height = 96;
-    const ctx = canvas.getContext('2d');
-    // fundal alb cu border subțire
-    ctx.fillStyle = 'rgba(255,255,255,0.92)';
-    ctx.strokeStyle = 'rgba(15,23,42,0.4)';
-    ctx.lineWidth = 2;
-    const r = 12;
-    ctx.beginPath();
-    ctx.roundRect ? ctx.roundRect(2,2,252,92,r) : ctx.rect(2,2,252,92);
-    ctx.fill(); ctx.stroke();
-    // text
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = '#0f172a';
-    ctx.font = 'bold 26px -apple-system, BlinkMacSystemFont, sans-serif';
-    ctx.fillText(text, 128, 38);
-    if(area){
-      ctx.font = '20px -apple-system, BlinkMacSystemFont, sans-serif';
-      ctx.fillStyle = '#475569';
-      ctx.fillText(area, 128, 68);
-    }
-    const tex = new THREE.CanvasTexture(canvas);
-    tex.minFilter = THREE.LinearFilter;
-    const mat = new THREE.SpriteMaterial({ map: tex, depthTest: false, depthWrite: false });
-    const sprite = new THREE.Sprite(mat);
-    sprite.scale.set(2.4, 0.9, 1);
-    return sprite;
-  }
-
-  // ═════════════════════════════════════════════════════════════════════════
-  // MOBILIER IDENTIFICABIL DIN TOP-DOWN (folosim convenții Imagine 3 referință)
+  // MOBILIER DETALIAT — siluete recognoscibile (referință RoomSketcher)
   // ═════════════════════════════════════════════════════════════════════════
   function _addFurniture(group, r, ox, oz){
     const THREE = window.THREE;
@@ -1123,9 +1159,9 @@
       group.add(m);
       return m;
     };
-    const cyl = (x,y,z,radius,h,color) => {
+    const cyl = (x,y,z,radius,h,color,segs) => {
       const mat = new THREE.MeshStandardMaterial({ color: new THREE.Color(color), roughness: 0.6 });
-      const m = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, h, 16), mat);
+      const m = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, h, segs||16), mat);
       m.position.set(x,y,z);
       m.castShadow = true; m.receiveShadow = true;
       group.add(m);
@@ -1133,138 +1169,264 @@
     };
 
     if(r.t === 'living'){
-      // Sofa în L (3 segmente)
-      const sw = Math.min(r.w * 0.5, 2.2), sd = 0.85;
-      box(cx - sw*0.15, 0.25, cz - r.h/2 + sd/2 + 0.3, sw, 0.4, sd, '#374151'); // bază
-      box(cx - sw*0.15, 0.6, cz - r.h/2 + 0.2, sw, 0.45, 0.18, '#374151');       // spătar
-      // 2 perne portocaliu
-      box(cx - sw*0.3, 0.5, cz - r.h/2 + 0.5, 0.35, 0.15, 0.3, '#FB923C');
-      box(cx + sw*0.1, 0.5, cz - r.h/2 + 0.5, 0.35, 0.15, 0.3, '#FB923C');
-      // Măsuță cafea rotundă (cilindru)
-      cyl(cx, 0.22, cz + 0.1, 0.45, 0.4, '#78350F');
-      // Covor pătrat sub măsuță
-      box(cx, 0.04, cz + 0.1, sw * 0.85, 0.005, 1.3, '#FB923C');
-      // TV plat pe perete opus (sus)
-      box(cx, 1.0, cz + r.h/2 - 0.08, 1.5, 0.7, 0.05, '#1F2937');
+      // SOFA în L galben deschis (3 module aliniate pe latura lungă)
+      const sofaColor = '#e8d8a8'; // galben crem ca în referință
+      const sofaCushColor = '#d4c190';
+      // Orientare: pe latura cea mai lungă
+      const longSide = (r.w >= r.h) ? 'x' : 'z';
+      if(longSide === 'x'){
+        const sw = Math.min(r.w * 0.6, 2.5);
+        const sd = 0.9;
+        // 3 module bază
+        const modW = sw / 3;
+        for(let i = 0; i < 3; i++){
+          const mx = cx - sw/2 + modW*(i + 0.5);
+          box(mx, 0.25, cz - r.h/2 + sd/2 + 0.3, modW * 0.95, 0.4, sd, sofaColor);
+          // Pernă deasupra (puțin mai mică, maro)
+          box(mx, 0.5, cz - r.h/2 + sd/2 + 0.3, modW * 0.85, 0.15, sd * 0.85, '#a08060');
+        }
+        // Spătar continuu
+        box(cx, 0.6, cz - r.h/2 + 0.15, sw, 0.5, 0.2, sofaColor);
+        // 2 perne portocaliu deasupra spătar
+        box(cx - sw*0.25, 0.7, cz - r.h/2 + 0.35, 0.35, 0.3, 0.3, '#c47850');
+        box(cx + sw*0.25, 0.7, cz - r.h/2 + 0.35, 0.35, 0.3, 0.3, '#c47850');
+      } else {
+        const sd = Math.min(r.h * 0.6, 2.5);
+        const sw = 0.9;
+        const modD = sd / 3;
+        for(let i = 0; i < 3; i++){
+          const mz = cz - sd/2 + modD*(i + 0.5);
+          box(cx - r.w/2 + sw/2 + 0.3, 0.25, mz, sw, 0.4, modD * 0.95, sofaColor);
+          box(cx - r.w/2 + sw/2 + 0.3, 0.5, mz, sw * 0.85, 0.15, modD * 0.85, '#a08060');
+        }
+        box(cx - r.w/2 + 0.15, 0.6, cz, 0.2, 0.5, sd, sofaColor);
+      }
+
+      // Masă cafea alungită lemn maro închis
+      box(cx, 0.21, cz, 1.2, 0.4, 0.55, '#5d3920');
+      // Vază sau cărți deasupra masă (cilindru mic)
+      cyl(cx - 0.3, 0.5, cz, 0.08, 0.18, '#2d2017');
+      // Carte mică pe masă
+      box(cx + 0.25, 0.43, cz - 0.1, 0.25, 0.04, 0.18, '#f5e9d3');
+
+      // Covor sub măsuță (textil colorat)
+      const carpet = new THREE.Mesh(
+        new THREE.BoxGeometry(2.4, 0.012, 1.8),
+        new THREE.MeshStandardMaterial({
+          map: _makeCarpetTexture('#d4d0c4'),
+          roughness: 0.95
+        })
+      );
+      carpet.position.set(cx, 0.025, cz);
+      carpet.receiveShadow = true;
+      group.add(carpet);
+
+      // 3 tablouri pe perete (sus, opus sofei)
+      const wallZ = cz + r.h/2 - 0.04;
+      box(cx - 0.7, 1.5, wallZ, 0.5, 0.6, 0.03, '#4a7c4a'); // verde palmier
+      box(cx, 1.5, wallZ, 0.4, 0.6, 0.03, '#f0eee0');     // alb cu text
+      box(cx + 0.6, 1.5, wallZ, 0.45, 0.6, 0.03, '#c4b896'); // bej deschis
+
+      // Plantă mică în ghiveci
+      if(r.w > 3){
+        cyl(cx + r.w/2 - 0.4, 0.2, cz - r.h/2 + 0.4, 0.15, 0.35, '#5d3920');
+        cyl(cx + r.w/2 - 0.4, 0.55, cz - r.h/2 + 0.4, 0.22, 0.4, '#4a7c4a', 8);
+      }
     }
     else if(r.t === 'bedroom'){
-      const bw = Math.min(r.w * 0.55, 1.7), bd = Math.min(r.h * 0.6, 1.95);
-      const bedZ = cz + 0.1;
-      // Pat — ramă închisă
-      box(cx, 0.15, bedZ, bw + 0.12, 0.3, bd + 0.12, '#451A03');
-      // Saltea
-      box(cx, 0.34, bedZ, bw, 0.18, bd, '#FAFAF9');
-      // Pătură verde-petrol distinctă
-      box(cx, 0.44, bedZ + 0.15, bw - 0.05, 0.025, bd - 0.5, '#0F766E');
-      // 2 perne portocaliu sus
-      box(cx - bw*0.22, 0.46, bedZ - bd/2 + 0.22, bw*0.32, 0.1, 0.32, '#FB923C');
-      box(cx + bw*0.22, 0.46, bedZ - bd/2 + 0.22, bw*0.32, 0.1, 0.32, '#FB923C');
-      // Tăblie
-      box(cx, 0.7, bedZ - bd/2 - 0.04, bw + 0.2, 1.0, 0.07, '#451A03');
-      // 2 noptiere
-      if(bw + 0.7 < r.w - 0.4){
-        box(cx - bw/2 - 0.25, 0.3, bedZ - bd/2 + 0.2, 0.4, 0.55, 0.4, '#78350F');
-        box(cx + bw/2 + 0.25, 0.3, bedZ - bd/2 + 0.2, 0.4, 0.55, 0.4, '#78350F');
+      // PAT KING — saltea + pătură verde-petrol + perne portocaliu
+      const longSide = (r.w >= r.h) ? 'x' : 'z';
+      let bw, bd, bedCx, bedCz, headSide;
+      if(longSide === 'x'){
+        bw = Math.min(r.w * 0.6, 2.0);
+        bd = Math.min(r.h * 0.65, 1.95);
+        bedCx = cx; bedCz = cz + 0.1;
+        headSide = 'z-';
+      } else {
+        bw = Math.min(r.h * 0.6, 2.0);
+        bd = Math.min(r.w * 0.65, 1.95);
+        bedCx = cx; bedCz = cz + 0.1;
+        headSide = 'z-';
       }
+      // Ramă pat lemn maro închis
+      box(bedCx, 0.18, bedCz, bw + 0.15, 0.35, bd + 0.15, '#3d2918');
+      // Saltea albă crem
+      box(bedCx, 0.4, bedCz, bw, 0.2, bd, '#faf6ed');
+      // Pătură verde-petrol (vizibil mai mică decât salteaua — vezi salteaua pe lateral)
+      box(bedCx, 0.51, bedCz + 0.15, bw - 0.1, 0.025, bd - 0.55, '#2d6b6e');
+      // 2 perne portocaliu sus
+      box(bedCx - bw*0.22, 0.52, bedCz - bd/2 + 0.25, bw*0.32, 0.12, 0.32, '#d99060');
+      box(bedCx + bw*0.22, 0.52, bedCz - bd/2 + 0.25, bw*0.32, 0.12, 0.32, '#d99060');
+      // Tăblie pat (panou înalt cu fâșii lemn)
+      const headboardZ = bedCz - bd/2 - 0.06;
+      box(bedCx, 0.85, headboardZ, bw + 0.25, 1.3, 0.1, '#3d2918');
+      // 5 fâșii lemn deschis pe tăblie (slats decorative)
+      for(let i = 0; i < 5; i++){
+        const sx = bedCx - bw*0.4 + (bw*0.8) * (i / 4);
+        box(sx, 0.85, headboardZ + 0.06, 0.08, 1.1, 0.04, '#a07850');
+      }
+      // 2 noptiere — cuburi simple cu lampă
+      if(bw + 0.7 < r.w - 0.4 || longSide === 'z'){
+        box(bedCx - bw/2 - 0.25, 0.3, bedCz - bd/2 + 0.2, 0.4, 0.55, 0.4, '#3d2918');
+        cyl(bedCx - bw/2 - 0.25, 0.7, bedCz - bd/2 + 0.2, 0.12, 0.18, '#f5e9d3');
+        box(bedCx + bw/2 + 0.25, 0.3, bedCz - bd/2 + 0.2, 0.4, 0.55, 0.4, '#3d2918');
+        cyl(bedCx + bw/2 + 0.25, 0.7, bedCz - bd/2 + 0.2, 0.12, 0.18, '#f5e9d3');
+      }
+      // Covor sub pat (puțin mai mare decât patul)
+      const carpet = new THREE.Mesh(
+        new THREE.BoxGeometry(bw + 0.6, 0.01, bd + 0.6),
+        new THREE.MeshStandardMaterial({
+          map: _makeCarpetTexture('#bcb3a3'),
+          roughness: 0.95
+        })
+      );
+      carpet.position.set(bedCx, 0.025, bedCz);
+      carpet.receiveShadow = true;
+      group.add(carpet);
+
+      // PANOURI VERTICALE LEMN (slats) pe peretele de la cap pat (semn marcant referință)
+      const wallZ = bedCz - bd/2 - 0.15;
+      const slatCount = 7;
+      for(let i = 0; i < slatCount; i++){
+        const sx = bedCx - (bw + 0.6)/2 + ((bw + 0.6) / (slatCount - 1)) * i;
+        box(sx, 1.5, wallZ + 0.04, 0.08, 1.6, 0.04, '#a07850');
+      }
+      // Cadru tablou mic deasupra patului (peretele dintre slats)
+      box(bedCx, 1.7, wallZ + 0.06, 0.55, 0.4, 0.03, '#f5e9d3');
+
       // Dulap pe peretele opus (dacă încape)
-      if(r.h > 3){
-        box(cx, 0.95, cz + r.h/2 - 0.3, Math.min(r.w * 0.6, 1.8), 1.85, 0.5, '#D6BFA1');
+      if(r.h > 3.5){
+        box(cx, 0.95, cz + r.h/2 - 0.35, Math.min(r.w * 0.55, 2.0), 1.85, 0.55, '#a07850');
       }
     }
     else if(r.t === 'kitchen'){
-      // Blat L-shape (2 segmente)
+      // Blat L-shape lemn deschis
       const kw = Math.min(r.w * 0.85, 3.0);
-      box(cx, 0.43, cz - r.h/2 + 0.32, kw, 0.05, 0.6, '#E7E5E4'); // blat
-      box(cx, 0.22, cz - r.h/2 + 0.32, kw, 0.4, 0.6, '#D6BFA1');  // dulapuri lemn deschis
+      box(cx, 0.42, cz - r.h/2 + 0.32, kw, 0.05, 0.6, '#e8e0d2');
+      box(cx, 0.21, cz - r.h/2 + 0.32, kw, 0.4, 0.6, '#a07850');
       // Chiuvetă (cerc gri)
-      cyl(cx - kw*0.25, 0.46, cz - r.h/2 + 0.35, 0.25, 0.04, '#9CA3AF');
-      // Aragaz (placă neagră cu 4 cercuri)
-      box(cx + kw*0.05, 0.46, cz - r.h/2 + 0.35, 0.55, 0.04, 0.55, '#1F2937');
-      cyl(cx + kw*0.05 - 0.12, 0.49, cz - r.h/2 + 0.22, 0.06, 0.01, '#4B5563');
-      cyl(cx + kw*0.05 + 0.12, 0.49, cz - r.h/2 + 0.22, 0.06, 0.01, '#4B5563');
-      cyl(cx + kw*0.05 - 0.12, 0.49, cz - r.h/2 + 0.48, 0.06, 0.01, '#4B5563');
-      cyl(cx + kw*0.05 + 0.12, 0.49, cz - r.h/2 + 0.48, 0.06, 0.01, '#4B5563');
+      cyl(cx - kw*0.25, 0.46, cz - r.h/2 + 0.35, 0.2, 0.04, '#8a8a8a');
+      // Aragaz negru cu 4 cercuri
+      box(cx + kw*0.05, 0.46, cz - r.h/2 + 0.35, 0.55, 0.04, 0.55, '#1a1a1a');
+      cyl(cx + kw*0.05 - 0.12, 0.49, cz - r.h/2 + 0.22, 0.06, 0.01, '#4a4a4a', 12);
+      cyl(cx + kw*0.05 + 0.12, 0.49, cz - r.h/2 + 0.22, 0.06, 0.01, '#4a4a4a', 12);
+      cyl(cx + kw*0.05 - 0.12, 0.49, cz - r.h/2 + 0.48, 0.06, 0.01, '#4a4a4a', 12);
+      cyl(cx + kw*0.05 + 0.12, 0.49, cz - r.h/2 + 0.48, 0.06, 0.01, '#4a4a4a', 12);
       // Frigider inox cu mâner
       const fX = cx + r.w/2 - 0.4;
-      box(fX, 0.85, cz - r.h/2 + 0.38, 0.65, 1.7, 0.6, '#E5E7EB');
-      box(fX + 0.32, 0.85, cz - r.h/2 + 0.4, 0.04, 0.4, 0.04, '#9CA3AF'); // mâner
+      box(fX, 0.85, cz - r.h/2 + 0.38, 0.65, 1.7, 0.6, '#e0e0e0');
+      box(fX + 0.32, 0.85, cz - r.h/2 + 0.4, 0.04, 0.5, 0.04, '#707070');
       // Hotă
-      box(cx + kw*0.05, 1.35, cz - r.h/2 + 0.3, 0.7, 0.3, 0.45, '#6B7280');
-    }
-    else if(r.t === 'bath'){
-      // Cadă albă alungită cu margini ridicate
-      if(r.w > 1.6 || r.h > 1.6){
-        const bathDir = r.w >= r.h ? 'x' : 'z';
-        if(bathDir === 'x'){
-          box(cx, 0.25, cz + r.h/2 - 0.4, 1.6, 0.5, 0.7, '#FAFAFA');     // corp
-          box(cx, 0.42, cz + r.h/2 - 0.4, 1.5, 0.04, 0.6, '#DBEAFE');    // apă (placă albastră deasupra)
-        } else {
-          box(cx + r.w/2 - 0.4, 0.25, cz, 0.7, 0.5, 1.6, '#FAFAFA');
-          box(cx + r.w/2 - 0.4, 0.42, cz, 0.6, 0.04, 1.5, '#DBEAFE');
+      box(cx + kw*0.05, 1.35, cz - r.h/2 + 0.3, 0.7, 0.3, 0.45, '#5a5a5a');
+      // Masă dining (dacă încape) — marmură neagră + 4 scaune albe
+      if(r.w > 2.5 && r.h > 3.5){
+        const tableZ = cz + 0.3;
+        // Blat masă marmură (textura procedurală)
+        const tableMat = new THREE.MeshStandardMaterial({
+          color: 0x2a2a2a, roughness: 0.3, metalness: 0.15,
+          map: _makeMarbleTexture(),
+        });
+        tableMat.map.repeat.set(2, 1);
+        const table = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.05, 0.85), tableMat);
+        table.position.set(cx, 0.78, tableZ);
+        table.castShadow = true; table.receiveShadow = true;
+        group.add(table);
+        // 4 picioare metalice
+        for(let dx of [-0.65, 0.65]){
+          for(let dz of [-0.35, 0.35]){
+            box(cx + dx, 0.39, tableZ + dz, 0.04, 0.78, 0.04, '#4a4a4a');
+          }
+        }
+        // 4 scaune albe (cuburi)
+        for(let i = 0; i < 4; i++){
+          const angles = [
+            { dx: -0.7, dz: -0.55, side: 'left' },
+            { dx: 0.7, dz: -0.55, side: 'right' },
+            { dx: -0.7, dz: 0.55, side: 'left' },
+            { dx: 0.7, dz: 0.55, side: 'right' },
+          ];
+          const a = angles[i];
+          box(cx + a.dx, 0.25, tableZ + a.dz, 0.45, 0.5, 0.45, '#f0eee0');
+          // Spătar mic
+          const spZ = a.dz < 0 ? a.dz - 0.2 : a.dz + 0.2;
+          box(cx + a.dx, 0.65, tableZ + spZ, 0.45, 0.5, 0.05, '#f0eee0');
         }
       }
-      // WC cu rezervor sus
+    }
+    else if(r.t === 'bath'){
+      // Cadă albă alungită
+      const bathDir = r.w >= r.h ? 'x' : 'z';
+      if(bathDir === 'x' && r.w > 1.6){
+        // Pe latura lungă X
+        box(cx, 0.25, cz + r.h/2 - 0.4, Math.min(r.w * 0.8, 1.7), 0.5, 0.7, '#f8f8f8');
+        // "Apă" în cadă (placă albastră deasupra)
+        box(cx, 0.42, cz + r.h/2 - 0.4, Math.min(r.w * 0.75, 1.6), 0.04, 0.6, '#c8e0f0');
+      } else if(r.h > 1.6){
+        box(cx + r.w/2 - 0.4, 0.25, cz, 0.7, 0.5, Math.min(r.h * 0.8, 1.7), '#f8f8f8');
+        box(cx + r.w/2 - 0.4, 0.42, cz, 0.6, 0.04, Math.min(r.h * 0.75, 1.6), '#c8e0f0');
+      }
+      // WC
       const wX = cx - r.w/2 + 0.3;
-      box(wX, 0.2, cz - 0.2, 0.4, 0.4, 0.55, '#FAFAFA');                  // bază
-      box(wX, 0.55, cz - 0.4, 0.4, 0.4, 0.18, '#FAFAFA');                  // rezervor
-      // Chiuvetă cilindrică pe blat
+      box(wX, 0.2, cz - 0.2, 0.4, 0.4, 0.55, '#f8f8f8');
+      box(wX, 0.55, cz - 0.4, 0.4, 0.4, 0.18, '#f8f8f8');
+      // Chiuvetă cu mobilier
       const sX = cx + r.w/2 - 0.4;
-      box(sX, 0.42, cz - r.h/2 + 0.3, 0.55, 0.04, 0.45, '#E5E7EB');       // blat
-      box(sX, 0.22, cz - r.h/2 + 0.3, 0.55, 0.4, 0.45, '#D6BFA1');         // dulap jos
-      cyl(sX, 0.46, cz - r.h/2 + 0.3, 0.16, 0.04, '#FAFAFA');              // chiuvetă
-      // Oglindă (placă albastră reflectorizantă)
-      box(sX, 1.0, cz - r.h/2 + 0.08, 0.5, 0.5, 0.03, '#BFDBFE');
+      box(sX, 0.42, cz - r.h/2 + 0.3, 0.55, 0.04, 0.45, '#e8e0d2');
+      box(sX, 0.22, cz - r.h/2 + 0.3, 0.55, 0.4, 0.45, '#a07850');
+      cyl(sX, 0.46, cz - r.h/2 + 0.3, 0.14, 0.04, '#f8f8f8');
+      // Oglindă pe perete
+      box(sX, 1.1, cz - r.h/2 + 0.08, 0.55, 0.55, 0.03, '#c5d8e8');
     }
     else if(r.t === 'wc'){
-      // WC cu rezervor
-      box(cx - 0.1, 0.2, cz, 0.4, 0.4, 0.55, '#FAFAFA');
-      box(cx - 0.1, 0.55, cz - 0.18, 0.4, 0.4, 0.18, '#FAFAFA');
+      box(cx - 0.1, 0.2, cz, 0.4, 0.4, 0.55, '#f8f8f8');
+      box(cx - 0.1, 0.55, cz - 0.18, 0.4, 0.4, 0.18, '#f8f8f8');
     }
     else if(r.t === 'office'){
-      // Birou
-      box(cx, 0.37, cz - r.h/2 + 0.4, 1.4, 0.05, 0.7, '#78350F');
-      // Scaun office cu spătar
-      box(cx, 0.25, cz - r.h/2 + 1.05, 0.55, 0.5, 0.5, '#374151');
-      box(cx, 0.62, cz - r.h/2 + 1.3, 0.55, 0.5, 0.05, '#374151');
-      // Monitor pe birou
-      box(cx, 0.6, cz - r.h/2 + 0.3, 0.55, 0.35, 0.04, '#1F2937');
-      // Bibliotecă pe perete
-      if(r.h > 3){
-        box(cx, 0.9, cz + r.h/2 - 0.2, Math.min(r.w * 0.6, 1.8), 1.7, 0.3, '#451A03');
-      }
+      box(cx, 0.37, cz - r.h/2 + 0.4, 1.4, 0.05, 0.7, '#5d3920');
+      box(cx, 0.25, cz - r.h/2 + 1.05, 0.55, 0.5, 0.5, '#3d2918');
+      box(cx, 0.62, cz - r.h/2 + 1.3, 0.55, 0.5, 0.05, '#3d2918');
+      box(cx, 0.6, cz - r.h/2 + 0.3, 0.55, 0.35, 0.04, '#1a1a1a');
     }
     else if(r.t === 'hall' || r.t === 'corridor'){
       // Cuier dulap dacă încape
       if(r.w > 2 && r.h > 1.5){
-        box(cx, 0.9, cz + r.h/2 - 0.18, Math.min(r.w * 0.45, 1.2), 1.75, 0.35, '#D6BFA1');
+        box(cx, 0.9, cz + r.h/2 - 0.18, Math.min(r.w * 0.45, 1.2), 1.75, 0.35, '#a07850');
       }
       // Covor lung pe centru
-      box(cx, 0.025, cz, r.w * 0.5, 0.005, r.h * 0.75, '#FB923C');
+      const carpet = new THREE.Mesh(
+        new THREE.BoxGeometry(r.w * 0.55, 0.012, r.h * 0.78),
+        new THREE.MeshStandardMaterial({
+          map: _makeCarpetTexture('#c8b896'),
+          roughness: 0.95
+        })
+      );
+      carpet.position.set(cx, 0.025, cz);
+      carpet.receiveShadow = true;
+      group.add(carpet);
     }
     else if(r.t === 'storage'){
-      // Rafturi
-      box(cx, 0.9, cz, r.w * 0.6, 1.7, 0.4, '#6B7280');
+      box(cx, 0.9, cz, r.w * 0.6, 1.7, 0.4, '#a07850');
     }
     else if(r.t === 'core'){
-      // Scări — Z-pattern de trepte
-      const steps = 8;
-      const stepW = Math.min(r.w * 0.8, 1.2);
+      // Scări — Z pattern de trepte
+      const steps = 10;
+      const stepW = Math.min(r.w * 0.8, 1.4);
       for(let i = 0; i < steps; i++){
-        box(cx - r.w*0.15, 0.05 + i*0.18, cz - r.h/2 + 0.3 + i*0.28, stepW, 0.18, 0.28, '#94A3B8');
+        box(cx - r.w*0.15, 0.05 + i*0.16, cz - r.h/2 + 0.3 + i*0.25, stepW, 0.16, 0.25, '#a0a0a0');
       }
-      // Lift (cub gri închis)
-      box(cx + r.w*0.2, 1.0, cz, 0.9, 2.0, 1.2, '#475569');
+      // Lift
+      box(cx + r.w*0.2, 1.0, cz, 0.9, 2.0, 1.1, '#5a5a5a');
     }
   }
 
   // ═════════════════════════════════════════════════════════════════════════
-  // CONSTRUIRE FLOOR PLAN COMPLET
+  // CONSTRUIRE FLOOR PLAN per nivel
   // ═════════════════════════════════════════════════════════════════════════
   function _buildFloorPlan(){
     const THREE = window.THREE;
     const anchor = _computeAnchor();
     const aedisFloors = _readAedis();
-    if(!aedisFloors){ console.warn('[VTour S2] AEDIS lipsește'); return; }
+    if(!aedisFloors){ console.warn('[VTour S2b] AEDIS lipsește'); return; }
     const RV = window._RV;
 
     STATE._anchor = anchor;
@@ -1273,102 +1435,121 @@
     const ox = anchor.cx - bW / 2;
     const oz = anchor.cz - bD / 2;
 
+    // Pre-cache texturi
+    STATE._woodTex = _makeWoodTexture();
+
     aedisFloors.floors.forEach((floor, fIdx) => {
-      const wallH = 1.2; // pereți joși ca să vezi mobilier deasupra
       const fg = new THREE.Group();
       fg.name = `FP_Floor_${fIdx}`;
       fg.userData.fIdx = fIdx;
-      fg.userData.baseY = anchor.baseY + floor.baseY;
-      fg.position.y = fg.userData.baseY;
+      fg.position.y = anchor.baseY + floor.baseY;
 
-      // Podea de bază (placă albă-bej)
-      const baseSlab = new THREE.Mesh(
-        new THREE.BoxGeometry(bW + 0.2, 0.1, bD + 0.2),
-        new THREE.MeshStandardMaterial({ color: 0xfaf8f3, roughness: 0.9 })
+      // ── PODEA cu textură de lemn procedurală ──
+      const woodTex = STATE._woodTex.clone();
+      woodTex.needsUpdate = true;
+      woodTex.repeat.set(bW * 0.15, bD * 0.15);
+      const floorMat = new THREE.MeshStandardMaterial({
+        map: woodTex, roughness: 0.85, metalness: 0,
+      });
+      const floorMesh = new THREE.Mesh(
+        new THREE.BoxGeometry(bW, 0.08, bD),
+        floorMat
       );
-      baseSlab.position.set(anchor.cx, -0.05, anchor.cz);
-      baseSlab.receiveShadow = true;
-      fg.add(baseSlab);
+      floorMesh.position.set(anchor.cx, -0.04, anchor.cz);
+      floorMesh.receiveShadow = true;
+      fg.add(floorMesh);
 
-      // Conturul exterior al clădirii (margine subțire)
-      const outline = new THREE.Mesh(
-        new THREE.BoxGeometry(bW + 0.25, 0.04, bD + 0.25),
-        new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 })
-      );
-      outline.position.set(anchor.cx, 0.03, anchor.cz);
-      fg.add(outline);
-      // Goluri interior conturului (placă mai mică deasupra)
-      const innerCutout = new THREE.Mesh(
-        new THREE.BoxGeometry(bW + 0.15, 0.05, bD + 0.15),
-        new THREE.MeshStandardMaterial({ color: 0xfaf8f3, roughness: 0.9 })
-      );
-      innerCutout.position.set(anchor.cx, 0.05, anchor.cz);
-      fg.add(innerCutout);
+      // ── PEREȚI EXTERIORI negri subțiri ──
+      const wallH = 1.8;
+      const wallT = 0.08;
+      const wallMat = new THREE.MeshStandardMaterial({
+        color: 0x1f2937, roughness: 0.85,
+      });
+      // 4 pereți perimetrici
+      const wS = new THREE.Mesh(new THREE.BoxGeometry(bW + wallT*2, wallH, wallT), wallMat);
+      wS.position.set(anchor.cx, wallH/2, anchor.cz + bD/2 + wallT/2);
+      wS.castShadow = true; wS.receiveShadow = true;
+      fg.add(wS);
+      const wN = wS.clone();
+      wN.position.set(anchor.cx, wallH/2, anchor.cz - bD/2 - wallT/2);
+      fg.add(wN);
+      const wE = new THREE.Mesh(new THREE.BoxGeometry(wallT, wallH, bD), wallMat);
+      wE.position.set(anchor.cx + bW/2 + wallT/2, wallH/2, anchor.cz);
+      wE.castShadow = true; wE.receiveShadow = true;
+      fg.add(wE);
+      const wW = wE.clone();
+      wW.position.set(anchor.cx - bW/2 - wallT/2, wallH/2, anchor.cz);
+      fg.add(wW);
 
-      // ── Camerele din releveu ──
+      // ── PEREȚII CAMERELOR INTERIOR + MOBILIER ──
       if(RV && Array.isArray(RV.floors) && RV.floors[fIdx]){
         const rvFloor = RV.floors[fIdx];
         if(Array.isArray(rvFloor.rects)){
+          // Wall material interior - albe ca în referință
+          const intWallMat = new THREE.MeshStandardMaterial({
+            color: 0xfafaf8, roughness: 0.9, side: THREE.DoubleSide,
+          });
+          const intWallT = 0.06;
+          const intWallH = 1.5; // puțin mai joși ca exteriorii
+
           rvFloor.rects.forEach(r => {
             if(!r || !isFinite(r.w) || !isFinite(r.h) || r.w <= 0.1 || r.h <= 0.1) return;
-            const type = r.t || 'default';
 
             if(r.bal){
-              // Balcon — placă aurie deschisă cu balustradă transparentă
+              // Balcon — placă deschisă + balustradă
               const bal = new THREE.Mesh(
-                new THREE.BoxGeometry(r.w * 0.96, 0.04, r.h * 0.96),
-                _matFor('balcon', { opacity: 0.7, transparent: true })
+                new THREE.BoxGeometry(r.w, 0.05, r.h),
+                new THREE.MeshStandardMaterial({ color: 0x6a5a4a, roughness: 0.9 })
               );
-              bal.position.set(ox + r.x + r.w/2, 0.07, oz + r.y + r.h/2);
+              bal.position.set(ox + r.x + r.w/2, 0.06, oz + r.y + r.h/2);
               bal.receiveShadow = true;
               fg.add(bal);
+              // Balustradă metal subțire
               const rail = new THREE.Mesh(
-                new THREE.BoxGeometry(r.w, 0.7, 0.04),
-                new THREE.MeshStandardMaterial({ color: 0x94a3b8, transparent: true, opacity: 0.4 })
+                new THREE.BoxGeometry(r.w, 0.95, 0.04),
+                new THREE.MeshStandardMaterial({ color: 0x2a2a2a, roughness: 0.5, metalness: 0.7 })
               );
-              rail.position.set(ox + r.x + r.w/2, 0.35, oz + r.y + r.h);
+              rail.position.set(ox + r.x + r.w/2, 0.5, oz + r.y + r.h);
               fg.add(rail);
               return;
             }
 
-            // Podea cameră (colorată conform tip)
-            const cFloor = new THREE.Mesh(
-              new THREE.BoxGeometry(r.w * 0.97, 0.03, r.h * 0.97),
-              _matFor(type, { opacity: 0.55, transparent: true })
-            );
-            cFloor.position.set(ox + r.x + r.w/2, 0.07, oz + r.y + r.h/2);
-            cFloor.receiveShadow = true;
-            fg.add(cFloor);
+            // Pereții camerei (4 muchii) — exclud părți care se suprapun cu perete exterior
+            const rx1 = ox + r.x;
+            const rx2 = ox + r.x + r.w;
+            const rz1 = oz + r.y;
+            const rz2 = oz + r.y + r.h;
+            // Sud (z+) — doar dacă nu e pe marginea exterioară
+            if(Math.abs(rz2 - (anchor.cz + bD/2)) > 0.05){
+              const ws = new THREE.Mesh(new THREE.BoxGeometry(r.w, intWallH, intWallT), intWallMat);
+              ws.position.set(ox + r.x + r.w/2, intWallH/2, rz2);
+              ws.castShadow = true; ws.receiveShadow = true;
+              fg.add(ws);
+            }
+            // Nord (z-)
+            if(Math.abs(rz1 - (anchor.cz - bD/2)) > 0.05){
+              const wn = new THREE.Mesh(new THREE.BoxGeometry(r.w, intWallH, intWallT), intWallMat);
+              wn.position.set(ox + r.x + r.w/2, intWallH/2, rz1);
+              wn.castShadow = true; wn.receiveShadow = true;
+              fg.add(wn);
+            }
+            // Est (x+)
+            if(Math.abs(rx2 - (anchor.cx + bW/2)) > 0.05){
+              const we = new THREE.Mesh(new THREE.BoxGeometry(intWallT, intWallH, r.h), intWallMat);
+              we.position.set(rx2, intWallH/2, oz + r.y + r.h/2);
+              we.castShadow = true; we.receiveShadow = true;
+              fg.add(we);
+            }
+            // Vest (x-)
+            if(Math.abs(rx1 - (anchor.cx - bW/2)) > 0.05){
+              const ww = new THREE.Mesh(new THREE.BoxGeometry(intWallT, intWallH, r.h), intWallMat);
+              ww.position.set(rx1, intWallH/2, oz + r.y + r.h/2);
+              ww.castShadow = true; ww.receiveShadow = true;
+              fg.add(ww);
+            }
 
-            // Pereți joși (1.2m) — albi opaci, ușor să vezi peste
-            const wallMat = new THREE.MeshStandardMaterial({ color: 0xf5f1ea, roughness: 0.9, side: THREE.DoubleSide });
-            const t = 0.08;
-            // 4 pereți (fără goluri pentru uși deocamdată — simplificare)
-            const wS = new THREE.Mesh(new THREE.BoxGeometry(r.w, wallH, t), wallMat);
-            wS.position.set(ox + r.x + r.w/2, 0.1 + wallH/2, oz + r.y + r.h);
-            wS.castShadow = true;
-            fg.add(wS);
-            const wN = wS.clone();
-            wN.position.set(ox + r.x + r.w/2, 0.1 + wallH/2, oz + r.y);
-            fg.add(wN);
-            const wE = new THREE.Mesh(new THREE.BoxGeometry(t, wallH, r.h), wallMat);
-            wE.position.set(ox + r.x + r.w, 0.1 + wallH/2, oz + r.y + r.h/2);
-            wE.castShadow = true;
-            fg.add(wE);
-            const wW = wE.clone();
-            wW.position.set(ox + r.x, 0.1 + wallH/2, oz + r.y + r.h/2);
-            fg.add(wW);
-
-            // Mobilier identificabil de sus
+            // Mobilier specific
             _addFurniture(fg, r, ox, oz);
-
-            // Etichetă text (Sprite) plutind deasupra
-            const labelText = r.lbl || _labelFor(type);
-            const area = (r.w * r.h > 4) ? `${(r.w * r.h).toFixed(1)} m²` : null;
-            const sprite = _makeLabel(labelText, area);
-            sprite.position.set(ox + r.x + r.w/2, 2.0, oz + r.y + r.h/2);
-            fg.add(sprite);
-            STATE._labels.push(sprite);
           });
         }
       }
@@ -1377,63 +1558,25 @@
       STATE.floorGroups.push(fg);
     });
 
-    // ── Acoperiș wireframe ──
-    const roofW = new THREE.Mesh(
-      new THREE.BoxGeometry(bW + 0.4, 0.15, bD + 0.4),
-      new THREE.MeshBasicMaterial({
-        color: 0x64748b, wireframe: true, transparent: true, opacity: 0.35,
-      })
-    );
-    roofW.position.set(anchor.cx, anchor.baseY + aedisFloors.totalHeight + 0.3, anchor.cz);
-    roofW.userData.isRoof = true;
-    STATE.scene.add(roofW);
-    STATE.floorGroups.push(roofW);
-
     _showFloor(0);
-    console.log(`[VTour S2] FloorPlan: ${aedisFloors.floors.length} etaje, ${STATE._labels.length} etichete`);
-  }
-
-  function _labelFor(type){
-    const map = {
-      living: 'Living', bedroom: 'Dormitor', kitchen: 'Bucătărie',
-      bath: 'Baie', wc: 'WC', hall: 'Hol', corridor: 'Coridor',
-      storage: 'Depozit', core: 'Scări/Lift', balcon: 'Balcon',
-      office: 'Birou', commercial: 'Comercial', meeting: 'Sală', reception: 'Recepție',
-    };
-    return map[type] || 'Cameră';
+    console.log(`[VTour S2b] FloorPlan: ${aedisFloors.floors.length} etaje construite`);
   }
 
   // ═════════════════════════════════════════════════════════════════════════
-  // SHOW FLOOR — ascunde etajele deasupra nivelului selectat
+  // SHOW FLOOR — afișează DOAR nivelul ales (ca în referință)
   // ═════════════════════════════════════════════════════════════════════════
   function _showFloor(idx){
     STATE.currentFloor = idx;
     STATE.floorGroups.forEach((g, i) => {
-      // i == idx: vizibil
-      // i < idx: vizibil (etajele de sub)
-      // i > idx: invizibil
-      // ultimul (acoperișul wireframe): vizibil DOAR la ultimul etaj
-      const isRoof = g.userData && g.userData.isRoof;
-      if(isRoof){
-        g.visible = (idx === STATE._aedisFloors.floors.length - 1);
-      } else {
-        g.visible = (i <= idx);
-      }
+      g.visible = (i === idx);
     });
-    // Update butoane UI
     document.querySelectorAll('[data-fp-floor]').forEach(b => {
-      b.classList.toggle('active', parseInt(b.dataset.fpFloor) === idx);
-      if(parseInt(b.dataset.fpFloor) === idx){
-        b.style.background = 'rgba(59,130,246,.4)';
-        b.style.color = '#fff';
-        b.style.borderColor = '#3b82f6';
-      } else {
-        b.style.background = 'rgba(15,23,42,.5)';
-        b.style.color = '#94a3b8';
-        b.style.borderColor = 'rgba(148,163,184,.3)';
-      }
+      const isActive = parseInt(b.dataset.fpFloor) === idx;
+      b.style.background = isActive ? 'rgba(59,130,246,.5)' : 'rgba(15,23,42,.5)';
+      b.style.color = isActive ? '#fff' : '#94a3b8';
+      b.style.borderColor = isActive ? '#3b82f6' : 'rgba(148,163,184,.3)';
     });
-    console.log(`[VTour S2] Vizualizez nivel ${idx}`);
+    console.log(`[VTour S2b] Vizualizez doar nivelul ${idx}`);
   }
 
   // ═════════════════════════════════════════════════════════════════════════
@@ -1443,9 +1586,8 @@
     const THREE = window.THREE;
     const scene = STATE.scene;
     const anchor = _computeAnchor();
-    // Soare direcțional
-    const sun = new THREE.DirectionalLight(0xfff8e8, 1.8);
-    sun.position.set(anchor.cx + 40, anchor.baseY + 60, anchor.cz + 30);
+    const sun = new THREE.DirectionalLight(0xfff4e0, 2.0);
+    sun.position.set(anchor.cx + 30, anchor.baseY + 60, anchor.cz + 20);
     sun.target.position.set(anchor.cx, anchor.baseY, anchor.cz);
     sun.castShadow = true;
     sun.shadow.mapSize.set(2048, 2048);
@@ -1460,36 +1602,114 @@
     sun.shadow.radius = 4;
     scene.add(sun);
     scene.add(sun.target);
-    // Hemi
-    const hemi = new THREE.HemisphereLight(0xcfe8ff, 0xb0aa90, 0.55);
+    const hemi = new THREE.HemisphereLight(0xfff0d8, 0xa8a090, 0.6);
     scene.add(hemi);
-    // Fill
-    const fill = new THREE.DirectionalLight(0xc8d8ee, 0.3);
-    fill.position.set(anchor.cx - 30, anchor.baseY + 40, anchor.cz - 20);
+    const fill = new THREE.DirectionalLight(0xe8d8c0, 0.35);
+    fill.position.set(anchor.cx - 25, anchor.baseY + 35, anchor.cz - 15);
     scene.add(fill);
   }
 
   // ═════════════════════════════════════════════════════════════════════════
-  // OVERLAY — UI cu butoane P/E1/E2
+  // INLINE ORBIT CONTROLS — fallback robust
+  // ═════════════════════════════════════════════════════════════════════════
+  function _createInlineOrbit(camera, dom, opts){
+    opts = opts || {};
+    const THREE = window.THREE;
+    const target = new THREE.Vector3(
+      opts.target ? opts.target.x : 0,
+      opts.target ? opts.target.y : 0,
+      opts.target ? opts.target.z : 0
+    );
+    const minDist = opts.minDistance || 2;
+    const maxDist = opts.maxDistance || 200;
+    const offset = new THREE.Vector3();
+    offset.copy(camera.position).sub(target);
+    let radius = offset.length();
+    let theta = Math.atan2(offset.x, offset.z);
+    let phi = Math.acos(Math.max(-1, Math.min(1, offset.y / radius)));
+    let targetTheta = theta, targetPhi = phi, targetRadius = radius;
+    let dragging = false, lastX = 0, lastY = 0;
+    let activeTouches = [];
+    const onDown = (x,y) => { dragging = true; lastX = x; lastY = y; };
+    const onMove = (x,y) => {
+      if(!dragging) return;
+      const dx = x - lastX, dy = y - lastY;
+      lastX = x; lastY = y;
+      targetTheta -= dx * 0.005;
+      targetPhi = Math.max(0.15, Math.min(Math.PI * 0.48, targetPhi - dy * 0.005));
+    };
+    const onUp = () => { dragging = false; };
+    const onWheel = (deltaY) => {
+      const factor = Math.exp(deltaY * 0.001);
+      targetRadius = Math.max(minDist, Math.min(maxDist, targetRadius * factor));
+    };
+    const mouseMoveHandler = (e) => onMove(e.clientX, e.clientY);
+    const mouseUpHandler = () => onUp();
+    dom.addEventListener('mousedown', (e) => onDown(e.clientX, e.clientY));
+    window.addEventListener('mousemove', mouseMoveHandler);
+    window.addEventListener('mouseup', mouseUpHandler);
+    dom.addEventListener('wheel', (e) => { e.preventDefault(); onWheel(e.deltaY); }, { passive: false });
+    dom.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      activeTouches = Array.from(e.touches);
+      if(e.touches.length === 1) onDown(e.touches[0].clientX, e.touches[0].clientY);
+      else if(e.touches.length === 2) dragging = false;
+    }, { passive: false });
+    dom.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      if(e.touches.length === 1 && dragging){
+        onMove(e.touches[0].clientX, e.touches[0].clientY);
+      } else if(e.touches.length === 2 && activeTouches.length === 2){
+        const d1 = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+        const d0 = Math.hypot(activeTouches[0].clientX - activeTouches[1].clientX, activeTouches[0].clientY - activeTouches[1].clientY);
+        if(d0 > 0){
+          targetRadius = Math.max(minDist, Math.min(maxDist, targetRadius * (d0/d1)));
+        }
+        activeTouches = Array.from(e.touches);
+      }
+    }, { passive: false });
+    dom.addEventListener('touchend', (e) => {
+      activeTouches = Array.from(e.touches);
+      if(e.touches.length === 0) onUp();
+    });
+    function update(){
+      theta += (targetTheta - theta) * 0.12;
+      phi += (targetPhi - phi) * 0.12;
+      radius += (targetRadius - radius) * 0.12;
+      const sinPhi = Math.sin(phi);
+      camera.position.x = target.x + radius * sinPhi * Math.sin(theta);
+      camera.position.y = target.y + radius * Math.cos(phi);
+      camera.position.z = target.z + radius * sinPhi * Math.cos(theta);
+      camera.lookAt(target);
+    }
+    function dispose(){
+      window.removeEventListener('mousemove', mouseMoveHandler);
+      window.removeEventListener('mouseup', mouseUpHandler);
+    }
+    return { update, dispose, target };
+  }
+
+  // ═════════════════════════════════════════════════════════════════════════
+  // OVERLAY
   // ═════════════════════════════════════════════════════════════════════════
   function _createOverlay(){
     if(STATE.overlay) return null;
     const overlay = document.createElement('div');
     overlay.id = 'vtour-fp-overlay';
     overlay.style.cssText = `
-      position:fixed;inset:0;background:rgba(8,12,20,.92);z-index:99998;
+      position:fixed;inset:0;background:#fafaf6;z-index:99998;
       display:flex;flex-direction:column;
       font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
     `;
     const top = document.createElement('div');
     top.style.cssText = `
       display:flex;align-items:center;justify-content:space-between;
-      padding:14px 20px;background:rgba(0,0,0,.55);
+      padding:14px 20px;background:rgba(30,41,59,.95);
       border-bottom:1px solid rgba(59,130,246,.3);
     `;
     top.innerHTML = `
       <div style="color:#fff;font-size:14px;font-weight:700">
-        📐 3D Floor Plan · <span style="color:#93c5fd;font-size:11px;font-weight:500">drag = rotire · scroll = zoom</span>
+        📐 3D Floor Plan · <span style="color:#93c5fd;font-size:11px;font-weight:500">drag = rotire · scroll = zoom · pinch = mobile</span>
       </div>
     `;
     const closeBtn = document.createElement('button');
@@ -1503,12 +1723,11 @@
     top.appendChild(closeBtn);
     overlay.appendChild(top);
 
-    // Bara cu butoane P/E1/E2 sub topbar
     const floorBar = document.createElement('div');
     floorBar.id = 'vtour-fp-floorbar';
     floorBar.style.cssText = `
       display:flex;align-items:center;gap:8px;
-      padding:10px 20px;background:rgba(0,0,0,.4);
+      padding:10px 20px;background:rgba(30,41,59,.85);
       border-bottom:1px solid rgba(255,255,255,.05);
     `;
     floorBar.innerHTML = `<div style="color:#94a3b8;font-size:10px;font-weight:700;letter-spacing:.3px;margin-right:4px">NIVEL:</div>`;
@@ -1525,7 +1744,6 @@
   }
 
   function _populateFloorButtons(floorBar, aedisFloors){
-    const niv = aedisFloors.floors.length;
     aedisFloors.floors.forEach((fl, idx) => {
       const lbl = (idx === 0) ? 'P' : `E${idx}`;
       const b = document.createElement('button');
@@ -1535,8 +1753,7 @@
         background:rgba(15,23,42,.5);color:#94a3b8;
         border:1px solid rgba(148,163,184,.3);border-radius:6px;
         padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;
-        min-width:42px;letter-spacing:.5px;touch-action:manipulation;
-        transition:all .15s;
+        min-width:42px;letter-spacing:.5px;touch-action:manipulation;transition:all .15s;
       `;
       b.addEventListener('click', () => _showFloor(idx));
       floorBar.appendChild(b);
@@ -1547,7 +1764,7 @@
   // START / STOP
   // ═════════════════════════════════════════════════════════════════════════
   function startFP(){
-    if(STATE.active){ console.warn('[VTour S2] deja activ'); return; }
+    if(STATE.active){ console.warn('[VTour S2b] deja activ'); return; }
     const V3D = window.V3D;
     if(!V3D || !V3D.scene){
       alert('Deschide întâi viewer-ul 3D și apasă "Generează AEDIS".');
@@ -1560,15 +1777,13 @@
     const THREE = window.THREE;
     STATE.active = true;
     STATE.floorGroups = [];
-    STATE._labels = [];
 
     const ov = _createOverlay();
     if(!ov){ STATE.active = false; return; }
     const canvasCtn = ov.canvasCtn;
 
     STATE.scene = new THREE.Scene();
-    STATE.scene.background = new THREE.Color(0xeef4fb); // alb-albastru curat
-    STATE.scene.fog = new THREE.Fog(0xeef4fb, 80, 300);
+    STATE.scene.background = new THREE.Color(0xfafaf6); // alb-crem ca în referință
 
     STATE.canvas = document.createElement('canvas');
     STATE.canvas.style.cssText = 'width:100%;height:100%;display:block;';
@@ -1586,16 +1801,15 @@
     STATE.renderer.toneMappingExposure = 1.0;
 
     const aspect = w / h;
-    STATE.camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 1000);
+    STATE.camera = new THREE.PerspectiveCamera(40, aspect, 0.1, 1000);
     const anchor = _computeAnchor();
-    // Distanță pentru a vedea tot etajul + înclinare 45° de la zenith
-    const dist = Math.max(anchor.bW, anchor.bD) * 1.0;
-    // Înclinare 45° = camera la 45° peste planul orizontal
-    const angle = Math.PI / 4; // 45°
+    // Distanță și unghi pentru a vedea tot etajul ca în referință (~50° de la zenith)
+    const dist = Math.max(anchor.bW, anchor.bD) * 1.1;
+    const angle = Math.PI * 0.38; // ~68° de la verticală = 22° de la zenith ridicat
     STATE.camera.position.set(
-      anchor.cx,
-      anchor.baseY + dist * Math.cos(angle),
-      anchor.cz + dist * Math.sin(angle)
+      anchor.cx + dist * Math.sin(angle) * 0.3,
+      anchor.baseY + dist * Math.cos(angle * 0.7),
+      anchor.cz + dist * Math.sin(angle) * 0.9
     );
 
     if(THREE.OrbitControls){
@@ -1605,19 +1819,21 @@
       STATE.controls.dampingFactor = 0.08;
       STATE.controls.minDistance = 3;
       STATE.controls.maxDistance = 300;
-      STATE.controls.maxPolarAngle = Math.PI * 0.45; // nu coboară sub clădire
-      STATE.controls.minPolarAngle = Math.PI * 0.05; // nu urcă pură verticală
+      STATE.controls.maxPolarAngle = Math.PI * 0.48;
+      STATE.controls.minPolarAngle = Math.PI * 0.08;
+      console.log('[VTour S2b] ✅ OrbitControls activ');
     } else {
-      console.warn('[VTour S2] OrbitControls lipsește');
-      STATE.camera.lookAt(anchor.cx, anchor.baseY + 0.5, anchor.cz);
+      console.warn('[VTour S2b] OrbitControls lipsește — fallback inline');
+      STATE.controls = _createInlineOrbit(STATE.camera, STATE.canvas, {
+        target: { x: anchor.cx, y: anchor.baseY + 0.5, z: anchor.cz },
+        minDistance: 3, maxDistance: 300,
+      });
     }
 
     _setupLighting();
     _buildFloorPlan();
-
-    // Populez butoanele de niveluri
     _populateFloorButtons(ov.floorBar, STATE._aedisFloors);
-    _showFloor(0); // încep cu parterul
+    _showFloor(0);
 
     STATE._resize = () => {
       if(!STATE.renderer || !canvasCtn) return;
@@ -1637,13 +1853,13 @@
         STATE.raf = requestAnimationFrame(loop);
       } catch(err){
         errCount++;
-        if(errCount <= 3) console.error('[VTour S2] eroare:', err);
+        if(errCount <= 3) console.error('[VTour S2b]:', err);
         if(errCount > 5){ stopFP(); }
         else STATE.raf = requestAnimationFrame(loop);
       }
     };
     STATE.raf = requestAnimationFrame(loop);
-    console.log('[VTour S2] ✅ FloorPlan start complet');
+    console.log('[VTour S2b] ✅ FloorPlan start complet');
   }
 
   function stopFP(){
@@ -1672,11 +1888,10 @@
     if(STATE.overlay){ STATE.overlay.remove(); STATE.overlay = null; }
     STATE.canvas = null;
     STATE.floorGroups = [];
-    STATE._labels = [];
-    console.log('[VTour S2] stop complet');
+    if(STATE._woodTex){ STATE._woodTex.dispose(); STATE._woodTex = null; }
+    console.log('[VTour S2b] stop complet');
   }
 
-  // Expun ca window.VTourFP — separat de window.VTour
   window.VTourFP = { startFP, stopFP };
 
   if(document.readyState === 'loading'){
