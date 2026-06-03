@@ -117,6 +117,74 @@ window.VTour = (function(){
   // Cache materiale
   const _matCache = new Map();
   const _texCache = new Map();
+  const _glbCache = new Map();  // cache pentru modele GLB încărcate
+
+  // ═════════════════════════════════════════════════════════════════════════
+  // GLB LOADER — încarcă modele 3D fotorealiste din assets/tur3d/models/
+  // Cache de promise pentru reutilizare. Fallback graceful dacă fișierul lipsește.
+  // ═════════════════════════════════════════════════════════════════════════
+
+  function _loadGLB(modelKey){
+    const url = `${CFG.assetsBase}/models/${modelKey}.glb`;
+    if(_glbCache.has(url)) return _glbCache.get(url);
+    const THREE = window.THREE;
+    const promise = new Promise((resolve) => {
+      if(!THREE.GLTFLoader){
+        resolve(null);
+        return;
+      }
+      const loader = new THREE.GLTFLoader();
+      loader.load(url,
+        (gltf) => {
+          const root = gltf.scene || (gltf.scenes && gltf.scenes[0]);
+          if(!root){ resolve(null); return; }
+          // Configurăm shadows + envMapIntensity pe toate mesh-urile
+          root.traverse(o => {
+            if(o.isMesh){
+              o.castShadow = true;
+              o.receiveShadow = true;
+              if(o.material){
+                if(Array.isArray(o.material)){
+                  o.material.forEach(m => { m.envMapIntensity = 1.0; });
+                } else {
+                  o.material.envMapIntensity = 1.0;
+                }
+              }
+            }
+          });
+          console.log('[VTour] ✅ GLB:', modelKey);
+          resolve(root);
+        },
+        undefined,
+        () => { resolve(null); /* silent fail — fallback la procedural */ }
+      );
+    });
+    _glbCache.set(url, promise);
+    return promise;
+  }
+
+  // Plasează un GLB cu scale + rotație. Async — promisul e înregistrat în
+  // STATE._pendingGLB pentru a putea fi awaited în bulk de _buildFurniture.
+  // Dacă lipsește GLB-ul, apelează fallbackFn (procedural) imediat sincron.
+  function _placeGLB(group, modelKey, x, y, z, scale, rotY, fallbackFn){
+    const promise = (async () => {
+      const model = await _loadGLB(modelKey);
+      if(!model){
+        if(fallbackFn){
+          try { fallbackFn(); } catch(e){ console.warn('[VTour] fallback fail:', modelKey, e.message); }
+        }
+        return null;
+      }
+      const clone = model.clone(true);
+      clone.position.set(x, y, z);
+      clone.scale.setScalar(scale || 1);
+      if(rotY) clone.rotation.y = rotY;
+      group.add(clone);
+      return clone;
+    })();
+    if(STATE._pendingGLB) STATE._pendingGLB.push(promise);
+    return promise;
+  }
 
   // ═════════════════════════════════════════════════════════════════════════
   // AEDIS READER — citește TOATE flagurile + AEDIS_STIL + AEDIS_FN
@@ -538,7 +606,7 @@ window.VTour = (function(){
     return mat;
   }
 
-  /** Material lemn (uși, mobilier, parchet finish, mâner) */
+  /** Material lemn (uși, mobilier, parchet finish, mâner) — lemn lăcuit cu clearcoat */
   function _woodMaterial(tone){
     tone = tone || 'medium';
     const colorMap = { dark: 0x3d2817, medium: 0x8b5a2b, light: 0xc9a373, ebony: 0x1a1008 };
@@ -546,35 +614,61 @@ window.VTour = (function(){
     const cacheKey = `wood:${tone}`;
     if(_matCache.has(cacheKey)) return _matCache.get(cacheKey);
     const THREE = window.THREE;
-    const mat = new THREE.MeshStandardMaterial({
-      color: c, roughness: 0.62, metalness: 0.05,
+    // MeshPhysicalMaterial cu clearcoat — lemn cu lac protector (parchet, mobilier lustruit)
+    const mat = new THREE.MeshPhysicalMaterial({
+      color: c, roughness: 0.55, metalness: 0.0,
+      clearcoat: 0.45, clearcoatRoughness: 0.18,
+      reflectivity: 0.35,
     });
     _matCache.set(cacheKey, mat);
     return mat;
   }
 
-  /** Material metal (mânere, rame, picioare mobilier) */
+  /** Material metal (mânere, rame, picioare mobilier) — cu anisotropy pentru periat */
   function _metalMaterial(tone){
     tone = tone || 'black';
-    const colorMap = { black:0x1a1a1a, chrome:0xc0c0c0, gold:0xb88a00, brass:0x9c7a3a, alu:0xa8a8a8, copper:0xb87333 };
+    const colorMap = { black:0x1a1a1a, chrome:0xc8c8c8, gold:0xb88a00, brass:0x9c7a3a, alu:0xa8a8a8, copper:0xb87333 };
     const c = colorMap[tone] || colorMap.black;
     const cacheKey = `metal:${tone}`;
     if(_matCache.has(cacheKey)) return _matCache.get(cacheKey);
     const THREE = window.THREE;
-    const mat = new THREE.MeshStandardMaterial({
-      color: c, roughness: 0.32, metalness: 0.92,
+    // Metal lustruit cu un strop de clearcoat pentru reflexii extra
+    const mat = new THREE.MeshPhysicalMaterial({
+      color: c, roughness: tone === 'chrome' ? 0.08 : 0.28, metalness: 0.95,
+      clearcoat: 0.3, clearcoatRoughness: 0.1,
+      envMapIntensity: 1.4,
     });
     _matCache.set(cacheKey, mat);
     return mat;
   }
 
-  /** Material textil (canapele, perne, draperii) */
+  /** Material textil (canapele, perne, draperii) — cu sheen pentru reflexie microfibrilară */
   function _fabricMaterial(colorHex, rough){
     const cacheKey = `fabric:${colorHex}:${rough||0.9}`;
     if(_matCache.has(cacheKey)) return _matCache.get(cacheKey);
     const THREE = window.THREE;
-    const mat = new THREE.MeshStandardMaterial({
-      color: _parseHex(colorHex), roughness: rough || 0.9, metalness: 0,
+    // MeshPhysicalMaterial cu sheen — efect velvet/textile real (vizibil pe muchii)
+    const mat = new THREE.MeshPhysicalMaterial({
+      color: _parseHex(colorHex),
+      roughness: rough || 0.9, metalness: 0,
+      sheen: 0.6,
+      sheenRoughness: 0.45,
+      sheenColor: new THREE.Color(0xffffff).multiplyScalar(0.4),
+    });
+    _matCache.set(cacheKey, mat);
+    return mat;
+  }
+
+  /** Material piele (sofa premium opțional, accente) */
+  function _leatherMaterial(colorHex){
+    const cacheKey = `leather:${colorHex || '#2a1a14'}`;
+    if(_matCache.has(cacheKey)) return _matCache.get(cacheKey);
+    const THREE = window.THREE;
+    const mat = new THREE.MeshPhysicalMaterial({
+      color: _parseHex(colorHex || '#2a1a14'),
+      roughness: 0.42, metalness: 0,
+      clearcoat: 0.3, clearcoatRoughness: 0.5,
+      sheen: 0.2, sheenRoughness: 0.6,
     });
     _matCache.set(cacheKey, mat);
     return mat;
@@ -710,29 +804,43 @@ window.VTour = (function(){
 
   function _computeAnchor(scene){
     const THREE = window.THREE;
-    let target = null;
-    if(window.V3D && Array.isArray(window.V3D.aedis) && window.V3D.aedis.length){
-      target = window.V3D.aedis[0];
-      if(target.parent && target.parent !== scene) target = target.parent;
-    }
     const bbox = new THREE.Box3();
-    if(target){
-      bbox.setFromObject(target);
-    } else {
+    // Strategia 1: bbox unit peste TOATE mesh-urile AEDIS (clădirea curentă)
+    if(window.V3D && Array.isArray(window.V3D.aedis) && window.V3D.aedis.length){
+      window.V3D.aedis.forEach(m => {
+        if(m && m.isObject3D){
+          try {
+            const sub = new THREE.Box3().setFromObject(m);
+            if(isFinite(sub.min.x)) bbox.union(sub);
+          } catch(e){}
+        }
+      });
+    }
+    // Fallback: scanăm scena pentru orice mesh AEDIS-like
+    if(!isFinite(bbox.min.x)){
       scene.traverse(o => {
-        if(o.isMesh && !o._vtourGenerated && !o._vtourLight && !o._vtourHotspot) bbox.expandByObject(o);
+        if(o.isMesh && !o._vtourGenerated && !o._vtourLight && !o._vtourHotspot && !o._vtourEntranceMarker){
+          try { bbox.expandByObject(o); } catch(e){}
+        }
       });
     }
     if(!isFinite(bbox.min.x)){
-      return { cx:0, cz:0, baseY:0, bW:20, bD:15 };
+      return { cx:0, cz:0, baseY:0, bW:20, bD:15, topY:12 };
     }
     const center = new THREE.Vector3();
     bbox.getCenter(center);
     const size = new THREE.Vector3();
     bbox.getSize(size);
+    // Suprascriem cu bW/bD din releveu dacă există (mai precise — în metri reali)
+    let bW = Math.max(size.x, 5), bD = Math.max(size.z, 5);
+    if(window._RV && window._RV.building){
+      if(window._RV.building.bW) bW = window._RV.building.bW;
+      if(window._RV.building.bD) bD = window._RV.building.bD;
+    }
+    console.log(`[VTour] Anchor: center=(${center.x.toFixed(1)}, ${bbox.min.y.toFixed(1)}, ${center.z.toFixed(1)}) dim=${bW.toFixed(1)}×${bD.toFixed(1)}m`);
     return {
       cx: center.x, cz: center.z, baseY: bbox.min.y,
-      bW: Math.max(size.x, 5), bD: Math.max(size.z, 5),
+      bW, bD,
       topY: bbox.max.y, bbox,
     };
   }
@@ -1285,11 +1393,14 @@ window.VTour = (function(){
   // FURNITURE SYSTEM — mobilier procedural per tip cameră
   // ═════════════════════════════════════════════════════════════════════════
 
-  function _buildFurniture(scene, anchor, aedisModel){
+  async function _buildFurniture(scene, anchor, aedisModel){
     if(!CFG.enableFurniture) return null;
     const THREE = window.THREE;
     const RV = window._RV;
     if(!RV || !Array.isArray(RV.floors)) return null;
+
+    // Pornim înregistrarea promiselor GLB (fiecare _placeGLB se adaugă aici)
+    STATE._pendingGLB = [];
 
     const group = new THREE.Group();
     group._vtourGenerated = true;
@@ -1303,7 +1414,7 @@ window.VTour = (function(){
     // Strategia: o cameră reprezentativă din fiecare tip relevant pe etajul cu cele mai multe
     const PRIORITY_TYPES = ['living', 'bedroom', 'kitchen', 'bath', 'office', 'meeting', 'reception'];
     const MAX_FURNISHED_ROOMS = 8;
-    const selectedRooms = []; // {floor, fIdx, rect}
+    const selectedRooms = []; // {floor, fIdx, rect, worldX, worldZ, worldY (centru-cameră), w, d}
     const seenTypes = new Set();
     // Prima trecere: o cameră per tip prioritar (cea mai mare)
     PRIORITY_TYPES.forEach(type => {
@@ -1346,17 +1457,28 @@ window.VTour = (function(){
     let pointLightCount = 0;
     const MAX_POINT_LIGHTS = 3;
 
-    selectedRooms.forEach(({ floor, fIdx, rect: r }) => {
-      const aedisFloor = aedisModel.floors[fIdx] || aedisModel.floors[aedisModel.floors.length - 1];
-      const yBottom = baseY + aedisFloor.baseY;
+    // Calculăm coordonatele world ale fiecărei camere (pentru CubeCamera ulterior)
+    selectedRooms.forEach(s => {
+      const aedisFloor = aedisModel.floors[s.fIdx] || aedisModel.floors[aedisModel.floors.length - 1];
+      s.yBottom = baseY + aedisFloor.baseY;
       const fScale = aedisFloor.footprintScale || 1.0;
       const ox = anchor.cx - (bW * fScale)/2;
       const oz = anchor.cz - (bD * fScale)/2;
-      const rx = ox + (r.x + r.w/2) * fScale;
-      const rz = oz + (r.y + r.h/2) * fScale;
-      const rw = r.w * fScale, rh = r.h * fScale;
+      s.worldX = ox + (s.rect.x + s.rect.w/2) * fScale;
+      s.worldZ = oz + (s.rect.y + s.rect.h/2) * fScale;
+      s.worldW = s.rect.w * fScale;
+      s.worldD = s.rect.h * fScale;
+    });
 
-      // Setăm un flag global temporar pentru a limita PointLights în primitives
+    // Salvăm pentru _setupCubeCameras (pasul 2)
+    STATE._selectedRooms = selectedRooms;
+
+    selectedRooms.forEach(s => {
+      const r = s.rect;
+      const yBottom = s.yBottom;
+      const rx = s.worldX, rz = s.worldZ;
+      const rw = s.worldW, rh = s.worldD;
+
       window.__vtourLightBudget = pointLightCount < MAX_POINT_LIGHTS;
       try {
         switch(r.t){
@@ -1381,6 +1503,16 @@ window.VTour = (function(){
 
     scene.add(group);
     STATE.furnitureGroup = group;
+
+    // Așteaptă încărcarea TUTUROR modelelor GLB înainte de a continua
+    const pending = STATE._pendingGLB;
+    console.log(`[VTour] Aștept încărcare ${pending.length} modele GLB...`);
+    if(pending.length > 0){
+      _setLoadingProgress(72, `Încarc ${pending.length} modele 3D...`);
+      await Promise.all(pending);
+    }
+    STATE._pendingGLB = null;
+
     console.log('[VTour] ✅ Mobilier:', group.children.length, 'mesh-uri,', pointLightCount, 'PointLights');
     return group;
   }
@@ -1388,112 +1520,145 @@ window.VTour = (function(){
   // ── LIVING — sofa + TV + măsuță cafea + plantă + covor + lustră ─────────
   function _placeLiving(group, cx, baseY, cz, w, d){
     const THREE = window.THREE;
-    // Sofa (perete N, lung pe X)
+    // Sofa GLB (fallback la procedural)
     if(w > 2.5){
-      _makeSofa(group, cx, baseY, cz - d/2 + 0.5, w * 0.65, 0.95, 0, '#3d4858');
+      _placeGLB(group, 'sofa', cx, baseY, cz - d/2 + 0.5, 1.0, 0, () => {
+        _makeSofa(group, cx, baseY, cz - d/2 + 0.5, w * 0.65, 0.95, 0, '#3d4858');
+      });
     }
-    // TV (perete S, montat pe perete)
+    // TV GLB (montat pe perete S)
     if(w > 1.4){
-      _makeTV(group, cx, baseY + 1.3, cz + d/2 - 0.05, 1.4, 0.85, 0);
+      _placeGLB(group, 'tv', cx, baseY + 1.0, cz + d/2 - 0.15, 1.0, Math.PI, () => {
+        _makeTV(group, cx, baseY + 1.3, cz + d/2 - 0.05, 1.4, 0.85, 0);
+      });
     }
-    // Măsuța cafea (centru)
-    _makeCoffeeTable(group, cx, baseY, cz, 1.0, 0.55);
-    // Covor mare (sub măsuță)
+    // Măsuță cafea GLB
+    _placeGLB(group, 'coffee_table', cx, baseY, cz, 1.0, 0, () => {
+      _makeCoffeeTable(group, cx, baseY, cz, 1.0, 0.55);
+    });
+    // Covor mare (sub măsuță) — procedural (e doar un plan)
     const carpetMat = _carpetMaterial('#8b6f47');
     const carpet = new THREE.Mesh(new THREE.PlaneGeometry(Math.min(w*0.7, 2.5), Math.min(d*0.6, 1.8)), carpetMat);
     carpet.rotation.x = -Math.PI / 2;
     carpet.position.set(cx, baseY + 0.005, cz);
     carpet.receiveShadow = true;
     group.add(carpet);
-    // Plantă (colț SV)
-    _makePlant(group, cx - w/2 + 0.4, baseY, cz + d/2 - 0.4, 1.4);
-    // Lustră (tavan centru)
-    _makeChandelier(group, cx, baseY + 2.7, cz);
+    // Plantă GLB (colț)
+    _placeGLB(group, 'plant_potted', cx - w/2 + 0.4, baseY, cz + d/2 - 0.4, 1.0, 0, () => {
+      _makePlant(group, cx - w/2 + 0.4, baseY, cz + d/2 - 0.4, 1.4);
+    });
+    // Lustră GLB (tavan centru)
+    _placeGLB(group, 'chandelier', cx, baseY + 2.8, cz, 1.0, 0, () => {
+      _makeChandelier(group, cx, baseY + 2.7, cz);
+    });
   }
 
   // ── BEDROOM ──────────────────────────────────────────────────────────────
   function _placeBedroom(group, cx, baseY, cz, w, d){
-    const THREE = window.THREE;
     if(d > 2.4){
-      // Pat dublu pe perete N
-      _makeBed(group, cx, baseY, cz - d/2 + 1.0);
-      // Noptiere flanc
-      _makeNightstand(group, cx - 1.0, baseY, cz - d/2 + 0.35);
-      _makeNightstand(group, cx + 1.0, baseY, cz - d/2 + 0.35);
-      // Lampe noptiere
+      // Pat dublu GLB pe perete N
+      _placeGLB(group, 'bed', cx, baseY, cz - d/2 + 1.0, 1.0, 0, () => {
+        _makeBed(group, cx, baseY, cz - d/2 + 1.0);
+      });
+      // Noptiere GLB flanc
+      _placeGLB(group, 'nightstand', cx - 1.0, baseY, cz - d/2 + 0.35, 1.0, 0, () => {
+        _makeNightstand(group, cx - 1.0, baseY, cz - d/2 + 0.35);
+      });
+      _placeGLB(group, 'nightstand', cx + 1.0, baseY, cz - d/2 + 0.35, 1.0, 0, () => {
+        _makeNightstand(group, cx + 1.0, baseY, cz - d/2 + 0.35);
+      });
+      // Lampe noptiere — procedural (au PointLight)
       _makeTableLamp(group, cx - 1.0, baseY + 0.6, cz - d/2 + 0.35);
       _makeTableLamp(group, cx + 1.0, baseY + 0.6, cz - d/2 + 0.35);
     }
-    // Dulap (perete S)
+    // Dulap GLB
     if(w > 1.5){
-      _makeWardrobe(group, cx, baseY, cz + d/2 - 0.35, Math.min(w * 0.6, 2.0));
+      _placeGLB(group, 'wardrobe', cx, baseY, cz + d/2 - 0.35, 1.0, Math.PI, () => {
+        _makeWardrobe(group, cx, baseY, cz + d/2 - 0.35, Math.min(w * 0.6, 2.0));
+      });
     }
-    // Lustră
+    // Lustră (procedural, are PointLight)
     _makeChandelier(group, cx, baseY + 2.7, cz, 'compact');
   }
 
   // ── KITCHEN ──────────────────────────────────────────────────────────────
   function _placeKitchen(group, cx, baseY, cz, w, d){
-    const THREE = window.THREE;
-    // Blat pe perete N
+    // Blat (procedural — adaptat la lățime variabilă)
     if(w > 1.5){
       _makeKitchenCounter(group, cx, baseY, cz - d/2 + 0.3, w * 0.85);
     }
-    // Frigider (colț SE)
-    _makeFridge(group, cx + w/2 - 0.4, baseY, cz - d/2 + 0.4);
-    // Masă mâncare (centru sau perete S)
+    // Frigider GLB
+    _placeGLB(group, 'fridge', cx + w/2 - 0.4, baseY, cz - d/2 + 0.4, 1.0, 0, () => {
+      _makeFridge(group, cx + w/2 - 0.4, baseY, cz - d/2 + 0.4);
+    });
+    // Masă mâncare GLB + scaune
     if(w > 2.2 && d > 2.4){
-      _makeDiningTable(group, cx, baseY, cz + 0.5, 1.2, 0.75);
-      _makeChair(group, cx - 0.5, baseY, cz + 0.95, Math.PI);
-      _makeChair(group, cx + 0.5, baseY, cz + 0.95, Math.PI);
-      _makeChair(group, cx - 0.5, baseY, cz + 0.05, 0);
-      _makeChair(group, cx + 0.5, baseY, cz + 0.05, 0);
+      _placeGLB(group, 'dining_table', cx, baseY, cz + 0.5, 1.0, 0, () => {
+        _makeDiningTable(group, cx, baseY, cz + 0.5, 1.2, 0.75);
+      });
+      // 4 scaune GLB
+      [[-0.5, 0.95, Math.PI], [0.5, 0.95, Math.PI], [-0.5, 0.05, 0], [0.5, 0.05, 0]].forEach(([dx, dz, rot]) => {
+        _placeGLB(group, 'chair', cx + dx, baseY, cz + dz, 1.0, rot, () => {
+          _makeChair(group, cx + dx, baseY, cz + dz, rot);
+        });
+      });
     }
-    // Lustră
     _makeChandelier(group, cx, baseY + 2.7, cz, 'compact');
   }
 
   // ── BATHROOM ─────────────────────────────────────────────────────────────
   function _placeBathroom(group, cx, baseY, cz, w, d){
-    // Cadă pe perete cel mai lung
     if(w > 1.8){
-      _makeBathtub(group, cx, baseY, cz - d/2 + 0.4, 1.7, 0.75);
+      _placeGLB(group, 'bathtub', cx, baseY, cz - d/2 + 0.4, 1.0, 0, () => {
+        _makeBathtub(group, cx, baseY, cz - d/2 + 0.4, 1.7, 0.75);
+      });
     }
-    // Chiuvetă
-    _makeSink(group, cx + w/2 - 0.35, baseY, cz);
-    // WC
-    _makeToilet(group, cx - w/2 + 0.35, baseY, cz + d/2 - 0.4);
-    // Oglindă
+    _placeGLB(group, 'sink', cx + w/2 - 0.35, baseY, cz, 1.0, -Math.PI/2, () => {
+      _makeSink(group, cx + w/2 - 0.35, baseY, cz);
+    });
+    _placeGLB(group, 'toilet', cx - w/2 + 0.35, baseY, cz + d/2 - 0.4, 1.0, Math.PI/2, () => {
+      _makeToilet(group, cx - w/2 + 0.35, baseY, cz + d/2 - 0.4);
+    });
     _makeMirror(group, cx + w/2 - 0.05, baseY + 1.55, cz, 0.6, 0.8, Math.PI/2);
   }
 
   // ── WC simplu ─────────────────────────────────────────────────────────────
   function _placeWC(group, cx, baseY, cz, w, d){
-    _makeToilet(group, cx, baseY, cz - d/2 + 0.4);
-    _makeSink(group, cx + w/2 - 0.25, baseY, cz);
+    _placeGLB(group, 'toilet', cx, baseY, cz - d/2 + 0.4, 1.0, 0, () => {
+      _makeToilet(group, cx, baseY, cz - d/2 + 0.4);
+    });
+    _placeGLB(group, 'sink', cx + w/2 - 0.25, baseY, cz, 1.0, -Math.PI/2, () => {
+      _makeSink(group, cx + w/2 - 0.25, baseY, cz);
+    });
   }
 
   // ── OFFICE ────────────────────────────────────────────────────────────────
   function _placeOffice(group, cx, baseY, cz, w, d){
-    // Birou (perete N, cu fereastra)
-    _makeDesk(group, cx, baseY, cz - d/2 + 0.4, 1.4, 0.7);
-    _makeOfficeChair(group, cx, baseY, cz - d/2 + 1.0);
-    // Bibliotecă (perete S)
+    _placeGLB(group, 'desk', cx, baseY, cz - d/2 + 0.4, 1.0, 0, () => {
+      _makeDesk(group, cx, baseY, cz - d/2 + 0.4, 1.4, 0.7);
+    });
+    _placeGLB(group, 'office_chair', cx, baseY, cz - d/2 + 1.0, 1.0, 0, () => {
+      _makeOfficeChair(group, cx, baseY, cz - d/2 + 1.0);
+    });
     if(w > 1.4){
-      _makeBookshelf(group, cx, baseY, cz + d/2 - 0.2, Math.min(w * 0.7, 1.5));
+      _placeGLB(group, 'bookshelf', cx, baseY, cz + d/2 - 0.2, 1.0, Math.PI, () => {
+        _makeBookshelf(group, cx, baseY, cz + d/2 - 0.2, Math.min(w * 0.7, 1.5));
+      });
     }
-    // Plantă (colț)
-    _makePlant(group, cx + w/2 - 0.35, baseY, cz + d/2 - 0.35, 1.0);
+    _placeGLB(group, 'plant_potted', cx + w/2 - 0.35, baseY, cz + d/2 - 0.35, 0.8, 0, () => {
+      _makePlant(group, cx + w/2 - 0.35, baseY, cz + d/2 - 0.35, 1.0);
+    });
     _makeChandelier(group, cx, baseY + 2.7, cz, 'compact');
   }
 
   // ── HALL — minim, cu cuier și plantă ──────────────────────────────────────
   function _placeHall(group, cx, baseY, cz, w, d){
     if(w > 1.5 || d > 1.5){
-      _makePlant(group, cx + Math.min(w,d)/2 - 0.4, baseY, cz, 1.2);
+      _placeGLB(group, 'plant_potted', cx + Math.min(w,d)/2 - 0.4, baseY, cz, 1.0, 0, () => {
+        _makePlant(group, cx + Math.min(w,d)/2 - 0.4, baseY, cz, 1.2);
+      });
     }
     if(d > 1.5){
-      // Cuier (BoxGeometry tall)
       _makeBox(group, cx - w/2 + 0.25, baseY + 0.9, cz - d/2 + 0.3, 0.4, 1.8, 0.08, _woodMaterial('medium'));
     }
   }
@@ -1501,29 +1666,40 @@ window.VTour = (function(){
   // ── RECEPTION — birou + scaune ───────────────────────────────────────────
   function _placeReception(group, cx, baseY, cz, w, d){
     _makeKitchenCounter(group, cx, baseY, cz - d/2 + 0.4, w * 0.7);
-    _makeOfficeChair(group, cx, baseY, cz - d/2 + 1.1);
-    _makePlant(group, cx - w/2 + 0.4, baseY, cz + d/2 - 0.4, 1.5);
-    _makePlant(group, cx + w/2 - 0.4, baseY, cz + d/2 - 0.4, 1.5);
+    _placeGLB(group, 'office_chair', cx, baseY, cz - d/2 + 1.1, 1.0, 0, () => {
+      _makeOfficeChair(group, cx, baseY, cz - d/2 + 1.1);
+    });
+    _placeGLB(group, 'plant_potted', cx - w/2 + 0.4, baseY, cz + d/2 - 0.4, 1.1, 0, () => {
+      _makePlant(group, cx - w/2 + 0.4, baseY, cz + d/2 - 0.4, 1.5);
+    });
+    _placeGLB(group, 'plant_potted', cx + w/2 - 0.4, baseY, cz + d/2 - 0.4, 1.1, 0, () => {
+      _makePlant(group, cx + w/2 - 0.4, baseY, cz + d/2 - 0.4, 1.5);
+    });
   }
 
   // ── MEETING ROOM — masă mare cu scaune ────────────────────────────────────
   function _placeMeeting(group, cx, baseY, cz, w, d){
     const tableW = Math.min(w * 0.55, 2.6);
     const tableD = Math.min(d * 0.4, 1.1);
-    _makeDiningTable(group, cx, baseY, cz, tableW, tableD);
+    _placeGLB(group, 'dining_table', cx, baseY, cz, tableW/1.2, 0, () => {
+      _makeDiningTable(group, cx, baseY, cz, tableW, tableD);
+    });
     const nChairs = Math.max(4, Math.floor(tableW / 0.6) * 2);
     for(let i = 0; i < nChairs/2; i++){
       const t = (i + 0.5) / (nChairs/2);
       const x = cx - tableW/2 + t * tableW;
-      _makeChair(group, x, baseY, cz + tableD/2 + 0.4, Math.PI);
-      _makeChair(group, x, baseY, cz - tableD/2 - 0.4, 0);
+      _placeGLB(group, 'chair', x, baseY, cz + tableD/2 + 0.4, 1.0, Math.PI, () => {
+        _makeChair(group, x, baseY, cz + tableD/2 + 0.4, Math.PI);
+      });
+      _placeGLB(group, 'chair', x, baseY, cz - tableD/2 - 0.4, 1.0, 0, () => {
+        _makeChair(group, x, baseY, cz - tableD/2 - 0.4, 0);
+      });
     }
     _makeChandelier(group, cx, baseY + 2.7, cz);
   }
 
   // ── COMMERCIAL — rafturi simple ──────────────────────────────────────────
   function _placeCommercial(group, cx, baseY, cz, w, d){
-    // 2 rânduri de rafturi paralele
     const shelfH = 2.0;
     const woodMat = _woodMaterial('medium');
     if(w > 3){
@@ -1547,6 +1723,47 @@ window.VTour = (function(){
     return m;
   }
 
+  // Cuboid cu muchii rotunjite (bevel) — diferența vizibilă față de BoxGeometry plat
+  // este enormă; orice piesă de mobilier reală are muchii cu raza de cel puțin 2-3mm
+  function _makeRoundedBox(group, x, y, z, w, h, d, radius, mat, rotY){
+    const THREE = window.THREE;
+    radius = Math.min(radius, w/2 - 0.001, h/2 - 0.001, d/2 - 0.001);
+    if(radius <= 0.005){
+      return _makeBox(group, x, y, z, w, h, d, mat, rotY);
+    }
+    // Shape 2D dreptunghi cu colțuri rotunjite (în planul XY)
+    const shape = new THREE.Shape();
+    const hw = w/2 - radius, hh = h/2 - radius;
+    shape.moveTo(-hw, -h/2);
+    shape.lineTo(hw, -h/2);
+    shape.quadraticCurveTo(w/2, -h/2, w/2, -hh);
+    shape.lineTo(w/2, hh);
+    shape.quadraticCurveTo(w/2, h/2, hw, h/2);
+    shape.lineTo(-hw, h/2);
+    shape.quadraticCurveTo(-w/2, h/2, -w/2, hh);
+    shape.lineTo(-w/2, -hh);
+    shape.quadraticCurveTo(-w/2, -h/2, -hw, -h/2);
+    // Extrudăm pe Z cu bevel ușor pentru muchiile din față/spate
+    const geo = new THREE.ExtrudeGeometry(shape, {
+      depth: d,
+      bevelEnabled: true,
+      bevelThickness: radius * 0.6,
+      bevelSize: radius * 0.6,
+      bevelOffset: 0,
+      bevelSegments: 3,
+      curveSegments: 6,
+    });
+    // Centrăm pe Z
+    geo.translate(0, 0, -d/2);
+    geo.computeVertexNormals();
+    const m = new THREE.Mesh(geo, mat);
+    m.position.set(x, y, z);
+    if(rotY) m.rotation.y = rotY;
+    m.castShadow = true; m.receiveShadow = true;
+    group.add(m);
+    return m;
+  }
+
   function _makeCyl(group, x, y, z, r, h, mat, rotZ){
     const THREE = window.THREE;
     const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, 16), mat);
@@ -1557,146 +1774,413 @@ window.VTour = (function(){
     return m;
   }
 
-  function _makeSofa(group, cx, baseY, cz, w, d, rotY, colorHex){
-    const fabricMat = _fabricMaterial(colorHex || '#3d4858', 0.92);
-    // Bază
-    _makeBox(group, cx, baseY + 0.32, cz, w, 0.45, d, fabricMat, rotY);
-    // Spatare
-    const sX = Math.cos(rotY||0), sZ = Math.sin(rotY||0);
-    const px = -Math.sin(rotY||0), pz = Math.cos(rotY||0);
-    _makeBox(group, cx + px * (d/2 - 0.1), baseY + 0.72, cz + pz * (d/2 - 0.1), w, 0.6, 0.15, fabricMat, rotY);
-    // Brațe
-    _makeBox(group, cx + sX * (w/2 - 0.08), baseY + 0.5, cz + sZ * (w/2 - 0.08), 0.15, 0.6, d, fabricMat, rotY);
-    _makeBox(group, cx - sX * (w/2 - 0.08), baseY + 0.5, cz - sZ * (w/2 - 0.08), 0.15, 0.6, d, fabricMat, rotY);
-    // 3 perne
-    const cushW = (w - 0.4) / 3;
+  function _makeSofa(parentGroup, cx, baseY, cz, w, d, rotY, colorHex){
+    const THREE = window.THREE;
+    // Construim sofa în spațiu LOCAL (centrată la origin), apoi aplicăm transform pe group
+    const sofa = new THREE.Group();
+    sofa._vtourGenerated = true;
+    const color = colorHex || '#3d4858';
+    const fabricMain = _fabricMaterial(color, 0.92);
+    const fabricCushion = _fabricMaterial(color, 0.95);
+    const legMat = _metalMaterial('black');
+
+    const baseH = 0.28;     // înălțime bază
+    const seatH = 0.18;     // perne sezut
+    const backH = 0.58;     // spătar
+    const armH = 0.66;      // brațe
+    const armW = 0.16;
+
+    // 1. Bază (sub perne) — roundedBox lung cu bevel
+    _makeRoundedBox(sofa, 0, baseH/2, 0, w, baseH, d, 0.04, fabricMain, 0);
+
+    // 2. Spătar — usor tiltat înapoi (~3.4°)
+    const back = _makeRoundedBox(sofa, 0, baseH + backH/2, -(d/2 - 0.09), w - 0.02, backH, 0.16, 0.05, fabricMain, 0);
+    back.rotation.x = -0.06;
+
+    // 3. Brațe — 2 boxe rotunjite, mai înalte decât spătarul
+    _makeRoundedBox(sofa, -(w/2 - armW/2), baseH + armH/2, 0, armW, armH, d, 0.05, fabricMain, 0);
+    _makeRoundedBox(sofa,  (w/2 - armW/2), baseH + armH/2, 0, armW, armH, d, 0.05, fabricMain, 0);
+
+    // 4. Perne sezut — 3 separate cu variație organică
+    const cushSpace = (w - 2*armW - 0.06);
+    const cushW = cushSpace / 3;
     for(let i = 0; i < 3; i++){
-      const offset = -w/2 + 0.2 + cushW/2 + i * cushW;
-      _makeBox(group, cx + sX * offset, baseY + 0.6, cz + sZ * offset, cushW * 0.85, 0.12, d * 0.7,
-        _fabricMaterial(colorHex || '#3d4858', 0.95), rotY);
+      const x = -cushSpace/2 + cushW/2 + i*cushW;
+      const yRot = (i - 1) * 0.03; // variație ușoară
+      _makeRoundedBox(sofa, x, baseH + seatH/2 + 0.01, 0.06, cushW * 0.93, seatH, d * 0.78, 0.045, fabricCushion, yRot);
     }
-  }
 
-  function _makeCoffeeTable(group, cx, baseY, cz, w, d){
-    const top = _woodMaterial('dark');
-    const legs = _metalMaterial('black');
-    // Suprafață
-    _makeBox(group, cx, baseY + 0.4, cz, w, 0.04, d, top);
-    // 4 picioare
-    [-1,1].forEach(sx => {
-      [-1,1].forEach(sz => {
-        _makeCyl(group, cx + sx * (w/2 - 0.08), baseY + 0.2, cz + sz * (d/2 - 0.08), 0.025, 0.4, legs);
-      });
+    // 5. Perne spătar — 3 înclinate ușor înainte
+    for(let i = 0; i < 3; i++){
+      const x = -cushSpace/2 + cushW/2 + i*cushW;
+      const cm = _makeRoundedBox(sofa, x, baseH + seatH + 0.22, -(d/2 - 0.22), cushW * 0.88, 0.34, 0.18, 0.05, fabricCushion, (i-1)*0.04);
+      cm.rotation.x = 0.12; // top înclinat înainte
+    }
+
+    // 6. Pernă decorativă accent (colț stânga)
+    const accentMat = _fabricMaterial('#a06a4a', 0.85);
+    _makeRoundedBox(sofa, -cushSpace/3, baseH + seatH + 0.09, -0.05, 0.32, 0.12, 0.32, 0.06, accentMat, 0.4);
+
+    // 7. Picioare metalice (4 colțuri, mici)
+    [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([sx, sz]) => {
+      _makeRoundedBox(sofa, sx * (w/2 - 0.12), 0.05, sz * (d/2 - 0.12), 0.07, 0.1, 0.07, 0.015, legMat, 0);
     });
+
+    sofa.position.set(cx, baseY, cz);
+    sofa.rotation.y = rotY || 0;
+    parentGroup.add(sofa);
+    return sofa;
   }
 
-  function _makeBed(group, cx, baseY, cz){
-    // Saltea albă
-    _makeBox(group, cx, baseY + 0.42, cz, 1.6, 0.25, 2.0, _fabricMaterial('#f5f5f0', 0.95));
-    // Cadru lemn
-    _makeBox(group, cx, baseY + 0.15, cz, 1.7, 0.3, 2.1, _woodMaterial('medium'));
-    // Tăblie
-    _makeBox(group, cx, baseY + 0.95, cz - 1.0 - 0.05, 1.7, 0.9, 0.1, _woodMaterial('medium'));
-    // 2 perne
-    _makeBox(group, cx - 0.35, baseY + 0.6, cz - 0.7, 0.6, 0.15, 0.4, _fabricMaterial('#ffffff', 0.95));
-    _makeBox(group, cx + 0.35, baseY + 0.6, cz - 0.7, 0.6, 0.15, 0.4, _fabricMaterial('#ffffff', 0.95));
-    // Plapumă (textil colorat)
-    _makeBox(group, cx, baseY + 0.56, cz + 0.2, 1.55, 0.05, 1.5, _fabricMaterial('#5d7a8c', 0.92));
+  function _makeCoffeeTable(parentGroup, cx, baseY, cz, w, d){
+    const THREE = window.THREE;
+    const table = new THREE.Group();
+    table._vtourGenerated = true;
+    const topMat = _woodMaterial('dark');         // lemn lăcuit cu clearcoat
+    const legs = _metalMaterial('black');
+    const shelfMat = _woodMaterial('medium');
+
+    // 1. Suprafață top cu chamfer pronunțat
+    _makeRoundedBox(table, 0, 0.40, 0, w, 0.045, d, 0.025, topMat, 0);
+
+    // 2. Raft inferior (caracteristic mesei moderne) — mai mic, sub blat
+    _makeRoundedBox(table, 0, 0.13, 0, w * 0.85, 0.03, d * 0.85, 0.02, shelfMat, 0);
+
+    // 3. Picioare metalice — cu un mic chamfer pe muchii
+    [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([sx, sz]) => {
+      _makeRoundedBox(table, sx * (w/2 - 0.06), 0.2, sz * (d/2 - 0.06), 0.035, 0.4, 0.035, 0.005, legs, 0);
+    });
+
+    // 4. Detaliu decorativ pe blat — vază mică
+    _makeRoundedBox(table, w*0.25, 0.46, 0, 0.06, 0.12, 0.06, 0.015, _metalMaterial('brass'), 0);
+
+    table.position.set(cx, baseY, cz);
+    parentGroup.add(table);
+    return table;
   }
 
-  function _makeNightstand(group, cx, baseY, cz){
-    _makeBox(group, cx, baseY + 0.3, cz, 0.45, 0.6, 0.4, _woodMaterial('medium'));
-    // Sertar (cosmetic)
-    _makeBox(group, cx, baseY + 0.42, cz + 0.21, 0.4, 0.12, 0.02, _woodMaterial('dark'));
-    _makeBox(group, cx, baseY + 0.42, cz + 0.22, 0.05, 0.02, 0.02, _metalMaterial('chrome'));
+  function _makeChair(parentGroup, cx, baseY, cz, rotY){
+    const THREE = window.THREE;
+    const ch = new THREE.Group();
+    ch._vtourGenerated = true;
+    const wood = _woodMaterial('medium');
+    const seatPad = _fabricMaterial('#5d4e3e', 0.92);
+
+    // 1. Sezut cu chamfer
+    _makeRoundedBox(ch, 0, 0.46, 0, 0.44, 0.05, 0.44, 0.025, wood, 0);
+
+    // 2. Pernă subțire pe sezut (decorativ)
+    _makeRoundedBox(ch, 0, 0.495, 0, 0.40, 0.025, 0.40, 0.04, seatPad, 0);
+
+    // 3. Spătar — usor tiltat înapoi, cu o curbură ușoară (ExtrudeGeometry shape)
+    // Folosim un dreptunghi cu colțuri rotunjite, plasat și înclinat
+    const back = _makeRoundedBox(ch, 0, 0.78, -0.21, 0.40, 0.5, 0.04, 0.04, wood, 0);
+    back.rotation.x = -0.08; // tilt back ~5°
+
+    // 4. Picioare — ușor înclinate spre exterior (Splay) — frumusețea designului modern
+    const legSplay = 0.025;
+    [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([sx, sz]) => {
+      const leg = _makeRoundedBox(ch, sx * (0.2 - legSplay*sx*0.5), 0.225, sz * (0.2 - legSplay*sz*0.5), 0.035, 0.45, 0.035, 0.006, wood, 0);
+      leg.rotation.z = -sx * 0.05; // tilt outward
+      leg.rotation.x = -sz * 0.05;
+    });
+
+    ch.position.set(cx, baseY, cz);
+    ch.rotation.y = rotY || 0;
+    parentGroup.add(ch);
+    return ch;
+  }
+
+  function _makeNightstand(parentGroup, cx, baseY, cz){
+    const THREE = window.THREE;
+    const ns = new THREE.Group();
+    ns._vtourGenerated = true;
+    const wood = _woodMaterial('medium');
+    const woodDark = _woodMaterial('dark');
+    const handle = _metalMaterial('chrome');
+
+    // 1. Corp principal cu chamfer
+    _makeRoundedBox(ns, 0, 0.3, 0, 0.45, 0.6, 0.4, 0.02, wood, 0);
+
+    // 2. Sertar — față proeminentă cu chamfer mai mare (efect de relief)
+    _makeRoundedBox(ns, 0, 0.42, 0.205, 0.4, 0.14, 0.015, 0.018, woodDark, 0);
+
+    // 3. Sertar inferior (al doilea)
+    _makeRoundedBox(ns, 0, 0.22, 0.205, 0.4, 0.14, 0.015, 0.018, woodDark, 0);
+
+    // 4. Mânere — 2 cilindre orizontale proeminente
+    const h1 = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.10, 12), handle);
+    h1.rotation.z = Math.PI / 2;
+    h1.position.set(0, 0.42, 0.225);
+    h1.castShadow = true; h1.receiveShadow = true;
+    ns.add(h1);
+    const h2 = h1.clone();
+    h2.position.y = 0.22;
+    ns.add(h2);
+
+    // 5. Picioare scurte
+    [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([sx, sz]) => {
+      _makeRoundedBox(ns, sx * 0.18, 0.025, sz * 0.16, 0.035, 0.05, 0.035, 0.008, wood, 0);
+    });
+
+    // 6. Decorativ pe top — carte
+    _makeRoundedBox(ns, 0.1, 0.625, 0, 0.16, 0.025, 0.22, 0.005, _fabricMaterial('#7c2d12', 0.7), 0.2);
+
+    ns.position.set(cx, baseY, cz);
+    parentGroup.add(ns);
+    return ns;
+  }
+
+  function _makeWardrobe(parentGroup, cx, baseY, cz, w){
+    const THREE = window.THREE;
+    const wd = new THREE.Group();
+    wd._vtourGenerated = true;
+    const wood = _woodMaterial('dark');
+    const woodTrim = _woodMaterial('medium');
+    const handle = _metalMaterial('chrome');
+    const H = 2.2, D = 0.6;
+
+    // 1. Corp principal
+    _makeRoundedBox(wd, 0, H/2, 0, w, H, D, 0.015, wood, 0);
+
+    // 2. Top trim (ornament sus)
+    _makeRoundedBox(wd, 0, H + 0.025, 0, w + 0.06, 0.05, D + 0.04, 0.015, woodTrim, 0);
+
+    // 3. Plinth (bază decorativă)
+    _makeRoundedBox(wd, 0, 0.04, 0, w + 0.04, 0.08, D + 0.02, 0.012, woodTrim, 0);
+
+    // 4. Uși — 2 sau 3 panele proeminente cu chamfer
+    const nDoors = w > 1.4 ? 2 : 1;
+    const doorW = (w - 0.04) / nDoors;
+    for(let i = 0; i < nDoors; i++){
+      const x = -w/2 + 0.02 + doorW/2 + i * doorW;
+      // Ușă proeminentă spre exterior (2cm peste corp)
+      _makeRoundedBox(wd, x, H/2, D/2 + 0.012, doorW - 0.02, H - 0.16, 0.024, 0.012, wood, 0);
+      // Panel decorativ interior pe ușă (un dreptunghi rotunjit ușor mai în interior)
+      _makeRoundedBox(wd, x, H/2, D/2 + 0.025, doorW - 0.14, H - 0.36, 0.005, 0.04, woodTrim, 0);
+      // Mâner vertical (cilindru lung)
+      const handleSide = (i === 0) ? doorW/2 - 0.05 : -doorW/2 + 0.05;
+      const hMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.3, 12), handle);
+      hMesh.position.set(x + handleSide, H/2, D/2 + 0.045);
+      hMesh.castShadow = true; hMesh.receiveShadow = true;
+      wd.add(hMesh);
+    }
+
+    wd.position.set(cx, baseY, cz);
+    parentGroup.add(wd);
+    return wd;
   }
 
   function _makeTableLamp(group, cx, baseY, cz){
     const THREE = window.THREE;
-    // Bază metalică
-    _makeCyl(group, cx, baseY + 0.03, cz, 0.08, 0.05, _metalMaterial('brass'));
-    // Stand
-    _makeCyl(group, cx, baseY + 0.2, cz, 0.015, 0.35, _metalMaterial('brass'));
-    // Abajur (con)
-    const lampMat = new THREE.MeshStandardMaterial({color:0xfff5d8, roughness:0.45, metalness:0, emissive:0xffe0a0, emissiveIntensity:0.6});
-    const cone = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.2, 16, 1, true), lampMat);
-    cone.position.set(cx, baseY + 0.45, cz);
-    cone.castShadow = true;
+    // Bază metalică (cilindru jos cu chamfer)
+    const baseMat = _metalMaterial('brass');
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.1, 0.04, 16), baseMat);
+    base.position.set(cx, baseY + 0.02, cz);
+    base.castShadow = true; base.receiveShadow = true;
+    group.add(base);
+    // Stand (cilindru subțire)
+    const stand = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.38, 12), baseMat);
+    stand.position.set(cx, baseY + 0.22, cz);
+    stand.castShadow = true; stand.receiveShadow = true;
+    group.add(stand);
+    // Abajur — emissive când e aprinsă
+    const lampMat = new THREE.MeshPhysicalMaterial({
+      color: 0xfff5d8, roughness: 0.4, metalness: 0,
+      emissive: 0xffe0a0, emissiveIntensity: 0.75,
+      transparent: true, opacity: 0.92,
+    });
+    const cone = new THREE.Mesh(new THREE.ConeGeometry(0.17, 0.22, 20, 1, true), lampMat);
+    cone.position.set(cx, baseY + 0.47, cz);
+    cone.castShadow = true; cone.receiveShadow = true;
     group.add(cone);
-    // Point light real
+    // Point light real (dacă bugetul permite)
     if(CFG.enableLighting && window.__vtourLightBudget){
-      const pl = new THREE.PointLight(0xfff0c8, 0.6, 4, 2);
-      pl.position.set(cx, baseY + 0.4, cz);
-      pl.castShadow = false; // off pentru performanță (multe lampe)
+      const pl = new THREE.PointLight(0xfff0c8, 0.55, 4, 2);
+      pl.position.set(cx, baseY + 0.42, cz);
+      pl.castShadow = false;
       group.add(pl);
     }
   }
 
-  function _makeWardrobe(group, cx, baseY, cz, w){
-    _makeBox(group, cx, baseY + 1.1, cz, w, 2.2, 0.6, _woodMaterial('dark'));
-    // Uși (linie verticală decupată cosmetic)
-    _makeBox(group, cx, baseY + 1.1, cz + 0.31, 0.02, 2.2, 0.02, _metalMaterial('chrome'));
-    // 2 mânere
-    _makeCyl(group, cx - 0.15, baseY + 1.1, cz + 0.32, 0.012, 0.08, _metalMaterial('chrome'), Math.PI/2);
-    _makeCyl(group, cx + 0.15, baseY + 1.1, cz + 0.32, 0.012, 0.08, _metalMaterial('chrome'), Math.PI/2);
+  function _makeBed(parentGroup, cx, baseY, cz){
+    const THREE = window.THREE;
+    const bed = new THREE.Group();
+    bed._vtourGenerated = true;
+    const wood = _woodMaterial('medium');
+    const sheets = _fabricMaterial('#f8f6ef', 0.95);
+    const comforter = _fabricMaterial('#4a6b85', 0.88);
+    const pillowMat = _fabricMaterial('#ffffff', 0.92);
+    const accentPillow = _fabricMaterial('#c8946b', 0.82);
+
+    // Dimensiuni (pat dublu standard)
+    const W = 1.6, D = 2.0;
+
+    // 1. Cadru lemn (boxă rotunjită jos)
+    _makeRoundedBox(bed, 0, 0.18, 0, W + 0.12, 0.34, D + 0.12, 0.03, wood, 0);
+
+    // 2. Picioare (4 mici cuburi rotunjite jos)
+    [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([sx, sz]) => {
+      _makeRoundedBox(bed, sx * (W/2 + 0.04), 0.02, sz * (D/2 + 0.04), 0.07, 0.06, 0.07, 0.012, wood, 0);
+    });
+
+    // 3. Saltea (rounded — vizibil deasupra cadrului)
+    _makeRoundedBox(bed, 0, 0.5, 0, W, 0.22, D, 0.025, sheets, 0);
+
+    // 4. Cearșaf (puțin mai mic, deasupra saltelei)
+    _makeRoundedBox(bed, 0, 0.62, 0.04, W * 0.98, 0.025, D * 0.96, 0.015, sheets, 0);
+
+    // 5. Plapumă (tilted la capătul de jos — pliată în jos)
+    const blanket = _makeRoundedBox(bed, 0, 0.64, 0.3, W * 0.95, 0.05, D * 0.55, 0.03, comforter, 0);
+    blanket.rotation.x = -0.05;
+
+    // 6. Tăblie pat — cu panouri verticale decorative (3 panouri proeminente)
+    _makeRoundedBox(bed, 0, 1.05, -(D/2 + 0.08), W + 0.12, 1.05, 0.08, 0.04, wood, 0);
+    // Panouri verticale ușor proeminente
+    const panelMat = _woodMaterial('dark');
+    for(let i = -1; i <= 1; i++){
+      _makeRoundedBox(bed, i * (W/3.2), 1.0, -(D/2 + 0.13), W/4.5, 0.85, 0.02, 0.01, panelMat, 0);
+    }
+
+    // 7. Footboard (mai jos, decorativ)
+    _makeRoundedBox(bed, 0, 0.5, (D/2 + 0.08), W + 0.12, 0.4, 0.08, 0.03, wood, 0);
+
+    // 8. Perne dormit (2 mari, înclinate sprijinit pe tăblie)
+    [-0.36, 0.36].forEach(xOff => {
+      const p = _makeRoundedBox(bed, xOff, 0.78, -(D/2 - 0.32), 0.62, 0.18, 0.42, 0.08, pillowMat, 0);
+      p.rotation.x = -0.45; // înclinate sprijinit
+    });
+
+    // 9. Perne decorative (2 mai mici, accent color, în față)
+    [-0.32, 0.32].forEach(xOff => {
+      _makeRoundedBox(bed, xOff, 0.74, -(D/2 - 0.6), 0.42, 0.14, 0.28, 0.06, accentPillow, xOff > 0 ? 0.1 : -0.1);
+    });
+
+    // 10. Pătură împăturită (la picioare, accent decorativ)
+    _makeRoundedBox(bed, -0.2, 0.7, (D/2 - 0.42), 0.7, 0.06, 0.32, 0.02, accentPillow, 0.05);
+
+    bed.position.set(cx, baseY, cz);
+    parentGroup.add(bed);
+    return bed;
   }
 
   function _makeKitchenCounter(group, cx, baseY, cz, w){
-    // Corp inferior (dulapuri)
-    _makeBox(group, cx, baseY + 0.45, cz, w, 0.9, 0.6, _woodMaterial('dark'));
-    // Blat
-    _makeBox(group, cx, baseY + 0.92, cz, w + 0.04, 0.04, 0.62, _loadPBR('blat_bucatarie', {repeatX:Math.max(2,w/0.8), repeatY:1, fallbackColor:0x4a3a2a}));
-    // Plită (cerc negru pe blat)
-    _makeBox(group, cx - w/4, baseY + 0.945, cz + 0.05, 0.4, 0.02, 0.4, new (window.THREE.MeshStandardMaterial)({color:0x0a0a0a, roughness:0.3, metalness:0.4}));
-    // Chiuvetă încastrată
-    _makeBox(group, cx + w/4, baseY + 0.93, cz, 0.5, 0.04, 0.4, _porcelainMaterial());
-    // Mânere dulapuri
+    const THREE = window.THREE;
+    const wcab = _woodMaterial('dark');
+    const wTrim = _woodMaterial('medium');
+    const chr = _metalMaterial('chrome');
+    // Corp inferior (dulapuri) cu chamfer
+    _makeRoundedBox(group, cx, baseY + 0.45, cz, w, 0.9, 0.6, 0.012, wcab, 0);
+    // Blat marmură (cu PBR) — proeminent peste corpus, chamfer pronunțat
+    const blatMat = _loadPBR('blat_bucatarie', {repeatX:Math.max(2,w/0.8), repeatY:1, fallbackColor:0xe8e0d0});
+    _makeRoundedBox(group, cx, baseY + 0.92, cz, w + 0.06, 0.045, 0.65, 0.018, blatMat, 0);
+    // Plită inducție (sticla neagră)
+    const plitaMat = new THREE.MeshPhysicalMaterial({color:0x0a0a0a, roughness:0.08, metalness:0.1, clearcoat:1, clearcoatRoughness:0.05});
+    _makeRoundedBox(group, cx - w/4, baseY + 0.945, cz + 0.05, 0.45, 0.015, 0.45, 0.025, plitaMat, 0);
+    // Cercuri plita (4)
+    const plitaRing = new THREE.MeshStandardMaterial({color:0x1a1a1a, roughness:0.4, metalness:0.7});
+    [[-0.09,-0.09],[0.09,-0.09],[-0.09,0.09],[0.09,0.09]].forEach(([dx,dz]) => {
+      const r = new THREE.Mesh(new THREE.RingGeometry(0.06, 0.08, 24), plitaRing);
+      r.rotation.x = -Math.PI/2;
+      r.position.set(cx - w/4 + dx, baseY + 0.953, cz + 0.05 + dz);
+      group.add(r);
+    });
+    // Chiuvetă încastrată (porțelan)
+    _makeRoundedBox(group, cx + w/4, baseY + 0.93, cz, 0.5, 0.04, 0.42, 0.04, _porcelainMaterial(), 0);
+    // Cuvă chiuvetă (deeper)
+    _makeRoundedBox(group, cx + w/4, baseY + 0.88, cz, 0.42, 0.1, 0.32, 0.025, _porcelainMaterial(), 0);
+    // Robinet
+    const tap = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.22, 12), chr);
+    tap.position.set(cx + w/4 + 0.16, baseY + 1.05, cz);
+    group.add(tap);
+    const tapHead = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.022, 0.10, 12), chr);
+    tapHead.rotation.z = Math.PI / 2;
+    tapHead.position.set(cx + w/4 + 0.11, baseY + 1.15, cz);
+    group.add(tapHead);
+    // Mânere dulapuri (cilindre orizontale, vizibile)
     for(let i = -1; i <= 1; i++){
-      _makeBox(group, cx + i * w/4, baseY + 0.7, cz + 0.31, 0.15, 0.02, 0.02, _metalMaterial('chrome'));
+      const h = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.13, 12), chr);
+      h.rotation.z = Math.PI / 2;
+      h.position.set(cx + i * w/4, baseY + 0.65, cz + 0.31);
+      h.castShadow = true; h.receiveShadow = true;
+      group.add(h);
     }
+    // Plinth bază
+    _makeRoundedBox(group, cx, baseY + 0.04, cz, w + 0.04, 0.08, 0.55, 0.012, wTrim, 0);
   }
 
-  function _makeFridge(group, cx, baseY, cz){
-    _makeBox(group, cx, baseY + 0.92, cz, 0.65, 1.85, 0.65, new (window.THREE.MeshStandardMaterial)({color:0xe8e8e8, roughness:0.25, metalness:0.6}));
-    // Mâner
-    _makeBox(group, cx + 0.27, baseY + 1.0, cz, 0.04, 0.4, 0.04, _metalMaterial('chrome'));
-    // Linie ușă freezer/frigider
-    _makeBox(group, cx, baseY + 1.3, cz + 0.331, 0.65, 0.01, 0.005, _metalMaterial('chrome'));
+  function _makeFridge(parentGroup, cx, baseY, cz){
+    const THREE = window.THREE;
+    const fr = new THREE.Group();
+    fr._vtourGenerated = true;
+    // Corp inox cu finisaj periat (anisotropy efect via roughness mai mare)
+    const inox = new THREE.MeshPhysicalMaterial({
+      color: 0xd5d8db, roughness: 0.35, metalness: 0.9,
+      clearcoat: 0.2, clearcoatRoughness: 0.4,
+    });
+    const handleMat = _metalMaterial('chrome');
+    // Corp
+    _makeRoundedBox(fr, 0, 0.92, 0, 0.65, 1.85, 0.65, 0.025, inox, 0);
+    // Linie despărțitoare congelator/frigider (relief)
+    _makeRoundedBox(fr, 0, 1.32, 0.331, 0.65, 0.012, 0.008, 0.002, _metalMaterial('chrome'), 0);
+    // Ușa congelator (mai mică, sus) — proeminentă
+    _makeRoundedBox(fr, 0, 1.62, 0.328, 0.62, 0.50, 0.012, 0.012, inox, 0);
+    // Ușa frigider (jos)
+    _makeRoundedBox(fr, 0, 0.78, 0.328, 0.62, 1.18, 0.012, 0.012, inox, 0);
+    // Mâner congelator (vertical, lateral)
+    const hF = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.35, 12), handleMat);
+    hF.position.set(0.26, 1.62, 0.345);
+    fr.add(hF);
+    // Mâner frigider (vertical mai lung)
+    const hR = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.9, 12), handleMat);
+    hR.position.set(0.26, 0.78, 0.345);
+    fr.add(hR);
+    // Display digital pe ușa congelator (mic dreptunghi emissive)
+    const dispMat = new THREE.MeshStandardMaterial({color:0x0a1a2a, emissive:0x4080ff, emissiveIntensity:0.4});
+    _makeRoundedBox(fr, -0.18, 1.78, 0.336, 0.18, 0.07, 0.003, 0.008, dispMat, 0);
+    fr.position.set(cx, baseY, cz);
+    parentGroup.add(fr);
+    return fr;
   }
 
-  function _makeDiningTable(group, cx, baseY, cz, w, d){
-    _makeBox(group, cx, baseY + 0.74, cz, w, 0.04, d, _woodMaterial('medium'));
+  function _makeDiningTable(parentGroup, cx, baseY, cz, w, d){
+    const THREE = window.THREE;
+    const tb = new THREE.Group();
+    tb._vtourGenerated = true;
+    const top = _woodMaterial('medium');
+    const legs = _woodMaterial('dark');
+    // Suprafață cu chamfer (lemn lăcuit, mai gros)
+    _makeRoundedBox(tb, 0, 0.74, 0, w, 0.05, d, 0.02, top, 0);
+    // 4 picioare îngroșate, fără chamfer mic (lemn solid)
     [-1,1].forEach(sx => {
       [-1,1].forEach(sz => {
-        _makeBox(group, cx + sx * (w/2 - 0.06), baseY + 0.37, cz + sz * (d/2 - 0.06), 0.05, 0.74, 0.05, _woodMaterial('medium'));
+        _makeRoundedBox(tb, sx * (w/2 - 0.08), 0.37, sz * (d/2 - 0.08), 0.07, 0.74, 0.07, 0.008, legs, 0);
       });
     });
+    // Cross-brace (caracteristic mese moderne)
+    _makeRoundedBox(tb, 0, 0.4, 0, w - 0.3, 0.04, 0.04, 0.008, legs, 0);
+    _makeRoundedBox(tb, 0, 0.4, 0, 0.04, 0.04, d - 0.3, 0.008, legs, 0);
+    tb.position.set(cx, baseY, cz);
+    parentGroup.add(tb);
+    return tb;
   }
 
-  function _makeChair(group, cx, baseY, cz, rotY){
-    const m = _woodMaterial('medium');
-    // Sezut
-    _makeBox(group, cx, baseY + 0.45, cz, 0.42, 0.04, 0.42, m, rotY);
-    // 4 picioare
-    const sX = Math.cos(rotY), sZ = Math.sin(rotY);
-    const pX = -Math.sin(rotY), pZ = Math.cos(rotY);
-    [[-1,-1],[-1,1],[1,-1],[1,1]].forEach(([a,b]) => {
-      _makeBox(group,
-        cx + sX * a * 0.18 + pX * b * 0.18,
-        baseY + 0.225,
-        cz + sZ * a * 0.18 + pZ * b * 0.18,
-        0.04, 0.45, 0.04, m);
-    });
-    // Spătar
-    _makeBox(group, cx - pX * 0.2, baseY + 0.7, cz - pZ * 0.2, 0.42, 0.45, 0.04, m, rotY);
-  }
-
-  function _makeTV(group, cx, baseY, cz, w, h, rotY){
-    // Ramă neagră
-    _makeBox(group, cx, baseY, cz, w, h, 0.06, new (window.THREE.MeshStandardMaterial)({color:0x0a0a0a, roughness:0.3, metalness:0.5}), rotY);
-    // Ecran activ
+  function _makeTV(parentGroup, cx, baseY, cz, w, h, rotY){
+    const THREE = window.THREE;
+    const tv = new THREE.Group();
+    tv._vtourGenerated = true;
+    const frameMat = new THREE.MeshPhysicalMaterial({color:0x0a0a0a, roughness:0.25, metalness:0.4, clearcoat:0.5, clearcoatRoughness:0.2});
+    // Ramă subțire foarte modernă
+    _makeRoundedBox(tv, 0, 0, 0, w, h, 0.05, 0.008, frameMat, 0);
+    // Ecran activ (cu textura procedurală emissive)
     const screen = _screenMaterial(true);
-    _makeBox(group, cx, baseY, cz + 0.031, w - 0.06, h - 0.06, 0.005, screen, rotY);
+    _makeBox(tv, 0, 0, 0.028, w - 0.04, h - 0.04, 0.003, screen, 0);
+    // Logo brand subtil jos
+    _makeBox(tv, 0, -h/2 + 0.02, 0.03, 0.06, 0.012, 0.001, _metalMaterial('chrome'), 0);
+    tv.position.set(cx, baseY, cz);
+    tv.rotation.y = rotY || 0;
+    parentGroup.add(tv);
+    return tv;
   }
 
   function _makeBathtub(group, cx, baseY, cz, w, d){
@@ -1811,39 +2295,364 @@ window.VTour = (function(){
   function _makeChandelier(group, cx, ceilY, cz, variant){
     const THREE = window.THREE;
     variant = variant || 'standard';
-    // Cordon
-    _makeCyl(group, cx, ceilY - 0.1, cz, 0.004, 0.2, _metalMaterial('chrome'));
-    // Ring sau cupolă
-    const baseMat = _metalMaterial('brass');
+    // Cordon de tavan
+    const cordMat = _metalMaterial('chrome');
+    const cord = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.25, 8), cordMat);
+    cord.position.set(cx, ceilY - 0.12, cz);
+    group.add(cord);
+
     if(variant === 'compact'){
-      // Lampă plafonieră
-      const lampMat = new THREE.MeshStandardMaterial({color:0xfff5d8, roughness:0.3, metalness:0, emissive:0xffe0a0, emissiveIntensity:0.8});
-      const dome = new THREE.Mesh(new THREE.SphereGeometry(0.18, 16, 8, 0, Math.PI*2, 0, Math.PI/2), lampMat);
-      dome.position.set(cx, ceilY - 0.22, cz);
+      // Plafonieră modernă — cupolă cu material emissive stratificat
+      const lampMat = new THREE.MeshPhysicalMaterial({
+        color: 0xfff5d8, roughness: 0.3, metalness: 0,
+        emissive: 0xffe0a0, emissiveIntensity: 0.95,
+        transparent: true, opacity: 0.85,
+        clearcoat: 0.5, clearcoatRoughness: 0.2,
+      });
+      const dome = new THREE.Mesh(new THREE.SphereGeometry(0.22, 20, 10, 0, Math.PI*2, 0, Math.PI/2), lampMat);
+      dome.position.set(cx, ceilY - 0.25, cz);
       dome.rotation.x = Math.PI;
       group.add(dome);
+      // Ring metalic ambient sub cupolă
+      const ringC = new THREE.Mesh(new THREE.TorusGeometry(0.22, 0.012, 8, 32), cordMat);
+      ringC.position.set(cx, ceilY - 0.04, cz);
+      ringC.rotation.x = Math.PI / 2;
+      group.add(ringC);
     } else {
-      // Lustră ring cu 5 bulbi
-      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.25, 0.02, 8, 24), baseMat);
-      ring.position.set(cx, ceilY - 0.25, cz);
+      // Lustră clasică — ring + 6 brațe + cristale + cristale centrale
+      const brassMat = _metalMaterial('brass');
+      // Ring central
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.32, 0.025, 12, 32), brassMat);
+      ring.position.set(cx, ceilY - 0.32, cz);
       ring.rotation.x = Math.PI / 2;
+      ring.castShadow = true; ring.receiveShadow = true;
       group.add(ring);
-      const bulbMat = new THREE.MeshStandardMaterial({color:0xfff8e0, emissive:0xffe0a0, emissiveIntensity:1.5, roughness:0.3});
-      for(let i = 0; i < 5; i++){
-        const a = i * Math.PI * 2 / 5;
-        const bx = cx + Math.cos(a) * 0.25, bz = cz + Math.sin(a) * 0.25;
-        const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 8), bulbMat);
-        bulb.position.set(bx, ceilY - 0.3, bz);
+      // Hub central (disc de unde pleacă brațele)
+      const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.1, 0.08, 12), brassMat);
+      hub.position.set(cx, ceilY - 0.28, cz);
+      hub.castShadow = true;
+      group.add(hub);
+
+      const bulbMat = new THREE.MeshPhysicalMaterial({
+        color: 0xfff8e0, emissive: 0xffe0a0, emissiveIntensity: 1.6,
+        roughness: 0.2, metalness: 0,
+        clearcoat: 0.8, clearcoatRoughness: 0.1,
+        transparent: true, opacity: 0.95,
+      });
+      // Cristal — material transparent reflectiv
+      const crystalMat = new THREE.MeshPhysicalMaterial({
+        color: 0xeef4fa, roughness: 0.02, metalness: 0,
+        clearcoat: 1.0, clearcoatRoughness: 0.02,
+        transparent: true, opacity: 0.55,
+        envMapIntensity: 1.8,
+      });
+
+      const nArms = 6;
+      for(let i = 0; i < nArms; i++){
+        const a = i * Math.PI * 2 / nArms;
+        const bx = cx + Math.cos(a) * 0.32;
+        const bz = cz + Math.sin(a) * 0.32;
+        const by = ceilY - 0.34;
+        // Braț orizontal
+        const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.32, 8), brassMat);
+        arm.position.set(cx + Math.cos(a) * 0.18, ceilY - 0.3, cz + Math.sin(a) * 0.18);
+        arm.rotation.z = Math.PI/2;
+        arm.rotation.y = -a;
+        arm.castShadow = true;
+        group.add(arm);
+        // Cupă suport bulb
+        const cup = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.025, 0.04, 12), brassMat);
+        cup.position.set(bx, by + 0.01, bz);
+        group.add(cup);
+        // Bulb emisiv
+        const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.045, 12, 8), bulbMat);
+        bulb.position.set(bx, by + 0.04, bz);
         group.add(bulb);
+        // Cristal pendant sub fiecare bulb
+        const crystal = new THREE.Mesh(new THREE.OctahedronGeometry(0.04, 0), crystalMat);
+        crystal.position.set(bx, by - 0.08, bz);
+        crystal.rotation.y = (i * 0.6) % Math.PI;
+        crystal.castShadow = true;
+        group.add(crystal);
+      }
+      // Cristale centrale (3 mai mari în șir vertical)
+      for(let j = 0; j < 3; j++){
+        const cr = new THREE.Mesh(new THREE.OctahedronGeometry(0.055 - j*0.01, 0), crystalMat);
+        cr.position.set(cx, ceilY - 0.44 - j * 0.1, cz);
+        cr.rotation.y = (j * 0.7) % Math.PI;
+        cr.castShadow = true;
+        group.add(cr);
       }
     }
-    // PointLight real — DOAR dacă budget-ul global permite
+    // PointLight real DOAR dacă bugetul permite
     if(CFG.enableLighting && window.__vtourLightBudget){
-      const pl = new THREE.PointLight(0xfff0d0, variant === 'compact' ? 1.0 : 1.6, 6, 2);
-      pl.position.set(cx, ceilY - 0.3, cz);
-      pl.castShadow = false; // perf — prea multe lumini interior cu shadow
+      const pl = new THREE.PointLight(0xfff0d0, variant === 'compact' ? 1.0 : 1.8, 7, 2);
+      pl.position.set(cx, ceilY - 0.35, cz);
+      pl.castShadow = false;
       group.add(pl);
     }
+  }
+
+  // ═════════════════════════════════════════════════════════════════════════
+  // VERTEX AO PROXIMITY — darkening pe muchii/colțuri/sub mobilier
+  // Folosește distanța la bbox-urile altor mesh-uri în loc de raycast (rapid).
+  // Aplică ca vertex colors → MeshPhysicalMaterial modulează diffuse natural.
+  // ═════════════════════════════════════════════════════════════════════════
+  function _bakeProximityAO(){
+    if(!STATE.furnitureGroup) return;
+    const THREE = window.THREE;
+    const t0 = performance.now();
+
+    // Pre-calc bbox-uri pentru toate mesh-urile relevante (interior + furniture + roof)
+    const allBoxes = [];
+    [STATE.interiorGroup, STATE.furnitureGroup, STATE.roofGroup].forEach(g => {
+      if(!g) return;
+      g.traverse(o => {
+        if(o.isMesh && o.geometry){
+          try {
+            const box = new THREE.Box3().setFromObject(o);
+            if(isFinite(box.min.x)){
+              allBoxes.push({ mesh: o, box });
+            }
+          } catch(e){}
+        }
+      });
+    });
+    if(!allBoxes.length) return;
+
+    const AO_MAX_DIST = 0.35;       // sub această distanță vertexii devin întunecați
+    const AO_MIN_BRIGHTNESS = 0.55; // cât de întunecat poate ajunge AO (0.5 = 50% lumină)
+    const tempV = new THREE.Vector3();
+    let processedMeshes = 0, processedVerts = 0;
+
+    // Pentru fiecare mesh din mobilier, calculăm vertex AO
+    STATE.furnitureGroup.traverse(mesh => {
+      if(!mesh.isMesh || !mesh.geometry) return;
+      const geo = mesh.geometry;
+      const positions = geo.attributes.position;
+      if(!positions) return;
+      // Limită hard: vertice > 5000 → sărim (geometrii prea mari, GLB-uri cu mult detail)
+      if(positions.count > 5000) return;
+
+      const colors = new Float32Array(positions.count * 3);
+      // Update world matrix pentru localToWorld corect
+      mesh.updateWorldMatrix(true, false);
+      for(let i = 0; i < positions.count; i++){
+        tempV.fromBufferAttribute(positions, i);
+        tempV.applyMatrix4(mesh.matrixWorld);
+
+        let minDist = AO_MAX_DIST;
+        for(let j = 0; j < allBoxes.length; j++){
+          const entry = allBoxes[j];
+          if(entry.mesh === mesh) continue;
+          const dist = entry.box.distanceToPoint(tempV);
+          if(dist < minDist){
+            minDist = dist;
+            if(minDist < 0.005) break; // foarte aproape — gata
+          }
+        }
+
+        // AO mapping: dist=0 → AO_MIN_BRIGHTNESS; dist=AO_MAX_DIST → 1.0
+        const t = Math.min(1, minDist / AO_MAX_DIST);
+        // Curve mai natural — t² accentuează tranziția în colțuri
+        const ao = AO_MIN_BRIGHTNESS + (1 - AO_MIN_BRIGHTNESS) * (t * t);
+        colors[i*3+0] = ao;
+        colors[i*3+1] = ao;
+        colors[i*3+2] = ao;
+        processedVerts++;
+      }
+
+      geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+      const applyVColors = (m) => {
+        if(!m) return;
+        m.vertexColors = true;
+        m.needsUpdate = true;
+      };
+      if(Array.isArray(mesh.material)) mesh.material.forEach(applyVColors);
+      else applyVColors(mesh.material);
+      processedMeshes++;
+    });
+
+    const dt = (performance.now() - t0).toFixed(0);
+    console.log(`[VTour] ✅ Vertex AO baked: ${processedMeshes} mesh-uri, ${processedVerts} vertices (${dt}ms)`);
+  }
+
+  // ═════════════════════════════════════════════════════════════════════════
+  // CONTACT SHADOWS — planuri soft sub fiecare piesă de mobilier
+  // Efect "ground shadow" Matterport — mobilierul nu mai pare că plutește
+  // ═════════════════════════════════════════════════════════════════════════
+  function _addContactShadows(scene){
+    if(!STATE.furnitureGroup) return;
+    const THREE = window.THREE;
+    if(STATE._shadowsGroup){
+      if(STATE._shadowsGroup.parent) STATE._shadowsGroup.parent.remove(STATE._shadowsGroup);
+      STATE._shadowsGroup = null;
+    }
+    // Generăm textura radial gradient o singură dată (cache)
+    if(!STATE._shadowTexture){
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = 128;
+      const ctx = canvas.getContext('2d');
+      const gradient = ctx.createRadialGradient(64, 64, 0, 64, 64, 60);
+      gradient.addColorStop(0, 'rgba(0,0,0,0.55)');
+      gradient.addColorStop(0.4, 'rgba(0,0,0,0.3)');
+      gradient.addColorStop(0.85, 'rgba(0,0,0,0.05)');
+      gradient.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 128, 128);
+      STATE._shadowTexture = new THREE.CanvasTexture(canvas);
+      STATE._shadowTexture.needsUpdate = true;
+    }
+    const shadowMat = new THREE.MeshBasicMaterial({
+      map: STATE._shadowTexture,
+      transparent: true,
+      opacity: 0.65,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+    });
+    STATE._shadowMat = shadowMat;
+
+    const shadowsGroup = new THREE.Group();
+    shadowsGroup._vtourGenerated = true;
+    shadowsGroup.name = 'VTourContactShadows';
+
+    const tempBox = new THREE.Box3();
+    const tempSize = new THREE.Vector3();
+    const tempCenter = new THREE.Vector3();
+    let count = 0;
+
+    // Pentru fiecare TOP-LEVEL child al furnitureGroup (sofa, pat, masă, etc.)
+    STATE.furnitureGroup.children.forEach(child => {
+      if(!child || !child.isObject3D) return;
+      try {
+        tempBox.setFromObject(child);
+        if(!isFinite(tempBox.min.x)) return;
+        tempBox.getSize(tempSize);
+        // Sărim peste obiecte foarte mici sau foarte mari (planuri/podele/covorașe)
+        if(tempSize.y < 0.15 || tempSize.y > 4) return;
+        if(tempSize.x * tempSize.z < 0.05) return;
+        tempBox.getCenter(tempCenter);
+        const planeW = tempSize.x * 1.35;
+        const planeD = tempSize.z * 1.35;
+        const plane = new THREE.Mesh(new THREE.PlaneGeometry(planeW, planeD), shadowMat);
+        plane.rotation.x = -Math.PI / 2;
+        plane.position.set(tempCenter.x, tempBox.min.y + 0.003, tempCenter.z);
+        plane.renderOrder = 1;
+        shadowsGroup.add(plane);
+        count++;
+      } catch(e){}
+    });
+
+    scene.add(shadowsGroup);
+    STATE._shadowsGroup = shadowsGroup;
+    console.log(`[VTour] ✅ Contact shadows: ${count} piese mobilier`);
+  }
+
+  // ═════════════════════════════════════════════════════════════════════════
+  // CUBECAMERA REFLECTION PROBES — reflexii reale per cameră (oglinzi, sticlă, metal)
+  // Plasate la centrul fiecărei camere selectate, randate o singură dată la build.
+  // Diferența vizibilă: oglinda din baie reflectă camera baiei, nu HDRI global.
+  // ═════════════════════════════════════════════════════════════════════════
+  function _setupCubeCameras(renderer, scene){
+    if(!STATE._selectedRooms || !STATE._selectedRooms.length) return;
+    if(!renderer || !scene) return;
+    const THREE = window.THREE;
+    if(!THREE.WebGLCubeRenderTarget || !THREE.CubeCamera) return;
+
+    const probes = []; // pentru dispose la stop()
+    const t0 = performance.now();
+
+    // PMREM generator pentru a prefilter cubemap-urile (envMap corect pe toate roughness)
+    let pmrem = null;
+    if(THREE.PMREMGenerator){
+      try {
+        pmrem = new THREE.PMREMGenerator(renderer);
+        pmrem.compileCubemapShader();
+      } catch(e){
+        console.warn('[VTour] PMREM cubemap compile fail:', e.message);
+        pmrem = null;
+      }
+    }
+
+    // Pasul 1: temporar ascundem elemente care nu trebuie capturate în reflexii
+    const hidden = [];
+    scene.traverse(o => {
+      if(o._vtourHotspot !== undefined || o._vtourEntranceMarker || o._vtourLight){
+        if(o.visible){ hidden.push(o); o.visible = false; }
+      }
+    });
+    // Ascundem și contact shadows group (umbrele au depthWrite:false → artifact în reflexii)
+    if(STATE._shadowsGroup && STATE._shadowsGroup.visible){
+      STATE._shadowsGroup.visible = false;
+      hidden.push(STATE._shadowsGroup);
+    }
+
+    // Pasul 2: pentru fiecare cameră, generăm un cubemap (apoi PMREM-filter)
+    STATE._selectedRooms.forEach((room, i) => {
+      try {
+        const renderTarget = new THREE.WebGLCubeRenderTarget(256, {
+          format: THREE.RGBAFormat,
+          generateMipmaps: true,
+          minFilter: THREE.LinearMipmapLinearFilter,
+        });
+        const cam = new THREE.CubeCamera(0.1, 100, renderTarget);
+        cam.position.set(room.worldX, room.yBottom + 1.5, room.worldZ);
+        scene.add(cam);
+        cam.update(renderer, scene);
+        scene.remove(cam);
+
+        // PMREM pe cubemap → envMap care răspunde corect la roughness
+        if(pmrem){
+          const prefiltered = pmrem.fromCubemap(renderTarget.texture);
+          room._envMap = prefiltered.texture;
+          probes.push({ cam, renderTarget, prefilteredRT: prefiltered });
+        } else {
+          room._envMap = renderTarget.texture;
+          probes.push({ cam, renderTarget });
+        }
+      } catch(e){
+        console.warn('[VTour] CubeCamera fail room', i, ':', e.message);
+      }
+    });
+
+    if(pmrem) pmrem.dispose();
+
+    // Pasul 3: restaurăm vizibilitatea
+    hidden.forEach(o => o.visible = true);
+
+    // Pasul 4: aplicăm envMap pe materialele din fiecare cameră
+    const furniture = STATE.furnitureGroup;
+    if(furniture){
+      const worldPos = new THREE.Vector3();
+      let appliedCount = 0;
+      furniture.traverse(mesh => {
+        if(!mesh.isMesh) return;
+        mesh.getWorldPosition(worldPos);
+        for(const room of STATE._selectedRooms){
+          if(!room._envMap) continue;
+          const dx = Math.abs(worldPos.x - room.worldX);
+          const dz = Math.abs(worldPos.z - room.worldZ);
+          if(dx <= room.worldW/2 + 0.2 && dz <= room.worldD/2 + 0.2){
+            const apply = (m) => {
+              if(m && (m.isMeshStandardMaterial || m.isMeshPhysicalMaterial)){
+                m.envMap = room._envMap;
+                if(!m.envMapIntensity) m.envMapIntensity = 1.0;
+                m.needsUpdate = true;
+                appliedCount++;
+              }
+            };
+            if(Array.isArray(mesh.material)) mesh.material.forEach(apply);
+            else apply(mesh.material);
+            break;
+          }
+        }
+      });
+      console.log(`[VTour] EnvMap aplicat pe ${appliedCount} materiale din mobilier`);
+    }
+
+    STATE._cubeCameraProbes = probes;
+    const dt = (performance.now() - t0).toFixed(0);
+    console.log(`[VTour] ✅ ${probes.length} CubeCamera reflection probes ${pmrem ? '(PMREM prefiltered)' : '(raw)'} — ${dt}ms`);
   }
 
   // ═════════════════════════════════════════════════════════════════════════
@@ -1855,26 +2664,48 @@ window.VTour = (function(){
     STATE.extraLights.forEach(l => scene.remove(l));
     STATE.extraLights = [];
 
-    const sun = new THREE.DirectionalLight(0xfff4e0, 2.2);
-    sun.position.set(60, 100, 50);
+    // ── SOARE PRINCIPAL — direcțional, intens, shadow 4K
+    const sun = new THREE.DirectionalLight(0xfff8e8, 3.0);
+    sun.position.set(45, 80, 35);
     sun.castShadow = true;
     sun.shadow.mapSize.set(CFG.shadowMapSize, CFG.shadowMapSize);
     sun.shadow.camera.near = 0.5; sun.shadow.camera.far = 500;
     sun.shadow.camera.left = -80; sun.shadow.camera.right = 80;
     sun.shadow.camera.top = 80; sun.shadow.camera.bottom = -80;
-    sun.shadow.bias = -0.0005;
-    sun.shadow.normalBias = 0.02;
+    sun.shadow.bias = -0.0004;
+    sun.shadow.normalBias = 0.03;
+    sun.shadow.radius = 4; // soft edges (PCFSoft)
     scene.add(sun);
     STATE.extraLights.push(sun);
 
-    const hemi = new THREE.HemisphereLight(0x88bbff, 0x4a4030, 0.35);
+    // ── HEMISFERIC — lumină ambient gradient cer/pământ (simulează GI)
+    const hemi = new THREE.HemisphereLight(0x88bbff, 0x5a4838, 0.55);
+    hemi.position.set(0, 50, 0);
     scene.add(hemi);
     STATE.extraLights.push(hemi);
 
-    const fill = new THREE.DirectionalLight(0xc8d8ff, 0.22);
-    fill.position.set(-40, 50, -30);
-    scene.add(fill);
-    STATE.extraLights.push(fill);
+    // ── FILL LIGHT (opus soarelui) — pentru umbre nu prea negre
+    const fillCool = new THREE.DirectionalLight(0xb8d0ff, 0.35);
+    fillCool.position.set(-40, 35, -30);
+    scene.add(fillCool);
+    STATE.extraLights.push(fillCool);
+
+    // ── RIM LIGHT (top down) — accentuează muchiile, simulează sky dome
+    const rim = new THREE.DirectionalLight(0xffffff, 0.18);
+    rim.position.set(0, 60, 0);
+    scene.add(rim);
+    STATE.extraLights.push(rim);
+
+    // Sync cu slider-ul "Ora soarelui" din UrbanX dacă există —
+    // _v3dSetSunHour recalculează poziție/culoare/intensitate pe TOATE
+    // DirectionalLights cu castShadow=true (inclusiv soarele meu)
+    try {
+      const slider = document.getElementById('v3d-sun-slider');
+      if(slider && typeof window._v3dSetSunHour === 'function'){
+        window._v3dSetSunHour(parseFloat(slider.value || '12'));
+        console.log('[VTour] ✅ Soare sincronizat cu slider (ora:', slider.value, ')');
+      }
+    } catch(e){ /* slider-ul lipsește — ok, folosesc default */ }
   }
 
   // ═════════════════════════════════════════════════════════════════════════
@@ -2002,18 +2833,31 @@ window.VTour = (function(){
         });
       });
     } else {
-      // Cu intrare detectată, adăugăm doar înconjurul clădirii (3 puncte)
-      STATE.hotspots.push({
-        x: anchor.cx + anchor.bW*0.9, z: anchor.cz, y: baseY + STATE.eyeHeight,
-        label: 'Exterior · Lateral E', kind: 'exterior', floorIdx: -1,
-      });
-      STATE.hotspots.push({
-        x: anchor.cx - anchor.bW*0.9, z: anchor.cz, y: baseY + STATE.eyeHeight,
-        label: 'Exterior · Lateral V', kind: 'exterior', floorIdx: -1,
-      });
-      STATE.hotspots.push({
-        x: anchor.cx, z: anchor.cz - anchor.bD*0.9, y: baseY + STATE.eyeHeight,
-        label: 'Exterior · Spate', kind: 'exterior', floorIdx: -1,
+      // Cu intrare detectată: 11 hotspots exterior pentru plimbare completă în jurul clădirii
+      const r = Math.max(anchor.bW, anchor.bD) * 0.75; // raza de plimbare
+      const ring = [
+        { ang: 0,            label: 'Exterior · Față (S)' },
+        { ang: Math.PI/4,    label: 'Exterior · Colț SE' },
+        { ang: Math.PI/2,    label: 'Exterior · Lateral E' },
+        { ang: 3*Math.PI/4,  label: 'Exterior · Colț NE' },
+        { ang: Math.PI,      label: 'Exterior · Spate (N)' },
+        { ang: 5*Math.PI/4,  label: 'Exterior · Colț NV' },
+        { ang: 3*Math.PI/2,  label: 'Exterior · Lateral V' },
+        { ang: 7*Math.PI/4,  label: 'Exterior · Colț SV' },
+      ];
+      ring.forEach(p => {
+        const px = anchor.cx + Math.sin(p.ang) * r;
+        const pz = anchor.cz + Math.cos(p.ang) * r;
+        // Sărim dacă e prea aproape de "Stradă · Intrare" (deja are hotspot acolo)
+        const distEntry = mainEntrance
+          ? Math.hypot(px - (mainEntrance.worldX + mainEntrance.normalX * 6), pz - (mainEntrance.worldZ + mainEntrance.normalZ * 6))
+          : 999;
+        if(distEntry < 3) return;
+        STATE.hotspots.push({
+          x: px, y: baseY + STATE.eyeHeight, z: pz,
+          label: p.label, kind: 'exterior', floorIdx: -1,
+          lookAt: { x: anchor.cx, z: anchor.cz },
+        });
       });
     }
 
@@ -2339,15 +3183,20 @@ window.VTour = (function(){
   function _glideTo(hotspotIdx){
     const hp = STATE.hotspots[hotspotIdx];
     if(!hp || !STATE.tourCam) return;
+    const prevFloor = STATE.currentFloorIdx;
     STATE.currentHotspot = hotspotIdx;
     STATE.currentFloorIdx = hp.floorIdx >= 0 ? hp.floorIdx : STATE.currentFloorIdx;
     const startPos = STATE.tourCam.position.clone();
     const endPos = new window.THREE.Vector3(hp.x, hp.y, hp.z);
-    // Yaw target — orientare spre centrul anchor
-    const dx = (STATE._anchor ? STATE._anchor.cx : hp.x) - hp.x;
-    const dz = (STATE._anchor ? STATE._anchor.cz : hp.z) - hp.z;
-    let targetYaw = Math.atan2(dx, dz);
-    if(hp.kind === 'interior') targetYaw = STATE.yaw; // păstrăm yaw-ul curent
+    // Detectăm dacă schimbăm etajul → folosim arc pentru urcare/coborâre
+    const floorChange = (hp.floorIdx >= 0 && hp.floorIdx !== prevFloor);
+    // Yaw target — orientare spre lookAt dacă există (exterior cardinal) sau spre centru
+    let targetYaw = STATE.yaw;
+    if(hp.lookAt){
+      const dx = hp.lookAt.x - hp.x;
+      const dz = hp.lookAt.z - hp.z;
+      targetYaw = Math.atan2(-dx, -dz);
+    }
     const startYaw = STATE.yaw;
     let dYaw = targetYaw - startYaw;
     while(dYaw > Math.PI) dYaw -= Math.PI * 2;
@@ -2355,8 +3204,11 @@ window.VTour = (function(){
 
     STATE.glide = {
       startPos, endPos, startYaw, dYaw,
-      t0: performance.now(), dur: CFG.glideDuration * 1000,
+      t0: performance.now(),
+      dur: (floorChange ? 1.6 : CFG.glideDuration) * 1000, // mai lent la schimb etaj
       active: true,
+      floorChange,
+      arcHeight: floorChange ? Math.abs(endPos.y - startPos.y) * 0.35 : 0,
     };
     _renderFloorplan();
   }
@@ -2368,6 +3220,11 @@ window.VTour = (function(){
     // Cubic ease in-out
     const e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
     STATE.tourCam.position.lerpVectors(g.startPos, g.endPos, e);
+    // Arc parabolic pentru schimb etaj (simulează urcare/coborâre)
+    if(g.floorChange && g.arcHeight > 0){
+      const arc = Math.sin(e * Math.PI) * g.arcHeight;
+      STATE.tourCam.position.y += arc;
+    }
     STATE.yaw = g.startYaw + g.dYaw * e;
     if(t >= 1){
       g.active = false;
@@ -2422,24 +3279,30 @@ window.VTour = (function(){
     if(k.a) strafe -= 1;
     if(forward === 0 && strafe === 0) return;
 
-    const speed = STATE.speed * (k.shift ? STATE.runMul : 1.0);
+    // Detectăm dacă utilizatorul e în exterior (departe de orice perete) → speed boost
+    const cur = STATE.tourCam.position.clone();
+    const isExterior = (STATE.currentHotspot >= 0 &&
+                       STATE.hotspots[STATE.currentHotspot] &&
+                       STATE.hotspots[STATE.currentHotspot].kind === 'exterior');
+    const speedMul = isExterior ? 2.0 : 1.0; // 2x mai rapid în exterior
+    const speed = STATE.speed * speedMul * (k.shift ? STATE.runMul : 1.0);
     const yaw = STATE.yaw;
-    // În spațiul lumii (Y up): direcția înainte = (-sin(yaw), 0, -cos(yaw))
     const fwdX = -Math.sin(yaw), fwdZ = -Math.cos(yaw);
     const strX = Math.cos(yaw), strZ = -Math.sin(yaw);
     const dx = (fwdX * forward + strX * strafe) * speed * dt;
     const dz = (fwdZ * forward + strZ * strafe) * speed * dt;
 
-    const cur = STATE.tourCam.position.clone();
     const desired = cur.clone(); desired.x += dx; desired.z += dz;
     const newPos = _checkCollision(cur, desired);
     STATE.tourCam.position.x = newPos.x;
     STATE.tourCam.position.z = newPos.z;
-    // Y rămâne la eyeHeight peste floor curent (gravitate simplă)
-    // Y floor se determină din STATE.currentFloorIdx
-    if(STATE._anchor && STATE._aedisCache){
+    // Y rămâne la eyeHeight peste floor curent
+    if(STATE._anchor && STATE._aedisCache && !isExterior){
       const af = STATE._aedisCache.floors[STATE.currentFloorIdx];
       if(af) STATE.tourCam.position.y = STATE._anchor.baseY + af.baseY + STATE.eyeHeight;
+    } else if(STATE._anchor && isExterior){
+      // În exterior: rămâne la nivel sol
+      STATE.tourCam.position.y = STATE._anchor.baseY + STATE.eyeHeight;
     }
   }
 
@@ -3126,22 +3989,92 @@ window.VTour = (function(){
     try {
       const composer = new THREE.EffectComposer(renderer);
       composer.addPass(new THREE.RenderPass(scene, camera));
+      // SSAO — soft ambient occlusion pentru detalii în colțuri/sub mobilier
       if(CFG.enableSSAO && THREE.SSAOPass){
         const ssao = new THREE.SSAOPass(scene, camera, window.innerWidth, window.innerHeight);
-        ssao.kernelRadius = 8;
-        ssao.minDistance = 0.005;
-        ssao.maxDistance = 0.1;
+        ssao.kernelRadius = 16;           // raza mai mare → AO mai vizibil în interior
+        ssao.minDistance = 0.001;
+        ssao.maxDistance = 0.15;
         ssao.output = THREE.SSAOPass.OUTPUT.Default;
         composer.addPass(ssao);
       }
+      // Bloom — glow subtil pe emisive (lustre, TV, lampe) — efect cinematic
       if(CFG.enableBloom && THREE.UnrealBloomPass){
         const bloom = new THREE.UnrealBloomPass(
           new THREE.Vector2(window.innerWidth, window.innerHeight),
-          0.45, 0.6, 0.85
+          0.25,  // intensity (sub 0.3 = subtil, nu spalat)
+          0.7,   // radius
+          0.92,  // threshold (numai cele mai luminoase pixeli intră în bloom)
         );
         composer.addPass(bloom);
       }
-      console.log('[VTour] ✅ Composer setat');
+      // BokehPass DOF — focus dinamic pe direcția de privire (efect Matterport real)
+      if(THREE.BokehPass){
+        try {
+          const bokeh = new THREE.BokehPass(scene, camera, {
+            focus: 3.5,           // distanța inițială focus (update dinamic în loop)
+            aperture: 0.00025,    // aperture mic = blur subtil (0.0001=foarte subtil, 0.001=blur evident)
+            maxblur: 0.012,       // limita blur maxim
+            width: window.innerWidth,
+            height: window.innerHeight,
+          });
+          composer.addPass(bokeh);
+          STATE._bokehPass = bokeh;
+          console.log('[VTour] ✅ BokehPass DOF activat (focus dinamic)');
+        } catch(e){
+          console.warn('[VTour] BokehPass setup failed:', e.message);
+        }
+      }
+      // Vignette + film grain — touch cinematic final (după bloom)
+      if(THREE.ShaderPass){
+        const cinematicShader = {
+          uniforms: {
+            tDiffuse:        { value: null },
+            time:            { value: 0.0 },
+            vignetteAmount:  { value: 1.15 },
+            vignetteOffset:  { value: 1.0 },
+            grainAmount:     { value: 0.045 },
+          },
+          vertexShader: `
+            varying vec2 vUv;
+            void main() {
+              vUv = uv;
+              gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+          `,
+          fragmentShader: `
+            uniform sampler2D tDiffuse;
+            uniform float time;
+            uniform float vignetteAmount;
+            uniform float vignetteOffset;
+            uniform float grainAmount;
+            varying vec2 vUv;
+            float rand(vec2 co){
+              return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
+            }
+            void main() {
+              vec4 color = texture2D(tDiffuse, vUv);
+              // Vignette — darken corners (smoothstep pentru tranziție soft)
+              vec2 centered = vUv - 0.5;
+              float dist = length(centered);
+              float vignette = smoothstep(0.85, 0.35 / vignetteAmount, dist) * vignetteOffset
+                             + (1.0 - vignetteOffset);
+              color.rgb *= vignette;
+              // Film grain — noise per frame
+              float grain = (rand(vUv + fract(time * 0.001)) - 0.5) * grainAmount;
+              color.rgb += grain;
+              // ușor lift pe negre (efect cinematic)
+              color.rgb = color.rgb * 0.98 + 0.012;
+              gl_FragColor = color;
+            }
+          `,
+        };
+        const cinematicPass = new THREE.ShaderPass(cinematicShader);
+        cinematicPass._isCinematic = true;
+        composer.addPass(cinematicPass);
+        STATE._cinematicPass = cinematicPass; // pentru update time în loop
+      }
+      console.log('[VTour] ✅ Composer cu SSAO + Bloom + Vignette/Grain activate');
       return composer;
     } catch(e){
       console.warn('[VTour] Composer setup failed:', e.message);
@@ -3205,6 +4138,39 @@ window.VTour = (function(){
       // Render
       const camera = (STATE.mode === 'dollhouse' && STATE.dollhouseCam) ? STATE.dollhouseCam : STATE.tourCam;
       if(STATE.composer && STATE.mode === 'walkthrough'){
+        // Update time pe ShaderPass cinematic pentru grain animat
+        if(STATE._cinematicPass && STATE._cinematicPass.uniforms.time){
+          STATE._cinematicPass.uniforms.time.value = now;
+        }
+        // Update focus DOF dinamic (throttle la 4Hz pentru performanță — raycast e scump)
+        if(STATE._bokehPass && (!STATE._lastFocusUpdate || now - STATE._lastFocusUpdate > 250)){
+          STATE._lastFocusUpdate = now;
+          try {
+            const THREE = window.THREE;
+            if(!STATE._focusRay) STATE._focusRay = new THREE.Raycaster();
+            const ray = STATE._focusRay;
+            const dir = new THREE.Vector3(0, 0, -1).applyQuaternion(STATE.tourCam.quaternion);
+            ray.set(STATE.tourCam.position, dir);
+            ray.far = 50;
+            // Intersect cu mesh-urile relevante (interior + furniture)
+            const targets = [];
+            if(STATE.interiorGroup) targets.push(STATE.interiorGroup);
+            if(STATE.furnitureGroup) targets.push(STATE.furnitureGroup);
+            if(STATE.roofGroup) targets.push(STATE.roofGroup);
+            if(targets.length){
+              const hits = ray.intersectObjects(targets, true);
+              if(hits.length){
+                // Focus la prima intersecție vizibilă (ignoră hotspots)
+                const hit = hits.find(h => !h.object._vtourHotspot && !h.object._vtourLight);
+                if(hit && STATE._bokehPass.uniforms.focus){
+                  // Lerp pentru tranziție smooth (10% per update)
+                  const current = STATE._bokehPass.uniforms.focus.value;
+                  STATE._bokehPass.uniforms.focus.value = current * 0.85 + hit.distance * 0.15;
+                }
+              }
+            }
+          } catch(e){ /* silent */ }
+        }
         STATE.composer.render();
       } else if(STATE.renderer && scene && camera){
         STATE.renderer.render(scene, camera);
@@ -3284,7 +4250,17 @@ window.VTour = (function(){
             if(typeof window.closeRelevee === 'function'){
               try { window.closeRelevee(); } catch(e){}
             }
-            await new Promise(r => setTimeout(r, 800)); // așteptăm finalizare
+            await new Promise(r => setTimeout(r, 1200)); // așteptăm finalizare + render
+            // Verificăm dacă releveul s-a generat MĂCAR PARȚIAL OK
+            const goodReleveu = window._RV && Array.isArray(window._RV.floors) &&
+                                window._RV.floors.length > 0 &&
+                                window._RV.floors[0] && Array.isArray(window._RV.floors[0].rects) &&
+                                window._RV.floors[0].rects.length > 2;
+            if(!goodReleveu){
+              _showInfoToast('⚠ Releveu incomplet',
+                'Generarea automată a întâmpinat probleme (vezi consola). Continuăm cu tur exterior + interior parțial.');
+              await new Promise(r => setTimeout(r, 1500));
+            }
             // Re-lansăm start()
             return start(options);
           } catch(e){
@@ -3343,12 +4319,24 @@ window.VTour = (function(){
     _buildInterior(V3D.scene, anchor, aedisModel);
     _setLoadingProgress(70, 'Plasez mobilierul…');
 
-    // 8. Mobilier
-    _buildFurniture(V3D.scene, anchor, aedisModel);
+    // 8. Mobilier (await — așteaptă încărcarea modelelor GLB)
+    await _buildFurniture(V3D.scene, anchor, aedisModel);
+    _setLoadingProgress(76, 'Calculez vertex AO…');
+
+    // 8.4 Vertex AO proximity — darkening în colțuri/sub mobilier
+    _bakeProximityAO();
+    _setLoadingProgress(78, 'Adaug umbre contact…');
+
+    // 8.5 Contact shadows sub mobilier (efect Matterport ground shadow)
+    _addContactShadows(V3D.scene);
     _setLoadingProgress(80, 'Construiesc acoperișul…');
 
     // 9. Acoperiș
     _buildRoof(V3D.scene, anchor, aedisModel);
+    _setLoadingProgress(85, 'Calculez reflexii fotorealiste…');
+
+    // 9.5 CubeCamera reflection probes — reflexii reale per cameră (oglinzi, sticlă, metal)
+    _setupCubeCameras(V3D.r, V3D.scene);
     _setLoadingProgress(88, 'Plasez hotspot-uri și mattertag-uri…');
 
     // 10. Hotspots + Mattertags
@@ -3388,12 +4376,21 @@ window.VTour = (function(){
     // 13. Post-processing
     STATE.composer = _setupComposer(V3D.r, V3D.scene, STATE.tourCam);
 
-    // 14. Tone mapping pe renderer (ACES)
+    // 14. Tone mapping pe renderer (ACES Filmic — standard cinematic)
     V3D.r.toneMapping = THREE.ACESFilmicToneMapping;
-    V3D.r.toneMappingExposure = 1.05;
+    V3D.r.toneMappingExposure = 1.15;
     V3D.r.outputEncoding = THREE.sRGBEncoding;
     V3D.r.shadowMap.enabled = true;
     V3D.r.shadowMap.type = THREE.PCFSoftShadowMap;
+    V3D.r.physicallyCorrectLights = true; // intensitate fizic corectă
+    // Salvăm stat-ul anterior ca să restaurăm la stop()
+    STATE._rendererState = {
+      toneMapping: V3D.r.toneMapping,
+      toneMappingExposure: V3D.r.toneMappingExposure,
+      outputEncoding: V3D.r.outputEncoding,
+      shadowEnabled: V3D.r.shadowMap.enabled,
+      physicallyCorrectLights: V3D.r.physicallyCorrectLights,
+    };
 
     // 15. Input
     _setupInput();
@@ -3415,8 +4412,48 @@ window.VTour = (function(){
     setTimeout(() => {
       STATE._lastTime = performance.now();
       requestAnimationFrame(_loop);
+      _showStartHint();
     }, 400);
     console.log('[VTour] ✅ START complet');
+  }
+
+  // Hint mare în centrul ecranului — "Click pentru a începe"
+  function _showStartHint(){
+    if(document.getElementById('vtour-start-hint')) return;
+    const hint = document.createElement('div');
+    hint.id = 'vtour-start-hint';
+    hint.style.cssText = `
+      position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+      background:rgba(0,0,0,.85);color:white;padding:18px 30px;border-radius:50px;
+      z-index:99;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      font-size:15px;font-weight:700;letter-spacing:.5px;pointer-events:none;
+      border:1px solid rgba(0,255,136,.4);backdrop-filter:blur(12px);
+      box-shadow:0 8px 32px rgba(0,0,0,.6);
+      animation:vtourPulse 1.6s ease-in-out infinite;
+    `;
+    hint.innerHTML = '🖱️ Click pe scenă pentru a începe navigarea (WASD + Mouse)';
+    STATE.overlay.appendChild(hint);
+    // Adăugăm și keyframe animation
+    if(!document.getElementById('vtour-styles')){
+      const style = document.createElement('style');
+      style.id = 'vtour-styles';
+      style.textContent = `
+        @keyframes vtourPulse {
+          0%,100% { opacity: 0.85; transform: translate(-50%,-50%) scale(1); }
+          50%     { opacity: 1; transform: translate(-50%,-50%) scale(1.03); }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+    // Auto-dismiss la primul click sau după 8s
+    const dismiss = () => {
+      hint.style.opacity = '0';
+      hint.style.transition = 'opacity .4s';
+      setTimeout(() => hint.remove(), 500);
+      document.removeEventListener('click', dismiss);
+    };
+    document.addEventListener('click', dismiss, { once: true });
+    setTimeout(dismiss, 8000);
   }
 
   // ═════════════════════════════════════════════════════════════════════════
@@ -3467,6 +4504,38 @@ window.VTour = (function(){
       STATE.extraLights = [];
     }
 
+    // CubeCamera reflection probes — dispose render targets + PMREM prefiltered
+    if(STATE._cubeCameraProbes){
+      STATE._cubeCameraProbes.forEach(p => {
+        try {
+          if(p.renderTarget) p.renderTarget.dispose();
+          if(p.prefilteredRT) p.prefilteredRT.dispose();
+        } catch(e){}
+      });
+      STATE._cubeCameraProbes = null;
+    }
+    if(STATE._selectedRooms){
+      STATE._selectedRooms.forEach(r => { r._envMap = null; });
+      STATE._selectedRooms = null;
+    }
+
+    // Contact shadows — dispose group + texture + material
+    if(STATE._shadowsGroup){
+      if(STATE._shadowsGroup.parent) STATE._shadowsGroup.parent.remove(STATE._shadowsGroup);
+      STATE._shadowsGroup.traverse(o => {
+        if(o.geometry) o.geometry.dispose();
+      });
+      STATE._shadowsGroup = null;
+    }
+    if(STATE._shadowMat){
+      STATE._shadowMat.dispose();
+      STATE._shadowMat = null;
+    }
+    if(STATE._shadowTexture){
+      STATE._shadowTexture.dispose();
+      STATE._shadowTexture = null;
+    }
+
     // Restore AEDIS visibility
     if(window.V3D && Array.isArray(window.V3D.aedis)){
       window.V3D.aedis.forEach(m => {
@@ -3486,6 +4555,20 @@ window.VTour = (function(){
     if(STATE.composer){
       if(STATE.composer.passes) STATE.composer.passes.forEach(p => { if(p.dispose) p.dispose(); });
       STATE.composer = null;
+    }
+    STATE._cinematicPass = null;
+    STATE._bokehPass = null;
+    STATE._focusRay = null;
+
+    // Restore renderer state (tone mapping etc.)
+    if(renderer && STATE._rendererState){
+      try {
+        renderer.toneMapping = STATE._rendererState.toneMapping;
+        renderer.toneMappingExposure = STATE._rendererState.toneMappingExposure;
+        renderer.outputEncoding = STATE._rendererState.outputEncoding;
+        renderer.physicallyCorrectLights = STATE._rendererState.physicallyCorrectLights;
+      } catch(e){}
+      STATE._rendererState = null;
     }
 
     // Restore scene state
