@@ -8174,8 +8174,8 @@ async function _rvInject(){
   #rv-mobile-menu-btn { display: none; }
   @media (max-width: 840px) { #rv-mobile-menu-btn { display: flex !important; } }
 
-.rv-close-btn{margin-left:8px;width:28px;height:28px;border-radius:6px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#64748b;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;}
-.rv-close-btn:hover{border-color:rgba(239,68,68,.4);color:#EF4444;}
+.rv-close-btn{margin-left:8px;width:36px;height:36px;border-radius:8px;border:1px solid rgba(239,68,68,.35);background:rgba(239,68,68,.1);color:#f87171;cursor:pointer;font-size:18px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+.rv-close-btn:hover,.rv-close-btn:active{border-color:rgba(239,68,68,.7);background:rgba(239,68,68,.25);color:#fff;}
 .rv-lpanel{background:#0B1426;border-right:1px solid rgba(212,175,55,.1);overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px;}
 .rv-lpanel::-webkit-scrollbar{width:3px;}.rv-lpanel::-webkit-scrollbar-thumb{background:rgba(212,175,55,.15);}
 .rv-sec-t{font-size:8px;text-transform:uppercase;letter-spacing:.12em;color:#4A6080;font-weight:700;margin-bottom:8px;font-family:'Space Grotesk',sans-serif;}
@@ -8291,6 +8291,24 @@ async function _rvInject(){
   .rv-topbar { padding: 0 10px; gap: 8px; }
   .rv-tinfo { max-width: 160px; font-size: 9px; }
   .rv-logo-t { font-size: 13px; }
+
+  /* ─── BUTON ÎNCHIDE — mare, vizibil, touch-friendly pe mobile ─── */
+  .rv-close-btn {
+    width: 44px !important;
+    height: 44px !important;
+    font-size: 22px !important;
+    border-radius: 10px !important;
+    border: 2px solid rgba(239,68,68,.6) !important;
+    background: rgba(239,68,68,.2) !important;
+    color: #fca5a5 !important;
+    flex-shrink: 0 !important;
+    margin-left: auto !important;
+  }
+  /* Buton floating fix jos-dreapta — MEREU vizibil pe mobile,
+     indiferent de scroll-ul din topbar */
+  #rv-close-mobile-fab {
+    display: flex !important;
+  }
 }
 
 /* Buton info mobil — apare în zoombar pe mobil */
@@ -8416,8 +8434,30 @@ async function _rvInject(){
       style="display:none;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);
       color:#fff;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:14px;margin-right:6px">
       ☰
-    </button><button class="rv-close-btn" onclick="closeRelevee()" title="Închide">✕</button>
+    </button><button class="rv-close-btn" onclick="closeRelevee()" title="Închide releveu">✕</button>
 </div>
+<!-- FAB mobil — buton floating fix jos-dreapta, mereu vizibil pe touch devices -->
+<button id="rv-close-mobile-fab"
+  onclick="closeRelevee()"
+  style="
+    display:none;
+    position:fixed;
+    bottom:24px;right:16px;
+    width:52px;height:52px;
+    border-radius:50%;
+    background:rgba(239,68,68,.9);
+    color:#fff;
+    font-size:24px;font-weight:700;
+    border:none;
+    cursor:pointer;
+    z-index:9999;
+    box-shadow:0 4px 20px rgba(239,68,68,.5);
+    touch-action:manipulation;
+    -webkit-tap-highlight-color:transparent;
+    align-items:center;justify-content:center;
+    line-height:1;
+  "
+  title="Închide releveu">✕</button>
 <div class="rv-body" id="rv-body-main">
   <!-- LEFT -->
   <div class="rv-lpanel" id="rv-lpanel-main">
