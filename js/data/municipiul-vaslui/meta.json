@@ -1,0 +1,19 @@
+{
+  "name": "Municipiul Vaslui",
+  "judet": "Vaslui",
+  "judetCode": "VS",
+  "siruta": "171469",
+  "lat": 46.6407,
+  "lng": 27.7292,
+  "zoom": 13,
+  "pugVersion": "PUG Vaslui — Actualizare 2003/2017",
+  "pugStatus": "aprobat",
+  "rluVersion": "RLU Vaslui Vol.II — HABITAT PROIECT IAȘI",
+  "populatie": 55000,
+  "suprafata_ha": 5700,
+  "nr_utrs": 44,
+  "trupuri": ["Trup A", "Trup A1", "Trup A2", "Trup A3", "Trup B", "Trup C", "Trup D", "Trup E", "Trup F", "Trup I"],
+  "seismic": { "ag": 0.30, "zona": "C" },
+  "statiuneTuristica": false,
+  "dataCompletare": "2026-06-04"
+}

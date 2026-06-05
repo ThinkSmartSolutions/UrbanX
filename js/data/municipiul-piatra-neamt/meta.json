@@ -1,0 +1,19 @@
+{
+  "name": "Municipiul Piatra Neamț",
+  "judet": "Neamț",
+  "judetCode": "NT",
+  "siruta": "120709",
+  "lat": 46.9298,
+  "lng": 26.3700,
+  "zoom": 13,
+  "pugVersion": "PUG Piatra Neamț 2019 (revizie)",
+  "pugStatus": "aprobat",
+  "rluVersion": "RLU Piatra Neamț 2018 — U.A.U.I.M.",
+  "populatie": 85000,
+  "suprafata_ha": 8290,
+  "nr_utrs": 16,
+  "trupuri": ["Trup principal", "Alexandru cel Bun", "Girov", "Dumbrava Roșie"],
+  "seismic": { "ag": 0.35, "zona": "E", "nota": "Seismicitate ridicată" },
+  "statiuneTuristica": true,
+  "dataCompletare": "2026-06-04"
+}
