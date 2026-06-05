@@ -4804,6 +4804,7 @@ Object.assign(window._PUG_REGISTRY, {
   'RO-IS-COM-ARONEANU':  { id:'comuna-aroneanu',  name:'Comuna Aroneanu',  pugFile:'data/comuna-aroneanu/pug.geojson',  reguli:'data/comuna-aroneanu/reguli.json' },
   'RO-IS-95727': { id:'comuna-vladeni', name:'Comuna Vlădeni', pugFile:'data/comuna-vladeni/pug.geojson', reguli:'data/comuna-vladeni/reguli.json' },
   'RO-VS-01': { id:'municipiul-vaslui',       name:'Municipiul Vaslui',       pugFile:'js/data/municipiul-vaslui/pug.geojson',       reguli:'js/data/municipiul-vaslui/reguli.json' },
+  'RO-GL-01': { id:'municipiul-galati', name:'Municipiul Galați', pugFile:'js/data/municipiul-galati/pug.geojson', reguli:'js/data/municipiul-galati/reguli.json' },
   'RO-NT-01': { id:'municipiul-piatra-neamt', name:'Municipiul Piatra Neamț', pugFile:'js/data/municipiul-piatra-neamt/pug.geojson',  reguli:'js/data/municipiul-piatra-neamt/reguli.json' },
   'RO-BT-COM-BALUSENI':  { id:'com-baluseni',  name:'Comuna Bălușeni',  pugFile:'data/com-baluseni/pug.geojson',  reguli:'js/data/com-baluseni/reguli.json' },
 });
@@ -5274,6 +5275,7 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
 <script src="js/rlu-mihaieminescu.js?v=20260525b"></script>
 <script src="js/rlu-vaslui.js?v=20260604a"></script>
 <script src="js/rlu-piatra-neamt.js?v=20260604a"></script>
+<script src="js/rlu-galati.js?v=20260605a"></script>
 
 <script>
 // ── Comune RLU v12 ───────────────────────────────────────────────────────────
@@ -5285,7 +5287,7 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
     {id:'comuna-aroneanu',      name:'Aroneanu',       judet:'iași',           badge:'✅ RLU',     key:'RO-IS-94889'},
     {id:'comuna-holboca',       name:'Holboca',        judet:'iași',           badge:'⚠ Parțial', key:'RO-IS-94951'},
     {id:'comuna-popricani',     name:'Popricani',      judet:'iași',           badge:'⚠ Parțial',  key:'RO-IS-95424'},
-    {id:'com-baluseni',      name:'Bălușeni',       judet:'botoșani',       badge:'✅ Complet', key:'RO-BT-18073',  cadastruFile:'zone/zona_com_baluseni_zaicesti.geojson' },
+    {id:'com-baluseni',      name:'Bălușeni',       judet:'botoșani',       badge:'✅ RLU',     key:'RO-BT-18073',  cadastruFile:'zone/zona_com_baluseni_zaicesti.geojson' },
     {id:'comuna-mihaieminescu', name:'Mihai Eminescu', judet:'botoșani',       badge:'⚠ Parțial', key:'RO-BT-38063'},
     {id:'comuna-cuzavoda',      name:'Cuza Vodă',      judet:'galați/vrancea', badge:'⚠ Parțial', key:'RO-GL-77595'},
 
@@ -5338,6 +5340,7 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
   var MUNI_RLU_PATCH=[
     {texts:['Vaslui'],       key:'RO-VS-01'},
     {texts:['Piatra-Neamț','Piatra Neamț'], key:'RO-NT-01'},
+    {texts:['Galați','Municipiul Galați'], key:'RO-GL-01'},
   ];
   function patchMuniBadges(modal){
     MUNI_RLU_PATCH.forEach(function(m){
