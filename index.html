@@ -909,37 +909,21 @@ canvas#c2d{width:100%;height:100%;display:block}
 </style>
 
 <script>
-    // Service Worker registration + auto-update + cleanup agresiv
+    // CURĂȚARE TOTALĂ SW — fără re-înregistrare, fără reload, fără bucle
     if('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=20260605').then(reg => {
-          console.log('[SW] Înregistrat v4.7:', reg.scope);
-          // Forțez verificare update la fiecare load
-          reg.update();
-          // Când apare un SW nou, îl activez imediat
-          reg.addEventListener('updatefound', () => {
-            const newSW = reg.installing;
-            console.log('[SW] Detect update — instalez noul SW');
-            newSW.addEventListener('statechange', () => {
-              if(newSW.state === 'activated'){
-                console.log('[SW] Noul SW activ — reload în 500ms');
-                setTimeout(() => location.reload(), 500);
-              }
-            });
+        // Unregister TOATE service workerii existenți
+        navigator.serviceWorker.getRegistrations().then(regs => {
+          regs.forEach(r => {
+            r.unregister().then(() => console.log('[SW] Unregistered:', r.scope));
           });
-          // Curățare cache forțată de fiecare dată când pagina se încarcă cu SW vechi
-          if(navigator.serviceWorker.controller){
-            navigator.serviceWorker.controller.postMessage({type: 'CLEAR_CACHE'});
-          }
-        }).catch(e => console.warn('[SW] Skip:', e.message));
-        // Detectează schimbarea controller-ului (SW nou activ) → reload
-        let refreshing = false;
-        navigator.serviceWorker.addEventListener('controllerchange', () => {
-          if(refreshing) return;
-          refreshing = true;
-          console.log('[SW] Controller schimbat — reload pagină');
-          location.reload();
         });
+        // Sterg toate cache-urile
+        if('caches' in window){
+          caches.keys().then(keys => {
+            keys.forEach(k => caches.delete(k).then(() => console.log('[Cache] Sters:', k)));
+          });
+        }
       });
     }
   </script>
