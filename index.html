@@ -4802,6 +4802,8 @@ Object.assign(window._PUG_REGISTRY, {
   // ── Alias-uri retrocompatibilitate ────────────────────────────────────────
   'RO-IS-COM-MIROSLAVA': { id:'comuna-miroslava', name:'Comuna Miroslava', pugFile:'data/comuna-miroslava/pug.geojson', reguli:'data/comuna-miroslava/reguli.json' },
   'RO-IS-COM-ARONEANU':  { id:'comuna-aroneanu',  name:'Comuna Aroneanu',  pugFile:'data/comuna-aroneanu/pug.geojson',  reguli:'data/comuna-aroneanu/reguli.json' },
+  'RO-VS-01': { id:'municipiul-vaslui',       name:'Municipiul Vaslui',       pugFile:'js/data/municipiul-vaslui/pug.geojson',       reguli:'js/data/municipiul-vaslui/reguli.json' },
+  'RO-NT-01': { id:'municipiul-piatra-neamt', name:'Municipiul Piatra Neamț', pugFile:'js/data/municipiul-piatra-neamt/pug.geojson',  reguli:'js/data/municipiul-piatra-neamt/reguli.json' },
   'RO-BT-COM-BALUSENI':  { id:'com-baluseni',  name:'Comuna Bălușeni',  pugFile:'data/com-baluseni/pug.geojson',  reguli:'js/data/com-baluseni/reguli.json' },
 });
 console.log('[UrbanX] _PUG_REGISTRY inițializat —', Object.keys(window._PUG_REGISTRY).length, 'UAT-uri disponibile');
@@ -5269,6 +5271,8 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
 <script src="js/rlu-holboca.js?v=20260525a"></script>
 <script src="js/rlu-cuzavoda.js?v=20260525a"></script>
 <script src="js/rlu-mihaieminescu.js?v=20260525b"></script>
+<script src="js/rlu-vaslui.js?v=20260604a"></script>
+<script src="js/rlu-piatra-neamt.js?v=20260604a"></script>
 
 <script>
 // ── Comune RLU v12 ───────────────────────────────────────────────────────────
@@ -5282,6 +5286,8 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
     {id:'com-baluseni',      name:'Bălușeni',       judet:'botoșani',       badge:'✅ RLU',     key:'RO-BT-18073',  cadastruFile:'zone/zona_com_baluseni_zaicesti.geojson' },
     {id:'comuna-mihaieminescu', name:'Mihai Eminescu', judet:'botoșani',       badge:'✅ RLU',     key:'RO-BT-38063'},
     {id:'comuna-cuzavoda',      name:'Cuza Vodă',      judet:'galați/vrancea', badge:'✅ RLU',     key:'RO-GL-77595'},
+    {id:'municipiul-vaslui',       name:'Vaslui',        judet:'vaslui',  badge:'✅ RLU', key:'RO-VS-01'},
+    {id:'municipiul-piatra-neamt', name:'Piatra Neamț',  judet:'neamț',   badge:'✅ RLU', key:'RO-NT-01'},
   ];
   var JH={'iași':'iași','botoșani':'botoșani','galați/vrancea':'galați'};
   function closeModal(){var m=document.getElementById('uat-selector');if(m)m.remove();var b=document.getElementById('uat-selector-backdrop');if(b)b.remove();}
