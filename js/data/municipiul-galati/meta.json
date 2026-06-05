@@ -1,0 +1,21 @@
+{
+  "name": "Municipiul Galați",
+  "judet": "Galați",
+  "judetCode": "GL",
+  "siruta": "79810",
+  "lat": 45.4353,
+  "lng": 28.0080,
+  "zoom": 13,
+  "pugVersion": "PUG Galați 2024 — Etapa II.2, Revizia 05 / Decembrie 2025",
+  "pugStatus": "în avizare",
+  "rluVersion": "RLU PUG Galați REV05 — UAUIM CCPEC + Urban Team + Oppidum Studio + Fida Solutions",
+  "populatie": 249432,
+  "suprafata_ha": 24644,
+  "nr_utrs": 55,
+  "nr_zone_functionale": 25,
+  "seismic": { "ag": 0.35, "Tc": 1.6, "zona": "B" },
+  "statiuneTuristica": false,
+  "portDunare": true,
+  "dataCompletare": "2026-06-05",
+  "nota": "PUG în procedură de avizare. Valorile sunt din REV05/Dec.2025 — verificați versiunea finală aprobată."
+}
