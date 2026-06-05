@@ -5286,8 +5286,7 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
     {id:'com-baluseni',      name:'Bălușeni',       judet:'botoșani',       badge:'✅ RLU',     key:'RO-BT-18073',  cadastruFile:'zone/zona_com_baluseni_zaicesti.geojson' },
     {id:'comuna-mihaieminescu', name:'Mihai Eminescu', judet:'botoșani',       badge:'✅ RLU',     key:'RO-BT-38063'},
     {id:'comuna-cuzavoda',      name:'Cuza Vodă',      judet:'galați/vrancea', badge:'✅ RLU',     key:'RO-GL-77595'},
-    {id:'municipiul-vaslui',       name:'Vaslui',        judet:'vaslui',  badge:'✅ RLU', key:'RO-VS-01'},
-    {id:'municipiul-piatra-neamt', name:'Piatra Neamț',  judet:'neamț',   badge:'✅ RLU', key:'RO-NT-01'},
+
   ];
   var JH={'iași':'iași','botoșani':'botoșani','galați/vrancea':'galați'};
   function closeModal(){var m=document.getElementById('uat-selector');if(m)m.remove();var b=document.getElementById('uat-selector-backdrop');if(b)b.remove();}
@@ -5312,7 +5311,7 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
     var byJ={};CC.forEach(function(c){if(!byJ[c.judet])byJ[c.judet]=[];byJ[c.judet].push(c);});
     Object.keys(byJ).forEach(function(j){
       var hf=JH[j]||j,cl=byJ[j],tg=null;
-      Array.from(modal.querySelectorAll('div')).forEach(function(g){if(tg)return;var h=g.firstElementChild;if(h&&h.textContent.toLowerCase().indexOf(hf)>-1&&g.children.length>1)tg=g;});
+      Array.from(scroll.children).forEach(function(g){if(tg)return;var h=g.firstElementChild;if(h&&h.textContent.toLowerCase().indexOf(hf)>-1)tg=g;});
       if(tg){
         var ai={};Array.from(tg.querySelectorAll('[data-rlu-key]')).forEach(function(el){ai[el.getAttribute('data-rlu-key')]=true;});
         if(cl.some(function(c){return!ai[c.key];})){
@@ -5333,7 +5332,52 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
       }
     });
   }
-  var obs=new MutationObserver(function(muts){muts.forEach(function(m){m.addedNodes.forEach(function(node){if(node.id==='uat-selector')setTimeout(function(){inject(node);},80);});});});
+  // ── Patch badge RLU pe municipiile principale ────────────────────────────
+  var MUNI_RLU_PATCH=[
+    {texts:['Vaslui'],       key:'RO-VS-01'},
+    {texts:['Piatra-Neamț','Piatra Neamț'], key:'RO-NT-01'},
+  ];
+  function patchMuniBadges(modal){
+    MUNI_RLU_PATCH.forEach(function(m){
+      var found=null;
+      Array.from(modal.querySelectorAll('div,button')).forEach(function(el){
+        if(found)return;
+        var txt=el.textContent||'';
+        var matches=m.texts.some(function(t){return txt.indexOf(t)>-1;});
+        if(!matches)return;
+        // Trebuie să fie un item clickabil (cursor pointer) care nu e deja RLU
+        var st=el.style&&el.style.cursor;
+        if(st!=='pointer'&&!el.onclick&&!el.getAttribute('onclick'))return;
+        if(txt.indexOf('RLU')>-1)return; // deja are badge
+        // Nu e un container mare (max 3 copii direcți = item simplu)
+        if(el.children.length>5)return;
+        found=el;
+      });
+      if(!found)return;
+      // Găsim span-ul cu badge (Gol) și îl înlocuim
+      var spans=found.querySelectorAll('span');
+      var badgeSpan=null;
+      spans.forEach(function(s){if(s.textContent.indexOf('Gol')>-1||s.textContent.indexOf('●')>-1)badgeSpan=s;});
+      var rluStyle='font-size:10px;padding:2px 7px;border-radius:10px;white-space:nowrap;background:rgba(5,150,105,0.2);color:#34d399;border:1px solid rgba(5,150,105,0.3)';
+      if(badgeSpan){
+        badgeSpan.style.cssText=rluStyle;
+        badgeSpan.textContent='✅ RLU';
+      } else {
+        var b=document.createElement('span');
+        b.style.cssText=rluStyle;
+        b.textContent='✅ RLU';
+        found.appendChild(b);
+      }
+      // Onclick → switchUAT corect
+      found.addEventListener('click',function(){
+        try{localStorage.setItem('ux_last_city',m.key);}catch(e){}
+        if(window.TCI)window.TCI.cityKey=m.key;
+        if(window._ProjectionEngine)window._ProjectionEngine.currentCity=m.key;
+        setTimeout(function(){window.dispatchEvent(new CustomEvent('ux:city_changed',{detail:{key:m.key}}));},50);
+      });
+    });
+  }
+  var obs=new MutationObserver(function(muts){muts.forEach(function(m){m.addedNodes.forEach(function(node){if(node.id==='uat-selector')setTimeout(function(){inject(node);patchMuniBadges(node);},150);});});});
   obs.observe(document.body,{childList:true,subtree:false});
   window.addEventListener('ux:city_changed',function(e){var key=(e.detail&&e.detail.key)||window.TCI?.cityKey||localStorage.getItem('ux_last_city');var pug=window._PUG_REGISTRY&&window._PUG_REGISTRY[key];if(pug){var i=document.getElementById('uat-indicator');if(i)i.textContent=pug.name.replace('Municipiul ','').replace('Comuna ','').replace('Orașul ','');}});
   console.log('[Comune RLU] v12 activ');
