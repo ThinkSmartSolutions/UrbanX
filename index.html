@@ -5286,9 +5286,9 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
     {id:'com-baluseni',      name:'Bălușeni',       judet:'botoșani',       badge:'✅ RLU',     key:'RO-BT-18073',  cadastruFile:'zone/zona_com_baluseni_zaicesti.geojson' },
     {id:'comuna-mihaieminescu', name:'Mihai Eminescu', judet:'botoșani',       badge:'✅ RLU',     key:'RO-BT-38063'},
     {id:'comuna-cuzavoda',      name:'Cuza Vodă',      judet:'galați/vrancea', badge:'✅ RLU',     key:'RO-GL-77595'},
-    {id:'municipiul-vaslui',       name:'Vaslui',        judet:'vaslui',  badge:'✅ RLU', key:'RO-VS-01'},
-    {id:'municipiul-piatra-neamt', name:'Piatra Neamț',  judet:'neamț',   badge:'✅ RLU', key:'RO-NT-01'},
   ];
+  // Municipii cu RLU — apar ca badge pe itemul principal din modal, nu ca subitem
+  var MUNI_RLU=['RO-VS-01','RO-NT-01'];
   var JH={'iași':'iași','botoșani':'botoșani','galați/vrancea':'galați'};
   function closeModal(){var m=document.getElementById('uat-selector');if(m)m.remove();var b=document.getElementById('uat-selector-backdrop');if(b)b.remove();}
   function makeItem(c,isChild){
@@ -5333,7 +5333,20 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
       }
     });
   }
-  var obs=new MutationObserver(function(muts){muts.forEach(function(m){m.addedNodes.forEach(function(node){if(node.id==='uat-selector')setTimeout(function(){inject(node);},80);});});});
+  function injectMuniBadges(modal){
+    MUNI_RLU.forEach(function(key){
+      var el=modal.querySelector('[data-city-key="'+key+'"]')||modal.querySelector('[data-key="'+key+'"]')||modal.querySelector('[data-rlu-key="'+key+'"]');
+      if(!el){// fallback: caută după onclick care conține key-ul
+        Array.from(modal.querySelectorAll('[onclick],[data-onclick]')).forEach(function(n){if(n.textContent&&!el){var txt=n.getAttribute('onclick')||'';if(txt.indexOf(key)>-1)el=n;}});
+      }
+      if(el&&!el.querySelector('.muni-rlu-badge')){
+        var b=document.createElement('span');b.className='muni-rlu-badge';
+        b.style.cssText='font-size:10px;padding:2px 7px;border-radius:10px;white-space:nowrap;background:rgba(5,150,105,0.2);color:#34d399;border:1px solid rgba(5,150,105,0.3);margin-left:6px';
+        b.textContent='✅ RLU';el.appendChild(b);
+      }
+    });
+  }
+  var obs=new MutationObserver(function(muts){muts.forEach(function(m){m.addedNodes.forEach(function(node){if(node.id==='uat-selector')setTimeout(function(){inject(node);injectMuniBadges(node);},80);});});});
   obs.observe(document.body,{childList:true,subtree:false});
   window.addEventListener('ux:city_changed',function(e){var key=(e.detail&&e.detail.key)||window.TCI?.cityKey||localStorage.getItem('ux_last_city');var pug=window._PUG_REGISTRY&&window._PUG_REGISTRY[key];if(pug){var i=document.getElementById('uat-indicator');if(i)i.textContent=pug.name.replace('Municipiul ','').replace('Comuna ','').replace('Orașul ','');}});
   console.log('[Comune RLU] v12 activ');
