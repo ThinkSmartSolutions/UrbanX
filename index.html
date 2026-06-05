@@ -909,12 +909,37 @@ canvas#c2d{width:100%;height:100%;display:block}
 </style>
 
 <script>
-    // Service Worker registration
+    // Service Worker registration + auto-update + cleanup agresiv
     if('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=20260523a')
-          .then(r => console.log('[SW] OK v4.0:', r.scope))
-          .catch(e => console.warn('[SW] Skip:', e.message));
+        navigator.serviceWorker.register('./sw.js?v=20260605').then(reg => {
+          console.log('[SW] Înregistrat v4.7:', reg.scope);
+          // Forțez verificare update la fiecare load
+          reg.update();
+          // Când apare un SW nou, îl activez imediat
+          reg.addEventListener('updatefound', () => {
+            const newSW = reg.installing;
+            console.log('[SW] Detect update — instalez noul SW');
+            newSW.addEventListener('statechange', () => {
+              if(newSW.state === 'activated'){
+                console.log('[SW] Noul SW activ — reload în 500ms');
+                setTimeout(() => location.reload(), 500);
+              }
+            });
+          });
+          // Curățare cache forțată de fiecare dată când pagina se încarcă cu SW vechi
+          if(navigator.serviceWorker.controller){
+            navigator.serviceWorker.controller.postMessage({type: 'CLEAR_CACHE'});
+          }
+        }).catch(e => console.warn('[SW] Skip:', e.message));
+        // Detectează schimbarea controller-ului (SW nou activ) → reload
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if(refreshing) return;
+          refreshing = true;
+          console.log('[SW] Controller schimbat — reload pagină');
+          location.reload();
+        });
       });
     }
   </script>
@@ -5712,7 +5737,7 @@ console.log('[FunctionEngine] v2.1 — point-in-polygon UTR lookup activ');
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/shaders/CopyShader.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/shaders/SSAOShader.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/shaders/LuminosityHighPassShader.js"></script>
-<script src="js/26-virtual-tour.js?v=20260604-S2-FLOORPLAN"></script>
+<script src="js/26-virtual-tour.js?v=20260604-S2b-FLOORPLAN"></script>
 </body>
 </html>
 <!-- cinema-v5.js defineste _startCinema -->
