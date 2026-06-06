@@ -654,6 +654,8 @@ function addLayers(){
         S.parcels=[parcelObj]; S.activeParcel=0;
         S.utr=utr; S.rule=REGULI[utr]||{};
         S.ctx=null; S.vol.genDone=false;
+        // ── Auto-fill params din RLU la selecție parcelă ─────────────────
+        parcelObj.params = getDefaultParams(utr);
         clearSource('vol-src'); clearSource('ctx-src');
         try{const bb=turf.bbox(parcelObj.geo);map.fitBounds([[bb[0],bb[1]],[bb[2],bb[3]]],{padding:100,maxZoom:19,duration:600});}catch(er){}
         ss('✅ Parcelă '+nrcad+' | UTR: '+utrDisplay+' | '+area+' m²');
@@ -829,8 +831,18 @@ async function onMapClick(lat,lng){
 function getDefaultParams(utr){
   const r=REGULI[utr]||{};
   // rl = aliniament lateral stânga, rr = lateral dreapta (implicit = rl)
-  return {pot:r.pot,cut:r.cut,niv:r.niv,h:r.h,rf:r.rf,rl:r.rl,rr:r.rl,rs:r.rs,sv:r.sv,pk:r.pk};
+  return {pot:r.pot,cut:r.cut,niv:r.niv,h:r.h,rf:r.rf,rl:r.rl,rr:r.rl??r.rl,rs:r.rs,sv:r.sv,pk:r.pk};
 }
+
+function resetParams(){
+  const ap = S.parcels[S.activeParcel??0];
+  if(!ap) return;
+  ap.params = getDefaultParams(ap.utr);
+  S.vol.sideSetbacks = {};
+  updateMap();
+  if(typeof renderTab==='function') renderTab('proiect');
+}
+window.resetParams = resetParams;
 
 // ═══ UTR LOOKUP ═══════════════════════════════════════════════════════════
 function lookupUTR(lng,lat){
