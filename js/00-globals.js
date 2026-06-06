@@ -810,8 +810,27 @@ function normalizeReguliEntry(v) {
     e.uc = Array.isArray(raw) ? raw.join('; ') : (raw || null);
   }
   if (!e.ui) {
-    const raw = e.functiuni_interzise || e.fn_interzise || [];
+    const raw = e.functiuni_interzise || e.fn_interzise || e.utilizari_interzise || [];
     e.ui = Array.isArray(raw) ? raw.join('; ') : (raw || null);
+  }
+  // ── Retrageri → rf/rl/rr/rs (numeric, extras din string "5.00m de la aliniament") ──
+  function parseM(s) {
+    if (s == null) return null;
+    if (typeof s === 'number') return s;
+    const m = String(s).match(/^([\d]+(?:[.,][\d]+)?)/);
+    return m ? parseFloat(m[1].replace(',', '.')) : null;
+  }
+  if (e.rf == null) e.rf = parseM(e.retragere_fata   || e.retragere_strada   || null);
+  if (e.rl == null) e.rl = parseM(e.retragere_laterala || e.retragere_lat    || null);
+  if (e.rr == null) e.rr = parseM(e.retragere_laterala || e.retragere_lat    || null);
+  if (e.rs == null) e.rs = parseM(e.retragere_spate  || e.retragere_posterior || null);
+  // front_min_m și parcela_min_mp
+  if (e.lung_min_aliniament_m == null && e.front_min_m != null) e.lung_min_aliniament_m = e.front_min_m;
+  if (e.fm == null && e.parcela_min_mp != null) e.fm = e.parcela_min_mp;
+  // ua fallback extins
+  if (!e.ua) {
+    const raw2 = e.utilizari_admise || [];
+    e.ua = Array.isArray(raw2) ? raw2.join('; ') : (raw2 || null);
   }
   return e;
 }
