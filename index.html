@@ -4703,8 +4703,8 @@ function _setupBtnUTR() {
     // ── DESCHIDERE ─────────────────────────────────────────────────────────
     btn.classList.add('on');
 
-    // UAT activ — sursa unică de adevăr: localStorage (setat de TCI._selPick)
-    const k = localStorage.getItem('ux_last_city') || window.TCI?.cityKey || 'RO-IS-01';
+    // UAT activ — TCI.cityKey are prioritate față de localStorage
+    const k = window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
     const db = window._RO_CITIES_DB || {};
     const city = db[k] || {name:'UAT', lat:47.158, lon:27.601};
     const cityName = city.name || 'UAT';
@@ -5266,6 +5266,7 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
 <script src="js/cinema-live-sources.js?v=20260525"></script>
 <script src="js/cinema-v5.js?v=20260525"></script>
 <script src="js/rlu-miroslava.js?v=20260525a"></script>
+<script src="js/rlu-loader.js?v=20260606a"></script>
 <script src="js/rlu-botosani.js?v=20260525a"></script>
 <script src="js/rlu-iasi.js?v=20260606a"></script>
 <script src="js/rlu-baluseni.js?v=20260525a"></script>
