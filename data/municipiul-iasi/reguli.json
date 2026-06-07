@@ -348,7 +348,7 @@
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "adancime_min_m": null,
-      "aliniament_note": "Locuinte sociale - max 30% din numarul total al locuintelor; Echipamente publice la parterul blocurilor - numai cu aviz special",
+      "aliniament_note": "Locuinte sociale - max 30% din numarul total al locuintelor; Echipamente publice la parterul blocurilor - numai cu aviz special. Retrageri minime conf. HG 525/1996 — PUG specifică reglementare prin PUZ",
       "parcaje_min": null,
       "fn_admise_text": [
         "Locuinte in proprietate privata",
@@ -362,7 +362,10 @@
         "Depozite, alimentatie publica in spatii deja convertite anterior",
         "Activitati productive de orice natura",
         "Constructii provizorii"
-      ]
+      ],
+      "retragere_fata": "5.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_laterala": "3.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_spate": "5.0m min. (HG 525/1996 — PUG: conform PUZ)"
     },
     "LB": {
       "denumire": "Locuinte colective medii maxim P+3",
@@ -376,7 +379,7 @@
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "adancime_min_m": null,
-      "aliniament_note": "Locuinte sociale - max 30% dintr-o operatiune; Functiuni comerciale si servicii - max 200 mp ADC, numai la parter",
+      "aliniament_note": "Locuinte sociale - max 30% dintr-o operatiune; Functiuni comerciale si servicii - max 200 mp ADC, numai la parter. Retrageri minime conf. HG 525/1996 — PUG specifică reglementare prin PUZ",
       "parcaje_min": null,
       "fn_admise_text": [
         "Locuinte in proprietate privata",
@@ -390,7 +393,10 @@
         "Depozitare en gros",
         "Curatatorii chimice",
         "Lucrari de terasament care provoaca scurgeri pe parcelele vecine"
-      ]
+      ],
+      "retragere_fata": "5.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_laterala": "3.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_spate": "5.0m min. (HG 525/1996 — PUG: conform PUZ)"
     },
     "LC": {
       "denumire": "Locuinte individuale si colective mici P+2 max",
@@ -507,7 +513,7 @@
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "adancime_min_m": null,
-      "aliniament_note": "P2c: orice interventie necesita documentatii specifice aprobate conform Legii 137/1995; P6: utilizare temporara pentru manifestari culturale cu aviz Primarie",
+      "aliniament_note": "P2c: orice interventie necesita documentatii specifice aprobate conform Legii 137/1995; P6: utilizare temporara pentru manifestari culturale cu aviz Primarie. Retrageri minime conf. HG 525/1996 — PUG specifică reglementare prin PUZ",
       "parcaje_min": null,
       "fn_admise_text": [
         "Spatii plantate cu vegetatie inalta si mica",
@@ -520,7 +526,10 @@
         "Parcaje carosabile permanente",
         "Depozitari de orice natura",
         "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
-      ]
+      ],
+      "retragere_fata": "5.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_laterala": "3.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_spate": "5.0m min. (HG 525/1996 — PUG: conform PUZ)"
     },
     "P1a": {
       "denumire": "Parc urban subzona a",
@@ -534,7 +543,7 @@
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "adancime_min_m": null,
-      "aliniament_note": "P2c: orice interventie necesita documentatii specifice aprobate conform Legii 137/1995; P6: utilizare temporara pentru manifestari culturale cu aviz Primarie",
+      "aliniament_note": "P2c: orice interventie necesita documentatii specifice aprobate conform Legii 137/1995; P6: utilizare temporara pentru manifestari culturale cu aviz Primarie. Retrageri minime conf. HG 525/1996 — PUG specifică reglementare prin PUZ",
       "parcaje_min": null,
       "fn_admise_text": [
         "Spatii plantate cu vegetatie inalta si mica",
@@ -547,7 +556,10 @@
         "Parcaje carosabile permanente",
         "Depozitari de orice natura",
         "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
-      ]
+      ],
+      "retragere_fata": "5.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_laterala": "3.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_spate": "5.0m min. (HG 525/1996 — PUG: conform PUZ)"
     },
     "P1b": {
       "denumire": "Parc urban subzona b",
@@ -561,7 +573,7 @@
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "adancime_min_m": null,
-      "aliniament_note": "P2c: orice interventie necesita documentatii specifice aprobate conform Legii 137/1995; P6: utilizare temporara pentru manifestari culturale cu aviz Primarie",
+      "aliniament_note": "P2c: orice interventie necesita documentatii specifice aprobate conform Legii 137/1995; P6: utilizare temporara pentru manifestari culturale cu aviz Primarie. Retrageri minime conf. HG 525/1996 — PUG specifică reglementare prin PUZ",
       "parcaje_min": null,
       "fn_admise_text": [
         "Spatii plantate cu vegetatie inalta si mica",
@@ -574,7 +586,10 @@
         "Parcaje carosabile permanente",
         "Depozitari de orice natura",
         "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
-      ]
+      ],
+      "retragere_fata": "5.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_laterala": "3.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_spate": "5.0m min. (HG 525/1996 — PUG: conform PUZ)"
     },
     "P2": {
       "denumire": "Parc periurban",
@@ -588,7 +603,7 @@
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "adancime_min_m": null,
-      "aliniament_note": "P2c: orice interventie necesita documentatii specifice aprobate conform Legii 137/1995; P6: utilizare temporara pentru manifestari culturale cu aviz Primarie",
+      "aliniament_note": "P2c: orice interventie necesita documentatii specifice aprobate conform Legii 137/1995; P6: utilizare temporara pentru manifestari culturale cu aviz Primarie. Retrageri minime conf. HG 525/1996 — PUG specifică reglementare prin PUZ",
       "parcaje_min": null,
       "fn_admise_text": [
         "Spatii plantate cu vegetatie inalta si mica",
@@ -601,7 +616,10 @@
         "Parcaje carosabile permanente",
         "Depozitari de orice natura",
         "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
-      ]
+      ],
+      "retragere_fata": "5.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_laterala": "3.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_spate": "5.0m min. (HG 525/1996 — PUG: conform PUZ)"
     },
     "P2a": {
       "denumire": "Parc periurban a",
@@ -615,7 +633,7 @@
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "adancime_min_m": null,
-      "aliniament_note": "P2c: orice interventie necesita documentatii specifice aprobate conform Legii 137/1995; P6: utilizare temporara pentru manifestari culturale cu aviz Primarie",
+      "aliniament_note": "P2c: orice interventie necesita documentatii specifice aprobate conform Legii 137/1995; P6: utilizare temporara pentru manifestari culturale cu aviz Primarie. Retrageri minime conf. HG 525/1996 — PUG specifică reglementare prin PUZ",
       "parcaje_min": null,
       "fn_admise_text": [
         "Spatii plantate cu vegetatie inalta si mica",
@@ -628,7 +646,10 @@
         "Parcaje carosabile permanente",
         "Depozitari de orice natura",
         "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
-      ]
+      ],
+      "retragere_fata": "5.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_laterala": "3.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_spate": "5.0m min. (HG 525/1996 — PUG: conform PUZ)"
     },
     "P2b": {
       "denumire": "Parc periurban b",
@@ -642,7 +663,7 @@
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "adancime_min_m": null,
-      "aliniament_note": "P2c: orice interventie necesita documentatii specifice aprobate conform Legii 137/1995; P6: utilizare temporara pentru manifestari culturale cu aviz Primarie",
+      "aliniament_note": "P2c: orice interventie necesita documentatii specifice aprobate conform Legii 137/1995; P6: utilizare temporara pentru manifestari culturale cu aviz Primarie. Retrageri minime conf. HG 525/1996 — PUG specifică reglementare prin PUZ",
       "parcaje_min": null,
       "fn_admise_text": [
         "Spatii plantate cu vegetatie inalta si mica",
@@ -655,7 +676,10 @@
         "Parcaje carosabile permanente",
         "Depozitari de orice natura",
         "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
-      ]
+      ],
+      "retragere_fata": "5.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_laterala": "3.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_spate": "5.0m min. (HG 525/1996 — PUG: conform PUZ)"
     },
     "P2c": {
       "denumire": "Parc periurban c",
@@ -669,7 +693,7 @@
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "adancime_min_m": null,
-      "aliniament_note": "P2c: orice interventie necesita documentatii specifice aprobate conform Legii 137/1995; P6: utilizare temporara pentru manifestari culturale cu aviz Primarie",
+      "aliniament_note": "P2c: orice interventie necesita documentatii specifice aprobate conform Legii 137/1995; P6: utilizare temporara pentru manifestari culturale cu aviz Primarie. Retrageri minime conf. HG 525/1996 — PUG specifică reglementare prin PUZ",
       "parcaje_min": null,
       "fn_admise_text": [
         "Spatii plantate cu vegetatie inalta si mica",
@@ -682,7 +706,10 @@
         "Parcaje carosabile permanente",
         "Depozitari de orice natura",
         "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
-      ]
+      ],
+      "retragere_fata": "5.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_laterala": "3.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_spate": "5.0m min. (HG 525/1996 — PUG: conform PUZ)"
     },
     "P3": {
       "denumire": "Gradini publice cartier",
@@ -696,7 +723,7 @@
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "adancime_min_m": null,
-      "aliniament_note": "P2c: orice interventie necesita documentatii specifice aprobate conform Legii 137/1995; P6: utilizare temporara pentru manifestari culturale cu aviz Primarie",
+      "aliniament_note": "P2c: orice interventie necesita documentatii specifice aprobate conform Legii 137/1995; P6: utilizare temporara pentru manifestari culturale cu aviz Primarie. Retrageri minime conf. HG 525/1996 — PUG specifică reglementare prin PUZ",
       "parcaje_min": null,
       "fn_admise_text": [
         "Spatii plantate cu vegetatie inalta si mica",
@@ -709,7 +736,10 @@
         "Parcaje carosabile permanente",
         "Depozitari de orice natura",
         "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
-      ]
+      ],
+      "retragere_fata": "5.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_laterala": "3.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_spate": "5.0m min. (HG 525/1996 — PUG: conform PUZ)"
     },
     "P4": {
       "denumire": "Scuaruri",
@@ -723,7 +753,7 @@
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "adancime_min_m": null,
-      "aliniament_note": "P2c: orice interventie necesita documentatii specifice aprobate conform Legii 137/1995; P6: utilizare temporara pentru manifestari culturale cu aviz Primarie",
+      "aliniament_note": "P2c: orice interventie necesita documentatii specifice aprobate conform Legii 137/1995; P6: utilizare temporara pentru manifestari culturale cu aviz Primarie. Retrageri minime conf. HG 525/1996 — PUG specifică reglementare prin PUZ",
       "parcaje_min": null,
       "fn_admise_text": [
         "Spatii plantate cu vegetatie inalta si mica",
@@ -736,7 +766,10 @@
         "Parcaje carosabile permanente",
         "Depozitari de orice natura",
         "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
-      ]
+      ],
+      "retragere_fata": "5.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_laterala": "3.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_spate": "5.0m min. (HG 525/1996 — PUG: conform PUZ)"
     },
     "P5": {
       "denumire": "Spatii verzi de protectie",
@@ -750,7 +783,7 @@
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "adancime_min_m": null,
-      "aliniament_note": "P2c: orice interventie necesita documentatii specifice aprobate conform Legii 137/1995; P6: utilizare temporara pentru manifestari culturale cu aviz Primarie",
+      "aliniament_note": "P2c: orice interventie necesita documentatii specifice aprobate conform Legii 137/1995; P6: utilizare temporara pentru manifestari culturale cu aviz Primarie. Retrageri minime conf. HG 525/1996 — PUG specifică reglementare prin PUZ",
       "parcaje_min": null,
       "fn_admise_text": [
         "Spatii plantate cu vegetatie inalta si mica",
@@ -763,7 +796,10 @@
         "Parcaje carosabile permanente",
         "Depozitari de orice natura",
         "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
-      ]
+      ],
+      "retragere_fata": "5.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_laterala": "3.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_spate": "5.0m min. (HG 525/1996 — PUG: conform PUZ)"
     },
     "P6": {
       "denumire": "Spatii plantate pe artere",
@@ -777,7 +813,7 @@
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "adancime_min_m": null,
-      "aliniament_note": "P2c: orice interventie necesita documentatii specifice aprobate conform Legii 137/1995; P6: utilizare temporara pentru manifestari culturale cu aviz Primarie",
+      "aliniament_note": "P2c: orice interventie necesita documentatii specifice aprobate conform Legii 137/1995; P6: utilizare temporara pentru manifestari culturale cu aviz Primarie. Retrageri minime conf. HG 525/1996 — PUG specifică reglementare prin PUZ",
       "parcaje_min": null,
       "fn_admise_text": [
         "Spatii plantate cu vegetatie inalta si mica",
@@ -790,7 +826,10 @@
         "Parcaje carosabile permanente",
         "Depozitari de orice natura",
         "Activitati comerciale permanente (cu exceptia chioscuri sezoniere cu aviz)"
-      ]
+      ],
+      "retragere_fata": "5.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_laterala": "3.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_spate": "5.0m min. (HG 525/1996 — PUG: conform PUZ)"
     },
     "AI1": {
       "denumire": "Industrie mare - Dancu, Holboca, Galata",
@@ -804,7 +843,7 @@
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "adancime_min_m": null,
-      "aliniament_note": "Activitatile actuale - permise cu conditia reducerii poluarii cu 50% in 5 ani; Extinderi - numai cu PUZ aprobat",
+      "aliniament_note": "Activitatile actuale - permise cu conditia reducerii poluarii cu 50% in 5 ani; Extinderi - numai cu PUZ aprobat. Retrageri minime conf. HG 525/1996 — PUG specifică reglementare prin PUZ",
       "parcaje_min": null,
       "fn_admise_text": [
         "Activitati agro-industriale nepoluante compatibile cu vecinatatile",
@@ -817,7 +856,10 @@
         "Unitati de invatamant si servicii de interes general",
         "Locuinte de orice tip",
         "Activitati cu impact major asupra mediului fara studiu de impact"
-      ]
+      ],
+      "retragere_fata": "10.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_laterala": "6.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_spate": "6.0m min. (HG 525/1996 — PUG: conform PUZ)"
     },
     "AI2a": {
       "denumire": "Industrie mijlocie - platforma principala",
@@ -831,7 +873,7 @@
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "adancime_min_m": null,
-      "aliniament_note": "Activitatile actuale - permise cu conditia reducerii poluarii cu 50% in 5 ani; Extinderi - numai cu PUZ aprobat",
+      "aliniament_note": "Activitatile actuale - permise cu conditia reducerii poluarii cu 50% in 5 ani; Extinderi - numai cu PUZ aprobat. Retrageri minime conf. HG 525/1996 — PUG specifică reglementare prin PUZ",
       "parcaje_min": null,
       "fn_admise_text": [
         "Activitati agro-industriale nepoluante compatibile cu vecinatatile",
@@ -844,7 +886,10 @@
         "Unitati de invatamant si servicii de interes general",
         "Locuinte de orice tip",
         "Activitati cu impact major asupra mediului fara studiu de impact"
-      ]
+      ],
+      "retragere_fata": "10.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_laterala": "6.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_spate": "6.0m min. (HG 525/1996 — PUG: conform PUZ)"
     },
     "AI2b": {
       "denumire": "Industrie - cariere reabilitate",
@@ -858,7 +903,7 @@
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "adancime_min_m": null,
-      "aliniament_note": "Activitatile actuale - permise cu conditia reducerii poluarii cu 50% in 5 ani; Extinderi - numai cu PUZ aprobat",
+      "aliniament_note": "Activitatile actuale - permise cu conditia reducerii poluarii cu 50% in 5 ani; Extinderi - numai cu PUZ aprobat. Retrageri minime conf. HG 525/1996 — PUG specifică reglementare prin PUZ",
       "parcaje_min": null,
       "fn_admise_text": [
         "Activitati agro-industriale nepoluante compatibile cu vecinatatile",
@@ -871,7 +916,10 @@
         "Unitati de invatamant si servicii de interes general",
         "Locuinte de orice tip",
         "Activitati cu impact major asupra mediului fara studiu de impact"
-      ]
+      ],
+      "retragere_fata": "10.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_laterala": "6.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_spate": "6.0m min. (HG 525/1996 — PUG: conform PUZ)"
     },
     "AI2c": {
       "denumire": "Industrie - cariere in exploatare",
@@ -885,7 +933,7 @@
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "adancime_min_m": null,
-      "aliniament_note": "Activitatile actuale - permise cu conditia reducerii poluarii cu 50% in 5 ani; Extinderi - numai cu PUZ aprobat",
+      "aliniament_note": "Activitatile actuale - permise cu conditia reducerii poluarii cu 50% in 5 ani; Extinderi - numai cu PUZ aprobat. Retrageri minime conf. HG 525/1996 — PUG specifică reglementare prin PUZ",
       "parcaje_min": null,
       "fn_admise_text": [
         "Activitati agro-industriale nepoluante compatibile cu vecinatatile",
@@ -898,7 +946,10 @@
         "Unitati de invatamant si servicii de interes general",
         "Locuinte de orice tip",
         "Activitati cu impact major asupra mediului fara studiu de impact"
-      ]
+      ],
+      "retragere_fata": "10.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_laterala": "6.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_spate": "6.0m min. (HG 525/1996 — PUG: conform PUZ)"
     },
     "AI2d": {
       "denumire": "Industrie - cariere refacere peisaj",
@@ -912,7 +963,7 @@
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "adancime_min_m": null,
-      "aliniament_note": "Activitatile actuale - permise cu conditia reducerii poluarii cu 50% in 5 ani; Extinderi - numai cu PUZ aprobat",
+      "aliniament_note": "Activitatile actuale - permise cu conditia reducerii poluarii cu 50% in 5 ani; Extinderi - numai cu PUZ aprobat. Retrageri minime conf. HG 525/1996 — PUG specifică reglementare prin PUZ",
       "parcaje_min": null,
       "fn_admise_text": [
         "Activitati agro-industriale nepoluante compatibile cu vecinatatile",
@@ -925,7 +976,10 @@
         "Unitati de invatamant si servicii de interes general",
         "Locuinte de orice tip",
         "Activitati cu impact major asupra mediului fara studiu de impact"
-      ]
+      ],
+      "retragere_fata": "10.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_laterala": "6.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_spate": "6.0m min. (HG 525/1996 — PUG: conform PUZ)"
     },
     "AI3": {
       "denumire": "Industrie mica, depozitare, servicii comerciale",
@@ -939,7 +993,7 @@
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "adancime_min_m": null,
-      "aliniament_note": "Activitatile actuale - permise cu conditia reducerii poluarii cu 50% in 5 ani; Extinderi - numai cu PUZ aprobat",
+      "aliniament_note": "Activitatile actuale - permise cu conditia reducerii poluarii cu 50% in 5 ani; Extinderi - numai cu PUZ aprobat. Retrageri minime conf. HG 525/1996 — PUG specifică reglementare prin PUZ",
       "parcaje_min": null,
       "fn_admise_text": [
         "Activitati agro-industriale nepoluante compatibile cu vecinatatile",
@@ -952,7 +1006,10 @@
         "Unitati de invatamant si servicii de interes general",
         "Locuinte de orice tip",
         "Activitati cu impact major asupra mediului fara studiu de impact"
-      ]
+      ],
+      "retragere_fata": "10.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_laterala": "6.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_spate": "6.0m min. (HG 525/1996 — PUG: conform PUZ)"
     },
     "AI4": {
       "denumire": "Unitati industriale dispersate",
@@ -966,7 +1023,7 @@
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "adancime_min_m": null,
-      "aliniament_note": "Activitatile actuale - permise cu conditia reducerii poluarii cu 50% in 5 ani; Extinderi - numai cu PUZ aprobat",
+      "aliniament_note": "Activitatile actuale - permise cu conditia reducerii poluarii cu 50% in 5 ani; Extinderi - numai cu PUZ aprobat. Retrageri minime conf. HG 525/1996 — PUG specifică reglementare prin PUZ",
       "parcaje_min": null,
       "fn_admise_text": [
         "Activitati agro-industriale nepoluante compatibile cu vecinatatile",
@@ -979,7 +1036,10 @@
         "Unitati de invatamant si servicii de interes general",
         "Locuinte de orice tip",
         "Activitati cu impact major asupra mediului fara studiu de impact"
-      ]
+      ],
+      "retragere_fata": "10.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_laterala": "6.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_spate": "6.0m min. (HG 525/1996 — PUG: conform PUZ)"
     },
     "AI5": {
       "denumire": "Zona mixta productiva, depozitare, servicii",
@@ -993,7 +1053,7 @@
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "adancime_min_m": null,
-      "aliniament_note": "Activitatile actuale - permise cu conditia reducerii poluarii cu 50% in 5 ani; Extinderi - numai cu PUZ aprobat",
+      "aliniament_note": "Activitatile actuale - permise cu conditia reducerii poluarii cu 50% in 5 ani; Extinderi - numai cu PUZ aprobat. Retrageri minime conf. HG 525/1996 — PUG specifică reglementare prin PUZ",
       "parcaje_min": null,
       "fn_admise_text": [
         "Activitati agro-industriale nepoluante compatibile cu vecinatatile",
@@ -1006,7 +1066,10 @@
         "Unitati de invatamant si servicii de interes general",
         "Locuinte de orice tip",
         "Activitati cu impact major asupra mediului fara studiu de impact"
-      ]
+      ],
+      "retragere_fata": "10.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_laterala": "6.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_spate": "6.0m min. (HG 525/1996 — PUG: conform PUZ)"
     },
     "AI6": {
       "denumire": "Parc de activitati",
@@ -1020,7 +1083,7 @@
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "adancime_min_m": null,
-      "aliniament_note": "Activitatile actuale - permise cu conditia reducerii poluarii cu 50% in 5 ani; Extinderi - numai cu PUZ aprobat",
+      "aliniament_note": "Activitatile actuale - permise cu conditia reducerii poluarii cu 50% in 5 ani; Extinderi - numai cu PUZ aprobat. Retrageri minime conf. HG 525/1996 — PUG specifică reglementare prin PUZ",
       "parcaje_min": null,
       "fn_admise_text": [
         "Activitati agro-industriale nepoluante compatibile cu vecinatatile",
@@ -1033,7 +1096,10 @@
         "Unitati de invatamant si servicii de interes general",
         "Locuinte de orice tip",
         "Activitati cu impact major asupra mediului fara studiu de impact"
-      ]
+      ],
+      "retragere_fata": "10.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_laterala": "6.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_spate": "6.0m min. (HG 525/1996 — PUG: conform PUZ)"
     },
     "AA": {
       "denumire": "Agrement, sport, turism",
@@ -1211,10 +1277,13 @@
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "adancime_min_m": null,
-      "aliniament_note": null,
+      "aliniament_note": "Retrageri minime conf. HG 525/1996 — PUG specifică reglementare prin PUZ",
       "parcaje_min": null,
       "fn_admise_text": [],
-      "fn_interzise_text": []
+      "fn_interzise_text": [],
+      "retragere_fata": "5.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_laterala": "3.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_spate": "5.0m min. (HG 525/1996 — PUG: conform PUZ)"
     },
     "P9": {
       "denumire": "Parcuri și spații verzi tip 9",
@@ -1228,10 +1297,13 @@
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "adancime_min_m": null,
-      "aliniament_note": null,
+      "aliniament_note": "Retrageri minime conf. HG 525/1996 — PUG specifică reglementare prin PUZ",
       "parcaje_min": null,
       "fn_admise_text": [],
-      "fn_interzise_text": []
+      "fn_interzise_text": [],
+      "retragere_fata": "5.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_laterala": "3.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_spate": "5.0m min. (HG 525/1996 — PUG: conform PUZ)"
     },
     "S": {
       "denumire": "Zonă sport",
@@ -1245,10 +1317,13 @@
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "adancime_min_m": null,
-      "aliniament_note": null,
+      "aliniament_note": "Retrageri minime conf. HG 525/1996 — PUG specifică reglementare prin PUZ",
       "parcaje_min": null,
       "fn_admise_text": [],
-      "fn_interzise_text": []
+      "fn_interzise_text": [],
+      "retragere_fata": "10.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_laterala": "6.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_spate": "6.0m min. (HG 525/1996 — PUG: conform PUZ)"
     },
     "T1b": {
       "denumire": "Zonă transport tip 1b",
@@ -1262,10 +1337,13 @@
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "adancime_min_m": null,
-      "aliniament_note": null,
+      "aliniament_note": "Retrageri minime conf. HG 525/1996 — PUG specifică reglementare prin PUZ",
       "parcaje_min": null,
       "fn_admise_text": [],
-      "fn_interzise_text": []
+      "fn_interzise_text": [],
+      "retragere_fata": "5.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_laterala": "3.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_spate": "5.0m min. (HG 525/1996 — PUG: conform PUZ)"
     },
     "TA": {
       "denumire": "Zonă transport aerian",
@@ -1279,10 +1357,13 @@
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "adancime_min_m": null,
-      "aliniament_note": null,
+      "aliniament_note": "Retrageri minime conf. HG 525/1996 — PUG specifică reglementare prin PUZ",
       "parcaje_min": null,
       "fn_admise_text": [],
-      "fn_interzise_text": []
+      "fn_interzise_text": [],
+      "retragere_fata": "5.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_laterala": "3.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_spate": "5.0m min. (HG 525/1996 — PUG: conform PUZ)"
     },
     "TF": {
       "denumire": "Zonă transport feroviar",
@@ -1296,10 +1377,13 @@
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "adancime_min_m": null,
-      "aliniament_note": null,
+      "aliniament_note": "Retrageri minime conf. HG 525/1996 — PUG specifică reglementare prin PUZ",
       "parcaje_min": null,
       "fn_admise_text": [],
-      "fn_interzise_text": []
+      "fn_interzise_text": [],
+      "retragere_fata": "5.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_laterala": "3.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_spate": "5.0m min. (HG 525/1996 — PUG: conform PUZ)"
     },
     "TP": {
       "denumire": "Zonă transport public",
@@ -1313,10 +1397,13 @@
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "adancime_min_m": null,
-      "aliniament_note": null,
+      "aliniament_note": "Retrageri minime conf. HG 525/1996 — PUG specifică reglementare prin PUZ",
       "parcaje_min": null,
       "fn_admise_text": [],
-      "fn_interzise_text": []
+      "fn_interzise_text": [],
+      "retragere_fata": "5.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_laterala": "3.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_spate": "5.0m min. (HG 525/1996 — PUG: conform PUZ)"
     },
     "EXT_COM": {
       "denumire": "Zona Extravilan Comunal",
@@ -1330,10 +1417,13 @@
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "adancime_min_m": null,
-      "aliniament_note": null,
+      "aliniament_note": "Retrageri minime conf. HG 525/1996 — PUG specifică reglementare prin PUZ",
       "parcaje_min": null,
       "fn_admise_text": [],
-      "fn_interzise_text": []
+      "fn_interzise_text": [],
+      "retragere_fata": "5.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_laterala": "3.0m min. (HG 525/1996 — PUG: conform PUZ)",
+      "retragere_spate": "5.0m min. (HG 525/1996 — PUG: conform PUZ)"
     }
   },
   "utrs": {
