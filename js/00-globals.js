@@ -817,8 +817,10 @@ function normalizeReguliEntry(v) {
   function parseM(s) {
     if (s == null) return null;
     if (typeof s === 'number') return s;
-    const m = String(s).match(/^([\d]+(?:[.,][\d]+)?)/);
-    return m ? parseFloat(m[1].replace(',', '.')) : null;
+    var m1 = String(s).match(/min\.?\s+([\d]+(?:[.,][\d]+)?)\s*m/);
+    if (m1) return parseFloat(m1[1].replace(',', '.'));
+    var m2 = String(s).match(/([\d]+(?:[.,][\d]+)?)\s*m/);
+    return m2 ? parseFloat(m2[1].replace(',', '.')) : null;
   }
   if (e.rf == null) e.rf = parseM(e.retragere_fata   || e.retragere_strada   || null);
   if (e.rl == null) e.rl = parseM(e.retragere_laterala || e.retragere_lat    || null);
