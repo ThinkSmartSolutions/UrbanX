@@ -4,422 +4,1218 @@
     "uat_key": "RO-IS-95087",
     "judet": "Iași",
     "proiect": "PUG Reactualizat nr. 20/2006, finalizat 25.06.2011 — SC ATD Proiect SRL (arh. Daniel Lucian Poiană)",
-    "seismic": { "ag": 0.2, "Tc": 1.0, "zona": "C" },
+    "seismic": {
+      "ag": 0.2,
+      "Tc": 1.0,
+      "zona": "C"
+    },
     "hdd": 2900,
-    "sate": ["Rediu", "Breazu", "Horleșți", "Tăutești"],
+    "sate": [
+      "Rediu",
+      "Breazu",
+      "Horleșți",
+      "Tăutești"
+    ],
     "note": "Comună periurbană la 6km NV de Iași. Risc semnificativ alunecări de teren (ZA1/ZA2) și inundabilitate (ZI). Alimentare apă parțială RAJAC."
   },
   "subzone": {
-    "IS":  { "denumire": "Zona centrală cu funcțiuni mixte", "pot_max": 50, "cut_max": 1.50, "hmax_m": 12, "niv_max": 4, "regim": "izolat/cuplat", "sup_min_mp": 200, "front_min_m": 10 },
-    "Li2": { "denumire": "Locuințe individuale P-P+2 (câmpie, fără riscuri)", "pot_max": 30, "cut_max": 1.20, "hmax_m": 9,  "niv_max": 3, "regim": "izolat/cuplat", "sup_min_mp": 150, "front_min_m": 8 },
-    "Li1": { "denumire": "Locuințe individuale P-P+1 (câmpie, fără riscuri)", "pot_max": 30, "cut_max": 0.90, "hmax_m": 9,  "niv_max": 2, "regim": "izolat", "sup_min_mp": 150, "front_min_m": 8 },
-    "Li0": { "denumire": "Locuințe individuale P (parter simplu)", "pot_max": 30, "cut_max": 0.60, "hmax_m": 6,  "niv_max": 1, "regim": "izolat", "sup_min_mp": 150, "front_min_m": 8 },
-    "Lv2": { "denumire": "Locuințe individuale P-P+1 (versant, risc mediu ZA2)", "pot_max": 20, "cut_max": 0.60, "hmax_m": 9,  "niv_max": 2, "regim": "izolat", "sup_min_mp": 200, "front_min_m": 10, "nota": "Aviz obligatoriu Comisia de Versanți" },
-    "Lv1": { "denumire": "Locuințe individuale P (versant, risc ridicat)", "pot_max": 15, "cut_max": 0.30, "hmax_m": 6,  "niv_max": 1, "regim": "izolat", "sup_min_mp": 200, "front_min_m": 12, "nota": "Aviz geotehnician + Comisia Versanților OBLIGATORIU" },
-    "ISt": { "denumire": "Agrement/turism/agroturism", "pot_max": 30, "cut_max": 0.90, "hmax_m": 9,  "niv_max": 2, "regim": "izolat" },
-    "ISsp":{ "denumire": "Sport și activități sportive", "pot_max": 15, "cut_max": 0.30, "hmax_m": 6,  "niv_max": 1, "regim": "izolat" },
-    "GC":  { "denumire": "Gospodărie comunală și cimitire", "pot_max": 30, "cut_max": 0.30, "hmax_m": 6,  "niv_max": 1, "regim": "izolat", "nota": "Distanță sanitară 50m față de cimitir" },
-    "AI":  { "denumire": "Agro-industrial și depozitare", "pot_max": 50, "cut_max": 1.00, "hmax_m": 6,  "niv_max": 2, "regim": "izolat", "nota": "Aviz mediu; nu se admit locuințe permanente" },
-    "TE":  { "denumire": "Echipare tehnico-edilitară", "pot_max": 50, "cut_max": 0.50, "hmax_m": 6,  "niv_max": 1, "regim": "izolat", "nota": "Puțuri captare, rezervoare, stații pompare, epurare" },
-    "BJ":  { "denumire": "Baraj Acumulare Rediu (ANA)", "pot_max": 30, "cut_max": 1.20, "hmax_m": 0,  "niv_max": 0, "regim": "conform studii", "nota": "Conform studii specialitate ANA" }
+    "IS": {
+      "denumire": "Zona centrală cu funcțiuni mixte",
+      "hmax_m": 12,
+      "niv_max": 4,
+      "regim": "izolat/cuplat",
+      "sup_min_mp": 200,
+      "front_min_m": 10,
+      "pot_baza": 50,
+      "cut_baza": 1.5,
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "min. 5,00 m față de aliniament; min. 12,00 m din axul drumului județean; min. 20,00 m distanță între garduri pe drum comunal (RLU IS, Art. Amplasare față de aliniament)",
+      "retragere_laterala": "H/2 din înălțimea la cornișă, min. 3,00 m față de limitele laterale; față de zonă rezidențială, funcțiune publică sau biserică min. H/2 min. 5,00 m (RLU IS, Art. Amplasare față de limite)",
+      "retragere_spate": "min. 5,00 m față de limita posterioară a proprietății (RLU IS, Art. Amplasare față de limite)",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "stationare în interiorul parcelei; max. 70% din retragere față aliniament rezervat parcajelor",
+      "parcaje": "Stationarea autovehiculelor numai în interiorul parcelei; max. 70% din retragere față de aliniament rezervat parcajelor (RLU IS, Stationare autovehicole)",
+      "utilizari_admise": [
+        "Funcțiuni publice reprezentative de importanță locală",
+        "Funcțiuni de interes general manageriale, tehnice, profesionale și financiar-bancare, telecomunicații",
+        "Hoteluri, restaurante, parcaje, comerț, servicii personale și colective, loisir",
+        "Locuințe individuale și colective izolate și cuplate, completări și extinderi",
+        "Supraetajări pentru clădiri joase sau clădiri noi cu parter altă destinație decât locuirea",
+        "Lucrări de îmbunătățire a confortului urban",
+        "Amenajări de locuri de joacă pentru copii cu spații plantate"
+      ],
+      "utilizari_interzise": [
+        "Activități productive poluante, cu risc tehnologic sau incomode prin traficul generat",
+        "Construcții industriale",
+        "Depozitarea substanțelor inflamabile/toxice; depozitări materiale refolosibile",
+        "Construcții provizorii; depozitare en-gros",
+        "Creșterea animalelor de casă și depozitarea gunoiului animalier",
+        "Construirea în zonele de protecție: ZpDJ min. 12m/ax, ZpDC min. 10m/ax, Zplea (aviz Electrica), ZpM (aviz DJCPN)"
+      ],
+      "note": "IS — Zona Instituțiilor Publice și Serviciilor, Rediu. POT=50% CUT=1,50 confirmate RLU. hmax=12m (niv=4, din JSON existent). Construcțiile publice pot depăși POT/CUT prin PUD."
+    },
+    "Li2": {
+      "denumire": "Locuințe individuale P-P+2 (câmpie, fără riscuri)",
+      "hmax_m": 9,
+      "niv_max": 3,
+      "regim": "izolat/cuplat",
+      "sup_min_mp": 150,
+      "front_min_m": 8,
+      "pot_baza": 30,
+      "cut_baza": 1.2,
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "min. 5,00 m față de aliniament; min. 12,00 m din axul drumului județean; min. 10,00 m din axul drumului comunal (RLU Li2, Art. Amplasare față de aliniament)",
+      "retragere_laterala": "H/2 din înălțimea la cornișă, min. 3,00 m față de limitele laterale (RLU Li2, Art. Amplasare față de limite)",
+      "retragere_spate": "min. 5,00 m față de limita posterioară a proprietății (RLU Li2, Art. Amplasare față de limite)",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "stationare în interiorul parcelei",
+      "parcaje": "Stationarea autovehiculelor numai în interiorul parcelei, în afara circulațiilor publice; se recomandă gruparea parcajelor prin cooperare (RLU Li2)",
+      "utilizari_admise": [
+        "Locuințe individuale și colective mici, izolate sau cuplate, anexe gospodărești",
+        "Completări și extinderi cu respectarea aliniamentelor impuse de profilul transversal al străzilor",
+        "Supraetajări pentru clădiri joase de locuit sau clădiri noi cu parter altă destinație decât locuirea",
+        "Lucrări de construire, întreținere, renovare, modernizare la fondul construit existent",
+        "Echipamente publice de nivel rezidențial"
+      ],
+      "utilizari_interzise": [
+        "Activități productive poluante, cu risc tehnologic sau incomode prin traficul generat",
+        "Depozitarea unor cantități mari de substanțe inflamabile sau toxice",
+        "Depozitări de materiale refolosibile sau platforme de precolectare a deșeurilor",
+        "Construcții provizorii de orice natură",
+        "Creșterea animalelor de casă și depozitarea gunoiului animalier în zonă",
+        "Construirea în zonele de protecție: ZpDJ min. 12m/ax, ZpDC min. 10m/ax, Zplea (conform aviz Electrica), ZpM (conform aviz DJCPN)"
+      ],
+      "note": "Li2 — Locuințe individuale P–P+2 (UTR 2,3 Rediu). POT=30% CUT=1,20 confirmate RLU (UTR 2,3). hmax=9m (niv=3). Parcelă min. 150 mp înșiruit / 200 mp izolat-cuplat."
+    },
+    "Li1": {
+      "denumire": "Locuințe individuale P-P+1 (câmpie, fără riscuri)",
+      "hmax_m": 9,
+      "niv_max": 2,
+      "regim": "izolat",
+      "sup_min_mp": 150,
+      "front_min_m": 8,
+      "pot_baza": 30,
+      "cut_baza": 0.9,
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "min. 5,00 m față de aliniament; min. 12,00 m din axul drumului județean; min. 10,00 m din axul drumului comunal (RLU Li1, Art. Amplasare față de aliniament)",
+      "retragere_laterala": "H/2 din înălțimea la cornișă, min. 3,00 m față de limitele laterale (RLU Li1, Art. Amplasare față de limite)",
+      "retragere_spate": "min. 5,00 m față de limita posterioară a proprietății (RLU Li1, Art. Amplasare față de limite)",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "stationare în interiorul parcelei",
+      "parcaje": "Stationarea autovehiculelor numai în interiorul parcelei, în afara circulațiilor publice (RLU Li1)",
+      "utilizari_admise": [
+        "Locuințe individuale și colective mici, izolate sau cuplate, anexe gospodărești",
+        "Completări și extinderi cu respectarea aliniamentelor impuse de profilul transversal al străzilor",
+        "Supraetajări pentru clădiri joase de locuit sau clădiri noi cu parter altă destinație decât locuirea",
+        "Lucrări de construire, întreținere, renovare, modernizare la fondul construit existent",
+        "Echipamente publice de nivel rezidențial"
+      ],
+      "utilizari_interzise": [
+        "Activități productive poluante, cu risc tehnologic sau incomode prin traficul generat",
+        "Depozitarea unor cantități mari de substanțe inflamabile sau toxice",
+        "Depozitări de materiale refolosibile sau platforme de precolectare a deșeurilor",
+        "Construcții provizorii de orice natură",
+        "Creșterea animalelor de casă și depozitarea gunoiului animalier în zonă",
+        "Construirea în zonele de protecție: ZpDJ min. 12m/ax, ZpDC min. 10m/ax, Zplea (conform aviz Electrica), ZpM (conform aviz DJCPN)"
+      ],
+      "note": "Li1 — Locuințe individuale P–P+1 (UTR 4,5 Rediu). POT=30% CUT=0,90 confirmate RLU (UTR 4,5). hmax=9m (niv=2). Parcelă min. 150 mp înșiruit / 200 mp izolat-cuplat."
+    },
+    "Li0": {
+      "denumire": "Locuințe individuale P (parter simplu)",
+      "hmax_m": 6,
+      "niv_max": 1,
+      "regim": "izolat",
+      "sup_min_mp": 150,
+      "front_min_m": 8,
+      "pot_baza": 30,
+      "cut_baza": 0.6,
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "min. 5,00 m față de aliniament; min. 12,00 m din axul drumului județean; min. 10,00 m din axul drumului comunal (RLU Li0, Art. Amplasare față de aliniament)",
+      "retragere_laterala": "H/2 din înălțimea la cornișă, min. 3,00 m față de limitele laterale (RLU Li0, Art. Amplasare față de limite)",
+      "retragere_spate": "min. 5,00 m față de limita posterioară a proprietății (RLU Li0, Art. Amplasare față de limite)",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "stationare în interiorul parcelei",
+      "parcaje": "Stationarea autovehiculelor numai în interiorul parcelei, în afara circulațiilor publice (RLU Li0)",
+      "utilizari_admise": [
+        "Locuințe individuale și colective mici, izolate sau cuplate, anexe gospodărești",
+        "Completări și extinderi cu respectarea aliniamentelor impuse de profilul transversal al străzilor",
+        "Supraetajări pentru clădiri joase de locuit sau clădiri noi cu parter altă destinație decât locuirea",
+        "Lucrări de construire, întreținere, renovare, modernizare la fondul construit existent",
+        "Echipamente publice de nivel rezidențial"
+      ],
+      "utilizari_interzise": [
+        "Activități productive poluante, cu risc tehnologic sau incomode prin traficul generat",
+        "Depozitarea unor cantități mari de substanțe inflamabile sau toxice",
+        "Depozitări de materiale refolosibile sau platforme de precolectare a deșeurilor",
+        "Construcții provizorii de orice natură",
+        "Creșterea animalelor de casă și depozitarea gunoiului animalier în zonă",
+        "Construirea în zonele de protecție: ZpDJ min. 12m/ax, ZpDC min. 10m/ax, Zplea (conform aviz Electrica), ZpM (conform aviz DJCPN)"
+      ],
+      "note": "Li0 — Locuințe individuale P (UTR 6 Rediu). POT=30% CUT=0,60 confirmate RLU (UTR 6). hmax=6m (niv=1)."
+    },
+    "Lv2": {
+      "denumire": "Locuințe individuale P-P+1 (versant, risc mediu ZA2)",
+      "hmax_m": 9,
+      "niv_max": 2,
+      "regim": "izolat",
+      "sup_min_mp": 200,
+      "front_min_m": 10,
+      "nota": "Aviz obligatoriu Comisia de Versanți",
+      "pot_baza": 20,
+      "cut_baza": 0.6,
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "min. 5,00 m față de aliniament; min. 12,00 m din axul drumului județean; min. 10,00 m din axul drumului comunal (RLU Lv2, Art. Amplasare față de aliniament)",
+      "retragere_laterala": "H/2 din înălțimea la cornișă, min. 3,00 m față de limitele laterale (RLU Lv2, Art. Amplasare față de limite)",
+      "retragere_spate": "min. 5,00 m față de limita posterioară a proprietății (RLU Lv2, Art. Amplasare față de limite)",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "stationare în interiorul parcelei",
+      "parcaje": "Stationarea autovehiculelor numai în interiorul parcelei, în afara circulațiilor publice (RLU Lv2)",
+      "utilizari_admise": [
+        "Locuințe individuale și colective mici izolate, anexe gospodărești",
+        "Completări și extinderi cu respectarea aliniamentelor",
+        "Lucrări de construire, întreținere, renovare, modernizare la fondul existent",
+        "Echipamente publice de nivel rezidențial"
+      ],
+      "utilizari_interzise": [
+        "Activități productive poluante, cu risc tehnologic sau incomode prin traficul generat",
+        "Depozitarea unor cantități mari de substanțe inflamabile sau toxice",
+        "Depozitări de materiale refolosibile sau platforme de precolectare a deșeurilor",
+        "Construcții provizorii de orice natură",
+        "Creșterea animalelor de casă și depozitarea gunoiului animalier în zonă",
+        "Construirea în zonele de protecție: ZpDJ min. 12m/ax, ZpDC min. 10m/ax, Zplea (conform aviz Electrica), ZpM (conform aviz DJCPN)",
+        "Orice construcție fără studii geotehnice și aviz Comisia de Versanți"
+      ],
+      "note": "Lv2 — Locuințe pe versanți, densitate normală (UTR 7,8,10). POT=20% CUT=0,60 confirmate RLU. hmax=9m (niv=2). Studii geotehnice obligatorii; aviz Comisia de Versanți și RA Apele Române."
+    },
+    "Lv1": {
+      "denumire": "Locuințe individuale P (versant, risc ridicat)",
+      "hmax_m": 6,
+      "niv_max": 1,
+      "regim": "izolat",
+      "sup_min_mp": 200,
+      "front_min_m": 12,
+      "nota": "Aviz geotehnician + Comisia Versanților OBLIGATORIU",
+      "pot_baza": 15,
+      "cut_baza": 0.3,
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "min. 5,00 m față de aliniament; min. 12,00 m din axul drumului județean; min. 10,00 m din axul drumului comunal (RLU Lv1, Art. Amplasare față de aliniament)",
+      "retragere_laterala": "H/2 din înălțimea la cornișă, min. 3,00 m față de limitele laterale (RLU Lv1, Art. Amplasare față de limite)",
+      "retragere_spate": "min. 5,00 m față de limita posterioară a proprietății (RLU Lv1, Art. Amplasare față de limite)",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "stationare în interiorul parcelei",
+      "parcaje": "Stationarea autovehiculelor numai în interiorul parcelei, în afara circulațiilor publice (RLU Lv1)",
+      "utilizari_admise": [
+        "Locuințe individuale izolate",
+        "Anexe gospodărești",
+        "Lucrări de întreținere, renovare la fondul construit existent"
+      ],
+      "utilizari_interzise": [
+        "Activități productive poluante, cu risc tehnologic sau incomode prin traficul generat",
+        "Depozitarea unor cantități mari de substanțe inflamabile sau toxice",
+        "Depozitări de materiale refolosibile sau platforme de precolectare a deșeurilor",
+        "Construcții provizorii de orice natură",
+        "Creșterea animalelor de casă și depozitarea gunoiului animalier în zonă",
+        "Construirea în zonele de protecție: ZpDJ min. 12m/ax, ZpDC min. 10m/ax, Zplea (conform aviz Electrica), ZpM (conform aviz DJCPN)",
+        "Orice construcție fără studii geotehnice verificate și aviz Comisia de Versanți"
+      ],
+      "note": "Lv1 — Locuințe pe versanți, densitate redusă (UTR 9,11,12,13). POT=15% CUT=0,30 confirmate RLU. hmax=6m (niv=1). Studii geotehnice și de stabilitate obligatorii; aviz Comisia de Versanți și RA Apele Române."
+    },
+    "ISt": {
+      "denumire": "Agrement/turism/agroturism",
+      "hmax_m": 9,
+      "niv_max": 2,
+      "regim": "izolat",
+      "pot_baza": 30,
+      "cut_baza": 0.9,
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "min. 5,00 m față de aliniament și min. 10,00 m din axul străzii (RLU ISt, Art. Amplasare față de aliniament)",
+      "retragere_laterala": "H/2 din înălțimea la cornișă, min. 3,00 m față de limitele laterale (RLU ISt, Art. Amplasare față de limite)",
+      "retragere_spate": "min. 5,00 m față de limita posterioară a proprietății (RLU ISt, Art. Amplasare față de limite)",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "stationare în interiorul parcelei",
+      "parcaje": "Stationarea autovehiculelor numai în interiorul parcelei, în afara circulațiilor publice (RLU ISt)",
+      "utilizari_admise": [
+        "Construcții și amenajări cu caracter turistic (pensiuni, cabane, agrement)",
+        "Servicii și comerț complementare turismului",
+        "Spații verzi amenajate și de agrement"
+      ],
+      "utilizari_interzise": [
+        "Activități productive poluante, cu risc tehnologic",
+        "Construcții industriale; depozitare en-gros",
+        "Activități incompatibile cu caracterul turistic al zonei"
+      ],
+      "note": "ISt — Zona Instituțiilor și Serviciilor Turistice (UTR 14). POT=30% CUT=0,90 confirmate RLU (UTR 14). hmax=9m (niv=2). Aviz ANPM și RA Apele Române."
+    },
+    "ISsp": {
+      "denumire": "Sport și activități sportive",
+      "hmax_m": 6,
+      "niv_max": 1,
+      "regim": "izolat",
+      "pot_baza": 15,
+      "cut_baza": 0.3,
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "plantații înalte pe aleile principale și la limita exterioară a incintei (RLU ISsp, Spații libere și plantate)",
+      "retragere_laterala": "conform specificului amenajărilor sportive (RLU ISsp, Art. Amplasare față de limite)",
+      "retragere_spate": "conform specificului amenajărilor sportive (RLU ISsp, Art. Amplasare față de limite)",
+      "spatii_verzi_pct": 50,
+      "parcaje_min": "conform normative specifice amenajări sportive",
+      "parcaje": "Parcaje conform normativelor specifice; împrejmuiri semi-opace sau opace max. 1,50m (RLU ISsp)",
+      "utilizari_admise": [
+        "Construcții și amenajări sportive și de agrement",
+        "Facilități pentru sportivi; spații verzi amenajate"
+      ],
+      "utilizari_interzise": [
+        "Construcții incompatibile cu funcțiunea sportivă",
+        "Activități productive poluante"
+      ],
+      "note": "ISsp — Zona Instituțiilor și Serviciilor Sportive (UTR 15). POT=15% CUT=0,30 confirmate RLU (UTR 15). hmax=6m (niv=1). SV=50% (conform normative zone sportive)."
+    },
+    "GC": {
+      "denumire": "Gospodărie comunală și cimitire",
+      "hmax_m": 6,
+      "niv_max": 1,
+      "regim": "izolat",
+      "nota": "Distanță sanitară 50m față de cimitir",
+      "pot_baza": 30,
+      "cut_baza": 0.3,
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "min. 5,00 m față de aliniament (HG 525/1996; RLU GC nu specifică valoare proprie)",
+      "retragere_laterala": "H/2 din înălțimea clădirii, min. 3,00 m față de limitele parcelei (HG 525/1996)",
+      "retragere_spate": "min. 5,00 m față de limita posterioară (HG 525/1996)",
+      "spatii_verzi_pct": 15,
+      "parcaje_min": "circulații pietonale 15% din suprafața cimitirului",
+      "parcaje": "Circulații pietonale și carosabile în pondere de min. 15% din suprafața cimitirului; plantații min. 5% (RLU GC, Spații libere și plantate)",
+      "utilizari_admise": [
+        "Cimitire și clădiri anexe (capelă mortuară, mausoleu-osuar)",
+        "Circulații pietonale și carosabile, parcaje",
+        "Plantații (min. 5% din suprafața cimitirului)",
+        "Spații pentru administrare și întreținere"
+      ],
+      "utilizari_interzise": [
+        "Densificarea cimitirelor prin ocuparea aleilor",
+        "Orice construcții permanente cu altă destinație",
+        "Locuințe la mai puțin de 50m de limita cimitirului"
+      ],
+      "note": "GC — Gospodărie Comunală / Cimitire. POT=30% CUT=0,30 din JSON existent (RLU confirmă norme cimitire: 1% construcții + 15% circulații + 5% plantații). hmax=6m (niv=1)."
+    },
+    "AI": {
+      "denumire": "Agro-industrial și depozitare",
+      "hmax_m": 6,
+      "niv_max": 2,
+      "regim": "izolat",
+      "nota": "Aviz mediu; nu se admit locuințe permanente",
+      "pot_baza": 50,
+      "cut_baza": 1.0,
+      "rf": 5.0,
+      "rl": 5.0,
+      "rs": 6.0,
+      "retragere_fata": "retrageri de la aliniament din rațiuni funcționale sau protecția contra zgomotelor/nocivităților; se impune PUZ (RLU AI, Art. Amplasare față de aliniament)",
+      "retragere_laterala": "H/2 din înălțimea clădirii, min. 5,00 m față de limitele laterale; plantații pe tot conturul incintei min. 40% (RLU AI, Art. Amplasare față de limite)",
+      "retragere_spate": "min. 6,00 m față de limita posterioară a parcelei (RLU AI, Art. Amplasare față de limite)",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "stationare în interiorul parcelei; trasee agabaritice",
+      "parcaje": "Stationarea vehiculelor în afara drumurilor publice; spații de circulație, încărcare și întoarcere în interiorul parcelei; max. 70% din retragere față aliniament rezervat parcajelor (RLU AI)",
+      "utilizari_admise": [
+        "Activități industriale și agro-industriale nepoluante",
+        "Depozitare și distribuție bunuri și materiale",
+        "Servicii și birouri aferente unităților industriale",
+        "Locuințe de serviciu strict necesare pentru pază/conducere"
+      ],
+      "utilizari_interzise": [
+        "Activități poluante cu risc tehnologic",
+        "Locuințe permanente (cu excepția celor de serviciu stricte)",
+        "Unități de învățământ și servicii de interes general"
+      ],
+      "note": "AI — Activități Industriale/Agro-industriale. POT=50% CUT=1,00 din JSON existent. hmax=6m (niv=2 — înălțime standard hală mică). PUZ obligatoriu pentru evaluarea consecințelor includerii de noi construcții. Aviz ANPM, DSP, RA Apele Române."
+    },
+    "TE": {
+      "denumire": "Echipare tehnico-edilitară",
+      "hmax_m": 6,
+      "niv_max": 1,
+      "regim": "izolat",
+      "nota": "Puțuri captare, rezervoare, stații pompare, epurare",
+      "pot_baza": 50,
+      "cut_baza": 0.5,
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "se păstrează aliniamentele actuale; min. 5,00 m față de aliniament (RLU TE, Art. Amplasare față de aliniament)",
+      "retragere_laterala": "se păstrează aliniamentele actuale; conform normativelor specifice (RLU TE, Art. Amplasare față de limite)",
+      "retragere_spate": "se păstrează aliniamentele actuale; conform normativelor specifice (RLU TE, Art. Amplasare față de limite)",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "stationare în interiorul parcelei; trasee agabaritice",
+      "parcaje": "Stationarea vehiculelor în afara drumurilor publice; max. 70% din retragere față aliniament rezervat parcajelor (RLU TE)",
+      "utilizari_admise": [
+        "Construcții și instalații tehnico-edilitare (alimentare apă, canalizare, energie electrică, gaz, salubritate)",
+        "Birouri autonome",
+        "Rețele tehnico-edilitare; stații de pompare, transformare"
+      ],
+      "utilizari_interzise": [
+        "Activități cu risc tehnologic incompatibile cu vecinătățile",
+        "Activități poluante incompatibile cu vecinătățile",
+        "Locuințe"
+      ],
+      "note": "TE — Tehnico-Edilitare (UTR 19,20 Rediu). POT=50% CUT=0,50 confirmate RLU (UTR 19,20: POT=50%, CUT=0,50). hmax=6m (niv=1). Autorizarea construcțiilor din vecinătatea TE trebuie să respecte distanțele de protecție specifice."
+    },
+    "BJ": {
+      "denumire": "Baraj Acumulare Rediu (ANA)",
+      "hmax_m": 0,
+      "niv_max": 0,
+      "regim": "conform studii",
+      "nota": "Conform studii specialitate ANA",
+      "pot_baza": 30,
+      "cut_baza": 1.2,
+      "rf": 0.0,
+      "rl": 0.0,
+      "rs": 0.0,
+      "retragere_fata": "conform studii specialitate; retragere față de maluri conform Legii Apelor nr. 107/1996 și aviz ABA Prut-Bârlad (RLU BJ)",
+      "retragere_laterala": "conform studii specialitate (RLU BJ)",
+      "retragere_spate": "conform studii specialitate (RLU BJ)",
+      "spatii_verzi_pct": 70,
+      "parcaje_min": "conform studii specialitate",
+      "parcaje": "Conform studii specialitate avizate; amenajări specifice zonei balneoclimaterice/agrement (RLU BJ, Spații libere și plantate)",
+      "utilizari_admise": [
+        "Amenajări specifice bălților și cursurilor de apă (Jijia și afluenți)",
+        "Spații verzi și plantate de protecție a malurilor",
+        "Circulații pietonale de întreținere (drum de halaj)",
+        "Amenajări de agrement și pescuit conform studii specialitate"
+      ],
+      "utilizari_interzise": [
+        "Construcții permanente în albia minoră sau zona de protecție a apelor",
+        "Activități care afectează regimul hidrologic",
+        "Orice amenajare fără aviz ABA Prut-Bârlad"
+      ],
+      "note": "BJ — Zone Bălți/Jijia (zone de apă și protecție). POT=30% CUT=1,20 conform studii specialitate (RLU BJ). hmax=0 niv=0 (din JSON existent — fără construcții permanente standard). SV=70%. Aviz ABA Prut-Bârlad și ANPM obligatoriu."
+    }
   },
   "utrs": {
     "1": {
-      "sat": "Rediu", "nr_utr": "1", "fn_dominanta": "IS",
+      "sat": "Rediu",
+      "nr_utr": "1",
+      "fn_dominanta": "IS",
       "denumire": "Zona centrală cu funcțiuni mixte — Rediu",
-      "subzone_admise": ["IS", "Li2", "Li1"],
-      "pot_max": 50, "cut_max": 1.50, "hmax_m": 12, "niv_max": 4,
-      "sup_min_mp": 200, "front_min_m": 10,
+      "subzone_admise": [
+        "IS",
+        "Li2",
+        "Li1"
+      ],
+      "pot_max": 50,
+      "cut_max": 1.5,
+      "hmax_m": 12,
+      "niv_max": 4,
+      "sup_min_mp": 200,
+      "front_min_m": 10,
       "aliniament_note": "PUD pentru funcțiuni publice noi; respectare alinieri existente",
-      "avize": ["Aviz Apele Române (pârâul Rediu)", "Aviz DSP"],
+      "avize": [
+        "Aviz Apele Române (pârâul Rediu)",
+        "Aviz DSP"
+      ],
       "interdictii": "Fără funcțiuni industriale; fără depozite inflamabile",
       "ref": "UTR 1 — Rediu, RLU PUG 2011"
     },
     "2": {
-      "sat": "Rediu", "nr_utr": "2", "fn_dominanta": "Li2",
+      "sat": "Rediu",
+      "nr_utr": "2",
+      "fn_dominanta": "Li2",
       "denumire": "Locuințe individuale P-P+2 — Rediu (câmpie)",
-      "subzone_admise": ["Li2", "Li1"],
-      "pot_max": 30, "cut_max": 1.20, "hmax_m": 9, "niv_max": 3,
-      "sup_min_mp": 150, "front_min_m": 8,
+      "subzone_admise": [
+        "Li2",
+        "Li1"
+      ],
+      "pot_max": 30,
+      "cut_max": 1.2,
+      "hmax_m": 9,
+      "niv_max": 3,
+      "sup_min_mp": 150,
+      "front_min_m": 8,
       "aliniament_note": "Retragere min 5-10m față de ax stradă locală",
-      "avize": ["Aviz Apele Române dacă în zona ZI"],
+      "avize": [
+        "Aviz Apele Române dacă în zona ZI"
+      ],
       "interdictii": "Fără industriale; fără depozite materiale toxice",
       "ref": "UTR 2 — Rediu, RLU PUG 2011"
     },
     "3": {
-      "sat": "Rediu", "nr_utr": "3", "fn_dominanta": "Li2",
+      "sat": "Rediu",
+      "nr_utr": "3",
+      "fn_dominanta": "Li2",
       "denumire": "Locuințe individuale P-P+2 — Rediu",
-      "subzone_admise": ["Li2", "Li1"],
-      "pot_max": 30, "cut_max": 1.20, "hmax_m": 9, "niv_max": 3,
-      "sup_min_mp": 150, "front_min_m": 8,
+      "subzone_admise": [
+        "Li2",
+        "Li1"
+      ],
+      "pot_max": 30,
+      "cut_max": 1.2,
+      "hmax_m": 9,
+      "niv_max": 3,
+      "sup_min_mp": 150,
+      "front_min_m": 8,
       "aliniament_note": "Retragere min 5-10m față de ax stradă",
       "avize": [],
       "interdictii": "Fără industriale",
       "ref": "UTR 3 — Rediu, RLU PUG 2011"
     },
     "4": {
-      "sat": "Rediu", "nr_utr": "4", "fn_dominanta": "Li1",
+      "sat": "Rediu",
+      "nr_utr": "4",
+      "fn_dominanta": "Li1",
       "denumire": "Locuințe individuale P-P+1 — Rediu",
-      "subzone_admise": ["Li1", "Li0"],
-      "pot_max": 30, "cut_max": 0.90, "hmax_m": 9, "niv_max": 2,
-      "sup_min_mp": 150, "front_min_m": 8,
+      "subzone_admise": [
+        "Li1",
+        "Li0"
+      ],
+      "pot_max": 30,
+      "cut_max": 0.9,
+      "hmax_m": 9,
+      "niv_max": 2,
+      "sup_min_mp": 150,
+      "front_min_m": 8,
       "avize": [],
       "interdictii": "Fără industriale",
       "ref": "UTR 4 — Rediu, RLU PUG 2011"
     },
     "5": {
-      "sat": "Rediu", "nr_utr": "5", "fn_dominanta": "Li1",
+      "sat": "Rediu",
+      "nr_utr": "5",
+      "fn_dominanta": "Li1",
       "denumire": "Locuințe individuale P-P+1 — Rediu",
-      "subzone_admise": ["Li1", "Li0"],
-      "pot_max": 30, "cut_max": 0.90, "hmax_m": 9, "niv_max": 2,
-      "sup_min_mp": 150, "front_min_m": 8,
+      "subzone_admise": [
+        "Li1",
+        "Li0"
+      ],
+      "pot_max": 30,
+      "cut_max": 0.9,
+      "hmax_m": 9,
+      "niv_max": 2,
+      "sup_min_mp": 150,
+      "front_min_m": 8,
       "avize": [],
       "interdictii": "Fără industriale",
       "ref": "UTR 5 — Rediu, RLU PUG 2011"
     },
     "6": {
-      "sat": "Rediu", "nr_utr": "6", "fn_dominanta": "Li0",
+      "sat": "Rediu",
+      "nr_utr": "6",
+      "fn_dominanta": "Li0",
       "denumire": "Locuințe individuale P (zonă mai restrânsă) — Rediu",
-      "subzone_admise": ["Li0"],
-      "pot_max": 30, "cut_max": 0.60, "hmax_m": 6, "niv_max": 1,
-      "sup_min_mp": 150, "front_min_m": 8,
+      "subzone_admise": [
+        "Li0"
+      ],
+      "pot_max": 30,
+      "cut_max": 0.6,
+      "hmax_m": 6,
+      "niv_max": 1,
+      "sup_min_mp": 150,
+      "front_min_m": 8,
       "avize": [],
       "interdictii": "Fără industriale",
       "ref": "UTR 6 — Rediu, RLU PUG 2011"
     },
     "7": {
-      "sat": "Rediu", "nr_utr": "7", "fn_dominanta": "Lv2",
+      "sat": "Rediu",
+      "nr_utr": "7",
+      "fn_dominanta": "Lv2",
       "denumire": "Locuințe individuale P-P+1 pe versant ZA2 — Rediu",
-      "subzone_admise": ["Lv2"],
-      "pot_max": 20, "cut_max": 0.60, "hmax_m": 9, "niv_max": 2,
-      "sup_min_mp": 200, "front_min_m": 10,
-      "avize": ["Aviz Comisia de Versanți — OBLIGATORIU", "Studiu geotehnic"],
+      "subzone_admise": [
+        "Lv2"
+      ],
+      "pot_max": 20,
+      "cut_max": 0.6,
+      "hmax_m": 9,
+      "niv_max": 2,
+      "sup_min_mp": 200,
+      "front_min_m": 10,
+      "avize": [
+        "Aviz Comisia de Versanți — OBLIGATORIU",
+        "Studiu geotehnic"
+      ],
       "interdictii": "ZA2 — interdicție temporară până la studiu geotehnic de stabilitate; ZA1 — interdicție DEFINITIVĂ",
       "ref": "UTR 7 — Rediu, RLU PUG 2011"
     },
     "8": {
-      "sat": "Rediu", "nr_utr": "8", "fn_dominanta": "Lv2",
+      "sat": "Rediu",
+      "nr_utr": "8",
+      "fn_dominanta": "Lv2",
       "denumire": "Locuințe individuale P-P+1 pe versant — Rediu",
-      "subzone_admise": ["Lv2"],
-      "pot_max": 20, "cut_max": 0.60, "hmax_m": 9, "niv_max": 2,
-      "sup_min_mp": 200, "front_min_m": 10,
-      "avize": ["Aviz Comisia de Versanți", "Studiu geotehnic"],
+      "subzone_admise": [
+        "Lv2"
+      ],
+      "pot_max": 20,
+      "cut_max": 0.6,
+      "hmax_m": 9,
+      "niv_max": 2,
+      "sup_min_mp": 200,
+      "front_min_m": 10,
+      "avize": [
+        "Aviz Comisia de Versanți",
+        "Studiu geotehnic"
+      ],
       "interdictii": "ZA2 — interdicție temporară; ZA1 — interdicție definitivă",
       "ref": "UTR 8 — Rediu, RLU PUG 2011"
     },
     "9": {
-      "sat": "Rediu", "nr_utr": "9", "fn_dominanta": "Lv1",
+      "sat": "Rediu",
+      "nr_utr": "9",
+      "fn_dominanta": "Lv1",
       "denumire": "Locuințe individuale P pe versant abrupt — Rediu",
-      "subzone_admise": ["Lv1"],
-      "pot_max": 15, "cut_max": 0.45, "hmax_m": 6, "niv_max": 1,
-      "sup_min_mp": 200, "front_min_m": 12,
-      "avize": ["Aviz Comisia de Versanți — OBLIGATORIU", "Studiu geotehnic vizat OCPI"],
+      "subzone_admise": [
+        "Lv1"
+      ],
+      "pot_max": 15,
+      "cut_max": 0.45,
+      "hmax_m": 6,
+      "niv_max": 1,
+      "sup_min_mp": 200,
+      "front_min_m": 12,
+      "avize": [
+        "Aviz Comisia de Versanți — OBLIGATORIU",
+        "Studiu geotehnic vizat OCPI"
+      ],
       "interdictii": "Risc ridicat; interdicție în ZA1; aviz geotehnic obligatoriu pentru orice construcție",
       "ref": "UTR 9 — Rediu, RLU PUG 2011"
     },
     "10": {
-      "sat": "Rediu", "nr_utr": "10", "fn_dominanta": "Lv2",
+      "sat": "Rediu",
+      "nr_utr": "10",
+      "fn_dominanta": "Lv2",
       "denumire": "Locuințe individuale P-P+1 pe versant — Rediu",
-      "subzone_admise": ["Lv2"],
-      "pot_max": 20, "cut_max": 0.60, "hmax_m": 6, "niv_max": 2,
-      "avize": ["Aviz Comisia de Versanți"],
+      "subzone_admise": [
+        "Lv2"
+      ],
+      "pot_max": 20,
+      "cut_max": 0.6,
+      "hmax_m": 6,
+      "niv_max": 2,
+      "avize": [
+        "Aviz Comisia de Versanți"
+      ],
       "interdictii": "ZA2 — interdicție temporară",
       "ref": "UTR 10 — Rediu, RLU PUG 2011"
     },
     "11": {
-      "sat": "Rediu", "nr_utr": "11", "fn_dominanta": "Lv1",
+      "sat": "Rediu",
+      "nr_utr": "11",
+      "fn_dominanta": "Lv1",
       "denumire": "Locuințe individuale P pe versant abrupt — Rediu",
-      "subzone_admise": ["Lv1"],
-      "pot_max": 15, "cut_max": 0.30, "hmax_m": 6, "niv_max": 1,
-      "avize": ["Aviz Comisia de Versanți", "Aviz Apele Române"],
+      "subzone_admise": [
+        "Lv1"
+      ],
+      "pot_max": 15,
+      "cut_max": 0.3,
+      "hmax_m": 6,
+      "niv_max": 1,
+      "avize": [
+        "Aviz Comisia de Versanți",
+        "Aviz Apele Române"
+      ],
       "interdictii": "ZA1 — interdicție definitivă; ZA2 — temporară",
       "ref": "UTR 11 — Rediu, RLU PUG 2011"
     },
     "12": {
-      "sat": "Rediu", "nr_utr": "12", "fn_dominanta": "Lv1",
+      "sat": "Rediu",
+      "nr_utr": "12",
+      "fn_dominanta": "Lv1",
       "denumire": "Locuințe individuale P pe versant abrupt — Rediu",
-      "subzone_admise": ["Lv1"],
-      "pot_max": 15, "cut_max": 0.30, "hmax_m": 6, "niv_max": 1,
-      "avize": ["Aviz Comisia de Versanți", "Studiu geotehnic"],
+      "subzone_admise": [
+        "Lv1"
+      ],
+      "pot_max": 15,
+      "cut_max": 0.3,
+      "hmax_m": 6,
+      "niv_max": 1,
+      "avize": [
+        "Aviz Comisia de Versanți",
+        "Studiu geotehnic"
+      ],
       "interdictii": "Risc ridicat de alunecare",
       "ref": "UTR 12 — Rediu, RLU PUG 2011"
     },
     "13": {
-      "sat": "Rediu", "nr_utr": "13", "fn_dominanta": "Lv1",
+      "sat": "Rediu",
+      "nr_utr": "13",
+      "fn_dominanta": "Lv1",
       "denumire": "Locuințe individuale P pe versant abrupt — Rediu",
-      "subzone_admise": ["Lv1"],
-      "pot_max": 15, "cut_max": 0.30, "hmax_m": 6, "niv_max": 1,
-      "avize": ["Aviz Comisia de Versanți"],
+      "subzone_admise": [
+        "Lv1"
+      ],
+      "pot_max": 15,
+      "cut_max": 0.3,
+      "hmax_m": 6,
+      "niv_max": 1,
+      "avize": [
+        "Aviz Comisia de Versanți"
+      ],
       "interdictii": "Risc alunecare; interdicție în ZA1",
       "ref": "UTR 13 — Rediu, RLU PUG 2011"
     },
     "14": {
-      "sat": "Rediu", "nr_utr": "14", "fn_dominanta": "ISt",
+      "sat": "Rediu",
+      "nr_utr": "14",
+      "fn_dominanta": "ISt",
       "denumire": "Agrement, turism, agroturism — Rediu",
-      "subzone_admise": ["ISt"],
-      "pot_max": 30, "cut_max": 0.90, "hmax_m": 9, "niv_max": 2,
-      "sup_min_mp": 150, "front_min_m": 8,
-      "avize": ["Aviz Apele Române", "Aviz mediu"],
+      "subzone_admise": [
+        "ISt"
+      ],
+      "pot_max": 30,
+      "cut_max": 0.9,
+      "hmax_m": 9,
+      "niv_max": 2,
+      "sup_min_mp": 150,
+      "front_min_m": 8,
+      "avize": [
+        "Aviz Apele Române",
+        "Aviz mediu"
+      ],
       "interdictii": "Fără construcții care nu au legătură cu turismul/agrementul",
       "ref": "UTR 14 — Rediu, RLU PUG 2011"
     },
     "15": {
-      "sat": "Rediu", "nr_utr": "15", "fn_dominanta": "ISsp",
+      "sat": "Rediu",
+      "nr_utr": "15",
+      "fn_dominanta": "ISsp",
       "denumire": "Teren sport și activități sportive — Rediu",
-      "subzone_admise": ["ISsp"],
-      "pot_max": 15, "cut_max": 0.30, "hmax_m": 6, "niv_max": 1,
-      "avize": ["Aviz mediu"],
+      "subzone_admise": [
+        "ISsp"
+      ],
+      "pot_max": 15,
+      "cut_max": 0.3,
+      "hmax_m": 6,
+      "niv_max": 1,
+      "avize": [
+        "Aviz mediu"
+      ],
       "interdictii": "Exclusiv sport și agrement",
       "ref": "UTR 15 — Rediu, RLU PUG 2011"
     },
     "16": {
-      "sat": "Rediu", "nr_utr": "16", "fn_dominanta": "GC",
+      "sat": "Rediu",
+      "nr_utr": "16",
+      "fn_dominanta": "GC",
       "denumire": "Cimitir — Rediu (zonă cu alunecări)",
-      "subzone_admise": ["GC"],
-      "pot_max": 30, "cut_max": 0.30, "hmax_m": 6, "niv_max": 1,
-      "avize": ["Aviz Comisia de Versanți"],
+      "subzone_admise": [
+        "GC"
+      ],
+      "pot_max": 30,
+      "cut_max": 0.3,
+      "hmax_m": 6,
+      "niv_max": 1,
+      "avize": [
+        "Aviz Comisia de Versanți"
+      ],
       "interdictii": "Exclusiv cimitir; protecție sanitară 50m; fără construcții noi fără aviz stabilitate",
       "ref": "UTR 16 — Rediu, RLU PUG 2011"
     },
     "17": {
-      "sat": "Rediu", "nr_utr": "17", "fn_dominanta": "BJ",
+      "sat": "Rediu",
+      "nr_utr": "17",
+      "fn_dominanta": "BJ",
       "denumire": "Zona Baraj Acumulare Rediu — ANA",
-      "subzone_admise": ["BJ"],
-      "pot_max": 30, "cut_max": 0.90, "hmax_m": 0, "niv_max": 0,
-      "avize": ["Aviz ANA (Apele Române)", "Aviz mediu"],
+      "subzone_admise": [
+        "BJ"
+      ],
+      "pot_max": 30,
+      "cut_max": 0.9,
+      "hmax_m": 0,
+      "niv_max": 0,
+      "avize": [
+        "Aviz ANA (Apele Române)",
+        "Aviz mediu"
+      ],
       "interdictii": "Exclusiv funcțiuni ANA; conform studii specialitate",
       "ref": "UTR 17 — Rediu, RLU PUG 2011"
     },
     "18": {
-      "sat": "Rediu", "nr_utr": "18", "fn_dominanta": "AI",
+      "sat": "Rediu",
+      "nr_utr": "18",
+      "fn_dominanta": "AI",
       "denumire": "Zona agro-industrială (fostă fermă dezafectată) — Rediu",
-      "subzone_admise": ["AI"],
-      "pot_max": 50, "cut_max": 1.00, "hmax_m": 6, "niv_max": 2,
-      "avize": ["Aviz mediu", "Aviz DSP", "Aviz Apele Române"],
+      "subzone_admise": [
+        "AI"
+      ],
+      "pot_max": 50,
+      "cut_max": 1.0,
+      "hmax_m": 6,
+      "niv_max": 2,
+      "avize": [
+        "Aviz mediu",
+        "Aviz DSP",
+        "Aviz Apele Române"
+      ],
       "interdictii": "Fără locuințe permanente; fără școli/servicii publice; activități nepoluante",
       "ref": "UTR 18 — Rediu, RLU PUG 2011"
     },
     "19": {
-      "sat": "Rediu", "nr_utr": "19", "fn_dominanta": "TE",
+      "sat": "Rediu",
+      "nr_utr": "19",
+      "fn_dominanta": "TE",
       "denumire": "Stație pompare ape uzate (propusă) — Rediu",
-      "subzone_admise": ["TE"],
-      "pot_max": 50, "cut_max": 0.50, "hmax_m": 6, "niv_max": 1,
-      "avize": ["Aviz Apele Române", "Aviz DSP"],
+      "subzone_admise": [
+        "TE"
+      ],
+      "pot_max": 50,
+      "cut_max": 0.5,
+      "hmax_m": 6,
+      "niv_max": 1,
+      "avize": [
+        "Aviz Apele Române",
+        "Aviz DSP"
+      ],
       "interdictii": "Exclusiv echipare tehnico-edilitară",
       "ref": "UTR 19 — Rediu, RLU PUG 2011"
     },
     "20": {
-      "sat": "Rediu", "nr_utr": "20", "fn_dominanta": "TE",
+      "sat": "Rediu",
+      "nr_utr": "20",
+      "fn_dominanta": "TE",
       "denumire": "Puț captare + stații pompare + rezervor (propuse) — Rediu",
-      "subzone_admise": ["TE"],
-      "pot_max": 50, "cut_max": 0.50, "hmax_m": 6, "niv_max": 1,
-      "avize": ["Aviz Apele Române", "Aviz DSP"],
+      "subzone_admise": [
+        "TE"
+      ],
+      "pot_max": 50,
+      "cut_max": 0.5,
+      "hmax_m": 6,
+      "niv_max": 1,
+      "avize": [
+        "Aviz Apele Române",
+        "Aviz DSP"
+      ],
       "interdictii": "Exclusiv alimentare cu apă",
       "ref": "UTR 20 — Rediu, RLU PUG 2011"
     },
     "21": {
-      "sat": "Breazu", "nr_utr": "21", "fn_dominanta": "Li2",
+      "sat": "Breazu",
+      "nr_utr": "21",
+      "fn_dominanta": "Li2",
       "denumire": "Locuințe individuale P-P+2 — Breazu (lângă DJ)",
-      "subzone_admise": ["Li2", "Li1"],
-      "pot_max": 30, "cut_max": 1.20, "hmax_m": 9, "niv_max": 3,
-      "sup_min_mp": 150, "front_min_m": 8,
+      "subzone_admise": [
+        "Li2",
+        "Li1"
+      ],
+      "pot_max": 30,
+      "cut_max": 1.2,
+      "hmax_m": 9,
+      "niv_max": 3,
+      "sup_min_mp": 150,
+      "front_min_m": 8,
       "aliniament_note": "Min 12m din axul DJ; aviz CNADNR",
-      "avize": ["Aviz CNADNR (drum județean)", "Aviz Comisia Versanți dacă ZA"],
+      "avize": [
+        "Aviz CNADNR (drum județean)",
+        "Aviz Comisia Versanți dacă ZA"
+      ],
       "interdictii": "Fără construcții în ZA1; ZA2 — interdicție temporară; ZI — interdicție umiditate",
       "ref": "UTR 21 — Breazu, RLU PUG 2011"
     },
     "22": {
-      "sat": "Breazu", "nr_utr": "22", "fn_dominanta": "Li1",
+      "sat": "Breazu",
+      "nr_utr": "22",
+      "fn_dominanta": "Li1",
       "denumire": "Locuințe individuale P-P+1 — Breazu",
-      "subzone_admise": ["Li1", "Li0"],
-      "pot_max": 30, "cut_max": 0.90, "hmax_m": 9, "niv_max": 2,
-      "sup_min_mp": 150, "front_min_m": 8,
-      "avize": ["Aviz Comisia Versanți dacă ZA"],
+      "subzone_admise": [
+        "Li1",
+        "Li0"
+      ],
+      "pot_max": 30,
+      "cut_max": 0.9,
+      "hmax_m": 9,
+      "niv_max": 2,
+      "sup_min_mp": 150,
+      "front_min_m": 8,
+      "avize": [
+        "Aviz Comisia Versanți dacă ZA"
+      ],
       "interdictii": "Fără construcții în ZA1; ZA2 — temporar",
       "ref": "UTR 22 — Breazu, RLU PUG 2011"
     },
     "23": {
-      "sat": "Breazu", "nr_utr": "23", "fn_dominanta": "Li0",
+      "sat": "Breazu",
+      "nr_utr": "23",
+      "fn_dominanta": "Li0",
       "denumire": "Locuințe individuale P (versant) — Breazu",
-      "subzone_admise": ["Li0"],
-      "pot_max": 30, "cut_max": 0.60, "hmax_m": 6, "niv_max": 1,
-      "avize": ["Aviz Comisia Versanți", "Studiu geotehnic"],
+      "subzone_admise": [
+        "Li0"
+      ],
+      "pot_max": 30,
+      "cut_max": 0.6,
+      "hmax_m": 6,
+      "niv_max": 1,
+      "avize": [
+        "Aviz Comisia Versanți",
+        "Studiu geotehnic"
+      ],
       "interdictii": "ZA1 — interdicție definitivă",
       "ref": "UTR 23 — Breazu, RLU PUG 2011"
     },
     "24": {
-      "sat": "Breazu", "nr_utr": "24", "fn_dominanta": "AI",
+      "sat": "Breazu",
+      "nr_utr": "24",
+      "fn_dominanta": "AI",
       "denumire": "Canton Silvic — Breazu",
-      "subzone_admise": ["AI"],
-      "pot_max": 30, "cut_max": 0.60, "hmax_m": 6, "niv_max": 1,
-      "avize": ["Aviz Romsilva"],
+      "subzone_admise": [
+        "AI"
+      ],
+      "pot_max": 30,
+      "cut_max": 0.6,
+      "hmax_m": 6,
+      "niv_max": 1,
+      "avize": [
+        "Aviz Romsilva"
+      ],
       "interdictii": "Menținere funcțiune silvică; etajări/mansardări permise",
       "ref": "UTR 24 — Breazu, RLU PUG 2011"
     },
     "25": {
-      "sat": "Breazu", "nr_utr": "25", "fn_dominanta": "AI",
+      "sat": "Breazu",
+      "nr_utr": "25",
+      "fn_dominanta": "AI",
       "denumire": "Zona agro-industrială (Stațiunea Didactică UASVM) — Breazu",
-      "subzone_admise": ["AI"],
-      "pot_max": 50, "cut_max": 1.00, "hmax_m": 6, "niv_max": 2,
-      "avize": ["Aviz CNADNR (DJ 282)", "Aviz mediu"],
+      "subzone_admise": [
+        "AI"
+      ],
+      "pot_max": 50,
+      "cut_max": 1.0,
+      "hmax_m": 6,
+      "niv_max": 2,
+      "avize": [
+        "Aviz CNADNR (DJ 282)",
+        "Aviz mediu"
+      ],
       "interdictii": "Activități legate de agricultură/cercetare; fără locuințe permanente",
       "ref": "UTR 25 — Breazu, RLU PUG 2011"
     },
     "26": {
-      "sat": "Breazu", "nr_utr": "26", "fn_dominanta": "AI",
+      "sat": "Breazu",
+      "nr_utr": "26",
+      "fn_dominanta": "AI",
       "denumire": "Microfermă zootehnică — Breazu",
-      "subzone_admise": ["AI"],
-      "pot_max": 50, "cut_max": 1.00, "hmax_m": 6, "niv_max": 2,
-      "avize": ["Aviz mediu", "Aviz DSP (zona sanitară)"],
+      "subzone_admise": [
+        "AI"
+      ],
+      "pot_max": 50,
+      "cut_max": 1.0,
+      "hmax_m": 6,
+      "niv_max": 2,
+      "avize": [
+        "Aviz mediu",
+        "Aviz DSP (zona sanitară)"
+      ],
       "interdictii": "Fără locuințe în zona de protecție sanitară",
       "ref": "UTR 26 — Breazu, RLU PUG 2011"
     },
     "27": {
-      "sat": "Breazu", "nr_utr": "27", "fn_dominanta": "GC",
+      "sat": "Breazu",
+      "nr_utr": "27",
+      "fn_dominanta": "GC",
       "denumire": "Cimitir — Breazu",
-      "subzone_admise": ["GC"],
-      "pot_max": 50, "cut_max": 0.50, "hmax_m": 6, "niv_max": 1,
+      "subzone_admise": [
+        "GC"
+      ],
+      "pot_max": 50,
+      "cut_max": 0.5,
+      "hmax_m": 6,
+      "niv_max": 1,
       "avize": [],
       "interdictii": "Exclusiv cimitir; protecție sanitară 50m",
       "ref": "UTR 27 — Breazu, RLU PUG 2011"
     },
     "28": {
-      "sat": "Breazu", "nr_utr": "28", "fn_dominanta": "TE",
+      "sat": "Breazu",
+      "nr_utr": "28",
+      "fn_dominanta": "TE",
       "denumire": "Rezervor înmagazinare (propus) — Breazu",
-      "subzone_admise": ["TE"],
-      "pot_max": 50, "cut_max": 0.50, "hmax_m": 6, "niv_max": 1,
-      "avize": ["Aviz Apele Române"],
+      "subzone_admise": [
+        "TE"
+      ],
+      "pot_max": 50,
+      "cut_max": 0.5,
+      "hmax_m": 6,
+      "niv_max": 1,
+      "avize": [
+        "Aviz Apele Române"
+      ],
       "interdictii": "Exclusiv echipare tehnico-edilitară",
       "ref": "UTR 28 — Breazu, RLU PUG 2011"
     },
     "29": {
-      "sat": "Horleșți", "nr_utr": "29", "fn_dominanta": "IS",
+      "sat": "Horleșți",
+      "nr_utr": "29",
+      "fn_dominanta": "IS",
       "denumire": "Zona centrală cu funcțiuni mixte — Horleșți",
-      "subzone_admise": ["IS", "Li2"],
-      "pot_max": 50, "cut_max": 1.50, "hmax_m": 12, "niv_max": 4,
-      "sup_min_mp": 200, "front_min_m": 10,
-      "avize": ["Aviz DSP", "Aviz Apele Române (pârâul Horleșți/Zahorna)"],
+      "subzone_admise": [
+        "IS",
+        "Li2"
+      ],
+      "pot_max": 50,
+      "cut_max": 1.5,
+      "hmax_m": 12,
+      "niv_max": 4,
+      "sup_min_mp": 200,
+      "front_min_m": 10,
+      "avize": [
+        "Aviz DSP",
+        "Aviz Apele Române (pârâul Horleșți/Zahorna)"
+      ],
       "interdictii": "Fără industriale; PUD pentru funcțiuni publice noi",
       "ref": "UTR 29 — Horleșți, RLU PUG 2011"
     },
     "30": {
-      "sat": "Horleșți", "nr_utr": "30", "fn_dominanta": "Li2",
+      "sat": "Horleșți",
+      "nr_utr": "30",
+      "fn_dominanta": "Li2",
       "denumire": "Locuințe individuale P-P+2 — Horleșți",
-      "subzone_admise": ["Li2", "Li1"],
-      "pot_max": 30, "cut_max": 1.20, "hmax_m": 9, "niv_max": 3,
-      "sup_min_mp": 150, "front_min_m": 8,
+      "subzone_admise": [
+        "Li2",
+        "Li1"
+      ],
+      "pot_max": 30,
+      "cut_max": 1.2,
+      "hmax_m": 9,
+      "niv_max": 3,
+      "sup_min_mp": 150,
+      "front_min_m": 8,
       "avize": [],
       "interdictii": "Fără industriale; fără construcții în ZA1",
       "ref": "UTR 30 — Horleșți, RLU PUG 2011"
     },
     "35": {
-      "sat": "Horleșți", "nr_utr": "35", "fn_dominanta": "Lv1",
+      "sat": "Horleșți",
+      "nr_utr": "35",
+      "fn_dominanta": "Lv1",
       "denumire": "Locuințe individuale P pe versant abrupt — Horleșți",
-      "subzone_admise": ["Lv1"],
-      "pot_max": 15, "cut_max": 0.30, "hmax_m": 6, "niv_max": 1,
-      "avize": ["Aviz Comisia de Versanți — OBLIGATORIU", "Studiu geotehnic"],
+      "subzone_admise": [
+        "Lv1"
+      ],
+      "pot_max": 15,
+      "cut_max": 0.3,
+      "hmax_m": 6,
+      "niv_max": 1,
+      "avize": [
+        "Aviz Comisia de Versanți — OBLIGATORIU",
+        "Studiu geotehnic"
+      ],
       "interdictii": "ZA1 — interdicție definitivă; risc major alunecare",
       "ref": "UTR 35 — Horleșți, RLU PUG 2011"
     },
     "36": {
-      "sat": "Horleșți", "nr_utr": "36", "fn_dominanta": "Lv1",
+      "sat": "Horleșți",
+      "nr_utr": "36",
+      "fn_dominanta": "Lv1",
       "denumire": "Locuințe individuale P pe versant abrupt — Horleșți",
-      "subzone_admise": ["Lv1"],
-      "pot_max": 15, "cut_max": 0.30, "hmax_m": 6, "niv_max": 1,
-      "avize": ["Aviz Comisia de Versanți", "Studiu geotehnic"],
+      "subzone_admise": [
+        "Lv1"
+      ],
+      "pot_max": 15,
+      "cut_max": 0.3,
+      "hmax_m": 6,
+      "niv_max": 1,
+      "avize": [
+        "Aviz Comisia de Versanți",
+        "Studiu geotehnic"
+      ],
       "interdictii": "ZA1 — interdicție definitivă",
       "ref": "UTR 36 — Horleșți, RLU PUG 2011"
     },
     "37": {
-      "sat": "Horleșți", "nr_utr": "37", "fn_dominanta": "Lv1",
+      "sat": "Horleșți",
+      "nr_utr": "37",
+      "fn_dominanta": "Lv1",
       "denumire": "Locuințe individuale P pe versant abrupt — Horleșți",
-      "subzone_admise": ["Lv1"],
-      "pot_max": 15, "cut_max": 0.30, "hmax_m": 6, "niv_max": 1,
-      "avize": ["Aviz Comisia de Versanți", "Studiu geotehnic"],
+      "subzone_admise": [
+        "Lv1"
+      ],
+      "pot_max": 15,
+      "cut_max": 0.3,
+      "hmax_m": 6,
+      "niv_max": 1,
+      "avize": [
+        "Aviz Comisia de Versanți",
+        "Studiu geotehnic"
+      ],
       "interdictii": "ZA1 — interdicție definitivă",
       "ref": "UTR 37 — Horleșți, RLU PUG 2011"
     },
     "38": {
-      "sat": "Horleșți", "nr_utr": "38", "fn_dominanta": "AI",
+      "sat": "Horleșți",
+      "nr_utr": "38",
+      "fn_dominanta": "AI",
       "denumire": "Zona agro-industrială — Horleșți",
-      "subzone_admise": ["AI"],
-      "pot_max": 50, "cut_max": 1.00, "hmax_m": 6, "niv_max": 2,
-      "avize": ["Aviz mediu", "Aviz DSP"],
+      "subzone_admise": [
+        "AI"
+      ],
+      "pot_max": 50,
+      "cut_max": 1.0,
+      "hmax_m": 6,
+      "niv_max": 2,
+      "avize": [
+        "Aviz mediu",
+        "Aviz DSP"
+      ],
       "interdictii": "Fără locuințe permanente; activități nepoluante",
       "ref": "UTR 38 — Horleșți, RLU PUG 2011"
     },
     "39": {
-      "sat": "Horleșți", "nr_utr": "39", "fn_dominanta": "GC",
+      "sat": "Horleșți",
+      "nr_utr": "39",
+      "fn_dominanta": "GC",
       "denumire": "Cimitir — Horleșți",
-      "subzone_admise": ["GC"],
-      "pot_max": 50, "cut_max": 0.50, "hmax_m": 6, "niv_max": 1,
+      "subzone_admise": [
+        "GC"
+      ],
+      "pot_max": 50,
+      "cut_max": 0.5,
+      "hmax_m": 6,
+      "niv_max": 1,
       "avize": [],
       "interdictii": "Exclusiv cimitir; protecție sanitară 50m",
       "ref": "UTR 39 — Horleșți, RLU PUG 2011"
     },
     "40": {
-      "sat": "Horleșți", "nr_utr": "40", "fn_dominanta": "TE",
+      "sat": "Horleșți",
+      "nr_utr": "40",
+      "fn_dominanta": "TE",
       "denumire": "Echipare tehnico-edilitară — Horleșți",
-      "subzone_admise": ["TE"],
-      "pot_max": 50, "cut_max": 0.50, "hmax_m": 6, "niv_max": 1,
-      "avize": ["Aviz Apele Române"],
+      "subzone_admise": [
+        "TE"
+      ],
+      "pot_max": 50,
+      "cut_max": 0.5,
+      "hmax_m": 6,
+      "niv_max": 1,
+      "avize": [
+        "Aviz Apele Române"
+      ],
       "interdictii": "Exclusiv funcțiuni edilitare",
       "ref": "UTR 40-41 — Horleșți, RLU PUG 2011"
     },
     "42": {
-      "sat": "Tăutești", "nr_utr": "42", "fn_dominanta": "IS",
+      "sat": "Tăutești",
+      "nr_utr": "42",
+      "fn_dominanta": "IS",
       "denumire": "Zona centrală cu funcțiuni mixte — Tăutești",
-      "subzone_admise": ["IS", "Li2"],
-      "pot_max": 50, "cut_max": 1.50, "hmax_m": 12, "niv_max": 4,
-      "sup_min_mp": 200, "front_min_m": 10,
-      "avize": ["Aviz DSP", "Aviz Apele Române"],
+      "subzone_admise": [
+        "IS",
+        "Li2"
+      ],
+      "pot_max": 50,
+      "cut_max": 1.5,
+      "hmax_m": 12,
+      "niv_max": 4,
+      "sup_min_mp": 200,
+      "front_min_m": 10,
+      "avize": [
+        "Aviz DSP",
+        "Aviz Apele Române"
+      ],
       "interdictii": "Fără industriale; PUD pentru funcțiuni publice noi",
       "ref": "UTR 42 — Tăutești, RLU PUG 2011"
     },
     "43": {
-      "sat": "Tăutești", "nr_utr": "43", "fn_dominanta": "Li1",
+      "sat": "Tăutești",
+      "nr_utr": "43",
+      "fn_dominanta": "Li1",
       "denumire": "Locuințe individuale P-P+1 — Tăutești",
-      "subzone_admise": ["Li1", "Li2"],
-      "pot_max": 30, "cut_max": 0.90, "hmax_m": 9, "niv_max": 2,
-      "sup_min_mp": 150, "front_min_m": 8,
+      "subzone_admise": [
+        "Li1",
+        "Li2"
+      ],
+      "pot_max": 30,
+      "cut_max": 0.9,
+      "hmax_m": 9,
+      "niv_max": 2,
+      "sup_min_mp": 150,
+      "front_min_m": 8,
       "avize": [],
       "interdictii": "Fără industriale",
       "ref": "UTR 43 — Tăutești, RLU PUG 2011"
     },
     "44": {
-      "sat": "Tăutești", "nr_utr": "44", "fn_dominanta": "Li1",
+      "sat": "Tăutești",
+      "nr_utr": "44",
+      "fn_dominanta": "Li1",
       "denumire": "Locuințe individuale P-P+1 — Tăutești",
-      "subzone_admise": ["Li1"],
-      "pot_max": 30, "cut_max": 0.90, "hmax_m": 9, "niv_max": 2,
-      "sup_min_mp": 150, "front_min_m": 8,
+      "subzone_admise": [
+        "Li1"
+      ],
+      "pot_max": 30,
+      "cut_max": 0.9,
+      "hmax_m": 9,
+      "niv_max": 2,
+      "sup_min_mp": 150,
+      "front_min_m": 8,
       "avize": [],
       "interdictii": "Fără industriale",
       "ref": "UTR 44 — Tăutești, RLU PUG 2011"
     },
     "45": {
-      "sat": "Tăutești", "nr_utr": "45", "fn_dominanta": "Lv2",
+      "sat": "Tăutești",
+      "nr_utr": "45",
+      "fn_dominanta": "Lv2",
       "denumire": "Locuințe individuale P-P+1 pe versant/inundabilitate — Tăutești",
-      "subzone_admise": ["Lv2"],
-      "pot_max": 20, "cut_max": 0.60, "hmax_m": 6, "niv_max": 2,
-      "avize": ["Aviz Comisia de Versanți", "Aviz Apele Române"],
+      "subzone_admise": [
+        "Lv2"
+      ],
+      "pot_max": 20,
+      "cut_max": 0.6,
+      "hmax_m": 6,
+      "niv_max": 2,
+      "avize": [
+        "Aviz Comisia de Versanți",
+        "Aviz Apele Române"
+      ],
       "interdictii": "ZA2 — temporar; ZI — interdicție umiditate excesivă",
       "ref": "UTR 45 — Tăutești, RLU PUG 2011"
     },
     "46": {
-      "sat": "Tăutești", "nr_utr": "46", "fn_dominanta": "AI",
+      "sat": "Tăutești",
+      "nr_utr": "46",
+      "fn_dominanta": "AI",
       "denumire": "Zona agro-industrială — Tăutești",
-      "subzone_admise": ["AI"],
-      "pot_max": 50, "cut_max": 0.50, "hmax_m": 6, "niv_max": 2,
-      "avize": ["Aviz mediu", "Aviz DSP"],
+      "subzone_admise": [
+        "AI"
+      ],
+      "pot_max": 50,
+      "cut_max": 0.5,
+      "hmax_m": 6,
+      "niv_max": 2,
+      "avize": [
+        "Aviz mediu",
+        "Aviz DSP"
+      ],
       "interdictii": "Fără locuințe permanente",
       "ref": "UTR 46 — Tăutești, RLU PUG 2011"
     },
     "47": {
-      "sat": "Tăutești", "nr_utr": "47", "fn_dominanta": "TE",
+      "sat": "Tăutești",
+      "nr_utr": "47",
+      "fn_dominanta": "TE",
       "denumire": "Echipare tehnico-edilitară — Tăutești",
-      "subzone_admise": ["TE"],
-      "pot_max": 50, "cut_max": 0.50, "hmax_m": 6, "niv_max": 1,
-      "avize": ["Aviz Apele Române"],
+      "subzone_admise": [
+        "TE"
+      ],
+      "pot_max": 50,
+      "cut_max": 0.5,
+      "hmax_m": 6,
+      "niv_max": 1,
+      "avize": [
+        "Aviz Apele Române"
+      ],
       "interdictii": "Exclusiv funcțiuni edilitare",
       "ref": "UTR 47-48 — Tăutești, RLU PUG 2011"
     }
