@@ -7,7 +7,7 @@
     "data_generare": "2026-06-04",
     "generare_nota": "Generat din RLU Vaslui Vol.II — 44 UTR-uri, 10 trupuri, zone funcționale: L/IS/ID/A/SP/GC/TE/SI",
     "seismic": {
-      "ag": 0.30,
+      "ag": 0.3,
       "Tc": 1.0,
       "zona": "C",
       "nota": "P100-1/2013 — Vaslui zona seismică C, ag=0.30g, Tc=1.0s"
@@ -29,13 +29,43 @@
       "niv_max": 7,
       "regim": "P+2-P+6",
       "spatii_verzi_pct": 10,
-      "parcaje_min": "1 loc/100mp Adc funcțiuni publice",
+      "parcaje_min": "1 loc/5 salariați + 60% public (administrative); 1 loc/200mp ADC (comerciale <400mp)",
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "aliniament_note": "aliniere la frontul existent sau conf. PUZ+R aprobat",
       "ref_vol1": "Cap.IV — IS Zona pentru instituții și servicii — ISM/ISR",
-      "fn_complementare": ["comerț", "servicii", "birouri", "cultură", "turism"],
-      "fn_interzise": ["industrie", "depozitare", "agricultură", "construcții provizorii"]
+      "fn_complementare": [
+        "comerț",
+        "servicii",
+        "birouri",
+        "cultură",
+        "turism"
+      ],
+      "fn_interzise": [
+        "industrie",
+        "depozitare",
+        "agricultură",
+        "construcții provizorii"
+      ],
+      "rf": 0.0,
+      "rl": 3.0,
+      "rs": 3.0,
+      "retragere_fata": "retragerea este permisă numai dacă se respectă coerența și caracterul fronturilor stradale; pe aliniament cu înălțimea ≤ distanța față de aliniamentul opus (RLU CC, Amplasare față de aliniament)",
+      "retragere_laterala": "distanță de minim 1,90m între fațade cu ferestre/balcoane și limita proprietății vecine; H/2 față de limitele parcelei, min. 3,0m (RLU CC)",
+      "retragere_spate": "H/2 față de limita posterioară, min. 3,0m (RLU CC)",
+      "parcaje": "1 loc/5 salariați + 60% public (administrative); 1 loc/200mp ADC (comerciale <400mp); 1 loc/5-10 locuri la masă (restaurante); 1 loc/5 angajați (sănătate) (RLU CC — IS, Parcaje)",
+      "utilizari_admise": [
+        "Funcțiuni de interes public, administrative, comerciale, servicii",
+        "Instituții publice: comerț, hoteluri, restaurante, servicii financiar-bancare",
+        "Comerț la parterul blocurilor; locuire la etajele superioare",
+        "Dotări de interes general (piață agroalimentară)"
+      ],
+      "utilizari_interzise": [
+        "Activități productive poluante, cu risc tehnologic",
+        "Construcții incompatibile cu funcția centrului civic",
+        "Depozitare en-gros; construcții provizorii"
+      ],
+      "note": "CC — Centru Civic Vaslui (ansambluri colective P+8-P+10 + instituții). POT=50-70% (max 70% din JSON). CUT=5,5-7,7 din RLU (IMG 022) — JSON are CUT=2,5 mai restrictiv, menținut. hmax=24m (niv=7). rf=0 (se amplasează pe aliniament)."
     },
     "CM": {
       "denumire": "Zona Centrală Extinsă — Funcțiuni Mixte",
@@ -48,13 +78,40 @@
       "niv_max": 5,
       "regim": "P+1-P+4",
       "spatii_verzi_pct": 10,
-      "parcaje_min": "1 loc/apartament; 1 loc/100mp funcțiuni terțiare",
+      "parcaje_min": "1 loc/200mp ADC (comerciale); 1 loc/10-40 salariați (administrative)",
       "suprafata_min_mp": 300,
       "lung_min_aliniament_m": 10.0,
       "aliniament_note": "retragere max 3m față de aliniament în zonele compacte",
       "ref_vol1": "Cap.IV — IS zona centrală extinsă mixtă",
-      "fn_complementare": ["locuire colectivă", "comerț", "servicii", "birouri"],
-      "fn_interzise": ["industrie grea", "depozitare en-gros", "activități poluante"]
+      "fn_complementare": [
+        "locuire colectivă",
+        "comerț",
+        "servicii",
+        "birouri"
+      ],
+      "fn_interzise": [
+        "industrie grea",
+        "depozitare en-gros",
+        "activități poluante"
+      ],
+      "rf": 6.0,
+      "rl": 3.0,
+      "rs": 3.0,
+      "retragere_fata": "min. 6,00m față de aliniamentul general stabilit (RLU CM/IS — Amplasare față de aliniament)",
+      "retragere_laterala": "cu respectarea distanțelor minime obligatorii față de limitele laterale; H/2 față de limite, min. 3,0m (RLU CM)",
+      "retragere_spate": "cu respectarea distanțelor minime obligatorii față de limita posterioară, min. 3,0m (RLU CM)",
+      "parcaje": "1 loc/200mp ADC (comerciale <400mp); 1 loc/10-40 salariați (administrative); 1 loc/5-10 locuri la masă (restaurante); parcaje separate consum/personal/aprovizionare (RLU CM/IS, Parcaje)",
+      "utilizari_admise": [
+        "Construcții de noi instituții de interes public; dezvoltarea și modernizarea celor existente",
+        "Comerț, cultură, sănătate, servicii de interes general",
+        "Regim de înălțime maxim admis: P-P+2E (ISL) sau P+1-P+4 (CC/CM)"
+      ],
+      "utilizari_interzise": [
+        "Construcția de locuințe",
+        "Activități productive, construcții provizorii, depozitare en-gros",
+        "Orice construcție fără PUZ pe terenurile delimitate pentru instituții publice noi"
+      ],
+      "note": "CM — Zona Mixtă Comercial-Instituții Vaslui. POT=40-70% (max 65% din JSON) CUT=1,2-2,1 din RLU (IMG 036) — JSON are CUT=2,0. hmax=18m (niv=5). rf=6m explicit din RLU (ISL/IS). regim P+1-P+4."
     },
     "LA": {
       "denumire": "Locuințe Colective Mari — P+8÷P+10",
@@ -67,13 +124,49 @@
       "niv_max": 11,
       "regim": "P+8-P+10",
       "spatii_verzi_pct": 20,
-      "parcaje_min": "1 loc/apartament",
+      "parcaje_min": "1 loc/1-5 locuințe unifamiliale; 60-100% garaje din total; nu se recomandă împrejmuiri",
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "aliniament_note": "conf. PUZ+R; retrageri minime 10m față de stradă",
       "ref_vol1": "Cap.IV — L zona locuințe — LA ansambluri noi colective mari",
-      "fn_complementare": ["comerț parter max 200mp Adc", "grădinițe", "dispensare"],
-      "fn_interzise": ["industrie", "servicii auto", "depozitare", "construcții provizorii"]
+      "fn_complementare": [
+        "comerț parter max 200mp Adc",
+        "grădinițe",
+        "dispensare"
+      ],
+      "fn_interzise": [
+        "industrie",
+        "servicii auto",
+        "depozitare",
+        "construcții provizorii"
+      ],
+      "rf": 0.0,
+      "rl": 3.0,
+      "rs": 3.0,
+      "retragere_fata": "retragerea este permisă numai dacă se respectă coerența și caracterul fronturilor stradale; se menține distanța de min. 1,90m față de limita proprietății vecine (RLU LA, Amplasare față de aliniament)",
+      "retragere_laterala": "distanță de minim 1,90m față de limita proprietății vecine cu ferestre/balcoane; H/2 min. 3,0m față de limitele parcelei (RLU LA)",
+      "retragere_spate": "H/2 față de limita posterioară, min. 3,0m (RLU LA)",
+      "parcaje": "Câte un loc de parcare la 1-5 locuințe unifamiliale în funcție de gradul de motorizare; 60-100% garaje din total; nu se recomandă realizarea de împrejmuiri (RLU LA, Parcaje)",
+      "utilizari_admise": [
+        "Construcții aferente echipării tehnico-edilitare; lucrări noi și reabilitare",
+        "Amenajări aferente locuințelor: parcaje, garaje, spații plantate, locuri de joacă",
+        "Echipamente publice la nivel rezidențial: creșă, grădinițe, școli, dispensare, biserici parohiale",
+        "Conversia locuințelor de la parter în spații comerciale/birouri (fără afectarea locuirii)",
+        "Plombarea spațiilor dintre blocuri la parter/mezanin pentru front stradal"
+      ],
+      "utilizari_interzise": [
+        "Activități productive poluante, cu risc tehnologic sau incomode prin traficul generat (>5 autovehicole mici/zi)",
+        "Construcții provizorii de orice natură",
+        "Depozitare en-gros; depozitări materiale refolosibile; platforme precolectare deșeuri urbane",
+        "Depozitarea substanțelor inflamabile/toxice în cantități mari",
+        "Activități care utilizează terenul vizibil din circulațiile publice pentru depozitare/producție",
+        "Lucrări de terasament care provoacă scurgerea necontrolată a apelor meteorice",
+        "Construcții în zona de protecție a cimitirului (50m perimetral)",
+        "Construcții în culoarul LEA 20kV (24m — 12m din ax) și LEA 110kV (36m — 18m din ax)",
+        "Realizarea de locuințe unifamiliale pe terenuri proprietate în această subzonă",
+        "Subîmpărțirea în parcele pentru locuințe individuale"
+      ],
+      "note": "LA — Ansambluri colective mari P+8-P+10 Vaslui. POT=50-70% (JSON are 22% — valoare subestimată față de RLU; valoarea RLU pentru LA este 50-70%). CUT=5,5-7,7 din RLU (JSON 1,8 mai restrictiv, menținut). hmax=35m (niv=11). rf=0 (blocuri pe aliniament)."
     },
     "LB": {
       "denumire": "Locuințe Colective Medii — P+4",
@@ -86,13 +179,43 @@
       "niv_max": 5,
       "regim": "P+3-P+5",
       "spatii_verzi_pct": 20,
-      "parcaje_min": "1 loc/apartament",
+      "parcaje_min": "studiu posibilitate parcaje separate locuințe/instituții publice",
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "aliniament_note": "retragere min 5m față de stradă",
       "ref_vol1": "Cap.IV — L zona locuințe — LB colective mijlocii P+4",
-      "fn_complementare": ["comerț parter max 200mp Adc", "servicii cartier"],
-      "fn_interzise": ["industrie", "activități productive poluante", "construcții provizorii"]
+      "fn_complementare": [
+        "comerț parter max 200mp Adc",
+        "servicii cartier"
+      ],
+      "fn_interzise": [
+        "industrie",
+        "activități productive poluante",
+        "construcții provizorii"
+      ],
+      "rf": 0.0,
+      "rl": 3.0,
+      "rs": 3.0,
+      "retragere_fata": "retragerea este permisă numai dacă se respectă coerența și caracterul fronturilor stradale; distanță de min. 1,90m față de limita proprietății (RLU LB)",
+      "retragere_laterala": "distanță de minim 1,90m față de limita proprietății vecine cu ferestre/balcoane; H/2 min. 3,0m (RLU LB)",
+      "retragere_spate": "H/2 față de limita posterioară, min. 3,0m (RLU LB)",
+      "parcaje": "Studiu posibilitate parcaje separate locuințe și instituții; 1 loc/1-5 locuințe unifamiliale; 10-40 autoturisme/instituție funcție de salariați; 60-100% garaje din total locuri (RLU LB, Parcaje)",
+      "utilizari_admise": [
+        "Locuințe colective medii P+4 (modernizări, renovări, reconversii parterul blocurilor)",
+        "Realizarea unor dotări (sănătate, învățământ) pe terenurile puse în posesie",
+        "Comerț și servicii care nu afectează funcția dominantă"
+      ],
+      "utilizari_interzise": [
+        "Activități productive poluante, cu risc tehnologic sau incomode prin traficul generat (>5 autovehicole mici/zi)",
+        "Construcții provizorii de orice natură",
+        "Depozitare en-gros; depozitări materiale refolosibile; platforme precolectare deșeuri urbane",
+        "Depozitarea substanțelor inflamabile/toxice în cantități mari",
+        "Activități care utilizează terenul vizibil din circulațiile publice pentru depozitare/producție",
+        "Lucrări de terasament care provoacă scurgerea necontrolată a apelor meteorice",
+        "Construcții în zona de protecție a cimitirului (50m perimetral)",
+        "Construcții în culoarul LEA 20kV (24m — 12m din ax) și LEA 110kV (36m — 18m din ax)"
+      ],
+      "note": "LB — Locuințe colective mijlocii P+4 Vaslui. POT=30-50% (max; JSON are 30%) CUT=1,5-2,5 (JSON are 1,5). hmax=17m (niv=5). Ansambluri uzate fizic/moral (>30 ani). rf=0."
     },
     "LC": {
       "denumire": "Locuințe Individuale și Colective Mici — P+1-2",
@@ -105,14 +228,49 @@
       "niv_max": 3,
       "regim": "P+1-P+2",
       "spatii_verzi_pct": 20,
-      "parcaje_min": "1 loc/locuință pe parcelă",
+      "parcaje_min": "1 loc/1-5 locuințe unifamiliale; 60-100% garaje din total",
       "suprafata_min_mp": 200,
       "lung_min_aliniament_m": 8.0,
       "adancime_min_m": 15.0,
       "aliniament_note": "aliniere la frontul existent; retragere 1-5.5m conf. profil stradal",
       "ref_vol1": "Cap.IV — L zona locuințe — LC individuale și colective mici",
-      "fn_complementare": ["comerț max 200mp Adc", "servicii profesionale", "grădinițe"],
-      "fn_interzise": ["industrie", "activități productive poluante", "service auto", "depozitare en-gros"]
+      "fn_complementare": [
+        "comerț max 200mp Adc",
+        "servicii profesionale",
+        "grădinițe"
+      ],
+      "fn_interzise": [
+        "industrie",
+        "activități productive poluante",
+        "service auto",
+        "depozitare en-gros"
+      ],
+      "rf": 6.0,
+      "rl": 3.0,
+      "rs": 3.0,
+      "retragere_fata": "min. 6,00m față de aliniamentul general (LC 10,12,16,17,23); min. 8,00m în alte subunități LC; clădirile pe aliniament cu înălțimea ≤ distanța față de aliniamentul opus (RLU LC, Art. Amplasare față de aliniament)",
+      "retragere_laterala": "în cazul retragerilor de la aliniament: min. 4,00m (RLU LC); H/2 față de limitele parcelei, min. 3,0m (RLU LC, Forma și dimensiunile)",
+      "retragere_spate": "H/2 față de limita posterioară, min. 3,0m (RLU LC)",
+      "parcaje": "1 loc/1-5 locuințe unifamiliale; 60-100% garaje din total; stationare numai în interiorul parcelei (RLU LC, Parcaje)",
+      "utilizari_admise": [
+        "Locuințe individuale și colective mici P+1-2, izolate/cuplate",
+        "Echipamente publice la nivel rezidențial",
+        "Comerț, servicii, meșteșuguri care nu afectează funcția dominantă (max. 200mp ADC)",
+        "Mansardare admisă (CUT + 60% din aria unui nivel curent)"
+      ],
+      "utilizari_interzise": [
+        "Activități productive poluante, cu risc tehnologic sau incomode prin traficul generat (>5 autovehicole mici/zi)",
+        "Construcții provizorii de orice natură",
+        "Depozitare en-gros; depozitări materiale refolosibile; platforme precolectare deșeuri urbane",
+        "Depozitarea substanțelor inflamabile/toxice în cantități mari",
+        "Activități care utilizează terenul vizibil din circulațiile publice pentru depozitare/producție",
+        "Lucrări de terasament care provoacă scurgerea necontrolată a apelor meteorice",
+        "Construcții în zona de protecție a cimitirului (50m perimetral)",
+        "Construcții în culoarul LEA 20kV (24m — 12m din ax) și LEA 110kV (36m — 18m din ax)",
+        "Funcțiuni comerciale și servicii >200mp ADC care generează trafic important sau poluare",
+        "Service auto"
+      ],
+      "note": "LC — Locuințe individuale și colective mici P+1-2 Vaslui. POT=30-40% CUT=0,35-1,75 (JSON are POT=35% CUT=0,9). hmax=12m parțial 15m (JSON 9m). rf=6m (min. 8m în unele subunități) confirmat RLU IMG 025."
     },
     "Li": {
       "denumire": "Locuințe Individuale — P+1-2 (tip LL/LV)",
@@ -125,14 +283,39 @@
       "niv_max": 3,
       "regim": "P+1-P+2",
       "spatii_verzi_pct": 20,
-      "parcaje_min": "1 loc/locuință pe parcelă",
+      "parcaje_min": "1 loc/1-5 locuințe unifamiliale; 60-100% garaje din total",
       "suprafata_min_mp": 200,
       "lung_min_aliniament_m": 8.0,
       "adancime_min_m": 12.0,
       "aliniament_note": "8m față de axul drumului pentru stradă neclasată",
       "ref_vol1": "Cap.IV — L zona locuințe — LL/LV lotizări anterioare sau versanți",
-      "fn_complementare": ["comerț max 200mp Adc", "servicii profesionale"],
-      "fn_interzise": ["industrie", "activități productive poluante", "construcții provizorii", "depozitare"]
+      "fn_complementare": [
+        "comerț max 200mp Adc",
+        "servicii profesionale"
+      ],
+      "fn_interzise": [
+        "industrie",
+        "activități productive poluante",
+        "construcții provizorii",
+        "depozitare"
+      ],
+      "rf": 4.0,
+      "rl": 3.0,
+      "rs": 3.0,
+      "retragere_fata": "min. 4,00m de la aliniament (RLU LI — LC condiții similare); retragerea este permisă numai dacă se respectă coerența fronturilor (RLU Li)",
+      "retragere_laterala": "H/2 față de limitele parcelei, min. 1,90m față de limita cu ferestre a proprietății vecine (RLU Li)",
+      "retragere_spate": "H/2 față de limita posterioară, min. 3,0m (RLU Li)",
+      "parcaje": "1 loc/1-5 locuințe unifamiliale; propunere dezafectare în timp — până la dezafectare se aplică condițiile LC (RLU Li)",
+      "utilizari_admise": [
+        "LI — intervenții minore pentru păstrarea calității locuirii până la dezafectare",
+        "Locuințe individuale mici cu regim de construire discontinuu P-P+1"
+      ],
+      "utilizari_interzise": [
+        "Orice construcții noi în zona de protecție față de culoarele tehnice și CF/cimitire",
+        "Activități incompatibile cu funcția de locuire",
+        "Orice investiție majoră dată propunerea de dezafectare a zonei"
+      ],
+      "note": "Li — Zone izolate în extinție cu locuințe individuale mici Vaslui. POT=15% CUT=0,45-0,6 confirmate RLU IMG 031. hmax=6m parțial 9m. JSON are POT=35% CUT=0,9 — s-au păstrat valorile din JSON (mai permisive, RLU permite până la dezafectare). Se propune dezafectare și transformare în spațiu de parcare (80% din suprafață)."
     },
     "Lc": {
       "denumire": "Locuințe Colective — P+3÷P+8",
@@ -145,13 +328,46 @@
       "niv_max": 9,
       "regim": "P+3-P+8",
       "spatii_verzi_pct": 20,
-      "parcaje_min": "1 loc/apartament",
+      "parcaje_min": "studiu realizare spații parcare separate locuințe/instituții",
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "aliniament_note": "retragere min 5m față de stradă; conf. PUZ+R",
       "ref_vol1": "Cap.IV — L zona locuințe colective medii-mari",
-      "fn_complementare": ["comerț parter", "servicii cartier", "dotări sociale"],
-      "fn_interzise": ["industrie", "activități productive poluante"]
+      "fn_complementare": [
+        "comerț parter",
+        "servicii cartier",
+        "dotări sociale"
+      ],
+      "fn_interzise": [
+        "industrie",
+        "activități productive poluante"
+      ],
+      "rf": 0.0,
+      "rl": 3.0,
+      "rs": 3.0,
+      "retragere_fata": "retragerea este permisă numai dacă se respectă coerența și caracterul fronturilor stradale; distanță de min. 1,90m față de limita proprietății (RLU Lc)",
+      "retragere_laterala": "distanță de minim 1,90m față de limita proprietății vecine cu ferestre/balcoane; H/2 min. 3,0m (RLU Lc)",
+      "retragere_spate": "H/2 față de limita posterioară, min. 3,0m (RLU Lc)",
+      "parcaje": "Studiu realizare spații parcare separate; nu se permit împărțiri ale subzonei; 1 loc/1-5 locuințe (RLU Lc)",
+      "utilizari_admise": [
+        "Locuințe colective P+3 cu comerț, servicii sau echipări la nivel rezidențial la parter",
+        "Locuințe individuale, mici, izolate și/sau cuplate",
+        "Echipamente publice de nivel rezidențial",
+        "Modernizări, renovări, reconversii care să confere un caracter unitar"
+      ],
+      "utilizari_interzise": [
+        "Activități productive poluante, cu risc tehnologic sau incomode prin traficul generat (>5 autovehicole mici/zi)",
+        "Construcții provizorii de orice natură",
+        "Depozitare en-gros; depozitări materiale refolosibile; platforme precolectare deșeuri urbane",
+        "Depozitarea substanțelor inflamabile/toxice în cantități mari",
+        "Activități care utilizează terenul vizibil din circulațiile publice pentru depozitare/producție",
+        "Lucrări de terasament care provoacă scurgerea necontrolată a apelor meteorice",
+        "Construcții în zona de protecție a cimitirului (50m perimetral)",
+        "Construcții în culoarul LEA 20kV (24m — 12m din ax) și LEA 110kV (36m — 18m din ax)",
+        "Subîmpărțirea subzonei",
+        "Construcții care depreciază valoarea peisajului prin aspect arhitectural"
+      ],
+      "note": "Lc — Locuințe colective zona centrală Vaslui (P+3 cu servicii la parter). POT=30-50% CUT=1,5-2,5 din RLU (IMG 024). JSON are POT=22% CUT=1,5 — s-au păstrat din JSON (mai restrictive). hmax=28m (niv=9 conform JSON — include accente)."
     },
     "AP": {
       "denumire": "Zona Activități Productive — Industrie Mică, Depozitare, Servicii",
@@ -164,13 +380,40 @@
       "niv_max": 3,
       "regim": "P-P+2",
       "spatii_verzi_pct": 20,
-      "parcaje_min": "1 loc/100mp Adc; min 100 locuri pentru obiective noi",
+      "parcaje_min": "stationare în interiorul incintei; trasee agabaritice; max. 40% din retragere față aliniament rezervat parcajelor",
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "aliniament_note": "perdea vegetală min 30m față de zone rezidențiale",
       "ref_vol1": "Cap.IV — ID zona activități productive — ID3/ID4",
-      "fn_complementare": ["servicii comerciale", "birouri", "depozitare"],
-      "fn_interzise": ["locuire", "instituții publice sensibile", "industrie grea poluantă"]
+      "fn_complementare": [
+        "servicii comerciale",
+        "birouri",
+        "depozitare"
+      ],
+      "fn_interzise": [
+        "locuire",
+        "instituții publice sensibile",
+        "industrie grea poluantă"
+      ],
+      "rf": 10.0,
+      "rl": 5.0,
+      "rs": 3.0,
+      "retragere_fata": "se vor preciza retragerile de la aliniamente spre străzile perimetrale/interioare; obligatoriu >10m pe str. cat.II și >6m pe str. cat.III (RLU AP/ID)",
+      "retragere_laterala": "H/2 față de limitele parcelei, min. 5,0m; față de alte UTR decât industrie — interzisă amplasarea pe limita parcelei (RLU AP/ID)",
+      "retragere_spate": "min. 3,0m față de limita posterioară a parcelei (RLU AP/ID)",
+      "parcaje": "Stationare în interiorul parcelei, spații de circulație, încărcare și întoarcere; max. 40% din retragere față aliniament rezervat parcajelor salariați/clienți (RLU AP/ID, Parcaje)",
+      "utilizari_admise": [
+        "Activități productive (unitați industriale mari în platforme distincte): S.C. VASITEX, HIDROTEHNICA, HERMES, MECANICA, VAROTEX, COMAT",
+        "Depozite sau servicii specifice; transport CF uzinal",
+        "Servicii pentru IMM-uri cu profil nepoluant; transporturi și depozitare comercială",
+        "Activități industriale nepoluante compatibile cu funcționarea unității"
+      ],
+      "utilizari_interzise": [
+        "Locuințe permanente",
+        "Activități care depășesc normele de poluare admise",
+        "Unități de învățământ și servicii de interes general în zone cu poluare peste coeficienții maximi"
+      ],
+      "note": "AP — Activități Productive Vaslui (unități industriale mari). POT=10-50% CUT=0,1-5,9 din RLU (IMG 038) — JSON are POT=55% CUT=1,2 (mai restrictive, menținute). hmax=12m (niv=3). Nu este prevăzut POT maxim pentru zonele industriale existente."
     },
     "IS": {
       "denumire": "Zona Industrială și Servicii — Platformă Industrială",
@@ -180,16 +423,43 @@
       "cut_baza": 2.0,
       "cut_cumulat": 2.5,
       "hmax_m": 18.0,
-      "niv_max": null,
+      "niv_max": 5,
       "regim": "P-P+3",
       "spatii_verzi_pct": 20,
-      "parcaje_min": "conf. studiu de specialitate; min 1 loc/100mp Adc",
+      "parcaje_min": "1 loc/5 angajați (sănătate); 1 loc/10-20 locuri în sală (cultură); 1 loc/20mp ADC (gară); max 5 autocare + 40 autoturisme (zone culturale)",
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "aliniament_note": "perdea vegetală min 30m față de zone rezidențiale; conf. aviz mediu",
       "ref_vol1": "Cap.IV — ID zona industrială — ID1/ID2",
-      "fn_complementare": ["depozitare", "servicii productive", "birouri administrative"],
-      "fn_interzise": ["locuire", "instituții publice", "comerț cu amănuntul general"]
+      "fn_complementare": [
+        "depozitare",
+        "servicii productive",
+        "birouri administrative"
+      ],
+      "fn_interzise": [
+        "locuire",
+        "instituții publice",
+        "comerț cu amănuntul general"
+      ],
+      "rf": 6.0,
+      "rl": 3.0,
+      "rs": 3.0,
+      "retragere_fata": "min. 6,00m față de aliniamentul general stabilit; ISL: min. 6,00m-8,00m față de aliniament (RLU IS/ISL — Amplasare față de aliniament)",
+      "retragere_laterala": "cu respectarea distanțelor minime obligatorii față de limitele laterale; min. 3,0m (RLU IS)",
+      "retragere_spate": "cu respectarea distanțelor minime obligatorii față de limita posterioară, min. 3,0m (RLU IS)",
+      "parcaje": "1 loc/5 angajați (sănătate); 1 loc/10-20 locuri (cultură); 1 loc/20mp ADC (gară); accese carosabile separate consumatori/personal/aprovizionare (RLU IS/CM, Parcaje)",
+      "utilizari_admise": [
+        "Construcția de noi instituții de interes public; dezvoltarea și modernizarea celor existente",
+        "Comerț, cultură, sănătate, servicii de interes general",
+        "Regim de înălțime maxim: P-P+2E",
+        "ISL — instituții de interes local: hotel, casă de cultură, biserică, service auto, stație Peco"
+      ],
+      "utilizari_interzise": [
+        "Construcția de locuințe",
+        "Activități productive, construcții provizorii, depozitare en-gros",
+        "Orice construcție fără PUZ pe terenurile delimitate pentru instituții publice noi"
+      ],
+      "note": "IS — Instituții și Servicii Vaslui. POT=40-70% CUT=1,2-2,1 confirmate RLU (IMG 036). JSON are POT=65% CUT=2,0 (menținute). hmax=18m (niv=5). rf=6m explicit RLU. Regim max P-P+2E."
     },
     "Sp": {
       "denumire": "Zona Spații Verzi și Agrement — Parcuri, Sport, Protecție",
@@ -202,13 +472,41 @@
       "niv_max": 1,
       "regim": "P-P+1",
       "spatii_verzi_pct": 70,
-      "parcaje_min": "conf. destinație specifică",
+      "parcaje_min": "parcaje amenajate conform studii specialitate; nu se admit în interiorul spațiilor plantate protejate",
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "aliniament_note": "construcțiile permise doar pt dotări aferente (vestiare, chioșcuri, pavilioane)",
       "ref_vol1": "Cap.IV — SP zona spații plantate — SPP/SPS/SPL/SPV",
-      "fn_complementare": ["amenajări sportive", "dotări agrement", "pavilioane"],
-      "fn_interzise": ["locuire", "industrie", "comerț general", "construcții permanente masive"]
+      "fn_complementare": [
+        "amenajări sportive",
+        "dotări agrement",
+        "pavilioane"
+      ],
+      "fn_interzise": [
+        "locuire",
+        "industrie",
+        "comerț general",
+        "construcții permanente masive"
+      ],
+      "rf": 5.0,
+      "rl": 5.0,
+      "rs": 5.0,
+      "retragere_fata": "nu se aplică construcții propriu-zise; accese ocazionale carosabile pentru întreținere (RLU Sp/SPP)",
+      "retragere_laterala": "nu se aplică în general; construcții accesorii min. 5,0m față de limitele parcelei (RLU Sp)",
+      "retragere_spate": "nu se aplică; construcții accesorii min. 5,0m față de limita posterioară (RLU Sp)",
+      "parcaje": "Parcaje amenajate în vecinătatea zonelor de intrare conform studii specialitate; plantate obligatoriu cu arbori; gard viu 1,2m (RLU Sp, Parcaje)",
+      "utilizari_admise": [
+        "SPP — spații plantate publice: parcuri, grădini, scuaruri, fâșii plantate publice",
+        "SPL — amenajări sportive și de loisir (în imediata apropiere a stadionului)",
+        "Zone și perdele de protecție; plantații decorative și de odihnă",
+        "Construcții accesorii specifice (max. 5% construcții; 15% total circulații+construcții)"
+      ],
+      "utilizari_interzise": [
+        "Orice funcțiuni, clădiri și amenajări care produc diminuarea valorii peisagistice și ecologice",
+        "Construcții care degradează atractivitatea zonei",
+        "Schimbarea destinației spațiilor plantate publice"
+      ],
+      "note": "Sp — Spații Plantate Publice / Sport și Loisir Vaslui. POT=5% CUT=0,05 din JSON. hmax=6m (niv=1). SV=70%. Localizare: UTR-urile 1,3,13,16,23,24,25,26,29."
     },
     "Ag": {
       "denumire": "Zona Activități Agricole și Agro-Zootehnice",
@@ -221,13 +519,40 @@
       "niv_max": 1,
       "regim": "P",
       "spatii_verzi_pct": 20,
-      "parcaje_min": "conf. normative specifice",
+      "parcaje_min": "stationare în interiorul parcelei; trasee agabaritice",
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "aliniament_note": "zone de protecție sanitară obligatorii față de zone rezidențiale",
       "ref_vol1": "Cap.IV — A zona activități agricole — AI/AZ",
-      "fn_complementare": ["sere", "ferme", "silozuri", "mecanizare agricolă"],
-      "fn_interzise": ["locuire urbană", "industrie neagricolă", "comerț general"]
+      "fn_complementare": [
+        "sere",
+        "ferme",
+        "silozuri",
+        "mecanizare agricolă"
+      ],
+      "fn_interzise": [
+        "locuire urbană",
+        "industrie neagricolă",
+        "comerț general"
+      ],
+      "rf": 10.0,
+      "rl": 5.0,
+      "rs": 5.0,
+      "retragere_fata": "conform studiilor de specialitate; retragere față de drumuri conform normative (RLU Ag/A)",
+      "retragere_laterala": "H/2 față de limitele parcelei, min. 5,0m (RLU Ag/A)",
+      "retragere_spate": "min. 5,0m față de limita posterioară (RLU Ag/A)",
+      "parcaje": "Stationare în interiorul parcelei; conform studiilor de specialitate (RLU Ag/A)",
+      "utilizari_admise": [
+        "Activități agricole și de mecanizare agricolă",
+        "Construcții care servesc activității agricole (conform Legii 50/1991)",
+        "Regim de înălțime: P (parter); max P+1E cu POT=40% CUT=1,8"
+      ],
+      "utilizari_interzise": [
+        "Locuințe permanente",
+        "Activități poluante incompatibile cu zona agricolă",
+        "Construcții fără aviz ANPM și DSP"
+      ],
+      "note": "Ag — Activități Agricole și Mecanizare Vaslui. POT=40% CUT=1,8 confirmate RLU IMG 063 (pentru UTR-uri cu activități agricole). JSON are POT=20% CUT=0,3 (mai restrictive, menținute din JSON). hmax=8m (regim P). rf=10m față de drumuri."
     },
     "TE": {
       "denumire": "Zona Tehnico-Edilitară — Infrastructură",
@@ -240,59 +565,350 @@
       "niv_max": 2,
       "regim": "P-P+1",
       "spatii_verzi_pct": 20,
-      "parcaje_min": "conf. destinație",
+      "parcaje_min": "stationare în interiorul parcelei; trasee agabaritice",
       "suprafata_min_mp": null,
       "lung_min_aliniament_m": null,
       "aliniament_note": "conf. norme tehnice specifice infrastructurii",
       "ref_vol1": "Cap.IV — TE zona echipare edilitară",
-      "fn_complementare": ["stații tehnice", "depozite tehnice", "birouri operare"],
-      "fn_interzise": ["locuire", "comerț general", "industrie"]
+      "fn_complementare": [
+        "stații tehnice",
+        "depozite tehnice",
+        "birouri operare"
+      ],
+      "fn_interzise": [
+        "locuire",
+        "comerț general",
+        "industrie"
+      ],
+      "rf": 6.0,
+      "rl": 6.0,
+      "rs": 6.0,
+      "retragere_fata": "birouri: pe aliniament sau min. 6,0m; incinte tehnice dispersate: min. 10,0m pe str. cat.II și min. 8,0m pe str. cat.III (RLU TE/TED)",
+      "retragere_laterala": "H/2 față de limitele parcelei, min. 6,0m; interzisă alipirea de clădiri publice și locuit (RLU TE)",
+      "retragere_spate": "H/2 față de limita posterioară, min. 6,0m (RLU TE)",
+      "parcaje": "Stationare în interiorul parcelei, spații de circulație, încărcare și întoarcere (RLU TE/TED, Parcaje)",
+      "utilizari_admise": [
+        "TED — zona de deservire tehnico-edilitară: stații de pompare, transformare, gaze",
+        "TEA — zona de administrare tehnico-edilitară (incinte principale)",
+        "Construcții și instalații tehnico-edilitare; rețele apă, canalizare, gaz, energie electrică",
+        "Servicii publice și de interes general compatibile cu funcționarea tehnică"
+      ],
+      "utilizari_interzise": [
+        "Locuințe permanente",
+        "Funcțiuni incompatibile cu destinația tehnico-edilitară",
+        "Alipirea de clădiri cu funcțiuni publice și locuit"
+      ],
+      "note": "TE — Tehnico-Edilitare Vaslui (TED = deservire; TEA = administrare). POT=50% CUT=1,0 din JSON. hmax=9m (niv=2). rf=6m (10m/8m incinte tehnice pe str. cat.II/III). Localizări: conform PUG Vaslui."
     }
   },
   "utrs": {
-    "1":  { "subzona": "CC",  "denumire": "Centru Civic",              "trup": "A",  "sup_ha": 45,  "ref": "UTR 1 — Trup A centru" },
-    "2":  { "subzona": "CM",  "denumire": "Centru Extins Vest",        "trup": "A",  "sup_ha": 38,  "ref": "UTR 2" },
-    "3":  { "subzona": "CM",  "denumire": "Centru Extins Nord",        "trup": "A",  "sup_ha": 42,  "ref": "UTR 3" },
-    "4":  { "subzona": "CM",  "denumire": "Zona Mixtă Nord",           "trup": "A",  "sup_ha": 28,  "ref": "UTR 4" },
-    "5":  { "subzona": "Li",  "denumire": "Locuințe Individuale Nord", "trup": "A",  "sup_ha": 95,  "ref": "UTR 5" },
-    "6":  { "subzona": "Sp",  "denumire": "Agrement — Lacul Roșu",    "trup": "A",  "sup_ha": 35,  "ref": "UTR 6 — risc alunecare" },
-    "7":  { "subzona": "Li",  "denumire": "Locuințe Est — Dealul Viei","trup": "A",  "sup_ha": 68,  "ref": "UTR 7" },
-    "8":  { "subzona": "TE",  "denumire": "Activități Tehnico-Edilitare Est", "trup": "A", "sup_ha": 22, "ref": "UTR 8" },
-    "9":  { "subzona": "Li",  "denumire": "Locuințe Est II",           "trup": "A",  "sup_ha": 72,  "ref": "UTR 9" },
-    "10": { "subzona": "Li",  "denumire": "Locuințe Est III",          "trup": "A",  "sup_ha": 58,  "ref": "UTR 10" },
-    "11": { "subzona": "Lc",  "denumire": "Locuințe Colective Sud-Est","trup": "A",  "sup_ha": 40,  "ref": "UTR 11" },
-    "12": { "subzona": "Sp",  "denumire": "Zona Verde Sud-Est",        "trup": "A",  "sup_ha": 48,  "ref": "UTR 12 — destinație specială S" },
-    "13": { "subzona": "LA",  "denumire": "Locuințe Colective Nord",   "trup": "A",  "sup_ha": 35,  "ref": "UTR 13" },
-    "14": { "subzona": "AP",  "denumire": "Activități Productive Nord","trup": "A",  "sup_ha": 52,  "ref": "UTR 14" },
-    "15": { "subzona": "IS",  "denumire": "Industrie Nord-Vest",       "trup": "A",  "sup_ha": 88,  "ref": "UTR 15" },
-    "16": { "subzona": "Li",  "denumire": "Locuințe Individuale Vest", "trup": "A",  "sup_ha": 62,  "ref": "UTR 16" },
-    "17": { "subzona": "Ag",  "denumire": "Activități Agro-Zoo Nord",  "trup": "A1", "sup_ha": 120, "ref": "UTR 17 — Trup A1" },
-    "18": { "subzona": "Li",  "denumire": "Locuințe Individuale NV",   "trup": "A",  "sup_ha": 55,  "ref": "UTR 18" },
-    "19": { "subzona": "Sp",  "denumire": "Sport și Agrement",         "trup": "A",  "sup_ha": 30,  "ref": "UTR 19 — SPS" },
-    "20": { "subzona": "Li",  "denumire": "Locuințe Sud",              "trup": "A",  "sup_ha": 78,  "ref": "UTR 20" },
-    "21": { "subzona": "Ag",  "denumire": "Zona Agricolă Sud",         "trup": "A",  "sup_ha": 200, "ref": "UTR 21" },
-    "22": { "subzona": "Lc",  "denumire": "Locuințe Colective Vest",   "trup": "A",  "sup_ha": 32,  "ref": "UTR 22" },
-    "23": { "subzona": "Li",  "denumire": "Locuințe Individuale SV",   "trup": "A",  "sup_ha": 65,  "ref": "UTR 23" },
-    "24": { "subzona": "CM",  "denumire": "Centru Extins Vest II",     "trup": "A",  "sup_ha": 40,  "ref": "UTR 24" },
-    "25": { "subzona": "AP",  "denumire": "Activități Productive Vest","trup": "A",  "sup_ha": 45,  "ref": "UTR 25" },
-    "26": { "subzona": "IS",  "denumire": "Industrie Vest",            "trup": "A",  "sup_ha": 75,  "ref": "UTR 26" },
-    "27": { "subzona": "Li",  "denumire": "Locuințe Individuale V",    "trup": "A",  "sup_ha": 80,  "ref": "UTR 27" },
-    "28": { "subzona": "Sp",  "denumire": "Zona Verde Râul Bârlad",    "trup": "A",  "sup_ha": 25,  "ref": "UTR 28 — protecție curs apă 30m" },
-    "29": { "subzona": "Li",  "denumire": "Trup A2 — Vest",            "trup": "A2", "sup_ha": 55,  "ref": "UTR 29 — Trup A2, risc alunecare" },
-    "30": { "subzona": "Ag",  "denumire": "Activități Agro NE",        "trup": "A",  "sup_ha": 95,  "ref": "UTR 30" },
-    "31": { "subzona": "Li",  "denumire": "Locuințe Individuale S",    "trup": "A",  "sup_ha": 48,  "ref": "UTR 31" },
-    "32": { "subzona": "IS",  "denumire": "Industrie Sud-Vest",        "trup": "A2", "sup_ha": 60,  "ref": "UTR 32 — Trup A2" },
-    "33": { "subzona": "AP",  "denumire": "Activități Prod. SV",       "trup": "A2", "sup_ha": 38,  "ref": "UTR 33 — Trup A2, teren rezervat locuințe sociale P+3-4" },
-    "34": { "subzona": "Ag",  "denumire": "Zona Agricolă NE",          "trup": "A",  "sup_ha": 180, "ref": "UTR 34" },
-    "35": { "subzona": "Li",  "denumire": "Locuințe Est IV",           "trup": "A",  "sup_ha": 85,  "ref": "UTR 35" },
-    "36": { "subzona": "Sp",  "denumire": "Zona Verde Delea",          "trup": "A",  "sup_ha": 18,  "ref": "UTR 36 — pârâul Delea" },
-    "37": { "subzona": "Lc",  "denumire": "Locuințe Colective E",      "trup": "A",  "sup_ha": 30,  "ref": "UTR 37" },
-    "38": { "subzona": "CM",  "denumire": "Zona Mixtă NE",             "trup": "A",  "sup_ha": 35,  "ref": "UTR 38" },
-    "39": { "subzona": "AP",  "denumire": "Activități Prod. N",        "trup": "A",  "sup_ha": 42,  "ref": "UTR 39" },
-    "40": { "subzona": "Li",  "denumire": "Trup I — Nou",              "trup": "I",  "sup_ha": 28,  "ref": "UTR 40 — Trup I" },
-    "41": { "subzona": "Li",  "denumire": "Trup B — Moara Grecilor",   "trup": "B",  "sup_ha": 95,  "ref": "UTR 41 — Trup B" },
-    "42": { "subzona": "AP",  "denumire": "Trup B — Activități",       "trup": "B",  "sup_ha": 30,  "ref": "UTR 42 — Trup B" },
-    "43": { "subzona": "Li",  "denumire": "Trup C — Vișoara",          "trup": "C",  "sup_ha": 45,  "ref": "UTR 43 — Trup C" },
-    "44": { "subzona": "Li",  "denumire": "Trup E — Rediu",            "trup": "E",  "sup_ha": 65,  "ref": "UTR 44 — Trup E" }
+    "1": {
+      "subzona": "CC",
+      "denumire": "Centru Civic",
+      "trup": "A",
+      "sup_ha": 45,
+      "ref": "UTR 1 — Trup A centru"
+    },
+    "2": {
+      "subzona": "CM",
+      "denumire": "Centru Extins Vest",
+      "trup": "A",
+      "sup_ha": 38,
+      "ref": "UTR 2"
+    },
+    "3": {
+      "subzona": "CM",
+      "denumire": "Centru Extins Nord",
+      "trup": "A",
+      "sup_ha": 42,
+      "ref": "UTR 3"
+    },
+    "4": {
+      "subzona": "CM",
+      "denumire": "Zona Mixtă Nord",
+      "trup": "A",
+      "sup_ha": 28,
+      "ref": "UTR 4"
+    },
+    "5": {
+      "subzona": "Li",
+      "denumire": "Locuințe Individuale Nord",
+      "trup": "A",
+      "sup_ha": 95,
+      "ref": "UTR 5"
+    },
+    "6": {
+      "subzona": "Sp",
+      "denumire": "Agrement — Lacul Roșu",
+      "trup": "A",
+      "sup_ha": 35,
+      "ref": "UTR 6 — risc alunecare"
+    },
+    "7": {
+      "subzona": "Li",
+      "denumire": "Locuințe Est — Dealul Viei",
+      "trup": "A",
+      "sup_ha": 68,
+      "ref": "UTR 7"
+    },
+    "8": {
+      "subzona": "TE",
+      "denumire": "Activități Tehnico-Edilitare Est",
+      "trup": "A",
+      "sup_ha": 22,
+      "ref": "UTR 8"
+    },
+    "9": {
+      "subzona": "Li",
+      "denumire": "Locuințe Est II",
+      "trup": "A",
+      "sup_ha": 72,
+      "ref": "UTR 9"
+    },
+    "10": {
+      "subzona": "Li",
+      "denumire": "Locuințe Est III",
+      "trup": "A",
+      "sup_ha": 58,
+      "ref": "UTR 10"
+    },
+    "11": {
+      "subzona": "Lc",
+      "denumire": "Locuințe Colective Sud-Est",
+      "trup": "A",
+      "sup_ha": 40,
+      "ref": "UTR 11"
+    },
+    "12": {
+      "subzona": "Sp",
+      "denumire": "Zona Verde Sud-Est",
+      "trup": "A",
+      "sup_ha": 48,
+      "ref": "UTR 12 — destinație specială S"
+    },
+    "13": {
+      "subzona": "LA",
+      "denumire": "Locuințe Colective Nord",
+      "trup": "A",
+      "sup_ha": 35,
+      "ref": "UTR 13"
+    },
+    "14": {
+      "subzona": "AP",
+      "denumire": "Activități Productive Nord",
+      "trup": "A",
+      "sup_ha": 52,
+      "ref": "UTR 14"
+    },
+    "15": {
+      "subzona": "IS",
+      "denumire": "Industrie Nord-Vest",
+      "trup": "A",
+      "sup_ha": 88,
+      "ref": "UTR 15"
+    },
+    "16": {
+      "subzona": "Li",
+      "denumire": "Locuințe Individuale Vest",
+      "trup": "A",
+      "sup_ha": 62,
+      "ref": "UTR 16"
+    },
+    "17": {
+      "subzona": "Ag",
+      "denumire": "Activități Agro-Zoo Nord",
+      "trup": "A1",
+      "sup_ha": 120,
+      "ref": "UTR 17 — Trup A1"
+    },
+    "18": {
+      "subzona": "Li",
+      "denumire": "Locuințe Individuale NV",
+      "trup": "A",
+      "sup_ha": 55,
+      "ref": "UTR 18"
+    },
+    "19": {
+      "subzona": "Sp",
+      "denumire": "Sport și Agrement",
+      "trup": "A",
+      "sup_ha": 30,
+      "ref": "UTR 19 — SPS"
+    },
+    "20": {
+      "subzona": "Li",
+      "denumire": "Locuințe Sud",
+      "trup": "A",
+      "sup_ha": 78,
+      "ref": "UTR 20"
+    },
+    "21": {
+      "subzona": "Ag",
+      "denumire": "Zona Agricolă Sud",
+      "trup": "A",
+      "sup_ha": 200,
+      "ref": "UTR 21"
+    },
+    "22": {
+      "subzona": "Lc",
+      "denumire": "Locuințe Colective Vest",
+      "trup": "A",
+      "sup_ha": 32,
+      "ref": "UTR 22"
+    },
+    "23": {
+      "subzona": "Li",
+      "denumire": "Locuințe Individuale SV",
+      "trup": "A",
+      "sup_ha": 65,
+      "ref": "UTR 23"
+    },
+    "24": {
+      "subzona": "CM",
+      "denumire": "Centru Extins Vest II",
+      "trup": "A",
+      "sup_ha": 40,
+      "ref": "UTR 24"
+    },
+    "25": {
+      "subzona": "AP",
+      "denumire": "Activități Productive Vest",
+      "trup": "A",
+      "sup_ha": 45,
+      "ref": "UTR 25"
+    },
+    "26": {
+      "subzona": "IS",
+      "denumire": "Industrie Vest",
+      "trup": "A",
+      "sup_ha": 75,
+      "ref": "UTR 26"
+    },
+    "27": {
+      "subzona": "Li",
+      "denumire": "Locuințe Individuale V",
+      "trup": "A",
+      "sup_ha": 80,
+      "ref": "UTR 27"
+    },
+    "28": {
+      "subzona": "Sp",
+      "denumire": "Zona Verde Râul Bârlad",
+      "trup": "A",
+      "sup_ha": 25,
+      "ref": "UTR 28 — protecție curs apă 30m"
+    },
+    "29": {
+      "subzona": "Li",
+      "denumire": "Trup A2 — Vest",
+      "trup": "A2",
+      "sup_ha": 55,
+      "ref": "UTR 29 — Trup A2, risc alunecare"
+    },
+    "30": {
+      "subzona": "Ag",
+      "denumire": "Activități Agro NE",
+      "trup": "A",
+      "sup_ha": 95,
+      "ref": "UTR 30"
+    },
+    "31": {
+      "subzona": "Li",
+      "denumire": "Locuințe Individuale S",
+      "trup": "A",
+      "sup_ha": 48,
+      "ref": "UTR 31"
+    },
+    "32": {
+      "subzona": "IS",
+      "denumire": "Industrie Sud-Vest",
+      "trup": "A2",
+      "sup_ha": 60,
+      "ref": "UTR 32 — Trup A2"
+    },
+    "33": {
+      "subzona": "AP",
+      "denumire": "Activități Prod. SV",
+      "trup": "A2",
+      "sup_ha": 38,
+      "ref": "UTR 33 — Trup A2, teren rezervat locuințe sociale P+3-4"
+    },
+    "34": {
+      "subzona": "Ag",
+      "denumire": "Zona Agricolă NE",
+      "trup": "A",
+      "sup_ha": 180,
+      "ref": "UTR 34"
+    },
+    "35": {
+      "subzona": "Li",
+      "denumire": "Locuințe Est IV",
+      "trup": "A",
+      "sup_ha": 85,
+      "ref": "UTR 35"
+    },
+    "36": {
+      "subzona": "Sp",
+      "denumire": "Zona Verde Delea",
+      "trup": "A",
+      "sup_ha": 18,
+      "ref": "UTR 36 — pârâul Delea"
+    },
+    "37": {
+      "subzona": "Lc",
+      "denumire": "Locuințe Colective E",
+      "trup": "A",
+      "sup_ha": 30,
+      "ref": "UTR 37"
+    },
+    "38": {
+      "subzona": "CM",
+      "denumire": "Zona Mixtă NE",
+      "trup": "A",
+      "sup_ha": 35,
+      "ref": "UTR 38"
+    },
+    "39": {
+      "subzona": "AP",
+      "denumire": "Activități Prod. N",
+      "trup": "A",
+      "sup_ha": 42,
+      "ref": "UTR 39"
+    },
+    "40": {
+      "subzona": "Li",
+      "denumire": "Trup I — Nou",
+      "trup": "I",
+      "sup_ha": 28,
+      "ref": "UTR 40 — Trup I"
+    },
+    "41": {
+      "subzona": "Li",
+      "denumire": "Trup B — Moara Grecilor",
+      "trup": "B",
+      "sup_ha": 95,
+      "ref": "UTR 41 — Trup B"
+    },
+    "42": {
+      "subzona": "AP",
+      "denumire": "Trup B — Activități",
+      "trup": "B",
+      "sup_ha": 30,
+      "ref": "UTR 42 — Trup B"
+    },
+    "43": {
+      "subzona": "Li",
+      "denumire": "Trup C — Vișoara",
+      "trup": "C",
+      "sup_ha": 45,
+      "ref": "UTR 43 — Trup C"
+    },
+    "44": {
+      "subzona": "Li",
+      "denumire": "Trup E — Rediu",
+      "trup": "E",
+      "sup_ha": 65,
+      "ref": "UTR 44 — Trup E"
+    }
   }
 }
