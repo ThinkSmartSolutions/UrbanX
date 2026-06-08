@@ -846,11 +846,7 @@ function htmlUTR(){
       <div class="met"><div class="ml">UTR</div><div class="mv" style="font-weight:700;color:#fbbf24">${esc(utrNr||u||'—')}</div></div>
       ${r.d?`<div class="met" style="grid-column:span 2"><div class="ml">Descriere zonă</div><div class="mv">${esc(r.d)}</div></div>`:''}
     </div>
-    ${r.ua?`
-    <div class="met" style="margin-top:7px"><div class="ml">✅ Utilizări admise</div><div class="mv">${esc(r.ua)}</div></div>
-    <div class="met" style="margin-top:6px"><div class="ml">⚠️ Condiționate</div><div class="mv">${esc(r.uc||'-')}</div></div>
-    <div class="met" style="margin-top:6px"><div class="ml">🚫 Interzise</div><div class="mv">${esc(r.ui||'-')}</div></div>
-    `:''}
+
   </div>
   <div class="section" style="margin-top:10px">🔍 Ce vrei să construiești?</div>
   ${(()=>{
@@ -935,9 +931,7 @@ function htmlUTR(){
     const pk   = curData.parcaje_min;
     const sf   = curData.suprafata_min_mp;
     const reg  = curData.regim || '';
-    const lung = curData.lung_min_aliniament_m;  // front minim stradal
-    const adnc = curData.adancime_min_m;          // adâncime parcelă minimă
-    const alinNote = curData.aliniament_note || '';
+
 
     const scSol  = pot && area ? Math.round(area * pot / 100) : null;
     const sdTot  = cut && area ? Math.round(area * cut)       : null;
@@ -964,15 +958,23 @@ function htmlUTR(){
         +'<span style="line-height:1.2;text-align:center">'+cat.label+'</span></button>';
     }).join('');
 
-    // ── Rând aliniamente (afișat doar dacă există date) ───────────────────
-    const alinRow = (lung || adnc || alinNote)
+    // ── Rând retrageri + parcaje ──────────────────────────────────────────
+    const retF  = curData.retragere_fata      || '';
+    const retL  = curData.retragere_laterala  || '';
+    const retS  = curData.retragere_spate     || '';
+    const svNota = curData.spatii_verzi_nota  || '';
+    const parcaje = curData.parcaje           || '';
+
+    const alinRow = (retF || retL || retS)
       ? '<div style="background:rgba(56,189,248,0.06);border:1px solid rgba(56,189,248,0.15);border-radius:7px;padding:8px;margin-top:6px">'
-          +'<div style="font-size:9px;color:#38bdf8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">📐 Aliniamente parcelă</div>'
-          +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">'
-            +(lung ? ibox('Front min stradal', lung, 'm', '#38bdf8', null) : '')
-            +(adnc ? ibox('Adâncime min', adnc, 'm', '#38bdf8', null) : '')
+          +'<div style="font-size:9px;color:#38bdf8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">📐 Retrageri minime</div>'
+          +'<div style="display:flex;flex-direction:column;gap:4px">'
+            +(retF ? '<div style="display:flex;gap:6px;align-items:baseline"><span style="font-size:9px;color:#64748b;min-width:56px">Față stradă</span><span style="font-size:11px;color:#e2e8f0">'+esc(retF)+'</span></div>' : '')
+            +(retL ? '<div style="display:flex;gap:6px;align-items:baseline"><span style="font-size:9px;color:#64748b;min-width:56px">Laterale</span><span style="font-size:11px;color:#e2e8f0">'+esc(retL)+'</span></div>' : '')
+            +(retS ? '<div style="display:flex;gap:6px;align-items:baseline"><span style="font-size:9px;color:#64748b;min-width:56px">Spate</span><span style="font-size:11px;color:#e2e8f0">'+esc(retS)+'</span></div>' : '')
           +'</div>'
-          +(alinNote ? '<div style="font-size:9px;color:#475569;margin-top:5px;line-height:1.4">'+esc(alinNote)+'</div>' : '')
+          +(parcaje ? '<div style="margin-top:6px;padding-top:6px;border-top:1px solid rgba(56,189,248,0.1)"><span style="font-size:9px;color:#64748b">🅿️ Parcaje: </span><span style="font-size:11px;color:#e2e8f0">'+esc(parcaje)+'</span></div>' : '')
+          +(svNota ? '<div style="margin-top:4px"><span style="font-size:9px;color:#64748b">🌿 Sp. verzi: </span><span style="font-size:10px;color:#86efac">'+esc(svNota)+'</span></div>' : '')
         +'</div>'
       : '';
 
