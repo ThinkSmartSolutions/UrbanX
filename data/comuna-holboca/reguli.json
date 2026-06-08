@@ -32,12 +32,33 @@
       "denumire": "Zona - Ape (iazuri, ape curgătoare)",
       "pot_max": null,
       "cut_max": null,
-      "hmax_m": null,
+      "hmax_m": 0.0,
       "rh_max": null,
       "parc_desc": null,
       "aliniament": null,
       "utiliz_admise_rezumat": "SECȚIUNEA 11. TERENURI ACOPERITE DE APĂ\n\nART. 27. (1) Autorizarea executării construcțiilor de orice fel în albiile minore ale cursurilor de apă se va face conform art. 7 din R.G.U.  \n(2) Autorizarea executării construcțiilor de orice fel în albiile minore ale cursurilor de apa este interzisă, cu excepția lucrărilor de poduri, lucrărilor necesare căilor ferate și drumurilor de traversare a albiei ",
-      "utiliz_interzise_rezumat": null
+      "utiliz_interzise_rezumat": null,
+      "pot_baza": 0,
+      "cut_baza": 0.0,
+      "niv_max": 0,
+      "regim": "interzis/restricționat",
+      "rf": 0.0,
+      "rl": 0.0,
+      "rs": 0.0,
+      "retragere_fata": "construirea interzisă sau strict condiționată — nu se aplică retrageri standard",
+      "retragere_laterala": "construirea interzisă sau strict condiționată",
+      "retragere_spate": "construirea interzisă sau strict condiționată",
+      "spatii_verzi_pct": 0,
+      "parcaje_min": "nu se aplică",
+      "parcaje": "nu se aplică — zonă fără construcții",
+      "utilizari_admise": [
+        "Lucrări de poduri, lucrări necesare căilor ferate și drumurilor de traversare a albiei",
+        "Lucrări de gospodărire a apelor (conform RLU Art.27)"
+      ],
+      "utilizari_interzise": [
+        "Orice construcții de orice fel în albiile minore ale cursurilor de apă (RLU Art.27 / RGU Art.7)"
+      ],
+      "note": "TH — Terenuri acoperite de apă. Construcții interzise conform RGU Art.7. Excepții: lucrări hidrotehnice, poduri, cu aviz ABA."
     },
     "05_Patrim": {
       "cod": "05_Patrim",
@@ -46,12 +67,38 @@
       "denumire": "Zona de protecție a monumentelor istorice sau siturilor arheologice",
       "pot_max": null,
       "cut_max": null,
-      "hmax_m": null,
+      "hmax_m": 9.0,
       "rh_max": null,
       "parc_desc": "Se păstrează trama stradală precum şi alinierea construcţiilor după traseul străzilor. Alături de trama stradală, structura parcelarului existent, ceea ce determină obligativitatea conservării actualei structurii a parcelarului, indiferent de natura regimului de proprietate asupra terenului (public ",
       "aliniament": "În cazul părţilor de imobil fără valoare culturală, identificate şi prezentate explicit prin studiile istorice, se poate interveni, ţinând cont de valoarea culturală a zonei învecinate imobilului, pri",
       "utiliz_admise_rezumat": "Pentru zonele istorice protejate, sunt admise următoarele categorii de utilizării funcţionale ale imobilelor:\na)\timobile utilizate preponderent pentru locuire şi secundar pentru alte funcţiuni compatibile;\nb)\timobile utilizate pentru activităţi mixte, în care pe lângă funcţiunea de locuire se întâlnesc funcţiunile de comerţ, servicii, alimentaţie sau mici spaţii de birouri;\nc)\timobile utilizate pe",
-      "utiliz_interzise_rezumat": "a)\tsunt incompatibile cu statutul de zonă protejată;\nb)\tpot conduce sau provoca degradarea sitului istoric sau imobilelor clasate şi a celor care deţin o valoare culturală semnificativă identificată prin studiile preliminare;\n\tSunt interzise activităţile care generează poluare, cele care prezintă ri"
+      "utiliz_interzise_rezumat": "a)\tsunt incompatibile cu statutul de zonă protejată;\nb)\tpot conduce sau provoca degradarea sitului istoric sau imobilelor clasate şi a celor care deţin o valoare culturală semnificativă identificată prin studiile preliminare;\n\tSunt interzise activităţile care generează poluare, cele care prezintă ri",
+      "pot_baza": 40,
+      "cut_baza": 1.2,
+      "niv_max": 3,
+      "regim": "P+2 (max, subordonat regim existent)",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "se păstrează alinierea existentă; orice modificare cu aviz DJPC Iași (RLU Art.30)",
+      "retragere_laterala": "se păstrează structura parcelară existentă; modificare cu aviz DJPC (RLU Art.30)",
+      "retragere_spate": "se păstrează structura parcelară existentă; modificare cu aviz DJPC (RLU Art.30)",
+      "spatii_verzi_pct": 30,
+      "parcaje_min": "1 loc/80 mp locuire; 1 loc/50 mp servicii",
+      "parcaje": "Parcaje conform destinației; amenajarea spațiilor publice cu aviz DJPC Iași (RLU Art.30)",
+      "utilizari_admise": [
+        "Imobile pentru locuire (predominant sau cu funcțiuni mixte compatibile)",
+        "Servicii financiar-bancare, poștă, telecomunicații",
+        "Comerț, alimentație publică, hoteluri, pensiuni (compatibile cu zona protejată)",
+        "Restaurarea și conservarea monumentelor istorice"
+      ],
+      "utilizari_interzise": [
+        "Activități incompatibile cu statutul de zonă protejată",
+        "Activități generatoare de poluare sau risc",
+        "Demolare sau intervenții fără aviz DJPC Iași",
+        "Modificări ale structurii parcelare fără PUD/PUZ aprobat"
+      ],
+      "note": "05_Patrim — Zonă de protecție monumente istorice/situri arheologice. Aviz obligatoriu DJPC Iași pentru orice intervenție. POT/CUT orientative — se subordonează regimului existent și avizelor culturale."
     },
     "TF": {
       "cod": "TF",
@@ -60,12 +107,33 @@
       "denumire": "Terenuri forestiere - Pădure",
       "pot_max": null,
       "cut_max": null,
-      "hmax_m": null,
+      "hmax_m": 0.0,
       "rh_max": null,
       "parc_desc": null,
       "aliniament": null,
       "utiliz_admise_rezumat": "ART. 23. Sunt considerate păduri, în sensul Codului Silvic art. 2 alin.1 și sunt incluse în fondul forestier national terenurile cu o suprafata de cel putin 0,25 ha, acoperite cu arbori; arborii trebuie să atingă o înălțime minimă de 5 m la maturitate în condiții normale de vegetație. Terenurile delimitate în prezentul PUG ca având utilizarea pădure își vor păstra utilizarea, fiind interzisă modif",
-      "utiliz_interzise_rezumat": null
+      "utiliz_interzise_rezumat": null,
+      "pot_baza": 0,
+      "cut_baza": 0.0,
+      "niv_max": 0,
+      "regim": "interzis/restricționat",
+      "rf": 0.0,
+      "rl": 0.0,
+      "rs": 0.0,
+      "retragere_fata": "construirea interzisă sau strict condiționată — nu se aplică retrageri standard",
+      "retragere_laterala": "construirea interzisă sau strict condiționată",
+      "retragere_spate": "construirea interzisă sau strict condiționată",
+      "spatii_verzi_pct": 0,
+      "parcaje_min": "nu se aplică",
+      "parcaje": "nu se aplică — zonă fără construcții",
+      "utilizari_admise": [
+        "Lucrări de stabilizare versanți, lucrări hidrotehnice, lucrări forestiere (excepție conform RLU Art.24)"
+      ],
+      "utilizari_interzise": [
+        "Modificarea utilizării de pădure",
+        "Construcții permanente cu altă destinație (RLU Art.23)"
+      ],
+      "note": "TF — Fond forestier. Utilizarea de pădure se păstrează; interzisă modificarea prin PUZ."
     },
     "TA": {
       "cod": "TA",
@@ -74,12 +142,33 @@
       "denumire": "Terenuri agricole",
       "pot_max": null,
       "cut_max": null,
-      "hmax_m": null,
+      "hmax_m": 0.0,
       "rh_max": null,
       "parc_desc": null,
       "aliniament": null,
       "utiliz_admise_rezumat": "SECȚIUNEA 7. TERENURI AGRICOLE IN EXTRAVILAN\n\nART. 16. Potrivit Legii nr. 18/1991 – republicată, art. 92, alin.1 – “amplasarea construcțiilor de orice fel pe terenuri agricole din extravilan de clasa I și a II-a de calitate, parcuri naționale, rezervații, monumente, ansambluri arheologice și istorice este interzisă”. \n\nART. 17. Excepțiile sunt prevăzute la art. 92 alin.2: “Se exceptează de la prev",
-      "utiliz_interzise_rezumat": null
+      "utiliz_interzise_rezumat": null,
+      "pot_baza": 0,
+      "cut_baza": 0.0,
+      "niv_max": 0,
+      "regim": "interzis/restricționat",
+      "rf": 0.0,
+      "rl": 0.0,
+      "rs": 0.0,
+      "retragere_fata": "construirea interzisă sau strict condiționată — nu se aplică retrageri standard",
+      "retragere_laterala": "construirea interzisă sau strict condiționată",
+      "retragere_spate": "construirea interzisă sau strict condiționată",
+      "spatii_verzi_pct": 0,
+      "parcaje_min": "nu se aplică",
+      "parcaje": "nu se aplică — zonă fără construcții",
+      "utilizari_admise": [
+        "Construcții care servesc activităților agricole (adăposturi animale, spații depozitare recoltă/utilaje) — fără delimitare ca trup de localitate (RLU Art.19)"
+      ],
+      "utilizari_interzise": [
+        "Locuințe, garaje sau alte amenajări permanente (RLU Art.19)",
+        "Construcții pe terenuri clasa I-II de calitate (Legea 18/1991 Art.92)"
+      ],
+      "note": "TA — Terenuri agricole extravilan. Construcții permise doar pentru activități agricole stricte, fără autorizare prin PUG."
     },
     "03_TA_V": {
       "cod": "03_TA_V",
@@ -88,12 +177,34 @@
       "denumire": "Terenuri agricole - vii",
       "pot_max": null,
       "cut_max": null,
-      "hmax_m": null,
+      "hmax_m": 0.0,
       "rh_max": null,
       "parc_desc": null,
       "aliniament": null,
       "utiliz_admise_rezumat": null,
-      "utiliz_interzise_rezumat": null
+      "utiliz_interzise_rezumat": null,
+      "pot_baza": 0,
+      "cut_baza": 0.0,
+      "niv_max": 0,
+      "regim": "interzis/restricționat",
+      "rf": 0.0,
+      "rl": 0.0,
+      "rs": 0.0,
+      "retragere_fata": "construirea interzisă sau strict condiționată — nu se aplică retrageri standard",
+      "retragere_laterala": "construirea interzisă sau strict condiționată",
+      "retragere_spate": "construirea interzisă sau strict condiționată",
+      "spatii_verzi_pct": 0,
+      "parcaje_min": "nu se aplică",
+      "parcaje": "nu se aplică — zonă fără construcții",
+      "utilizari_admise": [
+        "Utilizare agricolă specifică (vie/pășune/fânațe)",
+        "Lucrări agricole specifice categoriei de teren"
+      ],
+      "utilizari_interzise": [
+        "Construcții permanente fără autorizare specială",
+        "Modificarea utilizării fără PUZ aprobat"
+      ],
+      "note": "03_TA_V — Teren agricol extravilan specializat. Fără indicatori urbanistici de construire."
     },
     "03_TA_P": {
       "cod": "03_TA_P",
@@ -102,12 +213,34 @@
       "denumire": "Terenuri agricole - pășuni",
       "pot_max": null,
       "cut_max": null,
-      "hmax_m": null,
+      "hmax_m": 0.0,
       "rh_max": null,
       "parc_desc": null,
       "aliniament": null,
       "utiliz_admise_rezumat": null,
-      "utiliz_interzise_rezumat": null
+      "utiliz_interzise_rezumat": null,
+      "pot_baza": 0,
+      "cut_baza": 0.0,
+      "niv_max": 0,
+      "regim": "interzis/restricționat",
+      "rf": 0.0,
+      "rl": 0.0,
+      "rs": 0.0,
+      "retragere_fata": "construirea interzisă sau strict condiționată — nu se aplică retrageri standard",
+      "retragere_laterala": "construirea interzisă sau strict condiționată",
+      "retragere_spate": "construirea interzisă sau strict condiționată",
+      "spatii_verzi_pct": 0,
+      "parcaje_min": "nu se aplică",
+      "parcaje": "nu se aplică — zonă fără construcții",
+      "utilizari_admise": [
+        "Utilizare agricolă specifică (vie/pășune/fânațe)",
+        "Lucrări agricole specifice categoriei de teren"
+      ],
+      "utilizari_interzise": [
+        "Construcții permanente fără autorizare specială",
+        "Modificarea utilizării fără PUZ aprobat"
+      ],
+      "note": "03_TA_P — Teren agricol extravilan specializat. Fără indicatori urbanistici de construire."
     },
     "03_TA_F": {
       "cod": "03_TA_F",
@@ -116,12 +249,34 @@
       "denumire": "Terenuri agricole - fânațe",
       "pot_max": null,
       "cut_max": null,
-      "hmax_m": null,
+      "hmax_m": 0.0,
       "rh_max": null,
       "parc_desc": null,
       "aliniament": null,
       "utiliz_admise_rezumat": null,
-      "utiliz_interzise_rezumat": null
+      "utiliz_interzise_rezumat": null,
+      "pot_baza": 0,
+      "cut_baza": 0.0,
+      "niv_max": 0,
+      "regim": "interzis/restricționat",
+      "rf": 0.0,
+      "rl": 0.0,
+      "rs": 0.0,
+      "retragere_fata": "construirea interzisă sau strict condiționată — nu se aplică retrageri standard",
+      "retragere_laterala": "construirea interzisă sau strict condiționată",
+      "retragere_spate": "construirea interzisă sau strict condiționată",
+      "spatii_verzi_pct": 0,
+      "parcaje_min": "nu se aplică",
+      "parcaje": "nu se aplică — zonă fără construcții",
+      "utilizari_admise": [
+        "Utilizare agricolă specifică (vie/pășune/fânațe)",
+        "Lucrări agricole specifice categoriei de teren"
+      ],
+      "utilizari_interzise": [
+        "Construcții permanente fără autorizare specială",
+        "Modificarea utilizării fără PUZ aprobat"
+      ],
+      "note": "03_TA_F — Teren agricol extravilan specializat. Fără indicatori urbanistici de construire."
     },
     "UTR24_A": {
       "cod": "UTR24_A",
@@ -130,12 +285,37 @@
       "denumire": "Zonă Agro Zootehnică",
       "pot_max": 50.0,
       "cut_max": 1.0,
-      "hmax_m": null,
+      "hmax_m": 12.0,
       "rh_max": "conform  PUZ+RLU",
       "parc_desc": "conform  PUZ+RLU",
       "aliniament": "conform  PUZ+RLU",
       "utiliz_admise_rezumat": "conform  PUZ+RLU",
-      "utiliz_interzise_rezumat": "conform  PUZ+RLU"
+      "utiliz_interzise_rezumat": "conform  PUZ+RLU",
+      "pot_baza": 50,
+      "cut_baza": 1.0,
+      "niv_max": 3,
+      "regim": "P+2 agro-industrial",
+      "rf": 10.0,
+      "rl": 6.0,
+      "rs": 6.0,
+      "retragere_fata": "min. 10,00 m față de aliniament — conform PUZ+RLU specific (RLU UTR24 A)",
+      "retragere_laterala": "min. 6,00 m față de limitele laterale — conform PUZ+RLU (HG 525/1996 industrial/agro)",
+      "retragere_spate": "min. 6,00 m față de limita posterioară — conform PUZ+RLU (HG 525/1996 industrial/agro)",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "conform PUZ+RLU specific",
+      "parcaje": "Conform PUZ+RLU aferent UTR24; activitățile agro-zootehnice necesită documentație PUZ separată (RLU Art.1-16 UTR24)",
+      "utilizari_admise": [
+        "Activități productive agro-industriale și agro-zootehnice",
+        "Construcții pentru producție agricolă și zootehnică",
+        "Depozitare produse agricole",
+        "Servicii aferente funcțiunii agricole"
+      ],
+      "utilizari_interzise": [
+        "Locuințe permanente (cu excepția celor de serviciu strict necesare)",
+        "Activități incompatibile cu profilul agro-zootehnic",
+        "Conform PUZ+RLU specific elaborat pentru UTR24"
+      ],
+      "note": "UTR24_A — Agro-zootehnic. POT=50% CUT=1,00 (RLU Art.15-16 UTR24). Toate condițiile se supun PUZ+RLU specific elaborat."
     },
     "TE": {
       "cod": "TE",
@@ -144,12 +324,34 @@
       "denumire": "Construcții tehnico-edilitare",
       "pot_max": null,
       "cut_max": null,
-      "hmax_m": null,
+      "hmax_m": 6.0,
       "rh_max": null,
       "parc_desc": null,
       "aliniament": null,
       "utiliz_admise_rezumat": null,
-      "utiliz_interzise_rezumat": null
+      "utiliz_interzise_rezumat": null,
+      "pot_baza": 50,
+      "cut_baza": 1.0,
+      "niv_max": 2,
+      "regim": "P+1",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 3.0,
+      "retragere_fata": "min. 5,00 m față de aliniament (HG 525/1996; RLU nu specifică valori proprii pentru TE)",
+      "retragere_laterala": "H/2 min. 3,00 m (HG 525/1996)",
+      "retragere_spate": "H/2 min. 3,00 m (HG 525/1996)",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "conform necesități operaționale",
+      "parcaje": "Conform necesităților operaționale ale instalației tehnice",
+      "utilizari_admise": [
+        "Construcții tehnico-edilitare (stații pompare, transformatoare, rezervoare, rețele)",
+        "Instalații pentru energie regenerabilă"
+      ],
+      "utilizari_interzise": [
+        "Locuințe",
+        "Activități comerciale sau industriale incompatibile"
+      ],
+      "note": "TE — Echipare edilitară. POT/CUT conform HG 525/1996 (RLU nu specifică valori proprii). PUZ obligatoriu pentru incinte cu impact major."
     },
     "T1": {
       "cod": "T1",
@@ -158,12 +360,35 @@
       "denumire": "subzona transporturilor rutiere și a amenajărilor aferente",
       "pot_max": 50.0,
       "cut_max": 0.5,
-      "hmax_m": 0.0,
+      "hmax_m": 6.0,
       "rh_max": "(1) Conform studiilor de specialitate și a normativelor avizate conform legii.\n(2) Înălţime maximă de 10,00 m la cornișă, Regim maxim de înălţime P+1E.\n(3) Înălţimea maximă a construcţiilor aferente nu va depăși distanţa dintre aliniamente și nici înălţimea maximă admisă pentru fiecare subzonă funcţională în prezentul Regulament Local de Urbanism (vezi Art. 10 al fiecărui capitol din R.L.U.).",
       "parc_desc": "(1) Conform studiilor de specialitate avizate conform legii.\n(2) Conform Regulamentului Local de Urbanism prezent pentru fiecare subzonă funcţională în parte (vezi Art. 5 al fiecărui capitol din R.L.U.).",
       "aliniament": "(1) Conform studiilor de specialitate și a normativelor avizate conform legii.\n(2) Parcelarul și caile de circulaţie vor fi organizate și trasate conform Regulamentului Local de Urbanism prezent pentr",
       "utiliz_admise_rezumat": "•\tactivităţi legate de transporturi la distanţă pe căi rutiere pentru călători și mărfuri;\n•\tautogări și alte construcţii și amenajări pentru transportul de călători, precum și serviciile anexe aferente;\n•\tsemnalizări prin panouri și luminoase conform normativelor și legislaţiei în vigoare;\n•\tmobilier urban, corpuri de iluminat stradal specific profilului stradal și a categoriilor de circulaţie că",
-      "utiliz_interzise_rezumat": "(1) Se interzic orice utilizări care afectează buna funcţionare și diminuează posibilităţile ulterioare de modernizare sau extindere.\n(2) Se interzic orice construcţii sau amenajări pe terenurile rezervate pentru:\n•\tlărgirea unor străzi sau realizarea străzilor propuse, lărgirea arterei de centură ș"
+      "utiliz_interzise_rezumat": "(1) Se interzic orice utilizări care afectează buna funcţionare și diminuează posibilităţile ulterioare de modernizare sau extindere.\n(2) Se interzic orice construcţii sau amenajări pe terenurile rezervate pentru:\n•\tlărgirea unor străzi sau realizarea străzilor propuse, lărgirea arterei de centură ș",
+      "pot_baza": 50,
+      "cut_baza": 0.5,
+      "niv_max": 2,
+      "regim": "P+1",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "conform normativelor specifice infrastructurii de transport; aviz administrator drum/cale ferată/AACR obligatoriu",
+      "retragere_laterala": "conform normativelor specifice",
+      "retragere_spate": "conform normativelor specifice",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "conform normative transport",
+      "parcaje": "Parcaje pentru salariați și călători conform normativelor specifice tipului de transport (RLU Art.9 T)",
+      "utilizari_admise": [
+        "Activități specifice Transporturi rutiere",
+        "Construcții și amenajări pentru infrastructura de transport",
+        "Servicii conexe transportului"
+      ],
+      "utilizari_interzise": [
+        "Utilizări care afectează buna funcționare a infrastructurii",
+        "Construcții incompatibile cu normativele specifice"
+      ],
+      "note": "T1 — Transporturi rutiere. POT=50% CUT=0.5 (RLU Art.15-16 T). hmax=6.0m. Avize specifice obligatorii."
     },
     "T3": {
       "cod": "T3",
@@ -172,12 +397,35 @@
       "denumire": "Zonă aferentă transporturilor aeriene",
       "pot_max": 70.0,
       "cut_max": 3.0,
-      "hmax_m": 0.0,
+      "hmax_m": 30.0,
       "rh_max": "(1) Conform studiilor de specialitate și a normativelor avizate conform legii.\n(2) Înălţime maximă de 10,00 m la cornișă, Regim maxim de înălţime P+1E.\n(3) Înălţimea maximă a construcţiilor aferente nu va depăși distanţa dintre aliniamente și nici înălţimea maximă admisă pentru fiecare subzonă funcţională în prezentul Regulament Local de Urbanism (vezi Art. 10 al fiecărui capitol din R.L.U.).\n(4) H maxim = 16m – pentru investitia – Extindere infrastructura de procesare a pasagerilor - TERMINAL T2 ( conform aviz AACR nr. nr.32587/177 din 22.12.2016, obtinut la faza Studiu de Fezabilitate) \n(5) H maxim - pentru viitoarele investitii din zona edificabila propusa, se va stabili conform aviz de specialitate al Autoritatii Aeronautice Civile din Romania, in baza documentatiilor eleborate conform legislatiei in vigoare la data autorizarii de construire.",
       "parc_desc": "(1) Conform studiilor de specialitate avizate conform legii.\n(2) Conform Regulamentului Local de Urbanism prezent pentru fiecare subzonă funcţională în parte (vezi Art. 5 al fiecărui capitol din R.L.U.).",
       "aliniament": "(1) Conform studiilor de specialitate și a normativelor avizate conform legii.\n(2) Parcelarul și caile de circulaţie vor fi organizate și trasate conform Regulamentului Local de Urbanism prezent pentr",
       "utiliz_admise_rezumat": "•\tactivităţi legate de transporturi la distanţă pe căi aeriene pentru călători și mărfuri;\n•\taerogară (terminale pasageri) și alte construcţii și amenajări pentru transportul de călători, precum și serviciile anexe aferente;\n•\tsemnalizări prin panouri și luminoase conform normativelor și legislaţiei în vigoare;\n•\tmobilier urban, corpuri de iluminat stradal specific profilului stradal și a categori",
-      "utiliz_interzise_rezumat": "(1) Se interzic orice utilizări care afectează buna funcţionare și diminuează posibilităţile ulterioare de modernizare sau extindere.\n(2) Se interzic orice construcţii sau amenajări pe terenurile rezervate pentru:\n•\tlărgirea unor străzi sau realizarea străzilor propuse, lărgirea arterei de centură ș"
+      "utiliz_interzise_rezumat": "(1) Se interzic orice utilizări care afectează buna funcţionare și diminuează posibilităţile ulterioare de modernizare sau extindere.\n(2) Se interzic orice construcţii sau amenajări pe terenurile rezervate pentru:\n•\tlărgirea unor străzi sau realizarea străzilor propuse, lărgirea arterei de centură ș",
+      "pot_baza": 70,
+      "cut_baza": 3.0,
+      "niv_max": 10,
+      "regim": "P+9",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "conform normativelor specifice infrastructurii de transport; aviz administrator drum/cale ferată/AACR obligatoriu",
+      "retragere_laterala": "conform normativelor specifice",
+      "retragere_spate": "conform normativelor specifice",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "conform normative transport",
+      "parcaje": "Parcaje pentru salariați și călători conform normativelor specifice tipului de transport (RLU Art.9 T)",
+      "utilizari_admise": [
+        "Activități specifice Transporturi aeriene — Aeroport Iași",
+        "Construcții și amenajări pentru infrastructura de transport",
+        "Servicii conexe transportului"
+      ],
+      "utilizari_interzise": [
+        "Utilizări care afectează buna funcționare a infrastructurii",
+        "Construcții incompatibile cu normativele specifice"
+      ],
+      "note": "T3 — Transporturi aeriene — Aeroport Iași. POT=70% CUT=3.0 (RLU Art.15-16 T). hmax=30.0m. Avize specifice obligatorii."
     },
     "T2": {
       "cod": "T2",
@@ -186,12 +434,35 @@
       "denumire": "subzona transporturilor feroviare și a amenajărilor aferente",
       "pot_max": 50.0,
       "cut_max": 0.5,
-      "hmax_m": 0.0,
+      "hmax_m": 6.0,
       "rh_max": "(1) Conform studiilor de specialitate și a normativelor avizate conform legii.\n(2) Înălţime maximă de 10,00 m la cornișă, Regim maxim de înălţime P+1E.\n(3) Înălţimea maximă a construcţiilor aferente nu va depăși distanţa dintre aliniamente și nici înălţimea maximă admisă pentru fiecare subzonă funcţională în prezentul Regulament Local de Urbanism (vezi Art. 10 al fiecărui capitol din R.L.U.).",
       "parc_desc": "(1) Conform studiilor de specialitate avizate conform legii.\n(2) Conform Regulamentului Local de Urbanism prezent pentru fiecare subzonă funcţională în parte (vezi Art. 5 al fiecărui capitol din R.L.U.).",
       "aliniament": "(1) Conform studiilor de specialitate și a normativelor avizate conform legii.\n(2) Parcelarul și caile de circulaţie vor fi organizate și trasate conform Regulamentului Local de Urbanism prezent pentr",
       "utiliz_admise_rezumat": "•\tstatii de calatori, de marfuri si de triaj cu instalatii, constructii, depozite si amenajari necesare functionarii serviciilor feroviare; \n•\tservicii publice si de interes general compatibile cu functionarea serviciilor feroviare;\n•\tamenajari, lucrari de terasamente si infrastructura, spatii necesare functional si pentru asigurarea securitatii transportului feroviar;\n•\tlucrari de protectie împot",
-      "utiliz_interzise_rezumat": "(1) Se interzic orice utilizări care afectează buna funcţionare și diminuează posibilităţile ulterioare de modernizare sau extindere.\n(2) Se interzic orice construcţii sau amenajări pe terenurile rezervate pentru:\n•\tlărgirea unor străzi sau realizarea străzilor propuse, lărgirea arterei de centură ș"
+      "utiliz_interzise_rezumat": "(1) Se interzic orice utilizări care afectează buna funcţionare și diminuează posibilităţile ulterioare de modernizare sau extindere.\n(2) Se interzic orice construcţii sau amenajări pe terenurile rezervate pentru:\n•\tlărgirea unor străzi sau realizarea străzilor propuse, lărgirea arterei de centură ș",
+      "pot_baza": 50,
+      "cut_baza": 0.5,
+      "niv_max": 2,
+      "regim": "P+1",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "conform normativelor specifice infrastructurii de transport; aviz administrator drum/cale ferată/AACR obligatoriu",
+      "retragere_laterala": "conform normativelor specifice",
+      "retragere_spate": "conform normativelor specifice",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "conform normative transport",
+      "parcaje": "Parcaje pentru salariați și călători conform normativelor specifice tipului de transport (RLU Art.9 T)",
+      "utilizari_admise": [
+        "Activități specifice Transporturi feroviare",
+        "Construcții și amenajări pentru infrastructura de transport",
+        "Servicii conexe transportului"
+      ],
+      "utilizari_interzise": [
+        "Utilizări care afectează buna funcționare a infrastructurii",
+        "Construcții incompatibile cu normativele specifice"
+      ],
+      "note": "T2 — Transporturi feroviare. POT=50% CUT=0.5 (RLU Art.15-16 T). hmax=6.0m. Avize specifice obligatorii."
     },
     "TS_S2": {
       "cod": "TS_S2",
@@ -200,12 +471,32 @@
       "denumire": "subzona unităţilor cu destinaţie specială - extravilan Ministerul Apararii Nationale",
       "pot_max": null,
       "cut_max": null,
-      "hmax_m": null,
+      "hmax_m": 0.0,
       "rh_max": "Conform legislaţiei și normativelor în vigoare si numai cu avizul Ministerului Afacerilor Interne / ministerul Apararii Nationale - Statul Major General",
       "parc_desc": "Conform legislaţiei și normativelor în vigoare si numai cu avizul Ministerului Afacerilor Interne / ministerul Apararii Nationale - Statul Major General",
       "aliniament": "Conform legislaţiei și normativelor în vigoare si numai cu avizul Ministerului Afacerilor Interne / ministerul Apararii Nationale - Statul Major General",
       "utiliz_admise_rezumat": "Conform legislaţiei și normativelor în vigoare si numai cu avizul Ministerului Afacerilor Interne / ministerul Apararii Nationale - Statul Major General",
-      "utiliz_interzise_rezumat": "Conform legislaţiei și normativelor în vigoare si numai cu avizul Ministerului Afacerilor Interne / ministerul Apararii Nationale - Statul Major General"
+      "utiliz_interzise_rezumat": "Conform legislaţiei și normativelor în vigoare si numai cu avizul Ministerului Afacerilor Interne / ministerul Apararii Nationale - Statul Major General",
+      "pot_baza": 0,
+      "cut_baza": 0.0,
+      "niv_max": 0,
+      "regim": "destinație specială MApN",
+      "rf": 0.0,
+      "rl": 0.0,
+      "rs": 0.0,
+      "retragere_fata": "conform normative MApN/secret de stat",
+      "retragere_laterala": "conform normative MApN",
+      "retragere_spate": "conform normative MApN",
+      "spatii_verzi_pct": 0,
+      "parcaje_min": "conform normative MApN",
+      "parcaje": "Conform normativelor specifice MApN; autorizare de la ministerul tutelar (RLU TS_S2)",
+      "utilizari_admise": [
+        "Construcții și amenajări specifice Ministerului Apărării Naționale (S2 extravilan)"
+      ],
+      "utilizari_interzise": [
+        "Orice utilizări neautorizate de MApN"
+      ],
+      "note": "TS_S2 — Destinație specială extravilan MApN (CF 608102 + CF 60683, 14,09 ha, sat Valea Lungă). Autorizare exclusiv cu aviz MApN."
     },
     "UTR2_S1": {
       "cod": "UTR2_S1",
@@ -214,12 +505,33 @@
       "denumire": "subzona unităţilor cu destinaţie specială - Intravilan - Ministerul Afacerilor Interne",
       "pot_max": null,
       "cut_max": null,
-      "hmax_m": null,
+      "hmax_m": 9.0,
       "rh_max": "Conform legislaţiei și normativelor în vigoare si numai cu avizul Ministerului Afacerilor Interne / ministerul Apararii Nationale - Statul Major General",
       "parc_desc": "Conform legislaţiei și normativelor în vigoare si numai cu avizul Ministerului Afacerilor Interne / ministerul Apararii Nationale - Statul Major General",
       "aliniament": "Conform legislaţiei și normativelor în vigoare si numai cu avizul Ministerului Afacerilor Interne / ministerul Apararii Nationale - Statul Major General",
       "utiliz_admise_rezumat": "Conform legislaţiei și normativelor în vigoare si numai cu avizul Ministerului Afacerilor Interne / ministerul Apararii Nationale - Statul Major General",
-      "utiliz_interzise_rezumat": "Conform legislaţiei și normativelor în vigoare si numai cu avizul Ministerului Afacerilor Interne / ministerul Apararii Nationale - Statul Major General"
+      "utiliz_interzise_rezumat": "Conform legislaţiei și normativelor în vigoare si numai cu avizul Ministerului Afacerilor Interne / ministerul Apararii Nationale - Statul Major General",
+      "pot_baza": 60,
+      "cut_baza": 2.0,
+      "niv_max": 3,
+      "regim": "P+2",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "min. 5,00 m față de aliniament (conform norme specifice MAI)",
+      "retragere_laterala": "min. 3,00 m față de limitele laterale (HG 525/1996)",
+      "retragere_spate": "min. 5,00 m față de limita posterioară (HG 525/1996)",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "conform normative MAI",
+      "parcaje": "Conform normativelor specifice MAI; autorizare cu avize MAI (RLU UTR2_S1)",
+      "utilizari_admise": [
+        "Post de Poliție și construcții aferente Ministerului Afacerilor Interne",
+        "Locuințe de serviciu"
+      ],
+      "utilizari_interzise": [
+        "Orice utilizări neautorizate de MAI"
+      ],
+      "note": "UTR2_S1 — Destinație specială intravilanul Holboca (MAI/Post Poliție, 0,648 ha, CF 65194). Autorizare cu aviz MAI."
     },
     "UTR22_G2": {
       "cod": "UTR22_G2",
@@ -228,12 +540,38 @@
       "denumire": "Subzona cimitirelor şi a amenajărilor aferente",
       "pot_max": 20.0,
       "cut_max": 0.4,
-      "hmax_m": 0.0,
+      "hmax_m": 6.0,
       "rh_max": "P+1E.",
       "parc_desc": "Pentru diferite servicii și birouri suprafaţa minimă a parcelei este de 300 mp și un front la stradă de minim 12 metri.",
       "aliniament": "La intersecţia dintre străzi aliniamentul va fi racordat printr-o linie perpendiculară pe bisectoarea unghiului dintre străzi, având o lungime de minim 12,00 metri pe străzi de categoria I, a II-a și ",
       "utiliz_admise_rezumat": "•\tcimitire și clădiri anexă:\no\tcimitire;\no\tbiserica;\no\tcapelă mortuară;\no\tmausoleu - osuar;\no\tcirculaţii carosabile;\no\tparcaje;\no\tcirculaţii pietonale;\no\tplantaţii;\no\tpavilion pentru administraţie, depozitare și anexe sanitare",
-      "utiliz_interzise_rezumat": "Se interzice densificarea cimitirelor existente prin ocuparea aleilor și distrugerea\nvegetaţiei din lungul acestora sau a celei perimetrale"
+      "utiliz_interzise_rezumat": "Se interzice densificarea cimitirelor existente prin ocuparea aleilor și distrugerea\nvegetaţiei din lungul acestora sau a celei perimetrale",
+      "pot_baza": 20,
+      "cut_baza": 0.4,
+      "niv_max": 2,
+      "regim": "P+1",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 3.0,
+      "retragere_fata": "min. 5,00 m față de aliniament; la intersecții racord de min. 6 m pe str.cat.III (RLU Art.5 G)",
+      "retragere_laterala": "H/2 min. 3,00 m față de limitele parcelei (RLU Art.6 G1)",
+      "retragere_spate": "H/2 min. 3,00 m față de limita posterioară (RLU Art.6 G1)",
+      "spatii_verzi_pct": 5,
+      "parcaje_min": "parcaje în afara circulațiilor publice, plantat 1 arbore/4 locuri",
+      "parcaje": "Parcaje în afara circulațiilor publice; plantate cu un arbore la 4 locuri; 15% din suprafața totală alocată circulațiilor (RLU Art.9 G2)",
+      "utilizari_admise": [
+        "Cimitire și clădiri anexe (capelă mortuară, mausoleu-osuar)",
+        "Circulații carosabile și pietonale",
+        "Parcaje",
+        "Plantații",
+        "Pavilion pentru administrație, depozitare și anexe sanitare",
+        "Biserică"
+      ],
+      "utilizari_interzise": [
+        "Densificarea cimitirelor existente prin ocuparea aleilor și distrugerea vegetației",
+        "Orice construcții permanente cu altă destinație"
+      ],
+      "note": "UTR22_G2 — G2 Cimitir. POT=20% CUT=0,40 pentru construcții anexe (RLU Art.15-16 G2). hmax=6,0m (P+1 × 3m). SV=5% (1% construcții, 3% spații verzi amenajate, 15% circulații din normativul de 10mp/loc de veci)."
     },
     "UTR23_G2": {
       "cod": "UTR23_G2",
@@ -242,12 +580,38 @@
       "denumire": "Subzona cimitirelor şi a amenajărilor aferente",
       "pot_max": 20.0,
       "cut_max": 0.4,
-      "hmax_m": 0.0,
+      "hmax_m": 6.0,
       "rh_max": "P+1E.",
       "parc_desc": "Pentru diferite servicii și birouri suprafaţa minimă a parcelei este de 300 mp și un front la stradă de minim 12 metri.",
       "aliniament": "La intersecţia dintre străzi aliniamentul va fi racordat printr-o linie perpendiculară pe bisectoarea unghiului dintre străzi, având o lungime de minim 12,00 metri pe străzi de categoria I, a II-a și ",
       "utiliz_admise_rezumat": "•\tcimitire și clădiri anexă:\no\tcimitire;\no\tbiserica;\no\tcapelă mortuară;\no\tmausoleu - osuar;\no\tcirculaţii carosabile;\no\tparcaje;\no\tcirculaţii pietonale;\no\tplantaţii;\no\tpavilion pentru administraţie, depozitare și anexe sanitare",
-      "utiliz_interzise_rezumat": "Se interzice densificarea cimitirelor existente prin ocuparea aleilor și distrugerea\nvegetaţiei din lungul acestora sau a celei perimetrale"
+      "utiliz_interzise_rezumat": "Se interzice densificarea cimitirelor existente prin ocuparea aleilor și distrugerea\nvegetaţiei din lungul acestora sau a celei perimetrale",
+      "pot_baza": 20,
+      "cut_baza": 0.4,
+      "niv_max": 2,
+      "regim": "P+1",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 3.0,
+      "retragere_fata": "min. 5,00 m față de aliniament; la intersecții racord de min. 6 m pe str.cat.III (RLU Art.5 G)",
+      "retragere_laterala": "H/2 min. 3,00 m față de limitele parcelei (RLU Art.6 G1)",
+      "retragere_spate": "H/2 min. 3,00 m față de limita posterioară (RLU Art.6 G1)",
+      "spatii_verzi_pct": 5,
+      "parcaje_min": "parcaje în afara circulațiilor publice, plantat 1 arbore/4 locuri",
+      "parcaje": "Parcaje în afara circulațiilor publice; plantate cu un arbore la 4 locuri; 15% din suprafața totală alocată circulațiilor (RLU Art.9 G2)",
+      "utilizari_admise": [
+        "Cimitire și clădiri anexe (capelă mortuară, mausoleu-osuar)",
+        "Circulații carosabile și pietonale",
+        "Parcaje",
+        "Plantații",
+        "Pavilion pentru administrație, depozitare și anexe sanitare",
+        "Biserică"
+      ],
+      "utilizari_interzise": [
+        "Densificarea cimitirelor existente prin ocuparea aleilor și distrugerea vegetației",
+        "Orice construcții permanente cu altă destinație"
+      ],
+      "note": "UTR23_G2 — G2 Cimitir. POT=20% CUT=0,40 pentru construcții anexe (RLU Art.15-16 G2). hmax=6,0m (P+1 × 3m). SV=5% (1% construcții, 3% spații verzi amenajate, 15% circulații din normativul de 10mp/loc de veci)."
     },
     "UTR15_V1": {
       "cod": "UTR15_V1",
@@ -256,12 +620,39 @@
       "denumire": "subzona spaţiilor verzi amenajate, scuarurilor publice, parcuri, spaţii verzi de agrement cu acces nelimitat (Zona de ag",
       "pot_max": 15.0,
       "cut_max": 0.15,
-      "hmax_m": 0.0,
+      "hmax_m": 6.0,
       "rh_max": "P+1E",
       "parc_desc": "Conform studiilor de specialitate avizate conform legii",
       "aliniament": "Conform studiilor de specialitate avizate conform legii.",
       "utiliz_admise_rezumat": "•\tspaţii plantate;\n•\tcirculaţii pietonale din care unele ocazional carosabile pentru întreţinerea spaţiilor plantate și accesul la activităţile permise;\n•\tdrumuri de halaj (traseu de-a lungul unei ape) din care se asigură - prin dimensionare corespunzătoare - accesul direct din drumuri publice la lac / curs de apa pentru aprovizionarea cu apă a mașinilor de pompieri de tonaj ridicat;\n•\tmobilier ur",
-      "utiliz_interzise_rezumat": "•\tse interzic orice intervenţii care contravin legilor și normelor în vigoare;\n•\tse interzic orice schimbări ale funcţiunilor spaţiilor verzi publice și specializate;\n•\tse interzice ocuparea malurilor între drumul de halaj și oglinda de apă ca și poziţionarea pe platforme flotante sau pe piloţi în i"
+      "utiliz_interzise_rezumat": "•\tse interzic orice intervenţii care contravin legilor și normelor în vigoare;\n•\tse interzic orice schimbări ale funcţiunilor spaţiilor verzi publice și specializate;\n•\tse interzice ocuparea malurilor între drumul de halaj și oglinda de apă ca și poziţionarea pe platforme flotante sau pe piloţi în i",
+      "pot_baza": 15,
+      "cut_baza": 0.15,
+      "niv_max": 2,
+      "regim": "P+1",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "conform studiilor de specialitate avizate; orientativ min. 5,00 m față de aliniament (RLU Art.5 V1)",
+      "retragere_laterala": "conform studiilor de specialitate avizate; orientativ min. 3,00 m (RLU Art.6 V1)",
+      "retragere_spate": "conform studiilor de specialitate avizate; orientativ min. 5,00 m (RLU Art.6 V1)",
+      "spatii_verzi_pct": 75,
+      "parcaje_min": "plantate cu arbore/4 locuri de parcare",
+      "parcaje": "Parcaje complementare funcțiunilor V1; plantate cu un arbore la 4 locuri; înconjurate de gard viu 1,20 m (RLU Art.9 V1)",
+      "utilizari_admise": [
+        "Spații plantate; circulații pietonale, ocazional carosabile pentru întreținere",
+        "Mobilier urban, amenajări pentru sport, joc și odihnă",
+        "Construcții pentru expoziții, activități culturale, sportive, alimentație publică și comerț",
+        "Adăposturi, grupuri sanitare, spații pentru administrare și întreținere",
+        "Parcaje complementare funcțiunilor specifice zonei V1"
+      ],
+      "utilizari_interzise": [
+        "Intervenții care contravin legilor și normelor în vigoare",
+        "Schimbări ale funcțiunilor spațiilor verzi publice",
+        "Localizarea tonetelor și tarabelor prin decuparea abuzivă a spațiilor plantate",
+        "Diminuarea suprafețelor împădurite, case de vacanță, locuințe permanente"
+      ],
+      "note": "UTR15_V1 — Zona de agrement Jijia. POT=15% CUT=0,15 (RLU Art.15-16 V1). hmax=6,0m (P+1). SV=75% (HG 525/1996 zone verzi/agrement)."
     },
     "UTR15_V2": {
       "cod": "UTR15_V2",
@@ -270,12 +661,32 @@
       "denumire": "subzona spaţiilor verzi cu destinaţie tehnică (culoare de protecţie pentru infrastructura de comunicaţie rutieră și fero",
       "pot_max": 15.0,
       "cut_max": 0.15,
-      "hmax_m": null,
+      "hmax_m": 6.0,
       "rh_max": "Conform legilor și normelor în vigoare care se aplică elementelor specifice generatoare ale zonelor de protecţie.",
       "parc_desc": "Conform studiilor de specialitate avizate conform legii. Lăţimea zonei verzi de protecţie faţă de infrastructura de circulaţii și reţele tehnice majore va respecta normele în vigoare.",
       "aliniament": "Conform studiilor de specialitate avizate conform legii.",
       "utiliz_admise_rezumat": "•\tconform legilor și normelor în vigoare care se aplică elementelor generatoare ale\nzonelor de protecţie",
-      "utiliz_interzise_rezumat": "•\tse interzic orice intervenţii care contravin legilor și normelor în vigoare;\n•\tse interzic orice schimbări ale funcţiunilor spaţiilor verzi publice și specializate;\n•\tse interzice ocuparea malurilor între drumul de halaj și oglinda de apă ca și poziţionarea pe platforme flotante sau pe piloţi în i"
+      "utiliz_interzise_rezumat": "•\tse interzic orice intervenţii care contravin legilor și normelor în vigoare;\n•\tse interzic orice schimbări ale funcţiunilor spaţiilor verzi publice și specializate;\n•\tse interzice ocuparea malurilor între drumul de halaj și oglinda de apă ca și poziţionarea pe platforme flotante sau pe piloţi în i",
+      "pot_baza": 15,
+      "cut_baza": 0.15,
+      "niv_max": 2,
+      "regim": "P+1 (max)",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "conform normelor specifice elementelor generatoare ale zonei de protecție (RLU Art.5 V2)",
+      "retragere_laterala": "conform normelor specifice (RLU Art.6 V2)",
+      "retragere_spate": "conform normelor specifice (RLU Art.6 V2)",
+      "spatii_verzi_pct": 75,
+      "parcaje_min": "nu se admit parcaje permanente",
+      "parcaje": "Nu se admit parcaje permanente; accese ocazionale pentru întreținere infrastructură (RLU Art.9 V2)",
+      "utilizari_admise": [
+        "Conform legilor și normelor în vigoare pentru elementele generatoare ale zonelor de protecție"
+      ],
+      "utilizari_interzise": [
+        "Construcții permanente incompatibile cu destinația tehnică de protecție"
+      ],
+      "note": "UTR15_V2 — Spații verzi cu destinație tehnică (protecție infrastructură). POT=15% CUT=0,15 (RLU Art.15-16 V2). hmax conform norme specifice."
     },
     "UTR5_IS1": {
       "cod": "UTR5_IS1",
@@ -284,12 +695,41 @@
       "denumire": "Subzonă instituțiilor publice și serviciilor de interes general",
       "pot_max": 50.0,
       "cut_max": 1.5,
-      "hmax_m": 12.0,
+      "hmax_m": 9.0,
       "rh_max": "S+P+1E+M",
       "parc_desc": "-\tRegim înșiruit: dimensiune minimă a terenului = 200mp, front minim = 8m;\n-\tRegim Cuplat: dimensiune minimă a terenului = 300mp, front minim = 12m;\n-\tRegim Izolat: dimensiune minimă a terenului = 300mp, front minim = 12m.",
       "aliniament": "Racordarea aliniamentelor la intersecţiile străzilor se va face printr-o linie perpendiculară pe bisectoarea unghiului dintre aliniamente, având lungimea de 12,00 metri pe străzile de categoria I–a și",
       "utiliz_admise_rezumat": "•\tinstituţii, servicii și echipamente publice de nivel comunal;\n•\tscoli, gradinite , crese\n•\tsedii ale unor companii și firme, servicii pentru întreprinderi, proiectare, cercetare, expertizare, consultanţă în diferite domenii și alte servicii profesionale;\n•\tservicii sociale,  medicale, colective și personale;\n•\tsedii ale unor organizaţii politice, profesionale etc.;\n•\tlăcașuri de cult;\n•\trestaura",
-      "utiliz_interzise_rezumat": "•\tse interzice localizarea restaurantelor care comercializează băuturi alcoolice la o distanţă mai mică de 100,00 metri de servicii și echipamente publice și de biserici;\n•\tdispunerea de panouri de afișaj pe plinurile faţadelor, desfigurând arhitectura și deteriorând finisajul acestora;\n•\tdepozitare"
+      "utiliz_interzise_rezumat": "•\tse interzice localizarea restaurantelor care comercializează băuturi alcoolice la o distanţă mai mică de 100,00 metri de servicii și echipamente publice și de biserici;\n•\tdispunerea de panouri de afișaj pe plinurile faţadelor, desfigurând arhitectura și deteriorând finisajul acestora;\n•\tdepozitare",
+      "pot_baza": 50,
+      "cut_baza": 1.5,
+      "niv_max": 3,
+      "regim": "P+2",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "pe aliniament sau retras cu min. 5,00 m în funcție de caracterul străzii (RLU Art.5 IS1/UTR5)",
+      "retragere_laterala": "H/2 min. 3,00 m față de limitele laterale (RLU Art.6 IS1)",
+      "retragere_spate": "H/2 min. 3,00 m față de limita posterioară (RLU Art.6 IS1)",
+      "spatii_verzi_pct": 30,
+      "parcaje_min": "1 loc/50 mp ADC servicii",
+      "parcaje": "1 loc/50 mp ADC pentru instituții publice și servicii; 1 loc/30 pers. pentru instituții deschise publicului (RLU Art.9 IS1/UTR5)",
+      "utilizari_admise": [
+        "Instituții, servicii și echipamente publice de nivel comunal",
+        "Sedii ale unor companii și firme, servicii profesionale, proiectare, cercetare",
+        "Servicii sociale, colective și personale",
+        "Școli, grădinițe, creșe",
+        "Sedii ale organizațiilor politice, profesionale",
+        "Comerț, alimentație publică, hoteluri, pensiuni",
+        "Servicii medicale, dispensare, farmacii",
+        "Parcaje publice, spații verzi amenajate"
+      ],
+      "utilizari_interzise": [
+        "Activități productive poluante sau cu risc tehnologic",
+        "Depozite en-gros incompatibile cu zona",
+        "Autobaze, stații de betoane"
+      ],
+      "note": "UTR5_IS1 — IS1 în UTR5 Holboca central. POT=50% CUT=1,50 (RLU Art.15-16 UTR5 IS). hmax=9,0m (P+2 × 3m)."
     },
     "UTR1_C1": {
       "cod": "UTR1_C1",
@@ -298,12 +738,40 @@
       "denumire": "subzona centrală şi funcţiuni complexe de interes general",
       "pot_max": 80.0,
       "cut_max": 1.0,
-      "hmax_m": 7.0,
+      "hmax_m": 16.0,
       "rh_max": "Înălţimea maximă admisibilă este egală cu distanţa dintre aliniamente; pot fi adăugate suplimentar unul sau două niveluri în funcţie de volumetria caracteristică străzii, cu condiţia retragerii acestora în limitele unui arc de cerc cu raza de 4,00 metri continuat cu tangenta sa la 45 grade. în toate cazurile în care construcţiile au acoperiș cu pante de peste 45 grade se admite mansardarea.În cazul racordării între străzi cu lăţimi diferite, cu clădiri având regim diferit de înălţime, se va prelungi regimul cel mai înalt spre strada secundară pe o lungime de 25,00 metri.",
       "parc_desc": "•\tîn cazul clădirilor cu înălţimi  P+2 niveluri se consideră construibile parcelele având minim 200 mp și un front la stradă de minim 10,00 m pentru clădirile alcătuind fronturi continue și de minim 12,00 metri în cazul celor cuplate și izolate cu parcelele  de  300 mp. în cazul clădirilor cu înălţi",
       "aliniament": "(1) Racordarea aliniamentelor la intersecţiile străzilor se va face printr-o linie perpendiculară pe bisectoarea unghiului dintre aliniamente, având lungimea de 8,00 metri pe străzile de categoria III",
       "utiliz_admise_rezumat": "•\tservicii financiar-bancare și de asigurări;\n•\tservicii autonome avansate (manageriale și profesionale);\n•\tservicii de formare – informare;\n•\tbiblioteci, mediateci;\n•\tpoștă și telecomunicaţii;\n•\tactivităţi asociative diverse (centre de zi – sociale);\n•\tscoli, gradinite si crese\n•\tsăli expoziţionale, galerii de artă;\n•\tservicii profesionale, colective și personale, servicii specializate de comerţ;",
-      "utiliz_interzise_rezumat": "•\tactivităţi care pot provoca degradarea clădirilor protejate sau sunt incompatibile cu statutul de zonă protejată;\n•\tactivităţi productive poluante, cu risc tehnologic sau incomode prin traficul generat;\n•\tcu excepţia telecomunicaţiilor speciale, se interzice dispunerea de piloneţi zăbreliţi (tripo"
+      "utiliz_interzise_rezumat": "•\tactivităţi care pot provoca degradarea clădirilor protejate sau sunt incompatibile cu statutul de zonă protejată;\n•\tactivităţi productive poluante, cu risc tehnologic sau incomode prin traficul generat;\n•\tcu excepţia telecomunicaţiilor speciale, se interzice dispunerea de piloneţi zăbreliţi (tripo",
+      "pot_baza": 80,
+      "cut_baza": 2.0,
+      "niv_max": 5,
+      "regim": "S+P+4",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "retragere la regimul de aliniere specific străzii; minim 5,00 m față de aliniament (RLU Art.5 L/UTR1)",
+      "retragere_laterala": "H/2 min. 3,00 m față de limitele laterale; alipit calcan admis până la 20,00 m de aliniament (RLU Art.6 L/UTR1)",
+      "retragere_spate": "H/2 min. 5,00 m față de limita posterioară (RLU Art.6 L/UTR1)",
+      "spatii_verzi_pct": 30,
+      "parcaje_min": "1 loc/80 mp suprafață locuibilă; 1 loc/50 mp ADC servicii",
+      "parcaje": "1 loc/80 mp suprafață locuibilă pentru locuințe; 1 loc/50 mp ADC pentru instituții publice și servicii; 1 loc/30 pers. pentru instituții deschise publicului (RLU Art.9 L/UTR1)",
+      "utilizari_admise": [
+        "Servicii financiar-bancare și de asigurări, servicii profesionale",
+        "Biblioteci, mediateci, poștă și telecomunicații",
+        "Activități asociative, centre de zi sociale, săli expoziționale, galerii de artă",
+        "Restaurante, cofetării, cafenele, baruri, centre de recreere și sport",
+        "Locuințe de tip S+P, P+1, P+2, P+3, P+4 (maxim 16 m la cornișă)",
+        "Clinici medicale, dispensare, farmacii",
+        "Parcuri și locuri de joacă pentru copii, piețe agroalimentare, parcări publice",
+        "Școli, grădinițe, creșe, biserici, capele"
+      ],
+      "utilizari_interzise": [
+        "Activități productive poluante sau cu risc tehnologic",
+        "Autobaze, stații de betoane, spălătorii chimice, depozite en-gros"
+      ],
+      "note": "UTR1 — Zona Centrală Dancu. POT=80% și CUT=2,00 pentru P+4; POT=40% CUT=1,20 pentru P+2 (RLU Art.15-16 UTR1). hmax=16m la cornișă (P+4 × 3,0m + S). Subzone: C1, L, IS1, IS2."
     },
     "UTR2_L1": {
       "cod": "UTR2_L1",
@@ -312,12 +780,40 @@
       "denumire": "subzona de locuire individuală situată în ţesut tradiţional cu regim de construire continuu şi discontinuu. Subzonă dezv",
       "pot_max": 40.0,
       "cut_max": 1.2,
-      "hmax_m": 10.0,
+      "hmax_m": 9.0,
       "rh_max": "P+2",
       "parc_desc": "-\tRegim înșiruit - Dimensiune minimă în cazul concesionării terenului / proprietate privata*: Suprafața terenului = 200mp și front minim = 8m; Dimensiune minimă în zone protejate: Suprafața terenului = 250 și front minim = 10m;\n-\tRegim Cuplat - Dimensiune minimă în cazul concesionării terenului / pr",
       "aliniament": "(1) Racordarea aliniamentelor la intersecţiile străzilor se va face printr-o linie perpendiculară pe bisectoarea unghiului dintre aliniamente, având lungimea de 12,00 metri pe străzile de categoria I–",
       "utiliz_admise_rezumat": "•\tlocuinţe individuale cu maxim 4 apartamente si  maxim P+2 niveluri în regim de construire continuu (înșiruit) sau discontinuu (cuplat sau izolat), anexe si garaje;\n•\techipamente publice specifice zonei rezidenţiale; scuaruri publice;\n•\tîmprejmuiri, căi de acces pietonale și private, parcaje, spaţii plantate;\n•\tmicro-obiective tehno-edilitare de producere a energiei electrice: centrale eoliene de",
-      "utiliz_interzise_rezumat": "•\tactivităţi productive poluante, cu risc tehnologic sau care sunt incomode prin traficul generat (vehicule de transport greu sau peste 5 autovehicule mici pe zi), prin utilizarea incintei pentru depozitare și producţie, prin deșeurile produse ori prin programul de activitate prelungit după orele 22"
+      "utiliz_interzise_rezumat": "•\tactivităţi productive poluante, cu risc tehnologic sau care sunt incomode prin traficul generat (vehicule de transport greu sau peste 5 autovehicule mici pe zi), prin utilizarea incintei pentru depozitare și producţie, prin deșeurile produse ori prin programul de activitate prelungit după orele 22",
+      "pot_baza": 40,
+      "cut_baza": 1.2,
+      "niv_max": 3,
+      "regim": "P+2",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "retragere la regimul de aliniere specific; minim 5,00 m față de aliniament pe str. cat. I-II (RLU Art.5 L)",
+      "retragere_laterala": "H/2 min. 3,00 m față de limitele laterale; alipit calcan admis până la 20,00 m de aliniament (RLU Art.6 L)",
+      "retragere_spate": "H/2 min. 5,00 m față de limita posterioară (RLU Art.6 L)",
+      "spatii_verzi_pct": 30,
+      "parcaje_min": "1 loc/80 mp suprafață locuibilă",
+      "parcaje": "1 loc/80 mp suprafață locuibilă; stationarea numai în interiorul parcelei (RLU Art.9 L)",
+      "utilizari_admise": [
+        "Locuințe individuale cu maxim 4 apartamente și maxim P+2 niveluri (continuu, cuplat sau izolat), anexe și garaje",
+        "Echipamente publice specifice zonei rezidențiale; scuaruri publice",
+        "Împrejmuiri, căi de acces pietonale și private, parcaje, spații plantate",
+        "Magazine de mici dimensiuni cu maxim 100 mp",
+        "Spații de depozitare și producție cu suprafață maximă 100 mp (cu acord notarial vecini)",
+        "Micro-obiective tehno-edilitare pentru energie regenerabilă (panouri solare, pompe căldură etc.)"
+      ],
+      "utilizari_interzise": [
+        "Activități productive poluante, cu risc tehnologic sau incomode prin traficul generat",
+        "Depozitarea pentru vânzare a cantităților mari de substanțe inflamabile sau toxice",
+        "Stații de betoane, autobaze, spălătorii chimice",
+        "Lucrări de terasament ce afectează amenajările din spațiile publice sau construcțiile adiacente"
+      ],
+      "note": "UTR2_L1 — L1, locuire individuală P+2. POT=40% CUT=1,20 (RLU Art.15-16 UTR 2,3,4,6,7). hmax=9,0m (P+2 × 3,0m)."
     },
     "UTR3_L1": {
       "cod": "UTR3_L1",
@@ -326,12 +822,40 @@
       "denumire": "subzona de locuire individuală situată în ţesut tradiţional cu regim de construire continuu şi discontinuu. Subzonă dezv",
       "pot_max": 40.0,
       "cut_max": 1.2,
-      "hmax_m": 10.0,
+      "hmax_m": 9.0,
       "rh_max": "P+2",
       "parc_desc": "-\tRegim înșiruit - Dimensiune minimă în cazul concesionării terenului / proprietate privata*: Suprafața terenului = 200mp și front minim = 8m; Dimensiune minimă în zone protejate: Suprafața terenului = 250 și front minim = 10m;\n-\tRegim Cuplat - Dimensiune minimă în cazul concesionării terenului / pr",
       "aliniament": "(1) Racordarea aliniamentelor la intersecţiile străzilor se va face printr-o linie perpendiculară pe bisectoarea unghiului dintre aliniamente, având lungimea de 12,00 metri pe străzile de categoria I–",
       "utiliz_admise_rezumat": "•\tlocuinţe individuale cu maxim 4 apartamente si  maxim P+2 niveluri în regim de construire continuu (înșiruit) sau discontinuu (cuplat sau izolat), anexe si garaje;\n•\techipamente publice specifice zonei rezidenţiale; scuaruri publice;\n•\tîmprejmuiri, căi de acces pietonale și private, parcaje, spaţii plantate;\n•\tmicro-obiective tehno-edilitare de producere a energiei electrice: centrale eoliene de",
-      "utiliz_interzise_rezumat": "•\tactivităţi productive poluante, cu risc tehnologic sau care sunt incomode prin traficul generat (vehicule de transport greu sau peste 5 autovehicule mici pe zi), prin utilizarea incintei pentru depozitare și producţie, prin deșeurile produse ori prin programul de activitate prelungit după orele 22"
+      "utiliz_interzise_rezumat": "•\tactivităţi productive poluante, cu risc tehnologic sau care sunt incomode prin traficul generat (vehicule de transport greu sau peste 5 autovehicule mici pe zi), prin utilizarea incintei pentru depozitare și producţie, prin deșeurile produse ori prin programul de activitate prelungit după orele 22",
+      "pot_baza": 40,
+      "cut_baza": 1.2,
+      "niv_max": 3,
+      "regim": "P+2",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "retragere la regimul de aliniere specific; minim 5,00 m față de aliniament pe str. cat. I-II (RLU Art.5 L)",
+      "retragere_laterala": "H/2 min. 3,00 m față de limitele laterale; alipit calcan admis până la 20,00 m de aliniament (RLU Art.6 L)",
+      "retragere_spate": "H/2 min. 5,00 m față de limita posterioară (RLU Art.6 L)",
+      "spatii_verzi_pct": 30,
+      "parcaje_min": "1 loc/80 mp suprafață locuibilă",
+      "parcaje": "1 loc/80 mp suprafață locuibilă; stationarea numai în interiorul parcelei (RLU Art.9 L)",
+      "utilizari_admise": [
+        "Locuințe individuale cu maxim 4 apartamente și maxim P+2 niveluri (continuu, cuplat sau izolat), anexe și garaje",
+        "Echipamente publice specifice zonei rezidențiale; scuaruri publice",
+        "Împrejmuiri, căi de acces pietonale și private, parcaje, spații plantate",
+        "Magazine de mici dimensiuni cu maxim 100 mp",
+        "Spații de depozitare și producție cu suprafață maximă 100 mp (cu acord notarial vecini)",
+        "Micro-obiective tehno-edilitare pentru energie regenerabilă (panouri solare, pompe căldură etc.)"
+      ],
+      "utilizari_interzise": [
+        "Activități productive poluante, cu risc tehnologic sau incomode prin traficul generat",
+        "Depozitarea pentru vânzare a cantităților mari de substanțe inflamabile sau toxice",
+        "Stații de betoane, autobaze, spălătorii chimice",
+        "Lucrări de terasament ce afectează amenajările din spațiile publice sau construcțiile adiacente"
+      ],
+      "note": "UTR3_L1 — L1, locuire individuală P+2. POT=40% CUT=1,20 (RLU Art.15-16 UTR 2,3,4,6,7). hmax=9,0m (P+2 × 3,0m)."
     },
     "UTR4_L1": {
       "cod": "UTR4_L1",
@@ -340,12 +864,40 @@
       "denumire": "subzona de locuire individuală situată în ţesut tradiţional cu regim de construire continuu şi discontinuu. Subzonă dezv",
       "pot_max": 40.0,
       "cut_max": 1.2,
-      "hmax_m": 10.0,
+      "hmax_m": 9.0,
       "rh_max": "P+2",
       "parc_desc": "-\tRegim înșiruit - Dimensiune minimă în cazul concesionării terenului / proprietate privata*: Suprafața terenului = 200mp și front minim = 8m; Dimensiune minimă în zone protejate: Suprafața terenului = 250 și front minim = 10m;\n-\tRegim Cuplat - Dimensiune minimă în cazul concesionării terenului / pr",
       "aliniament": "(1) Racordarea aliniamentelor la intersecţiile străzilor se va face printr-o linie perpendiculară pe bisectoarea unghiului dintre aliniamente, având lungimea de 12,00 metri pe străzile de categoria I–",
       "utiliz_admise_rezumat": "•\tlocuinţe individuale cu maxim 4 apartamente si  maxim P+2 niveluri în regim de construire continuu (înșiruit) sau discontinuu (cuplat sau izolat), anexe si garaje;\n•\techipamente publice specifice zonei rezidenţiale; scuaruri publice;\n•\tîmprejmuiri, căi de acces pietonale și private, parcaje, spaţii plantate;\n•\tmicro-obiective tehno-edilitare de producere a energiei electrice: centrale eoliene de",
-      "utiliz_interzise_rezumat": "•\tactivităţi productive poluante, cu risc tehnologic sau care sunt incomode prin traficul generat (vehicule de transport greu sau peste 5 autovehicule mici pe zi), prin utilizarea incintei pentru depozitare și producţie, prin deșeurile produse ori prin programul de activitate prelungit după orele 22"
+      "utiliz_interzise_rezumat": "•\tactivităţi productive poluante, cu risc tehnologic sau care sunt incomode prin traficul generat (vehicule de transport greu sau peste 5 autovehicule mici pe zi), prin utilizarea incintei pentru depozitare și producţie, prin deșeurile produse ori prin programul de activitate prelungit după orele 22",
+      "pot_baza": 40,
+      "cut_baza": 1.2,
+      "niv_max": 3,
+      "regim": "P+2",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "retragere la regimul de aliniere specific; minim 5,00 m față de aliniament pe str. cat. I-II (RLU Art.5 L)",
+      "retragere_laterala": "H/2 min. 3,00 m față de limitele laterale; alipit calcan admis până la 20,00 m de aliniament (RLU Art.6 L)",
+      "retragere_spate": "H/2 min. 5,00 m față de limita posterioară (RLU Art.6 L)",
+      "spatii_verzi_pct": 30,
+      "parcaje_min": "1 loc/80 mp suprafață locuibilă",
+      "parcaje": "1 loc/80 mp suprafață locuibilă; stationarea numai în interiorul parcelei (RLU Art.9 L)",
+      "utilizari_admise": [
+        "Locuințe individuale cu maxim 4 apartamente și maxim P+2 niveluri (continuu, cuplat sau izolat), anexe și garaje",
+        "Echipamente publice specifice zonei rezidențiale; scuaruri publice",
+        "Împrejmuiri, căi de acces pietonale și private, parcaje, spații plantate",
+        "Magazine de mici dimensiuni cu maxim 100 mp",
+        "Spații de depozitare și producție cu suprafață maximă 100 mp (cu acord notarial vecini)",
+        "Micro-obiective tehno-edilitare pentru energie regenerabilă (panouri solare, pompe căldură etc.)"
+      ],
+      "utilizari_interzise": [
+        "Activități productive poluante, cu risc tehnologic sau incomode prin traficul generat",
+        "Depozitarea pentru vânzare a cantităților mari de substanțe inflamabile sau toxice",
+        "Stații de betoane, autobaze, spălătorii chimice",
+        "Lucrări de terasament ce afectează amenajările din spațiile publice sau construcțiile adiacente"
+      ],
+      "note": "UTR4_L1 — L1, locuire individuală P+2. POT=40% CUT=1,20 (RLU Art.15-16 UTR 2,3,4,6,7). hmax=9,0m (P+2 × 3,0m)."
     },
     "UTR5_L1": {
       "cod": "UTR5_L1",
@@ -354,12 +906,40 @@
       "denumire": "subzona de locuire individuală situată în ţesut tradiţional cu regim de construire continuu şi discontinuu. Subzonă dezv",
       "pot_max": 40.0,
       "cut_max": 1.2,
-      "hmax_m": 10.0,
+      "hmax_m": 9.0,
       "rh_max": "P+2",
       "parc_desc": "-\tRegim înșiruit - Dimensiune minimă în cazul concesionării terenului / proprietate privata*: Suprafața terenului = 200mp și front minim = 8m; Dimensiune minimă în zone protejate: Suprafața terenului = 250 și front minim = 10m;\n-\tRegim Cuplat - Dimensiune minimă în cazul concesionării terenului / pr",
       "aliniament": "(1) Racordarea aliniamentelor la intersecţiile străzilor se va face printr-o linie perpendiculară pe bisectoarea unghiului dintre aliniamente, având lungimea de 12,00 metri pe străzile de categoria I–",
       "utiliz_admise_rezumat": "•\tlocuinţe individuale cu maxim 4 apartamente si  maxim P+2 niveluri în regim de construire continuu (înșiruit) sau discontinuu (cuplat sau izolat), anexe si garaje;\n•\techipamente publice specifice zonei rezidenţiale; scuaruri publice;\n•\tîmprejmuiri, căi de acces pietonale și private, parcaje, spaţii plantate;\n•\tmicro-obiective tehno-edilitare de producere a energiei electrice: centrale eoliene de",
-      "utiliz_interzise_rezumat": "•\tactivităţi productive poluante, cu risc tehnologic sau care sunt incomode prin traficul generat (vehicule de transport greu sau peste 5 autovehicule mici pe zi), prin utilizarea incintei pentru depozitare și producţie, prin deșeurile produse ori prin programul de activitate prelungit după orele 22"
+      "utiliz_interzise_rezumat": "•\tactivităţi productive poluante, cu risc tehnologic sau care sunt incomode prin traficul generat (vehicule de transport greu sau peste 5 autovehicule mici pe zi), prin utilizarea incintei pentru depozitare și producţie, prin deșeurile produse ori prin programul de activitate prelungit după orele 22",
+      "pot_baza": 30,
+      "cut_baza": 0.9,
+      "niv_max": 3,
+      "regim": "P+2",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "retragere la regimul de aliniere specific; minim 5,00 m față de aliniament (RLU Art.5 L/UTR5)",
+      "retragere_laterala": "H/2 min. 3,00 m față de limitele laterale (RLU Art.6 L/UTR5)",
+      "retragere_spate": "H/2 min. 5,00 m față de limita posterioară (RLU Art.6 L/UTR5)",
+      "spatii_verzi_pct": 30,
+      "parcaje_min": "1 loc/80 mp suprafață locuibilă",
+      "parcaje": "1 loc/80 mp suprafață locuibilă; stationarea numai în interiorul parcelei (RLU Art.9 L)",
+      "utilizari_admise": [
+        "Locuințe individuale cu maxim 4 apartamente și maxim P+2 niveluri (continuu, cuplat sau izolat), anexe și garaje",
+        "Echipamente publice specifice zonei rezidențiale; scuaruri publice",
+        "Împrejmuiri, căi de acces pietonale și private, parcaje, spații plantate",
+        "Magazine de mici dimensiuni cu maxim 100 mp",
+        "Spații de depozitare și producție cu suprafață maximă 100 mp (cu acord notarial vecini)",
+        "Micro-obiective tehno-edilitare pentru energie regenerabilă (panouri solare, pompe căldură etc.)"
+      ],
+      "utilizari_interzise": [
+        "Activități productive poluante, cu risc tehnologic sau incomode prin traficul generat",
+        "Depozitarea pentru vânzare a cantităților mari de substanțe inflamabile sau toxice",
+        "Stații de betoane, autobaze, spălătorii chimice",
+        "Lucrări de terasament ce afectează amenajările din spațiile publice sau construcțiile adiacente"
+      ],
+      "note": "UTR5_L1 — subzona L din UTR5 Holboca central. POT=30% CUT=0,90 (RLU Art.15-16 UTR5, subzona L1). hmax=9,0m."
     },
     "UTR6_L1": {
       "cod": "UTR6_L1",
@@ -368,12 +948,40 @@
       "denumire": "subzona de locuire individuală situată în ţesut tradiţional cu regim de construire continuu şi discontinuu. Subzonă dezv",
       "pot_max": 40.0,
       "cut_max": 1.2,
-      "hmax_m": 10.0,
+      "hmax_m": 9.0,
       "rh_max": "P+2",
       "parc_desc": "-\tRegim înșiruit - Dimensiune minimă în cazul concesionării terenului / proprietate privata*: Suprafața terenului = 200mp și front minim = 8m; Dimensiune minimă în zone protejate: Suprafața terenului = 250 și front minim = 10m;\n-\tRegim Cuplat - Dimensiune minimă în cazul concesionării terenului / pr",
       "aliniament": "(1) Racordarea aliniamentelor la intersecţiile străzilor se va face printr-o linie perpendiculară pe bisectoarea unghiului dintre aliniamente, având lungimea de 12,00 metri pe străzile de categoria I–",
       "utiliz_admise_rezumat": "•\tlocuinţe individuale cu maxim 4 apartamente si  maxim P+2 niveluri în regim de construire continuu (înșiruit) sau discontinuu (cuplat sau izolat), anexe si garaje;\n•\techipamente publice specifice zonei rezidenţiale; scuaruri publice;\n•\tîmprejmuiri, căi de acces pietonale și private, parcaje, spaţii plantate;\n•\tmicro-obiective tehno-edilitare de producere a energiei electrice: centrale eoliene de",
-      "utiliz_interzise_rezumat": "•\tactivităţi productive poluante, cu risc tehnologic sau care sunt incomode prin traficul generat (vehicule de transport greu sau peste 5 autovehicule mici pe zi), prin utilizarea incintei pentru depozitare și producţie, prin deșeurile produse ori prin programul de activitate prelungit după orele 22"
+      "utiliz_interzise_rezumat": "•\tactivităţi productive poluante, cu risc tehnologic sau care sunt incomode prin traficul generat (vehicule de transport greu sau peste 5 autovehicule mici pe zi), prin utilizarea incintei pentru depozitare și producţie, prin deșeurile produse ori prin programul de activitate prelungit după orele 22",
+      "pot_baza": 40,
+      "cut_baza": 1.2,
+      "niv_max": 3,
+      "regim": "P+2",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "retragere la regimul de aliniere specific; minim 5,00 m față de aliniament pe str. cat. I-II (RLU Art.5 L)",
+      "retragere_laterala": "H/2 min. 3,00 m față de limitele laterale; alipit calcan admis până la 20,00 m de aliniament (RLU Art.6 L)",
+      "retragere_spate": "H/2 min. 5,00 m față de limita posterioară (RLU Art.6 L)",
+      "spatii_verzi_pct": 30,
+      "parcaje_min": "1 loc/80 mp suprafață locuibilă",
+      "parcaje": "1 loc/80 mp suprafață locuibilă; stationarea numai în interiorul parcelei (RLU Art.9 L)",
+      "utilizari_admise": [
+        "Locuințe individuale cu maxim 4 apartamente și maxim P+2 niveluri (continuu, cuplat sau izolat), anexe și garaje",
+        "Echipamente publice specifice zonei rezidențiale; scuaruri publice",
+        "Împrejmuiri, căi de acces pietonale și private, parcaje, spații plantate",
+        "Magazine de mici dimensiuni cu maxim 100 mp",
+        "Spații de depozitare și producție cu suprafață maximă 100 mp (cu acord notarial vecini)",
+        "Micro-obiective tehno-edilitare pentru energie regenerabilă (panouri solare, pompe căldură etc.)"
+      ],
+      "utilizari_interzise": [
+        "Activități productive poluante, cu risc tehnologic sau incomode prin traficul generat",
+        "Depozitarea pentru vânzare a cantităților mari de substanțe inflamabile sau toxice",
+        "Stații de betoane, autobaze, spălătorii chimice",
+        "Lucrări de terasament ce afectează amenajările din spațiile publice sau construcțiile adiacente"
+      ],
+      "note": "UTR6_L1 — L1, locuire individuală P+2. POT=40% CUT=1,20 (RLU Art.15-16 UTR 2,3,4,6,7). hmax=9,0m (P+2 × 3,0m)."
     },
     "UTR7_L1": {
       "cod": "UTR7_L1",
@@ -382,12 +990,40 @@
       "denumire": "subzona de locuire individuală situată în ţesut tradiţional cu regim de construire continuu şi discontinuu. Subzonă dezv",
       "pot_max": 40.0,
       "cut_max": 1.2,
-      "hmax_m": 10.0,
+      "hmax_m": 9.0,
       "rh_max": "P+2",
       "parc_desc": "-\tRegim înșiruit - Dimensiune minimă în cazul concesionării terenului / proprietate privata*: Suprafața terenului = 200mp și front minim = 8m; Dimensiune minimă în zone protejate: Suprafața terenului = 250 și front minim = 10m;\n-\tRegim Cuplat - Dimensiune minimă în cazul concesionării terenului / pr",
       "aliniament": "(1) Racordarea aliniamentelor la intersecţiile străzilor se va face printr-o linie perpendiculară pe bisectoarea unghiului dintre aliniamente, având lungimea de 12,00 metri pe străzile de categoria I–",
       "utiliz_admise_rezumat": "•\tlocuinţe individuale cu maxim 4 apartamente si  maxim P+2 niveluri în regim de construire continuu (înșiruit) sau discontinuu (cuplat sau izolat), anexe si garaje;\n•\techipamente publice specifice zonei rezidenţiale; scuaruri publice;\n•\tîmprejmuiri, căi de acces pietonale și private, parcaje, spaţii plantate;\n•\tmicro-obiective tehno-edilitare de producere a energiei electrice: centrale eoliene de",
-      "utiliz_interzise_rezumat": "•\tactivităţi productive poluante, cu risc tehnologic sau care sunt incomode prin traficul generat (vehicule de transport greu sau peste 5 autovehicule mici pe zi), prin utilizarea incintei pentru depozitare și producţie, prin deșeurile produse ori prin programul de activitate prelungit după orele 22"
+      "utiliz_interzise_rezumat": "•\tactivităţi productive poluante, cu risc tehnologic sau care sunt incomode prin traficul generat (vehicule de transport greu sau peste 5 autovehicule mici pe zi), prin utilizarea incintei pentru depozitare și producţie, prin deșeurile produse ori prin programul de activitate prelungit după orele 22",
+      "pot_baza": 40,
+      "cut_baza": 1.2,
+      "niv_max": 3,
+      "regim": "P+2",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "retragere la regimul de aliniere specific; minim 5,00 m față de aliniament pe str. cat. I-II (RLU Art.5 L)",
+      "retragere_laterala": "H/2 min. 3,00 m față de limitele laterale; alipit calcan admis până la 20,00 m de aliniament (RLU Art.6 L)",
+      "retragere_spate": "H/2 min. 5,00 m față de limita posterioară (RLU Art.6 L)",
+      "spatii_verzi_pct": 30,
+      "parcaje_min": "1 loc/80 mp suprafață locuibilă",
+      "parcaje": "1 loc/80 mp suprafață locuibilă; stationarea numai în interiorul parcelei (RLU Art.9 L)",
+      "utilizari_admise": [
+        "Locuințe individuale cu maxim 4 apartamente și maxim P+2 niveluri (continuu, cuplat sau izolat), anexe și garaje",
+        "Echipamente publice specifice zonei rezidențiale; scuaruri publice",
+        "Împrejmuiri, căi de acces pietonale și private, parcaje, spații plantate",
+        "Magazine de mici dimensiuni cu maxim 100 mp",
+        "Spații de depozitare și producție cu suprafață maximă 100 mp (cu acord notarial vecini)",
+        "Micro-obiective tehno-edilitare pentru energie regenerabilă (panouri solare, pompe căldură etc.)"
+      ],
+      "utilizari_interzise": [
+        "Activități productive poluante, cu risc tehnologic sau incomode prin traficul generat",
+        "Depozitarea pentru vânzare a cantităților mari de substanțe inflamabile sau toxice",
+        "Stații de betoane, autobaze, spălătorii chimice",
+        "Lucrări de terasament ce afectează amenajările din spațiile publice sau construcțiile adiacente"
+      ],
+      "note": "UTR7_L1 — L1, locuire individuală P+2. POT=40% CUT=1,20 (RLU Art.15-16 UTR 2,3,4,6,7). hmax=9,0m (P+2 × 3,0m)."
     },
     "UTR9_L1": {
       "cod": "UTR9_L1",
@@ -396,12 +1032,40 @@
       "denumire": "subzona de locuire individuală situată în ţesut tradiţional cu regim de construire continuu şi discontinuu. Subzonă dezv",
       "pot_max": 20.0,
       "cut_max": 0.4,
-      "hmax_m": 10.0,
+      "hmax_m": 6.0,
       "rh_max": "P+1+M",
       "parc_desc": "-\tRegim înșiruit - Dimensiune minimă în cazul concesionării terenului / proprietate privata*: Suprafața terenului = 200mp și front minim = 8m; Dimensiune minimă în zone protejate: Suprafața terenului = 250 și front minim = 10m;\n-\tRegim Cuplat - Dimensiune minimă în cazul concesionării terenului / pr",
       "aliniament": "(1) Racordarea aliniamentelor la intersecţiile străzilor se va face printr-o linie perpendiculară pe bisectoarea unghiului dintre aliniamente, având lungimea de 12,00 metri pe străzile de categoria I–",
       "utiliz_admise_rezumat": "•\tlocuinţe individuale cu maxim 4 apartamente si  maxim P+2 niveluri în regim de construire continuu (înșiruit) sau discontinuu (cuplat sau izolat), anexe si garaje;\n•\techipamente publice specifice zonei rezidenţiale; scuaruri publice;\n•\tîmprejmuiri, căi de acces pietonale și private, parcaje, spaţii plantate;\n•\tmicro-obiective tehno-edilitare de producere a energiei electrice: centrale eoliene de",
-      "utiliz_interzise_rezumat": "•\tactivităţi productive poluante, cu risc tehnologic sau care sunt incomode prin traficul generat (vehicule de transport greu sau peste 5 autovehicule mici pe zi), prin utilizarea incintei pentru depozitare și producţie, prin deșeurile produse ori prin programul de activitate prelungit după orele 22"
+      "utiliz_interzise_rezumat": "•\tactivităţi productive poluante, cu risc tehnologic sau care sunt incomode prin traficul generat (vehicule de transport greu sau peste 5 autovehicule mici pe zi), prin utilizarea incintei pentru depozitare și producţie, prin deșeurile produse ori prin programul de activitate prelungit după orele 22",
+      "pot_baza": 20,
+      "cut_baza": 0.4,
+      "niv_max": 3,
+      "regim": "P+1+M",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "retragere la regimul de aliniere specific; minim 5,00 m față de aliniament (RLU Art.5 L)",
+      "retragere_laterala": "H/2 min. 3,00 m față de limitele laterale (RLU Art.6 L)",
+      "retragere_spate": "H/2 min. 5,00 m față de limita posterioară (RLU Art.6 L)",
+      "spatii_verzi_pct": 30,
+      "parcaje_min": "1 loc/80 mp suprafață locuibilă",
+      "parcaje": "1 loc/80 mp suprafață locuibilă; stationarea numai în interiorul parcelei (RLU Art.9 L)",
+      "utilizari_admise": [
+        "Locuințe individuale cu maxim 4 apartamente și maxim P+2 niveluri (continuu, cuplat sau izolat), anexe și garaje",
+        "Echipamente publice specifice zonei rezidențiale; scuaruri publice",
+        "Împrejmuiri, căi de acces pietonale și private, parcaje, spații plantate",
+        "Magazine de mici dimensiuni cu maxim 100 mp",
+        "Spații de depozitare și producție cu suprafață maximă 100 mp (cu acord notarial vecini)",
+        "Micro-obiective tehno-edilitare pentru energie regenerabilă (panouri solare, pompe căldură etc.)"
+      ],
+      "utilizari_interzise": [
+        "Activități productive poluante, cu risc tehnologic sau incomode prin traficul generat",
+        "Depozitarea pentru vânzare a cantităților mari de substanțe inflamabile sau toxice",
+        "Stații de betoane, autobaze, spălătorii chimice",
+        "Lucrări de terasament ce afectează amenajările din spațiile publice sau construcțiile adiacente"
+      ],
+      "note": "UTR9_L1 — L1 P+1+M. POT=20% CUT=0,40 (RLU Art.15-16). hmax=6,0m (P+1+M ≈ 3×2,0+0m cornișă~6m)."
     },
     "UTR16_L1": {
       "cod": "UTR16_L1",
@@ -410,12 +1074,40 @@
       "denumire": "subzona de locuire individuală situată în ţesut tradiţional cu regim de construire continuu şi discontinuu. Subzonă dezv",
       "pot_max": 20.0,
       "cut_max": 0.4,
-      "hmax_m": 10.0,
+      "hmax_m": 6.0,
       "rh_max": "P+1+M",
       "parc_desc": "-\tRegim înșiruit - Dimensiune minimă în cazul concesionării terenului / proprietate privata*: Suprafața terenului = 200mp și front minim = 8m; Dimensiune minimă în zone protejate: Suprafața terenului = 250 și front minim = 10m;\n-\tRegim Cuplat - Dimensiune minimă în cazul concesionării terenului / pr",
       "aliniament": "(1) Racordarea aliniamentelor la intersecţiile străzilor se va face printr-o linie perpendiculară pe bisectoarea unghiului dintre aliniamente, având lungimea de 12,00 metri pe străzile de categoria I–",
       "utiliz_admise_rezumat": "•\tlocuinţe individuale cu maxim 4 apartamente si  maxim P+2 niveluri în regim de construire continuu (înșiruit) sau discontinuu (cuplat sau izolat), anexe si garaje;\n•\techipamente publice specifice zonei rezidenţiale; scuaruri publice;\n•\tîmprejmuiri, căi de acces pietonale și private, parcaje, spaţii plantate;\n•\tmicro-obiective tehno-edilitare de producere a energiei electrice: centrale eoliene de",
-      "utiliz_interzise_rezumat": "•\tactivităţi productive poluante, cu risc tehnologic sau care sunt incomode prin traficul generat (vehicule de transport greu sau peste 5 autovehicule mici pe zi), prin utilizarea incintei pentru depozitare și producţie, prin deșeurile produse ori prin programul de activitate prelungit după orele 22"
+      "utiliz_interzise_rezumat": "•\tactivităţi productive poluante, cu risc tehnologic sau care sunt incomode prin traficul generat (vehicule de transport greu sau peste 5 autovehicule mici pe zi), prin utilizarea incintei pentru depozitare și producţie, prin deșeurile produse ori prin programul de activitate prelungit după orele 22",
+      "pot_baza": 20,
+      "cut_baza": 0.4,
+      "niv_max": 3,
+      "regim": "P+1+M",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "retragere la regimul de aliniere specific; minim 5,00 m față de aliniament (RLU Art.5 L)",
+      "retragere_laterala": "H/2 min. 3,00 m față de limitele laterale (RLU Art.6 L)",
+      "retragere_spate": "H/2 min. 5,00 m față de limita posterioară (RLU Art.6 L)",
+      "spatii_verzi_pct": 30,
+      "parcaje_min": "1 loc/80 mp suprafață locuibilă",
+      "parcaje": "1 loc/80 mp suprafață locuibilă; stationarea numai în interiorul parcelei (RLU Art.9 L)",
+      "utilizari_admise": [
+        "Locuințe individuale cu maxim 4 apartamente și maxim P+2 niveluri (continuu, cuplat sau izolat), anexe și garaje",
+        "Echipamente publice specifice zonei rezidențiale; scuaruri publice",
+        "Împrejmuiri, căi de acces pietonale și private, parcaje, spații plantate",
+        "Magazine de mici dimensiuni cu maxim 100 mp",
+        "Spații de depozitare și producție cu suprafață maximă 100 mp (cu acord notarial vecini)",
+        "Micro-obiective tehno-edilitare pentru energie regenerabilă (panouri solare, pompe căldură etc.)"
+      ],
+      "utilizari_interzise": [
+        "Activități productive poluante, cu risc tehnologic sau incomode prin traficul generat",
+        "Depozitarea pentru vânzare a cantităților mari de substanțe inflamabile sau toxice",
+        "Stații de betoane, autobaze, spălătorii chimice",
+        "Lucrări de terasament ce afectează amenajările din spațiile publice sau construcțiile adiacente"
+      ],
+      "note": "UTR16_L1 — L1 P+1+M. POT=20% CUT=0,40 (RLU Art.15-16). hmax=6,0m (P+1+M ≈ 3×2,0+0m cornișă~6m)."
     },
     "UTR19_L1": {
       "cod": "UTR19_L1",
@@ -424,12 +1116,40 @@
       "denumire": "subzona de locuire individuală situată în ţesut tradiţional cu regim de construire continuu şi discontinuu. Subzonă dezv",
       "pot_max": 30.0,
       "cut_max": 0.6,
-      "hmax_m": 10.0,
+      "hmax_m": 4.5,
       "rh_max": "P+M",
       "parc_desc": "-\tRegim înșiruit - Dimensiune minimă în cazul concesionării terenului / proprietate privata*: Suprafața terenului = 200mp și front minim = 8m; Dimensiune minimă în zone protejate: Suprafața terenului = 250 și front minim = 10m;\n-\tRegim Cuplat - Dimensiune minimă în cazul concesionării terenului / pr",
       "aliniament": "(1) Racordarea aliniamentelor la intersecţiile străzilor se va face printr-o linie perpendiculară pe bisectoarea unghiului dintre aliniamente, având lungimea de 12,00 metri pe străzile de categoria I–",
       "utiliz_admise_rezumat": "•\tlocuinţe individuale cu maxim 4 apartamente si  maxim P+2 niveluri în regim de construire continuu (înșiruit) sau discontinuu (cuplat sau izolat), anexe si garaje;\n•\techipamente publice specifice zonei rezidenţiale; scuaruri publice;\n•\tîmprejmuiri, căi de acces pietonale și private, parcaje, spaţii plantate;\n•\tmicro-obiective tehno-edilitare de producere a energiei electrice: centrale eoliene de",
-      "utiliz_interzise_rezumat": "•\tactivităţi productive poluante, cu risc tehnologic sau care sunt incomode prin traficul generat (vehicule de transport greu sau peste 5 autovehicule mici pe zi), prin utilizarea incintei pentru depozitare și producţie, prin deșeurile produse ori prin programul de activitate prelungit după orele 22"
+      "utiliz_interzise_rezumat": "•\tactivităţi productive poluante, cu risc tehnologic sau care sunt incomode prin traficul generat (vehicule de transport greu sau peste 5 autovehicule mici pe zi), prin utilizarea incintei pentru depozitare și producţie, prin deșeurile produse ori prin programul de activitate prelungit după orele 22",
+      "pot_baza": 30,
+      "cut_baza": 0.6,
+      "niv_max": 2,
+      "regim": "P+M",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "retragere la regimul de aliniere specific; minim 5,00 m față de aliniament (RLU Art.5 L)",
+      "retragere_laterala": "H/2 min. 3,00 m față de limitele laterale (RLU Art.6 L)",
+      "retragere_spate": "H/2 min. 5,00 m față de limita posterioară (RLU Art.6 L)",
+      "spatii_verzi_pct": 30,
+      "parcaje_min": "1 loc/80 mp suprafață locuibilă",
+      "parcaje": "1 loc/80 mp suprafață locuibilă; stationarea numai în interiorul parcelei (RLU Art.9 L)",
+      "utilizari_admise": [
+        "Locuințe individuale cu maxim 4 apartamente și maxim P+2 niveluri (continuu, cuplat sau izolat), anexe și garaje",
+        "Echipamente publice specifice zonei rezidențiale; scuaruri publice",
+        "Împrejmuiri, căi de acces pietonale și private, parcaje, spații plantate",
+        "Magazine de mici dimensiuni cu maxim 100 mp",
+        "Spații de depozitare și producție cu suprafață maximă 100 mp (cu acord notarial vecini)",
+        "Micro-obiective tehno-edilitare pentru energie regenerabilă (panouri solare, pompe căldură etc.)"
+      ],
+      "utilizari_interzise": [
+        "Activități productive poluante, cu risc tehnologic sau incomode prin traficul generat",
+        "Depozitarea pentru vânzare a cantităților mari de substanțe inflamabile sau toxice",
+        "Stații de betoane, autobaze, spălătorii chimice",
+        "Lucrări de terasament ce afectează amenajările din spațiile publice sau construcțiile adiacente"
+      ],
+      "note": "UTR19_L1 — L1 P+M (parter+mansardă). POT=30% CUT=0,60 (RLU Art.15-16). hmax=4,5m (P=3m + M~1,5m cornișă)."
     },
     "UTR20_L1": {
       "cod": "UTR20_L1",
@@ -438,12 +1158,40 @@
       "denumire": "subzona de locuire individuală situată în ţesut tradiţional cu regim de construire continuu şi discontinuu. Subzonă dezv",
       "pot_max": 30.0,
       "cut_max": 0.6,
-      "hmax_m": 10.0,
+      "hmax_m": 4.5,
       "rh_max": "P+M",
       "parc_desc": "-\tRegim înșiruit - Dimensiune minimă în cazul concesionării terenului / proprietate privata*: Suprafața terenului = 200mp și front minim = 8m; Dimensiune minimă în zone protejate: Suprafața terenului = 250 și front minim = 10m;\n-\tRegim Cuplat - Dimensiune minimă în cazul concesionării terenului / pr",
       "aliniament": "(1) Racordarea aliniamentelor la intersecţiile străzilor se va face printr-o linie perpendiculară pe bisectoarea unghiului dintre aliniamente, având lungimea de 12,00 metri pe străzile de categoria I–",
       "utiliz_admise_rezumat": "•\tlocuinţe individuale cu maxim 4 apartamente si  maxim P+2 niveluri în regim de construire continuu (înșiruit) sau discontinuu (cuplat sau izolat), anexe si garaje;\n•\techipamente publice specifice zonei rezidenţiale; scuaruri publice;\n•\tîmprejmuiri, căi de acces pietonale și private, parcaje, spaţii plantate;\n•\tmicro-obiective tehno-edilitare de producere a energiei electrice: centrale eoliene de",
-      "utiliz_interzise_rezumat": "•\tactivităţi productive poluante, cu risc tehnologic sau care sunt incomode prin traficul generat (vehicule de transport greu sau peste 5 autovehicule mici pe zi), prin utilizarea incintei pentru depozitare și producţie, prin deșeurile produse ori prin programul de activitate prelungit după orele 22"
+      "utiliz_interzise_rezumat": "•\tactivităţi productive poluante, cu risc tehnologic sau care sunt incomode prin traficul generat (vehicule de transport greu sau peste 5 autovehicule mici pe zi), prin utilizarea incintei pentru depozitare și producţie, prin deșeurile produse ori prin programul de activitate prelungit după orele 22",
+      "pot_baza": 30,
+      "cut_baza": 0.6,
+      "niv_max": 2,
+      "regim": "P+M",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "retragere la regimul de aliniere specific; minim 5,00 m față de aliniament (RLU Art.5 L)",
+      "retragere_laterala": "H/2 min. 3,00 m față de limitele laterale (RLU Art.6 L)",
+      "retragere_spate": "H/2 min. 5,00 m față de limita posterioară (RLU Art.6 L)",
+      "spatii_verzi_pct": 30,
+      "parcaje_min": "1 loc/80 mp suprafață locuibilă",
+      "parcaje": "1 loc/80 mp suprafață locuibilă; stationarea numai în interiorul parcelei (RLU Art.9 L)",
+      "utilizari_admise": [
+        "Locuințe individuale cu maxim 4 apartamente și maxim P+2 niveluri (continuu, cuplat sau izolat), anexe și garaje",
+        "Echipamente publice specifice zonei rezidențiale; scuaruri publice",
+        "Împrejmuiri, căi de acces pietonale și private, parcaje, spații plantate",
+        "Magazine de mici dimensiuni cu maxim 100 mp",
+        "Spații de depozitare și producție cu suprafață maximă 100 mp (cu acord notarial vecini)",
+        "Micro-obiective tehno-edilitare pentru energie regenerabilă (panouri solare, pompe căldură etc.)"
+      ],
+      "utilizari_interzise": [
+        "Activități productive poluante, cu risc tehnologic sau incomode prin traficul generat",
+        "Depozitarea pentru vânzare a cantităților mari de substanțe inflamabile sau toxice",
+        "Stații de betoane, autobaze, spălătorii chimice",
+        "Lucrări de terasament ce afectează amenajările din spațiile publice sau construcțiile adiacente"
+      ],
+      "note": "UTR20_L1 — L1 P+M (parter+mansardă). POT=30% CUT=0,60 (RLU Art.15-16). hmax=4,5m (P=3m + M~1,5m cornișă)."
     },
     "UTR21_L1": {
       "cod": "UTR21_L1",
@@ -452,12 +1200,40 @@
       "denumire": "subzona de locuire individuală situată în ţesut tradiţional cu regim de construire continuu şi discontinuu. Subzonă dezv",
       "pot_max": 20.0,
       "cut_max": 0.4,
-      "hmax_m": 10.0,
+      "hmax_m": 4.5,
       "rh_max": "P+M",
       "parc_desc": "-\tRegim înșiruit - Dimensiune minimă în cazul concesionării terenului / proprietate privata*: Suprafața terenului = 200mp și front minim = 8m; Dimensiune minimă în zone protejate: Suprafața terenului = 250 și front minim = 10m;\n-\tRegim Cuplat - Dimensiune minimă în cazul concesionării terenului / pr",
       "aliniament": "(1) Racordarea aliniamentelor la intersecţiile străzilor se va face printr-o linie perpendiculară pe bisectoarea unghiului dintre aliniamente, având lungimea de 12,00 metri pe străzile de categoria I–",
       "utiliz_admise_rezumat": "•\tlocuinţe individuale cu maxim 4 apartamente si  maxim P+2 niveluri în regim de construire continuu (înșiruit) sau discontinuu (cuplat sau izolat), anexe si garaje;\n•\techipamente publice specifice zonei rezidenţiale; scuaruri publice;\n•\tîmprejmuiri, căi de acces pietonale și private, parcaje, spaţii plantate;\n•\tmicro-obiective tehno-edilitare de producere a energiei electrice: centrale eoliene de",
-      "utiliz_interzise_rezumat": "•\tactivităţi productive poluante, cu risc tehnologic sau care sunt incomode prin traficul generat (vehicule de transport greu sau peste 5 autovehicule mici pe zi), prin utilizarea incintei pentru depozitare și producţie, prin deșeurile produse ori prin programul de activitate prelungit după orele 22"
+      "utiliz_interzise_rezumat": "•\tactivităţi productive poluante, cu risc tehnologic sau care sunt incomode prin traficul generat (vehicule de transport greu sau peste 5 autovehicule mici pe zi), prin utilizarea incintei pentru depozitare și producţie, prin deșeurile produse ori prin programul de activitate prelungit după orele 22",
+      "pot_baza": 20,
+      "cut_baza": 0.4,
+      "niv_max": 2,
+      "regim": "P+M",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "retragere la regimul de aliniere specific; minim 5,00 m față de aliniament (RLU Art.5 L)",
+      "retragere_laterala": "H/2 min. 3,00 m față de limitele laterale (RLU Art.6 L)",
+      "retragere_spate": "H/2 min. 5,00 m față de limita posterioară (RLU Art.6 L)",
+      "spatii_verzi_pct": 30,
+      "parcaje_min": "1 loc/80 mp suprafață locuibilă",
+      "parcaje": "1 loc/80 mp suprafață locuibilă; stationarea numai în interiorul parcelei (RLU Art.9 L)",
+      "utilizari_admise": [
+        "Locuințe individuale cu maxim 4 apartamente și maxim P+2 niveluri (continuu, cuplat sau izolat), anexe și garaje",
+        "Echipamente publice specifice zonei rezidențiale; scuaruri publice",
+        "Împrejmuiri, căi de acces pietonale și private, parcaje, spații plantate",
+        "Magazine de mici dimensiuni cu maxim 100 mp",
+        "Spații de depozitare și producție cu suprafață maximă 100 mp (cu acord notarial vecini)",
+        "Micro-obiective tehno-edilitare pentru energie regenerabilă (panouri solare, pompe căldură etc.)"
+      ],
+      "utilizari_interzise": [
+        "Activități productive poluante, cu risc tehnologic sau incomode prin traficul generat",
+        "Depozitarea pentru vânzare a cantităților mari de substanțe inflamabile sau toxice",
+        "Stații de betoane, autobaze, spălătorii chimice",
+        "Lucrări de terasament ce afectează amenajările din spațiile publice sau construcțiile adiacente"
+      ],
+      "note": "UTR21_L1 — L1 P+M. POT=20% CUT=0,40 (RLU Art.15-16 UTR21). hmax=4,5m."
     },
     "UTR8_ID": {
       "cod": "UTR8_ID",
@@ -471,7 +1247,33 @@
       "parc_desc": "suprafaţa minimă a unei parcele pentru a putea fi construibilă cu funcţiunile admise  este de 500 mp, iar deschiderea minimă la stradă de 12 m.",
       "aliniament": "Cladirile se vor retrage cu minim 5.00 m fata  de  aliniament .\n             In zona drumurilor  nationale , judetene sau comunale se vor respecta distantele minime impuse  intre garduri  sau construc",
       "utiliz_admise_rezumat": "(1) Activităţi industriale productive și de locuire de serviciu, IMM desfășurate în construcţii industriale mari și mijlocii, distribuţia și depozitarea bunurilor și materialelor produse, cercetarea industrială care necesită suprafeţe mari de teren.\n\t(2) Servicii pentru zona industrială, transporturi, depozitare comercială, servicii comerciale legate de transporturi și depozitare - în suprafaţă ma",
-      "utiliz_interzise_rezumat": "•\torice lucrări de terasament care pot să provoace scurgerea apelor pe parcelele vecine sau care împiedică evacuarea și colectarea rapidă a apelor meteorice;\nse interzice amplasarea unităţilor funţionale care ar afecta funcţionarea activităţilor dominante ale subzonelor"
+      "utiliz_interzise_rezumat": "•\torice lucrări de terasament care pot să provoace scurgerea apelor pe parcelele vecine sau care împiedică evacuarea și colectarea rapidă a apelor meteorice;\nse interzice amplasarea unităţilor funţionale care ar afecta funcţionarea activităţilor dominante ale subzonelor",
+      "pot_baza": 50,
+      "cut_baza": 1.0,
+      "niv_max": 3,
+      "regim": "P+2 industrial",
+      "rf": 5.0,
+      "rl": 4.0,
+      "rs": 5.0,
+      "retragere_fata": "min. 5,00 m față de aliniament; distanțe de protecție față de DN/DJ conform legislației (RLU Art.5 ID)",
+      "retragere_laterala": "H/2 min. 4,00 m față de limitele laterale; min. 5,00 m față de alte UTR-uri (RLU Art.6 ID)",
+      "retragere_spate": "min. 5,00 m față de limita posterioară a parcelei (RLU Art.6 ID)",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "1 loc/5 angajați (P17/2017)",
+      "parcaje": "Stationarea în interiorul parcelei; max. 40% din spațiul de retragere față de aliniament poate fi rezervat parcajelor; pentru instituții publice 1 loc/100 mp ADC; pentru servicii comerciale 1 loc/100 mp ADC (RLU Art.9 ID)",
+      "utilizari_admise": [
+        "Activități industriale productive și de locuire de serviciu, IMM în construcții industriale mari și mijlocii",
+        "Distribuția și depozitarea bunurilor și materialelor produse, cercetare industrială",
+        "Servicii pentru zona industrială, transporturi, depozitare comercială",
+        "Terminale feroviare, stații de alimentare cu carburanți",
+        "Sedii ale unor companii și firme, servicii pentru întreprinderi, proiectare, consultanță",
+        "Spații libere pietonale, spații plantate"
+      ],
+      "utilizari_interzise": [
+        "Utilizări care afectează funcționarea activităților dominante ale subzonelor",
+        "Lucrări de terasament ce provoacă scurgerea apelor pe parcelele vecine"
+      ],
+      "note": "UTR8_ID — ID industrie și depozitare. POT=50% CUT=1,00 (RLU Art.15-16 UTR 8,8a,8b,8c,11,12,13,14). hmax=12,0m (RLU Art.10 ID). SV=20% (RLU Art.13 ID: plantații obligatorii)."
     },
     "UTR8c_ID": {
       "cod": "UTR8c_ID",
@@ -485,7 +1287,33 @@
       "parc_desc": "suprafaţa minimă a unei parcele pentru a putea fi construibilă cu funcţiunile admise  este de 500 mp, iar deschiderea minimă la stradă de 12 m.",
       "aliniament": "Cladirile se vor retrage cu minim 5.00 m fata  de  aliniament .\n             In zona drumurilor  nationale , judetene sau comunale se vor respecta distantele minime impuse  intre garduri  sau construc",
       "utiliz_admise_rezumat": "(1) Activităţi industriale productive și de locuire de serviciu, IMM desfășurate în construcţii industriale mari și mijlocii, distribuţia și depozitarea bunurilor și materialelor produse, cercetarea industrială care necesită suprafeţe mari de teren.\n\t(2) Servicii pentru zona industrială, transporturi, depozitare comercială, servicii comerciale legate de transporturi și depozitare - în suprafaţă ma",
-      "utiliz_interzise_rezumat": "•\torice lucrări de terasament care pot să provoace scurgerea apelor pe parcelele vecine sau care împiedică evacuarea și colectarea rapidă a apelor meteorice;\nse interzice amplasarea unităţilor funţionale care ar afecta funcţionarea activităţilor dominante ale subzonelor"
+      "utiliz_interzise_rezumat": "•\torice lucrări de terasament care pot să provoace scurgerea apelor pe parcelele vecine sau care împiedică evacuarea și colectarea rapidă a apelor meteorice;\nse interzice amplasarea unităţilor funţionale care ar afecta funcţionarea activităţilor dominante ale subzonelor",
+      "pot_baza": 50,
+      "cut_baza": 1.0,
+      "niv_max": 3,
+      "regim": "P+2 industrial",
+      "rf": 5.0,
+      "rl": 4.0,
+      "rs": 5.0,
+      "retragere_fata": "min. 5,00 m față de aliniament; distanțe de protecție față de DN/DJ conform legislației (RLU Art.5 ID)",
+      "retragere_laterala": "H/2 min. 4,00 m față de limitele laterale; min. 5,00 m față de alte UTR-uri (RLU Art.6 ID)",
+      "retragere_spate": "min. 5,00 m față de limita posterioară a parcelei (RLU Art.6 ID)",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "1 loc/5 angajați (P17/2017)",
+      "parcaje": "Stationarea în interiorul parcelei; max. 40% din spațiul de retragere față de aliniament poate fi rezervat parcajelor; pentru instituții publice 1 loc/100 mp ADC; pentru servicii comerciale 1 loc/100 mp ADC (RLU Art.9 ID)",
+      "utilizari_admise": [
+        "Activități industriale productive și de locuire de serviciu, IMM în construcții industriale mari și mijlocii",
+        "Distribuția și depozitarea bunurilor și materialelor produse, cercetare industrială",
+        "Servicii pentru zona industrială, transporturi, depozitare comercială",
+        "Terminale feroviare, stații de alimentare cu carburanți",
+        "Sedii ale unor companii și firme, servicii pentru întreprinderi, proiectare, consultanță",
+        "Spații libere pietonale, spații plantate"
+      ],
+      "utilizari_interzise": [
+        "Utilizări care afectează funcționarea activităților dominante ale subzonelor",
+        "Lucrări de terasament ce provoacă scurgerea apelor pe parcelele vecine"
+      ],
+      "note": "UTR8c_ID — ID industrie și depozitare. POT=50% CUT=1,00 (RLU Art.15-16 UTR 8,8a,8b,8c,11,12,13,14). hmax=12,0m (RLU Art.10 ID). SV=20% (RLU Art.13 ID: plantații obligatorii)."
     },
     "UTR8b_ID": {
       "cod": "UTR8b_ID",
@@ -499,7 +1327,33 @@
       "parc_desc": "suprafaţa minimă a unei parcele pentru a putea fi construibilă cu funcţiunile admise  este de 500 mp, iar deschiderea minimă la stradă de 12 m.",
       "aliniament": "Cladirile se vor retrage cu minim 5.00 m fata  de  aliniament .\n             In zona drumurilor  nationale , judetene sau comunale se vor respecta distantele minime impuse  intre garduri  sau construc",
       "utiliz_admise_rezumat": "(1) Activităţi industriale productive și de locuire de serviciu, IMM desfășurate în construcţii industriale mari și mijlocii, distribuţia și depozitarea bunurilor și materialelor produse, cercetarea industrială care necesită suprafeţe mari de teren.\n\t(2) Servicii pentru zona industrială, transporturi, depozitare comercială, servicii comerciale legate de transporturi și depozitare - în suprafaţă ma",
-      "utiliz_interzise_rezumat": "•\torice lucrări de terasament care pot să provoace scurgerea apelor pe parcelele vecine sau care împiedică evacuarea și colectarea rapidă a apelor meteorice;\nse interzice amplasarea unităţilor funţionale care ar afecta funcţionarea activităţilor dominante ale subzonelor"
+      "utiliz_interzise_rezumat": "•\torice lucrări de terasament care pot să provoace scurgerea apelor pe parcelele vecine sau care împiedică evacuarea și colectarea rapidă a apelor meteorice;\nse interzice amplasarea unităţilor funţionale care ar afecta funcţionarea activităţilor dominante ale subzonelor",
+      "pot_baza": 50,
+      "cut_baza": 1.0,
+      "niv_max": 3,
+      "regim": "P+2 industrial",
+      "rf": 5.0,
+      "rl": 4.0,
+      "rs": 5.0,
+      "retragere_fata": "min. 5,00 m față de aliniament; distanțe de protecție față de DN/DJ conform legislației (RLU Art.5 ID)",
+      "retragere_laterala": "H/2 min. 4,00 m față de limitele laterale; min. 5,00 m față de alte UTR-uri (RLU Art.6 ID)",
+      "retragere_spate": "min. 5,00 m față de limita posterioară a parcelei (RLU Art.6 ID)",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "1 loc/5 angajați (P17/2017)",
+      "parcaje": "Stationarea în interiorul parcelei; max. 40% din spațiul de retragere față de aliniament poate fi rezervat parcajelor; pentru instituții publice 1 loc/100 mp ADC; pentru servicii comerciale 1 loc/100 mp ADC (RLU Art.9 ID)",
+      "utilizari_admise": [
+        "Activități industriale productive și de locuire de serviciu, IMM în construcții industriale mari și mijlocii",
+        "Distribuția și depozitarea bunurilor și materialelor produse, cercetare industrială",
+        "Servicii pentru zona industrială, transporturi, depozitare comercială",
+        "Terminale feroviare, stații de alimentare cu carburanți",
+        "Sedii ale unor companii și firme, servicii pentru întreprinderi, proiectare, consultanță",
+        "Spații libere pietonale, spații plantate"
+      ],
+      "utilizari_interzise": [
+        "Utilizări care afectează funcționarea activităților dominante ale subzonelor",
+        "Lucrări de terasament ce provoacă scurgerea apelor pe parcelele vecine"
+      ],
+      "note": "UTR8b_ID — ID industrie și depozitare. POT=50% CUT=1,00 (RLU Art.15-16 UTR 8,8a,8b,8c,11,12,13,14). hmax=12,0m (RLU Art.10 ID). SV=20% (RLU Art.13 ID: plantații obligatorii)."
     },
     "UTR8a_ID": {
       "cod": "UTR8a_ID",
@@ -513,7 +1367,33 @@
       "parc_desc": "suprafaţa minimă a unei parcele pentru a putea fi construibilă cu funcţiunile admise  este de 500 mp, iar deschiderea minimă la stradă de 12 m.",
       "aliniament": "Cladirile se vor retrage cu minim 5.00 m fata  de  aliniament .\n             In zona drumurilor  nationale , judetene sau comunale se vor respecta distantele minime impuse  intre garduri  sau construc",
       "utiliz_admise_rezumat": "(1) Activităţi industriale productive și de locuire de serviciu, IMM desfășurate în construcţii industriale mari și mijlocii, distribuţia și depozitarea bunurilor și materialelor produse, cercetarea industrială care necesită suprafeţe mari de teren.\n\t(2) Servicii pentru zona industrială, transporturi, depozitare comercială, servicii comerciale legate de transporturi și depozitare - în suprafaţă ma",
-      "utiliz_interzise_rezumat": "•\torice lucrări de terasament care pot să provoace scurgerea apelor pe parcelele vecine sau care împiedică evacuarea și colectarea rapidă a apelor meteorice;\nse interzice amplasarea unităţilor funţionale care ar afecta funcţionarea activităţilor dominante ale subzonelor"
+      "utiliz_interzise_rezumat": "•\torice lucrări de terasament care pot să provoace scurgerea apelor pe parcelele vecine sau care împiedică evacuarea și colectarea rapidă a apelor meteorice;\nse interzice amplasarea unităţilor funţionale care ar afecta funcţionarea activităţilor dominante ale subzonelor",
+      "pot_baza": 50,
+      "cut_baza": 1.0,
+      "niv_max": 3,
+      "regim": "P+2 industrial",
+      "rf": 5.0,
+      "rl": 4.0,
+      "rs": 5.0,
+      "retragere_fata": "min. 5,00 m față de aliniament; distanțe de protecție față de DN/DJ conform legislației (RLU Art.5 ID)",
+      "retragere_laterala": "H/2 min. 4,00 m față de limitele laterale; min. 5,00 m față de alte UTR-uri (RLU Art.6 ID)",
+      "retragere_spate": "min. 5,00 m față de limita posterioară a parcelei (RLU Art.6 ID)",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "1 loc/5 angajați (P17/2017)",
+      "parcaje": "Stationarea în interiorul parcelei; max. 40% din spațiul de retragere față de aliniament poate fi rezervat parcajelor; pentru instituții publice 1 loc/100 mp ADC; pentru servicii comerciale 1 loc/100 mp ADC (RLU Art.9 ID)",
+      "utilizari_admise": [
+        "Activități industriale productive și de locuire de serviciu, IMM în construcții industriale mari și mijlocii",
+        "Distribuția și depozitarea bunurilor și materialelor produse, cercetare industrială",
+        "Servicii pentru zona industrială, transporturi, depozitare comercială",
+        "Terminale feroviare, stații de alimentare cu carburanți",
+        "Sedii ale unor companii și firme, servicii pentru întreprinderi, proiectare, consultanță",
+        "Spații libere pietonale, spații plantate"
+      ],
+      "utilizari_interzise": [
+        "Utilizări care afectează funcționarea activităților dominante ale subzonelor",
+        "Lucrări de terasament ce provoacă scurgerea apelor pe parcelele vecine"
+      ],
+      "note": "UTR8a_ID — ID industrie și depozitare. POT=50% CUT=1,00 (RLU Art.15-16 UTR 8,8a,8b,8c,11,12,13,14). hmax=12,0m (RLU Art.10 ID). SV=20% (RLU Art.13 ID: plantații obligatorii)."
     },
     "UTR14_ID": {
       "cod": "UTR14_ID",
@@ -527,7 +1407,33 @@
       "parc_desc": "suprafaţa minimă a unei parcele pentru a putea fi construibilă cu funcţiunile admise  este de 500 mp, iar deschiderea minimă la stradă de 12 m.",
       "aliniament": "Cladirile se vor retrage cu minim 5.00 m fata  de  aliniament .\n             In zona drumurilor  nationale , judetene sau comunale se vor respecta distantele minime impuse  intre garduri  sau construc",
       "utiliz_admise_rezumat": "(1) Activităţi industriale productive și de locuire de serviciu, IMM desfășurate în construcţii industriale mari și mijlocii, distribuţia și depozitarea bunurilor și materialelor produse, cercetarea industrială care necesită suprafeţe mari de teren.\n\t(2) Servicii pentru zona industrială, transporturi, depozitare comercială, servicii comerciale legate de transporturi și depozitare - în suprafaţă ma",
-      "utiliz_interzise_rezumat": "•\torice lucrări de terasament care pot să provoace scurgerea apelor pe parcelele vecine sau care împiedică evacuarea și colectarea rapidă a apelor meteorice;\nse interzice amplasarea unităţilor funţionale care ar afecta funcţionarea activităţilor dominante ale subzonelor"
+      "utiliz_interzise_rezumat": "•\torice lucrări de terasament care pot să provoace scurgerea apelor pe parcelele vecine sau care împiedică evacuarea și colectarea rapidă a apelor meteorice;\nse interzice amplasarea unităţilor funţionale care ar afecta funcţionarea activităţilor dominante ale subzonelor",
+      "pot_baza": 50,
+      "cut_baza": 1.0,
+      "niv_max": 3,
+      "regim": "P+2 industrial",
+      "rf": 5.0,
+      "rl": 4.0,
+      "rs": 5.0,
+      "retragere_fata": "min. 5,00 m față de aliniament; distanțe de protecție față de DN/DJ conform legislației (RLU Art.5 ID)",
+      "retragere_laterala": "H/2 min. 4,00 m față de limitele laterale; min. 5,00 m față de alte UTR-uri (RLU Art.6 ID)",
+      "retragere_spate": "min. 5,00 m față de limita posterioară a parcelei (RLU Art.6 ID)",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "1 loc/5 angajați (P17/2017)",
+      "parcaje": "Stationarea în interiorul parcelei; max. 40% din spațiul de retragere față de aliniament poate fi rezervat parcajelor; pentru instituții publice 1 loc/100 mp ADC; pentru servicii comerciale 1 loc/100 mp ADC (RLU Art.9 ID)",
+      "utilizari_admise": [
+        "Activități industriale productive și de locuire de serviciu, IMM în construcții industriale mari și mijlocii",
+        "Distribuția și depozitarea bunurilor și materialelor produse, cercetare industrială",
+        "Servicii pentru zona industrială, transporturi, depozitare comercială",
+        "Terminale feroviare, stații de alimentare cu carburanți",
+        "Sedii ale unor companii și firme, servicii pentru întreprinderi, proiectare, consultanță",
+        "Spații libere pietonale, spații plantate"
+      ],
+      "utilizari_interzise": [
+        "Utilizări care afectează funcționarea activităților dominante ale subzonelor",
+        "Lucrări de terasament ce provoacă scurgerea apelor pe parcelele vecine"
+      ],
+      "note": "UTR14_ID — ID industrie și depozitare. POT=50% CUT=1,00 (RLU Art.15-16 UTR 8,8a,8b,8c,11,12,13,14). hmax=12,0m (RLU Art.10 ID). SV=20% (RLU Art.13 ID: plantații obligatorii)."
     },
     "UTR13_ID": {
       "cod": "UTR13_ID",
@@ -541,7 +1447,33 @@
       "parc_desc": "suprafaţa minimă a unei parcele pentru a putea fi construibilă cu funcţiunile admise  este de 500 mp, iar deschiderea minimă la stradă de 12 m.",
       "aliniament": "Cladirile se vor retrage cu minim 5.00 m fata  de  aliniament .\n             In zona drumurilor  nationale , judetene sau comunale se vor respecta distantele minime impuse  intre garduri  sau construc",
       "utiliz_admise_rezumat": "(1) Activităţi industriale productive și de locuire de serviciu, IMM desfășurate în construcţii industriale mari și mijlocii, distribuţia și depozitarea bunurilor și materialelor produse, cercetarea industrială care necesită suprafeţe mari de teren.\n\t(2) Servicii pentru zona industrială, transporturi, depozitare comercială, servicii comerciale legate de transporturi și depozitare - în suprafaţă ma",
-      "utiliz_interzise_rezumat": "•\torice lucrări de terasament care pot să provoace scurgerea apelor pe parcelele vecine sau care împiedică evacuarea și colectarea rapidă a apelor meteorice;\nse interzice amplasarea unităţilor funţionale care ar afecta funcţionarea activităţilor dominante ale subzonelor"
+      "utiliz_interzise_rezumat": "•\torice lucrări de terasament care pot să provoace scurgerea apelor pe parcelele vecine sau care împiedică evacuarea și colectarea rapidă a apelor meteorice;\nse interzice amplasarea unităţilor funţionale care ar afecta funcţionarea activităţilor dominante ale subzonelor",
+      "pot_baza": 50,
+      "cut_baza": 1.0,
+      "niv_max": 3,
+      "regim": "P+2 industrial",
+      "rf": 5.0,
+      "rl": 4.0,
+      "rs": 5.0,
+      "retragere_fata": "min. 5,00 m față de aliniament; distanțe de protecție față de DN/DJ conform legislației (RLU Art.5 ID)",
+      "retragere_laterala": "H/2 min. 4,00 m față de limitele laterale; min. 5,00 m față de alte UTR-uri (RLU Art.6 ID)",
+      "retragere_spate": "min. 5,00 m față de limita posterioară a parcelei (RLU Art.6 ID)",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "1 loc/5 angajați (P17/2017)",
+      "parcaje": "Stationarea în interiorul parcelei; max. 40% din spațiul de retragere față de aliniament poate fi rezervat parcajelor; pentru instituții publice 1 loc/100 mp ADC; pentru servicii comerciale 1 loc/100 mp ADC (RLU Art.9 ID)",
+      "utilizari_admise": [
+        "Activități industriale productive și de locuire de serviciu, IMM în construcții industriale mari și mijlocii",
+        "Distribuția și depozitarea bunurilor și materialelor produse, cercetare industrială",
+        "Servicii pentru zona industrială, transporturi, depozitare comercială",
+        "Terminale feroviare, stații de alimentare cu carburanți",
+        "Sedii ale unor companii și firme, servicii pentru întreprinderi, proiectare, consultanță",
+        "Spații libere pietonale, spații plantate"
+      ],
+      "utilizari_interzise": [
+        "Utilizări care afectează funcționarea activităților dominante ale subzonelor",
+        "Lucrări de terasament ce provoacă scurgerea apelor pe parcelele vecine"
+      ],
+      "note": "UTR13_ID — ID industrie și depozitare. POT=50% CUT=1,00 (RLU Art.15-16 UTR 8,8a,8b,8c,11,12,13,14). hmax=12,0m (RLU Art.10 ID). SV=20% (RLU Art.13 ID: plantații obligatorii)."
     },
     "UTR12_ID": {
       "cod": "UTR12_ID",
@@ -555,7 +1487,33 @@
       "parc_desc": "suprafaţa minimă a unei parcele pentru a putea fi construibilă cu funcţiunile admise  este de 500 mp, iar deschiderea minimă la stradă de 12 m.",
       "aliniament": "Cladirile se vor retrage cu minim 5.00 m fata  de  aliniament .\n             In zona drumurilor  nationale , judetene sau comunale se vor respecta distantele minime impuse  intre garduri  sau construc",
       "utiliz_admise_rezumat": "(1) Activităţi industriale productive și de locuire de serviciu, IMM desfășurate în construcţii industriale mari și mijlocii, distribuţia și depozitarea bunurilor și materialelor produse, cercetarea industrială care necesită suprafeţe mari de teren.\n\t(2) Servicii pentru zona industrială, transporturi, depozitare comercială, servicii comerciale legate de transporturi și depozitare - în suprafaţă ma",
-      "utiliz_interzise_rezumat": "•\torice lucrări de terasament care pot să provoace scurgerea apelor pe parcelele vecine sau care împiedică evacuarea și colectarea rapidă a apelor meteorice;\nse interzice amplasarea unităţilor funţionale care ar afecta funcţionarea activităţilor dominante ale subzonelor"
+      "utiliz_interzise_rezumat": "•\torice lucrări de terasament care pot să provoace scurgerea apelor pe parcelele vecine sau care împiedică evacuarea și colectarea rapidă a apelor meteorice;\nse interzice amplasarea unităţilor funţionale care ar afecta funcţionarea activităţilor dominante ale subzonelor",
+      "pot_baza": 50,
+      "cut_baza": 1.0,
+      "niv_max": 3,
+      "regim": "P+2 industrial",
+      "rf": 5.0,
+      "rl": 4.0,
+      "rs": 5.0,
+      "retragere_fata": "min. 5,00 m față de aliniament; distanțe de protecție față de DN/DJ conform legislației (RLU Art.5 ID)",
+      "retragere_laterala": "H/2 min. 4,00 m față de limitele laterale; min. 5,00 m față de alte UTR-uri (RLU Art.6 ID)",
+      "retragere_spate": "min. 5,00 m față de limita posterioară a parcelei (RLU Art.6 ID)",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "1 loc/5 angajați (P17/2017)",
+      "parcaje": "Stationarea în interiorul parcelei; max. 40% din spațiul de retragere față de aliniament poate fi rezervat parcajelor; pentru instituții publice 1 loc/100 mp ADC; pentru servicii comerciale 1 loc/100 mp ADC (RLU Art.9 ID)",
+      "utilizari_admise": [
+        "Activități industriale productive și de locuire de serviciu, IMM în construcții industriale mari și mijlocii",
+        "Distribuția și depozitarea bunurilor și materialelor produse, cercetare industrială",
+        "Servicii pentru zona industrială, transporturi, depozitare comercială",
+        "Terminale feroviare, stații de alimentare cu carburanți",
+        "Sedii ale unor companii și firme, servicii pentru întreprinderi, proiectare, consultanță",
+        "Spații libere pietonale, spații plantate"
+      ],
+      "utilizari_interzise": [
+        "Utilizări care afectează funcționarea activităților dominante ale subzonelor",
+        "Lucrări de terasament ce provoacă scurgerea apelor pe parcelele vecine"
+      ],
+      "note": "UTR12_ID — ID industrie și depozitare. POT=50% CUT=1,00 (RLU Art.15-16 UTR 8,8a,8b,8c,11,12,13,14). hmax=12,0m (RLU Art.10 ID). SV=20% (RLU Art.13 ID: plantații obligatorii)."
     },
     "06_Risc": {
       "cod": "06_Risc",
@@ -564,12 +1522,32 @@
       "denumire": "Zonă cu interdicție temporară de construire până la elaborare Studiu Geotehnic",
       "pot_max": null,
       "cut_max": null,
-      "hmax_m": null,
+      "hmax_m": 0.0,
       "rh_max": null,
       "parc_desc": null,
       "aliniament": null,
       "utiliz_admise_rezumat": "ART. 31. Pentru zonele cu risc de producere a alunecărilor de teren, se stabilesc următoarele reglementări: \n\n\tpentru teritoriile ce vor fi clasificate ca prezentând o probabilitate medie-mare de producere a alunecărilor de teren, documentațiile geotehnice vor respecta toate prevederile normativului NP 074-2007 și, în plus, vor include studii de stabilitate generală;\n\tpentru teritoriile ce vor f",
-      "utiliz_interzise_rezumat": "ART. 31. Pentru zonele cu risc de producere a alunecărilor de teren, se stabilesc următoarele reglementări: \n\n\tpentru teritoriile ce vor fi clasificate ca prezentând o probabilitate medie-mare de producere a alunecărilor de teren, documentațiile geotehnice vor respecta toate prevederile normativulu"
+      "utiliz_interzise_rezumat": "ART. 31. Pentru zonele cu risc de producere a alunecărilor de teren, se stabilesc următoarele reglementări: \n\n\tpentru teritoriile ce vor fi clasificate ca prezentând o probabilitate medie-mare de producere a alunecărilor de teren, documentațiile geotehnice vor respecta toate prevederile normativulu",
+      "pot_baza": 0,
+      "cut_baza": 0.0,
+      "niv_max": 0,
+      "regim": "interdicție/restricție",
+      "rf": 0.0,
+      "rl": 0.0,
+      "rs": 0.0,
+      "retragere_fata": "nu se aplică — zonă de protecție/restricție",
+      "retragere_laterala": "nu se aplică",
+      "retragere_spate": "nu se aplică",
+      "spatii_verzi_pct": 0,
+      "parcaje_min": "nu se aplică",
+      "parcaje": "nu se aplică — zonă fără construcții",
+      "utilizari_admise": [
+        "Lucrări de consolidare și stabilizare a versanților (cu PUZ și expertiză geotehnică)"
+      ],
+      "utilizari_interzise": [
+        "Construcții de orice fel până la elaborarea PUZ cu expertiză geotehnică (RLU Art.13 zone risc)"
+      ],
+      "note": "06_Risc — Interdicție temporară de construire în zone cu risc natural (alunecări teren). PUZ obligatoriu cu expertiză geotehnică."
     },
     "19_Cimitir": {
       "cod": "19_Cimitir",
@@ -578,12 +1556,32 @@
       "denumire": "Zonă de protecție față de cimitire",
       "pot_max": null,
       "cut_max": null,
-      "hmax_m": null,
+      "hmax_m": 0.0,
       "rh_max": null,
       "parc_desc": null,
       "aliniament": null,
       "utiliz_admise_rezumat": "ART. 34. (1) Zonele de protecție sunt marcate în planșa 3. „Reglementari Urbanistice - Zonificare”. \n(2) Autorizarea lucrărilor de construire în interiorul zonelor de protecție pe baza normelor sanitare se face numai pe baza consultării Direcției de Sănătate Publică.\n\nART. 35. Se vor dimensiona și institui perimetrele de protectie hidro-geologică de protecție și zonele de protecție sanitară (cu re",
-      "utiliz_interzise_rezumat": "ART. 34. (1) Zonele de protecție sunt marcate în planșa 3. „Reglementari Urbanistice - Zonificare”. \n(2) Autorizarea lucrărilor de construire în interiorul zonelor de protecție pe baza normelor sanitare se face numai pe baza consultării Direcției de Sănătate Publică.\n\nART. 35. Se vor dimensiona și i"
+      "utiliz_interzise_rezumat": "ART. 34. (1) Zonele de protecție sunt marcate în planșa 3. „Reglementari Urbanistice - Zonificare”. \n(2) Autorizarea lucrărilor de construire în interiorul zonelor de protecție pe baza normelor sanitare se face numai pe baza consultării Direcției de Sănătate Publică.\n\nART. 35. Se vor dimensiona și i",
+      "pot_baza": 0,
+      "cut_baza": 0.0,
+      "niv_max": 0,
+      "regim": "interdicție/restricție",
+      "rf": 0.0,
+      "rl": 0.0,
+      "rs": 0.0,
+      "retragere_fata": "nu se aplică — zonă de protecție/restricție",
+      "retragere_laterala": "nu se aplică",
+      "retragere_spate": "nu se aplică",
+      "spatii_verzi_pct": 0,
+      "parcaje_min": "nu se aplică",
+      "parcaje": "nu se aplică — zonă fără construcții",
+      "utilizari_admise": [
+        "Lucrări de mentenanță a obiectivului existent"
+      ],
+      "utilizari_interzise": [
+        "Construcții permanente la mai puțin de 100 m față de cimitire (normative sanitare OMS 119/2014)"
+      ],
+      "note": "19_Cimitir — Zonă de protecție sanitară de 100 m față de cimitire. Construcții condiționate de aviz DSP."
     },
     "13_Ccf": {
       "cod": "13_Ccf",
@@ -592,12 +1590,32 @@
       "denumire": "Zonă de protecție cale ferată",
       "pot_max": null,
       "cut_max": null,
-      "hmax_m": null,
+      "hmax_m": 0.0,
       "rh_max": null,
       "parc_desc": null,
       "aliniament": null,
       "utiliz_admise_rezumat": null,
-      "utiliz_interzise_rezumat": null
+      "utiliz_interzise_rezumat": null,
+      "pot_baza": 0,
+      "cut_baza": 0.0,
+      "niv_max": 0,
+      "regim": "interdicție/restricție",
+      "rf": 0.0,
+      "rl": 0.0,
+      "rs": 0.0,
+      "retragere_fata": "nu se aplică — zonă de protecție/restricție",
+      "retragere_laterala": "nu se aplică",
+      "retragere_spate": "nu se aplică",
+      "spatii_verzi_pct": 0,
+      "parcaje_min": "nu se aplică",
+      "parcaje": "nu se aplică — zonă fără construcții",
+      "utilizari_admise": [
+        "Lucrări cu avizul SNCFR și Ministerului Transporturilor (conform OUG 12/1998)"
+      ],
+      "utilizari_interzise": [
+        "Construcții fără aviz SNCFR în zona de protecție/siguranță a căii ferate"
+      ],
+      "note": "13_Ccf — Zonă de protecție cale ferată. Zona de siguranță: 20 m de la limita CFR; zona de protecție: 100 m. Aviz SNCFR obligatoriu."
     },
     "16_Cca_I": {
       "cod": "16_Cca_I",
@@ -606,12 +1624,32 @@
       "denumire": "Zonă de referință aeronautică I",
       "pot_max": null,
       "cut_max": null,
-      "hmax_m": null,
+      "hmax_m": 0.0,
       "rh_max": null,
       "parc_desc": null,
       "aliniament": null,
       "utiliz_admise_rezumat": null,
-      "utiliz_interzise_rezumat": null
+      "utiliz_interzise_rezumat": null,
+      "pot_baza": 0,
+      "cut_baza": 0.0,
+      "niv_max": 0,
+      "regim": "interdicție/restricție",
+      "rf": 0.0,
+      "rl": 0.0,
+      "rs": 0.0,
+      "retragere_fata": "nu se aplică — zonă de protecție/restricție",
+      "retragere_laterala": "nu se aplică",
+      "retragere_spate": "nu se aplică",
+      "spatii_verzi_pct": 0,
+      "parcaje_min": "nu se aplică",
+      "parcaje": "nu se aplică — zonă fără construcții",
+      "utilizari_admise": [
+        "Lucrări cu aviz AACR conform RACR-ZSAC ediția 1/2015"
+      ],
+      "utilizari_interzise": [
+        "Construcții care depășesc limitele de înălțime aeronautică sau afectează navigația aeriană"
+      ],
+      "note": "16_Cca_I — Zonă cu servituți aeronautice civile (Aeroport Iași). Aviz obligatoriu AACR conform RACR-ZSAC."
     },
     "16_Cca_II": {
       "cod": "16_Cca_II",
@@ -620,12 +1658,32 @@
       "denumire": "Zonă de referință aeronautică II",
       "pot_max": null,
       "cut_max": null,
-      "hmax_m": null,
+      "hmax_m": 0.0,
       "rh_max": null,
       "parc_desc": null,
       "aliniament": null,
       "utiliz_admise_rezumat": null,
-      "utiliz_interzise_rezumat": null
+      "utiliz_interzise_rezumat": null,
+      "pot_baza": 0,
+      "cut_baza": 0.0,
+      "niv_max": 0,
+      "regim": "interdicție/restricție",
+      "rf": 0.0,
+      "rl": 0.0,
+      "rs": 0.0,
+      "retragere_fata": "nu se aplică — zonă de protecție/restricție",
+      "retragere_laterala": "nu se aplică",
+      "retragere_spate": "nu se aplică",
+      "spatii_verzi_pct": 0,
+      "parcaje_min": "nu se aplică",
+      "parcaje": "nu se aplică — zonă fără construcții",
+      "utilizari_admise": [
+        "Lucrări cu aviz AACR conform RACR-ZSAC ediția 1/2015"
+      ],
+      "utilizari_interzise": [
+        "Construcții care depășesc limitele de înălțime aeronautică sau afectează navigația aeriană"
+      ],
+      "note": "16_Cca_II — Zonă cu servituți aeronautice civile (Aeroport Iași). Aviz obligatoriu AACR conform RACR-ZSAC."
     },
     "16_Cca_III": {
       "cod": "16_Cca_III",
@@ -634,12 +1692,32 @@
       "denumire": "Zonă de referință aeronautică III",
       "pot_max": null,
       "cut_max": null,
-      "hmax_m": null,
+      "hmax_m": 0.0,
       "rh_max": null,
       "parc_desc": null,
       "aliniament": null,
       "utiliz_admise_rezumat": null,
-      "utiliz_interzise_rezumat": null
+      "utiliz_interzise_rezumat": null,
+      "pot_baza": 0,
+      "cut_baza": 0.0,
+      "niv_max": 0,
+      "regim": "interdicție/restricție",
+      "rf": 0.0,
+      "rl": 0.0,
+      "rs": 0.0,
+      "retragere_fata": "nu se aplică — zonă de protecție/restricție",
+      "retragere_laterala": "nu se aplică",
+      "retragere_spate": "nu se aplică",
+      "spatii_verzi_pct": 0,
+      "parcaje_min": "nu se aplică",
+      "parcaje": "nu se aplică — zonă fără construcții",
+      "utilizari_admise": [
+        "Lucrări cu aviz AACR conform RACR-ZSAC ediția 1/2015"
+      ],
+      "utilizari_interzise": [
+        "Construcții care depășesc limitele de înălțime aeronautică sau afectează navigația aeriană"
+      ],
+      "note": "16_Cca_III — Zonă cu servituți aeronautice civile (Aeroport Iași). Aviz obligatoriu AACR conform RACR-ZSAC."
     },
     "16_Cca DME": {
       "cod": "16_Cca DME",
@@ -648,12 +1726,32 @@
       "denumire": "Zonă de protecție DME",
       "pot_max": null,
       "cut_max": null,
-      "hmax_m": null,
+      "hmax_m": 0.0,
       "rh_max": null,
       "parc_desc": null,
       "aliniament": null,
       "utiliz_admise_rezumat": null,
-      "utiliz_interzise_rezumat": null
+      "utiliz_interzise_rezumat": null,
+      "pot_baza": 0,
+      "cut_baza": 0.0,
+      "niv_max": 0,
+      "regim": "interdicție/restricție",
+      "rf": 0.0,
+      "rl": 0.0,
+      "rs": 0.0,
+      "retragere_fata": "nu se aplică — zonă de protecție/restricție",
+      "retragere_laterala": "nu se aplică",
+      "retragere_spate": "nu se aplică",
+      "spatii_verzi_pct": 0,
+      "parcaje_min": "nu se aplică",
+      "parcaje": "nu se aplică — zonă fără construcții",
+      "utilizari_admise": [
+        "Lucrări cu aviz AACR conform RACR-ZSAC ediția 1/2015"
+      ],
+      "utilizari_interzise": [
+        "Construcții care depășesc limitele de înălțime aeronautică sau afectează navigația aeriană"
+      ],
+      "note": "16_Cca DME — Zonă cu servituți aeronautice civile (Aeroport Iași). Aviz obligatoriu AACR conform RACR-ZSAC."
     },
     "16_Cca NDB": {
       "cod": "16_Cca NDB",
@@ -662,12 +1760,32 @@
       "denumire": "Zonă de protecție  NDB",
       "pot_max": null,
       "cut_max": null,
-      "hmax_m": null,
+      "hmax_m": 0.0,
       "rh_max": null,
       "parc_desc": null,
       "aliniament": null,
       "utiliz_admise_rezumat": null,
-      "utiliz_interzise_rezumat": null
+      "utiliz_interzise_rezumat": null,
+      "pot_baza": 0,
+      "cut_baza": 0.0,
+      "niv_max": 0,
+      "regim": "interdicție/restricție",
+      "rf": 0.0,
+      "rl": 0.0,
+      "rs": 0.0,
+      "retragere_fata": "nu se aplică — zonă de protecție/restricție",
+      "retragere_laterala": "nu se aplică",
+      "retragere_spate": "nu se aplică",
+      "spatii_verzi_pct": 0,
+      "parcaje_min": "nu se aplică",
+      "parcaje": "nu se aplică — zonă fără construcții",
+      "utilizari_admise": [
+        "Lucrări cu aviz AACR conform RACR-ZSAC ediția 1/2015"
+      ],
+      "utilizari_interzise": [
+        "Construcții care depășesc limitele de înălțime aeronautică sau afectează navigația aeriană"
+      ],
+      "note": "16_Cca NDB — Zonă cu servituți aeronautice civile (Aeroport Iași). Aviz obligatoriu AACR conform RACR-ZSAC."
     },
     "25_LEA": {
       "cod": "25_LEA",
@@ -676,12 +1794,32 @@
       "denumire": "Zona de protecție a liniilor electrice  aeriene",
       "pot_max": null,
       "cut_max": null,
-      "hmax_m": null,
+      "hmax_m": 0.0,
       "rh_max": null,
       "parc_desc": null,
       "aliniament": null,
       "utiliz_admise_rezumat": "ART. 43. (1) Conform „Norme tehnice privind delimitarea zonelor de protecție și de siguranță aferente capacităților energetice (Ordinul ANRE nr.4/09.03.2007 modificat și completat cu Ordinul ANRE nr.49/29.11.2007) lățimea zonei de protecție si de siguranță a liniilor electrice aeriene este de: 24m pentru LEA 20kV și 37 m pentru LEA 110kV.\n(2) Pentru posturi de transformare de tip aerian, zona de p",
-      "utiliz_interzise_rezumat": null
+      "utiliz_interzise_rezumat": null,
+      "pot_baza": 0,
+      "cut_baza": 0.0,
+      "niv_max": 0,
+      "regim": "interdicție/restricție",
+      "rf": 0.0,
+      "rl": 0.0,
+      "rs": 0.0,
+      "retragere_fata": "nu se aplică — zonă de protecție/restricție",
+      "retragere_laterala": "nu se aplică",
+      "retragere_spate": "nu se aplică",
+      "spatii_verzi_pct": 0,
+      "parcaje_min": "nu se aplică",
+      "parcaje": "nu se aplică — zonă fără construcții",
+      "utilizari_admise": [
+        "Lucrări cu aviz Distribuție Energie Electrică"
+      ],
+      "utilizari_interzise": [
+        "Construcții în zona de protecție a liniilor electrice aeriene fără aviz DEE"
+      ],
+      "note": "25_LEA — Zonă de protecție linii electrice aeriene. Aviz obligatoriu Distribuție Energie Electrică."
     },
     "20_PUZ": {
       "cod": "20_PUZ",
@@ -690,12 +1828,32 @@
       "denumire": "Zonă cu interdicție temporară de construire până la elaborare documentație de urbanism (PUZ/PUD)",
       "pot_max": null,
       "cut_max": null,
-      "hmax_m": null,
+      "hmax_m": 0.0,
       "rh_max": null,
       "parc_desc": null,
       "aliniament": null,
       "utiliz_admise_rezumat": "SECȚIUNEA 28. BAZA LEGALĂ ȘI DEFINIREA UNOR TERMENI\n\nART. 89. (1) Conform alin.6 al art.6 din Legea nr. 50/1991 republicată în 2004, modificată și completată de Legea nr. 401/2003, pentru operațiuni notariale privind circulația imobiliară atunci când operațiunile respective au ca obiect împărțeli ori comasari de parcele solicitate în scopul realizarii de lucrări de construcții precum și constituir",
-      "utiliz_interzise_rezumat": null
+      "utiliz_interzise_rezumat": null,
+      "pot_baza": 0,
+      "cut_baza": 0.0,
+      "niv_max": 0,
+      "regim": "interdicție/restricție",
+      "rf": 0.0,
+      "rl": 0.0,
+      "rs": 0.0,
+      "retragere_fata": "nu se aplică — zonă de protecție/restricție",
+      "retragere_laterala": "nu se aplică",
+      "retragere_spate": "nu se aplică",
+      "spatii_verzi_pct": 0,
+      "parcaje_min": "nu se aplică",
+      "parcaje": "nu se aplică — zonă fără construcții",
+      "utilizari_admise": [
+        "Construcții după elaborarea și aprobarea PUZ obligatoriu (RLU Art.15-16)"
+      ],
+      "utilizari_interzise": [
+        "Construcții directe fără PUZ aprobat în prealabil"
+      ],
+      "note": "20_PUZ — Interdicție temporară de construire până la elaborarea PUZ. Suprafețe >5000 mp sau parcelări >4 loturi."
     },
     "33_MAI": {
       "cod": "33_MAI",
@@ -704,12 +1862,32 @@
       "denumire": "Zonă cu restricții_Infrastructură Comunicații M.A.I",
       "pot_max": null,
       "cut_max": null,
-      "hmax_m": null,
+      "hmax_m": 0.0,
       "rh_max": null,
       "parc_desc": null,
       "aliniament": null,
       "utiliz_admise_rezumat": "in Zona 1 de restructie MAI nu se admit constructii cu regim de înalţime mai mare de 30,00m fata de cota terenului natural. in Zona 2 de restructie MAI nu se admit constructii cu regim de înalţime mai mare de 40,00m fata de cota terenului natural.",
-      "utiliz_interzise_rezumat": null
+      "utiliz_interzise_rezumat": null,
+      "pot_baza": 0,
+      "cut_baza": 0.0,
+      "niv_max": 0,
+      "regim": "interdicție/restricție",
+      "rf": 0.0,
+      "rl": 0.0,
+      "rs": 0.0,
+      "retragere_fata": "nu se aplică — zonă de protecție/restricție",
+      "retragere_laterala": "nu se aplică",
+      "retragere_spate": "nu se aplică",
+      "spatii_verzi_pct": 0,
+      "parcaje_min": "nu se aplică",
+      "parcaje": "nu se aplică — zonă fără construcții",
+      "utilizari_admise": [
+        "Lucrări cu aviz MAI conform legislației specifice"
+      ],
+      "utilizari_interzise": [
+        "Construcții sau amenajări fără aviz MAI în zona de restricție infrastructură comunicații"
+      ],
+      "note": "33_MAI — Zonă cu restricții MAI (infrastructură comunicații). Aviz obligatoriu MAI."
     },
     "TC": {
       "cod": "TC",
@@ -718,12 +1896,32 @@
       "denumire": "Terenuri ocupate de căi de comunicație",
       "pot_max": null,
       "cut_max": null,
-      "hmax_m": null,
+      "hmax_m": 0.0,
       "rh_max": null,
       "parc_desc": null,
       "aliniament": null,
       "utiliz_admise_rezumat": null,
-      "utiliz_interzise_rezumat": null
+      "utiliz_interzise_rezumat": null,
+      "pot_baza": 0,
+      "cut_baza": 0.0,
+      "niv_max": 0,
+      "regim": "interdicție/restricție",
+      "rf": 0.0,
+      "rl": 0.0,
+      "rs": 0.0,
+      "retragere_fata": "nu se aplică — zonă de protecție/restricție",
+      "retragere_laterala": "nu se aplică",
+      "retragere_spate": "nu se aplică",
+      "spatii_verzi_pct": 0,
+      "parcaje_min": "nu se aplică",
+      "parcaje": "nu se aplică — zonă fără construcții",
+      "utilizari_admise": [
+        "Căi de comunicație rutieră și amenajările aferente"
+      ],
+      "utilizari_interzise": [
+        "Construcții care ocupă ampriza drumului sau zona de siguranță"
+      ],
+      "note": "TC — Terenuri ocupate de căi de comunicație (extravilan). Distanțe de protecție conform OG 43/1997: autostradă 50m, DN 22m, DJ 20m, DC 18m."
     },
     "UTR11_ID": {
       "cod": "UTR11_ID",
@@ -737,7 +1935,33 @@
       "parc_desc": "suprafaţa minimă a unei parcele pentru a putea fi construibilă cu funcţiunile admise  este de 500 mp, iar deschiderea minimă la stradă de 12 m.",
       "aliniament": "Cladirile se vor retrage cu minim 5.00 m fata  de  aliniament .\n             In zona drumurilor  nationale , judetene sau comunale se vor respecta distantele minime impuse  intre garduri  sau construc",
       "utiliz_admise_rezumat": "(1) Activităţi industriale productive și de locuire de serviciu, IMM desfășurate în construcţii industriale mari și mijlocii, distribuţia și depozitarea bunurilor și materialelor produse, cercetarea industrială care necesită suprafeţe mari de teren.\n\t(2) Servicii pentru zona industrială, transporturi, depozitare comercială, servicii comerciale legate de transporturi și depozitare - în suprafaţă ma",
-      "utiliz_interzise_rezumat": "•\torice lucrări de terasament care pot să provoace scurgerea apelor pe parcelele vecine sau care împiedică evacuarea și colectarea rapidă a apelor meteorice;\nse interzice amplasarea unităţilor funţionale care ar afecta funcţionarea activităţilor dominante ale subzonelor"
+      "utiliz_interzise_rezumat": "•\torice lucrări de terasament care pot să provoace scurgerea apelor pe parcelele vecine sau care împiedică evacuarea și colectarea rapidă a apelor meteorice;\nse interzice amplasarea unităţilor funţionale care ar afecta funcţionarea activităţilor dominante ale subzonelor",
+      "pot_baza": 50,
+      "cut_baza": 1.0,
+      "niv_max": 3,
+      "regim": "P+2 industrial",
+      "rf": 5.0,
+      "rl": 4.0,
+      "rs": 5.0,
+      "retragere_fata": "min. 5,00 m față de aliniament; distanțe de protecție față de DN/DJ conform legislației (RLU Art.5 ID)",
+      "retragere_laterala": "H/2 min. 4,00 m față de limitele laterale; min. 5,00 m față de alte UTR-uri (RLU Art.6 ID)",
+      "retragere_spate": "min. 5,00 m față de limita posterioară a parcelei (RLU Art.6 ID)",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "1 loc/5 angajați (P17/2017)",
+      "parcaje": "Stationarea în interiorul parcelei; max. 40% din spațiul de retragere față de aliniament poate fi rezervat parcajelor; pentru instituții publice 1 loc/100 mp ADC; pentru servicii comerciale 1 loc/100 mp ADC (RLU Art.9 ID)",
+      "utilizari_admise": [
+        "Activități industriale productive și de locuire de serviciu, IMM în construcții industriale mari și mijlocii",
+        "Distribuția și depozitarea bunurilor și materialelor produse, cercetare industrială",
+        "Servicii pentru zona industrială, transporturi, depozitare comercială",
+        "Terminale feroviare, stații de alimentare cu carburanți",
+        "Sedii ale unor companii și firme, servicii pentru întreprinderi, proiectare, consultanță",
+        "Spații libere pietonale, spații plantate"
+      ],
+      "utilizari_interzise": [
+        "Utilizări care afectează funcționarea activităților dominante ale subzonelor",
+        "Lucrări de terasament ce provoacă scurgerea apelor pe parcelele vecine"
+      ],
+      "note": "UTR11_ID — ID industrie și depozitare. POT=50% CUT=1,00 (RLU Art.15-16 UTR 8,8a,8b,8c,11,12,13,14). hmax=12,0m (RLU Art.10 ID). SV=20% (RLU Art.13 ID: plantații obligatorii)."
     },
     "UTR18_L1": {
       "cod": "UTR18_L1",
@@ -746,12 +1970,41 @@
       "denumire": "subzona de locuire individuală situată în ţesut tradiţional cu regim de construire continuu şi discontinuu. Subzonă dezv",
       "pot_max": 30.0,
       "cut_max": 0.6,
-      "hmax_m": 10.0,
+      "hmax_m": 4.5,
       "rh_max": "P+M",
       "parc_desc": "-\tRegim înșiruit - Dimensiune minimă în cazul concesionării terenului / proprietate privata*: Suprafața terenului = 200mp și front minim = 8m; Dimensiune minimă în zone protejate: Suprafața terenului = 250 și front minim = 10m;\n-\tRegim Cuplat - Dimensiune minimă în cazul concesionării terenului / pr",
       "aliniament": "(1) Racordarea aliniamentelor la intersecţiile străzilor se va face printr-o linie perpendiculară pe bisectoarea unghiului dintre aliniamente, având lungimea de 12,00 metri pe străzile de categoria I–",
       "utiliz_admise_rezumat": "•\tlocuinţe individuale cu maxim 4 apartamente si  maxim P+2 niveluri în regim de construire continuu (înșiruit) sau discontinuu (cuplat sau izolat), anexe si garaje;\n•\techipamente publice specifice zonei rezidenţiale; scuaruri publice;\n•\tîmprejmuiri, căi de acces pietonale și private, parcaje, spaţii plantate;\n•\tmicro-obiective tehno-edilitare de producere a energiei electrice: centrale eoliene de",
-      "utiliz_interzise_rezumat": "•\tactivităţi productive poluante, cu risc tehnologic sau care sunt incomode prin traficul generat (vehicule de transport greu sau peste 5 autovehicule mici pe zi), prin utilizarea incintei pentru depozitare și producţie, prin deșeurile produse ori prin programul de activitate prelungit după orele 22"
+      "utiliz_interzise_rezumat": "•\tactivităţi productive poluante, cu risc tehnologic sau care sunt incomode prin traficul generat (vehicule de transport greu sau peste 5 autovehicule mici pe zi), prin utilizarea incintei pentru depozitare și producţie, prin deșeurile produse ori prin programul de activitate prelungit după orele 22",
+      "pot_baza": 20,
+      "cut_baza": 0.4,
+      "niv_max": 2,
+      "regim": "P+M",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "retragere la regimul de aliniere specific; minim 5,00 m față de aliniament (RLU Art.5 L); condiționat de servituțile aeronautice",
+      "retragere_laterala": "H/2 min. 3,00 m față de limitele laterale (RLU Art.6 L)",
+      "retragere_spate": "H/2 min. 5,00 m față de limita posterioară (RLU Art.6 L)",
+      "spatii_verzi_pct": 30,
+      "parcaje_min": "1 loc/80 mp suprafață locuibilă",
+      "parcaje": "1 loc/80 mp suprafață locuibilă; stationarea numai în interiorul parcelei; aviz AACR obligatoriu pentru orice construcție",
+      "utilizari_admise": [
+        "Locuințe individuale cu maxim 4 apartamente și maxim P+2 niveluri (continuu, cuplat sau izolat), anexe și garaje",
+        "Echipamente publice specifice zonei rezidențiale; scuaruri publice",
+        "Împrejmuiri, căi de acces pietonale și private, parcaje, spații plantate",
+        "Magazine de mici dimensiuni cu maxim 100 mp",
+        "Spații de depozitare și producție cu suprafață maximă 100 mp (cu acord notarial vecini)",
+        "Micro-obiective tehno-edilitare pentru energie regenerabilă (panouri solare, pompe căldură etc.)"
+      ],
+      "utilizari_interzise": [
+        "Activități productive poluante, cu risc tehnologic sau incomode prin traficul generat",
+        "Depozitarea pentru vânzare a cantităților mari de substanțe inflamabile sau toxice",
+        "Stații de betoane, autobaze, spălătorii chimice",
+        "Lucrări de terasament ce afectează amenajările din spațiile publice sau construcțiile adiacente",
+        "Construcții care depășesc înălțimea admisă în servituțile aeronautice civile (RACR-ZSAC)"
+      ],
+      "note": "UTR18_L1 — L1 în zona cu servituți aeronautice (vecinătate Aeroport Iași). POT=20% CUT=0,40 (similar UTR21). Aviz AACR obligatoriu."
     },
     "C1": {
       "cod": "C1",
@@ -760,12 +2013,40 @@
       "denumire": "subzona centrală şi funcţiuni complexe de interes general",
       "pot_max": null,
       "cut_max": null,
-      "hmax_m": null,
+      "hmax_m": 16.0,
       "rh_max": null,
       "parc_desc": null,
       "aliniament": null,
       "utiliz_admise_rezumat": null,
-      "utiliz_interzise_rezumat": null
+      "utiliz_interzise_rezumat": null,
+      "pot_baza": 80,
+      "cut_baza": 2.0,
+      "niv_max": 5,
+      "regim": "S+P+4",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "retragere la regimul de aliniere specific; minim 5,00 m față de aliniament (RLU Art.5 C1)",
+      "retragere_laterala": "H/2 min. 3,00 m față de limitele laterale (RLU Art.6 C1)",
+      "retragere_spate": "H/2 min. 5,00 m față de limita posterioară (RLU Art.6 C1)",
+      "spatii_verzi_pct": 30,
+      "parcaje_min": "1 loc/80 mp suprafață locuibilă; 1 loc/50 mp ADC servicii",
+      "parcaje": "1 loc/80 mp suprafață locuibilă; 1 loc/50 mp ADC servicii; 1 loc/30 pers. instituții deschise publicului (RLU Art.9 C1)",
+      "utilizari_admise": [
+        "Servicii financiar-bancare și de asigurări, servicii profesionale",
+        "Biblioteci, mediateci, poștă și telecomunicații",
+        "Activități asociative, centre de zi sociale, săli expoziționale, galerii de artă",
+        "Restaurante, cofetării, cafenele, baruri, centre de recreere și sport",
+        "Locuințe de tip S+P, P+1, P+2, P+3, P+4 (maxim 16 m la cornișă)",
+        "Clinici medicale, dispensare, farmacii",
+        "Parcuri și locuri de joacă pentru copii, piețe agroalimentare, parcări publice",
+        "Școli, grădinițe, creșe, biserici, capele"
+      ],
+      "utilizari_interzise": [
+        "Activități productive poluante sau cu risc tehnologic",
+        "Autobaze, stații de betoane, spălătorii chimice, depozite en-gros"
+      ],
+      "note": "C1 — Zona Centrală Holboca (S+P+4). POT=80% CUT=2,00 pentru P+4 (RLU Art.15-16 UTR1). hmax=16m la cornișă."
     }
   },
   "utrs": {
