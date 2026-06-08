@@ -11,7 +11,8 @@
     [/\/UrbanX\/data\/municipii[_\-]suceava\//gi,  '/UrbanX/js/data/municipiul-suceava/'],
   ];
   function fix(u){if(typeof u!=='string')return u;M.forEach(function(r){u=u.replace(r[0],r[1]);});return u;}
-  window.fetch=function(u,o){return _f.call(this,fix(u),o);};
+  window.fetch=function(u,o){var fn=_f||window._nativeFetch;return fn?fn.call(this,fix(u),o):Promise.resolve(new Response(''));};
+  window._nativeFetch=_f;
   XMLHttpRequest.prototype.open=function(m,u){arguments[1]=fix(u);return _x.apply(this,arguments);};
 })();
 </script>
