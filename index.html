@@ -5477,11 +5477,26 @@ async function _loadReguli(cityKey) {
   var reg = window._PUG_REGISTRY && window._PUG_REGISTRY[cityKey];
   if (!reg || !reg.reguli) return null;
   try {
-    var r = await fetch(reg.reguli + '?v=20260526');
+    var r = await fetch(reg.reguli + '?v=20260527');
     if (!r.ok) return null;
     var d = await r.json();
-    if (!d.subzone || !d.utrs) return null;
+    if (!d.subzone) return null;
     window._PUG_REGULI[cityKey] = d;
+    // Populează REGULI[] cu rf/rl/rs/parcaje_min pentru orice format (cu sau fără utrs)
+    if (typeof mergeIntoREGULI === 'function') mergeIntoREGULI(d, cityKey);
+    // Re-aplică params pe parcela activă dacă rf/rl/rs erau null la momentul click-ului
+    try {
+      var ap = window.S && window.S.parcels && window.S.parcels[window.S.activeParcel || 0];
+      if (ap && ap.utr && ap.params) {
+        var rNou = REGULI[ap.utr] || {};
+        if (ap.params.rf == null && rNou.rf != null) ap.params.rf = rNou.rf;
+        if (ap.params.rl == null && rNou.rl != null) ap.params.rl = rNou.rl;
+        if (ap.params.rr == null && rNou.rr != null) ap.params.rr = rNou.rr;
+        if (ap.params.rs == null && rNou.rs != null) ap.params.rs = rNou.rs;
+        if (ap.params.sv == null && rNou.sv != null) ap.params.sv = rNou.sv;
+        if (typeof renderTab === 'function') renderTab('proiect');
+      }
+    } catch(e2) {}
     return d;
   } catch(e) { return null; }
 }
