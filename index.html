@@ -5767,7 +5767,12 @@ function _hookPopup() {
 window.addEventListener('ux:city_changed', function(e) {
   if (e.detail?.key) _loadReguli(e.detail.key);
 });
-setTimeout(function(){ _loadReguli(_cityKey()); }, 2500);
+setTimeout(function(){ 
+  console.log('[RLU] Starting _loadReguli for', _cityKey());
+  _loadReguli(_cityKey()).then(function(d){
+    console.log('[RLU] Result:', d ? 'OK subzone keys:'+Object.keys(d.subzone||{}).join(',') : 'NULL');
+  });
+}, 2500);
 
 window._FunctionEngine = {v:'2.1', cats:CATS, findUTR:_findUTRNumericForParcel};
 console.log('[FunctionEngine] v2.1 — point-in-polygon UTR lookup activ');
