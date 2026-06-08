@@ -2,7 +2,11 @@
 <html lang="ro">
 <head><script>
 (function(){
-  var _f=window.fetch,_x=XMLHttpRequest.prototype.open;
+  var _f=window.fetch||function(u,o){return window._realFetch?window._realFetch(u,o):Promise.reject(new Error('fetch not ready'));};
+  var _x=XMLHttpRequest.prototype.open;
+  // Salvam fetch-ul nativ cand devine disponibil
+  if(!window._realFetch && window.fetch) window._realFetch = window.fetch;
+  window.addEventListener('DOMContentLoaded',function(){if(window.fetch&&!window._realFetch)window._realFetch=window.fetch;});
   var M=[
     [/\/UrbanX\/data\/municipii[_\-]iasi\//gi,    '/UrbanX/data/municipiul-iasi/'],
     [/\/UrbanX\/js\/data\/(iasi|municipiul-iasi)\//gi,'/UrbanX/data/municipiul-iasi/'],
