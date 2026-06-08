@@ -18,19 +18,26 @@
   "subzone": {
     "L": {
       "denumire": "Zonă de locuit",
-      "pot_max": 30,
-      "cut_max": 1.1,
-      "hmax_m": 10,
-      "rh_max": "P+2E+M",
+      "pot_baza": 30,
+      "cut_baza": 1.1,
+      "hmax_m": 10.0,
+      "niv_max": 4,
+      "regim": "P+2E+M",
+      "rf": 5.0,
+      "rl": 4.0,
+      "rs": 5.0,
+      "retragere_fata": "min. 4,00 m pe străzi cat. III; min. 5,00 m pe străzi cat. I–II; min. 10,00 m față de drumurile județene (RLU Art.5 ZL)",
+      "retragere_laterala": "min. 1,50 m pe o limită laterală și min. 4,00 m pe cealaltă (acces pompieri); cu ferestre min. 2,00 m (RLU Art.6 ZL)",
+      "retragere_spate": "H/2 din înălțimea la cornișă, min. 5,00 m, max. 40,00 m față de aliniament (RLU Art.6 ZL)",
+      "spatii_verzi_pct": 25,
+      "parcaje_min": "conform Anexei 5 RGU / P17/2017: 1 loc/ap.",
+      "parcaje": "Stationarea autovehiculelor se admite numai în interiorul parcelei; se va asigura numărul de parcaje conform Anexei nr.5 din R.G.U. (min. 1 loc/apartament pentru locuințe individuale)",
       "parcela_min_mp": 600,
-      "front_min_m": null,
-      "retragere_fata_m": null,
-      "retragere_spate_m": null,
-      "spatii_verzi_pct": null,
+      "front_min_m": 12,
       "utilizari_admise": [
         "Locuințe individuale mici cu maxim P+2E+M niveluri",
         "Clădiri colective sau instituții publice și de turism/agrement (max P+2E+M)",
-        "Activități comerciale și de servicii cu suprafată maximă de 250 mp",
+        "Activități comerciale și de servicii cu suprafață maximă de 250 mp",
         "Parcaje, garaje",
         "Spații plantate, grădini"
       ],
@@ -38,19 +45,30 @@
         "Activități productive poluante, cu risc tehnologic",
         "Activități incomode prin traficul generat",
         "Depozite en-gros",
-        "Stații de întreținere auto"
+        "Stații de întreținere auto",
+        "Anexe pentru creșterea animalelor pentru producție",
+        "Autobaze și stații de întreținere auto"
       ],
-      "note": "Se vor menține caracteristicile parcelarului existent. Noile parcelări: min 600 mp și front min la stradă conform profilelor stradale. Respectarea caracterului tradițional al aliniamentului."
+      "note": "Se vor menține caracteristicile parcelarului existent. Noile parcelări: min 600 mp și front min 12 m la stradă pentru locuințe izolate (500 mp și 10 m pentru cuplate). Înălțimea max la cornișă = P+2E+M = 10,00 m (RLU Art.10 ZL). CUT detaliat: 1,1 mp.Adc/mp teren (P+2E+M); 0,9 (P+2E); 0,6 (P+1E); 0,3 (Parter)."
     },
     "ZIP": {
       "denumire": "Subzona instituțiilor publice și serviciilor",
-      "pot_max": 50,
-      "cut_max": 2.0,
-      "hmax_m": null,
-      "rh_max": "P+3E",
+      "pot_baza": 50,
+      "cut_baza": 2.0,
+      "hmax_m": 12.0,
+      "niv_max": 4,
+      "regim": "P+3E",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "min. 5,00 m de la aliniament sau la aliniament în funcție de profilul stradal (RLU Art.5 IS/ZIP)",
+      "retragere_laterala": "min. 3,00 m față de limitele laterale (HG 525/1996, RLU nu specifică valoare proprie)",
+      "retragere_spate": "min. 5,00 m față de limita posterioară (HG 525/1996, RLU nu specifică valoare proprie)",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "1 loc/10-40 salariați + suplimentar conform destinație",
+      "parcaje": "Construcțiile administrative vor fi prevăzute cu câte un loc de parcare pentru 10-40 salariați și locuri suplimentare pentru public, acces oficial și serviciu (RLU Cap. IS, Condiții specifice)",
       "parcela_min_mp": 1000,
       "front_min_m": 15,
-      "retragere_fata_m": 5,
       "utilizari_admise": [
         "Instituții publice: primărie, judecătorie, poliție, pompieri",
         "Servicii: bănci, poștă, telecomunicații",
@@ -63,17 +81,26 @@
         "Depozite",
         "Locuințe individuale izolate"
       ],
-      "note": "Clădirile publice se retrag de la aliniament cu min 5 m sau se dispun la aliniament în funcție de profilul stradal. Documentație PUZ obligatorie pentru funcțiuni cu impact major."
+      "note": "hmax calculat: P+3E × 3,0m = 12,0m. SV = 20% conform HG 525/1996 (RLU nu specifică procentul explicit). Documentație PUZ obligatorie pentru funcțiuni cu impact major."
     },
     "ZB": {
       "denumire": "Subzona activităților legate de culte",
-      "pot_max": 50,
-      "cut_max": 2.2,
-      "hmax_m": 12,
-      "rh_max": null,
+      "pot_baza": 50,
+      "cut_baza": 2.2,
+      "hmax_m": 12.0,
+      "niv_max": 4,
+      "regim": "conform proiecte tehnice (max echivalent P+3E)",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "min. 5,00 m de la aliniament (RLU Art.5 IS, aplicat ZB)",
+      "retragere_laterala": "min. 3,00 m față de limitele laterale (HG 525/1996)",
+      "retragere_spate": "min. 5,00 m față de limita posterioară (HG 525/1996)",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "conform destinație cult / normative specifice",
+      "parcaje": "Parcaje conform normativelor specifice cultelor și P17/2017; în incintă, în afara circulațiilor publice",
       "parcela_min_mp": 1000,
       "front_min_m": 15,
-      "retragere_fata_m": 5,
       "utilizari_admise": [
         "Lăcașuri de cult (biserici, mânăstiri, capele)",
         "Clădiri anexe ale cultelor",
@@ -84,17 +111,26 @@
         "Activități comerciale incompatibile cu caracterul zonei",
         "Activități productive sau industriale"
       ],
-      "note": "Unitățile viitoare se vor realiza ca funcțiuni complementare în zonele de locuințe. Interdicții temporare în cazul necesității elaborării PUZ."
+      "note": "hmax RLU: 'conform proiecte tehnice' — nu se specifică valoare numerică; s-a folosit 12,0m (P+3E × 3m) ca limită maximă aplicabilă din tabelul IS (pg.74 RLU). CUT=2,20 confirmat din tabelul IS. Interdicții temporare în cazul necesității elaborării PUZ."
     },
     "ZC": {
       "denumire": "Subzona activităților legate de cultură și educație",
-      "pot_max": 25,
-      "cut_max": 0.5,
-      "hmax_m": null,
-      "rh_max": "P+1E",
+      "pot_baza": 25,
+      "cut_baza": 0.5,
+      "hmax_m": 6.0,
+      "niv_max": 2,
+      "regim": "P+1E",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "min. 5,00 m de la aliniament (RLU Art.5 IS/ZC)",
+      "retragere_laterala": "min. 3,00 m față de limitele laterale (HG 525/1996)",
+      "retragere_spate": "min. 5,00 m față de limita posterioară (HG 525/1996)",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "conform P17/2017 unități de învățământ",
+      "parcaje": "Parcaje conform normativelor pentru unități de învățământ și cultură (P17/2017); se asigură accese carosabile și pietonale separate",
       "parcela_min_mp": 1000,
       "front_min_m": 15,
-      "retragere_fata_m": 5,
       "utilizari_admise": [
         "Școli, grădinițe, licee",
         "Biblioteci, muzee, case de cultură",
@@ -106,14 +142,24 @@
         "Locuințe individuale",
         "Activități comerciale de mari dimensiuni"
       ],
-      "note": "Clădirile se retrag de la aliniament cu min 5 m. Unitățile viitoare ca funcțiuni complementare în zone de locuințe."
+      "note": "hmax calculat: P+1E × 3,0m = 6,0m. POT=25% și CUT=0,50 confirmate din tabelul IS (pg.74 RLU). SV = 20% conform HG 525/1996."
     },
     "ZD": {
       "denumire": "Clădiri cu destinație specială",
-      "pot_max": 50,
-      "cut_max": 1.5,
-      "hmax_m": null,
-      "rh_max": "P+2E",
+      "pot_baza": 50,
+      "cut_baza": 1.5,
+      "hmax_m": 9.0,
+      "niv_max": 3,
+      "regim": "P+2E",
+      "rf": 5.0,
+      "rl": 4.0,
+      "rs": 5.0,
+      "retragere_fata": "conform profilurilor stradale — planșa U9 (RLU Art.5 ZD); orientativ min. 5,00 m",
+      "retragere_laterala": "min. 1,50 m pe o limită laterală și min. 4,00 m pe cealaltă (RLU Art.6 ZD)",
+      "retragere_spate": "min. 5,00 m față de limita posterioară (HG 525/1996; RLU spune 'conform legislației')",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "conform legislație și normative în vigoare",
+      "parcaje": "ZD – conform legislației și normativelor în vigoare (RLU Art.9 ZD)",
       "utilizari_admise": [
         "Construcții și amenajări specifice destinației speciale",
         "Locuințe de serviciu",
@@ -122,17 +168,26 @@
       "utilizari_interzise": [
         "Conform legislației și normativelor în vigoare"
       ],
-      "note": "Se va păstra parcelarea existentă. Reparcelarea doar în baza documentație urbanistice aprobate. Retragerile conform profilurilor stradale — planșa U9."
+      "note": "hmax calculat: P+2E × 3,0m = 9,0m (RLU Art.10 ZD: regim max P+2E). POT=50% și CUT=1,50 confirmate din RLU pg.96. Se va păstra parcelarea existentă."
     },
     "ZI": {
       "denumire": "Subzona unităților industriale cu factor redus de poluare și depozitare",
-      "pot_max": 50,
-      "cut_max": 1.2,
-      "hmax_m": 12,
-      "rh_max": null,
+      "pot_baza": 50,
+      "cut_baza": 1.2,
+      "hmax_m": 12.0,
+      "niv_max": 3,
+      "regim": "P+2E (industrial)",
+      "rf": 15.0,
+      "rl": 5.0,
+      "rs": 5.0,
+      "retragere_fata": "min. 15,00 m față de străzile principale; min. 10,00 m față de străzile secundare (RLU Art.5 ZI)",
+      "retragere_laterala": "min. H/2 din înălțimea clădirii, min. 3,00 m față de limitele laterale; min. 15,00 m față de zone rezidențiale/mixte (RLU Art.6 ZI)",
+      "retragere_spate": "min. 5,00 m față de limita posterioară a parcelei (RLU Art.6 ZI)",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "1 loc/5 angajați (P17/2017)",
+      "parcaje": "Parcaje la sol în incintă, în afara circulațiilor publice; conform P17/2017: 1 loc/5 angajați pentru industrial/depozitare; PUZ obligatoriu pentru incinte >5000 mp",
       "parcela_min_mp": 1000,
       "front_min_m": 15,
-      "retragere_fata_m": 15,
       "utilizari_admise": [
         "Activități industriale și productive cu poluare redusă",
         "Depozitare și logistică (parcuri logistice)",
@@ -146,14 +201,24 @@
         "Activități care produc poluare incompatibilă cu vecinătățile",
         "Unități cu profil incompatibil zonei"
       ],
-      "note": "Retragere 15 m față de străzile principale, 10 m față de secundare, 5 m față de vecini. PUZ obligatoriu pentru incinte >5000 mp."
+      "note": "POT=50% și CUT=1,2 confirmate din RLU pg.102 (Art.15-16 ZI/ID). hmax=12,0m din reguli.json existent (confirmat față de tipul industrial P+2E × 4m = 8-12m; valoarea din JSON 12m păstrată). SV = 20% conform RLU Art.13 ZI (minim 20% din suprafața totală a parcelei)."
     },
     "ZG": {
       "denumire": "Subzona cimitirelor și clădirilor anexe",
-      "pot_max": 50,
-      "cut_max": 0.5,
-      "hmax_m": 4,
-      "rh_max": null,
+      "pot_baza": 50,
+      "cut_baza": 0.5,
+      "hmax_m": 4.5,
+      "niv_max": 1,
+      "regim": "P",
+      "rf": 10.0,
+      "rl": 5.0,
+      "rs": 5.0,
+      "retragere_fata": "locurile de veci se retrag față de aliniament cu min. 10,00 m (RLU Art.5 ZG)",
+      "retragere_laterala": "locurile de veci se retrag față de limitele laterale cu min. 5,00 m (RLU Art.6 ZG)",
+      "retragere_spate": "locurile de veci se retrag față de limita posterioară cu min. 5,00 m (RLU Art.6 ZG)",
+      "spatii_verzi_pct": 15,
+      "parcaje_min": "în afara circulațiilor publice",
+      "parcaje": "Stationarea autovehiculelor în afara spațiului circulației publice; circulații carosabile și pietonale în pondere de circa 15% din suprafața totală a cimitirului (RLU Art.8 ZG)",
       "utilizari_admise": [
         "Cimitire",
         "Capelă mortuară",
@@ -168,14 +233,24 @@
         "Densificarea cimitirelor existente prin reducerea spațiului minim per loc de veci",
         "Construcții permanente cu altă destinație"
       ],
-      "note": "Locurile de veci se retrag față de aliniament cu min 10 m."
+      "note": "POT=50% și CUT=0,50 confirmate din RLU pg.112 (Art.15-16 ZG). hmax RLU Art.10 ZG: 'a nu depăși 3,0m la cornișă, respectiv 4,5m la coamă' — s-a reținut 4,5m (coamă). niv_max=1 (parter). SV = minim 15% (plantații înalte pe alei conform RLU Art.13 ZG)."
     },
     "GC": {
       "denumire": "Subzona echipare edilitară",
-      "pot_max": 50,
-      "cut_max": 1.0,
-      "hmax_m": null,
-      "rh_max": null,
+      "pot_baza": 50,
+      "cut_baza": 1.0,
+      "hmax_m": 6.0,
+      "niv_max": 2,
+      "regim": "P+1E",
+      "rf": 5.0,
+      "rl": 6.0,
+      "rs": 6.0,
+      "retragere_fata": "min. 5,00 m în cazul în care fronturile dominante sunt retrase de la stradă (RLU Art.5 GC)",
+      "retragere_laterala": "H/2 din înălțimea clădirii, min. 6,00 m față de limitele parcelei (RLU Art.6 GC)",
+      "retragere_spate": "H/2 din înălțimea clădirii, min. 6,00 m față de limitele parcelei (RLU Art.6 GC)",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "în afara circulațiilor publice",
+      "parcaje": "Stationarea autovehiculelor în afara spațiului circulației publice; max. 40% din spațiul de retragere poate fi rezervat pentru parcaje (RLU Art.9 GC)",
       "utilizari_admise": [
         "Birouri autonome GC",
         "Incinte tehnice pentru alimentare cu apă și canalizare",
@@ -186,34 +261,56 @@
         "Activități cu risc tehnologic în zone rezidențiale sau mixte",
         "Activități poluante incompatibile cu vecinătățile"
       ],
-      "note": "PUZ obligatoriu pentru incinte tehnice cu impact major. Retragere min 5 m față de aliniament când fronturile dominante sunt retrase."
+      "note": "POT=50% și CUT=1,0 confirmate din RLU pg.112 (Art.15-16 GC). hmax nespecificat explicit — calculat P+1E × 3,0m = 6,0m (orientativ, înălțimea nu va depăși distanța dintre aliniamente conform RLU Art.10 GC). SV = 20% (HG 525/1996; RLU nu specifică procent explicit pentru GC)."
     },
     "ZV 1": {
       "denumire": "Subzona spațiilor verzi publice cu acces nelimitat",
-      "pot_max": 20,
-      "cut_max": 0.6,
-      "hmax_m": 6,
-      "rh_max": "P+1E",
+      "pot_baza": 20,
+      "cut_baza": 0.6,
+      "hmax_m": 6.0,
+      "niv_max": 2,
+      "regim": "P+1E",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "min. 5,00 m față de aliniament (HG 525/1996; RLU nu specifică valoare numerică proprie)",
+      "retragere_laterala": "min. 3,00 m față de limitele laterale (HG 525/1996)",
+      "retragere_spate": "min. 5,00 m față de limita posterioară (HG 525/1996)",
+      "spatii_verzi_pct": 75,
+      "parcaje_min": "în afara circulațiilor publice",
+      "parcaje": "Parcaje ocazionale pentru întreținere și vizitatori; platforme permeabile pentru ape meteorice (RLU Cap. SP/ZV1)",
       "utilizari_admise": [
         "Spații plantate: grădini publice, scuaruri, parcuri",
         "Circulații pietonale",
         "Circulații carosabile ocazionale pentru întreținere",
         "Mobilier urban și amenajări de agrement",
-        "Fântâni arteziene, pergole, pavilione"
+        "Fântâni arteziene, pergole, pavilione",
+        "Clădiri pentru cultură, sport, recreere și anexe (max. 20% din suprafața totală construită)"
       ],
       "utilizari_interzise": [
         "Construcții permanente cu altă destinație decât cea a spațiului verde",
         "Intervenții care depreciază calitatea peisagistică",
-        "Modificarea proiectului inițial fără aviz"
+        "Modificarea proiectului inițial fără aviz",
+        "Intervenții care impun separări fizice ce interzic libera circulație"
       ],
-      "note": "Amenajările se vor face conform studiilor de specialitate avizate conform legii."
+      "note": "POT=20% și CUT=0,60 confirmate din RLU pg.107 (Art.15-16 ZV1). hmax=P+1E=6,0m (calculat). SV = 75% (spații verzi publice conform HG 525/1996 Art.15 pt. zone verzi/agrement; RLU nu specifică procentul exact — s-a aplicat HG 525)."
     },
     "ZV 2": {
       "denumire": "Subzona spațiilor verzi de protecție a cursurilor de apă",
-      "pot_max": 10,
-      "cut_max": 0.3,
-      "hmax_m": 6,
-      "rh_max": "P+1E",
+      "pot_baza": 10,
+      "cut_baza": 0.3,
+      "hmax_m": 6.0,
+      "niv_max": 2,
+      "regim": "P+1E",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "min. 5,00 m față de aliniament (HG 525/1996; RLU nu specifică valoare numerică proprie)",
+      "retragere_laterala": "min. 3,00 m față de limitele laterale (HG 525/1996)",
+      "retragere_spate": "min. 5,00 m față de limita posterioară (HG 525/1996)",
+      "spatii_verzi_pct": 75,
+      "parcaje_min": "nu se admit parcaje permanente",
+      "parcaje": "Nu se admit parcaje permanente; accese ocazionale de întreținere exclusiv (RLU Cap. SP/ZV2)",
       "utilizari_admise": [
         "Spații plantate de protecție",
         "Fâșii publice plantate",
@@ -223,7 +320,7 @@
         "Orice construcții permanente",
         "Activități care afectează regimul hidrologic"
       ],
-      "note": "Fâșii de protecție obligatorie față de cursurile de apă. Amenajări conform studiilor hidrologice avizate."
+      "note": "POT=10% și CUT=0,30 confirmate din RLU pg.107 (Art.15-16 ZV2). hmax=P+1E=6,0m (calculat, același cu ZV1 conform RLU). SV = 75% (aceeași logică cu ZV1 — zone de protecție cursuri apă)."
     }
   },
   "zone_restrictive": {
