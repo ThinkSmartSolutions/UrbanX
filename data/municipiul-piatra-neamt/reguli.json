@@ -1,0 +1,840 @@
+{
+  "_meta": {
+    "uat": "Municipiul Piatra Neamț",
+    "uat_key": "RO-NT-01",
+    "sursa": "RLU Municipiul Piatra Neamț — U.A.U.I.M. – C.C.P.E.C. 2018, PUG Piatra Neamț revizie 2019",
+    "versiune": "1.0.0",
+    "data_generare": "2026-06-04",
+    "generare_nota": "Generat din RLU PNT 2018 (111 pag.) — 16 UTR-uri principale, subzone CP/CA/CB/M/L/A/B/V/T/G/S",
+    "seismic": {
+      "ag": 0.35,
+      "Tc": 1.6,
+      "zona": "E",
+      "nota": "P100-1/2013 — Piatra Neamț zona seismică E, ag=0.35g, Tc=1.6s — zonă cu seismicitate ridicată"
+    },
+    "hdd": 3400,
+    "hdd_nota": "Grade-zile încălzire Piatra Neamț (conf. C107/4-2022)",
+    "nr_utrs": 16,
+    "nr_subzone": 18,
+    "statiune_turistica": true,
+    "nota_statiune": "Piatra Neamț este declarată stațiune turistică — RLU stabilește direcții de dezvoltare turistică"
+  },
+  "subzone": {
+    "CP": {
+      "denumire": "Zona Centrală — Subzone în Limitele Zonei de Protecție a Monumentelor Istorice",
+      "zona_parinte": "C",
+      "pot_baza": 35,
+      "pot_cumulat": 70,
+      "cut_baza": 0.7,
+      "cut_cumulat": 0.7,
+      "cut_note": "CP1a, CP1b: CUT maxim = 0,7 conf. caracter zonă protejată; în zona parcajului subteran POT=100%, CUT=1,0",
+      "hmax_m": 9.0,
+      "niv_max": 3,
+      "regim": "conf. zona protejată — PUZ+aviz Ministerul Culturii",
+      "spatii_verzi_pct": 15,
+      "parcaje_min": "parcare în locuri amenajate; deficit acoperit la max. 150m",
+      "suprafata_min_mp": 150,
+      "lung_min_aliniament_m": null,
+      "aliniament_note": "CP1a: menținere configurație țesut urban tradițional; CP1b: aliniere la front existent",
+      "ref_vol1": "RLU PNT 2018 — CP Zona Centrală în zona protejată",
+      "fn_complementare": [
+        "instituții publice",
+        "servicii",
+        "comerț",
+        "rezidențial compatibil",
+        "turism"
+      ],
+      "fn_interzise": [
+        "industrie",
+        "depozitare",
+        "activități poluante",
+        "construcții incompatibile cu zona protejată"
+      ],
+      "rf": 3.0,
+      "rl": 3.0,
+      "rs": 3.0,
+      "retragere_fata": "se mențin aliniamentele actuale; str. Alexandru cel Bun și str. Ștefan cel Mare — retragere minimă prin PUZ-CP; str. D. Ernici min. 6,0m; str. Pinului min. 4,0m; str. V.A. Urechia 8,0m/7,5m (RLU CP, Art.5)",
+      "retragere_laterala": "se menține situația actuală; construcții noi în sistem izolat min. 3,0m față de una din limitele laterale sau pe limită în regim cuplat (cu acordul vecinilor și studiu însorire) (RLU CP, Art.6)",
+      "retragere_spate": "H/2 față de limita posterioară, min. 3,0m (RLU CP, Art.6)",
+      "parcaje": "Stationare numai în locurile amenajate (supraterane/subterane); deficit acoperit la max. 150m cu aviz studiu trafic; aviz DMI/DJCPN obligatoriu (RLU CP, Art.9)",
+      "utilizari_admise": [
+        "CP1a — conservare și restaurare fond construit protejat, fără schimbare regim înălțime",
+        "CP1b — locuințe în zona de protecție a monumentelor istorice str. Ștefan cel Mare",
+        "Funcțiuni publice și rezidențiale POT≤40%; funcțiuni mixte POT≤70% (conform PUZ-CP)",
+        "Spații verzi de punere în valoare a monumentelor; parcaj subteran (POT=100%, CUT=1,0)"
+      ],
+      "utilizari_interzise": [
+        "Orice intervenție fără aviz DMI/DJCPN Neamț și Comisia Zonală Monumente Istorice",
+        "Schimbarea regimului de înălțime al construcțiilor existente în CP1a",
+        "Construcții provizorii sau incompatibile cu statutul de zonă protejată"
+      ],
+      "note": "CP — Zona Centrală Protejată. CP1a: POT=35% CUT=0,7 confirmate RLU Art.16 CP1a. CP1b: POT=40%(rezid./public)/70%(mixt); CUT=0,7; hmax=9,0m la streașină (P+1+M, max 12,5m la coamă). Aviz obligatoriu DMI/Ministerul Culturii."
+    },
+    "CA1": {
+      "denumire": "Subzona Centrală — Centru de Afaceri cu Clădiri Înalte și Accente >30m",
+      "zona_parinte": "C",
+      "pot_baza": 75,
+      "pot_cumulat": 80,
+      "cut_baza": 2.4,
+      "cut_cumulat": null,
+      "cut_note": "CUT minim = 2,4; CUT maxim nu se limitează — conf. RLU PNT Art.17",
+      "hmax_m": 30.0,
+      "niv_max": 8,
+      "regim": "P+2-P+8 și accente >30m conf. PUZ",
+      "spatii_verzi_pct": 10,
+      "parcaje_min": "parcare în locuri amenajate; garaj public/privat conform normative",
+      "suprafata_min_mp": null,
+      "lung_min_aliniament_m": null,
+      "aliniament_note": "regim continuu sau discontinuu; accente >30m numai prin PUZ aprobat",
+      "ref_vol1": "RLU PNT 2018 — CA1 centru afaceri înălțime medie/înaltă",
+      "fn_complementare": [
+        "birouri",
+        "comerț",
+        "hoteluri",
+        "servicii financiare",
+        "rezidențial superior"
+      ],
+      "fn_interzise": [
+        "industrie",
+        "depozitare",
+        "activități poluante",
+        "construcții rurale"
+      ],
+      "rf": 6.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "clădirile cu funcțiuni publice reprezentative se retrag min. 6,0m față de aliniament sau se păstrează aliniamentele existente (RLU CA1, Art.5)",
+      "retragere_laterala": "clădirile se pot amplasa izolat sau în regim continuu/discontinuu; față de clădiri publice izolate sau culte min. 3,0m (RLU CA1, Art.6)",
+      "retragere_spate": "H/2 față de limita posterioară, min. 5,0m (RLU CA1, Art.6)",
+      "parcaje": "Stationare în interiorul parcelei; parcaje multietajate permise; 1 loc/5 salariați + 60% public (administrative) (RLU CA1, Art.9)",
+      "utilizari_admise": [
+        "Instituții și servicii publice de interes general de înălțime medie și mare",
+        "Sedii companii și firme; servicii financiar-bancare; hoteluri",
+        "Centre comerciale, galerii comerciale; restaurante, cafenele",
+        "Parcaje multietajate"
+      ],
+      "utilizari_interzise": [
+        "Activități productive poluante, cu risc tehnologic",
+        "Depozite en-gros; autogări",
+        "Antene TV satelit vizibile pe fațade"
+      ],
+      "note": "CA1 — Zona Centrală tip 1. POT=75% CUT min.=2,4 (nelimitat maxim) confirmate RLU Art.16-17 CA1. hmax=distanța dintre aliniamente; accente >30m prin PUZ. regim=P+2-P+8 și accente conform JSON."
+    },
+    "CA2": {
+      "denumire": "Subzona Centrală cu Funcțiuni Complexe — Clădiri Medii și Înalte",
+      "zona_parinte": "C",
+      "pot_baza": 70,
+      "pot_cumulat": 75,
+      "cut_baza": 0.8,
+      "cut_cumulat": 7.7,
+      "cut_note": "sub 3 niv: CUT 0,8-2,4; 3-6 niv: CUT 2,4-4,2; peste 6 niv: CUT 4,2-7,7 conf. RLU Art.17",
+      "hmax_m": 22.0,
+      "niv_max": 6,
+      "regim": "P+2-P+5 curent; accente >30m prin PUZ",
+      "spatii_verzi_pct": 10,
+      "parcaje_min": "parcare conform normative; PUZ pentru intervenții majore",
+      "suprafata_min_mp": null,
+      "lung_min_aliniament_m": null,
+      "aliniament_note": "regim continuu sau discontinuu",
+      "ref_vol1": "RLU PNT 2018 — CA2 funcțiuni complexe",
+      "fn_complementare": [
+        "birouri",
+        "comerț",
+        "servicii publice",
+        "hoteluri",
+        "rezidențial"
+      ],
+      "fn_interzise": [
+        "industrie grea",
+        "depozitare en-gros",
+        "activități poluante"
+      ],
+      "rf": 4.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "respectarea înălțimii la cornișă ≤ distanța dintre aliniamente; volumele mai înalte retrase cu diferența față de distanța dintre aliniamente min. 4,0m (RLU CA2, Art.5)",
+      "retragere_laterala": "clădirile în regim discontinuu se retrag min. 3,0m față de limitele laterale (RLU CA2, Art.6)",
+      "retragere_spate": "H/2 față de limita posterioară, min. 5,0m (RLU CA2, Art.6)",
+      "parcaje": "Stationare în interiorul parcelei; PUZ pentru intervenții care depășesc regimul curent (RLU CA2, Art.9)",
+      "utilizari_admise": [
+        "Instituții și servicii publice de interes general",
+        "Comerț, servicii, hoteluri; birouri",
+        "Accente înalte >30m exclusiv prin PUZ aprobat"
+      ],
+      "utilizari_interzise": [
+        "Activități productive poluante, cu risc tehnologic",
+        "Depozite en-gros; construcții provizorii"
+      ],
+      "note": "CA2 — Zona Centrală tip 2. POT=70% CUT: clădiri P+2-P+5 → 2,4-4,2; clădiri >P+5 → 4,2-7,7 confirmate RLU Art.17 CA2. hmax=22m curent; accente >30m prin PUZ."
+    },
+    "L1a": {
+      "denumire": "Locuințe Individuale și Colective Mici P-P+2E — Afara Zonei Protejate",
+      "zona_parinte": "L",
+      "pot_baza": 40,
+      "pot_cumulat": 45,
+      "cut_baza": 0.8,
+      "cut_cumulat": 1.2,
+      "cut_note": "P+1E: CUT max 0,8; P+2E: CUT max 1,2 conf. RLU Art.17",
+      "hmax_m": 9.0,
+      "niv_max": 3,
+      "regim": "P+1-P+2",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "stationare în interiorul parcelei",
+      "suprafata_min_mp": 150,
+      "lung_min_aliniament_m": 8.0,
+      "adancime_min_m": 15.0,
+      "aliniament_note": "regim continuu (înșiruit), grupat (cuplat) sau izolat",
+      "ref_vol1": "RLU PNT 2018 — L1a locuințe individuale afara zonei protejate",
+      "fn_complementare": [
+        "comerț max 200mp Adc",
+        "servicii profesionale",
+        "grădinițe"
+      ],
+      "fn_interzise": [
+        "industrie",
+        "activități productive poluante",
+        "service auto",
+        "depozitare"
+      ],
+      "rf": 4.0,
+      "rl": 3.0,
+      "rs": 2.0,
+      "retragere_fata": "min. 4,0m pe str. cat.III și 5,0m pe str. cat.II; clădirile independente pe aliniament dacă înălțimea ≤ distanța dintre aliniamente, altfel retragere = diferența, min. 4,0m; adâncime max. 15,0m de la aliniament (RLU L1a, Art.5)",
+      "retragere_laterala": "H/2 față de limitele laterale, min. 3,0m; alipit calcan în regim înșiruit pe max. 15,0m adâncime (RLU L1a, Art.6)",
+      "retragere_spate": "H/2 față de limita posterioară, min. 2,0m (RLU L1, Art.6 — min. 2,0m explicit)",
+      "parcaje": "Stationarea numai în interiorul parcelei (RLU L1a, Art.9). 1 loc/locuință; mansardare admisă (suprafața mansardei ≤ 60% din nivel curent)",
+      "utilizari_admise": [
+        "Locuințe individuale și colective mici cu regim P-P+2E în regim înșiruit, cuplat sau izolat",
+        "Funcțiuni complementare zonei (comerț, alimentație publică, servicii la parterul locuinței)",
+        "Spații amenajate, locuri de joacă, mobilier urban",
+        "Accese pietonale, carosabile, parcaje"
+      ],
+      "utilizari_interzise": [
+        "Funcțiuni incompatibile cu caracterul rezidențial",
+        "Activități poluante, cu risc tehnologic",
+        "Depozitare en-gros; depozitări materiale refolosibile"
+      ],
+      "note": "L1a — Locuințe individuale P-P+2E, țesut urban constituit. POT=40% CUT=0,8(P+1E)/1,2(P+2E) confirmate RLU Art.16-17 L1a. hmax=9,0m (10m cornișă, 12,5m coamă). Admise P+2E+M conform Legea 50/1991 art.21."
+    },
+    "L1b": {
+      "denumire": "Locuințe Individuale și Colective Mici P-P+2E — Interior Zonă Protejată",
+      "zona_parinte": "L",
+      "pot_baza": 40,
+      "pot_cumulat": 40,
+      "cut_baza": 0.8,
+      "cut_cumulat": 1.2,
+      "cut_note": "P+1E: CUT max 0,8; P+2E: CUT max 1,2 — conf. caracter zonă protejată",
+      "hmax_m": 9.0,
+      "niv_max": 3,
+      "regim": "P+1-P+2",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "stationare în interiorul parcelei",
+      "suprafata_min_mp": 150,
+      "lung_min_aliniament_m": 8.0,
+      "adancime_min_m": 15.0,
+      "aliniament_note": "în interiorul perimetrelor de protecție — conf. aviz MCI",
+      "ref_vol1": "RLU PNT 2018 — L1b locuințe în zona protejată",
+      "fn_complementare": [
+        "comerț max 200mp Adc",
+        "servicii profesionale compatibile cu zona protejată"
+      ],
+      "fn_interzise": [
+        "industrie",
+        "activități productive poluante",
+        "construcții incompatibile cu zona protejată"
+      ],
+      "rf": 4.0,
+      "rl": 3.0,
+      "rs": 2.0,
+      "retragere_fata": "min. 4,0m pe str. cat.III și 5,0m pe str. cat.II; clădirile independente pe aliniament dacă înălțimea ≤ distanța dintre aliniamente, min. 4,0m (RLU L1b, Art.5)",
+      "retragere_laterala": "H/2 față de limitele laterale, min. 3,0m; alipit calcan în regim înșiruit (RLU L1b, Art.6)",
+      "retragere_spate": "H/2 față de limita posterioară, min. 2,0m; în loturi puțin adânci admis adosare la calcanul existent (RLU L1b, Art.6)",
+      "parcaje": "Stationarea numai în interiorul parcelei (RLU L1b, Art.9)",
+      "utilizari_admise": [
+        "Locuințe individuale și colective mici cu regim P-P+2E în regim înșiruit, cuplat sau izolat",
+        "Funcțiuni complementare zonei (comerț, alimentație publică, servicii la parterul locuinței)",
+        "Spații amenajate, locuri de joacă, mobilier urban",
+        "Accese pietonale, carosabile, parcaje"
+      ],
+      "utilizari_interzise": [
+        "Funcțiuni incompatibile cu caracterul rezidențial",
+        "Activități poluante, cu risc tehnologic",
+        "Depozitare en-gros; depozitări materiale refolosibile"
+      ],
+      "note": "L1b — Locuințe individuale P-P+2E, enclave neconstituite. POT=40% CUT=0,8(P+1)/1,2(P+2) confirmate RLU Art.16-17 L1b. hmax=9,0m."
+    },
+    "L1c": {
+      "denumire": "Locuințe Individuale și Colective Mici P-P+2E — Noi Extinderi / Enclave",
+      "zona_parinte": "L",
+      "pot_baza": 40,
+      "pot_cumulat": 40,
+      "cut_baza": 0.8,
+      "cut_cumulat": 1.2,
+      "cut_note": "P+1E: CUT max 0,8; P+2E: CUT max 1,2",
+      "hmax_m": 9.0,
+      "niv_max": 3,
+      "regim": "P+1-P+2",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "stationare în interiorul parcelei; PUZ de lotizare obligatoriu",
+      "suprafata_min_mp": 200,
+      "lung_min_aliniament_m": 8.0,
+      "adancime_min_m": 15.0,
+      "aliniament_note": "noi extinderi sau enclave neconstruite — conf. PUZ dacă >3 parcele",
+      "ref_vol1": "RLU PNT 2018 — L1c locuințe noi extinderi",
+      "fn_complementare": [
+        "comerț max 200mp Adc",
+        "servicii profesionale"
+      ],
+      "fn_interzise": [
+        "industrie",
+        "activități productive poluante",
+        "depozitare"
+      ],
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 2.0,
+      "retragere_fata": "min. 5,0m față de aliniament conform PUZ de lotizare (permite parcarea mașinii a 2-a și plantarea arborilor fără deteriorarea gardului/trotuarelor) (RLU L1c, Art.5)",
+      "retragere_laterala": "H/2 față de limitele laterale, min. 3,0m; conform PUZ de lotizare (RLU L1c, Art.6)",
+      "retragere_spate": "H/2 față de limita posterioară, min. 2,0m; conform PUZ de lotizare (RLU L1c, Art.6)",
+      "parcaje": "Stationarea în interiorul parcelei; PUZ de lotizare obligatoriu (cu excepția lotizărilor existente cu acces la drum public) (RLU L1c, Art.9)",
+      "utilizari_admise": [
+        "Locuințe individuale și colective mici cu regim P-P+2E în regim înșiruit, cuplat sau izolat",
+        "Funcțiuni complementare zonei (comerț, alimentație publică, servicii la parterul locuinței)",
+        "Spații amenajate, locuri de joacă, mobilier urban",
+        "Accese pietonale, carosabile, parcaje"
+      ],
+      "utilizari_interzise": [
+        "Funcțiuni incompatibile cu caracterul rezidențial",
+        "Activități poluante, cu risc tehnologic",
+        "Depozitare en-gros; depozitări materiale refolosibile"
+      ],
+      "note": "L1c — Locuințe individuale P-P+2E, noile extinderi. POT=40% CUT=0,8(P+1)/1,2(P+2) confirmate RLU Art.16-17 L1c. hmax=9,0m. PUZ de lotizare obligatoriu."
+    },
+    "L2a": {
+      "denumire": "Locuințe Individuale/Colective Mici P-P+2E — Lotizări Anterioare, Afara Zonei Protejate",
+      "zona_parinte": "L",
+      "pot_baza": 40,
+      "pot_cumulat": 40,
+      "cut_baza": 0.8,
+      "cut_cumulat": 1.5,
+      "cut_note": "P+1E: CUT 0,8; P+2E: CUT 1,2; P+2E+M: CUT 1,5 — respectare POT inițial lotizare",
+      "hmax_m": 9.0,
+      "niv_max": 3,
+      "regim": "P+1-P+2",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "stationare în interiorul parcelei",
+      "suprafata_min_mp": 150,
+      "lung_min_aliniament_m": 8.0,
+      "adancime_min_m": 12.0,
+      "aliniament_note": "respectare aliniament lotizare anterioară; POT max nu depășește POT inițial lotizare",
+      "ref_vol1": "RLU PNT 2018 — L2a lotizări anterioare afara zonei protejate",
+      "fn_complementare": [
+        "comerț max 200mp Adc",
+        "servicii profesionale"
+      ],
+      "fn_interzise": [
+        "industrie",
+        "activități productive poluante",
+        "depozitare"
+      ],
+      "rf": 4.0,
+      "rl": 3.0,
+      "rs": 2.0,
+      "retragere_fata": "se mențin retragerile din planurile inițiale de lotizare (4,0-5,0m); pe aliniament sau retras în funcție de lotizarea existentă (RLU L2a, Art.5)",
+      "retragere_laterala": "H/2 față de limitele laterale, min. 3,0m; sistem de cuplare max. 15,0m adâncime de la aliniament (RLU L2a, Art.6)",
+      "retragere_spate": "H/2 față de limita posterioară, min. 2,0m (RLU L2a, Art.6 — conform POT inițial lotizare)",
+      "parcaje": "Stationarea numai în interiorul parcelei (RLU L2a, Art.9)",
+      "utilizari_admise": [
+        "Locuințe individuale și colective mici cu regim P-P+2E în regim înșiruit, cuplat sau izolat",
+        "Funcțiuni complementare zonei (comerț, alimentație publică, servicii la parterul locuinței)",
+        "Spații amenajate, locuri de joacă, mobilier urban",
+        "Accese pietonale, carosabile, parcaje"
+      ],
+      "utilizari_interzise": [
+        "Funcțiuni incompatibile cu caracterul rezidențial",
+        "Activități poluante, cu risc tehnologic",
+        "Depozitare en-gros; depozitări materiale refolosibile"
+      ],
+      "note": "L2a — Locuințe individuale P-P+2E, lotizări urbane anterioare. POT=max 40% (conf. POT inițial lotizare) CUT=0,8(P+1)/1,2(P+2)/1,5(P+2+M) confirmate RLU Art.16-17 L2a."
+    },
+    "L3": {
+      "denumire": "Locuințe Colective Medii P+3E-5E — Ansambluri Rezidențiale",
+      "zona_parinte": "L",
+      "pot_baza": 30,
+      "pot_cumulat": 70,
+      "cut_baza": 1.2,
+      "cut_cumulat": 6.6,
+      "cut_note": "P+3E: CUT 1,2; P+5E: CUT 1,8; accente P+10-12E: CUT 6,6 — blocuri mixte POT 70%",
+      "hmax_m": 20.0,
+      "niv_max": 6,
+      "regim": "P+3-P+5",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "1 loc/80 mp suprafață utilă",
+      "suprafata_min_mp": null,
+      "lung_min_aliniament_m": null,
+      "aliniament_note": "ansambluri existente — intervenții corective prin DTAC; noi construcții conf. PUZ",
+      "ref_vol1": "RLU PNT 2018 — L3 locuințe colective medii P+3-5E",
+      "fn_complementare": [
+        "comerț parter",
+        "servicii cartier",
+        "dotări sociale",
+        "parcaje"
+      ],
+      "fn_interzise": [
+        "industrie",
+        "activități productive poluante"
+      ],
+      "rf": 4.0,
+      "rl": 5.0,
+      "rs": 5.0,
+      "retragere_fata": "min. 4,0m pe str. cat.III și 6,0m pe str. cat.II; nu mai puțin decât diferența dintre înălțime și distanța dintre aliniamente (RLU L3, Art.5)",
+      "retragere_laterala": "H/2 față de limitele laterale ale parcelei (RLU L3, Art.6)",
+      "retragere_spate": "H/2 față de limita posterioară, min. 3,0m (RLU L3, Art.6)",
+      "parcaje": "Conform normelor în vigoare; 1 loc/80 mp suprafață utilă (RLU L3, Art.9)",
+      "utilizari_admise": [
+        "Locuințe colective medii P+3E-P+5E în ansambluri rezidențiale",
+        "Accente locuințe colective înalte P+4E în cadrul ansamblurilor existente",
+        "Funcțiuni complementare (comerț, servicii la parter)"
+      ],
+      "utilizari_interzise": [
+        "Funcțiuni incompatibile cu caracterul rezidențial",
+        "Activități poluante, cu risc tehnologic",
+        "Depozitare en-gros; depozitări materiale refolosibile"
+      ],
+      "note": "L3 — Locuințe colective medii P+3E-P+5E. POT=30%(exclusiv rez.)/70%(mixt) CUT=1,2(P+3)/1,8(P+5)/6,6(accente P+10-12) confirmate RLU Art.16-17 L3. hmax=20,0m (6 niveluri)."
+    },
+    "A1": {
+      "denumire": "Zona Activităților Productive și Servicii — Unități Predominant Industriale",
+      "zona_parinte": "A",
+      "pot_baza": 65,
+      "pot_cumulat": 70,
+      "cut_baza": 2.0,
+      "cut_cumulat": 2.5,
+      "hmax_m": 15.0,
+      "niv_max": 4,
+      "regim": "P+1-P+3",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "stationare în interiorul parcelei; front minim la stradă 30m",
+      "suprafata_min_mp": null,
+      "lung_min_aliniament_m": null,
+      "aliniament_note": "perdea vegetală min 30m față de zone rezidențiale",
+      "ref_vol1": "RLU PNT 2018 — A1 activități productive predominant industriale",
+      "fn_complementare": [
+        "depozitare",
+        "servicii productive",
+        "birouri"
+      ],
+      "fn_interzise": [
+        "locuire",
+        "instituții publice sensibile"
+      ],
+      "rf": 10.0,
+      "rl": 3.5,
+      "rs": 3.0,
+      "retragere_fata": "min. 10,0m pe str. cat.II și min. 6,0m pe str. cat.III față de aliniament (RLU A1, Art.5)",
+      "retragere_laterala": "H/2 față de limitele laterale, min. 3,5m; față de alte UTR decât A interzisă amplasarea pe limita parcelei (RLU A1, Art.6)",
+      "retragere_spate": "min. 3,0m față de limita posterioară (RLU A1, Art.6)",
+      "parcaje": "Stationare în interiorul parcelei; max. 40% din retragere față aliniament rezervat parcajelor (gard viu 1,20m) (RLU A1, Art.9)",
+      "utilizari_admise": [
+        "A1a — activități industriale productive nepoluante, construcții industriale mari",
+        "A1b — activități industriale și servicii IMM cu profil nepoluant",
+        "A1c — activități terțiare (transporturi, depozitare comercială, servicii legate de transporturi) max. 10.000 mp ADC",
+        "Garaje publice/private, service auto, stații ITP cu parcaje mari"
+      ],
+      "utilizari_interzise": [
+        "Locuințe permanente",
+        "Unități de învățământ și servicii de interes general în zone cu poluare >normele admise",
+        "Activități care agravează situația poluării"
+      ],
+      "note": "A1 — Zona Activităților Productive industriale. POT=80% confirmat RLU Art.15 A1. CUT volumetric ≤15 mc/mp. hmax=15,0m din JSON. Front minim stradă: 30,0m."
+    },
+    "A2": {
+      "denumire": "Zona Unităților Mici și Mijlocii Productive și Servicii",
+      "zona_parinte": "A",
+      "pot_baza": 60,
+      "pot_cumulat": 65,
+      "cut_baza": 1.5,
+      "cut_cumulat": 2.0,
+      "hmax_m": 12.0,
+      "niv_max": 3,
+      "regim": "P+1-P+2",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "stationare în interiorul parcelei; front minim la stradă 30m",
+      "suprafata_min_mp": null,
+      "lung_min_aliniament_m": null,
+      "aliniament_note": "autorizare directă fără PUD — cf. art.4.6 RLU",
+      "ref_vol1": "RLU PNT 2018 — A2 unități mici și mijlocii",
+      "fn_complementare": [
+        "servicii",
+        "depozitare mică",
+        "birouri"
+      ],
+      "fn_interzise": [
+        "locuire",
+        "industrie grea poluantă"
+      ],
+      "rf": 6.0,
+      "rl": 3.5,
+      "rs": 3.0,
+      "retragere_fata": "min. 10,0m pe str. cat.II și min. 6,0m pe str. cat.III față de aliniament (RLU A2, Art.5)",
+      "retragere_laterala": "H/2 față de limitele laterale, min. 3,5m (RLU A2, Art.6 — min. 3,5m PSI)",
+      "retragere_spate": "min. 3,0m față de limita posterioară (RLU A2, Art.6)",
+      "parcaje": "Stationare în interiorul parcelei; max. 40% din retragere față aliniament rezervat parcajelor (RLU A2, Art.9)",
+      "utilizari_admise": [
+        "A2 — activități productive IMM în construcții industriale mici-mijlocii",
+        "Distribuție și depozitare bunuri și materiale; cercetare industrială",
+        "Comerț en-gros max. 10.000 mp ADC (1500 mp suprafață vânzare)/amplasament",
+        "Garaje publice/private, service auto, stații ITP"
+      ],
+      "utilizari_interzise": [
+        "Locuințe permanente",
+        "Unități de învățământ; servicii de interes general în zone poluate"
+      ],
+      "note": "A2 — Zona Activităților Productive mici-mijlocii. POT=60% confirmat RLU Art.15 A2. CUT volumetric ≤9 mc/mp. hmax=12,0m din JSON. Front minim stradă: 30,0m."
+    },
+    "B1": {
+      "denumire": "Zona Activităților Turistice — Turism și Agrement, Case de Vacanță",
+      "zona_parinte": "B",
+      "pot_baza": 20,
+      "pot_cumulat": 30,
+      "cut_baza": 0.4,
+      "cut_cumulat": 0.8,
+      "hmax_m": 9.0,
+      "niv_max": 2,
+      "regim": "P-P+1",
+      "spatii_verzi_pct": 40,
+      "parcaje_min": "stationare în interiorul parcelei",
+      "suprafata_min_mp": null,
+      "lung_min_aliniament_m": null,
+      "aliniament_note": "stațiune turistică — conf. reglementări specifice turism",
+      "ref_vol1": "RLU PNT 2018 — B1 turism și agrement",
+      "fn_complementare": [
+        "cazare",
+        "restaurante",
+        "recreere",
+        "sport"
+      ],
+      "fn_interzise": [
+        "industrie",
+        "depozitare",
+        "locuire permanentă cu densitate mare"
+      ],
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "min. 5,0m față de aliniament; zona de turism și agrement, case de vacanță (RLU B1, Art.5)",
+      "retragere_laterala": "H/2 față de limitele laterale, min. 3,0m (RLU B1, Art.6)",
+      "retragere_spate": "H/2 față de limita posterioară, min. 5,0m (RLU B1, Art.6)",
+      "parcaje": "Stationare în interiorul parcelei; piatra Neamț stațiune turistică — parcaje dimensionate conform norme turism (RLU B1, Art.9)",
+      "utilizari_admise": [
+        "B1 — case de vacanță, pensiuni turistice, hoteluri mici",
+        "Servicii-comerț, alimentație publică",
+        "Amenajări turistice și de agrement"
+      ],
+      "utilizari_interzise": [
+        "Activități productive poluante",
+        "Industrie; depozite en-gros"
+      ],
+      "note": "B1 — Turism și Agrement, case de vacanță. POT=60% CUT=3,0 confirmate RLU Art.15-16 B1. hmax=9,0m din JSON (P-P+1). Piatra Neamț stațiune turistică (RLU prevede direcții de dezvoltare turistică). SV=40%."
+    },
+    "V1a": {
+      "denumire": "Parcuri, Grădini și Scuaruri Publice Orășenești",
+      "zona_parinte": "V",
+      "pot_baza": 5,
+      "pot_cumulat": 10,
+      "cut_baza": 0.05,
+      "cut_cumulat": 0.1,
+      "hmax_m": 6.0,
+      "niv_max": 1,
+      "regim": "—",
+      "spatii_verzi_pct": 80,
+      "parcaje_min": "parcaje dimensionate și dispuse în afara circulațiilor publice conform norme specifice",
+      "suprafata_min_mp": null,
+      "lung_min_aliniament_m": null,
+      "aliniament_note": "construcțiile permise doar pt dotări de agrement (pavilioane, chioșcuri)",
+      "ref_vol1": "RLU PNT 2018 — V1a parcuri și scuaruri publice",
+      "fn_complementare": [
+        "amenajări sportive",
+        "pavilioane agrement",
+        "alei"
+      ],
+      "fn_interzise": [
+        "locuire",
+        "industrie",
+        "comerț permanent",
+        "construcții masive"
+      ],
+      "rf": 0.0,
+      "rl": 0.0,
+      "rs": 0.0,
+      "retragere_fata": "nu se aplică — spații verzi publice fără construcții propriu-zise; se conservă accesele actuale (RLU V1a, Art.5-6)",
+      "retragere_laterala": "nu se aplică (RLU V1a — fără obiect)",
+      "retragere_spate": "nu se aplică (RLU V1a — fără obiect)",
+      "parcaje": "Parcaje obligatoriu plantate cu cel puțin un arbore la 4 locuri, înconjurate de gard viu 1,2m; organizate la intrări ca parte a sistemului de parcaje publice (RLU V1, Art.9)",
+      "utilizari_admise": [
+        "V1a — parcuri, grădini, scuaruri publice și fâșii plantate publice",
+        "Circulații pietonale ocazional carosabile pentru întreținere",
+        "Mobilier urban, amenajări pentru joc și odihnă",
+        "Construcții pentru expoziții, activități culturale, alimentație publică (max. 15% din suprafață)"
+      ],
+      "utilizari_interzise": [
+        "Schimbarea destinației spațiilor verzi — interdicție definitivă (nu se poate modifica prin PUZ)",
+        "Tăierea arborilor fără autorizația autorității locale",
+        "Conversia grupurilor sanitare în spații comerciale"
+      ],
+      "note": "V1a — Parcuri, grădini, scuaruri publice. POT=15% CUT=0,2 confirmate RLU Art.15-16 V1/V2/V4. hmax=6,0m din JSON. SV=80%. Interdicție definitivă de schimbare a destinației (nu se poate modifica prin PUZ — Legea 88/2014)."
+    },
+    "V3a": {
+      "denumire": "Spații Verzi pentru Agrement și Sport — Zone Fosiliferee Protejate",
+      "zona_parinte": "V",
+      "pot_baza": 10,
+      "pot_cumulat": 15,
+      "cut_baza": 0.1,
+      "cut_cumulat": 0.2,
+      "hmax_m": 6.0,
+      "niv_max": 1,
+      "regim": "P",
+      "spatii_verzi_pct": 70,
+      "parcaje_min": "parcaje la intrare, în afara circulațiilor publice",
+      "suprafata_min_mp": null,
+      "lung_min_aliniament_m": null,
+      "aliniament_note": "zone fosilifere protejate — conf. aviz protecție mediu",
+      "ref_vol1": "RLU PNT 2018 — V3a spații verzi agrement și sport",
+      "fn_complementare": [
+        "pârtii schi",
+        "baze sportive",
+        "agrement"
+      ],
+      "fn_interzise": [
+        "locuire permanentă",
+        "industrie",
+        "construcții permanente masive"
+      ],
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "min. 5,0m față de aliniament; baze de agrement, parcuri de distracții (RLU V3, Art.5 — fără obiect pentru construcții accesorii; orientativ)",
+      "retragere_laterala": "min. 3,0m față de limitele parcelei orientativ (RLU V3, Art.6 — fără obiect)",
+      "retragere_spate": "min. 5,0m față de limita posterioară orientativ (RLU V3, Art.6)",
+      "parcaje": "Parcaje dimensionate și dispuse în afara circulațiilor publice conform norme specifice; plantate 1 arbore/4 locuri, gard viu 1,2m (RLU V3, Art.9)",
+      "utilizari_admise": [
+        "V3a — baze de agrement, parcuri de distracții, poli de agrement la nivel municipal",
+        "Construcții și instalații specifice conform proiecte legal avizate",
+        "H.max construcții accesorii: 15,0m"
+      ],
+      "utilizari_interzise": [
+        "Schimbarea destinației spațiilor verzi",
+        "Construcții care degradează peisajul"
+      ],
+      "note": "V3a — Baze de agrement, parcuri de distracții. POT=30%(min) CUT=0,35 confirmate RLU Art.15-16 V3. hmax=6,0m din JSON (construcții accesorii; instalații/tribune max. 15,0m). SV=70%. Piatra Neamț stațiune turistică."
+    },
+    "M2": {
+      "denumire": "Zona Mixtă — Locuințe, Case Vacanță, Pensiuni, Servicii-Comerț P+2E max",
+      "zona_parinte": "M",
+      "pot_baza": 45,
+      "pot_cumulat": 50,
+      "cut_baza": 0.8,
+      "cut_cumulat": 1.2,
+      "cut_note": "M2: CUT maxim = 1,2 conf. RLU Art.17",
+      "hmax_m": 9.0,
+      "niv_max": 3,
+      "regim": "P+1-P+3",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "stationare în interiorul parcelei; garaje din materiale tradiționale admise",
+      "suprafata_min_mp": 150,
+      "lung_min_aliniament_m": 8.0,
+      "aliniament_note": "regim continuu sau discontinuu; P+2E maxim",
+      "ref_vol1": "RLU PNT 2018 — M2 mixt locuințe/turism/servicii P+2E",
+      "fn_complementare": [
+        "locuire",
+        "pensiuni",
+        "restaurante",
+        "comerț",
+        "servicii"
+      ],
+      "fn_interzise": [
+        "industrie",
+        "depozitare",
+        "activități poluante"
+      ],
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 3.0,
+      "retragere_fata": "clădirile se dispun pe aliniament, cu excepția celor cu înălțime > distanța dintre aliniamente → retragere = diferența, min. 5,0m; str. cu fronturi continue retrase → min. 5,0m (RLU M2, Art.5)",
+      "retragere_laterala": "H/2 față de limitele laterale, min. 3,0m (RLU M2, Art.6)",
+      "retragere_spate": "H/2 față de limita posterioară, min. 3,0m (RLU M2, Art.6)",
+      "parcaje": "Stationare în interiorul parcelei; împrejmuiri din materiale tradiționale (lemn, piatră) în spiritul zonei turistice (RLU M2, Art.9)",
+      "utilizari_admise": [
+        "Locuințe individuale sau cuplate max. P+2E",
+        "Case de vacanță P+1E-P+1E+M",
+        "Pensiuni turistice P-P+1E+M-P+2E",
+        "Servicii, comerț, alimentație publică"
+      ],
+      "utilizari_interzise": [
+        "Activități productive poluante",
+        "Construcții incompatibile cu caracterul turistic al zonei"
+      ],
+      "note": "M2 — Zonă Mixtă (locuințe, case de vacanță, pensiuni, servicii). POT=45% CUT=1,2 confirmate RLU Art.16-17 M2. hmax=9,0m (P+2E: 12,0m atic/terase, 9,0m streașină, 12,5m coamă). Piatra Neamț stațiune turistică — spirit arhitectural tradițional."
+    },
+    "G1": {
+      "denumire": "Zona Construcțiilor și Amenajărilor pentru Gospodărie Comunală",
+      "zona_parinte": "G",
+      "pot_baza": 50,
+      "pot_cumulat": 60,
+      "cut_baza": 1.0,
+      "cut_cumulat": 1.2,
+      "hmax_m": 9.0,
+      "niv_max": 2,
+      "regim": "P-P+1",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "max. 40% din retragere față aliniament rezervat parcajelor",
+      "suprafata_min_mp": null,
+      "lung_min_aliniament_m": null,
+      "aliniament_note": "conf. normative specifice gospodărie comunală",
+      "ref_vol1": "RLU PNT 2018 — G1 gospodărie comunală",
+      "fn_complementare": [
+        "depozit ecologic",
+        "stații tehnice",
+        "cimitire"
+      ],
+      "fn_interzise": [
+        "locuire",
+        "comerț general",
+        "industrie nespecifică"
+      ],
+      "rf": 6.0,
+      "rl": 6.0,
+      "rs": 6.0,
+      "retragere_fata": "min. 6,0m față de aliniament (birouri/administrative); incinte tehnice: min. 10,0m pe str. cat.II și min. 8,0m pe str. cat.III (RLU G, Art.5)",
+      "retragere_laterala": "H/2 față de limitele parcelei, min. 6,0m; interzisă alipirea de clădiri publice sau locuit (RLU G, Art.6)",
+      "retragere_spate": "H/2 față de limita posterioară, min. 6,0m (RLU G, Art.6)",
+      "parcaje": "Stationare în afara circulațiilor publice; max. 40% din retragere față aliniament rezervat parcajelor salariați și vizitatori (RLU G, Art.9)",
+      "utilizari_admise": [
+        "G1a — depozit ecologic de deșeuri menajere cu sisteme de depozitare selectivă",
+        "G1b — puncte de colectare selectivă a deșeurilor",
+        "G1c — stație de epurare ape menajere uzate; instalații tehnice",
+        "G2 — cimitire și clădiri anexă (capelă mortuară, mausoleu-osuar, circulații, plantații)"
+      ],
+      "utilizari_interzise": [
+        "Activități cu risc tehnologic incompatibile cu vecinătățile",
+        "Densificarea cimitirelor prin ocuparea aleilor și distrugerea vegetației",
+        "Depozitarea întâmplătoare a deșeurilor în spații verzi sau zone rezidențiale"
+      ],
+      "note": "G1 — Gospodărie Comunală. G1: POT=50% CUT=1,8 confirmate RLU Art.15-16 G1. G2 (cimitire): 15% circulații + 5% plantații + 1% construcții din 7,5-10mp/loc de veci; CUT=0,15. hmax=9,0m din JSON. Distanță protecție sanitară: 50m cimitire existente, 100m cimitire noi."
+    }
+  },
+  "utrs": {
+    "1": {
+      "subzona": "CP",
+      "denumire": "Centru Civic",
+      "zona_pnt": "CP",
+      "sup_ha": 142,
+      "ref": "UTR 1 PNT — Zona centrală în zona protejată"
+    },
+    "2": {
+      "subzona": "CA1",
+      "denumire": "Centru Afaceri",
+      "zona_pnt": "CA1",
+      "sup_ha": 89,
+      "ref": "UTR 2 PNT — Centru de afaceri"
+    },
+    "3": {
+      "subzona": "CA2",
+      "denumire": "Funcțiuni Complexe",
+      "zona_pnt": "CA2",
+      "sup_ha": 67,
+      "ref": "UTR 3 PNT — Funcțiuni complexe"
+    },
+    "4": {
+      "subzona": "L1a",
+      "denumire": "Locuințe Individuale Vest",
+      "zona_pnt": "L1a",
+      "sup_ha": 210,
+      "ref": "UTR 4 PNT — Tărâncuța, L1a"
+    },
+    "5": {
+      "subzona": "L2a",
+      "denumire": "Valea Viei",
+      "zona_pnt": "L2a",
+      "sup_ha": 185,
+      "ref": "UTR 5 PNT — Valea Viei, L2a"
+    },
+    "6": {
+      "subzona": "V1a",
+      "denumire": "Cozla — Rezervație",
+      "zona_pnt": "V1a",
+      "sup_ha": 320,
+      "ref": "UTR 6 PNT — Cozla, V7a zone fosilifere"
+    },
+    "7": {
+      "subzona": "B1",
+      "denumire": "Cetatea Neamțului",
+      "zona_pnt": "B1",
+      "sup_ha": 48,
+      "ref": "UTR 7 PNT — Cetatea Neamțului, turism"
+    },
+    "8": {
+      "subzona": "A2",
+      "denumire": "Zona Industrială Nord",
+      "zona_pnt": "A2",
+      "sup_ha": 156,
+      "ref": "UTR 8 PNT — Dârmănești, A2 unități mici-mijlocii"
+    },
+    "9": {
+      "subzona": "V3a",
+      "denumire": "Pietricica",
+      "zona_pnt": "V3a",
+      "sup_ha": 95,
+      "ref": "UTR 9 PNT — Pietricica, V zone fosilifere"
+    },
+    "10": {
+      "subzona": "L3",
+      "denumire": "Doamnei Sud",
+      "zona_pnt": "L3",
+      "sup_ha": 112,
+      "ref": "UTR 10 PNT — Mărătei, L3 colective medii"
+    },
+    "11": {
+      "subzona": "L1c",
+      "denumire": "Sarata",
+      "zona_pnt": "L1c",
+      "sup_ha": 78,
+      "ref": "UTR 11 PNT — Gara Veche, L1c"
+    },
+    "12": {
+      "subzona": "L1a",
+      "denumire": "Girov Est",
+      "zona_pnt": "L1a",
+      "sup_ha": 203,
+      "ref": "UTR 12 PNT — Ciritei, L1a"
+    },
+    "13": {
+      "subzona": "A1",
+      "denumire": "Dumbrava Roșie",
+      "zona_pnt": "A1",
+      "sup_ha": 134,
+      "ref": "UTR 13 PNT — Vânători, A1 industrial"
+    },
+    "14": {
+      "subzona": "L1b",
+      "denumire": "Alexandru cel Bun",
+      "zona_pnt": "L1b",
+      "sup_ha": 167,
+      "ref": "UTR 14 PNT — Vânători, L1b"
+    },
+    "15": {
+      "subzona": "G1",
+      "denumire": "Valeni",
+      "zona_pnt": "G1",
+      "sup_ha": 42,
+      "ref": "UTR 15 PNT — Văleni, G1 gospodărie comunală"
+    },
+    "16": {
+      "subzona": "M2",
+      "denumire": "Doamnei Nord",
+      "zona_pnt": "M2",
+      "sup_ha": 98,
+      "ref": "UTR 16 PNT — Doamna, M2 mixt turism/locuire"
+    }
+  }
+}
