@@ -1021,19 +1021,22 @@ function buildFrontLayer(parcelGeo, fp, params, bearing){
       if(flFrontSet.size===0) flFrontSet.add(sides.reduce((bi,s,i)=>s.diff<sides[bi].diff?i:bi, 0));
     }
     const flPostCands = sides.map((s,i)=>({...s,i})).filter(({diff,i})=>diff>=PTHRESH&&!flFrontSet.has(i));
-    const flPostIdx = flPostCands.length>0
-      ? flPostCands.reduce((a,b)=>a.diff>b.diff?a:b).i
-      : sides.map((s,i)=>({...s,i})).filter(({i})=>!flFrontSet.has(i))
+    // Toate laturile candidate la posterior primesc rs, nu doar una
+    const flPostSet = new Set(flPostCands.map(({i})=>i));
+    if(flPostSet.size===0){
+      const fallback = sides.map((s,i)=>({...s,i})).filter(({i})=>!flFrontSet.has(i))
              .reduce((a,b)=>a&&a.diff>b.diff?a:b, null)?.i ?? 0;
+      flPostSet.add(fallback);
+    }
 
     sides.forEach((side,si)=>{
       let role, color, setback, setbackLabel;
       if(flFrontSet.has(si)){
         role='front'; color='#FFD700'; setback=rf;
-        setbackLabel=rf>0?`rf=${rf}m`:'calcan';
-      } else if(si===flPostIdx){
+        setbackLabel=rf>0?'rf='+rf+'m':'calcan';
+      } else if(flPostSet.has(si)){
         role='posterior'; color='#FF4444'; setback=rs;
-        setbackLabel=rs>0?`rs=${rs}m`:'calcan';
+        setbackLabel=rs>0?'rs='+rs+'m':'calcan';
       } else {
         const vx=(side.midX-cx)*111320*Math.cos(cy*Math.PI/180);
         const vy=(side.midY-cy)*111320;
@@ -1257,8 +1260,14 @@ function buildFP(geom, paramsOrUtr){
       if(frontSet.size===0) frontSet.add(sides.reduce((a,b)=>a.diff<b.diff?a:b).i);
     }
     const nonFront = sides.filter(s=>!frontSet.has(s.i));
-    const postIdx = nonFront.length>0
-      ? nonFront.reduce((a,b)=>a.diff>b.diff?a:b).i : -1;
+    // Posterior = toate laturile cu diff > 140° (opuse frontului), nu doar una
+    const PTHRESH = 140;
+    const postSet = new Set(nonFront.filter(s=>s.diff>PTHRESH).map(s=>s.i));
+    // Dacă nicio latură nu depășește pragul, posterioară e cea cu diff maxim
+    if(postSet.size===0 && nonFront.length>0){
+      postSet.add(nonFront.reduce((a,b)=>a.diff>b.diff?a:b).i);
+    }
+    const postIdx = postSet.size===1 ? [...postSet][0] : -1; // păstrăm compat cu codul vechi
 
     // ── Edificabil = parcela minus retrageri ─────────────────────────────
     // METODA ROBUSTA: buffer negativ uniform cu valoarea minima,
@@ -1271,7 +1280,7 @@ function buildFP(geom, paramsOrUtr){
         return Math.max(0, Number(S.vol.sideSetbacks[side.i])||0);
       }
       if(frontSet.has(side.i)) return rf;
-      if(side.i===postIdx) return rs;
+      if(postSet.has(side.i)) return rs;
       const vx=(side.mx-cx)*mLng, vy=(side.my-cy)*mLat;
       const fx=Math.sin(brg*Math.PI/180), fy=Math.cos(brg*Math.PI/180);
       return (fx*vy-fy*vx)>0 ? rl : rr;
