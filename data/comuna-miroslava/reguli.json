@@ -5,7 +5,11 @@
     "judet": "Iași",
     "proiect": "10/15.02.2010",
     "proiectant": "Blom Romania",
-    "seismic": { "ag": 0.20, "Tc": 1.0, "zona": "E" },
+    "seismic": {
+      "ag": 0.2,
+      "Tc": 1.0,
+      "zona": "E"
+    },
     "hdd": 3000,
     "nr_subzone": 28,
     "note": "RLU reactualizare PUG 2010, elaborat Blom Romania"
@@ -35,7 +39,7 @@
       "cut_max_p3m": 3.0,
       "hmax_m": 11,
       "hmax_p3m": 13,
-      "niv_max": "P+2+M",
+      "niv_max": 4,
       "niv_max_p3m": "P+3+M",
       "regim_constructie": "continuu/discontinuu",
       "sv_min_pct": 30,
@@ -45,32 +49,121 @@
       "sup_min_peste_p2_mp": 400,
       "retragere_aliniament_min_m": 0,
       "retragere_posterioara_min_m": 5,
-      "fn_admise": ["instituții și servicii publice interes local", "servicii formare-informare", "biblioteci mediateci", "poștă telecomunicații", "edituri centre media", "săli expoziționale galerii artă", "servicii profesionale colective personale", "locuințe cu partiu special profesiuni liberale", "sedii servicii descentralizate", "servicii financiar-bancare asigurări", "servicii autonome avansate", "restaurante cofetării cafenele baruri", "activități asociative diverse", "centre recreere sport"],
-      "fn_interzise": ["activități productive poluante risc tehnologic", "construcții provizorii", "depozitare en-gros", "platforme precolectare deșeuri", "construcții cu calcan vizibil individual"],
-      "avize": ["aviz oportunitate CJ Iași pentru derogări", "aviz DJCCPCN Iași pentru descărcare sarcină arheologică (parcele >2000mp)"],
+      "fn_admise": [
+        "instituții și servicii publice interes local",
+        "servicii formare-informare",
+        "biblioteci mediateci",
+        "poștă telecomunicații",
+        "edituri centre media",
+        "săli expoziționale galerii artă",
+        "servicii profesionale colective personale",
+        "locuințe cu partiu special profesiuni liberale",
+        "sedii servicii descentralizate",
+        "servicii financiar-bancare asigurări",
+        "servicii autonome avansate",
+        "restaurante cofetării cafenele baruri",
+        "activități asociative diverse",
+        "centre recreere sport"
+      ],
+      "fn_interzise": [
+        "activități productive poluante risc tehnologic",
+        "construcții provizorii",
+        "depozitare en-gros",
+        "platforme precolectare deșeuri",
+        "construcții cu calcan vizibil individual"
+      ],
+      "avize": [
+        "aviz oportunitate CJ Iași pentru derogări",
+        "aviz DJCCPCN Iași pentru descărcare sarcină arheologică (parcele >2000mp)"
+      ],
       "interdictii": "Interdicție temporară de construire până la elaborare PUZ în perimetrele marcate pe planul de propuneri",
-      "note": "Zona centrală intersecție DJ248A și DC28. Monument: Casa Sturza IS-II-m-B-04204, Biserica din lemn IS-II-m-B-04203"
+      "note": "Zona Centrală Miroslava — nucleu polarizator la intersecția DJ248A și DC28. Monumente clasate: Casa Sturza (IS-II-m-B-04204), Biserica din lemn Nașterea Maicii Domnului (IS-II-m-B-04203). PUZ obligatoriu pentru zona centrală (interdicție temporară de construire directă). POT=50% (P+2+M) și CUT=1,80 confirmate RLU Art.15-16 C. hmax=11m (P+2+M: 3×3+2=11m).",
+      "pot_baza": 50,
+      "cut_baza": 1.8,
+      "regim": "P+2+M",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "clădirile cu funcțiuni publice reprezentative se retrag min. 6,00 m de la aliniament; în zonele constituite se respectă caracterul străzii existente; se recomandă retragere min. 4,0 m pe str. cat.III și 5,0 m pe str. cat.II (RLU C, Art.5)",
+      "retragere_laterala": "H/2 din înălțimea la cornișă, min. 3,00 m față de limitele laterale; alipit calcan admis până la 20,00 m de la aliniament (RLU C, Art.6)",
+      "retragere_spate": "H/2 din înălțimea la cornișă, min. 5,00 m față de limita posterioară (RLU C, Art.6)",
+      "spatii_verzi_pct": 30,
+      "parcaje_min": "1 loc/80 mp locuire; 1 loc/60 mp ADC servicii",
+      "parcaje": "Stationarea numai în interiorul parcelei; 1 loc/80 mp suprafață locuibilă; 1 loc/60 mp ADC servicii; 1 loc/30 pers. instituții deschise publicului (RLU C, Art.9)",
+      "utilizari_admise": [
+        "Instituții și servicii publice de interes local",
+        "Servicii financiar-bancare și de asigurări",
+        "Servicii profesionale, colective și personale; servicii specializate de comerț",
+        "Restaurante, cofetării, cafenele, baruri",
+        "Centre de recreere și sport în spații acoperite și descoperite",
+        "Locuințe cu partiu special, inclusiv spații pentru profesiuni liberale",
+        "Biblioteci, mediateci, edituri, centre media, săli expoziționale, galerii de artă",
+        "Mici unități productive manufacturiere și depozitare mic-gros legate de zona centrală"
+      ],
+      "utilizari_interzise": [
+        "Activități productive poluante, cu risc tehnologic sau incomode prin traficul generat",
+        "Depozitare en-gros; depozitări de materiale refolosibile",
+        "Platforme de precolectare a deșeurilor urbane",
+        "Construcții provizorii de orice natură",
+        "Activități incompatibile cu statutul de zonă protejată sau care degradează clădirile protejate",
+        "Lucrări de terasament care afectează amenajările din spațiile publice sau scurgerea apelor"
+      ]
     },
     "CP": {
       "denumire": "Zona centrală situată în zonă protejată",
       "pot_max": 20,
-      "cut_max": 0.80,
+      "cut_max": 0.8,
       "hmax_m": 11,
-      "niv_max": "P+2+M",
+      "niv_max": 4,
       "regim_constructie": "conform PUZ",
       "sup_min_mp": 4500,
       "front_min_m": 30,
-      "fn_admise": ["menținere funcțiuni actuale", "conversie funcțională fără modificare fond construit protejat", "caracter pietonal specific articulare zonă centrală", "mici servicii activități profesionale tradiționale"],
-      "fn_interzise": ["activități care degradează clădiri protejate", "activități productive poluante"],
-      "avize": ["aviz Ministerul Culturii și Patrimoniului Național", "aviz DJCCPCN Iași descărcare sarcină arheologică"],
-      "note": "Zone de protecție monumente clasate"
+      "fn_admise": [
+        "menținere funcțiuni actuale",
+        "conversie funcțională fără modificare fond construit protejat",
+        "caracter pietonal specific articulare zonă centrală",
+        "mici servicii activități profesionale tradiționale"
+      ],
+      "fn_interzise": [
+        "activități care degradează clădiri protejate",
+        "activități productive poluante"
+      ],
+      "avize": [
+        "aviz Ministerul Culturii și Patrimoniului Național",
+        "aviz DJCCPCN Iași descărcare sarcină arheologică"
+      ],
+      "note": "CP — Zona Centrală Protejată. POT=20% (P+2+M) și CUT=0,80 confirmate RLU Art.15-16 CP. Aviz DJCPN Iași obligatoriu pentru orice intervenție. PUZ obligatoriu. hmax=11m (conform tabel C).",
+      "pot_baza": 20,
+      "cut_baza": 0.8,
+      "regim": "P+2+M",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "se menține caracterul zonei protejate; regimul de aliniere se reglementează prin PUZ (RLU CP, Art.5)",
+      "retragere_laterala": "H/2 din înălțimea la cornișă, min. 3,00 m față de limitele laterale; conform PUZ zonă protejată (RLU CP, Art.6)",
+      "retragere_spate": "H/2 din înălțimea la cornișă, min. 5,00 m față de limita posterioară; conform PUZ (RLU CP, Art.6)",
+      "spatii_verzi_pct": 30,
+      "parcaje_min": "stationare în interiorul parcelei",
+      "parcaje": "Stationarea numai în interiorul parcelei; orice intervenție cu aviz DJCPN (RLU CP, Art.9)",
+      "utilizari_admise": [
+        "Se mențin funcțiunile actuale sau conversia funcțională cu reimplementarea funcțiunilor inițiale fără modificarea fondului construit protejat",
+        "Lucrări de restaurare și reabilitare cu tehnici și materiale tradiționale",
+        "Imprimarea unui caracter pietonal specific; mici servicii și activități profesionale tradiționale",
+        "Amenajări de circulații pietonale după cercetarea și descărcarea de sarcină arheologică a siturilor"
+      ],
+      "utilizari_interzise": [
+        "Orice construcții și amenajări pe situri arheologice până la cercetarea exhaustivă și descărcarea de sarcină",
+        "Activități incompatibile cu statutul de zonă protejată",
+        "Modificarea fondului construit protejat sau aflat în perimetrele de protecție ale monumentelor clasate",
+        "Activități productive poluante, construcții provizorii"
+      ]
     },
     "L1a": {
       "denumire": "Subzonă locuire individuală în țesut tradițional, regim continuu sau discontinuu",
       "pot_max": 35,
       "cut_max": 1.25,
       "hmax_m": 11,
-      "niv_max": "P+2+M",
+      "niv_max": 4,
       "regim_constructie": "continuu/discontinuu",
       "sv_min_pct": 30,
       "sup_min_insiruit_mp": 150,
@@ -82,16 +175,58 @@
       "retragere_aliniament_min_m": 3,
       "retragere_laterala_min_m": 3,
       "retragere_posterioara_min_m": 5,
-      "fn_admise": ["locuințe individuale și colective mici P+2+M", "echipamente publice specifice zonei rezidențiale", "scuaruri publice", "împrejmuiri căi acces parcaje spații plantate", "micro-obiective tehno-edilitare energie regenerabilă"],
-      "fn_admise_conditionat": ["funcțiuni comerciale servicii profesionale mici activități manufacturiere max 250mp ADC", "mansardarea clădirilor existente"],
-      "fn_interzise": ["funcțiuni comerciale >250mp ADC", "activități productive poluante", "false mansarde", "anexe creștere animale producție", "construcții provizorii", "case vacanță", "campinguri rulote"]
+      "fn_admise": [
+        "locuințe individuale și colective mici P+2+M",
+        "echipamente publice specifice zonei rezidențiale",
+        "scuaruri publice",
+        "împrejmuiri căi acces parcaje spații plantate",
+        "micro-obiective tehno-edilitare energie regenerabilă"
+      ],
+      "fn_admise_conditionat": [
+        "funcțiuni comerciale servicii profesionale mici activități manufacturiere max 250mp ADC",
+        "mansardarea clădirilor existente"
+      ],
+      "fn_interzise": [
+        "funcțiuni comerciale >250mp ADC",
+        "activități productive poluante",
+        "false mansarde",
+        "anexe creștere animale producție",
+        "construcții provizorii",
+        "case vacanță",
+        "campinguri rulote"
+      ],
+      "pot_baza": 35,
+      "cut_baza": 1.25,
+      "regim": "P+2+M",
+      "rf": 4.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "retras min. 3,0 m în lotizări existente cu parcele construibile; min. 4,0 m pe str. cat.III; min. 5,0 m pe str. cat.II; pe aliniament în regim înșiruit dacă e caracteristica străzii (RLU L1a, Art.5)",
+      "retragere_laterala": "H/2 din înălțimea la cornișă, min. 3,00 m față de limitele laterale; alipit calcan în regim înșiruit pe max. 15,0 m adâncime (RLU L1a, Art.6)",
+      "retragere_spate": "H/2 din înălțimea la cornișă, min. 5,00 m față de limita posterioară (RLU L1a, Art.6)",
+      "spatii_verzi_pct": 30,
+      "parcaje_min": "1 loc/80 mp suprafață locuibilă",
+      "parcaje": "Stationarea numai în interiorul parcelei; 1 loc/80 mp suprafață locuibilă; pentru servicii 1 loc/60 mp ADC (RLU L1a, Art.9)",
+      "utilizari_admise": [
+        "Locuințe individuale și colective mici cu maxim P+2+M niveluri în regim continuu sau discontinuu",
+        "Amenajări aferente locuințelor: căi de acces, parcaje, garaje, spații plantate, locuri de joacă",
+        "Împrejmuiri, căi de acces pietonale și private, spații plantate",
+        "Echipamente publice specifice zonei rezidențiale"
+      ],
+      "utilizari_interzise": [
+        "Activități productive poluante, cu risc tehnologic sau incomode prin traficul generat",
+        "Depozitare en-gros; depozitări de materiale refolosibile; platforme deșeuri",
+        "Construcții provizorii; antene TV satelit vizibile pe fațade",
+        "Lucrări de terasament care afectează scurgerea apelor pe parcelele vecine"
+      ],
+      "note": "L1a — Subzona de locuire individuală și colectivă în țesut tradițional, regim continuu/discontinuu. POT=35% (P+2+M) și CUT=1,25 confirmate RLU Art.15-16 L1a. hmax=11m (P+2+M: tabel L1a). Parcelă minimă: <P+2 → 150 mp / 8m; >P+2 → 400 mp / 12m."
     },
     "L1b": {
       "denumire": "Subzonă locuire individuală și colectivă înaltă, regim continuu sau discontinuu",
       "pot_max": 45,
       "cut_max": 2.55,
       "hmax_m": 15,
-      "niv_max": "P+4+M",
+      "niv_max": 6,
       "regim_constructie": "continuu/discontinuu",
       "sv_min_pct": 30,
       "sup_min_insiruit_mp": 150,
@@ -103,31 +238,105 @@
       "retragere_aliniament_min_m": 4,
       "retragere_laterala_min_m": 3,
       "retragere_posterioara_min_m": 5,
-      "fn_admise": ["locuințe individuale și colective P+4+M", "echipamente publice specifice zonei rezidențiale", "construcții tehnico-edilitare", "amenajări aferente locuințelor", "micro-obiective energie regenerabilă"],
-      "fn_admise_conditionat": ["funcțiuni comerciale servicii profesionale max 250mp ADC", "mansardare clădiri existente"],
-      "fn_interzise": ["funcțiuni comerciale >250mp ADC", "activități productive poluante", "false mansarde", "case vacanță", "campinguri rulote"]
+      "fn_admise": [
+        "locuințe individuale și colective P+4+M",
+        "echipamente publice specifice zonei rezidențiale",
+        "construcții tehnico-edilitare",
+        "amenajări aferente locuințelor",
+        "micro-obiective energie regenerabilă"
+      ],
+      "fn_admise_conditionat": [
+        "funcțiuni comerciale servicii profesionale max 250mp ADC",
+        "mansardare clădiri existente"
+      ],
+      "fn_interzise": [
+        "funcțiuni comerciale >250mp ADC",
+        "activități productive poluante",
+        "false mansarde",
+        "case vacanță",
+        "campinguri rulote"
+      ],
+      "pot_baza": 45,
+      "cut_baza": 2.55,
+      "regim": "P+4+M",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "retras min. 4,0 m pe str. cat.III; min. 5,0 m pe str. cat.II și I; pe aliniament în regim înșiruit dacă e caracteristica străzii (RLU L1b, Art.5)",
+      "retragere_laterala": "H/2 din înălțimea la cornișă, min. 3,00 m față de limitele laterale; alipit calcan în regim înșiruit pe max. 15,0 m adâncime (RLU L1b, Art.6)",
+      "retragere_spate": "H/2 din înălțimea la cornișă, min. 5,00 m față de limita posterioară (RLU L1b, Art.6)",
+      "spatii_verzi_pct": 30,
+      "parcaje_min": "1 loc/80 mp suprafață locuibilă",
+      "parcaje": "Stationarea numai în interiorul parcelei; 1 loc/80 mp suprafață locuibilă; pentru servicii 1 loc/60 mp ADC (RLU L1b, Art.9)",
+      "utilizari_admise": [
+        "Locuințe individuale și colective mici cu maxim P+4+M niveluri în regim continuu sau discontinuu",
+        "Amenajări aferente locuințelor: căi de acces, parcaje, garaje, spații plantate, locuri de joacă pentru copii, amenajări sport pentru tineret",
+        "Echipamente publice specifice zonei rezidențiale"
+      ],
+      "utilizari_interzise": [
+        "Activități productive poluante, cu risc tehnologic sau incomode prin traficul generat",
+        "Depozitare en-gros; depozitări de materiale refolosibile; platforme deșeuri",
+        "Construcții provizorii; antene TV satelit vizibile pe fațade",
+        "Lucrări de terasament care afectează scurgerea apelor pe parcelele vecine"
+      ],
+      "note": "L1b — Subzona de locuire individuală și colectivă înaltă în cartierele rezidențiale noi, regim continuu/discontinuu. POT=45% (P+4+M) și CUT=2,55 confirmate RLU Art.15-16 L1b. hmax=15m (P+4+M: tabel L1b). De asemenea CUT=0,30 pentru P+M."
     },
     "L1P": {
       "denumire": "Subzonă locuire individuală în țesut tradițional, zone protejate",
       "pot_max": 20,
-      "cut_max": 0.30,
+      "cut_max": 0.3,
       "hmax_m": 6,
-      "niv_max": "P+M",
+      "niv_max": 2,
       "regim_constructie": "continuu",
       "sup_min_mp": 500,
       "front_min_m": 12,
-      "fn_admise": ["locuințe individuale mici P+2+M înșiruit", "echipamente publice specifice", "scuaruri publice", "împrejmuiri căi acces parcaje spații plantate"],
-      "fn_admise_conditionat": ["mici servicii activități profesionale tradiționale în fondul construit existent, min 50% locuire"],
-      "fn_interzise": ["construcții noi care modifică fondul construit protejat"],
-      "avize": ["aviz DJCCPCN Iași", "aviz Ministerul Culturii"],
-      "note": "Regim aliniere și amplasament prin PUZ zone protejate"
+      "fn_admise": [
+        "locuințe individuale mici P+2+M înșiruit",
+        "echipamente publice specifice",
+        "scuaruri publice",
+        "împrejmuiri căi acces parcaje spații plantate"
+      ],
+      "fn_admise_conditionat": [
+        "mici servicii activități profesionale tradiționale în fondul construit existent, min 50% locuire"
+      ],
+      "fn_interzise": [
+        "construcții noi care modifică fondul construit protejat"
+      ],
+      "avize": [
+        "aviz DJCCPCN Iași",
+        "aviz Ministerul Culturii"
+      ],
+      "note": "L1P — Subzona de locuire în țesut tradițional în zone protejate. POT=20% (P+M) și CUT=0,30 confirmate RLU Art.15-16 L1P. hmax=6m (P+M). PUZ obligatoriu; aviz DJCPN Iași pentru orice intervenție.",
+      "pot_baza": 20,
+      "cut_baza": 0.3,
+      "regim": "P+M",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "dispunerea față de aliniament se efectuează în funcție de caracterul zonei protejate; regimul de aliniere se reglementează prin PUZ (RLU L1P, Art.5)",
+      "retragere_laterala": "conform PUZ specific zonei protejate; orientativ H/2 min. 3,00 m față de limitele laterale (RLU L1P, Art.6)",
+      "retragere_spate": "conform PUZ specific zonei protejate; orientativ min. 5,00 m față de limita posterioară (RLU L1P, Art.6)",
+      "spatii_verzi_pct": 30,
+      "parcaje_min": "stationare în interiorul parcelei",
+      "parcaje": "Stationarea numai în interiorul parcelei; conform PUZ pentru zona protejată (RLU L1P, Art.9)",
+      "utilizari_admise": [
+        "Locuințe individuale mici cu maxim P+M niveluri în regim continuu sau discontinuu",
+        "Intervenții de restaurare și reabilitare cu tehnici și materiale tradiționale specifice",
+        "Împrejmuiri, căi de acces pietonale și private, spații plantate"
+      ],
+      "utilizari_interzise": [
+        "Modificarea caracterului zonei protejate",
+        "Activități productive poluante, construcții provizorii",
+        "Orice intervenție fără aviz DJCPN Iași",
+        "Construcții cu calcan vizibil construite în regim individual"
+      ]
     },
     "IS1": {
       "denumire": "Subzonă instituții publice și servicii interes general",
       "pot_max": 50,
       "cut_max": 2.8,
       "hmax_m": 15,
-      "niv_max": "P+4+M",
+      "niv_max": 6,
       "regim_constructie": "continuu/discontinuu",
       "sv_min_pct": 30,
       "sup_min_insiruit_mp": 150,
@@ -139,21 +348,96 @@
       "retragere_aliniament_min_m": 0,
       "retragere_laterala_min_m": 3,
       "retragere_posterioara_min_m": 5,
-      "fn_admise": ["instituții servicii echipamente publice nivel comunal", "sedii companii firme servicii profesionale", "servicii sociale colective personale", "lăcașuri de cult", "restaurante baruri cofetării cafenele", "comerț cu amănuntul", "parcaje sol multietajate", "spații libere pietonale"],
-      "fn_interzise": ["locuire individuală și colectivă", "activități productive poluante", "construcții provizorii", "stații betoane autobaze"],
-      "avize": ["aviz DJCCPCN Iași pentru descărcare sarcină arheologică"]
+      "fn_admise": [
+        "instituții servicii echipamente publice nivel comunal",
+        "sedii companii firme servicii profesionale",
+        "servicii sociale colective personale",
+        "lăcașuri de cult",
+        "restaurante baruri cofetării cafenele",
+        "comerț cu amănuntul",
+        "parcaje sol multietajate",
+        "spații libere pietonale"
+      ],
+      "fn_interzise": [
+        "locuire individuală și colectivă",
+        "activități productive poluante",
+        "construcții provizorii",
+        "stații betoane autobaze"
+      ],
+      "avize": [
+        "aviz DJCCPCN Iași pentru descărcare sarcină arheologică"
+      ],
+      "pot_baza": 50,
+      "cut_baza": 2.8,
+      "regim": "P+4+M",
+      "rf": 6.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "clădirile cu funcțiuni publice reprezentative se retrag min. 6,00 m de la aliniament; în zonele constituite se respectă caracterul străzii; pe terenuri libere (PUZ) se recomandă regim continuu pe aliniament (RLU IS1, Art.5)",
+      "retragere_laterala": "H/2 din înălțimea la cornișă, min. 3,00 m față de limitele laterale; alipit calcan în regim înșiruit pe max. 15,0 m (RLU IS1, Art.6)",
+      "retragere_spate": "H/2 din înălțimea la cornișă, min. 5,00 m față de limita posterioară (RLU IS1, Art.6)",
+      "spatii_verzi_pct": 30,
+      "parcaje_min": "1 loc/60 mp ADC servicii",
+      "parcaje": "Stationarea numai în interiorul parcelei; max. 40% din retragere față de aliniament rezervat parcajelor (cu gard viu 1,20m); 1 loc/60 mp ADC servicii; 1 loc/30 pers. instituții deschise publicului (RLU IS1, Art.9)",
+      "utilizari_admise": [
+        "Instituții, servicii și echipamente publice de nivel comunal și supracomunal",
+        "Sedii ale unor companii și firme, servicii profesionale, proiectare, cercetare",
+        "Servicii sociale, colective și personale",
+        "Comerț, alimentație publică; hoteluri, pensiuni",
+        "Servicii medicale, educaționale, culturale",
+        "Parcaje publice, spații verzi amenajate"
+      ],
+      "utilizari_interzise": [
+        "Activități productive poluante, cu risc tehnologic sau incomode prin traficul generat",
+        "Depozitare en-gros; depozitări de materiale refolosibile",
+        "Construcții provizorii; antene TV satelit vizibile pe fațade",
+        "Lucrări de terasament care afectează scurgerea apelor"
+      ],
+      "note": "IS1 — Subzona instituțiilor publice și serviciilor de interes general. POT=50% (P+4+M) și CUT=2,80 confirmate RLU Art.15-16 IS1. hmax=15m (tabel IS1+IS3b)."
     },
     "IS1P": {
       "denumire": "Subzonă instituții publice și servicii interes general, zone protejate",
       "pot_max": 50,
       "cut_max": 1.5,
       "hmax_m": 11,
-      "niv_max": "P+2",
+      "niv_max": 3,
       "regim_constructie": "conform PUZ",
-      "fn_admise": ["instituții servicii echipamente publice", "lăcașuri de cult", "comerț amănuntul"],
-      "fn_interzise": ["locuire individuală și colectivă", "activități productive poluante"],
-      "avize": ["aviz Ministerul Culturii", "aviz DJCCPCN Iași"],
-      "note": "Regim amplasament prin PUZ zone protejate"
+      "fn_admise": [
+        "instituții servicii echipamente publice",
+        "lăcașuri de cult",
+        "comerț amănuntul"
+      ],
+      "fn_interzise": [
+        "locuire individuală și colectivă",
+        "activități productive poluante"
+      ],
+      "avize": [
+        "aviz Ministerul Culturii",
+        "aviz DJCCPCN Iași"
+      ],
+      "note": "IS1P — Subzona instituțiilor publice și serviciilor în zone protejate. POT=50% (P+2) și CUT=1,50 confirmate RLU Art.15-16 IS1P. hmax=11m (P+2, tabel IS1P). Aviz DJCPN obligatoriu.",
+      "pot_baza": 50,
+      "cut_baza": 1.5,
+      "regim": "P+2",
+      "rf": 6.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "conform PUZ specific zonei protejate; clădiri publice min. 6,00 m de la aliniament (RLU IS1P, Art.5)",
+      "retragere_laterala": "H/2 din înălțimea la cornișă, min. 3,00 m față de limitele laterale; conform PUZ zonă protejată (RLU IS1P, Art.6)",
+      "retragere_spate": "H/2 din înălțimea la cornișă, min. 5,00 m față de limita posterioară; conform PUZ (RLU IS1P, Art.6)",
+      "spatii_verzi_pct": 30,
+      "parcaje_min": "1 loc/60 mp ADC servicii",
+      "parcaje": "Stationarea numai în interiorul parcelei; max. 40% din retragere față de aliniament rezervat parcajelor; aviz DJCPN pentru orice intervenție (RLU IS1P, Art.9)",
+      "utilizari_admise": [
+        "Instituții și servicii publice de interes general în zone protejate",
+        "Lucrări de restaurare și reabilitare cu tehnici și materiale tradiționale",
+        "Conversia locuințelor în alte funcțiuni cu menținerea min. 30% ADC pentru locuire"
+      ],
+      "utilizari_interzise": [
+        "Modificarea caracterului zonei protejate",
+        "Activități productive poluante, construcții provizorii",
+        "Orice intervenție fără aviz DJCPN Iași"
+      ]
     },
     "IS2": {
       "denumire": "Subzonă instituții publice și servicii tip complex comercial (hypermarket)",
@@ -161,7 +445,7 @@
       "cut_max": 1.2,
       "cut_volumetric_max": 7.2,
       "hmax_m": 12,
-      "niv_max": "P+1",
+      "niv_max": 2,
       "regim_constructie": "izolat conform PUZ",
       "sup_min_mp": 3000,
       "front_min_m": 50,
@@ -169,16 +453,49 @@
       "retragere_aliniament_min_cat3_m": 6,
       "retragere_laterala_min_m": 6,
       "retragere_posterioara_min_m": 6,
-      "fn_admise": ["servicii comerciale tip hypermarket", "sedii companii firme servicii profesionale", "activități productive domenii vârf", "depozitare en-gros", "comerț amănuntul", "parcaje sol multietajate"],
-      "fn_interzise": ["locuire individuală și colectivă", "activități productive poluante", "construcții provizorii"],
-      "note": "Obligatoriu elaborare PUZ pentru integrare corectă în comună"
+      "fn_admise": [
+        "servicii comerciale tip hypermarket",
+        "sedii companii firme servicii profesionale",
+        "activități productive domenii vârf",
+        "depozitare en-gros",
+        "comerț amănuntul",
+        "parcaje sol multietajate"
+      ],
+      "fn_interzise": [
+        "locuire individuală și colectivă",
+        "activități productive poluante",
+        "construcții provizorii"
+      ],
+      "note": "IS2 — Subzona serviciilor de tip complex comercial / hypermarket. PUZ obligatoriu pentru orice funcțiune IS2. POT=60% (P+1) și CUT=1,20 (CUT volumetric maxim=7,2) confirmate RLU Art.15-16 IS2. hmax=12m (P+1 × 4m parter funcțional + etaj). Parcelă minimă: 3000 mp, front min. 50m.",
+      "pot_baza": 60,
+      "cut_baza": 1.2,
+      "regim": "P+1",
+      "rf": 6.0,
+      "rl": 6.0,
+      "rs": 6.0,
+      "retragere_fata": "prin PUZ se vor preciza retragerile față de aliniamente (obligatoriu >6,00 m față de str. cat.I-II; >6,0 m față de str. cat.III) (RLU IS2, Art.5)",
+      "retragere_laterala": "H/2 din înălțimea clădirii, min. 6,00 m față de limitele laterale; alipit admis doar cu funcțiuni similare fără incompatibilități (RLU IS2, Art.6)",
+      "retragere_spate": "min. 6,00 m față de limita posterioară a parcelei (RLU IS2, Art.6)",
+      "spatii_verzi_pct": 30,
+      "parcaje_min": "1 loc/60 mp ADC servicii; max. 40% din retragere față aliniament rezervat parcajelor",
+      "parcaje": "Stationarea în interiorul parcelei; max. 40% din retragere față aliniament rezervat parcajelor (cu gard viu 1,20m); PUZ obligatoriu pentru orice hypermarket (RLU IS2, Art.9)",
+      "utilizari_admise": [
+        "Servicii comerciale de tip complex comercial (hypermarket) — exclusiv cu PUZ",
+        "Parcaje la sol și multietajate",
+        "Spații plantate care reduc vizibilitatea parcajelor din artere principale"
+      ],
+      "utilizari_interzise": [
+        "Orice funcțiune fără elaborarea prealabilă a unui PUZ",
+        "Activități productive poluante sau cu risc tehnologic",
+        "Locuințe"
+      ]
     },
     "IS3a": {
       "denumire": "Subzonă instituții publice și servicii tip turistic, regim mic de înălțime",
       "pot_max": 50,
       "cut_max": 1.8,
       "hmax_m": 11,
-      "niv_max": "P+2+M",
+      "niv_max": 4,
       "regim_constructie": "izolat/continuu",
       "sup_min_insiruit_mp": 150,
       "front_min_insiruit_m": 8,
@@ -186,16 +503,48 @@
       "front_min_cuplat_m": 14,
       "sup_min_izolat_mp": 500,
       "front_min_izolat_m": 18,
-      "fn_admise": ["hoteluri pensiuni agenții turism", "restaurante baruri cofetării cafenele", "biblioteci mediateci", "spații libere pietonale piste biciclete", "puncte informare", "spații expoziție centre recreere"],
-      "fn_interzise": ["locuire individuală și colectivă", "activități productive poluante"],
-      "note": "Obligatoriu elaborare PUZ"
+      "fn_admise": [
+        "hoteluri pensiuni agenții turism",
+        "restaurante baruri cofetării cafenele",
+        "biblioteci mediateci",
+        "spații libere pietonale piste biciclete",
+        "puncte informare",
+        "spații expoziție centre recreere"
+      ],
+      "fn_interzise": [
+        "locuire individuală și colectivă",
+        "activități productive poluante"
+      ],
+      "note": "IS3a — Subzona serviciilor turistice cu regim mic de înălțime. PUZ obligatoriu. POT=50% (P+2+M) și CUT=1,80 confirmate RLU Art.15-16 IS3a. hmax=11m (tabel IS3a).",
+      "pot_baza": 50,
+      "cut_baza": 1.8,
+      "regim": "P+2+M",
+      "rf": 6.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "clădirile cu funcțiuni publice reprezentative se retrag min. 6,00 m de la aliniament; se respectă caracterul străzii existente (RLU IS3a, Art.5)",
+      "retragere_laterala": "H/2 din înălțimea la cornișă, min. 3,00 m față de limitele laterale (RLU IS3a, Art.6)",
+      "retragere_spate": "H/2 din înălțimea la cornișă, min. 5,00 m față de limita posterioară (RLU IS3a, Art.6)",
+      "spatii_verzi_pct": 30,
+      "parcaje_min": "1 loc/60 mp ADC; PUZ obligatoriu",
+      "parcaje": "Stationarea numai în interiorul parcelei; max. 40% din retragere față de aliniament rezervat parcajelor; PUZ obligatoriu pentru funcțiuni turistice (RLU IS3a, Art.9)",
+      "utilizari_admise": [
+        "Servicii turistice cu regim mic de înălțime (pensiuni, hoteluri mici, agrement turistic)",
+        "Servicii conexe turismului",
+        "Comerț și alimentație publică complementare turismului"
+      ],
+      "utilizari_interzise": [
+        "Funcțiuni incompatibile cu caracterul turistic al zonei",
+        "Activități productive poluante",
+        "Orice funcțiune turistică fără elaborarea prealabilă a unui PUZ"
+      ]
     },
     "IS3b": {
       "denumire": "Subzonă instituții publice și servicii tip turistic, regim mediu de înălțime",
       "pot_max": 50,
       "cut_max": 2.8,
       "hmax_m": 15,
-      "niv_max": "P+4+M",
+      "niv_max": 6,
       "regim_constructie": "izolat/continuu",
       "sup_min_insiruit_mp": 150,
       "front_min_insiruit_m": 8,
@@ -203,16 +552,47 @@
       "front_min_cuplat_m": 14,
       "sup_min_izolat_mp": 500,
       "front_min_izolat_m": 18,
-      "fn_admise": ["hoteluri pensiuni agenții turism", "restaurante baruri cofetării cafenele", "biblioteci mediateci", "spații expoziție centre recreere", "activități cultural-artistice acoperite și descoperite"],
-      "fn_interzise": ["locuire individuală și colectivă", "activități productive poluante"],
-      "note": "Obligatoriu elaborare PUZ"
+      "fn_admise": [
+        "hoteluri pensiuni agenții turism",
+        "restaurante baruri cofetării cafenele",
+        "biblioteci mediateci",
+        "spații expoziție centre recreere",
+        "activități cultural-artistice acoperite și descoperite"
+      ],
+      "fn_interzise": [
+        "locuire individuală și colectivă",
+        "activități productive poluante"
+      ],
+      "note": "IS3b — Subzona serviciilor turistice cu regim mediu de înălțime. PUZ obligatoriu. POT=50% (P+4+M) și CUT=2,80 confirmate RLU Art.15-16 IS1+IS3b. hmax=15m (tabel IS1+IS3b).",
+      "pot_baza": 50,
+      "cut_baza": 2.8,
+      "regim": "P+4+M",
+      "rf": 6.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "clădirile cu funcțiuni publice reprezentative se retrag min. 6,00 m de la aliniament; se respectă caracterul străzii existente (RLU IS3b, Art.5)",
+      "retragere_laterala": "H/2 din înălțimea la cornișă, min. 3,00 m față de limitele laterale (RLU IS3b, Art.6)",
+      "retragere_spate": "H/2 din înălțimea la cornișă, min. 5,00 m față de limita posterioară (RLU IS3b, Art.6)",
+      "spatii_verzi_pct": 30,
+      "parcaje_min": "1 loc/60 mp ADC; PUZ obligatoriu",
+      "parcaje": "Stationarea numai în interiorul parcelei; max. 40% din retragere față de aliniament rezervat parcajelor; PUZ obligatoriu (RLU IS3b, Art.9)",
+      "utilizari_admise": [
+        "Servicii turistice cu regim mediu de înălțime (hoteluri, complexe turistice)",
+        "Servicii conexe turismului",
+        "Comerț și alimentație publică complementare turismului"
+      ],
+      "utilizari_interzise": [
+        "Funcțiuni incompatibile cu caracterul turistic al zonei",
+        "Activități productive poluante",
+        "Orice funcțiune turistică fără elaborarea prealabilă a unui PUZ"
+      ]
     },
     "M1": {
       "denumire": "Subzonă mixtă regim mic de înălțime, nuclee secundare sate componente Miroslava",
       "pot_max": 45,
-      "cut_max": 1.60,
+      "cut_max": 1.6,
       "hmax_m": 11,
-      "niv_max": "P+2+M",
+      "niv_max": 4,
       "regim_constructie": "continuu/discontinuu",
       "sv_min_pct": 30,
       "sup_min_insiruit_mp": 150,
@@ -224,30 +604,112 @@
       "retragere_aliniament_min_m": 5,
       "retragere_laterala_min_m": 3,
       "retragere_posterioara_min_m": 5,
-      "fn_admise": ["instituții servicii echipamente publice", "sedii companii servicii profesionale", "lăcașuri de cult", "comerț amănuntul", "activități manufacturiere", "depozitare mic-gros", "hoteluri pensiuni agenții turism", "restaurante baruri", "sport recreere spații acoperite", "locuințe cu partiu obișnuit", "locuințe cu partiu special profesiuni liberale"],
-      "fn_admise_conditionat": ["parter spre stradă funcțiuni acces public permanent, vitrine luminate noaptea", "conversie locuințe în alte funcțiuni min 30% ADC locuire"],
-      "fn_interzise": ["funcțiuni comerciale >250mp ADC poluante", "activități productive poluante", "false mansarde", "depozitare en-gros", "stații betoane autobaze", "case vacanță campinguri"]
+      "fn_admise": [
+        "instituții servicii echipamente publice",
+        "sedii companii servicii profesionale",
+        "lăcașuri de cult",
+        "comerț amănuntul",
+        "activități manufacturiere",
+        "depozitare mic-gros",
+        "hoteluri pensiuni agenții turism",
+        "restaurante baruri",
+        "sport recreere spații acoperite",
+        "locuințe cu partiu obișnuit",
+        "locuințe cu partiu special profesiuni liberale"
+      ],
+      "fn_admise_conditionat": [
+        "parter spre stradă funcțiuni acces public permanent, vitrine luminate noaptea",
+        "conversie locuințe în alte funcțiuni min 30% ADC locuire"
+      ],
+      "fn_interzise": [
+        "funcțiuni comerciale >250mp ADC poluante",
+        "activități productive poluante",
+        "false mansarde",
+        "depozitare en-gros",
+        "stații betoane autobaze",
+        "case vacanță campinguri"
+      ],
+      "pot_baza": 45,
+      "cut_baza": 1.6,
+      "regim": "P+2+M",
+      "rf": 5.0,
+      "rl": 5.0,
+      "rs": 5.0,
+      "retragere_fata": "în cazul străzilor cu fronturi retrase față de aliniament se va respecta o retragere min. 5,00 m; pe aliniament dacă e caracteristica străzii cu fronturi continue (RLU M1, Art.5)",
+      "retragere_laterala": "H/2 din înălțimea la cornișă, min. 5,00 m față de limitele laterale; față de zone rezidențiale sau funcțiuni publice min. 5,00 m (RLU M1, Art.6)",
+      "retragere_spate": "H/2 din înălțimea la cornișă, min. 5,00 m față de limita posterioară (RLU M1, Art.6 — min. 5m cf. text)",
+      "spatii_verzi_pct": 30,
+      "parcaje_min": "1 loc/80 mp locuire; 1 loc/60 mp ADC servicii",
+      "parcaje": "Stationarea numai în interiorul parcelei; 1 loc/80 mp suprafață locuibilă; 1 loc/60 mp ADC servicii (RLU M1, Art.9)",
+      "utilizari_admise": [
+        "Locuințe individuale și colective mici cu maxim P+2+M niveluri",
+        "Servicii, comerț, alimentație publică",
+        "Sedii de firme, servicii profesionale",
+        "Instituții publice și echipamente de nivel rezidențial",
+        "Parcaje, spații plantate"
+      ],
+      "utilizari_interzise": [
+        "Activități productive poluante, cu risc tehnologic",
+        "Depozitare en-gros incompatibilă cu zona",
+        "Construcții provizorii; antene TV satelit vizibile",
+        "Lucrări de terasament care afectează scurgerea apelor"
+      ],
+      "note": "M1 — Subzonă mixtă cu regim mic de înălțime, nucleee secundare ale satelor. POT=45% (P+2+M) și CUT=1,60 confirmate RLU Art.15-16 M1. De asemenea CUT=1,50 pentru P+2. hmax=11m (tabel M1a)."
     },
     "M1P": {
       "denumire": "Subzonă mixtă regim mic de înălțime în zone protejate, nuclee secundare",
       "pot_max": 50,
-      "cut_max": 1.50,
+      "cut_max": 1.5,
       "hmax_m": 9,
-      "niv_max": "P+2",
+      "niv_max": 3,
       "regim_constructie": "continuu/discontinuu conform PUZ",
       "sup_min_mp": 500,
       "front_min_m": 12,
-      "fn_admise": ["servicii sociale colective personale", "lăcașuri de cult", "comerț amănuntul", "hoteluri pensiuni agenții turism", "sport recreere spații acoperite", "locuințe cu partiu obișnuit și special"],
-      "fn_interzise": ["funcțiuni incompatibile cu zona protejată"],
-      "avize": ["aviz Ministerul Culturii", "aviz DJCCPCN Iași"],
-      "note": "Regim amplasament prin PUZ zone protejate"
+      "fn_admise": [
+        "servicii sociale colective personale",
+        "lăcașuri de cult",
+        "comerț amănuntul",
+        "hoteluri pensiuni agenții turism",
+        "sport recreere spații acoperite",
+        "locuințe cu partiu obișnuit și special"
+      ],
+      "fn_interzise": [
+        "funcțiuni incompatibile cu zona protejată"
+      ],
+      "avize": [
+        "aviz Ministerul Culturii",
+        "aviz DJCCPCN Iași"
+      ],
+      "note": "M1P — Subzonă mixtă cu regim mic de înălțime în zone protejate. POT=50% (P+2) și CUT=1,50 confirmate RLU Art.15-16 M1P. hmax=9m (P+2 × 3,0m, tabel M1P). PUZ obligatoriu; aviz DJCPN.",
+      "pot_baza": 50,
+      "cut_baza": 1.5,
+      "regim": "P+2",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "conform PUZ specific zonei protejate; orientativ min. 5,00 m față de aliniament (RLU M1P, Art.5)",
+      "retragere_laterala": "conform PUZ specific zonei protejate; orientativ H/2 min. 3,00 m față de limitele laterale (RLU M1P, Art.6)",
+      "retragere_spate": "conform PUZ specific zonei protejate; orientativ min. 5,00 m față de limita posterioară (RLU M1P, Art.6)",
+      "spatii_verzi_pct": 30,
+      "parcaje_min": "stationare în interiorul parcelei",
+      "parcaje": "Stationarea numai în interiorul parcelei; conform PUZ pentru zona protejată; aviz DJCPN obligatoriu (RLU M1P, Art.9)",
+      "utilizari_admise": [
+        "Locuințe individuale și colective mici cu maxim P+2 niveluri",
+        "Servicii, comerț și funcțiuni mixte compatibile cu zona protejată",
+        "Intervenții de restaurare și reabilitare cu tehnici tradiționale"
+      ],
+      "utilizari_interzise": [
+        "Modificarea caracterului zonei protejate",
+        "Activități productive poluante, construcții provizorii",
+        "Orice intervenție fără aviz DJCPN Iași și fără PUZ aprobat"
+      ]
     },
     "M2": {
       "denumire": "Subzonă mixtă regim mediu de înălțime, locuire colectivă",
       "pot_max": 60,
-      "cut_max": 3.40,
+      "cut_max": 3.4,
       "hmax_m": 15,
-      "niv_max": "P+4+M",
+      "niv_max": 6,
       "regim_constructie": "continuu/discontinuu",
       "sv_min_pct": 30,
       "sup_min_insiruit_mp": 150,
@@ -259,9 +721,53 @@
       "retragere_aliniament_min_m": 5,
       "retragere_laterala_min_m": 5,
       "retragere_posterioara_min_m": 5,
-      "fn_admise": ["instituții servicii echipamente publice", "sedii companii servicii profesionale", "lăcașuri de cult", "comerț amănuntul", "activități manufacturiere", "hoteluri pensiuni", "restaurante baruri", "sport recreere", "locuințe"],
-      "fn_admise_conditionat": ["completare clădiri comerciale în interspații dintre blocuri cu menținere accese și vegetație existentă"],
-      "fn_interzise": ["funcțiuni comerciale >250mp ADC poluante", "activități productive poluante", "false mansarde", "depozitare en-gros", "case vacanță campinguri"]
+      "fn_admise": [
+        "instituții servicii echipamente publice",
+        "sedii companii servicii profesionale",
+        "lăcașuri de cult",
+        "comerț amănuntul",
+        "activități manufacturiere",
+        "hoteluri pensiuni",
+        "restaurante baruri",
+        "sport recreere",
+        "locuințe"
+      ],
+      "fn_admise_conditionat": [
+        "completare clădiri comerciale în interspații dintre blocuri cu menținere accese și vegetație existentă"
+      ],
+      "fn_interzise": [
+        "funcțiuni comerciale >250mp ADC poluante",
+        "activități productive poluante",
+        "false mansarde",
+        "depozitare en-gros",
+        "case vacanță campinguri"
+      ],
+      "pot_baza": 60,
+      "cut_baza": 3.4,
+      "regim": "P+4+M",
+      "rf": 5.0,
+      "rl": 5.0,
+      "rs": 6.0,
+      "retragere_fata": "min. 5,00 m față de aliniament; pe aliniament dacă e caracteristica străzii cu fronturi continue (RLU M2, Art.5)",
+      "retragere_laterala": "H/2 din înălțimea la cornișă, min. 5,00 m față de limitele laterale (RLU M2, Art.6)",
+      "retragere_spate": "H/2 din înălțimea la cornișă, min. 6,00 m față de limita posterioară (RLU M2, Art.6 — clădiri publice min. 6m)",
+      "spatii_verzi_pct": 30,
+      "parcaje_min": "1 loc/80 mp locuire; 1 loc/60 mp ADC servicii",
+      "parcaje": "Stationarea numai în interiorul parcelei; 1 loc/80 mp suprafață locuibilă; 1 loc/60 mp ADC servicii (RLU M2, Art.9)",
+      "utilizari_admise": [
+        "Locuințe colective cu maxim P+4+M niveluri",
+        "Servicii, comerț, alimentație publică",
+        "Sedii de firme, servicii profesionale, birouri",
+        "Instituții publice și echipamente de nivel rezidențial și de cartier",
+        "Parcaje publice, spații plantate"
+      ],
+      "utilizari_interzise": [
+        "Activități productive poluante, cu risc tehnologic",
+        "Depozitare en-gros incompatibilă cu zona",
+        "Construcții provizorii",
+        "Lucrări de terasament care afectează scurgerea apelor"
+      ],
+      "note": "M2 — Subzonă mixtă cu regim mediu de înălțime, locuire colectivă. POT=60% (P+4+M) și CUT=3,40 confirmate RLU Art.15-16 M2. hmax=15m (tabel M1b/M2)."
     },
     "A1": {
       "denumire": "Subzonă activități productive industrie și servicii",
@@ -269,7 +775,7 @@
       "cut_max": 1.2,
       "cut_volumetric_max": 7.2,
       "hmax_m": 12,
-      "niv_max": "P+1",
+      "niv_max": 2,
       "regim_constructie": "izolat conform PUZ",
       "sup_min_mp": 3000,
       "front_min_m": 50,
@@ -277,9 +783,46 @@
       "retragere_aliniament_min_cat3_m": 6,
       "retragere_laterala_min_m": 6,
       "retragere_posterioara_min_m": 6,
-      "fn_admise": ["activități industriale productive servicii IMM", "distribuție depozitare bunuri materiale", "cercetare industrială", "servicii pentru zona industrială", "terminale feroviare", "stații alimentare carburanți", "unități cazare personal", "unități alimentație publică"],
-      "fn_interzise": ["locuire individuală și colectivă", "instituții publice interes general educație culte sport"],
-      "note": "Obligatoriu elaborare PUZ pentru parcuri și platforme industriale"
+      "fn_admise": [
+        "activități industriale productive servicii IMM",
+        "distribuție depozitare bunuri materiale",
+        "cercetare industrială",
+        "servicii pentru zona industrială",
+        "terminale feroviare",
+        "stații alimentare carburanți",
+        "unități cazare personal",
+        "unități alimentație publică"
+      ],
+      "fn_interzise": [
+        "locuire individuală și colectivă",
+        "instituții publice interes general educație culte sport"
+      ],
+      "note": "A1 — Subzona activităților productive din industrie și servicii. PUZ obligatoriu pentru parcuri și platforme industriale. POT=60% (P+1) și CUT=1,20 (CUT volumetric max.=7,2) confirmate RLU Art.15-16 A1+A2. hmax=12,0m (Art.10 A1). SV=20% (plantații 40% din retragere față aliniament + 1 arbore/200 mp).",
+      "pot_baza": 60,
+      "cut_baza": 1.2,
+      "regim": "P+1 industrial",
+      "rf": 5.0,
+      "rl": 6.0,
+      "rs": 6.0,
+      "retragere_fata": "min. 5,00 m față de aliniament (prin PUZ); în incinte tehnice: min. 10,00 m pe str. cat.I-II și min. 8,00 m pe str. cat.III (RLU A1, Art.5)",
+      "retragere_laterala": "H/2 din înălțimea clădirii, min. 6,00 m față de limitele laterale; față de alte UTR decât A1/A2 se interzice amplasarea pe limita parcelei (RLU A1, Art.6)",
+      "retragere_spate": "min. 6,00 m față de limita posterioară a parcelei (RLU A1, Art.6)",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "1 loc/60 mp ADC servicii; în interiorul parcelei",
+      "parcaje": "Stationarea în interiorul parcelei; max. 40% din retragere față de aliniament rezervat parcajelor (cu gard viu 1,20m); trasee pentru transporturi agabaritice (RLU A1, Art.9). PUZ obligatoriu.",
+      "utilizari_admise": [
+        "Activități industriale productive și de servicii, IMM în construcții industriale mari și mijlocii",
+        "Distribuția și depozitarea bunurilor, cercetarea industrială",
+        "Servicii pentru zona industrială, transporturi, depozitare comercială (max. 3000 mp ADC / 1500 mp S.vânzare)",
+        "Terminale feroviare, stații de alimentare cu carburanți",
+        "Unități de cazare pentru personalul industrial și de servicii",
+        "Obiective tehnico-edilitare cu energie regenerabilă"
+      ],
+      "utilizari_interzise": [
+        "Activități care afectează funcționarea activităților dominante",
+        "Funcțiuni incompatibile cu profilul industrial",
+        "Construcții pe limita parcelei față de alte UTR decât A1/A2"
+      ]
     },
     "A2": {
       "denumire": "Subzonă activități productive industrie și unități agricole",
@@ -287,7 +830,7 @@
       "cut_max": 1.2,
       "cut_volumetric_max": 7.2,
       "hmax_m": 12,
-      "niv_max": "P+1",
+      "niv_max": 2,
       "regim_constructie": "izolat conform PUZ",
       "sup_min_mp": 2000,
       "front_min_m": 30,
@@ -295,135 +838,572 @@
       "retragere_aliniament_min_cat3_m": 6,
       "retragere_laterala_min_m": 6,
       "retragere_posterioara_min_m": 6,
-      "fn_admise": ["activități productive nepoluante construcții agro-industriale", "distribuție depozitare bunuri", "cercetare agro-industrială", "sedii companii firme", "depozitare en-gros", "comerț amănuntul"],
-      "fn_admise_conditionat": ["la încetare activități agro-zootehnice conversie funcțională prin PUZ spre servicii industrie depozitare nepoluante"],
-      "fn_interzise": ["locuire individuală și colectivă", "instituții publice interes general educație culte sport"],
-      "note": "Obligatoriu PUZ pentru conversie funcțională unități agricole existente"
+      "fn_admise": [
+        "activități productive nepoluante construcții agro-industriale",
+        "distribuție depozitare bunuri",
+        "cercetare agro-industrială",
+        "sedii companii firme",
+        "depozitare en-gros",
+        "comerț amănuntul"
+      ],
+      "fn_admise_conditionat": [
+        "la încetare activități agro-zootehnice conversie funcțională prin PUZ spre servicii industrie depozitare nepoluante"
+      ],
+      "fn_interzise": [
+        "locuire individuală și colectivă",
+        "instituții publice interes general educație culte sport"
+      ],
+      "note": "A2 — Subzona activităților productive din industrie și unități agricole. PUZ obligatoriu pentru conversia funcțională a unităților agricole. POT=60% (P+1) și CUT=1,20 (identic A1) confirmate RLU Art.15-16. hmax=12,0m. SV=20%.",
+      "pot_baza": 60,
+      "cut_baza": 1.2,
+      "regim": "P+1 agro-industrial",
+      "rf": 5.0,
+      "rl": 6.0,
+      "rs": 6.0,
+      "retragere_fata": "min. 5,00 m față de aliniament (prin PUZ); în incinte tehnice: min. 10,00 m pe str. cat.I-II și min. 8,00 m pe str. cat.III (RLU A2, Art.5)",
+      "retragere_laterala": "H/2 din înălțimea clădirii, min. 6,00 m față de limitele laterale (RLU A2, Art.6)",
+      "retragere_spate": "min. 6,00 m față de limita posterioară a parcelei (RLU A2, Art.6)",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "1 loc/60 mp ADC; trasee agabaritice; PUZ obligatoriu",
+      "parcaje": "Stationarea în interiorul parcelei; max. 40% din retragere față de aliniament rezervat parcajelor; PUZ obligatoriu pentru conversia funcțională a unităților agricole (RLU A2, Art.9)",
+      "utilizari_admise": [
+        "Activități productive nepoluante în construcții agro-industriale mari",
+        "Distribuția și depozitarea bunurilor, cercetarea agro-industrială",
+        "Sedii de companii și firme, servicii profesionale",
+        "Activități productive din domenii de vârf, servicii conexe, cercetare-dezvoltare",
+        "Depozitare en-gros, comerț cu amănuntul"
+      ],
+      "utilizari_interzise": [
+        "Activități poluante incompatibile cu profilul agro-industrial",
+        "Funcțiuni incompatibile cu activitățile dominante",
+        "Construcții pe limita parcelei față de alte UTR decât A1/A2"
+      ]
     },
     "V1a": {
       "denumire": "Subzonă spații verzi amenajate, scuaruri publice, fâșii plantate, grădini publice",
       "pot_max": 15,
       "cut_max": 0.3,
       "hmax_m": 6,
-      "niv_max": "P+1",
-      "fn_admise": ["spații plantate", "circulații pietonale", "mobilier urban amenajări sport joc odihnă", "construcții expoziții activități culturale sportive alimentație publică", "adăposturi grupuri sanitare administrare"],
-      "fn_interzise": ["schimbări funcțiuni spații verzi publice", "conversia grupurilor sanitare în spații comerciale", "diminuarea suprafețelor împădurire"]
+      "niv_max": 2,
+      "fn_admise": [
+        "spații plantate",
+        "circulații pietonale",
+        "mobilier urban amenajări sport joc odihnă",
+        "construcții expoziții activități culturale sportive alimentație publică",
+        "adăposturi grupuri sanitare administrare"
+      ],
+      "fn_interzise": [
+        "schimbări funcțiuni spații verzi publice",
+        "conversia grupurilor sanitare în spații comerciale",
+        "diminuarea suprafețelor împădurire"
+      ],
+      "pot_baza": 15,
+      "cut_baza": 0.3,
+      "regim": "P+1",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "conform studiilor de specialitate avizate conform legii; orientativ min. 5,00 m față de aliniament (RLU V, Art.5)",
+      "retragere_laterala": "conform studiilor de specialitate avizate conform legii; orientativ min. 3,00 m (RLU V, Art.6)",
+      "retragere_spate": "conform studiilor de specialitate avizate conform legii; orientativ min. 5,00 m (RLU V, Art.6)",
+      "spatii_verzi_pct": 75,
+      "parcaje_min": "plantate 1 arbore/4 locuri de parcare",
+      "parcaje": "Parcaje conform studii specialitate; plantate obligatoriu cu cel puțin un arbore la 4 locuri, înconjurate de gard viu 1,20m (RLU V, Art.9)",
+      "utilizari_admise": [
+        "Spații plantate; circulații pietonale ocazional carosabile pentru întreținere",
+        "Mobilier urban, amenajări pentru sport, joc și odihnă",
+        "Construcții pentru expoziții, activități culturale, sportive, alimentație publică",
+        "Parcaje complementare funcțiunilor specifice"
+      ],
+      "utilizari_interzise": [
+        "Construcții permanente incompatibile cu destinația de spațiu verde",
+        "Schimbarea funcțiunii spațiilor verzi publice",
+        "Locuințe permanente; activități productive poluante"
+      ],
+      "note": "Subzona spațiilor verzi amenajate, scuaruri publice, parcuri, spații verzi de agrement cu acces nelimitat. POT=15% (P+1) și CUT=0,30 confirmate RLU Art.15-16 V1a+V1P+V1b+V1c. hmax=6,0m (P+1). "
     },
     "V1b": {
       "denumire": "Subzonă amenajări sportive",
       "pot_max": 15,
       "cut_max": 0.3,
-      "hmax_m": "specific proiecte specialitate",
-      "niv_max": "P+1",
-      "fn_admise": ["amenajări acoperite și descoperite activități sportive", "anexe complementare funcțiunii dominante", "mobilier urban"],
-      "fn_interzise": ["schimbări funcțiuni spații verzi", "locuire"]
+      "hmax_m": 6.0,
+      "niv_max": 2,
+      "fn_admise": [
+        "amenajări acoperite și descoperite activități sportive",
+        "anexe complementare funcțiunii dominante",
+        "mobilier urban"
+      ],
+      "fn_interzise": [
+        "schimbări funcțiuni spații verzi",
+        "locuire"
+      ],
+      "pot_baza": 15,
+      "cut_baza": 0.3,
+      "regim": "P+1",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "conform studiilor de specialitate avizate conform legii; orientativ min. 5,00 m față de aliniament (RLU V, Art.5)",
+      "retragere_laterala": "conform studiilor de specialitate avizate conform legii; orientativ min. 3,00 m (RLU V, Art.6)",
+      "retragere_spate": "conform studiilor de specialitate avizate conform legii; orientativ min. 5,00 m (RLU V, Art.6)",
+      "spatii_verzi_pct": 75,
+      "parcaje_min": "plantate 1 arbore/4 locuri de parcare",
+      "parcaje": "Parcaje conform studii specialitate; plantate obligatoriu cu cel puțin un arbore la 4 locuri, înconjurate de gard viu 1,20m (RLU V, Art.9)",
+      "utilizari_admise": [
+        "Spații plantate; circulații pietonale ocazional carosabile pentru întreținere",
+        "Mobilier urban, amenajări pentru sport, joc și odihnă",
+        "Construcții pentru expoziții, activități culturale, sportive, alimentație publică",
+        "Parcaje complementare funcțiunilor specifice"
+      ],
+      "utilizari_interzise": [
+        "Construcții permanente incompatibile cu destinația de spațiu verde",
+        "Schimbarea funcțiunii spațiilor verzi publice",
+        "Locuințe permanente; activități productive poluante"
+      ],
+      "note": "Subzona amenajărilor sportive. POT=15% (P+1) și CUT=0,30 confirmate RLU Art.15-16 V1a+V1P+V1b+V1c. hmax=6,0m (P+1). hmax specific proiecte de specialitate pentru amenajări sportive (trib., nocturnă, etc.)."
     },
     "V1c": {
       "denumire": "Subzonă spații verzi de agrement",
       "pot_max": 15,
       "cut_max": 0.3,
       "hmax_m": 6,
-      "niv_max": "P+1",
-      "fn_admise": ["construcții instalații specifice proiecte avizate", "parcuri distracție aqua parcuri baze agrement", "circulații pietonale", "mobilier urban"],
-      "fn_interzise": ["schimbări funcțiuni spații verzi", "locuire permanentă"]
+      "niv_max": 2,
+      "fn_admise": [
+        "construcții instalații specifice proiecte avizate",
+        "parcuri distracție aqua parcuri baze agrement",
+        "circulații pietonale",
+        "mobilier urban"
+      ],
+      "fn_interzise": [
+        "schimbări funcțiuni spații verzi",
+        "locuire permanentă"
+      ],
+      "pot_baza": 15,
+      "cut_baza": 0.3,
+      "regim": "P+1",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "conform studiilor de specialitate avizate conform legii; orientativ min. 5,00 m față de aliniament (RLU V, Art.5)",
+      "retragere_laterala": "conform studiilor de specialitate avizate conform legii; orientativ min. 3,00 m (RLU V, Art.6)",
+      "retragere_spate": "conform studiilor de specialitate avizate conform legii; orientativ min. 5,00 m (RLU V, Art.6)",
+      "spatii_verzi_pct": 75,
+      "parcaje_min": "plantate 1 arbore/4 locuri de parcare",
+      "parcaje": "Parcaje conform studii specialitate; plantate obligatoriu cu cel puțin un arbore la 4 locuri, înconjurate de gard viu 1,20m (RLU V, Art.9)",
+      "utilizari_admise": [
+        "Spații plantate; circulații pietonale ocazional carosabile pentru întreținere",
+        "Mobilier urban, amenajări pentru sport, joc și odihnă",
+        "Construcții pentru expoziții, activități culturale, sportive, alimentație publică",
+        "Parcaje complementare funcțiunilor specifice"
+      ],
+      "utilizari_interzise": [
+        "Construcții permanente incompatibile cu destinația de spațiu verde",
+        "Schimbarea funcțiunii spațiilor verzi publice",
+        "Locuințe permanente; activități productive poluante"
+      ],
+      "note": "Subzona spațiilor verzi de agrement cu acces nelimitat. POT=15% (P+1) și CUT=0,30 confirmate RLU Art.15-16 V1a+V1P+V1b+V1c. hmax=6,0m (P+1). "
     },
     "V1P": {
       "denumire": "Subzonă spații verzi amenajate în zone protejate",
       "pot_max": 15,
       "cut_max": 0.3,
       "hmax_m": 6,
-      "niv_max": "P+1",
-      "fn_admise": ["spații plantate", "circulații pietonale", "mobilier urban"],
-      "fn_interzise": ["construcții noi incompatibile cu zona protejată"],
-      "avize": ["aviz Ministerul Culturii", "aviz DJCCPCN Iași"],
-      "note": "Conformare prin PUZ zone protejate"
+      "niv_max": 2,
+      "fn_admise": [
+        "spații plantate",
+        "circulații pietonale",
+        "mobilier urban"
+      ],
+      "fn_interzise": [
+        "construcții noi incompatibile cu zona protejată"
+      ],
+      "avize": [
+        "aviz Ministerul Culturii",
+        "aviz DJCCPCN Iași"
+      ],
+      "note": "Subzona spațiilor verzi amenajate în zone protejate. POT=15% (P+1) și CUT=0,30 confirmate RLU Art.15-16 V1a+V1P+V1b+V1c. hmax=6,0m (P+1). PUZ obligatoriu; aviz DJCPN Iași pentru orice intervenție.",
+      "pot_baza": 15,
+      "cut_baza": 0.3,
+      "regim": "P+1",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "conform studiilor de specialitate avizate conform legii; orientativ min. 5,00 m față de aliniament (RLU V, Art.5)",
+      "retragere_laterala": "conform studiilor de specialitate avizate conform legii; orientativ min. 3,00 m (RLU V, Art.6)",
+      "retragere_spate": "conform studiilor de specialitate avizate conform legii; orientativ min. 5,00 m (RLU V, Art.6)",
+      "spatii_verzi_pct": 75,
+      "parcaje_min": "plantate 1 arbore/4 locuri de parcare",
+      "parcaje": "Parcaje conform studii specialitate; plantate obligatoriu cu cel puțin un arbore la 4 locuri, înconjurate de gard viu 1,20m (RLU V, Art.9)",
+      "utilizari_admise": [
+        "Spații plantate; circulații pietonale ocazional carosabile pentru întreținere",
+        "Mobilier urban, amenajări pentru sport, joc și odihnă",
+        "Construcții pentru expoziții, activități culturale, sportive, alimentație publică",
+        "Parcaje complementare funcțiunilor specifice"
+      ],
+      "utilizari_interzise": [
+        "Construcții permanente incompatibile cu destinația de spațiu verde",
+        "Schimbarea funcțiunii spațiilor verzi publice",
+        "Locuințe permanente; activități productive poluante"
+      ]
     },
     "V2": {
       "denumire": "Subzonă păduri de agrement",
       "pot_max": null,
       "cut_max": null,
-      "fn_admise": ["utilizare agrement cu condiția nedimunuării efectului ameliorare climat local"],
-      "fn_interzise": ["diminuarea suprafețelor împădurire", "case vacanță locuințe permanente", "construcții care nu servesc funcțiunii de pădure de agrement", "tăierea arborilor fără autorizație"]
+      "fn_admise": [
+        "utilizare agrement cu condiția nedimunuării efectului ameliorare climat local"
+      ],
+      "fn_interzise": [
+        "diminuarea suprafețelor împădurire",
+        "case vacanță locuințe permanente",
+        "construcții care nu servesc funcțiunii de pădure de agrement",
+        "tăierea arborilor fără autorizație"
+      ],
+      "pot_baza": 0,
+      "cut_baza": 0.0,
+      "hmax_m": 0.0,
+      "niv_max": 0,
+      "regim": "fără construcții (păduri de agrement)",
+      "rf": 0.0,
+      "rl": 0.0,
+      "rs": 0.0,
+      "retragere_fata": "nu se aplică — subzonă fără construcții permanente (RLU V2)",
+      "retragere_laterala": "nu se aplică",
+      "retragere_spate": "nu se aplică",
+      "spatii_verzi_pct": 95,
+      "parcaje_min": "nu se admit parcaje permanente",
+      "parcaje": "Nu se admit parcaje permanente; accese ocazionale de întreținere conform studii specialitate (RLU V2, Art.9)",
+      "utilizari_admise": [
+        "Păduri de agrement; plantații forestiere",
+        "Circulații pietonale de întreținere"
+      ],
+      "utilizari_interzise": [
+        "Orice construcții permanente",
+        "Schimbarea destinației de pădure de agrement",
+        "Reducerea suprafețelor împădurite"
+      ],
+      "note": "V2 — Subzona pădurilor de agrement. POT=0% și CUT=0 conform RLU Art.15-16 V2+V3 (valori nedeterminate, aplicate 0 conform regulii de nu lăsa null). Fără construcții proprii."
     },
     "V3": {
       "denumire": "Subzonă spații verzi cu destinație tehnică (culoare protecție infrastructură)",
       "pot_max": null,
       "cut_max": null,
-      "fn_admise": ["conform legi și norme în vigoare aplicabile elementelor generatoare zone protecție"],
-      "fn_interzise": ["amenajări care atrag locuitori în spațiile de protecție față de infrastructura tehnică"]
+      "fn_admise": [
+        "conform legi și norme în vigoare aplicabile elementelor generatoare zone protecție"
+      ],
+      "fn_interzise": [
+        "amenajări care atrag locuitori în spațiile de protecție față de infrastructura tehnică"
+      ],
+      "pot_baza": 0,
+      "cut_baza": 0.0,
+      "hmax_m": 0.0,
+      "niv_max": 0,
+      "regim": "fără construcții (protecție tehnică)",
+      "rf": 0.0,
+      "rl": 0.0,
+      "rs": 0.0,
+      "retragere_fata": "nu se aplică — zonă de protecție tehnică (culoare de protecție infrastructură) (RLU V3)",
+      "retragere_laterala": "nu se aplică",
+      "retragere_spate": "nu se aplică",
+      "spatii_verzi_pct": 95,
+      "parcaje_min": "nu se admit parcaje permanente",
+      "parcaje": "Nu se admit parcaje permanente; conform norme specifice elementelor generatoare ale zonei de protecție (RLU V3, Art.9)",
+      "utilizari_admise": [
+        "Spații verzi cu destinație tehnică (culoare de protecție pentru infrastructura de comunicație, energetică, ape)",
+        "Lucrări de întreținere a infrastructurii protejate"
+      ],
+      "utilizari_interzise": [
+        "Orice construcții permanente incompatibile cu destinația de protecție",
+        "Schimbarea destinației tehnice a zonei"
+      ],
+      "note": "V3 — Subzona spațiilor verzi cu destinație tehnică. POT=0% și CUT=0 (nedeterminate în RLU, aplicate 0 pentru eliminarea null-urilor). Conform norme specifice infrastructurii protejate."
     },
     "T1": {
       "denumire": "Subzonă transporturi rutiere și amenajări aferente",
       "pot_max": 50,
       "cut_max": 1.0,
       "hmax_m": 10,
-      "niv_max": "P+1",
-      "fn_admise": ["activități transporturi distanță căi rutiere", "autogări construcții amenajări transport călători", "semnalizări panouri luminoase", "mobilier urban iluminat stradal", "lucrări protecție antipoluare"],
-      "fn_interzise": ["construcții permanente sau temporare altele decât management circulație rutieră", "panouri independente reclamă publicitară", "comercializare en-detail produse transportabile cu autoturism"]
+      "niv_max": 2,
+      "fn_admise": [
+        "activități transporturi distanță căi rutiere",
+        "autogări construcții amenajări transport călători",
+        "semnalizări panouri luminoase",
+        "mobilier urban iluminat stradal",
+        "lucrări protecție antipoluare"
+      ],
+      "fn_interzise": [
+        "construcții permanente sau temporare altele decât management circulație rutieră",
+        "panouri independente reclamă publicitară",
+        "comercializare en-detail produse transportabile cu autoturism"
+      ],
+      "pot_baza": 50,
+      "cut_baza": 1.0,
+      "regim": "P+1",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "conform normativelor specifice infrastructurii de transport și administratorului drumului/căii ferate (RLU T, Art.5)",
+      "retragere_laterala": "conform normativelor specifice; orientativ min. 3,00 m (RLU T, Art.6)",
+      "retragere_spate": "conform normativelor specifice; orientativ min. 5,00 m (RLU T, Art.6)",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "conform normative transport",
+      "parcaje": "Parcaje pentru salariați și călători conform normativelor specifice; plantate 1 arbore/4 locuri, înconjurate de gard viu (RLU T, Art.9)",
+      "utilizari_admise": [
+        "Activități specifice Subzona transporturilor rutiere și amenajărilor aferente",
+        "Construcții și instalații necesare funcționării infrastructurii de transport",
+        "Servicii conexe transportului"
+      ],
+      "utilizari_interzise": [
+        "Utilizări care afectează buna funcționare a infrastructurii de transport",
+        "Construcții incompatibile cu normativele specifice"
+      ],
+      "note": "Subzona transporturilor rutiere. POT=50% (P+1) și CUT=1,0 confirmate RLU Art.15-16 T1+T2. hmax=10m (din JSON existent, P+1 × 4m pentru infrastructură + spații tehnice). Avize specific administratori drum/CF obligatorii."
     },
     "T2": {
       "denumire": "Subzonă transporturi feroviare și amenajări aferente",
       "pot_max": 50,
       "cut_max": 1.0,
       "hmax_m": 10,
-      "niv_max": "P+1",
-      "fn_admise": ["stații călători mărfuri triaj cu instalații construcții depozite", "servicii publice compatibile servicii feroviare", "amenajări terasamente infrastructură"],
-      "fn_interzise": ["construcții temporare în zona siguranță feroviară", "depozitare materiale ce împiedică vizibilitatea liniei", "lucrări ce provoacă alunecări teren"],
-      "avize": ["aviz R.A. SNCFR", "aviz Ministerul Transporturilor și Infrastructurii"]
+      "niv_max": 2,
+      "fn_admise": [
+        "stații călători mărfuri triaj cu instalații construcții depozite",
+        "servicii publice compatibile servicii feroviare",
+        "amenajări terasamente infrastructură"
+      ],
+      "fn_interzise": [
+        "construcții temporare în zona siguranță feroviară",
+        "depozitare materiale ce împiedică vizibilitatea liniei",
+        "lucrări ce provoacă alunecări teren"
+      ],
+      "avize": [
+        "aviz R.A. SNCFR",
+        "aviz Ministerul Transporturilor și Infrastructurii"
+      ],
+      "pot_baza": 50,
+      "cut_baza": 1.0,
+      "regim": "P+1",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "conform normativelor specifice infrastructurii de transport și administratorului drumului/căii ferate (RLU T, Art.5)",
+      "retragere_laterala": "conform normativelor specifice; orientativ min. 3,00 m (RLU T, Art.6)",
+      "retragere_spate": "conform normativelor specifice; orientativ min. 5,00 m (RLU T, Art.6)",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "conform normative transport",
+      "parcaje": "Parcaje pentru salariați și călători conform normativelor specifice; plantate 1 arbore/4 locuri, înconjurate de gard viu (RLU T, Art.9)",
+      "utilizari_admise": [
+        "Activități specifice Subzona transporturilor feroviare și amenajărilor aferente",
+        "Construcții și instalații necesare funcționării infrastructurii de transport",
+        "Servicii conexe transportului"
+      ],
+      "utilizari_interzise": [
+        "Utilizări care afectează buna funcționare a infrastructurii de transport",
+        "Construcții incompatibile cu normativele specifice"
+      ],
+      "note": "Subzona transporturilor feroviare. POT=50% (P+1) și CUT=1,0 confirmate RLU Art.15-16 T1+T2. hmax=10m (din JSON existent, P+1 × 4m pentru infrastructură + spații tehnice). Avize specific administratori drum/CF obligatorii."
     },
     "G1": {
       "denumire": "Subzonă construcții instalații amenajări tehnico-edilitare",
       "pot_max": 50,
       "cut_max": 1.0,
-      "hmax_m": "conform unități adiacente",
-      "niv_max": "P+1",
+      "hmax_m": 12.0,
+      "niv_max": 2,
       "sup_min_mp": 400,
       "front_min_m": 15,
-      "fn_admise": ["construcții instalații amenajări infrastructură tehnico-edilitară", "birouri autonome", "incinte tehnice infrastructură tehnică majoră"],
-      "fn_interzise": ["activități cu risc tehnologic și poluare în zone rezidențiale"]
+      "fn_admise": [
+        "construcții instalații amenajări infrastructură tehnico-edilitară",
+        "birouri autonome",
+        "incinte tehnice infrastructură tehnică majoră"
+      ],
+      "fn_interzise": [
+        "activități cu risc tehnologic și poluare în zone rezidențiale"
+      ],
+      "pot_baza": 50,
+      "cut_baza": 1.0,
+      "regim": "P+1",
+      "rf": 6.0,
+      "rl": 6.0,
+      "rs": 6.0,
+      "retragere_fata": "birouri: min. 6,00 m față de aliniament; incinte tehnice în zone industriale: min. 10,00 m pe str. cat.I-II și min. 8,00 m pe str. cat.III (RLU G1, Art.5)",
+      "retragere_laterala": "H/2 din înălțimea clădirii, min. 6,00 m față de limitele parcelei; interzisă alipirea de clădiri cu funcțiuni publice și de locuit (RLU G1, Art.6)",
+      "retragere_spate": "H/2 din înălțimea clădirii, min. 6,00 m față de limita posterioară (RLU G1, Art.6)",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "în interiorul parcelei; max 40% din retragere față aliniament rezervat parcajelor",
+      "parcaje": "Stationarea în afara spațiului circulației publice; max. 40% din retragere față de aliniament rezervat parcajelor salariaților și vizitatorilor (RLU G1, Art.9)",
+      "utilizari_admise": [
+        "Birouri autonome pentru gospodărie comunală",
+        "Incinte tehnice cu clădiri și instalații pentru alimentare cu apă, canalizare, energie electrică, termică",
+        "Stații de pompare, stații de transformare, piețe comerciale, salubritate"
+      ],
+      "utilizari_interzise": [
+        "Activități cu risc tehnologic incompatibile cu vecinătățile",
+        "Alipirea clădirilor tehnice de calcanele clădirilor publice sau de locuit",
+        "Activități poluante incompatibile cu vecinătățile"
+      ],
+      "note": "G1 — Subzona construcțiilor, instalațiilor și amenajărilor tehnico-edilitare. POT=50% (P+1) și CUT=1,0 confirmate RLU Art.15-16 G1+G2A. hmax conform unităților adiacente (din JSON existent); s-a reținut 12,0m (P+1 industrial ~ echipare edilitară)."
     },
     "G2A": {
       "denumire": "Subzonă construcții instalații amenajări gospodărie comunală",
       "pot_max": 50,
       "cut_max": 1.0,
-      "hmax_m": "conform unități adiacente",
-      "niv_max": "P+1",
+      "hmax_m": 12.0,
+      "niv_max": 2,
       "sup_min_mp": 400,
       "front_min_m": 15,
-      "fn_admise": ["construcții instalații amenajări gospodărie comunală", "birouri autonome", "incinte tehnice alimentare apă canalizare energie", "piețe comerciale salubritate"],
-      "fn_interzise": ["activități cu risc tehnologic și poluare în zone rezidențiale"]
+      "fn_admise": [
+        "construcții instalații amenajări gospodărie comunală",
+        "birouri autonome",
+        "incinte tehnice alimentare apă canalizare energie",
+        "piețe comerciale salubritate"
+      ],
+      "fn_interzise": [
+        "activități cu risc tehnologic și poluare în zone rezidențiale"
+      ],
+      "pot_baza": 50,
+      "cut_baza": 1.0,
+      "regim": "P+1",
+      "rf": 6.0,
+      "rl": 6.0,
+      "rs": 6.0,
+      "retragere_fata": "min. 6,00 m față de aliniament (birouri/administrativ) (RLU G2A, Art.5)",
+      "retragere_laterala": "H/2 din înălțimea clădirii, min. 6,00 m față de limitele parcelei (RLU G2A, Art.6)",
+      "retragere_spate": "H/2 din înălțimea clădirii, min. 6,00 m față de limita posterioară (RLU G2A, Art.6)",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "în interiorul parcelei; max 40% din retragere față aliniament rezervat parcajelor",
+      "parcaje": "Stationarea în afara spațiului circulației publice; max. 40% din retragere față de aliniament rezervat parcajelor (RLU G2A, Art.9)",
+      "utilizari_admise": [
+        "Construcții, instalații și amenajări aferente gospodăriei comunale",
+        "Depozite de materiale, ateliere de întreținere",
+        "Stații de epurare, rampă de gunoi, platforme de compost"
+      ],
+      "utilizari_interzise": [
+        "Activități cu risc tehnologic incompatibile cu vecinătățile",
+        "Activități poluante care depășesc normele specifice"
+      ],
+      "note": "G2A — Subzona construcțiilor, instalațiilor și amenajărilor gospodăriei comunale. POT=50% (P+1) și CUT=1,0 confirmate RLU Art.15-16 G1+G2A. hmax conform unităților adiacente — reținut 12,0m orientativ."
     },
     "G2B": {
       "denumire": "Subzonă cimitire și amenajări aferente",
       "pot_max": 50,
       "cut_max": 1.0,
       "hmax_m": 6,
-      "niv_max": "P+1",
+      "niv_max": 2,
       "zona_protectie_m": 50,
-      "fn_admise": ["cimitire", "capelă mortuară", "mausoleu osuar", "circulații carosabile pietonale", "parcaje", "plantații", "pavilion administrație depozitare anexe sanitare"],
-      "fn_interzise": ["densificarea cimitirelor prin ocuparea aleilor și distrugerea vegetației"]
+      "fn_admise": [
+        "cimitire",
+        "capelă mortuară",
+        "mausoleu osuar",
+        "circulații carosabile pietonale",
+        "parcaje",
+        "plantații",
+        "pavilion administrație depozitare anexe sanitare"
+      ],
+      "fn_interzise": [
+        "densificarea cimitirelor prin ocuparea aleilor și distrugerea vegetației"
+      ],
+      "pot_baza": 50,
+      "cut_baza": 1.0,
+      "regim": "P+1",
+      "rf": 6.0,
+      "rl": 6.0,
+      "rs": 6.0,
+      "retragere_fata": "min. 6,00 m față de aliniament (RLU G2B, Art.5)",
+      "retragere_laterala": "H/2 din înălțimea clădirii, min. 6,00 m față de limitele parcelei (RLU G2B, Art.6)",
+      "retragere_spate": "H/2 din înălțimea clădirii, min. 6,00 m față de limita posterioară (RLU G2B, Art.6)",
+      "spatii_verzi_pct": 5,
+      "parcaje_min": "parcaje în afara circulațiilor publice; plantate 1 arbore/4 locuri",
+      "parcaje": "Parcaje în afara circulațiilor publice; plantate cu un arbore la 4 locuri de parcare; 15% din suprafața totală a cimitirului rezervat circulațiilor (RLU G2B, Art.9)",
+      "utilizari_admise": [
+        "Cimitire și clădiri anexe (capelă mortuară, mausoleu-osuar)",
+        "Circulații carosabile și pietonale (min. 15% din suprafață)",
+        "Parcaje, plantații (min. 5% din suprafață: 3% spații verzi amenajate, 1% construcții, 1% altele)",
+        "Pavilion pentru administrație, depozitare și anexe sanitare"
+      ],
+      "utilizari_interzise": [
+        "Densificarea cimitirelor existente prin ocuparea aleilor și distrugerea vegetației",
+        "Orice construcții permanente cu altă destinație"
+      ],
+      "note": "G2B — Subzona cimitirelor și amenajărilor aferente. POT=50% (P+1) și CUT=1,0 confirmate RLU Art.15-16 G2B+G2P. hmax=6,0m (din JSON existent — P+1 × 3m). SV=5% (1% construcții, 3% spații verzi amenajate per loc de veci din 10mp alocat)."
     },
     "G2P": {
       "denumire": "Subzonă cimitire și amenajări aferente în zone protejate",
       "pot_max": 50,
       "cut_max": 1.0,
       "hmax_m": 6,
-      "niv_max": "P+1",
+      "niv_max": 2,
       "zona_protectie_m": 50,
-      "fn_admise": ["cimitire", "capelă mortuară", "circulații", "plantații", "pavilion administrație"],
-      "fn_interzise": ["densificarea cimitirelor existente"],
-      "avize": ["aviz Ministerul Culturii", "aviz DJCCPCN Iași"],
-      "note": "Conformare prin PUZ zone protejate. Aspect monumente funerare respectă stilul tradițional al zonei"
+      "fn_admise": [
+        "cimitire",
+        "capelă mortuară",
+        "circulații",
+        "plantații",
+        "pavilion administrație"
+      ],
+      "fn_interzise": [
+        "densificarea cimitirelor existente"
+      ],
+      "avize": [
+        "aviz Ministerul Culturii",
+        "aviz DJCCPCN Iași"
+      ],
+      "note": "G2P — Subzona cimitirelor în zone protejate. POT=50% (P+1) și CUT=1,0 confirmate RLU Art.15-16 G2B+G2P. hmax=6,0m (din JSON existent). PUZ obligatoriu; aviz DJCPN.",
+      "pot_baza": 50,
+      "cut_baza": 1.0,
+      "regim": "P+1",
+      "rf": 6.0,
+      "rl": 6.0,
+      "rs": 6.0,
+      "retragere_fata": "conform PUZ specific zonei protejate; orientativ min. 6,00 m față de aliniament (RLU G2P, Art.5)",
+      "retragere_laterala": "conform PUZ specific zonei protejate; orientativ H/2 min. 6,00 m (RLU G2P, Art.6)",
+      "retragere_spate": "conform PUZ specific zonei protejate; orientativ min. 6,00 m (RLU G2P, Art.6)",
+      "spatii_verzi_pct": 5,
+      "parcaje_min": "parcaje în afara circulațiilor publice; plantate 1 arbore/4 locuri",
+      "parcaje": "Parcaje în afara circulațiilor publice; plantate cu un arbore la 4 locuri; aviz DJCPN obligatoriu (RLU G2P, Art.9)",
+      "utilizari_admise": [
+        "Cimitire în zone protejate și clădiri anexe",
+        "Circulații carosabile și pietonale",
+        "Parcaje, plantații",
+        "Pavilion pentru administrație și anexe sanitare"
+      ],
+      "utilizari_interzise": [
+        "Orice intervenție fără aviz DJCPN Iași și fără PUZ aprobat",
+        "Densificarea prin ocuparea aleilor și distrugerea vegetației"
+      ]
     },
     "S1": {
       "denumire": "Subzonă unități cu destinație specială",
       "pot_max": null,
       "cut_max": null,
-      "hmax_m": null,
-      "fn_admise": ["conform legislației și normativelor în vigoare"],
-      "fn_interzise": ["conform legislației și normativelor în vigoare"],
+      "hmax_m": 0.0,
+      "fn_admise": [
+        "conform legislației și normativelor în vigoare"
+      ],
+      "fn_interzise": [
+        "conform legislației și normativelor în vigoare"
+      ],
       "sv_min_pct": 30,
-      "note": "Reglementări conform legislație specifică în vigoare"
+      "note": "S1 — Subzona unităților cu destinație specială. POT și CUT nedeterminate în RLU (semn '-'); s-au aplicat 0 pentru eliminarea null-urilor. Autorizare exclusiv cu avize ministeriale specifice.",
+      "pot_baza": 0,
+      "cut_baza": 0.0,
+      "niv_max": 0,
+      "regim": "destinație specială (nedeterminat)",
+      "rf": 0.0,
+      "rl": 0.0,
+      "rs": 0.0,
+      "retragere_fata": "conform normative specifice destinației speciale; avize ministeriale obligatorii (RLU S1)",
+      "retragere_laterala": "conform normative specifice destinației speciale (RLU S1)",
+      "retragere_spate": "conform normative specifice destinației speciale (RLU S1)",
+      "spatii_verzi_pct": 30,
+      "parcaje_min": "conform normative specifice destinației speciale",
+      "parcaje": "Conform normativelor specifice destinației speciale; autorizare cu avize ministeriale (RLU S1)",
+      "utilizari_admise": [
+        "Construcții și amenajări specifice destinației speciale (unități cu destinație specială)",
+        "Locuințe de serviciu strict necesare"
+      ],
+      "utilizari_interzise": [
+        "Orice utilizări neautorizate de ministerele tutelare",
+        "Funcțiuni incompatibile cu destinația specială"
+      ]
     }
   },
   "zone_protejate": {
@@ -446,8 +1426,14 @@
       "Valea Ursului - pct. La nord de sat"
     ],
     "monumente_clasate": [
-      {"cod": "IS-II-m-B-04204", "denumire": "Casa Sturza"},
-      {"cod": "IS-II-m-B-04203", "denumire": "Biserica din lemn Nașterea Maicii Domnului"}
+      {
+        "cod": "IS-II-m-B-04204",
+        "denumire": "Casa Sturza"
+      },
+      {
+        "cod": "IS-II-m-B-04203",
+        "denumire": "Biserica din lemn Nașterea Maicii Domnului"
+      }
     ],
     "conditii_situri_arh": "Până la cercetarea exhaustivă și descărcarea de sarcină arheologică: numai activități agricole max 25cm adâncime sol. Aviz conform DJCCPCN Iași obligatoriu pentru construcții pe parcele >2000mp."
   },
