@@ -886,18 +886,56 @@ function htmlUTR(){
       }
       // Fallback: afișăm din REGULI[u] (sistem Iași) sau mesaj neutru
       var rFb = (typeof REGULI !== 'undefined' ? REGULI : window.REGULI||{})[u] || {};
-      if (rFb.d || rFb.ua || rFb.pot) {
+      // Îmbogățim rFb cu date din d.subzone[u] dacă există (funcționează pentru orice UAT cu subzone)
+      var szFb = (d && d.subzone && d.subzone[u]) || {};
+      var fbPot = rFb.pot != null ? rFb.pot : szFb.pot_baza;
+      var fbCut = rFb.cut != null ? rFb.cut : szFb.cut_baza;
+      var fbH   = rFb.h   != null ? rFb.h   : szFb.hmax_m;
+      var fbNiv = rFb.niv != null ? rFb.niv : szFb.niv_max;
+      var fbSv  = rFb.sv  != null ? rFb.sv  : szFb.spatii_verzi_pct;
+      var fbDen = rFb.d || szFb.denumire || '';
+      var fbUa  = rFb.ua || (Array.isArray(szFb.utilizari_admise) ? szFb.utilizari_admise.join('; ') : szFb.utilizari_admise) || '';
+      var fbUc  = rFb.uc || (Array.isArray(szFb.utilizari_conditionate) ? szFb.utilizari_conditionate.join('; ') : szFb.utilizari_conditionate) || '';
+      var fbUi  = rFb.ui || (Array.isArray(szFb.utilizari_interzise) ? szFb.utilizari_interzise.join('; ') : szFb.utilizari_interzise) || '';
+      var fbRetF = szFb.retragere_fata || '';
+      var fbRetL = szFb.retragere_laterala || '';
+      var fbRetS = szFb.retragere_spate || '';
+      var fbParcaje = szFb.parcaje || '';
+      var fbSvNota  = szFb.spatii_verzi_nota || '';
+      var fbRegim   = szFb.regim || '';
+      function fbIbox(label, val, unit, color, sub) {
+        var disp = val != null ? val+unit : '—';
+        var s = sub ? '<div style="font-size:9px;color:#64748b;margin-top:1px">'+sub+'</div>' : '';
+        return '<div style="background:rgba(0,0,0,0.2);border-radius:7px;padding:6px 8px"><div style="font-size:9px;color:#64748b;margin-bottom:2px">'+label+'</div><div style="font-size:14px;font-weight:700;color:'+color+'">'+disp+'</div>'+s+'</div>';
+      }
+      var fbArea = ap.area || 0;
+      if (fbDen || fbUa || fbPot != null) {
         return '<div id="utr-indicators-card" style="background:rgba(212,175,55,0.06);border:1px solid rgba(212,175,55,0.2);border-radius:9px;padding:10px;margin-bottom:8px">'
           +'<div style="font-size:10px;color:#64748b;text-transform:uppercase;margin-bottom:4px">UTR '+esc(u||'?')+'</div>'
-          +'<div style="font-size:12px;color:#e2e8f0;font-weight:600;margin-bottom:8px">'+esc(rFb.d||'')+'</div>'
-          +(rFb.ua?'<div style="margin-bottom:6px"><div style="font-size:9px;color:#34d399;font-weight:700;text-transform:uppercase;margin-bottom:3px">\u2705 Utilizări admise</div><div style="font-size:11px;color:#cbd5e1">'+esc(rFb.ua)+'</div></div>':'')
-          +(rFb.uc?'<div style="margin-bottom:6px"><div style="font-size:9px;color:#fbbf24;font-weight:700;text-transform:uppercase;margin-bottom:3px">\u26a0\ufe0f Condiționate</div><div style="font-size:11px;color:#cbd5e1">'+esc(rFb.uc)+'</div></div>':'')
-          +(rFb.ui?'<div style="margin-bottom:6px"><div style="font-size:9px;color:#ef4444;font-weight:700;text-transform:uppercase;margin-bottom:3px">\U0001f6ab Interzise</div><div style="font-size:11px;color:#cbd5e1">'+esc(rFb.ui)+'</div></div>':'')
-          +(rFb.pot?'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:6px">'
-            +'<div style="background:rgba(0,0,0,0.2);border-radius:7px;padding:6px 8px"><div style="font-size:9px;color:#64748b">POT max</div><div style="font-size:14px;font-weight:700;color:#fbbf24">'+rFb.pot+'%</div></div>'
-            +(rFb.cut?'<div style="background:rgba(0,0,0,0.2);border-radius:7px;padding:6px 8px"><div style="font-size:9px;color:#64748b">CUT max</div><div style="font-size:14px;font-weight:700;color:#fbbf24">'+rFb.cut+'</div></div>':'')
-            +(rFb.h?'<div style="background:rgba(0,0,0,0.2);border-radius:7px;padding:6px 8px"><div style="font-size:9px;color:#64748b">H max</div><div style="font-size:14px;font-weight:700;color:#34d399">'+rFb.h+'m</div></div>':'')
-            +'</div>':'')
+          +'<div style="font-size:12px;color:#e2e8f0;font-weight:600;margin-bottom:8px">'+esc(fbDen)+'</div>'
+          +(fbUa?'<div style="margin-bottom:6px"><div style="font-size:9px;color:#34d399;font-weight:700;text-transform:uppercase;margin-bottom:3px">\u2705 Utilizări admise</div><div style="font-size:11px;color:#cbd5e1">'+esc(fbUa)+'</div></div>':'')
+          +(fbUc?'<div style="margin-bottom:6px"><div style="font-size:9px;color:#fbbf24;font-weight:700;text-transform:uppercase;margin-bottom:3px">\u26a0\ufe0f Condiționate</div><div style="font-size:11px;color:#cbd5e1">'+esc(fbUc)+'</div></div>':'')
+          +(fbUi?'<div style="margin-bottom:6px"><div style="font-size:9px;color:#ef4444;font-weight:700;text-transform:uppercase;margin-bottom:3px">\u26d4 Interzise</div><div style="font-size:11px;color:#cbd5e1">'+esc(fbUi)+'</div></div>':'')
+          +(fbPot != null
+            ?'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:6px">'
+              +fbIbox('POT max', fbPot, '%', '#fbbf24', fbArea ? Math.round(fbArea*fbPot/100)+'m² la sol' : null)
+              +fbIbox('CUT max', fbCut, '', '#fbbf24', fbArea && fbCut ? Math.round(fbArea*fbCut)+'mp ADC' : null)
+              +fbIbox('H max', fbH, 'm', '#34d399', fbNiv ? fbNiv+' niv' : (fbRegim||null))
+              +fbIbox('Sp. verzi', fbSv, '%', '#86efac', fbArea && fbSv ? Math.round(fbArea*fbSv/100)+'m²' : null)
+            +'</div>'
+            :'')
+          +((fbRetF||fbRetL||fbRetS)
+            ?'<div style="background:rgba(56,189,248,0.06);border:1px solid rgba(56,189,248,0.15);border-radius:7px;padding:8px;margin-top:6px">'
+              +'<div style="font-size:9px;color:#38bdf8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">\ud83d\udcd0 Retrageri minime</div>'
+              +'<div style="display:flex;flex-direction:column;gap:4px">'
+                +(fbRetF?'<div style="display:flex;gap:6px;align-items:baseline"><span style="font-size:9px;color:#64748b;min-width:56px">Față stradă</span><span style="font-size:11px;color:#e2e8f0">'+esc(fbRetF)+'</span></div>':'')
+                +(fbRetL?'<div style="display:flex;gap:6px;align-items:baseline"><span style="font-size:9px;color:#64748b;min-width:56px">Laterale</span><span style="font-size:11px;color:#e2e8f0">'+esc(fbRetL)+'</span></div>':'')
+                +(fbRetS?'<div style="display:flex;gap:6px;align-items:baseline"><span style="font-size:9px;color:#64748b;min-width:56px">Spate</span><span style="font-size:11px;color:#e2e8f0">'+esc(fbRetS)+'</span></div>':'')
+              +'</div>'
+              +(fbParcaje?'<div style="margin-top:6px;padding-top:6px;border-top:1px solid rgba(56,189,248,0.1)"><span style="font-size:9px;color:#64748b">\ud83c\udd7f\ufe0f Parcaje: </span><span style="font-size:11px;color:#e2e8f0">'+esc(fbParcaje)+'</span></div>':'')
+              +(fbSvNota?'<div style="margin-top:4px"><span style="font-size:9px;color:#64748b">\ud83c\udf3f Sp. verzi: </span><span style="font-size:10px;color:#86efac">'+esc(fbSvNota)+'</span></div>':'')
+            +'</div>'
+            :'')
         +'</div>';
       }
       return '<div class="'+(fnVal.status==='ok'?'ok-box':fnVal.status==='warn'?'warn-box':'err-box')+'">'+fnVal.msg+'</div>'
