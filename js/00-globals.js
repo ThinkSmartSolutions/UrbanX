@@ -1350,3 +1350,4 @@ if(typeof mapboxgl === 'undefined' || typeof mapboxgl.Map !== 'function'){
   });
   throw new Error('mapboxgl not loaded');
 }
+
