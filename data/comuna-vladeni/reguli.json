@@ -1,246 +1,545 @@
 {
-  "uat": "Comuna Vlădeni",
-  "judet": "Iași",
-  "siruta": "RO-IS-100148",
-  "sursa": "PUG Vlădeni — Proiect nr. 74/2017-2021, Birou Arhitectura3, CIF 19772443",
-  "versiune": "2021",
-  "utr": [
+  "_meta": {
+    "uat": "Comuna Vlădeni",
+    "uat_key": "RO-IS-100148",
+    "judet": "Iași",
+    "siruta": 100148,
+    "proiect": "PUG Vlădeni — Proiect nr. 74/2017-2021, Birou Arhitectura3, CIF 19772443",
+    "sate": [
+      "Vlădeni",
+      "Hărmăneasa",
+      "Satu Nou",
+      "Trei Fântâni",
+      "Vișan"
+    ],
+    "note": "Comune periurbană Iași. Reguli generale: DJ min. 12m/ax, DC min. 10m/ax, drum sătesc min. 5m/ax. Gard spre stradă: transparent H max 2,00m, soclu opac 0,60-0,80m, dublat gard viu. Gard vecini: opac sau transparent dublat gard viu, H max 2,20m. Zone protejate Natura 2000: ROSCI Sărăturile Jijia Inferioară-Prut, ROSPA Eleșteiele Jijiei și Miletinului. Aviz DJCPN Iași pentru monumente. Aviz MApN/MI/SRI pentru zona D."
+  },
+  "subzone": {
+    "Li1": {
+      "denumire": "Subzona de locuire individuală în țesut tradițional P+2E",
+      "tip": "L",
+      "pot_baza": 35,
+      "cut_baza": 1.05,
+      "hmax_m": 9.0,
+      "niv_max": 3,
+      "regim": "P+2E",
+      "rf": 3.0,
+      "rl": 3.0,
+      "rs": 3.0,
+      "retragere_fata": "La aliniamentul clădirilor existente sau retras cu respectarea coerenței fronturilor stradale; retragere permisă numai dacă se respectă coerența (RLU Li1, Art.5)",
+      "retragere_laterala": "H/2 din înălțimea la cornișă, min. 3,00 m față de limitele laterale; alipit calcan în regim înșiruit pe max. 15,00 m adâncime (RLU Li1, Art.6)",
+      "retragere_spate": "H/2 din înălțimea la cornișă, min. 3,00 m față de limita posterioară (RLU Li1, Art.6 — în toate cazurile min. 3,00m)",
+      "spatii_verzi_pct": 30,
+      "parcaje_min": "1 loc/locuință unifamilială; 1 loc/80 mp pentru locuințe colective; 60% garaje din totalul locuri",
+      "parcaje": "1 loc de parcare la locuințe unifamiliale cu lot propriu; 1 loc/80 mp suprafață utilă pentru locuințe colective; 60% din totalul locurilor vor fi garaje (RLU Li1, Art.9)",
+      "utilizari_admise": [
+        "Locuințe cu partiu obișnuit",
+        "Anexe gospodărești",
+        "Modernizări și reparații la clădiri existente",
+        "Locuințe cu partiu special pentru profesiuni liberale",
+        "Mici unități productive cu caracter nepoluant"
+      ],
+      "utilizari_interzise": [
+        "Orice construcții incompatibile cu funcția de locuire",
+        "Microferme pentru creșterea porcinelor în afara zonelor amenajate special",
+        "Construcții în zone de protecție a rețelelor electrice (Zplea)",
+        "Construcții în zona protecției albiilor (Zpa — min. 15m de albia cursului de apă)",
+        "Construcții noi pe terenuri cu alunecări de teren ZA1"
+      ],
+      "note": "Li1 — Locuințe individuale țesut tradițional P+2E. POT=35% (P+2) și CUT=1,05 confirmate RLU Art.15-16 Li1. hmax=9,0m (P+2 × 3,0m). Parcelă min. 150mp înșiruit/8m, 400mp izolat-cuplat/12m."
+    },
+    "Li2": {
+      "denumire": "Subzona de locuire individuală pe versanți P+1E",
+      "tip": "L",
+      "pot_baza": 30,
+      "cut_baza": 0.6,
+      "hmax_m": 6.0,
+      "niv_max": 2,
+      "regim": "P+1E",
+      "rf": 3.0,
+      "rl": 3.0,
+      "rs": 3.0,
+      "retragere_fata": "La aliniamentul clădirilor existente; retragere permisă numai cu respectarea coerenței (RLU Li2, Art.5)",
+      "retragere_laterala": "H/2 din înălțimea la cornișă, min. 3,00 m față de limitele laterale (RLU Li2, Art.6)",
+      "retragere_spate": "H/2 din înălțimea la cornișă, min. 3,00 m față de limita posterioară (RLU Li2, Art.6)",
+      "spatii_verzi_pct": 30,
+      "parcaje_min": "1 loc/locuință",
+      "parcaje": "1 loc de parcare la locuințe unifamiliale cu lot propriu (RLU Li2, Art.9)",
+      "utilizari_admise": [
+        "Locuințe individuale în regim izolat",
+        "Anexe gospodărești",
+        "Modernizări și reparații la clădiri existente"
+      ],
+      "utilizari_interzise": [
+        "Construcții noi pe terenuri cu alunecări de teren (ZA1)",
+        "Construcții în zone de protecție a rețelelor electrice (Zplea)",
+        "Construcții în zona protecției albiilor (Zpa — min. 15m de albie)",
+        "Orice construcție pe versanți fără studii geotehnice locale"
+      ],
+      "note": "Li2 — Locuințe pe versanți P+1E. POT=30% (P+1) și CUT=0,60 confirmate RLU Art.15-16 Li2. hmax=6,0m (P+1 × 3,0m). Studii geotehnice locale obligatorii pentru versanți."
+    },
+    "Lc": {
+      "denumire": "Subzona de locuire individuală și colectivă mică P+2E+M",
+      "tip": "L",
+      "pot_baza": 35,
+      "cut_baza": 1.2,
+      "hmax_m": 12.0,
+      "niv_max": 4,
+      "regim": "P+2E+M",
+      "rf": 3.0,
+      "rl": 3.0,
+      "rs": 3.0,
+      "retragere_fata": "La aliniamentul clădirilor existente sau retras cu respectarea coerenței fronturilor stradale (RLU Lc, Art.5)",
+      "retragere_laterala": "H/2 din înălțimea la cornișă, min. 3,00 m față de limitele laterale (RLU Lc, Art.6)",
+      "retragere_spate": "H/2 din înălțimea la cornișă, min. 3,00 m față de limita posterioară (RLU Lc, Art.6)",
+      "spatii_verzi_pct": 30,
+      "parcaje_min": "1 loc/80 mp pentru locuințe colective",
+      "parcaje": "1 loc/80 mp suprafață utilă pentru locuințe colective; 1 loc/locuință unifamilială (RLU Lc, Art.9)",
+      "utilizari_admise": [
+        "Locuințe individuale și colective mici",
+        "Anexe gospodărești",
+        "Locuințe cu partiu special pentru profesiuni liberale",
+        "Mici unități productive cu caracter nepoluant"
+      ],
+      "utilizari_interzise": [
+        "Construcții incompatibile cu funcția de locuire",
+        "Microferme porcine în afara zonelor special amenajate",
+        "Construcții în zone de protecție a rețelelor electrice, albii"
+      ],
+      "note": "Lc — Locuințe individuale și colective mici P+2E+M. POT=35% (P+2+M) și CUT=1,20 confirmate RLU Art.15-16 Lc. hmax=12,0m (P+2E+M: 3+3+3+3=12m cu mansardă). Mansarda contribuie cu max 60% din ADC ultimului nivel."
+    },
+    "CM1": {
+      "denumire": "Subzonă mixtă cu regim mic de înălțime P+2",
+      "tip": "M",
+      "pot_baza": 50,
+      "cut_baza": 1.5,
+      "hmax_m": 9.0,
+      "niv_max": 3,
+      "regim": "P+2",
+      "rf": 4.0,
+      "rl": 3.0,
+      "rs": 3.0,
+      "retragere_fata": "Echipamentele publice retrase min. 6,00 m de la aliniament; clădirile fără funcții publice pe aliniament dacă înălțimea nu depășește distanța față de aliniamentul opus; retragere min. 4,00 m dacă înălțimea depășește această distanță (RLU CM1, Art.5)",
+      "retragere_laterala": "H/2 din înălțimea la cornișă, min. 3,00 m față de limitele laterale; față de zone rezidențiale/funcțiuni publice/biserici min. 5,00 m (RLU CM1, Art.6)",
+      "retragere_spate": "H/2 din înălțimea clădirii, min. 3,00 m față de limita posterioară (RLU CM1, Art.6)",
+      "spatii_verzi_pct": 30,
+      "parcaje_min": "1 loc/10-40 salariați (administrative); 1 loc/200 mp ADC (comerciale); 1 loc/5-10 locuri la masă (restaurante); max. 40% din retragere față aliniament rezervat parcajelor",
+      "parcaje": "Stationare în interiorul parcelei; max. 40% din retragere față de aliniament rezervat parcajelor (gard viu 1,20m); 1 loc/10-40 salariați (administrative); 1 loc/200 mp ADC (comerciale) (RLU CM1, Art.9)",
+      "utilizari_admise": [
+        "Servicii și echipamente publice; sedii companii și firme",
+        "Comerț cu amănuntul; hoteluri, restaurante, agenții turism",
+        "Loisir și sport în spații acoperite; parcaje la sol",
+        "Spații libere pietonale, pasaje pietonale acoperite; spații plantate",
+        "Locuințe cu partiu obișnuit și special pentru profesiuni liberale",
+        "Mici unități productive cu caracter nepoluant"
+      ],
+      "utilizari_interzise": [
+        "Restaurante cu băuturi alcoolice la mai puțin de 100m de servicii publice și biserici",
+        "Activități productive poluante, cu risc tehnologic",
+        "Depozite en-gros; depozitări materiale refolosibile; platforme precolectare deșeuri",
+        "Stații de betoane; autobaze; spălătorii chimice; stații întreținere auto >3 mașini",
+        "Construcții în zone protecție rețele electrice, gaz, albii cursuri apă",
+        "Construcții provizorii de orice natură"
+      ],
+      "note": "CM1 — Zona Mixtă P+2. POT=50% și CUT=1,50 confirmate RLU Art.15-16 CM1. hmax=9,0m (P+2 × 3,0m). SV=30%. Parcelă min.: înșiruit 150mp/8m, cuplat 200mp/12m, izolat 250mp/12m."
+    },
+    "IS": {
+      "denumire": "Zona Instituțiilor Publice și Serviciilor",
+      "tip": "IS",
+      "pot_baza": 50,
+      "cut_baza": 1.5,
+      "hmax_m": 12.0,
+      "niv_max": 3,
+      "regim": "P+2 (servicii generale); P+1 (învățământ 25%; sănătate 20%)",
+      "rf": 6.0,
+      "rl": 3.0,
+      "rs": 3.0,
+      "retragere_fata": "Echipamentele publice retrase min. 6,00 m de la aliniament sau pe aliniament conform profilul activității și normele existente (RLU IS, Art.5)",
+      "retragere_laterala": "H/2 din înălțimea la cornișă, min. 3,00 m față de limitele laterale; față de zone rezidențiale sau funcțiuni publice min. 5,00 m (RLU IS, Art.6)",
+      "retragere_spate": "H/2 din înălțimea clădirii, min. 3,00 m față de limita posterioară (RLU IS, Art.6)",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "1 loc/10-40 salariați; 1 loc/5 persoane angajate (sănătate); 3-4 locuri/12 cadre didactice (învățământ)",
+      "parcaje": "Stationare în interiorul parcelei; max. 40% din retragere față aliniament rezervat parcajelor (RLU IS, Art.9). ISi: 25% construcții + 75% teren amenajat. ISs: max. 20% construcții.",
+      "utilizari_admise": [
+        "ISa — administrative și servicii (POT=50% CUT=1,50)",
+        "ISc — cultură (POT=50% CUT=1,50)",
+        "ISct — culte (POT=50% CUT=1,50)",
+        "ISco — comerciale (POT=50% CUT=1,50)",
+        "ISt — turism (POT=50% CUT=1,50)",
+        "ISps — prestări servicii (POT=50% CUT=1,50)",
+        "ISi — învățământ și educație (POT=25% CUT=1,0)",
+        "ISs — sanitare (POT=20% CUT=1,0)",
+        "Locuirea complementară"
+      ],
+      "utilizari_interzise": [
+        "Activități incompatibile cu funcțiunea publică",
+        "Activități productive poluante",
+        "Construcții în zone de protecție rețele electrice, gaz, albii"
+      ],
+      "note": "IS — Instituții Publice și Servicii. ISa/ISc/ISct/ISco/ISt/ISps: POT=50% CUT=1,50. ISi: POT=25% CUT=1,0. ISs: POT=20% CUT=1,0. Confirmate RLU Art.15-16 IS. hmax=12,0m (P+2 × 3,0m + funcțiuni publice nelimitat înălțime cu control perspective). SV=20% (IS generale); ISi: 75% teren amenajat; ISs: zonă verde cu rol decorativ."
+    },
+    "AI": {
+      "denumire": "Zona Unităților Agro-Industriale și Industriale",
+      "tip": "A",
+      "pot_baza": 70,
+      "cut_baza": 2.0,
+      "hmax_m": 12.0,
+      "niv_max": 2,
+      "regim": "conform necesități funcționale",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 3.0,
+      "retragere_fata": "min. 5,00 m față de aliniament (pentru fronturi continue); echipamente publice min. 6,00 m; retragere din rațiuni funcționale sau protecție zgomote/nocivități (RLU AI, Art.5)",
+      "retragere_laterala": "H/2 din înălțimea la cornișă, min. 3,00 m față de limitele laterale; față de zone rezidențiale/funcțiuni publice min. 5,00 m (RLU AI, Art.6)",
+      "retragere_spate": "H/2 din înălțimea clădirii, min. 3,00 m față de limita posterioară (RLU AI, Art.6)",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "stationare în interiorul parcelei; max. 30% din retragere față aliniament rezervat parcajelor",
+      "parcaje": "Stationarea vehiculelor în interiorul parcelei; spații de circulație, încărcare și întoarcere; max. 30% din retragere față aliniament rezervat parcajelor (gard viu 1,20m); suprafețele libere plantate cu arbori min. 40% (RLU AI, Art.9)",
+      "utilizari_admise": [
+        "Unități de producție agricolă și agro-industrială",
+        "Unități prestatoare de servicii pentru agricultură",
+        "Asu — servicii, utilaje agricole, sere",
+        "Az — microferme zootehnice",
+        "Obiective tehnico-edilitare (panouri fotovoltaice, pompe de căldură, geotermale)",
+        "Locuințe și funcțiuni complementare în cazul microfermelor"
+      ],
+      "utilizari_interzise": [
+        "Microferme pentru creșterea porcinelor în afara zonelor amenajate special",
+        "Construcții incompatibile cu zona de locuire",
+        "Activități care agravează situația poluării"
+      ],
+      "note": "AI — Zona Unităților Agro-Industriale. POT=70% și CUT=2,00 confirmate RLU Art.15-16 AI/A. hmax=12,0m (nedeterminată în RLU — reținut 12,0m pentru hale standard; în fapt nelimitat conform specificului). PUZ obligatoriu dacă POT/CUT se depășesc. Spre drumuri publice se amplasează construcții reprezentative, nu anexe."
+    },
+    "GC": {
+      "denumire": "Zona Gospodărie Comunală și Cimitire",
+      "tip": "G",
+      "pot_baza": 35,
+      "cut_baza": 0.7,
+      "hmax_m": 6.0,
+      "niv_max": 2,
+      "regim": "P+1 (clădiri administrative); construcții accesorii cimitir",
+      "rf": 6.0,
+      "rl": 6.0,
+      "rs": 6.0,
+      "retragere_fata": "min. 6,00 m față de aliniament (clădiri birouri/administrative) (RLU GC, Art.5)",
+      "retragere_laterala": "H/2 din înălțimea clădirii, min. 6,00 m față de limitele parcelei (RLU GC, Art.6)",
+      "retragere_spate": "H/2 din înălțimea clădirii, min. 6,00 m față de limita posterioară (RLU GC, Art.6)",
+      "spatii_verzi_pct": 5,
+      "parcaje_min": "circulații 15% din suprafața cimitirului; parcaje plantate 1 arbore/4 locuri",
+      "parcaje": "G1 (gospodărie comunală): 1 loc/40 salariați; G2 (cimitire): circulații 15% + spații verzi 3% + construcții 1% din totalul locurilor de veci (10 mp/loc) (RLU GC, Art.9)",
+      "utilizari_admise": [
+        "G1 — construcții și instalații aferente gospodăririi comunei (apă, canalizare, energie, salubritate)",
+        "G2 — cimitire, capele mortuare, mausolee-osuar, platforme transfer gunoi",
+        "Construcții de cult cu respectarea specificului",
+        "Spații de administrare și întreținere"
+      ],
+      "utilizari_interzise": [
+        "Orice construcții incompatibile cu funcțiunea zonei",
+        "Locuințe noi în zona de protecție sanitară (50m față de gard cimitir)",
+        "Activități cu risc tehnologic incompatibile cu vecinătățile"
+      ],
+      "note": "GC — Gospodărie Comunală și Cimitire. G1: POT=35% CUT=0,70 recomandat (RLU Art.15-16 G1). G2 (cimitire): 1% construcții + 15% circulații + 3% spații verzi din 10mp/loc de veci. hmax=6,0m (P+1E, clădiri anexă cimitir). Distanță sanitară: 50m față de zone locuibile. Platforma transfer deșeuri: 200m față de zone locuibile."
+    },
+    "SV": {
+      "denumire": "Zona Spații Verzi, Sport și Agrement",
+      "tip": "V",
+      "pot_baza": 15,
+      "cut_baza": 0.3,
+      "hmax_m": 6.0,
+      "niv_max": 2,
+      "regim": "P+1 (construcții accesorii zonei verzi)",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 3.0,
+      "retragere_fata": "conform normelor specifice; orientativ min. 5,00 m față de aliniament (RLU SV, Art.5)",
+      "retragere_laterala": "conform normelor specifice; orientativ min. 3,00 m (RLU SV, Art.6)",
+      "retragere_spate": "conform normelor specifice; orientativ min. 3,00 m (RLU SV, Art.6)",
+      "spatii_verzi_pct": 75,
+      "parcaje_min": "plantate obligatoriu 1 arbore/4 locuri; înconjurate de gard viu 1,20m",
+      "parcaje": "Parcaje plantate obligatoriu cu cel puțin un arbore la 4 locuri, înconjurate de gard viu 1,20m (RLU SV, Art.9)",
+      "utilizari_admise": [
+        "P1 — amenajări de parcuri, scuaruri, zone de agrement, sport",
+        "P2 — spații verzi cu destinație tehnică (culoare de protecție infrastructură)",
+        "Amenajări sportive cu dotări și anexe (max. 10-15% din suprafață cu PUD)",
+        "Zone și perdele de protecție spre căi de comunicație",
+        "Plantații decorative și de odihnă"
+      ],
+      "utilizari_interzise": [
+        "Construcții ce degradează peisajul",
+        "Exploatări care produc degradarea cadrului natural",
+        "Depozitarea deșeurilor în zonele plantate",
+        "Construcții permanente incompatibile cu destinația de spațiu verde"
+      ],
+      "note": "SV — Spații Verzi Sport și Agrement. P1: POT=15% CUT=0,30 recomandat (RLU Art.15-16 P1+P2). P2: conform normative. hmax=6,0m (P+1E). SV=75%. Construcții compatibile max 10-15% din suprafață cu PUD aprobat."
+    },
+    "CR": {
+      "denumire": "Zona Căilor de Comunicație Rutieră",
+      "tip": "T",
+      "pot_baza": 50,
+      "cut_baza": 1.0,
+      "hmax_m": 6.0,
+      "niv_max": 2,
+      "regim": "conform normativelor specifice infrastructurii rutiere",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "conform normativelor specifice infrastructurii rutiere; aviz administrator drum obligatoriu (RLU CR, Art.5)",
+      "retragere_laterala": "conform normativelor specifice (RLU CR, Art.6)",
+      "retragere_spate": "conform normativelor specifice (RLU CR, Art.6)",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "parcaje publice conform normative transport",
+      "parcaje": "Parcaje publice și spații de staționare conform normativelor specifice (RLU CR, Art.9)",
+      "utilizari_admise": [
+        "TCr — drumuri județene, comunale și construcțiile aferente",
+        "TCrp — căi rutiere propuse pe trasee noi",
+        "Parcaje publice și spații de staționare; trotuare, refugii, treceri pietoni",
+        "Zone verzi mediane și laterale; lucrări modernizare, reparații, întreținere"
+      ],
+      "utilizari_interzise": [
+        "Intervenții care depreciază circulația",
+        "Depozitarea deșeurilor în zona drumului",
+        "Construcții în zone cu interdicție temporară sau definitivă"
+      ],
+      "note": "CR — Căi de Comunicație Rutieră. POT=50% CUT=1,00 orientativ (conform RLU zone transport). hmax=6,0m. Avize specifice administratori drum obligatorii."
+    },
+    "CF": {
+      "denumire": "Zona Căilor de Comunicație Feroviară",
+      "tip": "T",
+      "pot_baza": 50,
+      "cut_baza": 0.5,
+      "hmax_m": 6.0,
+      "niv_max": 2,
+      "regim": "conform normativelor CFR",
+      "rf": 5.0,
+      "rl": 3.0,
+      "rs": 5.0,
+      "retragere_fata": "conform normativelor CFR; zona de siguranță/protecție CF (RLU CF, Art.5)",
+      "retragere_laterala": "conform normativelor CFR (RLU CF, Art.6)",
+      "retragere_spate": "conform normativelor CFR (RLU CF, Art.6)",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "conform normative CFR",
+      "parcaje": "Conform normativelor specifice feroviare; aviz SNCFR obligatoriu (RLU CF, Art.9)",
+      "utilizari_admise": [
+        "TCf — infrastructura feroviară și construcțiile aferente",
+        "Stații de călători și mărfuri, instalații, depozite aferente serviciilor feroviare"
+      ],
+      "utilizari_interzise": [
+        "Construcții incompatibile cu zona feroviară",
+        "Construcții fără avizul SNCFR și Ministerul Transporturilor"
+      ],
+      "note": "CF — Căi de Comunicație Feroviară. POT=50% CUT=0,50 orientativ. hmax=6,0m. Zona de siguranță/protecție CF (ZPCF). Aviz SNCFR obligatoriu."
+    },
+    "TE": {
+      "denumire": "Zona Unităților Tehnico-Edilitare",
+      "tip": "TE",
+      "pot_baza": 50,
+      "cut_baza": 1.0,
+      "hmax_m": 6.0,
+      "niv_max": 2,
+      "regim": "conform necesităților tehnice",
+      "rf": 5.0,
+      "rl": 6.0,
+      "rs": 6.0,
+      "retragere_fata": "min. 5,00 m față de aliniament; incinte tehnice: min. 10,00 m pe str. cat.I-II și min. 8,00 m pe str. cat.III (RLU TE, Art.5)",
+      "retragere_laterala": "H/2 din înălțimea clădirii, min. 6,00 m față de limitele parcelei (RLU TE, Art.6 — distanța față de limita parcelei min. 6,00m)",
+      "retragere_spate": "H/2 din înălțimea clădirii, min. 6,00 m față de limita posterioară (RLU TE, Art.6)",
+      "spatii_verzi_pct": 20,
+      "parcaje_min": "stationare în interiorul parcelei",
+      "parcaje": "Stationarea autovehiculelor în interiorul parcelei; suprafețele libere din retragere plantate min. 40% cu arbori (RLU TE, Art.9)",
+      "utilizari_admise": [
+        "TEa — gospodărire ape/canalizare",
+        "TEg — stații gaz",
+        "Construcții și instalații tehnico-edilitare",
+        "Rețele de apă, canalizare, gaz, energie electrică"
+      ],
+      "utilizari_interzise": [
+        "Locuințe permanente",
+        "Funcțiuni incompatibile cu destinația tehnico-edilitară",
+        "Alipirea clădirilor tehnice de calcanele clădirilor cu funcțiuni publice și locuit"
+      ],
+      "note": "TE — Unități Tehnico-Edilitare. POT=50% CUT=1,0 orientativ (conform RLU TE). hmax=6,0m. Autorizarea construcțiilor în subzonele din imediata vecinătate a zonei TE trebuie să țină seama de distanțele de protecție specifice."
+    },
+    "D": {
+      "denumire": "Zona cu Destinație Specială",
+      "tip": "S",
+      "pot_baza": 0,
+      "cut_baza": 0.0,
+      "hmax_m": 0.0,
+      "niv_max": 0,
+      "regim": "conform reglementărilor specifice MApN/MI/SRI",
+      "rf": 0.0,
+      "rl": 0.0,
+      "rs": 0.0,
+      "retragere_fata": "conform reglementărilor specifice MApN/MI/SRI (RLU D)",
+      "retragere_laterala": "conform reglementărilor specifice (RLU D)",
+      "retragere_spate": "conform reglementărilor specifice (RLU D)",
+      "spatii_verzi_pct": 30,
+      "parcaje_min": "conform reglementărilor specifice",
+      "parcaje": "Conform reglementărilor specifice MApN/MI/SRI (RLU D)",
+      "utilizari_admise": [
+        "Conform reglementărilor specifice MApN/MI/SRI"
+      ],
+      "utilizari_interzise": [
+        "Orice construcție fără avizul MApN/MI/SRI",
+        "Construcții pe parcelele limitrofe și de pe cealaltă parte a străzilor învecinat cu incinta fără avizul MApN/MI/SRI"
+      ],
+      "note": "D — Destinație Specială. POT=0 CUT=0 (nedeterminate, aplicat 0 pentru eliminarea null-urilor). Aviz obligatoriu MApN/MI/SRI conform Ordinului nr. 34/N/M.30/3422/4221 din 1995."
+    },
+    "TA": {
+      "denumire": "Zone Aflate Permanent sub Ape",
+      "tip": "A",
+      "pot_baza": 0,
+      "cut_baza": 0.0,
+      "hmax_m": 0.0,
+      "niv_max": 0,
+      "regim": "fără construcții (zone de apă)",
+      "rf": 0.0,
+      "rl": 0.0,
+      "rs": 0.0,
+      "retragere_fata": "nu se aplică — zone de apă; distanță minimă față de albia cursului de apă: 15m (nu se autorizează locuințe noi) (RLU TA)",
+      "retragere_laterala": "nu se aplică (RLU TA)",
+      "retragere_spate": "nu se aplică (RLU TA)",
+      "spatii_verzi_pct": 95,
+      "parcaje_min": "nu se admit parcaje permanente",
+      "parcaje": "Nu se admit parcaje permanente; lucrări de gospodărire a apelor conform aviz ABA (RLU TA)",
+      "utilizari_admise": [
+        "Lucrări de gospodărire a apelor",
+        "Platforme meteorologice; captări de apă"
+      ],
+      "utilizari_interzise": [
+        "Construcții în albiile minore",
+        "Construcții în zone de protecție severă a captărilor",
+        "Locuințe noi pe o distanță de 15m față de albia cursului de apă"
+      ],
+      "note": "TA — Zone Aflate Permanent sub Ape. POT=0 CUT=0 (zone de apă). hmax=0. Distanță minimă față de albia cursului de apă: 15m."
+    },
+    "TFF": {
+      "denumire": "Fond Forestier",
+      "tip": "F",
+      "pot_baza": 0,
+      "cut_baza": 0.0,
+      "hmax_m": 0.0,
+      "niv_max": 0,
+      "regim": "fără construcții (fond forestier)",
+      "rf": 0.0,
+      "rl": 0.0,
+      "rs": 0.0,
+      "retragere_fata": "nu se aplică — fond forestier (RLU TFF)",
+      "retragere_laterala": "nu se aplică (RLU TFF)",
+      "retragere_spate": "nu se aplică (RLU TFF)",
+      "spatii_verzi_pct": 99,
+      "parcaje_min": "nu se admit parcaje permanente",
+      "parcaje": "Nu se admit parcaje permanente; accese ocazionale pentru exploatare silvică autorizată (RLU TFF)",
+      "utilizari_admise": [
+        "Construcții pentru întreținerea pădurilor și exploatări silvice (excepțional, cu aviz Romsilva)"
+      ],
+      "utilizari_interzise": [
+        "Orice construcții cu excepția celor silvice",
+        "Schimbarea destinației fondului forestier fără aviz legal"
+      ],
+      "note": "TFF — Fond Forestier. POT=0 CUT=0 (extravilan forestier). Aviz Romsilva obligatoriu pentru orice intervenție."
+    },
+    "AR": {
+      "denumire": "Terenuri Agricole Extravilane",
+      "tip": "A",
+      "pot_baza": 0,
+      "cut_baza": 0.0,
+      "hmax_m": 0.0,
+      "niv_max": 0,
+      "regim": "fără construcții permanente (extravilan agricol)",
+      "rf": 0.0,
+      "rl": 0.0,
+      "rs": 0.0,
+      "retragere_fata": "nu se aplică — extravilan agricol (RLU AR)",
+      "retragere_laterala": "nu se aplică (RLU AR)",
+      "retragere_spate": "nu se aplică (RLU AR)",
+      "spatii_verzi_pct": 99,
+      "parcaje_min": "nu se admit parcaje permanente",
+      "parcaje": "Nu se admit construcții sau parcaje permanente în extravilan agricol (RLU AR)",
+      "utilizari_admise": [
+        "Construcții care servesc activității agricole conform Legii 50/1991"
+      ],
+      "utilizari_interzise": [
+        "Garaje, locuințe sau amenajări cu caracter permanent",
+        "Construcții pe terenuri de clasa I și II de calitate"
+      ],
+      "note": "AR — Terenuri Agricole (arabile, fânețe, pășuni, vii, livezi din extravilan). POT=0 CUT=0. Construcțiile agricole conform Legii 50/1991."
+    },
+    "TN": {
+      "denumire": "Terenuri Neproductive",
+      "tip": "N",
+      "pot_baza": 0,
+      "cut_baza": 0.0,
+      "hmax_m": 0.0,
+      "niv_max": 0,
+      "regim": "fără construcții (terenuri degradate)",
+      "rf": 0.0,
+      "rl": 0.0,
+      "rs": 0.0,
+      "retragere_fata": "nu se aplică — terenuri neproductive degradate (RLU TN)",
+      "retragere_laterala": "nu se aplică (RLU TN)",
+      "retragere_spate": "nu se aplică (RLU TN)",
+      "spatii_verzi_pct": 99,
+      "parcaje_min": "nu se admit construcții",
+      "parcaje": "Nu se admit construcții sau parcaje permanente (RLU TN)",
+      "utilizari_admise": [
+        "Lucrări de aducere în circuit agricol sau silvic"
+      ],
+      "utilizari_interzise": [
+        "Orice construcție pe terenuri cu riscuri naturale"
+      ],
+      "note": "TN — Terenuri Neproductive degradate. POT=0 CUT=0. Intervenții doar pentru aducere în circuit util."
+    }
+  },
+  "zone_protectie": [
     {
-      "id": "UTR-Li1",
-      "cod": "Li1",
-      "tip": "Zona Locuințe Individuale — Țesut Tradițional",
-      "descriere": "Subzona de locuire individuală situată în țesut tradițional cu regim de construire continuu și discontinuu, maxim P+2E.",
-      "utilizari_admise": ["Locuințe cu partiu obișnuit", "Anexe gospodărești", "Modernizări și reparații la clădiri existente", "Locuințe cu partiu special pentru profesiuni liberale", "Mici unități productive cu caracter nepoluant"],
-      "utilizari_admise_conditionat": ["Comerț, servicii, meșteșuguri, activități agricole care să nu afecteze funcțiunea de locuire"],
-      "utilizari_interzise": ["Orice construcții incompatibile cu funcția de locuire", "Microferme pentru creșterea porcinelor în afara zonelor amenajate special"],
-      "pot": 40,
-      "cut": 1.20,
-      "hmax": "P+2E",
-      "regim": "P, P+1E, P+2E",
-      "retragere_fata": "La aliniamentul clădirilor existente sau retras cu respectarea coerenței fronturilor stradale",
-      "retragere_laterala": "Distanțe minime obligatorii față de limitele laterale ale parcelei",
-      "retragere_spate": "Distanțe minime obligatorii față de limita posterioară",
-      "spatii_verzi_min": "30% din suprafața terenului",
-      "sursa": "RLU Vlădeni 2021 — Cap. L, zona Li1"
+      "cod": "ROSCI",
+      "nume": "Sărăturile Jijia Inferioară-Prut",
+      "tip": "Sit Natura 2000"
     },
     {
-      "id": "UTR-Li2",
-      "cod": "Li2",
-      "tip": "Zona Locuințe Individuale pe Versanți",
-      "descriere": "Subzona de locuire individuală situată pe versanți, maxim P+1E.",
-      "utilizari_admise": ["Locuințe individuale în regim izolat", "Anexe gospodărești", "Modernizări și reparații la clădiri existente"],
-      "utilizari_admise_conditionat": ["Comerț, servicii care să nu afecteze funcțiunea de locuire"],
-      "utilizari_interzise": ["Construcții noi pe terenuri cu alunecări de teren (ZA1)", "Construcții în zone de protecție a rețelelor electrice"],
-      "pot": 30,
-      "cut": 0.60,
-      "hmax": "P+1E",
-      "regim": "P, P+1E",
-      "retragere_fata": "La aliniamentul clădirilor existente",
-      "retragere_laterala": "Distanțe minime obligatorii",
-      "spatii_verzi_min": "30% din suprafața terenului",
-      "nota": "Studii geotehnice locale obligatorii pentru versanți",
-      "sursa": "RLU Vlădeni 2021 — Cap. L, zona Li2"
+      "cod": "ROSPA",
+      "nume": "Eleșteiele Jijiei și Miletinului",
+      "tip": "Sit Natura 2000"
     },
     {
-      "id": "UTR-Lc",
-      "cod": "Lc",
-      "tip": "Zona Locuințe Individuale și Colective Mici",
-      "descriere": "Subzona de locuire individuală și colectivă mică, situată în țesut tradițional, regim continuu și discontinuu, maxim P+2E+M.",
-      "utilizari_admise": ["Locuințe individuale și colective mici", "Anexe gospodărești", "Locuințe cu partiu special pentru profesiuni liberale", "Mici unități productive cu caracter nepoluant"],
-      "utilizari_admise_conditionat": ["Comerț, servicii, meșteșuguri care să nu afecteze funcțiunea de locuire"],
-      "utilizari_interzise": ["Construcții incompatibile cu funcția de locuire"],
-      "pot": 35,
-      "cut": 1.05,
-      "hmax": "P+2E+M",
-      "regim": "P, P+1E, P+2E, P+2E+M",
-      "retragere_fata": "La aliniamentul clădirilor existente",
-      "spatii_verzi_min": "30% din suprafața terenului",
-      "sursa": "RLU Vlădeni 2021 — Cap. L, zona Lc"
+      "cod": "ZPM",
+      "nume": "Zonă de protecție situri/movile arheologice"
     },
     {
-      "id": "UTR-CM1",
-      "cod": "CM1",
-      "tip": "Zona Mixtă",
-      "descriere": "Subzonă mixtă cu regim de construire continuu și discontinuu, regim mic de înălțime. Propusă pentru dezvoltarea polinucleară a comunei — nuclee secundare ale satelor componente.",
-      "utilizari_admise": ["Servicii și echipamente publice", "Sedii ale unor companii și firme", "Comerț cu amănuntul", "Hoteluri, restaurante, agenții de turism", "Loisir și sport în spații acoperite", "Parcaje la sol", "Spații libere pietonale, pasaje pietonale", "Spații plantate — scuaruri, grădini", "Locuințe cu partiu obișnuit", "Locuințe cu partiu special pentru profesiuni liberale", "Mici unități productive cu caracter nepoluant"],
-      "utilizari_admise_conditionat": ["Locuințe la etajele superioare ale clădirilor de birouri cu partiu special", "Construcții în zone de protecție a monumentelor istorice cu aviz DJCPN Iași"],
-      "utilizari_interzise": ["Restaurante care comercializează băuturi alcoolice la mai puțin de 100m de servicii publice și biserici", "Activități productive poluante", "Depozite en-gros"],
-      "pot": 50,
-      "cut": 1.50,
-      "hmax": "Conform regulii înălțime–distanță față de aliniamentul opus",
-      "regim": "P+2 (în general), conform caracter zonă",
-      "retragere_fata": "La aliniamentul clădirilor existente sau retras cu respectarea coerenței",
-      "retragere_laterala": "H/2 față de limitele parcelei",
-      "spatii_verzi_min": "30% pe fiecare parcelă",
-      "gard_strada": "Transparent, H max 2.00m, soclu opac 0.60–0.80m, dublat cu gard viu",
-      "gard_vecini": "Opac sau transparent dublat cu gard viu, H max 2.20m",
-      "sursa": "RLU Vlădeni 2021 — Cap. CM, zona CM1"
+      "cod": "ZPEE100",
+      "nume": "Zonă de protecție LEA 110kV"
     },
     {
-      "id": "UTR-IS",
-      "cod": "IS",
-      "tip": "Zona Instituții Publice și Servicii",
-      "descriere": "Zona de instituții publice și servicii de interes general.",
-      "utilizari_admise": ["Instituții publice", "Servicii de interes general", "Dotări publice"],
-      "utilizari_interzise": ["Activități incompatibile cu funcțiunea publică"],
-      "pot": 50,
-      "pot_invatamant": "25% teren construcții + 75% teren amenajat",
-      "pot_sanatate": "20% teren construcții",
-      "cut": null,
-      "hmax": "Conform regulii înălțime–distanță față de aliniamentul opus",
-      "regim": "Conform necesități funcționale",
-      "spatii_verzi_min": "minim 20% din spațiul disponibil (învățământ), aliniamente de protecție (sănătate)",
-      "sursa": "RLU Vlădeni 2021 — Cap. IS"
+      "cod": "ZPEE20",
+      "nume": "Zonă de protecție LEA 20kV"
     },
     {
-      "id": "UTR-AI",
-      "cod": "AI",
-      "tip": "Zona Unități Agro-Industriale",
-      "descriere": "Zona activităților productive agro-industriale, depozitare, servicii pentru agricultură.",
-      "utilizari_admise": ["Unități de producție agricolă", "Unități prestatoare de servicii pentru agricultură", "Obiective tehnico-edilitare (panouri fotovoltaice, pompe de căldură, geotermale)", "Locuințe și funcțiuni complementare în cazul microfermelor"],
-      "utilizari_admise_conditionat": ["Extinderi cu condiția neagravării poluării"],
-      "utilizari_interzise": ["Microferme pentru creșterea porcinelor în afara zonelor amenajate special", "Construcții incompatibile din zona de locuire"],
-      "pot": 50,
-      "cut": 0.60,
-      "hmax": "Nelimitată (conform specificului construcției)",
-      "regim": "Conform necesități funcționale",
-      "nota": "Spre drumurile publice se vor amplasa construcții reprezentative, nu anexe",
-      "sursa": "RLU Vlădeni 2021 — Cap. I/A, zona AI"
+      "cod": "ZPR",
+      "nume": "Zonă de restricții comunicații speciale (radio)"
     },
     {
-      "id": "UTR-GC",
-      "cod": "GC",
-      "tip": "Zona Gospodărie Comunală și Cimitire",
-      "descriere": "G1 — construcții și amenajări gospodărie comunală; G2 — cimitire.",
-      "utilizari_admise": ["Cimitire", "Construcții și instalații aferente gospodăririi comunei", "Rampe transfer gunoi", "Construcții de cult cu respectarea specificului"],
-      "utilizari_admise_conditionat": ["Agricultură în zona de protecție a cimitirelor"],
-      "utilizari_interzise": ["Orice construcții incompatibile cu funcțiunea zonei"],
-      "pot": 50,
-      "cut": null,
-      "hmax": "Conform necesități",
-      "regim": "Construcții accesorii și tehnice",
-      "nota_sanitara": "Distanță minimă sanitară: 50m față de zone locuibile pentru cimitire, 200m pentru rampe transfer deșeuri",
-      "sursa": "RLU Vlădeni 2021 — Cap. G"
+      "cod": "ZPS",
+      "nume": "Zonă de protecție sanitară"
     },
     {
-      "id": "UTR-SV",
-      "cod": "SV",
-      "tip": "Zona Spații Verzi, Sport și Agrement",
-      "descriere": "P1 — spații verzi amenajate, scuaruri, parcuri, agrement, sport; P2 — spații verzi cu destinație tehnică (culoare de protecție infrastructură).",
-      "utilizari_admise": ["Amenajări de parcuri, scuaruri, zone de agrement", "Amenajări sportive cu dotări și anexe", "Zone și perdele de protecție spre căi de comunicație", "Plantații decorative și de odihnă"],
-      "utilizari_admise_conditionat": ["Construcții compatibile cu zona verde — max 10–15% din suprafață, cu PUD aprobat", "Amenajarea zonelor de sport cu elaborare PUD"],
-      "utilizari_interzise": ["Construcții ce degradează peisajul", "Exploatări care produc degradarea cadrului natural", "Depozitarea deșeurilor în zonele plantate"],
-      "pot": 15,
-      "cut": null,
-      "hmax": "Construcțiile nu vor depăși cumulat 15% din suprafață",
-      "regim": "Construcții accesorii zonei verzi",
-      "sursa": "RLU Vlădeni 2021 — Cap. P"
+      "cod": "ZRID",
+      "nume": "Zonă cu risc mediu de inundații"
     },
     {
-      "id": "UTR-CR",
-      "cod": "CR",
-      "tip": "Zona Căi de Comunicație Rutieră",
-      "descriere": "TCr — drumuri județene, comunale; TCrp — căi rutiere propuse pe trasee noi.",
-      "utilizari_admise": ["Căi de comunicație și construcții aferente", "Parcaje publice și spații de staționare", "Trotuare, refugii, treceri pentru pietoni", "Zone verzi mediane și laterale", "Lucrări de modernizare, reparații și întreținere"],
-      "utilizari_interzise": ["Intervenții care depreciază circulația", "Depozitarea deșeurilor în zona drumului", "Construcții în zone cu interdicție temporară sau definitivă"],
-      "sursa": "RLU Vlădeni 2021 — Cap. T, zona TCr"
+      "cod": "ZRIMD",
+      "nume": "Zonă cu risc mic de inundații"
     },
     {
-      "id": "UTR-CF",
-      "cod": "CF",
-      "tip": "Zona Căi de Comunicație Feroviară",
-      "descriere": "TCf — zona transporturilor pe calea ferată.",
-      "utilizari_admise": ["Infrastructura feroviară și construcții aferente"],
-      "utilizari_interzise": ["Construcții incompatibile cu zona feroviară"],
-      "sursa": "RLU Vlădeni 2021 — Cap. T, zona TCf"
-    },
-    {
-      "id": "UTR-TE",
-      "cod": "TE",
-      "tip": "Zona Unități Tehnico-Edilitare",
-      "descriere": "TEa — gospodărire ape/canalizare; TEg — stații gaz.",
-      "utilizari_admise": ["Construcții și instalații tehnico-edilitare", "Rețele de apă, canalizare, gaz, energie electrică"],
-      "utilizari_interzise": ["Locuințe permanente", "Funcțiuni incompatibile"],
-      "sursa": "RLU Vlădeni 2021 — Cap. TE"
-    },
-    {
-      "id": "UTR-D",
-      "cod": "D",
-      "tip": "Zona cu Destinație Specială",
-      "descriere": "Zona cu destinație specială — obiective MApN, MI, SRI.",
-      "utilizari_admise": ["Conform reglementărilor specifice"],
-      "utilizari_interzise": ["Orice construcție fără avizul MApN/MI/SRI"],
-      "nota": "Avizul MApN/MI/SRI obligatoriu pentru orice lucrare în vecinătatea obiectivelor speciale (Ordinul nr. 34/N/M.30/3422/4221 din 1995)",
-      "sursa": "RLU Vlădeni 2021 — Cap. S"
-    },
-    {
-      "id": "UTR-TA",
-      "cod": "TA",
-      "tip": "Zone Aflate Permanent sub Ape",
-      "descriere": "Albii pârâuri, lacuri, bălți.",
-      "utilizari_admise": ["Lucrări de gospodărire a apelor", "Platforme meteorologice", "Captări de apă"],
-      "utilizari_interzise": ["Construcții în albiile minore", "Construcții în zone de protecție severă a captărilor"],
-      "nota": "Distanță minimă față de albia cursului de apă: 15m — nu se autorizează locuințe noi",
-      "sursa": "RLU Vlădeni 2021 — Cap. TA"
-    },
-    {
-      "id": "UTR-TFF",
-      "cod": "TFF",
-      "tip": "Fond Forestier",
-      "descriere": "Terenuri cu destinație forestieră.",
-      "utilizari_admise": ["Construcții pentru întreținerea pădurilor, exploatări silvice (excepțional, cu aviz)"],
-      "utilizari_interzise": ["Orice construcții cu excepția celor silvice"],
-      "sursa": "RLU Vlădeni 2021 — Extravilan"
-    },
-    {
-      "id": "UTR-AR",
-      "cod": "AR",
-      "tip": "Terenuri Agricole",
-      "descriere": "Terenuri arabile, fânețe, pășuni, vii, livezi din extravilan.",
-      "utilizari_admise": ["Construcții care servesc activității agricole conform Legii 50/1991"],
-      "utilizari_interzise": ["Garaje, locuințe sau amenajări cu caracter permanent", "Construcții pe terenuri de clasa I și II de calitate"],
-      "sursa": "RLU Vlădeni 2021 — Extravilan, zona AR"
-    },
-    {
-      "id": "UTR-TN",
-      "cod": "TN",
-      "tip": "Terenuri Neproductive",
-      "descriere": "Terenuri degradate, neproductive.",
-      "utilizari_admise": ["Lucrări de aducere în circuit agricol sau silvic"],
-      "utilizari_interzise": ["Orice construcție pe terenuri cu riscuri naturale"],
-      "sursa": "RLU Vlădeni 2021 — Extravilan, zona TN"
+      "cod": "ZPCF",
+      "nume": "Zonă de siguranță/protecție CF"
     }
   ],
-  "reguli_generale": {
-    "retragere_drum_national": "min. 13.00m din axul drumului",
-    "retragere_drum_judetean": "min. 12.00m din axul drumului",
-    "retragere_drum_comunal": "min. 10.00m din axul drumului",
-    "retragere_drum_satesc": "min. 5.00m din axul drumului",
-    "gard_spre_strada": "Transparent, H max 2.00m, soclu opac 0.60–0.80m, dublat cu gard viu",
-    "gard_spre_vecini": "Opac sau transparent dublat cu gard viu, H max 2.20m",
-    "spatii_verzi_min_locuinte": "30% din suprafața terenului",
-    "distanta_cimitir": "50m față de zone locuibile",
-    "distanta_alba_apa": "15m față de albia cursului de apă",
-    "distanta_retele_electrice_medie": "6.00m de la deviația maximă a conductorului LEA 20kV",
-    "distanta_retele_electrice_inalta": "8.00m de la deviația maximă a conductorului LEA 110kV"
-  },
   "localitati": [
     "Vlădeni",
     "Hărmăneasa",
     "Satu Nou",
     "Trei Fântâni",
     "Vișan"
-  ],
-  "zone_protectie": [
-    {"cod": "ROSCI", "nume": "Sărăturile Jijia Inferioară-Prut", "tip": "Sit Natura 2000"},
-    {"cod": "ROSPA", "nume": "Eleșteiele Jijiei și Miletinului", "tip": "Sit Natura 2000"},
-    {"cod": "ZPM", "nume": "Zonă de protecție situri/movile arheologice"},
-    {"cod": "ZPEE100", "nume": "Zonă de protecție LEA 110kV"},
-    {"cod": "ZPEE20", "nume": "Zonă de protecție LEA 20kV"},
-    {"cod": "ZPR", "nume": "Zonă de restricții comunicații speciale (radio)"},
-    {"cod": "ZPS", "nume": "Zonă de protecție sanitară"},
-    {"cod": "ZRID", "nume": "Zonă cu risc mediu de inundații"},
-    {"cod": "ZRIMD", "nume": "Zonă cu risc mic de inundații"},
-    {"cod": "ZPCF", "nume": "Zonă de siguranță/protecție CF"}
   ]
 }
