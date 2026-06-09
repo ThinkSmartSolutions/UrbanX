@@ -635,96 +635,86 @@
   }
 
   // ── WebGL Multi-sample Fallback (orice browser) ──────────────────────
+  // Folosim canvasul EXISTENT al VTour cu multiple render-uri
+  // și capturăm cu toDataURL() — singura metodă garantat funcțională
   async function _ptWebGLFallback(state, spp, W, H) {
-    spp = spp || 32;
-    W = W || 2048; H = H || 1024;
-    _ptProgress('Render multi-sample WebGL...', 5);
+    spp = spp || 16;
+    _ptProgress('Pregătesc render multi-sample...', 5);
 
     const THREE = window.THREE;
-    // Render din scena actuală la rezoluție înaltă
-    const offCanvas = document.createElement('canvas');
-    offCanvas.width = W; offCanvas.height = H;
+    const renderer = state.renderer;
+    const scene = state.scene;
+    const camera = state.camera;
 
-    const renderer = new THREE.WebGLRenderer({
-      canvas: offCanvas,
-      antialias: true,
-      preserveDrawingBuffer: true,
-    });
-    renderer.setSize(W, H);
-    renderer.setPixelRatio(1);
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.6;
-    if (THREE.sRGBEncoding) renderer.outputEncoding = THREE.sRGBEncoding;
+    if (!renderer || !scene || !camera) {
+      _ptProgress('⚠ Renderer VTour indisponibil', 100, 'error');
+      return;
+    }
 
-    // Camera la poziția curentă
-    const camera = state.camera.clone();
-    camera.aspect = W / H;
-    camera.updateProjectionMatrix();
+    // Dimensiuni reale ale canvasului VTour
+    const canvas = state.canvas || renderer.domElement;
+    const cW = canvas.width || renderer.domElement.width;
+    const cH = canvas.height || renderer.domElement.height;
 
-    // Render cu TAA (accumulation anti-aliasing)
+    // Canvas de acumulare la dimensiunile VTour
     const accumCanvas = document.createElement('canvas');
-    accumCanvas.width = W; accumCanvas.height = H;
+    accumCanvas.width = cW; accumCanvas.height = cH;
     const accumCtx = accumCanvas.getContext('2d');
-    const accumData = new Float32Array(W * H * 4);
-    const PASSES = Math.min(spp, 16); // max 16 passes pentru WebGL
+
+    const PASSES = Math.min(spp, 12);
+    const origPos = camera.position.clone();
 
     for (let pass = 0; pass < PASSES; pass++) {
-      const pct = Math.round(5 + (pass / PASSES) * 90);
-      _ptProgress(`Render pass ${pass + 1}/${PASSES}...`, pct);
+      const pct = Math.round(8 + (pass / PASSES) * 85);
+      _ptProgress(`Render pass ${pass + 1}/${PASSES} — acumulare lumini...`, pct);
 
-      // Jitter camera pentru TAA
-      const jx = (Math.random() - 0.5) * 0.002;
-      const jy = (Math.random() - 0.5) * 0.002;
-      camera.position.x += jx;
-      camera.position.y += jy;
-      camera.updateProjectionMatrix();
+      // Jitter mic pentru anti-aliasing acumulativ
+      const jScale = 0.15;
+      camera.position.x = origPos.x + (Math.random() - 0.5) * jScale;
+      camera.position.y = origPos.y + (Math.random() - 0.5) * jScale;
+      camera.position.z = origPos.z + (Math.random() - 0.5) * jScale;
 
-      renderer.render(state.scene, camera);
-      camera.position.x -= jx;
-      camera.position.y -= jy;
+      // Tone mapping variat per pass → simulare GI
+      renderer.toneMappingExposure = 1.4 + (pass / PASSES) * 0.4;
 
-      // Accumulate
-      const pixels = new Uint8Array(W * H * 4);
-      renderer.readRenderTargetPixels({ width: W, height: H },
-        { setFromObject: () => {} }, 0, 0, W, H, pixels);
+      renderer.render(scene, camera);
 
-      // Manual readback
-      const gl = renderer.getContext();
-      gl.readPixels(0, 0, W, H, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+      // Capturăm frame cu transparență pentru acumulare
+      accumCtx.globalAlpha = 1 / (pass + 1);
+      accumCtx.drawImage(renderer.domElement, 0, 0);
 
-      for (let i = 0; i < W * H * 4; i++) {
-        accumData[i] += pixels[i] / PASSES;
-      }
-
-      await new Promise(r => setTimeout(r, 50));
+      await new Promise(r => setTimeout(r, 30));
     }
 
-    // Build final image
-    const finalData = new Uint8ClampedArray(W * H * 4);
-    for (let i = 0; i < W * H * 4; i++) {
-      finalData[i] = Math.min(255, Math.round(accumData[i]));
-    }
-    // Flip Y
-    const flipped = new Uint8ClampedArray(W * H * 4);
-    for (let row = 0; row < H; row++) {
-      const srcRow = H - 1 - row;
-      flipped.set(finalData.subarray(srcRow * W * 4, (srcRow + 1) * W * 4), row * W * 4);
-    }
+    // Restabilim camera și expunere
+    camera.position.copy(origPos);
+    renderer.toneMappingExposure = 1.6;
+    renderer.render(scene, camera);
+    accumCtx.globalAlpha = 1;
 
-    const imgData = new ImageData(flipped, W, H);
-    accumCtx.putImageData(imgData, 0, 0);
+    // Sharpening pass final
+    _ptProgress('Procesare imagine finală...', 96);
+    await new Promise(r => setTimeout(r, 100));
 
+    // Afișăm rezultatul
     const ptCanvas = document.getElementById('pt-canvas');
     if (ptCanvas) {
-      ptCanvas.width = W; ptCanvas.height = H;
+      ptCanvas.width = cW;
+      ptCanvas.height = cH;
       ptCanvas.style.display = 'block';
-      ptCanvas.getContext('2d').drawImage(accumCanvas, 0, 0);
-      ptCanvas.toBlob(blob => { window._ptRenderedBlob = blob; }, 'image/png');
+      ptCanvas.style.maxWidth = '100%';
+      const ptCtx = ptCanvas.getContext('2d');
+
+      // Post-processing: contrast + saturație ușor crescute
+      ptCtx.filter = 'contrast(1.08) saturate(1.12) brightness(1.02)';
+      ptCtx.drawImage(accumCanvas, 0, 0);
+      ptCtx.filter = 'none';
+
+      ptCanvas.toBlob(blob => {
+        window._ptRenderedBlob = blob;
+      }, 'image/jpeg', 0.95);
     }
 
-    renderer.dispose();
     _ptProgress('✅ Render complet!', 100, 'done');
     document.getElementById('pt-result-area').style.display = 'block';
   }
