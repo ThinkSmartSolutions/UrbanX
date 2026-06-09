@@ -182,8 +182,36 @@
   // ── Mobilier per tip cameră ────────────────────────────────────────────
   async function _furnishRoom(group, r, cx, baseY, cz, stil, loader, THREE) {
     let count = 0;
+    const fnKey = window._RV?.fn || 'rez';
 
     switch (r.t) {
+      // ── BIROURI ──────────────────────────────────────────────────────
+      case 'office':
+      case 'reception': {
+        // Birou + scaun + monitor
+        count += await _placeModel(group, 'coffee_table', cx, baseY, cz - r.h*0.25, stil, loader, THREE, {
+          scaleOverride: Math.min(r.w*0.3, 1.4), rotY: 0,
+        });
+        // Scaun conferință
+        count += await _placeModel(group, 'chair', cx - r.w*0.15, baseY, cz + r.h*0.1, stil, loader, THREE, {
+          scaleOverride: 0.55, rotY: Math.PI,
+        });
+        break;
+      }
+
+      // ── HOTEL ───────────────────────────────────────────────────────
+      case 'bedroom':
+      case 'bedroom2':
+      case 'bedroom3': {
+        // Pat hotel sau dormitor rezidențial
+        count += await _placeModel(group, 'bed_double', cx, baseY, cz, stil, loader, THREE, {
+          scaleOverride: Math.min(r.w / 3.5, 0.85),
+          rotY: r.h > r.w ? 0 : Math.PI / 2,
+        });
+        break;
+      }
+
+      // ── LIVING REZIDENTIAL ──────────────────────────────────────────
       case 'living':
       case 'dining': {
         // Sofa — poziție pe peretele sudic

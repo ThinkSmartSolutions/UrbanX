@@ -40,6 +40,15 @@
   function _fix1_MixV2Override() {
     // Suprascrie _rvMixV2 cu logică corectă
     window._rvMixV2 = function (P) {
+      // PRIORITATE 1 — selectorul UI din relevee (_RV.fn setat de _rvSetFn)
+      const rvFn = window._RV?.fn || '';
+      if (rvFn === 'birouri')  return 'birouri';
+      if (rvFn === 'hotel')    return 'hotel';
+      if (rvFn === 'com')      return 'com';
+      if (rvFn === 'rez')      return 'rezCol';
+      if (rvFn && rvFn.startsWith('mixt')) return 'mixt';
+
+      // PRIORITATE 2 — P.fn din parcela sau AEDIS
       const fnStr = String(P?.fn || window.AEDIS?.fn || '').toLowerCase();
       const b = _RV?.building;
       const niv = b?.niv || P?.niv || 4;
@@ -63,6 +72,25 @@
 
     // Patch și window._rvMix pentru compatibilitate
     window._rvMix = window._rvMixV2;
+  // ── Sync _rvSetFn cu _rvMixV2 ────────────────────────────────────────────
+  // Când utilizatorul schimbă funcțiunea din UI, re-generăm planul + mobilierul
+  const _origSetFn = window._rvSetFn;
+  if (_origSetFn && !window._SETFN_SYNC_HOOKED) {
+    window._SETFN_SYNC_HOOKED = true;
+    window._rvSetFn = function (fnKey) {
+      _origSetFn.apply(this, arguments);
+      // Re-trigger mobilier VTour după schimbare funcțiune
+      if (window._FURNITURE_LOADED) {
+        window._FURNITURE_LOADED = false;
+        setTimeout(() => window._furnitureReload?.(), 800);
+      }
+      // Re-trigger PBR materials după schimbare stil/funcțiune
+      if (window.VTour?._state?.scene) {
+        setTimeout(() => window._upgradeMaterials?.(), 600);
+      }
+    };
+  }
+
   }
 
   // ═══════════════════════════════════════════════════════════════════════
