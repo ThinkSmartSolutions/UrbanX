@@ -378,8 +378,11 @@
     // ── Build VTour scene dacă nu e activă ──────────────────────────────
     _tfProgress('Construiesc scena 3D…', 8);
     const scene = await _ensureVTourScene();
-    const anchor = window.VTour?._state?._anchor;
-    if (!scene || !anchor) throw new Error('Scena 3D nu poate fi construită');
+    // Anchor din 36-vtour-fixes.js (funcționează în orice context)
+    const anchor = (typeof window._rvGetAnchor === 'function')
+      ? window._rvGetAnchor()
+      : window.VTour?._state?._anchor;
+    if (!scene || !anchor) throw new Error('Scena 3D nu poate fi construită. Deschideți viewer-ul 3D înainte.');
 
     // ── Colectează camerele principale ──────────────────────────────────
     const rooms = fl.rects.filter(r => !r.bal && r.apt >= 0 && r.w * r.h >= 4 &&
@@ -551,11 +554,17 @@
 
   // ── Ensure VTour scene is built ──────────────────────────────────────────
   async function _ensureVTourScene() {
-    // Dacă VTour e activ, folosim scena lui
+    // Dacă VTour e activ și are scenă, o folosim direct
     const vState = window.VTour?._state;
     if (vState?.scene && vState.active) return vState.scene;
 
-    // Altfel, construim o scenă minimală din V3D
+    // Folosim funcția din 36-vtour-fixes.js care gestionează toate contextele
+    if (typeof window._buildTurFotoScene === 'function') {
+      const scene = window._buildTurFotoScene();
+      if (scene) return scene;
+    }
+
+    // Fallback local: construim o scenă minimală din V3D
     const THREE = window.THREE;
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0xc5dff0);
