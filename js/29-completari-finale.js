@@ -1077,7 +1077,7 @@
       const menu = document.getElementById('ux-export-menu');
       if (!menu || document.getElementById('ux-cert-item')) return false;
       const btn = document.createElement('button');
-      btn.id = 'ux-cert-item'; btn.className = 'ux-exp-item';
+      btn.id = 'ux-cert-exp-item'; btn.className = 'ux-exp-item';
       btn.innerHTML = '<span style="font-size:14px">🏛</span>Certificat Conformitate Urbanistică';
       btn.onclick = () => { menu.classList.remove('open'); window._rvExportCertificat?.(); };
       menu.appendChild(btn);

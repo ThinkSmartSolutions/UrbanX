@@ -458,7 +458,7 @@
 
       const items = [
         { icon: '📄', label: 'PDF Planșe complet', fn: '_rvExportPDF', group: 'Planșe' },
-        { icon: '🖼', label: 'PNG planșa curentă', fn: '_rvExportPNG', group: 'Planșe' },
+        { icon: '🖼', label: 'PNG planșa curentă', fn: '_rvExport', group: 'Planșe' },
         { icon: '🔷', label: 'SVG vectorial', fn: '_exportCurrentSVG', group: 'Planșe' },
         { icon: '📐', label: 'DXF (AutoCAD)', fn: '_exportCurrentDXF', group: 'Planșe' },
         { divider: true },

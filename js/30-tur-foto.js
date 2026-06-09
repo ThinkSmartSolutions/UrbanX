@@ -645,6 +645,7 @@
   // ── Launch Pannellum viewer ──────────────────────────────────────────────
   function _launchPannellumTour(config, level) {
     _loadPannellumCSS();
+    _injectMobileCSS();
 
     if (document.getElementById('tf-tour-overlay')) {
       document.getElementById('tf-tour-overlay').remove();
@@ -1144,6 +1145,32 @@
   // ═══════════════════════════════════════════════════════════════════════
   // PANNELLUM LOADER
   // ═══════════════════════════════════════════════════════════════════════
+
+
+  // Mobile CSS for tour overlay
+  function _injectMobileCSS() {
+    if (document.getElementById('tf-mobile-css')) return;
+    const s = document.createElement('style');
+    s.id = 'tf-mobile-css';
+    s.textContent = `
+      @media (max-width: 768px) {
+        #tf-launcher-overlay > div > div[style*="grid-template-columns:1fr 1fr 1fr"] {
+          grid-template-columns: 1fr !important;
+        }
+        #tf-tour-overlay > div:first-child { flex-wrap: wrap; gap: 6px; padding: 8px 10px; }
+        #tf-scene-bar button { padding: 5px 8px; font-size: 9px; }
+        #tf-minimap { width: 90px; height: 72px; bottom: 54px; right: 8px; }
+        #tf-room-title { font-size: 10px; max-width: 55%; }
+        #ux-tour-bottombar { flex-wrap: wrap; gap: 5px; padding: 6px 8px; }
+        .ux-tour-btn { padding: 5px 8px; font-size: 9.5px; }
+      }
+      @media (max-width: 480px) {
+        #tf-launcher-overlay h2 { font-size: 17px !important; }
+        #tf-ai-loading { font-size: 10px; padding: 6px 12px; }
+      }
+    `;
+    document.head.appendChild(s);
+  }
 
   function _loadPannellumCSS() {
     if (document.getElementById('pannellum-css')) return;

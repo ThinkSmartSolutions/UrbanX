@@ -61,7 +61,7 @@
       grp.textContent = 'BIM Structural';
       menu.appendChild(div); menu.appendChild(grp);
       const btn = document.createElement('button');
-      btn.id = 'ifc-bim-item'; btn.className = 'ux-exp-item';
+      btn.id = 'ifc-bim-exp-item'; btn.className = 'ux-exp-item';
       btn.innerHTML = '<span style="font-size:14px">🏗</span>IFC 2x3 BIM Structural Complet';
       btn.title = 'Export IFC cu structură completă: pereți, planșee, stâlpi, grinzi, acoperiș, ferestre, uși, fundații';
       btn.onclick = () => { menu.classList.remove('open'); window._rvExportIFCStructural(); };

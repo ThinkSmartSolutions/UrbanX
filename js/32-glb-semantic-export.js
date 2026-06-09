@@ -93,7 +93,7 @@
       menu.appendChild(grp);
 
       const btn = document.createElement('button');
-      btn.id = 'glb-sem-item'; btn.className = 'ux-exp-item';
+      btn.id = 'glb-sem-exp-item'; btn.className = 'ux-exp-item';
       btn.innerHTML = '<span style="font-size:14px">📦</span>GLB Semantic (Blender / Revit / Speckle)';
       btn.title = 'Export GLB cu userData IFC pe fiecare mesh + JSON metadate + rezumat cantități';
       btn.onclick = () => { menu.classList.remove('open'); window._rvExportGLBSemantic(); };
