@@ -78,9 +78,10 @@
   }
 
   waitReady(() => {
-    _injectTurFotoButton();
+    // Butonul ✨ este injectat de 27-tur-sync.js (sursa unică)
+    // _injectTurFotoButton() dezactivat pentru a evita duplicarea
     _injectSettingsPanel();
-    console.log('[TurFoto v1] ✅ loaded — preview + Replicate AI + Luma Gaussian Splat');
+    console.log('[TurFoto v1] ✅ loaded — preview + Replicate AI | buton gestionat de 27-tur-sync');
   });
 
   // ═══════════════════════════════════════════════════════════════════════
@@ -306,14 +307,29 @@
     if (!b) return;
 
     if (level === 'foto' && !CFG.replicateKey) { alert('Configurează Replicate API key mai întâi.'); return; }
-    if (level === 'splat' && !CFG.lumaKey)      { alert('Configurează Luma AI API key mai întâi.'); return; }
+    if (level === 'splat') {
+      // Delegăm întotdeauna la 34-gaussian-splat-auto.js
+      if (typeof window._gsLaunch === 'function') {
+        STATE.rendering = false;
+        document.getElementById('tf-launcher-overlay')?.remove();
+        window._gsLaunch();
+        return;
+      }
+      if (!CFG.lumaKey) { alert('Configurează Luma AI API key mai întâi.'); return; }
+    }
     if (STATE.rendering) return;
 
     STATE.rendering = true;
     STATE.activeLevel = level;
 
     _tfProgress('Pregătesc scena 3D…', 5);
-    document.getElementById('tf-progress-area').style.display = 'block';
+    const _pa = document.getElementById('tf-progress-area');
+    if (_pa) _pa.style.display = 'block';
+    else {
+      // Launcher overlay not open yet - open it first
+      if (typeof _showTurFotoLauncher === 'function') _showTurFotoLauncher();
+      setTimeout(() => { const pa2 = document.getElementById('tf-progress-area'); if(pa2) pa2.style.display='block'; }, 400);
+    }
 
     try {
       if (level === 'preview' || level === 'foto') {
@@ -1211,5 +1227,9 @@
       bath:'🚿', hall:'🚪', core:'🪜', balcon:'🌅', commercial:'🏪', office:'💼' };
     return M[t] || '🏠';
   }
+
+
+  // Expose global functions for external use
+  window._showTurFotoLauncher = _showTurFotoLauncher;
 
 })();

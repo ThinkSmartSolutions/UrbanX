@@ -131,9 +131,12 @@
     const b = window._RV?.building;
     const P = window._RV?.parcelParams;
 
-    if (!window.V3D?.scene && !b) {
-      alert('Deschideți Viewer 3D mai întâi (click pe parcelă → butonul 3D).'); return;
+    if (!window.V3D?.scene) {
+      if (typeof ss === 'function') ss('⚠ Deschideți Viewer 3D înainte de export GLB (click pe parcelă → buton Urban3D)');
+      alert('Viewer 3D nu este deschis.\n\nPaș:\n1. Click pe parcela dorită în hartă\n2. Click buton "Urban3D →" din panoul dreapta\n3. Așteptați să se genereze modelul 3D\n4. Apăsați GLB+BIM'); 
+      return;
     }
+    if (!b) { alert('Generați releveele mai întâi.'); return; }
     if (typeof ss === 'function') ss('⏳ Tagare semantică meshuri + export GLB…');
 
     try {
@@ -194,7 +197,7 @@
     const b = window._RV?.building;
     const P = window._RV?.parcelParams;
     const A = window.AEDIS || {};
-    const _AC = typeof _rvGetAEDISConfig === 'function' ? _rvGetAEDISConfig() : {};
+    const _AC = (typeof _rvGetAEDISConfig === 'function' ? _rvGetAEDISConfig() : null) || {};
     const fl0 = window._RV?.floors?.[0];
 
     const metadata = {
@@ -226,7 +229,7 @@
       if (!obj.isMesh && !obj.isGroup) return;
 
       // Deducem tipul IFC din poziție + culoare + bbox
-      const semantic = _deduceSemantic(obj, b, P, hNiv, totalH, A, fl0);
+      const semantic = _deduceSemantic(obj, b, P, hNiv, totalH, A, fl0, _AC);
       if (!semantic) return;
 
       // Setăm userData pe mesh
@@ -292,7 +295,7 @@
     return metadata;
   }
 
-  function _deduceSemantic(obj, b, P, hNiv, totalH, A, fl0) {
+  function _deduceSemantic(obj, b, P, hNiv, totalH, A, fl0, _AC) {
     if (!obj || (!obj.isMesh && !obj.isGroup)) return null;
 
     const pos = obj.position;
@@ -461,7 +464,7 @@
 
   function _buildSummary(meta, b, P) {
     const A = window.AEDIS || {};
-    const _AC = typeof _rvGetAEDISConfig === 'function' ? _rvGetAEDISConfig() : {};
+    const _AC = (typeof _rvGetAEDISConfig === 'function' ? _rvGetAEDISConfig() : null) || {};
     const lines = [];
 
     lines.push('═══════════════════════════════════════════════════════');

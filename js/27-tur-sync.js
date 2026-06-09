@@ -99,9 +99,17 @@
     turBtn.onmouseover = () => turBtn.style.background = 'linear-gradient(135deg,rgba(168,85,247,.38),rgba(59,130,246,.25))';
     turBtn.onmouseout  = () => turBtn.style.background = 'linear-gradient(135deg,rgba(168,85,247,.22),rgba(59,130,246,.15))';
     turBtn.onclick = () => {
-      if (typeof window._showTurFotoLauncher === 'function') window._showTurFotoLauncher();
-      else if (typeof window._tfSelectLevel === 'function') window._tfSelectLevel('preview');
-      else { alert('Modulul 30-tur-foto.js nu este încărcat. Verificați consola.'); }
+      // Deschide launcher-ul care creează overlay-ul înainte de _tfSelectLevel
+      if (typeof window._showTurFotoLauncher === 'function') {
+        window._showTurFotoLauncher();
+      } else {
+        // Fallback: creăm un overlay minimal direct
+        if (typeof ss === 'function') ss('⚠ Modulul tur foto se încarcă... reîncercați în 2s');
+        setTimeout(() => {
+          if (typeof window._showTurFotoLauncher === 'function') window._showTurFotoLauncher();
+          else if (typeof ss === 'function') ss('⚠ 30-tur-foto.js nu este disponibil în această pagină');
+        }, 2000);
+      }
     };
     row.appendChild(turBtn);
 
