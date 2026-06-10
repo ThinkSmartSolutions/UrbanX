@@ -968,4 +968,144 @@
   // Fix parcare
   _fixParcareLogica();
 
+  // ═══════════════════════════════════════════════════════════════════
+  // FIX PARCARE — logică corectă: nu în spatele clădirii fără acces
+  // ═══════════════════════════════════════════════════════════════════
+
+  function _fixParcareLogica() {
+    if (window._PARCARE_LOGIC_PATCHED) return;
+    window._PARCARE_LOGIC_PATCHED = true;
+
+    // Patch _rvRenderSituatieV3 — redesenăm parcarea corect
+    const tryPatch = () => {
+      const orig = window._rvRenderSituatieV3;
+      if (!orig) return false;
+
+      window._rvRenderSituatieV3 = function (b) {
+        orig.apply(this, arguments);
+        setTimeout(() => {
+          try {
+            const cv = document.getElementById('rv-canvas');
+            if (!cv) return;
+            const ctx = cv.getContext('2d');
+            _redrawParcareCorect(ctx, b || window._RV?.building);
+          } catch (e) {}
+        }, 120);
+      };
+      return true;
+    };
+
+    if (!tryPatch()) {
+      const obs = new MutationObserver(() => { if (tryPatch()) obs.disconnect(); });
+      obs.observe(document.body, { childList: true, subtree: true });
+      setTimeout(() => obs.disconnect(), 30000);
+    }
+  }
+
+  function _redrawParcareCorect(ctx, b) {
+    if (!b?.P) return;
+    const { P, bW, bD, niv } = b;
+    const SC = Math.min((window._RV?.scale || 8) * 0.6, 6);
+    const PAD = 80, CTX = 50;
+    const pW = P.W * SC, pH = P.D * SC;
+    const ox = PAD + CTX, oy = PAD + CTX;
+    const rl = (P.rl || 3) * SC, rf = (P.rf || 3) * SC;
+    const bX = ox + (P.W - bW) * SC / 2;
+    const bY = oy + (P.D - bD) * SC / 2;
+    const isNorth = !P.frontDir || P.frontDir === 'N';
+
+    // Ștergem locurile greșite din spate
+    const wrongY = bY + bD * SC + 2;
+    const wrongH = 5 * SC + 24;
+    if (wrongY + wrongH < oy + pH - 4) {
+      ctx.fillStyle = 'rgba(254,252,232,.6)';
+      ctx.fillRect(ox + rl, wrongY, pW - rl * 2, wrongH);
+    }
+
+    const hasSubsol = (b.subsolNiv || 0) > 0;
+    if (hasSubsol) return; // rampa deja desenată de codul original
+
+    // Calcul spațiu frontal disponibil
+    const frontSpaceM = (bY - oy - rf) / SC;
+    const culoarNec = 7.5, locD = 5.0, locW = 2.5;
+    const canParkFront = frontSpaceM >= (locD + culoarNec);
+
+    const parcNec = Math.ceil(((b.sdaTotal || bW * bD * niv) / 70));
+
+    if (canParkFront) {
+      // Parcare frontală cu culoar de manevră
+      const nLoc = Math.min(parcNec, Math.floor((pW - rl * 2 - 20) / (locW * SC + 2)));
+      if (nLoc <= 0) return;
+
+      const startX = bX;
+      const culoarY = isNorth ? (oy + rf * SC * 0.3) : (bY + bD * SC + rf * 0.3);
+      const locY    = isNorth ? culoarY + culoarNec * SC : culoarY - locD * SC;
+
+      // Culoar manevră
+      ctx.fillStyle = 'rgba(251,191,36,.12)';
+      ctx.strokeStyle = 'rgba(180,100,20,.25)'; ctx.lineWidth = 0.6;
+      ctx.setLineDash([3, 3]);
+      ctx.strokeRect(startX, culoarY, nLoc * (locW * SC + 2), culoarNec * SC);
+      ctx.fillRect(startX, culoarY, nLoc * (locW * SC + 2), culoarNec * SC);
+      ctx.setLineDash([]);
+      ctx.fillStyle = '#92400E'; ctx.font = '5.5px IBM Plex Mono'; ctx.textAlign = 'center';
+      ctx.fillText('CULOAR MANEVRĂ 7.5m — NP067/2002',
+        startX + nLoc * (locW * SC + 2) / 2, culoarY + culoarNec * SC / 2 + 2);
+      ctx.textAlign = 'left';
+
+      // Locuri parcare
+      for (let i = 0; i < nLoc; i++) {
+        const lx = startX + i * (locW * SC + 2);
+        ctx.fillStyle = 'rgba(241,245,249,.9)';
+        ctx.strokeStyle = '#94A3B8'; ctx.lineWidth = 0.8;
+        ctx.fillRect(lx, locY, locW * SC, locD * SC);
+        ctx.strokeRect(lx, locY, locW * SC, locD * SC);
+        ctx.fillStyle = '#334155'; ctx.font = 'bold 7px IBM Plex Mono'; ctx.textAlign = 'center';
+        ctx.fillText(String(i + 1), lx + locW * SC / 2, locY + locD * SC / 2 + 2);
+        ctx.textAlign = 'left';
+      }
+
+      ctx.fillStyle = '#1E3A5F'; ctx.font = '5.5px IBM Plex Mono';
+      ctx.fillText('Parcare la sol — ' + nLoc + ' loc. (2.5×5m)',
+        startX, locY + (isNorth ? locD * SC + 9 : -5));
+
+      // Dacă mai lipsesc locuri → banner subsol
+      if (nLoc < parcNec) {
+        _drawSubsolBanner(ctx, bX, bY, bW * SC, bD * SC, parcNec - nLoc);
+      }
+    } else {
+      // Nu există spațiu → parcare la sol imposibilă
+      _drawNoParcareMsg(ctx, bX, bY, bW * SC, parcNec);
+    }
+  }
+
+  function _drawNoParcareMsg(ctx, bX, bY, bW, parcNec) {
+    const msgX = bX + bW / 2, msgY = bY - 12;
+    const tw = 195, th = 40;
+    ctx.fillStyle = 'rgba(254,226,226,.96)';
+    ctx.strokeStyle = '#DC2626'; ctx.lineWidth = 1.2;
+    ctx.fillRect(msgX - tw / 2, msgY - th, tw, th);
+    ctx.strokeRect(msgX - tw / 2, msgY - th, tw, th);
+    ctx.fillStyle = '#991B1B'; ctx.font = 'bold 7px IBM Plex Mono'; ctx.textAlign = 'center';
+    ctx.fillText('⚠ PARCARE LA SOL IMPOSIBILĂ', msgX, msgY - th + 12);
+    ctx.fillStyle = '#7F1D1D'; ctx.font = '6px IBM Plex Mono';
+    ctx.fillText('Spațiu insuficient culoar manevră 7.5m', msgX, msgY - th + 24);
+    ctx.fillText('→ OBLIGATORIU SUBSOL (' + parcNec + ' locuri)', msgX, msgY - th + 35);
+    ctx.textAlign = 'left';
+  }
+
+  function _drawSubsolBanner(ctx, bX, bY, bW, bD, deficit) {
+    const x = bX + bW / 2, y = bY + bD + 14;
+    const tw = 170;
+    ctx.fillStyle = 'rgba(254,243,199,.96)';
+    ctx.strokeStyle = '#D97706'; ctx.lineWidth = 1;
+    ctx.fillRect(x - tw / 2, y, tw, 26);
+    ctx.strokeRect(x - tw / 2, y, tw, 26);
+    ctx.fillStyle = '#92400E'; ctx.font = 'bold 6.5px IBM Plex Mono'; ctx.textAlign = 'center';
+    ctx.fillText('⬇ SUBSOL: încă ' + deficit + ' locuri necesare', x, y + 11);
+    ctx.fillStyle = '#78350F'; ctx.font = '5.5px IBM Plex Mono';
+    ctx.fillText('conf. NP 067/2002 — rampă acces frontal', x, y + 21);
+    ctx.textAlign = 'left';
+  }
+
 })();
