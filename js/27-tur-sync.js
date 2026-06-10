@@ -751,10 +751,11 @@
     style.textContent = `
       /* ── VIEWER 3D MOBIL ─────────────────────────────────── */
       @media (max-width: 768px) {
-        /* Butoane duplicate ascunse */
-        #vtour-launch-btn, #vtour-fp-btn,
-        #ts-tur-foto-btn, #gs-splat-btn,
-        #gs-splat-btn { display:none !important; }
+        /* Butoane duplicate ascunse — PERMANENT cu !important */
+        #vtour-launch-btn,
+        #vtour-fp-btn,
+        #ts-tur-foto-btn,
+        #gs-splat-btn { display:none !important; visibility:hidden !important; }
 
         /* Slider soare ascuns */
         #v3d-sun-row { display:none !important; }
@@ -831,6 +832,22 @@
       #ts-viewer-action-bar button:active { opacity:.7; transform:scale(.95); }
     `;
     document.head.appendChild(style);
+
+    // ── Observer permanent: ascunde butoane duplicate imediat ce apar ───
+    const _hideIds = ['vtour-launch-btn','vtour-fp-btn','ts-tur-foto-btn','gs-splat-btn'];
+    const _hideDuplicates = () => {
+      _hideIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el && el.style.display !== 'none') {
+          el.style.display = 'none';
+          el.style.visibility = 'hidden';
+        }
+      });
+    };
+    const _dupObs = new MutationObserver(_hideDuplicates);
+    _dupObs.observe(document.body, { childList: true, subtree: true });
+    // Rulăm imediat
+    _hideDuplicates();
 
     // ── Bara de jos se injectează NUMAI în viewer-ul 3D ──────────────
     // Monitorizăm deschiderea viewer-ului
@@ -954,6 +971,93 @@
     const canvas = viewerEl.querySelector('#v3d-canvas, canvas');
     if (canvas) canvas.style.paddingBottom = '64px';
   }
+
+
+
+
+
+  // ── FIX: Dollhouse cu camere auto din AEDIS când lipsesc planșele ────
+  function _patchDollhouseEmpty() {
+    if (window._DOLLHOUSE_EMPTY_PATCHED) return;
+    window._DOLLHOUSE_EMPTY_PATCHED = true;
+    const origStart = window.VTour && window.VTour.start;
+    if (origStart && !window._DH_START_PATCHED) {
+      window._DH_START_PATCHED = true;
+      window.VTour.start = function () {
+        _ensureRVFloors();
+        return origStart.apply(this, arguments);
+      };
+    }
+  }
+
+  function _ensureRVFloors() {
+    var RV = window._RV;
+    var A  = window.AEDIS;
+    if (!A) return;
+    if (RV && Array.isArray(RV.floors) && RV.floors.length > 0 &&
+        RV.floors[0] && RV.floors[0].rects && RV.floors[0].rects.length > 0) return;
+
+    var corp = (Array.isArray(A.corpuri) && A.corpuri[0]) || {};
+    var niv  = parseInt(corp.niv)  || parseInt(A.niv)  || 3;
+    var bW   = (RV && RV.building && RV.building.bW) ? RV.building.bW : (corp.bW || 18);
+    var bD   = (RV && RV.building && RV.building.bD) ? RV.building.bD : (corp.bD || 14);
+    var hNiv = parseFloat(corp.hNiv) || 3.0;
+    var fn   = A.fn || 'rezidential_colectiv';
+
+    if (!window._RV) window._RV = { floors: [], floorIdx: 0 };
+    var _RV2 = window._RV;
+    if (!_RV2.floors) _RV2.floors = [];
+
+    var syntheticFloors = [];
+    for (var f = 0; f < niv; f++) {
+      syntheticFloors.push(_genFloor(f, bW, bD, fn));
+    }
+    _RV2.floors = syntheticFloors;
+
+    if (!_RV2.building) {
+      _RV2.building = {
+        bW: bW, bD: bD, niv: niv,
+        scArea: bW * bD, sdaTotal: bW * bD * niv,
+        P: { hn: hNiv, W: bW + 6, D: bD + 6, area: (bW + 6) * (bD + 6) },
+        cores: [{ x: bW * 0.4, y: bD * 0.32, w: bW * 0.18, h: bD * 0.28 }],
+        subsolNiv: 0,
+      };
+    }
+    console.log('[VTour] Dollhouse sintetic: ' + niv + ' etaje (' + bW.toFixed(1) + 'x' + bD.toFixed(1) + 'm, fn=' + fn + ')');
+  }
+
+  function _genFloor(fIdx, bW, bD, fn) {
+    var rects = [];
+    var cX = bW * 0.38, cY = bD * 0.32;
+    var cW = bW * 0.20, cH = bD * 0.30;
+    rects.push({ t:'core', x:cX, y:cY, w:cW, h:cH, apt:-1, lbl:'Scari+Lift', bal:false });
+
+    if (fn === 'birouri' || fn === 'comercial') {
+      rects.push({ t:'office',  x:0.3,        y:0.3,     w:bW*0.35, h:bD*0.55, apt:1, lbl:'Birou', bal:false });
+      rects.push({ t:'living',  x:bW*0.36+cW, y:0.3,     w:bW*0.28, h:bD*0.35, apt:1, lbl:'Sala conferinte', bal:false });
+      rects.push({ t:'hall',    x:0.3,        y:bD*0.65, w:bW*0.65, h:bD*0.18, apt:-1, lbl:'Hol', bal:false });
+      rects.push({ t:'bath',    x:bW*0.70,    y:0.3,     w:bW*0.22, h:bD*0.28, apt:1, lbl:'Sanitare', bal:false });
+    } else {
+      var nApt = bW > 16 ? 2 : 1;
+      var aptW = (bW - cW - 0.8) / nApt;
+      for (var a = 0; a < nApt; a++) {
+        var aptX   = a < 1 ? 0.3 : (cX + cW + 0.3);
+        var aptIdx = a + 1;
+        var hasBalc = !!(window.AEDIS && window.AEDIS.hasBalcoane !== false && fIdx > 0);
+        rects.push({ t:'living',  x:aptX,           y:0.3,     w:aptW*0.48, h:bD*0.40, apt:aptIdx, lbl:'Living',    bal:false });
+        rects.push({ t:'bedroom', x:aptX+aptW*0.50, y:0.3,     w:aptW*0.44, h:bD*0.38, apt:aptIdx, lbl:'Dormitor',  bal:false });
+        rects.push({ t:'kitchen', x:aptX,           y:bD*0.42, w:aptW*0.40, h:bD*0.28, apt:aptIdx, lbl:'Bucatarie', bal:false });
+        rects.push({ t:'bath',    x:aptX+aptW*0.42, y:bD*0.42, w:aptW*0.24, h:bD*0.24, apt:aptIdx, lbl:'Baie',      bal:false });
+        rects.push({ t:'hall',    x:aptX,           y:bD*0.72, w:aptW*0.62, h:bD*0.18, apt:aptIdx, lbl:'Hol',       bal:false });
+        if (hasBalc) {
+          rects.push({ t:'balcon', x:aptX, y:-0.65, w:aptW*0.55, h:0.65, apt:aptIdx, lbl:'Balcon', bal:true });
+        }
+      }
+    }
+    return { floorIdx: fIdx, rects: rects, doors: [], wins: [] };
+  }
+
+  _patchDollhouseEmpty();
 
 
 })();
