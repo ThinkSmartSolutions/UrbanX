@@ -31,7 +31,13 @@
 (function () {
   'use strict';
 
-  const GLTFE_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/exporters/GLTFExporter.js';
+  // Multiple CDN fallbacks pentru GLTFExporter r128
+  const GLTFE_CDNS = [
+    'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/exporters/GLTFExporter.js',
+    'https://unpkg.com/three@0.128.0/examples/js/exporters/GLTFExporter.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/exporters/GLTFExporter.js',
+  ];
+  const GLTFE_CDN = GLTFE_CDNS[0]; // compatibilitate
   const JSZIP_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
 
   // ── Mapare culoare mesh → tip IFC (din viewer3D) ──────────────────────────
@@ -573,19 +579,42 @@ Document orientativ — UrbanX TSS·FG`;
   function _loadGLTFExporter() {
     return new Promise((resolve) => {
       if (window.THREE?.GLTFExporter) { resolve(); return; }
+
+      // Dacă scriptul e deja în curs de încărcare, așteptăm
       if (document.getElementById('gltfe-script')) {
         const check = setInterval(() => {
           if (window.THREE?.GLTFExporter) { clearInterval(check); resolve(); }
-        }, 100);
-        setTimeout(() => { clearInterval(check); resolve(); }, 8000);
+        }, 150);
+        setTimeout(() => { clearInterval(check); resolve(); }, 10000);
         return;
       }
-      const s = document.createElement('script');
-      s.id = 'gltfe-script';
-      s.src = GLTFE_CDN;
-      s.onload = () => { setTimeout(resolve, 200); };
-      s.onerror = () => { console.warn('[GLB] GLTFExporter CDN failed'); resolve(); };
-      document.head.appendChild(s);
+
+      // Încearcă fiecare CDN în ordine
+      let cdnIdx = 0;
+      const tryNext = () => {
+        if (cdnIdx >= GLTFE_CDNS.length) {
+          console.warn('[GLB] Toate CDN-urile GLTFExporter au eșuat');
+          resolve(); return;
+        }
+        const old = document.getElementById('gltfe-script');
+        if (old) old.remove();
+
+        const s = document.createElement('script');
+        s.id = 'gltfe-script';
+        s.src = GLTFE_CDNS[cdnIdx++];
+        s.onload = () => {
+          setTimeout(() => {
+            if (window.THREE?.GLTFExporter) { resolve(); }
+            else tryNext(); // scriptul s-a încărcat dar fără GLTFExporter
+          }, 300);
+        };
+        s.onerror = () => {
+          console.warn('[GLB] CDN eșuat, încerc următorul:', s.src);
+          tryNext();
+        };
+        document.head.appendChild(s);
+      };
+      tryNext();
     });
   }
 

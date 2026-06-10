@@ -253,7 +253,7 @@
           // Ștergem camerele generic de la parter și adăugăm funcțiuni specifice
           // (păstrăm core-urile)
           const cores = rects.filter(r => r.t === 'core');
-          fl.rects = cores;
+          // fl.rects = cores;  ← dezactivat: păstrăm rects existente, adăugăm doar camere speciale
 
           fl.rects.push({
             t: 'reception', x: 0, y: bD * 0.55, w: bW * 0.55, h: bD * 0.45,
@@ -307,8 +307,8 @@
 
       // ── BIROURI MANAGEMENT (ultimul etaj) ────────────────────────────
       case 'birouri_management': {
-        const cores = rects.filter(r => r.t === 'core');
-        fl.rects = cores;
+        // Păstrăm rects existente — adăugăm camere speciale LA ele
+        // const cores = rects.filter(r => r.t === 'core'); // fl.rects = cores - șterge camerele!
         // Birouri premium cu vedere panoramică
         fl.rects.push({
           t: 'office', x: 0, y: 0, w: bW * 0.38, h: bD * 0.6,
@@ -338,7 +338,7 @@
         const hasLobby = rects.some(r => r.lbl?.toLowerCase().includes('lobby'));
         if (!hasLobby) {
           const cores = rects.filter(r => r.t === 'core');
-          fl.rects = cores;
+          // fl.rects = cores;  ← dezactivat: păstrăm rects existente, adăugăm doar camere speciale
           fl.rects.push({
             t: 'commercial', x: 0, y: bD * 0.5, w: bW * 0.6, h: bD * 0.5,
             lbl: '🏨 Lobby\n+ Recepție Hotel', apt: -2, zIdx: -1, _enriched: true,
@@ -381,8 +381,8 @@
 
       // ── HOTEL ETAJ PREMIUM ───────────────────────────────────────────
       case 'hotel_premium': {
-        const cores = rects.filter(r => r.t === 'core');
-        fl.rects = cores;
+        // Păstrăm rects existente — adăugăm camere speciale LA ele
+        // const cores = rects.filter(r => r.t === 'core'); // fl.rects = cores - șterge camerele!
         const sW = Math.min(bW * 0.5, 12), sD = Math.min(bD * 0.7, 14);
         const nSuite = Math.max(1, Math.floor(bW / (sW + 0.3)));
         for (let i = 0; i < nSuite; i++) {
@@ -422,7 +422,7 @@
         const hasOffice = rects.some(r => r.t === 'office');
         if (!hasOffice) {
           const cores = rects.filter(r => r.t === 'core');
-          fl.rects = cores;
+          // fl.rects = cores;  ← dezactivat: păstrăm rects existente, adăugăm doar camere speciale
           fl.rects.push({
             t: 'office', x: 0, y: 0, w: bW * 0.7, h: bD,
             lbl: `🖥 Birouri Administrative\nEt.${fi}`, apt: 0, _enriched: true,
@@ -448,7 +448,7 @@
         const hasComercial = rects.some(r => r.t === 'commercial');
         if (!hasComercial) {
           const cores = rects.filter(r => r.t === 'core');
-          fl.rects = cores;
+          // fl.rects = cores;  ← dezactivat: păstrăm rects existente, adăugăm doar camere speciale
           fl.rects.push({
             t: 'commercial', x: 0, y: 0, w: bW * 0.65, h: bD,
             lbl: '🏪 Spațiu Comercial P0\n(vitrină stradă)', apt: 0, _enriched: true,

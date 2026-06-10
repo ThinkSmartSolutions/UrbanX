@@ -258,7 +258,10 @@
     const hasSubsolFn = typeof window._rvFloorSubsol === 'function' ||
                         typeof window._rvFloorParcaj === 'function';
 
-    if (!hasSubsolDNA && !hasSubsolParcaj) return;
+    // Subsolul se afișează mereu dacă parcela are suficient spațiu
+    // (utilizatorul vede cum ar arăta subsolul propus)
+    const showSubsol = hasSubsolDNA || hasSubsolParcaj || (b.bW * b.bD > 200);
+    if (!showSubsol) return;
 
     const hSubsol = 2.8; // înălțimea subsolului
     const bW = anchor.bW, bD = anchor.bD;
