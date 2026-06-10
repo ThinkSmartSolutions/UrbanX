@@ -344,182 +344,370 @@
   // ═══════════════════════════════════════════════════════════════════════
 
   function _reorganizeToolbar() {
+    if (window._TOOLBAR_REORGANIZED) return;
+
     const _try = () => {
-      const tabBar = document.querySelector('.rv-tabs');
-      if (!tabBar || document.getElementById('ux-toolbar-done')) return false;
-      tabBar.id = 'ux-toolbar-done';
+      const topbar = document.querySelector('.rv-topbar');
+      const tabsBar = document.querySelector('.rv-tabs');
+      if (!topbar || !tabsBar) return false;
+      if (document.getElementById('ux-export-wrap')) return false; // deja injectat
 
-      // ── CSS scroll orizontal pe mobile ──────────────────────────────────
-      const style = document.createElement('style');
-      style.textContent = `
-        /* Tab bar scrollabil */
-        .rv-tabs {
-          overflow-x: auto !important;
-          overflow-y: hidden !important;
-          scroll-behavior: smooth;
-          -webkit-overflow-scrolling: touch;
-          scrollbar-width: none;
-        }
-        .rv-tabs::-webkit-scrollbar { display: none; }
-        .rv-tab { white-space: nowrap; flex-shrink: 0; }
+      // ══════════════════════════════════════════════════════════════════
+      // TOPBAR: curățăm duplicatele și reorganizăm
+      // ══════════════════════════════════════════════════════════════════
 
-        /* Export dropdown */
-        #ux-export-wrap { position: relative; display: inline-flex; align-items: center; margin-left: 6px; flex-shrink: 0; }
-        #ux-export-btn {
-          height: 30px; padding: 0 12px; border-radius: 7px; cursor: pointer;
-          font-family: inherit; font-size: 10px; font-weight: 800;
-          background: rgba(212,175,55,.15); border: 1.5px solid rgba(212,175,55,.4); color: #FBBF24;
-          display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;
+      // 1. Ascundem butoanele standalone redundante din topbar
+      // (Memoriu Tehnic și Export PDF Raport — vor fi în dropdown)
+      topbar.querySelectorAll('button').forEach(btn => {
+        const txt = btn.textContent.trim();
+        if (txt.includes('Memoriu Tehnic') || txt.includes('Export PDF Raport') ||
+            txt.includes('Export PDF')) {
+          btn.style.display = 'none';
         }
-        #ux-export-menu {
-          display: none; position: absolute; top: 34px; right: 0;
-          background: #0F172A; border: 1px solid rgba(212,175,55,.2);
-          border-radius: 10px; padding: 6px; min-width: 200px; z-index: 999;
-          box-shadow: 0 8px 32px rgba(0,0,0,.6);
-        }
-        #ux-export-menu.open { display: block; }
-        .ux-exp-item {
-          display: flex; align-items: center; gap: 8px; padding: 8px 10px;
-          border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: 600;
-          color: #94A3B8; font-family: inherit; border: none; background: none; width: 100%;
-          text-align: left; white-space: nowrap;
-        }
-        .ux-exp-item:hover { background: rgba(255,255,255,.05); color: #DDE6F5; }
-        .ux-exp-divider { height: 1px; background: rgba(255,255,255,.05); margin: 4px 0; }
+      });
 
-        /* TVA badge în toolbar */
-        #ux-tva-badge {
-          font-size: 9px; font-weight: 700; color: #94A3B8; font-family: IBM Plex Mono, monospace;
-          padding: 2px 6px; border-radius: 4px; background: rgba(245,158,11,.08);
-          border: 1px solid rgba(245,158,11,.2); cursor: pointer; flex-shrink: 0; margin-left: 4px;
-        }
-        #ux-tva-badge:hover { color: #FBBF24; }
+      // 2. Ascundem toggle Analiză standalone — îl integrăm în dropdown Analiză
+      const analizaToggle = document.getElementById('rv-btn-hide-analiza');
+      if (analizaToggle) analizaToggle.style.display = 'none';
 
-        /* Scroll indicator tab bar */
-        .rv-tabs::after {
-          content: '';
-          position: sticky; right: 0; top: 0; bottom: 0;
-          width: 20px; flex-shrink: 0;
-          background: linear-gradient(to right, transparent, rgba(11,20,38,.95));
-          pointer-events: none;
-        }
+      // 3. Găsim butonul Închide pentru a insera înainte de el
+      const closeBtn = topbar.querySelector('.rv-close-btn');
+      const menuBtn = document.getElementById('rv-mobile-menu-btn');
 
-        /* Mobile: tab bar mai compact */
-        @media (max-width: 840px) {
-          .rv-tab { padding: 8px 9px !important; font-size: 9.5px !important; }
-          #ux-export-btn { font-size: 9px; padding: 0 8px; }
-          #ux-tva-badge { display: none; }
-        }
+      // ── DROPDOWN EXPORT ───────────────────────────────────────────────
+      const expWrap = document.createElement('span');
+      expWrap.id = 'ux-export-wrap';
+      expWrap.style.cssText = 'position:relative;flex-shrink:0';
+
+      const expBtn = document.createElement('button');
+      expBtn.id = 'ux-export-btn';
+      expBtn.innerHTML = '⬇ Export ▾';
+      expBtn.style.cssText = `
+        height:32px;padding:0 14px;border-radius:7px;
+        border:1.5px solid rgba(212,175,55,.5);
+        background:linear-gradient(135deg,rgba(212,175,55,.18),rgba(212,175,55,.08));
+        color:#F5C518;cursor:pointer;font-size:11px;font-weight:800;
+        font-family:'Space Grotesk',sans-serif;letter-spacing:.03em;
+        display:flex;align-items:center;gap:6px;flex-shrink:0;
       `;
-      document.head.appendChild(style);
 
-      // ── Buton TVA rapid în toolbar ──────────────────────────────────────
-      const zoomBar = document.querySelector('.rv-zoombar');
-      if (zoomBar && !document.getElementById('ux-tva-badge')) {
-        const tvaBadge = document.createElement('span');
-        tvaBadge.id = 'ux-tva-badge';
-        tvaBadge.title = 'TVA curent — click pentru editare';
-        tvaBadge.textContent = 'TVA ' + (window._UX_TVA * 100).toFixed(0) + '%';
-        tvaBadge.onclick = () => {
-          const pct = prompt('TVA (%) conform legislație în vigoare:', (window._UX_TVA * 100).toFixed(1));
-          if (!pct) return;
-          const val = parseFloat(pct) / 100;
-          if (isNaN(val) || val < 0 || val > 0.3) { alert('Valoare TVA invalidă (0–30%)'); return; }
-          window._UX_TVA = val;
-          localStorage.setItem('urbanx_tva', String(val));
-          tvaBadge.textContent = 'TVA ' + (val * 100).toFixed(0) + '%';
-          const inp = document.getElementById('ux-tva-input');
-          const slid = document.getElementById('ux-tva-slider');
-          if (inp) inp.value = (val * 100).toFixed(1);
-          if (slid) slid.value = (val * 100).toFixed(1);
-          if (typeof ss === 'function') ss('✅ TVA actualizat: ' + (val * 100).toFixed(1) + '%');
-        };
-        zoomBar.appendChild(tvaBadge);
-      }
+      const expMenu = document.createElement('div');
+      expMenu.id = 'ux-export-menu';
+      expMenu.style.cssText = `
+        position:fixed;z-index:99999;
+        background:#0d1829;border:1px solid rgba(212,175,55,.3);
+        border-radius:10px;padding:6px;min-width:220px;
+        box-shadow:0 8px 32px rgba(0,0,0,.7);display:none;
+        max-height:80vh;overflow-y:auto;
+      `;
 
-      // ── Export dropdown ─────────────────────────────────────────────────
-      const expBtnOld = document.querySelector('.rv-expbtn');
-      if (!expBtnOld) return false;
-
-      const wrap = document.createElement('span');
-      wrap.id = 'ux-export-wrap';
-
-      const mainBtn = document.createElement('button');
-      mainBtn.id = 'ux-export-btn';
-      mainBtn.innerHTML = '⬇ Export ▾';
-      mainBtn.onclick = (e) => {
-        e.stopPropagation();
-        const menu = document.getElementById('ux-export-menu');
-        menu?.classList.toggle('open');
-      };
-
-      const menu = document.createElement('div');
-      menu.id = 'ux-export-menu';
-
-      const items = [
-        { icon: '📄', label: 'PDF Planșe complet', fn: '_rvExportPDF', group: 'Planșe' },
-        { icon: '🖼', label: 'PNG planșa curentă', fn: '_rvExport', group: 'Planșe' },
-        { icon: '🔷', label: 'SVG vectorial', fn: '_exportCurrentSVG', group: 'Planșe' },
-        { icon: '📐', label: 'DXF (AutoCAD)', fn: '_exportCurrentDXF', group: 'Planșe' },
-        { divider: true },
-        { icon: '🏗', label: 'IFC 2x3 (BIM)', fn: '_rvExportIFC', group: 'BIM' },
-        { icon: '📋', label: 'Prezentare client', fn: '_rvExportPrezentare', group: 'BIM' },
-        { divider: true },
-        { icon: '💰', label: 'Deviz estimativ HG907', fn: '_rvExportDeviz', group: 'Documente' },
-        { icon: '📦', label: 'Extras materiale', fn: '_rvExportExtras', group: 'Documente' },
-        { icon: '📄', label: 'Memoriu tehnic', fn: '_rvExportMemoriu', group: 'Documente' },
-        { divider: true },
-        { icon: '🎯', label: 'DNA Optimizare', fn: '_rvDNAOptimize', group: 'Analiză' },
-        { icon: '⚖', label: 'Scenarii A/B', fn: '_rvExportScenarii', group: 'Analiză' },
+      const exportGroups = [
+        {
+          label: '📐 Planșe',
+          items: [
+            { icon:'📄', label:'PDF complet (toate planșele)',  fn: '_rvExportPDF' },
+            { icon:'🖼', label:'PNG planșa curentă',            fn: '_rvExport' },
+            { icon:'🔷', label:'SVG vectorial',                 fn: '_exportCurrentSVG' },
+            { icon:'📐', label:'DXF (AutoCAD/ArchiCAD)',        fn: '_exportCurrentDXF' },
+          ],
+        },
+        {
+          label: '🏗 BIM / 3D',
+          items: [
+            { icon:'🏗', label:'IFC 2x3 structural',            fn: '_rvExportIFC' },
+            { icon:'📦', label:'GLB semantic (3D model)',        fn: '_rvExportGLBSemantic' },
+            { icon:'📋', label:'Prezentare client (PDF)',        fn: '_rvExportPrezentare' },
+          ],
+        },
+        {
+          label: '💰 Documente tehnice',
+          items: [
+            { icon:'💰', label:'Deviz estimativ HG907',          fn: '_rvExportDeviz' },
+            { icon:'📦', label:'Extras cantități materiale',     fn: '_rvExportExtras' },
+            { icon:'📄', label:'Memoriu tehnic justificativ',    fn: '_rvExportMemoriu' },
+            { icon:'🌡', label:'Raport termic C107/2010',        fn: '_rvExportRaportTermic' },
+            { icon:'🏛', label:'Certificat conformitate urban.', fn: '_rvExportCertificat' },
+          ],
+        },
       ];
 
-      let lastGroup = null;
-      items.forEach(item => {
-        if (item.divider) {
-          const div = document.createElement('div'); div.className = 'ux-exp-divider';
-          menu.appendChild(div); lastGroup = null; return;
+      exportGroups.forEach((group, gi) => {
+        if (gi > 0) {
+          const sep = document.createElement('div');
+          sep.style.cssText = 'height:1px;background:rgba(255,255,255,.07);margin:4px 0';
+          expMenu.appendChild(sep);
         }
-        if (item.group !== lastGroup) {
-          const grp = document.createElement('div');
-          grp.style.cssText = 'font-size:8px;color:#4A6080;font-weight:700;padding:4px 10px 2px;text-transform:uppercase;letter-spacing:.4px';
-          grp.textContent = item.group;
-          menu.appendChild(grp);
-          lastGroup = item.group;
+        const grpLabel = document.createElement('div');
+        grpLabel.style.cssText = 'font-size:8px;color:#64748B;font-weight:700;padding:6px 10px 3px;text-transform:uppercase;letter-spacing:.4px;font-family:IBM Plex Mono,monospace';
+        grpLabel.textContent = group.label;
+        expMenu.appendChild(grpLabel);
+
+        group.items.forEach(item => {
+          const btn = document.createElement('button');
+          btn.style.cssText = `
+            display:flex;align-items:center;gap:8px;width:100%;
+            padding:7px 10px;border:none;border-radius:6px;
+            background:transparent;color:#CBD5E1;cursor:pointer;
+            font-family:inherit;font-size:11px;text-align:left;
+            transition:background .1s;
+          `;
+          btn.innerHTML = `<span style="font-size:14px;width:18px;text-align:center">${item.icon}</span>${item.label}`;
+          btn.onmouseenter = () => btn.style.background = 'rgba(212,175,55,.08)';
+          btn.onmouseleave = () => btn.style.background = 'transparent';
+          btn.onclick = () => {
+            expMenu.style.display = 'none';
+            _expMenuOpen = false;
+            expBtn.innerHTML = '⬇ Export ▾';
+            if (typeof window[item.fn] === 'function') window[item.fn]();
+            else if (typeof ss === 'function') ss('⚠ ' + item.fn + ' indisponibil momentan');
+          };
+          expMenu.appendChild(btn);
+        });
+      });
+
+      document.body.appendChild(expMenu);
+      expWrap.appendChild(expBtn);
+
+      let _expMenuOpen = false;
+      const _closeExp = () => {
+        expMenu.style.display = 'none';
+        _expMenuOpen = false;
+        expBtn.innerHTML = '⬇ Export ▾';
+      };
+      expBtn.onclick = e => {
+        e.stopPropagation();
+        if (_expMenuOpen) { _closeExp(); return; }
+        const r = expBtn.getBoundingClientRect();
+        expMenu.style.top = (r.bottom + 4) + 'px';
+        expMenu.style.left = Math.max(4, r.left - 60) + 'px';
+        expMenu.style.display = 'block';
+        _expMenuOpen = true;
+        expBtn.innerHTML = '⬇ Export ▲';
+      };
+      document.addEventListener('click', e => {
+        if (!expMenu.contains(e.target) && e.target !== expBtn) _closeExp();
+      });
+
+      // ── DROPDOWN ANALIZĂ ──────────────────────────────────────────────
+      const anlWrap = document.createElement('span');
+      anlWrap.id = 'ux-analiza-wrap';
+      anlWrap.style.cssText = 'position:relative;flex-shrink:0';
+
+      const anlBtn = document.createElement('button');
+      anlBtn.id = 'ux-analiza-btn';
+      anlBtn.innerHTML = '📊 Analiză ▾';
+      anlBtn.style.cssText = `
+        height:32px;padding:0 12px;border-radius:7px;
+        border:1px solid rgba(56,189,248,.35);
+        background:rgba(56,189,248,.08);
+        color:#38BDF8;cursor:pointer;font-size:11px;font-weight:700;
+        font-family:'Space Grotesk',sans-serif;letter-spacing:.03em;
+        display:flex;align-items:center;gap:6px;flex-shrink:0;
+      `;
+
+      const anlMenu = document.createElement('div');
+      anlMenu.style.cssText = `
+        position:fixed;z-index:99999;
+        background:#0d1829;border:1px solid rgba(56,189,248,.25);
+        border-radius:10px;padding:6px;min-width:200px;
+        box-shadow:0 8px 32px rgba(0,0,0,.7);display:none;
+      `;
+
+      const analizaItems = [
+        { icon:'🎯', label:'DNA Optimizare',         fn: '_rvDNAOptimize',        sub:'Conformitate + optimizare' },
+        { icon:'⚖', label:'Scenarii A/B',            fn: '_rvExportScenarii',     sub:'Compară variante proiect' },
+        { icon:'☀', label:'Studiu însorire OMS',     fn: '_rvToggleSolar',        sub:'NP057 + OMS 119' },
+        { icon:'🚒', label:'Distanțe ISU',           fn: '_rvToggleISU',          sub:'P118-3/2015 evacuare' },
+        { icon:'♿', label:'Verificare PMR',          fn: '_rvCheckPMRReport',     sub:'NP051/2012' },
+        { sep: true },
+        { icon:'○',  label: analizaToggle?.dataset.hidden==='1' ? 'Arată panoul analiză' : 'Ascunde panoul analiză',
+                            fn: null, onclick: () => analizaToggle?.click(), sub:'Toggle panou stânga' },
+      ];
+
+      analizaItems.forEach(item => {
+        if (item.sep) {
+          const sep = document.createElement('div');
+          sep.style.cssText = 'height:1px;background:rgba(255,255,255,.07);margin:4px 0';
+          anlMenu.appendChild(sep); return;
         }
         const btn = document.createElement('button');
-        btn.className = 'ux-exp-item';
-        btn.innerHTML = `<span style="font-size:14px">${item.icon}</span>${item.label}`;
+        btn.style.cssText = `
+          display:flex;align-items:flex-start;gap:8px;width:100%;
+          padding:7px 10px;border:none;border-radius:6px;
+          background:transparent;color:#CBD5E1;cursor:pointer;
+          font-family:inherit;font-size:11px;text-align:left;
+          transition:background .1s;
+        `;
+        btn.innerHTML = `
+          <span style="font-size:14px;width:18px;text-align:center;flex-shrink:0;margin-top:1px">${item.icon}</span>
+          <div>
+            <div style="font-weight:700;color:#38BDF8">${item.label}</div>
+            ${item.sub ? `<div style="font-size:9px;color:#475569;margin-top:1px">${item.sub}</div>` : ''}
+          </div>
+        `;
+        btn.onmouseenter = () => btn.style.background = 'rgba(56,189,248,.06)';
+        btn.onmouseleave = () => btn.style.background = 'transparent';
         btn.onclick = () => {
-          menu.classList.remove('open');
-          if (typeof window[item.fn] === 'function') window[item.fn]();
-          else if (typeof ss === 'function') ss('⚠ ' + item.fn + ' indisponibil');
+          anlMenu.style.display = 'none';
+          _anlMenuOpen = false;
+          anlBtn.innerHTML = '📊 Analiză ▾';
+          if (item.onclick) item.onclick();
+          else if (item.fn && typeof window[item.fn] === 'function') window[item.fn]();
         };
-        menu.appendChild(btn);
+        anlMenu.appendChild(btn);
       });
 
-      wrap.appendChild(mainBtn);
-      wrap.appendChild(menu);
-      expBtnOld.parentElement.insertBefore(wrap, expBtnOld);
+      document.body.appendChild(anlMenu);
+      anlWrap.appendChild(anlBtn);
 
-      // Ascunde butoanele vechi redundante (DNA, deviz, extras, memoriu, IFC, SVG etc.)
-      // Le lăsăm vizibile dacă există dar le mutăm în dropdown
-      ['#rv-deviz-btn', '#rv-extras-btn', '#rv-memoriu-btn', '#rv-ifc-btn', '#rv-svg-btn',
-       '#rv-svg-tab-btn', '#rv-dxf-tab-btn', '#rv-optim-wrap', '#rv-deviz-wrap',
-       '#rv-scen-btn', '#rv-svg-per-plansa', '#rv-prezentare-btn'].forEach(sel => {
-        document.querySelectorAll(sel).forEach(el => { el.style.display = 'none'; });
+      let _anlMenuOpen = false;
+      const _closeAnl = () => {
+        anlMenu.style.display = 'none';
+        _anlMenuOpen = false;
+        anlBtn.innerHTML = '📊 Analiză ▾';
+      };
+      anlBtn.onclick = e => {
+        e.stopPropagation();
+        if (_anlMenuOpen) { _closeAnl(); return; }
+        const r = anlBtn.getBoundingClientRect();
+        anlMenu.style.top = (r.bottom + 4) + 'px';
+        anlMenu.style.left = Math.max(4, r.right - 200) + 'px';
+        anlMenu.style.display = 'block';
+        _anlMenuOpen = true;
+        anlBtn.innerHTML = '📊 Analiză ▲';
+      };
+      document.addEventListener('click', e => {
+        if (!anlMenu.contains(e.target) && e.target !== anlBtn) _closeAnl();
       });
 
-      // Închide meniul la click exterior
-      document.addEventListener('click', (e) => {
-        if (!wrap.contains(e.target)) menu.classList.remove('open');
+      // ── Inserăm butoanele în topbar (înainte de Închide) ─────────────
+      if (closeBtn) {
+        topbar.insertBefore(anlWrap, closeBtn);
+        topbar.insertBefore(expWrap, anlWrap);
+      } else {
+        topbar.appendChild(expWrap);
+        topbar.appendChild(anlWrap);
+      }
+
+      // ══════════════════════════════════════════════════════════════════
+      // TABS: 5 principale + dropdown "Mai mult ▾" pentru restul
+      // ══════════════════════════════════════════════════════════════════
+
+      const primaryTabs = ['plan','fatada','sectiune','axono','situatie'];
+      const secondaryTabs = ['acoperis','incadrare','retele','scenarii','subsol'];
+
+      // Ascundem tab-urile secundare
+      secondaryTabs.forEach(tab => {
+        const el = document.querySelector(`.rv-tab[data-tab="${tab}"]`);
+        if (el) el.style.display = 'none';
       });
 
+      // Adăugăm dropdown "Mai mult ▾" în bara de tabs
+      const moreTabWrap = document.createElement('div');
+      moreTabWrap.id = 'rv-tab-more-wrap';
+      moreTabWrap.style.cssText = 'position:relative;display:flex;align-items:center';
+
+      const moreTabBtn = document.createElement('div');
+      moreTabBtn.id = 'rv-tab-more-btn';
+      moreTabBtn.className = 'rv-tab';
+      moreTabBtn.innerHTML = 'Mai mult ▾';
+      moreTabBtn.style.cssText += ';color:#64748B;font-size:11px;white-space:nowrap;cursor:pointer;';
+
+      const moreTabMenu = document.createElement('div');
+      moreTabMenu.id = 'rv-tab-more-menu';
+      moreTabMenu.style.cssText = `
+        position:fixed;z-index:99999;
+        background:#0d1829;border:1px solid rgba(212,175,55,.2);
+        border-radius:10px;padding:6px;min-width:180px;
+        box-shadow:0 8px 24px rgba(0,0,0,.7);display:none;
+      `;
+
+      const secTabDefs = [
+        { tab:'acoperis',  icon:'🏠', label:'Plan Acoperiș' },
+        { tab:'incadrare', icon:'🗺', label:'Încadrare Zonă' },
+        { tab:'retele',    icon:'⚡', label:'Rețele Utilități' },
+        { tab:'scenarii',  icon:'⚖', label:'Scenarii A/B' },
+        { tab:'subsol',    icon:'🅿', label:'Subsol Parcaj', cond: () => document.getElementById('rv-tab-subsol')?.style.display !== 'none' },
+      ];
+
+      secTabDefs.forEach(def => {
+        const btn = document.createElement('button');
+        btn.style.cssText = `
+          display:flex;align-items:center;gap:8px;width:100%;
+          padding:8px 10px;border:none;border-radius:6px;
+          background:transparent;color:#CBD5E1;cursor:pointer;
+          font-family:inherit;font-size:11px;text-align:left;
+          transition:background .1s;
+        `;
+        btn.innerHTML = `<span style="font-size:14px">${def.icon}</span>${def.label}`;
+        btn.onmouseenter = () => btn.style.background = 'rgba(212,175,55,.06)';
+        btn.onmouseleave = () => btn.style.background = 'transparent';
+        btn.onclick = () => {
+          moreTabMenu.style.display = 'none';
+          _moreTabOpen = false;
+          moreTabBtn.innerHTML = 'Mai mult ▾';
+          // Activăm tab-ul
+          const tabEl = document.querySelector(`.rv-tab[data-tab="${def.tab}"]`);
+          if (tabEl) {
+            tabEl.style.display = '';
+            tabEl.click();
+            // Highlight buton Mai mult
+            moreTabBtn.innerHTML = `${def.icon} ${def.label} ▾`;
+            moreTabBtn.style.color = '#D4AF37';
+            moreTabBtn.style.borderBottomColor = '#D4AF37';
+          }
+        };
+        moreTabMenu.appendChild(btn);
+      });
+
+      document.body.appendChild(moreTabMenu);
+      moreTabWrap.appendChild(moreTabBtn);
+      tabsBar.appendChild(moreTabWrap);
+
+      let _moreTabOpen = false;
+      const _closeMoreTab = () => {
+        moreTabMenu.style.display = 'none';
+        _moreTabOpen = false;
+      };
+      moreTabBtn.onclick = e => {
+        e.stopPropagation();
+        if (_moreTabOpen) { _closeMoreTab(); return; }
+        const r = moreTabBtn.getBoundingClientRect();
+        moreTabMenu.style.top = (r.bottom + 2) + 'px';
+        moreTabMenu.style.left = Math.max(4, r.left) + 'px';
+        moreTabMenu.style.display = 'block';
+        _moreTabOpen = true;
+        moreTabBtn.innerHTML = 'Mai mult ▲';
+      };
+      document.addEventListener('click', e => {
+        if (!moreTabMenu.contains(e.target) && e.target !== moreTabBtn) _closeMoreTab();
+      });
+
+      // Când se activează un tab primar — resetăm "Mai mult"
+      primaryTabs.forEach(tab => {
+        const el = document.querySelector(`.rv-tab[data-tab="${tab}"]`);
+        el?.addEventListener('click', () => {
+          moreTabBtn.innerHTML = 'Mai mult ▾';
+          moreTabBtn.style.color = '#64748B';
+          moreTabBtn.style.borderBottomColor = 'transparent';
+        });
+      });
+
+      // Ascundem butoanele redundante deja în topbar
+      ['#rv-deviz-btn','#rv-extras-btn','#rv-memoriu-btn','#rv-ifc-btn',
+       '#rv-svg-btn','#rv-svg-tab-btn','#rv-dxf-tab-btn','#rv-optim-wrap',
+       '#rv-deviz-wrap','#rv-scen-btn','#rv-prezentare-btn'].forEach(sel => {
+        document.querySelectorAll(sel).forEach(el => el.style.display = 'none');
+      });
+
+      window._TOOLBAR_REORGANIZED = true;
       return true;
     };
 
     if (_try()) return;
-    const obs = setInterval(() => { if (_try()) clearInterval(obs); }, 800);
-    setTimeout(() => clearInterval(obs), 15000);
+    const obs = new MutationObserver(() => { if (_try()) obs.disconnect(); });
+    obs.observe(document.body, { childList: true, subtree: true });
+    setTimeout(() => obs.disconnect(), 30000);
   }
 
   // ═══════════════════════════════════════════════════════════════════════
