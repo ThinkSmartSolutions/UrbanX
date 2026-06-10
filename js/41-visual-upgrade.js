@@ -32,6 +32,7 @@
 
   waitReady(() => {
     _patchA_2DPlans();
+    // _patchRenderFacade dezactivat — 42-facade-sync.js gestionează fațadele
     _patchB_Dollhouse();
     _patchC_FloorPlan();
     console.log('[VisualUpgrade v1] ✅ A(2D) + B(Dollhouse) + C(FloorPlan) aplicate');

@@ -749,7 +749,7 @@
           openRelevee_safe();
           if (typeof _rvRender === 'function') _rvRender();
         } else {
-          alert('Selectați o parcelă și generați volumul în AEDIS mai întâi.');
+          if(typeof ss==='function') ss('⚠ Selectați o parcelă și generați volumul în AEDIS mai întâi');
         }
       };
 

@@ -713,7 +713,7 @@
   if (origFacade && !window._FACADE_SYNC_v2) {
     window._FACADE_SYNC_v2 = true;
     window._rvRenderFacade = function (b) {
-      if (window.AEDIS && b?.P) { b.P.fn = window.AEDIS.fn || b.P.fn; }
+      if (window.AEDIS && b?.P) { b.P.fn = (window.AEDIS||{}).fn || b.P.fn; }
       return origFacade.apply(this, arguments);
     };
   }
@@ -1043,7 +1043,7 @@
       for (var a = 0; a < nApt; a++) {
         var aptX   = a < 1 ? 0.3 : (cX + cW + 0.3);
         var aptIdx = a + 1;
-        var hasBalc = !!(window.AEDIS && window.AEDIS.hasBalcoane !== false && fIdx > 0);
+        var hasBalc = !!(window.AEDIS && (window.AEDIS||{}).hasBalcoane !== false && fIdx > 0);
         rects.push({ t:'living',  x:aptX,           y:0.3,     w:aptW*0.48, h:bD*0.40, apt:aptIdx, lbl:'Living',    bal:false });
         rects.push({ t:'bedroom', x:aptX+aptW*0.50, y:0.3,     w:aptW*0.44, h:bD*0.38, apt:aptIdx, lbl:'Dormitor',  bal:false });
         rects.push({ t:'kitchen', x:aptX,           y:bD*0.42, w:aptW*0.40, h:bD*0.28, apt:aptIdx, lbl:'Bucatarie', bal:false });
@@ -1058,6 +1058,106 @@
   }
 
   _patchDollhouseEmpty();
+
+  // ── FIX: input[type=number] cu valori text din PUG (parcaje_min) ────
+  function _fixParcajInputs() {
+    document.querySelectorAll('input[type="number"]').forEach(function(inp) {
+      if (inp.value && isNaN(parseFloat(inp.value)) && inp.value.trim() !== '') {
+        inp.type = 'text';
+        inp.style.color = '#94A3B8';
+        inp.style.fontSize = '10px';
+      }
+    });
+  }
+  setTimeout(_fixParcajInputs, 2000);
+  setTimeout(_fixParcajInputs, 5000);
+
+  // ── AUTO-GENERARE PLANȘE la deschiderea Viewer 3D ───────────────────
+  function _initAutoPlanse() {
+    if (window._AUTO_PLANSE_INIT) return;
+    window._AUTO_PLANSE_INIT = true;
+
+    // Hook pe _v3dStatus — detectăm finalizarea build-ului
+    var _origStatus = window._v3dStatus;
+    window._v3dStatus = function(msg) {
+      if (_origStatus) _origStatus.apply(this, arguments);
+      if (msg && msg.indexOf('✅') >= 0 && msg.indexOf('vol. AEDIS') >= 0) {
+        _scheduleAutoPlanse('viewer_ready');
+      }
+    };
+
+    // Detectăm modificări AEDIS (utilizatorul iese, modifică, reintră)
+    var _lastHash = '';
+    setInterval(function() {
+      var A = window.AEDIS;
+      if (!A) return;
+      var hash = [A.stil, A.fn, A.tipAcoperis,
+        A.peretelCortina ? '1' : '0',
+        A.cortinaProcent || 0,
+        A.activeRetragere ? '1' : '0',
+        A.parterDiferit ? '1' : '0',
+        (A.corpuri && A.corpuri[0] && A.corpuri[0].niv) || 0
+      ].join('|');
+
+      if (_lastHash && hash !== _lastHash) {
+        _lastHash = hash;
+        _scheduleAutoPlanse('aedis_changed');
+      } else {
+        _lastHash = hash;
+      }
+    }, 3000);
+
+    console.log('[AutoPlanse] ✅ activ — planșele se sincronizează automat cu AEDIS');
+  }
+
+  var _autoPlansePending = false;
+
+  function _scheduleAutoPlanse(reason) {
+    if (_autoPlansePending) return;
+    _autoPlansePending = true;
+    setTimeout(function() {
+      _autoPlansePending = false;
+      _generatePlanseBackground(reason);
+    }, 1500);
+  }
+
+  function _generatePlanseBackground(reason) {
+    if (typeof window.generateRelevee !== 'function') return;
+
+    var modal = document.getElementById('rv-modal');
+    var wasOpen = modal && modal.classList.contains('rv-modal-open');
+
+    // Dacă planșele sunt deschise → re-renderăm live
+    if (wasOpen && typeof window._rvRender === 'function') {
+      setTimeout(function() { window._rvRender(); }, 500);
+      if (typeof ss === 'function') ss('🔄 Planșe actualizate din AEDIS');
+      return;
+    }
+
+    // Generare silențioasă — fără a deschide UI
+    if (modal) {
+      modal.style.visibility = 'hidden';
+      modal.style.pointerEvents = 'none';
+    }
+
+    try { window.generateRelevee(); } catch(e) { }
+
+    setTimeout(function() {
+      if (modal && !(window._RV && window._RV.open)) {
+        modal.classList.remove('rv-modal-open');
+        modal.style.visibility = 'hidden';
+        modal.style.pointerEvents = '';
+      }
+    }, 300);
+
+    var msg = reason === 'aedis_changed'
+      ? '🔄 Planșe actualizate automat'
+      : '✅ Planșe gata — deschide 📐 Planșe când ești pregătit';
+    if (typeof ss === 'function') ss(msg);
+    console.log('[AutoPlanse] generat (' + reason + ')');
+  }
+
+  _initAutoPlanse();
 
 
 })();
