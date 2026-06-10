@@ -731,35 +731,46 @@
   // ── Mobile UI improvements ───────────────────────────────────────────
 
   function _injectMobileUI() {
+    // ── CSS global pentru mobile (fără bara de jos) ───────────────────
     if (document.getElementById('ts-mobile-css')) return;
-
-    // CSS
     const style = document.createElement('style');
     style.id = 'ts-mobile-css';
     style.textContent = `
+      /* Viewer 3D: ascundem butoanele duplicate din topbar pe mobil */
       @media (max-width: 768px) {
-        /* Ascundem butoanele din topbar pe mobil — avem bara jos */
         #vtour-launch-btn, #vtour-fp-btn,
         #ts-tur-foto-btn, #gs-splat-btn { display:none !important; }
-        /* Ascundem zoom inutile și P/F/L/T pe ecran mic */
         #v3d-sun-row { display:none !important; }
-        /* Topbar mai compact pe mobil */
         #v3d-topbar { padding:4px 6px !important; }
-        /* Menuul Explorare — full width pe mobil */
-        #ts-explore-menu { left:8px !important; right:8px !important; min-width:unset !important; }
+        #ts-explore-menu { left:8px !important; right:8px !important; }
       }
-      #ts-mobile-action-bar button:active { opacity:.7; transform:scale(.95); }
+      #ts-viewer-action-bar button:active { opacity:.7; transform:scale(.95); }
     `;
     document.head.appendChild(style);
 
-    if (window.innerWidth > 768) return;
-    if (document.getElementById('ts-mobile-action-bar')) return;
+    // ── Bara de jos se injectează NUMAI în viewer-ul 3D ──────────────
+    // Monitorizăm deschiderea viewer-ului
+    const obs = new MutationObserver(() => {
+      const viewer = document.getElementById('aedis-3d-viewer-overlay');
+      const barExists = document.getElementById('ts-viewer-action-bar');
 
-    // ── Bara mobilă jos — 3 principale + "Mai mult" ──────────────────────
+      if (viewer && !barExists && window.innerWidth <= 768) {
+        _createViewerActionBar(viewer);
+      }
+      if (!viewer && barExists) {
+        barExists.remove();
+      }
+    });
+    obs.observe(document.body, { childList: true, subtree: false });
+  }
+
+  function _createViewerActionBar(viewerEl) {
+    if (document.getElementById('ts-viewer-action-bar')) return;
+
     const bar = document.createElement('div');
-    bar.id = 'ts-mobile-action-bar';
+    bar.id = 'ts-viewer-action-bar';
     bar.style.cssText = `
-      position:fixed;bottom:0;left:0;right:0;z-index:99990;
+      position:absolute;bottom:0;left:0;right:0;z-index:99990;
       background:rgba(7,16,30,.97);
       border-top:1px solid rgba(139,92,246,.3);
       display:flex;align-items:stretch;
@@ -770,10 +781,10 @@
       { id:'mb-dollhouse', icon:'🏠', label:'Dollhouse',
         color:'#00ff88', border:'rgba(0,255,136,.35)', bg:'rgba(0,255,136,.08)',
         fn: "document.getElementById('vtour-launch-btn')?.click()||document.getElementById('mi-dollhouse')?.click()" },
-      { id:'mb-3dplan',    icon:'📐', label:'3D Plan',
+      { id:'mb-3dplan', icon:'📐', label:'3D Plan',
         color:'#60a5fa', border:'rgba(59,130,246,.35)', bg:'rgba(59,130,246,.08)',
         fn: "document.getElementById('vtour-fp-btn')?.click()||document.getElementById('mi-3dplan')?.click()" },
-      { id:'mb-tur',       icon:'✨', label:'Tur Foto',
+      { id:'mb-tur', icon:'✨', label:'Tur Foto',
         color:'#c084fc', border:'rgba(168,85,247,.35)', bg:'rgba(168,85,247,.08)',
         fn: "typeof window._showTurFotoLauncher==='function'&&window._showTurFotoLauncher()" },
     ];
@@ -787,20 +798,16 @@
         background:${a.bg};color:${a.color};cursor:pointer;
         font-family:inherit;touch-action:manipulation;
       `;
-      btn.innerHTML = `
-        <span style="font-size:22px;line-height:1">${a.icon}</span>
-        <span style="font-size:9px;font-weight:700">${a.label}</span>
-      `;
+      btn.innerHTML = `<span style="font-size:22px;line-height:1">${a.icon}</span><span style="font-size:9px;font-weight:700">${a.label}</span>`;
       btn.setAttribute('onclick', a.fn);
       bar.appendChild(btn);
     });
 
-    // Separator
+    // Separator + "···" Altele
     const sep = document.createElement('div');
     sep.style.cssText = 'width:1px;background:rgba(255,255,255,.1);flex-shrink:0';
     bar.appendChild(sep);
 
-    // Buton "···" mai mult — deschide mini drawer cu restul
     const moreBtn = document.createElement('button');
     moreBtn.id = 'mb-more';
     moreBtn.style.cssText = `
@@ -809,32 +816,25 @@
       background:rgba(255,255,255,.04);color:#64748b;cursor:pointer;
       font-family:inherit;touch-action:manipulation;
     `;
-    moreBtn.innerHTML = `
-      <span style="font-size:18px;line-height:1">···</span>
-      <span style="font-size:9px;font-weight:700">Altele</span>
-    `;
+    moreBtn.innerHTML = '<span style="font-size:18px;line-height:1">···</span><span style="font-size:9px;font-weight:700">Altele</span>';
     bar.appendChild(moreBtn);
 
-    document.body.appendChild(bar);
-
-    // ── Mini drawer "Altele" ──────────────────────────────────────────────
+    // Drawer "Altele"
     const drawer = document.createElement('div');
     drawer.id = 'mb-drawer';
     drawer.style.cssText = `
-      position:fixed;bottom:-200px;left:0;right:0;z-index:99991;
+      position:absolute;bottom:-200px;left:0;right:0;z-index:99991;
       background:#0d1829;border-top:1px solid rgba(139,92,246,.3);
       border-radius:20px 20px 0 0;padding:12px;
       transition:bottom .25s ease;
       display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
     `;
 
-    const drawerItems = [
+    [
       { icon:'⭐', label:'Render HD', fn:"typeof window._ptShowOverlay==='function'&&window._ptShowOverlay()", color:'#fbbf24' },
       { icon:'🌟', label:'Splat',     fn:"typeof window._gsLaunch==='function'&&window._gsLaunch()",          color:'#4ade80' },
       { icon:'📦', label:'GLB+BIM',   fn:"typeof window._rvExportGLBSemantic==='function'&&window._rvExportGLBSemantic()", color:'#818cf8' },
-    ];
-
-    drawerItems.forEach(item => {
+    ].forEach(item => {
       const btn = document.createElement('button');
       btn.style.cssText = `
         display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px;
@@ -842,15 +842,10 @@
         border-radius:10px;color:${item.color};cursor:pointer;
         font-family:inherit;touch-action:manipulation;
       `;
-      btn.innerHTML = `
-        <span style="font-size:24px">${item.icon}</span>
-        <span style="font-size:9px;font-weight:700">${item.label}</span>
-      `;
-      btn.setAttribute('onclick', item.fn + ';document.getElementById("mb-drawer").style.bottom="-200px"');
+      btn.innerHTML = `<span style="font-size:24px">${item.icon}</span><span style="font-size:9px;font-weight:700">${item.label}</span>`;
+      btn.setAttribute('onclick', item.fn + ';document.getElementById("mb-drawer").style.bottom="-200px";drawerOpen=false');
       drawer.appendChild(btn);
     });
-
-    document.body.appendChild(drawer);
 
     let drawerOpen = false;
     moreBtn.onclick = () => {
@@ -858,7 +853,6 @@
       drawer.style.bottom = drawerOpen ? '0' : '-200px';
       moreBtn.querySelector('span:first-child').textContent = drawerOpen ? '✕' : '···';
     };
-
     document.addEventListener('click', e => {
       if (drawerOpen && !drawer.contains(e.target) && e.target !== moreBtn) {
         drawer.style.bottom = '-200px';
@@ -867,8 +861,14 @@
       }
     });
 
-    // Padding body
-    document.body.style.paddingBottom = '72px';
+    // Adăugăm în viewer (position:absolute față de el, nu față de body)
+    viewerEl.style.position = 'relative';
+    viewerEl.appendChild(bar);
+    viewerEl.appendChild(drawer);
+
+    // Padding canvas pentru a nu ascunde conținut
+    const canvas = viewerEl.querySelector('#v3d-canvas, canvas');
+    if (canvas) canvas.style.paddingBottom = '64px';
   }
 
 
