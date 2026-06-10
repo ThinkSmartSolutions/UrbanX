@@ -576,9 +576,18 @@
       equirectTarget.dispose();
       equirectMat.dispose();
 
-      outCanvas.toBlob(blob => {
-        resolve(URL.createObjectURL(blob));
-      }, 'image/jpeg', 0.92);
+      // Încercăm Blob URL (mai eficient) cu fallback la dataURL
+      try {
+        outCanvas.toBlob(function(blob) {
+          if (blob) {
+            resolve(URL.createObjectURL(blob));
+          } else {
+            resolve(outCanvas.toDataURL('image/jpeg', 0.90));
+          }
+        }, 'image/jpeg', 0.90);
+      } catch(e) {
+        resolve(outCanvas.toDataURL('image/jpeg', 0.90));
+      }
     });
   }
 
@@ -628,9 +637,11 @@
       camera.position.copy(origPos);
       if (vtState.controls?.target) vtState.controls.target.copy(origTarget);
 
-      outCanvas.toBlob(blob => {
-        if(blob) { resolve(URL.createObjectURL(blob)); } else { _generatePlaceholderPanorama(x, z).then(resolve); }
-      }, 'image/jpeg', 0.85);
+      try {
+        resolve(outCanvas.toDataURL('image/jpeg', 0.88));
+      } catch(e2) {
+        _generatePlaceholderPanorama(x, z).then(resolve);
+      }
 
     } catch (e) {
       console.warn('[TurFoto iOS]', e.message);
@@ -639,47 +650,244 @@
   }
 
   async function _generatePlaceholderPanorama(x, z) {
-    // Generăm o panoramă placeholder cu gradient cer + teren
-    const W = 1024, H = 512;
+    // Generăm panoramă placeholder garantat validă pentru Pannellum
+    const W = 2048, H = 1024; // dimensiune mai mare pentru calitate
     const cv = document.createElement('canvas');
     cv.width = W; cv.height = H;
     const ctx = cv.getContext('2d');
 
-    // Cer gradient
-    const skyGrad = ctx.createLinearGradient(0, 0, 0, H * 0.6);
-    skyGrad.addColorStop(0, '#87CEEB');
-    skyGrad.addColorStop(1, '#E0F0FF');
-    ctx.fillStyle = skyGrad;
-    ctx.fillRect(0, 0, W, H * 0.6);
+    // Cer gradient (sus)
+    const sky = ctx.createLinearGradient(0, 0, 0, H * 0.55);
+    sky.addColorStop(0, '#1a3a6b');
+    sky.addColorStop(0.5, '#2d6ea8');
+    sky.addColorStop(1, '#87CEEB');
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, W, H * 0.55);
 
-    // Teren
-    ctx.fillStyle = '#8BC34A';
-    ctx.fillRect(0, H * 0.6, W, H * 0.4);
+    // Orizont + teren
+    const ground = ctx.createLinearGradient(0, H * 0.55, 0, H);
+    ground.addColorStop(0, '#6B8E5A');
+    ground.addColorStop(1, '#4A6741');
+    ctx.fillStyle = ground;
+    ctx.fillRect(0, H * 0.55, W, H * 0.45);
 
-    // Text informativ
-    ctx.fillStyle = 'rgba(0,0,0,0.4)';
-    ctx.font = 'bold 24px sans-serif';
+    // Clădiri schematice pe orizont
+    ctx.fillStyle = 'rgba(30,50,80,.45)';
+    var blds = [[100,80,60,130],[220,50,50,160],[400,90,80,110],[600,60,60,150],[820,70,90,120]];
+    blds.forEach(function(b) { ctx.fillRect(b[0], H*0.55-b[3], b[1], b[3]); });
+    // Repetăm pe lățime
+    for (var rep = 1; rep < 4; rep++) {
+      blds.forEach(function(b) {
+        ctx.fillRect(b[0]+rep*500, H*0.55-b[3]*0.9, b[1], b[3]*0.9);
+      });
+    }
+
+    // Soare
+    var sunGrad = ctx.createRadialGradient(W*0.65, H*0.2, 0, W*0.65, H*0.2, 60);
+    sunGrad.addColorStop(0, 'rgba(255,255,180,0.9)');
+    sunGrad.addColorStop(1, 'rgba(255,200,50,0)');
+    ctx.fillStyle = sunGrad;
+    ctx.beginPath(); ctx.arc(W*0.65, H*0.2, 60, 0, Math.PI*2); ctx.fill();
+
+    // Label cameră (discret)
+    ctx.fillStyle = 'rgba(255,255,255,0.25)';
+    ctx.font = 'bold 28px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('Preview · x=' + x.toFixed(1) + ' z=' + z.toFixed(1), W/2, H/2);
-    ctx.font = '16px sans-serif';
-    ctx.fillText('iOS: preview simplificat', W/2, H/2 + 30);
+    ctx.fillText('Preview · Cam ' + Math.round(x) + '/' + Math.round(z), W/2, H*0.52);
+    ctx.textAlign = 'left';
 
-    // Pannellum nu acceptă dataURL lung — convertim la Blob URL
-    return new Promise(function(res) {
-      cv.toBlob(function(blob) {
-        res(blob ? URL.createObjectURL(blob) : null);
-      }, 'image/jpeg', 0.85);
-    });
+    // Returnăm dataURL direct — funcționează garantat pe orice browser
+    return cv.toDataURL('image/jpeg', 0.88);
   }
 
 
   // ── Ensure VTour scene is built ──────────────────────────────────────────
-  async function _ensureVTourScene() {
-    // Dacă VTour e activ și are scenă, o folosim direct
-    const vState = window.VTour?._state;
-    if (vState?.scene && vState.active) return vState.scene;
+  // ── Adăugăm tavane la scena interioară ───────────────────────────────
+  function _addCeilingsToScene(scene) {
+    if (!scene || scene._ceilingsAdded) return;
+    scene._ceilingsAdded = true;
+    const THREE = window.THREE;
+    if (!THREE) return;
+    const RV = window._RV;
+    if (!RV?.floors || !RV?.building) return;
+    const anchor = window.VTour?._state?._anchor;
+    if (!anchor) return;
 
-    // Folosim funcția din 36-vtour-fixes.js care gestionează toate contextele
+    const hNiv = RV.building.P?.hn || 3.0;
+    const ox = anchor.cx - anchor.bW / 2;
+    const oz = anchor.cz - anchor.bD / 2;
+    const ceilMat = new THREE.MeshStandardMaterial({
+      color: 0xF5F5F0, roughness: 0.95, metalness: 0, side: THREE.BackSide
+    });
+
+    RV.floors.forEach(function(fl, fIdx) {
+      if (!fl?.rects) return;
+      const baseY = anchor.baseY + fIdx * hNiv;
+      fl.rects.forEach(function(r) {
+        if (r.bal) return;
+        const cx = ox + r.x + r.w / 2;
+        const cz = oz + r.y + r.h / 2;
+        const ceil = new THREE.Mesh(
+          new THREE.BoxGeometry(r.w - 0.02, 0.04, r.h - 0.02),
+          ceilMat
+        );
+        ceil.position.set(cx, baseY + hNiv - 0.02, cz);
+        scene.add(ceil);
+      });
+    });
+    console.log('[TurFoto] ✅ Tavane adăugate scenei interioare');
+  }
+
+  // ── Construim scena interioară fără overlay vizibil ───────────────────
+  async function _buildInteriorSceneSilent() {
+    return new Promise(function(resolve) {
+      const STATE = window.VTour?._state;
+      if (!STATE) { resolve(); return; }
+
+      const THREE = window.THREE;
+      if (!THREE) { resolve(); return; }
+
+      const RV = window._RV;
+      if (!RV?.floors || !RV?.building) { resolve(); return; }
+
+      // Construim manual o scenă interioară minimală
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0xE8E8E0);
+
+      // Iluminare interioară realistă
+      scene.add(new THREE.AmbientLight(0xFFF5E4, 1.2));
+      const fill = new THREE.DirectionalLight(0xFFEDD8, 0.8);
+      fill.position.set(10, 20, 10);
+      scene.add(fill);
+      const fill2 = new THREE.DirectionalLight(0xD0E8FF, 0.4);
+      fill2.position.set(-10, 15, -10);
+      scene.add(fill2);
+
+      const anchor = STATE._anchor;
+      if (!anchor) { resolve(); return; }
+
+      const hNiv = RV.building.P?.hn || 3.0;
+      const ox = anchor.cx - anchor.bW / 2;
+      const oz = anchor.cz - anchor.bD / 2;
+
+      const roomMaterials = {
+        living:   new THREE.MeshStandardMaterial({ color: 0xF5EDD8, roughness: 0.85 }),
+        bedroom:  new THREE.MeshStandardMaterial({ color: 0xEAE0D5, roughness: 0.85 }),
+        kitchen:  new THREE.MeshStandardMaterial({ color: 0xE8F0E8, roughness: 0.8  }),
+        bath:     new THREE.MeshStandardMaterial({ color: 0xE0EEF5, roughness: 0.7  }),
+        hall:     new THREE.MeshStandardMaterial({ color: 0xF0ECE4, roughness: 0.9  }),
+        core:     new THREE.MeshStandardMaterial({ color: 0xD8D8D8, roughness: 0.9  }),
+        office:   new THREE.MeshStandardMaterial({ color: 0xECF0F4, roughness: 0.8  }),
+        default:  new THREE.MeshStandardMaterial({ color: 0xF0EDE8, roughness: 0.85 }),
+      };
+
+      const wallMat = new THREE.MeshStandardMaterial({ color: 0xF8F6F0, roughness: 0.9, side: THREE.DoubleSide });
+      const ceilMat = new THREE.MeshStandardMaterial({ color: 0xFFFFFF, roughness: 0.95 });
+
+      RV.floors.forEach(function(fl, fIdx) {
+        if (!fl || !fl.rects || fIdx > 1) return;
+        var baseY = anchor.baseY + fIdx * hNiv;
+
+        fl.rects.forEach(function(r) {
+          if (r.bal) return;
+          var rcx = ox + r.x + r.w / 2;
+          var rcz = oz + r.y + r.h / 2;
+          var floorMat = roomMaterials[r.t] || roomMaterials.default;
+
+          // Podea
+          var fl2 = new THREE.Mesh(new THREE.BoxGeometry(r.w, 0.08, r.h), floorMat);
+          fl2.position.set(rcx, baseY + 0.04, rcz);
+          fl2.receiveShadow = true;
+          scene.add(fl2);
+
+          // Tavan
+          var ceil2 = new THREE.Mesh(new THREE.BoxGeometry(r.w, 0.06, r.h), ceilMat);
+          ceil2.position.set(rcx, baseY + hNiv - 0.03, rcz);
+          scene.add(ceil2);
+
+          // Pereți cu textură mai realistă
+          var wT = 0.10, wH = hNiv - 0.14;
+          [
+            [r.w, wT, rcx, rcz - r.h/2 + wT/2],
+            [r.w, wT, rcx, rcz + r.h/2 - wT/2],
+            [wT,  r.h, rcx - r.w/2 + wT/2, rcz],
+            [wT,  r.h, rcx + r.w/2 - wT/2, rcz],
+          ].forEach(function(wall) {
+            var m = new THREE.Mesh(new THREE.BoxGeometry(wall[0], wH, wall[1]), wallMat);
+            m.position.set(wall[2], baseY + 0.08 + wH/2, wall[3]);
+            scene.add(m);
+          });
+
+          // Fereastră pe peretele frontal
+          var winMat = new THREE.MeshStandardMaterial({
+            color: 0x87CEEB, transparent: true, opacity: 0.45,
+            roughness: 0.05, metalness: 0.3
+          });
+          var winW = Math.min(r.w * 0.5, 1.4);
+          var win = new THREE.Mesh(new THREE.BoxGeometry(winW, hNiv*0.48, 0.04), winMat);
+          win.position.set(rcx, baseY + hNiv*0.56, rcz - r.h/2 + 0.04);
+          scene.add(win);
+        });
+      });
+
+      // Pereți exteriori pe forma reală (L/U/T) dacă există pts
+      var bldPts = RV.building && RV.building.pts;
+      if (bldPts && bldPts.length >= 3) {
+        var extWallMat = new THREE.MeshStandardMaterial({ color: 0xE8E0D8, roughness: 0.92 });
+        var halfW2 = (anchor.bW || RV.building.bW) / 2;
+        var halfD2 = (anchor.bD || RV.building.bD) / 2;
+        // Construim perete pe fiecare segment al poligonului exterior
+        for (var si = 0; si < bldPts.length; si++) {
+          var p1 = bldPts[si];
+          var p2 = bldPts[(si + 1) % bldPts.length];
+          var segLen = Math.hypot(p2[0]-p1[0], p2[1]-p1[1]);
+          if (segLen < 0.3) continue;
+          var midX = anchor.cx + (p1[0]+p2[0])/2;
+          var midZ = anchor.cz + (p1[1]+p2[1])/2;
+          var angle = Math.atan2(p2[1]-p1[1], p2[0]-p1[0]);
+          for (var fi2 = 0; fi2 < Math.min(RV.floors.length, 2); fi2++) {
+            var baseY2 = anchor.baseY + fi2 * hNiv;
+            var eWall = new THREE.Mesh(
+              new THREE.BoxGeometry(segLen, hNiv, 0.25),
+              extWallMat
+            );
+            eWall.position.set(midX, baseY2 + hNiv/2, midZ);
+            eWall.rotation.y = -angle;
+            scene.add(eWall);
+          }
+        }
+      }
+
+      STATE.scene = scene;
+      STATE.floorGroups = [scene]; // marker că e gata
+
+      console.log('[TurFoto] ✅ Scenă interioară construită silențios');
+      resolve();
+    });
+  }
+
+
+  async function _ensureVTourScene() {
+    // PRIORITATE 1: Scena 3D Floor Plan (interioară) — cea mai bună pentru tur
+    // startFP() și VTour._state SHARE același STATE object
+    const STATE = window.VTour?._state;
+    if (STATE?.scene && STATE.active && STATE.floorGroups?.length > 0) {
+      // Adăugăm tavan dacă nu există
+      _addCeilingsToScene(STATE.scene);
+      return STATE.scene;
+    }
+
+    // PRIORITATE 2: Lansăm implicit 3D Floor Plan pentru a construi scena interioară
+    if (typeof window.VTourFP?.startFP === 'function' && !STATE?.active) {
+      // Pregătim scena FP în background (fără overlay vizibil)
+      await _buildInteriorSceneSilent();
+      if (STATE?.scene && STATE.floorGroups?.length > 0) {
+        _addCeilingsToScene(STATE.scene);
+        return STATE.scene;
+      }
+    }
+
+    // PRIORITATE 3: _buildTurFotoScene din 36-vtour-fixes
     if (typeof window._buildTurFotoScene === 'function') {
       const scene = window._buildTurFotoScene();
       if (scene) return scene;
@@ -763,9 +971,9 @@
 
       config.scenes[key] = {
         title: sc.label,
-        panorama: sc.equirectURL || sc.fotoURL || '',
+        panorama: sc.equirectURL || sc.fotoURL || _tfEmptyPanorama(),
         hotSpots: hotspots,
-        hfov: 100,
+        hfov: 75,
         autoLoad: true,
       };
     });

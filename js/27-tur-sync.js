@@ -1381,37 +1381,210 @@
     var modal = document.getElementById('rv-modal');
     var wasOpen = modal && modal.classList.contains('rv-modal-open');
 
-    // Dacă planșele sunt deschise → re-renderăm live
+    // Dacă planșele sunt deja deschise → re-renderăm live
     if (wasOpen && typeof window._rvRender === 'function') {
       setTimeout(function() { window._rvRender(); }, 500);
       if (typeof ss === 'function') ss('🔄 Planșe actualizate din AEDIS');
       return;
     }
 
-    // Generare silențioasă — fără a deschide UI
+    // ── Generare silențioasă în background ──────────────────────────────
+    // IMPORTANT: dezactivăm guard-ul _rvAllowOpen temporar
+    // (generăm datele fără interacțiune utilizator — by design)
+    var prevAllow = window._rvAllowOpen;
+    window._rvAllowOpen = true;
+
+    // Ascundem modalul ÎNAINTE de generateRelevee — nu vrem să apară vizual
     if (modal) {
       modal.style.visibility = 'hidden';
       modal.style.pointerEvents = 'none';
+      modal.style.zIndex = '-1';
     }
 
-    try { window.generateRelevee(); } catch(e) { }
+    try {
+      window.generateRelevee();
+    } catch(e) {
+      console.warn('[AutoPlanse] Eroare:', e.message);
+    }
 
+    // Resetăm starea după generare
     setTimeout(function() {
-      if (modal && !(window._RV && window._RV.open)) {
-        modal.classList.remove('rv-modal-open');
-        modal.style.visibility = 'hidden';
-        modal.style.pointerEvents = '';
+      window._rvAllowOpen = prevAllow;
+      var m2 = document.getElementById('rv-modal');
+      if (m2) {
+        // Ascundem complet dacă nu era deja deschis de utilizator
+        m2.classList.remove('rv-modal-open');
+        m2.style.visibility = 'hidden';
+        m2.style.pointerEvents = '';
+        m2.style.zIndex = '';
       }
-    }, 300);
+    }, 400);
 
     var msg = reason === 'aedis_changed'
       ? '🔄 Planșe actualizate automat'
       : '✅ Planșe gata — deschide 📐 Planșe când ești pregătit';
     if (typeof ss === 'function') ss(msg);
-    console.log('[AutoPlanse] generat (' + reason + ')');
+    console.log('[AutoPlanse] generat silențios (' + reason + ')');
   }
 
   _initAutoPlanse();
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // PATCH FORMA CLĂDIRE — extrage pts2d reale (L/U/T/curte) din S.vol
+  // și le injectează în _RV.building.pts pentru planșe + tur virtual
+  // ═══════════════════════════════════════════════════════════════════════
+  function _initFormaPatch() {
+    if (window._FORMA_PATCH_INIT) return;
+    window._FORMA_PATCH_INIT = true;
+
+    // Hook pe _rvRender — injectăm pts înainte de fiecare render
+    var origRvRender = window._rvRender;
+    if (origRvRender && !origRvRender._formaPatch) {
+      origRvRender._formaPatch = true;
+      window._rvRender = function () {
+        _injectFormaPts();
+        return origRvRender.apply(this, arguments);
+      };
+    }
+
+    // Hook pe VTour.start și startFP
+    ['start', 'startFP'].forEach(function(method) {
+      var obj = method === 'start' ? window.VTour : window.VTourFP;
+      if (!obj || !obj[method] || obj[method]._formaPatch) return;
+      obj[method]._formaPatch = true;
+      var orig = obj[method];
+      obj[method] = function () {
+        _injectFormaPts();
+        return orig.apply(this, arguments);
+      };
+    });
+
+    console.log('[FormaPatch] ✅ Forma clădire preluată în planșe și 3D');
+  }
+
+  function _injectFormaPts() {
+    var RV = window._RV;
+    var S  = window.S;
+    if (!RV || !RV.building) return;
+    if (RV.building.pts) return; // deja injectat
+
+    // Extragem pts din S.vol._lastFeats
+    var volFeats = S && S.vol && S.vol._lastFeats;
+    if (!volFeats || !volFeats.length) return;
+
+    // Găsim feature-ul de parter (floor=0) al primului corp
+    var groundFeat = null;
+    for (var i = 0; i < volFeats.length; i++) {
+      var f = volFeats[i];
+      if (f && f.geometry && f.properties && f.properties.floor === 0 &&
+          !f.properties.isExistent) {
+        groundFeat = f;
+        break;
+      }
+    }
+    if (!groundFeat) return;
+
+    // Extragem coordonatele
+    var coords = groundFeat.geometry.type === 'Polygon'
+      ? groundFeat.geometry.coordinates[0]
+      : (groundFeat.geometry.coordinates[0] && groundFeat.geometry.coordinates[0][0]) || [];
+    if (coords.length < 3) return;
+
+    // Convertim lon/lat → coordonate locale în metri
+    // Folosim același toLoc din 11-viewer3d.js
+    var toLoc = window._v3dToLoc || _makeToLoc(coords);
+
+    var pts2d = coords.slice(0, -1).map(toLoc);
+    if (pts2d.length < 3) return;
+
+    // Calculăm bounding box local
+    var xs = pts2d.map(function(p) { return p[0]; });
+    var ys = pts2d.map(function(p) { return p[1]; });
+    var minX = Math.min.apply(null, xs), maxX = Math.max.apply(null, xs);
+    var minY = Math.min.apply(null, ys), maxY = Math.max.apply(null, ys);
+
+    // Centrăm pts față de centrul bbox
+    var cx = (minX + maxX) / 2;
+    var cy = (minY + maxY) / 2;
+    var localPts = pts2d.map(function(p) { return [p[0] - cx, p[1] - cy]; });
+
+    // Salvăm în building
+    RV.building.pts        = localPts;    // poligon real centrat
+    RV.building.ptsRaw     = pts2d;       // coordonate absolute
+    RV.building.ptsBBox    = { minX: minX, maxX: maxX, minY: minY, maxY: maxY };
+    RV.building.forma      = window.AEDIS && window.AEDIS.forma || 'dreptunghi';
+    RV.building.hasHole    = coords.length > 1; // curte interioară
+
+    // Actualizăm bW și bD cu dimensiunile reale (nu bbox aproximativ)
+    var realW = maxX - minX;
+    var realD = maxY - minY;
+    if (realW > 0.5) RV.building.bW = realW;
+    if (realD > 0.5) RV.building.bD = realD;
+
+    console.log('[FormaPatch] ✅ pts injectați: ' + localPts.length +
+      ' pct, forma=' + RV.building.forma +
+      ', ' + realW.toFixed(1) + '×' + realD.toFixed(1) + 'm');
+  }
+
+  function _makeToLoc(coords) {
+    // Generăm toLoc minimal dacă _v3dToLoc nu e disponibil
+    if (typeof window._v3dToLoc === 'function') return window._v3dToLoc;
+    if (!coords || !coords.length) return function(c) { return [c[0], c[1]]; };
+
+    var refLng = coords[0][0], refLat = coords[0][1];
+    var mLng = 111320 * Math.cos(refLat * Math.PI / 180);
+    var mLat = 111320;
+    return function(c) {
+      return [(c[0] - refLng) * mLng, (c[1] - refLat) * mLat];
+    };
+  }
+
+  // Patch pe _genFloor pentru a respecta forma clădirii
+  // Camerele sunt generate NUMAI în interiorul formei reale
+  function _patchGenFloorForForma() {
+    // _genFloor deja există în 27 — adăugăm filtrare rects outside forma
+    var origGenFloor = window._genFloorOrig || _genFloor;
+    if (!window._genFloorOrig) window._genFloorOrig = _genFloor;
+
+    // Înlocuim _genFloor cu o versiune care verifică forma
+    window._genFloorForma = function(fIdx, bW, bD, fn) {
+      var floor = origGenFloor(fIdx, bW, bD, fn);
+      var RV = window._RV;
+      if (!RV || !RV.building || !RV.building.pts) return floor;
+
+      var pts = RV.building.pts;
+      var forma = RV.building.forma || 'dreptunghi';
+      if (forma === 'dreptunghi' || forma === 'patrat' || forma === 'bara') return floor;
+
+      // Filtrăm camerele care cad complet în afara formei
+      var halfW = bW / 2, halfD = bD / 2;
+      floor.rects = floor.rects.filter(function(r) {
+        // Centrul camerei în coordonate locale (0,0 = centrul clădirii)
+        var rcx = r.x + r.w / 2 - halfW;
+        var rcy = r.y + r.h / 2 - halfD;
+        // Verificăm dacă centrul e în interiorul poligonului formei
+        return _pointInPoly(rcx, rcy, pts);
+      });
+
+      return floor;
+    };
+  }
+
+  function _pointInPoly(px, py, pts) {
+    // Ray casting algorithm
+    var inside = false;
+    for (var i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+      var xi = pts[i][0], yi = pts[i][1];
+      var xj = pts[j][0], yj = pts[j][1];
+      var intersect = ((yi > py) !== (yj > py)) &&
+        (px < (xj - xi) * (py - yi) / (yj - yi) + xi);
+      if (intersect) inside = !inside;
+    }
+    return inside;
+  }
+
+  _initFormaPatch();
+  _patchGenFloorForForma();
 
 
 })();

@@ -98,7 +98,15 @@
       var orig = window[name];
       if (orig && !orig._s1patched) {
         orig._s1patched = true;
-        window[name] = function () { _addS1(); return orig.apply(this, arguments); };
+        window[name] = function () {
+          _addS1();
+          // Asigurăm _rvAllowOpen=true pt apeluri programatice
+          var had = window._rvAllowOpen;
+          if (!had) window._rvAllowOpen = true;
+          var res = orig.apply(this, arguments);
+          if (!had) setTimeout(function(){ window._rvAllowOpen = false; }, 500);
+          return res;
+        };
       }
     });
 

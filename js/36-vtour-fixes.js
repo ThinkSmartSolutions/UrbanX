@@ -186,6 +186,26 @@
     }
 
     setTimeout(_mapDoorsToRects, 300);
+
+    // Hook pe startFP (3D Floor Plan) — același tratament ca VTour.start
+    var _hookStartFP = function() {
+      var fp = window.VTourFP;
+      if (!fp || !fp.startFP || fp.startFP._doorsFPHooked) return false;
+      fp.startFP._doorsFPHooked = true;
+      var origFP = fp.startFP;
+      fp.startFP = function() {
+        _mapDoorsToRects();
+        return origFP.apply(this, arguments);
+      };
+      return true;
+    };
+    if (!_hookStartFP()) {
+      var fpObs = new MutationObserver(function() {
+        if (_hookStartFP()) fpObs.disconnect();
+      });
+      fpObs.observe(document.body, { childList: true, subtree: true });
+      setTimeout(function() { fpObs.disconnect(); }, 15000);
+    }
   }
 
   function _mapDoorsToRects() {
@@ -368,6 +388,63 @@
 
     if (painted > 0 && typeof ss === 'function') {
       ss(`✅ ${painted} suprafețe colorate per apartament`);
+    }
+  }
+
+
+  // ── Culori per apartament pe 3D Floor Plan ────────────────────────────
+  function _applyAptColorsFP() {
+    const state = window.VTour?._state;
+    if (!state?.scene) return;
+    const THREE = window.THREE;
+    const floors = window._RV?.floors;
+    const anchor = window._rvGetAnchor?.() || state._anchor;
+    if (!floors || !anchor) return;
+
+    const b = window._RV?.building;
+    const ox = anchor.cx - (anchor.bW || b?.bW || 18) / 2;
+    const oz = anchor.cz - (anchor.bD || b?.bD || 14) / 2;
+    const hNiv = b?.P?.hn || 3;
+    let painted = 0;
+
+    floors.forEach((fl, fIdx) => {
+      if (!fl?.rects) return;
+      const baseY = anchor.baseY + fIdx * hNiv;
+
+      // Map aptIdx → culoare
+      const aptColorMap = {};
+      fl.rects.forEach(r => {
+        if (r.apt > 0 && aptColorMap[r.apt] === undefined) {
+          aptColorMap[r.apt] = APT_COLORS[r.apt % APT_COLORS.length];
+        }
+      });
+
+      // Recolorăm mesh-urile de podea din scenă
+      state.scene.traverse(obj => {
+        if (!obj.isMesh) return;
+        const wp = new THREE.Vector3();
+        obj.getWorldPosition(wp);
+        if (Math.abs(wp.y - baseY) > hNiv * 0.3) return; // nu e la acest etaj
+
+        const rx = wp.x - ox, rz = wp.z - oz;
+        const match = fl.rects.find(r =>
+          !r.bal && r.apt > 0 &&
+          rx >= r.x - 0.4 && rx <= r.x + r.w + 0.4 &&
+          rz >= r.y - 0.4 && rz <= r.y + r.h + 0.4
+        );
+        if (match) {
+          const col = aptColorMap[match.apt];
+          if (col && obj.material?.color) {
+            obj.material = new THREE.MeshStandardMaterial({
+              color: col, roughness: 0.7, metalness: 0,
+            });
+            painted++;
+          }
+        }
+      });
+    });
+    if (painted > 0 && typeof ss === 'function') {
+      ss('✅ ' + painted + ' suprafețe colorate per apartament (FP)');
     }
   }
 
