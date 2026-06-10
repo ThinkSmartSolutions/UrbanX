@@ -461,17 +461,30 @@
   async function _renderCubemapToEquirect(scene, x, y, z) {
     return new Promise((resolve) => {
       const THREE = window.THREE;
+      if (!THREE) { resolve(null); return; }
       const W = CFG.equirectW, H = CFG.equirectH;
 
-      // Canvas offscreen pentru render
-      const canvas = document.createElement('canvas');
-      canvas.width = W; canvas.height = H;
-      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
-      renderer.setSize(W, H);
-      renderer.shadowMap.enabled = true;
-      renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.8;
-      if (THREE.sRGBEncoding) renderer.outputEncoding = THREE.sRGBEncoding;
+      // Preferăm renderer-ul VTour existent (evităm probleme cu texturile cross-context)
+      const vtState = window.VTour?._state;
+      let renderer, ownRenderer = false;
+      
+      if (vtState?.renderer && vtState.scene === scene) {
+        // Scena e a VTour → folosim renderer-ul lui direct
+        renderer = vtState.renderer;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.8;
+      } else {
+        // Scenă proprie (clonată) → renderer nou cu preserveDrawingBuffer
+        const canvas = document.createElement('canvas');
+        canvas.width = W; canvas.height = H;
+        renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+        renderer.setSize(W, H);
+        renderer.shadowMap.enabled = true;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.8;
+        if (THREE.sRGBEncoding) renderer.outputEncoding = THREE.sRGBEncoding;
+        ownRenderer = true;
+      }
 
       // CubeCamera
       const cubeRT = new THREE.WebGLCubeRenderTarget(1024, {
@@ -540,8 +553,8 @@
       }
       ctx.putImageData(imageData, 0, 0);
 
-      // Cleanup
-      renderer.dispose();
+      // Cleanup (dispose numai renderer-ul propriu)
+      if (ownRenderer) renderer.dispose();
       cubeRT.dispose();
       equirectTarget.dispose();
       equirectMat.dispose();

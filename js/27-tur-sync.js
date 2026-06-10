@@ -313,23 +313,49 @@
   let _wKeys = {}, _wYaw = 0, _wPitch = 0, _wRaf = null;
   function _toggleWalk(on) {
     const ctn = document.getElementById('vtour-s1-canvas-ctn');
+    const canvas = ctn?.querySelector('canvas') || ctn;
     if (!ctn) return;
+
+    const state = window.VTour?._state;
+    const controls = state?.controls;
+
     if (on) {
       ctn.style.cursor = 'crosshair';
-      ctn.requestPointerLock?.();
-      _wKeys = {}; _wYaw = 0; _wPitch = 0;
+      _wKeys = {}; _wYaw = 0; _wPitch = 0; _wMouseDown = false;
+
+      // Dezactivăm OrbitControls — altfel resetează camera la fiecare frame
+      if (controls) {
+        controls._savedEnabled = controls.enabled;
+        controls.enabled = false;
+      }
+
+      // Pointer lock dacă disponibil (HTTPS)
+      try { ctn.requestPointerLock?.(); } catch(e) {}
+
       _runWalk();
       document.addEventListener('keydown', _wKeyDown);
       document.addEventListener('keyup',   _wKeyUp);
       document.addEventListener('mousemove', _wMouseMove);
-      if (typeof ss === 'function') ss('🚶 Walk mode — W/A/S/D mișcare · mouse look · ESC ieșire');
+      ctn.addEventListener('mousedown', _wMouseDownFn);
+      ctn.addEventListener('mouseup',   _wMouseUpFn);
+
+      if (typeof ss === 'function') ss('🚶 Walk mode ON — W/A/S/D + mouse drag · ESC = ieșire');
     } else {
       ctn.style.cursor = '';
-      document.exitPointerLock?.();
+      try { document.exitPointerLock?.(); } catch(e) {}
+
+      // Reactivăm OrbitControls
+      if (controls && controls._savedEnabled !== undefined) {
+        controls.enabled = controls._savedEnabled;
+      }
+
       if (_wRaf) { cancelAnimationFrame(_wRaf); _wRaf = null; }
       document.removeEventListener('keydown', _wKeyDown);
       document.removeEventListener('keyup',   _wKeyUp);
       document.removeEventListener('mousemove', _wMouseMove);
+      ctn.removeEventListener('mousedown', _wMouseDownFn);
+      ctn.removeEventListener('mouseup',   _wMouseUpFn);
+      if (typeof ss === 'function') ss('🚶 Walk mode OFF');
     }
   }
   function _wKeyDown(e) {
@@ -337,14 +363,23 @@
     if (e.key === 'Escape') { document.getElementById('ts-walk-btn')?.click(); }
   }
   function _wKeyUp(e) { delete _wKeys[e.key.toLowerCase()]; }
+  let _wMouseDown = false;
+  const _wMouseDownFn = () => { _wMouseDown = true; };
+  const _wMouseUpFn   = () => { _wMouseDown = false; };
+
   function _wMouseMove(e) {
-    if (!document.pointerLockElement) return;
+    // Funcționează cu pointer lock SAU cu mouse drag (buton stâng apăsat)
+    const hasLock = !!document.pointerLockElement;
+    if (!hasLock && !_wMouseDown) return;
     const THREE = window.THREE;
     const cam = window.VTour?._state?.camera;
     if (!cam || !THREE) return;
-    _wYaw -= e.movementX * 0.002;
-    _wPitch = Math.max(-1.2, Math.min(1.2, _wPitch - e.movementY * 0.002));
-    cam.rotation.order = 'YXZ'; cam.rotation.y = _wYaw; cam.rotation.x = _wPitch;
+    const sensitivity = hasLock ? 0.002 : 0.004;
+    _wYaw   -= e.movementX * sensitivity;
+    _wPitch  = Math.max(-1.2, Math.min(1.2, _wPitch - e.movementY * sensitivity));
+    cam.rotation.order = 'YXZ';
+    cam.rotation.y = _wYaw;
+    cam.rotation.x = _wPitch;
   }
   function _runWalk() {
     const state = window.VTour?._state;
