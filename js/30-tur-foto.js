@@ -408,7 +408,13 @@
       const worldY = anchor.baseY + 1.5; // înălțime ochi
       const worldZ = oz + r.y + r.h / 2;
 
-      const equirectURL = await _renderCubemapToEquirect(scene, worldX, worldY, worldZ);
+      let equirectURL = null;
+      try {
+        equirectURL = await _renderCubemapToEquirect(scene, worldX, worldY, worldZ);
+      } catch (renderErr) {
+        console.warn('[TurFoto] Eroare render cameră ' + (i+1) + ':', renderErr.message);
+        equirectURL = _generatePlaceholderPanorama(worldX, worldZ);
+      }
       scenes[key] = {
         r, equirectURL,
         label: _roomLabel(r.t),
@@ -462,6 +468,17 @@
     return new Promise((resolve) => {
       const THREE = window.THREE;
       if (!THREE) { resolve(null); return; }
+
+      // ── iOS Safari detection — WebGLCubeRenderTarget nu funcționează ──
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+      if (isIOS) {
+        // iOS fallback: captură 2D din camera viewer-ului existent
+        _renderFallbackIOS(scene, x, y, z, resolve);
+        return;
+      }
+
       const W = CFG.equirectW, H = CFG.equirectH;
 
       // Preferăm renderer-ul VTour existent (evităm probleme cu texturile cross-context)
@@ -564,6 +581,92 @@
       }, 'image/jpeg', 0.92);
     });
   }
+
+  // ── iOS Safari fallback: render simplu 2D per cameră ────────────────────
+  function _renderFallbackIOS(scene, x, y, z, resolve) {
+    const THREE = window.THREE;
+    const vtState = window.VTour?._state;
+
+    // Folosim renderer-ul existent din VTour dacă e disponibil
+    const renderer = vtState?.renderer;
+    const camera   = vtState?.camera;
+
+    if (!renderer || !camera) {
+      // Fără renderer — generăm o imagine placeholder cu gradient
+      resolve(_generatePlaceholderPanorama(x, z));
+      return;
+    }
+
+    try {
+      // Salvăm starea camerei
+      const origPos = camera.position.clone();
+      const origTarget = vtState.controls?.target?.clone?.() || new THREE.Vector3(x, y, z + 1);
+
+      // Mutăm camera la poziția camerei
+      camera.position.set(x, y + 1.5, z);
+      camera.lookAt(x + 1, y + 1.5, z);
+
+      // Render la resoliție redusă (safe pe iOS)
+      const W = 1024, H = 512;
+      renderer.setSize(W, H, false);
+      renderer.render(scene, camera);
+
+      // Capturăm din canvas
+      const srcCanvas = renderer.domElement;
+      const outCanvas = document.createElement('canvas');
+      outCanvas.width = W; outCanvas.height = H;
+      const ctx = outCanvas.getContext('2d');
+      ctx.drawImage(srcCanvas, 0, 0, W, H);
+
+      // Restaurăm renderer la dimensiunea originală
+      const win = renderer.domElement.parentElement;
+      const origW = win?.clientWidth || 800;
+      const origH = win?.clientHeight || 600;
+      renderer.setSize(origW, origH, false);
+
+      // Restaurăm camera
+      camera.position.copy(origPos);
+      if (vtState.controls?.target) vtState.controls.target.copy(origTarget);
+
+      outCanvas.toBlob(blob => {
+        resolve(blob ? URL.createObjectURL(blob) : _generatePlaceholderPanorama(x, z));
+      }, 'image/jpeg', 0.85);
+
+    } catch (e) {
+      console.warn('[TurFoto iOS]', e.message);
+      resolve(_generatePlaceholderPanorama(x, z));
+    }
+  }
+
+  function _generatePlaceholderPanorama(x, z) {
+    // Generăm o panoramă placeholder cu gradient cer + teren
+    const W = 1024, H = 512;
+    const cv = document.createElement('canvas');
+    cv.width = W; cv.height = H;
+    const ctx = cv.getContext('2d');
+
+    // Cer gradient
+    const skyGrad = ctx.createLinearGradient(0, 0, 0, H * 0.6);
+    skyGrad.addColorStop(0, '#87CEEB');
+    skyGrad.addColorStop(1, '#E0F0FF');
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, W, H * 0.6);
+
+    // Teren
+    ctx.fillStyle = '#8BC34A';
+    ctx.fillRect(0, H * 0.6, W, H * 0.4);
+
+    // Text informativ
+    ctx.fillStyle = 'rgba(0,0,0,0.4)';
+    ctx.font = 'bold 24px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Preview · x=' + x.toFixed(1) + ' z=' + z.toFixed(1), W/2, H/2);
+    ctx.font = '16px sans-serif';
+    ctx.fillText('iOS: preview simplificat', W/2, H/2 + 30);
+
+    return cv.toDataURL('image/jpeg', 0.85);
+  }
+
 
   // ── Ensure VTour scene is built ──────────────────────────────────────────
   async function _ensureVTourScene() {
