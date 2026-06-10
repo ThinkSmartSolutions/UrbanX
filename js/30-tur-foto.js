@@ -413,7 +413,7 @@
         equirectURL = await _renderCubemapToEquirect(scene, worldX, worldY, worldZ);
       } catch (renderErr) {
         console.warn('[TurFoto] Eroare render cameră ' + (i+1) + ':', renderErr.message);
-        equirectURL = _generatePlaceholderPanorama(worldX, worldZ);
+        equirectURL = await _generatePlaceholderPanorama(worldX, worldZ);
       }
       scenes[key] = {
         r, equirectURL,
@@ -593,7 +593,7 @@
 
     if (!renderer || !camera) {
       // Fără renderer — generăm o imagine placeholder cu gradient
-      resolve(_generatePlaceholderPanorama(x, z));
+      _generatePlaceholderPanorama(x, z).then(resolve);
       return;
     }
 
@@ -629,16 +629,16 @@
       if (vtState.controls?.target) vtState.controls.target.copy(origTarget);
 
       outCanvas.toBlob(blob => {
-        resolve(blob ? URL.createObjectURL(blob) : _generatePlaceholderPanorama(x, z));
+        if(blob) { resolve(URL.createObjectURL(blob)); } else { _generatePlaceholderPanorama(x, z).then(resolve); }
       }, 'image/jpeg', 0.85);
 
     } catch (e) {
       console.warn('[TurFoto iOS]', e.message);
-      resolve(_generatePlaceholderPanorama(x, z));
+      _generatePlaceholderPanorama(x, z).then(resolve);
     }
   }
 
-  function _generatePlaceholderPanorama(x, z) {
+  async function _generatePlaceholderPanorama(x, z) {
     // Generăm o panoramă placeholder cu gradient cer + teren
     const W = 1024, H = 512;
     const cv = document.createElement('canvas');
@@ -664,7 +664,12 @@
     ctx.font = '16px sans-serif';
     ctx.fillText('iOS: preview simplificat', W/2, H/2 + 30);
 
-    return cv.toDataURL('image/jpeg', 0.85);
+    // Pannellum nu acceptă dataURL lung — convertim la Blob URL
+    return new Promise(function(res) {
+      cv.toBlob(function(blob) {
+        res(blob ? URL.createObjectURL(blob) : null);
+      }, 'image/jpeg', 0.85);
+    });
   }
 
 
@@ -758,7 +763,7 @@
 
       config.scenes[key] = {
         title: sc.label,
-        panorama: sc.equirectURL,
+        panorama: sc.equirectURL || sc.fotoURL || '',
         hotSpots: hotspots,
         hfov: 100,
         autoLoad: true,

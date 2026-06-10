@@ -980,6 +980,8 @@
   function _patchDollhouseEmpty() {
     if (window._DOLLHOUSE_EMPTY_PATCHED) return;
     window._DOLLHOUSE_EMPTY_PATCHED = true;
+
+    // Hook VTour.start (Dollhouse)
     const origStart = window.VTour && window.VTour.start;
     if (origStart && !window._DH_START_PATCHED) {
       window._DH_START_PATCHED = true;
@@ -987,6 +989,29 @@
         _ensureRVFloors();
         return origStart.apply(this, arguments);
       };
+    }
+
+    // Hook VTourFP.startFP (3D Floor Plan) — funcție separată
+    var _hookFP = function() {
+      var origStartFP = window.VTourFP && window.VTourFP.startFP;
+      if (origStartFP && !window._DH_STARTFP_PATCHED) {
+        window._DH_STARTFP_PATCHED = true;
+        window.VTourFP.startFP = function() {
+          _ensureRVFloors();
+          return origStartFP.apply(this, arguments);
+        };
+        return true;
+      }
+      return false;
+    };
+
+    if (!_hookFP()) {
+      // VTourFP nu e gata — așteptăm
+      var fpObs = new MutationObserver(function() {
+        if (_hookFP()) fpObs.disconnect();
+      });
+      fpObs.observe(document.body, { childList: true, subtree: true });
+      setTimeout(function() { fpObs.disconnect(); }, 15000);
     }
   }
 
@@ -1028,36 +1053,265 @@
 
   function _genFloor(fIdx, bW, bD, fn) {
     var rects = [];
+    var doors = [];
+    var wins  = [];
+    var isGround = fIdx === 0;
+
+    // ── Nucleu scări + lift ─────────────────────────────────────
     var cX = bW * 0.38, cY = bD * 0.32;
     var cW = bW * 0.20, cH = bD * 0.30;
-    rects.push({ t:'core', x:cX, y:cY, w:cW, h:cH, apt:-1, lbl:'Scari+Lift', bal:false });
+    rects.push({ t:'core', x:cX, y:cY, w:cW, h:cH, apt:-1, lbl:'Scari+Lift', bal:false,
+      doors:[
+        // Acces din hol comun spre casa scărilor
+        { side:'s', pos:cW*0.5, w:0.9 }
+      ]
+    });
 
     if (fn === 'birouri' || fn === 'comercial') {
-      rects.push({ t:'office',  x:0.3,        y:0.3,     w:bW*0.35, h:bD*0.55, apt:1, lbl:'Birou', bal:false });
-      rects.push({ t:'living',  x:bW*0.36+cW, y:0.3,     w:bW*0.28, h:bD*0.35, apt:1, lbl:'Sala conferinte', bal:false });
-      rects.push({ t:'hall',    x:0.3,        y:bD*0.65, w:bW*0.65, h:bD*0.18, apt:-1, lbl:'Hol', bal:false });
-      rects.push({ t:'bath',    x:bW*0.70,    y:0.3,     w:bW*0.22, h:bD*0.28, apt:1, lbl:'Sanitare', bal:false });
+      rects.push({ t:'office',  x:0.3,        y:0.3,     w:bW*0.35, h:bD*0.55, apt:1, lbl:'Birou open-space', bal:false,
+        doors:[{ side:'s', pos:bW*0.35*0.5, w:1.2 }] });
+      rects.push({ t:'living',  x:bW*0.36+cW, y:0.3,     w:bW*0.28, h:bD*0.35, apt:1, lbl:'Sala conferinte', bal:false,
+        doors:[{ side:'s', pos:bW*0.28*0.4, w:1.0 }] });
+      rects.push({ t:'hall',    x:0.3,        y:bD*0.65, w:bW*0.65, h:bD*0.18, apt:-1, lbl:'Hol comun', bal:false,
+        doors:[] });
+      rects.push({ t:'bath',    x:bW*0.70,    y:0.3,     w:bW*0.22, h:bD*0.28, apt:1, lbl:'Sanitare', bal:false,
+        doors:[{ side:'v', pos:bD*0.28*0.5, w:0.8 }] });
+
+      // Ușă principală intrare clădire (parter)
+      if (isGround) {
+        doors.push({ x:bW*0.5-0.9, y:bD, w:1.8, type:'main', swing:'out' });
+      }
+
     } else {
+      // Rezidențial
       var nApt = bW > 16 ? 2 : 1;
       var aptW = (bW - cW - 0.8) / nApt;
+
       for (var a = 0; a < nApt; a++) {
         var aptX   = a < 1 ? 0.3 : (cX + cW + 0.3);
         var aptIdx = a + 1;
-        var hasBalc = !!(window.AEDIS && (window.AEDIS||{}).hasBalcoane !== false && fIdx > 0);
-        rects.push({ t:'living',  x:aptX,           y:0.3,     w:aptW*0.48, h:bD*0.40, apt:aptIdx, lbl:'Living',    bal:false });
-        rects.push({ t:'bedroom', x:aptX+aptW*0.50, y:0.3,     w:aptW*0.44, h:bD*0.38, apt:aptIdx, lbl:'Dormitor',  bal:false });
-        rects.push({ t:'kitchen', x:aptX,           y:bD*0.42, w:aptW*0.40, h:bD*0.28, apt:aptIdx, lbl:'Bucatarie', bal:false });
-        rects.push({ t:'bath',    x:aptX+aptW*0.42, y:bD*0.42, w:aptW*0.24, h:bD*0.24, apt:aptIdx, lbl:'Baie',      bal:false });
-        rects.push({ t:'hall',    x:aptX,           y:bD*0.72, w:aptW*0.62, h:bD*0.18, apt:aptIdx, lbl:'Hol',       bal:false });
+        var hasBalc = fIdx > 0;
+
+        // Hol apartament (acces din casa scărilor)
+        var holX = aptX;
+        var holY = cY + cH * 0.1; // la nivelul core-ului
+        var holW = aptW * 0.62;
+        var holH = bD * 0.18;
+        rects.push({ t:'hall', x:holX, y:holY, w:holW, h:holH, apt:aptIdx, lbl:'Hol Ap.'+aptIdx, bal:false,
+          doors:[
+            // Ușă acces apartament dinspre casa scărilor
+            { side: a<1 ? 'e' : 'v', pos:holH*0.5, w:0.9 }
+          ]
+        });
+
+        // Living — ușă spre hol
+        var livX = aptX, livY = holY + holH + 0.1;
+        var livW = aptW*0.48, livH = bD*0.32;
+        rects.push({ t:'living', x:livX, y:livY, w:livW, h:livH, apt:aptIdx, lbl:'Living', bal:false,
+          doors:[{ side:'n', pos:livW*0.4, w:0.9 }] });
+
+        // Dormitor — ușă spre hol
+        var bedX = aptX + aptW*0.50, bedY = livY;
+        var bedW = aptW*0.44, bedH = bD*0.30;
+        rects.push({ t:'bedroom', x:bedX, y:bedY, w:bedW, h:bedH, apt:aptIdx, lbl:'Dormitor', bal:false,
+          doors:[{ side:'n', pos:bedW*0.4, w:0.8 }] });
+
+        // Bucătărie — ușă spre living
+        var kitX = aptX, kitY = livY + livH + 0.1;
+        var kitW = aptW*0.40, kitH = bD*0.24;
+        rects.push({ t:'kitchen', x:kitX, y:kitY, w:kitW, h:kitH, apt:aptIdx, lbl:'Bucatarie', bal:false,
+          doors:[{ side:'n', pos:kitW*0.5, w:0.8 }] });
+
+        // Baie — ușă spre hol
+        var bathX = aptX + aptW*0.42, bathY = kitY;
+        var bathW = aptW*0.24, bathH = bD*0.20;
+        rects.push({ t:'bath', x:bathX, y:bathY, w:bathW, h:bathH, apt:aptIdx, lbl:'Baie', bal:false,
+          doors:[{ side:'n', pos:bathW*0.5, w:0.7 }] });
+
+        // Balcon (etaje 1+)
         if (hasBalc) {
-          rects.push({ t:'balcon', x:aptX, y:-0.65, w:aptW*0.55, h:0.65, apt:aptIdx, lbl:'Balcon', bal:true });
+          rects.push({ t:'balcon', x:livX-0.6, y:livY-0.7, w:livW*0.9, h:0.65,
+            apt:aptIdx, lbl:'Balcon', bal:true, doors:[] });
         }
+
+        // Ușă acces apartament din core (pe peretele core adiacent holului)
+        doors.push({
+          x: a < 1 ? cX - 0.05 : cX + cW + 0.05,
+          y: holY + holH * 0.5 - 0.45,
+          w: 0.9,
+          type: 'apt',
+          swing: a < 1 ? 'right' : 'left',
+          axis: 'V',
+          aptIdx: aptIdx
+        });
+      }
+
+      // ── Ușă principală intrare bloc (PARTER) ─────────────────
+      if (isGround) {
+        doors.push({ x: bW*0.5 - 0.9, y: bD, w: 1.8, type: 'main', swing: 'out' });
+        // Hol comun parter (acces din stradă → casa scărilor)
+        rects.push({ t:'hall', x: bW*0.35, y: bD*0.75, w: bW*0.30, h: bD*0.22,
+          apt:-1, lbl:'Hol intrare', bal:false,
+          doors:[{ side:'s', pos:bW*0.30*0.5, w:1.8 }] });
       }
     }
-    return { floorIdx: fIdx, rects: rects, doors: [], wins: [] };
+
+    return { floorIdx: fIdx, rects: rects, doors: doors, wins: wins };
   }
 
   _patchDollhouseEmpty();
+
+  // ── Marker 3D intrare principală + uși apartamente în 3D Floor Plan ──
+  function _addDoorMarkersToFP() {
+    var vtState = window.VTour && window.VTour._state;
+    if (!vtState || !vtState.scene) return;
+    if (vtState._doorMarkersAdded) return;
+    vtState._doorMarkersAdded = true;
+
+    var THREE  = window.THREE;
+    var RV     = window._RV;
+    var anchor = vtState._anchor;
+    if (!THREE || !RV || !anchor) return;
+
+    var bW = anchor.bW, bD = anchor.bD;
+    var ox = anchor.cx - bW / 2;
+    var oz = anchor.cz - bD / 2;
+    var hNiv = (RV.building && RV.building.P && RV.building.P.hn) || 3.0;
+
+    // Materiale
+    var mainEntryMat = new THREE.MeshStandardMaterial({
+      color: 0xF59E0B, emissive: 0xF59E0B, emissiveIntensity: 0.4,
+      roughness: 0.4, metalness: 0.3
+    });
+    var aptDoorMat = new THREE.MeshStandardMaterial({
+      color: 0x3B82F6, emissive: 0x3B82F6, emissiveIntensity: 0.2,
+      roughness: 0.5, metalness: 0.2
+    });
+    var intDoorMat = new THREE.MeshStandardMaterial({
+      color: 0xE2E8F0, roughness: 0.8, metalness: 0
+    });
+
+    var niv = (RV.building && RV.building.niv) || 3;
+
+    for (var fIdx = 0; fIdx < niv; fIdx++) {
+      var fl    = RV.floors && RV.floors[fIdx];
+      var baseY = anchor.baseY + fIdx * hNiv;
+      if (!fl) continue;
+
+      // Ușile din fl.doors (intrare principală + uși apartamente)
+      var flDoors = fl.doors || [];
+      flDoors.forEach(function(d) {
+        var dW = d.w || 0.9, dH = 2.1;
+        var mat = d.type === 'main' ? mainEntryMat : aptDoorMat;
+        var door = new THREE.Mesh(new THREE.BoxGeometry(dW, dH, 0.06), mat);
+        var worldX, worldZ;
+
+        if (d.axis === 'V') {
+          // Ușă pe perete vertical
+          worldX = ox + d.x;
+          worldZ = oz + (d.y || 0) + dW / 2;
+          door.position.set(worldX, baseY + dH / 2, worldZ);
+        } else {
+          // Ușă pe perete orizontal (default)
+          worldX = ox + d.x + dW / 2;
+          worldZ = oz + (d.y || bD);
+          door.position.set(worldX, baseY + dH / 2, worldZ);
+        }
+        door.userData.doorType = d.type;
+        vtState.scene.add(door);
+
+        // Marker pentru intrarea principală (săgeată + label)
+        if (d.type === 'main' && fIdx === 0) {
+          _addMainEntryMarker(vtState.scene, worldX, baseY, worldZ, anchor, THREE);
+        }
+      });
+
+      // Ușile interioare din r.doors ale fiecărei camere
+      var rects = fl.rects || [];
+      rects.forEach(function(r) {
+        if (!r.doors || !r.doors.length) return;
+        r.doors.forEach(function(rd) {
+          var dW2 = rd.w || 0.8, dH2 = 2.0;
+          var dX, dZ;
+          if (rd.side === 'n') { dX = ox + r.x + rd.pos; dZ = oz + r.y; }
+          else if (rd.side === 's') { dX = ox + r.x + rd.pos; dZ = oz + r.y + r.h; }
+          else if (rd.side === 'e') { dX = ox + r.x + r.w; dZ = oz + r.y + rd.pos; }
+          else { dX = ox + r.x; dZ = oz + r.y + rd.pos; } // 'v'
+
+          var intDoor = new THREE.Mesh(new THREE.BoxGeometry(dW2, dH2, 0.05), intDoorMat);
+          var isVert = rd.side === 'e' || rd.side === 'v';
+          if (isVert) {
+            intDoor.position.set(dX, baseY + dH2 / 2, dZ + dW2 / 2);
+            intDoor.rotation.y = Math.PI / 2;
+          } else {
+            intDoor.position.set(dX + dW2 / 2, baseY + dH2 / 2, dZ);
+          }
+          vtState.scene.add(intDoor);
+        });
+      });
+    }
+  }
+
+  function _addMainEntryMarker(scene, x, baseY, z, anchor, THREE) {
+    // Săgeată verticală aurie deasupra intrării
+    var arrowMat = new THREE.MeshStandardMaterial({
+      color: 0xF59E0B, emissive: 0xF59E0B, emissiveIntensity: 0.8
+    });
+
+    // Coloană verticală
+    var pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.5, 8), arrowMat);
+    pole.position.set(x, baseY + 2.5, z);
+    scene.add(pole);
+
+    // Con vârf (săgeată în jos)
+    var cone = new THREE.Mesh(new THREE.ConeGeometry(0.25, 0.5, 8), arrowMat);
+    cone.position.set(x, baseY + 3.5, z);
+    scene.add(cone);
+
+    // Animație pulsatilă
+    var _t = 0;
+    var _animFn = function() {
+      _t += 0.04;
+      var s = 1 + Math.sin(_t) * 0.15;
+      cone.scale.set(s, s, s);
+      cone.position.y = baseY + 3.5 + Math.sin(_t) * 0.1;
+    };
+    if (!scene._entryAnimFns) scene._entryAnimFns = [];
+    scene._entryAnimFns.push(_animFn);
+  }
+
+  // Hookăm startFP să adauge marcheri după build
+  function _hookFPMarkers() {
+    if (window._FP_MARKERS_HOOKED) return;
+    window._FP_MARKERS_HOOKED = true;
+
+    var origStartFP = window.VTourFP && window.VTourFP.startFP;
+    if (!origStartFP) {
+      var obs2 = new MutationObserver(function() {
+        if (window.VTourFP && window.VTourFP.startFP && !window._FP_MARKERS_INNER) {
+          window._FP_MARKERS_INNER = true;
+          var orig2 = window.VTourFP.startFP;
+          window.VTourFP.startFP = function() {
+            var r = orig2.apply(this, arguments);
+            setTimeout(_addDoorMarkersToFP, 800);
+            return r;
+          };
+          obs2.disconnect();
+        }
+      });
+      obs2.observe(document.body, { childList: true, subtree: true });
+    } else if (!window._FP_MARKERS_INNER) {
+      window._FP_MARKERS_INNER = true;
+      window.VTourFP.startFP = function() {
+        var r = origStartFP.apply(this, arguments);
+        setTimeout(_addDoorMarkersToFP, 800);
+        return r;
+      };
+    }
+  }
+
+  _hookFPMarkers();
+
 
   // ── FIX: input[type=number] cu valori text din PUG (parcaje_min) ────
   function _fixParcajInputs() {
