@@ -98,68 +98,200 @@
   // FIX 2 — Buton ✨ Tur Fotorealist cu MutationObserver
   // v3d-topbar e creat dinamic la deschiderea viewer 3D
   // ═══════════════════════════════════════════════════════════════════════
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // TOPBAR REORGANIZAT — UX clar, fără duplicate
+  // Desktop: Logo │ [☀▾] [🏙▾]  ⌂ 📏 P F T  │ [🔍 Explorare ▾] │ ✕
+  // Mobil:   topbar minim + bara jos cu 3+1 butoane
+  // ═══════════════════════════════════════════════════════════════════════
+
   function _fix2_TurFotoButton() {
-    if (_tryInjectTurBtn()) return;
+    if (_tryInjectTopbar()) return;
     const obs = new MutationObserver(() => {
-      if (_tryInjectTurBtn()) obs.disconnect();
+      if (_tryInjectTopbar()) obs.disconnect();
     });
     obs.observe(document.body, { childList: true, subtree: true });
     setTimeout(() => obs.disconnect(), 600000);
   }
 
-  function _tryInjectTurBtn() {
+  function _tryInjectTopbar() {
     const topbar = document.getElementById('v3d-topbar');
-    if (!topbar || document.getElementById('ts-tur-foto-btn')) return false;
+    if (!topbar || document.getElementById('ts-explore-btn')) return false;
 
-    // Găsim primul rând de butoane
-    const row = topbar.querySelector('div[style*="flex"]') || topbar;
+    // ── 1. Ascundem rândul 3 (slider soare separat) — îl mutăm în dropdown ─
+    const sunRow = document.getElementById('v3d-sun-row');
+    if (sunRow) sunRow.style.display = 'none';
 
-    const turBtn = document.createElement('button');
-    turBtn.id = 'ts-tur-foto-btn';
-    turBtn.innerHTML = '✨ Tur Foto';
-    turBtn.title = 'Tur virtual fotorealist — preview instant + AI Stable Diffusion + Gaussian Splat';
-    turBtn.style.cssText = [
-      'background:linear-gradient(135deg,rgba(168,85,247,.22),rgba(59,130,246,.15))',
-      'color:#c084fc', 'border:1.5px solid rgba(168,85,247,.55)',
-      'border-radius:7px', 'padding:4px 12px', 'font-size:11px', 'font-weight:800',
-      'cursor:pointer', 'flex-shrink:0', 'white-space:nowrap', 'font-family:inherit',
-      'margin-left:6px', 'min-height:30px', 'transition:all .2s',
-    ].join(';');
-    turBtn.onmouseover = () => turBtn.style.background = 'linear-gradient(135deg,rgba(168,85,247,.38),rgba(59,130,246,.25))';
-    turBtn.onmouseout  = () => turBtn.style.background = 'linear-gradient(135deg,rgba(168,85,247,.22),rgba(59,130,246,.15))';
-    turBtn.onclick = () => {
-      // Deschide launcher-ul care creează overlay-ul înainte de _tfSelectLevel
-      if (typeof window._showTurFotoLauncher === 'function') {
-        window._showTurFotoLauncher();
-      } else {
-        // Fallback: creăm un overlay minimal direct
-        if (typeof ss === 'function') ss('⚠ Modulul tur foto se încarcă... reîncercați în 2s');
-        setTimeout(() => {
-          if (typeof window._showTurFotoLauncher === 'function') window._showTurFotoLauncher();
-          else if (typeof ss === 'function') ss('⚠ 30-tur-foto.js nu este disponibil în această pagină');
-        }, 2000);
+    // ── 2. Ascundem zoom +/- (redundant cu scroll) ───────────────────────
+    topbar.querySelectorAll('button').forEach(btn => {
+      if (btn.textContent.trim() === '＋' || btn.textContent.trim() === '－') {
+        btn.style.display = 'none';
       }
-    };
-    row.appendChild(turBtn);
+    });
 
-    const bimBtn = document.createElement('button');
-    bimBtn.id = 'ts-glb-bim-btn';
-    bimBtn.innerHTML = '📦 GLB+BIM';
-    bimBtn.title = 'Export GLB semantic + IFC structural — Blender, Revit, Speckle';
-    bimBtn.style.cssText = [
-      'background:rgba(99,102,241,.15)', 'color:#818CF8',
-      'border:1.5px solid rgba(99,102,241,.45)',
-      'border-radius:7px', 'padding:4px 11px', 'font-size:11px', 'font-weight:700',
-      'cursor:pointer', 'flex-shrink:0', 'white-space:nowrap', 'font-family:inherit',
-      'margin-left:4px', 'min-height:30px',
-    ].join(';');
-    bimBtn.onclick = () => {
-      if (typeof window._rvExportGLBSemantic === 'function') window._rvExportGLBSemantic();
-      else if (typeof ss === 'function') ss('⚠ Modulul 32-glb-semantic-export.js nu este încărcat');
-    };
-    row.appendChild(bimBtn);
+    // ── 3. Ascundem bara verde Gaussian Splat din 27 (o mutăm în dropdown) ─
+    const splatBar = document.querySelector('.ts-splat-bar, [style*="Gaussian Splat"]');
+    if (splatBar && splatBar.id !== 'ts-mobile-action-bar') {
+      // Căutăm bara verde dedicată
+      document.querySelectorAll('button, div').forEach(el => {
+        if (el.textContent?.trim() === '🌟 Gaussian Splat' && 
+            el.id !== 'ts-explore-btn' && el.id !== 'mb-splat') {
+          el.style.display = 'none';
+        }
+      });
+    }
 
-    console.log('[TurSync v2.1] ✅ butoane tur foto + GLB injectate în v3d-topbar');
+    // ── 4. Upgrade select iluminare — adaugă slider soare inline ─────────
+    const lightSel = document.getElementById('v3d-light');
+    if (lightSel && !lightSel._upgraded) {
+      lightSel._upgraded = true;
+      // Adăugăm slider soare după select (doar când nu e noapte)
+      const solarWrap = document.createElement('div');
+      solarWrap.id = 'ts-solar-inline';
+      solarWrap.style.cssText = `
+        display:flex;align-items:center;gap:6px;flex-shrink:0;
+        background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.2);
+        border-radius:8px;padding:3px 8px;
+      `;
+      solarWrap.innerHTML = `
+        <span style="font-size:11px;color:#d4af37">☀</span>
+        <input type="range" id="ts-sun-inline" min="6" max="20" step="0.5" value="12"
+          style="width:80px;height:3px;accent-color:#d4af37;cursor:pointer"
+          oninput="_v3dSetSunHour(parseFloat(this.value));document.getElementById('ts-sun-label').textContent=Math.floor(this.value)+':'+(this.value%1?'30':'00')">
+        <span id="ts-sun-label" style="font-size:10px;color:#d4af37;min-width:28px">12:00</span>
+      `;
+      lightSel.parentNode.insertBefore(solarWrap, lightSel.nextSibling);
+      // Sync cu slider-ul original
+      const origSlider = document.getElementById('v3d-sun-slider');
+      if (origSlider) {
+        document.getElementById('ts-sun-inline').addEventListener('input', e => {
+          origSlider.value = e.target.value;
+        });
+      }
+    }
+
+    // ── 5. Upgrade butoane P/F/L/T — adăugăm tooltip vizibil ─────────────
+    const viewBtns = {
+      'P': 'Perspectivă', 'F': 'Față', 'L': 'Lateral', 'T': 'Top'
+    };
+    topbar.querySelectorAll('button').forEach(btn => {
+      const txt = btn.textContent.trim();
+      if (viewBtns[txt] && !btn._labeled) {
+        btn._labeled = true;
+        btn.innerHTML = `<span style="font-size:9px;line-height:1">${viewBtns[txt]}</span>`;
+        btn.style.minWidth = '44px';
+        btn.style.fontSize = '9px';
+      }
+    });
+
+    // ── 6. Buton dropdown EXPLORARE — toate acțiunile principale ──────────
+    const row2 = topbar.querySelectorAll(':scope > div')[1] || topbar;
+
+    // Separator vizual înainte de Explorare
+    const sep = document.createElement('div');
+    sep.style.cssText = 'width:1px;background:rgba(255,255,255,.12);height:24px;flex-shrink:0;margin:0 4px';
+    row2.appendChild(sep);
+
+    const exploreBtn = document.createElement('button');
+    exploreBtn.id = 'ts-explore-btn';
+    exploreBtn.innerHTML = '🔍 Explorare ▾';
+    exploreBtn.style.cssText = `
+      background:linear-gradient(135deg,rgba(99,102,241,.25),rgba(168,85,247,.2));
+      color:#a78bfa;border:1px solid rgba(139,92,246,.5);border-radius:8px;
+      padding:5px 14px;font-size:11px;font-weight:700;cursor:pointer;
+      flex-shrink:0;min-height:36px;white-space:nowrap;
+      position:relative;letter-spacing:.3px;
+    `;
+
+    // Dropdown menu
+    const menu = document.createElement('div');
+    menu.id = 'ts-explore-menu';
+    menu.style.cssText = `
+      position:fixed;top:0;left:0;z-index:999999;
+      background:#0d1829;border:1px solid rgba(139,92,246,.4);
+      border-radius:12px;padding:6px;min-width:200px;
+      box-shadow:0 8px 32px rgba(0,0,0,.6);display:none;
+    `;
+
+    const menuItems = [
+      { id:'mi-dollhouse', icon:'🏠', label:'Dollhouse',     sub:'Clădire explodată 3D',   color:'#00ff88', fn:() => document.getElementById('vtour-launch-btn')?.click() },
+      { id:'mi-3dplan',    icon:'📐', label:'3D Floor Plan', sub:'Plan nivel interactiv',  color:'#60a5fa', fn:() => document.getElementById('vtour-fp-btn')?.click() },
+      { sep: true },
+      { id:'mi-tur',       icon:'✨', label:'Tur Fotorealist',sub:'Preview 360° instant',  color:'#c084fc', fn:() => typeof window._showTurFotoLauncher==='function'&&window._showTurFotoLauncher() },
+      { id:'mi-render',    icon:'⭐', label:'Render HD',      sub:'Path tracing WebGL',    color:'#fbbf24', fn:() => typeof window._ptShowOverlay==='function'&&window._ptShowOverlay() },
+      { id:'mi-splat',     icon:'🌟', label:'Gaussian Splat', sub:'Polycam / Luma AI',     color:'#4ade80', fn:() => typeof window._gsLaunch==='function'&&window._gsLaunch() },
+      { sep: true },
+      { id:'mi-glb',       icon:'📦', label:'Export GLB+BIM', sub:'3D + IFC structural',   color:'#818cf8', fn:() => typeof window._rvExportGLBSemantic==='function'&&window._rvExportGLBSemantic() },
+    ];
+
+    menuItems.forEach(item => {
+      if (item.sep) {
+        const s = document.createElement('div');
+        s.style.cssText = 'height:1px;background:rgba(255,255,255,.08);margin:4px 0';
+        menu.appendChild(s);
+        return;
+      }
+      const el = document.createElement('button');
+      el.id = item.id;
+      el.style.cssText = `
+        display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;
+        background:transparent;border:none;border-radius:8px;cursor:pointer;
+        color:#e2e8f0;font-family:inherit;text-align:left;
+        transition:background .12s;
+      `;
+      el.innerHTML = `
+        <span style="font-size:18px;width:24px;text-align:center">${item.icon}</span>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:${item.color}">${item.label}</div>
+          <div style="font-size:9px;color:#64748B;margin-top:1px">${item.sub}</div>
+        </div>
+      `;
+      el.onmouseenter = () => el.style.background = 'rgba(255,255,255,.06)';
+      el.onmouseleave = () => el.style.background = 'transparent';
+      el.onclick = (e) => {
+        e.stopPropagation();
+        _closeExploreMenu();
+        item.fn();
+      };
+      menu.appendChild(el);
+    });
+
+    document.body.appendChild(menu);
+
+    // Toggle menu
+    let _menuOpen = false;
+    const _closeExploreMenu = () => {
+      menu.style.display = 'none';
+      _menuOpen = false;
+      exploreBtn.innerHTML = '🔍 Explorare ▾';
+    };
+
+    exploreBtn.onclick = (e) => {
+      e.stopPropagation();
+      if (_menuOpen) { _closeExploreMenu(); return; }
+      // Poziționăm meniul sub buton
+      const r = exploreBtn.getBoundingClientRect();
+      menu.style.top = (r.bottom + 6) + 'px';
+      menu.style.left = Math.max(8, r.left - 40) + 'px';
+      menu.style.display = 'block';
+      _menuOpen = true;
+      exploreBtn.innerHTML = '🔍 Explorare ▲';
+    };
+
+    document.addEventListener('click', (e) => {
+      if (!menu.contains(e.target) && e.target !== exploreBtn) _closeExploreMenu();
+    });
+
+    row2.appendChild(exploreBtn);
+
+    // ── 7. Ascundem butoanele individuale injectate de alte module ─────────
+    // Le înlocuim cu itemele din dropdown
+    const toHide = ['vtour-launch-btn','vtour-fp-btn','ts-tur-foto-btn','gs-splat-btn'];
+    toHide.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+
     return true;
   }
 
@@ -597,103 +729,147 @@
 
 
   // ── Mobile UI improvements ───────────────────────────────────────────
+
   function _injectMobileUI() {
     if (document.getElementById('ts-mobile-css')) return;
+
+    // CSS
     const style = document.createElement('style');
     style.id = 'ts-mobile-css';
     style.textContent = `
-      /* Scroll indicator pe bara de butoane */
-      #v3d-topbar > div:nth-child(2) {
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-        scroll-behavior: smooth;
-      }
-      #v3d-topbar > div:nth-child(2)::-webkit-scrollbar { display: none; }
-
-      /* Pe mobil: bara principală cu Dollhouse + acțiuni pe rând separat */
       @media (max-width: 768px) {
-        #ts-mobile-action-bar {
-          display: flex !important;
-        }
+        /* Ascundem butoanele din topbar pe mobil — avem bara jos */
+        #vtour-launch-btn, #vtour-fp-btn,
+        #ts-tur-foto-btn, #gs-splat-btn { display:none !important; }
+        /* Ascundem zoom inutile și P/F/L/T pe ecran mic */
+        #v3d-sun-row { display:none !important; }
+        /* Topbar mai compact pe mobil */
+        #v3d-topbar { padding:4px 6px !important; }
+        /* Menuul Explorare — full width pe mobil */
+        #ts-explore-menu { left:8px !important; right:8px !important; min-width:unset !important; }
       }
-      @media (min-width: 769px) {
-        #ts-mobile-action-bar {
-          display: none !important;
-        }
-      }
-
-      /* Butoanele din topbar mai mici pe mobil */
-      @media (max-width: 768px) {
-        #ts-tur-foto-btn, #ts-glb-bim-btn, #gs-splat-btn {
-          font-size: 10px !important;
-          padding: 4px 8px !important;
-        }
-      }
+      #ts-mobile-action-bar button:active { opacity:.7; transform:scale(.95); }
     `;
     document.head.appendChild(style);
 
-    // Bara de acțiuni fixă jos pe mobil (doar pe mobile)
     if (window.innerWidth > 768) return;
     if (document.getElementById('ts-mobile-action-bar')) return;
 
+    // ── Bara mobilă jos — 3 principale + "Mai mult" ──────────────────────
     const bar = document.createElement('div');
     bar.id = 'ts-mobile-action-bar';
     bar.style.cssText = `
-      position: fixed; bottom: 0; left: 0; right: 0; z-index: 99990;
-      background: rgba(7,16,30,.97);
-      border-top: 1px solid rgba(139,92,246,.3);
-      display: flex; align-items: center; justify-content: space-around;
-      padding: 8px 12px 12px; gap: 8px;
-      padding-bottom: max(12px, env(safe-area-inset-bottom));
+      position:fixed;bottom:0;left:0;right:0;z-index:99990;
+      background:rgba(7,16,30,.97);
+      border-top:1px solid rgba(139,92,246,.3);
+      display:flex;align-items:stretch;
+      padding-bottom:max(8px,env(safe-area-inset-bottom));
     `;
 
-    const actions = [
-      { id: 'mb-dollhouse', icon: '🏠', label: 'Dollhouse', 
-        color: '#00ff88', border: 'rgba(0,255,136,.4)',
-        bg: 'rgba(0,255,136,.12)',
-        onclick: "document.getElementById('vtour-launch-btn')?.click()" },
-      { id: 'mb-3dplan', icon: '📐', label: '3D Plan',
-        color: '#60a5fa', border: 'rgba(59,130,246,.4)',
-        bg: 'rgba(59,130,246,.12)',
-        onclick: "document.getElementById('vtour-3d-plan-btn')?.click()" },
-      { id: 'mb-tur', icon: '✨', label: 'Tur Foto',
-        color: '#c084fc', border: 'rgba(168,85,247,.4)',
-        bg: 'rgba(168,85,247,.12)',
-        onclick: "typeof window._showTurFotoLauncher==='function'&&window._showTurFotoLauncher()" },
-      { id: 'mb-splat', icon: '🌟', label: 'Splat',
-        color: '#4ade80', border: 'rgba(34,197,94,.4)',
-        bg: 'rgba(34,197,94,.1)',
-        onclick: "typeof window._gsLaunch==='function'&&window._gsLaunch()" },
-      { id: 'mb-glb', icon: '📦', label: 'GLB+BIM',
-        color: '#818cf8', border: 'rgba(99,102,241,.4)',
-        bg: 'rgba(99,102,241,.1)',
-        onclick: "typeof window._rvExportGLBSemantic==='function'&&window._rvExportGLBSemantic()" },
+    const mainActions = [
+      { id:'mb-dollhouse', icon:'🏠', label:'Dollhouse',
+        color:'#00ff88', border:'rgba(0,255,136,.35)', bg:'rgba(0,255,136,.08)',
+        fn: "document.getElementById('vtour-launch-btn')?.click()||document.getElementById('mi-dollhouse')?.click()" },
+      { id:'mb-3dplan',    icon:'📐', label:'3D Plan',
+        color:'#60a5fa', border:'rgba(59,130,246,.35)', bg:'rgba(59,130,246,.08)',
+        fn: "document.getElementById('vtour-fp-btn')?.click()||document.getElementById('mi-3dplan')?.click()" },
+      { id:'mb-tur',       icon:'✨', label:'Tur Foto',
+        color:'#c084fc', border:'rgba(168,85,247,.35)', bg:'rgba(168,85,247,.08)',
+        fn: "typeof window._showTurFotoLauncher==='function'&&window._showTurFotoLauncher()" },
     ];
 
-    actions.forEach(a => {
+    mainActions.forEach(a => {
       const btn = document.createElement('button');
       btn.id = a.id;
       btn.style.cssText = `
-        display: flex; flex-direction: column; align-items: center;
-        gap: 3px; padding: 8px 6px; border-radius: 10px; cursor: pointer;
-        background: ${a.bg}; border: 1.5px solid ${a.border};
-        color: ${a.color}; font-family: inherit; flex: 1;
-        min-width: 0; touch-action: manipulation;
+        flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+        gap:3px;padding:8px 4px;border:none;border-top:2px solid ${a.border};
+        background:${a.bg};color:${a.color};cursor:pointer;
+        font-family:inherit;touch-action:manipulation;
       `;
       btn.innerHTML = `
-        <span style="font-size:20px;line-height:1">${a.icon}</span>
-        <span style="font-size:9px;font-weight:700;white-space:nowrap">${a.label}</span>
+        <span style="font-size:22px;line-height:1">${a.icon}</span>
+        <span style="font-size:9px;font-weight:700">${a.label}</span>
       `;
-      btn.setAttribute('onclick', a.onclick);
+      btn.setAttribute('onclick', a.fn);
       bar.appendChild(btn);
     });
 
-    // Adăugăm la body (nu în overlay, e fix)
+    // Separator
+    const sep = document.createElement('div');
+    sep.style.cssText = 'width:1px;background:rgba(255,255,255,.1);flex-shrink:0';
+    bar.appendChild(sep);
+
+    // Buton "···" mai mult — deschide mini drawer cu restul
+    const moreBtn = document.createElement('button');
+    moreBtn.id = 'mb-more';
+    moreBtn.style.cssText = `
+      width:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:3px;padding:8px 4px;border:none;border-top:2px solid rgba(255,255,255,.1);
+      background:rgba(255,255,255,.04);color:#64748b;cursor:pointer;
+      font-family:inherit;touch-action:manipulation;
+    `;
+    moreBtn.innerHTML = `
+      <span style="font-size:18px;line-height:1">···</span>
+      <span style="font-size:9px;font-weight:700">Altele</span>
+    `;
+    bar.appendChild(moreBtn);
+
     document.body.appendChild(bar);
 
-    // Padding bottom pentru a nu ascunde conținut
-    const viewer = document.getElementById('aedis-3d-viewer-overlay');
-    if (viewer) viewer.style.paddingBottom = '72px';
+    // ── Mini drawer "Altele" ──────────────────────────────────────────────
+    const drawer = document.createElement('div');
+    drawer.id = 'mb-drawer';
+    drawer.style.cssText = `
+      position:fixed;bottom:-200px;left:0;right:0;z-index:99991;
+      background:#0d1829;border-top:1px solid rgba(139,92,246,.3);
+      border-radius:20px 20px 0 0;padding:12px;
+      transition:bottom .25s ease;
+      display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+    `;
+
+    const drawerItems = [
+      { icon:'⭐', label:'Render HD', fn:"typeof window._ptShowOverlay==='function'&&window._ptShowOverlay()", color:'#fbbf24' },
+      { icon:'🌟', label:'Splat',     fn:"typeof window._gsLaunch==='function'&&window._gsLaunch()",          color:'#4ade80' },
+      { icon:'📦', label:'GLB+BIM',   fn:"typeof window._rvExportGLBSemantic==='function'&&window._rvExportGLBSemantic()", color:'#818cf8' },
+    ];
+
+    drawerItems.forEach(item => {
+      const btn = document.createElement('button');
+      btn.style.cssText = `
+        display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px;
+        background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+        border-radius:10px;color:${item.color};cursor:pointer;
+        font-family:inherit;touch-action:manipulation;
+      `;
+      btn.innerHTML = `
+        <span style="font-size:24px">${item.icon}</span>
+        <span style="font-size:9px;font-weight:700">${item.label}</span>
+      `;
+      btn.setAttribute('onclick', item.fn + ';document.getElementById("mb-drawer").style.bottom="-200px"');
+      drawer.appendChild(btn);
+    });
+
+    document.body.appendChild(drawer);
+
+    let drawerOpen = false;
+    moreBtn.onclick = () => {
+      drawerOpen = !drawerOpen;
+      drawer.style.bottom = drawerOpen ? '0' : '-200px';
+      moreBtn.querySelector('span:first-child').textContent = drawerOpen ? '✕' : '···';
+    };
+
+    document.addEventListener('click', e => {
+      if (drawerOpen && !drawer.contains(e.target) && e.target !== moreBtn) {
+        drawer.style.bottom = '-200px';
+        drawerOpen = false;
+        moreBtn.querySelector('span:first-child').textContent = '···';
+      }
+    });
+
+    // Padding body
+    document.body.style.paddingBottom = '72px';
   }
+
 
 })();
