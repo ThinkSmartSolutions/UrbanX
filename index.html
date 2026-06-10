@@ -987,6 +987,14 @@ document.addEventListener('click', function(){
 #tci-adv-menu > div:empty,
 #tci-adv-menu > p:empty { display:none!important; }
 </style>
+
+<script>/* Suprimer warnings */
+(function(){var _w=console.warn;console.warn=function(){
+  var m=Array.prototype.join.call(arguments,' ');
+  if(m.indexOf('OrbitControls lipseste')>=0||m.indexOf('Overpass failed')>=0||
+     m.indexOf('Streets OSM')>=0||m.indexOf('No-op fetch')>=0)return;
+  _w.apply(console,arguments);};})();
+</script>
 </head>
 <body>
 <script>
@@ -2731,7 +2739,7 @@ setInterval(()=>{
   <script src="js/tci-street-real.js?v=20260520c"></script><!-- Vehicule OSM reale + cladiri etaj/etaj + iluminat noapte -->
   <script src="js/urbanx-analytics.js?v=20260520c"></script>
   <script src="js/tci-transparency.js?v=20260520c"></script>
-  <!-- urbanx-urban-intelligence.js eliminat (404) -->
+  <!-- urbanx-urban-intelligence.js eliminat -->
   <script src="js/tci-onboarding.js?v=20260520c"></script>
   <script src="js/tci-cinematic-scenes.js?v=20260524a"></script>
   <script src="js/tci-zone-engine.js?v=20260522z"></script>
