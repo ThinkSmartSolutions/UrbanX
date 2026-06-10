@@ -285,15 +285,28 @@
     row2.appendChild(exploreBtn);
 
     // ── 7. Ascundem butoanele individuale injectate de alte module ─────────
-    // Le înlocuim cu itemele din dropdown
+    // Le înlocuim cu itemele din dropdown Explorare
     const toHide = ['vtour-launch-btn','vtour-fp-btn','ts-tur-foto-btn','gs-splat-btn'];
     toHide.forEach(id => {
       const el = document.getElementById(id);
       if (el) el.style.display = 'none';
     });
+    // Bara verde Gaussian Splat dacă există separat
+    document.querySelectorAll('button, div').forEach(el => {
+      const txt = el.textContent?.trim();
+      if ((txt === '🌟 Gaussian Splat' || txt === '🌟 Splat') &&
+          !['ts-explore-btn','mb-splat','mi-splat','mb-more'].includes(el.id)) {
+        el.style.display = 'none';
+      }
+    });
+    // Butoane zoom +/- (redundant cu scroll/pinch)
+    row2?.querySelectorAll('button').forEach(btn => {
+      const txt = btn.textContent?.trim();
+      if (txt === '＋' || txt === '－') btn.style.display = 'none';
+    });
 
     return true;
-  }
+  };
 
   // ═══════════════════════════════════════════════════════════════════════
   // FIX 3 — Navigare niveluri în dollhouse + Walk mode
@@ -736,14 +749,85 @@
     const style = document.createElement('style');
     style.id = 'ts-mobile-css';
     style.textContent = `
-      /* Viewer 3D: ascundem butoanele duplicate din topbar pe mobil */
+      /* ── VIEWER 3D MOBIL ─────────────────────────────────── */
       @media (max-width: 768px) {
+        /* Butoane duplicate ascunse */
         #vtour-launch-btn, #vtour-fp-btn,
-        #ts-tur-foto-btn, #gs-splat-btn { display:none !important; }
+        #ts-tur-foto-btn, #gs-splat-btn,
+        #gs-splat-btn { display:none !important; }
+
+        /* Slider soare ascuns */
         #v3d-sun-row { display:none !important; }
+
+        /* Topbar compact */
         #v3d-topbar { padding:4px 6px !important; }
-        #ts-explore-menu { left:8px !important; right:8px !important; }
+
+        /* Dropdown menus full-width */
+        #ts-explore-menu,
+        #ux-export-menu,
+        .ux-export-menu { left:8px !important; right:8px !important; min-width:unset !important; }
+
+        /* STATUS debug ascuns pe mobil */
+        #v3d-status { display:none !important; }
+
+        /* Fix height viewer să nu permită STATUS să urce */
+        #aedis-3d-viewer-overlay {
+          height: 100dvh !important;
+          max-height: 100dvh !important;
+          overflow: hidden !important;
+        }
       }
+
+      /* ── PLANȘE — touch pan/zoom ─────────────────────────── */
+      #rv-canvas {
+        touch-action: none !important;
+        -webkit-user-select: none !important;
+        user-select: none !important;
+      }
+      .rv-drawwrap {
+        overscroll-behavior: contain !important;
+        -webkit-overflow-scrolling: touch !important;
+        touch-action: pan-x pan-y !important;
+      }
+      @media (max-width: 768px) {
+        .rv-drawwrap {
+          overflow: auto !important;
+          min-height: 0 !important;
+          flex: 1 !important;
+        }
+      }
+
+      /* ── TOPBAR PLANȘE MOBIL ─────────────────────────────── */
+      @media (max-width: 768px) {
+        .rv-topbar {
+          flex-wrap: wrap !important;
+          gap: 4px !important;
+          padding: 6px 8px !important;
+          height: auto !important;
+        }
+        /* Ascundem butoanele standalone din topbar (sunt în dropdown) */
+        .rv-topbar > button:not(.rv-close-btn):not(#rv-mobile-menu-btn):not(#ux-export-btn):not(#ux-analiza-btn) {
+          display: none !important;
+        }
+        /* Tabs scroll orizontal */
+        .rv-tabs {
+          overflow-x: auto !important;
+          -webkit-overflow-scrolling: touch !important;
+          scrollbar-width: none !important;
+        }
+        .rv-tabs::-webkit-scrollbar { display:none !important; }
+      }
+
+      /* ── STATUS DESKTOP — discret, nu intrusiv ────────────── */
+      #v3d-status {
+        font-size: 8px !important;
+        color: rgba(100,116,139,.6) !important;
+        max-width: 200px !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+      }
+
       #ts-viewer-action-bar button:active { opacity:.7; transform:scale(.95); }
     `;
     document.head.appendChild(style);
