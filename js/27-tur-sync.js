@@ -30,6 +30,7 @@
     _fix4_FloorDirectCalls();
     _fix5_MixSlidersVisibility();
     _fix6_FnDimensionWarning();
+    _injectMobileUI();
     _exposeDebug();
     console.log('[TurSync v2.1] ✅ toate fix-urile aplicate');
   });
@@ -592,6 +593,107 @@
         'VTour activ':    !!window.VTour?._state?.active,
       });
     };
+  }
+
+
+  // ── Mobile UI improvements ───────────────────────────────────────────
+  function _injectMobileUI() {
+    if (document.getElementById('ts-mobile-css')) return;
+    const style = document.createElement('style');
+    style.id = 'ts-mobile-css';
+    style.textContent = `
+      /* Scroll indicator pe bara de butoane */
+      #v3d-topbar > div:nth-child(2) {
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        scroll-behavior: smooth;
+      }
+      #v3d-topbar > div:nth-child(2)::-webkit-scrollbar { display: none; }
+
+      /* Pe mobil: bara principală cu Dollhouse + acțiuni pe rând separat */
+      @media (max-width: 768px) {
+        #ts-mobile-action-bar {
+          display: flex !important;
+        }
+      }
+      @media (min-width: 769px) {
+        #ts-mobile-action-bar {
+          display: none !important;
+        }
+      }
+
+      /* Butoanele din topbar mai mici pe mobil */
+      @media (max-width: 768px) {
+        #ts-tur-foto-btn, #ts-glb-bim-btn, #gs-splat-btn {
+          font-size: 10px !important;
+          padding: 4px 8px !important;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Bara de acțiuni fixă jos pe mobil (doar pe mobile)
+    if (window.innerWidth > 768) return;
+    if (document.getElementById('ts-mobile-action-bar')) return;
+
+    const bar = document.createElement('div');
+    bar.id = 'ts-mobile-action-bar';
+    bar.style.cssText = `
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 99990;
+      background: rgba(7,16,30,.97);
+      border-top: 1px solid rgba(139,92,246,.3);
+      display: flex; align-items: center; justify-content: space-around;
+      padding: 8px 12px 12px; gap: 8px;
+      padding-bottom: max(12px, env(safe-area-inset-bottom));
+    `;
+
+    const actions = [
+      { id: 'mb-dollhouse', icon: '🏠', label: 'Dollhouse', 
+        color: '#00ff88', border: 'rgba(0,255,136,.4)',
+        bg: 'rgba(0,255,136,.12)',
+        onclick: "document.getElementById('vtour-launch-btn')?.click()" },
+      { id: 'mb-3dplan', icon: '📐', label: '3D Plan',
+        color: '#60a5fa', border: 'rgba(59,130,246,.4)',
+        bg: 'rgba(59,130,246,.12)',
+        onclick: "document.getElementById('vtour-3d-plan-btn')?.click()" },
+      { id: 'mb-tur', icon: '✨', label: 'Tur Foto',
+        color: '#c084fc', border: 'rgba(168,85,247,.4)',
+        bg: 'rgba(168,85,247,.12)',
+        onclick: "typeof window._showTurFotoLauncher==='function'&&window._showTurFotoLauncher()" },
+      { id: 'mb-splat', icon: '🌟', label: 'Splat',
+        color: '#4ade80', border: 'rgba(34,197,94,.4)',
+        bg: 'rgba(34,197,94,.1)',
+        onclick: "typeof window._gsLaunch==='function'&&window._gsLaunch()" },
+      { id: 'mb-glb', icon: '📦', label: 'GLB+BIM',
+        color: '#818cf8', border: 'rgba(99,102,241,.4)',
+        bg: 'rgba(99,102,241,.1)',
+        onclick: "typeof window._rvExportGLBSemantic==='function'&&window._rvExportGLBSemantic()" },
+    ];
+
+    actions.forEach(a => {
+      const btn = document.createElement('button');
+      btn.id = a.id;
+      btn.style.cssText = `
+        display: flex; flex-direction: column; align-items: center;
+        gap: 3px; padding: 8px 6px; border-radius: 10px; cursor: pointer;
+        background: ${a.bg}; border: 1.5px solid ${a.border};
+        color: ${a.color}; font-family: inherit; flex: 1;
+        min-width: 0; touch-action: manipulation;
+      `;
+      btn.innerHTML = `
+        <span style="font-size:20px;line-height:1">${a.icon}</span>
+        <span style="font-size:9px;font-weight:700;white-space:nowrap">${a.label}</span>
+      `;
+      btn.setAttribute('onclick', a.onclick);
+      bar.appendChild(btn);
+    });
+
+    // Adăugăm la body (nu în overlay, e fix)
+    document.body.appendChild(bar);
+
+    // Padding bottom pentru a nu ascunde conținut
+    const viewer = document.getElementById('aedis-3d-viewer-overlay');
+    if (viewer) viewer.style.paddingBottom = '72px';
   }
 
 })();
