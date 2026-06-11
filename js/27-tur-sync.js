@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   UrbanX · 27-tur-sync.js · v2.1 · 09 Iunie 2026
+   UrbanX · 27-tur-sync.js · v2.2 · 11 Iunie 2026
    ──────────────────────────────────────────────────────────────────────────
    FIX v2.1 — toate problemele identificate din audit + screenshots:
 
@@ -23,6 +23,26 @@
     setTimeout(() => waitReady(cb, n + 1), 150);
   }
 
+  // Guard global: patch _rvDetectBuildings dacă nu e definit (din 11-viewer3d.js)
+  // Previne eroarea "not defined" la init rapid, înainte că 15-relevee.js să se execute
+  (function _guardRvDetect() {
+    if (typeof window._rvDetectBuildings !== 'undefined') return;
+    var _guardInterval = setInterval(function() {
+      if (typeof window._rvDetectBuildings !== 'undefined') {
+        clearInterval(_guardInterval); return;
+      }
+      // Stub temporar până ce 15-relevee.js definește funcția reală
+      if (!window._rvDetectBuildings) {
+        window._rvDetectBuildings = function() {
+          console.log('[RV bld] _rvDetectBuildings stub — 15-relevee.js nu e gata încă');
+          return null;
+        };
+      }
+    }, 200);
+    // Curățăm după 30s
+    setTimeout(function() { clearInterval(_guardInterval); }, 30000);
+  })();
+
   waitReady(() => {
     _fix1_MixV2Override();
     _fix2_TurFotoButton();
@@ -32,7 +52,7 @@
     _fix6_FnDimensionWarning();
     _injectMobileUI();
     _exposeDebug();
-    console.log('[TurSync v2.1] ✅ toate fix-urile aplicate');
+    console.log('[TurSync v2.2] ✅ toate fix-urile aplicate');
   });
 
   // ═══════════════════════════════════════════════════════════════════════
@@ -1375,8 +1395,22 @@
     }, 1500);
   }
 
-  function _generatePlanseBackground(reason) {
+  function _generatePlanseBackground(reason, _retries) {
     if (typeof window.generateRelevee !== 'function') return;
+    _retries = _retries || 0;
+
+    // Guard: _RV trebuie să existe cu floors populat înainte de generateRelevee
+    // Altfel 15-relevee.js aruncă "Cannot read properties of null (reading 'floorIdx')"
+    var RV = window._RV;
+    if (!RV || !Array.isArray(RV.floors) || RV.floors.length === 0) {
+      if (_retries > 10) {
+        console.warn('[AutoPlanse] _RV.floors nu e gata după 10 reîncercări — skip');
+        return;
+      }
+      // _RV nu e gata — re-scheduleăm după 800ms
+      setTimeout(function() { _generatePlanseBackground(reason, _retries + 1); }, 800);
+      return;
+    }
 
     var modal = document.getElementById('rv-modal');
     var wasOpen = modal && modal.classList.contains('rv-modal-open');
