@@ -591,62 +591,123 @@
     });
   }
 
-  // ── iOS Safari fallback: render simplu 2D per cameră ────────────────────
+  // ── iOS Safari fallback: 6 capturi ortogonale → equirectangular manual ──
   function _renderFallbackIOS(scene, x, y, z, resolve) {
     const THREE = window.THREE;
     const vtState = window.VTour?._state;
-
-    // Folosim renderer-ul existent din VTour dacă e disponibil
     const renderer = vtState?.renderer;
-    const camera   = vtState?.camera;
 
-    if (!renderer || !camera) {
-      // Fără renderer — generăm o imagine placeholder cu gradient
+    if (!renderer) {
       _generatePlaceholderPanorama(x, z).then(resolve);
       return;
     }
 
     try {
-      // Salvăm starea camerei
-      const origPos = camera.position.clone();
-      const origTarget = vtState.controls?.target?.clone?.() || new THREE.Vector3(x, y, z + 1);
+      // Dimensiunea unei fețe cubemap
+      const FACE = 512;
+      const EW = FACE * 4;  // equirect width
+      const EH = FACE * 2;  // equirect height
 
-      // Mutăm camera la poziția camerei
-      camera.position.set(x, y + 1.5, z);
-      camera.lookAt(x + 1, y + 1.5, z);
+      // Camera temporară Perspectivă 90° FOV
+      const faceCam = new THREE.PerspectiveCamera(90, 1, 0.05, 500);
+      faceCam.position.set(x, y + 1.55, z);
 
-      // Render la resoliție redusă (safe pe iOS)
-      const W = 1024, H = 512;
-      renderer.setSize(W, H, false);
-      renderer.render(scene, camera);
+      // Direcțiile celor 6 fețe cubemap
+      const FACES = [
+        { lookAt: [x+1,  y+1.55, z    ], up: [0,1,0] },  // +X față
+        { lookAt: [x-1,  y+1.55, z    ], up: [0,1,0] },  // -X spate
+        { lookAt: [x,    y+2.55, z    ], up: [0,0,-1] }, // +Y sus
+        { lookAt: [x,    y+0.55, z    ], up: [0,0,1]  }, // -Y jos
+        { lookAt: [x,    y+1.55, z+1  ], up: [0,1,0]  }, // +Z dreapta
+        { lookAt: [x,    y+1.55, z-1  ], up: [0,1,0]  }, // -Z stânga
+      ];
 
-      // Capturăm din canvas
-      const srcCanvas = renderer.domElement;
-      const outCanvas = document.createElement('canvas');
-      outCanvas.width = W; outCanvas.height = H;
-      const ctx = outCanvas.getContext('2d');
-      ctx.drawImage(srcCanvas, 0, 0, W, H);
+      // Capturăm fiecare față
+      const faceCanvases = [];
+      const origW = renderer.domElement.width;
+      const origH = renderer.domElement.height;
+      renderer.setSize(FACE, FACE, false);
 
-      // Restaurăm renderer la dimensiunea originală
-      const win = renderer.domElement.parentElement;
-      const origW = win?.clientWidth || 800;
-      const origH = win?.clientHeight || 600;
-      renderer.setSize(origW, origH, false);
+      for (let fi = 0; fi < FACES.length; fi++) {
+        const fd = FACES[fi];
+        faceCam.up.set(fd.up[0], fd.up[1], fd.up[2]);
+        faceCam.lookAt(fd.lookAt[0], fd.lookAt[1], fd.lookAt[2]);
+        faceCam.updateMatrixWorld(true);
+        renderer.render(scene, faceCam);
 
-      // Restaurăm camera
-      camera.position.copy(origPos);
-      if (vtState.controls?.target) vtState.controls.target.copy(origTarget);
-
-      try {
-        resolve(outCanvas.toDataURL('image/jpeg', 0.88));
-      } catch(e2) {
-        _generatePlaceholderPanorama(x, z).then(resolve);
+        // Capturăm pixelii acestei fețe
+        const cv = document.createElement('canvas');
+        cv.width = FACE; cv.height = FACE;
+        cv.getContext('2d').drawImage(renderer.domElement, 0, 0);
+        faceCanvases.push(cv);
       }
 
-    } catch (e) {
-      console.warn('[TurFoto iOS]', e.message);
+      // Restaurăm renderer-ul
+      renderer.setSize(origW, origH, false);
+
+      // Convertim 6 fețe → equirectangular via mapping manual
+      const eqCv = document.createElement('canvas');
+      eqCv.width = EW; eqCv.height = EH;
+      const eqCtx = eqCv.getContext('2d');
+
+      // Desenăm imaginile fețelor în layout cruciform (cross layout)
+      // și le sampling-uim în equirectangular
+      const imgDataOut = eqCtx.createImageData(EW, EH);
+      const out = imgDataOut.data;
+
+      // Pre-procesăm fețele în ImageData pentru sampling rapid
+      const faceData = faceCanvases.map(cv => {
+        const ctx2 = cv.getContext('2d');
+        return ctx2.getImageData(0, 0, FACE, FACE).data;
+      });
+
+      for (let py = 0; py < EH; py++) {
+        for (let px = 0; px < EW; px++) {
+          // Coordonate sferice
+          const phi   = (py / EH) * Math.PI;          // 0..PI  (sus→jos)
+          const theta = (px / EW) * 2 * Math.PI;      // 0..2PI (stânga→dreapta)
+
+          // Direcție 3D
+          const dx = Math.sin(phi) * Math.cos(theta);
+          const dy = Math.cos(phi);
+          const dz = Math.sin(phi) * Math.sin(theta);
+
+          // Determinăm fața dominantă
+          const ax = Math.abs(dx), ay = Math.abs(dy), az = Math.abs(dz);
+          let faceIdx, fu, fv;
+
+          if (ax >= ay && ax >= az) {
+            if (dx > 0) { faceIdx=0; fu=(-dz/ax+1)/2; fv=(-dy/ax+1)/2; }
+            else        { faceIdx=1; fu=( dz/ax+1)/2; fv=(-dy/ax+1)/2; }
+          } else if (ay >= ax && ay >= az) {
+            if (dy > 0) { faceIdx=2; fu=( dx/ay+1)/2; fv=( dz/ay+1)/2; }
+            else        { faceIdx=3; fu=( dx/ay+1)/2; fv=(-dz/ay+1)/2; }
+          } else {
+            if (dz > 0) { faceIdx=4; fu=( dx/az+1)/2; fv=(-dy/az+1)/2; }
+            else        { faceIdx=5; fu=(-dx/az+1)/2; fv=(-dy/az+1)/2; }
+          }
+
+          // Sample pixel din față
+          const fx = Math.min(FACE-1, Math.floor(fu * FACE));
+          const fy = Math.min(FACE-1, Math.floor(fv * FACE));
+          const fi = (fy * FACE + fx) * 4;
+          const oi = (py * EW + px) * 4;
+          const fd2 = faceData[faceIdx];
+          out[oi]   = fd2[fi];
+          out[oi+1] = fd2[fi+1];
+          out[oi+2] = fd2[fi+2];
+          out[oi+3] = 255;
+        }
+      }
+
+      eqCtx.putImageData(imgDataOut, 0, 0);
+      resolve(eqCv.toDataURL('image/jpeg', 0.88));
+
+    } catch(err) {
+      console.warn('[TurFoto iOS]', err.message);
       _generatePlaceholderPanorama(x, z).then(resolve);
     }
+
   }
 
   async function _generatePlaceholderPanorama(x, z) {
