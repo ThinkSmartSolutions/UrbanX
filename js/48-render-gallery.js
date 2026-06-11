@@ -46,17 +46,48 @@
 
   // ── Launcher ─────────────────────────────────────────────────────────
   function _launchGallery() {
-    var RV = window._RV;
-    if (!RV || !RV.building || !RV.floors || !RV.floors[0]) {
-      if (typeof ss === 'function') ss('⚠ Deschide planșele înainte de render');
-      return;
-    }
     var THREE = window.THREE;
     if (!THREE) {
       if (typeof ss === 'function') ss('⚠ Deschide Viewer 3D înainte de render');
       return;
     }
+    // Dacă _RV.floors e gol, construim date sintetice din AEDIS
+    var RV = window._RV;
+    if (!RV || !RV.building || !RV.floors || !RV.floors[0]) {
+      var A = window.AEDIS;
+      if (!A) {
+        if (typeof ss === 'function') ss('⚠ Generează mai întâi o clădire în AEDIS');
+        return;
+      }
+      // Construim _RV sintetic minimal pentru galerie
+      if (!window._RV) window._RV = {};
+      var corp = (Array.isArray(A.corpuri) && A.corpuri[0]) || {};
+      var niv  = parseInt(corp.niv) || parseInt(A.niv) || 3;
+      var bW   = corp.bW || 18;
+      var bD   = corp.bD || 14;
+      window._RV.building = window._RV.building || { bW:bW, bD:bD, niv:niv, scArea:bW*bD };
+      if (!window._RV.floors || !window._RV.floors[0]) {
+        window._RV.floors = [];
+        var fn = A.fn || 'rezidential_colectiv';
+        for (var f = 0; f < niv; f++) {
+          window._RV.floors.push(_syntheticFloor(f, bW, bD, fn));
+        }
+      }
+      console.log('[Gallery4K] _RV sintetic construit din AEDIS: ' + niv + ' etaje');
+    }
     _showGalleryUI();
+  }
+
+  function _syntheticFloor(fIdx, bW, bD, fn) {
+    // Plan minimal: living + dormitor + baie + bucătărie + hol
+    var rects = [
+      { t:'living',   x:0,        y:0,      w:bW*0.45, h:bD*0.55, apt:0 },
+      { t:'bedroom',  x:bW*0.45,  y:0,      w:bW*0.35, h:bD*0.5,  apt:0 },
+      { t:'kitchen',  x:0,        y:bD*0.55,w:bW*0.35, h:bD*0.45, apt:0 },
+      { t:'bath',     x:bW*0.45,  y:bD*0.5, w:bW*0.2,  h:bD*0.25, apt:0 },
+      { t:'hall',     x:bW*0.35,  y:bD*0.55,w:bW*0.1,  h:bD*0.45, apt:0 },
+    ];
+    return { floorIdx: fIdx, rects: rects, doors: [], wins: [] };
   }
 
   // ── UI Galerie ────────────────────────────────────────────────────────
@@ -1008,7 +1039,9 @@
   function waitReady(cb,n){n=n||0;if(n>200)return;if(window.THREE){cb();return;}setTimeout(function(){waitReady(cb,n+1);},250);}
   waitReady(function(){
     _inject();
-    console.log('[Gallery4K v1] ✅ Galerie render 4K per cameră activă');
+    // Expunem global pentru butonul Render HD din 27-tur-sync.js
+    window._launchGallery4K = _launchGallery;
+    console.log('[Gallery4K v1.1] ✅ Galerie render 4K per cameră activă');
   });
 
 })();

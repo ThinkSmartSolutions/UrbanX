@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   UrbanX · 27-tur-sync.js · v2.2 · 11 Iunie 2026
+   UrbanX · 27-tur-sync.js · v2.3 · 11 Iunie 2026
    ──────────────────────────────────────────────────────────────────────────
    FIX v2.1 — toate problemele identificate din audit + screenshots:
 
@@ -23,24 +23,29 @@
     setTimeout(() => waitReady(cb, n + 1), 150);
   }
 
-  // Guard global: patch _rvDetectBuildings dacă nu e definit (din 11-viewer3d.js)
-  // Previne eroarea "not defined" la init rapid, înainte că 15-relevee.js să se execute
+  // Guard global: patch _rvDetectBuildings + _rvRenderScore dacă nu sunt definite
+  // Previne erorile "not defined" la init rapid, înainte că 15-relevee.js să se execute
   (function _guardRvDetect() {
-    if (typeof window._rvDetectBuildings !== 'undefined') return;
-    var _guardInterval = setInterval(function() {
-      if (typeof window._rvDetectBuildings !== 'undefined') {
-        clearInterval(_guardInterval); return;
-      }
-      // Stub temporar până ce 15-relevee.js definește funcția reală
-      if (!window._rvDetectBuildings) {
-        window._rvDetectBuildings = function() {
-          console.log('[RV bld] _rvDetectBuildings stub — 15-relevee.js nu e gata încă');
-          return null;
-        };
-      }
-    }, 200);
-    // Curățăm după 30s
-    setTimeout(function() { clearInterval(_guardInterval); }, 30000);
+    var _missingFns = ['_rvDetectBuildings', '_rvRenderScore'];
+    _missingFns.forEach(function(fnName) {
+      if (typeof window[fnName] !== 'undefined') return;
+      var _gi = setInterval(function() {
+        // Dacă 15-relevee.js l-a definit între timp, ștergem stub-ul
+        if (typeof window[fnName] === 'function' &&
+            !window[fnName]._isStub) {
+          clearInterval(_gi); return;
+        }
+        if (!window[fnName] || window[fnName]._isStub) {
+          var stub = function() {
+            console.log('[RV bld] ' + fnName + ' stub — 15-relevee.js nu e gata încă');
+            return null;
+          };
+          stub._isStub = true;
+          window[fnName] = stub;
+        }
+      }, 200);
+      setTimeout(function() { clearInterval(_gi); }, 30000);
+    });
   })();
 
   waitReady(() => {
@@ -52,7 +57,7 @@
     _fix6_FnDimensionWarning();
     _injectMobileUI();
     _exposeDebug();
-    console.log('[TurSync v2.2] ✅ toate fix-urile aplicate');
+    console.log('[TurSync v2.3] ✅ toate fix-urile aplicate');
   });
 
   // ═══════════════════════════════════════════════════════════════════════
@@ -238,7 +243,19 @@
       { id:'mi-3dplan',    icon:'📐', label:'3D Floor Plan', sub:'Plan nivel interactiv',  color:'#60a5fa', fn:() => document.getElementById('vtour-fp-btn')?.click() },
       { sep: true },
       { id:'mi-tur',       icon:'✨', label:'Tur Fotorealist',sub:'Preview 360° instant',  color:'#c084fc', fn:() => typeof window._showTurFotoLauncher==='function'&&window._showTurFotoLauncher() },
-      { id:'mi-render',    icon:'⭐', label:'Render HD',      sub:'Path tracing WebGL',    color:'#fbbf24', fn:() => typeof window._ptShowOverlay==='function'&&window._ptShowOverlay() },
+      { id:'mi-render',    icon:'⭐', label:'Render HD',      sub:'Path tracing WebGL',    color:'#fbbf24', fn:() => {
+        // Încearcă 33-photorealism _ptShowOverlay, fallback pe 48-render-gallery
+        if (typeof window._ptShowOverlay === 'function') {
+          window._ptShowOverlay();
+        } else if (typeof window._launchGallery4K === 'function') {
+          window._launchGallery4K();
+        } else {
+          // Fallback direct: click butonul din 48-render-gallery dacă există
+          var gBtn = document.getElementById('btn-gallery-4k');
+          if (gBtn) { gBtn.click(); }
+          else if (typeof ss === 'function') ss('⚠ Render HD: deschide Viewer 3D și planșele mai întâi');
+        }
+      }},
       { id:'mi-splat',     icon:'🌟', label:'Gaussian Splat', sub:'Polycam / Luma AI',     color:'#4ade80', fn:() => typeof window._gsLaunch==='function'&&window._gsLaunch() },
       { sep: true },
       { id:'mi-glb',       icon:'📦', label:'Export GLB+BIM', sub:'3D + IFC structural',   color:'#818cf8', fn:() => typeof window._rvExportGLBSemantic==='function'&&window._rvExportGLBSemantic() },
