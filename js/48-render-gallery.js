@@ -530,20 +530,40 @@
     var isMini    = stil === 'minimalist';
     var isIndu    = stil === 'industrial';
 
+    // Wrapper compatibil THREE r128 — elimină proprietăți din r130+
     function mp(o) {
-      return new THREE.MeshPhysicalMaterial(Object.assign({
-        envMap: envMap, envMapIntensity: o.envI || 1.0,
-      }, o));
+      var safe = {};
+      var skip = ['envI','sheenColor','sheenRoughness','transmission','thickness','ior'];
+      var envIntensity = o.envI || 1.0;
+      Object.keys(o).forEach(function(k) {
+        if (skip.indexOf(k) === -1) safe[k] = o[k];
+      });
+      safe.envMap = envMap;
+      safe.envMapIntensity = envIntensity;
+      // sheenColor → aproximăm prin color dacă e material cu sheen
+      if (o.sheenColor && !safe.color) {
+        // nu setăm color pe materiale cu map
+      }
+      return new THREE.MeshPhysicalMaterial(safe);
     }
 
+    // Sticlă: r128 nu are transmission — folosim transparent simplu
+    var glassMat = new THREE.MeshPhysicalMaterial({
+      color: 0xD0E8F5,
+      transparent: true, opacity: 0.18,
+      roughness: 0.0, metalness: 0.0,
+      envMap: envMap, envMapIntensity: 1.8,
+      side: THREE.DoubleSide,
+    });
+
     return {
-      // Podele
       floorLiving: mp({
         map:          _loadTex(THREE, PBR+'parchet_stejar/diff.jpg', 5),
         normalMap:    _loadTex(THREE, PBR+'parchet_stejar/nor_gl.jpg', 5),
         roughnessMap: _loadTex(THREE, PBR+'parchet_stejar/rough.jpg', 5),
         aoMap:        _loadTex(THREE, PBR+'parchet_stejar/ao.jpg', 5),
-        roughness:.50, metalness:.01, clearcoat:.30, clearcoatRoughness:.18, envI:1.4,
+        roughness:.50, metalness:.01,
+        clearcoat:.30, clearcoatRoughness:.18, envI:1.4,
         aoMapIntensity: 1.0,
       }),
       floorBath: mp({
@@ -551,7 +571,8 @@
         normalMap:    _loadTex(THREE, PBR+'marble_white/nor_gl.jpg', 2),
         roughnessMap: _loadTex(THREE, PBR+'marble_white/rough.jpg', 2),
         aoMap:        _loadTex(THREE, PBR+'marble_white/ao.jpg', 2),
-        roughness:.10, metalness:.05, clearcoat:.95, clearcoatRoughness:.04, envI:2.0,
+        roughness:.10, metalness:.05,
+        clearcoat:.95, clearcoatRoughness:.04, envI:2.0,
       }),
       floorKitchen: mp({
         map:          _loadTex(THREE, PBR+(isClassic?'marble_white':'blat_bucatarie')+'/diff.jpg', 3),
@@ -560,28 +581,22 @@
         roughness: isClassic?.12:.30, metalness:.05,
         clearcoat: isClassic?.9:.4, clearcoatRoughness:.06, envI:1.5,
       }),
-
-      // Pereți
       wall: mp({
         map:          _loadTex(THREE, PBR+(isIndu?'caramida_aparenta':'tencuiala_interior')+'/diff.jpg', 6),
         normalMap:    _loadTex(THREE, PBR+(isIndu?'caramida_aparenta':'tencuiala_interior')+'/nor_gl.jpg', 6),
         roughnessMap: _loadTex(THREE, PBR+(isIndu?'caramida_aparenta':'tencuiala_interior')+'/rough.jpg', 6),
         aoMap:        _loadTex(THREE, PBR+(isIndu?'caramida_aparenta':'tencuiala_interior')+'/ao.jpg', 6),
-        roughness: isIndu?.85:.82, metalness:0, aoMapIntensity:.7, envI:.5,
+        roughness: isIndu?.85:.82, metalness:0,
+        aoMapIntensity:.7, envI:.3,
         normalScale: new THREE.Vector2(isIndu?.9:.35, isIndu?.9:.35),
       }),
-
-      // Tavan
       ceiling: mp({ color:0xFBFAF8, roughness:.93, metalness:0, envI:.2 }),
-
-      // Mobilier
       sofa: mp({
-        map:          _loadTex(THREE, PBR+'fabric_canapea/nor_gl.jpg', 2),
         normalMap:    _loadTex(THREE, PBR+'fabric_canapea/nor_gl.jpg', 2),
         roughnessMap: _loadTex(THREE, PBR+'fabric_canapea/rough.jpg', 2),
         color: isClassic?0x6B4030:isMini?0xC0B8B0:0x3A4A5E,
         roughness:.85, metalness:0,
-        sheen:1.0, sheenRoughness:.55, sheenColor:0xE0C090, envI:.6,
+        sheen: 1.0, envI:.5,
       }),
       metal: mp({
         map:          _loadTex(THREE, PBR+'metal_finish/diff.jpg', 1),
@@ -595,12 +610,7 @@
         color:0x2A1508, roughness:.18, metalness:0,
         clearcoat:.95, clearcoatRoughness:.05, envI:1.5,
       }),
-      glass: new THREE.MeshPhysicalMaterial({
-        color:0xC8E8F8, transparent:true, opacity:.14,
-        roughness:0, metalness:0, transmission:.97,
-        thickness:.5, ior:1.52, envMap:envMap, envMapIntensity:2.5,
-        side:THREE.DoubleSide,
-      }),
+      glass: glassMat,
     };
   }
 
@@ -621,15 +631,15 @@
       camera.lookAt(0, niv * hNiv * .45, 0);
       camera.fov = 38;
     } else {
+      // Scena interioară e construită de la (0,0) la (rW, rD)
+      // Camera la înălțimea ochilor, în treimea din spate, privind spre fereastră (z=0)
       var r = room.r;
-      var cx = r.x + r.w / 2;
-      var cz = r.y + r.h / 2;
-      var camZ = cz + r.h * 0.35;
-      var targetZ = cz - r.h * 0.35;
-      camera.position.set(cx, 1.55, camZ);
-      camera.lookAt(cx, 1.35, targetZ);
-      camera.fov = 62;
+      var rW = r.w, rD = r.h;
+      camera.position.set(rW * 0.5, 1.55, rD * 0.72);
+      camera.lookAt(rW * 0.5, 1.25, 0);
+      camera.fov = 65;
       camera.near = 0.05;
+      camera.far  = 200;
     }
     camera.updateProjectionMatrix();
   }
@@ -720,7 +730,7 @@
   function _addCurtainsRoom(scene, THREE, M, rW, rD, hNiv) {
     var curtMat = new THREE.MeshPhysicalMaterial({
       color:0xC8D8E0, roughness:.88, metalness:0,
-      sheen:.6, sheenRoughness:.7, sheenColor:0xE0D8C8,
+      sheen: 0.6,
       transparent:true, opacity:.85, side:THREE.DoubleSide,
     });
     var rodMat = M.metal;
@@ -857,7 +867,7 @@
       new THREE.MeshPhysicalMaterial({color:0xF0EDE5,roughness:.90}));
     matt.position.y=.42; g.add(matt);
     var duvet=new THREE.Mesh(new THREE.BoxGeometry(W-.06,.10,D*.62),
-      new THREE.MeshPhysicalMaterial({color:0x607090,roughness:.90,sheen:.7,sheenRoughness:.65,sheenColor:0x8090A0}));
+      new THREE.MeshPhysicalMaterial({color:0x607090,roughness:.90,sheen:.7}));
     duvet.position.set(0,.58,D*.10); duvet.castShadow=true; g.add(duvet);
     [-W/4,W/4].forEach(function(px){
       var p=new THREE.Mesh(new THREE.BoxGeometry(.68,.16,.48),
@@ -865,7 +875,7 @@
       p.position.set(px,.60,-D*.35); g.add(p);
     });
     var head=new THREE.Mesh(new THREE.BoxGeometry(W+.10,1.0,.12),
-      new THREE.MeshPhysicalMaterial({color:0x8B7355,roughness:.78,sheen:.9,sheenRoughness:.55,sheenColor:0xAA9070}));
+      new THREE.MeshPhysicalMaterial({color:0x8B7355,roughness:.78,sheen:.9}));
     head.position.set(0,.80,-D/2-.04); head.castShadow=true; g.add(head);
     g.position.set(x,y,z); scene.add(g);
   }
@@ -1052,7 +1062,7 @@
     _inject();
     // Expunem global pentru butonul Render HD din 27-tur-sync.js
     window._launchGallery4K = _launchGallery;
-    console.log('[Gallery4K v1.2] ✅ Galerie render 4K independentă de _RV');
+    console.log('[Gallery4K v1.3] ✅ r128 compatibil + camera fix');
   });
 
 })();
