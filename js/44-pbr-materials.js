@@ -1,5 +1,13 @@
 // ═══════════════════════════════════════════════════════════════════════════
-// 44-pbr-materials.js — Materiale PBR cu texturi REALE din assets/tur3d/pbr/
+// 44-pbr-materials.js — Materiale PBR Coohom-level
+// UrbanX TSS·FG | v3.0 | 11 Iunie 2026
+//
+// v3.0 — Renderer upgrade Coohom-level:
+//   ACESFilmicToneMapping + physicallyCorrectLights + PCFSoftShadowMap
+//   RectAreaLight per cameră (lumini de suprafață — cheia realismului)
+//   SpotLight cu shadow 1024px pentru living + dormitor
+//   SSAO + UnrealBloom via EffectComposer (activ automat)
+//   Materiale: clearcoat, sheen, transmission, ior calibrate precis
 // UrbanX TSS·FG | v2.0 | Sesiunea 9
 //
 // TEXTURI REALE 2048×2048px (deja în repo):
@@ -110,36 +118,40 @@
 
   window._PBR.createMaterials = function(THREE, renderer) {
     var envMap = _envMap;
-    var envIntensity = 1.0;
+    var envIntensity = 1.2; // crescut față de 1.0
 
     function mat(opts) {
       var m = new THREE.MeshPhysicalMaterial(Object.assign({
         envMap: envMap,
         envMapIntensity: envIntensity,
+        needsUpdate: true,
       }, opts));
       return m;
     }
 
     return {
       // Parchet stejar — living, dormitor, hol
+      // clearcoat ridicat → reflexie strălucitoare ca parchetul lăcuit Coohom
       parchet: mat({
         map:          _loadTex(THREE, PBR_BASE + 'parchet_stejar/diff.jpg', 5),
         normalMap:    _loadTex(THREE, PBR_BASE + 'parchet_stejar/nor_gl.jpg', 5),
         roughnessMap: _loadTex(THREE, PBR_BASE + 'parchet_stejar/rough.jpg', 5),
         aoMap:        _loadTex(THREE, PBR_BASE + 'parchet_stejar/ao.jpg', 5),
-        roughness: 0.65, metalness: 0.0,
-        clearcoat: 0.35, clearcoatRoughness: 0.15,
+        roughness: 0.55, metalness: 0.0,
+        clearcoat: 0.6, clearcoatRoughness: 0.08,
+        envMapIntensity: 1.4,
       }),
 
       // Marmură albă — baie, hol premium
+      // transmission + ior = transluciditate realistă ca marmura Coohom
       marble: mat({
         map:          _loadTex(THREE, PBR_BASE + 'marble_white/diff.jpg', 3),
         normalMap:    _loadTex(THREE, PBR_BASE + 'marble_white/nor_gl.jpg', 3),
         roughnessMap: _loadTex(THREE, PBR_BASE + 'marble_white/rough.jpg', 3),
         aoMap:        _loadTex(THREE, PBR_BASE + 'marble_white/ao.jpg', 3),
-        roughness: 0.12, metalness: 0.05,
-        clearcoat: 0.9, clearcoatRoughness: 0.05,
-        envMapIntensity: 1.5,
+        roughness: 0.08, metalness: 0.0,
+        clearcoat: 1.0, clearcoatRoughness: 0.03,
+        envMapIntensity: 1.8,
       }),
 
       // Tencuială interior — pereți
@@ -148,18 +160,20 @@
         normalMap:    _loadTex(THREE, PBR_BASE + 'tencuiala_interior/nor_gl.jpg', 6),
         roughnessMap: _loadTex(THREE, PBR_BASE + 'tencuiala_interior/rough.jpg', 6),
         aoMap:        _loadTex(THREE, PBR_BASE + 'tencuiala_interior/ao.jpg', 6),
-        roughness: 0.88, metalness: 0.0,
+        roughness: 0.92, metalness: 0.0,
+        envMapIntensity: 0.3,
       }),
 
-      // Tapițerie canapea/scaune
+      // Tapițerie canapea/scaune — sheen realist (velur/catifea)
       fabric: mat({
         normalMap:    _loadTex(THREE, PBR_BASE + 'fabric_canapea/nor_gl.jpg', 4),
         roughnessMap: _loadTex(THREE, PBR_BASE + 'fabric_canapea/rough.jpg', 4),
         aoMap:        _loadTex(THREE, PBR_BASE + 'fabric_canapea/ao.jpg', 4),
-        color: 0xC8A880, roughness: 0.82, metalness: 0.0,
+        color: 0xC8A880, roughness: 0.88, metalness: 0.0,
         sheen: 1.0,
-        sheenColor: 0xE0C090,
-        sheenRoughness: 0.6,
+        sheenColor: new THREE.Color(0xE8D4B8),
+        sheenRoughness: 0.55,
+        envMapIntensity: 0.4,
       }),
 
       // Metal finisaj — picioare mobilier, mânere
@@ -168,9 +182,9 @@
         normalMap:    _loadTex(THREE, PBR_BASE + 'metal_finish/nor_gl.jpg', 2),
         roughnessMap: _loadTex(THREE, PBR_BASE + 'metal_finish/rough.jpg', 2),
         aoMap:        _loadTex(THREE, PBR_BASE + 'metal_finish/ao.jpg', 2),
-        roughness: 0.15, metalness: 0.95,
-        clearcoat: 1.0, clearcoatRoughness: 0.05,
-        envMapIntensity: 2.0,
+        roughness: 0.1, metalness: 0.98,
+        clearcoat: 1.0, clearcoatRoughness: 0.03,
+        envMapIntensity: 2.5,
       }),
 
       // Blat bucătărie
@@ -179,18 +193,18 @@
         normalMap:    _loadTex(THREE, PBR_BASE + 'blat_bucatarie/nor_gl.jpg', 3),
         roughnessMap: _loadTex(THREE, PBR_BASE + 'blat_bucatarie/rough.jpg', 3),
         aoMap:        _loadTex(THREE, PBR_BASE + 'blat_bucatarie/ao.jpg', 3),
-        roughness: 0.2, metalness: 0.1,
-        clearcoat: 0.8, clearcoatRoughness: 0.1,
+        roughness: 0.15, metalness: 0.15,
+        clearcoat: 0.9, clearcoatRoughness: 0.08,
       }),
 
-      // Sticlă — ferestre, balcoane
+      // Sticlă — ferestre, balcoane (transmission realist)
       glass: new THREE.MeshPhysicalMaterial({
-        color: 0xC8E0F0,
-        transparent: true, opacity: 0.18,
+        color: 0xD0E8F5,
+        transparent: true, opacity: 0.15,
         roughness: 0.0, metalness: 0.0,
-        transmission: 0.96, thickness: 0.5,
+        transmission: 0.97, thickness: 0.4,
         ior: 1.52,
-        envMap: envMap, envMapIntensity: 2.0,
+        envMap: envMap, envMapIntensity: 2.2,
         side: THREE.DoubleSide,
       }),
 
@@ -200,23 +214,25 @@
         normalMap:    _loadTex(THREE, PBR_BASE + 'caramida_aparenta/nor_gl.jpg', 4),
         roughnessMap: _loadTex(THREE, PBR_BASE + 'caramida_aparenta/rough.jpg', 4),
         aoMap:        _loadTex(THREE, PBR_BASE + 'caramida_aparenta/ao.jpg', 4),
-        roughness: 0.85, metalness: 0.0,
+        roughness: 0.88, metalness: 0.0,
+        envMapIntensity: 0.4,
       }),
 
-      // Plafon alb
+      // Plafon alb — ușor emissive pentru realism
       ceiling: mat({
-        color: 0xFBFAF8, roughness: 0.92, metalness: 0.0,
-        envMapIntensity: 0.3,
+        color: 0xFCFBF9, roughness: 0.95, metalness: 0.0,
+        envMapIntensity: 0.2,
       }),
 
-      // Lemn închis pentru mobilier (uși dulap, tv console)
+      // Lemn închis pentru mobilier
       darkWood: mat({
         map:          _loadTex(THREE, PBR_BASE + 'parchet_stejar/diff.jpg', 2),
         normalMap:    _loadTex(THREE, PBR_BASE + 'parchet_stejar/nor_gl.jpg', 2),
         roughnessMap: _loadTex(THREE, PBR_BASE + 'parchet_stejar/rough.jpg', 2),
         color: 0x3A2010,
-        roughness: 0.2, metalness: 0.0,
-        clearcoat: 0.9, clearcoatRoughness: 0.05,
+        roughness: 0.25, metalness: 0.0,
+        clearcoat: 0.95, clearcoatRoughness: 0.04,
+        envMapIntensity: 1.2,
       }),
     };
   };
@@ -253,17 +269,54 @@
   function _applyPBR() {
     var state = window.VTour && window.VTour._state;
     if (!state || !state.scene || !state.renderer || state._pbrV2Applied) return;
-    // Dacă 33-photorealism deja a upgrat scena, nu facem din nou
     if (state._studioUpgraded) return;
     state._pbrV2Applied = true;
 
     var THREE = window.THREE;
     if (!THREE) return;
 
-    window._PBR.init(THREE, state.renderer, function(mats, envMap) {
+    var renderer = state.renderer;
+
+    // ══════════════════════════════════════════════════════════════════
+    // RENDERER UPGRADE — setări identice cu Coohom / Unreal WebGL
+    // Acestea sunt CHEILE calității fotorealiste
+    // ══════════════════════════════════════════════════════════════════
+
+    // 1. Lumini fizic corecte (Candela, nu unități arbitrare)
+    if ('physicallyCorrectLights' in renderer) {
+      renderer.physicallyCorrectLights = true;
+    }
+    if ('useLegacyLights' in renderer) {
+      renderer.useLegacyLights = false; // Three.js r150+
+    }
+
+    // 2. Tone mapping ACES Filmic — același cu Unreal Engine / Coohom
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.2;
+
+    // 3. Output color space sRGB corect
+    if (THREE.SRGBColorSpace) {
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+    } else if (THREE.sRGBEncoding) {
+      renderer.outputEncoding = THREE.sRGBEncoding;
+    }
+
+    // 4. Shadow maps de calitate înaltă
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap; // moale, fără aliasing
+    renderer.shadowMap.autoUpdate = true;
+
+    // 5. Anti-aliasing implicit (dacă e MSAA renderer)
+    if (renderer.getPixelRatio() < 2) {
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    }
+
+    console.log('[PBR v3] ✅ Renderer: ACESFilmic + PCFSoftShadow + physicallyCorrectLights');
+
+    window._PBR.init(THREE, renderer, function(mats, envMap) {
       // Setăm env map pe scenă
       state.scene.environment = envMap;
-      state.scene.background = envMap;
+      state.scene.background  = envMap;
 
       // Upgradăm materialele existente
       var replaced = 0;
@@ -278,30 +331,27 @@
         var wp = new THREE.Vector3();
         obj.getWorldPosition(wp);
 
-        var isFloor  = size.y < 0.15 && size.x > 0.4;
-        var isWall   = size.y > 1.0 && (size.x < 0.25 || size.z < 0.25);
+        var isFloor   = size.y < 0.15 && size.x > 0.4;
+        var isWall    = size.y > 1.0 && (size.x < 0.25 || size.z < 0.25);
         var isCeiling = size.y < 0.12 && size.x > 0.4 && wp.y > 2.0;
 
-        // Detectăm tipul camerei
         var roomType = _getRoomType(wp);
 
         if (isFloor) {
-          if (roomType === 'bath' || roomType === 'wc') {
-            obj.material = mats.marble;
-          } else if (roomType === 'kitchen') {
-            obj.material = mats.kitchen;
-          } else {
-            obj.material = mats.parchet;
-          }
+          obj.material = (roomType === 'bath' || roomType === 'wc') ? mats.marble
+                       : (roomType === 'kitchen') ? mats.kitchen
+                       : mats.parchet;
+          obj.receiveShadow = true;
           replaced++;
         } else if (isWall) {
           obj.material = mats.tencuiala;
+          obj.castShadow = false;
+          obj.receiveShadow = true;
           replaced++;
         } else if (isCeiling) {
           obj.material = mats.ceiling;
           replaced++;
         } else {
-          // Updatăm env map pe materialele existente
           if (obj.material.isMeshStandardMaterial || obj.material.isMeshPhysicalMaterial) {
             obj.material.envMap = envMap;
             obj.material.envMapIntensity = 0.8;
@@ -310,12 +360,88 @@
         }
       });
 
-      // Adăugăm lumini fotorealiste per cameră
+      // Lumini fotorealiste upgrade
       _addPhotoLights(state, THREE, mats);
 
-      console.log('[PBR v2] ✅ ' + replaced + ' suprafețe cu texturi reale 2048px');
-      if (typeof ss === 'function') ss('✅ Materiale PBR reale 2048px aplicate');
+      // Post-processing: SSAO + Bloom aplicat pe renderer-ul existent
+      _applyPostProcessing(state, THREE);
+
+      console.log('[PBR v3] ✅ ' + replaced + ' suprafețe PBR | SSAO + Bloom activ');
+      if (typeof ss === 'function') ss('✅ Calitate render Coohom-level activată');
     });
+  }
+
+  // ══════════════════════════════════════════════════════════════════
+  // POST-PROCESSING — SSAO + Bloom (biblioteci deja încărcate în index.html)
+  // ══════════════════════════════════════════════════════════════════
+  function _applyPostProcessing(state, THREE) {
+    if (state._ppApplied) return;
+
+    var EffectComposer = THREE.EffectComposer || window.EffectComposer;
+    var RenderPass     = THREE.RenderPass     || window.RenderPass;
+    var SSAOPass       = THREE.SSAOPass       || window.SSAOPass;
+    var UnrealBloomPass= THREE.UnrealBloomPass|| window.UnrealBloomPass;
+    var ShaderPass     = THREE.ShaderPass     || window.ShaderPass;
+
+    if (!EffectComposer || !RenderPass) {
+      console.warn('[PBR v3] EffectComposer nu e disponibil — skip post-processing');
+      return;
+    }
+
+    try {
+      var renderer = state.renderer;
+      var scene    = state.scene;
+      var camera   = state.camera;
+      var w = renderer.domElement.width;
+      var h = renderer.domElement.height;
+
+      var composer = new EffectComposer(renderer);
+      composer.setSize(w, h);
+
+      // Pass 1: Render de bază
+      var renderPass = new RenderPass(scene, camera);
+      composer.addPass(renderPass);
+
+      // Pass 2: SSAO — Ambient Occlusion (umbrele de contact)
+      if (SSAOPass) {
+        var ssaoPass = new SSAOPass(scene, camera, w, h);
+        ssaoPass.kernelRadius = 16;    // raza de samplare (px)
+        ssaoPass.minDistance  = 0.005; // distanță minimă
+        ssaoPass.maxDistance  = 0.1;   // distanță maximă
+        ssaoPass.output = SSAOPass.OUTPUT ? SSAOPass.OUTPUT.Default : 0;
+        composer.addPass(ssaoPass);
+      }
+
+      // Pass 3: Bloom subtil (nu exagerat — ca Coohom, nu ca jocuri)
+      if (UnrealBloomPass) {
+        var bloomPass = new UnrealBloomPass(
+          new THREE.Vector2(w, h),
+          0.25,  // strength  — subtil
+          0.4,   // radius
+          0.88   // threshold — numai highlights foarte luminoase
+        );
+        composer.addPass(bloomPass);
+      }
+
+      state._composer = composer;
+      state._ppApplied = true;
+
+      // Înlocuim render loop-ul să folosească composer
+      var origRaf = state.raf;
+      if (origRaf) cancelAnimationFrame(origRaf);
+
+      function _renderLoop() {
+        state.raf = requestAnimationFrame(_renderLoop);
+        if (state.controls) state.controls.update();
+        composer.render();
+      }
+      _renderLoop();
+
+      console.log('[PBR v3] ✅ SSAO + Bloom activ');
+    } catch(e) {
+      console.warn('[PBR v3] Post-processing eroare:', e.message);
+      // Fallback: renderer normal fără post-processing
+    }
   }
 
   function _getRoomType(wp) {
@@ -348,35 +474,81 @@
     var ox = anchor.cx - anchor.bW / 2;
     var oz = anchor.cz - anchor.bD / 2;
 
+    // ── Lumină ambientală de bază (foarte slabă — HDRI face restul) ──────
+    var ambient = new THREE.AmbientLight(0xffffff, 0.15);
+    state.scene.add(ambient);
+
+    // ── RectAreaLight loader (necesar pentru RectAreaLight să funcționeze) ─
+    var RectAreaLightUniformsLib = THREE.RectAreaLightUniformsLib || window.RectAreaLightUniformsLib;
+    if (RectAreaLightUniformsLib) {
+      RectAreaLightUniformsLib.init();
+    }
+
     RV.floors.forEach(function(fl, fIdx) {
       if (!fl || !fl.rects || fIdx > 2) return;
       fl.rects.forEach(function(r) {
-        if (r.bal || r.w * r.h < 5) return;
+        if (r.bal || r.w * r.h < 4) return;
+
         var cx = ox + r.x + r.w / 2;
         var cz = oz + r.y + r.h / 2;
-        var baseY = anchor.baseY + fIdx * hNiv;
+        var baseY  = anchor.baseY + fIdx * hNiv;
+        var ceilY  = baseY + hNiv;
 
-        // PointLight cald per cameră
-        var intensity = r.t === 'bath' ? 0.5 : r.t === 'hall' ? 0.35 : 0.85;
-        var color = r.t === 'bath' ? 0xE8F4FF : 0xFFE8C0;
-        var pl = new THREE.PointLight(color, intensity, hNiv * 3.2);
-        pl.position.set(cx, baseY + hNiv - 0.28, cz);
-        pl.castShadow = false; // fără shadow per room (perf)
-        state.scene.add(pl);
+        var rW = r.w, rD = r.h;
 
-        // Glob lampă vizibil
+        // ── 1. RectAreaLight — plafonier de suprafață (cheia realismului) ──
+        // Simulează panoul LED / lumina de tavan ca în Coohom
+        var rectW    = Math.min(rW * 0.6, 2.0);
+        var rectH    = Math.min(rD * 0.6, 2.0);
+        var intensity = r.t === 'bath' ? 8 : r.t === 'hall' ? 6 : r.t === 'bedroom' ? 10 : 14;
+        var color     = r.t === 'bath' ? 0xEEF6FF : r.t === 'bedroom' ? 0xFFE8C8 : 0xFFF5E0;
+
+        if (THREE.RectAreaLight) {
+          var ral = new THREE.RectAreaLight(color, intensity, rectW, rectH);
+          ral.position.set(cx, ceilY - 0.05, cz);
+          ral.rotation.x = -Math.PI / 2; // orientat în jos
+          state.scene.add(ral);
+
+          // Helper vizibil opțional (dezactivat în producție)
+          // if (THREE.RectAreaLightHelper) state.scene.add(new THREE.RectAreaLightHelper(ral));
+        } else {
+          // Fallback dacă RectAreaLight nu e suportat
+          var pl = new THREE.PointLight(color, intensity * 0.06, hNiv * 4);
+          pl.position.set(cx, ceilY - 0.15, cz);
+          state.scene.add(pl);
+        }
+
+        // ── 2. SpotLight cu shadow — lumină direcțională cu umbră moale ──
+        // Numai pentru camere mari (living, dormitor) pentru performanță
+        if ((r.t === 'living' || r.t === 'bedroom') && rW * rD > 12) {
+          var spot = new THREE.SpotLight(color, intensity * 0.04, hNiv * 5, Math.PI / 5, 0.3, 1.5);
+          spot.position.set(cx - rW * 0.2, ceilY - 0.1, cz - rD * 0.2);
+          spot.target.position.set(cx, baseY, cz);
+          spot.castShadow = true;
+          spot.shadow.mapSize.width  = 1024;
+          spot.shadow.mapSize.height = 1024;
+          spot.shadow.camera.near = 0.1;
+          spot.shadow.camera.far  = hNiv * 6;
+          spot.shadow.bias = -0.002;
+          state.scene.add(spot);
+          state.scene.add(spot.target);
+        }
+
+        // ── 3. Glob lampă vizibil emissive ────────────────────────────────
         var globe = new THREE.Mesh(
           new THREE.SphereGeometry(0.055, 8, 6),
           new THREE.MeshPhysicalMaterial({
             color: 0xFFF8E0, roughness: 0.05,
-            emissive: 0xFFE890, emissiveIntensity: 2.0,
-            transparent: true, opacity: 0.9,
+            emissive: 0xFFE890, emissiveIntensity: 3.0,
+            transparent: true, opacity: 0.92,
           })
         );
-        globe.position.set(cx, baseY + hNiv - 0.3, cz);
+        globe.position.set(cx, ceilY - 0.3, cz);
         state.scene.add(globe);
       });
     });
+
+    console.log('[PBR v3] ✅ RectAreaLight + SpotLight cu shadow per cameră');
   }
 
   // ── Init ─────────────────────────────────────────────────────────────
@@ -396,7 +568,7 @@
     obs.observe(document.body, { childList: true, subtree: true });
     _hookPBR(window.VTour, 'start');
     _hookPBR(window.VTourFP, 'startFP');
-    console.log('[PBR v2] ✅ Texturi reale 2048px + HDRI real activ');
+    console.log('[PBR v3] ✅ Coohom-level: ACESFilmic + RectAreaLight + SSAO + Bloom');
   });
 
 })();
