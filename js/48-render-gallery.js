@@ -45,36 +45,48 @@
   }
 
   // ── Launcher ─────────────────────────────────────────────────────────
+  // Date locale ale galeriei — copiate la launch, independente de _RV global
+  var _galleryData = null; // { building, floors }
+
+  function _buildGalleryData() {
+    // Încearcă _RV mai întâi
+    var RV = window._RV;
+    if (RV && RV.building && Array.isArray(RV.floors) && RV.floors[0]) {
+      return { building: RV.building, floors: RV.floors };
+    }
+    // Fallback: construim din AEDIS
+    var A = window.AEDIS;
+    var corp = (A && Array.isArray(A.corpuri) && A.corpuri[0]) || (A || {});
+    var niv  = parseInt(corp.niv) || parseInt((A||{}).niv) || 3;
+    var bW   = parseFloat(corp.bW) || 18;
+    var bD   = parseFloat(corp.bD) || 14;
+    var hNiv = parseFloat(corp.hNiv) || 3.0;
+    var fn   = (A && A.fn) || 'rezidential_colectiv';
+
+    var building = {
+      bW: bW, bD: bD, niv: niv, scArea: bW * bD,
+      P: { hn: hNiv, W: bW + 6, D: bD + 6 },
+      cores: [{ x: bW * 0.4, y: bD * 0.32, w: bW * 0.18, h: bD * 0.28 }],
+    };
+    var floors = [];
+    for (var f = 0; f < niv; f++) floors.push(_syntheticFloor(f, bW, bD, fn));
+    console.log('[Gallery4K] Date sintetice din AEDIS: ' + niv + ' etaje ' + bW.toFixed(1) + 'x' + bD.toFixed(1) + 'm');
+    return { building: building, floors: floors };
+  }
+
   function _launchGallery() {
     var THREE = window.THREE;
     if (!THREE) {
       if (typeof ss === 'function') ss('⚠ Deschide Viewer 3D înainte de render');
       return;
     }
-    // Dacă _RV.floors e gol, construim date sintetice din AEDIS
-    var RV = window._RV;
-    if (!RV || !RV.building || !RV.floors || !RV.floors[0]) {
-      var A = window.AEDIS;
-      if (!A) {
-        if (typeof ss === 'function') ss('⚠ Generează mai întâi o clădire în AEDIS');
-        return;
-      }
-      // Construim _RV sintetic minimal pentru galerie
-      if (!window._RV) window._RV = {};
-      var corp = (Array.isArray(A.corpuri) && A.corpuri[0]) || {};
-      var niv  = parseInt(corp.niv) || parseInt(A.niv) || 3;
-      var bW   = corp.bW || 18;
-      var bD   = corp.bD || 14;
-      window._RV.building = window._RV.building || { bW:bW, bD:bD, niv:niv, scArea:bW*bD };
-      if (!window._RV.floors || !window._RV.floors[0]) {
-        window._RV.floors = [];
-        var fn = A.fn || 'rezidential_colectiv';
-        for (var f = 0; f < niv; f++) {
-          window._RV.floors.push(_syntheticFloor(f, bW, bD, fn));
-        }
-      }
-      console.log('[Gallery4K] _RV sintetic construit din AEDIS: ' + niv + ' etaje');
+    var A = window.AEDIS;
+    if (!A && (!window._RV || !window._RV.building)) {
+      if (typeof ss === 'function') ss('⚠ Generează mai întâi o clădire în AEDIS');
+      return;
     }
+    // Construim și stocăm datele LOCAL — nu mai depindem de _RV global
+    _galleryData = _buildGalleryData();
     _showGalleryUI();
   }
 
@@ -190,8 +202,9 @@
   function _buildRoomTabs() {
     var tabs = document.getElementById('gallery-tabs');
     if (!tabs) return;
-    var RV = window._RV;
-    var fl = RV.floors[0];
+    var GD = _galleryData;
+    if (!GD || !GD.floors || !GD.floors[0]) return;
+    var fl = GD.floors[0];
     if (!fl || !fl.rects) return;
 
     // Camere unice (by type, skip core/hall/wc)
@@ -337,7 +350,9 @@
   // ── Render o cameră ────────────────────────────────────────────────────
   async function _renderRoom(room, roomIdx, roomTotal) {
     var THREE = window.THREE;
-    var RV = window._RV;
+    // Folosim datele locale ale galeriei — NICIODATĂ window._RV direct
+    var GD = _galleryData;
+    if (!GD) { throw new Error('_galleryData lipsă'); }
 
     var TILE = 1024, NX = 4, NY = 4, SSAA = 2;
     var OUT_W = TILE * NX, OUT_H = TILE * NY;
@@ -362,12 +377,12 @@
     if (THREE.sRGBEncoding) r4k.outputEncoding = THREE.sRGBEncoding;
 
     // ── SCENA FOTOREALISTĂ ────────────────────────────────────────────
-    var scene = await _buildRoomScene(THREE, r4k, room, RV);
+    var scene = await _buildRoomScene(THREE, r4k, room, GD);
     _setProgress(20, 'Scenă gata. Start render tiled...');
 
     // ── CAMERA ────────────────────────────────────────────────────────
     var camera = new THREE.PerspectiveCamera(58, OUT_W / OUT_H, 0.1, 500);
-    _positionCamera(camera, room, RV, THREE);
+    _positionCamera(camera, room, GD, THREE);
 
     // ── TILED RENDER 4×4 ──────────────────────────────────────────────
     var finalCv = document.createElement('canvas');
@@ -432,27 +447,25 @@
   }
 
   // ── Construiește scena fotorealistă per cameră ─────────────────────────
-  async function _buildRoomScene(THREE, renderer, room, RV) {
+  async function _buildRoomScene(THREE, renderer, room, GD) {
     var scene = new THREE.Scene();
 
-    // HDRI — cache global sau încărcăm
     var envMap = await _getEnvMap(THREE, renderer);
     scene.environment = envMap;
     scene.background  = envMap;
 
-    var b    = RV.building;
+    var b    = GD.building;
     var hNiv = (b.P && b.P.hn) || 3.0;
     var stil = (window.AEDIS && window.AEDIS.stil) || 'modern';
 
-    // Materials
     var M = _buildMaterials(THREE, envMap, stil);
 
     if (room.t === 'exterior') {
-      _buildExteriorScene(scene, THREE, M, b, RV);
+      _buildExteriorScene(scene, THREE, M, b, GD);
     } else if (room.t === 'section') {
-      _buildSectionScene(scene, THREE, M, b, RV, hNiv);
+      _buildSectionScene(scene, THREE, M, b, GD, hNiv);
     } else {
-      _buildInteriorRoom(scene, THREE, M, room, b, RV, hNiv);
+      _buildInteriorRoom(scene, THREE, M, room, b, GD, hNiv);
     }
 
     return scene;
@@ -595,24 +608,22 @@
   function _positionCamera(camera, room, RV, THREE) {
     var b = RV.building;
     var hNiv = (b.P && b.P.hn) || 3.0;
-    var fl = RV.floors[0];
+    var niv  = b.niv || 3;
 
     if (room.t === 'exterior') {
-      var dist = Math.max(b.bW, b.bD, b.niv * hNiv) * 1.75;
+      var dist = Math.max(b.bW || 18, b.bD || 14, niv * hNiv) * 1.75;
       camera.position.set(dist*.6, dist*.7, dist*.9);
-      camera.lookAt(0, b.niv * hNiv * .4, 0);
+      camera.lookAt(0, niv * hNiv * .4, 0);
       camera.fov = 35;
     } else if (room.t === 'section') {
-      var distS = Math.max(b.bW, b.niv * hNiv) * 1.85;
-      camera.position.set(0, b.niv * hNiv * .5, distS);
-      camera.lookAt(0, b.niv * hNiv * .45, 0);
+      var distS = Math.max(b.bW || 18, niv * hNiv) * 1.85;
+      camera.position.set(0, niv * hNiv * .5, distS);
+      camera.lookAt(0, niv * hNiv * .45, 0);
       camera.fov = 38;
     } else {
-      // Interior: camera în cameră la înălțimea ochilor
       var r = room.r;
       var cx = r.x + r.w / 2;
       var cz = r.y + r.h / 2;
-      // Camera în spate, privind spre fereastră (peretele din față)
       var camZ = cz + r.h * 0.35;
       var targetZ = cz - r.h * 0.35;
       camera.position.set(cx, 1.55, camZ);
@@ -1041,7 +1052,7 @@
     _inject();
     // Expunem global pentru butonul Render HD din 27-tur-sync.js
     window._launchGallery4K = _launchGallery;
-    console.log('[Gallery4K v1.1] ✅ Galerie render 4K per cameră activă');
+    console.log('[Gallery4K v1.2] ✅ Galerie render 4K independentă de _RV');
   });
 
 })();
