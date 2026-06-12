@@ -5366,7 +5366,7 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
         // Trebuie să fie un item clickabil (cursor pointer) care nu e deja RLU
         var st=el.style&&el.style.cursor;
         if(st!=='pointer'&&!el.onclick&&!el.getAttribute('onclick'))return;
-        if(txt.indexOf('RLU')>-1)return; // deja are badge
+        if(txt.indexOf(m.badge||'x-none')>-1)return; // deja are badge corect
         // Nu e un container mare (max 3 copii direcți = item simplu)
         if(el.children.length>5)return;
         found=el;
