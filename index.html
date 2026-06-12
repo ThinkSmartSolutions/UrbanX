@@ -4815,7 +4815,7 @@ Object.assign(window._PUG_REGISTRY, {
   'RO-IS-COM-ARONEANU':  { id:'comuna-aroneanu',  name:'Comuna Aroneanu',  pugFile:'data/comuna-aroneanu/pug.geojson',  reguli:'data/comuna-aroneanu/reguli.json' },
   'RO-IS-95727': { id:'comuna-vladeni', name:'Comuna Vlădeni', pugFile:'data/comuna-vladeni/pug.geojson', reguli:'data/comuna-vladeni/reguli.json' },
   'RO-VS-01': { id:'municipiul-vaslui',       name:'Municipiul Vaslui',       pugFile:'js/data/municipiul-vaslui/pug.geojson',       reguli:'js/data/municipiul-vaslui/reguli.json' },
-  'RO-GL-01': { id:'municipiul-galati', name:'Municipiul Galați', pugFile:'data/municipiul-galati/pug.geojson', reguli:'data/municipiul-galati/reguli.json' },
+  'RO-GL-01': { id:'municipiul-galati', name:'Municipiul Galați', pugFile:'js/data/municipiul-galati/pug.geojson', reguli:'js/data/municipiul-galati/reguli.json' },
   'RO-NT-01': { id:'municipiul-piatra-neamt', name:'Municipiul Piatra Neamț', pugFile:'js/data/municipiul-piatra-neamt/pug.geojson',  reguli:'js/data/municipiul-piatra-neamt/reguli.json' },
   'RO-BT-COM-BALUSENI':  { id:'com-baluseni',  name:'Comuna Bălușeni',  pugFile:'data/com-baluseni/pug.geojson',  reguli:'js/data/com-baluseni/reguli.json' },
 });
@@ -5351,9 +5351,9 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
   }
   // ── Patch badge RLU pe municipiile principale ────────────────────────────
   var MUNI_RLU_PATCH=[
-    {texts:['Vaslui'],       key:'RO-VS-01'},
-    {texts:['Piatra-Neamț','Piatra Neamț'], key:'RO-NT-01'},
-    {texts:['Galați','Municipiul Galați'], key:'RO-GL-01'},
+    {texts:['Vaslui'],       key:'RO-VS-01', badge:'✅ RLU',     bStyle:'background:rgba(5,150,105,0.2);color:#34d399;border:1px solid rgba(5,150,105,0.3)'},
+    {texts:['Piatra-Neamț','Piatra Neamț'], key:'RO-NT-01', badge:'✅ RLU', bStyle:'background:rgba(5,150,105,0.2);color:#34d399;border:1px solid rgba(5,150,105,0.3)'},
+    {texts:['Galați','Municipiul Galați'], key:'RO-GL-01', badge:'⚠ Parțial', bStyle:'background:rgba(59,130,246,0.2);color:#93c5fd;border:1px solid rgba(59,130,246,0.3)'},
   ];
   function patchMuniBadges(modal){
     MUNI_RLU_PATCH.forEach(function(m){
@@ -5366,7 +5366,7 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
         // Trebuie să fie un item clickabil (cursor pointer) care nu e deja RLU
         var st=el.style&&el.style.cursor;
         if(st!=='pointer'&&!el.onclick&&!el.getAttribute('onclick'))return;
-        if(txt.indexOf(m.badge||'x-none')>-1)return; // deja are badge corect
+        if(txt.indexOf(m.badge||'✅ RLU')>-1)return; // deja are badge corect
         // Nu e un container mare (max 3 copii direcți = item simplu)
         if(el.children.length>5)return;
         found=el;
@@ -5376,14 +5376,15 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
       var spans=found.querySelectorAll('span');
       var badgeSpan=null;
       spans.forEach(function(s){if(s.textContent.indexOf('Gol')>-1||s.textContent.indexOf('●')>-1)badgeSpan=s;});
-      var rluStyle='font-size:10px;padding:2px 7px;border-radius:10px;white-space:nowrap;background:rgba(5,150,105,0.2);color:#34d399;border:1px solid rgba(5,150,105,0.3)';
+      var rluStyle='font-size:10px;padding:2px 7px;border-radius:10px;white-space:nowrap;'+(m.bStyle||'background:rgba(5,150,105,0.2);color:#34d399;border:1px solid rgba(5,150,105,0.3)');
+      var rluText=m.badge||'✅ RLU';
       if(badgeSpan){
         badgeSpan.style.cssText=rluStyle;
-        badgeSpan.textContent='✅ RLU';
+        badgeSpan.textContent=rluText;
       } else {
         var b=document.createElement('span');
         b.style.cssText=rluStyle;
-        b.textContent='✅ RLU';
+        b.textContent=rluText;
         found.appendChild(b);
       }
       // Onclick → switchUAT corect
