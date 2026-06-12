@@ -943,7 +943,7 @@ const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 
 let _supabase = null;
 // ── ADMIN CONFIG ─────────────────────────────────────────────────────────────
-const ADMIN_EMAILS = ['3dtravelsoftart@gmail.com']; // adaugă emailuri admin aici
+const ADMIN_EMAILS = ['3dtravelsoftart@gmail.com', 'office@m2msolutions.ro']; // adaugă emailuri admin aici
 let _isAdmin = false;
 
 let _authUser = null;
