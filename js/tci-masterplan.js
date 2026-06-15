@@ -2579,16 +2579,39 @@ G._TCIMasterplanPDF = {
   // Date reale din PUG (pug.geojson) + reguli.json ale UAT-ului.
   // ═══════════════════════════════════════════════════════════════════════
 
-  // Clasifica o subzona/UTR intr-o categorie de functiune + culoare standard
-  _clasFunc(name){
+  // Rezolva denumirea functionala a unei zone din proprietati + reguli
+  // (suporta: zf/utr = cod subzona direct, SAU utrs[cod].fn_dominanta -> subzone)
+  _zoneDen(p, reguli){
+    p=p||{}; const sub=(reguli&&reguli.subzone)||{};
+    const code=p.zf||p.ZF||p.utr||p.UTR||p.UTR_COD||null;
+    let den='';
+    if(code!=null && reguli){
+      if(sub[code]&&sub[code].denumire) den=sub[code].denumire;
+      else if(reguli.utrs && reguli.utrs[code]){ const fn=reguli.utrs[code].fn_dominanta; if(fn&&sub[fn]&&sub[fn].denumire) den=sub[fn].denumire; }
+    }
+    if(!den) den=String(code||'')+' '+String(p.det||'');
+    return {den, code:String(code||'')};
+  },
+
+  // Clasifica o subzona intr-o categorie de functiune + culoare standard.
+  // name = denumirea descriptiva; code = codul subzonei (prefix RO: L/C/V/I/A...)
+  _clasFunc(name, code){
     const s=String(name||'').toLowerCase();
     if(/verde|verzi|parc|agrement|sport|padure|forest|plantat|peisag/.test(s)) return ['Spatii verzi / Agrement',[46,160,90]];
     if(/industr|product|depozit|logistic|antrepoz/.test(s)) return ['Industrial / Productie',[120,120,132]];
-    if(/circulat|drum|strad|transport|cale ferata|gara|infrastruct rutier/.test(s)) return ['Circulatii',[95,95,100]];
-    if(/\bape\b|apa\b|rau|lac|balta|fluvi|maritim|port|acvati/.test(s)) return ['Ape',[59,130,246]];
+    if(/circulat|\bdrum\b|strad|transport|cale ferata|\bgara\b|edilitar|tehnico/.test(s)) return ['Circulatii / Edilitar',[95,95,100]];
+    if(/\bape\b|\bapa\b|\brau\b|\blac\b|balta|fluvi|maritim|\bport\b|acvati|delta/.test(s)) return ['Ape',[59,130,246]];
     if(/agricol|extravilan|teren liber|neconstr|arabil|pasune|viticol/.test(s)) return ['Agricol / Rezerva',[206,194,128]];
-    if(/comer|mixt|central|servicii|birou|institut|invatamant|scoal|sanat|spital|cultur|administ|turism|hotel/.test(s)) return ['Mixt / Servicii / Institutii',[232,142,52]];
+    if(/comer|mixt|central|servicii|birou|institut|invatamant|scoal|sanat|spital|cultur|administ|turism|hotel|tertiar/.test(s)) return ['Mixt / Servicii / Institutii',[232,142,52]];
     if(/rezid|locuin|locuit|colectiv|individual/.test(s)) return ['Rezidential',[236,202,92]];
+    // Hint pe codul subzonei (nomenclatura RGU: L=locuinte, C=central/mixt, V=verde, I=ind, A=agricol, T/G=echipare)
+    const cd=String(code||'').toUpperCase().trim();
+    if(/^V/.test(cd)) return ['Spatii verzi / Agrement',[46,160,90]];
+    if(/^L/.test(cd)) return ['Rezidential',[236,202,92]];
+    if(/^(C|M|S)/.test(cd)) return ['Mixt / Servicii / Institutii',[232,142,52]];
+    if(/^I/.test(cd)) return ['Industrial / Productie',[120,120,132]];
+    if(/^A/.test(cd)) return ['Agricol / Rezerva',[206,194,128]];
+    if(/^(T|G|DC)/.test(cd)) return ['Circulatii / Edilitar',[95,95,100]];
     return ['Altele / Neclasificat',[160,160,172]];
   },
 
@@ -2602,9 +2625,8 @@ G._TCIMasterplanPDF = {
       let a=0; try{ a=turf.area(f); }catch(e){ return; }
       if(!a || a<=0) return;
       const p=f.properties||{};
-      const zf=p.zf||p.ZF||null, utr=p.utr||p.UTR||null;
-      const den=(zf&&sub[zf]&&sub[zf].denumire) || (zf||'') + ' ' + (p.det||'') + ' ' + (utr||'');
-      const [cat,col]=this._clasFunc(den);
+      const zd=this._zoneDen(p, reguli);
+      const [cat,col]=this._clasFunc(zd.den, zd.code);
       if(!out.cats[cat]) out.cats[cat]={m2:0,color:col};
       out.cats[cat].m2+=a; out.total+=a; out.feats++;
     });
@@ -2702,10 +2724,8 @@ G._TCIMasterplanPDF = {
     if(pr){
       c.pugGeo.features.forEach(f=>{
         if(!f||!f.geometry) return;
-        const p=f.properties||{};
-        const zf=p.zf||p.ZF||null;
-        const den=(zf&&sub[zf]&&sub[zf].denumire)||((zf||'')+' '+(p.det||'')+' '+(p.utr||p.UTR||''));
-        const [cat,col]=this._clasFunc(den); used[cat]=col;
+        const zd=this._zoneDen(f.properties, c.reguli);
+        const [cat,col]=this._clasFunc(zd.den, zd.code); used[cat]=col;
         const g=f.geometry, polys = g.type==='MultiPolygon'?g.coordinates:(g.type==='Polygon'?[g.coordinates]:[]);
         polys.forEach(rings=>{ if(rings&&rings[0]){ const pts=rings[0].map(pt=>pr.P(pt[0],pt[1])); this._fillRing(pdf,pts,col,[255,255,255]); } });
       });
