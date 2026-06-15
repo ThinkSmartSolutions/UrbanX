@@ -3184,6 +3184,10 @@ _waitAll(()=>{
       console.error('[Masterplan] jsPDF lipsă. jsPDF=',typeof jsPDF,'jspdf=',typeof window.jspdf);
       return;
     }
+    // Masterplan strategic EXTINS (100+ pagini) daca motorul nou e incarcat
+    if(window._StratMasterplan && window._StratMasterplanContent){
+      return await window._StratMasterplan.generate(k, sc);
+    }
     if(!window._TCIMasterplanPDF) {
       window.ss?.('⏳ Masterplan se inițializează — mai încearcă în 2 secunde');
       return;
