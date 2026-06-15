@@ -4252,6 +4252,8 @@ async function generateGeotehnicalStudy(){
   const catGeo = terrainClass.catGeo;
   const F1=terrainClass.F1, F2=terrainClass.F2, F3=terrainClass.F3, sumaFact=terrainClass.sumaFact;
   const geomorphRisks = _geomorphRisk(elevData.elev, 5.0, terrainClass.tip);
+  // Cote de nivel / declivitate (model digital teren) — pentru decizia de demisol
+  let _coteNiv=null; try{ if(window._CoteNivel) _coteNiv=await window._CoteNivel.analyze(ap.geo, ap.nrcad); }catch(e){ console.warn('Cote nivel:', e.message); }
 
 const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
 
@@ -4319,6 +4321,22 @@ const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
   });
   if(caps.imgLocation){try{pdf.addImage(caps.imgLocation,'JPEG',14,H-72,W-28,58,undefined,'FAST');pdf.setDrawColor(...GOLD);pdf.setLineWidth(0.4);pdf.rect(14,H-72,W-28,58,'S');pdf.setTextColor(...GOLD);pdf.setFontSize(6);pdf.text('AMPLASAMENT · '+S2(nrcad),W/2,H-75,{align:'center'});}catch(e){}}
   ftr();
+
+  // PAG: COTE DE NIVEL / DECLIVITATE (pagina dedicata, fara a perturba layout-ul existent)
+  if(_coteNiv){
+    pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('COTE DE NIVEL - DECLIVITATE TEREN',2);ftr();
+    let cyc=30;
+    cyc=sec('ANALIZA COTELOR DE NIVEL ('+_coteNiv.sursa+')',cyc);
+    cyc=tblRow(['Indicator','Valoare','Observatie'],cyc,true,[52,42,78]);
+    [['Cota minima', _coteNiv.min+' m', 'altitudine teren'],
+     ['Cota maxima', _coteNiv.max+' m', _coteNiv.puncte+' puncte esantionate pe parcela'],
+     ['Diferenta de nivel (dH)', _coteNiv.dH+' m', _coteNiv.nivel],
+     ['Panta medie', _coteNiv.panta+' %', 'pe extinderea de '+_coteNiv.extent_m+' m'],
+    ].forEach(r=>cyc=tblRow(r,cyc,false,[52,42,78]));
+    cyc+=3;
+    cyc=body('Recomandare privind demisolul: '+_coteNiv.recomandare,14,cyc);cyc+=2;
+    cyc=body('NOTA: '+_coteNiv.nota,14,cyc);
+  }
 
   // PAG 2: Harta + zonare seismica
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONTEXT GEOTEHNIC - ZONARE SEISMICA SI TEREN',2);ftr();
