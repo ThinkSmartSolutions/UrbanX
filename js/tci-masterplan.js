@@ -128,10 +128,24 @@ G._TCIMasterplanPDF = {
       } catch(e){ console.log('[Masterplan] INSE fallback:', e); }
     }
 
+    // ── PUG vectorial + reguli (pentru bilant teritorial / zonificare / RLU) ─
+    let pugGeo=null, reguli=null;
+    try{
+      const reg=(window._PUG_REGISTRY||{})[cityKey];
+      if(reg){
+        const ff=(u)=>u?fetch(u).then(r=>r.ok?r.json():null).catch(()=>null):Promise.resolve(null);
+        const res=await Promise.race([
+          Promise.all([ff(reg.pugFile), ff(reg.reguli)]),
+          new Promise((rs)=>setTimeout(()=>rs([null,null]),8000))
+        ]);
+        pugGeo=res&&res[0]; reguli=res&&res[1];
+      }
+    }catch(e){ console.log('[Masterplan] PUG/reguli fallback:', e); }
+
     // ── Construim PDF ────────────────────────────────────────────────────
     const pdf = new J({orientation:'portrait', unit:'mm', format:'a4'});
     const ctx  = { pdf, W:210, H:297, city, risk, need, grav, climate,
-                   housing, invest, bench, euComp, scenario, liveData,
+                   housing, invest, bench, euComp, scenario, liveData, pugGeo, reguli,
                    today: new Date().toLocaleDateString('ro-RO',{year:'numeric',month:'long',day:'numeric'}),
                    iso: new Date().toISOString().split('T')[0] };
 
@@ -150,6 +164,12 @@ G._TCIMasterplanPDF = {
     this._pg13_infrastructure(ctx);
     this._pg14_environment(ctx);
     this._pg15_zones_proposals(ctx);
+    // ── Propuneri de Organizare Urbanistica (tipar masterplan profesional) ──
+    this._pgBilantTeritorial(ctx);   // bilant teritorial existent vs propus (PUG real)
+    this._pgZonificare(ctx);         // plansa reglementari / zonificare functionala (vector PUG)
+    this._pgRLU(ctx);                // regulament local urbanism — POT/CUT/regim pe subzone
+    this._pgProfileStradale(ctx);    // profile stradale tip
+    this._pgGhidDesign(ctx);         // ghid de design urban si peisagistic
     this._pg16_financing(ctx);
     this._pg17_phasing(ctx);
     this._pg18_heritage(ctx);
@@ -2552,6 +2572,250 @@ G._TCIMasterplanPDF = {
     return y+4;
   },
 
+  // ═══════════════════════════════════════════════════════════════════════
+  // MODULE MASTERPLAN EXTINS — Propuneri de organizare urbanistica
+  // (bilant teritorial, zonificare functionala, RLU aferent, profile
+  //  stradale, ghid de design) conform tiparului profesional RO + Legea 350.
+  // Date reale din PUG (pug.geojson) + reguli.json ale UAT-ului.
+  // ═══════════════════════════════════════════════════════════════════════
+
+  // Clasifica o subzona/UTR intr-o categorie de functiune + culoare standard
+  _clasFunc(name){
+    const s=String(name||'').toLowerCase();
+    if(/verde|verzi|parc|agrement|sport|padure|forest|plantat|peisag/.test(s)) return ['Spatii verzi / Agrement',[46,160,90]];
+    if(/industr|product|depozit|logistic|antrepoz/.test(s)) return ['Industrial / Productie',[120,120,132]];
+    if(/circulat|drum|strad|transport|cale ferata|gara|infrastruct rutier/.test(s)) return ['Circulatii',[95,95,100]];
+    if(/\bape\b|apa\b|rau|lac|balta|fluvi|maritim|port|acvati/.test(s)) return ['Ape',[59,130,246]];
+    if(/agricol|extravilan|teren liber|neconstr|arabil|pasune|viticol/.test(s)) return ['Agricol / Rezerva',[206,194,128]];
+    if(/comer|mixt|central|servicii|birou|institut|invatamant|scoal|sanat|spital|cultur|administ|turism|hotel/.test(s)) return ['Mixt / Servicii / Institutii',[232,142,52]];
+    if(/rezid|locuin|locuit|colectiv|individual/.test(s)) return ['Rezidential',[236,202,92]];
+    return ['Altele / Neclasificat',[160,160,172]];
+  },
+
+  // Calculeaza ariile pe categorii de functiune din PUG (m2 reali, turf)
+  _pugAreaByFunc(pugGeo, reguli){
+    const out={cats:{}, total:0, feats:0, hasTurf:(typeof turf!=='undefined'&&turf.area)};
+    if(!pugGeo || !pugGeo.features || !out.hasTurf) return out;
+    const sub=(reguli&&reguli.subzone)||{};
+    pugGeo.features.forEach(f=>{
+      if(!f || !f.geometry) return;
+      let a=0; try{ a=turf.area(f); }catch(e){ return; }
+      if(!a || a<=0) return;
+      const p=f.properties||{};
+      const zf=p.zf||p.ZF||null, utr=p.utr||p.UTR||null;
+      const den=(zf&&sub[zf]&&sub[zf].denumire) || (zf||'') + ' ' + (p.det||'') + ' ' + (utr||'');
+      const [cat,col]=this._clasFunc(den);
+      if(!out.cats[cat]) out.cats[cat]={m2:0,color:col};
+      out.cats[cat].m2+=a; out.total+=a; out.feats++;
+    });
+    return out;
+  },
+
+  // Proiectie lon/lat -> coordonate pagina (mm), pastrand proportia (corectie cos lat)
+  _projPug(pugGeo, ox, oy, Wd, Hd){
+    let mnX=180,mnY=90,mxX=-180,mxY=-90;
+    const scan=(coords)=>{ coords.forEach(c=>{ if(typeof c[0]==='number'){ if(c[0]<mnX)mnX=c[0]; if(c[0]>mxX)mxX=c[0]; if(c[1]<mnY)mnY=c[1]; if(c[1]>mxY)mxY=c[1]; } else scan(c); }); };
+    (pugGeo.features||[]).forEach(f=>{ if(f&&f.geometry&&f.geometry.coordinates) scan(f.geometry.coordinates); });
+    if(mxX<=mnX||mxY<=mnY) return null;
+    const midLat=(mnY+mxY)/2, kx=Math.cos(midLat*Math.PI/180);
+    const spanX=(mxX-mnX)*kx, spanY=(mxY-mnY);
+    const sc=Math.min(Wd/spanX, Hd/spanY)*0.96;
+    const offX=ox+(Wd-spanX*sc)/2, offY=oy+(Hd-spanY*sc)/2;
+    return {sc, kx, mnX, mxY, offX, offY,
+      P:(lon,lat)=>[ offX+(lon-mnX)*kx*sc, offY+(mxY-lat)*sc ]};
+  },
+
+  // Deseneaza un inel poligon plin din puncte absolute (mm)
+  _fillRing(pdf, pts, fill, stroke){
+    if(!pts||pts.length<3) return;
+    const segs=[]; for(let i=1;i<pts.length;i++) segs.push([pts[i][0]-pts[i-1][0], pts[i][1]-pts[i-1][1]]);
+    if(fill){ pdf.setFillColor(fill[0],fill[1],fill[2]); }
+    if(stroke){ pdf.setDrawColor(stroke[0],stroke[1],stroke[2]); pdf.setLineWidth(0.1); }
+    try{ pdf.lines(segs, pts[0][0], pts[0][1], [1,1], fill?(stroke?'FD':'F'):'S', true); }catch(e){}
+  },
+
+  // ── BILANT TERITORIAL (existent vs propus orientativ) ───────────────────
+  _pgBilantTeritorial(c){
+    const {pdf,W,H,city,need,today}=c;
+    pdf.addPage(); this._pgHeader(pdf,W,'BILANT TERITORIAL — EXISTENT vs PROPUS',city.name,today,'B1'); let y=22;
+    const ab=this._pugAreaByFunc(c.pugGeo, c.reguli);
+    if(!ab.total){
+      y=this._section(pdf,W,y,'Bilant teritorial — PUG necesar');
+      pdf.setTextColor(70,80,100); pdf.setFont('helvetica','normal'); pdf.setFontSize(8.5);
+      y=_pdfText(pdf, S2('Bilantul teritorial cantitativ se calculeaza din geometria PUG (pug.geojson) a UAT-ului. Pentru '+city.name+' nu este incarcat un PUG vectorial in platforma, deci bilantul existent nu poate fi masurat automat. Dupa incarcarea PUG-ului, acest capitol genereaza suprafetele reale (m2/%) pe categorii de functiune si proiectia propusa pe scenariu.'), 14, y+3, {maxWidth:W-28, lineHeight:5});
+      this._pgFooter(pdf,W,H,today,'B1','Bilant teritorial · necesita PUG vectorial incarcat'); return;
+    }
+    const ha=(m2)=>m2/10000;
+    const totalHa=ha(ab.total);
+    // Propus orientativ (model UrbanX, transparent): verde la norma 26 mp/loc,
+    // rezidential absoarbe necesarul de locuire, restul ajustat pe rezerva.
+    const pop55=(need&&need.pop2055)||city.pop2021||50000;
+    const verdeTargetM2=26*pop55;
+    const locTot=(need&&need.locuinteTotale)||0;
+    const rezAddM2=locTot*110; // ~110 mp teren brut/unitate (mix), orientativ
+    const cur={}; Object.keys(ab.cats).forEach(k=>cur[k]=ab.cats[k].m2);
+    const prop=Object.assign({},cur);
+    if('Spatii verzi / Agrement' in prop) prop['Spatii verzi / Agrement']=Math.max(cur['Spatii verzi / Agrement'],verdeTargetM2);
+    else prop['Spatii verzi / Agrement']=verdeTargetM2;
+    prop['Rezidential']=(cur['Rezidential']||0)+rezAddM2;
+    // Balansare pe rezerva (Agricol/Rezerva) pastrand totalul constant
+    let deltaUp=(prop['Spatii verzi / Agrement']-(cur['Spatii verzi / Agrement']||0))+rezAddM2;
+    const rezervaKey='Agricol / Rezerva';
+    if(prop[rezervaKey]!=null){ prop[rezervaKey]=Math.max(0, prop[rezervaKey]-deltaUp); }
+    const propTotal=Object.values(prop).reduce((s,v)=>s+v,0);
+    y=this._section(pdf,W,y,'B.1 Suprafete pe Categorii de Functiune  ·  Sursa: PUG vectorial '+city.name+' (masurat turf.js)');
+    const order=['Rezidential','Mixt / Servicii / Institutii','Industrial / Productie','Spatii verzi / Agrement','Circulatii','Ape','Agricol / Rezerva','Altele / Neclasificat'];
+    const rows=[];
+    order.forEach(k=>{ if(cur[k]==null && prop[k]==null) return;
+      const e=cur[k]||0, p=prop[k]||0;
+      rows.push([k, N(ha(e),1)+' ha', (e/ab.total*100).toFixed(1)+'%', N(ha(p),1)+' ha', (p/propTotal*100).toFixed(1)+'%', (p>=e?'+':'')+N(ha(p-e),1)+' ha']);
+    });
+    rows.push(['TOTAL', N(totalHa,1)+' ha','100%', N(ha(propTotal),1)+' ha','100%','—']);
+    y=this._tbl(pdf,W,y,rows,['Functiune','Existent','%','Propus*','%','Delta'],[46,24,16,24,16,26]);
+    y+=2;
+    pdf.setTextColor(120,130,150); pdf.setFont('helvetica','italic'); pdf.setFontSize(6.5);
+    y=_pdfText(pdf,S2('* Propus = scenariu orientativ model UrbanX: spatii verzi calibrate la norma de 26 mp/locuitor (proiectie '+N(pop55)+' loc. 2055), rezidential dimensionat pe necesarul de locuire ('+N(locTot)+' unitati), balansat pe rezerva intravilana. NU este un plan proiectat — fundamenteaza decizia de organizare urbanistica.'),14,y+2,{maxWidth:W-28,lineHeight:3.4});
+    y+=2;
+    // Infografic: bare orizontale existent (procente)
+    y=this._section(pdf,W,y,'B.2 Structura Functionala Existenta (% din intravilan masurat)');
+    const barData=order.filter(k=>cur[k]).map(k=>[k, +(cur[k]/ab.total*100).toFixed(1), N(ha(cur[k]),1)+' ha', ab.cats[k]?ab.cats[k].color:[150,150,150]]);
+    y=this._barChartH(pdf,W,y,barData,{title:'Pondere functiuni (%) — situatie existenta',maxVal:Math.max.apply(null,barData.map(d=>d[1])).toFixed(0)*1,unit:'%',showPct:false,sources:'Masurat din PUG '+city.name+' · '+ab.feats+' poligoane · turf.js area'});
+    this._pgFooter(pdf,W,H,today,'B1','Bilant teritorial · PUG '+city.name+' · norma spatii verzi 26 mp/loc (OMS/Legea 24/2007)');
+  },
+
+  // ── PLANSA ZONIFICARE FUNCTIONALA (vector din PUG, fara Mapbox) ──────────
+  _pgZonificare(c){
+    const {pdf,W,H,city,today}=c;
+    pdf.addPage(); this._pgHeader(pdf,W,'PLANSA — REGLEMENTARI / ZONIFICARE FUNCTIONALA',city.name,today,'B2'); let y=20;
+    if(!c.pugGeo || !c.pugGeo.features || !c.pugGeo.features.length){
+      y=this._section(pdf,W,y,'Plansa zonificare — PUG necesar');
+      pdf.setTextColor(70,80,100); pdf.setFont('helvetica','normal'); pdf.setFontSize(8.5);
+      _pdfText(pdf,S2('Plansa de reglementari se deseneaza din geometria PUG vectoriala a UAT-ului. Nu este incarcat un PUG pentru '+city.name+'.'),14,y+3,{maxWidth:W-28,lineHeight:5});
+      this._pgFooter(pdf,W,H,today,'B2','Plansa zonificare · necesita PUG vectorial'); return;
+    }
+    const sub=(c.reguli&&c.reguli.subzone)||{};
+    const drawX=14, drawY=24, drawW=W-28, drawH=180;
+    pdf.setFillColor(244,247,250); pdf.rect(drawX,drawY,drawW,drawH,'F');
+    pdf.setDrawColor(180,190,205); pdf.setLineWidth(0.2); pdf.rect(drawX,drawY,drawW,drawH,'S');
+    const pr=this._projPug(c.pugGeo, drawX, drawY, drawW, drawH);
+    const used={};
+    if(pr){
+      c.pugGeo.features.forEach(f=>{
+        if(!f||!f.geometry) return;
+        const p=f.properties||{};
+        const zf=p.zf||p.ZF||null;
+        const den=(zf&&sub[zf]&&sub[zf].denumire)||((zf||'')+' '+(p.det||'')+' '+(p.utr||p.UTR||''));
+        const [cat,col]=this._clasFunc(den); used[cat]=col;
+        const g=f.geometry, polys = g.type==='MultiPolygon'?g.coordinates:(g.type==='Polygon'?[g.coordinates]:[]);
+        polys.forEach(rings=>{ if(rings&&rings[0]){ const pts=rings[0].map(pt=>pr.P(pt[0],pt[1])); this._fillRing(pdf,pts,col,[255,255,255]); } });
+      });
+      // Scara grafica + nord
+      pdf.setDrawColor(40,50,70); pdf.setLineWidth(0.5);
+      const scaleM=1000, scaleMm=(scaleM/ (111320*pr.kx))*pr.sc; // 1km in mm pe pagina
+      const sbx=drawX+6, sby=drawY+drawH-8;
+      if(scaleMm>5 && scaleMm<drawW-20){ pdf.line(sbx,sby,sbx+scaleMm,sby); pdf.line(sbx,sby-1.2,sbx,sby+1.2); pdf.line(sbx+scaleMm,sby-1.2,sbx+scaleMm,sby+1.2);
+        pdf.setTextColor(40,50,70); pdf.setFont('helvetica','normal'); pdf.setFontSize(6); pdf.text('1 km', sbx+scaleMm/2, sby-1.8,{align:'center'}); }
+      // Nord
+      pdf.setTextColor(40,50,70); pdf.setFont('helvetica','bold'); pdf.setFontSize(9); pdf.text('N', drawX+drawW-8, drawY+10,{align:'center'});
+      pdf.setLineWidth(0.6); pdf.line(drawX+drawW-8, drawY+11, drawX+drawW-8, drawY+5); pdf.triangle(drawX+drawW-9.2,drawY+6.2, drawX+drawW-6.8,drawY+6.2, drawX+drawW-8,drawY+4,'F');
+    }
+    y=drawY+drawH+4;
+    // Legenda
+    pdf.setTextColor(40,50,70); pdf.setFont('helvetica','bold'); pdf.setFontSize(7.5); pdf.text('LEGENDA FUNCTIUNI', drawX, y); y+=4;
+    let lx=drawX, ly=y;
+    Object.keys(used).forEach((cat,i)=>{ const col=used[cat];
+      if(lx>W-70){ lx=drawX; ly+=5; }
+      pdf.setFillColor(col[0],col[1],col[2]); pdf.rect(lx,ly-2.6,3.2,3.2,'F'); pdf.setDrawColor(180,180,180); pdf.rect(lx,ly-2.6,3.2,3.2,'S');
+      pdf.setTextColor(50,60,80); pdf.setFont('helvetica','normal'); pdf.setFontSize(6.3); pdf.text(S2(cat), lx+4.2, ly);
+      lx+=4.2+pdf.getTextWidth(S2(cat))+6;
+    });
+    this._pgFooter(pdf,W,H,today,'B2','Plansa schematica generata din PUG vectorial '+city.name+' · proiectie WGS84 · NU inlocuieste plansa topografica vizata');
+  },
+
+  // ── REGULAMENT LOCAL DE URBANISM AFERENT (din reguli.json) ──────────────
+  _pgRLU(c){
+    const {pdf,W,H,city,today}=c;
+    pdf.addPage(); this._pgHeader(pdf,W,'REGULAMENT LOCAL DE URBANISM — INDICATORI PE SUBZONE',city.name,today,'B3'); let y=22;
+    const sub=(c.reguli&&c.reguli.subzone)||{};
+    const keys=Object.keys(sub);
+    if(!keys.length){
+      y=this._section(pdf,W,y,'RLU — reguli necesare');
+      pdf.setTextColor(70,80,100); pdf.setFont('helvetica','normal'); pdf.setFontSize(8.5);
+      _pdfText(pdf,S2('Indicatorii urbanistici (POT, CUT, regim de inaltime, retrageri) se preiau din regulamentul UAT (reguli.json). Nu sunt incarcate reguli pentru '+city.name+'.'),14,y+3,{maxWidth:W-28,lineHeight:5});
+      this._pgFooter(pdf,W,H,today,'B3','RLU aferent · necesita reguli.json'); return;
+    }
+    y=this._section(pdf,W,y,'B.3 Indicatori Urbanistici Maxim Admisi pe Subzone  ·  Sursa: RLU '+city.name);
+    const checkY=(yy)=>{ if(yy>H-18){ pdf.addPage(); this._pgHeader(pdf,W,'REGULAMENT LOCAL DE URBANISM (continuare)',city.name,today,'B3'); const ny=22; return this._section(pdf,W,ny,'B.3 Indicatori Urbanistici (continuare)'); } return yy; };
+    const rows=[];
+    keys.forEach(k=>{ const z=sub[k]||{};
+      rows.push([ k, S2(String(z.denumire||'').slice(0,34)),
+        z.pot_baza!=null?z.pot_baza+'%':'—', z.cut_baza!=null?String(z.cut_baza):'—',
+        z.hmax_m!=null?(z.hmax_m+'m'):(z.regim||'—'), S2(String(z.regim||z.niv_max||'—').slice(0,10)),
+        z.spatii_verzi_pct!=null?z.spatii_verzi_pct+'%':'—' ]);
+    });
+    // randam in pagini de cate ~38 randuri
+    const cw=[20,52,14,12,16,22,14];
+    let i=0; const per=38;
+    while(i<rows.length){ const chunk=rows.slice(i,i+per);
+      y=this._tbl(pdf,W,y,chunk,['Cod','Denumire','POT','CUT','Hmax','Regim','SV'],cw);
+      i+=per; if(i<rows.length){ pdf.addPage(); this._pgHeader(pdf,W,'REGULAMENT LOCAL DE URBANISM (continuare)',city.name,today,'B3'); y=22; y=this._section(pdf,W,y,'B.3 Indicatori Urbanistici (continuare)'); }
+    }
+    y+=2; pdf.setTextColor(120,130,150); pdf.setFont('helvetica','italic'); pdf.setFontSize(6.5);
+    _pdfText(pdf,S2('POT = Procent de Ocupare a Terenului · CUT = Coeficient de Utilizare a Terenului · SV = procent minim spatii verzi. Valorile sunt cele din RLU/PUG in vigoare ('+keys.length+' subzone). Retragerile fata de limite si conditiile detaliate sunt in fisa fiecarei subzone (drawer info parcela).'),14,y+2,{maxWidth:W-28,lineHeight:3.4});
+    this._pgFooter(pdf,W,H,today,'B3','RLU aferent · '+keys.length+' subzone · Legea 350/2001 · HG 525/1996 (RGU)');
+  },
+
+  // ── PROFILE STRADALE TIP (sectiuni schematice) ──────────────────────────
+  _pgProfileStradale(c){
+    const {pdf,W,H,city,today}=c;
+    pdf.addPage(); this._pgHeader(pdf,W,'PROFILE STRADALE TIP — REGLEMENTARI MOBILITATE',city.name,today,'B4'); let y=22;
+    y=this._section(pdf,W,y,'B.4 Profile Transversale Recomandate  ·  Conform STAS 10144 + ghid mobilitate durabila');
+    const profile=[
+      {nume:'Bulevard principal (categoria I-II)', lat:26, comp:[['Trotuar',2.5,[120,130,150]],['Aliniament arbori',1.5,[46,160,90]],['Pista biciclete',2.0,[245,158,11]],['Banda auto',3.25,[95,95,100]],['Banda auto',3.25,[95,95,100]],['Banda TP/verde',3.0,[168,85,247]],['Banda auto',3.25,[95,95,100]],['Banda auto',3.25,[95,95,100]],['Aliniament+trotuar',4.0,[46,160,90]]]},
+      {nume:'Strada colectoare (categoria III)', lat:15, comp:[['Trotuar',2.0,[120,130,150]],['Aliniament arbori',1.5,[46,160,90]],['Pista biciclete',1.5,[245,158,11]],['Banda auto',3.0,[95,95,100]],['Banda auto',3.0,[95,95,100]],['Aliniament+trotuar',4.0,[46,160,90]]]},
+      {nume:'Strada locala (categoria IV) — zona rezidentiala', lat:9, comp:[['Trotuar',1.5,[120,130,150]],['Banda auto',2.75,[95,95,100]],['Banda auto',2.75,[95,95,100]],['Trotuar+verde',2.0,[46,160,90]]]},
+    ];
+    profile.forEach(pf=>{
+      pdf.setTextColor(40,50,70); pdf.setFont('helvetica','bold'); pdf.setFontSize(8); pdf.text(S2(pf.nume+'  —  amprenta '+pf.lat+' m'), 14, y); y+=3;
+      const x0=14, drawW=W-28, total=pf.comp.reduce((s,k)=>s+k[1],0), h=11;
+      let cx=x0;
+      pf.comp.forEach(k=>{ const w=k[1]/total*drawW; pdf.setFillColor(k[2][0],k[2][1],k[2][2]); pdf.rect(cx,y,w,h,'F'); pdf.setDrawColor(255,255,255); pdf.setLineWidth(0.2); pdf.rect(cx,y,w,h,'S');
+        if(w>9){ pdf.setTextColor(255,255,255); pdf.setFont('helvetica','bold'); pdf.setFontSize(5.4); pdf.text(S2(k[0]),cx+w/2,y+h/2-0.5,{align:'center'}); pdf.setFontSize(5); pdf.text(k[1]+'m',cx+w/2,y+h/2+2.6,{align:'center'}); }
+        cx+=w; });
+      y+=h+6;
+    });
+    pdf.setTextColor(90,100,120); pdf.setFont('helvetica','normal'); pdf.setFontSize(7.5);
+    y=_pdfText(pdf,S2('Principii: autovehiculele sunt impinse spre exteriorul celulelor urbane; interiorul cartierelor prioritizeaza pietonii, bicicletele si transportul public. Fiecare profil include obligatoriu aliniament de arbori si management al apelor pluviale (rigole verzi / rain gardens). Profilele se detaliaza in plansa de mobilitate la scara adecvata.'),14,y+2,{maxWidth:W-28,lineHeight:4});
+    this._pgFooter(pdf,W,H,today,'B4','Profile stradale tip · STAS 10144/1-90 · ghid mobilitate durabila (PMUD)');
+  },
+
+  // ── GHID DE DESIGN URBAN SI PEISAGISTIC ─────────────────────────────────
+  _pgGhidDesign(c){
+    const {pdf,W,H,city,climate,today}=c;
+    pdf.addPage(); this._pgHeader(pdf,W,'GHID DE DESIGN URBAN SI PEISAGISTIC',city.name,today,'B5'); let y=22;
+    y=this._section(pdf,W,y,'B.5 Paletar Materiale & Cromatica Recomandata');
+    const pal=[['Tencuiala texturata — tonuri pamantii',[214,198,170]],['Caramida aparenta',[170,96,70]],['Piatra naturala',[150,148,140]],['Lemn termotratat',[140,100,60]],['Tabla fatuita antracit',[70,74,80]],['Sticla / parapeti',[170,196,210]]];
+    let px=16; const sw=26;
+    pal.forEach(p=>{ if(px>W-30){px=16;y+=14;} pdf.setFillColor(p[1][0],p[1][1],p[1][2]); pdf.rect(px,y,sw,10,'F'); pdf.setDrawColor(180,180,180); pdf.rect(px,y,sw,10,'S'); pdf.setTextColor(60,70,90); pdf.setFont('helvetica','normal'); pdf.setFontSize(5.2); _pdfText(pdf,S2(p[0]),px,y+12.6,{maxWidth:sw,lineHeight:2.6}); px+=sw+5; });
+    y+=20;
+    y=this._section(pdf,W,y,'B.6 Reguli de Estetica Urbana');
+    const reguli=[
+      'Fatade in culori neutre/pamantii; se interzic culorile stridente pe volume mari.',
+      'Materiale naturale dominante; placari ceramice/compozite doar ca accent.',
+      'Imprejmuiri transparente sau vegetale spre spatiul public; se descurajeaza gardurile opace inalte.',
+      'Parcarea la sol limitata; se prevad garaje colective/subterane mascate cu fatade verzi.',
+      'Acoperisuri verzi si panouri fotovoltaice incurajate pe cladirile noi.',
+      'Mobilier urban unitar (banci, iluminat, cosuri) pe familie de design coerenta.',
+    ];
+    pdf.setTextColor(60,70,90); pdf.setFont('helvetica','normal'); pdf.setFontSize(8);
+    reguli.forEach(r=>{ pdf.setFillColor(212,175,55); pdf.circle(16,y-1,0.9,'F'); y=_pdfText(pdf,S2(r),19,y,{maxWidth:W-33,lineHeight:4})+2; });
+    y+=2;
+    y=this._section(pdf,W,y,'B.7 Vegetatie & Management Ape Pluviale');
+    const reg=(climate&&climate.zona)||(city.regiune||'');
+    pdf.setTextColor(60,70,90); pdf.setFont('helvetica','normal'); pdf.setFontSize(8);
+    y=_pdfText(pdf,S2('Plantari cu specii native, adaptate climatic (tei, stejar, artar, frasin, carpen) — biodiversitate si intretinere redusa. Se interzic speciile invazive. Managementul apelor pluviale prin gradini de ploaie (rain gardens), rigole inierbate si pavaje permeabile, pentru reducerea scurgerii si reincarcarea panzei freatice. Aliniamentele de arbori sunt obligatorii pe arterele principale (umbrire, confort termic, reducerea insulei de caldura urbana).'),14,y+2,{maxWidth:W-28,lineHeight:4});
+    this._pgFooter(pdf,W,H,today,'B5','Ghid de design urban · recomandari · se detaliaza in regulamentul masterplanului');
+  },
 
 };
 
