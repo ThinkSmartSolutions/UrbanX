@@ -43,14 +43,24 @@
       try { return _setFont.call(this, font, st, weight); }
       catch (e) { try { return _setFont.call(this, 'DejaVu', 'normal'); } catch (e2) { } }
     };
-    var _text = J.API.text;
-    J.API.text = function (text, x, y, opts, transform) {
+    // NU atingem J.API.text (jsPDF defineste text pe instanta, nu pe API).
+    // Inveliim text-ul instantei la evenimentul 'initialized' (this = instanta, text real).
+    J.API.events.push(['initialized', function () {
       try {
-        if (Array.isArray(text)) text = text.map(_uniSafe);
-        else text = _uniSafe(text);
+        var inst = this;
+        if (typeof inst.text === 'function' && !inst.text.__roWrap) {
+          var _t = inst.text;
+          inst.text = function (text, x, y, opts, transform) {
+            try {
+              if (Array.isArray(text)) text = text.map(_uniSafe);
+              else text = _uniSafe(text);
+            } catch (e) { }
+            return _t.call(this, text, x, y, opts, transform);
+          };
+          inst.text.__roWrap = true;
+        }
       } catch (e) { }
-      return _text.call(this, text, x, y, opts, transform);
-    };
+    }]);
   }
 
   function _init() {
