@@ -296,8 +296,11 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
     pdf.setTextColor(...GOLD2);pdf.setFontSize(8);pdf.setFont('helvetica','bold');
     pdf.text('URBANX - PLATFORMA NATIONALA DE ANALIZA URBANISTICA',W/2,50,{align:'center'});
     pdf.setFillColor(...GOLD);pdf.rect(W/2-40,54,80,1,'F');
-    pdf.setTextColor(255,255,255);pdf.setFontSize(20);pdf.setFont('helvetica','bold');
-    pdf.text(S2(studyName.toUpperCase()),W/2,67,{align:'center'});
+    pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');
+    // Auto-fit titlu: micsoram fontul pana incape pe un rand (titluri lungi nu mai depasesc pagina)
+    {var _tt=S2(studyName.toUpperCase()),_fs=20,_maxTW=W-30;pdf.setFontSize(_fs);
+     while(pdf.getTextWidth(_tt)>_maxTW&&_fs>10.5){_fs-=0.5;pdf.setFontSize(_fs);}
+     pdf.text(_tt,W/2,67,{align:'center'});}
     if(subtitle2){
       pdf.setTextColor(...GOLD2);pdf.setFontSize(10);pdf.setFont('helvetica','normal');
       pdf.text(S2(subtitle2),W/2,76,{align:'center'});

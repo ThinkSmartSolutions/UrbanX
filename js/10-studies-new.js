@@ -475,8 +475,8 @@ async function generateREPA(){
     ['VERIFICARE','Aviz DJCPN','Direcția Cultură','Dacă zonă istorică/LMI','45 zile','Cf. Legea 422/2001'],
   ];
   cy=tblRow(['Status','Aviz','Emitent','Motiv','Termen','Obs.'],
-    cy,true,[28,45,45,50,18,W-28-28-45-45-50-18]);
-  avize.forEach(r=>{cy=tblRow(r,cy,false,[28,45,45,50,18,W-28-28-45-45-50-18]);cy=checkY(cy,10,'AVIZE',4);});
+    cy,true,[24,32,38,40,16,W-28-24-32-38-40-16]);
+  avize.forEach(r=>{cy=tblRow(r,cy,false,[24,32,38,40,16,W-28-24-32-38-40-16]);cy=checkY(cy,10,'AVIZE',4);});
 
   // PAG 5 — Documentație tehnică necesară
   cy=newPage('4. DOCUMENTAȚIE TEHNICĂ — HG 907/2016',5);
