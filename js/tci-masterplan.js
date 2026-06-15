@@ -1322,7 +1322,7 @@ G._TCIMasterplanPDF = {
     pdf.setTextColor(212,175,55); pdf.setFont('helvetica','bold'); pdf.setFontSize(9);
     pdf.text(S2(title), 8, 9);
     pdf.setTextColor(100,120,160); pdf.setFont('helvetica','normal'); pdf.setFontSize(7);
-    pdf.text(S2(cityName)+' · Masterplan Strategic 2025-2055', W-6, 9, {align:'right'});
+    pdf.text(S2(cityName)+' · '+(pdf.__doc||'Masterplan Strategic 2025-2055'), W-6, 9, {align:'right'});
   },
 
   _pgFooter(pdf,W,H,today,pgNum,sources){
@@ -2882,6 +2882,7 @@ G._TCIPmudPDF = {
       try{ if(typeof _AQLive!=='undefined'&&_AQLive.fetch){ aq=await Promise.race([_AQLive.fetch(city.lat,city.lon),new Promise(r=>setTimeout(()=>r(null),5000))]); } }catch(e){}
       const pdf=new J({orientation:'portrait',unit:'mm',format:'a4'});
       const today=new Date().toLocaleDateString('ro-RO',{year:'numeric',month:'long',day:'numeric'});
+      pdf.__doc='PMUD 2030 / 2040';
       const c={pdf,W:210,H:297,city,m,aq,today,scenario:scenario||'S2'};
       this._cover(c);
       this._c1_existing(c);
@@ -2998,7 +2999,7 @@ G._TCIPmudPDF = {
     y+=3;
     y=MP._section(pdf,W,y,'3.2 Siguranta Rutiera & Costuri');
     y=MP._tbl(pdf,W,y,[
-      ['Victime accidente', N(m.accidente)+'/an','Tinta SUMP: -50% pana in 2030 (Vision Zero)'],
+      ['Victime accidente', N(m.accidente)+'/an','-50% pana in 2030 (Vision Zero)'],
       ['Cost congestie estimat', N(Math.round(m.pop*0.12))+' mil. EUR/an','~0.12k EUR/loc/an (timp pierdut)'],
     ],['Indicator','Valoare','Tinta / nota'],[52,46,92]);
     y+=3;
