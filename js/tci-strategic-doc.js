@@ -23,10 +23,13 @@
     const INK = [28, 38, 58], SUB = [90, 102, 124], MUT = [130, 142, 162];
     const docTitle = opts.docTitle || 'DOCUMENT STRATEGIC';
     const cityName = opts.cityName || '';
-    let y = MT, pageNum = 0;
+    let y = MT, pageNum = 1;   // documentul incepe cu 1 pagina (coperta)
     const toc = [];           // {title, level, page}
     let chapterNo = 0, subNo = 0, subsubNo = 0;
     let suppressChrome = false; // pt cover
+    // urmarim TOATE paginile (inclusiv cele adaugate de metodele MP full-page)
+    const _addPageOrig = pdf.addPage.bind(pdf);
+    pdf.addPage = function () { const r = _addPageOrig.apply(pdf, arguments); pageNum++; return r; };
 
     function band() {
       pdf.setFillColor(10, 18, 38); pdf.rect(0, 0, W, 13, 'F');
@@ -42,7 +45,7 @@
       pdf.text(S2('UrbanX · ' + docTitle + ' · ' + cityName), ML, H - 6.5);
       pdf.text(String(pageNum), W - MR, H - 6.5, { align: 'right' });
     }
-    function newPage() { pdf.addPage(); pageNum++; pdf.setFillColor(255,255,255); pdf.rect(0,0,W,H,'F'); if(!suppressChrome){ band(); foot(); } y = MT + 4; }
+    function newPage() { pdf.addPage(); pdf.setFillColor(255,255,255); pdf.rect(0,0,W,H,'F'); if(!suppressChrome){ band(); foot(); } y = MT + 4; }
     function ensure(h) { if (y + h > H - MB) newPage(); }
     function setY(v){ y = v; }
 
@@ -143,11 +146,17 @@
       y += bh + 4;
     }
     function spacer(h) { y += (h || 3); }
+    // Integreaza o pagina/metoda MP full-page (deseneaza propria pagina). Numerotam capitolul.
+    function fullPage(title, drawFn) {
+      chapterNo++; subNo = 0; subsubNo = 0;
+      toc.push({ title: chapterNo + '. ' + title, level: 1, page: pageNum + 1 });
+      try { drawFn(); } catch (e) { console.warn('[StratDoc] fullPage esuat: ' + title, e); }
+    }
     // reutilizare grafice MP (iau (pdf,W,y,...) si returneaza y)
     function useMP(fn, estH, args) { ensure(estH || 40); const m = MP(); const r = m[fn].apply(m, [pdf, W, y].concat(args || [])); if (typeof r === 'number') y = r; y += 2; }
 
     return {
-      pdf, get y(){return y}, setY, ensure, newPage, chapter, h2, h3, P, bullets, table, source, callout, kpis, spacer, useMP,
+      pdf, get y(){return y}, setY, ensure, newPage, chapter, h2, h3, P, bullets, table, source, callout, kpis, spacer, useMP, fullPage,
       toc, get page(){return pageNum}, setPage:(p)=>{pageNum=p;}, _band:band, _foot:foot,
       setSuppress:(v)=>{suppressChrome=v;}, S2, N, RN, Pct, dims:{W,H,ML,MR,MT,MB,CW,ACCENT,INK,SUB,MUT},
     };

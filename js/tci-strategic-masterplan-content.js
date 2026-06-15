@@ -144,6 +144,8 @@
       // ─────────────────────────────────────────────────────────────────────
       // CAP 6 — DEMOGRAFIE
       // ─────────────────────────────────────────────────────────────────────
+      D.fullPage('Profilul de risc — scor compozit si matrice probabilitate x impact', () => m._pg7_risk(ctx));
+
       D.chapter('Analiza demografica si proiectii');
       D.h2('Evolutia populatiei');
       D.P('Dinamica demografica este factorul determinant al necesarului de locuinte, servicii si infrastructura. Analiza ia in considerare miscarea naturala (natalitate, mortalitate) si migratorie (sold migratoriu intern si extern), precum si fenomenul de suburbanizare care transfera populatie catre zona periurbana.');
@@ -167,6 +169,8 @@
       // ─────────────────────────────────────────────────────────────────────
       // CAP 7 — ECONOMIE
       // ─────────────────────────────────────────────────────────────────────
+      D.fullPage('Demografie — grafice de evolutie, proiectii si structura pe varste', () => m._pg3_demographic(ctx));
+
       D.chapter('Analiza economica si competitivitate');
       D.h2('Profilul economic si structura sectoriala');
       D.P('Economia locala este analizata prin prisma valorii adaugate brute, a structurii pe sectoare (primar, secundar, tertiar), a ocuparii si a productivitatii. Tranzitia catre o economie a cunoasterii si a serviciilor cu valoare adaugata ridicata, alaturi de specializarea inteligenta, reprezinta directii strategice pentru competitivitate.');
@@ -189,6 +193,8 @@
       // ─────────────────────────────────────────────────────────────────────
       // CAP 8 — SOCIAL
       // ─────────────────────────────────────────────────────────────────────
+      D.fullPage('Economie — convergenta UE, structura investitiilor si surse', () => m._pg5_economic(ctx));
+
       D.chapter('Profil social si calitatea vietii');
       D.h2('Educatie si capital uman');
       D.P('Reteaua de unitati de invatamant (crese, gradinite, scoli, licee, invatamant superior) si gradul de acoperire teritoriala conditioneaza echitatea accesului si atractivitatea orasului pentru familiile tinere. Planificarea trebuie sa asigure dotari de invatamant la distanta de mers pe jos in noile dezvoltari.');
@@ -205,13 +211,15 @@
       D.P('Analiza fondului locativ vizeaza numarul de locuinte, vechimea, starea tehnica, suprafata medie si gradul de aglomerare (persoane/locuinta). Fondul construit in perioada socialista (ansambluri de blocuri) necesita programe de regenerare, eficientizare energetica si imbunatatire a confortului urban.');
       D.h2('Necesarul de locuinte 2025-2055');
       D.P('Necesarul este estimat pe baza cresterii demografice proiectate, a reducerii gradului de aglomerare, a inlocuirii fondului degradat si a formarii de noi gospodarii. Modelul indica un necesar total de aproximativ ' + N((need && need.locuinteTotale) || 0) + ' locuinte pe orizontul analizat, respectiv o medie de cca. ' + N(Math.round(((need && need.locuinteTotale) || 0) / 30)) + ' locuinte/an.');
-      try { D.useMP('_pg4_housing', 0, []); } catch (e) { /* metoda full-page; sarim daca incompatibila */ }
       D.h2('Housing mix recomandat');
       D.P('Diversificarea ofertei de locuinte (colective, insiruite, individuale; pentru proprietate si pentru inchiriere; locuinte accesibile si sociale) raspunde nevoilor variate ale populatiei si previne segregarea. Mixul recomandat este calibrat pe structura demografica si pe tipul UAT.');
 
       // ─────────────────────────────────────────────────────────────────────
       // CAP 10 — INFRASTRUCTURA
       // ─────────────────────────────────────────────────────────────────────
+      D.fullPage('Locuire — cerere, housing mix si ritm de construire', () => m._pg4_housing(ctx));
+      D.fullPage('Dinamica autorizatiilor si analiza fondului locativ', () => m._pg6_construction(ctx));
+
       D.chapter('Infrastructura tehnico-edilitara');
       D.P('Echiparea edilitara conditioneaza dezvoltarea: extinderea intravilanului fara retele genereaza costuri si disfunctionalitati. Strategia prioritizeaza densificarea zonelor deja echipate si extinderea coordonata a retelelor.');
       D.table(['Utilitate', 'Acoperire estimata', 'Directie strategica'], [
@@ -228,6 +236,8 @@
       // ─────────────────────────────────────────────────────────────────────
       // CAP 11 — MOBILITATE (sinteza, trimitere PMUD)
       // ─────────────────────────────────────────────────────────────────────
+      D.fullPage('Infrastructura edilitara — acoperire utilitati si modal split', () => m._pg13_infrastructure(ctx));
+
       D.chapter('Mobilitate si transport — sinteza strategica');
       D.P('Mobilitatea este tratata strategic in Planul de Mobilitate Urbana Durabila (PMUD), document complementar Masterplanului. Sinteza de fata stabileste principiile de integrare intre dezvoltarea spatiala si sistemul de transport.');
       D.h2('Principii de integrare transport — urbanism');
@@ -260,6 +270,8 @@
       // ─────────────────────────────────────────────────────────────────────
       // CAP 13 — PATRIMONIU
       // ─────────────────────────────────────────────────────────────────────
+      D.fullPage('Mediu — indicatori detaliati si proiectie climatica', () => m._pg14_environment(ctx));
+
       D.chapter('Patrimoniu construit si identitate culturala');
       D.P('Patrimoniul construit (monumente istorice — LMI, zone construite protejate, ansambluri urbane) si patrimoniul imaterial definesc identitatea orasului si reprezinta o resursa pentru turism si calitatea vietii. Protejarea se realizeaza prin reglementari specifice (Legea 422/2001), zone de protectie si avize ale Directiei pentru Cultura.');
       D.bullets([
@@ -345,6 +357,8 @@
       // ─────────────────────────────────────────────────────────────────────
       // CAP 18 — BENCHMARK
       // ─────────────────────────────────────────────────────────────────────
+      D.fullPage('Scenarii — proiectii demografice si de dezvoltare comparate', () => m._pg8_scenarios(ctx));
+
       D.chapter('Benchmark national si european');
       D.P('Pozitionarea comparativa fata de orase similare din Romania si din Europa ofera repere pentru tinte realiste si pentru transferul de bune practici.');
       if (bench && (bench.dims || bench.dimensions)) {
@@ -354,6 +368,8 @@
       // ─────────────────────────────────────────────────────────────────────
       // CAP 19 — PROPUNERI ORGANIZARE (zonificare propusa)
       // ─────────────────────────────────────────────────────────────────────
+      D.fullPage('Benchmark — radar 8 dimensiuni si heatmap comparativ', () => m._pg9_benchmark(ctx));
+
       D.chapter('Propuneri de organizare urbanistica');
       D.P('Organizarea urbanistica propusa structureaza teritoriul pe zone functionale coerente, prioritizand densificarea calitativa, mixul functional si conceptul orasului de proximitate. Plansa de reglementari (zonificare functionala) reda distributia spatiala a functiunilor.');
       // plansa zonificare vector din PUG (porta in flux)
@@ -433,6 +449,8 @@
       // ─────────────────────────────────────────────────────────────────────
       // CAP 24 — PHASING
       // ─────────────────────────────────────────────────────────────────────
+      D.fullPage('Accesibilitate, walkability si simulare Monte Carlo', () => m._pg21_accessibility(ctx));
+
       D.chapter('Plan de implementare si etapizare');
       D.table(['Etapa', 'Orizont', 'Prioritati'], [
         ['Etapa 1 — Fundamentare', '2025-2030', 'Actualizare PUG/PUZ, regenerare zone pilot, mobilitate activa, spatii verzi'],
@@ -508,6 +526,7 @@
       D.P('INS TEMPO-Online; Eurostat (Urban Audit, NUTS3); INFP (zonare seismica); ANAR/MMAP (hidrografie, hazard inundatii); ANM (date climatice); OpenStreetMap; PUG vectorial UAT; analize geospatiale UrbanX (turf.js).');
       D.spacer(2);
       D.callout('Disclaimer', 'Document strategic de fundamentare, cu valoare orientativa si analitica. Propunerile spatiale si indicatorii se valideaza prin documentatiile de urbanism normative (PUG/PUZ) elaborate de colective atestate RUR, pe suport topografic vizat.');
+      D.fullPage('Anexa statistica — toate datele cu surse citate', () => m._pg22_full_statistics(ctx));
     }
   };
 })(window);
