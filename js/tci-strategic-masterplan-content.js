@@ -171,7 +171,7 @@
       const base55 = pop55; const r2 = Math.pow(base55 / pop, 1 / (2055 - 2021));
       const rows = [['S1 — Optimist', Math.pow((base55 * 1.08) / pop, 1 / 34)], ['S2 — Referinta', r2], ['S3 — Conservator', Math.pow((base55 * 0.9) / pop, 1 / 34)]]
         .map(([lab, rr]) => [lab].concat(yrs.map(yy => N(Math.round(pop * Math.pow(rr, yy - 2021))))).concat([Pct((Math.pow(rr, 34) - 1) * 100)]));
-      D.table(['Scenariu'].concat(yrs.map(String)).concat(['2021-2055']), rows, [30, 19, 19, 19, 19, 19, 19, 19, 21], { fs: 6.4, hfs: 6.2, boldFirst: true });
+      D.table(['Scenariu'].concat(yrs.map(String)).concat(['2021-2055']), rows, [26, 18, 18, 18, 18, 18, 18, 18, 22], { fs: 6.3, hfs: 6.1, boldFirst: true });
       D.source('Model cohorta-componenta ONU/Eurostat, calibrat pe RPL2021 (INS). Pct = variatie totala 2021-2055.');
       D.callout('Implicatie pentru planificare', 'Indiferent de scenariu, planificarea trebuie sa fie flexibila si etapizata, evitand supradimensionarea infrastructurii. Densificarea calitativa a intravilanului existent este preferabila expansiunii, reducand costurile de echipare si presiunea asupra terenurilor agricole.');
 
@@ -347,6 +347,84 @@
       // ─────────────────────────────────────────────────────────────────────
       // CAP 15 — SWOT
       // ─────────────────────────────────────────────────────────────────────
+      // ─────────────────────────────────────────────────────────────────────
+      // CAPITOLE TEMATICE SUPLIMENTARE (analiza aprofundata pe domenii)
+      // ─────────────────────────────────────────────────────────────────────
+      D.chapter('Reteaua de localitati si dezvoltarea metropolitana');
+      D.h2('Zona urbana functionala (ZUF)');
+      D.P('Dezvoltarea moderna a oraselor depaseste limita administrativa: fenomenul de suburbanizare a transferat populatie si activitati catre localitatile invecinate, generand fluxuri zilnice de naveta. Zona urbana functionala (ZUF) cuprinde orasul-nucleu si arealul sau de naveta, fiind cadrul natural de planificare a mobilitatii, locuirii si serviciilor.');
+      D.P('Coordonarea metropolitana evita concurenta intre UAT-uri, optimizeaza investitiile in infrastructura comuna (transport, apa-canal, deseuri) si gestioneaza coerent expansiunea rezidentiala din comunele periurbane, care altfel genereaza dependenta de autoturism si presiune asupra orasului-nucleu.');
+      D.h2('Cooperare teritoriala');
+      D.bullets([
+        'Asociatie de dezvoltare intercomunitara (ADI) pentru servicii publice comune.',
+        'Plan de mobilitate la nivel metropolitan (transport public integrat, park&ride).',
+        'Coordonarea expansiunii rezidentiale si protejarea coridoarelor verzi metropolitane.',
+        'Strategie economica comuna pentru atragerea investitiilor.',
+      ]);
+
+      D.chapter('Resurse de apa si gospodarirea apelor');
+      D.h2('Surse de apa si alimentare');
+      D.P('Securitatea resurselor de apa (surse de suprafata si subterane) este esentiala pentru dezvoltarea pe termen lung. Gestionarea integrata vizeaza protejarea surselor (zone de protectie sanitara), reducerea pierderilor in retea, eficienta consumului si adaptarea la perioadele de seceta amplificate de schimbarile climatice.');
+      D.h2('Apele uzate si pluviale');
+      D.P('Colectarea si epurarea apelor uzate conform directivelor europene (Directiva 91/271/CEE), separarea retelelor pluviale si gestiunea apelor de ploaie prin solutii bazate pe natura (drenaj urban durabil) reduc poluarea si riscul de inundatii urbane. Reutilizarea apei si reincarcarea acviferelor sunt directii de economie circulara a apei.');
+      D.callout('Adaptare la seceta si la viituri', 'Managementul apei trebuie sa gestioneze simultan ambele extreme climatice: stocarea si economisirea in perioade secetoase, respectiv retentia si evacuarea controlata in episoade de precipitatii intense.');
+
+      D.chapter('Energie si tranzitie energetica');
+      D.h2('Profilul energetic urban');
+      D.P('Consumul de energie al orasului (cladiri, transport, iluminat public, servicii) si sursele de alimentare determina amprenta de carbon. Tranzitia energetica vizeaza eficienta (reducerea consumului), decarbonizarea (surse regenerabile) si flexibilitatea (stocare, retele inteligente).');
+      D.table(['Directie de actiune', 'Masuri', 'Tinta'], [
+        ['Eficienta energetica cladiri', 'Reabilitare termica, standard nZEB la constructii noi', '-30% consum (2030)'],
+        ['Surse regenerabile', 'Fotovoltaic pe cladiri publice, comunitati de energie', '+ capacitate locala'],
+        ['Iluminat public', 'Trecere integrala la LED + telegestiune', '-50% consum iluminat'],
+        ['Mobilitate electrica', 'Statii de incarcare, electrificarea flotei publice', 'retea de incarcare'],
+        ['Retele termice', 'Modernizare / alternative eficiente, recuperare caldura', 'pierderi minime'],
+      ], [50, 76, 48], { boldFirst: true });
+      D.P('Obiectivul pe termen lung este neutralitatea climatica, in acord cu misiunea UE pentru 100 de orase inteligente si neutre climatic pana in 2030 si cu angajamentele nationale.');
+
+      D.chapter('Deseuri si economie circulara');
+      D.P('Tranzitia de la modelul liniar (extragere-productie-aruncare) la economia circulara reduce consumul de resurse si impactul de mediu. Ierarhia deseurilor prioritizeaza prevenirea, reutilizarea si reciclarea, in detrimentul depozitarii.');
+      D.table(['Flux', 'Tinta de valorificare', 'Instrument'], [
+        ['Deseuri municipale', 'Colectare selectiva extinsa, reciclare >50%', 'Sistem integrat de management'],
+        ['Biodeseuri', 'Compostare / digestie anaeroba', 'Colectare separata'],
+        ['Deseuri din constructii', 'Reutilizare si reciclare materiale', 'Trasabilitate santiere'],
+        ['Deseuri electronice / periculoase', 'Colectare dedicata', 'Puncte de colectare'],
+      ], [54, 70, 50], { boldFirst: true });
+      D.callout('Orasul circular', 'Economia circulara urbana integreaza managementul deseurilor cu energia (valorificare), apa (reutilizare) si materialele de constructie (reciclare), reducand presiunea asupra mediului si costurile pe termen lung.');
+
+      D.chapter('Spatii publice, peisaj si identitate urbana');
+      D.h2('Calitatea spatiului public');
+      D.P('Spatiul public (strazi, piete, parcuri, maluri de apa) este "camera de zi" a orasului si determina in mod direct calitatea vietii urbane. Un spatiu public de calitate este accesibil, sigur, confortabil, atractiv si incluziv, favorizand interactiunea sociala si mobilitatea activa.');
+      D.h2('Principii de amenajare');
+      D.bullets([
+        'Prioritatea pietonului si a vietii la nivelul strazii (parter activ).',
+        'Confort climatic prin umbrire, vegetatie si suprafete permeabile.',
+        'Accesibilitate universala si siguranta (iluminat, vizibilitate).',
+        'Mobilier urban de calitate, coerent si durabil.',
+        'Arta publica si elemente identitare locale.',
+      ]);
+      D.h2('Peisaj si patrimoniu peisagistic');
+      D.P('Protejarea si valorificarea peisajului natural si cultural (deschideri vizuale, silueta urbana, maluri de apa, dealuri) intareste identitatea locala si calitatea cadrului de viata, conform Conventiei Europene a Peisajului.');
+
+      D.chapter('Digitalizare urbana si oras inteligent (smart city)');
+      D.P('Digitalizarea sustine planificarea bazata pe dovezi si imbunatateste serviciile publice. O strategie smart city integreaza date, tehnologie si participare, fara a deveni un scop in sine, ci un instrument pentru obiectivele urbane.');
+      D.table(['Domeniu smart', 'Aplicatii', 'Beneficiu'], [
+        ['Date urbane', 'Platforma GIS, date deschise, geamana digitala (digital twin)', 'Decizii fundamentate'],
+        ['Mobilitate', 'ITS, informare in timp real, parcare inteligenta', 'Trafic fluidizat'],
+        ['Mediu', 'Senzori calitate aer, zgomot, ape', 'Monitorizare continua'],
+        ['Servicii publice', 'Administratie digitala, ghiseu unic online', 'Acces si transparenta'],
+        ['Energie / utilitati', 'Contorizare inteligenta, retele eficiente', 'Reducerea pierderilor'],
+      ], [44, 80, 50], { boldFirst: true });
+
+      D.chapter('Guvernanta urbana si capacitate institutionala');
+      D.P('Implementarea unui masterplan ambitios depinde de capacitatea institutionala a administratiei: resurse umane calificate, structuri dedicate de management urban, capacitate de atragere si gestiune a fondurilor europene si cooperare intre departamente si cu actorii externi.');
+      D.bullets([
+        ['Structura de management urban integrat', 'coordoneaza implementarea, monitorizeaza indicatorii si raporteaza public'],
+        ['Capacitate de absorbtie a fondurilor', 'pregatirea si managementul proiectelor cu finantare europeana'],
+        ['Planificare integrata', 'corelarea documentatiilor (PUG, PMUD, SIDU, strategii sectoriale)'],
+        ['Date si monitorizare', 'sistem de indicatori si platforma de date pentru decizii'],
+        ['Parteneriate', 'cooperare cu mediul privat, academic si societatea civila'],
+      ]);
+
       D.chapter('Diagnostic integrat — disfunctionalitati si analiza SWOT');
       D.h2('Disfunctionalitati majore');
       D.bullets([
