@@ -765,7 +765,7 @@ function _pdfESGBlock(pdf, W, cy, esg) {
     pdf.setFillColor(...dim.col); pdf.rect(cx,cy,2,52,'F');
     pdf.setTextColor(...dim.col); pdf.setFontSize(7.5); pdf.setFont('helvetica','bold');
     pdf.text(dim.k+' — '+dim.label, cx+5, cy+6);
-    pdf.setFontSize(14); pdf.text(dim.score, cx+colW-15, cy+12);
+    pdf.setFontSize(14); pdf.text(String(dim.score), cx+colW-15, cy+12);
     dim.items.forEach((item,ii) => {
       const iy=cy+18+ii*10;
       pdf.setTextColor(140,165,200); pdf.setFontSize(6); pdf.setFont('helvetica','normal');
@@ -4288,7 +4288,7 @@ const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
   const F3_mediu = F3||1;
   const sumaFact_struct = F1_struct+F2_teren+F3_mediu;
   const catGeoNr = sumaFact>=7?3 : sumaFact>=4?2 : 1;
-  const catGeo2 = catGeoNr===3?'3 — Complexă (>7 puncte NP 074)' : catGeoNr2===2?'2 — Curentă (4-6 puncte NP 074)':'1 — Simplă (<=3 puncte NP 074)';
+  const catGeo2 = catGeoNr===3?'3 — Complexă (>7 puncte NP 074)' : catGeoNr===2?'2 — Curentă (4-6 puncte NP 074)':'1 — Simplă (<=3 puncte NP 074)';
 
   // Date hidrologie estimative zona Iași (din hărți geologice IGPG + foraje existente)
   const hidro={
@@ -4992,6 +4992,7 @@ const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
   const _corOk = _lungCorActual <= _lungMaxCor;
   // Acces ISU
   const _accesLungSSF = pArea>5000?65:pArea>2000?45:pArea>800?28:18;
+  const _nrAccese = (aedisH>28 || scEst>1000) ? 2 : 1;
   const _avizISU_SSF  = aedisH>28||niv>5||sdEst>600||_accesLungSSF>50||['comercial','industrial','depozit'].includes(fn);
 
   // ── PAG 1: COVER ─────────────────────────────────────────────────────────
@@ -6685,6 +6686,7 @@ const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
   cy2=tblRow(['Înălțime H (clădire ce umbrește)','Distanță min. N (H/tan15°)','Distanță min. NE/NV','Distanță min. E/V','Obs.'],cy2,true,[48,42,42,38,12]);
   [[10,37.3,26.4,18.7,'P+3'],[15,56.0,39.6,28.0,'P+4'],[20,74.6,52.7,37.3,'P+6'],[25,93.3,65.9,46.6,'P+8'],[30,112.0,79.2,56.0,'P+9'],[aedisH,+(aedisH/Math.tan(15*Math.PI/180)).toFixed(1),+(aedisH/Math.tan(20*Math.PI/180)).toFixed(1),+(aedisH/Math.tan(30*Math.PI/180)).toFixed(1),'H PROPUS']].forEach(([h,dN,dNE,dE,niv2])=>{
     const isThis=h===aedisH;
+    const bg=isThis?[240,250,235]:[255,255,255];
     pdf.setFillColor(...bg);pdf.rect(14,cy2-5.5,W-28,8,'F');
     pdf.setDrawColor(...GRAY4);pdf.setLineWidth(0.15);pdf.line(14,cy2+2.5,W-14,cy2+2.5);
     const vs=[h+'m',dN+'m',dNE+'m',dE+'m',niv2];
@@ -6952,6 +6954,7 @@ async function generateStudiuFezabilitate(paramOverrides){
   const areaNum=parseFloat(area)||300;
   const scMax=Math.round(areaNum*parseFloat(params?.pot||35)/100);
   const sdTotal=Math.round(areaNum*parseFloat(params?.cut||1.0));
+  const nrPers=Math.max(1,Math.round((sdTotal||areaNum||0)/30)); // est. ocupare: ~30 mp ADC/pers.
   const svMin=Math.round(areaNum*parseFloat(params?.sv||20)/100);
   const pkMin=Math.max(2,Math.ceil(sdTotal/120)*parseInt(params?.pk||1));
   const latN=lat.toFixed(4),lonE=lon.toFixed(4);

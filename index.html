@@ -1386,21 +1386,7 @@ document.addEventListener('click', function(){
 
 <!-- RAPOARTE DROPDOWN — direct pe body pentru a evita overflow clipping din topbar -->
 <div id="rapoarte-menu" style="display:none;position:fixed;background:#0f172a;border:1px solid rgba(212,175,55,.3);border-radius:12px;padding:10px;min-width:280px;max-height:85vh;overflow-y:auto;z-index:9000;box-shadow:0 12px 40px rgba(0,0,0,.7)">
-  <!-- Proiectie Urbanistica TCI - PRIMUL -->
-  <button onclick="openTCI&&openTCI();document.getElementById('rapoarte-menu').style.display='none'"
-    style="display:flex;align-items:center;gap:10px;width:100%;text-align:left;
-    background:linear-gradient(135deg,rgba(139,92,246,0.15),rgba(212,175,55,0.08));
-    border:1px solid rgba(139,92,246,0.35);border-radius:8px;
-    color:#8b5cf6;padding:10px 12px;cursor:pointer;margin-bottom:8px;font-weight:700;font-size:12px">
-    <span style="font-size:18px">🏙</span>
-    <div>
-      <div>Proiecție Urbanistică TCI</div>
-      <div style="font-size:9px;font-weight:400;color:rgba(148,163,184,0.7);margin-top:1px">
-        Animație 2021-2055 · INSE · Eurostat · IPCC AR6
-      </div>
-    </div>
-  </button>
-  <div style="border-top:1px solid rgba(255,255,255,0.06);margin:4px 0 8px"></div>
+  <!-- TCI (Proiecție Urbanistică) mutat în meniul UrbanX Pro — nu mai apare în Rapoarte -->
   <!-- Hartă conexiuni -->
   <button onclick="openStudyMap();toggleRapoarteMenu()" style="display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:linear-gradient(135deg,rgba(212,175,55,.12),rgba(99,102,241,.08));border:1px solid rgba(212,175,55,.25);border-radius:8px;color:#d4af37;padding:8px 10px;cursor:pointer;font-size:11px;font-weight:700;margin-bottom:8px">
     <span style="font-size:16px">🗺</span>
