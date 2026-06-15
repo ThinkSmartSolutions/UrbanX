@@ -191,12 +191,14 @@
         if (yy > H - MB - 4 && idx + 1 < (p + 1) * perPage) { /* va continua pe pagina urmatoare de TOC */ break; }
       }
     }
-    // muta paginile TOC (ultimele tocPages) imediat dupa coperti
+    // muta paginile TOC (ultimele tocPages) imediat dupa coperti, pastrand ordinea
     try {
       const total = pdf.getNumberOfPages();
+      const firstTocIdx = total - tocPages + 1;   // prima pagina TOC (la final)
       for (let k = 0; k < tocPages; k++) {
-        // pagina TOC curenta e la finalul listei
-        pdf.movePage(total, coverPages + 1 + k);
+        // pagina TOC k este la firstTocIdx+k (indicii mai mari raman neschimbati
+        // la inserarile anterioare); o ducem la pozitia coverPages+1+k
+        pdf.movePage(firstTocIdx + k, coverPages + 1 + k);
       }
     } catch (e) { console.warn('[StratDoc] movePage indisponibil, TOC ramane la final', e); }
     return tocPages;
