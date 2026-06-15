@@ -87,7 +87,9 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
 
   // Sectiune principala navy + gold
   const sec=(title,y,col)=>{
-    y=_ensureSpace(y,16,title);
+    // break-after: avoid — rezervam titlul + cel putin un rand de continut,
+    // ca titlul sa nu ramana singur la baza paginii.
+    y=_ensureSpace(y,30,title);
     const bg=col||NAVY;
     pdf.setFillColor(...bg);pdf.rect(14,y,W-28,9,'F');
     pdf.setFillColor(...GOLD);pdf.rect(14,y,3,9,'F');
@@ -99,7 +101,7 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
 
   // Subsectiune
   const subsec=(title,y,col)=>{
-    y=_ensureSpace(y,13,title);
+    y=_ensureSpace(y,24,title);  // break-after: avoid — subtitlu + un rand de continut
     pdf.setFillColor(...(col||LIGHT3));pdf.rect(14,y,W-28,7.5,'F');
     pdf.setFillColor(...GOLD);pdf.rect(14,y,2,7.5,'F');
     pdf.setTextColor(...(col?WHITE:BLUE));pdf.setFontSize(8);pdf.setFont('helvetica','bold');
