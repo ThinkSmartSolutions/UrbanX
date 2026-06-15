@@ -1506,10 +1506,7 @@ document.addEventListener('click', function(){
     <button onclick="generateStudiuRestrictii();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#f87171;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px">🚧 Studiu Restricții & Zone de Risc</button>
     <button onclick="infoDrawerOpen('restrictii')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='#475569'">ⓘ</button>
   </div>
-  <div style="display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:6px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
-    <button onclick="generatePMUD();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#34d399;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px">🚍 PMUD — Plan Mobilitate Urbană Durabilă</button>
-    <button onclick="infoDrawerOpen('pmud')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#34d399'" onmouseout="this.style.color='#475569'">ⓘ</button>
-  </div>
+  <!-- PMUD + Masterplan = exclusiv in meniul UrbanX Pro (crema rapoartelor, nivel municipiu) -->
   <!-- Studii noi 2026 -->
   <div style="border-top:1px solid rgba(212,175,55,.2);margin:8px 0 4px;padding-top:6px">
     <div style="font-family:var(--mono,monospace);font-size:9px;color:#5a6788;letter-spacing:2px;text-transform:uppercase;padding:0 8px 4px">STUDII NOI 2026</div>
@@ -3189,8 +3186,18 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
     onmouseover="this.style.background='rgba(212,175,55,.2)'"
     onmouseout="this.style.background='rgba(212,175,55,.08)'">
     📋 Masterplan PDF
-    <div style="font-size:10px;color:rgba(212,175,55,.6);font-weight:400">22 pagini · formule · surse · conf. Legii 350/2001</div>
-  </button></button>
+    <div style="font-size:10px;color:rgba(212,175,55,.6);font-weight:400">Document strategic 100+ pagini · diagnostic multidisciplinar · RLU · planșe · conf. Legii 350/2001</div>
+  </button>
+
+  <button onclick="if(typeof generatePMUD==='function')generatePMUD();else ss?.('⏳ PMUD se inițializează — mai încearcă');_closeAllMenusAndOverlay()"
+    style="display:block;width:100%;text-align:left;background:rgba(52,211,153,.08);
+      border:none;color:#34d399;padding:10px 12px;cursor:pointer;border-radius:8px;
+      font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
+    onmouseover="this.style.background='rgba(52,211,153,.2)'"
+    onmouseout="this.style.background='rgba(52,211,153,.08)'">
+    🚍 PMUD — Plan Mobilitate Urbană Durabilă
+    <div style="font-size:10px;color:rgba(52,211,153,.6);font-weight:400">Document strategic 100+ pagini · 8 componente SUMP · ghid MDLPA + EU/ELTIS</div>
+  </button>
 
   <!-- PPTX Export -->
   <button onclick="if(typeof generatePPTX==='function')generatePPTX();else ss?.('⏳ Se inițializează...');_closeAllMenusAndOverlay()"
