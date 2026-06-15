@@ -4502,15 +4502,22 @@ async function _loadPUGOnMap(geojsonUrl, cityName, fitCoords) {
           return true;
         })
         .map(f => {
-          const coords = f.geometry.type === 'MultiPolygon'
-            ? f.geometry.coordinates[0][0]
-            : f.geometry.coordinates[0];
-          const lons = coords.map(c=>c[0]), lats = coords.map(c=>c[1]);
+          // FIX: bbox complet pentru MultiPolygon (turf.bbox), nu doar primul sub-poligon.
+          // Zonele unionate (ex. București) sunt MultiPolygon — bbox trunchiat făcea lookupUTR să rateze.
+          let bb;
+          try { bb = turf.bbox(f); }
+          catch(e) {
+            const coords = f.geometry.type === 'MultiPolygon'
+              ? f.geometry.coordinates[0][0]
+              : f.geometry.coordinates[0];
+            const lons = coords.map(c=>c[0]), lats = coords.map(c=>c[1]);
+            bb = [Math.min(...lons), Math.min(...lats), Math.max(...lons), Math.max(...lats)];
+          }
           return {
-            utr: f.properties.utr,
+            utr: (typeof normU==='function' ? normU(f.properties.utr||'') : f.properties.utr),
             UTR: f.properties.UTR || null,
             geom: f.geometry,
-            bb: [Math.min(...lons), Math.min(...lats), Math.max(...lons), Math.max(...lats)]
+            bb: [bb[0], bb[1], bb[2], bb[3]]
           };
         });
       window.S.pug = geojson; // stocăm geojson pentru FunctionEngine
