@@ -147,11 +147,11 @@
     if(s === null || s === undefined) return '\u2014';
     return String(s)
       // ─── Minuscule ───────────────────────────────────────────────────
-      .replace(/\u015f/g,"\u0219")   // ş cu cedilă  (U+015F)
-      .replace(/\u0163/g,"\u021b")   // ţ cu cedilă  (U+0163)
+      .replace(/[\u0103\u00e2]/g,'a').replace(/\u00ee/g,'i').replace(/[\u0219\u015f]/g,'s').replace(/[\u021b\u0163]/g,'t')
+      .replace(/[\u0102\u00c2]/g,'A').replace(/\u00ce/g,'I').replace(/[\u0218\u015e]/g,'S').replace(/[\u021a\u0162]/g,'T')
       // ─── Majuscule ───────────────────────────────────────────────────
-      .replace(/\u015e/g,"\u0218")   // Ş cu cedilă  (U+015E)
-      .replace(/\u0162/g,"\u021a")   // Ţ cu cedilă  (U+0162)
+
+
       // ─── Caractere speciale ──────────────────────────────────────────
       .replace(/\u2014/g,'-')   // — em dash
       .replace(/\u2013/g,'-')   // – en dash
