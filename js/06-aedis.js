@@ -3339,14 +3339,12 @@ async function exportVol3(pdf, ap, r, p){
 function _pdfSafe(str){
   if(str===null||str===undefined) return '';
   return String(str)
-    // ── Diacritice românești — ambele forme Unicode (cu și fără cedilă) ──
-    .replace(/[ăÃã]/g,'a').replace(/[âÂ]/g,'a')
-    .replace(/[îÎ]/g,'i')
-    .replace(/[șȘşŞ]/g,'s')
-    .replace(/[țȚţŢ]/g,'t')
-    // ── Alte diacritice europene comune ──
+    // ── Diacriticele românești se PĂSTREAZĂ (fontul DejaVu RO le redă corect în PDF) ──
+    // normalizăm doar formele cu cedilă (ş/ţ) la formele standard cu virgulă (ș/ț)
+    .replace(/ş/g,'ș').replace(/Ş/g,'Ș').replace(/ţ/g,'ț').replace(/Ţ/g,'Ț')
+    // ── Alte diacritice europene comune (non-RO) → ASCII ──
     .replace(/[àáäÀÁÄ]/g,'a').replace(/[èéêëÈÉÊË]/g,'e')
-    .replace(/[ìíîïÌÍÎÏ]/g,'i').replace(/[òóôöÒÓÔÖ]/g,'o')
+    .replace(/[ìíïÌÍÏ]/g,'i').replace(/[òóôöÒÓÔÖ]/g,'o')
     .replace(/[ùúûüÙÚÛÜ]/g,'u').replace(/[ñÑ]/g,'n')
     .replace(/[çÇ]/g,'c').replace(/[ýÝ]/g,'y')
     .replace(/[ßẞ]/g,'ss').replace(/[æÆ]/g,'ae').replace(/[øØ]/g,'o')

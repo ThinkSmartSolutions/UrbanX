@@ -59,6 +59,19 @@
           };
           inst.text.__roWrap = true;
         }
+        // Alias setFont la nivel de instanta (helvetica/times/courier -> DejaVu)
+        if (typeof inst.setFont === 'function' && !inst.setFont.__roWrap) {
+          var _sf = inst.setFont;
+          inst.setFont = function (font, style, weight) {
+            if (/^(helvetica|times|courier|arial)$/i.test(font || '')) font = 'DejaVu';
+            var st = (style === 'italic' || style === 'bolditalic') ? (style === 'bolditalic' ? 'bold' : 'normal') : style;
+            try { return _sf.call(this, font, st, weight); }
+            catch (e) { try { return _sf.call(this, 'DejaVu', 'normal'); } catch (e2) { } }
+          };
+          inst.setFont.__roWrap = true;
+        }
+        // Font implicit = DejaVu (text fara setFont explicit foloseste tot DejaVu, nu helvetica)
+        try { inst.setFont('DejaVu', 'normal'); } catch (e) { }
       } catch (e) { }
     }]);
   }
