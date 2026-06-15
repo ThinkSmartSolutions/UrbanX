@@ -2976,7 +2976,8 @@ const TCI = {
     const url = `https://statistici.insse.ro:8077/tempo-ins/matrix/LOC103A?`+
       `Judete=${sirutaCode}&Destinatii=TOTAL&Ani=2019,2020,2021,2022,2023,2024&lang=ro`;
     try {
-      const r = await fetch(url, {signal:AbortSignal.timeout(6000), mode:'cors'});
+      const _pUrl = 'https://urbanx-proxy.3dtravelsoftart.workers.dev/proxy?url=' + encodeURIComponent(url);
+      const r = await fetch(_pUrl, {signal:AbortSignal.timeout(6000)});
       if(!r.ok) return null;
       const data = await r.json();
       const vals = (data?.rowDimensions?.[0]?.valori||[]).map(Number).filter(v=>!isNaN(v)&&v>0);

@@ -24,6 +24,13 @@ const _cache = {};
 function _cacheGet(key){ const e=_cache[key]; return e&&(Date.now()-e.ts<CACHE_TTL)?e.data:null; }
 function _cacheSet(key,data){ _cache[key]={data,ts:Date.now()}; }
 
+// ── Proxy Cloudflare pentru fetch-uri externe (CLAUDE.md §10) + circuit breaker ──
+const _PROXY = 'https://urbanx-proxy.3dtravelsoftart.workers.dev/proxy?url=';
+const _viaProxy = (u) => _PROXY + encodeURIComponent(u);
+// INSE TEMPO (statistici.insse.ro:8077) e frecvent indisponibil — după primul eșec
+// nu mai reîncercăm în sesiune (evită zeci de erori în consolă); folosim date locale.
+let _inseDown = false;
+
 // ═══════════════════════════════════════════════════════════════════════════
 // ① INSE TEMPO-INS — Date oficiale România
 // ═══════════════════════════════════════════════════════════════════════════
@@ -38,10 +45,10 @@ G._TCILiveINSE = {
     const cached = _cacheGet(k);
     if(cached) return cached;
 
-    try {
+    if(!_inseDown) try {
       // INSE TEMPO-INS: indicator POP107D — Populatia rezidenta
       const url = `${this.BASE}/api/json/POP107D?siruta=${siruta}`;
-      const r = await fetch(url, { signal: AbortSignal.timeout(8000) });
+      const r = await fetch(_viaProxy(url), { signal: AbortSignal.timeout(8000) });
       if(!r.ok) throw new Error('HTTP '+r.status);
       const data = await r.json();
 
@@ -49,7 +56,8 @@ G._TCILiveINSE = {
       const result = this._parsePop(data, siruta);
       if(result) { _cacheSet(k, result); return result; }
     } catch(e) {
-      console.log('[INSE] fetchPop fallback:', e.message);
+      _inseDown = true;
+      console.log('[INSE] indisponibil — folosesc date locale:', e.message);
     }
 
     // Fallback: căutăm în _RO_CITIES_DB
@@ -78,16 +86,17 @@ G._TCILiveINSE = {
     const cached = _cacheGet(k);
     if(cached) return cached;
 
-    try {
+    if(!_inseDown) try {
       const url = `${this.BASE}/api/json/CON101A?siruta=${siruta}`;
-      const r = await fetch(url, { signal: AbortSignal.timeout(8000) });
+      const r = await fetch(_viaProxy(url), { signal: AbortSignal.timeout(8000) });
       if(!r.ok) throw new Error('HTTP '+r.status);
       const data = await r.json();
 
       const result = this._parseAuth(data);
       if(result) { _cacheSet(k, result); return result; }
     } catch(e) {
-      console.log('[INSE] fetchAuth fallback:', e.message);
+      _inseDown = true;
+      console.log('[INSE] indisponibil — folosesc date locale:', e.message);
     }
     return null;
   },

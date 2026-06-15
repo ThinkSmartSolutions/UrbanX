@@ -184,8 +184,9 @@ const _INSEFetcher = {
   // Fetch date nationale (alternative: INSE API v2)
   async fetchNational(indicator) {
     try {
+      const _inseUrl = `https://statistici.insse.ro:8077/tempo-ins/api/json/${indicator}`;
       const resp = await fetch(
-        `https://statistici.insse.ro:8077/tempo-ins/api/json/${indicator}`,
+        'https://urbanx-proxy.3dtravelsoftart.workers.dev/proxy?url=' + encodeURIComponent(_inseUrl),
         { signal: AbortSignal.timeout(5000) }
       );
       if(resp.ok) return await resp.json();

@@ -249,7 +249,9 @@ async function goToLocation(lat, lng, label){
   if(!S._zoneCache) S._zoneCache={};
   
   let zoneData=S._zoneCache[zonaName];
-  if(!zoneData){
+  // Sărim fetch-ul dacă manifestul confirmă că nu există tile pentru celulă (evită 404)
+  const _tileMaybe = (typeof window._zoneTileExists==='function') ? await window._zoneTileExists(zonaName) : true;
+  if(!zoneData && _tileMaybe){
     try{
       ss('⏳ Se încarcă datele cadastrale pentru zonă…');
       const r=await fetch('./zone/'+zonaName+'.geojson');

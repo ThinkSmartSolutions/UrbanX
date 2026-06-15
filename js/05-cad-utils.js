@@ -1,5 +1,19 @@
 // UrbanX — UTR helpers, parcele din zona
 
+// ── Pre-verificare manifest zone/index.json: evită 404 pe celule fără tile-uri ──
+// Returnează true dacă tile-ul există SAU dacă manifestul nu e disponibil (nu blocăm niciodată).
+window._zoneManifest = (typeof window._zoneManifest!=='undefined') ? window._zoneManifest : null;
+async function _zoneTileExists(zonaName){
+  try{
+    if(window._zoneManifest === null){
+      const r = await fetch('./zone/index.json');
+      window._zoneManifest = r.ok ? await r.json() : {};
+    }
+    if(!window._zoneManifest || !Object.keys(window._zoneManifest).length) return true; // fallback: nu bloca
+    return Object.prototype.hasOwnProperty.call(window._zoneManifest, zonaName);
+  }catch(e){ return true; } // la orice eroare → comportament vechi (încearcă fetch)
+}
+window._zoneTileExists = _zoneTileExists;
 
 async function doLoadLocalParcels(){
   const bb = map.getBounds();
@@ -18,6 +32,8 @@ async function doLoadLocalParcels(){
     if(!S._zoneCache) S._zoneCache={};
     
     if(!S._zoneCache[zonaName]){
+      if(!(await _zoneTileExists(zonaName)))
+        throw new Error('Nicio parcelă cartografiată în zona '+zonaName);
       const r = await fetch('./zone/'+zonaName+'.geojson');
       if(!r.ok) throw new Error('Zona '+zonaName+' indisponibilă');
       S._zoneCache[zonaName] = await r.json();
