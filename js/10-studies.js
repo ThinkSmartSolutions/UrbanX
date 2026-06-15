@@ -5011,6 +5011,7 @@ const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
   // Acces ISU
   const _accesLungSSF = pArea>5000?65:pArea>2000?45:pArea>800?28:18;
   const _nrAccese = (aedisH>28 || scEst>1000) ? 2 : 1;
+  const _latime_min_ISU = aedisH > 12 ? 5.0 : 3.5;
   const _avizISU_SSF  = aedisH>28||niv>5||sdEst>600||_accesLungSSF>50||['comercial','industrial','depozit'].includes(fn);
 
   // ── PAG 1: COVER ─────────────────────────────────────────────────────────
