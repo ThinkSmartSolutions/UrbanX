@@ -26,7 +26,7 @@ if(_mapEl) _mapEl.style.visibility = 'visible';
 function _checkPUGZone(utr){
   const utrClean = resolveUTR(utr||'');
   const isFromPUG = utrClean && utrClean !== '—' && utrClean !== ''
-                    && utrClean !== 'EXT' && utrClean !== 'EXT_COM'
+                    && utrClean !== 'EXT' && utrClean !== 'EXT_COM' && utrClean !== 'NECART'
                     && utrClean !== '?' && utrClean !== '??';
   return {utrClean, isFromPUG};
 }
@@ -40,6 +40,20 @@ function _getActiveUATName() {
 function _getActivePUGLabel() {
   return 'PUG ' + _getActiveUATName();
 }
+// UAT urban (capitală/municipiu/oraș) — acolo "extravilan" e aproape sigur greșit;
+// o parcelă fără UTR mapat e INTRAVILAN necartografiat, nu extravilan.
+function _isCityUAT() {
+  var k = (window.TCI && window.TCI.cityKey) || localStorage.getItem('ux_last_city') || '';
+  var db = window._RO_CITIES_DB || {};
+  var tip = (db[k] && db[k].tip) || '';
+  return /capitala|municipiu|oras/i.test(tip) || /^RO-B-/.test(k);
+}
+// Stare onestă pentru parcelă urbană fără regulament cartografiat — FĂRĂ indicatori inventați.
+function _necartZone(uatName) {
+  return { type: 'necartografiat', utr: 'NECART',
+           label: '🏙 Intravilan ' + uatName + ' — zonă fără regulament cartografiat (verificați PUG/PUZ sector)',
+           color: '#fbbf24', uat: uatName };
+}
 
 // Versiunea sincrona (folosita pentru UI instant) - doar pe baza UTR
 function detectZoneType(lat, lng, utr){
@@ -48,6 +62,7 @@ function detectZoneType(lat, lng, utr){
   if(isFromPUG){
     return {type:'intravilan', utr:utrClean, label:'🏙 Intravilan ' + uatName + ' — UTR '+utrClean, color:'#34d399'};
   }
+  if(_isCityUAT()) return _necartZone(uatName);  // urban fără UTR mapat -> necartografiat, NU extravilan
   return {type:'necunoscut', utr:utrClean||'EXT_COM', label:'📍 În afara ' + _getActivePUGLabel() + ' — se verifică UAT-ul…', color:'#94a3b8'};
 }
 
@@ -63,7 +78,9 @@ async function detectZoneTypeAsync(lat, lng, utr){
   if(fromPUG){
     return {type:'intravilan', utr:utrCl, label:'🏙 Intravilan ' + activeName + ' — UTR '+utrCl, color:'#34d399', uat:activeName};
   }
-  
+  // UAT urban fără UTR mapat = intravilan necartografiat (NU extravilan, NU altă localitate)
+  if(_isCityUAT()) return _necartZone(activeName);
+
   // Nu e in PUG activ - interogam Nominatim pentru UAT real
   try{
     const r = await fetch(

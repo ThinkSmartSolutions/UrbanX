@@ -1247,6 +1247,18 @@ var REGULI={
   uc:"Funcțiuni rurale compatibile cu PUG-ul localității",
   ui:"Industrie, depozitare, activități incompatibile cu zona rurală",
   obs:"Parametri orientativi conform Legea 350/2001. Verificați cu primăria localității."
+},
+// Zonă fără regulament cartografiat în platformă — NU se inventează indicatori.
+// Folosit pentru parcele din intravilan urban care cad în afara zonelor UTR încărcate.
+"NECART":{
+  d:"Zonă fără regulament cartografiat — verificați PUG/PUZ oficial",
+  pot:null,cut:null,niv:null,h:null,
+  rf:null,rl:null,rs:null,sv:null,pk:null,
+  ao:"NU",fm:null,
+  ua:"Indeterminat — necesită consultarea PUG/PUZ de sector și a RLU oficial",
+  uc:"—",
+  ui:"—",
+  obs:"Parcelă în intravilan, dar în afara zonelor UTR cartografiate în platformă. Indicatorii NU sunt estimați — consultați documentația de urbanism oficială (PUG/PUZ sector + RLU) și certificatul de urbanism."
 }
 };
 
