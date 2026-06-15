@@ -465,6 +465,23 @@ const RAPORT_INFO = {
     ],
     nu: ['Nu înlocuiește studiul geotehnic oficial realizat de geotehnician autorizat cu foraje', 'Datele de teren estimate sunt orientative — condiționatele reale pot diferi semnificativ'],
   },
+  restrictii: {
+    ico: '🚧', label: 'Studiu Restricții & Zone de Risc',
+    badge: 'fundamentare', badgeLabel: 'Toate amplasamentele',
+    color: '248,113,113',
+    fn: 'generateStudiuRestrictii()',
+    ce: 'Identifică și tratează restricțiile de construire aplicabile parcelei conform legislației naționale și europene: risc seismic (P100), inundații (Directiva 2007/60/CE), alunecări de teren / stabilitate (HG 447/2003), zonă costieră (OUG 202/2002), arii naturale protejate și Delta (OUG 57/2007, Natura 2000), precum și zone de protecție speciale (baraje, mine, saline, porturi). Profilul de risc este determinat din date geospațiale (cotă teren și declivitate din DEM), zonarea seismică și datele hidrografice ale Administrației Bazinale de Apă.',
+    dece: 'Restricțiile de risc natural condiționează autorizarea și pot face un teren neconstruibil sau scump de fundat. Identificarea lor din faza de concept evită blocaje la avizare, fundamentează condițiile din Certificatul de Urbanism și ajută beneficiarul să bugeteze din timp avizele și studiile de specialitate.',
+    legal: 'P100-1/2013 (seismic) · Legea 107/1996 + Dir. 2007/60/CE (ape/inundații) · HG 447/2003 + Legea 575/2001 (alunecări) · OUG 202/2002 (zonă costieră) · OUG 57/2007 + Dir. 92/43/CEE (arii protejate) · Legea 82/1993 (RBDD) · NP 074/2014',
+    output: [
+      { ico: '⚠️', txt: 'Profil de risc sintetic: seismic, inundații, alunecări, costier, arii protejate' },
+      { ico: '🌍', txt: 'Risc seismic: ag, Tc, zona și cerințe de proiectare antiseismică' },
+      { ico: '💧', txt: 'Risc inundații: bazin, curs de apă, zonă inundabilă, aviz ABA' },
+      { ico: '⛰', txt: 'Stabilitate teren: declivitate (DEM), susceptibilitate alunecări' },
+      { ico: '📋', txt: 'Sinteză avize/studii necesare + recomandări proiectant/beneficiar/autorități' },
+    ],
+    nu: ['Document preliminar de fundamentare — nu înlocuiește studiile de specialitate certificate (geotehnic, hidrologic, expertiză seismică, evaluare adecvată)', 'Nivelurile de risc sunt estimative; se confirmă pe sursele oficiale (MMAP/ANAR, MDLPA, ANRM, administrații arii protejate)'],
+  },
   trafic: {
     ico: '🚦', label: 'Studiu de Impact Trafic',
     badge: 'obligatoriu', badgeLabel: 'Proiecte >20 unități',
