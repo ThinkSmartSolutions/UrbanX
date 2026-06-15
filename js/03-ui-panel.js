@@ -182,6 +182,38 @@ function _ctxFromMapbox(center, radiusM){
     }
   }catch(e){ console.warn('_ctxFromMapbox error:', e.message); }
 
+  // Augmentare: querySourceFeatures = TOATE cladirile din tile-urile incarcate,
+  // nu doar cele randate in viewport -> distante complete fata de vecini, nu partiale.
+  try{
+    const srcSet = new Set();
+    const st = (map.getStyle && map.getStyle()) || {};
+    (st.layers||[]).forEach(L=>{
+      if((L.type==='fill-extrusion'||L['source-layer']==='building'||/building/i.test(L.id||'')) && L.source && L['source-layer']){
+        srcSet.add(L.source+'|'+L['source-layer']);
+      }
+    });
+    srcSet.add('composite|building'); // sursa Mapbox standard
+    srcSet.forEach(pair=>{
+      const [src,sl]=pair.split('|');
+      let qs=[]; try{ qs=map.querySourceFeatures(src,{sourceLayer:sl}); }catch(e){ return; }
+      for(const f of qs){
+        if(!f.geometry) continue;
+        const geom=f.geometry.type==='MultiPolygon'?{type:'Polygon',coordinates:f.geometry.coordinates[0]}:f.geometry;
+        if(geom.type!=='Polygon'||(geom.coordinates[0]?.length<3)) continue;
+        try{
+          const ctr=turf.centerOfMass({type:'Feature',geometry:geom,properties:{}});
+          const dist=turf.distance(centerPt,ctr,{units:'meters'});
+          if(dist>radiusM+100) continue;
+          const key=ctr.geometry.coordinates.map(v=>v.toFixed(4)).join(',');
+          if(seen.has(key)) continue; seen.add(key);
+          const h=pN(f.properties?.height)||pN(f.properties?.render_height)||(pN(f.properties?.['building:levels'])||0)*3||7;
+          const fn=f.properties?.building||f.properties?.fn||'yes';
+          feats.push({type:'Feature',properties:{h,lv:Math.round(h/3),fn,col:(typeof BLD_COL!=='undefined'&&BLD_COL[fn])||'#8a9ab0'},geometry:geom});
+        }catch(e){}
+      }
+    });
+  }catch(e){ console.warn('_ctxFromMapbox source-features:', e.message); }
+
   return feats;
 }
 
