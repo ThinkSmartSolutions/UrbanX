@@ -147,21 +147,11 @@
     if(s === null || s === undefined) return '\u2014';
     return String(s)
       // ─── Minuscule ───────────────────────────────────────────────────
-      .replace(/\u0103/g,'a')   // ă (U+0103)
-      .replace(/\u00e2/g,'a')   // â (U+00E2)
-      .replace(/\u00ee/g,'i')   // î (U+00EE)
-      .replace(/\u0219/g,'s')   // ș cu virgulă (U+0219) ← LIPSEA
-      .replace(/\u015f/g,'s')   // ş cu cedilă  (U+015F)
-      .replace(/\u021b/g,'t')   // ț cu virgulă (U+021B) ← LIPSEA
-      .replace(/\u0163/g,'t')   // ţ cu cedilă  (U+0163)
+      .replace(/\u015f/g,"\u0219")   // ş cu cedilă  (U+015F)
+      .replace(/\u0163/g,"\u021b")   // ţ cu cedilă  (U+0163)
       // ─── Majuscule ───────────────────────────────────────────────────
-      .replace(/\u0102/g,'A')   // Ă (U+0102)
-      .replace(/\u00c2/g,'A')   // Â (U+00C2)
-      .replace(/\u00ce/g,'I')   // Î (U+00CE)
-      .replace(/\u0218/g,'S')   // Ș cu virgulă (U+0218) ← LIPSEA
-      .replace(/\u015e/g,'S')   // Ş cu cedilă  (U+015E)
-      .replace(/\u021a/g,'T')   // Ț cu virgulă (U+021A) ← LIPSEA
-      .replace(/\u0162/g,'T')   // Ţ cu cedilă  (U+0162)
+      .replace(/\u015e/g,"\u0218")   // Ş cu cedilă  (U+015E)
+      .replace(/\u0162/g,"\u021a")   // Ţ cu cedilă  (U+0162)
       // ─── Caractere speciale ──────────────────────────────────────────
       .replace(/\u2014/g,'-')   // — em dash
       .replace(/\u2013/g,'-')   // – en dash
