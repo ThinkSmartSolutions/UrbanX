@@ -144,6 +144,17 @@
       // ─────────────────────────────────────────────────────────────────────
       // CAP 6 — DEMOGRAFIE
       // ─────────────────────────────────────────────────────────────────────
+      D.h2('Masuri de reducere a riscului si reziliente');
+      D.P('Strategia de reziliente combina masuri structurale (lucrari de aparare, consolidare, infrastructura) si nestructurale (planificare, avertizare, asigurare, educatie), pe fiecare categorie de risc:');
+      D.table(['Risc', 'Masuri de prevenire / reducere', 'Responsabili'], [
+        ['Seismic', 'Expertizarea si consolidarea cladirilor vulnerabile (clasa I-II de risc seismic), respectarea P100 la constructii noi, planuri de interventie', 'Primarie, ISU, proprietari'],
+        ['Inundatii', 'Lucrari de aparare, decolmatare, bazine de retentie, interdictie de construire in albia majora, sistem de avertizare', 'ABA, primarie, ISU'],
+        ['Alunecari', 'Studii de stabilitate, drenaje, consolidari de versant, interdictii pe terenuri instabile, monitorizare', 'Primarie, geotehnicieni'],
+        ['Caldura / seceta', 'Infrastructura verde, suprafete permeabile, puncte de racorire, planuri pentru valuri de caldura', 'Primarie, sanatate publica'],
+        ['Tehnologic', 'Zone de protectie, planuri de urgenta SEVESO, monitorizarea calitatii aerului', 'APM, ISU, operatori'],
+      ], [28, 116, 30], { fs: 7 });
+      D.callout('Principiul prevenirii', 'Investitia in prevenire si adaptare este de cateva ori mai eficienta decat costul interventiei post-dezastru. Rezilienta urbana se construieste integrat, in toate documentatiile de urbanism si in programarea investitiilor.');
+
       D.fullPage('Profilul de risc — scor compozit si matrice probabilitate x impact', () => m._pg7_risk(ctx));
 
       D.chapter('Analiza demografica si proiectii');
@@ -264,6 +275,17 @@
       D.P('Calitatea aerului, a apei si a solului, nivelul de zgomot si gestionarea deseurilor determina sanatatea publica si calitatea vietii. Sursele principale de poluare sunt traficul, incalzirea si, dupa caz, activitatile industriale. Monitorizarea continua si masurile de reducere a emisiilor sunt prioritare.');
       D.h2('Spatii verzi si infrastructura albastra-verde');
       D.P('Norma legala (Legea 24/2007) prevede minim 26 mp de spatiu verde pe locuitor. Cresterea si conectarea spatiilor verzi (parcuri, coridoare, scuaruri, acoperisuri verzi) aduce beneficii multiple: combaterea insulei de caldura, gestionarea apelor pluviale, biodiversitate, sanatate si coeziune sociala.');
+      const _abV = (m && m._pugAreaByFunc) ? m._pugAreaByFunc(pugGeo, reguli) : { cats: {} };
+      const verdeExist = (_abV.cats && _abV.cats['Spatii verzi / Agrement']) ? _abV.cats['Spatii verzi / Agrement'].m2 : null;
+      const verdeNorma = 26 * pop55;
+      D.h3('Analiza deficitului de spatii verzi');
+      D.table(['Indicator spatii verzi', 'Valoare', 'Observatie'], [
+        ['Norma legala minima', '26 mp/locuitor', 'Legea 24/2007 (OUG 114/2007)'],
+        ['Necesar la proiectia 2055', N(Math.round(verdeNorma / 10000), 1) + ' ha', 'pentru ' + N(pop55) + ' locuitori'],
+        ['Suprafata verde existenta (PUG)', verdeExist != null ? N(Math.round(verdeExist / 10000), 1) + ' ha' : 'necesita PUG', verdeExist != null ? N(Math.round(verdeExist / pop), 1) + ' mp/loc actual' : 'masurat din PUG vectorial'],
+        ['Deficit estimat', verdeExist != null ? N(Math.max(0, Math.round((verdeNorma - verdeExist) / 10000)), 1) + ' ha' : '-', 'de realizat pana in 2055'],
+      ], [56, 40, 78], { boldFirst: true });
+      D.source('Norma 26 mp/loc (Legea 24/2007). Suprafata existenta masurata din PUG vectorial (turf.js) unde este disponibil.');
       D.h2('Neutralitate climatica si economie circulara');
       D.P('In acord cu Pactul Verde European si misiunea UE pentru orase neutre climatic, strategia vizeaza reducerea emisiilor de gaze cu efect de sera (cladiri, transport, energie), eficienta energetica, surse regenerabile si tranzitia catre o economie circulara (reducerea, reutilizarea si reciclarea resurselor).');
 
@@ -457,6 +479,27 @@
         ['Etapa 2 — Consolidare', '2030-2040', 'Densificare TOD, extindere retele, transport public, locuire accesibila'],
         ['Etapa 3 — Maturizare', '2040-2055', 'Neutralitate climatica, oras de proximitate generalizat, reziliente'],
       ], [40, 32, 102], { boldFirst: true });
+      D.h2('Portofoliu de proiecte prioritare');
+      D.P('Portofoliul de proiecte operationalizeaza obiectivele strategice. Fiecare proiect este caracterizat prin obiectiv, descriere, indicatori de rezultat, etapa de implementare si sursa de finantare. Bugetele sunt orientative si se detaliaza in studiile de fezabilitate.');
+      const invTot = (invest && (invest.total || invest.totalMilEur)) || Math.round(pop * 0.5);
+      const proiecte = [
+        ['P1 — Actualizare PUG si documentatii de urbanism', 'Actualizarea Planului Urbanistic General si elaborarea PUZ-urilor pentru zonele de regenerare si densificare, in conformitate cu viziunea Masterplanului.', 'PUG aprobat; min. 5 PUZ-uri prioritare', 'Etapa 1', Math.round(invTot * 0.01)],
+        ['P2 — Regenerarea ansamblurilor de locuinte colective', 'Reabilitare termica, modernizarea spatiului public dintre blocuri, parcari organizate, spatii verzi si dotari de proximitate in cartierele construite in perioada socialista.', 'Min. 3 ansambluri regenerate; -40% consum energetic', 'Etapa 1-2', Math.round(invTot * 0.18)],
+        ['P3 — Reteaua de mobilitate activa', 'Realizarea unei retele continue si sigure de piste de biciclete si trasee pietonale, conectand cartierele cu centrul, zonele de munca si dotarile majore.', '+' + N(Math.round(pop / 1000 * 1.2)) + ' km piste; +6 pp cota activa', 'Etapa 1-2', Math.round(invTot * 0.08)],
+        ['P4 — Modernizarea transportului public', 'Innoirea flotei cu vehicule electrice, benzi dedicate, prioritizare semaforica, e-ticketing si cresterea frecventei pe coridoarele principale.', 'Flota electrica >50%; +10 pp cota TP', 'Etapa 2', Math.round(invTot * 0.16)],
+        ['P5 — Infrastructura verde-albastra', 'Crearea si conectarea parcurilor, coridoarelor verzi de-a lungul cursurilor de apa, scuarurilor si acoperisurilor verzi, atingand norma de 26 mp/locuitor.', '>= 26 mp verde/loc; coridor ecologic continuu', 'Etapa 1-3', Math.round(invTot * 0.12)],
+        ['P6 — Extinderea si modernizarea retelelor edilitare', 'Extinderea retelelor de apa-canal in zonele deficitare, reducerea pierderilor, statie de epurare conforma si digitalizarea managementului.', '100% canalizare; -20% pierderi apa', 'Etapa 1-2', Math.round(invTot * 0.15)],
+        ['P7 — Locuinte accesibile si sociale', 'Dezvoltarea unui fond de locuinte accesibile si sociale, prin proiecte publice si parteneriate, pentru tineri, familii si categorii vulnerabile.', '+' + N(Math.round(((need && need.locuinteTotale) || 0) * 0.1)) + ' locuinte accesibile', 'Etapa 2-3', Math.round(invTot * 0.1)],
+        ['P8 — Eficienta energetica si surse regenerabile', 'Eficientizarea energetica a cladirilor publice, iluminat public LED, instalatii fotovoltaice si tranzitia catre neutralitate climatica.', '-30% emisii cladiri publice (2030)', 'Etapa 1-3', Math.round(invTot * 0.08)],
+        ['P9 — Digitalizare urbana (smart city)', 'Platforma de date urbane, senzori de mediu si trafic, servicii publice digitale si sisteme inteligente de transport (ITS).', 'Platforma urbana operationala; ITS pe arterele majore', 'Etapa 2', Math.round(invTot * 0.05)],
+        ['P10 — Regenerarea zonelor centrale si de patrimoniu', 'Reabilitarea spatiului public si a fatadelor in zonele istorice/protejate, pietonalizari si valorificarea patrimoniului.', 'Zona centrala regenerata; trasee culturale', 'Etapa 2-3', Math.round(invTot * 0.07)],
+      ];
+      proiecte.forEach(p => {
+        D.h3(p[0]);
+        D.P(p[1], { gap: 1.5 });
+        D.table(['Indicatori de rezultat', 'Etapa', 'Buget orientativ'], [[p[2], p[3], N(p[4]) + ' mil. EUR']], [96, 30, 48], { fs: 7 });
+      });
+      D.callout('Buget total portofoliu', 'Investitie cumulata orientativa de aproximativ ' + N(invTot) + ' mil. EUR pe orizontul 2025-2055, mobilizata predominant din fonduri europene (POR, PNRR), completate de buget local si parteneriate public-private.');
 
       // ─────────────────────────────────────────────────────────────────────
       // CAP 25 — FINANTARE
