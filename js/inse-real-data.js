@@ -10,8 +10,9 @@
 // ═══════════════════════════════════════════════════════════════════════════
 (function () {
   'use strict';
-  var DOMIC = 'data/ins-populatie-2021.json';
-  var REZJUD = 'data/ins-rezidenta-judet-2021.json';
+  var DOMIC = 'data/ins-populatie-domiciliu.json';
+  var REZJUD = 'data/ins-rezidenta-judet.json';
+  var AN = { dom: null, rez: null };   // anul real, din _meta (actualizat automat)
 
   function norm(s) {
     s = (s || '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
@@ -28,6 +29,8 @@
     fetch(REZJUD + '?v=20260615').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
   ]).then(function (res) {
     var dom = res[0], rez = res[1];
+    if (dom && dom._meta) AN.dom = dom._meta.an;
+    if (rez && rez._meta) AN.rez = rez._meta.an;
     if (dom && dom.nume && dom.populatie) {
       Object.keys(dom.nume).forEach(function (siruta) {
         var raw = dom.nume[siruta];
@@ -55,7 +58,11 @@
     if (d && e.pop_domiciliu_2021 == null) { e.pop_domiciliu_2021 = d.pop; e.pop_domiciliu_siruta = d.siruta; n++; }
     var rj = rezByJud[norm(e.judet || e.judet_code || '')];
     if (rj && e.pop_rezidenta_judet_2021 == null) { e.pop_rezidenta_judet_2021 = rj; n++; }
-    if (n) e.pop_sursa_reala = 'INS TEMPO 2021 — POP107D (domiciliu) + POP105A (rezidentă județ)';
+    if (n) {
+      e.pop_domiciliu_an = AN.dom; e.pop_rezidenta_judet_an = AN.rez;
+      e.pop_sursa_reala = 'INS TEMPO — POP107D domiciliu ' + (AN.dom || '') +
+                          ' + POP105A rezidentă județ ' + (AN.rez || '');
+    }
     return n;
   }
 

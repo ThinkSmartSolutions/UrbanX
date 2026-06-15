@@ -1,0 +1,41 @@
+name: Refresh date INS (TEMPO)
+
+# Actualizează automat populația INS (după domiciliu + rezidentă județ) din TEMPO.
+# Datele INS se publică anual, deci rulăm lunar (prinde noul an când apare) + manual.
+on:
+  schedule:
+    - cron: '0 4 5 * *'        # a 5-a zi a lunii, 04:00 UTC
+  workflow_dispatch:            # buton manual în tab-ul Actions
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-inse
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Extrage date INS din TEMPO
+        run: python3 scripts/refresh_inse.py
+
+      - name: Comite dacă s-au schimbat datele
+        run: |
+          git config user.name  "urbanx-inse-bot"
+          git config user.email "actions@users.noreply.github.com"
+          if [ -n "$(git status --porcelain data/ins-populatie-domiciliu.json data/ins-rezidenta-judet.json)" ]; then
+            git add data/ins-populatie-domiciliu.json data/ins-rezidenta-judet.json
+            git commit -m "chore: actualizare automată date INS TEMPO ($(date -u +%Y-%m-%d))"
+            git push
+            echo "Date INS actualizate și publicate."
+          else
+            echo "Fără modificări — datele INS sunt la zi."
+          fi
