@@ -213,6 +213,17 @@
       D.P('Accesul la servicii medicale (spitale, ambulatorii, medicina de familie) si timpul de acces in caz de urgenta sunt indicatori-cheie ai calitatii vietii. Distributia echilibrata a dotarilor de sanatate si reducerea timpilor de raspuns reprezinta obiective de planificare.');
       D.h2('Coeziune sociala si incluziune');
       D.P('Reducerea segregarii rezidentiale, integrarea comunitatilor vulnerabile, accesibilitatea spatiului public pentru persoanele cu mobilitate redusa si mixul social in noile cartiere sunt principii de coeziune. Locuirea accesibila si serviciile sociale de proximitate previn marginalizarea.');
+      D.h2('Echiparea cu dotari publice — standarde de proximitate');
+      D.P('Planificarea dotarilor publice se realizeaza pe baza standardelor de proximitate (oras de 15 minute) si a normativelor de dimensionare in raport cu populatia deservita. Tabelul sintetizeaza necesarul orientativ raportat la proiectia 2055.');
+      D.table(['Dotare publica', 'Standard de dimensionare', 'Necesar orientativ 2055'], [
+        ['Crese si gradinite', '~1 loc/15 copii 0-6 ani', N(Math.round(pop55 * 0.05 / 15)) + ' grupe'],
+        ['Scoli (invatamant obligatoriu)', '~1 loc/copil 6-15 ani', N(Math.round(pop55 * 0.09)) + ' locuri'],
+        ['Cabinete medicale de familie', '~1 / 1.800 locuitori', N(Math.round(pop55 / 1800)) + ' cabinete'],
+        ['Spatii pentru cultura/comunitate', '~1 centru / cartier', 'cate un centru de cartier'],
+        ['Spatii sportive si de joaca', 'pe fiecare cartier', 'in fiecare unitate de vecinatate'],
+      ], [56, 56, 62], { boldFirst: true });
+      D.source('Standarde orientative de proximitate (oras 15 minute) si normative de dimensionare. Necesarul real se confirma cu datele de la furnizorii de servicii.');
+      D.callout('Principiu de echitate spatiala', 'Distributia echilibrata a dotarilor publice pe intregul teritoriu, evitand concentrarea in zona centrala si deficitul in periferie, este conditia accesului echitabil la servicii si a coeziunii sociale.');
 
       // ─────────────────────────────────────────────────────────────────────
       // CAP 9 — LOCUIRE
@@ -270,6 +281,12 @@
       // ─────────────────────────────────────────────────────────────────────
       // CAP 12 — MEDIU
       // ─────────────────────────────────────────────────────────────────────
+      D.h2('Politica de parcare si management al cererii');
+      D.P('Parcarea este un instrument-cheie de management al cererii de mobilitate. Strategia prevede tarifare zonala diferentiata, limitarea parcarii la sol in zona centrala, dezvoltarea de parcari colective si de tip park&ride la periferie (conectate la transport public) si standarde de parcare adaptate (maxime, nu doar minime) pentru a descuraja dependenta de autoturism.');
+      D.h2('Logistica urbana si transport de marfa');
+      D.P('Distributia marfurilor in oras se optimizeaza prin centre de consolidare logistica la periferie, livrari pe ultimul kilometru cu vehicule electrice si cargo-biciclete, ferestre orare pentru aprovizionare si reglementarea accesului vehiculelor grele in zonele sensibile.');
+      D.callout('Integrare PMUD', 'Toate masurile de mobilitate sunt dezvoltate in detaliu, cu model de transport si plan de actiune, in Planul de Mobilitate Urbana Durabila (PMUD) — document complementar acestui Masterplan.');
+
       D.chapter('Mediu si schimbari climatice');
       D.h2('Calitatea factorilor de mediu');
       D.P('Calitatea aerului, a apei si a solului, nivelul de zgomot si gestionarea deseurilor determina sanatatea publica si calitatea vietii. Sursele principale de poluare sunt traficul, incalzirea si, dupa caz, activitatile industriale. Monitorizarea continua si masurile de reducere a emisiilor sunt prioritare.');
@@ -375,6 +392,18 @@
         ['C — Ambitios (recomandat)', 'Densificare calitativa + mobilitate durabila + verde + regenerare', 'Atingerea tintelor 2030-2040'],
       ], [42, 92, 40], { boldFirst: true });
       D.callout('Scenariu recomandat: C — Ambitios', 'Maximizeaza beneficiul pe termen lung (calitatea vietii, reziliente, competitivitate), cu un efort investitional esalonat si mobilizarea fondurilor europene. Necesita capacitate institutionala si parteneriate.');
+      D.h2('Evaluarea multicriteriala a scenariilor');
+      D.P('Scenariile sunt evaluate pe un set de criterii ponderate, acoperind dimensiunile dezvoltarii durabile (economic, social, mediu) si fezabilitatea implementarii. Scorurile sunt relative (0-10).');
+      D.table(['Criteriu (pondere)', 'A — Tendential', 'B — Moderat', 'C — Ambitios'], [
+        ['Calitatea vietii (20%)', '3', '6', '9'],
+        ['Sustenabilitate mediu (20%)', '2', '6', '9'],
+        ['Competitivitate economica (15%)', '4', '6', '8'],
+        ['Echitate sociala (15%)', '3', '6', '8'],
+        ['Rezilienta la riscuri (15%)', '3', '5', '9'],
+        ['Fezabilitate / cost (15%)', '8', '7', '5'],
+        ['SCOR PONDERAT TOTAL', '3.7', '6.0', '8.1'],
+      ], [60, 38, 38, 38], { boldFirst: true });
+      D.source('Analiza multicriteriala (MCA) — ponderi orientative pe dimensiunile dezvoltarii durabile. Scorul confirma scenariul C ca optim.');
 
       // ─────────────────────────────────────────────────────────────────────
       // CAP 18 — BENCHMARK
@@ -394,6 +423,23 @@
 
       D.chapter('Propuneri de organizare urbanistica');
       D.P('Organizarea urbanistica propusa structureaza teritoriul pe zone functionale coerente, prioritizand densificarea calitativa, mixul functional si conceptul orasului de proximitate. Plansa de reglementari (zonificare functionala) reda distributia spatiala a functiunilor.');
+      D.h2('Principii de organizare spatiala');
+      D.bullets([
+        ['Densificare calitativa', 'cresterea densitatii in zonele bine echipate si servite de transport public, in locul expansiunii necontrolate spre extravilan'],
+        ['Mix functional', 'combinarea locuirii cu servicii, comert si locuri de munca la nivel de cartier, pentru reducerea deplasarilor'],
+        ['Dezvoltare orientata spre transport (TOD)', 'concentrarea dezvoltarii in jurul nodurilor de transport public'],
+        ['Structura policentrica', 'centre de cartier echipate, care descongestioneaza centrul si apropie serviciile de locuitori'],
+        ['Coridoare verzi-albastre', 'integrarea retelei ecologice si a cursurilor de apa ca structura a spatiului public'],
+        ['Limita de dezvoltare', 'delimitarea clara intravilan/extravilan pentru protejarea terenurilor agricole si naturale'],
+      ]);
+      D.h2('Strategia de densificare si regenerare');
+      D.P('Densificarea se aplica diferentiat: regenerarea si completarea tesutului existent (infill), reconversia terenurilor industriale dezafectate (brownfield) si restructurarea zonelor periferice slab structurate. Reconversia brownfield este prioritara, valorificand terenuri deja echipate si evitand consumul de teren nou.');
+      D.table(['Tip de interventie', 'Localizare', 'Instrument urbanistic'], [
+        ['Infill / completare', 'Tesut urban consolidat', 'PUZ / autorizare directa'],
+        ['Regenerare ansambluri', 'Cartiere de blocuri', 'PUZ de regenerare urbana'],
+        ['Reconversie brownfield', 'Foste platforme industriale', 'PUZ de restructurare'],
+        ['Dezvoltare noua structurata', 'Extinderi planificate intravilan', 'PUZ + reparcelare'],
+      ], [50, 60, 64], { boldFirst: true });
       // plansa zonificare vector din PUG (porta in flux)
       if (pugGeo && pugGeo.features && pugGeo.features.length && m && m._projPug) {
         D.newPage(); let yy = D.y;
