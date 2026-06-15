@@ -255,10 +255,15 @@ G._TCIMasterplanPDF = {
     const N=v=>isNaN(+v)?'—':Number(v).toLocaleString('ro-RO');
 
     // ── Tabel diagnostic ────────────────────────────────────────────
-    y=this._section(pdf,W,y,'1.1 Context Demografic & Economic  ·  Sursa: INSE 2021 + Eurostat');
+    y=this._section(pdf,W,y,'1.1 Context Demografic & Economic  ·  Sursa: INS TEMPO (date verificate) + Eurostat');
     const delta=city.pop2021&&city.pop2011?((city.pop2021-city.pop2011)/city.pop2011*100):null;
+    // Date INS REALE (extrase din TEMPO, actualizate automat) — vezi js/inse-real-data.js
+    const _insR = city.pop_rezidenta_judet_2021, _insD = city.pop_domiciliu_2021;
+    const _insAn = city.pop_domiciliu_an || city.pop_rezidenta_judet_an || '';
     const rows_demo=[
-      ['Populatie 2021 (INSE Rec.)',N(city.pop2021)+' loc.','Confirmat recensamant'],
+      ['Populatie 2021 (estimare platforma)',N(city.pop2021)+' loc.', _insR?'Estimare — vezi date INS verificate jos':'INSE Rec. 2021'],
+      ...(_insD?[['Populatie dupa domiciliu (localitate)',N(_insD)+' loc.','INS TEMPO POP107D '+_insAn+' — REAL']]:[]),
+      ...(_insR?[['Populatie rezidenta (judet)',N(_insR)+' loc.','INS TEMPO POP105A '+_insAn+' — REAL']]:[]),
       ['Populatie 2011 (INSE Rec.)',N(city.pop2011||'—')+' loc.','Recensamant INSE 2011'],
       ['Variatie 2011→2021',delta!==null?(delta>=0?'+':'')+delta.toFixed(2)+'%':'—','Calcul direct'],
       ['Densitate',N(city.densitate||Math.round((city.pop2021||0)/(city.suprafata_ha||94)*100))+' loc/km²','Pop/Suprafata'],

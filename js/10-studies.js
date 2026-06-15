@@ -5860,6 +5860,17 @@ async function generateEnvironmentalImpact(){
   cy=sec('12. IMPACT SOCIO-ECONOMIC - DATE INS',cy);
   cy=body('Date demografice și socio-economice '+(ins.sursa||'INS')+' pentru '+uat+': Populație: '+(ins.populatie?ins.populatie.toLocaleString():' — verificare statistici.insse.ro')+(ins.densitate_pop?' · Densitate: '+ins.densitate_pop+' loc/km²':'')+'. '+(ins.rata_somaj?'Rata șomaj: '+ins.rata_somaj+'% · ':'')+( ins.venit_mediu_lunar?'Venit mediu net: '+ins.venit_mediu_lunar+' RON/lună. ':'')+
     'Proiectul propus contribuie pozitiv la indicatorii socio-economici locali prin crearea de noi funcțiuni, locuri de muncă în faza de construcție și stimularea activității economice locale.',14,cy);cy+=3;
+  // ── Date INS REALE (TEMPO, verificate) — bază reală, nu estimare ──
+  try {
+    var _R = window._INSEReal;
+    if (_R && _R.ready()) {
+      var _dom = _R.domiciliu(uat), _an = _R.an() || '';
+      if (_dom != null) {
+        cy = body('Date oficiale INS (TEMPO ' + _an + ', verificate): populație după domiciliu ' +
+          _dom.toLocaleString('ro-RO') + ' locuitori. Sursă: Institutul Național de Statistică — folosită ca bază reală a analizei (nu valoare estimată).', 14, cy); cy += 3;
+      }
+    }
+  } catch (e) {}
   cy=tblRow(['Indicator','Valoare locală','Impact proiect','Calificare'],cy,true,[50,40,50,42]);
   [['Locuri muncă construcție (est.)','—',Math.round(parseFloat(area)/50)+' persoane/lună','Pozitiv temporar'],
    ['Locuri muncă exploatare (est.)','—',Math.round(niv*2)+' persoane','Pozitiv permanent'],

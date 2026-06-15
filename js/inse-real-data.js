@@ -90,6 +90,7 @@
   window._INSEReal = {
     domiciliu: function (name) { var d = domicByName[norm(name)]; return d ? d.pop : null; },
     rezidentaJudet: function (judet) { return rezByJud[norm(judet)] || null; },
+    an: function () { return AN.dom || AN.rez || null; },
     ready: function () { return ready; },
     repatch: patchAll
   };
