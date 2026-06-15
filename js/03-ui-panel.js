@@ -1348,6 +1348,7 @@ function htmlProiect(){
   // ── CALCULE LIVE ──
   '<div class="card" style="background:#0a1628;border-color:rgba(212,175,55,.3)">',
   '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:6px"><div style="font-size:12px;font-weight:700;color:#d4af37">📐 Calcule live — '+esc(ap.nrcad||'?')+' · UTR: '+esc(ap.utr||'—')+'</div><div id="zone-badge" style="font-size:10px;padding:2px 8px;border-radius:20px;border:1px solid #34d39955;background:#34d39915;color:#34d399">Detectare zonă…</div></div>','<div id="live-calcule" style="font-size:11px;color:#94a3b8;margin-bottom:8px;padding:5px 8px;background:#080f1c;border-radius:6px">Modifică parametrii pentru a vedea calculele live</div>',
+  '<div style="margin-bottom:8px;padding:6px 8px;background:#080f1c;border-radius:6px"><button onclick="window._showCoteNivel&&window._showCoteNivel()" style="background:rgba(56,189,248,.15);border:1px solid rgba(56,189,248,.4);color:#38bdf8;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:11px;font-weight:600">📐 Cote de nivel / declivitate</button><div id="cote-nivel-result" style="font-size:11px;color:#94a3b8;margin-top:6px;line-height:1.5"></div></div>',
   '<div class="g3">',
   '<div class="met"><div class="ml">Teren total</div><div class="mv">'+(m2?Math.round(m2)+' m²':'—')+'</div></div>',
   '<div class="met"><div class="ml">Spații verzi obligatorii</div><div class="mv warn">'+(sv_m2?sv_m2+' m²  ('+( p.sv||0)+'%)':'—')+'</div></div>',

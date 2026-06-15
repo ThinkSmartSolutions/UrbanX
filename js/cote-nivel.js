@@ -79,4 +79,24 @@
   }
 
   window._CoteNivel = { analyze: analyze, _cache: _cache };
+
+  // Handler UI: buton "Cote de nivel" din panoul de calcule live
+  window._showCoteNivel = async function () {
+    var el = document.getElementById('cote-nivel-result');
+    var S = window.S || {};
+    var ap = S.parcels && S.parcels[S.activeParcel == null ? 0 : S.activeParcel];
+    if (!ap || !ap.geo || !ap.geo.geometry) { if (el) el.innerHTML = '<span style="color:#fbbf24">Selectați o parcelă mai întâi.</span>'; return; }
+    if (el) el.innerHTML = '<span style="color:#64748b">⏳ Se interoghează modelul digital al terenului (EU-DEM)…</span>';
+    try {
+      var r = await analyze(ap.geo, ap.nrcad);
+      var col = r.dH < 0.5 ? '#34d399' : r.dH < 1.5 ? '#86efac' : r.dH < 3 ? '#fbbf24' : '#f87171';
+      if (el) el.innerHTML =
+        '<b style="color:#e2e8f0">Cote: ' + r.min + '–' + r.max + ' m</b> · ' +
+        '<b style="color:' + col + '">ΔH = ' + r.dH + ' m</b> · pantă ' + r.panta + '% · <i>' + r.nivel + '</i><br>' +
+        '<span style="color:#94a3b8">' + r.recomandare + '</span><br>' +
+        '<span style="color:#475569;font-size:9.5px">' + r.sursa + ' · ' + r.nota + '</span>';
+    } catch (e) {
+      if (el) el.innerHTML = '<span style="color:#f87171">Eroare elevație: ' + (e.message || e) + ' — reîncercați.</span>';
+    }
+  };
 })();

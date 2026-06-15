@@ -6929,6 +6929,8 @@ async function generateStudiuFezabilitate(paramOverrides){
   const d=_initStudyPdf('Studiu de Fezabilitate / DALI','SF/DALI · HG 907/2016',18);
   const {pdf,W,H,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,
     hdr,ftr,sec,subsec,body,tblRow,addImg,kv,badge,divider,bullet,concluzii,sign,cover,newPage,checkY}=d;
+  // Cote de nivel / declivitate (pentru decizia demisol in SF)
+  let _coteNivF=null; try{ if(window._CoteNivel) _coteNivF=await window._CoteNivel.analyze(ap.geo, ap.nrcad); }catch(e){ console.warn('Cote nivel SF:', e.message); }
     _pdfTableOfContents(pdf,W,H,[
     {num:1,title:'Cover — Identificare amplasament si parametri economici',page:1},
     {num:2,title:'Context urban 3D — volumetrie propusa si vecini',page:2},
@@ -7119,6 +7121,22 @@ async function generateStudiuFezabilitate(paramOverrides){
    ['Funcțiuni admise','Conf. UTR '+utr,'Conform PUG '+uat+' în vigoare','Verificare PUG'],
    ['Funcțiuni interzise','Conf. UTR '+utr,'Conform PUG '+uat+' în vigoare','Obligatoriu'],
   ].forEach(r=>cy=tblRow(r,cy,false,[40,30,70,42]));
+
+  // ── PAG: COTE DE NIVEL / DECLIVITATE (teren existent — decizie demisol) ──
+  if(_coteNivF){
+    pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('COTE DE NIVEL - DECLIVITATE TEREN',4);ftr();
+    cy=33;
+    cy=sec('ANALIZA COTELOR DE NIVEL ('+_coteNivF.sursa+')',cy);
+    cy=tblRow(['Indicator','Valoare','Observatie'],cy,true,[52,42,78]);
+    [['Cota minima', _coteNivF.min+' m', 'altitudine teren'],
+     ['Cota maxima', _coteNivF.max+' m', _coteNivF.puncte+' puncte esantionate pe parcela'],
+     ['Diferenta de nivel (dH)', _coteNivF.dH+' m', _coteNivF.nivel],
+     ['Panta medie', _coteNivF.panta+' %', 'pe extinderea de '+_coteNivF.extent_m+' m'],
+    ].forEach(r=>cy=tblRow(r,cy,false,[52,42,78]));
+    cy+=3;
+    cy=body('Recomandare privind demisolul: '+_coteNivF.recomandare,14,cy);cy+=2;
+    cy=body('NOTA: '+_coteNivF.nota,14,cy);
+  }
 
   // ── PAG 4: PROPUNEREA DE INVESTIȚIE — VARIANTE TEHNICE ───────────────────
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('PROPUNEREA DE INVESTITIE - VARIANTE TEHNICE COMPARATE',4);ftr();
