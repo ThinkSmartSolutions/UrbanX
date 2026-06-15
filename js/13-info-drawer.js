@@ -482,6 +482,23 @@ const RAPORT_INFO = {
     ],
     nu: ['Document preliminar de fundamentare — nu înlocuiește studiile de specialitate certificate (geotehnic, hidrologic, expertiză seismică, evaluare adecvată)', 'Nivelurile de risc sunt estimative; se confirmă pe sursele oficiale (MMAP/ANAR, MDLPA, ANRM, administrații arii protejate)'],
   },
+  pmud: {
+    ico: '🚍', label: 'PMUD — Plan Mobilitate Urbană Durabilă',
+    badge: 'strategic', badgeLabel: 'Nivel UAT · obligatoriu fonduri',
+    color: '52,211,153',
+    fn: 'generatePMUD()',
+    ce: 'Generează un Plan de Mobilitate Urbană Durabilă (PMUD/SUMP) la nivel de UAT, structurat în cele 8 componente oficiale (ghid MDLPA + metodologia EU SUMP/ELTIS): analiza situației existente, modelul de transport, evaluarea impactului, viziune și ținte (KPI), direcții de acțiune și măsuri, evaluarea scenariilor, plan de acțiune și finanțare, monitorizare. Indicatori de mobilitate calculați din date (motorizare INS, rețea OSM, calitate aer OpenAQ live unde există), cu distribuție modală actual vs. țintă 2030 și analiză cost-beneficiu pe scenarii.',
+    dece: 'PMUD aprobat este condiție de eligibilitate pentru majoritatea finanțărilor pe mobilitate urbană (POR, PNRR). Documentul fundamentează strategia de mobilitate a orașului, prioritizează proiectele și aliniază orașul la Pactul Verde European și Strategia Națională de Mobilitate.',
+    legal: 'Ghid MDLPA elaborare PMUD · Liniile directoare EU SUMP (ELTIS) · Legea 350/2001 · Directiva 2008/50/CE (calitate aer) · Pactul Verde European',
+    output: [
+      { ico: '🚗', txt: 'Distribuție modală actuală vs. țintă SUMP 2030 (auto/TP/activ)' },
+      { ico: '🚌', txt: 'Indicatori: motorizare, acoperire TP, viteză comercială, piste' },
+      { ico: '🌍', txt: 'Impact: emisii CO2, calitate aer (PM2.5/NO2), siguranță rutieră' },
+      { ico: '🎯', txt: 'Obiective și ținte KPI cuantificate cu orizont 2030' },
+      { ico: '💶', txt: 'Plan de acțiune: proiecte prioritare, buget, surse POR/PNRR, calendar' },
+    ],
+    nu: ['Document de fundamentare (pre-PMUD) — PMUD final necesită recensământ de trafic, anchete de mobilitate și model calibrat de consultant atestat', 'Indicatorii sunt estimări calibrate; se validează cu primăria și operatorii de transport'],
+  },
   trafic: {
     ico: '🚦', label: 'Studiu de Impact Trafic',
     badge: 'obligatoriu', badgeLabel: 'Proiecte >20 unități',

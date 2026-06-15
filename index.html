@@ -1506,6 +1506,10 @@ document.addEventListener('click', function(){
     <button onclick="generateStudiuRestrictii();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#f87171;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px">🚧 Studiu Restricții & Zone de Risc</button>
     <button onclick="infoDrawerOpen('restrictii')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='#475569'">ⓘ</button>
   </div>
+  <div style="display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:6px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+    <button onclick="generatePMUD();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#34d399;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px">🚍 PMUD — Plan Mobilitate Urbană Durabilă</button>
+    <button onclick="infoDrawerOpen('pmud')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#34d399'" onmouseout="this.style.color='#475569'">ⓘ</button>
+  </div>
   <!-- Studii noi 2026 -->
   <div style="border-top:1px solid rgba(212,175,55,.2);margin:8px 0 4px;padding-top:6px">
     <div style="font-family:var(--mono,monospace);font-size:9px;color:#5a6788;letter-spacing:2px;text-transform:uppercase;padding:0 8px 4px">STUDII NOI 2026</div>
@@ -1836,7 +1840,7 @@ document.addEventListener('click', function(){
     <script src="js/10-studies-restrictii.js?v=20260615a"></script>
 <script src="js/11-viewer3d.js?v=2026050904"></script>
 <script src="js/12-admin.js?v=2026050601"></script>
-<script src="js/13-info-drawer.js?v=20260615c"></script>
+<script src="js/13-info-drawer.js?v=20260615d"></script>
 <script src="js/14-docx-export.js?v=2026050601"></script>
 <script src="js/15-relevee.js?v=20260520cy"></script>
     <script src="js/15-relevee-canvas-upgrade.js?v=20260517"></script>
@@ -2722,7 +2726,7 @@ setInterval(()=>{
   
   <script src="js/18-animation-engine.js?v=20260520c"></script>
   <script src="js/uats-extended-data.js?v=20260520c"></script><!-- Date extinse: etnic+ISD+AROPE+geo+poli+TFR+migratii -->
-  <script src="js/tci-masterplan.js?v=20260615mq"></script>
+  <script src="js/tci-masterplan.js?v=20260615pmud"></script>
   <script src="js/tci-masterplan-visual.js?v=20260520c"></script>
   <script src="js/tci-masterplan-qr.js?v=20260520c"></script><!-- QR Code in PDF Masterplan — scanabil cu telefonul → deschide scenariul live -->
   <script src="js/tci-cinematic-capture.js?v=20260520c"></script><!-- Capture: frames automate Cinema v2 → colaj în Masterplan PDF --><!-- Masterplan visual: cover premium + SWOT + formule + progress bars --><!-- TCI Masterplan: PDF 12pg+grafice+benchmark+metodologie citabilă -->
