@@ -72,8 +72,22 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
     pdf.text('Document orientativ \u00b7 UrbanX TSS\u00b7FG',W-8,H-3.5,{align:'right'});
   };
 
+  // Auto page-break: daca nu mai e loc, pagina noua cu header continuare + footer.
+  // Evita text peste footer, randuri trunchiate si text pierdut (pagini partiale).
+  const _ensureSpace=(y,needed,title)=>{
+    if(y + (needed||6) > H-15){
+      pdf.addPage();
+      pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
+      try{ hdr((title||studyName||'').toString()+' (continuare)', pdf.getNumberOfPages()); }catch(e){}
+      try{ ftr(); }catch(e){}
+      return 33;
+    }
+    return y;
+  };
+
   // Sectiune principala navy + gold
   const sec=(title,y,col)=>{
+    y=_ensureSpace(y,16,title);
     const bg=col||NAVY;
     pdf.setFillColor(...bg);pdf.rect(14,y,W-28,9,'F');
     pdf.setFillColor(...GOLD);pdf.rect(14,y,3,9,'F');
@@ -85,6 +99,7 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
 
   // Subsectiune
   const subsec=(title,y,col)=>{
+    y=_ensureSpace(y,13,title);
     pdf.setFillColor(...(col||LIGHT3));pdf.rect(14,y,W-28,7.5,'F');
     pdf.setFillColor(...GOLD);pdf.rect(14,y,2,7.5,'F');
     pdf.setTextColor(...(col?WHITE:BLUE));pdf.setFontSize(8);pdf.setFont('helvetica','bold');
@@ -94,10 +109,11 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
 
   // Body text justify
   const body=(txt,x,y,maxW,fontSize,lineH)=>{
-    if(y>H-20) return y;
     pdf.setTextColor(24,36,54);pdf.setFont('helvetica','normal');
     const fs=fontSize||8.5,lh=lineH||(fs*0.66),mx=maxW||(W-28),ox=x||14;
+    pdf.setFontSize(fs);
     const lines=pdf.splitTextToSize(S2(txt),mx);
+    y=_ensureSpace(y, lines.length*lh+3);  // page-break in loc de a pierde textul
     lines.forEach((line,i)=>{
       pdf.setFontSize(fs);
       const isLast=i===lines.length-1;
@@ -126,6 +142,7 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
       maxLines=Math.max(maxLines,lines.length);
     });
     const rowH=Math.max(isHeader?8.5:8,maxLines*lineH+(isHeader?3:2));
+    y=_ensureSpace(y, rowH+2);  // randul nu se mai suprapune peste footer
     const bg=isHeader?NAVY:(y%2===0?LIGHT:LIGHT2);
     pdf.setFillColor(...bg);pdf.rect(14,y-5.5,W-28,rowH,'F');
     if(isHeader){
