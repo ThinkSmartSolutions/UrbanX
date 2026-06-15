@@ -347,6 +347,9 @@ Stiluri CSS:
 | `RO-BT-18073` | 18073 | Bălușeni | ✅ RLU | com-baluseni |
 | `RO-BT-18875` | 18875 | Mihai Eminescu BT | ⚠ Parțial | comuna-mihaieminescu |
 | `RO-GL-77595` | 77595 | Cuza Vodă | ⚠ Parțial | comuna-cuzavoda |
+| `RO-B-01` | 179141 | Municipiul București (agregat S2+S6) | ⚠ Parțial | bucuresti |
+| `RO-B-179178` | 179178 | București — Sectorul 2 | ⚠ Parțial (PUG+RLU+cadastru) | bucuresti-sector-2 |
+| `RO-B-179211` | 179211 | București — Sectorul 6 | ⚠ Parțial (PUG, reguli orientative) | bucuresti-sector-6 |
 
 ---
 

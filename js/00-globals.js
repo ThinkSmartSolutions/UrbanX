@@ -1273,7 +1273,15 @@ var UTR_COLORS={
   P:'#4ade80',P1:'#bbf7d0',P1A:'#86efac',P1B:'#4ade80','P1A,P1B':'#34d399',P2:'#34d399',P3:'#6ee7b7',P4:'#fde68a',P5:'#fcd34d',PP:'#064e3b',
   AA:'#fef08a',S:'#fef9c3',
   AI1:'#fca5a5',AI2A:'#f87171',AI2B:'#ef4444',AI2C:'#dc2626',AI2D:'#b91c1c',AI3:'#991b1b',AI4:'#7f1d1d',AI4A:'#7f1d1d',AI5:'#450a0a',AI6:'#3b0a0a',
-  'G/P9':'#d1fae5',T1B:'#374151'
+  'G/P9':'#d1fae5',T1B:'#374151',
+  // ── BUCUREȘTI — nomenclator PUZ Coordonator de Sector (normU) ──
+  M2:'#fb923c',M3:'#fdba74','M*':'#f97316',M_S1:'#fdba74',
+  L1:'#bef264',L1A:'#a3e635',L2A:'#84cc16',L2B:'#65a30d',L2_S1:'#a3e635','L2A*':'#84cc16',L3A:'#4ade80',L4A:'#22c55e',
+  V1:'#16a34a',V1A:'#15803d',V1M:'#166534',V2A:'#22c55e',V3A:'#4ade80','V3A*':'#4ade80',V3B:'#34d399',V4:'#15803d',V5:'#059669',V7:'#064e3b',V8:'#10b981',
+  'CB3.1':'#a78bfa','C*':'#f472b6',
+  A1:'#fca5a5',A2A:'#f87171',A2B:'#ef4444',CA2:'#fde68a',
+  S1:'#9ca3af',T:'#6b7280',T2:'#4b5563',R:'#c084fc',G2A:'#9ca3af',
+  APA:'#38bdf8',BAZINE:'#0ea5e9'
 };
 const ucol=u=>UTR_COLORS[u]||'#94a3b8';
 // Paleta culori per stil arhitectural

@@ -1,0 +1,1029 @@
+{
+ "_meta": {
+  "uat": "Municipiul București",
+  "uat_key": "RO-B-01",
+  "judet": "București",
+  "siruta": "179141",
+  "sursa": "Agregat PUZ Coordonator Sectoarele 2 și 6; indicatori per nomenclator PUG București",
+  "versiune": "1.0.0",
+  "nota": "Acoperire parțială: doar Sectoarele 2 și 6 au geometrie de zonare încărcată."
+ },
+ "subzone": {
+  "A1": {
+   "denumire": "Activități productive și servicii (parcuri tehnologice)",
+   "pot_baza": 60,
+   "pot_max": 60,
+   "cut_baza": 1.5,
+   "cut_max": 1.5,
+   "hmax_m": 15,
+   "niv_max": "P+2",
+   "regim": "discontinuu",
+   "regim_constructie": "discontinuu",
+   "spatii_verzi_pct": 20,
+   "sv_min_pct": 20,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "A2A": {
+   "denumire": "Industrie și servicii nepoluante",
+   "pot_baza": 60,
+   "pot_max": 60,
+   "cut_baza": 1.5,
+   "cut_max": 1.5,
+   "hmax_m": 15,
+   "niv_max": "P+2",
+   "regim": "discontinuu",
+   "regim_constructie": "discontinuu",
+   "spatii_verzi_pct": 20,
+   "sv_min_pct": 20,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "A2B": {
+   "denumire": "Industrie și servicii nepoluante",
+   "pot_baza": 60,
+   "pot_max": 60,
+   "cut_baza": 1.5,
+   "cut_max": 1.5,
+   "hmax_m": 15,
+   "niv_max": "P+2",
+   "regim": "discontinuu",
+   "regim_constructie": "discontinuu",
+   "spatii_verzi_pct": 20,
+   "sv_min_pct": 20,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "APA": {
+   "denumire": "Luciu de apă / ape de suprafață — neconstruibil",
+   "pot_baza": 0,
+   "pot_max": 0,
+   "cut_baza": 0,
+   "cut_max": 0,
+   "hmax_m": 0,
+   "niv_max": "—",
+   "regim": "—",
+   "regim_constructie": "—",
+   "spatii_verzi_pct": 100,
+   "sv_min_pct": 100,
+   "retragere_fata": "—",
+   "retragere_lat": "—",
+   "retragere_spate": "—"
+  },
+  "BAZINE": {
+   "denumire": "Luciu de apă / ape de suprafață — neconstruibil",
+   "pot_baza": 0,
+   "pot_max": 0,
+   "cut_baza": 0,
+   "cut_max": 0,
+   "hmax_m": 0,
+   "niv_max": "—",
+   "regim": "—",
+   "regim_constructie": "—",
+   "spatii_verzi_pct": 100,
+   "sv_min_pct": 100,
+   "retragere_fata": "—",
+   "retragere_lat": "—",
+   "retragere_spate": "—"
+  },
+  "C*": {
+   "denumire": "Zonă centrală — funcțiuni complexe de interes general",
+   "pot_baza": 65,
+   "pot_max": 65,
+   "cut_baza": 3.0,
+   "cut_max": 3.0,
+   "hmax_m": 25,
+   "niv_max": "P+7",
+   "regim": "continuu",
+   "regim_constructie": "continuu",
+   "spatii_verzi_pct": 15,
+   "sv_min_pct": 15,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "CA2": {
+   "denumire": "Zonă centrală — funcțiuni complexe de interes general",
+   "pot_baza": 65,
+   "pot_max": 65,
+   "cut_baza": 3.0,
+   "cut_max": 3.0,
+   "hmax_m": 25,
+   "niv_max": "P+7",
+   "regim": "continuu",
+   "regim_constructie": "continuu",
+   "spatii_verzi_pct": 15,
+   "sv_min_pct": 15,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "CB1": {
+   "denumire": "Instituții publice și servicii de interes general (învățământ, sănătate)",
+   "pot_baza": 60,
+   "pot_max": 60,
+   "cut_baza": 2.5,
+   "cut_max": 2.5,
+   "hmax_m": 21,
+   "niv_max": "P+6",
+   "regim": "discontinuu",
+   "regim_constructie": "discontinuu",
+   "spatii_verzi_pct": 20,
+   "sv_min_pct": 20,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "CB2": {
+   "denumire": "Servicii publice dispersate / lăcașuri de cult",
+   "pot_baza": 50,
+   "pot_max": 50,
+   "cut_baza": 2.4,
+   "cut_max": 2.4,
+   "hmax_m": 18,
+   "niv_max": "P+5",
+   "regim": "discontinuu",
+   "regim_constructie": "discontinuu",
+   "spatii_verzi_pct": 20,
+   "sv_min_pct": 20,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "CB3": {
+   "denumire": "Servicii publice și de interes general",
+   "pot_baza": 50,
+   "pot_max": 50,
+   "cut_baza": 2.0,
+   "cut_max": 2.0,
+   "hmax_m": 16,
+   "niv_max": "P+4",
+   "regim": "discontinuu",
+   "regim_constructie": "discontinuu",
+   "spatii_verzi_pct": 20,
+   "sv_min_pct": 20,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "CB3.1": {
+   "denumire": "Servicii publice și de interes general",
+   "pot_baza": 50,
+   "pot_max": 50,
+   "cut_baza": 2.0,
+   "cut_max": 2.0,
+   "hmax_m": 16,
+   "niv_max": "P+4",
+   "regim": "discontinuu",
+   "regim_constructie": "discontinuu",
+   "spatii_verzi_pct": 20,
+   "sv_min_pct": 20,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "CP": {
+   "denumire": "Zonă centrală — servicii și parcaje publice",
+   "pot_baza": 60,
+   "pot_max": 60,
+   "cut_baza": 2.5,
+   "cut_max": 2.5,
+   "hmax_m": 18,
+   "niv_max": "P+5",
+   "regim": "continuu/discontinuu",
+   "regim_constructie": "continuu/discontinuu",
+   "spatii_verzi_pct": 15,
+   "sv_min_pct": 15,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "G1": {
+   "denumire": "Cimitire",
+   "pot_baza": 15,
+   "pot_max": 15,
+   "cut_baza": 0.15,
+   "cut_max": 0.15,
+   "hmax_m": 8,
+   "niv_max": "P+1",
+   "regim": "izolat",
+   "regim_constructie": "izolat",
+   "spatii_verzi_pct": 40,
+   "sv_min_pct": 40,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "G2A": {
+   "denumire": "Gospodărie comunală / depozitare",
+   "pot_baza": 50,
+   "pot_max": 50,
+   "cut_baza": 1.0,
+   "cut_max": 1.0,
+   "hmax_m": 12,
+   "niv_max": "P+2",
+   "regim": "discontinuu",
+   "regim_constructie": "discontinuu",
+   "spatii_verzi_pct": 20,
+   "sv_min_pct": 20,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "L1": {
+   "denumire": "Locuințe individuale mici (max P+2)",
+   "pot_baza": 45,
+   "pot_max": 45,
+   "cut_baza": 1.3,
+   "cut_max": 1.3,
+   "hmax_m": 10,
+   "niv_max": "P+2",
+   "regim": "izolat/cuplat",
+   "regim_constructie": "izolat/cuplat",
+   "spatii_verzi_pct": 30,
+   "sv_min_pct": 30,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "L1A": {
+   "denumire": "Locuințe individuale mici (max P+2)",
+   "pot_baza": 45,
+   "pot_max": 45,
+   "cut_baza": 1.3,
+   "cut_max": 1.3,
+   "hmax_m": 10,
+   "niv_max": "P+2",
+   "regim": "izolat/cuplat",
+   "regim_constructie": "izolat/cuplat",
+   "spatii_verzi_pct": 30,
+   "sv_min_pct": 30,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "L2A": {
+   "denumire": "Locuințe individuale și colective mici",
+   "pot_baza": 45,
+   "pot_max": 45,
+   "cut_baza": 1.3,
+   "cut_max": 1.3,
+   "hmax_m": 13,
+   "niv_max": "P+2+M",
+   "regim": "izolat/cuplat",
+   "regim_constructie": "izolat/cuplat",
+   "spatii_verzi_pct": 30,
+   "sv_min_pct": 30,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "L2A*": {
+   "denumire": "Locuințe individuale și colective mici",
+   "pot_baza": 45,
+   "pot_max": 45,
+   "cut_baza": 1.3,
+   "cut_max": 1.3,
+   "hmax_m": 13,
+   "niv_max": "P+2+M",
+   "regim": "izolat/cuplat",
+   "regim_constructie": "izolat/cuplat",
+   "spatii_verzi_pct": 30,
+   "sv_min_pct": 30,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "L2B": {
+   "denumire": "Locuințe colective mici-medii",
+   "pot_baza": 45,
+   "pot_max": 45,
+   "cut_baza": 2.0,
+   "cut_max": 2.0,
+   "hmax_m": 16,
+   "niv_max": "P+4",
+   "regim": "discontinuu",
+   "regim_constructie": "discontinuu",
+   "spatii_verzi_pct": 30,
+   "sv_min_pct": 30,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "L2_S1": {
+   "denumire": "Locuințe individuale și colective mici",
+   "pot_baza": 45,
+   "pot_max": 45,
+   "cut_baza": 1.6,
+   "cut_max": 1.6,
+   "hmax_m": 13,
+   "niv_max": "P+2+M",
+   "regim": "izolat/cuplat",
+   "regim_constructie": "izolat/cuplat",
+   "spatii_verzi_pct": 30,
+   "sv_min_pct": 30,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "L3A": {
+   "denumire": "Locuințe colective medii (P+3÷P+4)",
+   "pot_baza": 40,
+   "pot_max": 40,
+   "cut_baza": 2.0,
+   "cut_max": 2.0,
+   "hmax_m": 16,
+   "niv_max": "P+4",
+   "regim": "discontinuu",
+   "regim_constructie": "discontinuu",
+   "spatii_verzi_pct": 30,
+   "sv_min_pct": 30,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "L4A": {
+   "denumire": "Ansambluri de locuințe colective mari",
+   "pot_baza": 30,
+   "pot_max": 30,
+   "cut_baza": 2.4,
+   "cut_max": 2.4,
+   "hmax_m": 36,
+   "niv_max": "P+10",
+   "regim": "discontinuu",
+   "regim_constructie": "discontinuu",
+   "spatii_verzi_pct": 35,
+   "sv_min_pct": 35,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "M*": {
+   "denumire": "Zonă mixtă — locuințe și servicii",
+   "pot_baza": 60,
+   "pot_max": 60,
+   "cut_baza": 2.5,
+   "cut_max": 2.5,
+   "hmax_m": 21,
+   "niv_max": "P+6",
+   "regim": "discontinuu",
+   "regim_constructie": "discontinuu",
+   "spatii_verzi_pct": 10,
+   "sv_min_pct": 10,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "M2": {
+   "denumire": "Zonă mixtă — locuințe și servicii (clădiri medii-înalte)",
+   "pot_baza": 70,
+   "pot_max": 70,
+   "cut_baza": 3.5,
+   "cut_max": 3.5,
+   "hmax_m": 36,
+   "niv_max": "P+10",
+   "regim": "continuu/discontinuu",
+   "regim_constructie": "continuu/discontinuu",
+   "spatii_verzi_pct": 10,
+   "sv_min_pct": 10,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "M3": {
+   "denumire": "Zonă mixtă — locuințe și servicii (clădiri medii)",
+   "pot_baza": 60,
+   "pot_max": 60,
+   "cut_baza": 2.5,
+   "cut_max": 2.5,
+   "hmax_m": 21,
+   "niv_max": "P+6",
+   "regim": "discontinuu",
+   "regim_constructie": "discontinuu",
+   "spatii_verzi_pct": 10,
+   "sv_min_pct": 10,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "M_S1": {
+   "denumire": "Zonă mixtă — locuințe și servicii",
+   "pot_baza": 60,
+   "pot_max": 60,
+   "cut_baza": 2.5,
+   "cut_max": 2.5,
+   "hmax_m": 21,
+   "niv_max": "P+6",
+   "regim": "discontinuu",
+   "regim_constructie": "discontinuu",
+   "spatii_verzi_pct": 10,
+   "sv_min_pct": 10,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "R": {
+   "denumire": "Zonă cu reglementări speciale",
+   "pot_baza": 50,
+   "pot_max": 50,
+   "cut_baza": 1.5,
+   "cut_max": 1.5,
+   "hmax_m": 16,
+   "niv_max": "P+4",
+   "regim": "discontinuu",
+   "regim_constructie": "discontinuu",
+   "spatii_verzi_pct": 20,
+   "sv_min_pct": 20,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "S1": {
+   "denumire": "Gospodărie comunală / echipare edilitară",
+   "pot_baza": 50,
+   "pot_max": 50,
+   "cut_baza": 1.0,
+   "cut_max": 1.0,
+   "hmax_m": 12,
+   "niv_max": "P+2",
+   "regim": "discontinuu",
+   "regim_constructie": "discontinuu",
+   "spatii_verzi_pct": 20,
+   "sv_min_pct": 20,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "T": {
+   "denumire": "Zona transporturilor (rutier / feroviar)",
+   "pot_baza": 50,
+   "pot_max": 50,
+   "cut_baza": 1.0,
+   "cut_max": 1.0,
+   "hmax_m": 12,
+   "niv_max": "P+2",
+   "regim": "discontinuu",
+   "regim_constructie": "discontinuu",
+   "spatii_verzi_pct": 10,
+   "sv_min_pct": 10,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "T1": {
+   "denumire": "Zona transporturilor (rutier / feroviar)",
+   "pot_baza": 50,
+   "pot_max": 50,
+   "cut_baza": 1.0,
+   "cut_max": 1.0,
+   "hmax_m": 12,
+   "niv_max": "P+2",
+   "regim": "discontinuu",
+   "regim_constructie": "discontinuu",
+   "spatii_verzi_pct": 10,
+   "sv_min_pct": 10,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "T2": {
+   "denumire": "Zona transporturilor (rutier / feroviar)",
+   "pot_baza": 50,
+   "pot_max": 50,
+   "cut_baza": 1.0,
+   "cut_max": 1.0,
+   "hmax_m": 12,
+   "niv_max": "P+2",
+   "regim": "discontinuu",
+   "regim_constructie": "discontinuu",
+   "spatii_verzi_pct": 10,
+   "sv_min_pct": 10,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "V1": {
+   "denumire": "Parcuri, grădini și scuaruri publice",
+   "pot_baza": 5,
+   "pot_max": 5,
+   "cut_baza": 0.1,
+   "cut_max": 0.1,
+   "hmax_m": 7,
+   "niv_max": "P",
+   "regim": "izolat",
+   "regim_constructie": "izolat",
+   "spatii_verzi_pct": 85,
+   "sv_min_pct": 85,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "V1A": {
+   "denumire": "Parcuri, grădini și scuaruri publice",
+   "pot_baza": 5,
+   "pot_max": 5,
+   "cut_baza": 0.1,
+   "cut_max": 0.1,
+   "hmax_m": 7,
+   "niv_max": "P",
+   "regim": "izolat",
+   "regim_constructie": "izolat",
+   "spatii_verzi_pct": 85,
+   "sv_min_pct": 85,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "V1M": {
+   "denumire": "Parcuri, grădini și scuaruri publice",
+   "pot_baza": 5,
+   "pot_max": 5,
+   "cut_baza": 0.1,
+   "cut_max": 0.1,
+   "hmax_m": 7,
+   "niv_max": "P",
+   "regim": "izolat",
+   "regim_constructie": "izolat",
+   "spatii_verzi_pct": 85,
+   "sv_min_pct": 85,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "V2A": {
+   "denumire": "Spații verzi pentru sport și agrement",
+   "pot_baza": 10,
+   "pot_max": 10,
+   "cut_baza": 0.15,
+   "cut_max": 0.15,
+   "hmax_m": 7,
+   "niv_max": "P",
+   "regim": "izolat",
+   "regim_constructie": "izolat",
+   "spatii_verzi_pct": 80,
+   "sv_min_pct": 80,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "V3A": {
+   "denumire": "Spații verzi de protecție / amenajări sportive",
+   "pot_baza": 15,
+   "pot_max": 15,
+   "cut_baza": 0.25,
+   "cut_max": 0.25,
+   "hmax_m": 10,
+   "niv_max": "P+1",
+   "regim": "izolat",
+   "regim_constructie": "izolat",
+   "spatii_verzi_pct": 70,
+   "sv_min_pct": 70,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "V3A*": {
+   "denumire": "Spații verzi de protecție / amenajări sportive",
+   "pot_baza": 15,
+   "pot_max": 15,
+   "cut_baza": 0.25,
+   "cut_max": 0.25,
+   "hmax_m": 10,
+   "niv_max": "P+1",
+   "regim": "izolat",
+   "regim_constructie": "izolat",
+   "spatii_verzi_pct": 70,
+   "sv_min_pct": 70,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "V3B": {
+   "denumire": "Spații verzi de protecție / amenajări sportive",
+   "pot_baza": 15,
+   "pot_max": 15,
+   "cut_baza": 0.25,
+   "cut_max": 0.25,
+   "hmax_m": 10,
+   "niv_max": "P+1",
+   "regim": "izolat",
+   "regim_constructie": "izolat",
+   "spatii_verzi_pct": 70,
+   "sv_min_pct": 70,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "V4": {
+   "denumire": "Păduri-parc și păduri de agrement",
+   "pot_baza": 5,
+   "pot_max": 5,
+   "cut_baza": 0.1,
+   "cut_max": 0.1,
+   "hmax_m": 7,
+   "niv_max": "P",
+   "regim": "izolat",
+   "regim_constructie": "izolat",
+   "spatii_verzi_pct": 90,
+   "sv_min_pct": 90,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "V5": {
+   "denumire": "Culoare de protecție (mal apă / ecologice)",
+   "pot_baza": 5,
+   "pot_max": 5,
+   "cut_baza": 0.1,
+   "cut_max": 0.1,
+   "hmax_m": 7,
+   "niv_max": "P",
+   "regim": "izolat",
+   "regim_constructie": "izolat",
+   "spatii_verzi_pct": 90,
+   "sv_min_pct": 90,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "V7": {
+   "denumire": "Păduri și plantații forestiere",
+   "pot_baza": 1,
+   "pot_max": 1,
+   "cut_baza": 0.05,
+   "cut_max": 0.05,
+   "hmax_m": 7,
+   "niv_max": "P",
+   "regim": "izolat",
+   "regim_constructie": "izolat",
+   "spatii_verzi_pct": 95,
+   "sv_min_pct": 95,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  },
+  "V8": {
+   "denumire": "Complexe și baze sportive",
+   "pot_baza": 15,
+   "pot_max": 15,
+   "cut_baza": 0.25,
+   "cut_max": 0.25,
+   "hmax_m": 12,
+   "niv_max": "P+1",
+   "regim": "izolat",
+   "regim_constructie": "izolat",
+   "spatii_verzi_pct": 65,
+   "sv_min_pct": 65,
+   "retragere_fata": "min. 5.0 m sau la aliniament",
+   "retragere_lat": "H/2, min. 3.0 m",
+   "retragere_spate": "H/2, min. 5.0 m"
+  }
+ },
+ "utrs": {
+  "A1": {
+   "denumire": "Activități productive și servicii (parcuri tehnologice)",
+   "fn_dominanta": "A1",
+   "subzone_admise": [
+    "A1"
+   ],
+   "fn_interzise": []
+  },
+  "A2A": {
+   "denumire": "Industrie și servicii nepoluante",
+   "fn_dominanta": "A2A",
+   "subzone_admise": [
+    "A2A"
+   ],
+   "fn_interzise": []
+  },
+  "A2B": {
+   "denumire": "Industrie și servicii nepoluante",
+   "fn_dominanta": "A2B",
+   "subzone_admise": [
+    "A2B"
+   ],
+   "fn_interzise": []
+  },
+  "APA": {
+   "denumire": "Luciu de apă / ape de suprafață — neconstruibil",
+   "fn_dominanta": "APA",
+   "subzone_admise": [
+    "APA"
+   ],
+   "fn_interzise": []
+  },
+  "BAZINE": {
+   "denumire": "Luciu de apă / ape de suprafață — neconstruibil",
+   "fn_dominanta": "BAZINE",
+   "subzone_admise": [
+    "BAZINE"
+   ],
+   "fn_interzise": []
+  },
+  "C*": {
+   "denumire": "Zonă centrală — funcțiuni complexe de interes general",
+   "fn_dominanta": "C*",
+   "subzone_admise": [
+    "C*"
+   ],
+   "fn_interzise": []
+  },
+  "CA2": {
+   "denumire": "Zonă centrală — funcțiuni complexe de interes general",
+   "fn_dominanta": "CA2",
+   "subzone_admise": [
+    "CA2"
+   ],
+   "fn_interzise": []
+  },
+  "CB1": {
+   "denumire": "Instituții publice și servicii de interes general (învățământ, sănătate)",
+   "fn_dominanta": "CB1",
+   "subzone_admise": [
+    "CB1"
+   ],
+   "fn_interzise": []
+  },
+  "CB2": {
+   "denumire": "Servicii publice dispersate / lăcașuri de cult",
+   "fn_dominanta": "CB2",
+   "subzone_admise": [
+    "CB2"
+   ],
+   "fn_interzise": []
+  },
+  "CB3": {
+   "denumire": "Servicii publice și de interes general",
+   "fn_dominanta": "CB3",
+   "subzone_admise": [
+    "CB3"
+   ],
+   "fn_interzise": []
+  },
+  "CB3.1": {
+   "denumire": "Servicii publice și de interes general",
+   "fn_dominanta": "CB3.1",
+   "subzone_admise": [
+    "CB3.1"
+   ],
+   "fn_interzise": []
+  },
+  "CP": {
+   "denumire": "Zonă centrală — servicii și parcaje publice",
+   "fn_dominanta": "CP",
+   "subzone_admise": [
+    "CP"
+   ],
+   "fn_interzise": []
+  },
+  "G1": {
+   "denumire": "Cimitire",
+   "fn_dominanta": "G1",
+   "subzone_admise": [
+    "G1"
+   ],
+   "fn_interzise": []
+  },
+  "G2A": {
+   "denumire": "Gospodărie comunală / depozitare",
+   "fn_dominanta": "G2A",
+   "subzone_admise": [
+    "G2A"
+   ],
+   "fn_interzise": []
+  },
+  "L1": {
+   "denumire": "Locuințe individuale mici (max P+2)",
+   "fn_dominanta": "L1",
+   "subzone_admise": [
+    "L1"
+   ],
+   "fn_interzise": []
+  },
+  "L1A": {
+   "denumire": "Locuințe individuale mici (max P+2)",
+   "fn_dominanta": "L1A",
+   "subzone_admise": [
+    "L1A"
+   ],
+   "fn_interzise": []
+  },
+  "L2A": {
+   "denumire": "Locuințe individuale și colective mici",
+   "fn_dominanta": "L2A",
+   "subzone_admise": [
+    "L2A"
+   ],
+   "fn_interzise": []
+  },
+  "L2A*": {
+   "denumire": "Locuințe individuale și colective mici",
+   "fn_dominanta": "L2A*",
+   "subzone_admise": [
+    "L2A*"
+   ],
+   "fn_interzise": []
+  },
+  "L2B": {
+   "denumire": "Locuințe colective mici-medii",
+   "fn_dominanta": "L2B",
+   "subzone_admise": [
+    "L2B"
+   ],
+   "fn_interzise": []
+  },
+  "L2_S1": {
+   "denumire": "Locuințe individuale și colective mici",
+   "fn_dominanta": "L2_S1",
+   "subzone_admise": [
+    "L2_S1"
+   ],
+   "fn_interzise": []
+  },
+  "L3A": {
+   "denumire": "Locuințe colective medii (P+3÷P+4)",
+   "fn_dominanta": "L3A",
+   "subzone_admise": [
+    "L3A"
+   ],
+   "fn_interzise": []
+  },
+  "L4A": {
+   "denumire": "Ansambluri de locuințe colective mari",
+   "fn_dominanta": "L4A",
+   "subzone_admise": [
+    "L4A"
+   ],
+   "fn_interzise": []
+  },
+  "M*": {
+   "denumire": "Zonă mixtă — locuințe și servicii",
+   "fn_dominanta": "M*",
+   "subzone_admise": [
+    "M*"
+   ],
+   "fn_interzise": []
+  },
+  "M2": {
+   "denumire": "Zonă mixtă — locuințe și servicii (clădiri medii-înalte)",
+   "fn_dominanta": "M2",
+   "subzone_admise": [
+    "M2"
+   ],
+   "fn_interzise": []
+  },
+  "M3": {
+   "denumire": "Zonă mixtă — locuințe și servicii (clădiri medii)",
+   "fn_dominanta": "M3",
+   "subzone_admise": [
+    "M3"
+   ],
+   "fn_interzise": []
+  },
+  "M_S1": {
+   "denumire": "Zonă mixtă — locuințe și servicii",
+   "fn_dominanta": "M_S1",
+   "subzone_admise": [
+    "M_S1"
+   ],
+   "fn_interzise": []
+  },
+  "R": {
+   "denumire": "Zonă cu reglementări speciale",
+   "fn_dominanta": "R",
+   "subzone_admise": [
+    "R"
+   ],
+   "fn_interzise": []
+  },
+  "S1": {
+   "denumire": "Gospodărie comunală / echipare edilitară",
+   "fn_dominanta": "S1",
+   "subzone_admise": [
+    "S1"
+   ],
+   "fn_interzise": []
+  },
+  "T": {
+   "denumire": "Zona transporturilor (rutier / feroviar)",
+   "fn_dominanta": "T",
+   "subzone_admise": [
+    "T"
+   ],
+   "fn_interzise": []
+  },
+  "T1": {
+   "denumire": "Zona transporturilor (rutier / feroviar)",
+   "fn_dominanta": "T1",
+   "subzone_admise": [
+    "T1"
+   ],
+   "fn_interzise": []
+  },
+  "T2": {
+   "denumire": "Zona transporturilor (rutier / feroviar)",
+   "fn_dominanta": "T2",
+   "subzone_admise": [
+    "T2"
+   ],
+   "fn_interzise": []
+  },
+  "V1": {
+   "denumire": "Parcuri, grădini și scuaruri publice",
+   "fn_dominanta": "V1",
+   "subzone_admise": [
+    "V1"
+   ],
+   "fn_interzise": []
+  },
+  "V1A": {
+   "denumire": "Parcuri, grădini și scuaruri publice",
+   "fn_dominanta": "V1A",
+   "subzone_admise": [
+    "V1A"
+   ],
+   "fn_interzise": []
+  },
+  "V1M": {
+   "denumire": "Parcuri, grădini și scuaruri publice",
+   "fn_dominanta": "V1M",
+   "subzone_admise": [
+    "V1M"
+   ],
+   "fn_interzise": []
+  },
+  "V2A": {
+   "denumire": "Spații verzi pentru sport și agrement",
+   "fn_dominanta": "V2A",
+   "subzone_admise": [
+    "V2A"
+   ],
+   "fn_interzise": []
+  },
+  "V3A": {
+   "denumire": "Spații verzi de protecție / amenajări sportive",
+   "fn_dominanta": "V3A",
+   "subzone_admise": [
+    "V3A"
+   ],
+   "fn_interzise": []
+  },
+  "V3A*": {
+   "denumire": "Spații verzi de protecție / amenajări sportive",
+   "fn_dominanta": "V3A*",
+   "subzone_admise": [
+    "V3A*"
+   ],
+   "fn_interzise": []
+  },
+  "V3B": {
+   "denumire": "Spații verzi de protecție / amenajări sportive",
+   "fn_dominanta": "V3B",
+   "subzone_admise": [
+    "V3B"
+   ],
+   "fn_interzise": []
+  },
+  "V4": {
+   "denumire": "Păduri-parc și păduri de agrement",
+   "fn_dominanta": "V4",
+   "subzone_admise": [
+    "V4"
+   ],
+   "fn_interzise": []
+  },
+  "V5": {
+   "denumire": "Culoare de protecție (mal apă / ecologice)",
+   "fn_dominanta": "V5",
+   "subzone_admise": [
+    "V5"
+   ],
+   "fn_interzise": []
+  },
+  "V7": {
+   "denumire": "Păduri și plantații forestiere",
+   "fn_dominanta": "V7",
+   "subzone_admise": [
+    "V7"
+   ],
+   "fn_interzise": []
+  },
+  "V8": {
+   "denumire": "Complexe și baze sportive",
+   "fn_dominanta": "V8",
+   "subzone_admise": [
+    "V8"
+   ],
+   "fn_interzise": []
+  }
+ },
+ "conditii_generale": {
+  "nota": "Indicatori conform nomenclatorului unificat PUG București și PUZ Coordonator de Sector. Valorile P.O.T./C.U.T. sunt maxime orientative; pentru proiecte se confruntă cu RLU-ul aprobat și eventualele PUZ/PUD în vigoare.",
+  "autorizare": "Funcțiunea dominantă a UTR se autorizează direct; funcțiunile admise cu condiționări necesită PUZ/PUD."
+ },
+ "zone_protejate": [],
+ "zone_risc": []
+}
