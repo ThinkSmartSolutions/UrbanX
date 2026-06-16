@@ -35,7 +35,9 @@
         if (typeof inst.text === 'function' && !inst.text.__roWrap) {
           var _t = inst.text;
           inst.text = function (text, x, y, opts, transform) {
-            try { text = Array.isArray(text) ? text.map(_clean) : _clean(text); } catch (e) { }
+            // Daca instanta foloseste fontul Unicode embed (DejaVuRO), NU transliteram
+            // diacriticele -> documentele strategice pastreaza diacriticele reale.
+            if (!this.__unicodeFont) { try { text = Array.isArray(text) ? text.map(_clean) : _clean(text); } catch (e) { } }
             return _t.call(this, text, x, y, opts, transform);
           };
           inst.text.__roWrap = true;
