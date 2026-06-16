@@ -251,10 +251,25 @@
         ['Electrificarea mobilitatii (statii incarcare)', 'Retea publica de statii de incarcare pentru vehicule electrice.', 'Retea de incarcare acoperitoare', 'Mediu', 0.04],
         ['Digitalizarea mobilitatii (MaaS)', 'Platforma de mobilitate ca serviciu (planificare + plata integrata multimodala).', 'Aplicatie MaaS operationala', 'Mediu', 0.03],
       ];
+      const fiseBenef = ['Reducerea timpilor de calatorie si cresterea atractivitatii alternativelor la autoturism',
+        'Reducerea emisiilor si a poluarii in zonele dens populate', 'Cresterea sigurantei tuturor participantilor la trafic',
+        'Imbunatatirea accesibilitatii si a echitatii sociale', 'Sustinerea dezvoltarii economice si a calitatii vietii urbane'];
+      const fiseRisc = ['Intarzieri in achizitii/avize', 'Cofinantare locala insuficienta', 'Acceptabilitate publica',
+        'Coordonare interinstitutionala', 'Disponibilitatea terenului'];
       fise.forEach((f, i) => {
         D.h3('PROIECT ' + (i + 1) + ' — ' + f[0]);
-        D.P(f[1], { gap: 1.5 });
-        D.table(['Indicatori de rezultat', 'Etapa', 'Buget orientativ'], [[f[2], f[3], N(Math.round(invTot * f[4])) + ' mil. EUR']], [98, 28, 48], { fs: 7 });
+        D.P('Obiectiv: ' + f[1], { gap: 1.5 });
+        D.P('Justificare: proiectul raspunde direct disfunctionalitatilor identificate in analiza situatiei existente (componenta 2) si contribuie la atingerea obiectivelor strategice ale PMUD. ' + fiseBenef[i % fiseBenef.length] + '. Implementarea se realizeaza etapizat, cu studii de fezabilitate si proiecte tehnice care detaliaza solutiile si bugetele.', { gap: 1.5 });
+        D.table(['Atribut', 'Valoare'], [
+          ['Indicatori de rezultat', f[2]],
+          ['Etapa de implementare', f[3]],
+          ['Buget orientativ', N(Math.round(invTot * f[4])) + ' mil. EUR'],
+          ['Sursa de finantare probabila', f[4] >= 0.12 ? 'POR / PNRR' : 'Buget local / PPP / POR'],
+          ['Beneficiu principal', fiseBenef[i % fiseBenef.length]],
+          ['Risc principal de implementare', fiseRisc[i % fiseRisc.length]],
+          ['Contributie la tinte', 'Transfer modal, reducere emisii, siguranta'],
+        ], [54, 120], { fs: 7, boldFirst: true });
+        D.spacer(2);
       });
       D.h2('Buget si surse de finantare');
       D.pie([['POR (Regional)', 38, PAL[0]], ['PNRR', 26, activColor], ['Buget local', 18, PAL[1]], ['PPP', 12, PAL[4]], ['Alte fonduri', 6, PAL[6]]], { title: 'Structura surselor de finantare (%)', source: 'Mix tipic de finantare a mobilitatii urbane. PMUD aprobat = conditie de eligibilitate.' });
