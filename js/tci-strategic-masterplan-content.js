@@ -470,6 +470,27 @@
         ['Parteneriate', 'cooperare cu mediul privat, academic si societatea civila'],
       ]);
 
+      D.chapter('Strategia spatiilor publice si a retelei de centralitati');
+      D.P('Spatiile publice si centralitatile (centrul orasului si centrele de cartier) constituie scheletul social si functional al orasului. O strategie a spatiilor publice defineste o retea ierarhizata si conectata de piete, strazi, parcuri si maluri de apa, asigurand ca fiecare locuitor are acces, la distanta de mers pe jos, la spatii publice de calitate. Centralitatile concentreaza servicii, comert si viata publica, structurand orasul de proximitate.');
+      D.P('Un model policentric — un centru principal completat de centre de cartier puternice — descongestioneaza centrul istoric, apropie serviciile de locuitori si sustine vitalitatea cartierelor. Fiecare centralitate combina functiuni (comert la parter, servicii, dotari publice), un spatiu public reprezentativ (piateta) si conexiuni bune de transport public si mobilitate activa. Identificarea, intarirea si crearea de noi centralitati este o directie majora de organizare urbanistica.');
+
+      D.chapter('Regenerarea brownfield si activarea terenurilor subutilizate');
+      D.P('Orasele dispun adesea de terenuri subutilizate sau abandonate in interiorul intravilanului: foste platforme industriale (brownfield), zone feroviare dezafectate, terenuri virane, cladiri parasite. Aceste terenuri reprezinta o resursa strategica majora: fiind deja in intravilan si (partial) echipate, reconversia lor permite dezvoltare fara consum de teren nou si fara expansiune, valorificand totodata localizari centrale.');
+      D.P('Activarea brownfield necesita instrumente specifice: inventarierea terenurilor, eventuala decontaminare a solului, documentatii de urbanism de restructurare (PUZ), mecanisme de finantare si parteneriate. Reconversia transforma liabilitati urbane (zone degradate, nesigure) in noi cartiere mixte, spatii verzi sau poli de activitate, contribuind decisiv la densificarea calitativa si la regenerarea urbana.');
+
+      D.chapter('Aliniere la Obiectivele de Dezvoltare Durabila (ODD)');
+      D.P('Masterplanul se aliniaza Agendei 2030 a ONU si celor 17 Obiective de Dezvoltare Durabila (ODD), in special ODD 11 — "Orase si comunitati durabile". Integrarea ODD ofera un cadru global de referinta si permite monitorizarea contributiei orasului la dezvoltarea durabila.');
+      D.table(['ODD relevant', 'Contributia masterplanului'], [
+        ['ODD 3 — Sanatate', 'Mobilitate activa, aer curat, spatii verzi, acces la servicii'],
+        ['ODD 7 — Energie curata', 'Eficienta energetica, surse regenerabile'],
+        ['ODD 9 — Infrastructura', 'Infrastructura reziliente si inovare'],
+        ['ODD 10 — Reducerea inegalitatilor', 'Echitate spatiala, locuire accesibila, incluziune'],
+        ['ODD 11 — Orase durabile', 'Locuire, mobilitate, spatii publice, patrimoniu, reziliente'],
+        ['ODD 12 — Consum responsabil', 'Economie circulara, gestiunea deseurilor'],
+        ['ODD 13 — Actiune climatica', 'Adaptare si atenuare, neutralitate climatica'],
+        ['ODD 15 — Viata terestra', 'Capital natural, biodiversitate, coridoare ecologice'],
+      ], [50, 124], { boldFirst: true, fs: 7 });
+
       D.chapter('Educatie, capital uman si invatare pe tot parcursul vietii');
       D.P('Educatia si formarea capitalului uman sunt determinanti fundamentali ai dezvoltarii pe termen lung. Reteaua de unitati de invatamant (de la crese si gradinite la invatamant superior) trebuie sa asigure acces echitabil, in proximitate (oras de 15 minute pentru invatamantul de baza), si o capacitate adecvata cresterii sau structurii demografice. Calitatea infrastructurii educationale (cladiri, dotari, spatii exterioare) si siguranta traseelor catre scoala influenteaza direct rezultatele si calitatea vietii familiilor.');
       D.P('Prezenta invatamantului superior si a cercetarii constituie un atu strategic major: atrage si retine populatie tanara, alimenteaza economia cu forta de munca calificata, sustine inovarea si parteneriatele cu mediul de afaceri. Conectarea orasului cu universitatile (campusuri integrate, transfer tehnologic, incubatoare) si oferta de invatare pe tot parcursul vietii (formare profesionala, recalificare) sunt directii de dezvoltare a capitalului uman.');
