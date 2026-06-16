@@ -50,8 +50,14 @@ var SCENES = [
   {id:'b10s1',dur:22000,label:'CRIZE SIMULTANE',     bloc:10,blabel:'CRIZE & REZILIENTA'},
   {id:'b10s2',dur:22000,label:'SCENARIUL NEGRU',     bloc:10,blabel:'CRIZE & REZILIENTA'},
   {id:'b10s3',dur:20000,label:'CONSTRUCTIA REZILIENTEI',bloc:10,blabel:'CRIZE & REZILIENTA'},
-  {id:'b11s1',dur:24000,label:'AGENDA PRIMARULUI',   bloc:11,blabel:'AGENDA & VIZIUNEA'},
-  {id:'b11s2',dur:28000,label:'VIZIUNEA',            bloc:11,blabel:'AGENDA & VIZIUNEA'},
+  // BLOC 11 — INOVATII & MODELE INTERNATIONALE (scene noi; id-urile au prefix b12*
+  // ca sa nu intre in coliziune cu cele existente, dar se afiseaza ca BLOC 11)
+  {id:'b12s1',dur:22000,label:'SUPERBLOCKS BARCELONA',bloc:11,blabel:'INOVATII & MODELE INTERNATIONALE'},
+  {id:'b12s2',dur:20000,label:'REGULA 3-30-300',      bloc:11,blabel:'INOVATII & MODELE INTERNATIONALE'},
+  {id:'b12s3',dur:20000,label:'ORASUL 15 MINUTE',     bloc:11,blabel:'INOVATII & MODELE INTERNATIONALE'},
+  {id:'b12s4',dur:22000,label:'SINTEZA MASTERPLAN',   bloc:11,blabel:'INOVATII & MODELE INTERNATIONALE'},
+  {id:'b11s1',dur:24000,label:'AGENDA PRIMARULUI',   bloc:12,blabel:'AGENDA & VIZIUNEA'},
+  {id:'b11s2',dur:28000,label:'VIZIUNEA',            bloc:12,blabel:'AGENDA & VIZIUNEA'},
 ];
 
 // ── DATE LIVE ─────────────────────────────────────────────────────────────
@@ -1067,6 +1073,34 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         fly(Z.CBD,15.5,72,30,5000,0,'dusk');
         fly(Z.CBD,16.0,75,120,18000,5000,'dusk');
         break;
+
+      // BLOC 11 — INOVATII & MODELE INTERNATIONALE ─────────────────────────
+      case 'b12s1': // Superblocks Barcelona
+        lp('day');
+        onIdle(function(){ try{SE._add3DGrowth&&SE._add3DGrowth(map);}catch(e){} });
+        fly(Z.CBD,15,60,0,4000,0,'day');
+        fly(Z.CBD,15.6,66,90,16000,4500,'day');
+        break;
+      case 'b12s2': // 3-30-300
+        lp('day');
+        onIdle(function(){ try{SE._addDensityHeat&&SE._addDensityHeat(map);}catch(e){} });
+        fly(Z.VERDE,14,54,0,4000,0,'day');
+        fly(Z.C,13.5,50,40,14000,4500,'day');
+        break;
+      case 'b12s3': // Oras 15 minute
+        lp('day');
+        onIdle(function(){ try{SE._addExpansionRings&&SE._addExpansionRings(map);}catch(e){} });
+        fly(Z.C,14.2,56,0,4000,0,'day');
+        rot(20,0.005);
+        fly(Z.C,14.5,60,60,14000,4500,'day');
+        break;
+      case 'b12s4': // Sinteza Masterplan
+        lp('dusk');
+        onIdle(function(){ try{SE._add3DGrowthFull&&SE._add3DGrowthFull(map);}catch(e){} });
+        rot(25,0.006);
+        fly(Z.CBD,14.8,64,20,5000,0,'dusk');
+        fly(Z.CBD,15.4,70,110,16000,5000,'dusk');
+        break;
     }
   }
 
@@ -1980,6 +2014,141 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
           ctx.globalAlpha=1;
         }
         break;
+
+      // \u2500\u2500 BLOC 11 \u2014 INOVATII & MODELE INTERNATIONALE \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+      case 'b12s1': { // Superblocks Barcelona
+        titlu('Superblocks \u2014 Modelul Barcelona','Salvador Rueda \u00b7 Agencia d\'Ecologia Urbana de Barcelona'); linie();
+        var areaHa=city.suprafata_ha||city.suprafata||Math.round(pop21/40);
+        var intraKm2=Math.max(1.5,areaHa*0.30/100);
+        var nSuper=Math.max(2,Math.round(intraKm2/0.16));
+        var sbCell=Math.min(W*0.046,54), sbGap=Math.min(W*0.006,7), sbX=W*0.42, sbY=H*0.34;
+        if(t>0.10){
+          for(var sbR=0;sbR<3;sbR++)for(var sbC=0;sbC<3;sbC++){
+            var sbA=Math.min(1,(t-0.10-(sbR*3+sbC)*0.018)/0.18)*sA; if(sbA<=0)continue;
+            ctx.globalAlpha=sbA;
+            ctx.fillStyle=(sbR===1&&sbC===1)?'rgba(34,197,94,0.88)':'rgba(59,130,246,0.42)';
+            ctx.fillRect(sbX+sbC*(sbCell+sbGap),sbY+sbR*(sbCell+sbGap),sbCell,sbCell);
+          }
+          ctx.globalAlpha=Math.min(1,(t-0.22)/0.18)*sA*0.85;
+          ctx.strokeStyle='rgba(239,68,68,0.75)';ctx.lineWidth=3;
+          ctx.strokeRect(sbX-7,sbY-7,3*sbCell+2*sbGap+14,3*sbCell+2*sbGap+14);
+          ctx.globalAlpha=1;
+          if(t>0.30){
+            ctx.globalAlpha=Math.min(1,(t-0.30)/0.2)*sA*0.85;
+            ctx.textAlign='center';
+            ctx.fillStyle='rgba(248,113,113,0.9)';ctx.font='600 '+Math.min(W*0.009,11)+'px "IBM Plex Mono",monospace';
+            ctx.fillText('TRAFIC PERIMETRAL',sbX+(3*sbCell+2*sbGap)/2,sbY-14);
+            ctx.fillStyle='rgba(52,211,153,0.92)';
+            ctx.fillText('INTERIOR PIETONAL RECUPERAT',sbX+(3*sbCell+2*sbGap)/2,sbY+3*sbCell+2*sbGap+24);
+            ctx.globalAlpha=1;
+          }
+        }
+        cifra(N2(nSuper),'Superblocks posibile in '+name);
+        cifra2('-21% trafic','Efect documentat Barcelona');
+        narativ('Superilles grupeaza 3\u00d73 cvartale: traficul de tranzit ramane pe perimetru, iar interiorul devine spatiu public pietonal. Studiul Lancet (Mueller et al. 2020) estimeaza 667 decese premature evitate/an la Barcelona, prin reducerea NO2 (-24%), a zgomotului si a insulei de caldura urbana. Aplicat la '+name+': ~'+N2(nSuper)+' superblocks, spatiu stradal recuperat fara demolari.');
+        concluzie('Reorganizarea circulatiei, nu demolari \u2014 spatiu public castigat');
+        break;
+      }
+
+      case 'b12s2': { // Regula 3-30-300
+        titlu('Regula 3-30-300','Cecil Konijnendijk (2021) \u00b7 standard OMS spatii verzi urbane'); linie();
+        var sv330=pred.svM2||11;
+        var canopy=sv330>=15?22:sv330>=9?15:9;
+        var ok300=sv330>=12;
+        var r330=[
+          {n:'3',u:'copaci vizibili din fiecare locuinta',ok:canopy>=18,cur:'~'+(canopy>=18?'3+':canopy>=12?'2':'1')+' copaci vizibili'},
+          {n:'30%',u:'acoperire coronament (canopy) in cartier',ok:canopy>=30,cur:'actual ~'+canopy+'%'},
+          {n:'300m',u:'distanta maxima la spatiu verde public',ok:ok300,cur:sv330+' m\u00b2/loc vs OMS 9-26'}
+        ];
+        r330.forEach(function(rl,i){
+          var a=Math.min(1,(t-0.12-i*0.10)/0.18)*sA; if(a<=0)return;
+          ctx.globalAlpha=a;
+          var by=H*0.30+i*H*0.16;
+          ctx.fillStyle='rgba(4,10,24,0.78)';ctx.fillRect(W*0.36,by,W*0.58,H*0.125);
+          ctx.fillStyle=rl.ok?'rgba(34,197,94,0.95)':'rgba(245,158,11,0.95)';
+          ctx.font='900 '+Math.min(W*0.042,54)+'px "Space Grotesk",sans-serif';ctx.textAlign='left';
+          ctx.fillText(rl.n,W*0.375,by+H*0.082);
+          ctx.fillStyle='rgba(220,228,255,0.88)';ctx.font='500 '+Math.min(W*0.012,15)+'px "Space Grotesk",sans-serif';
+          ctx.fillText(rl.u,W*0.47,by+H*0.05);
+          ctx.fillStyle=rl.ok?'rgba(52,211,153,0.85)':'rgba(245,158,11,0.85)';
+          ctx.font='600 '+Math.min(W*0.011,13)+'px "IBM Plex Mono",monospace';
+          ctx.fillText((rl.ok?'\u2713 ':'\u26a0 ')+rl.cur,W*0.47,by+H*0.092);
+          ctx.globalAlpha=1;
+        });
+        cifra(sv330+' m\u00b2/loc','Spatii verzi actuale ('+name+')');
+        cifra2(canopy+'% canopy','Tinta: 30%');
+        narativ('Regula 3-30-300 (Konijnendijk): fiecare locuitor sa vada minim 3 copaci de la fereastra, cartierul sa atinga 30% coronament arboricol, iar un spatiu verde public sa fie la max 300m. Reduce mortalitatea, raceste orasul cu 2-4\u00b0C in valuri de caldura si imbunatateste sanatatea mintala. Standard adoptat de OMS si UE.');
+        concluzie('Plantare strategica + acces echitabil la verde public');
+        break;
+      }
+
+      case 'b12s3': { // Orasul 15 minute
+        titlu('Orasul 15 minute','Carlos Moreno (Sorbonne) \u00b7 Paris "Ville du quart d\'heure"'); linie();
+        var funcs15=[{n:'Locuire',c:'#60a5fa'},{n:'Munca',c:'#a78bfa'},{n:'Aprovizionare',c:'#f59e0b'},{n:'Sanatate',c:'#ef4444'},{n:'Educatie',c:'#22c55e'},{n:'Recreere',c:'#34d399'}];
+        var f15x=W*0.62, f15y=H*0.50, f15R=Math.min(W*0.10,130);
+        if(t>0.12){
+          ctx.globalAlpha=Math.min(1,(t-0.12)/0.2)*sA*0.5;
+          ctx.strokeStyle='rgba(212,175,55,0.5)';ctx.lineWidth=2;ctx.setLineDash([5,5]);
+          ctx.beginPath();ctx.arc(f15x,f15y,f15R,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
+          ctx.globalAlpha=1;
+          funcs15.forEach(function(f,i){
+            var a=Math.min(1,(t-0.15-i*0.06)/0.18)*sA; if(a<=0)return;
+            var ang=-Math.PI/2+i*Math.PI/3;
+            var fx=f15x+Math.cos(ang)*f15R, fy=f15y+Math.sin(ang)*f15R;
+            ctx.globalAlpha=a*0.4;ctx.strokeStyle=f.c;ctx.lineWidth=1.5;
+            ctx.beginPath();ctx.moveTo(f15x,f15y);ctx.lineTo(fx,fy);ctx.stroke();
+            ctx.globalAlpha=a;
+            ctx.fillStyle=f.c;ctx.beginPath();ctx.arc(fx,fy,Math.min(W*0.016,20),0,Math.PI*2);ctx.fill();
+            ctx.fillStyle='rgba(220,228,255,0.9)';ctx.font='600 '+Math.min(W*0.009,11)+'px "IBM Plex Mono",monospace';ctx.textAlign='center';
+            ctx.fillText(f.n,fx,fy+Math.min(W*0.028,34));
+            ctx.globalAlpha=1;
+          });
+          ctx.globalAlpha=Math.min(1,(t-0.12)/0.2)*sA;
+          ctx.fillStyle='rgba(212,175,55,0.95)';ctx.font='900 '+Math.min(W*0.03,38)+'px "Space Grotesk",sans-serif';ctx.textAlign='center';
+          ctx.fillText('15\u2032',f15x,f15y+Math.min(W*0.01,14));
+          ctx.globalAlpha=1;
+        }
+        var cov15=Math.round(Math.min(95,40+(pred.tp||62)*0.4+(pred.svM2||11)));
+        cifra(cov15+'%','Acoperire estimata 15-min ('+name+')');
+        cifra2('6 functii','La 15 min pe jos / bicicleta');
+        narativ('Modelul Carlos Moreno: fiecare cetatean ajunge in 15 minute pe jos sau cu bicicleta la cele 6 functii esentiale \u2014 locuire, munca, aprovizionare, sanatate, educatie, recreere. Reduce dependenta de masina, emisiile si timpul pierdut in trafic, revitalizand cartierele. Implementat la Paris, Melbourne, Portland.');
+        concluzie('Densificare mixta + proximitate, nu zonare monofunctionala');
+        break;
+      }
+
+      case 'b12s4': { // Sinteza Masterplan + QR
+        titlu('Sinteza Masterplan '+_S()+'\u2013'+_E(),name+' \u00b7 6 axe strategice \u00b7 conf. Legii 350/2001'); linie();
+        var axe=[
+          {n:'01 Regenerare urbana',c:'#D4AF37'},
+          {n:'02 Mobilitate durabila (PMUD)',c:'#60a5fa'},
+          {n:'03 Rezilienta climatica',c:'#22c55e'},
+          {n:'04 Economie & inovatie',c:'#a78bfa'},
+          {n:'05 Spatii verzi & sanatate',c:'#34d399'},
+          {n:'06 Guvernanta & participare',c:'#f59e0b'}
+        ];
+        axe.forEach(function(ax,i){
+          var a=Math.min(1,(t-0.12-i*0.07)/0.16)*sA; if(a<=0)return;
+          ctx.globalAlpha=a;
+          var col=i<3?0:1, row=i%3;
+          var bx=W*0.05+col*W*0.47, by=H*0.30+row*H*0.135;
+          ctx.fillStyle='rgba(4,10,24,0.80)';ctx.fillRect(bx,by,W*0.43,H*0.11);
+          ctx.fillStyle=ax.c;ctx.fillRect(bx,by,W*0.006,H*0.11);
+          ctx.fillStyle='rgba(220,228,255,0.92)';ctx.font='700 '+Math.min(W*0.014,18)+'px "Space Grotesk",sans-serif';ctx.textAlign='left';
+          ctx.fillText(ax.n,bx+W*0.022,by+H*0.066);
+          ctx.globalAlpha=1;
+        });
+        cifra(N2(pred.invTotal||300)+' M\u20ac','Investitii mobilizate (FEDR+PNRR+PPP)');
+        cifra2(_S()+'\u2013'+_E(),'Orizont strategic 30 ani');
+        narativ('Masterplanul integreaza toate analizele \u2014 demografie, economie, riscuri, mobilitate (PMUD), spatii verzi \u2014 in 6 axe strategice cu proiecte etapizate si surse de finantare. Documentul complet (100+ pagini) e disponibil in UrbanX Pro.');
+        if(t>0.55){
+          var aqr=Math.min(1,(t-0.55)/0.16)*sA;
+          ctx.globalAlpha=aqr;ctx.fillStyle='rgba(212,175,55,0.92)';ctx.font='700 '+Math.min(W*0.011,14)+'px "IBM Plex Mono",monospace';ctx.textAlign='center';
+          ctx.fillText('\u25b6 SCANEAZA pentru Masterplanul complet',W*0.5,H*0.90);
+          ctx.globalAlpha=1;
+        }
+        if(t>0.6) _drawQR(ctx,W,H,Math.min(1,(t-0.6)/0.12)*sA);
+        break;
+      }
     }
 
     prog();
