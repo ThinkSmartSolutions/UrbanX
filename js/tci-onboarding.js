@@ -347,7 +347,10 @@ G._ShareManager = {
 G._ParcelResults = {
   _panel: null,
 
-  show(ap, city) {
+  _show(ap, city) {
+    this._last = { ap: ap, city: city };
+    const launcher = document.getElementById('ux-parcel-launcher');
+    if(launcher) launcher.style.display = 'none';
     let panel = document.getElementById('ux-parcel-results');
     if(!panel){
       panel = document.createElement('div');
@@ -383,7 +386,7 @@ G._ParcelResults = {
             <div style="font-size:10px;font-weight:700;color:#e2e8f0">${ap.nrCad||'Nr. cadastral necunoscut'}</div>
             <div style="font-size:8px;color:rgba(148,163,184,.5)">${ap.utr||'UTR necunoscut'} · ${ap.area||'—'} m²</div>
           </div>
-          <button onclick="document.getElementById('ux-parcel-results').remove()"
+          <button onclick="_ParcelResults._collapse()" title="Închide analizele (regulamentul urbanistic rămâne)"
             style="background:none;border:none;color:rgba(148,163,184,.4);cursor:pointer;font-size:16px;padding:0">✕</button>
         </div>
 
@@ -464,6 +467,39 @@ G._ParcelResults = {
         </div>
       </div>`;
   },
+
+  // Lansator compact — NU deschide automat analizele. Utilizatorul vede întâi
+  // regulamentul urbanistic (panoul UTR) și apoi alege analizele dacă vrea.
+  _last: null,
+  showLauncher(ap, city) {
+    this._last = { ap: ap, city: city };
+    const panel = document.getElementById('ux-parcel-results');
+    if(panel) panel.remove(); // dacă era deschis dintr-o parcelă anterioară, îl închidem
+    let b = document.getElementById('ux-parcel-launcher');
+    if(!b){
+      b = document.createElement('button');
+      b.id = 'ux-parcel-launcher';
+      b.style.cssText = `
+        position:fixed;top:50px;right:10px;z-index:2000;
+        padding:7px 12px;border-radius:10px;cursor:pointer;
+        background:rgba(4,10,24,.92);backdrop-filter:blur(10px);
+        border:1px solid rgba(212,175,55,.35);color:#D4AF37;
+        font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:800;
+        box-shadow:0 4px 18px rgba(0,0,0,.4);letter-spacing:.04em;`;
+      b.onclick = () => { const l = _ParcelResults._last; if(l) _ParcelResults.show(l.ap, l.city); };
+      document.body.appendChild(b);
+    }
+    b.innerHTML = '📊 Analize parcelă ▸';
+    b.style.display = 'block';
+  },
+
+  _collapse() {
+    const panel = document.getElementById('ux-parcel-results');
+    if(panel) panel.remove();
+    if(this._last) this.showLauncher(this._last.ap, this._last.city);
+  },
+
+  show(ap, city) { return this._show(ap, city); },
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -599,7 +635,9 @@ G._watchForParcelSelect = function() {
       if(m) city = m[1];
     }
 
-    if(city) G._ParcelResults.show(ap, city);
+    // VI.1 — NU mai deschidem automat analizele. Arătăm doar un lansator compact;
+    // regulamentul urbanistic (panoul UTR) rămâne primul lucru pe care îl vede utilizatorul.
+    if(city) G._ParcelResults.showLauncher(ap, city);
   }, 800);
 };
 
