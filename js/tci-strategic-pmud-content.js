@@ -710,6 +710,9 @@
       ]);
       D.P('Participarea nu este o formalitate, ci un proces continuu care fundamenteaza deciziile și construiește sprijinul public necesar pentru măsuri uneori dificile (restricții auto, tarifare parcare).');
 
+      // TABLOU DE BORD — indicatori de calitate urbana (acelasi modul ca in cinematic + Masterplan)
+      try{ if(window._UrbanIndices){ var _prPM=(window._PredEngine&&_PredEngine.calc)?_PredEngine.calc(city):{}; window._UrbanIndices.renderChapter(D, _prPM, city, {title:'Tablou de bord — Indicatori de calitate urbana si mobilitate'}); } }catch(e){ console.warn('[PMUD] indici:',e.message); }
+
       // ── 11. METODOLOGIE SI SURSE ─────────────────────────────────────────
       D.chapter('Metodologie, surse și glosar');
       D.h2('Cadru metodologic și legal');

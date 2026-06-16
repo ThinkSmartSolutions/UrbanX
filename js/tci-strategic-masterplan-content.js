@@ -1024,6 +1024,9 @@
       ], [56, 44, 74], { boldFirst: true, fs: 7 });
       D.callout('Factori-cheie de succes', 'Asumarea politică de durată, capacitatea administrativă, finanțarea predictibila, participarea publică și monitorizarea riguroasa sunt condițiile transformării viziunii în realitate.');
 
+      // TABLOU DE BORD — indicatori de calitate urbana (acelasi modul ca in cinematic)
+      try{ if(window._UrbanIndices){ var _prMP=(window._PredEngine&&_PredEngine.calc)?_PredEngine.calc(city):{}; window._UrbanIndices.renderChapter(D, _prMP, city); } }catch(e){ console.warn('[MP] indici:',e.message); }
+
       D.chapter('Concluzii și recomandări strategice');
       D.P('Masterplanul Strategic al Municipiului ' + city.name + ' fundamenteaza o dezvoltare urbană integrată, durabilă și rezilienta. Recomandările prioritare:');
       D.bullets([
