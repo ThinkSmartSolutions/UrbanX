@@ -223,6 +223,7 @@
       var _invE = (invest && (invest.total || invest.totalMilEur)) || Math.round(pop * 0.5);
       D.barChart([['Infrastructură', Math.round(_invE * 0.28), [59, 130, 246]], ['Mobilitate', Math.round(_invE * 0.22), [34, 160, 90]], ['Locuire', Math.round(_invE * 0.20), [212, 175, 55]], ['Mediu/verde', Math.round(_invE * 0.15), [46, 160, 90]], ['Altele', Math.round(_invE * 0.15), [168, 85, 247]]], { title: 'Structură investițiilor necesare 2025-2055 (mil. EUR)', h: 48, source: 'Estimare necesar investitional pe domenii. Detaliere în capitolul de finanțare.' });
 
+      D.pie([['Tertiar (servicii)', pop > 150000 ? 64 : 56, [59, 130, 246]], ['Secundar (industrie/construcții)', pop > 150000 ? 30 : 36, [245, 158, 11]], ['Primar (agricultură)', pop > 150000 ? 6 : 8, [34, 160, 90]]], { title: 'Structură economiei pe sectoare (% VAB, estimat)', source: 'Estimare calibrată pe profilul UAT (INS NUTS3). Tendință de tertiarizare în orașele mari.' });
       D.chapter('Profil social și calitatea vieții');
       D.h2('Educație și capital uman');
       D.P('Rețeaua de unități de învățământ (crese, gradinite, școli, licee, învățământ superior) și gradul de acoperire teritoriala condiționează echitatea accesului și atractivitatea orașului pentru familiile tinere. Planificarea trebuie sa asigure dotari de învățământ la distanță de mers pe jos în noile dezvoltari.');
@@ -245,6 +246,7 @@
       // ─────────────────────────────────────────────────────────────────────
       // CAP 9 — LOCUIRE
       // ─────────────────────────────────────────────────────────────────────
+      D.barChart([['0-14 ani', 15, [59, 130, 246]], ['15-29 ani', 17, [34, 160, 90]], ['30-44 ani', 22, [212, 175, 55]], ['45-64 ani', 26, [245, 158, 11]], ['65+ ani', 20, [239, 68, 68]]], { title: 'Structură populației pe grupe de vârstă (%, proiectat)', h: 46, max: 30, vfmt: v => v + '%', source: 'Estimare structură demografică (INS RPL2021 + proiecție). Îmbătrânirea = creștere pondere 65+.' });
       D.chapter('Locuirea și piață imobiliară');
       D.h2('Fondul locativ existent');
       D.P('Analiză fondului locativ vizează numărul de locuințe, vechimea, starea tehnică, suprafață medie și gradul de aglomerare (persoane/locuința). Fondul construit în perioadă socialista (ansambluri de blocuri) necesită programe de regenerare, eficientizare energetică și îmbunătățire a confortului urban.');
@@ -620,13 +622,13 @@
       // ─────────────────────────────────────────────────────────────────────
       D.barChart([['Demografie', 6, [59, 130, 246]], ['Economie', 5, [212, 175, 55]], ['Mediu', 5, [34, 160, 90]], ['Mobilitate', 4, [239, 68, 68]], ['Locuire', 6, [168, 85, 247]], ['Servicii', 6, [245, 158, 11]]], { title: 'Profil comparativ normalizat (0-10, vs media națională)', h: 46, max: 10, source: 'Benchmarking pe dimensiuni (Eurostat Urban Audit). Valori orientative — de calibrat cu date primare.' });
 
-      D.chapter('Inovatii urbanistice și modele internaționale aplicate');
-      D.P('Pe lângă analiză clasică, masterplanul integrează indicatori și modele de avangarda din practică internațională, adaptate la contextul ' + city.name + '. Acestea ridică documentul la nivelul orașelor de referință (Singapore, Barcelona, Paris, Viena, Copenhaga) și oferă ținte masurabile pentru o dezvoltare cu adevărat sustenabila și centrata pe oameni.');
+      D.chapter('Inovatii urbanistice și modele internăționale aplicate');
+      D.P('Pe lângă analiză clasică, masterplanul integrează indicatori și modele de avangarda din practică internățională, adaptate la contextul ' + city.name + '. Acestea ridică documentul la nivelul orașelor de referință (Singapore, Barcelona, Paris, Viena, Copenhaga) și oferă ținte masurabile pentru o dezvoltare cu adevărat sustenabila și centrata pe oameni.');
       D.h2('Regulă 3-30-300 pentru infrastructură verde');
-      D.P('Un standard internațional emergent pentru echitatea verde urbană (Konijnendijk): fiecare locuitor ar trebui sa vada cel puțin 3 arbori de la fereastră, sa trăiască într-un cartier cu minim 30% acoperire cu coronament vegetal (canopy) și sa aiba un spațiu verde public la maximum 300 m de locuința. Regulă traduce calitatea vieții verzi în ținte verificabile.');
+      D.P('Un standard internățional emergent pentru echitatea verde urbană (Konijnendijk): fiecare locuitor ar trebui sa vada cel puțîn 3 arbori de la fereastră, sa trăiască într-un cartier cu minim 30% acoperire cu coronament vegetal (canopy) și sa aiba un spațiu verde public la maximum 300 m de locuința. Regulă traduce calitatea vieții verzi în ținte verificabile.');
       var _canopy = 18, _park300 = pop > 200000 ? 62 : 48;
       D.barChart([['Canopy actual', _canopy, [120, 130, 150]], ['Țintă 30%', 30, [34, 160, 90]], ['Pop. <300m parc', _park300, [59, 130, 246]], ['Țintă 100%', 100, [212, 175, 55]]], { title: 'Regulă 3-30-300 — situație actuală vs țintă (%)', h: 48, max: 100, vfmt: v => v + '%', source: 'Standard 3-30-300 (Konijnendijk 2021). Canopy estimat; acces parc din analiză izocrone.' });
-      D.h2('Modele urbane internaționale de referință');
+      D.h2('Modele urbane internăționale de referință');
       D.table(['Oraș / model', 'Principiu inovator', 'Aplicabilitate la ' + city.name], [
         ['Singapore — City în Nature', 'Densitate ridicată + verde integrat (Green Plot Ratio, grădini verticale)', 'Verde obligatoriu în dezvoltari noi; compensarea amprentei verzi'],
         ['Barcelona — Superilles (superblocks)', 'Recuperarea străzilor pentru oameni; tranzitul pe perimetru', 'Pilot în zone rezidențiale dense / centrale'],
@@ -645,7 +647,7 @@
         ['Indice de rezilienta climatică', 'expunerea la insulă de căldură + capacitatea de adaptare (verde, permeabilitate)'],
         ['Indice de conectivitate ecologică', 'continuitatea rețelei verzi-albastre pentru biodiversitate'],
       ]);
-      D.callout('Aport metodologic UrbanX', 'Combinarea modelelor internaționale cu simulări proprii (Monte Carlo, walkability, izocrone, indici sintetici) face din acest masterplan un instrument de planificare bazat pe dovezi, la nivelul celor mai avansate orașe — un standard de referință pentru urbanismul românesc.');
+      D.callout('Aport metodologic UrbanX', 'Combinarea modelelor internăționale cu simulări proprii (Monte Carlo, walkability, izocrone, indici sintetici) face din acest masterplan un instrument de planificare bazat pe dovezi, la nivelul celor mai avansate orașe — un standard de referință pentru urbanismul românesc.');
 
       D.chapter('Propuneri de organizare urbanistică');
       D.P('Organizarea urbanistică propusa structureaza teritoriul pe zone funcționale coerente, prioritizand densificarea calitativă, mixul funcțional și conceptul orașului de proximitate. Plansa de reglementari (zonificare funcțională) reda distribuția spațială a funcțiunilor.');
