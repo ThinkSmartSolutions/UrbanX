@@ -463,6 +463,33 @@
       D.P('Coordonarea revine unei structuri de management al mobilitatii din cadrul primariei (sau autoritatii metropolitane), cu raportare anuala publica. Participarea publica este obligatorie in toate fazele. PMUD se revizuieste la 5 ani sau la modificari majore ale contextului.');
 
       // ── CAPITOLE SUPLIMENTARE ────────────────────────────────────────────
+      D.chapter('Decarbonizarea transportului si tranzitia energetica');
+      D.P('Transportul rutier este una dintre principalele surse de emisii de gaze cu efect de sera la nivel urban si singurul sector in care emisiile au tendinta de crestere, in lipsa interventiilor. Decarbonizarea mobilitatii este esentiala pentru atingerea tintelor climatice nationale si europene (neutralitate climatica pana in 2050, reduceri intermediare pana in 2030). Strategia de decarbonizare combina trei parghii complementare: evitarea deplasarilor inutile (avoid), transferul modal catre moduri curate (shift) si imbunatatirea tehnologica a vehiculelor ramase (improve).');
+      D.P('Electrificarea flotei — transport public, vehicule municipale, taxiuri, logistica si autoturisme — elimina emisiile la nivel local (esential pentru calitatea aerului urban) si, in masura in care energia provine din surse regenerabile, reduce emisiile pe intregul ciclu de viata. Conditia este dezvoltarea infrastructurii de incarcare (publica si privata) si stimularea tranzitiei. Combustibilii alternativi (hidrogen, biocombustibili) pot completa solutiile pentru segmentele greu de electrificat.');
+      D.callout('Ierarhia decarbonizarii (Avoid-Shift-Improve)', 'Prioritatea este reducerea nevoii de deplasare (planificare urbana, digitalizare), apoi transferul catre moduri curate (TP, activ), si abia apoi imbunatatirea tehnologica (electrificare). Doar electrificarea, fara transfer modal, nu rezolva congestia si consumul de spatiu.');
+
+      D.chapter('Mobilitate, sanatate publica si calitatea vietii');
+      D.P('Mobilitatea influenteaza profund sanatatea publica, prin mai multe canale. Poluarea aerului generata de trafic (particule PM, NO2) este asociata cu boli respiratorii si cardiovasculare si cu decese premature. Zgomotul rutier afecteaza somnul, sanatatea cardiovasculara si bunastarea psihica. Accidentele rutiere produc decese si invaliditati. Sedentarismul, favorizat de dependenta de autoturism, contribuie la obezitate si boli cronice.');
+      D.P('Invers, o mobilitate durabila aduce beneficii directe de sanatate: mobilitatea activa (mers pe jos, bicicleta) asigura activitate fizica zilnica, reducand semnificativ riscul de boli cronice; reducerea traficului auto amelioreaza calitatea aerului si scade zgomotul; spatiul public redat oamenilor favorizeaza interactiunea sociala si sanatatea mintala. Astfel, investitia in mobilitate durabila este si o investitie in sanatatea publica, cu economii substantiale pentru sistemul sanitar.');
+
+      D.chapter('Mobilitate si dezvoltare economica');
+      D.P('Un sistem de mobilitate eficient sustine economia: asigura accesul fortei de munca la locurile de munca, conecteaza producatorii cu pietele, atrage investitii si talent prin calitatea vietii. Congestia, in schimb, genereaza pierderi economice (timp, combustibil, intarzieri) si reduce atractivitatea orasului. Accesibilitatea — nu doar viteza traficului — este indicatorul economic relevant: cati oameni si activitati pot fi atinse intr-un timp rezonabil, cu orice mod de transport.');
+      D.P('Mobilitatea durabila genereaza, de asemenea, beneficii economice directe: locuri de munca in transport public, infrastructura si servicii noi de mobilitate; cresterea valorii imobiliare in zonele bine deservite si pietonalizate; vitalitatea comerciala a strazilor prietenoase pentru pietoni (contrar perceptiei, pietonalizarea creste de regula cifra de afaceri a comertului local). Investitiile in mobilitate au un efect de levier asupra dezvoltarii urbane integrate.');
+
+      D.chapter('Schimbarea comportamentala si educatia pentru mobilitate');
+      D.P('Infrastructura si serviciile sunt necesare, dar nu suficiente: schimbarea obiceiurilor de mobilitate necesita si masuri de schimbare comportamentala (mobility management). Acestea includ campanii de informare si constientizare, planuri de mobilitate pentru institutii, scoli si companii, evenimente (saptamana mobilitatii, zile fara masini), stimulente pentru navetisti si educatie rutiera si de mobilitate durabila inca din scoala.');
+      D.P('Schimbarea comportamentala este deosebit de eficienta in momentele de tranzitie (mutare, schimbarea locului de munca, inceputul scolii), cand obiceiurile sunt mai usor de modificat. Combinarea masurilor "hard" (infrastructura) cu cele "soft" (informare, stimulente, reglementare) maximizeaza transferul modal. Acceptabilitatea publica a masurilor mai dificile (restrictii auto, tarifare) creste prin comunicare transparenta si prin oferirea de alternative atractive inainte de restrictii.');
+
+      D.chapter('Cadrul institutional si capacitatea de implementare');
+      D.P('Implementarea cu succes a PMUD depinde de cadrul institutional si de capacitatea administrativa. Mobilitatea urbana implica numerosi actori (primarie, operatori de transport, politie, administratori de drumuri, dezvoltatori, localitati periurbane), iar coordonarea lor este adesea deficitara. O structura dedicata de management al mobilitatii, cu competente si resurse clare, este esentiala pentru coerenta si continuitatea implementarii.');
+      D.bullets([
+        ['Structura de management al mobilitatii', 'unitate dedicata in primarie sau autoritate metropolitana de transport, cu personal calificat'],
+        ['Coordonare metropolitana', 'asociatie de dezvoltare intercomunitara pentru transport public si planificare integrata'],
+        ['Capacitate de atragere a fondurilor', 'pregatirea si managementul proiectelor cu finantare europeana'],
+        ['Date si monitorizare', 'sistem de colectare si analiza a datelor de mobilitate pentru decizii fundamentate'],
+        ['Cooperare si participare', 'mecanisme de cooperare cu operatorii, mediul de afaceri si cetatenii'],
+      ]);
+
       D.chapter('Integrarea cu dezvoltarea spatiala (TOD)');
       D.P('Mobilitatea si urbanismul sunt indisolubil legate: forma urbana determina cererea de deplasare, iar sistemul de transport modeleaza dezvoltarea. Dezvoltarea orientata catre transport public (Transit-Oriented Development, TOD) concentreaza densitati ridicate, mix functional si calitate a spatiului public in jurul nodurilor de transport, reducand nevoia de deplasari motorizate.');
       D.h2('Principii TOD aplicate');
