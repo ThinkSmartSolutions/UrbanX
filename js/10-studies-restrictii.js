@@ -212,7 +212,7 @@
     cy = body('Cel mai apropiat aeroport este ' + R.aeroport.nume + ', la cca. ' + (R.aeroport.dist != null ? R.aeroport.dist + ' km' : 'distanta necunoscuta') + '. ' + (R.aeroport.da ? 'Amplasamentul se afla in zona de servitute aeronautica: se aplica suprafetele de limitare a obstacolelor (OLS) si restrictii de inaltime conform RACR-CTA si HG 930/2016. Inaltimea constructiilor si macaralelor de santier necesita avizul AACR (Autoritatea Aeronautica Civila Romana).' : 'Amplasamentul nu pare a fi in zona de servitute aeronautica directa; pentru constructii inalte (>45 m) sau macarale, se verifica oricum cerintele AACR.'), 14, cy); cy += 1;
     cy = tblRow(['Element', 'Cerinta', 'Temei / aviz'], cy, true, [50, 50, 82]);
     [['Suprafete de limitare obstacole (OLS)', R.aeroport.da ? 'Aplicabile' : 'Verificare', 'RACR-CTA; ICAO Anexa 14'],
-    ['Inaltime maxima admisa', R.aeroport.da ? 'Limitata (functie de distanta/cota)', 'HG 930/2016'],
+    ['Inaltime maxima admisa', R.aeroport.da ? 'Limitata (functie de distanta/cota)' : 'Conform RACR', 'HG 930/2016'],
     ['Aviz AACR', R.aeroport.da ? 'OBLIGATORIU' : 'La H>45m sau macarale', 'AACR'],
     ].forEach(function (r) { cy = tblRow(r, cy, false, [50, 50, 82]); }); cy += 3;
     cy = sec('5.5 Obiective militare si servituti MApN', cy);
