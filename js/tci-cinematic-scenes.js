@@ -406,12 +406,20 @@ G._CinemaEngine={
     let features=[];
     if(geo?.features?.length>0){
       geo.features.slice(0,800).forEach(f=>{
-        const u=f.properties?.utr_cod||f.properties?.cod_utr||'';
-        const rv=reg[u]||{};
-        const cut=parseFloat(rv.CUT||rv.cut||0)||0;
-        const pr=u.startsWith('CC')||u.startsWith('CP')?0.95:u.startsWith('CM')||u.startsWith('CB')?0.75:u.startsWith('LC')||u.startsWith('LB')?0.58:u.startsWith('LA')||u.startsWith('LL')?0.42:u.startsWith('AI')||u.startsWith('AA')?0.65:0.30;
-        const hFinal=Math.max(4,(cut||pr*4.5)*(12+pred.hub*7));
-        const c=pr>0.80?'#ff3366':pr>0.65?'#ff8c00':pr>0.45?'#4a90d9':'#22c55e';
+        const p=f.properties||{};
+        // FIX: campul real din PUG e 'utr' (ex. CM, CC, CP, LL), NU utr_cod/cod_utr.
+        // Inainte toate zonele ieseau verzi joase (nediferentiate) — masa verde uniforma.
+        const u=String(p.zf||p.utr||p.utr_cod||p.cod_utr||'').trim().toUpperCase();
+        // reguli.json are structura {subzone:{COD:{...}}} — citim si forma plata.
+        const rv=(reg.subzone&&reg.subzone[u])||reg[u]||{};
+        const hmax=parseFloat(rv.hmax_m||rv.hmax||0)||0;
+        const cut=parseFloat(rv.cut_baza||rv.CUT||rv.cut||0)||0;
+        const hub=(pred&&pred.hub)||0.7;
+        const pr=u.startsWith('CC')||u.startsWith('CP')?0.95:u.startsWith('CM')||u.startsWith('CB')||u.startsWith('CA')?0.75:u.startsWith('LC')||u.startsWith('LB')?0.58:u.startsWith('LA')||u.startsWith('LL')?0.42:u.startsWith('A')?0.62:(u.startsWith('V')||u.startsWith('S'))?0.12:0.30;
+        // Inaltime REALA din regulament (hmax_m / CUT) daca exista, scalata cinematic
+        const base=hmax>0?hmax:(cut>0?cut*9:pr*40);
+        const hFinal=Math.max(3,base*(1.8+hub*0.6));
+        const c=pr>0.80?'#ff3366':pr>0.65?'#ff8c00':pr>0.45?'#4a90d9':pr>0.20?'#22c55e':'#15803d';
         features.push({...f,properties:{...f.properties,hFinal,h:0.5,c,pr}});
       });
     }else{
