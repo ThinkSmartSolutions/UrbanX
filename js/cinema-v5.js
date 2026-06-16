@@ -896,6 +896,8 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         lp('night');
         try{map.setPaintProperty('building-extrusion','fill-extrusion-height',0.5);}catch(e){}
         onIdle(function(){try{SE._add3DGrowth&&SE._add3DGrowth(map);}catch(e){}});
+        // PRESIUNE DENSITATE (heatmap proiectat) — apare progresiv sub masterplan
+        onIdle(function(){try{SE._addDensityPressure&&SE._addDensityPressure(map);}catch(e){}});
         // MASTERPLAN PROIECTAT desenat pe harta: centura, tren metropolitan,
         // cartiere noi, parc, reconversie, pasaje — peste fondul construit.
         setTimeout(function(){ if(SE._playing){ try{SE._addMasterplanProjection&&SE._addMasterplanProjection(map);}catch(e){} } },2800);
@@ -909,6 +911,8 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
       case 'b6s3':
         lp('dusk');
         onIdle(function(){try{SE._addExpansionRings&&SE._addExpansionRings(map);}catch(e){}});
+        // LIMITA INTRAVILAN: actual (auriu) vs proiectat 2055 (rosu punctat)
+        onIdle(function(){try{SE._addFutureIntravilan&&SE._addFutureIntravilan(map);}catch(e){}});
         // Zoom la nivel oras - inelele sa fie vizibile dar nu sa acopere tot judetul
         fly([cx,cy],12.5,48,-5,4000,0,'dusk');
         fly(Z.C,13.5,55,20,6000,9000,'dusk');
@@ -922,6 +926,8 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         setTimeout(function(){
           if(!SE._playing) return;
           try{SE._addTrafficPulse&&SE._addTrafficPulse(map);}catch(e){}
+          // PRESIUNE TRAFIC (heatmap proiectat) pe nodurile critice — apare progresiv
+          try{SE._addTrafficPressure&&SE._addTrafficPressure(map);}catch(e){}
           if(D.urban&&D.urban.length){ addLine('v9-urb',D.urban); _pulse(map,'v9-urb','line-opacity',0.3,0.9,10); }
         },1500);
         fly(Z.C,13.5,55,15,6000,9000,'night');
@@ -1647,6 +1653,8 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         var tE=1-Math.pow(1-tG,3);
         // _updateGrowth la fiecare frame — inaltimile cresc vizibil
         try{ if(SE._updateGrowth) SE._updateGrowth(tE); }catch(e){}
+        // Presiunea de densitate apare progresiv (heatmap), dupa ce cresc cladirile
+        try{ if(map.getLayer('v8-dp-l')) map.setPaintProperty('v8-dp-l','heatmap-opacity', Math.max(0,Math.min(0.7,(t-0.35)*1.4))); }catch(e){}
         // Etapizare masterplan — elementele proiectate apar pe ani (2025->2055)
         try{ if(SE._revealMasterplan) SE._revealMasterplan(tE); }catch(e){}
         // Cladirile Mapbox standard ascunse — bara 3D PUG le inlocuiesc
@@ -1710,6 +1718,8 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
       case 'b7s1':
         // _updateTraffic la fiecare frame - animeaza vehiculele pe retea
         try{if(SE._updateTraffic) SE._updateTraffic(t);}catch(e){}
+        // Presiunea de trafic creste progresiv pe nodurile critice (heatmap)
+        try{ if(map.getLayer('v8-tp2-l')) map.setPaintProperty('v8-tp2-l','heatmap-opacity', Math.max(0,Math.min(0.8,(t-0.25)*1.3))); }catch(e){}
         titlu('Trafic & Congestie','Flux real OSM \u00b7 Noduri critice \u00b7 Saturatie'); linie();
         cifra(N2(pred.mot24),'Vehicule/1000 loc',(pred.mot24||380)>450?'#ef4444':'#f59e0b');
         cifra2(N2(pred.fluxOra)+' veh/h','Flux ora varf estimat');

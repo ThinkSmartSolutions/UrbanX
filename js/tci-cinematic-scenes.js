@@ -848,6 +848,82 @@ G._CinemaEngine={
     if(this._mpMarkers){ this._mpMarkers.forEach(m=>{ if(m.el){ const o=(t>=m.ph)?'1':'0'; if(m.el.style.opacity!==o) m.el.style.opacity=o; } }); }
   },
 
+  // Centroid ieftin (medie ring) — evitam turf per-feature pe mii de poligoane
+  _cheapCentroid(g){
+    try{ let c=g.coordinates;
+      while(Array.isArray(c)&&Array.isArray(c[0])&&Array.isArray(c[0][0])) c=c[0];
+      let sx=0,sy=0,n=0;
+      for(let i=0;i<c.length;i++){ if(Array.isArray(c[i])&&typeof c[i][0]==='number'){sx+=c[i][0];sy+=c[i][1];n++;} }
+      return n?[sx/n,sy/n]:null;
+    }catch(e){return null;}
+  },
+
+  // ── PRESIUNE DENSITATE LOCUITORI (proiectata) — heatmap din zonele PUG ponderate
+  // pe potentialul de densificare. Rosu = presiune maxima. Apare progresiv.
+  _addDensityPressure(map){
+    const geo=this._pugGeo, cx=this._city?.lon||25, cy=this._city?.lat||45.5;
+    let pts=[];
+    if(geo&&geo.features&&geo.features.length){
+      geo.features.slice(0,900).forEach(f=>{
+        const u=String((f.properties||{}).utr||'').toUpperCase();
+        const w=u.startsWith('CC')||u.startsWith('CP')?1.0:u.startsWith('CM')||u.startsWith('CA')||u.startsWith('CB')?0.78:u.startsWith('LC')||u.startsWith('LB')?0.55:u.startsWith('LA')||u.startsWith('LL')?0.35:0.12;
+        const c=this._cheapCentroid(f.geometry); if(!c)return;
+        pts.push({type:'Feature',geometry:{type:'Point',coordinates:c},properties:{w:w}});
+      });
+    }
+    if(!pts.length){ for(let i=0;i<48;i++){const ang=i/48*Math.PI*2,r=0.015+(i%6)*0.007;pts.push({type:'Feature',geometry:{type:'Point',coordinates:[cx+Math.cos(ang)*r*1.5,cy+Math.sin(ang)*r]},properties:{w:1-(i%6)*0.15}});} }
+    this._safeAdd(map,'v8-dp',{type:'geojson',data:{type:'FeatureCollection',features:pts}},{
+      id:'v8-dp-l',type:'heatmap',source:'v8-dp',
+      paint:{'heatmap-weight':['get','w'],'heatmap-intensity':1.3,'heatmap-radius':32,'heatmap-opacity':0,
+        'heatmap-color':['interpolate',['linear'],['heatmap-density'],0,'rgba(0,0,0,0)',0.25,'rgba(34,197,94,0.45)',0.5,'rgba(245,158,11,0.7)',0.78,'rgba(239,68,68,0.85)',1,'rgba(255,0,51,0.95)']}
+    });
+  },
+
+  // ── PRESIUNE TRAFIC (proiectata) — heatmap pe noduri critice: centru + intersectii
+  // radiale × centura. Rosu = congestie recurenta proiectata.
+  _addTrafficPressure(map){
+    const cx=this._city?.lon||25, cy=this._city?.lat||45.5;
+    let pts=[{type:'Feature',geometry:{type:'Point',coordinates:[cx,cy]},properties:{w:1}}];
+    [0,45,90,135,180,225,270,315].forEach(deg=>{
+      const a=deg*Math.PI/180;
+      pts.push({type:'Feature',geometry:{type:'Point',coordinates:[cx+Math.cos(a)*0.018*1.5,cy+Math.sin(a)*0.018]},properties:{w:0.72}});
+      pts.push({type:'Feature',geometry:{type:'Point',coordinates:[cx+Math.cos(a)*0.045*1.5,cy+Math.sin(a)*0.045]},properties:{w:0.5}});
+    });
+    this._safeAdd(map,'v8-tp2',{type:'geojson',data:{type:'FeatureCollection',features:pts}},{
+      id:'v8-tp2-l',type:'heatmap',source:'v8-tp2',
+      paint:{'heatmap-weight':['get','w'],'heatmap-intensity':1.4,'heatmap-radius':40,'heatmap-opacity':0,
+        'heatmap-color':['interpolate',['linear'],['heatmap-density'],0,'rgba(0,0,0,0)',0.3,'rgba(59,130,246,0.4)',0.55,'rgba(245,158,11,0.7)',0.8,'rgba(239,68,68,0.9)',1,'rgba(255,0,51,0.95)']}
+    });
+  },
+
+  // ── LIMITA INTRAVILAN: actual (hull din PUG) vs PROIECTAT 2055 (buffer extins) ──
+  _addFutureIntravilan(map){
+    const geo=this._pugGeo, cx=this._city?.lon||25, cy=this._city?.lat||45.5;
+    let curHull=null;
+    try{
+      if(geo&&geo.features&&typeof turf!=='undefined'){
+        const pp=geo.features.slice(0,1500).map(f=>{const c=this._cheapCentroid(f.geometry);return c?turf.point(c):null;}).filter(Boolean);
+        if(pp.length>=3) curHull=turf.convex(turf.featureCollection(pp));
+      }
+    }catch(e){}
+    if(!curHull){ const r=0.05,ring=[];for(let i=0;i<=64;i++){const a=i/64*Math.PI*2;ring.push([cx+Math.cos(a)*r*1.5,cy+Math.sin(a)*r]);}curHull={type:'Feature',geometry:{type:'Polygon',coordinates:[ring]},properties:{}}; }
+    let future=null; try{ future=turf.buffer(curHull,1.4,{units:'kilometers'}); }catch(e){}
+    // umplutura subtila a benzii de expansiune
+    if(future){
+      this._safeAdd(map,'v8-fi-fut',{type:'geojson',data:future},{
+        id:'v8-fi-fut-fill',type:'fill',source:'v8-fi-fut',paint:{'fill-color':'#ef4444','fill-opacity':0.10}
+      });
+      try{ if(!map.getLayer('v8-fi-fut-l')) map.addLayer({id:'v8-fi-fut-l',type:'line',source:'v8-fi-fut',paint:{'line-color':'#ef4444','line-width':3,'line-opacity':0.92,'line-dasharray':[3,2]},layout:{'line-cap':'round'}}); }catch(e){}
+    }
+    this._safeAdd(map,'v8-fi-cur',{type:'geojson',data:curHull},{
+      id:'v8-fi-cur-l',type:'line',source:'v8-fi-cur',paint:{'line-color':'#D4AF37','line-width':3.5,'line-opacity':0.95},layout:{'line-cap':'round'}
+    });
+    this._cinLabels(map,[
+      {lon:cx, lat:cy+0.052, color:'#D4AF37', icon:'▰', title:'INTRAVILAN ACTUAL', sub:'limita azi'},
+      {lon:cx, lat:cy+0.078, color:'#ef4444', icon:'⇢', title:'LIMITA PROIECTATA 2055', sub:'expansiune controlata'}
+    ]);
+  },
+
   // Protejeaza canvas-ul — il re-adauga daca e sters de platforma
   _guardCanvas(){
     if(this._canvasObserver)this._canvasObserver.disconnect();
@@ -871,6 +947,7 @@ G._CinemaEngine={
      'v8-fl-l','v8-fl','v8-aut-l','v8-aut','v8-ex-line','v8-ex-l','v8-ex','v8-inf-l','v8-inf',
      'v8-mp-ring-l','v8-mp-ring','v8-mp-rail-l','v8-mp-rail','v8-mp-stn-l','v8-mp-stn',
      'v8-mp-zone-line','v8-mp-zone-l','v8-mp-zone','v8-mp-green-l','v8-mp-green','v8-mp-pass-l','v8-mp-pass',
+     'v8-dp-l','v8-dp','v8-tp2-l','v8-tp2','v8-fi-cur-l','v8-fi-cur','v8-fi-fut-fill','v8-fi-fut-l','v8-fi-fut',
      // cleanup v6/v7 layers
      'v6-gr-l','v6-gr','v6-bld-l','v6-bld','v6-den-l','v6-den','v6-tr-l','v6-tr',
      'v7-gr-l','v7-gr','v7-bld-l','v7-bld','v7-den-l','v7-den','v7-tr-l','v7-tr',
