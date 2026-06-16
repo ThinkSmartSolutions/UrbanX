@@ -889,12 +889,14 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         lp('night');
         try{map.setPaintProperty('building-extrusion','fill-extrusion-height',0.5);}catch(e){}
         onIdle(function(){try{SE._add3DGrowth&&SE._add3DGrowth(map);}catch(e){}});
+        // MASTERPLAN PROIECTAT desenat pe harta: centura, tren metropolitan,
+        // cartiere noi, parc, reconversie, pasaje — peste fondul construit.
+        setTimeout(function(){ if(SE._playing){ try{SE._addMasterplanProjection&&SE._addMasterplanProjection(map);}catch(e){} } },2800);
         try{map.setPaintProperty('building-extrusion','fill-extrusion-color',['interpolate',['linear'],['get','height'],0,'#14532d',6,'#15803d',15,'#f59e0b',28,'#ef4444']);}catch(e){}
-        // Zoom aproape - cladirile 3D trebuie sa se vada
-        fly(Z.CBD,15.5,68,20,4000,0,'night');
-        rot(18,0.012);
-        fly(Z.NV,15.5,70,55,7000,11000,'night');
-        fly(Z.SE2,15.0,68,135,7000,19000,'dusk');
+        // Vedere larga — sa se vada TOT orasul proiectat (centura + retea), apoi push-in
+        fly(Z.C,12.6,54,0,4500,0,'night');
+        rot(10,0.006);
+        fly(Z.C,13.4,60,45,9000,12000,'night');
         break;
 
       case 'b6s3':
@@ -1651,7 +1653,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
           ctx.letterSpacing='0.05em';
           ctx.fillText('UNITATI LOCATIVE NECESARE '+_E(),W*0.04,H*0.906);
           cifra2(N2(pred.recHa||200)+' ha','Potential reconversie','#f59e0b');
-          if(tE>0.35) narativ('ANIMATIE: cladirile cresc gradual = proiectia urbana '+_S()+'\u2192'+_E()+'. VERDE=densitate mica/potential densificare. GALBEN=medie. ROSU=suprasaturat. Coridoarele reale urmeaza axele TP si autostrazile noi planificate. '+N2(pred.defLoc||5000)+' unitati necesare pana in '+_E()+'.');
+          if(tE>0.35) narativ('PROIECTAT pe harta: \u2b57 CENTURA ocolitoare (devieaza tranzitul), \ud83d\ude86 TREN METROPOLITAN (3 linii + statii), \ud83c\udfd8 CARTIERE NOI la periferie, \ud83c\udf33 PARC metropolitan, \ud83c\udfed RECONVERSIE industriala, \u2b06 PASAJE denivelate. Barele 3D = densitate: VERDE mica / GALBEN medie / ROSU suprasaturat. '+N2(pred.defLoc||5000)+' unitati necesare pana in '+_E()+'.');
           ctx.globalAlpha=1;
         }
         concluzie('Coridoarele reale = axa TP principal + proximitate autostrada + reconversie industriala');

@@ -710,6 +710,78 @@ G._CinemaEngine={
     this._cinLabels(map, items.map(p=>({lon:cx+p.dx,lat:cy+p.dy,color:p.color,icon:p.icon,title:p.title,sub:p.sub})));
   },
 
+  // ── MASTERPLAN PROIECTAT 30 ANI — urbanism DESENAT ca geometrie reala pe harta:
+  // centura ocolitoare, retea tren metropolitan + statii, cartiere noi, parc,
+  // reconversie industriala, pasaje denivelate. Dimensionat din extinderea reala UAT.
+  _addMasterplanProjection(map){
+    if(!map) return;
+    const cx=this._city?.lon||25, cy=this._city?.lat||45.5;
+    const pred=this._pred||{};
+    let R=0.05;
+    try{
+      if(this._pugGeo&&this._pugGeo.features&&typeof turf!=='undefined'){
+        const bb=turf.bbox(this._pugGeo);
+        R=Math.max(0.025, Math.min(0.13, Math.max(bb[2]-bb[0], bb[3]-bb[1])*0.5));
+      }
+    }catch(e){}
+    const ls=1/Math.max(0.3,Math.cos(cy*Math.PI/180));
+    const P=(ang,rad)=>[cx+Math.cos(ang)*rad*ls, cy+Math.sin(ang)*rad];
+    const ringR=R*1.28;
+
+    // 1. CENTURA OCOLITOARE
+    const ring=[]; for(let i=0;i<=128;i++){ring.push(P((i/128)*Math.PI*2, ringR));}
+    this._safeAdd(map,'v8-mp-ring',{type:'geojson',data:{type:'Feature',geometry:{type:'LineString',coordinates:ring},properties:{}}},{
+      id:'v8-mp-ring-l',type:'line',source:'v8-mp-ring',
+      paint:{'line-color':'#f59e0b','line-width':5,'line-opacity':0.92,'line-dasharray':[2,1.2]},layout:{'line-cap':'round'}
+    });
+
+    // 2. RETEA TREN METROPOLITAN + statii
+    const railDeg=[18,78,138], railFeats=[], stnFeats=[];
+    railDeg.forEach(d=>{
+      const a=d*Math.PI/180;
+      railFeats.push({type:'Feature',geometry:{type:'LineString',coordinates:[P(a,ringR*0.98),[cx,cy],P(a+Math.PI,ringR*0.98)]},properties:{}});
+      for(let s=1;s<=2;s++){ stnFeats.push({type:'Feature',geometry:{type:'Point',coordinates:P(a,ringR*0.98*s/2.2)},properties:{}}); stnFeats.push({type:'Feature',geometry:{type:'Point',coordinates:P(a+Math.PI,ringR*0.98*s/2.2)},properties:{}}); }
+    });
+    stnFeats.push({type:'Feature',geometry:{type:'Point',coordinates:[cx,cy]},properties:{}});
+    this._safeAdd(map,'v8-mp-rail',{type:'geojson',data:{type:'FeatureCollection',features:railFeats}},{
+      id:'v8-mp-rail-l',type:'line',source:'v8-mp-rail',
+      paint:{'line-color':'#a855f7','line-width':3.5,'line-opacity':0.92,'line-dasharray':[1,1]},layout:{'line-cap':'round'}
+    });
+    this._safeAdd(map,'v8-mp-stn',{type:'geojson',data:{type:'FeatureCollection',features:stnFeats}},{
+      id:'v8-mp-stn-l',type:'circle',source:'v8-mp-stn',
+      paint:{'circle-radius':5,'circle-color':'#ffffff','circle-stroke-width':3,'circle-stroke-color':'#a855f7'}
+    });
+
+    // 3. ZONE proiectate (cartiere, parc, reconversie) ca poligoane
+    const blob=(ang,rad,size)=>{const c=P(ang,rad),pts=[];for(let i=0;i<=28;i++){const a=(i/28)*Math.PI*2;const rr=size*(1+0.16*Math.sin(a*3+ang));pts.push([c[0]+Math.cos(a)*rr*ls,c[1]+Math.sin(a)*rr]);}return [pts];};
+    const zones=[
+      {ang:50*Math.PI/180,  rad:R*0.95, size:R*0.22, c:'#3b82f6', t:'CARTIER NOU NORD-EST',    sub:(Math.round((pred.locuinteTotale||4500)/3)||1500)+' locuinte', icon:'🏘'},
+      {ang:200*Math.PI/180, rad:R*0.92, size:R*0.20, c:'#3b82f6', t:'CARTIER NOU SUD-VEST',    sub:'mixt rezidential',  icon:'🏘'},
+      {ang:130*Math.PI/180, rad:R*0.70, size:R*0.18, c:'#22c55e', t:'PARC METROPOLITAN',       sub:'verde 3-30-300',    icon:'🌳'},
+      {ang:330*Math.PI/180, rad:R*0.55, size:R*0.16, c:'#9ca3af', t:'RECONVERSIE INDUSTRIALA', sub:'brownfield → mixt', icon:'🏭'},
+    ];
+    this._safeAdd(map,'v8-mp-zone',{type:'geojson',data:{type:'FeatureCollection',features:zones.map(z=>({type:'Feature',geometry:{type:'Polygon',coordinates:blob(z.ang,z.rad,z.size)},properties:{c:z.c}}))}},{
+      id:'v8-mp-zone-l',type:'fill',source:'v8-mp-zone',
+      paint:{'fill-color':['get','c'],'fill-opacity':0.42}
+    });
+    if(!map.getLayer('v8-mp-zone-line')){try{map.addLayer({id:'v8-mp-zone-line',type:'line',source:'v8-mp-zone',paint:{'line-color':['get','c'],'line-width':2.5,'line-opacity':0.95}});}catch(e){}}
+
+    // 4. PASAJE denivelate (centura × cale ferata)
+    this._safeAdd(map,'v8-mp-pass',{type:'geojson',data:{type:'FeatureCollection',features:railDeg.map(d=>({type:'Feature',geometry:{type:'Point',coordinates:P(d*Math.PI/180,ringR)},properties:{}}))}},{
+      id:'v8-mp-pass-l',type:'circle',source:'v8-mp-pass',
+      paint:{'circle-radius':7,'circle-color':'#ef4444','circle-stroke-width':2,'circle-stroke-color':'#ffffff','circle-opacity':0.95}
+    });
+
+    // 5. ETICHETE MARI
+    const kmCentura=Math.round(2*Math.PI*ringR*111*Math.cos(cy*Math.PI/180));
+    const labels=[
+      {lon:P(270*Math.PI/180,ringR)[0], lat:P(270*Math.PI/180,ringR)[1], color:'#f59e0b', icon:'⭗', title:'CENTURA OCOLITOARE', sub:kmCentura+' km propusi'},
+      {lon:P(78*Math.PI/180,ringR*0.55)[0], lat:P(78*Math.PI/180,ringR*0.55)[1], color:'#a855f7', icon:'🚆', title:'TREN METROPOLITAN', sub:'3 linii + statii'},
+      {lon:P(18*Math.PI/180,ringR)[0], lat:P(18*Math.PI/180,ringR)[1], color:'#ef4444', icon:'⬆', title:'PASAJ DENIVELAT', sub:'centura × cale ferata'},
+    ].concat(zones.map(z=>({lon:P(z.ang,z.rad)[0], lat:P(z.ang,z.rad)[1], color:z.c, icon:z.icon, title:z.t, sub:z.sub})));
+    this._cinLabels(map, labels);
+  },
+
   // Protejeaza canvas-ul — il re-adauga daca e sters de platforma
   _guardCanvas(){
     if(this._canvasObserver)this._canvasObserver.disconnect();
@@ -731,6 +803,8 @@ G._CinemaEngine={
     ['v8-gr-l','v8-gr','v8-bld-l','v8-bld','v8-ht-l','v8-ht',
      'v8-tr-l','v8-tr','v8-tp-l','v8-tp','v8-sei-l','v8-sei','v8-risc-l','v8-risc',
      'v8-fl-l','v8-fl','v8-aut-l','v8-aut','v8-ex-line','v8-ex-l','v8-ex','v8-inf-l','v8-inf',
+     'v8-mp-ring-l','v8-mp-ring','v8-mp-rail-l','v8-mp-rail','v8-mp-stn-l','v8-mp-stn',
+     'v8-mp-zone-line','v8-mp-zone-l','v8-mp-zone','v8-mp-pass-l','v8-mp-pass',
      // cleanup v6/v7 layers
      'v6-gr-l','v6-gr','v6-bld-l','v6-bld','v6-den-l','v6-den','v6-tr-l','v6-tr',
      'v7-gr-l','v7-gr','v7-bld-l','v7-bld','v7-den-l','v7-den','v7-tr-l','v7-tr',
