@@ -43,7 +43,7 @@
       const pdf = D.pdf, W = 210, H = 297, m = ctx.mob, city = ctx.city;
       pdf.setFillColor(7, 26, 18); pdf.rect(0, 0, W, H, 'F');
       pdf.setFillColor(34, 160, 90); pdf.rect(0, 0, W, 4, 'F'); pdf.rect(0, H - 4, W, 4, 'F');
-      pdf.setTextColor(120, 230, 170); pdf.setFont('helvetica', 'bold'); pdf.setFontSize(9);
+      pdf.setTextColor(120, 230, 170); pdf.setFont('DejaVuRO', 'bold'); pdf.setFontSize(9);
       pdf.text('URBANX · TEMPORAL CITY INTELLIGENCE', W / 2, 42, { align: 'center' });
       pdf.setTextColor(255, 255, 255); pdf.setFontSize(34); pdf.text('PMUD', W / 2, 70, { align: 'center' });
       pdf.setFontSize(15); pdf.text(S2('PLAN DE MOBILITATE Urbană Durabilă'), W / 2, 82, { align: 'center' });
@@ -54,14 +54,14 @@
        ['Distribuție modala (auto/TP/activ):', m.modalAct[0] + '% / ' + m.modalAct[1] + '% / ' + m.modalAct[2] + '%'],
        ['Țintă 2030 (auto/TP/activ):', m.modalTinta[0] + '% / ' + m.modalTinta[1] + '% / ' + m.modalTinta[2] + '%'],
        ['Rețea stradală:', N(m.strRet) + ' km'], ['Emisii CO2 transport:', m.co2cap + ' t/cap/an']
-      ].forEach((r, i) => { pdf.setTextColor(150, 190, 170); pdf.setFont('helvetica', 'normal'); pdf.setFontSize(8); pdf.text(S2(r[0]), 24, 122 + i * 11);
-        pdf.setTextColor(255, 255, 255); pdf.setFont('helvetica', 'bold'); pdf.setFontSize(9.5); pdf.text(S2(String(r[1])), 118, 122 + i * 11); });
+      ].forEach((r, i) => { pdf.setTextColor(150, 190, 170); pdf.setFont('DejaVuRO', 'normal'); pdf.setFontSize(8); pdf.text(S2(r[0]), 24, 122 + i * 11);
+        pdf.setTextColor(255, 255, 255); pdf.setFont('DejaVuRO', 'bold'); pdf.setFontSize(9.5); pdf.text(S2(String(r[1])), 118, 122 + i * 11); });
       // strip surse
-      pdf.setTextColor(120, 150, 135); pdf.setFont('helvetica', 'bold'); pdf.setFontSize(6.5); pdf.text('SURSE OFICIALE INTEGRATE', W / 2, 205, { align: 'center' });
+      pdf.setTextColor(120, 150, 135); pdf.setFont('DejaVuRO', 'bold'); pdf.setFontSize(6.5); pdf.text('SURSE OFICIALE INTEGRATE', W / 2, 205, { align: 'center' });
       const srcs = ['INS TEMPO', 'Eurostat', 'EEA', 'OpenStreetMap', 'OpenAQ', 'INFP', 'Ghid SUMP/ELTIS', 'MDLPA']; let bx = 0; pdf.setFontSize(7);
       const widths = srcs.map(s => pdf.getTextWidth(S2(s)) + 8); const totalW = widths.reduce((a, b) => a + b + 3, 0); bx = (W - totalW) / 2;
-      srcs.forEach((s, i) => { pdf.setFillColor(15, 45, 32); pdf.setDrawColor(34, 160, 90); pdf.setLineWidth(0.2); pdf.roundedRect(bx, 209, widths[i], 6, 1.2, 1.2, 'FD'); pdf.setTextColor(160, 220, 185); pdf.setFont('helvetica', 'normal'); pdf.text(S2(s), bx + 4, 213); bx += widths[i] + 3; });
-      pdf.setTextColor(120, 150, 135); pdf.setFont('helvetica', 'normal'); pdf.setFontSize(7);
+      srcs.forEach((s, i) => { pdf.setFillColor(15, 45, 32); pdf.setDrawColor(34, 160, 90); pdf.setLineWidth(0.2); pdf.roundedRect(bx, 209, widths[i], 6, 1.2, 1.2, 'FD'); pdf.setTextColor(160, 220, 185); pdf.setFont('DejaVuRO', 'normal'); pdf.text(S2(s), bx + 4, 213); bx += widths[i] + 3; });
+      pdf.setTextColor(120, 150, 135); pdf.setFont('DejaVuRO', 'normal'); pdf.setFontSize(7);
       pdf.text(S2('Document de fundamentare (pre-PMUD). PMUD final: model de trafic calibrat de consultant atestat, anchete de mobilitate, aviz CTATU.'), W / 2, H - 18, { align: 'center', maxWidth: W - 30 });
       pdf.text(S2('Generat: ' + new Date().toLocaleDateString('ro-RO') + ' · UrbanX'), W / 2, H - 10, { align: 'center' });
     }
@@ -108,7 +108,7 @@
       ], [50, 64, 30, 30], { boldFirst: true });
       D.source('Estimare pe bază rețelei OSM și a normativelor de ierarhizare (OG 43/1997). Lungimile se confirmă cu inventarul administratorului.');
       D.h2('Transport public');
-      D.P('Transportul public este coloană vertebrală a mobilității durabile. Performanță sa depinde de acoperirea teritoriala, frecvență, viteză comercială, confort și integrarea tarifara. Pentru ' + city.name + ', acoperirea estimată este de ' + m.accLatPct + '% din populație la mai puțin de 300 m de o stație, cu o viteză comercială de cca. ' + m.vitezaTP + ' km/h, afectată de congestie în absența benzilor dedicate.');
+      D.P('Transportul public este coloană vertebrală a mobilității durabile. Performanță sa depinde de acoperirea teritoriala, frecvență, viteză comercială, confort și integrarea tarifara. Pentru ' + city.name + ', acoperirea estimată este de ' + m.accLatPct + '% din populație la mai puțîn de 300 m de o stație, cu o viteză comercială de cca. ' + m.vitezaTP + ' km/h, afectată de congestie în absența benzilor dedicate.');
       D.table(['Indicator transport public', 'Valoare estimată', 'Reper de buna practică'], [
         ['Stații', N(m.statiiTP), '-'],
         ['Acoperire (<300 m)', m.accLatPct + '% populație', '>= 90%'],
@@ -142,7 +142,7 @@
         ['Autoturism', 'întreg orașul (în afară varfurilor)', 'zonă metropolitană'],
       ], [44, 65, 65], { boldFirst: true, fs: 7 });
       D.h2('Navetă și zonă urbană funcțională');
-      D.P('Fluxurile zilnice de navetă între ' + city.name + ' și localitatile periurbane sunt semnificative și predominant auto, în absența unui transport public metropolitan integrat. Estimarea navetei nete (intrări minus ieșiri) indică rolul de pol de locuri de muncă al orașului. Gestionarea navetei prin transport public metropolitan și park&ride este esențială pentru decongestionarea intrarilor în oraș.');
+      D.P('Fluxurile zilnice de navetă între ' + city.name + ' și localitatile periurbane sunt semnificative și predominant auto, în absența unui transport public metropolitan integrat. Estimarea navetei nete (întrări minus ieșiri) indică rolul de pol de locuri de muncă al orașului. Gestionarea navetei prin transport public metropolitan și park&ride este esențială pentru decongestionarea intrarilor în oraș.');
       D.h2('Grupuri vulnerabile și echitate în mobilitate');
       D.P('Mobilitatea echitabilă asigură acces pentru toti: persoane cu mobilitate redusă, vârstnici, copii, persoane fără autoturism și cu venituri reduse. Accesibilitatea universală (rampe, stații adaptate, informare accesibilă), siguranță și tariful accesibil al transportului public sunt condiții ale incluziunii. Aproximativ o treime din populație nu conduce (copii, vârstnici, persoane fără permis), depinzând de alternative la autoturism.');
       D.sourceBadges(['INS — navetă', 'OSM — rețea', 'Analiză izocrone UrbanX', 'HCM (LOS)']);
@@ -161,13 +161,13 @@
         ['Pe jos', 'Pietonalizari, oraș 15 min', 'Spațiu cedat mașinilor, nesiguranță'],
       ], [22, 76, 76], { fs: 6.6, boldFirst: true });
       D.h2('Analiză coridoarelor strategice de mobilitate');
-      D.P('Coridoarele majore de mobilitate (axele radiale către centru și inelele de circulație) concentrează cea mai mare parte a deplasarilor și a congestiei. Interventiile prioritare (benzi dedicate TP, piste velo, management trafic) se concentrează pe aceste coridoare.');
+      D.P('Coridoarele majore de mobilitate (axele radiale către centru și inelele de circulăție) concentrează cea mai mare parte a deplasarilor și a congestiei. Interventiile prioritare (benzi dedicate TP, piste velo, management trafic) se concentrează pe aceste coridoare.');
       const corid = [
         ['Coridor radial Nord', 'Ridicat', 'LOS D-E în varf', 'Bandă dedicată TP + pistă velo'],
         ['Coridor radial Sud', 'Ridicat', 'Congestie acces centru', 'Prioritizare TP + park&ride'],
         ['Coridor radial Est', 'Mediu-ridicat', 'Trafic de tranzit', 'Reproiectare profil + velo'],
         ['Coridor radial Vest', 'Mediu', 'Acces zone industriale', 'Management marfă + TP'],
-        ['Inel de circulație', 'Ridicat', 'Tranzit + navetă', 'Optimizare noduri + ITS'],
+        ['Inel de circulăție', 'Ridicat', 'Tranzit + navetă', 'Optimizare noduri + ITS'],
         ['Axa centrală (oraș 15 min)', 'Mediu', 'Conflict pietoni-auto', 'Pietonalizare + calmare trafic'],
       ];
       D.table(['Coridor', 'Cerere', 'Disfunctionalitate', 'Intervenție propusa'], corid, [44, 28, 44, 58], { fs: 6.8, boldFirst: true });
@@ -177,9 +177,9 @@
       D.chapter('Analiză aprofundata a transportului public');
       D.h2('Rețeaua și ofertă de transport public');
       D.P('Transportul public reprezintă coloană vertebrală a unui sistem de mobilitate durabilă, fiind singurul mod capabil sa deserveasca eficient cererea de masa din zonele urbane dense, cu un consum de spațiu și o amprentă de carbon pe pasager-kilometru semnificativ mai reduse decât autoturismul individual. Pentru ' + city.name + ', rețeaua de transport public deserveste cca. ' + m.accLatPct + '% din populație în raza de 300 m de o stație, printr-un sistem estimat la ' + N(m.statiiTP) + ' de stații. Calitatea ofertei — frecvență, viteză comercială, fiabilitatea, confortul și integrarea tarifara — determină în mod direct atractivitatea sa față de autoturism.');
-      D.P('Viteză comercială actuală, estimată la ' + m.vitezaTP + ' km/h, este penalizata de circulația în trafic mixt, fără benzi dedicate și fără prioritizare semaforica. Această o face necompetitiva față de autoturism pe coridoarele congestionate, generând un cerc vicios: viteză mica reduce atractivitatea, scăderea numărului de călători reduce veniturile și justificarea investițiilor, iar subfinantarea degradeaza serviciul. Inversarea acestui cerc necesită intervenții integrate: infrastructură prioritară, flotă modernă și o politică tarifara atractivă.');
+      D.P('Viteză comercială actuală, estimată la ' + m.vitezaTP + ' km/h, este penalizata de circulăția în trafic mixt, fără benzi dedicate și fără prioritizare semaforica. Această o face necompetitiva față de autoturism pe coridoarele congestionate, generând un cerc vicios: viteză mica reduce atractivitatea, scăderea numărului de călători reduce veniturile și justificarea investițiilor, iar subfinantarea degradeaza serviciul. Inversarea acestui cerc necesită intervenții integrate: infrastructură prioritară, flotă modernă și o politică tarifara atractivă.');
       D.h2('Performanță și indicatori operationali');
-      D.table(['Indicator operațional', 'Valoare estimată', 'Țintă de buna practică'], [
+      D.table(['Indicator operățional', 'Valoare estimată', 'Țintă de buna practică'], [
         ['Viteză comercială', m.vitezaTP + ' km/h', '>= 20 km/h (benzi dedicate)'],
         ['Frecvență în varf (coridoare)', '10-20 min', '<= 10 min'],
         ['Acoperire teritoriala (<300 m)', m.accLatPct + '%', '>= 90%'],
@@ -195,7 +195,7 @@
       D.P('Mersul pe jos este modul de deplasare universal, gratuit, sănătos și cu zero emisii, prezent la începutul și sfârșitul oricărei deplasari (inclusiv cu transport public). Calitatea infrastructurii pietonale — lățimea și continuitatea trotuarelor, siguranță trecerilor, accesibilitatea pentru persoane cu mobilitate redusă, umbrirea și confortul — determină ponderea deplasarilor pe jos. În orașele compacte, deplasarile sub 1-2 km, majoritare, pot fi realizate pe jos daca mediul construit este prietenos.');
       D.P('Bariere frecvente în calea mersului pe jos sunt: trotuarele înguste sau ocupate (de mașini parcate, mobilier, vegetație necontrolata), lipsă trecerilor sigure, timpii lungi de așteptare la semafoare, lipsă umbririi și insecuritatea. Reproiectarea spațiului public pentru pietoni (pietonalizari, zone partajate, trotuare generoase, treceri suprainaltate) este o investiție cu cost redus și beneficiu social ridicat.');
       D.h2('Ciclismul urban — potențial ridicat');
-      D.P('Bicicletă (clasică și electrică) acoperă eficient distanțele de 2-8 km, dominante în oraș, fiind adesea mai rapidă decât autoturismul pe distanțe scurte și în condiții de congestie. Rețeaua actuală de piste, estimată la ' + N(m.pisteKm) + ' km, este insa fragmentata și lipsită de continuitate, ceea ce descurajeaza utilizarea, în special a categoriilor mai puțin experimentate (copii, vârstnici, familii).');
+      D.P('Bicicletă (clasică și electrică) acoperă eficient distanțele de 2-8 km, dominante în oraș, fiind adesea mai rapidă decât autoturismul pe distanțe scurte și în condiții de congestie. Rețeaua actuală de piste, estimată la ' + N(m.pisteKm) + ' km, este insa fragmentata și lipsită de continuitate, ceea ce descurajeaza utilizarea, în special a categoriilor mai puțîn experimentate (copii, vârstnici, familii).');
       D.P('Dezvoltarea unei rețele velo continue, sigure și conectate (separată de traficul auto pe arterele intense), țintă fiind cca. ' + N(m.pisteTinta) + ' km, completata de sisteme de bike-sharing și parcări sigure la noduri și dotari, poate prelua o pondere semnificativă din deplasari. Buna practică europeană arată ca infrastructură velo de calitate, coroborata cu măsuri de descurajare a autoturismului, poate ridică cotă ciclismului peste 10-15% din deplasari.');
       D.barChart([['Pe jos', m.modalAct[2] - 8 > 0 ? Math.round(m.modalAct[2] * 0.7) : 14, [120,130,150]], ['Bicicletă actual', Math.round(m.modalAct[2] * 0.3), activColor], ['Bicicletă țintă', Math.round(m.modalTinta[2] * 0.4), PAL[1]]], { title: 'Ponderea mobilității active în deplasari (%)', h: 44, vfmt: v => v + '%', source: 'Estimare. Potențialul ciclismului este mare pe distanțele scurte dominante în oraș.' });
       D.callout('Mobilitate activă = sănătate publică', 'Promovarea mersului pe jos și a ciclismului aduce beneficii directe de sănătate (activitate fizică, reducerea bolilor cardiovasculare și a obezitatii), de mediu (zero emisii) și economice (cost redus), fiind cea mai eficiență investiție în mobilitate raportat la beneficii.');
@@ -239,14 +239,14 @@
 
       D.chapter('Transport de marfă și logistică urbană');
       D.h2('Rolul și impactul logisticii urbane');
-      D.P('Transportul de marfă și logistică urbană susțin activitatea economică a orașului — aprovizionarea comerțului, a unitatilor de alimentație, livrările către populație (în creștere explozivă odată cu comerțul electronic) și serviciile. Desi reprezintă o pondere relativ redusă din numărul total de deplasari, transportul de marfă are un impact disproportionat asupra emisiilor, zgomotului, congestiei și uzurii infrastructurii, în special prin vehiculele grele și prin livrările pe ultimul kilometru în zonele dense.');
-      D.P('Provocările specifice includ: accesul vehiculelor grele în zonele centrale și rezidențiale, parcarea pentru aprovizionare (adesea pe bandă de circulație sau pe trotuar), proliferarea livrarilor de colete și lipsă unei coordonari între operatori. În absența unei strategii de logistică urbană, aceste fluxuri generează disfunctionalitati semnificative și emisii ridicate în zonele cele mai sensibile.');
+      D.P('Transportul de marfă și logistică urbană susțîn activitatea economică a orașului — aprovizionarea comerțului, a unitatilor de alimentație, livrările către populație (în creștere explozivă odată cu comerțul electronic) și serviciile. Desi reprezintă o pondere relativ redusă din numărul total de deplasari, transportul de marfă are un impact disproportionat asupra emisiilor, zgomotului, congestiei și uzurii infrastructurii, în special prin vehiculele grele și prin livrările pe ultimul kilometru în zonele dense.');
+      D.P('Provocările specifice includ: accesul vehiculelor grele în zonele centrale și rezidențiale, parcarea pentru aprovizionare (adesea pe bandă de circulăție sau pe trotuar), proliferarea livrarilor de colete și lipsă unei coordonari între operatori. În absența unei strategii de logistică urbană, aceste fluxuri generează disfunctionalitati semnificative și emisii ridicate în zonele cele mai sensibile.');
       D.h2('Soluții de logistică urbană durabilă');
       D.bullets([
         ['Centre de consolidare a marfurilor', 'puncte logistice la periferie unde marfă este consolidata și redistribuita cu vehicule curate, reducand numărul de curse în centru'],
         ['Livrări pe ultimul kilometru curate', 'vehicule electrice, cargo-biciclete și puncte de ridicare (lockere) pentru colete'],
         ['Ferestre orare și reglementarea accesului', 'livrări în afară orelor de varf, restricții pentru vehicule grele în zone sensibile'],
-        ['Zone de încărcare/descărcare dedicate', 'spații reglementate pentru aprovizionare, eliberând bandă de circulație și trotuarele'],
+        ['Zone de încărcare/descărcare dedicate', 'spații reglementate pentru aprovizionare, eliberând bandă de circulăție și trotuarele'],
         ['Digitalizare și coordonare', 'platforme de optimizare a curselor și de partajare a capacității între operatori'],
       ]);
       D.callout('Logistică și comerțul electronic', 'Creșterea livrarilor de colete necesită o abordare proactiva: puncte de ridicare în cartiere, livrări consolidate și curate, pentru a evită ca fiecare comandă sa genereze o cursă individuală cu vehicul poluant.');
@@ -260,10 +260,10 @@
 
       D.chapter('Intermodalitate și noduri de transport');
       D.P('Eficiență sistemului de mobilitate depinde de cât de usor pot fi combinate modurile de transport într-o singură deplasare (intermodalitate). Nodurile intermodale — gari, autogari, stații majore de transport public, parcări park&ride, stații de bike-sharing — sunt punctele unde călătorii transferă între moduri. Calitatea acestor noduri (acces facil, informare, confort, timp de transfer redus) determină atractivitatea lanturilor de deplasare alternative la autoturism.');
-      D.P('Integrarea intermodala are mai multe dimensiuni: fizică (proximitatea și conexiunea facila între moduri), tarifara (titlu unic de călătorie multimodal), informationala (informare integrată în timp real, platforme MaaS) și instituțională (coordonarea operatorilor). Dezvoltarea nodurilor intermodale și a park&ride la intrările în oraș intercepteaza navetă auto și o transferă către transport public, decongestionand zonă centrală.');
+      D.P('Integrarea intermodala are mai multe dimensiuni: fizică (proximitatea și conexiunea facila între moduri), tarifara (titlu unic de călătorie multimodal), informationala (informare integrată în timp real, platforme MaaS) și instituțională (coordonarea operatorilor). Dezvoltarea nodurilor intermodale și a park&ride la întrările în oraș intercepteaza navetă auto și o transferă către transport public, decongestionand zonă centrală.');
 
       D.chapter('Mobilitatea metropolitană și navetă');
-      D.P('Funcționarea reală a orașului depășește limită sa administrativă: zonă urbană funcțională include localitatile periurbane de unde provine o navetă zilnică semnificativă, predominant cu autoturismul în absența unor alternative atractive. Această navetă congestioneaza intrările în oraș și zonă centrală, generând emisii și presiune asupra parcării.');
+      D.P('Funcționarea reală a orașului depășește limită sa administrativă: zonă urbană funcțională include localitatile periurbane de unde provine o navetă zilnică semnificativă, predominant cu autoturismul în absența unor alternative atractive. Această navetă congestioneaza întrările în oraș și zonă centrală, generând emisii și presiune asupra parcării.');
       D.P('Soluția durabilă este un sistem de transport public metropolitan integrat — linii care conectează orașul cu localitatile periurbane, cu orar și tarif integrat, completate de parcări park&ride la periferie. Coordonarea metropolitană (printr-o asociație de dezvoltare intercomunitara sau o autoritate metropolitană de transport) este esențială, întrucât fluxurile de mobilitate nu respectă granițele administrative. Dezvoltarea coordonata a locuirii periurbane în jurul nodurilor de transport public previne adancirea dependentei de autoturism.');
 
       // ── 3. MODELUL DE TRANSPORT ──────────────────────────────────────────
@@ -305,7 +305,7 @@
       const no2 = aq && aq.no2 != null ? aq.no2 : (pop > 200000 ? 32 : 24);
       D.P('Transportul rutier este o sursă majoră de emisii de gaze cu efect de sera și de poluanti atmosferici (NOx, particule PM). ' + (aq ? 'Măsurători live (OpenAQ): ' : 'Estimari (model + EEA): ') + 'PM2.5 = ' + pm25 + ' ug/mc, NO2 = ' + no2 + ' ug/mc.');
       D.barChart([['Autoturisme', 72, trafColor], ['Transport marfă', 20, PAL[5]], ['Transport public', 8, tpColor]], { title: 'Repartitia emisiilor CO2 din transport pe categorii (%)', h: 42, vfmt: v => v + '%', source: 'Repartitie tipică EEA. Autoturismele individuale domină emisiile — țintă principală a transferului modal.' });
-      D.formula('Emisii CO2 din transport', 'E = SUM ( Dist_mod * FE_mod )', 'Dist_mod = vehicule-km pe mod; FE_mod = factor de emisie (g CO2/km). Reducerea = transfer modal + electrificare (FE -> 0 la sursă curată).');
+      D.formula('Emisii CO2 din transport', 'E = SUM ( Dist_mod * FE_mod )', 'Dist_mod = vehicule-km pe mod; FE_mod = factor de emisie (g CO2/km). Reducerea = transfer modal + electrificare (FE -> 0 la sursă curăță).');
       D.table(['Indicator de mediu', 'Valoare', 'Limită / reper'], [
         ['Emisii CO2 transport', m.co2cap + ' t/cap/an', 'țintă -30% (2030)'],
         ['PM2.5', pm25 + ' ug/mc', 'OMS: 5 ug/mc (medie anuală)'],
@@ -334,7 +334,7 @@
       D.source('Estimari pe bază valorilor unitare din ghidurile europene de evaluare a costurilor externe ale transportului (Handbook on external costs of transport, CE Delft).');
 
       D.chapter('Viziune, obiective și ținte');
-      D.callout('Viziune de mobilitate 2040', 'În ' + city.name + ', mobilitatea este sigură, curată, accesibilă și echitabilă: deplasarile zilnice se realizează preponderent pe jos, cu bicicletă și cu un transport public de calitate, iar autoturismul devine o opțiune complementara. Spațiul public este redat oamenilor, emisiile și accidentele scad semnificativ.');
+      D.callout('Viziune de mobilitate 2040', 'În ' + city.name + ', mobilitatea este sigură, curăță, accesibilă și echitabilă: deplasarile zilnice se realizează preponderent pe jos, cu bicicletă și cu un transport public de calitate, iar autoturismul devine o opțiune complementara. Spațiul public este redat oamenilor, emisiile și accidentele scad semnificativ.');
       D.h2('Viziune pe trei niveluri teritoriale');
       D.bullets([
         ['Nivel local (oraș)', 'oraș de proximitate, străzi sigure și verzi, prioritate pietoni și bicicliști'],
@@ -355,8 +355,8 @@
       // ── 6. DIRECTII DE ACTIUNE ───────────────────────────────────────────
       D.chapter('Direcții de acțiune și proiecte');
       D.h2('Infrastructură de transport');
-      D.bullets(['Coridoare de transport public cu benzi dedicate și prioritizare semaforica.', 'Rețea continuă și sigură de piste de biciclete și trasee pietonale.', 'Reabilitarea și reproiectarea străzilor pentru siguranță (zone 30, treceri sigure).', 'Noduri intermodale și park&ride la intrările în oraș.']);
-      D.h2('Măsuri operaționale');
+      D.bullets(['Coridoare de transport public cu benzi dedicate și prioritizare semaforica.', 'Rețea continuă și sigură de piste de biciclete și trasee pietonale.', 'Reabilitarea și reproiectarea străzilor pentru siguranță (zone 30, treceri sigure).', 'Noduri intermodale și park&ride la întrările în oraș.']);
+      D.h2('Măsuri operăționale');
       D.bullets(['Creșterea frecventei și optimizarea traseelor de transport public.', 'Tarifare integrată și e-ticketing.', 'Politică de parcare cu tarifare zonala și management al cererii.', 'Sisteme inteligente de transport (ITS) și informare în timp real.']);
       D.h2('Măsuri organizationale și partajate');
       D.bullets(['Înființarea unei autorități/structuri de management al mobilității.', 'Coordonare metropolitană a transportului public.', 'Campanii de mobilitate durabilă și planuri de mobilitate pentru instituții/școli.', 'Logistică urbană verde și reglementarea accesului marfă.']);
@@ -400,25 +400,25 @@
         ['Coridoare de transport public cu benzi dedicate', 'Amenajarea benzilor dedicate și prioritizarea semaforica pe coridoarele principale, pentru creșterea vitezei comerciale și a atractivitatii TP.', '+' + (m.vitezaTP > 0 ? 4 : 4) + ' km/h viteză comercială; +8 pp cotă TP', 'Mediu', 0.16],
         ['Innoirea flotei de transport public (electric)', 'Achizitia de vehicule electrice și infrastructură de încărcare, eliminând emisiile la sursă.', '>50% flotă electrică; -emisii TP', 'Mediu', 0.18],
         ['Rețeaua metropolitană de piste de biciclete', 'Realizarea unei rețele continue, sigure și conectate de piste, cu separare față de trafic.', '+' + N(m.pisteTinta - m.pisteKm) + ' km piste; +6 pp cotă velo', 'Scurt-Mediu', 0.1],
-        ['Sistem de bike-sharing și parcări velo', 'Stații de închiriere biciclete (inclusiv electrice) și parcări sigure la noduri și dotari.', 'Sistem operațional; stații la noduri', 'Scurt', 0.03],
+        ['Sistem de bike-sharing și parcări velo', 'Stații de închiriere biciclete (inclusiv electrice) și parcări sigure la noduri și dotari.', 'Sistem operățional; stații la noduri', 'Scurt', 0.03],
         ['Pietonalizari și spațiu public de calitate', 'Pietonalizarea zonelor centrale și reproiectarea spațiului public pentru pietoni.', 'Zonă centrală pietonală; spațiu public regenerat', 'Mediu', 0.07],
         ['Tratarea punctelor negre de siguranță', 'Reproiectarea intersectiilor periculoase, treceri suprainaltate, zone 30 rezidențiale.', '-50% victime (Vision Zero)', 'Scurt', 0.06],
-        ['Noduri intermodale și park&ride', 'Amenajarea de park&ride la intrările în oraș, conectate la transport public.', 'Min. 3 noduri P&R; -trafic auto în centru', 'Mediu-Lung', 0.12],
+        ['Noduri intermodale și park&ride', 'Amenajarea de park&ride la întrările în oraș, conectate la transport public.', 'Min. 3 noduri P&R; -trafic auto în centru', 'Mediu-Lung', 0.12],
         ['Sistem inteligent de transport (ITS)', 'Managementul adaptiv al traficului, informare în timp real, semaforizare inteligentă.', 'ITS pe arterele majore; -timp deplasare', 'Mediu', 0.05],
         ['Politică și infrastructură de parcare', 'Tarifare zonala, parcări colective, reducerea parcării la sol în centru.', 'Sistem de tarifare zonal; management cerere', 'Scurt', 0.05],
         ['Logistică urbană verde', 'Centru de consolidare marfă, livrări cu vehicule electrice/cargo-bike, ferestre orare.', 'Centru logistic; livrări ultimul km curate', 'Lung', 0.05],
         ['Electrificarea mobilității (stații încărcare)', 'Rețea publică de stații de încărcare pentru vehicule electrice.', 'Rețea de încărcare acoperitoare', 'Mediu', 0.04],
-        ['Digitalizarea mobilității (MaaS)', 'Platformă de mobilitate ca serviciu (planificare + plată integrată multimodala).', 'Aplicație MaaS operațională', 'Mediu', 0.03],
+        ['Digitalizarea mobilității (MaaS)', 'Platformă de mobilitate ca serviciu (planificare + plată integrată multimodala).', 'Aplicăție MaaS operățională', 'Mediu', 0.03],
         ['Reabilitarea și reproiectarea străzilor (street redesign)', 'Reconfigurarea profilelor stradale pentru echilibrarea modurilor: trotuare largi, aliniamente de arbori, zone tampon verzi, calmarea traficului.', 'Străzi reproiectate pe coridoare-cheie', 'Mediu', 0.06],
         ['Coridoare verzi pentru mobilitate activă', 'Trasee pietonale și velo de-a lungul cursurilor de apă și al spațiilor verzi, conectand cartierele de zonele de recreere.', 'Coridoare verzi-active continue', 'Mediu', 0.04],
         ['Mobilitate pentru școli (zone școlare sigure)', 'Amenajarea de zone sigure în jurul școlilor (trasee pietonale, calmare trafic, parcare reglementata) și planuri de mobilitate școlară.', 'Zone școlare sigure; trasee pietonale', 'Scurt', 0.02],
         ['Accesibilitate universală a spațiului public', 'Adaptarea trotuarelor, trecerilor, statiilor și dotarilor pentru persoane cu mobilitate redusă, conform NP 051.', 'Spațiu public accesibil universal', 'Scurt-Mediu', 0.03],
         ['Transport public metropolitan integrat', 'Linii metropolitane care conectează orașul cu localitatile periurbane, cu tarif și orar integrat, descurajand navetă auto.', 'Linii metropolitane; tarif integrat', 'Lung', 0.08],
-        ['Centru de monitorizare și management al mobilității', 'Dispecerat integrat (trafic, TP, parcare, mediu) pentru decizii în timp real și monitorizarea indicatorilor PMUD.', 'Centru operațional; date în timp real', 'Mediu', 0.04],
-        ['Zonă cu trafic limitat / emisii reduse în centru', 'Reglementarea accesului auto în zonă centrală protejată, cu sistem de control și excepții justificate.', 'ZTL/LEZ operațională; -emisii în centru', 'Mediu', 0.03],
+        ['Centru de monitorizare și management al mobilității', 'Dispecerat integrat (trafic, TP, parcare, mediu) pentru decizii în timp real și monitorizarea indicatorilor PMUD.', 'Centru operățional; date în timp real', 'Mediu', 0.04],
+        ['Zonă cu trafic limitat / emisii reduse în centru', 'Reglementarea accesului auto în zonă centrală protejată, cu sistem de control și excepții justificate.', 'ZTL/LEZ operățională; -emisii în centru', 'Mediu', 0.03],
         ['Trasee școlare sigure și zone școlare', 'Amenajarea de zone sigure în jurul școlilor și trasee pietonale/velo protejate către unitățile de învățământ.', 'Zone școlare sigure la toate școlile', 'Scurt-Mediu', 0.03],
         ['Modernizarea statiilor de transport public', 'Stații accesibile, cu informare în timp real, adăposturi, iluminat și confort, integrate intermodal.', 'Stații modernizate și accesibile', 'Mediu', 0.04],
-        ['Sistem de tarifare integrată și e-ticketing', 'Titlu unic multimodal și metropolitan, plată contactless, integrare tarifara între operatori.', 'Tarif integrat; e-ticketing operațional', 'Mediu', 0.03],
+        ['Sistem de tarifare integrată și e-ticketing', 'Titlu unic multimodal și metropolitan, plată contactless, integrare tarifara între operatori.', 'Tarif integrat; e-ticketing operățional', 'Mediu', 0.03],
         ['Rețeaua de încărcare pentru vehicule electrice', 'Stații de încărcare publice distribuite teritorial, prioritizand nodurile și flotele intensive.', 'Rețea de încărcare acoperitoare', 'Mediu', 0.04],
         ['Calmarea traficului în zonele rezidențiale (zone 30)', 'Introducerea zonelor cu viteză redusă și a amenajarilor de calmare în cartierele rezidențiale.', 'Zone 30 în cartiere; -viteze, +siguranță', 'Scurt', 0.04],
         ['Plan de mobilitate metropolitană și guvernantă', 'Coordonarea transportului și planificarii la nivel metropolitan, printr-o structură dedicată.', 'Structură metropolitană; plan integrat', 'Mediu-Lung', 0.03],
@@ -493,8 +493,8 @@
       D.P('Mobilitatea turistică durabilă — acces facil la atractii prin transport public și moduri active, descurajarea traficului auto în zonele sensibile (centre istorice, zone naturale), și servicii de mobilitate pentru vizitatori (bike-sharing, informare) — protejează patrimoniul și calitatea vieții rezidentilor, valorificand totodată potențialul turistic.');
 
       D.chapter('Date deschise și transparentă în mobilitate');
-      D.P('Datele de mobilitate (trafic, transport public, calitatea aerului, accidente) constituie o resursă esențială pentru planificare, dar și pentru transparentă și inovare. Politică de date deschise (open data) — publicarea datelor în formate standard și reutilizabile — permite cercetatorilor, dezvoltatorilor și cetățenilor sa creeze servicii și analize, susținând un ecosistem de mobilitate inovator (aplicații, platforme MaaS).');
-      D.P('Standardele de date (precum GTFS pentru transport public, care permite afisarea orarelor în aplicații de planificare a călătoriilor) facilitează interoperabilitatea și integrarea. Protecția datelor personale și guvernantă datelor (cine deține, cine accesează, în ce scop) sunt condiții ale unui sistem de date etic și de încredere.');
+      D.P('Datele de mobilitate (trafic, transport public, calitatea aerului, accidente) constituie o resursă esențială pentru planificare, dar și pentru transparentă și inovare. Politică de date deschise (open data) — publicarea datelor în formate standard și reutilizabile — permite cercetatorilor, dezvoltatorilor și cetățenilor sa creeze servicii și analize, susțînând un ecosistem de mobilitate inovator (aplicății, platforme MaaS).');
+      D.P('Standardele de date (precum GTFS pentru transport public, care permite afisarea orarelor în aplicății de planificare a călătoriilor) facilitează interoperabilitatea și integrarea. Protecția datelor personale și guvernantă datelor (cine deține, cine accesează, în ce scop) sunt condiții ale unui sistem de date etic și de încredere.');
 
       D.chapter('Viitorul mobilității — tehnologii emergente');
       D.P('Mobilitatea urbană se afla într-o transformare tehnologică profundă: electrificarea, conectivitatea (vehicule conectate, V2X), automatizarea (vehicule autonome), partajarea (sharing) și digitalizarea (MaaS) redefinesc sistemul de transport. Aceste tendințe pot aduce beneficii majore (siguranță, eficiență, acces), dar comportă și riscuri (creșterea deplasarilor daca vehiculele autonome devin prea convenabile, polarizare digitală) ce trebuie gestionate proactiv prin politici publice.');
@@ -510,7 +510,7 @@
 
       D.chapter('Transport feroviar și conexiuni regionale');
       D.P('Transportul feroviar — atat cel de lungă distanță, cât și cel regional (trenuri regionale, eventual de tip tren metropolitan) — poate juca un rol important în mobilitatea durabilă, oferind capacitate mare, viteză și emisii reduse. Valorificarea infrastructurii feroviare existente pentru servicii de tip "tren urban/metropolitan" (cu frecvență ridicată și stații în oraș și în zonă periurbana) este o soluție eficiență de cost pentru navetă, folosind un activ deja existent.');
-      D.P('Integrarea gării și a statiilor feroviare în sistemul de transport urban (ca noduri intermodale majore, cu acces facil prin transport public, mobilitate activă și park&ride) maximizeaza valoarea rețelei feroviare. Conexiunile feroviare regionale eficiente reduc dependență de autoturism pentru deplasarile inter-urbane și susțin dezvoltarea policentrica a teritoriului.');
+      D.P('Integrarea gării și a statiilor feroviare în sistemul de transport urban (ca noduri intermodale majore, cu acces facil prin transport public, mobilitate activă și park&ride) maximizeaza valoarea rețelei feroviare. Conexiunile feroviare regionale eficiente reduc dependență de autoturism pentru deplasarile inter-urbane și susțîn dezvoltarea policentrica a teritoriului.');
 
       D.chapter('Bune practici europene în mobilitatea urbană');
       D.P('Orașele europene de referință oferă modele inspiratoare, adaptabile la contextul local. Acestea demonstrează ca transformarea mobilității este posibilă și aduce beneficii ample.');
@@ -522,6 +522,11 @@
         ['Ljubljana', 'pietonalizarea centrului și măsuri integrate au transformat orașul într-un model de mobilitate durabilă'],
       ]);
       D.P('Lecția comună: transformarea reușește prin viziune politică de durată, măsuri integrate (infrastructură + reglementare + comunicare), prioritizarea consecventa a oamenilor față de autoturisme și implicarea comunității. Rezultatele — orașe mai sănătoase, sigure, atractive economic și plăcute de locuit — confirmă justetea abordarii.');
+      D.h2('Benchmark internațional — cotă modala');
+      D.P('Compararea distributiei modale cu orașe europene de referință arată potențialul de transfer modal și decalajul de recuperat. Orașele-model au cote ridicate de transport public și mobilitate activă, obținute prin decenii de investiții consecvente.');
+      D.barChart([['Copenhaga (velo)', 49, [34,160,90]], ['Amsterdam (velo)', 38, [34,160,90]], ['Viena (TP)', 38, [59,130,246]], ['Paris (activ+TP)', 60, [168,85,247]], [city.name + ' actual (TP+activ)', m.modalAct[1] + m.modalAct[2], [239,68,68]], [city.name + ' țintă 2030', m.modalTinta[1] + m.modalTinta[2], [212,175,55]]], { title: 'Cotă modala sustenabila — benchmark internațional (%)', h: 52, max: 100, vfmt: v => v + '%', source: 'Date orașe (rapoarte municipale). Decalajul față de orașele-model = potențial de îmbunătățire.' });
+      D.h2('Superblocks (Barcelona) — aplicabilitate');
+      D.P('Modelul superilles (superblocks) grupeaza 3x3 cvartale, deviind traficul de tranzit pe perimetru și transformând străzile interioare în spațiu public pentru pietoni, joacă, vegetație și socializare. Rezultatele la Barcelona: reducerea traficului, a poluarii și a zgomotului, creșterea spațiului public și a vitalitatii comerciale. Pentru ' + city.name + ', modelul este aplicabil pilot în zonele rezidențiale dense și în centrul protejat, ca instrument de calmare a traficului și regenerare a spațiului public.');
 
       D.chapter('Evaluarea ex-ante, monitorizarea și evaluarea ex-post');
       D.P('Ciclul complet de planificare include evaluarea înainte (ex-ante), în timpul (monitorizare) și după (ex-post) implementare. Evaluarea ex-ante (analiză cost-beneficiu, evaluarea de mediu, evaluarea impactului) fundamenteaza deciziile înainte de investiție. Monitorizarea continuă urmărește implementarea și indicatorii în timp real. Evaluarea ex-post măsoară rezultatele efective față de ținte și față de prognoze, oferind invataminte pentru ciclurile viitoare.');
@@ -539,7 +544,7 @@
         ['Tramvai modern / LRT', '8.000 - 20.000', 'Coridoare structurante, cerere ridicată'],
         ['Metrou / metrou usor', '> 20.000', 'Mările aglomerari, cerere foarte ridicată'],
       ], [56, 56, 62], { boldFirst: true, fs: 7 });
-      D.P('Pentru majoritatea orașelor românești de talie medie, combinația optimă este o rețea de autobuze (electrice) cu coridoare prioritare (benzi dedicate, prioritizare semaforica — de tip BRT) pe axele principale, completata, acolo unde există, de tramvai modernizat. Investiția în infrastructură dedicată se justifică pe coridoarele cu cerere ridicată, unde aduce salt de viteză și fiabilitate.');
+      D.P('Pentru majoritatea orașelor românești de talie medie, combinăția optimă este o rețea de autobuze (electrice) cu coridoare prioritare (benzi dedicate, prioritizare semaforica — de tip BRT) pe axele principale, completata, acolo unde există, de tramvai modernizat. Investiția în infrastructură dedicată se justifică pe coridoarele cu cerere ridicată, unde aduce salt de viteză și fiabilitate.');
 
       D.chapter('Micromobilitate și reglementarea serviciilor noi');
       D.P('Micromobilitatea (biciclete și trotinete electrice partajate) a cunoscut o expansiune rapidă, oferind soluții pentru deplasarile scurte și pentru ultimul kilometru, complementare transportului public. Beneficiile (deplasari rapide, zero emisii locale, ocupare redusă de spațiu) sunt insotite insa de provocări: parcarea dezordonată pe trotuare, conflicte cu pietonii, siguranță utilizatorilor și gestionarea operatorilor privați.');
@@ -560,14 +565,14 @@
       D.chapter('Studiu de caz — testarea modelului pe un coridor prioritar');
       D.P('Pentru a ilustra aplicarea modelului de transport, se testează un scenariu de intervenție pe un coridor radial prioritar: introducerea unei benzi dedicate transportului public, a unei piste de biciclete protejate și prioritizarea semaforica. Modelul estimează efectele asupra vitezei comerciale, a cotei modale și a emisiilor pe coridor.');
       D.P('Rezultatele asteptate (orientative, conform modelului): creșterea vitezei comerciale a transportului public cu 20-30% pe coridor, transferul unei părți din deplasarile auto către transport public și bicicletă (reducerea cotei auto cu câteva puncte procentuale pe coridor), și o reducere corespunzătoare a emisiilor și a congestiei. Desi capacitatea rutieră pentru autoturisme se reduce, capacitatea Totală de transport a coridorului (persoane/ora) crește, datorită eficientei superioare a benzii dedicate TP. Acest tip de testare fundamenteaza deciziile de investiție înainte de implementare.');
-      D.callout('Capacitatea măsurată în persoane, nu în vehicule', 'O bandă de circulație poate transportă ~2.000 persoane/ora cu autoturisme, ~9.000 cu autobuze pe bandă dedicată și ~20.000 cu tramvai. Realocarea spațiului către moduri eficiente crește capacitatea reală a coridorului.');
+      D.callout('Capacitatea măsurată în persoane, nu în vehicule', 'O bandă de circulăție poate transportă ~2.000 persoane/ora cu autoturisme, ~9.000 cu autobuze pe bandă dedicată și ~20.000 cu tramvai. Realocarea spațiului către moduri eficiente crește capacitatea reală a coridorului.');
 
       D.chapter('Politică tarifara și integrarea transportului public');
       D.P('Politică tarifara a transportului public influențează puternic atractivitatea și echitatea sistemului. Un tarif accesibil, simplu și integrat (un singur titlu valabil pe toate liniile și modurile, inclusiv la nivel metropolitan) încurajează utilizarea, în timp ce tarifele complicate sau ridicate descurajeaza. Integrarea tarifara — combinată cu e-ticketing și plată contactless — reduce barierele de acces și timpul de îmbarcare, crescând viteză comercială.');
       D.P('Subventionarea transportului public este o decizie de politică publică justificată de beneficiile sale externe (reducerea congestiei, emisiilor, accidentelor) și de rolul social (mobilitate pentru toti). Multe orașe oferă gratuitati sau reduceri pentru categorii (elevi, studenți, vârstnici, persoane cu venituri reduse), iar unele experimentează gratuitatea totală. Echilibrul între venituri din tarife, subventii și calitatea serviciului este o decizie strategică fundamentală.');
 
       D.chapter('Comunicare, marketing și promovarea mobilității durabile');
-      D.P('Chiar și cel mai bun sistem de mobilitate are nevoie de comunicare și promovare pentru a fi utilizat. Marketingul mobilității durabile informează despre alternativele disponibile, schimbă perceptiile (de exemplu, transportul public ca opțiune modernă și confortabilă, nu de ultimă instanță) și construiește o cultură a mobilității durabile. Instrumentele includ campanii media, branding al transportului public, informare în timp real, aplicații și evenimente publice.');
+      D.P('Chiar și cel mai bun sistem de mobilitate are nevoie de comunicare și promovare pentru a fi utilizat. Marketingul mobilității durabile informează despre alternativele disponibile, schimbă perceptiile (de exemplu, transportul public ca opțiune modernă și confortabilă, nu de ultimă instanță) și construiește o cultură a mobilității durabile. Instrumentele includ campanii media, branding al transportului public, informare în timp real, aplicății și evenimente publice.');
       D.P('Comunicarea este esențială și pentru acceptabilitatea masurilor dificile (restricții auto, tarifare parcare, pietonalizari), care întâmpina adesea rezistență inițială. Explicarea beneficiilor, implicarea timpurie a părților interesate, proiectele-pilot demonstrative și comunicarea rezultatelor construiesc sprijinul public necesar. Experiență arată ca măsuri inițial contestate (precum pietonalizari) devin populare odată implementate și experimentate.');
 
       D.chapter('Managementul cererii de mobilitate (TDM)');
@@ -596,8 +601,8 @@
       D.callout('Mobilitate sensibilă la gen', 'Studiile arată ca femeile au tipare de mobilitate diferite (deplasari mai scurte, mai frecvente, multimodale, legate de îngrijire) și nevoi specifice de siguranță. Planificarea sensibilă la gen — siguranță în spațiul public și în transport, trasee și orare adaptate, date dezagregate pe gen — asigură o mobilitate echitabilă.');
 
       D.chapter('Rezilienta sistemului de transport');
-      D.P('Rezilienta este capacitatea sistemului de transport de a funcționa și de a se reface în față socurilor și perturbarilor: fenomene meteo extreme (inundații, ninsori, valuri de căldură), accidente majore, pene de infrastructură, crize energetice sau sanitare (precum pandemia, care a modificat profund tiparele de mobilitate). Un sistem rezilient este redundant (rute și moduri alternative), flexibil și capabil sa se adapteze rapid.');
-      D.P('Creșterea rezilientei se realizează prin diversificarea modurilor de transport (nu dependență de unul singur), prin redundanta rețelei (rute alternative), prin protejarea infrastructurii critice față de riscuri (de exemplu, față de inundații) și prin planuri de continuitate și intervenție. Diversitatea modala — un sistem echilibrat între auto, transport public și mobilitate activă — este în sine un factor major de rezilienta, așa cum a demonstrat criză sanitară, când mobilitatea activă a oferit o alternativă sigură.');
+      D.P('Rezilienta este capacitatea sistemului de transport de a funcționa și de a se reface în față socurilor și perturbarilor: fenomene meteo extreme (inundății, ninsori, valuri de căldură), accidente majore, pene de infrastructură, crize energetice sau sanitare (precum pandemia, care a modificat profund tiparele de mobilitate). Un sistem rezilient este redundant (rute și moduri alternative), flexibil și capabil sa se adapteze rapid.');
+      D.P('Creșterea rezilientei se realizează prin diversificarea modurilor de transport (nu dependență de unul singur), prin redundanta rețelei (rute alternative), prin protejarea infrastructurii critice față de riscuri (de exemplu, față de inundății) și prin planuri de continuitate și intervenție. Diversitatea modala — un sistem echilibrat între auto, transport public și mobilitate activă — este în sine un factor major de rezilienta, așa cum a demonstrat criză sanitară, când mobilitatea activă a oferit o alternativă sigură.');
 
       D.chapter('Străzi complete și calitatea spațiului stradal');
       D.P('Conceptul de "străzi complete" (complete streets) reconfigureaza strada ca spațiu public partajat echitabil între toti utilizatorii — pietoni, bicicliști, transport public și autovehicule — nu doar ca un canal pentru trafic auto. O strada completă include trotuare generoase și accesibile, infrastructură velo sigură, amenajari pentru transport public, vegetație și mobilier, alături de benzile auto dimensionate adecvat.');
@@ -617,7 +622,7 @@
         ['Captarea plusvalorii imobiliare', 'taxe pe beneficiile aduse de infrastructură de transport proprietăților adiacente'],
         ['Veniturile din parcare și tarifare', 'reinvestite în transport public și mobilitate activă'],
         ['Parteneriate public-private', 'pentru infrastructură, parcări, servicii noi de mobilitate'],
-        ['Finanțare europeană și verde', 'fonduri pentru mobilitate curată, obligațiuni verzi'],
+        ['Finanțare europeană și verde', 'fonduri pentru mobilitate curăță, obligățiuni verzi'],
         ['Contributii ale dezvoltatorilor', 'la infrastructură de mobilitate necesară dezvoltarilor noi'],
       ]);
 
@@ -662,13 +667,13 @@
         ['Distanță', 'dotari și stații la distanță de mers pe jos (oraș de 15 minute)'],
         ['Tranzit', 'transport public frecvent, rapid și fiabil ca structură a dezvoltării'],
       ]);
-      D.P('Corelarea PMUD cu PUG-ul și cu Masterplanul strategic asigură ca noile dezvoltari sunt amplasate în zone bine deservite de transport public, evitând expansiunea dependență de autoturism. Reglementarile urbanistice (POT, CUT, parcare) susțin sau frânează obiectivele de mobilitate.');
+      D.P('Corelarea PMUD cu PUG-ul și cu Masterplanul strategic asigură ca noile dezvoltari sunt amplasate în zone bine deservite de transport public, evitând expansiunea dependență de autoturism. Reglementarile urbanistice (POT, CUT, parcare) susțîn sau frânează obiectivele de mobilitate.');
 
       D.chapter('Mobilitate la cerere și servicii noi de mobilitate');
       D.P('Pe lângă modurile tradiționale, mobilitatea urbană integrează servicii noi: micromobilitate partajata (biciclete, trotinete electrice), transport la cerere (DRT) în zonele cu cerere redusă, car-sharing și mobilitate ca serviciu (MaaS). Aceste servicii completează transportul public și reduc dependență de autoturismul propriu.');
       D.table(['Serviciu de mobilitate', 'Rol', 'Condiții de succes'], [
         ['Bike/scooter-sharing', 'deplasari scurte, ultimul kilometru', 'infrastructură velo + reglementare parcare'],
-        ['Transport la cerere (DRT)', 'zone/ore cu cerere redusă', 'integrare cu TP, aplicație de rezervare'],
+        ['Transport la cerere (DRT)', 'zone/ore cu cerere redusă', 'integrare cu TP, aplicăție de rezervare'],
         ['Car-sharing', 'reducerea detinerii de autoturisme', 'locuri dedicate, masa critică utilizatori'],
         ['MaaS (mobilitate ca serviciu)', 'planificare + plată integrată multimodala', 'integrare date + tarife operatori'],
       ], [50, 60, 64], { boldFirst: true, fs: 7 });

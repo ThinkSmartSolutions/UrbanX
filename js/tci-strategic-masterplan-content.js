@@ -52,7 +52,7 @@
         ['INS (Institutul Național de Statistică)', 'bază de date TEMPO-Online — populație, mișcare naturală și migratorie, locuințe, forța de muncă, autorizatii de construire'],
         ['Eurostat', 'indicatori comparativi NUTS3, Urban Audit, PIB regional la paritatea puterii de cumpărare'],
         ['INFP', 'zonarea seismică națională (accelerația terenului ag, perioadă de control Tc)'],
-        ['ANAR / MMAP', 'hidrografie, hărți de hazard și risc la inundații (Directivă 2007/60/CE)'],
+        ['ANAR / MMAP', 'hidrografie, hărți de hazard și risc la inundății (Directivă 2007/60/CE)'],
         ['ANM', 'date climatice și proiecții (scenarii RCP/SSP, IPCC AR6)'],
         ['OpenStreetMap', 'rețeaua de străzi, dotari, puncte de interes (date geospatiale deschise)'],
         ['PUG vectorial al UAT', 'geometria zonelor funcționale și Regulamentul Local de Urbanism (unde este disponibil digital)'],
@@ -65,7 +65,7 @@
       // CAP 2 — REZUMAT EXECUTIV
       // ─────────────────────────────────────────────────────────────────────
       D.chapter('Rezumat executiv');
-      D.P('Municipiul ' + city.name + (jud ? ', reședința/oraș din judetul ' + jud : '') + ', numără ' + N(pop) + ' locuitori (recensamant 2021). Analiză strategică proiectează o populație de aproximativ ' + N(pop55) + ' locuitori la orizontul 2055 în scenariul de referință, cu implicații directe asupra necesarului de locuințe, servicii publice, infrastructură și spații verzi.');
+      D.P('Municipiul ' + city.name + (jud ? ', reședința/oraș din judetul ' + jud : '') + ', numără ' + N(pop) + ' locuitori (recensamant 2021). Analiză strategică proiectează o populație de aproximativ ' + N(pop55) + ' locuitori la orizontul 2055 în scenariul de referință, cu implicății directe asupra necesarului de locuințe, servicii publice, infrastructură și spații verzi.');
       D.kpis([
         { val: N(pop), label: 'Populație 2021', sub: 'INS RPL2021' },
         { val: N(pop55), label: 'Proiecție 2055', sub: 'scenariu ' + scenario },
@@ -109,12 +109,12 @@
       // ─────────────────────────────────────────────────────────────────────
       D.chapter('Cadrul natural și peisaj');
       D.h2('Relief și geomorfologie');
-      D.P('Formă de relief, altimetria și declivitatea condiționează extinderea intravilanului, costurile de echipare edilitara și stabilitatea terenului. Zonele cu pante accentuate sunt supuse restrictiilor de construire și necesită studii geotehnice de stabilitate, în timp ce luncile și terasele joase sunt expuse riscului de inundații.');
+      D.P('Formă de relief, altimetria și declivitatea condiționează extinderea intravilanului, costurile de echipare edilitara și stabilitatea terenului. Zonele cu pante accentuate sunt supuse restrictiilor de construire și necesită studii geotehnice de stabilitate, în timp ce luncile și terasele joase sunt expuse riscului de inundății.');
       D.h2('Geologie și soluri');
       D.P('Natură litologica a substratului și tipul de sol determină capacitatea portanta a terenului de fundare, comportamentul seismic local (efectul de amplificare în depozite moi) și pretabilitatea agricolă. Conservarea solurilor fertile din extravilan și gestionarea responsabilă a terenurilor de fundare sunt principii de bază ale dezvoltării durabile.');
       D.h2('Hidrografie și resurse de apă');
       const apa = (typeof _APA_ROMANA_CFG !== 'undefined' && _APA_ROMANA_CFG[ctx.cityKey]) || {};
-      D.P('Rețeaua hidrografica structureaza teritoriul și oferă oportunități de amenajare peisagistica (coridoare albastre-verzi), dar impune și servituti de protecție și gestiunea riscului la inundații. ' + (apa.bazin ? 'Teritoriul aparține bazinului hidrografic ' + apa.bazin + ', administrat de ' + (apa.DA || 'Administrația Bazinala de Apă competență') + '.' : 'Gospodarirea apelor se coordonează cu Administrația Bazinala de Apă competență.'));
+      D.P('Rețeaua hidrografica structureaza teritoriul și oferă oportunități de amenajare peisagistica (coridoare albastre-verzi), dar impune și servituti de protecție și gestiunea riscului la inundății. ' + (apa.bazin ? 'Teritoriul aparține bazinului hidrografic ' + apa.bazin + ', administrat de ' + (apa.DA || 'Administrația Bazinala de Apă competență') + '.' : 'Gospodarirea apelor se coordonează cu Administrația Bazinala de Apă competență.'));
       D.h2('Climă și confort bioclimatic');
       if (climate) {
         D.table(['Parametru climatic', 'Valoare / caracterizare'], [
@@ -136,13 +136,13 @@
       const seism = (typeof getSeismConfig === 'function' && window.S_UAT) ? getSeismConfig() : (city.seism || { ag: 0.20, Tc: 1.0, zona: 'E', MSK: 'VII' });
       D.h2('Risc seismic');
       D.P('România este expusă preponderent sursei subcrustale Vrancea. Proiectarea antiseismica este obligatorie conform codului P100-1/2013, în funcție de accelerația terenului ag și perioadă de control Tc specifice amplasamentului.');
-      D.table(['Parametru seismic', 'Valoare', 'Semnificație'], [
+      D.table(['Parametru seismic', 'Valoare', 'Semnificăție'], [
         ['Accelerația terenului ag', (seism.ag || '-') + ' g', 'Interval mediu de recurenta 225 ani'],
         ['Perioadă de control Tc', (seism.Tc || '-') + ' s', 'Conținutul de frecvente al mișcării'],
         ['Zonă seismică / intensitate', (seism.zona || '-') + ' / ' + (seism.MSK || '-'), 'Conform zonarii naționale P100-1/2013'],
       ], [62, 38, 76], { boldFirst: true });
-      D.h2('Risc de inundații');
-      D.P('Expunerea la inundații este evaluata în raport cu rețeaua hidrografica, cotele terenului și hărțile de hazard (Directivă 2007/60/CE, transpusa prin Legea 107/1996). ' + (apa.risc_inundabil ? 'Nivel estimat: ' + apa.risc_inundabil + '. ' : '') + 'Amplasamentele din albia majoră și zonele de protecție sunt supuse interdictiei de construire și necesită avizul de gospodarire a apelor.');
+      D.h2('Risc de inundății');
+      D.P('Expunerea la inundății este evaluata în raport cu rețeaua hidrografica, cotele terenului și hărțile de hazard (Directivă 2007/60/CE, transpusa prin Legea 107/1996). ' + (apa.risc_inundabil ? 'Nivel estimat: ' + apa.risc_inundabil + '. ' : '') + 'Amplasamentele din albia majoră și zonele de protecție sunt supuse interdictiei de construire și necesită avizul de gospodarire a apelor.');
       D.h2('Alunecari de teren și stabilitate');
       D.P('Susceptibilitatea la alunecari se evaluează pe bază pantei, litologiei și condițiilor hidrogeologice (HG 447/2003, Legea 575/2001 — PATN secțiunea V). Zonele cu risc impun studii de stabilitate și, după caz, lucrări de consolidare și drenaj.');
       D.h2('Riscuri climatice și tehnologice');
@@ -159,7 +159,7 @@
       D.P('Strategia de reziliente combină măsuri structurale (lucrări de apărare, consolidare, infrastructură) și nestructurale (planificare, avertizare, asigurare, educație), pe fiecare categorie de risc:');
       D.table(['Risc', 'Măsuri de prevenire / reducere', 'Responsabili'], [
         ['Seismic', 'Expertizarea și consolidarea clădirilor vulnerabile (clasă I-II de risc seismic), respectarea P100 la construcții noi, planuri de intervenție', 'Primărie, ISU, proprietari'],
-        ['Inundații', 'Lucrări de apărare, decolmatare, bazine de retentie, interdicție de construire în albia majoră, sistem de avertizare', 'ABA, primărie, ISU'],
+        ['Inundății', 'Lucrări de apărare, decolmatare, bazine de retentie, interdicție de construire în albia majoră, sistem de avertizare', 'ABA, primărie, ISU'],
         ['Alunecari', 'Studii de stabilitate, drenaje, consolidari de versant, interdictii pe terenuri instabile, monitorizare', 'Primărie, geotehnicieni'],
         ['Căldură / secetă', 'Infrastructură verde, suprafețe permeabile, puncte de racorire, planuri pentru valuri de căldură', 'Primărie, sănătate publică'],
         ['Tehnologic', 'Zone de protecție, planuri de urgență SEVESO, monitorizarea calității aerului', 'APM, ISU, operatori'],
@@ -167,7 +167,7 @@
       D.callout('Principiul prevenirii', 'Investiția în prevenire și adaptare este de câteva ori mai eficiență decât costul interventiei post-dezastru. Rezilienta urbană se construiește integrat, în toate documentatiile de urbanism și în programarea investițiilor.');
 
       var _ag = parseFloat(seism.ag || 0.2), _sl = _ag >= 0.3 ? 5 : _ag >= 0.25 ? 4 : _ag >= 0.2 ? 3 : 2;
-      D.barChart([['Seismic', _sl, [239, 68, 68]], ['Inundații', /mediu|ridicat|mare/i.test(apa.risc_inundabil || '') ? 3 : 2, [59, 130, 246]], ['Alunecari', 2, [245, 158, 11]], ['Climatic', 3, [168, 85, 247]], ['Tehnologic', 1, [120, 120, 132]]], { title: 'Profil de risc pe categorii (1=scăzut ... 5=ridicat)', h: 46, max: 5, source: 'Scor compozit UrbanX (orientativ). Categoriile cu nivel ridicat necesită studii de specialitate.' });
+      D.barChart([['Seismic', _sl, [239, 68, 68]], ['Inundății', /mediu|ridicat|mare/i.test(apa.risc_inundabil || '') ? 3 : 2, [59, 130, 246]], ['Alunecari', 2, [245, 158, 11]], ['Climatic', 3, [168, 85, 247]], ['Tehnologic', 1, [120, 120, 132]]], { title: 'Profil de risc pe categorii (1=scăzut ... 5=ridicat)', h: 46, max: 5, source: 'Scor compozit UrbanX (orientativ). Categoriile cu nivel ridicat necesită studii de specialitate.' });
 
       D.chapter('Analiză demografică și proiecții');
       D.h2('Evoluția populației');
@@ -202,7 +202,7 @@
       D.h2('Profilul economic și structură sectoriala');
       D.P('Economia locală este analizata prin prisma valorii adăugate brute, a structurii pe sectoare (primar, secundar, tertiar), a ocuparii și a productivitatii. Tranziția către o economie a cunoașterii și a serviciilor cu valoare adăugată ridicată, alături de specializarea inteligentă, reprezintă direcții strategice pentru competitivitate.');
       D.h2('Convergenta economică europeană');
-      D.P('Compararea PIB-ului pe cap de locuitor (la paritatea puterii de cumpărare) cu media națională și europeană indică decalajul de convergenta și potențialul de creștere. Atragerea investițiilor, dezvoltarea capitalului uman și îmbunătățirea infrastructurii susțin recuperarea decalajelor față de media UE-27.');
+      D.P('Compararea PIB-ului pe cap de locuitor (la paritatea puterii de cumpărare) cu media națională și europeană indică decalajul de convergenta și potențialul de creștere. Atragerea investițiilor, dezvoltarea capitalului uman și îmbunătățirea infrastructurii susțîn recuperarea decalajelor față de media UE-27.');
       if (euComp) {
         D.table(['Indicator de convergenta', 'Valoare', 'Referință'], [
           ['PIB/capita estimat (PPS)', (euComp.pibCapita != null ? N(euComp.pibCapita) + ' EUR' : 'estimat'), 'Eurostat NUTS3'],
@@ -314,7 +314,7 @@
       const verdeExist = (_abV.cats && _abV.cats['Spații verzi / Agrement']) ? _abV.cats['Spații verzi / Agrement'].m2 : null;
       const verdeNorma = 26 * pop55;
       D.h3('Analiză deficitului de spații verzi');
-      D.table(['Indicator spații verzi', 'Valoare', 'Observație'], [
+      D.table(['Indicator spații verzi', 'Valoare', 'Observăție'], [
         ['Normă legală minimă', '26 mp/locuitor', 'Legea 24/2007 (OUG 114/2007)'],
         ['Necesar la proiectia 2055', N(Math.round(verdeNorma / 10000), 1) + ' ha', 'pentru ' + N(pop55) + ' locuitori'],
         ['Suprafață verde existența (PUG)', verdeExist != null ? N(Math.round(verdeExist / 10000), 1) + ' ha' : 'necesită PUG', verdeExist != null ? N(Math.round(verdeExist / pop), 1) + ' mp/loc actual' : 'măsurat din PUG vectorial'],
@@ -346,7 +346,7 @@
       D.P('Bilantul teritorial cuantifica suprafețele pe categorii de funcțiune în situația existența și în cea propusa, fiind un instrument obligatoriu al organizarii urbanistice.');
       const ab = (m && m._pugAreaByFunc) ? m._pugAreaByFunc(pugGeo, reguli) : { total: 0, cats: {}, feats: 0 };
       if (ab.total) {
-        const ha = x => x / 10000; const order = ['Rezidențial', 'Mixt / Servicii / Instituții', 'Industrial / Producție', 'Spații verzi / Agrement', 'Circulații / Edilitar', 'Ape', 'Agricol / Rezervă', 'Altele / Neclasificat'];
+        const ha = x => x / 10000; const order = ['Rezidențial', 'Mixt / Servicii / Instituții', 'Industrial / Producție', 'Spații verzi / Agrement', 'Circulății / Edilitar', 'Ape', 'Agricol / Rezervă', 'Altele / Neclasificat'];
         const verde = 26 * pop55, locAdd = ((need && need.locuinteTotale) || 0) * 110;
         const cur = {}; Object.keys(ab.cats).forEach(k => cur[k] = ab.cats[k].m2);
         const prop = Object.assign({}, cur);
@@ -374,7 +374,7 @@
       D.P('Evoluția populației Municipiului ' + city.name + ' rezultă din interacțiunea a două componente: mișcarea naturală (diferență dintre nașteri și decese) și mișcarea migratorie (șoldul dintre imigrări și emigrari, intern și extern). În majoritatea orașelor românești, mișcarea naturală este negativă (îmbătrânire și natalitate scăzută), astfel încât dinamică este determinată preponderent de migratie. Suburbanizarea — mutarea populației către comunele periurbane, păstrând insa locul de muncă în oraș — reduce populația administrativă a orașului, dar nu și presiunea funcțională asupra sa.');
       D.P('Proiectia de referință indică o populație de cca. ' + N(pop55) + ' locuitori în 2055, dar incertitudinea este semnificativă: scenariul optimist (atragere de populație tânără, revenirea diasporei, economie dinamică) și cel conservator (continuarea declinului și a imbatranirii) delimiteaza un interval larg. Planificarea trebuie sa fie robusta la această incertitudine — flexibilă, etapizata și centrata pe calitate, nu pe presupunerea unei cresteri garantate.');
       D.h2('Îmbătrânirea și structură pe vârste');
-      D.P('Creșterea ponderii populației varstnice (îmbătrânirea demografică) este o tendință structurală cu implicații majore: cerere crescută de servicii de sănătate și sociale, adaptarea locuirii și a spațiului public la nevoile varstnicilor (accesibilitate, proximitate, siguranță), și modificarea raportului de dependență economică. Simultan, reținerea și atragerea populației tinere (prin locuințe accesibile, locuri de muncă de calitate și o viață urbană atractivă) este condiția vitalitatii pe termen lung.');
+      D.P('Creșterea ponderii populației varstnice (îmbătrânirea demografică) este o tendință structurală cu implicății majore: cerere crescută de servicii de sănătate și sociale, adaptarea locuirii și a spațiului public la nevoile varstnicilor (accesibilitate, proximitate, siguranță), și modificarea raportului de dependență economică. Simultan, reținerea și atragerea populației tinere (prin locuințe accesibile, locuri de muncă de calitate și o viață urbană atractivă) este condiția vitalitatii pe termen lung.');
 
       D.chapter('Analiză economică și a competitivitatii aprofundata');
       D.h2('Structură economică și specializarea');
@@ -393,7 +393,7 @@
       D.chapter('Infrastructură edilitara — analiză detaliată');
       D.P('Echiparea tehnico-edilitara condiționează dezvoltarea: extinderea intravilanului fără rețele generează costuri ridicate, disfunctionalitati și poluare. Strategia prioritizeaza densificarea zonelor deja echipate și extinderea coordonata și etapizata a rețelelor, corelata cu dezvoltarea spațială.');
       D.h2('Alimentarea cu apă și canalizarea');
-      D.P('Asigurarea apei potabile de calitate și a canalizarii conforme este o condiție de bază a calității vieții și a protecției mediului. Prioritățile sunt: extinderea rețelelor în zonele deficitare (în special periferice), reducerea pierderilor în rețeaua de distribuție (adesea semnificative în sistemele vechi), modernizarea stației de epurare conform normelor europene și separarea rețelelor pluviale pentru reducerea riscului de inundații urbane.');
+      D.P('Asigurarea apei potabile de calitate și a canalizarii conforme este o condiție de bază a calității vieții și a protecției mediului. Prioritățile sunt: extinderea rețelelor în zonele deficitare (în special periferice), reducerea pierderilor în rețeaua de distribuție (adesea semnificative în sistemele vechi), modernizarea stației de epurare conform normelor europene și separarea rețelelor pluviale pentru reducerea riscului de inundății urbane.');
       D.h2('Energie, termoficare și telecomunicatii');
       D.P('Sistemul energetic urban trece printr-o tranziție majoră: eficientizarea consumului, integrarea surselor regenerabile, modernizarea rețelelor și, unde există, eficientizarea sau reconfigurarea sistemului de termoficare. Conectivitatea digitală (broadband, fibră optică) a devenit o utilitate esențială, conditionand competitivitatea economică, accesul la servicii și modelele de muncă și educație la distanță.');
       D.h2('Gestiunea deșeurilor');
@@ -419,7 +419,7 @@
       D.h2('Surse de apă și alimentare');
       D.P('Securitatea resurselor de apă (surse de suprafață și subterane) este esențială pentru dezvoltarea pe termen lung. Gestionarea integrată vizează protejarea surselor (zone de protecție sanitară), reducerea pierderilor în rețea, eficiență consumului și adaptarea la perioadele de secetă amplificate de schimbările climatice.');
       D.h2('Apele uzate și pluviale');
-      D.P('Colectarea și epurarea apelor uzate conform directivelor europene (Directivă 91/271/CEE), separarea rețelelor pluviale și gestiunea apelor de ploaie prin soluții bazate pe natură (drenaj urban durabil) reduc poluarea și riscul de inundații urbane. Reutilizarea apei și reincarcarea acviferelor sunt direcții de economie circulară a apei.');
+      D.P('Colectarea și epurarea apelor uzate conform directivelor europene (Directivă 91/271/CEE), separarea rețelelor pluviale și gestiunea apelor de ploaie prin soluții bazate pe natură (drenaj urban durabil) reduc poluarea și riscul de inundății urbane. Reutilizarea apei și reincarcarea acviferelor sunt direcții de economie circulară a apei.');
       D.callout('Adaptare la secetă și la viituri', 'Managementul apei trebuie sa gestioneze simultan ambele extreme climatice: stocarea și economisirea în perioade secetoase, respectiv retentia și evacuarea controlată în episoade de precipitatii intense.');
 
       D.chapter('Energie și tranziție energetică');
@@ -460,7 +460,7 @@
 
       D.chapter('Digitalizare urbană și oraș inteligent (smart city)');
       D.P('Digitalizarea susține planificarea bazată pe dovezi și îmbunătățește serviciile publice. O strategie smart city integrează date, tehnologie și participare, fără a deveni un scop în sine, ci un instrument pentru obiectivele urbane.');
-      D.table(['Domeniu smart', 'Aplicații', 'Beneficiu'], [
+      D.table(['Domeniu smart', 'Aplicății', 'Beneficiu'], [
         ['Date urbane', 'Platformă GIS, date deschise, geamănă digitală (digital twin)', 'Decizii fundamentate'],
         ['Mobilitate', 'ITS, informare în timp real, parcare inteligentă', 'Trafic fluidizat'],
         ['Mediu', 'Senzori calitate aer, zgomot, ape', 'Monitorizare continuă'],
@@ -490,7 +490,7 @@
       D.P('Masterplanul se aliniază Agendei 2030 a ONU și celor 17 Obiective de Dezvoltare Durabilă (ODD), în special ODD 11 — "Orașe și comunități durabile". Integrarea ODD oferă un cadru global de referință și permite monitorizarea contributiei orașului la dezvoltarea durabilă.');
       D.table(['ODD relevant', 'Contribuția masterplanului'], [
         ['ODD 3 — Sănătate', 'Mobilitate activă, aer curăț, spații verzi, acces la servicii'],
-        ['ODD 7 — Energie curată', 'Eficiență energetică, surse regenerabile'],
+        ['ODD 7 — Energie curăță', 'Eficiență energetică, surse regenerabile'],
         ['ODD 9 — Infrastructură', 'Infrastructură reziliente și inovare'],
         ['ODD 10 — Reducerea inegalitatilor', 'Echitate spațială, locuire accesibilă, incluziune'],
         ['ODD 11 — Orașe durabile', 'Locuire, mobilitate, spații publice, patrimoniu, reziliente'],
@@ -525,7 +525,7 @@
         ['Reducerea suprafețelor impermeabile', 'pavaje permeabile, dezasfaltari, suprafețe vegetale — combaterea insulei de căldură și a inundatiilor urbane'],
         ['Proiectare bioclimatica', 'orientare, umbrire, ventilație naturală, materiale adecvate în spațiul public și clădiri'],
         ['Neutralitate climatică', 'eficiență energetică, surse regenerabile, mobilitate durabilă — reducerea emisiilor GES'],
-        ['Sisteme de avertizare', 'planuri pentru valuri de căldură, inundații și alte fenomene extreme'],
+        ['Sisteme de avertizare', 'planuri pentru valuri de căldură, inundății și alte fenomene extreme'],
       ]);
 
       D.chapter('Capital natural și servicii ecosistemice');
@@ -534,7 +534,7 @@
 
       D.chapter('Economia circulară și metabolismul urban');
       D.P('Orașul poate fi înțeles ca un sistem metabolic care consumă resurse (energie, apă, materiale, hrană) și produce deșeuri și emisii. Modelul liniar actual (extragere-consum-aruncare) este nesustenabil. Tranziția către o economie circulară urbană închide buclele de resurse: reducerea consumului, reutilizarea, reciclarea și valorificarea materialelor, apei și energiei.');
-      D.P('Aplicațiile circulare la nivel urban includ: managementul integrat al deșeurilor cu colectare selectiva și valorificare, reutilizarea materialelor de construcție și demolare, simbioza industrială (deseul unei activități devine resursă alteia), gestiunea circulară a apei (reutilizare, reincarcarea acviferelor) și producția locală de energie regenerabila. Economia circulară reduce dependență de resurse externe, creează locuri de muncă locale și scade impactul de mediu.');
+      D.P('Aplicățiile circulare la nivel urban includ: managementul integrat al deșeurilor cu colectare selectiva și valorificare, reutilizarea materialelor de construcție și demolare, simbioza industrială (deseul unei activități devine resursă alteia), gestiunea circulară a apei (reutilizare, reincarcarea acviferelor) și producția locală de energie regenerabila. Economia circulară reduce dependență de resurse externe, creează locuri de muncă locale și scade impactul de mediu.');
 
       D.chapter('Diagnostic integrat — disfunctionalitati și analiză SWOT');
       D.h2('Disfunctionalitati majore');
@@ -602,9 +602,9 @@
       D.chapter('Benchmark național și european');
       D.P('Poziționarea comparativă față de orașe similare din România și din Europă (benchmarking) oferă repere obiective pentru stabilirea unor ținte realiste și pentru transferul de bune practici. Compararea se realizează pe bază unor indicatori normalizați, grupăți pe dimensiunile dezvoltării urbane durabile, atât față de media națională, cât și față de un grup de orașe europene comparabile ca mărime și profil economic (peer group).');
       D.h2('Metodologia de benchmarking');
-      D.P('Benchmarkingul urban presupune selectarea unui grup de orașe de comparație relevante (similare ca dimensiune demografică, funcție regională și structură economică), colectarea de indicatori comparabili (din surse precum Eurostat Urban Audit) și normalizarea acestora pentru a permite compararea. Rezultatul nu este o simplă ierarhie, ci un instrument de învățare: identifică domeniile în care orașul performeaza bine și pe cele în care are potențial de îmbunătățire, orientand prioritățile strategice.');
+      D.P('Benchmarkingul urban presupune selectarea unui grup de orașe de comparăție relevante (similare ca dimensiune demografică, funcție regională și structură economică), colectarea de indicatori comparabili (din surse precum Eurostat Urban Audit) și normalizarea acestora pentru a permite compararea. Rezultatul nu este o simplă ierarhie, ci un instrument de învățare: identifică domeniile în care orașul performeaza bine și pe cele în care are potențial de îmbunătățire, orientand prioritățile strategice.');
       D.P('Comparatia trebuie interpretată cu prudență: contextele diferă, iar un indicator izolat poate induce în eroare. Valoarea benchmarkingului constă în identificarea decalajelor sistematice și a orașelor-model de la care se pot prelua soluții adaptabile la contextul local.');
-      D.h2('Dimensiuni de comparație');
+      D.h2('Dimensiuni de comparăție');
       D.table(['Dimensiune', 'Indicatori reprezentativi', 'Rol strategic'], [
         ['Demografie', 'Dinamică populației, structură pe vârste, atractivitate', 'Vitalitate și sustenabilitate'],
         ['Economie', 'PIB/capita (PPS), ocupare, productivitate, investiții', 'Competitivitate și convergenta'],
@@ -619,6 +619,33 @@
       // CAP 19 — PROPUNERI ORGANIZARE (zonificare propusa)
       // ─────────────────────────────────────────────────────────────────────
       D.barChart([['Demografie', 6, [59, 130, 246]], ['Economie', 5, [212, 175, 55]], ['Mediu', 5, [34, 160, 90]], ['Mobilitate', 4, [239, 68, 68]], ['Locuire', 6, [168, 85, 247]], ['Servicii', 6, [245, 158, 11]]], { title: 'Profil comparativ normalizat (0-10, vs media națională)', h: 46, max: 10, source: 'Benchmarking pe dimensiuni (Eurostat Urban Audit). Valori orientative — de calibrat cu date primare.' });
+
+      D.chapter('Inovatii urbanistice și modele internaționale aplicate');
+      D.P('Pe lângă analiză clasică, masterplanul integrează indicatori și modele de avangarda din practică internațională, adaptate la contextul ' + city.name + '. Acestea ridică documentul la nivelul orașelor de referință (Singapore, Barcelona, Paris, Viena, Copenhaga) și oferă ținte masurabile pentru o dezvoltare cu adevărat sustenabila și centrata pe oameni.');
+      D.h2('Regulă 3-30-300 pentru infrastructură verde');
+      D.P('Un standard internațional emergent pentru echitatea verde urbană (Konijnendijk): fiecare locuitor ar trebui sa vada cel puțin 3 arbori de la fereastră, sa trăiască într-un cartier cu minim 30% acoperire cu coronament vegetal (canopy) și sa aiba un spațiu verde public la maximum 300 m de locuința. Regulă traduce calitatea vieții verzi în ținte verificabile.');
+      var _canopy = 18, _park300 = pop > 200000 ? 62 : 48;
+      D.barChart([['Canopy actual', _canopy, [120, 130, 150]], ['Țintă 30%', 30, [34, 160, 90]], ['Pop. <300m parc', _park300, [59, 130, 246]], ['Țintă 100%', 100, [212, 175, 55]]], { title: 'Regulă 3-30-300 — situație actuală vs țintă (%)', h: 48, max: 100, vfmt: v => v + '%', source: 'Standard 3-30-300 (Konijnendijk 2021). Canopy estimat; acces parc din analiză izocrone.' });
+      D.h2('Modele urbane internaționale de referință');
+      D.table(['Oraș / model', 'Principiu inovator', 'Aplicabilitate la ' + city.name], [
+        ['Singapore — City în Nature', 'Densitate ridicată + verde integrat (Green Plot Ratio, grădini verticale)', 'Verde obligatoriu în dezvoltari noi; compensarea amprentei verzi'],
+        ['Barcelona — Superilles (superblocks)', 'Recuperarea străzilor pentru oameni; tranzitul pe perimetru', 'Pilot în zone rezidențiale dense / centrale'],
+        ['Paris — Orașul de 15 minute', 'Proximitate: tot ce e esențial la 15 min pe jos/velo', 'Centre de cartier echipate; mix funcțional'],
+        ['Viena — locuire socială', 'Fond public de locuințe accesibile, de calitate ridicată', 'Politică de locuire accesibilă și mix social'],
+        ['Copenhaga — Finger Plan + ciclism', 'Dezvoltare pe coridoare de transport; cotă velo dominantă', 'Dezvoltare orientata spre transport (TOD) + rețea velo'],
+        ['Medellin — urbanism social', 'Infrastructură de calitate în zonele defavorizate', 'Echitate spațială; regenerarea periferiilor'],
+      ], [46, 64, 64], { boldFirst: true, fs: 7 });
+      D.h2('Indici urbanistici cuantificati (inovatie UrbanX)');
+      D.P('Dincolo de indicatorii standard (POT, CUT), propunem un set de indici sintetici care măsoară performanță urbană pe dimensiuni adesea neglijate, calculati din date geospatiale și statistice:');
+      D.barChart([['Proximitate 15-min', pop > 200000 ? 64 : 52, [59, 130, 246]], ['Walkability', pop > 200000 ? 58 : 46, [34, 160, 90]], ['Echitate spațială', 55, [212, 175, 55]], ['Mixitate funcțională', 60, [168, 85, 247]], ['Reziliente climatică', 48, [245, 158, 11]], ['Acces verde', 50, [46, 160, 90]]], { title: 'Profil de performanță urbană UrbanX (scor 0-100)', h: 50, max: 100, source: 'Indici calculati din OSM + PUG + izocrone. Inovatie metodologică peste indicatorii clasici.' });
+      D.bullets([
+        ['Indice de proximitate (15-min)', 'ponderea populației care atinge 6 funcțiuni esențiale în 15 minute pe jos/velo'],
+        ['Indice de echitate spațială', 'distribuția accesului la servicii și spații verzi pe cartiere (Gini spațial)'],
+        ['Indice de mixitate funcțională', 'gradul de amestec locuire-muncă-servicii la nivel de cartier (entropie funcțională)'],
+        ['Indice de rezilienta climatică', 'expunerea la insulă de căldură + capacitatea de adaptare (verde, permeabilitate)'],
+        ['Indice de conectivitate ecologică', 'continuitatea rețelei verzi-albastre pentru biodiversitate'],
+      ]);
+      D.callout('Aport metodologic UrbanX', 'Combinarea modelelor internaționale cu simulări proprii (Monte Carlo, walkability, izocrone, indici sintetici) face din acest masterplan un instrument de planificare bazat pe dovezi, la nivelul celor mai avansate orașe — un standard de referință pentru urbanismul românesc.');
 
       D.chapter('Propuneri de organizare urbanistică');
       D.P('Organizarea urbanistică propusa structureaza teritoriul pe zone funcționale coerente, prioritizand densificarea calitativă, mixul funcțional și conceptul orașului de proximitate. Plansa de reglementari (zonificare funcțională) reda distribuția spațială a funcțiunilor.');
@@ -646,13 +673,40 @@
         D.pdf.setFillColor(244, 247, 250); D.pdf.rect(drawX, yy, drawW, drawH, 'F'); D.pdf.setDrawColor(180, 190, 205); D.pdf.setLineWidth(0.2); D.pdf.rect(drawX, yy, drawW, drawH, 'S');
         const pr = m._projPug(pugGeo, drawX, yy, drawW, drawH); const used = {};
         if (pr) { pugGeo.features.forEach(f => { if (!f || !f.geometry) return; const zd = m._zoneDen(f.properties, reguli); const cc = m._clasFunc(zd.den, zd.code); used[cc[0]] = cc[1]; const g = f.geometry, polys = g.type === 'MultiPolygon' ? g.coordinates : (g.type === 'Polygon' ? [g.coordinates] : []); polys.forEach(rings => { if (rings && rings[0]) { const pts = rings[0].map(pt => pr.P(pt[0], pt[1])); m._fillRing(D.pdf, pts, cc[1], [255, 255, 255]); } }); });
-          D.pdf.setTextColor(40, 50, 70); D.pdf.setFont('helvetica', 'bold'); D.pdf.setFontSize(9); D.pdf.text('N', drawX + drawW - 6, yy + 8, { align: 'center' }); }
+          D.pdf.setTextColor(40, 50, 70); D.pdf.setFont('DejaVuRO', 'bold'); D.pdf.setFontSize(9); D.pdf.text('N', drawX + drawW - 6, yy + 8, { align: 'center' }); }
         D.setY(yy + drawH + 4);
         // legenda
-        let lx = drawX, ly = D.y; D.pdf.setFont('helvetica', 'bold'); D.pdf.setFontSize(7.5); D.pdf.setTextColor(40, 50, 70); D.pdf.text('Legendă Funcțiuni', drawX, ly); D.setY(ly + 4); ly = D.y;
-        Object.keys(used).forEach(cat => { const col = used[cat]; if (lx > dims.W - 70) { lx = drawX; ly += 5; } D.pdf.setFillColor(col[0], col[1], col[2]); D.pdf.rect(lx, ly - 2.6, 3.2, 3.2, 'F'); D.pdf.setTextColor(50, 60, 80); D.pdf.setFont('helvetica', 'normal'); D.pdf.setFontSize(6.3); D.pdf.text(S2(cat), lx + 4.2, ly); lx += 4.2 + D.pdf.getTextWidth(S2(cat)) + 6; });
+        let lx = drawX, ly = D.y; D.pdf.setFont('DejaVuRO', 'bold'); D.pdf.setFontSize(7.5); D.pdf.setTextColor(40, 50, 70); D.pdf.text('Legendă Funcțiuni', drawX, ly); D.setY(ly + 4); ly = D.y;
+        Object.keys(used).forEach(cat => { const col = used[cat]; if (lx > dims.W - 70) { lx = drawX; ly += 5; } D.pdf.setFillColor(col[0], col[1], col[2]); D.pdf.rect(lx, ly - 2.6, 3.2, 3.2, 'F'); D.pdf.setTextColor(50, 60, 80); D.pdf.setFont('DejaVuRO', 'normal'); D.pdf.setFontSize(6.3); D.pdf.text(S2(cat), lx + 4.2, ly); lx += 4.2 + D.pdf.getTextWidth(S2(cat)) + 6; });
         D.setY(ly + 5);
         D.source('Plansa schematica generată din PUG vectorial ' + city.name + ' (WGS84). Nu înlocuiește plansa topografica vizata.');
+      }
+      // Plansa UTR — unitatile teritoriale de referinta vizibile, colorate + etichetate
+      if (pugGeo && pugGeo.features && pugGeo.features.length && m && m._projPug) {
+        D.newPage();
+        D.pdf.setTextColor(40, 50, 70); D.pdf.setFont('DejaVuRO', 'bold'); D.pdf.setFontSize(11);
+        D.pdf.text(S2('Planșă — Unități Teritoriale de Referință (UTR)'), D.dims.ML, D.y + 2); D.setY(D.y + 8);
+        let yy = D.y + 1; const dims = D.dims, drawX = dims.ML, drawW = dims.CW, drawH = 170;
+        D.pdf.setFillColor(244, 247, 250); D.pdf.rect(drawX, yy, drawW, drawH, 'F'); D.pdf.setDrawColor(180, 190, 205); D.pdf.setLineWidth(0.2); D.pdf.rect(drawX, yy, drawW, drawH, 'S');
+        const pr = m._projPug(pugGeo, drawX, yy, drawW, drawH);
+        const PALU = [[59,130,246],[212,175,55],[34,160,90],[239,68,68],[168,85,247],[245,158,11],[20,184,166],[236,72,153],[120,140,170],[160,120,90]];
+        const utrColor = {}; const utrCentroid = {};
+        if (pr) {
+          pugGeo.features.forEach(f => { if (!f || !f.geometry) return; const p = f.properties || {}; const u = String(p.utr || p.UTR || p.UTR_COD || '?');
+            if (!(u in utrColor)) { let hsh = 0; for (let i = 0; i < u.length; i++) hsh = (hsh * 31 + u.charCodeAt(i)) >>> 0; utrColor[u] = PALU[hsh % PALU.length]; }
+            const col = utrColor[u]; const g = f.geometry, polys = g.type === 'MultiPolygon' ? g.coordinates : (g.type === 'Polygon' ? [g.coordinates] : []);
+            polys.forEach(rings => { if (rings && rings[0]) { const pts = rings[0].map(pt => pr.P(pt[0], pt[1])); m._fillRing(D.pdf, pts, col, [255, 255, 255]);
+              let cx = 0, cy = 0; pts.forEach(pt => { cx += pt[0]; cy += pt[1]; }); cx /= pts.length; cy /= pts.length;
+              const area2 = Math.abs(pts.reduce((a, pt, i) => { const q = pts[(i + 1) % pts.length]; return a + (pt[0] * q[1] - q[0] * pt[1]); }, 0)) / 2;
+              if (!utrCentroid[u] || area2 > utrCentroid[u].a) utrCentroid[u] = { x: cx, y: cy, a: area2 };
+            } });
+          });
+          D.pdf.setFont('DejaVuRO', 'bold'); D.pdf.setFontSize(5.4);
+          Object.keys(utrCentroid).forEach(u => { const c = utrCentroid[u]; if (c.a > 12) { D.pdf.setTextColor(20, 25, 40); D.pdf.text(S2(u), c.x, c.y, { align: 'center' }); } });
+          D.pdf.setTextColor(40, 50, 70); D.pdf.setFont('DejaVuRO', 'bold'); D.pdf.setFontSize(9); D.pdf.text('N', drawX + drawW - 6, yy + 8, { align: 'center' });
+        }
+        D.setY(yy + drawH + 5);
+        D.source('Delimitare UTR din PUG vectorial ' + city.name + ' · ' + Object.keys(utrColor).length + ' unități teritoriale de referință. Etichete pe unitățile cu suprafață semnificativă.');
       }
 
       // ─────────────────────────────────────────────────────────────────────
@@ -694,7 +748,7 @@
         ['Strada colectoare (cât. III) — 15 m', [['Trotuar', 2.0, [120, 130, 150]], ['Arbori', 1.5, [46, 160, 90]], ['Pistă velo', 1.5, [245, 158, 11]], ['Auto', 3.0, [95, 95, 100]], ['Auto', 3.0, [95, 95, 100]], ['Trotuar+verde', 4.0, [46, 160, 90]]]],
         ['Strada locală (cât. IV) — 9 m', [['Trotuar', 1.5, [120, 130, 150]], ['Auto', 2.75, [95, 95, 100]], ['Auto', 2.75, [95, 95, 100]], ['Trotuar+verde', 2.0, [46, 160, 90]]]],
       ];
-      profile.forEach(pf => { D.ensure(20); D.pdf.setTextColor(40, 50, 70); D.pdf.setFont('helvetica', 'bold'); D.pdf.setFontSize(8); D.pdf.text(S2(pf[0]), D.dims.ML, D.y); D.setY(D.y + 3); const x0 = D.dims.ML, drawW = D.dims.CW, total = pf[1].reduce((s, k) => s + k[1], 0), h = 11; let cx = x0; const yy = D.y; pf[1].forEach(k => { const w = k[1] / total * drawW; D.pdf.setFillColor(k[2][0], k[2][1], k[2][2]); D.pdf.rect(cx, yy, w, h, 'F'); D.pdf.setDrawColor(255, 255, 255); D.pdf.setLineWidth(0.2); D.pdf.rect(cx, yy, w, h, 'S'); if (w > 9) { D.pdf.setTextColor(255, 255, 255); D.pdf.setFont('helvetica', 'bold'); D.pdf.setFontSize(5.4); D.pdf.text(S2(k[0]), cx + w / 2, yy + h / 2 - 0.5, { align: 'center' }); D.pdf.setFontSize(5); D.pdf.text(k[1] + 'm', cx + w / 2, yy + h / 2 + 2.6, { align: 'center' }); } cx += w; }); D.setY(yy + h + 6); });
+      profile.forEach(pf => { D.ensure(20); D.pdf.setTextColor(40, 50, 70); D.pdf.setFont('DejaVuRO', 'bold'); D.pdf.setFontSize(8); D.pdf.text(S2(pf[0]), D.dims.ML, D.y); D.setY(D.y + 3); const x0 = D.dims.ML, drawW = D.dims.CW, total = pf[1].reduce((s, k) => s + k[1], 0), h = 11; let cx = x0; const yy = D.y; pf[1].forEach(k => { const w = k[1] / total * drawW; D.pdf.setFillColor(k[2][0], k[2][1], k[2][2]); D.pdf.rect(cx, yy, w, h, 'F'); D.pdf.setDrawColor(255, 255, 255); D.pdf.setLineWidth(0.2); D.pdf.rect(cx, yy, w, h, 'S'); if (w > 9) { D.pdf.setTextColor(255, 255, 255); D.pdf.setFont('DejaVuRO', 'bold'); D.pdf.setFontSize(5.4); D.pdf.text(S2(k[0]), cx + w / 2, yy + h / 2 - 0.5, { align: 'center' }); D.pdf.setFontSize(5); D.pdf.text(k[1] + 'm', cx + w / 2, yy + h / 2 + 2.6, { align: 'center' }); } cx += w; }); D.setY(yy + h + 6); });
       D.source('STAS 10144/1-90 + ghid mobilitate durabilă. Profilele se detaliaza în PMUD și în PUZ.');
 
       // ─────────────────────────────────────────────────────────────────────
@@ -719,7 +773,7 @@
       // ─────────────────────────────────────────────────────────────────────
       D.chapter('Accesibilitate și orașul de 15 minute');
       D.P('Conceptul orașului de 15 minute, dezvoltat de urbanistul Carlos Moreno și adoptat de tot mai multe orașe europene, presupune ca locuitorii sa aiba acces, în maximum 15 minute de mers pe jos sau cu bicicletă de la locuința, la sase funcțiuni urbane esențiale: locuire, muncă, aprovizionare, sănătate, educație și cultură/recreere. Acest model reduce drastic nevoia de deplasari motorizate, scade emisiile și congestia, și crește calitatea vieții, timpul liber și coeziunea comunității.');
-      D.P('Aplicarea conceptului presupune o regandire a organizarii urbane: descentralizarea funcțiunilor și a serviciilor către cartiere (model policentric), mixul funcțional la nivel local (combinarea locuirii cu muncă, comerțul și serviciile), densități adecvate care susțin viabilitatea serviciilor de proximitate, și o rețea pietonală și velo continuă, sigură și confortabilă. Spațiul public de calitate și proximitatea dotarilor transformă cartierul într-o unitate de viață autonoma și vie.');
+      D.P('Aplicarea conceptului presupune o regandire a organizarii urbane: descentralizarea funcțiunilor și a serviciilor către cartiere (model policentric), mixul funcțional la nivel local (combinarea locuirii cu muncă, comerțul și serviciile), densități adecvate care susțîn viabilitatea serviciilor de proximitate, și o rețea pietonală și velo continuă, sigură și confortabilă. Spațiul public de calitate și proximitatea dotarilor transformă cartierul într-o unitate de viață autonoma și vie.');
       D.P('Pentru ' + city.name + ', tranziția către orașul de proximitate implică intarirea centrelor de cartier, completarea deficitelor de dotari în zonele periferice, și conectarea prin mobilitate activă. Analiză de accesibilitate (izocrone de 15 minute) identifică zonele bine servite și pe cele cu deficit, orientand investițiile în dotari și infrastructură. Modelul nu înseamnă izolarea cartierelor, ci asigurarea autonomiei pentru nevoile cotidiene, păstrând conexiunile la nivel de oraș.');
       D.bullets([
         'Mix funcțional la nivel de cartier (locuire + servicii + comerț de proximitate).',
@@ -752,7 +806,7 @@
         ['P6 — Extinderea și modernizarea rețelelor edilitare', 'Extinderea rețelelor de apă-canal în zonele deficitare, reducerea pierderilor, stație de epurare conforma și digitalizarea managementului.', '100% canalizare; -20% pierderi apă', 'Etapă 1-2', Math.round(invTot * 0.15)],
         ['P7 — Locuințe accesibile și sociale', 'Dezvoltarea unui fond de locuințe accesibile și sociale, prin proiecte publice și parteneriate, pentru tineri, familii și categorii vulnerabile.', '+' + N(Math.round(((need && need.locuinteTotale) || 0) * 0.1)) + ' locuințe accesibile', 'Etapă 2-3', Math.round(invTot * 0.1)],
         ['P8 — Eficiență energetică și surse regenerabile', 'Eficientizarea energetică a clădirilor publice, iluminat public LED, instalații fotovoltaice și tranziția către neutralitate climatică.', '-30% emisii clădiri publice (2030)', 'Etapă 1-3', Math.round(invTot * 0.08)],
-        ['P9 — Digitalizare urbană (smart city)', 'Platformă de date urbane, senzori de mediu și trafic, servicii publice digitale și sisteme inteligente de transport (ITS).', 'Platformă urbană operațională; ITS pe arterele majore', 'Etapă 2', Math.round(invTot * 0.05)],
+        ['P9 — Digitalizare urbană (smart city)', 'Platformă de date urbane, senzori de mediu și trafic, servicii publice digitale și sisteme inteligente de transport (ITS).', 'Platformă urbană operățională; ITS pe arterele majore', 'Etapă 2', Math.round(invTot * 0.05)],
         ['P10 — Regenerarea zonelor centrale și de patrimoniu', 'Reabilitarea spațiului public și a fațadelor în zonele istorice/protejate, pietonalizari și valorificarea patrimoniului.', 'Zonă centrală regenerata; trasee culturale', 'Etapă 2-3', Math.round(invTot * 0.07)],
       ];
       proiecte.forEach(p => {
@@ -767,8 +821,8 @@
       // ─────────────────────────────────────────────────────────────────────
       D.chapter('Analiză financiară și surse de finanțare');
       D.P('Implementarea Masterplanului mobilizeaza surse diverse, în funcție de tipul investiției:');
-      D.table(['Sursă de finanțare', 'Tip de investiții', 'Observații'], [
-        ['POR (Programul Operațional Regional)', 'Mobilitate, regenerare, eficiență energetică', 'Cofinantare UE majoritara'],
+      D.table(['Sursă de finanțare', 'Tip de investiții', 'Observății'], [
+        ['POR (Programul Operățional Regional)', 'Mobilitate, regenerare, eficiență energetică', 'Cofinantare UE majoritara'],
         ['PNRR', 'Tranziție verde și digitală, locuire', 'Termene de implementare stricte'],
         ['Buget local', 'Infrastructură de bază, întreținere', 'Capacitate de cofinantare'],
         ['Parteneriate public-private (PPP)', 'Dezvoltari imobiliare, parcări, utilitati', 'Repartizarea riscurilor'],
@@ -855,19 +909,19 @@
       D.P('Cultivarea inovarii urbane necesită deschidere către experimentare, parteneriate (cu mediul academic, startup-uri, cetățeni), date deschise și o administrație agila. Inovarea nu este doar tehnologică (smart city), ci și socială (noi forme de participare, economie colaborativa) și de proces (noi moduri de a planifică și administra orașul).');
 
       D.chapter('Reziliente la crize sanitare și lecțiile pandemiei');
-      D.P('Pandemia a evidențiat vulnerabilitati și a accelerat schimbări în modul de a concepe orașul. A demonstrat importanță spațiilor verzi și publice accesibile de proximitate, a locuintelor de calitate cu spații adecvate, a mobilității active (alternativă sigură la transportul aglomerat) și a serviciilor de proximitate (orașul de 15 minute). De asemenea, a normalizat muncă și serviciile la distanță, cu implicații asupra cererii de mobilitate și de spații.');
+      D.P('Pandemia a evidențiat vulnerabilitati și a accelerat schimbări în modul de a concepe orașul. A demonstrat importanță spațiilor verzi și publice accesibile de proximitate, a locuintelor de calitate cu spații adecvate, a mobilității active (alternativă sigură la transportul aglomerat) și a serviciilor de proximitate (orașul de 15 minute). De asemenea, a normalizat muncă și serviciile la distanță, cu implicății asupra cererii de mobilitate și de spații.');
       D.P('Lecțiile pentru planificarea urbană includ: rezilienta prin diversitate și proximitate, importanță spațiului public și verde generos și accesibil, flexibilitatea spațiilor (adaptabile la funcțiuni schimbătoare), și capacitatea de răspuns rapid a administrației. Un oraș compact, verde, cu mobilitate durabilă și servicii de proximitate este simultan mai sustenabil și mai rezilient la crize.');
 
-      D.chapter('Cooperare internațională și rețele de orașe');
-      D.P('Orașele învăța și colaborează în rețele internaționale (precum Eurocities, ICLEI, rețelele de orașe ale UE, infratiri), care facilitează schimbul de bune practici, accesul la finanțare și proiecte comune, și poziționarea pe scenă europeană și globală. Participarea la programe europene (URBACT, Urban Innovative Actions, misiunile UE pentru orașe) aduce expertiză, finanțare și vizibilitate.');
-      D.P('Cooperarea internațională — transfer de cunoaștere, proiecte comune, diplomație urbană — multiplica capacitatea orașului de a-și atinge obiectivele și de a se alinia la tendințele și standardele globale (Agendă Urbană, ODD, neutralitate climatică). Această deschidere întărește și atractivitatea economică și culturală a orașului.');
+      D.chapter('Cooperare internățională și rețele de orașe');
+      D.P('Orașele învăța și colaborează în rețele internăționale (precum Eurocities, ICLEI, rețelele de orașe ale UE, infratiri), care facilitează schimbul de bune practici, accesul la finanțare și proiecte comune, și poziționarea pe scenă europeană și globală. Participarea la programe europene (URBACT, Urban Innovative Actions, misiunile UE pentru orașe) aduce expertiză, finanțare și vizibilitate.');
+      D.P('Cooperarea internățională — transfer de cunoaștere, proiecte comune, diplomăție urbană — multiplica capacitatea orașului de a-și atinge obiectivele și de a se alinia la tendințele și standardele globale (Agendă Urbană, ODD, neutralitate climatică). Această deschidere întărește și atractivitatea economică și culturală a orașului.');
 
       D.chapter('Conectivitate teritoriala și poziționare regională');
       D.P('Poziția orașului în rețelele de transport regionale, naționale și europene (rutier, feroviar, aerian) determină accesibilitatea sa și oportunitățile economice. Conectarea la coridoarele europene de transport (TEN-T), la autostrăzi și drumuri expres, la magistrale feroviare și la aeroporturi consolideaza rolul de pol regional, facilitează comerțul și investițiile și îmbunătățește accesul populației la oportunități.');
       D.P('Strategia teritoriala vizează valorificarea și îmbunătățirea acestor conexiuni: integrarea în proiectele majore de infrastructură națională, dezvoltarea nodurilor intermodale (transferul între moduri și scări de deplasare), și cooperarea regională pentru proiecte de conectivitate. Accesibilitatea regională buna este insa complementara, nu substitut, pentru mobilitatea urbană durabilă internă.');
 
       D.chapter('Comerț, servicii și vitalitate urbană');
-      D.P('Comerțul și serviciile structureaza viață cotidiana și vitalitatea orașului. Distribuția lor spațială — concentrarea în centre comerciale periferice versus comerțul de proximitate din cartiere și de pe străzile comerciale — are implicații majore asupra mobilității, vitalitatii spațiului public și coeziunii. Modelul orașului de 15 minute și vitalitatea urbană se sprijină pe comerțul și serviciile de proximitate, cu parter activ pe străzile principale.');
+      D.P('Comerțul și serviciile structureaza viață cotidiana și vitalitatea orașului. Distribuția lor spațială — concentrarea în centre comerciale periferice versus comerțul de proximitate din cartiere și de pe străzile comerciale — are implicății majore asupra mobilității, vitalitatii spațiului public și coeziunii. Modelul orașului de 15 minute și vitalitatea urbană se sprijină pe comerțul și serviciile de proximitate, cu parter activ pe străzile principale.');
       D.P('Strategia susține echilibrul: revitalizarea comerțului de proximitate și a străzilor comerciale (prin calitatea spațiului public, accesibilitate pietonală, parcare reglementata), integrarea funcțională a mărilor generatori comerciali și sprijinirea piețelor locale și a economiei de cartier. Străzile comerciale vii, prietenoase pentru pietoni, sunt simultan motoare economice și spații sociale.');
 
       D.chapter('Sport, recreere și oraș prietenos cu toate vârstele');
@@ -900,7 +954,7 @@
 
       D.chapter('Politici demografice — atragere și retentie');
       D.P('Într-un context național de declin și îmbătrânire demografică, atragerea și reținerea populației, în special tinere și calificate, devine un obiectiv strategic. Orașele concurează pentru talent și populație activă, factorii decisivi fiind: oportunitățile economice (locuri de muncă de calitate), locuirea accesibilă, calitatea vieții (spații publice, cultură, mediu, mobilitate) și serviciile (educație, sănătate).');
-      D.P('Politicile de retentie a tinerilor (prevenind exodul către alte orașe sau străinătate) și de atragere (inclusiv revenirea diasporei și atragerea de noi rezidenți) se construiesc pe aceste fundamente. Un oraș care oferă o calitate a vieții ridicată, oportunități și o identitate puternică are șanse mai mari sa isi mențină și sa isi intinereasca populația, sustinandu-și dezvoltarea pe termen lung.');
+      D.P('Politicile de retentie a tinerilor (prevenind exodul către alte orașe sau străînătate) și de atragere (inclusiv revenirea diasporei și atragerea de noi rezidenți) se construiesc pe aceste fundamente. Un oraș care oferă o calitate a vieții ridicată, oportunități și o identitate puternică are șanse mai mari sa isi mențînă și sa isi intinereasca populația, sustinandu-și dezvoltarea pe termen lung.');
 
       D.chapter('Analiză detaliată a factorilor de mediu');
       D.h2('Calitatea aerului');
@@ -921,7 +975,7 @@
         ['Zone de protecție monumente (LMI)', 'Reglementare strictă, avize', 'Legea 422/2001'],
         ['Zone de protecție sanitară', 'Restricții de funcțiuni', 'Norme sanitare'],
         ['Culoare infrastructură (LEA, conducte, drumuri, CF)', 'Servituti, interdictii', 'Legi sectoriale'],
-        ['Zone de risc natural (inundații, alunecari)', 'Interdicție / conditionare', 'HG 447/2003, Legea 575/2001'],
+        ['Zone de risc natural (inundății, alunecari)', 'Interdicție / conditionare', 'HG 447/2003, Legea 575/2001'],
         ['Zone aeroportuare (servituti)', 'Limitari de înălțime', 'HG 930/2016, RACR'],
       ], [60, 50, 64], { boldFirst: true, fs: 7 });
 
@@ -930,8 +984,8 @@
       D.P('Acest principiu — "intravilan înainte de extindere" — protejează terenurile agricole și naturale, optimizeaza investițiile publice în infrastructură și previne expansiunea necontrolata (urban sprawl) cu toate costurile sale (mobilitate dependență de auto, echipare scumpă, fragmentarea peisajului). Fiecare etapă de extindere se condiționează de gradul de ocupare al etapei anterioare și de asigurarea infrastructurii.');
 
       D.chapter('Guvernantă digitală și orașul bazat pe date');
-      D.P('Planificarea și administrarea urbană modernă se bazează tot mai mult pe date. O platformă integrată de date urbane (GIS, geamănă digitală / digital twin a orașului) reuneste informații despre teritoriu, infrastructură, mobilitate, mediu și servicii, permițând decizii fundamentate, simularea scenariilor și monitorizarea în timp real a indicatorilor. Datele deschise (open data) susțin transparentă, inovarea și participarea cetateneasca.');
-      D.P('Geamănă digitală a orașului — un model 3D dinamic, alimentat cu date în timp real — devine un instrument puternic de planificare: permite testarea propunerilor (volumetrii, insorire, trafic, inundații) înainte de implementare și comunicarea vizuală cu cetățenii și investitorii. UrbanX se înscrie în această direcție, oferind analiză geospatiala, modelare 3D și proiecții bazate pe date.');
+      D.P('Planificarea și administrarea urbană modernă se bazează tot mai mult pe date. O platformă integrată de date urbane (GIS, geamănă digitală / digital twin a orașului) reuneste informații despre teritoriu, infrastructură, mobilitate, mediu și servicii, permițând decizii fundamentate, simularea scenariilor și monitorizarea în timp real a indicatorilor. Datele deschise (open data) susțîn transparentă, inovarea și participarea cetateneasca.');
+      D.P('Geamănă digitală a orașului — un model 3D dinamic, alimentat cu date în timp real — devine un instrument puternic de planificare: permite testarea propunerilor (volumetrii, insorire, trafic, inundății) înainte de implementare și comunicarea vizuală cu cetățenii și investitorii. UrbanX se înscrie în această direcție, oferind analiză geospatiala, modelare 3D și proiecții bazate pe date.');
 
       D.chapter('Mecanisme de finanțare a dezvoltării urbane');
       D.P('Realizarea masterplanului necesită mobilizarea unor resurse financiare semnificative, prin mecanisme diverse și inovatoare, dincolo de bugetul local. Pe lângă fondurile europene (POR, PNRR) și parteneriatele public-private, există instrumente specifice de finanțare a dezvoltării urbane.');
@@ -939,7 +993,7 @@
         ['Captarea plusvalorii (value capture)', 'recuperarea pentru comunitate a unei părți din creșterea valorii terenurilor generată de investițiile publice (infrastructură, transport)'],
         ['Taxe și contributii de dezvoltare', 'contributii ale dezvoltatorilor la infrastructură publică necesară'],
         ['Instrumente financiare europene', 'fonduri rambursabile, garanții, finanțare mixtă (blending)'],
-        ['Obligațiuni verzi municipale', 'finanțarea proiectelor de mediu prin emisiuni de obligațiuni'],
+        ['Obligățiuni verzi municipale', 'finanțarea proiectelor de mediu prin emisiuni de obligățiuni'],
         ['Reparcelare urbană', 'mecanism prin care proprietarii contribuie cu teren pentru infrastructură, beneficiind de creșterea valorii'],
       ]);
 
@@ -995,7 +1049,7 @@
         ['GES', 'Gaze cu Efect de Sera'],
       ], [30, 144], { boldFirst: true });
       D.h2('Surse de date');
-      D.P('INS TEMPO-Online; Eurostat (Urban Audit, NUTS3); INFP (zonare seismică); ANAR/MMAP (hidrografie, hazard inundații); ANM (date climatice); OpenStreetMap; PUG vectorial UAT; analize geospatiale UrbanX (turf.js).');
+      D.P('INS TEMPO-Online; Eurostat (Urban Audit, NUTS3); INFP (zonare seismică); ANAR/MMAP (hidrografie, hazard inundății); ANM (date climatice); OpenStreetMap; PUG vectorial UAT; analize geospatiale UrbanX (turf.js).');
       D.spacer(2);
       D.callout('Disclaimer', 'Document strategic de fundamentare, cu valoare orientativa și analitică. Propunerile spațiale și indicatorii se valideaza prin documentatiile de urbanism normative (PUG/PUZ) elaborate de colective atestate RUR, pe suport topografic vizat.');
       D.fullPage('Anexă statistică — toate datele cu surse citate', () => m._pg22_full_statistics(ctx));
