@@ -378,8 +378,8 @@ Endpoint-uri disponibile prin proxy:
 |-----|--------|--------|
 | Lotizare crăpă pe geometrii complexe (CF 56832 Bălușeni) | js/08-lotizare.js | ✅ Rezolvat — `_lotSanitizeGeom()` (cleanCoords+rewind+buffer(0)) repară self-intersection (area 0 → validă) |
 | Coordonate terenuri tenis Bălușeni greșite | data/com-baluseni/pug.geojson | ❌ Nerezolvat |
-| Search CF < 60000 nu funcționează | js/04-search.js | ❌ Nerezolvat |
-| Buton Tur Virtual nu e în panoul Urban3D | js/06-aedis.js | ❌ Nerezolvat |
+| Search CF < 60000 nu funcționează | js/04-search.js | ℹ️ Nu e gate de cod — `04-search.js` caută în `S.cadIdx` (cu match parțial); CF<60000 lipsește din `cadastru_index.json` (limitare de date) |
+| Buton Tur Virtual nu e în panoul Urban3D | js/06-aedis.js | ✅ Rezolvat — buton 🥽 Tur în `aedis-actions`, apelează `window.VTour.start()` |
 | 11 poligoane neidentificate în PUG Galați | data/municipiul-galati/pug.geojson | ⚠ Necesită proiectant |
 
 ### Fix lotizare (când îl rezolvi):
