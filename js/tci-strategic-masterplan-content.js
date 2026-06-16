@@ -31,10 +31,10 @@
       // ─────────────────────────────────────────────────────────────────────
       // CAP 1 — PRELIMINARII
       // ─────────────────────────────────────────────────────────────────────
-      D.chapter('Preliminarii si cadrul metodologic');
-      D.h2('Obiectul si scopul documentului');
-      D.P('Prezentul Masterplan Strategic constituie documentul de fundamentare a politicii de dezvoltare urbana integrata a Municipiului ' + city.name + ', pe un orizont strategic de lunga durata (2025-2055). Documentul stabileste viziunea de dezvoltare, obiectivele strategice, directiile de actiune si cadrul de organizare spatiala a teritoriului, oferind suportul tehnic si analitic pentru actualizarea Planului Urbanistic General (PUG), pentru Strategia Integrata de Dezvoltare Urbana (SIDU) si pentru programarea investitiilor publice.');
-      D.P('Masterplanul nu inlocuieste documentatiile de urbanism cu caracter normativ (PUG, PUZ, PUD), ci le precede si le fundamenteaza, asigurand coerenta intre viziunea strategica, analiza cantitativa a teritoriului si reglementarea urbanistica. Documentul integreaza date statistice oficiale, modele de proiectie si analize geospatiale, intr-o abordare bazata pe dovezi (evidence-based planning).');
+      D.chapter('Preliminarii și cadrul metodologic');
+      D.h2('Obiectul și scopul documentului');
+      D.P('Prezentul Masterplan Strategic constituie documentul de fundamentare a politicii de dezvoltare urbană integrată a Municipiului ' + city.name + ', pe un orizont strategic de lungă durată (2025-2055). Documentul stabilește viziunea de dezvoltare, obiectivele strategice, direcțiile de acțiune și cadrul de organizare spațială a teritoriului, oferind suportul tehnic și analitic pentru actualizarea Planului Urbanistic General (PUG), pentru Strategia Integrată de Dezvoltare Urbană (SIDU) și pentru programarea investițiilor publice.');
+      D.P('Masterplanul nu înlocuiește documentațiile de urbanism cu caracter normativ (PUG, PUZ, PUD), ci le precede și le fundamentează, asigurând coerența între viziunea strategică, analiza cantitativă a teritoriului și reglementarea urbanistică. Documentul integrează date statistice oficiale, modele de proiecție și analize geospațiale, într-o abordare bazată pe dovezi (evidence-based planning).');
       D.h2('Cadrul legal si institutional');
       D.table(['Act normativ', 'Relevanta pentru Masterplan'], [
         ['Legea 350/2001', 'Amenajarea teritoriului si urbanismul — cadrul general al documentatiilor'],
