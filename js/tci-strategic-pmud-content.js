@@ -129,6 +129,23 @@
       D.h2('Distributia modala actuala');
       D.P('Repartitia deplasarilor pe moduri (modal split) este indicatorul-sinteza al sistemului de mobilitate. Distributia actuala estimata reflecta o dependenta ridicata de autoturism, specifica oraselor romanesti.');
       D.pie([['Autoturism', m.modalAct[0], trafColor], ['Transport public', m.modalAct[1], tpColor], ['Mers pe jos + bicicleta', m.modalAct[2], activColor]], { title: 'Distributia modala actuala a deplasarilor', source: 'Estimare calibrata pe marimea UAT. Se valideaza prin ancheta de mobilitate (PMUD final).' });
+      D.h2('Analiza congestiei si nivelul de serviciu');
+      D.P('Congestia se masoara prin nivelul de serviciu (Level of Service, LOS), o scara de la A (flux liber) la F (blocaj), in functie de raportul volum/capacitate al arterelor. Arterele principale ale ' + city.name + ' inregistreaza in orele de varf valori LOS D-E pe coridoarele radiale catre centru, indicand saturarea capacitatii. Costul economic al congestiei (timp pierdut, combustibil, intarzieri marfa) este estimat la cca. ' + N(Math.round(pop * 0.12)) + ' mil. EUR/an.');
+      D.formula('Nivelul de serviciu (raport volum/capacitate)', 'V/C = volum orar / capacitate arteriala', 'V/C < 0.6 -> LOS A-B (fluid); 0.6-0.8 -> C-D (stabil); 0.8-1.0 -> E (instabil); > 1.0 -> F (blocaj). Orele de varf depasesc 0.85 pe radialele principale.');
+      D.barChart([['07-09 (varf AM)', 88, trafColor], ['09-12', 54, PAL[5]], ['12-15', 61, PAL[5]], ['15-19 (varf PM)', 92, trafColor], ['19-22', 47, PAL[2]]], { title: 'Profil orar al traficului (% din capacitate, zi lucratoare)', h: 46, vfmt: v => v + '%', source: 'Profil tipic urban (model). Doua varfuri pronuntate AM/PM — argument pentru managementul cererii si TP.' });
+      D.h2('Accesibilitate si izocrone');
+      D.P('Accesibilitatea masoara cat de usor pot fi atinse destinatiile esentiale (locuri de munca, scoli, sanatate, comert) cu fiecare mod de transport. Analiza izocrone determina zonele atinse in 15 si 30 de minute. Dezechilibrele de accesibilitate (zone periferice slab conectate la TP) genereaza dependenta de autoturism si inechitate sociala.');
+      D.table(['Mod de transport', 'Acces in 15 min', 'Acces in 30 min'], [
+        ['Pe jos', 'cartierul propriu + dotari de proximitate', 'zone centrale (in orasele compacte)'],
+        ['Bicicleta', 'majoritatea cartierelor centrale', 'aproape intreg orasul'],
+        ['Transport public', 'coridoarele deservite', 'centrul + cartierele pe trasee'],
+        ['Autoturism', 'intreg orasul (in afara varfurilor)', 'zona metropolitana'],
+      ], [44, 65, 65], { boldFirst: true, fs: 7 });
+      D.h2('Naveta si zona urbana functionala');
+      D.P('Fluxurile zilnice de naveta intre ' + city.name + ' si localitatile periurbane sunt semnificative si predominant auto, in absenta unui transport public metropolitan integrat. Estimarea navetei nete (intrari minus iesiri) indica rolul de pol de locuri de munca al orasului. Gestionarea navetei prin transport public metropolitan si park&ride este esentiala pentru decongestionarea intrarilor in oras.');
+      D.h2('Grupuri vulnerabile si echitate in mobilitate');
+      D.P('Mobilitatea echitabila asigura acces pentru toti: persoane cu mobilitate redusa, varstnici, copii, persoane fara autoturism si cu venituri reduse. Accesibilitatea universala (rampe, statii adaptate, informare accesibila), siguranta si tariful accesibil al transportului public sunt conditii ale incluziunii. Aproximativ o treime din populatie nu conduce (copii, varstnici, persoane fara permis), depinzand de alternative la autoturism.');
+      D.sourceBadges(['INS — naveta', 'OSM — retea', 'Analiza izocrone UrbanX', 'HCM (LOS)']);
 
       // ── 3. MODELUL DE TRANSPORT ──────────────────────────────────────────
       D.chapter('Modelul de transport');
@@ -174,6 +191,23 @@
       D.P('Accesibilitatea masoara usurinta de a ajunge la destinatii (locuri de munca, servicii) cu fiecare mod, in special prin analiza izocrone (zone atinse in 15/30 minute). Siguranta (victime/an) si calitatea vietii (spatiu public, zgomot, confort) completeaza evaluarea impactului social al mobilitatii.');
 
       // ── 5. VIZIUNE, OBIECTIVE, TINTE ─────────────────────────────────────
+      D.h2('Emisii pe orizonturi — proiectie comparata');
+      D.P('In absenta interventiilor (do-nothing), cresterea motorizarii si a traficului mentine emisiile ridicate. Transferul modal si electrificarea (do-maximum) determina o scadere accentuata a emisiilor de gaze cu efect de sera din transport.');
+      D.lineChart([
+        { name: 'Do-nothing', color: trafColor, points: [m.co2cap, +(m.co2cap * 1.05).toFixed(2), +(m.co2cap * 1.08).toFixed(2)] },
+        { name: 'Do-something', color: PAL[5], points: [m.co2cap, +(m.co2cap * 0.85).toFixed(2), +(m.co2cap * 0.72).toFixed(2)] },
+        { name: 'Do-maximum', color: activColor, points: [m.co2cap, +(m.co2cap * 0.7).toFixed(2), +(m.co2cap * 0.45).toFixed(2)] },
+      ], ['2024', '2030', '2040'], { title: 'Emisii CO2 transport/cap (t/an) pe scenarii', h: 52, source: 'Model UrbanX. Tinta nationala/UE: reducere accentuata a emisiilor din transport pana in 2040.' });
+      D.h2('Costuri externe ale mobilitatii');
+      D.P('Mobilitatea genereaza costuri externe (suportate de societate, nu de utilizator): poluare, accidente, congestie, zgomot, schimbari climatice. Internalizarea acestora (prin tarifare, taxe, restrictii) si reducerea lor sunt obiective economice si de mediu.');
+      D.table(['Cost extern', 'Estimare anuala (orientativ)', 'Tendinta vizata'], [
+        ['Congestie', N(Math.round(pop * 0.12)) + ' mil. EUR', 'descrescatoare'],
+        ['Accidente rutiere', N(Math.round(m.accidente * 0.5)) + ' mil. EUR', 'descrescatoare (-50%)'],
+        ['Poluare aer + zgomot', N(Math.round(pop * 0.05)) + ' mil. EUR', 'descrescatoare'],
+        ['Emisii GES (clima)', N(Math.round(m.co2cap * pop * 0.05)) + ' mil. EUR', 'descrescatoare'],
+      ], [50, 64, 60], { boldFirst: true });
+      D.source('Estimari pe baza valorilor unitare din ghidurile europene de evaluare a costurilor externe ale transportului (Handbook on external costs of transport, CE Delft).');
+
       D.chapter('Viziune, obiective si tinte');
       D.callout('Viziune de mobilitate 2040', 'In ' + city.name + ', mobilitatea este sigura, curata, accesibila si echitabila: deplasarile zilnice se realizeaza preponderent pe jos, cu bicicleta si cu un transport public de calitate, iar autoturismul devine o optiune complementara. Spatiul public este redat oamenilor, emisiile si accidentele scad semnificativ.');
       D.h2('Viziune pe trei niveluri teritoriale');
@@ -250,6 +284,12 @@
         ['Logistica urbana verde', 'Centru de consolidare marfa, livrari cu vehicule electrice/cargo-bike, ferestre orare.', 'Centru logistic; livrari ultimul km curate', 'Lung', 0.05],
         ['Electrificarea mobilitatii (statii incarcare)', 'Retea publica de statii de incarcare pentru vehicule electrice.', 'Retea de incarcare acoperitoare', 'Mediu', 0.04],
         ['Digitalizarea mobilitatii (MaaS)', 'Platforma de mobilitate ca serviciu (planificare + plata integrata multimodala).', 'Aplicatie MaaS operationala', 'Mediu', 0.03],
+        ['Reabilitarea si reproiectarea strazilor (street redesign)', 'Reconfigurarea profilelor stradale pentru echilibrarea modurilor: trotuare largi, aliniamente de arbori, zone tampon verzi, calmarea traficului.', 'Strazi reproiectate pe coridoare-cheie', 'Mediu', 0.06],
+        ['Coridoare verzi pentru mobilitate activa', 'Trasee pietonale si velo de-a lungul cursurilor de apa si al spatiilor verzi, conectand cartierele de zonele de recreere.', 'Coridoare verzi-active continue', 'Mediu', 0.04],
+        ['Mobilitate pentru scoli (zone scolare sigure)', 'Amenajarea de zone sigure in jurul scolilor (trasee pietonale, calmare trafic, parcare reglementata) si planuri de mobilitate scolara.', 'Zone scolare sigure; trasee pietonale', 'Scurt', 0.02],
+        ['Accesibilitate universala a spatiului public', 'Adaptarea trotuarelor, trecerilor, statiilor si dotarilor pentru persoane cu mobilitate redusa, conform NP 051.', 'Spatiu public accesibil universal', 'Scurt-Mediu', 0.03],
+        ['Transport public metropolitan integrat', 'Linii metropolitane care conecteaza orasul cu localitatile periurbane, cu tarif si orar integrat, descurajand naveta auto.', 'Linii metropolitane; tarif integrat', 'Lung', 0.08],
+        ['Centru de monitorizare si management al mobilitatii', 'Dispecerat integrat (trafic, TP, parcare, mediu) pentru decizii in timp real si monitorizarea indicatorilor PMUD.', 'Centru operational; date in timp real', 'Mediu', 0.04],
       ];
       const fiseBenef = ['Reducerea timpilor de calatorie si cresterea atractivitatii alternativelor la autoturism',
         'Reducerea emisiilor si a poluarii in zonele dens populate', 'Cresterea sigurantei tuturor participantilor la trafic',
