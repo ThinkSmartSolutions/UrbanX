@@ -592,10 +592,20 @@
       D.fullPage('Scenarii — proiectii demografice si de dezvoltare comparate', () => m._pg8_scenarios(ctx));
 
       D.chapter('Benchmark national si european');
-      D.P('Pozitionarea comparativa fata de orase similare din Romania si din Europa ofera repere pentru tinte realiste si pentru transferul de bune practici.');
-      if (bench && (bench.dims || bench.dimensions)) {
-        D.P('Profilul orasului este evaluat pe multiple dimensiuni normalizate (demografie, economie, mediu, mobilitate, locuire, servicii), comparativ cu media nationala si cu orase europene comparabile.');
-      }
+      D.P('Pozitionarea comparativa fata de orase similare din Romania si din Europa (benchmarking) ofera repere obiective pentru stabilirea unor tinte realiste si pentru transferul de bune practici. Compararea se realizeaza pe baza unor indicatori normalizati, grupati pe dimensiunile dezvoltarii urbane durabile, atat fata de media nationala, cat si fata de un grup de orase europene comparabile ca marime si profil economic (peer group).');
+      D.h2('Metodologia de benchmarking');
+      D.P('Benchmarkingul urban presupune selectarea unui grup de orase de comparatie relevante (similare ca dimensiune demografica, functie regionala si structura economica), colectarea de indicatori comparabili (din surse precum Eurostat Urban Audit) si normalizarea acestora pentru a permite compararea. Rezultatul nu este o simpla ierarhie, ci un instrument de invatare: identifica domeniile in care orasul performeaza bine si pe cele in care are potential de imbunatatire, orientand prioritatile strategice.');
+      D.P('Comparatia trebuie interpretata cu prudenta: contextele difera, iar un indicator izolat poate induce in eroare. Valoarea benchmarkingului consta in identificarea decalajelor sistematice si a oraselor-model de la care se pot prelua solutii adaptabile la contextul local.');
+      D.h2('Dimensiuni de comparatie');
+      D.table(['Dimensiune', 'Indicatori reprezentativi', 'Rol strategic'], [
+        ['Demografie', 'Dinamica populatiei, structura pe varste, atractivitate', 'Vitalitate si sustenabilitate'],
+        ['Economie', 'PIB/capita (PPS), ocupare, productivitate, investitii', 'Competitivitate si convergenta'],
+        ['Mediu', 'Spatii verzi/loc, calitatea aerului, emisii', 'Sustenabilitate si calitatea vietii'],
+        ['Mobilitate', 'Distributie modala, acoperire TP, siguranta', 'Accesibilitate durabila'],
+        ['Locuire', 'Accesibilitate, calitate, suprafata/loc', 'Calitatea conditiilor de trai'],
+        ['Servicii si guvernanta', 'Acces la educatie, sanatate, digitalizare', 'Coeziune si eficienta'],
+      ], [40, 80, 54], { boldFirst: true, fs: 7 });
+      D.P('Profilul comparativ al Municipiului ' + city.name + ', evaluat pe aceste dimensiuni si reprezentat in radarul de benchmarking de mai jos, evidentiaza atat punctele forte (de consolidat), cat si decalajele (de recuperat), fundamentand obiectivele strategice si tintele cuantificate ale masterplanului.');
 
       // ─────────────────────────────────────────────────────────────────────
       // CAP 19 — PROPUNERI ORGANIZARE (zonificare propusa)
