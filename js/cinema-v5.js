@@ -1150,6 +1150,19 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
     ctx.fillStyle='rgba(212,175,55,'+(0.30*lbA)+')';
     ctx.fillRect(0,lbH,W,1); ctx.fillRect(0,H-lbH-1,W,1);
 
+    // Cifre kinetice (odometru): numerele urca de la 0 in primele ~42% din scena.
+    // La k>=1 returneaza textul exact (aterizare corecta), deci ramp-ul aproximativ
+    // pe zecimale rare e invizibil — conteaza valoarea finala.
+    var _kineticK=Math.min(1, t/0.42);
+    function _kin(s){
+      if(_kineticK>=1) return s;
+      return String(s).replace(/[0-9][0-9.,]*/g,function(m){
+        var num=parseFloat(m.replace(/\./g,'').replace(',','.'));
+        if(isNaN(num)) return m;
+        return Math.round(num*_kineticK).toLocaleString('ro-RO');
+      });
+    }
+
     function titlu(txt,sub){
       ctx.globalAlpha=sA*rE(0.04,0.16);
       ctx.fillStyle='rgba(212,175,55,0.96)';
@@ -1175,7 +1188,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
     function cifra(val,lbl,clr){
       ctx.globalAlpha=sA*rE(0.13,0.20);
       ctx.fillStyle=clr||'#ffffff';
-      var s=String(val), fd=FD;
+      var s=_kin(String(val)), fd=FD;
       ctx.font='900 '+fd+'px "Space Grotesk",sans-serif';
       // auto-shrink ca sa incapa intreg (ex. interval "[362.803—601.405]") — fara taiere
       while(ctx.measureText(s).width>W*0.52 && fd>14){ fd-=2; ctx.font='900 '+fd+'px "Space Grotesk",sans-serif'; }
@@ -1191,7 +1204,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
     function cifra2(val,lbl,clr){
       ctx.globalAlpha=sA*rE(0.18,0.18);
       ctx.fillStyle=clr||'rgba(212,175,55,0.96)';
-      var s2=String(val), f2=Math.min(W*0.026,36);
+      var s2=_kin(String(val)), f2=Math.min(W*0.026,36);
       ctx.font='900 '+f2+'px "Space Grotesk",sans-serif';
       while(ctx.measureText(s2).width>W*0.40 && f2>12){ f2-=2; ctx.font='900 '+f2+'px "Space Grotesk",sans-serif'; }
       ctx.textAlign='right'; ctx.letterSpacing='0';
@@ -1254,6 +1267,8 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
       ctx.globalAlpha=1;
     }
 
+    // Radar de analiza — atmosferic, doar pe scenele analitice
+    if([2,3,5,7,9].indexOf(sc.bloc)>=0) _drawRadar(ctx,W,H,sA);
     var pop21=pred.p21||100000;
     var r10=pred.r10||0;
     bloc_hdr();
@@ -1815,7 +1830,8 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         var dens3=Math.round(pop21/((city.suprafata_ha||5000)/100));
         cifra(dens3+' loc/km\u00b2','Densitate urbana',dens3>1000?'#22c55e':dens3>500?'#f59e0b':'#94a3b8');
         cifra2((pred.pctUE||38)+'% UE27','Convergenta economica');
-        if(t>0.12) _drawBench(ctx,W,H,Math.min(1,(t-0.12)/0.24)*sA,pred,name);
+        // Split-screen comparativ: orasul curent vs un peer (Cluj) — ca in storyboard
+        if(t>0.12) _drawCompare(ctx,W,H,Math.min(1,(t-0.12)/0.22)*sA,city,pred);
         if(t>0.45){
           ctx.globalAlpha=sA*rE(0.45,0.20)*0.82;
           ctx.fillStyle='rgba(212,175,55,0.88)';
@@ -2038,8 +2054,34 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
           ctx.fillText('\u25B6 CU VIZIUNE SI ACTIUNE SUSTINUTA: '+name+' poate deveni MODEL URBAN EUROPEAN',W/2,H*0.985);
           ctx.globalAlpha=1;
         }
-        if(t>0.92) _drawQR(ctx,W,H,Math.min(1,(t-0.92)/0.07)*sA);
-        if(t>0.60){
+        // ── OUTRO CU SEMNATURA — generic final cinematic ──
+        if(t>0.90){
+          var oA=Math.min(1,(t-0.90)/0.05)*sA;
+          ctx.save();
+          ctx.globalAlpha=oA*0.85; ctx.fillStyle='rgba(2,5,14,0.94)'; ctx.fillRect(0,0,W,H);
+          ctx.globalAlpha=oA; ctx.textAlign='center';
+          ctx.fillStyle='#D4AF37'; ctx.font='900 '+Math.min(W*0.06,86)+'px "Space Grotesk",sans-serif'; ctx.letterSpacing='.05em';
+          ctx.fillText('URBANX',W/2,H*0.385);
+          ctx.fillStyle='rgba(225,232,255,0.92)'; ctx.font='600 '+Math.min(W*0.016,21)+'px "Space Grotesk",sans-serif'; ctx.letterSpacing='.02em';
+          ctx.fillText('Urbanism proiectat pe 30 de ani · '+(name||'')+' '+_S()+'→'+_E(),W/2,H*0.45);
+          var srcs=['INSE','Eurostat','OSM','ANAR','INFP','Copernicus'];
+          var pw=Math.min(W*0.095,118), gp=10, tot=srcs.length*pw+(srcs.length-1)*gp, sx=W/2-tot/2;
+          ctx.font='700 '+Math.min(W*0.009,11)+'px "IBM Plex Mono",monospace';
+          srcs.forEach(function(s,i){
+            var x=sx+i*(pw+gp);
+            ctx.globalAlpha=oA*Math.max(0,Math.min(1,(t-0.905-i*0.006)/0.035));
+            ctx.fillStyle='rgba(212,175,55,0.12)'; ctx.fillRect(x,H*0.50,pw,H*0.04);
+            ctx.strokeStyle='rgba(212,175,55,0.45)'; ctx.lineWidth=1; ctx.strokeRect(x,H*0.50,pw,H*0.04);
+            ctx.fillStyle='#D4AF37'; ctx.textAlign='center'; ctx.fillText(s,x+pw/2,H*0.527);
+          });
+          ctx.globalAlpha=oA; ctx.fillStyle='rgba(148,163,184,0.75)'; ctx.font='500 '+Math.min(W*0.010,13)+'px "IBM Plex Mono",monospace'; ctx.textAlign='center'; ctx.letterSpacing='.06em';
+          ctx.fillText('THINKSMART SOLUTIONS SRL · © '+_NOW+' · DATE ORIENTATIVE · NECESITA VALIDARE URBANIST ATESTAT RUR',W/2,H*0.60);
+          ctx.fillStyle='rgba(212,175,55,0.9)'; ctx.font='700 '+Math.min(W*0.012,15)+'px "IBM Plex Mono",monospace';
+          ctx.fillText('↓ SCANEAZA pentru scenariul live in UrbanX',W/2,H*0.665);
+          ctx.restore();
+          _drawQR(ctx,W,H,oA);
+        } else if(t>0.92) _drawQR(ctx,W,H,Math.min(1,(t-0.92)/0.07)*sA);
+        if(t>0.60 && t<=0.90){
           ctx.globalAlpha=Math.min(1,(t-0.60)/0.20)*sA*0.30;
           ctx.fillStyle='rgba(148,163,184,0.40)';
           ctx.font='500 '+Math.min(W*0.007,9)+'px "IBM Plex Mono",monospace';
@@ -2543,6 +2585,57 @@ function _drawSpiral(ctx,W,H,a,t){
     ctx.fillStyle='rgba(230,235,255,0.92)'; ctx.font='700 '+Math.min(W*0.0095,12)+'px "IBM Plex Mono",monospace';
     ctx.textAlign=Math.cos(na)>=-0.2?'left':'right';
     ctx.fillText(nd[0], nx+(Math.cos(na)>=-0.2?11:-11), ny+3);
+  });
+  ctx.restore();
+}
+
+// Radar de analiza — baleiaj rotativ subtil peste harta (scenele de analiza).
+function _drawRadar(ctx,W,H,a){
+  if(a<=0) return;
+  ctx.save();
+  var cx=W/2, cy=H*0.52, R=Math.min(W,H)*0.62;
+  var ang=(performance.now()/2400)%(Math.PI*2);
+  ctx.globalAlpha=a*0.06; ctx.strokeStyle='rgba(212,175,55,0.6)'; ctx.lineWidth=1;
+  [0.28,0.55,0.82,1].forEach(function(f){ ctx.beginPath(); ctx.arc(cx,cy,R*f,0,Math.PI*2); ctx.stroke(); });
+  ctx.globalAlpha=a*0.14;
+  var grd=ctx.createLinearGradient(cx,cy,cx+Math.cos(ang)*R,cy+Math.sin(ang)*R);
+  grd.addColorStop(0,'rgba(212,175,55,0.55)'); grd.addColorStop(1,'rgba(212,175,55,0)');
+  ctx.strokeStyle=grd; ctx.lineWidth=2.5;
+  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+Math.cos(ang)*R,cy+Math.sin(ang)*R); ctx.stroke();
+  ctx.restore();
+}
+
+// Split-screen comparativ — orasul curent vs un oras de referinta (benchmark).
+function _drawCompare(ctx,W,H,a,city,pred){
+  if(a<=0) return;
+  var n2=function(v){return isNaN(+v)?'—':Math.round(+v).toLocaleString('ro-RO');};
+  var bench=null;
+  try{ if(window._RO_CITIES_DB){ bench=window._RO_CITIES_DB['RO-CJ-01']||Object.values(window._RO_CITIES_DB).find(function(v){return (v.name||'')!==(city.name||'')&&v.pop2021;}); } }catch(e){}
+  bench=bench||{name:'Cluj-Napoca',pop2021:286598,pib_eur_cap:18000,suprafata_ha:17952};
+  var dens=function(c){return c.pop2021&&c.suprafata_ha?Math.round(c.pop2021/c.suprafata_ha):'—';};
+  ctx.save();
+  var midX=W/2;
+  ctx.globalAlpha=a*0.5; ctx.strokeStyle='rgba(212,175,55,0.6)'; ctx.lineWidth=2; ctx.setLineDash([4,4]);
+  ctx.beginPath(); ctx.moveTo(midX,H*0.28); ctx.lineTo(midX,H*0.74); ctx.stroke(); ctx.setLineDash([]);
+  ctx.globalAlpha=a; ctx.textAlign='center';
+  ctx.fillStyle='#fff'; ctx.font='900 '+Math.min(W*0.020,26)+'px "Space Grotesk",sans-serif';
+  ctx.fillText((city.name||'').toUpperCase(), W*0.27, H*0.265);
+  ctx.fillStyle='rgba(148,163,184,0.85)';
+  ctx.fillText((bench.name||'').toUpperCase(), W*0.73, H*0.265);
+  var rows=[
+    ['POPULATIE 2021', n2(city.pop2021), n2(bench.pop2021)],
+    ['PIB EUR/CAP', n2(city.pib_eur_cap), n2(bench.pib_eur_cap)],
+    ['DENSITATE loc/ha', dens(city), dens(bench)],
+  ];
+  rows.forEach(function(r,i){
+    var y=H*(0.37+i*0.105);
+    ctx.globalAlpha=a*Math.min(1,(i+1));
+    ctx.fillStyle='rgba(148,163,184,0.6)'; ctx.font='600 '+Math.min(W*0.009,11)+'px "IBM Plex Mono",monospace'; ctx.textAlign='center';
+    ctx.fillText(r[0], midX, y-Math.min(W*0.016,20));
+    ctx.fillStyle='#D4AF37'; ctx.font='900 '+Math.min(W*0.024,32)+'px "Space Grotesk",sans-serif';
+    ctx.fillText(r[1], W*0.27, y);
+    ctx.fillStyle='rgba(200,210,230,0.85)';
+    ctx.fillText(r[2], W*0.73, y);
   });
   ctx.restore();
 }

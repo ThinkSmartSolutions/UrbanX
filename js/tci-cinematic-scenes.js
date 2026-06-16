@@ -404,6 +404,12 @@ G._CinemaEngine={
     const geo=this._pugGeo,reg=this._reguli||{},pred=this._pred;
     const cx=this._city?.lon||25,cy=this._city?.lat||45.5;
     let features=[];
+    // Pentru efectul "ghost -> living city": unda de crestere traverseaza orasul
+    // V->E. Calculam longitudinea min/max ca sa dam fiecarei cladiri o faza (0..1).
+    let _mnLon=cx-0.08,_mxLon=cx+0.08;
+    try{ if(geo&&geo.features&&typeof turf!=='undefined'){ const bb=turf.bbox(geo); _mnLon=bb[0]; _mxLon=bb[2]; } }catch(e){}
+    const _spanLon=Math.max(1e-6,_mxLon-_mnLon);
+    const _flon=(g)=>{ try{ let c=g.coordinates; while(Array.isArray(c[0])) c=c[0]; return c[0]; }catch(e){ return cx; } };
     if(geo?.features?.length>0){
       geo.features.slice(0,800).forEach(f=>{
         const p=f.properties||{};
@@ -420,7 +426,8 @@ G._CinemaEngine={
         const base=hmax>0?hmax:(cut>0?cut*9:pr*40);
         const hFinal=Math.max(3,base*(1.8+hub*0.6));
         const c=pr>0.80?'#ff3366':pr>0.65?'#ff8c00':pr>0.45?'#4a90d9':pr>0.20?'#22c55e':'#15803d';
-        features.push({...f,properties:{...f.properties,hFinal,h:0.5,c,pr}});
+        const wphase=Math.max(0,Math.min(1,(_flon(f.geometry)-_mnLon)/_spanLon));
+        features.push({...f,properties:{...f.properties,hFinal,h:0.5,c,pr,wphase}});
       });
     }else{
       // Fallback geometric realist — mai multe zone cu densitati diferite
@@ -471,13 +478,18 @@ G._CinemaEngine={
     },2000);
   },
 
-  // Update animat bare 3D cu t
+  // Update animat bare 3D cu t — UNDA "ghost -> living city": frontul de crestere
+  // traverseaza orasul V->E; fiecare cladire creste cand unda ii atinge faza.
   _updateGrowth(t){
     const map=this._map;if(!map||!this._gf)return;
     try{
       const src=map.getSource('v8-gr');if(!src)return;
-      const te=eo(t);
-      src.setData({type:'FeatureCollection',features:this._gf.map(f=>({...f,properties:{...f.properties,h:Math.max(0.5,(f.properties.hFinal||20)*te)}}))});
+      src.setData({type:'FeatureCollection',features:this._gf.map(f=>{
+        const ph=f.properties.wphase||0;
+        const lt=Math.max(0,Math.min(1,(t-ph*0.45)/0.55)); // fereastra de crestere locala
+        const te=eo(lt);
+        return {...f,properties:{...f.properties,h:Math.max(0.5,(f.properties.hFinal||20)*te)}};
+      })});
     }catch(e){}
   },
 
