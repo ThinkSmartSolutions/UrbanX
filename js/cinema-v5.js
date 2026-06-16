@@ -51,26 +51,30 @@ var SCENES = [
   {id:'b10s2',dur:22000,label:'SCENARIUL NEGRU',     bloc:10,blabel:'CRIZE & REZILIENTA'},
   {id:'b10s3',dur:20000,label:'CONSTRUCTIA REZILIENTEI',bloc:10,blabel:'CRIZE & REZILIENTA'},
 ];
-// ── RESTRUCTURARE IN ACTE (Faza 1) — reordonare + comasare scene redundante.
-// Pastram id-urile (switch-urile setup/draw raman valide); scenele comasate
-// (b1s3, b2s3, b3s2, b4s1, b8s2, b9s3) ies din ordine. 38 -> 32 scene, ~12 min.
+// ── RESTRUCTURARE IN ACTE — reordonare in 7 ACTE, PASTRAND TOATE scenele
+// (nicio scena eliminata) + 4 scene noi de indici calitate viata (b13s1-4).
+// Id-urile pastrate -> switch-urile setup/draw raman valide.
 SCENES = [
   // ACT I — INTELEGEREA ORASULUI
   {id:'b1s1',dur:22000,label:'IDENTITATE',            bloc:1,blabel:'INTELEGEREA ORASULUI'},
   {id:'b1s2',dur:20000,label:'POZITIE STRATEGICA',    bloc:1,blabel:'INTELEGEREA ORASULUI'},
+  {id:'b1s3',dur:18000,label:'RETEA NATIONALA',       bloc:1,blabel:'INTELEGEREA ORASULUI'},
   {id:'b1s4',dur:18000,label:'EVOLUTIE ISTORICA',     bloc:1,blabel:'INTELEGEREA ORASULUI'},
   {id:'b2s1',dur:22000,label:'DEMOGRAFIE LIVE',       bloc:1,blabel:'INTELEGEREA ORASULUI'},
-  {id:'b2s2',dur:20000,label:'IMBATRANIRE & MIGRATIE',bloc:1,blabel:'INTELEGEREA ORASULUI'},
+  {id:'b2s2',dur:20000,label:'CRIZA IMBATRANIRE',     bloc:1,blabel:'INTELEGEREA ORASULUI'},
+  {id:'b2s3',dur:20000,label:'MIGRATIE & EMIGRARE',   bloc:1,blabel:'INTELEGEREA ORASULUI'},
   {id:'b2s4',dur:18000,label:'PROFIL CUMPARATORI',    bloc:1,blabel:'INTELEGEREA ORASULUI'},
   {id:'b3s1',dur:20000,label:'ECONOMIA REALA',        bloc:1,blabel:'INTELEGEREA ORASULUI'},
+  {id:'b3s2',dur:20000,label:'MOTOARE ECONOMICE',     bloc:1,blabel:'INTELEGEREA ORASULUI'},
   {id:'b3s3',dur:18000,label:'INVESTITII & ROI',      bloc:1,blabel:'INTELEGEREA ORASULUI'},
   // ACT II — ORASUL SUB PRESIUNE
-  {id:'b7s1',dur:22000,label:'TRAFIC & CONGESTIE',    bloc:2,blabel:'ORASUL SUB PRESIUNE'},
-  {id:'b7s2',dur:20000,label:'SOLUTII MOBILITATE',    bloc:2,blabel:'ORASUL SUB PRESIUNE'},
-  {id:'b7s3',dur:18000,label:'MODAL SPLIT',           bloc:2,blabel:'ORASUL SUB PRESIUNE'},
+  {id:'b4s1',dur:20000,label:'RETEA RUTIERA',         bloc:2,blabel:'ORASUL SUB PRESIUNE'},
   {id:'b4s2',dur:18000,label:'CONECTIVITATE REG.',    bloc:2,blabel:'ORASUL SUB PRESIUNE'},
   {id:'b4s3',dur:18000,label:'TRANSPORT PUBLIC',      bloc:2,blabel:'ORASUL SUB PRESIUNE'},
   {id:'b4s4',dur:18000,label:'RETELE UTILITATI',      bloc:2,blabel:'ORASUL SUB PRESIUNE'},
+  {id:'b7s1',dur:22000,label:'TRAFIC & CONGESTIE',    bloc:2,blabel:'ORASUL SUB PRESIUNE'},
+  {id:'b7s2',dur:20000,label:'SOLUTII MOBILITATE',    bloc:2,blabel:'ORASUL SUB PRESIUNE'},
+  {id:'b7s3',dur:18000,label:'MODAL SPLIT',           bloc:2,blabel:'ORASUL SUB PRESIUNE'},
   {id:'b5s1',dur:20000,label:'RISC SEISMIC',          bloc:2,blabel:'ORASUL SUB PRESIUNE'},
   {id:'b5s2',dur:20000,label:'INUNDATII & CLIMA',     bloc:2,blabel:'ORASUL SUB PRESIUNE'},
   {id:'b5s3',dur:18000,label:'COSTUL INACTIUNII',     bloc:2,blabel:'ORASUL SUB PRESIUNE'},
@@ -79,9 +83,11 @@ SCENES = [
   {id:'b6s2',dur:26000,label:'CORIDOARE '+(_NOW+30),  bloc:3,blabel:'ORASUL 2055'},
   {id:'b6s3',dur:22000,label:'SCENARII INTRAVILAN',   bloc:3,blabel:'ORASUL 2055'},
   {id:'b8s1',dur:22000,label:'PROIECTE STRATEGICE',   bloc:3,blabel:'ORASUL 2055'},
+  {id:'b8s2',dur:20000,label:'CORIDOARE INFLUENTA',   bloc:3,blabel:'ORASUL 2055'},
   {id:'b9s1',dur:24000,label:'MONTE CARLO',           bloc:3,blabel:'ORASUL 2055'},
   {id:'b9s2',dur:22000,label:'BENCHMARK EUROPEAN',    bloc:3,blabel:'ORASUL 2055'},
   // ACT IV — REZILIENTA
+  {id:'b9s3',dur:20000,label:'DACA NU SE ACTIONEAZA', bloc:4,blabel:'REZILIENTA'},
   {id:'b10s1',dur:22000,label:'CRIZE SIMULTANE',      bloc:4,blabel:'REZILIENTA'},
   {id:'b10s2',dur:22000,label:'SCENARIUL NEGRU',      bloc:4,blabel:'REZILIENTA'},
   {id:'b10s3',dur:20000,label:'CONSTRUCTIA REZILIENTEI',bloc:4,blabel:'REZILIENTA'},
@@ -90,11 +96,16 @@ SCENES = [
   {id:'b12s2',dur:20000,label:'REGULA 3-30-300',      bloc:5,blabel:'MODELE CARE FUNCTIONEAZA'},
   {id:'b12s3',dur:20000,label:'ORASUL 15 MINUTE',     bloc:5,blabel:'MODELE CARE FUNCTIONEAZA'},
   {id:'b12s4',dur:22000,label:'SINTEZA MASTERPLAN',   bloc:5,blabel:'MODELE CARE FUNCTIONEAZA'},
-  // ACT VI — AGENDA & VIZIUNEA
-  {id:'b11s1',dur:22000,label:'AGENDA PRIMARULUI',    bloc:6,blabel:'AGENDA & VIZIUNEA'},
-  {id:'b11s2',dur:28000,label:'VIZIUNEA',             bloc:6,blabel:'AGENDA & VIZIUNEA'},
+  // ACT VI — ORASUL PENTRU OAMENI (indici calitate viata — scene noi)
+  {id:'b13s1',dur:20000,label:'HAPPINESS INDEX',      bloc:6,blabel:'ORASUL PENTRU OAMENI'},
+  {id:'b13s2',dur:18000,label:'ECONOMIA DE NOAPTE',   bloc:6,blabel:'ORASUL PENTRU OAMENI'},
+  {id:'b13s3',dur:18000,label:'ORAS PRIETENOS SENIORI',bloc:6,blabel:'ORASUL PENTRU OAMENI'},
+  {id:'b13s4',dur:18000,label:'ORAS PENTRU COPII',    bloc:6,blabel:'ORASUL PENTRU OAMENI'},
+  // ACT VII — AGENDA & VIZIUNEA
+  {id:'b11s1',dur:22000,label:'AGENDA PRIMARULUI',    bloc:7,blabel:'AGENDA & VIZIUNEA'},
+  {id:'b11s2',dur:28000,label:'VIZIUNEA',             bloc:7,blabel:'AGENDA & VIZIUNEA'},
 ];
-var _ACT_ROMAN={1:'I',2:'II',3:'III',4:'IV',5:'V',6:'VI'};
+var _ACT_ROMAN={1:'I',2:'II',3:'III',4:'IV',5:'V',6:'VI',7:'VII'};
 
 // ── DATE LIVE ─────────────────────────────────────────────────────────────
 var D = {wiki:null,inse:null,roads:null,rail:null,airports:null,
@@ -528,7 +539,11 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
   }
 
   function stopAll(){
-    SE._playing=false; _clrIvs();
+    SE._playing=false; SE._paused=false; _clrIvs();
+    try{if(SE._cinKeyHandler)document.removeEventListener('keydown',SE._cinKeyHandler);}catch(e){}
+    var _pi=document.getElementById('cin-pause-ind'); if(_pi)_pi.remove();
+    try{if(window._CinemaRec&&window._CinemaRec._active)window._CinemaRec.stop();}catch(e){}
+    try{if(window._CinemaExplain)window._CinemaExplain._hide();}catch(e){}
     try{map.flyTo=_oFly;map.jumpTo=_oJump;}catch(e){}
     if(SE._raf) cancelAnimationFrame(SE._raf);
     if(SE._rotInt){clearInterval(SE._rotInt);SE._rotInt=null;}
@@ -565,9 +580,34 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
     _mkCtrlFallback(stopAll,goScene,SE);
   }
 
-  // Injecteaza butoanele ℹ Explica + ⏺ REC daca lipsesc (cand _mkCtrl propriu nu le are)
+  // PAUZA pentru prezentare + scurtaturi tastatura (Space=pauza, ←/→=scena, Esc=stop)
+  function _togglePause(){
+    SE._paused=!SE._paused;
+    var pb=document.getElementById('c8-pause');
+    if(pb){ pb.textContent=SE._paused?'▶ Reia':'⏸ Pauza'; pb.style.background=SE._paused?'rgba(34,197,94,.3)':'rgba(0,0,0,.6)'; }
+    var pi=document.getElementById('cin-pause-ind');
+    if(SE._paused){ if(!pi){pi=document.createElement('div');pi.id='cin-pause-ind';pi.style.cssText='position:fixed;top:62px;left:50%;transform:translateX(-50%);z-index:1000001;background:rgba(34,197,94,.92);color:#04210f;font:800 12px/1 "IBM Plex Mono",monospace;padding:7px 16px;border-radius:20px;letter-spacing:.1em';pi.textContent='⏸ PAUZA — apasa SPACE pentru a relua';document.body.appendChild(pi);} }
+    else if(pi){ pi.remove(); }
+  }
+  if(SE._cinKeyHandler){ try{document.removeEventListener('keydown',SE._cinKeyHandler);}catch(e){} }
+  SE._cinKeyHandler=function(e){
+    if(!SE._playing) return;
+    if(e.code==='Space'||e.key===' '){ e.preventDefault(); _togglePause(); }
+    else if(e.key==='ArrowRight'){ e.preventDefault(); goScene(SE._si+1); }
+    else if(e.key==='ArrowLeft'){ e.preventDefault(); goScene(SE._si-1); }
+    else if(e.key==='Escape'){ stopAll(); }
+  };
+  document.addEventListener('keydown',SE._cinKeyHandler);
+
+  // Injecteaza butoanele ⏸ Pauza + ℹ Explica + ⏺ REC daca lipsesc
   (function _injectExtraCtrl(){
     var bar=document.getElementById('tci-c8-ctrl'); if(!bar) return;
+    if(!document.getElementById('c8-pause')){
+      var bp=document.createElement('button'); bp.id='c8-pause'; bp.title='Pauza / Reia (SPACE) — pentru prezentari';
+      bp.style.cssText='background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.8);padding:10px 14px;border-radius:10px;cursor:pointer;font:700 12px/1 monospace;backdrop-filter:blur(8px)';
+      bp.textContent='⏸ Pauza'; bp.onclick=_togglePause;
+      bar.insertBefore(bp, bar.firstChild);
+    }
     if(!document.getElementById('c8-explain')){
       var be=document.createElement('button'); be.id='c8-explain'; be.title='Mod explicat — descrie fiecare scena';
       be.style.cssText='background:rgba(59,130,246,.25);border:1px solid rgba(59,130,246,.4);color:#93c5fd;padding:10px 14px;border-radius:10px;cursor:pointer;font:700 12px/1 monospace;backdrop-filter:blur(8px)';
@@ -1179,6 +1219,33 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         fly(Z.C,12.6,56,10,4500,0,'dusk');
         fly(Z.C,13.3,60,90,16000,5000,'dusk');
         break;
+
+      // ACT VI — ORASUL PENTRU OAMENI (indici calitate viata) ──────────────
+      case 'b13s1': // Happiness
+        lp('day');
+        onIdle(function(){ try{SE._addBuildings&&SE._addBuildings(map);}catch(e){} });
+        fly(Z.C,13.5,52,0,4000,0,'day');
+        rot(14,0.004);
+        fly(Z.C,14,56,40,14000,4500,'day');
+        break;
+      case 'b13s2': // Economia de noapte
+        lp('night');
+        onIdle(function(){ try{SE._addBuildings&&SE._addBuildings(map);}catch(e){} });
+        fly(Z.CBD,14.5,60,20,4000,0,'night');
+        fly(Z.CBD,15,64,80,13000,4500,'night');
+        break;
+      case 'b13s3': // Oras prietenos seniori
+        lp('day');
+        fly(Z.RES,14,54,0,4000,0,'day');
+        fly(Z.C,13.6,52,40,13000,4500,'day');
+        break;
+      case 'b13s4': // Oras pentru copii
+        lp('day');
+        onIdle(function(){ try{SE._addExpansionRings&&SE._addExpansionRings(map);}catch(e){} });
+        fly(Z.RES,14,54,0,4000,0,'day');
+        rot(12,0.004);
+        fly(Z.C,13.8,54,50,13000,4500,'day');
+        break;
     }
   }
 
@@ -1373,6 +1440,8 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         // nu si aici in scena de identitate \u2014 evita dublarea istoricului la pornire.
         cifra(N2(pop21),'Locuitori \u2014 INSE Recensamant 2021');
         cifra2(N2(Math.round(((city.suprafata_ha||city.suprafata||9800)/100)))+' km\u00b2','Suprafata UAT');
+        // URBAN DNA \u2014 amprenta orasului la deschidere (indicele-semnatura)
+        if(t>0.55) _drawUrbanDNA(ctx,W,H,Math.min(1,(t-0.55)/0.18)*sA,pred,city,false);
         break;
 
       case 'b1s2':
@@ -2036,6 +2105,8 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
           wrap(ctx,it[0],W*0.04,H*(0.57+i*0.058),W*0.56,Math.min(W*0.013,16)*1.4,2);
         });
         ctx.globalAlpha=1;
+        // URBAN DNA — transformarea 2025 -> 2055 (rezultatul actiunilor de rezilienta)
+        if(t>0.30) _drawUrbanDNA(ctx,W,H,Math.min(1,(t-0.30)/0.2)*sA,pred,city,true);
         narativ('Rezilienta nu este luxul unui oras bogat — este conditia de supravietuire in sec. 21. Instrumentele exista: PNRR, FEDR, FSE+, fonduri climat. Vointa politica si continuitatea planificarii sunt singurele lipsuri documentate. ROI 1:3.2 dovedit pe 30 ani (Banca Mondiala 2022).');
         concluzie('Rezilienta urbana = cea mai buna investitie: ROI 1:3.2 documentat + calitate vietii + atractivitate investitori');
         break;
@@ -2314,6 +2385,32 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         if(t>0.6) _drawQR(ctx,W,H,Math.min(1,(t-0.6)/0.12)*sA);
         break;
       }
+
+      // ACT VI — ORASUL PENTRU OAMENI ──────────────────────────────────────
+      case 'b13s1':
+        titlu('Happiness Index','Calitatea vietii · 6 dimensiuni · World Happiness / OECD'); linie();
+        if(t>0.14) _drawHappiness(ctx,W,H,Math.min(1,(t-0.14)/0.2)*sA,pred,city);
+        narativ('Un oras nu se masoara doar in PIB. Indicele de fericire urbana combina spatii verzi, mobilitate, venit, siguranta, sanatate si cultura. Orasele cu scor ridicat retin tinerii si atrag investitii — fericirea devine factor economic, nu doar social.');
+        concluzie('Calitatea vietii este noul avantaj competitiv intre orase');
+        break;
+      case 'b13s2':
+        titlu('Economia de Noapte','Orasul dupa apus · model night-czar (London/Amsterdam/Berlin)'); linie();
+        if(t>0.14) _drawNight(ctx,W,H,Math.min(1,(t-0.14)/0.2)*sA,pred,city);
+        narativ('Economia de noapte (restaurante, cultura, evenimente) genereaza venituri, locuri de munca si vitalitate urbana. Orase ca Londra si Amsterdam au "night-czar" dedicat. Necesita transport nocturn, siguranta si spatii culturale — altfel centrul moare dupa ora 20.');
+        concluzie('Un centru viu noaptea = oras atractiv, sigur si economic puternic');
+        break;
+      case 'b13s3':
+        titlu('Oras Prietenos cu Seniorii','Imbatranire demografica · WHO Age-Friendly Cities'); linie();
+        if(t>0.14) _drawSilver(ctx,W,H,Math.min(1,(t-0.14)/0.2)*sA,pred,city);
+        narativ('Romania imbatraneste rapid. Un oras pregatit pentru seniori inseamna acces medical de proximitate, transport adaptat, spatii publice sigure si locuire accesibila. Modelul WHO Age-Friendly Cities — tot mai relevant pentru fiecare UAT din Romania.');
+        concluzie('Orasul care isi ingrijeste varstnicii este orasul care isi pastreaza comunitatea');
+        break;
+      case 'b13s4':
+        titlu('Oras pentru Copii','Acces scoala + parc in 10 min · UNICEF Child Friendly'); linie();
+        if(t>0.14) _drawChild(ctx,W,H,Math.min(1,(t-0.14)/0.2)*sA,pred,city);
+        narativ('Un oras bun pentru un copil de 8 ani e bun pentru toata lumea (Enrique Penalosa). Indicatorul UNICEF masoara cati copii ajung la scoala si parc in 10 minute pe jos, in siguranta. Decizie de planificare puternica si politic — viitorul orasului se masoara in copii.');
+        concluzie('Orasele care pun copilul in centru castiga familiile tinere si viitorul');
+        break;
     }
 
     // ── CARTON DE CAPITOL — la inceputul fiecarui BLOC nou, un titlu mare se
@@ -2339,7 +2436,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         ctx.letterSpacing='.10em';
         ctx.fillText((name||'').toUpperCase()+'  ·  '+_S()+' — '+_E(), W/2, H*0.560);
         // FIR NARATIV — o propozitie care leaga capitolul de povestea de ansamblu
-        var _thread={1:'Mai intai — cine, unde si din ce traieste orasul.',2:'Apoi: ce il apasa — mobilitate, infrastructura, riscuri.',3:'Si totusi — cum poate creste pana in '+_E()+'.',4:'Ce se intampla cand crizele vin impreuna.',5:'Ce au facut altii — si chiar functioneaza.',6:'Ce putem decide, acum.'}[sc.bloc];
+        var _thread={1:'Mai intai — cine, unde si din ce traieste orasul.',2:'Apoi: ce il apasa — infrastructura, mobilitate, riscuri.',3:'Si totusi — cum poate creste pana in '+_E()+'.',4:'Ce se intampla cand crizele vin impreuna.',5:'Ce au facut altii — si chiar functioneaza.',6:'Dar un oras bun se masoara in oameni — fericire, varste, copii.',7:'Ce putem decide, acum.'}[sc.bloc];
         if(_thread){ ctx.globalAlpha=cardA*0.7; ctx.fillStyle='rgba(212,175,55,0.85)'; ctx.font='italic 600 '+Math.min(W*0.012,16)+'px "Space Grotesk",sans-serif'; ctx.letterSpacing='0'; ctx.fillText('“'+_thread+'”', W/2, H*0.585); }
         ctx.restore();
       }
@@ -2363,6 +2460,8 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
     var loop=function(){
       if(!SE._playing) return;
       var W=window.innerWidth, H=window.innerHeight;
+      // PAUZA pentru prezentare: cand e pe pauza, decalam _startT ca sa inghete t.
+      if(SE._paused){ SE._startT+=16; SE._raf=requestAnimationFrame(loop); return; }
       var t=Math.min(1,Math.max(0.001,(performance.now()-SE._startT)/sc.dur));
       SE._ctx.clearRect(0,0,W*(window.devicePixelRatio||1),H*(window.devicePixelRatio||1));
       try{draw(sc,t);}catch(e){console.error('[v9]',sc.id,e.message);}
@@ -2380,6 +2479,8 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
     }
     var sc=SCENES[idx];
     SE._si=idx; SE._startT=performance.now();
+    // reset pauza la schimbarea scenei (prev/next reia redarea)
+    if(SE._paused){ SE._paused=false; var _pb=document.getElementById('c8-pause'); if(_pb){_pb.textContent='⏸ Pauza';_pb.style.background='rgba(0,0,0,.6)';} var _pi=document.getElementById('cin-pause-ind'); if(_pi)_pi.remove(); }
     SE._cleanLayers&&SE._cleanLayers();
     _cleanV9(map);
     // Restaureaza cladirile Mapbox standard pentru scenele fara bare 3D PUG
@@ -2714,6 +2815,135 @@ function _drawSpiral(ctx,W,H,a,t){
     ctx.fillText(nd[0], nx+(Math.cos(na)>=-0.2?11:-11), ny+3);
   });
   ctx.restore();
+}
+
+// URBAN DNA — amprenta orasului pe 6 axe (din date reale). showFuture=true
+// suprapune 2025 (auriu) vs 2055 (verde) = transformarea. Indicele-semnatura UrbanX.
+function _drawUrbanDNA(ctx,W,H,a,pred,city,showFuture){
+  if(a<=0) return;
+  pred=pred||{}; city=city||{};
+  var cl=function(v){return Math.max(10,Math.min(96,v));};
+  // 6 axe din date reale (formula transparenta)
+  var now=[
+    cl(50+(pred.r10||0)*18),                              // Capital uman (demografie)
+    cl(pred.pctUE||40),                                   // Economie (% UE27)
+    cl(35+(pred.tp||60)*0.4+(pred.svM2||11)),             // Accesibilitate (TP + verde)
+    cl(((city.universitati||0)>0?70:45)+(city.coef_hub||0.7)*18), // Inovare
+    cl((pred.svM2||11)*4.6),                              // Natura (mp verde/loc)
+    cl(82-(pred.ag||0.2)*120)                             // Rezilienta (inv. risc seismic)
+  ];
+  var fut=now.map(function(v){return cl(v+10+(96-v)*0.28);}); // potential 2055
+  var axes=['CAPITAL\nUMAN','ECONOMIE','ACCESI-\nBILITATE','INOVARE','NATURA','REZILIENTA'];
+  var cx=W*0.70, cy=H*0.46, R=Math.min(W*0.11,150);
+  ctx.save();
+  // grila hexagonala
+  ctx.globalAlpha=a*0.4; ctx.strokeStyle='rgba(148,163,184,0.4)'; ctx.lineWidth=1;
+  [0.25,0.5,0.75,1].forEach(function(g){
+    ctx.beginPath();
+    for(var i=0;i<=6;i++){var ang=-Math.PI/2+i*Math.PI/3;var x=cx+Math.cos(ang)*R*g,y=cy+Math.sin(ang)*R*g;i?ctx.lineTo(x,y):ctx.moveTo(x,y);}
+    ctx.stroke();
+  });
+  // poligon helper
+  var poly=function(vals,col,fill){
+    ctx.beginPath();
+    for(var i=0;i<6;i++){var ang=-Math.PI/2+i*Math.PI/3;var rr=R*vals[i]/100;var x=cx+Math.cos(ang)*rr,y=cy+Math.sin(ang)*rr;i?ctx.lineTo(x,y):ctx.moveTo(x,y);}
+    ctx.closePath();
+    if(fill){ctx.globalAlpha=a*0.18;ctx.fillStyle=col;ctx.fill();}
+    ctx.globalAlpha=a*0.92;ctx.strokeStyle=col;ctx.lineWidth=2.5;ctx.stroke();
+  };
+  if(showFuture) poly(fut,'#22c55e',true);
+  poly(now,'#D4AF37',true);
+  // etichete axe
+  ctx.globalAlpha=a*0.8; ctx.fillStyle='rgba(220,228,255,0.85)'; ctx.font='700 '+Math.min(W*0.0078,10)+'px "IBM Plex Mono",monospace'; ctx.textAlign='center';
+  for(var i=0;i<6;i++){var ang=-Math.PI/2+i*Math.PI/3;var x=cx+Math.cos(ang)*(R+Math.min(W*0.022,28)),y=cy+Math.sin(ang)*(R+Math.min(W*0.022,28));
+    axes[i].split('\n').forEach(function(ln,k){ctx.fillText(ln,x,y+k*10);});}
+  // titlu + scor
+  ctx.globalAlpha=a; ctx.fillStyle='#D4AF37'; ctx.font='800 '+Math.min(W*0.011,14)+'px "IBM Plex Mono",monospace';
+  ctx.fillText('URBAN DNA',cx,cy-R-Math.min(W*0.03,38));
+  var avgN=Math.round(now.reduce(function(s,v){return s+v;},0)/6);
+  ctx.fillStyle='rgba(212,175,55,0.95)'; ctx.font='900 '+Math.min(W*0.018,24)+'px "Space Grotesk",sans-serif';
+  if(showFuture){
+    var avgF=Math.round(fut.reduce(function(s,v){return s+v;},0)/6);
+    ctx.fillText(avgN+' → '+avgF,cx,cy-R-Math.min(W*0.012,16));
+    ctx.fillStyle='rgba(148,163,184,0.6)'; ctx.font='600 '+Math.min(W*0.008,10)+'px "IBM Plex Mono",monospace';
+    ctx.fillText('2025 (auriu) vs 2055 (verde)',cx,cy+R+Math.min(W*0.04,50));
+  } else {
+    ctx.fillText(avgN+'/100',cx,cy-R-Math.min(W*0.012,16));
+  }
+  ctx.restore();
+}
+
+// Gauge semicircular reutilizabil (0-100) cu eticheta + sursa.
+function _gauge(ctx,W,H,a,cx,cy,R,val,col,title,sub){
+  ctx.save(); ctx.globalAlpha=a;
+  ctx.lineWidth=Math.max(8,R*0.16); ctx.lineCap='round';
+  ctx.strokeStyle='rgba(255,255,255,0.10)';
+  ctx.beginPath(); ctx.arc(cx,cy,R,Math.PI,2*Math.PI); ctx.stroke();
+  ctx.strokeStyle=col;
+  ctx.beginPath(); ctx.arc(cx,cy,R,Math.PI,Math.PI+Math.PI*Math.max(0,Math.min(1,val/100))); ctx.stroke();
+  ctx.fillStyle=col; ctx.textAlign='center'; ctx.font='900 '+Math.min(W*0.03,40)+'px "Space Grotesk",sans-serif';
+  ctx.fillText(Math.round(val),cx,cy-R*0.05);
+  ctx.fillStyle='rgba(148,163,184,0.7)'; ctx.font='700 '+Math.min(W*0.009,11)+'px "IBM Plex Mono",monospace';
+  ctx.fillText('/100',cx,cy+R*0.18);
+  ctx.fillStyle='rgba(230,235,255,0.9)'; ctx.font='800 '+Math.min(W*0.013,17)+'px "Space Grotesk",sans-serif';
+  ctx.fillText(title,cx,cy-R-Math.min(W*0.018,24));
+  if(sub){ ctx.fillStyle='rgba(148,163,184,0.55)'; ctx.font='500 '+Math.min(W*0.008,10)+'px "IBM Plex Mono",monospace'; ctx.fillText(sub,cx,cy+R*0.45); }
+  ctx.restore();
+}
+function _factorBars(ctx,W,H,a,x,y,items){ // items: [[label,val0-100,color]]
+  ctx.save(); ctx.globalAlpha=a; var bw=Math.min(W*0.20,260), rh=Math.min(H*0.045,32);
+  items.forEach(function(it,i){
+    var yy=y+i*rh;
+    ctx.fillStyle='rgba(255,255,255,0.07)'; ctx.fillRect(x,yy,bw,rh-7);
+    ctx.fillStyle=it[2]; ctx.fillRect(x,yy,bw*Math.max(0,Math.min(1,it[1]/100)),rh-7);
+    ctx.fillStyle='rgba(230,235,255,0.92)'; ctx.font='700 '+Math.min(W*0.0092,12)+'px "IBM Plex Mono",monospace'; ctx.textAlign='left';
+    ctx.fillText(it[0],x+6,yy+rh*0.42);
+    ctx.textAlign='right'; ctx.fillText(Math.round(it[1]),x+bw-6,yy+rh*0.42);
+  });
+  ctx.restore();
+}
+
+// HAPPINESS INDEX — scor compozit calitate viata (World Happiness/OECD Better Life).
+function _drawHappiness(ctx,W,H,a,pred,city){
+  pred=pred||{};var cl=function(v){return Math.max(8,Math.min(96,v));};
+  var f=[['Spatii verzi',cl((pred.svM2||11)*4.6),'#22c55e'],['Mobilitate',cl(35+(pred.tp||60)*0.5),'#60a5fa'],
+    ['Venit',cl((pred.pctUE||40)*0.9+20),'#D4AF37'],['Siguranta',cl(64+(pred.r10||0)*8),'#a855f7'],
+    ['Sanatate',cl(58+(pred.svM2||11)),'#ef4444'],['Cultura',cl(((city.universitati||0)>0?72:50)),'#f59e0b']];
+  var score=Math.round(f.reduce(function(s,x){return s+x[1];},0)/f.length);
+  if(a>0){ _gauge(ctx,W,H,a,W*0.30,H*0.50,Math.min(W*0.10,135),score,score>=70?'#22c55e':score>=55?'#f59e0b':'#ef4444','URBAN HAPPINESS','World Happiness · OECD Better Life');
+    _factorBars(ctx,W,H,a,W*0.58,H*0.34,f); }
+}
+// ECONOMIA DE NOAPTE — model night-time economy (Londra/Amsterdam/Berlin).
+function _drawNight(ctx,W,H,a,pred,city){
+  pred=pred||{};var cl=function(v){return Math.max(8,Math.min(96,v));};
+  var score=Math.round(cl(40+((city.universitati||0)>0?18:6)+(pred.pctUE||40)*0.2+(city.pop2021>150000?12:4)));
+  if(a<=0) return; ctx.save();
+  // split zi/noapte
+  ctx.globalAlpha=a*0.12; var g=ctx.createLinearGradient(0,0,W,0); g.addColorStop(0,'#fde68a'); g.addColorStop(1,'#1e1b4b'); ctx.fillStyle=g; ctx.fillRect(W*0.06,H*0.30,W*0.5,H*0.04); ctx.globalAlpha=1; ctx.restore();
+  _gauge(ctx,W,H,a,W*0.74,H*0.48,Math.min(W*0.10,130),score,'#a855f7','ECONOMIA DE NOAPTE','model night-czar (London/Amsterdam)');
+  _factorBars(ctx,W,H,a,W*0.06,H*0.44,[['Restaurante/baruri',cl(score+8),'#f59e0b'],['Cultura/evenimente',cl(score-4),'#a855f7'],['Siguranta nocturna',cl(score-10),'#60a5fa'],['Transport noapte',cl(score-18),'#22c55e']]);
+}
+// ORAS PRIETENOS SENIORI — WHO Age-Friendly Cities.
+function _drawSilver(ctx,W,H,a,pred,city){
+  pred=pred||{};var cl=function(v){return Math.max(8,Math.min(96,v));};
+  var crit=[['Acces medical',cl(55+(pred.svM2||11)),'#ef4444'],['Transport adaptat',cl(30+(pred.tp||60)*0.5),'#60a5fa'],['Spatii publice',cl((pred.svM2||11)*4.2),'#22c55e'],['Locuire accesibila',cl(60-(pred.pctUE||40)*0.1),'#D4AF37']];
+  var score=Math.round(crit.reduce(function(s,x){return s+x[1];},0)/crit.length);
+  _gauge(ctx,W,H,a,W*0.30,H*0.50,Math.min(W*0.10,135),score,score>=65?'#22c55e':'#f59e0b','ORAS PRIETENOS SENIORI', (score>=60?'PREGATIT':'NEPREGATIT')+' · WHO Age-Friendly');
+  _factorBars(ctx,W,H,a,W*0.58,H*0.36,crit);
+}
+// ORAS PENTRU COPII — UNICEF Child Friendly Cities.
+function _drawChild(ctx,W,H,a,pred,city){
+  pred=pred||{};var cl=function(v){return Math.max(8,Math.min(96,v));};
+  var pct=Math.round(cl(45+(pred.svM2||11)+(pred.tp||60)*0.2));
+  if(a<=0) return; ctx.save(); ctx.globalAlpha=a; ctx.textAlign='center';
+  ctx.fillStyle='#22c55e'; ctx.font='900 '+Math.min(W*0.07,96)+'px "Space Grotesk",sans-serif';
+  ctx.fillText(pct+'%',W*0.5,H*0.46);
+  ctx.fillStyle='rgba(230,235,255,0.9)'; ctx.font='700 '+Math.min(W*0.013,17)+'px "Space Grotesk",sans-serif';
+  ctx.fillText('copii cu scoala + parc in 10 minute pe jos',W*0.5,H*0.53);
+  ctx.fillStyle='rgba(148,163,184,0.55)'; ctx.font='500 '+Math.min(W*0.009,11)+'px "IBM Plex Mono",monospace';
+  ctx.fillText('model UNICEF Child Friendly Cities',W*0.5,H*0.58);
+  ctx.restore();
+  _factorBars(ctx,W,H,a,W*0.34,H*0.62,[['Acces scoala 10min',cl(pct+6),'#22c55e'],['Acces parc 10min',cl(pct-3),'#34d399'],['Strazi sigure',cl(pct-12),'#60a5fa']]);
 }
 
 // Radar de analiza — baleiaj rotativ subtil peste harta (scenele de analiza).
