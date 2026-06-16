@@ -826,6 +826,30 @@
         ['Implicarea societatii civile', 'Legitimitate si calitate a deciziilor', 'ONG-uri, asociatii de cartier'],
       ], [50, 58, 66], { boldFirst: true, fs: 7 });
 
+      D.chapter('Strategia spatiilor verzi pe tipologii');
+      D.P('Sistemul de spatii verzi este planificat ierarhic si multifunctional, de la parcuri urbane mari pana la scuaruri si vegetatie de aliniament, asigurand acoperire echitabila si conectivitate ecologica. Diversitatea tipologica raspunde unor functii complementare: recreere, sport, biodiversitate, gestiunea apelor, racire si identitate.');
+      D.table(['Tipologie spatiu verde', 'Rol principal', 'Acces / proximitate'], [
+        ['Parcuri urbane mari', 'Recreere, evenimente, biodiversitate', 'la nivel de oras'],
+        ['Parcuri de cartier', 'Recreere zilnica, sport, joaca', '<= 10 min mers pe jos'],
+        ['Scuaruri si gradini', 'Pauze, socializare, racire', 'proximitate imediata'],
+        ['Coridoare verzi (maluri, alei)', 'Conectivitate ecologica + mobilitate activa', 'retea continua'],
+        ['Vegetatie de aliniament', 'Umbrire strazi, calitate aer', 'pe arterele principale'],
+        ['Spatii verzi productive (gradini)', 'Agricultura urbana, educatie', 'comunitar'],
+      ], [54, 66, 54], { boldFirst: true, fs: 7 });
+      D.source('Norma minima 26 mp/locuitor (Legea 24/2007). Obiectiv de echitate: acces la spatiu verde de calitate la distanta de mers pe jos de fiecare locuinta.');
+
+      D.chapter('Autonomie energetica si comunitati de energie');
+      D.P('Tranzitia energetica urbana evolueaza catre un model descentralizat, in care orasul si comunitatile sale devin nu doar consumatori, ci si producatori de energie (prosumatori). Productia locala de energie regenerabila (in special fotovoltaic pe acoperisuri si suprafete construite), stocarea si retelele inteligente (smart grids) cresc autonomia energetica, rezilienta si reduc emisiile si costurile pe termen lung.');
+      D.P('Comunitatile de energie regenerabila — asocieri de cetateni, institutii si firme care produc, consuma si partajeaza energie local — reprezinta un model promovat de UE pentru democratizarea si decarbonizarea energiei. La nivel urban, cladirile publice pot deveni poli de productie, iar reabilitarea energetica a fondului construit (standard nZEB la cladiri noi, renovare profunda la cele existente) reduce drastic consumul.');
+
+      D.chapter('Reziliente economica si diversificare');
+      D.P('Rezilienta economica este capacitatea economiei locale de a absorbi socuri (crize economice, restructurari sectoriale, pandemii) si de a se adapta. Dependenta de un singur sector dominant sau de cativa mari angajatori constituie o vulnerabilitate majora: declinul lor poate destabiliza intregul oras. Diversificarea economica — dezvoltarea unui portofoliu echilibrat de sectoare si firme de dimensiuni variate — distribuie riscul si creste stabilitatea.');
+      D.P('Strategiile de reziliente economica includ: sprijinirea antreprenoriatului si a IMM-urilor locale, atragerea de investitii in sectoare diverse cu valoare adaugata, dezvoltarea capitalului uman adaptabil (formare, recalificare), si crearea unui mediu urban atractiv care retine si atrage talent. Economia locala de proximitate si circulara intareste, de asemenea, rezilienta prin reducerea dependentei de lanturi de aprovizionare externe.');
+
+      D.chapter('Politici demografice — atragere si retentie');
+      D.P('Intr-un context national de declin si imbatranire demografica, atragerea si retinerea populatiei, in special tinere si calificate, devine un obiectiv strategic. Orasele concureaza pentru talent si populatie activa, factorii decisivi fiind: oportunitatile economice (locuri de munca de calitate), locuirea accesibila, calitatea vietii (spatii publice, cultura, mediu, mobilitate) si serviciile (educatie, sanatate).');
+      D.P('Politicile de retentie a tinerilor (prevenind exodul catre alte orase sau strainatate) si de atragere (inclusiv revenirea diasporei si atragerea de noi rezidenti) se construiesc pe aceste fundamente. Un oras care ofera o calitate a vietii ridicata, oportunitati si o identitate puternica are sanse mai mari sa isi mentina si sa isi intinereasca populatia, sustinandu-si dezvoltarea pe termen lung.');
+
       D.chapter('Analiza detaliata a factorilor de mediu');
       D.h2('Calitatea aerului');
       D.P('Calitatea aerului este un determinant major al sanatatii publice si al calitatii vietii. Principalele surse de poluare urbana sunt traficul rutier (particule PM, oxizi de azot NOx), incalzirea rezidentiala (in special arderea combustibililor solizi), si, dupa caz, activitatile industriale. Monitorizarea continua a poluantilor (PM2.5, PM10, NO2, O3) si compararea cu limitele legale (Directiva 2008/50/CE) si cu valorile-ghid OMS fundamenteaza masurile de reducere. Imbunatatirea calitatii aerului se realizeaza prin transfer modal, electrificarea transportului, eficienta energetica a cladirilor si extinderea spatiilor verzi.');

@@ -469,6 +469,37 @@
       D.P('Coordonarea revine unei structuri de management al mobilitatii din cadrul primariei (sau autoritatii metropolitane), cu raportare anuala publica. Participarea publica este obligatorie in toate fazele. PMUD se revizuieste la 5 ani sau la modificari majore ale contextului.');
 
       // ── CAPITOLE SUPLIMENTARE ────────────────────────────────────────────
+      D.chapter('Sisteme de transport public — tipuri si tehnologii');
+      D.P('Alegerea tipului de sistem de transport public se face in functie de cererea de transport pe coridor, de spatiul disponibil si de resurse. Ierarhia capacitatilor merge de la autobuzul clasic (flexibil, cost redus) la sisteme de mare capacitate cu infrastructura dedicata. Adecvarea sistemului la cerere este esentiala: supradimensionarea risipeste resurse, subdimensionarea limiteaza atractivitatea.');
+      D.table(['Sistem', 'Capacitate (pas/ora/sens)', 'Adecvare'], [
+        ['Autobuz urban (trafic mixt)', 'pana la ~4.000', 'Cerere redusa-medie, retea capilara'],
+        ['Autobuz cu banda dedicata / BRT', '4.000 - 15.000', 'Coridoare cu cerere medie-ridicata'],
+        ['Tramvai modern / LRT', '8.000 - 20.000', 'Coridoare structurante, cerere ridicata'],
+        ['Metrou / metrou usor', '> 20.000', 'Marile aglomerari, cerere foarte ridicata'],
+      ], [56, 56, 62], { boldFirst: true, fs: 7 });
+      D.P('Pentru majoritatea oraselor romanesti de talie medie, combinatia optima este o retea de autobuze (electrice) cu coridoare prioritare (benzi dedicate, prioritizare semaforica — de tip BRT) pe axele principale, completata, acolo unde exista, de tramvai modernizat. Investitia in infrastructura dedicata se justifica pe coridoarele cu cerere ridicata, unde aduce salt de viteza si fiabilitate.');
+
+      D.chapter('Micromobilitate si reglementarea serviciilor noi');
+      D.P('Micromobilitatea (biciclete si trotinete electrice partajate) a cunoscut o expansiune rapida, oferind solutii pentru deplasarile scurte si pentru ultimul kilometru, complementare transportului public. Beneficiile (deplasari rapide, zero emisii locale, ocupare redusa de spatiu) sunt insotite insa de provocari: parcarea dezordonata pe trotuare, conflicte cu pietonii, siguranta utilizatorilor si gestionarea operatorilor privati.');
+      D.P('Reglementarea echilibrata a micromobilitatii este esentiala: zone si reguli de parcare clare (inclusiv parcari dedicate), limite de viteza in zonele pietonale, cerinte de siguranta, si acorduri cu operatorii privind distributia, intretinerea si partajarea datelor. Integrarea micromobilitatii in platformele MaaS si in nodurile intermodale o transforma intr-o componenta valoroasa a ecosistemului de mobilitate.');
+
+      D.chapter('Cadrul de indicatori si tabloul de bord al mobilitatii');
+      D.P('Monitorizarea PMUD se bazeaza pe un cadru structurat de indicatori (KPI), organizati pe dimensiuni: eficienta, mediu, siguranta, accesibilitate, calitate. Tabloul de bord (dashboard) al mobilitatii agrega acesti indicatori, permitand urmarirea progresului catre tinte si ajustarea masurilor. Indicatorii trebuie sa fie relevanti, masurabili, comparabili in timp si dezagregati (pe zone, grupuri, moduri).');
+      D.table(['Dimensiune', 'Indicatori-cheie'], [
+        ['Eficienta', 'Timp mediu de deplasare; viteza comerciala TP; cost congestie'],
+        ['Mediu', 'Emisii CO2/cap; PM2.5, NO2; zgomot; consum energetic transport'],
+        ['Siguranta', 'Victime/100.000 loc; numar puncte negre tratate'],
+        ['Accesibilitate', '% pop la <300m de TP; izocrone 15/30 min; acoperire piste'],
+        ['Modal split', 'Cota auto / TP / activ; grad de motorizare'],
+        ['Calitate / satisfactie', 'Satisfactia utilizatorilor; fiabilitate; confort'],
+      ], [40, 134], { boldFirst: true, fs: 7 });
+      D.source('Cadru de indicatori aliniat la setul SUMP (EU) si la indicatorii de mobilitate urbana durabila. Se raporteaza periodic public.');
+
+      D.chapter('Studiu de caz — testarea modelului pe un coridor prioritar');
+      D.P('Pentru a ilustra aplicarea modelului de transport, se testeaza un scenariu de interventie pe un coridor radial prioritar: introducerea unei benzi dedicate transportului public, a unei piste de biciclete protejate si prioritizarea semaforica. Modelul estimeaza efectele asupra vitezei comerciale, a cotei modale si a emisiilor pe coridor.');
+      D.P('Rezultatele asteptate (orientative, conform modelului): cresterea vitezei comerciale a transportului public cu 20-30% pe coridor, transferul unei parti din deplasarile auto catre transport public si bicicleta (reducerea cotei auto cu cateva puncte procentuale pe coridor), si o reducere corespunzatoare a emisiilor si a congestiei. Desi capacitatea rutiera pentru autoturisme se reduce, capacitatea TOTALA de transport a coridorului (persoane/ora) creste, datorita eficientei superioare a benzii dedicate TP. Acest tip de testare fundamenteaza deciziile de investitie inainte de implementare.');
+      D.callout('Capacitatea masurata in persoane, nu in vehicule', 'O banda de circulatie poate transporta ~2.000 persoane/ora cu autoturisme, ~9.000 cu autobuze pe banda dedicata si ~20.000 cu tramvai. Realocarea spatiului catre moduri eficiente creste capacitatea reala a coridorului.');
+
       D.chapter('Politica tarifara si integrarea transportului public');
       D.P('Politica tarifara a transportului public influenteaza puternic atractivitatea si echitatea sistemului. Un tarif accesibil, simplu si integrat (un singur titlu valabil pe toate liniile si modurile, inclusiv la nivel metropolitan) incurajeaza utilizarea, in timp ce tarifele complicate sau ridicate descurajeaza. Integrarea tarifara — combinata cu e-ticketing si plata contactless — reduce barierele de acces si timpul de imbarcare, crescand viteza comerciala.');
       D.P('Subventionarea transportului public este o decizie de politica publica justificata de beneficiile sale externe (reducerea congestiei, emisiilor, accidentelor) si de rolul social (mobilitate pentru toti). Multe orase ofera gratuitati sau reduceri pentru categorii (elevi, studenti, varstnici, persoane cu venituri reduse), iar unele experimenteaza gratuitatea totala. Echilibrul intre venituri din tarife, subventii si calitatea serviciului este o decizie strategica fundamentala.');
