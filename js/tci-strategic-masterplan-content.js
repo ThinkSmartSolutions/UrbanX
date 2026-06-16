@@ -662,6 +662,18 @@
         ['Parteneriate public-private (PPP)', 'Dezvoltari imobiliare, parcari, utilitati', 'Repartizarea riscurilor'],
         ['Fonduri pentru tranzitie justa / mediu', 'Decarbonizare, economie circulara', 'Eligibilitate specifica'],
       ], [56, 70, 48], { boldFirst: true });
+      D.h2('Esalonarea investitiilor pe domenii si decade');
+      const invD = (invest && (invest.total || invest.totalMilEur)) || Math.round(pop * 0.5);
+      D.table(['Domeniu de investitii', '2025-2035', '2035-2045', '2045-2055', 'Total'], [
+        ['Mobilitate si transport', N(Math.round(invD * 0.12)), N(Math.round(invD * 0.10)), N(Math.round(invD * 0.06)), N(Math.round(invD * 0.28))],
+        ['Infrastructura edilitara', N(Math.round(invD * 0.10)), N(Math.round(invD * 0.07)), N(Math.round(invD * 0.05)), N(Math.round(invD * 0.22))],
+        ['Locuire si regenerare', N(Math.round(invD * 0.06)), N(Math.round(invD * 0.08)), N(Math.round(invD * 0.06)), N(Math.round(invD * 0.20))],
+        ['Spatii verzi si mediu', N(Math.round(invD * 0.05)), N(Math.round(invD * 0.04)), N(Math.round(invD * 0.03)), N(Math.round(invD * 0.12))],
+        ['Echipamente publice', N(Math.round(invD * 0.04)), N(Math.round(invD * 0.03)), N(Math.round(invD * 0.02)), N(Math.round(invD * 0.09))],
+        ['Digitalizare si energie', N(Math.round(invD * 0.04)), N(Math.round(invD * 0.03)), N(Math.round(invD * 0.02)), N(Math.round(invD * 0.09))],
+        ['TOTAL (mil. EUR)', N(Math.round(invD * 0.41)), N(Math.round(invD * 0.35)), N(Math.round(invD * 0.24)), N(invD)],
+      ], [54, 30, 30, 30, 30], { fs: 7, boldFirst: true });
+      D.source('Esalonare orientativa a necesarului investitional pe domenii si decade. Valorile se rafineaza prin studii de fezabilitate.');
       D.callout('Principiu de finantare', 'Prioritizarea proiectelor cu raport beneficiu/cost ridicat si cu efect de levier (atrag investitii private), esalonate pe etape pentru a distribui efortul bugetar.');
 
       // ─────────────────────────────────────────────────────────────────────

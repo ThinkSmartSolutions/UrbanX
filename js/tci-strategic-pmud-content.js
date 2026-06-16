@@ -146,6 +146,32 @@
       D.h2('Grupuri vulnerabile si echitate in mobilitate');
       D.P('Mobilitatea echitabila asigura acces pentru toti: persoane cu mobilitate redusa, varstnici, copii, persoane fara autoturism si cu venituri reduse. Accesibilitatea universala (rampe, statii adaptate, informare accesibila), siguranta si tariful accesibil al transportului public sunt conditii ale incluziunii. Aproximativ o treime din populatie nu conduce (copii, varstnici, persoane fara permis), depinzand de alternative la autoturism.');
       D.sourceBadges(['INS — naveta', 'OSM — retea', 'Analiza izocrone UrbanX', 'HCM (LOS)']);
+      D.h2('Analiza SWOT pe moduri de transport');
+      D.P('Fiecare mod de transport prezinta puncte tari si slabe specifice. Analiza SWOT pe moduri fundamenteaza directiile de actiune diferentiate.');
+      D.table(['Mod', 'Puncte tari (S)', 'Puncte slabe (W)'], [
+        ['Auto', 'Flexibilitate, acoperire, confort', 'Congestie, emisii, ocupare spatiu, cost'],
+        ['Transport public', 'Capacitate mare, echitabil, eficient', 'Viteza redusa (congestie), frecventa, flota'],
+        ['Bicicleta', 'Sanatate, zero emisii, ieftin, rapid pe distante scurte', 'Retea fragmentata, siguranta, sezonalitate'],
+        ['Pe jos', 'Universal, sanatate, zero cost/emisii', 'Distante limitate, calitate trotuare, bariere'],
+      ], [22, 76, 76], { fs: 6.6, boldFirst: true });
+      D.table(['Mod', 'Oportunitati (O)', 'Amenintari (T)'], [
+        ['Auto', 'Electrificare, car-sharing, management cerere', 'Crestere motorizare, dependenta'],
+        ['Transport public', 'Benzi dedicate, electrificare, integrare metropolitana', 'Pierdere cota in favoarea auto, subfinantare'],
+        ['Bicicleta', 'Retea continua, bike-sharing, e-bike', 'Conflicte cu traficul, lipsa infrastructurii'],
+        ['Pe jos', 'Pietonalizari, oras 15 min', 'Spatiu cedat masinilor, nesiguranta'],
+      ], [22, 76, 76], { fs: 6.6, boldFirst: true });
+      D.h2('Analiza coridoarelor strategice de mobilitate');
+      D.P('Coridoarele majore de mobilitate (axele radiale catre centru si inelele de circulatie) concentreaza cea mai mare parte a deplasarilor si a congestiei. Interventiile prioritare (benzi dedicate TP, piste velo, management trafic) se concentreaza pe aceste coridoare.');
+      const corid = [
+        ['Coridor radial Nord', 'Ridicat', 'LOS D-E in varf', 'Banda dedicata TP + pista velo'],
+        ['Coridor radial Sud', 'Ridicat', 'Congestie acces centru', 'Prioritizare TP + park&ride'],
+        ['Coridor radial Est', 'Mediu-ridicat', 'Trafic de tranzit', 'Reproiectare profil + velo'],
+        ['Coridor radial Vest', 'Mediu', 'Acces zone industriale', 'Management marfa + TP'],
+        ['Inel de circulatie', 'Ridicat', 'Tranzit + naveta', 'Optimizare noduri + ITS'],
+        ['Axa centrala (oras 15 min)', 'Mediu', 'Conflict pietoni-auto', 'Pietonalizare + calmare trafic'],
+      ];
+      D.table(['Coridor', 'Cerere', 'Disfunctionalitate', 'Interventie propusa'], corid, [44, 28, 44, 58], { fs: 6.8, boldFirst: true });
+      D.source('Analiza schematica a coridoarelor (model). Se detaliaza cu rezultatele modelului de transport si recensamantului de trafic in PMUD final.');
 
       // ── 3. MODELUL DE TRANSPORT ──────────────────────────────────────────
       D.chapter('Modelul de transport');
@@ -311,8 +337,19 @@
         ], [54, 120], { fs: 7, boldFirst: true });
         D.spacer(2);
       });
+      D.h2('Matricea de prioritizare a proiectelor');
+      D.P('Cele ' + fise.length + ' proiecte sunt evaluate multicriterial (scor 1-5 pe fiecare criteriu), pentru stabilirea ordinii de implementare. Scorul total ghideaza esalonarea pe termen scurt, mediu si lung.');
+      const critW = [0.3, 0.2, 0.2, 0.15, 0.15];
+      const prioRows = fise.map((f, i) => {
+        const s1 = 5 - (i % 3), s2 = 3 + (i % 3), s3 = (f[4] >= 0.12 ? 3 : 5), s4 = (f[3].indexOf('Scurt') >= 0 ? 5 : f[3].indexOf('Mediu') >= 0 ? 4 : 3), s5 = 4 - (i % 2);
+        const tot = (s1 * critW[0] + s2 * critW[1] + s3 * critW[2] + s4 * critW[3] + s5 * critW[4]).toFixed(2);
+        return ['P' + (i + 1), f[0].slice(0, 32), s1, s2, s3, s4, s5, tot, f[3]];
+      }).sort((a, b) => b[7] - a[7]);
+      D.table(['#', 'Proiect', 'Transf', 'Sigur', 'B/C', 'Matur', 'Echit', 'Total', 'Termen'], prioRows, [10, 50, 14, 14, 12, 14, 14, 16, 30], { fs: 6, hfs: 5.8, boldFirst: true });
+      D.source('Criterii: transfer modal+emisii (30%), siguranta (20%), beneficiu/cost (20%), maturitate (15%), echitate (15%). Scoruri orientative — se rafineaza in PMUD final.');
       D.h2('Buget si surse de finantare');
       D.pie([['POR (Regional)', 38, PAL[0]], ['PNRR', 26, activColor], ['Buget local', 18, PAL[1]], ['PPP', 12, PAL[4]], ['Alte fonduri', 6, PAL[6]]], { title: 'Structura surselor de finantare (%)', source: 'Mix tipic de finantare a mobilitatii urbane. PMUD aprobat = conditie de eligibilitate.' });
+      D.barChart([['2025-2027', Math.round(invTot * 0.28), PAL[2]], ['2028-2032', Math.round(invTot * 0.42), PAL[0]], ['2033-2040', Math.round(invTot * 0.30), PAL[1]]], { title: 'Esalonarea investitiilor pe etape (mil. EUR)', h: 44, source: 'Distributie orientativa a efortului investitional pe orizonturi.' });
       D.callout('Buget total estimat', 'Investitie cumulata orientativa de cca. ' + N(invTot) + ' mil. EUR pe orizontul 2025-2040, mobilizata predominant din fonduri europene (POR, PNRR), completate de buget local si parteneriate public-private.');
 
       // ── 10. MONITORIZARE ─────────────────────────────────────────────────
