@@ -617,6 +617,16 @@ function _rvFillApt(x0, y0, W, D, aptIdx, isFlipped, type='auto'){
   return rms;
 }
 
+// Returneaza nivelul cerut, generandu-l lazy daca lipseste — NU mai cade pe parter
+// (altfel etajele 1,2,... aparau identice cu parterul, cu usa de intrare peste tot).
+function _rvGetFloor(idx){
+  if(idx==null) idx = (_RV && _RV.floor) || 0;
+  if(!_RV || !Array.isArray(_RV.floors) || !_RV.floors.length) return null;
+  if(idx<0 || idx>=_RV.floors.length) idx = 0;
+  if(_RV.floors[idx]==null){ try{ _RV.floors[idx] = _rvFloor(_RV.building, idx); }catch(e){} }
+  return _RV.floors[idx] || _RV.floors[0];
+}
+
 function _rvFloor(b, floorIdx){
   const {bW, bD, cores, P} = b;
   const isGround = floorIdx === 0;
@@ -886,10 +896,7 @@ function _rvRender(){
     return;
   }
   // Lazy: calculăm etajul dacă nu a fost calculat încă (mobil)
-  if(_RV.floors[_RV.floor] === null){
-    try{ _RV.floors[_RV.floor] = _rvFloor(_RV.building, _RV.floor); }catch(e){}
-  }
-  const fl = _RV.floors[_RV.floor] || _RV.floors[0];
+  const fl = _rvGetFloor(_RV.floor);
   const b  = _RV.building;
   // ── Curăță handler-ul de hover când NU suntem pe Plan ─────────────────────
   // Bug: hover-ul de plan (tooltip camere) rămâne activ pe canvas la switch tab
@@ -4198,7 +4205,7 @@ function _rvDrawISUCircles(ctx, b, ox, oy, SC){
     ctx.textAlign='left';
   });
 
-  const fl=_RV.floors[_RV.floor]||_RV.floors[0];
+  const fl=_rvGetFloor(_RV.floor);
   fl.rects.filter(r=>r.apt>=0).forEach(r=>{
     const rx=ox+r.x*SC, ry=oy+r.y*SC, rw=r.w*SC, rh=r.h*SC;
     const cx_r=ox+(r.x+r.w/2)*SC, cy_r=oy+(r.y+r.h/2)*SC;
@@ -4218,7 +4225,7 @@ function _rvDrawISUCircles(ctx, b, ox, oy, SC){
   });
   ctx.restore();
 
-  const fl_=_RV.floors[_RV.floor]||_RV.floors[0];
+  const fl_=_rvGetFloor(_RV.floor);
   const overLimit=fl_.rects.filter(r=>r.apt>=0).filter(r=>{
     const cx_r=ox+(r.x+r.w/2)*SC, cy_r=oy+(r.y+r.h/2)*SC;
     return Math.min(...b.cores.map(c=>{
@@ -5698,7 +5705,7 @@ async function generateRelevee(){
   }catch(e){} }, 9000);
   setTimeout(()=>{ try{
     // AI SCORING ENGINE + AUTO-FIX ENGINE
-    const flScore=_RV.floors[_RV.curFloor]||_RV.floors[0];
+    const flScore=_rvGetFloor(_RV.curFloor);
     _rvRenderScore(b, flScore, P);
     // Rulăm auto-fix și populăm tab-ul Scenarii A/B
     const {bOpt,POpt,floorsOpt,fixes}=_rvAutoFix(b,P,_RV.floors);
@@ -5724,7 +5731,7 @@ async function generateRelevee(){
   }catch(e){console.warn('[RV autofix]',e);} }, 10500);
   setTimeout(()=>{ try{
     // PMR + Energy + Print button in normative panel
-    const fl_pmr=_RV.floors[_RV.curFloor]||_RV.floors[0];
+    const fl_pmr=_rvGetFloor(_RV.curFloor);
     _rvUpdateVerificareExtended(_RV.building,fl_pmr,_RV.building?.P||P);
   }catch(e){} }, 11000);
   setTimeout(()=>{ try{
