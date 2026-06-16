@@ -826,6 +826,47 @@
         ['Implicarea societatii civile', 'Legitimitate si calitate a deciziilor', 'ONG-uri, asociatii de cartier'],
       ], [50, 58, 66], { boldFirst: true, fs: 7 });
 
+      D.chapter('Analiza detaliata a factorilor de mediu');
+      D.h2('Calitatea aerului');
+      D.P('Calitatea aerului este un determinant major al sanatatii publice si al calitatii vietii. Principalele surse de poluare urbana sunt traficul rutier (particule PM, oxizi de azot NOx), incalzirea rezidentiala (in special arderea combustibililor solizi), si, dupa caz, activitatile industriale. Monitorizarea continua a poluantilor (PM2.5, PM10, NO2, O3) si compararea cu limitele legale (Directiva 2008/50/CE) si cu valorile-ghid OMS fundamenteaza masurile de reducere. Imbunatatirea calitatii aerului se realizeaza prin transfer modal, electrificarea transportului, eficienta energetica a cladirilor si extinderea spatiilor verzi.');
+      D.h2('Calitatea apei si a solului');
+      D.P('Protejarea resurselor de apa (de suprafata si subterane) impotriva poluarii, asigurarea epurarii conforme a apelor uzate si gestiunea apelor pluviale sunt esentiale pentru sanatate si mediu. Solul urban, adesea contaminat istoric in zonele industriale, necesita evaluare si, unde e cazul, remediere inainte de reconversie. Reducerea impermeabilizarii si protejarea solurilor fertile periurbane sunt principii de baza.');
+      D.h2('Zgomotul urban');
+      D.P('Poluarea fonica, generata preponderent de trafic, afecteaza sanatatea (somn, sistem cardiovascular) si calitatea vietii. Hartile strategice de zgomot identifica zonele expuse, iar planurile de actiune prevad masuri de reducere: managementul traficului, asfalturi fonoabsorbante, ecrane acustice, izolarea cladirilor si, fundamental, reducerea traficului auto in zonele rezidentiale.');
+
+      D.chapter('Strategia de regenerare urbana');
+      D.P('Regenerarea urbana este procesul integrat de revitalizare a zonelor degradate, subutilizate sau in declin — fizic, economic, social si de mediu. Spre deosebire de simpla reabilitare, regenerarea abordeaza simultan cladirile, spatiul public, dotarile, mobilitatea, economia locala si comunitatea. Zonele-tinta tipice sunt ansamblurile de locuinte colective, zonele industriale dezafectate, centrele istorice degradate si periferiile slab structurate.');
+      D.P('O strategie de regenerare eficienta porneste de la zone-pilot demonstrative, mobilizeaza finantare diversa (fonduri europene, buget local, parteneriate), implica comunitatea in proces si masoara rezultatele. Principiul director este interventia integrata si echitabila, care imbunatateste conditiile fara a disloca populatia existenta (prevenirea gentrificarii excesive).');
+
+      D.chapter('Zone cu regim special si servituti');
+      D.P('Teritoriul cuprinde zone supuse unor regimuri speciale de protectie si servituti, care conditioneaza sau interzic construirea. Identificarea si respectarea lor este obligatorie in documentatiile de urbanism.');
+      D.table(['Zona / servitute', 'Regim', 'Temei'], [
+        ['Zone de protectie ape si maluri', 'Servitute, interdictie partiala', 'Legea 107/1996'],
+        ['Zone de protectie monumente (LMI)', 'Reglementare stricta, avize', 'Legea 422/2001'],
+        ['Zone de protectie sanitara', 'Restrictii de functiuni', 'Norme sanitare'],
+        ['Culoare infrastructura (LEA, conducte, drumuri, CF)', 'Servituti, interdictii', 'Legi sectoriale'],
+        ['Zone de risc natural (inundatii, alunecari)', 'Interdictie / conditionare', 'HG 447/2003, Legea 575/2001'],
+        ['Zone aeroportuare (servituti)', 'Limitari de inaltime', 'HG 930/2016, RACR'],
+      ], [60, 50, 64], { boldFirst: true, fs: 7 });
+
+      D.chapter('Etapizarea spatiala a dezvoltarii');
+      D.P('Dezvoltarea teritoriului se realizeaza etapizat, in functie de echiparea edilitara, de cererea reala si de prioritatile strategice, evitand deschiderea simultana a unor suprafete extinse care ar genera dispersie si costuri. Etapizarea spatiala stabileste ordinea logica de dezvoltare: intai densificarea si regenerarea intravilanului echipat, apoi extinderile coordonate cu infrastructura, mentinand restul ca rezerva pe termen lung.');
+      D.P('Acest principiu — "intravilan inainte de extindere" — protejeaza terenurile agricole si naturale, optimizeaza investitiile publice in infrastructura si previne expansiunea necontrolata (urban sprawl) cu toate costurile sale (mobilitate dependenta de auto, echipare scumpa, fragmentarea peisajului). Fiecare etapa de extindere se conditioneaza de gradul de ocupare al etapei anterioare si de asigurarea infrastructurii.');
+
+      D.chapter('Guvernanta digitala si orasul bazat pe date');
+      D.P('Planificarea si administrarea urbana moderna se bazeaza tot mai mult pe date. O platforma integrata de date urbane (GIS, geamana digitala / digital twin a orasului) reuneste informatii despre teritoriu, infrastructura, mobilitate, mediu si servicii, permitand decizii fundamentate, simularea scenariilor si monitorizarea in timp real a indicatorilor. Datele deschise (open data) sustin transparenta, inovarea si participarea cetateneasca.');
+      D.P('Geamana digitala a orasului — un model 3D dinamic, alimentat cu date in timp real — devine un instrument puternic de planificare: permite testarea propunerilor (volumetrii, insorire, trafic, inundatii) inainte de implementare si comunicarea vizuala cu cetatenii si investitorii. UrbanX se inscrie in aceasta directie, oferind analiza geospatiala, modelare 3D si proiectii bazate pe date.');
+
+      D.chapter('Mecanisme de finantare a dezvoltarii urbane');
+      D.P('Realizarea masterplanului necesita mobilizarea unor resurse financiare semnificative, prin mecanisme diverse si inovatoare, dincolo de bugetul local. Pe langa fondurile europene (POR, PNRR) si parteneriatele public-private, exista instrumente specifice de finantare a dezvoltarii urbane.');
+      D.bullets([
+        ['Captarea plusvalorii (value capture)', 'recuperarea pentru comunitate a unei parti din cresterea valorii terenurilor generata de investitiile publice (infrastructura, transport)'],
+        ['Taxe si contributii de dezvoltare', 'contributii ale dezvoltatorilor la infrastructura publica necesara'],
+        ['Instrumente financiare europene', 'fonduri rambursabile, garantii, finantare mixta (blending)'],
+        ['Obligatiuni verzi municipale', 'finantarea proiectelor de mediu prin emisiuni de obligatiuni'],
+        ['Reparcelare urbana', 'mecanism prin care proprietarii contribuie cu teren pentru infrastructura, beneficiind de cresterea valorii'],
+      ]);
+
       D.chapter('Concluzii si recomandari strategice');
       D.P('Masterplanul Strategic al Municipiului ' + city.name + ' fundamenteaza o dezvoltare urbana integrata, durabila si rezilienta. Recomandarile prioritare:');
       D.bullets([
