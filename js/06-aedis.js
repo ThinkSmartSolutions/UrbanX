@@ -5420,9 +5420,12 @@ function aedisGetContent(){
     <button onclick="aedisGenerateAll()" class="aedis-build-btn">
       ${S.vol.multiVol ? `⚡ Generează ${S.vol.multiVolCount||2} Volume 3D în hartă` : '⚡ Generează Volum 3D în hartă'}
     </button>
-    <button onclick="aedisOpen3DViewer()" class="aedis-dim-btn" 
-      style="background:rgba(99,102,241,.2);border-color:rgba(139,92,246,.5);color:#a78bfa;font-size:9px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 8px" 
+    <button onclick="aedisOpen3DViewer()" class="aedis-dim-btn"
+      style="background:rgba(99,102,241,.2);border-color:rgba(139,92,246,.5);color:#a78bfa;font-size:9px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 8px"
       title="Viewer 3D isometric">🔭<span style="font-size:8px">3D</span></button>
+    <button onclick="if(window.VTour&&window.VTour.start){window.VTour.start();}else{ss&&ss('Turul virtual se încarcă...');}" class="aedis-dim-btn"
+      style="background:rgba(59,130,246,.18);border-color:rgba(59,130,246,.45);color:#60a5fa;font-size:9px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 8px"
+      title="Tur Virtual 3D first-person (WASD + touch) — generați întâi volumul 3D">🥽<span style="font-size:8px">Tur</span></button>
     <button onclick="aedisOpenLoisir()" class="aedis-dim-btn"
       style="background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.4);color:#4ade80;font-size:9px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 8px"
       title="LOISIR — Amenajare spații publice">🌿<span style="font-size:8px">Loisir</span></button>

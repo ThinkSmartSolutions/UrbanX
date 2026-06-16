@@ -376,7 +376,7 @@ Endpoint-uri disponibile prin proxy:
 
 | Bug | Fișier | Status |
 |-----|--------|--------|
-| Lotizare crăpă pe geometrii complexe (CF 56832 Bălușeni) | js/08-lotizare.js | ❌ Nerezolvat |
+| Lotizare crăpă pe geometrii complexe (CF 56832 Bălușeni) | js/08-lotizare.js | ✅ Rezolvat — `_lotSanitizeGeom()` (cleanCoords+rewind+buffer(0)) repară self-intersection (area 0 → validă) |
 | Coordonate terenuri tenis Bălușeni greșite | data/com-baluseni/pug.geojson | ❌ Nerezolvat |
 | Search CF < 60000 nu funcționează | js/04-search.js | ❌ Nerezolvat |
 | Buton Tur Virtual nu e în panoul Urban3D | js/06-aedis.js | ❌ Nerezolvat |
