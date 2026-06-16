@@ -826,6 +826,22 @@
         ['Implicarea societatii civile', 'Legitimitate si calitate a deciziilor', 'ONG-uri, asociatii de cartier'],
       ], [50, 58, 66], { boldFirst: true, fs: 7 });
 
+      D.chapter('Conectivitate teritoriala si pozitionare regionala');
+      D.P('Pozitia orasului in retelele de transport regionale, nationale si europene (rutier, feroviar, aerian) determina accesibilitatea sa si oportunitatile economice. Conectarea la coridoarele europene de transport (TEN-T), la autostrazi si drumuri expres, la magistrale feroviare si la aeroporturi consolideaza rolul de pol regional, faciliteaza comertul si investitiile si imbunatateste accesul populatiei la oportunitati.');
+      D.P('Strategia teritoriala vizeaza valorificarea si imbunatatirea acestor conexiuni: integrarea in proiectele majore de infrastructura nationala, dezvoltarea nodurilor intermodale (transferul intre moduri si scari de deplasare), si cooperarea regionala pentru proiecte de conectivitate. Accesibilitatea regionala buna este insa complementara, nu substitut, pentru mobilitatea urbana durabila interna.');
+
+      D.chapter('Comert, servicii si vitalitate urbana');
+      D.P('Comertul si serviciile structureaza viata cotidiana si vitalitatea orasului. Distributia lor spatiala — concentrarea in centre comerciale periferice versus comertul de proximitate din cartiere si de pe strazile comerciale — are implicatii majore asupra mobilitatii, vitalitatii spatiului public si coeziunii. Modelul orasului de 15 minute si vitalitatea urbana se sprijina pe comertul si serviciile de proximitate, cu parter activ pe strazile principale.');
+      D.P('Strategia sustine echilibrul: revitalizarea comertului de proximitate si a strazilor comerciale (prin calitatea spatiului public, accesibilitate pietonala, parcare reglementata), integrarea functionala a marilor generatori comerciali si sprijinirea pietelor locale si a economiei de cartier. Strazile comerciale vii, prietenoase pentru pietoni, sunt simultan motoare economice si spatii sociale.');
+
+      D.chapter('Sport, recreere si oras prietenos cu toate varstele');
+      D.P('Accesul la sport si recreere este o componenta a calitatii vietii si a sanatatii publice. Reteaua de infrastructura sportiva si de recreere (baze sportive, sali, terenuri de joaca, trasee pentru alergare si ciclism, spatii pentru sport informal) trebuie sa fie accesibila, distribuita echitabil si adaptata tuturor varstelor si abilitatilor. Spatiul public insusi, bine proiectat, incurajeaza activitatea fizica spontana.');
+      D.P('Un oras prietenos cu toate varstele integreaza nevoile copiilor (spatii de joaca sigure, autonomie de deplasare, trasee scolare sigure), ale tinerilor (spatii pentru sport, cultura, socializare) si ale varstnicilor (accesibilitate, banci, proximitate, siguranta). Proiectarea pentru cei mai vulnerabili utilizatori beneficiaza intreaga comunitate.');
+
+      D.chapter('Securitate urbana si management al situatiilor de urgenta');
+      D.P('Siguranta si securitatea (fata de criminalitate, accidente si dezastre) sunt conditii fundamentale ale calitatii vietii urbane. Proiectarea spatiului public pentru siguranta (prin vizibilitate, iluminat adecvat, activitate si "ochi pe strada" — principiul supravegherii naturale) reduce criminalitatea si creste sentimentul de siguranta, fara a recurge exclusiv la masuri de supraveghere.');
+      D.P('Managementul situatiilor de urgenta (dezastre naturale, accidente tehnologice, crize) necesita planuri de interventie, infrastructura reziliente, sisteme de avertizare timpurie si capacitatea de raspuns a serviciilor de urgenta (acces, timpi de raspuns). Integrarea rezilientei in planificarea urbana — de la infrastructura critica la coeziunea comunitara — pregateste orasul pentru a face fata si a se reface dupa socuri.');
+
       D.chapter('Strategia spatiilor verzi pe tipologii');
       D.P('Sistemul de spatii verzi este planificat ierarhic si multifunctional, de la parcuri urbane mari pana la scuaruri si vegetatie de aliniament, asigurand acoperire echitabila si conectivitate ecologica. Diversitatea tipologica raspunde unor functii complementare: recreere, sport, biodiversitate, gestiunea apelor, racire si identitate.');
       D.table(['Tipologie spatiu verde', 'Rol principal', 'Acces / proximitate'], [

@@ -469,6 +469,29 @@
       D.P('Coordonarea revine unei structuri de management al mobilitatii din cadrul primariei (sau autoritatii metropolitane), cu raportare anuala publica. Participarea publica este obligatorie in toate fazele. PMUD se revizuieste la 5 ani sau la modificari majore ale contextului.');
 
       // ── CAPITOLE SUPLIMENTARE ────────────────────────────────────────────
+      D.chapter('Transport feroviar si conexiuni regionale');
+      D.P('Transportul feroviar — atat cel de lunga distanta, cat si cel regional (trenuri regionale, eventual de tip tren metropolitan) — poate juca un rol important in mobilitatea durabila, oferind capacitate mare, viteza si emisii reduse. Valorificarea infrastructurii feroviare existente pentru servicii de tip "tren urban/metropolitan" (cu frecventa ridicata si statii in oras si in zona periurbana) este o solutie eficienta de cost pentru naveta, folosind un activ deja existent.');
+      D.P('Integrarea garii si a statiilor feroviare in sistemul de transport urban (ca noduri intermodale majore, cu acces facil prin transport public, mobilitate activa si park&ride) maximizeaza valoarea retelei feroviare. Conexiunile feroviare regionale eficiente reduc dependenta de autoturism pentru deplasarile inter-urbane si sustin dezvoltarea policentrica a teritoriului.');
+
+      D.chapter('Bune practici europene in mobilitatea urbana');
+      D.P('Orasele europene de referinta ofera modele inspiratoare, adaptabile la contextul local. Acestea demonstreaza ca transformarea mobilitatii este posibila si aduce beneficii ample.');
+      D.bullets([
+        ['Copenhaga / Amsterdam', 'reteaua velo cuprinzatoare si prioritatea acordata bicicletei au facut din ciclism modul dominant pentru deplasarile zilnice'],
+        ['Viena', 'transport public de calitate cu tarif anual accesibil si integrare exemplara, cota TP foarte ridicata'],
+        ['Pontevedra (Spania)', 'pietonalizarea extinsa a centrului a redus drastic traficul, emisiile si accidentele, crescand vitalitatea'],
+        ['Orase franceze (tramvai)', 'reintroducerea tramvaiului modern ca instrument de regenerare urbana si transfer modal'],
+        ['Ljubljana', 'pietonalizarea centrului si masuri integrate au transformat orasul intr-un model de mobilitate durabila'],
+      ]);
+      D.P('Lectia comuna: transformarea reuseste prin viziune politica de durata, masuri integrate (infrastructura + reglementare + comunicare), prioritizarea consecventa a oamenilor fata de autoturisme si implicarea comunitatii. Rezultatele — orase mai sanatoase, sigure, atractive economic si placute de locuit — confirma justetea abordarii.');
+
+      D.chapter('Evaluarea ex-ante, monitorizarea si evaluarea ex-post');
+      D.P('Ciclul complet de planificare include evaluarea inainte (ex-ante), in timpul (monitorizare) si dupa (ex-post) implementare. Evaluarea ex-ante (analiza cost-beneficiu, evaluarea de mediu, evaluarea impactului) fundamenteaza deciziile inainte de investitie. Monitorizarea continua urmareste implementarea si indicatorii in timp real. Evaluarea ex-post masoara rezultatele efective fata de tinte si fata de prognoze, oferind invataminte pentru ciclurile viitoare.');
+      D.P('Aceasta abordare bazata pe dovezi si pe invatare continua (planificare adaptiva) creste eficienta utilizarii resurselor publice si imbunatateste progresiv calitatea deciziilor. Transparenta evaluarilor si raportarea publica intaresc increderea si responsabilizarea.');
+
+      D.chapter('Faza de implementare si managementul programului');
+      D.P('Trecerea de la plan la realitate este faza critica, unde multe planuri esueaza din lipsa de capacitate, resurse sau vointa. Implementarea PMUD necesita un management de program riguros: defalcarea masurilor in proiecte concrete cu responsabili, bugete si termene; asigurarea finantarii; coordonarea actorilor; managementul riscurilor; si raportarea periodica a progresului.');
+      D.P('Succesul implementarii depinde de cativa factori-cheie: angajamentul politic sustinut pe termen lung (dincolo de cicluri electorale), capacitatea administrativa si tehnica, finantarea adecvata si predictibila, si sprijinul public construit prin participare si comunicare. Proiectele-pilot vizibile si cu impact rapid (quick wins) genereaza incredere si sustinere pentru masurile mai ample.');
+
       D.chapter('Sisteme de transport public — tipuri si tehnologii');
       D.P('Alegerea tipului de sistem de transport public se face in functie de cererea de transport pe coridor, de spatiul disponibil si de resurse. Ierarhia capacitatilor merge de la autobuzul clasic (flexibil, cost redus) la sisteme de mare capacitate cu infrastructura dedicata. Adecvarea sistemului la cerere este esentiala: supradimensionarea risipeste resurse, subdimensionarea limiteaza atractivitatea.');
       D.table(['Sistem', 'Capacitate (pas/ora/sens)', 'Adecvare'], [
