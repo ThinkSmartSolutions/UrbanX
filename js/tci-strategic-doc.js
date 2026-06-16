@@ -51,8 +51,11 @@
 
     // Primitive de continut
     function chapter(title, opts2) {
-      opts2 = opts2 || {}; chapterNo++; subNo = 0; subsubNo = 0;
-      newPage();
+      opts2 = opts2 || {}; const first = chapterNo === 0; chapterNo++; subNo = 0; subsubNo = 0;
+      // Capitolele CURG continuu (nu forteaza pagina noua) -> pagini dense, fara continut partial.
+      // Primul capitol incepe pe pagina noua (dupa coperta); restul doar daca nu mai e loc.
+      if (first) newPage();
+      else { ensure(54); if (y > MT + 6) y += 5; }
       // banda capitol
       pdf.setFillColor(12, 24, 56); pdf.rect(ML, y, CW, 16, 'F'); pdf.setFillColor.apply(pdf, ACCENT); pdf.rect(ML, y, 2.4, 16, 'F');
       pdf.setTextColor.apply(pdf, ACCENT); pdf.setFont('helvetica', 'bold'); pdf.setFontSize(7);
@@ -237,6 +240,7 @@
       chapterNo++; subNo = 0; subsubNo = 0;
       toc.push({ title: chapterNo + '. ' + title, level: 1, page: pageNum + 1 });
       try { drawFn(); } catch (e) { console.warn('[StratDoc] fullPage esuat: ' + title, e); }
+      y = H; // metoda MP a desenat propria pagina plina -> urmatorul capitol incepe pe pagina noua
     }
     // reutilizare grafice MP (iau (pdf,W,y,...) si returneaza y)
     function useMP(fn, estH, args) { ensure(estH || 40); const m = MP(); const r = m[fn].apply(m, [pdf, W, y].concat(args || [])); if (typeof r === 'number') y = r; y += 2; }
