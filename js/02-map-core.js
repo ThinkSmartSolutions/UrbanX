@@ -1229,10 +1229,14 @@ function buildFP(geom, paramsOrUtr){
     const pA = turf.area(pf);
     if(pA < 1) return pf;
 
-    const rf = Math.max(0, pN(p.rf)||0);
-    const rl = Math.max(0, pN(p.rl)||0);
-    const rr = Math.max(0, pN(p.rr)??pN(p.rl)??0);
-    const rs = Math.max(0, pN(p.rs)||0);
+    // Retrageri: daca lipsesc (necunoscute) folosim valori implicite urbanistice
+    // (front 3m, lateral 3m, spate 5m) ca edificabilul sa fie INTOTDEAUNA vizibil.
+    // Valoarea 0 explicita (calcan) este pastrata.
+    const _sb = (v, def) => { const n = pN(v); return (n == null || isNaN(n)) ? def : Math.max(0, n); };
+    const rf = _sb(p.rf, 3);
+    const rl = _sb(p.rl, 3);
+    const rr = _sb(p.rr != null ? p.rr : p.rl, 3);
+    const rs = _sb(p.rs, 5);
     const sv = Math.max(0, Math.min(100, pN(p.sv)||0));
     const brg = S.bearing || 0;
 
