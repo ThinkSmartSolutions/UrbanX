@@ -92,17 +92,21 @@
       arr.forEach(it => {
         const txt = Array.isArray(it) ? it : [null, it];
         const head = txt[0], body = txt[1];
+        // textul intreg (eticheta + corp) se infasoara la aceeasi latime -> fara depasire
+        const full = head ? (S2(head) + ': ' + S2(body)) : S2(body);
         pdf.setFont('helvetica', 'normal'); pdf.setFontSize(fs);
-        const full = (head ? '' : '') + body;
-        const lines = pdf.splitTextToSize(S2(full), CW - 6);
+        const lines = pdf.splitTextToSize(full, CW - 6);
         ensure(lh + 0.5);
         pdf.setFillColor.apply(pdf, ACCENT); pdf.circle(ML + 1.6, y + lh - 2.4, 0.85, 'F');
+        const y0 = y;
         for (let i = 0; i < lines.length; i++) {
           ensure(lh + 0.5);
-          if (i === 0 && head) { pdf.setFont('helvetica','bold'); pdf.setTextColor.apply(pdf,INK); pdf.text(S2(head+': '), ML+5, y+lh-1); const wlab=pdf.getTextWidth(S2(head+': ')); pdf.setFont('helvetica','normal'); pdf.setTextColor.apply(pdf,INK); pdf.text(lines[i], ML+5+wlab, y+lh-1); }
-          else { pdf.setTextColor.apply(pdf, INK); pdf.text(lines[i], ML + 5, y + lh - 1); }
+          pdf.setTextColor.apply(pdf, INK); pdf.setFont('helvetica', 'normal'); pdf.setFontSize(fs);
+          pdf.text(lines[i], ML + 5, y + lh - 1);
           y += lh;
         }
+        // accentuam eticheta (bold) peste inceputul primei linii
+        if (head) { pdf.setFont('helvetica', 'bold'); pdf.setTextColor.apply(pdf, INK); pdf.setFontSize(fs); pdf.text(S2(head) + ':', ML + 5, y0 + lh - 1); pdf.setFont('helvetica', 'normal'); }
         y += 0.8;
       });
       y += 1.5;
