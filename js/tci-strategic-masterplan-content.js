@@ -8,6 +8,17 @@
   const MP = () => G._TCIMasterplanPDF;
 
   G._StratMasterplanContent = {
+    _zoneRecom(cat) {
+      const c = String(cat || '').toLowerCase();
+      if (c.indexOf('rezid') >= 0) return 'Se recomanda densificare calitativa, completarea tesutului si imbunatatirea dotarilor de proximitate, cu protejarea calitatii locuirii si a spatiilor verzi de cartier.';
+      if (c.indexOf('mixt') >= 0 || c.indexOf('servicii') >= 0) return 'Se incurajeaza mixul functional, parterul activ si concentrarea dezvoltarii in jurul nodurilor de transport public (TOD).';
+      if (c.indexOf('industr') >= 0) return 'Se recomanda modernizarea, reconversia partiala a platformelor subutilizate (brownfield) si zone tampon verzi fata de locuire.';
+      if (c.indexOf('verzi') >= 0 || c.indexOf('agrement') >= 0) return 'Se protejeaza si se extind, asigurand conectivitatea ecologica si accesul public; interdictie de reducere a suprafetei verzi.';
+      if (c.indexOf('circulat') >= 0 || c.indexOf('edilitar') >= 0) return 'Se prioritizeaza reabilitarea, profile stradale echilibrate (pietoni/velo/TP) si infrastructura edilitara performanta.';
+      if (c.indexOf('agricol') >= 0 || c.indexOf('rezerva') >= 0) return 'Se mentine ca rezerva de dezvoltare etapizata sau spatiu verde/agricol, evitand expansiunea prematura si necontrolata.';
+      if (c.indexOf('ape') >= 0) return 'Se protejeaza, cu valorificare peisagistica (coridoare albastre-verzi) si respectarea servitutilor de gospodarire a apelor.';
+      return 'Se reglementeaza conform functiunii dominante si principiilor de dezvoltare durabila ale masterplanului.';
+    },
     build(D, ctx) {
       const { city, need, risk, grav, climate, housing, invest, bench, euComp, scenario, pugGeo, reguli } = ctx;
       const N = D.N, RN = D.RN, S2 = D.S2;
@@ -552,6 +563,20 @@
       // ─────────────────────────────────────────────────────────────────────
       // CAP 21 — PROFILE STRADALE
       // ─────────────────────────────────────────────────────────────────────
+      // Analiza detaliata pe subzone (din reguli.json) — text per subzona
+      if (keys && keys.length) {
+        D.chapter('Analiza detaliata a subzonelor functionale (UTR)');
+        D.P('Fiecare subzona functionala a Municipiului ' + city.name + ' este caracterizata prin functiunea dominanta, indicatorii urbanistici maxim admisi si directiile de interventie recomandate. Analiza de mai jos sintetizeaza profilul fiecarei subzone din regulamentul in vigoare (' + keys.length + ' subzone), fundamentand reglementarea propusa.');
+        keys.forEach((k, idx) => {
+          const z = sub[k] || {};
+          const zd = m._zoneDen ? m._zoneDen({ utr: k }, reguli) : { den: z.denumire, code: k };
+          const cat = m._clasFunc ? m._clasFunc(z.denumire, k)[0] : '';
+          D.h3('Subzona ' + k + (z.denumire ? ' — ' + String(z.denumire).slice(0, 50) : ''));
+          D.P('Categorie functionala: ' + (cat || '-') + '. Indicatori maxim admisi: POT ' + (z.pot_baza != null ? z.pot_baza + '%' : 'n/a') + ', CUT ' + (z.cut_baza != null ? z.cut_baza : 'n/a') + ', inaltime maxima ' + (z.hmax_m != null ? z.hmax_m + ' m' : (z.regim || 'n/a')) + ', spatii verzi minim ' + (z.spatii_verzi_pct != null ? z.spatii_verzi_pct + '%' : 'n/a') + '. ' + this._zoneRecom(cat) + (z.regim ? ' Regim de inaltime caracteristic: ' + z.regim + '.' : ''), { gap: 1.5, fs: 8.2 });
+        });
+        D.source('Indicatori din RLU/PUG ' + city.name + ' (reguli.json). Recomandarile sunt orientative, conform principiilor masterplanului.');
+      }
+
       D.chapter('Profile stradale si mobilitate propusa');
       D.P('Profilele stradale tip reglementeaza alocarea spatiului public intre modurile de deplasare, prioritizand pietonii, biciclistii si transportul public. Toate profilele includ aliniamente de arbori si gestiunea apelor pluviale.');
       const profile = [
