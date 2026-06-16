@@ -237,6 +237,35 @@
       ], [60, 80, 34], { boldFirst: true, fs: 7 });
       D.callout('Vision Zero', 'Responsabilitatea sigurantei este partajata intre proiectantii sistemului si utilizatori. Un sistem bine proiectat (viteze adecvate, separare a modurilor, infrastructura iertatoare) reduce atat probabilitatea, cat si gravitatea accidentelor — tinta finala fiind zero victime.');
 
+      D.chapter('Transport de marfa si logistica urbana');
+      D.h2('Rolul si impactul logisticii urbane');
+      D.P('Transportul de marfa si logistica urbana sustin activitatea economica a orasului — aprovizionarea comertului, a unitatilor de alimentatie, livrarile catre populatie (in crestere exploziva odata cu comertul electronic) si serviciile. Desi reprezinta o pondere relativ redusa din numarul total de deplasari, transportul de marfa are un impact disproportionat asupra emisiilor, zgomotului, congestiei si uzurii infrastructurii, in special prin vehiculele grele si prin livrarile pe ultimul kilometru in zonele dense.');
+      D.P('Provocarile specifice includ: accesul vehiculelor grele in zonele centrale si rezidentiale, parcarea pentru aprovizionare (adesea pe banda de circulatie sau pe trotuar), proliferarea livrarilor de colete si lipsa unei coordonari intre operatori. In absenta unei strategii de logistica urbana, aceste fluxuri genereaza disfunctionalitati semnificative si emisii ridicate in zonele cele mai sensibile.');
+      D.h2('Solutii de logistica urbana durabila');
+      D.bullets([
+        ['Centre de consolidare a marfurilor', 'puncte logistice la periferie unde marfa este consolidata si redistribuita cu vehicule curate, reducand numarul de curse in centru'],
+        ['Livrari pe ultimul kilometru curate', 'vehicule electrice, cargo-biciclete si puncte de ridicare (lockere) pentru colete'],
+        ['Ferestre orare si reglementarea accesului', 'livrari in afara orelor de varf, restrictii pentru vehicule grele in zone sensibile'],
+        ['Zone de incarcare/descarcare dedicate', 'spatii reglementate pentru aprovizionare, eliberand banda de circulatie si trotuarele'],
+        ['Digitalizare si coordonare', 'platforme de optimizare a curselor si de partajare a capacitatii intre operatori'],
+      ]);
+      D.callout('Logistica si comertul electronic', 'Cresterea livrarilor de colete necesita o abordare proactiva: puncte de ridicare in cartiere, livrari consolidate si curate, pentru a evita ca fiecare comanda sa genereze o cursa individuala cu vehicul poluant.');
+
+      D.chapter('Managementul traficului si sistemele inteligente (ITS)');
+      D.h2('Managementul traficului');
+      D.P('Managementul traficului optimizeaza utilizarea infrastructurii existente, fara investitii majore in capacitate noua. Instrumentele includ: semaforizarea adaptiva (care ajusteaza timpii in functie de fluxurile reale), undele verzi (coordonarea semafoarelor pe coridoare), sensurile unice, zonele cu viteza redusa si prioritizarea transportului public si a vehiculelor de urgenta. Un management eficient reduce congestia, emisiile si timpii de calatorie, crescand totodata siguranta.');
+      D.h2('Sistemele inteligente de transport (ITS)');
+      D.P('ITS integreaza tehnologia informatiei in managementul mobilitatii: senzori de trafic, camere, semaforizare inteligenta, panouri de informare in timp real, sisteme de management al parcarii si platforme de date. Acestea permit monitorizarea continua, deciziile in timp real si informarea utilizatorilor, contribuind la fluidizarea traficului si la o experienta de mobilitate mai buna.');
+      D.P('Un centru de management al mobilitatii (dispecerat integrat) coreleaza datele din toate subsistemele (trafic, transport public, parcare, mediu), permitand interventii coordonate si masurarea performantei sistemului. Datele colectate fundamenteaza, de asemenea, planificarea bazata pe dovezi si monitorizarea indicatorilor PMUD. Protectia datelor personale si interoperabilitatea sistemelor sunt conditii esentiale.');
+
+      D.chapter('Intermodalitate si noduri de transport');
+      D.P('Eficienta sistemului de mobilitate depinde de cat de usor pot fi combinate modurile de transport intr-o singura deplasare (intermodalitate). Nodurile intermodale — gari, autogari, statii majore de transport public, parcari park&ride, statii de bike-sharing — sunt punctele unde calatorii transfera intre moduri. Calitatea acestor noduri (acces facil, informare, confort, timp de transfer redus) determina atractivitatea lanturilor de deplasare alternative la autoturism.');
+      D.P('Integrarea intermodala are mai multe dimensiuni: fizica (proximitatea si conexiunea facila intre moduri), tarifara (titlu unic de calatorie multimodal), informationala (informare integrata in timp real, platforme MaaS) si institutionala (coordonarea operatorilor). Dezvoltarea nodurilor intermodale si a park&ride la intrarile in oras intercepteaza naveta auto si o transfera catre transport public, decongestionand zona centrala.');
+
+      D.chapter('Mobilitatea metropolitana si naveta');
+      D.P('Functionarea reala a orasului depaseste limita sa administrativa: zona urbana functionala include localitatile periurbane de unde provine o naveta zilnica semnificativa, predominant cu autoturismul in absenta unor alternative atractive. Aceasta naveta congestioneaza intrarile in oras si zona centrala, generand emisii si presiune asupra parcarii.');
+      D.P('Solutia durabila este un sistem de transport public metropolitan integrat — linii care conecteaza orasul cu localitatile periurbane, cu orar si tarif integrat, completate de parcari park&ride la periferie. Coordonarea metropolitana (printr-o asociatie de dezvoltare intercomunitara sau o autoritate metropolitana de transport) este esentiala, intrucat fluxurile de mobilitate nu respecta granitele administrative. Dezvoltarea coordonata a locuirii periurbane in jurul nodurilor de transport public previne adancirea dependentei de autoturism.');
+
       // ── 3. MODELUL DE TRANSPORT ──────────────────────────────────────────
       D.chapter('Modelul de transport');
       D.P('Modelul de transport simuleaza cererea de deplasare si fluxurile pe retea, permitand testarea scenariilor si a proiectelor inainte de implementare. Se utilizeaza modelul clasic in patru etape, calibrat pe datele observate.');
