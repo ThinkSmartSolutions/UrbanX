@@ -663,6 +663,40 @@
       // ─────────────────────────────────────────────────────────────────────
       // CAP 28 — CONCLUZII
       // ─────────────────────────────────────────────────────────────────────
+      D.chapter('Piata imobiliara si dinamica terenurilor');
+      D.P('Piata imobiliara reflecta si influenteaza dezvoltarea urbana. Preturile terenurilor si ale locuintelor, ritmul tranzactiilor si presiunea de dezvoltare semnaleaza zonele atractive si riscurile de speculatie sau de excludere a categoriilor cu venituri reduse. Monitorizarea pietei fundamenteaza politici de locuire accesibila si de captare a plusvalorii generate de investitiile publice.');
+      D.bullets([
+        ['Presiune de dezvoltare', 'zonele bine echipate si conectate atrag investitii — necesita reglementare pentru densificare calitativa'],
+        ['Accesibilitatea locuirii', 'cresterea preturilor poate exclude tinerii si familiile — argument pentru locuinte accesibile'],
+        ['Captarea plusvalorii', 'investitiile publice (transport, parcuri) cresc valoarea terenurilor private — mecanisme de recuperare pentru comunitate'],
+        ['Terenuri subutilizate', 'identificarea si activarea terenurilor virane si a brownfield-urilor din intravilan'],
+      ]);
+
+      D.chapter('Turism, cultura si economie locala');
+      D.P('Turismul si activitatile culturale valorifica patrimoniul si identitatea locala, generand venituri si locuri de munca. Dezvoltarea unei oferte turistice sustenabile (trasee culturale, evenimente, turism urban si de proximitate) trebuie integrata cu protejarea patrimoniului si cu calitatea spatiului public, evitand suprasolicitarea (overtourism).');
+      D.P('Economia locala de proximitate (comert, servicii, mestesuguri, industrii creative) sustine vitalitatea cartierelor si modelul orasului de 15 minute. Sprijinirea parterelor active, a pietelor locale si a antreprenoriatului contribuie la coeziune si la reducerea deplasarilor.');
+
+      D.chapter('Oras incluziv si egalitate de sanse');
+      D.P('Un oras incluziv asigura acces echitabil la locuire, servicii, spatiu public si oportunitati pentru toti locuitorii, indiferent de varsta, gen, venit, dizabilitate sau origine. Planificarea sensibila la dimensiunea sociala previne segregarea si marginalizarea.');
+      D.bullets([
+        ['Accesibilitate universala', 'spatiu public si dotari adaptate persoanelor cu mobilitate redusa, varstnicilor si copiilor'],
+        ['Locuire pentru toti', 'mix social si fond de locuinte accesibile/sociale, prevenirea segregarii rezidentiale'],
+        ['Siguranta si confort', 'spatii publice sigure, bine iluminate, prietenoase pentru femei, copii si varstnici'],
+        ['Servicii de proximitate', 'acces echitabil la educatie, sanatate si servicii sociale in toate cartierele'],
+      ]);
+
+      D.chapter('Siguranta urbana si rezilienta comunitatii');
+      D.P('Siguranta urbana (rutiera, fata de criminalitate, fata de dezastre) si rezilienta comunitatii sunt conditii ale calitatii vietii. Proiectarea spatiului public pentru siguranta (vizibilitate, iluminat, activitate), sistemele de avertizare si planurile de urgenta, alaturi de coeziunea sociala, intaresc capacitatea orasului de a face fata socurilor (climatice, economice, sanitare).');
+
+      D.chapter('Cooperare, parteneriate si finantare strategica');
+      D.P('Realizarea viziunii depinde de cooperarea intre administratie, mediul privat, mediul academic si societatea civila, si de capacitatea de a mobiliza resurse diverse. Parteneriatele public-private, cooperarea metropolitana si atragerea fondurilor europene multiplica impactul investitiilor publice.');
+      D.table(['Tip de cooperare', 'Rol', 'Exemple'], [
+        ['Cooperare metropolitana', 'Coordonarea dezvoltarii si a serviciilor', 'ADI, transport public integrat'],
+        ['Parteneriate public-private', 'Cofinantare si expertiza', 'Regenerare, parcari, utilitati'],
+        ['Parteneriate cu mediul academic', 'Cercetare, inovare, monitorizare', 'Universitati, institute'],
+        ['Implicarea societatii civile', 'Legitimitate si calitate a deciziilor', 'ONG-uri, asociatii de cartier'],
+      ], [50, 58, 66], { boldFirst: true, fs: 7 });
+
       D.chapter('Concluzii si recomandari strategice');
       D.P('Masterplanul Strategic al Municipiului ' + city.name + ' fundamenteaza o dezvoltare urbana integrata, durabila si rezilienta. Recomandarile prioritare:');
       D.bullets([

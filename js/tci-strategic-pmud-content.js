@@ -332,6 +332,52 @@
       D.h2('Guvernanta si revizuire');
       D.P('Coordonarea revine unei structuri de management al mobilitatii din cadrul primariei (sau autoritatii metropolitane), cu raportare anuala publica. Participarea publica este obligatorie in toate fazele. PMUD se revizuieste la 5 ani sau la modificari majore ale contextului.');
 
+      // ── CAPITOLE SUPLIMENTARE ────────────────────────────────────────────
+      D.chapter('Integrarea cu dezvoltarea spatiala (TOD)');
+      D.P('Mobilitatea si urbanismul sunt indisolubil legate: forma urbana determina cererea de deplasare, iar sistemul de transport modeleaza dezvoltarea. Dezvoltarea orientata catre transport public (Transit-Oriented Development, TOD) concentreaza densitati ridicate, mix functional si calitate a spatiului public in jurul nodurilor de transport, reducand nevoia de deplasari motorizate.');
+      D.h2('Principii TOD aplicate');
+      D.bullets([
+        ['Densitate', 'densitati rezidentiale si de locuri de munca mai mari in proximitatea statiilor de transport public'],
+        ['Diversitate', 'mix functional (locuire, munca, servicii, comert) care permite deplasari scurte'],
+        ['Design', 'spatiu public de calitate, prioritar pentru pietoni si biciclisti'],
+        ['Distanta', 'dotari si statii la distanta de mers pe jos (oras de 15 minute)'],
+        ['Tranzit', 'transport public frecvent, rapid si fiabil ca structura a dezvoltarii'],
+      ]);
+      D.P('Corelarea PMUD cu PUG-ul si cu Masterplanul strategic asigura ca noile dezvoltari sunt amplasate in zone bine deservite de transport public, evitand expansiunea dependenta de autoturism. Reglementarile urbanistice (POT, CUT, parcare) sustin sau franeaza obiectivele de mobilitate.');
+
+      D.chapter('Mobilitate la cerere si servicii noi de mobilitate');
+      D.P('Pe langa modurile traditionale, mobilitatea urbana integreaza servicii noi: micromobilitate partajata (biciclete, trotinete electrice), transport la cerere (DRT) in zonele cu cerere redusa, car-sharing si mobilitate ca serviciu (MaaS). Aceste servicii completeaza transportul public si reduc dependenta de autoturismul propriu.');
+      D.table(['Serviciu de mobilitate', 'Rol', 'Conditii de succes'], [
+        ['Bike/scooter-sharing', 'deplasari scurte, ultimul kilometru', 'infrastructura velo + reglementare parcare'],
+        ['Transport la cerere (DRT)', 'zone/ore cu cerere redusa', 'integrare cu TP, aplicatie de rezervare'],
+        ['Car-sharing', 'reducerea detinerii de autoturisme', 'locuri dedicate, masa critica utilizatori'],
+        ['MaaS (mobilitate ca serviciu)', 'planificare + plata integrata multimodala', 'integrare date + tarife operatori'],
+      ], [50, 60, 64], { boldFirst: true, fs: 7 });
+
+      D.chapter('Evaluarea strategica de mediu (SEA)');
+      D.P('PMUD, ca plan cu efecte potentiale asupra mediului, este supus evaluarii strategice de mediu (SEA), conform Directivei 2001/42/CE (transpusa prin HG 1076/2004). SEA analizeaza efectele probabile ale planului asupra factorilor de mediu si propune masuri de prevenire, reducere si compensare.');
+      D.table(['Factor de mediu', 'Efect probabil PMUD', 'Sens'], [
+        ['Aer si clima', 'Reducerea emisiilor prin transfer modal si electrificare', 'Pozitiv'],
+        ['Zgomot', 'Reducerea traficului auto in zone sensibile', 'Pozitiv'],
+        ['Biodiversitate', 'Coridoare verzi; atentie la fragmentare in faza de constructie', 'Pozitiv / de gestionat'],
+        ['Sol si apa', 'Suprafete permeabile, drenaj durabil', 'Pozitiv'],
+        ['Sanatatea populatiei', 'Aer curat, siguranta, mobilitate activa', 'Pozitiv'],
+        ['Peisaj si patrimoniu', 'Spatiu public de calitate; integrare contextuala', 'Pozitiv / de gestionat'],
+      ], [42, 96, 36], { boldFirst: true, fs: 7 });
+      D.callout('Concluzie SEA (orientativa)', 'Implementarea PMUD are un efect global pozitiv asupra mediului si sanatatii, prin reducerea emisiilor, a zgomotului si a accidentelor. Efectele negative temporare (faza de constructie) se gestioneaza prin masuri standard de mediu. SEA finala se elaboreaza de expert atestat.');
+
+      D.chapter('Participare publica si consultare');
+      D.P('Planificarea participativa este o cerinta esentiala a metodologiei SUMP si o conditie legala (Legea 52/2003, Legea 350/2001). Implicarea cetatenilor, a mediului de afaceri si a societatii civile in toate fazele creste calitatea, legitimitatea si acceptabilitatea planului.');
+      D.h2('Instrumente de participare');
+      D.bullets([
+        'Anchete de mobilitate si sondaje de opinie privind nevoile de deplasare.',
+        'Dezbateri publice si ateliere participative pe etape ale planului.',
+        'Platforma online de consultare si harti interactive de feedback.',
+        'Grupuri de lucru cu partile interesate (operatori, ONG-uri, mediu academic).',
+        'Comunicare transparenta a deciziilor si a progresului implementarii.',
+      ]);
+      D.P('Participarea nu este o formalitate, ci un proces continuu care fundamenteaza deciziile si construieste sprijinul public necesar pentru masuri uneori dificile (restrictii auto, tarifare parcare).');
+
       // ── 11. METODOLOGIE SI SURSE ─────────────────────────────────────────
       D.chapter('Metodologie, surse si glosar');
       D.h2('Cadru metodologic si legal');
