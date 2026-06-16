@@ -1,6 +1,17 @@
 // UrbanX — Panel, tab-uri, HTML UI
 
-let _ctxLastParcel = null;
+// Derivare consistenta inaltime(m) / niveluri / regim, fara NaN.
+// Daca avem doar inaltimea -> niv = round(h/3); daca avem doar nivelurile -> h = niv*3.
+// Regim afisat ca "P", "P+1E" ... (niveluri-1 etaje peste parter).
+function _deriveHNivRegim(hmax_m, niv_max, regim) {
+  var h = (hmax_m != null && !isNaN(+hmax_m) && +hmax_m > 0) ? +hmax_m : null;
+  var niv = (niv_max != null && !isNaN(+niv_max) && +niv_max > 0) ? Math.round(+niv_max) : null;
+  if (niv == null && h != null) niv = Math.max(1, Math.round(h / 3));
+  if (h == null && niv != null) h = niv * 3;
+  var reg = (regim && String(regim).trim()) ? String(regim).trim()
+          : (niv != null ? (niv <= 1 ? 'P' : 'P+' + (niv - 1) + 'E') : '');
+  return { h: h, niv: niv, regim: reg };
+}
 
 async function loadContext(){
   const ap = S.parcels[S.activeParcel??0];
@@ -922,8 +933,9 @@ function htmlUTR(){
       var szFb = (d && d.subzone && d.subzone[u]) || {};
       var fbPot = rFb.pot != null ? rFb.pot : szFb.pot_baza;
       var fbCut = rFb.cut != null ? rFb.cut : szFb.cut_baza;
-      var fbH   = rFb.h   != null ? rFb.h   : szFb.hmax_m;
-      var fbNiv = rFb.niv != null ? rFb.niv : szFb.niv_max;
+      var _fbhr = _deriveHNivRegim(rFb.h != null ? rFb.h : szFb.hmax_m, rFb.niv != null ? rFb.niv : szFb.niv_max, szFb.regim);
+      var fbH   = _fbhr.h;
+      var fbNiv = _fbhr.niv;
       var fbSv  = rFb.sv  != null ? rFb.sv  : szFb.spatii_verzi_pct;
       var fbDen = rFb.d || szFb.denumire || '';
       var fbUa  = rFb.ua || (Array.isArray(szFb.utilizari_admise) ? szFb.utilizari_admise.join('; ') : szFb.utilizari_admise) || '';
@@ -934,7 +946,7 @@ function htmlUTR(){
       var fbRetS = szFb.retragere_spate || '';
       var fbParcaje = szFb.parcaje || '';
       var fbSvNota  = szFb.spatii_verzi_nota || '';
-      var fbRegim   = szFb.regim || '';
+      var fbRegim   = _fbhr.regim || szFb.regim || '';
       function fbIbox(label, val, unit, color, sub) {
         var disp = val != null ? val+unit : '—';
         var s = sub ? '<div style="font-size:9px;color:#64748b;margin-top:1px">'+sub+'</div>' : '';
@@ -952,7 +964,7 @@ function htmlUTR(){
             ?'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:6px">'
               +fbIbox('POT max', fbPot, '%', '#fbbf24', fbArea ? Math.round(fbArea*fbPot/100)+'m² la sol' : null)
               +fbIbox('CUT max', fbCut, '', '#fbbf24', fbArea && fbCut ? Math.round(fbArea*fbCut)+'mp ADC' : null)
-              +fbIbox('H max', fbH, 'm', '#34d399', fbNiv ? fbNiv+' niv' : (fbRegim||null))
+              +fbIbox('H max', fbH, 'm', '#34d399', fbNiv ? (fbRegim+' · '+fbNiv+'×3m') : (fbRegim||null))
               +fbIbox('Sp. verzi', fbSv, '%', '#86efac', fbArea && fbSv ? Math.round(fbArea*fbSv/100)+'m²' : null)
             +'</div>'
             :'')
@@ -995,12 +1007,14 @@ function htmlUTR(){
     // ── Card indicatori subzonă curentă ───────────────────────────────────
     const pot  = curData.pot_baza;
     const cut  = curData.cut_baza;
-    const h    = curData.hmax_m;
-    const niv  = curData.niv_max;
     const sv   = curData.spatii_verzi_pct;
     const pk   = curData.parcaje_min;
     const sf   = curData.suprafata_min_mp;
-    const reg  = curData.regim || '';
+    // Inaltime / niveluri / regim — derivate consistent, fara NaN
+    const _hr  = _deriveHNivRegim(curData.hmax_m, curData.niv_max, curData.regim);
+    const h    = _hr.h;        // metri (sau null)
+    const niv  = _hr.niv;      // numar niveluri (sau null)
+    const reg  = _hr.regim;    // ex. "P+7E"
 
 
     const scSol  = pot && area ? Math.round(area * pot / 100) : null;
@@ -1069,7 +1083,7 @@ function htmlUTR(){
         +'<div id="utr-ibox-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:8px">'
           +ibox('POT max', pot, '%', '#fbbf24', scSol ? scSol+'m² la sol' : null)
           +ibox('CUT max', cut, '', '#fbbf24', sdTot ? sdTot+'mp ADC' : null)
-          +ibox('H max', h, 'm', '#34d399', niv ? niv+' niv' : null)
+          +ibox('H max', h, 'm', '#34d399', niv ? (reg+' · '+niv+'×3m') : null)
           +ibox('Sp. verzi', sv, '%', '#86efac', svMp ? svMp+'m²' : null)
           +ibox('Sf. min parcelă', sf, 'm²', '#94a3b8', null)
           +ibox('Regim', null, '', '#94a3b8', reg || '—')
