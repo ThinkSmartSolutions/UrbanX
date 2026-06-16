@@ -837,6 +837,8 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
 
       case 'b4s4':
         lp('day');
+        // Schema retelelor de utilitati desenata pe harta (apa/canal/energie/gaz)
+        onIdle(function(){try{SE._addUtilityNet&&SE._addUtilityNet(map);}catch(e){}});
         setTimeout(function(){
           if(!SE._playing) return;
           if(D.monuments&&D.monuments.length){ addCircle('v9-mon',D.monuments); _pulse(map,'v9-mon','circle-radius',5,12,8); }
@@ -1946,6 +1948,8 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
           wrap(ctx,it[0],W*0.04,H*(0.57+i*0.060),W*0.55,Math.min(W*0.013,16)*1.4,2);
         });
         ctx.globalAlpha=1;
+        // Vizual: cele 5 crize converg spre oras (presiune cumulata)
+        if(t>0.15) _drawCrisisConverge(ctx,W,H,Math.min(1,(t-0.15)/0.25)*sA,t);
         narativ('Crizele nu apar izolat — se cumuleaza si se amplifica reciproc. Un cutremur in context de criza energetica si demografica are impact de 3-5x mai mare decat izolat. Planificarea urbana rezilienta trebuie sa pregateasca orasul pentru scenarii de crize multiple simultane — noua paradigma post-2020.');
         concluzie('Orasele reziliente nu evita crizele — se recupereaza rapid si transforma criza in oportunitate');
         break;
@@ -2748,6 +2752,41 @@ function _drawTemporalSweep(ctx,W,H,p){
   ctx.font='900 '+Math.min(W*0.016,22)+'px "Space Grotesk",sans-serif';
   ctx.fillStyle='rgba(148,163,184,0.92)'; ctx.fillText('◄ 2025 EXISTENT', Math.max(W*0.11,x-W*0.11), H*0.5-Math.min(W*0.02,26));
   ctx.fillStyle='#D4AF37'; ctx.fillText('2055 PROIECTAT ►', Math.min(W*0.89,x+W*0.11), H*0.5-Math.min(W*0.02,26));
+  ctx.restore();
+}
+
+// Crize simultane — 5 cercuri colorate care se string spre oras (presiune cumulata).
+function _drawCrisisConverge(ctx,W,H,a,t){
+  if(a<=0) return;
+  ctx.save();
+  var cx=W*0.66, cy=H*0.50, Rmax=Math.min(W,H)*0.42;
+  var crises=[
+    {c:'#ef4444',l:'SEISMIC'},{c:'#3b82f6',l:'INUNDATII'},{c:'#f59e0b',l:'CALDURA'},
+    {c:'#94a3b8',l:'DEMOGRAFIC'},{c:'#fbbf24',l:'ENERGETIC'}
+  ];
+  var pulse=0.5+0.5*Math.sin(t*Math.PI*4);
+  crises.forEach(function(cr,i){
+    var ph=Math.max(0,Math.min(1,(t-i*0.06)/0.5));
+    if(ph<=0) return;
+    var r=Rmax*(1-ph*0.62)*(1+0.03*pulse);
+    var ang=-Math.PI/2+i*(Math.PI*2/5);
+    ctx.globalAlpha=a*0.75*ph; ctx.strokeStyle=cr.c; ctx.lineWidth=2.5; ctx.setLineDash([6,5]);
+    ctx.beginPath(); ctx.arc(cx,cy,r,ang-0.6,ang+0.6); ctx.stroke(); ctx.setLineDash([]);
+    // sageata spre centru + eticheta
+    var lx=cx+Math.cos(ang)*r, ly=cy+Math.sin(ang)*r;
+    ctx.fillStyle=cr.c; ctx.beginPath(); ctx.arc(lx,ly,4,0,Math.PI*2); ctx.fill();
+    ctx.globalAlpha=a*ph; ctx.font='700 '+Math.min(W*0.0095,12)+'px "IBM Plex Mono",monospace';
+    ctx.textAlign=Math.cos(ang)>=0?'left':'right';
+    ctx.fillText(cr.l, lx+(Math.cos(ang)>=0?9:-9), ly+3);
+  });
+  // miez = orasul sub presiune
+  if(t>0.4){
+    var ca=Math.min(1,(t-0.4)/0.2)*a;
+    ctx.globalAlpha=ca*(0.6+0.4*pulse); ctx.fillStyle='rgba(239,68,68,0.9)';
+    ctx.beginPath(); ctx.arc(cx,cy,Math.min(W*0.02,26),0,Math.PI*2); ctx.fill();
+    ctx.globalAlpha=ca; ctx.fillStyle='#fff'; ctx.font='900 '+Math.min(W*0.011,14)+'px "Space Grotesk",sans-serif'; ctx.textAlign='center';
+    ctx.fillText('ORAS', cx, cy+4);
+  }
   ctx.restore();
 }
 

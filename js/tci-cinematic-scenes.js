@@ -967,6 +967,28 @@ G._CinemaEngine={
     ]);
   },
 
+  // ── REȚELE UTILITĂȚI — schemă desenată pe hartă (apă/canal/energie/gaz) ca
+  // arbori ramificați din centru. Garanteaza un vizual chiar cand OSM e jos.
+  _addUtilityNet(map){
+    const cx=this._city?.lon||25, cy=this._city?.lat||45.5;
+    const nets=[{c:'#3b82f6',ang:20,label:'APA'},{c:'#a855f7',ang:105,label:'CANALIZARE'},{c:'#fbbf24',ang:190,label:'ENERGIE'},{c:'#f97316',ang:285,label:'GAZ'}];
+    const feats=[];
+    nets.forEach(n=>{
+      const a=n.ang*Math.PI/180, ls=1.6;
+      const tip=[cx+Math.cos(a)*0.05*ls, cy+Math.sin(a)*0.05];
+      feats.push({type:'Feature',geometry:{type:'LineString',coordinates:[[cx,cy],tip]},properties:{c:n.c}});
+      for(let b=-1;b<=1;b+=2){
+        const ba=a+b*0.42, mid=[cx+Math.cos(a)*0.03*ls,cy+Math.sin(a)*0.03];
+        feats.push({type:'Feature',geometry:{type:'LineString',coordinates:[mid,[cx+Math.cos(ba)*0.046*ls,cy+Math.sin(ba)*0.046]]},properties:{c:n.c}});
+      }
+    });
+    this._safeAdd(map,'v8-util',{type:'geojson',data:{type:'FeatureCollection',features:feats}},{
+      id:'v8-util-l',type:'line',source:'v8-util',
+      paint:{'line-color':['get','c'],'line-width':3,'line-opacity':0.82,'line-blur':0.4},layout:{'line-cap':'round'}
+    });
+    this._cinLabels(map, nets.map(n=>({lon:cx+Math.cos(n.ang*Math.PI/180)*0.05*1.6, lat:cy+Math.sin(n.ang*Math.PI/180)*0.05, color:n.c, icon:'', title:n.label, sub:'retea'})));
+  },
+
   // Protejeaza canvas-ul — il re-adauga daca e sters de platforma
   _guardCanvas(){
     if(this._canvasObserver)this._canvasObserver.disconnect();
@@ -992,7 +1014,7 @@ G._CinemaEngine={
      'v8-mp-zone-line','v8-mp-zone-l','v8-mp-zone','v8-mp-green-l','v8-mp-green','v8-mp-pass-l','v8-mp-pass',
      'v8-dp-l','v8-dp','v8-tp2-l','v8-tp2','v8-fi-cur-l','v8-fi-cur','v8-fi-fut-fill','v8-fi-fut-l','v8-fi-fut',
      'v8-mp-belt-l','v8-mp-belt','v8-mp-gwedge-l','v8-mp-gwedge',
-     'v8-fi-2030-l','v8-fi-2030','v8-fi-2040-l','v8-fi-2040','v8-fi-2055-l','v8-fi-2055',
+     'v8-fi-2030-l','v8-fi-2030','v8-fi-2040-l','v8-fi-2040','v8-fi-2055-l','v8-fi-2055','v8-util-l','v8-util',
      // cleanup v6/v7 layers
      'v6-gr-l','v6-gr','v6-bld-l','v6-bld','v6-den-l','v6-den','v6-tr-l','v6-tr',
      'v7-gr-l','v7-gr','v7-bld-l','v7-bld','v7-den-l','v7-den','v7-tr-l','v7-tr',
