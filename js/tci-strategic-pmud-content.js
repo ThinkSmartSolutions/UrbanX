@@ -173,6 +173,33 @@
       D.table(['Coridor', 'Cerere', 'Disfunctionalitate', 'Interventie propusa'], corid, [44, 28, 44, 58], { fs: 6.8, boldFirst: true });
       D.source('Analiza schematica a coridoarelor (model). Se detaliaza cu rezultatele modelului de transport si recensamantului de trafic in PMUD final.');
 
+      // ── ANALIZE APROFUNDATE PE MODURI ────────────────────────────────────
+      D.chapter('Analiza aprofundata a transportului public');
+      D.h2('Reteaua si oferta de transport public');
+      D.P('Transportul public reprezinta coloana vertebrala a unui sistem de mobilitate durabila, fiind singurul mod capabil sa deserveasca eficient cererea de masa din zonele urbane dense, cu un consum de spatiu si o amprenta de carbon pe pasager-kilometru semnificativ mai reduse decat autoturismul individual. Pentru ' + city.name + ', reteaua de transport public deserveste cca. ' + m.accLatPct + '% din populatie in raza de 300 m de o statie, printr-un sistem estimat la ' + N(m.statiiTP) + ' de statii. Calitatea ofertei — frecventa, viteza comerciala, fiabilitatea, confortul si integrarea tarifara — determina in mod direct atractivitatea sa fata de autoturism.');
+      D.P('Viteza comerciala actuala, estimata la ' + m.vitezaTP + ' km/h, este penalizata de circulatia in trafic mixt, fara benzi dedicate si fara prioritizare semaforica. Aceasta o face necompetitiva fata de autoturism pe coridoarele congestionate, generand un cerc vicios: viteza mica reduce atractivitatea, scaderea numarului de calatori reduce veniturile si justificarea investitiilor, iar subfinantarea degradeaza serviciul. Inversarea acestui cerc necesita interventii integrate: infrastructura prioritara, flota moderna si o politica tarifara atractiva.');
+      D.h2('Performanta si indicatori operationali');
+      D.table(['Indicator operational', 'Valoare estimata', 'Tinta de buna practica'], [
+        ['Viteza comerciala', m.vitezaTP + ' km/h', '>= 20 km/h (benzi dedicate)'],
+        ['Frecventa in varf (coridoare)', '10-20 min', '<= 10 min'],
+        ['Acoperire teritoriala (<300 m)', m.accLatPct + '%', '>= 90%'],
+        ['Fiabilitate (punctualitate)', 'de imbunatatit', '>= 90% curse la timp'],
+        ['Varsta medie a flotei', 'in tranzitie', 'flota innoita, emisii reduse'],
+        ['Integrare tarifara', 'partiala', 'titlu unic multimodal + metropolitan'],
+      ], [56, 50, 68], { boldFirst: true, fs: 7 });
+      D.P('Modernizarea transportului public vizeaza electrificarea flotei (eliminarea emisiilor la sursa si reducerea zgomotului), introducerea benzilor dedicate si a prioritizarii semaforice pe coridoarele majore (cresterea vitezei comerciale cu 20-30%), digitalizarea (e-ticketing, informare in timp real) si integrarea metropolitana a serviciilor. Aceste masuri, corelate cu dezvoltarea orientata catre transport public (TOD), pot creste semnificativ cota modala a transportului public, de la ' + m.modalAct[1] + '% in prezent catre tinta de ' + m.modalTinta[1] + '% in 2030.');
+      D.callout('Prioritate strategica', 'Transportul public competitiv (rapid, frecvent, fiabil, curat) este conditia esentiala a transferului modal dinspre autoturism. Fara prioritizarea sa fizica (benzi dedicate) si financiara, celelalte masuri au impact limitat.');
+
+      D.chapter('Analiza aprofundata a mobilitatii active');
+      D.h2('Mersul pe jos — modul fundamental');
+      D.P('Mersul pe jos este modul de deplasare universal, gratuit, sanatos si cu zero emisii, prezent la inceputul si sfarsitul oricarei deplasari (inclusiv cu transport public). Calitatea infrastructurii pietonale — latimea si continuitatea trotuarelor, siguranta trecerilor, accesibilitatea pentru persoane cu mobilitate redusa, umbrirea si confortul — determina ponderea deplasarilor pe jos. In orasele compacte, deplasarile sub 1-2 km, majoritare, pot fi realizate pe jos daca mediul construit este prietenos.');
+      D.P('Bariere frecvente in calea mersului pe jos sunt: trotuarele inguste sau ocupate (de masini parcate, mobilier, vegetatie necontrolata), lipsa trecerilor sigure, timpii lungi de asteptare la semafoare, lipsa umbririi si insecuritatea. Reproiectarea spatiului public pentru pietoni (pietonalizari, zone partajate, trotuare generoase, treceri suprainaltate) este o investitie cu cost redus si beneficiu social ridicat.');
+      D.h2('Ciclismul urban — potential ridicat');
+      D.P('Bicicleta (clasica si electrica) acopera eficient distantele de 2-8 km, dominante in oras, fiind adesea mai rapida decat autoturismul pe distante scurte si in conditii de congestie. Reteaua actuala de piste, estimata la ' + N(m.pisteKm) + ' km, este insa fragmentata si lipsita de continuitate, ceea ce descurajeaza utilizarea, in special a categoriilor mai putin experimentate (copii, varstnici, familii).');
+      D.P('Dezvoltarea unei retele velo continue, sigure si conectate (separata de traficul auto pe arterele intense), tinta fiind cca. ' + N(m.pisteTinta) + ' km, completata de sisteme de bike-sharing si parcari sigure la noduri si dotari, poate prelua o pondere semnificativa din deplasari. Buna practica europeana arata ca infrastructura velo de calitate, coroborata cu masuri de descurajare a autoturismului, poate ridica cota ciclismului peste 10-15% din deplasari.');
+      D.barChart([['Pe jos', m.modalAct[2] - 8 > 0 ? Math.round(m.modalAct[2] * 0.7) : 14, [120,130,150]], ['Bicicleta actual', Math.round(m.modalAct[2] * 0.3), activColor], ['Bicicleta tinta', Math.round(m.modalTinta[2] * 0.4), PAL[1]]], { title: 'Ponderea mobilitatii active in deplasari (%)', h: 44, vfmt: v => v + '%', source: 'Estimare. Potentialul ciclismului este mare pe distantele scurte dominante in oras.' });
+      D.callout('Mobilitate activa = sanatate publica', 'Promovarea mersului pe jos si a ciclismului aduce beneficii directe de sanatate (activitate fizica, reducerea bolilor cardiovasculare si a obezitatii), de mediu (zero emisii) si economice (cost redus), fiind cea mai eficienta investitie in mobilitate raportat la beneficii.');
+
       // ── 3. MODELUL DE TRANSPORT ──────────────────────────────────────────
       D.chapter('Modelul de transport');
       D.P('Modelul de transport simuleaza cererea de deplasare si fluxurile pe retea, permitand testarea scenariilor si a proiectelor inainte de implementare. Se utilizeaza modelul clasic in patru etape, calibrat pe datele observate.');
