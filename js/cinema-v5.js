@@ -1107,12 +1107,13 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         rot(20,0.005);
         fly(Z.C,14.5,60,60,14000,4500,'day');
         break;
-      case 'b12s4': // Sinteza Masterplan
+      case 'b12s4': // Sinteza Masterplan — proiectia COMPLETA pe harta (nefazata)
         lp('dusk');
         onIdle(function(){ try{SE._add3DGrowthFull&&SE._add3DGrowthFull(map);}catch(e){} });
-        rot(25,0.006);
-        fly(Z.CBD,14.8,64,20,5000,0,'dusk');
-        fly(Z.CBD,15.4,70,110,16000,5000,'dusk');
+        setTimeout(function(){ if(SE._playing){ try{SE._addMasterplanProjection&&SE._addMasterplanProjection(map,{phased:false});}catch(e){} } },2600);
+        rot(14,0.005);
+        fly(Z.C,12.6,56,10,4500,0,'dusk');
+        fly(Z.C,13.3,60,90,16000,5000,'dusk');
         break;
     }
   }
@@ -1615,6 +1616,8 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         var tE=1-Math.pow(1-tG,3);
         // _updateGrowth la fiecare frame — inaltimile cresc vizibil
         try{ if(SE._updateGrowth) SE._updateGrowth(tE); }catch(e){}
+        // Etapizare masterplan — elementele proiectate apar pe ani (2025->2055)
+        try{ if(SE._revealMasterplan) SE._revealMasterplan(tE); }catch(e){}
         // Cladirile Mapbox standard ascunse — bara 3D PUG le inlocuiesc
         try{map.setLayoutProperty('building-extrusion','visibility','none');}catch(e){}
         // Afisare progres animatie in canvas
