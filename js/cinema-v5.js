@@ -1182,23 +1182,8 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         ctx.textAlign='center'; ctx.letterSpacing='0';
         ctx.fillText((city.judet||'\u2014').toUpperCase()+' \u00b7 '+(city.regiune||'\u2014')+' \u00b7 '+N2(pop21)+' LOCUITORI',W/2,H*0.544);
         ctx.globalAlpha=1;
-        if(D.wiki&&D.wiki.extract&&t>0.34){
-          var wA=Math.min(1,(t-0.34)/0.18)*sA*0.92;
-          ctx.globalAlpha=wA;
-          var bx=W*0.04,by=H*0.60,bw=Math.min(W*0.54,500),bh=H*0.28;
-          ctx.fillStyle='rgba(4,10,24,0.84)';
-          ctx.beginPath(); ctx.roundRect&&ctx.roundRect(bx,by,bw,bh,8); ctx.fill();
-          ctx.strokeStyle='rgba(212,175,55,0.18)'; ctx.lineWidth=1; ctx.stroke();
-          ctx.fillStyle='rgba(148,163,184,0.50)';
-          ctx.font='700 '+Math.min(W*0.008,10)+'px "IBM Plex Mono",monospace';
-          ctx.textAlign='left'; ctx.letterSpacing='.06em';
-          ctx.fillText('\u{1F4D6} WIKIPEDIA \u2014 SCURT ISTORIC',bx+12,by+17);
-          ctx.fillStyle='rgba(210,225,255,0.86)';
-          ctx.font='400 '+Math.min(W*0.0112,14)+'px "Space Grotesk",sans-serif';
-          ctx.letterSpacing='0';
-          wrap(ctx,D.wiki.extract,bx+12,by+36,bw-24,Math.min(W*0.014,17)*1.5,9);
-          ctx.globalAlpha=1;
-        }
+        // NOTA: istoricul Wikipedia se afiseaza DOAR in scena b1s4 (Evolutie Istorica),
+        // nu si aici in scena de identitate \u2014 evita dublarea istoricului la pornire.
         cifra(N2(pop21),'Locuitori \u2014 INSE Recensamant 2021');
         cifra2(N2(Math.round(((city.suprafata_ha||city.suprafata||9800)/100)))+' km\u00b2','Suprafata UAT');
         break;

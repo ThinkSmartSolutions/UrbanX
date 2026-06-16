@@ -100,7 +100,9 @@ TONUL: tehnic-juridic, obiectiv, bazat pe date, fara superlative`,
       this._generating = false;
       this._updateUI('error', e.message);
       ss?.('❌ Eroare AI: ' + e.message.slice(0, 60));
-      throw e;
+      // NU mai aruncam eroarea mai departe — altfel devine "unhandled promise
+      // rejection" (onclick-ul nu are .catch). UI-ul de eroare e deja afisat.
+      return null;
     }
   },
 
@@ -171,9 +173,15 @@ Raspunde DOAR cu textul sectiunii, fara titlu, fara comentarii.`,
     const prompt = prompts[sectionId];
     if(!prompt) return '[Sectiune necunoscuta]';
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    // Rutare prin proxy Cloudflare (CORS) — apelul direct din browser e blocat.
+    const _proxy = (window._PROXY_URL || 'https://urbanx-proxy.3dtravelsoftart.workers.dev');
+    const response = await fetch(_proxy + '/proxy?url=' + encodeURIComponent('https://api.anthropic.com/v1/messages'), {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1000,
