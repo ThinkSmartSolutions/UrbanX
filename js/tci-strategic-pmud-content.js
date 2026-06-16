@@ -469,6 +469,24 @@
       D.P('Coordonarea revine unei structuri de management al mobilitatii din cadrul primariei (sau autoritatii metropolitane), cu raportare anuala publica. Participarea publica este obligatorie in toate fazele. PMUD se revizuieste la 5 ani sau la modificari majore ale contextului.');
 
       // ── CAPITOLE SUPLIMENTARE ────────────────────────────────────────────
+      D.chapter('Procesul de planificare SUMP — cele 12 etape');
+      D.P('Metodologia SUMP (ELTIS) structureaza elaborarea si implementarea PMUD intr-un ciclu de patru faze si douasprezece etape, asigurand un proces riguros, participativ si bazat pe dovezi. Fiecare etapa are activitati si livrabile specifice.');
+      D.table(['Faza', 'Etape principale'], [
+        ['1. Pregatire si analiza', 'Evaluarea capacitatii; cadrul de planificare; analiza situatiei (date, probleme, oportunitati)'],
+        ['2. Dezvoltarea strategiei', 'Scenarii; viziune si obiective impreuna cu partile interesate; tinte si indicatori'],
+        ['3. Planificarea masurilor', 'Selectia pachetelor de masuri; actiuni si responsabilitati; finantare si plan de actiune'],
+        ['4. Implementare si monitorizare', 'Managementul implementarii; monitorizare si evaluare; revizuire si invatare'],
+      ], [44, 130], { boldFirst: true, fs: 7 });
+      D.P('Caracterul iterativ si participativ al procesului — implicarea continua a cetatenilor si a partilor interesate, deciziile bazate pe date, monitorizarea si revizuirea — distinge SUMP de planificarea traditionala a transportului. Acest PMUD respecta structura metodologica, fiind un document de fundamentare ce parcurge etapele de analiza si strategie, urmand a fi completat in faza finala cu modelul de trafic calibrat si avizele necesare.');
+
+      D.chapter('Deplasari de agrement, turism si evenimente');
+      D.P('Pe langa deplasarile cotidiene (naveta, scoala, cumparaturi), mobilitatea de agrement, turism si pentru evenimente are caracteristici specifice: varfuri in weekend si in sezon, destinatii concentrate (zone de recreere, atractii turistice, locatii de evenimente) si profil modal diferit. Gestionarea acestor fluxuri (acces la zonele de agrement, transport public catre evenimente, managementul parcarii in varfuri) este o componenta a planului.');
+      D.P('Mobilitatea turistica durabila — acces facil la atractii prin transport public si moduri active, descurajarea traficului auto in zonele sensibile (centre istorice, zone naturale), si servicii de mobilitate pentru vizitatori (bike-sharing, informare) — protejeaza patrimoniul si calitatea vietii rezidentilor, valorificand totodata potentialul turistic.');
+
+      D.chapter('Date deschise si transparenta in mobilitate');
+      D.P('Datele de mobilitate (trafic, transport public, calitatea aerului, accidente) constituie o resursa esentiala pentru planificare, dar si pentru transparenta si inovare. Politica de date deschise (open data) — publicarea datelor in formate standard si reutilizabile — permite cercetatorilor, dezvoltatorilor si cetatenilor sa creeze servicii si analize, sustinand un ecosistem de mobilitate inovator (aplicatii, platforme MaaS).');
+      D.P('Standardele de date (precum GTFS pentru transport public, care permite afisarea orarelor in aplicatii de planificare a calatoriilor) faciliteaza interoperabilitatea si integrarea. Protectia datelor personale si guvernanta datelor (cine detine, cine acceseaza, in ce scop) sunt conditii ale unui sistem de date etic si de incredere.');
+
       D.chapter('Viitorul mobilitatii — tehnologii emergente');
       D.P('Mobilitatea urbana se afla intr-o transformare tehnologica profunda: electrificarea, conectivitatea (vehicule conectate, V2X), automatizarea (vehicule autonome), partajarea (sharing) si digitalizarea (MaaS) redefinesc sistemul de transport. Aceste tendinte pot aduce beneficii majore (siguranta, eficienta, acces), dar comporta si riscuri (cresterea deplasarilor daca vehiculele autonome devin prea convenabile, polarizare digitala) ce trebuie gestionate proactiv prin politici publice.');
       D.P('Principiul director este ca tehnologia sa serveasca obiectivele de mobilitate durabila, nu invers. Vehiculele autonome, de exemplu, sunt benefice daca sunt partajate, electrice si integrate cu transportul public, dar daunatoare daca perpetueaza modelul autoturismului individual. Orasul trebuie sa pregateasca cadrul (reglementare, infrastructura, date) pentru a orienta aceste tehnologii catre binele public, ramanand flexibil intr-un context de incertitudine tehnologica.');

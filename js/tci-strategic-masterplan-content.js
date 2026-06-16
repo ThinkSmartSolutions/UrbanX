@@ -923,6 +923,31 @@
         ['Reparcelare urbana', 'mecanism prin care proprietarii contribuie cu teren pentru infrastructura, beneficiind de cresterea valorii'],
       ]);
 
+      D.chapter('Matricea de actiuni pe obiective strategice');
+      D.P('Operationalizarea viziunii se realizeaza printr-o matrice care leaga fiecare obiectiv strategic de directii de actiune concrete, de indicatori si de orizonturi de timp, asigurand trasabilitatea de la viziune la implementare.');
+      D.table(['Obiectiv', 'Directii de actiune', 'Orizont'], [
+        ['O1 Dezvoltare spatiala echilibrata', 'Densificare calitativa, regenerare, limitarea expansiunii, mix functional', 'Continuu'],
+        ['O2 Mobilitate durabila', 'PMUD, transfer modal, retea velo, transport public, parcare', '2025-2040'],
+        ['O3 Mediu si clima', 'Spatii verzi 26 mp/loc, infrastructura albastra-verde, neutralitate climatica', '2025-2055'],
+        ['O4 Locuire accesibila', 'Fond accesibil/social, regenerare ansambluri, housing mix', '2027-2045'],
+        ['O5 Economie competitiva', 'Atragere investitii, diversificare, brownfield, capital uman', 'Continuu'],
+        ['O6 Coeziune si servicii', 'Dotari de proximitate, echitate spatiala, incluziune', 'Continuu'],
+        ['O7 Identitate si patrimoniu', 'Protejare LMI, ghid design, valorificare peisaj', 'Continuu'],
+        ['O8 Guvernanta si reziliente', 'Capacitate institutionala, date, participare, adaptare riscuri', 'Continuu'],
+      ], [54, 90, 30], { boldFirst: true, fs: 7 });
+
+      D.chapter('Riscuri ale implementarii si masuri de gestionare');
+      D.P('Implementarea masterplanului comporta riscuri care trebuie anticipate si gestionate proactiv, pentru a asigura atingerea obiectivelor.');
+      D.table(['Risc', 'Impact', 'Masura de gestionare'], [
+        ['Capacitate institutionala insuficienta', 'Intarzieri, absorbtie redusa', 'Intarirea structurilor, formare, asistenta tehnica'],
+        ['Finantare insuficienta sau intrerupta', 'Proiecte blocate', 'Diversificarea surselor, pregatirea proiectelor mature'],
+        ['Lipsa de continuitate politica', 'Abandonarea directiilor', 'Consens larg, asumarea documentului, monitorizare publica'],
+        ['Rezistenta la schimbare', 'Blocarea masurilor', 'Participare, comunicare, proiecte-pilot demonstrative'],
+        ['Presiune de dezvoltare necontrolata', 'Erodarea viziunii', 'Reglementare ferma (PUG/RLU), control urbanistic'],
+        ['Schimbari de context (economic, climatic)', 'Ipoteze invalidate', 'Planificare adaptiva, revizuire periodica'],
+      ], [56, 44, 74], { boldFirst: true, fs: 7 });
+      D.callout('Factori-cheie de succes', 'Asumarea politica de durata, capacitatea administrativa, finantarea predictibila, participarea publica si monitorizarea riguroasa sunt conditiile transformarii viziunii in realitate.');
+
       D.chapter('Concluzii si recomandari strategice');
       D.P('Masterplanul Strategic al Municipiului ' + city.name + ' fundamenteaza o dezvoltare urbana integrata, durabila si rezilienta. Recomandarile prioritare:');
       D.bullets([
