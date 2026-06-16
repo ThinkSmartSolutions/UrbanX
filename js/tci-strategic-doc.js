@@ -327,8 +327,10 @@
 
         // COPERTI (2): folosim coperta premium existenta a MP pt prima pagina
         const D = makeDoc(pdf, { docTitle: 'MASTERPLAN STRATEGIC', cityName: city.name, accent: [212,175,55] });
+        // QR deep-link (UAT+scenariu) pe coperta — restaureaza la scanare
+        try { if (G._QRMasterplanPatch && G._QRGenerator) { const u = G._QRMasterplanPatch._buildShareURL(cityKey, scenario); window._currentShareURL = u; window._currentMasterplanQR = G._QRGenerator.generate(u, 100); } } catch (e) {}
         D.setSuppress(true); D.setPage(1);
-        m._pg1_cover(ctx);            // pagina 1 = coperta premium (deja existenta)
+        m._pg1_cover(ctx);            // pagina 1 = coperta premium (cu QR via patch)
         D.setSuppress(false);
         const coverPages = 1;
 

@@ -168,20 +168,15 @@ G._QRMasterplanPatch = {
 
   _buildShareURL(cityKey, scenario) {
     const base = window.location.origin + window.location.pathname;
-    const params = new URLSearchParams({
-      uat: cityKey || window.TCI?.cityKey || 'RO-IS-01',
-      sc:  scenario || window._ProjectionEngine?.currentScenario || 'S2',
-      yr:  window.TCI?.year || 2025,
-      src: 'qr_pdf',
-    });
+    // Format ?tci=<base64(c,s,y)> recunoscut de _TCIShare.restoreFromURL ->
+    // scanarea QR deschide platforma SI restaureaza UAT + scenariu + an (nu doar root).
+    const c = cityKey || window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
+    const s = scenario || window._ProjectionEngine?.currentScenario || 'S2';
+    const y = window.TCI?.year || 2025;
+    const inner = new URLSearchParams({ c: c, s: s, y: y });
     const map = window.map;
-    if(map) {
-      const c = map.getCenter();
-      params.set('lat', c.lat.toFixed(4));
-      params.set('lon', c.lng.toFixed(4));
-      params.set('z', map.getZoom().toFixed(1));
-    }
-    return `${base}?${params.toString()}`;
+    if (map) { const cc = map.getCenter(); inner.set('lat', cc.lat.toFixed(5)); inner.set('lon', cc.lng.toFixed(5)); inner.set('z', map.getZoom().toFixed(1)); }
+    return base + '?tci=' + btoa(inner.toString());
   },
 
   _addQRToPage(pdf, W, H, isLast = false) {

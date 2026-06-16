@@ -3213,12 +3213,17 @@ const _TCIShare = {
       const cityKey = state.get('c') || localStorage.getItem('ux_last_city') || 'RO-IS-01';
       const scenario = state.get('s') || 'S2';
       const year = parseInt(state.get('y') || '2025');
+      const lat = parseFloat(state.get('lat')), lon = parseFloat(state.get('lon')), z = parseFloat(state.get('z'));
       setTimeout(() => {
         _ProjectionEngine.open();
         _ProjectionEngine.setScenario(scenario);
         _ProjectionEngine.setYear(year);
         const city = _RO_CITIES_DB[cityKey];
         if(city) _ProjectionEngine.setFullCity(cityKey, city.name);
+        // Zboara la locatia codificata in QR (daca exista)
+        if(!isNaN(lat) && !isNaN(lon) && window.map && window.map.flyTo){
+          try{ window.map.flyTo({center:[lon,lat], zoom: isNaN(z)?15:z, duration:1500}); }catch(e){}
+        }
       }, 800);
     } catch(e) {}
   },

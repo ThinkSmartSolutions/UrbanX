@@ -64,6 +64,14 @@
       pdf.setTextColor(120, 150, 135); pdf.setFont('DejaVuRO', 'normal'); pdf.setFontSize(7);
       pdf.text(S2('Document de fundamentare (pre-PMUD). PMUD final: model de trafic calibrat de consultant atestat, anchete de mobilitate, aviz CTATU.'), W / 2, H - 18, { align: 'center', maxWidth: W - 30 });
       pdf.text(S2('Generat: ' + new Date().toLocaleDateString('ro-RO') + ' · UrbanX'), W / 2, H - 10, { align: 'center' });
+      // QR deep-link (UAT) — la scanare deschide platforma pe acest UAT
+      try {
+        if (window._QRMasterplanPatch && window._QRGenerator) {
+          const u = window._QRMasterplanPatch._buildShareURL(ctx.cityKey, ctx.scenario || 'S2');
+          const qr = window._QRGenerator.generate(u, 100);
+          if (qr) { pdf.addImage(qr, 'PNG', W - 38, H - 42, 24, 24); pdf.setTextColor(120, 150, 135); pdf.setFontSize(5.5); pdf.text('Scaneaza →', W - 26, H - 44, { align: 'center' }); }
+        }
+      } catch (e) {}
     }
   };
 
