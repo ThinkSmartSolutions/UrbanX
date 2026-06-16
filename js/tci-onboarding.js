@@ -433,7 +433,9 @@ G._ParcelResults = {
             ['🌍 SDG 11 per UAT', "document.querySelector('[data-t=analytics]')?.click();setTimeout(()=>_AnalyticsPanel?.runSDG11(),300)", '#a78bfa'],
             ['🌆 Coridoare + Patrimoniu', "document.querySelector('[data-t=urban-intel]')?.click()", '#34d399'],
             ['🎬 TCI Cinema 30 ani', "openTCI&&openTCI()", '#8b5cf6'],
-            ['📋 Masterplan PDF', "_TCIMasterplanPDF?.generate()", '#D4AF37'],
+            ['📋 Masterplan PDF (100+ pag.)', "(window.generateMasterplan||function(){})()", '#D4AF37'],
+            ['🚍 PMUD (Plan Mobilitate)', "(window.generatePMUD||function(){})()", '#34d399'],
+            ['🚧 Studiu Restricții & Risc', "(window.generateStudiuRestrictii||function(){})()", '#f87171'],
           ].map(([label,action,color])=>`
             <button onclick="${action.replace(/"/g,"'")}"
               style="text-align:left;padding:6px 8px;border-radius:5px;
