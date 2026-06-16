@@ -2145,3 +2145,6 @@ function buildVolume(){
 
 // Throttle: minimum 20s between Overpass calls for same parcel
 let _ctxLastCall = 0;
+// FIX: _ctxLastParcel era folosit in loadContext (03-ui-panel.js) dar nedeclarat
+// -> ReferenceError la click pe parcela / cautare. Il declaram aici, langa _ctxLastCall.
+let _ctxLastParcel = null;

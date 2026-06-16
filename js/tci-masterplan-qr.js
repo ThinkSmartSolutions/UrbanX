@@ -26,11 +26,12 @@ G._QRGenerator = {
   // Folosim Canvas 2D pentru randare
   generate(text, size = 120) {
     try {
-      // Folosim qrcode.js dacă e disponibil în browser
-      if (typeof QRCode !== 'undefined') {
-        return this._withQRCodeLib(text, size);
+      // QR REAL scanabil via qrcode-generator (sincron). Esential: scanarea
+      // trebuie sa deschida efectiv URL-ul scenariului, nu un pattern decorativ.
+      if (typeof qrcode !== 'undefined') {
+        return this._realQR(text, size);
       }
-      // Fallback: generăm un pattern vizual reprezentativ
+      // Fallback decorativ doar daca biblioteca nu s-a incarcat
       return this._generateVisualPattern(text, size);
     } catch(e) {
       console.warn('[QR] Eroare generare:', e.message);
@@ -38,17 +39,24 @@ G._QRGenerator = {
     }
   },
 
-  // QR cu biblioteca QRCode.js (dacă e disponibilă)
-  _withQRCodeLib(text, size) {
+  // QR REAL, scanabil — qrcode-generator (Kazuhiko Arase), randat pe canvas.
+  // Module inchise pe fundal alb = contrast maxim pentru scanare fiabila.
+  _realQR(text, size) {
+    const qr = qrcode(0, 'M');            // type 0 = auto-fit, ECC nivel M (15%)
+    qr.addData(text);
+    qr.make();
+    const n = qr.getModuleCount();
+    const dpr = window.devicePixelRatio || 1;
     const canvas = document.createElement('canvas');
-    canvas.width = size;
-    canvas.height = size;
-    QRCode.toCanvas(canvas, text, {
-      width: size,
-      margin: 1,
-      color: { dark: '#D4AF37', light: '#040a1c' },
-      errorCorrectionLevel: 'M',
-    });
+    canvas.width = size * dpr; canvas.height = size * dpr;
+    const ctx = canvas.getContext('2d'); ctx.scale(dpr, dpr);
+    const margin = 2, cell = size / (n + margin * 2);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, size, size);
+    ctx.fillStyle = '#0a0e1f';
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) {
+      if (qr.isDark(r, c)) ctx.fillRect((margin + c) * cell, (margin + r) * cell, cell + 0.6, cell + 0.6);
+    }
     return canvas.toDataURL('image/png');
   },
 
