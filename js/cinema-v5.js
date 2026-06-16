@@ -355,7 +355,14 @@ window._startCinema = function(cityKey){
 // ── FILM START ────────────────────────────────────────────────────────────
 function _film(map,SE,city,pred,cx,cy,name,siruta){
   // onIdle — asteapta harta idle inainte de layere
-  function onIdle(fn){try{map.once('idle',fn);}catch(e){setTimeout(fn,1200);}}
+  // onIdle legat de scena curenta: daca harta devine 'idle' DUPA ce scena s-a
+  // schimbat, NU mai rulam callback-ul (altfel layere vechi — trafic/seismic/
+  // inundatii — se re-adauga in scena urmatoare si raman pana la final).
+  function onIdle(fn){
+    var _si=SE._si;
+    var g=function(){ if(!SE._playing||SE._si!==_si) return; try{fn();}catch(e){} };
+    try{map.once('idle',g);}catch(e){setTimeout(g,1200);}
+  }
 
   var cv = SE._mkCanvas ? SE._mkCanvas() : _mkFallbackCanvas();
   if(!cv){console.error('[v9] Canvas lipsa');return;}
@@ -951,17 +958,12 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
       // BLOC 8 ───────────────────────────────────────────────────────────
       case 'b8s1':
         lp('day');
-        setTimeout(function(){
-          if(!SE._playing) return;
-          onIdle(function(){try{SE._addInfraPoints&&SE._addInfraPoints(map);}catch(e){}});
-          if(D.roads&&D.roads.length) addLine('v9-hw',D.roads);
-          if(D.rail&&D.rail.length) addLine('v9-rail',D.rail,{'line-color':'#a78bfa','line-width':2,'line-opacity':0.7});
-          if(D.amenity&&D.amenity.length) addCircle('v9-amenity',D.amenity);
-        },1000);
-        rot(12,0.007);
-        fly(Z.C,14,62,20,4000,0,'day');
-        fly(Z.NV,14.5,65,55,6000,11000,'day');
-        fly(Z.SE2,14,62,-30,6000,19000,'day');
+        // Proiectele DESENATE ca zone/propuneri (poligoane + retea), nu doar pin-uri
+        setTimeout(function(){ if(SE._playing){ try{SE._addMasterplanProjection&&SE._addMasterplanProjection(map,{phased:false});}catch(e){} } },2400);
+        // Vedere larga ca sa se vada propunerile pe tot orasul, apoi push-in
+        fly(Z.C,12.8,56,15,4500,0,'day');
+        rot(10,0.006);
+        fly(Z.C,13.5,60,60,9000,12000,'day');
         break;
 
       case 'b8s2':
@@ -1164,9 +1166,12 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
     function cifra(val,lbl,clr){
       ctx.globalAlpha=sA*rE(0.13,0.20);
       ctx.fillStyle=clr||'#ffffff';
-      ctx.font='900 '+FD+'px "Space Grotesk",sans-serif';
+      var s=String(val), fd=FD;
+      ctx.font='900 '+fd+'px "Space Grotesk",sans-serif';
+      // auto-shrink ca sa incapa intreg (ex. interval "[362.803—601.405]") — fara taiere
+      while(ctx.measureText(s).width>W*0.52 && fd>14){ fd-=2; ctx.font='900 '+fd+'px "Space Grotesk",sans-serif'; }
       ctx.textAlign='left'; ctx.letterSpacing='0';
-      ctx.fillText(String(val).slice(0,13),W*0.04,H*0.882);
+      ctx.fillText(s,W*0.04,H*0.882);
       ctx.globalAlpha=sA*rE(0.16,0.17)*0.72;
       ctx.fillStyle='rgba(148,163,184,0.78)';
       ctx.font='600 '+FL+'px "IBM Plex Mono",monospace';
@@ -1177,9 +1182,11 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
     function cifra2(val,lbl,clr){
       ctx.globalAlpha=sA*rE(0.18,0.18);
       ctx.fillStyle=clr||'rgba(212,175,55,0.96)';
-      ctx.font='900 '+Math.min(W*0.026,36)+'px "Space Grotesk",sans-serif';
+      var s2=String(val), f2=Math.min(W*0.026,36);
+      ctx.font='900 '+f2+'px "Space Grotesk",sans-serif';
+      while(ctx.measureText(s2).width>W*0.40 && f2>12){ f2-=2; ctx.font='900 '+f2+'px "Space Grotesk",sans-serif'; }
       ctx.textAlign='right'; ctx.letterSpacing='0';
-      ctx.fillText(String(val).slice(0,16),W*0.96,H*0.882);
+      ctx.fillText(s2,W*0.96,H*0.882);
       ctx.globalAlpha=sA*rE(0.21,0.17)*0.68;
       ctx.fillStyle='rgba(148,163,184,0.70)';
       ctx.font='600 '+FL+'px "IBM Plex Mono",monospace';
@@ -1887,9 +1894,11 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
           wrap(ctx,it[0],W*0.04,H*(0.57+i*0.057),W*0.55,Math.min(W*0.013,16)*1.4,2);
         });
         ctx.globalAlpha=1;
+        // SPIRALA NEGATIVA desenata (bucla vicioasa, nu doar pomenita in text)
+        _drawSpiral(ctx,W,H,sA,t);
         cifra('\u221247 orase','Au pierdut >25% populatie in Romania 1992-2021','#ef4444');
         cifra2(_NOW+' \u2014 alegere','Inca se poate schimba traiectoria','#22c55e');
-        narativ('Spirala negativa documentata: populatie minus = fiscalitate minus = servicii minus = populatie minus. Singurul mecanism de iesire: investitie masiva concentrata + viziune 30 ani + continuitate politica. Nu exista alt mecanism dovedit in literatura de specialitate.');
+        narativ('Spirala negativa (dreapta): populatie\u2193 \u2192 fiscalitate\u2193 \u2192 servicii\u2193 \u2192 atractivitate\u2193 \u2192 populatie\u2193, strangandu-se spre COLAPS. Singura iesire: investitie masiva concentrata + viziune 30 ani + continuitate politica. Nu exista alt mecanism dovedit in literatura.');
         concluzie('Spirala negativa a declinului nu se opreste singura — necesita interventia deliberata a tuturor factorilor');
         negativ('In Romania, 47 orase confirma aceasta traiectorie. '+name+' are inca instrumentele sa nu fie pe lista.');
         break;
@@ -2452,6 +2461,50 @@ function _drawBench(ctx,W,H,a,pred,name){
     ctx.fillStyle=isUs?'#D4AF37':'rgba(220,230,255,0.68)';
     ctx.font=(isUs?'700':'500')+' '+Math.min(W*0.009,10)+'px "Space Grotesk",sans-serif';ctx.textAlign='left';ctx.letterSpacing='0';ctx.fillText(p.n,x+4,y+28+i*rH+rH*0.55);
     ctx.textAlign='right';ctx.fillText(p.pib+'%',x+w-4,y+28+i*rH+rH*0.55);
+  });
+  ctx.restore();
+}
+
+// Spirala negativa a declinului — desenata, nu doar pomenita in text.
+// Bucla vicioasa: Populatie↓ -> Fiscalitate↓ -> Servicii↓ -> Atractivitate↓ -> ...
+function _drawSpiral(ctx,W,H,a,t){
+  if(a<=0) return;
+  ctx.save();
+  var cx=W*0.74, cy=H*0.50, R=Math.min(W*0.13,175);
+  var turns=3.0, steps=200, prog=Math.min(1,(t-0.30)/0.45);
+  if(prog<=0){ ctx.restore(); return; }
+  // traseul spiralei (rosu, se strange spre centru)
+  ctx.globalAlpha=a*0.9; ctx.strokeStyle='#ef4444'; ctx.lineWidth=3; ctx.lineCap='round';
+  ctx.beginPath();
+  var lim=Math.floor(steps*prog);
+  for(var i=0;i<=lim;i++){
+    var f=i/steps, ang=f*turns*Math.PI*2 - Math.PI/2, rr=R*(1-f/turns*0.90);
+    var x=cx+Math.cos(ang)*rr, y=cy+Math.sin(ang)*rr;
+    if(i===0)ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+  // varf-sageata la capatul curent (spre interior)
+  if(lim>2){
+    var f1=lim/steps, a1=f1*turns*Math.PI*2-Math.PI/2, r1=R*(1-f1/turns*0.90);
+    var hx=cx+Math.cos(a1)*r1, hy=cy+Math.sin(a1)*r1;
+    ctx.globalAlpha=a; ctx.fillStyle='#ef4444';
+    ctx.beginPath(); ctx.arc(hx,hy,4,0,Math.PI*2); ctx.fill();
+  }
+  // centru: COLAPS
+  ctx.globalAlpha=a*Math.min(1,prog*1.5); ctx.fillStyle='#ef4444';
+  ctx.font='900 '+Math.min(W*0.015,20)+'px "Space Grotesk",sans-serif'; ctx.textAlign='center';
+  ctx.fillText('COLAPS',cx,cy+Math.min(W*0.006,7));
+  // noduri bucla vicioasa cu etichete (apar progresiv)
+  var nodes=[['POPULATIE ↓',-Math.PI/2,0.30],['FISCALITATE ↓',0,0.45],['SERVICII ↓',Math.PI/2,0.58],['ATRACTIVITATE ↓',Math.PI,0.70]];
+  nodes.forEach(function(nd,i){
+    if(t<nd[2]) return;
+    var na=nd[1], nr=R*(0.97-i*0.03), nx=cx+Math.cos(na)*nr, ny=cy+Math.sin(na)*nr;
+    var na2=Math.min(1,(t-nd[2])/0.10)*a;
+    ctx.globalAlpha=na2; ctx.fillStyle='#fbbf24';
+    ctx.beginPath(); ctx.arc(nx,ny,5,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='rgba(230,235,255,0.92)'; ctx.font='700 '+Math.min(W*0.0095,12)+'px "IBM Plex Mono",monospace';
+    ctx.textAlign=Math.cos(na)>=-0.2?'left':'right';
+    ctx.fillText(nd[0], nx+(Math.cos(na)>=-0.2?11:-11), ny+3);
   });
   ctx.restore();
 }
