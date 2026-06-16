@@ -1983,6 +1983,8 @@ function runLotizare(){
     } else {
       pFeat={type:'Feature',geometry:ap.geo.geometry,properties:{}};
     }
+    // Saneaza geometria (repara self-intersections / MultiPolygon ex. CF 56832)
+    pFeat = _lotSanitizeGeom(pFeat) || pFeat;
     const pArea=turf.area(pFeat);
     const params=ap.params||getDefaultParams(ap.utr||'');
 
@@ -2450,6 +2452,26 @@ function _lotDrumEditorUpdatePanel(){
 // ═══════════════════════════════════════════════════════════════════════════
 // GENERARE LOTURI — MODULARĂ, UMPLU COMPLET PARCELA
 // ═══════════════════════════════════════════════════════════════════════════
+
+// ── Saneaza geometria parcelei inainte de lotizare ───────────────────────────
+// Geometriile cadastrale complexe (ex. CF 56832 Baluseni) au self-intersections,
+// puncte duplicate sau inele prost orientate care fac turf/jsts sa esueze silentios
+// (0 loturi). Curatam: cleanCoords -> rewind -> buffer(0) reparare topologie.
+function _lotSanitizeGeom(feat){
+  if(!feat || !feat.geometry) return feat;
+  let g = feat;
+  try{ const c = turf.cleanCoords(g); if(c && c.geometry) g = c; }catch(e){}
+  try{ const r = turf.rewind(g, {reverse:false, mutate:false}); if(r && r.geometry) g = r; }catch(e){}
+  // Reparare self-intersection: buffer(0) este metoda standard JSTS de "noding"
+  try{
+    const t = g.geometry.type;
+    if(t==='Polygon' || t==='MultiPolygon'){
+      const fixed = turf.buffer(g, 0, {units:'meters'});
+      if(fixed && fixed.geometry && turf.area(fixed) > 0) g = fixed;
+    }
+  }catch(e){}
+  return g;
+}
 
 function _genLotizareGeom(fpFeat, loturiPerTip, drumFract){
   const loturi=[], drumuri=[];
