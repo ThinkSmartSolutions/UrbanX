@@ -1060,9 +1060,14 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
           var agendaCorridors = _buildAgendaCorridors(cx,cy,pred);
           _showCorridorsOnMap(map, agendaCorridors, 1500);
           if(D.roads&&D.roads.length) addLine('v9-hw',D.roads);
-          // Puncte prioritati deasupra
-          addCircle('v9-agenda',_agendaPts(cx,cy,pred));
-          setTimeout(function(){ if(SE._playing) _pulse(map,'v9-agenda','circle-radius',8,22,7); },2000);
+          // Prioritatile primarului — etichetate explicit (nu buline anonime)
+          try{ if(SE._cinLabels) SE._cinLabels(map,[
+            {lon:cx,       lat:cy+0.020, color:'#ef4444', icon:'1', title:'CONSOLIDARE SEISMICA',  sub:'prioritate maxima'},
+            {lon:cx+0.026, lat:cy+0.006, color:'#f59e0b', icon:'2', title:'MOBILITATE & PASAJE',   sub:'decongestionare'},
+            {lon:cx-0.028, lat:cy+0.010, color:'#22c55e', icon:'3', title:'SPATII VERZI 3-30-300',  sub:'sanatate urbana'},
+            {lon:cx+0.018, lat:cy-0.016, color:'#60a5fa', icon:'4', title:'REGENERARE CENTRU',     sub:'mixt + pietonal'},
+            {lon:cx-0.024, lat:cy-0.012, color:'#a855f7', icon:'5', title:'RECONVERSIE INDUSTRIALA',sub:'brownfield'},
+          ]); }catch(e){}
         },2000);
         fly([cx,cy],13,52,0,4000,0,'day');
         fly(Z.C,14.5,62,22,6000,9500,'day');
