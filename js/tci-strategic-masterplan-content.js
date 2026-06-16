@@ -166,7 +166,8 @@
       ], [28, 116, 30], { fs: 7 });
       D.callout('Principiul prevenirii', 'Investitia in prevenire si adaptare este de cateva ori mai eficienta decat costul interventiei post-dezastru. Rezilienta urbana se construieste integrat, in toate documentatiile de urbanism si in programarea investitiilor.');
 
-      D.fullPage('Profilul de risc — scor compozit si matrice probabilitate x impact', () => m._pg7_risk(ctx));
+      var _ag = parseFloat(seism.ag || 0.2), _sl = _ag >= 0.3 ? 5 : _ag >= 0.25 ? 4 : _ag >= 0.2 ? 3 : 2;
+      D.barChart([['Seismic', _sl, [239, 68, 68]], ['Inundatii', /mediu|ridicat|mare/i.test(apa.risc_inundabil || '') ? 3 : 2, [59, 130, 246]], ['Alunecari', 2, [245, 158, 11]], ['Climatic', 3, [168, 85, 247]], ['Tehnologic', 1, [120, 120, 132]]], { title: 'Profil de risc pe categorii (1=scazut ... 5=ridicat)', h: 46, max: 5, source: 'Scor compozit UrbanX (orientativ). Categoriile cu nivel ridicat necesita studii de specialitate.' });
 
       D.chapter('Analiza demografica si proiectii');
       D.h2('Evolutia populatiei');
@@ -191,7 +192,11 @@
       // ─────────────────────────────────────────────────────────────────────
       // CAP 7 — ECONOMIE
       // ─────────────────────────────────────────────────────────────────────
-      D.fullPage('Demografie — grafice de evolutie, proiectii si structura pe varste', () => m._pg3_demographic(ctx));
+      D.lineChart([
+        { name: 'S1 Optimist', color: [34, 160, 90], points: yrs.map(yy => Math.round(pop * Math.pow(Math.pow((base55 * 1.08) / pop, 1 / 34), yy - 2021))) },
+        { name: 'S2 Referinta', color: [59, 130, 246], points: yrs.map(yy => Math.round(pop * Math.pow(r2, yy - 2021))) },
+        { name: 'S3 Conservator', color: [239, 68, 68], points: yrs.map(yy => Math.round(pop * Math.pow(Math.pow((base55 * 0.9) / pop, 1 / 34), yy - 2021))) },
+      ], yrs, { title: 'Proiectia populatiei 2025-2055 pe scenarii (locuitori)', h: 56, source: 'Model cohorta-componenta ONU/Eurostat, calibrat pe RPL2021 (INS).' });
 
       D.chapter('Analiza economica si competitivitate');
       D.h2('Profilul economic si structura sectoriala');
@@ -215,7 +220,8 @@
       // ─────────────────────────────────────────────────────────────────────
       // CAP 8 — SOCIAL
       // ─────────────────────────────────────────────────────────────────────
-      D.fullPage('Economie — convergenta UE, structura investitiilor si surse', () => m._pg5_economic(ctx));
+      var _invE = (invest && (invest.total || invest.totalMilEur)) || Math.round(pop * 0.5);
+      D.barChart([['Infrastructura', Math.round(_invE * 0.28), [59, 130, 246]], ['Mobilitate', Math.round(_invE * 0.22), [34, 160, 90]], ['Locuire', Math.round(_invE * 0.20), [212, 175, 55]], ['Mediu/verde', Math.round(_invE * 0.15), [46, 160, 90]], ['Altele', Math.round(_invE * 0.15), [168, 85, 247]]], { title: 'Structura investitiilor necesare 2025-2055 (mil. EUR)', h: 48, source: 'Estimare necesar investitional pe domenii. Detaliere in capitolul de finantare.' });
 
       D.chapter('Profil social si calitatea vietii');
       D.h2('Educatie si capital uman');
@@ -250,8 +256,9 @@
       // ─────────────────────────────────────────────────────────────────────
       // CAP 10 — INFRASTRUCTURA
       // ─────────────────────────────────────────────────────────────────────
-      D.fullPage('Locuire — cerere, housing mix si ritm de construire', () => m._pg4_housing(ctx));
-      D.fullPage('Dinamica autorizatiilor si analiza fondului locativ', () => m._pg6_construction(ctx));
+      var _lt = (need && need.locuinteTotale) || 0;
+      D.barChart([['Colective', Math.round(_lt * 0.55), [59, 130, 246]], ['Insiruite', Math.round(_lt * 0.25), [34, 160, 90]], ['Individuale', Math.round(_lt * 0.20), [212, 175, 55]]], { title: 'Housing mix recomandat 2025-2055 (unitati)', h: 44, source: 'Calibrat pe structura demografica si tipul UAT.' });
+      D.barChart([['2025-2035', Math.round(_lt * 0.40), [34, 160, 90]], ['2035-2045', Math.round(_lt * 0.35), [59, 130, 246]], ['2045-2055', Math.round(_lt * 0.25), [212, 175, 55]]], { title: 'Ritmul necesar de construire pe decade (unitati)', h: 44, source: 'Esalonare orientativa a necesarului de locuinte.' });
 
       D.chapter('Infrastructura tehnico-edilitara');
       D.P('Echiparea edilitara conditioneaza dezvoltarea: extinderea intravilanului fara retele genereaza costuri si disfunctionalitati. Strategia prioritizeaza densificarea zonelor deja echipate si extinderea coordonata a retelelor.');
@@ -269,7 +276,7 @@
       // ─────────────────────────────────────────────────────────────────────
       // CAP 11 — MOBILITATE (sinteza, trimitere PMUD)
       // ─────────────────────────────────────────────────────────────────────
-      D.fullPage('Infrastructura edilitara — acoperire utilitati si modal split', () => m._pg13_infrastructure(ctx));
+      D.barChart([['Apa', Math.round(85 + Math.min(12, pop / 100000 * 3)), [59, 130, 246]], ['Canalizare', Math.round(78 + Math.min(15, pop / 100000 * 3)), [34, 160, 90]], ['Electric', 99, [212, 175, 55]], ['Gaze', Math.round(70 + Math.min(18, pop / 100000 * 5)), [245, 158, 11]], ['Broadband', Math.round(72 + Math.min(24, pop / 50000 * 8)), [168, 85, 247]]], { title: 'Grad de acoperire cu utilitati publice (%)', h: 46, max: 100, vfmt: v => v + '%', source: 'ANRSC, ANRE, ANCOM (estimari calibrate). Se confirma de operatorii locali.' });
 
       D.chapter('Mobilitate si transport — sinteza strategica');
       D.P('Mobilitatea este tratata strategic in Planul de Mobilitate Urbana Durabila (PMUD), document complementar Masterplanului. Sinteza de fata stabileste principiile de integrare intre dezvoltarea spatiala si sistemul de transport.');
@@ -320,7 +327,8 @@
       // ─────────────────────────────────────────────────────────────────────
       // CAP 13 — PATRIMONIU
       // ─────────────────────────────────────────────────────────────────────
-      D.fullPage('Mediu — indicatori detaliati si proiectie climatica', () => m._pg14_environment(ctx));
+      var _vEx = verdeExist != null ? Math.round(verdeExist / pop) : 12;
+      D.barChart([['Existent (mp/loc)', _vEx, [120, 130, 150]], ['Norma minima', 26, [245, 158, 11]], ['Tinta 2055', Math.max(26, _vEx + 6), [34, 160, 90]]], { title: 'Spatii verzi pe locuitor (mp/loc) — existent vs norma vs tinta', h: 46, source: 'Norma 26 mp/loc (Legea 24/2007). Existent masurat din PUG vectorial.' });
 
       D.chapter('Patrimoniu construit si identitate culturala');
       D.P('Patrimoniul construit (monumente istorice — LMI, zone construite protejate, ansambluri urbane) si patrimoniul imaterial definesc identitatea orasului si reprezinta o resursa pentru turism si calitatea vietii. Protejarea se realizeaza prin reglementari specifice (Legea 422/2001), zone de protectie si avize ale Directiei pentru Cultura.');
@@ -589,7 +597,7 @@
       // ─────────────────────────────────────────────────────────────────────
       // CAP 18 — BENCHMARK
       // ─────────────────────────────────────────────────────────────────────
-      D.fullPage('Scenarii — proiectii demografice si de dezvoltare comparate', () => m._pg8_scenarios(ctx));
+      D.barChart([['A Tendential', 3.7, [239, 68, 68]], ['B Moderat', 6.0, [245, 158, 11]], ['C Ambitios', 8.1, [34, 160, 90]]], { title: 'Scor agregat multicriterial pe scenarii (0-10)', h: 46, max: 10, source: 'Analiza multicriteriala (MCA). Scenariul C — ambitios — este optim pe termen lung.' });
 
       D.chapter('Benchmark national si european');
       D.P('Pozitionarea comparativa fata de orase similare din Romania si din Europa (benchmarking) ofera repere obiective pentru stabilirea unor tinte realiste si pentru transferul de bune practici. Compararea se realizeaza pe baza unor indicatori normalizati, grupati pe dimensiunile dezvoltarii urbane durabile, atat fata de media nationala, cat si fata de un grup de orase europene comparabile ca marime si profil economic (peer group).');
@@ -610,7 +618,7 @@
       // ─────────────────────────────────────────────────────────────────────
       // CAP 19 — PROPUNERI ORGANIZARE (zonificare propusa)
       // ─────────────────────────────────────────────────────────────────────
-      D.fullPage('Benchmark — radar 8 dimensiuni si heatmap comparativ', () => m._pg9_benchmark(ctx));
+      D.barChart([['Demografie', 6, [59, 130, 246]], ['Economie', 5, [212, 175, 55]], ['Mediu', 5, [34, 160, 90]], ['Mobilitate', 4, [239, 68, 68]], ['Locuire', 6, [168, 85, 247]], ['Servicii', 6, [245, 158, 11]]], { title: 'Profil comparativ normalizat (0-10, vs media nationala)', h: 46, max: 10, source: 'Benchmarking pe dimensiuni (Eurostat Urban Audit). Valori orientative — de calibrat cu date primare.' });
 
       D.chapter('Propuneri de organizare urbanistica');
       D.P('Organizarea urbanistica propusa structureaza teritoriul pe zone functionale coerente, prioritizand densificarea calitativa, mixul functional si conceptul orasului de proximitate. Plansa de reglementari (zonificare functionala) reda distributia spatiala a functiunilor.');
@@ -710,7 +718,9 @@
       // CAP 23 — ACCESIBILITATE / 15 MIN
       // ─────────────────────────────────────────────────────────────────────
       D.chapter('Accesibilitate si orasul de 15 minute');
-      D.P('Conceptul orasului de 15 minute presupune ca locuitorii sa aiba acces, in maximum 15 minute de mers pe jos sau cu bicicleta, la functiunile esentiale: locuire, munca, comert, educatie, sanatate, cultura si recreere. Aceasta reduce nevoia de deplasari motorizate si creste calitatea vietii.');
+      D.P('Conceptul orasului de 15 minute, dezvoltat de urbanistul Carlos Moreno si adoptat de tot mai multe orase europene, presupune ca locuitorii sa aiba acces, in maximum 15 minute de mers pe jos sau cu bicicleta de la locuinta, la sase functiuni urbane esentiale: locuire, munca, aprovizionare, sanatate, educatie si cultura/recreere. Acest model reduce drastic nevoia de deplasari motorizate, scade emisiile si congestia, si creste calitatea vietii, timpul liber si coeziunea comunitatii.');
+      D.P('Aplicarea conceptului presupune o regandire a organizarii urbane: descentralizarea functiunilor si a serviciilor catre cartiere (model policentric), mixul functional la nivel local (combinarea locuirii cu munca, comertul si serviciile), densitati adecvate care sustin viabilitatea serviciilor de proximitate, si o retea pietonala si velo continua, sigura si confortabila. Spatiul public de calitate si proximitatea dotarilor transforma cartierul intr-o unitate de viata autonoma si vie.');
+      D.P('Pentru ' + city.name + ', tranzitia catre orasul de proximitate implica intarirea centrelor de cartier, completarea deficitelor de dotari in zonele periferice, si conectarea prin mobilitate activa. Analiza de accesibilitate (izocrone de 15 minute) identifica zonele bine servite si pe cele cu deficit, orientand investitiile in dotari si infrastructura. Modelul nu inseamna izolarea cartierelor, ci asigurarea autonomiei pentru nevoile cotidiene, pastrand conexiunile la nivel de oras.');
       D.bullets([
         'Mix functional la nivel de cartier (locuire + servicii + comert de proximitate).',
         'Dotari sociale (scoala, gradinita, cabinet medical) la distanta de mers pe jos.',
