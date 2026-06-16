@@ -2597,21 +2597,21 @@ G._TCIMasterplanPDF = {
   // name = denumirea descriptiva; code = codul subzonei (prefix RO: L/C/V/I/A...)
   _clasFunc(name, code){
     const s=String(name||'').toLowerCase();
-    if(/verde|verzi|parc|agrement|sport|padure|forest|plantat|peisag/.test(s)) return ['Spatii verzi / Agrement',[46,160,90]];
-    if(/industr|product|depozit|logistic|antrepoz/.test(s)) return ['Industrial / Productie',[120,120,132]];
-    if(/circulat|\bdrum\b|strad|transport|cale ferata|\bgara\b|edilitar|tehnico/.test(s)) return ['Circulatii / Edilitar',[95,95,100]];
+    if(/verde|verzi|parc|agrement|sport|padure|forest|plantat|peisag/.test(s)) return ['Spații verzi / Agrement',[46,160,90]];
+    if(/industr|product|depozit|logistic|antrepoz/.test(s)) return ['Industrial / Producție',[120,120,132]];
+    if(/circulat|\bdrum\b|strad|transport|cale ferata|\bgara\b|edilitar|tehnico/.test(s)) return ['Circulații / Edilitar',[95,95,100]];
     if(/\bape\b|\bapa\b|\brau\b|\blac\b|balta|fluvi|maritim|\bport\b|acvati|delta/.test(s)) return ['Ape',[59,130,246]];
-    if(/agricol|extravilan|teren liber|neconstr|arabil|pasune|viticol/.test(s)) return ['Agricol / Rezerva',[206,194,128]];
-    if(/comer|mixt|central|servicii|birou|institut|invatamant|scoal|sanat|spital|cultur|administ|turism|hotel|tertiar/.test(s)) return ['Mixt / Servicii / Institutii',[232,142,52]];
-    if(/rezid|locuin|locuit|colectiv|individual/.test(s)) return ['Rezidential',[236,202,92]];
+    if(/agricol|extravilan|teren liber|neconstr|arabil|pasune|viticol/.test(s)) return ['Agricol / Rezervă',[206,194,128]];
+    if(/comer|mixt|central|servicii|birou|institut|invatamant|scoal|sanat|spital|cultur|administ|turism|hotel|tertiar/.test(s)) return ['Mixt / Servicii / Instituții',[232,142,52]];
+    if(/rezid|locuin|locuit|colectiv|individual/.test(s)) return ['Rezidențial',[236,202,92]];
     // Hint pe codul subzonei (nomenclatura RGU: L=locuinte, C=central/mixt, V=verde, I=ind, A=agricol, T/G=echipare)
     const cd=String(code||'').toUpperCase().trim();
-    if(/^V/.test(cd)) return ['Spatii verzi / Agrement',[46,160,90]];
-    if(/^L/.test(cd)) return ['Rezidential',[236,202,92]];
-    if(/^(C|M|S)/.test(cd)) return ['Mixt / Servicii / Institutii',[232,142,52]];
-    if(/^I/.test(cd)) return ['Industrial / Productie',[120,120,132]];
-    if(/^A/.test(cd)) return ['Agricol / Rezerva',[206,194,128]];
-    if(/^(T|G|DC)/.test(cd)) return ['Circulatii / Edilitar',[95,95,100]];
+    if(/^V/.test(cd)) return ['Spații verzi / Agrement',[46,160,90]];
+    if(/^L/.test(cd)) return ['Rezidențial',[236,202,92]];
+    if(/^(C|M|S)/.test(cd)) return ['Mixt / Servicii / Instituții',[232,142,52]];
+    if(/^I/.test(cd)) return ['Industrial / Producție',[120,120,132]];
+    if(/^A/.test(cd)) return ['Agricol / Rezervă',[206,194,128]];
+    if(/^(T|G|DC)/.test(cd)) return ['Circulații / Edilitar',[95,95,100]];
     return ['Altele / Neclasificat',[160,160,172]];
   },
 
@@ -2677,16 +2677,16 @@ G._TCIMasterplanPDF = {
     const rezAddM2=locTot*110; // ~110 mp teren brut/unitate (mix), orientativ
     const cur={}; Object.keys(ab.cats).forEach(k=>cur[k]=ab.cats[k].m2);
     const prop=Object.assign({},cur);
-    if('Spatii verzi / Agrement' in prop) prop['Spatii verzi / Agrement']=Math.max(cur['Spatii verzi / Agrement'],verdeTargetM2);
-    else prop['Spatii verzi / Agrement']=verdeTargetM2;
-    prop['Rezidential']=(cur['Rezidential']||0)+rezAddM2;
+    if('Spații verzi / Agrement' in prop) prop['Spații verzi / Agrement']=Math.max(cur['Spații verzi / Agrement'],verdeTargetM2);
+    else prop['Spații verzi / Agrement']=verdeTargetM2;
+    prop['Rezidențial']=(cur['Rezidențial']||0)+rezAddM2;
     // Balansare pe rezerva (Agricol/Rezerva) pastrand totalul constant
-    let deltaUp=(prop['Spatii verzi / Agrement']-(cur['Spatii verzi / Agrement']||0))+rezAddM2;
-    const rezervaKey='Agricol / Rezerva';
+    let deltaUp=(prop['Spații verzi / Agrement']-(cur['Spații verzi / Agrement']||0))+rezAddM2;
+    const rezervaKey='Agricol / Rezervă';
     if(prop[rezervaKey]!=null){ prop[rezervaKey]=Math.max(0, prop[rezervaKey]-deltaUp); }
     const propTotal=Object.values(prop).reduce((s,v)=>s+v,0);
     y=this._section(pdf,W,y,'B.1 Suprafete pe Categorii de Functiune  ·  Sursa: PUG vectorial '+city.name+' (masurat turf.js)');
-    const order=['Rezidential','Mixt / Servicii / Institutii','Industrial / Productie','Spatii verzi / Agrement','Circulatii','Ape','Agricol / Rezerva','Altele / Neclasificat'];
+    const order=['Rezidențial','Mixt / Servicii / Instituții','Industrial / Producție','Spații verzi / Agrement','Circulatii','Ape','Agricol / Rezervă','Altele / Neclasificat'];
     const rows=[];
     order.forEach(k=>{ if(cur[k]==null && prop[k]==null) return;
       const e=cur[k]||0, p=prop[k]||0;
