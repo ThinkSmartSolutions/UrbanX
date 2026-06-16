@@ -529,6 +529,24 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
     _mkCtrlFallback(stopAll,goScene,SE);
   }
 
+  // Injecteaza butoanele ℹ Explica + ⏺ REC daca lipsesc (cand _mkCtrl propriu nu le are)
+  (function _injectExtraCtrl(){
+    var bar=document.getElementById('tci-c8-ctrl'); if(!bar) return;
+    if(!document.getElementById('c8-explain')){
+      var be=document.createElement('button'); be.id='c8-explain'; be.title='Mod explicat — descrie fiecare scena';
+      be.style.cssText='background:rgba(59,130,246,.25);border:1px solid rgba(59,130,246,.4);color:#93c5fd;padding:10px 14px;border-radius:10px;cursor:pointer;font:700 12px/1 monospace;backdrop-filter:blur(8px)';
+      be.textContent='ℹ Explica'; be.onclick=function(){ window._CinemaExplain&&window._CinemaExplain.toggle(SE); };
+      bar.insertBefore(be, bar.firstChild);
+    }
+    if(!document.getElementById('c8-rec')){
+      var br=document.createElement('button'); br.id='c8-rec'; br.title='Inregistreaza filmul (.webm)';
+      br.style.cssText='background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);padding:10px 14px;border-radius:10px;cursor:pointer;font:700 12px/1 monospace;backdrop-filter:blur(8px)';
+      br.textContent='⏺ REC';
+      br.onclick=function(){ var b=this; if(window._CinemaRec){ if(window._CinemaRec._active){window._CinemaRec.stop();b.style.background='rgba(0,0,0,.6)';b.textContent='⏺ REC';} else {window._CinemaRec.start();b.style.background='rgba(220,0,0,.6)';b.textContent='⏹ STOP';} } };
+      bar.appendChild(br);
+    }
+  })();
+
   // Legenda
   var LEGENDS={
     'b1s3':['#dc2626','Metropolitan','#f59e0b','Regional','#22c55e','Local','#a78bfa','Cale ferata','#60a5fa','Autostrada'],
@@ -1294,6 +1312,25 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         ctx.textAlign='center'; ctx.letterSpacing='0';
         ctx.fillText((city.judet||'\u2014').toUpperCase()+' \u00b7 '+(city.regiune||'\u2014')+' \u00b7 '+N2(pop21)+' LOCUITORI',W/2,H*0.544);
         ctx.globalAlpha=1;
+        // Badge tip UAT \u2014 calibrare per profil (costier/Delta/granita/montan/metropola)
+        if(t>0.40){
+          var _jd=String(city.judet||'').toUpperCase();
+          var _badge=null;
+          if(_jd==='TL') _badge={t:'\ud83d\udedf ORAS DELTA / REZERVATIE',c:'#06b6d4'};
+          else if(_jd==='CT') _badge={t:'\ud83c\udf0a ORAS COSTIER / PORTUAR',c:'#0ea5e9'};
+          else if(['IS','BT','SV','GL','SM','MM','AR','TM','CS','MH','OT','DJ'].indexOf(_jd)>=0) _badge={t:'\ud83d\udec2 ORAS DE GRANITA',c:'#f59e0b'};
+          else if(['BV','HR','CV','SB','AB','HD','GJ','VL','NT','BN','CJ','MS'].indexOf(_jd)>=0) _badge={t:'\ud83c\udfd4 ORAS MONTAN / SUBCARPATIC',c:'#22c55e'};
+          else if((city.pop2021||pop21)>=200000) _badge={t:'\ud83c\udfd9 POL METROPOLITAN',c:'#a855f7'};
+          if(_badge){
+            var _ba=Math.min(1,(t-0.40)/0.12)*sA;
+            ctx.globalAlpha=_ba; ctx.font='800 '+Math.min(W*0.012,16)+'px "IBM Plex Mono",monospace'; ctx.textAlign='center';
+            var _bw=ctx.measureText(_badge.t).width+28;
+            ctx.fillStyle='rgba(2,6,18,0.8)'; ctx.fillRect(W/2-_bw/2,H*0.57,_bw,H*0.04);
+            ctx.strokeStyle=_badge.c; ctx.lineWidth=1.5; ctx.strokeRect(W/2-_bw/2,H*0.57,_bw,H*0.04);
+            ctx.fillStyle=_badge.c; ctx.fillText(_badge.t,W/2,H*0.57+H*0.026);
+            ctx.globalAlpha=1;
+          }
+        }
         // NOTA: istoricul Wikipedia se afiseaza DOAR in scena b1s4 (Evolutie Istorica),
         // nu si aici in scena de identitate \u2014 evita dublarea istoricului la pornire.
         cifra(N2(pop21),'Locuitori \u2014 INSE Recensamant 2021');
@@ -1367,7 +1404,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         var tLbl=r10>=1?'CRESTERE':r10>=0.2?'CRESTERE LENTA':r10>=-0.5?'STAGNARE':'DECLIN';
         cifra((r10>=0?'+':'')+r10.toFixed(2)+'%/an',tLbl,rClr);
         cifra2(N2(pred.pop55),'Proiectie '+_E());
-        if(t>0.18) _drawAge(ctx,W,H,Math.min(1,(t-0.18)/0.22)*sA,r10,pred);
+        if(t>0.18) _drawAgePyramid(ctx,W,H,Math.min(1,(t-0.18)/0.22)*sA,pred,city);
         if(pred.p21_inse){
           ctx.globalAlpha=sA*rE(0.25,0.18)*0.78;
           ctx.fillStyle='#22c55e';
@@ -2261,6 +2298,9 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         ctx.globalAlpha=cardA*0.55; ctx.fillStyle='rgba(148,163,184,0.8)'; ctx.font='500 '+Math.min(W*0.010,13)+'px "IBM Plex Mono",monospace';
         ctx.letterSpacing='.10em';
         ctx.fillText((name||'').toUpperCase()+'  ·  '+_S()+' — '+_E(), W/2, H*0.560);
+        // FIR NARATIV — o propozitie care leaga capitolul de povestea de ansamblu
+        var _thread={1:'Mai intai, cine si unde este orasul.',2:'Apoi: cine il locuieste — si cine pleaca.',3:'Ce il sustine economic.',4:'Cum este conectat azi.',5:'Ce il ameninta.',6:'Si totusi — unde si cum poate creste.',7:'Cum se misca oamenii prin el.',8:'Ce se construieste si cine plateste.',9:'Ce spun cifrele despre viitor.',10:'Ce se intampla daca nu facem nimic.',11:'Ce au facut altii — si merge.',12:'Ce putem decide, acum.'}[sc.bloc];
+        if(_thread){ ctx.globalAlpha=cardA*0.7; ctx.fillStyle='rgba(212,175,55,0.85)'; ctx.font='italic 600 '+Math.min(W*0.012,16)+'px "Space Grotesk",sans-serif'; ctx.letterSpacing='0'; ctx.fillText('“'+_thread+'”', W/2, H*0.585); }
         ctx.restore();
       }
     }
@@ -2467,6 +2507,41 @@ function _drawModalFull(ctx,W,H,a,pred){
     ctx.fillStyle='rgba(212,175,55,0.75)';ctx.fillText('SUMP '+col.sump+'%',x+55+bMaxW-2,bY+i*bH+bH*0.67);
   });
   ctx.restore();
+}
+
+// Piramida varstelor — vizual demografic (M stanga / F dreapta pe cohorte).
+function _drawAgePyramid(ctx,W,H,a,pred,city){
+  if(a<=0) return;
+  ctx.save();
+  // distributie pe cohorte (% din populatie) — RO 2021, ajustata pe imbatranire
+  var aging=(pred&&pred.r10!=null&&pred.r10<0)?0.06:0; // orase in declin = mai imbatranite
+  var coh=[
+    {l:'75+',  p:0.095+aging},
+    {l:'60-74',p:0.16+aging*0.5},
+    {l:'45-59',p:0.21},
+    {l:'30-44',p:0.22-aging*0.6},
+    {l:'15-29',p:0.16-aging*0.5},
+    {l:'0-14', p:0.155-aging*0.4}
+  ];
+  var cx=W*0.62, top=H*0.30, rowH=Math.min(H*0.055,40), maxW=Math.min(W*0.13,170);
+  var maxP=0.24;
+  ctx.globalAlpha=a; ctx.textAlign='center';
+  ctx.fillStyle='rgba(148,163,184,0.6)'; ctx.font='700 '+Math.min(W*0.009,11)+'px "IBM Plex Mono",monospace'; ctx.letterSpacing='.06em';
+  ctx.fillText('PIRAMIDA VARSTELOR · INSE',cx,top-12);
+  ctx.fillStyle='#60a5fa'; ctx.textAlign='right'; ctx.fillText('BARBATI',cx-12,top-12);
+  ctx.fillStyle='#f472b6'; ctx.textAlign='left'; ctx.fillText('FEMEI',cx+12,top-12);
+  coh.forEach(function(c,i){
+    var aa=Math.min(1,(a-0+i*0)); var bw=maxW*(c.p/maxP);
+    var y=top+i*rowH;
+    ctx.globalAlpha=a*Math.min(1,1.1-i*0.02);
+    // barbati (stanga) — putin mai mult la tineri, mai putin la batrani
+    var mF=i<2?0.46:0.51;
+    ctx.fillStyle='rgba(96,165,250,0.75)'; ctx.fillRect(cx-8-bw*mF, y, bw*mF, rowH-5);
+    ctx.fillStyle='rgba(244,114,182,0.75)'; ctx.fillRect(cx+8, y, bw*(1-mF), rowH-5);
+    ctx.fillStyle='rgba(220,228,255,0.85)'; ctx.font='700 '+Math.min(W*0.0095,12)+'px "IBM Plex Mono",monospace';
+    ctx.textAlign='center'; ctx.fillText(c.l, cx, y+rowH*0.55);
+  });
+  ctx.globalAlpha=1; ctx.restore();
 }
 
 function _drawPopHist(ctx,W,H,a,pred){
@@ -3109,14 +3184,125 @@ function _mkCtrlFallback(stopCb,goCb,SE){
   document.getElementById('tci-c8-ctrl')&&document.getElementById('tci-c8-ctrl').remove();
   var d=document.createElement('div'); d.id='tci-c8-ctrl';
   d.style.cssText='position:fixed;bottom:24px;right:20px;z-index:96000;display:flex;gap:8px;';
-  d.innerHTML='<button id="c8-prev" style="background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);padding:10px 16px;border-radius:10px;cursor:pointer;font:600 12px/1 monospace;backdrop-filter:blur(8px)">\u25C0</button>'
-    +'<button id="c8-skip" style="background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);padding:10px 18px;border-radius:10px;cursor:pointer;font:600 12px/1 monospace;backdrop-filter:blur(8px)">\u25B6</button>'
+  var bs='border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);padding:10px 16px;border-radius:10px;cursor:pointer;font:600 12px/1 monospace;backdrop-filter:blur(8px)';
+  d.innerHTML='<button id="c8-prev" style="background:rgba(0,0,0,.6);'+bs+'">\u25C0</button>'
+    +'<button id="c8-skip" style="background:rgba(0,0,0,.6);'+bs+'">\u25B6</button>'
+    +'<button id="c8-explain" title="Mod explicat \u2014 pauza + descriere scena" style="background:rgba(59,130,246,.25);border:1px solid rgba(59,130,246,.4);color:#93c5fd;padding:10px 14px;border-radius:10px;cursor:pointer;font:700 12px/1 monospace;backdrop-filter:blur(8px)">\u2139 Explica</button>'
+    +'<button id="c8-rec" title="Inregistreaza filmul (.webm)" style="background:rgba(0,0,0,.6);'+bs+'">\u23FA REC</button>'
     +'<button id="c8-stop" style="background:rgba(180,0,0,.5);border:1px solid rgba(255,80,80,.3);color:#ff9999;padding:10px 14px;border-radius:10px;cursor:pointer;font:600 12px/1 monospace;backdrop-filter:blur(8px)">\u2715</button>';
   document.body.appendChild(d);
   document.getElementById('c8-prev').onclick=function(){goCb(SE._si-1);};
   document.getElementById('c8-skip').onclick=function(){goCb(SE._si+1);};
   document.getElementById('c8-stop').onclick=stopCb;
+  document.getElementById('c8-explain').onclick=function(){ window._CinemaExplain&&window._CinemaExplain.toggle(SE); };
+  document.getElementById('c8-rec').onclick=function(){ var b=this; if(window._CinemaRec){ if(window._CinemaRec._active){window._CinemaRec.stop();b.style.background='rgba(0,0,0,.6)';b.textContent='\u23FA REC';} else {window._CinemaRec.start();b.style.background='rgba(220,0,0,.6)';b.textContent='\u23F9 STOP';} } };
 }
+
+// \u2500\u2500 EXPORT VIDEO (.webm) \u2014 compozit harta Mapbox (preserveDrawingBuffer) + overlay \u2500\u2500
+window._CinemaRec={
+  _rec:null,_chunks:[],_raf:null,_active:false,
+  start:function(){
+    try{
+      var map=window.map, ov=document.getElementById('tci-c8');
+      if(!map||!ov){ if(window.ss)ss('Porneste intai cinematicul'); return; }
+      if(typeof MediaRecorder==='undefined'){ if(window.ss)ss('Browserul nu suporta inregistrarea video'); return; }
+      var mc=map.getCanvas();
+      var comp=document.createElement('canvas'); comp.width=mc.width; comp.height=mc.height;
+      var cx=comp.getContext('2d'); var self=this;
+      var stream=comp.captureStream(30);
+      var mimes=['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'], mime='video/webm';
+      for(var i=0;i<mimes.length;i++){ try{ if(MediaRecorder.isTypeSupported(mimes[i])){mime=mimes[i];break;} }catch(e){} }
+      this._chunks=[];
+      this._rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:10000000});
+      this._rec.ondataavailable=function(e){ if(e.data&&e.data.size) self._chunks.push(e.data); };
+      this._rec.onstop=function(){
+        var blob=new Blob(self._chunks,{type:'video/webm'}); var url=URL.createObjectURL(blob);
+        var a=document.createElement('a'); a.href=url;
+        a.download='UrbanX-cinematic-'+((window.TCI&&window.TCI.cityKey)||'film')+'.webm';
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function(){URL.revokeObjectURL(url);},8000);
+      };
+      this._active=true; this._rec.start(1000);
+      var draw=function(){
+        if(!self._active) return;
+        try{
+          if(comp.width!==mc.width) comp.width=mc.width;
+          if(comp.height!==mc.height) comp.height=mc.height;
+          cx.drawImage(mc,0,0);
+          var o=document.getElementById('tci-c8'); if(o) cx.drawImage(o,0,0,comp.width,comp.height);
+        }catch(e){}
+        self._raf=requestAnimationFrame(draw);
+      };
+      draw();
+      if(window.ss)ss('\u23FA Inregistrare pornita \u2014 apasa \u23F9 STOP pentru a salva .webm');
+    }catch(e){ console.warn('[Rec]',e.message); if(window.ss)ss('Eroare inregistrare: '+e.message); }
+  },
+  stop:function(){ if(!this._active) return; this._active=false; if(this._raf)cancelAnimationFrame(this._raf); try{this._rec.stop();}catch(e){} if(window.ss)ss('\uD83D\uDCBE Se salveaza filmul (.webm)...'); }
+};
+
+// \u2500\u2500 MOD EXPLICAT (step-by-step) \u2014 panou care descrie scena curenta, pt sedinte \u2500\u2500
+window._CinemaExplain={
+  _on:false,_iv:null,
+  _TXT:{
+    'b1s1':'Identitatea UAT-ului: pozitie, judet, regiune, populatie INSE 2021. Punctul de plecare al oricarei analize.',
+    'b1s2':'Contextul geopolitic: vecini, granite, coridoare de transport. Conteaza pentru fluxuri economice si fonduri UE.',
+    'b1s3':'Reteaua nationala si scorul gravitational: cat de mult atrage orasul fata de regiune (model de gravitatie urbana).',
+    'b1s4':'Evolutia istorica (Wikipedia + demografie): trecutul explica fondul construit invechit si tendintele actuale.',
+    'b2s1':'Demografie live INSE: piramida varstelor, densitate. Structura populatiei determina nevoile de locuire si servicii.',
+    'b2s2':'Criza imbatranirii: raportul activi/dependenti scade \u2014 mai putini contribuabili, presiune pe servicii sociale.',
+    'b2s3':'Migratie si emigrare: pierderea fortei de munca tinere; fiecare plecare = pierdere fiscala si economica.',
+    'b2s4':'Profilul cumparatorilor: salariu mediu, putere de cumparare, segmente imobiliare accesibile.',
+    'b3s1':'PIB/locuitor si convergenta cu UE27 (Eurostat). Motorul valorii imobiliare pe termen lung.',
+    'b3s2':'Motoarele economice: universitati, industrie, servicii, hub-uri. Diversificarea = rezilienta.',
+    'b3s3':'Investitii si ROI imobiliar: preturi, oportunitati, riscuri ajustate seismic.',
+    'b4s1':'Reteaua rutiera reala (OSM): unde se formeaza congestia si blocajele.',
+    'b4s2':'Conectivitate regionala: autostrazi, CFR, aeroporturi, pozitia fata de coridoarele TEN-T.',
+    'b4s3':'Transport public: acoperire actuala + propuneri (BRT, tramvai).',
+    'b4s4':'Retele de utilitati si restrictii: apa, canal, energie, gaz, monumente \u2014 limiteaza construibilul.',
+    'b5s1':'Risc seismic (P100/2013): fondul vulnerabil + UTR-urile expuse. Prioritate consolidare PNRR C10-I2.',
+    'b5s2':'Inundatii si clima (ANAR PGRA, WMS real): zone inundabile, insula de caldura, scenarii RCP.',
+    'b5s3':'Costul inactiunii: ce pierde orasul daca nu intervine pe riscuri.',
+    'b6s1':'Fondul construit existent: tipuri, monumente, densitate reala azi.',
+    'b6s2':'INIMA FILMULUI: orasul se construieste ca un val 2025->2055. Masterplan etapizat (centura, tren, cartiere, parc, reconversie, centura verde), presiune densitate, split temporal.',
+    'b6s3':'Scenarii de extindere a intravilanului: 3 orizonturi (2030/2040/2055) + interval Monte Carlo al populatiei.',
+    'b7s1':'Trafic si congestie: presiune din fluxurile OSM reale pe nodurile critice.',
+    'b7s2':'Solutii de mobilitate desenate: pasaje, centura, BRT, piste velo, axe pietonale.',
+    'b7s3':'Distributia modala (auto/TP/activ) azi vs tinta 2030.',
+    'b8s1':'Proiecte majore & PNRR: propunerea desenata ca zone (spital, cartiere, hub, reconversie).',
+    'b8s2':'Coridoare de influenta: cum o autostrada/proiect major creste valoarea zonelor (model gravitational).',
+    'b9s1':'Monte Carlo: 10.000 de viitoruri simulate -> 3 scenarii + interval de incredere 90% pentru dimensionarea PUG.',
+    'b9s2':'Benchmark european: orasul vs un peer (ex. Cluj) + exemple internationale reusite.',
+    'b9s3':'Scenariul inactiunii: consecintele documentate daca nu se actioneaza.',
+    'b10s1':'Crize simultane: geopolitic + demografic + climatic + energetic + seismic se amplifica reciproc.',
+    'b10s2':'Scenariul negru + SPIRALA NEGATIVA desenata: populatie\u2193->fiscalitate\u2193->servicii\u2193->colaps.',
+    'b10s3':'Constructia rezilientei: solutii dovedite si resurse disponibile pentru iesirea din spirala.',
+    'b12s1':'Superblocks Barcelona aplicat: grupuri 3x3 cvartale, -21% trafic, spatiu public recuperat.',
+    'b12s2':'Regula 3-30-300 (OMS): 3 copaci vizibili, 30% canopy, 300m la verde \u2014 vs starea reala.',
+    'b12s3':'Orasul 15 minute (Moreno): 6 functii esentiale la 15 min pe jos/velo.',
+    'b12s4':'Sinteza Masterplan: proiectia completa + 6 axe strategice + QR catre scenariul live.',
+    'b11s1':'Agenda primarului: 5 prioritati de actiune + coridoarele de prioritate.',
+    'b11s2':'Viziunea 2055 + Urban Health Index + generic final cu QR scanabil.'
+  },
+  toggle:function(SE){
+    this._on=!this._on;
+    if(!this._on){ this._hide(); if(window.ss)ss('Mod explicat dezactivat'); return; }
+    var self=this; this._render(SE);
+    this._iv=setInterval(function(){ if(!self._on){clearInterval(self._iv);return;} self._render(SE); },700);
+    if(window.ss)ss('\u2139 Mod explicat activ \u2014 fiecare scena e descrisa. Foloseste \u23F8 pentru pauza.');
+  },
+  _render:function(SE){
+    var sc=(SE.SCENES&&SE.SCENES[SE._si])||{};
+    var txt=this._TXT[sc.id]||sc.blabel||'';
+    var p=document.getElementById('cin-explain');
+    if(!p){ p=document.createElement('div'); p.id='cin-explain';
+      p.style.cssText='position:fixed;left:20px;bottom:92px;max-width:430px;z-index:1000001;background:rgba(2,6,18,0.93);border:1px solid rgba(59,130,246,.4);border-radius:12px;padding:14px 16px;font-family:"Space Grotesk",system-ui,sans-serif;color:#e2e8f0;box-shadow:0 8px 30px rgba(0,0,0,.55);backdrop-filter:blur(10px)';
+      document.body.appendChild(p); }
+    p.innerHTML='<div style="font-size:9px;font-weight:800;color:#93c5fd;letter-spacing:.12em;margin-bottom:4px">BLOC '+(sc.bloc||'')+' \u00B7 '+(sc.blabel||'')+'</div>'
+      +'<div style="font-size:15px;font-weight:800;color:#fff;margin-bottom:6px">'+(sc.label||'')+'</div>'
+      +'<div style="font-size:12px;line-height:1.5;color:rgba(220,228,255,.86)">'+txt+'</div>';
+  },
+  _hide:function(){ this._on=false; if(this._iv)clearInterval(this._iv); var p=document.getElementById('cin-explain'); if(p)p.remove(); }
+};
 
 // ── PATCH & EXPORT ────────────────────────────────────────────────────────
 (function patch(n){
