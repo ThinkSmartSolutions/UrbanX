@@ -1141,6 +1141,15 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
     gB.addColorStop(0,'rgba(2,5,14,0)'); gB.addColorStop(1,'rgba(2,5,14,0.90)');
     ctx.fillStyle=gB; ctx.fillRect(0,H*0.72,W,H*0.28);
 
+    // ── LETTERBOX cinematic (cinemascope) — bare negre care intra lin la start ──
+    var lbH=Math.min(H*0.052,46);
+    var lbA=Math.min(1,t/0.05); // intra in primele 5% din scena
+    ctx.fillStyle='rgba(0,0,0,'+(0.92*lbA)+')';
+    ctx.fillRect(0,0,W,lbH); ctx.fillRect(0,H-lbH,W,lbH);
+    // linie aurie fina pe marginea letterbox
+    ctx.fillStyle='rgba(212,175,55,'+(0.30*lbA)+')';
+    ctx.fillRect(0,lbH,W,1); ctx.fillRect(0,H-lbH-1,W,1);
+
     function titlu(txt,sub){
       ctx.globalAlpha=sA*rE(0.04,0.16);
       ctx.fillStyle='rgba(212,175,55,0.96)';
@@ -2175,6 +2184,35 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         break;
       }
     }
+
+    // ── CARTON DE CAPITOL — la inceputul fiecarui BLOC nou, un titlu mare se
+    // deschide cinematic (ca marcajele de episod). Director-style chapter card.
+    var _prevBloc=(SE._si>0&&SCENES[SE._si-1])?SCENES[SE._si-1].bloc:-1;
+    var _isBlocStart=(SE._si===0)||(_prevBloc!==sc.bloc);
+    if(_isBlocStart && t<0.26){
+      var cardA=t<0.04?(t/0.04):t>0.20?(1-(t-0.20)/0.06):1; cardA=Math.max(0,Math.min(1,cardA));
+      if(cardA>0){
+        ctx.save();
+        ctx.globalAlpha=cardA*0.86; ctx.fillStyle='rgba(2,5,14,0.86)'; ctx.fillRect(0,H*0.40,W,H*0.20);
+        // linie aurie care se intinde (wipe) din centru
+        var lw=W*0.62*Math.min(1,t/0.14);
+        ctx.globalAlpha=cardA; ctx.fillStyle='#D4AF37';
+        ctx.fillRect(W/2-lw/2, H*0.485, lw, 2);
+        ctx.fillStyle='rgba(212,175,55,0.92)'; ctx.font='700 '+Math.min(W*0.013,17)+'px "IBM Plex Mono",monospace';
+        ctx.textAlign='center'; ctx.letterSpacing='.22em';
+        ctx.fillText('BLOC '+sc.bloc, W/2, H*0.465);
+        ctx.fillStyle='rgba(255,255,255,0.97)'; ctx.font='900 '+Math.min(W*0.040,54)+'px "Space Grotesk",sans-serif';
+        ctx.letterSpacing='.01em';
+        ctx.fillText(sc.blabel||'', W/2, H*0.525);
+        ctx.globalAlpha=cardA*0.55; ctx.fillStyle='rgba(148,163,184,0.8)'; ctx.font='500 '+Math.min(W*0.010,13)+'px "IBM Plex Mono",monospace';
+        ctx.letterSpacing='.10em';
+        ctx.fillText((name||'').toUpperCase()+'  ·  '+_S()+' — '+_E(), W/2, H*0.560);
+        ctx.restore();
+      }
+    }
+
+    // Flux viu prin reteaua proiectata (daca exista in scena curenta)
+    try{ if(SE._flowMasterplan) SE._flowMasterplan(t); }catch(e){}
 
     prog();
     ctx.save(); ctx.globalAlpha=0.008;

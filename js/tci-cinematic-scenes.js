@@ -813,6 +813,17 @@ G._CinemaEngine={
     addLbl(P(18*d2r,ringR)[0], P(18*d2r,ringR)[1], '#ef4444','⬆','PASAJ DENIVELAT','centura × cale ferata', 0.80);
   },
 
+  // Flux animat prin reteaua proiectata (tren/centura/coridor verde) — "marching
+  // ants": orasul proiectat pare VIU, energia curge prin retea. Apelat per-frame.
+  _flowMasterplan(t){
+    const map=this._map; if(!map) return;
+    const seq=[[1,2,4],[2,2,3],[3,2,2],[4,2,1]];
+    const d=seq[Math.floor(t*46)%seq.length];
+    ['v8-mp-rail-l','v8-mp-green-l','v8-mp-ring-l'].forEach(function(id){
+      try{ if(map.getLayer(id)) map.setPaintProperty(id,'line-dasharray',d); }catch(e){}
+    });
+  },
+
   // Reveleaza progresiv elementele masterplanului pe masura ce ruleaza timpul (t: 0..1)
   // Apelat din bucla scenei b6s2 -> urbanismul "se construieste" 2025->2055.
   _revealMasterplan(t){
