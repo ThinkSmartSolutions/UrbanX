@@ -436,6 +436,27 @@
         ['Parteneriate', 'cooperare cu mediul privat, academic si societatea civila'],
       ]);
 
+      D.chapter('Schimbari climatice si adaptare urbana');
+      D.h2('Vulnerabilitati climatice');
+      D.P('Schimbarile climatice afecteaza direct orasele prin intensificarea valurilor de caldura, a episoadelor de seceta si a ploilor torentiale. Suprafetele construite si impermeabile amplifica efectul de insula de caldura urbana (temperaturi cu 2-5 grade C mai mari decat in zonele rurale invecinate), cu impact asupra sanatatii, in special a categoriilor vulnerabile (varstnici, copii). Proiectiile climatice (IPCC AR6, scenarii SSP) indica o crestere a temperaturii medii si a frecventei fenomenelor extreme pe orizontul de planificare al masterplanului.');
+      D.P('Adaptarea la schimbarile climatice impune integrarea rezilientei in toate componentele dezvoltarii urbane: infrastructura verde-albastra pentru racire si gestiunea apelor pluviale, proiectarea bioclimatica a cladirilor si a spatiului public, materiale reflectorizante si permeabile, si sisteme de avertizare timpurie. Adaptarea si reducerea emisiilor (mitigare) sunt complementare: un oras verde, compact si cu mobilitate durabila este simultan mai rezilient si cu emisii mai reduse.');
+      D.h2('Masuri de adaptare si atenuare');
+      D.bullets([
+        ['Infrastructura verde-albastra', 'parcuri, coridoare, acoperisuri verzi, gradini de ploaie — racire, retentie apa, biodiversitate'],
+        ['Reducerea suprafetelor impermeabile', 'pavaje permeabile, dezasfaltari, suprafete vegetale — combaterea insulei de caldura si a inundatiilor urbane'],
+        ['Proiectare bioclimatica', 'orientare, umbrire, ventilatie naturala, materiale adecvate in spatiul public si cladiri'],
+        ['Neutralitate climatica', 'eficienta energetica, surse regenerabile, mobilitate durabila — reducerea emisiilor GES'],
+        ['Sisteme de avertizare', 'planuri pentru valuri de caldura, inundatii si alte fenomene extreme'],
+      ]);
+
+      D.chapter('Capital natural si servicii ecosistemice');
+      D.P('Capitalul natural urban (spatii verzi, arbori, sol, apa, biodiversitate) furnizeaza servicii ecosistemice esentiale, adesea neevaluate economic: reglarea climei locale si racirea, purificarea aerului, retentia si filtrarea apei, sechestrarea carbonului, habitat pentru biodiversitate, precum si beneficii culturale si de sanatate (recreere, bunastare psihica). Protejarea si extinderea capitalului natural este o investitie cu randament ridicat in calitatea vietii si rezilienta.');
+      D.P('Reteaua verde-albastra trebuie planificata ca infrastructura — conectata, multifunctionala si distribuita echitabil — nu ca spatii reziduale. Conectivitatea ecologica (coridoare verzi care leaga parcurile, malurile de apa si zonele naturale periurbane) sustine biodiversitatea si ofera trasee pentru mobilitate activa. Standardul de 26 mp spatiu verde/locuitor (Legea 24/2007) este pragul minim, iar accesul la spatiu verde la distanta de mers pe jos de fiecare locuinta este obiectivul de echitate.');
+
+      D.chapter('Economia circulara si metabolismul urban');
+      D.P('Orasul poate fi inteles ca un sistem metabolic care consuma resurse (energie, apa, materiale, hrana) si produce deseuri si emisii. Modelul liniar actual (extragere-consum-aruncare) este nesustenabil. Tranzitia catre o economie circulara urbana inchide buclele de resurse: reducerea consumului, reutilizarea, reciclarea si valorificarea materialelor, apei si energiei.');
+      D.P('Aplicatiile circulare la nivel urban includ: managementul integrat al deseurilor cu colectare selectiva si valorificare, reutilizarea materialelor de constructie si demolare, simbioza industriala (deseul unei activitati devine resursa alteia), gestiunea circulara a apei (reutilizare, reincarcarea acviferelor) si productia locala de energie regenerabila. Economia circulara reduce dependenta de resurse externe, creeaza locuri de munca locale si scade impactul de mediu.');
+
       D.chapter('Diagnostic integrat — disfunctionalitati si analiza SWOT');
       D.h2('Disfunctionalitati majore');
       D.bullets([

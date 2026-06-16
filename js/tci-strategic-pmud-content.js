@@ -200,6 +200,43 @@
       D.barChart([['Pe jos', m.modalAct[2] - 8 > 0 ? Math.round(m.modalAct[2] * 0.7) : 14, [120,130,150]], ['Bicicleta actual', Math.round(m.modalAct[2] * 0.3), activColor], ['Bicicleta tinta', Math.round(m.modalTinta[2] * 0.4), PAL[1]]], { title: 'Ponderea mobilitatii active in deplasari (%)', h: 44, vfmt: v => v + '%', source: 'Estimare. Potentialul ciclismului este mare pe distantele scurte dominante in oras.' });
       D.callout('Mobilitate activa = sanatate publica', 'Promovarea mersului pe jos si a ciclismului aduce beneficii directe de sanatate (activitate fizica, reducerea bolilor cardiovasculare si a obezitatii), de mediu (zero emisii) si economice (cost redus), fiind cea mai eficienta investitie in mobilitate raportat la beneficii.');
 
+      D.chapter('Analiza aprofundata a retelei stradale si a traficului');
+      D.h2('Ierarhizarea functionala a retelei');
+      D.P('Reteaua stradala a ' + city.name + ', estimata la ' + N(m.strRet) + ' km, indeplineste doua functii adesea conflictuale: deplasarea (mobilitatea) si accesul la proprietati. Ierarhizarea functionala separa aceste roluri: arterele principale (categoria I-II) preiau traficul de tranzit si legaturile majore, strazile colectoare (categoria III) distribuie traficul intre artere si zonele rezidentiale, iar strazile locale (categoria IV) asigura accesul la proprietati, cu prioritate pentru pietoni si rezidenti. O ierarhizare clara protejeaza zonele de locuit de traficul de tranzit si concentreaza fluxurile pe artere proiectate pentru capacitate.');
+      D.P('Disfunctionalitatile tipice ale retelei includ: discontinuitati si "gaturi de sticla" (bottleneck-uri) la intersectii si pe poduri, lipsa unui inel de centura complet care sa devieze traficul de tranzit, intersectii suprasolicitate fara amenajari adecvate si trafic de tranzit care patrunde in zonele rezidentiale. Identificarea si tratarea acestor puncte critice, impreuna cu optimizarea geometrica si semaforica a intersectiilor majore, sunt prioritati de interventie pe termen scurt si mediu.');
+      D.h2('Capacitatea si congestia');
+      D.P('Capacitatea unei artere este determinata de numarul de benzi, de geometria intersectiilor si de managementul traficului. Congestia apare atunci cand cererea depaseste capacitatea, in special in orele de varf (07-09 si 16-19). Solutia durabila nu este largirea continua a strazilor (care induce trafic suplimentar — fenomenul de cerere indusa), ci managementul cererii: transferul modal catre transport public si mobilitate activa, descurajarea deplasarilor auto inutile si optimizarea celor existente.');
+      D.formula('Functia de timp pe arc (BPR)', 't = t0 * [ 1 + a * (v/c)^b ]', 't = timpul de parcurgere; t0 = timp la flux liber; v = volum; c = capacitate; a, b = parametri (uzual 0.15 si 4). Cresterea volumului peste capacitate creste exponential timpul de parcurgere.');
+      D.callout('Cererea indusa', 'Largirea strazilor pentru a reduce congestia atrage, in timp, trafic suplimentar care reumple capacitatea adaugata (cerere indusa). De aceea, solutia eficienta este managementul cererii si oferta de alternative atractive, nu cresterea capacitatii rutiere.');
+
+      D.chapter('Analiza aprofundata a parcarii');
+      D.h2('Rolul parcarii in managementul mobilitatii');
+      D.P('Politica de parcare este unul dintre cele mai puternice instrumente de gestionare a cererii de mobilitate, adesea subutilizat. Disponibilitatea, locatia si pretul parcarii influenteaza direct decizia de a folosi autoturismul. Parcarea gratuita si abundenta in zona centrala stimuleaza utilizarea masinii si ocupa spatiu public valoros, in timp ce o politica inteligenta de parcare poate redirectiona cererea catre transport public si moduri active.');
+      D.P('Problemele frecvente sunt: ocuparea spatiului public si a trotuarelor de catre autovehicule parcate (in detrimentul pietonilor si al spatiului de calitate), lipsa unui sistem de tarifare diferentiata, cautarea locurilor de parcare care genereaza trafic suplimentar (pana la 30% din traficul din centru) si lipsa de coordonare intre parcarea pe strada si cea in structuri.');
+      D.h2('Directii de politica a parcarii');
+      D.bullets([
+        ['Tarifare zonala diferentiata', 'tarife mai mari in zonele centrale si la cerere ridicata, pentru rotatie si descurajarea stationarii indelungate'],
+        ['Reducerea parcarii la sol in centru', 'eliberarea spatiului public pentru pietoni, vegetatie si terase, in favoarea structurilor colective'],
+        ['Park&ride la periferie', 'parcari de transfer conectate la transport public, care intercepteaza naveta auto inainte de centru'],
+        ['Standarde de parcare adaptate', 'maxime (nu doar minime) la dezvoltari noi, pentru a nu induce dependenta de autoturism'],
+        ['Parcari de cartier pentru rezidenti', 'organizarea parcarii rezidentiale, eliberand strazile si trotuarele'],
+      ]);
+
+      D.chapter('Siguranta rutiera — analiza detaliata si Vision Zero');
+      D.P('Siguranta rutiera este o prioritate absoluta, abordata prin filozofia Vision Zero: niciun deces sau ranire grava in trafic nu este acceptabil. Aceasta presupune proiectarea unui sistem de transport tolerant la erorile umane — daca un accident se produce, infrastructura trebuie sa limiteze severitatea consecintelor. Numarul estimat de victime pentru ' + city.name + ' este de cca. ' + N(m.accidente) + '/an, cu tinta de reducere la jumatate pana in 2030 si catre zero pana in 2040.');
+      D.h2('Cauze si puncte negre');
+      D.P('Accidentele se concentreaza in "puncte negre" — locatii cu frecventa ridicata de accidente, de regula intersectii majore, treceri de pietoni neamenajate corespunzator si artere cu viteze mari in apropierea zonelor cu pietoni. Cauzele principale sunt vitezele excesive, conflictele intre moduri (auto-pietoni, auto-biciclisti), vizibilitatea redusa si lipsa amenajarilor de protectie a utilizatorilor vulnerabili.');
+      D.h2('Masuri sistematice de siguranta');
+      D.table(['Masura', 'Efect asupra sigurantei', 'Prioritate'], [
+        ['Zone 30 in cartiere rezidentiale', 'Reduce drastic severitatea accidentelor', 'Inalta'],
+        ['Treceri de pietoni suprainaltate / refugii', 'Reduce viteza si protejeaza pietonii', 'Inalta'],
+        ['Reproiectarea intersectiilor periculoase', 'Elimina conflictele si punctele negre', 'Inalta'],
+        ['Separarea pistelor de biciclete', 'Protejeaza biciclistii de trafic', 'Medie-inalta'],
+        ['Iluminat public adecvat', 'Creste vizibilitatea nocturna', 'Medie'],
+        ['Camere si control viteza', 'Descurajeaza vitezele excesive', 'Medie'],
+      ], [60, 80, 34], { boldFirst: true, fs: 7 });
+      D.callout('Vision Zero', 'Responsabilitatea sigurantei este partajata intre proiectantii sistemului si utilizatori. Un sistem bine proiectat (viteze adecvate, separare a modurilor, infrastructura iertatoare) reduce atat probabilitatea, cat si gravitatea accidentelor — tinta finala fiind zero victime.');
+
       // ── 3. MODELUL DE TRANSPORT ──────────────────────────────────────────
       D.chapter('Modelul de transport');
       D.P('Modelul de transport simuleaza cererea de deplasare si fluxurile pe retea, permitand testarea scenariilor si a proiectelor inainte de implementare. Se utilizeaza modelul clasic in patru etape, calibrat pe datele observate.');
