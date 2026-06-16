@@ -207,6 +207,33 @@ window._startCinema = function(cityKey){
   if(!map){console.error('[v9] map lipsa');return;}
   if(!SE){console.error('[v9] _CinemaEngine lipsa');return;}
 
+  // ── FIX cladiri 3D in cinematic ───────────────────────────────────────────
+  // Metodele _addBuildings/_add3DGrowth (cladirile care cresc pe harta) sunt
+  // definite pe _SceneEngine, NU pe _CinemaEngine. cinema-v5 le apeleaza ca
+  // SE._addBuildings && SE._addBuildings(map) -> erau undefined -> nu apareau
+  // niciodata cladiri. Le legam la SE (cu try/catch) si incarcam PUG-ul real.
+  (function _cinBridgeBuildings(){
+    try{
+      var src=window._SceneEngine;
+      if(src){
+        ['_addBuildings','_add3DGrowth','_add3DGrowthFull','_addDensityHeat',
+         '_addTrafficPulse','_addSeismicHeat','_addFloodExpand','_addExpansionRings',
+         '_addInfraPoints','_addTransitExpand'].forEach(function(m){
+          if(typeof src[m]==='function' && typeof SE[m]!=='function'){
+            SE[m]=function(){ try{ return src[m].apply(SE,arguments); }catch(e){ console.warn('[v9]',m,e.message); } };
+          }
+        });
+      }
+      var reg=window._PUG_REGISTRY&&window._PUG_REGISTRY[cityKey];
+      if(reg){
+        if(reg.pugFile) fetch(reg.pugFile).then(function(r){return r.ok?r.json():null;})
+          .then(function(g){ if(g&&g.features){ SE._pugGeo=g; console.log('[v9] PUG incarcat:',g.features.length,'UTR pt cladiri 3D'); } }).catch(function(){});
+        if(reg.reguli) fetch(reg.reguli).then(function(r){return r.ok?r.json():null;})
+          .then(function(j){ if(j) SE._reguli=j; }).catch(function(){});
+      }
+    }catch(e){ console.warn('[v9] bridge cladiri:',e.message); }
+  })();
+
   var city=null;
   if(window._RO_CITIES_DB) city=window._RO_CITIES_DB[cityKey];
   if(!city&&window._UAT_DB) city=window._UAT_DB[cityKey];
