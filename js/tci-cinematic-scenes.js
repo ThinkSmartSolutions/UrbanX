@@ -800,6 +800,21 @@ G._CinemaEngine={
     });
     regL('v8-mp-green-l','line-opacity',0.5,0.58);
 
+    // 3c. CENTURA VERDE (model Frankfurt GrünGürtel) — inel verde lat + pene
+    // verzi radiale (coridoare ecologice inter-urbane spre natura din jur). Faza ~2044.
+    const gbR=ringR*0.92, gb=[]; for(let i=0;i<=96;i++){ gb.push(P((i/96)*Math.PI*2, gbR)); }
+    this._safeAdd(map,'v8-mp-belt',{type:'geojson',data:{type:'Feature',geometry:{type:'LineString',coordinates:gb},properties:{}}},{
+      id:'v8-mp-belt-l',type:'line',source:'v8-mp-belt',
+      paint:{'line-color':'#16a34a','line-width':16,'line-opacity':oi(0.32),'line-blur':7},layout:{'line-cap':'round'}
+    });
+    regL('v8-mp-belt-l','line-opacity',0.32,0.60);
+    const wedges=[45,135,225,315].map(deg=>{const a=deg*d2r;return{type:'Feature',geometry:{type:'LineString',coordinates:[P(a,gbR*0.55),P(a,ringR*1.45)]},properties:{}};});
+    this._safeAdd(map,'v8-mp-gwedge',{type:'geojson',data:{type:'FeatureCollection',features:wedges}},{
+      id:'v8-mp-gwedge-l',type:'line',source:'v8-mp-gwedge',
+      paint:{'line-color':'#22c55e','line-width':11,'line-opacity':oi(0.30),'line-blur':5},layout:{'line-cap':'round'}
+    });
+    regL('v8-mp-gwedge-l','line-opacity',0.30,0.62);
+
     // 4. PASAJE denivelate (centura × cale ferata) (faza ~2050)
     this._safeAdd(map,'v8-mp-pass',{type:'geojson',data:{type:'FeatureCollection',features:railDeg.map(d=>({type:'Feature',geometry:{type:'Point',coordinates:P(d*d2r,ringR)},properties:{}}))}},{
       id:'v8-mp-pass-l',type:'circle',source:'v8-mp-pass',
@@ -822,6 +837,7 @@ G._CinemaEngine={
     addLbl(P(78*d2r,ringR*0.55)[0], P(78*d2r,ringR*0.55)[1], '#a855f7','🚆','TREN METROPOLITAN','3 linii + statii', 0.30);
     zones.forEach(z=>addLbl(P(z.ang,z.rad)[0], P(z.ang,z.rad)[1], z.c, z.icon, z.t, z.sub, z.ph));
     addLbl(P(150*d2r,R*0.95)[0], P(150*d2r,R*0.95)[1], '#16a34a','🌿','CORIDOR VERDE','retea ecologica', 0.58);
+    addLbl(P(225*d2r,gbR)[0], P(225*d2r,gbR)[1], '#16a34a','🌳','CENTURA VERDE','model Frankfurt GrunGurtel', 0.60);
     addLbl(P(18*d2r,ringR)[0], P(18*d2r,ringR)[1], '#ef4444','⬆','PASAJ DENIVELAT','centura × cale ferata', 0.80);
   },
 
@@ -879,16 +895,35 @@ G._CinemaEngine={
     });
   },
 
-  // ── PRESIUNE TRAFIC (proiectata) — heatmap pe noduri critice: centru + intersectii
-  // radiale × centura. Rosu = congestie recurenta proiectata.
-  _addTrafficPressure(map){
+  // ── PRESIUNE TRAFIC (proiectata) — daca avem reteaua OSM reala (roads), construim
+  // heatmap-ul din fluxurile reale ponderate pe clasa drumului + proximitate centru.
+  // Altfel fallback la nodurile critice radiale × centura.
+  _addTrafficPressure(map, roads){
     const cx=this._city?.lon||25, cy=this._city?.lat||45.5;
-    let pts=[{type:'Feature',geometry:{type:'Point',coordinates:[cx,cy]},properties:{w:1}}];
-    [0,45,90,135,180,225,270,315].forEach(deg=>{
-      const a=deg*Math.PI/180;
-      pts.push({type:'Feature',geometry:{type:'Point',coordinates:[cx+Math.cos(a)*0.018*1.5,cy+Math.sin(a)*0.018]},properties:{w:0.72}});
-      pts.push({type:'Feature',geometry:{type:'Point',coordinates:[cx+Math.cos(a)*0.045*1.5,cy+Math.sin(a)*0.045]},properties:{w:0.5}});
-    });
+    let pts=[];
+    if(roads && roads.length){
+      // FLUXURI OSM REALE — esantionam puncte de-a lungul arterelor
+      roads.slice(0,500).forEach(rd=>{
+        const co=rd&&rd.geometry&&rd.geometry.coordinates; if(!co||!co.length) return;
+        const cls=String((rd.properties&&(rd.properties.t||rd.properties.highway))||'');
+        const base=(cls.indexOf('motorway')>=0||cls.indexOf('trunk')>=0)?0.95:cls.indexOf('primary')>=0?0.72:cls.indexOf('secondary')>=0?0.5:0.38;
+        for(let i=0;i<co.length;i+=2){
+          if(!Array.isArray(co[i])||typeof co[i][0]!=='number') continue;
+          const dx=(co[i][0]-cx),dy=(co[i][1]-cy),d=Math.sqrt(dx*dx+dy*dy);
+          const prox=Math.max(0.12,1-d/0.07); // presiune mai mare spre centru
+          pts.push({type:'Feature',geometry:{type:'Point',coordinates:co[i]},properties:{w:Math.min(1,base*prox)}});
+        }
+      });
+    }
+    if(!pts.length){
+      // Fallback: noduri critice radiale × centura
+      pts=[{type:'Feature',geometry:{type:'Point',coordinates:[cx,cy]},properties:{w:1}}];
+      [0,45,90,135,180,225,270,315].forEach(deg=>{
+        const a=deg*Math.PI/180;
+        pts.push({type:'Feature',geometry:{type:'Point',coordinates:[cx+Math.cos(a)*0.018*1.5,cy+Math.sin(a)*0.018]},properties:{w:0.72}});
+        pts.push({type:'Feature',geometry:{type:'Point',coordinates:[cx+Math.cos(a)*0.045*1.5,cy+Math.sin(a)*0.045]},properties:{w:0.5}});
+      });
+    }
     this._safeAdd(map,'v8-tp2',{type:'geojson',data:{type:'FeatureCollection',features:pts}},{
       id:'v8-tp2-l',type:'heatmap',source:'v8-tp2',
       paint:{'heatmap-weight':['get','w'],'heatmap-intensity':1.4,'heatmap-radius':40,'heatmap-opacity':0,
@@ -907,20 +942,28 @@ G._CinemaEngine={
       }
     }catch(e){}
     if(!curHull){ const r=0.05,ring=[];for(let i=0;i<=64;i++){const a=i/64*Math.PI*2;ring.push([cx+Math.cos(a)*r*1.5,cy+Math.sin(a)*r]);}curHull={type:'Feature',geometry:{type:'Polygon',coordinates:[ring]},properties:{}}; }
-    let future=null; try{ future=turf.buffer(curHull,1.4,{units:'kilometers'}); }catch(e){}
-    // umplutura subtila a benzii de expansiune
-    if(future){
-      this._safeAdd(map,'v8-fi-fut',{type:'geojson',data:future},{
-        id:'v8-fi-fut-fill',type:'fill',source:'v8-fi-fut',paint:{'fill-color':'#ef4444','fill-opacity':0.10}
-      });
-      try{ if(!map.getLayer('v8-fi-fut-l')) map.addLayer({id:'v8-fi-fut-l',type:'line',source:'v8-fi-fut',paint:{'line-color':'#ef4444','line-width':3,'line-opacity':0.92,'line-dasharray':[3,2]},layout:{'line-cap':'round'}}); }catch(e){}
-    }
+    // TREI ORIZONTURI simultan: 2030 / 2040 / 2055 — contururi nestate din hull-ul actual
+    const horizons=[{km:0.6,yr:2030,c:'#fbbf24'},{km:1.1,yr:2040,c:'#f97316'},{km:1.6,yr:2055,c:'#ef4444'}];
+    // banda de expansiune (cel mai mare orizont) umpluta subtil
+    try{ const big=turf.buffer(curHull,1.6,{units:'kilometers'}); if(big) this._safeAdd(map,'v8-fi-fut',{type:'geojson',data:big},{id:'v8-fi-fut-fill',type:'fill',source:'v8-fi-fut',paint:{'fill-color':'#ef4444','fill-opacity':0.08}}); }catch(e){}
+    horizons.forEach(h=>{
+      try{
+        const b=turf.buffer(curHull,h.km,{units:'kilometers'}); if(!b) return;
+        this._safeAdd(map,'v8-fi-'+h.yr,{type:'geojson',data:b},{
+          id:'v8-fi-'+h.yr+'-l',type:'line',source:'v8-fi-'+h.yr,
+          paint:{'line-color':h.c,'line-width':2.6,'line-opacity':0.9,'line-dasharray':[3,2]},layout:{'line-cap':'round'}
+        });
+      }catch(e){}
+    });
+    // conturul actual — auriu solid, gros
     this._safeAdd(map,'v8-fi-cur',{type:'geojson',data:curHull},{
-      id:'v8-fi-cur-l',type:'line',source:'v8-fi-cur',paint:{'line-color':'#D4AF37','line-width':3.5,'line-opacity':0.95},layout:{'line-cap':'round'}
+      id:'v8-fi-cur-l',type:'line',source:'v8-fi-cur',paint:{'line-color':'#D4AF37','line-width':3.8,'line-opacity':0.96},layout:{'line-cap':'round'}
     });
     this._cinLabels(map,[
-      {lon:cx, lat:cy+0.052, color:'#D4AF37', icon:'▰', title:'INTRAVILAN ACTUAL', sub:'limita azi'},
-      {lon:cx, lat:cy+0.078, color:'#ef4444', icon:'⇢', title:'LIMITA PROIECTATA 2055', sub:'expansiune controlata'}
+      {lon:cx, lat:cy+0.044, color:'#D4AF37', icon:'▰', title:'INTRAVILAN ACTUAL', sub:'limita azi'},
+      {lon:cx, lat:cy+0.062, color:'#fbbf24', icon:'⇢', title:'ORIZONT 2030', sub:'expansiune etapa 1'},
+      {lon:cx, lat:cy+0.080, color:'#f97316', icon:'⇢', title:'ORIZONT 2040', sub:'expansiune etapa 2'},
+      {lon:cx, lat:cy+0.098, color:'#ef4444', icon:'⇢', title:'ORIZONT 2055', sub:'limita maxima controlata'}
     ]);
   },
 
@@ -948,6 +991,8 @@ G._CinemaEngine={
      'v8-mp-ring-l','v8-mp-ring','v8-mp-rail-l','v8-mp-rail','v8-mp-stn-l','v8-mp-stn',
      'v8-mp-zone-line','v8-mp-zone-l','v8-mp-zone','v8-mp-green-l','v8-mp-green','v8-mp-pass-l','v8-mp-pass',
      'v8-dp-l','v8-dp','v8-tp2-l','v8-tp2','v8-fi-cur-l','v8-fi-cur','v8-fi-fut-fill','v8-fi-fut-l','v8-fi-fut',
+     'v8-mp-belt-l','v8-mp-belt','v8-mp-gwedge-l','v8-mp-gwedge',
+     'v8-fi-2030-l','v8-fi-2030','v8-fi-2040-l','v8-fi-2040','v8-fi-2055-l','v8-fi-2055',
      // cleanup v6/v7 layers
      'v6-gr-l','v6-gr','v6-bld-l','v6-bld','v6-den-l','v6-den','v6-tr-l','v6-tr',
      'v7-gr-l','v7-gr','v7-bld-l','v7-bld','v7-den-l','v7-den','v7-tr-l','v7-tr',

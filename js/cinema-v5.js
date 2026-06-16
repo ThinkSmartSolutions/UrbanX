@@ -926,8 +926,8 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         setTimeout(function(){
           if(!SE._playing) return;
           try{SE._addTrafficPulse&&SE._addTrafficPulse(map);}catch(e){}
-          // PRESIUNE TRAFIC (heatmap proiectat) pe nodurile critice — apare progresiv
-          try{SE._addTrafficPressure&&SE._addTrafficPressure(map);}catch(e){}
+          // PRESIUNE TRAFIC din fluxurile OSM REALE daca exista (D.roads), altfel noduri
+          try{SE._addTrafficPressure&&SE._addTrafficPressure(map, (D.roads&&D.roads.length)?D.roads:null);}catch(e){}
           if(D.urban&&D.urban.length){ addLine('v9-urb',D.urban); _pulse(map,'v9-urb','line-opacity',0.3,0.9,10); }
         },1500);
         fly(Z.C,13.5,55,15,6000,9000,'night');
@@ -1655,6 +1655,8 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         try{ if(SE._updateGrowth) SE._updateGrowth(tE); }catch(e){}
         // Presiunea de densitate apare progresiv (heatmap), dupa ce cresc cladirile
         try{ if(map.getLayer('v8-dp-l')) map.setPaintProperty('v8-dp-l','heatmap-opacity', Math.max(0,Math.min(0.7,(t-0.35)*1.4))); }catch(e){}
+        // Split temporal 2025<->2055 — matura o singura data in a doua jumatate a scenei
+        if(t>0.45&&t<0.86) _drawTemporalSweep(ctx,W,H,(t-0.45)/0.41);
         // Etapizare masterplan — elementele proiectate apar pe ani (2025->2055)
         try{ if(SE._revealMasterplan) SE._revealMasterplan(tE); }catch(e){}
         // Cladirile Mapbox standard ascunse — bara 3D PUG le inlocuiesc
@@ -2647,6 +2649,30 @@ function _drawCompare(ctx,W,H,a,city,pred){
     ctx.fillStyle='rgba(200,210,230,0.85)';
     ctx.fillText(r[2], W*0.73, y);
   });
+  ctx.restore();
+}
+
+// Split temporal 2025 <-> 2055 — o linie verticala matura ecranul; stanga =
+// existent, dreapta = proiectat. Reda senzatia de "timp care trece peste oras".
+function _drawTemporalSweep(ctx,W,H,p){
+  if(p<=0||p>=1) return;
+  var x=W*(0.10+0.80*p);
+  ctx.save();
+  // partea "trecut" (stanga) usor desaturata/intunecata
+  ctx.globalAlpha=0.12; ctx.fillStyle='#0a1224'; ctx.fillRect(0,0,x,H);
+  // muchia luminoasa
+  var g=ctx.createLinearGradient(x-W*0.04,0,x,0);
+  g.addColorStop(0,'rgba(212,175,55,0)'); g.addColorStop(1,'rgba(212,175,55,0.22)');
+  ctx.globalAlpha=1; ctx.fillStyle=g; ctx.fillRect(x-W*0.04,0,W*0.04,H);
+  ctx.strokeStyle='#D4AF37'; ctx.lineWidth=2.5; ctx.globalAlpha=0.92;
+  ctx.beginPath(); ctx.moveTo(x,H*0.12); ctx.lineTo(x,H*0.88); ctx.stroke();
+  ctx.fillStyle='#D4AF37'; ctx.beginPath(); ctx.arc(x,H*0.5,7,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#0a1224'; ctx.font='900 9px monospace'; ctx.textAlign='center'; ctx.fillText('⇄',x,H*0.5+3);
+  // etichete
+  ctx.globalAlpha=0.9; ctx.textAlign='center'; ctx.letterSpacing='.04em';
+  ctx.font='900 '+Math.min(W*0.016,22)+'px "Space Grotesk",sans-serif';
+  ctx.fillStyle='rgba(148,163,184,0.92)'; ctx.fillText('◄ 2025 EXISTENT', Math.max(W*0.11,x-W*0.11), H*0.5-Math.min(W*0.02,26));
+  ctx.fillStyle='#D4AF37'; ctx.fillText('2055 PROIECTAT ►', Math.min(W*0.89,x+W*0.11), H*0.5-Math.min(W*0.02,26));
   ctx.restore();
 }
 
