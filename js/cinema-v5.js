@@ -1440,8 +1440,8 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         // nu si aici in scena de identitate \u2014 evita dublarea istoricului la pornire.
         cifra(N2(pop21),'Locuitori \u2014 INSE Recensamant 2021');
         cifra2(N2(Math.round(((city.suprafata_ha||city.suprafata||9800)/100)))+' km\u00b2','Suprafata UAT');
-        // URBAN DNA \u2014 amprenta orasului la deschidere (indicele-semnatura)
-        if(t>0.55) _drawUrbanDNA(ctx,W,H,Math.min(1,(t-0.55)/0.18)*sA,pred,city,false);
+        // AMPRENTA ORASULUI \u2014 amprenta orasului la deschidere (indicele-semnatura)
+        if(t>0.55) _drawCityFingerprint(ctx,W,H,Math.min(1,(t-0.55)/0.18)*sA,pred,city,false);
         break;
 
       case 'b1s2':
@@ -1571,6 +1571,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
 
       case 'b3s2':
         titlu('Motoare Economice','Universitati \u00b7 Industrie \u00b7 Servicii \u00b7 Hub-uri'); linie();
+        if(t>0.16) _drawGravity(ctx,W,H,Math.min(1,(t-0.16)/0.2)*sA,pred,city);
         var isUniv3=(city.universitati||0)>0||(city.coef_hub||0)>=1.1;
         var eItems=[
           ['\u{1F3EB} EDUCATIE: '+(isUniv3?'HUB UNIVERSITAR — atrage studenti + talente + cercetare':'fara universitate majora — gap competitiv'),'#3b82f6'],
@@ -1749,6 +1750,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
 
       case 'b5s3':
         titlu('Costul Inactiunii','Ce se intampla cand nimeni nu face nimic — documentat'); linie();
+        if(t>0.16) _drawCarbon(ctx,W,H,Math.min(1,(t-0.16)/0.2)*sA,pred);
         var costIn=Math.round((pred.invTotal||300)*3.2);
         cifra(N2(costIn)+' M \u20ac','Costul inactiunii pe '+_HORIZON+' ani','#ef4444');
         cifra2(N2(pred.invTotal||300)+' M \u20ac','Cost preventie — de 3.2x mai mic','#22c55e');
@@ -2009,6 +2011,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
 
       case 'b9s3':
         titlu('Daca Nu Se Actioneaza','Scenariul inactiunii \u00b7 Consecinte documentate'); linie();
+        if(t>0.16) _drawCityStress(ctx,W,H,Math.min(1,(t-0.16)/0.2)*sA,pred,t);
         var costT2=Math.round((pred.invTotal||300)*3.2);
         ctx.globalAlpha=sA*rE(0.14,0.24)*(0.7+0.3*Math.sin(t*Math.PI*6));
         ctx.fillStyle='rgba(239,68,68,0.12)'; ctx.fillRect(0,0,W,H);
@@ -2105,8 +2108,8 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
           wrap(ctx,it[0],W*0.04,H*(0.57+i*0.058),W*0.56,Math.min(W*0.013,16)*1.4,2);
         });
         ctx.globalAlpha=1;
-        // URBAN DNA — transformarea 2025 -> 2055 (rezultatul actiunilor de rezilienta)
-        if(t>0.30) _drawUrbanDNA(ctx,W,H,Math.min(1,(t-0.30)/0.2)*sA,pred,city,true);
+        // AMPRENTA ORASULUI — transformarea 2025 -> 2055 (rezultatul actiunilor de rezilienta)
+        if(t>0.30) _drawCityFingerprint(ctx,W,H,Math.min(1,(t-0.30)/0.2)*sA,pred,city,true);
         narativ('Rezilienta nu este luxul unui oras bogat — este conditia de supravietuire in sec. 21. Instrumentele exista: PNRR, FEDR, FSE+, fonduri climat. Vointa politica si continuitatea planificarii sunt singurele lipsuri documentate. ROI 1:3.2 dovedit pe 30 ani (Banca Mondiala 2022).');
         concluzie('Rezilienta urbana = cea mai buna investitie: ROI 1:3.2 documentat + calitate vietii + atractivitate investitori');
         break;
@@ -2817,9 +2820,9 @@ function _drawSpiral(ctx,W,H,a,t){
   ctx.restore();
 }
 
-// URBAN DNA — amprenta orasului pe 6 axe (din date reale). showFuture=true
+// AMPRENTA ORASULUI — amprenta orasului pe 6 axe (din date reale). showFuture=true
 // suprapune 2025 (auriu) vs 2055 (verde) = transformarea. Indicele-semnatura UrbanX.
-function _drawUrbanDNA(ctx,W,H,a,pred,city,showFuture){
+function _drawCityFingerprint(ctx,W,H,a,pred,city,showFuture){
   if(a<=0) return;
   pred=pred||{}; city=city||{};
   var cl=function(v){return Math.max(10,Math.min(96,v));};
@@ -2859,7 +2862,7 @@ function _drawUrbanDNA(ctx,W,H,a,pred,city,showFuture){
     axes[i].split('\n').forEach(function(ln,k){ctx.fillText(ln,x,y+k*10);});}
   // titlu + scor
   ctx.globalAlpha=a; ctx.fillStyle='#D4AF37'; ctx.font='800 '+Math.min(W*0.011,14)+'px "IBM Plex Mono",monospace';
-  ctx.fillText('URBAN DNA',cx,cy-R-Math.min(W*0.03,38));
+  ctx.fillText('AMPRENTA ORASULUI',cx,cy-R-Math.min(W*0.03,38));
   var avgN=Math.round(now.reduce(function(s,v){return s+v;},0)/6);
   ctx.fillStyle='rgba(212,175,55,0.95)'; ctx.font='900 '+Math.min(W*0.018,24)+'px "Space Grotesk",sans-serif';
   if(showFuture){
@@ -2944,6 +2947,67 @@ function _drawChild(ctx,W,H,a,pred,city){
   ctx.fillText('model UNICEF Child Friendly Cities',W*0.5,H*0.58);
   ctx.restore();
   _factorBars(ctx,W,H,a,W*0.34,H*0.62,[['Acces scoala 10min',cl(pct+6),'#22c55e'],['Acces parc 10min',cl(pct-3),'#34d399'],['Strazi sigure',cl(pct-12),'#60a5fa']]);
+}
+
+// GRAVITATIA OPORTUNITATILOR — noduri economice cu fluxuri luminoase spre oras.
+function _drawGravity(ctx,W,H,a,pred,city){
+  if(a<=0)return; pred=pred||{};city=city||{}; ctx.save();
+  var cx=W*0.66, cy=H*0.50, R=Math.min(W*0.13,175);
+  var nodes=[{n:'Universitati',c:'#3b82f6',w:(city.universitati||0)>0?1:0.45},{n:'Spitale',c:'#ef4444',w:0.7},
+    {n:'Industrie',c:'#f59e0b',w:0.8},{n:'Logistica',c:'#a855f7',w:0.6},{n:'Retail',c:'#22c55e',w:0.65},{n:'Inovare/IT',c:'#06b6d4',w:Math.min(1,(city.coef_hub||0.7))}];
+  nodes.forEach(function(nd,i){
+    var ang=-Math.PI/2+i*Math.PI/3, nx=cx+Math.cos(ang)*R, ny=cy+Math.sin(ang)*R;
+    var g=ctx.createLinearGradient(nx,ny,cx,cy); g.addColorStop(0,nd.c); g.addColorStop(1,'rgba(212,175,55,0.08)');
+    ctx.globalAlpha=a*0.5; ctx.strokeStyle=g; ctx.lineWidth=1+nd.w*4.5; ctx.beginPath(); ctx.moveTo(nx,ny); ctx.lineTo(cx,cy); ctx.stroke();
+    ctx.globalAlpha=a; ctx.fillStyle=nd.c; ctx.beginPath(); ctx.arc(nx,ny,4+nd.w*7,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='rgba(230,235,255,0.9)'; ctx.font='700 '+Math.min(W*0.0088,11)+'px "IBM Plex Mono",monospace'; ctx.textAlign='center';
+    ctx.fillText(nd.n,nx,ny+Math.min(W*0.024,30));
+  });
+  ctx.globalAlpha=a; ctx.fillStyle='#D4AF37'; ctx.beginPath(); ctx.arc(cx,cy,Math.min(W*0.018,24),0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#0a1224'; ctx.font='900 '+Math.min(W*0.01,13)+'px "Space Grotesk",sans-serif'; ctx.textAlign='center'; ctx.fillText('ORAS',cx,cy+4);
+  ctx.globalAlpha=a*0.85; ctx.fillStyle='#D4AF37'; ctx.font='800 '+Math.min(W*0.011,14)+'px "IBM Plex Mono",monospace';
+  ctx.fillText('GRAVITATIA OPORTUNITATILOR',cx,cy-R-Math.min(W*0.028,36));
+  ctx.restore();
+}
+// CITY STRESS INDEX — presiune cumulata ca traseu ECG.
+function _drawCityStress(ctx,W,H,a,pred,t){
+  if(a<=0)return; pred=pred||{}; var cl=function(v){return Math.max(8,Math.min(98,v));};
+  var stress=Math.round(cl(28+(pred.mot24||380)/12+(pred.ag||0.2)*55+((pred.r10||0)<0?18:0)));
+  var lvl=stress>80?'CRITIC':stress>60?'RIDICAT':stress>40?'MODERAT':'SCAZUT';
+  var col=stress>80?'#ff0033':stress>60?'#ef4444':stress>40?'#f59e0b':'#22c55e';
+  var x0=W*0.06,x1=W*0.60,y=H*0.46,amp=H*0.11*(stress/100);
+  ctx.save(); ctx.globalAlpha=a*0.92; ctx.strokeStyle=col; ctx.lineWidth=2.5; ctx.beginPath();
+  for(var px=x0;px<=x1;px+=2){
+    var f=(px-x0)/(x1-x0); var base=Math.sin(f*Math.PI*14+t*7)*0.25;
+    var sp=((f*7+t*3)%1); var spike=sp<0.05?Math.sin(sp/0.05*Math.PI):0;
+    var yy=y-(base+spike)*amp;
+    px===x0?ctx.moveTo(px,yy):ctx.lineTo(px,yy);
+  }
+  ctx.stroke();
+  ctx.globalAlpha=a; ctx.fillStyle=col; ctx.font='900 '+Math.min(W*0.034,46)+'px "Space Grotesk",sans-serif'; ctx.textAlign='left';
+  ctx.fillText(stress,W*0.64,y+8);
+  ctx.fillStyle='rgba(230,235,255,0.9)'; ctx.font='800 '+Math.min(W*0.013,17)+'px "Space Grotesk",sans-serif'; ctx.fillText('CITY STRESS · '+lvl,W*0.64,y-Math.min(W*0.024,30));
+  ctx.fillStyle='rgba(148,163,184,0.55)'; ctx.font='500 '+Math.min(W*0.008,10)+'px "IBM Plex Mono",monospace'; ctx.fillText('trafic+caldura+poluare+imbatranire',W*0.64,y+Math.min(W*0.026,32));
+  ctx.restore();
+}
+// CARBON PATHWAY — traiectorie decarbonare CO2 t/locuitor 2025->2055 (EEA/IPCC).
+function _drawCarbon(ctx,W,H,a,pred){
+  if(a<=0)return; pred=pred||{}; ctx.save();
+  var base=(pred.co2cap||4.6);
+  var yrs=[[_S(),base],[_P1(),base*0.78],[_P2(),base*0.55],[_E(),base*0.32]];
+  var x0=W*0.60,x1=W*0.94,y=H*0.64,bw=(x1-x0)/yrs.length;
+  yrs.forEach(function(yr,i){
+    var bh=(H*0.22)*(yr[1]/base)*Math.min(1,a*1.2);
+    var col=i===0?'#ef4444':i===1?'#f59e0b':i===2?'#84cc16':'#22c55e';
+    ctx.globalAlpha=a; ctx.fillStyle=col; ctx.fillRect(x0+i*bw+5,y-bh,bw-12,bh);
+    ctx.fillStyle='rgba(230,235,255,0.9)'; ctx.font='700 '+Math.min(W*0.0092,12)+'px "Space Grotesk",sans-serif'; ctx.textAlign='center';
+    ctx.fillText(yr[1].toFixed(1),x0+i*bw+bw/2,y-bh-6);
+    ctx.fillStyle='rgba(148,163,184,0.6)'; ctx.font='500 '+Math.min(W*0.008,10)+'px "IBM Plex Mono",monospace'; ctx.fillText(yr[0],x0+i*bw+bw/2,y+15);
+  });
+  ctx.globalAlpha=a*0.85; ctx.fillStyle='#22c55e'; ctx.font='800 '+Math.min(W*0.011,14)+'px "IBM Plex Mono",monospace'; ctx.textAlign='left';
+  ctx.fillText('CARBON: '+base.toFixed(1)+' → '+(base*0.32).toFixed(1)+' t CO2/loc',x0,y-H*0.24);
+  ctx.fillStyle='rgba(148,163,184,0.5)'; ctx.font='500 '+Math.min(W*0.0078,10)+'px "IBM Plex Mono",monospace'; ctx.fillText('neutralitate climatica · EEA / IPCC / Green Deal',x0,y+32);
+  ctx.restore();
 }
 
 // Radar de analiza — baleiaj rotativ subtil peste harta (scenele de analiza).
