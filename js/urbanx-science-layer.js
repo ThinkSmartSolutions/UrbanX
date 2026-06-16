@@ -245,14 +245,26 @@ G._ZoneLabels = {
 G._ScienceUI = {
   _p(){return window.S?.parcels?.[window.S?.activeParcel??0];},
   _c(){
+    // 1) din parcela selectata
     const ap=this._p();const un=(ap?.uat||'').toLowerCase().replace('municipiul ','').trim();
-    if(!window._RO_CITIES_DB)return null;
-    const m=Object.entries(_RO_CITIES_DB).find(([,v])=>(v.name||'').toLowerCase().includes(un));
-    return m?.[1]||null;
+    if(window._RO_CITIES_DB){
+      if(un){const m=Object.entries(_RO_CITIES_DB).find(([,v])=>(v.name||'').toLowerCase().includes(un));if(m)return m[1];}
+      // 2) fallback: orasul TCI / proiectie curent (mod cinematic, fara parcela clicata)
+      const key=window.TCI?.cityKey||window._ProjectionEngine?.currentCity||localStorage.getItem('ux_last_city');
+      if(key&&_RO_CITIES_DB[key])return _RO_CITIES_DB[key];
+    }
+    return null;
   },
-  async runSpaceSyntax(){const ap=this._p(),c=this._c();const lat=ap?.lat||c?.lat,lon=ap?.lon||c?.lon;if(!lat){ss?.('Selectați o parcelă');return;}const r=await G._SpaceSyntax.analyze(lat,lon);if(r)G._SpaceSyntax.addToMap(r,window.map);},
-  async runNoiseMap(){const ap=this._p(),c=this._c();const lat=ap?.lat||c?.lat,lon=ap?.lon||c?.lon;if(!lat){ss?.('Selectați o parcelă');return;}await G._NoiseMapper.addToMap(lat,lon,window.map);},
-  runSunlight(){const ap=this._p(),c=this._c();const lat=ap?.lat||c?.lat,lon=ap?.lon||c?.lon;if(!lat){ss?.('Selectați o parcelă');return;}const h=parseInt(ap?.params?.rh?.replace(/\D/g,'')||'4')*3;G._SunlightAnalyzer.renderResult(lat,lon,h,'science-sunlight-result');},
+  // lat/lon robust: parcela -> oras -> centrul hartii. Nu mai esueaza in mod oras.
+  _ll(){
+    const ap=this._p(),c=this._c();
+    let lat=ap?.lat||c?.lat, lon=ap?.lon||c?.lon;
+    if((!lat||!lon)&&window.map){const cc=window.map.getCenter();lat=cc.lat;lon=cc.lng;}
+    return (lat&&lon)?{lat:lat,lon:lon}:null;
+  },
+  async runSpaceSyntax(){const p=this._ll();if(!p){ss?.('Selectați un UAT sau o parcelă');return;}const r=await G._SpaceSyntax.analyze(p.lat,p.lon);if(r)G._SpaceSyntax.addToMap(r,window.map);},
+  async runNoiseMap(){const p=this._ll();if(!p){ss?.('Selectați un UAT sau o parcelă');return;}await G._NoiseMapper.addToMap(p.lat,p.lon,window.map);},
+  runSunlight(){const ap=this._p(),p=this._ll();if(!p){ss?.('Selectați un UAT sau o parcelă');return;}const h=parseInt(ap?.params?.rh?.replace(/\D/g,'')||'4')*3;G._SunlightAnalyzer.renderResult(p.lat,p.lon,h,'science-sunlight-result');},
   runEconomicImpact(){const ap=this._p(),c=this._c();const area=parseFloat(ap?.area||500),niv=parseInt(ap?.params?.rh?.replace(/\D/g,'')||'4')||4;const sda=area*niv*0.85,inv=Math.round(sda*1100/1e6*10)/10;const r=G._EconomicImpact.calculate({investitie_mil_eur:inv,tip:ap?.params?.fn||'residential',city:c,nr_unitati:Math.round(sda/70)});G._EconomicImpact.render(r,'science-economic-result');},
 };
 
