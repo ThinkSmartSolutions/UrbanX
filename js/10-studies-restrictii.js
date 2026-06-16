@@ -33,6 +33,17 @@
     var areaP = (mediu && mediu.arie_protejata_apropiere) || apa.arie_naturala || '';
     R.delta = { da: /delta|tulcea|rbdd|biosfer/i.test(areaP) || /tulcea/.test(j), arie: areaP };
     R.arii = { da: /ROSCI|ROSPA|Natura ?2000|rezerva|parc na[țt]ional|sit/i.test(areaP), arie: areaP };
+    // Proximitate aeroport (servitute aeronautica) — distanta la cel mai apropiat aeroport major RO
+    var AERO = [['Otopeni (OTP)',44.571,26.085],['Bucuresti-Baneasa',44.503,26.102],['Cluj-Napoca',46.785,23.686],['Timisoara',45.810,21.337],['Iasi',47.178,27.621],['Constanta (Kogalniceanu)',44.362,28.488],['Sibiu',45.785,24.091],['Bacau',46.522,26.911],['Craiova',44.318,23.889],['Suceava',47.687,26.354],['Oradea',47.025,21.925],['Targu Mures',46.467,24.412],['Arad',46.176,21.262],['Brasov-Ghimbav',45.704,25.526],['Tulcea',45.062,28.714],['Satu Mare',47.703,22.886],['Baia Mare',47.658,23.470]];
+    function _hav(la1,lo1,la2,lo2){var R0=6371,dLa=(la2-la1)*Math.PI/180,dLo=(lo2-lo1)*Math.PI/180,a=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(dLo/2)*Math.sin(dLo/2);return R0*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
+    var aMin = null, aName = '';
+    if (lat && lon) AERO.forEach(function(a){ var d=_hav(lat,lon,a[1],a[2]); if(aMin==null||d<aMin){aMin=d;aName=a[0];} });
+    R.aeroport = { da: aMin != null && aMin < 15, dist: aMin != null ? Math.round(aMin*10)/10 : null, nume: aName };
+    // Port / zona maritima — orase portuare
+    R.port = { da: /constan[țt]a|mangalia|galat|braila|tulcea|sulina|midia|agigea/.test(j) || (R.costier.da) };
+    // Militar / Seveso — nu exista set public; mereu "verificare obligatorie"
+    R.militar = { da: 'verificare' };
+    R.seveso = { da: 'verificare' };
     return R;
   }
 
@@ -42,7 +53,7 @@
     (window.ss || console.log)('Se generează Studiul de Restricții & Zone de Risc...');
 
     var d = _initStudyPdf('Studiu de Restrictii de Construire si Zone de Risc',
-      'Risc seismic - inundatii - alunecari - zona costiera - arii protejate', 10);
+      'Risc seismic - inundatii - alunecari - costier/maritim/portuar - aeronautic - militar - Seveso', 12);
     var pdf = d.pdf, W = d.W, H = d.H, S2 = d.S2, hdr = d.hdr, ftr = d.ftr, sec = d.sec, subsec = d.subsec,
       body = d.body, tblRow = d.tblRow, kv = d.kv, nrcad = d.nrcad, utr = d.utr, area = d.area,
       lat = d.lat, lon = d.lon, uat = d.uat, judet = d.judet, dateStr = d.dateStr;
@@ -93,7 +104,8 @@
       { num: 3, title: 'Risc de inundatii (Legea 107/1996, Dir. 2007/60/CE)', page: 4 },
       { num: 4, title: 'Stabilitatea terenului si alunecari (HG 447/2003)', page: 5 },
       { num: 5, title: 'Zona costiera / arii protejate / restrictii speciale', page: 6 },
-      { num: 6, title: 'Sinteza restrictii, avize necesare, recomandari', page: 7 },
+      { num: '5bis', title: 'Servituti aeronautice, militare, maritime, Seveso', page: 7 },
+      { num: 6, title: 'Sinteza restrictii, avize necesare, recomandari', page: 8 },
       { num: 'ESG', title: 'ESG Urban Sustainability Rating', page: 'ult.' }
     ], 'Studiu de Restrictii de Construire si Zone de Risc');
 
@@ -109,6 +121,11 @@
     ['Alunecari teren', R.alunecari.nivel, cote ? 'Panta ' + cote.panta + '% (DEM)' : 'Verificare geotehnica', 'HG 447/2003; Legea 575/2001'],
     ['Zona costiera', R.costier.da ? 'APLICABIL' : 'Neaplicabil', R.costier.da ? 'Amplasament litoral' : '-', 'OUG 202/2002'],
     ['Arii protejate', R.arii.da || R.delta.da ? 'POSIBIL' : 'Neaplicabil', R.arii.arie || R.delta.arie || '-', 'OUG 57/2007; Dir. 92/43/CEE'],
+    ['Servitute aeronautica', R.aeroport.da ? 'APLICABIL' : 'Verificare', R.aeroport.dist != null ? (R.aeroport.dist + ' km de ' + R.aeroport.nume) : '-', 'HG 930/2016; RACR-CTA'],
+    ['Zona costiera / maritima', R.costier.da ? 'APLICABIL' : 'Neaplicabil', R.costier.da ? 'Litoral / proximitate mare' : '-', 'OUG 202/2002'],
+    ['Zona portuara', R.port.da ? 'POSIBIL' : 'Neaplicabil', R.port.da ? 'Oras portuar / maritim' : '-', 'Aviz administratie portuara'],
+    ['Obiective militare', 'VERIFICARE', 'Servituti MApN (CU)', 'Aviz MApN'],
+    ['Risc tehnologic (Seveso)', 'VERIFICARE', 'Registru APM/MMAP', 'Legea 59/2016 (Seveso III)'],
     ].forEach(function (r) { cy = tblRow(r, cy, false, [42, 32, 56, 52]); });
     cy += 3;
     cy = body('NOTA: Nivelurile sunt estimate orientativ. Pentru fiecare factor cu nivel MEDIU sau RIDICAT este obligatorie verificarea pe sursele oficiale si obtinerea avizelor/studiilor de specialitate indicate in capitolele urmatoare.', 14, cy);
@@ -189,6 +206,32 @@
     ['Infrastructura energetica', 'Culoare de protectie LEA/conducte', 'Legea 123/2012; avize operatori'],
     ].forEach(function (r) { cy = tblRow(r, cy, false, [44, 50, 88]); });
 
+    // ── 5bis. SERVITUTI SPECIALE: AEROPORT, MILITAR, MARITIM/PORTUAR, SEVESO ──
+    cy = page('5bis. SERVITUTI AERONAUTICE, MILITARE, MARITIME SI TEHNOLOGICE');
+    cy = sec('5.4 Servitute aeronautica (proximitate aeroport)', cy);
+    cy = body('Cel mai apropiat aeroport este ' + R.aeroport.nume + ', la cca. ' + (R.aeroport.dist != null ? R.aeroport.dist + ' km' : 'distanta necunoscuta') + '. ' + (R.aeroport.da ? 'Amplasamentul se afla in zona de servitute aeronautica: se aplica suprafetele de limitare a obstacolelor (OLS) si restrictii de inaltime conform RACR-CTA si HG 930/2016. Inaltimea constructiilor si macaralelor de santier necesita avizul AACR (Autoritatea Aeronautica Civila Romana).' : 'Amplasamentul nu pare a fi in zona de servitute aeronautica directa; pentru constructii inalte (>45 m) sau macarale, se verifica oricum cerintele AACR.'), 14, cy); cy += 1;
+    cy = tblRow(['Element', 'Cerinta', 'Temei / aviz'], cy, true, [50, 50, 82]);
+    [['Suprafete de limitare obstacole (OLS)', R.aeroport.da ? 'Aplicabile' : 'Verificare', 'RACR-CTA; ICAO Anexa 14'],
+    ['Inaltime maxima admisa', R.aeroport.da ? 'Limitata (functie de distanta/cota)', 'HG 930/2016'],
+    ['Aviz AACR', R.aeroport.da ? 'OBLIGATORIU' : 'La H>45m sau macarale', 'AACR'],
+    ].forEach(function (r) { cy = tblRow(r, cy, false, [50, 50, 82]); }); cy += 3;
+    cy = sec('5.5 Obiective militare si servituti MApN', cy);
+    cy = body('Zonele de protectie ale obiectivelor militare nu sunt publice; existenta unei servituti militare incidente amplasamentului se confirma exclusiv prin Certificatul de Urbanism si, daca este cazul, prin avizul Ministerului Apararii Nationale (MApN). In zonele de servitute se aplica restrictii de construire, de inaltime si de utilizare. Verificarea este obligatorie inainte de proiectare in zonele cu prezenta militara cunoscuta.', 14, cy); cy += 3;
+    cy = sec('5.6 Zona maritima / portuara (litoral si Delta)', cy);
+    if (R.costier.da || R.port.da) {
+      cy = body('Amplasamentul se afla in zona maritima/portuara sau costiera. Pe langa servitutea costiera (OUG 202/2002), se analizeaza: eroziunea litorala si retragerea tarmului, riscul de inundare marina si cresterea nivelului marii (proiectii IPCC), efectele furtunilor, compatibilitatea cu operatiunile portuare (culoare de navigatie, zone de siguranta, acces logistic) si protectia peisajului marin. Se recomanda un Studiu de Impact Costier (SIC) si avizul Administratiei Bazinale de Apa Dobrogea-Litoral (ABADL), respectiv al administratiei portuare.', 14, cy); cy += 1;
+      cy = tblRow(['Aspect maritim/costier', 'Evaluare', 'Temei / aviz'], cy, true, [54, 40, 88]);
+      [['Eroziune costiera / retragere tarm', 'Studii ABADL', 'OUG 202/2002; proiecte protectie litorala'],
+      ['Inundare marina / nivel mare', 'Proiectie IPCC + harti hazard', 'Dir. 2007/60/CE'],
+      ['Compatibilitate portuara', R.port.da ? 'Necesara' : 'Dupa caz', 'Aviz administratie portuara / AFDJ'],
+      ['Siguranta portuara (Seveso)', 'Verificare', 'Legea 59/2016; ISU'],
+      ].forEach(function (r) { cy = tblRow(r, cy, false, [54, 40, 88]); }); cy += 3;
+    } else {
+      cy = body('Amplasamentul nu este in zona maritima/portuara — sectiune neaplicabila.', 14, cy); cy += 3;
+    }
+    cy = sec('5.7 Risc tehnologic (amplasamente Seveso)', cy);
+    cy = body('In proximitatea amplasamentelor cu pericol de accidente majore care implica substante periculoase (amplasamente Seveso de nivel inferior/superior), se aplica zone de planificare a urgentei si restrictii de amplasare a functiunilor vulnerabile (locuinte, scoli, spitale). Lista amplasamentelor Seveso este gestionata de APM/MMAP. Compatibilitatea se verifica obligatoriu, integrat cu studiul ISU/SU, pentru orice dezvoltare in proximitatea zonelor industriale.', 14, cy);
+
     // ── 6. SINTEZA ─────────────────────────────────────────────────────────
     cy = page('6. SINTEZA RESTRICTIILOR, AVIZE NECESARE SI RECOMANDARI');
     cy = sec('6.1 Avize si studii probabil necesare', cy);
@@ -197,7 +240,11 @@
     ['Analiza stabilitate taluzuri', R.alunecari.da ? 'RECOMANDAT/OBLIGATORIU' : 'Dupa caz', 'HG 447/2003'],
     ['Expertiza tehnica seismica', (R.seismic.val >= 0.25) ? 'RECOMANDAT (>P+3)' : 'Dupa caz', 'P100-3/2019'],
     ['Evaluare adecvata (Natura 2000)', (R.delta.da || R.arii.da) ? 'POSIBIL OBLIGATORIE' : 'Neaplicabil', 'OUG 57/2007'],
-    ['Aviz arie protejata / RBDD', (R.delta.da) ? 'OBLIGATORIU in arie' : 'Dupa caz', 'Legea 82/1993; OUG 57/2007']];
+    ['Aviz arie protejata / RBDD', (R.delta.da) ? 'OBLIGATORIU in arie' : 'Dupa caz', 'Legea 82/1993; OUG 57/2007'],
+    ['Aviz AACR (aeronautic)', R.aeroport.da ? 'PROBABIL' : 'La H>45m', 'HG 930/2016; RACR'],
+    ['Aviz MApN (militar)', 'VERIFICARE', 'Servituti militare'],
+    ['Aviz administratie portuara', R.port.da ? 'POSIBIL' : 'Neaplicabil', 'Cod maritim/portuar'],
+    ['Compatibilitate Seveso (APM/ISU)', 'VERIFICARE', 'Legea 59/2016']];
     cy = tblRow(['Aviz / studiu', 'Necesitate', 'Temei'], cy, true, [62, 46, 74]);
     avize.forEach(function (r) { cy = tblRow(r, cy, false, [62, 46, 74]); });
     cy += 3;
