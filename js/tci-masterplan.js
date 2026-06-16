@@ -3197,6 +3197,8 @@ _waitAll(()=>{
   // ── PMUD — Plan de Mobilitate Urbana Durabila ──────────────────────────
   window.generatePMUD = async function(cityKey, scenario){
     const k = cityKey || window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
+    // PMUD extins (100+ pagini) pe motorul de flux
+    if(window._StratPMUD && window._StratPMUDContent){ return await window._StratPMUD.generate(k, scenario||'S2'); }
     if(!window._TCIPmudPDF){ window.ss?.('⏳ PMUD se initializeaza — mai incearca'); return; }
     return await window._TCIPmudPDF.generate(k, scenario||'S2');
   };

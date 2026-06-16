@@ -149,6 +149,83 @@
         if (it.sub) { pdf.setTextColor(150, 165, 190); pdf.setFontSize(5.6); pdf.text(S2(it.sub), x + bw / 2, y + 16.5, { align: 'center', maxWidth: bw - 3 }); } });
       y += bh + 4;
     }
+    // ── GRAFICE NATIVE (control complet, densitate mare) ───────────────────
+    const PAL = [[59,130,246],[212,175,55],[34,160,90],[239,68,68],[168,85,247],[245,158,11],[20,184,166],[236,72,153]];
+    function _axes(x0, top, plotW, plotH, mv, yfmt) {
+      const baseY = top + plotH;
+      pdf.setDrawColor(205,210,220); pdf.setLineWidth(0.2);
+      pdf.line(x0, top, x0, baseY); pdf.line(x0, baseY, x0 + plotW, baseY);
+      pdf.setFontSize(5.4); pdf.setFont('helvetica','normal'); pdf.setTextColor.apply(pdf, MUT);
+      for (let g = 0; g <= 4; g++) { const gy = baseY - plotH * g / 4; pdf.setDrawColor(234,237,242); pdf.setLineWidth(0.1); if(g>0) pdf.line(x0, gy, x0 + plotW, gy); pdf.text((yfmt?yfmt(mv*g/4):N(Math.round(mv*g/4))), x0 - 1.5, gy + 1, { align: 'right' }); }
+      return baseY;
+    }
+    function barChart(data, opts) { // data: [[label,val,color?],...]
+      opts = opts || {}; const h = opts.h || 50, ttl = opts.title;
+      ensure(h + (ttl?6:0) + (opts.source?7:0) + 6);
+      if (ttl) { pdf.setTextColor.apply(pdf, INK); pdf.setFont('helvetica','bold'); pdf.setFontSize(8); pdf.text(S2(ttl), ML, y + 3.5); y += 6.5; }
+      const x0 = ML + 12, plotW = CW - 14, plotH = h - 10, top = y;
+      const mv = opts.max || Math.max.apply(null, data.map(d => +d[1] || 0)) * 1.12 || 1;
+      const baseY = _axes(x0, top, plotW, plotH, mv, opts.yfmt);
+      const n = data.length, gap = plotW / n, bw = Math.min(gap * 0.62, 16);
+      data.forEach((d, i) => { const v = +d[1] || 0, bh = plotH * v / mv, bx = x0 + gap * i + (gap - bw) / 2, col = d[2] || ACCENT;
+        pdf.setFillColor(col[0], col[1], col[2]); pdf.rect(bx, baseY - bh, bw, bh, 'F');
+        pdf.setTextColor.apply(pdf, INK); pdf.setFont('helvetica','bold'); pdf.setFontSize(5.6); pdf.text(opts.vfmt?opts.vfmt(v):N(v), bx + bw/2, baseY - bh - 1.2, { align: 'center' });
+        pdf.setTextColor.apply(pdf, SUB); pdf.setFont('helvetica','normal'); pdf.setFontSize(5.4); pdf.text(S2(String(d[0])), bx + bw/2, baseY + 3, { align: 'center', maxWidth: gap }); });
+      y = baseY + 6; if (opts.source) source(opts.source);
+    }
+    function lineChart(series, xLabels, opts) { // series:[{name,color,points:[]}]
+      opts = opts || {}; const h = opts.h || 54, ttl = opts.title;
+      ensure(h + (ttl?6:0) + (opts.source?7:0) + 10);
+      if (ttl) { pdf.setTextColor.apply(pdf, INK); pdf.setFont('helvetica','bold'); pdf.setFontSize(8); pdf.text(S2(ttl), ML, y + 3.5); y += 6.5; }
+      const x0 = ML + 14, plotW = CW - 16, plotH = h - 10, top = y;
+      let mx = 0, mn = opts.min!=null?opts.min:Infinity; series.forEach(s => s.points.forEach(p => { if (p > mx) mx = p; if (p < mn) mn = p; }));
+      if (opts.min==null) mn = Math.min(mn, 0); mx = opts.max || mx * 1.1 || 1; const span = (mx - mn) || 1;
+      const baseY = top + plotH; pdf.setDrawColor(205,210,220); pdf.setLineWidth(0.2); pdf.line(x0, top, x0, baseY); pdf.line(x0, baseY, x0 + plotW, baseY);
+      pdf.setFontSize(5.4); pdf.setFont('helvetica','normal'); pdf.setTextColor.apply(pdf, MUT);
+      for (let g = 0; g <= 4; g++) { const gy = baseY - plotH * g / 4; pdf.setDrawColor(234,237,242); pdf.setLineWidth(0.1); if(g>0) pdf.line(x0, gy, x0 + plotW, gy); pdf.text(N(Math.round(mn + span * g / 4)), x0 - 1.5, gy + 1, { align: 'right' }); }
+      const np = xLabels.length;
+      const px = i => x0 + plotW * (np>1?i/(np-1):0.5), py = v => baseY - plotH * (v - mn) / span;
+      series.forEach(s => { const col = s.color || ACCENT; pdf.setDrawColor(col[0],col[1],col[2]); pdf.setLineWidth(0.7);
+        for (let i = 1; i < s.points.length; i++) pdf.line(px(i-1), py(s.points[i-1]), px(i), py(s.points[i]));
+        pdf.setFillColor(col[0],col[1],col[2]); s.points.forEach((v,i)=>pdf.circle(px(i), py(v), 0.7, 'F')); });
+      pdf.setTextColor.apply(pdf, SUB); pdf.setFontSize(5.4); xLabels.forEach((l,i)=>pdf.text(S2(String(l)), px(i), baseY + 3, { align: 'center' }));
+      y = baseY + 5;
+      // legenda
+      let lx = x0; pdf.setFontSize(6);
+      series.forEach(s => { const col = s.color || ACCENT; pdf.setFillColor(col[0],col[1],col[2]); pdf.rect(lx, y - 2, 3, 1.6, 'F'); pdf.setTextColor.apply(pdf, SUB); pdf.text(S2(s.name), lx + 4, y); lx += 4 + pdf.getTextWidth(S2(s.name)) + 7; });
+      y += 5; if (opts.source) source(opts.source);
+    }
+    function pie(slices, opts) { // slices:[[label,val,color?],...]
+      opts = opts || {}; const R = opts.r || 22, ttl = opts.title; const boxH = R * 2 + (ttl?6:0) + 8;
+      ensure(boxH + (opts.source?7:0));
+      if (ttl) { pdf.setTextColor.apply(pdf, INK); pdf.setFont('helvetica','bold'); pdf.setFontSize(8); pdf.text(S2(ttl), ML, y + 3.5); y += 6.5; }
+      const cx = ML + R + 4, cy = y + R, tot = slices.reduce((s, d) => s + (+d[1] || 0), 0) || 1;
+      let a0 = -Math.PI / 2;
+      slices.forEach((d, i) => { const frac = (+d[1] || 0) / tot, a1 = a0 + frac * 2 * Math.PI, col = d[2] || PAL[i % PAL.length];
+        pdf.setFillColor(col[0], col[1], col[2]); const steps = Math.max(2, Math.ceil(frac * 40));
+        for (let s = 0; s < steps; s++) { const t0 = a0 + (a1 - a0) * s / steps, t1 = a0 + (a1 - a0) * (s + 1) / steps; pdf.triangle(cx, cy, cx + R * Math.cos(t0), cy + R * Math.sin(t0), cx + R * Math.cos(t1), cy + R * Math.sin(t1), 'F'); }
+        a0 = a1; });
+      // legenda
+      let ly = y + 2; const lx = cx + R + 8; pdf.setFontSize(6.4);
+      slices.forEach((d, i) => { const col = d[2] || PAL[i % PAL.length], pc = Math.round((+d[1]||0)/tot*100); pdf.setFillColor(col[0],col[1],col[2]); pdf.rect(lx, ly - 2.4, 3.2, 3.2, 'F'); pdf.setTextColor.apply(pdf, INK); pdf.setFont('helvetica','normal'); pdf.text(S2(String(d[0]) + ' — ' + pc + '%'), lx + 4.5, ly, { maxWidth: CW - (lx - ML) - 6 }); ly += 5.2; });
+      y += boxH; if (opts.source) source(opts.source);
+    }
+    function formula(title, expr, where) {
+      const wlines = where ? pdf.splitTextToSize(S2(where), CW - 12) : [];
+      const hh = 13 + wlines.length * 3.6 + 3; ensure(hh + 2);
+      pdf.setFillColor(245, 248, 252); pdf.rect(ML, y, CW, hh, 'F'); pdf.setFillColor.apply(pdf, ACCENT); pdf.rect(ML, y, 2, hh, 'F');
+      pdf.setTextColor.apply(pdf, SUB); pdf.setFont('helvetica', 'bold'); pdf.setFontSize(6.6); pdf.text(S2('FORMULA · ' + title), ML + 5, y + 4.5);
+      pdf.setTextColor.apply(pdf, INK); pdf.setFont('courier', 'bold'); pdf.setFontSize(9.5); pdf.text(S2(expr), ML + 6, y + 10.5);
+      pdf.setFont('helvetica', 'italic'); pdf.setFontSize(6.4); pdf.setTextColor.apply(pdf, MUT);
+      wlines.forEach((l, i) => pdf.text(l, ML + 6, y + 14.5 + i * 3.6));
+      y += hh + 3;
+    }
+    function sourceBadges(list) { // ['INS','Eurostat',...]
+      ensure(9); pdf.setTextColor.apply(pdf, MUT); pdf.setFont('helvetica','bold'); pdf.setFontSize(6); pdf.text('SURSE:', ML, y + 3);
+      let bx = ML + 13; pdf.setFontSize(6.2);
+      list.forEach(s => { const w = pdf.getTextWidth(S2(s)) + 5; if (bx + w > ML + CW) { bx = ML + 13; y += 6; ensure(7); } pdf.setFillColor(238, 242, 248); pdf.setDrawColor(200, 208, 220); pdf.setLineWidth(0.2); pdf.roundedRect(bx, y - 1.2, w, 5, 1, 1, 'FD'); pdf.setTextColor.apply(pdf, SUB); pdf.setFont('helvetica','normal'); pdf.text(S2(s), bx + 2.5, y + 2.2); bx += w + 3; });
+      y += 8;
+    }
     function spacer(h) { y += (h || 3); }
     // Integreaza o pagina/metoda MP full-page (deseneaza propria pagina). Numerotam capitolul.
     function fullPage(title, drawFn) {
@@ -161,6 +238,7 @@
 
     return {
       pdf, get y(){return y}, setY, ensure, newPage, chapter, h2, h3, P, bullets, table, source, callout, kpis, spacer, useMP, fullPage,
+      barChart, lineChart, pie, formula, sourceBadges, PAL,
       toc, get page(){return pageNum}, setPage:(p)=>{pageNum=p;}, _band:band, _foot:foot,
       setSuppress:(v)=>{suppressChrome=v;}, S2, N, RN, Pct, dims:{W,H,ML,MR,MT,MB,CW,ACCENT,INK,SUB,MUT},
     };
