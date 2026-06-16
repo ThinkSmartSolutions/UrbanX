@@ -50,15 +50,51 @@ var SCENES = [
   {id:'b10s1',dur:22000,label:'CRIZE SIMULTANE',     bloc:10,blabel:'CRIZE & REZILIENTA'},
   {id:'b10s2',dur:22000,label:'SCENARIUL NEGRU',     bloc:10,blabel:'CRIZE & REZILIENTA'},
   {id:'b10s3',dur:20000,label:'CONSTRUCTIA REZILIENTEI',bloc:10,blabel:'CRIZE & REZILIENTA'},
-  // BLOC 11 — INOVATII & MODELE INTERNATIONALE (scene noi; id-urile au prefix b12*
-  // ca sa nu intre in coliziune cu cele existente, dar se afiseaza ca BLOC 11)
-  {id:'b12s1',dur:22000,label:'SUPERBLOCKS BARCELONA',bloc:11,blabel:'INOVATII & MODELE INTERNATIONALE'},
-  {id:'b12s2',dur:20000,label:'REGULA 3-30-300',      bloc:11,blabel:'INOVATII & MODELE INTERNATIONALE'},
-  {id:'b12s3',dur:20000,label:'ORASUL 15 MINUTE',     bloc:11,blabel:'INOVATII & MODELE INTERNATIONALE'},
-  {id:'b12s4',dur:22000,label:'SINTEZA MASTERPLAN',   bloc:11,blabel:'INOVATII & MODELE INTERNATIONALE'},
-  {id:'b11s1',dur:24000,label:'AGENDA PRIMARULUI',   bloc:12,blabel:'AGENDA & VIZIUNEA'},
-  {id:'b11s2',dur:28000,label:'VIZIUNEA',            bloc:12,blabel:'AGENDA & VIZIUNEA'},
 ];
+// ── RESTRUCTURARE IN ACTE (Faza 1) — reordonare + comasare scene redundante.
+// Pastram id-urile (switch-urile setup/draw raman valide); scenele comasate
+// (b1s3, b2s3, b3s2, b4s1, b8s2, b9s3) ies din ordine. 38 -> 32 scene, ~12 min.
+SCENES = [
+  // ACT I — INTELEGEREA ORASULUI
+  {id:'b1s1',dur:22000,label:'IDENTITATE',            bloc:1,blabel:'INTELEGEREA ORASULUI'},
+  {id:'b1s2',dur:20000,label:'POZITIE STRATEGICA',    bloc:1,blabel:'INTELEGEREA ORASULUI'},
+  {id:'b1s4',dur:18000,label:'EVOLUTIE ISTORICA',     bloc:1,blabel:'INTELEGEREA ORASULUI'},
+  {id:'b2s1',dur:22000,label:'DEMOGRAFIE LIVE',       bloc:1,blabel:'INTELEGEREA ORASULUI'},
+  {id:'b2s2',dur:20000,label:'IMBATRANIRE & MIGRATIE',bloc:1,blabel:'INTELEGEREA ORASULUI'},
+  {id:'b2s4',dur:18000,label:'PROFIL CUMPARATORI',    bloc:1,blabel:'INTELEGEREA ORASULUI'},
+  {id:'b3s1',dur:20000,label:'ECONOMIA REALA',        bloc:1,blabel:'INTELEGEREA ORASULUI'},
+  {id:'b3s3',dur:18000,label:'INVESTITII & ROI',      bloc:1,blabel:'INTELEGEREA ORASULUI'},
+  // ACT II — ORASUL SUB PRESIUNE
+  {id:'b7s1',dur:22000,label:'TRAFIC & CONGESTIE',    bloc:2,blabel:'ORASUL SUB PRESIUNE'},
+  {id:'b7s2',dur:20000,label:'SOLUTII MOBILITATE',    bloc:2,blabel:'ORASUL SUB PRESIUNE'},
+  {id:'b7s3',dur:18000,label:'MODAL SPLIT',           bloc:2,blabel:'ORASUL SUB PRESIUNE'},
+  {id:'b4s2',dur:18000,label:'CONECTIVITATE REG.',    bloc:2,blabel:'ORASUL SUB PRESIUNE'},
+  {id:'b4s3',dur:18000,label:'TRANSPORT PUBLIC',      bloc:2,blabel:'ORASUL SUB PRESIUNE'},
+  {id:'b4s4',dur:18000,label:'RETELE UTILITATI',      bloc:2,blabel:'ORASUL SUB PRESIUNE'},
+  {id:'b5s1',dur:20000,label:'RISC SEISMIC',          bloc:2,blabel:'ORASUL SUB PRESIUNE'},
+  {id:'b5s2',dur:20000,label:'INUNDATII & CLIMA',     bloc:2,blabel:'ORASUL SUB PRESIUNE'},
+  {id:'b5s3',dur:18000,label:'COSTUL INACTIUNII',     bloc:2,blabel:'ORASUL SUB PRESIUNE'},
+  // ACT III — ORASUL 2055 (climaxul vizual)
+  {id:'b6s1',dur:18000,label:'FOND CONSTRUIT AZI',    bloc:3,blabel:'ORASUL 2055'},
+  {id:'b6s2',dur:26000,label:'CORIDOARE '+(_NOW+30),  bloc:3,blabel:'ORASUL 2055'},
+  {id:'b6s3',dur:22000,label:'SCENARII INTRAVILAN',   bloc:3,blabel:'ORASUL 2055'},
+  {id:'b8s1',dur:22000,label:'PROIECTE STRATEGICE',   bloc:3,blabel:'ORASUL 2055'},
+  {id:'b9s1',dur:24000,label:'MONTE CARLO',           bloc:3,blabel:'ORASUL 2055'},
+  {id:'b9s2',dur:22000,label:'BENCHMARK EUROPEAN',    bloc:3,blabel:'ORASUL 2055'},
+  // ACT IV — REZILIENTA
+  {id:'b10s1',dur:22000,label:'CRIZE SIMULTANE',      bloc:4,blabel:'REZILIENTA'},
+  {id:'b10s2',dur:22000,label:'SCENARIUL NEGRU',      bloc:4,blabel:'REZILIENTA'},
+  {id:'b10s3',dur:20000,label:'CONSTRUCTIA REZILIENTEI',bloc:4,blabel:'REZILIENTA'},
+  // ACT V — MODELE CARE FUNCTIONEAZA
+  {id:'b12s1',dur:20000,label:'SUPERBLOCKS BARCELONA',bloc:5,blabel:'MODELE CARE FUNCTIONEAZA'},
+  {id:'b12s2',dur:20000,label:'REGULA 3-30-300',      bloc:5,blabel:'MODELE CARE FUNCTIONEAZA'},
+  {id:'b12s3',dur:20000,label:'ORASUL 15 MINUTE',     bloc:5,blabel:'MODELE CARE FUNCTIONEAZA'},
+  {id:'b12s4',dur:22000,label:'SINTEZA MASTERPLAN',   bloc:5,blabel:'MODELE CARE FUNCTIONEAZA'},
+  // ACT VI — AGENDA & VIZIUNEA
+  {id:'b11s1',dur:22000,label:'AGENDA PRIMARULUI',    bloc:6,blabel:'AGENDA & VIZIUNEA'},
+  {id:'b11s2',dur:28000,label:'VIZIUNEA',             bloc:6,blabel:'AGENDA & VIZIUNEA'},
+];
+var _ACT_ROMAN={1:'I',2:'II',3:'III',4:'IV',5:'V',6:'VI'};
 
 // ── DATE LIVE ─────────────────────────────────────────────────────────────
 var D = {wiki:null,inse:null,roads:null,rail:null,airports:null,
@@ -1277,7 +1313,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
       ctx.fillStyle='rgba(212,175,55,0.55)';
       ctx.font='600 '+Math.min(W*0.008,10)+'px "IBM Plex Mono",monospace';
       ctx.textAlign='right'; ctx.letterSpacing='.08em';
-      ctx.fillText('BLOC '+sc.bloc+' \u00b7 '+sc.blabel.toUpperCase(),W*0.96,H*0.060);
+      ctx.fillText('ACT '+(_ACT_ROMAN[sc.bloc]||sc.bloc)+' \u00b7 '+sc.blabel.toUpperCase(),W*0.96,H*0.060);
       ctx.globalAlpha=1;
     }
     function prog(){
@@ -1293,8 +1329,8 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
       ctx.globalAlpha=1;
     }
 
-    // Radar de analiza — atmosferic, doar pe scenele analitice
-    if([2,3,5,7,9].indexOf(sc.bloc)>=0) _drawRadar(ctx,W,H,sA);
+    // Radar de analiza — atmosferic, doar pe scenele analitice (dupa id, nu dupa act)
+    if(['b2s1','b2s2','b3s1','b3s3','b5s1','b5s2','b9s1','b9s2'].indexOf(id)>=0) _drawRadar(ctx,W,H,sA);
     var pop21=pred.p21||100000;
     var r10=pred.r10||0;
     bloc_hdr();
@@ -2295,7 +2331,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         ctx.fillRect(W/2-lw/2, H*0.485, lw, 2);
         ctx.fillStyle='rgba(212,175,55,0.92)'; ctx.font='700 '+Math.min(W*0.013,17)+'px "IBM Plex Mono",monospace';
         ctx.textAlign='center'; ctx.letterSpacing='.22em';
-        ctx.fillText('BLOC '+sc.bloc, W/2, H*0.465);
+        ctx.fillText('ACT '+(_ACT_ROMAN[sc.bloc]||sc.bloc), W/2, H*0.465);
         ctx.fillStyle='rgba(255,255,255,0.97)'; ctx.font='900 '+Math.min(W*0.040,54)+'px "Space Grotesk",sans-serif';
         ctx.letterSpacing='.01em';
         ctx.fillText(sc.blabel||'', W/2, H*0.525);
@@ -2303,7 +2339,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         ctx.letterSpacing='.10em';
         ctx.fillText((name||'').toUpperCase()+'  ·  '+_S()+' — '+_E(), W/2, H*0.560);
         // FIR NARATIV — o propozitie care leaga capitolul de povestea de ansamblu
-        var _thread={1:'Mai intai, cine si unde este orasul.',2:'Apoi: cine il locuieste — si cine pleaca.',3:'Ce il sustine economic.',4:'Cum este conectat azi.',5:'Ce il ameninta.',6:'Si totusi — unde si cum poate creste.',7:'Cum se misca oamenii prin el.',8:'Ce se construieste si cine plateste.',9:'Ce spun cifrele despre viitor.',10:'Ce se intampla daca nu facem nimic.',11:'Ce au facut altii — si merge.',12:'Ce putem decide, acum.'}[sc.bloc];
+        var _thread={1:'Mai intai — cine, unde si din ce traieste orasul.',2:'Apoi: ce il apasa — mobilitate, infrastructura, riscuri.',3:'Si totusi — cum poate creste pana in '+_E()+'.',4:'Ce se intampla cand crizele vin impreuna.',5:'Ce au facut altii — si chiar functioneaza.',6:'Ce putem decide, acum.'}[sc.bloc];
         if(_thread){ ctx.globalAlpha=cardA*0.7; ctx.fillStyle='rgba(212,175,55,0.85)'; ctx.font='italic 600 '+Math.min(W*0.012,16)+'px "Space Grotesk",sans-serif'; ctx.letterSpacing='0'; ctx.fillText('“'+_thread+'”', W/2, H*0.585); }
         ctx.restore();
       }
