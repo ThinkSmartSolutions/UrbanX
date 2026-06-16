@@ -635,41 +635,79 @@ G._CinemaEngine={
   },
 
   // Inele extindere intravilan
+  // ── ETICHETE MARI pe harta (HTML markers) — citibile cand se proiecteaza intr-o
+  // sala de sedinte. Nu depind de glyph-fonts Mapbox; redau emoji + text stilizat.
+  _cinLabels(map, items){
+    if(!map) return;
+    this._cinMarkers = this._cinMarkers || [];
+    this._cinMarkers.forEach(m=>{try{m.remove();}catch(e){}});
+    this._cinMarkers = [];
+    if(typeof mapboxgl==='undefined' || !mapboxgl.Marker) return;
+    items.forEach(it=>{
+      const el=document.createElement('div');
+      el.style.cssText='display:flex;align-items:center;gap:8px;background:rgba(2,6,18,0.92);border:2px solid '+it.color+';border-radius:12px;padding:7px 13px;font-family:"Space Grotesk",system-ui,sans-serif;font-weight:800;font-size:15px;color:#fff;white-space:nowrap;box-shadow:0 6px 22px rgba(0,0,0,0.55);pointer-events:none;backdrop-filter:blur(4px);';
+      el.innerHTML='<span style="font-size:19px;line-height:1">'+(it.icon||'')+'</span>'
+        +'<span style="line-height:1.15">'+it.title
+        +(it.sub?'<span style="display:block;font-size:10px;font-weight:600;color:'+it.color+';letter-spacing:.02em">'+it.sub+'</span>':'')
+        +'</span>';
+      try{
+        const m=new mapboxgl.Marker({element:el, anchor:'bottom'}).setLngLat([it.lon,it.lat]).addTo(map);
+        this._cinMarkers.push(m);
+      }catch(e){}
+    });
+  },
+  _clearCinLabels(){
+    if(this._cinMarkers){ this._cinMarkers.forEach(m=>{try{m.remove();}catch(e){}}); this._cinMarkers=[]; }
+  },
+
+  // INELE de extindere intravilan — benzi PLINE, colorate, cu etichete MARI per an
   _addExpansionRings(map){
     const cx=this._city?.lon||25,cy=this._city?.lat||45.5;
     const rings=[
-      {rm:0.78,col:'#94a3b8',op:0.25,w:2,yr:2011},
-      {rm:1.00,col:'#60a5fa',op:0.40,w:3,yr:2021},
-      {rm:1.18,col:'#f59e0b',op:0.50,w:4,yr:2035},
-      {rm:1.40,col:'#ef4444',op:0.65,w:6,yr:2055},
+      {rm:0.62,col:'#94a3b8',yr:2011,label:'INTRAVILAN 2011'},
+      {rm:0.88,col:'#60a5fa',yr:2021,label:'EXTINDERE 2021'},
+      {rm:1.12,col:'#f59e0b',yr:2035,label:'PROIECTAT 2035'},
+      {rm:1.40,col:'#ef4444',yr:2055,label:'SCENARIU 2055'},
     ];
-    const ft=rings.map(ring=>{
-      const n=80,r=0.075*ring.rm,coords=[];
-      for(let i=0;i<=n;i++){const a=(i/n)*Math.PI*2;coords.push([cx+Math.cos(a)*r*1.65,cy+Math.sin(a)*r]);}
-      return{type:'Feature',geometry:{type:'LineString',coordinates:coords},properties:{c:ring.col,op:ring.op,w:ring.w,yr:ring.yr}};
+    const ringPoly=(r)=>{const n=96,coords=[];for(let i=0;i<=n;i++){const a=(i/n)*Math.PI*2;coords.push([cx+Math.cos(a)*r*1.65,cy+Math.sin(a)*r]);}return coords;};
+    const feats=[];
+    for(let k=rings.length-1;k>=0;k--){
+      const outer=ringPoly(0.075*rings[k].rm);
+      const inner=k>0?ringPoly(0.075*rings[k-1].rm):null;
+      const coords=inner?[outer,inner.slice().reverse()]:[outer];
+      feats.push({type:'Feature',geometry:{type:'Polygon',coordinates:coords},properties:{c:rings[k].col}});
+    }
+    this._safeAdd(map,'v8-ex',{type:'geojson',data:{type:'FeatureCollection',features:feats}},{
+      id:'v8-ex-l',type:'fill',source:'v8-ex',
+      paint:{'fill-color':['get','c'],'fill-opacity':0.28}
     });
-    this._safeAdd(map,'v8-ex',{type:'geojson',data:{type:'FeatureCollection',features:ft}},{
-      id:'v8-ex-l',type:'line',source:'v8-ex',
-      paint:{'line-color':['get','c'],'line-width':['get','w'],'line-opacity':['get','op'],'line-dasharray':[6,3]},
-      layout:{'line-cap':'round'}
-    });
+    if(!map.getLayer('v8-ex-line')){
+      try{map.addLayer({id:'v8-ex-line',type:'line',source:'v8-ex',paint:{'line-color':['get','c'],'line-width':3,'line-opacity':0.92}});}catch(e){}
+    }
+    // Etichete mari pe marginea de nord a fiecarui inel
+    this._cinLabels(map, rings.map(r=>({lon:cx, lat:cy+0.075*r.rm*1.03, color:r.col, icon:'', title:r.label, sub:''})));
   },
 
-  // Puncte infrastructura necesara
+  // PROIECTE concrete pe harta — desenate explicit cu etichete mari (nu buline anonime)
   _addInfraPoints(map){
-    const cx=this._city?.lon||25,cy=this._city?.lat||45.5,pred=this._pred;
-    const pts=[
-      {lon:cx+0.01,lat:cy+0.018,c:'#60a5fa',r:16,type:'tp'},
-      {lon:cx-0.025,lat:cy-0.012,c:'#ef4444',r:13,type:'seismic'},
-      {lon:cx+0.030,lat:cy-0.008,c:'#22c55e',r:14,type:'verde'},
-      {lon:cx+0.015,lat:cy+0.025,c:'#60a5fa',r:10,type:'scoala'},
-      {lon:cx-0.010,lat:cy+0.010,c:'#f59e0b',r:11,type:'social'},
-      {lon:cx-0.035,lat:cy+0.005,c:'#a855f7',r:12,type:'brt'},
+    const cx=this._city?.lon||25,cy=this._city?.lat||45.5;
+    const items=[
+      {dx:0.016, dy:0.022, color:'#22c55e', icon:'🌳', title:'PARC URBAN NOU',           sub:'spatiu verde public'},
+      {dx:-0.032,dy:-0.013,color:'#9ca3af', icon:'🏭', title:'RECONVERSIE INDUSTRIALA',  sub:'brownfield → mixt'},
+      {dx:0.036, dy:-0.007,color:'#ef4444', icon:'🏥', title:'SPITAL / SANATATE',        sub:'serviciu public'},
+      {dx:-0.015,dy:0.015, color:'#a855f7', icon:'🚌', title:'CORIDOR BRT',              sub:'transport rapid'},
+      {dx:0.022, dy:0.032, color:'#f59e0b', icon:'⬆',  title:'PASAJ SUPRATERAN',         sub:'nod critic CFR/artera'},
+      {dx:-0.038,dy:0.005, color:'#60a5fa', icon:'🚆', title:'HUB INTERMODAL',           sub:'gara + transport public'},
     ];
-    this._safeAdd(map,'v8-inf',{type:'geojson',data:{type:'FeatureCollection',features:pts.map(p=>({type:'Feature',geometry:{type:'Point',coordinates:[p.lon,p.lat]},properties:{c:p.c,r:p.r}}))}},{
-      id:'v8-inf-l',type:'circle',source:'v8-inf',
-      paint:{'circle-radius':['get','r'],'circle-color':['get','c'],'circle-opacity':0.9,'circle-stroke-width':3,'circle-stroke-color':'rgba(255,255,255,0.5)','circle-blur':0.1}
+    // Coridoare de dezvoltare — linii groase de la centru spre periferie
+    const corr=[{a:30,c:'#a855f7'},{a:115,c:'#f59e0b'},{a:205,c:'#22c55e'},{a:300,c:'#60a5fa'}];
+    const cf=corr.map(co=>{const rad=co.a*Math.PI/180;return{type:'Feature',geometry:{type:'LineString',coordinates:[[cx,cy],[cx+Math.cos(rad)*0.052*1.65,cy+Math.sin(rad)*0.052]]},properties:{c:co.c}};});
+    this._safeAdd(map,'v8-inf',{type:'geojson',data:{type:'FeatureCollection',features:cf}},{
+      id:'v8-inf-l',type:'line',source:'v8-inf',
+      paint:{'line-color':['get','c'],'line-width':6,'line-opacity':0.45,'line-blur':1.5},layout:{'line-cap':'round'}
     });
+    // Etichetele proiectelor — mari, citibile
+    this._cinLabels(map, items.map(p=>({lon:cx+p.dx,lat:cy+p.dy,color:p.color,icon:p.icon,title:p.title,sub:p.sub})));
   },
 
   // Protejeaza canvas-ul — il re-adauga daca e sters de platforma
@@ -689,9 +727,10 @@ G._CinemaEngine={
 
   _cleanLayers(){
     const map=this._map;if(!map)return;
+    if(this._clearCinLabels) this._clearCinLabels(); // sterge etichetele HTML la schimbarea scenei
     ['v8-gr-l','v8-gr','v8-bld-l','v8-bld','v8-ht-l','v8-ht',
      'v8-tr-l','v8-tr','v8-tp-l','v8-tp','v8-sei-l','v8-sei','v8-risc-l','v8-risc',
-     'v8-fl-l','v8-fl','v8-aut-l','v8-aut','v8-ex-l','v8-ex','v8-inf-l','v8-inf',
+     'v8-fl-l','v8-fl','v8-aut-l','v8-aut','v8-ex-line','v8-ex-l','v8-ex','v8-inf-l','v8-inf',
      // cleanup v6/v7 layers
      'v6-gr-l','v6-gr','v6-bld-l','v6-bld','v6-den-l','v6-den','v6-tr-l','v6-tr',
      'v7-gr-l','v7-gr','v7-bld-l','v7-bld','v7-den-l','v7-den','v7-tr-l','v7-tr',

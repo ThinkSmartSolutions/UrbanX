@@ -923,9 +923,15 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         lp('day');
         setTimeout(function(){
           if(!SE._playing) return;
-          addCircle('v9-mob-pts',_mobPts(cx,cy,pred));
-          _pulse(map,'v9-mob-pts','circle-radius',8,20,7);
           if(D.roads&&D.roads.length) addLine('v9-hw',D.roads);
+          // Solutii de mobilitate DESENATE explicit cu etichete mari (nu buline anonime)
+          try{ if(SE._cinLabels) SE._cinLabels(map,[
+            {lon:cx,        lat:cy+0.022, color:'#a855f7', icon:'🚌', title:'CORIDOR BRT',        sub:'transport rapid'},
+            {lon:cx-0.026,  lat:cy+0.006, color:'#f59e0b', icon:'⬆',  title:'PASAJ SUPRATERAN',   sub:'nod CFR / artera'},
+            {lon:cx+0.028,  lat:cy-0.010, color:'#22c55e', icon:'🚲', title:'PISTA VELO',         sub:'retea conectata'},
+            {lon:cx-0.030,  lat:cy-0.014, color:'#60a5fa', icon:'🚶', title:'AX PIETONAL',        sub:'zona centrala'},
+            {lon:cx+0.034,  lat:cy+0.016, color:'#ef4444', icon:'⛗',  title:'CENTURA OCOLITOARE', sub:'devieaza tranzitul'},
+          ]); }catch(e){}
         },1500);
         fly([cx,cy],13,52,0,4000,0,'day');
         fly(Z.C,14.5,62,22,6000,9000,'day');
