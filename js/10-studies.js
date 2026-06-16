@@ -6937,7 +6937,7 @@ async function generateStudiuFezabilitate(paramOverrides){
     {num:2,title:'Context urban 3D — volumetrie propusa si vecini',page:2},
     {num:3,title:'Analiza juridica — conformitate PUG/RLU',page:3},
     {num:4,title:'Indicatori tehnico-economici (SDA, SU, SC, parcaje)',page:4},
-    {num:5,title:'Deviz estimativ HG 907/2016 (Cap.1+4+5 + TVA 21%)',page:5},
+    {num:5,title:'Deviz general HG 907/2016 (Cap.1-6, C+M, TVA, RON)',page:5},
     {num:6,title:'Scenarii S1/S2/S3 — ROI, payback, cash-flow',page:6},
     {num:7,title:'Baza legala — HG 907/2016, Legea 50/1991',page:7},
     {num:'ESG',title:'ESG Urban Sustainability Rating',page:'ult.'},
@@ -7255,36 +7255,73 @@ async function generateStudiuFezabilitate(paramOverrides){
   // Structura deviz conform HG 907/2016 Anexa nr. 6 (Devizul general al investitiei)
   cy=sec('5.1. DEVIZ ESTIMATIV PER CATEGORII — HG 907/2016 Anexa 6',cy);cy+=2;
   cy=body('Structura devizului general conform HG 907/2016 — Metodologia de elaborare a devizului general. Valorile sunt estimative (±25-35%), bazate pe indicii de cost medii nationali 2025 si specifici zonei '+S2(uat)+'. Devizul definitiv: devizist autorizat, pe baza PT aprobat.',14,cy);cy+=3;
-  const _C1 = Math.round(sdTotal * _pretConstr * 0.05);  // Obtinere teren (deja in proprietate, sau cost)
-  const _C2 = Math.round(sdTotal * _pretConstr * 0.04);  // Amenajare teren
-  const _C3 = Math.round(sdTotal * _pretConstr * 0.08);  // Amenajari pt protectia mediului
-  const _C4 = Math.round(sdTotal * _pretConstr * 0.67);  // Constructii si instalatii (corp principal)
-  const _C4sub = Math.round(sdTotal * _pretConstr * 0.15); // Instalatii electrice + sanitare + HVAC
-  const _C5 = Math.round(sdTotal * _pretConstr * 0.06);  // Organizare de santier
-  const _C6 = Math.round(sdTotal * _pretConstr * 0.03);  // Cheltuieli diverse si neprevazute (3%)
-  const _C7 = Math.round(sdTotal * _pretConstr * 0.07);  // Proiectare + consultanta + taxe
-  const _totalDeviz = _C1+_C2+_C3+_C4+_C4sub+_C5+_C6+_C7+costTeren;
-  cy=tblRow(['Capitol','Denumire (HG 907/2016)','EUR','%'],cy,true,[14,110,35,23]);
+  // Deviz general complet conform HG 907/2016 Anexa 6 — toate cele 6 capitole + subcapitole
+  const _Cc = costConstr; // constructii+instalatii corp principal (baza Cap 4.1)
+  // Cap 1 — obtinerea si amenajarea terenului
+  const d11 = costTeren, d12 = Math.round(_Cc*0.020), d13 = Math.round(_Cc*0.012), d14 = Math.round(_Cc*0.006);
+  const CAP1 = d11+d12+d13+d14;
+  // Cap 2 — asigurarea utilitatilor (bransamente apa/canal/electric/gaz/termic/telecom)
+  const CAP2 = Math.round(_Cc*0.05);
+  // Cap 4 — investitia de baza
+  const d41 = _Cc, d42 = Math.round(_Cc*0.012), d43 = Math.round(_Cc*0.010), d44 = Math.round(_Cc*0.008), d45 = Math.round(_Cc*0.030), d46 = Math.round(_Cc*0.004);
+  const CAP4 = d41+d42+d43+d44+d45+d46;
+  // Cap 3 — proiectare si asistenta tehnica (procent din C1+C2+C4)
+  const _bazaProi = CAP1+CAP2+CAP4;
+  const d31 = Math.round(_Cc*0.006), d32 = Math.round(_Cc*0.004), d33 = Math.round(_Cc*0.005), d34 = Math.round(_Cc*0.002), d35 = Math.round(_Cc*0.025), d36 = Math.round(_Cc*0.002), d37 = Math.round(_Cc*0.004), d38 = Math.round(_Cc*0.012);
+  const CAP3 = d31+d32+d33+d34+d35+d36+d37+d38;
+  // Constructii-montaj (C+M) = 1.2+1.3+2+4.1+4.2
+  const CM = d12+d13+CAP2+d41+d42;
+  // Cap 5 — alte cheltuieli
+  const d51 = Math.round(_Cc*0.025);              // 5.1 organizare santier
+  const d52 = Math.round(CM*0.011);               // 5.2 cote ISC (0.1%+0.5%) + CSC (0.5%)
+  const d53 = Math.round((CAP1+CAP2+CAP3+CAP4)*0.05); // 5.3 diverse si neprevazute (5%)
+  const d54 = Math.round(_Cc*0.001);              // 5.4 informare si publicitate
+  const CAP5 = d51+d52+d53+d54;
+  // Cap 6 — probe tehnologice si teste
+  const d61 = Math.round(_Cc*0.003), d62 = Math.round(_Cc*0.004);
+  const CAP6 = d61+d62;
+  const _totalDeviz = CAP1+CAP2+CAP3+CAP4+CAP5+CAP6;
+  const _pc = v => Math.round(v/_totalDeviz*100)+'%';
+  const _n = v => v.toLocaleString('en-US');
+  cy=tblRow(['Cap.','Denumire capitolelor/subcapitolelor de cheltuieli (HG 907/2016)','EUR fără TVA','%'],cy,true,[16,108,33,25]);
   [
-    ['Cap. 1','Cheltuieli pentru obtinerea si amenajarea terenului',(_C1+_C2).toLocaleString(),Math.round((_C1+_C2)/_totalDeviz*100)+'%'],
-    ['  1.1','Obtinerea terenului (daca e cazul)',costTeren.toLocaleString(),Math.round(costTeren/_totalDeviz*100)+'%'],
-    ['  1.2','Amenajarea terenului (demolare, nivelare, imprejmuire)',_C2.toLocaleString(),Math.round(_C2/_totalDeviz*100)+'%'],
-    ['  1.3','Amenajari pentru protectia mediului',_C3.toLocaleString(),Math.round(_C3/_totalDeviz*100)+'%'],
-    ['Cap. 4','Cheltuieli pentru investitia de baza',(_C4+_C4sub).toLocaleString(),Math.round((_C4+_C4sub)/_totalDeviz*100)+'%'],
-    ['  4.1','Constructii si instalatii (corp principal, '+sdTotal+'mp SDA × '+_pretConstr+' EUR/mp)',_C4.toLocaleString(),Math.round(_C4/_totalDeviz*100)+'%'],
-    ['  4.2','Instalatii electrice + sanitare + HVAC + lift (est.)',_C4sub.toLocaleString(),Math.round(_C4sub/_totalDeviz*100)+'%'],
-    ['Cap. 5','Alte cheltuieli',(_C5+_C6+_C7).toLocaleString(),Math.round((_C5+_C6+_C7)/_totalDeviz*100)+'%'],
-    ['  5.1','Organizare de santier (6% din Cap. 4)',_C5.toLocaleString(),Math.round(_C5/_totalDeviz*100)+'%'],
-    ['  5.2','Consultanta, proiectare, taxe AC/CU, dirigentie (7%)',_C7.toLocaleString(),Math.round(_C7/_totalDeviz*100)+'%'],
-    ['  5.3','Cheltuieli diverse si neprevazute (3%)',_C6.toLocaleString(),Math.round(_C6/_totalDeviz*100)+'%'],
-    ['TOTAL DEVIZ GENERAL','Valoare totala investitie (exclusiv TVA)',_totalDeviz.toLocaleString(),'100%'],
-    ['+ TVA '+Math.round(_TVA_STANDARD*100)+'%','(standard constructii noi · Legea 227/2015 + OUG 25/2017)','',Math.round(_totalDeviz*_TVA_STANDARD).toLocaleString()+' EUR'],
-    ['TOTAL CU TVA','',Math.round(_totalDeviz*(1+_TVA_STANDARD)).toLocaleString()+' EUR','TVA '+Math.round(_TVA_STANDARD*100)+'% (standard, din '+_TVA_DATA_VIGOARE+')'],
-    ['Echivalent RON (curs BNR)','',Math.round(_totalDeviz*(1+_TVA_STANDARD)*(_cursEUR?.rate||5.05)).toLocaleString()+' RON','1 EUR = '+(_cursEUR?.rate||5.05).toFixed(4)+' RON ('+(_cursEUR?.date||'estimat')+')'],
-  ].forEach((r,i)=>{
-    const isBold = r[0].startsWith('Cap.')||r[0].startsWith('TOTAL');
-    cy=tblRow(r,cy,false,[14,110,35,23]);
-    if(isBold){pdf.setFont('helvetica','bold');pdf.setFontSize(6.5);}
+    ['Cap.1','CHELTUIELI PENTRU OBTINEREA SI AMENAJAREA TERENULUI',_n(CAP1),_pc(CAP1)],
+    ['1.1','Obtinerea terenului',_n(d11),_pc(d11)],
+    ['1.2','Amenajarea terenului (demolari, nivelari, imprejmuiri)',_n(d12),_pc(d12)],
+    ['1.3','Amenajari pentru protectia mediului si aducerea la starea initiala',_n(d13),_pc(d13)],
+    ['1.4','Cheltuieli pentru relocarea/protectia utilitatilor',_n(d14),_pc(d14)],
+    ['Cap.2','CHELTUIELI PENTRU ASIGURAREA UTILITATILOR NECESARE',_n(CAP2),_pc(CAP2)],
+    ['Cap.3','CHELTUIELI PENTRU PROIECTARE SI ASISTENTA TEHNICA',_n(CAP3),_pc(CAP3)],
+    ['3.1','Studii (de teren, geotehnic, hidrologic, topografic)',_n(d31),_pc(d31)],
+    ['3.2','Documentatii-suport, avize, acorduri, autorizatii',_n(d32),_pc(d32)],
+    ['3.3','Expertizare tehnica',_n(d33),_pc(d33)],
+    ['3.4','Certificarea performantei energetice / audit energetic',_n(d34),_pc(d34)],
+    ['3.5','Proiectare (SF/DALI, PT, DE, verificare proiect)',_n(d35),_pc(d35)],
+    ['3.6','Organizarea procedurilor de achizitie',_n(d36),_pc(d36)],
+    ['3.7','Consultanta (management proiect, audit financiar)',_n(d37),_pc(d37)],
+    ['3.8','Asistenta tehnica (proiectant + diriginte de santier)',_n(d38),_pc(d38)],
+    ['Cap.4','CHELTUIELI PENTRU INVESTITIA DE BAZA',_n(CAP4),_pc(CAP4)],
+    ['4.1','Constructii si instalatii ('+sdTotal+'mp SDA × '+_pretConstr+' EUR/mp)',_n(d41),_pc(d41)],
+    ['4.2','Montaj utilaje, echipamente tehnologice si functionale',_n(d42),_pc(d42)],
+    ['4.3','Utilaje, echipamente tehnologice si functionale care necesita montaj',_n(d43),_pc(d43)],
+    ['4.4','Utilaje, echipamente fara montaj si echipamente de transport',_n(d44),_pc(d44)],
+    ['4.5','Dotari (mobilier, dotari PSI, aparatura)',_n(d45),_pc(d45)],
+    ['4.6','Active necorporale',_n(d46),_pc(d46)],
+    ['Cap.5','ALTE CHELTUIELI',_n(CAP5),_pc(CAP5)],
+    ['5.1','Organizare de santier (lucrari + cheltuieli conexe)',_n(d51),_pc(d51)],
+    ['5.2','Comisioane, cote, taxe (ISC 0.1%+0.5%, CSC 0.5%, taxe AC)',_n(d52),_pc(d52)],
+    ['5.3','Cheltuieli diverse si neprevazute (5%)',_n(d53),_pc(d53)],
+    ['5.4','Cheltuieli pentru informare si publicitate',_n(d54),_pc(d54)],
+    ['Cap.6','CHELTUIELI PENTRU PROBE TEHNOLOGICE SI TESTE',_n(CAP6),_pc(CAP6)],
+    ['6.1','Pregatirea personalului de exploatare',_n(d61),_pc(d61)],
+    ['6.2','Probe tehnologice si teste',_n(d62),_pc(d62)],
+    ['TOTAL','TOTAL GENERAL (fara TVA)',_n(_totalDeviz),'100%'],
+    ['din care','Constructii-montaj (C+M)',_n(CM),_pc(CM)],
+    ['TVA','TVA '+Math.round(_TVA_STANDARD*100)+'% (Legea 227/2015)',_n(Math.round(_totalDeviz*_TVA_STANDARD)),''],
+    ['TOTAL','TOTAL GENERAL (inclusiv TVA)',_n(Math.round(_totalDeviz*(1+_TVA_STANDARD))),''],
+    ['RON','Echivalent RON (1 EUR='+(_cursEUR?.rate||5.05).toFixed(4)+')',_n(Math.round(_totalDeviz*(1+_TVA_STANDARD)*(_cursEUR?.rate||5.05)))+' RON',''],
+  ].forEach((r)=>{
+    cy=tblRow(r,cy,false,[16,108,33,25]);
   });
   cy+=2;
   pdf.setFillColor(240,248,255);pdf.rect(14,cy,W-28,10,'F');
