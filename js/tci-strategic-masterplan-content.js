@@ -1030,6 +1030,8 @@
       try{ if(window._UrbanProjects){ window._UrbanProjects.renderChapter(D, ctx.cityKey || (city&&city.key), city); } }catch(e){ console.warn('[MP] proiecte:',e.message); }
       // HARTI DE RISC vectoriale (seismic, inundatii, monumente/protectie)
       try{ if(window._RiskMaps){ window._RiskMaps.renderChapter(D, ctx); } }catch(e){ console.warn('[MP] harti risc:',e.message); }
+      // INFRASTRUCTURA REGIONALA REALA (autostrazi CNAIR/PNRR + aeroporturi + geopolitic)
+      try{ if(window._RegioInfra){ window._RegioInfra.renderChapter(D, ctx.cityKey||(city&&city.key), city); } }catch(e){ console.warn('[MP] regio infra:',e.message); }
 
       D.chapter('Concluzii și recomandări strategice');
       D.P('Masterplanul Strategic al Municipiului ' + city.name + ' fundamenteaza o dezvoltare urbană integrată, durabilă și rezilienta. Recomandările prioritare:');

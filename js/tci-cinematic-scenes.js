@@ -1051,6 +1051,26 @@ G._CinemaEngine={
     if(this._cinLabels) this._cinLabels(map, f.labels||[]);
   },
 
+  // ── INFRASTRUCTURA REGIONALA REALA (autostrazi CNAIR + aeroporturi + metrou) ──
+  // Status pe culori (verde=finalizat, portocaliu=executie, albastru=proiectare).
+  _addRegioInfra(map, city){
+    if(!window._RegioInfra) return;
+    var f=window._RegioInfra.buildFeatures(city||this._city||{});
+    if(f.lines && f.lines.length){
+      this._safeAdd(map,'v8-ri-line',{type:'geojson',data:{type:'FeatureCollection',features:f.lines}},{
+        id:'v8-ri-line-l',type:'line',source:'v8-ri-line',
+        paint:{'line-color':['get','c'],'line-width':5,'line-opacity':0.9,'line-blur':0.5,'line-dasharray':[1.5,0.8]},layout:{'line-cap':'round','line-join':'round'}
+      });
+    }
+    if(f.airportPts && f.airportPts.length){
+      this._safeAdd(map,'v8-ri-apt',{type:'geojson',data:{type:'FeatureCollection',features:f.airportPts}},{
+        id:'v8-ri-apt-l',type:'circle',source:'v8-ri-apt',
+        paint:{'circle-radius':11,'circle-color':['get','c'],'circle-opacity':0.92,'circle-stroke-width':3,'circle-stroke-color':'#0b1424'}
+      });
+    }
+    if(this._cinLabels) this._cinLabels(map, f.labels||[]);
+  },
+
   // ── VERDE + OAZE DE RACOARE + AER (model Singapore / regula 3-30-300) ──────
   // Insula de caldura urbana (heatmap rosu peste fondul construit dens) +
   // parcurile reale OSM ca OAZE DE RACOARE (verde, halo rece). Contrastul
@@ -1139,6 +1159,7 @@ G._CinemaEngine={
      'v8-fi-2030-l','v8-fi-2030','v8-fi-2040-l','v8-fi-2040','v8-fi-2055-l','v8-fi-2055','v8-util-l','v8-util','v8-util-n-l','v8-util-n',
      'v8-proj-line-l','v8-proj-line','v8-proj-pt-l','v8-proj-pt',
      'v8-uhi-l','v8-uhi','v8-oasis-h-l','v8-oasis-h','v8-oasis-l','v8-oasis',
+     'v8-ri-line-l','v8-ri-line','v8-ri-apt-l','v8-ri-apt',
      // cleanup v6/v7 layers
      'v6-gr-l','v6-gr','v6-bld-l','v6-bld','v6-den-l','v6-den','v6-tr-l','v6-tr',
      'v7-gr-l','v7-gr','v7-bld-l','v7-bld','v7-den-l','v7-den','v7-tr-l','v7-tr',

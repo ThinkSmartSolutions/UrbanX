@@ -71,7 +71,7 @@ SCENES = [
   {id:'b3s3',dur:18000,label:'INVESTITII & ROI',      bloc:1,blabel:'INTELEGEREA ORASULUI'},
   // ACT II — ORASUL SUB PRESIUNE
   {id:'b4s1',dur:20000,label:'RETEA RUTIERA',         bloc:2,blabel:'ORASUL SUB PRESIUNE'},
-  {id:'b4s2',dur:18000,label:'CONECTIVITATE REG.',    bloc:2,blabel:'ORASUL SUB PRESIUNE'},
+  {id:'b4s2',dur:24000,label:'CONECTIVITATE REG.',    bloc:2,blabel:'ORASUL SUB PRESIUNE'},
   {id:'b4s3',dur:18000,label:'TRANSPORT PUBLIC',      bloc:2,blabel:'ORASUL SUB PRESIUNE'},
   {id:'b4s4',dur:18000,label:'RETELE UTILITATI',      bloc:2,blabel:'ORASUL SUB PRESIUNE'},
   {id:'b7s1',dur:22000,label:'TRAFIC & CONGESTIE',    bloc:2,blabel:'ORASUL SUB PRESIUNE'},
@@ -901,17 +901,24 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
             addLine('v9-rail',D.rail,{'line-color':'#a78bfa','line-width':2,'line-opacity':0.7,'line-dasharray':[4,2]});
             _flowLine(map,'v9-rail');
           }
-          if(D.airports&&D.airports.length){
-            addCircle('v9-apt',D.airports.map(function(a){return{type:'Feature',geometry:{type:'Point',coordinates:[a.lon,a.lat]},properties:{c:'#22c55e',r:14,n:a.name}};}));
-            _pulse(map,'v9-apt','circle-radius',8,20,6);
-          }
-          // CNAIR autostrazi planificate Romania
+          // INFRASTRUCTURA REGIONALA REALA: autostrazi (status culori) + aeroporturi
+          // reale (AACR) + metrou — inlocuieste aerodromurile OSM aproximative.
+          try{ SE._addRegioInfra && SE._addRegioInfra(map, city); }catch(e){}
+          // CNAIR autostrazi planificate Romania (supliment live)
           if(window._LiveCNAIR&&city){
             window._LiveCNAIR.showOnMap(map,city,{radiusKm:120});
           }
         },2000);
         fly([cx,cy],10,22,-10,5000,7500,'day');
         fly([cx,cy],12.5,42,18,5000,14000,'day');
+        // ZOOM DE DETALIU pe cel mai apropiat aeroport international (nu doar fly-by)
+        setTimeout(function(){
+          if(!SE._playing) return;
+          try{
+            var ap=window._RegioInfra && window._RegioInfra.nearestAirports(cy,cx,260,1)[0];
+            if(ap){ map.flyTo({center:[ap.lon,ap.lat],zoom:13.5,pitch:55,bearing:30,duration:5000,essential:true}); }
+          }catch(e){}
+        },15500);
         break;
 
       case 'b4s3':
@@ -1524,11 +1531,15 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         var hub=city.coef_hub||0.78;
         var isGr=['IS','BT','SV','GL','TL','CT','TM','AR','SM','MM'].indexOf(city.judet||'')>=0;
         var isCfP=['IS','BT','SV','GL','TL'].indexOf(city.judet||'')>=0;
+        // date reale infrastructura regionala + context frontiera (surse oficiale)
+        var _gctx=(window._RegioInfra&&window._RegioInfra.geoContext)?window._RegioInfra.geoContext(city.judet):null;
+        var _aps=(window._RegioInfra&&window._RegioInfra.nearestAirports)?window._RegioInfra.nearestAirports(cy,cx,260,2):[];
+        var _apTxt=_aps.length?_aps.map(function(a){return a.name.replace('Aeroportul Interna\u021Bional ','').replace('Aeroportul ','')+' ('+a.iata+', '+a.distKm+'km)';}).join(', '):'verificare';
         var gR=[
           ['\u{1F30D} '+(isGr?'ZONA DE GRANITA'+(isCfP?' \u26A0 PROXIMITATE CONFLICT':''):' INTERIOR ROMANIA'),'#D4AF37'],
-          ['\u{1F6E3} Autostrazi/DN in raza 70km: '+(D.roads||[]).length+' segmente OSM','#ea580c'],
-          ['\u{1F682} Cale ferata in raza 40km: '+(D.rail||[]).length+' segmente CFR','#a78bfa'],
-          ['\u2708 Aeroporturi 120km: '+(D.airports&&D.airports.length>0?D.airports.map(function(a){return a.name;}).join(', '):'verificare'),'#22c55e'],
+          ['\u{1F6E3} '+( (window._RegioInfra?window._RegioInfra.relevantHighways(cy,cx,180).map(function(h){return h.nume.replace('Autostrada ','A-').split(' ')[0];}).join(' \u00B7 '):'')||'DN principale')+' (CNAIR/PNRR)','#ea580c'],
+          ['\u2708 Aeroporturi: '+_apTxt,'#22d3ee'],
+          ['\u{1F6A8} '+(_gctx?_gctx.border:'-'),'#ef4444'],
           ['\u{1F3D9} Hub: '+(hub>=1.1?'METROPOLITAN':hub>=0.9?'REGIONAL':'LOCAL')+' (coef '+hub.toFixed(2)+')'+(isCfP?' \u2014 flux migratie pozitiv Est':''),'#60a5fa'],
         ];
         gR.forEach(function(it,i){
@@ -1541,7 +1552,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         ctx.globalAlpha=1;
         cifra(N2(pop21),'Populatie UAT');
         cifra2(hub.toFixed(2)+' hub','Coef. gravitational');
-        narativ('Contextul geopolitic influenteaza direct dezvoltarea urbana. '+(isCfP?'Proximitatea conflictului Ucraina genereaza flux de migratie estimat +8-15% populatie in 2024-2026. Orasul devine receptor demografic temporar.':'Pozitia in interiorul Romaniei asigura stabilitate geopolitica. Accesul la coridoarele europene determina viteza de convergenta economica.'));
+        narativ('Contextul geopolitic influenteaza direct dezvoltarea urbana. '+(_gctx?_gctx.note+' '+_gctx.risk+'.':(isCfP?'Proximitatea conflictului Ucraina genereaza flux de migratie estimat +8-15% populatie in 2024-2026.':'Pozitia in interiorul Romaniei asigura stabilitate geopolitica. Accesul la coridoarele europene determina viteza de convergenta economica.')));
         concluzie('Geopolitica se traduce direct in fluxuri demografice si oportunitati economice masurate');
         negativ('Izolarea infrastructurala intr-un context geopolitic instabil = vulnerabilitate x3 fata de orasele conectate');
         break;
