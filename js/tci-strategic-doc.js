@@ -11,7 +11,7 @@
   const MP = () => G._TCIMasterplanPDF;
   // PASTRAM diacriticele romanesti (fontul DejaVuRO le suporta). Normalizam doar
   // cateva caractere si eliminam ce nu e in subset (emoji etc.) ca sa nu apara casute.
-  const _NORM = { ' ':' ','·':'-','‧':'-','„':'"','”':'"','“':'"','’':"'",'‚':"'",'…':'...' };
+  const _NORM = { ' ':' ','·':'-','‧':'-','„':'"','”':'"','“':'"','’':"'",'‚':"'",'…':'...','ş':'ș','Ş':'Ș','ţ':'ț','Ţ':'Ț' };
   const _KEEP = /[\t\n\r -ɏˆˇˉ˘-˝°²³«»–—‘’‚“”„†•…‰‹›€™→−✓]/;
   const S2 = s => { if (s == null) return ''; var out = ''; var t = String(s); for (var i = 0; i < t.length; i++) { var c = t[i]; if (_NORM[c] !== undefined) { out += _NORM[c]; } else if (_KEEP.test(c)) { out += c; } } return out; };
   // Transliterare RO->ASCII pt NUME DE FISIER (fara diacritice, fara underscore urat)
