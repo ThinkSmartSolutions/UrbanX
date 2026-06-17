@@ -497,12 +497,16 @@ G._CinemaEngine={
   _addBuildings(map){
     if(!this._pugGeo?.features?.length)return;
     const reg=this._reguli||{};
-    const features=this._pugGeo.features.slice(0,600).map(f=>{
-      const u=f.properties?.utr_cod||'';
-      const rv=reg[u]||{};
-      const rh=parseInt(rv.RH?.replace(/[^0-9]/g,'')||'3');
-      const h=Math.max(4,rh*3.8);
-      const c=h>40?'#c0c8d8':h>20?'#d4d9e3':'#e8eaed';
+    const features=this._pugGeo.features.slice(0,700).map(f=>{
+      const p=f.properties||{};
+      // FIX: campul real e 'utr' (CM/CC/LL...), nu utr_cod -> altfel toate ies albe.
+      const u=String(p.zf||p.utr||p.utr_cod||'').trim().toUpperCase();
+      const rv=(reg.subzone&&reg.subzone[u])||reg[u]||{};
+      const hmax=parseFloat(rv.hmax_m||rv.hmax||0)||0;
+      const cut=parseFloat(rv.cut_baza||rv.CUT||rv.cut||0)||0;
+      const h=Math.max(4, hmax>0?hmax*1.4:(cut>0?cut*9:12));
+      // culori pe functiune economica/densitate (nu alb): central, mixt/comercial, colectiv, rezidential, verde/industrial
+      const c=u.startsWith('CC')||u.startsWith('CP')?'#ff3366':u.startsWith('CM')||u.startsWith('CB')||u.startsWith('CA')?'#f59e0b':u.startsWith('LC')||u.startsWith('LB')?'#4a90d9':u.startsWith('LA')||u.startsWith('LL')?'#22c55e':u.startsWith('A')?'#a855f7':(u.startsWith('V')||u.startsWith('S'))?'#16a34a':'#94a3b8';
       return{...f,properties:{...f.properties,h,c}};
     });
     this._safeAdd(map,'v8-bld',{type:'geojson',data:{type:'FeatureCollection',features}},{
@@ -511,8 +515,8 @@ G._CinemaEngine={
         'fill-extrusion-color':['get','c'],
         'fill-extrusion-height':['coalesce',['get','h'],4],
         'fill-extrusion-base':0,
-        'fill-extrusion-opacity':0.7,
-        'fill-extrusion-ambient-occlusion-intensity':0.35
+        'fill-extrusion-opacity':0.9,
+        'fill-extrusion-ambient-occlusion-intensity':0.4
       }
     });
   },
@@ -553,38 +557,49 @@ G._CinemaEngine={
     }
   },
 
-  // Trafic pulsand — linii animate prin data update
-  _addTrafficPulse(map){
+  // Trafic pulsand — RETEAUA RUTIERA REALA (OSM) cand exista, altfel schematic.
+  // Apare pe rand (din centru spre exterior) si pulseaza, ca reteaua feroviara.
+  _addTrafficPulse(map, roads){
     const cx=this._city?.lon||25,cy=this._city?.lat||45.5;
-    const artere=[];
-    // 8 radiale cu culori trafic
-    [0,45,90,135,180,225,270,315].forEach((deg,i)=>{
-      const rad=deg*Math.PI/180,r=0.055;
-      const c=i<3?'#ef4444':i<5?'#f59e0b':'#22c55e';
-      const w=i<3?7:i<5?5:3;
-      artere.push({type:'Feature',geometry:{type:'LineString',coordinates:[[cx,cy],[cx+Math.cos(rad)*r*1.6,cy+Math.sin(rad)*r]]},properties:{c,w,idx:i}});
-    });
-    // Centura
-    const n=80,r=0.06,ring=[];
-    for(let i=0;i<=n;i++){const a=(i/n)*Math.PI*2;ring.push([cx+Math.cos(a)*r*1.7,cy+Math.sin(a)*r]);}
-    artere.push({type:'Feature',geometry:{type:'LineString',coordinates:ring},properties:{c:'#a855f7',w:6,idx:8}});
-    this._gfTr=artere;
+    let artere=[];
+    if(roads && roads.length){
+      roads.slice(0,300).forEach(rd=>{
+        const co=rd&&rd.geometry&&rd.geometry.coordinates; if(!co||co.length<2) return;
+        const cls=String((rd.properties&&(rd.properties.t||rd.properties.highway))||'');
+        const major=(cls.indexOf('motorway')>=0||cls.indexOf('trunk')>=0);
+        const c=major?'#dc2626':cls.indexOf('primary')>=0?'#ea580c':cls.indexOf('secondary')>=0?'#f59e0b':'#16a34a';
+        const w=major?6:cls.indexOf('primary')>=0?4:cls.indexOf('secondary')>=0?3:2;
+        // distanta primului varf fata de centru (pt aparitie din centru spre exterior)
+        const d=Math.hypot((co[0][0]-cx),(co[0][1]-cy));
+        artere.push({type:'Feature',geometry:{type:'LineString',coordinates:co},properties:{c,w,major,d}});
+      });
+      artere.sort((a,b)=>a.properties.d-b.properties.d); // din centru spre periferie
+    }
+    if(!artere.length){
+      // Fallback schematic DOAR cand OSM e jos (de evitat pozitii fixe altfel)
+      [0,45,90,135,180,225,270,315].forEach((deg,i)=>{const rad=deg*Math.PI/180,r=0.055;artere.push({type:'Feature',geometry:{type:'LineString',coordinates:[[cx,cy],[cx+Math.cos(rad)*r*1.6,cy+Math.sin(rad)*r]]},properties:{c:i<3?'#ef4444':i<5?'#f59e0b':'#22c55e',w:i<3?7:i<5?5:3,major:i<3,d:i}});});
+      const n=80,r=0.06,ring=[];for(let i=0;i<=n;i++){const a=(i/n)*Math.PI*2;ring.push([cx+Math.cos(a)*r*1.7,cy+Math.sin(a)*r]);}artere.push({type:'Feature',geometry:{type:'LineString',coordinates:ring},properties:{c:'#a855f7',w:6,major:true,d:99}});
+    }
+    artere.forEach((f,i)=>{f.properties.idx=i;});
+    this._gfTr=artere; this._trN=artere.length;
     this._safeAdd(map,'v8-tr',{type:'geojson',data:{type:'FeatureCollection',features:artere}},{
       id:'v8-tr-l',type:'line',source:'v8-tr',
-      paint:{'line-color':['get','c'],'line-width':['get','w'],'line-opacity':0.92,'line-blur':0.5},
+      paint:{'line-color':['get','c'],'line-width':['get','w'],'line-opacity':['coalesce',['get','_op'],0.06],'line-blur':0.5},
       layout:{'line-cap':'round','line-join':'round'}
     });
   },
 
-  // Update puls trafic
+  // Update puls trafic — reteaua apare PE RAND (front din centru) + pulseaza arterele majore
   _updateTraffic(t){
     const map=this._map;if(!map||!this._gfTr)return;
     try{
       const src=map.getSource('v8-tr');if(!src)return;
-      const pulse=0.5+0.5*Math.sin(t*Math.PI*8);
-      src.setData({type:'FeatureCollection',features:this._gfTr.map(f=>{
-        const isPulse=f.properties.idx<3;
-        return{...f,properties:{...f.properties,w:isPulse?f.properties.w*(0.7+pulse*0.6):f.properties.w}};
+      const N=this._gfTr.length||1; const front=t*N*1.25; // frontul de aparitie
+      const pulse=0.55+0.45*Math.sin(t*Math.PI*8);
+      src.setData({type:'FeatureCollection',features:this._gfTr.map((f,i)=>{
+        const appeared=i<front;
+        const op=!appeared?0.05:(f.properties.major?(0.5+pulse*0.45):0.5);
+        return{...f,properties:{...f.properties,_op:op,w:f.properties.major&&appeared?f.properties.w*(0.85+pulse*0.4):f.properties.w}};
       })});
     }catch(e){}
   },

@@ -25,7 +25,7 @@ var SCENES = [
   {id:'b2s1',dur:22000,label:'DEMOGRAFIE LIVE',      bloc:2,blabel:'CINE SUNT LOCUITORII'},
   {id:'b2s2',dur:20000,label:'CRIZA IMBATRANIRE',    bloc:2,blabel:'CINE SUNT LOCUITORII'},
   {id:'b2s3',dur:20000,label:'MIGRATIE & EMIGRARE',  bloc:2,blabel:'CINE SUNT LOCUITORII'},
-  {id:'b2s4',dur:18000,label:'PROFIL CUMPARATORI',   bloc:2,blabel:'CINE SUNT LOCUITORII'},
+  {id:'b2s4',dur:18000,label:'PROFIL LOCUITOR',   bloc:2,blabel:'CINE SUNT LOCUITORII'},
   {id:'b3s1',dur:20000,label:'PIB & CONVERGENTA UE', bloc:3,blabel:'ECONOMIA REALA'},
   {id:'b3s2',dur:20000,label:'MOTOARE ECONOMICE',    bloc:3,blabel:'ECONOMIA REALA'},
   {id:'b3s3',dur:18000,label:'INVESTITII & ROI',     bloc:3,blabel:'ECONOMIA REALA'},
@@ -65,7 +65,7 @@ SCENES = [
   {id:'b2s1',dur:22000,label:'DEMOGRAFIE LIVE',       bloc:1,blabel:'INTELEGEREA ORASULUI'},
   {id:'b2s2',dur:20000,label:'CRIZA IMBATRANIRE',     bloc:1,blabel:'INTELEGEREA ORASULUI'},
   {id:'b2s3',dur:20000,label:'MIGRATIE & EMIGRARE',   bloc:1,blabel:'INTELEGEREA ORASULUI'},
-  {id:'b2s4',dur:18000,label:'PROFIL CUMPARATORI',    bloc:1,blabel:'INTELEGEREA ORASULUI'},
+  {id:'b2s4',dur:18000,label:'PROFIL LOCUITOR',    bloc:1,blabel:'INTELEGEREA ORASULUI'},
   {id:'b3s1',dur:20000,label:'ECONOMIA REALA',        bloc:1,blabel:'INTELEGEREA ORASULUI'},
   {id:'b3s2',dur:20000,label:'MOTOARE ECONOMICE',     bloc:1,blabel:'INTELEGEREA ORASULUI'},
   {id:'b3s3',dur:18000,label:'INVESTITII & ROI',      bloc:1,blabel:'INTELEGEREA ORASULUI'},
@@ -107,7 +107,7 @@ SCENES = [
   {id:'b13s4',dur:18000,label:'ORAS PENTRU COPII',    bloc:6,blabel:'ORASUL PENTRU OAMENI'},
   {id:'b14s3',dur:18000,label:'ORASUL CA SISTEM VIU', bloc:6,blabel:'ORASUL PENTRU OAMENI'},
   // ACT VII — AGENDA & VIZIUNEA
-  {id:'b11s1',dur:22000,label:'AGENDA PRIMARULUI',    bloc:7,blabel:'AGENDA & VIZIUNEA'},
+  {id:'b11s1',dur:22000,label:'AGENDA ADMINISTRATORULUI',    bloc:7,blabel:'AGENDA & VIZIUNEA'},
   {id:'b11s2',dur:28000,label:'VIZIUNEA',             bloc:7,blabel:'AGENDA & VIZIUNEA'},
 ];
 var _ACT_ROMAN={1:'I',2:'II',3:'III',4:'IV',5:'V',6:'VI',7:'VII'};
@@ -793,11 +793,12 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
 
       // BLOC 3 ───────────────────────────────────────────────────────────
       case 'b3s1':
-        lp('day');
+        lp('dusk');
+        try{map.setLayoutProperty('building-extrusion','visibility','none');}catch(e){}
         onIdle(function(){try{SE._addBuildings&&SE._addBuildings(map);}catch(e){}});
-        fly(Z.C,14,55,-10,4000,0,'day');
-        fly(Z.NE,15,65,25,6000,10000,'day');
-        fly(Z.C,13.5,52,0,5000,18000,'dusk');
+        fly(Z.C,14,55,-10,4000,0,'dusk');
+        fly(Z.NE,15,65,25,6000,10000,'dusk');
+        fly(Z.C,13.5,52,0,5000,18000,'night');
         break;
 
       case 'b3s2':
@@ -842,7 +843,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
               _pulse(map,'v9-urb-maj','line-opacity',0.3,1.0,8);
             }
           }
-          try{SE._addTrafficPulse&&SE._addTrafficPulse(map);}catch(e){}
+          try{SE._addTrafficPulse&&SE._addTrafficPulse(map, (D.roads&&D.roads.length)?D.roads:null);}catch(e){}
         },1500);
         fly(Z.C,14.0,60,15,6000,9000,'night');   // zoom mai aproape
         fly(Z.CBD,14.5,65,-10,5500,16000,'night'); // centru - noduri congestie
@@ -1026,7 +1027,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         fly([cx,cy],12,48,0,4000,0,'night');
         setTimeout(function(){
           if(!SE._playing) return;
-          try{SE._addTrafficPulse&&SE._addTrafficPulse(map);}catch(e){}
+          try{SE._addTrafficPulse&&SE._addTrafficPulse(map, (D.roads&&D.roads.length)?D.roads:null);}catch(e){}
           // PRESIUNE TRAFIC din fluxurile OSM REALE daca exista (D.roads), altfel noduri
           try{SE._addTrafficPressure&&SE._addTrafficPressure(map, (D.roads&&D.roads.length)?D.roads:null);}catch(e){}
           if(D.urban&&D.urban.length){ addLine('v9-urb',D.urban); _pulse(map,'v9-urb','line-opacity',0.3,0.9,10); }
@@ -1582,7 +1583,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         break;
 
       case 'b2s4':
-        titlu('Profil Cumparatori & Putere de Cumparare','Salariu \u00b7 Ocupatie \u00b7 Segmente imobiliare'); linie();
+        titlu('Profil Locuitor & Putere de Cumparare','Salariu \u00b7 Ocupatie \u00b7 Segmente imobiliare'); linie();
         var sal=(window._getSalariu&&city&&city.judet)?window._getSalariu(city.judet):(pred.salariu||3500);
         cifra(N2(sal)+' RON/luna','Salariu mediu estimat',sal>=4000?'#22c55e':sal>=2500?'#f59e0b':'#ef4444');
         cifra2((pred.pctUE||39)+'% UE27','Convergenta economica');
@@ -2151,7 +2152,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         break;
 
       case 'b11s1':
-        titlu('Agenda Primarului '+_S()+'\u2013'+_P1(),'Ce se face \u00b7 Unde \u00b7 Cand \u00b7 Cat \u00b7 Ce se intampla daca NU'); linie();
+        titlu('Agenda Administratorului '+_S()+'\u2013'+_P1(),'Ce se face \u00b7 Unde \u00b7 Cand \u00b7 Cat \u00b7 Ce se intampla daca NU'); linie();
         var ag2=_buildAgenda(pred,city,pop21);
         ag2.forEach(function(it,i){
           ctx.globalAlpha=sA*rE(0.10+i*0.05,0.16);
@@ -3470,7 +3471,7 @@ function _showCorridorsOnMap(map, corridors, delay_ms) {
   _ivs.push(iv);
 }
 
-// Coridoare pentru Agenda Primarului — zone de interventie localizate
+// Coridoare pentru Agenda Administratorului — zone de interventie localizate
 function _buildAgendaCorridors(cx,cy,pred) {
   var ag=pred.ag||0.20;
   var feats=[];
