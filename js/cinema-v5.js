@@ -113,6 +113,7 @@ SCENES = [
   {id:'b21s1',dur:20000,label:'SANATATE & DIGITAL',   bloc:6,blabel:'ORASUL PENTRU OAMENI'},
   {id:'b14s3',dur:18000,label:'ORASUL CA SISTEM VIU', bloc:6,blabel:'ORASUL PENTRU OAMENI'},
   // ACT VII — AGENDA & VIZIUNEA
+  {id:'b22s1',dur:20000,label:'PARTICIPARE PUBLICA',  bloc:7,blabel:'AGENDA & VIZIUNEA'},
   {id:'b11s1',dur:22000,label:'AGENDA ADMINISTRATORULUI',    bloc:7,blabel:'AGENDA & VIZIUNEA'},
   {id:'b16s1',dur:24000,label:'NOTA URBANX',          bloc:7,blabel:'AGENDA & VIZIUNEA'},
   {id:'b11s2',dur:28000,label:'VIZIUNEA',             bloc:7,blabel:'AGENDA & VIZIUNEA'},
@@ -1336,6 +1337,15 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         rot(20,0.006);
         fly(Z.CBD,14.5,66,20,5000,0,'night');
         fly(Z.CBD,15,70,110,13000,5000,'night');
+        break;
+      case 'b22s1': // PARTICIPARE PUBLICA (transparenta decizionala)
+        lp('day');
+        onIdle(function(){try{SE._addBuildings&&SE._addBuildings(map);}catch(e){}});
+        setTimeout(function(){ if(SE._playing){ try{SE._addParticipation&&SE._addParticipation(map);}catch(e){} } },1600);
+        fly(Z.C,13.2,52,0,4500,0,'day');
+        rot(10,0.004);
+        fly(Z.C,13.8,56,40,7000,9000,'day');
+        fly(Z.NE,13.5,54,-20,6000,15500,'day');
         break;
       case 'b21s1': // SANATATE & ORAS DIGITAL
         lp('day');
@@ -2805,6 +2815,29 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         }
         narativ('Sanatatea si digitalizarea sunt servicii esentiale cu impact direct pe 30 de ani. Accesul medical e corelat cu imbatranirea — cererea creste; spitalele regionale PNRR (Iasi/Cluj/Craiova) schimba radical accesul regional. Romania are una dintre cele mai bune retele de fibra din UE — atu pentru IT, remote work si investitii digitale; e-guvernarea reduce birocratia.');
         concluzie('Acces medical echitabil + oras digital = calitate a vietii, reziliență si competitivitate economica');
+        break;
+      }
+
+      case 'b22s1': { // PARTICIPARE PUBLICA
+        titlu('Participare publica','Vocea cetatenilor pe harta · model Helsinki · transparenta decizionala'); linie();
+        var PS=(window._PublicParticipation&&window._PublicParticipation.snapshot)?window._PublicParticipation.snapshot():null;
+        if(PS){
+          cifra(N2(PS.n)+' comentarii','Cetateni · '+(PS.live?'date live':'demo'),'#60a5fa');
+          cifra2(N2(PS.votes)+' voturi · '+PS.categories+' categorii','Prioritati exprimate','#22c55e');
+          // listeaza top comentarii pe ecran
+          var top=PS.comments.slice().sort(function(a,b){return ((b.vote_up||0)-(b.vote_down||0))-((a.vote_up||0)-(a.vote_down||0));}).slice(0,4);
+          top.forEach(function(c,i){
+            var al=Math.min(1,(t-0.16-i*0.06)/0.18)*sA; if(al<=0)return; ctx.globalAlpha=al;
+            ctx.fillStyle='rgba(4,10,24,0.74)'; ctx.fillRect(W*0.04,H*(0.40+i*0.066),W*0.54,H*0.056);
+            ctx.fillStyle='#93c5fd'; ctx.font='700 '+Math.min(W*0.011,15)+'px "Space Grotesk",sans-serif'; ctx.textAlign='left';
+            ctx.fillText('💬 '+(c.comment||'').slice(0,48),W*0.055,H*(0.40+i*0.066)+H*0.024);
+            ctx.fillStyle='rgba(148,163,184,0.75)'; ctx.font='600 '+Math.min(W*0.0085,11)+'px "IBM Plex Mono",monospace';
+            ctx.fillText('Cetatean · +'+((c.vote_up||0)-(c.vote_down||0))+' voturi',W*0.055,H*(0.40+i*0.066)+H*0.046);
+            ctx.globalAlpha=1;
+          });
+        }
+        narativ('Urbanismul bun nu se face „de sus in jos". UrbanX integreaza participarea publica (model Helsinki): cetatenii adauga comentarii geolocalizate pe harta si voteaza prioritatile, iar administratia vede in timp real unde sunt problemele. Consultarea e si cerinta legala pentru PMUD si PUG (Legea 350/2001). Deciziile fundamentate pe dialog au legitimitate mai mare si mai putine contestatii.');
+        concluzie('Transparenta + dialog cu cetatenii = planuri mai bune, implementare mai usoara, incredere — invitam la dialog');
         break;
       }
     }

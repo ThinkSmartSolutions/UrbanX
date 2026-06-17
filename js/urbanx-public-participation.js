@@ -42,6 +42,42 @@ G._PublicParticipation = {
   _channel:   null,
   _comments:  [],
   _cityKey:   null,
+  CATEGORIES: CATEGORIES,
+
+  // ── Snapshot sincron pt cinematic + Masterplan/PMUD (comentarii + statistici).
+  // Foloseste comentariile live daca exista, altfel un set demo reprezentativ.
+  snapshot: function(){
+    var cm = (this._comments && this._comments.length) ? this._comments : [
+      { lat:47.162, lon:27.598, category:'mobilitate',  comment:'Lipsesc piste de bicicliști pe Bd. Independenței', vote_up:12, vote_down:1 },
+      { lat:47.158, lon:27.601, category:'spatii_verzi', comment:'Parcul Copou are nevoie de mai multe bănci și iluminat', vote_up:8, vote_down:0 },
+      { lat:47.155, lon:27.605, category:'risc',         comment:'Zona inundabilă în apropierea Bahluiului — avertizare necesară', vote_up:15, vote_down:2 },
+    ];
+    var votes=0, cats={};
+    cm.forEach(function(c){ votes += (c.vote_up||0); cats[c.category||'general']=1; }); // vote_up — consistent cu panoul
+    return { comments:cm, n:cm.length, votes:votes, categories:Object.keys(cats).length, live:!!(this._comments&&this._comments.length) };
+  },
+
+  // ── Capitol PDF (Masterplan + PMUD) — transparență decizională / consultare ──
+  renderChapter: function(D, city){
+    if(!D || !D.pdf) return;
+    var s = this.snapshot();
+    D.chapter('Participare publică și transparență decizională');
+    D.P('Urbanismul modern nu se face „de sus în jos": planurile sunt cu atât mai bune și mai ușor de implementat cu cât comunitatea este consultată din timp. UrbanX integrează un strat de participare publică (model Helsinki) — cetățenii adaugă comentarii geolocalizate pe hartă, votează prioritățile, iar administrația vede în timp real unde sunt problemele. Consultarea publică este și o cerință legală pentru PMUD și PUG (Legea 350/2001).');
+    if(D.kpis) D.kpis([
+      {val:String(s.n), label:'Comentarii cetățeni', sub:(s.live?'date live':'demo')},
+      {val:String(s.votes), label:'Voturi exprimate', sub:'priorități'},
+      {val:String(s.categories), label:'Categorii active', sub:'mobilitate, verde, risc...'},
+    ]);
+    D.h2('Vocea cetățenilor — comentarii recente (top)');
+    var top = s.comments.slice().sort(function(a,b){return ((b.vote_up||0)-(b.vote_down||0))-((a.vote_up||0)-(a.vote_down||0));}).slice(0,6);
+    D.bullets(top.map(function(c){ var cat=(CATEGORIES[c.category]||CATEGORIES.general); return [cat.label+' (+'+((c.vote_up||0)-(c.vote_down||0))+')', c.comment]; }));
+    D.bullets([
+      ['De ce contează', 'comentariile geolocalizate identifică problemele reale (congestie, lipsă piste, zone de risc) acolo unde sunt — informație pe care datele statistice nu o prind.'],
+      ['Transparență', 'deciziile fundamentate pe consultare au legitimitate mai mare și contestații mai puține.'],
+      ['Invitație la dialog', 'platforma este deschisă: orice cetățean poate contribui — „Adaugă comentariu pe hartă".'],
+    ]);
+    if(D.sourceBadges) D.sourceBadges(['Model Helsinki (participatory budgeting)','Legea 350/2001','Aarhus Convention','UrbanX live (Supabase)']);
+  },
 
   // ── Inițializare ─────────────────────────────────────────────────────
   init(map) {
