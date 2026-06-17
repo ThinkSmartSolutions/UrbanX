@@ -1032,6 +1032,8 @@
       try{ if(window._RiskMaps){ window._RiskMaps.renderChapter(D, ctx); } }catch(e){ console.warn('[MP] harti risc:',e.message); }
       // INFRASTRUCTURA REGIONALA REALA (autostrazi CNAIR/PNRR + aeroporturi + geopolitic)
       try{ if(window._RegioInfra){ window._RegioInfra.renderChapter(D, ctx.cityKey||(city&&city.key), city); } }catch(e){ console.warn('[MP] regio infra:',e.message); }
+      // FAUNA urbana & siguranta (caini fara stapan + ursi)
+      try{ if(window._UrbanFauna){ window._UrbanFauna.renderChapter(D, city); } }catch(e){ console.warn('[MP] fauna:',e.message); }
       // NOTA UrbanX — clasament + benchmark european
       try{ if(window._UrbanRank){ var _prR=(window._PredEngine&&_PredEngine.calc)?_PredEngine.calc(city):{}; window._UrbanRank.renderChapter(D, _prR, city); } }catch(e){ console.warn('[MP] rank:',e.message); }
 

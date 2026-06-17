@@ -107,6 +107,7 @@ SCENES = [
   {id:'b13s2',dur:18000,label:'ECONOMIA DE NOAPTE',   bloc:6,blabel:'ORASUL PENTRU OAMENI'},
   {id:'b13s3',dur:18000,label:'ORAS PRIETENOS SENIORI',bloc:6,blabel:'ORASUL PENTRU OAMENI'},
   {id:'b13s4',dur:18000,label:'ORAS PENTRU COPII',    bloc:6,blabel:'ORASUL PENTRU OAMENI'},
+  {id:'b18s1',dur:20000,label:'FAUNA & SIGURANTA',    bloc:6,blabel:'ORASUL PENTRU OAMENI'},
   {id:'b14s3',dur:18000,label:'ORASUL CA SISTEM VIU', bloc:6,blabel:'ORASUL PENTRU OAMENI'},
   // ACT VII — AGENDA & VIZIUNEA
   {id:'b11s1',dur:22000,label:'AGENDA ADMINISTRATORULUI',    bloc:7,blabel:'AGENDA & VIZIUNEA'},
@@ -1332,6 +1333,15 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         rot(20,0.006);
         fly(Z.CBD,14.5,66,20,5000,0,'night');
         fly(Z.CBD,15,70,110,13000,5000,'night');
+        break;
+      case 'b18s1': // FAUNA URBANA & SIGURANTA (#8 strays, #9 ursi)
+        lp('day');
+        onIdle(function(){try{SE._addBuildings&&SE._addBuildings(map);}catch(e){}});
+        setTimeout(function(){ if(SE._playing){ try{SE._addFauna&&SE._addFauna(map, SE._city);}catch(e){} } },1800);
+        fly(Z.C,13,52,0,4000,0,'day');
+        rot(12,0.004);
+        fly(Z.C,13.6,56,45,7000,9000,'day');
+        fly(Z.NV,13.4,54,-20,6000,16000,'day');
         break;
       case 'b17s1': // CARTIERE la nivel de strada (street-view / pieton)
         lp('day');
@@ -2655,6 +2665,31 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         }
         narativ('Camera coboara la nivelul pietonului — asa isi traieste orasul un locuitor. Calitatea tesutului urban (strazi la scara umana, fronturi continue, parter activ, verde de proximitate) decide daca un cartier este viu sau dormitor. Orasul de 15 minute: locuire, munca, scoala, sanatate, cumparaturi si recreere accesibile pe jos sau cu bicicleta.');
         concluzie('Densificare calitativa + parter activ + verde de proximitate = cartiere vii, nu dormitor');
+        break;
+      }
+
+      case 'b18s1': { // FAUNA URBANA & SIGURANTA
+        titlu('Fauna urbana & siguranta','Caini fara stapan · padocuri · risc ursi · impact pe nota UrbanX'); linie();
+        var FA=(window._UrbanFauna)?window._UrbanFauna.strays(city):null;
+        var BR=(window._UrbanFauna)?window._UrbanFauna.bearRisk(city.judet):{present:false};
+        if(FA){
+          cifra(N2(FA.est)+' caini','Fara stapan (est.) · '+FA.perK+'/1000 loc','#f59e0b');
+          cifra2(BR.present?('URSI: '+BR.level):'fara ursi', 'Risc faunistic salbatic', BR.present?'#ef4444':'#22c55e');
+          // mini prognoza pe ecran
+          var rows=[['Azi',FA.est,'#f59e0b'],['2030 fara actiune',FA.pred2030NoAction,'#ef4444'],['2030 cu sterilizare',FA.pred2030Action,'#22c55e']];
+          var mx=FA.pred2030NoAction||1;
+          rows.forEach(function(r,i){
+            var a=Math.min(1,(t-0.16-i*0.07)/0.18)*sA; if(a<=0)return; ctx.globalAlpha=a;
+            var by=H*(0.34+i*0.085), bx=W*0.04, bw=W*0.40*(r[1]/mx);
+            ctx.fillStyle='rgba(255,255,255,0.08)'; ctx.fillRect(bx,by,W*0.40,H*0.04);
+            ctx.fillStyle=r[2]; ctx.fillRect(bx,by,bw,H*0.04);
+            ctx.fillStyle='rgba(230,236,250,0.95)'; ctx.font='700 '+Math.min(W*0.011,15)+'px "Space Grotesk",sans-serif'; ctx.textAlign='left';
+            ctx.fillText(r[0]+': '+N2(r[1]),bx+W*0.012,by+H*0.027);
+            ctx.globalAlpha=1;
+          });
+        }
+        narativ('Fauna urbana influenteaza calitatea vietii, siguranta si atractivitatea turistica — de aceea conteaza in nota UrbanX. Cainii fara stapan: fara sterilizare sustinuta, populatia si reclamatiile cresc ~60% pana in 2030; cu program CNVSU + adoptie scad ~60%. '+(BR.present?('Urs: '+BR.note+' Romania are cea mai mare populatie de ursi bruni din UE (~8.000). Necesita containere anti-urs, interzicerea hranirii, RO-Alert.'):'Fara prezenta semnificativa a ursilor.'));
+        concluzie('Gestionarea umana a faunei (sterilizare + adapost + management urs) = oras mai sigur, mai curat, mai atractiv');
         break;
       }
     }
