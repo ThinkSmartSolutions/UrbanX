@@ -714,6 +714,7 @@
       // TABLOU DE BORD — indicatori de calitate urbana (acelasi modul ca in cinematic + Masterplan)
       try{ if(window._UrbanIndices){ var _prPM=(window._PredEngine&&_PredEngine.calc)?_PredEngine.calc(city):{}; window._UrbanIndices.renderChapter(D, _prPM, city, {title:'Tablou de bord — Indicatori de calitate urbana si mobilitate'}); } }catch(e){ console.warn('[PMUD] indici:',e.message); }
       try{ if(window._UrbanProjects){ window._UrbanProjects.renderChapter(D, ctx.cityKey, city); } }catch(e){ console.warn('[PMUD] proiecte:',e.message); }
+      try{ if(window._RiskMaps){ window._RiskMaps.renderChapter(D, ctx); } }catch(e){ console.warn('[PMUD] harti risc:',e.message); }
 
       // ── 11. METODOLOGIE SI SURSE ─────────────────────────────────────────
       D.chapter('Metodologie, surse și glosar');
