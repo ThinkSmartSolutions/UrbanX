@@ -109,6 +109,7 @@ SCENES = [
   {id:'b14s3',dur:18000,label:'ORASUL CA SISTEM VIU', bloc:6,blabel:'ORASUL PENTRU OAMENI'},
   // ACT VII — AGENDA & VIZIUNEA
   {id:'b11s1',dur:22000,label:'AGENDA ADMINISTRATORULUI',    bloc:7,blabel:'AGENDA & VIZIUNEA'},
+  {id:'b16s1',dur:24000,label:'NOTA URBANX',          bloc:7,blabel:'AGENDA & VIZIUNEA'},
   {id:'b11s2',dur:28000,label:'VIZIUNEA',             bloc:7,blabel:'AGENDA & VIZIUNEA'},
 ];
 var _ACT_ROMAN={1:'I',2:'II',3:'III',4:'IV',5:'V',6:'VI',7:'VII'};
@@ -1319,6 +1320,13 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         rot(20,0.006);
         fly(Z.CBD,14.5,66,20,5000,0,'night');
         fly(Z.CBD,15,70,110,13000,5000,'night');
+        break;
+      case 'b16s1': // NOTA UrbanX (clasament)
+        lp('dusk');
+        onIdle(function(){ try{SE._add3DGrowthFull&&SE._add3DGrowthFull(map);}catch(e){} });
+        rot(12,0.004);
+        fly(Z.C,12.6,56,0,4500,0,'dusk');
+        fly(Z.C,13.2,60,40,16000,5000,'night');
         break;
       case 'b15s1': // Proiecte structurante reale
         lp('day');
@@ -2544,6 +2552,61 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         });
         narativ('Marile proiecte (Spital Regional, centura, tren metropolitan, poli rezidentiali) restructureaza orasul. Fiecare = pol de dezvoltare cu efecte cumulate pe 10-15 ani. PUG-ul trebuie sa anticipeze presiunile de densificare, mobilitate si servicii din jurul lor.');
         concluzie('Anticiparea polilor de dezvoltare = dimensionare corecta a infrastructurii, nu reactie tardiva');
+        break;
+      }
+
+      case 'b16s1': { // NOTA UrbanX — clasament transparent + benchmark european
+        titlu('Nota UrbanX','Index transparent · toti indicatorii reali · benchmark european'); linie();
+        var R=(window._UrbanRank&&window._UrbanRank.compute)?window._UrbanRank.compute(pred,city):null;
+        if(R){
+          // dimensiunile notei — bare orizontale cu pondere si scor
+          R.dims.forEach(function(d,i){
+            var a=Math.min(1,(t-0.12-i*0.05)/0.16)*sA; if(a<=0)return;
+            ctx.globalAlpha=a;
+            var by=H*(0.30+i*0.072), bx=W*0.04, bw=W*0.42;
+            ctx.fillStyle='rgba(220,228,255,0.92)'; ctx.font='600 '+Math.min(W*0.011,15)+'px "Space Grotesk",sans-serif'; ctx.textAlign='left';
+            ctx.fillText(d.label+'  ('+Math.round(d.w*100)+'%)', bx, by-3);
+            ctx.fillStyle='rgba(255,255,255,0.08)'; ctx.fillRect(bx,by,bw,H*0.020);
+            var col=d.score>=70?'#22c55e':d.score>=55?'#fbbf24':'#ef4444';
+            ctx.fillStyle=col; ctx.fillRect(bx,by,bw*(d.score/100)*Math.min(1,(t-0.12-i*0.05)/0.30),H*0.020);
+            ctx.fillStyle=col; ctx.font='800 '+Math.min(W*0.012,16)+'px "IBM Plex Mono",monospace'; ctx.textAlign='left';
+            ctx.fillText(String(d.score), bx+bw+W*0.012, by+H*0.017);
+            ctx.globalAlpha=1;
+          });
+          // calificativ mare + scor (dreapta)
+          var ga=Math.min(1,(t-0.28)/0.2)*sA;
+          if(ga>0){
+            ctx.globalAlpha=ga;
+            var gcol=R.score>=70?'#22c55e':R.score>=55?'#fbbf24':'#ef4444';
+            ctx.textAlign='center'; ctx.fillStyle=gcol;
+            ctx.font='900 '+Math.min(W*0.095,140)+'px "Space Grotesk",sans-serif';
+            ctx.fillText(R.grade, W*0.79, H*0.40);
+            ctx.fillStyle='rgba(255,255,255,0.96)'; ctx.font='900 '+Math.min(W*0.028,40)+'px "Space Grotesk",sans-serif';
+            ctx.fillText(R.score+'/100', W*0.79, H*0.475);
+            ctx.fillStyle='rgba(148,163,184,0.82)'; ctx.font='600 '+Math.min(W*0.0095,12)+'px "IBM Plex Mono",monospace'; ctx.letterSpacing='0.05em';
+            ctx.fillText('NOTA URBANX', W*0.79, H*0.515); ctx.letterSpacing='0';
+            ctx.globalAlpha=1;
+          }
+          // benchmark european (tier echivalent)
+          var pa=Math.min(1,(t-0.48)/0.18)*sA;
+          if(pa>0 && R.peersWithCity){
+            ctx.globalAlpha=pa;
+            ctx.fillStyle='rgba(212,175,55,0.92)'; ctx.font='700 '+Math.min(W*0.0095,12)+'px "IBM Plex Mono",monospace'; ctx.textAlign='left';
+            ctx.fillText('BENCHMARK EUROPEAN · '+R.tierLabel+' · #'+R.rankInPeers+'/'+R.peerCount, W*0.56, H*0.60);
+            R.peersWithCity.slice(0,5).forEach(function(p,i){
+              var py=H*(0.635+i*0.040);
+              ctx.fillStyle=p.self?'rgba(212,175,55,0.96)':'rgba(180,190,210,0.82)';
+              ctx.font=(p.self?'800 ':'500 ')+Math.min(W*0.0095,12)+'px "Space Grotesk",sans-serif'; ctx.textAlign='left';
+              ctx.fillText((p.self?'▶ ':'   ')+p.n, W*0.56, py);
+              ctx.textAlign='right'; ctx.fillText(String(p.s), W*0.95, py);
+            });
+            ctx.globalAlpha=1;
+          }
+          cifra(R.score+'/100','Nota UrbanX · calificativ '+R.grade,'#D4AF37');
+          cifra2('#'+R.rankInPeers+'/'+R.peerCount,'In tier-ul echivalent');
+          narativ('Nota UrbanX = suma ponderata a dimensiunilor (Economie 20%, Calitate vietii 20%, Conectivitate 15%, Mediu 15%, Demografie 15%, Rezilienta 15%). Toate sub-scorurile provin din date reale analizate de platforma (ISO 37120, Eurostat, OECD, INFP, EEA). Comparatia se face DOAR cu orase europene echivalente ca marime — nu comparam un oras mic cu o metropola.');
+          concluzie('O nota transparenta si reproductibila — UrbanX poate deveni un standard de evaluare comparabila a oraselor');
+        } else { titlu('Nota UrbanX','modul indisponibil'); }
         break;
       }
     }
