@@ -3767,6 +3767,21 @@ function _cleanV9(map){
   _sources9.forEach(function(id){
     try{if(map.getSource(id))map.removeSource(id);}catch(e){}
   });
+  // SWEEP ROBUST pe prefixe — garanteaza ca NICIO scena nu lasa layere in urma
+  // (fix #4: harta de inundatii anar-flood-* ramanea pana la final).
+  _sweepCin(map);
+}
+
+// Curatare exhaustiva dupa PREFIX — orice layer/source cinematic ramas e sters.
+// Mult mai robust decat listele enumerate (care ratau anar-flood-*, flood-est-*).
+function _sweepCin(map){
+  try{
+    var st=map.getStyle&&map.getStyle(); if(!st) return;
+    var PFX=['v6-','v7-','v8-','v9-','flood','tci-flood','tci-pressure','tci-tp','anar-flood','flood-est','corridors-','cnair-','cestrin-','gtfs-','aero-','opensky-','mdlpa-'];
+    var hit=function(id){ for(var i=0;i<PFX.length;i++){ if(id.indexOf(PFX[i])===0) return true; } return false; };
+    (st.layers||[]).slice().forEach(function(L){ if(L&&L.id&&hit(L.id)){ try{map.removeLayer(L.id);}catch(e){} } });
+    Object.keys(st.sources||{}).forEach(function(s){ if(hit(s)){ try{map.removeSource(s);}catch(e){} } });
+  }catch(e){}
 }
 
 function _mkFallbackCanvas(){

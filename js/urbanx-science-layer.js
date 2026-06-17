@@ -513,6 +513,8 @@ G._FloodMapper = {
     Object.keys(this.LAYERS).forEach(k => this.addLayer(map, k));
   },
 
+  hideAll(map) { try{ this.removeAll(map); }catch(e){} }, // alias folosit de cinematic (curatare intre scene)
+
   removeAll(map) {
     Object.keys(this.LAYERS).forEach(k => this.removeLayer(map, k));
   },
