@@ -53,6 +53,10 @@ G._UrbanRank = {
     function gv(k,d){ var f=idx.filter(function(x){return x.key===k;})[0]; return f?f.value:(d==null?50:d); }
 
     var econ    = cl(pred.pctUE||40);                                   // % din media UE
+    var econNote='', resilNote='';
+    // digital -> competitivitate economica ; sanatate -> rezilienta
+    try{ if(G._UrbanServices){ var _ck2=city&&(city.key||city.cityKey);
+      var db=G._UrbanServices.digitalBonus(_ck2,city)||0; if(db){ econ=cl(econ+db); econNote=' + '+db+' pct digital'; } } }catch(e){}
     var quality = cl((gv('happiness',55)+gv('uhi',55))/2);              // calitate viata
     // penalizare faună (câini fără stăpân + risc urși) pe calitatea vieții/siguranță
     var faunaPen = 0, faunaNote = '';
@@ -73,6 +77,7 @@ G._UrbanRank = {
     try{ if(G._UrbanVitality){ var _ck=city&&(city.key||city.cityKey);
       var eb=G._UrbanVitality.eduBonus(_ck,city)||0; if(eb){ demo=cl(demo+eb); eduNote=' + '+eb+' pct educație/talent'; } } }catch(e){}
     var resil   = cl(82 - (pred.ag||0.2)*120);                          // rezilienta (seismic)
+    try{ if(G._UrbanServices){ var hb=G._UrbanServices.healthBonus(city&&(city.key||city.cityKey),city)||0; if(hb){ resil=cl(resil+hb); resilNote=' + '+hb+' pct sănătate'; } } }catch(e){}
     var connect = cl(gv('gravity',50));                                 // gravitatia oportunitatilor
 
     // bonus conectivitate din infrastructura regionala reala (aeroport/autostrada)
@@ -89,12 +94,12 @@ G._UrbanRank = {
     connect = cl(connect + cbon);
 
     var dims = [
-      {label:'Economie & convergență UE', score:econ,    w:0.20, formula:'% din PIB/cap media UE27', src:'Eurostat / INS'},
+      {label:'Economie & convergență UE', score:econ,    w:0.20, formula:'% din PIB/cap media UE27'+econNote, src:'Eurostat / INS + DESI'},
       {label:'Calitate a vieții',         score:quality, w:0.20, formula:'media(Happiness, Urban Health Index)'+faunaNote+tourNote, src:'OECD Better Life / WHR + bunăstare animală + cultură/turism'},
       {label:'Conectivitate & poziție',   score:connect, w:0.15, formula:'Gravitația oportunităților + bonus aeroport/autostradă reală', src:'model UrbanX + CNAIR/AACR'},
       {label:'Mediu & climă',             score:enviro,  w:0.15, formula:'media(UHI, spații verzi/cap, traiectorie CO₂)', src:'EEA / WHO'},
       {label:'Demografie & capital uman', score:demo,    w:0.15, formula:'50 + ritm populație 10 ani × 18'+eduNote, src:'INS / recensământ 2021 + ARACIS'},
-      {label:'Reziliență & risc',         score:resil,   w:0.15, formula:'82 − accelerație seismică(g) × 120', src:'INFP P100 / ANAR'},
+      {label:'Reziliență & risc',         score:resil,   w:0.15, formula:'82 − accelerație seismică(g) × 120'+resilNote, src:'INFP P100 / ANAR + sănătate'},
     ];
     var score = Math.round(dims.reduce(function(s,d){return s+d.score*d.w;},0));
     var grade = gradeOf(score);

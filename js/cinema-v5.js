@@ -110,6 +110,7 @@ SCENES = [
   {id:'b18s1',dur:20000,label:'FAUNA & SIGURANTA',    bloc:6,blabel:'ORASUL PENTRU OAMENI'},
   {id:'b19s1',dur:24000,label:'CULTURA & TURISM',     bloc:6,blabel:'ORASUL PENTRU OAMENI'},
   {id:'b20s1',dur:20000,label:'EDUCATIE & SPORT',     bloc:6,blabel:'ORASUL PENTRU OAMENI'},
+  {id:'b21s1',dur:20000,label:'SANATATE & DIGITAL',   bloc:6,blabel:'ORASUL PENTRU OAMENI'},
   {id:'b14s3',dur:18000,label:'ORASUL CA SISTEM VIU', bloc:6,blabel:'ORASUL PENTRU OAMENI'},
   // ACT VII — AGENDA & VIZIUNEA
   {id:'b11s1',dur:22000,label:'AGENDA ADMINISTRATORULUI',    bloc:7,blabel:'AGENDA & VIZIUNEA'},
@@ -1335,6 +1336,15 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         rot(20,0.006);
         fly(Z.CBD,14.5,66,20,5000,0,'night');
         fly(Z.CBD,15,70,110,13000,5000,'night');
+        break;
+      case 'b21s1': // SANATATE & ORAS DIGITAL
+        lp('day');
+        onIdle(function(){try{SE._addBuildings&&SE._addBuildings(map);}catch(e){}});
+        setTimeout(function(){ if(SE._playing){ try{SE._addServices&&SE._addServices(map, SE._cityKey, SE._city);}catch(e){} } },1600);
+        fly(Z.C,13.4,54,0,4500,0,'day');
+        rot(11,0.004);
+        fly(Z.C,13.9,58,45,7000,9000,'day');
+        fly(Z.RES,13.6,55,-25,6000,15500,'day');
         break;
       case 'b20s1': // EDUCATIE & SPORT
         lp('day');
@@ -2776,6 +2786,25 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         }
         narativ('Universitatile sunt cel mai puternic magnet de tineri si talent — populatie tanara, forta de munca calificata, antreprenoriat. Cheia e RETENTIA absolventilor: orasele cu locuri de munca + locuire accesibila + calitate a vietii isi pastreaza tinerii (Iasi, Cluj convertesc studentia in IT/servicii); altele finanteaza gratuit forta de munca a altora. Sportul (stadioane, baze, evenimente) aduce sanatate, turism sportiv si vibratie.');
         concluzie('Pol universitar puternic + retentie absolventi + infrastructura sportiva = capital uman si economie pe 30 de ani');
+        break;
+      }
+
+      case 'b21s1': { // SANATATE & ORAS DIGITAL
+        titlu('Sanatate & Oras digital','Acces medical · spitale regionale · fibra (RO top UE) · e-guvernare'); linie();
+        var SV=(window._UrbanServices)?window._UrbanServices:null;
+        var ck2=SE._cityKey||(window.TCI&&TCI.cityKey)||'RO-IS-01';
+        if(SV){
+          var h=SV.health(ck2,city), d=SV.digital(ck2,city);
+          cifra(N2(h.beds)+' paturi','Acces medical · '+h.beds1000+'/1000 · desert '+h.desert,'#ef4444');
+          cifra2('fibra '+d.fiberPct+'%',(d.gigabit?'gigabit · ':'')+'oras digital','#06b6d4');
+          if(h.regional){
+            var ra=Math.min(1,(t-0.2)/0.18)*sA; if(ra>0){ ctx.globalAlpha=ra;
+              ctx.fillStyle='#22c55e'; ctx.font='700 '+Math.min(W*0.012,16)+'px "Space Grotesk",sans-serif'; ctx.textAlign='left';
+              ctx.fillText('🏥 '+h.regional,W*0.04,H*0.42); ctx.globalAlpha=1; }
+          }
+        }
+        narativ('Sanatatea si digitalizarea sunt servicii esentiale cu impact direct pe 30 de ani. Accesul medical e corelat cu imbatranirea — cererea creste; spitalele regionale PNRR (Iasi/Cluj/Craiova) schimba radical accesul regional. Romania are una dintre cele mai bune retele de fibra din UE — atu pentru IT, remote work si investitii digitale; e-guvernarea reduce birocratia.');
+        concluzie('Acces medical echitabil + oras digital = calitate a vietii, reziliență si competitivitate economica');
         break;
       }
     }
