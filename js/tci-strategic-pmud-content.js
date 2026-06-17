@@ -17,6 +17,7 @@
 
   G._StratPMUD = {
     async generate(cityKey, scenario) {
+      if (window._USER && _USER.email === 'office@m2msolutions.ro') { window.ss && ss('Generare dezactivată pentru acest cont'); return; }
       const J = _jsPDF(), m = MP(), p = PM();
       if (!J || !m || !p) { window.ss && ss('Motor PMUD indisponibil'); return; }
       window.ss && ss('🚍 Generez PMUD extins (100+ pagini)...');

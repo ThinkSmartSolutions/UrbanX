@@ -564,8 +564,11 @@ const _PanelRenderer = {
       },
     ];
 
+    const _proGated = (window._USER && _USER.email === 'office@m2msolutions.ro');
     const groupsHTML = studyGroups.map(group => {
-      const studiesHTML = group.studies.map(s => {
+      const studiesHTML = group.studies
+        .filter(s => !(_proGated && (s.fn === 'generateMasterplan' || s.fn === 'generatePMUD')))
+        .map(s => {
         const canDo = _USER.canGenerateStudy(s.fn);
         return `<button class="wx-study-btn ${canDo?'':'locked'}"
           data-study-require="${s.fn}"
@@ -788,4 +791,21 @@ function _showPackageSelector() {
 window.addEventListener('load', () => {
   setTimeout(() => _WorkspaceManager.init(), 500);
 });
+
+// ── GATE Masterplan/PMUD pentru office@m2msolutions.ro ─────────────────────
+// Ascunde butoanele care apeleaza generateMasterplan/generatePMUD oriunde in UI
+// (meniu Pro index.html, onboarding etc.). Functiile sunt deja gate-uite la apel.
+// NU se atinge ADMIN_EMAILS — doar afisarea acestor doua rapoarte.
+window._gateProReports = function(){
+  try{
+    if(!(window._USER && _USER.email === 'office@m2msolutions.ro')) return;
+    document.querySelectorAll('[onclick*="generateMasterplan"],[onclick*="generatePMUD"]').forEach(function(el){
+      // urcam la butonul-container daca info-ul e copil
+      var btn = el.closest ? (el.closest('button,[class*="card"],[class*="btn"],[class*="item"]') || el) : el;
+      btn.style.display = 'none';
+    });
+  }catch(e){}
+};
+window.addEventListener('load', function(){ [600,1500,3000,6000].forEach(function(d){ setTimeout(window._gateProReports, d); }); });
+document.addEventListener('click', function(){ setTimeout(window._gateProReports, 120); }, true);
 

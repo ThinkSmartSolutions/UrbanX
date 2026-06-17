@@ -320,6 +320,7 @@
   // ═══════════════════════════════════════════════════════════════════════
   G._StratMasterplan = {
     async generate(cityKey, scenario) {
+      if (window._USER && _USER.email === 'office@m2msolutions.ro') { window.ss && ss('Generare dezactivată pentru acest cont'); return; }
       const J = _jsPDF(); const m = MP(); if (!J || !m) { window.ss && ss('Motor indisponibil'); return; }
       window.ss && ss('📘 Generez Masterplan Strategic extins (100+ pagini)...');
       try {

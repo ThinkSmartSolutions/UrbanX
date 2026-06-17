@@ -3172,6 +3172,7 @@ _waitAll(()=>{
   // Expunem global pentru acces din HTML si alte module
   window._TCIMasterplanPDF  = G._TCIMasterplanPDF;
   window.generateMasterplan = async function(cityKey, scenario) {
+    if(window._USER && _USER.email === 'office@m2msolutions.ro'){ window.ss?.('Generare dezactivată pentru acest cont'); return; }
     const k = cityKey ||
               window.TCI?.cityKey ||
               localStorage.getItem('ux_last_city') ||
@@ -3196,6 +3197,7 @@ _waitAll(()=>{
   };
   // ── PMUD — Plan de Mobilitate Urbana Durabila ──────────────────────────
   window.generatePMUD = async function(cityKey, scenario){
+    if(window._USER && _USER.email === 'office@m2msolutions.ro'){ window.ss?.('Generare dezactivată pentru acest cont'); return; }
     const k = cityKey || window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
     // PMUD extins (100+ pagini) pe motorul de flux
     if(window._StratPMUD && window._StratPMUDContent){ return await window._StratPMUD.generate(k, scenario||'S2'); }
