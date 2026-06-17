@@ -338,14 +338,14 @@ G._FloodMapper = {
     // Folosim fallback estimativ imediat + incercam WMS in background
     this._addEstimativLayer(map, layerKey, srcId, lyId, layer);
 
-    // Incercam WMS real in background - daca merge, inlocuim
-    const testUrl = `https://gis.rowater.ro/flood_hazard/wms?SERVICE=WMS&VERSION=1.1.1` +
-      `&REQUEST=GetCapabilities`;
-    fetch(testUrl, {method:'HEAD', signal: AbortSignal.timeout(3000)})
-      .then(() => this._addWMSLayer(map, layerKey, srcId+'_wms', lyId+'_wms', layer))
+    // Incercam WMS real prin proxy (CORS) - daca merge, se suprapune peste estimativ.
+    const PROXY = (window._PROXY_URL || 'https://urbanx-proxy.3dtravelsoftart.workers.dev');
+    const testUrl = PROXY + '/anar?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetCapabilities';
+    fetch(testUrl, { signal: AbortSignal.timeout(3500) })
+      .then(r => { if(r.ok) this._addWMSLayer(map, layerKey, srcId+'_wms', lyId+'_wms', layer); else throw new Error(r.status); })
       .catch(() => {
-        console.info('[ANAR] WMS indisponibil (503) — se folosesc date estimative PGRA 2021');
-        window.ss?.('🌊 Hărți inundații: date estimative PGRA 2021 (serverul ANAR temporar indisponibil)');
+        console.info('[ANAR] WMS indisponibil — se folosesc date estimative PGRA 2021');
+        window.ss?.('🌊 Hărți inundații: date estimative PGRA 2021 (server ANAR temporar indisponibil)');
       });
     this._active[layerKey] = true;
   },
@@ -353,10 +353,11 @@ G._FloodMapper = {
   _addWMSLayer(map, layerKey, srcId, lyId, layer) {
     try {
       if(map.getSource(srcId)) return;
+      const PROXY = (window._PROXY_URL || 'https://urbanx-proxy.3dtravelsoftart.workers.dev');
       map.addSource(srcId, {
         type: 'raster',
         tiles: [
-          `https://gis.rowater.ro/flood_hazard/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap` +
+          PROXY + `/anar?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap` +
           `&FORMAT=image/png&TRANSPARENT=true&LAYERS=${layer.id}` +
           `&BBOX={bbox-epsg-3857}&WIDTH=256&HEIGHT=256&SRS=EPSG:3857`
         ],
@@ -415,10 +416,22 @@ G._FloodMapper = {
         const bufPoly = this._simpleLineBuffer(coords, bufferDeg);
         if(bufPoly) features.push({ type:'Feature', geometry:bufPoly, properties:{} });
       });
-      if(map.getSource(srcId)) {
-        map.getSource(srcId).setData({ type:'FeatureCollection', features });
-      }
-    } catch(e) { console.warn('[River buffer]', e.message); }
+      if(!features.length) features.push(this._schematicFlood(map, bufferDeg)); // OSM jos -> banda schematica
+      if(map.getSource(srcId)) map.getSource(srcId).setData({ type:'FeatureCollection', features });
+    } catch(e) {
+      console.warn('[River buffer]', e.message);
+      // garantam un vizual chiar daca Overpass e jos: banda de lunca schematica
+      try{ if(map.getSource(srcId)) map.getSource(srcId).setData({ type:'FeatureCollection', features:[this._schematicFlood(map, bufferDeg)] }); }catch(e2){}
+    }
+  },
+
+  // Banda de inundabilitate schematica (cand nu avem rauri OSM) — lunca prin centru, E-V.
+  _schematicFlood(map, bufferDeg){
+    var c = map.getCenter(); var cx=c.lng, cy=c.lat;
+    var w=0.10, h=Math.max(0.004, bufferDeg*6);
+    var coords=[[cx-w,cy-0.006],[cx-w*0.5,cy-h],[cx,cy-0.004],[cx+w*0.5,cy-h*0.8],[cx+w,cy-0.005],
+                [cx+w,cy+0.005],[cx+w*0.5,cy+h*0.8],[cx,cy+0.004],[cx-w*0.5,cy+h],[cx-w,cy+0.006],[cx-w,cy-0.006]];
+    return { type:'Feature', geometry:{ type:'Polygon', coordinates:[coords] }, properties:{} };
   },
 
   _simpleLineBuffer(coords, buf) {

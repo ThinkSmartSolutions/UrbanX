@@ -176,7 +176,7 @@
     function barChart(data, opts) { // data: [[label,val,color?],...]
       opts = opts || {}; const h = opts.h || 50, ttl = opts.title;
       ensure(h + (ttl?6:0) + (opts.source?7:0) + 6);
-      if (ttl) { pdf.setTextColor.apply(pdf, INK); pdf.setFont(FONT,'bold'); pdf.setFontSize(8); pdf.text(S2(ttl), ML, y + 3.5); y += 6.5; }
+      if (ttl) { pdf.setTextColor.apply(pdf, INK); var _tf=fitFont(FONT,'bold',8,ttl,CW); pdf.setFontSize(_tf); pdf.text(S2(ttl), ML, y + 3.5); y += 6.5; }
       const x0 = ML + 12, plotW = CW - 14, plotH = h - 10, top = y;
       const mv = opts.max || Math.max.apply(null, data.map(d => +d[1] || 0)) * 1.12 || 1;
       const baseY = _axes(x0, top, plotW, plotH, mv, opts.yfmt);
@@ -190,7 +190,7 @@
     function lineChart(series, xLabels, opts) { // series:[{name,color,points:[]}]
       opts = opts || {}; const h = opts.h || 54, ttl = opts.title;
       ensure(h + (ttl?6:0) + (opts.source?7:0) + 10);
-      if (ttl) { pdf.setTextColor.apply(pdf, INK); pdf.setFont(FONT,'bold'); pdf.setFontSize(8); pdf.text(S2(ttl), ML, y + 3.5); y += 6.5; }
+      if (ttl) { pdf.setTextColor.apply(pdf, INK); var _tf=fitFont(FONT,'bold',8,ttl,CW); pdf.setFontSize(_tf); pdf.text(S2(ttl), ML, y + 3.5); y += 6.5; }
       const x0 = ML + 14, plotW = CW - 16, plotH = h - 10, top = y;
       let mx = 0, mn = opts.min!=null?opts.min:Infinity; series.forEach(s => s.points.forEach(p => { if (p > mx) mx = p; if (p < mn) mn = p; }));
       if (opts.min==null) mn = Math.min(mn, 0); mx = opts.max || mx * 1.1 || 1; const span = (mx - mn) || 1;
@@ -212,7 +212,7 @@
     function pie(slices, opts) { // slices:[[label,val,color?],...]
       opts = opts || {}; const R = opts.r || 22, ttl = opts.title; const boxH = R * 2 + (ttl?6:0) + 8;
       ensure(boxH + (opts.source?7:0));
-      if (ttl) { pdf.setTextColor.apply(pdf, INK); pdf.setFont(FONT,'bold'); pdf.setFontSize(8); pdf.text(S2(ttl), ML, y + 3.5); y += 6.5; }
+      if (ttl) { pdf.setTextColor.apply(pdf, INK); var _tf=fitFont(FONT,'bold',8,ttl,CW); pdf.setFontSize(_tf); pdf.text(S2(ttl), ML, y + 3.5); y += 6.5; }
       const cx = ML + R + 4, cy = y + R, tot = slices.reduce((s, d) => s + (+d[1] || 0), 0) || 1;
       let a0 = -Math.PI / 2;
       slices.forEach((d, i) => { const frac = (+d[1] || 0) / tot, a1 = a0 + frac * 2 * Math.PI, col = d[2] || PAL[i % PAL.length];
@@ -224,14 +224,27 @@
       slices.forEach((d, i) => { const col = d[2] || PAL[i % PAL.length], pc = Math.round((+d[1]||0)/tot*100); pdf.setFillColor(col[0],col[1],col[2]); pdf.rect(lx, ly - 2.4, 3.2, 3.2, 'F'); pdf.setTextColor.apply(pdf, INK); pdf.setFont(FONT,'normal'); pdf.text(S2(String(d[0]) + ' — ' + pc + '%'), lx + 4.5, ly, { maxWidth: CW - (lx - ML) - 6 }); ly += 5.2; });
       y += boxH; if (opts.source) source(opts.source);
     }
+    // Ajusteaza marimea fontului ca textul sa incapa in latimea data (anti-overflow)
+    function fitFont(font, style, base, str, maxW) {
+      var fs = base; pdf.setFont(font, style); pdf.setFontSize(fs);
+      while (pdf.getTextWidth(S2(str)) > maxW && fs > 5) { fs -= 0.3; pdf.setFontSize(fs); }
+      return fs;
+    }
     function formula(title, expr, where) {
       const wlines = where ? pdf.splitTextToSize(S2(where), CW - 12) : [];
-      const hh = 13 + wlines.length * 3.6 + 3; ensure(hh + 2);
+      // formula: micsoreaza fontul ca sa incapa; daca tot e prea lata, o sparge pe linii
+      var exprS = S2(expr);
+      var fs = fitFont('courier', 'bold', 9.5, exprS, CW - 12);
+      var exprLines = (pdf.getTextWidth(exprS) > CW - 12) ? pdf.splitTextToSize(exprS, CW - 12) : [exprS];
+      var elh = 4.6;
+      const hh = 8 + exprLines.length * elh + wlines.length * 3.6 + 4; ensure(hh + 2);
       pdf.setFillColor(245, 248, 252); pdf.rect(ML, y, CW, hh, 'F'); pdf.setFillColor.apply(pdf, ACCENT); pdf.rect(ML, y, 2, hh, 'F');
       pdf.setTextColor.apply(pdf, SUB); pdf.setFont(FONT, 'bold'); pdf.setFontSize(6.6); pdf.text(S2('FORMULA · ' + title), ML + 5, y + 4.5);
-      pdf.setTextColor.apply(pdf, INK); pdf.setFont('courier', 'bold'); pdf.setFontSize(9.5); pdf.text(S2(expr), ML + 6, y + 10.5);
+      pdf.setTextColor.apply(pdf, INK); pdf.setFont('courier', 'bold'); pdf.setFontSize(fs);
+      exprLines.forEach((l, i) => pdf.text(l, ML + 6, y + 10 + i * elh));
+      var wy = y + 10 + exprLines.length * elh + 1;
       pdf.setFont(FONT, 'italic'); pdf.setFontSize(6.4); pdf.setTextColor.apply(pdf, MUT);
-      wlines.forEach((l, i) => pdf.text(l, ML + 6, y + 14.5 + i * 3.6));
+      wlines.forEach((l, i) => pdf.text(l, ML + 6, wy + i * 3.6));
       y += hh + 3;
     }
     function sourceBadges(list) { // ['INS','Eurostat',...]

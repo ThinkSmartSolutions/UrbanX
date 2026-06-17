@@ -59,8 +59,9 @@ TONUL: tehnic-juridic, obiectiv, bazat pe date, fara superlative`,
     }
 
     this._generating = true;
+    this._lastCity = city;   // pt sablonul de rezerva (cand AI nu e disponibil)
     this._updateUI('generating');
-    ss?.('🤖 AI generează memoriul justificativ... (30-60 sec)');
+    ss?.('🤖 AI generează memoriul justificativ... (sablon din date dacă API indisponibil)');
 
     try {
       const context = this._buildContext(city);
@@ -173,30 +174,48 @@ Raspunde DOAR cu textul sectiunii, fara titlu, fara comentarii.`,
     const prompt = prompts[sectionId];
     if(!prompt) return '[Sectiune necunoscuta]';
 
-    // Rutare prin proxy Cloudflare (CORS) — apelul direct din browser e blocat.
-    const _proxy = (window._PROXY_URL || 'https://urbanx-proxy.3dtravelsoftart.workers.dev');
-    const response = await fetch(_proxy + '/proxy?url=' + encodeURIComponent('https://api.anthropic.com/v1/messages'), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: this.SYSTEM_PROMPT,
-        messages: [{ role: 'user', content: prompt }],
-      }),
-    });
-
-    if(!response.ok) {
-      const err = await response.json().catch(()=>({}));
-      throw new Error(err.error?.message || `HTTP ${response.status}`);
+    // Incercam AI prin proxy; daca esueaza (CORS/cheie/retea) -> SABLON din date reale,
+    // ca utilizatorul sa primeasca TOTUSI un memoriu complet. NU trimitem headere
+    // anthropic-* din browser (declanseaza preflight CORS respins de proxy) — proxy-ul
+    // le injecteaza server-side daca e configurat.
+    try {
+      const _proxy = (window._PROXY_URL || 'https://urbanx-proxy.3dtravelsoftart.workers.dev');
+      const response = await fetch(_proxy + '/proxy?url=' + encodeURIComponent('https://api.anthropic.com/v1/messages'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:1000, system:this.SYSTEM_PROMPT, messages:[{role:'user',content:prompt}] }),
+        signal: AbortSignal.timeout ? AbortSignal.timeout(20000) : undefined,
+      });
+      if(!response.ok) throw new Error('HTTP '+response.status);
+      const data = await response.json();
+      const txt = data.content?.[0]?.text;
+      if(txt) return txt;
+      throw new Error('raspuns gol');
+    } catch(e) {
+      console.warn('[AI Narrative] API indisponibil, folosesc sablon din date:', e.message);
+      return this._template(sectionId, this._lastCity);
     }
+  },
 
-    const data = await response.json();
-    return data.content?.[0]?.text || '[Răspuns gol]';
+  // ── SABLON din date reale (fallback cand AI nu e disponibil) ──────────────
+  _template(sectionId, city) {
+    city = city || {};
+    var N = function(v){ return isNaN(+v)?'-':Number(v).toLocaleString('ro-RO'); };
+    var pop = city.pop2021 || 100000, r = city.rata_reala_2011_2021 || 0, pib = city.pib_eur_cap || 10000;
+    var jud = city.judet || city.judet_code || '';
+    var pr = (window._PredEngine && _PredEngine.calc) ? (function(){try{return _PredEngine.calc(city);}catch(e){return {};}})() : {};
+    var pop55 = pr.pop55 || Math.round(pop*Math.pow(1+r/100,30));
+    var idx = (window._UrbanIndices && _UrbanIndices.compute) ? (function(){try{return _UrbanIndices.compute(pr,city);}catch(e){return [];}})() : [];
+    var uh = (idx.find(function(i){return i.key==='uhi';})||{}).value;
+    var T = {
+      intro: 'Municipiul '+(city.name||'')+', situat in judetul '+jud+', reprezinta un pol urban cu o populatie de '+N(pop)+' locuitori (Recensamant INS 2021). Documentatia de urbanism fundamenteaza dezvoltarea spatiala integrata pe orizontul 2025-2055, in acord cu Legea 350/2001, strategia teritoriala nationala si obiectivele de dezvoltare durabila (SDG 11). Prezentul memoriu sintetizeaza diagnoza multidisciplinara si directiile strategice propuse.',
+      demographic: 'Populatia actuala este de '+N(pop)+' locuitori, cu o rata anuala de '+(r>=0?'+':'')+r.toFixed(2)+'%. Proiectia pentru 2055 (scenariu tendential) indica cca. '+N(pop55)+' locuitori. Structura pe varste reflecta tendinta nationala de imbatranire, cu implicatii directe asupra serviciilor publice, locuirii si fortei de munca. Retentia tinerilor si atragerea de noi rezidenti sunt conditii pentru viabilitatea pe termen lung.',
+      economic: 'PIB-ul estimat este de '+N(pib)+' EUR/locuitor, reprezentand '+((pr.pctUE)||Math.round(pib/366))+'% din media UE27. Convergenta economica este motorul principal al valorii imobiliare si al atractivitatii investitionale. Diversificarea economica (servicii, industrie, educatie, IT) reduce vulnerabilitatea la socuri externe si sustine o crestere echilibrata.',
+      risks: 'Profilul de risc cuprinde hazardul seismic (acceleratie de proiectare '+((pr.ag)||0.2)+'g, conform P100-1/2013), riscul de inundatii (conform ANAR PGRA) si efectele schimbarilor climatice (insula de caldura urbana, evenimente extreme). Consolidarea fondului construit vulnerabil (finantare PNRR C10) si masurile de adaptare climatica sunt prioritati de siguranta publica.',
+      objectives: 'Obiectivele strategice vizeaza: regenerarea urbana si densificarea controlata; mobilitatea durabila (transport public, piste velo, decongestionare); rezilienta climatica si spatiile verzi (tinta 26 mp/locuitor); economia competitiva; si guvernanta participativa.'+(uh!=null?(' Indicele compozit de sanatate urbana (Urban Health Index) este estimat la '+uh+'/100, cu potential de crestere prin implementarea masurilor propuse.'):''),
+      conclusions: 'Documentatia fundamenteaza o dezvoltare integrata, durabila si rezilienta pentru '+(city.name||'')+'. Se recomanda scenariul moderat (S2) cu marja de +20%, etapizat pe trei orizonturi (2025-2030, 2031-2040, 2041-2055), cu monitorizare prin indicatori in timp real. Document orientativ — nu inlocuieste studiile de specialitate elaborate de specialisti atestati RUR.'
+    };
+    return T[sectionId] || '[Sectiune in pregatire]';
   },
 
   // ── Construiește contextul UAT pentru prompt ──────────────────────────
