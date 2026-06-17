@@ -170,7 +170,11 @@
     }
     function source(t) { ensure(5); pdf.setTextColor.apply(pdf, MUT); pdf.setFont(FONT, 'italic'); pdf.setFontSize(6.6); const ls = pdf.splitTextToSize(S2('Sursa: ' + t), CW); ls.forEach(l=>{ensure(3.2);pdf.text(l, ML, y + 2.6);y+=3.2;}); y += 2; }
     function callout(title, text, col) {
-      col = col || ACCENT; const lines = pdf.splitTextToSize(S2(text), CW - 12); const hh = lines.length * 4.2 + 11;
+      col = col || ACCENT;
+      // FONT setat ÎNAINTE de splitTextToSize (altfel wrap-ul foloseste fontul anterior,
+      // mai mic, si liniile ies din caseta cand se randeaza la 8.2pt) — fix overflow.
+      pdf.setFont(FONT, 'normal'); pdf.setFontSize(8.2);
+      const lines = pdf.splitTextToSize(S2(text), CW - 12); const hh = lines.length * 4.2 + 11;
       ensure(hh + 2); pdf.setFillColor(247, 249, 252); pdf.rect(ML, y, CW, hh, 'F'); pdf.setFillColor.apply(pdf, col); pdf.rect(ML, y, 2.4, hh, 'F');
       pdf.setTextColor.apply(pdf, col); pdf.setFont(FONT, 'bold'); pdf.setFontSize(8.5); pdf.text(S2(title), ML + 6, y + 6);
       pdf.setTextColor.apply(pdf, INK); pdf.setFont(FONT, 'normal'); pdf.setFontSize(8.2);

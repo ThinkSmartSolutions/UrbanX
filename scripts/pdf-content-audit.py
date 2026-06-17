@@ -43,14 +43,22 @@ AUDIT_JS = r'''(function(){
   var feats=[];for(var i=0;i<60;i++){var lon=27.55+(i%9)*0.007,lat=47.13+Math.floor(i/9)*0.007;feats.push({type:'Feature',properties:{zf:(i%4===0?'LA':i%4===1?'CC':i%4===2?'LC':'V')+'1'},geometry:{type:'Polygon',coordinates:[[[lon,lat],[lon+0.005,lat],[lon+0.005,lat+0.005],[lon,lat+0.005],[lon,lat]]]}});}
   var pug={type:'FeatureCollection',features:feats}, report={};
   cities.forEach(function(C){
-    var pdf=new window.jspdf.jsPDF({unit:'mm',format:'a4'}); var drawn=[]; var ot=pdf.text.bind(pdf);
-    pdf.text=function(t,x,y,o){ var s=Array.isArray(t)?t.join(' '):String(t); drawn.push(s); return ot(t,x,y,o); };
+    var pdf=new window.jspdf.jsPDF({unit:'mm',format:'a4'}); var drawn=[], over=[]; var ot=pdf.text.bind(pdf);
+    pdf.text=function(t,x,y,o){
+      var s=Array.isArray(t)?t.join(' '):String(t); drawn.push(s);
+      // OVERFLOW: marginea dreapta a paginii A4 cu margine 18mm = 192mm; >197 = iese din pagina
+      try{ var tw=pdf.getTextWidth(s); var al=(o&&o.align)||'left';
+        var right = al==='center'? x+tw/2 : al==='right'? x : x+tw;
+        if(right>197 && s.trim().length>1) over.push(s.slice(0,30)+' @x='+Math.round(x)+' right='+Math.round(right));
+      }catch(e){}
+      return ot(t,x,y,o);
+    };
     var D=window._makeStratDoc(pdf,{docTitle:'AUDIT',cityName:C.city.name});
     var ctx={city:C.city,cityKey:C.city.key,pugGeo:pug,reguli:{},risk:{seismic:{ag:C.pred.ag}}};
     var steps=[['indici',function(){window._UrbanIndices.renderChapter(D,C.pred,C.city);}],['proiecte',function(){window._UrbanProjects.renderChapter(D,C.city.key,C.city);}],['risc',function(){window._RiskMaps.renderChapter(D,ctx);}],['regio',function(){window._RegioInfra.renderChapter(D,C.city.key,C.city);}],['turism',function(){window._UrbanTourism.renderChapter(D,C.city.key,C.city);}],['vitality',function(){window._UrbanVitality.renderChapter(D,C.city.key,C.city);}],['servicii',function(){window._UrbanServices.renderChapter(D,C.city.key,C.city);}],['locuire',function(){window._UrbanHousing.renderChapter(D,C.city,C.pred);}],['energie',function(){window._UrbanEnergy.renderChapter(D,C.city,C.pred);}],['resurse',function(){window._UrbanResources.renderChapter(D,C.city);}],['fauna',function(){window._UrbanFauna.renderChapter(D,C.city);}],['participare',function(){window._PublicParticipation.renderChapter(D,C.city);}],['rank',function(){window._UrbanRank.renderChapter(D,C.pred,C.city);}]];
     var thrown=[]; steps.forEach(function(s){try{s[1]();}catch(e){thrown.push(s[0]+':'+e.message);}});
     var bad=drawn.filter(function(s){return /undefined|NaN|\[object Object\]/.test(s);});
-    report[C.city.name]={pages:pdf.getNumberOfPages(), thrown:thrown, badTokens:bad.slice(0,5), badCount:bad.length};
+    report[C.city.name]={pages:pdf.getNumberOfPages(), thrown:thrown, badTokens:bad.slice(0,5), badCount:bad.length, overflow:over.slice(0,5), overflowCount:over.length};
   });
   return JSON.stringify(report);
 })()'''
@@ -83,11 +91,12 @@ def main():
         rep=json.loads(ev(w,AUDIT_JS))
         print("═══ UrbanX PDF content audit ═══")
         for name,d in rep.items():
-            ok = d['badCount']==0 and not d['thrown']
+            ok = d['badCount']==0 and not d['thrown'] and d.get('overflowCount',0)==0
             if not ok: fail=True
-            print("%s %-22s pagini=%d throw=%s badTokens=%d %s"%(
-                '✅' if ok else '❌', name, d['pages'], d['thrown'] or '-', d['badCount'],
-                d['badTokens'] if d['badTokens'] else ''))
+            print("%s %-22s pagini=%d throw=%s tokens=%d overflow=%d"%(
+                '✅' if ok else '❌', name, d['pages'], d['thrown'] or '-', d['badCount'], d.get('overflowCount',0)))
+            if d['badTokens']: print("     tokens:", d['badTokens'])
+            if d.get('overflow'): print("     overflow:", d['overflow'])
         print("VERDICT:", "PASS ✅" if not fail else "FAIL ❌")
     finally:
         p.send_signal(signal.SIGTERM)
