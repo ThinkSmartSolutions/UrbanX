@@ -1219,9 +1219,9 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         fly(Z.CBD,15,60,0,4000,0,'day');
         fly(Z.CBD,15.6,66,90,16000,4500,'day');
         break;
-      case 'b12s2': // 3-30-300
+      case 'b12s2': // 3-30-300 — verde, oaze de racoare, aer (model Singapore)
         lp('day');
-        onIdle(function(){ try{SE._addDensityHeat&&SE._addDensityHeat(map);}catch(e){} });
+        onIdle(function(){ try{SE._addGreenHeatOasis&&SE._addGreenHeatOasis(map, D.green);}catch(e){} });
         fly(Z.VERDE,14,54,0,4000,0,'day');
         fly(Z.C,13.5,50,40,14000,4500,'day');
         break;

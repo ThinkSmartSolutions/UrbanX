@@ -1023,6 +1023,66 @@ G._CinemaEngine={
     if(this._cinLabels) this._cinLabels(map, f.labels||[]);
   },
 
+  // ── VERDE + OAZE DE RACOARE + AER (model Singapore / regula 3-30-300) ──────
+  // Insula de caldura urbana (heatmap rosu peste fondul construit dens) +
+  // parcurile reale OSM ca OAZE DE RACOARE (verde, halo rece). Contrastul
+  // rosu↔verde = modelul Singapore (coridoare verzi care racoresc orasul).
+  _addGreenHeatOasis(map, green){
+    const cx=this._city?.lon||25, cy=this._city?.lat||45.5;
+    // 1) INSULA DE CALDURA — puncte ponderate pe intensitatea construita a UTR
+    const hot=[];
+    const fs=(this._pugGeo&&this._pugGeo.features)||[];
+    if(fs.length){
+      const step=Math.max(1,Math.floor(fs.length/600));
+      for(let i=0;i<fs.length;i+=step){
+        const c=this._cheapCentroid(fs[i].geometry); if(!c) continue;
+        const u=String((fs[i].properties||{}).zf||(fs[i].properties||{}).utr||'').toUpperCase();
+        // construit dens/central = caldura mare; verde/agricol = racoare
+        let w=0.45;
+        if(u.indexOf('CC')===0||u.indexOf('CP')===0||u.indexOf('CA')===0||u.indexOf('M')===0) w=1.0;     // central/mixt
+        else if(u.indexOf('L')===0) w=0.8;                                                                  // locuire colectiva/individuala
+        else if(u.indexOf('A')===0||u.indexOf('IS')===0) w=0.6;                                             // activitati/servicii
+        else if(u.indexOf('V')===0||u.indexOf('TE')===0||u.indexOf('G')===0||u.indexOf('P')===0) w=0.08;   // verde/perdele/agro
+        hot.push({type:'Feature',geometry:{type:'Point',coordinates:c},properties:{w}});
+      }
+    } else {
+      for(let i=0;i<220;i++){ const a=Math.random()*Math.PI*2,r=Math.random()*0.04; hot.push({type:'Feature',geometry:{type:'Point',coordinates:[cx+Math.cos(a)*r*1.4,cy+Math.sin(a)*r]},properties:{w:1-r/0.05}}); }
+    }
+    this._safeAdd(map,'v8-uhi',{type:'geojson',data:{type:'FeatureCollection',features:hot}},{
+      id:'v8-uhi-l',type:'heatmap',source:'v8-uhi',
+      paint:{
+        'heatmap-weight':['get','w'],
+        'heatmap-intensity':['interpolate',['linear'],['zoom'],10,1,15,2.6],
+        'heatmap-color':['interpolate',['linear'],['heatmap-density'],0,'rgba(0,0,0,0)',0.25,'rgba(250,204,21,0.35)',0.5,'rgba(249,115,22,0.6)',0.78,'rgba(239,68,68,0.82)',1,'rgba(190,18,60,0.92)'],
+        'heatmap-radius':['interpolate',['linear'],['zoom'],10,18,14,38],
+        'heatmap-opacity':0.0
+      }
+    });
+    try{ map.setPaintProperty('v8-uhi-l','heatmap-opacity',0.78); }catch(e){}
+    // 2) OAZE DE RACOARE — parcurile reale, halo rece + miez verde
+    const gp=(green&&green.length)?green.slice(0,80):[];
+    if(gp.length){
+      const gf=gp.map(g=>{ const co=(g.geometry&&g.geometry.coordinates)||[g.lon,g.lat]; return {type:'Feature',geometry:{type:'Point',coordinates:co},properties:{n:(g.properties&&g.properties.n)||g.n||'Spatiu verde'}}; });
+      // halo rece (efectul de racoare ~ -3..-7°C in jurul parcului)
+      this._safeAdd(map,'v8-oasis-h',{type:'geojson',data:{type:'FeatureCollection',features:gf}},{
+        id:'v8-oasis-h-l',type:'circle',source:'v8-oasis-h',
+        paint:{'circle-radius':['interpolate',['linear'],['zoom'],11,18,15,46],'circle-color':'#22d3ee','circle-opacity':0.16,'circle-blur':1}
+      });
+      // miez verde
+      this._safeAdd(map,'v8-oasis',{type:'geojson',data:{type:'FeatureCollection',features:gf}},{
+        id:'v8-oasis-l',type:'circle',source:'v8-oasis',
+        paint:{'circle-radius':['interpolate',['linear'],['zoom'],11,5,15,13],'circle-color':'#22c55e','circle-opacity':0.92,'circle-stroke-width':2,'circle-stroke-color':'#ecfdf5'}
+      });
+    }
+    // 3) ETICHETE — cele mai mari parcuri + panou model 3-30-300 / norma UE aer
+    const labels=[];
+    gp.slice(0,4).forEach(g=>{ const co=(g.geometry&&g.geometry.coordinates)||[g.lon,g.lat]; if(co&&co.length>=2) labels.push({lon:co[0],lat:co[1],color:'#22c55e',icon:'🌳',title:((g.properties&&g.properties.n)||g.n||'Parc').slice(0,22),sub:'oaza de racoare −3..−7°C'}); });
+    labels.push({lon:cx, lat:cy+0.052, color:'#ef4444', icon:'🌡', title:'INSULA DE CALDURA', sub:'fond construit dens = +4..+8°C vara'});
+    labels.push({lon:cx, lat:cy-0.052, color:'#22d3ee', icon:'🍃', title:'REGULA 3-30-300', sub:'3 arbori vizibili · 30% canopy · 300 m la parc'});
+    labels.push({lon:cx, lat:cy-0.070, color:'#a3e635', icon:'🌬', title:'AER — NORMA UE', sub:'PM2.5 tinta 10 µg/m³ (Dir. 2024/2881) vs 25 azi'});
+    if(this._cinLabels) this._cinLabels(map, labels);
+  },
+
   // Protejeaza canvas-ul — il re-adauga daca e sters de platforma
   _guardCanvas(){
     if(this._canvasObserver)this._canvasObserver.disconnect();
@@ -1050,6 +1110,7 @@ G._CinemaEngine={
      'v8-mp-belt-l','v8-mp-belt','v8-mp-gwedge-l','v8-mp-gwedge',
      'v8-fi-2030-l','v8-fi-2030','v8-fi-2040-l','v8-fi-2040','v8-fi-2055-l','v8-fi-2055','v8-util-l','v8-util',
      'v8-proj-line-l','v8-proj-line','v8-proj-pt-l','v8-proj-pt',
+     'v8-uhi-l','v8-uhi','v8-oasis-h-l','v8-oasis-h','v8-oasis-l','v8-oasis',
      // cleanup v6/v7 layers
      'v6-gr-l','v6-gr','v6-bld-l','v6-bld','v6-den-l','v6-den','v6-tr-l','v6-tr',
      'v7-gr-l','v7-gr','v7-bld-l','v7-bld','v7-den-l','v7-den','v7-tr-l','v7-tr',
