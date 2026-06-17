@@ -14,6 +14,10 @@
   const _NORM = { ' ':' ','·':'-','‧':'-','„':'"','”':'"','“':'"','’':"'",'‚':"'",'…':'...' };
   const _KEEP = /[\t\n\r -ɏˆˇˉ˘-˝°²³«»–—‘’‚“”„†•…‰‹›€™→−✓]/;
   const S2 = s => { if (s == null) return ''; var out = ''; var t = String(s); for (var i = 0; i < t.length; i++) { var c = t[i]; if (_NORM[c] !== undefined) { out += _NORM[c]; } else if (_KEEP.test(c)) { out += c; } } return out; };
+  // Transliterare RO->ASCII pt NUME DE FISIER (fara diacritice, fara underscore urat)
+  const _DIA = {'ă':'a','â':'a','î':'i','ș':'s','ş':'s','ț':'t','ţ':'t','Ă':'A','Â':'A','Î':'I','Ș':'S','Ş':'S','Ț':'T','Ţ':'T'};
+  const _ascii = s => String(s == null ? '' : s).replace(/[ăâîșşțţĂÂÎȘŞȚŢ]/g, c => _DIA[c] || c);
+  G._asciiFile = _ascii; // expus pt PMUD / masterplan legacy
   const N = (v,d=0)=> isNaN(+v)?'-':Number(v).toLocaleString('ro-RO',{minimumFractionDigits:d,maximumFractionDigits:d});
   const RN = (v,d=2)=> isNaN(+v)?'-':Number(v).toFixed(d);
   const Pct = (v,d=1)=> (v>=0?'+':'')+Number(v).toFixed(d)+'%';
@@ -89,11 +93,18 @@
       pdf.text(S2(chapterNo + '.' + subNo + '.' + subsubNo + '  ' + title), ML, y + 4);
       y += 7.5;
     }
+    // text JUSTIFY: aliniaza la ambele margini toate liniile dintr-un paragraf,
+    // mai putin ultima (si liniile fara spatiu). Cerinta: toate rapoartele justify.
+    function _jline(str, x, yy, w, last) {
+      if (!last && str && str.indexOf(' ') > 0) { try { pdf.text(str, x, yy, { align: 'justify', maxWidth: w }); return; } catch (e) {} }
+      pdf.text(str, x, yy);
+    }
     function P(text, o) {
       o = o || {}; const fs = o.fs || 8.6, lh = o.lh || 4.55, ind = o.indent || 0;
       pdf.setTextColor.apply(pdf, o.color || INK); pdf.setFont(FONT, o.bold ? 'bold' : 'normal'); pdf.setFontSize(fs);
       const lines = pdf.splitTextToSize(S2(text), CW - ind);
-      for (let i = 0; i < lines.length; i++) { ensure(lh + 0.5); pdf.text(lines[i], ML + ind, y + lh - 1); y += lh; }
+      const jw = CW - ind;
+      for (let i = 0; i < lines.length; i++) { ensure(lh + 0.5); _jline(lines[i], ML + ind, y + lh - 1, jw, o.noJustify || i === lines.length - 1); y += lh; }
       y += o.gap == null ? 2 : o.gap;
     }
     function bullets(arr, o) {
@@ -113,13 +124,13 @@
           if (cur) lines.push(cur);
           for (let i = 0; i < lines.length; i++) {
             ensure(lh + 0.5);
-            if (i === 0) { pdf.setFont(FONT, 'bold'); pdf.text(hstr, ML + 5, y + lh - 1); pdf.setFont(FONT, 'normal'); pdf.text(lines[0], ML + 5 + hw, y + lh - 1); }
-            else pdf.text(lines[i], ML + 5, y + lh - 1);
+            if (i === 0) { pdf.setFont(FONT, 'bold'); pdf.text(hstr, ML + 5, y + lh - 1); pdf.setFont(FONT, 'normal'); _jline(lines[0], ML + 5 + hw, y + lh - 1, CW - 6 - hw, lines.length === 1); }
+            else { _jline(lines[i], ML + 5, y + lh - 1, CW - 6, i === lines.length - 1); }
             y += lh;
           }
         } else {
           const lines = pdf.splitTextToSize(body, CW - 6);
-          for (let i = 0; i < lines.length; i++) { ensure(lh + 0.5); pdf.setFont(FONT, 'normal'); pdf.text(lines[i], ML + 5, y + lh - 1); y += lh; }
+          for (let i = 0; i < lines.length; i++) { ensure(lh + 0.5); pdf.setFont(FONT, 'normal'); _jline(lines[i], ML + 5, y + lh - 1, CW - 6, i === lines.length - 1); y += lh; }
         }
         y += 0.8;
       });
@@ -353,7 +364,7 @@
         // CUPRINS dupa coperta
         buildTOC(D, coverPages);
 
-        const fn = ('Masterplan_Strategic_' + S2(city.name || cityKey) + '_' + ctx.iso + '.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
+        const fn = ('Masterplan_Strategic_' + _ascii(city.name || cityKey) + '_' + ctx.iso + '.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
         pdf.save(fn);
         window.ss && ss('✅ Masterplan Strategic extins generat: ' + pdf.getNumberOfPages() + ' pagini · ' + city.name);
         return fn;

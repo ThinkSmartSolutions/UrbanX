@@ -34,7 +34,8 @@
         D.setSuppress(true); D.setPage(1); this._cover(D, ctx); D.setSuppress(false);
         G._StratPMUDContent.build(D, ctx);
         window._buildStratTOC(D, 1);
-        const fn = ('PMUD_' + S2(city.name || cityKey) + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
+        const _af = window._asciiFile || ((s)=>String(s||''));
+        const fn = ('PMUD_' + _af(city.name || cityKey) + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
         pdf.save(fn);
         window.ss && ss('✅ PMUD extins generat: ' + pdf.getNumberOfPages() + ' pagini · ' + city.name);
         return fn;

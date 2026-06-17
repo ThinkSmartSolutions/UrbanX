@@ -180,7 +180,8 @@ G._TCIMasterplanPDF = {
     this._pg12_methodology(ctx);   // metodologia rămâne ultima
     this._addPageNumbers(ctx);
 
-    const fn = ('masterplan_'+S2(city.name||cityKey)+'_'+ctx.iso+'.pdf')
+    const _af = window._asciiFile || ((s)=>String(s||''));
+    const fn = ('masterplan_'+_af(city.name||cityKey)+'_'+ctx.iso+'.pdf')
                .replace(/[^a-zA-Z0-9._-]/g,'_');
     pdf.save(fn);
     ss?.('✅ Masterplan generat: '+fn+' · '+city.name+' · '+scenario);
@@ -2895,7 +2896,8 @@ G._TCIPmudPDF = {
       this._c8_monitoring(c);
       this._methodology(c);
       MP._addPageNumbers(c);
-      const fn=('PMUD_'+S2(city.name||cityKey)+'_'+new Date().toISOString().slice(0,10)+'.pdf').replace(/[^a-zA-Z0-9._-]/g,'_');
+      const _af2 = window._asciiFile || ((s)=>String(s||''));
+      const fn=('PMUD_'+_af2(city.name||cityKey)+'_'+new Date().toISOString().slice(0,10)+'.pdf').replace(/[^a-zA-Z0-9._-]/g,'_');
       pdf.save(fn);
       ss?.('✅ PMUD generat: '+fn);
       return fn;

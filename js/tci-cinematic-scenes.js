@@ -983,25 +983,53 @@ G._CinemaEngine={
   },
 
   // ── REȚELE UTILITĂȚI — schemă desenată pe hartă (apă/canal/energie/gaz) ca
-  // arbori ramificați din centru. Garanteaza un vizual chiar cand OSM e jos.
+  // arbori ramificați din centru, SCALATĂ la extinderea reală a orașului (PUG)
+  // ca să fie vizibilă la orice zoom. Noduri = stații (tratare/epurare/substație).
   _addUtilityNet(map){
     const cx=this._city?.lon||25, cy=this._city?.lat||45.5;
-    const nets=[{c:'#3b82f6',ang:20,label:'APA'},{c:'#a855f7',ang:105,label:'CANALIZARE'},{c:'#fbbf24',ang:190,label:'ENERGIE'},{c:'#f97316',ang:285,label:'GAZ'}];
-    const feats=[];
-    nets.forEach(n=>{
-      const a=n.ang*Math.PI/180, ls=1.6;
-      const tip=[cx+Math.cos(a)*0.05*ls, cy+Math.sin(a)*0.05];
-      feats.push({type:'Feature',geometry:{type:'LineString',coordinates:[[cx,cy],tip]},properties:{c:n.c}});
-      for(let b=-1;b<=1;b+=2){
-        const ba=a+b*0.42, mid=[cx+Math.cos(a)*0.03*ls,cy+Math.sin(a)*0.03];
-        feats.push({type:'Feature',geometry:{type:'LineString',coordinates:[mid,[cx+Math.cos(ba)*0.046*ls,cy+Math.sin(ba)*0.046]]},properties:{c:n.c}});
+    // scara adaptiva: raza ~ 0.42 din extinderea PUG (cu fallback)
+    let R=0.045;
+    try{
+      const fs=(this._pugGeo&&this._pugGeo.features)||[];
+      if(fs.length){
+        let mnx=1e9,mny=1e9,mxx=-1e9,mxy=-1e9;
+        for(let i=0;i<fs.length;i+=Math.max(1,Math.floor(fs.length/200))){
+          const c=this._cheapCentroid(fs[i].geometry); if(c){ if(c[0]<mnx)mnx=c[0];if(c[0]>mxx)mxx=c[0];if(c[1]<mny)mny=c[1];if(c[1]>mxy)mxy=c[1]; }
+        }
+        if(mxx>mnx) R=Math.max(0.02, Math.min(0.085, Math.max(mxx-mnx,mxy-mny)*0.42));
       }
+    }catch(e){}
+    const latC=Math.cos(cy*Math.PI/180)||0.7, rx=R/latC, ry=R; // corectie aspect lon/lat
+    const nets=[
+      {c:'#3b82f6',ang:25, label:'APA',        icon:'💧', node:'Stație tratare'},
+      {c:'#a855f7',ang:110,label:'CANALIZARE', icon:'♻',  node:'Stație epurare'},
+      {c:'#fbbf24',ang:200,label:'ENERGIE',    icon:'⚡', node:'Substație 110kV'},
+      {c:'#f97316',ang:290,label:'GAZ',        icon:'🔥', node:'SRM gaz'},
+    ];
+    const feats=[], nodes=[];
+    nets.forEach(n=>{
+      const a=n.ang*Math.PI/180;
+      const tip=[cx+Math.cos(a)*rx, cy+Math.sin(a)*ry];
+      feats.push({type:'Feature',geometry:{type:'LineString',coordinates:[[cx,cy],tip]},properties:{c:n.c}});
+      // ramuri secundare la ~60% si la varf
+      for(let b=-1;b<=1;b+=2){
+        const ba=a+b*0.40, mid=[cx+Math.cos(a)*rx*0.6,cy+Math.sin(a)*ry*0.6];
+        feats.push({type:'Feature',geometry:{type:'LineString',coordinates:[mid,[cx+Math.cos(ba)*rx*0.95,cy+Math.sin(ba)*ry*0.95]]},properties:{c:n.c}});
+        const ba2=a+b*0.22;
+        feats.push({type:'Feature',geometry:{type:'LineString',coordinates:[tip,[cx+Math.cos(ba2)*rx*1.18,cy+Math.sin(ba2)*ry*1.18]]},properties:{c:n.c}});
+      }
+      nodes.push({type:'Feature',geometry:{type:'Point',coordinates:tip},properties:{c:n.c}});
     });
     this._safeAdd(map,'v8-util',{type:'geojson',data:{type:'FeatureCollection',features:feats}},{
       id:'v8-util-l',type:'line',source:'v8-util',
-      paint:{'line-color':['get','c'],'line-width':3,'line-opacity':0.82,'line-blur':0.4},layout:{'line-cap':'round'}
+      paint:{'line-color':['get','c'],'line-width':3.2,'line-opacity':0.85,'line-blur':0.3},layout:{'line-cap':'round'}
     });
-    this._cinLabels(map, nets.map(n=>({lon:cx+Math.cos(n.ang*Math.PI/180)*0.05*1.6, lat:cy+Math.sin(n.ang*Math.PI/180)*0.05, color:n.c, icon:'', title:n.label, sub:'retea'})));
+    // nod central (sursa) + noduri statii la varfuri
+    this._safeAdd(map,'v8-util-n',{type:'geojson',data:{type:'FeatureCollection',features:nodes.concat([{type:'Feature',geometry:{type:'Point',coordinates:[cx,cy]},properties:{c:'#e2e8f0'}}])}},{
+      id:'v8-util-n-l',type:'circle',source:'v8-util-n',
+      paint:{'circle-radius':6,'circle-color':['get','c'],'circle-opacity':0.95,'circle-stroke-width':2,'circle-stroke-color':'#0b1424'}
+    });
+    this._cinLabels(map, nets.map(n=>({lon:cx+Math.cos(n.ang*Math.PI/180)*rx, lat:cy+Math.sin(n.ang*Math.PI/180)*ry, color:n.c, icon:n.icon, title:n.label, sub:n.node})));
   },
 
   // ── PROIECTE STRUCTURANTE REALE pe harta (din _UrbanProjects per-UAT) ──
@@ -1108,7 +1136,7 @@ G._CinemaEngine={
      'v8-mp-zone-line','v8-mp-zone-l','v8-mp-zone','v8-mp-green-l','v8-mp-green','v8-mp-pass-l','v8-mp-pass',
      'v8-dp-l','v8-dp','v8-tp2-l','v8-tp2','v8-fi-cur-l','v8-fi-cur','v8-fi-fut-fill','v8-fi-fut-l','v8-fi-fut',
      'v8-mp-belt-l','v8-mp-belt','v8-mp-gwedge-l','v8-mp-gwedge',
-     'v8-fi-2030-l','v8-fi-2030','v8-fi-2040-l','v8-fi-2040','v8-fi-2055-l','v8-fi-2055','v8-util-l','v8-util',
+     'v8-fi-2030-l','v8-fi-2030','v8-fi-2040-l','v8-fi-2040','v8-fi-2055-l','v8-fi-2055','v8-util-l','v8-util','v8-util-n-l','v8-util-n',
      'v8-proj-line-l','v8-proj-line','v8-proj-pt-l','v8-proj-pt',
      'v8-uhi-l','v8-uhi','v8-oasis-h-l','v8-oasis-h','v8-oasis-l','v8-oasis',
      // cleanup v6/v7 layers

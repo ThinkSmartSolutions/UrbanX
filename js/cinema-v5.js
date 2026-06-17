@@ -951,6 +951,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
       case 'b4s4':
         lp('day');
         // Schema retelelor de utilitati desenata pe harta (apa/canal/energie/gaz)
+        // la scara orasului -> zoom de oras (12.5-13), nu nivel strada.
         onIdle(function(){try{SE._addUtilityNet&&SE._addUtilityNet(map);}catch(e){}});
         setTimeout(function(){
           if(!SE._playing) return;
@@ -958,9 +959,10 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
           if(D.cimitire&&D.cimitire.length) addLine('v9-cim',D.cimitire,{'line-color':'#6b7280','line-width':2,'line-dasharray':[3,3],'line-opacity':0.7});
           if(D.utilities&&D.utilities.length) addLine('v9-utils',D.utilities,{'line-color':'#fbbf24','line-width':1,'line-opacity':0.5,'line-dasharray':[2,4]});
         },1500);
-        fly(Z.C,15.5,68,20,4000,0,'day');
-        fly(Z.NV,15,65,65,6000,10000,'day');
-        fly(Z.SE2,15,65,125,6000,18000,'day');
+        fly(Z.C,12.8,55,20,4000,0,'day');
+        rot(14,0.004);
+        fly(Z.C,13.2,58,70,7000,10000,'day');
+        fly(Z.C,12.9,54,120,6000,18000,'day');
         break;
 
       // BLOC 5 ───────────────────────────────────────────────────────────
