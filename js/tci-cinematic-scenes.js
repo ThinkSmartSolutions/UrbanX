@@ -1004,6 +1004,25 @@ G._CinemaEngine={
     this._cinLabels(map, nets.map(n=>({lon:cx+Math.cos(n.ang*Math.PI/180)*0.05*1.6, lat:cy+Math.sin(n.ang*Math.PI/180)*0.05, color:n.c, icon:'', title:n.label, sub:'retea'})));
   },
 
+  // ── PROIECTE STRUCTURANTE REALE pe harta (din _UrbanProjects per-UAT) ──
+  _addRealProjects(map, cityKey){
+    if(!map || !window._UrbanProjects) return;
+    var f = window._UrbanProjects.buildFeatures(cityKey || this._cityKey || (window.TCI&&window.TCI.cityKey) || 'RO-IS-01', this._city||{});
+    if(f.lines && f.lines.length){
+      this._safeAdd(map,'v8-proj-line',{type:'geojson',data:{type:'FeatureCollection',features:f.lines}},{
+        id:'v8-proj-line-l',type:'line',source:'v8-proj-line',
+        paint:{'line-color':['get','c'],'line-width':5,'line-opacity':0.88,'line-blur':0.6,'line-dasharray':[2,1]},layout:{'line-cap':'round'}
+      });
+    }
+    if(f.pts && f.pts.length){
+      this._safeAdd(map,'v8-proj-pt',{type:'geojson',data:{type:'FeatureCollection',features:f.pts}},{
+        id:'v8-proj-pt-l',type:'circle',source:'v8-proj-pt',
+        paint:{'circle-radius':10,'circle-color':['get','c'],'circle-opacity':0.92,'circle-stroke-width':3,'circle-stroke-color':'#ffffff'}
+      });
+    }
+    if(this._cinLabels) this._cinLabels(map, f.labels||[]);
+  },
+
   // Protejeaza canvas-ul — il re-adauga daca e sters de platforma
   _guardCanvas(){
     if(this._canvasObserver)this._canvasObserver.disconnect();
@@ -1030,6 +1049,7 @@ G._CinemaEngine={
      'v8-dp-l','v8-dp','v8-tp2-l','v8-tp2','v8-fi-cur-l','v8-fi-cur','v8-fi-fut-fill','v8-fi-fut-l','v8-fi-fut',
      'v8-mp-belt-l','v8-mp-belt','v8-mp-gwedge-l','v8-mp-gwedge',
      'v8-fi-2030-l','v8-fi-2030','v8-fi-2040-l','v8-fi-2040','v8-fi-2055-l','v8-fi-2055','v8-util-l','v8-util',
+     'v8-proj-line-l','v8-proj-line','v8-proj-pt-l','v8-proj-pt',
      // cleanup v6/v7 layers
      'v6-gr-l','v6-gr','v6-bld-l','v6-bld','v6-den-l','v6-den','v6-tr-l','v6-tr',
      'v7-gr-l','v7-gr','v7-bld-l','v7-bld','v7-den-l','v7-den','v7-tr-l','v7-tr',

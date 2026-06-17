@@ -336,7 +336,7 @@
 
         const pdf = new J({ orientation: 'portrait', unit: 'mm', format: 'a4' });
         pdf.__doc = 'Masterplan Strategic 2025-2055';
-        const ctx = { pdf, W: 210, H: 297, city, risk, need, grav, climate, housing, invest, bench, euComp, scenario, pugGeo, reguli,
+        const ctx = { pdf, W: 210, H: 297, cityKey, city, risk, need, grav, climate, housing, invest, bench, euComp, scenario, pugGeo, reguli,
           today: new Date().toLocaleDateString('ro-RO', { year: 'numeric', month: 'long', day: 'numeric' }), iso: new Date().toISOString().split('T')[0] };
 
         // COPERTI (2): folosim coperta premium existenta a MP pt prima pagina

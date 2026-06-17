@@ -86,6 +86,7 @@ SCENES = [
   {id:'b6s3',dur:22000,label:'SCENARII INTRAVILAN',   bloc:3,blabel:'ORASUL 2055'},
   {id:'b8s1',dur:22000,label:'PROIECTE STRATEGICE',   bloc:3,blabel:'ORASUL 2055'},
   {id:'b8s2',dur:20000,label:'CORIDOARE INFLUENTA',   bloc:3,blabel:'ORASUL 2055'},
+  {id:'b15s1',dur:24000,label:'PROIECTE STRUCTURANTE',bloc:3,blabel:'ORASUL 2055'},
   {id:'b9s1',dur:24000,label:'MONTE CARLO',           bloc:3,blabel:'ORASUL 2055'},
   {id:'b9s2',dur:22000,label:'BENCHMARK EUROPEAN',    bloc:3,blabel:'ORASUL 2055'},
   // ACT IV — REZILIENTA
@@ -292,6 +293,7 @@ window._startCinema = function(cityKey){
     }catch(e){ console.warn('[v9] bridge cladiri:',e.message); }
   })();
 
+  SE._cityKey = cityKey;   // pt proiectele reale per-UAT (_addRealProjects)
   var city=null;
   if(window._RO_CITIES_DB) city=window._RO_CITIES_DB[cityKey];
   if(!city&&window._UAT_DB) city=window._UAT_DB[cityKey];
@@ -1279,6 +1281,14 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         rot(20,0.006);
         fly(Z.CBD,14.5,66,20,5000,0,'night');
         fly(Z.CBD,15,70,110,13000,5000,'night');
+        break;
+      case 'b15s1': // Proiecte structurante reale
+        lp('day');
+        onIdle(function(){ try{SE._addBuildings&&SE._addBuildings(map);}catch(e){} });
+        setTimeout(function(){ if(SE._playing){ try{SE._addRealProjects&&SE._addRealProjects(map, SE._cityKey);}catch(e){} } },2400);
+        fly(Z.C,12.8,54,0,4500,0,'day');
+        rot(9,0.005);
+        fly(Z.C,13.5,58,55,12000,12000,'day');
         break;
     }
   }
@@ -2474,6 +2484,26 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         narativ('Oamenii, economia, mobilitatea, sanatatea, mediul si administratia nu functioneaza izolat — sunt module ale aceluiasi sistem viu. UrbanX le conecteaza intr-un Digital Twin care monitorizeaza si anticipeaza. Aceasta este Urban Intelligence: decizii bazate pe date, in timp real.');
         concluzie('Orasul nu este o colectie de cladiri — este un organism care poate fi inteles, masurat si vindecat');
         break;
+
+      case 'b15s1': {
+        titlu('Proiecte Structurante in derulare','PNRR · FEDR · CNAIR · poli reali de dezvoltare'); linie();
+        var _pj = (window._UrbanProjects && window._UrbanProjects.get) ? window._UrbanProjects.get(SE._cityKey||(window.TCI&&TCI.cityKey)||'RO-IS-01', city) : [];
+        cifra(_pj.length+' proiecte','Structurante identificate','#D4AF37');
+        cifra2('poli de dezvoltare','Efecte cumulate 10-15 ani','#22c55e');
+        // listam pe ecran proiectele (sustine etichetele de pe harta)
+        _pj.slice(0,5).forEach(function(p,i){
+          var a=Math.min(1,(t-0.18-i*0.06)/0.18)*sA; if(a<=0)return;
+          ctx.globalAlpha=a; ctx.fillStyle='rgba(4,10,24,0.72)'; ctx.fillRect(W*0.04,H*(0.56+i*0.068),W*0.50,H*0.058);
+          ctx.fillStyle=p.color||'#D4AF37'; ctx.font='700 '+Math.min(W*0.012,16)+'px "Space Grotesk",sans-serif'; ctx.textAlign='left';
+          ctx.fillText((p.icon||'•')+' '+p.nume.slice(0,42),W*0.055,H*(0.56+i*0.068)+H*0.024);
+          ctx.fillStyle='rgba(148,163,184,0.7)'; ctx.font='500 '+Math.min(W*0.0085,11)+'px "IBM Plex Mono",monospace';
+          ctx.fillText((p.impact||'').slice(0,64),W*0.055,H*(0.56+i*0.068)+H*0.046);
+          ctx.globalAlpha=1;
+        });
+        narativ('Marile proiecte (Spital Regional, centura, tren metropolitan, poli rezidentiali) restructureaza orasul. Fiecare = pol de dezvoltare cu efecte cumulate pe 10-15 ani. PUG-ul trebuie sa anticipeze presiunile de densificare, mobilitate si servicii din jurul lor.');
+        concluzie('Anticiparea polilor de dezvoltare = dimensionare corecta a infrastructurii, nu reactie tardiva');
+        break;
+      }
     }
 
     // ── CARTON DE CAPITOL — la inceputul fiecarui BLOC nou, un titlu mare se
