@@ -55,6 +55,8 @@ var SCENES = [
 // (nicio scena eliminata) + 4 scene noi de indici calitate viata (b13s1-4).
 // Id-urile pastrate -> switch-urile setup/draw raman valide.
 SCENES = [
+  // PROLOG — deschidere emotionala
+  {id:'b0s1',dur:12000,label:'ORASUL RESPIRA',        bloc:1,blabel:'INTELEGEREA ORASULUI'},
   // ACT I — INTELEGEREA ORASULUI
   {id:'b1s1',dur:22000,label:'IDENTITATE',            bloc:1,blabel:'INTELEGEREA ORASULUI'},
   {id:'b1s2',dur:20000,label:'POZITIE STRATEGICA',    bloc:1,blabel:'INTELEGEREA ORASULUI'},
@@ -91,6 +93,8 @@ SCENES = [
   {id:'b10s1',dur:22000,label:'CRIZE SIMULTANE',      bloc:4,blabel:'REZILIENTA'},
   {id:'b10s2',dur:22000,label:'SCENARIUL NEGRU',      bloc:4,blabel:'REZILIENTA'},
   {id:'b10s3',dur:20000,label:'CONSTRUCTIA REZILIENTEI',bloc:4,blabel:'REZILIENTA'},
+  {id:'b14s1',dur:18000,label:'SPONGE CITY',          bloc:4,blabel:'REZILIENTA'},
+  {id:'b14s2',dur:18000,label:'METABOLISM URBAN',     bloc:4,blabel:'REZILIENTA'},
   // ACT V — MODELE CARE FUNCTIONEAZA
   {id:'b12s1',dur:20000,label:'SUPERBLOCKS BARCELONA',bloc:5,blabel:'MODELE CARE FUNCTIONEAZA'},
   {id:'b12s2',dur:20000,label:'REGULA 3-30-300',      bloc:5,blabel:'MODELE CARE FUNCTIONEAZA'},
@@ -101,6 +105,7 @@ SCENES = [
   {id:'b13s2',dur:18000,label:'ECONOMIA DE NOAPTE',   bloc:6,blabel:'ORASUL PENTRU OAMENI'},
   {id:'b13s3',dur:18000,label:'ORAS PRIETENOS SENIORI',bloc:6,blabel:'ORASUL PENTRU OAMENI'},
   {id:'b13s4',dur:18000,label:'ORAS PENTRU COPII',    bloc:6,blabel:'ORASUL PENTRU OAMENI'},
+  {id:'b14s3',dur:18000,label:'ORASUL CA SISTEM VIU', bloc:6,blabel:'ORASUL PENTRU OAMENI'},
   // ACT VII — AGENDA & VIZIUNEA
   {id:'b11s1',dur:22000,label:'AGENDA PRIMARULUI',    bloc:7,blabel:'AGENDA & VIZIUNEA'},
   {id:'b11s2',dur:28000,label:'VIZIUNEA',             bloc:7,blabel:'AGENDA & VIZIUNEA'},
@@ -1245,6 +1250,34 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         fly(Z.RES,14,54,0,4000,0,'day');
         rot(12,0.004);
         fly(Z.C,13.8,54,50,13000,4500,'day');
+        break;
+
+      // PROLOG + scene-semnatura noi ────────────────────────────────────────
+      case 'b0s1': // Orasul respira (prolog)
+        lp('night');
+        fly([cx,cy],13.5,60,0,5000,0,'night');
+        rot(8,0.004);
+        fly([cx,cy],14,64,30,7000,5500,'dusk');
+        break;
+      case 'b14s1': // Sponge City
+        lp('dawn');
+        onIdle(function(){ try{SE._addFloodExpand&&SE._addFloodExpand(map);}catch(e){} });
+        fly(Z.SV,13.5,52,10,4000,0,'dawn');
+        fly(Z.C,13.8,55,45,13000,4500,'day');
+        break;
+      case 'b14s2': // Metabolism urban
+        lp('day');
+        onIdle(function(){ try{SE._addBuildings&&SE._addBuildings(map);}catch(e){} });
+        fly(Z.C,13,58,0,4000,0,'day');
+        rot(16,0.005);
+        fly(Z.C,13.4,60,60,13000,4500,'day');
+        break;
+      case 'b14s3': // Orasul ca sistem viu (City OS)
+        lp('night');
+        onIdle(function(){ try{SE._add3DGrowthFull&&SE._add3DGrowthFull(map);}catch(e){} });
+        rot(20,0.006);
+        fly(Z.CBD,14.5,66,20,5000,0,'night');
+        fly(Z.CBD,15,70,110,13000,5000,'night');
         break;
     }
   }
@@ -2414,6 +2447,29 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         narativ('Un oras bun pentru un copil de 8 ani e bun pentru toata lumea (Enrique Penalosa). Indicatorul UNICEF masoara cati copii ajung la scoala si parc in 10 minute pe jos, in siguranta. Decizie de planificare puternica si politic — viitorul orasului se masoara in copii.');
         concluzie('Orasele care pun copilul in centru castiga familiile tinere si viitorul');
         break;
+
+      // PROLOG + scene-semnatura noi ────────────────────────────────────────
+      case 'b0s1':
+        _drawBreathing(ctx,W,H,sA,t,name);
+        break;
+      case 'b14s1':
+        titlu('Sponge City','Adaptare climatica · ploaie 100mm · model UE (Rotterdam/Copenhaga)'); linie();
+        if(t>0.12) _drawSponge(ctx,W,H,Math.min(1,(t-0.12)/0.2)*sA,t);
+        narativ('Schimbarile climatice aduc ploi torentiale tot mai dese. Orasul-burete absoarbe apa in loc sa o evacueze: parcuri inundabile, coridoare albastre, bazine de retentie, pavaje permeabile, acoperisuri verzi. Reduce inundatiile urbane si reincarca panza freatica. Trend major in Europa.');
+        concluzie('Apa nu mai este dusman, ci resursa — orasul o absoarbe, o stocheaza, o foloseste');
+        break;
+      case 'b14s2':
+        titlu('Metabolism Urban','Orasul ca organism · intrari si iesiri · concept european'); linie();
+        if(t>0.12) _drawMetabolism(ctx,W,H,Math.min(1,(t-0.12)/0.2)*sA,t);
+        narativ('Orasul consuma resurse (apa, energie, oameni, marfuri) si produce emisii, deseuri, ape uzate. Un metabolism urban eficient inchide buclele: economie circulara, recuperare energie, reutilizare apa. Masurarea fluxurilor = primul pas spre un oras cu adevarat sustenabil.');
+        concluzie('Orasele eficiente nu consuma liniar — inchid buclele si transforma deseul in resursa');
+        break;
+      case 'b14s3':
+        titlu('Orasul ca Sistem Viu','UrbanX OS · toate sistemele conectate · Urban Intelligence'); linie();
+        _drawCityOS(ctx,W,H,sA,t);
+        narativ('Oamenii, economia, mobilitatea, sanatatea, mediul si administratia nu functioneaza izolat — sunt module ale aceluiasi sistem viu. UrbanX le conecteaza intr-un Digital Twin care monitorizeaza si anticipeaza. Aceasta este Urban Intelligence: decizii bazate pe date, in timp real.');
+        concluzie('Orasul nu este o colectie de cladiri — este un organism care poate fi inteles, masurat si vindecat');
+        break;
     }
 
     // ── CARTON DE CAPITOL — la inceputul fiecarui BLOC nou, un titlu mare se
@@ -3008,6 +3064,68 @@ function _drawCarbon(ctx,W,H,a,pred){
   ctx.fillText('CARBON: '+base.toFixed(1)+' → '+(base*0.32).toFixed(1)+' t CO2/loc',x0,y-H*0.24);
   ctx.fillStyle='rgba(148,163,184,0.5)'; ctx.font='500 '+Math.min(W*0.0078,10)+'px "IBM Plex Mono",monospace'; ctx.fillText('neutralitate climatica · EEA / IPCC / Green Deal',x0,y+32);
   ctx.restore();
+}
+
+// PROLOG — "orasul respira": glow pulsant + text poetic (deschidere emotionala).
+function _drawBreathing(ctx,W,H,a,t,name){
+  ctx.save();
+  var br=0.5+0.5*Math.sin(t*Math.PI*2.2);
+  var g=ctx.createRadialGradient(W/2,H*0.52,0,W/2,H*0.52,Math.min(W,H)*0.55);
+  g.addColorStop(0,'rgba(212,175,55,'+((0.10+br*0.07)*a)+')'); g.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  ctx.textAlign='center';
+  if(t>0.18){ ctx.globalAlpha=Math.min(1,(t-0.18)/0.25)*a; ctx.fillStyle='rgba(255,255,255,0.95)'; ctx.font='300 '+Math.min(W*0.026,34)+'px "Space Grotesk",sans-serif'; ctx.fillText('Fiecare oras spune o poveste.',W/2,H*0.45); }
+  if(t>0.46){ ctx.globalAlpha=Math.min(1,(t-0.46)/0.2)*a; ctx.fillStyle='#D4AF37'; ctx.font='800 '+Math.min(W*0.03,40)+'px "Space Grotesk",sans-serif'; ctx.fillText('Unde va fi '+((name||'orasul').toUpperCase())+' peste 30 de ani?',W/2,H*0.54); }
+  ctx.globalAlpha=1; ctx.restore();
+}
+// SPONGE CITY — ploaie 100mm: AZI inundatie vs DUPA absorbtie (trend climatic UE).
+function _drawSponge(ctx,W,H,a,t){
+  if(a<=0)return; ctx.save();
+  ctx.globalAlpha=a*0.4; ctx.strokeStyle='#60a5fa'; ctx.lineWidth=1.5;
+  for(var i=0;i<46;i++){ var x=(i*61+t*420)%W; var y=((i*43)+(t*640))%(H*0.5)+H*0.14; ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x-3,y+12); ctx.stroke(); }
+  var mid=W/2; ctx.textAlign='center';
+  ctx.globalAlpha=a; ctx.fillStyle='rgba(239,68,68,0.32)'; ctx.fillRect(W*0.06,H*0.66,mid-W*0.10,H*0.12);
+  ctx.fillStyle='#ef4444'; ctx.font='800 '+Math.min(W*0.014,18)+'px "Space Grotesk",sans-serif'; ctx.fillText('AZI: inundatie urbana',W*0.30,H*0.835);
+  ctx.fillStyle='rgba(34,197,94,0.32)'; ctx.fillRect(mid+W*0.04,H*0.66,mid-W*0.10,H*0.12);
+  ctx.fillStyle='#22c55e'; ctx.fillText('SPONGE CITY: absorbtie',W*0.72,H*0.835);
+  ctx.fillStyle='rgba(148,163,184,0.65)'; ctx.font='500 '+Math.min(W*0.0092,11)+'px "IBM Plex Mono",monospace'; ctx.fillText('parcuri absorbante · coridoare albastre · bazine de retentie · pavaje permeabile',W/2,H*0.91);
+  ctx.fillStyle='#60a5fa'; ctx.font='900 '+Math.min(W*0.02,26)+'px "Space Grotesk",sans-serif'; ctx.fillText('PLOAIE 100 mm / 24h',W/2,H*0.40);
+  ctx.globalAlpha=1; ctx.restore();
+}
+// URBAN METABOLISM — orasul ca organism: intrari (apa/energie/oameni/marfuri) -> iesiri.
+function _drawMetabolism(ctx,W,H,a,t){
+  if(a<=0)return; ctx.save();
+  var cx=W/2, cy=H*0.50, R=Math.min(W*0.13,170), cr=Math.min(W*0.03,40);
+  var br=0.5+0.5*Math.sin(t*Math.PI*3);
+  ctx.globalAlpha=a; ctx.fillStyle='rgba(212,175,55,'+(0.5+br*0.3)+')'; ctx.beginPath(); ctx.arc(cx,cy,cr,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#0a1224'; ctx.font='900 '+Math.min(W*0.011,14)+'px "Space Grotesk",sans-serif'; ctx.textAlign='center'; ctx.fillText('ORAS',cx,cy+4);
+  var ins=[['Apa','#3b82f6'],['Energie','#fbbf24'],['Oameni','#22c55e'],['Marfuri','#a855f7']];
+  var outs=[['Emisii','#ef4444'],['Deseuri','#9ca3af'],['Apa uzata','#06b6d4']];
+  ins.forEach(function(it,i){ var y=cy-R*0.7+i*(R*1.4/3), x=cx-R*1.5, flow=(t*2+i*0.25)%1;
+    ctx.globalAlpha=a*0.55; ctx.strokeStyle=it[1]; ctx.lineWidth=2.5; ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(cx-cr,cy); ctx.stroke();
+    var fx=x+(cx-cr-x)*flow, fy=y+(cy-y)*flow; ctx.globalAlpha=a; ctx.fillStyle=it[1]; ctx.beginPath(); ctx.arc(fx,fy,4,0,Math.PI*2); ctx.fill();
+    ctx.font='700 '+Math.min(W*0.0092,12)+'px "IBM Plex Mono",monospace'; ctx.textAlign='right'; ctx.fillText(it[0]+' →',x-4,y+3); });
+  outs.forEach(function(it,i){ var y=cy-R*0.45+i*(R*0.9/2), x=cx+R*1.5, flow=(t*2+i*0.3)%1;
+    ctx.globalAlpha=a*0.55; ctx.strokeStyle=it[1]; ctx.lineWidth=2.5; ctx.beginPath(); ctx.moveTo(cx+cr,cy); ctx.lineTo(x,y); ctx.stroke();
+    var fx=(cx+cr)+(x-(cx+cr))*flow, fy=cy+(y-cy)*flow; ctx.globalAlpha=a; ctx.fillStyle=it[1]; ctx.beginPath(); ctx.arc(fx,fy,4,0,Math.PI*2); ctx.fill();
+    ctx.font='700 '+Math.min(W*0.0092,12)+'px "IBM Plex Mono",monospace'; ctx.textAlign='left'; ctx.fillText('→ '+it[0],x+4,y+3); });
+  ctx.globalAlpha=a*0.85; ctx.fillStyle='#D4AF37'; ctx.font='800 '+Math.min(W*0.011,14)+'px "IBM Plex Mono",monospace'; ctx.textAlign='center'; ctx.fillText('METABOLISM URBAN — orasul ca organism',cx,cy-R-Math.min(W*0.02,26));
+  ctx.globalAlpha=1; ctx.restore();
+}
+// CITY OPERATING SYSTEM — orasul ca sistem viu (module care se aprind + CPU central).
+function _drawCityOS(ctx,W,H,a,t){
+  if(a<=0)return; ctx.save();
+  var cx=W/2, cy=H*0.45, R=Math.min(W*0.16,210);
+  var mods=[['Oameni','#22c55e'],['Economie','#D4AF37'],['Mobilitate','#60a5fa'],['Sanatate','#ef4444'],['Mediu','#34d399'],['Administratie','#a855f7']];
+  ctx.globalAlpha=a*0.28; ctx.strokeStyle='#D4AF37'; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.stroke();
+  mods.forEach(function(md,i){ var ang=-Math.PI/2+i*Math.PI/3, x=cx+Math.cos(ang)*R, y=cy+Math.sin(ang)*R, on=(t*1.25)>(i/mods.length);
+    ctx.globalAlpha=a*(on?0.5:0.14); ctx.strokeStyle=md[1]; ctx.lineWidth=on?2:1; ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(cx,cy); ctx.stroke();
+    ctx.globalAlpha=a*(on?1:0.3); ctx.fillStyle=md[1]; ctx.beginPath(); ctx.arc(x,y,on?9:5,0,Math.PI*2); ctx.fill();
+    ctx.globalAlpha=a*(on?0.95:0.4); ctx.fillStyle='rgba(230,235,255,0.92)'; ctx.font='700 '+Math.min(W*0.0092,12)+'px "IBM Plex Mono",monospace'; ctx.textAlign='center'; ctx.fillText(md[0],x,y+Math.min(W*0.024,30)); });
+  ctx.globalAlpha=a; ctx.fillStyle='#D4AF37'; ctx.fillRect(cx-Math.min(W*0.026,34),cy-Math.min(W*0.014,18),Math.min(W*0.052,68),Math.min(W*0.028,36));
+  ctx.fillStyle='#0a1224'; ctx.font='900 '+Math.min(W*0.009,12)+'px "Space Grotesk",sans-serif'; ctx.textAlign='center'; ctx.fillText('URBANX OS',cx,cy+3);
+  if(t>0.6){ ctx.globalAlpha=Math.min(1,(t-0.6)/0.2)*a; ctx.fillStyle='rgba(255,255,255,0.95)'; ctx.font='600 '+Math.min(W*0.015,20)+'px "Space Grotesk",sans-serif'; ctx.textAlign='center'; ctx.fillText('Orasul nu e o colectie de cladiri. Este un sistem viu.',cx,H*0.82); }
+  ctx.globalAlpha=1; ctx.restore();
 }
 
 // Radar de analiza — baleiaj rotativ subtil peste harta (scenele de analiza).
