@@ -1571,6 +1571,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
 
       case 'b2s3':
         titlu('Migratie & Emigrare','Forta de munca \u00b7 Studenti \u00b7 Diaspora \u00b7 Impact'); linie();
+        if(t>0.18) _drawMigration(ctx,W,H,Math.min(1,(t-0.18)/0.2)*sA,pred);
         var mig=pred.migNeta||0;
         var isUniv=(city.universitati||0)>0||(city.coef_hub||0)>=1.1;
         cifra((mig>=0?'+':'')+N2(mig)+'/an','Migratie neta estimata',mig>=0?'#22c55e':'#ef4444');
@@ -1629,6 +1630,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
 
       case 'b3s3':
         titlu('Investitii & ROI Imobiliar','Preturi \u00b7 Piata \u00b7 Oportunitati \u00b7 Riscuri'); linie();
+        if(t>0.18) _drawROI(ctx,W,H,Math.min(1,(t-0.18)/0.2)*sA,pred);
         var roi=pred.roi||8;
         cifra(roi+'%/an','ROI imobiliar estimat brut',roi>=10?'#22c55e':roi>=7?'#f59e0b':'#ef4444');
         cifra2(N2(Math.round(pred.invTotal*0.55))+' M \u20ac','Investitii private estimate '+_S()+'-'+_E());
@@ -1972,6 +1974,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
 
       case 'b8s2':
         titlu('Coridoare de Influenta','Autostrada = crestere valoare \u00b7 Model gravitational'); linie();
+        if(t>0.16) _drawInfluence(ctx,W,H,Math.min(1,(t-0.16)/0.2)*sA,t);
         var nMot3=(D.roads||[]).filter(function(r){return r.properties&&r.properties.t==='motorway';}).length;
         cifra(N2(nMot3)+' segmente','Autostrazi OSM detectate raza 70km','#dc2626');
         cifra2('+15-40%','Crestere valoare teren pe coridor');
@@ -3126,6 +3129,57 @@ function _drawCityOS(ctx,W,H,a,t){
   ctx.fillStyle='#0a1224'; ctx.font='900 '+Math.min(W*0.009,12)+'px "Space Grotesk",sans-serif'; ctx.textAlign='center'; ctx.fillText('URBANX OS',cx,cy+3);
   if(t>0.6){ ctx.globalAlpha=Math.min(1,(t-0.6)/0.2)*a; ctx.fillStyle='rgba(255,255,255,0.95)'; ctx.font='600 '+Math.min(W*0.015,20)+'px "Space Grotesk",sans-serif'; ctx.textAlign='center'; ctx.fillText('Orasul nu e o colectie de cladiri. Este un sistem viu.',cx,H*0.82); }
   ctx.globalAlpha=1; ctx.restore();
+}
+
+// MIGRATIE — fluxuri intrare/iesire fata de oras (sold migrator net).
+function _drawMigration(ctx,W,H,a,pred){
+  if(a<=0)return; pred=pred||{}; ctx.save();
+  var cx=W*0.64, cy=H*0.50, r=Math.min(W*0.045,56);
+  var mig=pred.migNeta||0;
+  ctx.globalAlpha=a; ctx.fillStyle='#D4AF37'; ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#0a1224'; ctx.font='900 '+Math.min(W*0.012,15)+'px "Space Grotesk",sans-serif'; ctx.textAlign='center'; ctx.fillText('ORAS',cx,cy+4);
+  var outs=[['Emigrare munca',0.6],['Tineri studenti',0.3],['Familii periurban',0.2]];
+  var ins=[['Revin diaspora',0.3],['Studenti noi',0.45],['Migratie interna',0.3]];
+  outs.forEach(function(f,i){ var ang=Math.PI*(0.62+i*0.26), ex=cx+Math.cos(ang)*r*3.4, ey=cy+Math.sin(ang)*r*2.2;
+    ctx.globalAlpha=a*0.7; ctx.strokeStyle='#ef4444'; ctx.lineWidth=2+f[1]*6; ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(ex,ey); ctx.stroke();
+    ctx.globalAlpha=a; ctx.fillStyle='#ef4444'; ctx.font='700 '+Math.min(W*0.0088,11)+'px "IBM Plex Mono",monospace'; ctx.textAlign='right'; ctx.fillText('← '+f[0],ex-4,ey+3); });
+  ins.forEach(function(f,i){ var ang=Math.PI*(-0.36+i*0.26), ex=cx+Math.cos(ang)*r*3.4, ey=cy+Math.sin(ang)*r*2.2;
+    ctx.globalAlpha=a*0.7; ctx.strokeStyle='#22c55e'; ctx.lineWidth=2+f[1]*6; ctx.beginPath(); ctx.moveTo(ex,ey); ctx.lineTo(cx,cy); ctx.stroke();
+    ctx.globalAlpha=a; ctx.fillStyle='#22c55e'; ctx.font='700 '+Math.min(W*0.0088,11)+'px "IBM Plex Mono",monospace'; ctx.textAlign='left'; ctx.fillText(f[0]+' →',ex+4,ey+3); });
+  ctx.globalAlpha=a; ctx.fillStyle=mig>=0?'#22c55e':'#ef4444'; ctx.font='900 '+Math.min(W*0.022,28)+'px "Space Grotesk",sans-serif'; ctx.textAlign='center';
+  ctx.fillText((mig>=0?'+':'')+(mig||0)+'/an',cx,cy-r-Math.min(W*0.02,26));
+  ctx.fillStyle='rgba(148,163,184,0.6)'; ctx.font='600 '+Math.min(W*0.009,11)+'px "IBM Plex Mono",monospace'; ctx.fillText('SOLD MIGRATOR NET',cx,cy+r+Math.min(W*0.026,34));
+  ctx.restore();
+}
+// ROI IMOBILIAR — comparatie randament imobiliar vs alternative.
+function _drawROI(ctx,W,H,a,pred){
+  if(a<=0)return; pred=pred||{}; ctx.save();
+  var roi=pred.roi||8;
+  var comp=[['Imobiliar oras',roi,'#D4AF37'],['Titluri stat',7,'#a855f7'],['Inflatie',6,'#ef4444'],['Depozit bancar',4,'#60a5fa']];
+  var mx=Math.max.apply(null,comp.map(function(c){return c[1];}))*1.15;
+  var x=W*0.58, y0=H*0.34, bw=Math.min(W*0.30,360), rh=Math.min(H*0.06,42);
+  comp.forEach(function(c,i){ var yy=y0+i*rh;
+    ctx.globalAlpha=a*Math.min(1,(a)); ctx.fillStyle='rgba(255,255,255,0.07)'; ctx.fillRect(x,yy,bw,rh-9);
+    ctx.fillStyle=c[2]; ctx.fillRect(x,yy,bw*(c[1]/mx),rh-9);
+    ctx.fillStyle='rgba(230,235,255,0.92)'; ctx.font='700 '+Math.min(W*0.0095,12)+'px "IBM Plex Mono",monospace'; ctx.textAlign='left'; ctx.fillText(c[0],x+6,yy+rh*0.4);
+    ctx.textAlign='right'; ctx.fillStyle=c[2]; ctx.font='900 '+Math.min(W*0.011,14)+'px "Space Grotesk",sans-serif'; ctx.fillText(c[1]+'%/an',x+bw-6,yy+rh*0.4); });
+  ctx.globalAlpha=a*0.85; ctx.fillStyle='#D4AF37'; ctx.font='800 '+Math.min(W*0.011,14)+'px "IBM Plex Mono",monospace'; ctx.textAlign='left';
+  ctx.fillText('RANDAMENT ANUAL ESTIMAT (brut)',x,y0-Math.min(W*0.015,20));
+  ctx.fillStyle='rgba(148,163,184,0.5)'; ctx.font='500 '+Math.min(W*0.0078,10)+'px "IBM Plex Mono",monospace'; ctx.fillText('orientativ · ajustat la riscul seismic local',x,y0+comp.length*rh+4);
+  ctx.restore();
+}
+// CORIDOARE DE INFLUENTA — zone concentrice de crestere a valorii in jurul unui pol.
+function _drawInfluence(ctx,W,H,a,t){
+  if(a<=0)return; ctx.save();
+  var cx=W*0.64, cy=H*0.50;
+  var zones=[[Math.min(W*0.20,260),'+3%','#3b82f6'],[Math.min(W*0.155,200),'+10%','#22c55e'],[Math.min(W*0.105,135),'+20%','#f59e0b'],[Math.min(W*0.06,78),'+35% valoare','#ff3366']];
+  zones.forEach(function(z,i){ var pr=Math.min(1,(t-i*0.06)/0.4); if(pr<=0)return;
+    ctx.globalAlpha=a*0.30*pr; ctx.fillStyle=z[2]; ctx.beginPath(); ctx.arc(cx,cy,z[0]*pr,0,Math.PI*2); ctx.fill();
+    ctx.globalAlpha=a*0.8*pr; ctx.strokeStyle=z[2]; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(cx,cy,z[0]*pr,0,Math.PI*2); ctx.stroke();
+    ctx.globalAlpha=a*pr; ctx.fillStyle=z[2]; ctx.font='800 '+Math.min(W*0.0095,12)+'px "IBM Plex Mono",monospace'; ctx.textAlign='center'; ctx.fillText(z[1],cx,cy-z[0]*pr+Math.min(W*0.012,15)); });
+  ctx.globalAlpha=a; ctx.fillStyle='#fff'; ctx.font='900 '+Math.min(W*0.011,14)+'px "Space Grotesk",sans-serif'; ctx.textAlign='center'; ctx.fillText('AUTOSTRADA /',cx,cy-3); ctx.fillText('PROIECT MAJOR',cx,cy+12);
+  ctx.globalAlpha=a*0.85; ctx.fillStyle='#D4AF37'; ctx.font='800 '+Math.min(W*0.011,14)+'px "IBM Plex Mono",monospace'; ctx.fillText('CORIDOR DE INFLUENTA · model gravitational',cx,H*0.20);
+  ctx.restore();
 }
 
 // Radar de analiza — baleiaj rotativ subtil peste harta (scenele de analiza).
