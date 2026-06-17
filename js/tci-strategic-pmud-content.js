@@ -718,6 +718,7 @@
       try{ if(window._RiskMaps){ window._RiskMaps.renderChapter(D, ctx); } }catch(e){ console.warn('[PMUD] harti risc:',e.message); }
       try{ if(window._RegioInfra){ window._RegioInfra.renderChapter(D, ctx.cityKey, city); } }catch(e){ console.warn('[PMUD] regio infra:',e.message); }
       try{ if(window._UrbanTourism){ window._UrbanTourism.renderChapter(D, ctx.cityKey, city); } }catch(e){ console.warn('[PMUD] turism:',e.message); }
+      try{ if(window._UrbanVitality){ window._UrbanVitality.renderChapter(D, ctx.cityKey, city); } }catch(e){ console.warn('[PMUD] vitality:',e.message); }
       try{ if(window._UrbanFauna){ window._UrbanFauna.renderChapter(D, city); } }catch(e){ console.warn('[PMUD] fauna:',e.message); }
       try{ if(window._UrbanRank){ var _prRk=(window._PredEngine&&_PredEngine.calc)?_PredEngine.calc(city):{}; window._UrbanRank.renderChapter(D, _prRk, city); } }catch(e){ console.warn('[PMUD] rank:',e.message); }
 

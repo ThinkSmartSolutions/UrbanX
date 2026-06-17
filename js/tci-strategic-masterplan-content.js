@@ -1034,6 +1034,8 @@
       try{ if(window._RegioInfra){ window._RegioInfra.renderChapter(D, ctx.cityKey||(city&&city.key), city); } }catch(e){ console.warn('[MP] regio infra:',e.message); }
       // CULTURA & TURISM (motor economic) — capitol dedicat
       try{ if(window._UrbanTourism){ window._UrbanTourism.renderChapter(D, ctx.cityKey||(city&&city.key), city); } }catch(e){ console.warn('[MP] turism:',e.message); }
+      // EDUCATIE & SPORT (capital uman + atractivitate)
+      try{ if(window._UrbanVitality){ window._UrbanVitality.renderChapter(D, ctx.cityKey||(city&&city.key), city); } }catch(e){ console.warn('[MP] vitality:',e.message); }
       // FAUNA urbana & siguranta (caini fara stapan + ursi)
       try{ if(window._UrbanFauna){ window._UrbanFauna.renderChapter(D, city); } }catch(e){ console.warn('[MP] fauna:',e.message); }
       // NOTA UrbanX — clasament + benchmark european

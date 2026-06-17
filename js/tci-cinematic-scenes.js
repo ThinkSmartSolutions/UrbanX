@@ -1230,6 +1230,19 @@ G._CinemaEngine={
     this._cinLabels(map, impacts.map(im=>({lon:cx+im.dx/latC, lat:cy+im.dy, color:im.c, icon:im.icon, title:im.t, sub:'pierdere estimată: '+im.loss})));
   },
 
+  // ── EDUCATIE & SPORT — campus universitar + stadioane/arene
+  _addVitality(map, cityKey, city){
+    if(!window._UrbanVitality) return;
+    var f=window._UrbanVitality.buildFeatures(cityKey||this._cityKey||'RO-IS-01', city||this._city||{});
+    if(f.pts && f.pts.length){
+      this._safeAdd(map,'v8-vit',{type:'geojson',data:{type:'FeatureCollection',features:f.pts}},{
+        id:'v8-vit-l',type:'circle',source:'v8-vit',
+        paint:{'circle-radius':['interpolate',['linear'],['zoom'],11,8,15,18],'circle-color':['get','c'],'circle-opacity':0.9,'circle-stroke-width':2,'circle-stroke-color':'#eef6ff'}
+      });
+    }
+    if(this._cinLabels) this._cinLabels(map, f.labels||[]);
+  },
+
   // ── CULTURA & TURISM — obiective (teatre/muzee/cetati) + Via Transilvanica
   _addTourism(map, cityKey, city){
     if(!window._UrbanTourism) return;
@@ -1352,7 +1365,7 @@ G._CinemaEngine={
      'v8-proj-line-l','v8-proj-line','v8-proj-pt-l','v8-proj-pt',
      'v8-uhi-l','v8-uhi','v8-oasis-h-l','v8-oasis-h','v8-oasis-l','v8-oasis',
      'v8-ri-line-l','v8-ri-line','v8-ri-apt-l','v8-ri-apt',
-     'v8-age-l','v8-age','v8-sc-l','v8-sc','v8-sc-h-l','v8-sc-h','v8-sc-w-l','v8-sc-w','v8-modal-l','v8-modal','v8-cost-l','v8-cost','v8-fauna-l','v8-fauna','v8-via-l','v8-via','v8-cult-l','v8-cult',
+     'v8-age-l','v8-age','v8-sc-l','v8-sc','v8-sc-h-l','v8-sc-h','v8-sc-w-l','v8-sc-w','v8-modal-l','v8-modal','v8-cost-l','v8-cost','v8-fauna-l','v8-fauna','v8-via-l','v8-via','v8-cult-l','v8-cult','v8-vit-l','v8-vit',
      // cleanup v6/v7 layers
      'v6-gr-l','v6-gr','v6-bld-l','v6-bld','v6-den-l','v6-den','v6-tr-l','v6-tr',
      'v7-gr-l','v7-gr','v7-bld-l','v7-bld','v7-den-l','v7-den','v7-tr-l','v7-tr',

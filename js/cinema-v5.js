@@ -109,6 +109,7 @@ SCENES = [
   {id:'b13s4',dur:18000,label:'ORAS PENTRU COPII',    bloc:6,blabel:'ORASUL PENTRU OAMENI'},
   {id:'b18s1',dur:20000,label:'FAUNA & SIGURANTA',    bloc:6,blabel:'ORASUL PENTRU OAMENI'},
   {id:'b19s1',dur:24000,label:'CULTURA & TURISM',     bloc:6,blabel:'ORASUL PENTRU OAMENI'},
+  {id:'b20s1',dur:20000,label:'EDUCATIE & SPORT',     bloc:6,blabel:'ORASUL PENTRU OAMENI'},
   {id:'b14s3',dur:18000,label:'ORASUL CA SISTEM VIU', bloc:6,blabel:'ORASUL PENTRU OAMENI'},
   // ACT VII — AGENDA & VIZIUNEA
   {id:'b11s1',dur:22000,label:'AGENDA ADMINISTRATORULUI',    bloc:7,blabel:'AGENDA & VIZIUNEA'},
@@ -1334,6 +1335,15 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         rot(20,0.006);
         fly(Z.CBD,14.5,66,20,5000,0,'night');
         fly(Z.CBD,15,70,110,13000,5000,'night');
+        break;
+      case 'b20s1': // EDUCATIE & SPORT
+        lp('day');
+        onIdle(function(){try{SE._addBuildings&&SE._addBuildings(map);}catch(e){}});
+        setTimeout(function(){ if(SE._playing){ try{SE._addVitality&&SE._addVitality(map, SE._cityKey, SE._city);}catch(e){} } },1600);
+        fly(Z.UNI,14.5,60,0,4500,0,'day');
+        rot(12,0.005);
+        fly(Z.C,13.6,56,50,7000,9000,'day');
+        fly(Z.CBD,14.2,58,-25,6000,15500,'day');
         break;
       case 'b19s1': // CULTURA & TURISM — obiective + Via Transilvanica + street-view
         lp('day');
@@ -2744,6 +2754,28 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         }
         narativ('Cultura si turismul sunt motor economic pe 30 de ani: locuri de munca, venituri la buget, retentia tinerilor, imaginea orasului. Accesibilitatea (aeroport + autostrada) amplifica turismul de city-break; patrimoniul activat (cetati restaurate — model Alba Carolina) si traseele tematice (Via Transilvanica) distribuie turismul teritorial. Orasele-model: Sibiu (Capitala Culturala 2007), Sighisoara (UNESCO), Salzburg, Krakow.');
         concluzie('Cultura activata + accesibilitate + evenimente = oras care vibreaza, atrage turisti si retine tineri');
+        break;
+      }
+
+      case 'b20s1': { // EDUCATIE & SPORT
+        titlu('Educatie, talent & sport','Universitati = magnet de tineri · stadioane · evenimente · capital uman'); linie();
+        var VV=(window._UrbanVitality)?window._UrbanVitality:null;
+        var ck=SE._cityKey||(window.TCI&&TCI.cityKey)||'RO-IS-01';
+        if(VV){
+          var e=VV.edu(ck,city), s=VV.sport(ck,city);
+          var es=VV.eduScore(ck,city), ss=VV.sportScore(ck,city);
+          cifra(N2(e.studenti)+' studenti','Pol universitar — '+e.pol,'#38bdf8');
+          cifra2('Edu '+es+' · Sport '+ss,'Scoruri atractivitate /100','#22c55e');
+          (e.univ||[]).slice(0,4).forEach(function(u,i){
+            var al=Math.min(1,(t-0.16-i*0.06)/0.18)*sA; if(al<=0)return; ctx.globalAlpha=al;
+            ctx.fillStyle='rgba(4,10,24,0.72)'; ctx.fillRect(W*0.04,H*(0.40+i*0.06),W*0.52,H*0.05);
+            ctx.fillStyle='#38bdf8'; ctx.font='700 '+Math.min(W*0.011,15)+'px "Space Grotesk",sans-serif'; ctx.textAlign='left';
+            ctx.fillText('🎓 '+u.slice(0,46),W*0.055,H*(0.40+i*0.06)+H*0.032);
+            ctx.globalAlpha=1;
+          });
+        }
+        narativ('Universitatile sunt cel mai puternic magnet de tineri si talent — populatie tanara, forta de munca calificata, antreprenoriat. Cheia e RETENTIA absolventilor: orasele cu locuri de munca + locuire accesibila + calitate a vietii isi pastreaza tinerii (Iasi, Cluj convertesc studentia in IT/servicii); altele finanteaza gratuit forta de munca a altora. Sportul (stadioane, baze, evenimente) aduce sanatate, turism sportiv si vibratie.');
+        concluzie('Pol universitar puternic + retentie absolventi + infrastructura sportiva = capital uman si economie pe 30 de ani');
         break;
       }
     }
