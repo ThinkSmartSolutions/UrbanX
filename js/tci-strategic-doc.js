@@ -95,9 +95,19 @@
     }
     // text JUSTIFY: aliniaza la ambele margini toate liniile dintr-un paragraf,
     // mai putin ultima (si liniile fara spatiu). Cerinta: toate rapoartele justify.
+    // JUSTIFY MANUAL — distribuie spatiul intre cuvinte (merge cu ORICE font,
+    // inclusiv DejaVuRO embedat; justify-ul nativ jsPDF nu e fiabil cu fonturi custom).
     function _jline(str, x, yy, w, last) {
-      if (!last && str && str.indexOf(' ') > 0) { try { pdf.text(str, x, yy, { align: 'justify', maxWidth: w }); return; } catch (e) {} }
-      pdf.text(str, x, yy);
+      if (last || !str || str.indexOf(' ') <= 0) { pdf.text(str, x, yy); return; }
+      var words = str.split(' ').filter(function (s) { return s.length; });
+      if (words.length < 2) { pdf.text(str, x, yy); return; }
+      var wW = 0; words.forEach(function (wd) { wW += pdf.getTextWidth(wd); });
+      var gap = (w - wW) / (words.length - 1);
+      var spaceW = pdf.getTextWidth(' ');
+      // nu intinde liniile scurte (gap urias) — randeaza normal
+      if (gap <= 0 || gap > spaceW * 4.5) { pdf.text(str, x, yy); return; }
+      var cx = x;
+      words.forEach(function (wd) { pdf.text(wd, cx, yy); cx += pdf.getTextWidth(wd) + gap; });
     }
     function P(text, o) {
       o = o || {}; const fs = o.fs || 8.6, lh = o.lh || 4.55, ind = o.indent || 0;
@@ -244,7 +254,8 @@
     function formula(title, expr, where) {
       const wlines = where ? pdf.splitTextToSize(S2(where), CW - 12) : [];
       // formula: micsoreaza fontul ca sa incapa; daca tot e prea lata, o sparge pe linii
-      var exprS = S2(expr);
+      // courier (monospace) NU are glife pt →/×/−/² etc -> sanitizam la ASCII.
+      var exprS = S2(expr).replace(/→/g,' -> ').replace(/×/g,' x ').replace(/−/g,'-').replace(/²/g,'2').replace(/·/g,'*').replace(/\s+/g,' ').trim();
       var fs = fitFont('courier', 'bold', 9.5, exprS, CW - 12);
       var exprLines = (pdf.getTextWidth(exprS) > CW - 12) ? pdf.splitTextToSize(exprS, CW - 12) : [exprS];
       var elh = 4.6;

@@ -113,7 +113,7 @@ G._UrbanIndices = {
     D.chapter(opts.title || 'Tablou de bord — Indicatori de calitate urbana');
     D.P('Dincolo de indicatorii clasici (populatie, PIB), orasul contemporan se masoara prin indici compoziti de calitate a vietii, rezilienta si sustenabilitate — aliniati standardelor ISO 37120/37122, SDG 11 (UN-Habitat) si politicilor europene (EEA, Green Deal). Tabloul de bord UrbanX pentru ' + (city.name || 'acest UAT') + ' prezinta, pentru fiecare indicator, valoarea calculata, definitia, formula transparenta si sursa metodologica.');
     // grid sintetic cu toate scorurile
-    D.kpis(idx.map(function(i){ return [i.name, i.value + (i.unit || ''), (i.fut!=null? ('→ '+i.fut+(i.unit||'')+' (2055)') : 'azi')]; }));
+    D.kpis(idx.map(function(i){ return {val:(i.value + (i.unit || '')), label:i.name, sub:(i.fut!=null? (i.fut+(i.unit||'')+' · 2055') : 'azi')}; }));
     idx.forEach(function(i){
       D.h2(i.name + ' — ' + i.value + (i.unit || '') + (i.fut!=null ? ('  →  ' + i.fut + (i.unit||'') + ' potential 2055') : ''));
       D.P(i.definition);

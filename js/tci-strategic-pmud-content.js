@@ -26,10 +26,19 @@
         const mob = p._mobilityModel(city);
         let aq = null;
         try { if (typeof _AQLive !== 'undefined' && _AQLive.fetch) aq = await Promise.race([_AQLive.fetch(city.lat, city.lon), new Promise(r => setTimeout(() => r(null), 5000))]); } catch (e) {}
+        // PUG vectorial + reguli + risc — necesare pt hartile de risc (gri = orasul real)
+        let pugGeo=null, reguli=null;
+        try{
+          const reg=(window._PUG_REGISTRY||{})[cityKey];
+          if(reg){ const ff=(u)=>u?fetch(u).then(r=>r.ok?r.json():null).catch(()=>null):Promise.resolve(null);
+            const res=await Promise.race([Promise.all([ff(reg.pugFile), ff(reg.reguli)]), new Promise((rs)=>setTimeout(()=>rs([null,null]),8000))]);
+            pugGeo=res&&res[0]; reguli=res&&res[1]; }
+        }catch(e){}
+        const risk = (typeof _getRiskProfile==='function')? _getRiskProfile(city) : (m._defaultRisk? m._defaultRisk(city) : {seismic:{ag:0.20}});
         const pdf = new J({ orientation: 'portrait', unit: 'mm', format: 'a4' });
         pdf.__doc = 'PMUD 2025-2040';
         const D = window._makeStratDoc(pdf, { docTitle: 'PMUD — PLAN DE MOBILITATE Urbană Durabilă', cityName: city.name, accent: [34, 160, 90] });
-        const ctx = { city, mob, aq, scenario: scenario || 'S2', cityKey };
+        const ctx = { city, mob, aq, scenario: scenario || 'S2', cityKey, pugGeo, reguli, risk };
         // COPERTA
         D.setSuppress(true); D.setPage(1); this._cover(D, ctx); D.setSuppress(false);
         G._StratPMUDContent.build(D, ctx);
