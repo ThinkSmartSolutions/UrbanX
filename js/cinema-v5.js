@@ -762,15 +762,9 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
 
       case 'b1s4':
         lp('dawn');
-        // MONUMENTE REALE (OSM historic) — reperele in jurul carora s-a construit
-        // orasul, pulsand auriu in scena de evolutie istorica.
-        setTimeout(function(){
-          if(!SE._playing) return;
-          if(D.monuments&&D.monuments.length){
-            addCircle('v9-mon',D.monuments);
-            setTimeout(function(){_pulse(map,'v9-mon','circle-radius',4,10,9);},1000);
-          }
-        },1800);
+        // MONUMENTE + ZONE DE PROTECTIE ~100m (OSM historic / LMI · Legea 422/2001)
+        // reperele in jurul carora s-a construit orasul + servitutile de protectie.
+        onIdle(function(){try{SE._addMonuments&&SE._addMonuments(map, D.monuments);}catch(e){}});
         fly(Z.C,13.5,52,0,4000,0,'dawn');
         fly(Z.NV,14,60,40,6000,10000,'dawn');
         fly(Z.C,13,50,-10,5000,17000,'day');
@@ -1114,7 +1108,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
       case 'b7s3':
         lp('day');
         // #3: modal split desenat ca coridoare radiale (latime ∝ cota modala)
-        onIdle(function(){try{SE._addModalSplit&&SE._addModalSplit(map,(SE._city&&SE._city.tp)||60);}catch(e){}});
+        onIdle(function(){try{SE._addModalSplit&&SE._addModalSplit(map,(SE._pred&&SE._pred.modalAuto)||52);}catch(e){}});
         rot(12,0.005);
         fly(Z.C,13,48,0,4000,0,'day');
         fly(Z.C,13.4,54,40,6000,11000,'day');
@@ -1416,22 +1410,23 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         break;
       case 'b17s1': // CARTIERE la nivel de strada (street-view / pieton)
         lp('day');
-        // cladirile native Mapbox 3D vizibile -> tesut urban real la nivel pieton
+        // TESUT URBAN REAL: barele 3D PUG colorate (la inaltime maxima) — bogat,
+        // ca in viewerul Urban3D; NU ne bazam pe cladirile native rare/intunecate.
+        onIdle(function(){ try{SE._add3DGrowthFull&&SE._add3DGrowthFull(map);}catch(e){} });
         try{map.setLayoutProperty('building-extrusion','visibility','visible');}catch(e){}
-        try{map.setPaintProperty('building-extrusion','fill-extrusion-opacity',0.95);}catch(e){}
         setTimeout(function(){
           if(!SE._playing||!SE._cinLabels) return;
+          var c=SE._city||{};
           SE._cinLabels(map,[
-            {lon:Z.RES[0],lat:Z.RES[1],color:'#22d3ee',icon:'🏘',title:'CARTIER REZIDENTIAL',sub:'nivel pieton · acces 15 min'},
-            {lon:Z.NV[0], lat:Z.NV[1], color:'#34d399',icon:'🚶',title:'CARTIER NORD-VEST',  sub:'tesut urban · strazi locale'},
-            {lon:Z.NE[0], lat:Z.NE[1], color:'#fbbf24',icon:'🌳',title:'ZONA NORD-EST',       sub:'mixaj functional de proximitate'},
+            {lon:(c.lon||27),lat:(c.lat||47)+0.004,color:'#22d3ee',icon:'🏘',title:'CARTIER CENTRAL',sub:'nivel pieton · acces 15 min'},
+            {lon:Z.RES[0],lat:Z.RES[1],color:'#34d399',icon:'🚶',title:'CARTIER REZIDENTIAL',sub:'tesut urban · strazi locale'},
           ]);
         },1500);
-        // dive la nivel de strada: pitch mare, zoom mare, miscare lenta intre cartiere
-        fly(Z.RES,16.4,80,10,5000,0,'day');
-        rot(16,0.005);
-        fly(Z.NV,16.6,82,95,8500,5500,'day');
-        fly(Z.NE,16.2,78,180,8500,15500,'dusk');
+        // dive la nivel de strada IN CENTRU DENS (nu camp gol periferic)
+        fly(Z.CBD,16.2,78,10,5000,0,'day');
+        rot(14,0.005);
+        fly(Z.C,16.5,80,80,8500,5500,'day');
+        fly(Z.RES,16.1,76,160,8500,15500,'dusk');
         break;
       case 'b16s1': // NOTA UrbanX (clasament)
         lp('dusk');
@@ -2125,10 +2120,11 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
 
       case 'b7s3':
         titlu('Modal Split '+_E(),'Transformarea mobilitatii \u00b7 Tinte SUMP'); linie();
-        cifra((pred.tp||62)+'%','Acoperire TP actual',(pred.tp||62)>=70?'#22c55e':'#f59e0b');
-        cifra2('35% TP target','Tinta SUMP '+_P1(),'#22c55e');
+        var _ms3=_modalSplit(pred);
+        cifra(_ms3.auto+'%','Cota AUTO (modal split actual)', _ms3.auto>=55?'#ef4444':'#f59e0b');
+        cifra2('45% auto target','Tinta SUMP '+_P1(),'#22c55e');
         if(t>0.18) _drawModalFull(ctx,W,H,Math.min(1,(t-0.18)/0.24)*sA,pred);
-        narativ('MODAL SPLIT azi: auto '+(pred.modalAuto||68)+'% | TP '+(pred.tp||22)+'% | pieton 7% | velo 3%. TARGET SUMP '+_P1()+': auto 45% | TP 35% | pieton 15% | velo 5%. Necesita: BRT '+pred.kmBRT+' km + piste velo 30km + pasaje pietonale '+(pred.pasaje||5)+'. Beneficii: -35% congestie + -18% CO2 + +20% calitate aer + 35 min/zi economisiti.');
+        narativ('MODAL SPLIT azi: auto '+_ms3.auto+'% | TP '+_ms3.tp+'% | pieton '+_ms3.pieton+'% | velo '+_ms3.velo+'% (suma 100%). Acoperire retea TP: '+(pred.tp||62)+'% (alta metrica). TARGET SUMP '+_P1()+': auto 45% | TP 35% | pieton 15% | velo 5%. Necesita: BRT '+(pred.kmBRT||30)+' km + piste velo 30km + pasaje pietonale '+(pred.pasaje||5)+'. Beneficii: -35% congestie + -18% CO2 + +20% calitate aer.');
         concluzie('Fiecare pp mutat de la auto la TP/activ = economie '+N2(Math.round(pop21*0.01*210*25/1000000))+' M EUR/an costuri sociale');
         negativ('Fara schimbare modal split: auto 82% in '+_P2()+' = oras complet dependent de masina = excludere populatie fara auto');
         break;
@@ -3146,6 +3142,15 @@ function _drawModal(ctx,W,H,a,pred){
   ctx.restore();
 }
 
+// Modal split CANONIC (sumă = 100%) — o singură sursă de adevăr. NU confunda cu
+// acoperirea rețelei TP (pred.tp, ~62-72%). Estimare RO urban realistă.
+function _modalSplit(pred){
+  pred=pred||{};
+  var auto=Math.max(40,Math.min(60, Math.round(pred.modalAuto||52)));
+  var rem=100-auto;
+  var tp=Math.round(rem*0.52), pieton=Math.round(rem*0.42), velo=rem-tp-pieton;
+  return {auto:auto, tp:tp, pieton:pieton, velo:velo};
+}
 function _drawModalFull(ctx,W,H,a,pred){
   ctx.save();
   var x=W*0.56,y=H*0.57,w=Math.min(W*0.40,360),h=H*0.28;
@@ -3153,7 +3158,8 @@ function _drawModalFull(ctx,W,H,a,pred){
   ctx.strokeStyle='rgba(255,255,255,0.07)';ctx.lineWidth=1;ctx.stroke();
   ctx.fillStyle='rgba(148,163,184,0.52)';ctx.font='700 '+Math.min(W*0.008,10)+'px "IBM Plex Mono",monospace';ctx.textAlign='left';ctx.letterSpacing='.05em';
   ctx.fillText('MODAL SPLIT: AZI vs TARGET SUMP '+_P1(),x+10,y+15);
-  var cols=[{n:'Auto',azi:pred.modalAuto||68,sump:45,c:'#ef4444'},{n:'TP',azi:pred.tp||22,sump:35,c:'#22c55e'},{n:'Pieton',azi:7,sump:15,c:'#60a5fa'},{n:'Velo',azi:3,sump:5,c:'#f59e0b'}];
+  var _ms=_modalSplit(pred);
+  var cols=[{n:'Auto',azi:_ms.auto,sump:45,c:'#ef4444'},{n:'TP',azi:_ms.tp,sump:35,c:'#22c55e'},{n:'Pieton',azi:_ms.pieton,sump:15,c:'#60a5fa'},{n:'Velo',azi:_ms.velo,sump:5,c:'#f59e0b'}];
   var bY=y+26,bH=(h-44)/cols.length,bMaxW=w-90;
   cols.forEach(function(col,i){
     ctx.fillStyle='rgba(220,230,255,0.55)';ctx.font='500 '+Math.min(W*0.009,10)+'px "Space Grotesk",sans-serif';ctx.textAlign='left';ctx.letterSpacing='0';ctx.fillText(col.n,x+6,bY+i*bH+bH*0.38);
@@ -3555,19 +3561,31 @@ function _drawMetabolism(ctx,W,H,a,t){
   if(a<=0)return; ctx.save();
   var cx=W/2, cy=H*0.50, R=Math.min(W*0.13,170), cr=Math.min(W*0.03,40);
   var br=0.5+0.5*Math.sin(t*Math.PI*3);
-  ctx.globalAlpha=a; ctx.fillStyle='rgba(212,175,55,'+(0.5+br*0.3)+')'; ctx.beginPath(); ctx.arc(cx,cy,cr,0,Math.PI*2); ctx.fill();
+  var FS=Math.min(W*0.0092,12);
+  // pastila intunecata sub text -> lizibil pe harta colorata (fix #4)
+  function pill(x,y,txt,align,col){
+    ctx.font='700 '+FS+'px "IBM Plex Mono",monospace';
+    var tw=ctx.measureText(txt).width, padX=5, padY=3, h=FS+padY*2;
+    var rx = align==='right'? x-tw-padX : align==='center'? x-tw/2-padX : x-padX;
+    ctx.globalAlpha=a*0.82; ctx.fillStyle='rgba(4,10,22,0.88)';
+    if(ctx.roundRect){ ctx.beginPath(); ctx.roundRect(rx,y-FS,tw+padX*2,h,4); ctx.fill(); } else ctx.fillRect(rx,y-FS,tw+padX*2,h);
+    ctx.globalAlpha=a; ctx.fillStyle=col; ctx.textAlign=align; ctx.fillText(txt,x,y);
+  }
+  ctx.globalAlpha=a; ctx.fillStyle='rgba(212,175,55,'+(0.6+br*0.3)+')'; ctx.beginPath(); ctx.arc(cx,cy,cr,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='rgba(10,18,36,0.9)'; ctx.lineWidth=2; ctx.stroke();
   ctx.fillStyle='#0a1224'; ctx.font='900 '+Math.min(W*0.011,14)+'px "Space Grotesk",sans-serif'; ctx.textAlign='center'; ctx.fillText('ORAS',cx,cy+4);
-  var ins=[['Apa','#3b82f6'],['Energie','#fbbf24'],['Oameni','#22c55e'],['Marfuri','#a855f7']];
-  var outs=[['Emisii','#ef4444'],['Deseuri','#9ca3af'],['Apa uzata','#06b6d4']];
+  var ins=[['Apa','#60a5fa'],['Energie','#fbbf24'],['Oameni','#4ade80'],['Marfuri','#c084fc']];
+  var outs=[['Emisii','#f87171'],['Deseuri','#d1d5db'],['Apa uzata','#22d3ee']];
   ins.forEach(function(it,i){ var y=cy-R*0.7+i*(R*1.4/3), x=cx-R*1.5, flow=(t*2+i*0.25)%1;
-    ctx.globalAlpha=a*0.55; ctx.strokeStyle=it[1]; ctx.lineWidth=2.5; ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(cx-cr,cy); ctx.stroke();
-    var fx=x+(cx-cr-x)*flow, fy=y+(cy-y)*flow; ctx.globalAlpha=a; ctx.fillStyle=it[1]; ctx.beginPath(); ctx.arc(fx,fy,4,0,Math.PI*2); ctx.fill();
-    ctx.font='700 '+Math.min(W*0.0092,12)+'px "IBM Plex Mono",monospace'; ctx.textAlign='right'; ctx.fillText(it[0]+' →',x-4,y+3); });
+    ctx.globalAlpha=a*0.8; ctx.strokeStyle=it[1]; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(cx-cr,cy); ctx.stroke();
+    var fx=x+(cx-cr-x)*flow, fy=y+(cy-y)*flow; ctx.globalAlpha=a; ctx.fillStyle=it[1]; ctx.beginPath(); ctx.arc(fx,fy,4.5,0,Math.PI*2); ctx.fill();
+    pill(x-6,y+3,it[0]+' →','right',it[1]); });
   outs.forEach(function(it,i){ var y=cy-R*0.45+i*(R*0.9/2), x=cx+R*1.5, flow=(t*2+i*0.3)%1;
-    ctx.globalAlpha=a*0.55; ctx.strokeStyle=it[1]; ctx.lineWidth=2.5; ctx.beginPath(); ctx.moveTo(cx+cr,cy); ctx.lineTo(x,y); ctx.stroke();
-    var fx=(cx+cr)+(x-(cx+cr))*flow, fy=cy+(y-cy)*flow; ctx.globalAlpha=a; ctx.fillStyle=it[1]; ctx.beginPath(); ctx.arc(fx,fy,4,0,Math.PI*2); ctx.fill();
-    ctx.font='700 '+Math.min(W*0.0092,12)+'px "IBM Plex Mono",monospace'; ctx.textAlign='left'; ctx.fillText('→ '+it[0],x+4,y+3); });
-  ctx.globalAlpha=a*0.85; ctx.fillStyle='#D4AF37'; ctx.font='800 '+Math.min(W*0.011,14)+'px "IBM Plex Mono",monospace'; ctx.textAlign='center'; ctx.fillText('METABOLISM URBAN — orasul ca organism',cx,cy-R-Math.min(W*0.02,26));
+    ctx.globalAlpha=a*0.8; ctx.strokeStyle=it[1]; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(cx+cr,cy); ctx.lineTo(x,y); ctx.stroke();
+    var fx=(cx+cr)+(x-(cx+cr))*flow, fy=cy+(y-cy)*flow; ctx.globalAlpha=a; ctx.fillStyle=it[1]; ctx.beginPath(); ctx.arc(fx,fy,4.5,0,Math.PI*2); ctx.fill();
+    pill(x+6,y+3,'→ '+it[0],'left',it[1]); });
+  ctx.font='800 '+Math.min(W*0.011,14)+'px "IBM Plex Mono",monospace';
+  pill(cx,cy-R-Math.min(W*0.02,26),'METABOLISM URBAN — orasul ca organism','center','#fcd34d');
   ctx.globalAlpha=1; ctx.restore();
 }
 // CITY OPERATING SYSTEM — orasul ca sistem viu (module care se aprind + CPU central).

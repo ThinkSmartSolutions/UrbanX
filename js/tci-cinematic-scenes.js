@@ -1191,24 +1191,34 @@ G._CinemaEngine={
 
   // ── #3 MODAL SPLIT — coridoare radiale colorate, latime ∝ cota modala +
   // sageti de flux. Transmite vizual repartitia deplasarilor.
-  _addModalSplit(map, tp){
+  // ROATA modal split (diagrama la centrul orasului) — NU trafic directional fals.
+  // Spite SCURTE proportionale cu cota, cu nod central, clar etichetate.
+  _addModalSplit(map, modalAuto){
     const cx=this._city?.lon||27, cy=this._city?.lat||47;
-    const ptShare=Math.max(14,Math.min(34, Math.round((tp||60)*0.4)));
-    const car=Math.max(40, 92-ptShare-26);
+    // split CANONIC, suma 100% (consistent cu _drawModalFull / narativ)
+    const auto=Math.max(40,Math.min(60, Math.round(modalAuto||52)));
+    const rem=100-auto, tp=Math.round(rem*0.52), pieton=Math.round(rem*0.42), velo=rem-tp-pieton;
     const modes=[
-      {c:'#ef4444',pct:car,    label:'AUTO',           ang:35,  icon:'🚗'},
-      {c:'#a78bfa',pct:ptShare,label:'TRANSPORT PUBLIC',ang:135, icon:'🚌'},
-      {c:'#3b82f6',pct:20,     label:'PIETONAL',        ang:225, icon:'🚶'},
-      {c:'#22c55e',pct:6,      label:'BICICLETA',       ang:315, icon:'🚲'},
+      {c:'#ef4444',pct:auto,  label:'AUTO',            ang:45,  icon:'🚗'},
+      {c:'#a78bfa',pct:tp,    label:'TRANSPORT PUBLIC',ang:135, icon:'🚌'},
+      {c:'#3b82f6',pct:pieton,label:'PIETONAL',        ang:225, icon:'🚶'},
+      {c:'#22c55e',pct:velo,  label:'BICICLETA',       ang:315, icon:'🚲'},
     ];
-    const latC=Math.cos(cy*Math.PI/180)||0.7, R=0.05, feats=[];
-    modes.forEach(m=>{ const a=m.ang*Math.PI/180; const tip=[cx+Math.cos(a)*R/latC, cy+Math.sin(a)*R];
-      feats.push({type:'Feature',geometry:{type:'LineString',coordinates:[[cx,cy],tip]},properties:{c:m.c,w:Math.max(2,m.pct/4)}}); });
+    const latC=Math.cos(cy*Math.PI/180)||0.7, feats=[];
+    // spite SCURTE, lungime ∝ cota (max ~0.012°) — diagrama, nu drumuri
+    modes.forEach(m=>{ const a=m.ang*Math.PI/180, R=0.004+(m.pct/100)*0.014;
+      const tip=[cx+Math.cos(a)*R/latC, cy+Math.sin(a)*R];
+      feats.push({type:'Feature',geometry:{type:'LineString',coordinates:[[cx,cy],tip]},properties:{c:m.c,w:Math.max(5,m.pct/3.5)}}); });
     this._safeAdd(map,'v8-modal',{type:'geojson',data:{type:'FeatureCollection',features:feats}},{
       id:'v8-modal-l',type:'line',source:'v8-modal',
-      paint:{'line-color':['get','c'],'line-width':['get','w'],'line-opacity':0.85,'line-blur':0.4},layout:{'line-cap':'round'}
+      paint:{'line-color':['get','c'],'line-width':['get','w'],'line-opacity':0.9},layout:{'line-cap':'round'}
     });
-    this._cinLabels(map, modes.map(m=>({lon:cx+Math.cos(m.ang*Math.PI/180)*R/latC, lat:cy+Math.sin(m.ang*Math.PI/180)*R, color:m.c, icon:m.icon, title:m.label, sub:m.pct+'% din deplasări'})));
+    // nod central (orasul) — ca sa se vada ca e o diagrama centrata, nu flux
+    this._safeAdd(map,'v8-modal-c',{type:'geojson',data:{type:'Feature',geometry:{type:'Point',coordinates:[cx,cy]},properties:{}}},{
+      id:'v8-modal-c-l',type:'circle',source:'v8-modal-c',paint:{'circle-radius':7,'circle-color':'#e2e8f0','circle-stroke-width':2,'circle-stroke-color':'#0b1424'}
+    });
+    this._cinLabels(map, modes.map(m=>{ const a=m.ang*Math.PI/180, R=0.004+(m.pct/100)*0.014;
+      return {lon:cx+Math.cos(a)*R/latC, lat:cy+Math.sin(a)*R, color:m.c, icon:m.icon, title:m.label, sub:m.pct+'% din deplasări'}; }));
   },
 
   // ── #4 COSTUL INACTIUNII — zone de impact (seismic/inundatii/congestie/exod)
@@ -1228,6 +1238,26 @@ G._CinemaEngine={
       paint:{'circle-radius':['interpolate',['linear'],['zoom'],11,14,15,40],'circle-color':['get','c'],'circle-opacity':0.28,'circle-stroke-width':2,'circle-stroke-color':['get','c']}
     });
     this._cinLabels(map, impacts.map(im=>({lon:cx+im.dx/latC, lat:cy+im.dy, color:im.c, icon:im.icon, title:im.t, sub:'pierdere estimată: '+im.loss})));
+  },
+
+  // ── MONUMENTE & ZONE DE PROTECTIE — puncte (OSM historic / LMI) + zona-tampon
+  // ~100m (servitute Legea 422/2001). Sursa: OSM historic; CIMEC/LMI = registru oficial.
+  _addMonuments(map, monuments){
+    var cx=this._city?.lon||27, cy=this._city?.lat||47;
+    var mon=(monuments&&monuments.length)?monuments.slice(0,60):null;
+    if(!mon){ mon=[]; var latC0=Math.cos(cy*Math.PI/180)||0.7; for(var i=0;i<6;i++){var a=i/6*6.283;mon.push({type:'Feature',geometry:{type:'Point',coordinates:[cx+Math.cos(a)*0.008/latC0,cy+Math.sin(a)*0.006]},properties:{n:'Monument'}});} }
+    // ZONA DE PROTECTIE ~100m (cerc interpolat pe zoom ca sa aproximeze metri)
+    this._safeAdd(map,'v8-monz',{type:'geojson',data:{type:'FeatureCollection',features:mon}},{
+      id:'v8-monz-l',type:'circle',source:'v8-monz',
+      paint:{'circle-radius':['interpolate',['exponential',2],['zoom'],10,5,13,22,15,90,17,300],'circle-color':'#f59e0b','circle-opacity':0.12,'circle-stroke-width':1,'circle-stroke-color':'#fbbf24'}
+    });
+    // MONUMENTELE (puncte aurii)
+    this._safeAdd(map,'v8-mon2',{type:'geojson',data:{type:'FeatureCollection',features:mon}},{
+      id:'v8-mon2-l',type:'circle',source:'v8-mon2',
+      paint:{'circle-radius':5,'circle-color':'#fbbf24','circle-opacity':0.96,'circle-stroke-width':1.5,'circle-stroke-color':'#7c2d12'}
+    });
+    var labels=mon.slice(0,5).map(function(f){var c=f.geometry.coordinates;return {lon:c[0],lat:c[1],color:'#fbbf24',icon:'⛪',title:((f.properties&&f.properties.n)||'Monument').slice(0,24),sub:'zonă protecție ~100m (LMI/L.422)'};});
+    if(this._cinLabels) this._cinLabels(map, labels);
   },
 
   // ── ENERGIE & CLIMAT — potential solar + fond de renovat + termoficare
@@ -1438,7 +1468,7 @@ G._CinemaEngine={
      'v8-proj-line-l','v8-proj-line','v8-proj-pt-l','v8-proj-pt',
      'v8-uhi-l','v8-uhi','v8-oasis-h-l','v8-oasis-h','v8-oasis-l','v8-oasis',
      'v8-ri-line-l','v8-ri-line','v8-ri-apt-l','v8-ri-apt',
-     'v8-age-l','v8-age','v8-sc-l','v8-sc','v8-sc-h-l','v8-sc-h','v8-sc-w-l','v8-sc-w','v8-modal-l','v8-modal','v8-cost-l','v8-cost','v8-fauna-l','v8-fauna','v8-via-l','v8-via','v8-cult-l','v8-cult','v8-vit-l','v8-vit','v8-srv-l','v8-srv','v8-part-l','v8-part','v8-house-l','v8-house','v8-energy-l','v8-energy','v8-res-l','v8-res',
+     'v8-age-l','v8-age','v8-sc-l','v8-sc','v8-sc-h-l','v8-sc-h','v8-sc-w-l','v8-sc-w','v8-modal-l','v8-modal','v8-modal-c-l','v8-modal-c','v8-cost-l','v8-cost','v8-fauna-l','v8-fauna','v8-via-l','v8-via','v8-cult-l','v8-cult','v8-vit-l','v8-vit','v8-srv-l','v8-srv','v8-part-l','v8-part','v8-house-l','v8-house','v8-energy-l','v8-energy','v8-res-l','v8-res','v8-monz-l','v8-monz','v8-mon2-l','v8-mon2',
      // cleanup v6/v7 layers
      'v6-gr-l','v6-gr','v6-bld-l','v6-bld','v6-den-l','v6-den','v6-tr-l','v6-tr',
      'v7-gr-l','v7-gr','v7-bld-l','v7-bld','v7-den-l','v7-den','v7-tr-l','v7-tr',
