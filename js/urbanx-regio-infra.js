@@ -62,6 +62,31 @@ var METROS = [
    desc:'1 Mai–Otopeni — conectează rețeaua de metrou la Aeroportul Henri Coandă.'},
 ];
 
+// ── PUNCTE MODALE & INFRASTRUCTURA STRATEGICA — baraje, porturi, treceri de
+// frontiera, noduri extractive (coord reale, surse publice: Hidroelectrica, APM,
+// AFDJ/porturi, Poliția de Frontieră). tip -> icon + culoare.
+var MODAL = [
+  // Baraje / hidro
+  {name:'Baraj Izvorul Muntelui–Bicaz', tip:'baraj', lat:46.9300, lon:26.0500, info:'cel mai mare lac de acumulare interior; hidro + apărare la inundații'},
+  {name:'Baraj Stânca–Costești (Prut)', tip:'baraj', lat:47.7800, lon:27.2200, info:'baraj comun RO–R. Moldova; rol cheie anti-inundații pe Prut'},
+  {name:'Baraj Vidraru (Argeș)', tip:'baraj', lat:45.3600, lon:24.6300, info:'hidrocentrală majoră'},
+  {name:'Porțile de Fier I (Dunăre)', tip:'baraj', lat:44.6700, lon:22.5300, info:'cea mai mare hidrocentrală de pe Dunăre (RO–RS)'},
+  // Porturi
+  {name:'Portul Constanța', tip:'port', lat:44.1700, lon:28.6600, info:'cel mai mare port la Marea Neagră; coridor cereale + NATO'},
+  {name:'Portul Galați', tip:'port', lat:45.4300, lon:28.0500, info:'port fluvial-maritim; siderurgie'},
+  {name:'Portul Brăila', tip:'port', lat:45.2700, lon:27.9600, info:'port maritim pe Dunăre'},
+  {name:'Portul Tulcea', tip:'port', lat:45.1800, lon:28.8000, info:'poartă spre Delta Dunării'},
+  {name:'Portul Giurgiu', tip:'port', lat:43.9000, lon:25.9700, info:'port dunărean spre Bulgaria'},
+  // Treceri de frontieră / puncte vamale
+  {name:'PTF Albița (spre R. Moldova)', tip:'vama', lat:46.9400, lon:28.1300, info:'principala trecere rutieră RO–R. Moldova'},
+  {name:'PTF Sculeni (spre R. Moldova)', tip:'vama', lat:47.3200, lon:27.7100, info:'trecere Iași–Ungheni'},
+  {name:'PTF Siret (spre Ucraina)', tip:'vama', lat:47.9500, lon:26.0700, info:'principala trecere RO–Ucraina; coridor umanitar'},
+  {name:'PTF Halmeu (spre Ucraina)', tip:'vama', lat:48.0000, lon:23.0200, info:'trecere nord-vest RO–Ucraina'},
+  // Noduri extractive / industriale
+  {name:'Bazinul minier Rovinari–Motru (Gorj)', tip:'mina', lat:44.9200, lon:23.1800, info:'cărbune — producție energetică (în tranziție justă)'},
+  {name:'Mina de cupru Moldova Nouă (Caraș)', tip:'mina', lat:44.7400, lon:21.6700, info:'minerit cupru — sit de reconversie'},
+];
+
 // ── CONTEXT GEOPOLITIC / FRONTIERA (județe estice) — factual, public ──
 var GEO = {
   IS: {border:'~20 km de frontiera cu Republica Moldova (râul Prut)', risk:'La ~200 km de zona de conflict din Ucraina', note:'Iași — cel mai mare oraș al UE la frontiera estică; poartă strategică spre R. Moldova, coridor logistic și umanitar din 2022.'},
@@ -72,7 +97,14 @@ var GEO = {
   VS: {border:'Frontieră cu Republica Moldova (Prut, Albița)', risk:'Punct vamal major spre R. Moldova', note:'Vaslui / Albița — principal punct de trecere rutier spre R. Moldova.'},
   CT: {border:'Litoral Marea Neagră; aproape de zona de conflict maritim', risk:'Port strategic NATO (apropiere de operațiunile din Marea Neagră)', note:'Constanța — cel mai mare port la Marea Neagră; rol NATO și de export cereale.'},
   NT: {border:'Interior, dar pe coridorul A7 spre frontieră', risk:'Indirect — coridor de aprovizionare', note:'Piatra-Neamț — pe axa de legătură cu A7.'},
+  BC: {border:'Interior, pe coridorul A7', risk:'Coridor logistic spre frontiera estică', note:'Bacău — nod pe A7, aeroport internațional.'},
+  MM: {border:'Frontieră cu Ucraina (nord)', risk:'Graniță nordică', note:'Maramureș — trecere Halmeu spre Ucraina.'},
+  SM: {border:'Frontieră cu Ucraina și Ungaria', risk:'Triplă vecinătate UE/non-UE', note:'Satu Mare — coridor nord-vest.'},
+  CJ: {border:'Interior — pol al Transilvaniei', risk:'Stabil; pe coridoarele A3/Rin–Dunăre', note:'Cluj — al doilea pol economic; metrou în execuție.'},
+  TM: {border:'Frontieră cu Serbia și Ungaria (vest)', risk:'Poartă vestică UE', note:'Timiș — pol vestic; conectat la coridorul IV pan-european.'},
+  B:  {border:'Capitală — centru de decizie', risk:'Țintă strategică; hub aerian național', note:'București — centru politic/economic; metrou M6 spre Otopeni.'},
 };
+var GEO_DEFAULT = {border:'Interior, fără frontieră directă', risk:'Stabilitate geopolitică relativă', note:'Accesul la coridoarele TEN-T determină viteza de convergență economică.'};
 
 function _hav(la1,lo1,la2,lo2){
   var R=6371, d2r=Math.PI/180;
@@ -84,8 +116,13 @@ function _minDistToTraseu(lat,lon,traseu){
   var m=1e9; traseu.forEach(function(p){ var d=_hav(lat,lon,p[1],p[0]); if(d<m)m=d; }); return m;
 }
 
+var MODAL_STYLE = {
+  baraj:{c:'#38bdf8', icon:'🌊'}, port:{c:'#60a5fa', icon:'⚓'},
+  vama:{c:'#f87171', icon:'🛂'},  mina:{c:'#a78bfa', icon:'⛏'},
+};
+
 G._RegioInfra = {
-  STATUS:STATUS, AIRPORTS:AIRPORTS, HIGHWAYS:HIGHWAYS, METROS:METROS, GEO:GEO,
+  STATUS:STATUS, AIRPORTS:AIRPORTS, HIGHWAYS:HIGHWAYS, METROS:METROS, GEO:GEO, MODAL:MODAL,
 
   // cele mai apropiate N aeroporturi reale (in raza maxKm)
   nearestAirports: function(lat, lon, maxKm, n){
@@ -104,7 +141,14 @@ G._RegioInfra = {
     maxKm=maxKm||60;
     return METROS.filter(function(m){ return _minDistToTraseu(lat,lon,m.traseu)<=maxKm; });
   },
-  geoContext: function(judet){ return GEO[(judet||'').toUpperCase()]||null; },
+  // puncte modale / infrastructura strategica cele mai apropiate
+  nearestModal: function(lat, lon, maxKm, n){
+    maxKm=maxKm||180; n=n||5;
+    return MODAL.map(function(m){ return Object.assign({distKm:Math.round(_hav(lat,lon,m.lat,m.lon))}, m); })
+      .filter(function(x){ return x.distKm<=maxKm; })
+      .sort(function(a,b){ return a.distKm-b.distKm; }).slice(0,n);
+  },
+  geoContext: function(judet){ return GEO[(judet||'').toUpperCase()]||GEO_DEFAULT; },
 
   // Features pt harta (cinematic): {lines, airportPts, labels}
   buildFeatures: function(city){
@@ -123,6 +167,12 @@ G._RegioInfra = {
       var col=a.tip==='hub'?'#fbbf24':'#22d3ee';
       pts.push({type:'Feature',geometry:{type:'Point',coordinates:[a.lon,a.lat]},properties:{c:col,n:a.name}});
       labels.push({lon:a.lon, lat:a.lat, color:col, icon:'✈', title:a.name.replace('Aeroportul Internațional ','Aeroport ').slice(0,30), sub:a.iata+' · '+a.distKm+' km · '+a.info});
+    });
+    // PUNCTE MODALE: baraje, porturi, treceri frontiera, mine
+    this.nearestModal(lat,lon,170,5).forEach(function(m){
+      var st=MODAL_STYLE[m.tip]||{c:'#94a3b8',icon:'•'};
+      pts.push({type:'Feature',geometry:{type:'Point',coordinates:[m.lon,m.lat]},properties:{c:st.c,n:m.name}});
+      labels.push({lon:m.lon, lat:m.lat, color:st.c, icon:st.icon, title:m.name.slice(0,30), sub:m.distKm+' km · '+m.info});
     });
     return {lines:lines, airportPts:pts, labels:labels};
   },
@@ -144,10 +194,15 @@ G._RegioInfra = {
     var mt=this.relevantMetros(lat,lon,60);
     if(mt.length){ D.h2('Transport greu urban (metrou)'); D.bullets(mt.map(function(m){ return [m.nume+' ['+((STATUS[m.status]||{}).label||m.status)+']', m.desc+' (sursă: '+m.sursa+').']; })); }
 
-    D.h2('Aeroporturi și puncte modale');
+    D.h2('Aeroporturi');
     var ap=this.nearestAirports(lat,lon,260,5);
     if(ap.length){
       D.bullets(ap.map(function(a){ return [a.name+' ('+a.iata+')', '~'+a.distKm+' km · '+a.tip+' · '+a.info+'.']; }));
+    }
+    var md=this.nearestModal(lat,lon,200,6);
+    if(md.length){
+      D.h2('Puncte modale și infrastructură strategică (baraje, porturi, treceri de frontieră, noduri extractive)');
+      D.bullets(md.map(function(m){ return [m.name, '~'+m.distKm+' km · '+m.tip+' · '+m.info+'.']; }));
     }
 
     var g=this.geoContext(judet);
