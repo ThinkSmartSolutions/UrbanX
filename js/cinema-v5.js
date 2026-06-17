@@ -108,6 +108,7 @@ SCENES = [
   {id:'b13s3',dur:18000,label:'ORAS PRIETENOS SENIORI',bloc:6,blabel:'ORASUL PENTRU OAMENI'},
   {id:'b13s4',dur:18000,label:'ORAS PENTRU COPII',    bloc:6,blabel:'ORASUL PENTRU OAMENI'},
   {id:'b18s1',dur:20000,label:'FAUNA & SIGURANTA',    bloc:6,blabel:'ORASUL PENTRU OAMENI'},
+  {id:'b19s1',dur:24000,label:'CULTURA & TURISM',     bloc:6,blabel:'ORASUL PENTRU OAMENI'},
   {id:'b14s3',dur:18000,label:'ORASUL CA SISTEM VIU', bloc:6,blabel:'ORASUL PENTRU OAMENI'},
   // ACT VII — AGENDA & VIZIUNEA
   {id:'b11s1',dur:22000,label:'AGENDA ADMINISTRATORULUI',    bloc:7,blabel:'AGENDA & VIZIUNEA'},
@@ -1333,6 +1334,16 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         rot(20,0.006);
         fly(Z.CBD,14.5,66,20,5000,0,'night');
         fly(Z.CBD,15,70,110,13000,5000,'night');
+        break;
+      case 'b19s1': // CULTURA & TURISM — obiective + Via Transilvanica + street-view
+        lp('day');
+        try{map.setLayoutProperty('building-extrusion','visibility','visible');}catch(e){}
+        setTimeout(function(){ if(SE._playing){ try{SE._addTourism&&SE._addTourism(map, SE._cityKey, SE._city);}catch(e){} } },1600);
+        fly(Z.C,13.2,54,0,4500,0,'day');
+        rot(12,0.004);
+        fly(Z.C,13.8,58,45,7000,9000,'day');
+        // STREET-VIEW pe obiectivul cultural principal (nivel pieton)
+        setTimeout(function(){ if(SE._playing && SE._tourMain){ try{map.flyTo({center:[SE._tourMain.lon,SE._tourMain.lat],zoom:16.6,pitch:80,bearing:30,duration:6000,essential:true});}catch(e){} } },16000);
         break;
       case 'b18s1': // FAUNA URBANA & SIGURANTA (#8 strays, #9 ursi)
         lp('day');
@@ -2707,6 +2718,32 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         }
         narativ('Fauna urbana influenteaza calitatea vietii, siguranta si atractivitatea turistica — de aceea conteaza in nota UrbanX. Cainii fara stapan: fara sterilizare sustinuta, populatia si reclamatiile cresc ~60% pana in 2030; cu program CNVSU + adoptie scad ~60%. '+(BR.present?('Urs: '+BR.note+' Romania are cea mai mare populatie de ursi bruni din UE (~8.000). Necesita containere anti-urs, interzicerea hranirii, RO-Alert.'):'Fara prezenta semnificativa a ursilor.'));
         concluzie('Gestionarea umana a faunei (sterilizare + adapost + management urs) = oras mai sigur, mai curat, mai atractiv');
+        break;
+      }
+
+      case 'b19s1': { // CULTURA & TURISM
+        titlu('Cultura & Turism','Teatre · muzee · cetati · festivaluri · Via Transilvanica · motor economic'); linie();
+        var TS=(window._UrbanTourism)?window._UrbanTourism.score(SE._cityKey||(window.TCI&&TCI.cityKey)||'RO-IS-01', city):null;
+        if(TS){
+          var a=TS.assets;
+          cifra(TS.score+'/100','Potential turistic (cultura+acces)', TS.score>=65?'#22c55e':TS.score>=45?'#f59e0b':'#ef4444');
+          cifra2(N2(a.muzee)+' muzee · '+N2(a.teatre)+' teatre',(a.unesco?a.unesco+' sit UNESCO':'patrimoniu local'),'#e879f9');
+          // listeaza obiectivele pe ecran
+          (a.obiective||[]).slice(0,4).forEach(function(o,i){
+            var al=Math.min(1,(t-0.16-i*0.06)/0.18)*sA; if(al<=0)return; ctx.globalAlpha=al;
+            ctx.fillStyle='rgba(4,10,24,0.72)'; ctx.fillRect(W*0.04,H*(0.40+i*0.062),W*0.50,H*0.052);
+            ctx.fillStyle='#e879f9'; ctx.font='700 '+Math.min(W*0.012,16)+'px "Space Grotesk",sans-serif'; ctx.textAlign='left';
+            ctx.fillText('• '+o.n.slice(0,44),W*0.055,H*(0.40+i*0.062)+H*0.033);
+            ctx.globalAlpha=1;
+          });
+          if(TS.via && TS.via.near){
+            var va=Math.min(1,(t-0.45)/0.18)*sA; if(va>0){ ctx.globalAlpha=va;
+              ctx.fillStyle='#f59e0b'; ctx.font='700 '+Math.min(W*0.011,15)+'px "IBM Plex Mono",monospace'; ctx.textAlign='left';
+              ctx.fillText('🥾 VIA TRANSILVANICA — '+TS.via.why+' (~1.400 km, Putna→Drobeta)',W*0.04,H*0.70); ctx.globalAlpha=1; }
+          }
+        }
+        narativ('Cultura si turismul sunt motor economic pe 30 de ani: locuri de munca, venituri la buget, retentia tinerilor, imaginea orasului. Accesibilitatea (aeroport + autostrada) amplifica turismul de city-break; patrimoniul activat (cetati restaurate — model Alba Carolina) si traseele tematice (Via Transilvanica) distribuie turismul teritorial. Orasele-model: Sibiu (Capitala Culturala 2007), Sighisoara (UNESCO), Salzburg, Krakow.');
+        concluzie('Cultura activata + accesibilitate + evenimente = oras care vibreaza, atrage turisti si retine tineri');
         break;
       }
     }

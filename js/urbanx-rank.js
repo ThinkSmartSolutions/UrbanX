@@ -58,7 +58,11 @@ G._UrbanRank = {
     var faunaPen = 0, faunaNote = '';
     try{ if(G._UrbanFauna){ var fm=G._UrbanFauna.qolModifier(city); faunaPen=fm.penalty||0;
       faunaNote=' − '+faunaPen+' pct faună (câini fără stăpân ~'+fm.strays.perK+'/1000'+(fm.bear.present?', risc urși '+fm.bear.level:'')+')'; } }catch(e){}
-    quality = cl(quality - faunaPen);
+    // bonus cultură/turism (vibrație culturală + atractivitate)
+    var tourBonus = 0, tourNote = '';
+    try{ if(G._UrbanTourism){ tourBonus=G._UrbanTourism.rankBonus(city&&(city.key||city.cityKey), city)||0;
+      if(tourBonus) tourNote=' + '+tourBonus+' pct cultură/turism'; } }catch(e){}
+    quality = cl(quality - faunaPen + tourBonus);
     var enviro  = cl((gv('uhi',55) + cl((pred.svM2||11)*4.6) + cl(82-(pred.co2cap||4.6)*6))/3);
     var demo    = cl(50 + (pred.r10||0)*18);                            // trend demografic
     var resil   = cl(82 - (pred.ag||0.2)*120);                          // rezilienta (seismic)
@@ -79,7 +83,7 @@ G._UrbanRank = {
 
     var dims = [
       {label:'Economie & convergență UE', score:econ,    w:0.20, formula:'% din PIB/cap media UE27', src:'Eurostat / INS'},
-      {label:'Calitate a vieții',         score:quality, w:0.20, formula:'media(Happiness, Urban Health Index)'+faunaNote, src:'OECD Better Life / WHR + bunăstare animală'},
+      {label:'Calitate a vieții',         score:quality, w:0.20, formula:'media(Happiness, Urban Health Index)'+faunaNote+tourNote, src:'OECD Better Life / WHR + bunăstare animală + cultură/turism'},
       {label:'Conectivitate & poziție',   score:connect, w:0.15, formula:'Gravitația oportunităților + bonus aeroport/autostradă reală', src:'model UrbanX + CNAIR/AACR'},
       {label:'Mediu & climă',             score:enviro,  w:0.15, formula:'media(UHI, spații verzi/cap, traiectorie CO₂)', src:'EEA / WHO'},
       {label:'Demografie & capital uman', score:demo,    w:0.15, formula:'50 + ritm populație 10 ani × 18', src:'INS / recensământ 2021'},
