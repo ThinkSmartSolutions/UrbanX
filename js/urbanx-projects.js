@@ -36,6 +36,86 @@ G._UrbanProjects = {
         desc:'Reamenajarea malurilor Bahluiului în parc liniar continuu: alei pietonale/velo, oaze de verdeață, retenție apă.',
         impact:'Coridor verde-albastru major — racorire urbană, conectivitate pietonală, calitatea vieții.', sursa:'Primăria Iași / fonduri climă UE' },
     ],
+
+    // ── MUNICIPIUL SUCEAVA ──
+    'RO-SV-01': [
+      { tip:'pol', icon:'✈', color:'#06b6d4', lat:47.6875, lon:26.3539, nume:'Aeroportul Internațional Ștefan cel Mare (Salcea)', desc:'Modernizat/extins — poartă aeriană a Bucovinei.', impact:'Pol logistic și turistic est — dezvoltare zonă Salcea.', sursa:'CJ Suceava / fonduri UE' },
+      { tip:'pol', icon:'🏥', color:'#ef4444', lat:47.6440, lon:26.2530, nume:'Spitalul Județean de Urgență „Sf. Ioan cel Nou”', desc:'Modernizare și extindere capacitate.', impact:'Pol medical regional.', sursa:'PNRR / MS' },
+      { tip:'coridor', icon:'🛣', color:'#dc2626', traseu:[[26.18,47.60],[26.25,47.65],[26.32,47.70]], nume:'A7 / drum expres + variantă ocolitoare', desc:'Conexiune rapidă nord (Pașcani–Suceava–Siret).', impact:'Coridor de dezvoltare nord, deviază tranzitul.', sursa:'CNAIR / A7 Moldova' },
+    ],
+
+    // ── MUNICIPIUL GALAȚI ──
+    'RO-GL-01': [
+      { tip:'pol', icon:'🌉', color:'#a855f7', lat:45.2750, lon:27.9650, nume:'Podul suspendat peste Dunăre (Brăila–Galați)', desc:'Cel mai mare pod suspendat din România (deschis 2023) — leagă Galați-Brăila de Dobrogea.', impact:'Salt major de conectivitate — coridor logistic și dezvoltare sud.', sursa:'CNAIR' },
+      { tip:'pol', icon:'⚓', color:'#0ea5e9', lat:45.4180, lon:28.0450, nume:'Port Galați + Zona Liberă', desc:'Cel mai mare port fluvial-maritim — extindere logistică.', impact:'Pol industrial-logistic est, pe Dunăre.', sursa:'APDM / Zona Liberă Galați' },
+      { tip:'zona', icon:'🏭', color:'#9ca3af', lat:45.4520, lon:27.9550, nume:'Platforma siderurgică (Liberty Galați)', desc:'Restructurare/decarbonare combinat siderurgic.', impact:'Reconversie industrială vest — brownfield major.', sursa:'Liberty / Green Deal' },
+    ],
+
+    // ── MUNICIPIUL CLUJ-NAPOCA ──
+    'RO-CJ-01': [
+      { tip:'pol', icon:'🏥', color:'#ef4444', lat:46.7450, lon:23.5550, nume:'Spitalul Regional de Urgență Cluj', desc:'Unul din cele 3 spitale regionale BEI/PNRR (Iași, Cluj, Craiova).', impact:'Pol medical regional + dezvoltare în jur.', sursa:'PNRR / BEI' },
+      { tip:'tren', icon:'🚇', color:'#a855f7', traseu:[[23.55,46.78],[23.59,46.77],[23.63,46.77],[23.67,46.78]], nume:'Metroul Cluj (Linia M1)', desc:'Prima linie de metrou din afara Bucureștiului (PNRR).', impact:'Coloană vertebrală de transport — densificare TOD.', sursa:'PNRR / CFR' },
+      { tip:'coridor', icon:'🛣', color:'#dc2626', traseu:[[23.52,46.74],[23.55,46.80],[23.66,46.81]], nume:'Centura metropolitană Cluj', desc:'Inel ocolitor metropolitan.', impact:'Coridor de dezvoltare periurban (Florești, Apahida).', sursa:'CNAIR / ZMC' },
+    ],
+
+    // ── MUNICIPIUL TIMIȘOARA ──
+    'RO-TM-01': [
+      { tip:'pol', icon:'🏥', color:'#ef4444', lat:45.7300, lon:21.2050, nume:'Spitalul Regional de Urgență Timișoara', desc:'Spital regional major (program PNRR).', impact:'Pol medical regional Banat.', sursa:'PNRR / MS' },
+      { tip:'pol', icon:'✈', color:'#06b6d4', lat:45.8098, lon:21.3379, nume:'Aeroportul Internațional „Traian Vuia”', desc:'Hub aerian vest — modernizare.', impact:'Pol logistic/economic est.', sursa:'CJ Timiș' },
+      { tip:'coridor', icon:'🛣', color:'#dc2626', traseu:[[21.15,45.72],[21.22,45.76],[21.30,45.80]], nume:'Centura + A1 (coridor IV)', desc:'Legătură autostradă A1 spre vest.', impact:'Coridor logistic și industrial.', sursa:'CNAIR / TEN-T' },
+    ],
+
+    // ── MUNICIPIUL CRAIOVA ──
+    'RO-DJ-01': [
+      { tip:'pol', icon:'🏥', color:'#ef4444', lat:44.3150, lon:23.7800, nume:'Spitalul Regional de Urgență Craiova', desc:'Unul din cele 3 spitale regionale BEI/PNRR.', impact:'Pol medical regional Oltenia.', sursa:'PNRR / BEI' },
+      { tip:'zona', icon:'🏭', color:'#f59e0b', lat:44.3450, lon:23.8350, nume:'Platforma auto (Ford Otosan Craiova)', desc:'Producție auto + electrificare — pol industrial.', impact:'Motor economic + furnizori în jur.', sursa:'Ford Otosan' },
+      { tip:'coridor', icon:'🛣', color:'#dc2626', traseu:[[23.74,44.29],[23.80,44.33],[23.86,44.36]], nume:'Centura Craiova + drum expres Craiova–Pitești', desc:'Ocolitoare + legătură A1.', impact:'Coridor de dezvoltare logistic.', sursa:'CNAIR' },
+    ],
+
+    // ── MUNICIPIUL BRAȘOV ──
+    'RO-BV-01': [
+      { tip:'pol', icon:'✈', color:'#06b6d4', lat:45.7020, lon:25.5230, nume:'Aeroportul Internațional Brașov-Ghimbav', desc:'Primul aeroport nou din România (deschis 2023).', impact:'Pol logistic/turistic vest — dezvoltare Ghimbav.', sursa:'CJ Brașov' },
+      { tip:'pol', icon:'🏥', color:'#ef4444', lat:45.6520, lon:25.6100, nume:'Spital clinic / pol medical', desc:'Modernizare infrastructură sanitară.', impact:'Pol medical regional.', sursa:'PNRR / MS' },
+      { tip:'coridor', icon:'🛣', color:'#dc2626', traseu:[[25.55,45.62],[25.60,45.66],[25.66,45.70]], nume:'A3 (Comarnic–Brașov) + ocolitoare', desc:'Legătură autostradă spre București.', impact:'Coridor major de dezvoltare sud.', sursa:'CNAIR' },
+    ],
+
+    // ── MUNICIPIUL CONSTANȚA ──
+    'RO-CT-01': [
+      { tip:'pol', icon:'⚓', color:'#0ea5e9', lat:44.1500, lon:28.6600, nume:'Portul Constanța (extindere)', desc:'Cel mai mare port la Marea Neagră — extindere + dana cereale.', impact:'Pol logistic-maritim major (poarta TEN-T).', sursa:'APM Constanța / CEF' },
+      { tip:'coridor', icon:'🛣', color:'#dc2626', traseu:[[28.55,44.15],[28.62,44.18],[28.70,44.22]], nume:'A4 centura + A2 (autostrada soarelui)', desc:'Centura ocolitoare + legătură A2 spre București.', impact:'Coridor logistic și turistic.', sursa:'CNAIR' },
+      { tip:'pol', icon:'🏥', color:'#ef4444', lat:44.1820, lon:28.6450, nume:'Spital județean / pol medical', desc:'Modernizare capacitate.', impact:'Pol medical regional Dobrogea.', sursa:'PNRR / MS' },
+    ],
+
+    // ── MUNICIPIUL BUCUREȘTI ──
+    'RO-B-01': [
+      { tip:'coridor', icon:'🛣', color:'#dc2626', traseu:[[25.95,44.35],[26.00,44.55],[26.25,44.55],[26.30,44.35],[26.05,44.28],[25.95,44.35]], nume:'A0 — Autostrada de Centură București', desc:'Inelul de autostradă în jurul Capitalei (în execuție pe tronsoane).', impact:'Deviază tranzitul + coridoare de dezvoltare periurbane (Ilfov).', sursa:'CNAIR' },
+      { tip:'tren', icon:'🚇', color:'#a855f7', traseu:[[26.07,44.45],[26.05,44.49],[26.05,44.55],[26.08,44.62]], nume:'Metrou M6 (1 Mai – Otopeni)', desc:'Legătura metrou spre Aeroportul Otopeni (PNRR/BEI).', impact:'Conexiune aeroport — densificare TOD nord.', sursa:'PNRR / Metrorex' },
+      { tip:'pol', icon:'🏥', color:'#ef4444', lat:44.4500, lon:26.1300, nume:'Spitale metropolitane (mai multe locații)', desc:'Programe de spitale noi / modernizare.', impact:'Poli medicali multipli.', sursa:'PMB / MS / PNRR' },
+    ],
+
+    // ── MUNICIPIUL BACĂU ──
+    'RO-BC-01': [
+      { tip:'coridor', icon:'🛣', color:'#dc2626', traseu:[[26.85,46.50],[26.91,46.57],[26.97,46.63]], nume:'A7 — Autostrada Moldovei', desc:'Tronson major Moldova (Bacău pe traseu).', impact:'Coridor de dezvoltare nord-sud.', sursa:'CNAIR / A7' },
+      { tip:'pol', icon:'✈', color:'#06b6d4', lat:46.5219, lon:26.9103, nume:'Aeroportul „George Enescu” Bacău', desc:'Hub aerian — modernizare.', impact:'Pol logistic sud.', sursa:'CJ Bacău' },
+    ],
+
+    // ── MUNICIPIUL PIATRA-NEAMȚ ──
+    'RO-NT-01': [
+      { tip:'pol', icon:'🏥', color:'#ef4444', lat:46.9250, lon:26.3650, nume:'Spitalul Județean de Urgență Neamț', desc:'Modernizare infrastructură sanitară.', impact:'Pol medical județean.', sursa:'PNRR / MS' },
+      { tip:'coridor', icon:'🛣', color:'#dc2626', traseu:[[26.30,46.91],[26.37,46.93],[26.43,46.95]], nume:'Variantă de ocolire + legătură DN', desc:'Decongestionare tranzit pe valea Bistriței.', impact:'Coridor de dezvoltare est.', sursa:'CNAIR' },
+    ],
+
+    // ── MUNICIPIUL BOTOȘANI ──
+    'RO-BT-01': [
+      { tip:'pol', icon:'🏥', color:'#ef4444', lat:47.7480, lon:26.6650, nume:'Spitalul Județean „Mavromati”', desc:'Modernizare și extindere.', impact:'Pol medical județean.', sursa:'PNRR / MS' },
+      { tip:'coridor', icon:'🛣', color:'#dc2626', traseu:[[26.62,47.72],[26.67,47.75],[26.72,47.78]], nume:'Variantă ocolitoare Botoșani', desc:'Ocolire tranzit + legătură spre Suceava/Iași.', impact:'Coridor de dezvoltare.', sursa:'CNAIR' },
+    ],
+
+    // ── MUNICIPIUL VASLUI ──
+    'RO-VS-01': [
+      { tip:'pol', icon:'🏥', color:'#ef4444', lat:46.6400, lon:27.7300, nume:'Spitalul Județean de Urgență Vaslui', desc:'Modernizare capacitate.', impact:'Pol medical județean.', sursa:'PNRR / MS' },
+      { tip:'coridor', icon:'🛣', color:'#dc2626', traseu:[[27.68,46.61],[27.73,46.64],[27.78,46.67]], nume:'Drum de legătură / variantă ocolitoare', desc:'Conexiune coridor Bârlad–Iași.', impact:'Coridor de dezvoltare.', sursa:'CNAIR' },
+    ],
   },
 
   // proiecte pentru un UAT; daca nu avem date reale -> set generic derivat din centru
