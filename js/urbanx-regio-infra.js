@@ -115,7 +115,9 @@ G._RegioInfra = {
       var col=(STATUS[h.status]||STATUS.proiectare).c;
       lines.push({type:'Feature',geometry:{type:'LineString',coordinates:h.traseu},properties:{c:col,nume:h.nume,status:h.status}});
       var mid=h.traseu[Math.floor(h.traseu.length/2)];
-      labels.push({lon:mid[0], lat:mid[1], color:col, icon:(h.oras?'🚇':'🛣'), title:h.nume, sub:(STATUS[h.status]||{}).label||h.status});
+      // santierele active (executie) marcate cu semn de constructie 🏗 (#9)
+      var ic = h.status==='executie' ? '🏗' : (h.oras?'🚇':'🛣');
+      labels.push({lon:mid[0], lat:mid[1], color:col, icon:ic, title:h.nume, sub:(STATUS[h.status]||{}).label||h.status});
     });
     this.nearestAirports(lat,lon,220,4).forEach(function(a){
       var col=a.tip==='hub'?'#fbbf24':'#22d3ee';
