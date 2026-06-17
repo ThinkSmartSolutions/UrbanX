@@ -177,12 +177,29 @@
       lines.forEach((l, i) => pdf.text(l, ML + 6, y + 11 + i * 4.2)); y += hh + 3;
     }
     function kpis(items) { // [{label,val,sub}]
-      const n = items.length, gap = 3, bw = (CW - gap * (n - 1)) / n, bh = 18; ensure(bh + 3);
-      items.forEach((it, i) => { const x = ML + i * (bw + gap); pdf.setFillColor(12, 24, 56); pdf.rect(x, y, bw, bh, 'F'); pdf.setFillColor.apply(pdf, ACCENT); pdf.rect(x, y, bw, 1.2, 'F');
-        pdf.setTextColor.apply(pdf, ACCENT); pdf.setFont(FONT, 'bold'); pdf.setFontSize(12); pdf.text(S2(String(it.val)), x + bw / 2, y + 9, { align: 'center' });
-        pdf.setTextColor(200, 210, 224); pdf.setFont(FONT, 'normal'); pdf.setFontSize(6.2); pdf.text(S2(it.label), x + bw / 2, y + 13.5, { align: 'center', maxWidth: bw - 3 });
-        if (it.sub) { pdf.setTextColor(150, 165, 190); pdf.setFontSize(5.6); pdf.text(S2(it.sub), x + bw / 2, y + 16.5, { align: 'center', maxWidth: bw - 3 }); } });
-      y += bh + 4;
+      if (!items || !items.length) return;
+      const n = items.length;
+      // WRAP pe randuri ca sa NU se inghesuie / iasa din pagina (max 5 coloane)
+      const cols = n <= 5 ? n : Math.min(5, Math.ceil(n / 2));
+      const gap = 3, bw = (CW - gap * (cols - 1)) / cols, bh = 22;
+      const rows = Math.ceil(n / cols);
+      ensure(rows * (bh + gap) + 3);
+      const y0 = y;
+      items.forEach((it, i) => {
+        const c = i % cols, r = Math.floor(i / cols);
+        const x = ML + c * (bw + gap), yy = y0 + r * (bh + gap);
+        pdf.setFillColor(12, 24, 56); pdf.rect(x, yy, bw, bh, 'F'); pdf.setFillColor.apply(pdf, ACCENT); pdf.rect(x, yy, bw, 1.2, 'F');
+        // VALOARE — font auto-fit la latimea cardului (nu mai iese "4.6t CO2/loc")
+        const vstr = S2(String(it.val)); const vf = fitFont(FONT, 'bold', 12, vstr, bw - 4);
+        pdf.setTextColor.apply(pdf, ACCENT); pdf.setFont(FONT, 'bold'); pdf.setFontSize(vf); pdf.text(vstr, x + bw / 2, yy + 8, { align: 'center' });
+        // ETICHETA — max 2 linii, centrata
+        pdf.setTextColor(200, 210, 224); pdf.setFont(FONT, 'normal'); pdf.setFontSize(6);
+        const ll = pdf.splitTextToSize(S2(it.label), bw - 3).slice(0, 2);
+        ll.forEach((l, li) => pdf.text(l, x + bw / 2, yy + 12 + li * 3.2, { align: 'center' }));
+        // SUB — sub eticheta, fara suprapunere
+        if (it.sub) { pdf.setTextColor(150, 165, 190); pdf.setFontSize(5.4); pdf.text(S2(it.sub), x + bw / 2, yy + 12 + ll.length * 3.2 + 1.6, { align: 'center', maxWidth: bw - 2 }); }
+      });
+      y = y0 + rows * (bh + gap) + 1;
     }
     // ── GRAFICE NATIVE (control complet, densitate mare) ───────────────────
     const PAL = [[59,130,246],[212,175,55],[34,160,90],[239,68,68],[168,85,247],[245,158,11],[20,184,166],[236,72,153]];
