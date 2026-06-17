@@ -66,6 +66,7 @@ SCENES = [
   {id:'b2s2',dur:20000,label:'CRIZA IMBATRANIRE',     bloc:1,blabel:'INTELEGEREA ORASULUI'},
   {id:'b2s3',dur:20000,label:'MIGRATIE & EMIGRARE',   bloc:1,blabel:'INTELEGEREA ORASULUI'},
   {id:'b2s4',dur:18000,label:'PROFIL LOCUITOR',    bloc:1,blabel:'INTELEGEREA ORASULUI'},
+  {id:'b17s1',dur:26000,label:'CARTIERE — NIVEL STRADA',bloc:1,blabel:'INTELEGEREA ORASULUI'},
   {id:'b3s1',dur:20000,label:'ECONOMIA REALA',        bloc:1,blabel:'INTELEGEREA ORASULUI'},
   {id:'b3s2',dur:20000,label:'MOTOARE ECONOMICE',     bloc:1,blabel:'INTELEGEREA ORASULUI'},
   {id:'b3s3',dur:18000,label:'INVESTITII & ROI',      bloc:1,blabel:'INTELEGEREA ORASULUI'},
@@ -1320,6 +1321,25 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         rot(20,0.006);
         fly(Z.CBD,14.5,66,20,5000,0,'night');
         fly(Z.CBD,15,70,110,13000,5000,'night');
+        break;
+      case 'b17s1': // CARTIERE la nivel de strada (street-view / pieton)
+        lp('day');
+        // cladirile native Mapbox 3D vizibile -> tesut urban real la nivel pieton
+        try{map.setLayoutProperty('building-extrusion','visibility','visible');}catch(e){}
+        try{map.setPaintProperty('building-extrusion','fill-extrusion-opacity',0.95);}catch(e){}
+        setTimeout(function(){
+          if(!SE._playing||!SE._cinLabels) return;
+          SE._cinLabels(map,[
+            {lon:Z.RES[0],lat:Z.RES[1],color:'#22d3ee',icon:'🏘',title:'CARTIER REZIDENTIAL',sub:'nivel pieton · acces 15 min'},
+            {lon:Z.NV[0], lat:Z.NV[1], color:'#34d399',icon:'🚶',title:'CARTIER NORD-VEST',  sub:'tesut urban · strazi locale'},
+            {lon:Z.NE[0], lat:Z.NE[1], color:'#fbbf24',icon:'🌳',title:'ZONA NORD-EST',       sub:'mixaj functional de proximitate'},
+          ]);
+        },1500);
+        // dive la nivel de strada: pitch mare, zoom mare, miscare lenta intre cartiere
+        fly(Z.RES,16.4,80,10,5000,0,'day');
+        rot(16,0.005);
+        fly(Z.NV,16.6,82,95,8500,5500,'day');
+        fly(Z.NE,16.2,78,180,8500,15500,'dusk');
         break;
       case 'b16s1': // NOTA UrbanX (clasament)
         lp('dusk');
@@ -2607,6 +2627,23 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
           narativ('Nota UrbanX = suma ponderata a dimensiunilor (Economie 20%, Calitate vietii 20%, Conectivitate 15%, Mediu 15%, Demografie 15%, Rezilienta 15%). Toate sub-scorurile provin din date reale analizate de platforma (ISO 37120, Eurostat, OECD, INFP, EEA). Comparatia se face DOAR cu orase europene echivalente ca marime — nu comparam un oras mic cu o metropola.');
           concluzie('O nota transparenta si reproductibila — UrbanX poate deveni un standard de evaluare comparabila a oraselor');
         } else { titlu('Nota UrbanX','modul indisponibil'); }
+        break;
+      }
+
+      case 'b17s1': { // CARTIERE la nivel de strada (street-view)
+        titlu('Cartiere la nivel de strada','Tesutul urban vazut de la inaltimea pietonului · orasul de 15 minute'); linie();
+        cifra(name,'Cartiere rezidentiale','#22d3ee');
+        cifra2('15 min','Acces servicii de proximitate','#34d399');
+        // mic indicator "street level" pulsant
+        var sa2=Math.min(1,(t-0.1)/0.2)*sA;
+        if(sa2>0){
+          ctx.globalAlpha=sa2*0.9; ctx.fillStyle='rgba(34,211,238,0.92)';
+          ctx.font='700 '+Math.min(W*0.011,15)+'px "IBM Plex Mono",monospace'; ctx.textAlign='left';
+          ctx.fillText('\u{1F6B6} NIVEL STRADA · pitch '+(78+Math.round(Math.sin(t*6)*2))+'°', W*0.04, H*0.30);
+          ctx.globalAlpha=1;
+        }
+        narativ('Camera coboara la nivelul pietonului — asa isi traieste orasul un locuitor. Calitatea tesutului urban (strazi la scara umana, fronturi continue, parter activ, verde de proximitate) decide daca un cartier este viu sau dormitor. Orasul de 15 minute: locuire, munca, scoala, sanatate, cumparaturi si recreere accesibile pe jos sau cu bicicleta.');
+        concluzie('Densificare calitativa + parter activ + verde de proximitate = cartiere vii, nu dormitor');
         break;
       }
     }
