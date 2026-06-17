@@ -1040,6 +1040,10 @@
       try{ if(window._UrbanServices){ window._UrbanServices.renderChapter(D, ctx.cityKey||(city&&city.key), city); } }catch(e){ console.warn('[MP] services:',e.message); }
       // LOCUIRE & ACCESIBILITATE
       try{ if(window._UrbanHousing){ var _prH=(window._PredEngine&&_PredEngine.calc)?_PredEngine.calc(city):{}; window._UrbanHousing.renderChapter(D, city, _prH); } }catch(e){ console.warn('[MP] locuire:',e.message); }
+      // ENERGIE & CLIMAT
+      try{ if(window._UrbanEnergy){ var _prE=(window._PredEngine&&_PredEngine.calc)?_PredEngine.calc(city):{}; window._UrbanEnergy.renderChapter(D, city, _prE); } }catch(e){ console.warn('[MP] energie:',e.message); }
+      // APA & ECONOMIE CIRCULARA
+      try{ if(window._UrbanResources){ window._UrbanResources.renderChapter(D, city); } }catch(e){ console.warn('[MP] resurse:',e.message); }
       // PARTICIPARE PUBLICA & transparenta decizionala
       try{ if(window._PublicParticipation&&window._PublicParticipation.renderChapter){ window._PublicParticipation.renderChapter(D, city); } }catch(e){ console.warn('[MP] participare:',e.message); }
       // FAUNA urbana & siguranta (caini fara stapan + ursi)

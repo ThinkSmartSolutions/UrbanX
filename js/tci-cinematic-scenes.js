@@ -1230,6 +1230,31 @@ G._CinemaEngine={
     this._cinLabels(map, impacts.map(im=>({lon:cx+im.dx/latC, lat:cy+im.dy, color:im.c, icon:im.icon, title:im.t, sub:'pierdere estimată: '+im.loss})));
   },
 
+  // ── ENERGIE & CLIMAT — potential solar + fond de renovat + termoficare
+  _addEnergy(map, city, pred){
+    if(!window._UrbanEnergy) return;
+    var f=window._UrbanEnergy.buildFeatures(city||this._city||{}, pred||this._pred||{});
+    if(f.pts && f.pts.length){
+      this._safeAdd(map,'v8-energy',{type:'geojson',data:{type:'FeatureCollection',features:f.pts}},{
+        id:'v8-energy-l',type:'circle',source:'v8-energy',
+        paint:{'circle-radius':['interpolate',['linear'],['zoom'],11,12,15,32],'circle-color':['get','c'],'circle-opacity':0.32,'circle-stroke-width':2,'circle-stroke-color':['get','c']}
+      });
+    }
+    if(this._cinLabels) this._cinLabels(map, f.labels||[]);
+  },
+  // ── APA & ECONOMIE CIRCULARA — apa + deseuri + risc seceta
+  _addResources(map, city){
+    if(!window._UrbanResources) return;
+    var f=window._UrbanResources.buildFeatures(city||this._city||{});
+    if(f.pts && f.pts.length){
+      this._safeAdd(map,'v8-res',{type:'geojson',data:{type:'FeatureCollection',features:f.pts}},{
+        id:'v8-res-l',type:'circle',source:'v8-res',
+        paint:{'circle-radius':['interpolate',['linear'],['zoom'],11,11,15,30],'circle-color':['get','c'],'circle-opacity':0.34,'circle-stroke-width':2,'circle-stroke-color':['get','c']}
+      });
+    }
+    if(this._cinLabels) this._cinLabels(map, f.labels||[]);
+  },
+
   // ── LOCUIRE & ACCESIBILITATE — presiune centru (scump) vs dezvoltare periferie
   _addHousing(map, city, pred){
     if(!window._UrbanHousing) return;
@@ -1413,7 +1438,7 @@ G._CinemaEngine={
      'v8-proj-line-l','v8-proj-line','v8-proj-pt-l','v8-proj-pt',
      'v8-uhi-l','v8-uhi','v8-oasis-h-l','v8-oasis-h','v8-oasis-l','v8-oasis',
      'v8-ri-line-l','v8-ri-line','v8-ri-apt-l','v8-ri-apt',
-     'v8-age-l','v8-age','v8-sc-l','v8-sc','v8-sc-h-l','v8-sc-h','v8-sc-w-l','v8-sc-w','v8-modal-l','v8-modal','v8-cost-l','v8-cost','v8-fauna-l','v8-fauna','v8-via-l','v8-via','v8-cult-l','v8-cult','v8-vit-l','v8-vit','v8-srv-l','v8-srv','v8-part-l','v8-part','v8-house-l','v8-house',
+     'v8-age-l','v8-age','v8-sc-l','v8-sc','v8-sc-h-l','v8-sc-h','v8-sc-w-l','v8-sc-w','v8-modal-l','v8-modal','v8-cost-l','v8-cost','v8-fauna-l','v8-fauna','v8-via-l','v8-via','v8-cult-l','v8-cult','v8-vit-l','v8-vit','v8-srv-l','v8-srv','v8-part-l','v8-part','v8-house-l','v8-house','v8-energy-l','v8-energy','v8-res-l','v8-res',
      // cleanup v6/v7 layers
      'v6-gr-l','v6-gr','v6-bld-l','v6-bld','v6-den-l','v6-den','v6-tr-l','v6-tr',
      'v7-gr-l','v7-gr','v7-bld-l','v7-bld','v7-den-l','v7-den','v7-tr-l','v7-tr',

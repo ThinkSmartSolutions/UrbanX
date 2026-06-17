@@ -82,6 +82,8 @@ G._UrbanRank = {
       var eb=G._UrbanVitality.eduBonus(_ck,city)||0; if(eb){ demo=cl(demo+eb); eduNote=' + '+eb+' pct educație/talent'; } } }catch(e){}
     var resil   = cl(82 - (pred.ag||0.2)*120);                          // rezilienta (seismic)
     try{ if(G._UrbanServices){ var hb=G._UrbanServices.healthBonus(city&&(city.key||city.cityKey),city)||0; if(hb){ resil=cl(resil+hb); resilNote=' + '+hb+' pct sănătate'; } } }catch(e){}
+    try{ if(G._UrbanEnergy){ var enb=G._UrbanEnergy.bonus(city,pred)||0; if(enb){ resil=cl(resil+enb); resilNote+=' + '+enb+' pct energie'; } } }catch(e){}
+    try{ if(G._UrbanResources){ var rd=G._UrbanResources.modifier(city); if(rd.delta){ resil=cl(resil+rd.delta); resilNote+=' '+(rd.delta>0?'+':'−')+' '+Math.abs(rd.delta)+' pct resurse'; } } }catch(e){}
     var connect = cl(gv('gravity',50));                                 // gravitatia oportunitatilor
 
     // bonus conectivitate din infrastructura regionala reala (aeroport/autostrada)

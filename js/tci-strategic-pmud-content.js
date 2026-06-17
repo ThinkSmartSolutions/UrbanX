@@ -721,6 +721,8 @@
       try{ if(window._UrbanVitality){ window._UrbanVitality.renderChapter(D, ctx.cityKey, city); } }catch(e){ console.warn('[PMUD] vitality:',e.message); }
       try{ if(window._UrbanServices){ window._UrbanServices.renderChapter(D, ctx.cityKey, city); } }catch(e){ console.warn('[PMUD] services:',e.message); }
       try{ if(window._UrbanHousing){ var _prH2=(window._PredEngine&&_PredEngine.calc)?_PredEngine.calc(city):{}; window._UrbanHousing.renderChapter(D, city, _prH2); } }catch(e){ console.warn('[PMUD] locuire:',e.message); }
+      try{ if(window._UrbanEnergy){ var _prE2=(window._PredEngine&&_PredEngine.calc)?_PredEngine.calc(city):{}; window._UrbanEnergy.renderChapter(D, city, _prE2); } }catch(e){ console.warn('[PMUD] energie:',e.message); }
+      try{ if(window._UrbanResources){ window._UrbanResources.renderChapter(D, city); } }catch(e){ console.warn('[PMUD] resurse:',e.message); }
       try{ if(window._PublicParticipation&&window._PublicParticipation.renderChapter){ window._PublicParticipation.renderChapter(D, city); } }catch(e){ console.warn('[PMUD] participare:',e.message); }
       try{ if(window._UrbanFauna){ window._UrbanFauna.renderChapter(D, city); } }catch(e){ console.warn('[PMUD] fauna:',e.message); }
       try{ if(window._UrbanRank){ var _prRk=(window._PredEngine&&_PredEngine.calc)?_PredEngine.calc(city):{}; window._UrbanRank.renderChapter(D, _prRk, city); } }catch(e){ console.warn('[PMUD] rank:',e.message); }

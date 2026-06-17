@@ -97,6 +97,8 @@ SCENES = [
   {id:'b10s2',dur:22000,label:'SCENARIUL NEGRU',      bloc:4,blabel:'REZILIENTA'},
   {id:'b10s3',dur:20000,label:'CONSTRUCTIA REZILIENTEI',bloc:4,blabel:'REZILIENTA'},
   {id:'b14s1',dur:18000,label:'SPONGE CITY',          bloc:4,blabel:'REZILIENTA'},
+  {id:'b24s1',dur:20000,label:'ENERGIE & CLIMAT',     bloc:4,blabel:'REZILIENTA'},
+  {id:'b25s1',dur:20000,label:'APA & CIRCULAR',       bloc:4,blabel:'REZILIENTA'},
   {id:'b14s2',dur:18000,label:'METABOLISM URBAN',     bloc:4,blabel:'REZILIENTA'},
   // ACT V — MODELE CARE FUNCTIONEAZA
   {id:'b12s1',dur:20000,label:'SUPERBLOCKS BARCELONA',bloc:5,blabel:'MODELE CARE FUNCTIONEAZA'},
@@ -1338,6 +1340,24 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         rot(20,0.006);
         fly(Z.CBD,14.5,66,20,5000,0,'night');
         fly(Z.CBD,15,70,110,13000,5000,'night');
+        break;
+      case 'b24s1': // ENERGIE & CLIMAT
+        lp('day');
+        onIdle(function(){try{SE._addBuildings&&SE._addBuildings(map);}catch(e){}});
+        setTimeout(function(){ if(SE._playing){ try{SE._addEnergy&&SE._addEnergy(map, SE._city, SE._pred);}catch(e){} } },1700);
+        fly(Z.C,13.2,54,0,4500,0,'day');
+        rot(11,0.004);
+        fly(Z.C,13.8,58,45,7000,9000,'day');
+        fly(Z.IND,13.6,56,-25,6000,15500,'dusk');
+        break;
+      case 'b25s1': // APA & ECONOMIE CIRCULARA
+        lp('dawn');
+        onIdle(function(){try{SE._addBuildings&&SE._addBuildings(map);}catch(e){}});
+        setTimeout(function(){ if(SE._playing){ try{SE._addResources&&SE._addResources(map, SE._city);}catch(e){} } },1700);
+        fly(Z.SV,13.2,52,0,4500,0,'dawn');
+        rot(11,0.004);
+        fly(Z.C,13.7,56,45,7000,9000,'day');
+        fly(Z.SE2,13.5,55,-25,6000,15500,'day');
         break;
       case 'b23s1': // LOCUIRE & ACCESIBILITATE
         lp('dusk');
@@ -2871,6 +2891,41 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         }
         narativ('Accesibilitatea locuirii e testul real al unui oras atractiv: poate avea economie buna, dar daca tinerii nu-si permit o locuinta, ii pierde. Pret in crestere fara oferta adecvata = navetism, sprawl periurban, exod. Solutii: densificare calitativa langa transportul public (TOD), locuinte accesibile/nZEB, reconversie cladiri, locuinte sociale — NU sprawl pe teren verde (cost infrastructura x3/loc).');
         concluzie('Locuire accesibila + densificare inteligenta langa TP = oras care isi pastreaza tinerii, nu ii exporta');
+        break;
+      }
+
+      case 'b24s1': { // ENERGIE & CLIMAT
+        titlu('Energie & climat','Sărăcie energetică · val de renovare · solar · termoficare · decarbonare'); linie();
+        var EM=(window._UrbanEnergy)?window._UrbanEnergy.metrics(city,pred):null;
+        if(EM){
+          cifra('~'+N2(EM.rooftopMW)+' MW solar','Potential acoperisuri · '+EM.irad+' kWh/m²/an','#fbbf24');
+          cifra2(EM.pre90+'% fond pre-1990 · sărăcie '+EM.poverty+'%','De renovat energetic','#f97316');
+          // traiectorie CO2 pe ecran
+          var co=[['Azi',EM.co2,'#ef4444'],['2040',+(EM.co2*0.55).toFixed(1),'#f59e0b'],['2055',+(EM.co2*0.32).toFixed(1),'#22c55e']];
+          co.forEach(function(r,i){ var al=Math.min(1,(t-0.2-i*0.07)/0.18)*sA; if(al<=0)return; ctx.globalAlpha=al;
+            var by=H*(0.42+i*0.07); ctx.fillStyle=r[2]; ctx.font='800 '+Math.min(W*0.013,18)+'px "Space Grotesk",sans-serif'; ctx.textAlign='left';
+            ctx.fillText(r[0]+': '+r[1]+' t CO₂/loc',W*0.04,by); ctx.globalAlpha=1; });
+        }
+        narativ('Tranzitia energetica e obligatorie (neutralitate 2050) si oportunitate: facturi mai mici, joburi verzi, independenta. Provocari: fond vechi ineficient, saracie energetica, termoficare imbatranita. Solutii: valul de renovare (PNRR) reduce facturile 40-60%, prosumatori solari, pompe de caldura. Romania are iradiere solara buna in sud/est.');
+        concluzie('Renovare + solar + termoficare modernizata = facturi mici, emisii reduse, independenta energetica');
+        break;
+      }
+
+      case 'b25s1': { // APA & ECONOMIE CIRCULARA
+        titlu('Apa, seceta & economie circulara','Pierderi retea · epurare · reciclare (RO ultima in UE) · seceta'); linie();
+        var RM=(window._UrbanResources)?window._UrbanResources.metrics(city):null;
+        if(RM){
+          cifra(RM.recycling+'% reciclat','vs tinta UE 55% · groapa '+RM.landfill+'%', RM.recycling>=20?'#22c55e':'#ef4444');
+          cifra2('pierderi apa '+RM.waterLoss+'% · seceta '+RM.drought,'Reziliența resurse', RM.drought==='ridicat'?'#ef4444':'#38bdf8');
+          var rows=[['Reciclat',RM.recycling,'#22c55e'],['Groapa',RM.landfill,'#a3a3a3'],['Tinta UE',55,'#3b82f6']];
+          rows.forEach(function(r,i){ var al=Math.min(1,(t-0.2-i*0.07)/0.18)*sA; if(al<=0)return; ctx.globalAlpha=al;
+            var by=H*(0.42+i*0.066), bx=W*0.04; ctx.fillStyle='rgba(255,255,255,0.08)'; ctx.fillRect(bx,by,W*0.36,H*0.038);
+            ctx.fillStyle=r[2]; ctx.fillRect(bx,by,W*0.36*(r[1]/100),H*0.038);
+            ctx.fillStyle='rgba(230,236,250,0.95)'; ctx.font='700 '+Math.min(W*0.011,15)+'px "Space Grotesk",sans-serif'; ctx.textAlign='left';
+            ctx.fillText(r[0]+': '+r[1]+'%',bx+W*0.012,by+H*0.026); ctx.globalAlpha=1; });
+        }
+        narativ('Securitatea resurselor devine critica cu schimbarile climatice. Romania pierde enorm pe retelele de apa invechite, are cea mai mica rata de reciclare din UE (dependenta de gropi) si seceta tot mai severa in sud/est. Economia circulara (colectare separata, sortare, compostare) reduce costuri, riscul de amenzi UE si amprenta de mediu. Apa: retentie tip sponge city + modernizare retele.');
+        concluzie('Apa gestionata + reciclare reala + economie circulara = reziliența climatica si costuri mai mici');
         break;
       }
     }
