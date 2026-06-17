@@ -752,6 +752,15 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
 
       case 'b1s4':
         lp('dawn');
+        // MONUMENTE REALE (OSM historic) — reperele in jurul carora s-a construit
+        // orasul, pulsand auriu in scena de evolutie istorica.
+        setTimeout(function(){
+          if(!SE._playing) return;
+          if(D.monuments&&D.monuments.length){
+            addCircle('v9-mon',D.monuments);
+            setTimeout(function(){_pulse(map,'v9-mon','circle-radius',4,10,9);},1000);
+          }
+        },1800);
         fly(Z.C,13.5,52,0,4000,0,'dawn');
         fly(Z.NV,14,60,40,6000,10000,'dawn');
         fly(Z.C,13,50,-10,5000,17000,'day');
@@ -818,6 +827,13 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
 
       case 'b3s2':
         lp('day');
+        // FONDUL ECONOMIC colorat pe functiune (birouri mov, comercial portocaliu,
+        // industrial gri) — vizibil cand camera ajunge in zona industriala (Z.IND).
+        onIdle(function(){try{SE._addBuildings&&SE._addBuildings(map);}catch(e){}});
+        setTimeout(function(){
+          if(!SE._playing) return;
+          if(SE._cinLabels) SE._cinLabels(map,[{lon:Z.IND[0],lat:Z.IND[1],color:'#94a3b8',icon:'🏭',title:'ZONA INDUSTRIALA',sub:'productie · logistica · reconversie'}]);
+        },14500);
         fly(Z.CBD,14.5,58,10,4000,0,'day');
         fly(Z.UNI,15.5,70,35,6000,8000,'day');
         fly(Z.IND,14,62,-30,6000,15000,'dusk');
