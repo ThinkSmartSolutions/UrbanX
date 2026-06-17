@@ -1038,6 +1038,8 @@
       try{ if(window._UrbanVitality){ window._UrbanVitality.renderChapter(D, ctx.cityKey||(city&&city.key), city); } }catch(e){ console.warn('[MP] vitality:',e.message); }
       // SANATATE & ORAS DIGITAL (servicii esentiale)
       try{ if(window._UrbanServices){ window._UrbanServices.renderChapter(D, ctx.cityKey||(city&&city.key), city); } }catch(e){ console.warn('[MP] services:',e.message); }
+      // LOCUIRE & ACCESIBILITATE
+      try{ if(window._UrbanHousing){ var _prH=(window._PredEngine&&_PredEngine.calc)?_PredEngine.calc(city):{}; window._UrbanHousing.renderChapter(D, city, _prH); } }catch(e){ console.warn('[MP] locuire:',e.message); }
       // PARTICIPARE PUBLICA & transparenta decizionala
       try{ if(window._PublicParticipation&&window._PublicParticipation.renderChapter){ window._PublicParticipation.renderChapter(D, city); } }catch(e){ console.warn('[MP] participare:',e.message); }
       // FAUNA urbana & siguranta (caini fara stapan + ursi)

@@ -69,7 +69,11 @@ G._UrbanRank = {
     var sportBonus=0;
     try{ if(G._UrbanVitality){ sportBonus=G._UrbanVitality.sportBonus(city&&(city.key||city.cityKey), city)||0;
       if(sportBonus) tourNote+=' + '+sportBonus+' pct sport'; } }catch(e){}
-    quality = cl(quality - faunaPen + tourBonus + sportBonus);
+    // penalizare locuire neaccesibilă (alungă tinerii)
+    var houPen=0;
+    try{ if(G._UrbanHousing){ var hm=G._UrbanHousing.qolModifier(city,pred); houPen=hm.penalty||0;
+      if(houPen) tourNote+=' − '+houPen+' pct locuire neaccesibilă'; } }catch(e){}
+    quality = cl(quality - faunaPen + tourBonus + sportBonus - houPen);
     var enviro  = cl((gv('uhi',55) + cl((pred.svM2||11)*4.6) + cl(82-(pred.co2cap||4.6)*6))/3);
     var demo    = cl(50 + (pred.r10||0)*18);                            // trend demografic
     // bonus educație (capital uman/talent) + sport (vibrație) — atractivitate

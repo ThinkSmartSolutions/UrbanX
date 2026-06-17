@@ -81,6 +81,7 @@ SCENES = [
   {id:'b5s1',dur:20000,label:'RISC SEISMIC',          bloc:2,blabel:'ORASUL SUB PRESIUNE'},
   {id:'b5s2',dur:20000,label:'INUNDATII & CLIMA',     bloc:2,blabel:'ORASUL SUB PRESIUNE'},
   {id:'b5s3',dur:18000,label:'COSTUL INACTIUNII',     bloc:2,blabel:'ORASUL SUB PRESIUNE'},
+  {id:'b23s1',dur:20000,label:'LOCUIRE & ACCESIBILITATE',bloc:2,blabel:'ORASUL SUB PRESIUNE'},
   // ACT III — ORASUL 2055 (climaxul vizual)
   {id:'b6s1',dur:18000,label:'FOND CONSTRUIT AZI',    bloc:3,blabel:'ORASUL 2055'},
   {id:'b6s2',dur:26000,label:'CORIDOARE '+(_NOW+30),  bloc:3,blabel:'ORASUL 2055'},
@@ -1337,6 +1338,15 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         rot(20,0.006);
         fly(Z.CBD,14.5,66,20,5000,0,'night');
         fly(Z.CBD,15,70,110,13000,5000,'night');
+        break;
+      case 'b23s1': // LOCUIRE & ACCESIBILITATE
+        lp('dusk');
+        onIdle(function(){try{SE._addBuildings&&SE._addBuildings(map);}catch(e){}});
+        setTimeout(function(){ if(SE._playing){ try{SE._addHousing&&SE._addHousing(map, SE._city, SE._pred);}catch(e){} } },1700);
+        fly(Z.C,13.4,56,0,4500,0,'dusk');
+        rot(11,0.004);
+        fly(Z.C,13.9,60,45,7000,9000,'dusk');
+        fly(Z.RES,13.6,56,-25,6000,15500,'day');
         break;
       case 'b22s1': // PARTICIPARE PUBLICA (transparenta decizionala)
         lp('day');
@@ -2838,6 +2848,29 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         }
         narativ('Urbanismul bun nu se face „de sus in jos". UrbanX integreaza participarea publica (model Helsinki): cetatenii adauga comentarii geolocalizate pe harta si voteaza prioritatile, iar administratia vede in timp real unde sunt problemele. Consultarea e si cerinta legala pentru PMUD si PUG (Legea 350/2001). Deciziile fundamentate pe dialog au legitimitate mai mare si mai putine contestatii.');
         concluzie('Transparenta + dialog cu cetatenii = planuri mai bune, implementare mai usoara, incredere — invitam la dialog');
+        break;
+      }
+
+      case 'b23s1': { // LOCUIRE & ACCESIBILITATE
+        titlu('Locuire & accesibilitate','Pret/venit · povara chiriei · cerere vs oferta · testul orasului atractiv'); linie();
+        var HM=(window._UrbanHousing)?window._UrbanHousing.metrics(city,pred):null;
+        if(HM){
+          cifra(HM.priceIncome+' ani','Venit median / apartament', HM.priceIncome>=11?'#ef4444':HM.priceIncome>=9?'#f59e0b':'#22c55e');
+          cifra2('Acces '+HM.afford+'/100 · chirie '+HM.rentBurden+'%',(HM.afford>=60?'accesibil':HM.afford>=45?'tensionat':'neaccesibil'), HM.afford>=60?'#22c55e':HM.afford>=45?'#f59e0b':'#ef4444');
+          // bare cerere vs oferta
+          var rows=[['Cerere/an',HM.demand,'#3b82f6'],['Oferta/an',HM.supply,'#f59e0b'],['Deficit social',HM.socialDeficit,'#ef4444']];
+          var mx=Math.max(HM.demand,HM.supply,HM.socialDeficit)||1;
+          rows.forEach(function(r,i){
+            var al=Math.min(1,(t-0.18-i*0.07)/0.18)*sA; if(al<=0)return; ctx.globalAlpha=al;
+            var by=H*(0.40+i*0.072), bx=W*0.04;
+            ctx.fillStyle='rgba(255,255,255,0.08)'; ctx.fillRect(bx,by,W*0.36,H*0.04);
+            ctx.fillStyle=r[2]; ctx.fillRect(bx,by,W*0.36*(r[1]/mx),H*0.04);
+            ctx.fillStyle='rgba(230,236,250,0.95)'; ctx.font='700 '+Math.min(W*0.011,15)+'px "Space Grotesk",sans-serif'; ctx.textAlign='left';
+            ctx.fillText(r[0]+': '+N2(r[1]),bx+W*0.012,by+H*0.027); ctx.globalAlpha=1;
+          });
+        }
+        narativ('Accesibilitatea locuirii e testul real al unui oras atractiv: poate avea economie buna, dar daca tinerii nu-si permit o locuinta, ii pierde. Pret in crestere fara oferta adecvata = navetism, sprawl periurban, exod. Solutii: densificare calitativa langa transportul public (TOD), locuinte accesibile/nZEB, reconversie cladiri, locuinte sociale — NU sprawl pe teren verde (cost infrastructura x3/loc).');
+        concluzie('Locuire accesibila + densificare inteligenta langa TP = oras care isi pastreaza tinerii, nu ii exporta');
         break;
       }
     }
